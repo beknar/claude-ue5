@@ -54,6 +54,9 @@ renders/
 *.mp3
 *.ogg
 
+# README showcase stills (small JPGs) are the one media exception
+!docs/images/*.jpg
+
 # --- Archives ---
 *.zip
 *.7z

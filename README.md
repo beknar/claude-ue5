@@ -4,6 +4,28 @@ An Unreal Engine 5.8 project built almost entirely from scripts. The scripts dri
 
 This repository is **source only**: the pipeline scripts, project config and small data files. Unreal assets (`Content/`), source art binaries, renders and the third-party packs they come from stay local. See [What's not in the repo](#whats-not-in-the-repo).
 
+## Early results
+
+Stills from the showcase videos: 1080p Movie Render Queue renders of each level's `*_Cine` copy, with the demo character running its recorded route.
+
+**FF — Tripo anime female** (`ff_level`). A static GLB rigged onto a UE4-mannequin skeleton, with locomotion retargeted from the template.
+
+| Idle | Run | Close-up |
+|---|---|---|
+| ![FF idle](docs/images/ff_idle.jpg) | ![FF run](docs/images/ff_run.jpg) | ![FF close-up](docs/images/ff_front.jpg) |
+
+**FF2 — animated Tripo anime female** (`ff2_level`). Her own clips, grounded on the sole contacts so she doesn't float or slide.
+
+| Jump | Boxing | Casting |
+|---|---|---|
+| ![FF2 jump](docs/images/ff2_jump.jpg) | ![FF2 boxing](docs/images/ff2_box.jpg) | ![FF2 casting](docs/images/ff2_spell.jpg) |
+
+**Dystopia Soldier 02** (`soldier_level`). Converted from a Unity-format Fab pack, with per-part PBR materials and retargeted locomotion.
+
+| Idle | Flamethrower | Close-up |
+|---|---|---|
+| ![Soldier idle](docs/images/soldier_idle.jpg) | ![Soldier flamethrower](docs/images/soldier_flamethrower.jpg) | ![Soldier close-up](docs/images/soldier_front.jpg) |
+
 ## Levels
 
 | Level | Character | What's in it |
