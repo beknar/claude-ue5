@@ -1,0 +1,311 @@
+{
+ "Boxing_Guard_Prep_Straight_Punch": {
+  "frames": [
+   0,
+   96
+  ],
+  "fps": 24,
+  "dur": 4.0,
+  "dx": -0.0,
+  "dy": -0.0,
+  "dz": 0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.1,
+  "z_min": 0.844,
+  "z_max": 0.939
+ },
+ "_mesh": {
+  "height": 1.555,
+  "verts": 77150,
+  "bones": [
+   "pelvis",
+   "spine_01",
+   "spine_02",
+   "spine_03",
+   "neck_01",
+   "head",
+   "head_end",
+   "headfront",
+   "clavicle_l",
+   "upperarm_l",
+   "lowerarm_l",
+   "hand_l",
+   "LeftHand_End",
+   "clavicle_r",
+   "upperarm_r",
+   "lowerarm_r",
+   "hand_r",
+   "RightHand_End",
+   "thigh_l",
+   "calf_l",
+   "foot_l",
+   "ball_l",
+   "LeftToe_end",
+   "thigh_r",
+   "calf_r",
+   "foot_r",
+   "ball_r",
+   "RightToe_end"
+  ],
+  "rest_pelvis": [
+   0.007334569934755564,
+   0.0015617900062352419,
+   1.009914755821228
+  ]
+ },
+ "Idle_3": {
+  "frames": [
+   0,
+   240
+  ],
+  "fps": 24,
+  "dur": 10.0,
+  "dx": 0.0,
+  "dy": 0.0,
+  "dz": -0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.0,
+  "z_min": 0.96,
+  "z_max": 0.98
+ },
+ "Idle_4": {
+  "frames": [
+   0,
+   336
+  ],
+  "fps": 24,
+  "dur": 14.0,
+  "dx": 0.0,
+  "dy": -0.0,
+  "dz": 0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.0,
+  "z_min": 0.968,
+  "z_max": 0.98
+ },
+ "Idle_5": {
+  "frames": [
+   0,
+   44
+  ],
+  "fps": 24,
+  "dur": 1.833,
+  "dx": 0.0,
+  "dy": 0.0,
+  "dz": 0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.0,
+  "z_min": 0.86,
+  "z_max": 0.892
+ },
+ "Idle_6": {
+  "frames": [
+   0,
+   177
+  ],
+  "fps": 24,
+  "dur": 7.375,
+  "dx": -0.0,
+  "dy": 0.0,
+  "dz": -0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.0,
+  "z_min": 0.958,
+  "z_max": 0.964
+ },
+ "Idle_7": {
+  "frames": [
+   0,
+   210
+  ],
+  "fps": 24,
+  "dur": 8.75,
+  "dx": -0.0,
+  "dy": 0.0,
+  "dz": -0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": 0.0,
+  "z_min": 0.966,
+  "z_max": 0.969
+ },
+ "Idle_Turn_Left": {
+  "frames": [
+   0,
+   23
+  ],
+  "fps": 24,
+  "dur": 0.958,
+  "dx": 0.045,
+  "dy": 0.044,
+  "dz": -0.0,
+  "speed_cm_s": 6.6,
+  "yaw_change": -59.0,
+  "z_min": 0.995,
+  "z_max": 1.003
+ },
+ "Idle_Turn_Right": {
+  "frames": [
+   0,
+   27
+  ],
+  "fps": 24,
+  "dur": 1.125,
+  "dx": 0.001,
+  "dy": -0.001,
+  "dz": -0.0,
+  "speed_cm_s": 0.1,
+  "yaw_change": 76.4,
+  "z_min": 0.993,
+  "z_max": 1.001
+ },
+ "Left_Jab_from_Guard": {
+  "frames": [
+   0,
+   42
+  ],
+  "fps": 24,
+  "dur": 1.75,
+  "dx": 0.0,
+  "dy": -0.0,
+  "dz": -0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": 0.1,
+  "z_min": 0.846,
+  "z_max": 0.954
+ },
+ "Left_Short_Hook_from_Guard": {
+  "frames": [
+   0,
+   32
+  ],
+  "fps": 24,
+  "dur": 1.333,
+  "dx": -0.0,
+  "dy": -0.0,
+  "dz": 0.001,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.5,
+  "z_min": 0.894,
+  "z_max": 0.956
+ },
+ "Leg_Sweep": {
+  "frames": [
+   0,
+   60
+  ],
+  "fps": 24,
+  "dur": 2.5,
+  "dx": 0.249,
+  "dy": -0.072,
+  "dz": -0.0,
+  "speed_cm_s": 10.4,
+  "yaw_change": -8.5,
+  "z_min": 0.881,
+  "z_max": 0.989
+ },
+ "RunFast": {
+  "frames": [
+   0,
+   12
+  ],
+  "fps": 24,
+  "dur": 0.5,
+  "dx": -0.0,
+  "dy": -0.001,
+  "dz": 0.0,
+  "speed_cm_s": 0.1,
+  "yaw_change": -0.8,
+  "z_min": 0.977,
+  "z_max": 0.995
+ },
+ "Run_02": {
+  "frames": [
+   0,
+   17
+  ],
+  "fps": 24,
+  "dur": 0.708,
+  "dx": 0.005,
+  "dy": 0.0,
+  "dz": 0.01,
+  "speed_cm_s": 0.7,
+  "yaw_change": -4.0,
+  "z_min": 0.95,
+  "z_max": 1.021
+ },
+ "Running": {
+  "frames": [
+   0,
+   16
+  ],
+  "fps": 24,
+  "dur": 0.667,
+  "dx": 0.0,
+  "dy": -0.0,
+  "dz": 0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": 0.0,
+  "z_min": 0.951,
+  "z_max": 1.015
+ },
+ "Step_Step_Turn_Kick": {
+  "frames": [
+   0,
+   48
+  ],
+  "fps": 24,
+  "dur": 2.0,
+  "dx": 0.667,
+  "dy": -0.35,
+  "dz": 0.0,
+  "speed_cm_s": 37.7,
+  "yaw_change": -147.3,
+  "z_min": 0.746,
+  "z_max": 0.958
+ },
+ "Walking_Woman": {
+  "frames": [
+   0,
+   24
+  ],
+  "fps": 24,
+  "dur": 1.0,
+  "dx": 0.0,
+  "dy": 0.0,
+  "dz": 0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": -0.0,
+  "z_min": 0.992,
+  "z_max": 1.028
+ },
+ "Walking": {
+  "frames": [
+   0,
+   25
+  ],
+  "fps": 24,
+  "dur": 1.042,
+  "dx": 0.0,
+  "dy": -0.0,
+  "dz": -0.0,
+  "speed_cm_s": 0.0,
+  "yaw_change": 0.0,
+  "z_min": 0.973,
+  "z_max": 1.037
+ },
+ "walking_2": {
+  "frames": [
+   0,
+   29
+  ],
+  "fps": 24,
+  "dur": 1.208,
+  "dx": 0.003,
+  "dy": -1.115,
+  "dz": 0.006,
+  "speed_cm_s": 92.3,
+  "yaw_change": -26.4,
+  "z_min": 0.982,
+  "z_max": 1.023
+ }
+}

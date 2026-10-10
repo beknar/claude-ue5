@@ -1,0 +1,110 @@
+{
+ "Boxing_Guard_Prep_Straight_Punch": {
+  "frames": 121,
+  "dur": 4.0,
+  "root_motion": false,
+  "stance_speed_cm_s": 5.8
+ },
+ "Idle_3": {
+  "frames": 301,
+  "dur": 10.0,
+  "root_motion": false,
+  "stance_speed_cm_s": 0.7
+ },
+ "Idle_4": {
+  "frames": 421,
+  "dur": 14.0,
+  "root_motion": false,
+  "stance_speed_cm_s": 0.6
+ },
+ "Idle_5": {
+  "frames": 56,
+  "dur": 1.833,
+  "root_motion": false,
+  "stance_speed_cm_s": 0.4
+ },
+ "Idle_6": {
+  "frames": 222,
+  "dur": 7.367,
+  "root_motion": false,
+  "stance_speed_cm_s": 0.3
+ },
+ "Idle_7": {
+  "frames": 263,
+  "dur": 8.733,
+  "root_motion": false,
+  "stance_speed_cm_s": 0.2
+ },
+ "Idle_Turn_Left": {
+  "frames": 30,
+  "dur": 0.967,
+  "root_motion": true,
+  "stance_speed_cm_s": 9.8
+ },
+ "Idle_Turn_Right": {
+  "frames": 35,
+  "dur": 1.133,
+  "root_motion": true,
+  "stance_speed_cm_s": 7.1
+ },
+ "Left_Jab_from_Guard": {
+  "frames": 53,
+  "dur": 1.733,
+  "root_motion": false,
+  "stance_speed_cm_s": 15.2
+ },
+ "Left_Short_Hook_from_Guard": {
+  "frames": 41,
+  "dur": 1.333,
+  "root_motion": false,
+  "stance_speed_cm_s": 9.7
+ },
+ "Leg_Sweep": {
+  "frames": 76,
+  "dur": 2.5,
+  "root_motion": true,
+  "stance_speed_cm_s": 4.0
+ },
+ "RunFast": {
+  "frames": 16,
+  "dur": 0.5,
+  "root_motion": false,
+  "stance_speed_cm_s": 420.3
+ },
+ "Run_02": {
+  "frames": 22,
+  "dur": 0.7,
+  "root_motion": false,
+  "stance_speed_cm_s": 375.1
+ },
+ "Running": {
+  "frames": 21,
+  "dur": 0.667,
+  "root_motion": false,
+  "stance_speed_cm_s": 428.9
+ },
+ "Step_Step_Turn_Kick": {
+  "frames": 61,
+  "dur": 2.0,
+  "root_motion": true,
+  "stance_speed_cm_s": 23.7
+ },
+ "Walking_Woman": {
+  "frames": 31,
+  "dur": 1.0,
+  "root_motion": false,
+  "stance_speed_cm_s": 138.9
+ },
+ "Walking": {
+  "frames": 32,
+  "dur": 1.033,
+  "root_motion": false,
+  "stance_speed_cm_s": 139.9
+ },
+ "walking_2": {
+  "frames": 37,
+  "dur": 1.2,
+  "root_motion": true,
+  "stance_speed_cm_s": 11.3
+ }
+}

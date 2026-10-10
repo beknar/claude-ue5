@@ -1,0 +1,9 @@
+{
+ "height_cm": 165.0,
+ "scale": 1.6859920427777277,
+ "textures": {
+  "anime_female_3d_model-tripo_metallic-anime_female_3d_model-tripo_roughness": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\ff_anime\\T_FF_MetalRough.png",
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\ff_anime\\T_FF_Color.png",
+  "Normal": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\ff_anime\\T_FF_Normal.png"
+ }
+}

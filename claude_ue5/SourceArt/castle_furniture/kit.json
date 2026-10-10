@@ -1,0 +1,648 @@
+{
+ "SM_Kit_BedSingle": {
+  "size": [
+   95.0,
+   205.0,
+   95.0
+  ],
+  "slots": [
+   "Wood",
+   "Straw",
+   "WoolRed",
+   "Linen"
+  ]
+ },
+ "SM_Kit_BedSingleGreen": {
+  "size": [
+   95.0,
+   205.0,
+   95.0
+  ],
+  "slots": [
+   "Wood",
+   "Straw",
+   "WoolGreen",
+   "Linen"
+  ]
+ },
+ "SM_Kit_BedDouble": {
+  "size": [
+   150.0,
+   205.0,
+   95.0
+  ],
+  "slots": [
+   "Wood",
+   "Straw",
+   "WoolBlue",
+   "Linen"
+  ]
+ },
+ "SM_Kit_Wardrobe": {
+  "size": [
+   116.0,
+   62.0,
+   198.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Chest": {
+  "size": [
+   92.0,
+   54.0,
+   56.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Rug": {
+  "size": [
+   220.0,
+   159.0,
+   1.4
+  ],
+  "slots": [
+   "WoolRed",
+   "WoolBrown",
+   "Linen"
+  ]
+ },
+ "SM_Kit_FurRug": {
+  "size": [
+   224.4,
+   148.7,
+   3.0
+  ],
+  "slots": [
+   "Fur"
+  ]
+ },
+ "SM_Kit_Washstand": {
+  "size": [
+   55.0,
+   40.0,
+   87.5
+  ],
+  "slots": [
+   "Wood",
+   "Clay"
+  ]
+ },
+ "SM_Kit_CandleStick": {
+  "size": [
+   12.0,
+   12.0,
+   31.5
+  ],
+  "slots": [
+   "Iron",
+   "Wax",
+   "Flame"
+  ]
+ },
+ "SM_Kit_TableLong": {
+  "size": [
+   230.0,
+   85.0,
+   76.0
+  ],
+  "slots": [
+   "Planks",
+   "Wood"
+  ]
+ },
+ "SM_Kit_TableSmall": {
+  "size": [
+   120.0,
+   75.0,
+   76.0
+  ],
+  "slots": [
+   "Planks",
+   "Wood"
+  ]
+ },
+ "SM_Kit_Bench": {
+  "size": [
+   180.0,
+   30.0,
+   47.0
+  ],
+  "slots": [
+   "Planks",
+   "Wood"
+  ]
+ },
+ "SM_Kit_Stool": {
+  "size": [
+   33.5,
+   34.0,
+   48.4
+  ],
+  "slots": [
+   "Wood"
+  ]
+ },
+ "SM_Kit_Tankard": {
+  "size": [
+   10.8,
+   12.6,
+   13.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Goblet": {
+  "size": [
+   8.0,
+   7.9,
+   16.0
+  ],
+  "slots": [
+   "Iron"
+  ]
+ },
+ "SM_Kit_Bowl": {
+  "size": [
+   18.0,
+   18.0,
+   6.0
+  ],
+  "slots": [
+   "Wood"
+  ]
+ },
+ "SM_Kit_BreadLoaf": {
+  "size": [
+   26.0,
+   14.8,
+   11.1
+  ],
+  "slots": [
+   "Bread",
+   "Dough"
+  ]
+ },
+ "SM_Kit_BreadRound": {
+  "size": [
+   20.0,
+   20.1,
+   10.0
+  ],
+  "slots": [
+   "Bread"
+  ]
+ },
+ "SM_Kit_Cheese": {
+  "size": [
+   24.0,
+   24.0,
+   8.0
+  ],
+  "slots": [
+   "Cheese"
+  ]
+ },
+ "SM_Kit_AppleBasket": {
+  "size": [
+   40.0,
+   40.0,
+   15.9
+  ],
+  "slots": [
+   "Straw",
+   "Apple"
+  ]
+ },
+ "SM_Kit_Fireplace": {
+  "size": [
+   240.0,
+   100.5,
+   322.0
+  ],
+  "slots": [
+   "Stone",
+   "Wood",
+   "Bark",
+   "Ember",
+   "Flame"
+  ]
+ },
+ "SM_Kit_Cauldron": {
+  "size": [
+   58.0,
+   58.0,
+   63.2
+  ],
+  "slots": [
+   "Iron",
+   "Stew"
+  ]
+ },
+ "SM_Kit_Tripod": {
+  "size": [
+   106.2,
+   104.2,
+   160.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_BreadOven": {
+  "size": [
+   180.0,
+   186.6,
+   220.0
+  ],
+  "slots": [
+   "Stone",
+   "Ember",
+   "Wood"
+  ]
+ },
+ "SM_Kit_PrepTable": {
+  "size": [
+   140.0,
+   70.0,
+   89.0
+  ],
+  "slots": [
+   "Planks",
+   "Wood",
+   "Iron",
+   "Clay",
+   "Dough",
+   "Apple"
+  ]
+ },
+ "SM_Kit_PotRack": {
+  "size": [
+   140.0,
+   33.5,
+   181.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_FryingPan": {
+  "size": [
+   34.0,
+   49.5,
+   5.0
+  ],
+  "slots": [
+   "Iron"
+  ]
+ },
+ "SM_Kit_ShelfRack": {
+  "size": [
+   122.0,
+   34.0,
+   181.0
+  ],
+  "slots": [
+   "Wood",
+   "Planks"
+  ]
+ },
+ "SM_Kit_Firewood": {
+  "size": [
+   89.5,
+   60.0,
+   54.0
+  ],
+  "slots": [
+   "Bark"
+  ]
+ },
+ "SM_Kit_Candles": {
+  "size": [
+   14.0,
+   8.2,
+   19.3
+  ],
+  "slots": [
+   "Wax",
+   "Flame"
+  ]
+ },
+ "SM_Kit_Chandelier": {
+  "size": [
+   140.0,
+   140.0,
+   121.0
+  ],
+  "slots": [
+   "Iron",
+   "Wood",
+   "Wax",
+   "Flame"
+  ]
+ },
+ "SM_Kit_HayBale": {
+  "size": [
+   95.0,
+   49.0,
+   43.0
+  ],
+  "slots": [
+   "Straw",
+   "Rope"
+  ]
+ },
+ "SM_Kit_HayPile": {
+  "size": [
+   235.8,
+   166.9,
+   147.5
+  ],
+  "slots": [
+   "Straw"
+  ]
+ },
+ "SM_Kit_StallPartition": {
+  "size": [
+   310.0,
+   14.0,
+   165.0
+  ],
+  "slots": [
+   "Wood",
+   "Planks"
+  ]
+ },
+ "SM_Kit_Trough": {
+  "size": [
+   150.0,
+   45.0,
+   40.0
+  ],
+  "slots": [
+   "Wood",
+   "Straw"
+  ]
+ },
+ "SM_Kit_Pitchfork": {
+  "size": [
+   26.0,
+   3.2,
+   183.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Rake": {
+  "size": [
+   48.0,
+   4.0,
+   168.0
+  ],
+  "slots": [
+   "Wood"
+  ]
+ },
+ "SM_Kit_Shovel": {
+  "size": [
+   26.0,
+   3.6,
+   150.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Ladder": {
+  "size": [
+   50.0,
+   6.0,
+   300.0
+  ],
+  "slots": [
+   "Wood"
+  ]
+ },
+ "SM_Kit_Cart": {
+  "size": [
+   395.0,
+   144.0,
+   120.0
+  ],
+  "slots": [
+   "Planks",
+   "Wood"
+  ]
+ },
+ "SM_Kit_Anvil": {
+  "size": [
+   83.0,
+   52.0,
+   93.0
+  ],
+  "slots": [
+   "Bark",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Forge": {
+  "size": [
+   190.0,
+   142.5,
+   420.0
+  ],
+  "slots": [
+   "Stone",
+   "Ember",
+   "Flame",
+   "Wood"
+  ]
+ },
+ "SM_Kit_ToolBoard": {
+  "size": [
+   150.0,
+   8.5,
+   90.0
+  ],
+  "slots": [
+   "Planks",
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_QuenchTub": {
+  "size": [
+   88.0,
+   88.0,
+   55.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron",
+   "Stew"
+  ]
+ },
+ "SM_Kit_ChestBody": {
+  "size": [
+   90.0,
+   53.7,
+   45.0
+  ],
+  "slots": [
+   "Wood",
+   "Linen",
+   "WoolRed",
+   "WoolBlue",
+   "Iron"
+  ]
+ },
+ "SM_Kit_ChestLid": {
+  "size": [
+   92.0,
+   54.0,
+   11.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_TrunkBody": {
+  "size": [
+   106.4,
+   63.2,
+   50.0
+  ],
+  "slots": [
+   "Wood",
+   "Linen",
+   "WoolRed",
+   "WoolBlue",
+   "Iron"
+  ]
+ },
+ "SM_Kit_TrunkLid": {
+  "size": [
+   106.0,
+   63.0,
+   19.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_WardrobeBody": {
+  "size": [
+   116.0,
+   60.0,
+   198.0
+  ],
+  "slots": [
+   "Wood",
+   "WoolBlue",
+   "Linen",
+   "WoolGreen",
+   "WoolBrown",
+   "WoolRed",
+   "Iron"
+  ]
+ },
+ "SM_Kit_WardrobeDoorL": {
+  "size": [
+   53.0,
+   5.6,
+   182.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_WardrobeDoorR": {
+  "size": [
+   53.0,
+   5.6,
+   182.0
+  ],
+  "slots": [
+   "Wood",
+   "Iron"
+  ]
+ },
+ "SM_Kit_Stairs300": {
+  "size": [
+   122.0,
+   444.4,
+   420.7
+  ],
+  "slots": [
+   "Planks",
+   "Wood"
+  ]
+ },
+ "SM_Kit_Panel": {
+  "size": [
+   100.0,
+   100.0,
+   100.0
+  ],
+  "slots": [
+   "Plaster"
+  ]
+ },
+ "SM_Kit_Beam": {
+  "size": [
+   100.0,
+   22.0,
+   22.0
+  ],
+  "slots": [
+   "Wood"
+  ]
+ },
+ "SM_Kit_Railing": {
+  "size": [
+   205.0,
+   8.0,
+   108.0
+  ],
+  "slots": [
+   "Wood"
+  ]
+ },
+ "_hinges": {
+  "Chest": [
+   0,
+   25.0,
+   45.0
+  ],
+  "Trunk": [
+   0,
+   30.0,
+   50.0
+  ],
+  "WardrobeL": [
+   -54.0,
+   -27.5,
+   4.0
+  ],
+  "WardrobeR": [
+   54.0,
+   -27.5,
+   4.0
+  ]
+ }
+}

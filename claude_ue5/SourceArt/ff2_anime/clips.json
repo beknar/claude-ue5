@@ -1,0 +1,10 @@
+{
+ "Box": 54,
+ "CastSpell": 130,
+ "Dance": 557,
+ "Idle": 369,
+ "Jump": 54,
+ "Run": 31,
+ "Shoot": 218,
+ "Walk": 57
+}
