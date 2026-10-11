@@ -33,6 +33,11 @@ claude_ue5/Content/
 *.mat
 *.bak
 
+# large generated data (sf-city flood-fill grid, rebuilt by pipeline/unreal/708) and superseded walk-test runs
+claude_ue5/SourceArt/sf_city/reach.json
+claude_ue5/SourceArt/sf_city/walk_r*.json
+claude_ue5/SourceArt/sf_city/walk_s*.json
+
 # --- Media ---
 renders/
 *.png

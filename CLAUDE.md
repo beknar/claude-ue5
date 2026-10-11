@@ -23,12 +23,14 @@ Guidance for Claude Code in this repository. See README.md for what the project 
 - **Idempotent:** scripts delete what they previously generated (by tag, label or asset path) and rebuild it. Spawned actors are tagged:
   - `castle_gen`: `340` (doors, floors, containers)
   - `castle_furn`: `380` (furniture)
+  - sf-city-level: `sfc_road` (`703`), `sfc_struct` (`706`), `sfc_start` (`707`), `sfc_safety` (`708` barrier walls)
 - **Cinematic copies:** each level has a `*_Cine` copy. Demo characters run on the Level Sequence clock (`SeqTime`/`DemoStartTime`), so Simulate (game time) and Movie Render Queue renders match.
 - **Coordinates:**
   - UE = Blender (x, −y, z) for FBX round trips.
   - The furniture kit's front is UE +Y.
   - Kit sizes are in cm; the Blender scene uses `scale_length` 0.01.
-- **End of big scripts:** delete the module globals and run `gc.collect()`. Lingering actor references caused python311 access violations on the next PIE start or map load.
+- **End of big scripts:** delete the module globals and run `gc.collect()`. Lingering actor references caused python311 access violations on the next PIE start or map load. `ue_exec.py` now runs each script in a fresh namespace and clears it afterwards, also when the script raises (an exception's traceback otherwise keeps its actors alive). Scripts that leave a tick callback running must set `__keep__ = True` (their functions still need their globals) and drop their actor references when the callback finishes.
+- **sf-city-level safety:** after changing anything walkable, re-run `708` (flood fill + barrier walls) and check it reports 0 remaining fall edges; the walk test (`709` plan, `710` in PIE) reports clipping, falls, doors and stuck legs.
 
 ## Editor pitfalls
 

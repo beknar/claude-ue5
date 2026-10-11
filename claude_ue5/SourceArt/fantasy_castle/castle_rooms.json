@@ -1,0 +1,150 @@
+{
+ "SM_House6_002": {
+  "mesh": "SM_House6",
+  "purpose": "barracks",
+  "side": "+y",
+  "door": [
+   -126.1,
+   -6.3
+  ],
+  "normal": [
+   0.0,
+   1.0
+  ],
+  "floor": 18.7,
+  "w": 160.0,
+  "h": 260.0,
+  "ground_world_z": 7649,
+  "ground_actor": "SM_Platform_001",
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "room": {
+   "x0": -173.1,
+   "x1": 154.8,
+   "y0": -223.7,
+   "y1": 198.4,
+   "h": 450.0
+  },
+  "inside_hits": {
+   "+x": 311,
+   "-x": 77,
+   "+y": null,
+   "-y": 86,
+   "+z": null
+  }
+ },
+ "SM_House3_003": {
+  "mesh": "SM_House3",
+  "purpose": "armory",
+  "side": "-x",
+  "door": [
+   -286.0,
+   -506.5
+  ],
+  "normal": [
+   -1.0,
+   0.0
+  ],
+  "floor": 8.6,
+  "w": 160.0,
+  "h": 260.0,
+  "ground_world_z": 7649,
+  "ground_actor": "SM_Platform_001",
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "room": {
+   "x0": -225.9,
+   "x1": 441.0,
+   "y0": -941.3,
+   "y1": -71.7,
+   "h": 450.0
+  },
+  "inside_hits": {
+   "+x": null,
+   "-x": null,
+   "+y": null,
+   "-y": null,
+   "+z": null
+  }
+ },
+ "SM_Build2_001": {
+  "mesh": "SM_Build2",
+  "purpose": "great_hall",
+  "side": "+x",
+  "door": [
+   1485.7,
+   -526.1
+  ],
+  "normal": [
+   1.0,
+   0.0
+  ],
+  "floor": 436.5,
+  "w": 160.0,
+  "h": 260.0,
+  "ground_world_z": 7649,
+  "ground_actor": "SM_Platform_001",
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "room": {
+   "x0": -1542.4,
+   "x1": 468.0,
+   "y0": -1323.6,
+   "y1": 271.3,
+   "h": 600.0
+  },
+  "inside_hits": {
+   "+x": 463,
+   "-x": null,
+   "+y": null,
+   "-y": null,
+   "+z": 1441
+  }
+ },
+ "SM_House4_001": {
+  "mesh": "SM_House4",
+  "purpose": "chapel",
+  "side": "-x",
+  "door": [
+   -526.3,
+   -650.1
+  ],
+  "normal": [
+   -1.0,
+   0.0
+  ],
+  "floor": -1.4,
+  "w": 160.0,
+  "h": 260.0,
+  "ground_world_z": 7649,
+  "ground_actor": "SM_Platform_001",
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "room": {
+   "x0": -484.5,
+   "x1": 182.4,
+   "y0": -663.3,
+   "y1": -80.0,
+   "h": 450.0
+  },
+  "inside_hits": {
+   "+x": null,
+   "-x": null,
+   "+y": null,
+   "-y": 43,
+   "+z": null
+  }
+ }
+}

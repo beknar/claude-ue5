@@ -1,0 +1,11 @@
+{
+ "clips": {
+  "Idle": 369,
+  "Run": 31,
+  "Walk": 57
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_fem5\\T_Fem5_Color.png"
+ },
+ "height_cm": 165.0
+}

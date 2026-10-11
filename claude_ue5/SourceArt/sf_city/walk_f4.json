@@ -1,0 +1,23 @@
+{
+ "mode": "route",
+ "range": [
+  140,
+  196
+ ],
+ "msg": "route 140..196 complete",
+ "seconds": 517.6,
+ "counts": {},
+ "events": [],
+ "probes": [],
+ "guard_catches": 0,
+ "guard_unsticks": 0,
+ "checks": 4424,
+ "pawn": {
+  "class": "BP_SFC_Fem5Character_C",
+  "mesh": "SK_JRPG_Fem5",
+  "capsule": [
+   36.0,
+   82.5
+  ]
+ }
+}
