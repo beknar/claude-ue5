@@ -1,0 +1,37 @@
+{
+ "plan": [
+  "expand:+x:400",
+  "visit:new:3"
+ ],
+ "msg": "ok",
+ "seconds": 201.0,
+ "counts": {
+  "container_not_open": 1
+ },
+ "events": [
+  {
+   "kind": "container_not_open",
+   "t": 131.1,
+   "task": "visit RTBuilding104 (tavern)",
+   "building": "RTBuilding104",
+   "opened": 2,
+   "of": 10
+  }
+ ],
+ "log": [
+  "0s session start: 4 cells [(-1, -1), (-1, 0), (0, -1), (0, 0)], seed 1002875120",
+  "6s expand:+x:400: running 400 m along the street",
+  "115s expand:+x:400: done in 108s at [39895, 0], cells now 7",
+  "115s visit:new:3: 3 buildings (05, 01b, 04b)",
+  "142s visit RTBuilding104 (tavern): done in 27s, door max 1.0, containers open (2, 10), near container -1, interior ready True",
+  "166s visit RTBuilding0 (home): done in 23s, door max 1.0, containers open (0, 0), near container -1, interior ready True",
+  "201s visit RTBuilding1 (store): done in 35s, door max 1.0, containers open (5, 5), near container -1, interior ready True"
+ ],
+ "checks": 1530,
+ "start_cells": 1b, 04b)",
+  "142s visit RTBuilding104 (tavern): done in 27s, door max 1.0, containers open (2, 10), near container -1, interior ready True",
+  "166s visit RTBuilding0 (home): done in 23s, door max 1.0, containers open (0, 0), near container -1, interior ready True",
+  "201s visit RTBuilding1 (store): done in 35s, door max 1.0, containers open (5, 5), near container -1, interior ready True"
+ ],
+ "checks": 1530,
+ "start_cells": 

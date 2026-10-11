@@ -3,7 +3,18 @@
 	"EngineAssociation": "{2155CBCA-407B-5375-F488-E6B2A561D41E}",
 	"Category": "",
 	"Description": "",
+	"Modules": [
+		{
+			"Name": "claude_ue5",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
 	"Plugins": [
+		{
+			"Name": "ProceduralMeshComponent",
+			"Enabled": true
+		},
 		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,

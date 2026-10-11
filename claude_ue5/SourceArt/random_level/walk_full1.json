@@ -1,0 +1,454 @@
+{
+ "plan": [
+  "expand:+x:400",
+  "visit:new:6",
+  "expand:-y:400",
+  "visit:new:4",
+  "expand:-x:350",
+  "expand:+y:350",
+  "visit:new:4",
+  "visit:start:8",
+  "home"
+ ],
+ "msg": "ok",
+ "seconds": 1009.6,
+ "counts": {
+  "entry_door_never_opened": 2,
+  "foot_below_ground": 7,
+  "stuck": 1
+ },
+ "events": [
+  {
+   "kind": "entry_door_never_opened",
+   "t": 197.9,
+   "task": "visit RTBuilding153 (home)",
+   "building": "RTBuilding153"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 395.7,
+   "task": "visit RTBuilding244 (tavern)",
+   "bone": "ball_r",
+   "depth": 7.6,
+   "at": [
+    36967,
+    -19070,
+    88
+   ],
+   "on": "SM_Stairs_4"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 433.2,
+   "task": "visit RTBuilding155 (home)",
+   "bone": "ball_l",
+   "depth": 6.2,
+   "at": [
+    42828,
+    3272,
+    -44
+   ],
+   "on": "SM_StoneBrick_A_261"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 441.7,
+   "task": "visit RTBuilding155 (home)",
+   "bone": "ball_r",
+   "depth": 19.3,
+   "at": [
+    42875,
+    3233,
+    -45
+   ],
+   "on": "SM_StoneBrick_A_261"
+  },
+  {
+   "kind": "entry_door_never_opened",
+   "t": 449.8,
+   "task": "visit RTBuilding155 (home)",
+   "building": "RTBuilding155"
+  },
+  {
+   "kind": "stuck",
+   "t": 740.9,
+   "task": "visit RTBuilding157 (home)",
+   "at": [
+    27858,
+    6622,
+    44
+   ],
+   "target": [
+    27806,
+    6622
+   ],
+   "dist": 52
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 798.4,
+   "task": "visit RTBuilding173 (cabin)",
+   "bone": "ball_r",
+   "depth": 6.5,
+   "at": [
+    46054,
+    12729,
+    -38
+   ],
+   "on": "BP_House_C11"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 864.6,
+   "task": "visit RT_01a_-1_-1_35 (home)",
+   "bone": "ball_r",
+   "depth": 9.2,
+   "at": [
+    -4073,
+    -8525,
+    -1
+   ],
+   "on": "SM_Stairs_01"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 988.0,
+   "task": "visit RT_cabin_A_-1_-1_19 (cabin)",
+   "bone": "ball_r",
+   "depth": 6.0,
+   "at": [
+    -15739,
+    -12335,
+    73
+   ],
+   "on": "BP_House_A3"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 1006.6,
+   "task": "visit RT_cabin_A_-1_-1_5 (cabin)",
+   "bone": "ball_r",
+   "depth": 6.0,
+   "at": [
+    -4261,
+    -22667,
+    92
+   ],
+   "on": "BP_House_A0"
+  }
+ ],
+ "log": [
+  "0s session start: 4 cells [(-1, -1), (-1, 0), (0, -1), (0, 0)], seed 30535936",
+  "6s expand:+x:400: running 400 m along the street",
+  "114s expand:+x:400: done in 108s at [39895, 0], cells now 7",
+  "114s visit:new:6: 6 buildings (05, 05, 02, 01a, 04a, 04a)",
+  "142s visit RTBuilding168 (tavern): done in 27s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "169s visit RTBuilding197 (tavern): done in 27s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "198s visit RTBuilding153 (home): done in 29s, door max -, containers open (5, 5), near container (0, 'crate'), interior ready True",
+  "223s visit RTBuilding154 (home): done in 26s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "254s visit RTBuilding151 (store): done in 30s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "282s visit RTBuilding152 (store): done in 28s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "282s expand:-y:400: running 400 m along the street",
+  "391s expand:-y:400: done in 109s at [0, -39929], cells now 13",
+  "391s visit:new:4: 4 buildings (05, 02, 04a, cabin_B)",
+  "422s visit RTBuilding244 (tavern): done in 30s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "450s visit RTBuilding155 (home): done in 28s, door max -, containers open (5, 5), near container (0, 'crate'), interior ready True",
+  "479s visit RTBuilding160 (store): done in 29s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "498s visit RTBuilding156 (cabin): done in 19s, door max 1.0, containers open (0, 0), near container None, interior ready True",
+  "498s expand:-x:350: running 350 m along the street",
+  "593s expand:-x:350: done in 95s at [-34923, 0], cells now 16",
+  "593s expand:+y:350: running 350 m along the street",
+  "689s expand:+y:350: done in 96s at [0, 34922], cells now 18",
+  "689s visit:new:4: 4 buildings (05, 03a, 04a, cabin_C)",
+  "723s visit RTBuilding291 (tavern): done in 33s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "755s visit RTBuilding157 (home): done in 32s, door max 1.0, containers open (4, 4), near container (3, 'chest'), interior ready True",
+  "784s visit RTBuilding167 (store): done in 29s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "803s visit RTBuilding173 (cabin): done in 18s, door max 1.0, containers open (0, 0), near container None, interior ready True",
+  "803s visit:start:8: 8 buildings (05, 05, 01a, 01a, 04a, 04a, cabin_A, cabin_A)",
+  "832s visit RT_05_-1_-1_32 (tavern): done in 28s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "861s visit RT_05_-1_0_19 (tavern): done in 29s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "887s visit RT_01a_-1_-1_35 (home): done in 25s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "912s visit RT_01a_-1_0_27 (home): done in 25s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "942s visit RT_04a_-1_-1_0 (store): done in 29s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "971s visit RT_04a_-1_-1_10 (store): done in 29s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "990s visit RT_cabin_A_-1_-1_19 (cabin): done in 19s, door max 1.0, containers open (0, 0), near container None, interior ready True",
+  "1009s visit RT_cabin_A_-1_-1_5 (cabin): done in 19s, door max 1.0, containers open (0, 0), near container None, interior ready True"
+ ],
+ "checks": 7489,
+ "start_cells": [
+  [
+   -1,
+   -1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   0,
+   0
+  ]
+ ],
+ "new_cells": [
+  {
+   "cell": [
+    1,
+    0
+   ],
+   "t": 55.6,
+   "her": [
+    18006,
+    0
+   ],
+   "dist_m": 69.9,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    1,
+    1
+   ],
+   "t": 56.3,
+   "her": [
+    18157,
+    0
+   ],
+   "dist_m": 259.2,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    1,
+    -1
+   ],
+   "t": 57.2,
+   "her": [
+    18307,
+    0
+   ],
+   "dist_m": 66.9,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    2,
+    0
+   ],
+   "t": 175.5,
+   "her": [
+    43014,
+    1034
+   ],
+   "dist_m": 69.9,
+   "task": "visit RTBuilding153 (home)"
+  },
+  {
+   "cell": [
+    2,
+    1
+   ],
+   "t": 176.4,
+   "her": [
+    43082,
+    1034
+   ],
+   "dist_m": 249.4,
+   "task": "visit RTBuilding153 (home)"
+  },
+  {
+   "cell": [
+    2,
+    -1
+   ],
+   "t": 177.5,
+   "her": [
+    43150,
+    1034
+   ],
+   "dist_m": 69.3,
+   "task": "visit RTBuilding153 (home)"
+  },
+  {
+   "cell": [
+    0,
+    -2
+   ],
+   "t": 332.0,
+   "her": [
+    0,
+    -18005
+   ],
+   "dist_m": 70.0,
+   "task": "expand:-y:400"
+  },
+  {
+   "cell": [
+    1,
+    -2
+   ],
+   "t": 332.7,
+   "her": [
+    0,
+    -18156
+   ],
+   "dist_m": 259.2,
+   "task": "expand:-y:400"
+  },
+  {
+   "cell": [
+    -1,
+    -2
+   ],
+   "t": 333.6,
+   "her": [
+    0,
+    -18306
+   ],
+   "dist_m": 66.9,
+   "task": "expand:-y:400"
+  },
+  {
+   "cell": [
+    -2,
+    0
+   ],
+   "t": 547.6,
+   "her": [
+    -18007,
+    0
+   ],
+   "dist_m": 69.9,
+   "task": "expand:-x:350"
+  },
+  {
+   "cell": [
+    -2,
+    1
+   ],
+   "t": 548.5,
+   "her": [
+    -18158,
+    0
+   ],
+   "dist_m": 259.2,
+   "task": "expand:-x:350"
+  },
+  {
+   "cell": [
+    -2,
+    -1
+   ],
+   "t": 549.3,
+   "her": [
+    -18308,
+    0
+   ],
+   "dist_m": 66.9,
+   "task": "expand:-x:350"
+  },
+  {
+   "cell": [
+    0,
+    1
+   ],
+   "t": 643.2,
+   "her": [
+    0,
+    18026
+   ],
+   "dist_m": 69.7,
+   "task": "expand:+y:350"
+  },
+  {
+   "cell": [
+    -1,
+    1
+   ],
+   "t": 644.3,
+   "her": [
+    0,
+    18177
+   ],
+   "dist_m": 68.2,
+   "task": "expand:+y:350"
+  }
+ ],
+ "cells_end": [
+  [
+   -2,
+   -1
+  ],
+  [
+   -2,
+   0
+  ],
+  [
+   -2,
+   1
+  ],
+  [
+   -1,
+   -2
+  ],
+  [
+   -1,
+   -1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   -1,
+   1
+  ],
+  [
+   0,
+   -2
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   -2
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   2,
+   -1
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   2,
+   1
+  ]
+ ]
+}

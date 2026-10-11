@@ -1,0 +1,126 @@
+{
+ "plan": [
+  "expand:+x:400",
+  "visit:new:2",
+  "home"
+ ],
+ "msg": "ok",
+ "seconds": 202.8,
+ "counts": {},
+ "events": [],
+ "log": [
+  "0s session start: 4 cells [(-1, -1), (-1, 0), (0, -1), (0, 0)], seed 1427267104",
+  "13s expand:+x:400: running 400 m along the street",
+  "136s expand:+x:400: done in 123s at [39918, 0], cells now 7",
+  "136s visit:new:2: 2 buildings (05, 03a)",
+  "177s visit RTBuilding18 (tavern): done in 41s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "202s visit RTBuilding1 (home): done in 24s, door max 1.0, containers open (4, 4), near container (3, 'chest'), interior ready True"
+ ],
+ "checks": 910,
+ "start_cells": [
+  [
+   -1,
+   -1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   0,
+   0
+  ]
+ ],
+ "new_cells": [
+  {
+   "cell": [
+    1,
+    0
+   ],
+   "t": 73.3,
+   "her": [
+    18031,
+    0
+   ],
+   "dist_m": 69.7,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    1,
+    1
+   ],
+   "t": 74.5,
+   "her": [
+    18182,
+    0
+   ],
+   "dist_m": 259.1,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    1,
+    -1
+   ],
+   "t": 75.3,
+   "her": [
+    18333,
+    0
+   ],
+   "dist_m": 66.7,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    0,
+    1
+   ],
+   "t": 175.0,
+   "her": [
+    26068,
+    18014
+   ],
+   "dist_m": 70.7,
+   "task": "visit RTBuilding18 (tavern)"
+  }
+ ],
+ "cells_end": [
+  [
+   -1,
+   -1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   1
+  ]
+ ]
+}

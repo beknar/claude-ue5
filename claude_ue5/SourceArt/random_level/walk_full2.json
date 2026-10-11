@@ -1,0 +1,567 @@
+{
+ "plan": [
+  "expand:+x:400",
+  "visit:new:6",
+  "expand:-y:400",
+  "visit:new:4",
+  "expand:-x:350",
+  "expand:+y:350",
+  "visit:new:4",
+  "visit:start:8",
+  "home"
+ ],
+ "msg": "ok",
+ "seconds": 1092.3,
+ "counts": {
+  "foot_below_ground": 11
+ },
+ "events": [
+  {
+   "kind": "foot_below_ground",
+   "t": 441.2,
+   "task": "visit RTBuilding109 (home)",
+   "bone": "ball_r",
+   "depth": 9.6,
+   "at": [
+    42787,
+    -7379,
+    21
+   ],
+   "on": "SM_Pot"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 733.3,
+   "task": "visit RTBuilding110 (home)",
+   "bone": "ball_r",
+   "depth": 5.1,
+   "at": [
+    47795,
+    -9079,
+    22
+   ],
+   "on": "SM_Stairs_2"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 737.7,
+   "task": "visit RTBuilding110 (home)",
+   "bone": "ball_r",
+   "depth": 5.0,
+   "at": [
+    48165,
+    -8742,
+    31
+   ],
+   "on": "SM_StoneBrick_A_249"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 757.9,
+   "task": "visit RTBuilding126 (store)",
+   "bone": "ball_r",
+   "depth": 4.0,
+   "at": [
+    59963,
+    2847,
+    -8
+   ],
+   "on": "RTCell3"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 808.0,
+   "task": "visit RTBuilding100 (cabin)",
+   "bone": "ball_r",
+   "depth": 6.9,
+   "at": [
+    27630,
+    -10747,
+    29
+   ],
+   "on": "BP_House_A17"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 809.6,
+   "task": "visit RTBuilding100 (cabin)",
+   "bone": "ball_r",
+   "depth": 7.0,
+   "at": [
+    27342,
+    -10740,
+    29
+   ],
+   "on": "BP_House_A17"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 896.3,
+   "task": "visit RT_01a_-1_-1_35 (home)",
+   "bone": "ball_l",
+   "depth": 8.7,
+   "at": [
+    -4083,
+    -8542,
+    -1
+   ],
+   "on": "SM_Stairs_01"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 896.4,
+   "task": "visit RT_01a_-1_-1_35 (home)",
+   "bone": "ball_r",
+   "depth": 9.6,
+   "at": [
+    -4081,
+    -8527,
+    -1
+   ],
+   "on": "SM_Stairs_01"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 1016.5,
+   "task": "visit RT_04a_-1_-1_0 (store)",
+   "bone": "ball_r",
+   "depth": 8.8,
+   "at": [
+    -22142,
+    -23945,
+    46
+   ],
+   "on": "SM_Stairs_3"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 1022.9,
+   "task": "visit RT_04a_-1_-1_10 (store)",
+   "bone": "ball_l",
+   "depth": 4.1,
+   "at": [
+    -12139,
+    -18941,
+    94
+   ],
+   "on": "SM_Stairs_3"
+  },
+  {
+   "kind": "foot_below_ground",
+   "t": 1060.4,
+   "task": "visit RT_cabin_A_-1_-1_19 (cabin)",
+   "bone": "ball_r",
+   "depth": 5.8,
+   "at": [
+    -16094,
+    -12840,
+    76
+   ],
+   "on": "BP_House_A22"
+  }
+ ],
+ "log": [
+  "0s session start: 4 cells [(-1, -1), (-1, 0), (0, -1), (0, 0)], seed 458904048",
+  "6s expand:+x:400: running 400 m along the street",
+  "115s expand:+x:400: done in 109s at [39939, 0], cells now 7",
+  "115s visit:new:6: 6 buildings (05, 05, 01a, 01a, 04b, 04b)",
+  "145s visit RTBuilding24 (tavern): done in 29s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "173s visit RTBuilding64 (tavern): done in 28s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "200s visit RTBuilding1 (home): done in 27s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "225s visit RTBuilding103 (home): done in 25s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "255s visit RTBuilding10 (store): done in 29s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "283s visit RTBuilding104 (store): done in 28s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "283s expand:-y:400: running 400 m along the street",
+  "392s expand:-y:400: done in 109s at [0, -39934], cells now 13",
+  "392s visit:new:4: 4 buildings (05, 03a, 04a, cabin_B)",
+  "425s visit RTBuilding316 (tavern): done in 32s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "450s visit RTBuilding109 (home): done in 24s, door max 1.0, containers open (4, 4), near container (3, 'chest'), interior ready True",
+  "479s visit RTBuilding107 (store): done in 29s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "500s visit RTBuilding0 (cabin): done in 21s, door max 1.0, containers open (0, 0), near container None, interior ready True",
+  "500s expand:-x:350: running 350 m along the street",
+  "598s expand:-x:350: done in 99s at [-34916, 0], cells now 16",
+  "598s expand:+y:350: running 350 m along the street",
+  "695s expand:+y:350: done in 96s at [0, 34947], cells now 18",
+  "695s visit:new:4: 4 buildings (05, 02, 04b, cabin_A)",
+  "728s visit RTBuilding347 (tavern): done in 32s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "757s visit RTBuilding110 (home): done in 29s, door max -, containers open (5, 5), near container (0, 'crate'), interior ready True",
+  "789s visit RTBuilding126 (store): done in 32s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "812s visit RTBuilding100 (cabin): done in 23s, door max 1.0, containers open (0, 0), near container None, interior ready True",
+  "812s visit:start:8: 8 buildings (05, 05, 01a, 01a, 04a, 04a, cabin_A, cabin_A)",
+  "853s visit RT_05_-1_-1_32 (tavern): done in 40s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "892s visit RT_05_-1_0_19 (tavern): done in 39s, door max 1.0, containers open (11, 11), near container None, interior ready True",
+  "927s visit RT_01a_-1_-1_35 (home): done in 35s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "959s visit RT_01a_-1_0_27 (home): done in 32s, door max 1.0, containers open (1, 1), near container (0, 'chest'), interior ready True",
+  "1018s visit RT_04a_-1_-1_0 (store): done in 59s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "1049s visit RT_04a_-1_-1_10 (store): done in 30s, door max 1.0, containers open (5, 5), near container None, interior ready True",
+  "1071s visit RT_cabin_A_-1_-1_19 (cabin): done in 22s, door max 1.0, containers open (0, 0), near container None, interior ready True",
+  "1091s visit RT_cabin_A_-1_-1_5 (cabin): done in 20s, door max 1.0, containers open (0, 0), near container None, interior ready True"
+ ],
+ "checks": 6696,
+ "start_cells": [
+  [
+   -1,
+   -1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   0,
+   0
+  ]
+ ],
+ "new_cells": [
+  {
+   "cell": [
+    1,
+    0
+   ],
+   "t": 55.9,
+   "her": [
+    18018,
+    0
+   ],
+   "dist_m": 69.8,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    1,
+    1
+   ],
+   "t": 57.0,
+   "her": [
+    18169,
+    0
+   ],
+   "dist_m": 259.2,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    1,
+    -1
+   ],
+   "t": 57.8,
+   "her": [
+    18319,
+    0
+   ],
+   "dist_m": 66.8,
+   "task": "expand:+x:400"
+  },
+  {
+   "cell": [
+    2,
+    0
+   ],
+   "t": 117.0,
+   "her": [
+    45004,
+    13022
+   ],
+   "dist_m": 50.0,
+   "task": "visit RTBuilding24 (tavern)"
+  },
+  {
+   "cell": [
+    2,
+    1
+   ],
+   "t": 117.7,
+   "her": [
+    45098,
+    13022
+   ],
+   "dist_m": 129.4,
+   "task": "visit RTBuilding24 (tavern)"
+  },
+  {
+   "cell": [
+    2,
+    -1
+   ],
+   "t": 118.5,
+   "her": [
+    45219,
+    13022
+   ],
+   "dist_m": 138.7,
+   "task": "visit RTBuilding24 (tavern)"
+  },
+  {
+   "cell": [
+    0,
+    -2
+   ],
+   "t": 332.9,
+   "her": [
+    0,
+    -18019
+   ],
+   "dist_m": 69.8,
+   "task": "expand:-y:400"
+  },
+  {
+   "cell": [
+    1,
+    -2
+   ],
+   "t": 333.8,
+   "her": [
+    0,
+    -18170
+   ],
+   "dist_m": 259.2,
+   "task": "expand:-y:400"
+  },
+  {
+   "cell": [
+    -1,
+    -2
+   ],
+   "t": 334.9,
+   "her": [
+    0,
+    -18320
+   ],
+   "dist_m": 66.8,
+   "task": "expand:-y:400"
+  },
+  {
+   "cell": [
+    3,
+    0
+   ],
+   "t": 393.9,
+   "her": [
+    70001,
+    23022
+   ],
+   "dist_m": 50.0,
+   "task": "visit RTBuilding316 (tavern)"
+  },
+  {
+   "cell": [
+    3,
+    1
+   ],
+   "t": 395.1,
+   "her": [
+    70085,
+    23022
+   ],
+   "dist_m": 53.0,
+   "task": "visit RTBuilding316 (tavern)"
+  },
+  {
+   "cell": [
+    3,
+    -1
+   ],
+   "t": 396.0,
+   "her": [
+    70206,
+    23022
+   ],
+   "dist_m": 235.2,
+   "task": "visit RTBuilding316 (tavern)"
+  },
+  {
+   "cell": [
+    -2,
+    0
+   ],
+   "t": 550.2,
+   "her": [
+    -18044,
+    0
+   ],
+   "dist_m": 69.6,
+   "task": "expand:-x:350"
+  },
+  {
+   "cell": [
+    -2,
+    1
+   ],
+   "t": 551.5,
+   "her": [
+    -18195,
+    0
+   ],
+   "dist_m": 259.1,
+   "task": "expand:-x:350"
+  },
+  {
+   "cell": [
+    -2,
+    -1
+   ],
+   "t": 552.4,
+   "her": [
+    -18345,
+    0
+   ],
+   "dist_m": 66.5,
+   "task": "expand:-x:350"
+  },
+  {
+   "cell": [
+    0,
+    1
+   ],
+   "t": 648.6,
+   "her": [
+    0,
+    18014
+   ],
+   "dist_m": 69.9,
+   "task": "expand:+y:350"
+  },
+  {
+   "cell": [
+    -1,
+    1
+   ],
+   "t": 649.7,
+   "her": [
+    0,
+    18165
+   ],
+   "dist_m": 68.4,
+   "task": "expand:+y:350"
+  },
+  {
+   "cell": [
+    2,
+    2
+   ],
+   "t": 697.0,
+   "her": [
+    51978,
+    45003
+   ],
+   "dist_m": 50.0,
+   "task": "visit RTBuilding347 (tavern)"
+  },
+  {
+   "cell": [
+    3,
+    2
+   ],
+   "t": 698.0,
+   "her": [
+    51978,
+    45098
+   ],
+   "dist_m": 235.4,
+   "task": "visit RTBuilding347 (tavern)"
+  },
+  {
+   "cell": [
+    1,
+    2
+   ],
+   "t": 699.0,
+   "her": [
+    51978,
+    45218
+   ],
+   "dist_m": 51.7,
+   "task": "visit RTBuilding347 (tavern)"
+  }
+ ],
+ "cells_end": [
+  [
+   -2,
+   -1
+  ],
+  [
+   -2,
+   0
+  ],
+  [
+   -2,
+   1
+  ],
+  [
+   -1,
+   -2
+  ],
+  [
+   -1,
+   -1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   -1,
+   1
+  ],
+  [
+   0,
+   -2
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   -2
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   -1
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   2,
+   1
+  ],
+  [
+   2,
+   2
+  ],
+  [
+   3,
+   2
+  ]
+ ]
+}
