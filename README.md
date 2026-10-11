@@ -69,7 +69,7 @@ claude_ue5/              UE project (claude_ue5.uproject, Config/; Content/ is l
   SourceArt/             exported/converted source art (only small JSON data is committed)
 pipeline/
   unreal/                numbered editor scripts (NNN_name.py), run inside the editor
-  blender_numpy/         Blender scripts (-b -P), numpy/scipy tools, ue_exec.py, encode_video.py, rl_reel_overlay.py
+  blender_numpy/         Blender scripts (-b -P), numpy/scipy tools, ue_exec.py, encode_video.py, rl_reel_overlay.py, rd_reel_overlay.py
 asset_survey/            survey of the local Fab library: UE5 usability, animation compatibility
 local-packs.md           rig/animation summary of the local Fab packs
 .mcp.json                MCP server config (UE ModelContextProtocol plugin on 127.0.0.1:8765)
@@ -104,7 +104,7 @@ Scripts are numbered roughly in build order. Each one's docstring states its pur
 | `290`–`383` | castle_level: village copy, interactive pieces, door/container/wardrobe BPs, splashes, populate, furniture kit, furnishing, grass mask, cinematic |
 | `700`–`714` | sf-city-level: map copies, Monolith strip/stream, bridge road, world-aligned materials, sci-fi door BP, structures + interiors, player/fall guard, barrier walls, walk-test planner and PIE walk test, foot IK, cinematic (demo paths, Simulate recorder, sequence) |
 | `750`–`761` | random_level: building templates (docks level instances, Sherwood cabins), ground material, level + generator setup, generation indicator, cinematic (demo path, Simulate recorder, one-camera sequence), PIE walk test |
-| `770`–`772` | random_dungeon_level: level + piece catalogue + monsters + game mode/HUD + start section (`770`), PIE walk test (`771` driven by `772_rd_walk.ps1`) |
+| `770`–`775` | random_dungeon_level: level + piece catalogue + monsters + game mode/HUD + start section (`770`), PIE walk test (`771` driven by `772_rd_walk.ps1`), cinematic (demo run, Simulate recorder, one-camera sequence) |
 
 **sf-city-level rebuild order** (needs the HDRIBackdrop plugin, enabled in the .uproject):
 1. `700_sfc_maps.py city`, restart the editor, `700_sfc_maps.py monolith`, restart
@@ -121,10 +121,11 @@ Scripts are numbered roughly in build order. Each one's docstring states its pur
 4. Walk test: `761_rl_walk.ps1 "<plan>" <tag>` (PIE + `760_rl_walk_test.py`), e.g. `"expand:+x:400,visit:new:6,expand:-y:400,visit:new:4,visit:start:8,home"`; results in `SourceArt/random_level/walk_<tag>.json`.
 5. Showcase: Save As `random_level_Cine` (`EditorLoadingAndSavingUtils.save_map`), restart, open it; `754_rl_cine_setup.py` (demo character + path, generator follows her with a fixed seed); `755_rl_cine_record.py` (Simulate; stop it after "RLPATH saved"); `756_rl_sequence.py` (one continuous camera: MRQ warms up at every camera cut, which would stall her); render `LS_RL_Showcase` with `75`; HUD with `pipeline/blender_numpy/rl_reel_overlay.py <frames> <out_dir> claude_ue5/Saved/Logs/claude_ue5.log` (reads the render's generation events from the log, so run it before the next PIE session), then encode from 0.
 
-**random_dungeon_level** (`770`–`772`, C++ in `claude_ue5/Source/claude_ue5/RD`; packs: Dungeon Builder top-down kit `MysticDungeon`, Modular Dungeon kits `HallowedDepths` / `DarkHalls`, `Gothic_Props`, `Medieval_Weapons`, `Creatures_Pack`, castle_level's furniture kit and openable barrels / crates; reveal materials from random_level's `753`):
+**random_dungeon_level** (`770`–`775`, C++ in `claude_ue5/Source/claude_ue5/RD`; packs: Dungeon Builder top-down kit `MysticDungeon`, Modular Dungeon kits `HallowedDepths` / `DarkHalls`, `Gothic_Props`, `Medieval_Weapons`, `Creatures_Pack`, castle_level's furniture kit and openable barrels / crates; reveal materials from random_level's `753`):
 1. Build the C++ module (`pipeline\build_cpp.ps1`, editor closed), relaunch.
 2. `770_rd_level.py` (pieces normalised to the dungeon frame, monsters with measured walk speeds, `BP_RD_GameMode` + `RDHUD`, level, start section, PlayerStart in the great hall; saved). Re-run after changing the generator's layout or furnishing code.
 3. Walk test: `772_rd_walk.ps1 "<plan>" <tag>` (PIE + `771_rd_walk_test.py`), e.g. `"rooms:3,expand:+x,rooms:2,map:a,expand:-y,home"`; results in `SourceArt/random_dungeon/walk_<tag>.json`. `Config/DefaultEditorSettings.ini` keeps the editor at full speed in the background (otherwise PIE runs at ~3 fps while a script drives it).
+4. Showcase: Save As `random_dungeon_level_Cine`, restart, open it; `773_rd_cine_setup.py` (demo character running east along a lane through the chapel and prison into the next section; generator follows her with a fixed seed, opens doors in front of her, 12 m trigger); `774_rd_cine_record.py` (Simulate; stop it after "RDPATH saved"; also records the map data); `775_rd_sequence.py` (one camera, doorway / ceiling clearance checks); render `LS_RD_Showcase` with `75`; HUD with `pipeline/blender_numpy/rd_reel_overlay.py <frames> <out_dir> claude_ue5/Saved/Logs/claude_ue5.log` (run it before the next PIE session), then encode from 0.
 
 **castle_level rebuild order:**
 1. `290_castle_level.py -2450 -1250 45`

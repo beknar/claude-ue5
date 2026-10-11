@@ -1567,8 +1567,16 @@ void ARDSection::Tick(float Dt)
 	UWorld* W = GetWorld();
 	if (!W || !W->IsGameWorld()) return;
 	const float Now = W->GetTimeSeconds();
-	APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	const AActor* Pawn = Generator ? Generator->GetTrackedActor() : UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector PL = Pawn ? Pawn->GetActorLocation() : FVector(1e9);
+	// cinematics: doors open by themselves in front of the tracked actor
+	if (Generator && Generator->TrackedActor && Generator->TrackedAutoDoorDistance > 0.f)
+		for (int32 I = 0; I < Doors.Num(); ++I)
+		{
+			FMover& M = Doors[I];
+			if (M.Target > 0.5f || M.bCell) continue;
+			if (FVector::Dist2D(PL, M.Center) < Generator->TrackedAutoDoorDistance) ToggleDoor(I, PL);
+		}
 	// torch flicker near the player
 	for (const FFlicker& F : Flickers)
 	{

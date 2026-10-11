@@ -1,5 +1,6 @@
 #include "RD/RDMonster.h"
 #include "RD/RDSection.h"
+#include "RD/RDDungeonGenerator.h"
 #include "Animation/AnimationAsset.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -30,6 +31,8 @@ ARDMonster::ARDMonster()
 void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 InSeed)
 {
 	Section = InSection; MonsterName = Def.Name;
+	if (Section && Section->Generator && !Section->Generator->bMonstersBlockPawns)
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	R.Initialize(InSeed);
 	GetCapsuleComponent()->SetCapsuleSize(Def.CapsuleRadius, Def.CapsuleHalfHeight);
 	USkeletalMeshComponent* M = GetMesh();
@@ -134,7 +137,7 @@ void ARDMonster::Tick(float Dt)
 	}
 	// the player ahead: step aside toward the wall away from her (hallways are 3 m wide), wait if she is right there
 	FVector Side = FVector::ZeroVector;
-	if (APawn* P = UGameplayStatics::GetPlayerPawn(this, 0))
+	if (const AActor* P = Section->Generator ? Section->Generator->GetTrackedActor() : UGameplayStatics::GetPlayerPawn(this, 0))
 	{
 		const FVector Dp = (P->GetActorLocation() - L) * FVector(1, 1, 0);
 		const FVector Fw = Dir2.GetSafeNormal();
