@@ -1,0 +1,126 @@
+{
+ "tag": "t7",
+ "plan": [
+  "rooms:3",
+  "expand:+x",
+  "rooms:2",
+  "map:c",
+  "expand:-y",
+  "rooms:2",
+  "expand:-x",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 1,
+ "doors_opened": 79,
+ "doors_failed": 0,
+ "containers_opened": 5,
+ "containers_failed": 1,
+ "rooms_visited": [
+  "Armory",
+  "Guard room",
+  "Barracks",
+  "Kitchen",
+  "Storeroom",
+  "Great hall",
+  "Chapel"
+ ],
+ "sections": [
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   0,
+   -1
+  ]
+ ],
+ "events": [
+  "step rooms:3",
+  "to room 20 Armory (46 tiles)",
+  "opened wardrobe 187 (alpha 1.00)",
+  "to room 9 Guard room (59 tiles)",
+  "opened barrel 79 (alpha 1.00)",
+  "to room 25 Barracks (50 tiles)",
+  "opened chest 242 (alpha 1.00)",
+  "step expand:+x",
+  "expand +x via portal (12450,150), path 53",
+  "entered section (1,0): 49 rooms, reachable 49, monsters 14",
+  "step rooms:2",
+  "to room 41 Kitchen (102 tiles)",
+  "STUCK at (34494,7350) going to (34650,7350): near 'close door', nearest monster 6821 cm",
+  "shot stuck1",
+  "opened crate 461 (alpha 1.00)",
+  "to room 3 Storeroom (97 tiles)",
+  "opened crate 86 (alpha 1.00)",
+  "step map:c",
+  "shot map_c",
+  "step expand:-y",
+  "expand -y via portal (25350,-12450), path 9",
+  "entered section (1,-1): 49 rooms, reachable 49, monsters 15",
+  "step rooms:2",
+  "to room 4 Great hall (112 tiles)",
+  "CONTAINER FAILED chest 97 at (30241,-36730) alpha 0.00",
+  "to room 34 Chapel (79 tiles)",
+  "room 34 Chapel: no closed container",
+  "step expand:-x",
+  "expand -x via portal (12750,-25050), path 90",
+  "entered section (0,-1): 49 rooms, reachable 49, monsters 22",
+  "step home"
+ ],
+ "shots": [
+  "rd_t7_stuck1.png",
+  "rd_t7_map_c.png"
+ ],
+ "monsters": {
+  "count": 117,
+  "moved_3m": 17,
+  "trips": 201,
+  "repaths": 664
+ },
+ "discovered": [
+  39,
+  289
+ ],
+ "frame_stats": {
+  "median": 19.1,
+  "p99": 30.6,
+  "max": 125.0,
+  "gen_median": 40.1,
+  "gen_max": 125.0
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   1,
+   -2
+  ],
+  [
+   2,
+   -1
+  ],
+  [
+   0,
+   -1
+  ]
+ ]
+}

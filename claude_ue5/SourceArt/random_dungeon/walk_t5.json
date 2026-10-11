@@ -1,0 +1,115 @@
+{
+ "tag": "t5",
+ "plan": [
+  "rooms:3",
+  "expand:+x",
+  "shot:newsec",
+  "rooms:2",
+  "map:a",
+  "expand:-y",
+  "rooms:2",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 74,
+ "doors_failed": 0,
+ "containers_opened": 5,
+ "containers_failed": 0,
+ "rooms_visited": [
+  "Armory",
+  "Guard room",
+  "Barracks",
+  "Torture chamber",
+  "Barracks",
+  "Chapel",
+  "Barracks"
+ ],
+ "sections": [
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   -1
+  ]
+ ],
+ "events": [
+  "step rooms:3",
+  "to room 20 Armory (46 tiles)",
+  "opened wardrobe 187 (alpha 1.00)",
+  "to room 9 Guard room (59 tiles)",
+  "opened barrel 79 (alpha 1.00)",
+  "to room 25 Barracks (50 tiles)",
+  "opened chest 242 (alpha 1.00)",
+  "step expand:+x",
+  "expand +x via portal (12450,150), path 53",
+  "entered section (1,0): 49 rooms, reachable 49, monsters 11",
+  "step shot:newsec",
+  "shot newsec",
+  "step rooms:2",
+  "to room 41 Torture chamber (150 tiles)",
+  "room 41 Torture chamber: no closed container",
+  "to room 3 Barracks (97 tiles)",
+  "opened chest 17 (alpha 1.00)",
+  "step map:a",
+  "shot map_a",
+  "step expand:-y",
+  "expand -y via portal (25350,-12450), path 7",
+  "entered section (1,-1): 49 rooms, reachable 49, monsters 13",
+  "step rooms:2",
+  "to room 6 Chapel (138 tiles)",
+  "room 6 Chapel: no closed container",
+  "to room 23 Barracks (110 tiles)",
+  "opened chest 211 (alpha 1.00)",
+  "step home"
+ ],
+ "shots": [
+  "rd_t5_newsec.png",
+  "rd_t5_map_a.png"
+ ],
+ "monsters": {
+  "count": 93,
+  "moved_3m": 17,
+  "trips": 116,
+  "repaths": 420
+ },
+ "discovered": [
+  38,
+  242
+ ],
+ "frame_stats": {
+  "median": 18.7,
+  "p99": 28.2,
+  "max": 125.0,
+  "gen_median": 39.4,
+  "gen_max": 125.0
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   1,
+   -2
+  ],
+  [
+   2,
+   -1
+  ]
+ ]
+}

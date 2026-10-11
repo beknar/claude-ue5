@@ -1,0 +1,203 @@
+// random_dungeon_level: one 252 m x 252 m dungeon section (84 x 84 tiles of 3 m). Plan() lays out the rooms and hallways
+// from (section, seed) alone; the static part (floors, walls, ceilings, furniture as instanced meshes, lights, fire
+// effects) is built once (saved with the level for the editor-built start section) and the interactive part (doors,
+// containers, monsters, map data) is rebuilt for play.
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "RDTypes.h"
+#include "RDSection.generated.h"
+
+class ARDDungeonGenerator;
+class ARDMonster;
+class UInstancedStaticMeshComponent;
+class UStaticMeshComponent;
+class UPointLightComponent;
+class UMaterialInterface;
+
+UCLASS()
+class CLAUDE_UE5_API ARDSection : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	ARDSection();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FIntPoint Coord = FIntPoint::ZeroValue;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 Seed = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bEditorBuilt = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TObjectPtr<ARDDungeonGenerator> Generator;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 NumInstances = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 NumLights = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float GenerateMs = 0.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TArray<TObjectPtr<ARDMonster>> SpawnedMonsters;
+	/** prefab actors (bookshelves, candle stands...) owned by the section */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TArray<TObjectPtr<AActor>> OtherActors;
+
+	/** editor build or runtime generation: plan + static + interactive (+ monsters and map data in play) */
+	void Generate(ARDDungeonGenerator* InGenerator, FIntPoint InCoord, int32 InSeed, bool bEditorBuild);
+	/** runtime generation spread over frames: BeginGenerate builds the shell and doors (and registers the map),
+	 *  ContinueGenerate furnishes rooms / hallways within a time budget; true once finished (monsters spawned) */
+	void BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoord, int32 InSeed, bool bEditorBuild);
+	bool ContinueGenerate(double BudgetSeconds);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") bool IsBuilding() const { return bBuilding; }
+	/** saved (editor-built) section at the start of play: plan again, rebuild the interactive part, monsters, map data */
+	void ActivateForPlay();
+	/** generation indicator: translucent walls on the section border (UV.y 0 at the floor, 1 at the top) */
+	void ShowCurtain(UMaterialInterface* Material, float StartTime, float Height, float Lifetime);
+
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector2D GetSectionMin() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumRooms() const { return Rooms.Num(); }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumDoors() const { return Doors.Num(); }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumContainers() const { return Containers.Num(); }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetDoorLocation(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") float GetDoorOpenAlpha(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") bool IsDoorCell(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetContainerLocation(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") float GetContainerOpenAlpha(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString GetContainerKind(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString GetRoomKind(int32 Index) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetRoomCenter(int32 Index) const;
+	/** room rectangle (world XY min / max) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void GetRoomBounds(int32 Index, FVector2D& Min, FVector2D& Max) const;
+	/** walkable tile centres of a room (walk test) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FVector> GetRoomFreeTiles(int32 Index) const;
+	/** room index at a world location (-1: none / hallway) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 RoomAt(FVector Location) const;
+	/** tile path between two world points over walkable tiles (tile centres, world); empty if none */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FVector> FindPathWorld(FVector From, FVector To) const;
+	/** number of rooms reachable from the first room over walkable tiles and doorways (connectivity check) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 CountReachableRooms() const;
+	/** world points of the hallway ends on this section's border (walk test) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FVector> GetPortalPoints() const;
+
+	// ---- interaction (doors, containers)
+	/** nearest door / container within MaxDistance: returns distance (or 1e9) */
+	float FindNearestInteractive(const FVector& From, float MaxDistance, bool& bDoor, int32& Index) const;
+	/** opener: who is pushing (the door swings away) */
+	void ToggleDoor(int32 Index, const FVector& Opener, bool bByMonster = false);
+	void ToggleContainer(int32 Index);
+	bool IsDoorOpenIndex(int32 Index) const;
+	/** open or opening (target) */
+	bool IsTargetOpen(bool bDoor, int32 Index) const;
+
+	// ---- monsters (tile pathing)
+	FIntPoint WorldToLocal(const FVector& L) const;
+	FVector LocalToWorld(FIntPoint T) const;
+	bool IsWalkable(FIntPoint Local) const;
+	/** door index on the edge between two adjacent local tiles (-1 if none) */
+	int32 DoorBetween(FIntPoint A, FIntPoint B) const;
+	bool FindPath(FIntPoint From, FIntPoint To, TArray<FIntPoint>& Out) const;
+	FIntPoint RandomRoomTile(FRandomStream& R, int32 NotRoom = -1) const;
+	int32 RoomAtLocal(FIntPoint Local) const;
+
+	// ---- map
+	FRDSectionMap BuildMapData() const;
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
+	virtual void Tick(float DeltaSeconds) override;
+
+private:
+	struct FRoom
+	{
+		FIntPoint Min, Max;       // local tiles, max exclusive
+		ERDRoomKind Kind = ERDRoomKind::Junction;
+		int32 Block = 0;
+		FIntPoint Lane;           // local tile: centre row (Y) and centre column (X) kept free (door lines)
+		bool bDoorSide[4] = { false, false, false, false };    // -X, +X, -Y, +Y
+	};
+	struct FCorr { FIntPoint Min, Max; bool bHoriz = true; int32 Theme = 0; };
+	struct FMover
+	{
+		USceneComponent* Pivot = nullptr;
+		TArray<UStaticMeshComponent*> Parts;
+		FQuat Closed = FQuat::Identity;
+		FVector Axis = FVector::UpVector;
+		float OpenAngle = 95.f;
+		float Alpha = 0.f, Target = 0.f;
+		bool bDoor = false, bCell = false;
+		bool bByMonster = false;
+		float MonsterCloseTimer = 0.f;
+		FString Kind;
+		FVector Center = FVector::ZeroVector;
+		FVector Normal = FVector::ZeroVector;   // doors: leaf normal (world) when closed
+		float LeafSign = 1.f;                    // doors: +1 when the leaf extends along +Y of its pivot
+		FIntPoint TileA = FIntPoint(-1), TileB = FIntPoint(-1);
+		int32 Partner = -1;                      // double door / wardrobe partner
+	};
+	struct FFlicker { UPointLightComponent* Light; float Base; float Phase; float Amount; };
+
+	// plan (pure function of Coord + Seed)
+	int32 N = 84;
+	TArray<FRoom> Rooms;
+	TArray<FCorr> Corrs;
+	TArray<uint8> Type;        // 0 void, 1 room, 2 hallway
+	TArray<int16> Owner;       // room index, or 1000 + hallway index
+	TArray<uint8> Blocked;     // furniture on the tile (monster pathing)
+	TMap<int64, int32> DoorEdges;
+	TArray<FIntPoint> Portals; // local tiles of hallway ends on the border
+
+	// build state
+	bool bBuildStatic = true, bBuildInteractive = true;
+	bool bNoBlock = false;          // hallway decoration: never blocks a tile (1-tile passages)
+	bool bBuilding = false;
+	int32 NextRoom = 0, NextCorr = 0;
+	FRandomStream GenR;
+	double GenStart = 0.0, ShellMs = 0.0, FurnishMs = 0.0;
+	int32 GenTicks = 0;
+	TArray<FBox2D> QuadBoxes;       // furnishing: the current room's quadrants (between the lanes and the walls)
+	TMap<UStaticMesh*, UInstancedStaticMeshComponent*> Hisms;
+	TMap<UStaticMesh*, UInstancedStaticMeshComponent*> HismsNoCol;
+	TMap<UStaticMesh*, TArray<FTransform>> Pending, PendingNoCol, PendingHidden;
+	TMap<UStaticMesh*, UInstancedStaticMeshComponent*> HismsHidden;
+	TArray<FMover> Doors;
+	TArray<FMover> Containers;
+	TArray<FFlicker> Flickers;
+	TArray<FTransform> MonsterSpawns;
+
+	int32 Idx(FIntPoint T) const { return T.Y * N + T.X; }
+	bool In(FIntPoint T) const { return T.X >= 0 && T.Y >= 0 && T.X < N && T.Y < N; }
+	static int64 EdgeKey(FIntPoint A, FIntPoint B);
+
+	void Plan(FRandomStream& R);
+	void BuildShell(FRandomStream& R);
+	void ShellPrepare(FRandomStream& R);
+	void ShellColumn(FRandomStream& R, int32 X);
+	void ShellCorners();
+	TArray<FName> ShellFloor, ShellWall;
+	int32 ShellX = 0;
+	void Furnish(FRandomStream& R, int32 RoomIndex);
+	void DecorateCorridor(FRandomStream& R, int32 CorrIndex);
+	void ClearInteractive();
+	void SpawnMonsters(FRandomStream& R);
+	void FlushInstances();
+	void RegisterMap();
+	void CollectFlicker();
+	void AddDoors();
+
+	// placement helpers (world space)
+	FVector TileWorld(FIntPoint Local, float Z = 0.f) const;
+	void AddPiece(FName Name, const FTransform& T, bool bForceNoCollision = false);
+	void AddPieceAt(FName Name, const FVector& Loc, float Yaw, float Scale = 1.f, bool bForceNoCollision = false);
+	UPointLightComponent* AddLight(const FVector& Loc, const FLinearColor& Color, float Candelas, float Radius, bool bShadows, float Flicker);
+	void AddEffect(FName Name, const FVector& Loc, float Scale = 1.f);
+	void AddTorch(const FVector& WallPoint, float InYaw, float Candelas, bool bLit = true);
+	void AddDoor(FIntPoint RoomTile, FIntPoint OutTile, int32 RoomIndex);
+	void AddCellDoor(const FVector& HingeWorld, float Yaw, float Width);
+	void AddContainer(FName Name, const FVector& Loc, float Yaw, const FString& Kind);
+	void MarkBlocked(const FVector& Loc, float Yaw, const FVector2D& Size, bool bLaneToo = false);
+	USceneComponent* AddPivot(USceneComponent* Parent, const FTransform& Rel);
+	UStaticMeshComponent* AddMesh(USceneComponent* Parent, UStaticMesh* Mesh, const FTransform& Rel, bool bCollision);
+
+	// furnishing helpers: room-local geometry
+	FBox2D RoomBox(const FRoom& Rm, float Inset = 0.f) const;
+	/** points along the inside of a wall (side 0..3), every Spacing, keeping Clear cm from the lane door lines */
+	TArray<FVector> WallSlots(const FRoom& Rm, int32 Side, float Spacing, float Clear, float Margin) const;
+	static float InwardYaw(int32 Side);
+	bool LaneFree(const FRoom& Rm, const FVector& P, float Radius) const;
+	void FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers = false);
+	void LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex);
+};

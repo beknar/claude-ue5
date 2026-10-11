@@ -1,0 +1,112 @@
+{
+ "tag": "t8",
+ "plan": [
+  "rooms:4",
+  "expand:+x",
+  "rooms:3",
+  "map:d",
+  "expand:-y",
+  "rooms:2",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 1,
+ "doors_opened": 80,
+ "doors_failed": 0,
+ "containers_opened": 5,
+ "containers_failed": 0,
+ "rooms_visited": [
+  "Armory",
+  "Guard room",
+  "Barracks",
+  "Prison cells",
+  "Prison cells",
+  "Library",
+  "Crypt",
+  "Great hall",
+  "Forge"
+ ],
+ "sections": [
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   -1
+  ]
+ ],
+ "events": [
+  "step rooms:4",
+  "to room 20 Armory (46 tiles)",
+  "opened wardrobe 187 (alpha 1.00)",
+  "to room 9 Guard room (59 tiles)",
+  "opened barrel 79 (alpha 1.00)",
+  "to room 25 Barracks (50 tiles)",
+  "opened chest 242 (alpha 1.00)",
+  "to room 41 Prison cells (95 tiles)",
+  "room 41 Prison cells: no closed container",
+  "step expand:+x",
+  "expand +x via portal (12450,7350), path 6",
+  "entered section (1,0): 49 rooms, reachable 49, monsters 20",
+  "step rooms:3",
+  "to room 3 Prison cells (100 tiles)",
+  "room 3 Prison cells: no closed container",
+  "to room 34 Library (83 tiles)",
+  "STUCK at (35702,124) going to (35850,150): near 'close door', nearest monster 69 cm",
+  "shot stuck1",
+  "room 34 Library: no closed container",
+  "to room 6 Crypt (71 tiles)",
+  "room 6 Crypt: no closed container",
+  "step map:d",
+  "shot map_d",
+  "step expand:-y",
+  "expand -y via portal (32550,-12450), path 18",
+  "entered section (1,-1): 49 rooms, reachable 49, monsters 13",
+  "step rooms:2",
+  "to room 37 Great hall (100 tiles)",
+  "opened chest 449 (alpha 1.00)",
+  "to room 32 Forge (58 tiles)",
+  "opened barrel 431 (alpha 1.00)",
+  "step home"
+ ],
+ "shots": [
+  "rd_t8_stuck1.png",
+  "rd_t8_map_d.png"
+ ],
+ "monsters": {
+  "count": 63,
+  "moved_3m": 17,
+  "trips": 158,
+  "repaths": 505
+ },
+ "discovered": [
+  40,
+  168
+ ],
+ "frame_stats": {
+  "median": 19.0,
+  "p99": 24.7,
+  "max": 125.0,
+  "gen_median": 40.7,
+  "gen_max": 125.0
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   2,
+   0
+  ]
+ ]
+}
