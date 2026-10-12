@@ -5,6 +5,7 @@
 // Houses stand shoulder to shoulder along the rings facing the street, their gardens filling the block behind. The plan
 // is a pure function of the plan seeds, so every 250 m section - whatever order they are generated in - continues the
 // same rings and lanes: the village grows as one clustered whole, thinning into farmsteads and fields away from the hub.
+// Villagers (AIVVillager, three for every ten buildings of a section) wander its streets; they exist in play only.
 // The start section (centred on the origin) is built in the editor with a fixed seed and saved; in play the next section
 // is generated when the player nears the edge of the generated village (fresh seed each session, never saved), with
 // random_level's reveal effect. Buildings are assembled from the House Forge kit so that the roof and the camera-side
@@ -17,6 +18,7 @@
 #include "IVVillageGenerator.generated.h"
 
 class AIVSection;
+class AIVVillager;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UPostProcessComponent;
@@ -48,11 +50,18 @@ public:
 	/** cinematics: doors open by themselves for the tracked actor within this distance (0 = off; the player uses F) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Layout") float TrackedAutoDoorDistance = 0.f;
 
-	// ---- view (fixed: the player controller and the cutaway use the same angles)
+	// ---- view (the player controller and the cutaway use the same angles; the pitch is fixed, the yaw turns in play)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IsoVillage|View") float IsoYaw = 45.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IsoVillage|View") float IsoPitch = -35.264f;
 	/** roofs and camera-side walls are cut away while she is inside a building */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|View") bool bCutaway = true;
+	/** how far the player has turned the view from IsoYaw (degrees; Q / E) */
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "IsoVillage|View") float ViewYawOffset = 0.f;
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage|View") void SetViewYawOffset(float Degrees);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "IsoVillage|View") float GetViewYaw() const { return IsoYaw + ViewYawOffset; }
+	/** in play r.Shadow.RadiusThreshold is lowered to this (0 = left alone): seen from 120 m away, people are too small to
+	 *  cast a shadow at the engine's default */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|View") float ShadowRadiusThreshold = 0.001f;
 
 	// ---- plan
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IsoVillage|Plan") float SquareRadius = 2600.f;
@@ -87,6 +96,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Content") TMap<FName, FIVPiece> Pieces;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Content") TMap<FName, TObjectPtr<UNiagaraSystem>> Effects;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Content") TObjectPtr<UMaterialInterface> GroundMaterial;
+
+	// ---- villagers (play only, never saved)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Villagers") TArray<FIVVillagerDef> Villagers;
+	/** villagers per building in every section (0.3: three for every ten buildings; 0 = none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Villagers") float VillagerCoverage = 0.3f;
+	/** she cannot walk through a villager (off for the cinematic's scripted walk) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Villagers") bool bVillagersBlockPawns = true;
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage|Villagers") TArray<AIVVillager*> GetVillagers() const;
+	/** villagers ask before searching a path: one search a frame for the whole village */
+	bool TakePathSlot();
+	/** path searches by villagers so far: how many, how many found nothing, total and longest time (ms) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage|Villagers") int32 VillagerPaths = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage|Villagers") int32 VillagerPathFails = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage|Villagers") float VillagerPathMs = 0.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage|Villagers") float VillagerPathMaxMs = 0.f;
+	void NotePath(double Ms, bool bFound) { ++VillagerPaths; if (!bFound) ++VillagerPathFails; VillagerPathMs += (float)Ms; VillagerPathMaxMs = FMath::Max(VillagerPathMaxMs, (float)Ms); }
 
 	// ---- state
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage") TMap<FIntPoint, TObjectPtr<AIVSection>> Sections;
@@ -155,15 +180,20 @@ public:
 	/** nav grid: is this world point free for the player capsule */
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") bool IsWalkable(FVector Location) const;
 	bool NavBlocked(const FVector2D& P) const;
+	/** FindPath; without bThroughDoors the path stays outdoors (or indoors) */
+	TArray<FVector> FindPathEx(const FVector& From, const FVector& To, int32 MaxCells, bool bThroughDoors) const;
 
 	const FIVPiece* Piece(FName Name) const { const FIVPiece* P = Pieces.Find(Name); return (P && (P->Mesh || P->ActorClass)) ? P : nullptr; }
 	/** unit vector from the scene toward the camera */
-	FVector ToCamera() const { return -FRotator(IsoPitch, IsoYaw, 0.f).Vector(); }
+	FVector ToCamera() const { return -FRotator(IsoPitch, GetViewYaw(), 0.f).Vector(); }
+	/** the same for the view the level starts with (what is built does not depend on how the view is turned) */
+	FVector ToCameraDefault() const { return -FRotator(IsoPitch, IsoYaw, 0.f).Vector(); }
 	float LastRevealTime = -100.f;
 	FIntPoint LastRevealSection = FIntPoint::ZeroValue;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
@@ -174,6 +204,11 @@ private:
 	TArray<FIntPoint> Queue;
 	FIntPoint InsideSection = FIntPoint::ZeroValue;
 	int32 InsideBuilding = -1;
+	bool bCutDirty = false;
+	float LastCutTime = -1.f;
+	float SavedShadowRadius = -1.f;
+	uint64 PathFrame = 0;
+	int32 PathsThisFrame = 0;
 	struct FBandInfo { int32 N = 0; TArray<float> Base; TArray<float> Bulge; TArray<int8> Main; };
 	mutable TMap<int32, FBandInfo> BandCache;
 	mutable TMap<int32, TArray<FIVLot>> LotCache;

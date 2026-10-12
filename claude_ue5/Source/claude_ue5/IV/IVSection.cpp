@@ -1,5 +1,6 @@
 #include "IV/IVSection.h"
 #include "IV/IVVillageGenerator.h"
+#include "IV/IVVillager.h"
 #include "ProceduralMeshComponent.h"
 #include "KismetProceduralMeshLibrary.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -180,7 +181,7 @@ UStaticMeshComponent* AIVSection::AddMesh(USceneComponent* Parent, UStaticMesh* 
 }
 
 /** sign of an angle about Axis that swings Tip toward Want */
-static float PickSign(const FVector& Axis, const FVector& Tip, const FVector& Want)
+static float IVPickSign(const FVector& Axis, const FVector& Tip, const FVector& Want)
 {
 	const FVector P = FQuat(Axis, FMath::DegreesToRadians(60.f)).RotateVector(Tip);
 	return FVector::DotProduct(P - Tip, Want) >= 0.f ? 1.f : -1.f;
@@ -192,24 +193,24 @@ int32 AIVSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const 
 	if (!P || !bBuildInteractive || !P->Moving) return -1;
 	const FVector Local = Loc - GetActorLocation();
 	USceneComponent* Base = AddPivot(RootComponent, FTransform(FRotator(0, Yaw, 0), Local));
-	AddMesh(Base, P->Mesh, P->Adjust, true);
+	UStaticMeshComponent* Body = AddMesh(Base, P->Mesh, P->Adjust, true);
 	const FVector Front = FRotator(0, Yaw, 0).RotateVector(FVector(1, 0, 0));
 	auto AddMoving = [&](UStaticMesh* Mesh, const FVector& Hinge, bool bVerticalAxis, int32 Partner)
 	{
 		USceneComponent* Hp = AddPivot(Base, FTransform(Hinge));
 		FTransform Rel = P->Adjust; Rel.AddToTranslation(-Hinge);
 		UStaticMeshComponent* M = AddMesh(Hp, Mesh, Rel, true);
-		FMover Mv; Mv.Pivot = Hp; Mv.Parts = { M }; Mv.Kind = Kind; Mv.Partner = Partner; Mv.Building = CurBld;
+		FMover Mv; Mv.Pivot = Hp; Mv.Parts = { M }; Mv.Kind = Kind; Mv.Partner = Partner; Mv.Building = CurBld; Mv.Body = Body;
 		const FBox Bx = Mesh->GetBoundingBox().TransformBy(Rel);
 		if (bVerticalAxis)
 		{
 			Mv.Axis = FVector::UpVector;          // wardrobe door: swings out toward the front (+X)
-			Mv.OpenAngle = 100.f * PickSign(Mv.Axis, FVector(0, Bx.GetCenter().Y, 0), FVector(1, 0, 0));
+			Mv.OpenAngle = 100.f * IVPickSign(Mv.Axis, FVector(0, Bx.GetCenter().Y, 0), FVector(1, 0, 0));
 		}
 		else
 		{
 			Mv.Axis = FVector::RightVector;       // lid: hinge along Y at the back, lifts up
-			Mv.OpenAngle = 100.f * PickSign(Mv.Axis, FVector(Bx.GetCenter().X, 0, 0), FVector::UpVector);
+			Mv.OpenAngle = 100.f * IVPickSign(Mv.Axis, FVector(Bx.GetCenter().X, 0, 0), FVector::UpVector);
 		}
 		Mv.Center = Loc + FVector(0, 0, P->Size.Z * 0.6f);
 		Mv.Stand = Loc + Front * (P->Size.X * 0.5f + 62.f);
@@ -500,7 +501,11 @@ bool AIVSection::ContinueGenerate(double Budget)
 		case 5:      // the ground last: it paints the gardens and the earth around the houses
 			if (!bBuildStatic || GroundRows(Budget, T0)) Step = 6;
 			break;
-		case 6: if (bBuildStatic) FinishGround(); Step = 7; break;
+		case 6: if (bBuildStatic) FinishGround(); Step = 7; SubStep = 0; break;
+		case 7:      // the villagers (play only: they are never part of the saved level)
+			if (bBuildInteractive && GetWorld() && GetWorld()->IsGameWorld() && SubStep < GetWantedVillagers()) SpawnVillager(SubStep++);
+			else Step = 8;
+			break;
 		default: Finish(); break;
 		}
 	}
@@ -508,8 +513,8 @@ bool AIVSection::ContinueGenerate(double Budget)
 	if (!bBuilding && bBuildStatic)
 	{
 		GenerateMs = WorkMs;
-		UE_LOG(LogIsoVillage, Log, TEXT("IVSECTION (%d,%d) seed %d: %d buildings, %d vacant sites, %d doors, %d containers, %d instances, %d lights, %d trees, %.0f ms over %d frames (%.1f s)%s"),
-			Coord.X, Coord.Y, Seed, Blds.Num(), Vacant.Num(), Doors.Num(), Containers.Num(), NumInstances, NumLights, MapTrees.Num(), WorkMs, GenTicks,
+		UE_LOG(LogIsoVillage, Log, TEXT("IVSECTION (%d,%d) seed %d: %d buildings, %d vacant sites, %d doors, %d containers, %d instances, %d lights, %d trees, %d villagers, %.0f ms over %d frames (%.1f s)%s"),
+			Coord.X, Coord.Y, Seed, Blds.Num(), Vacant.Num(), Doors.Num(), Containers.Num(), NumInstances, NumLights, MapTrees.Num(), Villagers.Num(), WorkMs, GenTicks,
 			FPlatformTime::Seconds() - GenStart, bEditorBuilt ? TEXT(" [editor]") : TEXT(""));
 	}
 	return !bBuilding;
@@ -576,7 +581,7 @@ void AIVSection::ActivateForPlay()
 	FinishGround();
 	NumInstances = Inst; NumLights = Lights;
 	for (FBld& B : Blds) for (UPointLightComponent* L : B.FillLights) if (L) L->SetVisibility(false);
-	UE_LOG(LogIsoVillage, Log, TEXT("IVSECTION (%d,%d) activated for play: %d buildings, %d doors, %d containers, %.0f ms"), Coord.X, Coord.Y, Blds.Num(), Doors.Num(), Containers.Num(),
+	UE_LOG(LogIsoVillage, Log, TEXT("IVSECTION (%d,%d) activated for play: %d buildings, %d doors, %d containers, %d villagers, %.0f ms"), Coord.X, Coord.Y, Blds.Num(), Doors.Num(), Containers.Num(), Villagers.Num(),
 		(FPlatformTime::Seconds() - T0) * 1000.0);
 }
 
@@ -689,6 +694,8 @@ void AIVSection::Destroyed()
 {
 	for (AActor* A : OtherActors) if (A) A->Destroy();
 	OtherActors.Reset();
+	for (AIVVillager* V : Villagers) if (V) V->Destroy();
+	Villagers.Reset();
 	Super::Destroyed();
 }
 
@@ -741,6 +748,7 @@ float AIVSection::FindNearestInteractive(const FVector& From, float MaxDistance,
 	}
 	for (int32 I = 0; I < Containers.Num(); ++I)
 	{
+		if (Containers[I].bCut) continue;                     // (cut away with its wall: turn the view to open it)
 		const FVector D = Containers[I].Center - From;
 		const float H = FVector2D(D.X, D.Y).Size() + 20.f;     // a door at the same distance wins
 		if (H < Best && FMath::Abs(D.Z) < 220.f) { Best = H; Index = I; bDoor = false; }
@@ -795,16 +803,54 @@ void AIVSection::SetBuildingCut(int32 I, bool bRoof, bool bWalls)
 {
 	if (!Blds.IsValidIndex(I)) return;
 	FBld& B = Blds[I];
-	// the building she is in: roof and camera-side walls; an occluder in front of it: roof, or everything above its floor
+	// the building she is in: the roof and the walls facing the camera as the view is turned now (with the tall
+	// furniture standing against them); an occluder in front of it: its roof, or everything above its floor
 	const bool bAll = bWalls && I != InsideBld;
 	B.bCutRoof = bRoof; B.bCutWalls = bWalls;
-	for (UInstancedStaticMeshComponent* C : B.Group[GRoof]) if (C) C->SetVisibility(!bRoof);
-	for (UInstancedStaticMeshComponent* C : B.Group[GNear]) if (C) C->SetVisibility(!bWalls);
-	for (UInstancedStaticMeshComponent* C : B.Group[GFar]) if (C) C->SetVisibility(!(bWalls && bAll));
+	const FVector Uc = Generator ? Generator->ToCamera() : FVector(-1, -1, 1);
+	const FVector2D ToCam = FVector2D(Uc.X, Uc.Y).GetSafeNormal();
+	bool bHide[GNum];
+	bHide[GRoof] = bRoof;
+	for (int32 G = GWall; G < GNum; ++G) bHide[G] = bWalls && (bAll || GroupNear(B, G, ToCam));
+	for (int32 G = 0; G < GNum; ++G)
+		for (UInstancedStaticMeshComponent* C : B.Group[G]) if (C) C->SetVisibility(!bHide[G]);
 	for (FMover& M : Doors)
-		if (M.Building == I)
-			for (UStaticMeshComponent* P : M.Parts) if (P) P->SetVisibility(!(bWalls && (M.Group == GNear || bAll)));
+		if (M.Building == I && M.Group >= 0 && M.Group < GNum)
+			for (UStaticMeshComponent* P : M.Parts) if (P) P->SetVisibility(!bHide[M.Group]);
+	for (FMover& M : Containers)
+		if (M.Building == I && M.Group >= GWall && M.Group < GNum)
+		{
+			M.bCut = bHide[M.Group];
+			if (M.Body) M.Body->SetVisibility(!M.bCut);
+			for (UStaticMeshComponent* P : M.Parts) if (P) P->SetVisibility(!M.bCut);
+		}
 	for (UPointLightComponent* L : B.FillLights) if (L) L->SetVisibility(bRoof && I == InsideBld);
+}
+
+FVector2D AIVSection::GroupOut(int32 G)
+{
+	if (G >= GCorner) return FVector2D(((G - GCorner) & 2) ? 1.f : -1.f, ((G - GCorner) & 1) ? 1.f : -1.f).GetSafeNormal();
+	switch (G - GWall) { case 0: return FVector2D(1, 0); case 1: return FVector2D(-1, 0); case 2: return FVector2D(0, 1); default: return FVector2D(0, -1); }
+}
+
+bool AIVSection::GroupNear(const FBld& B, int32 G, const FVector2D& ToCam) const
+{
+	const FVector2D O = GroupOut(G);
+	return FVector2D::DotProduct(B.Fx * O.X + B.Fy * O.Y, ToCam) > 0.08f;
+}
+
+bool AIVSection::IsBuildingWallHidden(int32 I, int32 Wall) const
+{
+	if (!Blds.IsValidIndex(I) || Wall < GWall || Wall >= GCorner) return false;
+	for (const UInstancedStaticMeshComponent* C : Blds[I].Group[Wall]) if (C && !C->IsVisible()) return true;
+	return false;
+}
+
+bool AIVSection::IsBuildingWallNear(int32 I, int32 Wall) const
+{
+	if (!Blds.IsValidIndex(I) || Wall < GWall || Wall >= GCorner || !Generator) return false;
+	const FVector U = Generator->ToCamera();
+	return GroupNear(Blds[I], Wall, FVector2D(U.X, U.Y).GetSafeNormal());
 }
 
 void AIVSection::ClearCutaway()
@@ -872,6 +918,100 @@ void AIVSection::CutOccluders(const TArray<FVector>& Floor, const FVector& U, in
 		}
 		if (bRoof || bWalls) SetBuildingCut(I, true, bWalls);
 	}
+}
+
+// ------------------------------------------------------------------------------------------------ villagers
+int32 AIVSection::GetWantedVillagers() const
+{
+	if (!Generator || Blds.Num() == 0) return 0;
+	bool bAny = false;
+	for (const FIVVillagerDef& D : Generator->Villagers) bAny |= D.Mesh != nullptr && D.Weight > 0.f;
+	return bAny ? FMath::RoundToInt(Generator->VillagerCoverage * Blds.Num()) : 0;
+}
+
+bool AIVSection::RandomVillagerSpot(FRandomStream& R, const FVector& From, FVector& Out, float MinDist, float MaxDist) const
+{
+	if (!Generator) return false;
+	const float M = Generator->Module, SS = Generator->SectionSize;
+	const FVector2D Mn = GetSectionMin(), F(From.X, From.Y);
+	const bool bSquare = Generator->IsStartSection(Coord);
+	for (int32 Try = 0; Try < 14; ++Try)
+	{
+		const float U = R.FRand();
+		FVector2D P(0, 0);
+		if (U < 0.42f && Blds.Num() > 0)
+		{
+			// in front of somebody's house, clear of the doorway
+			const FBld& B = Blds[R.RandRange(0, Blds.Num() - 1)];
+			const float Y = (B.DoorCell + 0.5f - B.Ny * 0.5f) * M;
+			const FVector D = BldPoint(B, B.Nx * M * 0.5f + R.FRandRange(290.f, 520.f), Y + R.FRandRange(-240.f, 240.f));
+			P = FVector2D(D.X, D.Y);
+		}
+		else if (U < 0.60f && bSquare)
+		{
+			// the market square
+			const float A = R.FRandRange(0.f, 2.f * PI), Rd = Generator->SquareRadius * 0.9f * FMath::Sqrt(R.FRand());
+			P = FVector2D(FMath::Cos(A), FMath::Sin(A)) * Rd;
+		}
+		else
+		{
+			// on a street or a lane
+			bool bRoad = false;
+			for (int32 K = 0; K < 8 && !bRoad; ++K)
+			{
+				P = Mn + FVector2D(R.FRandRange(150.f, SS - 150.f), R.FRandRange(150.f, SS - 150.f));
+				int32 Type = 0;
+				bRoad = Generator->RoadDistance(P, Type) < -60.f;
+			}
+			if (!bRoad) continue;
+		}
+		const float D = FVector2D::Distance(P, F);
+		if (D < MinDist || D > MaxDist) continue;
+		// its own section (each keeps its share of the villagers), free ground with some elbow room
+		if (P.X < Mn.X + 60.f || P.Y < Mn.Y + 60.f || P.X > Mn.X + SS - 60.f || P.Y > Mn.Y + SS - 60.f) continue;
+		bool bFree = NavAt(P) == 0;
+		for (int32 K = 0; K < 4 && bFree; ++K) bFree = !Generator->NavBlocked(P + FVector2D(K == 0 ? 60.f : K == 1 ? -60.f : 0.f, K == 2 ? 60.f : K == 3 ? -60.f : 0.f));
+		if (!bFree) continue;
+		Out = FVector(P, 0.f);
+		return true;
+	}
+	return false;
+}
+
+void AIVSection::SpawnVillager(int32 K)
+{
+	UWorld* W = GetWorld();
+	if (!W || !Generator) return;
+	FRandomStream R((int32)(((uint32)Seed * 2654435761u + (uint32)K * 40503u + 977u) & 0x7fffffff));
+	// the model, by weight
+	float Total = 0.f;
+	for (const FIVVillagerDef& D : Generator->Villagers) if (D.Mesh) Total += FMath::Max(D.Weight, 0.f);
+	if (Total <= 0.f) return;
+	float Pick = R.FRand() * Total;
+	const FIVVillagerDef* Def = nullptr;
+	for (const FIVVillagerDef& D : Generator->Villagers)
+	{
+		if (!D.Mesh || D.Weight <= 0.f) continue;
+		Def = &D; Pick -= D.Weight;
+		if (Pick <= 0.f) break;
+	}
+	if (!Def) return;
+	// it starts somewhere a villager would go: not on top of another one, not where she starts
+	FVector P = FVector::ZeroVector; bool bOk = false;
+	for (int32 Try = 0; Try < 6 && !bOk; ++Try)
+	{
+		if (!RandomVillagerSpot(R, FVector::ZeroVector, P, 0.f, 1e9f)) continue;
+		bOk = FVector2D(P.X, P.Y).SizeSquared() > 350.f * 350.f;
+		for (const AIVVillager* O : Villagers) if (O && FVector2D::DistSquared(O->Ground(), FVector2D(P.X, P.Y)) < 160.f * 160.f) bOk = false;
+	}
+	if (!bOk) return;
+	FActorSpawnParameters Sp;
+	Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	Sp.Owner = this; Sp.ObjectFlags |= RF_Transient;
+	AIVVillager* V = W->SpawnActor<AIVVillager>(AIVVillager::StaticClass(), FTransform(FRotator(0.f, R.FRandRange(-180.f, 180.f), 0.f), FVector(P.X, P.Y, 90.f)), Sp);
+	if (!V) return;
+	V->Setup(this, *Def, R.RandRange(1, 0x3fffffff));
+	Villagers.Add(V);
 }
 
 // ------------------------------------------------------------------------------------------------ curtain + tick

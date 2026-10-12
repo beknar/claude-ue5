@@ -326,7 +326,7 @@ UStaticMeshComponent* ARDSection::AddMesh(USceneComponent* Parent, UStaticMesh* 
 }
 
 /** sign of an angle about Axis that swings Tip toward Want */
-static float PickSign(const FVector& Axis, const FVector& Tip, const FVector& Want)
+static float RDPickSign(const FVector& Axis, const FVector& Tip, const FVector& Want)
 {
 	const FVector P = FQuat(Axis, FMath::DegreesToRadians(60.f)).RotateVector(Tip);
 	return FVector::DotProduct(P - Tip, Want) >= 0.f ? 1.f : -1.f;
@@ -397,14 +397,14 @@ void ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 			// wardrobe door: swings out toward the front (+X)
 			Mv.Axis = FVector::UpVector;
 			const FBox B = Mesh->GetBoundingBox().TransformBy(Rel);
-			Mv.OpenAngle = 100.f * PickSign(Mv.Axis, FVector(0, B.GetCenter().Y, 0), FVector(1, 0, 0));
+			Mv.OpenAngle = 100.f * RDPickSign(Mv.Axis, FVector(0, B.GetCenter().Y, 0), FVector(1, 0, 0));
 		}
 		else
 		{
 			// lid: hinge axis along Y at the back, lifts up
 			Mv.Axis = FVector::RightVector;
 			const FBox B = Mesh->GetBoundingBox().TransformBy(Rel);
-			Mv.OpenAngle = 100.f * PickSign(Mv.Axis, FVector(B.GetCenter().X, 0, 0), FVector::UpVector);
+			Mv.OpenAngle = 100.f * RDPickSign(Mv.Axis, FVector(B.GetCenter().X, 0, 0), FVector::UpVector);
 		}
 		Mv.Center = Loc + FVector(0, 0, P->Size.Z * 0.6f);
 		return Containers.Add(Mv);

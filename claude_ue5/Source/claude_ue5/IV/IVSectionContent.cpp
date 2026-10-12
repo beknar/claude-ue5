@@ -17,7 +17,7 @@ static FString ContainerKind(FName Name)
 	return S;
 }
 
-bool AIVSection::Place(FBld& B, FName Name, const FVector2D& Local, float LocalYaw, bool bContainer, float Clear, bool bBlocks, float Z)
+bool AIVSection::Place(FBld& B, FName Name, const FVector2D& Local, float LocalYaw, bool bContainer, float Clear, bool bBlocks, float Z, int32 WallGroup)
 {
 	const FIVPiece* P = Generator->Piece(Name);
 	if (!P) return false;
@@ -55,8 +55,14 @@ bool AIVSection::Place(FBld& B, FName Name, const FVector2D& Local, float LocalY
 	{
 		// she stands on the floor cell InteriorOk found in front of it
 		const int32 CI = AddContainer(Name, W, Yaw, ContainerKind(Name));
-		if (Containers.IsValidIndex(CI)) { Containers[CI].Stand = Stand; if (Containers.IsValidIndex(Containers[CI].Partner)) Containers[Containers[CI].Partner].Stand = Stand; }
+		if (Containers.IsValidIndex(CI))
+		{
+			Containers[CI].Stand = Stand; Containers[CI].Group = WallGroup;
+			if (Containers.IsValidIndex(Containers[CI].Partner)) { Containers[Containers[CI].Partner].Stand = Stand; Containers[Containers[CI].Partner].Group = WallGroup; }
+		}
 	}
+	// (a tall piece against a wall comes off with that wall: seen from behind it would hide the room)
+	else if (WallGroup >= 0 && CurBld >= 0 && P->Mesh && !P->ActorClass && !P->bHidden) AddToGroup(B, CurBld, WallGroup, Name, FTransform(FRotator(0, Yaw, 0), W));
 	else AddPieceAt(Name, W, Yaw);
 	if (bBlocks) B.Used.Add(Bx);
 	LastLocal = Local; LastYaw = LocalYaw;
@@ -125,7 +131,9 @@ bool AIVSection::PlaceWall(FBld& B, FName Name, int32 Side, float U, bool bConta
 	case 2: L = FVector2D(FMath::Lerp(-In.X + Wd, In.X - Wd, U), -In.Y + Dp); Yaw = 90.f; break;
 	default: L = FVector2D(FMath::Lerp(-In.X + Wd, In.X - Wd, U), In.Y - Dp); Yaw = -90.f; break;
 	}
-	return Place(B, Name, L, Yaw, bContainer, 8.f, true);
+	// side -> wall group (+X, -X, +Y, -Y)
+	static const int32 Wall[4] = { GWall + 1, GWall + 0, GWall + 3, GWall + 2 };
+	return Place(B, Name, L, Yaw, bContainer, 8.f, true, 0.f, (bWallHide && P->Size.Z > 140.f) ? Wall[FMath::Clamp(Side, 0, 3)] : -1);
 }
 
 int32 AIVSection::PlaceAnyWall(FBld& B, FRandomStream& R, FName Name, bool bContainer, int32 PreferSide)
@@ -135,10 +143,11 @@ int32 AIVSection::PlaceAnyWall(FBld& B, FRandomStream& R, FName Name, bool bCont
 	int32 Order[4] = { 0, 2, 3, 1 };
 	for (int32 I = 3; I > 0; --I) Swap(Order[I], Order[R.RandRange(0, I)]);
 	if (PreferSide >= 0) for (int32 I = 0; I < 4; ++I) if (Order[I] == PreferSide) { Swap(Order[0], Order[I]); break; }
-	// tall pieces stand against the walls away from the camera: against a cut-away wall they would show their backs
-	// and hide the room behind them
+	// tall pieces stand against the walls away from the camera of the view the level starts with: against a cut-away
+	// wall they would show their backs and hide the room behind them (turned to another view, they come off with
+	// their wall)
 	const bool bTall = P->Size.Z > 140.f;
-	const FVector2D ToCam = FVector2D(Generator->ToCamera().X, Generator->ToCamera().Y).GetSafeNormal();
+	const FVector2D ToCam = FVector2D(Generator->ToCameraDefault().X, Generator->ToCameraDefault().Y).GetSafeNormal();
 	auto Near = [&](int32 Side)
 	{
 		const FVector2D N = Side == 0 ? -B.Fx : Side == 1 ? B.Fx : Side == 2 ? -B.Fy : B.Fy;
@@ -198,7 +207,8 @@ void AIVSection::Furnish(int32 BI)
 	// a fire against a wall: flames, a warm flickering light (lit while she is inside), firewood beside it
 	auto Fire = [&](const TCHAR* N, int32 Prefer, float FireZ)
 	{
-		if (PlaceAnyWall(B, R, FName(N), false, Prefer) < 0) return false;
+		// (the hearth stays when its wall is cut away: the fire and its light belong to it)
+		{ TGuardValue<bool> Keep(bWallHide, false); if (PlaceAnyWall(B, R, FName(N), false, Prefer) < 0) return false; }
 		const FVector2D F = Dir(LastYaw), L = LastLocal;
 		const FIVPiece* P = Generator->Piece(FName(N));
 		AddEffect(TEXT("HearthFire"), BldPoint(B, L.X, L.Y, B.FloorZ + FireZ), 0.8f);
@@ -420,8 +430,9 @@ bool AIVSection::PlaceOutdoor(FName Name, const FVector2D& P, float Yaw, float S
 
 bool AIVSection::TreeAllowed(const FVector2D& P, float Height, float Radius) const
 {
-	// a tree hides whatever stands behind it from the camera: none may throw that "shadow" over a house
-	const FVector U = Generator->ToCamera();
+	// a tree hides whatever stands behind it from the camera (of the view the level starts with): none may throw that
+	// "shadow" over a house
+	const FVector U = Generator->ToCameraDefault();
 	const FVector2D Away = -FVector2D(U.X, U.Y).GetSafeNormal();
 	const float Len = Height * FVector2D(U.X, U.Y).Size() / FMath::Max((float)U.Z, 0.1f);
 	const float M = Generator->Module;

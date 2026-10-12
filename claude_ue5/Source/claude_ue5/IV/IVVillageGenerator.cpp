@@ -1,5 +1,7 @@
 #include "IV/IVVillageGenerator.h"
 #include "IV/IVSection.h"
+#include "IV/IVVillager.h"
+#include "HAL/IConsoleManager.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
@@ -544,7 +546,10 @@ void AIVVillageGenerator::UpdateCutaway(const FVector& L)
 					if (I >= 0) { NewS = S->Coord; NewB = I; }
 				}
 	}
-	if (NewB == InsideBuilding && (NewB < 0 || NewS == InsideSection)) return;
+	const float Now = GetWorld()->GetTimeSeconds();
+	const bool bSame = NewB == InsideBuilding && (NewB < 0 || NewS == InsideSection);
+	if (bSame && !(bCutDirty && Now - LastCutTime >= 0.05f)) return;
+	bCutDirty = false; LastCutTime = Now;
 	// restore everything, then cut away the new building and whatever hides its floor from the camera
 	for (auto& KV : Sections) if (KV.Value) KV.Value->ClearCutaway();
 	InsideSection = NewS; InsideBuilding = NewB;
@@ -590,6 +595,11 @@ bool AIVVillageGenerator::IsWalkable(FVector L) const
 
 TArray<FVector> AIVVillageGenerator::FindPath(FVector From, FVector To, int32 MaxCells) const
 {
+	return FindPathEx(From, To, MaxCells, true);
+}
+
+TArray<FVector> AIVVillageGenerator::FindPathEx(const FVector& From, const FVector& To, int32 MaxCells, bool bThroughDoors) const
+{
 	// A* over the sections' 50 cm grids (global cell coordinates), 8-connected; doorways are portal edges between the
 	// cell outside a door and the cell inside it
 	TArray<FVector> Out;
@@ -614,7 +624,7 @@ TArray<FVector> AIVVillageGenerator::FindPath(FVector From, FVector To, int32 Ma
 	FIntPoint A = Cell(FVector2D(From.X, From.Y)), B = Cell(FVector2D(To.X, To.Y));
 	if (!Snap(A) || !Snap(B)) return Out;
 	TMultiMap<FIntPoint, FIntPoint> Portals;
-	for (const auto& KV : Sections) if (KV.Value) KV.Value->AppendPortals(Portals);
+	if (bThroughDoors) for (const auto& KV : Sections) if (KV.Value) KV.Value->AppendPortals(Portals);
 	struct FNode { float F, Gc; FIntPoint C; };
 	auto Pred = [](const FNode& X, const FNode& Y) { return X.F < Y.F; };
 	auto Heur = [&B](const FIntPoint& C) { const int32 Dx = FMath::Abs(C.X - B.X), Dy = FMath::Abs(C.Y - B.Y); return (float)FMath::Max(Dx, Dy) + 0.4142f * FMath::Min(Dx, Dy); };
@@ -673,6 +683,16 @@ void AIVVillageGenerator::BeginPlay()
 	Super::BeginPlay();
 	SessionSeed = FixedSessionSeed != 0 ? FixedSessionSeed : (int32)(FDateTime::Now().GetTicks() & 0x7fffffff);
 	BandCache.Reset(); LotCache.Reset(); CacheSessionSeed = SessionSeed;
+	ViewYawOffset = 0.f; bCutDirty = false;
+	VillagerPaths = VillagerPathFails = 0; VillagerPathMs = VillagerPathMaxMs = 0.f;
+	// shadow casters under 1% of the shadow frustum's radius are dropped: with the camera 120 m from the scene that is
+	// everything the size of a person (her, the villagers). Lowered for this level's play only.
+	if (ShadowRadiusThreshold > 0.f)
+		if (IConsoleVariable* CV = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Shadow.RadiusThreshold")))
+		{
+			SavedShadowRadius = CV->GetFloat();
+			CV->Set(ShadowRadiusThreshold, ECVF_SetByCode);
+		}
 	if (bRevealEffect && RevealPostMaterial)
 	{
 		RevealMID = UMaterialInstanceDynamic::Create(RevealPostMaterial, this);
@@ -687,6 +707,37 @@ void AIVVillageGenerator::BeginPlay()
 	else for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	int32 Nb = 0; for (auto& KV : Sections) Nb += KV.Value->GetNumBuildings();
 	UE_LOG(LogIsoVillageGen, Log, TEXT("IVGEN play: %d start sections, %d buildings, session seed %d"), Sections.Num(), Nb, SessionSeed);
+}
+
+void AIVVillageGenerator::EndPlay(const EEndPlayReason::Type Reason)
+{
+	if (SavedShadowRadius >= 0.f)
+		if (IConsoleVariable* CV = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Shadow.RadiusThreshold"))) CV->Set(SavedShadowRadius, ECVF_SetByCode);
+	SavedShadowRadius = -1.f;
+	Super::EndPlay(Reason);
+}
+
+void AIVVillageGenerator::SetViewYawOffset(float Degrees)
+{
+	if (FMath::IsNearlyEqual(Degrees, ViewYawOffset, 0.01f)) return;
+	ViewYawOffset = Degrees;
+	// which walls face the camera has changed: the cutaway is worked out again (a few times a second while turning)
+	bCutDirty = true;
+}
+
+TArray<AIVVillager*> AIVVillageGenerator::GetVillagers() const
+{
+	TArray<AIVVillager*> Out;
+	for (const auto& KV : Sections) if (KV.Value) for (AIVVillager* V : KV.Value->GetVillagers()) if (V) Out.Add(V);
+	return Out;
+}
+
+bool AIVVillageGenerator::TakePathSlot()
+{
+	if (PathFrame != GFrameCounter) { PathFrame = GFrameCounter; PathsThisFrame = 0; }
+	if (PathsThisFrame >= 1) return false;
+	++PathsThisFrame;
+	return true;
 }
 
 void AIVVillageGenerator::Tick(float Dt)
@@ -741,7 +792,7 @@ void AIVVillageGenerator::Tick(float Dt)
 		{
 			AIVSection* Done = Building; Building = nullptr;
 			StartReveal(Done);
-			InsideBuilding = -2;      // re-evaluate the cutaway (a new neighbour may hide the house she is in)
+			bCutDirty = true;      // re-evaluate the cutaway (a new neighbour may hide the house she is in)
 		}
 		return;
 	}

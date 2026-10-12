@@ -2,9 +2,15 @@
 Plan (comma separated):
   input         the 8 movement directions: scripted keyboard-style input and scripted left-stick deflections (off-axis
                 angles must snap to the nearest of 8 directions; half deflection walks, full runs); the camera never turns
-  houses:N      visit the N nearest houses not yet visited: walk to the door, F (must open), step in (the roof and the
+  rotate        Q / E (RotateView): four steps left, six right, two left; after each the camera must stand at the new
+                yaw (same pitch), "up" must walk her away from the camera, and the view ends where it started
+  houses:N[:turn]  visit the N nearest houses not yet visited: walk to the door, F (must open), step in (the roof and the
                 camera-side walls must be cut away), walk to up to 2 containers and F each (must open), walk out again
-                (the cutaway must be restored)
+                (the cutaway must be restored). With :turn the view is turned through all 8 directions while she is
+                inside: after each step exactly the walls facing the camera must be hidden
+  villagers[:S] every generated section must have its villagers (the generator's coverage x its buildings); watched for
+                S seconds (default 20): they must walk, and never stand on a blocked nav cell
+  zoom:min|max|default|<cm>   set the orthographic view width (min must be a close view of her: <= 600)
   expand:+x|-x|+y|-y   walk along a road across that edge of the generated village: the next section must generate
                 (time, frames, buildings, unreachable doors / containers are logged), then walk 15 m into it
   home          back to the middle of the square
@@ -21,7 +27,7 @@ GEN = unreal.GameplayStatics.get_actor_of_class(W, unreal.IVVillageGenerator)
 PC = unreal.GameplayStatics.get_player_controller(W, 0)
 V = unreal.Vector
 SS = GEN.get_editor_property("section_size")
-R = {"tag": TAG, "plan": PLAN, "falls": 0, "stuck": 0, "doors_opened": 0, "doors_failed": 0, "containers_opened": 0, "containers_failed": 0, "cut_ok": 0, "cut_failed": 0,
+R = {"tag": TAG, "plan": PLAN, "rotate": {}, "villagers": {}, "falls": 0, "stuck": 0, "doors_opened": 0, "doors_failed": 0, "containers_opened": 0, "containers_failed": 0, "cut_ok": 0, "cut_failed": 0,
      "houses": [], "sections": [], "events": [], "frame_ms": [], "gen_frame_ms": [], "shots": [], "input": {}}
 def log(msg):
     R["events"].append(msg); unreal.log("IVWALK " + msg)
@@ -51,7 +57,13 @@ def next_step():
     if S["step"] > len(PLAN): finish(); return
     st = PLAN[S["step"] - 1]; S["mode"] = st; log(f"step {st}")
     if st == "input": S["sub"] = {"k": 0, "t": 0.0, "p0": None}
-    elif st.startswith("houses:"): S["sub"] = {"left": int(st.split(":")[1]), "phase": "pick"}
+    elif st == "rotate": S["sub"] = {"k": 0, "t": 0.0, "phase": "turn", "off": 0}
+    elif st.startswith("villagers"): S["sub"] = {"t": 0.0, "dur": float(st.split(":")[1]) if ":" in st else 20.0, "start": None}
+    elif st.startswith("zoom:"):
+        a = st.split(":")[1]; mn, mx = PC.get_editor_property("min_ortho_width"), PC.get_editor_property("max_ortho_width")
+        wd = mn if a == "min" else mx if a == "max" else 2500.0 if a == "default" else float(a)
+        PC.set_editor_property("ortho_width", wd); R["zoom"] = {"min": mn, "max": mx, "set": wd, "ok": mn <= 600.0}; log(f"zoom: view width {wd:.0f} cm (min {mn:.0f}, max {mx:.0f})"); S["wait"] = 1.0
+    elif st.startswith("houses:"): S["sub"] = {"left": int(st.split(":")[1]), "phase": "pick", "turn": st.endswith(":turn")}
     elif st.startswith("expand:"): S["sub"] = {"phase": "edge", "ax": st.split(":")[1]}
     elif st == "home":
         if not go(V(0, 0, 0)): log("home: no path")
@@ -67,9 +79,12 @@ def finish():
     out = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt\random_isometric_village", f"walk_{TAG}.json"); os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump(R, open(out, "w"), indent=1)
     inp = R["input"]; inp_ok = (not inp) or (inp.get("failed", 1) == 0)
-    ok = R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and R["cut_failed"] == 0 and inp_ok
+    rot, vil = R["rotate"], R["villagers"]
+    PC.rotate_view(-int(round((PC.get_view_yaw() - 45.0) / 45.0)))            # leave the view as it started
+    ok = (R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and R["cut_failed"] == 0 and inp_ok and rot.get("failed", 0) == 0
+          and vil.get("ok", True) and R.get("zoom", {}).get("ok", True))
     unreal.log(f"IVWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) "
-               f"| cutaway {R['cut_ok']} (failed {R['cut_failed']}) | houses {len(R['houses'])} | input {inp.get('passed', '-')}/{inp.get('tests', '-')} | sections {R['sections_final']} | village {R['village']} | frames {R['frame_stats']}")
+               f"| cutaway {R['cut_ok']} (failed {R['cut_failed']}) | houses {len(R['houses'])} | input {inp.get('passed', '-')}/{inp.get('tests', '-')} | rotate {rot.get('passed', '-')}/{rot.get('tests', '-')} | villagers {vil.get('summary', '-')} | sections {R['sections_final']} | village {R['village']} | frames {R['frame_stats']}")
     PC.set_scripted_move(unreal.Vector2D(0, 0), False); PC.set_scripted_stick(unreal.Vector2D(0, 0))
     unreal.unregister_slate_post_tick_callback(S["h"])
 def tick(dt):
@@ -77,6 +92,22 @@ def tick(dt):
     except Exception as e:
         import traceback
         unreal.log_error(f"IVWALK error {e} {traceback.format_exc()}"); unreal.unregister_slate_post_tick_callback(S["h"])
+# ---- the input tests start from open ground on the square (nothing within 4.5 m); a villager walking into her way
+# only means that test's distance / direction is not judged
+def clear_spot():
+    if S.get("clear") is None:
+        best = None
+        for r in range(400, 2400, 200):
+            for k in range(16):
+                c = V(r * math.cos(k * math.pi / 8), r * math.sin(k * math.pi / 8), 0)
+                if GEN.is_walkable(c) and all(GEN.is_walkable(V(c.x + q * math.cos(b * math.pi / 4), c.y + q * math.sin(b * math.pi / 4), 0)) for q in (150, 300, 450) for b in range(8)): best = c; break
+            if best: break
+        S["clear"] = best or V(0, 0, 0); log(f"input tests at ({S['clear'].x:.0f},{S['clear'].y:.0f})")
+    return S["clear"]
+def to_clear(L):
+    c = clear_spot(); p = pawn(); q = V(c.x, c.y, L.z); p.teleport(q, p.get_actor_rotation()); return q
+def villager_near(L, r=240.0):
+    return any(math.hypot(v.get_actor_location().x - L.x, v.get_actor_location().y - L.y) < r for v in GEN.get_villagers())
 # ---- the 8 directions: (scripted source, screen x, screen y, expected index, expected run)
 C45 = math.sqrt(0.5)
 def expected_dir(i):
@@ -96,7 +127,7 @@ def do_input(dt, L):
         log(f"input: {R['input']}"); next_step(); return
     src, sx, sy, ei, run = INPUT_TESTS[s["k"]]
     if s["p0"] is None:
-        s["p0"] = L; s["t"] = 0.0; s["idx"] = None; s["scale"] = None
+        s["p0"] = to_clear(L); s["t"] = 0.0; s["idx"] = None; s["scale"] = None
         if src == "key": PC.set_scripted_stick(unreal.Vector2D(0, 0)); PC.set_scripted_move(unreal.Vector2D(sx, sy), False)
         else: PC.set_scripted_move(unreal.Vector2D(0, 0), False); PC.set_scripted_stick(unreal.Vector2D(sx, sy))
         return
@@ -113,12 +144,83 @@ def do_input(dt, L):
     else:
         ex = expected_dir(ei); ang = math.degrees(math.acos(max(-1.0, min(1.0, (d.x * ex[0] + d.y * ex[1]) / max(dist, 1e-3)))))
         if s["idx"] != ei: ok = False; why += f" index {s['idx']} != {ei}"
-        if dist < 25 or ang > 4.0: ok = False; why += f" moved {dist:.0f} cm, {ang:.1f} deg off"
+        if dist < 25 or ang > 4.0:
+            if villager_near(L): R["input"]["deflected"] = R["input"].get("deflected", 0) + 1; log("input: a villager in her way, distance / direction not judged")
+            else: ok = False; why += f" moved {dist:.0f} cm, {ang:.1f} deg off"
         if (s["scale"] or 0) > 0.9 and not run: ok = False; why += " ran at half deflection"
         if (s["scale"] or 0) < 0.9 and run: ok = False; why += " walked at full deflection"
     R["input"]["passed" if ok else "failed"] = R["input"].get("passed" if ok else "failed", 0) + 1
     log(f"input {src} ({sx:+.2f},{sy:+.2f}) -> dir {s['idx']} scale {(s['scale'] or 0):.2f} moved {dist:.0f} cm: {'ok' if ok else 'FAILED' + why}")
     s["k"] += 1; s["p0"] = None
+# ---- turning the view
+TURNS = [1, 1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1]
+def ang_diff(a, b): return abs((a - b + 180.0) % 360.0 - 180.0)
+def do_rotate(dt, L):
+    s = S["sub"]; rr = R["rotate"]
+    if s["k"] >= len(TURNS):
+        rr["tests"] = len(TURNS); rr.setdefault("passed", 0); rr.setdefault("failed", 0); rr["final_yaw"] = round(PC.get_view_yaw(), 3)
+        if ang_diff(PC.get_view_yaw(), 45.0) > 0.01: rr["failed"] += 1; log("rotate: the view did not end where it started")
+        log(f"rotate: {rr}"); next_step(); return
+    s["t"] += dt
+    if s["phase"] == "turn":
+        PC.rotate_view(TURNS[s["k"]]); s["off"] += TURNS[s["k"]]; s["phase"] = "turning"; s["t"] = 0.0; return
+    if s["phase"] == "turning":
+        if PC.is_view_turning() and s["t"] < 3.0: return
+        s["phase"] = "walk"; s["t"] = 0.0; s["p0"] = to_clear(L); PC.set_scripted_move(unreal.Vector2D(0, 1), True); return
+    if s["phase"] == "walk":
+        if s["t"] < 0.7: return
+        PC.set_scripted_move(unreal.Vector2D(0, 0), False)
+        want = 45.0 + 45.0 * s["off"]; rot = PC.get_iso_camera().get_actor_rotation(); d = L - s["p0"]; dist = math.hypot(d.x, d.y)
+        fw = (math.cos(math.radians(want)), math.sin(math.radians(want)))
+        off = math.degrees(math.acos(max(-1.0, min(1.0, (d.x * fw[0] + d.y * fw[1]) / max(dist, 1e-3)))))
+        ok = True; why = ""
+        if ang_diff(rot.yaw, want) > 0.05 or abs(rot.pitch + 35.264) > 0.01: ok = False; why += f" camera at yaw {rot.yaw:.2f} pitch {rot.pitch:.2f}, wanted yaw {want % 360:.0f}"
+        if ang_diff(GEN.get_view_yaw(), want) > 0.05: ok = False; why += f" generator view yaw {GEN.get_view_yaw():.2f}"
+        up = PC.screen_to_world_direction(unreal.Vector2D(0, 1), True)
+        if up.x * fw[0] + up.y * fw[1] < 0.9995: ok = False; why += f" 'up' maps to ({up.x:.2f},{up.y:.2f}), not the camera's forward"
+        # (something in her way - a stall, a villager - stops her short: only a walk that got somewhere is judged)
+        if dist > 45 and off > 4.0 and not villager_near(L): ok = False; why += f" 'up' moved her {dist:.0f} cm, {off:.1f} deg off the camera's forward"
+        rr["passed" if ok else "failed"] = rr.get("passed" if ok else "failed", 0) + 1
+        log(f"rotate {TURNS[s['k']]:+d} -> yaw {rot.yaw:.1f}: {'ok' if ok else 'FAILED' + why}")
+        s["k"] += 1; s["phase"] = "rest"; s["t"] = 0.0; return
+    if s["phase"] == "rest" and s["t"] > 0.35: s["phase"] = "turn"
+# ---- the villagers
+def do_villagers(dt, L):
+    s = S["sub"]; vv = R["villagers"]
+    if s["start"] is None:
+        secs = []; ok = True
+        for c in GEN.get_section_coords():
+            sc = GEN.get_section(c)
+            if sc is None or sc.is_building(): continue
+            rec = {"coord": (c.x, c.y), "buildings": sc.get_num_buildings(), "villagers": sc.get_num_villagers(), "wanted": sc.get_wanted_villagers()}
+            rec["per_building"] = round(rec["villagers"] / max(rec["buildings"], 1), 3); secs.append(rec)
+            if rec["villagers"] != rec["wanted"] or rec["wanted"] != math.floor(GEN.get_editor_property("villager_coverage") * rec["buildings"] + 0.5): ok = False; log(f"VILLAGERS: section {rec}")
+        vs = list(GEN.get_villagers())
+        s["start"] = {v.get_name(): v.get_actor_location() for v in vs}; s["blocked"] = 0; s["samples"] = 0; s["next"] = 0.0; s["walking_max"] = 0
+        names = {}
+        for v in vs: names[str(v.get_editor_property("villager_name"))] = names.get(str(v.get_editor_property("villager_name")), 0) + 1
+        vv.update({"sections": secs, "count": len(vs), "counts_ok": ok, "models": names}); log(f"villagers: {len(vs)} in {len(secs)} sections {[(r['coord'], r['villagers'], r['buildings']) for r in secs]}"); return
+    s["t"] += dt; s["next"] -= dt
+    if s["next"] <= 0:
+        s["next"] = 0.5; vs = list(GEN.get_villagers()); walking = 0
+        for v in vs:
+            p = v.get_actor_location(); s["samples"] += 1; walking += 1 if v.is_walking() else 0
+            if not GEN.is_walkable(p):
+                s["blocked"] += 1
+                if s["blocked"] <= 5: log(f"VILLAGER {v.get_editor_property('villager_name')} on a blocked cell at ({p.x:.0f},{p.y:.0f})")
+        s["walking_max"] = max(s["walking_max"], walking)
+    if s["t"] < s["dur"]: return
+    vs = list(GEN.get_villagers()); moved = 0; far = 0.0; trips = 0; repaths = 0
+    for v in vs:
+        p0 = s["start"].get(v.get_name()); p = v.get_actor_location(); trips += v.get_editor_property("trips_done"); repaths += v.get_editor_property("repaths")
+        if p0 is not None:
+            d = math.hypot(p.x - p0.x, p.y - p0.y); far = max(far, d); moved += 1 if d > 100 else 0
+    np_, nf_, ms_, mx_ = (GEN.get_editor_property(k) for k in ("villager_paths", "villager_path_fails", "villager_path_ms", "villager_path_max_ms"))
+    vv["paths"] = {"searches": np_, "none_found": nf_, "mean_ms": round(ms_ / max(np_, 1), 2), "max_ms": round(mx_, 2)}
+    vv.update({"moved": moved, "farthest_cm": round(far), "walking_at_once_max": s["walking_max"], "blocked_samples": s["blocked"], "samples": s["samples"], "trips_done": trips, "repaths": repaths, "seconds": s["dur"]})
+    vv["ok"] = bool(vv["counts_ok"] and vv["count"] > 0 and moved > 0 and s["blocked"] == 0)
+    vv["summary"] = f"{vv['count']} ({moved} moved, {s['blocked']} blocked samples){'' if vv['ok'] else ' FAILED'}"
+    log(f"villagers after {s['dur']:.0f} s: {vv['summary']}, farthest {far:.0f} cm, up to {s['walking_max']} walking at once, {trips} trips done, {repaths} given up, paths {vv['paths']}"); next_step()
 def follow(dt, L, speed=1.0):
     """walk the current path; True while still walking"""
     if not S["path"]: return False
@@ -191,7 +293,20 @@ def do_houses(dt, L):
         R["cut_ok" if ok else "cut_failed"] += 1
         if not ok: log(f"CUTAWAY FAILED in {sc.get_building_kind(i)} {i}: current {cur}, cut {sc.is_building_cut(i)}, roof hidden {sc.is_building_roof_hidden(i)}")
         if len(R["houses"]) < 3: shot(f"inside{len(R['houses']) + 1}")
-        s["phase"] = "cont_pick"; s["t"] = 0.0; return
+        s["phase"] = "turning" if s.get("turn") else "cont_pick"; s["t"] = 0.0; s["tk"] = 0; s["tph"] = 0; return
+    if ph == "turning":
+        # the view goes once round in 8 steps: after each, exactly the walls facing the camera are cut away
+        s["t"] += dt
+        if s["tph"] == 0: PC.rotate_view(1); s["tph"] = 1; s["t"] = 0.0; return
+        if PC.is_view_turning() or s["t"] < 0.45: return
+        walls = [(sc.is_building_wall_hidden(i, wl), sc.is_building_wall_near(i, wl)) for wl in (1, 2, 3, 4)]
+        ok = all(h == nr for h, nr in walls) and any(h for h, _ in walls) and not all(h for h, _ in walls) and sc.is_building_roof_hidden(i)
+        R["cut_ok" if ok else "cut_failed"] += 1; s["rec"].setdefault("turns", []).append([round(PC.get_view_yaw() % 360), [int(h) for h, _ in walls]])
+        if not ok: log(f"CUTAWAY FAILED in {sc.get_building_kind(i)} {i} at view yaw {PC.get_view_yaw():.0f}: walls (hidden, facing camera) {walls}, roof hidden {sc.is_building_roof_hidden(i)}")
+        if s["tk"] in (1, 3, 5) and len(R["houses"]) < 1: shot(f"turn{s['tk']}")
+        s["tk"] += 1; s["tph"] = 0
+        if s["tk"] >= 8: s["phase"] = "cont_pick"; s["t"] = 0.0
+        return
     if ph == "cont_pick":
         if not s["conts"]:
             go(s["in"]); s["phase"] = "leave"; return
@@ -299,6 +414,8 @@ def _tick(dt):
     st = S["mode"]
     if st is None: next_step(); return
     if st == "input": do_input(dt, L); return
+    if st == "rotate": do_rotate(dt, L); return
+    if st.startswith("villagers"): do_villagers(dt, L); return
     if st.startswith("houses:"): do_houses(dt, L); return
     if st.startswith("expand:"): do_expand(dt, L); return
     if st == "home":

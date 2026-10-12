@@ -1,6 +1,7 @@
 #include "IV/IVHUD.h"
 #include "IV/IVVillageGenerator.h"
 #include "IV/IVPlayerController.h"
+#include "IV/IVVillager.h"
 #include "CanvasItem.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -317,6 +318,18 @@ void AIVHUD::DrawVillage(const FVector2D& A, const FVector2D& B, const FVector& 
 		else if (It.What == 1) DrawTree(*(const FIVMapTree*)It.Ptr);
 		else DrawProp(*(const FIVMapProp*)It.Ptr);
 	}
+	// villagers: small upright figures
+	{
+		const FVector Rt(IsoRight.X, IsoRight.Y, 0.f);
+		const float S = (bLabels ? 4.6f : 3.4f) / MapScale;
+		for (const AIVVillager* Vg : Gen->GetVillagers())
+		{
+			const FVector G(Vg->Ground(), 0.f);
+			if (!OnPanel(G, 6.f)) continue;
+			Tri3(G - Rt * S * 0.75f, G + Rt * S * 0.75f, G + FVector(0, 0, S * 2.9f), FLinearColor(0.20f, 0.13f, 0.09f));
+			Disc(G + FVector(0, 0, S * 3.0f), S * 0.62f, FLinearColor(0.96f, 0.80f, 0.62f), 6, 1.f);
+		}
+	}
 	DrawPlayer(Player, PlayerYaw, bLabels ? 11.f : 8.f);
 	Flush();
 	// ---- freshly generated sections: a cyan outline
@@ -391,7 +404,8 @@ void AIVHUD::DrawHUD()
 	const AActor* P = GetOwningPawn();
 	if (!P) P = Gen->GetTrackedActor();
 	if (!P) return;
-	const float Yr = FMath::DegreesToRadians(Gen->IsoYaw), Pr = FMath::DegreesToRadians(FMath::Abs(Gen->IsoPitch));
+	// (the map is drawn from where the camera looks: it turns with the view)
+	const float Yr = FMath::DegreesToRadians(Gen->GetViewYaw()), Pr = FMath::DegreesToRadians(FMath::Abs(Gen->IsoPitch));
 	IsoUp = FVector2D(FMath::Cos(Yr), FMath::Sin(Yr)); IsoRight = FVector2D(-FMath::Sin(Yr), FMath::Cos(Yr));
 	IsoSin = FMath::Sin(Pr); IsoCos = FMath::Cos(Pr);
 	const float Sc = Canvas->ClipY / 1080.f;
@@ -417,7 +431,7 @@ void AIVHUD::DrawHUD()
 		const FString Cnt = FString::Printf(TEXT("%d buildings"), Nb);
 		float Tw, Th; GetTextSize(Cnt, Tw, Th, Small, Sc * 1.1f);
 		DrawText(Cnt, Ink, S1.X - Tw, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
-		// north (+X) points up-left in this view
+		// north (+X): up-left in the view the level starts with
 		const FVector2D Nd = Project(FVector(1, 0, 0)).GetSafeNormal();
 		const FVector2D Nc(S0.X + 22.f * Sc, S1.Y - 22.f * Sc);
 		DrawLine(Nc.X - Nd.X * 9.f * Sc, Nc.Y - Nd.Y * 9.f * Sc, Nc.X + Nd.X * 11.f * Sc, Nc.Y + Nd.Y * 11.f * Sc, Ink, 2.f * Sc);
@@ -452,8 +466,8 @@ void AIVHUD::DrawHUD()
 	if (Now < 14.f && !Gen->bMapOpen)
 	{
 		const float A = FMath::Clamp((14.f - Now) / 1.5f, 0.f, 1.f);
-		const FString T = bPad ? TEXT("Left stick / D-pad  move (8 directions)   ·   A  open / close   ·   Y  map   ·   LB / RB  zoom   ·   LT  walk")
-			: TEXT("W A S D  move (8 directions)   ·   F  open / close   ·   M  map   ·   mouse wheel  zoom   ·   Shift  walk");
+		const FString T = bPad ? TEXT("Left stick / D-pad  move (8 directions)   ·   LB / RB  turn the view   ·   A  open / close   ·   Y  map   ·   right stick  zoom   ·   LT  walk")
+			: TEXT("W A S D  move (8 directions)   ·   Q / E  turn the view   ·   F  open / close   ·   M  map   ·   mouse wheel  zoom   ·   Shift  walk");
 		float Tw, Th; GetTextSize(T, Tw, Th, Small, Sc * 1.15f);
 		const float X = 28.f * Sc, Y = Canvas->ClipY - 46.f * Sc;
 		Rect(FVector2D(X - 10.f * Sc, Y - 6.f * Sc), FVector2D(X + Tw + 10.f * Sc, Y + Th + 6.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.55f * A));
@@ -471,7 +485,7 @@ void AIVHUD::DrawHUD()
 		Frame(A0, A1, FLinearColor(0.78f, 0.66f, 0.42f, 0.95f), 2.f * Sc);
 		DrawText(TEXT("VILLAGE MAP"), Ink, 60.f * Sc, 34.f * Sc, Medium, Sc * 1.6f);
 		const FString Sub = FString::Printf(TEXT("%d buildings in %d part%s of the village  ·  %d entered  ·  %s"), Nb, Ns, Ns == 1 ? TEXT("") : TEXT("s"), Nv,
-			bPad ? TEXT("Y / B  close  ·  LB / RB  zoom") : TEXT("M  close  ·  mouse wheel  zoom"));
+			bPad ? TEXT("Y / B  close  ·  right stick  zoom  ·  LB / RB  turn") : TEXT("M  close  ·  mouse wheel  zoom  ·  Q / E  turn"));
 		DrawText(Sub, FLinearColor(0.75f, 0.72f, 0.64f), 62.f * Sc, 72.f * Sc, Small, Sc * 1.1f);
 		// legend: roof colours
 		struct FLeg { const TCHAR* N; FLinearColor C; };

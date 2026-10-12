@@ -9,6 +9,7 @@
   SourceArt/random_isometric_village/cine_route.json for 785.
 - IV_VillageGenerator follows her (TrackedActor) with a fixed session seed; doors open for her within 3.2 m; the next
   section is generated 30 m before the border, so the border is on screen when the reveal starts (785 widens the view).
+- Villagers as in the playable level (786), but they do not block her: her walk is scripted.
 - MoviePipelineGameMode (no player pawn). 784 records her and the generation in Simulate, 785 keys the camera."""
 import unreal, json, math, os
 import editor_toolset.toolsets.blueprint as BT
@@ -142,6 +143,8 @@ a.mesh.set_render_custom_depth(True); a.mesh.set_custom_depth_stencil_value(1)
 for k, v in (("tracked_actor", a), ("fixed_session_seed", SEED), ("trigger_distance", 3000.0), ("safety_distance", 1300.0),
              ("tracked_auto_door_distance", 320.0), ("unload_section_distance", 0)):
     gen.set_editor_property(k, v)
+_p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "786_iv_villagers.py")
+exec(compile(open(_p, encoding="utf-8").read(), _p, "exec"), {"__name__": "iv_villagers", "ARGS": ["noblock", "nosave"]})
 print("Demo_IV_Fem5 at", a.get_actor_location(), "| generator tracks", gen.get_editor_property("tracked_actor").get_actor_label(), "seed", SEED)
 unreal.EditorLoadingAndSavingUtils.save_dirty_packages(True, True)
 print("saved")

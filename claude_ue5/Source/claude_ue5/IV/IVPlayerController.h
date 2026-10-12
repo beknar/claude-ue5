@@ -1,7 +1,8 @@
-// random_isometric_village_level: fixed isometric camera + 8-direction movement. The view never rotates: the camera
-// keeps the generator's IsoYaw / IsoPitch and only follows (and zooms). Movement is screen-relative and snapped to 8
-// directions: W/A/S/D or the arrow keys, an Xbox controller's left stick or D-pad. F / A / X interacts (doors,
-// containers), M / Y / View toggles the big map, mouse wheel / shoulder buttons / right stick zoom, Shift / left trigger walks.
+// random_isometric_village_level: isometric camera + 8-direction movement. Moving never turns the view: the camera keeps
+// the generator's IsoPitch and its view yaw and only follows (and zooms). Movement is screen-relative and snapped to 8
+// directions: W/A/S/D or the arrow keys, an Xbox controller's left stick or D-pad. Q / E (LB / RB) turn the view left /
+// right in 45 degree steps (the map and the cutaway turn with it). F / A / X interacts (doors, containers), M / Y / View
+// toggles the big map, mouse wheel / right stick zoom (down to a close view of her), Shift / left trigger walks.
 // The character blueprint's own input mappings (third-person template: camera-relative move + mouse look) are removed.
 #pragma once
 
@@ -22,7 +23,7 @@ public:
 
 	/** orthographic view width (cm): zoom */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float OrthoWidth = 2500.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float MinOrthoWidth = 1500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float MinOrthoWidth = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float MaxOrthoWidth = 5600.f;
 	/** camera distance from the focus point (orthographic: only clipping depends on it) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float CameraDistance = 12000.f;
@@ -30,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float FollowSpeed = 7.f;
 	/** camera looks at this height above her capsule centre */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float FocusHeight = 20.f;
+	/** one press of Q / E turns the view this far (degrees), at RotateSpeed degrees a second */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float RotateStep = 45.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Camera") float RotateSpeed = 240.f;
 	/** movement input scale while walking (her walk speed / run speed) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Input") float WalkScale = 0.3128f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IsoVillage|Input") float StickDeadZone = 0.3f;
@@ -50,6 +54,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") void SetScriptedStick(FVector2D Stick) { ScriptedStick = Stick; }
 	/** input scale of the last movement (1 = run, WalkScale = walk) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "IsoVillage") float GetMoveScale() const { return MoveScale; }
+	/** turn the view by Steps * RotateStep (what Q does for +1 and E for -1: +1 turns the camera clockwise seen from
+	 *  above, so the village turns to the left on screen) */
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage") void RotateView(int32 Steps) { TargetYawOffset += Steps * RotateStep; }
+	/** camera yaw now / once the turn in progress is finished */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "IsoVillage") float GetViewYaw() const { return IsoYaw(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "IsoVillage") bool IsViewTurning() const { return !FMath::IsNearlyEqual(YawOffset, TargetYawOffset, 0.01f); }
 
 protected:
 	virtual void BeginPlay() override;
@@ -67,6 +77,7 @@ private:
 	float MoveScale = 0.f;
 	bool bScriptedWalk = false;
 	float ClearMappingsUntil = 0.f;
+	float YawOffset = 0.f, TargetYawOffset = 0.f, TurnHold = 0.f;
 
 	void FindGenerator();
 	void EnsureCamera();

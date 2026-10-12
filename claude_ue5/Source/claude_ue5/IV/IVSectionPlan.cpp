@@ -120,7 +120,6 @@ void AIVSection::BuildShell(int32 BI)
 	FBld& B = Blds[BI];
 	FRandomStream R((int32)(B.Seed ^ 0x13579bdfu));
 	const float M = Generator->Module, WH = Generator->WallHeight;
-	const FVector2D ToCam = FVector2D(Generator->ToCamera().X, Generator->ToCamera().Y).GetSafeNormal();
 	const float Hx = B.Nx * M * 0.5f, Hy = B.Ny * M * 0.5f;
 	// a wall piece: P = middle of the wall segment (building frame), Out = its outward direction there
 	auto WallT = [&](const FVector2D& P, const FVector2D& Out, float Z)
@@ -128,11 +127,8 @@ void AIVSection::BuildShell(int32 BI)
 		const FVector2D Ow = B.Fx * Out.X + B.Fy * Out.Y;
 		return FTransform(FRotator(0, FMath::RadiansToDegrees(FMath::Atan2(Ow.Y, Ow.X)), 0), BldPoint(B, P.X, P.Y, Z));
 	};
-	auto GroupOf = [&](const FVector2D& Out)
-	{
-		const FVector2D Ow = B.Fx * Out.X + B.Fy * Out.Y;
-		return FVector2D::DotProduct(Ow, ToCam) > 0.08f ? GNear : GFar;
-	};
+	// each wall is a group of its own: which of them face the camera is decided when the building is cut away
+	auto GroupOf = [](const FVector2D& Out) { return GWall + (FMath::Abs(Out.X) > 0.5f ? (Out.X > 0.f ? 0 : 1) : (Out.Y > 0.f ? 2 : 3)); };
 	// ---- floor
 	for (int32 I = 0; I < B.Nx; ++I)
 		for (int32 J = 0; J < B.Ny; ++J)
@@ -169,7 +165,7 @@ void AIVSection::BuildShell(int32 BI)
 	for (int32 Cx = -1; Cx <= 1; Cx += 2)
 		for (int32 Cy = -1; Cy <= 1; Cy += 2)
 			for (int32 St = 0; St < B.Storeys; ++St)
-				AddToGroup(B, BI, St > 0 ? GRoof : GroupOf(FVector2D(Cx, Cy).GetSafeNormal()), KitPiece(B, TEXT("Pillar")),
+				AddToGroup(B, BI, St > 0 ? GRoof : GCorner + (Cx > 0 ? 2 : 0) + (Cy > 0 ? 1 : 0), KitPiece(B, TEXT("Pillar")),
 					FTransform(FRotator(0, B.Yaw, 0), BldPoint(B, Cx * Hx, Cy * Hy, B.FloorZ + St * WH)));
 	// ---- roof: gable roof over the cells not under the tower; ridge along A, slopes across C
 	const float Top = B.FloorZ + B.Storeys * WH;
@@ -263,7 +259,6 @@ void AIVSection::AddDoorsFor(int32 BI)
 	FBld& B = Blds[BI];
 	const float M = Generator->Module;
 	const float Hx = B.Nx * M * 0.5f, Hy = B.Ny * M * 0.5f;
-	const FVector2D ToCam = FVector2D(Generator->ToCamera().X, Generator->ToCamera().Y).GetSafeNormal();
 	for (int32 Which = 0; Which < 2; ++Which)
 	{
 		const int32 Cell = Which == 0 ? B.DoorCell : B.BackDoorCell;
@@ -291,7 +286,7 @@ void AIVSection::AddDoorsFor(int32 BI)
 		Mv.Center = Mid + FVector(0, 0, 100);
 		Mv.Normal = FVector(-Out.X, -Out.Y, 0.f);
 		Mv.Building = BI;
-		Mv.Group = FVector2D::DotProduct(Out, ToCam) > 0.08f ? GNear : GFar;
+		Mv.Group = GWall + Which;      // front door: the +X wall, back door: the -X wall
 		const int32 DI = Doors.Add(Mv);
 		if (Which == 0) B.DoorIndex = DI; else B.BackDoorIndex = DI;
 	}

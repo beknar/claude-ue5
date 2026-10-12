@@ -1,0 +1,527 @@
+{
+ "tag": "n4",
+ "plan": [
+  "input",
+  "rotate",
+  "villagers:20",
+  "houses:3:turn",
+  "map:a",
+  "expand:+x",
+  "villagers:15",
+  "houses:2",
+  "expand:-y",
+  "villagers:10",
+  "home"
+ ],
+ "rotate": {
+  "passed": 12,
+  "tests": 12,
+  "failed": 0,
+  "final_yaw": 45.0
+ },
+ "villagers": {
+  "sections": [
+   {
+    "coord": [
+     0,
+     0
+    ],
+    "buildings": 135,
+    "villagers": 41,
+    "wanted": 41,
+    "per_building": 0.304
+   },
+   {
+    "coord": [
+     1,
+     0
+    ],
+    "buildings": 74,
+    "villagers": 22,
+    "wanted": 22,
+    "per_building": 0.297
+   },
+   {
+    "coord": [
+     1,
+     -1
+    ],
+    "buildings": 69,
+    "villagers": 21,
+    "wanted": 21,
+    "per_building": 0.304
+   },
+   {
+    "coord": [
+     0,
+     -1
+    ],
+    "buildings": 82,
+    "villagers": 25,
+    "wanted": 25,
+    "per_building": 0.305
+   }
+  ],
+  "count": 109,
+  "counts_ok": true,
+  "models": {
+   "Boy2": 6,
+   "Townsman2": 9,
+   "Peasant2": 9,
+   "Girl": 7,
+   "Townsman1": 8,
+   "Peasant1": 8,
+   "YoungWoman": 10,
+   "Elder": 4,
+   "OldMan": 7,
+   "Woman": 7,
+   "Youth2": 3,
+   "Townsman4": 5,
+   "OldWoman": 7,
+   "Lady": 2,
+   "Servant1": 1,
+   "Youth1": 4,
+   "Townsman3": 5,
+   "Boy1": 4,
+   "Servant2": 2,
+   "Physician": 1
+  },
+  "paths": {
+   "searches": 386,
+   "none_found": 0,
+   "mean_ms": 0.99,
+   "max_ms": 6.04
+  },
+  "moved": 109,
+  "farthest_cm": 1635,
+  "walking_at_once_max": 102,
+  "blocked_samples": 0,
+  "samples": 2180,
+  "trips_done": 238,
+  "repaths": 51,
+  "seconds": 10.0,
+  "ok": true,
+  "summary": "109 (109 moved, 0 blocked samples)"
+ },
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 5,
+ "doors_failed": 0,
+ "containers_opened": 10,
+ "containers_failed": 0,
+ "cut_ok": 29,
+ "cut_failed": 0,
+ "houses": [
+  {
+   "kind": "Smithy",
+   "style": "Stone",
+   "containers": [
+    "chest",
+    "barrel"
+   ],
+   "turns": [
+    [
+     90,
+     [
+      0,
+      1,
+      1,
+      0
+     ]
+    ],
+    [
+     135,
+     [
+      0,
+      1,
+      0,
+      1
+     ]
+    ],
+    [
+     180,
+     [
+      0,
+      1,
+      0,
+      1
+     ]
+    ],
+    [
+     225,
+     [
+      1,
+      0,
+      0,
+      1
+     ]
+    ],
+    [
+     270,
+     [
+      1,
+      0,
+      0,
+      1
+     ]
+    ],
+    [
+     315,
+     [
+      1,
+      0,
+      1,
+      0
+     ]
+    ],
+    [
+     0,
+     [
+      1,
+      0,
+      1,
+      0
+     ]
+    ],
+    [
+     45,
+     [
+      0,
+      1,
+      1,
+      0
+     ]
+    ]
+   ]
+  },
+  {
+   "kind": "Bakery",
+   "style": "Timber",
+   "containers": [
+    "crate",
+    "barrel"
+   ],
+   "turns": [
+    [
+     90,
+     [
+      0,
+      1,
+      0,
+      0
+     ]
+    ],
+    [
+     135,
+     [
+      0,
+      1,
+      0,
+      1
+     ]
+    ],
+    [
+     180,
+     [
+      0,
+      0,
+      0,
+      1
+     ]
+    ],
+    [
+     225,
+     [
+      1,
+      0,
+      0,
+      1
+     ]
+    ],
+    [
+     270,
+     [
+      1,
+      0,
+      0,
+      0
+     ]
+    ],
+    [
+     315,
+     [
+      1,
+      0,
+      1,
+      0
+     ]
+    ],
+    [
+     0,
+     [
+      0,
+      0,
+      1,
+      0
+     ]
+    ],
+    [
+     45,
+     [
+      0,
+      1,
+      1,
+      0
+     ]
+    ]
+   ]
+  },
+  {
+   "kind": "Tavern",
+   "style": "Timber",
+   "containers": [
+    "crate",
+    "crate"
+   ],
+   "turns": [
+    [
+     90,
+     [
+      0,
+      1,
+      0,
+      1
+     ]
+    ],
+    [
+     135,
+     [
+      1,
+      0,
+      0,
+      1
+     ]
+    ],
+    [
+     180,
+     [
+      1,
+      0,
+      0,
+      1
+     ]
+    ],
+    [
+     225,
+     [
+      1,
+      0,
+      1,
+      0
+     ]
+    ],
+    [
+     270,
+     [
+      1,
+      0,
+      1,
+      0
+     ]
+    ],
+    [
+     315,
+     [
+      0,
+      1,
+      1,
+      0
+     ]
+    ],
+    [
+     0,
+     [
+      0,
+      1,
+      1,
+      0
+     ]
+    ],
+    [
+     45,
+     [
+      0,
+      1,
+      0,
+      1
+     ]
+    ]
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "crate"
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "coord": [
+    1,
+    0
+   ],
+   "buildings": 74,
+   "doors": 82,
+   "containers": 281,
+   "ms": 461,
+   "instances": 6152,
+   "unreachable": 0
+  },
+  {
+   "coord": [
+    1,
+    -1
+   ],
+   "buildings": 69,
+   "doors": 81,
+   "containers": 311,
+   "ms": 502,
+   "instances": 5780,
+   "unreachable": 0
+  }
+ ],
+ "events": [
+  "step input",
+  "input tests at (400,0)",
+  "input key (+0.00,+1.00) -> dir 0 scale 1.00 moved 314 cm: ok",
+  "input key (+0.00,-1.00) -> dir 4 scale 1.00 moved 321 cm: ok",
+  "input key (+1.00,+0.00) -> dir 2 scale 1.00 moved 322 cm: ok",
+  "input key (-1.00,+0.00) -> dir 6 scale 1.00 moved 313 cm: ok",
+  "input key (+1.00,+1.00) -> dir 1 scale 1.00 moved 315 cm: ok",
+  "input key (-1.00,-1.00) -> dir 5 scale 1.00 moved 319 cm: ok",
+  "input key (+1.00,-1.00) -> dir 3 scale 1.00 moved 318 cm: ok",
+  "input key (-1.00,+1.00) -> dir 7 scale 1.00 moved 315 cm: ok",
+  "input stick (+0.24,+0.97) -> dir 0 scale 1.00 moved 317 cm: ok",
+  "input stick (+0.29,-0.96) -> dir 4 scale 1.00 moved 319 cm: ok",
+  "input stick (+0.94,-0.34) -> dir 2 scale 1.00 moved 321 cm: ok",
+  "input stick (-0.98,-0.21) -> dir 6 scale 1.00 moved 315 cm: ok",
+  "input stick (+0.82,+0.48) -> dir 1 scale 1.00 moved 325 cm: ok",
+  "input stick (-0.50,-0.87) -> dir 5 scale 1.00 moved 228 cm: ok",
+  "input stick (+0.29,-0.41) -> dir 3 scale 0.31 moved 83 cm: ok",
+  "input stick (-0.45,+0.32) -> dir 7 scale 0.31 moved 83 cm: ok",
+  "input stick (+0.00,+0.20) -> dir -1 scale 0.00 moved 0 cm: ok",
+  "input: {'passed': 17, 'failed': 0, 'tests': 17, 'camera': [-35.264, 45.0, -0.0]}",
+  "step rotate",
+  "rotate +1 -> yaw 90.0: ok",
+  "rotate +1 -> yaw 135.0: ok",
+  "rotate +1 -> yaw 180.0: ok",
+  "rotate +1 -> yaw -135.0: ok",
+  "rotate -1 -> yaw 180.0: ok",
+  "rotate -1 -> yaw 135.0: ok",
+  "rotate -1 -> yaw 90.0: ok",
+  "rotate -1 -> yaw 45.0: ok",
+  "rotate -1 -> yaw 0.0: ok",
+  "rotate -1 -> yaw -45.0: ok",
+  "rotate +1 -> yaw 0.0: ok",
+  "rotate +1 -> yaw 45.0: ok",
+  "rotate: {'passed': 12, 'tests': 12, 'failed': 0, 'final_yaw': 45.0}",
+  "step villagers:20",
+  "villagers: 41 in 1 sections [((0, 0), 41, 135)]",
+  "villagers after 20 s: 41 (41 moved, 0 blocked samples), farthest 3028 cm, up to 39 walking at once, 41 trips done, 16 given up, paths {'searches': 89, 'none_found': 0, 'mean_ms': 1.11, 'max_ms': 4.15}",
+  "step houses:3:turn",
+  "to Smithy 8 (14 points)",
+  "shot inside1",
+  "shot turn1",
+  "shot turn3",
+  "shot turn5",
+  "to Bakery 5 (14 points)",
+  "shot inside2",
+  "to Tavern 1 (9 points)",
+  "shot inside3",
+  "step map:a",
+  "map: 121 buildings drawn, 110 labelled",
+  "shot map_a",
+  "step expand:+x",
+  "expand +x: to the edge of section (0,0) at (12250,-3257), 43 points",
+  "section (1,0) started generating with her at (10502,-3271)",
+  "shot reveal1",
+  "entered section {'coord': (1, 0), 'buildings': 74, 'doors': 82, 'containers': 281, 'ms': 461, 'instances': 6152, 'unreachable': 0}",
+  "step villagers:15",
+  "villagers: 63 in 2 sections [((0, 0), 41, 135), ((1, 0), 22, 74)]",
+  "villagers after 15 s: 63 (62 moved, 0 blocked samples), farthest 2363 cm, up to 58 walking at once, 149 trips done, 41 given up, paths {'searches': 241, 'none_found': 0, 'mean_ms': 1.02, 'max_ms': 4.74}",
+  "step houses:2",
+  "to Cottage 11 (6 points)",
+  "to Cottage 3 (20 points)",
+  "step expand:-y",
+  "expand -y: to the edge of section (1,0) at (14240,-12250), 28 points",
+  "section (1,-1) started generating with her at (14486,-10506)",
+  "shot reveal2",
+  "entered section {'coord': (1, -1), 'buildings': 69, 'doors': 81, 'containers': 311, 'ms': 502, 'instances': 5780, 'unreachable': 0}",
+  "step villagers:10",
+  "villagers: 109 in 4 sections [((0, 0), 41, 135), ((1, 0), 22, 74), ((1, -1), 21, 69), ((0, -1), 25, 82)]",
+  "villagers after 10 s: 109 (109 moved, 0 blocked samples), farthest 1635 cm, up to 102 walking at once, 238 trips done, 51 given up, paths {'searches': 386, 'none_found': 0, 'mean_ms': 0.99, 'max_ms': 6.04}",
+  "step home"
+ ],
+ "shots": [
+  "iv_n4_inside1.png",
+  "iv_n4_turn1.png",
+  "iv_n4_turn3.png",
+  "iv_n4_turn5.png",
+  "iv_n4_inside2.png",
+  "iv_n4_inside3.png",
+  "iv_n4_map_a.png",
+  "iv_n4_reveal1.png",
+  "iv_n4_reveal2.png"
+ ],
+ "input": {
+  "passed": 17,
+  "failed": 0,
+  "tests": 17,
+  "camera": [
+   -35.264,
+   45.0,
+   -0.0
+  ]
+ },
+ "frame_stats": {
+  "median": 22.7,
+  "p99": 35.7,
+  "max": 125.0,
+  "gen_median": 32.8,
+  "gen_max": 125.0
+ },
+ "village": {
+  "buildings": 360,
+  "visited": 5,
+  "sections": 4
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   0,
+   -1
+  ]
+ ]
+}

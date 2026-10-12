@@ -26,7 +26,7 @@ void AIVPlayerController::FindGenerator()
 	for (TActorIterator<AIVVillageGenerator> It(GetWorld()); It; ++It) { Gen = *It; break; }
 }
 
-float AIVPlayerController::IsoYaw() const { return Gen ? Gen->IsoYaw : 45.f; }
+float AIVPlayerController::IsoYaw() const { return (Gen ? Gen->IsoYaw : 45.f) + YawOffset; }
 float AIVPlayerController::IsoPitch() const { return Gen ? Gen->IsoPitch : -35.264f; }
 
 FVector AIVPlayerController::ScreenToWorldDirection(FVector2D S, bool bSnap) const
@@ -111,10 +111,29 @@ void AIVPlayerController::PlayerTick(float Dt)
 	if (Gen && P && !bMap && (WasInputKeyJustPressed(EKeys::F) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom) || WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left)))
 		Gen->InteractNearest(P->GetActorLocation(), InteractDistance);
 
+	// ---- turning the view: Q / E (LB / RB), one step a press; held, it keeps turning
+	{
+		const bool bLeft = IsInputKeyDown(EKeys::Q) || IsInputKeyDown(EKeys::Gamepad_LeftShoulder), bRight = IsInputKeyDown(EKeys::E) || IsInputKeyDown(EKeys::Gamepad_RightShoulder);
+		int32 Turn = 0;
+		if (WasInputKeyJustPressed(EKeys::Q) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)) ++Turn;
+		if (WasInputKeyJustPressed(EKeys::E) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) --Turn;
+		if (bLeft != bRight)
+		{
+			TurnHold += Dt;
+			if (Turn == 0 && TurnHold > 0.35f && !IsViewTurning()) Turn = bLeft ? 1 : -1;
+		}
+		else TurnHold = 0.f;
+		if (Turn != 0) RotateView(Turn);
+		YawOffset = FMath::FInterpConstantTo(YawOffset, TargetYawOffset, Dt, RotateSpeed);
+		if (FMath::Abs(YawOffset) > 360.f && FMath::Abs(TargetYawOffset) > 360.f) { const float K = FMath::Sign(YawOffset) * 360.f; YawOffset -= K; TargetYawOffset -= K; }
+		if (Gen) Gen->SetViewYawOffset(YawOffset);
+		SetControlRotation(FRotator(0.f, IsoYaw(), 0.f));
+	}
+
 	// ---- zoom (the big map zooms instead while it is open)
 	float Zoom = 0.f;
-	if (WasInputKeyJustPressed(EKeys::MouseScrollUp) || WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder) || WasInputKeyJustPressed(EKeys::Equals)) Zoom -= 1.f;
-	if (WasInputKeyJustPressed(EKeys::MouseScrollDown) || WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder) || WasInputKeyJustPressed(EKeys::Hyphen)) Zoom += 1.f;
+	if (WasInputKeyJustPressed(EKeys::MouseScrollUp) || WasInputKeyJustPressed(EKeys::Equals)) Zoom -= 1.f;
+	if (WasInputKeyJustPressed(EKeys::MouseScrollDown) || WasInputKeyJustPressed(EKeys::Hyphen)) Zoom += 1.f;
 	const float RY = GetInputAnalogKeyState(EKeys::Gamepad_RightY);
 	if (FMath::Abs(RY) > 0.35f) Zoom -= RY * Dt * 4.f;
 	if (Zoom != 0.f)
@@ -141,7 +160,9 @@ void AIVPlayerController::PlayerTick(float Dt)
 	else if (!Key.IsNearlyZero()) { Move = Key; Scale = bWalkKey ? WalkScale : 1.f; bGamepad = false; }
 	else if (!Pad.IsNearlyZero()) { Move = Pad; Scale = bWalkKey ? WalkScale : 1.f; bGamepad = true; }
 	else if (Stick.Size() > StickDeadZone) { Move = Stick; Scale = (bWalkKey || Stick.Size() < StickRunThreshold) ? WalkScale : 1.f; bGamepad = true; }
-	if (IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom) || IsInputKeyDown(EKeys::Gamepad_FaceButton_Top) || FMath::Abs(RY) > 0.35f) bGamepad = true;
+	if (IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom) || IsInputKeyDown(EKeys::Gamepad_FaceButton_Top) || IsInputKeyDown(EKeys::Gamepad_LeftShoulder) || IsInputKeyDown(EKeys::Gamepad_RightShoulder)
+		|| FMath::Abs(RY) > 0.35f) bGamepad = true;
+	else if (IsInputKeyDown(EKeys::Q) || IsInputKeyDown(EKeys::E)) bGamepad = false;
 	MoveDirIndex = -1; MoveScale = 0.f;
 	if (P && !bMap && !Move.IsNearlyZero())
 	{

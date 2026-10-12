@@ -15,8 +15,9 @@ and its Viking village props, the castle furniture kit and castle_level's openab
 - BP_IV_GameMode: BP_SFC_Fem5Character (jrpg-fem5-tripo) + IVPlayerController (isometric camera, WASD / Xbox pad) + IVHUD
 - generator at the origin + the 250 m start section built with a fixed seed (saved); PlayerStart in the middle of the square
 - reveal materials: random_level's M_RT_RevealPP / M_RT_RevealCurtain (753)
+- villagers: the generator's model list and coverage (786_iv_villagers.py, run from here); they exist in play only
 Args: [no_build] [materials_only]"""
-import sys, json, math, unreal
+import sys, os, json, math, unreal
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools(); MEL = unreal.MaterialEditingLibrary; V = unreal.Vector
@@ -343,6 +344,9 @@ for k, v in (("pieces", P), ("effects", effects), ("ground_material", ground), (
              # generate when the edge of the village is about to come on screen (she sees some 17 m along the world axes)
              ("trigger_distance", 2000.0), ("safety_distance", 1300.0)):
     gen.set_editor_property(k, v)
+# the villagers (three for every ten buildings of a section, spawned in play): the model list lives in 786
+_p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "786_iv_villagers.py")
+exec(compile(open(_p, encoding="utf-8").read(), _p, "exec"), {"__name__": "iv_villagers", "ARGS": ["nosave"]})
 ws = w.get_world_settings(); ws.set_editor_property("default_game_mode", gm.generated_class()); ws.set_editor_property("kill_z", -3000.0)
 if "no_build" not in sys.argv:
     gen.build_start_section()

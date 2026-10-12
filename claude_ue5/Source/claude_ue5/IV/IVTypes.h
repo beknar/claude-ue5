@@ -5,6 +5,8 @@
 #include "IVTypes.generated.h"
 
 class UStaticMesh;
+class USkeletalMesh;
+class UAnimationAsset;
 
 /** A placeable mesh normalised by Adjust to the village frame: origin at the footprint centre on the floor, front toward
  *  +X (furniture faces +X; wall pieces run along Y with their outside face toward +X; floor tiles centred, top at z = 0).
@@ -27,6 +29,25 @@ struct FIVPiece
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector Hinge2 = FVector::ZeroVector;
 	/** prefab: an actor blueprint spawned instead of an instanced mesh; Adjust applies */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TSubclassOf<AActor> ActorClass;
+};
+
+/** A villager model: a whole-body skeletal mesh with idle / walk clips on its own skeleton (780 fills the generator's list). */
+USTRUCT(BlueprintType)
+struct FIVVillagerDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Idle = nullptr;
+	/** in-place walk cycle */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Walk = nullptr;
+	/** ground speed the walk clip is drawn for at play rate 1 and scale 1 (cm/s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkClipSpeed = 237.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
+	/** turns the mesh's front to the actor's +X */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = -90.f;
+	/** how often this model is picked */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
 };
 
 UENUM(BlueprintType)

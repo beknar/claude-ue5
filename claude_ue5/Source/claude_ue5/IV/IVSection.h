@@ -1,9 +1,10 @@
 // random_isometric_village_level: one 250 m x 250 m part of the village. Plan() takes the building sites of the village
 // plan that fall in this section and decides what stands on each (kind, style, door, furniture) from the section seed.
 // The static part (ground, house shells, furniture and props as instanced meshes, lights) is built once - saved with the
-// level for the editor-built start section - and the interactive part (door leaves, containers, the nav grid, map data)
-// is rebuilt for play from the same plan. Every house keeps its roof and its camera-side walls in components of their
-// own, so they can be hidden while the player is inside (they keep casting shadows and keep their collision).
+// level for the editor-built start section - and the interactive part (door leaves, containers, the nav grid, map data,
+// the villagers) is rebuilt for play from the same plan. Every house keeps its roof, each of its four walls and each
+// corner post in components of their own, so the roof and whichever walls face the camera can be hidden while the
+// player is inside (they keep casting shadows and keep their collision), however the view is turned.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,6 +13,7 @@
 #include "IVSection.generated.h"
 
 class AIVVillageGenerator;
+class AIVVillager;
 class UInstancedStaticMeshComponent;
 class UStaticMeshComponent;
 class UPointLightComponent;
@@ -40,6 +42,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage") float GenerateMs = 0.f;
 	/** prefab actors (market stalls...) owned by the section */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage") TArray<TObjectPtr<AActor>> OtherActors;
+	/** the villagers of this section (play only, never saved) */
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "IsoVillage") TArray<TObjectPtr<AIVVillager>> Villagers;
 
 	void Generate(AIVVillageGenerator* InGenerator, FIntPoint InCoord, int32 InSeed, bool bEditorBuild);
 	/** runtime generation spread over frames; ContinueGenerate returns true once the section is complete */
@@ -54,6 +58,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") int32 GetNumBuildings() const { return Blds.Num(); }
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") int32 GetNumDoors() const { return Doors.Num(); }
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") int32 GetNumContainers() const { return Containers.Num(); }
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage") int32 GetNumVillagers() const { return Villagers.Num(); }
+	const TArray<TObjectPtr<AIVVillager>>& GetVillagers() const { return Villagers; }
+	/** how many villagers the section is meant to have: the generator's coverage times its buildings */
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage") int32 GetWantedVillagers() const;
+	/** somewhere for a villager to go in this section (in front of a house, on a street, on the square): free ground, not
+	 *  in a doorway, 4 m to 90 m from From */
+	bool RandomVillagerSpot(FRandomStream& R, const FVector& From, FVector& Out, float MinDist = 400.f, float MaxDist = 9000.f) const;
+	/** is this wall group of a building hidden right now (1..4 = the +X, -X, +Y, -Y wall; tests) */
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage") bool IsBuildingWallHidden(int32 Index, int32 Wall) const;
+	/** does this wall of a building face the camera as the view is turned now (1..4 as above) */
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage") bool IsBuildingWallNear(int32 Index, int32 Wall) const;
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") FString GetBuildingKind(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") FString GetBuildingStyle(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "IsoVillage") FVector GetBuildingCenter(int32 Index) const;
@@ -112,7 +127,9 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-	enum { GRoof = 0, GNear = 1, GFar = 2, GNum = 3 };
+	// component groups of a building: the roof (with everything above the ground storey), the four walls (+X = front,
+	// -X, +Y, -Y) and the four corner posts ((-,-), (-,+), (+,-), (+,+)). Tall furniture stands in the group of its wall.
+	enum { GRoof = 0, GWall = 1, GCorner = 5, GNum = 9 };
 	struct FBld
 	{
 		FIVLot Lot;
@@ -153,7 +170,9 @@ private:
 		float LeafSign = 1.f;
 		int32 Partner = -1;
 		int32 Building = -1;
-		int32 Group = -1;                        // doors: the wall group they hide with
+		int32 Group = -1;                        // the wall group it hides with (doors; tall containers against a wall)
+		UStaticMeshComponent* Body = nullptr;   // containers: the part that does not move
+		bool bCut = false;                       // hidden with its wall (cannot be opened until the view is turned)
 		FVector Stand = FVector::ZeroVector;    // containers: where to stand
 	};
 	struct FFlicker { UPointLightComponent* Light; float Base; float Phase; float Amount; };
@@ -177,6 +196,7 @@ private:
 	int32 GenTicks = 0;
 	int32 CurBld = -1;                       // building being furnished (containers / lights belong to it)
 	int32 InsideBld = -1;                    // building the player is in (cutaway)
+	bool bWallHide = true;                   // tall pieces placed against a wall join that wall's group (not the hearths)
 	FVector2D LastLocal = FVector2D::ZeroVector;      // where Place() put the last piece (building frame)
 	float LastYaw = 0.f;
 	TMap<UStaticMesh*, UInstancedStaticMeshComponent*> Isms, IsmsNoCol, IsmsHidden;
@@ -208,6 +228,10 @@ private:
 	void RegisterMap();
 	void CollectFlicker();
 	void RelinkGroups();
+	void SpawnVillager(int32 Index);
+	/** outward direction of a wall / corner group in the building frame */
+	static FVector2D GroupOut(int32 Group);
+	bool GroupNear(const FBld& B, int32 Group, const FVector2D& ToCam) const;
 	void Finish();
 
 	// placement helpers (world space)
@@ -227,7 +251,7 @@ private:
 	FName KitPiece(const FBld& B, const TCHAR* Part) const;
 	/** furniture in a house: Local = footprint centre in the building frame, LocalYaw = its front direction there.
 	 *  Returns false (nothing placed) when it would overlap something or block the door. */
-	bool Place(FBld& B, FName Name, const FVector2D& Local, float LocalYaw, bool bContainer = false, float Clear = 12.f, bool bBlocks = true, float Z = 0.f);
+	bool Place(FBld& B, FName Name, const FVector2D& Local, float LocalYaw, bool bContainer = false, float Clear = 12.f, bool bBlocks = true, float Z = 0.f, int32 WallGroup = -1);
 	/** against the inside of a wall (side 0 back -X, 1 front +X, 2 -Y, 3 +Y) at U = 0..1 along it */
 	bool PlaceWall(FBld& B, FName Name, int32 Side, float U, bool bContainer = false, float Gap = 6.f);
 	/** tries positions along the walls in turn; returns the side used or -1 */
