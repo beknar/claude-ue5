@@ -1,0 +1,315 @@
+{
+ "tag": "w3",
+ "plan": [
+  "houses:8",
+  "expand:+x",
+  "houses:3",
+  "expand:+y",
+  "houses:2",
+  "expand:-x",
+  "houses:2",
+  "expand:-y",
+  "houses:2",
+  "map:b",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 18,
+ "doors_failed": 0,
+ "containers_opened": 29,
+ "containers_failed": 1,
+ "cut_ok": 17,
+ "cut_failed": 0,
+ "houses": [
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Elder's hall",
+   "style": "Stone",
+   "containers": []
+  },
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Smithy",
+   "style": "Stone",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Bakery",
+   "style": "Timber",
+   "containers": [
+    "crate",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Tavern",
+   "style": "Timber",
+   "containers": [
+    "crate",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Timber",
+   "containers": [
+    "chest"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Smithy",
+   "style": "Stone",
+   "containers": [
+    "chest",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Tavern",
+   "style": "Stone",
+   "containers": [
+    "crate",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Timber",
+   "containers": [
+    "chest",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Barn",
+   "style": "Thatch",
+   "containers": [
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Tavern",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Barn",
+   "style": "Timber",
+   "containers": [
+    "barrel"
+   ]
+  },
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "crate",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "wardrobe"
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "coord": [
+    1,
+    0
+   ],
+   "buildings": 44,
+   "doors": 54,
+   "containers": 169,
+   "ms": 442,
+   "instances": 4521,
+   "unreachable": 0
+  },
+  {
+   "coord": [
+    1,
+    1
+   ],
+   "buildings": 26,
+   "doors": 28,
+   "containers": 100,
+   "ms": 192,
+   "instances": 3366,
+   "unreachable": 0
+  },
+  {
+   "coord": [
+    -1,
+    1
+   ],
+   "buildings": 42,
+   "doors": 53,
+   "containers": 147,
+   "ms": 236,
+   "instances": 4367,
+   "unreachable": 0
+  },
+  {
+   "coord": [
+    0,
+    -1
+   ],
+   "buildings": 50,
+   "doors": 56,
+   "containers": 197,
+   "ms": 283,
+   "instances": 4635,
+   "unreachable": 0
+  }
+ ],
+ "events": [
+  "step houses:8",
+  "to General store 20 (3 points)",
+  "shot inside1",
+  "to Carpenter 19 (3 points)",
+  "shot inside2",
+  "to Elder's hall 14 (6 points)",
+  "shot inside3",
+  "to General store 13 (9 points)",
+  "to Smithy 8 (11 points)",
+  "to Bakery 5 (14 points)",
+  "to Tavern 1 (9 points)",
+  "to Cottage 3 (27 points)",
+  "container 11 (barrel) in Cottage 3: no path to it",
+  "step expand:+x",
+  "expand +x: to the edge of section (0,0) at (12250,-3252), 28 points",
+  "section (1,0) started generating with her at (10511,-3175)",
+  "shot reveal1",
+  "entered section {'coord': (1, 0), 'buildings': 44, 'doors': 54, 'containers': 169, 'ms': 442, 'instances': 4521, 'unreachable': 0}",
+  "step houses:3",
+  "to Cottage 2 (14 points)",
+  "to Smithy 1 (12 points)",
+  "to Tavern 0 (8 points)",
+  "step expand:+y",
+  "expand +y: to the edge of section (1,0) at (12044,12250), 37 points",
+  "section (1,1) started generating with her at (12476,11201)",
+  "shot reveal2",
+  "entered section {'coord': (1, 1), 'buildings': 26, 'doors': 28, 'containers': 100, 'ms': 192, 'instances': 3366, 'unreachable': 0}",
+  "step houses:2",
+  "to Carpenter 1 (12 points)",
+  "to Barn 6 (12 points)",
+  "step expand:-x",
+  "expand -x: to the edge of section (0,1) at (-12250,18775), 42 points",
+  "section (-1,1) started generating with her at (-10503,18672)",
+  "shot reveal3",
+  "entered section {'coord': (-1, 1), 'buildings': 42, 'doors': 53, 'containers': 147, 'ms': 236, 'instances': 4367, 'unreachable': 0}",
+  "step houses:2",
+  "to Tavern 0 (4 points)",
+  "to Barn 7 (5 points)",
+  "step expand:-y",
+  "expand -y: to the edge of section (0,0) at (-11840,-12250), 29 points",
+  "section (0,-1) started generating with her at (-11828,-10511)",
+  "shot reveal4",
+  "entered section {'coord': (0, -1), 'buildings': 50, 'doors': 56, 'containers': 197, 'ms': 283, 'instances': 4635, 'unreachable': 0}",
+  "step houses:2",
+  "to General store 0 (6 points)",
+  "to Cottage 0 (16 points)",
+  "step map:b",
+  "map: 78 buildings drawn, 47 labelled",
+  "shot map_b",
+  "step home"
+ ],
+ "shots": [
+  "iv_w3_inside1.png",
+  "iv_w3_inside2.png",
+  "iv_w3_inside3.png",
+  "iv_w3_reveal1.png",
+  "iv_w3_reveal2.png",
+  "iv_w3_reveal3.png",
+  "iv_w3_reveal4.png",
+  "iv_w3_map_b.png"
+ ],
+ "input": {},
+ "frame_stats": {
+  "median": 24.0,
+  "p99": 56.3,
+  "max": 125.0,
+  "gen_median": 34.4,
+  "gen_max": 125.0
+ },
+ "village": {
+  "buildings": 390,
+  "visited": 17,
+  "sections": 8
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   -1,
+   1
+  ],
+  [
+   -1,
+   0
+  ],
+  [
+   0,
+   -1
+  ],
+  [
+   -1,
+   -1
+  ]
+ ]
+}

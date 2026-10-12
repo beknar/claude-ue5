@@ -1,0 +1,160 @@
+{
+ "tag": "w1",
+ "plan": [
+  "input",
+  "houses:4",
+  "map:a",
+  "expand:+x",
+  "houses:2",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 6,
+ "doors_failed": 0,
+ "containers_opened": 8,
+ "containers_failed": 2,
+ "cut_ok": 6,
+ "cut_failed": 0,
+ "houses": [
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel*"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Elder's hall",
+   "style": "Stone",
+   "containers": []
+  },
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Timber",
+   "containers": [
+    "chest",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Timber",
+   "containers": [
+    "chest"
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "coord": [
+    1,
+    0
+   ],
+   "buildings": 41,
+   "doors": 49,
+   "containers": 149,
+   "ms": 238,
+   "instances": 4067,
+   "unreachable": 0
+  }
+ ],
+ "events": [
+  "step input",
+  "input key (+0.00,+1.00) -> dir 0 scale 1.00 moved 318 cm: ok",
+  "input key (+0.00,-1.00) -> dir 4 scale 1.00 moved 312 cm: ok",
+  "input key (+1.00,+0.00) -> dir 2 scale 1.00 moved 318 cm: ok",
+  "input key (-1.00,+0.00) -> dir 6 scale 1.00 moved 316 cm: ok",
+  "input key (+1.00,+1.00) -> dir 1 scale 1.00 moved 319 cm: ok",
+  "input key (-1.00,-1.00) -> dir 5 scale 1.00 moved 317 cm: ok",
+  "input key (+1.00,-1.00) -> dir 3 scale 1.00 moved 321 cm: ok",
+  "input key (-1.00,+1.00) -> dir 7 scale 1.00 moved 316 cm: ok",
+  "input stick (+0.24,+0.97) -> dir 0 scale 1.00 moved 314 cm: ok",
+  "input stick (+0.29,-0.96) -> dir 4 scale 1.00 moved 316 cm: ok",
+  "input stick (+0.94,-0.34) -> dir 2 scale 1.00 moved 319 cm: ok",
+  "input stick (-0.98,-0.21) -> dir 6 scale 1.00 moved 317 cm: ok",
+  "input stick (+0.82,+0.48) -> dir 1 scale 1.00 moved 320 cm: ok",
+  "input stick (-0.50,-0.87) -> dir 5 scale 1.00 moved 316 cm: ok",
+  "input stick (+0.29,-0.41) -> dir 3 scale 0.31 moved 85 cm: ok",
+  "input stick (-0.45,+0.32) -> dir 7 scale 0.31 moved 84 cm: ok",
+  "input stick (+0.00,+0.20) -> dir -1 scale 0.00 moved 0 cm: ok",
+  "input: {'passed': 17, 'failed': 0, 'tests': 17, 'camera': [-35.264, 45.0, -0.0]}",
+  "step houses:4",
+  "to General store 20 (2 points)",
+  "shot inside1",
+  "CONTAINER FAILED barrel 66 in General store 20 at (107,2874): prompt 'close barrel', alpha 0.00",
+  "to Carpenter 19 (3 points)",
+  "shot inside2",
+  "to Elder's hall 14 (2 points)",
+  "shot inside3",
+  "to General store 13 (2 points)",
+  "step map:a",
+  "map: 97 buildings drawn, 83 labelled",
+  "shot map_a",
+  "step expand:+x",
+  "expand +x: to the edge of section (0,0) at (12250,1720), 10 points",
+  "section (1,0) started generating with her at (10502,1302)",
+  "shot reveal1",
+  "entered section {'coord': (1, 0), 'buildings': 41, 'doors': 49, 'containers': 149, 'ms': 238, 'instances': 4067, 'unreachable': 0}",
+  "step houses:2",
+  "to Carpenter 98 (6 points)",
+  "to Cottage 66 (2 points)",
+  "CONTAINER FAILED wardrobe 237 in Cottage 66 at (10938,1159): prompt 'close chest', alpha 0.00",
+  "step home"
+ ],
+ "shots": [
+  "iv_w1_inside1.png",
+  "iv_w1_inside2.png",
+  "iv_w1_inside3.png",
+  "iv_w1_map_a.png",
+  "iv_w1_reveal1.png"
+ ],
+ "input": {
+  "passed": 17,
+  "failed": 0,
+  "tests": 17,
+  "camera": [
+   -35.264,
+   45.0,
+   -0.0
+  ]
+ },
+ "frame_stats": {
+  "median": 22.4,
+  "p99": 40.3,
+  "max": 125.0,
+  "gen_median": 29.8,
+  "gen_max": 38.0
+ },
+ "village": {
+  "buildings": 145,
+  "visited": 6,
+  "sections": 2
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ]
+ ]
+}

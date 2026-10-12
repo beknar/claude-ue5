@@ -1,0 +1,187 @@
+{
+ "tag": "w4",
+ "plan": [
+  "input",
+  "houses:6",
+  "expand:-y",
+  "houses:3",
+  "map:c",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 9,
+ "doors_failed": 0,
+ "containers_opened": 16,
+ "containers_failed": 0,
+ "cut_ok": 9,
+ "cut_failed": 0,
+ "houses": [
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Elder's hall",
+   "style": "Stone",
+   "containers": []
+  },
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Storehouse",
+   "style": "Thatch",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Timber",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Farmhouse",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "trunk"
+   ]
+  },
+  {
+   "kind": "Barn",
+   "style": "Timber",
+   "containers": [
+    "crate",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Timber",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "coord": [
+    0,
+    -1
+   ],
+   "buildings": 80,
+   "doors": 91,
+   "containers": 364,
+   "ms": 408,
+   "instances": 6650,
+   "unreachable": 0
+  }
+ ],
+ "events": [
+  "step input",
+  "input key (+0.00,+1.00) -> dir 0 scale 1.00 moved 318 cm: ok",
+  "input key (+0.00,-1.00) -> dir 4 scale 1.00 moved 317 cm: ok",
+  "input key (+1.00,+0.00) -> dir 2 scale 1.00 moved 314 cm: ok",
+  "input key (-1.00,+0.00) -> dir 6 scale 1.00 moved 314 cm: ok",
+  "input key (+1.00,+1.00) -> dir 1 scale 1.00 moved 319 cm: ok",
+  "input key (-1.00,-1.00) -> dir 5 scale 1.00 moved 313 cm: ok",
+  "input key (+1.00,-1.00) -> dir 3 scale 1.00 moved 315 cm: ok",
+  "input key (-1.00,+1.00) -> dir 7 scale 1.00 moved 317 cm: ok",
+  "input stick (+0.24,+0.97) -> dir 0 scale 1.00 moved 323 cm: ok",
+  "input stick (+0.29,-0.96) -> dir 4 scale 1.00 moved 312 cm: ok",
+  "input stick (+0.94,-0.34) -> dir 2 scale 1.00 moved 317 cm: ok",
+  "input stick (-0.98,-0.21) -> dir 6 scale 1.00 moved 316 cm: ok",
+  "input stick (+0.82,+0.48) -> dir 1 scale 1.00 moved 315 cm: ok",
+  "input stick (-0.50,-0.87) -> dir 5 scale 1.00 moved 317 cm: ok",
+  "input stick (+0.29,-0.41) -> dir 3 scale 0.31 moved 85 cm: ok",
+  "input stick (-0.45,+0.32) -> dir 7 scale 0.31 moved 84 cm: ok",
+  "input stick (+0.00,+0.20) -> dir -1 scale 0.00 moved 0 cm: ok",
+  "input: {'passed': 17, 'failed': 0, 'tests': 17, 'camera': [-35.264, 45.0, -0.0]}",
+  "step houses:6",
+  "to General store 20 (3 points)",
+  "shot inside1",
+  "to Carpenter 19 (3 points)",
+  "shot inside2",
+  "to Elder's hall 14 (6 points)",
+  "shot inside3",
+  "to General store 13 (9 points)",
+  "to Storehouse 28 (19 points)",
+  "to Carpenter 27 (4 points)",
+  "step expand:-y",
+  "expand -y: to the edge of section (0,0) at (3641,-12250), 35 points",
+  "section (0,-1) started generating with her at (3474,-10502)",
+  "shot reveal1",
+  "entered section {'coord': (0, -1), 'buildings': 80, 'doors': 91, 'containers': 364, 'ms': 408, 'instances': 6650, 'unreachable': 0}",
+  "step houses:3",
+  "to Farmhouse 11 (7 points)",
+  "to Barn 27 (5 points)",
+  "to Cottage 28 (9 points)",
+  "step map:c",
+  "map: 112 buildings drawn, 82 labelled",
+  "shot map_c",
+  "step home"
+ ],
+ "shots": [
+  "iv_w4_inside1.png",
+  "iv_w4_inside2.png",
+  "iv_w4_inside3.png",
+  "iv_w4_reveal1.png",
+  "iv_w4_map_c.png"
+ ],
+ "input": {
+  "passed": 17,
+  "failed": 0,
+  "tests": 17,
+  "camera": [
+   -35.264,
+   45.0,
+   -0.0
+  ]
+ },
+ "frame_stats": {
+  "median": 20.1,
+  "p99": 30.7,
+  "max": 125.0,
+  "gen_median": 25.9,
+  "gen_max": 36.8
+ },
+ "village": {
+  "buildings": 215,
+  "visited": 9,
+  "sections": 2
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   -1
+  ]
+ ]
+}
