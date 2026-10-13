@@ -1,7 +1,16 @@
 #include "SS/SSPlayerController.h"
 #include "SS/SSFighter.h"
+#include "SS/SSArena.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "GameFramework/PlayerInput.h"
 #include "InputCoreTypes.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Parse.h"
+#include "Misc/Paths.h"
+#include "UnrealClient.h"
 
 ASSPlayerController::ASSPlayerController()
 {
@@ -14,6 +23,35 @@ void ASSPlayerController::BeginPlay()
 	Super::BeginPlay();
 	SetInputMode(FInputModeGameOnly());
 	SetIgnoreLookInput(true);
+	if (FParse::Value(FCommandLine::Get(), TEXT("SSSelfTest="), SelfTestSeconds) && SelfTestSeconds > 0.f)
+	{
+		bScriptedOnly = true;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("SSSelfTestOut="), SelfTestDir)) SelfTestDir = FPaths::ProjectSavedDir() / TEXT("SelfTest");
+		SelfTestDir = FPaths::ConvertRelativePathToFull(SelfTestDir);
+	}
+}
+
+void ASSPlayerController::TickSelfTest(ASSFighter* F, float Dt)
+{
+	SelfTestTime += Dt; ++SelfTestFrames;
+	// straight on from the start goes through the first two gates: throttle up, then the cannons
+	KeyW = SelfTestTime > 1.f; BtnLeft = SelfTestTime > 2.f;
+	if (SelfTestStage == 0 && SelfTestTime >= SelfTestSeconds)
+	{
+		SelfTestStage = 1;
+		const ASSArena* A = F->GetArena();
+		FVector2D View(0.f, 0.f);
+		if (GEngine && GEngine->GameViewport) GEngine->GameViewport->GetViewportSize(View);
+		const FVector L = F->GetActorLocation();
+		FString R = FString::Printf(TEXT("level %s\nseconds %.2f\nframes %d\nfps %.1f\nview %.0f x %.0f\nfighter %.0f %.0f %.0f\nspeed %.0f\nthrottle %.2f\nhull %.0f\nshots %d\nhits %d\ncollisions %d\n"),
+			*GetWorld()->GetMapName(), SelfTestTime, SelfTestFrames, SelfTestFrames / FMath::Max(SelfTestTime, 0.001f), View.X, View.Y, L.X, L.Y, L.Z, F->GetSpeed(), F->GetThrottle(), F->GetHull(),
+			F->ShotsFired, F->ShotsHit, F->Collisions);
+		if (A) R += FString::Printf(TEXT("asteroids %d\ndrones %d\ncontainers %d\nscore %d\n"), A->CountTargets(ESSTargetKind::Asteroid), A->CountTargets(ESSTargetKind::Drone), A->CountTargets(ESSTargetKind::Container), A->Score);
+		else R += TEXT("arena missing\n");
+		FFileHelper::SaveStringToFile(R, *(SelfTestDir / TEXT("selftest.txt")));
+		FScreenshotRequest::RequestScreenshot(SelfTestDir / TEXT("selftest.png"), true, false);
+	}
+	if (SelfTestStage == 1 && SelfTestTime >= SelfTestSeconds + 2.f) { SelfTestStage = 2; FPlatformMisc::RequestExit(false); }
 }
 
 void ASSPlayerController::ClearScripted()
@@ -37,6 +75,7 @@ void ASSPlayerController::PlayerTick(float Dt)
 	Super::PlayerTick(Dt);
 	ASSFighter* F = Cast<ASSFighter>(GetPawn());
 	if (!F) return;
+	if (SelfTestSeconds > 0.f) TickSelfTest(F, Dt);
 
 	// ---- keyboard and mouse
 	float Thr = 0.f, Roll = 0.f;
@@ -88,6 +127,7 @@ void ASSPlayerController::PlayerTick(float Dt)
 		MouseScale = FMath::Clamp(MouseScale * FMath::Pow(1.2f, Sens), MouseScaleRange.X, MouseScaleRange.Y);
 		MouseNoteUntil = GetWorld()->GetTimeSeconds() + 2.f;
 	}
+	if (Pressed(EKeys::Escape)) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
 	if (Pressed(EKeys::I)) bInvertPitch = !bInvertPitch;
 	if (Pressed(EKeys::H) || Pressed(EKeys::F1) || Pressed(EKeys::Gamepad_Special_Right)) bShowHelp = !bShowHelp;
 	if ((Pressed(EKeys::R) || Pressed(EKeys::Gamepad_Special_Left)) && !F->IsDestroyed()) F->Respawn();

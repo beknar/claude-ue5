@@ -38,6 +38,9 @@ claude_ue5/SourceArt/sf_city/reach.json
 claude_ue5/SourceArt/sf_city/walk_r*.json
 claude_ue5/SourceArt/sf_city/walk_s*.json
 
+# --- Packaged games (hold cooked pack content) ---
+builds/
+
 # --- Media ---
 renders/
 *.png

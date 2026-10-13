@@ -236,7 +236,7 @@ void ASSHUD::DrawHUD()
 		const float A = (PC && PC->bShowHelp) ? 1.f : FMath::Clamp((HelpSeconds - Now) / 1.5f, 0.f, 1.f);
 		static const TCHAR* Keys[] = { TEXT("W / S              throttle up / down"), TEXT("A / D              roll left / right"), TEXT("Mouse              point the nose      [ / ]  sensitivity"),
 			TEXT("Left button / Space    cannons"), TEXT("Right button / Ctrl    missile (homes on the locked target)"), TEXT("Shift              afterburner"),
-			TEXT("Tab                next target"), TEXT("Mouse wheel        camera distance"), TEXT("I  invert pitch     R  restart     H  this help") };
+			TEXT("Tab                next target"), TEXT("Mouse wheel        camera distance"), TEXT("I  invert pitch    R  restart    H  help    Esc  quit") };
 		static const TCHAR* Pad[] = { TEXT("Left stick up / down       throttle"), TEXT("Left stick left / right    roll"), TEXT("Right stick                point the nose"),
 			TEXT("RT                         cannons"), TEXT("LT / RB                    missile (homes on the locked target)"), TEXT("A / left stick click       afterburner"),
 			TEXT("Y                          next target"), TEXT("D-pad up / down            camera distance"), TEXT("View  restart     Menu  this help") };

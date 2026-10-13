@@ -9,11 +9,16 @@
 //   mouse wheel               chase camera closer / farther D-pad up / down
 //   [ / ]                     mouse sensitivity down / up
 //   I invert pitch, H help, R back to the start             (R: View button, help: Menu button)
+//   Esc                       quit (a packaged game has no other way out; in the editor it ends play)
 // The mouse moves an aim point ahead of the nose (drawn by the HUD); the fighter turns toward it at its mouse turn
 // rates (well above the stick's), so the nose follows the hand but a wild flick cannot spin it round. The mouse is
 // read as raw counts: the engine's own mouse value is the counts scaled by the project's axis sensitivity (0.07) and
 // by the field of view, which made the fighter about 40 times less responsive than the numbers here say. Tests drive
 // the same code paths through the Scripted* inputs.
+// A packaged build checks itself with -SSSelfTest=<seconds> on its command line (with -SSSelfTestOut=<directory>,
+// else Saved/SelfTest): it flies straight on with the throttle up and the cannons firing, then writes selftest.txt
+// (the level, the fighter, the targets, the frame rate) and selftest.png (its own view) and quits. With
+// -RenderOffScreen it does so without showing a window.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -69,5 +74,9 @@ private:
 	bool KeyW = false, KeyS = false, KeyA = false, KeyD = false, KeyShift = false, BtnLeft = false, BtnRight = false, PadA = false;
 	FVector2D ScriptedMouse = FVector2D::ZeroVector, ScriptedCounts = FVector2D::ZeroVector, PadLeft = FVector2D::ZeroVector, PadRight = FVector2D::ZeroVector;
 	float PadLT = 0.f, PadRT = 0.f;
+	float SelfTestSeconds = 0.f, SelfTestTime = 0.f;
+	int32 SelfTestStage = 0, SelfTestFrames = 0;
+	FString SelfTestDir;
+	void TickSelfTest(ASSFighter* F, float Dt);
 	float Stick(float V) const;
 };
