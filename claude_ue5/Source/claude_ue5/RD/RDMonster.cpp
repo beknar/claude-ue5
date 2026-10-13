@@ -1,7 +1,9 @@
 #include "RD/RDMonster.h"
 #include "RD/RDSection.h"
 #include "RD/RDDungeonGenerator.h"
+#include "RD/RDCombat.h"
 #include "Animation/AnimationAsset.h"
+#include "Animation/AnimSequenceBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
@@ -28,6 +30,12 @@ ARDMonster::ARDMonster()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 }
 
+static float RDClipLength(const UAnimationAsset* A)
+{
+	const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(A);
+	return S ? S->GetPlayLength() : 1.f;
+}
+
 void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 InSeed)
 {
 	Section = InSection; MonsterName = Def.Name;
@@ -46,6 +54,20 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 	M->SetPosition(R.FRandRange(0.f, 2.f));
 	WaitTime = R.FRandRange(0.5f, 5.f);
 	LastPos = GetActorLocation();
+	const ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	bCombat = G && G->bCombat;
+	if (bCombat)
+	{
+		for (UAnimationAsset* A : Def.Attacks) if (A) { AttackAnims.Add(A); HitTimes.Add(Def.HitTimes.IsValidIndex(AttackAnims.Num() - 1) ? Def.HitTimes[AttackAnims.Num() - 1] : RDClipLength(A) * 0.45f); }
+		GetHitAnim = Def.GetHit; DeathAnim = Def.Death;
+		float MeanH = 1.f, MeanD = 1.f; G->MeanMonsterFactors(MeanH, MeanD);
+		MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(G->GetMonsterHealth(Section->Coord) * Def.HealthFactor / MeanH));
+		Damage = FMath::Max(1.f, FMath::RoundToFloat(G->GetMonsterDamage(Section->Coord) * Def.DamageFactor / MeanD));
+		Reach = Def.Reach; AttackInterval = Def.AttackInterval;
+		AttackCooldown = R.FRandRange(0.f, 0.6f);
+		// (it must keep its pose up to date while she fights it at the edge of the view)
+		M->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	}
 #if WITH_EDITOR
 	SetActorLabel(FString::Printf(TEXT("RD_Monster_%s"), *Def.Name.ToString()));
 	SetFolderPath(TEXT("RandomDungeon/Monsters"));
@@ -61,21 +83,18 @@ void ARDMonster::SetWalkingAnim(bool bWalk)
 	if (A) GetMesh()->PlayAnimation(A, true);
 }
 
-void ARDMonster::PickTrip()
+FIntPoint ARDMonster::WalkableTileAt(const FVector& L) const
 {
-	Path.Reset();
-	if (!Section) return;
-	FIntPoint From = Section->WorldToLocal(GetActorLocation());
-	if (!Section->IsWalkable(From))
-	{
-		// pushed off the walkable tiles (next to furniture): start from the nearest walkable neighbour
-		for (int32 D = 1; D <= 2 && !Section->IsWalkable(From); ++D)
-			for (int32 Dx = -D; Dx <= D; ++Dx) for (int32 Dy = -D; Dy <= D; ++Dy)
-				if (Section->IsWalkable(From + FIntPoint(Dx, Dy))) { From += FIntPoint(Dx, Dy); Dx = Dy = D + 1; }
-	}
-	const FIntPoint To = Section->RandomRoomTile(R, Section->RoomAtLocal(From));
-	TArray<FIntPoint> Tiles;
-	if (!Section->FindPath(From, To, Tiles) || Tiles.Num() < 2) { WaitTime = R.FRandRange(1.f, 3.f); return; }
+	FIntPoint T = Section->WorldToLocal(L);
+	// pushed off the walkable tiles (next to furniture): the nearest walkable neighbour
+	for (int32 D = 1; D <= 2 && !Section->IsWalkable(T); ++D)
+		for (int32 Dx = -D; Dx <= D; ++Dx) for (int32 Dy = -D; Dy <= D; ++Dy)
+			if (Section->IsWalkable(T + FIntPoint(Dx, Dy))) { T += FIntPoint(Dx, Dy); Dx = Dy = D + 1; }
+	return T;
+}
+
+void ARDMonster::SetPathFromTiles(const TArray<FIntPoint>& Tiles)
+{
 	// straighten: skip tile centres while the straight line stays on walkable tiles of the same room / hallway
 	auto Clear = [this](FIntPoint A, FIntPoint B)
 	{
@@ -95,6 +114,7 @@ void ARDMonster::PickTrip()
 		}
 		return true;
 	};
+	Path.Reset();
 	int32 I = 0;
 	while (I < Tiles.Num() - 1)
 	{
@@ -103,14 +123,172 @@ void ARDMonster::PickTrip()
 		Path.Add(Section->LocalToWorld(Tiles[J]));
 		I = J;
 	}
+}
+
+void ARDMonster::PickTrip()
+{
+	Path.Reset();
+	if (!Section) return;
+	const FIntPoint From = WalkableTileAt(GetActorLocation());
+	const FIntPoint To = Section->RandomRoomTile(R, Section->RoomAtLocal(From));
+	TArray<FIntPoint> Tiles;
+	if (!Section->FindPath(From, To, Tiles) || Tiles.Num() < 2) { WaitTime = R.FRandRange(1.f, 3.f); return; }
+	SetPathFromTiles(Tiles);
 	Goal = Path.Last();
 	StuckTime = 0.f;
+}
+
+bool ARDMonster::WaitForDoor(const FVector& L, const FVector& Dir2)
+{
+	const FIntPoint Cur = Section->WorldToLocal(L);
+	const FIntPoint Ahead = Section->WorldToLocal(L + Dir2.GetSafeNormal() * 160.f);
+	if (Ahead != Cur && FMath::Abs(Ahead.X - Cur.X) + FMath::Abs(Ahead.Y - Cur.Y) == 1)
+	{
+		const int32 D = Section->DoorBetween(Cur, Ahead);
+		if (D >= 0 && !Section->IsDoorOpenIndex(D))
+		{
+			if (Section->GetDoorOpenAlpha(D) < 0.01f) Section->ToggleDoor(D, L, true);
+			SetWalkingAnim(false);
+			return true;
+		}
+	}
+	return false;
+}
+
+void ARDMonster::Face(const FVector& Dir, float Dt)
+{
+	if (Dir.IsNearlyZero(1.f)) return;
+	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), FRotator(0.f, Dir.Rotation().Yaw, 0.f), Dt, 420.f));
+}
+
+bool ARDMonster::ApplyDamage(float Amount, AActor* From)
+{
+	if (!bCombat || bDead || Amount <= 0.f) return false;
+	Health = FMath::Max(0.f, Health - Amount);
+	LastHurtTime = GetWorld()->GetTimeSeconds();
+	bAggro = true; WaitTime = 0.f;
+	if (Health <= 0.f) { Die(); return true; }
+	// a flinch: the blow it was winding up is lost
+	AttackTime = -1.f; AttackCooldown = FMath::Max(AttackCooldown, 0.45f);
+	Stun = 0.3f;
+	if (GetHitAnim) { GetMesh()->PlayAnimation(GetHitAnim, false); Stun = FMath::Clamp(RDClipLength(GetHitAnim) * 0.6f, 0.25f, 0.55f); }
+	return false;
+}
+
+void ARDMonster::Die()
+{
+	bDead = true; bAggro = false; AttackTime = -1.f; Stun = 0.f; DeadTime = 0.f;
+	Path.Reset();
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);       // (the body is no obstacle)
+	if (DeathAnim) GetMesh()->PlayAnimation(DeathAnim, false);
+	if (Section && Section->Generator) Section->Generator->OnMonsterKilled(this);
+}
+
+bool ARDMonster::TickCombat(float Dt)
+{
+	ARDDungeonGenerator* G = Section->Generator;
+	if (bDead)
+	{
+		// the body lies a while, then sinks into the floor and is gone
+		DeadTime += Dt;
+		if (DeadTime > G->CorpseSeconds) AddActorWorldOffset(FVector(0, 0, -45.f * Dt));
+		if (DeadTime > G->CorpseSeconds + 3.f) { Section->SpawnedMonsters.Remove(this); Destroy(); }
+		return true;
+	}
+	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
+	if (Stun > 0.f)
+	{
+		Stun -= Dt;
+		if (Stun <= 0.f) { bWalkingAnim = true; SetWalkingAnim(false); }
+		return true;
+	}
+	URDCombatComponent* Pc = G->GetPlayerCombat();
+	const AActor* P = Pc ? Pc->GetOwner() : nullptr;
+	if (!P || Pc->IsDead())
+	{
+		if (bAggro || AttackTime >= 0.f) { bAggro = false; AttackTime = -1.f; Path.Reset(); WaitTime = 1.f; bWalkingAnim = true; SetWalkingAnim(false); GetCharacterMovement()->MaxWalkSpeed = WalkSpeed; }
+		return false;
+	}
+	const FVector L = GetActorLocation(), Pl = P->GetActorLocation();
+	FVector D = Pl - L; const float Dz = FMath::Abs(D.Z); D.Z = 0.f;
+	const float Dist = D.Size();
+	const float Gap = Dist - GetCapsuleComponent()->GetScaledCapsuleRadius() - 36.f;       // (between the two capsules)
+	if (AttackTime >= 0.f)
+	{
+		AttackTime += Dt;
+		Face(D, Dt);
+		if (!bHitDone && AttackTime >= AttackHit)
+		{
+			bHitDone = true;
+			// the blow lands if she is still in reach and in front of it
+			if (Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f) { Pc->ApplyDamage(Damage, this); ++HitsLanded; }
+		}
+		if (AttackTime >= AttackLen) { AttackTime = -1.f; AttackCooldown = AttackInterval; bWalkingAnim = true; SetWalkingAnim(false); }
+		return true;
+	}
+	ChaseTimer -= Dt;
+	if (!bAggro)
+	{
+		// it notices her when she is near and there is a way to her that is not much longer than the straight line
+		if (Dist > G->AggroDistance || Dz > 300.f || ChaseTimer > 0.f) return false;
+		ChaseTimer = 0.4f;
+		TArray<FIntPoint> Tiles;
+		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
+		if (From != To && (!Section->FindPath(From, To, Tiles) || Tiles.Num() * G->TileSize > Dist * 2.f + 1200.f)) return false;
+		bAggro = true; Path.Reset(); WaitTime = 0.f; ChaseTimer = 0.f; StuckTime = 0.f;
+	}
+	if (Dist > G->LoseDistance || Dz > 400.f)
+	{
+		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		return false;
+	}
+	if (Gap <= Reach * 0.7f)
+	{
+		Face(D, Dt);
+		if (AttackCooldown <= 0.f && AttackAnims.Num() > 0 && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.6f)
+		{
+			const int32 K = R.RandRange(0, AttackAnims.Num() - 1);
+			GetMesh()->PlayAnimation(AttackAnims[K], false);
+			AttackLen = RDClipLength(AttackAnims[K]); AttackHit = FMath::Clamp(HitTimes[K], 0.05f, AttackLen); AttackTime = 0.f; bHitDone = false;
+			++AttacksMade;
+		}
+		else SetWalkingAnim(false);
+		return true;
+	}
+	// the chase: over the tile grid to her tile, then straight at her
+	if (ChaseTimer <= 0.f || Path.Num() == 0)
+	{
+		ChaseTimer = 0.35f;
+		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
+		TArray<FIntPoint> Tiles;
+		Path.Reset();
+		if (From == To || FMath::Abs(From.X - To.X) + FMath::Abs(From.Y - To.Y) == 1) Path.Add(Pl);
+		else if (Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) { SetPathFromTiles(Tiles); if (Path.Num() > 0) Path.Last() = Pl; }
+		if (Path.Num() == 0) { bAggro = false; WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed; return false; }
+	}
+	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * G->ChaseSpeedScale, G->MaxChaseSpeed);
+	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
+	if (WaitForDoor(L, Dir2)) return true;
+	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
+	FVector Side = FVector::ZeroVector;
+	if (StuckTime > 0.5f) { const FVector Fw = Dir2.GetSafeNormal(); Side = FVector(-Fw.Y, Fw.X, 0) * (((int32)(StuckTime / 0.8f)) % 2 ? 1.f : -1.f); }
+	AddMovementInput((Dir2.GetSafeNormal() + Side * 0.9f).GetSafeNormal(), 1.f);
+	const float Speed = GetVelocity().Size2D();
+	SetWalkingAnim(Speed > 25.f);
+	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 2.2f));
+	StuckTime = FVector::Dist2D(L, LastPos) < 30.f * Dt ? StuckTime + Dt : FMath::Max(0.f, StuckTime - Dt);
+	LastPos = L;
+	if (StuckTime > 3.f) { StuckTime = 0.f; Path.Reset(); }
+	return true;
 }
 
 void ARDMonster::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	if (!Section) return;
+	if (bCombat && TickCombat(Dt)) return;
 	if (WaitTime > 0.f)
 	{
 		WaitTime -= Dt;
@@ -121,27 +299,16 @@ void ARDMonster::Tick(float Dt)
 	if (Path.Num() == 0) { WaitTime = R.FRandRange(2.f, 6.f); return; }
 	const FVector L = GetActorLocation();
 	const FVector Target = Path[0];
-	// a closed door between here and the next waypoint: push it open and wait
-	const FIntPoint Cur = Section->WorldToLocal(L);
 	const FVector Dir2 = FVector(Target.X - L.X, Target.Y - L.Y, 0);
-	const FIntPoint Ahead = Section->WorldToLocal(L + Dir2.GetSafeNormal() * 160.f);
-	if (Ahead != Cur && FMath::Abs(Ahead.X - Cur.X) + FMath::Abs(Ahead.Y - Cur.Y) == 1)
-	{
-		const int32 D = Section->DoorBetween(Cur, Ahead);
-		if (D >= 0 && !Section->IsDoorOpenIndex(D))
-		{
-			if (Section->GetDoorOpenAlpha(D) < 0.01f) Section->ToggleDoor(D, L, true);
-			SetWalkingAnim(false);
-			return;
-		}
-	}
+	// a closed door between here and the next waypoint: push it open and wait
+	if (WaitForDoor(L, Dir2)) return;
 	// the player ahead: step aside toward the wall away from her (hallways are 3 m wide), wait if she is right there
 	FVector Side = FVector::ZeroVector;
 	if (const AActor* P = Section->Generator ? Section->Generator->GetTrackedActor() : UGameplayStatics::GetPlayerPawn(this, 0))
 	{
 		const FVector Dp = (P->GetActorLocation() - L) * FVector(1, 1, 0);
 		const FVector Fw = Dir2.GetSafeNormal();
-		if (Dp.Size() < 400.f && FVector::DotProduct(Dp.GetSafeNormal(), Fw) > 0.2f)
+		if (!bCombat && Dp.Size() < 400.f && FVector::DotProduct(Dp.GetSafeNormal(), Fw) > 0.2f)
 		{
 			const FVector Rt(-Fw.Y, Fw.X, 0);
 			Side = Rt * (FVector::DotProduct(Dp, Rt) > 0.f ? -1.f : 1.f);

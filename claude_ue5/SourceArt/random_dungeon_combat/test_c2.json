@@ -1,0 +1,227 @@
+{
+ "tag": "c2",
+ "plan": [
+  "setup",
+  "weapons",
+  "monsters",
+  "kill:3",
+  "hurt",
+  "tier",
+  "death",
+  "regen",
+  "map"
+ ],
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_SFC_Fem5Character_C",
+   "hit_points": 100.0,
+   "from_start_room_cm": 0,
+   "start_room_from_section_middle_cm": 0,
+   "weapon": "Sword",
+   "weapons": 3,
+   "combat": true
+  },
+  {
+   "step": "weapons",
+   "ok": true,
+   "weapons": [
+    {
+     "weapon": "Sword",
+     "mesh": "SM_Sword_1",
+     "bone": "hand_r",
+     "cm_from_hand": 11.4,
+     "shield": "SM_Shield_1",
+     "damage": 22.0,
+     "reach": 170.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 56,
+     "attack_seconds": 0.84,
+     "ok": true
+    },
+    {
+     "weapon": "Spear",
+     "mesh": "SM_Spear",
+     "bone": "hand_r",
+     "cm_from_hand": 95.3,
+     "shield": "SM_Shield_1",
+     "damage": 17.0,
+     "reach": 260.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 85,
+     "attack_seconds": 0.68,
+     "ok": true
+    },
+    {
+     "weapon": "Axe",
+     "mesh": "SM_Axe",
+     "bone": "hand_r",
+     "cm_from_hand": 8.0,
+     "shield": null,
+     "damage": 36.0,
+     "reach": 190.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 75,
+     "attack_seconds": 1.29,
+     "ok": true
+    }
+   ]
+  },
+  {
+   "step": "monsters",
+   "ok": true,
+   "monsters": 14,
+   "rooms": 46,
+   "coverage": 0.3,
+   "wanted": 0.30000001192092896,
+   "average_hit_points": 46.3,
+   "hers": 100.0,
+   "average_damage": 10.8,
+   "her_average_blow": 25.0,
+   "kinds": [
+    "Daemon",
+    "Horned",
+    "Mutant",
+    "Ripper_dog",
+    "Spider",
+    "Troll"
+   ],
+   "room_kinds": [
+    "Armory",
+    "Barracks",
+    "Chapel",
+    "Crypt",
+    "Forge",
+    "Great hall",
+    "Guard room",
+    "Hallway junction",
+    "Kitchen",
+    "Library",
+    "Prison cells",
+    "Storeroom",
+    "Torture chamber",
+    "Treasury"
+   ]
+  },
+  {
+   "step": "kill",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "weapon": "Sword",
+     "damage": 22.0,
+     "blows": 2,
+     "blows_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "it_fought_back": true,
+     "she_lost": 9,
+     "seconds": 1.7,
+     "ok": true
+    },
+    {
+     "monster": "Spider",
+     "hit_points": 30.0,
+     "weapon": "Spear",
+     "damage": 17.0,
+     "blows": 2,
+     "blows_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "it_fought_back": true,
+     "she_lost": 0,
+     "seconds": 1.5,
+     "ok": true
+    },
+    {
+     "monster": "Horned",
+     "hit_points": 59.0,
+     "weapon": "Axe",
+     "damage": 36.0,
+     "blows": 2,
+     "blows_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "it_fought_back": true,
+     "she_lost": 13,
+     "seconds": 2.5,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 3
+  },
+  {
+   "step": "hurt",
+   "ok": true,
+   "monster": "Daemon",
+   "its_damage": 12.0,
+   "she_lost": 12.0,
+   "its_attacks": 1,
+   "its_hits": 2,
+   "seconds": 2.9,
+   "aggro": true
+  },
+  {
+   "step": "tier",
+   "ok": true,
+   "section": [
+    1,
+    0
+   ],
+   "generated": true,
+   "monsters": 11,
+   "average_hit_points": 91.3,
+   "hers": 100.0,
+   "average_damage": 23.6,
+   "her_average_blow": 25.0,
+   "rooms": 49
+  },
+  {
+   "step": "death",
+   "ok": true,
+   "went_down": true,
+   "could_attack_while_down": false,
+   "seconds_down": 3.5,
+   "back_at_the_start_cm": 0,
+   "hit_points": 100.0
+  },
+  {
+   "step": "regen",
+   "ok": true,
+   "after_the_blow": 60.0,
+   "before_the_delay_is_over": 60.0,
+   "four_seconds_on": 72.3,
+   "per_second": 4.0
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "stylized": true,
+   "rooms_and_hallways": 119,
+   "doors": 122,
+   "chests": 984,
+   "torches": 505,
+   "sections_on_the_map": 3,
+   "opened": true
+  }
+ ],
+ "error": null,
+ "kills": 3,
+ "attacks": 9,
+ "hits": 6,
+ "deaths": 1,
+ "damage_dealt": 150.0,
+ "damage_taken": 1086.0
+}

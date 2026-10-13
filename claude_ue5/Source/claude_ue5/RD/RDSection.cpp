@@ -1225,6 +1225,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 		FRandomStream RM(Seed ^ 0x5f3759df);
 		SpawnMonsters(RM);
 		CollectFlicker();
+		RegisterMap();          // (again: the containers and lights are there now)
 	}
 	GenerateMs = ShellMs + FurnishMs;
 	UE_LOG(LogRandomDungeon, Log, TEXT("RDSECTION (%d,%d) seed %d: %d rooms, %d hallways, %d doors, %d containers, %d instances, %d lights, %d monsters, shell %.0f ms + furnish %.0f ms over %d frames (%.1f s)%s"),
@@ -1270,10 +1271,20 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 	float WSum = 0.f; for (const FRDMonsterDef& D : Generator->Monsters) if (D.Mesh) WSum += D.Weight;
 	if (WSum <= 0.f) return;
 	const FVector Start = Generator->GetStartRoomCenter();
-	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
+	// which rooms get a monster: a coin for each room, or (the combat dungeon) exactly the wanted share of the rooms,
+	// taken in a shuffled order (a room without a free tile or next to the player's start is passed over for the next)
+	TArray<int32> Order; int32 Want = MAX_int32;
+	for (int32 RI = 0; RI < Rooms.Num(); ++RI) if (Rooms[RI].Kind != ERDRoomKind::Junction) Order.Add(RI);
+	if (Generator->bCombat)
 	{
+		Want = FMath::RoundToInt(Order.Num() * Generator->MonsterCoverage);
+		for (int32 I = Order.Num() - 1; I > 0; --I) Order.Swap(I, R.RandRange(0, I));
+	}
+	for (const int32 RI : Order)
+	{
+		if (SpawnedMonsters.Num() >= Want) break;
 		const FRoom& Rm = Rooms[RI];
-		if (Rm.Kind == ERDRoomKind::Junction || R.FRand() >= Generator->MonsterCoverage) continue;
+		if (!Generator->bCombat && R.FRand() >= Generator->MonsterCoverage) continue;
 		// a free tile of the room (not where the player starts)
 		TArray<FIntPoint> Free;
 		for (int32 X = Rm.Min.X; X < Rm.Max.X; ++X) for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y) if (IsWalkable(FIntPoint(X, Y))) Free.Add(FIntPoint(X, Y));
@@ -1308,6 +1319,10 @@ FRDSectionMap ARDSection::BuildMapData() const
 	}
 	for (int32 I = 0; I < Doors.Num(); I += 1)
 		if (Doors[I].TileA.X >= 0 && (Doors[I].Partner < 0 || Doors[I].Partner > I)) M.Doors.Add(FVector2D(Doors[I].Center.X, Doors[I].Center.Y));
+	for (int32 I = 0; I < Containers.Num(); ++I)
+		if (Containers[I].Partner < 0 || Containers[I].Partner > I) M.Chests.Add(FVector2D(Containers[I].Center.X, Containers[I].Center.Y));
+	TArray<UPointLightComponent*> Ls; GetComponents(Ls);
+	for (const UPointLightComponent* L : Ls) if (L->ComponentHasTag(RDFlickerTag)) M.Torches.Add(FVector2D(L->GetComponentLocation().X, L->GetComponentLocation().Y));
 	return M;
 }
 

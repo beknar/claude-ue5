@@ -1,0 +1,203 @@
+{
+ "order": [
+  "Sword",
+  "Spear",
+  "Axe"
+ ],
+ "weapons": {
+  "Sword": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_1",
+   "shield": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_1",
+   "damage": 22.0,
+   "reach": 170.0,
+   "arc": 130.0,
+   "rate": 1.25,
+   "pack": "Weapon_Shield_Animations",
+   "grip": {
+    "loc": [
+     8.702716762593859,
+     -6.779059901202199,
+     2.69978622126082
+    ],
+    "rot": [
+     -122.26361944748665,
+     0.08386086237128161,
+     -92.09186628857888
+    ],
+    "scale": [
+     1.0000000596046488,
+     1.0000008344654678,
+     1.0000000596046488
+    ]
+   },
+   "hand_bone": "hand_r",
+   "shield_bone": "lowerarm_l",
+   "shield_grip": {
+    "loc": [
+     6.818155433553053e-05,
+     -7.963988088823555,
+     5.999999338002628
+    ],
+    "rot": [
+     -90.0000099056886,
+     -0.0006484819765214628,
+     1.9617862518182688e-06
+    ],
+    "scale": [
+     0.8000001430511642,
+     0.8000001430511761,
+     0.8000000953674402
+    ]
+   },
+   "flinch": "/Game/RandomDungeon/Combat/Anims/Anim_Weapon_Shield_Get_Hit_Fem5",
+   "death": "/Game/RandomDungeon/Combat/Anims/Anim_Weapon_Shield_Dead_01_Fem5",
+   "attacks": [
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Weapon_Shield_Attack_01_Fem5",
+     "length": 1.367,
+     "hit": 0.492,
+     "end": 1.042,
+     "hand_speed": 830
+    },
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Weapon_Shield_Attack_03_Fem5",
+     "length": 1.333,
+     "hit": 0.458,
+     "end": 1.008,
+     "hand_speed": 415
+    },
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Weapon_Shield_Attack_08_Fem5",
+     "length": 1.133,
+     "hit": 0.296,
+     "end": 0.846,
+     "hand_speed": 840
+    }
+   ]
+  },
+  "Spear": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Spear",
+   "shield": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_1",
+   "damage": 17.0,
+   "reach": 260.0,
+   "arc": 70.0,
+   "rate": 1.3,
+   "pack": "Spear_And_Shield_Animations",
+   "grip": {
+    "loc": [
+     81.37839366656297,
+     -9.366391080458694,
+     48.60787478923537
+    ],
+    "rot": [
+     -122.26361944748665,
+     0.08386086237128161,
+     -92.09186628857888
+    ],
+    "scale": [
+     1.0000000596046488,
+     1.0000008344654678,
+     1.0000000596046488
+    ]
+   },
+   "hand_bone": "hand_r",
+   "shield_bone": "lowerarm_l",
+   "shield_grip": {
+    "loc": [
+     6.818155433553053e-05,
+     -7.963988088823555,
+     5.999999338002628
+    ],
+    "rot": [
+     -90.0000099056886,
+     -0.0006484819765214628,
+     1.9617862518182688e-06
+    ],
+    "scale": [
+     0.8000001430511642,
+     0.8000001430511761,
+     0.8000000953674402
+    ]
+   },
+   "flinch": "/Game/RandomDungeon/Combat/Anims/Anim_Spear_Shield_Get_Hit_01_Fem5",
+   "death": "/Game/RandomDungeon/Combat/Anims/Anim_Spear_Shield_Dead_01_Fem5",
+   "attacks": [
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Spear_Shield_Attack_01_Fem5",
+     "length": 1.4,
+     "hit": 0.312,
+     "end": 0.862,
+     "hand_speed": 655
+    },
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Spear_Shield_Attack_02_Fem5",
+     "length": 1.6,
+     "hit": 0.425,
+     "end": 0.975,
+     "hand_speed": 737
+    },
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Spear_Shield_Attack_04_Fem5",
+     "length": 1.5,
+     "hit": 0.442,
+     "end": 0.992,
+     "hand_speed": 391
+    }
+   ]
+  },
+  "Axe": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Axe",
+   "shield": null,
+   "damage": 36.0,
+   "reach": 190.0,
+   "arc": 150.0,
+   "rate": 1.2,
+   "pack": "Animations_Warrior",
+   "grip": {
+    "loc": [
+     -2.283141374052633,
+     -6.387951699686685,
+     -4.239808562270215
+    ],
+    "rot": [
+     -122.26361944748665,
+     0.08386086237128161,
+     -92.09186628857888
+    ],
+    "scale": [
+     1.0000000596046488,
+     1.0000008344654678,
+     1.0000000596046488
+    ]
+   },
+   "hand_bone": "hand_r",
+   "shield_bone": "lowerarm_l",
+   "shield_grip": null,
+   "flinch": "/Game/RandomDungeon/Combat/Anims/Anim_Warrior_Get_Hit_1_Fem5",
+   "death": "/Game/RandomDungeon/Combat/Anims/Anim_Warrior_Dead_1_Fem5",
+   "attacks": [
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Warrior_Attack_1_Fem5",
+     "length": 2.333,
+     "hit": 0.848,
+     "end": 1.548,
+     "hand_speed": 1344
+    },
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Warrior_Attack_2_Fem5",
+     "length": 2.333,
+     "hit": 0.646,
+     "end": 1.346,
+     "hand_speed": 825
+    },
+    {
+     "clip": "/Game/RandomDungeon/Combat/Anims/Anim_Warrior_Attack_4_Fem5",
+     "length": 2.333,
+     "hit": 0.781,
+     "end": 1.481,
+     "hand_speed": 1014
+    }
+   ]
+  }
+ }
+}

@@ -1,6 +1,9 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDSection.h"
 #include "RD/RDMonster.h"
+#include "RD/RDCombat.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
@@ -176,6 +179,65 @@ void ARDDungeonGenerator::Enqueue(FIntPoint S)
 
 int32 ARDDungeonGenerator::GetNumMonsters() const { return GetMonsters().Num(); }
 
+float ARDDungeonGenerator::GetAverageWeaponDamage() const
+{
+	float Sum = 0.f; int32 Num = 0;
+	for (const FRDWeaponDef& W : Weapons) if (W.Mesh) { Sum += W.Damage; ++Num; }
+	return Num > 0 ? Sum / Num : 20.f;
+}
+
+float ARDDungeonGenerator::GetMonsterHealth(FIntPoint Section) const
+{
+	return PlayerMaxHealth * (IsStartSection(Section) ? StartMonsterHealth : RuntimeMonsterHealth);
+}
+
+float ARDDungeonGenerator::GetMonsterDamage(FIntPoint Section) const
+{
+	return GetAverageWeaponDamage() * (IsStartSection(Section) ? StartMonsterDamage : RuntimeMonsterDamage);
+}
+
+void ARDDungeonGenerator::MeanMonsterFactors(float& Health, float& Damage) const
+{
+	float W = 0.f, H = 0.f, D = 0.f;
+	for (const FRDMonsterDef& M : Monsters) if (M.Mesh) { W += M.Weight; H += M.Weight * M.HealthFactor; D += M.Weight * M.DamageFactor; }
+	Health = W > 0.f && H > 0.f ? H / W : 1.f; Damage = W > 0.f && D > 0.f ? D / W : 1.f;
+}
+
+void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
+{
+	++MonstersKilled;
+	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
+}
+
+void ARDDungeonGenerator::AddHitText(const FVector& At, float Amount, bool bOnPlayer)
+{
+	const float Now = GetWorld()->GetTimeSeconds();
+	HitTexts.RemoveAll([Now](const FHitText& T) { return Now - T.Time > 1.5f; });
+	HitTexts.Add({ At, Amount, Now, bOnPlayer });
+}
+
+void ARDDungeonGenerator::RestartPlay(int32 Seed)
+{
+	if (Seed != 0) SessionSeed = Seed;
+	for (auto It = Sections.CreateIterator(); It; ++It)
+	{
+		if (IsStartSection(It->Key) && It->Value) continue;
+		if (It->Value) It->Value->Destroy();
+		It.RemoveCurrent();
+	}
+	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
+	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; LastRevealTime = -100.f;
+	for (auto& KV : Sections) KV.Value->ActivateForPlay();
+	if (PlayerCombat)
+	{
+		PlayerCombat->Revive(true);
+		PlayerCombat->Kills = PlayerCombat->AttacksMade = PlayerCombat->HitsLanded = PlayerCombat->HitsTaken = PlayerCombat->Deaths = 0;
+		PlayerCombat->DamageDealt = PlayerCombat->DamageTaken = 0.f;
+		PlayerCombat->LastHurtTime = PlayerCombat->LastHitTime = PlayerCombat->DeathTime = -100.f;
+		PlayerCombat->SelectWeapon(0);
+	}
+}
+
 TArray<ARDMonster*> ARDDungeonGenerator::GetMonsters() const
 {
 	TArray<ARDMonster*> Out;
@@ -265,6 +327,17 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{
 		APawn* P = PC->GetPawn();
+		if (bCombat && P && (!PlayerCombat || PlayerCombat->GetOwner() != P))
+		{
+			// the player gets her hit points and weapons
+			PlayerCombat = P->FindComponentByClass<URDCombatComponent>();
+			if (!PlayerCombat)
+			{
+				PlayerCombat = NewObject<URDCombatComponent>(P, TEXT("RDCombat"));
+				PlayerCombat->RegisterComponent();
+				PlayerCombat->Init(this);
+			}
+		}
 		if (PC->WasInputKeyJustPressed(EKeys::F) && P) InteractNearest(P->GetActorLocation());
 		if (PC->WasInputKeyJustPressed(EKeys::M)) bMapOpen = !bMapOpen;
 	}

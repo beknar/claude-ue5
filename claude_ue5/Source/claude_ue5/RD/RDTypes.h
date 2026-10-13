@@ -7,6 +7,7 @@
 class UStaticMesh;
 class USkeletalMesh;
 class UAnimationAsset;
+class UAnimSequenceBase;
 class UNiagaraSystem;
 
 /** A placeable mesh normalised by Adjust to the dungeon frame: origin at the footprint centre on the floor, front toward
@@ -51,6 +52,46 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = -90.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	// ---- fighting (random_dungeoncombat_level): clips played directly, like idle / walk
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UAnimationAsset>> Attacks;
+	/** seconds into each attack clip at which the blow lands */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> HitTimes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> GetHit = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Death = nullptr;
+	/** this kind's hit points and damage against the average monster (the generator scales the average to the player) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealthFactor = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DamageFactor = 1.f;
+	/** how far beyond its own capsule a blow reaches (cm), and seconds between two attacks */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Reach = 110.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AttackInterval = 1.6f;
+};
+
+/** One of the player's melee weapons: the mesh in her hand (and a shield on her other arm), what it does, and the
+ *  clips she wields it with (retargeted to her skeleton by pipeline/unreal/790). */
+USTRUCT(BlueprintType)
+struct FRDWeaponDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName HandBone = TEXT("hand_r");
+	/** the mesh relative to the hand bone */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform Grip;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> OffHandMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName OffHandBone = TEXT("lowerarm_l");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform OffHandGrip;
+	/** hit points a blow takes; how far it reaches from her to a monster's capsule (cm); the arc in front of her (degrees) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Damage = 20.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Reach = 170.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Arc = 120.f;
+	/** attack clips, played in turn; of each the part played (seconds: start, end; 0 = the clip's end) and when the blow lands */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UAnimSequenceBase>> Attacks;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> AttackStarts;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> AttackEnds;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> HitTimes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PlayRate = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> GetHit = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Death = nullptr;
 };
 
 UENUM(BlueprintType)
@@ -81,6 +122,9 @@ struct FRDSectionMap
 	UPROPERTY(BlueprintReadOnly) TArray<FRDMapRect> Rects;
 	/** door positions (world XY) */
 	UPROPERTY(BlueprintReadOnly) TArray<FVector2D> Doors;
+	/** containers and lights (world XY): the stylised maps draw them */
+	UPROPERTY(BlueprintReadOnly) TArray<FVector2D> Chests;
+	UPROPERTY(BlueprintReadOnly) TArray<FVector2D> Torches;
 	UPROPERTY(BlueprintReadOnly) float GeneratedTime = -1.f;
 	UPROPERTY(BlueprintReadOnly) bool bStart = false;
 };
