@@ -4,9 +4,10 @@
   she steers at the path point 0.4 s ahead (as 773). Her mesh renders custom depth (stencil 1) for the silhouette.
 - Route (from the village plan and the nav grid of the rebuilt start section): she stands in a house by one of the three
   main roads on the outside of the first ring street, walks out of its door (doors open for her), runs out along the main
-  road, across the border of the start section (the next section generates ahead of her) and on into the new part.
-  The main road that leaves the start section soonest is used. Knots (time, x, y) are written to
-  SourceArt/random_isometric_village/cine_route.json for 785.
+  road, across the border of the start section (the next section generates ahead of her), stops a few metres into the
+  new part while the big map is open (as in play: she cannot move with the map open) and runs on.
+  The main road that leaves the start section soonest is used. Knots (time, x, y), the time the next section is
+  triggered and the map window are written to SourceArt/random_isometric_village/cine_route.json for 785.
 - IV_VillageGenerator follows her (TrackedActor) with a fixed session seed; doors open for her within 3.2 m; the next
   section is generated 30 m before the border, so the border is on screen when the reveal starts (785 widens the view).
 - Villagers as in the playable level (786), but they do not block her: her walk is scripted.
@@ -20,7 +21,9 @@ w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
 assert w.get_path_name().startswith("/Game/RandomIsoVillage/Maps/random_isometric_village_level_Cine."), w.get_path_name()
 RUN, WALK = 376.7, 150.0
 SEED = 20261013
-HOLD, DUR = 1.6, 31.0        # she waits inside while the camera comes over from the square; path length in seconds
+HOLD, DUR = 4.2, 31.0        # she waits inside while the camera comes over from the square and the view is turned; path length in seconds
+TRIGGER = 3000.0             # the next section is generated this far before the border
+MAP_AFTER, MAP_PAUSE = 8.9, 5.6   # she stops this long after the trigger (the reveal takes 7 s) and stands this long: the big map
 gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.IVVillageGenerator))
 for a in eas.get_all_level_actors():
     if a.get_actor_label().startswith("Demo_") or isinstance(a, unreal.PlayerStart): eas.destroy_actor(a)
@@ -68,17 +71,32 @@ pts = [route[0]]
 for p in route[1:]:
     if math.hypot(p[0] - pts[-1][0], p[1] - pts[-1][1]) > 60: pts.append(p)
 KNOTS = [(0.0, pts[0][0], pts[0][1]), (HOLD, pts[0][0], pts[0][1])]; t = HOLD
-cross = None
 for a, b in zip(pts, pts[1:]):
     t += math.hypot(b[0] - a[0], b[1] - a[1]) / b[2]
     KNOTS.append((t, b[0], b[1]))
-    if cross is None and max(abs(b[0]), abs(b[1])) > SS / 2: cross = t
-    if t > DUR: break
+def when(reach):
+    """time at which she is first `reach` cm from the middle of the start section along an axis (linear in a segment)"""
+    for (t0, x0, y0), (t1, x1, y1) in zip(KNOTS, KNOTS[1:]):
+        m0, m1 = max(abs(x0), abs(y0)), max(abs(x1), abs(y1))
+        if m0 <= reach < m1: return t0 + (t1 - t0) * (reach - m0) / (m1 - m0)
+    raise AssertionError("the route does not leave the start section")
+t_trig = when(SS / 2 - TRIGGER)
+# the stop for the map: a knot at t_stop, the same place again MAP_PAUSE later, everything after it that much later
+t_stop = t_trig + MAP_AFTER
+i = next(k for k in range(1, len(KNOTS)) if KNOTS[k][0] > t_stop)
+(t0, x0, y0), (t1, x1, y1) = KNOTS[i - 1], KNOTS[i]; u = (t_stop - t0) / (t1 - t0)
+stop = (x0 + (x1 - x0) * u, y0 + (y1 - y0) * u)
+KNOTS = KNOTS[:i] + [(t_stop, *stop), (t_stop + MAP_PAUSE, *stop)] + [(k[0] + MAP_PAUSE, k[1], k[2]) for k in KNOTS[i:]]
+cross = when(SS / 2)
+KNOTS = [k for n, k in enumerate(KNOTS) if n == 0 or KNOTS[n - 1][0] <= DUR]
 assert KNOTS[-1][0] >= DUR - 0.5, f"route too short: {KNOTS[-1][0]:.1f} s"
-print(f"house {bi} {sec.get_building_kind(bi)} {sec.get_building_style(bi)} at r {r(c) / 100:.0f} m | {len(KNOTS)} knots, {KNOTS[-1][0]:.1f} s | crosses the border at {cross:.1f} s "
-      f"| ends at ({KNOTS[-1][1]:.0f},{KNOTS[-1][2]:.0f})")
+# she steers at the point 0.4 s ahead: she has come to rest 0.72 s after t_stop and sets off 0.4 s early
+MAP = (t_stop + 0.85, t_stop + MAP_PAUSE - 0.55)
+print(f"house {bi} {sec.get_building_kind(bi)} {sec.get_building_style(bi)} at r {r(c) / 100:.0f} m | {len(KNOTS)} knots, {KNOTS[-1][0]:.1f} s | next section triggered at {t_trig:.1f} s "
+      f"| crosses the border at {cross:.1f} s | stops at {t_stop:.1f} s ({stop[0]:.0f},{stop[1]:.0f}), map {MAP[0]:.1f}-{MAP[1]:.1f} s | ends at ({KNOTS[-1][1]:.0f},{KNOTS[-1][2]:.0f})")
 OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\random_isometric_village"; os.makedirs(OUT, exist_ok=True)
-json.dump({"knots": KNOTS, "house": bi, "house_center": [c.x, c.y], "hold": HOLD, "cross": cross, "run": RUN}, open(os.path.join(OUT, "cine_route.json"), "w"))
+json.dump({"knots": KNOTS, "house": bi, "house_center": [c.x, c.y], "hold": HOLD, "trigger": t_trig, "cross": cross, "stop": t_stop, "map": MAP, "run": RUN},
+          open(os.path.join(OUT, "cine_route.json"), "w"))
 # ---- demo character
 G = "/Game/RandomIsoVillage/Blueprints"; PATH = f"{G}/BP_IV_Fem5Demo"
 if not eal.does_asset_exist(PATH):
@@ -140,7 +158,7 @@ a.set_actor_label("Demo_IV_Fem5"); a.set_folder_path("IsoVillage/Cine")
 a.set_editor_property("auto_possess_ai", unreal.AutoPossessAI.PLACED_IN_WORLD_OR_SPAWNED)
 a.set_editor_property("auto_possess_player", unreal.AutoReceiveInput.DISABLED)
 a.mesh.set_render_custom_depth(True); a.mesh.set_custom_depth_stencil_value(1)
-for k, v in (("tracked_actor", a), ("fixed_session_seed", SEED), ("trigger_distance", 3000.0), ("safety_distance", 1300.0),
+for k, v in (("tracked_actor", a), ("fixed_session_seed", SEED), ("trigger_distance", TRIGGER), ("safety_distance", 1300.0),
              ("tracked_auto_door_distance", 320.0), ("unload_section_distance", 0)):
     gen.set_editor_property(k, v)
 _p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "786_iv_villagers.py")

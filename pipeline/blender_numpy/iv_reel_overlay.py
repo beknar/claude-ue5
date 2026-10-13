@@ -1,53 +1,80 @@
-"""random_isometric_village_level demo reel HUD: composites a title, the village minimap (the same stylised isometric
-miniature the game's HUD draws: ground, fields, roads, houses with their roofs, trees, market stalls; her arrow; the new
-section fading in under a cyan tint as it is generated) and captions onto the MRQ frames.
-The map is 784's recording (cine_demo_path.json: same fixed session seed). The generation time comes from the render's own
-log line (last "IVGEN reveal": her tracked position there is looked up in the recording, which she follows on the sequence
-clock); the section's counts come from the render's "IVSECTION (x,y) ..." line.
-Usage: iv_reel_overlay.py frames_dir out_dir editor_log [step]"""
-import sys, os, re, json, glob, bisect, math
+"""random_isometric_village_level demo reel HUD: composites onto the MRQ frames what the game's HUD draws in play, and
+captions:
+- the village minimap (the same stylised isometric miniature: ground, fields, roads, houses with their roofs, trees,
+  market stalls, the villagers, her arrow, north; the new section fading in under a cyan tint as it is generated). It
+  is drawn from where the camera looks, so it turns with the view;
+- the big map (M) while she stands in the new part: the village around her with every building labelled, turning with
+  the view as well;
+- a key cap for each turn of the view (Q / E) and for the map (M), a title and captions.
+Everything is the render's own: 787's recording of it (cine_render.json: her path, the villagers, when the new section
+was built and what is in it, the map data) and 785's camera (cine_camera.json: view yaw per frame, turns, map window).
+Usage: iv_reel_overlay.py frames_dir out_dir [step]"""
+import sys, os, json, glob, math
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-src, dst, log = sys.argv[1], sys.argv[2], sys.argv[3]
-step = int(sys.argv[4]) if len(sys.argv) > 4 else 1
-FPS = 30
-R = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_isometric_village", "cine_demo_path.json")))
-rows = R["rows"]; ts = [r[0] for r in rows]; SS = R["section_size"]
-def her(t):
-    t = min(max(t, ts[0]), ts[-1]); i = min(max(1, bisect.bisect_left(ts, t)), len(ts) - 1)
-    a, b = rows[i - 1], rows[i]; u = 0 if ts[i] == ts[i - 1] else (t - ts[i - 1]) / (ts[i] - ts[i - 1])
-    dy = (b[4] - a[4] + 180) % 360 - 180
-    return a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u, a[4] + dy * u
-# ---- the render's generation event and section stats
-text = open(log, encoding="utf-8", errors="ignore").read()
-rev = re.findall(r"IVGEN reveal \((-?\d+),(-?\d+)\) t=([\d.]+) from \((-?\d+),(-?\d+)\) tracked \((-?\d+),(-?\d+)\)", text)[-1]
-NEW = (int(rev[0]), int(rev[1])); tx, ty = float(rev[5]), float(rev[6])
-T_GEN = min(rows, key=lambda r: (r[1] - tx) ** 2 + (r[2] - ty) ** 2)[0]
-st = re.findall(r"IVSECTION \(%d,%d\) seed -?\d+: (\d+) buildings, (\d+) vacant sites, (\d+) doors, (\d+) containers, (\d+) instances, (\d+) lights, (\d+) trees" % NEW, text)[-1]
-nb, nv, nd, nc, ni, nl, nt = map(int, st)
+src, dst = sys.argv[1], sys.argv[2]
+step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_isometric_village")
+R = json.load(open(os.path.join(SRC, "cine_render.json"))); CAM = json.load(open(os.path.join(SRC, "cine_camera.json")))
+FPS = R["fps"]; rows = R["rows"]; SS = R["section_size"]; VSTEP = R["vill_step"]; VILL = R["vill"]
+def her(f):
+    r = rows[min(max(f, 0), len(rows) - 1)]; return r[1], r[2], r[4]
+def villagers(f):
+    """the villagers at frame f (sampled every VSTEP frames, linear in between)"""
+    k = min(f // VSTEP, len(VILL) - 1); a = VILL[k]; b = VILL[min(k + 1, len(VILL) - 1)]; u = (f - k * VSTEP) / VSTEP
+    out = []
+    for i, p in enumerate(a):
+        if p is None: continue
+        q = b[i] if i < len(b) and b[i] is not None else p
+        out.append((p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u))
+    return out
+# ---- the render's generation event and what the new section holds
+EV = next(e for e in R["events"] if "built" in e)
+NEW = tuple(EV["section"]); T_TRIG, T_GEN = EV["frame"] / FPS, EV["built"] / FPS
 _in = next((i for i, r in enumerate(rows) if r[6] >= 0), 0)
-T_OUT = next((r[0] for r in rows[_in:] if r[6] < 0), 3.5)        # she steps out of her house (the cutaway closes)
-print(f"generation of section {NEW} at sequence {T_GEN:.2f} s; {nb} buildings, {nd} doors, {nc} container parts, {nt} trees")
-# ---- isometric projection (the game camera's)
-yaw, pit = math.radians(R["iso_yaw"]), math.radians(abs(R["iso_pitch"]))
-RX, RY, UX, UY, SN, CS = -math.sin(yaw), math.cos(yaw), math.cos(yaw), math.sin(yaw), math.sin(pit), math.cos(pit)
+T_OUT = next((r[0] for r in rows[_in:] if r[6] < 0), 6.0)         # she steps out of her house (the cutaway closes)
+MAP0, MAP1 = CAM["map"]; TURNS = CAM["turns"]; TURN = CAM["turn_time"]
+SECS = {tuple(m["coord"]): m for m in R["map"]}
+print(f"section {NEW} triggered at {T_TRIG:.2f} s, built at {T_GEN:.2f} s: {EV['buildings']} buildings, {EV['doors']} doors, {EV['containers']} container parts, {EV['trees']} trees, "
+      f"{EV['villagers']} villagers | out of her house at {T_OUT:.2f} s | map {MAP0:.2f}-{MAP1:.2f} s | turns {TURNS}")
+# ---- isometric projection: the game camera's, at the yaw the view has in this frame
+PIT = math.radians(abs(R["iso_pitch"])); SN, CS = math.sin(PIT), math.cos(PIT)
+RX = RY = UX = UY = 0.0
+def set_view(f):
+    global RX, RY, UX, UY
+    yaw = math.radians(R["iso_yaw"] + CAM["yaw_off"][min(max(f, 0), len(CAM["yaw_off"]) - 1)])
+    RX, RY, UX, UY = -math.sin(yaw), math.cos(yaw), math.cos(yaw), math.sin(yaw)
 def proj(x, y, z=0.0): return (x * RX + y * RY, -((x * UX + y * UY) * SN + z * CS))
 def srgb(c, k=1.0): return tuple(int(255 * min(1.0, max(0.0, v * k)) ** (1 / 2.2)) for v in c)
 WALL = {"THATCH": (0.80, 0.74, 0.60), "TIMBER": (0.60, 0.44, 0.29), "STONE": (0.68, 0.68, 0.66)}
 ROOF = {"THATCH": (0.84, 0.69, 0.31), "TIMBER": (0.50, 0.30, 0.19), "STONE": (0.42, 0.46, 0.55)}
 PATCH = [(0.62, 0.60, 0.56), (0.76, 0.66, 0.30), (0.44, 0.36, 0.22), (0.45, 0.62, 0.30), (0.28, 0.48, 0.66), (0.33, 0.46, 0.28)]
 ROADC = [(0.66, 0.56, 0.38), (0.74, 0.65, 0.46), (0.70, 0.60, 0.42), (0.62, 0.60, 0.56)]
-GROUND, CYAN = (0.36, 0.50, 0.25), (0.43, 0.88, 1.0)
-SECS = {tuple(m["coord"]): m for m in R["map"]}
+GROUND, CYAN, INK = (0.36, 0.50, 0.25), (0.43, 0.88, 1.0), (0.93, 0.89, 0.78)
+KIND = {"COTTAGE": "Cottage", "FARMHOUSE": "Farmhouse", "TAVERN": "Tavern", "SMITHY": "Smithy", "BAKERY": "Bakery", "STORE": "General store", "WORKSHOP": "Carpenter", "BARN": "Barn",
+        "STOREHOUSE": "Storehouse", "CHURCH": "Church", "MANOR": "Elder's hall"}
+F = r"C:\Windows\Fonts"
+def font(name, size):
+    for n in (name, "segoeui.ttf", "arial.ttf"):
+        try: return ImageFont.truetype(os.path.join(F, n), size)
+        except OSError: pass
+    return ImageFont.load_default()
+f_title, f_sub, f_head, f_line, f_small = font("segoeuib.ttf", 40), font("segoeui.ttf", 24), font("seguisb.ttf", 30), font("segoeui.ttf", 24), font("seguisb.ttf", 19)
+f_lab = [font("segoeuib.ttf", 19), font("seguisb.ttf", 16), font("segoeui.ttf", 14), font("segoeui.ttf", 14)]
+f_key, f_map = font("segoeuib.ttf", 34), font("seguisb.ttf", 44)
 SSAA = 2
-def draw_map(size, center, scale, with_new, t):
-    """the miniature around `center` (world x, y), `scale` px/cm, as an RGB image `size` (w, h)"""
+def draw_map(size, center, scale, with_new, f, big=False):
+    """the miniature around `center` (world x, y), `scale` px/cm, as an RGB image `size` (w, h); `big`: the M map
+    (larger figures, every building labelled where there is room)"""
+    t = f / FPS
     W, H = size[0] * SSAA, size[1] * SSAA; sc = scale * SSAA
-    im = Image.new("RGB", (W, H), srgb((0.10, 0.13, 0.09))); d = ImageDraw.Draw(im)
+    im = Image.new("RGB", (W, H), srgb((0.10, 0.13, 0.09))); d = ImageDraw.Draw(im, "RGBA")
     cx, cy = proj(center[0], center[1])
     def px(x, y, z=0.0):
         u, v = proj(x, y, z); return (W / 2 + (u - cx) * sc, H / 2 + (v - cy) * sc)
     reach = math.hypot(W, H) / 2 / sc / SN + 1500
     near = lambda x, y, pad=0: abs(x - center[0]) < reach + pad and abs(y - center[1]) < reach + pad
+    def on_panel(x, y, pad):
+        p = px(x, y); return -pad < p[0] < W + pad and -pad < p[1] < H + pad
     secs = [m for c, m in SECS.items() if (with_new or c != NEW) and near(c[0] * SS, c[1] * SS, SS)]
     for m in secs:
         x0, y0 = (m["coord"][0] - 0.5) * SS, (m["coord"][1] - 0.5) * SS
@@ -70,11 +97,11 @@ def draw_map(size, center, scale, with_new, t):
     items = []
     for m in secs:
         for b in m["buildings"]:
-            if near(*b["c"]): items.append((b["c"][0] * UX + b["c"][1] * UY, 0, b))
+            if on_panel(*b["c"], (math.hypot(*b["half"]) + b["wall"] + b["roof"] + b["tower"]) * sc): items.append((b["c"][0] * UX + b["c"][1] * UY, 0, b))
         for tr in m["trees"]:
-            if near(tr[0], tr[1]): items.append((tr[0] * UX + tr[1] * UY, 1, tr))
+            if on_panel(tr[0], tr[1], (tr[2] + tr[3]) * sc): items.append((tr[0] * UX + tr[1] * UY, 1, tr))
         for p in m["props"]:
-            if near(p[0], p[1]): items.append((p[0] * UX + p[1] * UY, 2, p))
+            if on_panel(p[0], p[1], 400 * sc): items.append((p[0] * UX + p[1] * UY, 2, p))
     items.sort(key=lambda it: -it[0])
     tocam = (-UX, -UY)
     for _, kind, o in items:
@@ -85,6 +112,7 @@ def draw_map(size, center, scale, with_new, t):
             if b["kind"] == "CHURCH": wc, rc = (0.74, 0.73, 0.70), (0.33, 0.40, 0.55)
             elif b["kind"] == "TAVERN": rc = (0.66, 0.26, 0.18)
             elif b["kind"] == "MANOR": rc = (0.55, 0.22, 0.26)
+            elif b["kind"] in ("BARN", "STOREHOUSE"): rc = tuple(v * 0.86 for v in rc)
             pt = lambda X, Y, Z: px(Cx + fx[0] * X + fy[0] * Y, Cy + fx[1] * X + fy[1] * Y, Z)
             def wallq(n, a, c2, z0, z1):
                 dn = n[0] * tocam[0] + n[1] * tocam[1]
@@ -148,76 +176,147 @@ def draw_map(size, center, scale, with_new, t):
                 c0 = px(x, y, 70); rr = 120 * sc; d.ellipse((c0[0] - rr, c0[1] - rr, c0[0] + rr, c0[1] + rr), fill=srgb((0.80, 0.68, 0.28)))
             elif ty == 4: d.polygon([px(x - RX * 30, y - RY * 30), px(x + RX * 30, y + RY * 30), px(x + RX * 30, y + RY * 30, 260), px(x - RX * 30, y - RY * 30, 260)], fill=srgb((0.70, 0.70, 0.68)))
             elif ty == 6: d.polygon([px(x - RX * 25, y - RY * 25), px(x + RX * 25, y + RY * 25), px(x + RX * 25, y + RY * 25, 85), px(x - RX * 25, y - RY * 25, 85)], fill=srgb((0.62, 0.63, 0.62)))
-    # her arrow (over everything)
-    hx_, hy_, hyaw = her(t); L = 8.0 * SSAA / sc; yr = math.radians(hyaw); f = (math.cos(yr), math.sin(yr)); rt = (-f[1], f[0])
-    g = px(hx_, hy_); rr = L * 1.4 * sc
-    tri = lambda k0, k1: [px(hx_ + f[0] * L * k0, hy_ + f[1] * L * k0, 40), px(hx_ - f[0] * L * k1 + rt[0] * L * k1, hy_ - f[1] * L * k1 + rt[1] * L * k1, 40),
-                          px(hx_ - f[0] * L * k1 - rt[0] * L * k1, hy_ - f[1] * L * k1 - rt[1] * L * k1, 40)]
-    d.polygon(tri(1.25, 0.85), fill=(255, 255, 255)); d.polygon(tri(0.95, 0.60), fill=srgb((1.0, 0.42, 0.66)))
+    # villagers: small upright figures
+    S = (4.6 if big else 3.4) * SSAA / sc
+    for vx, vy in villagers(f):
+        if not on_panel(vx, vy, 6 * SSAA): continue
+        d.polygon([px(vx - RX * S * 0.75, vy - RY * S * 0.75), px(vx + RX * S * 0.75, vy + RY * S * 0.75), px(vx, vy, S * 2.9)], fill=srgb((0.20, 0.13, 0.09)))
+        c0 = px(vx, vy, S * 3.0); rr = S * 0.62 * sc
+        d.ellipse((c0[0] - rr, c0[1] - rr, c0[0] + rr, c0[1] + rr), fill=srgb((0.96, 0.80, 0.62)))
+    # her: a ring on the ground and an arrow along her facing (over everything)
+    hx_, hy_, hyaw = her(f); L = (11.0 if big else 8.0) * SSAA / sc; yr = math.radians(hyaw); fw = (math.cos(yr), math.sin(yr)); rt = (-fw[1], fw[0])
+    g = px(hx_, hy_); rr = L * (1.25 + 0.25 * (0.5 + 0.5 * math.sin(t * 4.0))) * sc
+    d.ellipse((g[0] - rr, g[1] - rr * SN, g[0] + rr, g[1] + rr * SN), fill=(255, 255, 255, 77))
+    tri = lambda k0, k1, k2: [px(hx_ + fw[0] * L * k0, hy_ + fw[1] * L * k0, 40), px(hx_ - fw[0] * L * k1 + rt[0] * L * k2, hy_ - fw[1] * L * k1 + rt[1] * L * k2, 40),
+                              px(hx_ - fw[0] * L * k1 - rt[0] * L * k2, hy_ - fw[1] * L * k1 - rt[1] * L * k2, 40)]
+    d.polygon(tri(1.25, 0.85, 0.85), fill=(255, 255, 255)); d.polygon(tri(0.95, 0.60, 0.58), fill=srgb((1.0, 0.42, 0.66)))
     if with_new and NEW in SECS and 0 <= t - T_GEN < 5.0:
         x0, y0 = (NEW[0] - 0.5) * SS, (NEW[1] - 0.5) * SS; a = 1 - (t - T_GEN) / 5.0
         cn = [px(x0, y0), px(x0 + SS, y0), px(x0 + SS, y0 + SS), px(x0, y0 + SS)]
         d.line(cn + [cn[0]], fill=tuple(int(255 * (v * a + 0.3 * (1 - a)) ** (1 / 2.2)) for v in CYAN), width=3 * SSAA)
-    return im.resize(size, Image.LANCZOS)
+    im = im.resize(size, Image.LANCZOS)
+    if big:
+        # labels: landmarks first, then the houses wherever there is room
+        d = ImageDraw.Draw(im, "RGBA"); labs = []
+        for m in secs:
+            for b in m["buildings"]:
+                p = px(*b["c"]); p = (p[0] / SSAA, p[1] / SSAA)
+                if not (12 < p[0] < size[0] - 12 and 12 < p[1] < size[1] - 12): continue
+                pri = 0 if b["kind"] == "CHURCH" else 3 if b["kind"] in ("COTTAGE", "FARMHOUSE") else 2 if b["kind"] in ("BARN", "STOREHOUSE") else 1
+                labs.append((pri, (b["c"][0] - hx_) ** 2 + (b["c"][1] - hy_) ** 2, b))
+        labs.sort(key=lambda q: q[:2]); used = []
+        for pri, _, b in labs:
+            n = KIND.get(b["kind"], "House"); fn = f_lab[pri]
+            tw = d.textlength(n, font=fn); th = fn.size + 3
+            top = px(b["c"][0], b["c"][1], b["wall"] + b["roof"] + b["tower"] * 0.4); top = (top[0] / SSAA, top[1] / SSAA)
+            x0, y0 = top[0] - tw / 2, top[1] - th - 3
+            bx = (x0 - 4, y0 - 1, x0 + tw + 4, y0 + th + 1)
+            if bx[0] < 0 or bx[2] > size[0] or bx[1] < 0 or bx[3] > size[1]: continue
+            if any(bx[0] < u[2] and bx[2] > u[0] and bx[1] < u[3] and bx[3] > u[1] for u in used): continue
+            used.append(bx)
+            d.rectangle(bx, fill=(13, 13, 10, 158 if pri <= 1 else 107))
+            d.text((x0, y0 - 1), n, font=fn, fill=srgb((1.0, 0.93, 0.62)) if pri == 0 else srgb((1.0, 0.97, 0.88)) if pri == 1 else srgb((0.86, 0.86, 0.80)))
+    return im
 # ---- drawing
-F = r"C:\Windows\Fonts"
-def font(name, size):
-    for n in (name, "segoeui.ttf", "arial.ttf"):
-        try: return ImageFont.truetype(os.path.join(F, n), size)
-        except OSError: pass
-    return ImageFont.load_default()
-f_title, f_sub, f_head, f_line, f_small = font("segoeuib.ttf", 40), font("segoeui.ttf", 24), font("seguisb.ttf", 30), font("segoeui.ttf", 24), font("seguisb.ttf", 19)
 CY = tuple(int(255 * v ** (1 / 2.2)) for v in CYAN)
 def fade(t, t0, t1, fin=0.35, fout=0.6):
     if t < t0 or t > t1: return 0.0
     return min(1.0, (t - t0) / fin, (t1 - t) / fout)
 MW, MH = 384, 300
-def overlay(t):
-    W, H = 1920, 1080
-    o = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(o)
-    a = fade(t, 0.3, 5.2)
-    if a > 0:
-        d.text((44, 34), "random_isometric_village_level", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46, 86), "procedural nucleated village  \u00b7  fixed isometric view  \u00b7  jrpg-fem5-tripo", font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2, stroke_fill=(0, 0, 0, int(140 * a)))
-    # minimap
+W, H = 1920, 1080
+NB = lambda with_new: sum(len(m["buildings"]) for c, m in SECS.items() if c != NEW or with_new)
+def minimap(o, d, f):
+    t = f / FPS
     x0s, y0s = W - 44 - MW, 86
     d.rounded_rectangle((x0s - 14, 36, x0s + MW + 14, y0s + MH + 44), 14, fill=(14, 12, 9, 200))
-    hx_, hy_, _ = her(t); scale = MW / 11500.0
+    hx_, hy_, _ = her(f); scale = MW / 11500.0
     age = t - T_GEN
-    mm = draw_map((MW, MH), (hx_, hy_), scale, age >= 0, t)
+    mm = draw_map((MW, MH), (hx_, hy_), scale, age >= 0, f)
     if 0 <= age < 2.6:
         # the new part comes in under a cyan tint that clears over 2.6 s
-        base = draw_map((MW, MH), (hx_, hy_), scale, False, t)
+        base = draw_map((MW, MH), (hx_, hy_), scale, False, f)
         tint = Image.blend(mm, Image.new("RGB", mm.size, CY), 0.6 * (1 - age / 2.6))
         mask = ImageChops.difference(mm, base).convert("L").point(lambda v: 255 if v > 6 else 0)      # where the new part shows
         mm = Image.composite(tint, mm, mask)
     o.paste(mm, (x0s, y0s))
     d.rectangle((x0s, y0s, x0s + MW, y0s + MH), outline=(200, 170, 110, 240), width=2)
-    nbld = sum(len(m["buildings"]) for c, m in SECS.items() if c != NEW or age >= 0)
     d.text((x0s, 44), "VILLAGE", font=f_small, fill=(238, 228, 200, 240))
-    d.text((x0s + MW, 44), f"{nbld} buildings", font=f_small, fill=(238, 228, 200, 240), anchor="ra")
+    d.text((x0s + MW, 44), f"{NB(age >= 0)} buildings", font=f_small, fill=(238, 228, 200, 240), anchor="ra")
+    # north (+X): up-left in the view the level starts with
+    nx, ny = proj(1, 0); nl = math.hypot(nx, ny) or 1.0; nx, ny = nx / nl, ny / nl
+    ncx, ncy = x0s + 36, y0s + MH - 36
+    d.line((ncx - nx * 10, ncy - ny * 10, ncx + nx * 13, ncy + ny * 13), fill=srgb(INK) + (255,), width=3)
+    d.text((ncx + nx * 23, ncy + ny * 23), "N", font=f_small, fill=srgb(INK) + (255,), anchor="mm", stroke_width=2, stroke_fill=(0, 0, 0, 150))
     ly = y0s + MH + 10
     for i, (lab, col) in enumerate((("thatch", ROOF["THATCH"]), ("timber", ROOF["TIMBER"]), ("stone", ROOF["STONE"]), ("new part", CYAN))):
         xx = x0s + i * 98
         d.rectangle((xx, ly + 6, xx + 12, ly + 18), fill=srgb(col) + (255,)); d.text((xx + 18, ly), lab, font=f_small, fill=(214, 214, 208, 220))
-    # captions (bottom left)
-    def caption(a, head, lines, col=(255, 240, 214)):
-        if a <= 0: return
-        y = H - 62 - 36 - 34 * len(lines)
-        d.rounded_rectangle((32, y - 14, 60 + max([d.textlength(head, font=f_head)] + [d.textlength(s, font=f_line) for s in lines]), H - 48), 12, fill=(12, 11, 9, int(180 * a)))
-        d.text((50, y - 4), head, font=f_head, fill=col + (int(255 * a),))
-        for i, s in enumerate(lines): d.text((54, y + 42 + 34 * i), s, font=f_line, fill=(240, 244, 248, int(240 * a)))
-    caption(fade(t, 0.8, T_OUT + 0.5), "INSIDE A HOUSE", ["the roof and the camera-side walls are cut away", "doors, chests, wardrobes, barrels and crates open with F"])
-    caption(fade(t, T_OUT + 1.2, min(T_OUT + 6.4, T_GEN - 0.3)), "8-DIRECTION MOVEMENT", ["W A S D or an Xbox controller  \u00b7  the view never turns"])
-    caption(fade(t, T_GEN, T_GEN + 6.5), "\u25b2 NEW PART OF THE VILLAGE GENERATED",
-            [f"section ({NEW[0]}, {NEW[1]})  \u00b7  250 m x 250 m  \u00b7  the same rings and lanes carried on", f"{nb} buildings  \u00b7  {nd} doors  \u00b7  {nc} container parts  \u00b7  {nt} trees"], CY)
+def bigmap(f, a):
+    """the M map as a full-frame RGBA layer at opacity a"""
+    o = Image.new("RGBA", (W, H), srgb((0.05, 0.045, 0.035)) + (230,)); d = ImageDraw.Draw(o)
+    A0, A1 = (60, 104), (W - 60, H - 64)
+    k = (A1[1] - A0[1]) / (240.0 * 100.0 * SN)
+    hx_, hy_, _ = her(f)
+    o.paste(draw_map((A1[0] - A0[0], A1[1] - A0[1]), (hx_, hy_), k, True, f, big=True), A0)
+    d.rectangle((A0[0], A0[1], A1[0], A1[1]), outline=srgb((0.78, 0.66, 0.42)) + (242,), width=2)
+    d.text((60, 26), "VILLAGE MAP", font=f_map, fill=srgb(INK) + (255,))
+    nv = sum(1 for m in SECS.values() for b in m["buildings"] if b.get("visited"))
+    d.text((62, 76), f"{NB(True)} buildings in {len(SECS)} parts of the village  \u00b7  {nv} entered  \u00b7  M  close  \u00b7  mouse wheel  zoom  \u00b7  Q / E  turn", font=f_small, fill=srgb((0.75, 0.72, 0.64)) + (255,))
+    x = 62
+    for lab, col in (("thatched", (0.84, 0.69, 0.31)), ("timber", (0.50, 0.30, 0.19)), ("stone", (0.42, 0.46, 0.55)), ("tavern", (0.66, 0.26, 0.18)), ("church", (0.33, 0.40, 0.55)), ("road", (0.70, 0.60, 0.42)),
+                     ("field", (0.76, 0.66, 0.30))):
+        d.rectangle((x, H - 40, x + 14, H - 26), fill=srgb(col) + (255,)); d.text((x + 20, H - 46), lab, font=f_small, fill=srgb((0.78, 0.75, 0.67)) + (255,))
+        x += d.textlength(lab, font=f_small) + 48
+    if a < 1.0: o.putalpha(o.getchannel("A").point(lambda v: int(v * a)))
+    return o
+def keycap(d, a, key, text, y=H - 126):
+    """a key cap and what it does, bottom right"""
+    if a <= 0: return
+    tw = d.textlength(text, font=f_line); kw = 64; wd = kw + 18 + tw; x = W - 66 - wd
+    d.rounded_rectangle((x - 22, y - 14, x + wd + 22, y + 78), 14, fill=(12, 11, 9, int(190 * a)))
+    d.rounded_rectangle((x, y, x + kw, y + 64), 10, fill=(238, 232, 214, int(255 * a)), outline=(120, 110, 90, int(255 * a)), width=3)
+    d.text((x + kw / 2, y + 30), key, font=f_key, fill=(30, 26, 20, int(255 * a)), anchor="mm")
+    d.text((x + kw + 18, y + 32), text, font=f_line, fill=(244, 240, 228, int(255 * a)), anchor="lm")
+def overlay(f):
+    t = f / FPS
+    set_view(f)
+    o = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(o)
+    am = fade(t, MAP0, MAP1, 0.15, 0.15)
+    if am < 1.0:
+        a = fade(t, 0.3, 5.2)
+        if a > 0:
+            d.text((44, 34), "random_isometric_village_level", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2, stroke_fill=(0, 0, 0, int(140 * a)))
+            d.text((46, 86), "procedural nucleated village  \u00b7  isometric view that turns  \u00b7  jrpg-fem5-tripo", font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2, stroke_fill=(0, 0, 0, int(140 * a)))
+        minimap(o, d, f)
+        # captions (bottom left)
+        def caption(a, head, lines, col=(255, 240, 214)):
+            if a <= 0: return
+            y = H - 62 - 36 - 34 * len(lines)
+            d.rounded_rectangle((32, y - 14, 60 + max([d.textlength(head, font=f_head)] + [d.textlength(s, font=f_line) for s in lines]), H - 48), 12, fill=(12, 11, 9, int(180 * a)))
+            d.text((50, y - 4), head, font=f_head, fill=col + (int(255 * a),))
+            for i, s in enumerate(lines): d.text((54, y + 42 + 34 * i), s, font=f_line, fill=(240, 244, 248, int(240 * a)))
+        t1 = TURNS[0][0]
+        caption(fade(t, 0.7, t1 - 0.25), "VILLAGERS", ["unarmed townsfolk wander every part of the village", f"three for every ten buildings  \u00b7  {SECS[(0, 0)]['villagers']} in this part"])
+        caption(fade(t, t1 - 0.1, T_OUT + 0.4), "INSIDE A HOUSE", ["the roof and the walls that face the camera are cut away,", "whichever way the view is turned  \u00b7  doors and containers open with F"])
+        caption(fade(t, T_OUT + 0.9, T_GEN - 0.3), "8-DIRECTION MOVEMENT", ["W A S D or an Xbox controller  \u00b7  Q / E (LB / RB) turn the view in 45\u00b0 steps"])
+        caption(fade(t, T_GEN, min(T_GEN + 6.8, MAP0 - 0.4)), "\u25b2 NEW PART OF THE VILLAGE GENERATED",
+                [f"section ({NEW[0]}, {NEW[1]})  \u00b7  250 m x 250 m  \u00b7  the same rings and lanes carried on",
+                 f"{EV['buildings']} buildings  \u00b7  {EV['doors']} doors  \u00b7  {EV['containers']} container parts  \u00b7  {EV['trees']} trees  \u00b7  {EV['villagers']} villagers"], CY)
+        caption(fade(t, MAP1 + 0.5, 29.6), "THE VILLAGE GOES ON", ["every 250 m square is generated as she nears it,", "from the same plan of rings, lanes and main roads"])
+        for t0, n in TURNS:
+            if not (MAP0 - 0.5 < t0 < MAP1): keycap(d, fade(t, t0 - 0.2, t0 + 1.1, 0.12, 0.4), "Q" if n > 0 else "E", "turn the view left" if n > 0 else "turn the view right")
+        keycap(d, fade(t, MAP0 - 0.7, MAP0 + 0.1, 0.12, 0.15), "M", "village map")
+    if am > 0:
+        o = Image.alpha_composite(o, bigmap(f, am)); d = ImageDraw.Draw(o)
+        for t0, n in TURNS:
+            if MAP0 - 0.5 < t0 < MAP1: keycap(d, fade(t, t0 - 0.2, t0 + 1.1, 0.12, 0.4), "Q" if n > 0 else "E", "turn the view left" if n > 0 else "turn the view right", H - 190)
+        keycap(d, fade(t, MAP1 - 0.6, MAP1 + 0.1, 0.12, 0.15), "M", "close the map", H - 190)
     return o
 os.makedirs(dst, exist_ok=True)
 frames = sorted(glob.glob(os.path.join(src, "*.png")))
 for i, p in enumerate(frames):
     if i % step: continue
-    t = i / FPS
     im = Image.open(p).convert("RGBA")
-    if im.size != (1920, 1080): im = im.resize((1920, 1080))
-    Image.alpha_composite(im, overlay(t)).convert("RGB").save(os.path.join(dst, f"ivhud.{i:04d}.png"), compress_level=1)
+    if im.size != (W, H): im = im.resize((W, H))
+    Image.alpha_composite(im, overlay(i)).convert("RGB").save(os.path.join(dst, f"ivhud.{i:04d}.png"), compress_level=1)
 print("wrote", len(range(0, len(frames), step)), "frames to", dst)
