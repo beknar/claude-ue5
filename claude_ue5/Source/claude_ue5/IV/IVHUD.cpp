@@ -11,10 +11,10 @@
 #include "GameFramework/PlayerController.h"
 #include "RenderUtils.h"
 
-static const FLinearColor Cyan(0.43f, 0.88f, 1.0f, 1.f);
-static const FLinearColor Ink(0.93f, 0.89f, 0.78f, 1.f);
+static const FLinearColor IVCyan(0.43f, 0.88f, 1.0f, 1.f);
+static const FLinearColor IVInk(0.93f, 0.89f, 0.78f, 1.f);
 
-static FLinearColor Shade(const FLinearColor& C, float K, float A = 1.f) { return FLinearColor(C.R * K, C.G * K, C.B * K, C.A * A); }
+static FLinearColor IVShade(const FLinearColor& C, float K, float A = 1.f) { return FLinearColor(C.R * K, C.G * K, C.B * K, C.A * A); }
 
 FVector2D AIVHUD::Project(const FVector& W) const
 {
@@ -127,7 +127,7 @@ void AIVHUD::DrawBuilding(const FIVMapBuilding& B, float Alpha)
 	if (B.Kind == EIVBuildingKind::Church) { Wc = FLinearColor(0.74f, 0.73f, 0.70f); Rc = FLinearColor(0.33f, 0.40f, 0.55f); }
 	else if (B.Kind == EIVBuildingKind::Tavern) Rc = FLinearColor(0.66f, 0.26f, 0.18f);
 	else if (B.Kind == EIVBuildingKind::Manor) Rc = FLinearColor(0.55f, 0.22f, 0.26f);
-	else if (B.Kind == EIVBuildingKind::Barn || B.Kind == EIVBuildingKind::Storehouse) Rc = Shade(Rc, 0.86f);
+	else if (B.Kind == EIVBuildingKind::Barn || B.Kind == EIVBuildingKind::Storehouse) Rc = IVShade(Rc, 0.86f);
 	Wc.A = Alpha; Rc.A = Alpha;
 	const float Yr = FMath::DegreesToRadians(B.Yaw);
 	const FVector2D Fx(FMath::Cos(Yr), FMath::Sin(Yr)), Fy(-FMath::Sin(Yr), FMath::Cos(Yr));
@@ -138,7 +138,7 @@ void AIVHUD::DrawBuilding(const FIVMapBuilding& B, float Alpha)
 	{
 		if (FVector2D::DotProduct(N, ToCam) <= 0.02f) return;
 		const float K = 0.80f + 0.20f * FMath::Max(0.f, FVector2D::DotProduct(N, IsoRight));
-		Quad(FVector(A.X, A.Y, Z0), FVector(Bb.X, Bb.Y, Z0), FVector(Bb.X, Bb.Y, Z1), FVector(A.X, A.Y, Z1), Shade(Wc, K));
+		Quad(FVector(A.X, A.Y, Z0), FVector(Bb.X, Bb.Y, Z0), FVector(Bb.X, Bb.Y, Z1), FVector(A.X, A.Y, Z1), IVShade(Wc, K));
 	};
 	auto Box = [&](float X0, float X1, float Y0, float Y1, float Z0, float Z1)
 	{
@@ -153,13 +153,13 @@ void AIVHUD::DrawBuilding(const FIVMapBuilding& B, float Alpha)
 	auto Rp = [&](float Along, float Across, float Z) { return FVector(B.Center + Ax * Along + Cr * Across, Z); };
 	for (int32 E = -1; E <= 1; E += 2)
 		if (FVector2D::DotProduct(Ax * (float)E, ToCam) > 0.02f)
-			Tri3(Rp(E * La, -Lc, H), Rp(E * La, Lc, H), Rp(E * La, 0, H + Rh), Shade(Wc, 0.80f + 0.20f * FMath::Max(0.f, FVector2D::DotProduct(Ax * (float)E, IsoRight))));
+			Tri3(Rp(E * La, -Lc, H), Rp(E * La, Lc, H), Rp(E * La, 0, H + Rh), IVShade(Wc, 0.80f + 0.20f * FMath::Max(0.f, FVector2D::DotProduct(Ax * (float)E, IsoRight))));
 	const int32 FarSide = FVector2D::DotProduct(Cr, ToCam) > 0.f ? -1 : 1;
 	for (int32 Pass = 0; Pass < 2; ++Pass)
 	{
 		const float Sd = (Pass == 0 ? FarSide : -FarSide);
 		const float K = 0.78f + 0.30f * FMath::Max(0.f, FVector2D::DotProduct(Cr * Sd, IsoRight)) + (Pass == 1 ? 0.06f : 0.f);
-		Quad(Rp(-La - Ov, Sd * (Lc + Ov), H - Ov * 0.6f), Rp(La + Ov, Sd * (Lc + Ov), H - Ov * 0.6f), Rp(La + Ov, 0, H + Rh), Rp(-La - Ov, 0, H + Rh), Shade(Rc, K));
+		Quad(Rp(-La - Ov, Sd * (Lc + Ov), H - Ov * 0.6f), Rp(La + Ov, Sd * (Lc + Ov), H - Ov * 0.6f), Rp(La + Ov, 0, H + Rh), Rp(-La - Ov, 0, H + Rh), IVShade(Rc, K));
 	}
 	if (B.TowerHeight > 0.f)
 	{
@@ -174,7 +174,7 @@ void AIVHUD::DrawBuilding(const FIVMapBuilding& B, float Alpha)
 			{
 				const bool bNear = FVector2D::DotProduct(Ns[I], ToCam) > 0.f;
 				if (bNear != (Pass == 1)) continue;
-				Tri3(Cn[I], Cn[(I + 1) % 4], Apex, Shade(Rc, 0.8f + 0.3f * FMath::Max(0.f, FVector2D::DotProduct(Ns[I], IsoRight))));
+				Tri3(Cn[I], Cn[(I + 1) % 4], Apex, IVShade(Rc, 0.8f + 0.3f * FMath::Max(0.f, FVector2D::DotProduct(Ns[I], IsoRight))));
 			}
 	}
 }
@@ -188,14 +188,14 @@ void AIVHUD::DrawTree(const FIVMapTree& T)
 		const FLinearColor C(0.16f, 0.36f, 0.22f);
 		const FVector R3(IsoRight * T.Radius * 0.8f, 0.f);
 		Tri3(G - R3 + FVector(0, 0, T.Height * 0.18f), G + R3 + FVector(0, 0, T.Height * 0.18f), G + FVector(0, 0, T.Height), C);
-		Tri3(G + FVector(0, 0, T.Height * 0.18f), G + R3 + FVector(0, 0, T.Height * 0.18f), G + FVector(0, 0, T.Height), Shade(C, 1.25f));
+		Tri3(G + FVector(0, 0, T.Height * 0.18f), G + R3 + FVector(0, 0, T.Height * 0.18f), G + FVector(0, 0, T.Height), IVShade(C, 1.25f));
 		return;
 	}
 	const FLinearColor C = T.Type == 2 ? FLinearColor(0.42f, 0.62f, 0.24f) : T.Type == 3 ? FLinearColor(0.30f, 0.50f, 0.22f) : FLinearColor(0.22f, 0.46f, 0.20f);
 	const FVector Top = G + FVector(0, 0, T.Type == 3 ? T.Radius * 0.6f : T.Height * 0.62f);
 	if (T.Type != 3) Quad(G + FVector(IsoRight * -18.f, 0.f), G + FVector(IsoRight * 18.f, 0.f), Top + FVector(IsoRight * 18.f, 0.f), Top + FVector(IsoRight * -18.f, 0.f), FLinearColor(0.33f, 0.24f, 0.15f));
-	Disc(Top, T.Radius, Shade(C, 0.8f), 9);
-	Disc(Top + FVector(IsoRight * (T.Radius * 0.22f), T.Radius * 0.28f), T.Radius * 0.68f, Shade(C, 1.18f), 8);
+	Disc(Top, T.Radius, IVShade(C, 0.8f), 9);
+	Disc(Top + FVector(IsoRight * (T.Radius * 0.22f), T.Radius * 0.28f), T.Radius * 0.68f, IVShade(C, 1.18f), 8);
 }
 
 void AIVHUD::DrawProp(const FIVMapProp& P)
@@ -273,7 +273,7 @@ void AIVHUD::DrawVillage(const FVector2D& A, const FVector2D& B, const FVector& 
 		if (!Near(Mn + FVector2D(SS * 0.5f), SS)) continue;
 		const float Age = Now - KV.Value.GeneratedTime;
 		FLinearColor Gc(0.36f, 0.50f, 0.25f, 0.96f);
-		if (KV.Value.GeneratedTime >= 0.f && Age < 3.f) Gc = FMath::Lerp(FLinearColor(Cyan.R, Cyan.G, Cyan.B, 0.9f), Gc, FMath::Clamp(Age / 3.f, 0.f, 1.f));
+		if (KV.Value.GeneratedTime >= 0.f && Age < 3.f) Gc = FMath::Lerp(FLinearColor(IVCyan.R, IVCyan.G, IVCyan.B, 0.9f), Gc, FMath::Clamp(Age / 3.f, 0.f, 1.f));
 		Quad(FVector(Mn.X, Mn.Y, 0), FVector(Mn.X + SS, Mn.Y, 0), FVector(Mn.X + SS, Mn.Y + SS, 0), FVector(Mn.X, Mn.Y + SS, 0), Gc);
 	}
 	// ---- patches (fields, gardens, the square), then roads: outlines first, fills over them
@@ -355,7 +355,7 @@ void AIVHUD::DrawVillage(const FVector2D& A, const FVector2D& B, const FVector& 
 				const FVector2D C = P + (Q - P) * T;
 				if (Pi) Q = C; else P = C;
 			}
-			if (bOk) DrawLine(P.X, P.Y, Q.X, Q.Y, FLinearColor(Cyan.R, Cyan.G, Cyan.B, 1.f - Age / 5.f), 2.5f);
+			if (bOk) DrawLine(P.X, P.Y, Q.X, Q.Y, FLinearColor(IVCyan.R, IVCyan.G, IVCyan.B, 1.f - Age / 5.f), 2.5f);
 		}
 	}
 	// ---- labels (big map): landmarks first, then the houses wherever there is room
@@ -427,15 +427,15 @@ void AIVHUD::DrawHUD()
 		Rect(S0, S1, FLinearColor(0.10f, 0.13f, 0.09f, 0.95f));
 		DrawVillage(S0, S1, L, Px / (MinimapMeters * 100.f), false, L, Yaw);
 		Frame(S0, S1, FLinearColor(0.78f, 0.66f, 0.42f, 0.95f), 2.f * Sc);
-		DrawText(TEXT("VILLAGE"), Ink, S0.X, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
+		DrawText(TEXT("VILLAGE"), IVInk, S0.X, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
 		const FString Cnt = FString::Printf(TEXT("%d buildings"), Nb);
 		float Tw, Th; GetTextSize(Cnt, Tw, Th, Small, Sc * 1.1f);
-		DrawText(Cnt, Ink, S1.X - Tw, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
+		DrawText(Cnt, IVInk, S1.X - Tw, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
 		// north (+X): up-left in the view the level starts with
 		const FVector2D Nd = Project(FVector(1, 0, 0)).GetSafeNormal();
 		const FVector2D Nc(S0.X + 22.f * Sc, S1.Y - 22.f * Sc);
-		DrawLine(Nc.X - Nd.X * 9.f * Sc, Nc.Y - Nd.Y * 9.f * Sc, Nc.X + Nd.X * 11.f * Sc, Nc.Y + Nd.Y * 11.f * Sc, Ink, 2.f * Sc);
-		DrawText(TEXT("N"), Ink, Nc.X + Nd.X * 16.f * Sc - 4.f * Sc, Nc.Y + Nd.Y * 16.f * Sc - 7.f * Sc, Small, Sc);
+		DrawLine(Nc.X - Nd.X * 9.f * Sc, Nc.Y - Nd.Y * 9.f * Sc, Nc.X + Nd.X * 11.f * Sc, Nc.Y + Nd.Y * 11.f * Sc, IVInk, 2.f * Sc);
+		DrawText(TEXT("N"), IVInk, Nc.X + Nd.X * 16.f * Sc - 4.f * Sc, Nc.Y + Nd.Y * 16.f * Sc - 7.f * Sc, Small, Sc);
 		DrawText(bPad ? TEXT("Y  map") : TEXT("M  map"), FLinearColor(0.72f, 0.69f, 0.60f), S0.X, S1.Y + 6.f * Sc, Small, Sc);
 	}
 
@@ -448,7 +448,7 @@ void AIVHUD::DrawHUD()
 		float Tw, Th; GetTextSize(T, Tw, Th, Medium, Sc * 1.4f);
 		const float X = (Canvas->ClipX - Tw) * 0.5f, Y = 86.f * Sc;
 		Rect(FVector2D(X - 18.f * Sc, Y - 8.f * Sc), FVector2D(X + Tw + 18.f * Sc, Y + Th + 8.f * Sc), FLinearColor(0.02f, 0.05f, 0.07f, 0.55f * A));
-		DrawText(T, FLinearColor(Cyan.R, Cyan.G, Cyan.B, A), X, Y, Medium, Sc * 1.4f);
+		DrawText(T, FLinearColor(IVCyan.R, IVCyan.G, IVCyan.B, A), X, Y, Medium, Sc * 1.4f);
 	}
 
 	// ---- interaction prompt
@@ -483,7 +483,7 @@ void AIVHUD::DrawHUD()
 		const float K = (A1.Y - A0.Y) / (MapMeters * 100.f * IsoSin) * Gen->MapZoom;
 		DrawVillage(A0, A1, L, K, true, L, Yaw);
 		Frame(A0, A1, FLinearColor(0.78f, 0.66f, 0.42f, 0.95f), 2.f * Sc);
-		DrawText(TEXT("VILLAGE MAP"), Ink, 60.f * Sc, 34.f * Sc, Medium, Sc * 1.6f);
+		DrawText(TEXT("VILLAGE MAP"), IVInk, 60.f * Sc, 34.f * Sc, Medium, Sc * 1.6f);
 		const FString Sub = FString::Printf(TEXT("%d buildings in %d part%s of the village  ·  %d entered  ·  %s"), Nb, Ns, Ns == 1 ? TEXT("") : TEXT("s"), Nv,
 			bPad ? TEXT("Y / B  close  ·  right stick  zoom  ·  LB / RB  turn") : TEXT("M  close  ·  mouse wheel  zoom  ·  Q / E  turn"));
 		DrawText(Sub, FLinearColor(0.75f, 0.72f, 0.64f), 62.f * Sc, 72.f * Sc, Small, Sc * 1.1f);

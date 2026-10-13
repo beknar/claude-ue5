@@ -1,0 +1,309 @@
+{
+ "tag": "f5",
+ "plan": [
+  "input",
+  "agile",
+  "camera",
+  "cannon:3",
+  "missile:2",
+  "edge",
+  "collide",
+  "tour:20"
+ ],
+ "steps": [
+  {
+   "step": "input",
+   "ok": true,
+   "passed": 24,
+   "tests": 24,
+   "failed": [],
+   "all": [
+    {
+     "test": "key W: throttle up",
+     "value": 0.487,
+     "ok": true
+    },
+    {
+     "test": "key S: throttle down",
+     "value": -0.315,
+     "ok": true
+    },
+    {
+     "test": "key D: roll right",
+     "value": -0.853,
+     "ok": true
+    },
+    {
+     "test": "key A: roll left",
+     "value": 0.859,
+     "ok": true
+    },
+    {
+     "test": "mouse right: nose right",
+     "value": 0.733,
+     "ok": true
+    },
+    {
+     "test": "mouse left: nose left",
+     "value": -0.726,
+     "ok": true
+    },
+    {
+     "test": "mouse up: nose up",
+     "value": 0.728,
+     "ok": true
+    },
+    {
+     "test": "mouse down: nose down",
+     "value": -0.732,
+     "ok": true
+    },
+    {
+     "test": "left button: cannons",
+     "value": 9.0,
+     "ok": true
+    },
+    {
+     "test": "right button: missile",
+     "value": 1.0,
+     "ok": true
+    },
+    {
+     "test": "Shift: afterburner",
+     "value": 1.909,
+     "ok": true
+    },
+    {
+     "test": "pad left stick up: throttle up",
+     "value": 0.492,
+     "ok": true
+    },
+    {
+     "test": "pad left stick down: throttle down",
+     "value": -0.313,
+     "ok": true
+    },
+    {
+     "test": "pad left stick right: roll right",
+     "value": -0.858,
+     "ok": true
+    },
+    {
+     "test": "pad left stick left: roll left",
+     "value": 0.853,
+     "ok": true
+    },
+    {
+     "test": "pad right stick right: nose right",
+     "value": 0.786,
+     "ok": true
+    },
+    {
+     "test": "pad right stick left: nose left",
+     "value": -0.785,
+     "ok": true
+    },
+    {
+     "test": "pad right stick up: nose up",
+     "value": 0.917,
+     "ok": true
+    },
+    {
+     "test": "pad right stick down: nose down",
+     "value": -0.916,
+     "ok": true
+    },
+    {
+     "test": "pad RT: cannons",
+     "value": 9.0,
+     "ok": true
+    },
+    {
+     "test": "pad LT: missile",
+     "value": 1.0,
+     "ok": true
+    },
+    {
+     "test": "pad A: afterburner",
+     "value": 1.909,
+     "ok": true
+    },
+    {
+     "test": "pad stick inside the dead zone: nothing",
+     "value": 0.0,
+     "ok": true
+    },
+    {
+     "test": "mouse still: nose still",
+     "value": 0.0,
+     "ok": true,
+     "collisions": 0
+    }
+   ]
+  },
+  {
+   "step": "agile",
+   "ok": true,
+   "mouse_rates": [
+    220.0,
+    240.0
+   ],
+   "stick_rates": [
+    75.0,
+    95.0
+   ],
+   "degrees_per_count": 0.10000000149011612,
+   "slow_hand_wanted": 30.0,
+   "half_view_deg": 24.5,
+   "mouse_fast_yaw": {
+    "peak": 220.0,
+    "turned": 209.9,
+    "t90": 0.46,
+    "view_off": 13.7
+   },
+   "mouse_fast_pitch": {
+    "peak": 240.0,
+    "turned": 228.3,
+    "t90": 0.43,
+    "view_off": 19.8
+   },
+   "mouse_slow_yaw": {
+    "peak": 31.8,
+    "turned": 42.2,
+    "t90": null,
+    "view_off": 11.0
+   },
+   "stick_yaw": {
+    "peak": 75.0,
+    "turned": 80.7,
+    "t90": null,
+    "view_off": 11.5
+   },
+   "stick_pitch": {
+    "peak": 95.0,
+    "turned": 101.1,
+    "t90": 1.07,
+    "view_off": 15.4
+   }
+  },
+  {
+   "step": "camera",
+   "ok": true,
+   "view_target_is_fighter": true,
+   "behind_cm": 1708,
+   "above_cm": 330,
+   "side_cm": -5,
+   "looks_along_nose": 1.0,
+   "zoomed_out_behind_cm": 2320,
+   "lag_in_turn": 0.9702,
+   "settles": 1.0,
+   "collisions": 0
+  },
+  {
+   "step": "cannon",
+   "ok": true,
+   "kills": [
+    {
+     "ok": true,
+     "target": "SS_Asteroid_52",
+     "radius": 707,
+     "from_m": 210,
+     "seconds": 1.3,
+     "shots": 7,
+     "hits": 6,
+     "end": "destroyed"
+    },
+    {
+     "ok": true,
+     "target": "SS_Asteroid_23",
+     "radius": 511,
+     "from_m": 204,
+     "seconds": 3.6,
+     "shots": 5,
+     "hits": 4,
+     "end": "destroyed"
+    },
+    {
+     "ok": true,
+     "target": "SS_Asteroid_30",
+     "radius": 1211,
+     "from_m": 189,
+     "seconds": 3.3,
+     "shots": 11,
+     "hits": 10,
+     "end": "destroyed"
+    }
+   ]
+  },
+  {
+   "step": "missile",
+   "ok": true,
+   "kills": [
+    {
+     "ok": true,
+     "target": "SS_Drone_11_Hauler",
+     "from_m": 370,
+     "seconds": 12.4,
+     "locked_after_s": 4.7,
+     "missiles": 3,
+     "end": "destroyed"
+    },
+    {
+     "ok": true,
+     "target": "SS_Drone_4_Dart",
+     "from_m": 377,
+     "seconds": 3.3,
+     "locked_after_s": 0.8,
+     "missiles": 1,
+     "end": "destroyed"
+    }
+   ]
+  },
+  {
+   "step": "edge",
+   "ok": true,
+   "end": "back inside",
+   "farthest_outside_m": 282,
+   "seconds_to_return": 3.2,
+   "total_s": 7.9
+  },
+  {
+   "step": "collide",
+   "ok": true,
+   "target": "Asteroid_4_5",
+   "rock_radius_m": 54,
+   "end": "hit",
+   "speed_at_hit": 11780,
+   "hull_before": 100,
+   "hull_after": 94,
+   "destroyed": false,
+   "moved_after_cm": 28277,
+   "collisions": 4,
+   "seconds": 2.8
+  },
+  {
+   "step": "tour",
+   "ok": true,
+   "seconds": 20.0,
+   "collisions": 1,
+   "frame_ms_median": 25.1,
+   "frame_ms_p95": 35.3
+  }
+ ],
+ "error": null,
+ "frame_ms_median": 26.7,
+ "shots": 41,
+ "hits": 20,
+ "missiles": 6,
+ "collisions": 5,
+ "respawns": 35,
+ "turn_backs": 1,
+ "score": 330,
+ "asteroids_destroyed": 4,
+ "drones_destroyed": 2,
+ "targets_left": {
+  "asteroids": 571,
+  "drones": 14,
+  "containers": 36
+ }
+}

@@ -12,7 +12,7 @@ static const FLinearColor RoomLit(0.80f, 0.69f, 0.50f, 0.95f);
 static const FLinearColor RoomDim(0.30f, 0.32f, 0.36f, 0.55f);
 static const FLinearColor HallLit(0.58f, 0.52f, 0.42f, 0.95f);
 static const FLinearColor HallDim(0.24f, 0.26f, 0.29f, 0.50f);
-static const FLinearColor Cyan(0.43f, 0.88f, 1.0f, 1.f);
+static const FLinearColor RDCyan(0.43f, 0.88f, 1.0f, 1.f);
 
 void ARDHUD::Box(const FVector2D& A, const FVector2D& B, const FLinearColor& C)
 {
@@ -97,8 +97,8 @@ void ARDHUD::DrawHUD()
 					if (Clip(ToS(FVector2D(T0) * TS), ToS(FVector2D(T0 + FIntPoint(Gen->SectionTiles)) * TS), CA, CB))
 					{
 						const float Al = 1.f - Age / 4.f;
-						Box(CA, CB, FLinearColor(Cyan.R, Cyan.G, Cyan.B, 0.22f * Al));
-						Frame(CA, CB, FLinearColor(Cyan.R, Cyan.G, Cyan.B, Al), 2.f * Sc);
+						Box(CA, CB, FLinearColor(RDCyan.R, RDCyan.G, RDCyan.B, 0.22f * Al));
+						Frame(CA, CB, FLinearColor(RDCyan.R, RDCyan.G, RDCyan.B, Al), 2.f * Sc);
 					}
 				}
 			}
@@ -126,7 +126,7 @@ void ARDHUD::DrawHUD()
 		const float A = FMath::Clamp(FMath::Min((Now - Gen->LastRevealTime) / 0.3f, (3.5f - (Now - Gen->LastRevealTime)) / 0.8f), 0.f, 1.f);
 		const FString T = TEXT("▲ NEW DUNGEON SECTION GENERATED");
 		float Tw, Th; GetTextSize(T, Tw, Th, Medium, Sc * 1.4f);
-		DrawText(T, FLinearColor(Cyan.R, Cyan.G, Cyan.B, A), (Canvas->ClipX - Tw) * 0.5f, 90.f * Sc, Medium, Sc * 1.4f);
+		DrawText(T, FLinearColor(RDCyan.R, RDCyan.G, RDCyan.B, A), (Canvas->ClipX - Tw) * 0.5f, 90.f * Sc, Medium, Sc * 1.4f);
 	}
 
 	// ---- interaction prompt
