@@ -10,6 +10,10 @@
 // melee weapons of Weapons), the monsters fight. A monster's hit points and damage are the player's hit points and her
 // average damage a blow, times the tier of its section (StartMonster* in the start section, RuntimeMonster* in every
 // section generated in play) and its kind's factors. bStylizedMap draws the maps as a miniature of the dungeon.
+// Blood (URDBloodComponent, made here in play), the monsters' wounds (WoundMaterial) and sound are data on the
+// generator too: Sounds maps an occasion to its sound files; everything but the player's own flat sounds is played
+// where it happens and fades with its distance to her (the listener's attenuation point is the pawn, not the camera
+// behind her); the fires nearest to her get the looping voices (UpdateFireLoops).
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,6 +24,10 @@
 class ARDSection;
 class ARDMonster;
 class URDCombatComponent;
+class URDBloodComponent;
+class UStaticMesh;
+class USoundAttenuation;
+class UAudioComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UPostProcessComponent;
@@ -105,6 +113,53 @@ public:
 	/** runtime sections are furnished within this many milliseconds a frame (a reel sets it high: built in one frame) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetFrameBudget(float Milliseconds) { FrameBudgetMs = Milliseconds; }
 
+	// ---- blood and wounds (random_dungeoncombat_level; filled by pipeline/unreal/798)
+	/** a blow throws drops of this mesh (one instanced mesh for all of them) and a spray of camera-facing sprites */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TObjectPtr<UStaticMesh> BloodDropMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TObjectPtr<UMaterialInterface> BloodDropMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TObjectPtr<UStaticMesh> BloodSprayMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TObjectPtr<UMaterialInterface> BloodSprayMaterial;
+	/** decals left where a drop lands, and the pools under a body */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TArray<TObjectPtr<UMaterialInterface>> BloodDecals;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TArray<TObjectPtr<UMaterialInterface>> BloodPools;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") float BloodDecalSeconds = 45.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") int32 MaxBloodDecals = 140;
+	/** scales the number of drops of a burst */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") float BloodAmount = 1.f;
+	/** overlay material of a wounded monster (parameters Wound0..Wound9: the wounds in the mesh's reference pose, and
+	 *  Bleed); every monster gets an instance of its own with its first wound */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Gore") TObjectPtr<UMaterialInterface> WoundMaterial;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Gore") URDBloodComponent* GetBlood() const { return Blood; }
+
+	// ---- sound (filled by pipeline/unreal/797)
+	/** "Player.Step", "Monster.Troll.Roar", "Env.DoorOpen", "Env.Torch"... (an occasion without an entry is silent) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") TMap<FName, FRDSoundSet> Sounds;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") float SoundVolume = 1.f;
+	/** fires (Env.Torch / Env.Brazier / Env.Hearth loops) heard at once: the nearest ones to her get a voice */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") int32 FireLoopVoices = 6;
+	/** placed sounds are also heard from their direction (stereo). Play begins without it when the editor runs with
+	 *  -deterministicaudio: the engine's non-realtime audio device, which the Movie Render Queue records, loses every
+	 *  spatialised source (measured: a mono source panned by the built-in panner is missing from its two-channel output,
+	 *  from any direction; the same source without spatialisation is there). A render then has them centred, with the
+	 *  distance falloff only. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") bool bSpatializeSounds = true;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") bool AreSoundsSpatialized() const { return bSpatializeNow; }
+	/** plays one of the sounds of Key at a place (or flat, for a 2D set); false when there is no such sound */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sound") bool PlaySoundAt(FName Key, FVector At, float VolumeScale = 1.f, float PitchScale = 1.f);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") bool HasSound(FName Key) const;
+	/** how often each key was played since play began (tests, the demo reel's record) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") int32 GetSoundCount(FName Key) const { const int32* N = SoundCounts.Find(Key); return N ? *N : 0; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") TMap<FName, int32> GetSoundCounts() const { return SoundCounts; }
+	/** the fires that have a voice now: where they are */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") TArray<FVector> GetFireLoops() const;
+	/** the level a sound of Key has at a distance from her, against its level beside her (0..1) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") float GetSoundLevelAt(FName Key, float Distance) const;
+	USoundAttenuation* GetAttenuation(const FRDSoundSet& Set);
+	/** tests: where the audio device has the listener and its attenuation point now */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") FString DescribeListener() const;
+	/** tests: how loud the game is while its window does not have the focus (the engine's default is silent) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sound") static void SetUnfocusedVolume(float Multiplier);
+
 	// ---- generation indicator (same materials as random_level: M_RT_RevealPP / M_RT_RevealCurtain)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Reveal") bool bRevealEffect = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Reveal") TObjectPtr<UMaterialInterface> RevealPostMaterial;
@@ -174,6 +229,23 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> RevealMID;
 	UPROPERTY(Transient) TObjectPtr<ARDSection> Building;
 	UPROPERTY(Transient) TObjectPtr<URDCombatComponent> PlayerCombat;
+	UPROPERTY(Transient) TObjectPtr<URDBloodComponent> Blood;
+	UPROPERTY(Transient) TMap<int32, TObjectPtr<USoundAttenuation>> Attenuations;
+	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> FireComps;
+	UPROPERTY(Transient) TObjectPtr<UAudioComponent> AmbienceComp;
+	struct FFireVoice { FVector At = FVector::ZeroVector; uint8 Kind = 0; bool bOn = false; };
+	TArray<FFireVoice> FireVoices;
+	TMap<FName, int32> SoundCounts, LastSoundPick;
+	FRandomStream SoundR;
+	float FireTimer = 0.f;
+	bool bSpatializeNow = true;
+	// sound self test (-RDSoundTest=<dir>: records the game's output while sounds are played at known places, then quits)
+	FString SoundTestDir;
+	float SoundTestTime = 0.f;
+	int32 SoundTestStep = -1;
+	TArray<FString> SoundTestLog;
+	void TickSoundTest(float Dt);
+	void UpdateFireLoops(const FVector& Listener);
 	int32 NextRevealSlot = 0;
 	TArray<FIntPoint> Queue;
 	ARDSection* SpawnSection(FIntPoint S, bool bEditorBuild, bool bReveal = false);

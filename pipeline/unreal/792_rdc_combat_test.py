@@ -14,10 +14,19 @@ checks what happens. Plan = comma separated steps:
   death     she is brought to 0: she is down, and after the respawn time stands in the middle with full hit points
   regen     hurt and left alone, her hit points come back
   map       the stylised maps have their data (chests, torches) and M opens / closes the big map
+  blood     a blow on a monster throws a burst (drops in the air, spray) from where the monster is, drops land as
+            decals; a blow on her throws one from her
+  wounds    a monster she hits gets a wound a blow, on its skin, in an overlay material of its own whose parameters
+            hold them; the wound moves with it; no other monster (of its kind or any) has a wound or an overlay;
+            a pool spreads under it when it dies
+  sounds    her footsteps (running and walking sets) and breath, her voice when hurt; a door opening and closing;
+            the fire loops take the fires next to her and drop them when she is away; every placed sound is at
+            full level beside her and falls to nothing with distance; a monster's roar, hurt and death voice and
+            the monsters' footsteps; the rumble of a section being generated
 Writes SourceArt/random_dungeon_combat/test_<tag>.json and logs "RDCTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os
 __keep__ = True
-PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map").split(",") if s.strip()]
+PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds").split(",") if s.strip()]
 TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_combat"
 V = unreal.Vector; GS = unreal.GameplayStatics; ML = unreal.MathLibrary
@@ -34,7 +43,7 @@ def wait(sec):
     while now() - t0 < sec: yield
 def step_result(name, ok, **kw):
     R["steps"].append({"step": name, "ok": bool(ok), **kw})
-    unreal.log(f"RDCTEST step {name}: {'ok' if ok else 'FAILED'} {json.dumps(kw)[:400]}")
+    unreal.log(f"RDCTEST step {name}: {'ok' if ok else 'FAILED'} {json.dumps(kw)[:1600]}")
 def alive(m):
     try: return m is not None and unreal.SystemLibrary.is_valid(m) and not m.is_dead()
     except Exception: return False
@@ -154,7 +163,151 @@ def step_map():
     step_result("map", ok, stylized=bool(gen.get_editor_property("stylized_map")), rooms_and_hallways=len(m0.rects) if m0 else 0, doors=len(m0.doors) if m0 else 0, chests=len(m0.chests) if m0 else 0, torches=len(m0.torches) if m0 else 0,
                 sections_on_the_map=len(md), opened=opened)
 
-STEPS = {"setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map}
+def blow(m, tries=25.0):
+    """she strikes until one blow lands on m (the generator: yields); returns nothing, the caller reads the counters"""
+    c = cb(); n0 = c.hits_landed; t0 = now(); stand_by(m, 60.0)
+    while c.hits_landed == n0 and alive(m) and now() - t0 < tries:
+        if c.is_dead(): c.revive(False); stand_by(m, 60.0)
+        if not c.is_attacking():
+            if (m.get_actor_location() - G["pawn"].get_actor_location()).length() > 330: stand_by(m, 60.0)
+            c.start_attack()
+        yield
+    yield
+def step_blood():
+    gen = G["gen"]; c = cb(); b = gen.get_blood(); p = G["pawn"]; c.set_scripted_only(True); c.revive(False); c.select_weapon(0)
+    ms = start_monsters()
+    if b is None or not ms: step_result("blood", False, why="no blood component" if b is None else "no live monster"); return
+    m = max(ms, key=lambda q: q.get_health())
+    b0, d0, k0 = b.bursts, b.drops_spawned, b.decals_spawned
+    yield from blow(m)
+    bursts = b.bursts - b0; drops = b.drops_spawned - d0; flying = b.get_active_drops(); sprays = b.get_active_sprays()
+    at = b.last_burst_at; near = min((at - m.get_actor_location()).length(), (at - p.get_actor_location()).length())
+    yield from wait(2.6)
+    landed = b.decals_spawned - k0; marks = b.get_active_decals()
+    # she is hit: blood from her
+    c.revive(False); ht = c.hits_taken; b1 = b.bursts; t0 = now(); hers = 0; near2 = 1e9
+    while now() - t0 < 30.0 and alive(m):
+        if c.hits_taken > ht: hers = b.bursts - b1; near2 = (b.last_burst_at - p.get_actor_location()).length(); break
+        if (m.get_actor_location() - p.get_actor_location()).length() > 400: stand_by(m, 40.0)
+        yield
+    ok = bursts >= 1 and drops >= 16 and flying > 0 and sprays > 0 and near < 260 and landed >= 1 and marks >= 1 and hers >= 1 and near2 < 130
+    step_result("blood", ok, monster=str(m.monster_name), bursts_on_the_blow=bursts, drops=drops, in_the_air=flying, spray_sprites=sprays, burst_cm_from_the_fight=round(near), decals_after_2_6_s=landed, decals_on_the_floor=marks,
+                bursts_when_she_was_hit=hers, that_burst_cm_from_her=round(near2), drop_mesh=str(gen.get_editor_property("blood_drop_mesh").get_name()), decal_materials=len(gen.get_editor_property("blood_decals")))
+    c.revive(False); c.set_scripted_only(False)
+def step_wounds():
+    gen = G["gen"]; c = cb(); b = gen.get_blood(); p = G["pawn"]; c.set_scripted_only(True); c.revive(False); c.select_weapon(0)
+    fresh = [m for m in start_monsters() if m.get_num_wounds() == 0]
+    if not fresh: step_result("wounds", False, why="no unhurt monster"); return
+    # one of a kind that has a second unhurt monster, if there is such a kind (the second must stay as it is)
+    kinds = {}
+    for m in fresh: kinds.setdefault(str(m.monster_name), []).append(m)
+    pairs = [v for v in kinds.values() if len(v) > 1]
+    m = max(pairs[0] if pairs else fresh, key=lambda q: q.get_health()); twin = next((q for q in kinds[str(m.monster_name)] if q != m), None)
+    hits = 0; locs = []
+    for k in range(2):
+        if not alive(m) or m.get_health() <= c.get_weapon_damage(): break
+        n0 = c.hits_landed; yield from blow(m); hits += c.hits_landed - n0
+    mid = m.get_wound_material(); over = m.mesh.get_overlay_material(); n = m.get_num_wounds()
+    on_skin = all(m.is_wound_on_skin(i) for i in range(n)); radii = [round(m.get_wound_radius(i), 1) for i in range(n)]
+    getv = (getattr(mid, "get_vector_parameter_value", None) or getattr(mid, "k2_get_vector_parameter_value")) if mid else None; gets = (getattr(mid, "get_scalar_parameter_value", None) or getattr(mid, "k2_get_scalar_parameter_value")) if mid else None
+    params = [getv("Wound%d" % i) for i in range(n)] if mid else []
+    bleed = gets("Bleed") if mid else -1.0; lost = 1.0 - m.get_health() / m.get_max_health()
+    d0 = [(m.get_wound_location(i) - m.get_actor_location()).length() for i in range(n)]; a0 = m.get_actor_location()
+    yield from wait(1.5)
+    d1 = [(m.get_wound_location(i) - m.get_actor_location()).length() for i in range(n)] if alive(m) else d0; moved = (m.get_actor_location() - a0).length() if alive(m) else 0.0
+    others = [q for q in G["gen"].get_monsters() if alive(q) and q != m and q.get_health() >= q.get_max_health()]
+    clean = all(q.get_num_wounds() == 0 and q.get_wound_material() is None and q.mesh.get_overlay_material() is None for q in others)
+    twin_clean = twin is None or (twin.get_num_wounds() == 0 and twin.mesh.get_overlay_material() is None)
+    # it dies: a pool under it
+    p0 = b.pools_spawned if b else 0; t0 = now()
+    while alive(m) and now() - t0 < 40.0: yield from blow(m)
+    yield from wait(1.6)
+    pools = (b.pools_spawned - p0) if b else 0
+    ok = bool(hits >= 1 and n == hits and mid is not None and over == mid and on_skin and all(x.a > 1.0 for x in params) and abs(bleed - lost) < 0.02 and all(x < 260 for x in d0 + d1)
+              and len(others) >= 3 and clean and twin_clean and pools == 1)
+    step_result("wounds", ok, monster=str(m.monster_name), blows=hits, wounds=n, on_its_skin=on_skin, radius_cm=radii, own_material=mid.get_name() if mid else None, overlay_is_that_material=bool(mid is not None and over == mid),
+                parameters_set=[round(x.a, 1) for x in params], bleed=round(bleed, 2), hit_points_lost=round(lost, 2), wound_cm_from_its_middle=[round(x) for x in d0], after_it_moved_cm=round(moved),
+                then=[round(x) for x in d1], unhurt_monsters_checked=len(others), none_of_them_has_a_wound_or_overlay=clean, a_second_of_its_kind=str(twin.monster_name) if twin else None, that_one_untouched=twin_clean, pools_when_it_died=pools)
+    c.revive(False); c.set_scripted_only(False)
+def step_sounds():
+    gen = G["gen"]; c = cb(); p = G["pawn"]; c.set_scripted_only(True); out = {}
+    cnt = lambda k: gen.get_sound_count(k)
+    def total(suffix): return sum(v for k, v in gen.get_sound_counts().items() if str(k).startswith("Monster.") and str(k).endswith(suffix))
+    c.revive(True); yield from wait(0.6)
+    # her footsteps and breath: running, standing until she has her breath back, walking
+    r0, s0 = cnt("Player.Run"), cnt("Player.Step"); t0 = now()
+    while now() - t0 < 2.6: p.add_movement_input(V(1, 0, 0), 1.0); yield
+    out["running_steps_in_2_6_s"] = cnt("Player.Run") - r0; out["breath_running"] = c.get_breath_state(); t0 = now()
+    while c.get_breath_state() != 0 and now() - t0 < 12.0: yield
+    out["breath_standing"] = c.get_breath_state(); t0 = now()
+    while now() - t0 < 2.6: p.add_movement_input(V(-1, 0, 0), 0.45); yield
+    out["walking_steps_in_2_6_s"] = cnt("Player.Step") - s0; out["breath_walking"] = c.get_breath_state()
+    ok = out["running_steps_in_2_6_s"] >= 5 and out["breath_running"] == 2 and out["breath_standing"] == 0 and out["walking_steps_in_2_6_s"] >= 3 and out["breath_walking"] == 1
+    # her voice
+    h0 = cnt("Player.Hurt"); c.apply_damage(5.0, None); yield
+    out["hurt_voice"] = cnt("Player.Hurt") - h0; ok = ok and out["hurt_voice"] == 1
+    # a door: opening, closing
+    sec = gen.get_section(unreal.IntPoint(0, 0)); l = p.get_actor_location()
+    doors = [i for i in range(sec.get_num_doors()) if not sec.is_door_cell(i)]
+    di = min(doors, key=lambda i: (sec.get_door_location(i) - l).length()); dl = sec.get_door_location(di)
+    o0, c0 = cnt("Env.DoorOpen"), cnt("Env.DoorClose")
+    what = gen.interact_nearest(V(dl.x, dl.y, l.z), 260.0); yield
+    out["door_open"] = cnt("Env.DoorOpen") - o0; yield from wait(1.3)
+    gen.interact_nearest(V(dl.x, dl.y, l.z), 260.0); yield
+    out["door_close"] = cnt("Env.DoorClose") - c0; out["door"] = what
+    ok = ok and out["door_open"] >= 1 and out["door_close"] >= 1
+    # the fires: next to a torch its loop plays; back in the middle it does not (when the middle is out of its earshot)
+    fires = [(sec.get_fire_point(i), sec.get_fire_kind(i)) for i in range(sec.get_num_fire_points())]
+    torches = [q for q, k in fires if k == 0]; s = gen.get_start_room_center()
+    tq = max(torches, key=lambda q: (q - s).length()) if torches else None
+    if tq is not None:
+        best = None
+        for k in range(16):
+            a = k * math.pi / 8; q = V(tq.x + math.cos(a) * 180, tq.y + math.sin(a) * 180, 100.0)
+            n = len(sec.find_path_world(q, s))
+            if n > 0 and (best is None or n < best[0]): best = (n, q)
+        p.set_actor_location(best[1] if best else V(tq.x, tq.y, 100.0), False, True); yield from wait(0.7)
+        loops = gen.get_fire_loops(); out["fire_voices_by_a_torch"] = len(loops); out["nearest_voice_cm_from_that_torch"] = round(min((q - tq).length() for q in loops)) if loops else None
+        c.revive(True); yield from wait(0.7)
+        loops2 = gen.get_fire_loops(); out["torch_cm_from_the_middle"] = round((tq - s).length()); out["still_playing_from_the_middle"] = any((q - tq).length() < 5 for q in loops2); out["fire_voices_in_the_middle"] = len(loops2)
+        ok = ok and 1 <= len(loops) <= gen.get_editor_property("fire_loop_voices") and out["nearest_voice_cm_from_that_torch"] < 5 and ((tq - s).length() < 1500 or not out["still_playing_from_the_middle"])
+    out["fires_in_the_start_section"] = {"torch": len(torches), "brazier": sum(1 for q, k in fires if k == 1), "hearth": sum(1 for q, k in fires if k == 2)}
+    ok = ok and len(torches) > 20
+    # distance: full level beside her, falling to nothing
+    lv = {}
+    for key, ds in (("Env.Torch", (50, 400, 800, 1200, 1500)), ("Monster.Troll.Roar", (100, 1200, 2400, 3600, 4600)), ("Env.DoorOpen", (100, 1000, 2000, 3000, 3400)), ("Monster.Spider.Step", (100, 600, 1200, 1800, 2000))):
+        v = [round(gen.get_sound_level_at(key, d), 3) for d in ds]; lv[key] = dict(zip([str(d) for d in ds], v))
+        ok = ok and v[0] == 1.0 and v[-1] <= 0.011 and all(v[i] > v[i + 1] for i in range(len(v) - 1))      # (-40 dB at the end of the falloff; beyond it a sound is not started)
+    out["level_at_cm"] = lv; out["flat_sets"] = sorted(str(k) for k, v in gen.get_editor_property("sounds").items() if v.get_editor_property("b2d"))
+    # a monster: it notices her and roars, it is hurt, it dies; monsters walk
+    ms = [m for m in start_monsters() if m.get_num_wounds() == 0]
+    if ms:
+        l = p.get_actor_location(); m = min(ms, key=lambda q: (q.get_actor_location() - l).length())
+        r0, h0, d0, st0 = total(".Roar"), total(".Hurt"), total(".Death"), total(".Step")
+        stand_by(m, 420.0); t0 = now()
+        while total(".Roar") == r0 and now() - t0 < 10.0: yield
+        out["roar_when_it_noticed_her"] = total(".Roar") - r0
+        t0 = now()                                     # it comes to her: its footsteps
+        while alive(m) and now() - t0 < 8.0 and (m.get_actor_location() - p.get_actor_location()).length() > 230.0: yield
+        out["monster_footsteps"] = total(".Step") - st0
+        c.select_weapon(1); t0 = now()                 # (the spear: more than one blow for any of them)
+        while alive(m) and now() - t0 < 60.0: yield from blow(m)
+        yield from wait(1.2)
+        out["monster"] = str(m.monster_name); out["hurt_voices"] = total(".Hurt") - h0; out["death_voices"] = total(".Death") - d0; out["body_falls"] = cnt("Env.BodyFall")
+        ok = ok and out["roar_when_it_noticed_her"] >= 1 and out["hurt_voices"] >= 1 and out["death_voices"] == 1 and out["monster_footsteps"] >= 1 and out["body_falls"] >= 1
+    else: ok = False; out["monster"] = None
+    out["weapon_sounds"] = {k: cnt(k) for k in ("Player.Whoosh", "Player.Attack", "Player.Hit.Sword", "Player.Hit.Spear", "Player.Hit.Axe", "Blood.Splat", "Player.Draw")}
+    ok = ok and out["weapon_sounds"]["Player.Whoosh"] >= 1 and out["weapon_sounds"]["Blood.Splat"] >= 1 and (out["weapon_sounds"]["Player.Hit.Spear"] >= 1)
+    # a new section: its rumble
+    g0 = cnt("Env.Generate"); new = next((s2 for s2 in (unreal.IntPoint(0, -1), unreal.IntPoint(0, 1), unreal.IntPoint(-1, 0), unreal.IntPoint(1, 0)) if not gen.is_section_generated(s2)), None)
+    if new is not None: gen.generate_section_now(new); yield from wait(0.5)
+    out["generation_rumble"] = cnt("Env.Generate") - g0; ok = ok and out["generation_rumble"] == 1
+    out["sound_sets"] = len(gen.get_editor_property("sounds")); out["all_counts"] = {str(k): v for k, v in sorted(gen.get_sound_counts().items(), key=lambda kv: str(kv[0]))}
+    step_result("sounds", ok, **out)
+    c.revive(True); c.select_weapon(0); c.set_scripted_only(False)
+
+STEPS = {"setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map,
+         "blood": step_blood, "wounds": step_wounds, "sounds": step_sounds}
 def run():
     for s in PLAN:
         name, _, arg = s.partition(":")

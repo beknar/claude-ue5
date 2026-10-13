@@ -9,6 +9,7 @@ class USkeletalMesh;
 class UAnimationAsset;
 class UAnimSequenceBase;
 class UNiagaraSystem;
+class USoundBase;
 
 /** A placeable mesh normalised by Adjust to the dungeon frame: origin at the footprint centre on the floor, front toward
  *  +X (furniture faces +X; wall pieces run along Y with their room face toward +X; floor tiles centred, top at z = 0;
@@ -64,6 +65,26 @@ struct FRDMonsterDef
 	/** how far beyond its own capsule a blow reaches (cm), and seconds between two attacks */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Reach = 110.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AttackInterval = 1.6f;
+	/** its voice and footsteps: the generator's Sounds "Monster.<SoundSet>.Step / Hurt / Roar / Attack / Death / Idle" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SoundSet;
+	/** ground covered between two footstep sounds (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StepLength = 80.f;
+};
+
+/** Sounds for one occasion ("Player.Hurt", "Env.DoorOpen", "Monster.Troll.Roar"...): one of them is played each time,
+ *  at Volume and Pitch (+- PitchVariation). Unless b2D it is played where it happens and fades with the distance to the
+ *  player: full volume within InnerRadius, silent FalloffDistance beyond that. */
+USTRUCT(BlueprintType)
+struct FRDSoundSet
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<USoundBase>> Sounds;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Volume = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Pitch = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PitchVariation = 0.05f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float InnerRadius = 200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FalloffDistance = 2500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool b2D = false;
 };
 
 /** One of the player's melee weapons: the mesh in her hand (and a shield on her other arm), what it does, and the

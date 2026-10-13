@@ -9,7 +9,8 @@ game's HUD) what the game's HUD shows in play, redrawn from 795's recording of t
 - a bar with name and hit points over each monster in the fight, the damage numbers floating up from each blow, the
   red flash when she is hurt, the banner when a section is generated;
 - for the reel: a title, a caption for each fight (the monster's tier against her) and for the generation, a key cap
-  when she changes weapon.
+  when she changes weapon, and what is heard written out as it sounds (the record has every sound the game played:
+  a monster's roar, growl, cry and death, her cry, a door she opens, a torch she passes, the rumble of a new section).
 Usage: rdc_reel_overlay.py frames_dir out_dir [step]"""
 import sys, os, json, glob, math
 from PIL import Image, ImageDraw, ImageFont
@@ -23,6 +24,18 @@ W, H, K = 1920, 1080, 2                       # the layer is drawn K times large
 def row(f): return ROWS.get(min(max(f, 0), LASTF)) or ROWS[min(ROWS, key=lambda k: abs(k - f))]
 HITS = [e for e in EV if e["kind"] == "hit"]; KILLS = [e for e in EV if e["kind"] == "kill"]; FIGHTS = [e for e in EV if e["kind"] == "fight"]
 GENS = [e for e in EV if e["kind"] == "generated"]; DISC = [e for e in EV if e["kind"] == "discovered"]
+# ---- what is heard, written out: (time, text) from the sounds the game played
+HEARD = []
+VOICE = {"Roar": "roars", "Idle": "growls", "Hurt": "cries out", "Death": "dies"}
+for e in EV:
+    if e["kind"] == "sound":
+        k = e["key"].split(".")
+        if k[0] == "Monster" and len(k) == 3 and k[2] in VOICE: HEARD.append((e["t"], "the %s %s" % (k[1].lower(), VOICE[k[2]])))
+        elif e["key"] == "Player.Hurt": HEARD.append((e["t"], "she cries out"))
+        elif e["key"] == "Player.Death": HEARD.append((e["t"], "she falls"))
+        elif e["key"] == "Env.Generate": HEARD.append((e["t"], "the dungeon rumbles: a new section"))
+    elif e["kind"] == "door": HEARD.append((e["t"], "a door creaks open"))
+HEARD.sort()
 print("frames %d | %d fights, %d kills | %d blows on monsters, %d on her | sections generated at %s" % (len(ROWS), len(FIGHTS), len(KILLS), sum(1 for h in HITS if not h["on_player"]),
       sum(1 for h in HITS if h["on_player"]), ", ".join("%.1f s" % e["t"] for e in GENS)))
 # ---- the map as the HUD had it at a time: per section its latest snapshot and the rooms discovered by then
@@ -55,6 +68,7 @@ def font(name, size):
     return ImageFont.load_default()
 f_title, f_sub, f_head, f_line, f_small, f_tiny, f_key, f_num, f_ban = (font("segoeuib.ttf", 40), font("segoeui.ttf", 24), font("seguisb.ttf", 30), font("segoeui.ttf", 24), font("seguisb.ttf", 17),
                                                                       font("seguisb.ttf", 14), font("segoeuib.ttf", 34), font("segoeuib.ttf", 30), font("seguisb.ttf", 30))
+f_note = font("seguisym.ttf", 24)                 # (the note sign of the heard lines: not in Segoe UI itself)
 def fade(t, t0, t1, fin=0.35, fout=0.5):
     if t < t0 or t > t1: return 0.0
     return min(1.0, (t - t0) / fin, (t1 - t) / fout)
@@ -211,12 +225,12 @@ def overlay(f):
     # ---- the banner when a section is generated
     for e in GENS:
         age = t - e["t"]
-        if 0.0 <= age < 3.5: text_c(d, (W * K / 2, 104 * K), "\u25b2 NEW DUNGEON SECTION GENERATED", f_ban, lin(CYAN, max(0.0, min(age / 0.3, (3.5 - age) / 0.8, 1.0))))
+        if 0.0 <= age < 3.5: text_c(d, (W * K / 2, 156 * K), "\u25b2 NEW DUNGEON SECTION GENERATED", f_ban, lin(CYAN, max(0.0, min(age / 0.3, (3.5 - age) / 0.8, 1.0))))
     # ---- the reel's own: title, captions (bottom left)
     a = fade(t, 0.3, 4.6)
     if a > 0:
         d.text((44 * K, 34 * K), "random_dungeoncombat_level", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 86 * K), "procedural dungeon  \u00b7  melee combat  \u00b7  jrpg-fem5-tripo", font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
+        d.text((46 * K, 86 * K), "procedural dungeon  \u00b7  melee combat  \u00b7  blood, wounds and sound  \u00b7  jrpg-fem5-tripo", font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
     caps = []
     t_first = FIGHTS[0]["t"] if FIGHTS else 6.0
     caps.append((0.8, min(t_first, GENS[0]["t"] if GENS else 99) - 0.2, "THREE MELEE WEAPONS", ["sword and spear with a shield, and an axe  \u00b7  from the Medieval Weapons pack",
@@ -228,9 +242,12 @@ def overlay(f):
         if i + 1 < len(FIGHTS): end = min(end, FIGHTS[i + 1]["t"] - 0.1)
         tier = "start section" if e["section"][0] == 0 else "generated section"
         note = ("the first square's monsters are weaker than her" if e["section"][0] == 0 else "in the generated sections they are on a par with her (the average: %.0f hit points, %.0f a blow)" % tuple(C["runtime_tier"]))
+        more = ("every blow leaves a wound on this monster alone, where the weapon met it, and blood where the drops land",
+                "what is heard fades with its distance to her: voices, footsteps, doors, fires, the rumble of a new section",
+                "the worse off a monster is, the more of it is bloodied")[min(i, 2)]
         caps.append((e["t"], end, "%s  \u00b7  %s" % (e["monster"].replace("_", " ").upper(), tier),
                      ["%.0f hit points, %.0f damage a blow  \u00b7  she has %.0f, and her %s does %.0f" % (e["its_hit_points"], e["its_damage"], C["max_health"], e["weapon"].lower(),
-                                                                                                next(w_["damage"] for w_ in C["weapons"] if w_["name"] == e["weapon"])), note], (255, 226, 150)))
+                                                                                                next(w_["damage"] for w_ in C["weapons"] if w_["name"] == e["weapon"])), note, more], (255, 226, 150)))
     for t0, t1, head, lines, c in caps:
         k = fade(t, t0, t1)
         if k <= 0: continue
@@ -239,6 +256,17 @@ def overlay(f):
         d.rounded_rectangle((32 * K, y - 14 * K, 60 * K + wd, (H - 48) * K), 12 * K, fill=(12, 11, 9, int(180 * k)))
         d.text((50 * K, y - 4 * K), head, font=f_head, fill=tuple(c[:3]) + (int(255 * k),))
         for i, s in enumerate(lines): d.text((54 * K, y + (42 + 34 * i) * K), s, font=f_line, fill=(240, 244, 248, int(240 * k)))
+    # ---- what is heard (left, above the captions): each for a moment, the newest lowest; a torch while she is by it
+    lines = [(s, fade(t, t0, t0 + 1.9, 0.12, 0.5)) for t0, s in HEARD if t0 <= t <= t0 + 1.9]
+    fire = r.get("fire", -1)
+    if 0 <= fire < 520: lines.insert(0, ("a torch crackles", min(1.0, (520 - fire) / 170.0) * ua))
+    y = (H - 252) * K
+    for s, k in reversed(lines[-4:]):
+        if k <= 0: continue
+        tw = d.textlength(s, font=f_line)
+        d.rounded_rectangle((32 * K, y - 19 * K, 96 * K + tw, y + 19 * K), 10 * K, fill=(12, 11, 9, int(150 * k)))
+        d.text((48 * K, y), "\u266a", font=f_note, fill=(150, 220, 255, int(255 * k)), anchor="lm"); d.text((80 * K, y), s, font=f_line, fill=(236, 240, 244, int(245 * k)), anchor="lm")
+        y -= 44 * K
     if t < 0.4: d.rectangle((0, 0, W * K, H * K), fill=(0, 0, 0, int(255 * max(0.0, 1.0 - max(0.0, t - 0.07) / 0.33))))       # (the reel fades in: on the first frames the camera is still settling behind her)
     return o.resize((W, H), Image.LANCZOS)
 os.makedirs(dst, exist_ok=True)

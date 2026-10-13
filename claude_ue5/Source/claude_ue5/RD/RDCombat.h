@@ -8,6 +8,10 @@
 // Monsters hit her through ApplyDamage. Out of a fight her hit points come back slowly; at 0 she falls, and stands up
 // again in the middle of the start section with full hit points. Tests and the demo reel drive the same functions
 // (SetScriptedOnly keeps the real keys out).
+// What is heard of her comes from here too (the generator's Sounds "Player.*"): a footstep for every stride on the
+// ground (walking and running have their own sets), her breath while she walks or runs (two loops that fade in and
+// out), the swing and her effort, the weapon landing, her voice when she is hurt or falls. A blow she takes throws
+// blood from her (the generator's URDBloodComponent).
 #pragma once
 
 #include "CoreMinimal.h"
@@ -19,6 +23,7 @@ class ARDDungeonGenerator;
 class ARDMonster;
 class UStaticMeshComponent;
 class USkeletalMeshComponent;
+class UAudioComponent;
 
 UCLASS(ClassGroup = (RandomDungeon))
 class CLAUDE_UE5_API URDCombatComponent : public UActorComponent
@@ -58,6 +63,9 @@ public:
 	/** the weapon in her hand (and the shield), for tests */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") UStaticMeshComponent* GetWeaponMesh() const { return WeaponComp; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") UStaticMeshComponent* GetOffHandMesh() const { return OffHandComp; }
+	/** her breath now: 0 quiet, 1 the walking loop, 2 the running loop */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetBreathState() const { return BreathState; }
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 StepsTaken = 0;
 	/** world time she was last hurt / last hit something (HUD) */
 	float LastHurtTime = -100.f, LastHitTime = -100.f, DeathTime = -100.f;
 
@@ -72,6 +80,14 @@ private:
 	float AttackTime = -1.f, AttackLen = 0.f, AttackHit = 0.f, SavedWalkSpeed = 0.f;
 	bool bHitDone = false, bDead = false, bScriptedOnly = false, bSlowed = false;
 	float StaggerUntil = -100.f;
+	// sound
+	UPROPERTY(Transient) TObjectPtr<UAudioComponent> BreathWalk;
+	UPROPERTY(Transient) TObjectPtr<UAudioComponent> BreathRun;
+	int32 BreathState = 0;
+	float StepDist = 0.f, RunHeat = 0.f, WalkTime = 0.f, StillTime = 0.f;
+	bool bWhooshDone = false, bFallDone = false;
+	void TickSounds(float Dt, float Now);
+	void SetBreath(int32 State);
 	const FRDWeaponDef* Weapon() const;
 	USkeletalMeshComponent* Body() const;
 	void Strike();

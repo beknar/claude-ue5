@@ -16,6 +16,9 @@ class UStaticMeshComponent;
 class UPointLightComponent;
 class UMaterialInterface;
 
+/** a fire that is heard in play: 0 torch, 1 brazier / cooking fire, 2 hearth */
+struct FRDFirePoint { FVector At; uint8 Kind; };
+
 UCLASS()
 class CLAUDE_UE5_API ARDSection : public AActor
 {
@@ -32,6 +35,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 NumLights = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float GenerateMs = 0.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TArray<TObjectPtr<ARDMonster>> SpawnedMonsters;
+	/** the section's fires (play only; also of the saved start section): the generator gives the nearest a looping voice */
+	TArray<FRDFirePoint> FirePoints;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumFirePoints() const { return FirePoints.Num(); }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetFirePoint(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].At : FVector::ZeroVector; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetFireKind(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].Kind : -1; }
 	/** prefab actors (bookshelves, candle stands...) owned by the section */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TArray<TObjectPtr<AActor>> OtherActors;
 

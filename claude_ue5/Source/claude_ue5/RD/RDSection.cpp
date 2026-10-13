@@ -275,6 +275,12 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 
 void ARDSection::AddEffect(FName Name, const FVector& Loc, float Scale)
 {
+	// in play the fires are heard: where they are (also when the effect itself was saved with the start section)
+	if (const UWorld* W = GetWorld(); W && W->IsGameWorld())
+	{
+		const int32 Kind = Name == TEXT("TorchFire") ? 0 : Name == TEXT("HearthFire") ? 2 : (Name == TEXT("BrazierFire") || Scale > 2.f) ? 1 : -1;
+		if (Kind >= 0) FirePoints.Add({ Loc, (uint8)Kind });
+	}
 	if (!bBuildStatic) return;
 	const TObjectPtr<UNiagaraSystem>* S = Generator->Effects.Find(Name);
 	if (!S || !*S) return;
@@ -1246,6 +1252,7 @@ void ARDSection::ActivateForPlay()
 	// same plan as the editor build (same seed); only the interactive part is instantiated
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
+	FirePoints.Reset();
 	const int32 Inst = NumInstances, Lights = NumLights;
 	FRandomStream R(Seed);
 	Plan(R);
@@ -1405,6 +1412,7 @@ void ARDSection::ToggleDoor(int32 I, const FVector& Opener, bool bByMonster)
 	const float Target = M.Target > 0.5f ? 0.f : 1.f;
 	Set(M, Target);
 	if (Doors.IsValidIndex(M.Partner)) Set(Doors[M.Partner], Target);
+	if (Generator) Generator->PlaySoundAt(Target > 0.5f ? (M.bCell ? TEXT("Env.CellOpen") : TEXT("Env.DoorOpen")) : (M.bCell ? TEXT("Env.CellClose") : TEXT("Env.DoorClose")), M.Center);
 }
 
 bool ARDSection::IsDoorOpenIndex(int32 I) const { return Doors.IsValidIndex(I) && Doors[I].Alpha > 0.8f && Doors[I].Target > 0.5f; }
@@ -1421,6 +1429,7 @@ void ARDSection::ToggleContainer(int32 I)
 	FMover& M = Containers[I];
 	M.Target = M.Target > 0.5f ? 0.f : 1.f;
 	if (Containers.IsValidIndex(M.Partner)) Containers[M.Partner].Target = M.Target;
+	if (Generator) Generator->PlaySoundAt(M.Target > 0.5f ? TEXT("Env.ChestOpen") : TEXT("Env.ChestClose"), M.Center);
 }
 
 FVector ARDSection::GetDoorLocation(int32 I) const { return Doors.IsValidIndex(I) ? Doors[I].Center : FVector::ZeroVector; }
@@ -1607,7 +1616,11 @@ void ARDSection::Tick(float Dt)
 		bool bNear = FVector::Dist2D(PL, M.Center) < 300.f;
 		for (ARDMonster* Mo : SpawnedMonsters) if (Mo && FVector::Dist2D(Mo->GetActorLocation(), M.Center) < 260.f) bNear = true;
 		M.MonsterCloseTimer = bNear ? 0.f : M.MonsterCloseTimer + Dt;
-		if (M.MonsterCloseTimer > 2.5f) { M.Target = 0.f; M.bByMonster = false; }
+		if (M.MonsterCloseTimer > 2.5f)
+		{
+			M.Target = 0.f; M.bByMonster = false;
+			if (Generator && (M.Partner < 0 || M.Partner > I)) Generator->PlaySoundAt(M.bCell ? TEXT("Env.CellClose") : TEXT("Env.DoorClose"), M.Center);
+		}
 	}
 	auto Animate = [Dt](FMover& M)
 	{

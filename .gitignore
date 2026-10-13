@@ -74,3 +74,6 @@ renders/
 .claude/settings.local.json
 __pycache__/
 *.pyc
+
+# sounds converted from a licensed local library (rebuilt by pipeline/blender_numpy/rdc_sound_prep.py)
+claude_ue5/SourceArt/random_dungeon_combat/audio/

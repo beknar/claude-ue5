@@ -2,7 +2,10 @@
 the game runs as in play, under the level's BP_RD_GameMode, and the pilot script plays it). Arm 795 first.
   preview  640 x 360        final  1920 x 1080
 Both use 8 temporal samples a frame and no other anti-aliasing: the game is stepped at 240 Hz either way, so the pilot
-plays the same reel in the preview and in the final render. Args: out_dir preview|final [file_prefix]"""
+plays the same reel in the preview and in the final render.
+Sound: the job has a .wav output (the game's own mix, rendered in step with the frames). The queue only renders audio
+when the editor was started with -deterministicaudio (the non-realtime audio device); without it the .wav is missing
+or silent and the log says so. Args: out_dir preview|final [file_prefix]"""
 import sys, unreal
 OUT = sys.argv[1]; MODE = sys.argv[2] if len(sys.argv) > 2 else "preview"; PREFIX = sys.argv[3] if len(sys.argv) > 3 else "rdc"
 mq = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
@@ -16,6 +19,8 @@ o.output_resolution = unreal.IntPoint(*((640, 360) if MODE == "preview" else (19
 o.output_directory = unreal.DirectoryPath(OUT); o.file_name_format = PREFIX + ".{frame_number}"; o.override_existing_output = True
 cfg.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase)
 cfg.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_PNG)
+# the game's sound, as a .wav beside the frames (only when the editor runs with -deterministicaudio: see the docstring)
+cfg.find_or_add_setting_by_class(unreal.MoviePipelineWaveOutput)
 aa = cfg.find_or_add_setting_by_class(unreal.MoviePipelineAntiAliasingSetting)
 aa.override_anti_aliasing = True; aa.spatial_sample_count = 1; aa.temporal_sample_count = 8; aa.anti_aliasing_method = unreal.AntiAliasingMethod.AAM_NONE
 aa.engine_warm_up_count = 32; aa.render_warm_up_count = 32; aa.use_camera_cut_for_warm_up = False

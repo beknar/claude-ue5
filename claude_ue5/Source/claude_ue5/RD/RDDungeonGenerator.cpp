@@ -2,6 +2,16 @@
 #include "RD/RDSection.h"
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
+#include "RD/RDBlood.h"
+#include "AudioDevice.h"
+#include "AudioMixerBlueprintLibrary.h"
+#include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
+#include "Misc/App.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundAttenuation.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundWave.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
@@ -15,6 +25,9 @@
 #include "InputCoreTypes.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeonGen, Log, All);
+
+static const int32 RDSoundSeed = 90417;
+static const FName RDFireKeys[3] = { TEXT("Env.Torch"), TEXT("Env.Brazier"), TEXT("Env.Hearth") };
 
 ARDDungeonGenerator::ARDDungeonGenerator()
 {
@@ -137,6 +150,9 @@ void ARDDungeonGenerator::StartReveal(ARDSection* Sec)
 	}
 	if (RevealCurtainMaterial) Sec->ShowCurtain(RevealCurtainMaterial, Now, RevealCurtainHeight, RevealDuration + 0.5f);
 	LastRevealTime = Now; LastRevealSection = Sec->Coord;
+	// the new section is heard from where it meets the dungeon (a rumble, far-reaching)
+	PlaySoundAt(TEXT("Env.Generate"), FVector(O.X, O.Y, 150.f));
+	PlaySoundAt(TEXT("Env.GenerateHit"), FVector(O.X, O.Y, 150.f));
 	if (FRDSectionMap* M = MapData.Find(Sec->Coord)) M->GeneratedTime = Now;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDGEN reveal (%d,%d) t=%.3f from (%.0f,%.0f) tracked (%.0f,%.0f): %d rooms, %d doors, %d containers, %d monsters, %d instances, %d lights, %.0f ms"),
 		Sec->Coord.X, Sec->Coord.Y, Now, O.X, O.Y, L.X, L.Y, Sec->GetNumRooms(), Sec->GetNumDoors(), Sec->GetNumContainers(), Sec->SpawnedMonsters.Num(),
@@ -226,6 +242,8 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		It.RemoveCurrent();
 	}
 	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
+	if (Blood) Blood->Clear();
+	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
 	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; LastRevealTime = -100.f;
 	for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (PlayerCombat)
@@ -313,6 +331,20 @@ void ARDDungeonGenerator::BeginPlay()
 		for (int32 Slot = 0; Slot < RevealSlots; ++Slot) RevealMID->SetVectorParameterValue(*FString::Printf(TEXT("Info%d"), Slot), FLinearColor(0, 0, -1e6f, 0));
 		RevealPost->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.f, RevealMID));
 	}
+	SoundR.Initialize(RDSoundSeed);
+	// (the non-realtime audio device loses spatialised sources: see bSpatializeSounds)
+	bSpatializeNow = bSpatializeSounds && !FParse::Param(FCommandLine::Get(), TEXT("deterministicaudio"));
+	Attenuations.Reset();
+	if (FParse::Value(FCommandLine::Get(), TEXT("RDSoundTest="), SoundTestDir)) { SoundTestStep = -1; SoundTestLog.Reset(); }
+	if (bCombat && BloodDropMesh)
+	{
+		Blood = NewObject<URDBloodComponent>(this, TEXT("RDBlood"));
+		Blood->RegisterComponent();
+		Blood->Init(this);
+	}
+	// the dungeon's room tone (flat, quiet)
+	if (const FRDSoundSet* Amb = Sounds.Find(TEXT("Env.Ambience")))
+		if (Amb->Sounds.Num() > 0 && Amb->Sounds[0]) AmbienceComp = UGameplayStatics::SpawnSound2D(this, Amb->Sounds[0], Amb->Volume * SoundVolume, Amb->Pitch, 0.f, nullptr, false, false);
 	MapData.Reset();
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
 	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
@@ -337,10 +369,30 @@ void ARDDungeonGenerator::Tick(float Dt)
 				PlayerCombat->RegisterComponent();
 				PlayerCombat->Init(this);
 			}
+			// what she hears fades with the distance to her, not to the camera behind her
+			if (Sounds.Num() > 0) PC->SetAudioListenerAttenuationOverride(P->GetRootComponent(), FVector::ZeroVector);
+		}
+		if (Sounds.Num() > 0 && P)
+		{
+			// The listener, every tick. The viewport does this itself, but not for a play-in-editor window that does not
+			// have the focus (it shares the editor's audio device): a reel rendered with the editor in the background had
+			// every placed sound heard from wherever the listener was when the window lost the focus.
+			if (FAudioDeviceHandle AD = GetWorld()->GetAudioDevice())
+			{
+				FVector Loc, Front, Right;
+				PC->GetAudioListenerPosition(Loc, Front, Right);
+				FTransform Listener(FRotationMatrix::MakeFromXY(Front, Right));
+				Listener.SetTranslation(Loc);
+				Listener.NormalizeRotation();
+				AD->SetListener(GetWorld(), 0, Listener, Dt);
+				FVector Att;
+				if (PC->GetAudioListenerAttenuationOverridePosition(Att)) AD->SetListenerAttenuationOverride(0, Att);
+			}
 		}
 		if (PC->WasInputKeyJustPressed(EKeys::F) && P) InteractNearest(P->GetActorLocation());
 		if (PC->WasInputKeyJustPressed(EKeys::M)) bMapOpen = !bMapOpen;
 	}
+	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
 	const AActor* Pawn = GetTrackedActor();
 	if (Pawn)
 	{
@@ -381,6 +433,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 			}
 		}
 		UpdateDiscovery(L);
+		FireTimer -= Dt;
+		if (FireTimer <= 0.f && Sounds.Num() > 0) { FireTimer = 0.2f; UpdateFireLoops(L); }
 	}
 	// a section being built gets ~6 ms a frame; the next queued one starts when it is done
 	if (Building)
@@ -394,5 +448,201 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (IsSectionGenerated(C)) continue;
 		SpawnSection(C, false, true);
 		break;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------ sound
+bool ARDDungeonGenerator::HasSound(FName Key) const
+{
+	const FRDSoundSet* S = Sounds.Find(Key);
+	return S && S->Sounds.Num() > 0;
+}
+
+USoundAttenuation* ARDDungeonGenerator::GetAttenuation(const FRDSoundSet& Set)
+{
+	// one attenuation object per (inner radius, falloff) pair, made when first needed
+	const int32 Key = FMath::RoundToInt(Set.InnerRadius) * 100000 + FMath::RoundToInt(Set.FalloffDistance);
+	if (const TObjectPtr<USoundAttenuation>* Have = Attenuations.Find(Key)) return *Have;
+	USoundAttenuation* A = NewObject<USoundAttenuation>(this);
+	FSoundAttenuationSettings& T = A->Attenuation;
+	T.bAttenuate = true; T.bSpatialize = bSpatializeNow;
+	T.DistanceAlgorithm = EAttenuationDistanceModel::NaturalSound;
+	T.dBAttenuationAtMax = -40.f;
+	T.AttenuationShape = EAttenuationShape::Sphere;
+	T.AttenuationShapeExtents = FVector(Set.InnerRadius);
+	T.FalloffDistance = Set.FalloffDistance;
+	// far sounds are duller too
+	T.bAttenuateWithLPF = true;
+	T.LPFRadiusMin = Set.InnerRadius + Set.FalloffDistance * 0.2f; T.LPFRadiusMax = Set.InnerRadius + Set.FalloffDistance;
+	T.LPFFrequencyAtMin = 20000.f; T.LPFFrequencyAtMax = 2200.f;
+	Attenuations.Add(Key, A);
+	return A;
+}
+
+float ARDDungeonGenerator::GetSoundLevelAt(FName Key, float Distance) const
+{
+	const FRDSoundSet* S = Sounds.Find(Key);
+	if (!S) return 0.f;
+	if (S->b2D) return 1.f;
+	const USoundAttenuation* A = const_cast<ARDDungeonGenerator*>(this)->GetAttenuation(*S);
+	return A->Attenuation.Evaluate(FTransform::Identity, FVector(Distance, 0, 0));
+}
+
+bool ARDDungeonGenerator::PlaySoundAt(FName Key, FVector At, float VolumeScale, float PitchScale)
+{
+	const FRDSoundSet* S = Sounds.Find(Key);
+	UWorld* W = GetWorld();
+	if (!S || S->Sounds.Num() == 0 || !W || !W->IsGameWorld()) return false;
+	// one of the set, not the same twice running (a random stream of its own: sound never changes the play)
+	int32& Last = LastSoundPick.FindOrAdd(Key, -1);
+	int32 I = SoundR.RandRange(0, S->Sounds.Num() - 1);
+	if (S->Sounds.Num() > 1 && I == Last) I = (I + 1) % S->Sounds.Num();
+	Last = I;
+	USoundBase* Snd = S->Sounds[I];
+	if (!Snd) return false;
+	const float Volume = S->Volume * VolumeScale * SoundVolume;
+	const float Pitch = S->Pitch * PitchScale * (1.f + SoundR.FRandRange(-S->PitchVariation, S->PitchVariation));
+	if (S->b2D) UGameplayStatics::PlaySound2D(this, Snd, Volume, Pitch);
+	else UGameplayStatics::PlaySoundAtLocation(this, Snd, At, FRotator::ZeroRotator, Volume, Pitch, 0.f, GetAttenuation(*S));
+	++SoundCounts.FindOrAdd(Key);
+	return true;
+}
+
+TArray<FVector> ARDDungeonGenerator::GetFireLoops() const
+{
+	TArray<FVector> Out;
+	for (const FFireVoice& V : FireVoices) if (V.bOn) Out.Add(V.At);
+	return Out;
+}
+
+void ARDDungeonGenerator::UpdateFireLoops(const FVector& L)
+{
+	// the fires within earshot, nearest first
+	struct FCand { FVector At; uint8 Kind; float D2; };
+	TArray<FCand> Cands;
+	const FIntPoint Here = WorldToSection(L);
+	for (int32 Dx = -1; Dx <= 1; ++Dx)
+		for (int32 Dy = -1; Dy <= 1; ++Dy)
+			if (const ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy)))
+				for (const FRDFirePoint& F : S->FirePoints)
+				{
+					const FRDSoundSet* Set = Sounds.Find(RDFireKeys[FMath::Min<int32>(F.Kind, 2)]);
+					if (!Set || Set->Sounds.Num() == 0) continue;
+					const float D2 = FVector::DistSquared(F.At, L), Max = Set->InnerRadius + Set->FalloffDistance;
+					if (D2 < Max * Max) Cands.Add({ F.At, F.Kind, D2 });
+				}
+	Cands.Sort([](const FCand& A, const FCand& B) { return A.D2 < B.D2; });
+	if (Cands.Num() > FireLoopVoices) Cands.SetNum(FMath::Max(FireLoopVoices, 0));
+	// a voice whose fire is no longer among them falls silent; the fires that have a voice keep it
+	for (int32 I = 0; I < FireVoices.Num(); ++I)
+	{
+		FFireVoice& V = FireVoices[I];
+		if (!V.bOn) continue;
+		const int32 K = Cands.IndexOfByPredicate([&V](const FCand& C) { return C.Kind == V.Kind && C.At.Equals(V.At, 1.f); });
+		if (K != INDEX_NONE) Cands.RemoveAt(K);
+		else { V.bOn = false; if (FireComps[I]) FireComps[I]->FadeOut(0.3f, 0.f); }
+	}
+	for (const FCand& C : Cands)
+	{
+		int32 I = FireVoices.IndexOfByPredicate([](const FFireVoice& V) { return !V.bOn; });
+		if (I == INDEX_NONE)
+		{
+			if (FireVoices.Num() >= FireLoopVoices) break;
+			UAudioComponent* A = NewObject<UAudioComponent>(this);
+			A->bAutoActivate = false; A->bAutoDestroy = false; A->bAllowSpatialization = bSpatializeNow;
+			A->SetupAttachment(RootComponent);
+			A->RegisterComponent();
+			FireComps.Add(A);
+			I = FireVoices.AddDefaulted();
+		}
+		const FRDSoundSet& Set = Sounds[RDFireKeys[FMath::Min<int32>(C.Kind, 2)]];
+		USoundBase* Snd = Set.Sounds[SoundR.RandRange(0, Set.Sounds.Num() - 1)];
+		UAudioComponent* A = FireComps[I];
+		if (!Snd || !A) continue;
+		A->Stop();
+		A->SetWorldLocation(C.At);
+		A->SetSound(Snd);
+		A->AttenuationSettings = GetAttenuation(Set);
+		A->SetVolumeMultiplier(Set.Volume * SoundVolume);
+		A->SetPitchMultiplier(Set.Pitch * (1.f + SoundR.FRandRange(-Set.PitchVariation, Set.PitchVariation)));
+		// (each fire starts somewhere else in its loop, or two torches side by side would beat as one)
+		const USoundWave* Wave = Cast<USoundWave>(Snd);
+		A->Play(Wave ? SoundR.FRandRange(0.f, FMath::Max(0.f, Wave->Duration - 0.5f)) : 0.f);
+		FireVoices[I] = { C.At, C.Kind, true };
+	}
+}
+
+FString ARDDungeonGenerator::DescribeListener() const
+{
+	FAudioDeviceHandle AD = GetWorld() ? GetWorld()->GetAudioDevice() : FAudioDeviceHandle();
+	if (!AD) return TEXT("no audio device");
+	FVector L = FVector::ZeroVector, A = FVector::ZeroVector;
+	const bool bL = AD->GetListenerPosition(0, L, false), bA = AD->GetListenerPosition(0, A, true);
+	return FString::Printf(TEXT("device %u%s: listener %s(%.0f, %.0f, %.0f), attenuation point %s(%.0f, %.0f, %.0f), %d voices"), AD.GetDeviceID(), AD->IsMainAudioDevice() ? TEXT(" (main)") : TEXT(""),
+		bL ? TEXT("") : TEXT("none "), L.X, L.Y, L.Z, bA ? TEXT("") : TEXT("none "), A.X, A.Y, A.Z, AD->GetMaxChannels());
+}
+
+void ARDDungeonGenerator::SetUnfocusedVolume(float Multiplier)
+{
+	FApp::SetUnfocusedVolumeMultiplier(Multiplier);
+}
+
+// ------------------------------------------------------------------------------------------------ sound self test
+// -RDSoundTest=<dir> (a game or play-in-editor session): records what the audio device puts out while one flat sound and
+// the same placed sound at known places round her are played, writes <dir>/soundtest.wav and soundtest.txt, and quits.
+// The recording shows what nobody can check by counting calls: that a placed sound is there at all, louder in the ear
+// on its side, and quieter the farther it is.
+void ARDDungeonGenerator::TickSoundTest(float Dt)
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	APawn* P = PC ? PC->GetPawn() : nullptr;
+	if (!P || !PlayerCombat) return;
+	struct FStep { float T; const TCHAR* What; const TCHAR* Key; float Forward, Right; };
+	static const FStep Steps[] = {
+		{ 1.0f, TEXT("flat"), TEXT("Player.Hurt"), 0.f, 0.f },
+		{ 2.5f, TEXT("2 m ahead of her"), TEXT("Monster.Troll.Hurt"), 200.f, 0.f },
+		{ 4.0f, TEXT("4 m to her right"), TEXT("Monster.Troll.Hurt"), 0.f, 400.f },
+		{ 5.5f, TEXT("4 m to her left"), TEXT("Monster.Troll.Hurt"), 0.f, -400.f },
+		{ 7.0f, TEXT("12 m ahead"), TEXT("Monster.Troll.Hurt"), 1200.f, 0.f },
+		{ 8.5f, TEXT("25 m ahead"), TEXT("Monster.Troll.Hurt"), 2500.f, 0.f },
+		{ 10.0f, TEXT("flat again"), TEXT("Player.Hurt"), 0.f, 0.f },
+	};
+	const int32 NumSteps = UE_ARRAY_COUNT(Steps);
+	if (SoundTestStep < 0)
+	{
+		FApp::SetUnfocusedVolumeMultiplier(1.f);
+		PlayerCombat->SetScriptedOnly(true);
+		UAudioMixerBlueprintLibrary::StartRecordingOutput(this, 20.f, nullptr);
+		SoundTestStep = 0; SoundTestTime = 0.f;
+		SoundTestLog.Add(FString::Printf(TEXT("sound test: %d sets, master %.2f, spatialised %d, %s"), Sounds.Num(), SoundVolume, bSpatializeNow ? 1 : 0, *DescribeListener()));
+		return;
+	}
+	SoundTestTime += Dt;
+	FVector Cam; FRotator CamRot;
+	PC->GetPlayerViewPoint(Cam, CamRot);
+	const FVector Fw = FRotator(0, CamRot.Yaw, 0).Vector(), Rt = FRotator(0, CamRot.Yaw + 90.f, 0).Vector(), L = P->GetActorLocation();
+	while (SoundTestStep < NumSteps && SoundTestTime >= Steps[SoundTestStep].T)
+	{
+		const FStep& St = Steps[SoundTestStep++];
+		const FVector At = L + Fw * St.Forward + Rt * St.Right;
+		const FRDSoundSet* Set = Sounds.Find(St.Key);
+		if (!Set || Set->Sounds.Num() == 0 || !Set->Sounds[0]) { SoundTestLog.Add(FString::Printf(TEXT("%.2f | %s | %s | no such sound"), SoundTestTime, St.What, St.Key)); continue; }
+		// (always the set's first sound at its own pitch: the levels of the steps can be compared)
+		if (Set->b2D) UGameplayStatics::PlaySound2D(this, Set->Sounds[0], Set->Volume * SoundVolume, Set->Pitch);
+		else UGameplayStatics::PlaySoundAtLocation(this, Set->Sounds[0], At, FRotator::ZeroRotator, Set->Volume * SoundVolume, Set->Pitch, 0.f, GetAttenuation(*Set));
+		SoundTestLog.Add(FString::Printf(TEXT("%.2f | %s | %s | level by distance %.3f"), SoundTestTime, St.What, St.Key, GetSoundLevelAt(St.Key, FVector::Dist(At, L))));
+	}
+	if (SoundTestStep == NumSteps && SoundTestTime >= 12.f)
+	{
+		UAudioMixerBlueprintLibrary::StopRecordingOutput(this, EAudioRecordingExportType::WavFile, TEXT("soundtest"), SoundTestDir, nullptr, nullptr);
+		SoundTestLog.Add(FString::Printf(TEXT("%.2f | end | %s"), SoundTestTime, *DescribeListener()));
+		FFileHelper::SaveStringArrayToFile(SoundTestLog, *(SoundTestDir / TEXT("soundtest.txt")));
+		++SoundTestStep;
+	}
+	if (SoundTestStep > NumSteps && SoundTestTime >= 14.f)
+	{
+		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDSOUNDTEST done -> %s"), *SoundTestDir);
+		SoundTestDir.Reset();
+		if (!GIsEditor) FPlatformMisc::RequestExit(false);
 	}
 }

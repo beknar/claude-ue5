@@ -1,7 +1,8 @@
 """random_dungeoncombat_level demo reel: the pilot and the recorder. Plays jrpg-fem5-tripo through the dungeon with the
 calls the keys make (movement input, the combat component's attack and weapon functions, the generator's F on doors),
 turns the game's own third-person camera, and records the play for the overlay
-(pipeline/blender_numpy/rdc_reel_overlay.py: the Movie Render Queue does not draw the HUD).
+(pipeline/blender_numpy/rdc_reel_overlay.py: the Movie Render Queue does not draw the HUD). The record also holds every
+sound the game played (by occasion), every blood burst and the wounds each monster in view carries.
   render    (default) arm it right before 796: it waits for the render's world and LS_RDC_Showcase and starts with frame 0
   rehearse  the PIE session that is running now, in real time (the HUD is on)
 On the first frame the dungeon is put back to its start (ARDDungeonGenerator.RestartPlay with a fixed session seed, so
@@ -21,7 +22,7 @@ OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_combat\\" + (
 V = unreal.Vector; Rot = unreal.Rotator; GS = unreal.GameplayStatics; IP = unreal.IntPoint
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {}
-S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": "", "note": {}, "hp": {}, "mapsig": {}, "disc": {}}
+S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": "", "note": {}, "hp": {}, "mapsig": {}, "disc": {}, "snd": {}, "bursts": 0}
 if getattr(unreal, "_rdc_reel", None) is not None:
     try: unreal.unregister_slate_post_tick_callback(unreal._rdc_reel)
     except Exception: pass
@@ -86,7 +87,7 @@ def fight(m):
     c = G["combat"]; p = G["pawn"]; n = G["fights"]; G["fights"] += 1
     c.select_weapon(n % 3)
     name = str(m.monster_name); hp0 = m.get_max_health(); h0 = c.get_health(); t0 = T(); b0 = c.hits_landed
-    guard = 1.3 if n == 0 else 0.9; ht0 = c.hits_taken   # she lets it strike first (longer the first time)
+    guard = (1.3, 2.6, 0.5)[min(n, 2)]; ht0 = c.hits_taken   # she lets it strike first: the first two fights until it has (or this long), the last hardly
     event("fight", monster=name, weapon=str(c.get_weapon_name()), its_hit_points=hp0, its_damage=m.get_damage(), section=[m.get_editor_property("section").get_editor_property("coord").x, 0])
     seen = None
     while alive(m) and not c.is_dead() and T() - t0 < 14.0 and T() < DUR + 1.0:
@@ -203,11 +204,12 @@ def sample():
             ml = m.get_actor_location()
             if d2(ml, l) > 3200.0: continue
             mons.append([m.get_name(), str(m.monster_name), round(ml.x), round(ml.y), round(ml.z), round(m.get_health(), 1), m.get_max_health(), int(m.is_aggro()), int(m.is_dead()),
-                         round(m.capsule_component.get_scaled_capsule_half_height()), int(m.is_attacking())])
+                         round(m.capsule_component.get_scaled_capsule_half_height()), int(m.is_attacking()), m.get_num_wounds()])
         except Exception: pass
     return {"t": round(T(), 4), "p": r3(l), "yaw": round(p.get_actor_rotation().yaw, 1), "sp": round(p.get_velocity().length()), "hp": round(c.get_health(), 1), "mhp": c.get_max_health(), "w": c.get_weapon_index(),
             "kills": c.kills, "atk": round(c.get_attack_time(), 3), "dead": int(c.is_dead()), "cp": r3(cm.get_camera_location()), "cr": [round(cr.pitch, 3), round(cr.yaw, 3), round(cr.roll, 3)],
-            "fov": round(cm.get_fov_angle(), 2), "seg": S["seg"], "sections": len(gen.get_section_coords()), "mon": mons}
+            "fov": round(cm.get_fov_angle(), 2), "seg": S["seg"], "sections": len(gen.get_section_coords()), "mon": mons,
+            "fire": round(min([d2(q, l) for q in gen.get_fire_loops()] or [-1.0]))}           # (the nearest fire that has a voice: cm, -1 none)
 def hits():
     """the blows, from the hit points that went: a number floats up from each (as the HUD shows)"""
     c = G["combat"]; p = G["pawn"]; now = {}
@@ -223,6 +225,17 @@ def hits():
         l = p.get_actor_location(); S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "hit", "amount": round(old - h), "at": [round(l.x), round(l.y), round(l.z + 90)], "on_player": 1})
         unreal.log("RDCREEL %6.2f s  she is hit for %d (%d left)" % (T(), round(old - h), round(h)))
     S["hp"]["__her"] = h
+def heard():
+    """what was played since the last tick (the generator counts every sound by its occasion), and the blood bursts"""
+    gen = G["gen"]; now = {str(k): v for k, v in gen.get_sound_counts().items()}
+    for k, v in now.items():
+        if v > S["snd"].get(k, 0): S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "sound", "key": k, "n": v - S["snd"].get(k, 0)})
+    S["snd"] = now
+    b = gen.get_blood()
+    if b is not None and b.bursts != S["bursts"]:
+        if b.bursts > S["bursts"]:
+            at = b.last_burst_at; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "blood", "at": [round(at.x), round(at.y), round(at.z)], "from_her_cm": round(d2(at, loc())), "bursts": b.bursts})
+        S["bursts"] = b.bursts
 def save(why=None):
     if S["saved"]: return
     S["saved"] = True
@@ -230,9 +243,15 @@ def save(why=None):
     out = {"fps": FPS, "mode": MODE, "seed": SEED, "rows": rows, "events": S["events"], "segs": S["segs"], "maps": S["maps"], "note": S["note"], "const": G.get("const", {}), "error": why}
     os.makedirs(os.path.dirname(OUT), exist_ok=True); json.dump(out, open(OUT, "w"), separators=(",", ":"))
     kills = [e for e in S["events"] if e["kind"] == "kill"]; last = rows[-1] if rows else {}
-    msg = "%d frames | %d kills (%s) | she was hit %d times, %s hit points left | %d sections | %d doors | %s" % (
+    snd = {}
+    for e in S["events"]:
+        if e["kind"] == "sound":
+            k = e["key"].split("."); k = "Monster." + k[-1] if k[0] == "Monster" and len(k) == 3 else e["key"]; snd[k] = snd.get(k, 0) + e["n"]
+    wounds = max([q[11] for r in rows for q in r["mon"] if len(q) > 11] or [0])
+    msg = "%d frames | %d kills (%s) | she was hit %d times, %s hit points left | %d sections | %d doors | %s | %d blood bursts, %d of them hers | most wounds on one monster %d | sounds %s" % (
         len(rows), len(kills), ", ".join("%s with the %s" % (e["monster"], e["weapon"].lower()) for e in kills), sum(1 for e in S["events"] if e["kind"] == "hit" and e["on_player"]), last.get("hp"),
-        last.get("sections", 0), sum(1 for e in S["events"] if e["kind"] == "door"), " ".join("%s@%.1f" % (e["kind"], e["t"]) for e in S["events"] if e["kind"] in ("generated", "into_new_section")))
+        last.get("sections", 0), sum(1 for e in S["events"] if e["kind"] == "door"), " ".join("%s@%.1f" % (e["kind"], e["t"]) for e in S["events"] if e["kind"] in ("generated", "into_new_section")),
+        sum(1 for e in S["events"] if e["kind"] == "blood"), sum(1 for e in S["events"] if e["kind"] == "blood" and e["from_her_cm"] < 60), wounds, json.dumps(dict(sorted(snd.items()))))
     (unreal.log_error if why else unreal.log)(("RDCREEL failed: %s | " % why if why else "RDCREEL saved ") + msg)
 def stop(why=None):
     unreal.unregister_slate_post_tick_callback(unreal._rdc_reel); unreal._rdc_reel = None
@@ -278,10 +297,10 @@ def body():
         G["t"] = wt - G["w0"]; G["frame"] = int(math.floor(G["t"] * FPS))
     if start:
         # the first frame: the dungeon as it is when play begins, with a fixed seed for what is generated from here on
-        G["going"] = True; gen.set_frame_budget(1.0e6); gen.restart_play(SEED); S["hp"].clear()
+        G["going"] = True; gen.set_frame_budget(1.0e6); gen.restart_play(SEED); S["hp"].clear(); S["snd"] = {}; S["bursts"] = 0
     next(G["run"])
     if G["going"] and G["combat"] is not None:
-        hits()
+        hits(); heard()
         n = len(gen.get_section_coords())
         if n != G["sec_n"]:
             G["sec_n"] = n; l = loc(); event("generated", sections=n, she_is_at=[round(l.x), round(l.y)], monsters=len(gen.get_monsters()))

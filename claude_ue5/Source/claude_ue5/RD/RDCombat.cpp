@@ -1,6 +1,9 @@
 #include "RD/RDCombat.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDMonster.h"
+#include "RD/RDBlood.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequenceBase.h"
@@ -52,6 +55,21 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 		return C;
 	};
 	WeaponComp = Make(TEXT("RDWeapon")); OffHandComp = Make(TEXT("RDOffHand"));
+	// her breath: two loops (flat: it is her own), silent until she walks or runs a while
+	auto Breath = [&](const TCHAR* Key) -> UAudioComponent*
+	{
+		const FRDSoundSet* S = Generator ? Generator->Sounds.Find(Key) : nullptr;
+		if (!S || S->Sounds.Num() == 0 || !S->Sounds[0]) return nullptr;
+		UAudioComponent* A = NewObject<UAudioComponent>(GetOwner());
+		A->bAutoActivate = false; A->bAutoDestroy = false; A->bAllowSpatialization = false;
+		A->SetSound(S->Sounds[0]);
+		A->SetVolumeMultiplier(S->Volume * Generator->SoundVolume);
+		A->SetPitchMultiplier(S->Pitch);
+		A->SetupAttachment(GetOwner()->GetRootComponent());
+		A->RegisterComponent();
+		return A;
+	};
+	BreathWalk = Breath(TEXT("Player.BreathWalk")); BreathRun = Breath(TEXT("Player.BreathRun"));
 	SelectWeapon(0);
 }
 
@@ -59,6 +77,7 @@ void URDCombatComponent::SelectWeapon(int32 Index)
 {
 	if (!Generator || !Generator->Weapons.IsValidIndex(Index) || Index == WeaponIndex || bDead) return;
 	if (AttackTime >= 0.f) EndAttack();
+	if (WeaponIndex >= 0 && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Draw"), GetOwner()->GetActorLocation());
 	WeaponIndex = Index; NextAttack = 0;
 	const FRDWeaponDef& W = Generator->Weapons[Index];
 	USkeletalMeshComponent* M = Body();
@@ -115,6 +134,8 @@ bool URDCombatComponent::StartAttack()
 	}
 	AI->PlaySlotAnimationAsDynamicMontage(Clip, RDCombatSlot, 0.1f, 0.18f, Rate, 1, -1.f, T0);
 	AttackTime = 0.f; AttackLen = (T1 - T0) / Rate; AttackHit = FMath::Clamp((Hit - T0) / Rate, 0.05f, AttackLen); bHitDone = false;
+	bWhooshDone = false;
+	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
 	++NextAttack; ++AttacksMade;
 	SetSlowed(true);
 	return true;
@@ -137,6 +158,7 @@ void URDCombatComponent::Strike()
 		if (Dist > W->Reach || FMath::Abs(Mo->GetActorLocation().Z - L.Z) > 260.f) continue;
 		// (a big monster right against her is in the arc whatever the angle to its middle)
 		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
+		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *W->Name.ToString())), Mo->GetActorLocation());
 		const bool bKilled = Mo->ApplyDamage(W->Damage, O);
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), W->Damage, false);
 		DamageDealt += W->Damage; ++HitsLanded; bAny = true;
@@ -158,13 +180,24 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	Health = FMath::Max(0.f, Health - Amount);
 	DamageTaken += Amount; ++HitsTaken; LastHurtTime = Now;
 	AActor* O = GetOwner();
-	if (Generator && O) Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), Amount, true);
+	if (Generator && O)
+	{
+		Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), Amount, true);
+		// blood from where it caught her (toward the attacker, at a height that differs from blow to blow)
+		const FVector L = O->GetActorLocation();
+		const FVector To = From ? ((From->GetActorLocation() - L) * FVector(1, 1, 0)).GetSafeNormal(1e-4f, O->GetActorForwardVector()) : O->GetActorForwardVector();
+		const FVector At = L + To * 16.f + FVector(0, 0, 14.f + 11.f * ((HitsTaken * 37) % 5));
+		if (URDBloodComponent* B = Generator->GetBlood()) B->Burst(At, To * 0.7f + FVector(0, 0, 0.3f), FMath::Clamp(Amount / FMath::Max(MaxHealth, 1.f) * 3.f, 0.35f, 1.f));
+		Generator->PlaySoundAt(TEXT("Monster.Strike"), At);
+		Generator->PlaySoundAt(TEXT("Blood.Splat"), At);
+		Generator->PlaySoundAt(Health <= 0.f ? TEXT("Player.Death") : TEXT("Player.Hurt"), L);
+	}
 	USkeletalMeshComponent* M = Body();
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
 	const FRDWeaponDef* W = Weapon();
 	if (Health <= 0.f)
 	{
-		bDead = true; ++Deaths; DeathTime = Now;
+		bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
 		EndAttack();
 		if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
 		if (AI && W && W->Death)
@@ -196,6 +229,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	Super::TickComponent(Dt, TickType, ThisTickFunction);
 	if (!Generator) return;
 	const float Now = GetWorld()->GetTimeSeconds();
+	TickSounds(Dt, Now);
 	if (bDead)
 	{
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
@@ -213,9 +247,56 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (AttackTime >= 0.f)
 	{
 		AttackTime += Dt;
+		if (!bWhooshDone && AttackTime >= AttackHit - 0.16f) { bWhooshDone = true; Generator->PlaySoundAt(TEXT("Player.Whoosh"), GetOwner()->GetActorLocation()); }
 		if (!bHitDone && AttackTime >= AttackHit) { bHitDone = true; Strike(); }
 		if (AttackTime >= AttackLen) EndAttack();
 	}
 	// out of a fight the hit points come back
 	if (Health < MaxHealth && Now - LastHurtTime > Generator->RegenDelay) Health = FMath::Min(MaxHealth, Health + Generator->RegenPerSecond * Dt);
+}
+
+// ------------------------------------------------------------------------------------------------ sound
+void URDCombatComponent::SetBreath(int32 State)
+{
+	if (State == BreathState) return;
+	UAudioComponent* Old = BreathState == 1 ? BreathWalk.Get() : BreathState == 2 ? BreathRun.Get() : nullptr;
+	UAudioComponent* New = State == 1 ? BreathWalk.Get() : State == 2 ? BreathRun.Get() : nullptr;
+	if (Old) Old->FadeOut(0.7f, 0.f);
+	if (New) New->FadeIn(0.6f, 1.f);
+	BreathState = State;
+}
+
+void URDCombatComponent::TickSounds(float Dt, float Now)
+{
+	const ACharacter* C = Cast<ACharacter>(GetOwner());
+	if (!C) return;
+	if (bDead)
+	{
+		SetBreath(0); RunHeat = WalkTime = 0.f;
+		if (!bFallDone && Now - DeathTime > 0.9f) { bFallDone = true; Generator->PlaySoundAt(TEXT("Env.BodyFall"), C->GetActorLocation()); }
+		return;
+	}
+	const float Speed = C->GetVelocity().Size2D();
+	const bool bGround = C->GetCharacterMovement()->IsMovingOnGround();
+	const bool bRun = Speed > 250.f;
+	// a footstep for every stride on the ground: running strides are longer and have their own sounds
+	if (bGround && Speed > 20.f)
+	{
+		StepDist += Speed * Dt;
+		const float Stride = bRun ? 128.f : 72.f;
+		if (StepDist >= Stride)
+		{
+			StepDist = 0.f; ++StepsTaken;
+			Generator->PlaySoundAt(bRun ? TEXT("Player.Run") : TEXT("Player.Step"), C->GetActorLocation() - FVector(0, 0, C->GetSimpleCollisionHalfHeight()));
+		}
+	}
+	else StepDist = FMath::Min(StepDist, 40.f);
+	// her breath: the running loop once she has run a moment (it lingers after she stops), else the walking loop while she walks
+	RunHeat = FMath::Clamp(RunHeat + (bRun ? Dt : -0.5f * Dt), 0.f, 3.f);
+	const bool bWalk = Speed > 40.f && !bRun;
+	WalkTime = bWalk ? WalkTime + Dt : 0.f;
+	StillTime = Speed > 40.f ? 0.f : StillTime + Dt;
+	if (RunHeat > 1.2f || (BreathState == 2 && RunHeat > 0.3f)) SetBreath(2);
+	else if (WalkTime > 0.8f || (BreathState == 1 && StillTime < 1.f)) SetBreath(1);
+	else SetBreath(0);
 }
