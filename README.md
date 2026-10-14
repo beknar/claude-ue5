@@ -48,6 +48,7 @@ What the project does today. Everything here is built by the scripts in this rep
 - `build_cpp.ps1` builds the C++ module without a .NET Framework SDK installed; `package_starship.ps1` packages a level as a game.
 - Shared builders: `interior_lib.py` (rooms, furniture, openables, lights for any building), `mat_lib.py` (textures and Substrate materials from Python), `capture.py` (a picture of the editor world from any camera).
 - A survey of the local Fab library: what is usable in UE5 and which animations drive which models (`asset_survey/`, `local-packs.md`).
+- A hero gallery, [docs/heroes.md](docs/heroes.md): the library's 100 possible heroes and player characters in ten categories, each with a suggested role and three pictures (full body, upper body and head, an action pose copied from another pack's attack clip onto its own skeleton, with a sword, axe, spear, rifle or bare fists).
 - A monster gallery, [docs/monsters.md](docs/monsters.md): the library's 107 monsters ranked by looks from easiest to toughest, each pictured in its own colours and in three recoloured versions (infernal, venom, frost) made by one material that recolours the model's own texture and adds a pattern that follows the body. Packs that exist only in Unity format are unpacked and imported for it.
 
 ## Early results
@@ -124,11 +125,11 @@ claude_ue5/              UE project (claude_ue5.uproject, Config/; Content/ is l
   SourceArt/             exported/converted source art (only small JSON data is committed)
 pipeline/
   unreal/                numbered editor scripts (NNN_name.py), run inside the editor
-  blender_numpy/         Blender scripts (-b -P), numpy/scipy tools, ue_exec.py, encode_video.py, rl_reel_overlay.py, rd_reel_overlay.py, iv_reel_overlay.py, ss_reel_overlay.py, rdc_reel_overlay.py, rdc_sound_prep.py, rdc_sound_check.py, unity_extract.py, monster_doc.py
+  blender_numpy/         Blender scripts (-b -P), numpy/scipy tools, ue_exec.py, encode_video.py, rl_reel_overlay.py, rd_reel_overlay.py, iv_reel_overlay.py, ss_reel_overlay.py, rdc_reel_overlay.py, rdc_sound_prep.py, rdc_sound_check.py, unity_extract.py, monster_doc.py, hero_doc.py
   build_cpp.ps1          builds the C++ module (editor closed)
   package_starship.ps1   packages starship_level as a standalone Windows game
 asset_survey/            survey of the local Fab library: UE5 usability, animation compatibility
-docs/                    monsters.md (the monster gallery); images/: the README's stills and the gallery's pictures
+docs/                    monsters.md, heroes.md (the galleries), assets.md (attribution); images/: the README's stills and the galleries' pictures
 local-packs.md           rig/animation summary of the local Fab packs
 .mcp.json                MCP server config (UE ModelContextProtocol plugin on 127.0.0.1:8765)
 CLAUDE.md                working rules and pitfalls for Claude Code in this repository
@@ -172,6 +173,7 @@ Scripts are numbered roughly in build order. Each one's docstring states its pur
 | `790`–`799` | random_dungeoncombat_level: her weapons, grips and retargeted clips (`790`), the level copy and its combat set-up (`791`), PIE combat test (`792` driven by `793_rdc_combat.ps1`), demo reel: its sequence (`794`), the pilot that plays and records it (`795`), its Movie Render Queue job (`796`); sound: import and the generator's sound table (`797`); blood, wound and decal materials (`798`); the sound self test (`799_rdc_sound_test.ps1`). `790_rdc_weapons.py grips` computes only the grips again (then `791`). The range is full: further stages for this level start at `810` |
 | `800`–`806` | starship_level: materials + effects + level + arena + fighter kitbash (`800`), station + clutter + targets (`801`), PIE flight test (`802` driven by `803_ss_flight.ps1`), demo reel: its sequence (`804`), the pilot that flies and records it (`805`), its Movie Render Queue job (`806`) |
 | `900` | Monster gallery for `docs/monsters.md`: `unity` (imports the Unity-only monster packs after `blender_numpy/unity_extract.py` has unpacked them into `SourceArt/fab_unity`), `materials` (`M_MON_Variant`), `stage`, `warm`, `shoot <dir>`, `clear`, all in the scratch level `rl_scratch`; then `blender_numpy/monster_doc.py <dir>` writes the strips and the page from `SourceArt/monster_gallery/monsters.json` |
+| `901` | Hero gallery for `docs/heroes.md`: `stage <start> <count>` or `stage ids <id,...>` (pose animations on each hero's skeleton, weapons in hand), `shoot <dir>` during play-in-editor (the editor world does not evaluate animations), `clear`; then `blender_numpy/hero_doc.py <dir>` writes the pictures and the page from `SourceArt/hero_gallery/heroes.json` |
 | no number | Shared modules and probes: `interior_lib.py` (rooms, furniture, openables and lights for any building), `container_check.py` (measures in play where every container's lid or doors are against its body, for the tests), `mat_lib.py` (textures and Substrate materials), `capture.py` (a `SceneCapture2D` picture of the editor world), `state.py`, `save_all.py`, and the fig4 probes (`probe_*`, `inspect_*`, `body_*`) |
 
 **JRPG and Tripo characters** (`500`–`540`, `600`–`650`; they play in `L_Meshy_Meadow`):

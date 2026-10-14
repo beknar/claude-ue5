@@ -103,6 +103,15 @@ Guidance for Claude Code in this repository. See README.md for what the project 
   - A `SceneCaptureComponent2D`'s `show_only_actors` cannot be set from Python ("cannot be edited on templates"): use `show_only_actor_components`.
   - The scratch level is left empty and saved: a dirty level makes the next map load ask, and the editor waits for the answer.
 
+## Hero gallery (`docs/heroes.md`, `901`)
+
+- The list, roles and descriptions are data (`SourceArt/hero_gallery/heroes.json`); `hero_doc.py` writes the page. Its pictures are allowed in git like the monster gallery's.
+- **Action poses:** a one-frame AnimSequence made with the animation controller (`add_bone_curve`, `set_bone_track_keys`) on the hero's own skeleton: another pack's clip's local bone rotations at one frame, on the hero's bone lengths. It works between UE4-mannequin rigs (same bone names and axes); FF2's (Tripo) spell laid the body on the floor.
+- **Pose frame:** the right frame differs per clip. An axe at its overhead wind-up turned the body away from the camera; a punch is the frame the fist is farthest forward, not farthest from the hips (the drunk man's swing then had the arms out like a T).
+- **Where animations show:** the editor world does not evaluate a single-node animation on a `SkeletalMeshActor` (`set_update_animation_in_editor` did not help): stage in the editor, shoot during play-in-editor, which copies the staged actors.
+- **Batch sizes:** with `r.TextureStreaming 0`, 100 staged characters ran the machine out of memory (the editor crashed) and 12 heavy ones hung the GPU (a D3D12 timeout, the editor stuck on an error dialog). Stage 6 to 10 at a time.
+- After a crash the editor may stop on a **Restore Packages** dialog, which waits for an answer before remote execution comes up. `Saved/Autosaves/PackageRestoreData.json` lists the packages. Set it aside only if you know they are not wanted, as with a pack material that was never edited.
+
 ## Editor pitfalls
 
 **Maps**
@@ -154,5 +163,5 @@ The remote (`github.com/beknar/claude-ue5`) is **public** and the repo is **sour
 - Never commit `Content/`, `.uasset`/`.umap`, source-art binaries, media (`.png`, `.mp4`, `.wav`, …), archives, `Saved/` / `Intermediate/` / `DerivedDataCache/`, `renders/` or `builds/` (a packaged game holds cooked pack content).
 - Third-party packs (Fab, Megascans, MetaHuman, UE mannequins) and the sound and music library must not be redistributed. `SourceArt/random_dungeon_combat/audio/` (files converted from the library) is ignored; `sounds.json`, which only names the files, is committed.
 - `.gitignore` enforces this. Check `git status` before committing: a new kind of generated file needs its ignore rule first.
-- The monster gallery's thumbnails (`docs/images/monsters/*.jpg`) are allowed by the user, like the README's stills.
+- The galleries' pictures (`docs/images/monsters/*.jpg`, `docs/images/heroes/*.jpg`) are allowed by the user, like the README's stills.
 - Commit or push only when asked (see Working rules). Small data that a script reads or a test wrote (`SourceArt/**/*.json`) is committed; a test record replaces the one before it.
