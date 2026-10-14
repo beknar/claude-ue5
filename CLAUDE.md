@@ -103,6 +103,20 @@ Guidance for Claude Code in this repository. See README.md for what the project 
   - A `SceneCaptureComponent2D`'s `show_only_actors` cannot be set from Python ("cannot be edited on templates"): use `show_only_actor_components`.
   - The scratch level is left empty and saved: a dirty level makes the next map load ask, and the editor waits for the answer.
 
+## Vehicle gallery (`docs/vehicles.md`, `903`)
+
+- The list, uses and descriptions are data (`SourceArt/vehicle_gallery/vehicles.json`); `vehicle_doc.py` writes the page, its sizes and animation notes come from `902`. Its pictures are allowed in git like the other galleries'.
+- Models from 0.6 m to 115 m stand in one row: each gets a floor of its own, and every shot uses a show-only list (the model and its floor), or the neighbours fill the background. The camera distance is fitted to the model's box corners for the view direction; the "side" is the long side, unless `axis` says otherwise (the dragon's wingspan is longer than its body).
+- **A long session of galleries ran the editor out of memory** (texture streaming off, hundreds of packs' textures loaded): it crashed staging the first vehicles. Restart the editor before a big gallery; after the restart the first `load_level` of the scratch level did not take for play-in-editor (PIE played the startup map): load it with `EditorLoadingAndSavingUtils.load_map` and check the PIE world's name.
+- Right after play-in-editor stops, `get_editor_world()` can return None for a few seconds: a batch driver must wait for it before the next stage, check that play has started on the level it staged (`UEDPIE_0_<level>`) before shooting, and that it has stopped before staging again.
+- **Never run two editors on the project.** After the crash a relaunch was checked with `-match "NODE"`, which (case-insensitive) matched ue_exec's `no remote nodes found`; a second editor was started, and remote commands went to either one: stages landed in one, play started in the other, batches shot nothing or the previous batch. Check `Get-Process UnrealEditor` before launching and test ue_exec's ping with `-cmatch "^NODE"`.
+
+## Weapons and items gallery (`docs/objects.md`, `904`)
+
+- The list, uses and descriptions are data (`SourceArt/object_gallery/objects.json`: `section`, `group`, `kind` for the third-person sets that hold it, `fp` for its first-person arm clips); `object_doc.py` writes the page. Its pictures are allowed in git like the other galleries'.
+- An FPS pack's shot and reload clips are often on the bare gun's skeleton (`*_Basic`), not the full gun's: `904` uses a clip only if one of the entry's meshes is on its skeleton, otherwise the third picture is the far three-quarter view.
+- The claims of the third-person table (`WIELD` in `object_doc.py`) were checked against `902`'s libraries: there are no third-person bow, crossbow, staff, knife or throwing clips for the UE4 mannequin here (the Dark Fantasy Weapons pack aims a bow and a crossbow on the UE5 mannequin). Check them again after importing animations.
+
 ## Hero and enemy galleries (`docs/heroes.md`, `docs/humanoid_enemies.md`, `901`, `902`)
 
 - The lists, roles and descriptions are data (`SourceArt/hero_gallery/heroes.json`, `SourceArt/enemy_gallery/enemies.json`); `hero_doc.py` and `enemy_doc.py` write the pages. Their pictures are allowed in git like the monster gallery's. An enemy that is also a hero (`hero`) shows the hero's pictures and is not shot again.
@@ -166,5 +180,5 @@ The remote (`github.com/beknar/claude-ue5`) is **public** and the repo is **sour
 - Never commit `Content/`, `.uasset`/`.umap`, source-art binaries, media (`.png`, `.mp4`, `.wav`, …), archives, `Saved/` / `Intermediate/` / `DerivedDataCache/`, `renders/` or `builds/` (a packaged game holds cooked pack content).
 - Third-party packs (Fab, Megascans, MetaHuman, UE mannequins) and the sound and music library must not be redistributed. `SourceArt/random_dungeon_combat/audio/` (files converted from the library) is ignored; `sounds.json`, which only names the files, is committed.
 - `.gitignore` enforces this. Check `git status` before committing: a new kind of generated file needs its ignore rule first.
-- The galleries' pictures (`docs/images/monsters/*.jpg`, `docs/images/heroes/*.jpg`, `docs/images/enemies/*.jpg`) are allowed by the user, like the README's stills.
+- The galleries' pictures (`docs/images/monsters/*.jpg`, `docs/images/heroes/*.jpg`, `docs/images/enemies/*.jpg`, `docs/images/vehicles/*.jpg`, `docs/images/objects/*.jpg`) are allowed by the user, like the README's stills.
 - Commit or push only when asked (see Working rules). Small data that a script reads or a test wrote (`SourceArt/**/*.json`) is committed; a test record replaces the one before it.

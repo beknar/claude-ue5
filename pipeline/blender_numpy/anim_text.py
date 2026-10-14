@@ -56,9 +56,9 @@ def listings():
     """pack folder -> (listing title, uid), from docs/assets.md"""
     out = {}
     for line in io.open(ASSETS, encoding="utf-8"):
-        m = re.search(r"\[([^\]]+)\]\(https://www\.fab\.com/listings/([0-9a-f-]+)\)", line)
+        m = re.search(r"\[((?:[^\[\]]|\[[^\]]*\])+)\]\(https://www\.fab\.com/listings/([0-9a-f-]+)\)", line)      # (a title may hold [Nanite])
         if not m: continue
-        for f in re.findall(r"`([A-Za-z0-9_]+)`", line) + re.findall(r"\| ([A-Za-z0-9_]+) \(imported by", line): out.setdefault(f, (m.group(1), m.group(2)))
+        for f in re.findall(r"`([A-Za-z0-9_-]+)`", line) + re.findall(r"\| ([A-Za-z0-9_-]+) \(imported by", line): out.setdefault(f, (m.group(1), m.group(2)))
     return out
 
 

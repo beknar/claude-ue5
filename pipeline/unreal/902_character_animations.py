@@ -1,5 +1,8 @@
-"""Which animations each character of docs/heroes.md and docs/humanoid_enemies.md can play, for those pages
-(SourceArt/character_animations/animations.json, read by hero_doc.py and enemy_doc.py).
+"""Which animations each character of docs/heroes.md and docs/humanoid_enemies.md and each vehicle or mount of
+docs/vehicles.md and each weapon or item of docs/objects.md can play, for those pages
+(SourceArt/character_animations/animations.json, read by hero_doc.py, enemy_doc.py, vehicle_doc.py and object_doc.py).
+For the vehicles and objects also each model's size (vehicles: length, width, height in metres; objects: its three
+extents in cm, largest first) and the skeletons of its skeletal meshes.
 For every character (heroes.json, enemies.json): its skeleton, the clips of the project on that same skeleton (its
 pack's own), and the kind of rig: `ue4` (UE4-mannequin bone names: pelvis, spine_01..03, neck_01, head, the arm and
 leg chains), `ue5` (the UE5 mannequin's, spine_05 and neck_02 as well) or `own` (a rig of its own: CAT, Maya
@@ -48,7 +51,26 @@ for gal, key in (("hero_gallery", "heroes"), ("enemy_gallery", "enemies")):
         sk = m.skeleton.get_path_name().split(".")[0]
         r = rigs.get(sk) or rig(m.skeleton)
         chars[p] = {"skeleton": sk, "rig": r[0], "bones": r[1], "own": sorted(c.rsplit("/", 1)[1] for c in groups.get(sk, []))}
+models = {"vehicles": {}, "objects": {}}          # (docs/vehicles.md, docs/objects.md: each model's size, and the skeleton of a skeletal one)
+for key, v in [("vehicles", v) for v in json.load(open(os.path.join(ROOT, "vehicle_gallery", "vehicles.json"), encoding="utf-8"))["vehicles"]] + \
+              [("objects", v) for v in json.load(open(os.path.join(ROOT, "object_gallery", "objects.json"), encoding="utf-8"))["objects"]]:
+    lo = hi = None; skels = []
+    for p in v["meshes"]:
+        m = unreal.load_asset(p)
+        if not m: print("CHARANIM missing", p); continue
+        if isinstance(m, unreal.StaticMesh): b = m.get_bounding_box(); l, u = b.min, b.max
+        else:
+            b = m.get_bounds(); l = b.origin - b.box_extent; u = b.origin + b.box_extent
+            sk = m.skeleton.get_path_name().split(".")[0] if m.skeleton else None          # (the orc pack's SK_Azrak_Weapon has none)
+            if sk: skels.append(sk)
+            if sk and p not in chars:
+                r = rigs.get(sk) or rig(m.skeleton)
+                chars[p] = {"skeleton": sk, "rig": r[0], "bones": r[1], "own": sorted(c.rsplit("/", 1)[1] for c in groups.get(sk, []))}
+        lo = l if lo is None else unreal.Vector(min(lo.x, l.x), min(lo.y, l.y), min(lo.z, l.z)); hi = u if hi is None else unreal.Vector(max(hi.x, u.x), max(hi.y, u.y), max(hi.z, u.z))
+    s = sorted([hi.x - lo.x, hi.y - lo.y])
+    if key == "vehicles": models[key][v["id"]] = {"size_m": [round(s[1] / 100, 1), round(s[0] / 100, 1), round((hi.z - lo.z) / 100, 1)], "skeletons": skels}
+    else: models[key][v["id"]] = {"size_cm": sorted([round(hi.x - lo.x), round(hi.y - lo.y), round(hi.z - lo.z)], reverse=True), "skeletons": skels}
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
-json.dump({"libraries": libs, "characters": chars}, open(OUT, "w", encoding="utf-8"), indent=1)
+json.dump({"libraries": libs, "characters": chars, "vehicles": models["vehicles"], "objects": models["objects"]}, open(OUT, "w", encoding="utf-8"), indent=1)
 print("CHARANIM %d libraries (%d clips), %d characters: %s" % (len(libs), sum(len(l["clips"]) for l in libs), len(chars),
       {k: sum(1 for c in chars.values() if c["rig"] == k) for k in ("ue4", "ue5", "own")}))

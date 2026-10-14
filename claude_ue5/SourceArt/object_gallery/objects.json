@@ -1,0 +1,4423 @@
+{
+ "objects": [
+  {
+   "id": "medieval_weapons_arming_sword",
+   "name": "Arming Sword",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_1.SM_Sword_1"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "one-handed sword",
+   "looks": "A dark, ornate sword with a winged crossguard and a pommel spike."
+  },
+  {
+   "id": "medieval_weapons_broadsword",
+   "name": "Broadsword",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_2.SM_Sword_2"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "boss sword",
+   "looks": "A black, jagged blade sprouting spikes from its guard: an evil-looking greatsword."
+  },
+  {
+   "id": "medieval_weapons_longsword",
+   "name": "Longsword",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_3.SM_Sword_3"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "one-handed sword",
+   "looks": "A long bronze-tinted blade with a plain cross guard."
+  },
+  {
+   "id": "medieval_weapons_dagger",
+   "name": "Dagger",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Dagger.SM_Dagger"
+   ],
+   "kind": "dagger",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "dagger",
+   "looks": "A narrow dagger with a spiked guard and a wrapped grip."
+  },
+  {
+   "id": "knights_pack_templar_sword",
+   "name": "Templar Sword",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Sword.SM_Knight_01_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "knight's sword",
+   "looks": "A long plain arming sword with a down-curved guard."
+  },
+  {
+   "id": "knights_pack_eastern_sabre",
+   "name": "Eastern Sabre",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_02/Weapons/SM_Knight_02_Sword.SM_Knight_02_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "sabre",
+   "looks": "A long, deeply curved sabre."
+  },
+  {
+   "id": "knights_pack_plate_knight_s_sword",
+   "name": "Plate Knight's Sword",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_03/Weapon/SM_Knight_03_Sword.SM_Knight_03_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed sword",
+   "looks": "A flamberge: a long twisted blade with a ringed guard."
+  },
+  {
+   "id": "knights_pack_paladin_s_sword",
+   "name": "Paladin's Sword",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_05/Weapon/SM_Knight_05_Sword.SM_Knight_05_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed sword",
+   "looks": "A gilded, forked blade over an ornate silver guard."
+  },
+  {
+   "id": "warriors_pack_dark_knight_s_sword",
+   "name": "Dark Knight's Sword",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SM_Dark_Knight_02_Sword.SM_Dark_Knight_02_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed sword",
+   "looks": "A long steel greatsword with curled quillons."
+  },
+  {
+   "id": "warriors_pack_demonic_blade",
+   "name": "Demonic Blade",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SM_Demonic_Warrior_Sword.SM_Demonic_Warrior_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "boss sword",
+   "looks": "A huge cleaver-like blade covered in glowing runes."
+  },
+  {
+   "id": "samurai_katana",
+   "name": "Katana",
+   "pack": "SAMURAI",
+   "uid": "5f4c90b7-a282-45fc-89df-61468afc867b",
+   "folder": "Samurai",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Samurai/Mesh_UE4/Weapon/SM_Samurai_Sword_01.SM_Samurai_Sword_01"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "katana",
+   "looks": "A curved katana with a red-wrapped grip."
+  },
+  {
+   "id": "samurai_wakizashi",
+   "name": "Wakizashi",
+   "pack": "SAMURAI",
+   "uid": "5f4c90b7-a282-45fc-89df-61468afc867b",
+   "folder": "Samurai",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Samurai/Mesh_UE4/Weapon/SM_Samurai_Sword_02.SM_Samurai_Sword_02"
+   ],
+   "kind": "dagger",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "short sword",
+   "looks": "The katana's shorter companion."
+  },
+  {
+   "id": "vikings_viking_sword",
+   "name": "Viking Sword",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Sword_01.SM_Viking_Sword_01"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "one-handed sword",
+   "looks": "A plain Viking sword with a brass guard."
+  },
+  {
+   "id": "vikings_viking_seax",
+   "name": "Viking Shortsword",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Knife_01.SM_Viking_Knife_01"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "short sword",
+   "looks": "A narrow blade with a knobbed, ringed hilt."
+  },
+  {
+   "id": "fantasy_pack_veteran_s_sword",
+   "name": "Veteran's Sword",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/Warrior/Mesh/SM_Sword.SM_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "one-handed sword",
+   "looks": "A long, worn arming sword."
+  },
+  {
+   "id": "orcs_pack_orc_cleaver",
+   "name": "Orc Cleaver",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Gira/Mesh/SM_Gira_Sword.SM_Gira_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "orc blade",
+   "looks": "A crude curved blade with a rope-wrapped grip."
+  },
+  {
+   "id": "hive_sherwood_sherwood_sword",
+   "name": "Sherwood Sword",
+   "pack": "Modular Medieval Town",
+   "uid": "720ccb75-32a9-4130-acab-532239760d22",
+   "folder": "Hive_Sherwood",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Hive_Sherwood/Mesh/SM_Sword_01.SM_Sword_01"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "short sword",
+   "looks": "A short, broad iron sword with a square guard."
+  },
+  {
+   "id": "animals_pack_camel_rider_s_scimitar",
+   "name": "Camel Rider's Sheathed Sword",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Sword.SK_Camel_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "sidearm",
+   "looks": "A curved sword in a carved, studded scabbard."
+  },
+  {
+   "id": "houseforge_01_hunting_knife",
+   "name": "Leaf-Blade Knife",
+   "pack": "House Forge: Modular House Building Kit",
+   "uid": "277b975e-2158-41ef-908a-ef08bc26a409",
+   "folder": "HouseForge_01",
+   "section": "Fantasy weapons",
+   "group": "Swords and daggers",
+   "meshes": [
+    "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WeaponKnife/SM_WeaponKnife_01a.SM_WeaponKnife_01a"
+   ],
+   "kind": "dagger",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "knife",
+   "looks": "A stone-grey knife with a pierced, leaf-shaped blade."
+  },
+  {
+   "id": "medieval_weapons_battle_axe",
+   "name": "Battle Axe",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Axe.SM_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A double-bladed axe with a winged head and a spiked butt."
+  },
+  {
+   "id": "medieval_weapons_throwing_axe",
+   "name": "Double Axe",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_ThrowingAxe.SM_ThrowingAxe"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "one-handed axe",
+   "looks": "A short double-bitted axe with a heavy, wrapped haft."
+  },
+  {
+   "id": "medieval_weapons_mace",
+   "name": "Mace",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Mace.SM_Mace"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mace",
+   "looks": "A spiked iron ball on a ringed shaft."
+  },
+  {
+   "id": "vikings_bearded_axe",
+   "name": "Bearded Axe",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Axe_01.SM_Viking_Axe_01"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "one-handed axe",
+   "looks": "A Viking axe with a long, leather-wrapped haft."
+  },
+  {
+   "id": "vikings_dane_axe",
+   "name": "Dane Axe",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Axe_02.SM_Viking_Axe_02"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A double-bitted Viking axe on a long haft."
+  },
+  {
+   "id": "vikings_viking_club",
+   "name": "Viking Mace",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Club_01.SM_Viking_Club_01"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mace",
+   "looks": "A copper ball with spikes on a wooden haft."
+  },
+  {
+   "id": "fantasy_pack_dwarven_axe",
+   "name": "Dwarven Axe",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/Dwarf/Mesh/SM_Dwarf_Axe.SM_Dwarf_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A round double axe with glowing runes, on a pale haft with a ring."
+  },
+  {
+   "id": "fantasy_pack_knight_s_axe",
+   "name": "Knight's Poleaxe",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/RPG_Knight/Mesh/SM_Knight_Axe.SM_Knight_Axe"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "polearm",
+   "looks": "A slim axe head on a long red pole."
+  },
+  {
+   "id": "fantasy_pack_northman_s_axe",
+   "name": "Northman's Axe",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/Viking_Ulf/Mesh/SM_Viking_Axe.SM_Viking_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A heavy bearded double axe on a wrapped haft."
+  },
+  {
+   "id": "fantasy_pack_barbarian_axe",
+   "name": "Barbarian Axe",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/Fantasy_Barbarian/Mesh/SM_Fantasy_Barbarian_Weapon_01.SM_Fantasy_Barbarian_Weapon_01"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A single crescent blade on a long black-and-gold haft."
+  },
+  {
+   "id": "fantasy_pack_barbarian_cleaver",
+   "name": "Barbarian's Spiked Mace",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/Fantasy_Barbarian/Mesh/SM_Fantasy_Barbarian_Weapon_02.SM_Fantasy_Barbarian_Weapon_02"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed mace",
+   "looks": "A flanged, spiked iron head on a black wrapped shaft."
+  },
+  {
+   "id": "fantasy_pack_troll_s_cudgel",
+   "name": "Troll's Spiked Maul",
+   "pack": "Fantasy Characters (Pack)",
+   "uid": "f5816915-86d9-4bef-b8f3-921408ae240b",
+   "folder": "Fantasy_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Pack/Characters/Troll/Mesh/SK_Cudgel.SK_Cudgel"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed maul",
+   "looks": "A black four-pointed iron head on a red-bound handle."
+  },
+  {
+   "id": "fantasy_enemies_pack_executioner_s_axe",
+   "name": "Executioner's Axe",
+   "pack": "Fantasy Enemies (Pack)",
+   "uid": "79f79e3e-570b-4d96-bc3f-f62107178169",
+   "folder": "Fantasy_Enemies_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Executioner/Mesh_Axe/SM_Executioner_Axe.SM_Executioner_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "polearm",
+   "looks": "A blood-stained bearded axe on a tall pole."
+  },
+  {
+   "id": "fantasy_enemies_pack_demon_axe",
+   "name": "Demon Axe",
+   "pack": "Fantasy Enemies (Pack)",
+   "uid": "79f79e3e-570b-4d96-bc3f-f62107178169",
+   "folder": "Fantasy_Enemies_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Demon/Mesh_UE4/Weapon/SM_Demon_Axe.SM_Demon_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A golden double axe on a long bone-studded shaft."
+  },
+  {
+   "id": "fantasy_enemies_pack_troll_axe",
+   "name": "Troll's Morning Star",
+   "pack": "Fantasy Enemies (Pack)",
+   "uid": "79f79e3e-570b-4d96-bc3f-f62107178169",
+   "folder": "Fantasy_Enemies_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Troll/Mesh_UE4/Weapon/SM_Troll_Axe.SM_Troll_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed mace",
+   "looks": "A rusty spiked ball on a stout handle."
+  },
+  {
+   "id": "fantasy_enemies_pack_befouler_s_weapon",
+   "name": "Befouler's Weapon",
+   "pack": "Fantasy Enemies (Pack)",
+   "uid": "79f79e3e-570b-4d96-bc3f-f62107178169",
+   "folder": "Fantasy_Enemies_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Befouler/Mesh_UE4/SM_Mesh/SM_Befouler_Weapon.SM_Befouler_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A blood-red hooked blade on a bound bone haft."
+  },
+  {
+   "id": "dwarf_pack_dwarf_axe",
+   "name": "Dwarf Axe",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Dwarf_Pack/King/Mesh/SM_Axe.SM_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A broad dwarven double axe with gilded fittings."
+  },
+  {
+   "id": "dwarf_pack_bedvar_s_warhammer",
+   "name": "Bedvar's Warhammer",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Dwarf_Pack/Bedvar/Mesh/SM_Dwarf_Bedvar_Hammer_Mesh.SM_Dwarf_Bedvar_Hammer_Mesh"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "warhammer",
+   "looks": "A great gilded hammer with stone-faced heads and a red-wrapped grip."
+  },
+  {
+   "id": "houseforge_01_thor_s_hammer",
+   "name": "Hammer in the Stone",
+   "pack": "House Forge: Modular House Building Kit",
+   "uid": "277b975e-2158-41ef-908a-ef08bc26a409",
+   "folder": "HouseForge_01",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/HammerThor/SM_ThorHammer_01a.SM_ThorHammer_01a"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "quest item / warhammer",
+   "looks": "A war hammer driven into a rock."
+  },
+  {
+   "id": "hive_sherwood_sherwood_axe",
+   "name": "Sherwood Axe",
+   "pack": "Modular Medieval Town",
+   "uid": "720ccb75-32a9-4130-acab-532239760d22",
+   "folder": "Hive_Sherwood",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Hive_Sherwood/Mesh/SM_Axe_01.SM_Axe_01"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "hatchet",
+   "looks": "A plain woodcutter's hatchet."
+  },
+  {
+   "id": "npc_king_and_queen_headsman_s_axe",
+   "name": "Headsman's Axe",
+   "pack": "NPC King And Queen",
+   "uid": "cf92a409-cb02-460f-a4e1-27039c0e2a99",
+   "folder": "NPC_King_And_Queen",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/NPC_King_And_Queen/Mesh/NPC_Executioner/Mesh_UE4/Separate/SM_UE4_NPC_Executioner_Axe.SM_UE4_NPC_Executioner_Axe"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A bearded executioner's axe on a long wooden haft."
+  },
+  {
+   "id": "orcs_pack_orc_axe",
+   "name": "Orc Axe",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_01/Mesh/SM_Orc_01_Weapon.SM_Orc_01_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A spiked axe head with a long spike on top."
+  },
+  {
+   "id": "orcs_pack_orc_glaive",
+   "name": "Orc Spiked Club",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_02/Mesh/SM_Orc_02_Weapon.SM_Orc_02_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "club",
+   "looks": "A thick wooden club ringed with iron spikes."
+  },
+  {
+   "id": "orcs_pack_orc_bone_club",
+   "name": "Orc Bone Club",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SM_Orc_05_Weapon.SM_Orc_05_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "club",
+   "looks": "A curved club studded with fangs and a skull."
+  },
+  {
+   "id": "orcs_pack_orc_hand_axe",
+   "name": "Orc Warhammer",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_06/Mesh/SM_Orc_06_Weapon_01.SM_Orc_06_Weapon_01"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "warhammer",
+   "looks": "A blocky iron hammer head on a ringed shaft."
+  },
+  {
+   "id": "orcs_pack_azrak_s_weapon",
+   "name": "Azrak's Weapon",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Azrak/Mesh/SK_Azrak_Weapon.SK_Azrak_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "club",
+   "looks": "A gnarled, horn-spiked wooden club."
+  },
+  {
+   "id": "orcs_pack_magur_s_weapon",
+   "name": "Magur's Weapon",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Magur/Mesh/SK_Magur_Weapon.SK_Magur_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mace",
+   "looks": "A huge bone shaft topped with a horned skull."
+  },
+  {
+   "id": "orcs_pack_ursag_s_weapon",
+   "name": "Ursag's Horn Blade",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Ursag/Mesh/SK_Ursag_Weapon.SK_Ursag_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed blade",
+   "looks": "A great curved horn blade on a bone-wrapped grip."
+  },
+  {
+   "id": "orcs_pack_shaman_s_totem_staff",
+   "name": "Shaman's Totem Staff",
+   "pack": "14 Orcs Pack",
+   "uid": "3c224616-e998-433c-910b-32901d426103",
+   "folder": "Orcs_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_04/Mesh/SK_Orc_04_Weapon.SK_Orc_04_Weapon"
+   ],
+   "kind": "staff",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "staff",
+   "looks": "A tall staff topped with a skull and hung with charms."
+  },
+  {
+   "id": "animals_warrior_pack_bear_warrior_s_weapon",
+   "name": "Bear Warrior's Weapon",
+   "pack": "Animals Warrior Pack",
+   "uid": "be0d1014-cd06-4fc8-a442-b107ee75b81f",
+   "folder": "Animals_Warrior_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SM_Bear_Weapon.SM_Bear_Weapon"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A dark double axe with spiked wings."
+  },
+  {
+   "id": "animals_warrior_pack_minotaur_s_axe",
+   "name": "Minotaur's Axe",
+   "pack": "Animals Warrior Pack",
+   "uid": "be0d1014-cd06-4fc8-a442-b107ee75b81f",
+   "folder": "Animals_Warrior_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Bull/SM_Bull_Weapon_Mesh.SM_Bull_Weapon_Mesh"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "two-handed axe",
+   "looks": "A heavy steel labrys with a skull at its centre."
+  },
+  {
+   "id": "animals_warrior_pack_crocodile_s_weapon",
+   "name": "Crocodile's Spear",
+   "pack": "Animals Warrior Pack",
+   "uid": "be0d1014-cd06-4fc8-a442-b107ee75b81f",
+   "folder": "Animals_Warrior_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SM_Crocodile_Weapon_Mesh.SM_Crocodile_Weapon_Mesh"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A bone-hung spear with skulls on its shaft."
+  },
+  {
+   "id": "animals_warrior_pack_elephant_s_weapon",
+   "name": "Elephant's Trident",
+   "pack": "Animals Warrior Pack",
+   "uid": "be0d1014-cd06-4fc8-a442-b107ee75b81f",
+   "folder": "Animals_Warrior_Pack",
+   "section": "Fantasy weapons",
+   "group": "Axes, hammers, maces and clubs",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SM_Elephant_Weapon.SM_Elephant_Weapon"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "polearm",
+   "looks": "A black three-pronged polearm."
+  },
+  {
+   "id": "medieval_weapons_spear",
+   "name": "Spear",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Spear.SM_Spear"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A long dark spear with a barbed head."
+  },
+  {
+   "id": "medieval_weapons_war_scythe",
+   "name": "War Scythe",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Scythe.SM_Scythe"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "scythe",
+   "looks": "A black, toothed scythe blade on a short ornate haft."
+  },
+  {
+   "id": "knights_pack_halberd",
+   "name": "Halberd",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Halberd.SM_Knight_01_Halberd"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "halberd",
+   "looks": "A halberd: axe blade, hook and spike on a long wooden pole."
+  },
+  {
+   "id": "knights_pack_banner_spear",
+   "name": "Banner Spear",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Banner_Spear.SM_Knight_01_Banner_Spear"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A plain spear with a pennon fitting."
+  },
+  {
+   "id": "knights_pack_lady_knight_s_spear",
+   "name": "Lady Knight's Spear",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_04/Weapon/SM_Knight_04_Spear.SM_Knight_04_Spear"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "An ornate silver-and-white spear with a broad, winged head."
+  },
+  {
+   "id": "vikings_viking_spear",
+   "name": "Viking Spear",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Spear_01.SM_Viking_Spear_01"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A long Viking spear with a lugged head."
+  },
+  {
+   "id": "warriors_pack_desert_spear",
+   "name": "Desert Spear",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/SM_Mesh/SM_Fantasy_Hero_02_Spear.SM_Fantasy_Hero_02_Spear"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A dark spear wrapped in leather bands."
+  },
+  {
+   "id": "dwarf_pack_broddi_s_spear",
+   "name": "Broddi's Spear",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Dwarf_Pack/Broddi/Mesh/SM_Dwarf_BroddI_Spear_Dwarf_Broddi_Spear_Mesh.SM_Dwarf_BroddI_Spear_Dwarf_Broddi_Spear_Mesh"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A short dwarven spear with metal bands."
+  },
+  {
+   "id": "hive_sherwood_sherwood_spear",
+   "name": "Sherwood Spear",
+   "pack": "Modular Medieval Town",
+   "uid": "720ccb75-32a9-4130-acab-532239760d22",
+   "folder": "Hive_Sherwood",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Hive_Sherwood/Mesh/SM_Spear_01.SM_Spear_01"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A simple wooden spear."
+  },
+  {
+   "id": "primitive_characters_pack_stone_spear",
+   "name": "Stone Spear",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Spears and polearms",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_01/Mesh_Weapon/SM_Primitive_Weapon_01.SM_Primitive_Weapon_01"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spear",
+   "looks": "A stone-tipped wooden spear."
+  },
+  {
+   "id": "primitive_characters_pack_bone_club",
+   "name": "Bone Club",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Primitive weapons",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_01/Mesh_Weapon/SM_Primitive_Weapon_02.SM_Primitive_Weapon_02"
+   ],
+   "kind": "two",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "club",
+   "looks": "A wooden club with stones bound to its head."
+  },
+  {
+   "id": "primitive_characters_pack_stone_axe",
+   "name": "Obsidian Knife",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Primitive weapons",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_01/Mesh_Weapon/SM_Primitive_Weapon_03.SM_Primitive_Weapon_03"
+   ],
+   "kind": "dagger",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "knife",
+   "looks": "A black obsidian blade on a bound handle."
+  },
+  {
+   "id": "primitive_characters_pack_stone_hammer",
+   "name": "Bone Blade",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Primitive weapons",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_01/Mesh_Weapon/SM_Primitive_Weapon_04.SM_Primitive_Weapon_04"
+   ],
+   "kind": "dagger",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "knife",
+   "looks": "A long bone blade with a leather grip."
+  },
+  {
+   "id": "primitive_characters_pack_cavewoman_s_weapon",
+   "name": "Bone Pick",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Primitive weapons",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_02/Mesh_Weapons/SM_Primitive_02_Weapons_01.SM_Primitive_02_Weapons_01"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "pick",
+   "looks": "A bone pick with a horn point."
+  },
+  {
+   "id": "primitive_characters_pack_elder_s_staff",
+   "name": "Toothed Bone Sword",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Primitive weapons",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_03/Mesh_Weapons/SM_Primitive_03_Weapon_01.SM_Primitive_03_Weapon_01"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "blade",
+   "looks": "A bloodied bone blade set with teeth."
+  },
+  {
+   "id": "primitive_characters_pack_shaman_s_staff",
+   "name": "Shaman's Staff",
+   "pack": "Primitive Characters (Pack)",
+   "uid": "3ce14ea2-e944-46b1-afec-e10c50e7fa96",
+   "folder": "Primitive_Characters_Pack",
+   "section": "Fantasy weapons",
+   "group": "Primitive weapons",
+   "meshes": [
+    "/Game/Primitive_Characters_Pack/Mesh/Primitive_04/Weapon_Mesh/SM_Primitive_04_Weapon.SM_Primitive_04_Weapon"
+   ],
+   "kind": "staff",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "staff",
+   "looks": "A crooked staff topped with a ring of bone charms."
+  },
+  {
+   "id": "medieval_weapons_longbow",
+   "name": "Longbow",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Bow.SM_Bow"
+   ],
+   "kind": "bow",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "bow",
+   "looks": "A dark recurve bow with gold ornament."
+  },
+  {
+   "id": "medieval_weapons_crossbow",
+   "name": "Crossbow",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Crossbow.SM_Crossbow"
+   ],
+   "kind": "crossbow",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "crossbow",
+   "looks": "A gilded crossbow with blade-tipped limbs."
+  },
+  {
+   "id": "medieval_weapons_arrow",
+   "name": "Arrow",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Arrow_Var1.SM_Arrow_Var1"
+   ],
+   "kind": "ammo",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "ammunition",
+   "looks": "A dark arrow with a barbed head and black fletching."
+  },
+  {
+   "id": "medieval_weapons_wizard_s_staff",
+   "name": "Wizard's Staff",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Staff.SM_Staff"
+   ],
+   "kind": "staff",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mage's staff",
+   "looks": "An ornate staff topped with a glowing blue gem."
+  },
+  {
+   "id": "houseforge_01_viking_bow",
+   "name": "Viking Bow",
+   "pack": "House Forge: Modular House Building Kit",
+   "uid": "277b975e-2158-41ef-908a-ef08bc26a409",
+   "folder": "HouseForge_01",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WeaponBow/SM_WeaponBow_01a.SM_WeaponBow_01a"
+   ],
+   "kind": "bow",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "bow",
+   "looks": "A plain wooden longbow."
+  },
+  {
+   "id": "dwarf_pack_dwarf_crossbow",
+   "name": "Dwarf Crossbow",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Crossbow.SK_Crossbow"
+   ],
+   "kind": "crossbow",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "crossbow",
+   "looks": "A heavy wooden crossbow with a stirrup."
+  },
+  {
+   "id": "warriors_pack_witch_s_weapon",
+   "name": "Witch's Hooked Staff",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Fantasy weapons",
+   "group": "Bows, crossbows and staves",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE4/Separate/SM_Witch_Weapon.SM_Witch_Weapon"
+   ],
+   "kind": "staff",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "staff",
+   "looks": "A twisted dark staff with a hooked top."
+  },
+  {
+   "id": "medieval_weapons_heater_shield",
+   "name": "Heater Shield",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_1.SM_Shield_1"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "An ornate gold-and-iron shield with a monster's face in relief."
+  },
+  {
+   "id": "medieval_weapons_round_shield",
+   "name": "Beast Shield",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_2.SM_Shield_2"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A shield shaped like a horned beast's face."
+  },
+  {
+   "id": "medieval_weapons_kite_shield",
+   "name": "Kite Shield",
+   "pack": "Dark Fantasy Weapons",
+   "uid": "244607ad-e819-4320-bbc7-687b844b5bed",
+   "folder": "Medieval_Weapons",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_3.SM_Shield_3"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A dark kite shield with a demonic face."
+  },
+  {
+   "id": "knights_pack_templar_shield",
+   "name": "Heraldic Shield",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Shield.SM_Knight_01_Shield"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A heater shield painted with a gold lion on black and gold stripes."
+  },
+  {
+   "id": "knights_pack_eastern_shield",
+   "name": "Eastern Shield",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_02/Weapons/SM_Knight_02_Shield.SM_Knight_02_Shield"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A round, domed shield in black and gold filigree."
+  },
+  {
+   "id": "knights_pack_plate_knight_s_shield",
+   "name": "Plate Knight's Shield",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_03/Weapon/SM_Knight_03_Shield.SM_Knight_03_Shield"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A tall shield with fleurs-de-lis and red stripes."
+  },
+  {
+   "id": "knights_pack_lady_knight_s_shield",
+   "name": "Lady Knight's Shield",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_04/Weapon/SM_Knight_04_Shield.SM_Knight_04_Shield"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A black-and-gold shield with purple gems."
+  },
+  {
+   "id": "vikings_viking_round_shield",
+   "name": "Viking Round Shield",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Shield_01.SM_Viking_Shield_01"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A round wooden shield painted with green knotwork and a steel boss."
+  },
+  {
+   "id": "vikings_painted_viking_shield",
+   "name": "Painted Viking Shield",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Vikings/Mesh_Weapon/SM_Viking_Shield_03.SM_Viking_Shield_03"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A round shield quartered red and white."
+  },
+  {
+   "id": "warriors_pack_desert_shield",
+   "name": "Desert Shield",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/SM_Mesh/SM_Fantasy_Hero_02_Shield.SM_Fantasy_Hero_02_Shield"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A round bronze shield with gold arabesques."
+  },
+  {
+   "id": "dwarf_pack_broddi_s_shield",
+   "name": "Broddi's Shield",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Dwarf_Pack/Broddi/Mesh/SM_Dwarf_BroddI_Shield_Dwarf_Broddi_Sheld_Mesh.SM_Dwarf_BroddI_Shield_Dwarf_Broddi_Sheld_Mesh"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "tower shield",
+   "looks": "A tall stone-grey dwarven tower shield."
+  },
+  {
+   "id": "houseforge_01_village_shield",
+   "name": "Village Shield",
+   "pack": "House Forge: Modular House Building Kit",
+   "uid": "277b975e-2158-41ef-908a-ef08bc26a409",
+   "folder": "HouseForge_01",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/VikingShield/SM_VikingShield_01a.SM_VikingShield_01a"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A round plank shield painted blue and white."
+  },
+  {
+   "id": "hivemind_dock_shield",
+   "name": "Dock Shield",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Shield_01.SM_Shield_01"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A plain round iron-rimmed wooden shield."
+  },
+  {
+   "id": "warcamp_collection_war_camp_shield",
+   "name": "War Camp Shield",
+   "pack": "[Nanite] Medieval War Camp Kit",
+   "uid": "3cc08b13-9cb1-46a5-9bd2-47d743ee82b9",
+   "folder": "WarCamp_Collection",
+   "section": "Fantasy weapons",
+   "group": "Shields",
+   "meshes": [
+    "/Game/WarCamp_Collection/Props/SM_Shield/Meshes/FBX/SM_Shield.SM_Shield"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shield",
+   "looks": "A round shield quartered blue and white."
+  },
+  {
+   "id": "fps_automatic_rifle_02_assault_rifle_fps",
+   "name": "Bullpup Rifle (FPS)",
+   "pack": "FPS Automatic Rifle 02 (Animations)",
+   "uid": "4b9f847b-b641-47b8-acc5-fdefc54d7912",
+   "folder": "FPS_Automatic_Rifle_02",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/FPS_Automatic_Rifle_02/Mesh/AutoRifle/SK_AutoRifle_Full.SK_AutoRifle_Full"
+   ],
+   "kind": "rifle",
+   "clip": "Anim_AutoRifle_Reload",
+   "t": 0.4,
+   "fp": [
+    [
+     "FPS_Automatic_Rifle_02",
+     "AutoRifle",
+     "FPS Automatic Rifle 02"
+    ]
+   ],
+   "use": "assault rifle",
+   "looks": "A black and tan bullpup rifle with a long scope."
+  },
+  {
+   "id": "fps_automatic_rifle_01_carbine_fps",
+   "name": "Carbine (FPS)",
+   "pack": "FPS Automatic Rifle 01 Animations",
+   "uid": "65791a45-5921-48c9-b683-1740fe51b674",
+   "folder": "FPS_Automatic_Rifle_01",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/FPS_Automatic_Rifle_01/Mesh/Automatic_Rifle_01/SK_Automatic_Rifle_01_Basic.SK_Automatic_Rifle_01_Basic"
+   ],
+   "kind": "rifle",
+   "clip": "Anim_Automatic_Rifle_01_Reload_Without_Arms",
+   "t": 0.4,
+   "fp": [
+    [
+     "FPS_Automatic_Rifle_01",
+     "Automatic_Rifle_01",
+     "FPS Automatic Rifle 01"
+    ]
+   ],
+   "use": "carbine",
+   "looks": "A tan carbine on a rail-covered handguard, without sights."
+  },
+  {
+   "id": "automatic_gun_submachine_gun_fps",
+   "name": "Submachine Gun (FPS)",
+   "pack": "FPS Automatic Gun Animations",
+   "uid": "49622a89-4fae-4fe4-8ce4-47724f0e8aed",
+   "folder": "Automatic_Gun",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/Automatic_Gun/Mesh/Automatic_Gun/SK_FPS_Automatic_Gun_Full.SK_FPS_Automatic_Gun_Full"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "Automatic_Gun",
+     "Automatic_Gun",
+     "FPS Automatic Gun"
+    ]
+   ],
+   "use": "submachine gun",
+   "looks": "A compact black SMG with a red-dot sight and a long silencer."
+  },
+  {
+   "id": "fps_automatic_shotgun_automatic_shotgun_fps",
+   "name": "Automatic Shotgun (FPS)",
+   "pack": "FPS Automatic-Shotgun Animations",
+   "uid": "4a25f93c-ec5d-4e98-81b4-c08390724e58",
+   "folder": "FPS_Automatic_Shotgun",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/FPS_Automatic_Shotgun/Mesh/Automatic_Shotgun/SK_Automatic_Shotgun_Full.SK_Automatic_Shotgun_Full"
+   ],
+   "kind": "shotgun",
+   "clip": null,
+   "t": 0.3,
+   "fp": [
+    [
+     "FPS_Automatic_Shotgun",
+     "Automatic_Shotgun",
+     "FPS Automatic-Shotgun"
+    ]
+   ],
+   "use": "shotgun",
+   "looks": "A black magazine-fed combat shotgun with a skeleton stock."
+  },
+  {
+   "id": "mc_environment_assault_rifle",
+   "name": "Assault Rifle",
+   "pack": "Military Base Megapack",
+   "uid": "61202d6c-1bc2-4e5d-b2d5-d005ea8b7c67",
+   "folder": "MC_Environment",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/MC_Environment/Assets/SM_Gun_AssaultRifle.SM_Gun_AssaultRifle"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "assault rifle",
+   "looks": "A classic black assault rifle with a carry handle."
+  },
+  {
+   "id": "mc_environment_pump_shotgun",
+   "name": "Pump Shotgun",
+   "pack": "Military Base Megapack",
+   "uid": "61202d6c-1bc2-4e5d-b2d5-d005ea8b7c67",
+   "folder": "MC_Environment",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/MC_Environment/Assets/SM_Gun_Shotgun.SM_Gun_Shotgun"
+   ],
+   "kind": "shotgun",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shotgun",
+   "looks": "A plain black pump-action shotgun."
+  },
+  {
+   "id": "military_pack_marine_rifle",
+   "name": "Marine Rifle",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Rifle_05/SK_Rifle_05_Body.SK_Rifle_05_Body"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "battle rifle",
+   "looks": "A long black rifle with a rail handguard."
+  },
+  {
+   "id": "female_soldier_pack_riot_gun",
+   "name": "Tactical Rifle",
+   "pack": "Female Soldiers (Pack)",
+   "uid": "ecdc02f6-a5e4-4ee2-8b16-1cd2112b543e",
+   "folder": "Female_Soldier_Pack",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/Female_Soldier_Pack/Mesh/Woman_05/Mesh_Weapon/SK_Woman_05_Weapon_Full_01.SK_Woman_05_Weapon_Full_01"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "assault rifle",
+   "looks": "A tan-and-black rifle with a scope."
+  },
+  {
+   "id": "dystopia_pack_dystopian_machine_gun",
+   "name": "Dystopian Machine Gun",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Weapon_Full/SK_Machine_Gun_Full.SK_Machine_Gun_Full"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "heavy machine gun",
+   "looks": "A twin-barrelled gun on a drum and tank housing."
+  },
+  {
+   "id": "dystopia_pack_dystopian_rifle",
+   "name": "Dystopian Rifle",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Soldier/Mesh_UE4/Weapon/SK_Weapon.SK_Weapon"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "submachine gun",
+   "looks": "A short gun with a folding stock and a sling."
+  },
+  {
+   "id": "npc_old_gangster_tommy_gun",
+   "name": "Tommy Gun",
+   "pack": "Old Gangster",
+   "uid": "0f896299-3dbd-447d-93b1-98da85ea2f81",
+   "folder": "NPC_Old_gangster",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/NPC_Old_gangster/Mesh/Gun/SM_UE4_NPC_Old_gangster_Submachine_gun.SM_UE4_NPC_Old_gangster_Submachine_gun"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "submachine gun",
+   "looks": "A drum-fed tommy gun with a wooden stock."
+  },
+  {
+   "id": "megapost_character_scavenger_rifle",
+   "name": "Double-Barrel Shotgun",
+   "pack": "Customized Post Apocalyptic Characters",
+   "uid": "2f9e8f01-d369-4d32-939a-e22f4d3d60e8",
+   "folder": "MegaPost_Character",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/MegaPost_Character/Mesh/Weapons/SM_Rifle.SM_Rifle"
+   ],
+   "kind": "shotgun",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shotgun",
+   "looks": "A side-by-side shotgun with a blue-taped grip."
+  },
+  {
+   "id": "post_apocalypse_pack_wasteland_rifle",
+   "name": "Lever-Action Shotgun",
+   "pack": "Post-Apocalyptic Characters (Pack)",
+   "uid": "3e123c6d-c51c-4fb6-b787-1e386d637143",
+   "folder": "Post_Apocalypse_Pack",
+   "section": "Modern weapons",
+   "group": "Rifles, machine guns and shotguns",
+   "meshes": [
+    "/Game/Post_Apocalypse_Pack/Mesh/Apocalypse_Girl/SM_Weapon.SM_Weapon"
+   ],
+   "kind": "shotgun",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "shotgun",
+   "looks": "A long lever-action shotgun with a red wooden stock."
+  },
+  {
+   "id": "post_apocalypse_pack_scrap_gun",
+   "name": "Scrap Club",
+   "pack": "Post-Apocalyptic Characters (Pack)",
+   "uid": "3e123c6d-c51c-4fb6-b787-1e386d637143",
+   "folder": "Post_Apocalypse_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Post_Apocalypse_Pack/Mesh/Mutant_01/SM_Weapon_01.SM_Weapon_01"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "club",
+   "looks": "A rag-wrapped club with a blade bound on, a ring at its end."
+  },
+  {
+   "id": "fps_sniper_rifle_large_calibre_sniper_rifle_fps",
+   "name": "Large-Calibre Sniper Rifle (FPS)",
+   "pack": "FPS Sniper Rifle Large Calibre (Animations)",
+   "uid": "9860c746-58de-4c1c-8cdf-70a267c8aa6d",
+   "folder": "FPS_Sniper_Rifle",
+   "section": "Modern weapons",
+   "group": "Sniper rifles and launchers",
+   "meshes": [
+    "/Game/FPS_Sniper_Rifle/Mesh/Sniper_Rifle/SK_Sniper_Rifle_Full.SK_Sniper_Rifle_Full"
+   ],
+   "kind": "sniper",
+   "clip": "Anim_Sniper_Rifle_Shot",
+   "t": 0.3,
+   "fp": [
+    [
+     "FPS_Sniper_Rifle",
+     "Sniper_Rifle",
+     "FPS Sniper Rifle Large Calibre"
+    ]
+   ],
+   "use": "anti-materiel rifle",
+   "looks": "A long tan .50-calibre rifle with a big scope and muzzle brake."
+  },
+  {
+   "id": "fps_sniper_rifle_03_camouflaged_sniper_rifle_fps",
+   "name": "Camouflaged Sniper Rifle (FPS)",
+   "pack": "FPS Sniper Rifle 03 (Animations)",
+   "uid": "296631a1-03df-44d1-b494-9a8a1a167708",
+   "folder": "FPS_Sniper_Rifle_03",
+   "section": "Modern weapons",
+   "group": "Sniper rifles and launchers",
+   "meshes": [
+    "/Game/FPS_Sniper_Rifle_03/Mesh/Sniper_Rifle_03/SK_Sniper_Rifle_03_Full.SK_Sniper_Rifle_03_Full"
+   ],
+   "kind": "sniper",
+   "clip": "Anim_Sniper_Rifle_03_Shot",
+   "t": 0.3,
+   "fp": [
+    [
+     "FPS_Sniper_Rifle_03",
+     "Sniper_Rifle_03",
+     "FPS Sniper Rifle 03"
+    ]
+   ],
+   "use": "sniper rifle",
+   "looks": "A sniper rifle wrapped in ghillie strips."
+  },
+  {
+   "id": "sniper_ghillie_sniper_rifle",
+   "name": "Bipod Sniper Rifle",
+   "pack": "Sniper Soldier",
+   "uid": "70c21220-f9a1-4c3c-8bc2-699508be793f",
+   "folder": "Sniper",
+   "section": "Modern weapons",
+   "group": "Sniper rifles and launchers",
+   "meshes": [
+    "/Game/Sniper/Mesh/Sniper_Rifle/Full_Mesh/SK_Sniper_Rifle.SK_Sniper_Rifle"
+   ],
+   "kind": "sniper",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "sniper rifle",
+   "looks": "A long green rifle with a bipod, scope and silencer."
+  },
+  {
+   "id": "adventures_pack_hunting_rifle",
+   "name": "Hunting Rifle",
+   "pack": "Adventure Characters (Pack)",
+   "uid": "db81464d-fcb5-43a8-b309-5555c392be3a",
+   "folder": "Adventures_Pack",
+   "section": "Modern weapons",
+   "group": "Sniper rifles and launchers",
+   "meshes": [
+    "/Game/Adventures_Pack/Mesh/Adventure_04/Sniper_Rifle/SK_Sniper_Rifle_Full.SK_Sniper_Rifle_Full"
+   ],
+   "kind": "sniper",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "marksman rifle",
+   "looks": "A scoped rifle with a thumbhole stock and rag-wrapped barrel."
+  },
+  {
+   "id": "fps_rocket_launcher_rocket_launcher_fps",
+   "name": "Rocket Launcher (FPS)",
+   "pack": "FPS Rocket Launcher Animations",
+   "uid": "93bd04a5-1ea9-4d26-98d8-80577c201ec5",
+   "folder": "FPS_Rocket_Launcher",
+   "section": "Modern weapons",
+   "group": "Sniper rifles and launchers",
+   "meshes": [
+    "/Game/FPS_Rocket_Launcher/Mesh/Rocket_Launcher/SK_Rocket_Launcher.SK_Rocket_Launcher"
+   ],
+   "kind": "launcher",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Rocket_Launcher",
+     "Rocket_Launcher",
+     "FPS Rocket Launcher"
+    ]
+   ],
+   "use": "rocket launcher",
+   "looks": "A shoulder-fired RPG launcher with a wooden heat guard."
+  },
+  {
+   "id": "fps_pistol_single_pistol_fps",
+   "name": "Pistol (FPS)",
+   "pack": "FPS Pistol (Single)",
+   "uid": "fd81af73-be14-4b89-894d-fb3cfd5e2b67",
+   "folder": "FPS_Pistol_Single",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/FPS_Pistol_Single/Mesh/Pistol/SK_Pistol.SK_Pistol"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.4,
+   "fp": [
+    [
+     "FPS_Pistol_Single",
+     "Pistol_Single",
+     "FPS Pistol (Single)"
+    ]
+   ],
+   "use": "pistol",
+   "looks": "A green-framed polymer pistol (the Tarantula)."
+  },
+  {
+   "id": "mc_environment_service_pistol",
+   "name": "Service Pistol",
+   "pack": "Military Base Megapack",
+   "uid": "61202d6c-1bc2-4e5d-b2d5-d005ea8b7c67",
+   "folder": "MC_Environment",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/MC_Environment/Assets/SM_Gun_Pistol.SM_Gun_Pistol"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "pistol",
+   "looks": "A worn black service pistol."
+  },
+  {
+   "id": "adventures_pack_adventurer_s_pistol",
+   "name": "Silenced Revolver",
+   "pack": "Adventure Characters (Pack)",
+   "uid": "db81464d-fcb5-43a8-b309-5555c392be3a",
+   "folder": "Adventures_Pack",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/Adventures_Pack/Mesh/Adventure_03/Weapons/SK_Gun_Full.SK_Gun_Full"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "revolver",
+   "looks": "A revolver with a wrapped grip and a long perforated silencer."
+  },
+  {
+   "id": "npc_sailor_custom_flintlock_pistol",
+   "name": "Long-Barrel Revolver",
+   "pack": "NPC Sailor (Adventure)",
+   "uid": "e33244ec-02db-4d09-a96f-9cb11ec5f69a",
+   "folder": "NPC_Sailor_custom",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/NPC_Sailor_custom/Mesh/Mesh_UE4/Separate/SM_UE4_NPC_Sailor_custom_Gun.SM_UE4_NPC_Sailor_custom_Gun"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "revolver",
+   "looks": "A long-barrelled revolver with a white grip."
+  },
+  {
+   "id": "megapost_character_sawn_off",
+   "name": "Flare Pistol",
+   "pack": "Customized Post Apocalyptic Characters",
+   "uid": "2f9e8f01-d369-4d32-939a-e22f4d3d60e8",
+   "folder": "MegaPost_Character",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/MegaPost_Character/Mesh/Weapons/SM_Gun_02.SM_Gun_02"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "signal pistol",
+   "looks": "A short, wide-bored flare pistol."
+  },
+  {
+   "id": "safehouse_semi_automatic_pistol",
+   "name": "Old Revolver",
+   "pack": "Safe House VOL.1 - Supplies and Guns (Nanite and Low Poly)",
+   "uid": "46c37125-b9e2-48f1-a5a2-a432959da27f",
+   "folder": "Safehouse",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/Safehouse/VOL1/Meshes/LP/SM_Pistol_34a.SM_Pistol_34a"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "revolver",
+   "looks": "A worn revolver with a wooden grip."
+  },
+  {
+   "id": "safehouse_revolver",
+   "name": "Magnum Revolver",
+   "pack": "Safe House VOL.1 - Supplies and Guns (Nanite and Low Poly)",
+   "uid": "46c37125-b9e2-48f1-a5a2-a432959da27f",
+   "folder": "Safehouse",
+   "section": "Modern weapons",
+   "group": "Pistols and revolvers",
+   "meshes": [
+    "/Game/Safehouse/VOL1/Meshes/LP/SM_Revolver_12a.SM_Revolver_12a"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "revolver",
+   "looks": "A heavy revolver with a checkered wooden grip."
+  },
+  {
+   "id": "fps_pistol_knife_combat_knife_fps",
+   "name": "Combat Knife (FPS)",
+   "pack": "FPS Pistol And Knife Animations",
+   "uid": "daffc36a-8fb6-4b0b-9b1a-75bb72020184",
+   "folder": "FPS_Pistol_Knife",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Pistol_Knife/Mesh/SM_Mesh/SM_Knife.SM_Knife"
+   ],
+   "kind": "knife",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Pistol_Knife",
+     "Pistol_Knife",
+     "FPS Pistol And Knife"
+    ]
+   ],
+   "use": "knife",
+   "looks": "A fighting knife with a stacked-leather grip."
+  },
+  {
+   "id": "fps_starter_pack_kitchen_knife_fps",
+   "name": "Survival Knife (FPS)",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Knife_01.SM_Knife_01"
+   ],
+   "kind": "knife",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Knife_",
+     "FPS Starter Pack (knife)"
+    ]
+   ],
+   "use": "knife",
+   "looks": "A dark drop-point knife with a contoured grip."
+  },
+  {
+   "id": "fps_starter_pack_fire_axe_fps",
+   "name": "Tactical Axe (FPS)",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Axe_01.SM_Axe_01"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Two_Handed",
+     "FPS Starter Pack (two-handed)"
+    ]
+   ],
+   "use": "axe",
+   "looks": "A black tactical tomahawk."
+  },
+  {
+   "id": "fps_starter_pack_ice_axe_fps",
+   "name": "Ice Axe (FPS)",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Ice_Axe.SM_Ice_Axe"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Two_Handed",
+     "FPS Starter Pack (two-handed)"
+    ]
+   ],
+   "use": "axe",
+   "looks": "A curved red ice axe."
+  },
+  {
+   "id": "fps_starter_pack_baseball_bat_fps",
+   "name": "Nail Bat (FPS)",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Bita.SM_Bita"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Two_Handed",
+     "FPS Starter Pack (two-handed)"
+    ]
+   ],
+   "use": "club",
+   "looks": "A wooden bat studded with nails."
+  },
+  {
+   "id": "fps_starter_pack_stun_gun_fps",
+   "name": "Stun Gun (FPS)",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Stun_Gun.SK_Stun_Gun"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Stun",
+     "FPS Starter Pack (stun gun)"
+    ]
+   ],
+   "use": "stun gun",
+   "looks": "A black handheld stun gun with a wrist strap."
+  },
+  {
+   "id": "fps_starter_pack_riot_shield_and_club_fps",
+   "name": "Riot Shield and Club (FPS)",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Shield_Full.SK_Shield_Full",
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Club.SM_Club"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Shield_And_Club",
+     "FPS Starter Pack (shield and club)"
+    ]
+   ],
+   "use": "shield and club",
+   "looks": "A canvas-covered riot shield with a viewport (its club alongside)."
+  },
+  {
+   "id": "fps_pistol_shield_ballistic_shield_fps",
+   "name": "Ballistic Shield (FPS)",
+   "pack": "FPS ANIMATIONS PISTOL (TACTICAL SHIELD)",
+   "uid": "9f81d42c-fbe9-49e6-aa6b-a227edb3f36f",
+   "folder": "FPS_Pistol_Shield",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/FPS_Pistol_Shield/Mesh/Shield/SK_Shield_Full.SK_Shield_Full"
+   ],
+   "kind": "shield",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Pistol_Shield",
+     "Pistol_Shield",
+     "FPS Pistol (Tactical Shield)"
+    ]
+   ],
+   "use": "ballistic shield",
+   "looks": "A khaki ballistic shield with a window and lights."
+  },
+  {
+   "id": "npc_old_gangster_baseball_bat",
+   "name": "Baseball Bat",
+   "pack": "Old Gangster",
+   "uid": "0f896299-3dbd-447d-93b1-98da85ea2f81",
+   "folder": "NPC_Old_gangster",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/NPC_Old_gangster/Mesh/Mesh_UE4/Separate/SM_UE4_NPC_Old_gangster_Baseball_bat.SM_UE4_NPC_Old_gangster_Baseball_bat"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "club",
+   "looks": "A blood-stained wooden baseball bat."
+  },
+  {
+   "id": "npc_old_gangster_butcher_s_cleaver",
+   "name": "Butcher's Cleaver",
+   "pack": "Old Gangster",
+   "uid": "0f896299-3dbd-447d-93b1-98da85ea2f81",
+   "folder": "NPC_Old_gangster",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/NPC_Old_gangster/Mesh/Mesh_UE4/Separate/SM_UE4_NPC_Old_gangster_Cleaver.SM_UE4_NPC_Old_gangster_Cleaver"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "cleaver",
+   "looks": "A large meat cleaver."
+  },
+  {
+   "id": "adventures_pack_spiked_club",
+   "name": "Baton",
+   "pack": "Adventure Characters (Pack)",
+   "uid": "db81464d-fcb5-43a8-b309-5555c392be3a",
+   "folder": "Adventures_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Adventures_Pack/Mesh/Adventure_05/Shield_And_Club/SM_Club.SM_Club"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "baton",
+   "looks": "A black police baton."
+  },
+  {
+   "id": "post_apocalypse_pack_crazy_s_weapon",
+   "name": "Crowbar",
+   "pack": "Post-Apocalyptic Characters (Pack)",
+   "uid": "3e123c6d-c51c-4fb6-b787-1e386d637143",
+   "folder": "Post_Apocalypse_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Post_Apocalypse_Pack/Mesh/Crazy/SM_Crazy_Weapon.SM_Crazy_Weapon"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "crowbar",
+   "looks": "A red crowbar."
+  },
+  {
+   "id": "post_apocalypse_pack_backsword",
+   "name": "Bloody Cleaver",
+   "pack": "Post-Apocalyptic Characters (Pack)",
+   "uid": "3e123c6d-c51c-4fb6-b787-1e386d637143",
+   "folder": "Post_Apocalypse_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Post_Apocalypse_Pack/Mesh/Zombie/SM_Backsword.SM_Backsword"
+   ],
+   "kind": "melee",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "cleaver",
+   "looks": "A blood-smeared cleaver."
+  },
+  {
+   "id": "military_pack_military_knife",
+   "name": "Kukri",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Soldier_Marine/SM_Knife.SM_Knife"
+   ],
+   "kind": "knife",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "knife",
+   "looks": "A curved black kukri."
+  },
+  {
+   "id": "sniper_sniper_s_knife",
+   "name": "Sniper's Knife",
+   "pack": "Sniper Soldier",
+   "uid": "70c21220-f9a1-4c3c-8bc2-699508be793f",
+   "folder": "Sniper",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Sniper/Mesh/Sniper_UE4/SM_Mesh/SM_Sniper_Knife_02.SM_Sniper_Knife_02"
+   ],
+   "kind": "knife",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "knife",
+   "looks": "A plain combat knife with a leather grip."
+  },
+  {
+   "id": "military_pack_frag_grenade",
+   "name": "Frag Grenade",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Soldier_Sapper/SM_Grenade_Mesh.SM_Grenade_Mesh"
+   ],
+   "kind": "grenade",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "grenade",
+   "looks": "An olive fragmentation grenade."
+  },
+  {
+   "id": "dystopia_pack_dystopian_grenade",
+   "name": "Stick Grenade",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SM_Grenade.SM_Grenade"
+   ],
+   "kind": "grenade",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "grenade",
+   "looks": "A green stick grenade with a wooden handle."
+  },
+  {
+   "id": "military_pack_rocket",
+   "name": "Rocket",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "section": "Modern weapons",
+   "group": "Knives, melee weapons and grenades",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Rocket_Rocket_mesh.SM_Rocket_Rocket_mesh"
+   ],
+   "kind": "ammo",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "ammunition",
+   "looks": "A white rocket with a yellow nose."
+  },
+  {
+   "id": "sci_fi_characters_pack_sci_fi_rifle",
+   "name": "Sci-Fi Staff Weapon",
+   "pack": "Sci-Fi Characters (Pack)",
+   "uid": "2079cbeb-ec9f-425e-b5c9-feb92d96321c",
+   "folder": "Sci_Fi_Characters_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Characters_Pack/Mesh/Sci_Fi_Character_05/SK_Sci_Fi_Character_05_Weapon.SK_Sci_Fi_Character_05_Weapon"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "staff / polearm",
+   "looks": "A long black staff with a fan of blades at its head."
+  },
+  {
+   "id": "sci_fi_characters_pack_vol_2_defender_s_cannon",
+   "name": "Defender's Cannon",
+   "pack": "Sci-Fi Characters (Pack) Vol.2",
+   "uid": "d919d2b9-72be-4f86-a715-b8ce18e415f1",
+   "folder": "Sci_Fi_Characters_Pack_Vol_2",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_10/Weapon/SK_Defender_Weapon.SK_Defender_Weapon"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "heavy gun",
+   "looks": "A bulky black-and-yellow arm cannon."
+  },
+  {
+   "id": "sci_fi_characters_pack_vol_2_guard_s_rifle",
+   "name": "Guard's Halberd",
+   "pack": "Sci-Fi Characters (Pack) Vol.2",
+   "uid": "d919d2b9-72be-4f86-a715-b8ce18e415f1",
+   "folder": "Sci_Fi_Characters_Pack_Vol_2",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Guard/SM_Guard_Weapon.SM_Guard_Weapon"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "polearm",
+   "looks": "A black polearm with a forked red-and-silver head."
+  },
+  {
+   "id": "sci_fi_mercenary_pack_bounty_hunter_s_pistol",
+   "name": "Bounty Hunter's Pistol",
+   "pack": "Sci-Fi Mercenaries Pack",
+   "uid": "e0efc01c-ad86-428c-9103-d1f92c80db40",
+   "folder": "Sci_Fi_Mercenary_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Sci_Fi_Mercenary_Pack/Mesh/Head_Hunter/Mesh_Gun/SK_Head_Hunter_Gun.SK_Head_Hunter_Gun"
+   ],
+   "kind": "pistol",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "heavy pistol",
+   "looks": "A gold-engraved revolver-blaster."
+  },
+  {
+   "id": "sci_fi_mercenary_pack_marauder_rifle",
+   "name": "Marauder Rifle",
+   "pack": "Sci-Fi Mercenaries Pack",
+   "uid": "e0efc01c-ad86-428c-9103-d1f92c80db40",
+   "folder": "Sci_Fi_Mercenary_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Sci_Fi_Mercenary_Pack/Mesh/Marauder/Mesh_Weapon/SK_Marauder_Rifle_Full.SK_Marauder_Rifle_Full"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "rifle",
+   "looks": "A chunky yellow-and-grey rifle with a big magazine."
+  },
+  {
+   "id": "sci_fi_mercenary_pack_robot_s_arm_guns",
+   "name": "Robot's Arm Guns",
+   "pack": "Sci-Fi Mercenaries Pack",
+   "uid": "e0efc01c-ad86-428c-9103-d1f92c80db40",
+   "folder": "Sci_Fi_Mercenary_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Sci_Fi_Mercenary_Pack/Mesh/Robot/Mesh_UE4/Separate/SK_Robot_Weapons.SK_Robot_Weapons"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "twin guns",
+   "looks": "Two camouflaged gun barrels for a robot's arms."
+  },
+  {
+   "id": "aliens_warrior_pack_alien_sniper_rifle",
+   "name": "Alien Sniper Rifle",
+   "pack": "Aliens Warrior (Pack)",
+   "uid": "a683cdf2-a1b1-4c35-b788-eeae62c2ed37",
+   "folder": "Aliens_Warrior_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_03/Gun/Full/SK_Sci_Fi_Automatic_Sniper_Rifle_Full.SK_Sci_Fi_Automatic_Sniper_Rifle_Full"
+   ],
+   "kind": "sniper",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "sniper rifle",
+   "looks": "A long black-and-gold sniper rifle with a scope."
+  },
+  {
+   "id": "aliens_warrior_pack_alien_blaster",
+   "name": "Alien Blaster",
+   "pack": "Aliens Warrior (Pack)",
+   "uid": "a683cdf2-a1b1-4c35-b788-eeae62c2ed37",
+   "folder": "Aliens_Warrior_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_01/Mesh_Weapon_01/SM_UE4_Alien_Weapon_01.SM_UE4_Alien_Weapon_01"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "rifle",
+   "looks": "A sleek green alien rifle with vents along its barrel."
+  },
+  {
+   "id": "soldier_future_01_future_assault_rifle",
+   "name": "Future Assault Rifle",
+   "pack": "Soldier Future 01",
+   "uid": "74bb0b33-bccb-4e35-b996-3fac2ad6960c",
+   "folder": "Soldier_Future_01",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Soldier_Future_01/Mesh/Automatic_Rifle/SK_Automatic_Rifle_Full.SK_Automatic_Rifle_Full"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "assault rifle",
+   "looks": "A long tan rifle with a suppressor and optics."
+  },
+  {
+   "id": "soldier_future_03_future_rocket_launcher",
+   "name": "Rocket-Propelled Grenade",
+   "pack": "Soldier Future 03",
+   "uid": "75bde62a-fbe4-432f-99b2-00130b03e2a0",
+   "folder": "Soldier_Future_03",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Soldier_Future_03/Mesh/Mesh_Rocket_launcher/SK_Rocket.SK_Rocket"
+   ],
+   "kind": "ammo",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "ammunition",
+   "looks": "A tan RPG warhead."
+  },
+  {
+   "id": "astronauts_pack_space_marine_s_gun",
+   "name": "Space Marine's Gun",
+   "pack": "Astronauts (Pack)",
+   "uid": "69267151-497d-494f-9592-551cd39246a2",
+   "folder": "Astronauts_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Astronauts_Pack/Mesh/Astronaut_Soldier/Weapon/SK_Astronaut_Soldier_Weapon_Full.SK_Astronaut_Soldier_Weapon_Full"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "arm-mounted gun",
+   "looks": "A white articulated gun mount with fittings."
+  },
+  {
+   "id": "cybercharacter_pack_cyber_rifle",
+   "name": "Cyber Rifle",
+   "pack": "Cyber Characters Pack",
+   "uid": "f4631e9d-bea1-4258-a5fa-ead7247dc461",
+   "folder": "CyberCharacter_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/CyberCharacter_Pack/CybeHucker/Mesh/SM_Weapon.SM_Weapon"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "rifle",
+   "looks": "A black and silver cyberpunk rifle."
+  },
+  {
+   "id": "dystopia_pack_flamethrower",
+   "name": "Flamethrower",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SK_Firegun_Base.SK_Firegun_Base",
+    "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SK_Firegun_Hose.SK_Firegun_Hose",
+    "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SK_Firegun_Backpack.SK_Firegun_Backpack"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "flamethrower",
+   "looks": "A flamethrower gun on a hose to twin fuel tanks."
+  },
+  {
+   "id": "aliens_warrior_pack_alien_wrist_cannons",
+   "name": "Alien Wrist Cannons",
+   "pack": "Aliens Warrior (Pack)",
+   "uid": "a683cdf2-a1b1-4c35-b788-eeae62c2ed37",
+   "folder": "Aliens_Warrior_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Mesh_Weapon_04/SK_Alien_Weapon_04_Full_01.SK_Alien_Weapon_04_Full_01"
+   ],
+   "kind": "rifle",
+   "clip": "Anim_Alien_Warrior_04_Shot_Anim",
+   "t": 0.3,
+   "fp": [],
+   "use": "arm cannons",
+   "looks": "Twin mechanical wrist-mounted cannons with claw guards."
+  },
+  {
+   "id": "sci_fi_hands_knife_energy_knife_fps",
+   "name": "Energy Knife (FPS)",
+   "pack": "Sci-Fi Hands With Knife (Animation)",
+   "uid": "57215d02-5be7-4c74-bcfb-f1ae30012a7a",
+   "folder": "Sci_Fi_Hands_Knife",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Hands_Knife/Mesh/Knife/SM_Sci_Fi_Knife.SM_Sci_Fi_Knife"
+   ],
+   "kind": "knife",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "Sci_Fi_Hands_Knife",
+     "Knife",
+     "Sci-Fi Hands With Knife"
+    ]
+   ],
+   "use": "knife",
+   "looks": "A black serrated tactical knife."
+  },
+  {
+   "id": "sci_fi_hands_arm_shield_fps",
+   "name": "Arm Shield (FPS)",
+   "pack": "FPS Sci-Fi Hands Empty",
+   "uid": "1c1fbb6f-1a9a-42d7-b0c2-80837c55c564",
+   "folder": "Sci_Fi_Hands",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Hands/Mesh/Shield/SK_Sci_Fi_Shield.SK_Sci_Fi_Shield"
+   ],
+   "kind": "shield",
+   "clip": "Anim_Sci_Fi_Shield_Open",
+   "t": 0.9,
+   "fp": [
+    [
+     "Sci_Fi_Hands",
+     "Empty",
+     "FPS Sci-Fi Hands Empty"
+    ]
+   ],
+   "use": "energy shield",
+   "looks": "A folded arm device that opens into a round blue energy shield."
+  },
+  {
+   "id": "sci_fi_characters_pack_sci_fi_sword",
+   "name": "Sci-Fi Sword",
+   "pack": "Sci-Fi Characters (Pack)",
+   "uid": "2079cbeb-ec9f-425e-b5c9-feb92d96321c",
+   "folder": "Sci_Fi_Characters_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Characters_Pack/Mesh/Sci_Fi_Character_01/SM_Sci_Fi_Sword.SM_Sci_Fi_Sword"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "energy sword",
+   "looks": "A sword with a glowing blue blade."
+  },
+  {
+   "id": "sci_fi_characters_pack_sci_fi_blade",
+   "name": "Sci-Fi Blade",
+   "pack": "Sci-Fi Characters (Pack)",
+   "uid": "2079cbeb-ec9f-425e-b5c9-feb92d96321c",
+   "folder": "Sci_Fi_Characters_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Characters_Pack/Mesh/Sci_Fi_Character_03/SM_Sci_Fi_Sword_02.SM_Sci_Fi_Sword_02"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "energy blade",
+   "looks": "A black blade outlined in orange light."
+  },
+  {
+   "id": "sci_fi_characters_pack_vol_2_reaper_s_scythe",
+   "name": "Reaper's Scythe",
+   "pack": "Sci-Fi Characters (Pack) Vol.2",
+   "uid": "d919d2b9-72be-4f86-a715-b8ce18e415f1",
+   "folder": "Sci_Fi_Characters_Pack_Vol_2",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_07/SM_Scythe.SM_Scythe"
+   ],
+   "kind": "spear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "scythe",
+   "looks": "A black scythe with a curved blade."
+  },
+  {
+   "id": "dystopia_pack_dystopian_sword",
+   "name": "Wrist Blade",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Weapon_Full/SM_Sword_Full.SM_Sword_Full"
+   ],
+   "kind": "sword",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "wrist blade",
+   "looks": "A twin blade mounted on an armoured gauntlet."
+  },
+  {
+   "id": "aliens_warrior_pack_alien_mace",
+   "name": "Alien Mace",
+   "pack": "Aliens Warrior (Pack)",
+   "uid": "a683cdf2-a1b1-4c35-b788-eeae62c2ed37",
+   "folder": "Aliens_Warrior_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_02/Separate/SM_UE4_Alien_Warrior_02_Mace.SM_UE4_Alien_Warrior_02_Mace"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mace",
+   "looks": "A spiked metal ball on a long staff."
+  },
+  {
+   "id": "aliens_warrior_pack_alien_claw_blades",
+   "name": "Alien Claw Blades",
+   "pack": "Aliens Warrior (Pack)",
+   "uid": "a683cdf2-a1b1-4c35-b788-eeae62c2ed37",
+   "folder": "Aliens_Warrior_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy blades and shields",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Separate/SK_UE4_Alien_Warrior_04_Weapon.SK_UE4_Alien_Warrior_04_Weapon"
+   ],
+   "kind": "one",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "claws",
+   "looks": "A pair of long curved blades worn on the forearms."
+  },
+  {
+   "id": "aliens_warrior_pack_magma_alien_s_weapon",
+   "name": "Magma Alien's Weapon",
+   "pack": "Aliens Warrior (Pack)",
+   "uid": "a683cdf2-a1b1-4c35-b788-eeae62c2ed37",
+   "folder": "Aliens_Warrior_Pack",
+   "section": "Futuristic weapons",
+   "group": "Energy and sci-fi guns",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_05/Weapon/SM_Alien_Warrior_05_Weapon.SM_Alien_Warrior_05_Weapon"
+   ],
+   "kind": "rifle",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "arm gun",
+   "looks": "A heavy mechanical gun with pipes and pistons."
+  },
+  {
+   "id": "fps_starter_pack_chocolate_bar",
+   "name": "Chocolate Bar",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Chocolate_01.SK_Chocolate_01"
+   ],
+   "kind": "item",
+   "clip": "Anim_Chocolate_01_Hide",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Chocolate",
+     "FPS Starter Pack (chocolate)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A bar of milk chocolate in an orange wrapper."
+  },
+  {
+   "id": "fps_starter_pack_canned_sardines",
+   "name": "Canned Sardines",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sardines.SK_Sardines"
+   ],
+   "kind": "item",
+   "clip": "Anim_Sardines_Open",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Sardines",
+     "FPS Starter Pack (sardines)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A blue tin of sardines with a ring-pull lid."
+  },
+  {
+   "id": "fps_starter_pack_canned_sprats",
+   "name": "Canned Sprats",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sprats.SK_Sprats"
+   ],
+   "kind": "item",
+   "clip": "Anim_Sprats_Open",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Sprats",
+     "FPS Starter Pack (sprats)"
+    ]
+   ],
+   "use": "food",
+   "looks": "An oval tin of sprats in oil."
+  },
+  {
+   "id": "fps_starter_pack_canned_meatballs",
+   "name": "Canned Meatballs",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Meatball.SK_Meatball"
+   ],
+   "kind": "item",
+   "clip": "Anim_Meatball_Open",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Meatball",
+     "FPS Starter Pack (meatballs)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A foil tray of beef meatballs."
+  },
+  {
+   "id": "fps_starter_pack_porridge",
+   "name": "Porridge",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Porridge_Plate.SK_Porridge_Plate"
+   ],
+   "kind": "item",
+   "clip": "Anim_Porridge_Plate_Open",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Porridge",
+     "FPS Starter Pack (porridge)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A sealed pot of porridge."
+  },
+  {
+   "id": "fps_starter_pack_jar_of_food",
+   "name": "Canned Stew",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Jar.SK_Jar"
+   ],
+   "kind": "item",
+   "clip": "Anim_Jar_Open",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Jar",
+     "FPS Starter Pack (jar)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A tin of stewed meat with a green label."
+  },
+  {
+   "id": "fps_starter_pack_soda_can",
+   "name": "Soda Can",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Soda.SK_Soda"
+   ],
+   "kind": "item",
+   "clip": "Anim_Soda_Open_Close",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Soda",
+     "FPS Starter Pack (soda)"
+    ]
+   ],
+   "use": "drink",
+   "looks": "A red and orange soda can."
+  },
+  {
+   "id": "fps_starter_pack_juice_carton",
+   "name": "Juice Carton",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Juce.SK_Juce"
+   ],
+   "kind": "item",
+   "clip": "Anim_Juce_Open_Close",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Juce",
+     "FPS Starter Pack (juice)"
+    ]
+   ],
+   "use": "drink",
+   "looks": "A fruit juice carton."
+  },
+  {
+   "id": "fps_starter_pack_lemonade_bottle",
+   "name": "Lemonade Bottle",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lemonade_Bottle.SK_Lemonade_Bottle"
+   ],
+   "kind": "item",
+   "clip": "Anim_Lemonade_Bottle_Open_Close",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Lemonade",
+     "FPS Starter Pack (lemonade)"
+    ]
+   ],
+   "use": "drink",
+   "looks": "A brown swing-top bottle."
+  },
+  {
+   "id": "fps_starter_pack_coffee_mug",
+   "name": "Coffee Mug",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Mug.SK_Mug"
+   ],
+   "kind": "item",
+   "clip": "Anim_Coffe_Rotation",
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Coffe",
+     "FPS Starter Pack (coffee)"
+    ]
+   ],
+   "use": "drink",
+   "looks": "A dark enamel mug of coffee."
+  },
+  {
+   "id": "fps_starter_pack_sausage",
+   "name": "Sausage",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sausage.SK_Sausage"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Fish_Sausage",
+     "FPS Starter Pack (fish, sausage, marshmallows)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A sausage on a roasting stick."
+  },
+  {
+   "id": "fps_starter_pack_fish",
+   "name": "Fish",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Fish.SK_Fish"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.6,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Fish_Sausage",
+     "FPS Starter Pack (fish, sausage, marshmallows)"
+    ]
+   ],
+   "use": "food",
+   "looks": "A small fish on a roasting stick."
+  },
+  {
+   "id": "diner_colection_loaf_of_bread",
+   "name": "Loaf of Bread",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_Bread_Var/Meshes/FBX/SM_Bread_Var1.SM_Bread_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "food",
+   "looks": "A round crusty loaf."
+  },
+  {
+   "id": "diner_colection_cheese_wheel",
+   "name": "Cheese Wheel",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_Cheese/Meshes/FBX/SM_Cheese_Var1.SM_Cheese_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "food",
+   "looks": "A cheese wheel with a wedge cut out."
+  },
+  {
+   "id": "diner_colection_apple",
+   "name": "Apple",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_Fruits/Meshes/FBX/SM_Fruit_Apple.SM_Fruit_Apple"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "food",
+   "looks": "A red apple."
+  },
+  {
+   "id": "diner_colection_joint_of_meat",
+   "name": "Steak",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_PieceMeat/Meshes/FBX/SM_PieceMeat.SM_PieceMeat"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "food",
+   "looks": "A raw steak."
+  },
+  {
+   "id": "diner_colection_wine_bottle",
+   "name": "Wine Bottle",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_WineBottles/Meshes/FBX/SM_WineBottles_Var1.SM_WineBottles_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "drink",
+   "looks": "A dark, faceted wine bottle."
+  },
+  {
+   "id": "diner_colection_wooden_cup",
+   "name": "Wooden Tankard",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_WoodCup/Meshes/FBX/SM_WoodCup_SM_WoodCup.SM_WoodCup_SM_WoodCup"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "drink",
+   "looks": "A faceted wooden tankard."
+  },
+  {
+   "id": "diner_colection_silver_cup",
+   "name": "Silver Goblet",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_SilverCup/Meshes/FBX/SM_SilverCup.SM_SilverCup"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "drink / treasure",
+   "looks": "A tall silver goblet."
+  },
+  {
+   "id": "gothic_props_chalice",
+   "name": "Chalice",
+   "pack": "Medieval Furniture Props",
+   "uid": "aa584fda-82a3-4f6f-8675-e2f8fab14daf",
+   "folder": "Gothic_Props",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Gothic_Props/Assets/Meshes/SM_Prop_Chalice_A.SM_Prop_Chalice_A"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "drink / treasure",
+   "looks": "An embossed bronze chalice."
+  },
+  {
+   "id": "scene_bazaar_vol1_flatbread",
+   "name": "Flatbread",
+   "pack": "Bazaar",
+   "uid": "ccde8d34-48fc-4876-b1cd-1658af34ffbb",
+   "folder": "Scene_Bazaar_Vol1",
+   "section": "Non-weapon items",
+   "group": "Food and drink",
+   "meshes": [
+    "/Game/Scene_Bazaar_Vol1/Assets/MS/3D/His_Baz_Food_Bread_Naan_01/SM_His_Baz_Food_Bread_Naan_01.SM_His_Baz_Food_Bread_Naan_01"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "food",
+   "looks": "A round naan flatbread (a Megascans scan)."
+  },
+  {
+   "id": "fps_starter_pack_syringe",
+   "name": "Vaccine Gun",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_01.SK_Syringe_01"
+   ],
+   "kind": "item",
+   "clip": "Anim_Syringe_01_Push",
+   "t": 0.7,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Syringe",
+     "FPS Starter Pack (syringes)"
+    ]
+   ],
+   "use": "healing item",
+   "looks": "A pistol-grip injector with a vial on top."
+  },
+  {
+   "id": "fps_starter_pack_auto_injector",
+   "name": "Syringe",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_02.SK_Syringe_02"
+   ],
+   "kind": "item",
+   "clip": "Anim_Syringe_02_Push",
+   "t": 0.7,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Syringe",
+     "FPS Starter Pack (syringes)"
+    ]
+   ],
+   "use": "healing item",
+   "looks": "A black syringe."
+  },
+  {
+   "id": "fps_starter_pack_stim_syringe",
+   "name": "Dosing Syringe",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_03.SK_Syringe_03"
+   ],
+   "kind": "item",
+   "clip": "Anim_Syringe_03_Push",
+   "t": 0.7,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Syringe",
+     "FPS Starter Pack (syringes)"
+    ]
+   ],
+   "use": "healing item",
+   "looks": "A blue dosing syringe with a vial and finger loops."
+  },
+  {
+   "id": "fps_starter_pack_hip_flask",
+   "name": "Canteen",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Flask.SK_Flask"
+   ],
+   "kind": "item",
+   "clip": "Anim_Flask_Open_Close",
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Flask",
+     "FPS Starter Pack (flask)"
+    ]
+   ],
+   "use": "drink",
+   "looks": "A water canteen in a khaki cover."
+  },
+  {
+   "id": "diner_colection_potion",
+   "name": "Potion",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_Potions_Var/Meshes/FBX/SM_Potions_Var1.SM_Potions_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "potion",
+   "looks": "A dark purple potion in a round corked bottle."
+  },
+  {
+   "id": "diner_colection_tall_potion",
+   "name": "Tall Potion",
+   "pack": "(Nanite) Medieval Food & Dining Kit - Food Props",
+   "uid": "a694f62c-fe40-4227-b556-d9e17652e69e",
+   "folder": "Diner_Colection",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/Diner_Colection/Props/SM_Potions_Var/Meshes/FBX/SM_Potions_Var2.SM_Potions_Var2"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "potion",
+   "looks": "A green potion in a square corked bottle."
+  },
+  {
+   "id": "abandoned_hospital_pill_bottle",
+   "name": "Pill",
+   "pack": "Abandoned Hospital Mortuary Environment",
+   "uid": "ef1e3661-2b7d-47ec-af8f-a7c402433bbb",
+   "folder": "Abandoned_Hospital",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/Abandoned_Hospital/Meshs/Props/SM_Pill_01.SM_Pill_01"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "healing item",
+   "looks": "A round white tablet scored with a cross."
+  },
+  {
+   "id": "hospital_vol1_medical_bag",
+   "name": "Medical Bag",
+   "pack": "Hospital Props VOL.1 - Interior & Emergency Equipment",
+   "uid": "af2570f1-b718-4f43-ad0c-f0d7444032ee",
+   "folder": "Hospital_VOL1",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/Hospital_VOL1/Meshes/SM_MedicalBag_01a.SM_MedicalBag_01a"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "healing item",
+   "looks": "A red emergency first-aid bag."
+  },
+  {
+   "id": "warriors_pack_witch_s_flasks",
+   "name": "Witch's Flasks",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Non-weapon items",
+   "group": "Potions and medicine",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE4/Separate/SK_Witch_Flasks.SK_Witch_Flasks"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "potions",
+   "looks": "A bandolier of five glowing green flasks."
+  },
+  {
+   "id": "fps_starter_pack_lighter",
+   "name": "Lighter",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lighter.SK_Lighter"
+   ],
+   "kind": "item",
+   "clip": "Anim_Lighter_Open",
+   "t": 0.9,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Lighter",
+     "FPS Starter Pack (lighter)"
+    ]
+   ],
+   "use": "tool",
+   "looks": "A brushed-steel flip lighter, its lid opening."
+  },
+  {
+   "id": "fps_starter_pack_binoculars",
+   "name": "Binoculars",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Binoculars.SM_Binoculars"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Binoculars",
+     "FPS Starter Pack (binoculars)"
+    ]
+   ],
+   "use": "tool",
+   "looks": "A pair of rugged black binoculars."
+  },
+  {
+   "id": "fps_starter_pack_handheld_candle",
+   "name": "Handheld Candle",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Candle.SM_Candle"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Candle",
+     "FPS Starter Pack (candle)"
+    ]
+   ],
+   "use": "light",
+   "looks": "A candle in a tin chamberstick with a ring handle."
+  },
+  {
+   "id": "fps_starter_pack_torch",
+   "name": "Torch",
+   "pack": "FPS STARTER (PACK)",
+   "uid": "afe92192-dd5c-4bb0-a476-0c09646d897d",
+   "folder": "FPS_Starter_Pack",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Torch.SM_Torch"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Starter_Pack",
+     "Hands_Lantern",
+     "FPS Starter Pack (lantern and torch)"
+    ]
+   ],
+   "use": "light / club",
+   "looks": "A rag-wrapped torch on a wooden stick."
+  },
+  {
+   "id": "fps_devices_camcorder",
+   "name": "Camcorder",
+   "pack": "FPS Devices",
+   "uid": "cd0ce7d0-a66b-42bf-afbb-0f195c41d320",
+   "folder": "FPS_Devices",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Devices/Mesh/SK_Camera.SK_Camera"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Devices",
+     "Camera",
+     "FPS Devices (camera)"
+    ]
+   ],
+   "use": "device",
+   "looks": "A handheld camcorder with a flip-out screen."
+  },
+  {
+   "id": "fps_devices_smartphone",
+   "name": "Smartphone",
+   "pack": "FPS Devices",
+   "uid": "cd0ce7d0-a66b-42bf-afbb-0f195c41d320",
+   "folder": "FPS_Devices",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Devices/Mesh/SM_Phone.SM_Phone"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Devices",
+     "Phone",
+     "FPS Devices (phone)"
+    ]
+   ],
+   "use": "device",
+   "looks": "A rugged smartphone."
+  },
+  {
+   "id": "fps_devices_walkie_talkie",
+   "name": "Walkie-Talkie",
+   "pack": "FPS Devices",
+   "uid": "cd0ce7d0-a66b-42bf-afbb-0f195c41d320",
+   "folder": "FPS_Devices",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Devices/Mesh/SM_Walkie_Talkie.SM_Walkie_Talkie"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Devices",
+     "Walkie",
+     "FPS Devices (walkie-talkie)"
+    ]
+   ],
+   "use": "device",
+   "looks": "A walkie-talkie with a keypad and antenna."
+  },
+  {
+   "id": "fps_devices_listening_device",
+   "name": "Listening Device",
+   "pack": "FPS Devices",
+   "uid": "cd0ce7d0-a66b-42bf-afbb-0f195c41d320",
+   "folder": "FPS_Devices",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/FPS_Devices/Mesh/SM_Listening_Device.SM_Listening_Device"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [
+    [
+     "FPS_Devices",
+     "Listening",
+     "FPS Devices (listening device)"
+    ]
+   ],
+   "use": "device",
+   "looks": "A pistol-grip directional microphone."
+  },
+  {
+   "id": "mc_environment_military_radio",
+   "name": "Military Radio",
+   "pack": "Military Base Megapack",
+   "uid": "61202d6c-1bc2-4e5d-b2d5-d005ea8b7c67",
+   "folder": "MC_Environment",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/MC_Environment/Assets/SM_MilitaryRadio.SM_MilitaryRadio"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "device / prop",
+   "looks": "A stacked green military radio set."
+  },
+  {
+   "id": "sniper_radio_set",
+   "name": "Handheld Radio",
+   "pack": "Sniper Soldier",
+   "uid": "70c21220-f9a1-4c3c-8bc2-699508be793f",
+   "folder": "Sniper",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Sniper/Mesh/Sniper_UE4/SM_Mesh/SM_Sniper_Radio_Set02.SM_Sniper_Radio_Set02"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "device",
+   "looks": "A black handheld radio."
+  },
+  {
+   "id": "military_pack_field_laptop",
+   "name": "Rugged Tablet",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Elit_Soldier/SK_Elite_Soldier_Laptop_Mesh.SK_Elite_Soldier_Laptop_Mesh"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "device",
+   "looks": "A rugged tablet computer."
+  },
+  {
+   "id": "gothic_props_candlestick",
+   "name": "Candelabrum",
+   "pack": "Medieval Furniture Props",
+   "uid": "aa584fda-82a3-4f6f-8675-e2f8fab14daf",
+   "folder": "Gothic_Props",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Gothic_Props/Assets/Meshes/SM_Prop_CandleStand_A.SM_Prop_CandleStand_A"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "light / treasure",
+   "looks": "A tall brass candelabrum."
+  },
+  {
+   "id": "village_collection_pitchfork",
+   "name": "Pitchfork",
+   "pack": "(Nanite) Medieval Village Kit - Village Props",
+   "uid": "f9df4890-75d6-4f7e-a0b2-6774ba87c641",
+   "folder": "Village_Collection",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Village_Collection/Props/SM_Pitchfork/Meshes/FBX/SM_Pitchfork.SM_Pitchfork"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "tool",
+   "looks": "A wooden pitchfork with iron tines."
+  },
+  {
+   "id": "village_collection_shovel",
+   "name": "Shovel",
+   "pack": "(Nanite) Medieval Village Kit - Village Props",
+   "uid": "f9df4890-75d6-4f7e-a0b2-6774ba87c641",
+   "folder": "Village_Collection",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Village_Collection/Props/SM_Shovel/Meshes/FBX/SM_Shovel.SM_Shovel"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "tool",
+   "looks": "A long-handled spade."
+  },
+  {
+   "id": "scene_oldmine_pickaxe",
+   "name": "Pickaxe",
+   "pack": "Old Mine",
+   "uid": "dc4dc139-f3a3-4375-875f-d1831506953e",
+   "folder": "Scene_OldMine",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/His_Med_Tools_Pickaxe_Metal_Old_03/SM_His_Med_Tools_Pickaxe_Metal_Old_03.SM_His_Med_Tools_Pickaxe_Metal_Old_03"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "tool",
+   "looks": "An old pickaxe (a Megascans scan)."
+  },
+  {
+   "id": "hivemind_smith_s_hammer",
+   "name": "Claw Hammer",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Hammer.SM_Hammer"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "tool",
+   "looks": "A claw hammer with a wooden handle."
+  },
+  {
+   "id": "dwarf_pack_forge_tongs",
+   "name": "Forge Tongs",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Dwarf_Pack/Agvid/Mesh/SM/SM_Tools_For_Animations_Forge_Forceps_Mesh001.SM_Tools_For_Animations_Forge_Forceps_Mesh001"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "tool",
+   "looks": "A smith's long forge tongs."
+  },
+  {
+   "id": "safehouse_tool_kit",
+   "name": "Duct Tape",
+   "pack": "Safe House VOL.1 - Supplies and Guns (Nanite and Low Poly)",
+   "uid": "46c37125-b9e2-48f1-a5a2-a432959da27f",
+   "folder": "Safehouse",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Safehouse/VOL1/Meshes/LP/SM_Tool_Kit_01a.SM_Tool_Kit_01a"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "crafting item",
+   "looks": "A roll of grey duct tape."
+  },
+  {
+   "id": "scene_warehouse_jerrycan",
+   "name": "Jerrycan",
+   "pack": "Warehouse",
+   "uid": "a3149fab-3906-4043-b6ee-3937b752a06c",
+   "folder": "Scene_Warehouse",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Scene_Warehouse/Assets/MS/3D/Ind_War_Container_Jerrycan_Metal_Red_03/SM_Ind_War_Container_Jerrycan_Metal_Red_03.SM_Ind_War_Container_Jerrycan_Metal_Red_03"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "fuel",
+   "looks": "A rusty red jerrycan (a Megascans scan)."
+  },
+  {
+   "id": "anemoia_pocket_watch",
+   "name": "Pocket Watch",
+   "pack": "Anemoia Manor",
+   "uid": "5ff66818-b91e-4705-8a7a-652c771885a9",
+   "folder": "Anemoia",
+   "section": "Non-weapon items",
+   "group": "Tools and devices",
+   "meshes": [
+    "/Game/Anemoia/MAIN/Meshes/SM_Watch_01a.SM_Watch_01a"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "treasure / tool",
+   "looks": "A gold pocket watch."
+  },
+  {
+   "id": "castle_collection_gold_coin",
+   "name": "Gold Coin",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_Coin/Meshes/FBX/SM_Coin_var1.SM_Coin_var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "currency",
+   "looks": "An embossed gold coin."
+  },
+  {
+   "id": "crownfall_coin_purse",
+   "name": "Coin Pile",
+   "pack": "Crownfall: Modular Cathedral Megapack",
+   "uid": "ef310a60-0412-41fa-822a-ba4e719f6c90",
+   "folder": "Crownfall",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Crownfall/Assets/SmallAssets/SM_S_CoinPack.SM_S_CoinPack"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "currency",
+   "looks": "A scattered pile of silver coins."
+  },
+  {
+   "id": "castle_collection_gem",
+   "name": "Gem",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_Gem/Meshes/FBX/SM_Gem_Var1.SM_Gem_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "treasure",
+   "looks": "A blue faceted gem."
+  },
+  {
+   "id": "castle_collection_cut_gem",
+   "name": "Cut Gem",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_Gem/Meshes/FBX/SM_Gem_Var2.SM_Gem_Var2"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "treasure",
+   "looks": "A green square-cut gem."
+  },
+  {
+   "id": "castle_collection_iron_key",
+   "name": "Iron Key",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_Key/Meshes/FBX/SM_Key_Var1.SM_Key_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "key",
+   "looks": "A large iron key with an ornate bow."
+  },
+  {
+   "id": "anemoia_brass_key",
+   "name": "Brass Key",
+   "pack": "Anemoia Manor",
+   "uid": "5ff66818-b91e-4705-8a7a-652c771885a9",
+   "folder": "Anemoia",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Anemoia/MAIN/Meshes/SM_Key_01a.SM_Key_01a"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "key",
+   "looks": "A brass skeleton key with a scrolled bow."
+  },
+  {
+   "id": "castle_collection_leather_pouch",
+   "name": "Leather Pouch",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_LeatherSmallBag/Meshes/FBX/SM_LeatherSmallBag.SM_LeatherSmallBag"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "container",
+   "looks": "A small tied leather pouch."
+  },
+  {
+   "id": "castle_collection_gold_lion_statuette",
+   "name": "Gold Lion Statuette",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_GoldLionStatue/Meshes/FBX/SM_GoldLionStatue.SM_GoldLionStatue"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "treasure",
+   "looks": "A golden statuette of a seated lion."
+  },
+  {
+   "id": "dwarf_pack_dwarf_king_s_crown",
+   "name": "Dwarf King's Crown",
+   "pack": "Dwarfs Pack",
+   "uid": "80643e93-5d54-438c-ae9d-7717242e5a16",
+   "folder": "Dwarf_Pack",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Dwarf_Pack/King/Mesh/SK_Dwarf_King_Crown.SK_Dwarf_King_Crown"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "treasure / wearable",
+   "looks": "A spiked iron crown with gold scales."
+  },
+  {
+   "id": "npc_king_and_queen_king_s_crown",
+   "name": "King's Crown",
+   "pack": "NPC King And Queen",
+   "uid": "cf92a409-cb02-460f-a4e1-27039c0e2a99",
+   "folder": "NPC_King_And_Queen",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/NPC_King_And_Queen/Mesh/NPC_King/Mesh_UE4/Separate/SK_UE4_NPC_King_Crown.SK_UE4_NPC_King_Crown"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "treasure / wearable",
+   "looks": "A jewelled gold crown over a red velvet cap."
+  },
+  {
+   "id": "castle_collection_leather_book",
+   "name": "Leather Book",
+   "pack": "Medieval Castle Kit - Medieval Castle Props",
+   "uid": "8da1c211-3eca-4c8e-93a3-22796f3b0b87",
+   "folder": "Castle_Collection",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Castle_Collection/Props/SM_Book_Var/Meshes/FBX/SM_Book_Var1.SM_Book_Var1"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "book",
+   "looks": "A leather-bound book with gold tooling."
+  },
+  {
+   "id": "crownfall_book_of_eddrick",
+   "name": "Book of Eddrick",
+   "pack": "Crownfall: Modular Cathedral Megapack",
+   "uid": "ef310a60-0412-41fa-822a-ba4e719f6c90",
+   "folder": "Crownfall",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Crownfall/Assets/SmallAssets/SM_S_BookOfEddrick.SM_S_BookOfEddrick"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "book / quest item",
+   "looks": "A thick tooled-leather tome titled 'Book of Eddrick'."
+  },
+  {
+   "id": "warriors_pack_witch_s_spellbook",
+   "name": "Witch's Spellbook",
+   "pack": "Fantasy Warriors (Pack)",
+   "uid": "df8194f9-ec63-49f6-a885-6feb7a94fcb1",
+   "folder": "Warriors_Pack",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE4/Separate/SK_Witch_Book.SK_Witch_Book"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "spellbook",
+   "looks": "A chained 'Witchcraft' book with a blue gem."
+  },
+  {
+   "id": "victorianoffice_ink_bottle",
+   "name": "Ink Bottle",
+   "pack": "Victorian Office Environment",
+   "uid": "2e874e30-de1d-4123-b6cf-c0a4a512c182",
+   "folder": "VictorianOffice",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/VictorianOffice/Mesh/SM_inkBottle.SM_inkBottle"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "item",
+   "looks": "A small black ink bottle."
+  },
+  {
+   "id": "victorianoffice_chess_set",
+   "name": "Chess Set",
+   "pack": "Victorian Office Environment",
+   "uid": "2e874e30-de1d-4123-b6cf-c0a4a512c182",
+   "folder": "VictorianOffice",
+   "section": "Non-weapon items",
+   "group": "Treasure, keys and books",
+   "meshes": [
+    "/Game/VictorianOffice/Mesh/SM_chess.SM_chess"
+   ],
+   "kind": "item",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "game",
+   "looks": "A chess board with its pieces on a marble slab."
+  },
+  {
+   "id": "vikings_viking_helmet",
+   "name": "Viking Helmet",
+   "pack": "Viking (Customized)",
+   "uid": "e814c3a3-11ba-4316-a07a-b0980fd016ef",
+   "folder": "Vikings",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Vikings/Mesh_UE4/Separate/SK_Viking_Helmet_01.SK_Viking_Helmet_01"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "helmet",
+   "looks": "A banded nasal helm with a mail aventail."
+  },
+  {
+   "id": "knights_pack_great_helm",
+   "name": "Great Helm",
+   "pack": "Knights (Pack)",
+   "uid": "6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3",
+   "folder": "Knights_Pack",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Helmet.SK_Knight_01_Helmet"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "helmet",
+   "looks": "A flat-topped great helm with a cross."
+  },
+  {
+   "id": "samurai_kabuto",
+   "name": "Kabuto",
+   "pack": "SAMURAI",
+   "uid": "5f4c90b7-a282-45fc-89df-61468afc867b",
+   "folder": "Samurai",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Samurai/Mesh_UE4/Separate/SK_Samurai_Helmet_01.SK_Samurai_Helmet_01"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "helmet",
+   "looks": "A samurai kabuto with crescent horns."
+  },
+  {
+   "id": "samurai_samurai_war_mask",
+   "name": "Samurai War Mask",
+   "pack": "SAMURAI",
+   "uid": "5f4c90b7-a282-45fc-89df-61468afc867b",
+   "folder": "Samurai",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Samurai/Mesh_UE4/Separate/SK_Samurai_Mask.SK_Samurai_Mask"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mask",
+   "looks": "A red menpo war mask with teeth and a moustache."
+  },
+  {
+   "id": "npc_king_and_queen_plague_doctor_s_mask",
+   "name": "Plague Doctor's Mask",
+   "pack": "NPC King And Queen",
+   "uid": "cf92a409-cb02-460f-a4e1-27039c0e2a99",
+   "folder": "NPC_King_And_Queen",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/NPC_King_And_Queen/Mesh/NPC_Plague_doctor/Mesh_UE4/Separate/SK_UE4_NPC_Plague_doctor_Mask.SK_UE4_NPC_Plague_doctor_Mask"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mask",
+   "looks": "A leather plague doctor's beak mask with goggles."
+  },
+  {
+   "id": "mysticdungeon_wizard_s_hat",
+   "name": "Wizard's Hat",
+   "pack": "Dungeon Builder: Modular Top Down RPG Environment Kit",
+   "uid": "10cbf8dd-ef59-48f8-bbea-606a2b66774d",
+   "folder": "MysticDungeon",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleWizard_Hat01.SK_MaleWizard_Hat01"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "hat",
+   "looks": "A floppy brown wizard's hat."
+  },
+  {
+   "id": "tactical_masks_gas_mask",
+   "name": "Gas Mask",
+   "pack": "Tactical Masks",
+   "uid": "2362889e-5c63-4a0b-9391-7ca1b0b9c72f",
+   "folder": "Tactical_masks",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Tactical_masks/Mesh/Mesh_UE4/SK_Mesh/SK_UE4_Gas_mask_01.SK_UE4_Gas_mask_01"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mask",
+   "looks": "A grey rubber gas mask with a filter."
+  },
+  {
+   "id": "tactical_masks_tactical_mask",
+   "name": "Tactical Mask",
+   "pack": "Tactical Masks",
+   "uid": "2362889e-5c63-4a0b-9391-7ca1b0b9c72f",
+   "folder": "Tactical_masks",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Tactical_masks/Mesh/Mesh_UE4/SK_Mesh/SK_UE4_Tactical_mask_01.SK_UE4_Tactical_mask_01"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "mask",
+   "looks": "A black tactical face mask on straps."
+  },
+  {
+   "id": "astronauts_pack_pilot_s_helmet",
+   "name": "Pilot's Helmet",
+   "pack": "Astronauts (Pack)",
+   "uid": "69267151-497d-494f-9592-551cd39246a2",
+   "folder": "Astronauts_Pack",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Astronauts_Pack/Mesh/Astronaut_Pilot/SK_Astronaut_Pilot_Helmet.SK_Astronaut_Pilot_Helmet"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "helmet",
+   "looks": "A white flight helmet with a visor."
+  },
+  {
+   "id": "girl_vr_headset",
+   "name": "VR Headset",
+   "pack": "Geek Room",
+   "uid": null,
+   "folder": "Girl",
+   "section": "Non-weapon items",
+   "group": "Helmets and masks",
+   "meshes": [
+    "/Game/Girl/Mesh/Girl_for_room/Mesh_UE4/Separate/SK_UE4_Girl_for_room_Virtual_reality_helmet.SK_UE4_Girl_for_room_Virtual_reality_helmet"
+   ],
+   "kind": "wear",
+   "clip": null,
+   "t": 0.5,
+   "fp": [],
+   "use": "wearable",
+   "looks": "A bulky home-made VR headset."
+  }
+ ],
+ "blurbs": {
+  "Fantasy weapons": "Swords, axes, maces, polearms, bows and shields of medieval and fantasy packs: knights, Vikings, samurai, orcs, dwarves, demons and cavemen.",
+  "Modern weapons": "Firearms from flintlock-era revolvers to sniper rifles, the FPS packs' guns (skeletal, with their own shot and reload clips), and knives, clubs and grenades.",
+  "Futuristic weapons": "Sci-fi guns, arm cannons, energy blades and shields of the sci-fi, alien and dystopian packs.",
+  "Non-weapon items": "Food and drink, medicine, tools and devices, treasure, keys and books, and wearable helmets and masks: pickups, quest items and props for hands."
+ }
+}

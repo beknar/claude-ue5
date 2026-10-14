@@ -67,6 +67,8 @@ renders/
 !docs/images/monsters/*.jpg
 !docs/images/heroes/*.jpg
 !docs/images/enemies/*.jpg
+!docs/images/vehicles/*.jpg
+!docs/images/objects/*.jpg
 
 # --- Archives ---
 *.zip

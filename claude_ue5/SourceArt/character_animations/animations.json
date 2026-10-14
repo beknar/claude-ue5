@@ -11622,6 +11622,3867 @@
     "ThirdPersonWalk",
     "ThirdPerson_Jump"
    ]
+  },
+  "/Game/Animals_Pack/Mesh/Fantasy_Animal/SK_Fantasy_Animal_Full.SK_Fantasy_Animal_Full": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Fantasy_Animal/SK_Fantasy_Animal_Body_Skeleton",
+   "rig": "own",
+   "bones": 34,
+   "own": [
+    "Anim_Fantasy_Animal_Attack_01",
+    "Anim_Fantasy_Animal_Attack_02",
+    "Anim_Fantasy_Animal_Climb_On_Animal",
+    "Anim_Fantasy_Animal_Dead_01",
+    "Anim_Fantasy_Animal_Dead_02",
+    "Anim_Fantasy_Animal_Get_Hit_01",
+    "Anim_Fantasy_Animal_Get_Hit_02",
+    "Anim_Fantasy_Animal_Get_Off_Animal",
+    "Anim_Fantasy_Animal_Idle_01",
+    "Anim_Fantasy_Animal_Idle_02",
+    "Anim_Fantasy_Animal_Jump",
+    "Anim_Fantasy_Animal_Jump_End",
+    "Anim_Fantasy_Animal_Jump_Start",
+    "Anim_Fantasy_Animal_Loop",
+    "Anim_Fantasy_Animal_Rotation_L_90",
+    "Anim_Fantasy_Animal_Rotation_L_90_Back",
+    "Anim_Fantasy_Animal_Rotation_R_90",
+    "Anim_Fantasy_Animal_Rotation_R_90_Back",
+    "Anim_Fantasy_Animal_Run",
+    "Anim_Fantasy_Animal_Run_Root",
+    "Anim_Fantasy_Animal_Shout",
+    "Anim_Fantasy_Animal_Walk",
+    "Anim_Fantasy_Animal_Walk_Root"
+   ]
+  },
+  "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Full.SK_Camel_Full": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Body_Skeleton",
+   "rig": "own",
+   "bones": 35,
+   "own": [
+    "Anim_Camel_Dead",
+    "Anim_Camel_Get_Hit_01",
+    "Anim_Camel_Get_Hit_02",
+    "Anim_Camel_Idle_01",
+    "Anim_Camel_Idle_02",
+    "Anim_Camel_Jump",
+    "Anim_Camel_Jump_End",
+    "Anim_Camel_Jump_Loop",
+    "Anim_Camel_Jump_Start",
+    "Anim_Camel_Run",
+    "Anim_Camel_Run_Root",
+    "Anim_Camel_Walk",
+    "Anim_Camel_Walk_Root"
+   ]
+  },
+  "/Game/Animals_Pack/Mesh/Bull_Fantasy/SK_Bull_Fantasy_Full.SK_Bull_Fantasy_Full": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Bull_Fantasy/SK_Bull_Fantasy_Body_Skeleton",
+   "rig": "own",
+   "bones": 38,
+   "own": [
+    "Anim_Bull_Attack_01",
+    "Anim_Bull_Dead",
+    "Anim_Bull_Get_Hit",
+    "Anim_Bull_Idle_01",
+    "Anim_Bull_Idle_02",
+    "Anim_Bull_Run",
+    "Anim_Bull_Run_Root",
+    "Anim_Bull_Walk",
+    "Anim_Bull_Walk_Root"
+   ]
+  },
+  "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full.SK_Fantasy_Elephant_Full": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full_Skeleton",
+   "rig": "own",
+   "bones": 35,
+   "own": [
+    "Anim_Fantasy_Elephant_Attack_01",
+    "Anim_Fantasy_Elephant_Attack_02",
+    "Anim_Fantasy_Elephant_Dead_01",
+    "Anim_Fantasy_Elephant_Dead_02",
+    "Anim_Fantasy_Elephant_Get_Hit_01",
+    "Anim_Fantasy_Elephant_Get_Hit_02",
+    "Anim_Fantasy_Elephant_Get_Hit_03",
+    "Anim_Fantasy_Elephant_Idle_01",
+    "Anim_Fantasy_Elephant_Idle_02",
+    "Anim_Fantasy_Elephant_Idle_03",
+    "Anim_Fantasy_Elephant_Idle_04",
+    "Anim_Fantasy_Elephant_Rotation_90_L",
+    "Anim_Fantasy_Elephant_Rotation_90_L_Back",
+    "Anim_Fantasy_Elephant_Rotation_90_R",
+    "Anim_Fantasy_Elephant_Rotation_90_R_Back",
+    "Anim_Fantasy_Elephant_Run",
+    "Anim_Fantasy_Elephant_Run_Root",
+    "Anim_Fantasy_Elephant_Walk",
+    "Anim_Fantasy_Elephant_Walk_Root"
+   ]
+  },
+  "/Game/Animals_Pack/Mesh/Fantasy_Dragon/SK_Fantasy_Dragon_Full.SK_Fantasy_Dragon_Full": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Fantasy_Dragon/SK_Fantasy_Dragon_Full_Skeleton",
+   "rig": "own",
+   "bones": 39,
+   "own": [
+    "Anim_Fantasy_Dragon_Set_01_Attack_01",
+    "Anim_Fantasy_Dragon_Set_01_Attack_02",
+    "Anim_Fantasy_Dragon_Set_01_Attack_03",
+    "Anim_Fantasy_Dragon_Set_01_Dead",
+    "Anim_Fantasy_Dragon_Set_01_Get_Hit_01",
+    "Anim_Fantasy_Dragon_Set_01_Get_Hit_02",
+    "Anim_Fantasy_Dragon_Set_01_Idle_01",
+    "Anim_Fantasy_Dragon_Set_01_Idle_02",
+    "Anim_Fantasy_Dragon_Set_01_Landing",
+    "Anim_Fantasy_Dragon_Set_01_Rotation_90_L",
+    "Anim_Fantasy_Dragon_Set_01_Rotation_90_R",
+    "Anim_Fantasy_Dragon_Set_01_Run",
+    "Anim_Fantasy_Dragon_Set_01_Run_45_L",
+    "Anim_Fantasy_Dragon_Set_01_Run_45_L_Root",
+    "Anim_Fantasy_Dragon_Set_01_Run_45_R",
+    "Anim_Fantasy_Dragon_Set_01_Run_45_R_Root",
+    "Anim_Fantasy_Dragon_Set_01_Run_Root",
+    "Anim_Fantasy_Dragon_Set_01_Shout",
+    "Anim_Fantasy_Dragon_Set_01_Takeoff",
+    "Anim_Fantasy_Dragon_Set_01_Walk",
+    "Anim_Fantasy_Dragon_Set_01_Walk_45_L",
+    "Anim_Fantasy_Dragon_Set_01_Walk_45_R",
+    "Anim_Fantasy_Dragon_Set_01_Walk_Root",
+    "Anim_Fantasy_Dragon_Set_01_Walk_Root_45_L",
+    "Anim_Fantasy_Dragon_Set_01_Walk_Root_45_R",
+    "Anim_Fantasy_Dragon_Set_02_Attack_Fire",
+    "Anim_Fantasy_Dragon_Set_02_Flight",
+    "Anim_Fantasy_Dragon_Set_02_Flight_45_L",
+    "Anim_Fantasy_Dragon_Set_02_Flight_45_L_Root",
+    "Anim_Fantasy_Dragon_Set_02_Flight_45_R",
+    "Anim_Fantasy_Dragon_Set_02_Flight_45_R_Root",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Dead",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Get_Hit",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Idle",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Root",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Rotation_90_L",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Rotation_90_R",
+    "Anim_Fantasy_Dragon_Set_02_Flight_Soar"
+   ]
+  },
+  "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Full/SK_Fantasy_Elephant_Build_Full.SK_Fantasy_Elephant_Build_Full": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Full/SK_Fantasy_Elephant_Build_Full_Skeleton",
+   "rig": "own",
+   "bones": 13,
+   "own": []
+  },
+  "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Bathyscaphe.SK_Bathyscaphe": {
+   "skeleton": "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Bathyscaphe_Skeleton",
+   "rig": "own",
+   "bones": 16,
+   "own": []
+  },
+  "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Cargo_Ship.SK_Cargo_Ship": {
+   "skeleton": "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Cargo_Ship_Skeleton",
+   "rig": "own",
+   "bones": 18,
+   "own": [
+    "Anim_CargoShip_launching"
+   ]
+  },
+  "/Game/Dystopia_Pack/Tank/Mesh/Mesh_UE4/Full/SK_Tank_Full.SK_Tank_Full": {
+   "skeleton": "/Game/Dystopia_Pack/Tank/Mesh/Mesh_UE4/Full/SK_Tank_Full_Skeleton",
+   "rig": "own",
+   "bones": 12,
+   "own": [
+    "Anim_Tank_Flight_Back",
+    "Anim_Tank_Flight_Back_Root",
+    "Anim_Tank_Flight_Forward",
+    "Anim_Tank_Flight_Forward_Root",
+    "Anim_Tank_Flight_Left",
+    "Anim_Tank_Flight_Left_Root",
+    "Anim_Tank_Flight_Right",
+    "Anim_Tank_Flight_Right_Root",
+    "Anim_Tank_Idle",
+    "Anim_Tank_Landing",
+    "Anim_Tank_Muzzle_Down",
+    "Anim_Tank_Muzzle_Up",
+    "Anim_Tank_Rotation_45_L",
+    "Anim_Tank_Rotation_45_R",
+    "Anim_Tank_Rotation_90_L",
+    "Anim_Tank_Rotation_90_R",
+    "Anim_Tank_Shot_Mashinegun",
+    "Anim_Tank_Shot_Muzzle",
+    "Anim_Tank_Takeoff",
+    "Anim_Tank_Tower_45_Muzzle_10_L",
+    "Anim_Tank_Tower_45_Muzzle_10_R",
+    "Anim_Tank_Tower_45_Muzzle_45_L",
+    "Anim_Tank_Tower_45_Muzzle_45_R",
+    "Anim_Tank_Tower_90_Muzzle_10_L",
+    "Anim_Tank_Tower_90_Muzzle_10_R",
+    "Anim_Tank_Tower_90_Muzzle_45_L",
+    "Anim_Tank_Tower_90_Muzzle_45_R",
+    "Anim_Tank_Tower_Rotation_45_L",
+    "Anim_Tank_Tower_Rotation_45_R",
+    "Anim_Tank_Tower_Rotation_90_L",
+    "Anim_Tank_Tower_Rotation_90_R"
+   ]
+  },
+  "/Game/Dystopia_Pack/Dystopia_Airship/Mesh/SK_Dystopia_Airship.SK_Dystopia_Airship": {
+   "skeleton": "/Game/Dystopia_Pack/Dystopia_Airship/Mesh/SK_Dystopia_Airship_Skeleton",
+   "rig": "own",
+   "bones": 18,
+   "own": [
+    "Dystopia_Airship_Fly",
+    "Dystopia_Airship_Fly_Root",
+    "Dystopia_Airship_Idle",
+    "Dystopia_Airship_Landing",
+    "Dystopia_Airship_Rotation_90_L",
+    "Dystopia_Airship_Rotation_90_R",
+    "Dystopia_Airship_Shot_01",
+    "Dystopia_Airship_Shot_02",
+    "Dystopia_Airship_Shot_03",
+    "Dystopia_Airship_Takeoff"
+   ]
+  },
+  "/Game/Military_Pack/Mesh/Drone/SK_Dron_Skeleton.SK_Dron_Skeleton": {
+   "skeleton": "/Game/Military_Pack/Mesh/Drone/SK_Dron_Skeleton_Skeleton",
+   "rig": "own",
+   "bones": 12,
+   "own": [
+    "Anim_Dron_Idle",
+    "Anim_Drone_Dead",
+    "Anim_Drone_Fire_Attack",
+    "Anim_Drone_Flight_Back",
+    "Anim_Drone_Flight_Back_Root",
+    "Anim_Drone_Flight_Front",
+    "Anim_Drone_Flight_Front_Root",
+    "Anim_Drone_Flight_L",
+    "Anim_Drone_Flight_L_Root",
+    "Anim_Drone_Flight_R",
+    "Anim_Drone_Flight_R_Root",
+    "Anim_Drone_Get_Hit",
+    "Anim_Drone_Gun_Fire_Right_Left",
+    "Anim_Drone_Gun_Fire_Up_Down",
+    "Anim_Drone_Rotation_180_L",
+    "Anim_Drone_Rotation_180_R",
+    "Anim_Drone_Rotation_90_L",
+    "Anim_Drone_Rotation_90_R",
+    "Anim_Drone_Rotation_Return_180_L",
+    "Anim_Drone_Rotation_Return_180_R",
+    "Anim_Drone_Rotation_Return_90_L",
+    "Anim_Drone_Rotation_Return_90_R"
+   ]
+  },
+  "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Full.SK_Military_Drone_01_Full": {
+   "skeleton": "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Basic_Skeleton",
+   "rig": "own",
+   "bones": 24,
+   "own": [
+    "Anim_Military_Drone_Dropping_Grenade_01",
+    "Anim_Military_Drone_Dropping_Grenade_02",
+    "Anim_Military_Drone_Dropping_Grenade_03",
+    "Anim_Military_Drone_Fly_Back",
+    "Anim_Military_Drone_Fly_Back_Root",
+    "Anim_Military_Drone_Fly_Front",
+    "Anim_Military_Drone_Fly_Front_Root",
+    "Anim_Military_Drone_Fly_Left",
+    "Anim_Military_Drone_Fly_Left_Root",
+    "Anim_Military_Drone_Fly_Right",
+    "Anim_Military_Drone_Fly_Right_Root",
+    "Anim_Military_Drone_Idle",
+    "Anim_Military_Drone_Landing",
+    "Anim_Military_Drone_Rotation_L_45",
+    "Anim_Military_Drone_Rotation_L_90",
+    "Anim_Military_Drone_Rotation_R_45",
+    "Anim_Military_Drone_Rotation_R_90",
+    "Anim_Military_Drone_Takeoff"
+   ]
+  },
+  "/Game/Military_Drone/Mesh/SK_Military_Drone_02_Full_01.SK_Military_Drone_02_Full_01": {
+   "skeleton": "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Basic_Skeleton",
+   "rig": "own",
+   "bones": 24,
+   "own": [
+    "Anim_Military_Drone_Dropping_Grenade_01",
+    "Anim_Military_Drone_Dropping_Grenade_02",
+    "Anim_Military_Drone_Dropping_Grenade_03",
+    "Anim_Military_Drone_Fly_Back",
+    "Anim_Military_Drone_Fly_Back_Root",
+    "Anim_Military_Drone_Fly_Front",
+    "Anim_Military_Drone_Fly_Front_Root",
+    "Anim_Military_Drone_Fly_Left",
+    "Anim_Military_Drone_Fly_Left_Root",
+    "Anim_Military_Drone_Fly_Right",
+    "Anim_Military_Drone_Fly_Right_Root",
+    "Anim_Military_Drone_Idle",
+    "Anim_Military_Drone_Landing",
+    "Anim_Military_Drone_Rotation_L_45",
+    "Anim_Military_Drone_Rotation_L_90",
+    "Anim_Military_Drone_Rotation_R_45",
+    "Anim_Military_Drone_Rotation_R_90",
+    "Anim_Military_Drone_Takeoff"
+   ]
+  },
+  "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Tank_Mesh.SK_Tank_Mesh": {
+   "skeleton": "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Tank_Mesh_Skeleton",
+   "rig": "own",
+   "bones": 13,
+   "own": [
+    "Anim_Tank_Attack",
+    "Anim_Tank_Dead",
+    "Anim_Tank_Get_Hit",
+    "Anim_Tank_Idle",
+    "Anim_Tank_Move",
+    "Anim_Tank_Move_Z"
+   ]
+  },
+  "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Sword.SK_Camel_Sword": {
+   "skeleton": "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Body_Skeleton",
+   "rig": "own",
+   "bones": 35,
+   "own": [
+    "Anim_Camel_Dead",
+    "Anim_Camel_Get_Hit_01",
+    "Anim_Camel_Get_Hit_02",
+    "Anim_Camel_Idle_01",
+    "Anim_Camel_Idle_02",
+    "Anim_Camel_Jump",
+    "Anim_Camel_Jump_End",
+    "Anim_Camel_Jump_Loop",
+    "Anim_Camel_Jump_Start",
+    "Anim_Camel_Run",
+    "Anim_Camel_Run_Root",
+    "Anim_Camel_Walk",
+    "Anim_Camel_Walk_Root"
+   ]
+  },
+  "/Game/Fantasy_Pack/Characters/Troll/Mesh/SK_Cudgel.SK_Cudgel": {
+   "skeleton": "/Game/Fantasy_Pack/Characters/Troll/Mesh/SK_Cudgel_Skeleton",
+   "rig": "own",
+   "bones": 3,
+   "own": []
+  },
+  "/Game/Dwarf_Pack/Orme/Mesh/SK_Crossbow.SK_Crossbow": {
+   "skeleton": "/Game/Dwarf_Pack/Orme/Mesh/SK_Crossbow_Skeleton",
+   "rig": "ue4",
+   "bones": 73,
+   "own": []
+  },
+  "/Game/FPS_Automatic_Rifle_02/Mesh/AutoRifle/SK_AutoRifle_Full.SK_AutoRifle_Full": {
+   "skeleton": "/Game/FPS_Automatic_Rifle_02/Mesh/AutoRifle/SK_AutoRifle_Basic_Skeleton",
+   "rig": "own",
+   "bones": 14,
+   "own": [
+    "Anim_AutoRifle_Reload",
+    "Anim_AutoRifle_Shot"
+   ]
+  },
+  "/Game/FPS_Automatic_Rifle_01/Mesh/Automatic_Rifle_01/SK_Automatic_Rifle_01_Basic.SK_Automatic_Rifle_01_Basic": {
+   "skeleton": "/Game/FPS_Automatic_Rifle_01/Mesh/Automatic_Rifle_01/SK_Automatic_Rifle_01_Basic_Skeleton",
+   "rig": "own",
+   "bones": 12,
+   "own": [
+    "Anim_Automatic_Rifle_01_Reload_Without_Arms",
+    "Anim_Automatic_Rifle_01_Shot_Without_Arms"
+   ]
+  },
+  "/Game/Automatic_Gun/Mesh/Automatic_Gun/SK_FPS_Automatic_Gun_Full.SK_FPS_Automatic_Gun_Full": {
+   "skeleton": "/Game/Automatic_Gun/Mesh/Automatic_Gun/SK_FPS_Automatic_Gun_Basic_Skeleton",
+   "rig": "own",
+   "bones": 28,
+   "own": [
+    "Anim_Automatic_Gun_Reload",
+    "Anim_Automatic_Gun_Shot"
+   ]
+  },
+  "/Game/FPS_Automatic_Shotgun/Mesh/Automatic_Shotgun/SK_Automatic_Shotgun_Full.SK_Automatic_Shotgun_Full": {
+   "skeleton": "/Game/FPS_Automatic_Shotgun/Mesh/Automatic_Shotgun/SK_Automatic_Shotgun_Full_Skeleton",
+   "rig": "own",
+   "bones": 22,
+   "own": [
+    "Anim_Automatic_Shotgun_Shot"
+   ]
+  },
+  "/Game/Military_Pack/Mesh/Rifle_05/SK_Rifle_05_Body.SK_Rifle_05_Body": {
+   "skeleton": "/Game/Military_Pack/Mesh/Rifle_05/SK_Rifle_05_Body_Skeleton",
+   "rig": "own",
+   "bones": 9,
+   "own": []
+  },
+  "/Game/Female_Soldier_Pack/Mesh/Woman_05/Mesh_Weapon/SK_Woman_05_Weapon_Full_01.SK_Woman_05_Weapon_Full_01": {
+   "skeleton": "/Game/Female_Soldier_Pack/Mesh/Woman_05/Mesh_Weapon/SK_Woman_05_Weapon_Full_01_Skeleton",
+   "rig": "own",
+   "bones": 14,
+   "own": []
+  },
+  "/Game/Dystopia_Pack/Dystopia_Soldier/Mesh_UE4/Weapon/SK_Weapon.SK_Weapon": {
+   "skeleton": "/Game/Dystopia_Pack/Dystopia_Soldier/Mesh_UE4/Weapon/SK_Weapon_Skeleton",
+   "rig": "own",
+   "bones": 22,
+   "own": []
+  },
+  "/Game/FPS_Sniper_Rifle/Mesh/Sniper_Rifle/SK_Sniper_Rifle_Full.SK_Sniper_Rifle_Full": {
+   "skeleton": "/Game/FPS_Sniper_Rifle/Mesh/Sniper_Rifle/SK_Sniper_Rifle_Full_Skeleton",
+   "rig": "own",
+   "bones": 18,
+   "own": [
+    "Anim_Sniper_Rifle_Shot"
+   ]
+  },
+  "/Game/FPS_Sniper_Rifle_03/Mesh/Sniper_Rifle_03/SK_Sniper_Rifle_03_Full.SK_Sniper_Rifle_03_Full": {
+   "skeleton": "/Game/FPS_Sniper_Rifle_03/Mesh/Sniper_Rifle_03/SK_Sniper_Rifle_03_Full_Skeleton",
+   "rig": "own",
+   "bones": 12,
+   "own": [
+    "Anim_Sniper_Rifle_03_Shot"
+   ]
+  },
+  "/Game/Sniper/Mesh/Sniper_Rifle/Full_Mesh/SK_Sniper_Rifle.SK_Sniper_Rifle": {
+   "skeleton": "/Game/Sniper/Mesh/Sniper_Rifle/Full_Mesh/SK_Sniper_Rifle_Skeleton",
+   "rig": "own",
+   "bones": 12,
+   "own": []
+  },
+  "/Game/Adventures_Pack/Mesh/Adventure_04/Sniper_Rifle/SK_Sniper_Rifle_Full.SK_Sniper_Rifle_Full": {
+   "skeleton": "/Game/Adventures_Pack/Mesh/Adventure_04/Sniper_Rifle/SK_Sniper_Rifle_Basic_Skeleton",
+   "rig": "own",
+   "bones": 12,
+   "own": []
+  },
+  "/Game/FPS_Rocket_Launcher/Mesh/Rocket_Launcher/SK_Rocket_Launcher.SK_Rocket_Launcher": {
+   "skeleton": "/Game/FPS_Rocket_Launcher/Mesh/Rocket_Launcher/SK_Rocket_Launcher_Skeleton",
+   "rig": "own",
+   "bones": 8,
+   "own": []
+  },
+  "/Game/FPS_Pistol_Single/Mesh/Pistol/SK_Pistol.SK_Pistol": {
+   "skeleton": "/Game/FPS_Pistol_Single/Mesh/Pistol/SK_Pistol_Skeleton",
+   "rig": "own",
+   "bones": 14,
+   "own": [
+    "Anim_Pistol_Single_Get_Weapon_02",
+    "Anim_Pistol_Single_Reload_02",
+    "Anim_Pistol_Single_Shot"
+   ]
+  },
+  "/Game/Adventures_Pack/Mesh/Adventure_03/Weapons/SK_Gun_Full.SK_Gun_Full": {
+   "skeleton": "/Game/Adventures_Pack/Mesh/Adventure_03/Weapons/SK_Gun_Full_Skeleton",
+   "rig": "own",
+   "bones": 10,
+   "own": []
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Stun_Gun.SK_Stun_Gun": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Stun_Gun_Skeleton",
+   "rig": "own",
+   "bones": 5,
+   "own": []
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Shield_Full.SK_Shield_Full": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Shield_Full_Skeleton",
+   "rig": "own",
+   "bones": 1,
+   "own": []
+  },
+  "/Game/FPS_Pistol_Shield/Mesh/Shield/SK_Shield_Full.SK_Shield_Full": {
+   "skeleton": "/Game/FPS_Pistol_Shield/Mesh/Shield/SK_Shield_Basic_Skeleton",
+   "rig": "own",
+   "bones": 1,
+   "own": []
+  },
+  "/Game/Sci_Fi_Characters_Pack/Mesh/Sci_Fi_Character_05/SK_Sci_Fi_Character_05_Weapon.SK_Sci_Fi_Character_05_Weapon": {
+   "skeleton": "/Game/Sci_Fi_Characters_Pack/Mesh/Sci_Fi_Character_05/SK_Sci_Fi_Character_05_Weapon_Skeleton",
+   "rig": "own",
+   "bones": 5,
+   "own": [
+    "Anim_Sci_Fi_Character_05_Weapon_Close",
+    "Anim_Sci_Fi_Character_05_Weapon_Open"
+   ]
+  },
+  "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_10/Weapon/SK_Defender_Weapon.SK_Defender_Weapon": {
+   "skeleton": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_10/Weapon/SK_Defender_Weapon_Skeleton",
+   "rig": "own",
+   "bones": 6,
+   "own": [
+    "Anim_Weapon_Rotation"
+   ]
+  },
+  "/Game/Sci_Fi_Mercenary_Pack/Mesh/Head_Hunter/Mesh_Gun/SK_Head_Hunter_Gun.SK_Head_Hunter_Gun": {
+   "skeleton": "/Game/Sci_Fi_Mercenary_Pack/Mesh/Head_Hunter/Mesh_Gun/SK_Head_Hunter_Gun_Skeleton",
+   "rig": "own",
+   "bones": 5,
+   "own": []
+  },
+  "/Game/Sci_Fi_Mercenary_Pack/Mesh/Marauder/Mesh_Weapon/SK_Marauder_Rifle_Full.SK_Marauder_Rifle_Full": {
+   "skeleton": "/Game/Sci_Fi_Mercenary_Pack/Mesh/Marauder/Mesh_Weapon/SK_Marauder_Rifle_Full_Skeleton",
+   "rig": "own",
+   "bones": 8,
+   "own": []
+  },
+  "/Game/Sci_Fi_Mercenary_Pack/Mesh/Robot/Mesh_UE4/Separate/SK_Robot_Weapons.SK_Robot_Weapons": {
+   "skeleton": "/Game/Sci_Fi_Mercenary_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_03/Gun/Full/SK_Sci_Fi_Automatic_Sniper_Rifle_Full.SK_Sci_Fi_Automatic_Sniper_Rifle_Full": {
+   "skeleton": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_03/Gun/Full/SK_Sci_Fi_Automatic_Sniper_Rifle_Full_Skeleton",
+   "rig": "own",
+   "bones": 8,
+   "own": []
+  },
+  "/Game/Soldier_Future_01/Mesh/Automatic_Rifle/SK_Automatic_Rifle_Full.SK_Automatic_Rifle_Full": {
+   "skeleton": "/Game/Soldier_Future_01/Mesh/Automatic_Rifle/SK_Automatic_Rifle_Full_Skeleton",
+   "rig": "own",
+   "bones": 14,
+   "own": []
+  },
+  "/Game/Soldier_Future_03/Mesh/Mesh_Rocket_launcher/SK_Rocket.SK_Rocket": {
+   "skeleton": "/Game/Soldier_Future_03/Mesh/Mesh_Rocket_launcher/SK_Rocket_Skeleton",
+   "rig": "own",
+   "bones": 2,
+   "own": []
+  },
+  "/Game/Astronauts_Pack/Mesh/Astronaut_Soldier/Weapon/SK_Astronaut_Soldier_Weapon_Full.SK_Astronaut_Soldier_Weapon_Full": {
+   "skeleton": "/Game/Astronauts_Pack/Mesh/Astronaut_Soldier/Weapon/SK_Astronaut_Soldier_Weapon_Full_Skeleton",
+   "rig": "own",
+   "bones": 10,
+   "own": [
+    "Anim_Astronaut_Weapon_Close",
+    "Anim_Astronaut_Weapon_Open",
+    "Anim_Astronaut_Weapon_Rotation_45_Left",
+    "Anim_Astronaut_Weapon_Rotation_45_Right",
+    "Anim_Astronaut_Weapon_Rotation_90_Down",
+    "Anim_Astronaut_Weapon_Rotation_90_Up"
+   ]
+  },
+  "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SK_Firegun_Base.SK_Firegun_Base": {
+   "skeleton": "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 73,
+   "own": [
+    "Anim_Door_Close",
+    "Anim_Door_Open",
+    "Anim_Dystopia_Mech_Attack_01",
+    "Anim_Dystopia_Mech_Attack_02",
+    "Anim_Dystopia_Mech_Attack_03",
+    "Anim_Dystopia_Mech_Attack_04",
+    "Anim_Dystopia_Mech_Attack_05",
+    "Anim_Dystopia_Mech_Dead_01",
+    "Anim_Dystopia_Mech_Dead_02",
+    "Anim_Dystopia_Mech_Fly",
+    "Anim_Dystopia_Mech_Fly_Back",
+    "Anim_Dystopia_Mech_Fly_Back_Root",
+    "Anim_Dystopia_Mech_Fly_Dead",
+    "Anim_Dystopia_Mech_Fly_Fast",
+    "Anim_Dystopia_Mech_Fly_Fast_Landing",
+    "Anim_Dystopia_Mech_Fly_Fast_Left",
+    "Anim_Dystopia_Mech_Fly_Fast_Left_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Right",
+    "Anim_Dystopia_Mech_Fly_Fast_Right_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Start",
+    "Anim_Dystopia_Mech_Fly_Get_Hit",
+    "Anim_Dystopia_Mech_Fly_Get_Hit_Left",
+    "Anim_Dystopia_Mech_Fly_Get_Hit_Right",
+    "Anim_Dystopia_Mech_Fly_Idle",
+    "Anim_Dystopia_Mech_Fly_Landing",
+    "Anim_Dystopia_Mech_Fly_Left",
+    "Anim_Dystopia_Mech_Fly_Left_Root",
+    "Anim_Dystopia_Mech_Fly_Reload",
+    "Anim_Dystopia_Mech_Fly_Right",
+    "Anim_Dystopia_Mech_Fly_Right_Root",
+    "Anim_Dystopia_Mech_Fly_Root",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Down_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Down_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Up_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Up_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Down",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Up",
+    "Anim_Dystopia_Mech_Fly_Shot_01",
+    "Anim_Dystopia_Mech_Fly_Shot_02",
+    "Anim_Dystopia_Mech_Fly_Shot_03",
+    "Anim_Dystopia_Mech_Fly_Start",
+    "Anim_Dystopia_Mech_Get_Hit",
+    "Anim_Dystopia_Mech_Get_Hit_02",
+    "Anim_Dystopia_Mech_Idle_01",
+    "Anim_Dystopia_Mech_Idle_02",
+    "Anim_Dystopia_Mech_Idle_03",
+    "Anim_Dystopia_Mech_Jump",
+    "Anim_Dystopia_Mech_Reload",
+    "Anim_Dystopia_Mech_Rotate_90_45_Down_Left",
+    "Anim_Dystopia_Mech_Rotate_90_45_Down_Right",
+    "Anim_Dystopia_Mech_Rotate_90_45_Up_Left",
+    "Anim_Dystopia_Mech_Rotate_90_45_Up_Right",
+    "Anim_Dystopia_Mech_Rotate_90_Down",
+    "Anim_Dystopia_Mech_Rotate_90_Left",
+    "Anim_Dystopia_Mech_Rotate_90_Right",
+    "Anim_Dystopia_Mech_Rotate_90_Up",
+    "Anim_Dystopia_Mech_Run",
+    "Anim_Dystopia_Mech_Run_Back",
+    "Anim_Dystopia_Mech_Run_Back_Root",
+    "Anim_Dystopia_Mech_Run_Fast",
+    "Anim_Dystopia_Mech_Run_Fast_Root",
+    "Anim_Dystopia_Mech_Run_Left",
+    "Anim_Dystopia_Mech_Run_Left_Root",
+    "Anim_Dystopia_Mech_Run_Right",
+    "Anim_Dystopia_Mech_Run_Right_Root",
+    "Anim_Dystopia_Mech_Run_Root",
+    "Anim_Dystopia_Mech_Shot_01",
+    "Anim_Dystopia_Mech_Shot_02",
+    "Anim_Dystopia_Mech_Shot_03",
+    "Anim_Dystopia_Mech_Walk",
+    "Anim_Dystopia_Mech_Walk_Back",
+    "Anim_Dystopia_Mech_Walk_Back_Root",
+    "Anim_Dystopia_Mech_Walk_Left",
+    "Anim_Dystopia_Mech_Walk_Left_Root",
+    "Anim_Dystopia_Mech_Walk_Right",
+    "Anim_Dystopia_Mech_Walk_Right_Root",
+    "Anim_Dystopia_Mech_Walk_Root",
+    "Anim_Pilot_Disembarkation",
+    "Anim_Pilot_Jump",
+    "Anim_Pilot_Landing"
+   ]
+  },
+  "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SK_Firegun_Hose.SK_Firegun_Hose": {
+   "skeleton": "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 73,
+   "own": [
+    "Anim_Door_Close",
+    "Anim_Door_Open",
+    "Anim_Dystopia_Mech_Attack_01",
+    "Anim_Dystopia_Mech_Attack_02",
+    "Anim_Dystopia_Mech_Attack_03",
+    "Anim_Dystopia_Mech_Attack_04",
+    "Anim_Dystopia_Mech_Attack_05",
+    "Anim_Dystopia_Mech_Dead_01",
+    "Anim_Dystopia_Mech_Dead_02",
+    "Anim_Dystopia_Mech_Fly",
+    "Anim_Dystopia_Mech_Fly_Back",
+    "Anim_Dystopia_Mech_Fly_Back_Root",
+    "Anim_Dystopia_Mech_Fly_Dead",
+    "Anim_Dystopia_Mech_Fly_Fast",
+    "Anim_Dystopia_Mech_Fly_Fast_Landing",
+    "Anim_Dystopia_Mech_Fly_Fast_Left",
+    "Anim_Dystopia_Mech_Fly_Fast_Left_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Right",
+    "Anim_Dystopia_Mech_Fly_Fast_Right_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Start",
+    "Anim_Dystopia_Mech_Fly_Get_Hit",
+    "Anim_Dystopia_Mech_Fly_Get_Hit_Left",
+    "Anim_Dystopia_Mech_Fly_Get_Hit_Right",
+    "Anim_Dystopia_Mech_Fly_Idle",
+    "Anim_Dystopia_Mech_Fly_Landing",
+    "Anim_Dystopia_Mech_Fly_Left",
+    "Anim_Dystopia_Mech_Fly_Left_Root",
+    "Anim_Dystopia_Mech_Fly_Reload",
+    "Anim_Dystopia_Mech_Fly_Right",
+    "Anim_Dystopia_Mech_Fly_Right_Root",
+    "Anim_Dystopia_Mech_Fly_Root",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Down_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Down_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Up_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Up_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Down",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Up",
+    "Anim_Dystopia_Mech_Fly_Shot_01",
+    "Anim_Dystopia_Mech_Fly_Shot_02",
+    "Anim_Dystopia_Mech_Fly_Shot_03",
+    "Anim_Dystopia_Mech_Fly_Start",
+    "Anim_Dystopia_Mech_Get_Hit",
+    "Anim_Dystopia_Mech_Get_Hit_02",
+    "Anim_Dystopia_Mech_Idle_01",
+    "Anim_Dystopia_Mech_Idle_02",
+    "Anim_Dystopia_Mech_Idle_03",
+    "Anim_Dystopia_Mech_Jump",
+    "Anim_Dystopia_Mech_Reload",
+    "Anim_Dystopia_Mech_Rotate_90_45_Down_Left",
+    "Anim_Dystopia_Mech_Rotate_90_45_Down_Right",
+    "Anim_Dystopia_Mech_Rotate_90_45_Up_Left",
+    "Anim_Dystopia_Mech_Rotate_90_45_Up_Right",
+    "Anim_Dystopia_Mech_Rotate_90_Down",
+    "Anim_Dystopia_Mech_Rotate_90_Left",
+    "Anim_Dystopia_Mech_Rotate_90_Right",
+    "Anim_Dystopia_Mech_Rotate_90_Up",
+    "Anim_Dystopia_Mech_Run",
+    "Anim_Dystopia_Mech_Run_Back",
+    "Anim_Dystopia_Mech_Run_Back_Root",
+    "Anim_Dystopia_Mech_Run_Fast",
+    "Anim_Dystopia_Mech_Run_Fast_Root",
+    "Anim_Dystopia_Mech_Run_Left",
+    "Anim_Dystopia_Mech_Run_Left_Root",
+    "Anim_Dystopia_Mech_Run_Right",
+    "Anim_Dystopia_Mech_Run_Right_Root",
+    "Anim_Dystopia_Mech_Run_Root",
+    "Anim_Dystopia_Mech_Shot_01",
+    "Anim_Dystopia_Mech_Shot_02",
+    "Anim_Dystopia_Mech_Shot_03",
+    "Anim_Dystopia_Mech_Walk",
+    "Anim_Dystopia_Mech_Walk_Back",
+    "Anim_Dystopia_Mech_Walk_Back_Root",
+    "Anim_Dystopia_Mech_Walk_Left",
+    "Anim_Dystopia_Mech_Walk_Left_Root",
+    "Anim_Dystopia_Mech_Walk_Right",
+    "Anim_Dystopia_Mech_Walk_Right_Root",
+    "Anim_Dystopia_Mech_Walk_Root",
+    "Anim_Pilot_Disembarkation",
+    "Anim_Pilot_Jump",
+    "Anim_Pilot_Landing"
+   ]
+  },
+  "/Game/Dystopia_Pack/Dystopia_Soldier_02/Mesh_UE4/Parts/SK_Firegun_Backpack.SK_Firegun_Backpack": {
+   "skeleton": "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 73,
+   "own": [
+    "Anim_Door_Close",
+    "Anim_Door_Open",
+    "Anim_Dystopia_Mech_Attack_01",
+    "Anim_Dystopia_Mech_Attack_02",
+    "Anim_Dystopia_Mech_Attack_03",
+    "Anim_Dystopia_Mech_Attack_04",
+    "Anim_Dystopia_Mech_Attack_05",
+    "Anim_Dystopia_Mech_Dead_01",
+    "Anim_Dystopia_Mech_Dead_02",
+    "Anim_Dystopia_Mech_Fly",
+    "Anim_Dystopia_Mech_Fly_Back",
+    "Anim_Dystopia_Mech_Fly_Back_Root",
+    "Anim_Dystopia_Mech_Fly_Dead",
+    "Anim_Dystopia_Mech_Fly_Fast",
+    "Anim_Dystopia_Mech_Fly_Fast_Landing",
+    "Anim_Dystopia_Mech_Fly_Fast_Left",
+    "Anim_Dystopia_Mech_Fly_Fast_Left_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Right",
+    "Anim_Dystopia_Mech_Fly_Fast_Right_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Root",
+    "Anim_Dystopia_Mech_Fly_Fast_Start",
+    "Anim_Dystopia_Mech_Fly_Get_Hit",
+    "Anim_Dystopia_Mech_Fly_Get_Hit_Left",
+    "Anim_Dystopia_Mech_Fly_Get_Hit_Right",
+    "Anim_Dystopia_Mech_Fly_Idle",
+    "Anim_Dystopia_Mech_Fly_Landing",
+    "Anim_Dystopia_Mech_Fly_Left",
+    "Anim_Dystopia_Mech_Fly_Left_Root",
+    "Anim_Dystopia_Mech_Fly_Reload",
+    "Anim_Dystopia_Mech_Fly_Right",
+    "Anim_Dystopia_Mech_Fly_Right_Root",
+    "Anim_Dystopia_Mech_Fly_Root",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Down_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Down_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Up_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_45_Up_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Down",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Left",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Right",
+    "Anim_Dystopia_Mech_Fly_Rotate_90_Up",
+    "Anim_Dystopia_Mech_Fly_Shot_01",
+    "Anim_Dystopia_Mech_Fly_Shot_02",
+    "Anim_Dystopia_Mech_Fly_Shot_03",
+    "Anim_Dystopia_Mech_Fly_Start",
+    "Anim_Dystopia_Mech_Get_Hit",
+    "Anim_Dystopia_Mech_Get_Hit_02",
+    "Anim_Dystopia_Mech_Idle_01",
+    "Anim_Dystopia_Mech_Idle_02",
+    "Anim_Dystopia_Mech_Idle_03",
+    "Anim_Dystopia_Mech_Jump",
+    "Anim_Dystopia_Mech_Reload",
+    "Anim_Dystopia_Mech_Rotate_90_45_Down_Left",
+    "Anim_Dystopia_Mech_Rotate_90_45_Down_Right",
+    "Anim_Dystopia_Mech_Rotate_90_45_Up_Left",
+    "Anim_Dystopia_Mech_Rotate_90_45_Up_Right",
+    "Anim_Dystopia_Mech_Rotate_90_Down",
+    "Anim_Dystopia_Mech_Rotate_90_Left",
+    "Anim_Dystopia_Mech_Rotate_90_Right",
+    "Anim_Dystopia_Mech_Rotate_90_Up",
+    "Anim_Dystopia_Mech_Run",
+    "Anim_Dystopia_Mech_Run_Back",
+    "Anim_Dystopia_Mech_Run_Back_Root",
+    "Anim_Dystopia_Mech_Run_Fast",
+    "Anim_Dystopia_Mech_Run_Fast_Root",
+    "Anim_Dystopia_Mech_Run_Left",
+    "Anim_Dystopia_Mech_Run_Left_Root",
+    "Anim_Dystopia_Mech_Run_Right",
+    "Anim_Dystopia_Mech_Run_Right_Root",
+    "Anim_Dystopia_Mech_Run_Root",
+    "Anim_Dystopia_Mech_Shot_01",
+    "Anim_Dystopia_Mech_Shot_02",
+    "Anim_Dystopia_Mech_Shot_03",
+    "Anim_Dystopia_Mech_Walk",
+    "Anim_Dystopia_Mech_Walk_Back",
+    "Anim_Dystopia_Mech_Walk_Back_Root",
+    "Anim_Dystopia_Mech_Walk_Left",
+    "Anim_Dystopia_Mech_Walk_Left_Root",
+    "Anim_Dystopia_Mech_Walk_Right",
+    "Anim_Dystopia_Mech_Walk_Right_Root",
+    "Anim_Dystopia_Mech_Walk_Root",
+    "Anim_Pilot_Disembarkation",
+    "Anim_Pilot_Jump",
+    "Anim_Pilot_Landing"
+   ]
+  },
+  "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Mesh_Weapon_04/SK_Alien_Weapon_04_Full_01.SK_Alien_Weapon_04_Full_01": {
+   "skeleton": "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Mesh_Weapon_04/SK_Alien_Weapon_04_Full_01_Skeleton",
+   "rig": "own",
+   "bones": 28,
+   "own": [
+    "Anim_Alien_Warrior_04_Rotation_45_Down_Anim",
+    "Anim_Alien_Warrior_04_Rotation_45_L_Anim",
+    "Anim_Alien_Warrior_04_Rotation_45_R_Anim",
+    "Anim_Alien_Warrior_04_Rotation_45_Up_Anim",
+    "Anim_Alien_Warrior_04_Shot_Anim",
+    "Anim_Alien_Warrior_04_Shot_Rotation_45_Down_Anim",
+    "Anim_Alien_Warrior_04_Shot_Rotation_45_L_Anim",
+    "Anim_Alien_Warrior_04_Shot_Rotation_45_R_Anim",
+    "Anim_Alien_Warrior_04_Shot_Rotation_45_Up_Anim",
+    "Anim_Alien_Weapon_04_Rotation_45_45_Down_L_Anim",
+    "Anim_Alien_Weapon_04_Rotation_45_45_Down_R_Anim",
+    "Anim_Alien_Weapon_04_Rotation_45_45_Up_L_Anim",
+    "Anim_Alien_Weapon_04_Rotation_45_45_Up_R_Anim",
+    "Anim_Alien_Weapon_04_Shot_Rotation_45_45_Down_L_Anim",
+    "Anim_Alien_Weapon_04_Shot_Rotation_45_45_Down_R_Anim",
+    "Anim_Alien_Weapon_04_Shot_Rotation_45_45_Up_L_Anim",
+    "Anim_Alien_Weapon_04_Shot_Rotation_45_45_Up_R_Anim"
+   ]
+  },
+  "/Game/Sci_Fi_Hands/Mesh/Shield/SK_Sci_Fi_Shield.SK_Sci_Fi_Shield": {
+   "skeleton": "/Game/Sci_Fi_Hands/Mesh/Shield/SK_Sci_Fi_Shield_Skeleton",
+   "rig": "own",
+   "bones": 32,
+   "own": [
+    "Anim_Sci_Fi_Shield_Close",
+    "Anim_Sci_Fi_Shield_Open"
+   ]
+  },
+  "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Separate/SK_UE4_Alien_Warrior_04_Weapon.SK_UE4_Alien_Warrior_04_Weapon": {
+   "skeleton": "/Game/Aliens_Warrior_Pack/Demoscene_UE4/Mesh/Alien_Warrior_04/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Chocolate_01.SK_Chocolate_01": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Chocolate_01_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Chocolate_01_Hide"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sardines.SK_Sardines": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sardines_Skeleton",
+   "rig": "own",
+   "bones": 10,
+   "own": [
+    "Anim_Sardines_Open"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sprats.SK_Sprats": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sprats_Skeleton",
+   "rig": "own",
+   "bones": 10,
+   "own": [
+    "Anim_Sprats_Open"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Meatball.SK_Meatball": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Meatball_Skeleton",
+   "rig": "own",
+   "bones": 18,
+   "own": [
+    "Anim_Meatball_Open"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Porridge_Plate.SK_Porridge_Plate": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Porridge_Plate_Skeleton",
+   "rig": "own",
+   "bones": 8,
+   "own": [
+    "Anim_Porridge_Plate_Open"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Jar.SK_Jar": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Jar_Skeleton",
+   "rig": "own",
+   "bones": 10,
+   "own": [
+    "Anim_Jar_Open"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Soda.SK_Soda": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Soda_Skeleton",
+   "rig": "own",
+   "bones": 6,
+   "own": [
+    "Anim_Soda_Open_Close"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Juce.SK_Juce": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Juce_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Juce_Open_Close"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lemonade_Bottle.SK_Lemonade_Bottle": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lemonade_Bottle_Skeleton",
+   "rig": "own",
+   "bones": 8,
+   "own": [
+    "Anim_Lemonade_Bottle_Open_Close"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Mug.SK_Mug": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Mug_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Coffe_Rotation"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sausage.SK_Sausage": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Fish_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Fish_Sausage_Marshmallows_Hide"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Fish.SK_Fish": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Fish_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Fish_Sausage_Marshmallows_Hide"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_01.SK_Syringe_01": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_01_Skeleton",
+   "rig": "own",
+   "bones": 2,
+   "own": [
+    "Anim_Syringe_01_Push"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_02.SK_Syringe_02": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_02_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Syringe_02_Push"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_03.SK_Syringe_03": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_03_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": [
+    "Anim_Syringe_03_Push"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Flask.SK_Flask": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Flask_Skeleton",
+   "rig": "own",
+   "bones": 6,
+   "own": [
+    "Anim_Flask_Open_Close"
+   ]
+  },
+  "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE4/Separate/SK_Witch_Flasks.SK_Witch_Flasks": {
+   "skeleton": "/Game/Warriors_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lighter.SK_Lighter": {
+   "skeleton": "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lighter_Skeleton",
+   "rig": "own",
+   "bones": 2,
+   "own": [
+    "Anim_Lighter_Close",
+    "Anim_Lighter_Open"
+   ]
+  },
+  "/Game/FPS_Devices/Mesh/SK_Camera.SK_Camera": {
+   "skeleton": "/Game/FPS_Devices/Mesh/SK_Camera_Skeleton",
+   "rig": "own",
+   "bones": 4,
+   "own": []
+  },
+  "/Game/Military_Pack/Mesh/Elit_Soldier/SK_Elite_Soldier_Laptop_Mesh.SK_Elite_Soldier_Laptop_Mesh": {
+   "skeleton": "/Game/Military_Pack/Animations/AnimDemo/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 74,
+   "own": [
+    "Crouch_Walk_Fwd_Rifle_Hip",
+    "Jog_Fwd_Rifle",
+    "Jump_From_Stand",
+    "Sprint_Fwd_Rifle"
+   ]
+  },
+  "/Game/Dwarf_Pack/King/Mesh/SK_Dwarf_King_Crown.SK_Dwarf_King_Crown": {
+   "skeleton": "/Game/Dwarf_Pack/Mesh/SK_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 83,
+   "own": [
+    "Anim_Dead_1_Without_Weapon",
+    "Anim_Dead_2_Without_Weapon",
+    "Anim_Dead_Left_Without_Weapon",
+    "Anim_Dead_Right_Without_Weapon",
+    "Anim_Forge_A_Sword_Hit",
+    "Anim_Forge_A_Sword_Idle",
+    "Anim_Get_Hit_1_Without_Weapon",
+    "Anim_Get_Hit_2_Without_Weapon",
+    "Anim_Idle_2_Without_Weapon",
+    "Anim_Idle_3_Without_Weapon",
+    "Anim_Idle_Sit_Without_Weapon",
+    "Anim_Idle_Swim",
+    "Anim_Idle_Without_Weapon",
+    "Anim_Jump_Without_Weapon",
+    "Anim_Run_Back_Without_Weapon",
+    "Anim_Run_Back_Without_Weapon_Root",
+    "Anim_Run_Left_Without_Weapon",
+    "Anim_Run_Left_Without_Weapon_Root",
+    "Anim_Run_Right_Without_Weapon",
+    "Anim_Run_Right_Without_Weapon_Root",
+    "Anim_Run_Without_Weapon",
+    "Anim_Run_Without_Weapon_Root",
+    "Anim_Shout_Without_Weapon",
+    "Anim_Swim",
+    "Anim_Swim_Root",
+    "Anim_Turn_Right_Sit_Without_Weapon",
+    "Anim_Turn_Right_Without_Weapon",
+    "Anim_Turn_left_Sit_Without_Weapon",
+    "Anim_Turn_left_Without_Weapon",
+    "Anim_Walk_Back_Sit_Without_Weapon",
+    "Anim_Walk_Back_Sit_Without_Weapon_Root",
+    "Anim_Walk_Back_Without_Weapon",
+    "Anim_Walk_Back_Without_Weapon_Root",
+    "Anim_Walk_Left_Sit_Without_Weapon",
+    "Anim_Walk_Left_Sit_Without_Weapon_Root",
+    "Anim_Walk_Left_Without_Weapon",
+    "Anim_Walk_Left_Without_Weapon_Root",
+    "Anim_Walk_Right_Sit_Without_Weapon",
+    "Anim_Walk_Right_Sit_Without_Weapon_Root",
+    "Anim_Walk_Right_Without_Weapon",
+    "Anim_Walk_Right_Without_Weapon_Root",
+    "Anim_Walk_Sit_Without_Weapon",
+    "Anim_Walk_Sit_Without_Weapon_Root",
+    "Anim_Walk_Without_Weapon",
+    "Anim_Walk_Without_Weapon_Root",
+    "Anim_Warrior_Attack_1",
+    "Anim_Warrior_Attack_2",
+    "Anim_Warrior_Attack_3",
+    "Anim_Warrior_Attack_4",
+    "Anim_Warrior_Attack_5",
+    "Anim_Warrior_Attack_6",
+    "Anim_Warrior_Attack_7",
+    "Anim_Warrior_Attack_8",
+    "Anim_Warrior_Dead_1",
+    "Anim_Warrior_Dead_2",
+    "Anim_Warrior_Dead_3",
+    "Anim_Warrior_Dead_4",
+    "Anim_Warrior_Get_Hit_1",
+    "Anim_Warrior_Get_Hit_2",
+    "Anim_Warrior_Idle",
+    "Anim_Warrior_Idle_Othe",
+    "Anim_Warrior_Idle_Other_02",
+    "Anim_Warrior_Idle_Sit",
+    "Anim_Warrior_Jump",
+    "Anim_Warrior_Run",
+    "Anim_Warrior_Run_Back",
+    "Anim_Warrior_Run_Back_Root",
+    "Anim_Warrior_Run_Left",
+    "Anim_Warrior_Run_Left_Root",
+    "Anim_Warrior_Run_Right",
+    "Anim_Warrior_Run_Right_Root",
+    "Anim_Warrior_Run_Root",
+    "Anim_Warrior_Shout",
+    "Anim_Warrior_Take_Weapon",
+    "Anim_Warrior_Turn_Right",
+    "Anim_Warrior_Turn_Right_Sit",
+    "Anim_Warrior_Turn_left",
+    "Anim_Warrior_Turn_left_Sit",
+    "Anim_Warrior_Walk",
+    "Anim_Warrior_Walk_Back",
+    "Anim_Warrior_Walk_Back_Root",
+    "Anim_Warrior_Walk_Back_Sit",
+    "Anim_Warrior_Walk_Back_Sit_Root",
+    "Anim_Warrior_Walk_Left",
+    "Anim_Warrior_Walk_Left_Root",
+    "Anim_Warrior_Walk_Left_Sit",
+    "Anim_Warrior_Walk_Left_Sit_Root",
+    "Anim_Warrior_Walk_Right",
+    "Anim_Warrior_Walk_Right_Root",
+    "Anim_Warrior_Walk_Root",
+    "Anim_Warrior_Walk_Sit",
+    "Anim_Warrior_Walk_Sit_Right",
+    "Anim_Warrior_Walk_Sit_Right_Root",
+    "Anim_Warrior_Walk_Sit_Root"
+   ]
+  },
+  "/Game/NPC_King_And_Queen/Mesh/NPC_King/Mesh_UE4/Separate/SK_UE4_NPC_King_Crown.SK_UE4_NPC_King_Crown": {
+   "skeleton": "/Game/NPC_King_And_Queen/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE4/Separate/SK_Witch_Book.SK_Witch_Book": {
+   "skeleton": "/Game/Warriors_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Vikings/Mesh_UE4/Separate/SK_Viking_Helmet_01.SK_Viking_Helmet_01": {
+   "skeleton": "/Game/Vikings/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Helmet.SK_Knight_01_Helmet": {
+   "skeleton": "/Game/Knights_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Samurai/Mesh_UE4/Separate/SK_Samurai_Helmet_01.SK_Samurai_Helmet_01": {
+   "skeleton": "/Game/Samurai/DemoScene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Samurai/Mesh_UE4/Separate/SK_Samurai_Mask.SK_Samurai_Mask": {
+   "skeleton": "/Game/Samurai/DemoScene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/NPC_King_And_Queen/Mesh/NPC_Plague_doctor/Mesh_UE4/Separate/SK_UE4_NPC_Plague_doctor_Mask.SK_UE4_NPC_Plague_doctor_Mask": {
+   "skeleton": "/Game/NPC_King_And_Queen/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleWizard_Hat01.SK_MaleWizard_Hat01": {
+   "skeleton": "/Game/MysticDungeon/ModularCharacter/Meshes/PhysicsAssets/SKEL_Human",
+   "rig": "ue4",
+   "bones": 72,
+   "own": [
+    "A_Emotes_Bow",
+    "A_Emotes_Dance_Loop",
+    "A_Emotes_Sit_On_Ground__Loop_",
+    "A_Emotes_Wave",
+    "A_Knight_Idle",
+    "A_ThirdPersonIdle",
+    "A_ThirdPersonJump_End",
+    "A_ThirdPersonJump_Loop",
+    "A_ThirdPersonJump_Start",
+    "A_ThirdPersonRun",
+    "A_ThirdPersonWalk",
+    "A_ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Tactical_masks/Mesh/Mesh_UE4/SK_Mesh/SK_UE4_Gas_mask_01.SK_UE4_Gas_mask_01": {
+   "skeleton": "/Game/Tactical_masks/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Tactical_masks/Mesh/Mesh_UE4/SK_Mesh/SK_UE4_Tactical_mask_01.SK_UE4_Tactical_mask_01": {
+   "skeleton": "/Game/Tactical_masks/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  },
+  "/Game/Astronauts_Pack/Mesh/Astronaut_Pilot/SK_Astronaut_Pilot_Helmet.SK_Astronaut_Pilot_Helmet": {
+   "skeleton": "/Game/Astronauts_Pack/Mesh/Mannequin/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "Anim_Astronaut_Fly_01",
+    "Anim_Astronaut_Fly_02",
+    "Anim_Astronaut_Fly_03",
+    "Anim_Astronaut_Soldier_Idle",
+    "ThirdPersonIdle",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonRun",
+    "ThirdPersonWalk"
+   ]
+  },
+  "/Game/Girl/Mesh/Girl_for_room/Mesh_UE4/Separate/SK_UE4_Girl_for_room_Virtual_reality_helmet.SK_UE4_Girl_for_room_Virtual_reality_helmet": {
+   "skeleton": "/Game/Girl/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton",
+   "rig": "ue4",
+   "bones": 68,
+   "own": [
+    "Anim_Gerl_Idle",
+    "ThirdPersonIdle",
+    "ThirdPersonJump_End",
+    "ThirdPersonJump_Loop",
+    "ThirdPersonJump_Start",
+    "ThirdPersonRun",
+    "ThirdPersonWalk",
+    "ThirdPerson_Jump"
+   ]
+  }
+ },
+ "vehicles": {
+  "animals_pack_raptor_mount": {
+   "size_m": [
+    3.8,
+    1.0,
+    2.0
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Animal/SK_Fantasy_Animal_Body_Skeleton"
+   ]
+  },
+  "animals_pack_camel": {
+   "size_m": [
+    2.9,
+    1.6,
+    2.5
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Body_Skeleton"
+   ]
+  },
+  "animals_pack_pack_bull": {
+   "size_m": [
+    2.7,
+    1.8,
+    2.2
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Bull_Fantasy/SK_Bull_Fantasy_Body_Skeleton"
+   ]
+  },
+  "animals_pack_war_elephant": {
+   "size_m": [
+    11.4,
+    4.5,
+    7.0
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full_Skeleton"
+   ]
+  },
+  "animals_pack_armoured_dragon": {
+   "size_m": [
+    12.2,
+    10.0,
+    3.1
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Dragon/SK_Fantasy_Dragon_Full_Skeleton"
+   ]
+  },
+  "animals_pack_elephant_with_a_war_tower": {
+   "size_m": [
+    12.2,
+    7.4,
+    11.6
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Full/SK_Fantasy_Elephant_Build_Full_Skeleton",
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full_Skeleton"
+   ]
+  },
+  "village_collection_ale_cart": {
+   "size_m": [
+    3.0,
+    1.8,
+    2.1
+   ],
+   "skeletons": []
+  },
+  "village_collection_wooden_cart": {
+   "size_m": [
+    2.8,
+    1.7,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "village_collection_farm_wagon": {
+   "size_m": [
+    3.4,
+    1.5,
+    1.1
+   ],
+   "skeletons": []
+  },
+  "village_collection_small_farm_wagon": {
+   "size_m": [
+    2.5,
+    1.2,
+    0.9
+   ],
+   "skeletons": []
+  },
+  "medieval_lake_village_lake_village_wagon": {
+   "size_m": [
+    3.5,
+    2.2,
+    1.3
+   ],
+   "skeletons": []
+  },
+  "medieval_lake_village_lake_village_handcart": {
+   "size_m": [
+    2.4,
+    1.6,
+    1.0
+   ],
+   "skeletons": []
+  },
+  "hivemind_dock_cart": {
+   "size_m": [
+    4.8,
+    2.2,
+    2.5
+   ],
+   "skeletons": []
+  },
+  "hivemind_covered_dock_cart": {
+   "size_m": [
+    3.7,
+    2.0,
+    2.6
+   ],
+   "skeletons": []
+  },
+  "hivemind_dock_handcart": {
+   "size_m": [
+    3.1,
+    1.4,
+    1.4
+   ],
+   "skeletons": []
+  },
+  "hivemind_low_dock_cart": {
+   "size_m": [
+    3.3,
+    1.5,
+    1.0
+   ],
+   "skeletons": []
+  },
+  "hivemind_market_cart": {
+   "size_m": [
+    2.5,
+    1.4,
+    2.0
+   ],
+   "skeletons": []
+  },
+  "houseforge_01_viking_cart": {
+   "size_m": [
+    2.6,
+    1.6,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "houseforge_01_loaded_viking_cart": {
+   "size_m": [
+    2.6,
+    1.6,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "scene_roadsideconstruction_wheelbarrow": {
+   "size_m": [
+    1.5,
+    0.5,
+    0.6
+   ],
+   "skeletons": []
+  },
+  "warcamp_collection_ballista": {
+   "size_m": [
+    3.1,
+    3.0,
+    1.9
+   ],
+   "skeletons": []
+  },
+  "warcamp_collection_field_cannon": {
+   "size_m": [
+    2.6,
+    1.0,
+    1.4
+   ],
+   "skeletons": []
+  },
+  "warcamp_collection_catapult": {
+   "size_m": [
+    5.9,
+    3.0,
+    2.8
+   ],
+   "skeletons": []
+  },
+  "ancientruins_ruins_rowboat": {
+   "size_m": [
+    4.1,
+    2.0,
+    1.6
+   ],
+   "skeletons": []
+  },
+  "medieval_lake_village_lake_rowboat": {
+   "size_m": [
+    4.3,
+    1.2,
+    0.9
+   ],
+   "skeletons": []
+  },
+  "flower_meadows_meadow_boat": {
+   "size_m": [
+    8.6,
+    1.8,
+    2.0
+   ],
+   "skeletons": []
+  },
+  "flower_meadows_meadow_punt": {
+   "size_m": [
+    5.2,
+    1.8,
+    1.0
+   ],
+   "skeletons": []
+  },
+  "harbour_collection_harbour_skiff": {
+   "size_m": [
+    6.3,
+    1.0,
+    1.3
+   ],
+   "skeletons": []
+  },
+  "harbour_collection_wrecked_ship": {
+   "size_m": [
+    31.3,
+    7.7,
+    5.7
+   ],
+   "skeletons": []
+  },
+  "waterfront_baywalk_sailing_boat": {
+   "size_m": [
+    17.9,
+    5.1,
+    19.2
+   ],
+   "skeletons": []
+  },
+  "dockhouse_dockhouse_boat": {
+   "size_m": [
+    3.9,
+    1.7,
+    1.0
+   ],
+   "skeletons": []
+  },
+  "docks_rowing_boat": {
+   "size_m": [
+    4.6,
+    1.6,
+    1.0
+   ],
+   "skeletons": []
+  },
+  "docks_motor_launch": {
+   "size_m": [
+    4.9,
+    2.3,
+    1.8
+   ],
+   "skeletons": []
+  },
+  "docks_fishing_boat": {
+   "size_m": [
+    7.7,
+    2.9,
+    2.5
+   ],
+   "skeletons": []
+  },
+  "docks_harbour_boat": {
+   "size_m": [
+    7.4,
+    2.7,
+    2.0
+   ],
+   "skeletons": []
+  },
+  "docks_upturned_boat": {
+   "size_m": [
+    6.4,
+    2.4,
+    2.3
+   ],
+   "skeletons": []
+  },
+  "docks_pontoon_boat": {
+   "size_m": [
+    4.0,
+    2.9,
+    0.9
+   ],
+   "skeletons": []
+  },
+  "docks_lifeboat": {
+   "size_m": [
+    5.1,
+    1.8,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "docks_boat_wreck": {
+   "size_m": [
+    3.7,
+    1.8,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "underwater_odyssey_bathyscaphe": {
+   "size_m": [
+    10.0,
+    3.5,
+    3.6
+   ],
+   "skeletons": [
+    "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Bathyscaphe_Skeleton"
+   ]
+  },
+  "underwater_odyssey_cargo_ship": {
+   "size_m": [
+    44.6,
+    7.7,
+    24.5
+   ],
+   "skeletons": [
+    "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Cargo_Ship_Skeleton"
+   ]
+  },
+  "meridian_family_car": {
+   "size_m": [
+    5.3,
+    2.0,
+    1.5
+   ],
+   "skeletons": []
+  },
+  "meridian_saloon_car": {
+   "size_m": [
+    5.0,
+    1.9,
+    1.4
+   ],
+   "skeletons": []
+  },
+  "meridian_station_wagon": {
+   "size_m": [
+    4.9,
+    2.0,
+    1.6
+   ],
+   "skeletons": []
+  },
+  "meridian_school_bus": {
+   "size_m": [
+    9.5,
+    3.0,
+    3.2
+   ],
+   "skeletons": []
+  },
+  "meridian_bicycle": {
+   "size_m": [
+    2.2,
+    0.5,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "volstok_district_hatchback": {
+   "size_m": [
+    4.0,
+    2.7,
+    1.2
+   ],
+   "skeletons": []
+  },
+  "volstok_district_sedan": {
+   "size_m": [
+    5.4,
+    2.9,
+    1.3
+   ],
+   "skeletons": []
+  },
+  "scene_oldmine_log_mine_cart": {
+   "size_m": [
+    2.3,
+    0.8,
+    1.1
+   ],
+   "skeletons": []
+  },
+  "scene_oldmine_ore_mine_cart": {
+   "size_m": [
+    1.1,
+    0.8,
+    1.1
+   ],
+   "skeletons": []
+  },
+  "scene_oldmine_tipping_mine_cart": {
+   "size_m": [
+    2.1,
+    1.0,
+    1.6
+   ],
+   "skeletons": []
+  },
+  "scene_oldmine_mine_wagon": {
+   "size_m": [
+    1.1,
+    0.8,
+    1.1
+   ],
+   "skeletons": []
+  },
+  "dystopia_pack_hover_tank": {
+   "size_m": [
+    6.9,
+    3.2,
+    3.2
+   ],
+   "skeletons": [
+    "/Game/Dystopia_Pack/Tank/Mesh/Mesh_UE4/Full/SK_Tank_Full_Skeleton"
+   ]
+  },
+  "dystopia_pack_combat_mech": {
+   "size_m": [
+    1.3,
+    0.6,
+    1.8
+   ],
+   "skeletons": [
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton"
+   ]
+  },
+  "dystopia_pack_airship": {
+   "size_m": [
+    79.2,
+    17.9,
+    19.4
+   ],
+   "skeletons": [
+    "/Game/Dystopia_Pack/Dystopia_Airship/Mesh/SK_Dystopia_Airship_Skeleton"
+   ]
+  },
+  "military_pack_armoured_car": {
+   "size_m": [
+    5.5,
+    2.7,
+    3.1
+   ],
+   "skeletons": []
+  },
+  "mc_environment_armoured_vehicle": {
+   "size_m": [
+    5.7,
+    3.1,
+    2.4
+   ],
+   "skeletons": []
+  },
+  "military_pack_gun_drone": {
+   "size_m": [
+    2.9,
+    2.6,
+    2.6
+   ],
+   "skeletons": [
+    "/Game/Military_Pack/Mesh/Drone/SK_Dron_Skeleton_Skeleton"
+   ]
+  },
+  "military_drone_quadcopter": {
+   "size_m": [
+    0.6,
+    0.4,
+    0.1
+   ],
+   "skeletons": [
+    "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Basic_Skeleton"
+   ]
+  },
+  "military_drone_bomber_drone": {
+   "size_m": [
+    0.6,
+    0.6,
+    0.3
+   ],
+   "skeletons": [
+    "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Basic_Skeleton"
+   ]
+  },
+  "cartoon_zombies_pack_zombie_tank": {
+   "size_m": [
+    2.4,
+    1.6,
+    1.8
+   ],
+   "skeletons": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Tank_Mesh_Skeleton"
+   ]
+  },
+  "mega_city_flying_car_1": {
+   "size_m": [
+    9.8,
+    6.1,
+    2.9
+   ],
+   "skeletons": []
+  },
+  "mega_city_flying_car_2": {
+   "size_m": [
+    13.9,
+    7.3,
+    2.9
+   ],
+   "skeletons": []
+  },
+  "mega_city_flying_car_3": {
+   "size_m": [
+    13.9,
+    7.3,
+    2.9
+   ],
+   "skeletons": []
+  },
+  "mega_city_flying_car_4": {
+   "size_m": [
+    17.9,
+    7.0,
+    2.9
+   ],
+   "skeletons": []
+  },
+  "mega_city_shuttle": {
+   "size_m": [
+    23.4,
+    10.4,
+    5.8
+   ],
+   "skeletons": []
+  },
+  "red_echo_red_echo_shuttle": {
+   "size_m": [
+    20.3,
+    10.6,
+    3.7
+   ],
+   "skeletons": []
+  },
+  "spaceship_kit_spaceship": {
+   "size_m": [
+    51.6,
+    8.8,
+    8.9
+   ],
+   "skeletons": []
+  },
+  "sci_fi_flying_cargo_ship_flying_cargo_ship": {
+   "size_m": [
+    114.5,
+    52.2,
+    17.8
+   ],
+   "skeletons": []
+  }
+ },
+ "objects": {
+  "medieval_weapons_arming_sword": {
+   "size_cm": [
+    88,
+    18,
+    4
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_broadsword": {
+   "size_cm": [
+    84,
+    22,
+    4
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_longsword": {
+   "size_cm": [
+    93,
+    23,
+    3
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_dagger": {
+   "size_cm": [
+    34,
+    6,
+    2
+   ],
+   "skeletons": []
+  },
+  "knights_pack_templar_sword": {
+   "size_cm": [
+    109,
+    23,
+    5
+   ],
+   "skeletons": []
+  },
+  "knights_pack_eastern_sabre": {
+   "size_cm": [
+    115,
+    24,
+    5
+   ],
+   "skeletons": []
+  },
+  "knights_pack_plate_knight_s_sword": {
+   "size_cm": [
+    141,
+    28,
+    7
+   ],
+   "skeletons": []
+  },
+  "knights_pack_paladin_s_sword": {
+   "size_cm": [
+    159,
+    24,
+    4
+   ],
+   "skeletons": []
+  },
+  "warriors_pack_dark_knight_s_sword": {
+   "size_cm": [
+    158,
+    32,
+    13
+   ],
+   "skeletons": []
+  },
+  "warriors_pack_demonic_blade": {
+   "size_cm": [
+    148,
+    32,
+    6
+   ],
+   "skeletons": []
+  },
+  "samurai_katana": {
+   "size_cm": [
+    133,
+    12,
+    11
+   ],
+   "skeletons": []
+  },
+  "samurai_wakizashi": {
+   "size_cm": [
+    102,
+    11,
+    11
+   ],
+   "skeletons": []
+  },
+  "vikings_viking_sword": {
+   "size_cm": [
+    109,
+    29,
+    4
+   ],
+   "skeletons": []
+  },
+  "vikings_viking_seax": {
+   "size_cm": [
+    66,
+    15,
+    4
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_veteran_s_sword": {
+   "size_cm": [
+    146,
+    27,
+    4
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_orc_cleaver": {
+   "size_cm": [
+    110,
+    9,
+    3
+   ],
+   "skeletons": []
+  },
+  "hive_sherwood_sherwood_sword": {
+   "size_cm": [
+    79,
+    14,
+    5
+   ],
+   "skeletons": []
+  },
+  "animals_pack_camel_rider_s_scimitar": {
+   "size_cm": [
+    101,
+    32,
+    31
+   ],
+   "skeletons": [
+    "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Body_Skeleton"
+   ]
+  },
+  "houseforge_01_hunting_knife": {
+   "size_cm": [
+    42,
+    12,
+    4
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_battle_axe": {
+   "size_cm": [
+    91,
+    37,
+    7
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_throwing_axe": {
+   "size_cm": [
+    57,
+    32,
+    5
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_mace": {
+   "size_cm": [
+    83,
+    18,
+    17
+   ],
+   "skeletons": []
+  },
+  "vikings_bearded_axe": {
+   "size_cm": [
+    69,
+    22,
+    3
+   ],
+   "skeletons": []
+  },
+  "vikings_dane_axe": {
+   "size_cm": [
+    115,
+    45,
+    6
+   ],
+   "skeletons": []
+  },
+  "vikings_viking_club": {
+   "size_cm": [
+    73,
+    20,
+    20
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_dwarven_axe": {
+   "size_cm": [
+    109,
+    49,
+    11
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_knight_s_axe": {
+   "size_cm": [
+    193,
+    24,
+    6
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_northman_s_axe": {
+   "size_cm": [
+    73,
+    31,
+    6
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_barbarian_axe": {
+   "size_cm": [
+    92,
+    23,
+    5
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_barbarian_cleaver": {
+   "size_cm": [
+    92,
+    28,
+    25
+   ],
+   "skeletons": []
+  },
+  "fantasy_pack_troll_s_cudgel": {
+   "size_cm": [
+    173,
+    66,
+    66
+   ],
+   "skeletons": [
+    "/Game/Fantasy_Pack/Characters/Troll/Mesh/SK_Cudgel_Skeleton"
+   ]
+  },
+  "fantasy_enemies_pack_executioner_s_axe": {
+   "size_cm": [
+    179,
+    36,
+    9
+   ],
+   "skeletons": []
+  },
+  "fantasy_enemies_pack_demon_axe": {
+   "size_cm": [
+    167,
+    54,
+    10
+   ],
+   "skeletons": []
+  },
+  "fantasy_enemies_pack_troll_axe": {
+   "size_cm": [
+    99,
+    52,
+    45
+   ],
+   "skeletons": []
+  },
+  "fantasy_enemies_pack_befouler_s_weapon": {
+   "size_cm": [
+    116,
+    39,
+    11
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_dwarf_axe": {
+   "size_cm": [
+    94,
+    55,
+    10
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_bedvar_s_warhammer": {
+   "size_cm": [
+    87,
+    46,
+    19
+   ],
+   "skeletons": []
+  },
+  "houseforge_01_thor_s_hammer": {
+   "size_cm": [
+    266,
+    253,
+    225
+   ],
+   "skeletons": []
+  },
+  "hive_sherwood_sherwood_axe": {
+   "size_cm": [
+    56,
+    21,
+    5
+   ],
+   "skeletons": []
+  },
+  "npc_king_and_queen_headsman_s_axe": {
+   "size_cm": [
+    123,
+    30,
+    6
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_orc_axe": {
+   "size_cm": [
+    103,
+    49,
+    19
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_orc_glaive": {
+   "size_cm": [
+    102,
+    19,
+    17
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_orc_bone_club": {
+   "size_cm": [
+    98,
+    33,
+    14
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_orc_hand_axe": {
+   "size_cm": [
+    92,
+    33,
+    24
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_azrak_s_weapon": {
+   "size_cm": [
+    108,
+    38,
+    12
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_magur_s_weapon": {
+   "size_cm": [
+    124,
+    58,
+    28
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_ursag_s_weapon": {
+   "size_cm": [
+    89,
+    44,
+    11
+   ],
+   "skeletons": []
+  },
+  "orcs_pack_shaman_s_totem_staff": {
+   "size_cm": [
+    196,
+    34,
+    31
+   ],
+   "skeletons": []
+  },
+  "animals_warrior_pack_bear_warrior_s_weapon": {
+   "size_cm": [
+    109,
+    39,
+    39
+   ],
+   "skeletons": []
+  },
+  "animals_warrior_pack_minotaur_s_axe": {
+   "size_cm": [
+    111,
+    47,
+    9
+   ],
+   "skeletons": []
+  },
+  "animals_warrior_pack_crocodile_s_weapon": {
+   "size_cm": [
+    180,
+    17,
+    16
+   ],
+   "skeletons": []
+  },
+  "animals_warrior_pack_elephant_s_weapon": {
+   "size_cm": [
+    172,
+    33,
+    7
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_spear": {
+   "size_cm": [
+    244,
+    18,
+    4
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_war_scythe": {
+   "size_cm": [
+    82,
+    37,
+    8
+   ],
+   "skeletons": []
+  },
+  "knights_pack_halberd": {
+   "size_cm": [
+    234,
+    29,
+    5
+   ],
+   "skeletons": []
+  },
+  "knights_pack_banner_spear": {
+   "size_cm": [
+    307,
+    9,
+    4
+   ],
+   "skeletons": []
+  },
+  "knights_pack_lady_knight_s_spear": {
+   "size_cm": [
+    220,
+    29,
+    7
+   ],
+   "skeletons": []
+  },
+  "vikings_viking_spear": {
+   "size_cm": [
+    266,
+    16,
+    4
+   ],
+   "skeletons": []
+  },
+  "warriors_pack_desert_spear": {
+   "size_cm": [
+    211,
+    4,
+    4
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_broddi_s_spear": {
+   "size_cm": [
+    249,
+    14,
+    5
+   ],
+   "skeletons": []
+  },
+  "hive_sherwood_sherwood_spear": {
+   "size_cm": [
+    211,
+    9,
+    5
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_stone_spear": {
+   "size_cm": [
+    223,
+    7,
+    4
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_bone_club": {
+   "size_cm": [
+    50,
+    23,
+    7
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_stone_axe": {
+   "size_cm": [
+    28,
+    6,
+    4
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_stone_hammer": {
+   "size_cm": [
+    32,
+    6,
+    3
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_cavewoman_s_weapon": {
+   "size_cm": [
+    61,
+    37,
+    12
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_elder_s_staff": {
+   "size_cm": [
+    56,
+    11,
+    5
+   ],
+   "skeletons": []
+  },
+  "primitive_characters_pack_shaman_s_staff": {
+   "size_cm": [
+    200,
+    49,
+    21
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_longbow": {
+   "size_cm": [
+    122,
+    32,
+    10
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_crossbow": {
+   "size_cm": [
+    89,
+    85,
+    12
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_arrow": {
+   "size_cm": [
+    88,
+    6,
+    1
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_wizard_s_staff": {
+   "size_cm": [
+    106,
+    17,
+    9
+   ],
+   "skeletons": []
+  },
+  "houseforge_01_viking_bow": {
+   "size_cm": [
+    129,
+    25,
+    8
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_dwarf_crossbow": {
+   "size_cm": [
+    109,
+    100,
+    23
+   ],
+   "skeletons": [
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Crossbow_Skeleton"
+   ]
+  },
+  "warriors_pack_witch_s_weapon": {
+   "size_cm": [
+    181,
+    17,
+    5
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_heater_shield": {
+   "size_cm": [
+    76,
+    60,
+    13
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_round_shield": {
+   "size_cm": [
+    69,
+    67,
+    14
+   ],
+   "skeletons": []
+  },
+  "medieval_weapons_kite_shield": {
+   "size_cm": [
+    90,
+    57,
+    25
+   ],
+   "skeletons": []
+  },
+  "knights_pack_templar_shield": {
+   "size_cm": [
+    79,
+    52,
+    13
+   ],
+   "skeletons": []
+  },
+  "knights_pack_eastern_shield": {
+   "size_cm": [
+    77,
+    77,
+    20
+   ],
+   "skeletons": []
+  },
+  "knights_pack_plate_knight_s_shield": {
+   "size_cm": [
+    108,
+    48,
+    13
+   ],
+   "skeletons": []
+  },
+  "knights_pack_lady_knight_s_shield": {
+   "size_cm": [
+    103,
+    53,
+    22
+   ],
+   "skeletons": []
+  },
+  "vikings_viking_round_shield": {
+   "size_cm": [
+    66,
+    66,
+    11
+   ],
+   "skeletons": []
+  },
+  "vikings_painted_viking_shield": {
+   "size_cm": [
+    66,
+    66,
+    11
+   ],
+   "skeletons": []
+  },
+  "warriors_pack_desert_shield": {
+   "size_cm": [
+    82,
+    82,
+    16
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_broddi_s_shield": {
+   "size_cm": [
+    136,
+    78,
+    13
+   ],
+   "skeletons": []
+  },
+  "houseforge_01_village_shield": {
+   "size_cm": [
+    78,
+    78,
+    18
+   ],
+   "skeletons": []
+  },
+  "hivemind_dock_shield": {
+   "size_cm": [
+    78,
+    78,
+    13
+   ],
+   "skeletons": []
+  },
+  "warcamp_collection_war_camp_shield": {
+   "size_cm": [
+    88,
+    88,
+    10
+   ],
+   "skeletons": []
+  },
+  "fps_automatic_rifle_02_assault_rifle_fps": {
+   "size_cm": [
+    81,
+    36,
+    10
+   ],
+   "skeletons": [
+    "/Game/FPS_Automatic_Rifle_02/Mesh/AutoRifle/SK_AutoRifle_Basic_Skeleton"
+   ]
+  },
+  "fps_automatic_rifle_01_carbine_fps": {
+   "size_cm": [
+    92,
+    21,
+    8
+   ],
+   "skeletons": [
+    "/Game/FPS_Automatic_Rifle_01/Mesh/Automatic_Rifle_01/SK_Automatic_Rifle_01_Basic_Skeleton"
+   ]
+  },
+  "automatic_gun_submachine_gun_fps": {
+   "size_cm": [
+    67,
+    24,
+    11
+   ],
+   "skeletons": [
+    "/Game/Automatic_Gun/Mesh/Automatic_Gun/SK_FPS_Automatic_Gun_Basic_Skeleton"
+   ]
+  },
+  "fps_automatic_shotgun_automatic_shotgun_fps": {
+   "size_cm": [
+    80,
+    27,
+    8
+   ],
+   "skeletons": [
+    "/Game/FPS_Automatic_Shotgun/Mesh/Automatic_Shotgun/SK_Automatic_Shotgun_Full_Skeleton"
+   ]
+  },
+  "mc_environment_assault_rifle": {
+   "size_cm": [
+    112,
+    30,
+    9
+   ],
+   "skeletons": []
+  },
+  "mc_environment_pump_shotgun": {
+   "size_cm": [
+    105,
+    20,
+    6
+   ],
+   "skeletons": []
+  },
+  "military_pack_marine_rifle": {
+   "size_cm": [
+    118,
+    27,
+    8
+   ],
+   "skeletons": [
+    "/Game/Military_Pack/Mesh/Rifle_05/SK_Rifle_05_Body_Skeleton"
+   ]
+  },
+  "female_soldier_pack_riot_gun": {
+   "size_cm": [
+    101,
+    40,
+    9
+   ],
+   "skeletons": [
+    "/Game/Female_Soldier_Pack/Mesh/Woman_05/Mesh_Weapon/SK_Woman_05_Weapon_Full_01_Skeleton"
+   ]
+  },
+  "dystopia_pack_dystopian_machine_gun": {
+   "size_cm": [
+    86,
+    47,
+    40
+   ],
+   "skeletons": []
+  },
+  "dystopia_pack_dystopian_rifle": {
+   "size_cm": [
+    83,
+    26,
+    9
+   ],
+   "skeletons": [
+    "/Game/Dystopia_Pack/Dystopia_Soldier/Mesh_UE4/Weapon/SK_Weapon_Skeleton"
+   ]
+  },
+  "npc_old_gangster_tommy_gun": {
+   "size_cm": [
+    86,
+    23,
+    17
+   ],
+   "skeletons": []
+  },
+  "megapost_character_scavenger_rifle": {
+   "size_cm": [
+    42,
+    10,
+    4
+   ],
+   "skeletons": []
+  },
+  "post_apocalypse_pack_wasteland_rifle": {
+   "size_cm": [
+    79,
+    18,
+    3
+   ],
+   "skeletons": []
+  },
+  "post_apocalypse_pack_scrap_gun": {
+   "size_cm": [
+    92,
+    35,
+    6
+   ],
+   "skeletons": []
+  },
+  "fps_sniper_rifle_large_calibre_sniper_rifle_fps": {
+   "size_cm": [
+    166,
+    33,
+    13
+   ],
+   "skeletons": [
+    "/Game/FPS_Sniper_Rifle/Mesh/Sniper_Rifle/SK_Sniper_Rifle_Full_Skeleton"
+   ]
+  },
+  "fps_sniper_rifle_03_camouflaged_sniper_rifle_fps": {
+   "size_cm": [
+    143,
+    34,
+    16
+   ],
+   "skeletons": [
+    "/Game/FPS_Sniper_Rifle_03/Mesh/Sniper_Rifle_03/SK_Sniper_Rifle_03_Full_Skeleton"
+   ]
+  },
+  "sniper_ghillie_sniper_rifle": {
+   "size_cm": [
+    143,
+    34,
+    12
+   ],
+   "skeletons": [
+    "/Game/Sniper/Mesh/Sniper_Rifle/Full_Mesh/SK_Sniper_Rifle_Skeleton"
+   ]
+  },
+  "adventures_pack_hunting_rifle": {
+   "size_cm": [
+    136,
+    29,
+    8
+   ],
+   "skeletons": [
+    "/Game/Adventures_Pack/Mesh/Adventure_04/Sniper_Rifle/SK_Sniper_Rifle_Basic_Skeleton"
+   ]
+  },
+  "fps_rocket_launcher_rocket_launcher_fps": {
+   "size_cm": [
+    103,
+    34,
+    14
+   ],
+   "skeletons": [
+    "/Game/FPS_Rocket_Launcher/Mesh/Rocket_Launcher/SK_Rocket_Launcher_Skeleton"
+   ]
+  },
+  "fps_pistol_single_pistol_fps": {
+   "size_cm": [
+    23,
+    17,
+    5
+   ],
+   "skeletons": [
+    "/Game/FPS_Pistol_Single/Mesh/Pistol/SK_Pistol_Skeleton"
+   ]
+  },
+  "mc_environment_service_pistol": {
+   "size_cm": [
+    19,
+    13,
+    3
+   ],
+   "skeletons": []
+  },
+  "adventures_pack_adventurer_s_pistol": {
+   "size_cm": [
+    49,
+    19,
+    6
+   ],
+   "skeletons": [
+    "/Game/Adventures_Pack/Mesh/Adventure_03/Weapons/SK_Gun_Full_Skeleton"
+   ]
+  },
+  "npc_sailor_custom_flintlock_pistol": {
+   "size_cm": [
+    31,
+    17,
+    5
+   ],
+   "skeletons": []
+  },
+  "megapost_character_sawn_off": {
+   "size_cm": [
+    27,
+    20,
+    4
+   ],
+   "skeletons": []
+  },
+  "safehouse_semi_automatic_pistol": {
+   "size_cm": [
+    21,
+    11,
+    3
+   ],
+   "skeletons": []
+  },
+  "safehouse_revolver": {
+   "size_cm": [
+    27,
+    17,
+    5
+   ],
+   "skeletons": []
+  },
+  "fps_pistol_knife_combat_knife_fps": {
+   "size_cm": [
+    37,
+    8,
+    3
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_kitchen_knife_fps": {
+   "size_cm": [
+    36,
+    7,
+    2
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_fire_axe_fps": {
+   "size_cm": [
+    48,
+    19,
+    3
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_ice_axe_fps": {
+   "size_cm": [
+    55,
+    33,
+    3
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_baseball_bat_fps": {
+   "size_cm": [
+    80,
+    18,
+    16
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_stun_gun_fps": {
+   "size_cm": [
+    36,
+    12,
+    5
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Stun_Gun_Skeleton"
+   ]
+  },
+  "fps_starter_pack_riot_shield_and_club_fps": {
+   "size_cm": [
+    122,
+    48,
+    29
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Shield_Full_Skeleton"
+   ]
+  },
+  "fps_pistol_shield_ballistic_shield_fps": {
+   "size_cm": [
+    121,
+    48,
+    29
+   ],
+   "skeletons": [
+    "/Game/FPS_Pistol_Shield/Mesh/Shield/SK_Shield_Basic_Skeleton"
+   ]
+  },
+  "npc_old_gangster_baseball_bat": {
+   "size_cm": [
+    71,
+    6,
+    6
+   ],
+   "skeletons": []
+  },
+  "npc_old_gangster_butcher_s_cleaver": {
+   "size_cm": [
+    55,
+    16,
+    2
+   ],
+   "skeletons": []
+  },
+  "adventures_pack_spiked_club": {
+   "size_cm": [
+    68,
+    4,
+    4
+   ],
+   "skeletons": []
+  },
+  "post_apocalypse_pack_crazy_s_weapon": {
+   "size_cm": [
+    84,
+    19,
+    4
+   ],
+   "skeletons": []
+  },
+  "post_apocalypse_pack_backsword": {
+   "size_cm": [
+    43,
+    12,
+    3
+   ],
+   "skeletons": []
+  },
+  "military_pack_military_knife": {
+   "size_cm": [
+    54,
+    8,
+    3
+   ],
+   "skeletons": []
+  },
+  "sniper_sniper_s_knife": {
+   "size_cm": [
+    33,
+    5,
+    2
+   ],
+   "skeletons": []
+  },
+  "military_pack_frag_grenade": {
+   "size_cm": [
+    14,
+    8,
+    8
+   ],
+   "skeletons": []
+  },
+  "dystopia_pack_dystopian_grenade": {
+   "size_cm": [
+    31,
+    7,
+    7
+   ],
+   "skeletons": []
+  },
+  "military_pack_rocket": {
+   "size_cm": [
+    42,
+    7,
+    7
+   ],
+   "skeletons": []
+  },
+  "sci_fi_characters_pack_sci_fi_rifle": {
+   "size_cm": [
+    226,
+    57,
+    18
+   ],
+   "skeletons": [
+    "/Game/Sci_Fi_Characters_Pack/Mesh/Sci_Fi_Character_05/SK_Sci_Fi_Character_05_Weapon_Skeleton"
+   ]
+  },
+  "sci_fi_characters_pack_vol_2_defender_s_cannon": {
+   "size_cm": [
+    140,
+    72,
+    54
+   ],
+   "skeletons": [
+    "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_10/Weapon/SK_Defender_Weapon_Skeleton"
+   ]
+  },
+  "sci_fi_characters_pack_vol_2_guard_s_rifle": {
+   "size_cm": [
+    227,
+    23,
+    12
+   ],
+   "skeletons": []
+  },
+  "sci_fi_mercenary_pack_bounty_hunter_s_pistol": {
+   "size_cm": [
+    36,
+    17,
+    5
+   ],
+   "skeletons": [
+    "/Game/Sci_Fi_Mercenary_Pack/Mesh/Head_Hunter/Mesh_Gun/SK_Head_Hunter_Gun_Skeleton"
+   ]
+  },
+  "sci_fi_mercenary_pack_marauder_rifle": {
+   "size_cm": [
+    89,
+    37,
+    22
+   ],
+   "skeletons": [
+    "/Game/Sci_Fi_Mercenary_Pack/Mesh/Marauder/Mesh_Weapon/SK_Marauder_Rifle_Full_Skeleton"
+   ]
+  },
+  "sci_fi_mercenary_pack_robot_s_arm_guns": {
+   "size_cm": [
+    156,
+    75,
+    32
+   ],
+   "skeletons": [
+    "/Game/Sci_Fi_Mercenary_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "aliens_warrior_pack_alien_sniper_rifle": {
+   "size_cm": [
+    114,
+    27,
+    7
+   ],
+   "skeletons": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_03/Gun/Full/SK_Sci_Fi_Automatic_Sniper_Rifle_Full_Skeleton"
+   ]
+  },
+  "aliens_warrior_pack_alien_blaster": {
+   "size_cm": [
+    119,
+    40,
+    17
+   ],
+   "skeletons": []
+  },
+  "soldier_future_01_future_assault_rifle": {
+   "size_cm": [
+    148,
+    39,
+    11
+   ],
+   "skeletons": [
+    "/Game/Soldier_Future_01/Mesh/Automatic_Rifle/SK_Automatic_Rifle_Full_Skeleton"
+   ]
+  },
+  "soldier_future_03_future_rocket_launcher": {
+   "size_cm": [
+    61,
+    10,
+    10
+   ],
+   "skeletons": [
+    "/Game/Soldier_Future_03/Mesh/Mesh_Rocket_launcher/SK_Rocket_Skeleton"
+   ]
+  },
+  "astronauts_pack_space_marine_s_gun": {
+   "size_cm": [
+    192,
+    136,
+    80
+   ],
+   "skeletons": [
+    "/Game/Astronauts_Pack/Mesh/Astronaut_Soldier/Weapon/SK_Astronaut_Soldier_Weapon_Full_Skeleton"
+   ]
+  },
+  "cybercharacter_pack_cyber_rifle": {
+   "size_cm": [
+    121,
+    38,
+    14
+   ],
+   "skeletons": []
+  },
+  "dystopia_pack_flamethrower": {
+   "size_cm": [
+    148,
+    139,
+    86
+   ],
+   "skeletons": [
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton",
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton",
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mannequin/SK_Mannequin_Skeleton"
+   ]
+  },
+  "aliens_warrior_pack_alien_wrist_cannons": {
+   "size_cm": [
+    80,
+    75,
+    65
+   ],
+   "skeletons": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Mesh_Weapon_04/SK_Alien_Weapon_04_Full_01_Skeleton"
+   ]
+  },
+  "sci_fi_hands_knife_energy_knife_fps": {
+   "size_cm": [
+    31,
+    7,
+    3
+   ],
+   "skeletons": []
+  },
+  "sci_fi_hands_arm_shield_fps": {
+   "size_cm": [
+    55,
+    55,
+    8
+   ],
+   "skeletons": [
+    "/Game/Sci_Fi_Hands/Mesh/Shield/SK_Sci_Fi_Shield_Skeleton"
+   ]
+  },
+  "sci_fi_characters_pack_sci_fi_sword": {
+   "size_cm": [
+    119,
+    5,
+    3
+   ],
+   "skeletons": []
+  },
+  "sci_fi_characters_pack_sci_fi_blade": {
+   "size_cm": [
+    160,
+    34,
+    8
+   ],
+   "skeletons": []
+  },
+  "sci_fi_characters_pack_vol_2_reaper_s_scythe": {
+   "size_cm": [
+    197,
+    83,
+    8
+   ],
+   "skeletons": []
+  },
+  "dystopia_pack_dystopian_sword": {
+   "size_cm": [
+    84,
+    29,
+    10
+   ],
+   "skeletons": []
+  },
+  "aliens_warrior_pack_alien_mace": {
+   "size_cm": [
+    135,
+    46,
+    46
+   ],
+   "skeletons": []
+  },
+  "aliens_warrior_pack_alien_claw_blades": {
+   "size_cm": [
+    210,
+    65,
+    51
+   ],
+   "skeletons": [
+    "/Game/Aliens_Warrior_Pack/Demoscene_UE4/Mesh/Alien_Warrior_04/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "aliens_warrior_pack_magma_alien_s_weapon": {
+   "size_cm": [
+    126,
+    59,
+    37
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_chocolate_bar": {
+   "size_cm": [
+    18,
+    8,
+    1
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Chocolate_01_Skeleton"
+   ]
+  },
+  "fps_starter_pack_canned_sardines": {
+   "size_cm": [
+    9,
+    9,
+    5
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sardines_Skeleton"
+   ]
+  },
+  "fps_starter_pack_canned_sprats": {
+   "size_cm": [
+    18,
+    10,
+    3
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Sprats_Skeleton"
+   ]
+  },
+  "fps_starter_pack_canned_meatballs": {
+   "size_cm": [
+    20,
+    20,
+    6
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Meatball_Skeleton"
+   ]
+  },
+  "fps_starter_pack_porridge": {
+   "size_cm": [
+    20,
+    18,
+    6
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Porridge_Plate_Skeleton"
+   ]
+  },
+  "fps_starter_pack_jar_of_food": {
+   "size_cm": [
+    13,
+    10,
+    10
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Jar_Skeleton"
+   ]
+  },
+  "fps_starter_pack_soda_can": {
+   "size_cm": [
+    17,
+    9,
+    9
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Soda_Skeleton"
+   ]
+  },
+  "fps_starter_pack_juice_carton": {
+   "size_cm": [
+    22,
+    9,
+    8
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Juce_Skeleton"
+   ]
+  },
+  "fps_starter_pack_lemonade_bottle": {
+   "size_cm": [
+    31,
+    7,
+    7
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lemonade_Bottle_Skeleton"
+   ]
+  },
+  "fps_starter_pack_coffee_mug": {
+   "size_cm": [
+    15,
+    10,
+    10
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Mug_Skeleton"
+   ]
+  },
+  "fps_starter_pack_sausage": {
+   "size_cm": [
+    62,
+    6,
+    5
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Fish_Skeleton"
+   ]
+  },
+  "fps_starter_pack_fish": {
+   "size_cm": [
+    71,
+    10,
+    5
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Fish_Skeleton"
+   ]
+  },
+  "diner_colection_loaf_of_bread": {
+   "size_cm": [
+    24,
+    24,
+    14
+   ],
+   "skeletons": []
+  },
+  "diner_colection_cheese_wheel": {
+   "size_cm": [
+    32,
+    32,
+    7
+   ],
+   "skeletons": []
+  },
+  "diner_colection_apple": {
+   "size_cm": [
+    7,
+    7,
+    7
+   ],
+   "skeletons": []
+  },
+  "diner_colection_joint_of_meat": {
+   "size_cm": [
+    28,
+    16,
+    6
+   ],
+   "skeletons": []
+  },
+  "diner_colection_wine_bottle": {
+   "size_cm": [
+    34,
+    10,
+    10
+   ],
+   "skeletons": []
+  },
+  "diner_colection_wooden_cup": {
+   "size_cm": [
+    20,
+    18,
+    13
+   ],
+   "skeletons": []
+  },
+  "diner_colection_silver_cup": {
+   "size_cm": [
+    26,
+    13,
+    13
+   ],
+   "skeletons": []
+  },
+  "gothic_props_chalice": {
+   "size_cm": [
+    14,
+    6,
+    6
+   ],
+   "skeletons": []
+  },
+  "scene_bazaar_vol1_flatbread": {
+   "size_cm": [
+    26,
+    26,
+    3
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_syringe": {
+   "size_cm": [
+    20,
+    17,
+    4
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_01_Skeleton"
+   ]
+  },
+  "fps_starter_pack_auto_injector": {
+   "size_cm": [
+    24,
+    8,
+    3
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_02_Skeleton"
+   ]
+  },
+  "fps_starter_pack_stim_syringe": {
+   "size_cm": [
+    22,
+    20,
+    3
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Syringe_03_Skeleton"
+   ]
+  },
+  "fps_starter_pack_hip_flask": {
+   "size_cm": [
+    25,
+    19,
+    12
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Flask_Skeleton"
+   ]
+  },
+  "diner_colection_potion": {
+   "size_cm": [
+    18,
+    11,
+    11
+   ],
+   "skeletons": []
+  },
+  "diner_colection_tall_potion": {
+   "size_cm": [
+    16,
+    8,
+    8
+   ],
+   "skeletons": []
+  },
+  "abandoned_hospital_pill_bottle": {
+   "size_cm": [
+    2,
+    2,
+    0
+   ],
+   "skeletons": []
+  },
+  "hospital_vol1_medical_bag": {
+   "size_cm": [
+    82,
+    55,
+    42
+   ],
+   "skeletons": []
+  },
+  "warriors_pack_witch_s_flasks": {
+   "size_cm": [
+    20,
+    19,
+    14
+   ],
+   "skeletons": [
+    "/Game/Warriors_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "fps_starter_pack_lighter": {
+   "size_cm": [
+    11,
+    8,
+    2
+   ],
+   "skeletons": [
+    "/Game/FPS_Starter_Pack/Mesh/SK_Stuff/SK_Lighter_Skeleton"
+   ]
+  },
+  "fps_starter_pack_binoculars": {
+   "size_cm": [
+    24,
+    23,
+    12
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_handheld_candle": {
+   "size_cm": [
+    18,
+    14,
+    12
+   ],
+   "skeletons": []
+  },
+  "fps_starter_pack_torch": {
+   "size_cm": [
+    63,
+    10,
+    10
+   ],
+   "skeletons": []
+  },
+  "fps_devices_camcorder": {
+   "size_cm": [
+    23,
+    17,
+    9
+   ],
+   "skeletons": [
+    "/Game/FPS_Devices/Mesh/SK_Camera_Skeleton"
+   ]
+  },
+  "fps_devices_smartphone": {
+   "size_cm": [
+    20,
+    10,
+    2
+   ],
+   "skeletons": []
+  },
+  "fps_devices_walkie_talkie": {
+   "size_cm": [
+    35,
+    9,
+    6
+   ],
+   "skeletons": []
+  },
+  "fps_devices_listening_device": {
+   "size_cm": [
+    46,
+    38,
+    36
+   ],
+   "skeletons": []
+  },
+  "mc_environment_military_radio": {
+   "size_cm": [
+    68,
+    63,
+    56
+   ],
+   "skeletons": []
+  },
+  "sniper_radio_set": {
+   "size_cm": [
+    26,
+    9,
+    6
+   ],
+   "skeletons": []
+  },
+  "military_pack_field_laptop": {
+   "size_cm": [
+    16,
+    13,
+    12
+   ],
+   "skeletons": [
+    "/Game/Military_Pack/Animations/AnimDemo/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "gothic_props_candlestick": {
+   "size_cm": [
+    298,
+    153,
+    136
+   ],
+   "skeletons": []
+  },
+  "village_collection_pitchfork": {
+   "size_cm": [
+    193,
+    38,
+    10
+   ],
+   "skeletons": []
+  },
+  "village_collection_shovel": {
+   "size_cm": [
+    151,
+    31,
+    9
+   ],
+   "skeletons": []
+  },
+  "scene_oldmine_pickaxe": {
+   "size_cm": [
+    87,
+    50,
+    7
+   ],
+   "skeletons": []
+  },
+  "hivemind_smith_s_hammer": {
+   "size_cm": [
+    39,
+    19,
+    4
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_forge_tongs": {
+   "size_cm": [
+    130,
+    41,
+    12
+   ],
+   "skeletons": []
+  },
+  "safehouse_tool_kit": {
+   "size_cm": [
+    16,
+    16,
+    6
+   ],
+   "skeletons": []
+  },
+  "scene_warehouse_jerrycan": {
+   "size_cm": [
+    38,
+    26,
+    23
+   ],
+   "skeletons": []
+  },
+  "anemoia_pocket_watch": {
+   "size_cm": [
+    14,
+    10,
+    3
+   ],
+   "skeletons": []
+  },
+  "castle_collection_gold_coin": {
+   "size_cm": [
+    2,
+    2,
+    0
+   ],
+   "skeletons": []
+  },
+  "crownfall_coin_purse": {
+   "size_cm": [
+    40,
+    39,
+    2
+   ],
+   "skeletons": []
+  },
+  "castle_collection_gem": {
+   "size_cm": [
+    7,
+    5,
+    2
+   ],
+   "skeletons": []
+  },
+  "castle_collection_cut_gem": {
+   "size_cm": [
+    7,
+    7,
+    2
+   ],
+   "skeletons": []
+  },
+  "castle_collection_iron_key": {
+   "size_cm": [
+    11,
+    4,
+    1
+   ],
+   "skeletons": []
+  },
+  "anemoia_brass_key": {
+   "size_cm": [
+    11,
+    4,
+    1
+   ],
+   "skeletons": []
+  },
+  "castle_collection_leather_pouch": {
+   "size_cm": [
+    13,
+    9,
+    9
+   ],
+   "skeletons": []
+  },
+  "castle_collection_gold_lion_statuette": {
+   "size_cm": [
+    215,
+    184,
+    148
+   ],
+   "skeletons": []
+  },
+  "dwarf_pack_dwarf_king_s_crown": {
+   "size_cm": [
+    27,
+    23,
+    20
+   ],
+   "skeletons": [
+    "/Game/Dwarf_Pack/Mesh/SK_Mannequin_Skeleton"
+   ]
+  },
+  "npc_king_and_queen_king_s_crown": {
+   "size_cm": [
+    23,
+    21,
+    17
+   ],
+   "skeletons": [
+    "/Game/NPC_King_And_Queen/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "castle_collection_leather_book": {
+   "size_cm": [
+    35,
+    30,
+    4
+   ],
+   "skeletons": []
+  },
+  "crownfall_book_of_eddrick": {
+   "size_cm": [
+    39,
+    32,
+    10
+   ],
+   "skeletons": []
+  },
+  "warriors_pack_witch_s_spellbook": {
+   "size_cm": [
+    21,
+    18,
+    12
+   ],
+   "skeletons": [
+    "/Game/Warriors_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "victorianoffice_ink_bottle": {
+   "size_cm": [
+    15,
+    7,
+    7
+   ],
+   "skeletons": []
+  },
+  "victorianoffice_chess_set": {
+   "size_cm": [
+    110,
+    110,
+    15
+   ],
+   "skeletons": []
+  },
+  "vikings_viking_helmet": {
+   "size_cm": [
+    39,
+    31,
+    31
+   ],
+   "skeletons": [
+    "/Game/Vikings/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "knights_pack_great_helm": {
+   "size_cm": [
+    31,
+    26,
+    22
+   ],
+   "skeletons": [
+    "/Game/Knights_Pack/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "samurai_kabuto": {
+   "size_cm": [
+    40,
+    34,
+    27
+   ],
+   "skeletons": [
+    "/Game/Samurai/DemoScene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "samurai_samurai_war_mask": {
+   "size_cm": [
+    18,
+    18,
+    17
+   ],
+   "skeletons": [
+    "/Game/Samurai/DemoScene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "npc_king_and_queen_plague_doctor_s_mask": {
+   "size_cm": [
+    42,
+    24,
+    19
+   ],
+   "skeletons": [
+    "/Game/NPC_King_And_Queen/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "mysticdungeon_wizard_s_hat": {
+   "size_cm": [
+    55,
+    54,
+    43
+   ],
+   "skeletons": [
+    "/Game/MysticDungeon/ModularCharacter/Meshes/PhysicsAssets/SKEL_Human"
+   ]
+  },
+  "tactical_masks_gas_mask": {
+   "size_cm": [
+    40,
+    39,
+    22
+   ],
+   "skeletons": [
+    "/Game/Tactical_masks/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "tactical_masks_tactical_mask": {
+   "size_cm": [
+    28,
+    27,
+    18
+   ],
+   "skeletons": [
+    "/Game/Tactical_masks/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "astronauts_pack_pilot_s_helmet": {
+   "size_cm": [
+    35,
+    34,
+    31
+   ],
+   "skeletons": [
+    "/Game/Astronauts_Pack/Mesh/Mannequin/UE4_Mannequin_Skeleton"
+   ]
+  },
+  "girl_vr_headset": {
+   "size_cm": [
+    30,
+    25,
+    24
+   ],
+   "skeletons": [
+    "/Game/Girl/Demoscene_UE4/Mesh/UE4_Mannequin_Skeleton"
+   ]
   }
  }
 }

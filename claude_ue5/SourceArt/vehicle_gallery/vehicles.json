@@ -1,0 +1,1084 @@
+{
+ "vehicles": [
+  {
+   "id": "animals_pack_raptor_mount",
+   "name": "Raptor Mount",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "category": "Mounts and riding beasts",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Animal/SK_Fantasy_Animal_Full.SK_Fantasy_Animal_Full"
+   ],
+   "clip": "Anim_Fantasy_Animal_Run",
+   "t": 0.3,
+   "use": "riding mount",
+   "looks": "A long-tailed, beaked raptor with a saddle, saddlebags and a wineskin.",
+   "anim_note": "The pack's rider clips for a UE4-mannequin character (climb on and off, riding idles, hits, death; `Anim_Rider_*`, `Anim_Character_*`) go with it."
+  },
+  {
+   "id": "animals_pack_camel",
+   "name": "Camel",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "category": "Mounts and riding beasts",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Camel/Camel/SK_Camel_Full.SK_Camel_Full"
+   ],
+   "clip": "Anim_Camel_Run",
+   "t": 0.3,
+   "use": "pack animal / riding mount",
+   "looks": "A camel loaded with saddlebags, bundles and a sword, under a striped saddle cloth.",
+   "anim_note": "The pack's rider clips for a UE4-mannequin character (climb on and off, riding idles, hits, death; `Anim_Rider_*`, `Anim_Character_*`) go with it. The camel has an animation Blueprint for a rider (`AB_Camel_Rider`)."
+  },
+  {
+   "id": "animals_pack_pack_bull",
+   "name": "Pack Bull",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "category": "Mounts and riding beasts",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Bull_Fantasy/SK_Bull_Fantasy_Full.SK_Bull_Fantasy_Full"
+   ],
+   "clip": "Anim_Bull_Run",
+   "t": 0.3,
+   "use": "pack animal",
+   "looks": "A humped bull carrying baskets and bags under a canvas cover."
+  },
+  {
+   "id": "animals_pack_war_elephant",
+   "name": "War Elephant",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "category": "Mounts and riding beasts",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full.SK_Fantasy_Elephant_Full"
+   ],
+   "clip": "Anim_Fantasy_Elephant_Attack_01",
+   "t": 0.45,
+   "use": "war mount / boss",
+   "looks": "A giant elephant in riveted plate, its tusks capped with spiked steel.",
+   "anim_note": "The pack's rider clips for a UE4-mannequin character (climb on and off, riding idles, hits, death; `Anim_Rider_*`, `Anim_Character_*`) go with it."
+  },
+  {
+   "id": "animals_pack_armoured_dragon",
+   "name": "Armoured Dragon",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "category": "Mounts and riding beasts",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Dragon/SK_Fantasy_Dragon_Full.SK_Fantasy_Dragon_Full"
+   ],
+   "clip": "Anim_Fantasy_Dragon_Set_02_Flight",
+   "t": 0.3,
+   "use": "flying mount / boss",
+   "looks": "A red dragon with an armoured head and back, 12 m from wingtip to wingtip.",
+   "axis": "y",
+   "anim_note": "Two sets: on the ground (`Set_01`: walk, run, take-off, landing, attacks) and in the air (`Set_02`: flight, soaring, turns, fire breath)."
+  },
+  {
+   "id": "animals_pack_elephant_with_a_war_tower",
+   "name": "Elephant with a War Tower",
+   "pack": "Fantasy Animal (Pack)",
+   "uid": "4878a5f0-f82b-4530-b50d-a3f880ef4665",
+   "folder": "Animals_Pack",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Full/SK_Fantasy_Elephant_Build_Full.SK_Fantasy_Elephant_Build_Full",
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full.SK_Fantasy_Elephant_Full"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "siege beast / moving fort",
+   "looks": "The armoured elephant carrying a wooden war tower with ladders, banners, a canopy and spears.",
+   "axis": "y",
+   "anim_note": "The clips are the elephant's; the tower is a skeletal mesh of its own without clips, so it only follows the elephant attached to a socket on its back."
+  },
+  {
+   "id": "village_collection_ale_cart",
+   "name": "Ale Cart",
+   "pack": "(Nanite) Medieval Village Kit - Village Props",
+   "uid": "f9df4890-75d6-4f7e-a0b2-6774ba87c641",
+   "folder": "Village_Collection",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Village_Collection/Props/SM_AleCart/Meshes/FBX/SM_AleCart.SM_AleCart"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "horse-drawn delivery cart",
+   "looks": "A two-wheeled cart carrying a big ale barrel on a cradle, with shafts for a horse."
+  },
+  {
+   "id": "village_collection_wooden_cart",
+   "name": "Wooden Cart",
+   "pack": "(Nanite) Medieval Village Kit - Village Props",
+   "uid": "f9df4890-75d6-4f7e-a0b2-6774ba87c641",
+   "folder": "Village_Collection",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Village_Collection/Props/SM_WoodenCart/Meshes/FBX/SM_WoodenCart.SM_WoodenCart"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart",
+   "looks": "A plank-sided cart on two solid wheels, with long handles."
+  },
+  {
+   "id": "village_collection_farm_wagon",
+   "name": "Farm Wagon",
+   "pack": "(Nanite) Medieval Village Kit - Village Props",
+   "uid": "f9df4890-75d6-4f7e-a0b2-6774ba87c641",
+   "folder": "Village_Collection",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Village_Collection/Props/SM_WoodWagons_Var/Meshes/FBX/SM_WoodWagons_Var1.SM_WoodWagons_Var1"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart",
+   "looks": "A light two-wheeled cart with spoked wheels and long shafts."
+  },
+  {
+   "id": "village_collection_small_farm_wagon",
+   "name": "Small Farm Wagon",
+   "pack": "(Nanite) Medieval Village Kit - Village Props",
+   "uid": "f9df4890-75d6-4f7e-a0b2-6774ba87c641",
+   "folder": "Village_Collection",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Village_Collection/Props/SM_WoodWagons_Var/Meshes/FBX/SM_WoodWagons_Var2.SM_WoodWagons_Var2"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart / market stall",
+   "looks": "A flat plank bed on two octagonal wheels and two legs, with handles."
+  },
+  {
+   "id": "medieval_lake_village_lake_village_wagon",
+   "name": "Lake Village Wagon",
+   "pack": "Medieval Lake Village Environment",
+   "uid": "7d67384d-acb8-4ff8-9e71-c5036b5ea34a",
+   "folder": "Medieval_Lake_Village",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Medieval_Lake_Village/Meshs/SM_WoodenWagon01.SM_WoodenWagon01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart",
+   "looks": "A deep plank box on two wheels, tipped forward onto its handles."
+  },
+  {
+   "id": "medieval_lake_village_lake_village_handcart",
+   "name": "Lake Village Handcart",
+   "pack": "Medieval Lake Village Environment",
+   "uid": "7d67384d-acb8-4ff8-9e71-c5036b5ea34a",
+   "folder": "Medieval_Lake_Village",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Medieval_Lake_Village/Meshs/SM_WoodenWagon02.SM_WoodenWagon02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart",
+   "looks": "A smaller plank box cart resting on its handles."
+  },
+  {
+   "id": "hivemind_dock_cart",
+   "name": "Dock Cart",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/carts/SM_Cart.SM_Cart"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "horse-drawn cart",
+   "looks": "A long cart under a canvas hood, with shafts for a horse."
+  },
+  {
+   "id": "hivemind_covered_dock_cart",
+   "name": "Covered Dock Cart",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/carts/SM_Cart_01.SM_Cart_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "horse-drawn wagon",
+   "looks": "A boxed wagon with slatted sides and a canvas roof."
+  },
+  {
+   "id": "hivemind_dock_handcart",
+   "name": "Dock Handcart",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Cart_02.SM_Cart_02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart",
+   "looks": "A rough plank box cart with long handles."
+  },
+  {
+   "id": "hivemind_low_dock_cart",
+   "name": "Low Dock Cart",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/carts/SM_Cart_Small.SM_Cart_Small"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "horse-drawn cart",
+   "looks": "An open, slatted cart on two spoked wheels with long shafts."
+  },
+  {
+   "id": "hivemind_market_cart",
+   "name": "Market Cart",
+   "pack": "Modular Medieval Town, Docks",
+   "uid": "9bec871e-2d9b-4261-aa26-868d4300f81a",
+   "folder": "Hivemind",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/Market/SM_Market_Cart_01.SM_Market_Cart_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "market cart",
+   "looks": "A boxy plank cart with a little shingled roof: a stall on wheels."
+  },
+  {
+   "id": "houseforge_01_viking_cart",
+   "name": "Viking Cart",
+   "pack": "House Forge: Modular House Building Kit",
+   "uid": "277b975e-2158-41ef-908a-ef08bc26a409",
+   "folder": "HouseForge_01",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WoodCart/SM_WoodCart_01b.SM_WoodCart_01b"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart / horse cart",
+   "looks": "A Norse cart with slatted sides on two solid wheels and long shafts."
+  },
+  {
+   "id": "houseforge_01_loaded_viking_cart",
+   "name": "Loaded Viking Cart",
+   "pack": "House Forge: Modular House Building Kit",
+   "uid": "277b975e-2158-41ef-908a-ef08bc26a409",
+   "folder": "HouseForge_01",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WoodCart/SM_WoodCart_01c.SM_WoodCart_01c"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "handcart / horse cart",
+   "looks": "The Norse cart piled with loose planks."
+  },
+  {
+   "id": "scene_roadsideconstruction_wheelbarrow",
+   "name": "Wheelbarrow",
+   "pack": "Roadside Construction",
+   "uid": "6426cc8a-2410-45be-b3ce-edfea87d09cc",
+   "folder": "Scene_RoadsideConstruction",
+   "category": "Beast-drawn and hand-drawn carts",
+   "meshes": [
+    "/Game/Scene_RoadsideConstruction/Assets/MS/3D/Ind_Con_Wheelbarrow_Worn_01/SM_Ind_Con_Wheelbarrow_Worn_01.SM_Ind_Con_Wheelbarrow_Worn_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wheelbarrow",
+   "looks": "A rusty, dented builder's wheelbarrow (a Megascans scan)."
+  },
+  {
+   "id": "warcamp_collection_ballista",
+   "name": "Ballista",
+   "pack": "[Nanite] Medieval War Camp Kit",
+   "uid": "3cc08b13-9cb1-46a5-9bd2-47d743ee82b9",
+   "folder": "WarCamp_Collection",
+   "category": "Siege engines",
+   "meshes": [
+    "/Game/WarCamp_Collection/Props/SM_War_Ballista/Meshes/FBX/SM_War_Ballista_SM_War_Ballista_Base.SM_War_Ballista_SM_War_Ballista_Base",
+    "/Game/WarCamp_Collection/Props/SM_War_Ballista/Meshes/FBX/SM_War_Ballista_SM_War_Ballista_Wheels.SM_War_Ballista_SM_War_Ballista_Wheels"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "siege engine",
+   "looks": "A giant crossbow on a wheeled timber frame."
+  },
+  {
+   "id": "warcamp_collection_field_cannon",
+   "name": "Field Cannon",
+   "pack": "[Nanite] Medieval War Camp Kit",
+   "uid": "3cc08b13-9cb1-46a5-9bd2-47d743ee82b9",
+   "folder": "WarCamp_Collection",
+   "category": "Siege engines",
+   "meshes": [
+    "/Game/WarCamp_Collection/Props/SM_War_Cannon/Meshes/FBX/SM_War_Cannon_SM_War_Cannon.SM_War_Cannon_SM_War_Cannon"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "artillery",
+   "looks": "An iron cannon barrel on a wooden carriage with four small wheels."
+  },
+  {
+   "id": "warcamp_collection_catapult",
+   "name": "Catapult",
+   "pack": "[Nanite] Medieval War Camp Kit",
+   "uid": "3cc08b13-9cb1-46a5-9bd2-47d743ee82b9",
+   "folder": "WarCamp_Collection",
+   "category": "Siege engines",
+   "meshes": [
+    "/Game/WarCamp_Collection/Props/SM_War_Catapult/Meshes/FBX/SM_War_Catapult.SM_War_Catapult"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "siege engine",
+   "looks": "A wheeled timber catapult with its throwing arm and sling."
+  },
+  {
+   "id": "ancientruins_ruins_rowboat",
+   "name": "Ruins Rowboat",
+   "pack": "Ancient Ruins - VOL.1 (Nanite)",
+   "uid": "7c4188c2-374f-4bb5-afc5-1aebe1b15e23",
+   "folder": "AncientRuins",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/AncientRuins/VOL1/Meshes/SM_Boat_NN_01a.SM_Boat_NN_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat",
+   "looks": "A weathered, worn wooden boat with outrigger poles."
+  },
+  {
+   "id": "medieval_lake_village_lake_rowboat",
+   "name": "Lake Rowboat",
+   "pack": "Medieval Lake Village Environment",
+   "uid": "7d67384d-acb8-4ff8-9e71-c5036b5ea34a",
+   "folder": "Medieval_Lake_Village",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Medieval_Lake_Village/Meshs/SM_Boat.SM_Boat"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat",
+   "looks": "A simple clinker-built wooden rowing boat."
+  },
+  {
+   "id": "flower_meadows_meadow_boat",
+   "name": "Meadow Boat",
+   "pack": "Flower Meadows",
+   "uid": "f6b28dc0-4a82-4d10-a54e-b960eac8f324",
+   "folder": "Flower_meadows",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Flower_meadows/meshes/SM_boat_01.SM_boat_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "moored boat",
+   "looks": "A small wooden boat on a long mooring rope."
+  },
+  {
+   "id": "flower_meadows_meadow_punt",
+   "name": "Meadow Punt",
+   "pack": "Flower Meadows",
+   "uid": "f6b28dc0-4a82-4d10-a54e-b960eac8f324",
+   "folder": "Flower_meadows",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Flower_meadows/meshes/SM_boat_02.SM_boat_02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat",
+   "looks": "A brown wooden rowing boat with three thwarts."
+  },
+  {
+   "id": "harbour_collection_harbour_skiff",
+   "name": "Harbour Skiff",
+   "pack": "[Nanite] Medieval Harbor Kit - Harbor Props",
+   "uid": "eac56686-c7c5-47a6-8a98-9bc8ad321643",
+   "folder": "Harbour_Collection",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Harbour_Collection/Props/SM_SmallBoat/Meshes/FBX/SM_SmallBoat.SM_SmallBoat"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat",
+   "looks": "A long, narrow dark wooden skiff with upswept ends."
+  },
+  {
+   "id": "harbour_collection_wrecked_ship",
+   "name": "Wrecked Ship",
+   "pack": "[Nanite] Medieval Harbor Kit - Harbor Props",
+   "uid": "eac56686-c7c5-47a6-8a98-9bc8ad321643",
+   "folder": "Harbour_Collection",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Harbour_Collection/Props/SM_BrokenShip/Meshes/FBX/SM_BrokenShip.SM_BrokenShip"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wreck (scenery)",
+   "looks": "The broken ribs and planks of a large wooden ship."
+  },
+  {
+   "id": "waterfront_baywalk_sailing_boat",
+   "name": "Sailing Boat",
+   "pack": "Water Front Baywalk Modular Kit",
+   "uid": "78e82fca-e9ef-42c5-b3e5-44cfec33810d",
+   "folder": "Waterfront_Baywalk",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Waterfront_Baywalk/Meshes/Boat/SM_boat.SM_boat"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "sailing yacht",
+   "looks": "A small blue and white motor-sailer with a tall mast and rigging, no sails."
+  },
+  {
+   "id": "dockhouse_dockhouse_boat",
+   "name": "Dockhouse Boat",
+   "pack": "Meridian 1988: Moose's Dock House - Modular Environment (VOL 1)",
+   "uid": "de4b18d1-5bad-4b4c-bf70-adfb49d0dd57",
+   "folder": "Dockhouse",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Dockhouse/Meshes/SM_Warehouse_Boat_NN_01a.SM_Warehouse_Boat_NN_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat",
+   "looks": "A battered wooden boat, its red paint peeling."
+  },
+  {
+   "id": "docks_rowing_boat",
+   "name": "Rowing Boat",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL2_Powell/Meshes/SM_Boat_17a.SM_Boat_17a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat",
+   "looks": "A white-and-brown wooden rowing boat."
+  },
+  {
+   "id": "docks_motor_launch",
+   "name": "Motor Launch",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL4_Albert/Meshes/SM_Boat_NN_18a.SM_Boat_NN_18a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "motor boat",
+   "looks": "A small fishing launch with a cabin and fenders."
+  },
+  {
+   "id": "docks_fishing_boat",
+   "name": "Fishing Boat",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL4_Albert/Meshes/SM_Boat_NN_25a.SM_Boat_NN_25a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "motor boat",
+   "looks": "A worn open fishing boat with an outboard motor and a seat console."
+  },
+  {
+   "id": "docks_harbour_boat",
+   "name": "Harbour Boat",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL5_Laguna/Meshes/SM_Boat_54a.SM_Boat_54a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "rowing boat / tender",
+   "looks": "A teal wooden boat with fenders along its side."
+  },
+  {
+   "id": "docks_upturned_boat",
+   "name": "Upturned Boat",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL5_Laguna/Meshes/SM_Boat_NN_14a.SM_Boat_NN_14a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "motor boat",
+   "looks": "A flat aluminium jon boat with an outboard motor."
+  },
+  {
+   "id": "docks_pontoon_boat",
+   "name": "Pontoon Boat",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL4_Albert/Meshes/SM_Pontoon_Boat_NN_01a.SM_Pontoon_Boat_NN_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "raft",
+   "looks": "A plank deck on rusty pontoon floats."
+  },
+  {
+   "id": "docks_lifeboat",
+   "name": "Lifeboat",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL5_Laguna/Meshes/SM_Lifeboat_01a.SM_Lifeboat_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "lifeboat",
+   "looks": "A white ship's lifeboat with grab lines on its sides."
+  },
+  {
+   "id": "docks_boat_wreck",
+   "name": "Boat Wreck",
+   "pack": "DOCKS VOL.2 - Powell Dock (Modular / Low Poly)",
+   "uid": "c1d714a2-288f-4bfa-a820-ec0406d51c8a",
+   "folder": "Docks",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Docks/VOL5_Laguna/Meshes/SM_Boat_Wreck_01a.SM_Boat_Wreck_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wreck (scenery)",
+   "looks": "A white boat broken in half, its planks sprung."
+  },
+  {
+   "id": "underwater_odyssey_bathyscaphe",
+   "name": "Bathyscaphe",
+   "pack": "Underwater odyssey",
+   "uid": "0ed3a669-a335-46d4-b8c4-16b48278e2b4",
+   "folder": "Underwater_odyssey",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Bathyscaphe.SK_Bathyscaphe"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "submersible",
+   "looks": "A rusty, riveted brass-and-iron submarine with round lit portholes and a hatch tower."
+  },
+  {
+   "id": "underwater_odyssey_cargo_ship",
+   "name": "Cargo Ship",
+   "pack": "Underwater odyssey",
+   "uid": "0ed3a669-a335-46d4-b8c4-16b48278e2b4",
+   "folder": "Underwater_odyssey",
+   "category": "Boats and ships",
+   "meshes": [
+    "/Game/Underwater_odyssey/Mesh/SK_SM/SK_Cargo_Ship.SK_Cargo_Ship"
+   ],
+   "clip": "Anim_CargoShip_launching",
+   "t": 0.6,
+   "use": "ship",
+   "looks": "A rust-streaked steam cargo ship with masts, cranes and a funnel, 45 m long.",
+   "anim_note": "Its one clip launches it."
+  },
+  {
+   "id": "meridian_family_car",
+   "name": "Family Car",
+   "pack": "Meridian 1988: 14 Widow Street - Modular Environment (VOL 31)",
+   "uid": "25f80505-7c6c-40a5-a656-69a8b5db3fc5",
+   "folder": "MERIDIAN",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/MERIDIAN/VOL21_55ElmStreet/Meshes/LP/SM_Car_04a.SM_Car_04a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "car",
+   "looks": "A 1980s green two-door saloon in good order."
+  },
+  {
+   "id": "meridian_saloon_car",
+   "name": "Saloon Car",
+   "pack": "Meridian 1988: 14 Widow Street - Modular Environment (VOL 31)",
+   "uid": "25f80505-7c6c-40a5-a656-69a8b5db3fc5",
+   "folder": "MERIDIAN",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/MERIDIAN/VOL55_KingWashStrip/Meshes/NN/SM_Car_24a.SM_Car_24a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wreck",
+   "looks": "A stripped green coupe without doors, wheels or panels."
+  },
+  {
+   "id": "meridian_station_wagon",
+   "name": "Station Wagon",
+   "pack": "Meridian 1988: 14 Widow Street - Modular Environment (VOL 31)",
+   "uid": "25f80505-7c6c-40a5-a656-69a8b5db3fc5",
+   "folder": "MERIDIAN",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/MERIDIAN/VOL55_KingWashStrip/Meshes/NN/SM_Wagon_01a.SM_Wagon_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wreck",
+   "looks": "A gutted blue estate car without wheels or doors."
+  },
+  {
+   "id": "meridian_school_bus",
+   "name": "School Bus",
+   "pack": "Meridian 1988: 14 Widow Street - Modular Environment (VOL 31)",
+   "uid": "25f80505-7c6c-40a5-a656-69a8b5db3fc5",
+   "folder": "MERIDIAN",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/MERIDIAN/VOL57_School/Meshes/NN/SM_BUS_01a.SM_BUS_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "bus",
+   "looks": "A yellow American school bus."
+  },
+  {
+   "id": "meridian_bicycle",
+   "name": "Bicycle",
+   "pack": "Meridian 1988: 14 Widow Street - Modular Environment (VOL 31)",
+   "uid": "25f80505-7c6c-40a5-a656-69a8b5db3fc5",
+   "folder": "MERIDIAN",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/MERIDIAN/VOL21_55ElmStreet/Meshes/NN/SM_Bicycle_NN_02a.SM_Bicycle_NN_02a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "bicycle",
+   "looks": "An old black town bicycle."
+  },
+  {
+   "id": "volstok_district_hatchback",
+   "name": "Hatchback",
+   "pack": "Volstok District - Post Apocalyptic Environment",
+   "uid": "0d7c1c02-f660-479b-9c6f-0394d758dac9",
+   "folder": "Volstok_District",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/Volstok_District/Meshes/LP/SM_Hatchback_Car_JC_01a.SM_Hatchback_Car_JC_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wreck",
+   "looks": "A burnt-out, rusted hatchback shell."
+  },
+  {
+   "id": "volstok_district_sedan",
+   "name": "Sedan",
+   "pack": "Volstok District - Post Apocalyptic Environment",
+   "uid": "0d7c1c02-f660-479b-9c6f-0394d758dac9",
+   "folder": "Volstok_District",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/Volstok_District/Meshes/LP/SM_Sedan_Car_JC_01a.SM_Sedan_Car_JC_01a"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "wreck",
+   "looks": "A burnt, crushed saloon car shell."
+  },
+  {
+   "id": "scene_oldmine_log_mine_cart",
+   "name": "Log Mine Cart",
+   "pack": "Old Mine",
+   "uid": "dc4dc139-f3a3-4375-875f-d1831506953e",
+   "folder": "Scene_OldMine",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/Ind_Min_Cart_Log_Wood_Old_01/SM_Ind_Min_Cart_Log_Wood_Old_01.SM_Ind_Min_Cart_Log_Wood_Old_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "mine cart",
+   "looks": "A rail flat-car loaded with a bundle of logs (a Megascans scan)."
+  },
+  {
+   "id": "scene_oldmine_ore_mine_cart",
+   "name": "Ore Mine Cart",
+   "pack": "Old Mine",
+   "uid": "dc4dc139-f3a3-4375-875f-d1831506953e",
+   "folder": "Scene_OldMine",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/Ind_Min_Cart_Metal_Old_01/SM_Ind_Min_Cart_Metal_Old_01.SM_Ind_Min_Cart_Metal_Old_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "mine cart",
+   "looks": "A small rusty steel ore tub on four rail wheels."
+  },
+  {
+   "id": "scene_oldmine_tipping_mine_cart",
+   "name": "Tipping Mine Cart",
+   "pack": "Old Mine",
+   "uid": "dc4dc139-f3a3-4375-875f-d1831506953e",
+   "folder": "Scene_OldMine",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/Ind_Min_Cart_Metal_Old_02/SM_Ind_Min_Cart_Metal_Old_02.SM_Ind_Min_Cart_Metal_Old_02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "mine cart",
+   "looks": "A long rusted mine tub full of rock."
+  },
+  {
+   "id": "scene_oldmine_mine_wagon",
+   "name": "Mine Wagon",
+   "pack": "Old Mine",
+   "uid": "dc4dc139-f3a3-4375-875f-d1831506953e",
+   "folder": "Scene_OldMine",
+   "category": "Cars, buses, bicycles and mine carts",
+   "meshes": [
+    "/Game/Scene_OldMine/Assets/Megascans/3D_Assets/Ind_Min_Vehicle_Cart_Metal_Old_02/SM_Ind_Min_Vehicle_Cart_Metal_Old_02.SM_Ind_Min_Vehicle_Cart_Metal_Old_02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "mine cart",
+   "looks": "An open steel rail frame on four wheels: a mine bogie."
+  },
+  {
+   "id": "dystopia_pack_hover_tank",
+   "name": "Hover Tank",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Dystopia_Pack/Tank/Mesh/Mesh_UE4/Full/SK_Tank_Full.SK_Tank_Full"
+   ],
+   "clip": "Anim_Tank_Shot_Muzzle",
+   "t": 0.3,
+   "use": "hover tank",
+   "looks": "A heavy desert-camouflage tank on repulsor pads, a long main gun and machine guns.",
+   "anim_note": "A Blueprint (`BP_Tank_Full_Blueprint`) and an animation Blueprint (`AB_Tank`) come with it; its turret aims by clip (`Tower_*_Muzzle_*`)."
+  },
+  {
+   "id": "dystopia_pack_combat_mech",
+   "name": "Combat Mech",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Mech_Full/SK_Mech_Full.SK_Mech_Full"
+   ],
+   "clip": "Anim_Dystopia_Mech_Fly_Shot_01",
+   "t": 0.4,
+   "use": "powered armour / walker",
+   "looks": "A man-sized armoured walker with a cockpit dome and blades for arms.",
+   "anim_note": "It flies as well as walks. Blueprints for the mech and its pilot (`BP_Mech_Full`, `BP_Dystopia_Mech`, `BP_Dystopia_Pilot`) and a door rig come with it; the pilot gets out by clip.",
+   "clip_filter": "Mech|Door|Pilot|Disembark"
+  },
+  {
+   "id": "dystopia_pack_airship",
+   "name": "Airship",
+   "pack": "Dystopia Soldiers (Pack)",
+   "uid": "3be8756a-724d-4fca-a67f-8442a1fcb833",
+   "folder": "Dystopia_Pack",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Dystopia_Pack/Dystopia_Airship/Mesh/SK_Dystopia_Airship.SK_Dystopia_Airship"
+   ],
+   "clip": "Dystopia_Airship_Fly",
+   "t": 0.4,
+   "use": "airship / gunship",
+   "looks": "A 79 m grey dirigible with a gondola, engines and gun turrets.",
+   "anim_note": "A static mesh of it comes too (`Dystopia_Airship`)."
+  },
+  {
+   "id": "military_pack_armoured_car",
+   "name": "Armoured Car",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Body_mesh.SM_Armored_Car_Body_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Details_mesh.SM_Armored_Car_Details_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Object405.SM_Armored_Car_Object405",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Hub_back_L_mesh.SM_Armored_Car_Hub_back_L_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Hub_back_R_mesh.SM_Armored_Car_Hub_back_R_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Hub_front_L_mesh.SM_Armored_Car_Hub_front_L_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Hub_front_R_mesh.SM_Armored_Car_Hub_front_R_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Wheel_back_L_mesh.SM_Armored_Car_Wheel_back_L_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Wheel_back_R_mesh.SM_Armored_Car_Wheel_back_R_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Wheel_front_L_mesh.SM_Armored_Car_Wheel_front_L_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Wheel_front_R_mesh.SM_Armored_Car_Wheel_front_R_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Weapon_Body_mesh.SM_Armored_Car_Weapon_Body_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Weapon_Stand_mesh.SM_Armored_Car_Weapon_Stand_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Weapon_Stand_2_mesh.SM_Armored_Car_Weapon_Stand_2_mesh",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Weapon_Trunk_mesh_L.SM_Armored_Car_Weapon_Trunk_mesh_L",
+    "/Game/Military_Pack/Mesh/Armored_Car/SM_Armored_Car_Weapon_Trunk_mesh_R.SM_Armored_Car_Weapon_Trunk_mesh_R"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "armoured car",
+   "looks": "A green four-wheeled armoured patrol vehicle with a roof gun.",
+   "anim_note": "The pack has it as skeletal meshes too (body, wheels, gun), with no clips."
+  },
+  {
+   "id": "mc_environment_armoured_vehicle",
+   "name": "Armoured Vehicle",
+   "pack": "Military Base Megapack",
+   "uid": "61202d6c-1bc2-4e5d-b2d5-d005ea8b7c67",
+   "folder": "MC_Environment",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/MC_Environment/Assets/SM_ArmoredVehicle.SM_ArmoredVehicle"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "armoured car",
+   "looks": "A sand-coloured four-wheeled armoured patrol vehicle, no gun."
+  },
+  {
+   "id": "military_pack_gun_drone",
+   "name": "Gun Drone",
+   "pack": "Military Pack",
+   "uid": "295db2f7-fb2e-4f28-9a6c-dcd8ab724747",
+   "folder": "Military_Pack",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Military_Pack/Mesh/Drone/SK_Dron_Skeleton.SK_Dron_Skeleton"
+   ],
+   "clip": "Anim_Drone_Fire_Attack",
+   "t": 0.4,
+   "use": "combat drone",
+   "looks": "A hovering gun pod: a grey armoured housing with a rotary gun underneath."
+  },
+  {
+   "id": "military_drone_quadcopter",
+   "name": "Quadcopter",
+   "pack": "Military Drones",
+   "uid": "d0ab5611-041c-46c7-a9ee-192930e4fc34",
+   "folder": "Military_Drone",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Military_Drone/Mesh/SK_Military_Drone_01_Full.SK_Military_Drone_01_Full"
+   ],
+   "clip": "Anim_Military_Drone_Fly_Front",
+   "t": 0.4,
+   "use": "recon drone",
+   "looks": "A small black quadcopter with a camera and a grenade under its belly.",
+   "anim_note": "A Blueprint (`BP_Military_Drone_01`) and an animation Blueprint come with it, and first-person arm clips for its joystick (start and stop the drone)."
+  },
+  {
+   "id": "military_drone_bomber_drone",
+   "name": "Bomber Drone",
+   "pack": "Military Drones",
+   "uid": "d0ab5611-041c-46c7-a9ee-192930e4fc34",
+   "folder": "Military_Drone",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Military_Drone/Mesh/SK_Military_Drone_02_Full_01.SK_Military_Drone_02_Full_01"
+   ],
+   "clip": "Anim_Military_Drone_Dropping_Grenade_01",
+   "t": 0.5,
+   "use": "bomber drone",
+   "looks": "A home-made quadcopter carrying a big bomb and batteries strapped on top.",
+   "anim_note": "Its clips are the quadcopter's (one skeleton for both)."
+  },
+  {
+   "id": "cartoon_zombies_pack_zombie_tank",
+   "name": "Zombie Tank",
+   "pack": "Cartoon Zombies (Pack)",
+   "uid": "fd32f1e2-3b21-4e3c-aa7a-4e8437f55997",
+   "folder": "Cartoon_Zombies_Pack",
+   "category": "Military vehicles, walkers and drones",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Tank_Mesh.SK_Tank_Mesh"
+   ],
+   "clip": "Anim_Tank_Attack",
+   "t": 0.4,
+   "use": "comic boss / vehicle",
+   "looks": "A toy-like cartoon tank on six wheels, a zombie in a helmet in its turret."
+  },
+  {
+   "id": "mega_city_flying_car_1",
+   "name": "Flying Car 1",
+   "pack": "Open World Science fiction City",
+   "uid": "55a31cd5-0ff5-4748-84c0-0a35ad52d648",
+   "folder": "Mega_City",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Mega_City/Meshes/Cars/SM_car_01.SM_car_01"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "flying car / hover taxi",
+   "looks": "A white and maroon hover car with a glass roof."
+  },
+  {
+   "id": "mega_city_flying_car_2",
+   "name": "Flying Car 2",
+   "pack": "Open World Science fiction City",
+   "uid": "55a31cd5-0ff5-4748-84c0-0a35ad52d648",
+   "folder": "Mega_City",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Mega_City/Meshes/Cars/SM_car_02.SM_car_02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "flying bus",
+   "looks": "A long red hover bus with a glass roof."
+  },
+  {
+   "id": "mega_city_flying_car_3",
+   "name": "Flying Car 3",
+   "pack": "Open World Science fiction City",
+   "uid": "55a31cd5-0ff5-4748-84c0-0a35ad52d648",
+   "folder": "Mega_City",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Mega_City/Meshes/Cars/SM_car_03.SM_car_03"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "flying bus",
+   "looks": "The same long hover bus in yellow."
+  },
+  {
+   "id": "mega_city_flying_car_4",
+   "name": "Flying Car 4",
+   "pack": "Open World Science fiction City",
+   "uid": "55a31cd5-0ff5-4748-84c0-0a35ad52d648",
+   "folder": "Mega_City",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Mega_City/Meshes/Cars/SM_car_04.SM_car_04"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "racing hover car",
+   "looks": "A slim yellow hover racer with a bubble cockpit and long outriggers."
+  },
+  {
+   "id": "mega_city_shuttle",
+   "name": "Shuttle",
+   "pack": "Open World Science fiction City",
+   "uid": "55a31cd5-0ff5-4748-84c0-0a35ad52d648",
+   "folder": "Mega_City",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Mega_City/Meshes/Ship/SM_ship.SM_ship"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "shuttle / dropship",
+   "looks": "A white twin-hulled shuttle with engine pods on its back.",
+   "anim_note": "A flying version (`SM_ship_flying`) comes too."
+  },
+  {
+   "id": "red_echo_red_echo_shuttle",
+   "name": "Red Echo Shuttle",
+   "pack": "Alien Desert Station",
+   "uid": "22e6a6da-15a4-469d-a661-3c86f70aef7d",
+   "folder": "Red_Echo",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Red_Echo/Meshes/Ship/SM_ship_flying_landed.SM_ship_flying_landed"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "starfighter / shuttle",
+   "looks": "A white and red delta-winged ship with four engines.",
+   "anim_note": "A flying version (`SM_ship_flying`) comes too."
+  },
+  {
+   "id": "spaceship_kit_spaceship",
+   "name": "Spaceship",
+   "pack": "Spaceship Kit Interior/Exterior",
+   "uid": "fe85a06e-caa2-4a80-96cc-4301d83cadef",
+   "folder": "Spaceship_Kit",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Spaceship_Kit/Meshes/Ship_parts/SM_space_ship_body.SM_space_ship_body"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "capital ship / spaceship",
+   "looks": "A long grey hull plated in panels: a 52 m starship.",
+   "anim_note": "The pack has a flyable pawn and its game mode (`BP_ship_pawn`, `GM_Ship_flying`) and four more hulls (`SM_space_ship_body_02` to `_04`, `_04_RGB`)."
+  },
+  {
+   "id": "sci_fi_flying_cargo_ship_flying_cargo_ship",
+   "name": "Flying Cargo Ship",
+   "pack": "Sci-Fi Flying Cargo Ship",
+   "uid": "060d329e-05c5-4d00-8056-491f0611ba23",
+   "folder": "Sci-Fi_Flying_Cargo_Ship",
+   "category": "Sci-fi craft",
+   "meshes": [
+    "/Game/Sci-Fi_Flying_Cargo_Ship/Meshes/Cargo/SM_cargo_02.SM_cargo_02"
+   ],
+   "clip": null,
+   "t": 0.5,
+   "use": "freighter",
+   "looks": "A 115 m flat flying cargo barge with engines along its sides.",
+   "anim_note": "A Blueprint of it (`BPP_L_cargo_02`) and separate hull modules come with it."
+  }
+ ],
+ "categories": {
+  "Mounts and riding beasts": "Animals with saddles or packs, to ride or to load: the raptor, the camel, the bull, the war elephant and the dragon.",
+  "Beast-drawn and hand-drawn carts": "Carts and wagons with shafts for a horse or handles for a pair of hands, and the elephant with its war tower.",
+  "Siege engines": "Wheeled war machines of a medieval camp.",
+  "Boats and ships": "From rowing boats and wrecks to a cargo steamer and a submersible.",
+  "Cars, buses, bicycles and mine carts": "Road vehicles, most of them wrecks, and rail carts from an old mine.",
+  "Military vehicles, walkers and drones": "Tanks, armoured cars, a walker, an airship and drones.",
+  "Sci-fi craft": "Flying cars, shuttles, a starship and a flying freighter."
+ }
+}
