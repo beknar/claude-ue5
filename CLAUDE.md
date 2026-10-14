@@ -1,6 +1,13 @@
 # CLAUDE.md
 
-Guidance for Claude Code in this repository. See README.md for what the project is and how the levels were built.
+Guidance for Claude Code in this repository. See README.md for what the project is, what it can do (its Capabilities section) and how the levels were built.
+
+## Goals
+
+- **Everything is built by script.** A level, a character or an effect exists because a numbered script (or the C++ module plus the script that fills its data) builds it; nothing is arranged by hand in the editor. A change is finished when the script that makes it is in `pipeline/`.
+- **Each world is a game, not a backdrop.** The newer levels are played: generated in play, with doors, containers, creatures, fighting, sound and music. A new feature for one of them comes with a step in that level's scripted test, and README's level table and rebuild notes say what it does.
+- **A feature is shown in a demo reel.** When asked for a reel: the same kind as the level's earlier ones (45 s for the dungeon fight, 30 s for the fighter), rendered at 1080p, and delivered in two files in `renders/`: `<Name>_Showcase.mp4` and `<Name>_Showcase_20MB.mp4` (20 MB or less: `encode_video.py`'s `video_kbps` argument). Earlier reels are kept; a new one gets a new name.
+- **Measured, not assumed.** A claim in a report is one a test, a recording or a rendered frame showed. What could not be checked is said so: nobody here hears a sound or watches a video, so sounds and music are chosen by name and measurement and verified by recordings.
 
 ## Environment
 
@@ -11,14 +18,17 @@ Guidance for Claude Code in this repository. See README.md for what the project 
 | Blender 5.1 | `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe -b -P script.py -- args` |
 | Editor log (actual Python/Blueprint errors) | `claude_ue5/Saved/Logs/claude_ue5.log` |
 | Fab vault (launcher downloads) | `C:\Users\kestanol\Documents\code-godot\epicgames media packs\VaultCache` |
+| Asset library (sound effects, music, the Fab library surveyed in `asset_survey/`) | `I:\game assets` (read only: licensed, never copied into the repository) |
+| Showcase videos, packaged games | `renders/`, `builds/` (both ignored) |
 
 - **Shell:** Windows PowerShell 5.1. When writing a .py file from PowerShell, use `[IO.File]::WriteAllText(path, text, (New-Object Text.UTF8Encoding $false))`; `Set-Content -Encoding utf8` adds a BOM that the editor's Python rejects. In an array literal the comma binds tighter than `+`: `@('a', 'b' + $x)` is `('a', 'b') + $x`, so a find / replace pair built that way silently replaces with the wrong text (it dropped a line from two files): patch files with a Python script that asserts each match.
 - **Python in the editor:** `python pipeline\blender_numpy\ue_exec.py <script.py> [args]`, where the args become `sys.argv`; `-c "code"` runs a snippet and `--ping` checks for an editor. The editor needs PythonScriptPlugin remote execution (enabled in `Config/DefaultEngine.ini`).
+- **Python outside the editor:** the overlays, `encode_video.py`, `rdc_sound_prep.py` and `rdc_sound_check.py` need numpy, scipy, Pillow and imageio-ffmpeg. The PowerShell test drivers (`761`, `772`, `782`, `793`, `803`) call `python`, or the interpreter in the `UE_PY` environment variable; `799` takes one as its second argument.
 - **MCP:** an `unreal-mcp` server (UE ModelContextProtocol plugin, `http://127.0.0.1:8765/mcp`) is configured in `.mcp.json`.
 
 ## Conventions
 
-- **Script names:** editor scripts are `pipeline/unreal/NNN_name.py`, numbered in build order. Each starts with a docstring giving its purpose and arguments. New stages get the next free number in their range (see README).
+- **Script names:** editor scripts are `pipeline/unreal/NNN_name.py`, numbered in build order. Each starts with a docstring giving its purpose and arguments. New stages get the next free number in their range (see README). `790`-`799` (random_dungeoncombat_level) is full and `800`-`806` is starship_level: further stages for the dungeon fight start at `810`.
 - **One-off probes:** keep them out of `pipeline/` (use a scratch directory) unless they become a pipeline stage.
 - **Idempotent:** scripts delete what they previously generated (by tag, label or asset path) and rebuild it. Spawned actors are tagged:
   - `castle_gen`: `340` (doors, floors, containers)
@@ -30,7 +40,7 @@ Guidance for Claude Code in this repository. See README.md for what the project 
   - The furniture kit's front is UE +Y.
   - Kit sizes are in cm; the Blender scene uses `scale_length` 0.01.
 - **End of big scripts:** delete the module globals and run `gc.collect()`. Lingering actor references caused python311 access violations on the next PIE start or map load. `ue_exec.py` now runs each script in a fresh namespace and clears it afterwards, also when the script raises (an exception's traceback otherwise keeps its actors alive). Scripts that leave a tick callback running must set `__keep__ = True` (their functions still need their globals) and drop their actor references when the callback finishes.
-- **C++ module** (`claude_ue5/Source/claude_ue5`, random_level's town generator): build with `pipeline\build_cpp.ps1` while the editor is closed, then relaunch. Unity builds merge the .cpp files: give file-local helpers and constants a module prefix (`IVPickSign`, `RDPickSign`, `IVCyan`, `SSGreen`), or adding a file can make two of them collide. No .NET Framework SDK is installed, so the script points UnrealBuildTool at a stand-in NETFXSDK (UE_SDKS_ROOT) for that build only. Python sees UPROPERTY bools without the `b` prefix (`bCollision` -> `collision`).
+- **C++ module** (`claude_ue5/Source/claude_ue5`: `RT` town, `RD` dungeon and its combat / blood / sound, `IV` village, `SS` fighter): build with `pipeline\build_cpp.ps1` while the editor is closed, then relaunch. Unity builds merge the .cpp files: give file-local helpers and constants a module prefix (`IVPickSign`, `RDPickSign`, `IVCyan`, `SSGreen`), or adding a file can make two of them collide. No .NET Framework SDK is installed, so the script points UnrealBuildTool at a stand-in NETFXSDK (UE_SDKS_ROOT) for that build only. Python sees UPROPERTY bools without the `b` prefix (`bCollision` -> `collision`).
 - **random_level:** the town is generated by `ARTTownGenerator` (start square built in the editor by `752`, runtime cells never saved). Re-run `752` after changing templates or generator code. Docks building maps (`LI_Building_*`) cannot be opened while random_level is loaded (they are its level instances); `750`/`750b` open a scratch level first. `753` (generation indicator) rebuilds its materials in place and must be re-run on both random_level and random_level_Cine (each level's generator stores RevealDuration). In random_level_Cine the generator follows `Demo_RL_Fem5` (`TrackedActor`, fixed session seed).
 - **random_dungeon_level:** C++ `ARDDungeonGenerator` / `ARDSection` (`Source/claude_ue5/RD`). Content is data: `770` fills the generator's `Pieces` map (each mesh normalised by `Adjust` to the dungeon frame: front +X, footprint centred, floor z 0) and the furnishing code places pieces by name, so a missing piece is skipped silently (check `770`'s piece list). Re-run `770` after C++ layout/furnishing changes (the start section is saved; play rebuilds only its doors, containers, monsters and map data from the same seed). Runtime sections are built over several frames (`FrameBudgetMs`). Every container must be openable (body + moving part); don't add closed barrels/crates/vases as static props. random_dungeon_level_Cine (`773`-`775`): the generator follows `Demo_RD_Fem5` (`TrackedActor`, fixed seed) and opens doors in front of her (`TrackedAutoDoorDistance`); monsters don't block her (`bMonstersBlockPawns` off).
 - **random_dungeoncombat_level:** a Save As copy of random_dungeon_level whose generator has `bCombat` and `bStylizedMap` on (`790`-`799`); the two levels share the C++ and `BP_RD_GameMode`, so anything new must stay behind those flags.
@@ -44,7 +54,7 @@ Guidance for Claude Code in this repository. See README.md for what the project 
   - This project has Substrate on: a pack material written for the old shading models may not compile (the engine then draws the default material without an error on screen: RealisticBlood's decals were pale squares; the log says `Failed to compile ... Default Material will be used`). A deferred decal needs a Substrate blend mode (`BLEND_TRANSLUCENT_GREY_TRANSMITTANCE`).
   - Building a material from Python logs `Failed to compile` for every half-built state (each `set_editor_property` on a node recompiles); only one after the final `recompile_material` is real (`798` logs a marker line before it). `get_statistics(...).num_pixel_shader_instructions > 0` does not prove the material compiled.
   - Sound: `Sounds` maps an occasion to a set (`sounds.json` -> `rdc_sound_prep.py` -> `797`). Placed sets are played at a location with an attenuation object made at run time per (inner radius, falloff); the listener's attenuation point is the pawn. The generator sets the audio listener itself every tick: the viewport does not do it for a play-in-editor window without focus.
-  - Music and atmosphere: four flat stereo layers on the generator (`TickMusic`: sets `Music.Explore`, `Music.Combat`, `Atmos.Explore`, `Atmos.Combat`). A fight is on while a monster within `CombatMusicDistance` is after her or blows fell a second ago; the battle pair fades in from the track's start (each fight the next track), and `CombatMusicHold` seconds after the fight the wandering pair fades back in where it was (the generator keeps each layer's position itself: a faded-out component starts again from 0). Which tracks a session gets comes from the session seed. Her breath loops were removed by the user's wish: of her moving only the footsteps are heard. The sound self test plays no music, only the room tone (it measures single sounds; with nothing at all playing the engine does not process the silent submix, and a submix recording then has no audio for the silent stretches: it came out seconds shorter than the test).
+  - Music and atmosphere: four flat stereo layers on the generator (`TickMusic`: sets `Music.Explore`, `Music.Combat`, `Atmos.Explore`, `Atmos.Combat`). A fight is on while a monster within `CombatMusicDistance` is after her or blows fell a second ago; the battle pair fades in from the track's start (each fight the next track), and `CombatMusicHold` seconds after the fight the wandering pair fades back in where it was (the generator keeps each layer's position itself: a faded-out component starts again from 0). Which tracks a session gets comes from the session seed. Her breath loops were removed by the user's wish: of her moving only the footsteps are heard (her cry when hurt or dying and her effort on a swing were kept: they are not breathing, and the user has not said otherwise). The sound self test plays no music, only the room tone (it measures single sounds; with nothing at all playing the engine does not process the silent submix, and a submix recording then has no audio for the silent stretches: it came out seconds shorter than the test).
   - Nobody hears a test: counting `PlaySound` calls proved nothing about what comes out. `799_rdc_sound_test.ps1` (the game with `-RDSoundTest=<dir>`) records the device's output with sounds at known places and `rdc_sound_check.py` measures it: do that after touching attenuation or spatialisation. A play-in-editor or game window without focus is silent (`FApp::SetUnfocusedVolumeMultiplier`; the test sets it).
   - Movie Render Queue sound: the job needs a `MoviePipelineWaveOutput` setting and the editor started with `-deterministicaudio`. That non-realtime audio device loses every *spatialised* source (measured with test sounds from all sides: only flat and non-spatialised ones are in the `.wav`), so under `-deterministicaudio` the generator plays its placed sounds with the distance falloff but without direction (`bSpatializeSounds`, `AreSoundsSpatialized`). Run tests and normal play in an editor started without the switch.
   - A monster asked the door's *progress* before pushing it (`GetDoorOpenAlpha < 0.01`): at more than about 140 ticks a second (the render queue's sub-steps, a fast machine) the leaf had not moved that far by the next tick and the monster toggled it for ever. Ask for the state a thing is heading to (`IsTargetOpen`), not how far it has got.
@@ -108,14 +118,22 @@ Guidance for Claude Code in this repository. See README.md for what the project 
 - Interiors need their own capped-exposure PostProcessVolume.
 - The scanned barrels (`SM_Scan_Barrel*`) render as a grey patchwork; use the pack's `SM_barrel_01/02`.
 
+## Working rules
+
+- **Commit and push only when the user asks.** Finished work stays uncommitted until then, and the report says so.
+- **Leave the editor usable:** on a playable level (not a `*_Cine` copy), play stopped, started without `-deterministicaudio` (that switch is for a render with sound only; relaunch without it afterwards).
+- **Scratch stays out of the repository:** probes, intermediate renders and test recordings go to the session's scratch directory.
+
 ## Safety
 
 - **No full-desktop screenshots:** one exposed private windows, including credentials. Verify visually with editor-viewport `HighResShot`, Movie Render Queue frames or `SceneCapture2D` (`pipeline/unreal/capture.py`) only.
 - **Fab downloads:** acquiring or downloading Fab content needs the user in the Epic Games Launcher. Don't automate the launcher UI.
+- **System software:** installing anything on the machine (an SDK, a runtime, a codec) needs the user's go-ahead first.
 
 ## Git
 
 The remote (`github.com/beknar/claude-ue5`) is **public** and the repo is **source only**:
-- Never commit `Content/`, `.uasset`/`.umap`, source-art binaries, media (`.png`, `.mp4`, …), archives, or `Saved/` / `Intermediate/` / `DerivedDataCache/`.
-- Third-party packs (Fab, Megascans, MetaHuman, UE mannequins) must not be redistributed.
-- `.gitignore` enforces this. Check `git status` before committing.
+- Never commit `Content/`, `.uasset`/`.umap`, source-art binaries, media (`.png`, `.mp4`, `.wav`, …), archives, `Saved/` / `Intermediate/` / `DerivedDataCache/`, `renders/` or `builds/` (a packaged game holds cooked pack content).
+- Third-party packs (Fab, Megascans, MetaHuman, UE mannequins) and the sound and music library must not be redistributed. `SourceArt/random_dungeon_combat/audio/` (files converted from the library) is ignored; `sounds.json`, which only names the files, is committed.
+- `.gitignore` enforces this. Check `git status` before committing: a new kind of generated file needs its ignore rule first.
+- Commit or push only when asked (see Working rules). Small data that a script reads or a test wrote (`SourceArt/**/*.json`) is committed; a test record replaces the one before it.

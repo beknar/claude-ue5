@@ -1,8 +1,53 @@
 # claude-ue5
 
-An Unreal Engine 5.8 project built almost entirely from scripts. The scripts drive the running editor over Python remote execution, and Blender + numpy prepare the source art. The project has several playable character showcase levels: third-person controls, a recorded demo route and a Movie Render Queue showcase video for each.
+An Unreal Engine 5.8 project built almost entirely from scripts. The scripts drive the running editor over Python remote execution, Blender + numpy prepare the source art, and a C++ module holds the games that generate themselves in play. The project has fourteen levels: a photo studio and five character showcases, three hand-built worlds with walk-in buildings, three procedural worlds (a town, a dungeon, an isometric village), the dungeon again with melee combat, blood, sound and music, and a space fighter. Most have a recorded demo route or a scripted test, and a Movie Render Queue showcase video.
 
-This repository is **source only**: the pipeline scripts, project config and small data files. Unreal assets (`Content/`), source art binaries, renders and the third-party packs they come from stay local. See [What's not in the repo](#whats-not-in-the-repo).
+This repository is **source only**: the pipeline scripts, the C++ source, project config and small data files. Unreal assets (`Content/`), source art binaries, sounds, renders and the third-party packs they come from stay local. See [What's not in the repo](#whats-not-in-the-repo).
+
+## Capabilities
+
+What the project does today. Everything here is built by the scripts in this repository and can be rebuilt from the local packs; the [Levels](#levels) table has the detail.
+
+**Characters and animation**
+- A MetaHuman conformed to a 3D scan (`fig4`): face and body fitted to the scan, a strand hair groom, the scanned outfit refitted to her, studio lighting.
+- Characters from six kinds of source on the same third-person controls: the MetaHuman, a Meshy AI biped with 18 moves of its own, a Unity-format Fab soldier, a static Tripo GLB rigged in Blender, animated Tripo GLBs playing their own clips, and Meshy JRPG characters (one of them an unrigged mesh whose skeleton is worked out from its shape).
+- IK rigs and retargeters built from Python: UE5 mannequin and soldier animation onto the other characters, three Fab weapon animation packs onto the player of the dungeon.
+- Feet that stay put: walk and run speeds measured from the stance foot, clips grounded on the sole contacts, root locking, foot IK on uneven ground.
+
+**Worlds**
+- Hand-built from pack maps: a meadow (procedural Nanite terrain, rocks, grass), a photo studio, a medieval village and a castle with a lake village whose houses were opened up and furnished by purpose, a sci-fi city joined to a megastructure with furnished rooms behind automatic doors.
+- Procedural, in C++ (`ARTTownGenerator`, `ARDDungeonGenerator`, `AIVVillageGenerator`): a start area built from a fixed seed and saved; walking toward its edge generates the next area ahead of her, spread over several frames, with a reveal effect (a scan wave and a glowing border). Rooms and houses have a purpose and are furnished and lit for it; every door and container can be reached and opened.
+- Things to do in them: doors, chests, wardrobes, barrels and crates that open; a minimap and a full map of what has been generated and discovered; monsters that wander the dungeon; villagers who walk the village streets and give way.
+- Views: third person; a fixed isometric camera that turns in 45° steps and zooms, with roofs and camera-side walls cut away indoors and her silhouette shown through what hides her; a chase camera behind a fighter.
+
+**Combat** (`random_dungeoncombat_level`)
+- Three melee weapons with their own attack, flinch and death clips; monsters that notice her, give chase, attack, flinch and die; hit points and damage set by tier so the first area is easier than what is generated in play; regeneration, death and return.
+- Blood: bursts of drops and spray from where a blow lands, marks where the drops fall, a pool under a body.
+- Wounds: each blow leaves a wound on that one monster, on its skin where the weapon met it.
+- Sound placed in the world and fading with distance: her footsteps and voice, each monster kind's steps, growl, roar, cry and death, fires, doors, chests, the rumble of a new section.
+- Music: a wandering track over a room tone; a battle track over a tenser atmosphere when a monster comes at her, another one each fight; the wandering track resumes where it left off.
+
+**Space flight** (`starship_level`)
+- A fighter kitbashed from pack meshes in a 5 km combat area round a station: cannons, homing missiles with lock-on, destructible asteroids, containers and drones, collisions with hull damage, a gate course, engine flames and contrails, a full HUD.
+- A standalone Windows package of it that needs nothing installed.
+
+**Input:** keyboard and mouse everywhere; an Xbox controller in the village, the fighter and for attacks in the dungeon.
+
+**Tests**
+- A scripted play-in-editor test for the sci-fi city, the three procedural worlds, the dungeon fight and the fighter, driven from PowerShell by a plan string and written out as JSON: walk tests (routes, doors, containers, generation across each edge, falls, clipping, stuck legs), the combat test (13 steps, from each weapon's blow to the music changing), the flight test (every control, kills, collisions, a lap through the gates).
+- A sound self test that records what the audio device puts out while sounds play at known places, and measures it: is the sound there, on the correct side, quieter with distance.
+- A packaged game's own self test, run without a window: a report and a picture.
+
+**Demo reels**
+- 1080p Movie Render Queue renders. Recorded routes on `*_Cine` copies run on the sequence clock, so a preview and the final render match; for the dungeon fight and the fighter a pilot script plays the game itself through its inputs while the queue renders the player's view, and two renders log the same events.
+- The HUD, maps, captions and key presses are drawn over the frames from the recording of the render itself; the sound track is the game's own mix.
+- Each reel is encoded twice: full size, and a two-pass copy of 20 MB or less.
+
+**Tooling**
+- `ue_exec.py` runs a script or a snippet in the running editor; an MCP server exposes the editor's own toolsets.
+- `build_cpp.ps1` builds the C++ module without a .NET Framework SDK installed; `package_starship.ps1` packages a level as a game.
+- Shared builders: `interior_lib.py` (rooms, furniture, openables, lights for any building), `mat_lib.py` (textures and Substrate materials from Python), `capture.py` (a picture of the editor world from any camera).
+- A survey of the local Fab library: what is usable in UE5 and which animations drive which models (`asset_survey/`, `local-packs.md`).
 
 ## Early results
 
@@ -32,11 +77,12 @@ Stills from the showcase videos: 1080p Movie Render Queue renders of each level'
 |---|---|---|
 | `L_Fig4_Studio` | `fig4`, a MetaHuman conformed to a 3D scan | Photo-studio cyclorama, plinth, studio and MegaLights lighting, strand hair groom, refitted scanned outfit |
 | `L_Fig4_Meadow` | fig4 (`BP_Fig4Character`) | Outdoor meadow: procedural Nanite terrain, rocks and grass. Heel-stance locomotion retargeted from the UE mannequin |
-| `L_Meshy_Meadow` | Meshy AI biped (`BP_MeshyCharacter`) | Same meadow; 18 moves on input actions plus a sprint |
+| `L_Meshy_Meadow` | Meshy AI biped (`BP_MeshyCharacter`); the JRPG characters (`BP_JRPGFem1Character` … `BP_JRPGFem5Character`) | Same meadow; 18 moves on input actions plus a sprint. Also the stage of the JRPG characters, whose scripts set the meadow's game mode to the one built last: Fem1 (a Meshy rig playing the soldier's retargeted set, or the FF showcase set), Fem3 and Fem4 (Meshy meshes; one that comes unrigged, such as Fem3, is given a skeleton by `jrpg_autorig.py`), Fem5 (`jrpg-fem5-tripo`, an animated Tripo GLB playing her own idle / walk / run: the player of every later level) |
 | `soldier_level` | Dystopia Soldier 02 (`BP_SoldierCharacter`) | Same meadow; Unity-sourced soldier with retargeted locomotion |
 | `ff_level` | Tripo anime female (`BP_FFCharacter`) | Same meadow; static GLB rigged onto a UE4-mannequin skeleton |
 | `ff2_level` | Animated Tripo anime female (`BP_FF2Character`) | Same meadow; clips fixed on the sole contacts so she doesn't float or slide |
 | `castle_level` | FF2 | The Medieval Fantasy Village pack's map with walk-in houses: doors, chests, trunks, wardrobes and barrels open with **F**. Interiors are furnished by building purpose (tavern, manor, homes, bakery, stable, barn, storehouse, smithy) with lofts, attics and lighting. Water splashes in the river |
+| `fantasy_castle_level` | FF2 (`BP_FF2Character`, with a higher step and a steeper walkable slope for the pack's rock) | The Fantasy Castle Environment's map with the Medieval Lake Village streamed into its lake. The pack meshes collide with their real triangles instead of one convex hull each, so doorways, arches and the bridge can be walked. A stone stair links the castle's east terrace to the island bridge, and a road runs from the bridge down the island, over a wooden causeway and into the walled village. Three castle buildings had a doorway cut into their shell and got interiors (great hall, armory, barracks); the village's hollow houses were measured by flood fill and furnished by purpose (tavern, fisherman's house, farmhouse, weaver's cottage, smithy, barn, storehouse). Doors and chests open with **F**. No showcase video |
 | `sf-city-level` | jrpg-fem5-tripo (`BP_SFC_Fem5Character`: her own idle/walk/run, foot IK) | The Open World Science fiction City with the Monolith Megastructure streamed in beside it, joined by a 200 m bridge road. Four structures with furnished rooms behind automatic sci-fi blast doors: Port Authority (office + armory), neon noodle bar, hab apartment (living room + bedroom), excavation lab (relic lab + server room). Invisible barrier walls along every drop into the void, a fall guard, and a scripted walk test (`709`/`710`) |
 | `random_level` | jrpg-fem5-tripo (`BP_SFC_Fem5Character`) | Procedural medieval town (C++ `ARTTownGenerator`). Starts as a 500 m x 500 m square built with a fixed seed; whenever she nears the edge of town heading outward, the next 250 m of terrain, cobbled streets, furnished buildings, props and foliage is generated ahead of her (fresh seed each play, never saved). Each new cell is marked as it appears: a glowing curtain rises on its border and a scan wave sweeps across it, the cell drawn as a cyan ghost until the wave passes. Buildings: the Modular Medieval Town packs' furnished docks houses, tavern (fireplace, dining tables, chairs, bar), stores and Sherwood cabins, streamed in as level instances and turned to face the street. Doors swing open as she approaches; bedroom chests, wardrobes and crates open with **F** |
 | `random_dungeon_level` | jrpg-fem5-tripo (`BP_SFC_Fem5Character`) | Procedural dungeon (C++ `ARDDungeonGenerator`). A 252 m x 252 m start section of 49 interconnected rooms (fixed seed, saved), with hallways leaving every edge; walking toward the edge generates the next section (fresh seed each play, never saved) with random_level's reveal effect. Rooms have a purpose with matching furniture and lighting: great hall, barracks, prison cells, torture chamber, storeroom, armory, kitchen, library, chapel, crypt, treasury, guard room, forge; hallways are guard passages, supply passages or catacomb tunnels. Doors (crypt double doors, cell doors) and every container (chests, trunks, wardrobes, barrels, crates) open with **F**. Minimap of generated / discovered rooms, full map on **M**. Monsters from Creatures_Pack (troll, daemon, horned demon, ripper dog, spider, mutant) in 40% of the rooms wander from room to room |
@@ -44,14 +90,14 @@ Stills from the showcase videos: 1080p Movie Render Queue renders of each level'
 | `random_isometric_village_level` | jrpg-fem5-tripo (`BP_SFC_Fem5Character`) | Procedural nucleated village seen from a fixed isometric camera (C++ `AIVVillageGenerator`). One village around one hub: a cobbled market square (fountain, well, stalls) with the church, tavern, smithy, bakery, store and elder's hall facing it, ring streets closing around it and short lanes staggered between the rings, three main roads winding out. Houses stand along the streets with gardens, orchards and fields behind, thinning into farmsteads away from the square. The 250 m x 250 m start section is built with a fixed seed and saved; walking toward the edge generates the next 250 m section (fresh seed each play, never saved) on the same rings and lanes, with random_level's reveal effect. Houses are assembled from the House Forge kit (thatch / timber / stone) and furnished by purpose (cottage, farmhouse, tavern, smithy, bakery, store, carpenter, barn, storehouse, church, elder's hall); indoors the roof and the camera-side walls are cut away, and her silhouette shows through anything that hides her. Doors and every container open with **F**. Unarmed villagers (townsfolk, peasants, youths, a servant pair, the elder, a physician, a lady: three for every ten buildings of each 250 m section, in play only) wander the streets and the square, give way to her and step aside. **Q** / **E** turn the view in 45° steps (the cutaway and the maps turn with it) and the view zooms in to a close view of her. A stylised miniature of the village is the minimap; **M** opens the big map with every building labelled |
 | `starship_level` | A space fighter (C++ `ASSFighter`) | Outer space: a 5 km x 5 km x 5 km combat area round a space station, seen from a chase camera behind the fighter. The fighter is a kitbash of pack meshes in the style of a Colonial Viper (a white-and-red delta hull with two engines, stub wings, a third engine with a tail fin, wing-tip cannons, four missiles under the wings; engine flames that follow the throttle and a ribbon contrail from each engine). Two weapons: cannons (fast bolts) and homing missiles that lock on to the target nearest the nose; both destroy asteroids (big ones break up), drifting cargo containers and target drones that fly patrol circles and are replaced in waves. The station is built from Mega_City and Red_Echo modules (hub drums, landing decks, tower clusters, spokes, pylons, docking pads, hologram signs) with parked ships, a cargo ship, a gate course of six ring tunnels to fly through, a jump gate, relay satellites, a wreck field and five asteroid belts around it. The fighter bounces off what it hits (hull damage; destroyed at 0 and launched again) and is turned back at the edge of the area. HUD: nose crosshair and mouse aim point, target brackets with range, lead mark, scope, speed / throttle / hull / missiles, score |
 
-Each level except `starship_level` has a `*_Cine` copy (`MoviePipelineGameMode` with an AI demo character) for its `LS_*_Showcase` sequence. `starship_level`'s reel is rendered on the level itself: a pilot script flies the fighter through the game's own keyboard and mouse inputs while the Movie Render Queue renders the player's view.
+Most levels have a `*_Cine` copy (`MoviePipelineGameMode` with an AI demo character) for their `LS_*_Showcase` sequence; the JRPG characters use the meadow's. `starship_level` and `random_dungeoncombat_level` have none: their reels are rendered on the level itself, a pilot script playing the game through its own inputs while the Movie Render Queue renders the player's view. `L_Fig4_Studio` (stills) and `fantasy_castle_level` have no reel.
 
 **Controls:**
 - WASD and mouse: move and look (`random_isometric_village_level`: WASD or the arrow keys move in 8 screen directions and never turn the view; Q / E turn it left / right in 45° steps; the mouse wheel zooms, down to a close view of her)
 - Space: jump
 - Shift: run
 - Ctrl: sprint (Meshy)
-- F: open/close in `castle_level`; open/close chests, wardrobes and crates in `random_level` (doors open by themselves); open/close doors and containers in `random_dungeon_level` and `random_isometric_village_level`
+- F: open/close in `castle_level` and `fantasy_castle_level`; open/close chests, wardrobes and crates in `random_level` (doors open by themselves); open/close doors and containers in `random_dungeon_level` and `random_isometric_village_level`
 - Left mouse button (X or RT on a controller): attack in `random_dungeoncombat_level`; 1 / 2 / 3 (D-pad left / up / right): sword / spear / axe
 - M: full dungeon map in `random_dungeon_level` and `random_dungeoncombat_level`; village map in `random_isometric_village_level`
 - Xbox controller (`random_isometric_village_level`): left stick or D-pad move (snapped to 8 directions; half deflection walks), A or X open/close, Y or View map, B closes the map, LB / RB turn the view, right stick up / down zooms, LT walk
@@ -60,11 +106,11 @@ Each level except `starship_level` has a `*_Cine` copy (`MoviePipelineGameMode` 
 
 ## Requirements
 
-- **Unreal Engine 5.8**, expected at `E:\Program Files\Epic Games\UE_5.8`. Enabled plugins: PythonScriptPlugin (with `bRemoteExecution=True`), EditorScriptingUtilities, EditorToolset, ModelContextProtocol, MetaHuman, HairStrands, MovieRenderPipeline, HDRIBackdrop (the sci-fi city's sky).
-- **C++ toolchain** for the `claude_ue5` module (`claude_ue5/Source`, the random_level town generator): Visual Studio 2022/2026 C++ build tools (MSVC 14.38+) and a Windows 10/11 SDK. Build with the editor closed: `pipeline\build_cpp.ps1`. UE 5.8's build rules also want a .NET Framework SDK (4.6+); without one the script points UnrealBuildTool at a stand-in for that build only (installing the .NET Framework 4.8.x Developer Pack removes the need). Plugin ProceduralMeshComponent is enabled in the `.uproject`.
+- **Unreal Engine 5.8**, expected at `E:\Program Files\Epic Games\UE_5.8`. Enabled plugins: PythonScriptPlugin (with `bRemoteExecution=True`), EditorScriptingUtilities, EditorToolset, ConfigSettingsToolset, ModelContextProtocol, ModelingToolsEditorMode, MetaHuman (with MetaHumanCharacter and MetaHumanGenerator), HairStrands, AlembicHairImporter, MovieRenderPipeline, HDRIBackdrop (the sci-fi city's sky), ProceduralMeshComponent. The project renders with Substrate (`r.Substrate=True`): pack materials written for the old shading models may not compile.
+- **C++ toolchain** for the `claude_ue5` module (`claude_ue5/Source`: the town, dungeon and village generators, the combat, blood and sound of the dungeon, the space fighter): Visual Studio 2022/2026 C++ build tools (MSVC 14.38+) and a Windows 10/11 SDK. Build with the editor closed: `pipeline\build_cpp.ps1`. UE 5.8's build rules also want a .NET Framework SDK (4.6+); without one the script points UnrealBuildTool at a stand-in for that build only (installing the .NET Framework 4.8.x Developer Pack removes the need). The module depends on ProceduralMeshComponent, Niagara, EnhancedInput, RenderCore and AudioMixer.
 - **Blender 5.1**, run headless: `blender -b -P script.py -- args`.
-- **Python 3.11+** with `numpy`, `scipy`, `imageio-ffmpeg` and `Pillow`, for the numpy tools, the remote-exec client and video encoding.
-- The local asset packs listed below.
+- **Python 3.11+** with `numpy`, `scipy`, `imageio-ffmpeg` and `Pillow`, for the numpy tools, the remote-exec client, the reel overlays, the sound conversion and check, and video encoding. The PowerShell test drivers call `python`, or the interpreter named by the `UE_PY` environment variable.
+- The local asset packs listed below, and for `random_dungeoncombat_level`'s sound a local sound-effect and music library (`sounds.json` names its root and files).
 
 ## Layout
 
@@ -78,9 +124,14 @@ claude_ue5/              UE project (claude_ue5.uproject, Config/; Content/ is l
 pipeline/
   unreal/                numbered editor scripts (NNN_name.py), run inside the editor
   blender_numpy/         Blender scripts (-b -P), numpy/scipy tools, ue_exec.py, encode_video.py, rl_reel_overlay.py, rd_reel_overlay.py, iv_reel_overlay.py, ss_reel_overlay.py, rdc_reel_overlay.py, rdc_sound_prep.py, rdc_sound_check.py
+  build_cpp.ps1          builds the C++ module (editor closed)
+  package_starship.ps1   packages starship_level as a standalone Windows game
 asset_survey/            survey of the local Fab library: UE5 usability, animation compatibility
+docs/images/             the README's stills
 local-packs.md           rig/animation summary of the local Fab packs
 .mcp.json                MCP server config (UE ModelContextProtocol plugin on 127.0.0.1:8765)
+CLAUDE.md                working rules and pitfalls for Claude Code in this repository
+renders/, builds/        showcase videos and packaged games (local only)
 ```
 
 ## Running the pipeline
@@ -110,12 +161,28 @@ Scripts are numbered roughly in build order. Each one's docstring states its pur
 | `200`–`230` | FF (Tripo, static) |
 | `240`–`289` | FF2 (Tripo, animated): import, AnimBP, character, grounding and foot-contact fixes |
 | `290`–`383` | castle_level: village copy, interactive pieces, door/container/wardrobe BPs, splashes, populate, furniture kit, furnishing, grass mask, cinematic |
+| `400`–`421` | fantasy_castle_level: map copies, Lake Village strip / stream, triangle collision, road and causeway, PlayerStart, terrace-to-bridge link, FF2's movement on rugged ground, castle survey / doorway cuts / interiors, world-aligned materials, door leaves, village survey / interiors |
+| `500`–`540` | JRPG characters (Meshy): import, soldier retarget, character + game mode, the FF showcase animation set |
+| `600`–`650` | Animated Tripo characters (`jrpg-fem5-tripo`), generalised from FF2: import, AnimBP on her own clips, grounding, character, demo routine, sequence |
 | `700`–`714` | sf-city-level: map copies, Monolith strip/stream, bridge road, world-aligned materials, sci-fi door BP, structures + interiors, player/fall guard, barrier walls, walk-test planner and PIE walk test, foot IK, cinematic (demo paths, Simulate recorder, sequence) |
 | `750`–`761` | random_level: building templates (docks level instances, Sherwood cabins), ground material, level + generator setup, generation indicator, cinematic (demo path, Simulate recorder, one-camera sequence), PIE walk test |
 | `770`–`775` | random_dungeon_level: level + piece catalogue + monsters + game mode/HUD + start section (`770`), PIE walk test (`771` driven by `772_rd_walk.ps1`), cinematic (demo run, Simulate recorder, one-camera sequence) |
-| `790`–`799` | random_dungeoncombat_level: her weapons, grips and retargeted clips (`790`), the level copy and its combat set-up (`791`), PIE combat test (`792` driven by `793_rdc_combat.ps1`), demo reel: its sequence (`794`), the pilot that plays and records it (`795`), its Movie Render Queue job (`796`); sound: import and the generator's sound table (`797`); blood, wound and decal materials (`798`); the sound self test (`799_rdc_sound_test.ps1`) |
 | `780`–`787` | random_isometric_village_level: piece catalogue + materials + level + game mode + start section (`780`), PIE walk test (`781` driven by `782_iv_walk.ps1`), cinematic (demo route, Simulate recorder, isometric one-camera sequence with the view turns), villager models (`786`, run by `780` and `783`), render recorder for the reel's maps (`787`) |
+| `790`–`799` | random_dungeoncombat_level: her weapons, grips and retargeted clips (`790`), the level copy and its combat set-up (`791`), PIE combat test (`792` driven by `793_rdc_combat.ps1`), demo reel: its sequence (`794`), the pilot that plays and records it (`795`), its Movie Render Queue job (`796`); sound: import and the generator's sound table (`797`); blood, wound and decal materials (`798`); the sound self test (`799_rdc_sound_test.ps1`). The range is full: further stages for this level start at `810` |
 | `800`–`806` | starship_level: materials + effects + level + arena + fighter kitbash (`800`), station + clutter + targets (`801`), PIE flight test (`802` driven by `803_ss_flight.ps1`), demo reel: its sequence (`804`), the pilot that flies and records it (`805`), its Movie Render Queue job (`806`) |
+| no number | Shared modules and probes: `interior_lib.py` (rooms, furniture, openables and lights for any building), `mat_lib.py` (textures and Substrate materials), `capture.py` (a `SceneCapture2D` picture of the editor world), `state.py`, `save_all.py`, and the fig4 probes (`probe_*`, `inspect_*`, `body_*`) |
+
+**JRPG and Tripo characters** (`500`–`540`, `600`–`650`; they play in `L_Meshy_Meadow`):
+- A rigged Meshy character (Fem1): `blender_numpy/jrpg_build.py model.glb out_dir name` (a real `root` bone, centimetre rig, textures), `500_jrpg_import.py Fem1`, `510_jrpg_retarget.py` (the soldier's whole set retargeted onto her, speeds measured from her stance foot), `520_jrpg_character.py soldier|ff Fem1` (`540_jrpg_ff_anims.py` first for the `ff` set).
+- An unrigged Meshy mesh (Fem3): `blender_numpy/jrpg_autorig.py model.glb out_dir name [height_cm]` finds the joints in the mesh (arm line, armpits, crotch, slice centroids) and skins it to a mannequin-named skeleton; then as above.
+- An animated Tripo character (Fem5): `blender_numpy/tripo_build.py model.glb out_dir name tag [height_cm]` (the mesh and its clips as two FBX files), `600_tripo_import.py Fem5`, `610_tripo_anim.py Fem5` (the template's state machine with her own idle / walk / run), `615_tripo_ground.py Fem5` (Tripo pins the hips: each clip is lowered until the planted foot is on the ground), `620_tripo_character.py Fem5`; showcase with `640_tripo_demo.py Fem5` and `650_tripo_sequence.py Fem5`.
+
+**fantasy_castle_level** (`400`–`421`; packs: Fantasy Castle Environment, Medieval Lake Village, castle_level's furniture kit and door / container Blueprints):
+1. `400_fcl_maps.py castle`, restart the editor, `400_fcl_maps.py lake`, restart.
+2. `401_fcl_lake_strip.py` (the village copy loses its own sky, lights, backdrop and water), `402_fcl_assemble.py` (streams it into the castle's lake; game mode FF2), `403_fcl_collision.py` (triangle collision on the terrain and architecture meshes), `407_ff2_rugged_movement.py`.
+3. `404_fcl_road.py` (A* over traced heights from the bridge to the village, the pack's road spline, a two-span causeway), `406_fcl_castle_link.py` (ramp, slab and stair from the terrace to the bridge), `405_fcl_player.py`.
+4. Castle interiors: `410_fcl_castle_survey.py`, then `blender_numpy/fcl_castle_rooms.py` and `fcl_castle_open.py` (room frames and the doorway cut into each shell), `411_fcl_castle_open.py`, `412_fcl_materials.py`, `blender_numpy/fcl_leaf_pivot.py` and `414_fcl_door_leaves.py` (door leaves hinged at the origin), `415_fcl_castle_interiors.py`.
+5. Village interiors: `420_fcl_village_survey.py`, `421_fcl_village_interiors.py` (rooms by flood fill, the static doors replaced by ones that open, furniture by purpose through `interior_lib.py`).
 
 **sf-city-level rebuild order** (needs the HDRIBackdrop plugin, enabled in the .uproject):
 1. `700_sfc_maps.py city`, restart the editor, `700_sfc_maps.py monolith`, restart
@@ -170,16 +237,19 @@ Scripts are numbered roughly in build order. Each one's docstring states its pur
 **Showcase videos:**
 - Build the sequence with the level's `*_sequence.py`.
 - Render with `75_render_locomotion.py <out_dir> preview|final <level> <sequence> <prefix>`.
-- Encode with `pipeline/blender_numpy/encode_video.py <frames_dir> <out.mp4> 36 30`. The `36` drops the warm-up frames.
+- Encode with `pipeline/blender_numpy/encode_video.py <frames_dir> <out.mp4> 36 30`. The `36` drops the warm-up frames (the procedural levels' reels encode from 0).
+- Every reel is kept in two sizes in `renders/`: `<Name>_Showcase.mp4` (1080p, CRF 16) and `<Name>_Showcase_20MB.mp4`, a two-pass encode at a fixed video bitrate: `encode_video.py <frames_dir> <out.mp4> <start> 30 <track.wav or -> <video_kbps>` (45 s at 3300 kbps with a 128 kbps sound track is about 18.5 MB).
+- The reels so far: fig4 locomotion, Meshy biped, Dystopia soldier, FF, FF2, castle interiors and furnishing, JRPG Fem5 in the meadow, the sci-fi city, random_level, random_dungeon_level, random_isometric_village_level, the starship fighter, and three of random_dungeoncombat_level (combat; blood, wounds and sound; music).
 
 ## What's not in the repo
 
-These are excluded for size (about 10 GB, with single files over 1 GB) and licensing:
+These are excluded for size (the project's `Content/` is about 450 GB with all the packs, and single files exceed 1 GB) and licensing:
 
 - **Unreal content** (`claude_ue5/Content/`), including third-party packs:
   - [Medieval Fantasy Village](https://www.fab.com/) (LAYA DESIGN) and Fantasy Castle Environment (DanStudios), both from Fab
   - Monolith megastructure
   - Megascans scans (Saloon Interior pack)
+  - the packs named in each level's rebuild notes above (the sci-fi city, the dungeon, town, village and space kits, the creature, villager, weapon and animation packs)
   - MetaHuman assets and the UE template mannequins
 - **Source characters:**
   - the Tripo anime female GLBs
@@ -187,10 +257,13 @@ These are excluded for size (about 10 GB, with single files over 1 GB) and licen
   - the Dystopia Soldiers pack (Fab, Unity format)
   - the fig4 scan
 - **Source art binaries:** FBX, GLB, Alembic, DNA and textures.
+- **Sound:** the sound-effect and music library that `random_dungeoncombat_level` plays from, and the files converted from it (`SourceArt/random_dungeon_combat/audio/`). Only `sounds.json`, which names the files, is committed.
 - **Renders and showcase videos** (`renders/`).
+- **Packaged games** (`builds/`): they hold cooked pack content.
 - **Per-machine folders:** `Saved/`, `Intermediate/`, `DerivedDataCache/`.
 
 To rebuild a level you need the same packs locally:
 1. Add the Fab packs to the project through the Epic Games Launcher.
 2. Put the character sources where the build scripts expect them.
-3. Run the scripts in order.
+3. Build the C++ module (`pipeline\build_cpp.ps1`).
+4. Run the scripts in order.
