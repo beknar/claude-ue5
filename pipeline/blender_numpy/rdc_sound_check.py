@@ -1,10 +1,14 @@
 """random_dungeoncombat_level: reads the recording of the game's sound self test (the game started with
 -RDSoundTest=<dir> plays one flat sound and the same placed sound at known places round her, records what the audio
 device puts out and writes <dir>/soundtest.wav and soundtest.txt; pipeline/unreal/799_rdc_sound_test.ps1 runs it).
-For each step: the level of the second after it (200 Hz - 6 kHz, both channels) and how much louder the left channel
+For each step: the level of the sound it played (200 Hz - 6 kHz, both channels) and how much louder the left channel
 is than the right. Checks what counting calls cannot: that a placed sound is in the output at all, that one on her
 right is louder in the right channel and one on her left in the left, and that the same sound is quieter the farther
 away it is, down to nothing.
+
+The steps' times are on the audio device's clock. The game keeps its low room tone running under the test: the
+engine does not process a silent submix, so silence is not recorded and every later sound would sit earlier in the
+recording than logged (the check says so when the recording is shorter than the log).
 
 Usage (a Python with numpy):  rdc_sound_check.py <dir>      prints "RDCSOUNDCHECK ok" or "... FAILED" with the figures"""
 import sys, os, wave
@@ -20,6 +24,7 @@ print(log[0]); print("%s: %d Hz, %d channels, %.1f s, peak %.1f dBFS" % ("soundt
 
 def band(s):
     """power of 200 Hz - 6 kHz in a mono block"""
+    if len(s) < 64: return 0.0
     sp = np.abs(np.fft.rfft(s * np.hanning(len(s)))) ** 2; fr = np.fft.rfftfreq(len(s), 1.0 / sr)
     return sp[(fr >= 200) & (fr < 6000)].sum() / len(s) ** 2
 
@@ -27,15 +32,20 @@ def band(s):
 def db(p): return 10 * np.log10(p + 1e-15)
 
 
-quiet = db(band(x[int(0.2 * sr):int(0.9 * sr)].mean(axis=1)))            # (before the first step: the room tone)
+end = next((float(l.split("|")[0]) for l in log[1:] if "| end |" in l), n / sr)
+if n / sr < end - 0.45:
+    print("RDCSOUNDCHECK FAILED | the recording is %.1f s but the test ran %.1f s on the audio clock: stretches were not recorded (silence is not), the steps are not where the log says" % (n / sr, end))
+    sys.exit(1)
+quiet = db(band(x[int(0.1 * sr):int(0.85 * sr)].mean(axis=1)))            # (before the first step: the room tone)
 res = {}
 for t, what in steps:
-    s = x[int((t + 0.02) * sr):int((t + 1.2) * sr)]
+    s = x[int(max(t - 0.2, 0.0) * sr):int((t + 1.2) * sr)]
     res[what] = (db(band(s.mean(axis=1))), db(band(s[:, 0])) - db(band(s[:, -1])))
-    print("%5.2f s  %-20s level %6.1f dB (%+5.1f over the room tone)   left - right %+5.1f dB" % (t, what, res[what][0], res[what][0] - quiet, res[what][1]))
+    print("%5.2f s  %-20s level %6.1f dB (%+5.1f over the quiet before)   left - right %+5.1f dB" % (t, what, res[what][0], res[what][0] - quiet, res[what][1]))
 lv = lambda k: res[k][0]; lr = lambda k: res[k][1]
+flat = max(lv(k) for k in res if k.startswith("flat"))
 checks = {
-    "the flat sound is there": max(lv("flat"), lv("flat again")) > quiet + 15,      # (the very first sound of a session can come too late for its second)
+    "the flat sound is there": flat > quiet + 15,
     "a placed sound 2 m away is there": lv("2 m ahead of her") > quiet + 15,
     "ahead: both ears alike": abs(lr("2 m ahead of her")) < 3,
     "on her right: the right ear": lr("4 m to her right") < -3,

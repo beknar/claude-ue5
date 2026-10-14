@@ -2,7 +2,6 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDMonster.h"
 #include "RD/RDBlood.h"
-#include "Components/AudioComponent.h"
 #include "Sound/SoundBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
@@ -55,21 +54,6 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 		return C;
 	};
 	WeaponComp = Make(TEXT("RDWeapon")); OffHandComp = Make(TEXT("RDOffHand"));
-	// her breath: two loops (flat: it is her own), silent until she walks or runs a while
-	auto Breath = [&](const TCHAR* Key) -> UAudioComponent*
-	{
-		const FRDSoundSet* S = Generator ? Generator->Sounds.Find(Key) : nullptr;
-		if (!S || S->Sounds.Num() == 0 || !S->Sounds[0]) return nullptr;
-		UAudioComponent* A = NewObject<UAudioComponent>(GetOwner());
-		A->bAutoActivate = false; A->bAutoDestroy = false; A->bAllowSpatialization = false;
-		A->SetSound(S->Sounds[0]);
-		A->SetVolumeMultiplier(S->Volume * Generator->SoundVolume);
-		A->SetPitchMultiplier(S->Pitch);
-		A->SetupAttachment(GetOwner()->GetRootComponent());
-		A->RegisterComponent();
-		return A;
-	};
-	BreathWalk = Breath(TEXT("Player.BreathWalk")); BreathRun = Breath(TEXT("Player.BreathRun"));
 	SelectWeapon(0);
 }
 
@@ -256,23 +240,12 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 }
 
 // ------------------------------------------------------------------------------------------------ sound
-void URDCombatComponent::SetBreath(int32 State)
-{
-	if (State == BreathState) return;
-	UAudioComponent* Old = BreathState == 1 ? BreathWalk.Get() : BreathState == 2 ? BreathRun.Get() : nullptr;
-	UAudioComponent* New = State == 1 ? BreathWalk.Get() : State == 2 ? BreathRun.Get() : nullptr;
-	if (Old) Old->FadeOut(0.7f, 0.f);
-	if (New) New->FadeIn(0.6f, 1.f);
-	BreathState = State;
-}
-
 void URDCombatComponent::TickSounds(float Dt, float Now)
 {
 	const ACharacter* C = Cast<ACharacter>(GetOwner());
 	if (!C) return;
 	if (bDead)
 	{
-		SetBreath(0); RunHeat = WalkTime = 0.f;
 		if (!bFallDone && Now - DeathTime > 0.9f) { bFallDone = true; Generator->PlaySoundAt(TEXT("Env.BodyFall"), C->GetActorLocation()); }
 		return;
 	}
@@ -291,12 +264,4 @@ void URDCombatComponent::TickSounds(float Dt, float Now)
 		}
 	}
 	else StepDist = FMath::Min(StepDist, 40.f);
-	// her breath: the running loop once she has run a moment (it lingers after she stops), else the walking loop while she walks
-	RunHeat = FMath::Clamp(RunHeat + (bRun ? Dt : -0.5f * Dt), 0.f, 3.f);
-	const bool bWalk = Speed > 40.f && !bRun;
-	WalkTime = bWalk ? WalkTime + Dt : 0.f;
-	StillTime = Speed > 40.f ? 0.f : StillTime + Dt;
-	if (RunHeat > 1.2f || (BreathState == 2 && RunHeat > 0.3f)) SetBreath(2);
-	else if (WalkTime > 0.8f || (BreathState == 1 && StillTime < 1.f)) SetBreath(1);
-	else SetBreath(0);
 }

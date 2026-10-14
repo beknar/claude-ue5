@@ -4,10 +4,11 @@ Reads claude_ue5/SourceArt/random_dungeon_combat/sounds.json (which library file
 writes each chosen file as 44.1 kHz 16 bit WAV into claude_ue5/SourceArt/random_dungeon_combat/audio:
   * mono (a sound placed in the world has to be mono to be heard from its direction), stereo only for "stereo" sets
   * one-shots: the silence before and after is trimmed, "max_len" cuts a long tail, short fades at both ends
-  * "cut": [start, length] takes a part of a long file, "fade": [in, out] seconds
+  * "cut": [start, length] takes a part of a long file, "fade": [in, out] seconds; a third element of a "from" entry
+    is where that one file starts (a music track without its lead-in)
   * levelled: the sounding part of every file of a set gets the set's "level" (RMS, dBFS), with the peak kept under
     -1 dBFS; how loud a set is in the game is then the set's "volume" alone
-  * loops ("loop") are left whole, so they still loop
+  * loops ("loop") are left whole, so they still loop; the music and atmosphere sets are loops in stereo
 and audio/index.json (the files of each set, with their lengths and sources), which pipeline/unreal/797 reads.
 The library and the converted files are licensed sound packs: neither is in the repository.
 
@@ -94,14 +95,15 @@ def main():
         ch = 2 if s.get("stereo") else 1
         loop = bool(s.get("loop"))
         cand = []
-        for pack, rx in s["from"]:
+        for src in s["from"]:
+            pack, rx = src[0], src[1]; start = float(src[2]) if len(src) > 2 else 0.0
             base, fs = files(pack)
             got = [f for f in fs if re.search(rx, f)]
             if not got: missing.append("%s: nothing in '%s' matches %s" % (key, pack, rx))
-            cand += [(pack, f, os.path.join(base, f)) for f in got]
+            cand += [(pack, f, os.path.join(base, f), start) for f in got]
         clips = []
-        for pack, rel, path in cand:
-            x = decode(path, ch)
+        for pack, rel, path, start in cand:
+            x = decode(path, ch)[int(SR * start):]
             if "cut" in s: x = x[int(SR * s["cut"][0]):int(SR * (s["cut"][0] + s["cut"][1]))]
             if not loop and s.get("trim", True): x = trim(x)
             if "max_len" in s and len(x) > SR * s["max_len"]: x = fade(x[:int(SR * s["max_len"])], 0.0, min(0.12, s["max_len"] * 0.3))

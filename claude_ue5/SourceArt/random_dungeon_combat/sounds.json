@@ -1,7 +1,8 @@
 {
-  "comment": "random_dungeoncombat_level: which files of the local sound library are played for which occasion. pipeline/blender_numpy/rdc_sound_prep.py converts them (mono 44.1 kHz 16 bit, silence trimmed, levelled) into SourceArt/random_dungeon_combat/audio (not in the repository: licensed sound packs); pipeline/unreal/797_rdc_sounds.py imports those and fills the generator's Sounds. 'from' = [pack, regular expression on the path inside the pack]; level = RMS of the sounding part in dBFS; volume / pitch / pitch_var / inner / falloff / flat are the game's FRDSoundSet values (inner, falloff in cm: full volume within inner, silent falloff beyond it; flat = not placed in the world). master_volume is the generator's SoundVolume, on everything.",
+  "comment": "random_dungeoncombat_level: which files of the local sound library are played for which occasion. pipeline/blender_numpy/rdc_sound_prep.py converts them (mono 44.1 kHz 16 bit, silence trimmed, levelled) into SourceArt/random_dungeon_combat/audio (not in the repository: licensed sound packs); pipeline/unreal/797_rdc_sounds.py imports those and fills the generator's Sounds. 'from' = [pack, regular expression on the path inside the pack]; level = RMS of the sounding part in dBFS; volume / pitch / pitch_var / inner / falloff / flat are the game's FRDSoundSet values (inner, falloff in cm: full volume within inner, silent falloff beyond it; flat = not placed in the world). master_volume is the generator's SoundVolume, on everything but the music. Music.* and Atmos.* are the flat stereo layers the generator switches between wandering and fighting (music_volume is on them); a third element of a 'from' entry is where that file starts (seconds: a battle track without its lead-in).",
   "root": "I:/game assets",
-  "master_volume": 1.7,
+  "master_volume": 1.5,
+  "music_volume": 1.0,
   "packs": {
     "voice": "complete rpg creator bundle/human vocals vol 1/Human Vocals Vol1/Women/Ruby/WAV",
     "quest": "humble bundle - 2d game creation mega bundle/gdm-quest-game/Quest_Game_16bit/Quest_Game_16bit",
@@ -13,7 +14,9 @@
     "rpgsfx": "fanatical bundle packs/RPG Game Builder Assets Kit/RPG Game SFX/Action Mono",
     "khron": "complete rpg creator bundle/sound of survival vol1/Khron Studio - Sound Of Survival Vol 1 (UCS System 192Khz)",
     "amb": "complete rpg creator bundle/ambience sounds pack/The_Sound_Guild_Ambience_Sounds/WAV - 44100 Hz - 16 Bit",
-    "spells": "complete rpg creator bundle/monster and magic bundle/Elemental Spells Vol 1/Elemental_Spells_Vol_1"
+    "spells": "complete rpg creator bundle/monster and magic bundle/Elemental Spells Vol 1/Elemental_Spells_Vol_1",
+    "epic": "fanatical bundle packs/Ultimate SFX and Music Bundle/Epic Fantasy Music Pack - Volume 1 FILES/Epic_Fantasy_Music_Pack_Volume_1_Wav",
+    "darkamb": "fanatical bundle packs/Ultimate SFX and Music Bundle/Dark Fantasy Ambience Music Pack - Volume 1 FILES/Dark_Fantasy_Ambience_Music_Pack_Volume_1_Wav"
   },
   "monsters": {
     "Troll": {"set": "Troll", "step_length": 95},
@@ -26,8 +29,6 @@
   "sets": {
     "Player.Step": {"from": [["quest", "Footsteps/Quest_Game_Footstep_Cobble_Stone_Boots_\\d+\\.wav$"]], "max": 8, "max_len": 0.45, "level": -22, "volume": 0.5, "pitch_var": 0.06, "flat": true},
     "Player.Run": {"from": [["quest", "Footsteps/Quest_Game_Footstep_Concrete_Boots_\\d+\\.wav$"]], "max": 8, "max_len": 0.4, "level": -21, "volume": 0.6, "pitch_var": 0.06, "flat": true},
-    "Player.BreathWalk": {"from": [["voice", "Hero_Ruby_Breathing_Walking_Loop_1\\.wav$"]], "loop": true, "level": -26, "volume": 0.35, "flat": true},
-    "Player.BreathRun": {"from": [["voice", "Hero_Ruby_Breathing_Running_Loop_1\\.wav$"]], "loop": true, "level": -24, "volume": 0.45, "flat": true},
     "Player.Hurt": {"from": [["voice", "Hero_Ruby_Pain_\\d+\\.wav$"], ["voice", "Hero_Ruby_Sharp_Pain_\\d+\\.wav$"]], "max": 10, "max_len": 1.6, "level": -18, "volume": 0.95, "pitch_var": 0.03, "flat": true},
     "Player.Death": {"from": [["voice", "Hero_Ruby_Death_\\d+\\.wav$"]], "max": 6, "max_len": 2.6, "level": -18, "volume": 1.0, "pitch_var": 0.02, "flat": true},
     "Player.Attack": {"from": [["voice", "Hero_Ruby_Weapon_Swing_\\d+\\.wav$"]], "max": 7, "max_len": 1.0, "level": -21, "volume": 0.7, "pitch_var": 0.04, "flat": true},
@@ -93,6 +94,10 @@
     "Env.ChestClose": {"from": [["quest", "Doors and Chests/Quest_Game_Chest_Simple_Open_or_Close_([6-9]|10)\\.wav$"]], "max": 5, "max_len": 1.5, "level": -21, "volume": 0.8, "pitch": 0.92, "pitch_var": 0.05, "inner": 200, "falloff": 2200},
     "Env.Generate": {"from": [["amb", "Earth_Rumbling_Loop\\.wav$"]], "cut": [2.0, 7.5], "fade": [0.35, 3.0], "trim": false, "level": -17, "volume": 0.65, "pitch_var": 0.0, "inner": 6000, "falloff": 12000},
     "Env.GenerateHit": {"from": [["spells", "Rock/Rocks_Spell/Rocks_Spell_\\d+\\.wav$"]], "max": 3, "level": -18, "volume": 0.7, "pitch": 0.8, "pitch_var": 0.04, "inner": 6000, "falloff": 12000},
-    "Env.Ambience": {"from": [["amb", "Ambience_Dungeon_02_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -30, "volume": 0.3, "flat": true}
+
+    "Music.Explore": {"from": [["epic", "Track_5_Gameplay_Ambience\\.wav$"], ["darkamb", "Track_2_Gameplay_Ambience\\.wav$", 2.0], ["darkamb", "Track_8_Gameplay_Ambience\\.wav$"]], "loop": true, "stereo": true, "level": -24, "volume": 0.8, "flat": true},
+    "Music.Combat": {"from": [["epic", "Track_6_Battle_Action\\.wav$", 13.0], ["epic", "Track_7_Battle_Action\\.wav$"], ["epic", "Track_8_Battle_Action\\.wav$", 5.5]], "loop": true, "stereo": true, "level": -20, "volume": 0.85, "flat": true},
+    "Atmos.Explore": {"from": [["amb", "Ambience_Dungeon_02_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -30, "volume": 0.3, "flat": true},
+    "Atmos.Combat": {"from": [["amb", "Opressive_Eerie_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -28, "volume": 0.4, "flat": true}
   }
 }

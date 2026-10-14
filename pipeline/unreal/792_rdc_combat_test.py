@@ -19,14 +19,17 @@ checks what happens. Plan = comma separated steps:
   wounds    a monster she hits gets a wound a blow, on its skin, in an overlay material of its own whose parameters
             hold them; the wound moves with it; no other monster (of its kind or any) has a wound or an overlay;
             a pool spreads under it when it dies
-  sounds    her footsteps (running and walking sets) and breath, her voice when hurt; a door opening and closing;
+  sounds    her footsteps (running and walking sets; no breath set is left), her voice when hurt; a door opening and closing;
             the fire loops take the fires next to her and drop them when she is away; every placed sound is at
             full level beside her and falls to nothing with distance; a monster's roar, hurt and death voice and
             the monsters' footsteps; the rumble of a section being generated
+  music     while she wanders: a wandering track over the wandering atmosphere; a monster comes at her: the battle
+            track and atmosphere (other files) from the start of the track; the fight over and her away: the wandering
+            track again, further on than it was; the next fight has another battle track
 Writes SourceArt/random_dungeon_combat/test_<tag>.json and logs "RDCTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os
 __keep__ = True
-PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds").split(",") if s.strip()]
+PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds,music").split(",") if s.strip()]
 TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_combat"
 V = unreal.Vector; GS = unreal.GameplayStatics; ML = unreal.MathLibrary
@@ -55,8 +58,13 @@ def stand_by(m, gap=150.0):
     for k in range(16):
         a = k * math.pi / 8; q = V(ml.x + math.cos(a) * (gap + rad + 36), ml.y + math.sin(a) * (gap + rad + 36), ml.z)
         path = sec.find_path_world(q, ml)
-        if sec.room_at(q) == sec.room_at(ml) and sec.room_at(q) >= 0 and len(path) > 0 and (best is None or len(path) < best[0]): best = (len(path), q)
-    q = best[1] if best else V(ml.x + gap + rad + 36, ml.y, ml.z)
+        # (the place must be a walkable tile itself: the path search starts from the nearest one, also for a point in a wall)
+        if sec.room_at(q) == sec.room_at(ml) and len(path) > 0 and math.hypot(path[0].x - q.x, path[0].y - q.y) < 135.0 and (best is None or len(path) < best[0]): best = (len(path), q)
+    if best is None:
+        # no such place round it (a narrow hallway): a tile or two along its way to the middle of the dungeon
+        way = sec.find_path_world(ml, G["gen"].get_start_room_center())
+        best = (0, way[min(2 if gap > 150 else 1, len(way) - 1)]) if len(way) > 1 else (0, V(ml.x + rad + 60, ml.y, ml.z))
+    q = best[1]
     p.set_actor_location(V(q.x, q.y, 100.0), False, True)
     yaw = math.degrees(math.atan2(ml.y - q.y, ml.x - q.x)); p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=yaw))
 
@@ -234,15 +242,14 @@ def step_sounds():
     cnt = lambda k: gen.get_sound_count(k)
     def total(suffix): return sum(v for k, v in gen.get_sound_counts().items() if str(k).startswith("Monster.") and str(k).endswith(suffix))
     c.revive(True); yield from wait(0.6)
-    # her footsteps and breath: running, standing until she has her breath back, walking
+    # her footsteps: running, walking (and nothing of her breath: those sets are gone)
     r0, s0 = cnt("Player.Run"), cnt("Player.Step"); t0 = now()
     while now() - t0 < 2.6: p.add_movement_input(V(1, 0, 0), 1.0); yield
-    out["running_steps_in_2_6_s"] = cnt("Player.Run") - r0; out["breath_running"] = c.get_breath_state(); t0 = now()
-    while c.get_breath_state() != 0 and now() - t0 < 12.0: yield
-    out["breath_standing"] = c.get_breath_state(); t0 = now()
+    out["running_steps_in_2_6_s"] = cnt("Player.Run") - r0; yield from wait(0.8); t0 = now()
     while now() - t0 < 2.6: p.add_movement_input(V(-1, 0, 0), 0.45); yield
-    out["walking_steps_in_2_6_s"] = cnt("Player.Step") - s0; out["breath_walking"] = c.get_breath_state()
-    ok = out["running_steps_in_2_6_s"] >= 5 and out["breath_running"] == 2 and out["breath_standing"] == 0 and out["walking_steps_in_2_6_s"] >= 3 and out["breath_walking"] == 1
+    out["walking_steps_in_2_6_s"] = cnt("Player.Step") - s0
+    out["breath_sets"] = sorted(str(k) for k in gen.get_editor_property("sounds") if "Breath" in str(k)); out["her_sets"] = sorted(str(k) for k in gen.get_editor_property("sounds") if str(k).startswith("Player."))
+    ok = out["running_steps_in_2_6_s"] >= 5 and out["walking_steps_in_2_6_s"] >= 3 and not out["breath_sets"] and not hasattr(c, "get_breath_state")
     # her voice
     h0 = cnt("Player.Hurt"); c.apply_damage(5.0, None); yield
     out["hurt_voice"] = cnt("Player.Hurt") - h0; ok = ok and out["hurt_voice"] == 1
@@ -306,7 +313,44 @@ def step_sounds():
     step_result("sounds", ok, **out)
     c.revive(True); c.select_weapon(0); c.set_scripted_only(False)
 
-STEPS = {"setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map,
+def step_music():
+    gen = G["gen"]; c = cb(); p = G["pawn"]; c.set_scripted_only(True); out = {}
+    def away(limit=20.0):
+        c.revive(True); t0 = now()
+        while gen.is_combat_music() and now() - t0 < limit:
+            if c.is_dead() or c.get_health() < 40: c.revive(True)
+            yield
+    def fight():
+        ms = [m for m in start_monsters() if m.get_num_wounds() == 0] or start_monsters()
+        l = p.get_actor_location(); m = min(ms, key=lambda q: (q.get_actor_location() - l).length())
+        stand_by(m, 300.0); t0 = now()
+        while not gen.is_combat_music() and now() - t0 < 10.0: yield
+        r = {"monster": str(m.monster_name), "seconds_to_the_battle_music": round(now() - t0, 2), "battle": gen.is_combat_music()}
+        yield from wait(0.6)
+        r.update({"track": gen.get_music_track(), "atmosphere": gen.get_atmosphere_track(), "seconds_into_the_track": round(gen.get_music_position(), 2)})
+        c.select_weapon(2); t0 = now()
+        while alive(m) and now() - t0 < 60.0: yield from blow(m)
+        r["still_battle_at_the_kill"] = gen.is_combat_music(); t0 = now()
+        yield from away(); r["seconds_until_wandering_again"] = round(now() - t0, 1)
+        return r
+    yield from away()
+    yield from wait(1.5)
+    calm = {"battle": gen.is_combat_music(), "track": gen.get_music_track(), "atmosphere": gen.get_atmosphere_track(), "seconds_into_the_track": round(gen.get_music_position(), 1)}
+    n0 = gen.music_shifts
+    f1 = yield from fight()
+    yield from wait(1.0)
+    back = {"battle": gen.is_combat_music(), "track": gen.get_music_track(), "atmosphere": gen.get_atmosphere_track(), "seconds_into_the_track": round(gen.get_music_position(), 1)}
+    f2 = yield from fight()
+    sets = {str(k): len(v.get_editor_property("sounds")) for k, v in gen.get_editor_property("sounds").items() if str(k).startswith(("Music.", "Atmos."))}
+    ok = bool(not calm["battle"] and calm["track"] and calm["atmosphere"] and f1["battle"] and f1["track"] and f1["track"] != calm["track"] and f1["atmosphere"] and f1["atmosphere"] != calm["atmosphere"]
+              and f1["seconds_into_the_track"] < 3.0 and f1["still_battle_at_the_kill"] and not back["battle"] and back["track"] == calm["track"] and back["atmosphere"] == calm["atmosphere"]
+              and back["seconds_into_the_track"] > calm["seconds_into_the_track"] and f2["battle"] and f2["track"] not in ("", f1["track"], calm["track"]) and gen.music_shifts - n0 == 4
+              and sets.get("Music.Explore", 0) >= 1 and sets.get("Music.Combat", 0) >= 2 and sets.get("Atmos.Explore", 0) >= 1 and sets.get("Atmos.Combat", 0) >= 1)
+    step_result("music", ok, wandering=calm, first_fight=f1, wandering_again=back, second_fight=f2, shifts=gen.music_shifts - n0, sets=sets, hold_seconds=gen.get_editor_property("combat_music_hold"),
+                music_volume=gen.get_editor_property("music_volume"))
+    c.revive(True); c.select_weapon(0); c.set_scripted_only(False)
+
+STEPS = {"music": step_music, "setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map,
          "blood": step_blood, "wounds": step_wounds, "sounds": step_sounds}
 def run():
     for s in PLAN:

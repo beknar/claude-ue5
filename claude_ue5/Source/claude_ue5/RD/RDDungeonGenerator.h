@@ -14,6 +14,10 @@
 // generator too: Sounds maps an occasion to its sound files; everything but the player's own flat sounds is played
 // where it happens and fades with its distance to her (the listener's attenuation point is the pawn, not the camera
 // behind her); the fires nearest to her get the looping voices (UpdateFireLoops).
+// Music and atmosphere (TickMusic) are four flat stereo layers: while she wanders, a track of "Music.Explore" over
+// "Atmos.Explore"; when a fight is on (a monster near her is after her, or blows fell a moment ago) they fade out and
+// a track of "Music.Combat" comes in from its start over "Atmos.Combat"; CombatMusicHold seconds after the fight the
+// wandering pair comes back where it left off. Each fight takes the next battle track.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -144,6 +148,19 @@ public:
 	 *  distance falloff only. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") bool bSpatializeSounds = true;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") bool AreSoundsSpatialized() const { return bSpatializeNow; }
+	/** on the music and atmosphere sets (SoundVolume is for the sounds of the world) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") float MusicVolume = 1.f;
+	/** a fight is on while a monster within this distance is after her; the battle music stays this long after the fight */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") float CombatMusicDistance = 2600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") float CombatMusicHold = 3.5f;
+	/** times the music went from wandering to battle or back */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Sound") int32 MusicShifts = 0;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") bool IsCombatMusic() const { return bCombatMusic; }
+	/** the track playing now, and the atmosphere under it (asset names; "" none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") FString GetMusicTrack() const { return MusicLayerName(bCombatMusic ? 1 : 0); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") FString GetAtmosphereTrack() const { return MusicLayerName(bCombatMusic ? 3 : 2); }
+	/** seconds into its track the playing music is */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") float GetMusicPosition() const { return MusicPos[bCombatMusic ? 1 : 0]; }
 	/** plays one of the sounds of Key at a place (or flat, for a 2D set); false when there is no such sound */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sound") bool PlaySoundAt(FName Key, FVector At, float VolumeScale = 1.f, float PitchScale = 1.f);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") bool HasSound(FName Key) const;
@@ -232,7 +249,16 @@ private:
 	UPROPERTY(Transient) TObjectPtr<URDBloodComponent> Blood;
 	UPROPERTY(Transient) TMap<int32, TObjectPtr<USoundAttenuation>> Attenuations;
 	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> FireComps;
-	UPROPERTY(Transient) TObjectPtr<UAudioComponent> AmbienceComp;
+	/** wandering music, battle music, wandering atmosphere, battle atmosphere */
+	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> MusicComps;
+	float MusicPos[4] = { 0.f, 0.f, 0.f, 0.f };
+	int32 MusicIndex[4] = { 0, 0, 0, 0 };
+	bool bMusicOn = false, bCombatMusic = false;
+	float LastFightTime = -100.f;
+	void TickMusic(float Dt);
+	void StartMusicLayer(int32 Layer, float FadeSeconds, bool bFromStart);
+	void StopMusic();
+	FString MusicLayerName(int32 Layer) const;
 	struct FFireVoice { FVector At = FVector::ZeroVector; uint8 Kind = 0; bool bOn = false; };
 	TArray<FFireVoice> FireVoices;
 	TMap<FName, int32> SoundCounts, LastSoundPick;
@@ -242,6 +268,7 @@ private:
 	// sound self test (-RDSoundTest=<dir>: records the game's output while sounds are played at known places, then quits)
 	FString SoundTestDir;
 	float SoundTestTime = 0.f;
+	double SoundTestClock = 0.0;
 	int32 SoundTestStep = -1;
 	TArray<FString> SoundTestLog;
 	void TickSoundTest(float Dt);

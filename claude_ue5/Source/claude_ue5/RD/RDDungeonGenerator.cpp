@@ -28,6 +28,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeonGen, Log, All);
 
 static const int32 RDSoundSeed = 90417;
 static const FName RDFireKeys[3] = { TEXT("Env.Torch"), TEXT("Env.Brazier"), TEXT("Env.Hearth") };
+static const FName RDMusicKeys[4] = { TEXT("Music.Explore"), TEXT("Music.Combat"), TEXT("Atmos.Explore"), TEXT("Atmos.Combat") };
 
 ARDDungeonGenerator::ARDDungeonGenerator()
 {
@@ -244,6 +245,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Queue.Reset(); Building = nullptr; MapData.Reset(); HitTexts.Reset();
 	if (Blood) Blood->Clear();
 	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
+	StopMusic();
 	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; LastRevealTime = -100.f;
 	for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (PlayerCombat)
@@ -342,9 +344,7 @@ void ARDDungeonGenerator::BeginPlay()
 		Blood->RegisterComponent();
 		Blood->Init(this);
 	}
-	// the dungeon's room tone (flat, quiet)
-	if (const FRDSoundSet* Amb = Sounds.Find(TEXT("Env.Ambience")))
-		if (Amb->Sounds.Num() > 0 && Amb->Sounds[0]) AmbienceComp = UGameplayStatics::SpawnSound2D(this, Amb->Sounds[0], Amb->Volume * SoundVolume, Amb->Pitch, 0.f, nullptr, false, false);
+	StopMusic();
 	MapData.Reset();
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
 	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
@@ -393,6 +393,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (PC->WasInputKeyJustPressed(EKeys::M)) bMapOpen = !bMapOpen;
 	}
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
+	else TickMusic(Dt);         // (the self test measures single sounds: no music under them, only the room tone)
 	const AActor* Pawn = GetTrackedActor();
 	if (Pawn)
 	{
@@ -587,6 +588,86 @@ void ARDDungeonGenerator::SetUnfocusedVolume(float Multiplier)
 	FApp::SetUnfocusedVolumeMultiplier(Multiplier);
 }
 
+// ------------------------------------------------------------------------------------------------ music and atmosphere
+FString ARDDungeonGenerator::MusicLayerName(int32 Layer) const
+{
+	const UAudioComponent* A = MusicComps.IsValidIndex(Layer) ? MusicComps[Layer].Get() : nullptr;
+	return A && A->Sound && A->IsPlaying() ? A->Sound->GetName() : FString();
+}
+
+void ARDDungeonGenerator::StopMusic()
+{
+	for (UAudioComponent* A : MusicComps) if (A) A->Stop();
+	for (int32 I = 0; I < 4; ++I) { MusicPos[I] = 0.f; MusicIndex[I] = 0; }
+	bMusicOn = bCombatMusic = false; LastFightTime = -100.f; MusicShifts = 0;
+}
+
+void ARDDungeonGenerator::StartMusicLayer(int32 Layer, float FadeSeconds, bool bFromStart)
+{
+	const FRDSoundSet* Set = Sounds.Find(RDMusicKeys[Layer]);
+	if (!Set || Set->Sounds.Num() == 0) return;
+	USoundBase* Snd = Set->Sounds[MusicIndex[Layer] % Set->Sounds.Num()];
+	if (!Snd) return;
+	if (MusicComps.Num() < 4) MusicComps.SetNum(4);
+	if (!MusicComps[Layer])
+	{
+		UAudioComponent* A = NewObject<UAudioComponent>(this);
+		A->bAutoActivate = false; A->bAutoDestroy = false; A->bAllowSpatialization = false;
+		A->SetupAttachment(RootComponent);
+		A->RegisterComponent();
+		MusicComps[Layer] = A;
+	}
+	// from its start, or on from where this layer was when it last played
+	if (bFromStart) MusicPos[Layer] = 0.f;
+	const USoundWave* Wave = Cast<USoundWave>(Snd);
+	const float Start = Wave && Wave->Duration > 1.f ? FMath::Fmod(MusicPos[Layer], Wave->Duration) : 0.f;
+	UAudioComponent* A = MusicComps[Layer];
+	A->SetSound(Snd);
+	A->SetPitchMultiplier(Set->Pitch);
+	A->FadeIn(FadeSeconds, Set->Volume * MusicVolume, Start);
+}
+
+void ARDDungeonGenerator::TickMusic(float Dt)
+{
+	if (!bMusicOn)
+	{
+		// which wandering track this session has, and which battle track comes first: by the session seed
+		bool bAny = false;
+		for (const FName& K : RDMusicKeys) bAny |= HasSound(K);
+		if (!bAny || !PlayerCombat) return;
+		bMusicOn = true; bCombatMusic = false;
+		MusicIndex[0] = MusicIndex[1] = FMath::Abs(SessionSeed % 1000);
+		StartMusicLayer(0, 1.5f, true); StartMusicLayer(2, 1.5f, true);
+	}
+	const float Now = GetWorld()->GetTimeSeconds();
+	// a fight is on: blows fell a moment ago, or a monster near her is after her
+	bool bFight = false;
+	if (PlayerCombat && PlayerCombat->GetOwner() && !PlayerCombat->IsDead())
+	{
+		bFight = Now - PlayerCombat->LastHurtTime < 1.f || Now - PlayerCombat->LastHitTime < 1.f;
+		const FVector L = PlayerCombat->GetOwner()->GetActorLocation();
+		for (const auto& KV : Sections)
+		{
+			if (bFight || !KV.Value) continue;
+			for (const ARDMonster* M : KV.Value->SpawnedMonsters)
+				if (M && !M->IsDead() && M->IsAggro() && FVector::DistSquared(M->GetActorLocation(), L) < FMath::Square(CombatMusicDistance)) { bFight = true; break; }
+		}
+	}
+	if (bFight) LastFightTime = Now;
+	const bool bWant = Now - LastFightTime < CombatMusicHold;
+	if (bWant != bCombatMusic)
+	{
+		// the pair that was playing fades out (quickly into a fight, slowly out of one) and the other comes in
+		for (const int32 Layer : { bCombatMusic ? 1 : 0, bCombatMusic ? 3 : 2 })
+			if (MusicComps.IsValidIndex(Layer) && MusicComps[Layer]) MusicComps[Layer]->FadeOut(bWant ? 0.8f : 2.5f, 0.f);
+		bCombatMusic = bWant; ++MusicShifts;
+		if (bWant) { StartMusicLayer(1, 0.35f, true); StartMusicLayer(3, 0.8f, true); }
+		else { ++MusicIndex[1]; StartMusicLayer(0, 2.5f, false); StartMusicLayer(2, 2.5f, false); }      // (the next fight: the next battle track)
+		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDMUSIC %s: %s over %s"), bWant ? TEXT("battle") : TEXT("wandering"), *GetMusicTrack(), *GetAtmosphereTrack());
+	}
+	MusicPos[bCombatMusic ? 1 : 0] += Dt; MusicPos[bCombatMusic ? 3 : 2] += Dt;
+}
+
 // ------------------------------------------------------------------------------------------------ sound self test
 // -RDSoundTest=<dir> (a game or play-in-editor session): records what the audio device puts out while one flat sound and
 // the same placed sound at known places round her are played, writes <dir>/soundtest.wav and soundtest.txt, and quits.
@@ -610,14 +691,26 @@ void ARDDungeonGenerator::TickSoundTest(float Dt)
 	const int32 NumSteps = UE_ARRAY_COUNT(Steps);
 	if (SoundTestStep < 0)
 	{
+		// (a few seconds for the level to settle)
+		SoundTestTime += Dt;
+		if (SoundTestTime < 5.f) return;
+		// The wandering atmosphere (a low room tone) runs under the test. Without anything playing, the engine stops
+		// processing the silent submix and the recording simply has no audio for those stretches: it came out up to three
+		// seconds shorter than the test, with every sound earlier than its logged time.
+		StartMusicLayer(2, 0.2f, true);
 		FApp::SetUnfocusedVolumeMultiplier(1.f);
 		PlayerCombat->SetScriptedOnly(true);
 		UAudioMixerBlueprintLibrary::StartRecordingOutput(this, 20.f, nullptr);
 		SoundTestStep = 0; SoundTestTime = 0.f;
+		// (the steps are logged on the audio device's own clock, counted in the audio it has rendered: the recording's time.
+		// The game's clock runs ahead of it whenever the device falls behind, and did by more than a second.)
+		if (FAudioDeviceHandle AD = GetWorld()->GetAudioDevice()) SoundTestClock = AD->GetAudioClock();
 		SoundTestLog.Add(FString::Printf(TEXT("sound test: %d sets, master %.2f, spatialised %d, %s"), Sounds.Num(), SoundVolume, bSpatializeNow ? 1 : 0, *DescribeListener()));
 		return;
 	}
 	SoundTestTime += Dt;
+	FAudioDeviceHandle Device = GetWorld()->GetAudioDevice();
+	const float Heard = Device ? (float)(Device->GetAudioClock() - SoundTestClock) : SoundTestTime;
 	FVector Cam; FRotator CamRot;
 	PC->GetPlayerViewPoint(Cam, CamRot);
 	const FVector Fw = FRotator(0, CamRot.Yaw, 0).Vector(), Rt = FRotator(0, CamRot.Yaw + 90.f, 0).Vector(), L = P->GetActorLocation();
@@ -626,16 +719,16 @@ void ARDDungeonGenerator::TickSoundTest(float Dt)
 		const FStep& St = Steps[SoundTestStep++];
 		const FVector At = L + Fw * St.Forward + Rt * St.Right;
 		const FRDSoundSet* Set = Sounds.Find(St.Key);
-		if (!Set || Set->Sounds.Num() == 0 || !Set->Sounds[0]) { SoundTestLog.Add(FString::Printf(TEXT("%.2f | %s | %s | no such sound"), SoundTestTime, St.What, St.Key)); continue; }
+		if (!Set || Set->Sounds.Num() == 0 || !Set->Sounds[0]) { SoundTestLog.Add(FString::Printf(TEXT("%.2f | %s | %s | no such sound"), Heard, St.What, St.Key)); continue; }
 		// (always the set's first sound at its own pitch: the levels of the steps can be compared)
 		if (Set->b2D) UGameplayStatics::PlaySound2D(this, Set->Sounds[0], Set->Volume * SoundVolume, Set->Pitch);
 		else UGameplayStatics::PlaySoundAtLocation(this, Set->Sounds[0], At, FRotator::ZeroRotator, Set->Volume * SoundVolume, Set->Pitch, 0.f, GetAttenuation(*Set));
-		SoundTestLog.Add(FString::Printf(TEXT("%.2f | %s | %s | level by distance %.3f"), SoundTestTime, St.What, St.Key, GetSoundLevelAt(St.Key, FVector::Dist(At, L))));
+		SoundTestLog.Add(FString::Printf(TEXT("%.2f | %s | %s | level by distance %.3f | game clock %.2f"), Heard, St.What, St.Key, GetSoundLevelAt(St.Key, FVector::Dist(At, L)), SoundTestTime));
 	}
 	if (SoundTestStep == NumSteps && SoundTestTime >= 12.f)
 	{
 		UAudioMixerBlueprintLibrary::StopRecordingOutput(this, EAudioRecordingExportType::WavFile, TEXT("soundtest"), SoundTestDir, nullptr, nullptr);
-		SoundTestLog.Add(FString::Printf(TEXT("%.2f | end | %s"), SoundTestTime, *DescribeListener()));
+		SoundTestLog.Add(FString::Printf(TEXT("%.2f | end | %s | game clock %.2f"), Heard, *DescribeListener(), SoundTestTime));
 		FFileHelper::SaveStringArrayToFile(SoundTestLog, *(SoundTestDir / TEXT("soundtest.txt")));
 		++SoundTestStep;
 	}

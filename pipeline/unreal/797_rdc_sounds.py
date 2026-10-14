@@ -3,8 +3,8 @@
 the generator from claude_ue5/SourceArt/random_dungeon_combat/sounds.json:
   Sounds     one FRDSoundSet per occasion ("Player.Hurt", "Monster.Troll.Roar", "Env.DoorOpen", "Env.Torch"...): its
              sound waves, volume, pitch and pitch variation, and how it fades with distance (inner radius, falloff;
-             "flat" sets are not placed in the world: her own steps, breath and voice, the room tone)
-  SoundVolume  the manifest's master_volume
+             "flat" sets are not placed in the world: her own steps and voice, the music and atmosphere layers)
+  SoundVolume  the manifest's master_volume; MusicVolume its music_volume (on the Music.* and Atmos.* sets)
   Monsters   each kind's SoundSet (which "Monster.<set>.*" it uses) and StepLength (ground covered per footstep)
 Run with random_dungeoncombat_level open, after the C++ build. Idempotent: the waves are imported over the old ones,
 waves that are no longer in the index are deleted. Args: none (or "noimport": only the generator data)."""
@@ -61,6 +61,7 @@ for key, s in man["sets"].items():
 gen.modify()
 gen.set_editor_property("sounds", sounds)
 gen.set_editor_property("sound_volume", float(man.get("master_volume", 1.0)))
+gen.set_editor_property("music_volume", float(man.get("music_volume", 1.0)))
 
 # the monsters' voices and step lengths (struct arrays are copies: the whole array is set again)
 defs = list(gen.get_editor_property("monsters")); named = 0

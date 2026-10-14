@@ -2,7 +2,8 @@
 calls the keys make (movement input, the combat component's attack and weapon functions, the generator's F on doors),
 turns the game's own third-person camera, and records the play for the overlay
 (pipeline/blender_numpy/rdc_reel_overlay.py: the Movie Render Queue does not draw the HUD). The record also holds every
-sound the game played (by occasion), every blood burst and the wounds each monster in view carries.
+sound the game played (by occasion), every blood burst, the wounds each monster in view carries and each change
+of the music between wandering and battle (with the track).
   render    (default) arm it right before 796: it waits for the render's world and LS_RDC_Showcase and starts with frame 0
   rehearse  the PIE session that is running now, in real time (the HUD is on)
 On the first frame the dungeon is put back to its start (ARDDungeonGenerator.RestartPlay with a fixed session seed, so
@@ -22,7 +23,7 @@ OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_combat\\" + (
 V = unreal.Vector; Rot = unreal.Rotator; GS = unreal.GameplayStatics; IP = unreal.IntPoint
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {}
-S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": "", "note": {}, "hp": {}, "mapsig": {}, "disc": {}, "snd": {}, "bursts": 0}
+S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": "", "note": {}, "hp": {}, "mapsig": {}, "disc": {}, "snd": {}, "bursts": 0, "music": None}
 if getattr(unreal, "_rdc_reel", None) is not None:
     try: unreal.unregister_slate_post_tick_callback(unreal._rdc_reel)
     except Exception: pass
@@ -231,6 +232,10 @@ def heard():
     for k, v in now.items():
         if v > S["snd"].get(k, 0): S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "sound", "key": k, "n": v - S["snd"].get(k, 0)})
     S["snd"] = now
+    mu = (int(gen.is_combat_music()), str(gen.get_music_track()), str(gen.get_atmosphere_track()))
+    if mu != S["music"] and mu[1]:
+        S["music"] = mu; S["events"].append({"t": round(max(T(), 0.0), 3), "frame": G["frame"], "kind": "music", "battle": mu[0], "track": mu[1], "atmosphere": mu[2]})
+        unreal.log("RDCREEL %6.2f s  music: %s, %s over %s" % (T(), "battle" if mu[0] else "wandering", mu[1], mu[2]))
     b = gen.get_blood()
     if b is not None and b.bursts != S["bursts"]:
         if b.bursts > S["bursts"]:
@@ -297,7 +302,7 @@ def body():
         G["t"] = wt - G["w0"]; G["frame"] = int(math.floor(G["t"] * FPS))
     if start:
         # the first frame: the dungeon as it is when play begins, with a fixed seed for what is generated from here on
-        G["going"] = True; gen.set_frame_budget(1.0e6); gen.restart_play(SEED); S["hp"].clear(); S["snd"] = {}; S["bursts"] = 0
+        G["going"] = True; gen.set_frame_budget(1.0e6); gen.restart_play(SEED); S["hp"].clear(); S["snd"] = {}; S["bursts"] = 0; S["music"] = None
     next(G["run"])
     if G["going"] and G["combat"] is not None:
         hits(); heard()

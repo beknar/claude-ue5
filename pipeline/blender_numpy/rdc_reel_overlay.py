@@ -10,9 +10,10 @@ game's HUD) what the game's HUD shows in play, redrawn from 795's recording of t
   red flash when she is hurt, the banner when a section is generated;
 - for the reel: a title, a caption for each fight (the monster's tier against her) and for the generation, a key cap
   when she changes weapon, and what is heard written out as it sounds (the record has every sound the game played:
-  a monster's roar, growl, cry and death, her cry, a door she opens, a torch she passes, the rumble of a new section).
+  a monster's roar, growl, cry and death, her cry, a door she opens, a torch she passes, the rumble of a new section),
+  and which music is playing: the wandering track or the battle track (their names from the sound prep's index).
 Usage: rdc_reel_overlay.py frames_dir out_dir [step]"""
-import sys, os, json, glob, math
+import sys, os, re, json, glob, math
 from PIL import Image, ImageDraw, ImageFont
 src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
@@ -36,6 +37,15 @@ for e in EV:
         elif e["key"] == "Env.Generate": HEARD.append((e["t"], "the dungeon rumbles: a new section"))
     elif e["kind"] == "door": HEARD.append((e["t"], "a door creaks open"))
 HEARD.sort()
+# ---- the music: its changes between wandering and battle; the tracks' names from the prep's index when it is there
+MUSIC = [e for e in EV if e["kind"] == "music"]
+TRACK = {}
+try:
+    for e in json.load(open(os.path.join(SRC, "audio", "index.json"), encoding="utf-8")).values():
+        for f, s in zip(e["files"], e["source"]):
+            n = re.sub(r"_Music_Pack_Volume_\d+", "", os.path.splitext(os.path.basename(s.split(": ", 1)[1]))[0])
+            TRACK[os.path.splitext(f)[0]] = re.sub(r"_Track_(\d+)_.*$", r", track \1", n).replace("_", " ")
+except Exception as ex: print("no track names:", ex)
 print("frames %d | %d fights, %d kills | %d blows on monsters, %d on her | sections generated at %s" % (len(ROWS), len(FIGHTS), len(KILLS), sum(1 for h in HITS if not h["on_player"]),
       sum(1 for h in HITS if h["on_player"]), ", ".join("%.1f s" % e["t"] for e in GENS)))
 # ---- the map as the HUD had it at a time: per section its latest snapshot and the rooms discovered by then
@@ -225,12 +235,12 @@ def overlay(f):
     # ---- the banner when a section is generated
     for e in GENS:
         age = t - e["t"]
-        if 0.0 <= age < 3.5: text_c(d, (W * K / 2, 156 * K), "\u25b2 NEW DUNGEON SECTION GENERATED", f_ban, lin(CYAN, max(0.0, min(age / 0.3, (3.5 - age) / 0.8, 1.0))))
+        if 0.0 <= age < 3.5: text_c(d, (W * K / 2, 212 * K), "\u25b2 NEW DUNGEON SECTION GENERATED", f_ban, lin(CYAN, max(0.0, min(age / 0.3, (3.5 - age) / 0.8, 1.0))))
     # ---- the reel's own: title, captions (bottom left)
     a = fade(t, 0.3, 4.6)
     if a > 0:
         d.text((44 * K, 34 * K), "random_dungeoncombat_level", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 86 * K), "procedural dungeon  \u00b7  melee combat  \u00b7  blood, wounds and sound  \u00b7  jrpg-fem5-tripo", font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
+        d.text((46 * K, 86 * K), "procedural dungeon  \u00b7  melee combat  \u00b7  blood, wounds, sound and music  \u00b7  jrpg-fem5-tripo", font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
     caps = []
     t_first = FIGHTS[0]["t"] if FIGHTS else 6.0
     caps.append((0.8, min(t_first, GENS[0]["t"] if GENS else 99) - 0.2, "THREE MELEE WEAPONS", ["sword and spear with a shield, and an axe  \u00b7  from the Medieval Weapons pack",
@@ -243,7 +253,7 @@ def overlay(f):
         tier = "start section" if e["section"][0] == 0 else "generated section"
         note = ("the first square's monsters are weaker than her" if e["section"][0] == 0 else "in the generated sections they are on a par with her (the average: %.0f hit points, %.0f a blow)" % tuple(C["runtime_tier"]))
         more = ("every blow leaves a wound on this monster alone, where the weapon met it, and blood where the drops land",
-                "what is heard fades with its distance to her: voices, footsteps, doors, fires, the rumble of a new section",
+                "the music turns to a battle track when a monster comes at her, and back to the wandering track after the fight",
                 "the worse off a monster is, the more of it is bloodied")[min(i, 2)]
         caps.append((e["t"], end, "%s  \u00b7  %s" % (e["monster"].replace("_", " ").upper(), tier),
                      ["%.0f hit points, %.0f damage a blow  \u00b7  she has %.0f, and her %s does %.0f" % (e["its_hit_points"], e["its_damage"], C["max_health"], e["weapon"].lower(),
@@ -256,6 +266,16 @@ def overlay(f):
         d.rounded_rectangle((32 * K, y - 14 * K, 60 * K + wd, (H - 48) * K), 12 * K, fill=(12, 11, 9, int(180 * k)))
         d.text((50 * K, y - 4 * K), head, font=f_head, fill=tuple(c[:3]) + (int(255 * k),))
         for i, s in enumerate(lines): d.text((54 * K, y + (42 + 34 * i) * K), s, font=f_line, fill=(240, 244, 248, int(240 * k)))
+    # ---- the music playing now (top left, under the title): brighter for a moment when it changes
+    mu = None
+    for e in MUSIC:
+        if e["t"] <= t + 1e-6: mu = e
+    if mu:
+        hot = max(0.0, 1.0 - (t - mu["t"]) / 1.2); col = (255, 150, 90) if mu["battle"] else (150, 220, 255)
+        s = ("battle music" if mu["battle"] else "wandering music") + "  \u00b7  " + TRACK.get(mu["track"], mu["track"])
+        y = 146 * K; tw = d.textlength(s, font=f_line)
+        d.rounded_rectangle((32 * K, y - 20 * K, 102 * K + tw, y + 20 * K), 10 * K, fill=(12, 11, 9, int((150 + 70 * hot) * ua)), outline=col + (int(255 * hot * ua),), width=2 * K)
+        d.text((48 * K, y), "\u266b", font=f_note, fill=col + (int(255 * ua),), anchor="lm"); d.text((86 * K, y), s, font=f_line, fill=(236, 240, 244, int(245 * ua)), anchor="lm")
     # ---- what is heard (left, above the captions): each for a moment, the newest lowest; a torch while she is by it
     lines = [(s, fade(t, t0, t0 + 1.9, 0.12, 0.5)) for t0, s in HEARD if t0 <= t <= t0 + 1.9]
     fire = r.get("fire", -1)
