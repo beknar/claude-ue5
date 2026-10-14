@@ -1,9 +1,12 @@
 """docs/heroes.md and its pictures, from claude_ue5/SourceArt/hero_gallery/heroes.json (the candidates, their category,
-role and looks) and the renders of pipeline/unreal/901_hero_gallery.py (shoot): for each hero three pictures,
+role and looks), the renders of pipeline/unreal/901_hero_gallery.py (shoot) and the animation survey (902,
+anim_text.py): for each hero three pictures,
 docs/images/heroes/<id>_full.jpg / _bust.jpg / _action.jpg, 360 x 468.
 Usage (a Python with Pillow):  hero_doc.py <shots_dir>"""
 import sys, os, io, json
 from PIL import Image
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import anim_text
 SHOTS = sys.argv[1]
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 DATA = os.path.join(ROOT, "claude_ue5", "SourceArt", "hero_gallery", "heroes.json")
@@ -16,6 +19,7 @@ for f in os.listdir(IMG):
     if f.endswith(".jpg"): os.remove(os.path.join(IMG, f))
 D = json.load(io.open(DATA, encoding="utf-8"))
 heroes = D["heroes"]; cats = D.get("categories", {})
+A = anim_text.Anims()
 for h in heroes:
     for v in ("full", "bust", "action"):
         Image.open(os.path.join(SHOTS, "%s_%s.png" % (h["id"], v))).convert("RGB").resize((W, H), Image.LANCZOS).save(os.path.join(IMG, "%s_%s.jpg" % (h["id"], v)), quality=84, optimize=True)
@@ -32,10 +36,10 @@ Every character in the local Fab library cache (`I:\\game assets\\3d epicgames m
 
 - **Action poses:** most packs come without attack clips. These characters all share the UE4-mannequin skeleton, so each pose is copied from another pack's clip at the moment of the blow: a sword strike, a two-handed axe blow, a spear thrust, rifle aim or a punch. Characters whose pack has attack clips of its own use one of those.
 - **Props:** the weapons in the melee poses come from Medieval_Weapons; the rifle is MC_Environment's assault rifle. None of these props are the characters' own.
-- **Animation:** every character here uses the UE4-mannequin skeleton, so the Unreal mannequin's animations and any UE4-mannequin animation pack play on it, retargeted or as they are.
+- **Animation:** each entry says what its character can play; the libraries they share are listed under [Animations](#animations).
 - **Roles:** a role is a suggestion from the character's looks: what it wears, what it carries, how it is built.
 
-The list is `claude_ue5/SourceArt/hero_gallery/heroes.json`; the pictures come from `pipeline/unreal/901_hero_gallery.py` and `pipeline/blender_numpy/hero_doc.py`. The sellers and listings of the packs are in [assets.md](assets.md).
+The list is `claude_ue5/SourceArt/hero_gallery/heroes.json`; the pictures come from `pipeline/unreal/901_hero_gallery.py` and `pipeline/blender_numpy/hero_doc.py`, the animation notes from `pipeline/unreal/902_character_animations.py`. Many of them could be enemies as well: see [humanoid_enemies.md](humanoid_enemies.md). The sellers and listings of the packs are in [assets.md](assets.md).
 
 ## Categories
 
@@ -43,6 +47,7 @@ The list is `claude_ue5/SourceArt/hero_gallery/heroes.json`; the pictures come f
 for c in order:
     n = sum(1 for h in heroes if h["category"] == c)
     out.append("- [%s](#%s) (%d)%s\n" % (c, c.lower().replace(",", "").replace(" ", "-"), n, (": " + cats[c]) if c in cats else ""))
+out.append("- [Animations](#animations)\n- [Not included](#not-included)\n")
 for c in order:
     out.append("\n## %s\n" % c)
     if c in cats: out.append("\n%s\n" % cats[c])
@@ -51,7 +56,9 @@ for c in order:
         out.append("\n### %s\n\n" % h["name"])
         out.append("%s · **Role:** %s · **Pose:** %s · model `%s`\n\n" % (link, h.get("role") or "-", POSE.get(h["family"], h["family"]), h["mesh"].rsplit("/", 1)[1].split(".")[0]))
         if h.get("looks"): out.append("%s\n\n" % h["looks"])
+        out.append("**Animations:** %s\n\n" % A.line(h["mesh"], h["pack"]))
         out.append("".join('<img src="images/heroes/%s_%s.jpg" width="270" alt="%s, %s"> ' % (h["id"], v, h["name"], lbl) for v, lbl in (("full", "full body"), ("bust", "upper body and head"), ("action", "action pose"))).rstrip() + "\n")
+out.append("\n" + A.section())
 out.append("""
 ## Not included
 

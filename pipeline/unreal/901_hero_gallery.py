@@ -13,20 +13,26 @@ sailors' punch of Underwater_odyssey is on bones of other names);
 (gripped as in 790: a round handle under the hand, checked against the mesh), riflemen MC_Environment's assault rifle
 laid along the line between their hands.
 The editor world does not evaluate animations: the poses are shot in play-in-editor, which copies the staged actors.
+The same script shoots docs/humanoid_enemies.md (first argument `enemies`: SourceArt/enemy_gallery/enemies.json). An
+enemy that is also a hero (`hero` set) keeps the hero's pictures and is not staged; a model of several meshes (`parts`)
+gets one actor per mesh, all on the same animation; a pack's own clip on a rig without UE4-mannequin bone names is
+posed at the frame its right hand (found by name) is farthest from the hips.
 One mode per call:
   stage [start count]  pose animations, then every hero (or a batch of them: all of them at once ran the editor out of
              memory with texture streaming off) twice (neutral; posed, with its weapon) in a row 2 km up, lights, a floor,
              the capture camera; texture streaming off
   shoot dir  (play-in-editor running) dir/<id>_full.png, <id>_bust.png, <id>_action.png
   clear      the staged actors removed (the level saved empty), texture streaming on
-Args: mode [dir] [ids] | stage start count | stage ids <id,id,...>"""
+Args: [enemies] mode [dir] [ids] | [enemies] stage start count | [enemies] stage ids <id,id,...>"""
 import sys, os, re, json, math, unreal
+GALLERY = "heroes"
+if len(sys.argv) > 1 and sys.argv[1] in ("heroes", "enemies"): GALLERY = sys.argv.pop(1)
 MODE = sys.argv[1]
 V = unreal.Vector; ML = unreal.MathLibrary; APE = unreal.AnimPoseExtensions; GS = unreal.GameplayStatics
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools()
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
-DATA = r"E:\code\claude-ue5\claude_ue5\SourceArt\hero_gallery\heroes.json"
+DATA = r"E:\code\claude-ue5\claude_ue5\SourceArt\%s\%s.json" % ({"heroes": "hero_gallery", "enemies": "enemy_gallery"}[GALLERY], GALLERY)
 SCRATCH = "/Game/RandomLevel/Test/rl_scratch"; POSES = "/Game/HeroGallery/Poses"
 TAG = unreal.Name("hero_gallery"); SP = 6000.0; ORIGIN = V(0, 0, 200000.0)
 SRC = {"sword": "/Game/Weapon_Shield_Animations/Animations/Anim_Weapon_Shield_Attack_01", "heavy": "/Game/Animations_Warrior/Animations/With_Weapon/Anim_Warrior_Attack_1",
@@ -38,7 +44,16 @@ RIFLE = "/Game/MC_Environment/Assets/SM_Gun_AssaultRifle"; RIFLE_GRIP = V(0, -10
 O_EVAL = unreal.AnimPoseEvaluationOptions()
 
 
-def load_data(): return json.load(open(DATA, encoding="utf-8"))["heroes"]
+def load_data(): return json.load(open(DATA, encoding="utf-8"))[GALLERY]
+
+
+def hand_bones(pose):
+    """the right hand and the hips of a pose: UE4-mannequin names, else the first bones whose names say so"""
+    names = [str(b) for b in APE.get_bone_names(pose)]
+    if "hand_r" in names and "pelvis" in names: return "hand_r", "pelvis"
+    hand = [n for n in names if re.search(r"(^|[ _])r(ight)?[ _]?hand$|hand[ _]?r(ight)?$|r[ _]palm$", n, re.I)]
+    hips = [n for n in names if re.search(r"pelvis|hips?$|^bip0?1$", n, re.I)]
+    return (hand[0] if hand else None), (hips[0] if hips else names[0])
 
 
 def cleanup():
@@ -52,12 +67,14 @@ def strike_time(anim, mid=False, high=False, forward=False):
     L = unreal.AnimationLibrary.get_sequence_length(anim)
     if mid: return L * 0.5
     best = (0.0, L * 0.4)
+    hand, hips = hand_bones(APE.get_anim_pose_at_time(anim, 0.0, O_EVAL))
+    if not hand: return best[1]
     for k in range(41):
         p = APE.get_anim_pose_at_time(anim, L * k / 40, O_EVAL)
         try:
-            hr = APE.get_bone_pose(p, "hand_r", unreal.AnimPoseSpaces.WORLD).translation
+            hr = APE.get_bone_pose(p, hand, unreal.AnimPoseSpaces.WORLD).translation
             d = hr.z if high else (hr.y - APE.get_bone_pose(p, "spine_03", unreal.AnimPoseSpaces.WORLD).translation.y) if forward else \
-                (hr - APE.get_bone_pose(p, "pelvis", unreal.AnimPoseSpaces.WORLD).translation).length()
+                (hr - APE.get_bone_pose(p, hips, unreal.AnimPoseSpaces.WORLD).translation).length()
         except Exception: continue
         if d > best[0]: best = (d, L * k / 40)
     return best[1]
@@ -143,13 +160,22 @@ if MODE == "stage":
     sky.light_component.set_editor_property("cubemap", unreal.load_asset("/Engine/EngineResources/GrayLightTextureCube")); sky.light_component.set_intensity(1.3)
     spawn(unreal.SceneCapture2D, ORIGIN, tags=("H_CAP",))
     for i, h in enumerate(H):
-        if not B0 <= i < B0 + BN or (IDS and h["id"] not in IDS): continue
+        if not B0 <= i < B0 + BN or (IDS and h["id"] not in IDS) or h.get("hero"): continue
         mesh = unreal.load_asset(h["mesh"]); assert mesh, h["mesh"]
         skel = mesh.skeleton
         for posed in (False, True):
-            a = spawn(unreal.SkeletalMeshActor, ORIGIN + V(SP * i + (SP / 2 if posed else 0), 0, 0), tags=("H_%03d_%s" % (i, "P" if posed else "N"),))
+            tag = "H_%03d_%s" % (i, "P" if posed else "N"); loc = ORIGIN + V(SP * i + (SP / 2 if posed else 0), 0, 0)
+            a = spawn(unreal.SkeletalMeshActor, loc, tags=(tag,))
             smc = a.skeletal_mesh_component; smc.set_skinned_asset_and_update(mesh); smc.set_editor_property("forced_lod_model", 1)
             smc.set_editor_property("visibility_based_anim_tick_option", unreal.VisibilityBasedAnimTickOption.ALWAYS_TICK_POSE_AND_REFRESH_BONES)
+            parts = []
+            for j, pp in enumerate(h.get("parts") or []):               # (the other meshes of the model, posed alike)
+                pm = unreal.load_asset(pp); assert pm, pp
+                if posed and pm.skeleton != skel: continue                 # (a part on a rig of its own would stay behind)
+                pa = spawn(unreal.SkeletalMeshActor, loc, tags=(tag + "_%d" % j,))
+                pa.skeletal_mesh_component.set_skinned_asset_and_update(pm); pa.skeletal_mesh_component.set_editor_property("forced_lod_model", 1)
+                pa.skeletal_mesh_component.set_editor_property("visibility_based_anim_tick_option", unreal.VisibilityBasedAnimTickOption.ALWAYS_TICK_POSE_AND_REFRESH_BONES)
+                parts.append(pa.skeletal_mesh_component)
             if not posed: continue
             fam = h["family"]
             if fam == "own":
@@ -158,7 +184,8 @@ if MODE == "stage":
                 k = (skel.get_path_name(), fam)
                 if k not in poses: poses[k] = pose_anim(skel, fam)
                 (anim, shared), t = poses[k], 0.0
-            smc.set_animation_mode(unreal.AnimationMode.ANIMATION_SINGLE_NODE); smc.override_animation_data(anim, False, False, t, 0.0)
+            for c in [smc] + parts:
+                c.set_animation_mode(unreal.AnimationMode.ANIMATION_SINGLE_NODE); c.override_animation_data(anim, False, False, t, 0.0)
             wp = None
             if fam in WEAPON: wp = (WEAPON[fam][0], grip(skel, *WEAPON[fam]))
             elif fam == "rifle": wp = (RIFLE, rifle_grip(anim))
@@ -168,7 +195,7 @@ if MODE == "stage":
                 wa.attach_to_actor(a, "hand_r", unreal.AttachmentRule.KEEP_RELATIVE, unreal.AttachmentRule.KEEP_RELATIVE, unreal.AttachmentRule.KEEP_RELATIVE, False)
                 wa.set_actor_relative_transform(wp[1], False, False)
             report.append((h["id"], fam, shared))
-    print("HEROGAL staged", len(report), "heroes,", len(poses), "pose animations | bones shared with the pose clip (min):", min(s for _, _, s in report if s >= 0))
+    print("HEROGAL staged", len(report), GALLERY + ",", len(poses), "pose animations | bones shared with the pose clip (min):", min([s for _, _, s in report if s >= 0] or [-1]))
     for hid, fam, shared in report:
         if 0 <= shared < 40: print("HEROGAL few shared bones", hid, fam, shared)
 
@@ -194,11 +221,20 @@ elif MODE == "shoot":
         cap.set_actor_location(cam, False, False); cap.set_actor_rotation(ML.find_look_at_rotation(cam, look), False)
         for _ in range(6): comp.capture_scene()
         unreal.RenderingLibrary.export_render_target(w, rt, OUT, name)
+    def bounds(tag, children=False):
+        """origin and extent of an actor and its parts together"""
+        lo = hi = None
+        for t, x in acts.items():
+            if t != tag and not t.startswith(tag + "_"): continue
+            o, e = x.get_actor_bounds(False, children)          # (children: the weapon in its hand)
+            l = V(o.x - e.x, o.y - e.y, o.z - e.z); u = V(o.x + e.x, o.y + e.y, o.z + e.z)
+            lo = l if lo is None else V(min(lo.x, l.x), min(lo.y, l.y), min(lo.z, l.z)); hi = u if hi is None else V(max(hi.x, u.x), max(hi.y, u.y), max(hi.z, u.z))
+        return V((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (lo.z + hi.z) / 2), V((hi.x - lo.x) / 2, (hi.y - lo.y) / 2, (hi.z - lo.z) / 2)
     n = 0
     for i, h in enumerate(H):
         if (ONLY and h["id"] not in ONLY) or ("H_%03d_N" % i) not in acts: continue
-        a = acts["H_%03d_N" % i]; p = acts["H_%03d_P" % i]; smc = a.skeletal_mesh_component
-        org, ext = a.get_actor_bounds(False)
+        a = acts["H_%03d_N" % i]; smc = a.skeletal_mesh_component
+        org, ext = bounds("H_%03d_N" % i)
         base = a.get_actor_location(); top = org.z + ext.z; bottom = org.z - ext.z
         shoot("%s_full.png" % h["id"], V(base.x, base.y, (top + bottom) / 2), (top - bottom) / 2 + 8, ext.x + 10, 22.0)
         try:
@@ -208,10 +244,21 @@ elif MODE == "shoot":
         except Exception:
             head_top, lo = top, bottom + (top - bottom) * 0.5
         shoot("%s_bust.png" % h["id"], V(base.x, base.y, (head_top + lo) / 2), (head_top - lo) / 2 + 4, 40.0, 18.0, 0.04)
-        porg, pext = p.get_actor_bounds(False, True)
+        porg, pext = bounds("H_%03d_P" % i, True)
+        pc = acts["H_%03d_P" % i].skeletal_mesh_component                   # (a clip that moves the root, as a crawl does,
+        bl = [pc.get_socket_location(pc.get_bone_name(b)) for b in range(pc.get_num_bones())    # leaves the stored bounds behind;
+              if not re.match(r"root|ik_", str(pc.get_bone_name(b)), re.I)]                    #  the root and IK bones stay behind too)
+        lo = V(min(v.x for v in bl) - 28, min(v.y for v in bl) - 28, min(v.z for v in bl) - 28); hi = V(max(v.x for v in bl) + 28, max(v.y for v in bl) + 28, max(v.z for v in bl) + 28)
+        if ("H_%03d_W" % i) in acts:                                          # (and the weapon in its hand)
+            wo, we = bounds("H_%03d_W" % i)
+            lo = V(min(lo.x, wo.x - we.x), min(lo.y, wo.y - we.y), min(lo.z, wo.z - we.z)); hi = V(max(hi.x, wo.x + we.x), max(hi.y, wo.y + we.y), max(hi.z, wo.z + we.z))
+        bo = V((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (lo.z + hi.z) / 2); be = V((hi.x - lo.x) / 2, (hi.y - lo.y) / 2, (hi.z - lo.z) / 2)
+        if max(abs(bo.x - porg.x) - pext.x, abs(bo.y - porg.y) - pext.y, abs(bo.z - porg.z) - pext.z) > 0 or \
+                pext.x > 1.5 * be.x + 15 or pext.y > 1.5 * be.y + 15 or pext.z > 1.5 * be.z + 15:      # (bounds far bigger than the body: a zombie's)
+            porg, pext = bo, be
         shoot("%s_action.png" % h["id"], porg, pext.z + 6, max(pext.x, pext.y) * 0.9 + 10, 26.0)
         n += 1
-    print("HEROGAL shot", n, "heroes")
+    print("HEROGAL shot", n, GALLERY)
 
 elif MODE == "clear":
     w = ues.get_editor_world()

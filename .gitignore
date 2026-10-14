@@ -66,6 +66,7 @@ renders/
 !docs/images/*.jpg
 !docs/images/monsters/*.jpg
 !docs/images/heroes/*.jpg
+!docs/images/enemies/*.jpg
 
 # --- Archives ---
 *.zip

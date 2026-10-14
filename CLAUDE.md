@@ -103,9 +103,12 @@ Guidance for Claude Code in this repository. See README.md for what the project 
   - A `SceneCaptureComponent2D`'s `show_only_actors` cannot be set from Python ("cannot be edited on templates"): use `show_only_actor_components`.
   - The scratch level is left empty and saved: a dirty level makes the next map load ask, and the editor waits for the answer.
 
-## Hero gallery (`docs/heroes.md`, `901`)
+## Hero and enemy galleries (`docs/heroes.md`, `docs/humanoid_enemies.md`, `901`, `902`)
 
-- The list, roles and descriptions are data (`SourceArt/hero_gallery/heroes.json`); `hero_doc.py` writes the page. Its pictures are allowed in git like the monster gallery's.
+- The lists, roles and descriptions are data (`SourceArt/hero_gallery/heroes.json`, `SourceArt/enemy_gallery/enemies.json`); `hero_doc.py` and `enemy_doc.py` write the pages. Their pictures are allowed in git like the monster gallery's. An enemy that is also a hero (`hero`) shows the hero's pictures and is not shot again.
+- Each entry's animation note and the Animations section come from `902` (`SourceArt/character_animations/animations.json`: clips grouped by skeleton, each character's rig by its bone names) through `anim_text.py`; the Fab download's clips that were never imported come from `asset_survey/fab_animations.csv`. Re-run `902` after importing animations.
+- **Framing an action pose:** a skeletal mesh's bounds in play are not where its posed body is: a crawl clip moves the root away from them, and some packs' bounds are far bigger than the body (the post-apocalypse zombie came out a speck). `901` frames the action shot on the bone positions (plus the weapon) whenever the bounds disagree with them.
+- **Models of several meshes** (the crawlers: body, head, guts; a fish-man's shell): one actor per mesh, all on the same clip; a part on a skeleton of its own (Half Creature 01's eye) is left out of the posed copy, since the clip would not move it.
 - **Action poses:** a one-frame AnimSequence made with the animation controller (`add_bone_curve`, `set_bone_track_keys`) on the hero's own skeleton: another pack's clip's local bone rotations at one frame, on the hero's bone lengths. It works between UE4-mannequin rigs (same bone names and axes); FF2's (Tripo) spell laid the body on the floor.
 - **Pose frame:** the right frame differs per clip. An axe at its overhead wind-up turned the body away from the camera; a punch is the frame the fist is farthest forward, not farthest from the hips (the drunk man's swing then had the arms out like a T).
 - **Where animations show:** the editor world does not evaluate a single-node animation on a `SkeletalMeshActor` (`set_update_animation_in_editor` did not help): stage in the editor, shoot during play-in-editor, which copies the staged actors.
@@ -163,5 +166,5 @@ The remote (`github.com/beknar/claude-ue5`) is **public** and the repo is **sour
 - Never commit `Content/`, `.uasset`/`.umap`, source-art binaries, media (`.png`, `.mp4`, `.wav`, …), archives, `Saved/` / `Intermediate/` / `DerivedDataCache/`, `renders/` or `builds/` (a packaged game holds cooked pack content).
 - Third-party packs (Fab, Megascans, MetaHuman, UE mannequins) and the sound and music library must not be redistributed. `SourceArt/random_dungeon_combat/audio/` (files converted from the library) is ignored; `sounds.json`, which only names the files, is committed.
 - `.gitignore` enforces this. Check `git status` before committing: a new kind of generated file needs its ignore rule first.
-- The galleries' pictures (`docs/images/monsters/*.jpg`, `docs/images/heroes/*.jpg`) are allowed by the user, like the README's stills.
+- The galleries' pictures (`docs/images/monsters/*.jpg`, `docs/images/heroes/*.jpg`, `docs/images/enemies/*.jpg`) are allowed by the user, like the README's stills.
 - Commit or push only when asked (see Working rules). Small data that a script reads or a test wrote (`SourceArt/**/*.json`) is committed; a test record replaces the one before it.
