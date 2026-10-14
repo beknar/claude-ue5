@@ -56,6 +56,9 @@ def main():
             code = (f"import sys, gc, traceback\nsys.argv = {[path] + args[1:]!r}\n"
                     f"_ns = {{'__name__': '__main__', '__file__': {path!r}}}; _err = None\n"
                     f"try:\n    exec(compile(open({path!r}, encoding='utf-8').read(), {path!r}, 'exec'), _ns)\n"
+                    # (a script that stops early with a bare `raise SystemExit` has ended normally)
+                    f"except SystemExit as _e:\n    _err = None if _e.code in (None, 0) else 'SystemExit: %r' % (_e.code,)\n"
+                    f"    traceback.clear_frames(_e.__traceback__); _e = None\n"
                     f"except BaseException as _e:\n    _err = traceback.format_exc(); traceback.clear_frames(_e.__traceback__); _e = None\n"
                     f"finally:\n    if _err or not _ns.get('__keep__'): _ns.clear()\n    _ns = None; gc.collect()\n"
                     f"if _err: raise RuntimeError(_err)\n")

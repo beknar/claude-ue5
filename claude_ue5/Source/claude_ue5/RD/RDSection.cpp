@@ -13,6 +13,9 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "NiagaraSystemInstance.h"
+#include "NiagaraSystemInstanceController.h"
+#include "NiagaraEmitterInstance.h"
 #include "TimerManager.h"
 #include "HAL/PlatformTime.h"
 
@@ -20,6 +23,11 @@ DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeon, Log, All);
 
 static const FName RDInteractiveTag(TEXT("RDInteractive"));
 static const FName RDFlickerTag(TEXT("RDFlicker"));
+// The flame effect is a torch's (scale 0.6 on a sconce). At that size it was a spark at the bottom of a brazier's bowl
+// and in a hearth, and read as "light without a flame": the bigger fires scale it up.
+// The flame is drawn round the effect's origin, not above it: scaled up, half of it hangs below, so a brazier's goes
+// above the rim of its bowl (in the bowl it showed between the legs).
+static const float RDBrazierFlame = 2.0f, RDBrazierFlameUp = 12.f, RDHearthFlame = 2.6f, RDForgeFlame = 2.0f;
 static const FIntPoint Dir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntPoint(0, -1), FIntPoint(0, 1) };
 
 ARDSection::ARDSection()
@@ -294,6 +302,30 @@ void ARDSection::AddEffect(FName Name, const FVector& Loc, float Scale)
 	AddInstanceComponent(C);
 }
 
+int32 ARDSection::GetNumEffectsNear(FVector Location, float Radius) const
+{
+	int32 Num = 0;
+	TInlineComponentArray<UNiagaraComponent*> Cs(this);
+	for (const UNiagaraComponent* C : Cs) if (C && FVector::DistSquared(C->GetComponentLocation(), Location) <= Radius * Radius) ++Num;
+	return Num;
+}
+
+int32 ARDSection::GetEffectParticlesNear(FVector Location, float Radius) const
+{
+	// (read on the game thread for a test: a count that is a frame old is good enough)
+	int32 Num = 0;
+	TInlineComponentArray<UNiagaraComponent*> Cs(this);
+	for (const UNiagaraComponent* C : Cs)
+	{
+		if (!C || FVector::DistSquared(C->GetComponentLocation(), Location) > Radius * Radius) continue;
+		const FNiagaraSystemInstanceControllerConstPtr Ctl = C->GetSystemInstanceController();
+		if (!Ctl.IsValid() || !Ctl->IsValid()) continue;
+		if (const FNiagaraSystemInstance* SI = Ctl->GetSystemInstance_Unsafe())
+			for (const FNiagaraEmitterInstanceRef& E : SI->GetEmitters()) Num += E->GetNumParticles();
+	}
+	return Num;
+}
+
 void ARDSection::AddTorch(const FVector& WallPoint, float InYaw, float Candelas, bool bLit)
 {
 	// sconce on the wall (piece frame: back on the wall at x = 0, flame above its origin at FlameOffset = Hinge)
@@ -391,11 +423,15 @@ void ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 	if (!bBuildInteractive || !P->Moving) return;
 	USceneComponent* Base = AddPivot(RootComponent, FTransform(FRotator(0, Yaw, 0), Loc - GetActorLocation()));
 	AddMesh(Base, P->Mesh, P->Adjust, true);
-	// moving part(s): pivot at the hinge (piece frame); the part keeps the piece Adjust relative to the hinge
+	// moving part(s): a pivot at the hinge (piece frame)
 	auto AddMoving = [&](UStaticMesh* Mesh, const FVector& Hinge, bool bVerticalAxis, int32 Partner)
 	{
 		USceneComponent* Hp = AddPivot(Base, FTransform(Hinge));
-		FTransform Rel = P->Adjust; Rel.AddToTranslation(-Hinge);
+		// A moving part's mesh has its origin AT its hinge (a lid runs forward from it, a wardrobe door sideways), in the
+		// body mesh's axes: on the hinge pivot it takes the piece's rotation and scale and no offset. (It used to get the
+		// body's offset minus the hinge, as if it shared the body's origin: every lid lay on the floor inside its body and
+		// every wardrobe door stood in the middle of the wardrobe.)
+		FTransform Rel = P->Adjust; Rel.SetTranslation(FVector::ZeroVector);
 		UStaticMeshComponent* M = AddMesh(Hp, Mesh, Rel, true);
 		FMover Mv; Mv.Pivot = Hp; Mv.Parts = { M }; Mv.Kind = Kind; Mv.Partner = Partner;
 		if (bVerticalAxis)
@@ -473,6 +509,47 @@ static FName WallFor(ERDRoomKind K, FRandomStream& R)
 	}
 }
 
+/** an integer hash that is the same in every session (FName hashes are not) */
+static uint32 RDWallHash(uint32 A, uint32 B, uint32 C, uint32 D)
+{
+	uint32 H = A * 0x9E3779B1u ^ (B + 0x7F4A7C15u) * 0x85EBCA6Bu ^ (C + 0x165667B1u) * 0xC2B2AE35u ^ (D + 0x27D4EB2Fu) * 0x2545F491u;
+	H ^= H >> 15; H *= 0x2C1B3C6Du; H ^= H >> 12; H *= 0x297A2D39u; H ^= H >> 15;
+	return H;
+}
+
+FName ARDSection::WallVariant(FName Name, const FIntPoint& T, int32 Side, int32 Layer)
+{
+	// A wall piece may have variants in the generator's Pieces ("Wall_Rough_2", "Wall_Rough_3", ...): each segment takes
+	// one of them, never the one of the segment before it along the wall nor of the one under it. One broken wall mesh
+	// repeated along a room showed the same break every 3 m. The choice is a hash of where the segment is: it draws
+	// nothing from the plan's random stream, so the dungeon is the same as before.
+	TArray<FName>* V = WallVariants.Find(Name);
+	if (!V)
+	{
+		V = &WallVariants.Add(Name);
+		V->Add(Name);
+		for (int32 I = 2; I < 16; ++I)
+		{
+			const FName Nm(*FString::Printf(TEXT("%s_%d"), *Name.ToString(), I));
+			if (!Generator->Piece(Nm)) break;
+			V->Add(Nm);
+		}
+	}
+	if (V->Num() < 2) { ++WallCounts.FindOrAdd(Name); return Name; }
+	auto Key = [](const FIntPoint& P, int32 S, int32 L) { return (uint32)((P.X & 0x3ff) | ((P.Y & 0x3ff) << 10) | ((S & 3) << 20) | ((L & 0xff) << 22)); };
+	// (the wall runs along Y on the -X / +X sides and along X on the -Y / +Y sides; tiles are visited in ascending X, then Y)
+	const uint8* Before = WallPicks.Find(Key(T - (Side < 2 ? FIntPoint(0, 1) : FIntPoint(1, 0)), Side, Layer));
+	const uint8* Below = Layer > 0 ? WallPicks.Find(Key(T, Side, Layer - 1)) : nullptr;
+	TArray<uint8, TInlineAllocator<16>> Free;
+	for (int32 I = 0; I < V->Num(); ++I) if (!(Before && *Before == I) && !(Below && *Below == I)) Free.Add((uint8)I);
+	const uint32 H = RDWallHash((uint32)(Coord.X * 7919 + Coord.Y * 104729), (uint32)T.X, (uint32)T.Y, (uint32)(Side * 64 + Layer));
+	const uint8 Pick = Free.Num() > 0 ? Free[H % Free.Num()] : (uint8)(H % V->Num());
+	if ((Before && *Before == Pick) || (Below && *Below == Pick)) ++WallRepeats;
+	WallPicks.Add(Key(T, Side, Layer), Pick);
+	++WallCounts.FindOrAdd((*V)[Pick]);
+	return (*V)[Pick];
+}
+
 float ARDSection::InwardYaw(int32 Side)
 {
 	// side: 0 -X wall (inward +X), 1 +X wall (inward -X), 2 -Y wall (inward +Y), 3 +Y wall (inward -Y)
@@ -488,7 +565,7 @@ void ARDSection::BuildShell(FRandomStream& R)
 
 void ARDSection::ShellPrepare(FRandomStream& R)
 {
-	ShellFloor.Reset(); ShellWall.Reset();
+	ShellFloor.Reset(); ShellWall.Reset(); WallVariants.Reset(); WallPicks.Reset(); WallCounts.Reset(); WallRepeats = 0;
 	for (const FRoom& Rm : Rooms) { ShellFloor.Add(FloorFor(Rm.Kind, R)); ShellWall.Add(WallFor(Rm.Kind, R)); }
 }
 
@@ -497,12 +574,13 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 	const float S = Generator->TileSize;
 	const TArray<FName>& RoomFloor = ShellFloor;
 	const TArray<FName>& RoomWall = ShellWall;
-	auto Stack = [this](FName Name, const FVector& Base, float Yaw, float Z0, float Z1)
+	auto Stack = [this](FName Name, const FVector& Base, float Yaw, float Z0, float Z1, const FIntPoint& Tile, int32 Side)
 	{
 		const FRDPiece* P = Generator->Piece(Name);
 		if (!P) return;
 		const float H = FMath::Max(P->Size.Z - 2.f, 50.f);
-		for (float Z = Z0; Z < Z1 - 5.f; Z += H) AddPieceAt(Name, Base + FVector(0, 0, Z), Yaw);
+		int32 Layer = Z0 > 1.f ? 1 : 0;
+		for (float Z = Z0; Z < Z1 - 5.f; Z += H, ++Layer) AddPieceAt(WallVariant(Name, Tile, Side, Layer), Base + FVector(0, 0, Z), Yaw);
 	};
 		for (int32 Y = 0; Y < N; ++Y)
 		{
@@ -536,13 +614,13 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 				if (bWall)
 				{
 					const FName WN = bRoom ? RoomWall[O] : FName(TEXT("Wall_Corr"));
-					Stack(WN, Edge, Yaw, 0.f, Hgt);
+					Stack(WN, Edge, Yaw, 0.f, Hgt, T, Side);
 				}
 				else if (bDoorway)
 				{
 					AddPieceAt(TEXT("Doorway"), Edge, Yaw);
 					const FRDPiece* D = Generator->Piece(TEXT("Doorway"));
-					Stack(RoomWall[O], Edge, Yaw, D ? D->Size.Z - 2.f : 300.f, Hgt);
+					Stack(RoomWall[O], Edge, Yaw, D ? D->Size.Z - 2.f : 300.f, Hgt, T, Side);
 				}
 			}
 		}
@@ -749,7 +827,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			Center(TEXT("Brazier"), Cn, 0.f);
 			const FRDPiece* Bz = Generator->Piece(TEXT("Brazier"));
 			const float Hz = Bz ? Bz->Size.Z : 110.f;
-			AddEffect(TEXT("BrazierFire"), Cn + FVector(0, 0, Hz - 10.f), 1.f);
+			AddEffect(TEXT("BrazierFire"), Cn + FVector(0, 0, Hz + RDBrazierFlameUp), RDBrazierFlame);
 			AddLight(Cn + FVector(0, 0, Hz + 40.f), FLinearColor(1.f, 0.5f, 0.2f), 220.f, 1800.f, true, 0.2f);
 		}
 		FurnishWalls(R, Rm, { TEXT("Chest") }, 900.f, 0.35f, true);
@@ -837,7 +915,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			Center(TEXT("Brazier"), P, 0.f);
 			const FRDPiece* Bp = Generator->Piece(TEXT("Brazier"));
 			const float Hz = Bp ? Bp->Size.Z : 110.f;
-			AddEffect(TEXT("BrazierFire"), P + FVector(0, 0, Hz - 10.f), 1.f);
+			AddEffect(TEXT("BrazierFire"), P + FVector(0, 0, Hz + RDBrazierFlameUp), RDBrazierFlame);
 			AddLight(P + FVector(0, 0, Hz + 40.f), FLinearColor(1.f, 0.32f, 0.12f), 140.f, 1500.f, true, 0.3f);
 			break;
 		}
@@ -918,7 +996,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			{
 				const FVector P = Wall + Rt.RotateVector(FVector(Fp->Size.X * 0.5f + 30.f, 0, 0));
 				Center(TEXT("Fireplace"), P, Yaw, true, true);      // (on the lane at a wall without a door: block it)
-				AddEffect(TEXT("HearthFire"), P + Rt.RotateVector(FVector(0, 0, 0)) + FVector(0, 0, 30), 1.2f);
+				AddEffect(TEXT("HearthFire"), P + Rt.RotateVector(FVector(0, 0, 0)) + FVector(0, 0, 42), RDHearthFlame);
 				AddLight(P + Rt.RotateVector(FVector(80, 0, 0)) + FVector(0, 0, 90), FLinearColor(1.f, 0.48f, 0.18f), 260.f, 1800.f, true, 0.25f);
 			}
 		}
@@ -1058,7 +1136,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		{
 			const FVector P = Wall + Rt.RotateVector(FVector(Fg->Size.X * 0.5f + 35.f, 0, 0));
 			Center(TEXT("Forge"), P, Yaw, true, true);
-			AddEffect(TEXT("BrazierFire"), P + FVector(0, 0, Fg->Size.Z * 0.55f), 1.2f);
+			AddEffect(TEXT("BrazierFire"), P + FVector(0, 0, Fg->Size.Z * 0.55f), RDForgeFlame);
 			AddLight(P + Rt.RotateVector(FVector(90, 0, 0)) + FVector(0, 0, 120), FLinearColor(1.f, 0.42f, 0.12f), 300.f, 1800.f, true, 0.25f);
 		}
 		for (int32 I = 0; I < Quads.Num(); ++I)

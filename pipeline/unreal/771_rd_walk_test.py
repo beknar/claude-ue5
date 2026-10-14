@@ -2,6 +2,8 @@
 (ARDDungeonGenerator.InteractNearest) at closed doors and next to containers, and walks out through the edge
 hallways so new sections generate. Reports falls, stuck spots, doors / containers opened (verified by their open
 alpha), sections generated (and how long they took), monster wandering, frame times; screenshots on request.
+At the end every container of every section is measured (container_check.py): a closed lid lies on its body, a closed
+wardrobe's doors stand on its front, an opened lid stands up at the back, opened doors out in front.
 Plan (comma separated): rooms:N (visit N random rooms of the current section, opening one container in each),
 expand:+x|-x|+y|-y (walk out through that edge's hallway into the next section), home (back to the great hall),
 shot:name (HighResShot), map:name (open the M map, HighResShot, close it).
@@ -85,10 +87,15 @@ def finish():
                         "gen_median": gm[len(gm) // 2] if gm else 0, "gen_max": gm[-1] if gm else 0}
     R.pop("frame_ms"); R.pop("gen_frame_ms")
     R["sections_final"] = [(c.x, c.y) for c in GEN.get_section_coords()]
+    # where the lids and wardrobe doors are (every container as it stands now: the opened ones open, the rest closed)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import container_check as CC; import importlib; importlib.reload(CC)       # (the editor keeps modules: an edited one must be reloaded)
+    R["container_fit"] = fit = CC.check_all([GEN.get_section(c) for c in GEN.get_section_coords()])
+    for x in fit["faults"][:8]: unreal.log("RDWALK CONTAINER FIT " + x)
     out = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt\random_dungeon", f"walk_{TAG}.json"); os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump(R, open(out, "w"), indent=1)
-    ok = R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0
-    unreal.log(f"RDWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) | rooms {len(R['rooms_visited'])} | sections {R['sections_final']} | monsters {R['monsters']} | frames {R['frame_stats']} | discovered {d}/{g}")
+    ok = R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and not fit["faults"] and fit["containers"] > 0
+    unreal.log(f"RDWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) | lids and doors in place {fit['containers'] - len(fit['faults'])}/{fit['containers']} ({fit['open']} open) | rooms {len(R['rooms_visited'])} | sections {R['sections_final']} | monsters {R['monsters']} | frames {R['frame_stats']} | discovered {d}/{g}")
     unreal.unregister_slate_post_tick_callback(S["h"])
 def tick(dt):
     try: _tick(dt)

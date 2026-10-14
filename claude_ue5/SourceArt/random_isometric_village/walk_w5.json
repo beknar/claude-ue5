@@ -1,0 +1,169 @@
+{
+ "tag": "w5",
+ "plan": [
+  "houses:4",
+  "expand:+x",
+  "houses:2"
+ ],
+ "rotate": {},
+ "villagers": {},
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 6,
+ "doors_failed": 0,
+ "containers_opened": 10,
+ "containers_failed": 0,
+ "cut_ok": 6,
+ "cut_failed": 0,
+ "houses": [
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Thatch",
+   "containers": [
+    "chest",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Elder's hall",
+   "style": "Stone",
+   "containers": []
+  },
+  {
+   "kind": "General store",
+   "style": "Timber",
+   "containers": [
+    "barrel",
+    "barrel"
+   ]
+  },
+  {
+   "kind": "Carpenter",
+   "style": "Timber",
+   "containers": [
+    "chest",
+    "crate"
+   ]
+  },
+  {
+   "kind": "Cottage",
+   "style": "Timber",
+   "containers": [
+    "chest",
+    "wardrobe"
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "coord": [
+    1,
+    0
+   ],
+   "buildings": 71,
+   "doors": 81,
+   "containers": 289,
+   "ms": 508,
+   "instances": 5992,
+   "unreachable": 0
+  }
+ ],
+ "events": [
+  "step houses:4",
+  "to General store 20 (3 points)",
+  "shot inside1",
+  "to Carpenter 19 (3 points)",
+  "shot inside2",
+  "to Elder's hall 14 (6 points)",
+  "shot inside3",
+  "to General store 13 (9 points)",
+  "step expand:+x",
+  "expand +x: to the edge of section (0,0) at (12250,1720), 30 points",
+  "section (1,0) started generating with her at (10507,1572)",
+  "shot reveal1",
+  "entered section {'coord': (1, 0), 'buildings': 71, 'doors': 81, 'containers': 289, 'ms': 508, 'instances': 5992, 'unreachable': 0}",
+  "step houses:2",
+  "to Carpenter 124 (13 points)",
+  "to Cottage 77 (4 points)"
+ ],
+ "shots": [
+  "iv_w5_inside1.png",
+  "iv_w5_inside2.png",
+  "iv_w5_inside3.png",
+  "iv_w5_reveal1.png"
+ ],
+ "input": {},
+ "frame_stats": {
+  "median": 22.9,
+  "p99": 45.0,
+  "max": 125.0,
+  "gen_median": 30.0,
+  "gen_max": 42.2
+ },
+ "village": {
+  "buildings": 206,
+  "visited": 6,
+  "sections": 2
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ]
+ ],
+ "container_fit": {
+  "containers": 698,
+  "closed": 688,
+  "open": 10,
+  "by_body": {
+   "SM_Kit_ChestBody": {
+    "n": 173,
+    "closed": 170,
+    "open": 3
+   },
+   "SM_crate_01_body": {
+    "n": 93,
+    "closed": 93,
+    "open": 0
+   },
+   "SM_crate_02_body": {
+    "n": 92,
+    "closed": 91,
+    "open": 1
+   },
+   "SM_Kit_TrunkBody": {
+    "n": 49,
+    "closed": 49,
+    "open": 0
+   },
+   "SM_Kit_WardrobeBody": {
+    "n": 80,
+    "closed": 79,
+    "open": 1
+   },
+   "SM_barrel_01_body": {
+    "n": 117,
+    "closed": 113,
+    "open": 4
+   },
+   "SM_barrel_02_body": {
+    "n": 94,
+    "closed": 93,
+    "open": 1
+   }
+  },
+  "faults": []
+ }
+}

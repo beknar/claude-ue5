@@ -10,7 +10,8 @@ and idle / walk clips).
 - generator at the origin + the 252 m start section built with a fixed seed (saved); PlayerStart in the great hall
 - BP_RD_GameMode: BP_SFC_Fem5Character (jrpg-fem5-tripo) + RDHUD (minimap, M map, F prompt)
 - reveal materials: random_level's M_RT_RevealPP / M_RT_RevealCurtain (753)
-Args: [no_build]"""
+Args: [no_build] | pieces   (pieces: only rewrites the piece table in the generator of the open level, one of
+      random_dungeon_level, its Cine copy or random_dungeoncombat_level, builds its start section again and saves it)"""
 import sys, json, math, unreal
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
@@ -78,6 +79,16 @@ add("Floor_Corr", "SM_FloorRandomBrick_C", mode="floor"); add("Floor_Corr_Alt", 
 add("Ceil_Room", "SM_Floor_Stone_Square_Tiles_B", mode="ceil"); add("Ceil_Corr", "SM_FloorRandomBrick_A", mode="ceil")
 add("Wall_Stone", "SM_Wall_A", front="+y"); add("Wall_Block", "SM_wall_LargeBlock_B_300", front="+y"); add("Wall_Rough", "SM_Wall_A_DMG_D", front="+y")
 add("Wall_Corr", "SM_wall_LargeBlock_A", front="+y")
+# Broken walls come in variants: a section gives each wall segment one of "Wall_Rough", "Wall_Rough_2", ... and never
+# the one beside or under it (one broken mesh along a whole room showed the same break every 3 m). A variant is set
+# so that its mesh origin (the wall's own line) lies where the first one's does: the breaks stick out of the bounding
+# boxes by different amounts, and centring each on its box would leave gaps at the joints.
+def wall_variant(name, m, base):
+    b0 = mesh(base).get_bounding_box(); b = mesh(m).get_bounding_box()
+    sh = ((b.min.y + b.max.y) / 2 - (b0.min.y + b0.max.y) / 2, (b0.min.x + b0.max.x) / 2 - (b.min.x + b.max.x) / 2, b.min.z - b0.min.z)    # (front +y: piece x = mesh y, piece y = -mesh x)
+    p = piece(m, front="+y", shift=sh)
+    if p is not None: p.size = P[name.rsplit("_", 1)[0]].size; P[name] = p
+for i, m in enumerate(("SM_Wall_A_DMG_A", "SM_Wall_A_DMG_B", "SM_Wall_A_DMG_C", "SM_Wall_A")): wall_variant(f"Wall_Rough_{i + 2}", m, "SM_Wall_A_DMG_D")
 add("Doorway", "SM_Wall_Entrance_A", front="+y")
 add("CornerColumn", "SM_StoneCorner_SmallColumn_A")
 # double crypt doors (2 x 70 cm): the leaf spans +Y from its hinge; Hinge = (inset, half opening)
@@ -133,14 +144,34 @@ add("Sword", "SM_Sword_1", front="-y", mode="wall", back=24.0, collision=False);
 add("Axe", "SM_Axe", front="-y", mode="wall", back=24.0, collision=False); add("Shield", "SM_Shield_1", front="-y", mode="wallc", back=24.0, collision=False)
 for n, m in (("SwordFlat", "SM_Sword_1"), ("AxeFlat", "SM_Axe"), ("SpearFlat", "SM_Spear")): add(n, m, front="-y", pitch=90.0, collision=False)      # lying on a table
 # ---------------------------------------------------------------- containers (all open with F)
-add("Chest", "SM_Kit_ChestBody", front="+y", moving="SM_Kit_ChestLid", hinge=(0, -26, 45))
-add("Trunk", "SM_Kit_TrunkBody", front="+y", moving="SM_Kit_TrunkLid", hinge=(0, -31, 50))
-add("Wardrobe", "SM_Kit_WardrobeBody", front="+y", moving="SM_Kit_WardrobeDoorL", hinge=(-53, 30, 8), moving2="SM_Kit_WardrobeDoorR", hinge2=(53, 30, 8))
+# A moving part's mesh has its origin at its hinge, so the hinge below is where that origin goes on the body (body mesh
+# frame, UE axes). Both data files are written by Blender scripts and hold Blender's y: UE's is the negative.
+KH = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\castle_furniture\kit.json"))["_hinges"]
+ueh = lambda h: (h[0], -h[1], h[2])
+add("Chest", "SM_Kit_ChestBody", front="+y", moving="SM_Kit_ChestLid", hinge=ueh(KH["Chest"]))
+add("Trunk", "SM_Kit_TrunkBody", front="+y", moving="SM_Kit_TrunkLid", hinge=ueh(KH["Trunk"]))
+add("Wardrobe", "SM_Kit_WardrobeBody", front="+y", moving="SM_Kit_WardrobeDoorL", hinge=ueh(KH["WardrobeL"]),
+    moving2="SM_Kit_WardrobeDoorR", hinge2=ueh(KH["WardrobeR"]))
 CJ = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\castle_interactive\interactive.json"))["containers"]
 for n, src in (("Barrel", "SM_barrel_01"), ("Barrel2", "SM_barrel_02"), ("Crate", "SM_crate_01"), ("Crate2", "SM_crate_02")):
-    h = CJ[src]["hinge"]
+    h = ueh(CJ[src]["hinge"])                                          # the hinge is at the back: the front is the other side
     front = ("-y" if h[1] > 0 else "+y") if abs(h[1]) >= abs(h[0]) else ("-x" if h[0] > 0 else "+x")
-    add(n, f"{src}_body", front=front, moving=f"{src}_lid", hinge=tuple(h))
+    add(n, f"{src}_body", front=front, moving=f"{src}_lid", hinge=h)
+if "pieces" in sys.argv:
+    # Only the piece table, in the generator of the level that is open, and its start section built again from it (same
+    # seed: the same rooms and furniture). The Save As copies (the Cine copy, the combat level) carry a table and a start
+    # section of their own, and their generators have settings this script knows nothing of: it must not rebuild them.
+    w = ues.get_editor_world(); assert w.get_path_name().startswith("/Game/RandomDungeon/Maps/"), w.get_path_name()
+    g = [a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator)][0]
+    g.modify(); g.set_editor_property("pieces", P); g.build_start_section()
+    sec = g.get_section(unreal.IntPoint(0, 0))
+    print("pieces set in", w.get_path_name(), "|", len(P), "pieces | start section:", sec.get_num_rooms(), "rooms,", sec.get_editor_property("num_instances"), "instances, reachable rooms",
+          sec.count_reachable_rooms(), "| walls", {str(k): v for k, v in sec.get_wall_piece_counts().items()}, "repeats", sec.get_wall_repeats())
+    les.save_current_level()
+    import gc
+    for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]
+    gc.collect()
+    raise SystemExit
 print("pieces:", len(P), sorted(P))
 # ---------------------------------------------------------------- effects
 FX = {"TorchFire": "/Game/MysticDungeon/VFX/P_TorchFire", "CandleFire": "/Game/MysticDungeon/VFX/NS_Candle_Fire_A",

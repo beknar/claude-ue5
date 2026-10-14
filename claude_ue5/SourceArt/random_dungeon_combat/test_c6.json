@@ -1,10 +1,10 @@
 {
- "tag": "c4",
+ "tag": "c6",
  "plan": [
   "setup",
   "weapons",
   "monsters",
-  "kill:3",
+  "kill",
   "hurt",
   "tier",
   "death",
@@ -13,7 +13,9 @@
   "blood",
   "wounds",
   "sounds",
-  "music"
+  "music",
+  "containers",
+  "look"
  ],
  "steps": [
   {
@@ -35,15 +37,29 @@
      "weapon": "Sword",
      "mesh": "SM_Sword_1",
      "bone": "hand_r",
-     "cm_from_hand": 11.4,
+     "cm_from_hand": 69.3,
      "shield": "SM_Shield_1",
      "damage": 22.0,
      "reach": 170.0,
      "attack_started": true,
      "second_refused": true,
      "montage": true,
-     "hand_moved_cm": 56,
+     "hand_moved_cm": 55,
      "attack_seconds": 0.84,
+     "grip": {
+      "hand_at_mesh_z": 69.0,
+      "mesh_z": [
+       -1,
+       87
+      ],
+      "mesh_there_cm": [
+       2.9,
+       2.9
+      ],
+      "axis_from_hand_cm": 6.9,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": 53.7,
      "ok": true
     },
     {
@@ -58,22 +74,50 @@
      "second_refused": true,
      "montage": true,
      "hand_moved_cm": 85,
-     "attack_seconds": 0.67,
+     "attack_seconds": 0.68,
+     "grip": {
+      "hand_at_mesh_z": 95.0,
+      "mesh_z": [
+       1,
+       245
+      ],
+      "mesh_there_cm": [
+       2.5,
+       2.5
+      ],
+      "axis_from_hand_cm": 7.0,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": 54.0,
      "ok": true
     },
     {
      "weapon": "Axe",
      "mesh": "SM_Axe",
      "bone": "hand_r",
-     "cm_from_hand": 8.0,
+     "cm_from_hand": 9.8,
      "shield": null,
      "damage": 36.0,
      "reach": 190.0,
      "attack_started": true,
      "second_refused": true,
      "montage": true,
-     "hand_moved_cm": 74,
-     "attack_seconds": 1.31,
+     "hand_moved_cm": 75,
+     "attack_seconds": 1.3,
+     "grip": {
+      "hand_at_mesh_z": 7.0,
+      "mesh_z": [
+       -19,
+       72
+      ],
+      "mesh_there_cm": [
+       4.2,
+       4.0
+      ],
+      "axis_from_hand_cm": 6.9,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": null,
      "ok": true
     }
    ]
@@ -159,7 +203,7 @@
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "it_fought_back": true,
-     "she_lost": 12,
+     "she_lost": 25,
      "seconds": 2.5,
      "ok": true
     }
@@ -174,7 +218,7 @@
    "she_lost": 13.0,
    "its_attacks": 1,
    "its_hits": 2,
-   "seconds": 3.6,
+   "seconds": 2.6,
    "aggro": true
   },
   {
@@ -185,10 +229,10 @@
     0
    ],
    "generated": true,
-   "monsters": 12,
-   "average_hit_points": 101.8,
+   "monsters": 13,
+   "average_hit_points": 102.4,
    "hers": 100.0,
-   "average_damage": 25.2,
+   "average_damage": 25.3,
    "her_average_blow": 25.0,
    "rooms": 49
   },
@@ -206,7 +250,7 @@
    "ok": true,
    "after_the_blow": 60.0,
    "before_the_delay_is_over": 60.0,
-   "four_seconds_on": 72.1,
+   "four_seconds_on": 72.3,
    "per_second": 4.0
   },
   {
@@ -228,8 +272,8 @@
    "drops": 31,
    "in_the_air": 31,
    "spray_sprites": 3,
-   "burst_cm_from_the_fight": 54,
-   "decals_after_2_6_s": 21,
+   "burst_cm_from_the_fight": 39,
+   "decals_after_2_6_s": 25,
    "decals_on_the_floor": 140,
    "bursts_when_she_was_hit": 1,
    "that_burst_cm_from_her": 60,
@@ -256,13 +300,13 @@
    "bleed": 0.75,
    "hit_points_lost": 0.75,
    "wound_cm_from_its_middle": [
-    37,
+    35,
     57
    ],
    "after_it_moved_cm": 0,
    "then": [
-    69,
-    69
+    51,
+    49
    ],
    "unhurt_monsters_checked": 34,
    "none_of_them_has_a_wound_or_overlay": true,
@@ -273,7 +317,7 @@
   {
    "step": "sounds",
    "ok": true,
-   "running_steps_in_2_6_s": 7,
+   "running_steps_in_2_6_s": 6,
    "walking_steps_in_2_6_s": 6,
    "breath_sets": [],
    "her_sets": [
@@ -290,7 +334,7 @@
    ],
    "hurt_voice": 1,
    "door_open": 1,
-   "door_close": 2,
+   "door_close": 5,
    "door": "door",
    "fire_voices_by_a_torch": 2,
    "nearest_voice_cm_from_that_torch": 0,
@@ -365,18 +409,19 @@
    "all_counts": {
     "Blood.Splat": 21,
     "Env.BodyFall": 6,
-    "Env.DoorClose": 92,
-    "Env.DoorOpen": 107,
+    "Env.DoorClose": 99,
+    "Env.DoorOpen": 118,
     "Env.Generate": 5,
     "Env.GenerateHit": 5,
     "Monster.Daemon.Attack": 2,
     "Monster.Daemon.Death": 1,
     "Monster.Daemon.Hurt": 1,
     "Monster.Daemon.Roar": 1,
-    "Monster.Daemon.Step": 12,
+    "Monster.Daemon.Step": 13,
     "Monster.Dog.Attack": 4,
     "Monster.Dog.Death": 2,
     "Monster.Dog.Hurt": 2,
+    "Monster.Dog.Idle": 1,
     "Monster.Dog.Roar": 2,
     "Monster.Dog.Step": 14,
     "Monster.Horned.Attack": 5,
@@ -384,8 +429,8 @@
     "Monster.Horned.Hurt": 2,
     "Monster.Horned.Idle": 1,
     "Monster.Horned.Roar": 2,
-    "Monster.Horned.Step": 8,
-    "Monster.Mutant.Step": 9,
+    "Monster.Horned.Step": 6,
+    "Monster.Mutant.Step": 8,
     "Monster.Spider.Attack": 2,
     "Monster.Spider.Death": 1,
     "Monster.Spider.Hurt": 1,
@@ -411,33 +456,33 @@
    "ok": true,
    "wandering": {
     "battle": false,
-    "track": "Music_Explore_02",
+    "track": "Music_Explore_01",
     "atmosphere": "Atmos_Explore_01",
-    "seconds_into_the_track": 34.0
+    "seconds_into_the_track": 34.4
    },
    "first_fight": {
     "monster": "Daemon",
-    "seconds_to_the_battle_music": 0.07,
+    "seconds_to_the_battle_music": 0.1,
     "battle": true,
-    "track": "Music_Combat_03",
+    "track": "Music_Combat_02",
     "atmosphere": "Atmos_Combat_01",
-    "seconds_into_the_track": 0.65,
+    "seconds_into_the_track": 0.71,
     "still_battle_at_the_kill": true,
     "seconds_until_wandering_again": 4.5
    },
    "wandering_again": {
     "battle": false,
-    "track": "Music_Explore_02",
+    "track": "Music_Explore_01",
     "atmosphere": "Atmos_Explore_01",
-    "seconds_into_the_track": 35.1
+    "seconds_into_the_track": 35.5
    },
    "second_fight": {
     "monster": "Daemon",
-    "seconds_to_the_battle_music": 0.06,
+    "seconds_to_the_battle_music": 0.1,
     "battle": true,
-    "track": "Music_Combat_01",
+    "track": "Music_Combat_03",
     "atmosphere": "Atmos_Combat_01",
-    "seconds_into_the_track": 0.64,
+    "seconds_into_the_track": 0.7,
     "still_battle_at_the_kill": true,
     "seconds_until_wandering_again": 4.5
    },
@@ -450,6 +495,241 @@
    },
    "hold_seconds": 3.5,
    "music_volume": 1.0
+  },
+  {
+   "step": "containers",
+   "ok": true,
+   "containers": 984,
+   "by_body": {
+    "SM_Kit_ChestBody": 187,
+    "SM_Kit_TrunkBody": 27,
+    "SM_crate_01_body": 200,
+    "SM_barrel_01_body": 202,
+    "SM_Kit_WardrobeBody": 31,
+    "SM_barrel_02_body": 165,
+    "SM_crate_02_body": 172
+   },
+   "closed_faults": 0,
+   "opened": 28,
+   "fully_open": 28,
+   "open_faults": 0,
+   "closed_again": true,
+   "closed_again_faults": 0,
+   "examples": []
+  },
+  {
+   "step": "look",
+   "ok": true,
+   "flames": {
+    "torch": {
+     "at": [
+      1444,
+      -678,
+      306
+     ],
+     "effects": 1,
+     "particles": 1
+    },
+    "brazier": {
+     "at": [
+      -1350,
+      -1350,
+      171
+     ],
+     "effects": 1,
+     "particles": 1
+    }
+   },
+   "walls": [
+    {
+     "section": [
+      0,
+      0
+     ],
+     "rough": {
+      "Wall_Rough_5": 163,
+      "Wall_Rough_3": 153,
+      "Wall_Rough": 151,
+      "Wall_Rough_4": 142,
+      "Wall_Rough_2": 154
+     },
+     "repeats": 0,
+     "ok": true
+    },
+    {
+     "section": [
+      1,
+      0
+     ],
+     "rough": {
+      "Wall_Rough_5": 110,
+      "Wall_Rough_3": 111,
+      "Wall_Rough_2": 111,
+      "Wall_Rough_4": 113,
+      "Wall_Rough": 121
+     },
+     "repeats": 0,
+     "ok": true
+    },
+    {
+     "section": [
+      -1,
+      0
+     ],
+     "rough": {
+      "Wall_Rough": 153,
+      "Wall_Rough_5": 150,
+      "Wall_Rough_4": 131,
+      "Wall_Rough_3": 142,
+      "Wall_Rough_2": 157
+     },
+     "repeats": 0,
+     "ok": true
+    },
+    {
+     "section": [
+      -1,
+      -1
+     ],
+     "rough": {
+      "Wall_Rough_4": 123,
+      "Wall_Rough_5": 133,
+      "Wall_Rough_3": 120,
+      "Wall_Rough": 131,
+      "Wall_Rough_2": 135
+     },
+     "repeats": 0,
+     "ok": true
+    },
+    {
+     "section": [
+      0,
+      -1
+     ],
+     "rough": {
+      "Wall_Rough_3": 106,
+      "Wall_Rough_2": 125,
+      "Wall_Rough": 115,
+      "Wall_Rough_5": 120,
+      "Wall_Rough_4": 119
+     },
+     "repeats": 0,
+     "ok": true
+    },
+    {
+     "section": [
+      0,
+      1
+     ],
+     "rough": {
+      "Wall_Rough_5": 152,
+      "Wall_Rough": 139,
+      "Wall_Rough_3": 137,
+      "Wall_Rough_4": 142,
+      "Wall_Rough_2": 131
+     },
+     "repeats": 0,
+     "ok": true
+    }
+   ],
+   "lids": [
+    {
+     "mesh": "SM_barrel_01_lid",
+     "slots": [
+      [
+       "MI_small_props",
+       "MI_small_props"
+      ],
+      [
+       "Interior",
+       "MI_wood"
+      ]
+     ],
+     "ok": true,
+     "cut_vertices": 337,
+     "cut_z_max": 0.03,
+     "cut_spans_cm": [
+      58,
+      58
+     ],
+     "uv_span": [
+      0.97,
+      0.97
+     ]
+    },
+    {
+     "mesh": "SM_barrel_02_lid",
+     "slots": [
+      [
+       "MI_small_props",
+       "MI_small_props"
+      ],
+      [
+       "Interior",
+       "MI_wood"
+      ]
+     ],
+     "ok": true,
+     "cut_vertices": 204,
+     "cut_z_max": 0.0,
+     "cut_spans_cm": [
+      40,
+      40
+     ],
+     "uv_span": [
+      0.67,
+      0.66
+     ]
+    },
+    {
+     "mesh": "SM_crate_01_lid",
+     "slots": [
+      [
+       "MI_small_props",
+       "MI_small_props"
+      ],
+      [
+       "Interior",
+       "MI_wood"
+      ]
+     ],
+     "ok": true,
+     "cut_vertices": 40,
+     "cut_z_max": 0.0,
+     "cut_spans_cm": [
+      103,
+      59
+     ],
+     "uv_span": [
+      1.72,
+      0.99
+     ]
+    },
+    {
+     "mesh": "SM_crate_02_lid",
+     "slots": [
+      [
+       "MI_small_props",
+       "MI_small_props"
+      ],
+      [
+       "Interior",
+       "MI_wood"
+      ]
+     ],
+     "ok": true,
+     "cut_vertices": 40,
+     "cut_z_max": 0.0,
+     "cut_spans_cm": [
+      62,
+      59
+     ],
+     "uv_span": [
+      1.03,
+      0.99
+     ]
+    }
+   ]
   }
  ],
  "error": null,

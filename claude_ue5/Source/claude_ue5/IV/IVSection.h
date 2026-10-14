@@ -99,7 +99,7 @@ public:
 	// ---- interaction
 	float FindNearestInteractive(const FVector& From, float MaxDistance, bool& bDoor, int32& Index) const;
 	void ToggleDoor(int32 Index, const FVector& Opener);
-	void ToggleContainer(int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "IsoVillage") void ToggleContainer(int32 Index);
 	bool IsTargetOpen(bool bDoor, int32 Index) const;
 
 	// ---- cutaway

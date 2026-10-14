@@ -38,6 +38,15 @@ public:
 	/** the section's fires (play only; also of the saved start section): the generator gives the nearest a looping voice */
 	TArray<FRDFirePoint> FirePoints;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumFirePoints() const { return FirePoints.Num(); }
+	/** flame and smoke particles alive now in this section's effects within Radius of Location (tests: a light without a
+	    flame counts 0; far effects are asleep and count 0 too) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetEffectParticlesNear(FVector Location, float Radius) const;
+	/** effect components within Radius of Location */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumEffectsNear(FVector Location, float Radius) const;
+	/** how many of this section's wall segments use each wall piece (tests: the variants of a broken wall) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TMap<FName, int32> GetWallPieceCounts() const { return WallCounts; }
+	/** wall segments that got the same piece as the segment before them along the wall or below them, among walls with variants */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetWallRepeats() const { return WallRepeats; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetFirePoint(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].At : FVector::ZeroVector; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetFireKind(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].Kind : -1; }
 	/** prefab actors (bookshelves, candle stands...) owned by the section */
@@ -85,7 +94,7 @@ public:
 	float FindNearestInteractive(const FVector& From, float MaxDistance, bool& bDoor, int32& Index) const;
 	/** opener: who is pushing (the door swings away) */
 	void ToggleDoor(int32 Index, const FVector& Opener, bool bByMonster = false);
-	void ToggleContainer(int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void ToggleContainer(int32 Index);
 	bool IsDoorOpenIndex(int32 Index) const;
 	/** open or opening (target) */
 	bool IsTargetOpen(bool bDoor, int32 Index) const;
@@ -176,6 +185,12 @@ private:
 	void ShellColumn(FRandomStream& R, int32 X);
 	void ShellCorners();
 	TArray<FName> ShellFloor, ShellWall;
+	// a wall piece's variants ("Wall_Rough", "Wall_Rough_2", ...) and which one each segment got (key: tile, side, layer)
+	TMap<FName, TArray<FName>> WallVariants;
+	TMap<uint32, uint8> WallPicks;
+	UPROPERTY() TMap<FName, int32> WallCounts;
+	UPROPERTY() int32 WallRepeats = 0;
+	FName WallVariant(FName Name, const FIntPoint& T, int32 Side, int32 Layer);
 	int32 ShellX = 0;
 	void Furnish(FRandomStream& R, int32 RoomIndex);
 	void DecorateCorridor(FRandomStream& R, int32 CorrIndex);

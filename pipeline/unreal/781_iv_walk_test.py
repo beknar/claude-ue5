@@ -15,7 +15,9 @@ Plan (comma separated):
                 (time, frames, buildings, unreachable doors / containers are logged), then walk 15 m into it
   home          back to the middle of the square
   shot:name     HighResShot;  map:name  open the M map, HighResShot, close it
-Reports falls, stuck spots, doors / containers opened, cutaways, sections, frame times.
+Reports falls, stuck spots, doors / containers opened, cutaways, sections, frame times. At the end every container of
+every section is measured (container_check.py): a closed lid lies on its body, a closed wardrobe's doors stand on its
+front, an opened lid stands up at the back, opened doors out in front.
 Args: plan tag   -> SourceArt/random_isometric_village/walk_<tag>.json and a log line "IVWALK done | <tag> | ..."
 """
 import unreal, sys, json, math, time, os
@@ -76,14 +78,19 @@ def finish():
     R.pop("frame_ms"); R.pop("gen_frame_ms")
     b, v, n = GEN.get_village_stats(); R["village"] = {"buildings": b, "visited": v, "sections": n}
     R["sections_final"] = [(c.x, c.y) for c in GEN.get_section_coords()]
+    # where the lids and wardrobe doors are (every container as it stands now: the opened ones open, the rest closed)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import container_check as CC; import importlib; importlib.reload(CC)       # (the editor keeps modules: an edited one must be reloaded)
+    R["container_fit"] = fit = CC.check_all([GEN.get_section(c) for c in GEN.get_section_coords()])
+    for x in fit["faults"][:8]: unreal.log("IVWALK CONTAINER FIT " + x)
     out = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt\random_isometric_village", f"walk_{TAG}.json"); os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump(R, open(out, "w"), indent=1)
     inp = R["input"]; inp_ok = (not inp) or (inp.get("failed", 1) == 0)
     rot, vil = R["rotate"], R["villagers"]
     PC.rotate_view(-int(round((PC.get_view_yaw() - 45.0) / 45.0)))            # leave the view as it started
-    ok = (R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and R["cut_failed"] == 0 and inp_ok and rot.get("failed", 0) == 0
+    ok = (R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and not fit["faults"] and fit["containers"] > 0 and R["cut_failed"] == 0 and inp_ok and rot.get("failed", 0) == 0
           and vil.get("ok", True) and R.get("zoom", {}).get("ok", True))
-    unreal.log(f"IVWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) "
+    unreal.log(f"IVWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) | lids and doors in place {fit['containers'] - len(fit['faults'])}/{fit['containers']} ({fit['open']} open) "
                f"| cutaway {R['cut_ok']} (failed {R['cut_failed']}) | houses {len(R['houses'])} | input {inp.get('passed', '-')}/{inp.get('tests', '-')} | rotate {rot.get('passed', '-')}/{rot.get('tests', '-')} | villagers {vil.get('summary', '-')} | sections {R['sections_final']} | village {R['village']} | frames {R['frame_stats']}")
     PC.set_scripted_move(unreal.Vector2D(0, 0), False); PC.set_scripted_stick(unreal.Vector2D(0, 0))
     unreal.unregister_slate_post_tick_callback(S["h"])

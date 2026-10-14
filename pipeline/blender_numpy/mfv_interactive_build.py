@@ -190,6 +190,17 @@ for cname, kind, lid_t, inset in (("SM_crate_01", "box", 6.0, 3.0), ("SM_crate_0
             edges = [e for e in bm.edges if all(abs(v.co.z - cut) < 0.01 for v in e.verts) and len(e.link_faces) < 2]
             try: bmesh.ops.holes_fill(bm, edges=edges, sides=0)
             except Exception as ex: print("lid fill", ex)
+            # the fill has no UVs of its own on the prop's atlas (it showed the atlas's corner, like the reflection of a
+            # table's edge, once a lid stood open): it goes to the liner's slot 'Interior' with planar UVs (mfv_lid_caps.py
+            # does the same to lids that were built before this)
+            imat = bpy.data.materials.get("Interior") or bpy.data.materials.new("Interior")
+            if "Interior" not in [m.name for m in target.data.materials if m]: target.data.materials.append(imat)
+            imi = [m.name if m else "" for m in target.data.materials].index("Interior")
+            bm.normal_update(); uvc = bm.loops.layers.uv.active or bm.loops.layers.uv.new()
+            for f in bm.faces:
+                if f.normal.z < -0.9 and all(abs(v.co.z - cut) < 0.05 for v in f.verts):
+                    f.material_index = imi
+                    for l in f.loops: l[uvc].uv = (l.vert.co.x / 60.0, l.vert.co.y / 60.0)
         bm.to_mesh(target.data); bm.free()
     outer, inner = add_shell(ob, kind, cut, inset, 4.0 if kind == "box" else 7.0)
     ys = [v.co.y for v in lid.data.vertices]

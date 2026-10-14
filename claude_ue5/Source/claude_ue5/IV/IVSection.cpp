@@ -198,7 +198,11 @@ int32 AIVSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const 
 	auto AddMoving = [&](UStaticMesh* Mesh, const FVector& Hinge, bool bVerticalAxis, int32 Partner)
 	{
 		USceneComponent* Hp = AddPivot(Base, FTransform(Hinge));
-		FTransform Rel = P->Adjust; Rel.AddToTranslation(-Hinge);
+		// A moving part's mesh has its origin AT its hinge (a lid runs forward from it, a wardrobe door sideways), in the
+		// body mesh's axes: on the hinge pivot it takes the piece's rotation and scale and no offset. (It used to get the
+		// body's offset minus the hinge, as if it shared the body's origin: every lid lay on the floor inside its body and
+		// every wardrobe door stood in the middle of the wardrobe.)
+		FTransform Rel = P->Adjust; Rel.SetTranslation(FVector::ZeroVector);
 		UStaticMeshComponent* M = AddMesh(Hp, Mesh, Rel, true);
 		FMover Mv; Mv.Pivot = Hp; Mv.Parts = { M }; Mv.Kind = Kind; Mv.Partner = Partner; Mv.Building = CurBld; Mv.Body = Body;
 		const FBox Bx = Mesh->GetBoundingBox().TransformBy(Rel);

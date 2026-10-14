@@ -1,0 +1,103 @@
+{
+ "tag": "t10",
+ "plan": [
+  "rooms:4",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 25,
+ "doors_failed": 0,
+ "containers_opened": 3,
+ "containers_failed": 0,
+ "rooms_visited": [
+  "Armory",
+  "Guard room",
+  "Barracks",
+  "Prison cells"
+ ],
+ "sections": [],
+ "events": [
+  "step rooms:4",
+  "to room 20 Armory (46 tiles)",
+  "opened wardrobe 187 (alpha 1.00)",
+  "to room 9 Guard room (59 tiles)",
+  "opened barrel 79 (alpha 1.00)",
+  "to room 25 Barracks (50 tiles)",
+  "opened chest 242 (alpha 1.00)",
+  "to room 41 Prison cells (95 tiles)",
+  "room 41 Prison cells: no closed container",
+  "step home"
+ ],
+ "shots": [],
+ "monsters": {
+  "count": 30,
+  "moved_3m": 17,
+  "trips": 36,
+  "repaths": 46
+ },
+ "discovered": [
+  13,
+  91
+ ],
+ "frame_stats": {
+  "median": 23.9,
+  "p99": 29.3,
+  "max": 65.9,
+  "gen_median": 40.9,
+  "gen_max": 125.0
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ]
+ ],
+ "container_fit": {
+  "containers": 1881,
+  "closed": 1878,
+  "open": 3,
+  "by_body": {
+   "SM_Kit_ChestBody": {
+    "n": 338,
+    "closed": 337,
+    "open": 1
+   },
+   "SM_Kit_TrunkBody": {
+    "n": 55,
+    "closed": 55,
+    "open": 0
+   },
+   "SM_crate_01_body": {
+    "n": 370,
+    "closed": 370,
+    "open": 0
+   },
+   "SM_barrel_01_body": {
+    "n": 405,
+    "closed": 404,
+    "open": 1
+   },
+   "SM_Kit_WardrobeBody": {
+    "n": 55,
+    "closed": 54,
+    "open": 1
+   },
+   "SM_barrel_02_body": {
+    "n": 339,
+    "closed": 339,
+    "open": 0
+   },
+   "SM_crate_02_body": {
+    "n": 319,
+    "closed": 319,
+    "open": 0
+   }
+  },
+  "faults": []
+ }
+}

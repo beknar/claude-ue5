@@ -3,7 +3,9 @@
 checks what happens. Plan = comma separated steps:
   setup     she stands in the middle of the start section with 100 hit points and the first weapon in her hand
   weapons   each of the three weapons: its mesh in her right hand (shield on her left arm where it has one), an attack
-            plays over her locomotion (her hand moves, the attack ends), the damage / reach figures
+            plays over her locomotion (her hand moves, the attack ends), the damage / reach figures; her hand is on
+            the weapon's handle (where her hand is, the mesh is round and thin, and its axis passes through the hand)
+            and the shield's top is above its point as she stands
   monsters  the start section: share of rooms with a monster (30% wanted), their average hit points and damage against
             hers (must be lower)
   kill[:N]  N times (default 3, a different weapon each time): next to the nearest live monster of the start section,
@@ -26,10 +28,16 @@ checks what happens. Plan = comma separated steps:
   music     while she wanders: a wandering track over the wandering atmosphere; a monster comes at her: the battle
             track and atmosphere (other files) from the start of the track; the fight over and her away: the wandering
             track again, further on than it was; the next fight has another battle track
+  look      what is only seen: flame particles alive at the nearest torch and at a brazier (a light alone counts
+            nothing); the broken walls: several pieces in use and none beside or above the same one, in every
+            section; the cut face under each container lid is on the wood slot with texture coordinates of its own
+  containers  every container of the start section, measured (container_check.py): closed, the lid lies on its body and a
+            wardrobe's two doors stand on its front; four of each kind are opened: the lid stands up at the back, the
+            doors out in front; closed again, they are back where they were
 Writes SourceArt/random_dungeon_combat/test_<tag>.json and logs "RDCTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os
 __keep__ = True
-PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds,music").split(",") if s.strip()]
+PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds,music,containers,look").split(",") if s.strip()]
 TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_combat"
 V = unreal.Vector; GS = unreal.GameplayStatics; ML = unreal.MathLibrary
@@ -76,6 +84,20 @@ def step_setup():
     ok = c is not None and abs(c.get_health() - 100.0) < 0.5 and c.get_max_health() == 100.0 and d < 300 and math.hypot(s.x, s.y) < 0.2 * half and c.get_weapon_index() == 0 and wm is not None and wm.static_mesh is not None
     step_result("setup", ok, pawn=p.get_class().get_name(), hit_points=c.get_health() if c else None, from_start_room_cm=round(d), start_room_from_section_middle_cm=round(math.hypot(s.x, s.y)),
                 weapon=str(c.get_weapon_name()) if c else None, weapons=len(G["gen"].get_editor_property("weapons")), combat=bool(G["gen"].get_editor_property("combat")))
+def mesh_verts(m, section=None):
+    vs = []
+    for s in (range(m.get_num_sections(0)) if section is None else [section]): vs += list(unreal.ProceduralMeshLibrary.get_section_from_static_mesh(m, 0, s)[0])
+    return vs
+def grip_check(wm, hand):
+    """what her hand closes on: the size of the weapon mesh where her hand is, and how far its axis passes from the hand"""
+    loc = ML.inverse_transform_location(wm.get_world_transform(), hand); vs = mesh_verts(wm.static_mesh)
+    s = [v for v in vs if abs(v.z - loc.z) <= 3.0]
+    if not s: return {"hand_at_mesh_z": round(loc.z, 1), "on_handle": False, "why": "her hand is beyond the mesh"}
+    ex = max(v.x for v in s) - min(v.x for v in s); ey = max(v.y for v in s) - min(v.y for v in s)
+    cx = (max(v.x for v in s) + min(v.x for v in s)) / 2; cy = (max(v.y for v in s) + min(v.y for v in s)) / 2
+    off = math.hypot(loc.x - cx, loc.y - cy); zs = [v.z for v in vs]
+    return {"hand_at_mesh_z": round(loc.z, 1), "mesh_z": [round(min(zs)), round(max(zs))], "mesh_there_cm": [round(ex, 1), round(ey, 1)], "axis_from_hand_cm": round(off, 1),
+            "on_handle": bool(max(ex, ey) < 7.5 and max(ex, ey) < 1.8 * max(min(ex, ey), 0.1) and off < 12.0)}
 def step_weapons():
     c = cb(); p = G["pawn"]; out = []; c.set_scripted_only(True)
     wd = G["gen"].get_editor_property("weapons")
@@ -83,14 +105,19 @@ def step_weapons():
         c.select_weapon(i); yield from wait(0.4)
         wm, om = c.get_weapon_mesh(), c.get_off_hand_mesh(); hand = p.mesh.get_socket_location("hand_r")
         held = (wm.get_world_location() - hand).length(); attached = str(wm.get_attach_socket_name())
+        grip = grip_check(wm, hand); up = None
+        if om.static_mesh and om.is_visible():                       # the shield: its top (mesh +Z, the flat end) above its point
+            b = om.static_mesh.get_bounding_box(); tf = om.get_world_transform()
+            up = round(ML.transform_location(tf, V(0, 0, b.max.z)).z - ML.transform_location(tf, V(0, 0, b.min.z)).z, 1)
         rel = lambda: ML.inverse_transform_location(p.get_actor_transform(), p.mesh.get_socket_location("hand_r"))
         a0 = rel(); started = c.start_attack(); again = c.start_attack(); moved = 0.0; t0 = now(); mont = False
         while c.is_attacking() and now() - t0 < 5.0:
             moved = max(moved, (rel() - a0).length()); mont = mont or p.mesh.get_anim_instance().is_any_montage_playing(); yield
         secs = now() - t0
         e = {"weapon": str(d.name), "mesh": wm.static_mesh.get_name() if wm.static_mesh else None, "bone": attached, "cm_from_hand": round(held, 1), "shield": om.static_mesh.get_name() if om.static_mesh and om.is_visible() else None,
-             "damage": c.get_weapon_damage(), "reach": c.get_weapon_reach(), "attack_started": bool(started), "second_refused": not again, "montage": bool(mont), "hand_moved_cm": round(moved), "attack_seconds": round(secs, 2)}
-        e["ok"] = bool(e["mesh"] == d.mesh.get_name() and attached == "hand_r" and held < 130 and started and not again and mont and moved > 25 and 0.3 < secs < 3.0 and (e["shield"] is not None) == (d.off_hand_mesh is not None))
+             "damage": c.get_weapon_damage(), "reach": c.get_weapon_reach(), "attack_started": bool(started), "second_refused": not again, "montage": bool(mont), "hand_moved_cm": round(moved), "attack_seconds": round(secs, 2), "grip": grip, "shield_top_over_point_cm": up}
+        e["ok"] = bool(e["mesh"] == d.mesh.get_name() and attached == "hand_r" and held < 130 and started and not again and mont and moved > 25 and 0.3 < secs < 3.0 and (e["shield"] is not None) == (d.off_hand_mesh is not None)
+                       and grip["on_handle"] and (up is None or up > 20.0))
         out.append(e); yield from wait(0.3)
     c.select_weapon(0); c.set_scripted_only(False)
     step_result("weapons", len(out) == 3 and all(e["ok"] for e in out), weapons=out)
@@ -350,7 +377,58 @@ def step_music():
                 music_volume=gen.get_editor_property("music_volume"))
     c.revive(True); c.select_weapon(0); c.set_scripted_only(False)
 
-STEPS = {"music": step_music, "setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map,
+def step_look():
+    gen = G["gen"]; p = G["pawn"]; c = cb(); c.set_scripted_only(True); c.revive(True)
+    sec = gen.get_section(unreal.IntPoint(0, 0)); home = gen.get_start_room_center(); out = {}
+    # flames: beside the nearest torch and the nearest brazier (far effects are asleep)
+    for kind, name in ((0, "torch"), (1, "brazier")):
+        pts = [sec.get_fire_point(i) for i in range(sec.get_num_fire_points()) if sec.get_fire_kind(i) == kind]
+        q = min(pts, key=lambda v: math.hypot(v.x - home.x, v.y - home.y)); d = V(home.x - q.x, home.y - q.y, 0); n = max(d.length(), 1.0)
+        p.set_actor_location(V(q.x + d.x / n * 250.0, q.y + d.y / n * 250.0, 100.0), False, True); yield from wait(2.5)
+        out[name] = {"at": [round(q.x), round(q.y), round(q.z)], "effects": sec.get_num_effects_near(q, 60.0), "particles": sec.get_effect_particles_near(q, 60.0)}
+    p.set_actor_location(V(home.x, home.y, 100.0), False, True)
+    # broken walls, in every section there is
+    walls = []
+    for co in gen.get_section_coords():
+        s = gen.get_section(co); cnt = {str(k): v for k, v in s.get_wall_piece_counts().items()}
+        rough = {k: v for k, v in cnt.items() if k.startswith("Wall_Rough")}
+        walls.append({"section": [co.x, co.y], "rough": rough, "repeats": s.get_wall_repeats(),
+                      "ok": bool(s.get_wall_repeats() == 0 and (not rough or (len(rough) >= 4 and max(rough.values()) < 0.4 * sum(rough.values()))))})
+    # the cut face under a lid: on the wood slot, with texture coordinates that span it
+    lids = []
+    for n in ("SM_barrel_01_lid", "SM_barrel_02_lid", "SM_crate_01_lid", "SM_crate_02_lid"):
+        m = unreal.load_asset("/Game/Castle/Interactive/Meshes/" + n); slots = [(str(s.material_slot_name), s.material_interface.get_name() if s.material_interface else None) for s in m.static_materials]
+        e = {"mesh": n, "slots": slots, "ok": False}
+        if len(slots) >= 2 and m.get_num_sections(0) >= 2:
+            r = unreal.ProceduralMeshLibrary.get_section_from_static_mesh(m, 0, 1); vs, uv = list(r[0]), list(r[3]); b = m.get_bounding_box()
+            e.update({"cut_vertices": len(vs), "cut_z_max": round(max(v.z for v in vs), 2), "cut_spans_cm": [round(max(v.x for v in vs) - min(v.x for v in vs)), round(max(v.y for v in vs) - min(v.y for v in vs))],
+                      "uv_span": [round(max(u.x for u in uv) - min(u.x for u in uv), 2), round(max(u.y for u in uv) - min(u.y for u in uv), 2)]})
+            e["ok"] = bool(slots[1][0] == "Interior" and slots[1][1] and slots[1][1] != slots[0][1] and e["cut_z_max"] < 0.1 and e["cut_spans_cm"][0] > 0.9 * (b.max.x - b.min.x)
+                           and e["cut_spans_cm"][1] > 0.9 * (b.max.y - b.min.y) and min(e["uv_span"]) > 0.3)
+        lids.append(e)
+    ok = all(out[k]["effects"] >= 1 and out[k]["particles"] > 0 for k in out) and all(x["ok"] for x in walls) and any(x["rough"] for x in walls) and all(x["ok"] for x in lids)
+    step_result("look", ok, flames=out, walls=walls, lids=lids)
+    c.set_scripted_only(False)
+
+def step_containers():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import container_check as CC; import importlib; importlib.reload(CC)       # (the editor keeps modules: an edited one must be reloaded)
+    sec = G["gen"].get_section(unreal.IntPoint(0, 0))
+    rows = CC.measure(sec); by = CC.summary(rows); f0 = CC.faults(rows)
+    all_closed = all(e["closed"] == e["n"] for e in by.values())
+    picks = CC.sample(sec, rows, 4)
+    for i in picks: sec.toggle_container(i)
+    yield from wait(3.5)
+    rows1 = CC.measure(sec); n_open = sum(e["open"] for e in CC.summary(rows1).values()); f1 = CC.faults(rows1)
+    for i in picks: sec.toggle_container(i)
+    yield from wait(3.5)
+    rows2 = CC.measure(sec); by2 = CC.summary(rows2); f2 = CC.faults(rows2)
+    closed_again = all(e["closed"] == e["n"] for e in by2.values())
+    ok = len(rows) > 0 and all_closed and not f0 and n_open == len(picks) and len(picks) >= 4 and not f1 and closed_again and not f2
+    step_result("containers", ok, containers=len(rows), by_body={k: e["n"] for k, e in by.items()}, closed_faults=len(f0), opened=len(picks), fully_open=n_open,
+                open_faults=len(f1), closed_again=closed_again, closed_again_faults=len(f2), examples=(f0 + f1 + f2)[:6])
+
+STEPS = {"look": step_look, "containers": step_containers, "music": step_music, "setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map,
          "blood": step_blood, "wounds": step_wounds, "sounds": step_sounds}
 def run():
     for s in PLAN:

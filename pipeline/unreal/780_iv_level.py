@@ -16,7 +16,8 @@ and its Viking village props, the castle furniture kit and castle_level's openab
 - generator at the origin + the 250 m start section built with a fixed seed (saved); PlayerStart in the middle of the square
 - reveal materials: random_level's M_RT_RevealPP / M_RT_RevealCurtain (753)
 - villagers: the generator's model list and coverage (786_iv_villagers.py, run from here); they exist in play only
-Args: [no_build] [materials_only]"""
+Args: [no_build] [materials_only] | containers   (containers: only rewrites the container pieces in the generator of the
+      open level, random_isometric_village_level or its Cine copy, and saves it)"""
 import sys, os, json, math, unreal
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
@@ -129,14 +130,33 @@ add("Pew", MC + "SM_Chapel_Bench/Meshes/FBX/SM_Chapel_Bench_SM_Chapel_Bench", fr
 add("Candelabrum", MC + "SM_Chapel_Candelabrum/Meshes/FBX/SM_Chapel_Candelabrum_SM_Chapel_Candelabrum_Base", front="+x", scale=0.8)
 add("Statue", MC + "SM_Chapel_Statue/Meshes/FBX/SM_Chapel_Statue", front="+x", scale=0.6)
 # ---------------------------------------------------------------- containers (all open with F)
-add("Chest", KIT + "SM_Kit_ChestBody", front="+y", moving=KIT + "SM_Kit_ChestLid", hinge=(0, -26, 45))
-add("Trunk", KIT + "SM_Kit_TrunkBody", front="+y", moving=KIT + "SM_Kit_TrunkLid", hinge=(0, -31, 50))
-add("Wardrobe", KIT + "SM_Kit_WardrobeBody", front="+y", moving=KIT + "SM_Kit_WardrobeDoorL", hinge=(-53, 30, 8), moving2=KIT + "SM_Kit_WardrobeDoorR", hinge2=(53, 30, 8))
+# A moving part's mesh has its origin at its hinge, so the hinge below is where that origin goes on the body (body mesh
+# frame, UE axes). Both data files are written by Blender scripts and hold Blender's y: UE's is the negative.
+KH = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\castle_furniture\kit.json"))["_hinges"]
+ueh = lambda h: (h[0], -h[1], h[2])
+add("Chest", KIT + "SM_Kit_ChestBody", front="+y", moving=KIT + "SM_Kit_ChestLid", hinge=ueh(KH["Chest"]))
+add("Trunk", KIT + "SM_Kit_TrunkBody", front="+y", moving=KIT + "SM_Kit_TrunkLid", hinge=ueh(KH["Trunk"]))
+add("Wardrobe", KIT + "SM_Kit_WardrobeBody", front="+y", moving=KIT + "SM_Kit_WardrobeDoorL", hinge=ueh(KH["WardrobeL"]),
+    moving2=KIT + "SM_Kit_WardrobeDoorR", hinge2=ueh(KH["WardrobeR"]))
 CJ = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\castle_interactive\interactive.json"))["containers"]
 for n, src in (("Barrel", "SM_barrel_01"), ("Barrel2", "SM_barrel_02"), ("Crate", "SM_crate_01"), ("Crate2", "SM_crate_02")):
-    h = CJ[src]["hinge"]
+    h = ueh(CJ[src]["hinge"])                                          # the hinge is at the back: the front is the other side
     front = ("-y" if h[1] > 0 else "+y") if abs(h[1]) >= abs(h[0]) else ("-x" if h[0] > 0 else "+x")
-    add(n, INT + f"{src}_body", front=front, moving=INT + f"{src}_lid", hinge=tuple(h))
+    add(n, INT + f"{src}_body", front=front, moving=INT + f"{src}_lid", hinge=h)
+CONTAINERS = ("Chest", "Trunk", "Wardrobe", "Barrel", "Barrel2", "Crate", "Crate2")
+if "containers" in sys.argv:
+    # only the container pieces, in the generator of the level that is open: the Save As copies (the Cine copy, the
+    # combat level) carry a Pieces table of their own. Containers are built in play, so nothing else has to be rebuilt.
+    w = ues.get_editor_world(); assert w.get_path_name().startswith("/Game/RandomIsoVillage/Maps/"), w.get_path_name()
+    g = [a for a in eas.get_all_level_actors() if isinstance(a, unreal.IVVillageGenerator)][0]
+    cur = g.get_editor_property("pieces")
+    for k in CONTAINERS: cur[k] = P[k]
+    g.modify(); g.set_editor_property("pieces", cur); les.save_current_level()
+    print("container pieces set in", w.get_path_name())
+    import gc
+    for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]
+    gc.collect()
+    raise SystemExit
 # ---------------------------------------------------------------- outdoors
 add("Well", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Stone", front="+x", mode="raw", size=(180, 180, 280))      # stone ring and its winch: two meshes, one pivot
 add("WellRoof", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Wood", front="+x", mode="raw", collision=False)

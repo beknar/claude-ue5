@@ -69,7 +69,8 @@ else:
     MON = []
     for old in gen.get_editor_property("monsters"):
         name = str(old.name); d = unreal.RDMonsterDef()
-        for k in ("name", "mesh", "idle", "walk", "walk_speed", "walk_clip_speed", "capsule_radius", "capsule_half_height", "mesh_z", "mesh_yaw", "scale", "weight"): d.set_editor_property(k, old.get_editor_property(k))
+        for k in ("name", "mesh", "idle", "walk", "walk_speed", "walk_clip_speed", "capsule_radius", "capsule_half_height", "mesh_z", "mesh_yaw", "scale", "weight",
+                  "sound_set", "step_length"): d.set_editor_property(k, old.get_editor_property(k))      # (the last two are 797's: a re-run here must not silence the monsters)
         att = [unreal.load_asset(clips[c]) for c in sorted(clips) if c.startswith(f"Anim_{name}_Attack")]
         short = [a for a in att if unreal.AnimationLibrary.get_sequence_length(a) <= 2.8]                 # (the long clips are combinations: one blow counts)
         att = (short or sorted(att, key=unreal.AnimationLibrary.get_sequence_length)[:1])[:3]

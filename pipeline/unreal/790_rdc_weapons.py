@@ -8,12 +8,17 @@ For each pack: an IK rig for its mannequin (auto-generated), a retargeter onto h
 the weapon's attack, flinch and death clips retargeted to /Game/RandomDungeon/Combat/Anims (root locked: she attacks
 on the spot). Every attack clip is then measured on her skeleton: the blow lands where her weapon hand moves fastest.
 Grips: her skeleton has no fingers, so they are computed from her reference pose, in which her arms are out to the
-sides with the palms down: a handle lies across the palm, at right angles to the forearm and pointing the way the
-thumb does (forward), a blade's edge leading away along the forearm; a shield lies along the left forearm, its face
-turned the way the back of the hand faces.
+sides with the palms down: a handle lies across the palm, at right angles to the forearm, its business end pointing
+the way the thumb does (forward), a blade's edge leading away along the forearm; a shield lies along the left forearm,
+its top toward the elbow (upright when her arm hangs), its face turned the way the back of the hand faces.
+Where the hand closes (`hand_z`) is data, and it is checked against the mesh: there the weapon must be a handle, round
+and thin, and the business end is the longer part from there. The meshes' origins are not where one would think: the
+sword's is the tip of its blade (the hilt is at z 65 to 87), and a grip written for "blade +Z from the origin" had
+her holding the blade a hand from its tip.
 Writes SourceArt/random_dungeon_combat/weapons.json (meshes, grips, damage / reach / arc / play rate, clips with their
-lengths and hit times) for the level script, 791. Idempotent (rigs, retargeters and clips are made again)."""
-import json, os, unreal
+lengths and hit times) for the level script, 791. Idempotent (rigs, retargeters and clips are made again).
+Args: [grips]   (grips: only the grips are computed again and written into the existing weapons.json; run 791 after)"""
+import json, os, sys, unreal
 at = unreal.AssetToolsHelpers.get_asset_tools(); eal = unreal.EditorAssetLibrary; APE = unreal.AnimPoseExtensions; ML = unreal.MathLibrary
 V = unreal.Vector
 OUT = "/Game/RandomDungeon/Combat"; ANIMS = OUT + "/Anims"; RIGS = OUT + "/Rigs"
@@ -21,16 +26,16 @@ JSON = r"E:\code\claude-ue5\claude_ue5\SourceArt\random_dungeon_combat\weapons.j
 tgt_mesh = unreal.load_asset("/Game/JRPG/Character/SK_JRPG_Fem5"); tgt_rig = unreal.load_asset("/Game/JRPG/Rigs/IK_JRPG_Fem5_Auto")
 assert tgt_mesh and tgt_rig
 MW = "/Game/Medieval_Weapons/Meshes/VOL2/"
-# weapon: mesh (long axis Z), where along it the hand closes (cm from the mesh origin), shield; what it does: damage a
+# weapon: mesh (long axis Z), where along it the hand closes (cm from the mesh origin, on the handle: see handle_end), shield; what it does: damage a
 # blow, reach (cm from her to the monster's capsule), arc in front of her (degrees), play rate of its clips, how long
 # after the blow a clip is cut (s: the recovery back to idle is blended out, so the next blow can follow);
 # pack, clip prefix, attacks, flinch, death
 SETS = [
-    {"name": "Sword", "mesh": MW + "SM_Sword_1", "hand_z": 9.0, "shield": MW + "SM_Shield_1", "damage": 22.0, "reach": 170.0, "arc": 130.0, "rate": 1.25, "after": 0.55,
+    {"name": "Sword", "mesh": MW + "SM_Sword_1", "hand_z": 69.0, "shield": MW + "SM_Shield_1", "damage": 22.0, "reach": 170.0, "arc": 130.0, "rate": 1.25, "after": 0.55,
      "pack": "Weapon_Shield_Animations", "prefix": "Anim_Weapon_Shield_", "attacks": ["Attack_01", "Attack_03", "Attack_08"], "flinch": "Get_Hit", "death": "Dead_01"},
     {"name": "Spear", "mesh": MW + "SM_Spear", "hand_z": 95.0, "shield": MW + "SM_Shield_1", "damage": 17.0, "reach": 260.0, "arc": 70.0, "rate": 1.3, "after": 0.55,
      "pack": "Spear_And_Shield_Animations", "prefix": "Anim_Spear_Shield_", "attacks": ["Attack_01", "Attack_02", "Attack_04"], "flinch": "Get_Hit_01", "death": "Dead_01"},
-    {"name": "Axe", "mesh": MW + "SM_Axe", "hand_z": -4.0, "shield": None, "damage": 36.0, "reach": 190.0, "arc": 150.0, "rate": 1.2, "after": 0.7,
+    {"name": "Axe", "mesh": MW + "SM_Axe", "hand_z": 7.0, "shield": None, "damage": 36.0, "reach": 190.0, "arc": 150.0, "rate": 1.2, "after": 0.7,
      "pack": "Animations_Warrior", "prefix": "Anim_Warrior_", "attacks": ["Attack_1", "Attack_2", "Attack_4"], "flinch": "Get_Hit_1", "death": "Dead_1"},
 ]
 SHIELD_SCALE = 0.8
@@ -59,21 +64,43 @@ def measure(anim):
 ref = APE.get_reference_pose(tgt_mesh.skeleton)
 bone = lambda n: APE.get_bone_pose(ref, n, unreal.AnimPoseSpaces.WORLD)
 def xf(t): r = t.rotation.rotator(); return {"loc": [t.translation.x, t.translation.y, t.translation.z], "rot": [r.roll, r.pitch, r.yaw], "scale": [t.scale3d.x, t.scale3d.y, t.scale3d.z]}
-def weapon_grip(hand_z):
-    """the weapon mesh (edge +X, blade +Z) relative to hand_r"""
+def handle_end(path, hand_z):
+    """+1 / -1: which way along the mesh's Z the business end lies from the hand (the longer part). Fails unless the
+    mesh is a handle where the hand closes: round (as wide as it is deep) and thin."""
+    m = unreal.load_asset(path); vs = []
+    for sec in range(m.get_num_sections(0)): vs += list(unreal.ProceduralMeshLibrary.get_section_from_static_mesh(m, 0, sec)[0])
+    s = [v for v in vs if abs(v.z - hand_z) <= 3.0]
+    assert s, f"{path}: nothing of the mesh at z {hand_z}"
+    ex = max(v.x for v in s) - min(v.x for v in s); ey = max(v.y for v in s) - min(v.y for v in s)
+    assert max(ex, ey) < 7.5 and max(ex, ey) < 1.8 * max(min(ex, ey), 0.1), f"{path}: no handle at z {hand_z} (the mesh is {ex:.1f} x {ey:.1f} cm there)"
+    b = m.get_bounding_box()
+    print(f"  {os.path.basename(path)}: handle {ex:.1f} x {ey:.1f} cm at z {hand_z:.0f}, mesh z {b.min.z:.0f}..{b.max.z:.0f}, business end toward {'+Z' if b.max.z - hand_z >= hand_z - b.min.z else '-Z'}")
+    return 1.0 if b.max.z - hand_z >= hand_z - b.min.z else -1.0
+def weapon_grip(path, hand_z):
+    """the weapon mesh (edge along X, long axis Z) relative to hand_r"""
     hand = bone("hand_r"); fore = (hand.translation - bone("lowerarm_r").translation).normal()
     thumb = V(0, 1, 0); thumb = (thumb - fore * thumb.dot(fore)).normal()
     palm = hand.translation + fore * 6.5 + V(0, 0, -2.5)        # in the closed hand: past the wrist, a little under the bones
-    rot = ML.make_rot_from_xz(fore, thumb)
+    rot = ML.make_rot_from_xz(fore, thumb * handle_end(path, hand_z))
     return ML.make_relative_transform(unreal.Transform(palm - ML.get_up_vector(rot) * hand_z, rot, V(1, 1, 1)), hand)
 def shield_grip(path):
-    """the shield mesh (face +Y, tall along Z) relative to lowerarm_l"""
+    """the shield mesh (face +Y, tall along Z: its flat top at +Z, its point at -Z) relative to lowerarm_l"""
     elbow = bone("lowerarm_l"); hand = bone("hand_l").translation
     fore = (hand - elbow.translation).normal(); back = V(0, 0, 1); back = (back - fore * back.dot(fore)).normal()
-    w = unreal.Transform(elbow.translation + (hand - elbow.translation) * 0.55 + back * 6.0, ML.make_rot_from_zy(fore, back), V(SHIELD_SCALE, SHIELD_SCALE, SHIELD_SCALE))
+    w = unreal.Transform(elbow.translation + (hand - elbow.translation) * 0.55 + back * 6.0, ML.make_rot_from_zy(fore * -1.0, back), V(SHIELD_SCALE, SHIELD_SCALE, SHIELD_SCALE))
     b = unreal.load_asset(path).get_bounds().origin
     w = unreal.Transform(ML.transform_location(w, V(-b.x, -b.y, -b.z)), w.rotation.rotator(), w.scale3d)
     return ML.make_relative_transform(w, elbow)
+if "grips" in sys.argv:
+    res = json.load(open(JSON))
+    for s in SETS:
+        e = res["weapons"][s["name"]]
+        e["grip"] = xf(weapon_grip(s["mesh"], s["hand_z"])); e["shield_grip"] = xf(shield_grip(s["shield"])) if s["shield"] else None
+    json.dump(res, open(JSON, "w"), indent=1); print("grips saved", JSON)
+    import gc
+    for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]
+    gc.collect()
+    raise SystemExit
 res = {"order": [s["name"] for s in SETS], "weapons": {}}
 for s in SETS:
     weapon, pack, prefix = s["name"], s["pack"], s["prefix"]
@@ -112,7 +139,7 @@ for s in SETS:
         a.set_editor_property("enable_root_motion", False); a.set_editor_property("force_root_lock", True)
         eal.save_loaded_asset(a, False)
     e = {k: s[k] for k in ("mesh", "shield", "damage", "reach", "arc", "rate", "pack")}
-    e.update({"grip": xf(weapon_grip(s["hand_z"])), "hand_bone": "hand_r", "shield_bone": "lowerarm_l", "shield_grip": xf(shield_grip(s["shield"])) if s["shield"] else None,
+    e.update({"grip": xf(weapon_grip(s["mesh"], s["hand_z"])), "hand_bone": "hand_r", "shield_bone": "lowerarm_l", "shield_grip": xf(shield_grip(s["shield"])) if s["shield"] else None,
               "flinch": f"{ANIMS}/{prefix}{s['flinch']}_Fem5", "death": f"{ANIMS}/{prefix}{s['death']}_Fem5", "attacks": []})
     for n in s["attacks"]:
         p = f"{ANIMS}/{prefix}{n}_Fem5"; L, hit, speed = measure(unreal.load_asset(p))
