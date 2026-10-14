@@ -93,6 +93,16 @@ Guidance for Claude Code in this repository. See README.md for what the project 
 - **MRQ warm-up runs at every camera cut:** world time advances while the sequence is frozen, so a demo character steered on the sequence clock stops and restarts at each cut, and time-based effects jump ahead. Shoot runtime-driven scenes as one camera cut (random_level's `756`).
 - **sf-city-level safety:** after changing anything walkable, re-run `708` (flood fill + barrier walls) and check it reports 0 remaining fall edges; the walk test (`709` plan, `710` in PIE) reports clipping, falls, doors and stuck legs.
 
+## Monster gallery (`docs/monsters.md`, `900`)
+
+- The ranking is data (`SourceArt/monster_gallery/monsters.json`); `monster_doc.py` writes the page and the strips from it. Edit the JSON, not the page.
+- **The user allowed committing the gallery's pictures** (`docs/images/monsters/*.jpg`: renders of pack models, not the models). The packs themselves, their textures and the Unity files unpacked into `SourceArt/fab_unity` stay local.
+- **Shoot after the shaders are ready.** A `SceneCapture2D` loop inside one Python call cannot wait for anything: materials still compiling are drawn with the engine's grey checker placeholder, and textures with their low mips. That made most of the first gallery grey. `900` stages the monsters, then puts the variant material on every one (`warm`: each kind of skinned mesh needs its own shader permutation), and shoots in a later call with `r.TextureStreaming 0`.
+- Python details:
+  - `MaterialEditingLibrary.get_used_textures` takes a `Material` only; read an instance's own textures from `texture_parameter_values`.
+  - A `SceneCaptureComponent2D`'s `show_only_actors` cannot be set from Python ("cannot be edited on templates"): use `show_only_actor_components`.
+  - The scratch level is left empty and saved: a dirty level makes the next map load ask, and the editor waits for the answer.
+
 ## Editor pitfalls
 
 **Maps**
@@ -144,4 +154,5 @@ The remote (`github.com/beknar/claude-ue5`) is **public** and the repo is **sour
 - Never commit `Content/`, `.uasset`/`.umap`, source-art binaries, media (`.png`, `.mp4`, `.wav`, …), archives, `Saved/` / `Intermediate/` / `DerivedDataCache/`, `renders/` or `builds/` (a packaged game holds cooked pack content).
 - Third-party packs (Fab, Megascans, MetaHuman, UE mannequins) and the sound and music library must not be redistributed. `SourceArt/random_dungeon_combat/audio/` (files converted from the library) is ignored; `sounds.json`, which only names the files, is committed.
 - `.gitignore` enforces this. Check `git status` before committing: a new kind of generated file needs its ignore rule first.
+- The monster gallery's thumbnails (`docs/images/monsters/*.jpg`) are allowed by the user, like the README's stills.
 - Commit or push only when asked (see Working rules). Small data that a script reads or a test wrote (`SourceArt/**/*.json`) is committed; a test record replaces the one before it.

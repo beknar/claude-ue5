@@ -1,0 +1,1302 @@
+{
+ "monsters": [
+  {
+   "rank": 1,
+   "tier": "Tier 1: pushovers",
+   "name": "Rat",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Rat`",
+   "height": "50",
+   "looks": "A cartoon rat, knee high",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Rat.SK_Rat"
+   ]
+  },
+  {
+   "rank": 2,
+   "tier": "Tier 1: pushovers",
+   "name": "Half Creature 04",
+   "pack": "Creeping Creatures Pack",
+   "model": "`Half_Creatures_04`",
+   "height": "94",
+   "looks": "A torso with no legs, dragging itself along on its arms",
+   "meshes": [
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_04/SK_Half_Creature_04.SK_Half_Creature_04",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_04/SK_Half_Creature_04_Head.SK_Half_Creature_04_Head"
+   ]
+  },
+  {
+   "rank": 3,
+   "tier": "Tier 1: pushovers",
+   "name": "Parasite Slider",
+   "pack": "Parasites Pack",
+   "model": "`SK_Parasite_Slider`",
+   "height": "88",
+   "looks": "A man's upper body on a slug's tail; slow by the look of it",
+   "meshes": [
+    "/Game/Parasites_Pack/Mesh/SK_Parasite_Slider.SK_Parasite_Slider"
+   ]
+  },
+  {
+   "rank": 4,
+   "tier": "Tier 1: pushovers",
+   "name": "Man In Gut",
+   "pack": "Creeping Creatures Pack",
+   "model": "`SK_Man_In_Gut`",
+   "height": "251",
+   "looks": "A body hanging head down in a sack of gut: trapped, not fighting",
+   "meshes": [
+    "/Game/Half_Creatures_Pack/Mesh/Man_In_Gut/SK_Man_In_Gut.SK_Man_In_Gut"
+   ]
+  },
+  {
+   "rank": 5,
+   "tier": "Tier 1: pushovers",
+   "name": "Half Creature 05",
+   "pack": "Creeping Creatures Pack",
+   "model": "`Half_Creatures_05`",
+   "height": "96",
+   "looks": "A legless torso trailing its innards; long thin clawed arms, but waist high",
+   "meshes": [
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_05/SK_Half_Creature_05.SK_Half_Creature_05"
+   ]
+  },
+  {
+   "rank": 6,
+   "tier": "Tier 1: pushovers",
+   "name": "Drinker",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Drinker`",
+   "height": "188",
+   "looks": "Skinny cartoon zombie in shorts, bulging eyes",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Drinker.SK_Drinker"
+   ]
+  },
+  {
+   "rank": 7,
+   "tier": "Tier 1: pushovers",
+   "name": "Medic",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Medic`",
+   "height": "181",
+   "looks": "Skinny, skull-faced, in a gown",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Medic.SK_Medic"
+   ]
+  },
+  {
+   "rank": 8,
+   "tier": "Tier 1: pushovers",
+   "name": "Boy",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Boy`",
+   "height": "212",
+   "looks": "A cartoon kid",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Boy.SK_Boy"
+   ]
+  },
+  {
+   "rank": 9,
+   "tier": "Tier 1: pushovers",
+   "name": "Chicken",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Chicken`",
+   "height": "199",
+   "looks": "A zombie in a chicken costume",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Chicken.SK_Chicken"
+   ]
+  },
+  {
+   "rank": 10,
+   "tier": "Tier 1: pushovers",
+   "name": "Soldier",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Soldier`",
+   "height": "180",
+   "looks": "Scrawny cartoon zombie in a helmet, unarmed",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Soldier.SK_Soldier"
+   ]
+  },
+  {
+   "rank": 11,
+   "tier": "Tier 1: pushovers",
+   "name": "Half Creature 01",
+   "pack": "Creeping Creatures Pack",
+   "model": "`Half_Creatures_01`",
+   "height": "188",
+   "looks": "An upper body hanging over a trail of guts, no legs",
+   "meshes": [
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_01/SK_Eye.SK_Eye",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_01/SK_Guts.SK_Guts",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_01/SK_Hair.SK_Hair",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_01/SK_Half_Creature_01.SK_Half_Creature_01",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_01/SK_Head.SK_Head"
+   ]
+  },
+  {
+   "rank": 12,
+   "tier": "Tier 1: pushovers",
+   "name": "Half Creature 03",
+   "pack": "Creeping Creatures Pack",
+   "model": "`Half_Creatures_03`",
+   "height": "184",
+   "looks": "An emaciated torso on a chain",
+   "meshes": [
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_03/SK_Half_Creature_03_Body.SK_Half_Creature_03_Body",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_03/SK_Half_Creature_03_Chein.SK_Half_Creature_03_Chein",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_03/SK_Half_Creature_03_Head.SK_Half_Creature_03_Head"
+   ]
+  },
+  {
+   "rank": 13,
+   "tier": "Tier 1: pushovers",
+   "name": "Half Creature 02",
+   "pack": "Creeping Creatures Pack",
+   "model": "`Half_Creatures_02`",
+   "height": "189",
+   "looks": "A legless torso in a tactical vest, guts for a lower body",
+   "meshes": [
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Bag.SK_Half_Creature_02_Bag",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Body.SK_Half_Creature_02_Body",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Gut_01.SK_Half_Creature_02_Gut_01",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Gut_02.SK_Half_Creature_02_Gut_02",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Gut_03.SK_Half_Creature_02_Gut_03",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Gut_04.SK_Half_Creature_02_Gut_04",
+    "/Game/Half_Creatures_Pack/Mesh/Half_Creatures_02/SK_Half_Creature_02_Head.SK_Half_Creature_02_Head"
+   ]
+  },
+  {
+   "rank": 14,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Sufferer",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Sufferer_Full`",
+   "height": "188",
+   "looks": "Robed and barefoot; no armour, no weapon",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_05/Mesh/Sufferer/SK_Sufferer_Full.SK_Sufferer_Full"
+   ]
+  },
+  {
+   "rank": 15,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Fat",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Fat`",
+   "height": "201",
+   "looks": "Huge belly and a cap: slow",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Fat.SK_Fat"
+   ]
+  },
+  {
+   "rank": 16,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Mask",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Mask`",
+   "height": "182",
+   "looks": "Chubby, in a gas mask",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Mask.SK_Mask"
+   ]
+  },
+  {
+   "rank": 17,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Monster",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Monster`",
+   "height": "179",
+   "looks": "Hunched, ape-like cartoon brute with a big grin",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Monster.SK_Monster"
+   ]
+  },
+  {
+   "rank": 18,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Gunner",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Gunner`",
+   "height": "178",
+   "looks": "Stocky, carries a big launcher, cartoon proportions",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Gunner.SK_Gunner"
+   ]
+  },
+  {
+   "rank": 19,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Fat",
+   "pack": "Parasites Pack",
+   "model": "`SK_Fat`",
+   "height": "185",
+   "looks": "A fat man with tentacles bursting from his shoulder",
+   "meshes": [
+    "/Game/Parasites_Pack/Mesh/SK_Fat.SK_Fat"
+   ]
+  },
+  {
+   "rank": 20,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Parasit",
+   "pack": "Parasites Pack",
+   "model": "`SK_Parasit`",
+   "height": "180",
+   "looks": "A man with a creature erupting from his chest and head, one claw",
+   "meshes": [
+    "/Game/Parasites_Pack/Mesh/SK_Parasit.SK_Parasit"
+   ]
+  },
+  {
+   "rank": 21,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Creature 01",
+   "pack": "Sci-Fi Line With 3 Creatures",
+   "model": "`SK_UE4_Creatures_01_Full`",
+   "height": "188",
+   "looks": "Skinned, thin humanoid with a swollen belly",
+   "meshes": [
+    "/Game/Creatures/Mesh/Mesh_UE4/Full/SK_UE4_Creatures_01_Full.SK_UE4_Creatures_01_Full"
+   ]
+  },
+  {
+   "rank": 22,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Creature 03",
+   "pack": "Sci-Fi Line With 3 Creatures",
+   "model": "`SK_UE4_Creatures_03_Full`",
+   "height": "185",
+   "looks": "Skinned and thin, with a split, crested head",
+   "meshes": [
+    "/Game/Creatures/Mesh/Mesh_UE4/Full/SK_UE4_Creatures_03_Full.SK_UE4_Creatures_03_Full"
+   ]
+  },
+  {
+   "rank": 23,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Creature 05",
+   "pack": "Humanoids Creatures Pack",
+   "model": "`SK_Creature_05`",
+   "height": "186",
+   "looks": "Lean, long ridged skull, nothing to fight with",
+   "meshes": [
+    "/Game/Humanoid_Creatures/Mesh/SK_Creature_05.SK_Creature_05"
+   ]
+  },
+  {
+   "rank": 24,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Monster Underwater 04",
+   "pack": "Monsters Underwater Pack",
+   "model": "`SK_Monster_Underwater_04`",
+   "height": "200",
+   "looks": "Lean fish-man with a fin crest and small hands",
+   "meshes": [
+    "/Game/Monsters_Underwater_Pack/Mesh/SK_Monster_Underwater_04.SK_Monster_Underwater_04"
+   ]
+  },
+  {
+   "rank": 25,
+   "tier": "Tier 2: weak but unpleasant",
+   "name": "Orc 03",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_03_Full`",
+   "height": "186",
+   "looks": "A skinny orc in a spiked cage helmet and light leg armour",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Full.SK_Orc_03_Full"
+   ]
+  },
+  {
+   "rank": 26,
+   "tier": "Tier 3: an even fight",
+   "name": "Magur",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Magur_Full`",
+   "height": "181",
+   "looks": "Very fat, barely armoured, a little creature on his head",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Magur/Mesh/SK_Magur_Full.SK_Magur_Full"
+   ]
+  },
+  {
+   "rank": 27,
+   "tier": "Tier 3: an even fight",
+   "name": "Azrak",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Azrak_Full`",
+   "height": "184",
+   "looks": "Big-bellied, loincloth, a spiked mask",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Azrak/Mesh/SK_Azrak_Full.SK_Azrak_Full"
+   ]
+  },
+  {
+   "rank": 28,
+   "tier": "Tier 3: an even fight",
+   "name": "Alien Warrior 03",
+   "pack": "Aliens Warrior Pack",
+   "model": "`SK_UE4_Alien_Warrior_03_Full_01`",
+   "height": "183",
+   "looks": "The most human-looking alien: long coat, belt pouches",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_03/Full/SK_UE4_Alien_Warrior_03_Full_01.SK_UE4_Alien_Warrior_03_Full_01"
+   ]
+  },
+  {
+   "rank": 29,
+   "tier": "Tier 3: an even fight",
+   "name": "Warrior 02 (the leopard)",
+   "pack": "Animals Warrior Pack",
+   "model": "`SK_Warrior_02_Full_01`",
+   "height": "185",
+   "looks": "Hooded leopard-man in cloth and light armour",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Warrior_02/SK_Warrior_02_Full_01.SK_Warrior_02_Full_01"
+   ]
+  },
+  {
+   "rank": 30,
+   "tier": "Tier 3: an even fight",
+   "name": "Kanit",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Kanit_Full`",
+   "height": "186",
+   "looks": "Hooded orc with spiked bracers",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Kanit/Mesh/SK_Kanit_Full.SK_Kanit_Full"
+   ]
+  },
+  {
+   "rank": 31,
+   "tier": "Tier 3: an even fight",
+   "name": "Gnur",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Gnur_Full`",
+   "height": "184",
+   "looks": "Robed orc, spikes on the shoulders",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Full.SK_Gnur_Full"
+   ]
+  },
+  {
+   "rank": 32,
+   "tier": "Tier 3: an even fight",
+   "name": "Dardan",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Dardan_Full`",
+   "height": "182",
+   "looks": "Tusked, bone necklace, spiked greaves",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Full.SK_Dardan_Full"
+   ]
+  },
+  {
+   "rank": 33,
+   "tier": "Tier 3: an even fight",
+   "name": "Costalmed",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_Costalmed_Full`",
+   "height": "189",
+   "looks": "Half armoured: heavy leg plates and a shoulder guard",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Full.SK_Orc_Costalmed_Full"
+   ]
+  },
+  {
+   "rank": 34,
+   "tier": "Tier 3: an even fight",
+   "name": "Orc 05",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_05_Full`",
+   "height": "190",
+   "looks": "Fat but armoured: belt plate, greaves, a mask",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Full.SK_Orc_05_Full"
+   ]
+  },
+  {
+   "rank": 35,
+   "tier": "Tier 3: an even fight",
+   "name": "Orc 06",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_06_Full`",
+   "height": "188",
+   "looks": "Lean, spiked shoulder and arm armour",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Full.SK_Orc_06_Full"
+   ]
+  },
+  {
+   "rank": 36,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature 02",
+   "pack": "Sci-Fi Line With 3 Creatures",
+   "model": "`SK_UE4_Creatures_02_Full`",
+   "height": "188",
+   "looks": "Skinned and muscular, one arm a long blade",
+   "meshes": [
+    "/Game/Creatures/Mesh/Mesh_UE4/Full/SK_UE4_Creatures_02_Full.SK_UE4_Creatures_02_Full"
+   ]
+  },
+  {
+   "rank": 37,
+   "tier": "Tier 3: an even fight",
+   "name": "Alien",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Alien`",
+   "height": "200",
+   "looks": "Tall and gangly, long arms, small head",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Alien.SK_Alien"
+   ]
+  },
+  {
+   "rank": 38,
+   "tier": "Tier 3: an even fight",
+   "name": "Devourer",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Devourer`",
+   "height": "202",
+   "looks": "Lanky, a wide mouth, long clawed arms",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Devourer.SK_Devourer"
+   ]
+  },
+  {
+   "rank": 39,
+   "tier": "Tier 3: an even fight",
+   "name": "Insect",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Insect`",
+   "height": "182",
+   "looks": "A man-sized winged insect on thin legs",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Insect.SK_Insect"
+   ]
+  },
+  {
+   "rank": 40,
+   "tier": "Tier 3: an even fight",
+   "name": "Creepy",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Creepy`",
+   "height": "168",
+   "looks": "A low, flat crawler with long reaching limbs and a toothy maw",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Creepy.SK_Creepy"
+   ]
+  },
+  {
+   "rank": 41,
+   "tier": "Tier 3: an even fight",
+   "name": "Pangolin",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Pangolin`",
+   "height": "171",
+   "looks": "Four-legged, toothy, a spiked tail",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Pangolin.SK_Pangolin"
+   ]
+  },
+  {
+   "rank": 42,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster Underwater 02",
+   "pack": "Monsters Underwater Pack",
+   "model": "`SK_Monster_Underwater_02_Body` + `_Shell`",
+   "height": "185",
+   "looks": "Muscular fish-man with a gaping, toothy head",
+   "meshes": [
+    "/Game/Monsters_Underwater_Pack/Mesh/SK_Monster_Underwater_02_Body.SK_Monster_Underwater_02_Body",
+    "/Game/Monsters_Underwater_Pack/Mesh/SK_Monster_Underwater_02_Shell.SK_Monster_Underwater_02_Shell"
+   ]
+  },
+  {
+   "rank": 43,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster Underwater 03",
+   "pack": "Monsters Underwater Pack",
+   "model": "`SK_Monster_Underwater_03`",
+   "height": "179",
+   "looks": "Muscular, a hammerhead bar across the head",
+   "meshes": [
+    "/Game/Monsters_Underwater_Pack/Mesh/SK_Monster_Underwater_03.SK_Monster_Underwater_03"
+   ]
+  },
+  {
+   "rank": 44,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature 03",
+   "pack": "Humanoids Creatures Pack",
+   "model": "`SK_Creature_03`",
+   "height": "189",
+   "looks": "Lumpy, spiny skin, a crown of horns",
+   "meshes": [
+    "/Game/Humanoid_Creatures/Mesh/SK_Creature_03.SK_Creature_03"
+   ]
+  },
+  {
+   "rank": 45,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature 02",
+   "pack": "Humanoids Creatures Pack",
+   "model": "`SK_Creature_02`",
+   "height": "208",
+   "looks": "A tentacled head on a man's body in a vest and trousers",
+   "meshes": [
+    "/Game/Humanoid_Creatures/Mesh/SK_Creature_02.SK_Creature_02"
+   ]
+  },
+  {
+   "rank": 46,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature 07",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_07`",
+   "height": "188",
+   "looks": "Lean demon, small crested head, no weapon",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_07.SK_Creature_07"
+   ]
+  },
+  {
+   "rank": 47,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature 02",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_02`",
+   "height": "186",
+   "looks": "Lean demon with ram horns",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_02.SK_Creature_02"
+   ]
+  },
+  {
+   "rank": 48,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature 03",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_03`",
+   "height": "186",
+   "looks": "Lean demon with a crown of tendrils",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_03.SK_Creature_03"
+   ]
+  },
+  {
+   "rank": 49,
+   "tier": "Tier 3: an even fight",
+   "name": "Tank",
+   "pack": "Cartoon Zombies (Pack)",
+   "model": "`SK_Tank_Mesh`",
+   "height": "180",
+   "looks": "A cartoon zombie driving a toy-like tank with a cannon: armoured, but silly",
+   "meshes": [
+    "/Game/Cartoon_Zombies_Pack/Mesh/Characters/SK_Tank_Mesh.SK_Tank_Mesh"
+   ]
+  },
+  {
+   "rank": 50,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster 04",
+   "pack": "Humanoids Monsters Pack",
+   "model": "`SK_Monster_04`",
+   "height": "182",
+   "looks": "Lean, pinkish, ribbed belly, a skull of a face",
+   "meshes": [
+    "/Game/Humanoids_Monsters_Pack/Mesh/SK_Monster_04.SK_Monster_04"
+   ]
+  },
+  {
+   "rank": 51,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster 05",
+   "pack": "Humanoids Monsters Pack",
+   "model": "`SK_Monster_05`",
+   "height": "181",
+   "looks": "Grey and lean, a long flat skull, small claws",
+   "meshes": [
+    "/Game/Humanoids_Monsters_Pack/Mesh/SK_Monster_05.SK_Monster_05"
+   ]
+  },
+  {
+   "rank": 52,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature Insect 02",
+   "pack": "Creatures Insects Pack",
+   "model": "`SK_Creature_Insect_02`",
+   "height": "223",
+   "looks": "Thin golden grasshopper-man with huge eyes and long antennae",
+   "meshes": [
+    "/Game/Creatures_Insects_Pack/Mesh/SK_Creature_Insect_02.SK_Creature_Insect_02"
+   ]
+  },
+  {
+   "rank": 53,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature Insect 05",
+   "pack": "Creatures Insects Pack",
+   "model": "`SK_Creature_Insect_05`",
+   "height": "218",
+   "looks": "Thin pale-green mantis-man with pink eyes",
+   "meshes": [
+    "/Game/Creatures_Insects_Pack/Mesh/SK_Creature_Insect_05.SK_Creature_Insect_05"
+   ]
+  },
+  {
+   "rank": 54,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster 03",
+   "pack": "Humanoids Monsters Pack",
+   "model": "`SK_Monster_03`",
+   "height": "193",
+   "looks": "Grey-blue and pink, a toothy crested head, spines on the forearms",
+   "meshes": [
+    "/Game/Humanoids_Monsters_Pack/Mesh/SK_Monster_03.SK_Monster_03"
+   ]
+  },
+  {
+   "rank": 55,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature Insect 04",
+   "pack": "Creatures Insects Pack",
+   "model": "`SK_Creature_Insect_04`",
+   "height": "206",
+   "looks": "Copper carapace, branching antlers, clawed fingers",
+   "meshes": [
+    "/Game/Creatures_Insects_Pack/Mesh/SK_Creature_Insect_04.SK_Creature_Insect_04"
+   ]
+  },
+  {
+   "rank": 56,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster 01",
+   "pack": "Humanoids Monsters Pack",
+   "model": "`SK_Monster_01`",
+   "height": "195",
+   "looks": "Bulky, orange and lumpy, curled horns",
+   "meshes": [
+    "/Game/Humanoids_Monsters_Pack/Mesh/SK_Monster_01.SK_Monster_01"
+   ]
+  },
+  {
+   "rank": 57,
+   "tier": "Tier 3: an even fight",
+   "name": "Monster 02",
+   "pack": "Humanoids Monsters Pack",
+   "model": "`SK_Monster_02`",
+   "height": "192",
+   "looks": "Orange-gold, a sweeping crown of horns, spiked shoulders",
+   "meshes": [
+    "/Game/Humanoids_Monsters_Pack/Mesh/SK_Monster_02.SK_Monster_02"
+   ]
+  },
+  {
+   "rank": 58,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature Insect 01",
+   "pack": "Creatures Insects Pack",
+   "model": "`SK_Creature_Insect_01`",
+   "height": "213",
+   "looks": "Blue armoured beetle-man with a great horn",
+   "meshes": [
+    "/Game/Creatures_Insects_Pack/Mesh/SK_Creature_Insect_01.SK_Creature_Insect_01"
+   ]
+  },
+  {
+   "rank": 59,
+   "tier": "Tier 3: an even fight",
+   "name": "Creature Insect 03",
+   "pack": "Creatures Insects Pack",
+   "model": "`SK_Creature_Insect_03`",
+   "height": "186",
+   "looks": "Heavy dark carapace, a frilled head, long curved blades for arms",
+   "meshes": [
+    "/Game/Creatures_Insects_Pack/Mesh/SK_Creature_Insect_03.SK_Creature_Insect_03"
+   ]
+  },
+  {
+   "rank": 60,
+   "tier": "Tier 4: dangerous",
+   "name": "Orc 01",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_01_Full`",
+   "height": "186",
+   "looks": "Armoured, spiked arm guards, tusks, skull on the belt",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Full.SK_Orc_01_Full"
+   ]
+  },
+  {
+   "rank": 61,
+   "tier": "Tier 4: dangerous",
+   "name": "Orc 02",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_02_Full`",
+   "height": "184",
+   "looks": "Full spiked armour, blade-edged gauntlets",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Full.SK_Orc_02_Full"
+   ]
+  },
+  {
+   "rank": 62,
+   "tier": "Tier 4: dangerous",
+   "name": "Ursag",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Ursag_Full`",
+   "height": "197",
+   "looks": "Antlered helm, fur and bone armour",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_Ursag/Mesh/SK_Ursag_Full.SK_Ursag_Full"
+   ]
+  },
+  {
+   "rank": 63,
+   "tier": "Tier 4: dangerous",
+   "name": "Orc 04",
+   "pack": "14 Orcs Pack",
+   "model": "`SK_Orc_04_Full`",
+   "height": "239",
+   "looks": "A shaman under a totem of skulls",
+   "meshes": [
+    "/Game/Orcs_Pack/Orc_04/Mesh/SK_Orc_04_Full.SK_Orc_04_Full"
+   ]
+  },
+  {
+   "rank": 64,
+   "tier": "Tier 4: dangerous",
+   "name": "Bear Warrior",
+   "pack": "Animals Warrior Pack",
+   "model": "`SK_Bear_Full`",
+   "height": "182",
+   "looks": "Bear-man in a shaggy pelt",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Full.SK_Bear_Full"
+   ]
+  },
+  {
+   "rank": 65,
+   "tier": "Tier 4: dangerous",
+   "name": "Bull Warrior",
+   "pack": "Animals Warrior Pack",
+   "model": "`SK_Bull_Full`",
+   "height": "196",
+   "looks": "Horned bull-man in plate armour",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Bull/SK_Bull_Full.SK_Bull_Full"
+   ]
+  },
+  {
+   "rank": 66,
+   "tier": "Tier 4: dangerous",
+   "name": "Crocodile Warrior",
+   "pack": "Animals Warrior Pack",
+   "model": "`SK_Crocodile_Full`",
+   "height": "185",
+   "looks": "Crocodile head, armour, trophies on the belt",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Full.SK_Crocodile_Full"
+   ]
+  },
+  {
+   "rank": 67,
+   "tier": "Tier 4: dangerous",
+   "name": "Elephant Warrior",
+   "pack": "Animals Warrior Pack",
+   "model": "`SK_Elephant_Full`",
+   "height": "187",
+   "looks": "Elephant-man in full plate",
+   "meshes": [
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Full.SK_Elephant_Full"
+   ]
+  },
+  {
+   "rank": 68,
+   "tier": "Tier 4: dangerous",
+   "name": "Alien Warrior 05",
+   "pack": "Aliens Warrior Pack",
+   "model": "`SK_UE4_Alien_Warrior_05_Full_01`",
+   "height": "183",
+   "looks": "Lean and muscular, crested head",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_05/Full/SK_UE4_Alien_Warrior_05_Full_01.SK_UE4_Alien_Warrior_05_Full_01"
+   ]
+  },
+  {
+   "rank": 69,
+   "tier": "Tier 4: dangerous",
+   "name": "Alien Warrior 01",
+   "pack": "Aliens Warrior Pack",
+   "model": "`SK_UE4_Alien_Warrior_01_Full_01`",
+   "height": "188",
+   "looks": "Hunched and broad, armour plates",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_01/Full/SK_UE4_Alien_Warrior_01_Full_01.SK_UE4_Alien_Warrior_01_Full_01"
+   ]
+  },
+  {
+   "rank": 70,
+   "tier": "Tier 4: dangerous",
+   "name": "Alien Warrior 02",
+   "pack": "Aliens Warrior Pack",
+   "model": "`SK_UE4_Alien_Warrior_02_Full_01`",
+   "height": "185",
+   "looks": "Bulky, heavy armour",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_02/Full/SK_UE4_Alien_Warrior_02_Full_01.SK_UE4_Alien_Warrior_02_Full_01"
+   ]
+  },
+  {
+   "rank": 71,
+   "tier": "Tier 4: dangerous",
+   "name": "Alien Warrior 04",
+   "pack": "Aliens Warrior Pack",
+   "model": "`SK_UE4_Alien_Warrior_04_Full_01`",
+   "height": "185",
+   "looks": "Long claw blades on both hands",
+   "meshes": [
+    "/Game/Aliens_Warrior_Pack/Mesh/Mesh_UE4/Alien_Warrior_04/Full/SK_UE4_Alien_Warrior_04_Full_01.SK_UE4_Alien_Warrior_04_Full_01"
+   ]
+  },
+  {
+   "rank": 72,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 01",
+   "pack": "Humanoids Creatures Pack",
+   "model": "`SK_Creature_01`",
+   "height": "228",
+   "looks": "A huge horn-like growth curling up from the shoulder",
+   "meshes": [
+    "/Game/Humanoid_Creatures/Mesh/SK_Creature_01.SK_Creature_01"
+   ]
+  },
+  {
+   "rank": 73,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 04",
+   "pack": "Humanoids Creatures Pack",
+   "model": "`SK_Creature_04`",
+   "height": "203",
+   "looks": "Head swollen into a mass of tumours, lumpy body",
+   "meshes": [
+    "/Game/Humanoid_Creatures/Mesh/SK_Creature_04.SK_Creature_04"
+   ]
+  },
+  {
+   "rank": 74,
+   "tier": "Tier 4: dangerous",
+   "name": "Monster Underwater 01",
+   "pack": "Monsters Underwater Pack",
+   "model": "`SK_Monster_Underwater_01`",
+   "height": "187",
+   "looks": "A spear-like snout across the head, spiny legs",
+   "meshes": [
+    "/Game/Monsters_Underwater_Pack/Mesh/SK_Monster_Underwater_01.SK_Monster_Underwater_01"
+   ]
+  },
+  {
+   "rank": 75,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 08",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_08`",
+   "height": "191",
+   "looks": "Broad-shouldered demon, wide horned head",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_08.SK_Creature_08"
+   ]
+  },
+  {
+   "rank": 76,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 10",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_10`",
+   "height": "190",
+   "looks": "Skull face, ram horns, heavy build",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_10.SK_Creature_10"
+   ]
+  },
+  {
+   "rank": 77,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 01",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_01`",
+   "height": "192",
+   "looks": "Horned, spiked shoulders, clawed feet",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_01.SK_Creature_01"
+   ]
+  },
+  {
+   "rank": 78,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 09",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_09`",
+   "height": "186",
+   "looks": "Ripped, a crown of tendrils and tusks",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_09.SK_Creature_09"
+   ]
+  },
+  {
+   "rank": 79,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 06",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_06`",
+   "height": "206",
+   "looks": "A huge fat horned bulk",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_06.SK_Creature_06"
+   ]
+  },
+  {
+   "rank": 80,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 04",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_04`",
+   "height": "199",
+   "looks": "Horned, a blade for one arm and a hooked scythe in the other",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_04.SK_Creature_04"
+   ]
+  },
+  {
+   "rank": 81,
+   "tier": "Tier 4: dangerous",
+   "name": "Creature 05",
+   "pack": "10 Creatures (Pack)",
+   "model": "`SK_Creature_05`",
+   "height": "184",
+   "looks": "Two long blades for arms",
+   "meshes": [
+    "/Game/Creatures_10_Pack/Mesh_UE4/SK_Creature_05.SK_Creature_05"
+   ]
+  },
+  {
+   "rank": 82,
+   "tier": "Tier 4: dangerous",
+   "name": "Exterminator",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Exterminator`",
+   "height": "202",
+   "looks": "Hulking brute",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Exterminator.SK_Exterminator"
+   ]
+  },
+  {
+   "rank": 83,
+   "tier": "Tier 4: dangerous",
+   "name": "Shell",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Shell`",
+   "height": "200",
+   "looks": "Pale armoured brute with big claws",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Shell.SK_Shell"
+   ]
+  },
+  {
+   "rank": 84,
+   "tier": "Tier 4: dangerous",
+   "name": "Bug",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Bug`",
+   "height": "200",
+   "looks": "Blue armoured insect-man, spiked forearms",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Bug.SK_Bug"
+   ]
+  },
+  {
+   "rank": 85,
+   "tier": "Tier 4: dangerous",
+   "name": "Horned",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Horned`",
+   "height": "207",
+   "looks": "Horned devil, long clawed arms",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Horned.SK_Horned"
+   ]
+  },
+  {
+   "rank": 86,
+   "tier": "Tier 4: dangerous",
+   "name": "Mutant",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Mutant`",
+   "height": "201",
+   "looks": "Muscular, one arm a long tentacle",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Mutant.SK_Mutant"
+   ]
+  },
+  {
+   "rank": 87,
+   "tier": "Tier 4: dangerous",
+   "name": "Ripper dog",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Ripper_dog`",
+   "height": "194",
+   "looks": "A big snarling hound with quills on its back",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Ripper_dog.SK_Ripper_dog"
+   ]
+  },
+  {
+   "rank": 88,
+   "tier": "Tier 4: dangerous",
+   "name": "Daemon",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Daemon`",
+   "height": "219",
+   "looks": "Tall, bat-eared, clawed",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Daemon.SK_Daemon"
+   ]
+  },
+  {
+   "rank": 89,
+   "tier": "Tier 4: dangerous",
+   "name": "Troll",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Troll`",
+   "height": "201",
+   "looks": "Heavily muscled and tusked",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Troll.SK_Troll"
+   ]
+  },
+  {
+   "rank": 90,
+   "tier": "Tier 4: dangerous",
+   "name": "Executioner",
+   "pack": "Fantasy Enemies (Pack)",
+   "model": "`SK_Executioner_Full`",
+   "height": "185",
+   "looks": "Big armoured man, spiked shoulders",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Executioner/Mesh_UE4/Full/SK_Executioner_Full.SK_Executioner_Full"
+   ]
+  },
+  {
+   "rank": 91,
+   "tier": "Tier 4: dangerous",
+   "name": "Monster Underwater 05",
+   "pack": "Monsters Underwater Pack",
+   "model": "`SK_Monster_Underwater_05`",
+   "height": "184",
+   "looks": "Crab claws, spiked shell armour, horned head",
+   "meshes": [
+    "/Game/Monsters_Underwater_Pack/Mesh/SK_Monster_Underwater_05.SK_Monster_Underwater_05"
+   ]
+  },
+  {
+   "rank": 92,
+   "tier": "Tier 4: dangerous",
+   "name": "Monster For Capsule",
+   "pack": "Monster In Capsule",
+   "model": "`SK_UE4_Monster_For_Capsule_Full`",
+   "height": "201",
+   "looks": "Horned, long blade claws on both hands",
+   "meshes": [
+    "/Game/Capsule_Scene/Mesh/Monster_For_Capsule/Mesh_UE4/SK_UE4_Monster_For_Capsule_Full.SK_UE4_Monster_For_Capsule_Full"
+   ]
+  },
+  {
+   "rank": 93,
+   "tier": "Tier 4: dangerous",
+   "name": "Parasite Spider",
+   "pack": "Parasites Pack",
+   "model": "`SK_Parasite_Spider`",
+   "height": "199",
+   "looks": "A human body on spider legs",
+   "meshes": [
+    "/Game/Parasites_Pack/Mesh/SK_Parasite_Spider.SK_Parasite_Spider"
+   ]
+  },
+  {
+   "rank": 94,
+   "tier": "Tier 4: dangerous",
+   "name": "Fantasy Animal (raptor mount)",
+   "pack": "Fantasy Animal (Pack)",
+   "model": "`SK_Fantasy_Animal_Full`",
+   "height": "205",
+   "looks": "Saddled raptor: jaws and clawed feet",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Animal/SK_Fantasy_Animal_Full.SK_Fantasy_Animal_Full"
+   ]
+  },
+  {
+   "rank": 95,
+   "tier": "Tier 5: bosses",
+   "name": "Alfa",
+   "pack": "Parasites Pack",
+   "model": "`SK_Alfa`",
+   "height": "217",
+   "looks": "Fanged, hulking, one arm a giant scythe",
+   "meshes": [
+    "/Game/Parasites_Pack/Mesh/SK_Alfa.SK_Alfa"
+   ]
+  },
+  {
+   "rank": 96,
+   "tier": "Tier 5: bosses",
+   "name": "Demon",
+   "pack": "Fantasy Enemies (Pack)",
+   "model": "`SK_Demon_Full`",
+   "height": "202",
+   "looks": "Horned, in layered armour",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Demon/Mesh_UE4/Full/SK_Demon_Full.SK_Demon_Full"
+   ]
+  },
+  {
+   "rank": 97,
+   "tier": "Tier 5: bosses",
+   "name": "Befouler",
+   "pack": "Fantasy Enemies (Pack)",
+   "model": "`SK_Befouler_Full_01`",
+   "height": "200",
+   "looks": "Giant curved horns, skulls carried on its back",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Befouler/Mesh_UE4/Full/SK_Befouler_Full_01.SK_Befouler_Full_01"
+   ]
+  },
+  {
+   "rank": 98,
+   "tier": "Tier 5: bosses",
+   "name": "Devil",
+   "pack": "Fantasy Enemies (Pack)",
+   "model": "`SK_Devil_Full`",
+   "height": "197",
+   "looks": "Horned, spikes all over",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Devil/Mesh_UE4/Full/SK_Devil_Full.SK_Devil_Full"
+   ]
+  },
+  {
+   "rank": 99,
+   "tier": "Tier 5: bosses",
+   "name": "Troll",
+   "pack": "Fantasy Enemies (Pack)",
+   "model": "`SK_Troll_Full_01`",
+   "height": "198",
+   "looks": "Bristling with spikes and armour plates",
+   "meshes": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Troll/Mesh_UE4/Full/SK_Troll_Full_01.SK_Troll_Full_01"
+   ]
+  },
+  {
+   "rank": 100,
+   "tier": "Tier 5: bosses",
+   "name": "Spider",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Spider`",
+   "height": "250",
+   "looks": "Scythe legs, an open ribcage of a chest",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Spider.SK_Spider"
+   ]
+  },
+  {
+   "rank": 101,
+   "tier": "Tier 5: bosses",
+   "name": "Rock",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Rock`",
+   "height": "330",
+   "looks": "Spines on its back, long claws",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Rock.SK_Rock"
+   ]
+  },
+  {
+   "rank": 102,
+   "tier": "Tier 5: bosses",
+   "name": "Titan",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Titan`",
+   "height": "250",
+   "looks": "Massive clawed arms",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Titan.SK_Titan"
+   ]
+  },
+  {
+   "rank": 103,
+   "tier": "Tier 5: bosses",
+   "name": "Hunter",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Hunter`",
+   "height": "253",
+   "looks": "A giant hulk on its knuckles",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Hunter.SK_Hunter"
+   ]
+  },
+  {
+   "rank": 104,
+   "tier": "Tier 5: bosses",
+   "name": "Nasty",
+   "pack": "Creatures Mega Pack",
+   "model": "`SK_Nasty`",
+   "height": "270",
+   "looks": "A giant spider, 6.7 m long",
+   "meshes": [
+    "/Game/Creatures_Pack/Mesh/SK_Nasty.SK_Nasty"
+   ]
+  },
+  {
+   "rank": 105,
+   "tier": "Tier 5: bosses",
+   "name": "Fantasy Elephant",
+   "pack": "Fantasy Animal (Pack)",
+   "model": "`SK_Fantasy_Elephant_Full`",
+   "height": "705",
+   "looks": "A 7 m war elephant, armoured, spikes on the tusks",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Mesh/Full/SK_Fantasy_Elephant_Full.SK_Fantasy_Elephant_Full"
+   ]
+  },
+  {
+   "rank": 106,
+   "tier": "Tier 5: bosses",
+   "name": "Fantasy Elephant with a tower",
+   "pack": "Fantasy Animal (Pack)",
+   "model": "`SK_Fantasy_Elephant_Build_Full`",
+   "height": "1070",
+   "looks": "The war elephant carrying a fortified tower",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Full/SK_Fantasy_Elephant_Build_Full.SK_Fantasy_Elephant_Build_Full"
+   ]
+  },
+  {
+   "rank": 107,
+   "tier": "Tier 5: bosses",
+   "name": "Fantasy Dragon",
+   "pack": "Fantasy Animal (Pack)",
+   "model": "`SK_Fantasy_Dragon_Full`",
+   "height": "308",
+   "looks": "A dragon with a 12 m wingspan",
+   "meshes": [
+    "/Game/Animals_Pack/Mesh/Fantasy_Dragon/SK_Fantasy_Dragon_Full.SK_Fantasy_Dragon_Full"
+   ]
+  }
+ ]
+}

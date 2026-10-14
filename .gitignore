@@ -64,6 +64,7 @@ renders/
 
 # README showcase stills (small JPGs) are the one media exception
 !docs/images/*.jpg
+!docs/images/monsters/*.jpg
 
 # --- Archives ---
 *.zip
