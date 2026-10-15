@@ -14,6 +14,18 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
+#include "InputKeyEventArgs.h"
+#include "Components/PointLightComponent.h"
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraSystemInstance.h"
+#include "NiagaraSystemInstanceController.h"
+#include "NiagaraEmitterInstance.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 static const FName RDCombatSlot(TEXT("DefaultSlot"));
 
@@ -25,6 +37,25 @@ URDCombatComponent::URDCombatComponent()
 const FRDWeaponDef* URDCombatComponent::Weapon() const
 {
 	return Generator && Generator->Weapons.IsValidIndex(WeaponIndex) ? &Generator->Weapons[WeaponIndex] : nullptr;
+}
+
+const FRDWeaponDef* URDCombatComponent::AttackWeapon() const
+{
+	return AttackTime >= 0.f && Generator && Generator->Weapons.IsValidIndex(AttackIndex) ? &Generator->Weapons[AttackIndex] : Weapon();
+}
+
+int32 URDCombatComponent::GetAlongsideSpell() const
+{
+	if (Generator)
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+			if (Generator->Weapons[I].bSpell && Generator->Weapons[I].bAlongside) return I;
+	return -1;
+}
+
+bool URDCombatComponent::StartSpell()
+{
+	const int32 I = GetAlongsideSpell();
+	return I >= 0 && StartAttackWith(I);
 }
 
 USkeletalMeshComponent* URDCombatComponent::Body() const
@@ -59,10 +90,10 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 
 void URDCombatComponent::SelectWeapon(int32 Index)
 {
-	if (!Generator || !Generator->Weapons.IsValidIndex(Index) || Index == WeaponIndex || bDead) return;
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index) || Index == WeaponIndex || bDead || Generator->Weapons[Index].bAlongside) return;
 	if (AttackTime >= 0.f) EndAttack();
 	if (WeaponIndex >= 0 && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Draw"), GetOwner()->GetActorLocation());
-	WeaponIndex = Index; NextAttack = 0;
+	WeaponIndex = Index;
 	const FRDWeaponDef& W = Generator->Weapons[Index];
 	USkeletalMeshComponent* M = Body();
 	auto Hold = [&](UStaticMeshComponent* C, UStaticMesh* Mesh, FName Bone, const FTransform& Grip)
@@ -92,18 +123,41 @@ void URDCombatComponent::SetSlowed(bool bSlow)
 
 bool URDCombatComponent::StartAttack()
 {
-	const FRDWeaponDef* W = Weapon();
+	return StartAttackWith(WeaponIndex);
+}
+
+bool URDCombatComponent::StartAttackWith(int32 Index)
+{
+	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
 	if (!W || !M || bDead || AttackTime >= 0.f || W->Attacks.Num() == 0) return false;
 	UAnimInstance* AI = M->GetAnimInstance();
-	UAnimSequenceBase* Clip = W->Attacks[NextAttack % W->Attacks.Num()];
+	if (NextOf.Num() < Generator->Weapons.Num()) NextOf.SetNumZeroed(Generator->Weapons.Num());
+	const int32 NextAttack = NextOf[Index], K = NextAttack % W->Attacks.Num();
+	UAnimSequenceBase* Clip = W->Attacks[K];
 	if (!AI || !Clip) return false;
+	AttackIndex = Index;
 	const float Rate = FMath::Max(W->PlayRate, 0.1f);
-	const float T0 = W->AttackStarts.IsValidIndex(NextAttack % W->Attacks.Num()) ? W->AttackStarts[NextAttack % W->Attacks.Num()] : 0.f;
-	const float T1 = W->AttackEnds.IsValidIndex(NextAttack % W->Attacks.Num()) && W->AttackEnds[NextAttack % W->Attacks.Num()] > T0 ? W->AttackEnds[NextAttack % W->Attacks.Num()] : Clip->GetPlayLength();
-	const float Hit = W->HitTimes.IsValidIndex(NextAttack % W->Attacks.Num()) ? W->HitTimes[NextAttack % W->Attacks.Num()] : (T0 + T1) * 0.5f;
+	const float T0 = W->AttackStarts.IsValidIndex(K) ? W->AttackStarts[K] : 0.f;
+	const float T1 = W->AttackEnds.IsValidIndex(K) && W->AttackEnds[K] > T0 ? W->AttackEnds[K] : Clip->GetPlayLength();
+	const float Hit = W->HitTimes.IsValidIndex(K) ? W->HitTimes[K] : (T0 + T1) * 0.5f;
+	LastTarget = nullptr;
+	if (W->bSpell)
+	{
+		// a spell: she turns to the nearest monster in front of her within its reach that she can see, and the charge
+		// lights on her hand
+		if (AActor* O = GetOwner())
+			if (ARDMonster* Best = PickTarget(W->Reach, true))
+			{
+				LastTarget = Best;
+				O->SetActorRotation(FRotator(0.f, ((Best->GetActorLocation() - O->GetActorLocation()) * FVector(1, 1, 0)).Rotation().Yaw, 0.f));
+			}
+		StopCharge();
+		if (W->ChargeEffect) ChargeComp = SpawnFx(W->ChargeEffect, FVector::ZeroVector, FRotator::ZeroRotator, W->ChargeEffectScale, M, W->SpellBone);
+		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Charge.%s"), *W->Name.ToString())), GetOwner()->GetActorLocation());
+	}
 	// she turns to the nearest monster in front of her that the weapon could reach in a step (no need to line up by hand)
-	if (AActor* O = GetOwner())
+	else if (AActor* O = GetOwner())
 	{
 		const FVector L = O->GetActorLocation(), Fw = O->GetActorForwardVector();
 		const ARDMonster* Best = nullptr; float BestD = W->Reach + 160.f;
@@ -120,14 +174,14 @@ bool URDCombatComponent::StartAttack()
 	AttackTime = 0.f; AttackLen = (T1 - T0) / Rate; AttackHit = FMath::Clamp((Hit - T0) / Rate, 0.05f, AttackLen); bHitDone = false;
 	bWhooshDone = false;
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
-	++NextAttack; ++AttacksMade;
+	++NextOf[Index]; ++AttacksMade;
 	SetSlowed(true);
 	return true;
 }
 
 void URDCombatComponent::Strike()
 {
-	const FRDWeaponDef* W = Weapon();
+	const FRDWeaponDef* W = AttackWeapon();
 	AActor* O = GetOwner();
 	if (!W || !O || !Generator) return;
 	const FVector L = O->GetActorLocation(), Fw = O->GetActorForwardVector();
@@ -155,6 +209,7 @@ void URDCombatComponent::EndAttack()
 {
 	AttackTime = -1.f;
 	SetSlowed(false);
+	StopCharge();
 }
 
 void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
@@ -199,7 +254,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 void URDCombatComponent::Revive(bool bToStart)
 {
 	AActor* O = GetOwner();
-	bDead = false; Health = MaxHealth; AttackTime = -1.f; SetSlowed(false); StaggerUntil = -100.f;
+	bDead = false; Health = MaxHealth; AttackTime = -1.f; SetSlowed(false); StaggerUntil = -100.f; StopCharge();
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
 	if (bToStart && O && Generator)
 	{
@@ -214,6 +269,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (!Generator) return;
 	const float Now = GetWorld()->GetTimeSeconds();
 	TickSounds(Dt, Now);
+	TickBolts(Dt);
 	if (bDead)
 	{
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
@@ -226,13 +282,19 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 				if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
 				if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
 				if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
-				if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Left) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f) StartAttack();
+				// the drawn weapon: left mouse (X, RT); E too when it is a spell. A spell cast alongside it: right mouse or E (Y, LT)
+				const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
+				if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Left) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f
+					|| (bDrawnSpell && PC->IsInputKeyDown(EKeys::E))) StartAttack();
+				else if (GetAlongsideSpell() >= 0 && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Top)
+					|| PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f)) StartSpell();
 			}
 	if (AttackTime >= 0.f)
 	{
 		AttackTime += Dt;
-		if (!bWhooshDone && AttackTime >= AttackHit - 0.16f) { bWhooshDone = true; Generator->PlaySoundAt(TEXT("Player.Whoosh"), GetOwner()->GetActorLocation()); }
-		if (!bHitDone && AttackTime >= AttackHit) { bHitDone = true; Strike(); }
+		const bool bSpell = IsSpell();
+		if (!bWhooshDone && !bSpell && AttackTime >= AttackHit - 0.16f) { bWhooshDone = true; Generator->PlaySoundAt(TEXT("Player.Whoosh"), GetOwner()->GetActorLocation()); }
+		if (!bHitDone && AttackTime >= AttackHit) { bHitDone = true; if (bSpell) LaunchBolt(); else Strike(); }
 		if (AttackTime >= AttackLen) EndAttack();
 	}
 	// out of a fight the hit points come back
@@ -264,4 +326,254 @@ void URDCombatComponent::TickSounds(float Dt, float Now)
 		}
 	}
 	else StepDist = FMath::Min(StepDist, 40.f);
+}
+
+bool URDCombatComponent::SimulateKey(FKey Key, bool bDown)
+{
+	const APawn* P = Cast<APawn>(GetOwner());
+	APlayerController* PC = P ? Cast<APlayerController>(P->GetController()) : nullptr;
+	return PC && PC->InputKey(FInputKeyEventArgs::CreateSimulated(Key, bDown ? IE_Pressed : IE_Released, bDown ? 1.f : 0.f));
+}
+
+// ------------------------------------------------------------------------------------------------ spells
+bool URDCombatComponent::IsSpell() const { const FRDWeaponDef* W = AttackWeapon(); return W && W->bSpell; }
+
+bool URDCombatComponent::IsCharging() const { return ChargeComp != nullptr && ChargeComp->IsActive(); }
+
+TArray<FVector> URDCombatComponent::GetBolts() const
+{
+	TArray<FVector> Out;
+	for (const FBolt& B : Bolts) Out.Add(B.At);
+	return Out;
+}
+
+int32 URDCombatComponent::GetSpellParticles(FVector Location, float Radius, int32& Systems) const
+{
+	int32 Num = 0; Systems = 0;
+	for (const USceneComponent* C : SpellComps)
+	{
+		if (!IsValid(C) || (Radius > 0.f && FVector::DistSquared(C->GetComponentLocation(), Location) > Radius * Radius)) continue;
+		int32 N = 0;
+		if (const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C))
+		{
+			const FNiagaraSystemInstanceControllerConstPtr Ctl = Nc->GetSystemInstanceController();
+			if (Ctl.IsValid() && Ctl->IsValid())
+				if (const FNiagaraSystemInstance* SI = Ctl->GetSystemInstance_Unsafe())
+					for (const FNiagaraEmitterInstanceRef& E : SI->GetEmitters()) N += E->GetNumParticles();
+		}
+		else if (const UParticleSystemComponent* Pc = Cast<UParticleSystemComponent>(C)) N = Pc->GetNumActiveParticles();
+		else continue;
+		Num += N; if (N > 0) ++Systems;
+	}
+	return Num;
+}
+
+UFXSystemComponent* URDCombatComponent::SpawnFx(UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, USceneComponent* AttachTo, FName Socket)
+{
+	UFXSystemComponent* C = nullptr;
+	if (UNiagaraSystem* Ns = Cast<UNiagaraSystem>(Asset))
+		C = AttachTo ? UNiagaraFunctionLibrary::SpawnSystemAttached(Ns, AttachTo, Socket, FVector::ZeroVector, FRotator::ZeroRotator, FVector(Scale), EAttachLocation::SnapToTarget, true, ENCPoolMethod::None)
+		             : UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, Ns, At, Rot, FVector(Scale), true, true, ENCPoolMethod::None, false);
+	else if (UParticleSystem* Ps = Cast<UParticleSystem>(Asset))
+		C = AttachTo ? UGameplayStatics::SpawnEmitterAttached(Ps, AttachTo, Socket, FVector::ZeroVector, FRotator::ZeroRotator, FVector(Scale), EAttachLocation::SnapToTarget, true)
+		             : UGameplayStatics::SpawnEmitterAtLocation(this, Ps, At, Rot, FVector(Scale), true);
+	if (C) SpellComps.Add(C);
+	return C;
+}
+
+UPointLightComponent* URDCombatComponent::MakeLight(const FVector& At, const FLinearColor& Color, float Intensity, float Radius)
+{
+	if (Intensity <= 0.f || !GetOwner()) return nullptr;
+	UPointLightComponent* L = NewObject<UPointLightComponent>(GetOwner());
+	L->SetMobility(EComponentMobility::Movable);
+	L->SetUsingAbsoluteLocation(true); L->SetUsingAbsoluteRotation(true);
+	L->SetIntensityUnits(ELightUnits::Candelas);
+	L->SetIntensity(Intensity); L->SetLightColor(Color); L->SetAttenuationRadius(Radius);
+	L->SetCastShadows(false);
+	L->RegisterComponent();
+	L->SetWorldLocation(At);
+	SpellComps.Add(L);
+	return L;
+}
+
+bool URDCombatComponent::CanSee(const FVector& From, const AActor* Target) const
+{
+	// walls and doors are in the way; the monsters and she herself are not
+	// (seen when any of three points of it is: its middle, higher up, and a little to either side; a door frame or a
+	// table between her hand and its middle alone does not hide it)
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDSpellSight), false, GetOwner());
+	for (const ARDMonster* Mo : Generator->GetMonsters()) if (Mo) Q.AddIgnoredActor(Mo);
+	const FVector C = Target->GetActorLocation(), Side = FVector::CrossProduct((C - From).GetSafeNormal2D(), FVector::UpVector) * 25.f;
+	for (const FVector& P : { C, C + FVector(0, 0, 45.f), C + Side + FVector(0, 0, 20.f), C - Side + FVector(0, 0, 20.f) })
+	{
+		FHitResult H;
+		if (!GetWorld()->LineTraceSingleByChannel(H, From, P, ECC_Visibility, Q)) return true;
+	}
+	return false;
+}
+
+ARDMonster* URDCombatComponent::PickTarget(float Reach, bool bNeedSight) const
+{
+	const AActor* O = GetOwner();
+	if (!O || !Generator) return nullptr;
+	const FVector L = O->GetActorLocation(), Fw = O->GetActorForwardVector();
+	ARDMonster* Best = nullptr; float BestScore = 1e18f;
+	for (ARDMonster* Mo : Generator->GetMonsters())
+	{
+		if (!Mo || Mo->IsDead()) continue;
+		const FVector D = (Mo->GetActorLocation() - L) * FVector(1, 1, 0);
+		const float Dist = D.Size() - Mo->GetCapsuleComponent()->GetScaledCapsuleRadius();
+		const float Dot = FVector::DotProduct(D.GetSafeNormal(), Fw);
+		if (Dist > Reach || FMath::Abs(Mo->GetActorLocation().Z - L.Z) > 300.f || Dot < -0.5f) continue;
+		// (the nearest, but one in front of her before one to the side)
+		const float Score = Dist * (Dot > 0.5f ? 1.f : 1.8f);
+		if (Score >= BestScore || (bNeedSight && !CanSee(L + FVector(0, 0, 50.f), Mo))) continue;
+		BestScore = Score; Best = Mo;
+	}
+	return Best;
+}
+
+void URDCombatComponent::StopCharge()
+{
+	if (ChargeComp) ChargeComp->Deactivate();
+	ChargeComp = nullptr;
+}
+
+void URDCombatComponent::LaunchBolt()
+{
+	const FRDWeaponDef* W = AttackWeapon();
+	USkeletalMeshComponent* M = Body();
+	AActor* O = GetOwner();
+	if (!W || !M || !O) return;
+	// the charge is the bolt: it leaves her hand (otherwise it goes out and the bolt is a system of its own)
+	UFXSystemComponent* Grown = (ChargeComp && W->ChargeEffect && W->ChargeEffect == W->BoltEffect) ? ChargeComp.Get() : nullptr;
+	if (Grown) { ChargeComp = nullptr; Grown->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform); Grown->SetWorldScale3D(FVector(W->BoltEffectScale)); }
+	else StopCharge();
+	const FVector Fw = O->GetActorForwardVector();
+	FBolt B;
+	B.At = M->GetSocketLocation(W->SpellBone) + Fw * 12.f;
+	B.Weapon = AttackIndex;
+	ARDMonster* Tg = LastTarget.Get();
+	if (Tg && !Tg->IsDead())
+	{
+		B.Target = Tg;
+		B.Vel = (Tg->GetActorLocation() + FVector(0, 0, Tg->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.15f) - B.At).GetSafeNormal() * W->BoltSpeed;
+	}
+	else B.Vel = Fw * W->BoltSpeed;
+	const FRotator R = B.Vel.Rotation();
+	if (Grown) { Grown->SetWorldLocationAndRotation(B.At, R); B.Fx = Grown; }
+	else if (W->BoltEffect) B.Fx = SpawnFx(W->BoltEffect, B.At, R, W->BoltEffectScale);
+	if (W->BoltCoreEffect) B.Core = SpawnFx(W->BoltCoreEffect, B.At, R, W->BoltCoreEffectScale);
+	B.Light = MakeLight(B.At, W->SpellLightColor, W->SpellLightIntensity, 900.f);
+	Bolts.Add(B);
+	++BoltsCast; LastBoltFrom = B.At;
+	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Cast.%s"), *W->Name.ToString())), B.At);
+}
+
+void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
+{
+	if (!Generator->Weapons.IsValidIndex(B.Weapon)) return;
+	const FRDWeaponDef& W = Generator->Weapons[B.Weapon];
+	AActor* O = GetOwner();
+	if (W.BurstEffect) SpawnFx(W.BurstEffect, At, B.Vel.Rotation(), W.BurstEffectScale);
+	if (W.BurstFlameEffect)
+		if (UFXSystemComponent* Fl = SpawnFx(W.BurstFlameEffect, At, FRotator::ZeroRotator, W.BurstFlameEffectScale)) TimedFx.Add({ Fl, W.BurstFlameSeconds });
+	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *W.Name.ToString())), At);
+	// the flames on the bolt die away where they are (their particles finish); its light flares and fades
+	if (UFXSystemComponent* F = B.Fx.Get()) F->Deactivate();
+	if (UFXSystemComponent* F = B.Core.Get()) F->Deactivate();
+	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, W.SpellLightIntensity * 3.f }); }
+	bool bAny = false;
+	auto Hurt = [&](ARDMonster* Mo, float Amount, const FVector& Where)
+	{
+		const bool bKilled = Mo->ApplyDamageAt(Amount, O, &Where);
+		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Amount, false);
+		DamageDealt += Amount; ++HitsLanded; bAny = true;
+		if (bKilled) ++Kills;
+	};
+	if (Direct && !Direct->IsDead()) Hurt(Direct, W.Damage, At);
+	for (ARDMonster* Mo : Generator->GetMonsters())
+	{
+		if (!Mo || Mo == Direct || Mo->IsDead()) continue;
+		const FVector C = Mo->GetActorLocation();
+		const float Gap = FVector::Dist(C * FVector(1, 1, 0), At * FVector(1, 1, 0)) - Mo->GetCapsuleComponent()->GetScaledCapsuleRadius();
+		if (Gap > W.BoltSplash || FMath::Abs(C.Z - At.Z) > Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 80.f) continue;
+		Hurt(Mo, W.Damage * 0.5f, C + ((At - C) * FVector(1, 1, 0)).GetSafeNormal() * Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.8f);
+	}
+	if (bAny) LastHitTime = GetWorld()->GetTimeSeconds();
+	(Direct ? BoltsOnMonsters : BoltsElsewhere)++;
+	LastBurstAt = At; LastBoltFlown = B.Flown;
+}
+
+void URDCombatComponent::TickBolts(float Dt)
+{
+	// the bursts' light
+	for (int32 I = Flashes.Num() - 1; I >= 0; --I)
+	{
+		FFlash& F = Flashes[I]; F.Age += Dt;
+		UPointLightComponent* L = F.Light.Get();
+		const float K = 1.f - F.Age / 0.45f;
+		if (!L || K <= 0.f) { if (L) L->DestroyComponent(); Flashes.RemoveAt(I); continue; }
+		L->SetIntensity(F.Peak * K * K);
+	}
+	for (int32 I = TimedFx.Num() - 1; I >= 0; --I)
+	{
+		TimedFx[I].Left -= Dt;
+		if (TimedFx[I].Left > 0.f && TimedFx[I].Fx.IsValid()) continue;
+		if (UFXSystemComponent* F = TimedFx[I].Fx.Get()) F->Deactivate();
+		TimedFx.RemoveAt(I);
+	}
+	SpellComps.RemoveAll([](const TObjectPtr<USceneComponent>& C) { return !IsValid(C); });
+	if (Bolts.Num() == 0 || !Generator) return;
+	const AActor* O = GetOwner();
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDBolt), false, O);
+	for (const ARDMonster* Mo : Generator->GetMonsters()) if (Mo) Q.AddIgnoredActor(Mo);
+	for (int32 I = Bolts.Num() - 1; I >= 0; --I)
+	{
+		FBolt& B = Bolts[I];
+		if (!Generator->Weapons.IsValidIndex(B.Weapon)) { Bolts.RemoveAt(I); continue; }
+		const FRDWeaponDef& W = Generator->Weapons[B.Weapon];
+		// it steers after its monster (as far as it can turn)
+		const float Speed = B.Vel.Size();
+		if (ARDMonster* Tg = B.Target.Get())
+			if (!Tg->IsDead())
+			{
+				const FVector Want = (Tg->GetActorLocation() + FVector(0, 0, Tg->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.15f) - B.At).GetSafeNormal();
+				const FVector Cur = B.Vel.GetSafeNormal();
+				const float Ang = FMath::Acos(FMath::Clamp(FVector::DotProduct(Cur, Want), -1.f, 1.f)), MaxAng = FMath::DegreesToRadians(W.BoltTurnRate) * Dt;
+				const FQuat Turn = FQuat::FindBetweenNormals(Cur, Want);
+				B.Vel = (Ang <= MaxAng ? Want : FQuat::Slerp(FQuat::Identity, Turn, MaxAng / FMath::Max(Ang, 1e-4f)).RotateVector(Cur)) * Speed;
+			}
+		const FVector Next = B.At + B.Vel * Dt;
+		// the first monster on the way (the bolt against each capsule's axis), then the first wall
+		ARDMonster* HitMo = nullptr; float HitT = 2.f; FVector HitAt = Next;
+		for (ARDMonster* Mo : Generator->GetMonsters())
+		{
+			if (!Mo || Mo->IsDead()) continue;
+			const UCapsuleComponent* Cap = Mo->GetCapsuleComponent();
+			const float R = Cap->GetScaledCapsuleRadius(), Hh = Cap->GetScaledCapsuleHalfHeight();
+			const FVector C = Mo->GetActorLocation(), A0 = C - FVector(0, 0, Hh - R), A1 = C + FVector(0, 0, Hh - R);
+			FVector P, Qp;
+			FMath::SegmentDistToSegmentSafe(B.At, Next, A0, A1, P, Qp);
+			if (FVector::Dist(P, Qp) > R + 14.f) continue;
+			const float T = (Next - B.At).IsNearlyZero() ? 0.f : FVector::DotProduct(P - B.At, Next - B.At) / (Next - B.At).SizeSquared();
+			if (T < HitT) { HitT = T; HitMo = Mo; HitAt = Qp + (P - Qp).GetSafeNormal() * R * 0.85f; }
+		}
+		FHitResult H;
+		if (GetWorld()->LineTraceSingleByChannel(H, B.At, Next, ECC_Visibility, Q) && H.Time < HitT)
+		{
+			B.Flown += (H.ImpactPoint - B.At).Size();
+			Burst(B, H.ImpactPoint + H.ImpactNormal * 10.f, nullptr); Bolts.RemoveAt(I); continue;
+		}
+		if (HitMo)
+		{
+			B.Flown += (HitAt - B.At).Size();
+			Burst(B, HitAt, HitMo); Bolts.RemoveAt(I); continue;
+		}
+		B.Flown += (Next - B.At).Size(); B.At = Next;
+		if (B.Flown >= W.Reach + 150.f) { Burst(B, B.At, nullptr); Bolts.RemoveAt(I); continue; }
+		if (UFXSystemComponent* F = B.Fx.Get()) F->SetWorldLocationAndRotation(B.At, B.Vel.Rotation());
+		if (UFXSystemComponent* F = B.Core.Get()) F->SetWorldLocationAndRotation(B.At, B.Vel.Rotation());
+		if (UPointLightComponent* L = B.Light.Get()) L->SetWorldLocation(B.At);
+	}
 }

@@ -2,11 +2,14 @@
   <name>.fbx        skinned mesh only (native-centimetre rig, HEIGHT cm, baked mesh transforms, identity parent-inverse)
   <name>_Clips.fbx  every glTF clip re-keyed on the scaled armature as action A_<Clip> (bone translations scaled with the rig)
 Clips in the mesh FBX would make UE rebind the skin to a clip pose, hence two files. Textures extracted as T_<tag>_<role>.png.
-Blender: -b -P tripo_build.py -- model.glb out_dir name tag [height_cm]"""
+clip_maker: a Python file with make_clips(arm, scene, clips) -> {name: frames} (frames as sampled here: per frame, each pose
+bone's matrix_basis decomposed, on the GLB's own armature) for clips the GLB lacks (caster_clips.py: an idle and spell casts).
+Blender: -b -P tripo_build.py -- model.glb out_dir name tag [height_cm] [clip_maker.py]"""
 import bpy, sys, os, json
 from mathutils import Matrix
 argv = sys.argv[sys.argv.index("--") + 1:]
 src, out, NAME, TAG = argv[0], argv[1], argv[2], argv[3]; HEIGHT_CM = float(argv[4]) if len(argv) > 4 else 165.0
+MAKER = argv[5] if len(argv) > 5 else None
 os.makedirs(out, exist_ok=True)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
@@ -47,6 +50,13 @@ ad.action = None
 for a in list(bpy.data.actions): bpy.data.actions.remove(a)
 for pb in arm.pose.bones: pb.matrix_basis.identity()
 bpy.context.view_layer.update()
+if MAKER:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("clip_maker", MAKER); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    for name, frames in mod.make_clips(arm, sc, clips).items():
+        clips[name] = frames; print("made", name, len(frames))
+    for pb in arm.pose.bones: pb.matrix_basis.identity()
+    bpy.context.view_layer.update()
 zs = [(meshes[0].matrix_world @ v.co).z for v in meshes[0].data.vertices]
 h = max(zs) - min(zs); S = HEIGHT_CM / h
 print("source height m", round(h, 4), "unit scale", round(S, 3))

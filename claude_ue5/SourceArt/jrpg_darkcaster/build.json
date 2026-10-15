@@ -1,0 +1,16 @@
+{
+ "clips": {
+  "Idle": 369,
+  "Run": 31,
+  "Walk": 57,
+  "CastL1": 31,
+  "CastL2": 33,
+  "Slash1": 27,
+  "Slash2": 30,
+  "Slash3": 26
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_darkcaster\\T_DarkCaster_Color.png"
+ },
+ "height_cm": 170.0
+}

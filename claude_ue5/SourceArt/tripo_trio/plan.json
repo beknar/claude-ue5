@@ -1,0 +1,182 @@
+{
+ "fps": 30,
+ "seconds": 60.0,
+ "events": [
+  {
+   "kind": "cast",
+   "who": "trio_caster",
+   "hand": "hand_r",
+   "charge": 28.65,
+   "release": 28.926,
+   "target": "trio_mutant"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_caster",
+   "hand": "hand_r",
+   "charge": 29.691,
+   "release": 30.04,
+   "target": "trio_mutant"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_caster",
+   "hand": "hand_r",
+   "charge": 30.805,
+   "release": 31.197,
+   "target": "trio_mutant"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_caster",
+   "hand": "hand_r",
+   "charge": 31.962,
+   "release": 32.238,
+   "target": "trio_mutant"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_caster",
+   "hand": "hand_r",
+   "charge": 33.003,
+   "release": 33.395,
+   "target": "trio_mutant"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_caster",
+   "hand": "hand_r",
+   "charge": 34.16,
+   "release": 34.508,
+   "target": "trio_mutant"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_dark",
+   "hand": "hand_l",
+   "charge": 46.65,
+   "release": 46.926,
+   "target": "trio_daemon"
+  },
+  {
+   "kind": "cast",
+   "who": "trio_dark",
+   "hand": "hand_l",
+   "charge": 47.641,
+   "release": 48.033,
+   "target": "trio_daemon"
+  }
+ ],
+ "captions": [
+  {
+   "t0": 3.2,
+   "t1": 9.8,
+   "head": "JRPG-FEM5-TRIPO",
+   "lines": [
+    "the player of the procedural levels  \u00b7  her own idle, walk and run"
+   ]
+  },
+  {
+   "t0": 10.2,
+   "t1": 20.26571025641026,
+   "head": "SWORD  \u00b7  SPEAR  \u00b7  AXE",
+   "lines": [
+    "the attack clips of three Fab animation packs, retargeted to her  \u00b7  the weapons of random_dungeoncombat_level"
+   ]
+  },
+  {
+   "t0": 21.2,
+   "t1": 27.8,
+   "head": "GIRL-CASTER-TRIPO",
+   "lines": [
+    "her own walk and run  \u00b7  an idle and three casts made for her in Blender (caster_clips.py)"
+   ]
+  },
+  {
+   "t0": 28.2,
+   "t1": 35.52347826086957,
+   "head": "FIRE SPELL",
+   "lines": [
+    "sparks gather on her hand, the bolt leaves at the release and bursts on the mutant  \u00b7  the fire effects of docs/magic.md"
+   ]
+  },
+  {
+   "t0": 39.2,
+   "t1": 45.8,
+   "head": "GIRL-DARKCASTER-TRIPO",
+   "lines": [
+    "her own idle, walk and run  \u00b7  the right hand closed on the sword's hilt in every clip"
+   ]
+  },
+  {
+   "t0": 46.2,
+   "t1": 55.16965296055529,
+   "head": "FIRE AND STEEL",
+   "lines": [
+    "two casts from her left hand, then three cuts of the sword in her right  \u00b7  all made for her in Blender (darkcaster_clips.py)"
+   ]
+  },
+  {
+   "t0": 57.2,
+   "t1": 59.9,
+   "head": "THREE TRIPO CHARACTERS",
+   "lines": [
+    "jrpg-fem5-tripo  \u00b7  girl-caster-tripo  \u00b7  girl-darkcaster-tripo"
+   ]
+  }
+ ],
+ "segments": {
+  "fem5": [
+   3.0,
+   21.0
+  ],
+  "caster": [
+   21.0,
+   39.0
+  ],
+  "dark": [
+   39.0,
+   57.0
+  ]
+ },
+ "spell": {
+  "bolt_speed": 1700.0,
+  "bolt": "/Game/RandomDungeon/Magic/NS_RDM_FirePool_Warm",
+  "bolt_scale": 0.2,
+  "charge": "/Game/Feather/Demo/StarterContent/Particles/P_Sparks",
+  "charge_scale": 0.3,
+  "burst": "/Game/Feather/Demo/StarterContent/Particles/P_Explosion",
+  "burst_scale": 1.0,
+  "burst_flame": "/Game/RandomDungeon/Magic/NS_RDM_FireWings_Warm",
+  "burst_flame_scale": 0.35,
+  "burst_flame_seconds": 0.35,
+  "light_cd": 150.0
+ },
+ "hits": {
+  "troll": [
+   10.994,
+   11.88,
+   12.637,
+   13.847,
+   14.677,
+   16.337,
+   17.538,
+   18.852
+  ],
+  "mutant": [
+   29.274,
+   30.387,
+   31.544,
+   32.585,
+   33.742,
+   34.856
+  ],
+  "daemon": [
+   47.28,
+   48.387,
+   53.004,
+   53.784,
+   54.477
+  ]
+ }
+}

@@ -180,6 +180,11 @@ void ARDMonster::Face(const FVector& Dir, float Dt)
 
 bool ARDMonster::ApplyDamage(float Amount, AActor* From)
 {
+	return ApplyDamageAt(Amount, From, nullptr);
+}
+
+bool ARDMonster::ApplyDamageAt(float Amount, AActor* From, const FVector* At)
+{
 	if (!bCombat || bDead || Amount <= 0.f) return false;
 	Health = FMath::Max(0.f, Health - Amount);
 	LastHurtTime = GetWorld()->GetTimeSeconds();
@@ -193,6 +198,7 @@ bool ARDMonster::ApplyDamage(float Amount, AActor* From)
 		if (const URDCombatComponent* C = From->FindComponentByClass<URDCombatComponent>())
 			if (const UStaticMeshComponent* W = C->GetWeaponMesh())
 				if (W->GetStaticMesh()) Strike = W->Bounds.GetBox().GetClosestPointTo(Center);
+	if (At) Strike = *At;
 	// (drawn toward its trunk on the attacker's side, at a height of its own: a blow that only met a hand or a horn would hardly show)
 	const FVector ToFrom = ((FromLoc - Center) * FVector(1, 1, 0)).GetSafeNormal(1e-4f, GetActorForwardVector());
 	const FVector Trunk = Center + ToFrom * GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.9f + FVector(0, 0, SR.FRandRange(-0.3f, 0.5f) * GetCapsuleComponent()->GetScaledCapsuleHalfHeight());

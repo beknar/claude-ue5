@@ -43,6 +43,8 @@ public:
 	// ---- fighting
 	/** true when this killed it */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") bool ApplyDamage(float Amount, AActor* From);
+	/** the same, struck at a known point (a spell's bolt): the wound goes there */
+	bool ApplyDamageAt(float Amount, AActor* From, const FVector* At);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetHealth() const { return Health; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetMaxHealth() const { return MaxHealth; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetDamage() const { return Damage; }

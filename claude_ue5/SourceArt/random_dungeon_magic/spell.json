@@ -1,0 +1,50 @@
+{
+ "name": "Fire",
+ "damage": 25.0,
+ "reach": 1400.0,
+ "rate": 1.15,
+ "bolt_speed": 1700.0,
+ "bolt_turn": 200.0,
+ "splash": 170.0,
+ "bone": "hand_r",
+ "charge": "/Game/Feather/Demo/StarterContent/Particles/P_Sparks",
+ "charge_scale": 0.3,
+ "bolt": "/Game/RandomDungeon/Magic/NS_RDM_FirePool_Warm",
+ "bolt_scale": 0.2,
+ "burst": "/Game/Feather/Demo/StarterContent/Particles/P_Explosion",
+ "burst_scale": 1.0,
+ "burst_flame": "/Game/RandomDungeon/Magic/NS_RDM_FireWings_Warm",
+ "burst_flame_scale": 0.35,
+ "burst_flame_seconds": 0.35,
+ "light": [
+  1.0,
+  0.45,
+  0.12
+ ],
+ "light_cd": 150.0,
+ "casts": [
+  {
+   "clip": "/Game/JRPG/CasterAnims/AS_Caster_Cast1",
+   "length": 1.25,
+   "hit": 0.375,
+   "end": 0.795,
+   "hand_speed": 556
+  },
+  {
+   "clip": "/Game/JRPG/CasterAnims/AS_Caster_Cast2",
+   "length": 1.333,
+   "hit": 0.458,
+   "end": 0.878,
+   "hand_speed": 314
+  },
+  {
+   "clip": "/Game/JRPG/CasterAnims/AS_Caster_Cast3",
+   "length": 1.333,
+   "hit": 0.508,
+   "end": 0.928,
+   "hand_speed": 691
+  }
+ ],
+ "flinch": "/Game/RandomDungeon/Magic/Anims/Anim_Warrior_Get_Hit_1_Caster",
+ "death": "/Game/RandomDungeon/Magic/Anims/Anim_Warrior_Dead_1_Caster"
+}

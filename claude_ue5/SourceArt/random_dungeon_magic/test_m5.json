@@ -1,0 +1,216 @@
+{
+ "tag": "m5",
+ "plan": [
+  "setup",
+  "keys",
+  "cast",
+  "nothing",
+  "far",
+  "kill:3",
+  "tier"
+ ],
+ "level": "random_dungeonmagic_level",
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_RDM_CasterCharacter_C",
+   "mesh": "SK_JRPG_Caster",
+   "in_her_right_hand": null,
+   "hit_points": 100.0,
+   "weapons": [
+    "Fire"
+   ],
+   "spell": true,
+   "from_start_room_cm": 0,
+   "title": "GIRL-CASTER",
+   "keys": "WASD  walk     shift  run     left mouse / E  fire spell"
+  },
+  {
+   "step": "keys",
+   "ok": true,
+   "context_active": false,
+   "move_keys": [
+    "A",
+    "D",
+    "Down",
+    "Gamepad_Left2D",
+    "Left",
+    "Right",
+    "S",
+    "Up",
+    "W"
+   ],
+   "run_keys": [
+    "Gamepad_LeftThumbstick",
+    "LeftShift"
+   ],
+   "actions_on_E_and_left_mouse": [
+    "IA_Hook",
+    "IA_Jab",
+    "IA_TurnRight"
+   ],
+   "her_handlers": [
+    "Jump",
+    "Look",
+    "MouseLook",
+    "Move",
+    "Sprint"
+   ],
+   "clash": [],
+   "walk_cm_s": 119.7,
+   "her_walk": 119.71,
+   "run_cm_s": 381.7,
+   "her_run": 381.69,
+   "speeds": {
+    "walk": 119.7,
+    "run": 381.7,
+    "A": 119.7,
+    "S": 119.7,
+    "D": 119.7
+   },
+   "headings_deg": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "wanted_headings": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "attacks_by_key": {
+    "E": {
+     "attacks": 1,
+     "bolts": 1
+    },
+    "LeftMouseButton": {
+     "attacks": 1,
+     "bolts": 1
+    }
+   }
+  },
+  {
+   "step": "cast",
+   "ok": true,
+   "monster": "Ripper_dog",
+   "gap_cm": 900,
+   "hand": "hand_r",
+   "started": true,
+   "target_is_it": true,
+   "montage": true,
+   "hand_moved_cm": 74,
+   "charge_particles": 418,
+   "bolt_left_at_s": 0.45,
+   "bolt_speed_cm_s": 1700,
+   "spell_speed": 1700.0,
+   "particles_round_the_bolt": 783,
+   "on_monster": 1,
+   "elsewhere": 0,
+   "flown_cm": 605,
+   "it_lost": 25.0,
+   "damage": 25.0,
+   "burst_particles": 630,
+   "burst_at": [
+    -3204,
+    3907,
+    113
+   ],
+   "sounds": {
+    "Player.Charge.Fire": 1,
+    "Player.Cast.Fire": 1,
+    "Player.Hit.Fire": 1
+   }
+  },
+  {
+   "step": "nothing",
+   "ok": true,
+   "target": null,
+   "turned_deg": 0.0,
+   "off_her_heading_deg": 0.3,
+   "flown_cm": 1258,
+   "reach": 1400.0,
+   "damage_dealt": 0.0
+  },
+  {
+   "step": "far",
+   "ok": true,
+   "monster": "Horned",
+   "distance_cm": 1863,
+   "reach": 1400.0,
+   "target": null
+  },
+  {
+   "step": "kill",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Horned",
+     "hit_points": 59.0,
+     "casts": 3,
+     "bolts_on_it": 3,
+     "bolts_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 2.5,
+     "ok": true
+    },
+    {
+     "monster": "Mutant",
+     "hit_points": 49.0,
+     "casts": 4,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 2,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 3.2,
+     "ok": true
+    },
+    {
+     "monster": "Daemon",
+     "hit_points": 54.0,
+     "casts": 3,
+     "bolts_on_it": 3,
+     "bolts_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 2.4,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 4
+  },
+  {
+   "step": "tier",
+   "ok": true,
+   "section": [
+    1,
+    0
+   ],
+   "monsters": 12,
+   "average_hit_points": 96.8,
+   "hers": 100.0,
+   "average_damage": 19.8,
+   "spell_damage": 20.0
+  }
+ ],
+ "error": null,
+ "kills": 4,
+ "casts": 15,
+ "bolts": 15,
+ "bolts_on_monsters": 11,
+ "bolts_elsewhere": 4,
+ "deaths": 0,
+ "damage_dealt": 275.0,
+ "damage_taken": 0.0
+}

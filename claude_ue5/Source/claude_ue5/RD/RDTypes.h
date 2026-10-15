@@ -10,6 +10,7 @@ class UAnimationAsset;
 class UAnimSequenceBase;
 class UNiagaraSystem;
 class USoundBase;
+class UFXSystemAsset;
 
 /** A placeable mesh normalised by Adjust to the dungeon frame: origin at the footprint centre on the floor, front toward
  *  +X (furniture faces +X; wall pieces run along Y with their room face toward +X; floor tiles centred, top at z = 0;
@@ -113,6 +114,40 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PlayRate = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> GetHit = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Death = nullptr;
+	// ---- a spell (random_dungeonmagic_level): at the hit time a bolt leaves her hand instead of a blow landing. It flies
+	// at BoltSpeed after the monster she turned to (steering at most BoltTurnRate degrees a second), at most Reach cm,
+	// and bursts on the first monster or wall it meets: that monster takes Damage, every other one within BoltSplash cm
+	// of the burst half of it. Arc is not used.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bSpell = false;
+	/** a spell cast with keys of its own (right mouse button or E; Y or the left trigger) while the weapon she has drawn
+	 *  stays in her hand (random_dungeonmagic_level2: the fire from her left hand, the sword in her right); the number
+	 *  keys do not draw it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bAlongside = false;
+	/** where the bolt leaves her (and the charge burns while she gathers it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SpellBone = TEXT("hand_r");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltSpeed = 1600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltTurnRate = 220.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltSplash = 170.f;
+	/** effects (a Niagara system or a Cascade particle system): on her hand from the start of the cast to the release,
+	 *  on the bolt, and where it bursts; each with its scale. When the charge is the same system as the bolt, the charge
+	 *  itself leaves her hand as the bolt (a system that takes a while to build up is full grown when it flies). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> ChargeEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ChargeEffectScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BoltEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltEffectScale = 1.f;
+	/** a second system on the bolt (its core, under the flames) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BoltCoreEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltCoreEffectScale = 1.f;
+	/** the burst: a one-shot system, and flames that burn on where it burst for BurstFlameSeconds (a looping system is
+	 *  stopped then and its particles die away) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BurstEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BurstEffectScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BurstFlameEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BurstFlameEffectScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BurstFlameSeconds = 0.6f;
+	/** the bolt lights what it passes (a point light that goes with it; brighter for a moment where it bursts) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor SpellLightColor = FLinearColor(1.f, 0.45f, 0.12f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpellLightIntensity = 0.f;
 };
 
 UENUM(BlueprintType)

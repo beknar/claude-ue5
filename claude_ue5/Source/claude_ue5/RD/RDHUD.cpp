@@ -224,7 +224,7 @@ void ARDHUD::DrawCombat(float Sc)
 		const FVector2D A(Canvas->ClipX - Mg - W, Canvas->ClipY - Mg - H), B = A + FVector2D(W, H);
 		Box(A, B, FLinearColor(0.04f, 0.05f, 0.07f, 0.78f));
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
-		DrawText(TEXT("JRPG-FEM5"), RDInk, A.X + Pd, A.Y + 9.f * Sc, Small, Sc * 1.1f);
+		DrawText(Gen->PlayerTitle, RDInk, A.X + Pd, A.Y + 9.f * Sc, Small, Sc * 1.1f);
 		const FString Kl = FString::Printf(TEXT("KILLS  %d"), Cb->Kills);
 		float Tw, Th; GetTextSize(Kl, Tw, Th, Small, Sc * 1.1f);
 		DrawText(Kl, RDInk, B.X - Pd - Tw, A.Y + 9.f * Sc, Small, Sc * 1.1f);
@@ -244,12 +244,12 @@ void ARDHUD::DrawCombat(float Sc)
 		for (int32 I = 0; I < Num; ++I)
 		{
 			const FRDWeaponDef& Wp = Gen->Weapons[I];
-			const bool bOn = I == Cb->GetWeaponIndex();
+			const bool bOn = Wp.bAlongside ? Cb->GetAttackIndex() == I : I == Cb->GetWeaponIndex();
 			const FVector2D S0(A.X + Pd + I * (Sw + Gp), A.Y + 76.f * Sc), S1 = S0 + FVector2D(Sw, 66.f * Sc);
 			Box(S0, S1, bOn ? FLinearColor(0.36f, 0.27f, 0.10f, 0.95f) : FLinearColor(0.10f, 0.10f, 0.12f, 0.9f));
 			Frame(S0, S1, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.40f, 0.38f, 0.34f), (bOn ? 2.5f : 1.f) * Sc);
 			const FLinearColor Tc = bOn ? FLinearColor::White : FLinearColor(0.72f, 0.70f, 0.66f);
-			DrawText(FString::Printf(TEXT("%d"), I + 1), bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc);
+			DrawText(Wp.bAlongside ? FString(TEXT("RMB / E")) : FString::Printf(TEXT("%d"), I + 1), bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc);
 			const FString N = Wp.Name.ToString().ToUpper();
 			GetTextSize(N, Tw, Th, Small, Sc * 1.15f);
 			DrawText(N, Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 16.f * Sc, Small, Sc * 1.15f);
@@ -257,7 +257,7 @@ void ARDHUD::DrawCombat(float Sc)
 			GetTextSize(D, Tw, Th, Small, Sc);
 			DrawText(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 40.f * Sc, Small, Sc);
 		}
-		DrawText(TEXT("left mouse  attack      1  2  3  weapon"), FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
+		DrawText(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
 	}
 	// ---- she is down
 	if (Cb->IsDead())

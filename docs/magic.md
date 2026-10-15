@@ -106,6 +106,21 @@ These are not 3D, but could help:
   - `magic runes pixel art asset pack`;
   - the spell slots and spell book pages of the RPG interface kits.
 
+## Used in the project
+
+`random_dungeonmagic_level` and `random_dungeonmagic_level2` (see the README) have a fire spell built from this page.
+- **Bolt:** `NS_FirePool`.
+- **Burst:** `P_Explosion` with `NS_FireWings`.
+- **Charge on her hand:** `P_Sparks`.
+- **Sounds:** from Elemental Spells Vol 1.
+- **Warm copies:** the DarkHalls systems are used in copies that start warm.
+
+Tried and left out:
+- **`NS_FireEye`:** at the dungeon's exposure it is only a few embers.
+- **Sprite sizes:** `NS_FirePool`'s sprites do not shrink with the component's scale, so the bolt stays about a metre across.
+
+The casts, and the dark caster's sword cuts, were made for the two Tripo characters in Blender (`pipeline/blender_numpy/caster_clips.py`, `darkcaster_clips.py`). A spell animation pack is still missing for the Fab characters.
+
 ## Next steps
 
 - Add the Mystic Dungeon wizards and skeleton mages to [heroes.md](heroes.md) and [humanoid_enemies.md](humanoid_enemies.md), with pictures.

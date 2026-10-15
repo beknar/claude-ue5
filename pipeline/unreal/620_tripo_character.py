@@ -1,7 +1,8 @@
 """BP_JRPG<CH>Character: an animated Tripo character on the template third-person character, playing ITS OWN clips (610/615):
 WASD walk (her Walk), Shift run (her Run), Space jump (template jump/fall/land, retargeted), mouse camera. Walk / run speeds =
 her measured stance-foot speeds (SourceArt/jrpg_<ch>/speeds.txt), so the feet don't slide. BP_JRPG<CH>GameMode spawns her; it is
-set as L_Meshy_Meadow's game mode.  Args: CH [half_height_cm]"""
+set as L_Meshy_Meadow's game mode (not with "keepmeadow": a character made for another level).
+Args: CH [half_height_cm] [keepmeadow]"""
 import sys, unreal
 import editor_toolset.toolsets.blueprint as BT
 T = BT.BlueprintTools
@@ -43,6 +44,8 @@ if eal.does_asset_exist(GM): eal.delete_asset(GM)
 gm = eal.duplicate_asset("/Game/Soldier/Game/BP_SoldierGameMode", GM)
 unreal.get_default_object(gm.generated_class()).set_editor_property("default_pawn_class", bp.generated_class())
 unreal.BlueprintEditorLibrary.compile_blueprint(gm); eal.save_loaded_asset(gm)
+if "keepmeadow" in sys.argv:
+    print(f"{GM} made; L_Meshy_Meadow left as it is | walk {WALK:.1f} / run {RUN:.1f} cm/s"); raise SystemExit
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 les.load_level("/Game/Meshy/Maps/L_Meshy_Meadow")
 ws = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world().get_world_settings()

@@ -1,0 +1,103 @@
+{
+ "order": [
+  "Sword",
+  "Fire"
+ ],
+ "weapons": {
+  "Sword": {
+   "name": "Sword",
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_1",
+   "damage": 22.0,
+   "reach": 170.0,
+   "arc": 130.0,
+   "rate": 1.15,
+   "grip": {
+    "loc": [
+     -66.83602526176108,
+     -4.8153915994280165,
+     17.912398223165923
+    ],
+    "rot": [
+     107.33348398053542,
+     -2.1551507443389415,
+     -92.11485279925893
+    ],
+    "scale": [
+     0.999999940395397,
+     0.9999997615814729,
+     0.9999998807907247
+    ]
+   },
+   "hand_bone": "hand_r",
+   "attacks": [
+    {
+     "clip": "/Game/JRPG/DarkCasterAnims/AS_DarkCaster_Slash1",
+     "length": 1.083,
+     "hit": 0.375,
+     "end": 0.735,
+     "hand_speed": 772
+    },
+    {
+     "clip": "/Game/JRPG/DarkCasterAnims/AS_DarkCaster_Slash2",
+     "length": 1.208,
+     "hit": 0.445,
+     "end": 0.805,
+     "hand_speed": 599
+    },
+    {
+     "clip": "/Game/JRPG/DarkCasterAnims/AS_DarkCaster_Slash3",
+     "length": 1.042,
+     "hit": 0.344,
+     "end": 0.704,
+     "hand_speed": 626
+    }
+   ],
+   "flinch": "/Game/RandomDungeon/Magic2/Anims/Anim_Warrior_Get_Hit_1_DarkCaster",
+   "death": "/Game/RandomDungeon/Magic2/Anims/Anim_Warrior_Dead_1_DarkCaster"
+  },
+  "Fire": {
+   "name": "Fire",
+   "damage": 25.0,
+   "reach": 1400.0,
+   "rate": 1.15,
+   "bolt_speed": 1700.0,
+   "bolt_turn": 200.0,
+   "splash": 170.0,
+   "bone": "hand_l",
+   "charge": "/Game/Feather/Demo/StarterContent/Particles/P_Sparks",
+   "charge_scale": 0.3,
+   "bolt": "/Game/RandomDungeon/Magic/NS_RDM_FirePool_Warm",
+   "bolt_scale": 0.2,
+   "burst": "/Game/Feather/Demo/StarterContent/Particles/P_Explosion",
+   "burst_scale": 1.0,
+   "burst_flame": "/Game/RandomDungeon/Magic/NS_RDM_FireWings_Warm",
+   "burst_flame_scale": 0.35,
+   "burst_flame_seconds": 0.35,
+   "light": [
+    1.0,
+    0.45,
+    0.12
+   ],
+   "light_cd": 150.0,
+   "casts": [
+    {
+     "clip": "/Game/JRPG/DarkCasterAnims/AS_DarkCaster_CastL1",
+     "length": 1.25,
+     "hit": 0.375,
+     "end": 0.795,
+     "hand_speed": 507
+    },
+    {
+     "clip": "/Game/JRPG/DarkCasterAnims/AS_DarkCaster_CastL2",
+     "length": 1.333,
+     "hit": 0.508,
+     "end": 0.928,
+     "hand_speed": 629
+    }
+   ],
+   "flinch": "/Game/RandomDungeon/Magic2/Anims/Anim_Warrior_Get_Hit_1_DarkCaster",
+   "death": "/Game/RandomDungeon/Magic2/Anims/Anim_Warrior_Dead_1_DarkCaster",
+   "alongside": true
+  }
+ }
+}

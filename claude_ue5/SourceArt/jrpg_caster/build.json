@@ -1,0 +1,14 @@
+{
+ "clips": {
+  "Run": 31,
+  "Walk": 57,
+  "Idle": 78,
+  "Cast1": 31,
+  "Cast2": 33,
+  "Cast3": 33
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_caster\\T_Caster_Color.png"
+ },
+ "height_cm": 170.0
+}
