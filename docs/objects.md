@@ -1,6 +1,6 @@
 # Weapons and items of the Fab library
 
-The weapons and the handheld or wearable items in the local Fab library cache (`I:\game assets\3d epicgames media packs\VaultCache\FabLibrary` and the environment packs downloaded through it), in four parts: fantasy weapons, modern weapons, futuristic weapons and non-weapon items. All 231 are in this project. Each is shown three times, rendered in Unreal Engine:
+The weapons and the handheld or wearable items in the local Fab library cache (`I:\game assets\3d epicgames media packs\VaultCache\FabLibrary` and the environment packs downloaded through it), in five parts: fantasy weapons, modern weapons, futuristic weapons, armour and shields, and non-weapon items. All 311 are in this project. Each is shown three times, rendered in Unreal Engine:
 
 - **side view:** its broad face, level (or from above if it lies flat);
 - **three-quarter view;**
@@ -9,7 +9,8 @@ The weapons and the handheld or wearable items in the local Fab library cache (`
 ## About the pictures and notes
 
 - **Sizes:** each entry gives the object's three extents in centimetres, from its bounds; every picture is framed to fill, from a 2 cm coin to a 1.5 m flamethrower.
-- **Kept together:** the flamethrower (gun, hose, tank) and the riot shield with its club are several meshes, shown as they sit in their packs.
+- **Kept together:** the flamethrower (gun, hose, tank), the riot shield with its club and the police riot shield are several meshes, shown as they sit in their packs.
+- **Armour sets:** the packs' armour comes in pieces skinned to a character's skeleton (chest, pauldrons, bracers, greaves, helmet). Each set is all of one character's armour pieces, without the body under them, shown as an empty suit in the character's reference pose (a T- or A-pose).
 - **Variants:** many packs have several versions of a weapon (silencers, sights, paint, the ten knives of the FPS Starter Pack, eight pistols and revolvers in `Safehouse`); one of each kind is shown.
 - **Animations:** each entry says what clips the object has of its own, which first-person arm clips were made for it (the FPS packs: arms only, a camera rig's), and which third-person animation sets in the project hold that kind of weapon on a UE4-mannequin character (see [heroes.md](heroes.md#animations) for those sets). Bows, crossbows, staves, knives and grenades have no third-person clips here.
 - **Uses:** a use is a suggestion from the object's looks.
@@ -18,27 +19,32 @@ The list is `claude_ue5/SourceArt/object_gallery/objects.json`; the pictures com
 
 ## Contents
 
-- [Fantasy weapons](#fantasy-weapons) (89)
+- [Fantasy weapons](#fantasy-weapons) (75)
   - [Swords and daggers](#swords-and-daggers) (19)
   - [Axes, hammers, maces and clubs](#axes-hammers-maces-and-clubs) (33)
   - [Spears and polearms](#spears-and-polearms) (10)
   - [Primitive weapons](#primitive-weapons) (6)
   - [Bows, crossbows and staves](#bows-crossbows-and-staves) (7)
-  - [Shields](#shields) (14)
-- [Modern weapons](#modern-weapons) (44)
+- [Modern weapons](#modern-weapons) (42)
   - [Rifles, machine guns and shotguns](#rifles-machine-guns-and-shotguns) (13)
   - [Sniper rifles and launchers](#sniper-rifles-and-launchers) (5)
   - [Pistols and revolvers](#pistols-and-revolvers) (7)
-  - [Knives, melee weapons and grenades](#knives-melee-weapons-and-grenades) (19)
-- [Futuristic weapons](#futuristic-weapons) (23)
+  - [Knives, melee weapons and grenades](#knives-melee-weapons-and-grenades) (17)
+- [Futuristic weapons](#futuristic-weapons) (22)
   - [Energy and sci-fi guns](#energy-and-sci-fi-guns) (13)
-  - [Energy blades and shields](#energy-blades-and-shields) (10)
-- [Non-weapon items](#non-weapon-items) (75)
+  - [Energy blades and melee weapons](#energy-blades-and-melee-weapons) (9)
+- [Armour and shields](#armour-and-shields) (107)
+  - [Fantasy armour](#fantasy-armour) (37)
+  - [Modern armour](#modern-armour) (13)
+  - [Futuristic armour](#futuristic-armour) (14)
+  - [Fantasy shields](#fantasy-shields) (22)
+  - [Modern and sci-fi shields](#modern-and-sci-fi-shields) (4)
+  - [Helmets and masks](#helmets-and-masks) (17)
+- [Non-weapon items](#non-weapon-items) (65)
   - [Food and drink](#food-and-drink) (21)
   - [Potions and medicine](#potions-and-medicine) (9)
   - [Tools and devices](#tools-and-devices) (20)
   - [Treasure, keys and books](#treasure-keys-and-books) (15)
-  - [Helmets and masks](#helmets-and-masks) (10)
 - [Not included](#not-included)
 
 ## Fantasy weapons
@@ -805,148 +811,6 @@ A twisted dark staff with a hooked top.
 
 <img src="images/objects/warriors_pack_witch_s_weapon_side.jpg" width="280" alt="Witch's Hooked Staff, side view"> <img src="images/objects/warriors_pack_witch_s_weapon_quarter.jpg" width="280" alt="Witch's Hooked Staff, three-quarter view"> <img src="images/objects/warriors_pack_witch_s_weapon_third.jpg" width="280" alt="Witch's Hooked Staff, far three-quarter view">
 
-### Shields
-
-#### Heater Shield
-
-[Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) · **Use:** shield · model `SM_Shield_1` · 76 × 60 × 13 cm
-
-An ornate gold-and-iron shield with a monster's face in relief.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/medieval_weapons_heater_shield_side.jpg" width="280" alt="Heater Shield, side view"> <img src="images/objects/medieval_weapons_heater_shield_quarter.jpg" width="280" alt="Heater Shield, three-quarter view"> <img src="images/objects/medieval_weapons_heater_shield_third.jpg" width="280" alt="Heater Shield, far three-quarter view">
-
-#### Beast Shield
-
-[Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) · **Use:** shield · model `SM_Shield_2` · 69 × 67 × 14 cm
-
-A shield shaped like a horned beast's face.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/medieval_weapons_round_shield_side.jpg" width="280" alt="Beast Shield, side view"> <img src="images/objects/medieval_weapons_round_shield_quarter.jpg" width="280" alt="Beast Shield, three-quarter view"> <img src="images/objects/medieval_weapons_round_shield_third.jpg" width="280" alt="Beast Shield, far three-quarter view">
-
-#### Kite Shield
-
-[Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) · **Use:** shield · model `SM_Shield_3` · 90 × 57 × 25 cm
-
-A dark kite shield with a demonic face.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/medieval_weapons_kite_shield_side.jpg" width="280" alt="Kite Shield, side view"> <img src="images/objects/medieval_weapons_kite_shield_quarter.jpg" width="280" alt="Kite Shield, three-quarter view"> <img src="images/objects/medieval_weapons_kite_shield_third.jpg" width="280" alt="Kite Shield, far three-quarter view">
-
-#### Heraldic Shield
-
-[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_01_Shield` · 79 × 52 × 13 cm
-
-A heater shield painted with a gold lion on black and gold stripes.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/knights_pack_templar_shield_side.jpg" width="280" alt="Heraldic Shield, side view"> <img src="images/objects/knights_pack_templar_shield_quarter.jpg" width="280" alt="Heraldic Shield, three-quarter view"> <img src="images/objects/knights_pack_templar_shield_third.jpg" width="280" alt="Heraldic Shield, far three-quarter view">
-
-#### Eastern Shield
-
-[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_02_Shield` · 77 × 77 × 20 cm
-
-A round, domed shield in black and gold filigree.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/knights_pack_eastern_shield_side.jpg" width="280" alt="Eastern Shield, side view"> <img src="images/objects/knights_pack_eastern_shield_quarter.jpg" width="280" alt="Eastern Shield, three-quarter view"> <img src="images/objects/knights_pack_eastern_shield_third.jpg" width="280" alt="Eastern Shield, far three-quarter view">
-
-#### Plate Knight's Shield
-
-[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_03_Shield` · 108 × 48 × 13 cm
-
-A tall shield with fleurs-de-lis and red stripes.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/knights_pack_plate_knight_s_shield_side.jpg" width="280" alt="Plate Knight's Shield, side view"> <img src="images/objects/knights_pack_plate_knight_s_shield_quarter.jpg" width="280" alt="Plate Knight's Shield, three-quarter view"> <img src="images/objects/knights_pack_plate_knight_s_shield_third.jpg" width="280" alt="Plate Knight's Shield, far three-quarter view">
-
-#### Lady Knight's Shield
-
-[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_04_Shield` · 103 × 53 × 22 cm
-
-A black-and-gold shield with purple gems.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/knights_pack_lady_knight_s_shield_side.jpg" width="280" alt="Lady Knight's Shield, side view"> <img src="images/objects/knights_pack_lady_knight_s_shield_quarter.jpg" width="280" alt="Lady Knight's Shield, three-quarter view"> <img src="images/objects/knights_pack_lady_knight_s_shield_third.jpg" width="280" alt="Lady Knight's Shield, far three-quarter view">
-
-#### Viking Round Shield
-
-[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** shield · model `SM_Viking_Shield_01` · 66 × 66 × 11 cm
-
-A round wooden shield painted with green knotwork and a steel boss.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/vikings_viking_round_shield_side.jpg" width="280" alt="Viking Round Shield, side view"> <img src="images/objects/vikings_viking_round_shield_quarter.jpg" width="280" alt="Viking Round Shield, three-quarter view"> <img src="images/objects/vikings_viking_round_shield_third.jpg" width="280" alt="Viking Round Shield, far three-quarter view">
-
-#### Painted Viking Shield
-
-[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** shield · model `SM_Viking_Shield_03` · 66 × 66 × 11 cm
-
-A round shield quartered red and white.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/vikings_painted_viking_shield_side.jpg" width="280" alt="Painted Viking Shield, side view"> <img src="images/objects/vikings_painted_viking_shield_quarter.jpg" width="280" alt="Painted Viking Shield, three-quarter view"> <img src="images/objects/vikings_painted_viking_shield_third.jpg" width="280" alt="Painted Viking Shield, far three-quarter view">
-
-#### Desert Shield
-
-[Fantasy Warriors (Pack)](https://www.fab.com/listings/df8194f9-ec63-49f6-a885-6feb7a94fcb1) · **Use:** shield · model `SM_Fantasy_Hero_02_Shield` · 82 × 82 × 16 cm
-
-A round bronze shield with gold arabesques.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/warriors_pack_desert_shield_side.jpg" width="280" alt="Desert Shield, side view"> <img src="images/objects/warriors_pack_desert_shield_quarter.jpg" width="280" alt="Desert Shield, three-quarter view"> <img src="images/objects/warriors_pack_desert_shield_third.jpg" width="280" alt="Desert Shield, far three-quarter view">
-
-#### Broddi's Shield
-
-[Dwarfs Pack](https://www.fab.com/listings/80643e93-5d54-438c-ae9d-7717242e5a16) · **Use:** tower shield · model `SM_Dwarf_BroddI_Shield_Dwarf_Broddi_Sheld_Mesh` · 136 × 78 × 13 cm
-
-A tall stone-grey dwarven tower shield.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/dwarf_pack_broddi_s_shield_side.jpg" width="280" alt="Broddi's Shield, side view"> <img src="images/objects/dwarf_pack_broddi_s_shield_quarter.jpg" width="280" alt="Broddi's Shield, three-quarter view"> <img src="images/objects/dwarf_pack_broddi_s_shield_third.jpg" width="280" alt="Broddi's Shield, far three-quarter view">
-
-#### Village Shield
-
-[House Forge: Modular House Building Kit](https://www.fab.com/listings/277b975e-2158-41ef-908a-ef08bc26a409) · **Use:** shield · model `SM_VikingShield_01a` · 78 × 78 × 18 cm
-
-A round plank shield painted blue and white.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/houseforge_01_village_shield_side.jpg" width="280" alt="Village Shield, side view"> <img src="images/objects/houseforge_01_village_shield_quarter.jpg" width="280" alt="Village Shield, three-quarter view"> <img src="images/objects/houseforge_01_village_shield_third.jpg" width="280" alt="Village Shield, far three-quarter view">
-
-#### Dock Shield
-
-[Modular Medieval Town, Docks](https://www.fab.com/listings/9bec871e-2d9b-4261-aa26-868d4300f81a) · **Use:** shield · model `SM_Shield_01` · 78 × 78 × 13 cm
-
-A plain round iron-rimmed wooden shield.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/hivemind_dock_shield_side.jpg" width="280" alt="Dock Shield, side view"> <img src="images/objects/hivemind_dock_shield_quarter.jpg" width="280" alt="Dock Shield, three-quarter view"> <img src="images/objects/hivemind_dock_shield_third.jpg" width="280" alt="Dock Shield, far three-quarter view">
-
-#### War Camp Shield
-
-[[Nanite] Medieval War Camp Kit](https://www.fab.com/listings/3cc08b13-9cb1-46a5-9bd2-47d743ee82b9) · **Use:** shield · model `SM_Shield` · 88 × 88 × 10 cm
-
-A round shield quartered blue and white.
-
-**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/warcamp_collection_war_camp_shield_side.jpg" width="280" alt="War Camp Shield, side view"> <img src="images/objects/warcamp_collection_war_camp_shield_quarter.jpg" width="280" alt="War Camp Shield, three-quarter view"> <img src="images/objects/warcamp_collection_war_camp_shield_third.jpg" width="280" alt="War Camp Shield, far three-quarter view">
-
 ## Modern weapons
 
 Firearms from flintlock-era revolvers to sniper rifles, the FPS packs' guns (skeletal, with their own shot and reload clips), and knives, clubs and grenades.
@@ -1279,26 +1143,6 @@ A black handheld stun gun with a wrist strap.
 
 <img src="images/objects/fps_starter_pack_stun_gun_fps_side.jpg" width="280" alt="Stun Gun (FPS), side view"> <img src="images/objects/fps_starter_pack_stun_gun_fps_quarter.jpg" width="280" alt="Stun Gun (FPS), three-quarter view"> <img src="images/objects/fps_starter_pack_stun_gun_fps_third.jpg" width="280" alt="Stun Gun (FPS), far three-quarter view">
 
-#### Riot Shield and Club (FPS)
-
-[FPS STARTER (PACK)](https://www.fab.com/listings/afe92192-dd5c-4bb0-a476-0c09646d897d) · **Use:** shield and club · model `SK_Shield_Full` and 1 more meshes · 122 × 48 × 29 cm
-
-A canvas-covered riot shield with a viewport (its club alongside).
-
-**Animations.** **Own:** a skeletal mesh (1 bone) without clips of its own. **First person:** First-person arm clips: 13 in FPS Starter Pack (shield and club): 5 attacks, 1 hit reaction, 2 idles, 1 jump or fall, 2 moves, 2 other (shield and club down, shield and club up). **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/fps_starter_pack_riot_shield_and_club_fps_side.jpg" width="280" alt="Riot Shield and Club (FPS), side view"> <img src="images/objects/fps_starter_pack_riot_shield_and_club_fps_quarter.jpg" width="280" alt="Riot Shield and Club (FPS), three-quarter view"> <img src="images/objects/fps_starter_pack_riot_shield_and_club_fps_third.jpg" width="280" alt="Riot Shield and Club (FPS), far three-quarter view">
-
-#### Ballistic Shield (FPS)
-
-[FPS ANIMATIONS PISTOL (TACTICAL SHIELD)](https://www.fab.com/listings/9f81d42c-fbe9-49e6-aa6b-a227edb3f36f) · **Use:** ballistic shield · model `SK_Shield_Full` · 121 × 48 × 29 cm
-
-A khaki ballistic shield with a window and lights.
-
-**Animations.** **Own:** a skeletal mesh (1 bone) without clips of its own. **First person:** First-person arm clips: 24 in FPS Pistol (Tactical Shield): 6 attacks, 1 hit reaction, 5 idles, 1 jump or fall, 6 moves, 5 other (shield get weapon, shield hide, shield reload, shield weapon inspection). **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/fps_pistol_shield_ballistic_shield_fps_side.jpg" width="280" alt="Ballistic Shield (FPS), side view"> <img src="images/objects/fps_pistol_shield_ballistic_shield_fps_quarter.jpg" width="280" alt="Ballistic Shield (FPS), three-quarter view"> <img src="images/objects/fps_pistol_shield_ballistic_shield_fps_third.jpg" width="280" alt="Ballistic Shield (FPS), far three-quarter view">
-
 #### Baseball Bat
 
 [Old Gangster](https://www.fab.com/listings/0f896299-3dbd-447d-93b1-98da85ea2f81) · **Use:** club · model `SM_UE4_NPC_Old_gangster_Baseball_bat` · 71 × 6 × 6 cm
@@ -1535,7 +1379,7 @@ A heavy mechanical gun with pipes and pistons.
 
 <img src="images/objects/aliens_warrior_pack_magma_alien_s_weapon_side.jpg" width="280" alt="Magma Alien's Weapon, side view"> <img src="images/objects/aliens_warrior_pack_magma_alien_s_weapon_quarter.jpg" width="280" alt="Magma Alien's Weapon, three-quarter view"> <img src="images/objects/aliens_warrior_pack_magma_alien_s_weapon_third.jpg" width="280" alt="Magma Alien's Weapon, far three-quarter view">
 
-### Energy blades and shields
+### Energy blades and melee weapons
 
 #### Sci-Fi Staff Weapon
 
@@ -1566,16 +1410,6 @@ A black serrated tactical knife.
 **Animations.** **Own:** a static mesh, no clips of its own. **First person:** First-person arm clips: 34 in Sci-Fi Hands With Knife: 8 attacks, 2 hit reactions, 5 idles, 8 jumps and falls, 6 moves, 5 other (fi hands knife get, fi hands knife hide, fi hands knife inspection, fi hands knife shield get, fi hands knife shield hide). **Third person:** No third-person knife clips in the project.
 
 <img src="images/objects/sci_fi_hands_knife_energy_knife_fps_side.jpg" width="280" alt="Energy Knife (FPS), side view"> <img src="images/objects/sci_fi_hands_knife_energy_knife_fps_quarter.jpg" width="280" alt="Energy Knife (FPS), three-quarter view"> <img src="images/objects/sci_fi_hands_knife_energy_knife_fps_third.jpg" width="280" alt="Energy Knife (FPS), far three-quarter view">
-
-#### Arm Shield (FPS)
-
-[FPS Sci-Fi Hands Empty](https://www.fab.com/listings/1c1fbb6f-1a9a-42d7-b0c2-80837c55c564) · **Use:** energy shield · model `SK_Sci_Fi_Shield` · 55 × 55 × 8 cm
-
-A folded arm device that opens into a round blue energy shield.
-
-**Animations.** **Own:** a skeletal mesh (32 bones) with 2 clips of its own: close, open. **First person:** First-person arm clips: 27 in FPS Sci-Fi Hands Empty: 5 attacks, 2 hit reactions, 6 idles, 4 jumps and falls, 6 moves, 4 other (fi hands empty get, fi hands empty hide, fi hands empty shield get, fi hands empty shield hide). **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
-
-<img src="images/objects/sci_fi_hands_arm_shield_fps_side.jpg" width="280" alt="Arm Shield (FPS), side view"> <img src="images/objects/sci_fi_hands_arm_shield_fps_quarter.jpg" width="280" alt="Arm Shield (FPS), three-quarter view"> <img src="images/objects/sci_fi_hands_arm_shield_fps_third.jpg" width="280" alt="Arm Shield (FPS), a frame of its clip">
 
 #### Sci-Fi Sword
 
@@ -1636,6 +1470,1092 @@ A pair of long curved blades worn on the forearms.
 **Animations.** **Own:** a part skinned to its character's skeleton (68 bones): it moves with that character's clips. **Third person:** Held by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves).
 
 <img src="images/objects/aliens_warrior_pack_alien_claw_blades_side.jpg" width="280" alt="Alien Claw Blades, side view"> <img src="images/objects/aliens_warrior_pack_alien_claw_blades_quarter.jpg" width="280" alt="Alien Claw Blades, three-quarter view"> <img src="images/objects/aliens_warrior_pack_alien_claw_blades_third.jpg" width="280" alt="Alien Claw Blades, far three-quarter view">
+
+## Armour and shields
+
+Armour sets (all of a character's armour pieces, skinned to its skeleton, shown together as an empty suit in its reference pose), shields of every era, and helmets and masks.
+
+### Fantasy armour
+
+#### Templar's Armour
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** partial armour · model `SK_Knight_01_Armors_Knees` and 3 more meshes · 179 × 86 × 35 cm
+
+Great helm, plate pauldrons and arms, knee cops and greaves; the tabard and mail are the body's.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the Templar Knight (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_knights_pack_templar_s_armour_side.jpg" width="280" alt="Templar's Armour, side view"> <img src="images/objects/arm_knights_pack_templar_s_armour_quarter.jpg" width="280" alt="Templar's Armour, three-quarter view"> <img src="images/objects/arm_knights_pack_templar_s_armour_third.jpg" width="280" alt="Templar's Armour, far three-quarter view">
+
+#### Eastern Knight's Armour
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** partial armour · model `SK_Knight_02_Armor_Body` and 6 more meshes · 198 × 133 × 40 cm
+
+Spiked turban helm and mask, a scale breastplate, pauldrons, bracers and boots.
+
+**Animations.** **Own:** 7 pieces skinned to the skeleton of the Eastern Knight (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_knights_pack_eastern_knight_s_armour_side.jpg" width="280" alt="Eastern Knight's Armour, side view"> <img src="images/objects/arm_knights_pack_eastern_knight_s_armour_quarter.jpg" width="280" alt="Eastern Knight's Armour, three-quarter view"> <img src="images/objects/arm_knights_pack_eastern_knight_s_armour_third.jpg" width="280" alt="Eastern Knight's Armour, far three-quarter view">
+
+#### Plate Armour
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** full plate · model `SK_Knigh_03_Body_Armors_01` and 13 more meshes · 189 × 135 × 52 cm
+
+A full harness of polished plate: sallet, breastplate, articulated arms and legs.
+
+**Animations.** **Own:** 14 pieces skinned to the skeleton of the Plate Knight (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_knights_pack_plate_armour_side.jpg" width="280" alt="Plate Armour, side view"> <img src="images/objects/arm_knights_pack_plate_armour_quarter.jpg" width="280" alt="Plate Armour, three-quarter view"> <img src="images/objects/arm_knights_pack_plate_armour_third.jpg" width="280" alt="Plate Armour, far three-quarter view">
+
+#### Lady Knight's Armour
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** full plate · model `SK_Knight_04_Arms_Armor_01` and 10 more meshes · 198 × 138 × 35 cm
+
+Black and gold plate for the arms and legs under a plumed half-mask helm.
+
+**Animations.** **Own:** 11 pieces skinned to the skeleton of the Lady Knight (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_knights_pack_lady_knight_s_armour_side.jpg" width="280" alt="Lady Knight's Armour, side view"> <img src="images/objects/arm_knights_pack_lady_knight_s_armour_quarter.jpg" width="280" alt="Lady Knight's Armour, three-quarter view"> <img src="images/objects/arm_knights_pack_lady_knight_s_armour_third.jpg" width="280" alt="Lady Knight's Armour, far three-quarter view">
+
+#### Paladin's Armour
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** full plate · model `SK_Knight_05_Arms_Armors_01` and 13 more meshes · 208 × 139 × 50 cm
+
+Gilded, spiked plate from crested helm to sabatons.
+
+**Animations.** **Own:** 14 pieces skinned to the skeleton of the Paladin (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_knights_pack_paladin_s_armour_side.jpg" width="280" alt="Paladin's Armour, side view"> <img src="images/objects/arm_knights_pack_paladin_s_armour_quarter.jpg" width="280" alt="Paladin's Armour, three-quarter view"> <img src="images/objects/arm_knights_pack_paladin_s_armour_third.jpg" width="280" alt="Paladin's Armour, far three-quarter view">
+
+#### Dark Knight's Armour
+
+[Fantasy Warriors (Pack)](https://www.fab.com/listings/df8194f9-ec63-49f6-a885-6feb7a94fcb1) · **Use:** full plate · model `SK_Dark_Knight_02_Armor_Body_01` and 9 more meshes · 186 × 140 × 52 cm
+
+Dark plate with spiked pauldrons and a caged faceplate.
+
+**Animations.** **Own:** 10 pieces skinned to the skeleton of the Dark Knight (heroes.md, humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_warriors_pack_dark_knight_s_armour_side.jpg" width="280" alt="Dark Knight's Armour, side view"> <img src="images/objects/arm_warriors_pack_dark_knight_s_armour_quarter.jpg" width="280" alt="Dark Knight's Armour, three-quarter view"> <img src="images/objects/arm_warriors_pack_dark_knight_s_armour_third.jpg" width="280" alt="Dark Knight's Armour, far three-quarter view">
+
+#### Demonic Armour
+
+[Fantasy Warriors (Pack)](https://www.fab.com/listings/df8194f9-ec63-49f6-a885-6feb7a94fcb1) · **Use:** partial armour · model `SK_Demonic_Warrior_Armor_01` and 8 more meshes · 183 × 109 × 60 cm
+
+Scorched plate on one arm, a horned mask, and armoured boots and greaves.
+
+**Animations.** **Own:** 9 pieces skinned to the skeleton of the Demonic Warrior (heroes.md, humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_warriors_pack_demonic_armour_side.jpg" width="280" alt="Demonic Armour, side view"> <img src="images/objects/arm_warriors_pack_demonic_armour_quarter.jpg" width="280" alt="Demonic Armour, three-quarter view"> <img src="images/objects/arm_warriors_pack_demonic_armour_third.jpg" width="280" alt="Demonic Armour, far three-quarter view">
+
+#### Desert Hero's Armour
+
+[Fantasy Warriors (Pack)](https://www.fab.com/listings/df8194f9-ec63-49f6-a885-6feb7a94fcb1) · **Use:** light armour · model `SK_Fantasy_Hero_02_Arms_Armors_01` and 4 more meshes · 153 × 128 × 37 cm
+
+Studded leather pauldrons, bracers and high boots.
+
+**Animations.** **Own:** 5 pieces skinned to the skeleton of the Desert Hero (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_warriors_pack_desert_hero_s_armour_side.jpg" width="280" alt="Desert Hero's Armour, side view"> <img src="images/objects/arm_warriors_pack_desert_hero_s_armour_quarter.jpg" width="280" alt="Desert Hero's Armour, three-quarter view"> <img src="images/objects/arm_warriors_pack_desert_hero_s_armour_third.jpg" width="280" alt="Desert Hero's Armour, far three-quarter view">
+
+#### Tiefling's Armour
+
+[Fantasy Warriors (Pack)](https://www.fab.com/listings/df8194f9-ec63-49f6-a885-6feb7a94fcb1) · **Use:** light armour · model `SK_UE4_Fantasy_Hero_Armors_01` and 3 more meshes · 157 × 130 × 44 cm
+
+Ornate leather pauldrons, bracers, a gorget and boots with gold trim.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the Tiefling Hero (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_warriors_pack_tiefling_s_armour_side.jpg" width="280" alt="Tiefling's Armour, side view"> <img src="images/objects/arm_warriors_pack_tiefling_s_armour_quarter.jpg" width="280" alt="Tiefling's Armour, three-quarter view"> <img src="images/objects/arm_warriors_pack_tiefling_s_armour_third.jpg" width="280" alt="Tiefling's Armour, far three-quarter view">
+
+#### Barbarian's Armour
+
+[Fantasy Characters (Pack)](https://www.fab.com/listings/f5816915-86d9-4bef-b8f3-921408ae240b) · **Use:** barbarian armour · model `SK_Barbarian_Armor_01` and 12 more meshes · 171 × 163 × 56 cm
+
+Fur, bone and iron: spiked gauntlets, a skull-hung belt and fur boots.
+
+**Animations.** **Own:** 13 pieces skinned to the skeleton of the Barbarian (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_fantasy_pack_barbarian_s_armour_side.jpg" width="280" alt="Barbarian's Armour, side view"> <img src="images/objects/arm_fantasy_pack_barbarian_s_armour_quarter.jpg" width="280" alt="Barbarian's Armour, three-quarter view"> <img src="images/objects/arm_fantasy_pack_barbarian_s_armour_third.jpg" width="280" alt="Barbarian's Armour, far three-quarter view">
+
+#### Veteran's Pauldrons
+
+[Fantasy Characters (Pack)](https://www.fab.com/listings/f5816915-86d9-4bef-b8f3-921408ae240b) · **Use:** pauldrons · model `SK_Knight_Armors` · 70 × 21 × 19 cm
+
+A pair of heavy ridged steel pauldrons.
+
+**Animations.** **Own:** 1 piece skinned to the skeleton of the Veteran (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_fantasy_pack_veteran_s_armour_side.jpg" width="280" alt="Veteran's Pauldrons, side view"> <img src="images/objects/arm_fantasy_pack_veteran_s_armour_quarter.jpg" width="280" alt="Veteran's Pauldrons, three-quarter view"> <img src="images/objects/arm_fantasy_pack_veteran_s_armour_third.jpg" width="280" alt="Veteran's Pauldrons, far three-quarter view">
+
+#### Samurai Armour
+
+[SAMURAI](https://www.fab.com/listings/5f4c90b7-a282-45fc-89df-61468afc867b) · **Use:** full armour · model `SK_Samurai_Arms_Armor_01` and 10 more meshes · 183 × 135 × 45 cm
+
+Lacquered samurai armour: kabuto, menpo, cuirass, sleeves and greaves.
+
+**Animations.** **Own:** 11 pieces skinned to the skeleton of the Samurai (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_samurai_samurai_armour_side.jpg" width="280" alt="Samurai Armour, side view"> <img src="images/objects/arm_samurai_samurai_armour_quarter.jpg" width="280" alt="Samurai Armour, three-quarter view"> <img src="images/objects/arm_samurai_samurai_armour_third.jpg" width="280" alt="Samurai Armour, far three-quarter view">
+
+#### Broddi's Armour
+
+[Dwarfs Pack](https://www.fab.com/listings/80643e93-5d54-438c-ae9d-7717242e5a16) · **Use:** full plate · model `SK_Dwarf_BroddI_Armor_01` and 6 more meshes · 180 × 144 × 50 cm
+
+Heavy dwarven plate in pale gold with a squared full helm.
+
+**Animations.** **Own:** 7 pieces skinned to the skeleton of Dwarf Broddi (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dwarf_pack_broddi_s_armour_side.jpg" width="280" alt="Broddi's Armour, side view"> <img src="images/objects/arm_dwarf_pack_broddi_s_armour_quarter.jpg" width="280" alt="Broddi's Armour, three-quarter view"> <img src="images/objects/arm_dwarf_pack_broddi_s_armour_third.jpg" width="280" alt="Broddi's Armour, far three-quarter view">
+
+#### Dwarf King's Gauntlets and Crown
+
+[Dwarfs Pack](https://www.fab.com/listings/80643e93-5d54-438c-ae9d-7717242e5a16) · **Use:** regalia · model `SK_Dwarf_King_Armor_01` and 2 more meshes · 130 × 88 × 42 cm
+
+Big red-and-gold gauntlets and a spiked iron crown.
+
+**Animations.** **Own:** 3 pieces skinned to the skeleton of the Dwarf King (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dwarf_pack_dwarf_king_s_armour_side.jpg" width="280" alt="Dwarf King's Gauntlets and Crown, side view"> <img src="images/objects/arm_dwarf_pack_dwarf_king_s_armour_quarter.jpg" width="280" alt="Dwarf King's Gauntlets and Crown, three-quarter view"> <img src="images/objects/arm_dwarf_pack_dwarf_king_s_armour_third.jpg" width="280" alt="Dwarf King's Gauntlets and Crown, far three-quarter view">
+
+#### Orme's Armour
+
+[Dwarfs Pack](https://www.fab.com/listings/80643e93-5d54-438c-ae9d-7717242e5a16) · **Use:** light armour · model `SK_Dwarf_Orme_Armor_01` and 4 more meshes · 140 × 120 × 40 cm
+
+Copper pauldrons, bracers and knee pieces.
+
+**Animations.** **Own:** 5 pieces skinned to the skeleton of Dwarf Orme (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dwarf_pack_orme_s_armour_side.jpg" width="280" alt="Orme's Armour, side view"> <img src="images/objects/arm_dwarf_pack_orme_s_armour_quarter.jpg" width="280" alt="Orme's Armour, three-quarter view"> <img src="images/objects/arm_dwarf_pack_orme_s_armour_third.jpg" width="280" alt="Orme's Armour, far three-quarter view">
+
+#### Bedvar's Armour
+
+[Dwarfs Pack](https://www.fab.com/listings/80643e93-5d54-438c-ae9d-7717242e5a16) · **Use:** partial armour · model `SK_Dwarf_Bedvar_Armor_Hands_Mesh` and 1 more meshes · 130 × 60 × 38 cm
+
+Gilded pauldrons and gauntlets.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of Dwarf Bedvar (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dwarf_pack_bedvar_s_armour_side.jpg" width="280" alt="Bedvar's Armour, side view"> <img src="images/objects/arm_dwarf_pack_bedvar_s_armour_quarter.jpg" width="280" alt="Bedvar's Armour, three-quarter view"> <img src="images/objects/arm_dwarf_pack_bedvar_s_armour_third.jpg" width="280" alt="Bedvar's Armour, far three-quarter view">
+
+#### Orc Warrior's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Orc_01_Armor_01` and 8 more meshes · 186 × 140 × 49 cm
+
+Spiked shoulder and arm guards, a skull belt, knee plates and greaves.
+
+**Animations.** **Own:** 9 pieces skinned to the skeleton of the Orc Warrior (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_orc_warrior_s_armour_side.jpg" width="280" alt="Orc Warrior's Armour, side view"> <img src="images/objects/arm_orcs_pack_orc_warrior_s_armour_quarter.jpg" width="280" alt="Orc Warrior's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_orc_warrior_s_armour_third.jpg" width="280" alt="Orc Warrior's Armour, far three-quarter view">
+
+#### Orc Veteran's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Orc_02_Armor_01` and 13 more meshes · 166 × 146 × 57 cm
+
+Crossed bone-and-iron pauldrons, a plate skirt and heavy boots.
+
+**Animations.** **Own:** 14 pieces skinned to the skeleton of the Orc Veteran (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_orc_veteran_s_armour_side.jpg" width="280" alt="Orc Veteran's Armour, side view"> <img src="images/objects/arm_orcs_pack_orc_veteran_s_armour_quarter.jpg" width="280" alt="Orc Veteran's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_orc_veteran_s_armour_third.jpg" width="280" alt="Orc Veteran's Armour, far three-quarter view">
+
+#### Orc Skirmisher's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Orc_03_Armor_01` and 5 more meshes · 186 × 52 × 44 cm
+
+A spiked cage helmet, a belt plate and thigh-high leg armour.
+
+**Animations.** **Own:** 6 pieces skinned to the skeleton of the Orc Skirmisher (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_orc_skirmisher_s_armour_side.jpg" width="280" alt="Orc Skirmisher's Armour, side view"> <img src="images/objects/arm_orcs_pack_orc_skirmisher_s_armour_quarter.jpg" width="280" alt="Orc Skirmisher's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_orc_skirmisher_s_armour_third.jpg" width="280" alt="Orc Skirmisher's Armour, far three-quarter view">
+
+#### Orc Bruiser's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Orc_05_Armor_01_Mesh` and 9 more meshes · 190 × 122 × 55 cm
+
+A round helm, shoulder pieces, a wide plate skirt and boots.
+
+**Animations.** **Own:** 10 pieces skinned to the skeleton of the Orc Bruiser (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_orc_bruiser_s_armour_side.jpg" width="280" alt="Orc Bruiser's Armour, side view"> <img src="images/objects/arm_orcs_pack_orc_bruiser_s_armour_quarter.jpg" width="280" alt="Orc Bruiser's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_orc_bruiser_s_armour_third.jpg" width="280" alt="Orc Bruiser's Armour, far three-quarter view">
+
+#### Orc Raider's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Orc_06_Armor_01_Mesh` and 14 more meshes · 183 × 128 × 45 cm
+
+A mask and layered leather and iron from shoulders to boots.
+
+**Animations.** **Own:** 15 pieces skinned to the skeleton of the Orc Raider (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_orc_raider_s_armour_side.jpg" width="280" alt="Orc Raider's Armour, side view"> <img src="images/objects/arm_orcs_pack_orc_raider_s_armour_quarter.jpg" width="280" alt="Orc Raider's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_orc_raider_s_armour_third.jpg" width="280" alt="Orc Raider's Armour, far three-quarter view">
+
+#### Gnur's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Gnur_Armor_01_Mesh` and 5 more meshes · 166 × 97 × 44 cm
+
+A spiked chest harness, pauldrons, a plated skirt and greaves.
+
+**Animations.** **Own:** 6 pieces skinned to the skeleton of Gnur (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_gnur_s_armour_side.jpg" width="280" alt="Gnur's Armour, side view"> <img src="images/objects/arm_orcs_pack_gnur_s_armour_quarter.jpg" width="280" alt="Gnur's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_gnur_s_armour_third.jpg" width="280" alt="Gnur's Armour, far three-quarter view">
+
+#### Dardan's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Dardan_Armor_01` and 3 more meshes · 137 × 133 × 33 cm
+
+Spiked bracers and greaves.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of Dardan (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_dardan_s_armour_side.jpg" width="280" alt="Dardan's Armour, side view"> <img src="images/objects/arm_orcs_pack_dardan_s_armour_quarter.jpg" width="280" alt="Dardan's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_dardan_s_armour_third.jpg" width="280" alt="Dardan's Armour, far three-quarter view">
+
+#### Costalmed's Armour
+
+[14 Orcs Pack](https://www.fab.com/listings/3c224616-e998-433c-910b-32901d426103) · **Use:** orc armour · model `SK_Orc_Costalmed_Armor_Arm_01_Mesh` and 4 more meshes · 167 × 134 × 56 cm
+
+Rusty plate on one shoulder and arm, and on both legs.
+
+**Animations.** **Own:** 5 pieces skinned to the skeleton of Costalmed (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_orcs_pack_costalmed_s_armour_side.jpg" width="280" alt="Costalmed's Armour, side view"> <img src="images/objects/arm_orcs_pack_costalmed_s_armour_quarter.jpg" width="280" alt="Costalmed's Armour, three-quarter view"> <img src="images/objects/arm_orcs_pack_costalmed_s_armour_third.jpg" width="280" alt="Costalmed's Armour, far three-quarter view">
+
+#### Executioner's Armour
+
+[Fantasy Enemies (Pack)](https://www.fab.com/listings/79f79e3e-570b-4d96-bc3f-f62107178169) · **Use:** partial armour · model `SK_Executioner_Armor_01` and 1 more meshes · 144 × 60 × 29 cm
+
+Spiked pauldrons and bracers.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Executioner (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_fantasy_enemies_pack_executioner_s_armour_side.jpg" width="280" alt="Executioner's Armour, side view"> <img src="images/objects/arm_fantasy_enemies_pack_executioner_s_armour_quarter.jpg" width="280" alt="Executioner's Armour, three-quarter view"> <img src="images/objects/arm_fantasy_enemies_pack_executioner_s_armour_third.jpg" width="280" alt="Executioner's Armour, far three-quarter view">
+
+#### Demon Lord's Armour
+
+[Fantasy Enemies (Pack)](https://www.fab.com/listings/79f79e3e-570b-4d96-bc3f-f62107178169) · **Use:** demon armour · model `SK_Demon_Armors_01` and 5 more meshes · 123 × 87 × 54 cm
+
+Gold armour for the arms and legs, a gold breastplate.
+
+**Animations.** **Own:** 6 pieces skinned to the skeleton of the Demon Lord (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_fantasy_enemies_pack_demon_lord_s_armour_side.jpg" width="280" alt="Demon Lord's Armour, side view"> <img src="images/objects/arm_fantasy_enemies_pack_demon_lord_s_armour_quarter.jpg" width="280" alt="Demon Lord's Armour, three-quarter view"> <img src="images/objects/arm_fantasy_enemies_pack_demon_lord_s_armour_third.jpg" width="280" alt="Demon Lord's Armour, far three-quarter view">
+
+#### Spiked Troll's Armour
+
+[Fantasy Enemies (Pack)](https://www.fab.com/listings/79f79e3e-570b-4d96-bc3f-f62107178169) · **Use:** troll armour · model `SK_Troll_Armors_01` and 6 more meshes · 157 × 139 × 73 cm
+
+A horned helm and plates bristling with bone spikes.
+
+**Animations.** **Own:** 7 pieces skinned to the skeleton of the Spiked Troll (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_fantasy_enemies_pack_spiked_troll_s_armour_side.jpg" width="280" alt="Spiked Troll's Armour, side view"> <img src="images/objects/arm_fantasy_enemies_pack_spiked_troll_s_armour_quarter.jpg" width="280" alt="Spiked Troll's Armour, three-quarter view"> <img src="images/objects/arm_fantasy_enemies_pack_spiked_troll_s_armour_third.jpg" width="280" alt="Spiked Troll's Armour, far three-quarter view">
+
+#### Befouler's Armour
+
+[Fantasy Enemies (Pack)](https://www.fab.com/listings/79f79e3e-570b-4d96-bc3f-f62107178169) · **Use:** demon armour · model `SK_Befouler_Arms_Armors_01` and 7 more meshes · 154 × 135 × 109 cm
+
+Pale, spiked bone armour with skulls on its back.
+
+**Animations.** **Own:** 8 pieces skinned to the skeleton of the Befouler (humanoid_enemies.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_fantasy_enemies_pack_befouler_s_armour_side.jpg" width="280" alt="Befouler's Armour, side view"> <img src="images/objects/arm_fantasy_enemies_pack_befouler_s_armour_quarter.jpg" width="280" alt="Befouler's Armour, three-quarter view"> <img src="images/objects/arm_fantasy_enemies_pack_befouler_s_armour_third.jpg" width="280" alt="Befouler's Armour, far three-quarter view">
+
+#### Bear Warrior's Armour
+
+[Animals Warrior Pack](https://www.fab.com/listings/be0d1014-cd06-4fc8-a442-b107ee75b81f) · **Use:** heavy armour · model `SK_Bear_Armor_01` and 11 more meshes · 143 × 131 × 49 cm
+
+Black lamellar, iron arm guards and a red cloth skirt.
+
+**Animations.** **Own:** 12 pieces skinned to the skeleton of the Bear Warrior (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_animals_warrior_pack_bear_warrior_s_armour_side.jpg" width="280" alt="Bear Warrior's Armour, side view"> <img src="images/objects/arm_animals_warrior_pack_bear_warrior_s_armour_quarter.jpg" width="280" alt="Bear Warrior's Armour, three-quarter view"> <img src="images/objects/arm_animals_warrior_pack_bear_warrior_s_armour_third.jpg" width="280" alt="Bear Warrior's Armour, far three-quarter view">
+
+#### Minotaur's Armour
+
+[Animals Warrior Pack](https://www.fab.com/listings/be0d1014-cd06-4fc8-a442-b107ee75b81f) · **Use:** heavy armour · model `SK_Bull_Armor_01_Mesh` and 12 more meshes · 171 × 130 × 48 cm
+
+Golden plate cuirass and pauldrons over a mail skirt.
+
+**Animations.** **Own:** 13 pieces skinned to the skeleton of the Minotaur (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_animals_warrior_pack_minotaur_s_armour_side.jpg" width="280" alt="Minotaur's Armour, side view"> <img src="images/objects/arm_animals_warrior_pack_minotaur_s_armour_quarter.jpg" width="280" alt="Minotaur's Armour, three-quarter view"> <img src="images/objects/arm_animals_warrior_pack_minotaur_s_armour_third.jpg" width="280" alt="Minotaur's Armour, far three-quarter view">
+
+#### Crocodile Warrior's Armour
+
+[Animals Warrior Pack](https://www.fab.com/listings/be0d1014-cd06-4fc8-a442-b107ee75b81f) · **Use:** medium armour · model `SK_Crocodile_Armor_01_Mesh` and 10 more meshes · 170 × 125 × 56 cm
+
+A studded leather cuirass with a skull belt and greaves.
+
+**Animations.** **Own:** 11 pieces skinned to the skeleton of the Crocodile Warrior (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_animals_warrior_pack_crocodile_warrior_s_armour_side.jpg" width="280" alt="Crocodile Warrior's Armour, side view"> <img src="images/objects/arm_animals_warrior_pack_crocodile_warrior_s_armour_quarter.jpg" width="280" alt="Crocodile Warrior's Armour, three-quarter view"> <img src="images/objects/arm_animals_warrior_pack_crocodile_warrior_s_armour_third.jpg" width="280" alt="Crocodile Warrior's Armour, far three-quarter view">
+
+#### Elephant Warrior's Armour
+
+[Animals Warrior Pack](https://www.fab.com/listings/be0d1014-cd06-4fc8-a442-b107ee75b81f) · **Use:** heavy armour · model `SK_Elephant_Armor_01` and 11 more meshes · 186 × 135 × 61 cm
+
+Steel plate armour cut for a giant.
+
+**Animations.** **Own:** 12 pieces skinned to the skeleton of the Elephant Warrior (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_animals_warrior_pack_elephant_warrior_s_armour_side.jpg" width="280" alt="Elephant Warrior's Armour, side view"> <img src="images/objects/arm_animals_warrior_pack_elephant_warrior_s_armour_quarter.jpg" width="280" alt="Elephant Warrior's Armour, three-quarter view"> <img src="images/objects/arm_animals_warrior_pack_elephant_warrior_s_armour_third.jpg" width="280" alt="Elephant Warrior's Armour, far three-quarter view">
+
+#### War Elephant Barding
+
+[Fantasy Animal (Pack)](https://www.fab.com/listings/4878a5f0-f82b-4530-b50d-a3f880ef4665) · **Use:** barding · model `SK_Fantasy_Elephant_Armors_01` and 6 more meshes · 1107 × 667 × 409 cm
+
+An elephant's armour: a riveted saddle-cloth plate, head and leg pieces, tusk caps.
+
+**Animations.** **Own:** 7 pieces skinned to the skeleton of the War Elephant (vehicles.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_animals_pack_war_elephant_barding_side.jpg" width="280" alt="War Elephant Barding, side view"> <img src="images/objects/arm_animals_pack_war_elephant_barding_quarter.jpg" width="280" alt="War Elephant Barding, three-quarter view"> <img src="images/objects/arm_animals_pack_war_elephant_barding_third.jpg" width="280" alt="War Elephant Barding, far three-quarter view">
+
+#### Dragon Barding
+
+[Fantasy Animal (Pack)](https://www.fab.com/listings/4878a5f0-f82b-4530-b50d-a3f880ef4665) · **Use:** barding · model `SK_Fantasy_Dragon_Armor_Heads` and 6 more meshes · 830 × 297 × 226 cm
+
+A dragon's armour: head, neck, back, tail and leg plates.
+
+**Animations.** **Own:** 7 pieces skinned to the skeleton of the Armoured Dragon (vehicles.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_animals_pack_dragon_barding_side.jpg" width="280" alt="Dragon Barding, side view"> <img src="images/objects/arm_animals_pack_dragon_barding_quarter.jpg" width="280" alt="Dragon Barding, three-quarter view"> <img src="images/objects/arm_animals_pack_dragon_barding_third.jpg" width="280" alt="Dragon Barding, far three-quarter view">
+
+#### Epic Plate (male)
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** full plate · model `SK_Male_EpicArmorArms` and 3 more meshes · 163 × 136 × 47 cm
+
+A complete dark steel suit: cuirass, pauldrons, gauntlets and legs.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the dungeon pack's male modular character (a UE5 mannequin): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_mysticdungeon_epic_plate_male_side.jpg" width="280" alt="Epic Plate (male), side view"> <img src="images/objects/arm_mysticdungeon_epic_plate_male_quarter.jpg" width="280" alt="Epic Plate (male), three-quarter view"> <img src="images/objects/arm_mysticdungeon_epic_plate_male_third.jpg" width="280" alt="Epic Plate (male), far three-quarter view">
+
+#### Epic Plate (female)
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** full plate · model `SK_Female_EpicArmorGloves` and 3 more meshes · 160 × 122 × 41 cm
+
+The same dark steel suit cut for a woman.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the dungeon pack's female modular character (a UE5 mannequin): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_mysticdungeon_epic_plate_female_side.jpg" width="280" alt="Epic Plate (female), side view"> <img src="images/objects/arm_mysticdungeon_epic_plate_female_quarter.jpg" width="280" alt="Epic Plate (female), three-quarter view"> <img src="images/objects/arm_mysticdungeon_epic_plate_female_third.jpg" width="280" alt="Epic Plate (female), far three-quarter view">
+
+#### Split Armour (male)
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** medium armour · model `SK_MaleArmor_Dress01` and 5 more meshes · 162 × 133 × 57 cm
+
+Steel cuirass and pauldrons over a blue gambeson, with gloves and boots.
+
+**Animations.** **Own:** 6 pieces skinned to the skeleton of the dungeon pack's male modular character (a UE5 mannequin): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_mysticdungeon_split_armour_male_side.jpg" width="280" alt="Split Armour (male), side view"> <img src="images/objects/arm_mysticdungeon_split_armour_male_quarter.jpg" width="280" alt="Split Armour (male), three-quarter view"> <img src="images/objects/arm_mysticdungeon_split_armour_male_third.jpg" width="280" alt="Split Armour (male), far three-quarter view">
+
+### Modern armour
+
+#### Exo Trooper's Armour
+
+[Female Soldiers (Pack)](https://www.fab.com/listings/ecdc02f6-a5e4-4ee2-8b16-1cd2112b543e) · **Use:** combat armour · model `SK_Woman_01_Armors_Elbows` and 4 more meshes · 140 × 118 × 31 cm
+
+A yellow-visored helmet, shoulder, forearm, elbow and knee armour.
+
+**Animations.** **Own:** 5 pieces skinned to the skeleton of the Exo Trooper (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_female_soldier_pack_exo_trooper_s_armour_side.jpg" width="280" alt="Exo Trooper's Armour, side view"> <img src="images/objects/arm_female_soldier_pack_exo_trooper_s_armour_quarter.jpg" width="280" alt="Exo Trooper's Armour, three-quarter view"> <img src="images/objects/arm_female_soldier_pack_exo_trooper_s_armour_third.jpg" width="280" alt="Exo Trooper's Armour, far three-quarter view">
+
+#### Mercenary's Plate Carrier
+
+[Female Soldiers (Pack)](https://www.fab.com/listings/ecdc02f6-a5e4-4ee2-8b16-1cd2112b543e) · **Use:** combat armour · model `SK_Woman_02_Bulletproof_Vest` and 5 more meshes · 117 × 114 × 40 cm
+
+A tan plate carrier, an exo frame on the arms, a helmet and leg plates.
+
+**Animations.** **Own:** 6 pieces skinned to the skeleton of the Masked Mercenary (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_female_soldier_pack_mercenary_s_plate_carrier_side.jpg" width="280" alt="Mercenary's Plate Carrier, side view"> <img src="images/objects/arm_female_soldier_pack_mercenary_s_plate_carrier_quarter.jpg" width="280" alt="Mercenary's Plate Carrier, three-quarter view"> <img src="images/objects/arm_female_soldier_pack_mercenary_s_plate_carrier_third.jpg" width="280" alt="Mercenary's Plate Carrier, far three-quarter view">
+
+#### Hazmat Operator's Vest
+
+[Female Soldiers (Pack)](https://www.fab.com/listings/ecdc02f6-a5e4-4ee2-8b16-1cd2112b543e) · **Use:** bulletproof vest · model `SK_Woman_03_Bulletproof_Vest` · 66 × 36 × 35 cm
+
+A grey modular bulletproof vest.
+
+**Animations.** **Own:** 1 piece skinned to the skeleton of the Hazmat Operator (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_female_soldier_pack_hazmat_operator_s_vest_side.jpg" width="280" alt="Hazmat Operator's Vest, side view"> <img src="images/objects/arm_female_soldier_pack_hazmat_operator_s_vest_quarter.jpg" width="280" alt="Hazmat Operator's Vest, three-quarter view"> <img src="images/objects/arm_female_soldier_pack_hazmat_operator_s_vest_third.jpg" width="280" alt="Hazmat Operator's Vest, far three-quarter view">
+
+#### Desert Scout's Vest
+
+[Female Soldiers (Pack)](https://www.fab.com/listings/ecdc02f6-a5e4-4ee2-8b16-1cd2112b543e) · **Use:** chest rig · model `SK_Woman_04_Bulletproof_Vest` · 46 × 37 × 36 cm
+
+A green load-bearing vest full of pouches.
+
+**Animations.** **Own:** 1 piece skinned to the skeleton of the Desert Scout (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_female_soldier_pack_desert_scout_s_vest_side.jpg" width="280" alt="Desert Scout's Vest, side view"> <img src="images/objects/arm_female_soldier_pack_desert_scout_s_vest_quarter.jpg" width="280" alt="Desert Scout's Vest, three-quarter view"> <img src="images/objects/arm_female_soldier_pack_desert_scout_s_vest_third.jpg" width="280" alt="Desert Scout's Vest, far three-quarter view">
+
+#### Riot Armour
+
+[Female Soldiers (Pack)](https://www.fab.com/listings/ecdc02f6-a5e4-4ee2-8b16-1cd2112b543e) · **Use:** riot armour · model `SK_Woman_05_Armors_Body_01` and 10 more meshes · 129 × 74 × 36 cm
+
+Black 'POLICE' riot armour from shoulders to shins.
+
+**Animations.** **Own:** 11 pieces skinned to the skeleton of the Riot Officer (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_female_soldier_pack_riot_armour_side.jpg" width="280" alt="Riot Armour, side view"> <img src="images/objects/arm_female_soldier_pack_riot_armour_quarter.jpg" width="280" alt="Riot Armour, three-quarter view"> <img src="images/objects/arm_female_soldier_pack_riot_armour_third.jpg" width="280" alt="Riot Armour, far three-quarter view">
+
+#### Sniper's Armour
+
+[Sniper Soldier](https://www.fab.com/listings/70c21220-f9a1-4c3c-8bc2-699508be793f) · **Use:** combat armour · model `SK_Sniper_Armors_Arms` and 2 more meshes · 118 × 90 × 37 cm
+
+A camouflage plate carrier, arm guards and knee pads.
+
+**Animations.** **Own:** 3 pieces skinned to the skeleton of the Sniper (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sniper_sniper_s_armour_side.jpg" width="280" alt="Sniper's Armour, side view"> <img src="images/objects/arm_sniper_sniper_s_armour_quarter.jpg" width="280" alt="Sniper's Armour, three-quarter view"> <img src="images/objects/arm_sniper_sniper_s_armour_third.jpg" width="280" alt="Sniper's Armour, far three-quarter view">
+
+#### Armoured Vest
+
+[Adventure Characters (Pack)](https://www.fab.com/listings/db81464d-fcb5-43a8-b309-5555c392be3a) · **Use:** bulletproof vest · model `SK_UE4_Adventure_05_Armored_Vest` · 58 × 39 × 38 cm
+
+A black bulletproof vest with shoulder straps.
+
+**Animations.** **Own:** 1 piece skinned to the skeleton of the Escaped Convict (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_adventures_pack_armoured_vest_side.jpg" width="280" alt="Armoured Vest, side view"> <img src="images/objects/arm_adventures_pack_armoured_vest_quarter.jpg" width="280" alt="Armoured Vest, three-quarter view"> <img src="images/objects/arm_adventures_pack_armoured_vest_third.jpg" width="280" alt="Armoured Vest, far three-quarter view">
+
+#### Soldier's Body Armour
+
+[Military Pack](https://www.fab.com/listings/295db2f7-fb2e-4f28-9a6c-dcd8ab724747) · **Use:** combat armour · model `SK_Armor_01` and 1 more meshes · 83 × 51 × 25 cm
+
+Tan shoulder plates and thigh guards.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Military pack's customisable soldier: worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_military_pack_soldier_s_body_armour_side.jpg" width="280" alt="Soldier's Body Armour, side view"> <img src="images/objects/arm_military_pack_soldier_s_body_armour_quarter.jpg" width="280" alt="Soldier's Body Armour, three-quarter view"> <img src="images/objects/arm_military_pack_soldier_s_body_armour_third.jpg" width="280" alt="Soldier's Body Armour, far three-quarter view">
+
+#### Sapper's Helmet and Pads
+
+[Military Pack](https://www.fab.com/listings/295db2f7-fb2e-4f28-9a6c-dcd8ab724747) · **Use:** combat armour · model `SK_Sapper_Helmet_Mesh` and 1 more meshes · 69 × 45 × 35 cm
+
+A green steel helmet and two big shoulder guards.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Sapper (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_military_pack_sapper_s_helmet_and_pads_side.jpg" width="280" alt="Sapper's Helmet and Pads, side view"> <img src="images/objects/arm_military_pack_sapper_s_helmet_and_pads_quarter.jpg" width="280" alt="Sapper's Helmet and Pads, three-quarter view"> <img src="images/objects/arm_military_pack_sapper_s_helmet_and_pads_third.jpg" width="280" alt="Sapper's Helmet and Pads, far three-quarter view">
+
+#### Dystopian Soldier's Armour
+
+[Dystopia Soldiers (Pack)](https://www.fab.com/listings/3be8756a-724d-4fca-a67f-8442a1fcb833) · **Use:** combat armour · model `SK_Dystopia_Soldier_Armor_01` and 2 more meshes · 187 × 85 × 36 cm
+
+A dark helmet, shoulder armour and boots.
+
+**Animations.** **Own:** 3 pieces skinned to the skeleton of the Dystopia pack's first soldier: worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dystopia_pack_dystopian_soldier_s_armour_side.jpg" width="280" alt="Dystopian Soldier's Armour, side view"> <img src="images/objects/arm_dystopia_pack_dystopian_soldier_s_armour_quarter.jpg" width="280" alt="Dystopian Soldier's Armour, three-quarter view"> <img src="images/objects/arm_dystopia_pack_dystopian_soldier_s_armour_third.jpg" width="280" alt="Dystopian Soldier's Armour, far three-quarter view">
+
+#### Dystopian Trooper's Armour
+
+[Dystopia Soldiers (Pack)](https://www.fab.com/listings/3be8756a-724d-4fca-a67f-8442a1fcb833) · **Use:** combat armour · model `SK_Dystopia_Soldier_02_Armor_01` and 10 more meshes · 192 × 133 × 46 cm
+
+Black armour with a respirator hose: helmet, chest, arms and legs.
+
+**Animations.** **Own:** 11 pieces skinned to the skeleton of the Dystopian Trooper (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dystopia_pack_dystopian_trooper_s_armour_side.jpg" width="280" alt="Dystopian Trooper's Armour, side view"> <img src="images/objects/arm_dystopia_pack_dystopian_trooper_s_armour_quarter.jpg" width="280" alt="Dystopian Trooper's Armour, three-quarter view"> <img src="images/objects/arm_dystopia_pack_dystopian_trooper_s_armour_third.jpg" width="280" alt="Dystopian Trooper's Armour, far three-quarter view">
+
+#### General's Armour
+
+[Dystopia Soldiers (Pack)](https://www.fab.com/listings/3be8756a-724d-4fca-a67f-8442a1fcb833) · **Use:** officer's armour · model `SK_UE4_Dystopian_general_Armor_01` and 3 more meshes · 107 × 62 × 45 cm
+
+Green-and-orange armour plates and a large shoulder pad.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the Dystopian General (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dystopia_pack_general_s_armour_side.jpg" width="280" alt="General's Armour, side view"> <img src="images/objects/arm_dystopia_pack_general_s_armour_quarter.jpg" width="280" alt="General's Armour, three-quarter view"> <img src="images/objects/arm_dystopia_pack_general_s_armour_third.jpg" width="280" alt="General's Armour, far three-quarter view">
+
+#### Medic's Armour
+
+[Dystopia Soldiers (Pack)](https://www.fab.com/listings/3be8756a-724d-4fca-a67f-8442a1fcb833) · **Use:** light armour · model `SK_UE4_Medic_Dystopia_Armor_01` and 1 more meshes · 144 × 76 × 19 cm
+
+Black shoulder and shin plates.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Dystopian Medic (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_dystopia_pack_medic_s_armour_side.jpg" width="280" alt="Medic's Armour, side view"> <img src="images/objects/arm_dystopia_pack_medic_s_armour_quarter.jpg" width="280" alt="Medic's Armour, three-quarter view"> <img src="images/objects/arm_dystopia_pack_medic_s_armour_third.jpg" width="280" alt="Medic's Armour, far three-quarter view">
+
+### Futuristic armour
+
+#### Alien Warlord's Armour
+
+[Aliens Warrior (Pack)](https://www.fab.com/listings/a683cdf2-a1b1-4c35-b788-eeae62c2ed37) · **Use:** alien armour · model `SK_UE4_Alien_Warrior_01_Armor_01` and 6 more meshes · 169 × 136 × 63 cm
+
+Blue power armour with a high gorget, pauldrons and greaves.
+
+**Animations.** **Own:** a static mesh, no clips of its own.
+
+<img src="images/objects/arm_aliens_warrior_pack_alien_warlord_s_armour_side.jpg" width="280" alt="Alien Warlord's Armour, side view"> <img src="images/objects/arm_aliens_warrior_pack_alien_warlord_s_armour_quarter.jpg" width="280" alt="Alien Warlord's Armour, three-quarter view"> <img src="images/objects/arm_aliens_warrior_pack_alien_warlord_s_armour_third.jpg" width="280" alt="Alien Warlord's Armour, far three-quarter view">
+
+#### Alien Brute's Armour
+
+[Aliens Warrior (Pack)](https://www.fab.com/listings/a683cdf2-a1b1-4c35-b788-eeae62c2ed37) · **Use:** alien armour · model `SK_UE4_Alien_Warrior_02_Armor` and 2 more meshes · 141 × 91 × 78 cm
+
+A bulky green carapace, bracers and a gas mask.
+
+**Animations.** **Own:** 3 pieces skinned to the skeleton of the Alien Brute (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_aliens_warrior_pack_alien_brute_s_armour_side.jpg" width="280" alt="Alien Brute's Armour, side view"> <img src="images/objects/arm_aliens_warrior_pack_alien_brute_s_armour_quarter.jpg" width="280" alt="Alien Brute's Armour, three-quarter view"> <img src="images/objects/arm_aliens_warrior_pack_alien_brute_s_armour_third.jpg" width="280" alt="Alien Brute's Armour, far three-quarter view">
+
+#### Alien Agent's Armour
+
+[Aliens Warrior (Pack)](https://www.fab.com/listings/a683cdf2-a1b1-4c35-b788-eeae62c2ed37) · **Use:** alien armour · model `SK_UE4_Alien_Warrior_03_Armor_01` and 1 more meshes · 103 × 44 × 29 cm
+
+A silver collar, a harness and armoured boots.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Alien Agent (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_aliens_warrior_pack_alien_agent_s_armour_side.jpg" width="280" alt="Alien Agent's Armour, side view"> <img src="images/objects/arm_aliens_warrior_pack_alien_agent_s_armour_quarter.jpg" width="280" alt="Alien Agent's Armour, three-quarter view"> <img src="images/objects/arm_aliens_warrior_pack_alien_agent_s_armour_third.jpg" width="280" alt="Alien Agent's Armour, far three-quarter view">
+
+#### Alien Hunter's Armour
+
+[Aliens Warrior (Pack)](https://www.fab.com/listings/a683cdf2-a1b1-4c35-b788-eeae62c2ed37) · **Use:** alien armour · model `SK_UE4_Alien_Warrior_04_Armor` · 98 × 46 × 44 cm
+
+A grey insect-like chest carapace and belt.
+
+**Animations.** **Own:** 1 piece skinned to the skeleton of the Alien Hunter (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_aliens_warrior_pack_alien_hunter_s_armour_side.jpg" width="280" alt="Alien Hunter's Armour, side view"> <img src="images/objects/arm_aliens_warrior_pack_alien_hunter_s_armour_quarter.jpg" width="280" alt="Alien Hunter's Armour, three-quarter view"> <img src="images/objects/arm_aliens_warrior_pack_alien_hunter_s_armour_third.jpg" width="280" alt="Alien Hunter's Armour, far three-quarter view">
+
+#### Defender's Plating
+
+[Sci-Fi Characters (Pack) Vol.2](https://www.fab.com/listings/d919d2b9-72be-4f86-a715-b8ce18e415f1) · **Use:** power armour · model `SK_Defender_Forearm_Armor_L` and 3 more meshes · 154 × 57 × 40 cm
+
+Camouflaged shoulder and forearm plates.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the Defender (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sci_fi_characters_pack_vol_2_defender_s_plating_side.jpg" width="280" alt="Defender's Plating, side view"> <img src="images/objects/arm_sci_fi_characters_pack_vol_2_defender_s_plating_quarter.jpg" width="280" alt="Defender's Plating, three-quarter view"> <img src="images/objects/arm_sci_fi_characters_pack_vol_2_defender_s_plating_third.jpg" width="280" alt="Defender's Plating, far three-quarter view">
+
+#### Android's Armour
+
+[Sci-Fi Characters (Pack) Vol.2](https://www.fab.com/listings/d919d2b9-72be-4f86-a715-b8ce18e415f1) · **Use:** sci-fi armour · model `SK_Sci_Fi_Character_09_Forearm_Armor_L` and 9 more meshes · 130 × 128 × 49 cm
+
+A white-and-gold helmet, shoulder shields and black leg armour.
+
+**Animations.** **Own:** 10 pieces skinned to the skeleton of the Android (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sci_fi_characters_pack_vol_2_android_s_armour_side.jpg" width="280" alt="Android's Armour, side view"> <img src="images/objects/arm_sci_fi_characters_pack_vol_2_android_s_armour_quarter.jpg" width="280" alt="Android's Armour, three-quarter view"> <img src="images/objects/arm_sci_fi_characters_pack_vol_2_android_s_armour_third.jpg" width="280" alt="Android's Armour, far three-quarter view">
+
+#### Skull Valkyrie's Arm Armour
+
+[Sci-Fi Characters (Pack) Vol.2](https://www.fab.com/listings/d919d2b9-72be-4f86-a715-b8ce18e415f1) · **Use:** sci-fi armour · model `SK_Characters_07_Armors_Arms` · 74 × 34 × 28 cm
+
+Black spiked shoulder and arm armour.
+
+**Animations.** **Own:** 1 piece skinned to the skeleton of the Skull Valkyrie (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sci_fi_characters_pack_vol_2_skull_valkyrie_s_arm_armour_side.jpg" width="280" alt="Skull Valkyrie's Arm Armour, side view"> <img src="images/objects/arm_sci_fi_characters_pack_vol_2_skull_valkyrie_s_arm_armour_quarter.jpg" width="280" alt="Skull Valkyrie's Arm Armour, three-quarter view"> <img src="images/objects/arm_sci_fi_characters_pack_vol_2_skull_valkyrie_s_arm_armour_third.jpg" width="280" alt="Skull Valkyrie's Arm Armour, far three-quarter view">
+
+#### Marauder's Scrap Armour
+
+[Sci-Fi Mercenaries Pack](https://www.fab.com/listings/e0efc01c-ad86-428c-9103-d1f92c80db40) · **Use:** scrap armour · model `SK_Marauder_Armor_01` and 3 more meshes · 133 × 72 × 32 cm
+
+Orange scrap-metal shoulder and arm plates.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the Marauder (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sci_fi_mercenary_pack_marauder_s_scrap_armour_side.jpg" width="280" alt="Marauder's Scrap Armour, side view"> <img src="images/objects/arm_sci_fi_mercenary_pack_marauder_s_scrap_armour_quarter.jpg" width="280" alt="Marauder's Scrap Armour, three-quarter view"> <img src="images/objects/arm_sci_fi_mercenary_pack_marauder_s_scrap_armour_third.jpg" width="280" alt="Marauder's Scrap Armour, far three-quarter view">
+
+#### Robot's Plating
+
+[Sci-Fi Mercenaries Pack](https://www.fab.com/listings/e0efc01c-ad86-428c-9103-d1f92c80db40) · **Use:** scrap armour · model `SK_Robot_Armor_01_L` and 3 more meshes · 96 × 32 × 30 cm
+
+Spiked orange plates for a robot's shoulders and arms.
+
+**Animations.** **Own:** 4 pieces skinned to the skeleton of the Scrap Robot (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sci_fi_mercenary_pack_robot_s_plating_side.jpg" width="280" alt="Robot's Plating, side view"> <img src="images/objects/arm_sci_fi_mercenary_pack_robot_s_plating_quarter.jpg" width="280" alt="Robot's Plating, three-quarter view"> <img src="images/objects/arm_sci_fi_mercenary_pack_robot_s_plating_third.jpg" width="280" alt="Robot's Plating, far three-quarter view">
+
+#### Bounty Hunter's Arm Guards
+
+[Sci-Fi Mercenaries Pack](https://www.fab.com/listings/e0efc01c-ad86-428c-9103-d1f92c80db40) · **Use:** arm guards · model `SK_Head_Hunter_Armor_Arm_01` and 2 more meshes · 66 × 56 × 34 cm
+
+Worn tan arm armour.
+
+**Animations.** **Own:** 3 pieces skinned to the skeleton of the Head Hunter (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_sci_fi_mercenary_pack_bounty_hunter_s_arm_guards_side.jpg" width="280" alt="Bounty Hunter's Arm Guards, side view"> <img src="images/objects/arm_sci_fi_mercenary_pack_bounty_hunter_s_arm_guards_quarter.jpg" width="280" alt="Bounty Hunter's Arm Guards, three-quarter view"> <img src="images/objects/arm_sci_fi_mercenary_pack_bounty_hunter_s_arm_guards_third.jpg" width="280" alt="Bounty Hunter's Arm Guards, far three-quarter view">
+
+#### Future Soldier's Vest
+
+[Soldier Future 01](https://www.fab.com/listings/74bb0b33-bccb-4e35-b996-3fac2ad6960c) · **Use:** combat armour · model `SK_Soldier_Future_01_Bulletproof_Vest` and 2 more meshes · 122 × 67 × 44 cm
+
+A tan plate carrier with an exoskeleton frame for the arms.
+
+**Animations.** **Own:** 3 pieces skinned to the skeleton of the Future Soldier (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_soldier_future_01_future_soldier_s_vest_side.jpg" width="280" alt="Future Soldier's Vest, side view"> <img src="images/objects/arm_soldier_future_01_future_soldier_s_vest_quarter.jpg" width="280" alt="Future Soldier's Vest, three-quarter view"> <img src="images/objects/arm_soldier_future_01_future_soldier_s_vest_third.jpg" width="280" alt="Future Soldier's Vest, far three-quarter view">
+
+#### Future Ranger's Pads
+
+[Soldier Future 02](https://www.fab.com/listings/0414241c-8053-4139-a3b0-1bb481677e32) · **Use:** pads · model `SK_Soldier_Future_02_Armors_Armors_Legs` and 1 more meshes · 96 × 87 × 31 cm
+
+Black elbow and knee guards.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Future Ranger (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_soldier_future_02_future_ranger_s_pads_side.jpg" width="280" alt="Future Ranger's Pads, side view"> <img src="images/objects/arm_soldier_future_02_future_ranger_s_pads_quarter.jpg" width="280" alt="Future Ranger's Pads, three-quarter view"> <img src="images/objects/arm_soldier_future_02_future_ranger_s_pads_third.jpg" width="280" alt="Future Ranger's Pads, far three-quarter view">
+
+#### Future Heavy's Shoulder Guards
+
+[Soldier Future 03](https://www.fab.com/listings/75bde62a-fbe4-432f-99b2-00130b03e2a0) · **Use:** pauldrons · model `SK_Soldier_Future_03_Shoulder_Protection_01` and 1 more meshes · 84 × 35 × 29 cm
+
+Two olive armoured shoulder guards.
+
+**Animations.** **Own:** 2 pieces skinned to the skeleton of the Future Heavy (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_soldier_future_03_future_heavy_s_shoulder_guards_side.jpg" width="280" alt="Future Heavy's Shoulder Guards, side view"> <img src="images/objects/arm_soldier_future_03_future_heavy_s_shoulder_guards_quarter.jpg" width="280" alt="Future Heavy's Shoulder Guards, three-quarter view"> <img src="images/objects/arm_soldier_future_03_future_heavy_s_shoulder_guards_third.jpg" width="280" alt="Future Heavy's Shoulder Guards, far three-quarter view">
+
+#### Space Marine's Armour
+
+[Astronauts (Pack)](https://www.fab.com/listings/69267151-497d-494f-9592-551cd39246a2) · **Use:** space armour · model `SK_Astronaut_Soldier_Armors_Arms` and 5 more meshes · 163 × 100 × 49 cm
+
+A white armoured vest, arm plates and heavy space boots.
+
+**Animations.** **Own:** 6 pieces skinned to the skeleton of the Space Marine (heroes.md): worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own).
+
+<img src="images/objects/arm_astronauts_pack_space_marine_s_armour_side.jpg" width="280" alt="Space Marine's Armour, side view"> <img src="images/objects/arm_astronauts_pack_space_marine_s_armour_quarter.jpg" width="280" alt="Space Marine's Armour, three-quarter view"> <img src="images/objects/arm_astronauts_pack_space_marine_s_armour_third.jpg" width="280" alt="Space Marine's Armour, far three-quarter view">
+
+### Fantasy shields
+
+#### Heater Shield
+
+[Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) · **Use:** shield · model `SM_Shield_1` · 76 × 60 × 13 cm
+
+An ornate gold-and-iron shield with a monster's face in relief.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/medieval_weapons_heater_shield_side.jpg" width="280" alt="Heater Shield, side view"> <img src="images/objects/medieval_weapons_heater_shield_quarter.jpg" width="280" alt="Heater Shield, three-quarter view"> <img src="images/objects/medieval_weapons_heater_shield_third.jpg" width="280" alt="Heater Shield, far three-quarter view">
+
+#### Beast Shield
+
+[Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) · **Use:** shield · model `SM_Shield_2` · 69 × 67 × 14 cm
+
+A shield shaped like a horned beast's face.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/medieval_weapons_round_shield_side.jpg" width="280" alt="Beast Shield, side view"> <img src="images/objects/medieval_weapons_round_shield_quarter.jpg" width="280" alt="Beast Shield, three-quarter view"> <img src="images/objects/medieval_weapons_round_shield_third.jpg" width="280" alt="Beast Shield, far three-quarter view">
+
+#### Kite Shield
+
+[Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) · **Use:** shield · model `SM_Shield_3` · 90 × 57 × 25 cm
+
+A dark kite shield with a demonic face.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/medieval_weapons_kite_shield_side.jpg" width="280" alt="Kite Shield, side view"> <img src="images/objects/medieval_weapons_kite_shield_quarter.jpg" width="280" alt="Kite Shield, three-quarter view"> <img src="images/objects/medieval_weapons_kite_shield_third.jpg" width="280" alt="Kite Shield, far three-quarter view">
+
+#### Heraldic Shield
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_01_Shield` · 79 × 52 × 13 cm
+
+A heater shield painted with a gold lion on black and gold stripes.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/knights_pack_templar_shield_side.jpg" width="280" alt="Heraldic Shield, side view"> <img src="images/objects/knights_pack_templar_shield_quarter.jpg" width="280" alt="Heraldic Shield, three-quarter view"> <img src="images/objects/knights_pack_templar_shield_third.jpg" width="280" alt="Heraldic Shield, far three-quarter view">
+
+#### Eastern Shield
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_02_Shield` · 77 × 77 × 20 cm
+
+A round, domed shield in black and gold filigree.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/knights_pack_eastern_shield_side.jpg" width="280" alt="Eastern Shield, side view"> <img src="images/objects/knights_pack_eastern_shield_quarter.jpg" width="280" alt="Eastern Shield, three-quarter view"> <img src="images/objects/knights_pack_eastern_shield_third.jpg" width="280" alt="Eastern Shield, far three-quarter view">
+
+#### Plate Knight's Shield
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_03_Shield` · 108 × 48 × 13 cm
+
+A tall shield with fleurs-de-lis and red stripes.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/knights_pack_plate_knight_s_shield_side.jpg" width="280" alt="Plate Knight's Shield, side view"> <img src="images/objects/knights_pack_plate_knight_s_shield_quarter.jpg" width="280" alt="Plate Knight's Shield, three-quarter view"> <img src="images/objects/knights_pack_plate_knight_s_shield_third.jpg" width="280" alt="Plate Knight's Shield, far three-quarter view">
+
+#### Lady Knight's Shield
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** shield · model `SM_Knight_04_Shield` · 103 × 53 × 22 cm
+
+A black-and-gold shield with purple gems.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/knights_pack_lady_knight_s_shield_side.jpg" width="280" alt="Lady Knight's Shield, side view"> <img src="images/objects/knights_pack_lady_knight_s_shield_quarter.jpg" width="280" alt="Lady Knight's Shield, three-quarter view"> <img src="images/objects/knights_pack_lady_knight_s_shield_third.jpg" width="280" alt="Lady Knight's Shield, far three-quarter view">
+
+#### Viking Round Shield
+
+[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** shield · model `SM_Viking_Shield_01` · 66 × 66 × 11 cm
+
+A round wooden shield painted with green knotwork and a steel boss.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/vikings_viking_round_shield_side.jpg" width="280" alt="Viking Round Shield, side view"> <img src="images/objects/vikings_viking_round_shield_quarter.jpg" width="280" alt="Viking Round Shield, three-quarter view"> <img src="images/objects/vikings_viking_round_shield_third.jpg" width="280" alt="Viking Round Shield, far three-quarter view">
+
+#### Painted Viking Shield
+
+[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** shield · model `SM_Viking_Shield_03` · 66 × 66 × 11 cm
+
+A round shield quartered red and white.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/vikings_painted_viking_shield_side.jpg" width="280" alt="Painted Viking Shield, side view"> <img src="images/objects/vikings_painted_viking_shield_quarter.jpg" width="280" alt="Painted Viking Shield, three-quarter view"> <img src="images/objects/vikings_painted_viking_shield_third.jpg" width="280" alt="Painted Viking Shield, far three-quarter view">
+
+#### Desert Shield
+
+[Fantasy Warriors (Pack)](https://www.fab.com/listings/df8194f9-ec63-49f6-a885-6feb7a94fcb1) · **Use:** shield · model `SM_Fantasy_Hero_02_Shield` · 82 × 82 × 16 cm
+
+A round bronze shield with gold arabesques.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/warriors_pack_desert_shield_side.jpg" width="280" alt="Desert Shield, side view"> <img src="images/objects/warriors_pack_desert_shield_quarter.jpg" width="280" alt="Desert Shield, three-quarter view"> <img src="images/objects/warriors_pack_desert_shield_third.jpg" width="280" alt="Desert Shield, far three-quarter view">
+
+#### Broddi's Shield
+
+[Dwarfs Pack](https://www.fab.com/listings/80643e93-5d54-438c-ae9d-7717242e5a16) · **Use:** tower shield · model `SM_Dwarf_BroddI_Shield_Dwarf_Broddi_Sheld_Mesh` · 136 × 78 × 13 cm
+
+A tall stone-grey dwarven tower shield.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/dwarf_pack_broddi_s_shield_side.jpg" width="280" alt="Broddi's Shield, side view"> <img src="images/objects/dwarf_pack_broddi_s_shield_quarter.jpg" width="280" alt="Broddi's Shield, three-quarter view"> <img src="images/objects/dwarf_pack_broddi_s_shield_third.jpg" width="280" alt="Broddi's Shield, far three-quarter view">
+
+#### Village Shield
+
+[House Forge: Modular House Building Kit](https://www.fab.com/listings/277b975e-2158-41ef-908a-ef08bc26a409) · **Use:** shield · model `SM_VikingShield_01a` · 78 × 78 × 18 cm
+
+A round plank shield painted blue and white.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/houseforge_01_village_shield_side.jpg" width="280" alt="Village Shield, side view"> <img src="images/objects/houseforge_01_village_shield_quarter.jpg" width="280" alt="Village Shield, three-quarter view"> <img src="images/objects/houseforge_01_village_shield_third.jpg" width="280" alt="Village Shield, far three-quarter view">
+
+#### Dock Shield
+
+[Modular Medieval Town, Docks](https://www.fab.com/listings/9bec871e-2d9b-4261-aa26-868d4300f81a) · **Use:** shield · model `SM_Shield_01` · 78 × 78 × 13 cm
+
+A plain round iron-rimmed wooden shield.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/hivemind_dock_shield_side.jpg" width="280" alt="Dock Shield, side view"> <img src="images/objects/hivemind_dock_shield_quarter.jpg" width="280" alt="Dock Shield, three-quarter view"> <img src="images/objects/hivemind_dock_shield_third.jpg" width="280" alt="Dock Shield, far three-quarter view">
+
+#### War Camp Shield
+
+[[Nanite] Medieval War Camp Kit](https://www.fab.com/listings/3cc08b13-9cb1-46a5-9bd2-47d743ee82b9) · **Use:** shield · model `SM_Shield` · 88 × 88 × 10 cm
+
+A round shield quartered blue and white.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/warcamp_collection_war_camp_shield_side.jpg" width="280" alt="War Camp Shield, side view"> <img src="images/objects/warcamp_collection_war_camp_shield_quarter.jpg" width="280" alt="War Camp Shield, three-quarter view"> <img src="images/objects/warcamp_collection_war_camp_shield_third.jpg" width="280" alt="War Camp Shield, far three-quarter view">
+
+#### Viking Shield (iron-bound)
+
+[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** shield · model `SM_Viking_Shield_02` · 71 × 70 × 11 cm
+
+A round shield painted orange with a gold cross and a toothed iron rim.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_vikings_viking_shield_iron_bound_side.jpg" width="280" alt="Viking Shield (iron-bound), side view"> <img src="images/objects/arm_vikings_viking_shield_iron_bound_quarter.jpg" width="280" alt="Viking Shield (iron-bound), three-quarter view"> <img src="images/objects/arm_vikings_viking_shield_iron_bound_third.jpg" width="280" alt="Viking Shield (iron-bound), far three-quarter view">
+
+#### Viking Shield (green and white)
+
+[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** shield · model `SM_Viking_Shield_04` · 66 × 66 × 11 cm
+
+A round shield painted green and white with a brass boss.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_vikings_viking_shield_painted_boss_side.jpg" width="280" alt="Viking Shield (green and white), side view"> <img src="images/objects/arm_vikings_viking_shield_painted_boss_quarter.jpg" width="280" alt="Viking Shield (green and white), three-quarter view"> <img src="images/objects/arm_vikings_viking_shield_painted_boss_third.jpg" width="280" alt="Viking Shield (green and white), far three-quarter view">
+
+#### Village Shield (red)
+
+[House Forge: Modular House Building Kit](https://www.fab.com/listings/277b975e-2158-41ef-908a-ef08bc26a409) · **Use:** shield · model `SM_VikingShield_01b` · 78 × 78 × 18 cm
+
+A round plank shield with a red and white saltire.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_houseforge_01_village_shield_red_side.jpg" width="280" alt="Village Shield (red), side view"> <img src="images/objects/arm_houseforge_01_village_shield_red_quarter.jpg" width="280" alt="Village Shield (red), three-quarter view"> <img src="images/objects/arm_houseforge_01_village_shield_red_third.jpg" width="280" alt="Village Shield (red), far three-quarter view">
+
+#### Village Shield (green)
+
+[House Forge: Modular House Building Kit](https://www.fab.com/listings/277b975e-2158-41ef-908a-ef08bc26a409) · **Use:** shield · model `SM_VikingShield_01c` · 78 × 78 × 18 cm
+
+A round plank shield with worn green paint.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_houseforge_01_village_shield_plain_side.jpg" width="280" alt="Village Shield (green), side view"> <img src="images/objects/arm_houseforge_01_village_shield_plain_quarter.jpg" width="280" alt="Village Shield (green), three-quarter view"> <img src="images/objects/arm_houseforge_01_village_shield_plain_third.jpg" width="280" alt="Village Shield (green), far three-quarter view">
+
+#### Rider's Shield
+
+[Fantasy Animal (Pack)](https://www.fab.com/listings/4878a5f0-f82b-4530-b50d-a3f880ef4665) · **Use:** shield · model `SM_Shield_03` · 113 × 113 × 8 cm
+
+A round wooden shield with blue knotwork and a steel boss.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_animals_pack_rider_s_shield_side.jpg" width="280" alt="Rider's Shield, side view"> <img src="images/objects/arm_animals_pack_rider_s_shield_quarter.jpg" width="280" alt="Rider's Shield, three-quarter view"> <img src="images/objects/arm_animals_pack_rider_s_shield_third.jpg" width="280" alt="Rider's Shield, far three-quarter view">
+
+#### Crusader Shield
+
+[Fantasy Animal (Pack)](https://www.fab.com/listings/4878a5f0-f82b-4530-b50d-a3f880ef4665) · **Use:** shield · model `SM_Shield_04` · 122 × 94 × 24 cm
+
+A white kite shield with a red cross.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_animals_pack_rider_s_round_shield_side.jpg" width="280" alt="Crusader Shield, side view"> <img src="images/objects/arm_animals_pack_rider_s_round_shield_quarter.jpg" width="280" alt="Crusader Shield, three-quarter view"> <img src="images/objects/arm_animals_pack_rider_s_round_shield_third.jpg" width="280" alt="Crusader Shield, far three-quarter view">
+
+#### Scutum
+
+[Fantasy Animal (Pack)](https://www.fab.com/listings/4878a5f0-f82b-4530-b50d-a3f880ef4665) · **Use:** shield · model `SM_Shield_06` · 151 × 88 × 26 cm
+
+A curved Roman-style shield with gold wings and a boss.
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_animals_pack_rider_s_tall_shield_side.jpg" width="280" alt="Scutum, side view"> <img src="images/objects/arm_animals_pack_rider_s_tall_shield_quarter.jpg" width="280" alt="Scutum, three-quarter view"> <img src="images/objects/arm_animals_pack_rider_s_tall_shield_third.jpg" width="280" alt="Scutum, far three-quarter view">
+
+#### War Tower Shield
+
+[Fantasy Animal (Pack)](https://www.fab.com/listings/4878a5f0-f82b-4530-b50d-a3f880ef4665) · **Use:** pavise · model `SK_Fantasy_Elephant_Build_Shield_01` · 122 × 73 × 62 cm
+
+A plain grey heater shield from the elephant's war tower.
+
+**Animations.** **Own:** a skeletal mesh (13 bones) without clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_animals_pack_war_tower_shield_side.jpg" width="280" alt="War Tower Shield, side view"> <img src="images/objects/arm_animals_pack_war_tower_shield_quarter.jpg" width="280" alt="War Tower Shield, three-quarter view"> <img src="images/objects/arm_animals_pack_war_tower_shield_third.jpg" width="280" alt="War Tower Shield, far three-quarter view">
+
+### Modern and sci-fi shields
+
+#### Riot Shield and Club (FPS)
+
+[FPS STARTER (PACK)](https://www.fab.com/listings/afe92192-dd5c-4bb0-a476-0c09646d897d) · **Use:** shield and club · model `SK_Shield_Full` and 1 more meshes · 122 × 48 × 29 cm
+
+A canvas-covered riot shield with a viewport (its club alongside).
+
+**Animations.** **Own:** a skeletal mesh (1 bone) without clips of its own. **First person:** First-person arm clips: 13 in FPS Starter Pack (shield and club): 5 attacks, 1 hit reaction, 2 idles, 1 jump or fall, 2 moves, 2 other (shield and club down, shield and club up). **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/fps_starter_pack_riot_shield_and_club_fps_side.jpg" width="280" alt="Riot Shield and Club (FPS), side view"> <img src="images/objects/fps_starter_pack_riot_shield_and_club_fps_quarter.jpg" width="280" alt="Riot Shield and Club (FPS), three-quarter view"> <img src="images/objects/fps_starter_pack_riot_shield_and_club_fps_third.jpg" width="280" alt="Riot Shield and Club (FPS), far three-quarter view">
+
+#### Ballistic Shield (FPS)
+
+[FPS ANIMATIONS PISTOL (TACTICAL SHIELD)](https://www.fab.com/listings/9f81d42c-fbe9-49e6-aa6b-a227edb3f36f) · **Use:** ballistic shield · model `SK_Shield_Full` · 121 × 48 × 29 cm
+
+A khaki ballistic shield with a window and lights.
+
+**Animations.** **Own:** a skeletal mesh (1 bone) without clips of its own. **First person:** First-person arm clips: 24 in FPS Pistol (Tactical Shield): 6 attacks, 1 hit reaction, 5 idles, 1 jump or fall, 6 moves, 5 other (shield get weapon, shield hide, shield reload, shield weapon inspection). **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/fps_pistol_shield_ballistic_shield_fps_side.jpg" width="280" alt="Ballistic Shield (FPS), side view"> <img src="images/objects/fps_pistol_shield_ballistic_shield_fps_quarter.jpg" width="280" alt="Ballistic Shield (FPS), three-quarter view"> <img src="images/objects/fps_pistol_shield_ballistic_shield_fps_third.jpg" width="280" alt="Ballistic Shield (FPS), far three-quarter view">
+
+#### Arm Shield (FPS)
+
+[FPS Sci-Fi Hands Empty](https://www.fab.com/listings/1c1fbb6f-1a9a-42d7-b0c2-80837c55c564) · **Use:** energy shield · model `SK_Sci_Fi_Shield` · 55 × 55 × 8 cm
+
+A folded arm device that opens into a round blue energy shield.
+
+**Animations.** **Own:** a skeletal mesh (32 bones) with 2 clips of its own: close, open. **First person:** First-person arm clips: 27 in FPS Sci-Fi Hands Empty: 5 attacks, 2 hit reactions, 6 idles, 4 jumps and falls, 6 moves, 4 other (fi hands empty get, fi hands empty hide, fi hands empty shield get, fi hands empty shield hide). **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/sci_fi_hands_arm_shield_fps_side.jpg" width="280" alt="Arm Shield (FPS), side view"> <img src="images/objects/sci_fi_hands_arm_shield_fps_quarter.jpg" width="280" alt="Arm Shield (FPS), three-quarter view"> <img src="images/objects/sci_fi_hands_arm_shield_fps_third.jpg" width="280" alt="Arm Shield (FPS), a frame of its clip">
+
+#### Police Riot Shield
+
+[Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) · **Use:** riot shield · model `Shield_Mesh_Police_Shield_Detail_01_Mesh` and 3 more meshes · 112 × 60 × 11 cm
+
+A tall black 'POLICE' riot shield with a handle (the shield of Weapon And Shield Animations).
+
+**Animations.** **Own:** a static mesh, no clips of its own. **Third person:** Carried by [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) (35 clips: sword-and-shield attacks, blocks, hits, deaths, moves) and [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) (36 clips: 7 spear attacks, blocks, hits, moves).
+
+<img src="images/objects/arm_weapon_shield_animations_police_riot_shield_side.jpg" width="280" alt="Police Riot Shield, side view"> <img src="images/objects/arm_weapon_shield_animations_police_riot_shield_quarter.jpg" width="280" alt="Police Riot Shield, three-quarter view"> <img src="images/objects/arm_weapon_shield_animations_police_riot_shield_third.jpg" width="280" alt="Police Riot Shield, far three-quarter view">
+
+### Helmets and masks
+
+#### Viking Helmet
+
+[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** helmet · model `SK_Viking_Helmet_01` · 39 × 31 × 31 cm
+
+A banded nasal helm with a mail aventail.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/vikings_viking_helmet_side.jpg" width="280" alt="Viking Helmet, side view"> <img src="images/objects/vikings_viking_helmet_quarter.jpg" width="280" alt="Viking Helmet, three-quarter view"> <img src="images/objects/vikings_viking_helmet_third.jpg" width="280" alt="Viking Helmet, far three-quarter view">
+
+#### Great Helm
+
+[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** helmet · model `SK_Knight_01_Helmet` · 31 × 26 × 22 cm
+
+A flat-topped great helm with a cross.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/knights_pack_great_helm_side.jpg" width="280" alt="Great Helm, side view"> <img src="images/objects/knights_pack_great_helm_quarter.jpg" width="280" alt="Great Helm, three-quarter view"> <img src="images/objects/knights_pack_great_helm_third.jpg" width="280" alt="Great Helm, far three-quarter view">
+
+#### Kabuto
+
+[SAMURAI](https://www.fab.com/listings/5f4c90b7-a282-45fc-89df-61468afc867b) · **Use:** helmet · model `SK_Samurai_Helmet_01` · 40 × 34 × 27 cm
+
+A samurai kabuto with crescent horns.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/samurai_kabuto_side.jpg" width="280" alt="Kabuto, side view"> <img src="images/objects/samurai_kabuto_quarter.jpg" width="280" alt="Kabuto, three-quarter view"> <img src="images/objects/samurai_kabuto_third.jpg" width="280" alt="Kabuto, far three-quarter view">
+
+#### Samurai War Mask
+
+[SAMURAI](https://www.fab.com/listings/5f4c90b7-a282-45fc-89df-61468afc867b) · **Use:** mask · model `SK_Samurai_Mask` · 18 × 18 × 17 cm
+
+A red menpo war mask with teeth and a moustache.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/samurai_samurai_war_mask_side.jpg" width="280" alt="Samurai War Mask, side view"> <img src="images/objects/samurai_samurai_war_mask_quarter.jpg" width="280" alt="Samurai War Mask, three-quarter view"> <img src="images/objects/samurai_samurai_war_mask_third.jpg" width="280" alt="Samurai War Mask, far three-quarter view">
+
+#### Plague Doctor's Mask
+
+[NPC King And Queen](https://www.fab.com/listings/cf92a409-cb02-460f-a4e1-27039c0e2a99) · **Use:** mask · model `SK_UE4_NPC_Plague_doctor_Mask` · 42 × 24 × 19 cm
+
+A leather plague doctor's beak mask with goggles.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/npc_king_and_queen_plague_doctor_s_mask_side.jpg" width="280" alt="Plague Doctor's Mask, side view"> <img src="images/objects/npc_king_and_queen_plague_doctor_s_mask_quarter.jpg" width="280" alt="Plague Doctor's Mask, three-quarter view"> <img src="images/objects/npc_king_and_queen_plague_doctor_s_mask_third.jpg" width="280" alt="Plague Doctor's Mask, far three-quarter view">
+
+#### Wizard's Hat
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** hat · model `SK_MaleWizard_Hat01` · 55 × 54 × 43 cm
+
+A floppy brown wizard's hat.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/mysticdungeon_wizard_s_hat_side.jpg" width="280" alt="Wizard's Hat, side view"> <img src="images/objects/mysticdungeon_wizard_s_hat_quarter.jpg" width="280" alt="Wizard's Hat, three-quarter view"> <img src="images/objects/mysticdungeon_wizard_s_hat_third.jpg" width="280" alt="Wizard's Hat, far three-quarter view">
+
+#### Gas Mask
+
+[Tactical Masks](https://www.fab.com/listings/2362889e-5c63-4a0b-9391-7ca1b0b9c72f) · **Use:** mask · model `SK_UE4_Gas_mask_01` · 40 × 39 × 22 cm
+
+A grey rubber gas mask with a filter.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/tactical_masks_gas_mask_side.jpg" width="280" alt="Gas Mask, side view"> <img src="images/objects/tactical_masks_gas_mask_quarter.jpg" width="280" alt="Gas Mask, three-quarter view"> <img src="images/objects/tactical_masks_gas_mask_third.jpg" width="280" alt="Gas Mask, far three-quarter view">
+
+#### Tactical Mask
+
+[Tactical Masks](https://www.fab.com/listings/2362889e-5c63-4a0b-9391-7ca1b0b9c72f) · **Use:** mask · model `SK_UE4_Tactical_mask_01` · 28 × 27 × 18 cm
+
+A black tactical face mask on straps.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/tactical_masks_tactical_mask_side.jpg" width="280" alt="Tactical Mask, side view"> <img src="images/objects/tactical_masks_tactical_mask_quarter.jpg" width="280" alt="Tactical Mask, three-quarter view"> <img src="images/objects/tactical_masks_tactical_mask_third.jpg" width="280" alt="Tactical Mask, far three-quarter view">
+
+#### Pilot's Helmet
+
+[Astronauts (Pack)](https://www.fab.com/listings/69267151-497d-494f-9592-551cd39246a2) · **Use:** helmet · model `SK_Astronaut_Pilot_Helmet` · 35 × 34 × 31 cm
+
+A white flight helmet with a visor.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/astronauts_pack_pilot_s_helmet_side.jpg" width="280" alt="Pilot's Helmet, side view"> <img src="images/objects/astronauts_pack_pilot_s_helmet_quarter.jpg" width="280" alt="Pilot's Helmet, three-quarter view"> <img src="images/objects/astronauts_pack_pilot_s_helmet_third.jpg" width="280" alt="Pilot's Helmet, far three-quarter view">
+
+#### VR Headset
+
+Geek Room · **Use:** wearable · model `SK_UE4_Girl_for_room_Virtual_reality_helmet` · 30 × 25 × 24 cm
+
+A bulky home-made VR headset.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/girl_vr_headset_side.jpg" width="280" alt="VR Headset, side view"> <img src="images/objects/girl_vr_headset_quarter.jpg" width="280" alt="VR Headset, three-quarter view"> <img src="images/objects/girl_vr_headset_third.jpg" width="280" alt="VR Headset, far three-quarter view">
+
+#### Sallet
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** helmet · model `SK_Helmet_01` · 34 × 29 × 29 cm
+
+A blued steel sallet with a long tail.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/arm_mysticdungeon_dungeon_helmet_1_side.jpg" width="280" alt="Sallet, side view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_1_quarter.jpg" width="280" alt="Sallet, three-quarter view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_1_third.jpg" width="280" alt="Sallet, far three-quarter view">
+
+#### Nasal Helm
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** helmet · model `SK_Helmet_02` · 36 × 29 × 23 cm
+
+A blued steel helm with a nasal and cheek guards.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/arm_mysticdungeon_dungeon_helmet_2_side.jpg" width="280" alt="Nasal Helm, side view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_2_quarter.jpg" width="280" alt="Nasal Helm, three-quarter view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_2_third.jpg" width="280" alt="Nasal Helm, far three-quarter view">
+
+#### Corinthian Helm
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** helmet · model `SK_Helmet_03` · 30 × 27 × 21 cm
+
+A blued steel full helm with a T-shaped opening.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/arm_mysticdungeon_dungeon_helmet_3_side.jpg" width="280" alt="Corinthian Helm, side view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_3_quarter.jpg" width="280" alt="Corinthian Helm, three-quarter view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_3_third.jpg" width="280" alt="Corinthian Helm, far three-quarter view">
+
+#### Horned Death Helm
+
+[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** helmet · model `SK_Helmet_04` · 55 × 40 × 33 cm
+
+A black horned helm with glowing red eyes.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/arm_mysticdungeon_dungeon_helmet_4_side.jpg" width="280" alt="Horned Death Helm, side view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_4_quarter.jpg" width="280" alt="Horned Death Helm, three-quarter view"> <img src="images/objects/arm_mysticdungeon_dungeon_helmet_4_third.jpg" width="280" alt="Horned Death Helm, far three-quarter view">
+
+#### Mech Pilot's Helmet
+
+[Dystopia Soldiers (Pack)](https://www.fab.com/listings/3be8756a-724d-4fca-a67f-8442a1fcb833) · **Use:** helmet · model `SK_Dystopia_Pilot_Helmet` · 30 × 23 × 22 cm
+
+A padded leather flying helmet.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/arm_dystopia_pack_mech_pilot_s_helmet_side.jpg" width="280" alt="Mech Pilot's Helmet, side view"> <img src="images/objects/arm_dystopia_pack_mech_pilot_s_helmet_quarter.jpg" width="280" alt="Mech Pilot's Helmet, three-quarter view"> <img src="images/objects/arm_dystopia_pack_mech_pilot_s_helmet_third.jpg" width="280" alt="Mech Pilot's Helmet, far three-quarter view">
+
+#### Diving Helmet
+
+[Underwater odyssey](https://www.fab.com/listings/0ed3a669-a335-46d4-b8c4-16b48278e2b4) · **Use:** helmet · model `SK_Daiver_Helmet_Epic` · 45 × 33 × 29 cm
+
+A brass deep-sea diving helmet.
+
+**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
+
+<img src="images/objects/arm_underwater_odyssey_diving_helmet_side.jpg" width="280" alt="Diving Helmet, side view"> <img src="images/objects/arm_underwater_odyssey_diving_helmet_quarter.jpg" width="280" alt="Diving Helmet, three-quarter view"> <img src="images/objects/arm_underwater_odyssey_diving_helmet_third.jpg" width="280" alt="Diving Helmet, far three-quarter view">
+
+#### Hard Hat
+
+[Desert Industrial Outpost Environment](https://www.fab.com/listings/20c9a5be-5f39-4b25-ac96-61cbad30a74f) · **Use:** helmet · model `SM_helmet` · 76 × 55 × 36 cm
+
+A worn yellow construction hard hat.
+
+**Animations.** **Own:** a static mesh, no clips of its own.
+
+<img src="images/objects/arm_desert_outpost_army_helmet_side.jpg" width="280" alt="Hard Hat, side view"> <img src="images/objects/arm_desert_outpost_army_helmet_quarter.jpg" width="280" alt="Hard Hat, three-quarter view"> <img src="images/objects/arm_desert_outpost_army_helmet_third.jpg" width="280" alt="Hard Hat, far three-quarter view">
 
 ## Non-weapon items
 
@@ -2299,112 +3219,10 @@ A chess board with its pieces on a marble slab.
 
 <img src="images/objects/victorianoffice_chess_set_side.jpg" width="280" alt="Chess Set, side view"> <img src="images/objects/victorianoffice_chess_set_quarter.jpg" width="280" alt="Chess Set, three-quarter view"> <img src="images/objects/victorianoffice_chess_set_third.jpg" width="280" alt="Chess Set, far three-quarter view">
 
-### Helmets and masks
-
-#### Viking Helmet
-
-[Viking (Customized)](https://www.fab.com/listings/e814c3a3-11ba-4316-a07a-b0980fd016ef) · **Use:** helmet · model `SK_Viking_Helmet_01` · 39 × 31 × 31 cm
-
-A banded nasal helm with a mail aventail.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/vikings_viking_helmet_side.jpg" width="280" alt="Viking Helmet, side view"> <img src="images/objects/vikings_viking_helmet_quarter.jpg" width="280" alt="Viking Helmet, three-quarter view"> <img src="images/objects/vikings_viking_helmet_third.jpg" width="280" alt="Viking Helmet, far three-quarter view">
-
-#### Great Helm
-
-[Knights (Pack)](https://www.fab.com/listings/6907d3d8-d0db-43c0-bf9c-8ad43c70e7b3) · **Use:** helmet · model `SK_Knight_01_Helmet` · 31 × 26 × 22 cm
-
-A flat-topped great helm with a cross.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/knights_pack_great_helm_side.jpg" width="280" alt="Great Helm, side view"> <img src="images/objects/knights_pack_great_helm_quarter.jpg" width="280" alt="Great Helm, three-quarter view"> <img src="images/objects/knights_pack_great_helm_third.jpg" width="280" alt="Great Helm, far three-quarter view">
-
-#### Kabuto
-
-[SAMURAI](https://www.fab.com/listings/5f4c90b7-a282-45fc-89df-61468afc867b) · **Use:** helmet · model `SK_Samurai_Helmet_01` · 40 × 34 × 27 cm
-
-A samurai kabuto with crescent horns.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/samurai_kabuto_side.jpg" width="280" alt="Kabuto, side view"> <img src="images/objects/samurai_kabuto_quarter.jpg" width="280" alt="Kabuto, three-quarter view"> <img src="images/objects/samurai_kabuto_third.jpg" width="280" alt="Kabuto, far three-quarter view">
-
-#### Samurai War Mask
-
-[SAMURAI](https://www.fab.com/listings/5f4c90b7-a282-45fc-89df-61468afc867b) · **Use:** mask · model `SK_Samurai_Mask` · 18 × 18 × 17 cm
-
-A red menpo war mask with teeth and a moustache.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/samurai_samurai_war_mask_side.jpg" width="280" alt="Samurai War Mask, side view"> <img src="images/objects/samurai_samurai_war_mask_quarter.jpg" width="280" alt="Samurai War Mask, three-quarter view"> <img src="images/objects/samurai_samurai_war_mask_third.jpg" width="280" alt="Samurai War Mask, far three-quarter view">
-
-#### Plague Doctor's Mask
-
-[NPC King And Queen](https://www.fab.com/listings/cf92a409-cb02-460f-a4e1-27039c0e2a99) · **Use:** mask · model `SK_UE4_NPC_Plague_doctor_Mask` · 42 × 24 × 19 cm
-
-A leather plague doctor's beak mask with goggles.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/npc_king_and_queen_plague_doctor_s_mask_side.jpg" width="280" alt="Plague Doctor's Mask, side view"> <img src="images/objects/npc_king_and_queen_plague_doctor_s_mask_quarter.jpg" width="280" alt="Plague Doctor's Mask, three-quarter view"> <img src="images/objects/npc_king_and_queen_plague_doctor_s_mask_third.jpg" width="280" alt="Plague Doctor's Mask, far three-quarter view">
-
-#### Wizard's Hat
-
-[Dungeon Builder: Modular Top Down RPG Environment Kit](https://www.fab.com/listings/10cbf8dd-ef59-48f8-bbea-606a2b66774d) · **Use:** hat · model `SK_MaleWizard_Hat01` · 55 × 54 × 43 cm
-
-A floppy brown wizard's hat.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/mysticdungeon_wizard_s_hat_side.jpg" width="280" alt="Wizard's Hat, side view"> <img src="images/objects/mysticdungeon_wizard_s_hat_quarter.jpg" width="280" alt="Wizard's Hat, three-quarter view"> <img src="images/objects/mysticdungeon_wizard_s_hat_third.jpg" width="280" alt="Wizard's Hat, far three-quarter view">
-
-#### Gas Mask
-
-[Tactical Masks](https://www.fab.com/listings/2362889e-5c63-4a0b-9391-7ca1b0b9c72f) · **Use:** mask · model `SK_UE4_Gas_mask_01` · 40 × 39 × 22 cm
-
-A grey rubber gas mask with a filter.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/tactical_masks_gas_mask_side.jpg" width="280" alt="Gas Mask, side view"> <img src="images/objects/tactical_masks_gas_mask_quarter.jpg" width="280" alt="Gas Mask, three-quarter view"> <img src="images/objects/tactical_masks_gas_mask_third.jpg" width="280" alt="Gas Mask, far three-quarter view">
-
-#### Tactical Mask
-
-[Tactical Masks](https://www.fab.com/listings/2362889e-5c63-4a0b-9391-7ca1b0b9c72f) · **Use:** mask · model `SK_UE4_Tactical_mask_01` · 28 × 27 × 18 cm
-
-A black tactical face mask on straps.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/tactical_masks_tactical_mask_side.jpg" width="280" alt="Tactical Mask, side view"> <img src="images/objects/tactical_masks_tactical_mask_quarter.jpg" width="280" alt="Tactical Mask, three-quarter view"> <img src="images/objects/tactical_masks_tactical_mask_third.jpg" width="280" alt="Tactical Mask, far three-quarter view">
-
-#### Pilot's Helmet
-
-[Astronauts (Pack)](https://www.fab.com/listings/69267151-497d-494f-9592-551cd39246a2) · **Use:** helmet · model `SK_Astronaut_Pilot_Helmet` · 35 × 34 × 31 cm
-
-A white flight helmet with a visor.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/astronauts_pack_pilot_s_helmet_side.jpg" width="280" alt="Pilot's Helmet, side view"> <img src="images/objects/astronauts_pack_pilot_s_helmet_quarter.jpg" width="280" alt="Pilot's Helmet, three-quarter view"> <img src="images/objects/astronauts_pack_pilot_s_helmet_third.jpg" width="280" alt="Pilot's Helmet, far three-quarter view">
-
-#### VR Headset
-
-Geek Room · **Use:** wearable · model `SK_UE4_Girl_for_room_Virtual_reality_helmet` · 30 × 25 × 24 cm
-
-A bulky home-made VR headset.
-
-**Animations.** **Own:** a part of its character, skinned to the character's skeleton: it plays whatever the character plays.
-
-<img src="images/objects/girl_vr_headset_side.jpg" width="280" alt="VR Headset, side view"> <img src="images/objects/girl_vr_headset_quarter.jpg" width="280" alt="VR Headset, three-quarter view"> <img src="images/objects/girl_vr_headset_third.jpg" width="280" alt="VR Headset, far three-quarter view">
-
 ## Not included
 
 - **Parts:** magazines, cartridges, bullets, sleeves, sights, silencers, flashlights, scabbards and holsters, sold with the guns and blades as separate meshes.
 - **Duplicates and variants:** the same weapon in several volumes or colours, the fake toy weapons of `HOLIDAY`, a pack's second and third version of a shield, sword or spear.
 - **Scenery:** tables, racks and shelves with weapons on them (`Safehouse`'s gunsmith tables), weapon statues, spike barriers, the `Crownfall` spear-knight statues; furniture, lamps, food stalls and other set dressing.
-- **Clothing:** bags, belts, backpacks and armour pieces that only make sense on their character; a few helmets and masks are shown as wearable items.
+- **Clothing:** bags, belts, backpacks, cloth and hair; armour pieces are shown only as whole sets, and a pack's second and third version of a helmet is left out. The mech's armour plates, the Vikings' bracers and the elephant war tower's other five shields are left out too.
 - **The project's own:** the castle furniture kit's props (the tankard, the cart), modelled for this project.

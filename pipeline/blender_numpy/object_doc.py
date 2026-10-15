@@ -16,11 +16,11 @@ ROOT = anim_text.ROOT
 DATA = os.path.join(ROOT, "claude_ue5", "SourceArt", "object_gallery", "objects.json")
 IMG = os.path.join(ROOT, "docs", "images", "objects"); DOC = os.path.join(ROOT, "docs", "objects.md")
 W, H = 480, 300
-SECTIONS = ["Fantasy weapons", "Modern weapons", "Futuristic weapons", "Non-weapon items"]
-GROUPS = ["Swords and daggers", "Axes, hammers, maces and clubs", "Spears and polearms", "Primitive weapons", "Bows, crossbows and staves", "Shields",
+SECTIONS = ["Fantasy weapons", "Modern weapons", "Futuristic weapons", "Armour and shields", "Non-weapon items"]
+GROUPS = ["Swords and daggers", "Axes, hammers, maces and clubs", "Spears and polearms", "Primitive weapons", "Bows, crossbows and staves",
           "Rifles, machine guns and shotguns", "Sniper rifles and launchers", "Pistols and revolvers", "Knives, melee weapons and grenades",
-          "Energy and sci-fi guns", "Energy blades and shields", "Food and drink", "Potions and medicine", "Tools and devices", "Treasure, keys and books",
-          "Helmets and masks"]
+          "Energy and sci-fi guns", "Energy blades and melee weapons", "Fantasy armour", "Modern armour", "Futuristic armour",
+          "Fantasy shields", "Modern and sci-fi shields", "Helmets and masks", "Food and drink", "Potions and medicine", "Tools and devices", "Treasure, keys and books"]
 
 
 def groups(items):
@@ -66,6 +66,8 @@ def short_names(clips):
 def own_line(v, A, info):
     skels = info.get("skeletons", [])
     if not skels: return "a static mesh, no clips of its own."
+    if v["kind"] == "wear" and v.get("wearer"):
+        return ("%d piece%s skinned to the skeleton of %s: worn over that character, they move with whatever it plays (its clips are on that page; no clips of their own)." % (len(v["meshes"]), "" if len(v["meshes"]) == 1 else "s", v["wearer"]))
     if v["kind"] == "wear": return "a part of its character, skinned to the character's skeleton: it plays whatever the character plays."
     clips = sorted({x for m in v["meshes"] if m in A.chars for x in A.chars[m]["own"]})
     bones = max([A.chars[m]["bones"] for m in v["meshes"] if m in A.chars] or [0])
@@ -105,7 +107,7 @@ def anchor(s): return re.sub(r"[^a-z0-9 -]", "", s.lower()).replace(" ", "-")
 n_clip = sum(1 for v in obs if v.get("clip"))
 out = ["""# Weapons and items of the Fab library
 
-The weapons and the handheld or wearable items in the local Fab library cache (`I:\\game assets\\3d epicgames media packs\\VaultCache\\FabLibrary` and the environment packs downloaded through it), in four parts: fantasy weapons, modern weapons, futuristic weapons and non-weapon items. All %d are in this project. Each is shown three times, rendered in Unreal Engine:
+The weapons and the handheld or wearable items in the local Fab library cache (`I:\\game assets\\3d epicgames media packs\\VaultCache\\FabLibrary` and the environment packs downloaded through it), in five parts: fantasy weapons, modern weapons, futuristic weapons, armour and shields, and non-weapon items. All %d are in this project. Each is shown three times, rendered in Unreal Engine:
 
 - **side view:** its broad face, level (or from above if it lies flat);
 - **three-quarter view;**
@@ -114,7 +116,8 @@ The weapons and the handheld or wearable items in the local Fab library cache (`
 ## About the pictures and notes
 
 - **Sizes:** each entry gives the object's three extents in centimetres, from its bounds; every picture is framed to fill, from a 2 cm coin to a 1.5 m flamethrower.
-- **Kept together:** the flamethrower (gun, hose, tank) and the riot shield with its club are several meshes, shown as they sit in their packs.
+- **Kept together:** the flamethrower (gun, hose, tank), the riot shield with its club and the police riot shield are several meshes, shown as they sit in their packs.
+- **Armour sets:** the packs' armour comes in pieces skinned to a character's skeleton (chest, pauldrons, bracers, greaves, helmet). Each set is all of one character's armour pieces, without the body under them, shown as an empty suit in the character's reference pose (a T- or A-pose).
 - **Variants:** many packs have several versions of a weapon (silencers, sights, paint, the ten knives of the FPS Starter Pack, eight pistols and revolvers in `Safehouse`); one of each kind is shown.
 - **Animations:** each entry says what clips the object has of its own, which first-person arm clips were made for it (the FPS packs: arms only, a camera rig's), and which third-person animation sets in the project hold that kind of weapon on a UE4-mannequin character (see [heroes.md](heroes.md#animations) for those sets). Bows, crossbows, staves, knives and grenades have no third-person clips here.
 - **Uses:** a use is a suggestion from the object's looks.
@@ -154,7 +157,7 @@ out.append("""
 - **Parts:** magazines, cartridges, bullets, sleeves, sights, silencers, flashlights, scabbards and holsters, sold with the guns and blades as separate meshes.
 - **Duplicates and variants:** the same weapon in several volumes or colours, the fake toy weapons of `HOLIDAY`, a pack's second and third version of a shield, sword or spear.
 - **Scenery:** tables, racks and shelves with weapons on them (`Safehouse`'s gunsmith tables), weapon statues, spike barriers, the `Crownfall` spear-knight statues; furniture, lamps, food stalls and other set dressing.
-- **Clothing:** bags, belts, backpacks and armour pieces that only make sense on their character; a few helmets and masks are shown as wearable items.
+- **Clothing:** bags, belts, backpacks, cloth and hair; armour pieces are shown only as whole sets, and a pack's second and third version of a helmet is left out. The mech's armour plates, the Vikings' bracers and the elephant war tower's other five shields are left out too.
 - **The project's own:** the castle furniture kit's props (the tankard, the cart), modelled for this project.
 """)
 io.open(DOC, "w", encoding="utf-8", newline="\n").write("".join(out))

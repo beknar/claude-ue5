@@ -115,6 +115,7 @@ Guidance for Claude Code in this repository. See README.md for what the project 
 
 - The list, uses and descriptions are data (`SourceArt/object_gallery/objects.json`: `section`, `group`, `kind` for the third-person sets that hold it, `fp` for its first-person arm clips); `object_doc.py` writes the page. Its pictures are allowed in git like the other galleries'.
 - An FPS pack's shot and reload clips are often on the bare gun's skeleton (`*_Basic`), not the full gun's: `904` uses a clip only if one of the entry's meshes is on its skeleton, otherwise the third picture is the far three-quarter view.
+- **Armour** comes in pieces skinned to a character's skeleton; an armour set is all of one character's pieces (picked by name: armour, helmet, mask, crown, pads... never the bare body or arms under them) on one spot, an empty suit in the reference pose. Its note names the wearer (`wearer`). Armour sets carry full-size character textures: with texture streaming off, 8 sets in one batch ran a long-lived editor out of memory. Stage 4 at a time and restart the editor every 40 or so.
 - The claims of the third-person table (`WIELD` in `object_doc.py`) were checked against `902`'s libraries: there are no third-person bow, crossbow, staff, knife or throwing clips for the UE4 mannequin here (the Dark Fantasy Weapons pack aims a bow and a crossbow on the UE5 mannequin). Check them again after importing animations.
 
 ## Hero and enemy galleries (`docs/heroes.md`, `docs/humanoid_enemies.md`, `901`, `902`)
