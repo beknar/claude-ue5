@@ -33,6 +33,9 @@ claude_ue5/Content/
 *.mat
 *.bak
 
+# the project's own AI-made models (CC BY 4.0, see "ai models/LICENSE") are the one model exception
+!ai models/*.glb
+
 # large generated data (sf-city flood-fill grid, rebuilt by pipeline/unreal/708) and superseded walk-test runs
 claude_ue5/SourceArt/sf_city/reach.json
 claude_ue5/SourceArt/sf_city/walk_r*.json
