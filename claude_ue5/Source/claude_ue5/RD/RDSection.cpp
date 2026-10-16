@@ -566,6 +566,7 @@ void ARDSection::BuildShell(FRandomStream& R)
 void ARDSection::ShellPrepare(FRandomStream& R)
 {
 	ShellFloor.Reset(); ShellWall.Reset(); WallVariants.Reset(); WallPicks.Reset(); WallCounts.Reset(); WallRepeats = 0;
+	WallSegments.Reset(); WallSegmentNames.Reset(); CellFrames.Reset(); CellHay.Reset(); CellSides = 0;
 	for (const FRoom& Rm : Rooms) { ShellFloor.Add(FloorFor(Rm.Kind, R)); ShellWall.Add(WallFor(Rm.Kind, R)); }
 }
 
@@ -580,7 +581,22 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 		if (!P) return;
 		const float H = FMath::Max(P->Size.Z - 2.f, 50.f);
 		int32 Layer = Z0 > 1.f ? 1 : 0;
-		for (float Z = Z0; Z < Z1 - 5.f; Z += H, ++Layer) AddPieceAt(WallVariant(Name, Tile, Side, Layer), Base + FVector(0, 0, Z), Yaw);
+		// A broken wall has holes right through it: through them she saw the void behind and the backs of the rooms beyond,
+		// and could climb into the bigger ones and fall out of the dungeon. A wall piece may have a backing ("<name>_Back": a
+		// stone plate inside the wall's thickness, the back of a cavity seen through a hole) and a seal ("<name>_Seal": an
+		// invisible box over the wall's face that keeps her out of the holes).
+		const FName Back(*(Name.ToString() + TEXT("_Back"))), Seal(*(Name.ToString() + TEXT("_Seal")));
+		const bool bBack = Generator->Piece(Back) != nullptr, bSeal = Generator->Piece(Seal) != nullptr;
+		for (float Z = Z0; Z < Z1 - 5.f; Z += H, ++Layer)
+		{
+			const FName Pick = WallVariant(Name, Tile, Side, Layer);
+			const FVector At = Base + FVector(0, 0, Z);
+			AddPieceAt(Pick, At, Yaw);
+			if (!bBack && !bSeal) continue;
+			if (bBack) AddPieceAt(Back, At, Yaw);
+			if (bSeal) AddPieceAt(Seal, At, Yaw);
+			WallSegments.Add(FTransform(FRotator(0, Yaw, 0), At)); WallSegmentNames.Add(Pick);
+		}
 	};
 		for (int32 Y = 0; Y < N; ++Y)
 		{
@@ -865,6 +881,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			const float Yaw = InwardYaw(Side);
 			const FRotator Rt(0, Yaw, 0);
 			const float Depth = S;   // one tile deep
+			TArray<FVector> CellWalls;      // (the wall point of each cell built along this wall)
 			for (const FVector& W : WallSlots(Rm, Side, S, 160.f, S * 0.5f))
 			{
 				// cell: the tile against the wall (W is the wall point at the tile middle)
@@ -878,15 +895,41 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 					AddPieceAt(TEXT("CellFrame"), Front, Yaw);
 					AddPieceAt(TEXT("CellBlockHalf"), Front, Yaw);
 					const FRDPiece* Cd = Generator->Piece(TEXT("CellDoor"));
-					if (Cd) AddCellDoor(Front + Rt.RotateVector(FVector(0, Cd->Size.Y * 0.5f, 0)), Yaw + 180.f, Cd->Size.Y);
+					// (the half grating covers [-150, 0] of the front, the door the other half: hinged 5 cm in from the
+					// corner, its leaf (3 cm past the hinge to 147 short of it) covers [-2, 148], overlapping the bars' blocker.
+					// Hinged at +75 it covered [-72, 75] twice over and left a 75 cm gap at the corner.)
+					if (Cd) AddCellDoor(Front + Rt.RotateVector(FVector(0, S * 0.5f - 5.f, 0)), Yaw + 180.f, Cd->Size.Y);
 				}
 				else { AddPieceAt(TEXT("Grating"), Front, Yaw); AddPieceAt(TEXT("CellBlock"), Front, Yaw); }
-				AddPieceAt(TEXT("HayPile"), Inner + Rt.RotateVector(FVector(-30, R.FRandRange(-60, 60), 0)), R.FRandRange(0, 360), 1.f, true);
+				// (the hay pile is a mound as tall as she is, which looked like rock: it blocks)
+				const FVector Hay = Inner + Rt.RotateVector(FVector(-30, R.FRandRange(-60, 60), 0));
+				AddPieceAt(TEXT("HayPile"), Hay, R.FRandRange(0, 360));
 				if (R.FRand() < 0.5f) AddPieceAt(TEXT("Bones"), Inner + Rt.RotateVector(FVector(20, R.FRandRange(-80, 80), 0)), R.FRandRange(0, 360), 1.f, true);
 				AddPieceAt(TEXT("Shackles"), W + Rt.RotateVector(FVector(6, 0, 160)), Yaw, 1.f, true);
 				const FIntPoint T = WorldToLocal(Inner);
 				if (In(T)) Blocked[Idx(T)] = 1;
+				CellWalls.Add(W);
+				CellFrames.Add(FTransform(Rt, Inner)); CellHay.Add(Hay);
 			}
+			// The cells' sides: only the front had bars, so a cell beside the lane (the slots near it stay empty) or at a
+			// gap was open on that side, and two cells side by side were one. Bars (and their invisible blocker) on every
+			// side the room's own wall does not close, once between two cells. Nothing drawn from R: the layout stays.
+			const FBox2D Bx = RoomBox(Rm, 0.f);
+			const bool bAlongY = Side < 2;
+			const float Lo = bAlongY ? Bx.Min.Y : Bx.Min.X, Hi = bAlongY ? Bx.Max.Y : Bx.Max.X;
+			auto Along = [bAlongY](const FVector& P) { return bAlongY ? P.Y : P.X; };
+			for (int32 I = 0; I < CellWalls.Num(); ++I)
+				for (int32 D = -1; D <= 1; D += 2)
+				{
+					const float Ed = Along(CellWalls[I]) + D * S * 0.5f;
+					if (Ed < Lo + 10.f || Ed > Hi - 10.f) continue;       // the room's wall closes it
+					const bool bNext = CellWalls.ContainsByPredicate([&](const FVector& Q) { return FMath::Abs(Along(Q) - (Along(CellWalls[I]) + D * S)) < 1.f; });
+					if (bNext && D < 0) continue;                          // (between two cells: once)
+					const FVector Mid = CellWalls[I] + FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(Depth * 0.5f, 0, 0)) + (bAlongY ? FVector(0, 1, 0) : FVector(1, 0, 0)) * (D * S * 0.5f);
+					AddPieceAt(TEXT("Grating"), Mid, InwardYaw(Side) + 90.f);
+					AddPieceAt(TEXT("CellBlock"), Mid, InwardYaw(Side) + 90.f);
+					++CellSides;
+				}
 		}
 		for (const FVector& Q : Quads) if (R.FRand() < 0.5f) Hang(TEXT("Chain"), Q, R.FRandRange(0, 360));
 		if (Quads.Num() && R.FRand() < 0.6f) TableSet(Quads[0], 0.f, TEXT("TableSmall"), TEXT("Stool"), true);

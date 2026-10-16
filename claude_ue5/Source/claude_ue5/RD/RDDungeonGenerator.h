@@ -68,6 +68,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Layout") TObjectPtr<AActor> TrackedActor;
 	/** cinematics: doors open by themselves for the tracked actor within this distance (0 = off; the player uses F) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Layout") float TrackedAutoDoorDistance = 0.f;
+	/** a safety net: the player that drops this far below the floor (through a gap in the dungeon) is put back where she
+	 *  last stood on the ground (0 = off) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Layout") float FallResetDepth = 400.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Layout") int32 FallResets = 0;
 	/** monsters block pawns (off for cinematics: a monster never stalls the scripted walk) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Layout") bool bMonstersBlockPawns = true;
 
@@ -99,7 +103,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") FString PlayerTitle = TEXT("JRPG-FEM5");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") FString ControlsHint = TEXT("left mouse  attack      1  2  3  weapon");
 	/** the magic levels' controls (URDCombatComponent): gamepad RB the weapon in her hand, LB the spell, LT (R) walk / run,
-	 *  X opens (as F does); the HUD shows ControlsKeys or ControlsPad, whichever device is in use, in the upper left */
+	 *  X opens (as F does), Back (View) opens and closes the big map (as M does); the HUD shows ControlsKeys or ControlsPad, whichever device is in use, in the upper left */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") bool bCasterControls = false;
 	/** the HUD's controls panel, a line each: "key|what it does" (keyboard and mouse; gamepad) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") TArray<FString> ControlsKeys;
@@ -256,6 +260,9 @@ private:
 	UPROPERTY(Transient) TObjectPtr<ARDSection> Building;
 	UPROPERTY(Transient) TObjectPtr<URDCombatComponent> PlayerCombat;
 	UPROPERTY(Transient) TObjectPtr<URDBloodComponent> Blood;
+	/** the fall safety net: where the player last stood on the ground */
+	FVector LastSafeSpot = FVector::ZeroVector;
+	bool bHasSafeSpot = false;
 	UPROPERTY(Transient) TMap<int32, TObjectPtr<USoundAttenuation>> Attenuations;
 	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> FireComps;
 	/** wandering music, battle music, wandering atmosphere, battle atmosphere */

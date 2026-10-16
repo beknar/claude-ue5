@@ -324,6 +324,8 @@ void ARDHUD::DrawHUD()
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
 	const float Now = GetWorld()->GetTimeSeconds();
 	const bool bStyle = Gen->bStylizedMap;
+	// (the magic levels on the gamepad: Back opens and closes the map)
+	const bool bPadMap = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 
 	if (Gen->bCombat && !Gen->bMapOpen) DrawCombat(Sc);
 
@@ -395,7 +397,7 @@ void ARDHUD::DrawHUD()
 		float Tw, Th; GetTextSize(Cnt, Tw, Th, Small, Sc * 1.1f);
 		DrawText(Cnt, RDInk, S1.X - Tw, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
 		DrawText(TEXT("N"), RDInk, (S0.X + S1.X) * 0.5f - 4.f * Sc, S0.Y + 2.f * Sc, Small, Sc);
-		DrawText(TEXT("M  map"), FLinearColor(0.7f, 0.68f, 0.62f), S0.X, S1.Y + 6.f * Sc, Small, Sc);
+		DrawText(bPadMap ? TEXT("Back  map") : TEXT("M  map"), FLinearColor(0.7f, 0.68f, 0.62f), S0.X, S1.Y + 6.f * Sc, Small, Sc);
 	}
 
 	// ---- new section banner
@@ -471,7 +473,7 @@ void ARDHUD::DrawHUD()
 			}
 		DrawPlayerArrow(ToS(FVector2D(L.X, L.Y)), Yaw - 90.f, 12.f * Sc);
 		DrawText(TEXT("DUNGEON MAP"), RDInk, 80.f * Sc, 40.f * Sc, Medium, Sc * 1.6f);
-		const FString Sub = FString::Printf(TEXT("%d rooms discovered of %d generated  ·  %d sections  ·  M  close"), Disc, All, Gen->MapData.Num());
+		const FString Sub = FString::Printf(TEXT("%d rooms discovered of %d generated  ·  %d sections  ·  %s  close"), Disc, All, Gen->MapData.Num(), bPadMap ? TEXT("Back") : TEXT("M"));
 		DrawText(Sub, FLinearColor(0.75f, 0.72f, 0.65f), 82.f * Sc, 78.f * Sc, Small, Sc * 1.1f);
 		// legend: room codes
 		float Y = Canvas->ClipY - 64.f * Sc, X = 82.f * Sc;

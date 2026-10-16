@@ -8,7 +8,7 @@ and run it again. With the copy there, it opens it and sets it up:
   flinch and death clips
 - the HUD's status panel: her name; the controls (bCasterControls) in the upper left, keyboard or gamepad by the device
   in use: WASD / left stick move, mouse / right stick look, Space / A jump, R / LT switch walk and run (Shift held runs),
-  left mouse or E / LB or RB the fire spell, F / X open (run 819 first: her character's RunMode)
+  left mouse or E / LB or RB the fire spell, F / X open, M / Back the map (run 819 first: her character's RunMode)
 Everything else is the combat level's: the dungeon, its saved start section, the monsters with their clips and tiers
 (a monster's hit points and damage follow her average blow: the spell's damage), blood, wounds, sound, music, the
 stylised maps. Run 797 on this level after it to give it the spell's sounds. Args: none"""
@@ -56,7 +56,7 @@ else:
     gen.set_editor_property("controls_keys", ["W A S D|move", "Mouse|look / turn the camera", "Space|jump", "R|switch walk / run", "Shift (held)|run",
                                                "Left mouse / E|fire spell", "F|open door or container", "M|map"])
     gen.set_editor_property("controls_pad", ["Left stick|move", "Right stick|look / turn the camera", "A|jump", "LT|switch walk / run",
-                                              "LB / RB|fire spell", "X|open door or container"])
+                                              "LB / RB|fire spell", "X|open door or container", "Back|map"])
     ws = w.get_world_settings()
     ws.set_editor_property("default_game_mode", unreal.load_asset("/Game/RandomDungeon/Blueprints/BP_RDM_GameMode").generated_class())
     c = gen.get_start_room_center()

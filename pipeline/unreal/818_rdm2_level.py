@@ -62,7 +62,7 @@ else:
     gen.set_editor_property("controls_keys", ["W A S D|move", "Mouse|look / turn the camera", "Space|jump", "R|switch walk / run", "Shift (held)|run",
                                                "Left mouse|sword", "Right mouse / E|fire spell", "F|open door or container", "M|map"])
     gen.set_editor_property("controls_pad", ["Left stick|move", "Right stick|look / turn the camera", "A|jump", "LT|switch walk / run",
-                                              "RB|sword", "LB|fire spell", "X|open door or container"])
+                                              "RB|sword", "LB|fire spell", "X|open door or container", "Back|map"])
     ws = w.get_world_settings(); ws.set_editor_property("default_game_mode", unreal.load_asset("/Game/RandomDungeon/Blueprints/BP_RDM2_GameMode").generated_class())
     c = gen.get_start_room_center()
     for a in eas.get_all_level_actors():

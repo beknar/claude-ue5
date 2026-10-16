@@ -1,11 +1,11 @@
 {
- "tag": "t10",
+ "tag": "t12",
  "plan": [
   "rooms:4",
   "home"
  ],
  "falls": 0,
- "stuck": 0,
+ "stuck": 1,
  "doors_opened": 25,
  "doors_failed": 0,
  "containers_opened": 3,
@@ -27,24 +27,28 @@
   "opened chest 242 (alpha 1.00)",
   "to room 41 Prison cells (95 tiles)",
   "room 41 Prison cells: no closed container",
-  "step home"
+  "step home",
+  "STUCK at (178,1510) going to (150,1350): near 'close door', nearest monster 69 cm",
+  "shot stuck1"
  ],
- "shots": [],
+ "shots": [
+  "rd_t12_stuck1.png"
+ ],
  "monsters": {
-  "count": 30,
+  "count": 33,
   "moved_3m": 17,
   "trips": 36,
-  "repaths": 46
+  "repaths": 174
  },
  "discovered": [
   13,
-  91
+  84
  ],
  "frame_stats": {
-  "median": 23.9,
-  "p99": 29.3,
-  "max": 65.9,
-  "gen_median": 40.9,
+  "median": 29.0,
+  "p99": 45.9,
+  "max": 125.0,
+  "gen_median": 45.8,
   "gen_max": 125.0
  },
  "sections_final": [
@@ -58,46 +62,62 @@
   ]
  ],
  "container_fit": {
-  "containers": 1881,
-  "closed": 1878,
+  "containers": 1548,
+  "closed": 1545,
   "open": 3,
   "by_body": {
    "SM_Kit_ChestBody": {
-    "n": 338,
-    "closed": 337,
+    "n": 337,
+    "closed": 336,
     "open": 1
    },
    "SM_Kit_TrunkBody": {
-    "n": 55,
-    "closed": 55,
+    "n": 63,
+    "closed": 63,
     "open": 0
    },
    "SM_crate_01_body": {
-    "n": 370,
-    "closed": 370,
+    "n": 296,
+    "closed": 296,
     "open": 0
    },
    "SM_barrel_01_body": {
-    "n": 405,
-    "closed": 404,
+    "n": 303,
+    "closed": 302,
     "open": 1
    },
    "SM_Kit_WardrobeBody": {
-    "n": 55,
-    "closed": 54,
+    "n": 52,
+    "closed": 51,
     "open": 1
    },
    "SM_barrel_02_body": {
-    "n": 339,
-    "closed": 339,
+    "n": 257,
+    "closed": 257,
     "open": 0
    },
    "SM_crate_02_body": {
-    "n": 319,
-    "closed": 319,
+    "n": 240,
+    "closed": 240,
     "open": 0
    }
   },
   "faults": []
+ },
+ "broken_walls": {
+  "sections": 2,
+  "segments": 1426,
+  "by_piece": {
+   "Wall_Rough_5": 298,
+   "Wall_Rough_3": 285,
+   "Wall_Rough": 291,
+   "Wall_Rough_4": 270,
+   "Wall_Rough_2": 282
+  },
+  "rays": 108810,
+  "face": 95971,
+  "hole": 12839,
+  "leak": 0,
+  "leaks": []
  }
 }

@@ -47,6 +47,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TMap<FName, int32> GetWallPieceCounts() const { return WallCounts; }
 	/** wall segments that got the same piece as the segment before them along the wall or below them, among walls with variants */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetWallRepeats() const { return WallRepeats; }
+	/** the wall segments that got a backing or a seal (a wall piece "<name>_Back" / "<name>_Seal" in the generator's Pieces:
+	 *  the broken walls): each segment's frame (wall line, room face toward +X) and its piece. Tests. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FTransform> GetBackedWallSegments(TArray<FName>& Names) const { Names = WallSegmentNames; return WallSegments; }
+	/** the prison cells: each cell's frame (its middle on the floor, toward the room = +X) and where its hay pile stands;
+	 *  how many cell sides got bars. Tests. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FTransform> GetPrisonCells(TArray<FVector>& Hay) const { Hay = CellHay; return CellFrames; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetPrisonCellSides() const { return CellSides; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetFirePoint(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].At : FVector::ZeroVector; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetFireKind(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].Kind : -1; }
 	/** prefab actors (bookshelves, candle stands...) owned by the section */
@@ -190,6 +197,11 @@ private:
 	TMap<uint32, uint8> WallPicks;
 	UPROPERTY() TMap<FName, int32> WallCounts;
 	UPROPERTY() int32 WallRepeats = 0;
+	UPROPERTY() TArray<FTransform> WallSegments;
+	UPROPERTY() TArray<FName> WallSegmentNames;
+	UPROPERTY() TArray<FTransform> CellFrames;
+	UPROPERTY() TArray<FVector> CellHay;
+	UPROPERTY() int32 CellSides = 0;
 	FName WallVariant(FName Name, const FIntPoint& T, int32 Side, int32 Layer);
 	int32 ShellX = 0;
 	void Furnish(FRandomStream& R, int32 RoomIndex);

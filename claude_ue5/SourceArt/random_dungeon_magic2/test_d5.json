@@ -1,9 +1,10 @@
 {
- "tag": "d2",
+ "tag": "d5",
  "plan": [
   "setup",
   "keys",
   "pad",
+  "walls",
   "cast",
   "dual",
   "nothing",
@@ -47,7 +48,8 @@
     "LT|switch walk / run",
     "RB|sword",
     "LB|fire spell",
-    "X|open door or container"
+    "X|open door or container",
+    "Back|map"
    ]
   },
   {
@@ -159,7 +161,7 @@
     "R_again_walks": true
    },
    "A_jump_cm": 103,
-   "right_stick_turned_deg": 50.0,
+   "right_stick_turned_deg": 52.5,
    "RB": {
     "attacks": 1,
     "bolts": 0,
@@ -190,33 +192,143 @@
     "open_alpha": 1.0,
     "attacks": 0,
     "device": "gamepad"
+   },
+   "Back": {
+    "opens_map": true,
+    "closes_it": true
+   }
+  },
+  {
+   "step": "walls",
+   "ok": true,
+   "sections": 1,
+   "segments": 763,
+   "by_piece": {
+    "Wall_Rough_5": 163,
+    "Wall_Rough_3": 153,
+    "Wall_Rough": 151,
+    "Wall_Rough_4": 142,
+    "Wall_Rough_2": 154
+   },
+   "rays": 58203,
+   "face": 51377,
+   "hole": 6826,
+   "leak": 0,
+   "leaks": [],
+   "without_backing": {
+    "segments": 600,
+    "rays": 45747,
+    "face": 38921,
+    "hole": 358,
+    "leak": 6468
+   },
+   "walk_in": {
+    "tries": [
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 85,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     }
+    ],
+    "ok": true
+   },
+   "fall": {
+    "resets": 1,
+    "put_back_cm_from_where_she_stood": 0.0,
+    "ok": true
+   },
+   "cells": {
+    "cells": 49,
+    "cell_sides_with_bars": 49,
+    "rays": 2352,
+    "leak": 0,
+    "leaks": [],
+    "hay": 49,
+    "hay_blocks": 49,
+    "hay_tops_cm": [
+     143,
+     143,
+     143
+    ],
+    "ok": true
    }
   },
   {
    "step": "cast",
    "ok": true,
-   "monster": "Ripper_dog",
+   "monster": "Daemon",
    "gap_cm": 900,
    "hand": "hand_l",
    "started": true,
    "target_is_it": true,
    "montage": true,
-   "hand_moved_cm": 68,
-   "charge_particles": 402,
-   "bolt_left_at_s": 0.46,
+   "hand_moved_cm": 67,
+   "charge_particles": 385,
+   "bolt_left_at_s": 0.45,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 759,
+   "particles_round_the_bolt": 744,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 625,
+   "flown_cm": 638,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 598,
+   "burst_particles": 565,
    "burst_at": [
-    -3361,
-    758,
-    116
+    398,
+    -3539,
+    128
    ],
    "sounds": {
     "Player.Charge.Fire": 1,
@@ -229,11 +341,11 @@
    "ok": true,
    "cast_started": true,
    "sword_held_all_through": true,
-   "charge_particles_left_hand": 290,
+   "charge_particles_left_hand": 274,
    "attack_weapon_while_casting": [
     1
    ],
-   "bolt_from_left_hand_cm": 23,
+   "bolt_from_left_hand_cm": 25,
    "cut_started": true,
    "cut_weapon": 0,
    "bolts_by_the_cut": 0
@@ -252,7 +364,7 @@
    "step": "far",
    "ok": true,
    "monster": "Horned",
-   "distance_cm": 1762,
+   "distance_cm": 1738,
    "reach": 1400.0,
    "target": null
   },
@@ -270,20 +382,20 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 2.5,
+     "seconds": 2.9,
      "ok": true
     },
     {
      "monster": "Ripper_dog",
      "hit_points": 34.0,
-     "casts": 4,
-     "bolts_on_it": 1,
+     "casts": 2,
+     "bolts_on_it": 2,
      "bolts_needed": 2,
      "killed": true,
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 3.2,
+     "seconds": 1.7,
      "ok": true
     }
    ],
@@ -304,21 +416,21 @@
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 2.1,
+     "seconds": 2.3,
      "ok": true
     },
     {
-     "monster": "Troll",
-     "hit_points": 69.0,
+     "monster": "Daemon",
+     "hit_points": 54.0,
      "weapon": "Sword",
      "damage": 22.0,
-     "blows": 4,
-     "blows_needed": 4,
+     "blows": 2,
+     "blows_needed": 3,
      "killed": true,
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 2.9,
+     "seconds": 1.5,
      "ok": true
     }
    ]
@@ -331,19 +443,19 @@
     0
    ],
    "monsters": 12,
-   "average_hit_points": 100.2,
+   "average_hit_points": 93.5,
    "hers": 100.0,
-   "average_damage": 22.0,
+   "average_damage": 21.2,
    "spell_damage": 22.0
   }
  ],
  "error": null,
  "kills": 4,
- "casts": 24,
- "bolts": 14,
+ "casts": 20,
+ "bolts": 12,
  "bolts_on_monsters": 6,
- "bolts_elsewhere": 8,
+ "bolts_elsewhere": 6,
  "deaths": 0,
- "damage_dealt": 304.0,
- "damage_taken": 0.0
+ "damage_dealt": 260.0,
+ "damage_taken": 11.0
 }

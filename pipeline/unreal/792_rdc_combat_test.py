@@ -34,10 +34,14 @@ checks what happens. Plan = comma separated steps:
   containers  every container of the start section, measured (container_check.py): closed, the lid lies on its body and a
             wardrobe's two doors stand on its front; four of each kind are opened: the lid stands up at the back, the
             doors out in front; closed again, they are back where they were
+  walls     the broken walls (wall_check.py): rays from each broken segment's room on a grid over its face end on the
+            wall or, through a hole, on the stone plate behind it (never beyond the wall); she pushes and jumps into
+            holes low on the wall and stays out (without the plates the same rays went beyond the wall); every
+            prison cell is closed all round (rays from its middle meet bars, a door or a wall), its hay pile blocks; dropped below the floor she is put back where she stood
 Writes SourceArt/random_dungeon_combat/test_<tag>.json and logs "RDCTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os
 __keep__ = True
-PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds,music,containers,look").split(",") if s.strip()]
+PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else "setup,weapons,monsters,kill,hurt,tier,death,regen,map,blood,wounds,sounds,music,containers,look,walls").split(",") if s.strip()]
 TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_combat"
 V = unreal.Vector; GS = unreal.GameplayStatics; ML = unreal.MathLibrary
@@ -428,8 +432,24 @@ def step_containers():
     step_result("containers", ok, containers=len(rows), by_body={k: e["n"] for k, e in by.items()}, closed_faults=len(f0), opened=len(picks), fully_open=n_open,
                 open_faults=len(f1), closed_again=closed_again, closed_again_faults=len(f2), examples=(f0 + f1 + f2)[:6])
 
+def step_walls():
+    """the broken walls (wall_check.py): what is seen of every broken segment of the start section from its room (the wall,
+    or the backing through a hole: never beyond the wall), she cannot get into a hole by pushing or jumping, and dropped
+    below the floor she is put back where she stood"""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import wall_check as WC; import importlib; importlib.reload(WC)       # (the editor keeps modules: an edited one must be reloaded)
+    c = cb(); p = G["pawn"]; gen = G["gen"]; c.revive(True); c.set_scripted_only(True); yield from wait(0.5)
+    secs = [gen.get_section(unreal.IntPoint(0, 0))]; ign = [p] + list(gen.get_monsters())
+    r0 = WC.rays(G["w"], secs, ign, without_backing=True); r0.pop("spots")          # (what was seen before: the holes go right through)
+    r = WC.rays(G["w"], secs, ign); ce = WC.cells(G["w"], secs, ign)
+    wi = yield from WC.walk_in(G["w"], p, r.pop("spots"), wait, now)
+    c.revive(True); fl = yield from WC.fall(gen, p, wait)
+    ok = r["segments"] > 0 and r0["leak"] > 0 and r["hole"] > 0 and r["leak"] == 0 and wi["ok"] and fl["ok"] and ce["ok"]
+    step_result("walls", ok, **r, without_backing={k: r0[k] for k in ("segments", "rays", "face", "hole", "leak")}, walk_in=wi, fall=fl, cells=ce)
+    c.revive(True); c.set_scripted_only(False)
+
 STEPS = {"look": step_look, "containers": step_containers, "music": step_music, "setup": step_setup, "weapons": step_weapons, "monsters": step_monsters, "kill": step_kill, "hurt": step_hurt, "tier": step_tier, "death": step_death, "regen": step_regen, "map": step_map,
-         "blood": step_blood, "wounds": step_wounds, "sounds": step_sounds}
+         "blood": step_blood, "wounds": step_wounds, "sounds": step_sounds, "walls": step_walls}
 def run():
     for s in PLAN:
         name, _, arg = s.partition(":")

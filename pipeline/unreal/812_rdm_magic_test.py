@@ -14,7 +14,11 @@ generator and measures what happens. Plan = comma separated steps:
             the device in use and a gamepad button the gamepad (the HUD's controls panel follows it); the left stick held
             forward walks her at her walk speed, LT switches to running (her run speed) and back, R does the same with W
             held; the right stick turns the camera; A jumps; RB attacks with the weapon in her hand (level 1: the spell), LB casts the spell; RT and Y (the
-            combat level's buttons) do nothing; X by a closed container opens it
+            combat level's buttons) do nothing; X by a closed container opens it; Back opens the big map and closes it
+  walls     the broken walls (wall_check.py): rays from each broken segment's room on a grid over its face end on the
+            wall or, through a hole, on the stone plate behind it (never beyond the wall); she pushes and jumps into
+            holes low on the wall and stays out (without the plates the same rays went beyond the wall); every
+            prison cell is closed all round (rays from its middle meet bars, a door or a wall), its hay pile blocks; dropped below the floor she is put back where she stood
   cast      9 m from a monster she can see: one cast. The charge's particles burn at her casting hand while she winds up;
             the cast clip plays (her hand moves); at the release a bolt leaves her hand, flies at the spell's speed
             (measured between frames), with particles alive around it, and bursts on that monster: it loses the spell's
@@ -40,10 +44,10 @@ w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()
 assert w is not None, "PIE is not running"
 LEVELS = {"random_dungeonmagic_level": {"pawn": "BP_RDM_CasterCharacter_C", "mesh": "SK_JRPG_Caster", "ch": "Caster", "dual": False, "out": "random_dungeon_magic",
                                         "bps": ("/Game/JRPG/Game/BP_JRPGCasterCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), "cast_keys": ("E", "LeftMouseButton"),
-                                        "plan": "setup,keys,pad,cast,nothing,far,kill:3,tier"},
+                                        "plan": "setup,keys,pad,walls,cast,nothing,far,kill:3,tier"},
           "random_dungeonmagic_level2": {"pawn": "BP_RDM2_DarkCasterCharacter_C", "mesh": "SK_JRPG_DarkCaster", "ch": "DarkCaster", "dual": True, "out": "random_dungeon_magic2",
                                          "bps": ("/Game/JRPG/Game/BP_JRPGDarkCasterCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"), "cast_keys": ("E", "RightMouseButton"),
-                                         "plan": "setup,keys,pad,cast,dual,nothing,far,kill:2,sword:2,tier"}}
+                                         "plan": "setup,keys,pad,walls,cast,dual,nothing,far,kill:2,sword:2,tier"}}
 LV = LEVELS[w.get_path_name().split(".")[-1].replace("UEDPIE_0_", "")]
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "all" else LV["plan"]).split(",") if s.strip()]
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\" + LV["out"]
@@ -237,6 +241,10 @@ def step_pad():
         yield from tap("Gamepad_FaceButton_Left"); yield from wait(1.4)
         out["X"] = {"prompt": what, "container": sec.get_container_kind(k), "open_alpha": round(sec.get_container_open_alpha(k), 2), "attacks": c.attacks_made - n0, "device": "gamepad" if c.is_using_gamepad() else "keyboard"}
     else: out["X"] = {"why": "no closed container with a place to stand"}
+    # Back (View) opens the big map and closes it again (the generator, as M)
+    gen.set_map_open(False); yield from tap("Gamepad_Special_Left"); yield from wait(0.3); back_open = bool(gen.get_editor_property("map_open"))
+    yield from tap("Gamepad_Special_Left"); yield from wait(0.3); back_shut = not gen.get_editor_property("map_open")
+    out["Back"] = {"opens_map": back_open, "closes_it": back_shut}
     G["pc"].set_ignore_look_input(False)
     spell_w = spell_index()
     drawn = 0
@@ -245,7 +253,7 @@ def step_pad():
     near = lambda v, want: abs(v - want) < 0.15 * want
     ok = (kb and pad and kb2 and all(out["switch"].values()) and near(out["stick_walk"]["cm_s"], walk) and near(out["stick_run"]["cm_s"], runs)
           and near(out["W_run"]["cm_s"], runs) and near(out["W_walk"]["cm_s"], walk) and abs(out["stick_walk"]["heading_deg"]) < 15 and out["A_jump_cm"] > 20 and abs(out["right_stick_turned_deg"]) > 10
-          and rb_ok and lb_ok and out["RT"]["attacks"] == 0 and out["Y"]["attacks"] == 0 and found is not None and out["X"]["open_alpha"] > 0.5 and out["X"]["attacks"] == 0)
+          and rb_ok and lb_ok and out["RT"]["attacks"] == 0 and out["Y"]["attacks"] == 0 and found is not None and out["X"]["open_alpha"] > 0.5 and out["X"]["attacks"] == 0 and back_open and back_shut)
     step_result("pad", ok, her_walk=walk, her_run=runs, **out)
     c.set_run_mode(False); c.revive(True)
 
@@ -427,7 +435,23 @@ def step_tier():
     ok = len(ms) >= 5 and 0.75 <= hp / c.get_max_health() <= 1.25 and 0.75 <= dmg / avg <= 1.25
     step_result("tier", ok, section=[1, 0], monsters=len(ms), average_hit_points=round(hp, 1), hers=c.get_max_health(), average_damage=round(dmg, 1), spell_damage=round(avg, 1))
 
-STEPS = {"setup": step_setup, "keys": step_keys, "pad": step_pad, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual}
+def step_walls():
+    """the broken walls (wall_check.py): what is seen of every broken segment of the start section from its room (the wall,
+    or the backing through a hole: never beyond the wall), she cannot get into a hole by pushing or jumping, and dropped
+    below the floor she is put back where she stood"""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import wall_check as WC; import importlib; importlib.reload(WC)       # (the editor keeps modules: an edited one must be reloaded)
+    c = cb(); p = G["pawn"]; gen = G["gen"]; c.revive(True); c.set_scripted_only(True); yield from wait(0.5)
+    secs = [gen.get_section(unreal.IntPoint(0, 0))]; ign = [p] + list(gen.get_monsters())
+    r0 = WC.rays(G["w"], secs, ign, without_backing=True); r0.pop("spots")          # (what was seen before: the holes go right through)
+    r = WC.rays(G["w"], secs, ign); ce = WC.cells(G["w"], secs, ign)
+    wi = yield from WC.walk_in(G["w"], p, r.pop("spots"), wait, now)
+    c.revive(True); fl = yield from WC.fall(gen, p, wait)
+    ok = r["segments"] > 0 and r0["leak"] > 0 and r["hole"] > 0 and r["leak"] == 0 and wi["ok"] and fl["ok"] and ce["ok"]
+    step_result("walls", ok, **r, without_backing={k: r0[k] for k in ("segments", "rays", "face", "hole", "leak")}, walk_in=wi, fall=fl, cells=ce)
+    c.revive(True); c.set_scripted_only(False)
+
+STEPS = {"setup": step_setup, "keys": step_keys, "pad": step_pad, "walls": step_walls, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual}
 def run():
     for s in PLAN:
         name, _, arg = s.partition(":")

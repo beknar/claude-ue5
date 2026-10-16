@@ -11,7 +11,8 @@ and idle / walk clips).
 - BP_RD_GameMode: BP_SFC_Fem5Character (jrpg-fem5-tripo) + RDHUD (minimap, M map, F prompt)
 - reveal materials: random_level's M_RT_RevealPP / M_RT_RevealCurtain (753)
 Args: [no_build] | pieces   (pieces: only rewrites the piece table in the generator of the open level, one of
-      random_dungeon_level, its Cine copy or random_dungeoncombat_level, builds its start section again and saves it)"""
+      random_dungeon_level, its Cine copy, random_dungeoncombat_level or the two magic levels, builds its start section
+      again and saves it)"""
 import sys, json, math, unreal
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
@@ -89,6 +90,17 @@ def wall_variant(name, m, base):
     p = piece(m, front="+y", shift=sh)
     if p is not None: p.size = P[name.rsplit("_", 1)[0]].size; P[name] = p
 for i, m in enumerate(("SM_Wall_A_DMG_A", "SM_Wall_A_DMG_B", "SM_Wall_A_DMG_C", "SM_Wall_A")): wall_variant(f"Wall_Rough_{i + 2}", m, "SM_Wall_A_DMG_D")
+# The broken walls have holes right through them: she saw the void behind them and the backs of the rooms beyond, and
+# could climb into the bigger holes and fall out of the dungeon. Each broken segment gets (RDSection's Stack):
+# - Wall_Rough_Back: a stone plate (SM_Wall_A thinned to 8 cm) from 15.5 to 23.5 cm behind the wall line: seen through a
+#   hole it is the back of a cavity. The walls are centred on the tile edge (the broken ones +-33 cm, their breaks to
+#   -45 cm); behind them is an empty tile, or at a section's border the next section's wall on the same line, of which
+#   the thinnest (Wall_Stone) reaches 25 cm back: the plate stays inside it and is never seen from there.
+# - Wall_Rough_Seal: an invisible box from 33 cm behind the line to 30 cm in front of it (the wall's face is at 33), the
+#   whole segment's width and height: she cannot step or jump into a hole.
+add("Wall_Rough_Back", "SM_Wall_A", front="+y", scale=(1.03, 0.16, 1.03), shift=(-19.5, 0, 0))
+cb = piece("/Engine/BasicShapes/Cube", front="+x", scale=(0.63, 3.14, 3.11), shift=(-1.5, 0, 0))
+if cb: cb.hidden = True; P["Wall_Rough_Seal"] = cb
 add("Doorway", "SM_Wall_Entrance_A", front="+y")
 add("CornerColumn", "SM_StoneCorner_SmallColumn_A")
 # double crypt doors (2 x 70 cm): the leaf spans +Y from its hinge; Hinge = (inset, half opening)
@@ -122,7 +134,7 @@ for n, m, kw in (("Bed", "SM_Kit_BedSingle", {}), ("Stool", "SM_Kit_Stool", {}),
                  ("PrepTable", "SM_Kit_PrepTable", {}), ("ToolBoard", "SM_Kit_ToolBoard", {}), ("ShelfRack", "SM_Kit_ShelfRack", {}), ("Anvil", "SM_Kit_Anvil", {}),
                  ("Fireplace", "SM_Kit_Fireplace", {}), ("BreadOven", "SM_Kit_BreadOven", {}), ("Tripod", "SM_Kit_Tripod", {}), ("Cauldron", "SM_Kit_Cauldron", {"collision": False}),
                  ("Bench", "SM_Kit_Bench", {}), ("PotRack", "SM_Kit_PotRack", {"collision": False}), ("Forge", "SM_Kit_Forge", {}), ("QuenchTub", "SM_Kit_QuenchTub", {}),
-                 ("Firewood", "SM_Kit_Firewood", {}), ("HayPile", "SM_Kit_HayPile", {"collision": False})):
+                 ("Firewood", "SM_Kit_Firewood", {}), ("HayPile", "SM_Kit_HayPile", {})):      # (the prison cells' mound: it blocks; its mesh collides as its triangles)
     add(n, m, front="+y", **kw)
 add("Pew", "SM_Prop_Bench_A", front="-y"); add("Altar", "SM_Prop_Table_A", front="-y"); add("Desk", "SM_Prop_Table_A", front="-y")
 add("Chair", "SM_Prop_Chair_A", front="-y"); add("Throne", "SM_Prop_Chair_A", front="-y", scale=(1.25, 1.25, 1.25))
@@ -166,7 +178,8 @@ if "pieces" in sys.argv:
     g.modify(); g.set_editor_property("pieces", P); g.build_start_section()
     sec = g.get_section(unreal.IntPoint(0, 0))
     print("pieces set in", w.get_path_name(), "|", len(P), "pieces | start section:", sec.get_num_rooms(), "rooms,", sec.get_editor_property("num_instances"), "instances, reachable rooms",
-          sec.count_reachable_rooms(), "| walls", {str(k): v for k, v in sec.get_wall_piece_counts().items()}, "repeats", sec.get_wall_repeats())
+          sec.count_reachable_rooms(), "| walls", {str(k): v for k, v in sec.get_wall_piece_counts().items()}, "repeats", sec.get_wall_repeats(),
+          "| broken segments backed and sealed", len(sec.get_backed_wall_segments()[0]))
     les.save_current_level()
     import gc
     for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]

@@ -1,5 +1,5 @@
 {
- "tag": "c7",
+ "tag": "c9",
  "plan": [
   "setup",
   "weapons",
@@ -15,7 +15,8 @@
   "sounds",
   "music",
   "containers",
-  "look"
+  "look",
+  "walls"
  ],
  "steps": [
   {
@@ -44,7 +45,7 @@
      "attack_started": true,
      "second_refused": true,
      "montage": true,
-     "hand_moved_cm": 56,
+     "hand_moved_cm": 57,
      "attack_seconds": 0.85,
      "grip": {
       "hand_at_mesh_z": 69.0,
@@ -59,7 +60,7 @@
       "axis_from_hand_cm": 6.9,
       "on_handle": true
      },
-     "shield_top_over_point_cm": 55.4,
+     "shield_top_over_point_cm": 55.0,
      "ok": true
     },
     {
@@ -102,7 +103,7 @@
      "attack_started": true,
      "second_refused": true,
      "montage": true,
-     "hand_moved_cm": 75,
+     "hand_moved_cm": 74,
      "attack_seconds": 1.3,
      "grip": {
       "hand_at_mesh_z": 7.0,
@@ -174,7 +175,7 @@
      "each_blow_took_the_damage": true,
      "it_fought_back": true,
      "she_lost": 0,
-     "seconds": 1.5,
+     "seconds": 1.6,
      "ok": true
     },
     {
@@ -204,7 +205,7 @@
      "each_blow_took_the_damage": true,
      "it_fought_back": true,
      "she_lost": 12,
-     "seconds": 2.4,
+     "seconds": 2.5,
      "ok": true
     }
    ],
@@ -216,9 +217,9 @@
    "monster": "Horned",
    "its_damage": 13.0,
    "she_lost": 13.0,
-   "its_attacks": 1,
-   "its_hits": 2,
-   "seconds": 3.8,
+   "its_attacks": 0,
+   "its_hits": 1,
+   "seconds": 0.4,
    "aggro": true
   },
   {
@@ -229,10 +230,10 @@
     0
    ],
    "generated": true,
-   "monsters": 13,
-   "average_hit_points": 100.8,
+   "monsters": 11,
+   "average_hit_points": 94.9,
    "hers": 100.0,
-   "average_damage": 25.0,
+   "average_damage": 24.0,
    "her_average_blow": 25.0,
    "rooms": 49
   },
@@ -250,7 +251,7 @@
    "ok": true,
    "after_the_blow": 60.0,
    "before_the_delay_is_over": 60.0,
-   "four_seconds_on": 72.1,
+   "four_seconds_on": 72.2,
    "per_second": 4.0
   },
   {
@@ -272,52 +273,52 @@
    "drops": 31,
    "in_the_air": 31,
    "spray_sprites": 3,
-   "burst_cm_from_the_fight": 45,
-   "decals_after_2_6_s": 35,
+   "burst_cm_from_the_fight": 34,
+   "decals_after_2_6_s": 27,
    "decals_on_the_floor": 140,
    "bursts_when_she_was_hit": 1,
-   "that_burst_cm_from_her": 60,
+   "that_burst_cm_from_her": 39,
    "drop_mesh": "Sphere",
    "decal_materials": 8
   },
   {
    "step": "wounds",
    "ok": true,
-   "monster": "Horned",
+   "monster": "Daemon",
    "blows": 2,
    "wounds": 2,
    "on_its_skin": true,
    "radius_cm": [
-    21.7,
-    21.7
+    22.6,
+    22.6
    ],
    "own_material": "MID_M_RDC_Wounds_0",
    "overlay_is_that_material": true,
    "parameters_set": [
-    21.7,
-    21.7
+    22.6,
+    22.6
    ],
-   "bleed": 0.75,
-   "hit_points_lost": 0.75,
+   "bleed": 0.81,
+   "hit_points_lost": 0.81,
    "wound_cm_from_its_middle": [
-    43,
-    38
+    41,
+    65
    ],
    "after_it_moved_cm": 0,
    "then": [
-    78,
-    56
+    54,
+    75
    ],
-   "unhurt_monsters_checked": 34,
+   "unhurt_monsters_checked": 32,
    "none_of_them_has_a_wound_or_overlay": true,
-   "a_second_of_its_kind": "Horned",
+   "a_second_of_its_kind": "Daemon",
    "that_one_untouched": true,
    "pools_when_it_died": 1
   },
   {
    "step": "sounds",
    "ok": true,
-   "running_steps_in_2_6_s": 7,
+   "running_steps_in_2_6_s": 6,
    "walking_steps_in_2_6_s": 6,
    "breath_sets": [],
    "her_sets": [
@@ -336,7 +337,7 @@
    "door_open": 1,
    "door_close": 4,
    "door": "door",
-   "fire_voices_by_a_torch": 4,
+   "fire_voices_by_a_torch": 2,
    "nearest_voice_cm_from_that_torch": 0,
    "torch_cm_from_the_middle": 16419,
    "still_playing_from_the_middle": false,
@@ -400,7 +401,7 @@
     "Player.Attack": 9,
     "Player.Hit.Sword": 6,
     "Player.Hit.Spear": 4,
-    "Player.Hit.Axe": 2,
+    "Player.Hit.Axe": 3,
     "Blood.Splat": 21,
     "Player.Draw": 7
    },
@@ -409,42 +410,40 @@
    "all_counts": {
     "Blood.Splat": 21,
     "Env.BodyFall": 6,
-    "Env.DoorClose": 92,
-    "Env.DoorOpen": 108,
+    "Env.DoorClose": 90,
+    "Env.DoorOpen": 101,
     "Env.Generate": 5,
     "Env.GenerateHit": 5,
-    "Monster.Daemon.Attack": 2,
-    "Monster.Daemon.Death": 1,
-    "Monster.Daemon.Hurt": 1,
-    "Monster.Daemon.Roar": 1,
-    "Monster.Daemon.Step": 13,
-    "Monster.Dog.Attack": 3,
+    "Monster.Daemon.Attack": 5,
+    "Monster.Daemon.Death": 2,
+    "Monster.Daemon.Hurt": 3,
+    "Monster.Daemon.Roar": 2,
+    "Monster.Daemon.Step": 5,
+    "Monster.Dog.Attack": 4,
     "Monster.Dog.Death": 2,
     "Monster.Dog.Hurt": 2,
     "Monster.Dog.Roar": 2,
-    "Monster.Dog.Step": 15,
-    "Monster.Horned.Attack": 5,
-    "Monster.Horned.Death": 1,
-    "Monster.Horned.Hurt": 2,
-    "Monster.Horned.Idle": 1,
-    "Monster.Horned.Roar": 2,
-    "Monster.Horned.Step": 8,
-    "Monster.Mutant.Step": 8,
+    "Monster.Dog.Step": 5,
+    "Monster.Horned.Attack": 1,
+    "Monster.Horned.Hurt": 1,
+    "Monster.Horned.Roar": 1,
+    "Monster.Horned.Step": 9,
     "Monster.Spider.Attack": 2,
     "Monster.Spider.Death": 1,
     "Monster.Spider.Hurt": 1,
     "Monster.Spider.Roar": 1,
-    "Monster.Strike": 9,
+    "Monster.Strike": 8,
     "Monster.Troll.Attack": 3,
     "Monster.Troll.Hurt": 1,
+    "Monster.Troll.Idle": 1,
     "Monster.Troll.Roar": 1,
     "Player.Attack": 9,
     "Player.Death": 1,
     "Player.Draw": 7,
-    "Player.Hit.Axe": 2,
+    "Player.Hit.Axe": 3,
     "Player.Hit.Spear": 4,
     "Player.Hit.Sword": 6,
-    "Player.Hurt": 8,
+    "Player.Hurt": 7,
     "Player.Run": 7,
     "Player.Step": 6,
     "Player.Whoosh": 15
@@ -455,35 +454,35 @@
    "ok": true,
    "wandering": {
     "battle": false,
-    "track": "Music_Explore_03",
+    "track": "Music_Explore_02",
     "atmosphere": "Atmos_Explore_01",
-    "seconds_into_the_track": 34.1
+    "seconds_into_the_track": 33.9
    },
    "first_fight": {
     "monster": "Daemon",
-    "seconds_to_the_battle_music": 0.1,
+    "seconds_to_the_battle_music": 0.16,
     "battle": true,
-    "track": "Music_Combat_01",
+    "track": "Music_Combat_03",
     "atmosphere": "Atmos_Combat_01",
-    "seconds_into_the_track": 0.67,
+    "seconds_into_the_track": 0.7,
     "still_battle_at_the_kill": true,
     "seconds_until_wandering_again": 4.5
    },
    "wandering_again": {
     "battle": false,
-    "track": "Music_Explore_03",
+    "track": "Music_Explore_02",
     "atmosphere": "Atmos_Explore_01",
-    "seconds_into_the_track": 35.3
+    "seconds_into_the_track": 35.0
    },
    "second_fight": {
     "monster": "Daemon",
-    "seconds_to_the_battle_music": 0.11,
+    "seconds_to_the_battle_music": 0.12,
     "battle": true,
-    "track": "Music_Combat_02",
+    "track": "Music_Combat_01",
     "atmosphere": "Atmos_Combat_01",
-    "seconds_into_the_track": 0.71,
+    "seconds_into_the_track": 0.68,
     "still_battle_at_the_kill": true,
-    "seconds_until_wandering_again": 4.5
+    "seconds_until_wandering_again": 4.4
    },
    "shifts": 4,
    "sets": {
@@ -561,11 +560,11 @@
       0
      ],
      "rough": {
-      "Wall_Rough_5": 109,
-      "Wall_Rough_3": 121,
-      "Wall_Rough_2": 120,
-      "Wall_Rough": 124,
-      "Wall_Rough_4": 127
+      "Wall_Rough_4": 97,
+      "Wall_Rough": 82,
+      "Wall_Rough_3": 90,
+      "Wall_Rough_5": 93,
+      "Wall_Rough_2": 81
      },
      "repeats": 0,
      "ok": true
@@ -576,11 +575,11 @@
       0
      ],
      "rough": {
-      "Wall_Rough": 145,
-      "Wall_Rough_4": 121,
-      "Wall_Rough_3": 130,
-      "Wall_Rough_2": 133,
-      "Wall_Rough_5": 152
+      "Wall_Rough_4": 153,
+      "Wall_Rough_2": 146,
+      "Wall_Rough_5": 141,
+      "Wall_Rough": 154,
+      "Wall_Rough_3": 146
      },
      "repeats": 0,
      "ok": true
@@ -591,11 +590,11 @@
       -1
      ],
      "rough": {
-      "Wall_Rough_5": 104,
-      "Wall_Rough_3": 90,
-      "Wall_Rough": 104,
-      "Wall_Rough_2": 92,
-      "Wall_Rough_4": 102
+      "Wall_Rough": 131,
+      "Wall_Rough_2": 124,
+      "Wall_Rough_5": 117,
+      "Wall_Rough_4": 130,
+      "Wall_Rough_3": 112
      },
      "repeats": 0,
      "ok": true
@@ -606,11 +605,11 @@
       -1
      ],
      "rough": {
-      "Wall_Rough_5": 126,
-      "Wall_Rough": 143,
-      "Wall_Rough_2": 120,
-      "Wall_Rough_4": 144,
-      "Wall_Rough_3": 133
+      "Wall_Rough_4": 130,
+      "Wall_Rough": 157,
+      "Wall_Rough_3": 120,
+      "Wall_Rough_5": 133,
+      "Wall_Rough_2": 132
      },
      "repeats": 0,
      "ok": true
@@ -621,11 +620,11 @@
       1
      ],
      "rough": {
-      "Wall_Rough_4": 147,
-      "Wall_Rough_5": 151,
-      "Wall_Rough_3": 138,
-      "Wall_Rough": 141,
-      "Wall_Rough_2": 134
+      "Wall_Rough_4": 127,
+      "Wall_Rough_3": 145,
+      "Wall_Rough_5": 112,
+      "Wall_Rough_2": 139,
+      "Wall_Rough": 120
      },
      "repeats": 0,
      "ok": true
@@ -729,13 +728,119 @@
      ]
     }
    ]
+  },
+  {
+   "step": "walls",
+   "ok": true,
+   "sections": 1,
+   "segments": 763,
+   "by_piece": {
+    "Wall_Rough_5": 163,
+    "Wall_Rough_3": 153,
+    "Wall_Rough": 151,
+    "Wall_Rough_4": 142,
+    "Wall_Rough_2": 154
+   },
+   "rays": 58203,
+   "face": 51377,
+   "hole": 6826,
+   "leak": 0,
+   "leaks": [],
+   "without_backing": {
+    "segments": 600,
+    "rays": 45747,
+    "face": 38921,
+    "hole": 358,
+    "leak": 6468
+   },
+   "walk_in": {
+    "tries": [
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 85,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     }
+    ],
+    "ok": true
+   },
+   "fall": {
+    "resets": 1,
+    "put_back_cm_from_where_she_stood": 0.0,
+    "ok": true
+   },
+   "cells": {
+    "cells": 49,
+    "cell_sides_with_bars": 49,
+    "rays": 2352,
+    "leak": 0,
+    "leaks": [],
+    "hay": 49,
+    "hay_blocks": 49,
+    "hay_tops_cm": [
+     143,
+     143,
+     143
+    ],
+    "ok": true
+   }
   }
  ],
  "error": null,
- "kills": 8,
+ "kills": 7,
  "attacks": 19,
- "hits": 18,
+ "hits": 17,
  "deaths": 1,
- "damage_dealt": 488.0,
- "damage_taken": 1136.0
+ "damage_dealt": 452.0,
+ "damage_taken": 1135.0
 }

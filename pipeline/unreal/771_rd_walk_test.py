@@ -3,7 +3,10 @@
 hallways so new sections generate. Reports falls, stuck spots, doors / containers opened (verified by their open
 alpha), sections generated (and how long they took), monster wandering, frame times; screenshots on request.
 At the end every container of every section is measured (container_check.py): a closed lid lies on its body, a closed
-wardrobe's doors stand on its front, an opened lid stands up at the back, opened doors out in front.
+wardrobe's doors stand on its front, an opened lid stands up at the back, opened doors out in front. And every broken
+wall segment of every section is looked at from its room (wall_check.py): rays on a grid over its face end on the wall
+or, through a hole, on the stone plate behind it, never beyond the wall; every prison cell is closed all round and its
+hay pile blocks.
 Plan (comma separated): rooms:N (visit N random rooms of the current section, opening one container in each),
 expand:+x|-x|+y|-y (walk out through that edge's hallway into the next section), home (back to the great hall),
 shot:name (HighResShot), map:name (open the M map, HighResShot, close it).
@@ -92,10 +95,15 @@ def finish():
     import container_check as CC; import importlib; importlib.reload(CC)       # (the editor keeps modules: an edited one must be reloaded)
     R["container_fit"] = fit = CC.check_all([GEN.get_section(c) for c in GEN.get_section_coords()])
     for x in fit["faults"][:8]: unreal.log("RDWALK CONTAINER FIT " + x)
+    # what is seen through the broken walls (the walk's sections as they stand now)
+    import wall_check as WC; importlib.reload(WC)
+    wr = WC.rays(ues.get_game_world(), [GEN.get_section(c) for c in GEN.get_section_coords()], [pawn()] + list(GEN.get_monsters())); wr.pop("spots")
+    R["broken_walls"] = wr
+    R["prison_cells"] = ce = WC.cells(ues.get_game_world(), [GEN.get_section(c) for c in GEN.get_section_coords()], [pawn()] + list(GEN.get_monsters()))
     out = os.path.join(r"E:\code\claude-ue5\claude_ue5\SourceArt\random_dungeon", f"walk_{TAG}.json"); os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump(R, open(out, "w"), indent=1)
-    ok = R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and not fit["faults"] and fit["containers"] > 0
-    unreal.log(f"RDWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) | lids and doors in place {fit['containers'] - len(fit['faults'])}/{fit['containers']} ({fit['open']} open) | rooms {len(R['rooms_visited'])} | sections {R['sections_final']} | monsters {R['monsters']} | frames {R['frame_stats']} | discovered {d}/{g}")
+    ok = R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and not fit["faults"] and fit["containers"] > 0 and wr["segments"] > 0 and wr["leak"] == 0 and ce["ok"]
+    unreal.log(f"RDWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) | lids and doors in place {fit['containers'] - len(fit['faults'])}/{fit['containers']} ({fit['open']} open) | broken wall segments {wr['segments']}: rays on the wall {wr['face']}, through a hole on the backing {wr['hole']}, beyond the wall {wr['leak']} | prison cells {ce['cells']}: rays out of a cell {ce['leak']} of {ce['rays']}, hay piles that block {ce['hay_blocks']}/{ce['hay']} | rooms {len(R['rooms_visited'])} | sections {R['sections_final']} | monsters {R['monsters']} | frames {R['frame_stats']} | discovered {d}/{g}")
     unreal.unregister_slate_post_tick_callback(S["h"])
 def tick(dt):
     try: _tick(dt)

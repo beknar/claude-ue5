@@ -372,6 +372,21 @@ void ARDDungeonGenerator::Tick(float Dt)
 			// what she hears fades with the distance to her, not to the camera behind her
 			if (Sounds.Num() > 0) PC->SetAudioListenerAttenuationOverride(P->GetRootComponent(), FVector::ZeroVector);
 		}
+		// the safety net: a fall out of the dungeon (through a gap that let her through) puts her back where she last stood
+		if (ACharacter* Ch = Cast<ACharacter>(P); Ch && FallResetDepth > 0.f)
+		{
+			const FVector L = Ch->GetActorLocation();
+			const float Floor = GetActorLocation().Z;
+			if (L.Z < Floor - FallResetDepth)
+			{
+				const FVector To = bHasSafeSpot ? LastSafeSpot : GetStartRoomCenter() + FVector(0, 0, 100.f);
+				Ch->SetActorLocation(To, false, nullptr, ETeleportType::TeleportPhysics);
+				Ch->GetCharacterMovement()->StopMovementImmediately();
+				++FallResets;
+				UE_LOG(LogRandomDungeonGen, Warning, TEXT("RDGEN fell out at (%.0f, %.0f, %.0f): back to (%.0f, %.0f, %.0f)"), L.X, L.Y, L.Z, To.X, To.Y, To.Z);
+			}
+			else if (Ch->GetCharacterMovement()->IsMovingOnGround() && FMath::Abs(L.Z - Floor) < 250.f) { LastSafeSpot = L + FVector(0, 0, 5.f); bHasSafeSpot = true; }
+		}
 		if (Sounds.Num() > 0 && P)
 		{
 			// The listener, every tick. The viewport does this itself, but not for a play-in-editor window that does not
@@ -390,7 +405,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 			}
 		}
 		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P) InteractNearest(P->GetActorLocation());
-		if (PC->WasInputKeyJustPressed(EKeys::M)) bMapOpen = !bMapOpen;
+		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) bMapOpen = !bMapOpen;
 	}
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
 	else TickMusic(Dt);         // (the self test measures single sounds: no music under them, only the room tone)
