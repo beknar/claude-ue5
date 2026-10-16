@@ -1,0 +1,104 @@
+{
+ "_doc": "How the Warlock's hair chains swing (pipeline/unreal/820: one AnimDynamics node per chain in the mesh's post-process AnimBP). Unreal component space (Blender x, -y, z), cm, degrees. spheres: bodies kept outside them (chains: only those chains; a sphere that would hold a body of the rest pose is shrunk to clear it by margin_cm). overrides: per chain, by name prefix.",
+ "abp": "/Game/JRPG/Hair/ABP_DarkCaster_Hair",
+ "mesh": "/Game/JRPG/Character/SK_JRPG_DarkCaster",
+ "chains": [
+  "hair_b1",
+  "hair_b2",
+  "hair_b3",
+  "hair_b4",
+  "hair_fl",
+  "hair_fr"
+ ],
+ "space": "Component",
+ "_space": "Component: the bodies move with her and feel a share of her acceleration (component_acc_scale: starting, stopping, landing), of her velocity (component_vel_scale: trailing as she runs) and of her turning (angular_alpha); in World space they were left behind as she ran and the chains stretched",
+ "component_acc_scale": [
+  0.35,
+  0.35,
+  0.35
+ ],
+ "component_vel_scale": [
+  0.15,
+  0.15,
+  0.0
+ ],
+ "component_acc_clamp": [
+  1500.0,
+  1500.0,
+  1500.0
+ ],
+ "angular_alpha": 0.5,
+ "gravity_scale": 0.6,
+ "linear_damping": 0.8,
+ "angular_damping": 0.8,
+ "angular_spring": 100.0,
+ "solver_iterations": [
+  48,
+  16
+ ],
+ "swing_deg": 18.0,
+ "twist_deg": 4.0,
+ "body_thickness_cm": 4.0,
+ "collision_radius_cm": 2.5,
+ "overrides": {
+  "hair_f": {
+   "swing_deg": 12.0,
+   "angular_spring": 150.0
+  }
+ },
+ "spheres": [
+  {
+   "bone": "head",
+   "center_cm": [
+    0.3,
+    6.0,
+    160.0
+   ],
+   "radius_cm": 9.5
+  },
+  {
+   "bone": "head",
+   "center_cm": [
+    0.3,
+    14.0,
+    155.0
+   ],
+   "radius_cm": 9.0,
+   "chains": [
+    "hair_f"
+   ],
+   "_what": "her face"
+  },
+  {
+   "bone": "spine_03",
+   "center_cm": [
+    0.3,
+    8.0,
+    131.0
+   ],
+   "radius_cm": 10.0,
+   "chains": [
+    "hair_f"
+   ],
+   "_what": "her chest"
+  }
+ ],
+ "planes": [
+  {
+   "bone": "spine_03",
+   "normal_cm": [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   "chains": [
+    "hair_b"
+   ],
+   "_what": "her back: a plane under the back hair, its normal out of her back (Unreal -Y); placed as close under the hair as its rest pose allows"
+  }
+ ],
+ "_planes": "spheres pushed each back strand out a different way and tore them apart (38 cm); a plane pushes them all alike",
+ "margin_cm": 1.5,
+ "use_spheres": true,
+ "_solver": "iterations before / after the bodies move: 4 / 1 let the joints come apart by 60 % and more under her running and landing; 48 / 16 keeps it to about 35 % at the moment of a jump (2 to 3 cm on these 6 to 7 cm bones), 5 % when she stands. More (48 / 48) changed nothing, nor did the spring, the limits or clamping the acceleration"
+}

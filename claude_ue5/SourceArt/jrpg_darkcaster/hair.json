@@ -1,0 +1,13 @@
+{
+ "_doc": "The Warlock's hair chains (pipeline/blender_numpy/tripo_hair.py, through tripo_build.py's 7th argument). Blender world cm, front -Y, neck at y -5.6, head joint z 153. Each group's box is where its hair can be (|x| within x_abs; 'not' boxes cut out); back chains side by side, front locks left / right.",
+ "root": "head",
+ "smooth": 5,
+ "threshold": [0.35, 0.65],
+ "fade_cm": 6.0,
+ "groups": [
+  {"kind": "back", "name": "hair_b", "chains": 4, "bones": 3, "root_z": 152.0, "inset_cm": 2.0, "slice_cm": 4.0, "tip_quantile": 0.03,
+   "box": {"x_abs": [0.0, 14.0], "y": [-4.0, 40.0], "z": [123.0, 175.0]}},
+  {"kind": "front", "name": "hair_f", "bones": 2, "root_z": 152.0, "inset_cm": 1.0, "slice_cm": 4.0, "tip_quantile": 0.03,
+   "box": {"x_abs": [6.5, 14.0], "y": [-20.0, -6.0], "z": [136.0, 158.0], "not": [{"x_abs": [0.0, 8.5], "y": [-40.0, -12.0], "z": [140.0, 175.0]}, {"x_abs": [0.0, 13.0], "y": [-40.0, -13.0], "z": [100.0, 140.0]}]}}
+ ]
+}

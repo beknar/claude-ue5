@@ -1,9 +1,10 @@
 {
- "tag": "d5",
+ "tag": "d7",
  "plan": [
   "setup",
   "keys",
   "pad",
+  "hair",
   "walls",
   "cast",
   "dual",
@@ -161,7 +162,7 @@
     "R_again_walks": true
    },
    "A_jump_cm": 103,
-   "right_stick_turned_deg": 52.5,
+   "right_stick_turned_deg": 55.0,
    "RB": {
     "attacks": 1,
     "bolts": 0,
@@ -197,6 +198,58 @@
     "opens_map": true,
     "closes_it": true
    }
+  },
+  {
+   "step": "hair",
+   "ok": true,
+   "chains": {
+    "hair_b1": 3,
+    "hair_b2": 3,
+    "hair_b3": 3,
+    "hair_b4": 3,
+    "hair_fl": 2,
+    "hair_fr": 2
+   },
+   "peak_tip_offset_cm": {
+    "run": 29.8,
+    "stop": 21.0,
+    "settling after the stop": 5.5,
+    "standing after the stop": 3.6,
+    "jump": 27.9,
+    "settling after the jump": 16.4,
+    "standing after the jump": 3.2,
+    "after a teleport": 3.3,
+    "standing after the teleport": 2.3
+   },
+   "standing_jitter_cm": {
+    "standing after the stop": 1.1,
+    "standing after the jump": 1.2,
+    "standing after the teleport": 0.5
+   },
+   "worst_bone_stretch": 1.373,
+   "worst_stretch_where": [
+    "hair_b1_1",
+    "hair_b1_2",
+    "run"
+   ],
+   "stretch_by_phase": {
+    "run": 1.373,
+    "stop": 1.331,
+    "settling after the stop": 1.005,
+    "standing after the stop": 1.001,
+    "jump": 1.369,
+    "settling after the jump": 1.021,
+    "standing after the jump": 1.001,
+    "after a teleport": 1.001,
+    "standing after the teleport": 1.001
+   },
+   "back_tips_spread_change_cm": 14.0,
+   "closest_to_a_limit_cm": 2.4,
+   "closest_where": [
+    "hair_b3",
+    "spine_03 plane",
+    "jump"
+   ]
   },
   {
    "step": "walls",
@@ -291,6 +344,7 @@
    "cells": {
     "cells": 49,
     "cell_sides_with_bars": 49,
+    "doors_open": 0,
     "rays": 2352,
     "leak": 0,
     "leaks": [],
@@ -314,21 +368,21 @@
    "target_is_it": true,
    "montage": true,
    "hand_moved_cm": 67,
-   "charge_particles": 385,
-   "bolt_left_at_s": 0.45,
+   "charge_particles": 418,
+   "bolt_left_at_s": 0.48,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 744,
+   "particles_round_the_bolt": 774,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 638,
+   "flown_cm": 688,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 565,
+   "burst_particles": 585,
    "burst_at": [
-    398,
-    -3539,
-    128
+    2100,
+    -3449,
+    122
    ],
    "sounds": {
     "Player.Charge.Fire": 1,
@@ -341,11 +395,11 @@
    "ok": true,
    "cast_started": true,
    "sword_held_all_through": true,
-   "charge_particles_left_hand": 274,
+   "charge_particles_left_hand": 290,
    "attack_weapon_while_casting": [
     1
    ],
-   "bolt_from_left_hand_cm": 25,
+   "bolt_from_left_hand_cm": 23,
    "cut_started": true,
    "cut_weapon": 0,
    "bolts_by_the_cut": 0
@@ -356,7 +410,7 @@
    "target": null,
    "turned_deg": 0.0,
    "off_her_heading_deg": 0.3,
-   "flown_cm": 1215,
+   "flown_cm": 1216,
    "reach": 1400.0,
    "damage_dealt": 0.0
   },
@@ -364,7 +418,7 @@
    "step": "far",
    "ok": true,
    "monster": "Horned",
-   "distance_cm": 1738,
+   "distance_cm": 1742,
    "reach": 1400.0,
    "target": null
   },
@@ -382,7 +436,7 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 2.9,
+     "seconds": 2.5,
      "ok": true
     },
     {
@@ -416,7 +470,7 @@
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 2.3,
+     "seconds": 2.1,
      "ok": true
     },
     {
@@ -424,13 +478,13 @@
      "hit_points": 54.0,
      "weapon": "Sword",
      "damage": 22.0,
-     "blows": 2,
+     "blows": 3,
      "blows_needed": 3,
      "killed": true,
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 1.5,
+     "seconds": 2.1,
      "ok": true
     }
    ]
@@ -442,20 +496,20 @@
     1,
     0
    ],
-   "monsters": 12,
-   "average_hit_points": 93.5,
+   "monsters": 11,
+   "average_hit_points": 103.0,
    "hers": 100.0,
-   "average_damage": 21.2,
+   "average_damage": 22.6,
    "spell_damage": 22.0
   }
  ],
  "error": null,
  "kills": 4,
- "casts": 20,
+ "casts": 21,
  "bolts": 12,
  "bolts_on_monsters": 6,
  "bolts_elsewhere": 6,
  "deaths": 0,
- "damage_dealt": 260.0,
- "damage_taken": 11.0
+ "damage_dealt": 282.0,
+ "damage_taken": 22.0
 }

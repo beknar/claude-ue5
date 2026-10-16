@@ -19,6 +19,11 @@ generator and measures what happens. Plan = comma separated steps:
             wall or, through a hole, on the stone plate behind it (never beyond the wall); she pushes and jumps into
             holes low on the wall and stays out (without the plates the same rays went beyond the wall); every
             prison cell is closed all round (rays from its middle meet bars, a door or a wall), its hay pile blocks; dropped below the floor she is put back where she stood
+  hair      (level 2) the Warlock's hair: she stands, runs, stops, jumps and is teleported; the tips swing away from where
+            her head carries them (over 5 cm) and settle when she stands (under 4 cm of jitter); the hair bones keep their
+            length standing (8 %), running (45 %) and landing (60 %: the solver's joints give for a moment), the back
+            strands' tips keep their gaps (within 20 cm), the hair keeps out of the spheres round her head, face and
+            chest and above the plane on her back (2 cm at most)
   cast      9 m from a monster she can see: one cast. The charge's particles burn at her casting hand while she winds up;
             the cast clip plays (her hand moves); at the release a bolt leaves her hand, flies at the spell's speed
             (measured between frames), with particles alive around it, and bursts on that monster: it loses the spell's
@@ -47,7 +52,7 @@ LEVELS = {"random_dungeonmagic_level": {"pawn": "BP_RDM_CasterCharacter_C", "mes
                                         "plan": "setup,keys,pad,walls,cast,nothing,far,kill:3,tier"},
           "random_dungeonmagic_level2": {"pawn": "BP_RDM2_DarkCasterCharacter_C", "mesh": "SK_JRPG_DarkCaster", "ch": "DarkCaster", "dual": True, "out": "random_dungeon_magic2",
                                          "bps": ("/Game/JRPG/Game/BP_JRPGDarkCasterCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"), "cast_keys": ("E", "RightMouseButton"),
-                                         "plan": "setup,keys,pad,walls,cast,dual,nothing,far,kill:2,sword:2,tier"}}
+                                         "plan": "setup,keys,pad,hair,walls,cast,dual,nothing,far,kill:2,sword:2,tier"}}
 LV = LEVELS[w.get_path_name().split(".")[-1].replace("UEDPIE_0_", "")]
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "all" else LV["plan"]).split(",") if s.strip()]
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\" + LV["out"]
@@ -257,6 +262,72 @@ def step_pad():
     step_result("pad", ok, her_walk=walk, her_run=runs, **out)
     c.set_run_mode(False); c.revive(True)
 
+def step_hair():
+    """(level 2) the Warlock's hair (820: AnimDynamics on six chains): she stands, runs, stops, jumps, is teleported (the jitter: the last 0.5 s of standing, after 0.8 s of settling, 1.2 s after a landing); per
+    frame the hair tips' offset from where her head carries them (it swings, and settles when she stands), each hair
+    bone's length (no stretching), the gap between neighbouring back strands' tips (they do not tear apart), how far
+    each hair body keeps out of the spheres round her head, upper back, face and chest"""
+    p = G["pawn"]; c = cb(); gen = G["gen"]; m = p.mesh; c.revive(True); c.set_scripted_only(False); c.set_run_mode(False)
+    D = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_darkcaster\hair_dynamics.json"))
+    # (the rest places are the mesh's, written by 820: the skeleton keeps an older reference pose for bones it already had)
+    REF = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_darkcaster\hair_ref.json"))
+    bones = [b for b in REF if b.startswith("hair_")]
+    if not bones: step_result("hair", False, why="no hair bones (run tripo_build with hair.json, then 820)"); return
+    RW = lambda b: unreal.Transform(V(*REF[b]["t"]), unreal.Quat(*REF[b]["q"]).rotator(), V(1, 1, 1))
+    chains = {ch: sorted([b for b in bones if b.startswith(ch + "_") and b[len(ch) + 1:].isdigit()], key=lambda b: int(b.split("_")[-1])) + [ch + "_end"] for ch in D["chains"]}
+    rest_len = {(a, b): (RW(b).translation - RW(a).translation).length() for ch, bs in chains.items() for a, b in zip(bs[1:-1], bs[2:])}
+    # (the limits 820 set up, in their bones' spaces: spheres the hair is kept out of, planes it is kept above)
+    spheres = [(s["bone"], V(*s["local"]), s["radius"], s.get("chains")) for s in REF["_spheres"]]
+    planes = [(q["bone"], V(*q["local_point"]), V(*q["local_normal"]), q.get("chains")) for q in REF["_planes"]]
+    key = lambda n: (lambda k: (k.set_editor_property("key_name", n), k)[1])(unreal.Key())
+    head = lambda: m.get_socket_transform("head", unreal.RelativeTransformSpace.RTS_WORLD)
+    tips = [bs[-1] for bs in chains.values()]
+    def rel(b): return ML.inverse_transform_location(head(), m.get_socket_location(b))
+    s = gen.get_start_room_center(); p.set_actor_location(V(s.x - 600, s.y, 100), False, True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=0))
+    yield from wait(1.5)
+    rest = {b: rel(b) for b in tips}; back = [chains[ch][-1] for ch in D["chains"] if ch.startswith("hair_b")]
+    gap0 = [(m.get_socket_location(a) - m.get_socket_location(b)).length() for a, b in zip(back, back[1:])]
+    R_ = {"dev": {}, "stretch": 1.0, "stretch_at": None, "stretch_by": {}, "spread_cm": 0.0, "clear_cm": 99.0, "clear_at": None}
+    def sample(phase):
+        d = max((rel(b) - rest[b]).length() for b in tips); R_["dev"].setdefault(phase, []).append(d)
+        for (a, b), L in rest_len.items():
+            r_ = (m.get_socket_location(b) - m.get_socket_location(a)).length() / max(L, 0.1)
+            if r_ > R_["stretch"]: R_["stretch"] = r_; R_["stretch_at"] = [a, b, phase]
+            R_["stretch_by"][phase] = max(R_["stretch_by"].get(phase, 1.0), r_)
+        g = [(m.get_socket_location(a) - m.get_socket_location(b)).length() for a, b in zip(back, back[1:])]
+        R_["spread_cm"] = max(R_["spread_cm"], max(abs(x - y) for x, y in zip(g, gap0)))
+        for bone, off, rad, only in spheres:
+            cen = ML.transform_location(m.get_socket_transform(bone, unreal.RelativeTransformSpace.RTS_WORLD), off)
+            for ch, bs in chains.items():
+                if only and not any(ch.startswith(q) for q in only): continue
+                for a, b in zip(bs[1:-1], bs[2:]):
+                    mid = (m.get_socket_location(a) + m.get_socket_location(b)) * 0.5; cl = (mid - cen).length() - rad
+                    if cl < R_["clear_cm"]: R_["clear_cm"] = cl; R_["clear_at"] = [ch, bone + " sphere", phase]
+        for bone, lp, ln, only in planes:
+            btf = m.get_socket_transform(bone, unreal.RelativeTransformSpace.RTS_WORLD); P_ = ML.transform_location(btf, lp); N_ = ML.transform_direction(btf, ln).normal()
+            for ch, bs in chains.items():
+                if only and not any(ch.startswith(q) for q in only): continue
+                for a, b in zip(bs[1:-1], bs[2:]):
+                    cl = ((m.get_socket_location(a) + m.get_socket_location(b)) * 0.5 - P_).dot(N_)
+                    if cl < R_["clear_cm"]: R_["clear_cm"] = cl; R_["clear_at"] = [ch, bone + " plane", phase]
+    def during(sec, phase):
+        t0 = now()
+        while now() - t0 < sec: sample(phase); yield
+    c.set_run_mode(True); c.simulate_key(key("W"), True); yield from during(1.6, "run")
+    c.simulate_key(key("W"), False); yield from during(1.0, "stop"); yield from during(0.8, "settling after the stop"); yield from during(0.5, "standing after the stop")
+    c.simulate_key(key("SpaceBar"), True); yield from during(0.2, "jump"); c.simulate_key(key("SpaceBar"), False); yield from during(1.2, "jump")
+    yield from during(1.2, "settling after the jump"); yield from during(0.5, "standing after the jump")      # (a landing swings the hair longer than a stop)
+    p.set_actor_location(V(s.x, s.y, 100), False, True); yield from during(0.8, "after a teleport"); yield from during(0.5, "standing after the teleport")
+    c.set_run_mode(False)
+    peak = {k: round(max(v), 1) for k, v in R_["dev"].items()}
+    jitter = {k: round(max(v) - min(v), 1) for k, v in R_["dev"].items() if k.startswith("standing")}
+    ok = (peak["run"] > 5.0 and peak["stop"] > 5.0 and peak["jump"] > 5.0 and all(j < 4.0 for j in jitter.values())
+          # (AnimDynamics' joints give under fast motion: about a third of a 6 to 7 cm bone at the moment she lands, none when she stands)
+          and all(v < 1.08 for k, v in R_["stretch_by"].items() if k.startswith("standing")) and R_["stretch_by"]["run"] < 1.45 and R_["stretch"] < 1.6
+          and R_["spread_cm"] < 20.0 and R_["clear_cm"] > -2.0 and peak["standing after the teleport"] < 15.0)
+    step_result("hair", ok, chains={k: len(v) - 2 for k, v in chains.items()}, peak_tip_offset_cm=peak, standing_jitter_cm=jitter, worst_bone_stretch=round(R_["stretch"], 3), worst_stretch_where=R_["stretch_at"], stretch_by_phase={k: round(v, 3) for k, v in R_["stretch_by"].items()},
+                back_tips_spread_change_cm=round(R_["spread_cm"], 1), closest_to_a_limit_cm=round(R_["clear_cm"], 1), closest_where=R_["clear_at"])
+
 def cast_at(m, gap=900.0, label="cast"):
     """one cast at m from `gap` cm; measures the charge, the flight, the burst"""
     c = cb(); p = G["pawn"]; gen = G["gen"]; c.set_scripted_only(True); c.revive(False)
@@ -451,7 +522,7 @@ def step_walls():
     step_result("walls", ok, **r, without_backing={k: r0[k] for k in ("segments", "rays", "face", "hole", "leak")}, walk_in=wi, fall=fl, cells=ce)
     c.revive(True); c.set_scripted_only(False)
 
-STEPS = {"setup": step_setup, "keys": step_keys, "pad": step_pad, "walls": step_walls, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual}
+STEPS = {"setup": step_setup, "keys": step_keys, "pad": step_pad, "hair": step_hair, "walls": step_walls, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual}
 def run():
     for s in PLAN:
         name, _, arg = s.partition(":")

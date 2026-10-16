@@ -4,12 +4,14 @@
 Clips in the mesh FBX would make UE rebind the skin to a clip pose, hence two files. Textures extracted as T_<tag>_<role>.png.
 clip_maker: a Python file with make_clips(arm, scene, clips) -> {name: frames} (frames as sampled here: per frame, each pose
 bone's matrix_basis decomposed, on the GLB's own armature) for clips the GLB lacks (caster_clips.py: an idle and spell casts).
-Blender: -b -P tripo_build.py -- model.glb out_dir name tag [height_cm] [clip_maker.py]"""
+hair.json: hair chains added to the rig and the hair skinned to them (tripo_hair.py; the bones get no keys in the clips).
+Blender: -b -P tripo_build.py -- model.glb out_dir name tag [height_cm] [clip_maker.py | -] [hair.json]"""
 import bpy, sys, os, json
 from mathutils import Matrix
 argv = sys.argv[sys.argv.index("--") + 1:]
 src, out, NAME, TAG = argv[0], argv[1], argv[2], argv[3]; HEIGHT_CM = float(argv[4]) if len(argv) > 4 else 165.0
-MAKER = argv[5] if len(argv) > 5 else None
+MAKER = argv[5] if len(argv) > 5 and argv[5] != "-" else None
+HAIR = argv[6] if len(argv) > 6 else None
 os.makedirs(out, exist_ok=True)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
@@ -73,6 +75,14 @@ for o in meshes:
     mods = [m for m in o.modifiers if m.type == 'ARMATURE'] or [o.modifiers.new("Armature", 'ARMATURE')]
     for m in mods: m.object = arm
 bpy.context.view_layer.update()
+hair_report = None
+if HAIR:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("tripo_hair", os.path.join(os.path.dirname(os.path.abspath(__file__)), "tripo_hair.py"))
+    th = importlib.util.module_from_spec(spec); spec.loader.exec_module(th)
+    hair_report = th.add_hair(arm, meshes[0], json.load(open(HAIR)), tex["Color"])
+    print("hair", json.dumps({k: v for k, v in hair_report.items() if k != "chains"}), "| chains", sorted(hair_report["chains"]))
+    bpy.context.view_layer.update()
 bpy.ops.object.select_all(action='DESELECT')
 for o in [arm] + meshes: o.select_set(True)
 bpy.ops.export_scene.fbx(filepath=os.path.join(out, NAME + ".fbx"), use_selection=True, object_types={'ARMATURE', 'MESH'}, add_leaf_bones=False,
@@ -86,6 +96,7 @@ for name, frames in clips.items():
         except Exception: pass
     for i, fr in enumerate(frames):
         for pb in arm.pose.bones:
+            if pb.name not in fr: continue          # (the hair chains: no keys, Unreal swings them)
             loc, rot, scl = fr[pb.name]
             pb.location = loc * S; pb.rotation_quaternion = rot; pb.scale = scl
             pb.keyframe_insert("location", frame=i, group=pb.name); pb.keyframe_insert("rotation_quaternion", frame=i, group=pb.name)
@@ -101,5 +112,5 @@ bpy.ops.export_scene.fbx(filepath=os.path.join(out, NAME + "_Clips.fbx"), use_se
                          bake_anim=True, bake_anim_use_all_actions=True, bake_anim_use_nla_strips=False, bake_anim_force_startend_keying=True,
                          bake_anim_simplify_factor=0.0, apply_unit_scale=True, apply_scale_options='FBX_SCALE_NONE',
                          use_armature_deform_only=False, mesh_smooth_type='FACE', use_tspace=True, path_mode='STRIP')
-json.dump({"clips": {k: len(v) for k, v in clips.items()}, "textures": tex, "height_cm": HEIGHT_CM}, open(os.path.join(out, "build.json"), "w"), indent=1)
+json.dump({"clips": {k: len(v) for k, v in clips.items()}, "textures": tex, "height_cm": HEIGHT_CM, "hair": hair_report}, open(os.path.join(out, "build.json"), "w"), indent=1)
 print("EXPORT DONE")
