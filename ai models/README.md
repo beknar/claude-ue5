@@ -25,6 +25,10 @@ the full legal text is in [LICENSE](LICENSE).
 
 Copyright (c) 2026 beknar
 
+All of the models in this directory were generated on a paid Tripo plan, under which the generated
+models belong to the user who made them, with full rights to use, modify, distribute and license them
+(commercial use included). That is what allows them to be published here under CC BY 4.0.
+
 Suggested credit:
 
 > "Mage" by beknar (https://github.com/beknar/claude-ue5), licensed under CC BY 4.0.
