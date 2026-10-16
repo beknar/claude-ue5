@@ -1,8 +1,9 @@
 {
- "tag": "m5",
+ "tag": "m6",
  "plan": [
   "setup",
   "keys",
+  "pad",
   "cast",
   "nothing",
   "far",
@@ -24,7 +25,25 @@
    "spell": true,
    "from_start_room_cm": 0,
    "title": "GIRL-CASTER",
-   "keys": "WASD  walk     shift  run     left mouse / E  fire spell"
+   "caster_controls": true,
+   "keys": [
+    "W A S D|move",
+    "Mouse|look / turn the camera",
+    "Space|jump",
+    "R|switch walk / run",
+    "Shift (held)|run",
+    "Left mouse / E|fire spell",
+    "F|open door or container",
+    "M|map"
+   ],
+   "pad": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "LB / RB|fire spell",
+    "X|open door or container"
+   ]
   },
   {
    "step": "keys",
@@ -95,6 +114,76 @@
    }
   },
   {
+   "step": "pad",
+   "ok": true,
+   "her_walk": 119.71,
+   "her_run": 381.69,
+   "device": {
+    "after_W": "keyboard",
+    "after_pad_button": "gamepad",
+    "after_W_again": "keyboard"
+   },
+   "stick_walk": {
+    "cm_s": 119.7,
+    "heading_deg": 0,
+    "running": false
+   },
+   "stick_run": {
+    "cm_s": 381.7,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_run": {
+    "cm_s": 381.7,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_walk": {
+    "cm_s": 119.7,
+    "heading_deg": 0,
+    "running": false
+   },
+   "switch": {
+    "LT_runs": true,
+    "LT_again_walks": true,
+    "R_runs": true,
+    "R_again_walks": true
+   },
+   "A_jump_cm": 103,
+   "right_stick_turned_deg": 60.0,
+   "RB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     0
+    ]
+   },
+   "LB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     0
+    ]
+   },
+   "RT": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "Y": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "X": {
+    "prompt": "open chest",
+    "container": "chest",
+    "open_alpha": 1.0,
+    "attacks": 0,
+    "device": "gamepad"
+   }
+  },
+  {
    "step": "cast",
    "ok": true,
    "monster": "Ripper_dog",
@@ -103,21 +192,21 @@
    "started": true,
    "target_is_it": true,
    "montage": true,
-   "hand_moved_cm": 74,
-   "charge_particles": 418,
-   "bolt_left_at_s": 0.45,
+   "hand_moved_cm": 52,
+   "charge_particles": 369,
+   "bolt_left_at_s": 0.41,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 783,
+   "particles_round_the_bolt": 723,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 605,
+   "flown_cm": 612,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 630,
+   "burst_particles": 594,
    "burst_at": [
-    -3204,
-    3907,
+    -3670,
+    841,
     113
    ],
    "sounds": {
@@ -132,15 +221,15 @@
    "target": null,
    "turned_deg": 0.0,
    "off_her_heading_deg": 0.3,
-   "flown_cm": 1258,
+   "flown_cm": 1228,
    "reach": 1400.0,
    "damage_dealt": 0.0
   },
   {
    "step": "far",
    "ok": true,
-   "monster": "Horned",
-   "distance_cm": 1863,
+   "monster": "Ripper_dog",
+   "distance_cm": 1748,
    "reach": 1400.0,
    "target": null
   },
@@ -149,24 +238,24 @@
    "ok": true,
    "fights": [
     {
-     "monster": "Horned",
-     "hit_points": 59.0,
-     "casts": 3,
-     "bolts_on_it": 3,
-     "bolts_needed": 3,
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
      "killed": true,
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 2.5,
+     "seconds": 1.7,
      "ok": true
     },
     {
-     "monster": "Mutant",
-     "hit_points": 49.0,
+     "monster": "Horned",
+     "hit_points": 59.0,
      "casts": 4,
      "bolts_on_it": 2,
-     "bolts_needed": 2,
+     "bolts_needed": 3,
      "killed": true,
      "kills_counted": 2,
      "each_bolt_took_the_damage": true,
@@ -198,18 +287,18 @@
     0
    ],
    "monsters": 12,
-   "average_hit_points": 96.8,
+   "average_hit_points": 108.5,
    "hers": 100.0,
-   "average_damage": 19.8,
+   "average_damage": 21.2,
    "spell_damage": 20.0
   }
  ],
  "error": null,
  "kills": 4,
- "casts": 15,
- "bolts": 15,
- "bolts_on_monsters": 11,
- "bolts_elsewhere": 4,
+ "casts": 16,
+ "bolts": 16,
+ "bolts_on_monsters": 10,
+ "bolts_elsewhere": 6,
  "deaths": 0,
  "damage_dealt": 275.0,
  "damage_taken": 0.0

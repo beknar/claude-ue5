@@ -1,5 +1,5 @@
 {
- "tag": "c6",
+ "tag": "c7",
  "plan": [
   "setup",
   "weapons",
@@ -44,8 +44,8 @@
      "attack_started": true,
      "second_refused": true,
      "montage": true,
-     "hand_moved_cm": 55,
-     "attack_seconds": 0.84,
+     "hand_moved_cm": 56,
+     "attack_seconds": 0.85,
      "grip": {
       "hand_at_mesh_z": 69.0,
       "mesh_z": [
@@ -59,7 +59,7 @@
       "axis_from_hand_cm": 6.9,
       "on_handle": true
      },
-     "shield_top_over_point_cm": 53.7,
+     "shield_top_over_point_cm": 55.4,
      "ok": true
     },
     {
@@ -74,7 +74,7 @@
      "second_refused": true,
      "montage": true,
      "hand_moved_cm": 85,
-     "attack_seconds": 0.68,
+     "attack_seconds": 0.67,
      "grip": {
       "hand_at_mesh_z": 95.0,
       "mesh_z": [
@@ -174,7 +174,7 @@
      "each_blow_took_the_damage": true,
      "it_fought_back": true,
      "she_lost": 0,
-     "seconds": 1.7,
+     "seconds": 1.5,
      "ok": true
     },
     {
@@ -189,7 +189,7 @@
      "each_blow_took_the_damage": true,
      "it_fought_back": true,
      "she_lost": 0,
-     "seconds": 1.5,
+     "seconds": 1.6,
      "ok": true
     },
     {
@@ -203,8 +203,8 @@
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "it_fought_back": true,
-     "she_lost": 25,
-     "seconds": 2.5,
+     "she_lost": 12,
+     "seconds": 2.4,
      "ok": true
     }
    ],
@@ -218,7 +218,7 @@
    "she_lost": 13.0,
    "its_attacks": 1,
    "its_hits": 2,
-   "seconds": 2.6,
+   "seconds": 3.8,
    "aggro": true
   },
   {
@@ -230,9 +230,9 @@
    ],
    "generated": true,
    "monsters": 13,
-   "average_hit_points": 102.4,
+   "average_hit_points": 100.8,
    "hers": 100.0,
-   "average_damage": 25.3,
+   "average_damage": 25.0,
    "her_average_blow": 25.0,
    "rooms": 49
   },
@@ -250,7 +250,7 @@
    "ok": true,
    "after_the_blow": 60.0,
    "before_the_delay_is_over": 60.0,
-   "four_seconds_on": 72.3,
+   "four_seconds_on": 72.1,
    "per_second": 4.0
   },
   {
@@ -272,8 +272,8 @@
    "drops": 31,
    "in_the_air": 31,
    "spray_sprites": 3,
-   "burst_cm_from_the_fight": 39,
-   "decals_after_2_6_s": 25,
+   "burst_cm_from_the_fight": 45,
+   "decals_after_2_6_s": 35,
    "decals_on_the_floor": 140,
    "bursts_when_she_was_hit": 1,
    "that_burst_cm_from_her": 60,
@@ -300,13 +300,13 @@
    "bleed": 0.75,
    "hit_points_lost": 0.75,
    "wound_cm_from_its_middle": [
-    35,
-    57
+    43,
+    38
    ],
    "after_it_moved_cm": 0,
    "then": [
-    51,
-    49
+    78,
+    56
    ],
    "unhurt_monsters_checked": 34,
    "none_of_them_has_a_wound_or_overlay": true,
@@ -317,7 +317,7 @@
   {
    "step": "sounds",
    "ok": true,
-   "running_steps_in_2_6_s": 6,
+   "running_steps_in_2_6_s": 7,
    "walking_steps_in_2_6_s": 6,
    "breath_sets": [],
    "her_sets": [
@@ -334,9 +334,9 @@
    ],
    "hurt_voice": 1,
    "door_open": 1,
-   "door_close": 5,
+   "door_close": 4,
    "door": "door",
-   "fire_voices_by_a_torch": 2,
+   "fire_voices_by_a_torch": 4,
    "nearest_voice_cm_from_that_torch": 0,
    "torch_cm_from_the_middle": 16419,
    "still_playing_from_the_middle": false,
@@ -390,7 +390,7 @@
     "Player.Whoosh"
    ],
    "roar_when_it_noticed_her": 1,
-   "monster_footsteps": 4,
+   "monster_footsteps": 5,
    "monster": "Ripper_dog",
    "hurt_voices": 1,
    "death_voices": 1,
@@ -409,8 +409,8 @@
    "all_counts": {
     "Blood.Splat": 21,
     "Env.BodyFall": 6,
-    "Env.DoorClose": 99,
-    "Env.DoorOpen": 118,
+    "Env.DoorClose": 92,
+    "Env.DoorOpen": 108,
     "Env.Generate": 5,
     "Env.GenerateHit": 5,
     "Monster.Daemon.Attack": 2,
@@ -418,18 +418,17 @@
     "Monster.Daemon.Hurt": 1,
     "Monster.Daemon.Roar": 1,
     "Monster.Daemon.Step": 13,
-    "Monster.Dog.Attack": 4,
+    "Monster.Dog.Attack": 3,
     "Monster.Dog.Death": 2,
     "Monster.Dog.Hurt": 2,
-    "Monster.Dog.Idle": 1,
     "Monster.Dog.Roar": 2,
-    "Monster.Dog.Step": 14,
+    "Monster.Dog.Step": 15,
     "Monster.Horned.Attack": 5,
     "Monster.Horned.Death": 1,
     "Monster.Horned.Hurt": 2,
     "Monster.Horned.Idle": 1,
     "Monster.Horned.Roar": 2,
-    "Monster.Horned.Step": 6,
+    "Monster.Horned.Step": 8,
     "Monster.Mutant.Step": 8,
     "Monster.Spider.Attack": 2,
     "Monster.Spider.Death": 1,
@@ -456,33 +455,33 @@
    "ok": true,
    "wandering": {
     "battle": false,
-    "track": "Music_Explore_01",
+    "track": "Music_Explore_03",
     "atmosphere": "Atmos_Explore_01",
-    "seconds_into_the_track": 34.4
+    "seconds_into_the_track": 34.1
    },
    "first_fight": {
     "monster": "Daemon",
     "seconds_to_the_battle_music": 0.1,
     "battle": true,
-    "track": "Music_Combat_02",
+    "track": "Music_Combat_01",
     "atmosphere": "Atmos_Combat_01",
-    "seconds_into_the_track": 0.71,
+    "seconds_into_the_track": 0.67,
     "still_battle_at_the_kill": true,
     "seconds_until_wandering_again": 4.5
    },
    "wandering_again": {
     "battle": false,
-    "track": "Music_Explore_01",
+    "track": "Music_Explore_03",
     "atmosphere": "Atmos_Explore_01",
-    "seconds_into_the_track": 35.5
+    "seconds_into_the_track": 35.3
    },
    "second_fight": {
     "monster": "Daemon",
-    "seconds_to_the_battle_music": 0.1,
+    "seconds_to_the_battle_music": 0.11,
     "battle": true,
-    "track": "Music_Combat_03",
+    "track": "Music_Combat_02",
     "atmosphere": "Atmos_Combat_01",
-    "seconds_into_the_track": 0.7,
+    "seconds_into_the_track": 0.71,
     "still_battle_at_the_kill": true,
     "seconds_until_wandering_again": 4.5
    },
@@ -562,11 +561,11 @@
       0
      ],
      "rough": {
-      "Wall_Rough_5": 110,
-      "Wall_Rough_3": 111,
-      "Wall_Rough_2": 111,
-      "Wall_Rough_4": 113,
-      "Wall_Rough": 121
+      "Wall_Rough_5": 109,
+      "Wall_Rough_3": 121,
+      "Wall_Rough_2": 120,
+      "Wall_Rough": 124,
+      "Wall_Rough_4": 127
      },
      "repeats": 0,
      "ok": true
@@ -577,11 +576,11 @@
       0
      ],
      "rough": {
-      "Wall_Rough": 153,
-      "Wall_Rough_5": 150,
-      "Wall_Rough_4": 131,
-      "Wall_Rough_3": 142,
-      "Wall_Rough_2": 157
+      "Wall_Rough": 145,
+      "Wall_Rough_4": 121,
+      "Wall_Rough_3": 130,
+      "Wall_Rough_2": 133,
+      "Wall_Rough_5": 152
      },
      "repeats": 0,
      "ok": true
@@ -592,11 +591,11 @@
       -1
      ],
      "rough": {
-      "Wall_Rough_4": 123,
-      "Wall_Rough_5": 133,
-      "Wall_Rough_3": 120,
-      "Wall_Rough": 131,
-      "Wall_Rough_2": 135
+      "Wall_Rough_5": 104,
+      "Wall_Rough_3": 90,
+      "Wall_Rough": 104,
+      "Wall_Rough_2": 92,
+      "Wall_Rough_4": 102
      },
      "repeats": 0,
      "ok": true
@@ -607,11 +606,11 @@
       -1
      ],
      "rough": {
-      "Wall_Rough_3": 106,
-      "Wall_Rough_2": 125,
-      "Wall_Rough": 115,
-      "Wall_Rough_5": 120,
-      "Wall_Rough_4": 119
+      "Wall_Rough_5": 126,
+      "Wall_Rough": 143,
+      "Wall_Rough_2": 120,
+      "Wall_Rough_4": 144,
+      "Wall_Rough_3": 133
      },
      "repeats": 0,
      "ok": true
@@ -622,11 +621,11 @@
       1
      ],
      "rough": {
-      "Wall_Rough_5": 152,
-      "Wall_Rough": 139,
-      "Wall_Rough_3": 137,
-      "Wall_Rough_4": 142,
-      "Wall_Rough_2": 131
+      "Wall_Rough_4": 147,
+      "Wall_Rough_5": 151,
+      "Wall_Rough_3": 138,
+      "Wall_Rough": 141,
+      "Wall_Rough_2": 134
      },
      "repeats": 0,
      "ok": true

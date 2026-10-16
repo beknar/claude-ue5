@@ -17,6 +17,9 @@
 // turned to (one in front of her within the spell's reach that she can see); it bursts on the first monster or wall it
 // meets. E casts it too (the left hand stays on WASD). Sounds "Player.Charge.<spell>", "Player.Cast.<spell>",
 // "Player.Hit.<spell>" (the burst).
+// The magic levels have a layout of their own (generator bCasterControls): on the gamepad RB attacks with the weapon in
+// her hand, LB casts the spell (the one cast alongside it, or the drawn weapon when that is a spell), LT switches
+// between walking and running (R on the keyboard), X opens (the generator), D-pad left / up / right draw weapon 1 / 2 / 3.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -31,6 +34,7 @@ class USkeletalMeshComponent;
 class UFXSystemComponent;
 class UFXSystemAsset;
 class UPointLightComponent;
+class APlayerController;
 
 UCLASS(ClassGroup = (RandomDungeon))
 class CLAUDE_UE5_API URDCombatComponent : public UActorComponent
@@ -67,6 +71,14 @@ public:
 	/** tests: a key pressed (or let go) as if on the keyboard, through her player controller: the input mapping, her
 	 *  movement and the combat keys read it as a real press. It stays down until it is let go. */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool SimulateKey(FKey Key, bool bDown);
+	/** tests: a stick or trigger axis (Gamepad_LeftX ...) held at Value as if on the gamepad, until it is set back to 0 */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool SimulateAxis(FKey Key, float Value);
+	/** the magic levels (generator bCasterControls): walking or running, switched with R or the left trigger. Her
+	 *  character's MoveScale reads it from its RunMode variable (pipeline/unreal/819), which this sets. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetRunMode(bool bRun);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsRunMode() const { return bRunMode; }
+	/** the magic levels: the last input came from a gamepad (the HUD shows its controls) rather than the keyboard and mouse */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsUsingGamepad() const { return bUsingGamepad; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetHealth() const { return Health; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetMaxHealth() const { return MaxHealth; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsDead() const { return bDead; }
@@ -116,6 +128,10 @@ private:
 	float AttackTime = -1.f, AttackLen = 0.f, AttackHit = 0.f, SavedWalkSpeed = 0.f;
 	bool bHitDone = false, bDead = false, bScriptedOnly = false, bSlowed = false;
 	float StaggerUntil = -100.f;
+	// ---- the magic levels' controls (generator bCasterControls)
+	bool bRunMode = false, bUsingGamepad = false, bRunToggleDown = false;
+	void TickDevice(const APlayerController* PC);
+	void TickCasterInput(const APlayerController* PC);
 	// sound
 	float StepDist = 0.f;
 	bool bWhooshDone = false, bFallDone = false;

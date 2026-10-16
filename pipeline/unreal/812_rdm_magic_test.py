@@ -10,6 +10,11 @@ generator and measures what happens. Plan = comma separated steps:
             the cast keys (level 1: E and the left mouse button; level 2: E and the right mouse button) each cast one
             bolt, and in level 2 the left mouse button swings the sword (no bolt); her character has no handler for the
             other actions the input context puts on those keys
+  pad       the magic levels' controls (bCasterControls), pressed through her player controller: a key makes the keyboard
+            the device in use and a gamepad button the gamepad (the HUD's controls panel follows it); the left stick held
+            forward walks her at her walk speed, LT switches to running (her run speed) and back, R does the same with W
+            held; the right stick turns the camera; A jumps; RB attacks with the weapon in her hand (level 1: the spell), LB casts the spell; RT and Y (the
+            combat level's buttons) do nothing; X by a closed container opens it
   cast      9 m from a monster she can see: one cast. The charge's particles burn at her casting hand while she winds up;
             the cast clip plays (her hand moves); at the release a bolt leaves her hand, flies at the spell's speed
             (measured between frames), with particles alive around it, and bursts on that monster: it loses the spell's
@@ -35,10 +40,10 @@ w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()
 assert w is not None, "PIE is not running"
 LEVELS = {"random_dungeonmagic_level": {"pawn": "BP_RDM_CasterCharacter_C", "mesh": "SK_JRPG_Caster", "ch": "Caster", "dual": False, "out": "random_dungeon_magic",
                                         "bps": ("/Game/JRPG/Game/BP_JRPGCasterCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), "cast_keys": ("E", "LeftMouseButton"),
-                                        "plan": "setup,keys,cast,nothing,far,kill:3,tier"},
+                                        "plan": "setup,keys,pad,cast,nothing,far,kill:3,tier"},
           "random_dungeonmagic_level2": {"pawn": "BP_RDM2_DarkCasterCharacter_C", "mesh": "SK_JRPG_DarkCaster", "ch": "DarkCaster", "dual": True, "out": "random_dungeon_magic2",
                                          "bps": ("/Game/JRPG/Game/BP_JRPGDarkCasterCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"), "cast_keys": ("E", "RightMouseButton"),
-                                         "plan": "setup,keys,cast,dual,nothing,far,kill:2,sword:2,tier"}}
+                                         "plan": "setup,keys,pad,cast,dual,nothing,far,kill:2,sword:2,tier"}}
 LV = LEVELS[w.get_path_name().split(".")[-1].replace("UEDPIE_0_", "")]
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "all" else LV["plan"]).split(",") if s.strip()]
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\" + LV["out"]
@@ -92,9 +97,11 @@ def step_setup():
         held = wm is not None and wm.static_mesh is not None and wm.is_visible() and str(wm.get_attach_socket_name()) == "hand_r"
         arms = len(wd) == 2 and not wd[0].spell and wd[1].spell and wd[1].alongside and str(wd[1].spell_bone) == "hand_l" and c.get_weapon_index() == 0 and c.get_alongside_spell() == 1 and held
     else: arms = len(wd) == 1 and wd[0].spell and c.is_spell() and (wm is None or wm.static_mesh is None or not wm.is_visible())
-    ok = (c is not None and p.get_class().get_name() == LV["pawn"] and sk.get_name() == LV["mesh"] and abs(c.get_health() - 100.0) < 0.5 and math.hypot(l.x - s.x, l.y - s.y) < 300 and arms)
+    ok = (c is not None and p.get_class().get_name() == LV["pawn"] and sk.get_name() == LV["mesh"] and abs(c.get_health() - 100.0) < 0.5 and math.hypot(l.x - s.x, l.y - s.y) < 300 and arms
+          and G["gen"].get_editor_property("caster_controls") and len(G["gen"].get_editor_property("controls_pad")) > 0)
     step_result("setup", ok, pawn=p.get_class().get_name(), mesh=sk.get_name(), in_her_right_hand=wm.static_mesh.get_name() if wm is not None and wm.static_mesh is not None and wm.is_visible() else None, hit_points=c.get_health() if c else None, weapons=[str(d.name) for d in wd], spell=bool(c.is_spell()) if c else None,
-                from_start_room_cm=round(math.hypot(l.x - s.x, l.y - s.y)), title=G["gen"].get_editor_property("player_title"), keys=G["gen"].get_editor_property("controls_hint"))
+                from_start_room_cm=round(math.hypot(l.x - s.x, l.y - s.y)), title=G["gen"].get_editor_property("player_title"), caster_controls=G["gen"].get_editor_property("caster_controls"),
+                keys=list(G["gen"].get_editor_property("controls_keys")), pad=list(G["gen"].get_editor_property("controls_pad")))
 
 def step_keys():
     import editor_toolset.toolsets.blueprint as BT
@@ -146,6 +153,101 @@ def step_keys():
           and all(v["attacks"] == 1 and v["bolts"] == (0 if (LV["dual"] and k == "LeftMouseButton") else 1) for k, v in casts.items()))
     step_result("keys", ok, context_active=active, move_keys=mk, run_keys=sk, actions_on_E_and_left_mouse=on_spell_keys, her_handlers=sorted(handled), clash=clash,
                 walk_cm_s=speeds["walk"], her_walk=walk, run_cm_s=speeds["run"], her_run=runs, speeds=speeds, headings_deg=heading, wanted_headings=want, attacks_by_key=casts)
+
+def step_pad():
+    """the magic levels' controls (generator bCasterControls), pressed through her player controller as on the gamepad"""
+    p = G["pawn"]; c = cb(); gen = G["gen"]; c.revive(True); c.set_scripted_only(False); c.set_run_mode(False); yield from wait(0.5)
+    s = gen.get_start_room_center(); key = lambda n: (lambda k: (k.set_editor_property("key_name", n), k)[1])(unreal.Key())
+    G["pc"].set_ignore_look_input(True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=0))
+    walk, runs = [float(x) for x in open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + LV["ch"].lower() + r"\speeds.txt").read().split()]
+    out = {}
+    def tap(k, hold=0.15):
+        c.simulate_key(key(k), True); yield from wait(hold); c.simulate_key(key(k), False); yield from wait(0.1)
+    def travel(label, axis=None, keys=()):
+        """her speed (cm/s) and heading over a second: the left stick held forward (axis) or keys held"""
+        p.set_actor_location(V(s.x, s.y, 100.0), False, True); yield from wait(0.6)
+        for k in keys: c.simulate_key(key(k), True)
+        t0 = now(); a = None
+        while now() - t0 < 1.8:
+            if axis: c.simulate_axis(key(axis), 1.0)
+            if a is None and now() - t0 >= 0.8: a = p.get_actor_location(); ta = now()
+            yield
+        b = p.get_actor_location(); tb = now()
+        if axis: c.simulate_axis(key(axis), 0.0)
+        for k in reversed(keys): c.simulate_key(key(k), False)
+        out[label] = {"cm_s": round(math.hypot(b.x - a.x, b.y - a.y) / max(tb - ta, 1e-3), 1), "heading_deg": round(math.degrees(math.atan2(b.y - a.y, b.x - a.x))), "running": bool(c.is_run_mode())}
+        yield from wait(0.6)
+    # the device in use: a key makes it the keyboard, a gamepad button the gamepad
+    yield from tap("W"); kb = not c.is_using_gamepad()
+    yield from tap("Gamepad_DPad_Down"); pad = c.is_using_gamepad()
+    yield from tap("W"); kb2 = not c.is_using_gamepad()
+    out["device"] = {"after_W": "keyboard" if kb else "gamepad", "after_pad_button": "gamepad" if pad else "keyboard", "after_W_again": "keyboard" if kb2 else "gamepad"}
+    # walking and running: the left stick forward walks her; LT switches to running and back; R does the same on the keyboard
+    yield from travel("stick_walk", axis="Gamepad_LeftY")
+    yield from tap("Gamepad_LeftTrigger"); lt_on = c.is_run_mode()
+    yield from travel("stick_run", axis="Gamepad_LeftY")
+    yield from tap("Gamepad_LeftTrigger"); lt_off = not c.is_run_mode()
+    yield from tap("R"); r_on = c.is_run_mode()
+    yield from travel("W_run", keys=("W",))
+    yield from tap("R"); r_off = not c.is_run_mode()
+    yield from travel("W_walk", keys=("W",))
+    out["switch"] = {"LT_runs": lt_on, "LT_again_walks": lt_off, "R_runs": r_on, "R_again_walks": r_off}
+    # A jumps
+    p.set_actor_location(V(s.x, s.y, 100.0), False, True); yield from wait(0.8)
+    z0 = p.get_actor_location().z; top = z0; c.simulate_key(key("Gamepad_FaceButton_Bottom"), True); t0 = now()
+    while now() - t0 < 0.9: top = max(top, p.get_actor_location().z); yield
+    c.simulate_key(key("Gamepad_FaceButton_Bottom"), False); out["A_jump_cm"] = round(top - z0); yield from wait(0.8)
+    # the right stick turns the camera
+    G["pc"].set_ignore_look_input(False); yaw0 = G["pc"].get_control_rotation().yaw; t0 = now()
+    while now() - t0 < 0.5: c.simulate_axis(key("Gamepad_RightX"), 1.0); yield
+    c.simulate_axis(key("Gamepad_RightX"), 0.0); yield from wait(0.2)
+    out["right_stick_turned_deg"] = round((G["pc"].get_control_rotation().yaw - yaw0 + 180) % 360 - 180, 1)
+    # RB: the weapon in her hand; LB: the spell (cast alongside, or the drawn one); RT and Y (the combat level's) do nothing here
+    def press(label, k, axis=False):
+        yield from wait(1.0); n0 = (c.attacks_made, c.bolts_cast); idx = set()
+        if axis: c.simulate_axis(key(k), 1.0)
+        else: c.simulate_key(key(k), True)
+        t0 = now()
+        while now() - t0 < 0.2:
+            if c.is_attacking(): idx.add(c.get_attack_index())
+            yield
+        if axis: c.simulate_axis(key(k), 0.0)
+        else: c.simulate_key(key(k), False)
+        while c.is_attacking() and now() - t0 < 3.0: idx.add(c.get_attack_index()); yield
+        yield from wait(0.3)
+        out[label] = {"attacks": c.attacks_made - n0[0], "bolts": c.bolts_cast - n0[1], "weapons": sorted(idx)}
+    yield from press("RB", "Gamepad_RightShoulder"); yield from press("LB", "Gamepad_LeftShoulder")
+    yield from press("RT", "Gamepad_RightTriggerAxis", axis=True); yield from press("Y", "Gamepad_FaceButton_Top")
+    # X opens the container she stands by (the generator's InteractNearest, as F)
+    sec = gen.get_section(unreal.IntPoint(0, 0)); found = None
+    for k in range(sec.get_num_containers()):
+        q = sec.get_container_location(k)
+        if sec.get_container_open_alpha(k) > 0.01 or sec.get_container_kind(k).endswith("_r"): continue
+        for r in (120.0, 150.0, 180.0):
+            for j in range(16):
+                a = j * math.pi / 8; st = V(q.x + math.cos(a) * r, q.y + math.sin(a) * r, 100.0)
+                if sec.room_at(st) < 0 or not gen.describe_nearest(st, 260.0).startswith("open ") or "door" in gen.describe_nearest(st, 260.0): continue
+                pth = sec.find_path_world(st, q)
+                if len(pth) and math.hypot(pth[0].x - st.x, pth[0].y - st.y) < 135: found = (k, st); break
+            if found: break
+        if found: break
+    if found:
+        k, st = found; p.set_actor_location(st, False, True); yield from wait(0.6)
+        what = gen.describe_nearest(p.get_actor_location(), 260.0); n0 = c.attacks_made
+        yield from tap("Gamepad_FaceButton_Left"); yield from wait(1.4)
+        out["X"] = {"prompt": what, "container": sec.get_container_kind(k), "open_alpha": round(sec.get_container_open_alpha(k), 2), "attacks": c.attacks_made - n0, "device": "gamepad" if c.is_using_gamepad() else "keyboard"}
+    else: out["X"] = {"why": "no closed container with a place to stand"}
+    G["pc"].set_ignore_look_input(False)
+    spell_w = spell_index()
+    drawn = 0
+    rb_ok = out["RB"]["attacks"] == 1 and out["RB"]["weapons"] == [drawn if LV["dual"] else spell_w] and out["RB"]["bolts"] == (0 if LV["dual"] else 1)
+    lb_ok = out["LB"]["attacks"] == 1 and out["LB"]["weapons"] == [spell_w] and out["LB"]["bolts"] == 1
+    near = lambda v, want: abs(v - want) < 0.15 * want
+    ok = (kb and pad and kb2 and all(out["switch"].values()) and near(out["stick_walk"]["cm_s"], walk) and near(out["stick_run"]["cm_s"], runs)
+          and near(out["W_run"]["cm_s"], runs) and near(out["W_walk"]["cm_s"], walk) and abs(out["stick_walk"]["heading_deg"]) < 15 and out["A_jump_cm"] > 20 and abs(out["right_stick_turned_deg"]) > 10
+          and rb_ok and lb_ok and out["RT"]["attacks"] == 0 and out["Y"]["attacks"] == 0 and found is not None and out["X"]["open_alpha"] > 0.5 and out["X"]["attacks"] == 0)
+    step_result("pad", ok, her_walk=walk, her_run=runs, **out)
+    c.set_run_mode(False); c.revive(True)
 
 def cast_at(m, gap=900.0, label="cast"):
     """one cast at m from `gap` cm; measures the charge, the flight, the burst"""
@@ -325,7 +427,7 @@ def step_tier():
     ok = len(ms) >= 5 and 0.75 <= hp / c.get_max_health() <= 1.25 and 0.75 <= dmg / avg <= 1.25
     step_result("tier", ok, section=[1, 0], monsters=len(ms), average_hit_points=round(hp, 1), hers=c.get_max_health(), average_damage=round(dmg, 1), spell_damage=round(avg, 1))
 
-STEPS = {"setup": step_setup, "keys": step_keys, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual}
+STEPS = {"setup": step_setup, "keys": step_keys, "pad": step_pad, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual}
 def run():
     for s in PLAN:
         name, _, arg = s.partition(":")

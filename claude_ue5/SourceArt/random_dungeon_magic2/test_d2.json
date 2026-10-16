@@ -1,8 +1,9 @@
 {
- "tag": "d1",
+ "tag": "d2",
  "plan": [
   "setup",
   "keys",
+  "pad",
   "cast",
   "dual",
   "nothing",
@@ -27,7 +28,27 @@
    "spell": false,
    "from_start_room_cm": 0,
    "title": "GIRL-DARKCASTER",
-   "keys": "WASD walk   shift run   left mouse sword   right mouse / E fire"
+   "caster_controls": true,
+   "keys": [
+    "W A S D|move",
+    "Mouse|look / turn the camera",
+    "Space|jump",
+    "R|switch walk / run",
+    "Shift (held)|run",
+    "Left mouse|sword",
+    "Right mouse / E|fire spell",
+    "F|open door or container",
+    "M|map"
+   ],
+   "pad": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "RB|sword",
+    "LB|fire spell",
+    "X|open door or container"
+   ]
   },
   {
    "step": "keys",
@@ -102,6 +123,76 @@
    }
   },
   {
+   "step": "pad",
+   "ok": true,
+   "her_walk": 117.54,
+   "her_run": 379.51,
+   "device": {
+    "after_W": "keyboard",
+    "after_pad_button": "gamepad",
+    "after_W_again": "keyboard"
+   },
+   "stick_walk": {
+    "cm_s": 117.5,
+    "heading_deg": 0,
+    "running": false
+   },
+   "stick_run": {
+    "cm_s": 379.5,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_run": {
+    "cm_s": 379.5,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_walk": {
+    "cm_s": 117.5,
+    "heading_deg": 0,
+    "running": false
+   },
+   "switch": {
+    "LT_runs": true,
+    "LT_again_walks": true,
+    "R_runs": true,
+    "R_again_walks": true
+   },
+   "A_jump_cm": 103,
+   "right_stick_turned_deg": 50.0,
+   "RB": {
+    "attacks": 1,
+    "bolts": 0,
+    "weapons": [
+     0
+    ]
+   },
+   "LB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     1
+    ]
+   },
+   "RT": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "Y": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "X": {
+    "prompt": "open chest",
+    "container": "chest",
+    "open_alpha": 1.0,
+    "attacks": 0,
+    "device": "gamepad"
+   }
+  },
+  {
    "step": "cast",
    "ok": true,
    "monster": "Ripper_dog",
@@ -110,22 +201,22 @@
    "started": true,
    "target_is_it": true,
    "montage": true,
-   "hand_moved_cm": 51,
-   "charge_particles": 305,
-   "bolt_left_at_s": 0.34,
+   "hand_moved_cm": 68,
+   "charge_particles": 402,
+   "bolt_left_at_s": 0.46,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 662,
+   "particles_round_the_bolt": 759,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 635,
+   "flown_cm": 625,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 623,
+   "burst_particles": 598,
    "burst_at": [
-    -3218,
-    3760,
-    114
+    -3361,
+    758,
+    116
    ],
    "sounds": {
     "Player.Charge.Fire": 1,
@@ -138,11 +229,11 @@
    "ok": true,
    "cast_started": true,
    "sword_held_all_through": true,
-   "charge_particles_left_hand": 402,
+   "charge_particles_left_hand": 290,
    "attack_weapon_while_casting": [
     1
    ],
-   "bolt_from_left_hand_cm": 38,
+   "bolt_from_left_hand_cm": 23,
    "cut_started": true,
    "cut_weapon": 0,
    "bolts_by_the_cut": 0
@@ -153,7 +244,7 @@
    "target": null,
    "turned_deg": 0.0,
    "off_her_heading_deg": 0.3,
-   "flown_cm": 1220,
+   "flown_cm": 1215,
    "reach": 1400.0,
    "damage_dealt": 0.0
   },
@@ -161,7 +252,7 @@
    "step": "far",
    "ok": true,
    "monster": "Horned",
-   "distance_cm": 1864,
+   "distance_cm": 1762,
    "reach": 1400.0,
    "target": null
   },
@@ -170,21 +261,8 @@
    "ok": true,
    "fights": [
     {
-     "monster": "Mutant",
-     "hit_points": 49.0,
-     "casts": 4,
-     "bolts_on_it": 2,
-     "bolts_needed": 2,
-     "killed": true,
-     "kills_counted": 2,
-     "each_bolt_took_the_damage": true,
-     "she_lost": 0,
-     "seconds": 3.1,
-     "ok": true
-    },
-    {
-     "monster": "Daemon",
-     "hit_points": 54.0,
+     "monster": "Horned",
+     "hit_points": 59.0,
      "casts": 3,
      "bolts_on_it": 3,
      "bolts_needed": 3,
@@ -192,30 +270,29 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 2.4,
+     "seconds": 2.5,
+     "ok": true
+    },
+    {
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "casts": 4,
+     "bolts_on_it": 1,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 3.2,
      "ok": true
     }
    ],
-   "monsters_killed": 3
+   "monsters_killed": 2
   },
   {
    "step": "sword",
    "ok": true,
    "fights": [
-    {
-     "monster": "Ripper_dog",
-     "hit_points": 34.0,
-     "weapon": "Sword",
-     "damage": 22.0,
-     "blows": 1,
-     "blows_needed": 2,
-     "killed": true,
-     "kills_counted": 1,
-     "each_blow_took_the_damage": true,
-     "bolts_cast": 0,
-     "seconds": 0.7,
-     "ok": true
-    },
     {
      "monster": "Daemon",
      "hit_points": 54.0,
@@ -227,7 +304,21 @@
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 2.0,
+     "seconds": 2.1,
+     "ok": true
+    },
+    {
+     "monster": "Troll",
+     "hit_points": 69.0,
+     "weapon": "Sword",
+     "damage": 22.0,
+     "blows": 4,
+     "blows_needed": 4,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "bolts_cast": 0,
+     "seconds": 2.9,
      "ok": true
     }
    ]
@@ -239,20 +330,20 @@
     1,
     0
    ],
-   "monsters": 13,
-   "average_hit_points": 98.5,
+   "monsters": 12,
+   "average_hit_points": 100.2,
    "hers": 100.0,
    "average_damage": 22.0,
    "spell_damage": 22.0
   }
  ],
  "error": null,
- "kills": 5,
- "casts": 19,
- "bolts": 13,
- "bolts_on_monsters": 8,
- "bolts_elsewhere": 5,
+ "kills": 4,
+ "casts": 24,
+ "bolts": 14,
+ "bolts_on_monsters": 6,
+ "bolts_elsewhere": 8,
  "deaths": 0,
- "damage_dealt": 288.0,
+ "damage_dealt": 304.0,
  "damage_taken": 0.0
 }

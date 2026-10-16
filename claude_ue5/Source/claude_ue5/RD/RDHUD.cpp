@@ -180,6 +180,7 @@ void ARDHUD::DrawCombat(float Sc)
 	const float Now = GetWorld()->GetTimeSeconds();
 	const APawn* P = GetOwningPawn();
 	const FVector L = P ? P->GetActorLocation() : FVector::ZeroVector;
+	const bool bPad = Gen->bCasterControls && Cb->IsUsingGamepad();
 	// ---- she was just hurt: the edges of the view flash red
 	const float Hurt = Now - Cb->LastHurtTime;
 	if (Hurt < 0.5f)
@@ -249,7 +250,10 @@ void ARDHUD::DrawCombat(float Sc)
 			Box(S0, S1, bOn ? FLinearColor(0.36f, 0.27f, 0.10f, 0.95f) : FLinearColor(0.10f, 0.10f, 0.12f, 0.9f));
 			Frame(S0, S1, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.40f, 0.38f, 0.34f), (bOn ? 2.5f : 1.f) * Sc);
 			const FLinearColor Tc = bOn ? FLinearColor::White : FLinearColor(0.72f, 0.70f, 0.66f);
-			DrawText(Wp.bAlongside ? FString(TEXT("RMB / E")) : FString::Printf(TEXT("%d"), I + 1), bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc);
+			// (its key: the one that draws it, or casts it when it is cast alongside; on the gamepad the button it is used with)
+			FString Key = Wp.bAlongside ? FString(TEXT("RMB / E")) : FString::Printf(TEXT("%d"), I + 1);
+			if (bPad) Key = Wp.bAlongside ? FString(TEXT("LB")) : (Wp.bSpell && Cb->GetAlongsideSpell() < 0) ? FString(TEXT("LB / RB")) : FString(TEXT("RB"));
+			DrawText(Key, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc);
 			const FString N = Wp.Name.ToString().ToUpper();
 			GetTextSize(N, Tw, Th, Small, Sc * 1.15f);
 			DrawText(N, Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 16.f * Sc, Small, Sc * 1.15f);
@@ -257,7 +261,39 @@ void ARDHUD::DrawCombat(float Sc)
 			GetTextSize(D, Tw, Th, Small, Sc);
 			DrawText(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 40.f * Sc, Small, Sc);
 		}
-		DrawText(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
+		if (!Gen->ControlsHint.IsEmpty()) DrawText(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
+	}
+	// ---- the controls (upper left, the magic levels): those of the device in use, and whether she walks or runs
+	const TArray<FString>& Lines = bPad ? Gen->ControlsPad : Gen->ControlsKeys;
+	if (Gen->bCasterControls && Lines.Num() > 0)
+	{
+		const float Mg = 24.f * Sc, Pd = 14.f * Sc, Lh = 23.f * Sc, K = Sc * 1.05f;
+		TArray<FString> Keys, Whats;
+		float Kw = 0.f, Ww = 0.f, Tw, Th;
+		for (const FString& S : Lines)
+		{
+			FString Kt, Wt;
+			if (!S.Split(TEXT("|"), &Kt, &Wt)) { Kt = S; Wt = FString(); }
+			Keys.Add(Kt); Whats.Add(Wt);
+			GetTextSize(Kt, Tw, Th, Small, K); Kw = FMath::Max(Kw, Tw);
+			GetTextSize(Wt, Tw, Th, Small, K); Ww = FMath::Max(Ww, Tw);
+		}
+		const FString Title = bPad ? TEXT("CONTROLS  -  GAMEPAD") : TEXT("CONTROLS  -  KEYBOARD & MOUSE");
+		const FString Mode = Cb->IsRunMode() ? TEXT("RUNNING") : TEXT("WALKING");
+		float Tiw, Mw;
+		GetTextSize(Title, Tiw, Th, Small, Sc * 1.1f); GetTextSize(Mode, Mw, Th, Small, Sc * 1.1f);
+		const float W = FMath::Max(Kw + 18.f * Sc + Ww, Tiw + 24.f * Sc + Mw) + Pd * 2.f;
+		const FVector2D A(Mg, Mg), B(Mg + W, Mg + 40.f * Sc + Lh * Lines.Num() + 8.f * Sc);
+		Box(A, B, FLinearColor(0.04f, 0.05f, 0.07f, 0.72f));
+		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
+		DrawText(Title, RDInk, A.X + Pd, A.Y + 9.f * Sc, Small, Sc * 1.1f);
+		DrawText(Mode, Cb->IsRunMode() ? FLinearColor(1.f, 0.62f, 0.25f) : RDCyan, B.X - Pd - Mw, A.Y + 9.f * Sc, Small, Sc * 1.1f);
+		for (int32 I = 0; I < Keys.Num(); ++I)
+		{
+			const float Y = A.Y + 40.f * Sc + Lh * I;
+			DrawText(Keys[I], FLinearColor(1.f, 0.82f, 0.35f), A.X + Pd, Y, Small, K);
+			DrawText(Whats[I], FLinearColor(0.86f, 0.84f, 0.78f), A.X + Pd + Kw + 18.f * Sc, Y, Small, K);
+		}
 	}
 	// ---- she is down
 	if (Cb->IsDead())
@@ -375,7 +411,8 @@ void ARDHUD::DrawHUD()
 	const FString What = Gen->DescribeNearest(L);
 	if (!What.IsEmpty() && !Gen->bMapOpen)
 	{
-		const FString T = FString::Printf(TEXT("[F]  %s"), *What);
+		const URDCombatComponent* Cb = Gen->GetPlayerCombat();
+		const FString T = FString::Printf(TEXT("[%s]  %s"), (Gen->bCasterControls && Cb && Cb->IsUsingGamepad()) ? TEXT("X") : TEXT("F"), *What);
 		float Tw, Th; GetTextSize(T, Tw, Th, Medium, Sc * 1.2f);
 		const float X = (Canvas->ClipX - Tw) * 0.5f, Y = Canvas->ClipY * 0.72f;
 		Box(FVector2D(X - 14.f * Sc, Y - 8.f * Sc), FVector2D(X + Tw + 14.f * Sc, Y + Th + 8.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.6f));

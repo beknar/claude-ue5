@@ -6,7 +6,9 @@ and run it again. With the copy there, it opens it and sets it up:
 - her one weapon is the fire spell of 810's spell.json (FRDWeaponDef with bSpell: the three cast clips with their release
   times, the bolt's speed, steering, reach and splash, the charge / bolt / burst effects and the bolt's light); her
   flinch and death clips
-- the HUD's status panel: her name and her keys (WASD walk, Shift run, left mouse or E: the fire spell)
+- the HUD's status panel: her name; the controls (bCasterControls) in the upper left, keyboard or gamepad by the device
+  in use: WASD / left stick move, mouse / right stick look, Space / A jump, R / LT switch walk and run (Shift held runs),
+  left mouse or E / LB or RB the fire spell, F / X open (run 819 first: her character's RunMode)
 Everything else is the combat level's: the dungeon, its saved start section, the monsters with their clips and tiers
 (a monster's hit points and damage follow her average blow: the spell's damage), blood, wounds, sound, music, the
 stylised maps. Run 797 on this level after it to give it the spell's sounds. Args: none"""
@@ -48,7 +50,13 @@ else:
     assert all(d.attacks) and d.get_hit and d.death
     gen.set_editor_property("weapons", [d])
     gen.set_editor_property("player_title", "GIRL-CASTER")
-    gen.set_editor_property("controls_hint", "WASD  walk     shift  run     left mouse / E  fire spell")
+    # the controls: the magic levels' layout (URDCombatComponent with bCasterControls; 819 gives her character RunMode), shown
+    # in the HUD's upper left for the device in use ("key|what it does"); the old one-line hint under the status panel goes
+    gen.set_editor_property("caster_controls", True); gen.set_editor_property("controls_hint", "")
+    gen.set_editor_property("controls_keys", ["W A S D|move", "Mouse|look / turn the camera", "Space|jump", "R|switch walk / run", "Shift (held)|run",
+                                               "Left mouse / E|fire spell", "F|open door or container", "M|map"])
+    gen.set_editor_property("controls_pad", ["Left stick|move", "Right stick|look / turn the camera", "A|jump", "LT|switch walk / run",
+                                              "LB / RB|fire spell", "X|open door or container"])
     ws = w.get_world_settings()
     ws.set_editor_property("default_game_mode", unreal.load_asset("/Game/RandomDungeon/Blueprints/BP_RDM_GameMode").generated_class())
     c = gen.get_start_room_center()

@@ -389,7 +389,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 				if (PC->GetAudioListenerAttenuationOverridePosition(Att)) AD->SetListenerAttenuationOverride(0, Att);
 			}
 		}
-		if (PC->WasInputKeyJustPressed(EKeys::F) && P) InteractNearest(P->GetActorLocation());
+		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P) InteractNearest(P->GetActorLocation());
 		if (PC->WasInputKeyJustPressed(EKeys::M)) bMapOpen = !bMapOpen;
 	}
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);

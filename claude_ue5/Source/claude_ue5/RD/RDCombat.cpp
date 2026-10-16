@@ -26,6 +26,7 @@
 #include "NiagaraEmitterInstance.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "UObject/UnrealType.h"
 
 static const FName RDCombatSlot(TEXT("DefaultSlot"));
 
@@ -275,19 +276,26 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
 		return;
 	}
+	if (Generator->bCasterControls)
+		if (const APawn* P = Cast<APawn>(GetOwner()))
+			if (const APlayerController* PC = Cast<APlayerController>(P->GetController())) TickDevice(PC);
 	if (!bScriptedOnly && !Generator->bMapOpen)
 		if (const APawn* P = Cast<APawn>(GetOwner()))
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController()))
 			{
-				if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
-				if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
-				if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
-				// the drawn weapon: left mouse (X, RT); E too when it is a spell. A spell cast alongside it: right mouse or E (Y, LT)
-				const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
-				if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Left) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f
-					|| (bDrawnSpell && PC->IsInputKeyDown(EKeys::E))) StartAttack();
-				else if (GetAlongsideSpell() >= 0 && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Top)
-					|| PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f)) StartSpell();
+				if (Generator->bCasterControls) TickCasterInput(PC);      // (the magic levels' layout)
+				else
+				{
+					if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
+					if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
+					if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
+					// the drawn weapon: left mouse (X, RT); E too when it is a spell. A spell cast alongside it: right mouse or E (Y, LT)
+					const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
+					if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Left) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f
+						|| (bDrawnSpell && PC->IsInputKeyDown(EKeys::E))) StartAttack();
+					else if (GetAlongsideSpell() >= 0 && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Top)
+						|| PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f)) StartSpell();
+				}
 			}
 	if (AttackTime >= 0.f)
 	{
@@ -333,6 +341,61 @@ bool URDCombatComponent::SimulateKey(FKey Key, bool bDown)
 	const APawn* P = Cast<APawn>(GetOwner());
 	APlayerController* PC = P ? Cast<APlayerController>(P->GetController()) : nullptr;
 	return PC && PC->InputKey(FInputKeyEventArgs::CreateSimulated(Key, bDown ? IE_Pressed : IE_Released, bDown ? 1.f : 0.f));
+}
+
+bool URDCombatComponent::SimulateAxis(FKey Key, float Value)
+{
+	const APawn* P = Cast<APawn>(GetOwner());
+	APlayerController* PC = P ? Cast<APlayerController>(P->GetController()) : nullptr;
+	return PC && PC->InputKey(FInputKeyEventArgs::CreateSimulated(Key, IE_Axis, Value, 1));
+}
+
+// ------------------------------------------------------------------------------------------------ the magic levels' controls
+void URDCombatComponent::SetRunMode(bool bRun)
+{
+	bRunMode = bRun;
+	// (her character's MoveScale picks the run speed while its RunMode is on: a Blueprint variable, set by name)
+	if (AActor* O = GetOwner())
+		if (FBoolProperty* Pr = FindFProperty<FBoolProperty>(O->GetClass(), TEXT("RunMode"))) Pr->SetPropertyValue_InContainer(O, bRun);
+}
+
+void URDCombatComponent::TickDevice(const APlayerController* PC)
+{
+	// a button or a stick of the gamepad makes it the device in use; a key or the mouse makes it the keyboard again
+	static const FKey PadKeys[] = {
+		EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_FaceButton_Left, EKeys::Gamepad_FaceButton_Top,
+		EKeys::Gamepad_LeftShoulder, EKeys::Gamepad_RightShoulder, EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_RightTrigger,
+		EKeys::Gamepad_DPad_Up, EKeys::Gamepad_DPad_Down, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_DPad_Right,
+		EKeys::Gamepad_LeftThumbstick, EKeys::Gamepad_RightThumbstick, EKeys::Gamepad_Special_Left, EKeys::Gamepad_Special_Right };
+	static const FKey PadAxes[] = { EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY,
+		EKeys::Gamepad_LeftTriggerAxis, EKeys::Gamepad_RightTriggerAxis };
+	static const FKey KeyboardKeys[] = {
+		EKeys::W, EKeys::A, EKeys::S, EKeys::D, EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right, EKeys::SpaceBar, EKeys::LeftShift,
+		EKeys::E, EKeys::R, EKeys::F, EKeys::M, EKeys::One, EKeys::Two, EKeys::Three, EKeys::LeftMouseButton, EKeys::RightMouseButton };
+	for (const FKey& K : PadKeys) if (PC->IsInputKeyDown(K)) { bUsingGamepad = true; return; }
+	for (const FKey& K : PadAxes) if (FMath::Abs(PC->GetInputAnalogKeyState(K)) > 0.3f) { bUsingGamepad = true; return; }
+	for (const FKey& K : KeyboardKeys) if (PC->IsInputKeyDown(K)) { bUsingGamepad = false; return; }
+	float Mx = 0.f, My = 0.f;
+	PC->GetInputMouseDelta(Mx, My);
+	if (Mx != 0.f || My != 0.f) bUsingGamepad = false;
+}
+
+void URDCombatComponent::TickCasterInput(const APlayerController* PC)
+{
+	if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
+	if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
+	if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
+	// the weapon in her hand: left mouse or RB. The spell: right mouse, E or LB: the one cast alongside the drawn weapon,
+	// or the drawn weapon itself when it is a spell (then the left mouse and RB cast it too)
+	const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
+	const bool bAlongside = GetAlongsideSpell() >= 0;
+	const bool bSpellKey = PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder);
+	if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder) || (bDrawnSpell && !bAlongside && bSpellKey)) StartAttack();
+	else if (bAlongside && bSpellKey) StartSpell();
+	// walking / running: R, or the left trigger pulled (its button, or the axis past half way for a pad that sends none)
+	const bool bToggle = PC->IsInputKeyDown(EKeys::R) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f;
+	if (bToggle && !bRunToggleDown) SetRunMode(!bRunMode);
+	bRunToggleDown = bToggle;
 }
 
 // ------------------------------------------------------------------------------------------------ spells

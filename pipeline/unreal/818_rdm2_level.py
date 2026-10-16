@@ -7,7 +7,8 @@ copy there, it opens it and sets it up:
 - her weapons, from 817's weapons.json: the sword (drawn: Medieval_Weapons SM_Sword_1 in her right hand, her three cuts
   with their blow times) and the fire spell cast alongside it from her left hand (bAlongside: its own keys, the sword
   stays in her hand; the bolt, the effects and the numbers of random_dungeonmagic_level's spell); flinch and death
-- the HUD's status panel: her name and keys (WASD walk, Shift run, left mouse: the sword, right mouse or E: the fire)
+- the HUD's status panel: her name; the controls (bCasterControls) in the upper left, keyboard or gamepad by the device
+  in use: as 811's, with left mouse / RB the sword and right mouse or E / LB the fire (run 819 first)
 Everything else is the magic level's (the combat level's dungeon, monsters, blood, wounds, sound and music); the
 monsters' hit points and damage follow her average blow over the two. Args: none"""
 import json, unreal
@@ -56,7 +57,12 @@ else:
     assert all(d.attacks); out.append(d)
     gen.set_editor_property("weapons", out)
     gen.set_editor_property("player_title", "GIRL-DARKCASTER")
-    gen.set_editor_property("controls_hint", "WASD walk   shift run   left mouse sword   right mouse / E fire")
+    # the controls (as 811's): the magic levels' layout, shown in the HUD's upper left for the device in use
+    gen.set_editor_property("caster_controls", True); gen.set_editor_property("controls_hint", "")
+    gen.set_editor_property("controls_keys", ["W A S D|move", "Mouse|look / turn the camera", "Space|jump", "R|switch walk / run", "Shift (held)|run",
+                                               "Left mouse|sword", "Right mouse / E|fire spell", "F|open door or container", "M|map"])
+    gen.set_editor_property("controls_pad", ["Left stick|move", "Right stick|look / turn the camera", "A|jump", "LT|switch walk / run",
+                                              "RB|sword", "LB|fire spell", "X|open door or container"])
     ws = w.get_world_settings(); ws.set_editor_property("default_game_mode", unreal.load_asset("/Game/RandomDungeon/Blueprints/BP_RDM2_GameMode").generated_class())
     c = gen.get_start_room_center()
     for a in eas.get_all_level_actors():
