@@ -1,0 +1,18 @@
+{
+ "clips": {
+  "Run": 31,
+  "Walk": 57,
+  "Idle": 78,
+  "Stab1": 18,
+  "Stab2": 19,
+  "Stab3": 20,
+  "Shoot": 24,
+  "RollF": 20,
+  "RollB": 20
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_rogue\\T_Rogue_Color.png"
+ },
+ "height_cm": 170.0,
+ "hair": null
+}

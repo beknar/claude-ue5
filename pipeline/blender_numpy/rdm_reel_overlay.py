@@ -1,5 +1,5 @@
-"""random_dungeonmagic_level and random_dungeonmagic_level2 demo reel HUD (generalised from rdc_reel_overlay.py; the level is
-the recording's): composites onto the Movie Render Queue
+"""random_dungeonmagic_level, random_dungeonmagic_level2 and random_dungeonmagic_level3 demo reel HUD (generalised from
+rdc_reel_overlay.py; the level is the recording's): composites onto the Movie Render Queue
 frames (the queue does not draw the game's HUD) what the game's HUD shows in play, redrawn from 815's recording of the
 render itself (SourceArt/random_dungeon_magic/cine_render.json):
 - the stylised minimap (top right, north up): the miniature of the dungeon as ARDHUD::DrawDungeon draws it (walls, stone
@@ -14,13 +14,20 @@ render itself (SourceArt/random_dungeon_magic/cine_render.json):
   she casts, F as she opens: the pilot plays through the calls those keys make); what is heard written out as it sounds
   (the record has every sound the game played: the spell's charge, flight and burst, a monster's roar, growl, cry and
   death, a door or chest she opens, a torch she passes, the rumble of a new section), and which music is playing.
-Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1 or 2]"""
+A recording made with the tactical maps on (the generator's bTacticalMaps, every dungeon level since 821; level 3's reel)
+gets the tactical minimap instead, as ARDHUD::DrawTacticalMinimap draws it: no frame, a dark backdrop feathered into the
+picture, the tiles in dark greys fading to the rim (the rooms she has seen lighter, the rest faint), light lines where a
+seen floor meets no floor, a red dot for each monster within 25 m (an orange triangle for the strongest of their tier),
+gold stars on the unopened chests and trunks in rooms she has seen, cyan diamonds on the hallway exits toward sections
+she has not seen (815 records the markers).
+Level 3 (the Rogue): her keys are 1 / 2 (daggers / crossbow), the left mouse button (strike or shoot) and B (roll).
+Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1, 2 or 3]"""
 import sys, os, re, json, glob, math
 from PIL import Image, ImageDraw, ImageFont
 src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
-L2 = len(sys.argv) > 4 and sys.argv[4] == "2"
-SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("2" if L2 else ""))
+LV = sys.argv[4] if len(sys.argv) > 4 else "1"; L2, L3 = LV == "2", LV == "3"
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("" if LV == "1" else LV))
 SND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_combat")      # (the sounds are the combat level's)
 R = json.load(open(os.path.join(SRC, "cine_render.json")))
 FPS = R["fps"]; ROWS = {r["frame"]: r for r in R["rows"]}; LASTF = max(ROWS); C = R["const"]; EV = R["events"]
@@ -29,7 +36,9 @@ W, H, K = 1920, 1080, 2                       # the layer is drawn K times large
 def row(f): return ROWS.get(min(max(f, 0), LASTF)) or ROWS[min(ROWS, key=lambda k: abs(k - f))]
 HITS = [e for e in EV if e["kind"] == "hit"]; KILLS = [e for e in EV if e["kind"] == "kill"]; FIGHTS = [e for e in EV if e["kind"] == "fight"]
 GENS = [e for e in EV if e["kind"] == "generated"]; DISC = [e for e in EV if e["kind"] == "discovered"]; CHESTS = [e for e in EV if e["kind"] == "chest"]
-CASTS = [e for e in EV if e["kind"] == "cast"]; SPELL = C["spell"]
+CASTS = [e for e in EV if e["kind"] == "cast"]; SPELL = C["spell"]; ROLLS = [e for e in EV if e["kind"] == "rolled"]; DODGED = [e for e in EV if e["kind"] == "dodged"]
+TACTICAL = C.get("tactical", False)
+POIS = sorted((r["frame"], r["pois"]) for r in R["rows"] if r.get("pois") is not None)
 # ---- what is heard, written out: (time, text) from the sounds the game played
 HEARD = []
 VOICE = {"Roar": "roars", "Idle": "growls", "Hurt": "cries out", "Death": "dies"}
@@ -44,6 +53,11 @@ for e in EV:
         elif e["key"] == "Player.Cast.Fire": HEARD.append((e["t"], "the fire bolt roars away"))
         elif e["key"] == "Player.Hit.Fire": HEARD.append((e["t"], "the fire bursts"))
         elif e["key"] == "Player.Hit.Sword": HEARD.append((e["t"], "the sword bites"))
+        elif e["key"] == "Player.Hit.Daggers": HEARD.append((e["t"], "the dagger bites"))
+        elif e["key"] == "Player.Charge.Crossbow": HEARD.append((e["t"], "she raises the crossbow"))
+        elif e["key"] == "Player.Cast.Crossbow": HEARD.append((e["t"], "the crossbow snaps"))
+        elif e["key"] == "Player.Hit.Crossbow": HEARD.append((e["t"], "the bolt strikes"))
+        elif e["key"] == "Player.Roll": HEARD.append((e["t"], "she rolls"))
     elif e["kind"] == "door": HEARD.append((e["t"], "a door creaks open"))
     elif e["kind"] == "chest": HEARD.append((e["t"], "the %s creaks open" % e["what"].split()[-1]))
 HEARD.sort()
@@ -161,6 +175,92 @@ def minimap(r, t, maps, disc, P, half):
     d.polygon(tri, fill=lin((1.0, 0.47, 0.67)), outline=(255, 255, 255, 255))
     d.line(tri + [tri[0]], fill=(255, 255, 255, 255), width=2 * K)
     return im
+TAC = {"room": (0.15, 0.16, 0.17, 0.95), "hall": (0.115, 0.12, 0.13, 0.95), "unknown": (0.055, 0.058, 0.064, 0.7), "wall": (0.36, 0.385, 0.41, 0.9), "fresh": (0.16, 0.32, 0.36),
+       "red": (1.0, 0.16, 0.10), "elite": (1.0, 0.55, 0.08), "gold": (1.0, 0.82, 0.22), "exit": (0.25, 0.95, 1.0)}
+DISC_IM = {}
+def pois_at(f):
+    """the markers 815 recorded nearest before frame f (every third frame)"""
+    best = None
+    for fr, ps in POIS:
+        if fr > f: break
+        best = ps
+    return best or []
+def tactical(o, r, t, maps, disc, cx, cy, R, half, ua):
+    """ARDHUD::DrawTacticalMinimap: centred on (cx, cy) layer pixels, radius R, `half` cm from the middle to the rim"""
+    d = ImageDraw.Draw(o, "RGBA"); px0, py0 = r["p"][0], r["p"][1]; k = R / half; Tp = TS * k
+    ToS = lambda wx, wy: (cx + (wy - py0) * k, cy - (wx - px0) * k)
+    fade_ = lambda x, y: max(0.0, min(1.0, (1.0 - math.hypot(x - cx, y - cy) / R) / 0.38))
+    # the backdrop: a dark disc whose alpha falls off to its rim (1.3 R), no frame
+    B = int(R * 2.6); c0 = B / 2.0; key = (B, round(ua, 2))
+    if key not in DISC_IM:                      # (made once: the same disc every frame)
+        disc_im = Image.new("RGBA", (B, B), (0, 0, 0, 0)); px = disc_im.load(); col = lin((0.004, 0.005, 0.007))[:3]
+        for yy in range(B):
+            for xx in range(B):
+                q = math.hypot(xx + 0.5 - c0, yy + 0.5 - c0) / c0
+                if q < 1.0:
+                    u = min(1.0, max(0.0, (q - 0.4) / 0.6)); a = 1.0 - u * u * (3 - 2 * u)
+                    px[xx, yy] = col + (int(255 * a * 0.92 * ua),)
+        DISC_IM[key] = disc_im
+    disc_im = DISC_IM[key]
+    o.alpha_composite(disc_im, (int(cx - c0), int(cy - c0))); d = ImageDraw.Draw(o, "RGBA")
+    # the tiles: 1 generated, 2 seen, 4 hallway
+    tiles = {}
+    for c, m in maps.items():
+        seen = disc.get(c, set())
+        for i, q in enumerate(m["rects"]):
+            fl = 1 | (2 if i in seen else 0) | (4 if q[5] else 0)
+            for X in range(q[0], q[2]):
+                for Y in range(q[1], q[3]): tiles[(X, Y)] = tiles.get((X, Y), 0) | fl
+    fresh = set()
+    for e in GENS:
+        if 0.0 <= t - e["t"] < 4.0:
+            for c, m in maps.items():
+                if abs(m["t"] - e["t"]) < 1.0 and c != (0, 0): fresh.add(c)
+    sec_of = lambda X, Y: (int(math.floor(((X + 0.5) * TS) / (NT * TS) + 0.5)), int(math.floor(((Y + 0.5) * TS) / (NT * TS) + 0.5)))
+    n = int(half / TS) + 2; X0, Y0 = int(math.floor(px0 / TS)), int(math.floor(py0 / TS))
+    edges = []
+    for X in range(X0 - n, X0 + n + 1):
+        for Y in range(Y0 - n, Y0 + n + 1):
+            v = tiles.get((X, Y))
+            if not v: continue
+            sx, sy = ToS((X + 0.5) * TS, (Y + 0.5) * TS); a = fade_(sx, sy)
+            if a <= 0: continue
+            cc = (TAC["hall"] if v & 4 else TAC["room"]) if v & 2 else TAC["unknown"]
+            if fresh and sec_of(X, Y) in fresh: cc = TAC["fresh"] + (cc[3],)
+            h = Tp * 0.5 + 0.5 * K
+            d.rectangle((sx - h, sy - h, sx + h, sy + h), fill=lin(cc[:3], cc[3] * a * ua))
+            if not v & 2: continue
+            for nb, (a0, b0) in (((X + 1, Y), ((X + 1, Y), (X + 1, Y + 1))), ((X - 1, Y), ((X, Y), (X, Y + 1))), ((X, Y + 1), ((X, Y + 1), (X + 1, Y + 1))), ((X, Y - 1), ((X, Y), (X + 1, Y)))):
+                if nb not in tiles: edges.append((ToS(a0[0] * TS, a0[1] * TS), ToS(b0[0] * TS, b0[1] * TS), a))
+    for p0, p1, a in edges: d.line((p0, p1), fill=lin(TAC["wall"][:3], TAC["wall"][3] * a * ua), width=max(1, int(1.4 * K)))
+    # the markers, bright over the dark ground (chests only in rooms she has seen)
+    inside = lambda x, y: math.hypot(x - cx, y - cy) <= R * 0.94
+    def poly(pts, c, edge):
+        d.polygon(pts, fill=lin(c, ua)); d.line(pts + [pts[0]], fill=lin(edge, ua), width=max(1, int(1.2 * K)))
+    for wx, wy, kind in pois_at(int(round(t * FPS))):
+        x, y = ToS(wx, wy)
+        if not inside(x, y): continue
+        if kind == 2 and tiles.get((int(math.floor(wx / TS)), int(math.floor(wy / TS))), 0) & 2:
+            s_ = 6.5 * K; pts = [(x + math.cos(-math.pi / 2 + j * math.pi / 5) * (s_ if j % 2 == 0 else s_ * 0.45), y + math.sin(-math.pi / 2 + j * math.pi / 5) * (s_ if j % 2 == 0 else s_ * 0.45)) for j in range(10)]
+            poly(pts, TAC["gold"], (1.0, 0.97, 0.8))
+        elif kind == 3:
+            s_ = 5.5 * K; poly([(x, y - s_), (x + s_ * 0.75, y), (x, y + s_), (x - s_ * 0.75, y)], TAC["exit"], (0.85, 1.0, 1.0))
+    for mo in r["mon"]:
+        if mo[8] or math.hypot(mo[2] - px0, mo[3] - py0) > 2500.0: continue
+        x, y = ToS(mo[2], mo[3])
+        if not inside(x, y): continue
+        elite = len(mo) > 12 and mo[12]
+        c = TAC["elite"] if elite else TAC["red"]
+        for rr, al in ((11.0 if elite else 9.0, 0.12), (7.0, 0.2)): d.ellipse((x - rr * K, y - rr * K, x + rr * K, y + rr * K), fill=lin(c, al * ua))
+        if elite: s_ = 7.0 * K; poly([(x, y - s_), (x + s_ * 0.9, y + s_ * 0.65), (x - s_ * 0.9, y + s_ * 0.65)], c, (1.0, 0.9, 0.6))
+        else: rr = 4.6 * K; d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=lin(c, ua))
+    a = math.radians(r["yaw"] - 90.0); fx, fy = math.cos(a), math.sin(a); s_ = 9.0 * K
+    tri = [(cx + fx * s_, cy + fy * s_), (cx - fx * s_ * 0.6 - fy * s_ * 0.6, cy - fy * s_ * 0.6 + fx * s_ * 0.6), (cx - fx * s_ * 0.6 + fy * s_ * 0.6, cy - fy * s_ * 0.6 - fx * s_ * 0.6)]
+    d.polygon(tri, fill=lin((1.0, 0.47, 0.67), ua)); d.line(tri + [tri[0]], fill=(255, 255, 255, int(255 * ua)), width=2 * K)
+    ink = lin((0.75, 0.77, 0.8), 0.85 * ua)
+    d.text((cx, cy - R * 0.98), "N", font=f_small, fill=ink, anchor="ma")
+    rooms = sum(1 for m in maps.values() for q in m["rects"] if not q[5]); seen = sum(1 for c, m in maps.items() for i, q in enumerate(m["rects"]) if not q[5] and i in disc.get(c, set()))
+    d.text((cx, cy + R * 0.96), "%d / %d rooms    M  map" % (seen, rooms), font=f_small, fill=ink, anchor="ma")
 def axes(r):
     p, y, ro = (math.radians(v) for v in r); cp, sp, cy, sy, cr, sr = math.cos(p), math.sin(p), math.cos(y), math.sin(y), math.cos(ro), math.sin(ro)
     return (cp * cy, cp * sy, sp), (sr * sp * cy - cr * sy, sr * sp * sy + cr * cy, -sr * cp), (-(cr * sp * cy + sr * sy), cy * sr - cr * sp * sy, cr * cp)
@@ -172,6 +272,17 @@ def project(r, P):
 def text_c(d, xy, s, f, fill, anchor="mm", shadow=True):
     if shadow: d.text((xy[0] + K, xy[1] + K), s, font=f, fill=(0, 0, 0, int(fill[3] * 0.75)), anchor=anchor)
     d.text(xy, s, font=f, fill=fill, anchor=anchor)
+def stylised(o, r, t, maps, disc, P, x0, y0, ua, A):
+    """the stylised minimap in its frame (the combat level's look, before the tactical maps)"""
+    d = ImageDraw.Draw(o, "RGBA")
+    d.rectangle((x0 - 8 * K, y0 - 34 * K, x0 + P + 8 * K, y0 + P + 30 * K), fill=lin((0.04, 0.05, 0.07), A(0.72)))
+    mm = minimap(r, t, maps, disc, P, 84.0 * 50.0)
+    if ua < 1.0: mm.putalpha(mm.getchannel("A").point(lambda v: int(v * ua)))
+    o.alpha_composite(mm, (int(x0), int(y0))); d = ImageDraw.Draw(o, "RGBA")
+    d.rectangle((x0, y0, x0 + P, y0 + P), outline=lin((0.75, 0.65, 0.45), A(0.9)), width=2 * K)
+    rooms = sum(1 for m in maps.values() for q in m["rects"] if not q[5]); seen = sum(1 for c, m in maps.items() for i, q in enumerate(m["rects"]) if not q[5] and i in disc.get(c, set()))
+    d.text((x0, y0 - 28 * K), "DUNGEON", font=f_small, fill=lin(INK, A(1.0))); d.text((x0 + P, y0 - 28 * K), "%d / %d rooms" % (seen, rooms), font=f_small, fill=lin(INK, A(1.0)), anchor="ra")
+    d.text((x0 + P / 2, y0 + 3 * K), "N", font=f_small, fill=lin(INK, A(1.0)), anchor="ma"); d.text((x0, y0 + P + 5 * K), "M  map", font=f_small, fill=lin((0.7, 0.68, 0.62), A(1.0)))
 def overlay(f):
     r = row(f); t = f / FPS
     maps, disc = map_at(t)
@@ -204,14 +315,11 @@ def overlay(f):
         text_c(d, s, ("-%d" if h["on_player"] else "%d") % h["amount"], f_num, lin((1.0, 0.25, 0.2) if h["on_player"] else (1.0, 0.9, 0.35), al), "mb")
     # ---- minimap (top right)
     P = 300 * K; mg = 24 * K; x0, y0 = W * K - mg - P, mg + 26 * K
-    d.rectangle((x0 - 8 * K, y0 - 34 * K, x0 + P + 8 * K, y0 + P + 30 * K), fill=lin((0.04, 0.05, 0.07), A(0.72)))
-    mm = minimap(r, t, maps, disc, P, 84.0 * 50.0)
-    if ua < 1.0: mm.putalpha(mm.getchannel("A").point(lambda v: int(v * ua)))
-    o.alpha_composite(mm, (int(x0), int(y0))); d = ImageDraw.Draw(o, "RGBA")
-    d.rectangle((x0, y0, x0 + P, y0 + P), outline=lin((0.75, 0.65, 0.45), A(0.9)), width=2 * K)
-    rooms = sum(1 for m in maps.values() for q in m["rects"] if not q[5]); seen = sum(1 for c, m in maps.items() for i, q in enumerate(m["rects"]) if not q[5] and i in disc.get(c, set()))
-    d.text((x0, y0 - 28 * K), "DUNGEON", font=f_small, fill=lin(INK, A(1.0))); d.text((x0 + P, y0 - 28 * K), "%d / %d rooms" % (seen, rooms), font=f_small, fill=lin(INK, A(1.0)), anchor="ra")
-    d.text((x0 + P / 2, y0 + 3 * K), "N", font=f_small, fill=lin(INK, A(1.0)), anchor="ma"); d.text((x0, y0 + P + 5 * K), "M  map", font=f_small, fill=lin((0.7, 0.68, 0.62), A(1.0)))
+    if TACTICAL:
+        tactical(o, r, t, maps, disc, W * K - mg - P / 2, mg + 14 * K + P / 2, P / 2, C.get("stylized_minimap_m", 84.0) * 50.0, ua); d = ImageDraw.Draw(o, "RGBA")
+    else:
+        stylised(o, r, t, maps, disc, P, x0, y0, ua, A); d = ImageDraw.Draw(o, "RGBA")
+    # ---- status panel
     # ---- status panel (bottom right): hit points, the weapons with their damage, kills
     pw, ph, pd = 400 * K, 176 * K, 14 * K; ax, ay = W * K - mg - pw, H * K - mg - ph; bx, by = ax + pw, ay + ph
     d.rectangle((ax, ay, bx, by), fill=lin((0.04, 0.05, 0.07), A(0.78)), outline=lin((0.75, 0.65, 0.45), A(0.9)), width=2 * K)
@@ -235,6 +343,7 @@ def overlay(f):
     # Shift as she runs, E as she casts, F as she opens a door or chest
     mv, kh = r.get("moving", ""), r.get("keys", "")
     caps = [("W", mv != ""), ("A", False), ("S", False), ("D", False), ("SHIFT", mv == "run")] + ([("LMB", kh == "lmb")] if L2 else []) + [("E", kh == "e"), ("F", kh == "f")]
+    if L3: caps = [("W", mv != ""), ("A", False), ("S", False), ("D", False), ("SHIFT", mv == "run"), ("1", kh == "1"), ("2", kh == "2"), ("LMB", kh == "lmb"), ("B", kh == "b" or r.get("rolling", 0) == 1), ("F", kh == "f")]
     kw = {"SHIFT": 112, "LMB": 76}; gap = 8 * K; total = sum(kw.get(c, 52) * K for c, _ in caps) + gap * (len(caps) - 1) + 24 * K
     kx = bx - 16 * K - total; ky = ay - 100 * K
     d.rounded_rectangle((kx - 14 * K, ky - 52 * K, kx + total + 14 * K, ky + 64 * K), 14 * K, fill=(12, 11, 9, int(150 * ua)))
@@ -247,6 +356,10 @@ def overlay(f):
         kx += w_ + gap
     lab = "run" if mv == "run" else "walk" if mv == "walk" else ""
     lab = "cast the fire spell" if kh == "e" else "swing the sword" if kh == "lmb" else "open" if kh == "f" else lab
+    if L3:
+        drawn = C["weapons"][r["w"]]["name"].lower() if 0 <= r["w"] < len(C["weapons"]) else ""
+        lab = ("roll" if (kh == "b" or r.get("rolling", 0)) else "shoot the crossbow" if (kh == "lmb" and drawn == "crossbow") else "strike with the daggers" if kh == "lmb"
+               else "draw the daggers" if kh == "1" else "draw the crossbow" if kh == "2" else "open" if kh == "f" else ("run" if mv == "run" else "walk" if mv == "walk" else ""))
     if lab: text_c(d, ((k0x + kx) / 2, ky - 24 * K), lab, f_line, (244, 240, 228, int(240 * ua)))
     # ---- the banner when a section is generated
     for e in GENS:
@@ -255,13 +368,18 @@ def overlay(f):
     # ---- the reel's own: title, captions (bottom left)
     a = fade(t, 0.3, 4.6)
     if a > 0:
-        d.text((44 * K, 34 * K), "random_dungeonmagic_level2" if L2 else "random_dungeonmagic_level", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  fire from the left hand, a sword in the right  \u00b7  girl-darkcaster-tripo" if L2 else
+        d.text((44 * K, 34 * K), "random_dungeonmagic_level" + ("" if LV == "1" else LV), font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
+        d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  two daggers, a crossbow and a roll  \u00b7  the Rogue" if L3 else
+                                  "procedural dungeon  \u00b7  fire from the left hand, a sword in the right  \u00b7  girl-darkcaster-tripo" if L2 else
                                   "procedural dungeon  \u00b7  a fire spell at medium range  \u00b7  girl-caster-tripo"), font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
     caps = []
     t_first = FIGHTS[0]["t"] if FIGHTS else 6.0
     t_chest = CHESTS[0]["t"] if CHESTS else 99.0
-    if L2:
+    XB = next((w_ for w_ in C["weapons"] if w_.get("spell")), None); DG = next((w_ for w_ in C["weapons"] if not w_.get("spell")), None)
+    if L3:
+        caps.append((0.8, min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "THE ROGUE", ["Rogue.glb: her own walk and run; an idle, three dagger strikes, a crossbow shot and a roll made for her in Blender",
+                     "WASD walk  \u00b7  Shift run  \u00b7  1 / 2 daggers / crossbow  \u00b7  left mouse strikes or shoots  \u00b7  B rolls  \u00b7  F opens"], (255, 240, 214)))
+    elif L2:
         caps.append((0.8, min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "FIRE AND STEEL", ["girl-darkcaster-tripo: her own idle, walk and run, and two left-hand casts and three sword cuts made for her in Blender",
                      "WASD walk  \u00b7  Shift run  \u00b7  left mouse: the sword  \u00b7  right mouse or E: the fire  \u00b7  F opens doors and containers"], (255, 240, 214)))
     else:
@@ -280,8 +398,16 @@ def overlay(f):
         more = ("the bolt: %.0f m reach, %.0f m/s, it follows the monster she turned to and bursts on the first thing it meets" % (SPELL["reach"] / 100.0, SPELL["speed"] / 100.0),
                 "the burst also burns every other monster within %.1f m for half the damage" % (SPELL["splash"] / 100.0),
                 "the music turns to a battle track when a monster comes at her")[min(i, 2)]
+        if L3:
+            rl = [x for x in ROLLS if e["t"] <= x["t"] <= end]; dg = [x for x in DODGED if e["t"] <= x["t"] <= end]
+            more = ("B: a roll %.1f m out of its reach, and blows miss her through most of it%s" % (C.get("roll_distance", 420.0) / 100.0, (" (%d missed her)" % len(dg)) if dg else "") if rl else
+                    ("the crossbow bolt: %.0f m reach, %.0f m/s, straight at the monster she turned to; it sticks where it strikes a wall" % (SPELL["reach"] / 100.0, SPELL["speed"] / 100.0),
+                     "the daggers strike fast, one hand, the other, then both",
+                     "the music turns to a battle track when a monster comes at her")[min(i, 2)])
         caps.append((e["t"], end, "%s  \u00b7  %s" % (e["monster"].replace("_", " ").upper(), tier),
-                     [("%.0f hit points, %.0f damage a blow  \u00b7  she has %.0f; her fire bolt does %.0f, her sword %.0f  \u00b7  fire from %.0f m, then the sword" % (e["its_hit_points"], e["its_damage"], C["max_health"],
+                     [("%.0f hit points, %.0f damage a blow  \u00b7  she has %.0f; a crossbow bolt does %.0f, a dagger strike %.0f  \u00b7  bolts from %.0f m, then the daggers" % (e["its_hit_points"], e["its_damage"], C["max_health"],
+                       XB["damage"], DG["damage"], cs[0].get("m", e["from_m"]) if cs and cs[0].get("m") else e["from_m"])) if L3 else
+                      ("%.0f hit points, %.0f damage a blow  \u00b7  she has %.0f; her fire bolt does %.0f, her sword %.0f  \u00b7  fire from %.0f m, then the sword" % (e["its_hit_points"], e["its_damage"], C["max_health"],
                        SPELL["damage"], next(w_["damage"] for w_ in C["weapons"] if not w_.get("spell")), cs[0].get("m", e["from_m"]) if cs else e["from_m"])) if L2 else
                       ("%.0f hit points, %.0f damage a blow  \u00b7  she has %.0f, and her fire bolt does %.0f  \u00b7  she casts from %.0f m" % (e["its_hit_points"], e["its_damage"], C["max_health"],
                        SPELL["damage"], cs[0].get("m", e["from_m"]) if cs else e["from_m"])), note, more], (255, 226, 150)))
@@ -322,5 +448,5 @@ for i, p in enumerate(frames):
     if i % step: continue
     im = Image.open(p).convert("RGBA")
     if im.size != (W, H): im = im.resize((W, H), Image.LANCZOS)
-    Image.alpha_composite(im, overlay(i)).convert("RGB").save(os.path.join(dst, f"rdm{'2' if L2 else ''}hud.{i:04d}.png"), compress_level=1)
+    Image.alpha_composite(im, overlay(i)).convert("RGB").save(os.path.join(dst, f"rdm{'' if LV == '1' else LV}hud.{i:04d}.png"), compress_level=1)
 print("wrote", len(range(0, len(frames), step)), "frames to", dst)

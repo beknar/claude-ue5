@@ -20,6 +20,11 @@
 // The magic levels have a layout of their own (generator bCasterControls): on the gamepad RB attacks with the weapon in
 // her hand, LB casts the spell (the one cast alongside it, or the drawn weapon when that is a spell), LT switches
 // between walking and running (R on the keyboard), X opens (the generator), D-pad left / up / right draw weapon 1 / 2 / 3.
+// random_dungeonmagic_level3 (generator bRogueControls): two daggers (a mesh in each hand) and a crossbow (a spell whose
+// bolt is a mesh shot from the weapon, the next bolt lying on it until she has loaded again); the one not drawn is
+// carried on her (FRDWeaponDef::HolsterBone). 1 / 2, the mouse wheel or Y switch, the left mouse button or RB uses the
+// one in her hands, B rolls: toward the way she is moving (backward when she stands), moved by a root motion source
+// while her clip plays in place; blows miss her for most of it (generator RollDodge).
 #pragma once
 
 #include "CoreMinimal.h"
@@ -112,6 +117,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") int32 GetSpellParticles(FVector Location, float Radius, int32& Systems) const;
 	/** the charge on her hand burns now */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsCharging() const;
+	/** the next (Step 1) or the one before (-1) of the weapons she draws */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void NextWeapon(int32 Step);
+	/** the roll (generator RollClip): toward Dir (zero: the way she is moving, or backward when she stands; a way behind
+	 *  her is a roll backward, facing as she does). False while one is going, just after one, in the air or down */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool StartRoll(FVector Dir);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsRolling() const { return RollTime >= 0.f; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsRollingBack() const { return RollTime >= 0.f && bRollBack; }
+	/** blows miss her now (the middle of a roll) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsDodging() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 Rolls = 0;
+	/** blows that missed her because she was rolling */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 DodgedHits = 0;
+	/** a weapon carried on her while another is drawn (tests): its mesh, or its off-hand mesh */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") UStaticMeshComponent* GetHolsterMesh(int32 Index, bool bOffHand) const;
+	/** the bolt lying ready on the drawn weapon (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") UStaticMeshComponent* GetLoadedBoltMesh() const { return LoadedBoltComp; }
+	/** bolt meshes in flight and stuck where they struck (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetStuckBolts() const { return Stuck.Num(); }
 	/** world time she was last hurt / last hit something (HUD) */
 	float LastHurtTime = -100.f, LastHitTime = -100.f, DeathTime = -100.f;
 
@@ -121,6 +144,15 @@ private:
 	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Generator;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> WeaponComp;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> OffHandComp;
+	/** per weapon (2 x its index, + 1 the off hand): its meshes carried on her while it is not drawn */
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> HolsterComps;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> LoadedBoltComp;
+	void ShowLoadedBolt(bool bShow);
+	// ---- the roll
+	float RollTime = -1.f, RollLen = 0.f, RollReadyAt = -100.f;
+	bool bRollBack = false, bRollIgnoringMove = false;
+	uint16 RollSourceId = 0;
+	void EndRoll();
 	float Health = 100.f, MaxHealth = 100.f;
 	int32 WeaponIndex = -1, AttackIndex = -1;
 	/** per weapon: which of its attack clips comes next */
@@ -150,6 +182,7 @@ private:
 		TWeakObjectPtr<ARDMonster> Target;
 		TWeakObjectPtr<UFXSystemComponent> Fx, Core;
 		TWeakObjectPtr<UPointLightComponent> Light;
+		TWeakObjectPtr<UStaticMeshComponent> Mesh;
 		float Flown = 0.f;
 		int32 Weapon = 0;
 	};
@@ -163,6 +196,10 @@ private:
 	/** effects to stop after a while (the burst's flames) */
 	struct FTimedFx { TWeakObjectPtr<UFXSystemComponent> Fx; float Left = 0.f; };
 	TArray<FTimedFx> TimedFx;
+	/** bolts stuck where they struck, and how long they stay */
+	struct FStuck { TWeakObjectPtr<UStaticMeshComponent> Mesh; float Left = 0.f; };
+	TArray<FStuck> Stuck;
+	void PlaceBoltMesh(UStaticMeshComponent* C, const FRDWeaponDef& W, const FVector& At, const FVector& Dir) const;
 	UFXSystemComponent* SpawnFx(UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, USceneComponent* AttachTo = nullptr, FName Socket = NAME_None);
 	UPointLightComponent* MakeLight(const FVector& At, const FLinearColor& Color, float Intensity, float Radius);
 	ARDMonster* PickTarget(float Reach, bool bNeedSight) const;

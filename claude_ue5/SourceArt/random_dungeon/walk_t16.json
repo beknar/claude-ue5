@@ -1,14 +1,15 @@
 {
- "tag": "t15",
+ "tag": "t16",
  "plan": [
   "rooms:3",
   "expand:+x",
   "rooms:2",
+  "map:a",
   "home"
  ],
  "falls": 0,
- "stuck": 1,
- "doors_opened": 49,
+ "stuck": 0,
+ "doors_opened": 46,
  "doors_failed": 0,
  "containers_opened": 5,
  "containers_failed": 0,
@@ -16,8 +17,8 @@
   "Armory",
   "Guard room",
   "Barracks",
-  "Guard room",
-  "Kitchen"
+  "Kitchen",
+  "Storeroom"
  ],
  "sections": [
   [
@@ -35,34 +36,34 @@
   "opened chest 242 (alpha 1.00)",
   "step expand:+x",
   "expand +x via portal (12450,150), path 53",
-  "entered section (1,0): 49 rooms, reachable 49, monsters 13",
+  "entered section (1,0): 49 rooms, reachable 49, monsters 12",
   "step rooms:2",
-  "to room 41 Guard room (149 tiles)",
-  "STUCK at (15828,-3346) going to (16050,-3450): near 'close door', nearest monster 105 cm",
-  "shot stuck1",
-  "opened barrel 459 (alpha 1.00)",
-  "to room 3 Kitchen (121 tiles)",
-  "opened crate 32 (alpha 1.00)",
+  "to room 41 Kitchen (103 tiles)",
+  "opened barrel 796 (alpha 1.00)",
+  "to room 3 Storeroom (145 tiles)",
+  "opened crate 207 (alpha 1.00)",
+  "step map:a",
+  "shot map_a",
   "step home"
  ],
  "shots": [
-  "rd_t15_stuck1.png"
+  "rd_t16_map_a.png"
  ],
  "monsters": {
-  "count": 57,
-  "moved_3m": 16,
-  "trips": 60,
-  "repaths": 223
+  "count": 66,
+  "moved_3m": 17,
+  "trips": 71,
+  "repaths": 135
  },
  "discovered": [
-  25,
-  163
+  22,
+  169
  ],
  "frame_stats": {
-  "median": 30.3,
-  "p99": 65.7,
+  "median": 28.7,
+  "p99": 40.3,
   "max": 125.0,
-  "gen_median": 59.2,
+  "gen_median": 48.2,
   "gen_max": 125.0
  },
  "sections_final": [
@@ -84,73 +85,73 @@
   ]
  ],
  "container_fit": {
-  "containers": 3122,
-  "closed": 3117,
+  "containers": 3494,
+  "closed": 3489,
   "open": 5,
   "by_body": {
    "SM_Kit_ChestBody": {
-    "n": 627,
-    "closed": 626,
+    "n": 656,
+    "closed": 655,
     "open": 1
    },
    "SM_Kit_TrunkBody": {
-    "n": 120,
-    "closed": 120,
+    "n": 102,
+    "closed": 102,
     "open": 0
    },
    "SM_crate_01_body": {
-    "n": 557,
-    "closed": 556,
-    "open": 1
+    "n": 662,
+    "closed": 662,
+    "open": 0
    },
    "SM_barrel_01_body": {
-    "n": 633,
-    "closed": 631,
+    "n": 738,
+    "closed": 736,
     "open": 2
    },
    "SM_Kit_WardrobeBody": {
-    "n": 108,
-    "closed": 107,
+    "n": 103,
+    "closed": 102,
     "open": 1
    },
    "SM_barrel_02_body": {
-    "n": 544,
-    "closed": 544,
+    "n": 615,
+    "closed": 615,
     "open": 0
    },
    "SM_crate_02_body": {
-    "n": 533,
-    "closed": 533,
-    "open": 0
+    "n": 618,
+    "closed": 617,
+    "open": 1
    }
   },
   "faults": []
  },
  "broken_walls": {
   "sections": 4,
-  "segments": 2224,
+  "segments": 2423,
   "by_piece": {
-   "Wall_Rough_5": 454,
-   "Wall_Rough_3": 442,
-   "Wall_Rough": 434,
-   "Wall_Rough_4": 444,
-   "Wall_Rough_2": 450
+   "Wall_Rough_5": 482,
+   "Wall_Rough_3": 494,
+   "Wall_Rough": 483,
+   "Wall_Rough_4": 499,
+   "Wall_Rough_2": 465
   },
-  "rays": 169650,
-  "face": 149059,
-  "hole": 20591,
+  "rays": 184869,
+  "face": 162036,
+  "hole": 22833,
   "leak": 0,
   "leaks": []
  },
  "prison_cells": {
-  "cells": 163,
-  "cell_sides_with_bars": 163,
+  "cells": 169,
+  "cell_sides_with_bars": 169,
   "doors_open": 2,
-  "rays": 7728,
+  "rays": 8016,
   "leak": 0,
   "leaks": [],
-  "hay": 163,
-  "hay_blocks": 163,
+  "hay": 169,
+  "hay_blocks": 169,
   "hay_tops_cm": [
    143,
    143,

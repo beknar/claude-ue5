@@ -1,15 +1,16 @@
-"""The magic levels' walk / run switch: BP_RDM_CasterCharacter (random_dungeonmagic_level) and BP_RDM2_DarkCasterCharacter
-(random_dungeonmagic_level2) get a bool RunMode, which URDCombatComponent::SetRunMode sets (R on the keyboard, the left
+"""The magic levels' walk / run switch: BP_RDM_CasterCharacter (random_dungeonmagic_level), BP_RDM2_DarkCasterCharacter
+(random_dungeonmagic_level2) and BP_RDM3_RogueCharacter (random_dungeonmagic_level3) get a bool RunMode, which URDCombatComponent::SetRunMode sets (R on the keyboard, the left
 trigger on the gamepad: generator bCasterControls), and a MoveScale of their own that picks her run speed while RunMode is
 on or the run action (Shift, the left stick's click) is held, her walk speed otherwise; a stick pushed part way scales it
-down as before (620's MoveScale, with RunMode). Run after 810 / 817 (their characters), before 811 / 818. Idempotent.
+down as before (620's MoveScale, with RunMode). Run after 810 / 817 / 822 (their characters), before 811 / 818 / 823. Idempotent.
 Args: none"""
 import unreal
 import editor_toolset.toolsets.blueprint as BT
 T = BT.BlueprintTools
 eal = unreal.EditorAssetLibrary
-for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), ("DarkCaster", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter")):
-    bp = unreal.load_asset(PATH); assert bp, PATH + ": run 810 / 817 first"
+for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), ("DarkCaster", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"),
+                 ("Rogue", "/Game/RandomDungeon/Blueprints/BP_RDM3_RogueCharacter")):
+    bp = unreal.load_asset(PATH); assert bp, PATH + ": run 810 / 817 / 822 first"
     WALK, RUN = [float(v) for v in open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + CH.lower() + r"\speeds.txt").read().split()]
     cdo = unreal.get_default_object(bp.generated_class())
     try: cdo.get_editor_property("RunMode")

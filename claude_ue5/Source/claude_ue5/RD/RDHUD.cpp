@@ -2,6 +2,8 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
+#include "RD/RDSection.h"
+#include "Engine/Texture2D.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -253,6 +255,7 @@ void ARDHUD::DrawCombat(float Sc)
 			// (its key: the one that draws it, or casts it when it is cast alongside; on the gamepad the button it is used with)
 			FString Key = Wp.bAlongside ? FString(TEXT("RMB / E")) : FString::Printf(TEXT("%d"), I + 1);
 			if (bPad) Key = Wp.bAlongside ? FString(TEXT("LB")) : (Wp.bSpell && Cb->GetAlongsideSpell() < 0) ? FString(TEXT("LB / RB")) : FString(TEXT("RB"));
+			if (bPad && Gen->bRogueControls) Key = bOn ? FString(TEXT("RB")) : FString(TEXT("Y"));      // (the rogue: Y draws it, RB uses it)
 			DrawText(Key, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc);
 			const FString N = Wp.Name.ToString().ToUpper();
 			GetTextSize(N, Tw, Th, Small, Sc * 1.15f);
@@ -327,9 +330,15 @@ void ARDHUD::DrawHUD()
 	// (the magic levels on the gamepad: Back opens and closes the map)
 	const bool bPadMap = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 
-	if (Gen->bCombat && !Gen->bMapOpen) DrawCombat(Sc);
+	// (the tactical big map is an overlay: the game, its panels and prompts go on under it)
+	const bool bTac = Gen->bTacticalMaps;
+	const bool bBigMap = Gen->bMapOpen && !bTac;
+	if (bTac && Gen->bMapOpen) DrawTacticalMap(Sc, L, Yaw);
+	if (Gen->bCombat && !bBigMap) DrawCombat(Sc);
+	if (bTac && !Gen->bMapOpen) DrawTacticalMinimap(Sc, L, Yaw);
 
 	// ---- minimap (top right), north (+X) up: screen right = world +Y, screen up = world +X
+	if (!bTac)
 	{
 		const float Px = MinimapPixels * Sc, Mg = 24.f * Sc;
 		const FVector2D S0(Canvas->ClipX - Mg - Px, Mg + 26.f * Sc), S1 = S0 + FVector2D(Px);
@@ -411,7 +420,7 @@ void ARDHUD::DrawHUD()
 
 	// ---- interaction prompt
 	const FString What = Gen->DescribeNearest(L);
-	if (!What.IsEmpty() && !Gen->bMapOpen)
+	if (!What.IsEmpty() && !bBigMap)
 	{
 		const URDCombatComponent* Cb = Gen->GetPlayerCombat();
 		const FString T = FString::Printf(TEXT("[%s]  %s"), (Gen->bCasterControls && Cb && Cb->IsUsingGamepad()) ? TEXT("X") : TEXT("F"), *What);
@@ -422,7 +431,7 @@ void ARDHUD::DrawHUD()
 	}
 
 	// ---- full map (M): everything discovered, fitted to the screen, north up
-	if (Gen->bMapOpen)
+	if (bBigMap)
 	{
 		Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.02f, 0.02f, 0.03f, 0.96f));
 		const float TS = Gen->TileSize;
@@ -487,6 +496,289 @@ void ARDHUD::DrawHUD()
 			X += Tw + (bStyle ? 40.f : 24.f) * Sc;
 		}
 	}
+}
+
+// ------------------------------------------------------------------------------------------------ tactical maps
+// (generator bTacticalMaps) The minimap: dark monochrome terrain (floors, a lighter line where a wall is) fading out to
+// a feathered rim, no frame, and bright markers over it. The big map: an overlay centred on her, north up, that moves
+// as she does; only lines (walls and passage borders where a floor tile meets no floor, doorways as bars) over the game,
+// and bright shapes for what matters.
+static const FLinearColor RDTacRed(1.f, 0.16f, 0.10f, 1.f);
+static const FLinearColor RDTacElite(1.f, 0.55f, 0.08f, 1.f);
+static const FLinearColor RDTacGold(1.f, 0.82f, 0.22f, 1.f);
+static const FLinearColor RDTacExit(0.25f, 0.95f, 1.f, 1.f);
+static const FLinearColor RDTacWire(0.30f, 0.95f, 1.f, 1.f);
+static const FLinearColor RDTacDoor(1.f, 0.90f, 0.50f, 1.f);
+static FLinearColor RDTacA(const FLinearColor& C, float A) { return FLinearColor(C.R, C.G, C.B, C.A * A); }
+
+UTexture2D* ARDHUD::GetSoftDisc()
+{
+	if (SoftDisc) return SoftDisc;
+	const int32 N = 64;
+	UTexture2D* T = UTexture2D::CreateTransient(N, N, PF_B8G8R8A8);
+	if (!T || !T->GetPlatformData() || T->GetPlatformData()->Mips.Num() == 0) return nullptr;
+	FTexture2DMipMap& Mip = T->GetPlatformData()->Mips[0];
+	uint8* D = static_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
+	for (int32 Y = 0; Y < N; ++Y)
+		for (int32 X = 0; X < N; ++X)
+		{
+			const float R = FVector2D(X + 0.5f - N * 0.5f, Y + 0.5f - N * 0.5f).Size() / (N * 0.5f);
+			const float A = FMath::Clamp(1.f - FMath::SmoothStep(0.4f, 1.f, R), 0.f, 1.f);
+			uint8* Px = D + (Y * N + X) * 4; Px[0] = Px[1] = Px[2] = 255; Px[3] = (uint8)FMath::RoundToInt(A * 255.f);
+		}
+	Mip.BulkData.Unlock();
+	T->Filter = TF_Bilinear;
+	T->UpdateResource();
+	SoftDisc = T;
+	return T;
+}
+
+void ARDHUD::SoftDot(const FVector2D& P, float R, const FLinearColor& C)
+{
+	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, P.X - R, P.Y - R, R * 2.f, R * 2.f, 0.f, 0.f, 1.f, 1.f, C, BLEND_Translucent);
+}
+
+/** a filled polygon round P: lines fanned from P to every edge, then its outline */
+static void RDFan(ARDHUD* H, const FVector2D& P, const TArray<FVector2D>& V, const FLinearColor& C, const FLinearColor& Edge)
+{
+	for (int32 I = 0; I < V.Num(); ++I)
+	{
+		const FVector2D A = V[I], B = V[(I + 1) % V.Num()];
+		const int32 Steps = FMath::Max(2, FMath::CeilToInt(FVector2D::Distance(A, B) / 1.2f));
+		for (int32 K = 0; K <= Steps; ++K) { const FVector2D Q = FMath::Lerp(A, B, K / float(Steps)); H->DrawLine(P.X, P.Y, Q.X, Q.Y, C, 1.6f); }
+	}
+	for (int32 I = 0; I < V.Num(); ++I) { const FVector2D A = V[I], B = V[(I + 1) % V.Num()]; H->DrawLine(A.X, A.Y, B.X, B.Y, Edge, 1.2f); }
+}
+
+void ARDHUD::Star(const FVector2D& P, float R, const FLinearColor& C)
+{
+	TArray<FVector2D> V;
+	for (int32 K = 0; K < 10; ++K) { const float A = -PI * 0.5f + K * PI / 5.f, Rr = (K % 2) ? R * 0.45f : R; V.Add(P + FVector2D(FMath::Cos(A), FMath::Sin(A)) * Rr); }
+	RDFan(this, P, V, C, FLinearColor(1.f, 0.97f, 0.8f, C.A));
+}
+
+void ARDHUD::Diamond(const FVector2D& P, float R, const FLinearColor& C)
+{
+	RDFan(this, P, { P + FVector2D(0, -R), P + FVector2D(R * 0.75f, 0), P + FVector2D(0, R), P + FVector2D(-R * 0.75f, 0) }, C, FLinearColor(0.85f, 1.f, 1.f, C.A));
+}
+
+void ARDHUD::Triangle(const FVector2D& P, float R, const FLinearColor& C)
+{
+	RDFan(this, P, { P + FVector2D(0, -R), P + FVector2D(R * 0.9f, R * 0.65f), P + FVector2D(-R * 0.9f, R * 0.65f) }, C, FLinearColor(1.f, 0.9f, 0.6f, C.A));
+}
+
+bool ARDHUD::IsElite(const ARDMonster* M) const
+{
+	if (!M || !M->Section || !Gen) return false;
+	const float Avg = Gen->GetMonsterHealth(M->Section->Coord);
+	return Avg > 0.f && M->GetMaxHealth() > Avg * 1.25f;
+}
+
+void ARDHUD::CacheTiles()
+{
+	int32 Sig = 17 + Gen->MapData.Num();
+	for (const auto& KV : Gen->MapData)
+		for (const FRDMapRect& R : KV.Value.Rects) Sig = Sig * 31 + (R.Min.X * 7 + R.Min.Y * 13 + R.Max.X * 3 + R.Max.Y) * 2 + (R.bDiscovered ? 1 : 0);
+	if (Sig == TileSig && Tiles.Num() > 0) return;
+	TileSig = Sig; Tiles.Reset();
+	for (const auto& KV : Gen->MapData)
+		for (const FRDMapRect& R : KV.Value.Rects)
+			for (int32 X = R.Min.X; X < R.Max.X; ++X)
+				for (int32 Y = R.Min.Y; Y < R.Max.Y; ++Y) Tiles.FindOrAdd(FIntPoint(X, Y)) |= 1 | (R.bDiscovered ? 2 : 0) | (R.bCorridor ? 4 : 0);
+}
+
+void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance)
+{
+	Out.Reset();
+	const float TS = Gen->TileSize;
+	auto Discovered = [&](const FVector& P) { const uint8* V = Tiles.Find(FIntPoint(FMath::FloorToInt(P.X / TS), FMath::FloorToInt(P.Y / TS))); return V && (*V & 2); };
+	for (const ARDMonster* Mo : Gen->GetMonsters())
+	{
+		if (!Mo || Mo->IsDead() || FVector::Dist2D(Mo->GetActorLocation(), L) > SenseDistance) continue;      // (sensed nearby)
+		Out.Add({ FVector2D(Mo->GetActorLocation()), IsElite(Mo) ? 1 : 0 });
+	}
+	for (const auto& KV : Gen->Sections)
+	{
+		const ARDSection* S = KV.Value;
+		if (!S) continue;
+		for (int32 I = 0; I < S->GetNumContainers(); ++I)
+		{
+			// (the objectives: chests and trunks; the barrels, crates and wardrobes that line the storerooms would bury the map in stars)
+			const FString Kd = S->GetContainerKind(I);
+			if (S->GetContainerOpenAlpha(I) > 0.05f || (Kd != TEXT("chest") && Kd != TEXT("trunk"))) continue;
+			const FVector P = S->GetContainerLocation(I);
+			if (Discovered(P)) Out.Add({ FVector2D(P), 2 });
+		}
+		// a hallway end on the section's border that leads where she has not been: the next section is not generated, or
+		// nothing of it is discovered (it is generated as she nears it, so "not generated" alone was hardly ever seen)
+		const FVector2D Mid = (FVector2D(Gen->SectionMinTile(S->Coord)) + FVector2D(Gen->SectionTiles * 0.5f)) * TS;
+		for (const FVector& P : S->GetPortalPoints())
+		{
+			const FVector2D D = FVector2D(P) - Mid;
+			const FIntPoint Next = S->Coord + (FMath::Abs(D.X) > FMath::Abs(D.Y) ? FIntPoint(D.X > 0 ? 1 : -1, 0) : FIntPoint(0, D.Y > 0 ? 1 : -1));
+			const FRDSectionMap* M = Gen->MapData.Find(Next);
+			if (!M || !M->Rects.ContainsByPredicate([](const FRDMapRect& R) { return R.bDiscovered; })) Out.Add({ FVector2D(P), 3 });
+		}
+	}
+}
+
+void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
+{
+	UFont* Small = GEngine->GetSmallFont();
+	const float R = MinimapPixels * Sc * 0.5f, Mg = 24.f * Sc;
+	const FVector2D C(Canvas->ClipX - Mg - R, Mg + 14.f * Sc + R);
+	const float Half = StylizedMinimapMeters * 50.f, K = R / Half, TS = Gen->TileSize, Tp = TS * K;
+	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - L.Y, -(W.X - L.X)) * K; };
+	auto Fade = [&](const FVector2D& S) { return FMath::Clamp((1.f - FVector2D::Distance(S, C) / R) / 0.38f, 0.f, 1.f); };
+	// the feathered backdrop, no frame
+	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - R * 1.3f, C.Y - R * 1.3f, R * 2.6f, R * 2.6f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.92f), BLEND_Translucent);
+	CacheTiles();
+	const float Now = GetWorld()->GetTimeSeconds();
+	TSet<FIntPoint> Fresh;           // (sections generated in the last 4 s: their tiles tinted)
+	for (const auto& KV : Gen->MapData) if (KV.Value.GeneratedTime >= 0.f && Now - KV.Value.GeneratedTime < 4.f) Fresh.Add(KV.Key);
+	const int32 X0 = FMath::FloorToInt((L.X - Half) / TS), X1 = FMath::FloorToInt((L.X + Half) / TS);
+	const int32 Y0 = FMath::FloorToInt((L.Y - Half) / TS), Y1 = FMath::FloorToInt((L.Y + Half) / TS);
+	const FLinearColor Room(0.15f, 0.16f, 0.17f, 0.95f), Hall(0.115f, 0.12f, 0.13f, 0.95f), Unknown(0.055f, 0.058f, 0.064f, 0.7f), Wall(0.36f, 0.385f, 0.41f, 0.9f);
+	for (int32 X = X0; X <= X1; ++X)
+		for (int32 Y = Y0; Y <= Y1; ++Y)
+		{
+			const uint8* V = Tiles.Find(FIntPoint(X, Y));
+			if (!V) continue;
+			const FVector2D S = ToS(FVector2D((X + 0.5f) * TS, (Y + 0.5f) * TS));
+			const float A = Fade(S);
+			if (A <= 0.f) continue;
+			FLinearColor Col = (*V & 2) ? ((*V & 4) ? Hall : Room) : Unknown;
+			if (Fresh.Num() && Fresh.Contains(Gen->WorldToSection(FVector((X + 0.5f) * TS, (Y + 0.5f) * TS, 0.f)))) Col = FLinearColor(0.16f, 0.32f, 0.36f, Col.A);
+			Box(S - FVector2D(Tp * 0.5f + 0.5f), S + FVector2D(Tp * 0.5f + 0.5f), RDTacA(Col, A));
+			if (!(*V & 2)) continue;
+			// a wall where this floor meets no floor (world +X is up on the screen, +Y right)
+			const FVector2D W0(X * TS, Y * TS), W1((X + 1) * TS, (Y + 1) * TS);
+			auto Edge = [&](const FVector2D& A_, const FVector2D& B_) { const FVector2D P = ToS(A_), Q = ToS(B_); DrawLine(P.X, P.Y, Q.X, Q.Y, RDTacA(Wall, A), 1.4f * Sc); };
+			if (!Tiles.Contains(FIntPoint(X + 1, Y))) Edge(FVector2D(W1.X, W0.Y), FVector2D(W1.X, W1.Y));
+			if (!Tiles.Contains(FIntPoint(X - 1, Y))) Edge(FVector2D(W0.X, W0.Y), FVector2D(W0.X, W1.Y));
+			if (!Tiles.Contains(FIntPoint(X, Y + 1))) Edge(FVector2D(W0.X, W1.Y), FVector2D(W1.X, W1.Y));
+			if (!Tiles.Contains(FIntPoint(X, Y - 1))) Edge(FVector2D(W0.X, W0.Y), FVector2D(W1.X, W0.Y));
+		}
+	// the markers, bright over the dark ground
+	TArray<FRDPoi> Pois; GatherPois(Pois, L, 2500.f);
+	for (const FRDPoi& Pi : Pois)
+	{
+		const FVector2D S = ToS(Pi.W);
+		if (FVector2D::Distance(S, C) > R * 0.94f) continue;
+		if (Pi.Kind == 2) Star(S, 6.5f * Sc, RDTacGold);
+		else if (Pi.Kind == 3) Diamond(S, 5.5f * Sc, RDTacExit);
+	}
+	for (const FRDPoi& Pi : Pois)
+	{
+		const FVector2D S = ToS(Pi.W);
+		if (FVector2D::Distance(S, C) > R * 0.94f) continue;
+		if (Pi.Kind == 0) { SoftDot(S, 9.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 4.6f * Sc, RDTacRed); }
+		else if (Pi.Kind == 1) { SoftDot(S, 11.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 7.f * Sc, RDTacElite); }
+	}
+	DrawPlayerArrow(C, Yaw - 90.f, 9.f * Sc);
+	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
+	const FLinearColor Ink(0.75f, 0.77f, 0.8f, 0.85f);
+	float Tw, Th;
+	DrawText(TEXT("N"), Ink, C.X - 4.f * Sc, C.Y - R * 0.98f, Small, Sc);
+	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
+	const FString Under = FString::Printf(TEXT("%d / %d rooms    %s  map"), Disc, All, bPad ? TEXT("Back") : TEXT("M"));
+	GetTextSize(Under, Tw, Th, Small, Sc);
+	DrawText(Under, Ink, C.X - Tw * 0.5f, C.Y + R * 0.96f, Small, Sc);
+}
+
+void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
+{
+	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
+	const FVector2D C(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+	const float K = Canvas->ClipY / (TacticalMapMeters * 100.f), TS = Gen->TileSize;
+	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - L.Y, -(W.X - L.X)) * K; };
+	// a light veil only: the game shows through
+	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.012f, 0.02f, 0.28f));
+	CacheTiles();
+	const float HX = C.Y / K + TS, HY = C.X / K + TS;          // (world half extents shown: screen up = world X)
+	const int32 X0 = FMath::FloorToInt((L.X - HX) / TS), X1 = FMath::FloorToInt((L.X + HX) / TS);
+	const int32 Y0 = FMath::FloorToInt((L.Y - HY) / TS), Y1 = FMath::FloorToInt((L.Y + HY) / TS);
+	// the wireframe: where a discovered floor tile meets no floor, joined into runs along each grid line
+	TMap<int32, TArray<int32>> AlongY, AlongX;      // (lines of constant world X, running along Y; lines of constant Y, along X)
+	for (int32 X = X0; X <= X1; ++X)
+		for (int32 Y = Y0; Y <= Y1; ++Y)
+		{
+			const uint8* V = Tiles.Find(FIntPoint(X, Y));
+			if (!V || !(*V & 2)) continue;
+			if (!Tiles.Contains(FIntPoint(X + 1, Y))) AlongY.FindOrAdd(X + 1).Add(Y);
+			if (!Tiles.Contains(FIntPoint(X - 1, Y))) AlongY.FindOrAdd(X).Add(Y);
+			if (!Tiles.Contains(FIntPoint(X, Y + 1))) AlongX.FindOrAdd(Y + 1).Add(X);
+			if (!Tiles.Contains(FIntPoint(X, Y - 1))) AlongX.FindOrAdd(Y).Add(X);
+		}
+	auto Wire = [&](const FVector2D& A, const FVector2D& B)
+	{
+		const FVector2D P = ToS(A), Q = ToS(B);
+		DrawLine(P.X, P.Y, Q.X, Q.Y, RDTacA(RDTacWire, 0.12f), 6.f * Sc);       // (glow)
+		DrawLine(P.X, P.Y, Q.X, Q.Y, RDTacA(RDTacWire, 0.95f), 1.7f * Sc);
+	};
+	auto Runs = [&](TMap<int32, TArray<int32>>& Lines, bool bAlongY)
+	{
+		for (auto& KV : Lines)
+		{
+			TArray<int32>& Ts = KV.Value; Ts.Sort();
+			int32 Start = Ts[0], Prev = Ts[0];
+			for (int32 I = 1; I <= Ts.Num(); ++I)
+			{
+				if (I < Ts.Num() && Ts[I] == Prev + 1) { Prev = Ts[I]; continue; }
+				if (I < Ts.Num() && Ts[I] == Prev) continue;
+				const float Line = KV.Key * TS, A = Start * TS, B = (Prev + 1) * TS;
+				if (bAlongY) Wire(FVector2D(Line, A), FVector2D(Line, B)); else Wire(FVector2D(A, Line), FVector2D(B, Line));
+				if (I < Ts.Num()) { Start = Prev = Ts[I]; }
+			}
+		}
+	};
+	Runs(AlongY, true); Runs(AlongX, false);
+	// doorways: a bright bar across the gap in the wall (a door stands on a grid line: the bar runs along it)
+	for (const auto& KV : Gen->MapData)
+		for (const FVector2D& D : KV.Value.Doors)
+		{
+			const FVector2D Q = ToS(D);
+			if (Q.X < -20.f || Q.Y < -20.f || Q.X > Canvas->ClipX + 20.f || Q.Y > Canvas->ClipY + 20.f) continue;
+			const uint8* Va = Tiles.Find(FIntPoint(FMath::FloorToInt((D.X + 30.f) / TS), FMath::FloorToInt((D.Y + 30.f) / TS)));
+			const uint8* Vb = Tiles.Find(FIntPoint(FMath::FloorToInt((D.X - 30.f) / TS), FMath::FloorToInt((D.Y - 30.f) / TS)));
+			if (!((Va && (*Va & 2)) || (Vb && (*Vb & 2)))) continue;          // (doors of rooms she has found)
+			const bool bOnX = FMath::Abs(D.X / TS - FMath::RoundToFloat(D.X / TS)) < FMath::Abs(D.Y / TS - FMath::RoundToFloat(D.Y / TS));
+			const FVector2D Half = bOnX ? FVector2D(0.f, TS * 0.36f) : FVector2D(TS * 0.36f, 0.f);
+			const FVector2D P0 = ToS(D - Half), P1 = ToS(D + Half);
+			DrawLine(P0.X, P0.Y, P1.X, P1.Y, RDTacA(RDTacDoor, 0.25f), 7.f * Sc);
+			DrawLine(P0.X, P0.Y, P1.X, P1.Y, RDTacDoor, 3.f * Sc);
+		}
+	// what matters, as bright shapes
+	TArray<FRDPoi> Pois; GatherPois(Pois, L, 2500.f);
+	for (const FRDPoi& Pi : Pois)
+	{
+		const FVector2D S = ToS(Pi.W);
+		if (S.X < 0.f || S.Y < 0.f || S.X > Canvas->ClipX || S.Y > Canvas->ClipY) continue;
+		if (Pi.Kind == 0) { SoftDot(S, 13.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 6.5f * Sc, RDTacRed); }
+		else if (Pi.Kind == 1) { SoftDot(S, 16.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 10.f * Sc, RDTacElite); }
+		else if (Pi.Kind == 2) Star(S, 10.f * Sc, RDTacGold);
+		else Diamond(S, 9.f * Sc, RDTacExit);
+	}
+	DrawPlayerArrow(C, Yaw - 90.f, 13.f * Sc);
+	// title, compass and key
+	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
+	float Tw, Th;
+	const FString Title = TEXT("MAP");
+	GetTextSize(Title, Tw, Th, Medium, Sc * 1.3f);
+	DrawText(Title, RDTacA(RDTacWire, 0.95f), C.X - Tw * 0.5f, 30.f * Sc, Medium, Sc * 1.3f);
+	const FString Sub = FString::Printf(TEXT("N up   ·   %s  close"), bPad ? TEXT("Back") : TEXT("M"));
+	GetTextSize(Sub, Tw, Th, Small, Sc);
+	DrawText(Sub, FLinearColor(0.8f, 0.92f, 0.95f, 0.85f), C.X - Tw * 0.5f, 30.f * Sc + 36.f * Sc, Small, Sc);
+	float Y = Canvas->ClipY - 150.f * Sc; const float X = 40.f * Sc;
+	auto Key = [&](int32 Kind, const TCHAR* What)
+	{
+		const FVector2D P(X, Y + 8.f * Sc);
+		if (Kind == 0) SoftDot(P, 6.f * Sc, RDTacRed); else if (Kind == 1) Triangle(P, 8.f * Sc, RDTacElite); else if (Kind == 2) Star(P, 8.f * Sc, RDTacGold);
+		else if (Kind == 3) Diamond(P, 7.f * Sc, RDTacExit); else DrawLine(P.X - 8.f * Sc, P.Y, P.X + 8.f * Sc, P.Y, RDTacDoor, 3.f * Sc);
+		DrawText(What, FLinearColor(0.85f, 0.92f, 0.95f, 0.9f), X + 18.f * Sc, Y, Small, Sc);
+		Y += 24.f * Sc;
+	};
+	Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unopened chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
 }
 
 FString ARDHUD::KindCode(ERDRoomKind K)

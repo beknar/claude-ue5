@@ -27,11 +27,11 @@ The repository holds none of these assets: only scripts, source code and small d
 | [Modular Dungeon (Gothic Dungeon)](https://www.fab.com/listings/6db7a85d-aa42-4e2b-8ae6-85b434faf0fe) | not recorded locally (see the listing) | `HallowedDepths` | both dungeons (crypt doors, cell doors, tombs, candles); random_dungeoncombat_level (the RealisticBlood masks of the blood decals) |
 | [Modular Dungeon (Dungeon, Medieval Dungeon)](https://www.fab.com/listings/0ff28c1f-790d-4a1b-92be-04617439270b) | not recorded locally (see the listing) | `DarkHalls` | both dungeons (brazier, pillars, plinths, bone piles); both magic levels (the fire spell's bolt `NS_FirePool` and the flare where it bursts `NS_FireWings`, in copies that start warm) |
 | [Medieval Furniture Props](https://www.fab.com/listings/aa584fda-82a3-4f6f-8675-e2f8fab14daf) | Hivemind | `Gothic_Props` | both dungeons (pews, tables, chairs, bookshelves, banners) |
-| [Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) | not recorded locally (see the listing) | `Medieval_Weapons` | both dungeons (weapons on the walls); random_dungeoncombat_level (her sword, spear, axe and shield); random_dungeonmagic_level2 (the dark caster's sword); starship_level (the ribbon trail behind the contrails) |
+| [Dark Fantasy Weapons](https://www.fab.com/listings/244607ad-e819-4320-bbc7-687b844b5bed) | not recorded locally (see the listing) | `Medieval_Weapons` | both dungeons (weapons on the walls); random_dungeoncombat_level (her sword, spear, axe and shield); random_dungeonmagic_level2 (the dark caster's sword); random_dungeonmagic_level3 (the Rogue's daggers and crossbow, the arrow cut down to her bolts, the arrow trail behind them and the sparks where they strike); starship_level (the ribbon trail behind the contrails) |
 | [Creatures Mega Pack](https://www.fab.com/listings/13143978-3009-4fb1-893c-689e28b2e122) | Bugrimov Maksim | `Creatures_Pack` | both dungeons (the monsters); the monster gallery |
 | [Weapon And Shield Animations](https://www.fab.com/listings/eb3cfd11-3525-4a0d-9f15-793f62847f6a) | not recorded locally (see the listing) | `Weapon_Shield_Animations` | random_dungeoncombat_level (sword clips) |
 | [Spear And Shield Animations](https://www.fab.com/listings/0302d959-984a-48be-9e4f-033dd545b525) | not recorded locally (see the listing) | `Spear_And_Shield_Animations` | random_dungeoncombat_level (spear clips) |
-| [92 Animations For Warrior](https://www.fab.com/listings/84b7b209-1450-4a0a-a46f-cc6d4ab61eac) | not recorded locally (see the listing) | `Animations_Warrior` | random_dungeoncombat_level (axe clips); both magic levels (the casters' flinch and death) |
+| [92 Animations For Warrior](https://www.fab.com/listings/84b7b209-1450-4a0a-a46f-cc6d4ab61eac) | not recorded locally (see the listing) | `Animations_Warrior` | random_dungeoncombat_level (axe clips); the magic levels (the casters' and the Rogue's flinch and death) |
 | [House Forge: Modular House Building Kit](https://www.fab.com/listings/277b975e-2158-41ef-908a-ef08bc26a409) | Hivemind | `HouseForge_01` | random_isometric_village_level (houses, Viking props) |
 | Medieval Castle Kit - Medieval Castle Props | Hivemind | `Castle_Collection` | random_isometric_village_level (props) |
 | [[Nanite] Medieval War Camp Kit](https://www.fab.com/listings/3cc08b13-9cb1-46a5-9bd2-47d743ee82b9) | Hivemind | `WarCamp_Collection` | random_isometric_village_level (props) |
@@ -70,12 +70,12 @@ All in `random_dungeoncombat_level`. `claude_ue5/SourceArt/random_dungeon_combat
 | Library | Author / publisher | Obtained from | Used for |
 |---|---|---|---|
 | Human Vocals Vol1 (the voice "Ruby") | Liron Peer, Mashmashu Studio | Complete RPG Creator Bundle | her cries when hurt and dying, her effort on a swing |
-| Quest Game | Epic Stock Media | Humble Bundle: 2D Game Creation Mega Bundle (GameDev Market) | her footsteps (walking and running); chests opening and closing |
-| Combat Sounds Bundle | The Sound Guild | Complete RPG Creator Bundle | weapon swings and hits, drawing a weapon, a monster's strike, a body falling, blood splashes |
+| Quest Game | Epic Stock Media | Humble Bundle: 2D Game Creation Mega Bundle (GameDev Market) | her footsteps (walking and running); chests opening and closing; a crossbow bolt striking (random_dungeonmagic_level3) |
+| Combat Sounds Bundle | The Sound Guild | Complete RPG Creator Bundle | weapon swings and hits, drawing a weapon, a monster's strike, a body falling, blood splashes; the Rogue's dagger stabs and her roll (random_dungeonmagic_level3) |
 | Monster Sounds Volume 1 | The Sound Guild | Complete RPG Creator Bundle | the daemon's, horned demon's and spider's voices; the spider's steps |
 | Ambience Sounds | The Sound Guild | Complete RPG Creator Bundle | the room tone and the tenser fighting atmosphere; the rumble of a section being generated |
 | Monster Library Vol 1, Monster Library Vol 2, Elemental Spells Vol 1 (Monster & Magic Bundle) | Khron Studio (Jorge Guillén) | Complete RPG Creator Bundle | the mutant's and troll's voices, monster footsteps; the impact of a section appearing; the fire spell of the magic levels (Elemental Spells: the charge, the bolt, the burst) |
-| Sound Of Survival Vol 1 | Khron Studio | Complete RPG Creator Bundle | doors and cell doors opening and closing; the hearth |
+| Sound Of Survival Vol 1 | Khron Studio | Complete RPG Creator Bundle | doors and cell doors opening and closing; the hearth; the Rogue's crossbow raised and loosed, and its bolt striking (the bow's sounds: there is no crossbow in the library) |
 | Monster Sound FX Pack 1 | author not named in the files (GameDev Market) | Humble Bundle: 2D Game Creation Mega Bundle | the ripper dog's voice |
 | RPG Game SFX (from the RPG Game Builder Assets Kit) | author not named in the files | Fanatical: RPG Game Builder Assets Kit | torches and braziers burning |
 | Epic Fantasy Music Pack (Volume 1) | Arcade Origins | Fanatical: Ultimate SFX and Music Bundle | the battle music and one of the wandering tracks |
@@ -87,6 +87,7 @@ All in `random_dungeoncombat_level`. `claude_ue5/SourceArt/random_dungeon_combat
 |---|---|---|
 | jrpg-fem5-tripo, the FF and FF2 anime females | generated with Tripo AI (GLB files supplied by the project owner) | the player of sf-city-level, random_level, both dungeons and the village; ff_level, ff2_level, castle_level, fantasy_castle_level |
 | girl-caster-tripo, girl-darkcaster-tripo | generated with Tripo AI (GLB files supplied by the project owner; their idle, casts and sword cuts made by `caster_clips.py` / `darkcaster_clips.py`) | the player of random_dungeonmagic_level and random_dungeonmagic_level2 |
+| Rogue | generated with Tripo AI (`ai models/Rogue.glb`, supplied by the project owner; her idle, dagger strikes, crossbow shot and roll made by `rogue_clips.py`) | the player of random_dungeonmagic_level3 |
 | The Meshy biped; the JRPG characters Fem1, Fem3, Fem4 | generated with Meshy AI (supplied by the project owner) | L_Meshy_Meadow |
 | fig4 | Epic Games MetaHuman, conformed to a 3D scan supplied by the project owner | L_Fig4_Studio, L_Fig4_Meadow |
 | UE5 mannequins (Manny, Quinn), the Third Person template and its animations | Epic Games (Unreal Engine) | locomotion retargeted onto every character; the template characters |

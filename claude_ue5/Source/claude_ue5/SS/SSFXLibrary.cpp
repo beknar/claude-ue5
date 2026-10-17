@@ -13,6 +13,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/Size/ParticleModuleSize.h"
 #include "Particles/Spawn/ParticleModuleSpawn.h"
+#include "Particles/Spawn/ParticleModuleSpawnPerUnit.h"
 #include "Particles/TypeData/ParticleModuleTypeDataBase.h"
 #include "Particles/TypeData/ParticleModuleTypeDataRibbon.h"
 #include "UObject/UnrealType.h"
@@ -121,6 +122,30 @@ int32 USSFXLibrary::TuneParticleSystem(UParticleSystem* System, float Size, FLin
 					}
 				}
 			}
+		}
+	}
+	System->PostEditChange();
+	System->MarkPackageDirty();
+#endif
+	return Changed;
+}
+
+int32 USSFXLibrary::SetSpawnPerUnit(UParticleSystem* System, float UnitScalar, bool bSpawnInitialParticle)
+{
+	int32 Changed = 0;
+#if WITH_EDITOR
+	if (!System) return 0;
+	System->Modify();
+	for (UParticleEmitter* E : System->Emitters)
+	{
+		if (!E) continue;
+		for (UParticleLODLevel* L : E->LODLevels)
+		{
+			if (!L) continue;
+			if (UParticleModuleTypeDataRibbon* Rb = Cast<UParticleModuleTypeDataRibbon>(L->TypeDataModule)) { Rb->Modify(); Rb->bSpawnInitialParticle = bSpawnInitialParticle; ++Changed; }
+			for (UParticleModule* M : L->Modules)
+				if (UParticleModuleSpawnPerUnit* Su = Cast<UParticleModuleSpawnPerUnit>(M))
+					if (UnitScalar > 0.f) { Su->Modify(); Su->UnitScalar = UnitScalar; ++Changed; }
 		}
 	}
 	System->PostEditChange();

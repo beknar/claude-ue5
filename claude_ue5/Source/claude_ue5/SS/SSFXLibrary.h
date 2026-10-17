@@ -22,4 +22,8 @@ public:
 	 *  the particle's life), lifetime (s) and, when given, the material. Values <= 0 / null leave that setting alone.
 	 *  Returns the number of modules changed. */
 	UFUNCTION(BlueprintCallable, Category = "Starship|FX") static int32 TuneParticleSystem(UParticleSystem* System, float Size, FLinearColor Color, float Lifetime, UMaterialInterface* Material);
+	/** sets, in every emitter that spawns by distance: one particle every UnitScalar cm of movement, and whether a ribbon
+	 *  starts with a particle where it is spawned (a short, fast flight then has a trail from its first frame).
+	 *  random_dungeonmagic_level3's crossbow bolt (pipeline/unreal/822). Returns the number of modules changed. */
+	UFUNCTION(BlueprintCallable, Category = "Starship|FX") static int32 SetSpawnPerUnit(UParticleSystem* System, float UnitScalar, bool bSpawnInitialParticle);
 };

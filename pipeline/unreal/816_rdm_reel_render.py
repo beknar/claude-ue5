@@ -1,15 +1,16 @@
-"""random_dungeonmagic_level (and _level2) demo reel: the Movie Render Queue job for LS_RDM_Showcase (LS_RDM2_Showcase) on the
-playable level itself (no Cine copy: the game runs as in play, under the level's BP_RDM_GameMode / BP_RDM2_GameMode, and
+"""random_dungeonmagic_level (and _level2, _level3) demo reel: the Movie Render Queue job for LS_RDM_Showcase (LS_RDM2_Showcase,
+LS_RDM3_Showcase) on the playable level itself (no Cine copy: the game runs as in play, under the level's BP_RDM_GameMode /
+BP_RDM2_GameMode / BP_RDM3_GameMode, and
 the pilot script plays it). Arm 815 first.
   preview  640 x 360        final  1920 x 1080
 Both use 8 temporal samples a frame and no other anti-aliasing: the game is stepped at 240 Hz either way, so the pilot
 plays the same reel in the preview and in the final render.
 Sound: the job has a .wav output (the game's own mix, rendered in step with the frames). The queue only renders audio
 when the editor was started with -deterministicaudio (the non-realtime audio device); without it the .wav is missing
-or silent and the log says so. Args: out_dir preview|final [file_prefix] [level: 1 or 2]"""
+or silent and the log says so. Args: out_dir preview|final [file_prefix] [level: 1, 2 or 3]"""
 import sys, unreal
 OUT = sys.argv[1]; MODE = sys.argv[2] if len(sys.argv) > 2 else "preview"; PREFIX = sys.argv[3] if len(sys.argv) > 3 else "rdm"
-L2 = len(sys.argv) > 4 and sys.argv[4] == "2"; SUF = "2" if L2 else ""
+LV = sys.argv[4] if len(sys.argv) > 4 else "1"; SUF = "" if LV == "1" else LV
 mq = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
 queue = mq.get_queue(); queue.delete_all_jobs()
 j = queue.allocate_new_job(unreal.MoviePipelineExecutorJob)

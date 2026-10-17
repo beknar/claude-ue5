@@ -15,7 +15,8 @@ checks what happens. Plan = comma separated steps:
             average damage ~ her average blow)
   death     she is brought to 0: she is down, and after the respawn time stands in the middle with full hit points
   regen     hurt and left alone, her hit points come back
-  map       the stylised maps have their data (chests, torches) and M opens / closes the big map
+  map       the stylised maps have their data (chests, torches) and M opens / closes the big map; with the tactical maps
+            (bTacticalMaps) the big map is an overlay: with it open she walks and the left mouse button attacks
   blood     a blow on a monster throws a burst (drops in the air, spray) from where the monster is, drops land as
             decals; a blow on her throws one from her
   wounds    a monster she hits gets a wound a blow, on its skin, in an overlay material of its own whose parameters
@@ -197,10 +198,21 @@ def step_regen():
     c.revive(False)
 def step_map():
     gen = G["gen"]; md = gen.get_editor_property("map_data"); m0 = md.get(unreal.IntPoint(0, 0))
-    gen.set_map_open(True); yield from wait(0.6); opened = bool(gen.get_editor_property("map_open")); gen.set_map_open(False); yield from wait(0.3)
-    ok = bool(gen.get_editor_property("stylized_map")) and m0 is not None and len(m0.rects) > 40 and len(m0.doors) > 20 and len(m0.chests) > 10 and len(m0.torches) > 20 and opened and not gen.get_editor_property("map_open")
-    step_result("map", ok, stylized=bool(gen.get_editor_property("stylized_map")), rooms_and_hallways=len(m0.rects) if m0 else 0, doors=len(m0.doors) if m0 else 0, chests=len(m0.chests) if m0 else 0, torches=len(m0.torches) if m0 else 0,
-                sections_on_the_map=len(md), opened=opened)
+    gen.set_map_open(True); yield from wait(0.6); opened = bool(gen.get_editor_property("map_open"))
+    # the tactical big map (bTacticalMaps) is an overlay: under it she walks and fights on
+    tac = bool(gen.get_editor_property("tactical_maps")); under = {}
+    if tac:
+        c = cb(); p = G["pawn"]; c.revive(True); c.set_scripted_only(False); k = unreal.Key(); k.set_editor_property("key_name", "LeftMouseButton")
+        a = p.get_actor_location(); t0 = now()
+        while now() - t0 < 0.8: p.add_movement_input(p.get_actor_forward_vector(), 1.0, True); yield
+        n0 = c.attacks_made; c.simulate_key(k, True); yield from wait(0.15); c.simulate_key(k, False); yield from wait(0.3)
+        under = {"walked_cm": round((p.get_actor_location() - a).length()), "attacks": c.attacks_made - n0}
+        while c.is_attacking(): yield
+    gen.set_map_open(False); yield from wait(0.3)
+    ok = (bool(gen.get_editor_property("stylized_map")) and m0 is not None and len(m0.rects) > 40 and len(m0.doors) > 20 and len(m0.chests) > 10 and len(m0.torches) > 20 and opened
+          and not gen.get_editor_property("map_open") and (not tac or (under["walked_cm"] > 100 and under["attacks"] == 1)))
+    step_result("map", ok, stylized=bool(gen.get_editor_property("stylized_map")), tactical=tac, rooms_and_hallways=len(m0.rects) if m0 else 0, doors=len(m0.doors) if m0 else 0, chests=len(m0.chests) if m0 else 0, torches=len(m0.torches) if m0 else 0,
+                sections_on_the_map=len(md), opened=opened, with_the_big_map_open=under)
 
 def blow(m, tries=25.0):
     """she strikes until one blow lands on m (the generator: yields); returns nothing, the caller reads the counters"""

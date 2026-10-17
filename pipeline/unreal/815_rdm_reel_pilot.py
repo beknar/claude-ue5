@@ -1,5 +1,5 @@
-"""random_dungeonmagic_level and random_dungeonmagic_level2 demo reel: the pilot and the recorder (generalised from 795; the
-level is the one the render or PIE plays). Plays the caster (girl-caster-tripo; level 2: the dark caster,
+"""random_dungeonmagic_level, random_dungeonmagic_level2 and random_dungeonmagic_level3 demo reel: the pilot and the recorder
+(generalised from 795; the level is the one the render or PIE plays). Plays the caster (girl-caster-tripo; level 2: the dark caster,
 girl-darkcaster-tripo, with a sword in her right hand and fire from her left) through the dungeon with the calls the keys make (movement input at her walk or run speed, the
 combat component's cast, the generator's F on doors and chests), turns the game's own third-person camera, and records
 the play for the overlay (pipeline/blender_numpy/rdm_reel_overlay.py: the Movie Render Queue does not draw the HUD). The
@@ -14,24 +14,31 @@ and burns it down with the fire spell from range, runs east (opening the doors i
 next section is generated, runs into the new section, fights what is there and opens a chest there if there is time.
 In level 2 a fight is fire and steel: two bolts from range, then she closes in and finishes it with the sword (a monster
 that comes at her first meets the sword).
-Writes SourceArt/random_dungeon_magic[2]/cine_render.json (rehearse: cine_rehearsal.json) and logs "RDMREEL saved".
-Keeps its namespace (tick callback); a pilot left armed by an earlier run is dropped. Args: [render|rehearse] [seconds] [level 2: "2"]"""
+In level 3 (the Rogue) a fight is the crossbow and the daggers: up to two bolts from range (2 draws it), then the daggers
+(1) and she closes in and stabs; when the monster swings at her up close she rolls back out of it (B), twice a fight at
+most. The record then also has her rolls, the blows that missed her in a roll, and what the tactical minimap marks
+(unopened chests and trunks, the hallway exits toward sections she has not seen, the strongest monsters).
+Writes SourceArt/random_dungeon_magic[2|3]/cine_render.json (rehearse: cine_rehearsal.json) and logs "RDMREEL saved".
+Keeps its namespace (tick callback); a pilot left armed by an earlier run is dropped. Args: [render|rehearse] [seconds] [level: "2" or "3"]"""
 import unreal, sys, json, math, os
 __keep__ = True
 MODE = sys.argv[1] if len(sys.argv) > 1 else "render"
 DUR = float(sys.argv[2]) if len(sys.argv) > 2 else 45.0
 FPS = 30; SEED = 20261015
 CAST_GAP = 950.0            # she stops this far (cm, to the monster's capsule) and casts
-_lv = ""
+_lv = "1"
 for _w in unreal.ObjectIterator(unreal.World):
-    if "random_dungeonmagic_level2" in _w.get_name(): _lv = "2"
-L2 = (sys.argv[3] == "2") if len(sys.argv) > 3 else _lv == "2"           # (the argument wins: the editor may have the other level open)
-OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("2" if L2 else "") + "\\" + ("cine_render.json" if MODE == "render" else "cine_rehearsal.json")
-SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ("darkcaster" if L2 else "caster") + r"\speeds.txt"
+    for _n in ("2", "3"):
+        if "random_dungeonmagic_level" + _n in _w.get_name(): _lv = _n
+LV = sys.argv[3] if len(sys.argv) > 3 else _lv           # (the argument wins: the editor may have another level open)
+L2, L3 = LV == "2", LV == "3"
+OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + ("cine_render.json" if MODE == "render" else "cine_rehearsal.json")
+SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + {"1": "caster", "2": "darkcaster", "3": "rogue"}[LV] + r"\speeds.txt"
 V = unreal.Vector; Rot = unreal.Rotator; GS = unreal.GameplayStatics; IP = unreal.IntPoint
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {}
-S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": "", "note": {}, "hp": {}, "mapsig": {}, "disc": {}, "snd": {}, "bursts": 0, "music": None, "casts": 0, "bolts": 0}
+S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": "", "note": {}, "hp": {}, "mapsig": {}, "disc": {}, "snd": {}, "bursts": 0, "music": None, "casts": 0, "bolts": 0,
+     "rolls": 0, "dodged": 0, "poi_static": {}, "tier": {}}
 if getattr(unreal, "_rdm_reel", None) is not None:
     try: unreal.unregister_slate_post_tick_callback(unreal._rdm_reel)
     except Exception: pass
@@ -98,7 +105,7 @@ def threat():
         if not alive(m): continue
         ml = m.get_actor_location(); d = d2(l, ml)
         if abs(ml.z - l.z) > 300: continue
-        if (m.is_aggro() and d < 1500.0) or (d < 1500.0 and sees(l, m)):          # (the spell reaches 14 m: she takes on what she sees that far)
+        if (m.is_aggro() and d < 1500.0) or (d < 1500.0 and sees(l, m)):          # (the spell reaches 14 m, the crossbow 26: she takes on what she sees within 15)
             if best is None or d < best[0]: best = (d, m)
     return best[1] if best else None
 def chests_of(c):
@@ -127,7 +134,7 @@ def open_chest(at, stand=None):
     while T() - t0 < 9.0:
         l = loc()
         if d2(l, stand) < 45.0: break
-        move(route.target(90.0), run=d2(l, stand) > 600.0); doors(); camera(side=-22.0, pitch=-24.0, rate=90.0)
+        move(route.target(90.0), run=d2(l, stand) > (150.0 if L3 else 600.0)); doors(); camera(side=-22.0, pitch=-24.0, rate=90.0)
         stuck = stuck + G["el"] if d2(loc(), last) < 40.0 * G["el"] else 0.0; last = loc()
         if stuck > 0.8:
             stuck = 0.0; G["chest_repaths"] = G.get("chest_repaths", 0) + 1
@@ -168,6 +175,51 @@ def fight(m):
         yield
     G["last_fight"] = T()
     if not alive(m): event("kill", monster=name, casts=c.attacks_made - G.get("casts0", 0), blows=c.hits_landed - b0, seconds=round(T() - t0, 2), she_lost=round(max(0.0, h0 - c.get_health())), its_hit_points=hp0)
+    else: event("left", monster=name)
+    t1 = T()
+    while T() - t1 < 0.5: camera(side=18.0, rate=70.0); yield
+
+def key_hit(k): G["key_hit"] = k; G["keys_t"] = T()
+def fight3(m):
+    """(level 3) the crossbow from range, then the daggers; a roll back out of a blow up close"""
+    c = G["combat"]; p = G["pawn"]; n = G["fights"]; G["fights"] += 1
+    name = str(m.monster_name); hp0 = m.get_max_health(); h0 = c.get_health(); t0 = T(); b0 = c.hits_landed
+    event("fight", monster=name, its_hit_points=hp0, its_damage=m.get_damage(), section=[m.get_editor_property("section").get_editor_property("coord").x, 0],
+          from_m=round((d2(loc(), m.get_actor_location())) / 100.0, 1))
+    wd = G["gen"].get_editor_property("weapons"); reach = wd[0].reach; xbow = next(i for i, d in enumerate(wd) if d.spell)
+    route = None; rt = -9.0; shots = 0; rolls = 0; phase = "bolts"; last_roll = -9.0; gap_shot = 1600.0     # (the crossbow reaches 26 m: she shoots from 16)
+    while alive(m) and not c.is_dead() and T() - t0 < 16.0 and T() < DUR + 1.0:
+        l = loc(); ml = m.get_actor_location(); gap = d2(l, ml) - m.capsule_component.get_scaled_capsule_radius()
+        G["heading"] = yaw_to(l, ml)
+        face = lambda: p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=turn(p.get_actor_rotation().yaw, yaw_to(l, ml), 720.0 * G["el"])), False)
+        if c.is_rolling(): camera(side=24.0 if wide_here() else 8.0, pitch=-16.0 if wide_here() else -25.0, rate=80.0); yield; continue
+        # its blow is coming and she is in reach of it: a roll back (she keeps her eyes on it)
+        if m.is_attacking() and gap < 230.0 and rolls < 1 and T() - last_roll > 1.5:
+            face()
+            if c.start_roll(V(l.x - ml.x, l.y - ml.y, 0.0)):             # (away from it: behind her, a roll backward)
+                rolls += 1; last_roll = T(); key_hit("b"); event("roll", monster=name, gap_cm=round(gap), back=bool(c.is_rolling_back())); yield; continue
+        if not c.is_attacking():
+            if phase == "bolts" and (shots >= 2 or (gap < 330.0 and shots >= 1) or (gap < 200.0)):
+                phase = "daggers"
+                if c.get_weapon_index() != 0: c.select_weapon(0); key_hit("1")
+            if phase == "bolts":
+                if c.get_weapon_index() != xbow: c.select_weapon(xbow); key_hit("2")
+                if gap > gap_shot or not sees(l, m):
+                    if route is None or T() - rt > 0.7: route = Route(path(l, ml)); rt = T()
+                    move(route.target() if len(route.p) > 1 and gap > 400.0 else ml, run=True); doors()
+                else:
+                    face()
+                    if c.start_attack(): key_hit("lmb"); shots += 1
+            elif gap < reach - 10.0:
+                face()
+                if c.start_attack(): key_hit("lmb")
+            else:
+                if route is None or T() - rt > 0.5: route = Route(path(l, ml)); rt = T()
+                move(route.target() if len(route.p) > 1 and gap > 400.0 else ml, run=True); doors()
+        camera(side=(30.0 if n % 2 == 0 else -30.0) if wide_here() else 8.0, pitch=-15.0 if wide_here() else -25.0, rate=80.0)
+        yield
+    G["last_fight"] = T()
+    if not alive(m): event("kill", monster=name, casts=shots, blows=c.hits_landed - b0, seconds=round(T() - t0, 2), she_lost=round(max(0.0, h0 - c.get_health())), its_hit_points=hp0, rolls=rolls)
     else: event("left", monster=name)
     t1 = T()
     while T() - t1 < 0.5: camera(side=18.0, rate=70.0); yield
@@ -222,7 +274,7 @@ def run():
         if 1 < len(pts) <= 18 and (prey is None or len(pts) < prey[0]): prey = (len(pts), q)
     if prey is not None:
         event("hunt", monster=str(prey[1].monster_name), way_m=prey[0] * 3)
-        seg("fight"); G["casts0"] = G["combat"].attacks_made; yield from fight(prey[1])
+        seg("fight"); G["casts0"] = G["combat"].attacks_made; yield from (fight3 if L3 else fight)(prey[1])
     seg("walk"); stuck = 0.0; last = loc(); new_route = False; east = route.p[route.i:]; hunted = False; chest1_done = False
     def onward():
         back = path(loc(), portal)
@@ -239,8 +291,16 @@ def run():
                 if 1 < len(pts) <= 14 and (best is None or len(pts) < best[0]): best = (len(pts), q)
             if best is not None: event("hunt", monster=str(best[1].monster_name), way_m=best[0] * 3); m = best[1]
         if m is not None:
-            seg("fight"); G["casts0"] = G["combat"].attacks_made; yield from fight(m); seg("walk"); stuck = 0.0; last = loc()
+            seg("fight"); G["casts0"] = G["combat"].attacks_made; yield from (fight3 if L3 else fight)(m); seg("walk"); stuck = 0.0; last = loc()
             here = gen.world_to_section(loc())
+            if here.x == 0 and L3 and not G.get("chest_on_way") and T() < DUR - 16.0:
+                # (level 3: a container on the way east after the first fight: the reel opens more than one)
+                l = loc(); chs = []
+                for q in chests_of(here):
+                    if d2(q, l) > 1500.0 or q.x < l.x - 200.0: continue             # (close by, and on the way east)
+                    st = stand_by_chest(q, l)
+                    if st is not None and len(path(l, st)) <= 5: chs.append((len(path(l, st)), q, st))
+                if chs: G["chest_on_way"] = True; _, q, st = min(chs, key=lambda x: x[0]); seg("chest"); yield from open_chest(q, st); seg("walk")
             if here.x == 0: route = onward()
             elif not chest1_done and T() < DUR - 5.0:
                 # in the new section, after the fight: a chest near her, if there is one
@@ -261,12 +321,30 @@ def run():
                 if 1 < len(pts) <= 26 and (best is None or len(pts) < len(best[1])): best = (q, pts)
             if best is not None: event("hunt", monster=str(best[0].monster_name), way_m=len(best[1]) * 3); route = Route(best[1])
         if here.x >= 1 and not new_route and gen.get_section(IP(1, 0)) is not None and not gen.get_section(IP(1, 0)).is_building():
+            if L3 and not chest1_done:
+                # (level 3: a container in the new section first, if one is a few steps away)
+                chest1_done = True; l = loc(); chs = []
+                for q in chests_of(here):
+                    if d2(q, l) > 1500.0: continue
+                    st = stand_by_chest(q, l)
+                    if st is not None and len(path(l, st)) <= 5: chs.append((len(path(l, st)), q, st))
+                if chs: _, q, st = min(chs, key=lambda x: x[0]); seg("chest"); yield from open_chest(q, st); seg("walk"); continue
             new_route = True; l = loc(); sec1 = gen.get_section(IP(1, 0))
             ms = [q for q in gen.get_monsters() if alive(q) and q.get_editor_property("section") == sec1]
             if ms:
                 q = min(ms, key=lambda a: d2(a.get_actor_location(), l)); pts = list(sec1.find_path_world(l, q.get_actor_location()))
                 if 1 < len(pts) <= 25: route = Route(pts); event("into_new_section", toward=str(q.monster_name), way_m=round(len(pts) * 3))
         if route.done() and here.x == 0: route = onward()
+        if L3 and not G.get("chest_on_way") and G["fights"] > 0 and T() < DUR - 16.0 and T() - G.get("chest_look", -9.0) > 0.5:
+            # (level 3: on the way east, a container she passes within 11 m: she turns aside and opens it)
+            G["chest_look"] = T(); l = loc(); chs = []
+            for q in chests_of(here):
+                if d2(q, l) > 1100.0: continue
+                st = stand_by_chest(q, l)
+                if st is not None and len(path(l, st)) <= 6: chs.append((len(path(l, st)), q, st))
+            if chs:
+                G["chest_on_way"] = True; _, q, st = min(chs, key=lambda x: x[0]); seg("chest"); yield from open_chest(q, st); seg("walk")
+                route = onward() if gen.world_to_section(loc()).x == 0 else route; continue
         move(route.target(), run=True); doors(); camera()
         stuck = stuck + G["el"] if d2(loc(), last) < 60.0 * G["el"] else 0.0; last = loc()
         if stuck > 1.2:
@@ -287,6 +365,36 @@ def snap_maps():
         disc = [i for i, r in enumerate(m.rects) if r.discovered]
         if S["disc"].get(key) != disc:
             S["disc"][key] = disc; S["events"].append({"t": round(max(T(), 0.0), 3), "frame": G["frame"], "kind": "discovered", "coord": [c.x, c.y], "rects": disc})
+def tier(m):
+    """a monster's section's average hit points (the tactical map marks those above 1.25 x it)"""
+    k = m.get_editor_property("section").get_editor_property("coord"); key = (k.x, k.y)
+    if key not in S["tier"]: S["tier"][key] = G["gen"].get_monster_health(k)
+    return S["tier"][key]
+def pois(l, rad=5200.0):
+    """what the tactical minimap marks near her (ARDHUD::GatherPois): unopened chests and trunks [x, y, 2], and the
+    hallway exits whose next section has nothing discovered [x, y, 3] (the overlay keeps the chests in rooms she has seen)"""
+    gen = G["gen"]; out = []; md = gen.get_editor_property("map_data")
+    for k in gen.get_section_coords():
+        sec = gen.get_section(k); key = (k.x, k.y)
+        if sec is None or sec.is_building(): continue
+        if key not in S["poi_static"]:
+            ch = [(i, sec.get_container_location(i)) for i in range(sec.get_num_containers()) if sec.get_container_kind(i) in ("chest", "trunk")]
+            half = gen.get_editor_property("section_tiles") * 0.5; ts = gen.get_editor_property("tile_size")
+            mid = ((k.x * gen.get_editor_property("section_tiles")) * ts, (k.y * gen.get_editor_property("section_tiles")) * ts)
+            ex = []
+            for q in sec.get_portal_points():
+                dx, dy = q.x - mid[0], q.y - mid[1]
+                nxt = (k.x + (1 if dx > 0 else -1), k.y) if abs(dx) > abs(dy) else (k.x, k.y + (1 if dy > 0 else -1))
+                ex.append((q, nxt))
+            S["poi_static"][key] = (ch, ex)
+        ch, ex = S["poi_static"][key]
+        for i, q in ch:
+            if d2(q, l) < rad and sec.get_container_open_alpha(i) <= 0.05: out.append([round(q.x), round(q.y), 2])
+        for q, nxt in ex:
+            if d2(q, l) > rad: continue
+            m = md.get(IP(*nxt))
+            if m is None or not any(r.discovered for r in m.rects): out.append([round(q.x), round(q.y), 3])
+    return out
 def sample():
     gen, pc, p, c = G["gen"], G["pc"], G["pawn"], G["combat"]; cm = pc.player_camera_manager; l = p.get_actor_location(); cr = cm.get_camera_rotation()
     mons = []
@@ -295,7 +403,7 @@ def sample():
             ml = m.get_actor_location()
             if d2(ml, l) > 3200.0: continue
             mons.append([m.get_name(), str(m.monster_name), round(ml.x), round(ml.y), round(ml.z), round(m.get_health(), 1), m.get_max_health(), int(m.is_aggro()), int(m.is_dead()),
-                         round(m.capsule_component.get_scaled_capsule_half_height()), int(m.is_attacking()), m.get_num_wounds()])
+                         round(m.capsule_component.get_scaled_capsule_half_height()), int(m.is_attacking()), m.get_num_wounds(), int(m.get_max_health() > 1.25 * tier(m))])
         except Exception: pass
     # the keys that do what she does now: W (and Shift while she runs), E as she casts, F as she opens
     sp = p.get_velocity().length(); keys = G.get("key_hit", "") if T() - G.get("keys_t", -9.0) < 0.5 else ""
@@ -303,7 +411,8 @@ def sample():
     return {"t": round(T(), 4), "p": r3(l), "yaw": round(p.get_actor_rotation().yaw, 1), "sp": round(p.get_velocity().length()), "hp": round(c.get_health(), 1), "mhp": c.get_max_health(), "w": c.get_weapon_index(),
             "kills": c.kills, "atk": round(c.get_attack_time(), 3), "charging": int(c.is_charging()), "bolts": [r3(b) for b in c.get_bolts()], "dead": int(c.is_dead()),
             "cp": r3(cm.get_camera_location()), "cr": [round(cr.pitch, 3), round(cr.yaw, 3), round(cr.roll, 3)], "fov": round(cm.get_fov_angle(), 2), "seg": S["seg"],
-            "sections": len(gen.get_section_coords()), "mon": mons, "keys": keys, "moving": moving, "fire": round(min([d2(q, l) for q in gen.get_fire_loops()] or [-1.0]))}
+            "sections": len(gen.get_section_coords()), "mon": mons, "keys": keys, "moving": moving, "fire": round(min([d2(q, l) for q in gen.get_fire_loops()] or [-1.0])),
+            "rolling": int(c.is_rolling()), "pois": pois(l) if gen.get_editor_property("tactical_maps") and G["frame"] % 3 == 0 else None}
 def hits():
     c = G["combat"]; p = G["pawn"]; now = {}
     for m in G["gen"].get_monsters():
@@ -320,8 +429,10 @@ def hits():
     if c.attacks_made > S["casts"]:
         S["casts"] = c.attacks_made; tg = c.get_last_target()
         wi = c.get_attack_index(); wn = str(G["gen"].get_editor_property("weapons")[wi].name) if wi >= 0 else ""
-        S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "cast" if wn == "Fire" else "cut", "weapon": wn, "target": tg.get_name() if tg else None,
+        S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "cast" if wn in ("Fire", "Crossbow") else "cut", "weapon": wn, "target": tg.get_name() if tg else None,
                             "m": round(d2(p.get_actor_location(), tg.get_actor_location()) / 100.0, 1) if tg else None})       # (how far she cast from)
+    if c.rolls > S["rolls"]: S["rolls"] = c.rolls; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "rolled", "back": int(c.is_rolling_back())})
+    if c.dodged_hits > S["dodged"]: S["dodged"] = c.dodged_hits; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "dodged"})
     if c.bolts_cast > S["bolts"]: S["bolts"] = c.bolts_cast; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "bolt", "from": r3(c.last_bolt_from)})
     n = c.bolts_on_monsters + c.bolts_elsewhere
     if n > S.get("bursts_n", 0): S["bursts_n"] = n; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "burst", "at": r3(c.last_burst_at), "flown_m": round(c.last_bolt_flown / 100.0, 1)})
@@ -346,8 +457,8 @@ def save(why=None):
     os.makedirs(os.path.dirname(OUT), exist_ok=True); json.dump(out, open(OUT, "w"), separators=(",", ":"))
     ev = lambda k: [e for e in S["events"] if e["kind"] == k]
     last = rows[-1] if rows else {}
-    msg = "%d frames | %d casts, %d bolts, %d bursts | %d kills (%s) | chests %d | doors %d | sections %d (%s) | she was hit %d times, %s hit points left | blood bursts %d" % (
-        len(rows), len(ev("cast")), len(ev("bolt")), len(ev("burst")), len(ev("kill")), ", ".join("%s in %d casts" % (e["monster"], e["casts"]) for e in ev("kill")), len(ev("chest")), len(ev("door")),
+    msg = "%d frames | %d casts, %d cuts, %d bolts, %d bursts | %d rolls, %d blows dodged | %d kills (%s) | chests %d | doors %d | sections %d (%s) | she was hit %d times, %s hit points left | blood bursts %d" % (
+        len(rows), len(ev("cast")), len(ev("cut")), len(ev("bolt")), len(ev("burst")), len(ev("rolled")), len(ev("dodged")), len(ev("kill")), ", ".join("%s in %d casts" % (e["monster"], e["casts"]) for e in ev("kill")), len(ev("chest")), len(ev("door")),
         last.get("sections", 0), " ".join("%s@%.1f" % (e["kind"], e["t"]) for e in S["events"] if e["kind"] in ("generated", "into_new_section", "chest", "fight", "kill")),
         sum(1 for e in ev("hit") if e["on_player"]), last.get("hp"), len(ev("blood")))
     (unreal.log_error if why else unreal.log)(("RDMREEL failed: %s | " % why if why else "RDMREEL saved ") + msg)
@@ -383,7 +494,8 @@ def body():
         if G["combat"] is not None:
             G["combat"].set_scripted_only(True)
             wd = next(d for d in gen.get_editor_property("weapons") if d.spell)
-            G["const"] = {"level": 2 if L2 else 1, "weapons": [{"name": str(d.name), "damage": d.damage, "reach": d.reach, "spell": bool(d.spell)} for d in gen.get_editor_property("weapons")], "tile": gen.get_editor_property("tile_size"),
+            G["const"] = {"level": int(LV), "tactical": bool(gen.get_editor_property("tactical_maps")), "roll_distance": gen.get_editor_property("roll_distance"),
+                          "stylized_minimap_m": 84.0, "weapons": [{"name": str(d.name), "damage": d.damage, "reach": d.reach, "spell": bool(d.spell)} for d in gen.get_editor_property("weapons")], "tile": gen.get_editor_property("tile_size"),
                           "section_tiles": gen.get_editor_property("section_tiles"), "max_health": G["combat"].get_max_health(), "average_blow": gen.get_average_weapon_damage(),
                           "start_tier": [gen.get_monster_health(IP(0, 0)), gen.get_monster_damage(IP(0, 0))], "runtime_tier": [gen.get_monster_health(IP(1, 0)), gen.get_monster_damage(IP(1, 0))],
                           "spell": {"name": str(wd.name), "damage": wd.damage, "reach": wd.reach, "speed": wd.bolt_speed, "splash": wd.bolt_splash}, "walk": WALK, "run": RUN,
@@ -399,6 +511,7 @@ def body():
     if start:
         G["going"] = True; gen.set_frame_budget(1.0e6); gen.restart_play(SEED); S["hp"].clear(); S["snd"] = {}; S["bursts"] = 0; S["music"] = None
         S["casts"] = G["combat"].attacks_made; S["bolts"] = G["combat"].bolts_cast; S["bursts_n"] = G["combat"].bolts_on_monsters + G["combat"].bolts_elsewhere
+        S["rolls"] = G["combat"].rolls; S["dodged"] = G["combat"].dodged_hits
     next(G["run"])
     if G["going"] and G["combat"] is not None:
         hits(); heard()

@@ -1,31 +1,35 @@
 {
- "tag": "m9",
+ "tag": "d11",
  "plan": [
   "setup",
   "keys",
   "pad",
+  "hair",
   "walls",
   "cast",
+  "dual",
   "nothing",
   "far",
-  "kill:3",
+  "kill:2",
+  "sword:2",
   "tier"
  ],
- "level": "random_dungeonmagic_level",
+ "level": "random_dungeonmagic_level2",
  "steps": [
   {
    "step": "setup",
    "ok": true,
-   "pawn": "BP_RDM_CasterCharacter_C",
-   "mesh": "SK_JRPG_Caster",
-   "in_her_right_hand": null,
+   "pawn": "BP_RDM2_DarkCasterCharacter_C",
+   "mesh": "SK_JRPG_DarkCaster",
+   "in_her_right_hand": "SM_Sword_1",
    "hit_points": 100.0,
    "weapons": [
+    "Sword",
     "Fire"
    ],
-   "spell": true,
+   "spell": false,
    "from_start_room_cm": 0,
-   "title": "GIRL-CASTER",
+   "title": "GIRL-DARKCASTER",
    "caster_controls": true,
    "keys": [
     "W A S D|move",
@@ -33,7 +37,8 @@
     "Space|jump",
     "R|switch walk / run",
     "Shift (held)|run",
-    "Left mouse / E|fire spell",
+    "Left mouse|sword",
+    "Right mouse / E|fire spell",
     "F|open door or container",
     "M|map"
    ],
@@ -42,7 +47,8 @@
     "Right stick|look / turn the camera",
     "A|jump",
     "LT|switch walk / run",
-    "LB / RB|fire spell",
+    "RB|sword",
+    "LB|fire spell",
     "X|open door or container",
     "Back|map"
    ]
@@ -79,16 +85,16 @@
     "Sprint"
    ],
    "clash": [],
-   "walk_cm_s": 119.7,
-   "her_walk": 119.71,
-   "run_cm_s": 381.7,
-   "her_run": 381.69,
+   "walk_cm_s": 117.5,
+   "her_walk": 117.54,
+   "run_cm_s": 379.5,
+   "her_run": 379.51,
    "speeds": {
-    "walk": 119.7,
-    "run": 381.7,
-    "A": 119.7,
-    "S": 119.7,
-    "D": 119.7
+    "walk": 117.5,
+    "run": 379.5,
+    "A": 117.5,
+    "S": 117.5,
+    "D": 117.5
    },
    "headings_deg": {
     "walk": 0,
@@ -109,39 +115,43 @@
      "attacks": 1,
      "bolts": 1
     },
-    "LeftMouseButton": {
+    "RightMouseButton": {
      "attacks": 1,
      "bolts": 1
+    },
+    "LeftMouseButton": {
+     "attacks": 1,
+     "bolts": 0
     }
    }
   },
   {
    "step": "pad",
    "ok": true,
-   "her_walk": 119.71,
-   "her_run": 381.69,
+   "her_walk": 117.54,
+   "her_run": 379.51,
    "device": {
     "after_W": "keyboard",
     "after_pad_button": "gamepad",
     "after_W_again": "keyboard"
    },
    "stick_walk": {
-    "cm_s": 119.7,
+    "cm_s": 117.5,
     "heading_deg": 0,
     "running": false
    },
    "stick_run": {
-    "cm_s": 381.7,
+    "cm_s": 379.5,
     "heading_deg": 0,
     "running": true
    },
    "W_run": {
-    "cm_s": 381.7,
+    "cm_s": 379.5,
     "heading_deg": 0,
     "running": true
    },
    "W_walk": {
-    "cm_s": 119.7,
+    "cm_s": 117.5,
     "heading_deg": 0,
     "running": false
    },
@@ -152,10 +162,10 @@
     "R_again_walks": true
    },
    "A_jump_cm": 103,
-   "right_stick_turned_deg": 50.0,
+   "right_stick_turned_deg": 57.5,
    "RB": {
     "attacks": 1,
-    "bolts": 1,
+    "bolts": 0,
     "weapons": [
      0
     ]
@@ -164,7 +174,7 @@
     "attacks": 1,
     "bolts": 1,
     "weapons": [
-     0
+     1
     ]
    },
    "RT": {
@@ -188,6 +198,58 @@
     "opens_map": true,
     "closes_it": true
    }
+  },
+  {
+   "step": "hair",
+   "ok": true,
+   "chains": {
+    "hair_b1": 3,
+    "hair_b2": 3,
+    "hair_b3": 3,
+    "hair_b4": 3,
+    "hair_fl": 2,
+    "hair_fr": 2
+   },
+   "peak_tip_offset_cm": {
+    "run": 30.3,
+    "stop": 21.0,
+    "settling after the stop": 5.7,
+    "standing after the stop": 3.3,
+    "jump": 27.4,
+    "settling after the jump": 15.7,
+    "standing after the jump": 3.2,
+    "after a teleport": 3.4,
+    "standing after the teleport": 2.4
+   },
+   "standing_jitter_cm": {
+    "standing after the stop": 0.6,
+    "standing after the jump": 1.5,
+    "standing after the teleport": 0.5
+   },
+   "worst_bone_stretch": 1.383,
+   "worst_stretch_where": [
+    "hair_b1_2",
+    "hair_b1_3",
+    "jump"
+   ],
+   "stretch_by_phase": {
+    "run": 1.359,
+    "stop": 1.344,
+    "settling after the stop": 1.006,
+    "standing after the stop": 1.001,
+    "jump": 1.383,
+    "settling after the jump": 1.015,
+    "standing after the jump": 1.001,
+    "after a teleport": 1.001,
+    "standing after the teleport": 1.001
+   },
+   "back_tips_spread_change_cm": 14.6,
+   "closest_to_a_limit_cm": 2.4,
+   "closest_where": [
+    "hair_b3",
+    "spine_03 plane",
+    "run"
+   ]
   },
   {
    "step": "walls",
@@ -282,6 +344,7 @@
    "cells": {
     "cells": 49,
     "cell_sides_with_bars": 49,
+    "doors_open": 0,
     "rays": 2352,
     "leak": 0,
     "leaks": [],
@@ -300,26 +363,26 @@
    "ok": true,
    "monster": "Daemon",
    "gap_cm": 900,
-   "hand": "hand_r",
+   "hand": "hand_l",
    "started": true,
    "target_is_it": true,
    "montage": true,
-   "hand_moved_cm": 52,
-   "charge_particles": 370,
-   "bolt_left_at_s": 0.44,
+   "hand_moved_cm": 67,
+   "charge_particles": 401,
+   "bolt_left_at_s": 0.45,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 730,
+   "particles_round_the_bolt": 757,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 569,
+   "flown_cm": 635,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 579,
+   "burst_particles": 566,
    "burst_at": [
-    741,
-    -3450,
-    128
+    150,
+    2988,
+    122
    ],
    "sounds": {
     "Player.Charge.Fire": 1,
@@ -328,12 +391,27 @@
    }
   },
   {
+   "step": "dual",
+   "ok": true,
+   "cast_started": true,
+   "sword_held_all_through": true,
+   "charge_particles_left_hand": 306,
+   "attack_weapon_while_casting": [
+    1
+   ],
+   "bolt_from_left_hand_cm": 18,
+   "cut_started": true,
+   "cut_weapon": 0,
+   "bolts_by_the_cut": 0
+  },
+  {
    "step": "nothing",
    "ok": true,
+   "stuck_in_the_wall": null,
    "target": null,
    "turned_deg": 0.0,
    "off_her_heading_deg": 0.3,
-   "flown_cm": 1253,
+   "flown_cm": 1220,
    "reach": 1400.0,
    "damage_dealt": 0.0
   },
@@ -341,7 +419,7 @@
    "step": "far",
    "ok": true,
    "monster": "Horned",
-   "distance_cm": 1744,
+   "distance_cm": 1741,
    "reach": 1400.0,
    "target": null
   },
@@ -372,24 +450,45 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 1.8,
+     "seconds": 1.7,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 2
+  },
+  {
+   "step": "sword",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Daemon",
+     "hit_points": 54.0,
+     "weapon": "Sword",
+     "damage": 22.0,
+     "blows": 2,
+     "blows_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "bolts_cast": 0,
+     "seconds": 1.5,
      "ok": true
     },
     {
      "monster": "Daemon",
      "hit_points": 54.0,
-     "casts": 3,
-     "bolts_on_it": 3,
-     "bolts_needed": 3,
+     "weapon": "Sword",
+     "damage": 22.0,
+     "blows": 3,
+     "blows_needed": 3,
      "killed": true,
      "kills_counted": 1,
-     "each_bolt_took_the_damage": true,
-     "she_lost": 0,
-     "seconds": 2.6,
+     "each_blow_took_the_damage": true,
+     "bolts_cast": 0,
+     "seconds": 2.3,
      "ok": true
     }
-   ],
-   "monsters_killed": 3
+   ]
   },
   {
    "step": "tier",
@@ -398,20 +497,22 @@
     1,
     0
    ],
-   "monsters": 12,
-   "average_hit_points": 118.2,
+   "monsters": 13,
+   "average_hit_points": 109.1,
    "hers": 100.0,
-   "average_damage": 22.8,
-   "spell_damage": 20.0
+   "average_damage": 23.7,
+   "spell_damage": 22.0
   }
  ],
  "error": null,
- "kills": 3,
- "casts": 15,
- "bolts": 15,
- "bolts_on_monsters": 9,
+ "rolls": 0,
+ "dodged": 0,
+ "kills": 4,
+ "casts": 20,
+ "bolts": 12,
+ "bolts_on_monsters": 6,
  "bolts_elsewhere": 6,
  "deaths": 0,
- "damage_dealt": 225.0,
- "damage_taken": 0.0
+ "damage_dealt": 260.0,
+ "damage_taken": 11.0
 }

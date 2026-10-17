@@ -1,0 +1,234 @@
+{
+ "order": [
+  "Daggers",
+  "Crossbow"
+ ],
+ "weapons": {
+  "Daggers": {
+   "name": "Daggers",
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Dagger",
+   "damage": 15.0,
+   "reach": 150.0,
+   "arc": 110.0,
+   "rate": 1.0,
+   "grip": {
+    "loc": [
+     29.619615753174592,
+     -7.130074140940259,
+     0.2696302692597099
+    ],
+    "rot": [
+     -87.06798478733025,
+     -3.584519884842694,
+     -91.23757632802858
+    ],
+    "scale": [
+     1.0000003576279535,
+     1.000000417232623,
+     1.0000003576279457
+    ]
+   },
+   "hand_bone": "hand_r",
+   "off_mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Dagger",
+   "off_bone": "hand_l",
+   "off_grip": {
+    "loc": [
+     25.35066927173757,
+     -6.793832520109346,
+     -15.425537215206704
+    ],
+    "rot": [
+     -62.25378271905712,
+     2.8586176334180906,
+     -88.95049502581486
+    ],
+    "scale": [
+     1.0000004172326264,
+     1.0000001788139692,
+     1.0000002384186348
+    ]
+   },
+   "attacks": [
+    {
+     "clip": "/Game/JRPG/RogueAnims/AS_Rogue_Stab1",
+     "length": 0.708,
+     "hit": 0.211,
+     "end": 0.451,
+     "hand_speed": 599
+    },
+    {
+     "clip": "/Game/JRPG/RogueAnims/AS_Rogue_Stab2",
+     "length": 0.75,
+     "hit": 0.242,
+     "end": 0.482,
+     "hand_speed": 363
+    },
+    {
+     "clip": "/Game/JRPG/RogueAnims/AS_Rogue_Stab3",
+     "length": 0.792,
+     "hit": 0.261,
+     "end": 0.501,
+     "hand_speed": 433
+    }
+   ],
+   "holster_bone": "thigh_r",
+   "holster": {
+    "loc": [
+     2.1412277744129327,
+     -36.033256527063166,
+     -8.46323605349092
+    ],
+    "rot": [
+     89.99999870554564,
+     0.9560292598508789,
+     -3.954886692967197e-06
+    ],
+    "scale": [
+     1.0000000596046486,
+     1.0000000000000002,
+     1.000000059604648
+    ]
+   },
+   "off_holster_bone": "thigh_l",
+   "off_holster": {
+    "loc": [
+     1.8579467220212031,
+     -36.03325508926279,
+     8.529885874390054
+    ],
+    "rot": [
+     -90.00000212829869,
+     -0.954022431024133,
+     179.99999776920637
+    ],
+    "scale": [
+     0.9999955296718958,
+     1.0000000000000002,
+     0.9999980926550049
+    ]
+   },
+   "flinch": "/Game/RandomDungeon/Magic3/Anims/Anim_Warrior_Get_Hit_1_Rogue",
+   "death": "/Game/RandomDungeon/Magic3/Anims/Anim_Warrior_Dead_1_Rogue"
+  },
+  "Crossbow": {
+   "name": "Crossbow",
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Crossbow",
+   "damage": 34.0,
+   "reach": 2600.0,
+   "arc": 0.0,
+   "rate": 1.0,
+   "spell": true,
+   "grip": {
+    "loc": [
+     32.10515629105418,
+     -7.674911812550033,
+     0.11074221144890979
+    ],
+    "rot": [
+     -86.41079352535088,
+     2.9262742095165506,
+     178.94589537383084
+    ],
+    "scale": [
+     1.0000003576279535,
+     1.000000417232623,
+     1.0000003576279457
+    ]
+   },
+   "hand_bone": "hand_r",
+   "attacks": [
+    {
+     "clip": "/Game/JRPG/RogueAnims/AS_Rogue_Shoot",
+     "length": 0.958,
+     "hit": 0.4,
+     "end": 0.95
+    }
+   ],
+   "bolt_speed": 4500.0,
+   "bolt_turn": 0.0,
+   "splash": 0.0,
+   "bolt_mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Arrow_Var1",
+   "bolt_xf": {
+    "loc": [
+     -20.2776,
+     0.0,
+     0.0
+    ],
+    "rot": [
+     0.0,
+     -90.0,
+     0.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     0.42
+    ]
+   },
+   "muzzle": [
+    -32.0,
+    0.0,
+    5.6
+   ],
+   "loaded_xf": {
+    "loc": [
+     -9.722400000000015,
+     -2.4832897934390366e-15,
+     5.6
+    ],
+    "rot": [
+     0.0,
+     -90.0,
+     180.0
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     0.42
+    ]
+   },
+   "stick": 8.0,
+   "trail": "/Game/RandomDungeon/Magic3/FX/P_RDM3_BoltTrail",
+   "trail_scale": 1.0,
+   "hit_fx": "/Game/Medieval_Weapons/VFX/P_Impact",
+   "hit_scale": 1.0,
+   "holster_bone": "spine_03",
+   "holster": {
+    "loc": [
+     -25.210033157798698,
+     3.1812911951070593,
+     -8.411125249185215
+    ],
+    "rot": [
+     73.49238076193029,
+     36.85867029246452,
+     -86.18656732400211
+    ],
+    "scale": [
+     1.0000001192093004,
+     1.0000000596046483,
+     1.0000001192092995
+    ]
+   },
+   "flinch": "/Game/RandomDungeon/Magic3/Anims/Anim_Warrior_Get_Hit_1_Rogue",
+   "death": "/Game/RandomDungeon/Magic3/Anims/Anim_Warrior_Dead_1_Rogue"
+  }
+ },
+ "roll": {
+  "forward": "/Game/JRPG/RogueAnims/AS_Rogue_RollF",
+  "back": "/Game/JRPG/RogueAnims/AS_Rogue_RollB",
+  "length": 0.8
+ },
+ "thumb_check": {
+  "r": [
+   -0.007,
+   0.879,
+   -0.477
+  ],
+  "l": [
+   0.002,
+   0.885,
+   -0.465
+  ]
+ }
+}

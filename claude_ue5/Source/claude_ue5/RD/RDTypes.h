@@ -148,6 +148,25 @@ struct FRDWeaponDef
 	/** the bolt lights what it passes (a point light that goes with it; brighter for a moment where it bursts) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor SpellLightColor = FLinearColor(1.f, 0.45f, 0.12f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpellLightIntensity = 0.f;
+	// ---- a crossbow (random_dungeonmagic_level3): a spell whose bolt is a mesh, shot from the weapon (BoltTurnRate 0:
+	// it flies straight at the monster she turned to)
+	/** the flying bolt's mesh, placed by BoltMeshTransform in the bolt's frame (+X the way it flies, its point at the origin) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> BoltMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform BoltMeshTransform;
+	/** the bolt leaves from BoltMuzzle, a point of the weapon's mesh (its own space), instead of SpellBone */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bBoltFromWeapon = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector BoltMuzzle = FVector::ZeroVector;
+	/** the next bolt lies on the weapon (LoadedBoltTransform: the bolt mesh relative to the weapon's mesh), gone from the
+	 *  shot until the attack is over (she has loaded it again) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bShowLoadedBolt = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform LoadedBoltTransform;
+	/** seconds a bolt stays stuck where it struck a wall, a door or the floor */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltStickSeconds = 0.f;
+	// ---- where the weapon is carried while another one is drawn (none: out of sight), and its off-hand mesh
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName HolsterBone = NAME_None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform HolsterGrip;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName OffHandHolsterBone = NAME_None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform OffHandHolsterGrip;
 };
 
 UENUM(BlueprintType)

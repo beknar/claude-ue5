@@ -27,6 +27,8 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "UObject/UnrealType.h"
+#include "GameFramework/RootMotionSource.h"
+#include "GameFramework/Controller.h"
 
 static const FName RDCombatSlot(TEXT("DefaultSlot"));
 
@@ -86,6 +88,29 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 		return C;
 	};
 	WeaponComp = Make(TEXT("RDWeapon")); OffHandComp = Make(TEXT("RDOffHand"));
+	// (the weapons carried on her body while another is drawn, the bolt lying on the crossbow)
+	HolsterComps.Reset();
+	if (Generator)
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+		{
+			const FRDWeaponDef& W = Generator->Weapons[I];
+			for (int32 K = 0; K < 2; ++K)
+			{
+				const FName Bone = K == 0 ? W.HolsterBone : W.OffHandHolsterBone;
+				UStaticMesh* Mesh = K == 0 ? W.Mesh.Get() : W.OffHandMesh.Get();
+				UStaticMeshComponent* C = nullptr;
+				if (!Bone.IsNone() && Mesh && M)
+				{
+					C = Make(*FString::Printf(TEXT("RDHolster%d_%d"), I, K));
+					C->SetStaticMesh(Mesh);
+					C->AttachToComponent(M, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Bone);
+					C->SetRelativeTransform(K == 0 ? W.HolsterGrip : W.OffHandHolsterGrip);
+					C->SetVisibility(false);
+				}
+				HolsterComps.Add(C);
+			}
+		}
+	LoadedBoltComp = Make(TEXT("RDLoadedBolt")); LoadedBoltComp->SetVisibility(false);
 	SelectWeapon(0);
 }
 
@@ -110,6 +135,37 @@ void URDCombatComponent::SelectWeapon(int32 Index)
 	};
 	Hold(WeaponComp, W.Mesh, W.HandBone, W.Grip);
 	Hold(OffHandComp, W.OffHandMesh, W.OffHandBone, W.OffHandGrip);
+	for (int32 I = 0; I < HolsterComps.Num(); ++I)
+		if (UStaticMeshComponent* C = HolsterComps[I]) C->SetVisibility(I / 2 != Index);
+	if (LoadedBoltComp)
+	{
+		LoadedBoltComp->SetStaticMesh(W.BoltMesh);
+		if (WeaponComp && W.BoltMesh) { LoadedBoltComp->AttachToComponent(WeaponComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale); LoadedBoltComp->SetRelativeTransform(W.LoadedBoltTransform); }
+		ShowLoadedBolt(true);
+	}
+}
+
+void URDCombatComponent::ShowLoadedBolt(bool bShow)
+{
+	const FRDWeaponDef* W = Weapon();
+	if (LoadedBoltComp) LoadedBoltComp->SetVisibility(bShow && W && W->bShowLoadedBolt && W->BoltMesh != nullptr);
+}
+
+UStaticMeshComponent* URDCombatComponent::GetHolsterMesh(int32 Index, bool bOffHand) const
+{
+	const int32 I = Index * 2 + (bOffHand ? 1 : 0);
+	return HolsterComps.IsValidIndex(I) ? HolsterComps[I].Get() : nullptr;
+}
+
+void URDCombatComponent::NextWeapon(int32 Step)
+{
+	if (!Generator) return;
+	const int32 N = Generator->Weapons.Num();
+	for (int32 K = 1; K <= N; ++K)
+	{
+		const int32 I = ((WeaponIndex + Step * K) % N + N) % N;
+		if (!Generator->Weapons[I].bAlongside) { SelectWeapon(I); return; }
+	}
 }
 
 void URDCombatComponent::SetSlowed(bool bSlow)
@@ -131,7 +187,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 {
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
-	if (!W || !M || bDead || AttackTime >= 0.f || W->Attacks.Num() == 0) return false;
+	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0) return false;
 	UAnimInstance* AI = M->GetAnimInstance();
 	if (NextOf.Num() < Generator->Weapons.Num()) NextOf.SetNumZeroed(Generator->Weapons.Num());
 	const int32 NextAttack = NextOf[Index], K = NextAttack % W->Attacks.Num();
@@ -211,11 +267,13 @@ void URDCombatComponent::EndAttack()
 	AttackTime = -1.f;
 	SetSlowed(false);
 	StopCharge();
+	ShowLoadedBolt(true);
 }
 
 void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 {
 	if (bDead || Amount <= 0.f) return;
+	if (IsDodging()) { ++DodgedHits; return; }
 	const float Now = GetWorld()->GetTimeSeconds();
 	Health = FMath::Max(0.f, Health - Amount);
 	DamageTaken += Amount; ++HitsTaken; LastHurtTime = Now;
@@ -238,7 +296,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	if (Health <= 0.f)
 	{
 		bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
-		EndAttack();
+		EndAttack(); EndRoll();
 		if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
 		if (AI && W && W->Death)
 			if (UAnimMontage* Mo = AI->PlaySlotAnimationAsDynamicMontage(W->Death, RDCombatSlot, 0.12f, 0.2f, 1.f, 1, -1.f, 0.f)) Mo->bEnableAutoBlendOut = false;      // (she stays down)
@@ -255,7 +313,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 void URDCombatComponent::Revive(bool bToStart)
 {
 	AActor* O = GetOwner();
-	bDead = false; Health = MaxHealth; AttackTime = -1.f; SetSlowed(false); StaggerUntil = -100.f; StopCharge();
+	bDead = false; Health = MaxHealth; AttackTime = -1.f; SetSlowed(false); StaggerUntil = -100.f; StopCharge(); EndRoll(); ShowLoadedBolt(true);
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
 	if (bToStart && O && Generator)
 	{
@@ -279,7 +337,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (Generator->bCasterControls)
 		if (const APawn* P = Cast<APawn>(GetOwner()))
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController())) TickDevice(PC);
-	if (!bScriptedOnly && !Generator->bMapOpen)
+	if (!bScriptedOnly && (!Generator->bMapOpen || Generator->bTacticalMaps))        // (the tactical map is an overlay: she fights on under it)
 		if (const APawn* P = Cast<APawn>(GetOwner()))
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController()))
 			{
@@ -297,6 +355,11 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 						|| PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f)) StartSpell();
 				}
 			}
+	if (RollTime >= 0.f)
+	{
+		RollTime += Dt;
+		if (RollTime >= RollLen) EndRoll();
+	}
 	if (AttackTime >= 0.f)
 	{
 		AttackTime += Dt;
@@ -371,7 +434,7 @@ void URDCombatComponent::TickDevice(const APlayerController* PC)
 		EKeys::Gamepad_LeftTriggerAxis, EKeys::Gamepad_RightTriggerAxis };
 	static const FKey KeyboardKeys[] = {
 		EKeys::W, EKeys::A, EKeys::S, EKeys::D, EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right, EKeys::SpaceBar, EKeys::LeftShift,
-		EKeys::E, EKeys::R, EKeys::F, EKeys::M, EKeys::One, EKeys::Two, EKeys::Three, EKeys::LeftMouseButton, EKeys::RightMouseButton };
+		EKeys::E, EKeys::R, EKeys::F, EKeys::M, EKeys::B, EKeys::One, EKeys::Two, EKeys::Three, EKeys::LeftMouseButton, EKeys::RightMouseButton };
 	for (const FKey& K : PadKeys) if (PC->IsInputKeyDown(K)) { bUsingGamepad = true; return; }
 	for (const FKey& K : PadAxes) if (FMath::Abs(PC->GetInputAnalogKeyState(K)) > 0.3f) { bUsingGamepad = true; return; }
 	for (const FKey& K : KeyboardKeys) if (PC->IsInputKeyDown(K)) { bUsingGamepad = false; return; }
@@ -385,6 +448,18 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 	if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
 	if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
 	if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
+	if (Generator->bRogueControls)
+	{
+		// (the rogue: the wheel or Y switch weapons, the left mouse button or RB uses the one in her hands, B rolls)
+		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) NextWeapon(-1);
+		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
+		if (PC->WasInputKeyJustPressed(EKeys::B) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) StartRoll(FVector::ZeroVector);
+		if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder)) StartAttack();
+		const bool bToggleR = PC->IsInputKeyDown(EKeys::R) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f;
+		if (bToggleR && !bRunToggleDown) SetRunMode(!bRunMode);
+		bRunToggleDown = bToggleR;
+		return;
+	}
 	// the weapon in her hand: left mouse or RB. The spell: right mouse, E or LB: the one cast alongside the drawn weapon,
 	// or the drawn weapon itself when it is a spell (then the left mouse and RB cast it too)
 	const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
@@ -514,7 +589,7 @@ void URDCombatComponent::LaunchBolt()
 	else StopCharge();
 	const FVector Fw = O->GetActorForwardVector();
 	FBolt B;
-	B.At = M->GetSocketLocation(W->SpellBone) + Fw * 12.f;
+	B.At = (W->bBoltFromWeapon && WeaponComp) ? WeaponComp->GetComponentTransform().TransformPosition(W->BoltMuzzle) : M->GetSocketLocation(W->SpellBone) + Fw * 12.f;
 	B.Weapon = AttackIndex;
 	ARDMonster* Tg = LastTarget.Get();
 	if (Tg && !Tg->IsDead())
@@ -528,9 +603,26 @@ void URDCombatComponent::LaunchBolt()
 	else if (W->BoltEffect) B.Fx = SpawnFx(W->BoltEffect, B.At, R, W->BoltEffectScale);
 	if (W->BoltCoreEffect) B.Core = SpawnFx(W->BoltCoreEffect, B.At, R, W->BoltCoreEffectScale);
 	B.Light = MakeLight(B.At, W->SpellLightColor, W->SpellLightIntensity, 900.f);
+	if (W->BoltMesh)
+	{
+		UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(O);
+		C->SetMobility(EComponentMobility::Movable);
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision); C->SetGenerateOverlapEvents(false); C->SetCanEverAffectNavigation(false);
+		C->SetUsingAbsoluteLocation(true); C->SetUsingAbsoluteRotation(true); C->SetUsingAbsoluteScale(true);
+		C->SetStaticMesh(W->BoltMesh);
+		C->RegisterComponent();
+		PlaceBoltMesh(C, *W, B.At, B.Vel);
+		SpellComps.Add(C); B.Mesh = C;
+		ShowLoadedBolt(false);
+	}
 	Bolts.Add(B);
 	++BoltsCast; LastBoltFrom = B.At;
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Cast.%s"), *W->Name.ToString())), B.At);
+}
+
+void URDCombatComponent::PlaceBoltMesh(UStaticMeshComponent* C, const FRDWeaponDef& W, const FVector& At, const FVector& Dir) const
+{
+	if (C) C->SetWorldTransform(W.BoltMeshTransform * FTransform(Dir.Rotation(), At));
 }
 
 void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
@@ -586,6 +678,13 @@ void URDCombatComponent::TickBolts(float Dt)
 		if (UFXSystemComponent* F = TimedFx[I].Fx.Get()) F->Deactivate();
 		TimedFx.RemoveAt(I);
 	}
+	for (int32 I = Stuck.Num() - 1; I >= 0; --I)
+	{
+		Stuck[I].Left -= Dt;
+		if (Stuck[I].Left > 0.f && Stuck[I].Mesh.IsValid()) continue;
+		if (UStaticMeshComponent* C = Stuck[I].Mesh.Get()) C->DestroyComponent();
+		Stuck.RemoveAt(I);
+	}
 	SpellComps.RemoveAll([](const TObjectPtr<USceneComponent>& C) { return !IsValid(C); });
 	if (Bolts.Num() == 0 || !Generator) return;
 	const AActor* O = GetOwner();
@@ -626,17 +725,93 @@ void URDCombatComponent::TickBolts(float Dt)
 		if (GetWorld()->LineTraceSingleByChannel(H, B.At, Next, ECC_Visibility, Q) && H.Time < HitT)
 		{
 			B.Flown += (H.ImpactPoint - B.At).Size();
-			Burst(B, H.ImpactPoint + H.ImpactNormal * 10.f, nullptr); Bolts.RemoveAt(I); continue;
+			Burst(B, H.ImpactPoint + H.ImpactNormal * 10.f, nullptr);
+			// (a bolt mesh stays stuck in the wall a while, its point a little way in)
+			if (UStaticMeshComponent* C = B.Mesh.Get())
+			{
+				if (W.BoltStickSeconds > 0.f) { PlaceBoltMesh(C, W, H.ImpactPoint + B.Vel.GetSafeNormal() * 4.f, B.Vel); Stuck.Add({ C, W.BoltStickSeconds }); }
+				else C->DestroyComponent();
+			}
+			Bolts.RemoveAt(I); continue;
 		}
 		if (HitMo)
 		{
 			B.Flown += (HitAt - B.At).Size();
-			Burst(B, HitAt, HitMo); Bolts.RemoveAt(I); continue;
+			Burst(B, HitAt, HitMo);
+			if (UStaticMeshComponent* C = B.Mesh.Get()) C->DestroyComponent();
+			Bolts.RemoveAt(I); continue;
 		}
 		B.Flown += (Next - B.At).Size(); B.At = Next;
-		if (B.Flown >= W.Reach + 150.f) { Burst(B, B.At, nullptr); Bolts.RemoveAt(I); continue; }
+		if (B.Flown >= W.Reach + 150.f)
+		{
+			Burst(B, B.At, nullptr);
+			if (UStaticMeshComponent* C = B.Mesh.Get()) C->DestroyComponent();
+			Bolts.RemoveAt(I); continue;
+		}
+		if (UStaticMeshComponent* C = B.Mesh.Get()) PlaceBoltMesh(C, W, B.At, B.Vel);
 		if (UFXSystemComponent* F = B.Fx.Get()) F->SetWorldLocationAndRotation(B.At, B.Vel.Rotation());
 		if (UFXSystemComponent* F = B.Core.Get()) F->SetWorldLocationAndRotation(B.At, B.Vel.Rotation());
 		if (UPointLightComponent* L = B.Light.Get()) L->SetWorldLocation(B.At);
 	}
+}
+
+// ------------------------------------------------------------------------------------------------ the roll
+bool URDCombatComponent::IsDodging() const
+{
+	if (RollTime < 0.f || RollLen <= 0.f || !Generator) return false;
+	const float K = RollTime / RollLen;
+	return K >= Generator->RollDodge.X && K <= Generator->RollDodge.Y;
+}
+
+bool URDCombatComponent::StartRoll(FVector Dir)
+{
+	ACharacter* C = Cast<ACharacter>(GetOwner());
+	USkeletalMeshComponent* M = Body();
+	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
+	if (!C || !AI || !Generator || !Generator->RollClip || bDead || RollTime >= 0.f) return false;
+	const float Now = GetWorld()->GetTimeSeconds();
+	UCharacterMovementComponent* CM = C->GetCharacterMovement();
+	if (Now < RollReadyAt || !CM->IsMovingOnGround()) return false;
+	// the way: given, or the way she is being moved (the keys or the stick), or the way she is going; standing: backward
+	Dir.Z = 0.f;
+	if (Dir.IsNearlyZero()) Dir = CM->GetCurrentAcceleration() * FVector(1, 1, 0);
+	if (Dir.IsNearlyZero() && C->GetVelocity().Size2D() > 150.f) Dir = C->GetVelocity() * FVector(1, 1, 0);
+	// (a way behind her is a roll backward: she keeps facing the way she does, as when she stands)
+	const FVector Fw = (C->GetActorForwardVector() * FVector(1, 1, 0)).GetSafeNormal();
+	bRollBack = Dir.IsNearlyZero() || FVector::DotProduct(Dir.GetSafeNormal(), Fw) < -0.7f;
+	Dir = Dir.IsNearlyZero() ? -Fw : Dir;
+	Dir = Dir.GetSafeNormal();
+	if (Dir.IsNearlyZero()) return false;
+	if (AttackTime >= 0.f) EndAttack();                      // (a roll breaks off an attack)
+	if (!bRollBack) C->SetActorRotation(FRotator(0.f, Dir.Rotation().Yaw, 0.f));
+	UAnimSequenceBase* Clip = (bRollBack && Generator->RollBackClip) ? Generator->RollBackClip.Get() : Generator->RollClip.Get();
+	AI->PlaySlotAnimationAsDynamicMontage(Clip, RDCombatSlot, 0.06f, 0.16f, 1.f, 1, -1.f, 0.f);
+	RollLen = Clip->GetPlayLength(); RollTime = 0.f;
+	// she is carried along the floor for most of the clip (her own fall and steps stay the movement's)
+	TSharedPtr<FRootMotionSource_ConstantForce> F = MakeShared<FRootMotionSource_ConstantForce>();
+	F->InstanceName = TEXT("RDRoll");
+	F->AccumulateMode = ERootMotionAccumulateMode::Override;
+	F->Settings.SetFlag(ERootMotionSourceSettingsFlags::IgnoreZAccumulate);
+	F->Priority = 5;
+	F->Duration = RollLen * 0.82f;
+	F->Force = Dir * (Generator->RollDistance / F->Duration);
+	F->FinishVelocityParams.Mode = ERootMotionFinishVelocityMode::ClampVelocity;
+	F->FinishVelocityParams.ClampVelocity = 120.f;
+	RollSourceId = CM->ApplyRootMotionSource(F);
+	if (AController* Ctl = C->GetController()) { Ctl->SetIgnoreMoveInput(true); bRollIgnoringMove = true; }
+	++Rolls;
+	Generator->PlaySoundAt(TEXT("Player.Roll"), C->GetActorLocation());
+	return true;
+}
+
+void URDCombatComponent::EndRoll()
+{
+	if (RollTime < 0.f) return;
+	RollTime = -1.f;
+	ACharacter* C = Cast<ACharacter>(GetOwner());
+	if (C && RollSourceId) C->GetCharacterMovement()->RemoveRootMotionSourceByID(RollSourceId);
+	RollSourceId = 0;
+	if (bRollIgnoringMove && C && C->GetController()) C->GetController()->SetIgnoreMoveInput(false);
+	bRollIgnoringMove = false;
+	if (Generator) RollReadyAt = GetWorld()->GetTimeSeconds() + Generator->RollCooldown;
 }

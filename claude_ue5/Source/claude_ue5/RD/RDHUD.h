@@ -5,6 +5,9 @@
 // (stone floors coloured by room, walls with a lit and a shaded edge, paving joints, doors, chests, flickering torches;
 // every room named on the full map), a status panel in the bottom right corner (hit points, the three weapons with
 // their damage, kills), a bar over each monster in the fight, the damage numbers, a red flash when she is hurt.
+// With the generator's bTacticalMaps (every dungeon level, pipeline/unreal/821) both maps are tactical: the minimap dark
+// monochrome terrain with a feathered rim under bright markers, the big map a see-through wireframe centred on her over
+// the game (see DrawTacticalMinimap / DrawTacticalMap).
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,11 +28,32 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MinimapPixels = 300.f;
 	/** the stylised minimap shows less of the dungeon, larger (metres across) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float StylizedMinimapMeters = 84.f;
+	/** the generator's bTacticalMaps: the big map shows this many metres from the top of the screen to the bottom */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float TacticalMapMeters = 110.f;
 
 	virtual void DrawHUD() override;
 
 private:
 	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Gen;
+	// ---- the tactical maps (generator bTacticalMaps)
+	/** a white disc whose alpha falls off to its rim (made in play): the minimap's feathered backdrop, the soft dots */
+	UPROPERTY(Transient) TObjectPtr<class UTexture2D> SoftDisc;
+	UTexture2D* GetSoftDisc();
+	/** every tile of the map data: 1 generated, 2 discovered, 4 hallway; rebuilt when the map data changes */
+	TMap<FIntPoint, uint8> Tiles;
+	int32 TileSig = 0;
+	void CacheTiles();
+	void DrawTacticalMinimap(float Sc, const FVector& L, float Yaw);
+	void DrawTacticalMap(float Sc, const FVector& L, float Yaw);
+	void SoftDot(const FVector2D& P, float R, const FLinearColor& C);
+	void Star(const FVector2D& P, float R, const FLinearColor& C);
+	void Diamond(const FVector2D& P, float R, const FLinearColor& C);
+	void Triangle(const FVector2D& P, float R, const FLinearColor& C);
+	/** a monster much stronger than its section's average (the strongest kinds) */
+	bool IsElite(const class ARDMonster* M) const;
+	/** what the maps mark, in world XY: 0 monster, 1 elite, 2 unopened chest or trunk, 3 hallway exit to a section not yet generated */
+	struct FRDPoi { FVector2D W; int32 Kind; };
+	void GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance);
 	static FString KindCode(ERDRoomKind Kind);
 	void DrawPlayerArrow(const FVector2D& P, float Yaw, float Size);
 	void Box(const FVector2D& A, const FVector2D& B, const FLinearColor& C);
