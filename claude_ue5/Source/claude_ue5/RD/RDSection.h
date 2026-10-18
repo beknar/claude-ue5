@@ -151,6 +151,7 @@ private:
 		float LeafSign = 1.f;                    // doors: +1 when the leaf extends along +Y of its pivot
 		FIntPoint TileA = FIntPoint(-1), TileB = FIntPoint(-1);
 		int32 Partner = -1;                      // double door / wardrobe partner
+		bool bLooted = false;                    // containers: opened once (what it held was found)
 	};
 	struct FFlicker { UPointLightComponent* Light; float Base; float Phase; float Amount; };
 

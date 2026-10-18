@@ -112,6 +112,8 @@ def stand_off(m, gap):
         path = sec.find_path_world(q, ml)
         if not len(path) or math.hypot(path[0].x - q.x, path[0].y - q.y) > 135.0: continue
         if not clear(V(q.x, q.y, 150), V(ml.x, ml.y, ml.z + 20), ign): continue
+        # (and at the height a crossbow's bolt leaves: a bolt shot over a table burst on it 2.5 m out, the view above it clear)
+        if not clear(V(q.x, q.y, 128), V(ml.x, ml.y, ml.z + 20), ign): continue
         best = q; break
     if best is None: return False
     p.set_actor_location(V(best.x, best.y, 100.0), False, True)

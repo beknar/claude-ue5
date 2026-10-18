@@ -18,6 +18,7 @@
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/DateTime.h"
 #include "Components/PostProcessComponent.h"
@@ -34,6 +35,7 @@ ARDDungeonGenerator::ARDDungeonGenerator()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickInterval = 0.f;
+	PrimaryActorTick.bTickEvenWhenPaused = true;          // (her inventory pauses the game and is worked from Tick)
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RevealPost = CreateDefaultSubobject<UPostProcessComponent>(TEXT("RevealPost"));
 	RevealPost->SetupAttachment(RootComponent);
@@ -205,12 +207,98 @@ float ARDDungeonGenerator::GetAverageWeaponDamage() const
 
 float ARDDungeonGenerator::GetMonsterHealth(FIntPoint Section) const
 {
-	return PlayerMaxHealth * (IsStartSection(Section) ? StartMonsterHealth : RuntimeMonsterHealth);
+	return (MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth) * (IsStartSection(Section) ? StartMonsterHealth : RuntimeMonsterHealth);
 }
 
 float ARDDungeonGenerator::GetMonsterDamage(FIntPoint Section) const
 {
-	return GetAverageWeaponDamage() * (IsStartSection(Section) ? StartMonsterDamage : RuntimeMonsterDamage);
+	return (MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage()) * (IsStartSection(Section) ? StartMonsterDamage : RuntimeMonsterDamage);
+}
+
+// ------------------------------------------------------------------------------------------------ heroes, items
+const FRDHeroDef* ARDDungeonGenerator::FindHero(FName Name) const
+{
+	for (const FRDHeroDef& H : Heroes) if (H.Name == Name) return &H;
+	return nullptr;
+}
+
+FName ARDDungeonGenerator::ChosenHero() const
+{
+	if (Heroes.Num() == 0) return NAME_None;
+	if (const AGameModeBase* GM = GetWorld() ? GetWorld()->GetAuthGameMode() : nullptr)
+	{
+		const FString Opt = UGameplayStatics::ParseOption(GM->OptionsString, TEXT("Hero"));
+		if (!Opt.IsEmpty() && FindHero(FName(*Opt))) return FName(*Opt);
+	}
+	return FindHero(DefaultHero) ? DefaultHero : Heroes[0].Name;
+}
+
+bool ARDDungeonGenerator::ApplyHero(FName Name)
+{
+	const FRDHeroDef* H = FindHero(Name);
+	if (!H) return false;
+	CurrentHero = H->Name;
+	Weapons = H->Weapons;
+	PlayerMaxHealth = H->MaxHealth;
+	PlayerMaxMana = H->MaxMana; ManaPerSecond = H->ManaPerSecond;
+	MeleeBonus = H->MeleeBonus; RangedBonus = H->RangedBonus;
+	PlayerTitle = H->Title;
+	bRogueControls = H->bRogueControls;
+	RollClip = H->RollClip; RollBackClip = H->RollBackClip;
+	ControlsKeys = H->ControlsKeys; ControlsPad = H->ControlsPad;
+	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDHERO %s: %d weapons, %.0f hit points, %.0f mana (%.1f a second), melee +%.0f%%, ranged +%.0f%%"),
+		*Name.ToString(), Weapons.Num(), PlayerMaxHealth, PlayerMaxMana, ManaPerSecond, MeleeBonus * 100.f, RangedBonus * 100.f);
+	return true;
+}
+
+bool ARDDungeonGenerator::SwitchHero(FName Name)
+{
+	const FRDHeroDef* H = FindHero(Name);
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!H || !H->PawnClass || !PC) return false;
+	APawn* Old = PC->GetPawn();
+	const FTransform T = Old ? Old->GetActorTransform() : FTransform(GetStartRoomCenter() + FVector(0, 0, 100.f));
+	if (PlayerCombat) PlayerCombat->SetInventoryOpen(false);
+	ApplyHero(Name);
+	PlayerCombat = nullptr;         // (Tick gives the new pawn its own)
+	if (Old) { PC->UnPossess(); Old->Destroy(); }
+	FActorSpawnParameters P;
+	P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	APawn* New = GetWorld()->SpawnActor<APawn>(H->PawnClass, T, P);
+	if (!New) return false;
+	PC->Possess(New);
+	return true;
+}
+
+int32 ARDDungeonGenerator::FindItem(FName Name) const
+{
+	for (int32 I = 0; I < Items.Num(); ++I) if (Items[I].Name == Name) return I;
+	return -1;
+}
+
+FName ARDDungeonGenerator::LootOf(FIntPoint Section, int32 Index) const
+{
+	if (!bStartLoot || !IsStartSection(Section) || Items.Num() == 0) return NAME_None;
+	float Sum = 0.f;
+	for (const FRDItemDef& It : Items) Sum += FMath::Max(It.Weight, 0.f);
+	if (Sum <= 0.f) return NAME_None;
+	// (a stream of its own for each container: what it holds does not depend on the order she opens them in, and the
+	// play's streams are not drawn from)
+	FRandomStream R((int32)HashCombine(HashCombine((uint32)SessionSeed, GetTypeHash(Section)), GetTypeHash(Index * 7907 + 11)));
+	float U = R.FRand() * Sum;
+	for (const FRDItemDef& It : Items) { U -= FMath::Max(It.Weight, 0.f); if (U < 0.f) return It.Name; }
+	return Items.Last().Name;
+}
+
+void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, const FVector& At)
+{
+	if (!Section || !PlayerCombat) return;
+	const FName Item = LootOf(Section->Coord, Index);
+	if (Item.IsNone()) return;
+	PlayerCombat->AddItem(Item, 1);
+	LastFound = Item; LastFoundTime = GetWorld()->GetTimeSeconds(); ++ItemsFound;
+	PlaySoundAt(TEXT("Player.Loot"), At);
+	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDLOOT %s from container %d of section (%d, %d)"), *Item.ToString(), Index, Section->Coord.X, Section->Coord.Y);
 }
 
 void ARDDungeonGenerator::MeanMonsterFactors(float& Health, float& Damage) const
@@ -345,6 +433,8 @@ void ARDDungeonGenerator::BeginPlay()
 		Blood->Init(this);
 	}
 	StopMusic();
+	// (the hero chosen in the menu: her weapons, hit points and controls become the generator's before anything reads them)
+	if (Heroes.Num() > 0) ApplyHero(ChosenHero());
 	MapData.Reset();
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
 	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
@@ -355,6 +445,11 @@ void ARDDungeonGenerator::BeginPlay()
 void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	// (it ticks while the game is paused: then only her inventory, which paused it, is worked)
+	const bool bPaused = GetWorld()->IsPaused();
+	if (Heroes.Num() > 0 && PlayerCombat)
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) PlayerCombat->TickInventory(PC);
+	if (bPaused) return;
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{

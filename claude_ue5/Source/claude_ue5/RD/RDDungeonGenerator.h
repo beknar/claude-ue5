@@ -124,6 +124,47 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float RollCooldown = 0.25f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") FVector2D RollDodge = FVector2D(0.05f, 0.75f);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 MonstersKilled = 0;
+	/** a monster's hit points and damage scale with these instead of her hit points and her average blow (0: hers). With
+	 *  heroes to choose (random_dungeonmagic_level4) the monsters stay the same whoever she is, so the Warrior's hit
+	 *  points and blows and the Mage's frailty count. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float MonsterReferenceHealth = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float MonsterReferenceBlow = 0.f;
+
+	// ---- random_dungeonmagic_level4: the characters to choose from (the menu level, ARDHeroSelect, opens the level with
+	// ?Hero=<Name>; ARDHeroGameMode spawns her pawn). When play begins the chosen one's weapons, hit points, mana, bonuses,
+	// controls and roll become the generator's own (Weapons, PlayerMaxHealth, ...): the rest of the game reads those.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") TArray<FRDHeroDef> Heroes;
+	/** the one played when the level is opened without ?Hero= (from the editor) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") FName DefaultHero;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") FName CurrentHero;
+	/** hers (ApplyHero): mana, mana a second, the share more a melee blow / a ranged bolt does */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float PlayerMaxMana = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float ManaPerSecond = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float MeleeBonus = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float RangedBonus = 0.f;
+	const FRDHeroDef* FindHero(FName Name) const;
+	/** the hero of this play: ?Hero= of the level's URL, else DefaultHero, else the first */
+	FName ChosenHero() const;
+	/** puts a hero's data into the generator's fields (her pawn must be hers: see SwitchHero) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool ApplyHero(FName Name);
+	/** tests: in play, another hero takes her place (her pawn is replaced where she stands, with full hit points) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool SwitchHero(FName Name);
+
+	// ---- random_dungeonmagic_level4: potions and food in the containers
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") TArray<FRDItemDef> Items;
+	/** a container of the start section (the first tier of rooms) holds one item, picked by the items' weights, found when
+	 *  she opens it the first time; the sections generated in play hold none yet. The pick comes from the session seed,
+	 *  the section and the container (a stream of its own: the play's streams are not touched). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") bool bStartLoot = false;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") int32 FindItem(FName Name) const;
+	/** a container was opened (by her): its item goes into her inventory */
+	void OnContainerOpened(ARDSection* Section, int32 Index, const FVector& At);
+	/** what she found last (HUD) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") FName LastFound;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") int32 ItemsFound = 0;
+	float LastFoundTime = -100.f;
+	/** the item a container of a section holds (NAME_None: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") FName LootOf(FIntPoint Section, int32 Index) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") URDCombatComponent* GetPlayerCombat() const { return PlayerCombat; }
 	/** her average damage a blow over the weapons */

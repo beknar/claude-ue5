@@ -221,10 +221,30 @@ void ARDHUD::DrawCombat(float Sc)
 		DrawText(N, FLinearColor(0.f, 0.f, 0.f, Al * 0.8f), S.X - Tw * 0.5f + 2.f, S.Y - Th + 2.f, Medium, K);
 		DrawText(N, T.bOnPlayer ? FLinearColor(1.f, 0.25f, 0.2f, Al) : FLinearColor(1.f, 0.9f, 0.35f, Al), S.X - Tw * 0.5f, S.Y - Th, Medium, K);
 	}
-	// ---- status panel (bottom right): hit points, the weapons with their damage, kills
+	// ---- status panel (bottom right): hit points (and mana), the weapons with their damage, kills
 	{
-		const float W = 400.f * Sc, H = 176.f * Sc, Mg = 24.f * Sc, Pd = 14.f * Sc;
+		const bool bMana = Cb->GetMaxMana() > 0.f;
+		const float Mb = bMana ? 30.f * Sc : 0.f;         // (the mana bar's room)
+		const float W = 400.f * Sc, H = 176.f * Sc + Mb, Mg = 24.f * Sc, Pd = 14.f * Sc;
 		const FVector2D A(Canvas->ClipX - Mg - W, Canvas->ClipY - Mg - H), B = A + FVector2D(W, H);
+		// what is on her (potions, food): a chip each over the panel, with the seconds left
+		{
+			float X = B.X;
+			const TArray<URDCombatComponent::FEffect>& Ef = Cb->GetEffects();
+			for (int32 I = Ef.Num() - 1; I >= 0; --I)
+			{
+				const URDCombatComponent::FEffect& E = Ef[I];
+				const bool bSpeed = E.Kind == ERDItemKind::Speed;
+				const FString T = bSpeed ? FString::Printf(TEXT("SPEED +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+				                         : FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left));
+				float Tw, Th; GetTextSize(T, Tw, Th, Small, Sc);
+				const FVector2D C1(X, A.Y - 8.f * Sc), C0(X - Tw - 16.f * Sc, A.Y - 8.f * Sc - Th - 8.f * Sc);
+				Box(C0, C1, bSpeed ? FLinearColor(0.10f, 0.22f, 0.30f, 0.85f) : FLinearColor(0.12f, 0.26f, 0.12f, 0.85f));
+				Frame(C0, C1, bSpeed ? RDCyan : FLinearColor(0.45f, 0.9f, 0.45f), 1.f * Sc);
+				DrawText(T, FLinearColor::White, C0.X + 8.f * Sc, C0.Y + 4.f * Sc, Small, Sc);
+				X = C0.X - 8.f * Sc;
+			}
+		}
 		Box(A, B, FLinearColor(0.04f, 0.05f, 0.07f, 0.78f));
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 		DrawText(Gen->PlayerTitle, RDInk, A.X + Pd, A.Y + 9.f * Sc, Small, Sc * 1.1f);
@@ -241,6 +261,19 @@ void ARDHUD::DrawCombat(float Sc)
 		const FString Hp = FString::Printf(TEXT("HP  %.0f / %.0f"), FMath::CeilToFloat(Cb->GetHealth()), Cb->GetMaxHealth());
 		GetTextSize(Hp, Tw, Th, Small, Sc * 1.2f);
 		DrawText(Hp, FLinearColor::White, (H0.X + H1.X - Tw) * 0.5f, (H0.Y + H1.Y - Th) * 0.5f, Small, Sc * 1.2f);
+		// mana (blue; it flashes when a cast was refused for want of it)
+		if (bMana)
+		{
+			const float Mf = Cb->GetMana() / FMath::Max(Cb->GetMaxMana(), 1.f);
+			const FVector2D M0(A.X + Pd, A.Y + 70.f * Sc), M1(B.X - Pd, A.Y + 92.f * Sc);
+			const float Flash = FMath::Clamp(1.f - (Now - Cb->NoManaTime) / 0.6f, 0.f, 1.f);
+			Box(M0, M1, FLinearColor(0.03f + 0.3f * Flash, 0.04f, 0.12f, 0.95f));
+			Box(M0 + FVector2D(2.f), FVector2D(M0.X + 2.f + (M1.X - M0.X - 4.f) * Mf, M1.Y - 2.f), FLinearColor(0.18f, 0.40f, 0.95f));
+			Frame(M0, M1, Flash > 0.f ? FLinearColor(1.f, 0.3f, 0.25f) : FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 1.5f * Sc);
+			const FString Mt = FString::Printf(TEXT("MANA  %.0f / %.0f"), FMath::FloorToFloat(Cb->GetMana()), Cb->GetMaxMana());
+			GetTextSize(Mt, Tw, Th, Small, Sc * 1.05f);
+			DrawText(Mt, FLinearColor::White, (M0.X + M1.X - Tw) * 0.5f, (M0.Y + M1.Y - Th) * 0.5f, Small, Sc * 1.05f);
+		}
 		// the weapons
 		const int32 Num = Gen->Weapons.Num();
 		const float Gp = 8.f * Sc, Sw = Num > 0 ? (W - Pd * 2.f - Gp * (Num - 1)) / Num : 0.f;
@@ -248,7 +281,7 @@ void ARDHUD::DrawCombat(float Sc)
 		{
 			const FRDWeaponDef& Wp = Gen->Weapons[I];
 			const bool bOn = Wp.bAlongside ? Cb->GetAttackIndex() == I : I == Cb->GetWeaponIndex();
-			const FVector2D S0(A.X + Pd + I * (Sw + Gp), A.Y + 76.f * Sc), S1 = S0 + FVector2D(Sw, 66.f * Sc);
+			const FVector2D S0(A.X + Pd + I * (Sw + Gp), A.Y + 76.f * Sc + Mb), S1 = S0 + FVector2D(Sw, 66.f * Sc);
 			Box(S0, S1, bOn ? FLinearColor(0.36f, 0.27f, 0.10f, 0.95f) : FLinearColor(0.10f, 0.10f, 0.12f, 0.9f));
 			Frame(S0, S1, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.40f, 0.38f, 0.34f), (bOn ? 2.5f : 1.f) * Sc);
 			const FLinearColor Tc = bOn ? FLinearColor::White : FLinearColor(0.72f, 0.70f, 0.66f);
@@ -260,7 +293,7 @@ void ARDHUD::DrawCombat(float Sc)
 			const FString N = Wp.Name.ToString().ToUpper();
 			GetTextSize(N, Tw, Th, Small, Sc * 1.15f);
 			DrawText(N, Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 16.f * Sc, Small, Sc * 1.15f);
-			const FString D = FString::Printf(TEXT("%.0f damage"), Wp.Damage);
+			const FString D = Wp.ManaCost > 0.f ? FString::Printf(TEXT("%.0f damage  ·  %.0f mana"), Cb->GetDamageOf(I), Wp.ManaCost) : FString::Printf(TEXT("%.0f damage"), Cb->GetDamageOf(I));
 			GetTextSize(D, Tw, Th, Small, Sc);
 			DrawText(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 40.f * Sc, Small, Sc);
 		}
@@ -428,6 +461,13 @@ void ARDHUD::DrawHUD()
 		const float X = (Canvas->ClipX - Tw) * 0.5f, Y = Canvas->ClipY * 0.72f;
 		Box(FVector2D(X - 14.f * Sc, Y - 8.f * Sc), FVector2D(X + Tw + 14.f * Sc, Y + Th + 8.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.6f));
 		DrawText(T, FLinearColor(0.95f, 0.9f, 0.78f), X, Y, Medium, Sc * 1.2f);
+	}
+
+	// ---- random_dungeonmagic_level4: what she found, what the inventory did, the inventory itself
+	if (Gen->Heroes.Num() > 0 && Gen->GetPlayerCombat())
+	{
+		if (!bBigMap) DrawNotices(Sc);
+		if (Gen->GetPlayerCombat()->IsInventoryOpen()) DrawInventory(Sc);
 	}
 
 	// ---- full map (M): everything discovered, fitted to the screen, north up
@@ -791,4 +831,164 @@ FString ARDHUD::KindCode(ERDRoomKind K)
 	case ERDRoomKind::Crypt: return TEXT("Cr"); case ERDRoomKind::Treasury: return TEXT("Tr"); case ERDRoomKind::GuardRoom: return TEXT("G");
 	case ERDRoomKind::Forge: return TEXT("F"); default: return TEXT("");
 	}
+}
+
+// ------------------------------------------------------------------------------------------------ random_dungeonmagic_level4
+FString ARDHUD::DescribeItem(const FRDItemDef& It) const
+{
+	const URDCombatComponent* Cb = Gen ? Gen->GetPlayerCombat() : nullptr;
+	const float Hp = Cb ? Cb->GetMaxHealth() : 100.f, Mp = Cb ? Cb->GetMaxMana() : 0.f;
+	switch (It.Kind)
+	{
+	case ERDItemKind::Healing: return FString::Printf(TEXT("Restores %.0f%% of your hit points  (%.0f HP)"), It.Amount * 100.f, It.Amount * Hp);
+	case ERDItemKind::Mana: return Mp > 0.f ? FString::Printf(TEXT("Restores %.0f%% of your mana  (%.0f)"), It.Amount * 100.f, It.Amount * Mp) : FString(TEXT("No use to you: you have no mana"));
+	case ERDItemKind::Speed: return FString::Printf(TEXT("You move %.0f%% faster for %.0f seconds"), It.Amount * 100.f, It.Seconds);
+	case ERDItemKind::Food: return FString::Printf(TEXT("Restores %.0f%% of your hit points a second for %.0f s  (%.1f HP/s)"), It.Amount * 100.f, It.Seconds, It.Amount * Hp);
+	}
+	return FString();
+}
+
+void ARDHUD::DrawNotices(float Sc)
+{
+	const URDCombatComponent* Cb = Gen->GetPlayerCombat();
+	UFont* Small = GEngine->GetSmallFont();
+	UFont* Medium = GEngine->GetMediumFont();
+	const float Now = GetWorld()->GetTimeSeconds();
+	const bool bPad = Cb->IsUsingGamepad();
+	// what she just found: a moment under the middle of the view
+	const float Fa = Now - Gen->LastFoundTime;
+	if (Fa >= 0.f && Fa < 3.2f && !Gen->LastFound.IsNone())
+	{
+		const float Al = FMath::Clamp(FMath::Min(Fa / 0.25f, (3.2f - Fa) / 0.6f), 0.f, 1.f);
+		const FString N = Gen->LastFound.ToString();
+		const FString Hint = bPad ? TEXT("Start  inventory") : TEXT("I  inventory");
+		float Nw, Nh, Lw, Lh, Hw, Hh;
+		GetTextSize(N, Nw, Nh, Medium, Sc * 1.35f); GetTextSize(TEXT("FOUND"), Lw, Lh, Small, Sc * 1.1f); GetTextSize(Hint, Hw, Hh, Small, Sc);
+		const float Y = Canvas->ClipY * 0.60f, Bw = FMath::Max(Nw, FMath::Max(Lw, Hw)) + 48.f * Sc;
+		const FVector2D A((Canvas->ClipX - Bw) * 0.5f, Y - 10.f * Sc), B((Canvas->ClipX + Bw) * 0.5f, Y + Lh + Nh + Hh + 22.f * Sc);
+		Box(A, B, FLinearColor(0.05f, 0.04f, 0.02f, 0.78f * Al));
+		Frame(A, B, FLinearColor(1.f, 0.82f, 0.3f, 0.95f * Al), 2.f * Sc);
+		DrawText(TEXT("FOUND"), FLinearColor(1.f, 0.82f, 0.3f, Al), (Canvas->ClipX - Lw) * 0.5f, Y, Small, Sc * 1.1f);
+		DrawText(N, FLinearColor(1.f, 0.97f, 0.88f, Al), (Canvas->ClipX - Nw) * 0.5f, Y + Lh + 4.f * Sc, Medium, Sc * 1.35f);
+		DrawText(Hint, FLinearColor(0.75f, 0.72f, 0.65f, Al), (Canvas->ClipX - Hw) * 0.5f, Y + Lh + Nh + 10.f * Sc, Small, Sc);
+	}
+	// what the inventory did, or a cast refused (not over the open inventory: it shows it itself)
+	const float Ma = Now - Cb->MessageTime;
+	if (!Cb->IsInventoryOpen() && Ma >= 0.f && Ma < 2.6f && !Cb->Message.IsEmpty())
+	{
+		const float Al = FMath::Clamp((2.6f - Ma) / 0.5f, 0.f, 1.f);
+		float Tw, Th; GetTextSize(Cb->Message, Tw, Th, Small, Sc * 1.3f);
+		const float X = (Canvas->ClipX - Tw) * 0.5f, Y = Canvas->ClipY * 0.30f;
+		Box(FVector2D(X - 14.f * Sc, Y - 7.f * Sc), FVector2D(X + Tw + 14.f * Sc, Y + Th + 7.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.65f * Al));
+		DrawText(Cb->Message, FLinearColor(0.95f, 0.92f, 0.82f, Al), X, Y, Small, Sc * 1.3f);
+	}
+}
+
+void ARDHUD::DrawInventory(float Sc)
+{
+	URDCombatComponent* Cb = Gen->GetPlayerCombat();
+	UFont* Small = GEngine->GetSmallFont();
+	UFont* Medium = GEngine->GetMediumFont();
+	const bool bPad = Cb->IsUsingGamepad();
+	const TArray<FString> Lines = Cb->GetInventoryLines();
+	const int32 Cur = Cb->GetInventoryCursor();
+	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Line(0.75f, 0.65f, 0.45f, 0.9f);
+	// the game stands still under it
+	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.55f));
+	const int32 NumWeapons = Gen->Weapons.Num(), NumItems = Lines.Num() - NumWeapons;
+	const float Rh = 34.f * Sc, W = 1000.f * Sc, Pd = 22.f * Sc;
+	const float ListH = 46.f * Sc + Rh * NumWeapons + 46.f * Sc + Rh * FMath::Max(NumItems, 1);
+	const float H = FMath::Max(ListH, 330.f * Sc) + 150.f * Sc;
+	const FVector2D A((Canvas->ClipX - W) * 0.5f, FMath::Max(40.f * Sc, (Canvas->ClipY - H) * 0.5f)), B = A + FVector2D(W, H);
+	Box(A, B, FLinearColor(0.035f, 0.04f, 0.055f, 0.94f));
+	Frame(A, B, Line, 2.f * Sc);
+	DrawText(TEXT("INVENTORY"), RDInk, A.X + Pd, A.Y + 16.f * Sc, Medium, Sc * 1.5f);
+	float Tw, Th;
+	GetTextSize(Gen->PlayerTitle, Tw, Th, Small, Sc * 1.2f);
+	DrawText(Gen->PlayerTitle, Gold, B.X - Pd - Tw, A.Y + 18.f * Sc, Small, Sc * 1.2f);
+	DrawText(TEXT("the game is paused"), Dim, B.X - Pd - 150.f * Sc, A.Y + 42.f * Sc, Small, Sc * 0.95f);
+	// ---- the list (left): her weapons, then what she carries
+	const float Lx = A.X + Pd, Lw = W * 0.5f - Pd;
+	float Y = A.Y + 76.f * Sc;
+	auto Header = [&](const TCHAR* T) { DrawText(T, Dim, Lx, Y, Small, Sc * 1.05f); Y += 26.f * Sc; Box(FVector2D(Lx, Y - 4.f * Sc), FVector2D(Lx + Lw, Y - 3.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f)); Y += 4.f * Sc; };
+	auto Row = [&](int32 I, const FString& Name, const FString& Tag, const FLinearColor& TagC)
+	{
+		const bool bOn = I == Cur;
+		const FVector2D R0(Lx, Y), R1(Lx + Lw, Y + Rh - 4.f * Sc);
+		if (bOn) { Box(R0, R1, FLinearColor(0.36f, 0.27f, 0.10f, 0.95f)); Frame(R0, R1, Gold, 2.f * Sc); }
+		DrawText(Name, bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc, R0.Y + 6.f * Sc, Small, Sc * 1.15f);
+		if (!Tag.IsEmpty()) { GetTextSize(Tag, Tw, Th, Small, Sc); DrawText(Tag, TagC, R1.X - 12.f * Sc - Tw, R0.Y + 8.f * Sc, Small, Sc); }
+		Y += Rh;
+	};
+	Header(TEXT("WEAPONS AND SPELLS"));
+	for (int32 I = 0; I < NumWeapons; ++I)
+	{
+		const FRDWeaponDef& Wp = Gen->Weapons[I];
+		const FString Tag = Wp.bAlongside ? TEXT("ALWAYS AT HAND") : I == Cb->GetWeaponIndex() ? TEXT("IN YOUR HANDS") : TEXT("");
+		Row(I, Wp.Name.ToString(), Tag, Wp.bAlongside ? RDCyan : Gold);
+	}
+	Y += 12.f * Sc;
+	Header(TEXT("POTIONS AND FOOD"));
+	if (NumItems <= 0) { DrawText(TEXT("nothing yet: the chests, trunks and barrels hold some"), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc); }
+	for (int32 I = NumWeapons; I < Lines.Num(); ++I)
+	{
+		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
+		if (P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Gold);
+	}
+	// ---- the one under the cursor (right): what it does; then hers
+	const float Rx = A.X + W * 0.5f + Pd, Rw = W * 0.5f - Pd * 2.f;
+	float Ry = A.Y + 76.f * Sc;
+	Box(FVector2D(Rx - Pd * 0.5f, Ry), FVector2D(Rx - Pd * 0.5f + 1.f, B.Y - 110.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
+	TArray<FString> Sel;
+	if (Lines.IsValidIndex(Cur)) Lines[Cur].ParseIntoArray(Sel, TEXT("|"));
+	auto Para = [&](const FString& T, const FLinearColor& C, float K)
+	{
+		// (wrapped at the column's width, word by word)
+		TArray<FString> Words; T.ParseIntoArray(Words, TEXT(" "));
+		FString Cur2;
+		for (const FString& Wd : Words)
+		{
+			const FString Try = Cur2.IsEmpty() ? Wd : Cur2 + TEXT(" ") + Wd;
+			GetTextSize(Try, Tw, Th, Small, K);
+			if (Tw > Rw && !Cur2.IsEmpty()) { DrawText(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; Cur2 = Wd; }
+			else Cur2 = Try;
+		}
+		if (!Cur2.IsEmpty()) { GetTextSize(Cur2, Tw, Th, Small, K); DrawText(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; }
+	};
+	if (Sel.Num() >= 2)
+	{
+		DrawText(Sel[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f); Ry += 40.f * Sc;
+		if (Sel[0] == TEXT("weapon") && Gen->Weapons.IsValidIndex(Cur))
+		{
+			const FRDWeaponDef& Wp = Gen->Weapons[Cur];
+			const bool bRanged = Wp.bSpell && Wp.BoltMesh, bMagic = Wp.bSpell && !Wp.BoltMesh;
+			const float Bonus = !Wp.bSpell ? Gen->MeleeBonus : bRanged ? Gen->RangedBonus : 0.f;
+			Para(bMagic ? TEXT("A spell: a bolt flies after the monster you face") : bRanged ? TEXT("A ranged weapon: its bolts fly straight at the monster you face") : TEXT("A melee weapon"), Dim, Sc * 1.05f);
+			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Cur), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
+			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
+			Ry += 6.f * Sc;
+			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Cur == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
+		}
+		else if (Sel[0] == TEXT("item"))
+		{
+			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
+			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
+			Ry += 6.f * Sc;
+			Para(bPad ? TEXT("A  use it") : TEXT("Enter  use it"), Gold, Sc * 1.05f);
+		}
+	}
+	// her state
+	Ry = FMath::Max(Ry + 18.f * Sc, A.Y + 250.f * Sc);
+	Para(FString::Printf(TEXT("Hit points  %.0f / %.0f"), FMath::CeilToFloat(Cb->GetHealth()), Cb->GetMaxHealth()), FLinearColor(0.5f, 0.9f, 0.55f), Sc * 1.05f);
+	if (Cb->GetMaxMana() > 0.f) Para(FString::Printf(TEXT("Mana  %.0f / %.0f"), FMath::FloorToFloat(Cb->GetMana()), Cb->GetMaxMana()), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.05f);
+	for (const URDCombatComponent::FEffect& E : Cb->GetEffects())
+		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
+		                                 : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left)), RDCyan, Sc);
+	// ---- the keys, and what was done last
+	const float Fy = B.Y - 92.f * Sc;
+	Box(FVector2D(A.X + Pd, Fy), FVector2D(B.X - Pd, Fy + 1.f), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
+	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) DrawText(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd, Fy + 14.f * Sc, Small, Sc * 1.15f);
+	const FString Keys = bPad ? TEXT("D-pad / left stick  select      A  wield or use      Start or B  close")
+	                          : TEXT("W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close");
+	DrawText(Keys, Dim, A.X + Pd, Fy + 50.f * Sc, Small, Sc * 1.05f);
 }

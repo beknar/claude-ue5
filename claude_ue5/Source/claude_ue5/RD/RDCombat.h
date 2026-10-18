@@ -25,6 +25,11 @@
 // carried on her (FRDWeaponDef::HolsterBone). 1 / 2, the mouse wheel or Y switch, the left mouse button or RB uses the
 // one in her hands, B rolls: toward the way she is moving (backward when she stands), moved by a root motion source
 // while her clip plays in place; blows miss her for most of it (generator RollDodge).
+// random_dungeonmagic_level4 (generator Heroes): she is the hero chosen in the menu, and the generator's fields are hers.
+// Mana (generator PlayerMaxMana) comes back slowly (ManaPerSecond); a spell takes its ManaCost and is refused without it.
+// Melee blows do MeleeBonus more, a ranged weapon's bolts RangedBonus more. Hit points do not come back by themselves
+// (RegenPerSecond 0): potions and food do. What she finds in the containers goes into her inventory (I, Tab, the
+// gamepad's Start: it pauses the game), with her weapons, which she wields from there.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -138,6 +143,48 @@ public:
 	/** world time she was last hurt / last hit something (HUD) */
 	float LastHurtTime = -100.f, LastHitTime = -100.f, DeathTime = -100.f;
 
+	// ---- random_dungeonmagic_level4: mana, the hero's bonuses, her inventory (generator Heroes / Items)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetMana() const { return Mana; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetMaxMana() const { return MaxMana; }
+	/** tests: set her hit points / mana (clamped) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetHealth(float Value) { Health = FMath::Clamp(Value, 0.f, MaxHealth); }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetMana(float Value) { Mana = FMath::Clamp(Value, 0.f, MaxMana); }
+	/** what a blow or bolt of a weapon of the generator's list takes, with her bonus (melee or ranged) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetDamageOf(int32 Index) const;
+	/** casts refused for want of mana; world time of the last */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 CastsRefused = 0;
+	float NoManaTime = -100.f;
+	/** items she carries (the generator's Items by name) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void AddItem(FName Name, int32 Count = 1);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetItemCount(FName Name) const;
+	/** drinks or eats one: false when she has none, or it would do nothing (full hit points or mana, no mana at all) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool UseItem(FName Name);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ItemsUsed = 0;
+	/** what is on her now: her speed's share more (the strongest speed potion), hit points a second (the foods together) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetSpeedBonus() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetRegenPerSecond() const;
+	/** her movement's top speed without potions (the character's own) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetBaseWalkSpeed() const;
+	struct FEffect { ERDItemKind Kind; float Amount; float Left; FName Item; };
+	const TArray<FEffect>& GetEffects() const { return Effects; }
+	/** the last thing the inventory did ("Drank a small healing potion  +10 HP") and when (HUD) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") FString Message;
+	float MessageTime = -100.f;
+	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
+	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A
+	 *  wield or use the one under it; I, Tab, Start or B close it. The generator works it every tick, paused or not. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetInventoryOpen(bool bOpen);
+	/** the open inventory pauses the game (off for the demo reel: the Movie Render Queue renders a world that goes on) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") bool bInventoryPausesGame = true;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsInventoryOpen() const { return bInventoryOpen; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetInventoryCursor() const { return InventoryCursor; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveInventoryCursor(int32 Step);
+	/** wields the weapon / uses the item under the cursor */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool UseInventoryEntry();
+	/** the inventory's lines: "weapon|Sword" (her weapons, in the generator's order), then "item|<name>|<count>" (tests, HUD) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetInventoryLines() const;
+	void TickInventory(APlayerController* PC);
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
@@ -154,6 +201,18 @@ private:
 	uint16 RollSourceId = 0;
 	void EndRoll();
 	float Health = 100.f, MaxHealth = 100.f;
+	float Mana = 0.f, MaxMana = 0.f;
+	/** her top speed is set from SavedWalkSpeed while she is slowed (an attack) or a speed potion is on her */
+	bool bSpeedOverride = false;
+	TMap<FName, int32> Carried;
+	TArray<FName> CarriedOrder;
+	TArray<FEffect> Effects;
+	bool bInventoryOpen = false;
+	int32 InventoryCursor = 0;
+	float InventoryRepeat = 0.f;
+	void SetMessage(const FString& Text);
+	void UpdateWalkSpeed();
+	void TickEffects(float Dt);
 	int32 WeaponIndex = -1, AttackIndex = -1;
 	/** per weapon: which of its attack clips comes next */
 	TArray<int32> NextOf;

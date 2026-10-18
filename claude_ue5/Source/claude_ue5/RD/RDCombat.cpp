@@ -75,6 +75,7 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 {
 	Generator = InGenerator;
 	MaxHealth = Health = Generator ? Generator->PlayerMaxHealth : 100.f;
+	MaxMana = Mana = Generator ? Generator->PlayerMaxMana : 0.f;
 	USkeletalMeshComponent* M = Body();
 	auto Make = [&](const TCHAR* Name)
 	{
@@ -170,12 +171,41 @@ void URDCombatComponent::NextWeapon(int32 Step)
 
 void URDCombatComponent::SetSlowed(bool bSlow)
 {
-	ACharacter* C = Cast<ACharacter>(GetOwner());
-	if (!C || bSlow == bSlowed) return;
-	UCharacterMovementComponent* CM = C->GetCharacterMovement();
-	if (bSlow) { SavedWalkSpeed = CM->MaxWalkSpeed; CM->MaxWalkSpeed = SavedWalkSpeed * 0.12f; }
-	else CM->MaxWalkSpeed = SavedWalkSpeed;
+	if (bSlow == bSlowed) return;
 	bSlowed = bSlow;
+	UpdateWalkSpeed();
+}
+
+void URDCombatComponent::UpdateWalkSpeed()
+{
+	ACharacter* C = Cast<ACharacter>(GetOwner());
+	if (!C) return;
+	UCharacterMovementComponent* CM = C->GetCharacterMovement();
+	// her own top speed while nothing changes it; slowed in an attack, faster under a speed potion
+	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus());
+	if (FMath::IsNearlyEqual(K, 1.f))
+	{
+		if (bSpeedOverride) { CM->MaxWalkSpeed = SavedWalkSpeed; bSpeedOverride = false; }
+		return;
+	}
+	if (!bSpeedOverride) { SavedWalkSpeed = CM->MaxWalkSpeed; bSpeedOverride = true; }
+	CM->MaxWalkSpeed = SavedWalkSpeed * K;
+}
+
+float URDCombatComponent::GetBaseWalkSpeed() const
+{
+	if (bSpeedOverride) return SavedWalkSpeed;
+	const ACharacter* C = Cast<ACharacter>(GetOwner());
+	return C ? C->GetCharacterMovement()->MaxWalkSpeed : 0.f;
+}
+
+float URDCombatComponent::GetDamageOf(int32 Index) const
+{
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index)) return 0.f;
+	const FRDWeaponDef& W = Generator->Weapons[Index];
+	// (a melee weapon: no bolt; a ranged one: a spell whose bolt is a mesh, the crossbow; magic has no bonus)
+	const float Bonus = !W.bSpell ? Generator->MeleeBonus : W.BoltMesh ? Generator->RangedBonus : 0.f;
+	return W.Damage * (1.f + Bonus);
 }
 
 bool URDCombatComponent::StartAttack()
@@ -187,7 +217,15 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 {
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
-	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0) return false;
+	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen) return false;
+	// (a spell that costs more mana than she has is not cast)
+	if (W->ManaCost > 0.f && Mana < W->ManaCost)
+	{
+		const float Now = GetWorld()->GetTimeSeconds();
+		if (Now - NoManaTime > 0.6f) { ++CastsRefused; SetMessage(FString::Printf(TEXT("Not enough mana for %s"), *W->Name.ToString())); Generator->PlaySoundAt(TEXT("Player.NoMana"), GetOwner()->GetActorLocation()); }
+		NoManaTime = Now;
+		return false;
+	}
 	UAnimInstance* AI = M->GetAnimInstance();
 	if (NextOf.Num() < Generator->Weapons.Num()) NextOf.SetNumZeroed(Generator->Weapons.Num());
 	const int32 NextAttack = NextOf[Index], K = NextAttack % W->Attacks.Num();
@@ -232,6 +270,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	bWhooshDone = false;
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
 	++NextOf[Index]; ++AttacksMade;
+	if (W->ManaCost > 0.f) Mana = FMath::Max(0.f, Mana - W->ManaCost);
 	SetSlowed(true);
 	return true;
 }
@@ -254,9 +293,10 @@ void URDCombatComponent::Strike()
 		// (a big monster right against her is in the arc whatever the angle to its middle)
 		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
 		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *W->Name.ToString())), Mo->GetActorLocation());
-		const bool bKilled = Mo->ApplyDamage(W->Damage, O);
-		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), W->Damage, false);
-		DamageDealt += W->Damage; ++HitsLanded; bAny = true;
+		const float Dmg = GetDamageOf(AttackIndex);         // (with her melee bonus)
+		const bool bKilled = Mo->ApplyDamage(Dmg, O);
+		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false);
+		DamageDealt += Dmg; ++HitsLanded; bAny = true;
 		if (bKilled) ++Kills;
 	}
 	if (bAny) LastHitTime = GetWorld()->GetTimeSeconds();
@@ -313,7 +353,8 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 void URDCombatComponent::Revive(bool bToStart)
 {
 	AActor* O = GetOwner();
-	bDead = false; Health = MaxHealth; AttackTime = -1.f; SetSlowed(false); StaggerUntil = -100.f; StopCharge(); EndRoll(); ShowLoadedBolt(true);
+	bDead = false; Health = MaxHealth; Mana = MaxMana; AttackTime = -1.f; StaggerUntil = -100.f; StopCharge(); EndRoll(); ShowLoadedBolt(true);
+	Effects.Reset(); SetSlowed(false); UpdateWalkSpeed();
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
 	if (bToStart && O && Generator)
 	{
@@ -368,8 +409,172 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 		if (!bHitDone && AttackTime >= AttackHit) { bHitDone = true; if (bSpell) LaunchBolt(); else Strike(); }
 		if (AttackTime >= AttackLen) EndAttack();
 	}
-	// out of a fight the hit points come back
-	if (Health < MaxHealth && Now - LastHurtTime > Generator->RegenDelay) Health = FMath::Min(MaxHealth, Health + Generator->RegenPerSecond * Dt);
+	// out of a fight the hit points come back (not in random_dungeonmagic_level4: RegenPerSecond 0); mana comes back slowly
+	if (Health < MaxHealth && Generator->RegenPerSecond > 0.f && Now - LastHurtTime > Generator->RegenDelay) Health = FMath::Min(MaxHealth, Health + Generator->RegenPerSecond * Dt);
+	if (Mana < MaxMana) Mana = FMath::Min(MaxMana, Mana + Generator->ManaPerSecond * Dt);
+	TickEffects(Dt);
+}
+
+// ------------------------------------------------------------------------------------------------ items, the inventory
+void URDCombatComponent::SetMessage(const FString& Text)
+{
+	Message = Text;
+	MessageTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+}
+
+void URDCombatComponent::AddItem(FName Name, int32 Count)
+{
+	if (Name.IsNone() || Count <= 0) return;
+	int32& N = Carried.FindOrAdd(Name);
+	if (N == 0) CarriedOrder.AddUnique(Name);
+	N += Count;
+}
+
+int32 URDCombatComponent::GetItemCount(FName Name) const
+{
+	const int32* N = Carried.Find(Name);
+	return N ? *N : 0;
+}
+
+static FString RDItemLabel(FName Name) { return Name.ToString().ToLower(); }
+
+bool URDCombatComponent::UseItem(FName Name)
+{
+	if (!Generator || bDead || GetItemCount(Name) <= 0) return false;
+	const int32 Ix = Generator->FindItem(Name);
+	if (Ix < 0) return false;
+	const FRDItemDef& It = Generator->Items[Ix];
+	const FString Lb = RDItemLabel(Name);
+	switch (It.Kind)
+	{
+	case ERDItemKind::Healing:
+	{
+		if (Health >= MaxHealth) { SetMessage(TEXT("Your hit points are full")); return false; }
+		const float Before = Health;
+		Health = FMath::Min(MaxHealth, Health + MaxHealth * It.Amount);
+		SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f HP"), *Lb, Health - Before));
+		break;
+	}
+	case ERDItemKind::Mana:
+	{
+		if (MaxMana <= 0.f) { SetMessage(FString::Printf(TEXT("%s has no mana to restore"), *Generator->PlayerTitle)); return false; }
+		if (Mana >= MaxMana) { SetMessage(TEXT("Your mana is full")); return false; }
+		const float Before = Mana;
+		Mana = FMath::Min(MaxMana, Mana + MaxMana * It.Amount);
+		SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f mana"), *Lb, Mana - Before));
+		break;
+	}
+	case ERDItemKind::Speed:
+		Effects.Add({ It.Kind, It.Amount, It.Seconds, Name });
+		UpdateWalkSpeed();
+		SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f%% speed for %.0f s"), *Lb, It.Amount * 100.f, It.Seconds));
+		break;
+	case ERDItemKind::Food:
+		if (Health >= MaxHealth) { SetMessage(TEXT("Your hit points are full")); return false; }
+		Effects.Add({ It.Kind, It.Amount, It.Seconds, Name });
+		SetMessage(FString::Printf(TEXT("Ate the %s:  +%.0f HP a second for %.0f s"), *Lb, MaxHealth * It.Amount, It.Seconds));
+		break;
+	}
+	int32& N = Carried.FindOrAdd(Name);
+	if (--N <= 0) { Carried.Remove(Name); CarriedOrder.Remove(Name); }
+	++ItemsUsed;
+	if (AActor* O = GetOwner()) Generator->PlaySoundAt(It.Kind == ERDItemKind::Food ? TEXT("Player.Eat") : TEXT("Player.Drink"), O->GetActorLocation());
+	return true;
+}
+
+float URDCombatComponent::GetSpeedBonus() const
+{
+	float B = 0.f;
+	for (const FEffect& E : Effects) if (E.Kind == ERDItemKind::Speed) B = FMath::Max(B, E.Amount);       // (speed potions do not add up: the strongest counts)
+	return B;
+}
+
+float URDCombatComponent::GetRegenPerSecond() const
+{
+	float R = 0.f;
+	for (const FEffect& E : Effects) if (E.Kind == ERDItemKind::Food) R += E.Amount * MaxHealth;
+	return R;
+}
+
+void URDCombatComponent::TickEffects(float Dt)
+{
+	if (Effects.Num() == 0) return;
+	const float Regen = GetRegenPerSecond();
+	if (Regen > 0.f) Health = FMath::Min(MaxHealth, Health + Regen * Dt);
+	const float SpeedBefore = GetSpeedBonus();
+	for (int32 I = Effects.Num() - 1; I >= 0; --I)
+		if ((Effects[I].Left -= Dt) <= 0.f) Effects.RemoveAt(I);
+	if (!FMath::IsNearlyEqual(SpeedBefore, GetSpeedBonus())) UpdateWalkSpeed();
+}
+
+TArray<FString> URDCombatComponent::GetInventoryLines() const
+{
+	TArray<FString> Out;
+	if (Generator)
+		for (const FRDWeaponDef& W : Generator->Weapons) Out.Add(FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
+	for (const FName& N : CarriedOrder) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
+	return Out;
+}
+
+void URDCombatComponent::SetInventoryOpen(bool bOpen)
+{
+	if (bOpen == bInventoryOpen || (bOpen && bDead)) return;
+	bInventoryOpen = bOpen;
+	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1)); }
+	// (the game stands still while it is open; the generator, which ticks while paused, works the inventory)
+	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
+	if (Generator && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Inventory"), GetOwner()->GetActorLocation());
+}
+
+void URDCombatComponent::MoveInventoryCursor(int32 Step)
+{
+	const int32 N = GetInventoryLines().Num();
+	if (N > 0) InventoryCursor = ((InventoryCursor + Step) % N + N) % N;
+}
+
+bool URDCombatComponent::UseInventoryEntry()
+{
+	const TArray<FString> Lines = GetInventoryLines();
+	if (!Lines.IsValidIndex(InventoryCursor) || !Generator) return false;
+	TArray<FString> P;
+	Lines[InventoryCursor].ParseIntoArray(P, TEXT("|"));
+	if (P.Num() >= 2 && P[0] == TEXT("weapon"))
+	{
+		const int32 I = InventoryCursor;
+		const FRDWeaponDef& W = Generator->Weapons[I];
+		if (W.bAlongside) { SetMessage(FString::Printf(TEXT("%s is always at hand (RMB / E)"), *W.Name.ToString())); return false; }
+		if (I == WeaponIndex) { SetMessage(FString::Printf(TEXT("%s is in your hands"), *W.Name.ToString())); return false; }
+		SelectWeapon(I);
+		SetMessage(FString::Printf(TEXT("You wield the %s"), *W.Name.ToString().ToLower()));
+		return true;
+	}
+	if (P.Num() >= 2 && P[0] == TEXT("item"))
+	{
+		const bool bOk = UseItem(FName(*P[1]));
+		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
+		return bOk;
+	}
+	return false;
+}
+
+void URDCombatComponent::TickInventory(APlayerController* PC)
+{
+	if (!PC || bScriptedOnly) return;
+	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
+	const bool bToggle = Pressed({ EKeys::I, EKeys::Tab, EKeys::Gamepad_Special_Right });
+	if (!bInventoryOpen) { if (bToggle && !bDead) SetInventoryOpen(true); return; }
+	if (bToggle || Pressed({ EKeys::Gamepad_FaceButton_Right })) { SetInventoryOpen(false); return; }
+	if (Pressed({ EKeys::W, EKeys::Up, EKeys::MouseScrollUp, EKeys::Gamepad_DPad_Up })) MoveInventoryCursor(-1);
+	if (Pressed({ EKeys::S, EKeys::Down, EKeys::MouseScrollDown, EKeys::Gamepad_DPad_Down })) MoveInventoryCursor(1);
+	// (the left stick: a step when it is pushed, then one every 0.22 s while it is held)
+	const float Sy = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
+	if (FMath::Abs(Sy) > 0.6f)
+	{
+		const float Now = FPlatformTime::Seconds();
+		if (Now > InventoryRepeat) { MoveInventoryCursor(Sy > 0.f ? -1 : 1); InventoryRepeat = Now + (InventoryRepeat > 0.f ? 0.22f : 0.4f); }
+	}
+	else InventoryRepeat = 0.f;
+	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::LeftMouseButton, EKeys::Gamepad_FaceButton_Bottom })) UseInventoryEntry();
 }
 
 // ------------------------------------------------------------------------------------------------ sound
@@ -459,6 +664,12 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 		if (bToggleR && !bRunToggleDown) SetRunMode(!bRunMode);
 		bRunToggleDown = bToggleR;
 		return;
+	}
+	// (with heroes to choose, random_dungeonmagic_level4: the wheel or Y switch between her weapons, as the Rogue's do)
+	if (Generator->Heroes.Num() > 0)
+	{
+		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) NextWeapon(-1);
+		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
 	}
 	// the weapon in her hand: left mouse or RB. The spell: right mouse, E or LB: the one cast alongside the drawn weapon,
 	// or the drawn weapon itself when it is a spell (then the left mouse and RB cast it too)
@@ -646,14 +857,15 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 		DamageDealt += Amount; ++HitsLanded; bAny = true;
 		if (bKilled) ++Kills;
 	};
-	if (Direct && !Direct->IsDead()) Hurt(Direct, W.Damage, At);
+	const float Dmg = GetDamageOf(B.Weapon);       // (with her ranged bonus for a crossbow's bolt)
+	if (Direct && !Direct->IsDead()) Hurt(Direct, Dmg, At);
 	for (ARDMonster* Mo : Generator->GetMonsters())
 	{
 		if (!Mo || Mo == Direct || Mo->IsDead()) continue;
 		const FVector C = Mo->GetActorLocation();
 		const float Gap = FVector::Dist(C * FVector(1, 1, 0), At * FVector(1, 1, 0)) - Mo->GetCapsuleComponent()->GetScaledCapsuleRadius();
 		if (Gap > W.BoltSplash || FMath::Abs(C.Z - At.Z) > Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 80.f) continue;
-		Hurt(Mo, W.Damage * 0.5f, C + ((At - C) * FVector(1, 1, 0)).GetSafeNormal() * Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.8f);
+		Hurt(Mo, Dmg * 0.5f, C + ((At - C) * FVector(1, 1, 0)).GetSafeNormal() * Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.8f);
 	}
 	if (bAny) LastHitTime = GetWorld()->GetTimeSeconds();
 	(Direct ? BoltsOnMonsters : BoltsElsewhere)++;

@@ -11,6 +11,7 @@ class UAnimSequenceBase;
 class UNiagaraSystem;
 class USoundBase;
 class UFXSystemAsset;
+class APawn;
 
 /** A placeable mesh normalised by Adjust to the dungeon frame: origin at the footprint centre on the floor, front toward
  *  +X (furniture faces +X; wall pieces run along Y with their room face toward +X; floor tiles centred, top at z = 0;
@@ -167,6 +168,63 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform HolsterGrip;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName OffHandHolsterBone = NAME_None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform OffHandHolsterGrip;
+	/** random_dungeonmagic_level4: the mana a cast takes (0: none; a cast is refused while she has less) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaCost = 0.f;
+};
+
+/** random_dungeonmagic_level4: what a potion or a food does */
+UENUM(BlueprintType)
+enum class ERDItemKind : uint8
+{
+	Healing, Mana, Speed, Food
+};
+
+/** random_dungeonmagic_level4: a potion or a food found in a container. Amount is a share: of her hit points at once
+ *  (Healing), of her mana at once (Mana), of her speed for Seconds (Speed), of her hit points every second for Seconds
+ *  (Food). Weight: how likely a container holds it against the others (the item table's rarity). */
+USTRUCT(BlueprintType)
+struct FRDItemDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDItemKind Kind = ERDItemKind::Healing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Amount = 0.1f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Seconds = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+};
+
+/** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the
+ *  dungeon's generator puts the one chosen into its own fields when play begins: ARDDungeonGenerator::ApplyHero). */
+USTRUCT(BlueprintType)
+struct FRDHeroDef
+{
+	GENERATED_BODY()
+	/** Warrior, Mage, Warlock, Rogue: the menu opens the dungeon with ?Hero=<Name> */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	/** over the status panel and on the menu */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TSubclassOf<APawn> PawnClass;
+	/** her inventory's weapons (and spells): the first one is drawn when play begins */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponDef> Weapons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MaxHealth = 100.f;
+	/** mana (0: she has none) and how much comes back a second */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MaxMana = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaPerSecond = 0.f;
+	/** a melee weapon's blows / a ranged weapon's bolts (a spell with a bolt mesh) do this share more */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeleeBonus = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedBonus = 0.f;
+	/** the Rogue's layout (the wheel or Y switch weapons, B dodges) and her roll; none for the others */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRogueControls = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> RollClip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> RollBackClip = nullptr;
+	/** the HUD's controls panel ("key|what it does"), keyboard and mouse; gamepad */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> ControlsKeys;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> ControlsPad;
+	/** the menu: a line each for her main abilities, what she can wear, the weapons she starts with, a colour of her own */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Abilities;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Armour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString StartsWith;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Accent = FLinearColor(1.f, 0.8f, 0.4f);
 };
 
 UENUM(BlueprintType)

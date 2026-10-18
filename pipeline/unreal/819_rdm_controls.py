@@ -1,16 +1,17 @@
 """The magic levels' walk / run switch: BP_RDM_CasterCharacter (random_dungeonmagic_level), BP_RDM2_DarkCasterCharacter
-(random_dungeonmagic_level2) and BP_RDM3_RogueCharacter (random_dungeonmagic_level3) get a bool RunMode, which URDCombatComponent::SetRunMode sets (R on the keyboard, the left
+(random_dungeonmagic_level2), BP_RDM3_RogueCharacter (random_dungeonmagic_level3) and BP_RDM4_WarriorCharacter (the
+Warrior of random_dungeonmagic_level4) get a bool RunMode, which URDCombatComponent::SetRunMode sets (R on the keyboard, the left
 trigger on the gamepad: generator bCasterControls), and a MoveScale of their own that picks her run speed while RunMode is
 on or the run action (Shift, the left stick's click) is held, her walk speed otherwise; a stick pushed part way scales it
-down as before (620's MoveScale, with RunMode). Run after 810 / 817 / 822 (their characters), before 811 / 818 / 823. Idempotent.
+down as before (620's MoveScale, with RunMode). Run after 810 / 817 / 822 / 824 (their characters), before 811 / 818 / 823 / 825. Idempotent.
 Args: none"""
 import unreal
 import editor_toolset.toolsets.blueprint as BT
 T = BT.BlueprintTools
 eal = unreal.EditorAssetLibrary
 for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), ("DarkCaster", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"),
-                 ("Rogue", "/Game/RandomDungeon/Blueprints/BP_RDM3_RogueCharacter")):
-    bp = unreal.load_asset(PATH); assert bp, PATH + ": run 810 / 817 / 822 first"
+                 ("Rogue", "/Game/RandomDungeon/Blueprints/BP_RDM3_RogueCharacter"), ("Fem5", "/Game/RandomDungeon/Blueprints/BP_RDM4_WarriorCharacter")):
+    bp = unreal.load_asset(PATH); assert bp, PATH + ": run 810 / 817 / 822 / 824 first"
     WALK, RUN = [float(v) for v in open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + CH.lower() + r"\speeds.txt").read().split()]
     cdo = unreal.get_default_object(bp.generated_class())
     try: cdo.get_editor_property("RunMode")
@@ -18,8 +19,16 @@ for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharact
     unreal.BlueprintEditorLibrary.compile_blueprint(bp)
     graphs = lambda: {x.get_name(): x for x in T.list_graphs(bp)}
     BEL = unreal.BlueprintEditorLibrary
-    pbp = unreal.load_asset(BEL.get_blueprint_parent_class(bp).get_path_name().rsplit(".", 1)[0])
-    if isinstance(pbp, unreal.Blueprint) and "MoveScale" in [g.get_name() for g in T.list_graphs(pbp)]:
+    # (the parent that has a MoveScale: her own character's, or further up for the Warrior, whose dungeon character is a
+    # child of the city level's)
+    def has_move_scale(cls):
+        while cls is not None:
+            pb = unreal.load_asset(cls.get_path_name().rsplit(".", 1)[0])
+            if not isinstance(pb, unreal.Blueprint): return False
+            if "MoveScale" in [g.get_name() for g in T.list_graphs(pb)]: return True
+            cls = BEL.get_blueprint_parent_class(pb)
+        return False
+    if has_move_scale(BEL.get_blueprint_parent_class(bp)):
         # an override of her own character's (620's) MoveScale: a function of the same name made while the parent had none
         # (620 had deleted it: the editor gave the child to the class above) does not compile once the parent has it again
         if "MoveScale" in graphs(): BEL.remove_function_graph(bp, "MoveScale")

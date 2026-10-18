@@ -1551,6 +1551,14 @@ void ARDSection::ToggleContainer(int32 I)
 	M.Target = M.Target > 0.5f ? 0.f : 1.f;
 	if (Containers.IsValidIndex(M.Partner)) Containers[M.Partner].Target = M.Target;
 	if (Generator) Generator->PlaySoundAt(M.Target > 0.5f ? TEXT("Env.ChestOpen") : TEXT("Env.ChestClose"), M.Center);
+	// (random_dungeonmagic_level4: what it holds is found the first time it is opened; a wardrobe's two doors are one container)
+	const bool bFirst = M.Target > 0.5f && !M.bLooted && !(Containers.IsValidIndex(M.Partner) && Containers[M.Partner].bLooted);
+	if (bFirst)
+	{
+		M.bLooted = true;
+		const int32 Key = Containers.IsValidIndex(M.Partner) ? FMath::Min(I, M.Partner) : I;
+		if (Generator) Generator->OnContainerOpened(this, Key, M.Center);
+	}
 }
 
 FVector ARDSection::GetDoorLocation(int32 I) const { return Doors.IsValidIndex(I) ? Doors[I].Center : FVector::ZeroVector; }

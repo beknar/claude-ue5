@@ -61,4 +61,11 @@ private:
 	/** the miniature: ToS maps world XY to the screen, everything is clipped to S0..S1 */
 	void DrawDungeon(const FVector2D& S0, const FVector2D& S1, TFunctionRef<FVector2D(const FVector2D&)> ToS, float PixelsPerTile, bool bOnlyDiscovered, bool bLabels, float Sc);
 	void DrawCombat(float Sc);
+	// ---- random_dungeonmagic_level4 (generator Heroes)
+	/** "FOUND  <item>" a moment after a container gave it, and what the inventory last did */
+	void DrawNotices(float Sc);
+	/** her inventory (it pauses the game): her weapons, then her potions and food; what the one under the cursor does */
+	void DrawInventory(float Sc);
+	/** what an item does, for her (its share in her hit points or mana) */
+	FString DescribeItem(const FRDItemDef& It) const;
 };
