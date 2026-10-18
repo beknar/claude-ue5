@@ -3,12 +3,14 @@ crossbow, a roll. Run after 600 / 610 / 615 / 620 for Rogue (her mesh, her own W
 grip, and the Idle, stabs, shot and rolls that blender_numpy/rogue_clips.py made for her).
 - her flinch and death: Animations_Warrior's Get_Hit_1 and Dead_1 retargeted onto her rig, as 817 does
 - the daggers: Medieval_Weapons SM_Dagger in each hand, held as 817 holds the sword: the grip computed from her reference
-  pose (arms out, palms down), the handle across the closed hand and the blade the way her THUMB points there (from her
-  own thumb and finger bones: the clips aim the blade with that thumb). Stab1 (right), Stab2 (left), Stab3 (both): the
+  pose (arms out, palms down), the handle across the closed hand at a slant: the blade the way her THUMB points there (from
+  her own thumb and finger bones) leaning toward her fingers by rogue_clips.py's GRIP_TILT (times.json's grip_tilt; the
+  clips aim the blade as near as her wrist allows). Stab1 (right), Stab2 (left), Stab3 (both): the
   blow lands where the striking hand moves fastest; 15 damage, 1.5 m reach, a 110 degree arc. Carried on her thighs
   (blade down along the outside of each thigh) while the crossbow is drawn
 - the crossbow: Medieval_Weapons SM_Crossbow (its front is the mesh's -X, the rail on top +Z) in her right hand, the stock
-  through the closed hand along the thumb, the rail on the side away from her fingers; a spell weapon whose bolt is a
+  through the closed hand along the thumb, slanting toward the fingers as the dagger does (by its own GRIP_TILT), the rail
+  on the side away from her fingers; a spell weapon whose bolt is a
   mesh (SM_Arrow_Var1 cut down to a 37 cm bolt) shot from the front of the rail (bBoltFromWeapon) straight at the
   monster she turned to (BoltTurnRate 0), 34 damage, 26 m, 45 m/s, no splash; the next bolt lies on the rail until the
   shot is over; a bolt that strikes a wall stays there 8 s. The shot leaves at the release of her Shoot clip
@@ -19,7 +21,7 @@ grip, and the Idle, stabs, shot and rolls that blender_numpy/rogue_clips.py made
 - BP_RDM3_RogueCharacter (child of BP_JRPGRogueCharacter with a 36 cm capsule) and BP_RDM3_GameMode (BP_RD_GameMode with
   her as the pawn)
 Writes SourceArt/random_dungeon_magic3/weapons.json for 823. Idempotent. Args: none"""
-import json, os, unreal
+import json, math, os, unreal
 at = unreal.AssetToolsHelpers.get_asset_tools(); eal = unreal.EditorAssetLibrary; APE = unreal.AnimPoseExtensions; ML = unreal.MathLibrary
 V = unreal.Vector
 CH = "Rogue"
@@ -85,13 +87,17 @@ def hand_frame(s):
     th = bone(f"thumb_01_{s}").translation - h; along = (bone(f"middle_01_{s}").translation - h).normal()
     th = th - along * th.dot(along); th = (th - fore * th.dot(fore)).normal()
     return hand, h + fore * 6.5 + V(0, 0, -2.5), fore, th
+TILT = TIMES["grip_tilt"]          # (rogue_clips.py's: the handle and the stock slant across the palm, the blade and the front lean toward the fingers)
+def slant(th, fore, deg):
+    g = math.radians(deg); return (th * math.cos(g) + fore * math.sin(g)).normal()
 def dagger_grip(s):
     hand, palm, fore, th = hand_frame(s)
-    rot = ML.make_rot_from_xz(fore, th * handle_end(DAGGER["mesh"], DAGGER["hand_z"]))
+    rot = ML.make_rot_from_zx(slant(th, fore, TILT["dagger"]) * handle_end(DAGGER["mesh"], DAGGER["hand_z"]), fore)
     return ML.make_relative_transform(unreal.Transform(palm - ML.get_up_vector(rot) * DAGGER["hand_z"], rot, V(1, 1, 1)), hand), th
 def crossbow_grip():
     hand, palm, fore, th = hand_frame("r")
-    rot = ML.make_rot_from_xz(th * -1.0, fore * -1.0)         # (the front, -X, the thumb's way; the rail, +Z, away from the fingers. NB -v negates v in place)
+    g = math.radians(TILT["crossbow"])
+    rot = ML.make_rot_from_xz(slant(th, fore, TILT["crossbow"]) * -1.0, th * math.sin(g) - fore * math.cos(g))   # (the front, -X; the rail, +Z, away from the fingers. NB -v negates v in place)
     g = XBOW["grip"]; X, Z = ML.get_forward_vector(rot), ML.get_up_vector(rot)
     return ML.make_relative_transform(unreal.Transform(palm - X * g[0] - Z * g[2], rot, V(1, 1, 1)), hand), th
 def holster_thigh(s):
@@ -186,10 +192,16 @@ print("RDM3 Daggers: " + ", ".join(f"{os.path.basename(x['clip'])} at {x['hit']:
 print("RDM3 Crossbow: shot at", crossbow["attacks"][0]["hit"], "of", crossbow["attacks"][0]["length"], "| thumbs (component space)", res["thumb_check"])
 # ---- her dungeon character and game mode
 G = "/Game/RandomDungeon/Blueprints"; CHP = f"{G}/BP_RDM3_RogueCharacter"; GM = f"{G}/BP_RDM3_GameMode"
+PARENT = unreal.load_asset(f"/Game/JRPG/Game/BP_JRPG{CH}Character").generated_class()
 if not eal.does_asset_exist(CHP):
-    f = unreal.BlueprintFactory(); f.set_editor_property("parent_class", unreal.load_asset(f"/Game/JRPG/Game/BP_JRPG{CH}Character").generated_class())
+    f = unreal.BlueprintFactory(); f.set_editor_property("parent_class", PARENT)
     at.create_asset("BP_RDM3_RogueCharacter", G, unreal.Blueprint, f)
-chbp = unreal.load_asset(CHP); unreal.BlueprintEditorLibrary.compile_blueprint(chbp)
+chbp = unreal.load_asset(CHP)
+if unreal.BlueprintEditorLibrary.get_blueprint_parent_class(chbp) != PARENT:
+    # (620 deletes and makes BP_JRPG<CH>Character again: the editor hands its children to the class above it)
+    print("RDM3 reparented", chbp.get_name(), "from", unreal.BlueprintEditorLibrary.get_blueprint_parent_class(chbp).get_name())
+    unreal.BlueprintEditorLibrary.reparent_blueprint(chbp, PARENT)
+unreal.BlueprintEditorLibrary.compile_blueprint(chbp)
 unreal.get_default_object(chbp.generated_class()).get_component_by_class(unreal.CapsuleComponent).set_editor_property("capsule_radius", 36.0)
 unreal.BlueprintEditorLibrary.compile_blueprint(chbp); eal.save_loaded_asset(chbp, only_if_is_dirty=False)
 if eal.does_asset_exist(GM): eal.delete_asset(GM)

@@ -4,10 +4,10 @@ The characters this project uses in its current and future scenes, made with [Tr
 
 | Model | Former name | What it is | Used in |
 |---|---|---|---|
-| `Warrior.glb` | `jrpg-fem5-tripo.glb` | JRPG heroine (sword, shield, spear, axe) | random_level, random_dungeon_level, random_isometric_village_level, random_dungeoncombat_level, the Tripo trio showcase |
-| `Mage.glb` | `girl-caster-tripo.glb` | Fire caster | random_dungeonmagic_level, the Tripo trio showcase |
-| `Warlock.glb` | `girl-darkcaster-tripo.glb` | Dark caster (spell in the left hand, sword in the right) | random_dungeonmagic_level2, the Tripo trio showcase |
-| `Rogue.glb` | (none) | Hooded rogue (two daggers, a crossbow) | random_dungeonmagic_level3 (tag `Rogue`) |
+| `Warrior.glb` | `jrpg-fem5-tripo.glb` | JRPG heroine (sword, shield, spear, axe) | random_level, random_dungeon_level, random_isometric_village_level, random_dungeoncombat_level, the Tripo trio and quartet showcases |
+| `Mage.glb` | `girl-caster-tripo.glb` | Fire caster | random_dungeonmagic_level, the Tripo trio and quartet showcases |
+| `Warlock.glb` | `girl-darkcaster-tripo.glb` | Dark caster (spell in the left hand, sword in the right) | random_dungeonmagic_level2, the Tripo trio and quartet showcases |
+| `Rogue.glb` | (none) | Hooded rogue (two daggers, a crossbow) | random_dungeonmagic_level3 (tag `Rogue`), the Tripo quartet showcase |
 
 ## Renamed models
 

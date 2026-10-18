@@ -17,15 +17,25 @@ for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharact
     except Exception: T.add_variable(bp, "RunMode", "bool")
     unreal.BlueprintEditorLibrary.compile_blueprint(bp)
     graphs = lambda: {x.get_name(): x for x in T.list_graphs(bp)}
-    if "MoveScale" not in graphs(): T.add_function_graph(bp, "MoveScale"); unreal.BlueprintEditorLibrary.compile_blueprint(bp)
+    BEL = unreal.BlueprintEditorLibrary
+    pbp = unreal.load_asset(BEL.get_blueprint_parent_class(bp).get_path_name().rsplit(".", 1)[0])
+    if isinstance(pbp, unreal.Blueprint) and "MoveScale" in [g.get_name() for g in T.list_graphs(pbp)]:
+        # an override of her own character's (620's) MoveScale: a function of the same name made while the parent had none
+        # (620 had deleted it: the editor gave the child to the class above) does not compile once the parent has it again
+        if "MoveScale" in graphs(): BEL.remove_function_graph(bp, "MoveScale")
+        BEL.add_function_override(bp, "MoveScale"); BEL.compile_blueprint(bp)
+    elif "MoveScale" not in graphs(): T.add_function_graph(bp, "MoveScale"); unreal.BlueprintEditorLibrary.compile_blueprint(bp)
     code = f"""
 (fn MoveScale (X Y)
   (bind k (/ (select (or (Input|EnhancedActionValues|IA_Sprint) (Variables|Default|GetRunMode)) 1.0 {WALK / RUN:.4f}) (Math|Float|Max(Float) (Math|Float|Sqrt (+ (* X X) (* Y Y))) 1.0)))
   (return (* X k) (* Y k)))"""
     assert code.count("(") == code.count(")")
-    T.write_graph_dsl(graphs()["MoveScale"], code)
-    ok = unreal.BlueprintEditorLibrary.compile_blueprint(bp)
-    back = " ".join(T.read_graph_dsl(graphs()["MoveScale"]).split())
+    for attempt in range(2):
+        # (the first write into an override made in place of such a function did not take: the second, after a compile, did)
+        T.write_graph_dsl(graphs()["MoveScale"], code)
+        ok = unreal.BlueprintEditorLibrary.compile_blueprint(bp)
+        back = " ".join(T.read_graph_dsl(graphs()["MoveScale"]).split())
+        if "RunMode" in back: break
     assert "RunMode" in back and "IA_Sprint" in back, "MoveScale did not take: " + back[:300]
     eal.save_loaded_asset(bp, only_if_is_dirty=False)
     cdo = unreal.get_default_object(bp.generated_class())          # (the one before the compile is a REINST_ copy)

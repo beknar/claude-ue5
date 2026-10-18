@@ -1,15 +1,18 @@
-"""Tripo trio showcase: titles and captions over the Movie Render Queue frames of LS_Tripo_Trio_Showcase, from 660's plan
-(SourceArt/tripo_trio/plan.json): the reel's title over the opening shot, then for each character her name and what is
+"""Tripo trio / quartet showcase: titles and captions over the Movie Render Queue frames of LS_Tripo_Trio_Showcase, from
+660's plan (SourceArt/tripo_trio/plan.json), or of LS_Tripo_Quartet_Showcase with "quartet" first (663's, tripo_quartet): the reel's title over the opening shot, then for each character her name and what is
 shown (the turntable; her attacks or her spells), the music named in a corner, and the closing title.
 Optionally writes the sound track too: the first seconds of a music file, faded in and out (a 16 bit WAV).
-Usage: trio_showcase_overlay.py frames_dir out_dir [music.wav out_track.wav]"""
+Usage: trio_showcase_overlay.py [quartet] frames_dir out_dir [music.wav out_track.wav]"""
 import sys, os, json, glob, wave
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+WHICH = sys.argv.pop(1) if sys.argv[1] in ("trio", "quartet") else "trio"
 src, dst = sys.argv[1], sys.argv[2]
 HERE = os.path.dirname(os.path.abspath(__file__))
-PLAN = json.load(open(os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "tripo_trio", "plan.json")))
-FPS = PLAN["fps"]; W, H, K = 1920, 1080, 2
+PLAN = json.load(open(os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "tripo_" + WHICH, "plan.json")))
+FPS = PLAN["fps"]; DUR = PLAN["seconds"]; W, H, K = 1920, 1080, 2
+TITLE = {"trio": ("THREE TRIPO CHARACTERS", "jrpg-fem5-tripo  \u00b7  girl-caster-tripo  \u00b7  girl-darkcaster-tripo  \u00b7  turntable, attacks and magic in Unreal Engine 5.8"),
+         "quartet": ("FOUR TRIPO CHARACTERS", "Warrior  \u00b7  Mage  \u00b7  Warlock  \u00b7  Rogue  \u00b7  turntable, attacks, magic and the crossbow in Unreal Engine 5.8")}[WHICH]
 F = r"C:\Windows\Fonts"
 def font(name, size):
     for n in (name, "segoeui.ttf", "arial.ttf"):
@@ -25,8 +28,8 @@ def overlay(f):
     t = f / FPS; o = Image.new("RGBA", (W * K, H * K), (0, 0, 0, 0)); d = ImageDraw.Draw(o, "RGBA")
     a = fade(t, 0.3, 3.0, 0.5, 0.5)
     if a > 0:
-        d.text((W * K / 2, 120 * K), "THREE TRIPO CHARACTERS", font=f_title, fill=(255, 255, 255, int(240 * a)), anchor="mm", stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((W * K / 2, 178 * K), "jrpg-fem5-tripo  \u00b7  girl-caster-tripo  \u00b7  girl-darkcaster-tripo  \u00b7  turntable, attacks and magic in Unreal Engine 5.8",
+        d.text((W * K / 2, 120 * K), TITLE[0], font=f_title, fill=(255, 255, 255, int(240 * a)), anchor="mm", stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
+        d.text((W * K / 2, 178 * K), TITLE[1],
                font=f_sub, fill=(236, 240, 244, int(230 * a)), anchor="mm", stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
     for c in PLAN["captions"]:
         k = fade(t, c["t0"], c["t1"])
@@ -36,19 +39,19 @@ def overlay(f):
         d.rounded_rectangle((32 * K, y - 14 * K, 64 * K + wd, (H - 52) * K), 12 * K, fill=(12, 11, 9, int(175 * k)))
         d.text((50 * K, y - 4 * K), c["head"], font=f_head, fill=(255, 226, 150, int(255 * k)))
         for i, s in enumerate(lines): d.text((54 * K, y + (44 + 34 * i) * K), s, font=f_line, fill=(240, 244, 248, int(240 * k)))
-    m = fade(t, 1.0, 59.5, 0.8, 0.8)
+    m = fade(t, 1.0, DUR - 0.5, 0.8, 0.8)
     if m > 0:
         s = "\u266b  " + MUSIC; tw = d.textlength(s, font=f_note)
         d.text(((W - 36) * K - tw, 34 * K), s, font=f_note, fill=(230, 234, 240, int(200 * m)), stroke_width=K, stroke_fill=(0, 0, 0, int(120 * m)))
     if t < 0.4: d.rectangle((0, 0, W * K, H * K), fill=(0, 0, 0, int(255 * max(0.0, 1.0 - t / 0.4))))
-    if t > 59.2: d.rectangle((0, 0, W * K, H * K), fill=(0, 0, 0, int(255 * min(1.0, (t - 59.2) / 0.8))))
+    if t > DUR - 0.8: d.rectangle((0, 0, W * K, H * K), fill=(0, 0, 0, int(255 * min(1.0, (t - DUR + 0.8) / 0.8))))
     return o.resize((W, H), Image.LANCZOS)
 os.makedirs(dst, exist_ok=True)
 frames = sorted(glob.glob(os.path.join(src, "*.png")))
 for i, p in enumerate(frames):
     im = Image.open(p).convert("RGBA")
     if im.size != (W, H): im = im.resize((W, H), Image.LANCZOS)
-    Image.alpha_composite(im, overlay(i)).convert("RGB").save(os.path.join(dst, f"triohud.{i:04d}.png"), compress_level=1)
+    Image.alpha_composite(im, overlay(i)).convert("RGB").save(os.path.join(dst, f"{WHICH}hud.{i:04d}.png"), compress_level=1)
 print("wrote", len(frames), "frames to", dst)
 if len(sys.argv) > 4:
     with wave.open(sys.argv[3], "rb") as r:

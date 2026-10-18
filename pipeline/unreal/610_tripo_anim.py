@@ -84,7 +84,8 @@ for g in T.list_graphs(abp):
         cn = n.get_class().get_name()
         if cn == "AnimGraphNode_SequencePlayer" and g.get_name() == "Idle":
             nd = n.get_editor_property("node")
-            nd.import_text(re.sub(r'Sequence="[^"]*"', f"Sequence=\"/Script/Engine.AnimSequence'{idle.get_path_name()}'\"", nd.export_text())); n.set_editor_property("node", nd)
+            # (a re-run's retargeted copy can come with no clip there: Sequence=None)
+            nd.import_text(re.sub(r'Sequence=("[^"]*"|None)', f"Sequence=\"/Script/Engine.AnimSequence'{idle.get_path_name()}'\"", nd.export_text())); n.set_editor_property("node", nd)
             print("idle state -> her Idle")
         if cn == "AnimGraphNode_ControlRig":
             nd = n.get_editor_property("node"); nd.import_text(re.sub(r"Alpha=[0-9.]+", "Alpha=0.000000", nd.export_text())); n.set_editor_property("node", nd)

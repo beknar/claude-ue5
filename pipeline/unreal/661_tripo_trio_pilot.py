@@ -1,21 +1,31 @@
-"""Tripo trio showcase: the fire, spawned while the Movie Render Queue renders LS_Tripo_Trio_Showcase (arm it right before 662).
+"""Tripo trio / quartet showcase: the fire and the bolts, spawned while the Movie Render Queue renders LS_Tripo_Trio_Showcase or
+LS_Tripo_Quartet_Showcase (arm it right before 662).
 The casts' times are 660's (SourceArt/tripo_trio/plan.json), on the sequence's clock: from a cast's start to its release
 the charge (Starter Content P_Sparks) burns on the casting hand; at the release the bolt (the warm copy of DarkHalls
 NS_FirePool) leaves that hand and flies straight at the monster's chest at the spell's speed; where it arrives the burst
 (P_Explosion and the warm NS_FireWings for a moment) goes off, and the stage's spell light flashes there; while the bolt
 flies the light goes with it. Positions are read from the characters and monsters in the render's world, so the bolt
-leaves the hand where the hand is. Logs every effect ("TRIO fx") and "TRIO pilot done" at the end.
-  render (default) | rehearse (a PIE session of L_Tripo_Trio_Showcase that plays the sequence)
-Keeps its namespace (tick callback). Args: [render|rehearse]"""
+leaves the hand where the hand is. The quartet's crossbow bolts (663's "bolt" events): at the release the bolt actor
+placed by 663 is put on the crossbow's muzzle (where the weapon actor is now) with the arrow trail on it, flies straight
+at the monster's chest at the crossbow's speed (the mesh along its flight, placed as RDCombat places it) and stops 40 cm
+short of the chest, where the pack's impact goes off and the bolt is put away. Logs every effect ("TRIO fx") and "TRIO
+pilot done" at the end.
+  render (default) | rehearse (a PIE session of the showcase level that plays the sequence);  trio (default) | quartet
+Keeps its namespace (tick callback). Args: [render|rehearse] [trio|quartet]"""
 import unreal, sys, json, math
 __keep__ = True
 MODE = sys.argv[1] if len(sys.argv) > 1 else "render"
+WHICH = sys.argv[2] if len(sys.argv) > 2 else "trio"
 LIGHT = 0.35          # (the stage's exposure is higher than the dungeon's: the spell light at the game's strength washes the fire out)
-PLAN = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\tripo_trio\plan.json"))
+PLAN = json.load(open(r"E:\code\claude-ue5\claude_ue5\SourceArt\tripo_%s\plan.json" % WHICH))
 SPELL = PLAN["spell"]; FPS = PLAN["fps"]; DUR = PLAN["seconds"]
 V = unreal.Vector; GS = unreal.GameplayStatics
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 A = {k: unreal.load_asset(SPELL[k]) for k in ("charge", "bolt", "burst", "burst_flame")}
+XB = PLAN.get("crossbow")
+if XB:
+    A["trail"] = unreal.load_asset(XB["trail"]); A["impact"] = unreal.load_asset(XB["hit_fx"]); bx = XB["bolt_xf"]
+    XB["xf"] = unreal.Transform(V(*bx["loc"]), unreal.Rotator(roll=bx["rot"][0], pitch=bx["rot"][1], yaw=bx["rot"][2]), V(*bx["scale"]))
 G = {"ev": [dict(e, state=0) for e in PLAN["events"]], "timed": [], "flash": None}
 if getattr(unreal, "_trio_pilot", None) is not None:
     try: unreal.unregister_slate_post_tick_callback(unreal._trio_pilot)
@@ -40,10 +50,14 @@ def body():
         if not lsa or lsa[0].get_editor_property("sequence_player") is None: return
         G.update({"w": w, "player": lsa[0].get_editor_property("sequence_player")}); G["light"] = actor("trio_spell_light")
         if MODE == "rehearse": G["player"].play()
+        t0 = unreal.TimeManagementLibrary.conv_qualified_frame_time_to_seconds(G["player"].get_current_time())
+        for e in G["ev"]:                      # (a render of a part of the sequence: what was before it is not played)
+            if e["release"] < t0 - 0.5: e["state"] = 3
         unreal.log("TRIO pilot armed (%s) | %d casts" % (MODE, len(G["ev"])))
     if w is None: stop(); return
     t = unreal.TimeManagementLibrary.conv_qualified_frame_time_to_seconds(G["player"].get_current_time()); G["t"] = t
     for e in G["ev"]:
+        if e["kind"] == "bolt": crossbow_bolt(e, t); continue
         if e["state"] == 0 and t >= e["charge"] and t < e["release"]:
             m = mesh(e["who"])
             e["charge_fx"] = GS.spawn_emitter_attached(A["charge"], m, unreal.Name(e["hand"]), V(0, 0, 0), unreal.Rotator(), V(SPELL["charge_scale"], SPELL["charge_scale"], SPELL["charge_scale"]),
@@ -77,6 +91,28 @@ def body():
         if k <= 0.0: G["flash"] = None; light(V(0, 0, -500), 0.0)
     if t >= DUR - 0.05 and not G.get("done"):
         G["done"] = True; unreal.log("TRIO pilot done | %s" % " ".join("%s:%d" % (e["who"][5:], e["state"]) for e in G["ev"]))
+def put_bolt(b, at, d):
+    """the bolt mesh at a point of its flight, as RDCombat places it: the mesh's transform in a frame whose X is the flight"""
+    frame = unreal.Transform(at, unreal.MathLibrary.make_rot_from_x(d), V(1, 1, 1))
+    b.set_actor_transform(unreal.MathLibrary.compose_transforms(XB["xf"], frame), False, True)
+def crossbow_bolt(e, t):
+    if e["state"] == 0 and t >= e["release"]:
+        xb = actor(e["weapon"]); b = actor(e["bolt"])
+        frm = xb.get_actor_transform().transform_location(V(*XB["muzzle"])); c = chest(e["target"]); d = (c - frm).normal()
+        to = c - d * 40.0
+        e.update({"from": frm, "to": to, "dir": d, "dist": (to - frm).length(), "b": b}); put_bolt(b, frm, d)
+        s = XB["trail_scale"]
+        e["trail"] = GS.spawn_emitter_attached(A["trail"], b.static_mesh_component, unreal.Name("None"), V(0, 0, 0), unreal.Rotator(), V(s, s, s), unreal.AttachLocation.KEEP_RELATIVE_OFFSET, True)
+        e["state"] = 2; log("crossbow bolt from (%.0f %.0f %.0f), %.0f cm to %s (%.0f %.0f %.0f)" % (frm.x, frm.y, frm.z, e["dist"], e["target"], to.x, to.y, to.z))
+    if e["state"] == 2:
+        u = min(1.0, (t - e["release"]) * XB["speed"] / max(e["dist"], 1.0)); at = e["from"] + (e["to"] - e["from"]) * u
+        put_bolt(e["b"], at, e["dir"])
+        if u >= 1.0:
+            if e["trail"] is not None: e["trail"].deactivate()
+            s = XB["hit_scale"]
+            GS.spawn_emitter_at_location(G["w"], A["impact"], at, unreal.MathLibrary.make_rot_from_x(e["dir"] * -1.0), V(s, s, s), True)
+            e["b"].set_actor_location(V(0, 4000, 0), False, True)
+            e["state"] = 3; log("bolt hits %s after %.2f s" % (e["target"], t - e["release"]))
 def stop():
     unreal.unregister_slate_post_tick_callback(unreal._trio_pilot); unreal._trio_pilot = None
     if not G.get("done"): unreal.log("TRIO pilot ended at %.2f s" % G.get("t", -1.0))

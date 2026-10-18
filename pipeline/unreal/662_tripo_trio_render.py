@@ -1,18 +1,23 @@
-"""Tripo trio showcase: the Movie Render Queue job for LS_Tripo_Trio_Showcase in L_Tripo_Trio_Showcase (arm 661 first: it puts
-the fire in while the queue renders). The queue's own game mode (no pawn, no HUD).
+"""Tripo trio / quartet showcase: the Movie Render Queue job for LS_Tripo_Trio_Showcase in L_Tripo_Trio_Showcase, or
+LS_Tripo_Quartet_Showcase in L_Tripo_Quartet_Showcase (arm 661 first, with the same trio|quartet: it puts the fire and the
+bolts in while the queue renders). The queue's own game mode (no pawn, no HUD).
   preview  640 x 360        final  1920 x 1080
 8 temporal samples a frame, no other anti-aliasing; warm-up only before frame 0 (not at the camera cuts: the pilot's
-fire runs on the sequence's clock). Args: out_dir preview|final [file_prefix]"""
+fire runs on the sequence's clock). first-last: only those frames (a check of one part). Args: out_dir preview|final [file_prefix] [trio|quartet] [first-last]"""
 import sys, unreal
 OUT = sys.argv[1]; MODE = sys.argv[2] if len(sys.argv) > 2 else "preview"; PREFIX = sys.argv[3] if len(sys.argv) > 3 else "trio"
+NAME = {"trio": "Trio", "quartet": "Quartet"}[sys.argv[4] if len(sys.argv) > 4 else "trio"]
 mq = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem)
 queue = mq.get_queue(); queue.delete_all_jobs()
 j = queue.allocate_new_job(unreal.MoviePipelineExecutorJob)
-j.job_name = "TripoTrio_" + MODE
-j.sequence = unreal.SoftObjectPath("/Game/JRPG/Cinematics/LS_Tripo_Trio_Showcase"); j.map = unreal.SoftObjectPath("/Game/JRPG/Maps/L_Tripo_Trio_Showcase")
+j.job_name = f"Tripo{NAME}_" + MODE
+j.sequence = unreal.SoftObjectPath(f"/Game/JRPG/Cinematics/LS_Tripo_{NAME}_Showcase"); j.map = unreal.SoftObjectPath(f"/Game/JRPG/Maps/L_Tripo_{NAME}_Showcase")
 cfg = j.get_configuration()
 o = cfg.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting)
 o.output_resolution = unreal.IntPoint(*((640, 360) if MODE == "preview" else (1920, 1080)))
+if len(sys.argv) > 5:
+    a_, b_ = (int(x) for x in sys.argv[5].split("-"))
+    o.use_custom_playback_range = True; o.custom_start_frame = a_; o.custom_end_frame = b_
 o.output_directory = unreal.DirectoryPath(OUT); o.file_name_format = PREFIX + ".{frame_number}"; o.override_existing_output = True
 cfg.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase)
 cfg.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_PNG)

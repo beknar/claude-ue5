@@ -137,20 +137,46 @@ def place(a, keys, smooth=False):
             k = c.add_key(unreal.FrameNumber(F(tt)), v)
             k.set_interpolation_mode(unreal.RichCurveInterpMode.RCIM_LINEAR if lin else unreal.RichCurveInterpMode.RCIM_CONSTANT)
         for c in ch[6:9]: c.add_key(unreal.FrameNumber(F(tt)), a.get_actor_scale3d().x).set_interpolation_mode(unreal.RichCurveInterpMode.RCIM_CONSTANT)
+def bridge(items):
+    """no frame without a clip: a frame that no section covers shows the T-pose (it did, in every pause between two casts
+    or blows). An action clip (one that does not loop: idles and walks do) plays on into the pause after it and the blend
+    into the next clip as far as it has frames, and its last frame is held from there (a section past the end of its clip
+    starts it again)."""
+    out = []
+    for i, (t0, t1, clip, rate, off) in enumerate(items):
+        nxt = items[i + 1][0] if i + 1 < len(items) else None
+        if nxt is None: out.append((t0, t1, clip, rate, off)); continue
+        n = clip_len(clip); last = n - 0.05        # (a frame and a half of margin: both ends are rounded to frames)
+        if (t1 - t0) * rate > n - off: out.append((t0, max(t1, nxt), clip, rate, off)); continue        # (a loop: it covers the pause itself)
+        end = min(nxt, max(t0 + EASE, t0 + (last - off) / rate - EASE))
+        if F(end) >= F(nxt): end = nxt                    # (a hold under a frame long: none, or this one's blend out ends a frame off the next one's blend in)
+        out.append((t0, end, clip, rate, off))
+        if end < nxt: out.append((end, nxt, clip, 0.0001, last))
+    return out
 def animate(a, items):
     """items: (t0, t1, clip path, play rate, start offset s) one after another; each section blends into the next over EASE"""
+    items = bridge(items)
     t = bind(a).add_track(unreal.MovieSceneSkeletalAnimationTrack)
-    for i, (t0, t1, clip, rate, off) in enumerate(items):
-        s = t.add_section(); s.set_row_index(i % 2)
-        s.set_range(F(t0), F(t1 + (EASE if i < len(items) - 1 else 0.0)))
+    EF = int(round(EASE * FPS)); rows = []; made = []     # (a blend of whole frames, ending EF after the frame the next section starts on: one section's
+    for i, (t0, t1, clip, rate, off) in enumerate(items):  # blend out and the next one's blend in then sum to 1; a frame apart they dipped to 0.83)
+        f0, f1 = F(t0), F(t1) + (EF if i < len(items) - 1 else 0)
+        row = next((r for r, e in enumerate(rows) if e <= f0), len(rows))       # (two sections on one row must not overlap: Unreal trims one)
+        if row == len(rows): rows.append(f1)
+        else: rows[row] = f1
+        s = t.add_section(); s.set_row_index(row)
+        s.set_range(f0, f1); made.append((s, f0, f1))
         p = s.get_editor_property("params"); p.set_editor_property("animation", L(clip))
         pr = unreal.MovieSceneTimeWarpVariant(); pr.set_fixed_play_rate(rate); p.set_editor_property("play_rate", pr)      # (5.8: the play rate is a time warp)
         if off: p.set_editor_property("first_loop_start_frame_offset", unreal.FrameNumber(int(off * TICKS)))
         s.set_editor_property("params", p)
-        e = unreal.MovieSceneEasingSettings(); n_ = int(EASE * TICKS)        # (set as text: one of the two flags is not reachable by name from Python)
+        e = unreal.MovieSceneEasingSettings(); n_ = int(round(EF * TICKS / FPS))        # (set as text: one of the two flags is not reachable by name from Python)
         e.import_text("(bManualEaseIn=%s,ManualEaseInDuration=%d,bManualEaseOut=%s,ManualEaseOutDuration=%d)" % (i > 0, n_ if i > 0 else 0, i < len(items) - 1, n_ if i < len(items) - 1 else 0))
         s.set_editor_property("easing", e)
-OFF = (0.0, 4000.0, 0.0)          # (where a hidden actor waits: far off the stage)
+    for s, f0, f1 in made:              # (a section followed by one of the same clip (its hold) came out ending where that one starts: the ranges again, checked)
+        s.set_range(f0, f1)
+    for s, f0, f1 in made:
+        if (s.get_start_frame(), s.get_end_frame()) != (f0, f1): print("TRIO section range", a.get_actor_label(), (f0, f1), "is", (s.get_start_frame(), s.get_end_frame()))
+OFF =(0.0, 4000.0, 0.0)          # (where a hidden actor waits: far off the stage)
 P0, PZ = (0, -40), 6.0            # the plinth's middle, its top
 events = []; caps = []
 def turntable(t0, t1):
@@ -272,6 +298,30 @@ shots.append((57.0, 60.0, camera("Cam_Outro", [(57.0, (0, 640, 160), (0, 0, 105)
 cut = seq.add_track(unreal.MovieSceneCameraCutTrack)
 for t0, t1, b in shots:
     cs = cut.add_section(); cs.set_range(F(t0), F(t1)); cs.set_camera_binding_id(seq.get_binding_id(b) if hasattr(seq, "get_binding_id") else b.get_binding_id())
+def coverage():
+    """read back from the sequence: each animated actor's frames whose section weights (ease in x ease out, linear) sum
+    below 0.98 (it shows its T-pose there), and the action sections that play past the end of their clip"""
+    import re
+    bad = []
+    for b in seq.get_bindings():
+        for trk in b.get_tracks():
+            if not isinstance(trk, unreal.MovieSceneSkeletalAnimationTrack): continue
+            secs = []
+            for s in trk.get_sections():
+                p = s.get_editor_property("params"); et = s.get_editor_property("easing").export_text()     # (bManualEaseOut is not reachable by name)
+                g = lambda k: re.search(k + r"=(\w+)", et).group(1)
+                ein = int(g("ManualEaseInDuration")) * FPS / TICKS if g("bManualEaseIn") == "True" else 0.0
+                eout = int(g("ManualEaseOutDuration")) * FPS / TICKS if g("bManualEaseOut") == "True" else 0.0
+                clip = p.get_editor_property("animation"); rate = p.get_editor_property("play_rate").to_fixed_play_rate()
+                secs.append((s.get_start_frame(), s.get_end_frame(), ein, eout, clip.get_name(), rate,
+                             p.get_editor_property("first_loop_start_frame_offset").value / TICKS, unreal.AnimationLibrary.get_sequence_length(clip)))
+            low = [f for f in range(NF) if sum((min(1.0, (f + 0.5 - f0) / ei) if ei else 1.0) * (min(1.0, (f1 - f - 0.5) / eo) if eo else 1.0)
+                                               for f0, f1, ei, eo, *_ in secs if f0 <= f + 0.5 < f1) < 0.98]
+            over = [(nm, f0) for f0, f1, ei, eo, nm, rate, off, n in secs if (f1 - f0) * rate < n * FPS and off + (f1 - f0) / FPS * rate > n + 0.005]
+            if low or over: bad.append(f"{b.get_display_name()}: {len(low)} frames under full weight from {low[:1]}, past clip end {over[:2]}")
+    return bad
+uncovered = coverage()
+for line in uncovered: print("TRIO coverage", line)
 eal.save_loaded_asset(seq, False)
 les.save_current_level()
 os.makedirs(os.path.dirname(PLAN), exist_ok=True)
@@ -280,7 +330,7 @@ json.dump({"fps": FPS, "seconds": DUR, "events": events, "captions": [{"t0": a, 
            "spell": {k: SP[k] for k in ("bolt_speed", "bolt", "bolt_scale", "charge", "charge_scale", "burst", "burst_scale", "burst_flame", "burst_flame_scale", "burst_flame_seconds", "light_cd")},
            "hits": {"troll": [round(x, 3) for x in troll_hits], "mutant": [round(x, 3) for x in mut_hits], "daemon": [round(x, 3) for x in dae_hits]}}, open(PLAN, "w"), indent=1)
 print(f"TRIO stage saved {LEVEL} | sequence {SEQ} {NF} frames | Fem5 blows {len(troll_hits)} (to {fem_end:.1f} s), caster casts {sum(1 for e in events if e['who'] == 'trio_caster')} (to {cas_end:.1f} s),"
-      f" dark: casts 2, walk {walk_t0:.1f}-{walk_t1:.1f} s, cuts 3 (to {dark_end:.1f} s) | {len(shots)} shots | plan {PLAN}")
+      f" dark: casts 2, walk {walk_t0:.1f}-{walk_t1:.1f} s, cuts 3 (to {dark_end:.1f} s) | {len(shots)} shots | animation on every frame: {'yes' if not uncovered else 'NO, ' + str(len(uncovered)) + ' actors'} | plan {PLAN}")
 import gc
 for _n in [n for n in list(globals()) if not n.startswith("__") and n not in ("unreal", "gc")]: del globals()[_n]
 gc.collect()

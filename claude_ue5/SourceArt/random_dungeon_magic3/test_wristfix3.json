@@ -1,5 +1,5 @@
 {
- "tag": "r5",
+ "tag": "wristfix3",
  "plan": [
   "setup",
   "weapons",
@@ -63,25 +63,25 @@
     "visible": true,
     "bone": "hand_r",
     "handle_from_hand_cm": 6.9,
-    "point_from_hand_cm": 30.5
+    "point_from_hand_cm": 32.8
    },
    "dagger_l": {
     "visible": true,
     "bone": "hand_l",
     "handle_from_hand_cm": 6.9,
-    "point_from_hand_cm": 30.4
+    "point_from_hand_cm": 32.8
    },
    "crossbow_on_back": {
     "visible": true,
     "behind_spine_cm": 25.7,
-    "height_over_pelvis_cm": 20.5
+    "height_over_pelvis_cm": 20.3
    },
    "drawn_after_2": 1,
    "crossbow": {
     "mesh": "SM_Crossbow",
     "bone": "hand_r",
     "stock_from_hand_cm": 6.9,
-    "front_from_hand_cm": 72.6,
+    "front_from_hand_cm": 76.6,
     "off_hand_shown": false,
     "back_holster_shown": false
    },
@@ -218,7 +218,7 @@
     "R_again_walks": true
    },
    "A_jump_cm": 103,
-   "right_stick_turned_deg": 37.5,
+   "right_stick_turned_deg": 35.0,
    "RB": {
     "attacks": 1,
     "bolts": 0,
@@ -381,22 +381,22 @@
    "started": true,
    "target_is_it": true,
    "montage": true,
-   "hand_moved_cm": 30,
+   "hand_moved_cm": 31,
    "charge_particles": 0,
-   "bolt_left_at_s": 0.4,
+   "bolt_left_at_s": 0.43,
    "bolt_speed_cm_s": 4500,
    "spell_speed": 4500.0,
-   "particles_round_the_bolt": 225,
+   "particles_round_the_bolt": 275,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 505,
+   "flown_cm": 538,
    "it_lost": 34.0,
    "damage": 34.0,
    "burst_particles": 15,
    "burst_at": [
-    126,
-    2283,
-    123
+    1669,
+    -3426,
+    124
    ],
    "sounds": {
     "Player.Charge.Crossbow": 1,
@@ -408,7 +408,7 @@
    "loaded_bolt_gone_at_the_shot": true,
    "bolt_left_from_the_muzzle_cm": 0.0,
    "loaded_bolt_back_after": true,
-   "bolt_left_from_hand_cm": 73
+   "bolt_left_from_hand_cm": 88
   },
   {
    "step": "nothing",
@@ -417,7 +417,7 @@
    "target": null,
    "turned_deg": 0.0,
    "off_her_heading_deg": 0.3,
-   "flown_cm": 1205,
+   "flown_cm": 1190,
    "reach": 2600.0,
    "damage_dealt": 0.0
   },
@@ -425,7 +425,7 @@
    "step": "far",
    "ok": true,
    "monster": "Horned",
-   "distance_cm": 2949,
+   "distance_cm": 2937,
    "reach": 2600.0,
    "target": null
   },
@@ -471,20 +471,6 @@
      "hit_points": 54.0,
      "weapon": "Daggers",
      "damage": 15.0,
-     "blows": 2,
-     "blows_needed": 4,
-     "killed": true,
-     "kills_counted": 1,
-     "each_blow_took_the_damage": true,
-     "bolts_cast": 0,
-     "seconds": 1.1,
-     "ok": true
-    },
-    {
-     "monster": "Daemon",
-     "hit_points": 54.0,
-     "weapon": "Daggers",
-     "damage": 15.0,
      "blows": 4,
      "blows_needed": 4,
      "killed": true,
@@ -492,6 +478,20 @@
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
      "seconds": 2.2,
+     "ok": true
+    },
+    {
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "weapon": "Daggers",
+     "damage": 15.0,
+     "blows": 3,
+     "blows_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "bolts_cast": 0,
+     "seconds": 1.7,
      "ok": true
     }
    ]
@@ -503,16 +503,16 @@
    "standing": {
     "rolls": 1,
     "back": true,
-    "moved_x_cm": -437,
+    "moved_x_cm": -440,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
-    "middle_lowest_cm": -85,
+    "middle_lowest_cm": -86,
     "upright_after": true
    },
    "walking": {
     "rolls": 1,
     "back": false,
-    "moved_x_cm": 516,
+    "moved_x_cm": 487,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
     "middle_lowest_cm": -85,
@@ -521,7 +521,7 @@
    "twice": {
     "rolls": 1,
     "back": true,
-    "moved_x_cm": -442,
+    "moved_x_cm": -426,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
     "middle_lowest_cm": -86,
@@ -530,7 +530,7 @@
    "pad": {
     "rolls": 1,
     "back": true,
-    "moved_x_cm": -443,
+    "moved_x_cm": -425,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
     "middle_lowest_cm": -86,
@@ -555,9 +555,9 @@
     0
    ],
    "monsters": 12,
-   "average_hit_points": 102.6,
+   "average_hit_points": 97.8,
    "hers": 100.0,
-   "average_damage": 24.9,
+   "average_damage": 24.0,
    "spell_damage": 24.5
   }
  ],
@@ -565,11 +565,11 @@
  "rolls": 6,
  "dodged": 1,
  "kills": 4,
- "casts": 17,
+ "casts": 18,
  "bolts": 8,
  "bolts_on_monsters": 4,
  "bolts_elsewhere": 4,
  "deaths": 0,
- "damage_dealt": 226.0,
- "damage_taken": 22.0
+ "damage_dealt": 241.0,
+ "damage_taken": 10.0
 }

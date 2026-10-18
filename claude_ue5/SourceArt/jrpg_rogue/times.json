@@ -29,5 +29,9 @@
    "follow": 0.48,
    "end": 0.8
   }
+ },
+ "grip_tilt": {
+  "dagger": 25.0,
+  "crossbow": 45.0
  }
 }

@@ -9,8 +9,15 @@ every frame (a dagger in each, or the crossbow in the right); made for her:
   RollF    a forward roll (in place: the game moves her), tucked, once round
   RollB    the same played backward: a backward roll
 Poses are written as in caster_clips.py / darkcaster_clips.py (where the bones point, armature space: she faces -Y, her
-right is -X); `blade` turns a hand so its thumb points exactly where the blade (or the crossbow) is to point: the grips of
-pipeline/unreal/822 put a dagger's blade, and the crossbow's front, the way the thumb points in her reference pose.
+right is -X), but the arms are solved (solve_arm): the elbow is a hinge (the upper arm turns about its own axis until the
+forearm bends the way the elbow does, no more than ARM_ROLL: her cape hangs from the upper arms; a held arm's forearm
+may swing about the upper arm instead), the wrist stays within what a wrist can do (FLEX, DEV, TWIST), half of the hand's
+turn goes to the forearm's twist bone, and the hand points the blade as near its aim as that allows (the crossbow:
+exactly, the elbow put where the wrist can hold it). The clips aimed the blade with the thumb before, whatever it cost
+the wrist: the hands came out folded back or twisted half round. The grips of pipeline/unreal/822 put a dagger's blade
+and the crossbow's front the way the thumb points in her reference pose, leaning toward the fingers by GRIP_TILT (a
+handle lies across a fist at a slant; written to times.json for 822). Every solve prints how far past a limit the worst
+wrist went ("ROGUE wrists").
 In a roll the tucked body turns about her side axis and is lowered until its lowest point (bones and their flesh)
 touches the floor. The strike times are measured on the imported clips (822: where the striking hand moves fastest);
 the shot's release, which no hand speed marks, is written to times.json beside the build (TIMES below).
@@ -26,9 +33,27 @@ D, F, U, LEAN = C.D, C.F, C.U, C.LEAN
 FPS = C.FPS
 
 
+# what a wrist and an elbow can do (degrees). The wrist: flexion toward the palm (+) or the back of the hand, deviation
+# toward the thumb (+) or the little finger, and the hand's turn about the forearm from her reference pose (palms down in
+# the T-pose: the forearm half way between its turns), half of which the forearm's twist bone takes as the radius turns
+# over the ulna. The elbow is a hinge: it bends the forearm only the way it bends forward from the T-pose.
+FLEX, DEV, TWIST = (-50.0, 60.0), (-30.0, 15.0), (-80.0, 80.0)
+ARM_ROLL = 40.0       # the upper arm's turn about itself (from the shortest swing from the T-pose), at most: her cape hangs from her
+                      # upper arms, and a turn of 120 degrees and more (the elbow made a hinge with the arm's ways as written) lifted it off her back
+
+
+def roll_cost(roll):
+    return 0.0005 * roll * roll + 0.5 * max(0.0, abs(roll) - ARM_ROLL) ** 2
+# a dagger's handle and the crossbow's stock lie across the palm at a slant, as in a fist: the blade (the crossbow's
+# front) leans from the thumb's way toward the fingers' by these (822 grips them so); held square to the hand, the blade
+# could only point along the forearm with the wrist bent 90 degrees, and the crossbow only be aimed with it folded back
+GRIP_TILT = {"dagger": 25.0, "crossbow": 45.0}
+
+
 def hold(side, up, low, hand, thumb):
-    """an arm with a closed hand: upper arm, forearm, the hand's way, and where its thumb (the blade) points"""
-    sp = {f"upperarm_{side}": [("dir", up)], f"lowerarm_{side}": [("dir", low)], f"hand_{side}": [("blade", thumb, hand)]}
+    """an arm with a closed hand on a dagger: upper arm and forearm ways, and as near as the wrist allows, the blade
+    pointing `thumb`, the fingers' way `hand` (the hand and the forearm's twist are solved: solve_arm)"""
+    sp = {f"arm_{side}": ("hold", up, low, {"blade": thumb, "axis": hand})}
     sp.update(DC.fist(side)); return sp
 
 
@@ -90,21 +115,26 @@ def stab3(ctx, k):
     return sp
 
 
-def reach(side, at, pole):
-    """the arm bent so the hand's root is at `at` (cm from the base of her neck: (her right, forward, up)), the elbow toward
-    `pole`"""
-    return {f"upperarm_{side}": [("reach", at, pole)], f"lowerarm_{side}": [("reach2",)]}
+def reach(side, at, pole, want, exact=None):
+    """the arm bent so the hand's root is at `at` (cm from the base of her neck: (her right, forward, up)), the elbow on the
+    circle that allows, rather toward `pole`; the hand turned as `exact` says ({"front", "up"}: the crossbow's front and rail)
+    or as near `want` as the wrist allows"""
+    return {f"arm_{side}": ("reach", at, pole, want, exact)}
+
+
+STANCE, XB_HAND, XB_SUPPORT = 55.0, (12.0, 26.0, -4.0), (8.0, -7.0, 2.0)   # (shoulders turned; the right hand's root: cm from her neck (right, forward, up); the left's: cm along the crossbow (forward, up, left))
 
 
 def shoot(ctx, k):
-    """the crossbow at her right shoulder: the right hand on the stock under her chin (fingers down round it, the thumb
-    along it toward the front: the stock's butt then lies at her shoulder), the left hand under the forestock"""
-    up, back = {"aim": (0.0, 0.0), "kick": (2.5, 4.0), "hold": (0.8, 1.0)}[k]
-    sp = C.body(ctx, twist=24, lean=4 - 0.8 * up, knees=9, look=0.95)
-    sp.update(reach("r", (9.0, 16.0 - back, -3.0 + up), D("r", 0.7, -0.3, -0.65)))
-    sp["hand_r"] = [("blade", D("r", 0.0, 1.0, 0.03 + 0.03 * up), D("r", -0.1, 0.35, -0.95))]; sp.update(DC.fist("r"))
-    sp.update(reach("l", (5.0, 28.0 - back, -9.0 + up), D("l", 0.3, 0.1, -1.0)))
-    sp["hand_l"] = [("dir", D("l", -0.55, 0.8, 0.15)), ("twist", -75.0)]
+    """the crossbow at her right shoulder, level and aimed: the right hand round the stock below her chin (the stock
+    slanting through the fist toward the thumb: its butt then lies just in front of her shoulder), the elbow out and
+    down; the left hand under the forestock (a place on the crossbow, wherever the right hand put it), palm up"""
+    up, back = {"aim": (0.0, 0.0), "kick": (2.5, 2.5), "hold": (0.8, 1.0)}[k]
+    sp = C.body(ctx, twist=STANCE, lean=4 - 0.8 * up, knees=9, look=0.95)
+    front = D("r", 0.0, 1.0, 0.03 + 0.03 * up)
+    sp.update(reach("r", (XB_HAND[0], XB_HAND[1] - back, XB_HAND[2] + up), D("r", 0.6, 0.0, -0.8), None, {"front": front, "up": U}))
+    sp.update(DC.fist("r"))
+    sp.update(reach("l", ("crossbow",) + XB_SUPPORT, D("l", 0.3, 0.1, -1.0), {"axis": D("l", -0.55, 0.8, 0.15), "palm": U}))
     for fn in C.FINGERS:
         for kk, w in (("01", 0.7), ("02", 1.0), ("03", 0.8)): sp[f"{fn}_{kk}_l"] = [("curl", 40 * w)]
     return sp
@@ -167,63 +197,152 @@ def model_height(scene):
     return max(zs) - min(zs)
 
 
-def apply(arm_obj, spec, ctx):
-    """darkcaster_clips.apply with two more operations: ('reach', at, pole) on an upper arm and ('reach2',) on its forearm
-    put the hand's root at a point (two bones, the elbow toward the pole)"""
-    cm = ctx["cm"]; targets = {}
-    for pb in arm_obj.pose.bones: pb.matrix_basis.identity()
+Y = Vector((0.0, 1.0, 0.0))
+
+
+def arm_context(ctx, arm_obj):
+    """each arm's reference pose: the elbow's and the wrist's rest relations, the elbow's hinge, the wrist's axes, and the
+    weapons' ways in the hand's frame as 822 grips them (a dagger's blade, the crossbow's front: the thumb's way leaning
+    GRIP_TILT toward the forearm's; the crossbow's rail square to its front, away from the fingers), and the palm point
+    the grips are made at"""
+    B = arm_obj.data.bones; q = lambda n: B[n].matrix_local.to_quaternion(); ctx["arms"] = {}
+    for s in "rl":
+        u0, f0, h0 = q(f"upperarm_{s}"), q(f"lowerarm_{s}"), q(f"hand_{s}")
+        rel_e, rel_h = u0.inverted() @ f0, f0.inverted() @ h0
+        fore = (B[f"hand_{s}"].head_local - B[f"lowerarm_{s}"].head_local).normalized()
+        th = B[f"thumb_01_{s}"].head_local - B[f"hand_{s}"].head_local
+        along = (B[f"middle_01_{s}"].head_local - B[f"hand_{s}"].head_local).normalized()
+        th = th - along * th.dot(along); th = (th - fore * th.dot(fore)).normalized()
+        g = math.radians(GRIP_TILT["dagger"]); blade = (th * math.cos(g) + fore * math.sin(g)).normalized()
+        g = math.radians(GRIP_TILT["crossbow"]); front = (th * math.cos(g) + fore * math.sin(g)).normalized(); rail = (th * math.sin(g) - fore * math.cos(g)).normalized()
+        # the wrist's axes, square to each other: the hand's own, across the knuckles toward the thumb's side, the palm's
+        # normal (the thumb bone itself stands off the palm, half way to its normal)
+        ax0 = rel_h @ Y
+        t0 = f0.inverted() @ (B[f"index_01_{s}"].head_local - B[f"pinky_01_{s}"].head_local); t0 = (t0 - ax0 * t0.dot(ax0)).normalized()
+        p0 = ax0.cross(t0).normalized()
+        if p0.dot(rel_h @ ctx["palm"][f"hand_{s}"]) < 0: p0 = -p0
+        A = {"rel_e": rel_e, "rel_h": rel_h, "hinge": u0.inverted() @ fore.cross(F).normalized(), "ax0": ax0, "p0": p0, "t0": t0,
+             "a": (B[f"lowerarm_{s}"].head_local - B[f"upperarm_{s}"].head_local).length, "b": (B[f"hand_{s}"].head_local - B[f"lowerarm_{s}"].head_local).length,
+             "local": {"blade": h0.inverted() @ blade, "axis": Y.copy(), "palm": ctx["palm"][f"hand_{s}"], "front": h0.inverted() @ front, "up": h0.inverted() @ rail},
+             "palm_pt": h0.inverted() @ ((fore * 6.5 + Vector((0.0, 0.0, -2.5))) * ctx["cm"])}
+        A["grid"] = [(fl, dv, tw, wrist_q(A, fl, dv, tw) @ rel_h) for fl in range(-40, 61, 10) for dv in (-30, -22.5, -15, -7.5, 0, 7.5, 15)
+                     for tw in range(-75, 76, 15)]
+        ctx["arms"][s] = A
+
+
+def wrist_q(A, fl, dv, tw):
+    """the wrist's turn in the forearm's frame: the hand turned tw about its axis, then bent fl toward the palm, dv toward the thumb"""
+    ax0 = A["ax0"]
+    return (Quaternion(ax0.cross(A["t0"]).normalized(), math.radians(dv)) @ Quaternion(ax0.cross(A["p0"]).normalized(), math.radians(fl))
+            @ Quaternion(ax0, math.radians(tw)))
+
+
+def wrist_of(A, qf, qh):
+    """(flexion, deviation, twist) of a hand turned qh on a forearm turned qf"""
+    W = qf.inverted() @ qh @ A["rel_h"].inverted(); ax0 = A["ax0"]; ax = W @ ax0
+    fl = math.degrees(math.atan2(ax.dot(A["p0"]), ax.dot(ax0))); dv = math.degrees(math.atan2(ax.dot(A["t0"]), ax.dot(ax0)))
+    tq = ax0.rotation_difference(ax).inverted() @ W
+    tw = (math.degrees(2.0 * math.atan2(Vector(tq[1:]).dot(ax0), tq[0])) + 180.0) % 360.0 - 180.0
+    return fl, dv, tw
+
+
+def over(fl, dv, tw):
+    """degrees past the wrist's limits (0 inside them)"""
+    ex = lambda x, r: max(0.0, r[0] - x, x - r[1])
+    return max(ex(fl, FLEX), ex(dv, DEV), ex(tw, TWIST))
+
+
+def wrist_cost(fl, dv, tw):
+    ex = lambda x, r: max(0.0, r[0] - x, x - r[1])
+    return 0.5 * (ex(fl, FLEX) ** 2 + ex(dv, DEV) ** 2 + ex(tw, TWIST) ** 2) + 0.0004 * (fl * fl + dv * dv + tw * tw)
+
+
+def exact_hand(A, front, up):
+    """the hand's turn that puts the weapon's front and rail (its own frame: A["local"]) on front and up"""
+    def frame(x, z):
+        x = x.normalized(); y = z.cross(x).normalized(); z = x.cross(y)
+        return Matrix((x, y, z)).transposed().to_quaternion()
+    return frame(front, up) @ frame(A["local"]["front"], A["local"]["up"]).inverted()
+
+
+def solve_arm(arm_obj, ctx, side, op):
+    """('hold', up, low, want) or ('reach', at, pole, want, exact): the arm with the elbow a hinge (the upper arm turned about
+    its own axis until the forearm bends the way the elbow bends) and the wrist within its limits, the hand as near `want`
+    as they allow ({"blade" | "axis" | "palm": a way}) or exactly as `exact` says; half the hand's turn goes to the twist bone"""
+    A = ctx["arms"][side]; P = arm_obj.pose.bones
+    ua, la, ha, tb = P[f"upperarm_{side}"], P[f"lowerarm_{side}"], P[f"hand_{side}"], P[f"lowerarm_twist_01_{side}"]
+    qu0 = ua.matrix.to_quaternion(); S = ua.head.copy()
+    cands = []                                                    # (upper arm way, forearm way, cost of the elbow's place)
+    if op[0] == "hold":
+        # (the forearm may swing about the upper arm's axis, the bend kept, to keep the upper arm's turn within ARM_ROLL)
+        Uw = op[1].normalized(); want, exact = op[3], None
+        for al in range(-90, 91, 15): cands.append((Uw, Quaternion(Uw, math.radians(al)) @ op[2].normalized(), 0.002 * al * al))
+    else:
+        _, at, pole, want, exact = op
+        if at[0] == "crossbow":                                   # (cm along the crossbow in the right hand: forward, up, to her left)
+            R_ = ctx["arms"]["r"]; qr = P["hand_r"].matrix.to_quaternion(); fw, uw = qr @ R_["local"]["front"], qr @ R_["local"]["up"]
+            goal = P["hand_r"].head + qr @ R_["palm_pt"] + (fw * at[1] + uw * at[2] + uw.cross(fw) * at[3]) * ctx["cm"]
+        else:
+            goal = P["neck_01"].head + (C.OUT["r"] * at[0] + F * at[1] + U * at[2]) * ctx["cm"]
+        a, b = A["a"], A["b"]; d = goal - S; dist = min(d.length, (a + b) * 0.999); dn = d.normalized()
+        if d.length > (a + b) * 1.02: print("ROGUE the %s hand falls %.1f cm short of its place" % (side, (d.length - a - b) / ctx["cm"]))
+        ang = math.acos(max(-1.0, min(1.0, (a * a + dist * dist - b * b) / (2 * a * dist))))
+        e1 = dn.orthogonal().normalized(); e2 = dn.cross(e1)
+        for k in range(36):
+            ph = math.radians(10 * k); p = e1 * math.cos(ph) + e2 * math.sin(ph)
+            Uw = dn * math.cos(ang) + p * math.sin(ang); E = S + Uw * a
+            cands.append((Uw, (S + dn * dist - E).normalized(), 0.0004 * math.degrees(p.angle(pole - dn * pole.dot(dn))) ** 2))
+    qx = exact_hand(A, exact["front"], exact["up"]) if exact else None
+    aims = [(A["local"][k], v.normalized(), {"blade": 0.012, "axis": 0.002, "palm": 0.003}[k]) for k, v in (want or {}).items()]
+    best = None
+    for Uw, L, c0 in cands:
+        qmin = (qu0 @ Y).rotation_difference(Uw) @ qu0
+        bend = math.degrees(Uw.angle(L)); h = qmin @ A["hinge"]; h = h - Uw * h.dot(Uw)
+        bax = Uw.cross(L)
+        sh = math.atan2(h.cross(bax).dot(Uw), h.dot(bax)) if bax.length > 1e-6 and h.length > 1e-6 else 0.0
+        for ds in ((0,) if bend >= 25.0 else range(-90, 91, 15)):
+            # the upper arm's turn about itself (from the shortest swing there): her cape is skinned to it, and a big
+            # one lifted the cape off her back
+            roll = (math.degrees(sh) + ds + 180.0) % 360.0 - 180.0
+            c1 = c0 + 0.02 * (ds * min(1.0, bend / 25.0)) ** 2 + roll_cost(roll)
+            qu = Quaternion(Uw, sh + math.radians(ds)) @ qmin
+            qfi = qu @ A["rel_e"]; qf = (qfi @ Y).rotation_difference(L) @ qfi
+            if qx is not None:
+                w = wrist_of(A, qf, qx); c = c1 + wrist_cost(*w)
+                if best is None or c < best[0]: best = (c, qu, qf, qx, w, c1, roll)
+                continue
+            for fl, dv, tw, Wr in A["grid"]:
+                qh = qf @ Wr; c = c1 + wrist_cost(fl, dv, tw)
+                for v, aim, wt in aims: c += wt * math.degrees((qh @ v).angle(aim)) ** 2
+                if best is None or c < best[0]: best = (c, qu, qf, qh, (fl, dv, tw), c1, roll)
+    c, qu, qf, qh, w, c1, roll = best
+    if qx is None:                                                # finer, about the best of the grid
+        for step in (5.0, 2.5):
+            fl0, dv0, tw0 = w
+            for fl in (fl0 - step, fl0, fl0 + step):
+                for dv in (dv0 - step, dv0, dv0 + step):
+                    for tw in (tw0 - 2 * step, tw0, tw0 + 2 * step):
+                        qh_ = qf @ wrist_q(A, fl, dv, tw) @ A["rel_h"]; c_ = c1 + wrist_cost(fl, dv, tw)
+                        for v, aim, wt in aims: c_ += wt * math.degrees((qh_ @ v).angle(aim)) ** 2
+                        if c_ < c: c, qh, w = c_, qh_, (fl, dv, tw)
+        w = wrist_of(A, qf, qh)
+    for pb, q in ((ua, qu), (la, qf), (ha, qh)):
+        M = pb.matrix.copy(); pb.matrix = Matrix.LocRotScale(M.translation, q, M.to_scale()); bpy.context.view_layer.update()
+    M = tb.matrix.copy(); tb.matrix = Matrix.LocRotScale(M.translation, Quaternion(qf @ Y, math.radians(0.5 * w[2])) @ M.to_quaternion(), M.to_scale())
     bpy.context.view_layer.update()
-    plain = {}
-    for name, ops in spec.items():
-        if ops and ops[0][0] in ("reach", "reach2"):
-            pb = arm_obj.pose.bones[name]; side = name[-1]
-            if ops[0][0] == "reach": targets[side] = ops[0]
-            continue
-        plain[name] = ops
-    if not targets: return DC.apply(arm_obj, spec, ctx)
-    # pose everything else first, then each reaching arm (shoulder, then elbow), keeping what was set
-    DC.apply(arm_obj, plain, ctx)
-    B = arm_obj.data.bones
-    for side, (_, at, pole) in targets.items():
-        neck = arm_obj.pose.bones["neck_01"].head
-        goal = neck + (C.OUT["r"] * at[0] + F * at[1] + U * at[2]) * cm
-        ua, la = arm_obj.pose.bones[f"upperarm_{side}"], arm_obj.pose.bones[f"lowerarm_{side}"]
-        a = (B[f"lowerarm_{side}"].head_local - B[f"upperarm_{side}"].head_local).length
-        b = (B[f"hand_{side}"].head_local - B[f"lowerarm_{side}"].head_local).length
-        d = goal - ua.head; dist = min(d.length, (a + b) * 0.999); dn = d.normalized()
-        cosA = max(-1.0, min(1.0, (a * a + dist * dist - b * b) / (2 * a * dist))); A = math.acos(cosA)
-        p = pole - dn * pole.dot(dn); p.normalize()
-        for pb_, want in ((ua, dn * math.cos(A) + p * math.sin(A)), (la, None)):
-            if want is None: want = (goal - pb_.head).normalized()
-            M = pb_.matrix.copy(); rot = M.to_quaternion(); cur = rot @ Vector((0.0, 1.0, 0.0))
-            pb_.matrix = Matrix.LocRotScale(M.translation, cur.rotation_difference(want) @ rot, M.to_scale()); bpy.context.view_layer.update()
-        # the hand again (its ops are absolute, and the arm has moved; the fingers' turns are their own and go with it)
-        rest = {n: o for n, o in plain.items() if n == f"hand_{side}"}
-        for n, ops in rest.items():
-            pb_ = arm_obj.pose.bones[n]; M = pb_.matrix.copy(); rot = M.to_quaternion(); head = M.translation.copy(); scl = M.to_scale()
-            if n.startswith("hand_"):
-                pb_.matrix_basis.identity(); bpy.context.view_layer.update(); M = pb_.matrix.copy(); rot = M.to_quaternion()
-            for op in ops:
-                k = op[0]; cur = rot @ Vector((0.0, 1.0, 0.0))
-                if k == "dir": rot = cur.rotation_difference(op[1]) @ rot
-                elif k == "twist": rot = Quaternion(cur, math.radians(op[1])) @ rot
-                elif k == "curl":
-                    hq = arm_obj.pose.bones[ctx["hand_of"][n]].matrix.to_quaternion() @ ctx["palm"][ctx["hand_of"][n]]
-                    ax = cur.cross(hq)
-                    if ax.length > 1e-6: rot = Quaternion(ax.normalized(), math.radians(op[1])) @ rot
-                elif k == "blade":
-                    bb = op[1].normalized(); f = op[2] - bb * op[2].dot(bb)
-                    rot = cur.rotation_difference(f.normalized()) @ rot; cur = rot @ Vector((0.0, 1.0, 0.0))
-                    th = rot @ ctx["thumb"][n]; want = bb - cur * bb.dot(cur)
-                    if want.length > 1e-6:
-                        want.normalize(); ang = th.angle(want); sgn = 1.0 if th.cross(want).dot(cur) >= 0 else -1.0
-                        rot = Quaternion(cur, sgn * ang) @ rot
-            pb_.matrix = Matrix.LocRotScale(head, rot, scl); bpy.context.view_layer.update()
+    ctx.setdefault("wrists", []).append((side, w)); ctx.setdefault("rolls", []).append((side, roll))
+
+
+def apply(arm_obj, spec, ctx):
+    """darkcaster_clips.apply, then each arm given as 'arm_<side>' solved (solve_arm)"""
+    arms = {k[-1]: v for k, v in spec.items() if k.startswith("arm_")}
+    DC.apply(arm_obj, {k: v for k, v in spec.items() if not k.startswith("arm_")}, ctx)
+    for side, op in arms.items(): solve_arm(arm_obj, ctx, side, op)
     return {pb.name: pb.matrix_basis.decompose() for pb in arm_obj.pose.bones}
 
 
 def make_clips(arm_obj, scene, clips):
-    ctx = C.context(arm_obj); DC.add_thumb_op(ctx, arm_obj); ctx["cm"] = model_height(scene) / 170.0
+    ctx = C.context(arm_obj); DC.add_thumb_op(ctx, arm_obj); ctx["cm"] = model_height(scene) / 170.0; arm_context(ctx, arm_obj)
     P = lambda spec: apply(arm_obj, spec, ctx)
     # her own clips: both hands closed on a grip in every frame (a finger's local turn does not depend on the arm)
     closed = P({**DC.fist("r"), **DC.fist("l")})
@@ -244,10 +363,13 @@ def make_clips(arm_obj, scene, clips):
     out["RollF"] = C.sample(keys)
     out["RollB"] = list(reversed(out["RollF"]))
     for pb in arm_obj.pose.bones: pb.matrix_basis.identity()
+    worst = max(ctx["wrists"], key=lambda sw: over(*sw[1]))
+    print("ROGUE wrists: %d hands solved, the furthest past a limit %.1f deg (%s: flexion %.0f, deviation %.0f, twist %.0f)"
+          % (len(ctx["wrists"]), over(*worst[1]), worst[0], *worst[1]))
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     if len(argv) > 1 and os.path.isdir(argv[1]):
         json.dump({"Shoot": {"release": RELEASE, "length": SHOT["end"]}, "Roll": {"length": ROLL[-1][0], "turn": [ROLL[1][0], ROLL[-2][0]]},
-                   "Stabs": {k: {"wind": v[0], "release": v[1], "follow": v[2], "end": v[3]} for k, v in TIMES.items()}},
+                   "Stabs": {k: {"wind": v[0], "release": v[1], "follow": v[2], "end": v[3]} for k, v in TIMES.items()}, "grip_tilt": GRIP_TILT},
                   open(os.path.join(argv[1], "times.json"), "w"), indent=1)
     return out
 
@@ -293,10 +415,12 @@ def grips(arm_obj, wdir):
         th = ue(B[f"thumb_01_{s}"].head_local) - hand; along = (ue(B[f"middle_01_{s}"].head_local) - hand).normalized()
         th = th - along * th.dot(along); th = (th - fore * th.dot(fore)).normalized()
         palm = hand + fore * 6.5 + Vector((0.0, 0.0, -2.5))
-        Xd, Yd, Zd = ue_frame(fore, -th)                        # (the dagger's handle is at +Z, its blade toward -Z: blade -> thumb)
+        slant = lambda k: (th * math.cos(math.radians(GRIP_TILT[k])) + fore * math.sin(math.radians(GRIP_TILT[k]))).normalized()
+        z = -slant("dagger"); y = z.cross(fore).normalized(); Xd, Yd, Zd = y.cross(z), y, z    # (MakeFromZX: the handle at +Z, the blade toward -Z)
         out.append(place(arm_obj, f"dagger_{s}", dag, dag_f, f"hand_{s}", (Xd, Yd, Zd), palm - Zd * 28.5, 1.0 / S, (0.75, 0.8, 0.9, 1)))
         if s == "r":
-            Xc, Yc, Zc = ue_frame(-th, -fore)                   # (the crossbow's front is -X, its rail up +Z)
+            g = math.radians(GRIP_TILT["crossbow"])
+            Xc, Yc, Zc = ue_frame(-slant("crossbow"), th * math.sin(g) - fore * math.cos(g))    # (the crossbow's front is -X, its rail up +Z)
             out.append(place(arm_obj, "crossbow", xb, xb_f, "hand_r", (Xc, Yc, Zc), palm - (Xc * 31.0 + Zc * 0.5), 1.0 / S, (0.9, 0.7, 0.2, 1)))
     return out
 
