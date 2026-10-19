@@ -134,8 +134,14 @@ public:
 	// ?Hero=<Name>; ARDHeroGameMode spawns her pawn). When play begins the chosen one's weapons, hit points, mana, bonuses,
 	// controls and roll become the generator's own (Weapons, PlayerMaxHealth, ...): the rest of the game reads those.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") TArray<FRDHeroDef> Heroes;
-	/** the one played when the level is opened without ?Hero= (from the editor) */
+	/** the one played when the level is opened without ?Hero= and without its menu (MenuLevel, rd.HeroMenu 0) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") FName DefaultHero;
+	/** the menu that chooses the hero: the level played without ?Hero= (Play in the editor) opens it first, and it opens the
+	 *  level again with ?Hero=<her name>. Empty: no menu. The console variable rd.HeroMenu 0 skips it (the scripted tests and
+	 *  the reel's renders play the DefaultHero or switch heroes themselves). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") FString MenuLevel;
+	/** play began without a hero and the menu is being opened: the dungeon does not start */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") bool bOpeningMenu = false;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") FName CurrentHero;
 	/** hers (ApplyHero): mana, mana a second, the share more a melee blow / a ranged bolt does */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float PlayerMaxMana = 0.f;
@@ -165,6 +171,10 @@ public:
 	float LastFoundTime = -100.f;
 	/** the item a container of a section holds (NAME_None: none) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") FName LootOf(FIntPoint Section, int32 Index) const;
+
+	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
+	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") URDCombatComponent* GetPlayerCombat() const { return PlayerCombat; }
 	/** her average damage a blow over the weapons */

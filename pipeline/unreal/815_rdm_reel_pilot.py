@@ -24,9 +24,12 @@ the sword; the Mage casts, dark fire first; the Warlock and the Rogue as in leve
 says (east, north, west or south: the hallway leaving that edge of the start section, the next section that way), with
 a session seed of her own, opens the containers she passes as the Rogue does (what each held goes into her inventory),
 and after her first fight opens the inventory and uses what helps her (a healing potion or food when she is hurt, a
-mana potion when her mana is down, else the next weapon). The inventory does not pause the game in the reel (the
+mana potion when her mana is down, else the next weapon). After that she opens the big map (M) for 4 s and walks on
+under it (a fight closes it). The inventory does not pause the game in the reel (the
 combat component's bInventoryPausesGame): the Movie Render Queue renders a world that goes on. The record then also
-has her mana, the potions and food on her, what she found, the inventory as it was shown and what it said.
+has her mana, the potions and food on her, what she found, the inventory as it was shown and what it said, and whether
+the big map is open. The level is rendered without ?Hero=: the pilot sets rd.HeroMenu 0 when it is armed (else the
+level would open its menu) and 1 again when it stops.
 Writes SourceArt/random_dungeon_magic[2|3]/cine_render.json (level 4: random_dungeon_magic4/cine_<hero>.json; rehearse:
 cine_rehearsal.json) and logs "RDMREEL saved".
 Keeps its namespace (tick callback); a pilot left armed by an earlier run is dropped.
@@ -67,6 +70,8 @@ S = {"rows": {}, "events": [], "segs": [], "maps": [], "saved": False, "seg": ""
 if getattr(unreal, "_rdm_reel", None) is not None:
     try: unreal.unregister_slate_post_tick_callback(unreal._rdm_reel)
     except Exception: pass
+# (level 4 rendered without ?Hero= would open its menu: rd.HeroMenu 0 until the pilot stops)
+if L4: unreal.SystemLibrary.execute_console_command(None, "rd.HeroMenu 0")
 WALK, RUN = [float(x) for x in open(SPEEDS).read().split()]
 def T(): return G["t"]
 def loc(): return G["pawn"].get_actor_location()
@@ -370,6 +375,12 @@ def run():
                 pts = path(loc(), q.get_actor_location())
                 if 1 < len(pts) <= 14 and (best is None or len(pts) < best[0]): best = (len(pts), q)
             if best is not None: event("hunt", monster=str(best[1].monster_name), way_m=best[0] * 3); m = best[1]
+        # (level 4: the big map (M) once, for 4 s, while she walks on: after her first fight and the inventory; a fight closes it)
+        if L4 and G.get("map_until") is not None and (T() >= G["map_until"] or m is not None):
+            G["map_until"] = None; gen.set_map_open(False); key_hit("m"); event("map", open=0)
+        if (L4 and not G.get("map_done") and m is None and T() < DUR - 5.0 and T() - G.get("last_fight", -99.0) > 1.5
+                and (G.get("inv_done") or T() > 22.0) and (G["fights"] >= 1 or T() > 26.0)):
+            G["map_done"] = True; G["map_until"] = T() + 4.0; gen.set_map_open(True); key_hit("m"); event("map", open=1)
         if m is not None:
             seg("fight"); G["casts0"] = G["combat"].attacks_made; yield from (fight3 if L3 else fight)(m); seg("walk"); stuck = 0.0; last = loc()
             here = gen.world_to_section(loc())
@@ -494,7 +505,7 @@ def sample():
             "sections": len(gen.get_section_coords()), "mon": mons, "keys": keys, "moving": moving, "fire": round(min([d2(q, l) for q in gen.get_fire_loops()] or [-1.0])),
             "rolling": int(c.is_rolling()), "pois": pois(l) if gen.get_editor_property("tactical_maps") and G["frame"] % 3 == 0 else None,
             **({"mana": round(c.get_mana(), 1), "mmana": c.get_max_mana(), "inv": [int(c.is_inventory_open()), c.get_inventory_cursor()], "spb": round(c.get_speed_bonus(), 3),
-                "rg": round(c.get_regen_per_second(), 2)} if L4 else {})}
+                "rg": round(c.get_regen_per_second(), 2), "mapo": int(gen.get_editor_property("map_open"))} if L4 else {})}
 def hits():
     c = G["combat"]; p = G["pawn"]; now = {}
     for m in G["gen"].get_monsters():
@@ -555,6 +566,8 @@ def save(why=None):
     (unreal.log_error if why else unreal.log)(("RDMREEL failed: %s | " % why if why else "RDMREEL saved ") + msg)
 def stop(why=None):
     unreal.unregister_slate_post_tick_callback(unreal._rdm_reel); unreal._rdm_reel = None
+    # (level 4: the menu first again, for Play in the editor)
+    if L4: unreal.SystemLibrary.execute_console_command(None, "rd.HeroMenu 1")
     try: save(why)
     finally:
         try:

@@ -6,6 +6,7 @@
 #include "AudioDevice.h"
 #include "AudioMixerBlueprintLibrary.h"
 #include "Misc/CommandLine.h"
+#include "HAL/IConsoleManager.h"
 #include "Misc/FileHelper.h"
 #include "Misc/App.h"
 #include "Components/AudioComponent.h"
@@ -26,6 +27,9 @@
 #include "InputCoreTypes.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeonGen, Log, All);
+
+static TAutoConsoleVariable<int32> CVarRDHeroMenu(TEXT("rd.HeroMenu"), 1,
+	TEXT("1: a dungeon level with heroes and a MenuLevel, played without ?Hero=, opens its menu first. 0: it plays its DefaultHero (scripted tests, reel renders)."));
 
 static const int32 RDSoundSeed = 90417;
 static const FName RDFireKeys[3] = { TEXT("Env.Torch"), TEXT("Env.Brazier"), TEXT("Env.Hearth") };
@@ -433,6 +437,18 @@ void ARDDungeonGenerator::BeginPlay()
 		Blood->Init(this);
 	}
 	StopMusic();
+	// (no hero chosen, as when the level is played from the editor: the menu first; it opens this level again with ?Hero=)
+	if (Heroes.Num() > 0 && !MenuLevel.IsEmpty() && CVarRDHeroMenu.GetValueOnGameThread() != 0)
+	{
+		const AGameModeBase* GM = GetWorld()->GetAuthGameMode();
+		if (GM && UGameplayStatics::ParseOption(GM->OptionsString, TEXT("Hero")).IsEmpty())
+		{
+			bOpeningMenu = true;
+			UE_LOG(LogRandomDungeonGen, Log, TEXT("RDHERO no hero chosen: opening the menu %s"), *MenuLevel);
+			UGameplayStatics::OpenLevel(this, FName(*MenuLevel));
+			return;
+		}
+	}
 	// (the hero chosen in the menu: her weapons, hit points and controls become the generator's before anything reads them)
 	if (Heroes.Num() > 0) ApplyHero(ChosenHero());
 	MapData.Reset();
@@ -445,6 +461,7 @@ void ARDDungeonGenerator::BeginPlay()
 void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	if (bOpeningMenu) return;
 	// (it ticks while the game is paused: then only her inventory, which paused it, is worked)
 	const bool bPaused = GetWorld()->IsPaused();
 	if (Heroes.Num() > 0 && PlayerCombat)

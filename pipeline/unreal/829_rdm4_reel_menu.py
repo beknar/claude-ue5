@@ -32,8 +32,12 @@ def save(why=None):
     heroes = []
     if s is not None:
         for h in s.heroes:
+            # (what the card shows: the bars, the line of her other numbers, the abilities, each weapon and spell with its picture)
             heroes.append({"name": str(h.name), "title": h.title, "hp": h.max_health, "mana": h.max_mana, "abilities": list(h.abilities), "armour": h.armour,
-                           "starts_with": h.starts_with, "accent": [h.accent.r, h.accent.g, h.accent.b]})
+                           "starts_with": h.starts_with, "accent": [h.accent.r, h.accent.g, h.accent.b], "mana_per_second": h.mana_per_second,
+                           "melee_bonus": h.melee_bonus, "ranged_bonus": h.ranged_bonus, "roll": h.roll_clip is not None,
+                           "weapons": [{"name": str(w.name), "icon": str(w.icon), "damage": w.damage, "reach": w.reach, "spell": bool(w.spell),
+                                        "bolt": w.bolt_mesh is not None, "mana": w.mana_cost} for w in h.weapons]})
     rows = [S["rows"][k] for k in sorted(S["rows"])]
     picked = [e["hero"] for e in S["events"] if e["kind"] == "start"]
     out = {"fps": FPS, "passage": PASSAGE, "rows": rows, "events": S["events"], "heroes": heroes, "picked": picked, "want": WANT, "error": why}

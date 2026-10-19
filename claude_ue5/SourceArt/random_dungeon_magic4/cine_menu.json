@@ -8670,6 +8670,21 @@
 0.949999988079071,
 0.699999988079071,
 0.2800000011920929
+],
+"mana_per_second": 0.0,
+"melee_bonus": 0.30000001192092896,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Sword",
+"icon": "w_sword_shield",
+"damage": 22.0,
+"reach": 170.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+}
 ]
 },
 {
@@ -8688,6 +8703,30 @@
 1.0,
 0.47999998927116394,
 0.18000000715255737
+],
+"mana_per_second": 2.0,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Fire",
+"icon": "w_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 8.0
+},
+{
+"name": "Dark Fire",
+"icon": "w_dark_fire",
+"damage": 38.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 14.0
+}
 ]
 },
 {
@@ -8707,6 +8746,30 @@
 0.7200000286102295,
 0.44999998807907104,
 1.0
+],
+"mana_per_second": 1.2000000476837158,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Sword",
+"icon": "w_sword",
+"damage": 22.0,
+"reach": 170.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+},
+{
+"name": "Fire",
+"icon": "w_dark_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 10.0
+}
 ]
 },
 {
@@ -8726,6 +8789,30 @@
 0.41999998688697815,
 0.8799999952316284,
 0.550000011920929
+],
+"mana_per_second": 0.0,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.30000001192092896,
+"roll": true,
+"weapons": [
+{
+"name": "Daggers",
+"icon": "w_daggers",
+"damage": 15.0,
+"reach": 150.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+},
+{
+"name": "Crossbow",
+"icon": "w_crossbow",
+"damage": 34.0,
+"reach": 2600.0,
+"spell": true,
+"bolt": true,
+"mana": 0.0
+}
 ]
 }
 ],

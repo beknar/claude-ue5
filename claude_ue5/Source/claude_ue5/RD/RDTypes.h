@@ -12,6 +12,7 @@ class UNiagaraSystem;
 class USoundBase;
 class UFXSystemAsset;
 class APawn;
+class UTexture2D;
 
 /** A placeable mesh normalised by Adjust to the dungeon frame: origin at the footprint centre on the floor, front toward
  *  +X (furniture faces +X; wall pieces run along Y with their room face toward +X; floor tiles centred, top at z = 0;
@@ -170,6 +171,22 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform OffHandHolsterGrip;
 	/** random_dungeonmagic_level4: the mana a cast takes (0: none; a cast is refused while she has less) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaCost = 0.f;
+	/** random_dungeonmagic_level4: its picture among the generator's UIArt (none: the HUD shows its name only) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
+};
+
+/** random_dungeonmagic_level4: a painted piece of the interface (SourceArt/random_dungeon_magic4/ui_art.json, made on an
+ *  image server and cut out by pipeline/blender_numpy/rdm4_ui_*.py, imported by pipeline/unreal/830). Border: how much
+ *  of each side (left, top, right, bottom; shares of the picture) is the frame when the piece is stretched to another
+ *  shape: the corners keep their size and the edges stretch. Inner: the open inside of a hollow frame (left, top, right,
+ *  bottom shares): a bar's fill is drawn there. */
+USTRUCT(BlueprintType)
+struct FRDUIArt
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UTexture2D> Texture = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector4 Border = FVector4(0.0, 0.0, 0.0, 0.0);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector4 Inner = FVector4(0.0, 0.0, 1.0, 1.0);
 };
 
 /** random_dungeonmagic_level4: what a potion or a food does */
@@ -191,6 +208,8 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Amount = 0.1f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Seconds = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	/** its picture among the generator's UIArt (none: the HUD shows its name only) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
 };
 
 /** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the

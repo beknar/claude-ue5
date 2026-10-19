@@ -76,6 +76,8 @@ public:
 	bool bUsingGamepad = false;
 	/** world time the hero shown changed (the HUD fades the card in) */
 	float ShownTime = -100.f;
+	/** the painted interface (as the dungeon generator's UIArt; pipeline/unreal/830): the card, the names, the arrows, START */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
 
 protected:
 	virtual void BeginPlay() override;
@@ -97,6 +99,9 @@ class CLAUDE_UE5_API ARDHeroSelectHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 	virtual void NotifyHitBoxClick(FName BoxName) override;
+	/** tests: the painted pieces drawn in the last frame */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FName> GetArtDrawn() const { return ArtDrawn; }
 private:
 	UPROPERTY(Transient) TObjectPtr<ARDHeroSelect> Sel;
+	TArray<FName> ArtDrawn;
 };

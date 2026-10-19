@@ -2,12 +2,16 @@
 For each hero in turn (Warrior, Mage, Warlock, Rogue): a passage of the menu (the render of random_dungeonmagic_level4_select,
 829's record cine_menu.json: the hero shown, when she was shown, START, the key pressed) with the menu's HUD drawn over it
 as ARDHeroSelectHUD draws it in play (the Movie Render Queue does not draw the HUD): the title, her card (name, hit points
-and mana against the others', main abilities, armour, what she starts with), the four names along the bottom, the arrows,
+and mana against the others', her other numbers (mana back, bonuses, the roll), main abilities, armour, what she starts
+with: each weapon and spell with its picture and what it does), the four names along the bottom, the arrows,
 START lighting up when it is pressed, the keys pressed; then her run in the dungeon (815 + rdm_reel_overlay.py with level 4:
 frames with the dungeon's HUD already on them). The menu passages fade to black and the runs fade in.
 Sound: under the menu, the music pack's menu track ("Menu" by name, continuing from passage to passage); under each run, the
 game's own mix of that render (its .wav); the menu music levelled to the runs' loudness; short fades at every join.
-Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav>
+With the painted interface (ui_art_dir: rdm4_ui_cut.py --export's folder) the menu's card, bars, dividers, name plates,
+arrows and START are drawn with the painted pieces where ARDHeroSelectHUD draws them (rdm4_ui_draw.py), and the runs are
+taken from <hud_prefix><hero> (rdm_reel_overlay.py with the same folder).
+Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix]
   work_dir holds final_menu (the menu's frames), hud_<hero> (her run with the HUD) and final_<hero> (her run's .wav)"""
 import sys, os, glob, json, math
 import numpy as np
@@ -15,6 +19,11 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.io import wavfile
 WORK, OUT, MUSIC, TRACK = sys.argv[1:5]
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+UI, HUD = None, "hud_"
+if len(sys.argv) > 6:
+    from rdm4_ui_draw import UIArt
+    UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
 SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic4")
 M = json.load(open(os.path.join(SRC, "cine_menu.json")))
 ORDER = ["Warrior", "Mage", "Warlock", "Rogue"]
@@ -41,23 +50,50 @@ def menu_hud(f, k, fl):
     ink = lambda c, a=1.0: lin(c, a * fade)
     d.text((80 * K, 44 * K), "RANDOM DUNGEON", font=f_small, fill=lin(DIM)); d.text((78 * K, 64 * K), "CHOOSE YOUR HERO", font=f_title, fill=lin(INK))
     # ---- her card (laid out twice: measured, then drawn on its panel)
-    ax, ay, x = 80 * K, 160 * K, 114 * K; wd = 720 * K - x - 30 * K
+    ax, ay, x = 80 * K, 160 * K, (114 + (18 if (UI and UI.has("panel")) else 0)) * K; wd = 720 * K - x - 30 * K     # (clear of the board's corner ornaments)
     def card(draw):
         y = ay + 22 * K
         if draw: d.text((x, y), h["name"].upper(), font=f_name, fill=ink(acc))
         y += 74 * K
         mh = max(q["hp"] for q in HEROES); mm = max(max(q["mana"] for q in HEROES), 1.0)
-        for lab, v, mx, col, note in (("HIT POINTS", h["hp"], mh, (0.25, 0.75, 0.3), "%d" % h["hp"]), ("MANA", h["mana"], mm, (0.2, 0.42, 0.95), "%d" % h["mana"] if h["mana"] else "none")):
+        for lab, v, mx, col, note, fr0, fi0 in (("HIT POINTS", h["hp"], mh, (0.25, 0.75, 0.3), "%d" % h["hp"], "bar_health", "fill_health"),
+                                                 ("MANA", h["mana"], mm, (0.2, 0.42, 0.95), "%d" % h["mana"] if h["mana"] else "none", "bar_mana", "fill_mana")):
+            if UI and UI.has(fr0):
+                # (ARDHeroSelectHUD: the painted frame, its fill as far as she has against the strongest)
+                bh = 38 * K
+                if draw:
+                    d.text((x, y + 4 * K), lab, font=f_small, fill=ink(DIM))
+                    a0, a1 = (x + 120 * K, y - 6 * K), (x + wd - 80 * K, y - 6 * K + bh)
+                    UI.bar(o, fr0, fi0, a0, a1, UI.height_px(fr0, bh), min(1.0, v / mx), (1, 1, 1, fade), (1, 1, 1, fade))
+                    d.text((a1[0] + 12 * K, y + 4 * K), note, font=f_small, fill=ink(INK))
+                y += 44 * K
+                continue
             if draw:
                 d.text((x, y), lab, font=f_small, fill=ink(DIM)); b0x, b1x = x + 130 * K, x + wd - 90 * K
                 d.rectangle((b0x, y + 2 * K, b1x, y + 20 * K), fill=lin((0.08, 0.08, 0.1), 0.9 * fade))
                 d.rectangle((b0x, y + 2 * K, b0x + (b1x - b0x) * min(1.0, v / mx), y + 20 * K), fill=ink(col))
                 d.text((b1x + 12 * K, y), note, font=f_small, fill=ink(INK))
             y += 32 * K
+        # her other numbers on one line (ARDHeroSelectHUD): the mana that comes back, her bonuses, the roll
+        st = []
+        if h["mana"] > 0: st.append(("MANA BACK", "%.1f a second" % h.get("mana_per_second", 0.0)))
+        if h.get("melee_bonus", 0) > 0: st.append(("MELEE", "+%.0f%% damage" % (h["melee_bonus"] * 100)))
+        if h.get("ranged_bonus", 0) > 0: st.append(("RANGED", "+%.0f%% damage" % (h["ranged_bonus"] * 100)))
+        if h.get("roll"): st.append(("DODGE", "roll"))
+        sx = x
+        for a_, b_ in st:
+            if draw: d.text((sx, y), a_, font=f_small, fill=ink(DIM))
+            sx += d.textlength(a_, font=f_small) + 8 * K
+            if draw: d.text((sx, y), b_, font=f_small, fill=ink(acc))
+            sx += d.textlength(b_, font=f_small) + 28 * K
+        if st: y += 28 * K
         y += 14 * K
         def section(s):
             nonlocal y
-            if draw: d.text((x, y), s, font=f_small, fill=ink(acc)); d.rectangle((x, y + 21 * K, x + wd, y + 22 * K), fill=lin(LINE, 0.35 * fade))
+            if draw:
+                d.text((x, y), s, font=f_small, fill=ink(acc))
+                if UI and UI.has("divider"): UI.fit(o, "divider", (x - 6 * K, y + 8 * K), (x + wd + 6 * K, y + 36 * K), (1, 1, 1, fade))
+                else: d.rectangle((x, y + 21 * K, x + wd, y + 22 * K), fill=lin(LINE, 0.35 * fade))
             y += 30 * K
         def wrapped(s, ind):
             nonlocal y
@@ -77,27 +113,67 @@ def menu_hud(f, k, fl):
             wrapped(a, 24 * K)
         y += 10 * K
         if h["armour"]: section("ARMOUR"); wrapped(h["armour"], 0); y += 10 * K
-        if h["starts_with"]: section("STARTS WITH"); wrapped(h["starts_with"], 0)
+        if h["starts_with"] or h.get("weapons"):
+            section("STARTS WITH")
+            if h["starts_with"]: wrapped(h["starts_with"], 0)
+            # each weapon and spell: its picture in a slot, its name, what a blow or a cast does with her bonus
+            rh = 56 * K
+            for w_ in h.get("weapons", []):
+                tx = x
+                if UI and UI.has(w_["icon"]):
+                    if draw:
+                        if not UI.fit(o, "slot", (x, y), (x + rh, y + rh), (1, 1, 1, fade)): d.rectangle((x, y, x + rh, y + rh), fill=lin((0.03, 0.035, 0.05), 0.8 * fade), outline=ink(LINE), width=K)
+                        UI.fit(o, w_["icon"], (x + 8 * K, y + 8 * K), (x + rh - 8 * K, y + rh - 8 * K), (1, 1, 1, fade))
+                    tx = x + rh + 14 * K
+                bonus = h.get("melee_bonus", 0) if not w_["spell"] else (h.get("ranged_bonus", 0) if w_["bolt"] else 0.0)
+                what = ("%.0f damage a blow, reach %.1f m" % (w_["damage"] * (1 + bonus), w_["reach"] / 100.0) if not w_["spell"] else
+                        "%.0f damage a %s, flies %.0f m" % (w_["damage"] * (1 + bonus), "bolt" if w_["bolt"] else "cast", w_["reach"] / 100.0))
+                if w_["mana"] > 0: what += ", %.0f mana" % w_["mana"]
+                if draw:
+                    d.text((tx, y + 2 * K), w_["name"].upper(), font=f_line, fill=ink(INK))
+                    d.text((tx, y + 31 * K), what, font=f_small, fill=ink(DIM))
+                y += rh + 8 * K
         return y
     by = min(card(False) + 18 * K, H * K - 170 * K)
-    d.rectangle((ax, ay, 720 * K, by), fill=lin((0.03, 0.035, 0.05), 0.82), outline=lin(LINE), width=2 * K)
-    d.rectangle((ax, ay, ax + 6 * K, by), fill=ink(acc))
-    card(True)
+    if UI and UI.has("panel"):
+        UI.board(o, "panel", (ax, ay), (720 * K, by), 32 * K); d = ImageDraw.Draw(o, "RGBA")
+    else:
+        d.rectangle((ax, ay, 720 * K, by), fill=lin((0.03, 0.035, 0.05), 0.82), outline=lin(LINE), width=2 * K)
+        d.rectangle((ax, ay, ax + 6 * K, by), fill=ink(acc))
+    card(True); d = ImageDraw.Draw(o, "RGBA")
     # ---- the names along the bottom, the arrows, START
     tb, tg, ty, tbh = 210 * K, 14 * K, H * K - 130 * K, 52 * K; n = len(HEROES); t0 = (W * K - (n * tb + (n - 1) * tg)) / 2
+    plate = bool(UI and UI.has("button"))
     for i, q in enumerate(HEROES):
         on = i == r["hero"]; p0 = (t0 + i * (tb + tg), ty); p1 = (p0[0] + tb, ty + tbh); qa = tuple(q["accent"])
-        d.rectangle((*p0, *p1), fill=lin(tuple(c * 0.35 for c in qa), 0.95) if on else lin((0.04, 0.045, 0.06), 0.85), outline=lin(qa) if on else lin((0.40, 0.38, 0.34)), width=(3 if on else 1) * K)
+        if plate:
+            UI.nine(o, "button", p0, p1, UI.height_px("button", tbh), tuple(0.75 + c * 0.5 for c in qa) + (1,) if on else (0.55, 0.55, 0.55, 1)); d = ImageDraw.Draw(o, "RGBA")
+            if on: d.rectangle((p0[0] + 2 * K, p0[1] + 2 * K, p1[0] - 2 * K, p1[1] - 2 * K), outline=lin(qa), width=2 * K)
+        else:
+            d.rectangle((*p0, *p1), fill=lin(tuple(c * 0.35 for c in qa), 0.95) if on else lin((0.04, 0.045, 0.06), 0.85), outline=lin(qa) if on else lin((0.40, 0.38, 0.34)), width=(3 if on else 1) * K)
+        d.text(((p0[0] + p1[0]) / 2 + (2 * K if plate else 0), (p0[1] + p1[1]) / 2 + (2 * K if plate else 0)), q["name"].upper(), font=f_tab, fill=(0, 0, 0, 200), anchor="mm") if plate else None
         d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), q["name"].upper(), font=f_tab, fill=(255, 255, 255, 255) if on else lin(DIM), anchor="mm")
     for j, g in enumerate("<>"):
         px = t0 - tg - 56 * K if j == 0 else t0 + n * tb + (n - 1) * tg + tg
         hot = (r["key"] in ("A", "Left") and j == 0) or (r["key"] in ("D", "Right") and j == 1)
+        if UI and UI.has("arrow"):
+            # (the painted arrowhead, the left one mirrored; lit while its key is pressed)
+            UI.fit(o, "arrow", (px - 4 * K, ty - 4 * K), (px + 60 * K, ty + tbh + 4 * K), (1.5, 1.3, 0.9, 1) if hot else (1, 1, 1, 1), flip=j == 0); d = ImageDraw.Draw(o, "RGBA")
+            continue
         d.rectangle((px, ty, px + 56 * K, ty + tbh), fill=lin((0.36, 0.27, 0.10), 0.95) if hot else lin((0.04, 0.045, 0.06), 0.85), outline=lin((1.0, 0.82, 0.35)) if hot else lin(LINE), width=(3 if hot else 1) * K)
         d.text((px + 28 * K, ty + tbh / 2), g, font=f_key, fill=lin(INK), anchor="mm")
     st = "START AS %s" % h["name"].upper(); tw = d.textlength(st, font=f_cap)
     pressed = 0.0 <= r["start_ago"] < 0.7; pulse = 1.0 if pressed else 0.75 + 0.25 * math.sin(r["t"] * 3.0)
-    p1 = (W * K - 80 * K, H * K - 170 * K); p0 = (p1[0] - tw - 60 * K, p1[1] - 72 * K)
-    d.rectangle((*p0, *p1), fill=lin(tuple(c * (0.85 if pressed else 0.45) * pulse for c in acc), 0.95), outline=lin((1, 1, 1)) if pressed else lin(acc), width=(5 if pressed else 3) * K)
+    if plate:
+        # (ARDHeroSelectHUD: the plate, lit in her colour, wider for its rim and rivets)
+        wide = 50 * K; p1 = (W * K - 80 * K + wide / 2, H * K - 170 * K + wide / 4); p0 = (p1[0] - tw - 60 * K - wide, p1[1] - 72 * K - wide / 2)
+        k_ = 1.0 if pressed else pulse
+        UI.nine(o, "button", p0, p1, UI.height_px("button", p1[1] - p0[1]), tuple(0.6 + c * (0.9 if pressed else 0.6) * k_ for c in acc) + (1,)); d = ImageDraw.Draw(o, "RGBA")
+        d.rectangle((p0[0] + 3 * K, p0[1] + 3 * K, p1[0] - 3 * K, p1[1] - 3 * K), outline=lin((1, 1, 1)) if pressed else lin(acc, 0.5 + 0.5 * pulse), width=(4 if pressed else 2) * K)
+        d.text(((p0[0] + p1[0]) / 2 + 2 * K, (p0[1] + p1[1]) / 2 + 2 * K), st, font=f_cap, fill=(0, 0, 0, 200), anchor="mm")
+    else:
+        p1 = (W * K - 80 * K, H * K - 170 * K); p0 = (p1[0] - tw - 60 * K, p1[1] - 72 * K)
+        d.rectangle((*p0, *p1), fill=lin(tuple(c * (0.85 if pressed else 0.45) * pulse for c in acc), 0.95), outline=lin((1, 1, 1)) if pressed else lin(acc), width=(5 if pressed else 3) * K)
     d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), st, font=f_cap, fill=(255, 255, 255, 255), anchor="mm")
     keys = "A / D, arrows or wheel  another hero      Enter or Space  start      or click"; tw = d.textlength(keys, font=f_small)
     d.rectangle((W * K / 2 - tw / 2 - 16 * K, H * K - 62 * K, W * K / 2 + tw / 2 + 16 * K, H * K - 30 * K), fill=lin((0.03, 0.035, 0.05), 0.75))
@@ -136,7 +212,7 @@ for k, hero in enumerate(ORDER):
         if im.size != (W, H): im = im.resize((W, H), Image.LANCZOS)
         put(Image.alpha_composite(im, menu_hud(f, k, fl)))
     layout.append(("menu", k, n_out - PASS, PASS))
-    run = sorted(glob.glob(os.path.join(WORK, "hud_" + hero.lower(), "*.png")))
+    run = sorted(glob.glob(os.path.join(WORK, HUD + hero.lower(), "*.png")))
     for i, p in enumerate(run):
         im = Image.open(p).convert("RGB")
         n_left = len(run) - 1 - i

@@ -1,0 +1,844 @@
+{
+ "panel": {
+  "kind": "panel",
+  "size": [
+   857,
+   1024
+  ],
+  "border": [
+   0.12,
+   0.09,
+   0.12,
+   0.09
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "slot": {
+  "kind": "slot",
+  "size": [
+   256,
+   256
+  ],
+  "border": [
+   0.2,
+   0.2,
+   0.2,
+   0.2
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "bar_health": {
+  "kind": "bar",
+  "size": [
+   1024,
+   184
+  ],
+  "border": [
+   0.1504,
+   0.2663,
+   0.0791,
+   0.3315
+  ],
+  "inner": [
+   0.1504,
+   0.2663,
+   0.9209,
+   0.6685
+  ]
+ },
+ "bar_mana": {
+  "kind": "bar",
+  "size": [
+   1024,
+   233
+  ],
+  "border": [
+   0.1182,
+   0.2189,
+   0.0996,
+   0.2189
+  ],
+  "inner": [
+   0.1182,
+   0.2189,
+   0.9004,
+   0.7811
+  ]
+ },
+ "healing_vial": {
+  "kind": "icon",
+  "size": [
+   93,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "healing_flask": {
+  "kind": "icon",
+  "size": [
+   162,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "healing_large": {
+  "kind": "icon",
+  "size": [
+   118,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "healing_ornate": {
+  "kind": "icon",
+  "size": [
+   166,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "mana_vial": {
+  "kind": "icon",
+  "size": [
+   84,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "mana_flask": {
+  "kind": "icon",
+  "size": [
+   175,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "mana_large": {
+  "kind": "icon",
+  "size": [
+   164,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "mana_ornate": {
+  "kind": "icon",
+  "size": [
+   155,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "speed_vial": {
+  "kind": "icon",
+  "size": [
+   138,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "speed_flask": {
+  "kind": "icon",
+  "size": [
+   170,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "speed_large": {
+  "kind": "icon",
+  "size": [
+   223,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "speed_ornate": {
+  "kind": "icon",
+  "size": [
+   166,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "bread": {
+  "kind": "icon",
+  "size": [
+   234,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "fish": {
+  "kind": "icon",
+  "size": [
+   256,
+   147
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "fruit": {
+  "kind": "icon",
+  "size": [
+   256,
+   255
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "nuts": {
+  "kind": "icon",
+  "size": [
+   222,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "jerky": {
+  "kind": "icon",
+  "size": [
+   209,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "hardtack": {
+  "kind": "icon",
+  "size": [
+   254,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "travel_cake": {
+  "kind": "icon",
+  "size": [
+   256,
+   249
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "sweet_roll": {
+  "kind": "icon",
+  "size": [
+   256,
+   244
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "steak": {
+  "kind": "icon",
+  "size": [
+   256,
+   162
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "panel_wide": {
+  "kind": "panel",
+  "size": [
+   1024,
+   505
+  ],
+  "border": [
+   0.08,
+   0.16,
+   0.08,
+   0.16
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "button": {
+  "kind": "panel",
+  "size": [
+   1024,
+   324
+  ],
+  "border": [
+   0.07,
+   0.22,
+   0.07,
+   0.22
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "banner": {
+  "kind": "panel",
+  "size": [
+   1024,
+   265
+  ],
+  "border": [
+   0.13,
+   0.0,
+   0.13,
+   0.0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "fill_health": {
+  "kind": "texture",
+  "size": [
+   512,
+   63
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "fill_mana": {
+  "kind": "texture",
+  "size": [
+   512,
+   73
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "minimap_ring": {
+  "kind": "ring",
+  "size": [
+   504,
+   512
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.1369,
+   0.1348,
+   0.8631,
+   0.8633
+  ]
+ },
+ "divider": {
+  "kind": "ornament",
+  "size": [
+   512,
+   64
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "arrow": {
+  "kind": "ornament",
+  "size": [
+   512,
+   225
+  ],
+  "border": [
+   0.25,
+   0.0,
+   0.25,
+   0.0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "w_sword_shield": {
+  "kind": "icon",
+  "size": [
+   232,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "w_sword": {
+  "kind": "icon",
+  "size": [
+   253,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "w_fire": {
+  "kind": "icon",
+  "size": [
+   256,
+   249
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "w_dark_fire": {
+  "kind": "icon",
+  "size": [
+   255,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "w_daggers": {
+  "kind": "icon",
+  "size": [
+   256,
+   255
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "w_crossbow": {
+  "kind": "icon",
+  "size": [
+   256,
+   240
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chip_speed": {
+  "kind": "icon",
+  "size": [
+   256,
+   228
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chip_regen": {
+  "kind": "icon",
+  "size": [
+   198,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "compass": {
+  "kind": "ornament",
+  "size": [
+   476,
+   512
+  ],
+  "border": [
+   0.25,
+   0.0,
+   0.25,
+   0.0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "_icons": {
+  "Small Healing Potion": "healing_vial",
+  "Medium Healing Potion": "healing_flask",
+  "Large Healing Potion": "healing_large",
+  "Uncommon Healing Potion": "healing_flask",
+  "Wondrous Healing Potion": "healing_large",
+  "Rare Healing Potion": "healing_ornate",
+  "Very Rare Healing Potion": "healing_ornate",
+  "Legendary Healing Potion": "healing_ornate",
+  "Small Mana Potion": "mana_vial",
+  "Medium Mana Potion": "mana_flask",
+  "Large Mana Potion": "mana_large",
+  "Uncommon Mana Potion": "mana_flask",
+  "Wondrous Mana Potion": "mana_large",
+  "Rare Mana Potion": "mana_ornate",
+  "Very Rare Mana Potion": "mana_ornate",
+  "Legendary Mana Potion": "mana_ornate",
+  "Small Speed Potion": "speed_vial",
+  "Medium Speed Potion": "speed_flask",
+  "Large Speed Potion": "speed_large",
+  "Uncommon Speed Potion": "speed_flask",
+  "Wondrous Speed Potion": "speed_large",
+  "Rare Speed Potion": "speed_ornate",
+  "Very Rare Speed Potion": "speed_ornate",
+  "Legendary Speed Potion": "speed_ornate",
+  "Bread": "bread",
+  "Fish": "fish",
+  "Fruit": "fruit",
+  "Nuts and Seeds": "nuts",
+  "Jerky": "jerky",
+  "Hardtack": "hardtack",
+  "Travel Cake": "travel_cake",
+  "Sweet Roll": "sweet_roll",
+  "Well Done Steak": "steak"
+ },
+ "_weapons": {
+  "Warrior/Sword": "w_sword_shield",
+  "Mage/Fire": "w_fire",
+  "Mage/Dark Fire": "w_dark_fire",
+  "Warlock/Sword": "w_sword",
+  "Warlock/Fire": "w_dark_fire",
+  "Rogue/Daggers": "w_daggers",
+  "Rogue/Crossbow": "w_crossbow"
+ }
+}

@@ -26,6 +26,18 @@
   speed     running (W, run mode) she reaches her speed; under a large speed potion 30 % more, measured from where she
             goes; the bonus ends after its 30 s; in an attack she is slowed under it too
   noregen   hurt and left alone for 9 s her hit points stay where they are (the magic levels' come back after 6 s)
+  menufirst (828 starts play on random_dungeonmagic_level4 itself with rd.HeroMenu 1; first in a plan, before menuui and
+            select) the dungeon played without ?Hero= opened its menu (831's MenuLevel): play is in the menu level, the
+            turntable shows the Warrior, there is no generator; select then goes on from there
+  menuui    (the menu, before select) each hero's card drawn with the painted pieces (830): board, framed bars and fills,
+            dividers, plates, arrows, a slot with the picture of each of her weapons and spells (the HUD's GetArtDrawn);
+            a HighResShot of each card
+  map       (the dungeon) M opens the big map in the minimap's painted style (board, plaque, compass, the key's divider;
+            no minimap ring); she walks a second along a clear line with it open; M closes it and the ring is back;
+            HighResShots
+  ui        (the dungeon) each hero's status panel with the painted board, bars (mana only when she has it), weapon slots
+            with her weapons' pictures, the minimap's ring; the effect chips' pictures; FOUND on the plaque with the item's
+            picture; the inventory's board, dividers, plate and pictures; HighResShots of each
 Writes SourceArt/random_dungeon_magic4/test_<tag>.json and logs "RDM4TEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -417,8 +429,125 @@ def step_noregen():
     quiet(False)
     step_result("noregen", ok, before=h0, after_9s=h1, hits_taken=c.hits_taken - k0, regen_per_second=G["gen"].get_editor_property("regen_per_second"))
 
+# ------------------------------------------------------------------------------------------------ the painted interface
+def hud_art():
+    h = G["pc"].get_hud() if G.get("pc") else None
+    return sorted(str(n) for n in h.get_art_drawn()) if h else []
+def shot(name):
+    unreal.SystemLibrary.execute_console_command(G["w"], f"HighResShot 1920x1080 filename=rdm4_{TAG}_{name}")
+    R.setdefault("shots", []).append(f"rdm4_{TAG}_{name}.png")
+def step_menuui():
+    """(the menu) each hero's card is drawn with the painted pieces: the board, the framed hit point and mana bars with
+    their fills, the dividers, the plates under the names and START, the arrows; a picture of each for the eye"""
+    s = G["sel"]; assert s, "open random_dungeonmagic_level4_select for the menuui step"
+    sim = lambda k, d: G["sel"].simulate_key(k, d)
+    have = sorted(str(k) for k in s.get_editor_property("ui_art").keys())
+    want = {"panel", "button", "arrow", "bar_health", "fill_health", "bar_mana", "fill_mana", "divider"}
+    out = []
+    yield from wait(0.6)
+    for i in range(len(s.heroes)):
+        yield from wait(0.6)                            # (the card fades in over 0.35 s)
+        # (and her weapons' and spells' pictures in their slots)
+        h = s.heroes[s.get_index()]; wi = {str(w.icon) for w in h.weapons}
+        d = hud_art(); out.append({"hero": str(s.get_hero_name()), "drawn": d, "weapon_icons": sorted(wi), "missing": sorted((want | wi | {"slot"}) - set(d))})
+        shot(f"menu_{out[-1]['hero']}"); yield from rwait(1.5)
+        yield from press("D", sim=sim)
+    yield from wait(0.5)
+    ok = want <= set(have) and all(not o["missing"] for o in out) and str(s.get_hero_name()) == out[0]["hero"]
+    step_result("menuui", ok, pieces=have, cards=out)
+def step_ui():
+    """(the dungeon) for each hero the status panel's board, the framed bars and their fills (mana only for those who have
+    it), the weapon slots with her weapons' pictures and the minimap's ring are drawn; with a speed potion and food in her
+    the effects' pictures; a container's item shows on the FOUND plaque with its picture; the open inventory has the board,
+    the dividers, the lit plate, the pictures of her weapons and of what she carries; a picture of each for the eye"""
+    g = G["gen"]; ua = g.get_editor_property("ui_art")
+    pieces = sorted(str(k) for k in ua.keys())
+    textures = all(ua[k].texture is not None for k in ua.keys())
+    item_icons = {str(i.name): str(i.icon) for i in g.get_editor_property("items")}
+    heroes = []
+    quiet(True)
+    for h in ("Warrior", "Mage", "Warlock", "Rogue"):
+        yield from switch(h); quiet(True); c = cb()
+        yield from wait(0.5)
+        icons = [str(w.icon) for w in g.get_editor_property("weapons")]
+        want = {"panel_wide", "bar_health", "fill_health", "slot", "minimap_ring"} | set(icons) | ({"bar_mana", "fill_mana"} if c.get_max_mana() > 0 else set())
+        d = hud_art()
+        heroes.append({"hero": h, "weapon_icons": icons, "drawn": d, "missing": sorted(want - set(d)),
+                       "mana_bar_without_mana": c.get_max_mana() <= 0 and "bar_mana" in d})
+        shot(f"hud_{h}"); yield from rwait(1.5)
+    # (the Rogue) a speed potion drunk and bread eaten: their pictures on the effect chips
+    c = cb(); c.set_health(c.get_max_health() * 0.5)
+    for n in ("Large Speed Potion", "Bread"): c.add_item(n, 1); c.use_item(n)
+    yield from wait(0.3)
+    chips = hud_art(); shot("chips"); yield from rwait(1.5)
+    # a container's item: FOUND on the plaque with the item's picture
+    s0 = g.get_section(unreal.IntPoint(0, 0)); found = None
+    for i in range(s0.get_num_containers()):
+        if str(g.loot_of(unreal.IntPoint(0, 0), i)) == "None" or s0.get_container_open_alpha(i) > 0.0: continue
+        f0 = g.items_found; s0.toggle_container(i); yield from wait(0.05)
+        if g.items_found > f0: found = str(g.last_found); break
+    yield from wait(0.6)
+    fd = hud_art(); shot("found"); yield from rwait(1.5)
+    found_ok = found is not None and "banner" in fd and item_icons.get(found, "None") in fd
+    # the inventory (it pauses the game: real time)
+    for n in ("Small Healing Potion", "Fish"): c.add_item(n, 1)
+    yield from press("I"); yield from rwait(0.5)
+    inv = hud_art(); shot("inventory"); yield from rwait(1.5)
+    carried = [str(n) for n in c.get_inventory_lines()]
+    want_inv = {"panel_wide", "divider", "button", "slot", "w_daggers", "w_crossbow", item_icons["Small Healing Potion"], item_icons["Fish"]}
+    yield from press("I")
+    quiet(False)
+    ok = (textures and not [x for x in heroes if x["missing"] or x["mana_bar_without_mana"]] and {"chip_speed", "chip_regen"} <= set(chips)
+          and found_ok and want_inv <= set(inv) and all(v != "None" for v in item_icons.values()))
+    step_result("ui", ok, pieces=pieces, textures=textures, item_icons=item_icons, heroes=heroes, chips=chips, found=found, found_drawn=fd,
+                inventory_drawn=inv, inventory_missing=sorted(want_inv - set(inv)), carried=carried)
+
+def step_menufirst():
+    """(828 started play on random_dungeonmagic_level4 itself, rd.HeroMenu 1) the dungeon played without ?Hero= opened its
+    menu: play is in random_dungeonmagic_level4_select, the menu's turntable is there, no dungeon generator; the menu
+    opens the dungeon with the hero chosen (the select step goes on from here)"""
+    yield from wait(0.5)
+    refresh()
+    s = G.get("sel"); world = G["w"].get_path_name().split(".")[-1]
+    cvar = unreal.SystemLibrary.get_console_variable_int_value("rd.HeroMenu")
+    # (what play began in, from the log: the editor's world copied for play last, and the generator's line after it; the
+    # editor world itself is not to be had from Python during play)
+    lines = open(os.path.join(unreal.Paths.project_log_dir(), "claude_ue5.log"), encoding="utf-8", errors="replace").read().splitlines()
+    made = [i for i, l in enumerate(lines) if "Created PIE world by copying editor world from" in l]
+    played = lines[made[-1]].split("editor world from ")[-1].split(".")[0].split("/")[-1] if made else None
+    menu_line = next((l.split("RDHERO ")[-1] for l in lines[made[-1]:] if "RDHERO no hero chosen" in l), None) if made else None
+    ok = (played == "random_dungeonmagic_level4" and menu_line is not None and world == "random_dungeonmagic_level4_select" and s is not None
+          and G.get("gen") is None and str(s.get_hero_name()) == "Warrior" and str(s.target_level).endswith("random_dungeonmagic_level4") and cvar == 1)
+    step_result("menufirst", ok, played=played, generator_said=menu_line, now_in=world, menu=s is not None, generator=G.get("gen") is not None,
+                shown=str(s.get_hero_name()) if s else None, target=str(s.target_level) if s else None, hero_menu_cvar=cvar)
+def step_map():
+    """(the dungeon) M opens the big map in the minimap's painted style: the board, the plaque, the compass, the key's
+    divider, no minimap ring; she walks with it open (W, a second); M closes it and the minimap's ring is back"""
+    g = G["gen"]; c = cb(); quiet(True)
+    # (at the start of a clear line across the great hall, facing along it: the walk meets nothing)
+    start, yaw, _ = clear_line()
+    if start is not None:
+        G["pawn"].set_actor_location(start, False, True); G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=yaw))
+    yield from wait(0.5)
+    before = hud_art()
+    yield from press("M"); yield from wait(0.4)
+    opened = bool(g.get_editor_property("map_open")); d = hud_art()
+    shot("map"); yield from rwait(1.5)
+    p0 = G["pawn"].get_actor_location(); c.set_run_mode(True)
+    c.simulate_key(key("W"), True); yield from wait(1.0); c.simulate_key(key("W"), False)
+    moved = (G["pawn"].get_actor_location() - p0).length()
+    shot("map_walked"); yield from rwait(1.5)
+    yield from press("M"); yield from wait(0.4)
+    closed = not g.get_editor_property("map_open"); after = hud_art()
+    quiet(False)
+    want = {"panel_wide", "banner", "compass", "divider"}
+    ok = ("minimap_ring" in before and opened and want <= set(d) and "minimap_ring" not in d and moved > 150.0 and closed and "minimap_ring" in after and "compass" not in after)
+    step_result("map", ok, opened=opened, drawn=d, missing=sorted(want - set(d)), walked_cm=round(moved), closed=closed, after=after)
+
 STEPS = {"select": step_select, "heroes": step_heroes, "inventory": step_inventory, "mana": step_mana, "bonus": step_bonus, "loot": step_loot,
-         "potions": step_potions, "food": step_food, "speed": step_speed, "noregen": step_noregen}
+         "potions": step_potions, "food": step_food, "speed": step_speed, "noregen": step_noregen, "menuui": step_menuui, "ui": step_ui,
+         "menufirst": step_menufirst, "map": step_map}
 def run():
     for s in PLAN:
         yield from STEPS[s]()

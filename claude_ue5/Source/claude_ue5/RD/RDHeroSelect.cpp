@@ -1,6 +1,8 @@
 #include "RD/RDHeroSelect.h"
 #include "RD/RDDungeonGenerator.h"
+#include "RD/RDUIArt.h"
 #include "Engine/Canvas.h"
+#include "Engine/Texture2D.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "Engine/World.h"
@@ -161,6 +163,11 @@ void ARDHeroSelectHUD::DrawHUD()
 	if (!Sel || !Sel->Heroes.IsValidIndex(Sel->GetIndex())) return;
 	const FRDHeroDef& H = Sel->Heroes[Sel->GetIndex()];
 	const float Sc = Canvas->ClipY / 1080.f, Now = GetWorld()->GetTimeSeconds();
+	// (the painted interface where the menu has it: the card's board, framed bars, dividers, plates for the names and
+	// START, the arrows)
+	ArtDrawn.Reset();
+	FRDUIDraw UI; UI.Hud = this; UI.Art = &Sel->UIArt; UI.Drawn = &ArtDrawn;
+	auto HeightPx = [&](FName Nm, float Hgt) { const FRDUIArt* Ar = UI.Find(Nm); return Ar ? Hgt / FMath::Max((float)Ar->Texture->GetSizeY(), 1.f) : 0.f; };
 	UFont* Small = GEngine->GetSmallFont();
 	UFont* Medium = GEngine->GetMediumFont();
 	const bool bPad = Sel->bUsingGamepad;
@@ -178,7 +185,7 @@ void ARDHeroSelectHUD::DrawHUD()
 	const FLinearColor Ac(H.Accent.R, H.Accent.G, H.Accent.B, Fade);
 	auto Ink = [&](const FLinearColor& C) { return FLinearColor(C.R, C.G, C.B, C.A * Fade); };
 	const FVector2D A(80.f * Sc, 160.f * Sc);
-	const float X = A.X + 34.f * Sc, Wd = 720.f * Sc - X - 30.f * Sc;
+	const float X = A.X + 34.f * Sc + (UI.Has(TEXT("panel")) ? 18.f * Sc : 0.f), Wd = 720.f * Sc - X - 30.f * Sc;     // (clear of the board's corner ornaments)
 	float Y = 0.f;
 	// (laid out twice: once to measure how tall the card is, then drawn on it)
 	bool bDraw = false;
@@ -192,8 +199,19 @@ void ARDHeroSelectHUD::DrawHUD()
 	// hit points and mana, as bars against the strongest of the heroes
 	float MaxHp = 1.f, MaxMp = 1.f;
 	for (const FRDHeroDef& O : Sel->Heroes) { MaxHp = FMath::Max(MaxHp, O.MaxHealth); MaxMp = FMath::Max(MaxMp, O.MaxMana); }
-	auto Bar = [&](const TCHAR* Label, float V, float Max, const FLinearColor& C, const FString& Note)
+	auto Bar = [&](const TCHAR* Label, float V, float Max, const FLinearColor& C, const FString& Note, FName Frame0, FName Fill0)
 	{
+		if (UI.Has(Frame0))
+		{
+			// (the painted frame, its fill as far as she has against the strongest)
+			const float Bh = 38.f * Sc;
+			Text(Label, Ink(RDHSDim), X, Y + 4.f * Sc, Small, Sc * 1.1f);
+			const FVector2D F0(X + 120.f * Sc, Y - 6.f * Sc), F1(X + Wd - 80.f * Sc, Y - 6.f * Sc + Bh);
+			if (bDraw) UI.Bar(Frame0, Fill0, F0, F1, HeightPx(Frame0, Bh), FMath::Clamp(V / Max, 0.f, 1.f), FLinearColor(1.f, 1.f, 1.f, Fade), FLinearColor(1.f, 1.f, 1.f, Fade));
+			Text(Note, Ink(RDHSInk), F1.X + 12.f * Sc, Y + 4.f * Sc, Small, Sc * 1.1f);
+			Y += 44.f * Sc;
+			return;
+		}
 		Text(Label, Ink(RDHSDim), X, Y, Small, Sc * 1.1f);
 		const FVector2D B0(X + 130.f * Sc, Y + 2.f * Sc), B1(X + Wd - 90.f * Sc, Y + 20.f * Sc);
 		Fill(B0, B1, FLinearColor(0.08f, 0.08f, 0.1f, 0.9f * Fade));
@@ -201,14 +219,34 @@ void ARDHeroSelectHUD::DrawHUD()
 		Text(Note, Ink(RDHSInk), B1.X + 12.f * Sc, Y, Small, Sc * 1.1f);
 		Y += 32.f * Sc;
 	};
-	Bar(TEXT("HIT POINTS"), H.MaxHealth, MaxHp, FLinearColor(0.25f, 0.75f, 0.3f), FString::Printf(TEXT("%.0f"), H.MaxHealth));
-	Bar(TEXT("MANA"), H.MaxMana, MaxMp, FLinearColor(0.2f, 0.42f, 0.95f), H.MaxMana > 0.f ? FString::Printf(TEXT("%.0f"), H.MaxMana) : FString(TEXT("none")));
+	Bar(TEXT("HIT POINTS"), H.MaxHealth, MaxHp, FLinearColor(0.25f, 0.75f, 0.3f), FString::Printf(TEXT("%.0f"), H.MaxHealth), TEXT("bar_health"), TEXT("fill_health"));
+	Bar(TEXT("MANA"), H.MaxMana, MaxMp, FLinearColor(0.2f, 0.42f, 0.95f), H.MaxMana > 0.f ? FString::Printf(TEXT("%.0f"), H.MaxMana) : FString(TEXT("none")), TEXT("bar_mana"), TEXT("fill_mana"));
+	// her other numbers on one line: the mana that comes back, her bonuses, the roll
+	{
+		TArray<TPair<FString, FString>> St;
+		if (H.MaxMana > 0.f) St.Add({ TEXT("MANA BACK"), FString::Printf(TEXT("%.1f a second"), H.ManaPerSecond) });
+		if (H.MeleeBonus > 0.f) St.Add({ TEXT("MELEE"), FString::Printf(TEXT("+%.0f%% damage"), H.MeleeBonus * 100.f) });
+		if (H.RangedBonus > 0.f) St.Add({ TEXT("RANGED"), FString::Printf(TEXT("+%.0f%% damage"), H.RangedBonus * 100.f) });
+		if (H.RollClip) St.Add({ TEXT("DODGE"), TEXT("roll") });
+		float Sx = X;
+		for (const TPair<FString, FString>& P : St)
+		{
+			Text(P.Key, Ink(RDHSDim), Sx, Y, Small, Sc * 1.05f); GetTextSize(P.Key, Tw, Th, Small, Sc * 1.05f); Sx += Tw + 8.f * Sc;
+			Text(P.Value, Ac, Sx, Y, Small, Sc * 1.05f); GetTextSize(P.Value, Tw, Th, Small, Sc * 1.05f); Sx += Tw + 28.f * Sc;
+		}
+		if (St.Num()) Y += 28.f * Sc;
+	}
 	Y += 14.f * Sc;
 	auto Section = [&](const TCHAR* Head)
 	{
 		Text(Head, Ac, X, Y, Small, Sc * 1.05f);
 		Y += 24.f * Sc;
-		Fill(FVector2D(X, Y - 3.f * Sc), FVector2D(X + Wd, Y - 2.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.35f * Fade));
+		if (UI.Has(TEXT("divider")))
+		{
+			// (at its own proportions: a stretch smears its middle gem)
+			if (bDraw) UI.Fit(TEXT("divider"), FVector2D(X - 6.f * Sc, Y - 16.f * Sc), FVector2D(X + Wd + 6.f * Sc, Y + 12.f * Sc), FLinearColor(1.f, 1.f, 1.f, Fade));
+		}
+		else Fill(FVector2D(X, Y - 3.f * Sc), FVector2D(X + Wd, Y - 2.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.35f * Fade));
 		Y += 6.f * Sc;
 	};
 	// (a line wrapped at the card's width)
@@ -233,13 +271,49 @@ void ARDHeroSelectHUD::DrawHUD()
 	}
 	Y += 10.f * Sc;
 	if (!H.Armour.IsEmpty()) { Section(TEXT("ARMOUR")); Wrapped(H.Armour, 0.f, Ink(RDHSInk)); Y += 10.f * Sc; }
-	if (!H.StartsWith.IsEmpty()) { Section(TEXT("STARTS WITH")); Wrapped(H.StartsWith, 0.f, Ink(RDHSInk)); }
+	if (!H.StartsWith.IsEmpty() || H.Weapons.Num() > 0)
+	{
+		Section(TEXT("STARTS WITH"));
+		if (!H.StartsWith.IsEmpty()) Wrapped(H.StartsWith, 0.f, Ink(RDHSInk));
+		// each weapon and spell: its picture in a slot (painted interface), its name, what a blow or a cast does with her bonus
+		const float Rh = 56.f * Sc;
+		for (const FRDWeaponDef& W : H.Weapons)
+		{
+			float Tx = X;
+			if (UI.Has(W.Icon))
+			{
+				if (bDraw)
+				{
+					const FVector2D S0(X, Y), S1(X + Rh, Y + Rh);
+					if (!UI.Fit(TEXT("slot"), S0, S1, FLinearColor(1.f, 1.f, 1.f, Fade))) { Rect(S0, S1, FLinearColor(0.03f, 0.035f, 0.05f, 0.8f * Fade)); Frame(S0, S1, Ink(RDHSLine), 1.f * Sc); }
+					UI.Fit(W.Icon, S0 + FVector2D(8.f * Sc), S1 - FVector2D(8.f * Sc), FLinearColor(1.f, 1.f, 1.f, Fade));
+				}
+				Tx = X + Rh + 14.f * Sc;
+			}
+			const float Bonus = !W.bSpell ? H.MeleeBonus : (W.BoltMesh ? H.RangedBonus : 0.f);
+			FString What = !W.bSpell ? FString::Printf(TEXT("%.0f damage a blow, reach %.1f m"), W.Damage * (1.f + Bonus), W.Reach / 100.f)
+			                         : FString::Printf(TEXT("%.0f damage a %s, flies %.0f m"), W.Damage * (1.f + Bonus), W.BoltMesh ? TEXT("bolt") : TEXT("cast"), W.Reach / 100.f);
+			if (W.ManaCost > 0.f) What += FString::Printf(TEXT(", %.0f mana"), W.ManaCost);
+			Text(W.Name.ToString().ToUpper(), Ink(RDHSInk), Tx, Y + 6.f * Sc, Small, Sc * 1.25f);
+			Text(What, Ink(RDHSDim), Tx, Y + 31.f * Sc, Small, Sc * 1.05f);
+			Y += Rh + 8.f * Sc;
+		}
+	}
 	};
 	Card();
 	const FVector2D B(720.f * Sc, FMath::Min(Y + 18.f * Sc, Canvas->ClipY - 170.f * Sc));
-	Rect(A, B, FLinearColor(0.03f, 0.035f, 0.05f, 0.82f));
-	Frame(A, B, RDHSLine, 2.f * Sc);
-	Rect(A, FVector2D(A.X + 6.f * Sc, B.Y), Ac);
+	if (const FRDUIArt* Pa = UI.Find(TEXT("panel")))
+	{
+		// (the painted board reaches beyond the card: its frame sits round the text)
+		const float Ext = 32.f * Sc;
+		UI.Nine(TEXT("panel"), A - FVector2D(Ext), B + FVector2D(Ext), Ext * 1.6f / FMath::Max((float)Pa->Border.X * Pa->Texture->GetSizeX(), 1.f));
+	}
+	else
+	{
+		Rect(A, B, FLinearColor(0.03f, 0.035f, 0.05f, 0.82f));
+		Frame(A, B, RDHSLine, 2.f * Sc);
+		Rect(A, FVector2D(A.X + 6.f * Sc, B.Y), Ac);
+	}
 	bDraw = true;
 	Card();
 	// ---- the heroes along the bottom (a click shows one), the arrows, START
@@ -251,8 +325,18 @@ void ARDHeroSelectHUD::DrawHUD()
 		const FRDHeroDef& O = Sel->Heroes[I];
 		const bool bOn = I == Sel->GetIndex();
 		const FVector2D P0(T0 + I * (Tb + Tg), Ty), P1 = P0 + FVector2D(Tb, Tbh);
-		Rect(P0, P1, bOn ? FLinearColor(O.Accent.R * 0.35f, O.Accent.G * 0.35f, O.Accent.B * 0.35f, 0.95f) : FLinearColor(0.04f, 0.045f, 0.06f, 0.85f));
-		Frame(P0, P1, bOn ? O.Accent : FLinearColor(0.40f, 0.38f, 0.34f), (bOn ? 3.f : 1.f) * Sc);
+		if (UI.Has(TEXT("button")))
+		{
+			// (the plate, lit in her colour when she is the one shown)
+			UI.Nine(TEXT("button"), P0, P1, HeightPx(TEXT("button"), Tbh),
+			        bOn ? FLinearColor(0.75f + O.Accent.R * 0.5f, 0.75f + O.Accent.G * 0.5f, 0.75f + O.Accent.B * 0.5f) : FLinearColor(0.55f, 0.55f, 0.55f));
+			if (bOn) Frame(P0 + FVector2D(2.f * Sc), P1 - FVector2D(2.f * Sc), O.Accent, 2.f * Sc);
+		}
+		else
+		{
+			Rect(P0, P1, bOn ? FLinearColor(O.Accent.R * 0.35f, O.Accent.G * 0.35f, O.Accent.B * 0.35f, 0.95f) : FLinearColor(0.04f, 0.045f, 0.06f, 0.85f));
+			Frame(P0, P1, bOn ? O.Accent : FLinearColor(0.40f, 0.38f, 0.34f), (bOn ? 3.f : 1.f) * Sc);
+		}
 		const FString Nm = O.Name.ToString().ToUpper();
 		GetTextSize(Nm, Tw, Th, Medium, Sc * 1.1f);
 		DrawText(Nm, bOn ? FLinearColor::White : RDHSDim, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.1f);
@@ -264,10 +348,14 @@ void ARDHeroSelectHUD::DrawHUD()
 		for (int32 K = 0; K < 2; ++K)
 		{
 			const FVector2D P0(K == 0 ? Ax0 : Ax1, Ty), P1 = P0 + FVector2D(56.f * Sc, Tbh);
-			Rect(P0, P1, FLinearColor(0.04f, 0.045f, 0.06f, 0.85f)); Frame(P0, P1, RDHSLine, 1.5f * Sc);
-			const TCHAR* G = K == 0 ? TEXT("<") : TEXT(">");
-			GetTextSize(G, Tw, Th, Medium, Sc * 1.4f);
-			DrawText(G, RDHSInk, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.4f);
+			// (the painted arrowhead points right: the left one is mirrored)
+			if (!UI.Fit(TEXT("arrow"), P0 - FVector2D(4.f * Sc), P1 + FVector2D(4.f * Sc), FLinearColor::White, K == 0))
+			{
+				Rect(P0, P1, FLinearColor(0.04f, 0.045f, 0.06f, 0.85f)); Frame(P0, P1, RDHSLine, 1.5f * Sc);
+				const TCHAR* G = K == 0 ? TEXT("<") : TEXT(">");
+				GetTextSize(G, Tw, Th, Medium, Sc * 1.4f);
+				DrawText(G, RDHSInk, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.4f);
+			}
 			AddHitBox(P0, P1 - P0, K == 0 ? FName(TEXT("Prev")) : FName(TEXT("Next")), true);
 		}
 	}
@@ -276,10 +364,21 @@ void ARDHeroSelectHUD::DrawHUD()
 		const FString St = FString::Printf(TEXT("START AS %s"), *H.Name.ToString().ToUpper());
 		GetTextSize(St, Tw, Th, Medium, Sc * 1.3f);
 		const float Pulse = 0.75f + 0.25f * FMath::Sin(Now * 3.f);
-		const FVector2D P1(Canvas->ClipX - 80.f * Sc, Canvas->ClipY - 170.f * Sc), P0 = P1 - FVector2D(Tw + 60.f * Sc, Th + 30.f * Sc);
-		Rect(P0, P1, FLinearColor(H.Accent.R * 0.45f * Pulse, H.Accent.G * 0.45f * Pulse, H.Accent.B * 0.45f * Pulse, 0.95f));
-		Frame(P0, P1, H.Accent, 3.f * Sc);
-		DrawText(St, FLinearColor::White, P0.X + 30.f * Sc, P0.Y + 15.f * Sc, Medium, Sc * 1.3f);
+		const float Wide = UI.Has(TEXT("button")) ? 50.f * Sc : 0.f;      // (the plate's rim and rivets want room)
+		const FVector2D P1(Canvas->ClipX - 80.f * Sc + Wide * 0.5f, Canvas->ClipY - 170.f * Sc + Wide * 0.25f), P0 = P1 - FVector2D(Tw + 60.f * Sc + Wide, Th + 30.f * Sc + Wide * 0.5f);
+		if (UI.Has(TEXT("button")))
+		{
+			UI.Nine(TEXT("button"), P0, P1, HeightPx(TEXT("button"), P1.Y - P0.Y),
+			        FLinearColor(0.6f + H.Accent.R * 0.6f * Pulse, 0.6f + H.Accent.G * 0.6f * Pulse, 0.6f + H.Accent.B * 0.6f * Pulse));
+			Frame(P0 + FVector2D(3.f * Sc), P1 - FVector2D(3.f * Sc), FLinearColor(H.Accent.R, H.Accent.G, H.Accent.B, 0.5f + 0.5f * Pulse), 2.f * Sc);
+		}
+		else
+		{
+			Rect(P0, P1, FLinearColor(H.Accent.R * 0.45f * Pulse, H.Accent.G * 0.45f * Pulse, H.Accent.B * 0.45f * Pulse, 0.95f));
+			Frame(P0, P1, H.Accent, 3.f * Sc);
+		}
+		if (Wide > 0.f) DrawText(St, FLinearColor(0.f, 0.f, 0.f, 0.8f), (P0.X + P1.X - Tw) * 0.5f + 2.f * Sc, (P0.Y + P1.Y - Th) * 0.5f + 2.f * Sc, Medium, Sc * 1.3f);
+		DrawText(St, FLinearColor::White, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.3f);
 		AddHitBox(P0, P1 - P0, TEXT("Start"), true);
 	}
 	// the keys

@@ -13,6 +13,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "RDTypes.h"
+#include "RDUIArt.h"
 #include "RDHUD.generated.h"
 
 class ARDDungeonGenerator;
@@ -32,8 +33,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float TacticalMapMeters = 110.f;
 
 	virtual void DrawHUD() override;
+	/** tests: the painted pieces (the generator's UIArt) drawn in the last frame */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FName> GetArtDrawn() const { return ArtDrawn; }
 
 private:
+	// ---- random_dungeonmagic_level4's painted interface (the generator's UIArt; none on the other levels: plain boxes)
+	FRDUIDraw UI;
+	TArray<FName> ArtDrawn;
+	/** a panel's painted board stretched round A..B (it reaches Ext beyond them: its frame sits round what is in it) */
+	bool Board(FName Name, const FVector2D& A, const FVector2D& B, float Sc, float Ext);
+	/** a painted piece stretched along A..B at the height of the box (its ends kept: a divider, a plaque) */
+	bool Strip(FName Name, const FVector2D& A, const FVector2D& B, const FLinearColor& Tint = FLinearColor::White);
+	/** the picture of her weapon I / of an item (NAME_None: none) */
+	FName WeaponIcon(int32 I) const;
+	FName ItemIcon(FName Item) const;
 	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Gen;
 	// ---- the tactical maps (generator bTacticalMaps)
 	/** a white disc whose alpha falls off to its rim (made in play): the minimap's feathered backdrop, the soft dots */
@@ -45,6 +58,9 @@ private:
 	void CacheTiles();
 	void DrawTacticalMinimap(float Sc, const FVector& L, float Yaw);
 	void DrawTacticalMap(float Sc, const FVector& L, float Yaw);
+	/** level 4's big map in the minimap's style: the painted board, its leather darkened by a vignette, the minimap's dark
+	 *  tiles and lit walls fading out toward the board, the plaque, the compass, the key (DrawTacticalMap without the art) */
+	void DrawPaintedMap(float Sc, const FVector& L, float Yaw);
 	void SoftDot(const FVector2D& P, float R, const FLinearColor& C);
 	void Star(const FVector2D& P, float R, const FLinearColor& C);
 	void Diamond(const FVector2D& P, float R, const FLinearColor& C);
