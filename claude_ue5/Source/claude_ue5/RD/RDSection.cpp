@@ -1551,14 +1551,28 @@ void ARDSection::ToggleContainer(int32 I)
 	M.Target = M.Target > 0.5f ? 0.f : 1.f;
 	if (Containers.IsValidIndex(M.Partner)) Containers[M.Partner].Target = M.Target;
 	if (Generator) Generator->PlaySoundAt(M.Target > 0.5f ? TEXT("Env.ChestOpen") : TEXT("Env.ChestClose"), M.Center);
-	// (random_dungeonmagic_level4: what it holds is found the first time it is opened; a wardrobe's two doors are one container)
-	const bool bFirst = M.Target > 0.5f && !M.bLooted && !(Containers.IsValidIndex(M.Partner) && Containers[M.Partner].bLooted);
+	// (what it holds is found the first time it is opened, and never again: the generator keeps which were looted, also
+	// over a section dropped and generated again; a wardrobe's two doors are one container)
+	const bool bFirst = M.Target > 0.5f && !IsContainerLooted(I);
 	if (bFirst)
 	{
 		M.bLooted = true;
-		const int32 Key = Containers.IsValidIndex(M.Partner) ? FMath::Min(I, M.Partner) : I;
-		if (Generator) Generator->OnContainerOpened(this, Key, M.Center);
+		const int32 Key = ContainerKey(I);
+		if (Generator) { Generator->MarkContainerLooted(Coord, Key); Generator->OnContainerOpened(this, Key, M.Center); }
 	}
+}
+
+int32 ARDSection::ContainerKey(int32 I) const
+{
+	return Containers.IsValidIndex(I) && Containers.IsValidIndex(Containers[I].Partner) ? FMath::Min(I, Containers[I].Partner) : I;
+}
+
+bool ARDSection::IsContainerLooted(int32 I) const
+{
+	if (!Containers.IsValidIndex(I)) return false;
+	const FMover& M = Containers[I];
+	if (M.bLooted || (Containers.IsValidIndex(M.Partner) && Containers[M.Partner].bLooted)) return true;
+	return Generator && Generator->IsContainerLooted(Coord, ContainerKey(I));
 }
 
 FVector ARDSection::GetDoorLocation(int32 I) const { return Doors.IsValidIndex(I) ? Doors[I].Center : FVector::ZeroVector; }

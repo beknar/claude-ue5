@@ -1,6 +1,81 @@
 #include "RDUIArt.h"
 #include "GameFramework/HUD.h"
 #include "Engine/Texture2D.h"
+#include "Engine/Font.h"
+#include "Engine/FontFace.h"
+#include "Fonts/CompositeFont.h"
+
+// (a label in small capitals: each word of three letters or more that is written in capitals keeps its first and lowers
+// the rest, which the small-capitals face draws as small capitals; "HP", "N" and the numbers stay as they are)
+static FString RDUISmallCaps(const FString& S)
+{
+	FString O = S;
+	int32 I = 0;
+	while (I < O.Len())
+	{
+		int32 J = I;
+		while (J < O.Len() && FChar::IsAlpha(O[J])) ++J;
+		if (J - I >= 3)
+		{
+			bool bUpper = true;
+			for (int32 K = I; K < J; ++K) bUpper &= FChar::IsUpper(O[K]);
+			if (bUpper) for (int32 K = I + 1; K < J; ++K) O[K] = FChar::ToLower(O[K]);
+		}
+		I = FMath::Max(J, I + 1);
+		while (I < O.Len() && !FChar::IsAlpha(O[I])) ++I;
+	}
+	return O;
+}
+
+UFont* FRDUIDraw::Pick(UFont* Engine, float K, ERDType Role, float& OutK, FString& InOutS, float& OutRaise) const
+{
+	OutK = K; OutRaise = 0.f;
+	if (!Fonts || !FontCache || !Engine || !Hud) return Engine;
+	static const FName Names[3] = { FName(TEXT("text")), FName(TEXT("label")), FName(TEXT("title")) };
+	const FRDUIFont* F = Fonts->Find(Names[(int32)Role]);
+	if (!F || !F->Face) return Engine;
+	// (the tests read what was drawn: "font_title" and so on, as the pieces)
+	static const FName Notes[3] = { FName(TEXT("font_text")), FName(TEXT("font_label")), FName(TEXT("font_title")) };
+	Note(Notes[(int32)Role]);
+	if (Role == ERDType::Label) InOutS = RDUISmallCaps(InOutS);
+	// (the size the engine font would have at K, in this face's points)
+	const float Want = (float)FMath::Max(Engine->LegacyFontSize, 1) * K * FMath::Max(F->Size, 0.1f);
+	const int32 Pt = FMath::Clamp(FMath::RoundToInt(Want), 4, 160);
+	TObjectPtr<UFont>& Ft = FontCache->FindOrAdd((int32)Role * 1000 + Pt);
+	if (!Ft)
+	{
+		UFont* N = NewObject<UFont>(Hud);
+		N->FontCacheType = EFontCacheType::Runtime;
+		N->LegacyFontSize = Pt;
+		FTypefaceEntry E(TEXT("Regular"));
+		E.Font = FFontData(F->Face.Get());
+		N->GetMutableInternalCompositeFont().DefaultTypeface.Fonts.Add(E);
+		Ft = N;
+	}
+	OutK = Want / (float)Pt;
+	// (the engine font's em in pixels at K: a font's points are pixels at 96 dots an inch)
+	OutRaise = F->Lift * (float)FMath::Max(Engine->LegacyFontSize, 1) * K * (96.f / 72.f);
+	return Ft;
+}
+
+void FRDUIDraw::Text(const FString& S, const FLinearColor& C, float X, float Y, UFont* Engine, float K, ERDType Role) const
+{
+	if (!Hud) return;
+	FString T = S; float Kd, Up;
+	UFont* F = Pick(Engine, K, Role, Kd, T, Up);
+	Hud->DrawText(T, C, X, Y - Up, F, Kd);
+}
+
+void FRDUIDraw::TextSize(const FString& S, float& OutW, float& OutH, UFont* Engine, float K, ERDType Role) const
+{
+	OutW = OutH = 0.f;
+	if (!Hud) return;
+	FString T = S; float Kd, Up;
+	UFont* F = Pick(Engine, K, Role, Kd, T, Up);
+	Hud->GetTextSize(T, OutW, OutH, F, Kd);
+	// (the line as tall as the engine font's: the layouts were made for it, and Lift puts the capitals where its are)
+	if (F != Engine) { float Ew; Hud->GetTextSize(S, Ew, OutH, Engine, K); }
+}
 
 const FRDUIArt* FRDUIDraw::Find(FName Name) const
 {

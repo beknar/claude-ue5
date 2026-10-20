@@ -53,7 +53,16 @@ generator and measures what happens. Plan = comma separated steps:
             at her left hand, the bolt leaves from it; right after, the sword swings
   tier      the section east of the start is generated: its monsters are on a par with her (hit points ~ hers, damage
             ~ her average blow)
-Writes SourceArt/random_dungeon_magic[2|3]/test_<tag>.json and logs "RDMTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
+  face      (a level with a face: random_dungeonmagic_level5, the Summoner) her face measured where it shows: the level's
+            face camera (RDM5_FaceCam, 834) is put in front of her face and captures only her; each expression channel held
+            alone (SetManual) must set its morph targets and patches to the channel's numbers and change the picture (her
+            idle stopped, the colour as painted: unlit) against her face at rest (how much of the face changed, against two pictures at rest: the noise); each morph target alone
+            must change the picture too (a weight says nothing about whether the face moved); then the occasions: hurt (her
+            cry: Pain in, then out), a cast (Focus), the start of a fight (a monster after her: Anger, held, gone when it
+            leaves her), low hit points (Fear held, gone when they come back), death (Dead: eyes shut), and blinks over
+            twelve quiet seconds (the eyes' patch fully on and off again). The pictures go to Saved/FaceTest/<tag>
+            (face_<tag>_<channel>.png) for the eye.
+Writes SourceArt/random_dungeon_magic[2|3|5]/test_<tag>.json and logs "RDMTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os
 __keep__ = True
 TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
@@ -68,7 +77,10 @@ LEVELS = {"random_dungeonmagic_level": {"pawn": "BP_RDM_CasterCharacter_C", "mes
                                          "plan": "setup,keys,pad,hair,walls,cast,dual,nothing,far,kill:2,sword:2,tier"},
           "random_dungeonmagic_level3": {"pawn": "BP_RDM3_RogueCharacter_C", "mesh": "SK_JRPG_Rogue", "ch": "Rogue", "dual": False, "rogue": True, "out": "random_dungeon_magic3",
                                          "bps": ("/Game/JRPG/Game/BP_JRPGRogueCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM3_RogueCharacter"), "cast_keys": ("LeftMouseButton",),
-                                         "plan": "setup,weapons,keys,pad,walls,cast,nothing,far,kill:2,daggers:2,roll,dodge,tier"}}
+                                         "plan": "setup,weapons,keys,pad,walls,cast,nothing,far,kill:2,daggers:2,roll,dodge,tier"},
+          "random_dungeonmagic_level5": {"pawn": "BP_RDM5_SummonerCharacter_C", "mesh": "SK_JRPG_Summoner", "ch": "Summoner", "dual": False, "out": "random_dungeon_magic5",
+                                         "bps": ("/Game/JRPG/Game/BP_JRPGSummonerCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM5_SummonerCharacter"), "cast_keys": ("E", "LeftMouseButton"),
+                                         "plan": "setup,keys,pad,walls,cast,nothing,far,kill:3,tier,face"}}
 LV = LEVELS[w.get_path_name().split(".")[-1].replace("UEDPIE_0_", "")]
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "all" else LV["plan"]).split(",") if s.strip()]
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\" + LV["out"]
@@ -677,8 +689,114 @@ def step_walls():
     step_result("walls", ok, **r, without_backing={k: r0[k] for k in ("segments", "rays", "face", "hole", "leak")}, walk_in=wi, fall=fl, cells=ce)
     c.revive(True); c.set_scripted_only(False)
 
+def step_face():
+    """her face, measured in pictures of it: each channel and each morph target alone changes it; the occasions show theirs"""
+    gen = G["gen"]; p = G["pawn"]; c = cb()
+    f = p.get_component_by_class(unreal.RDFaceComponent)
+    cams = [a for a in GS.get_all_actors_of_class(G["w"], unreal.SceneCapture2D) if a.actor_has_tag("RDM5_FaceCam")]
+    assert f is not None and cams, "no face component on her or no RDM5_FaceCam in the level"
+    cam = cams[0]; cc = cam.capture_component2d; rt = cc.texture_target
+    cc.set_editor_property("primitive_render_mode", unreal.SceneCapturePrimitiveRenderMode.PRM_USE_SHOW_ONLY_LIST)
+    cc.show_only_actor_components(p, True)
+    aggro = (gen.get_editor_property("aggro_distance"), gen.get_editor_property("lose_distance"))
+    gen.set_editor_property("aggro_distance", 0.0); gen.set_editor_property("lose_distance", 1.0)
+    s0 = gen.get_start_room_center(); p.set_actor_location(V(s0.x, s0.y, 100), False, True); p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=0), True)
+    f.set_editor_property("blink", False); f.clear_manual()
+    # (still pictures: her idle stopped and the colour as painted, unlit: the idle and the torches' flicker changed two
+    # pictures of her at rest by 3 %, as much as some expressions)
+    p.mesh.set_editor_property("global_anim_rate_scale", 0.0)
+    cc.set_editor_property("capture_source", unreal.SceneCaptureSource.SCS_BASE_COLOR)
+    yield from wait(1.2)
+    outdir = os.path.join(unreal.Paths.project_saved_dir(), "FaceTest", TAG); os.makedirs(outdir, exist_ok=True)      # (test pictures: not in SourceArt)
+    def shoot(name=None):
+        h = p.mesh.get_socket_location("head"); fw = p.get_actor_forward_vector()
+        at = V(h.x + fw.x * 9, h.y + fw.y * 9, h.z + 6)                     # (the face: in front of the head bone, a little up)
+        loc = V(at.x + fw.x * 62, at.y + fw.y * 62, at.z + 2)
+        cam.set_actor_location(loc, False, True); cam.set_actor_rotation(ML.find_look_at_rotation(loc, at), True)
+        cc.capture_scene()
+        px = unreal.RenderingLibrary.read_render_target(G["w"], rt)
+        if name: unreal.RenderingLibrary.export_render_target(G["w"], rt, outdir, f"face_{TAG}_{name}")
+        return [(q.r, q.g, q.b) for q in px]
+    def changed(a, b, thr=18):
+        n = sum(1 for x, y in zip(a, b) if abs(x[0] - y[0]) + abs(x[1] - y[1]) + abs(x[2] - y[2]) > thr)
+        return n / max(len(a), 1)
+    def settle(sec=0.25):
+        yield from wait(sec)
+    rest = shoot("rest"); yield from settle(0.2); rest2 = shoot()
+    noise = changed(rest, rest2)
+    lit = sum(1 for q in rest if q[0] + q[1] + q[2] > 60) / len(rest)
+    chans = {str(x.name): x for x in gen.get_editor_property("face_channels")}
+    out = {}; bad = []
+    for name, ch in chans.items():
+        f.set_manual(name, 1.0); yield from settle()
+        img = shoot(name)
+        morphs = {str(k): round(f.get_morph_weight(k), 3) for k in ch.morphs.keys()}; params = {str(k): round(f.get_param_value(k), 3) for k in ch.params.keys()}
+        want_m = {str(k): min(1.0, v) for k, v in ch.morphs.items()}; want_p = {str(k): min(1.0, v) for k, v in ch.params.items()}
+        ok_n = all(abs(morphs[k] - want_m[k]) < 0.02 for k in morphs) and all(abs(params[k] - want_p[k]) < 0.02 for k in params)
+        frac = changed(rest, img)
+        out[name] = {"face_changed": round(frac, 4), "morphs": morphs, "params": params, "numbers_ok": ok_n}
+        if not ok_n or frac < max(0.01, noise * 4): bad.append(name)
+        f.set_manual(name, 0.0); yield from settle()
+    # each morph target alone (a channel of its own, for the test)
+    morph_names = sorted({str(k) for x in chans.values() for k in x.morphs.keys()})
+    keep = list(f.get_editor_property("channels")); alone = {}
+    for m in morph_names:
+        t = unreal.RDFaceChannel(); t.set_editor_property("name", "Test_" + m); t.set_editor_property("morphs", {m: 1.0})
+        f.set_editor_property("channels", keep + [t]); f.set_manual("Test_" + m, 1.0); yield from settle()
+        img = shoot("morph_" + m); frac = changed(rest, img, 10)
+        alone[m] = {"weight": round(f.get_morph_weight(m), 3), "face_changed": round(frac, 4)}
+        if frac < max(0.002, noise * 2): bad.append("morph " + m)
+        f.set_manual("Test_" + m, 0.0); yield from settle()
+    f.set_editor_property("channels", keep); yield from settle()
+    p.mesh.set_editor_property("global_anim_rate_scale", 1.0)
+    # the occasions
+    occ = {}
+    def peak(chname, sec):
+        best = 0.0; t0 = now()
+        while now() - t0 < sec:
+            best = max(best, f.get_channel_weight(chname)); yield
+        occ.setdefault("_peaks", {})[chname] = round(best, 3)
+    c.apply_damage(4.0, None); yield from peak("Pain", 0.5); hurt_peak = occ["_peaks"]["Pain"]; yield from wait(1.2); hurt_after = f.get_channel_weight("Pain")
+    occ["hurt"] = {"peak": hurt_peak, "after_1.7s": round(hurt_after, 3)}
+    c.set_health(c.get_max_health()); yield from wait(0.3)
+    c.start_attack(); yield from peak("Focus", 0.7); occ["cast"] = {"peak": occ["_peaks"]["Focus"]}
+    yield from wait(1.2)
+    c.set_health(c.get_max_health() * 0.2); yield from wait(1.6); low = f.get_channel_weight("Fear")
+    c.set_health(c.get_max_health()); yield from wait(1.8); low_after = f.get_channel_weight("Fear")
+    occ["low_health"] = {"held": round(low, 3), "after_recovery": round(low_after, 3)}
+    # a fight: a monster of the start section after her, near her
+    gen.set_editor_property("aggro_distance", aggro[0]); gen.set_editor_property("lose_distance", aggro[1])
+    ms = start_monsters(); fight = {"monster": None}
+    if ms and stand_off(ms[0], 700.0):
+        t0 = now()
+        while now() - t0 < 4.0 and not ms[0].is_aggro(): yield
+        yield from wait(1.0); fight = {"monster": str(ms[0].monster_name), "aggro": bool(ms[0].is_aggro()), "anger": round(f.get_channel_weight("Anger"), 3)}
+        gen.set_editor_property("aggro_distance", 0.0); gen.set_editor_property("lose_distance", 1.0)
+        p.set_actor_location(V(s0.x, s0.y, 100), False, True); yield from wait(2.5)
+        fight["anger_after_it_left"] = round(f.get_channel_weight("Anger"), 3); fight["its_aggro_after"] = bool(ms[0].is_aggro())
+    else: gen.set_editor_property("aggro_distance", 0.0); gen.set_editor_property("lose_distance", 1.0)
+    occ["fight"] = fight
+    c.set_health(c.get_max_health()); yield from wait(0.5)
+    c.apply_damage(1000.0, None); yield from wait(0.8)
+    occ["death"] = {"dead": round(f.get_channel_weight("Dead"), 3), "eyes_shut": round(f.get_param_value("EyesClosed"), 3)}
+    c.revive(True); yield from wait(1.5); occ["after_revive_dead"] = round(f.get_channel_weight("Dead"), 3)
+    # blinks over quiet seconds
+    p.set_actor_location(V(s0.x, s0.y, 100), False, True)
+    f.set_editor_property("blink", True); b0 = f.get_blinks(); top = 0.0; low_ = 1.0; t0 = now()
+    while now() - t0 < 12.0:
+        v = f.get_param_value("EyesClosed"); top = max(top, v); low_ = min(low_, v); yield
+    occ["blinks"] = {"in_12s": f.get_blinks() - b0, "eyes_shut_most": round(top, 3), "least": round(low_, 3)}
+    counts = {str(k): v for k, v in f.get_cue_counts().items()}
+    gen.set_editor_property("aggro_distance", aggro[0]); gen.set_editor_property("lose_distance", aggro[1])
+    cam.set_actor_location(V(0, 0, -5000), False, True)
+    ok_occ = (hurt_peak > 0.8 and hurt_after < 0.05 and occ["cast"]["peak"] > 0.8 and low > 0.6 and low_after < 0.05 and fight.get("anger", 0) > 0.5
+              and fight.get("anger_after_it_left", 1) < 0.1 and occ["death"]["dead"] > 0.9 and occ["death"]["eyes_shut"] > 0.9 and occ["after_revive_dead"] < 0.05
+              and occ["blinks"]["in_12s"] >= 2 and occ["blinks"]["eyes_shut_most"] > 0.9 and occ["blinks"]["least"] < 0.05)
+    ok = not bad and ok_occ and lit > 0.05 and len(chans) >= 8
+    step_result("face", ok, channels=out, morphs_alone=alone, occasions=occ, cue_counts=counts, rest_noise=round(noise, 4), face_lit_share=round(lit, 3), failed=bad, pictures=outdir)
+
 STEPS = {"setup": step_setup, "keys": step_keys, "pad": step_pad, "hair": step_hair, "walls": step_walls, "cast": step_cast, "nothing": step_nothing, "far": step_far, "kill": step_kill, "tier": step_tier, "sword": step_sword, "dual": step_dual,
-         "daggers": step_sword, "weapons": step_weapons, "roll": step_roll, "dodge": step_dodge}
+         "daggers": step_sword, "weapons": step_weapons, "roll": step_roll, "dodge": step_dodge, "face": step_face}
 def run():
     for s in PLAN:
         name, _, arg = s.partition(":")

@@ -27,7 +27,10 @@ what the inventory says, and the inventory itself while she has it open (as the 
 Level 4 with its painted interface (the sixth argument: rdm4_ui_cut.py --export's folder, which 830 imported): the
 status panel, its bars and weapon slots, the effect chips, the minimap's ring, the FOUND plaque and the inventory are
 drawn with the painted pieces where the game's HUD draws them (rdm4_ui_draw.py: the same stretch rules as ARDHUD), and
-while the big map is open (the record's "mapo") it is drawn as ARDHUD::DrawPaintedMap draws it, the minimap off.
+while the big map is open (the record's "mapo") it is drawn as ARDHUD::DrawPaintedMap draws it, the minimap off. Its
+lettering is the game's (rdm4_fonts.py's files, the roles of ARDHUD's FRDUIDraw::Text): Cinzel for titles, names, keys and
+numbers standing alone, Alegreya for the text, Alegreya SC for labels ("MANA BACK" written "Mana Back": sc()); the reel's
+own captions follow the same roles. The other levels keep Segoe UI.
 Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1, 2, 3 or 4] [level 4: hero] [level 4: ui art dir]"""
 import sys, os, re, json, glob, math
 from PIL import Image, ImageDraw, ImageFont
@@ -137,6 +140,22 @@ def font(name, size):
 f_title, f_sub, f_head, f_line, f_small, f_tiny, f_key, f_num, f_ban = (font("segoeuib.ttf", 40), font("segoeui.ttf", 24), font("seguisb.ttf", 30), font("segoeui.ttf", 24), font("seguisb.ttf", 17),
                                                                       font("seguisb.ttf", 14), font("segoeuib.ttf", 34), font("segoeuib.ttf", 30), font("seguisb.ttf", 30))
 f_note = font("seguisym.ttf", 24)                 # (the note sign of the heard lines: not in Segoe UI itself)
+# ---- level 4 with its painted interface: the game's lettering (sizes as the HUD's: Alegreya a tenth larger than the
+# Segoe UI it replaces, for the same x-height; Cinzel's capitals are as tall)
+FD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic4", "fonts")
+LETTERS = bool(UI) and os.path.exists(os.path.join(FD, "Cinzel-700.ttf"))
+def lfont(fn, size): return ImageFont.truetype(os.path.join(FD, fn + ".ttf"), int(size * K))
+def sc(s):
+    """a label for the small-capitals face (FRDUIDraw's RDUISmallCaps): a word of three letters or more written in capitals
+    keeps its first and lowers the rest"""
+    if not LETTERS: return s
+    return re.sub(r"[^\W\d_]{3,}", lambda m: m.group(0)[0] + m.group(0)[1:].lower() if m.group(0).isupper() else m.group(0), s)
+if LETTERS:
+    f_title, f_head, f_num, f_ban = lfont("Cinzel-700", 40), lfont("Cinzel-700", 30), lfont("Cinzel-700", 30), lfont("Cinzel-700", 30)
+    f_sub, f_line, f_small, f_tiny = lfont("Alegreya-500", 26), lfont("Alegreya-500", 26), lfont("Alegreya-500", 19), lfont("Alegreya-500", 15.5)
+    fl_small, fl_tiny, ft_small, ft_tiny = lfont("AlegreyaSC-700", 18), lfont("AlegreyaSC-700", 15), lfont("Cinzel-700", 17), lfont("Cinzel-700", 14)
+else:
+    fl_small, fl_tiny, ft_small, ft_tiny = f_small, f_tiny, f_small, f_tiny
 def fade(t, t0, t1, fin=0.35, fout=0.5):
     if t < t0 or t > t1: return 0.0
     return min(1.0, (t - t0) / fin, (t1 - t) / fout)
@@ -292,7 +311,7 @@ def tactical(o, r, t, maps, disc, cx, cy, R, half, ua, under=None):
     tri = [(cx + fx * s_, cy + fy * s_), (cx - fx * s_ * 0.6 - fy * s_ * 0.6, cy - fy * s_ * 0.6 + fx * s_ * 0.6), (cx - fx * s_ * 0.6 + fy * s_ * 0.6, cy - fy * s_ * 0.6 - fx * s_ * 0.6)]
     d.polygon(tri, fill=lin((1.0, 0.47, 0.67), ua)); d.line(tri + [tri[0]], fill=(255, 255, 255, int(255 * ua)), width=2 * K)
     ink = lin((0.75, 0.77, 0.8), 0.85 * ua)
-    d.text((cx, cy - R * 0.98), "N", font=f_small, fill=ink, anchor="ma")
+    d.text((cx, cy - R * 0.98), "N", font=ft_small, fill=ink, anchor="ma")
     rooms = sum(1 for m in maps.values() for q in m["rects"] if not q[5]); seen = sum(1 for c, m in maps.items() for i, q in enumerate(m["rects"]) if not q[5] and i in disc.get(c, set()))
     d.text((cx, cy + max(R * 0.96, under or 0)), "%d / %d rooms    M  map" % (seen, rooms), font=f_small, fill=ink, anchor="ma")
 def blend_box(o, box, radius, fill, outline=None, width=0):
@@ -304,6 +323,14 @@ def blend_box(o, box, radius, fill, outline=None, width=0):
     ImageDraw.Draw(small, "RGBA").rounded_rectangle((0, 0, x1 - x0, y1 - y0), radius, fill=fill, outline=outline, width=width)
     o.alpha_composite(small, (x0, y0))
 VIGNETTE = {}
+# (the rooms' names as ARDDungeonGenerator::KindName gives them, by the kind the record holds; the face of the labels)
+ROOM_NAMES = {"HALL": "Great hall", "BARRACKS": "Barracks", "PRISON": "Prison cells", "TORTURE": "Torture chamber", "STOREROOM": "Storeroom", "ARMORY": "Armory",
+              "KITCHEN": "Kitchen", "LIBRARY": "Library", "CHAPEL": "Chapel", "CRYPT": "Crypt", "TREASURY": "Treasury", "GUARD_ROOM": "Guard room", "FORGE": "Forge"}
+ROOM_FONTS = {}
+def lfont_room(sz):
+    k = round(sz, 1)
+    if k not in ROOM_FONTS: ROOM_FONTS[k] = lfont("AlegreyaSC-700", k) if LETTERS else font("seguisb.ttf", k)
+    return ROOM_FONTS[k]
 def painted_map(o, r, t, maps, disc, ua):
     """ARDHUD::DrawPaintedMap (level 4, the big map open): the wide board round a 900 x 880 area in the middle, its leather
     darkened by the minimap's feathered disc stretched over the area, the minimap's tiles (snapped to whole pixels) and lit
@@ -365,6 +392,29 @@ def painted_map(o, r, t, maps, disc, ua):
             on_x = abs(dx_ / TS - round(dx_ / TS)) < abs(dy_ / TS - round(dy_ / TS))
             hv = (0.0, TS * 0.36) if on_x else (TS * 0.36, 0.0)
             d.line((ToS(dx_ - hv[0], dy_ - hv[1]), ToS(dx_ + hv[0], dy_ + hv[1])), fill=lin((1.0, 0.90, 0.50), 0.9 * a * ua), width=max(1, int(2.5 * K)))
+    # the names of the rooms she has found (ARDHUD::DrawPaintedMap): the labels' small capitals in the middle of each room,
+    # on two lines when one is too wide, smaller when that is too, left out when nothing fits; faded toward the board
+    for c, m in maps.items():
+        seen = disc.get(c, set())
+        for i, q in enumerate(m["rects"]):
+            if i not in seen or q[5] or q[4] == "JUNCTION": continue
+            qa, qb = ToS(q[0] * TS, q[1] * TS), ToS(q[2] * TS, q[3] * TS)
+            lo, hi = (min(qa[0], qb[0]), min(qa[1], qb[1])), (max(qa[0], qb[0]), max(qa[1], qb[1])); mx, my = (lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2
+            a = fade_(mx, my)
+            if not (A_[0] <= mx <= B_[0] and A_[1] <= my <= B_[1]) or a < 0.25: continue
+            lines = [sc(ROOM_NAMES.get(q[4], q[4].replace("_", " ")).upper())]; rw, rh_ = hi[0] - lo[0] - 10 * K, hi[1] - lo[1] - 6 * K
+            sz = 18.0
+            if d.textlength(lines[0], font=lfont_room(sz)) > rw and " " in lines[0]: lines = lines[0].split(" ", 1)
+            for _ in range(5):
+                f_ = lfont_room(sz)
+                if max(d.textlength(x, font=f_) for x in lines) <= rw and f_.size * 1.2 * len(lines) <= rh_: break
+                sz *= 0.88
+            f_ = lfont_room(sz)
+            if max(d.textlength(x, font=f_) for x in lines) > rw or f_.size * 1.2 * len(lines) > rh_: continue
+            lh = f_.size * 1.05; y0 = my - lh * (len(lines) - 1) / 2
+            for j, x in enumerate(lines):
+                d.text((mx + 1.5 * K, y0 + j * lh + 1.5 * K), x, font=f_, fill=(0, 0, 0, int(215 * a * ua)), anchor="mm")
+                d.text((mx, y0 + j * lh), x, font=f_, fill=lin((0.90, 0.82, 0.62), a * ua), anchor="mm")
     def poly(pts, c, edge):
         d.polygon(pts, fill=lin(c, ua)); d.line(pts + [pts[0]], fill=lin(edge, ua), width=max(1, int(1.2 * K)))
     def star(x, y, s_, c): poly([(x + math.cos(-math.pi / 2 + j * math.pi / 5) * (s_ if j % 2 == 0 else s_ * 0.45), y + math.sin(-math.pi / 2 + j * math.pi / 5) * (s_ if j % 2 == 0 else s_ * 0.45)) for j in range(10)], c, (1.0, 0.97, 0.8))
@@ -395,11 +445,11 @@ def painted_map(o, r, t, maps, disc, ua):
     d.text((cx + 2 * K, (t0[1] + t1[1]) / 2 + 2 * K), title, font=f_head, fill=(0, 0, 0, int(200 * ua)), anchor="mm"); d.text((cx, (t0[1] + t1[1]) / 2), title, font=f_head, fill=gold, anchor="mm")
     cz = 118 * K
     if UI.fit(o, "compass", (B_[0] - 40 * K - cz, A_[1] + 46 * K), (B_[0] - 40 * K, A_[1] + 46 * K + cz), (1, 1, 1, ua)):
-        d = ImageDraw.Draw(o, "RGBA"); d.text((B_[0] - 40 * K - cz / 2, A_[1] + 45 * K), "N", font=f_small, fill=gold, anchor="md")
+        d = ImageDraw.Draw(o, "RGBA"); d.text((B_[0] - 40 * K - cz / 2, A_[1] + 45 * K), "N", font=ft_small, fill=gold, anchor="md")
     x, y = A_[0] + 44 * K, B_[1] - 166 * K
-    d.text((x - 6 * K, y - 30 * K), "KEY", font=f_small, fill=gold)
+    d.text((x - 6 * K, y - 30 * K), sc("KEY"), font=fl_small, fill=gold)
     if UI.fit(o, "divider", (x - 14 * K, y - 14 * K), (x + 200 * K, y + 2 * K), (1, 1, 1, ua)): d = ImageDraw.Draw(o, "RGBA")
-    for kind, what in ((0, "monster"), (1, "elite"), (2, "unopened chest or trunk"), (3, "unexplored passage"), (4, "door")):
+    for kind, what in ((0, "monster"), (1, "elite"), (2, "unlooted chest or trunk"), (3, "unexplored passage"), (4, "door")):
         mx, my = x + 6 * K, y + 10 * K
         if kind == 0: soft(mx, my, 5.5 * K, TAC["red"], 1.0)
         elif kind == 1: tri(mx, my, 7.5 * K, TAC["elite"])
@@ -408,7 +458,7 @@ def painted_map(o, r, t, maps, disc, ua):
         else: d.line(((mx - 7 * K, my), (mx + 7 * K, my)), fill=lin((1.0, 0.90, 0.50), ua), width=int(2.5 * K))
         d.text((x + 24 * K, y), what, font=f_small, fill=ink); y += 23 * K
     rooms = sum(1 for m in maps.values() for q in m["rects"] if not q[5]); seen = sum(1 for c, m in maps.items() for i, q in enumerate(m["rects"]) if not q[5] and i in disc.get(c, set()))
-    d.text((cx, B_[1] - 34 * K), "%d / %d rooms found        M  close" % (seen, rooms), font=f_small, fill=ink, anchor="ma")
+    d.text((cx, B_[1] - 34 * K), "%d / %d rooms found      Arrows  scroll      C  centre      M  close" % (seen, rooms), font=f_small, fill=ink, anchor="ma")
 def axes(r):
     p, y, ro = (math.radians(v) for v in r); cp, sp, cy, sy, cr, sr = math.cos(p), math.sin(p), math.cos(y), math.sin(y), math.cos(ro), math.sin(ro)
     return (cp * cy, cp * sy, sp), (sr * sp * cy - cr * sy, sr * sp * sy + cr * cy, -sr * cp), (-(cr * sp * cy + sr * sy), cy * sr - cr * sp * sy, cr * cp)
@@ -461,7 +511,7 @@ def l4_panels(o, r, t, ua):
         else:
             bw = max(nw, 200 * K) + 48 * K; cx = W * K / 2
             d.rectangle((W * K / 2 - bw / 2, y - 10 * K, W * K / 2 + bw / 2, y + 96 * K), fill=lin((0.05, 0.04, 0.02), 0.78 * a), outline=lin(gold, 0.95 * a), width=2 * K)
-        text_c(d, (cx, y + 6 * K), "FOUND", f_small, lin(gold, a), "mt", False)
+        text_c(d, (cx, y + 6 * K), sc("FOUND"), fl_small, lin(gold, a), "mt", False)
         text_c(d, (cx, y + 30 * K), fe["item"], f_head, lin((1.0, 0.97, 0.88), a), "mt", False)
         text_c(d, (cx, y + 70 * K), "I  inventory", f_tiny, lin((0.75, 0.72, 0.65), a), "mt", False)
     me = last_at(MSGS, t)
@@ -485,12 +535,13 @@ def l4_panels(o, r, t, ua):
     if UI and UI.has("panel_wide"): UI.board(o, "panel_wide", (ax, ay), (bx, by), 44 * K); d = ImageDraw.Draw(o, "RGBA")
     else: d.rectangle((ax, ay, bx, by), fill=lin((0.035, 0.04, 0.055), 0.94), outline=lin((0.75, 0.65, 0.45), 0.9), width=2 * K)
     divider = bool(UI and UI.has("divider")); plate = bool(UI and UI.has("button"))
-    d.text((ax + pd, ay + 16 * K), "INVENTORY", font=f_title, fill=lin(INK)); d.text((bx - pd, ay + 18 * K), C["title"], font=f_small, fill=lin(gold), anchor="ra")
-    d.text((bx - pd, ay + 46 * K), "in play the game pauses while it is open", font=f_tiny, fill=lin((0.70, 0.68, 0.62)), anchor="ra")
+    tin = 24 * K if (UI and UI.has("panel_wide")) else 0           # (the title row clear of the board's corner ornaments)
+    d.text((ax + pd + tin, ay + 16 * K), "INVENTORY", font=f_title, fill=lin(INK)); d.text((bx - pd - tin, ay + 18 * K), C["title"], font=ft_small, fill=lin(gold), anchor="ra")
+    d.text((bx - pd - tin, ay + 46 * K), "in play the game pauses while it is open", font=f_tiny, fill=lin((0.70, 0.68, 0.62)), anchor="ra")
     lx, lw = ax + pd, pw * 0.5 - pd; y = ay + 76 * K
     def header(s):
         nonlocal y, d
-        d.text((lx, y), s, font=f_small, fill=lin((0.70, 0.68, 0.62))); y += 26 * K
+        d.text((lx, y), sc(s), font=fl_small, fill=lin((0.70, 0.68, 0.62))); y += 26 * K
         if divider: UI.fit(o, "divider", (lx - 8 * K, y - 18 * K), (lx + lw + 8 * K, y + 12 * K)); d = ImageDraw.Draw(o, "RGBA")
         else: d.rectangle((lx, y - 4 * K, lx + lw, y - 3 * K), fill=lin((0.75, 0.65, 0.45), 0.4))
         y += 4 * K
@@ -505,7 +556,7 @@ def l4_panels(o, r, t, ua):
         ix = 0
         if icon and UI.has(icon): ix = rh; UI.fit(o, icon, (lx + 8 * K, y - 2 * K), (lx + 4 * K + rh, y + rh - 2 * K)); d = ImageDraw.Draw(o, "RGBA")
         d.text((lx + 12 * K + ix, y + 5 * K), name, font=f_line, fill=(255, 255, 255, 255) if on else lin((0.86, 0.84, 0.78)))
-        if tag: d.text((lx + lw - 12 * K, y + 9 * K), tag, font=f_tiny, fill=lin(tagc), anchor="ra")
+        if tag: d.text((lx + lw - 12 * K, y + 9 * K), sc(tag), font=fl_tiny, fill=lin(tagc), anchor="ra")
         y += rh
     header("WEAPONS AND SPELLS")
     for i in range(nwp):
@@ -551,8 +602,8 @@ def l4_panels(o, r, t, ua):
     if divider: UI.fit(o, "divider", (ax + pd, fy - 20 * K), (bx - pd, fy + 20 * K)); d = ImageDraw.Draw(o, "RGBA")
     else: d.rectangle((ax + pd, fy, bx - pd, fy + K), fill=lin((0.75, 0.65, 0.45), 0.4))
     op = last_at(INVS, t)
-    if me and me["text"] and op and me["t"] >= op["t"]: d.text((ax + pd, fy + 14 * K), me["text"], font=f_line, fill=lin((1.0, 0.93, 0.75)))
-    d.text((ax + pd, fy + 52 * K), "W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close", font=f_small, fill=lin((0.70, 0.68, 0.62)))
+    if me and me["text"] and op and me["t"] >= op["t"]: d.text((ax + pd + tin, fy + 14 * K), me["text"], font=f_line, fill=lin((1.0, 0.93, 0.75)))
+    d.text((ax + pd + tin, fy + 52 * K), "W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close", font=f_small, fill=lin((0.70, 0.68, 0.62)))
     top.alpha_composite(o)
 def overlay(f):
     r = row(f); t = f / FPS
@@ -578,7 +629,7 @@ def overlay(f):
         bw, bh, fr = 96 * K, 8 * K, mo[5] / max(mo[6], 1.0); x0, y0 = s[0] - bw / 2, s[1] - bh
         d.rectangle((x0 - 2, y0 - 2, x0 + bw + 2, y0 + bh + 2), fill=lin((0.02, 0.02, 0.02), A(0.8)))
         d.rectangle((x0, y0, x0 + bw * fr, y0 + bh), fill=lin((0.85, 0.2, 0.14) if fr > 0.5 else (0.95, 0.45, 0.1), A(1.0)))
-        text_c(d, (s[0], y0 - 4 * K), "%s  %.0f" % (mo[1].replace("_", " ").upper(), mo[5]), f_small, lin(INK, A(1.0)), "mb")
+        text_c(d, (s[0], y0 - 4 * K), sc("%s  %.0f" % (mo[1].replace("_", " ").upper(), mo[5])), fl_small, lin(INK, A(1.0)), "mb")
     # ---- the damage numbers float up
     for h in HITS:
         age = t - h["t"]
@@ -614,7 +665,7 @@ def overlay(f):
     else:
         d.rectangle((ax, ay, bx, by), fill=lin((0.04, 0.05, 0.07), A(0.78)), outline=lin((0.75, 0.65, 0.45), A(0.9)), width=2 * K)
     inn = 18 * K if ext else 0          # (clear of the board's corner ornaments)
-    d.text((ax + pd + inn, ay + 8 * K), C["title"], font=f_small, fill=lin(INK, A(1.0))); d.text((bx - pd - inn, ay + 8 * K), "KILLS  %d" % r["kills"], font=f_small, fill=lin(INK, A(1.0)), anchor="ra")
+    d.text((ax + pd + inn, ay + 8 * K), C["title"], font=ft_small, fill=lin(INK, A(1.0))); d.text((bx - pd - inn, ay + 8 * K), sc("KILLS  %d" % r["kills"]), font=fl_small, fill=lin(INK, A(1.0)), anchor="ra")
     fr = r["hp"] / max(r["mhp"], 1.0); hx0, hy0, hx1, hy1 = ax + pd, ay + 36 * K, bx - pd, ay + 64 * K
     def artbar(frame, fill, y0, f, fill_tint, frame_tint):
         a0, a1 = (ax + pd - 6 * K, y0), (bx - pd + 6 * K, y0 + bh); px = UI.height_px(frame, bh)
@@ -628,7 +679,7 @@ def overlay(f):
         d.rectangle((hx0, hy0, hx1, hy1), fill=lin((0.10, 0.03, 0.03), A(0.95)))
         d.rectangle((hx0 + 2, hy0 + 2, hx0 + 2 + (hx1 - hx0 - 4) * fr, hy1 - 2), fill=lin((0.20, 0.72, 0.26) if fr > 0.5 else (0.90, 0.62, 0.12) if fr > 0.25 else (0.88, 0.16, 0.12), A(1.0)))
         d.rectangle((hx0, hy0, hx1, hy1), outline=lin((0.75, 0.65, 0.45), A(0.9)), width=K)
-    text_c(d, ((hx0 + hx1) / 2, (hy0 + hy1) / 2 - K), "HP  %d / %d" % (math.ceil(r["hp"]), r["mhp"]), f_small, (255, 255, 255, int(255 * ua)))
+    text_c(d, ((hx0 + hx1) / 2, (hy0 + hy1) / 2 - K), sc("HP  %d / %d" % (math.ceil(r["hp"]), r["mhp"])), fl_small, (255, 255, 255, int(255 * ua)))
     if mb:
         mf = r["mana"] / max(r["mmana"], 1.0); m0x, m0y, m1x, m1y = ax + pd, ay + 70 * K, bx - pd, ay + 92 * K
         refused = any(e["kind"] == "no_mana" and 0 <= t - e["t"] < 0.6 for e in EV)
@@ -640,7 +691,7 @@ def overlay(f):
             d.rectangle((m0x, m0y, m1x, m1y), fill=lin((0.33 if refused else 0.03, 0.04, 0.12), A(0.95)))
             d.rectangle((m0x + 2, m0y + 2, m0x + 2 + (m1x - m0x - 4) * mf, m1y - 2), fill=lin((0.18, 0.40, 0.95), A(1.0)))
             d.rectangle((m0x, m0y, m1x, m1y), outline=lin((1.0, 0.3, 0.25) if refused else (0.75, 0.65, 0.45), A(0.9)), width=K)
-        text_c(d, ((m0x + m1x) / 2, (m0y + m1y) / 2 - K), "MANA  %d / %d" % (math.floor(r["mana"]), r["mmana"]), f_tiny, (255, 255, 255, int(255 * ua)))
+        text_c(d, ((m0x + m1x) / 2, (m0y + m1y) / 2 - K), sc("MANA  %d / %d" % (math.floor(r["mana"]), r["mmana"])), fl_tiny, (255, 255, 255, int(255 * ua)))
     if L4:
         # the potions and food working on her: a chip each over the panel, with the seconds left
         ex = bx
@@ -650,10 +701,10 @@ def overlay(f):
             s = ("SPEED +%d%%  %ds" % (round(it["amount"] * 100), math.ceil(it["seconds"] - (t - e["t"])))) if it["kind"] == "speed" else ("REGEN +%.1f/s  %ds" % (it["amount"] * r["mhp"], math.ceil(it["seconds"] - (t - e["t"]))))
             ic = ("chip_speed" if it["kind"] == "speed" else "chip_regen") if UI else None
             iw = (30 * K) if (ic and UI.has(ic)) else 0
-            tw = d.textlength(s, font=f_tiny); c0 = (ex - tw - 16 * K - iw, ay - 8 * K - 30 * K - up)
+            s = sc(s); tw = d.textlength(s, font=fl_tiny); c0 = (ex - tw - 16 * K - iw, ay - 8 * K - 30 * K - up)
             d.rectangle((c0[0], c0[1], ex, ay - 8 * K - up), fill=lin((0.10, 0.22, 0.30) if it["kind"] == "speed" else (0.12, 0.26, 0.12), A(0.85)), outline=lin(CYAN if it["kind"] == "speed" else (0.45, 0.9, 0.45), A(1.0)), width=K)
             if iw: UI.fit(o, ic, (c0[0] + 4 * K, c0[1] - 6 * K), (c0[0] + iw, ay - 2 * K - up), (1, 1, 1, ua)); d = ImageDraw.Draw(o, "RGBA")
-            d.text((c0[0] + 8 * K + iw, c0[1] + 6 * K), s, font=f_tiny, fill=(255, 255, 255, int(255 * ua))); ex = c0[0] - 8 * K
+            d.text((c0[0] + 8 * K + iw, c0[1] + 6 * K), s, font=fl_tiny, fill=(255, 255, 255, int(255 * ua))); ex = c0[0] - 8 * K
     n = len(C["weapons"]); gp = 8 * K; sw = (pw - pd * 2 - gp * (n - 1)) / n
     for i, wd in enumerate(C["weapons"]):
         on = i == r["w"]; sx0, sy0 = ax + pd + i * (sw + gp), ay + 76 * K + mb + hx; sx1, sy1 = sx0 + sw, sy0 + 66 * K
@@ -669,16 +720,16 @@ def overlay(f):
             # (the weapon's picture on the left; its name, damage and mana a line each beside it: ARDHUD::DrawCombat)
             iw = (sy1 - sy0) - 8 * K
             UI.fit(o, ic, (sx0 + 10 * K, sy0 + 8 * K), (sx0 + 6 * K + iw, sy1 - 8 * K), (1, 1, 1, ua) if on else (0.7, 0.7, 0.7, ua)); d = ImageDraw.Draw(o, "RGBA")
-            d.text((sx0 + 7 * K, sy0 + 3 * K), str(i + 1), font=f_tiny, fill=lin((1.0, 0.82, 0.35), A(1.0)) if on else tc)
+            d.text((sx0 + 7 * K, sy0 + 3 * K), str(i + 1), font=ft_tiny, fill=lin((1.0, 0.82, 0.35), A(1.0)) if on else tc)
             cx0, cx1 = sx0 + iw + 10 * K, sx1 - 6 * K
-            d.text(((cx0 + cx1) / 2, sy0 + 18 * K), wd["name"].upper(), font=f_small, fill=tc, anchor="mm")
+            d.text(((cx0 + cx1) / 2, sy0 + 18 * K), sc(wd["name"].upper()), font=fl_small, fill=tc, anchor="mm")
             dm = "%.1f damage" % wd["damage"] if abs(wd["damage"] - round(wd["damage"])) > 0.05 else "%.0f damage" % wd["damage"]
             d.text(((cx0 + cx1) / 2, sy0 + 37 * K), dm, font=f_tiny, fill=lin((1.0, 0.9, 0.6), A(1.0)) if on else tc, anchor="mm")
             if wd.get("mana"): d.text(((cx0 + cx1) / 2, sy0 + 53 * K), "%.0f mana" % wd["mana"], font=f_tiny, fill=lin((0.55, 0.7, 1.0), A(1.0)), anchor="mm")
             continue
         on = on if not (L2 and wd.get("spell")) else any(e["t"] <= t <= e["t"] + 0.9 for e in CASTS)
-        d.text((sx0 + 7 * K, sy0 + 3 * K), "RMB / E" if (L2 and wd.get("spell")) else str(i + 1), font=f_tiny, fill=lin((1.0, 0.82, 0.35), A(1.0)) if on else tc)
-        d.text(((sx0 + sx1) / 2, sy0 + 26 * K), wd["name"].upper(), font=f_small, fill=tc, anchor="mm")
+        d.text((sx0 + 7 * K, sy0 + 3 * K), "RMB / E" if (L2 and wd.get("spell")) else str(i + 1), font=ft_tiny, fill=lin((1.0, 0.82, 0.35), A(1.0)) if on else tc)
+        d.text(((sx0 + sx1) / 2, sy0 + 26 * K), sc(wd["name"].upper()), font=fl_small, fill=tc, anchor="mm")
         dmg = ("%.0f damage  ·  %.0f mana" % (wd["damage"], wd["mana"])) if wd.get("mana") else ("%.1f damage" % wd["damage"] if abs(wd["damage"] - round(wd["damage"])) > 0.05 else "%.0f damage" % wd["damage"])
         d.text(((sx0 + sx1) / 2, sy0 + 48 * K), dmg, font=f_tiny, fill=lin((1.0, 0.9, 0.6), A(1.0)) if on else tc, anchor="mm")
     d.text((ax + pd, by - 26 * K), C["hint"], font=f_tiny, fill=lin((0.7, 0.68, 0.62), A(1.0)))
@@ -702,7 +753,7 @@ def overlay(f):
         w_ = kw.get(c, 52) * K
         if c == "SHIFT": kx += 24 * K
         d.rounded_rectangle((kx, ky, kx + w_, ky + 52 * K), 9 * K, fill=(238, 214, 150, int(255 * ua)) if on else (60, 58, 54, int(220 * ua)), outline=(255, 236, 180, int(255 * ua)) if on else (120, 112, 98, int(200 * ua)), width=2 * K)
-        d.text((kx + w_ / 2, ky + 26 * K), c, font=f_small if c in ("SHIFT", "LMB", "ENTER") else f_head, fill=(28, 24, 18, int(255 * ua)) if on else (210, 204, 190, int(230 * ua)), anchor="mm")
+        d.text((kx + w_ / 2, ky + 26 * K), c, font=ft_small if c in ("SHIFT", "LMB", "ENTER") else f_head, fill=(28, 24, 18, int(255 * ua)) if on else (210, 204, 190, int(230 * ua)), anchor="mm")
         kx += w_ + gap
     lab = "run" if mv == "run" else "walk" if mv == "walk" else ""
     lab = "cast the fire spell" if kh == "e" else "swing the sword" if kh == "lmb" else "open" if kh == "f" else lab
@@ -720,7 +771,7 @@ def overlay(f):
     # ---- the banner when a section is generated
     for e in GENS:
         age = t - e["t"]
-        if 0.0 <= age < 3.5: text_c(d, (W * K / 2, 212 * K), "\u25b2 NEW DUNGEON SECTION GENERATED", f_ban, lin(CYAN, max(0.0, min(age / 0.3, (3.5 - age) / 0.8, 1.0))))
+        if 0.0 <= age < 3.5: text_c(d, (W * K / 2, 212 * K), ("NEW DUNGEON SECTION GENERATED" if LETTERS else "\u25b2 NEW DUNGEON SECTION GENERATED"), f_ban, lin(CYAN, max(0.0, min(age / 0.3, (3.5 - age) / 0.8, 1.0))))
     # ---- the reel's own: title, captions (bottom left)
     a = fade(t, 0.3, 4.6)
     if a > 0:
@@ -761,7 +812,7 @@ def overlay(f):
     for e in CHESTS:
         caps.append((e["t"] - 0.3, e["t"] + 1.6, "F  \u00b7  THE %s OPENS" % e["what"].split()[-1].upper(), ["every door and container of the dungeon opens: chests, trunks, wardrobes, barrels, crates"], (255, 226, 150)))
     for e in GENS[:1]:
-        caps.append((e["t"], min(e["t"] + 4.2, t_first - 0.1 if t_first > e["t"] else 99), "\u25b2 THE NEXT 252 m x 252 m OF DUNGEON IS GENERATED", ["as she nears the edge of what there is  \u00b7  never saved: a new dungeon every time"], lin(CYAN)[:3]))
+        caps.append((e["t"], min(e["t"] + 4.2, t_first - 0.1 if t_first > e["t"] else 99), ("" if LETTERS else "\u25b2 ") + "THE NEXT 252 m x 252 m OF DUNGEON IS GENERATED", ["as she nears the edge of what there is  \u00b7  never saved: a new dungeon every time"], lin(CYAN)[:3]))
     for i, e in enumerate(FIGHTS):
         end = next((k["t"] for k in KILLS if k["t"] > e["t"]), e["t"] + 6.0) + 1.2
         if i + 1 < len(FIGHTS): end = min(end, FIGHTS[i + 1]["t"] - 0.1)

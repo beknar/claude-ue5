@@ -35,11 +35,25 @@ public:
 	virtual void DrawHUD() override;
 	/** tests: the painted pieces (the generator's UIArt) drawn in the last frame */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FName> GetArtDrawn() const { return ArtDrawn; }
+	/** tests: the rooms the painted big map named the last time it was drawn (their kind's name) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetRoomLabels() const { return RoomLabels; }
+	/** tests: where the stars (chests not looted yet) were drawn in the last frame, world XY, on the minimap or the big map */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector2D> GetStarsDrawn() const { return StarsDrawn; }
+	/** tests: the world XY in the middle of the big map the last time it was drawn, and where her arrow was on the screen
+	 *  (false: scrolled out of view) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FVector2D GetMapView() const { return MapView; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool GetMapArrow(FVector2D& Screen) const { Screen = MapArrow; return bMapArrow; }
 
 private:
 	// ---- random_dungeonmagic_level4's painted interface (the generator's UIArt; none on the other levels: plain boxes)
 	FRDUIDraw UI;
 	TArray<FName> ArtDrawn;
+	TArray<FString> RoomLabels;
+	TArray<FVector2D> StarsDrawn;
+	FVector2D MapView = FVector2D::ZeroVector, MapArrow = FVector2D::ZeroVector;
+	bool bMapArrow = false;
+	/** the lettering's fonts made in play, one per role and size (FRDUIDraw::Text) */
+	UPROPERTY(Transient) TMap<int32, TObjectPtr<class UFont>> FontCache;
 	/** a panel's painted board stretched round A..B (it reaches Ext beyond them: its frame sits round what is in it) */
 	bool Board(FName Name, const FVector2D& A, const FVector2D& B, float Sc, float Ext);
 	/** a painted piece stretched along A..B at the height of the box (its ends kept: a divider, a plaque) */

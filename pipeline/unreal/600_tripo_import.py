@@ -1,6 +1,7 @@
 """Import an animated Tripo character built by blender_numpy/tripo_build.py (generalised 240_ff2_import.py):
 skeletal mesh -> /Game/JRPG/Character/SK_JRPG_<CH>, its own clips (separate FBX, imported onto that skeleton) ->
 /Game/JRPG/<CH>Anims/AS_<CH>_<Clip>, material M_JRPG_<CH> (base colour; normal / metal-rough if the GLB had them; two-sided).
+The mesh's shape keys come in as morph targets (printed: "morph targets").
 Args: CH (e.g. Fem5)."""
 import os, sys, json, importlib, unreal
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -15,6 +16,8 @@ t = unreal.AssetImportTask(); t.filename = os.path.join(SRC, NAME + ".fbx"); t.d
 t.automated = True; t.replace_existing = True; t.save = True
 o = unreal.FbxImportUI(); o.import_mesh = True; o.import_as_skeletal = True; o.import_animations = False; o.import_materials = False; o.import_textures = False
 o.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH; t.options = o
+# (the shape keys a build carries become morph targets: the Summoner's face, summoner_face.py)
+o.skeletal_mesh_import_data.set_editor_property("import_morph_targets", True)
 L.at.import_asset_tasks([t])
 kinds = {}
 for p in t.imported_object_paths:
@@ -72,6 +75,7 @@ for p in eal.list_assets(D + "/Character", recursive=False):
 sk = unreal.load_asset(kinds["SkeletalMesh"][0])
 print("slots", [(str(s.material_slot_name), s.material_interface.get_name() if s.material_interface else None) for s in sk.get_editor_property("materials")])
 b = sk.get_bounds(); print("bounds", b.origin, b.box_extent)
+print("morph targets", list(sk.get_all_morph_target_names()))
 ref = unreal.AnimPoseExtensions.get_reference_pose(skel)
 for bn in ("root", "pelvis", "head", "foot_l", "ball_l"):
     tr = unreal.AnimPoseExtensions.get_bone_pose(ref, bn, unreal.AnimPoseSpaces.WORLD); print(bn, [round(v, 1) for v in (tr.translation.x, tr.translation.y, tr.translation.z)])

@@ -1,0 +1,184 @@
+{
+ "tag": "l4w1",
+ "level": "random_dungeonmagic_level4",
+ "plan": [
+  "rooms:3",
+  "expand:+x",
+  "rooms:2",
+  "map:a",
+  "expand:-y",
+  "rooms:2",
+  "home"
+ ],
+ "falls": 0,
+ "stuck": 0,
+ "doors_opened": 61,
+ "doors_failed": 0,
+ "containers_opened": 7,
+ "containers_failed": 0,
+ "rooms_visited": [
+  "Armory",
+  "Guard room",
+  "Barracks",
+  "Forge",
+  "Kitchen",
+  "Guard room",
+  "Guard room"
+ ],
+ "sections": [
+  [
+   1,
+   0
+  ],
+  [
+   1,
+   -1
+  ]
+ ],
+ "events": [
+  "step rooms:3",
+  "to room 20 Armory (46 tiles)",
+  "opened wardrobe 187 (alpha 1.00)",
+  "to room 9 Guard room (59 tiles)",
+  "opened barrel 79 (alpha 1.00)",
+  "to room 25 Barracks (50 tiles)",
+  "opened chest 242 (alpha 1.00)",
+  "step expand:+x",
+  "expand +x via portal (12450,150), path 53",
+  "entered section (1,0): 49 rooms, reachable 49, monsters 13",
+  "step rooms:2",
+  "to room 41 Forge (125 tiles)",
+  "opened barrel 866 (alpha 1.00)",
+  "to room 3 Kitchen (93 tiles)",
+  "opened crate 154 (alpha 1.00)",
+  "step map:a",
+  "shot map_a",
+  "step expand:-y",
+  "expand -y via portal (25350,-12450), path 8",
+  "entered section (1,-1): 49 rooms, reachable 49, monsters 12",
+  "step rooms:2",
+  "to room 4 Guard room (89 tiles)",
+  "opened barrel 22 (alpha 1.00)",
+  "to room 23 Guard room (64 tiles)",
+  "opened chest 172 (alpha 1.00)",
+  "step home"
+ ],
+ "shots": [
+  "rd_l4w1_map_a.png"
+ ],
+ "monsters_quiet": true,
+ "monsters": {
+  "count": 64,
+  "moved_3m": 13,
+  "trips": 86,
+  "repaths": 411
+ },
+ "discovered": [
+  30,
+  211
+ ],
+ "frame_stats": {
+  "median": 55.4,
+  "p99": 116.9,
+  "max": 125.0,
+  "gen_median": 87.3,
+  "gen_max": 125.0
+ },
+ "sections_final": [
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   1,
+   -1
+  ],
+  [
+   1,
+   -2
+  ]
+ ],
+ "container_fit": {
+  "containers": 4136,
+  "closed": 4129,
+  "open": 7,
+  "by_body": {
+   "SM_Kit_ChestBody": {
+    "n": 754,
+    "closed": 752,
+    "open": 2
+   },
+   "SM_Kit_TrunkBody": {
+    "n": 126,
+    "closed": 126,
+    "open": 0
+   },
+   "SM_crate_01_body": {
+    "n": 787,
+    "closed": 786,
+    "open": 1
+   },
+   "SM_barrel_01_body": {
+    "n": 901,
+    "closed": 898,
+    "open": 3
+   },
+   "SM_Kit_WardrobeBody": {
+    "n": 125,
+    "closed": 124,
+    "open": 1
+   },
+   "SM_barrel_02_body": {
+    "n": 720,
+    "closed": 720,
+    "open": 0
+   },
+   "SM_crate_02_body": {
+    "n": 723,
+    "closed": 723,
+    "open": 0
+   }
+  },
+  "faults": []
+ },
+ "broken_walls": {
+  "sections": 5,
+  "segments": 3355,
+  "by_piece": {
+   "Wall_Rough_5": 687,
+   "Wall_Rough_3": 656,
+   "Wall_Rough": 696,
+   "Wall_Rough_4": 656,
+   "Wall_Rough_2": 660
+  },
+  "rays": 256005,
+  "face": 225116,
+  "hole": 30889,
+  "leak": 0,
+  "leaks": []
+ },
+ "prison_cells": {
+  "cells": 259,
+  "cell_sides_with_bars": 259,
+  "doors_open": 2,
+  "rays": 12336,
+  "leak": 0,
+  "leaks": [],
+  "hay": 259,
+  "hay_blocks": 259,
+  "hay_tops_cm": [
+   143,
+   143,
+   143
+  ],
+  "ok": true
+ }
+}

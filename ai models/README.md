@@ -8,6 +8,7 @@ The characters this project uses in its current and future scenes, made with [Tr
 | `Mage.glb` | `girl-caster-tripo.glb` | Fire caster | random_dungeonmagic_level, the Tripo trio and quartet showcases |
 | `Warlock.glb` | `girl-darkcaster-tripo.glb` | Dark caster (spell in the left hand, sword in the right) | random_dungeonmagic_level2, the Tripo trio and quartet showcases |
 | `Rogue.glb` | (none) | Hooded rogue (two daggers, a crossbow) | random_dungeonmagic_level3 (tag `Rogue`), the Tripo quartet showcase |
+| `Summoner.glb` | (none) | Twin-tailed summoner (the Mage's spells; a face that shows expressions) | random_dungeonmagic_level5 (character `Summoner`) and its face reel |
 
 ## Renamed models
 

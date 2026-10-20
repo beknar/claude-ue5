@@ -190,12 +190,12 @@ void ARDHUD::DrawDungeon(const FVector2D& S0, const FVector2D& S1, TFunctionRef<
 				const FVector2D A = ToS(FVector2D(R.Min) * TS), B = ToS(FVector2D(R.Max) * TS);
 				const FVector2D Lo(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y)), Hi(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y));
 				FString N = ARDDungeonGenerator::KindName(R.Kind);
-				float Tw, Th; GetTextSize(N, Tw, Th, Small, Sc * 0.95f);
-				if (Tw >= Hi.X - Lo.X - 6.f) { N = KindCode(R.Kind); GetTextSize(N, Tw, Th, Small, Sc * 0.95f); }
+				float Tw, Th; UI.TextSize(N, Tw, Th, Small, Sc * 0.95f);
+				if (Tw >= Hi.X - Lo.X - 6.f) { N = KindCode(R.Kind); UI.TextSize(N, Tw, Th, Small, Sc * 0.95f); }
 				if (Tw >= Hi.X - Lo.X - 2.f || Th >= Hi.Y - Lo.Y) continue;
 				const FVector2D P((Lo.X + Hi.X - Tw) * 0.5f, (Lo.Y + Hi.Y - Th) * 0.5f);
 				Box(P - FVector2D(4.f * Sc, 1.f * Sc), P + FVector2D(Tw + 4.f * Sc, Th + 1.f * Sc), FLinearColor(0.04f, 0.035f, 0.03f, 0.62f));
-				DrawText(N, FLinearColor(1.f, 0.94f, 0.78f), P.X, P.Y, Small, Sc * 0.95f);
+				UI.Text(N, FLinearColor(1.f, 0.94f, 0.78f), P.X, P.Y, Small, Sc * 0.95f);
 			}
 }
 
@@ -230,8 +230,8 @@ void ARDHUD::DrawCombat(float Sc)
 		Box(A - FVector2D(2.f), A + FVector2D(W + 2.f, H + 2.f), FLinearColor(0.02f, 0.02f, 0.02f, 0.8f));
 		Box(A, A + FVector2D(W * F, H), F > 0.5f ? FLinearColor(0.85f, 0.2f, 0.14f) : FLinearColor(0.95f, 0.45f, 0.1f));
 		const FString N = FString::Printf(TEXT("%s  %.0f"), *Mo->MonsterName.ToString().Replace(TEXT("_"), TEXT(" ")).ToUpper(), Mo->GetHealth());
-		float Tw, Th; GetTextSize(N, Tw, Th, Small, Sc);
-		DrawText(N, RDInk, S.X - Tw * 0.5f, A.Y - Th - 3.f * Sc, Small, Sc);
+		float Tw, Th; UI.TextSize(N, Tw, Th, Small, Sc, ERDType::Label);
+		UI.Text(N, RDInk, S.X - Tw * 0.5f, A.Y - Th - 3.f * Sc, Small, Sc, ERDType::Label);
 	}
 	// ---- the damage numbers float up from where a blow landed
 	for (const ARDDungeonGenerator::FHitText& T : Gen->HitTexts)
@@ -242,10 +242,10 @@ void ARDHUD::DrawCombat(float Sc)
 		if (S.Z <= 0.f) continue;
 		const FString N = FString::Printf(TEXT("%s%.0f"), T.bOnPlayer ? TEXT("-") : TEXT(""), T.Amount);
 		const float K = Sc * (T.bOnPlayer ? 1.7f : 1.9f);
-		float Tw, Th; GetTextSize(N, Tw, Th, Medium, K);
+		float Tw, Th; UI.TextSize(N, Tw, Th, Medium, K, ERDType::Title);
 		const float Al = FMath::Clamp(1.6f - Age * 1.5f, 0.f, 1.f);
-		DrawText(N, FLinearColor(0.f, 0.f, 0.f, Al * 0.8f), S.X - Tw * 0.5f + 2.f, S.Y - Th + 2.f, Medium, K);
-		DrawText(N, T.bOnPlayer ? FLinearColor(1.f, 0.25f, 0.2f, Al) : FLinearColor(1.f, 0.9f, 0.35f, Al), S.X - Tw * 0.5f, S.Y - Th, Medium, K);
+		UI.Text(N, FLinearColor(0.f, 0.f, 0.f, Al * 0.8f), S.X - Tw * 0.5f + 2.f, S.Y - Th + 2.f, Medium, K, ERDType::Title);
+		UI.Text(N, T.bOnPlayer ? FLinearColor(1.f, 0.25f, 0.2f, Al) : FLinearColor(1.f, 0.9f, 0.35f, Al), S.X - Tw * 0.5f, S.Y - Th, Medium, K, ERDType::Title);
 	}
 	// ---- status panel (bottom right): hit points (and mana), the weapons with their damage, kills
 	{
@@ -269,14 +269,14 @@ void ARDHUD::DrawCombat(float Sc)
 				const FString T = bSpeed ? FString::Printf(TEXT("SPEED +%.0f%%  %.0fs"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 				                         : FString::Printf(TEXT("REGEN +%.1f/s  %.0fs"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left));
 				const FName Ic = bSpeed ? FName(TEXT("chip_speed")) : FName(TEXT("chip_regen"));
-				float Tw, Th; GetTextSize(T, Tw, Th, Small, Sc);
+				float Tw, Th; UI.TextSize(T, Tw, Th, Small, Sc, ERDType::Label);
 				const float Iw = UI.Has(Ic) ? Th + 14.f * Sc : 0.f;           // (its picture before the text)
 				const float Up = Ext * 1.6f;
 				const FVector2D C1(X, A.Y - 8.f * Sc - Up), C0(X - Tw - 16.f * Sc - Iw, A.Y - 8.f * Sc - Th - 8.f * Sc - Up);
 				Box(C0, C1, bSpeed ? FLinearColor(0.10f, 0.22f, 0.30f, 0.85f) : FLinearColor(0.12f, 0.26f, 0.12f, 0.85f));
 				Frame(C0, C1, bSpeed ? RDCyan : FLinearColor(0.45f, 0.9f, 0.45f), 1.f * Sc);
 				if (Iw > 0.f) UI.Fit(Ic, C0 + FVector2D(4.f * Sc, -6.f * Sc), FVector2D(C0.X + Iw, C1.Y + 6.f * Sc));
-				DrawText(T, FLinearColor::White, C0.X + 8.f * Sc + Iw, C0.Y + 4.f * Sc, Small, Sc);
+				UI.Text(T, FLinearColor::White, C0.X + 8.f * Sc + Iw, C0.Y + 4.f * Sc, Small, Sc, ERDType::Label);
 				X = C0.X - 8.f * Sc;
 			}
 		}
@@ -286,10 +286,10 @@ void ARDHUD::DrawCombat(float Sc)
 			Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 		}
 		const float In = Ext > 0.f ? 18.f * Sc : 0.f;      // (clear of the board's corner ornaments)
-		DrawText(Gen->PlayerTitle, RDInk, A.X + Pd + In, A.Y + 9.f * Sc, Small, Sc * 1.1f);
+		UI.Text(Gen->PlayerTitle, RDInk, A.X + Pd + In, A.Y + 9.f * Sc, Small, Sc * 1.1f, ERDType::Title);
 		const FString Kl = FString::Printf(TEXT("KILLS  %d"), Cb->Kills);
-		float Tw, Th; GetTextSize(Kl, Tw, Th, Small, Sc * 1.1f);
-		DrawText(Kl, RDInk, B.X - Pd - In - Tw, A.Y + 9.f * Sc, Small, Sc * 1.1f);
+		float Tw, Th; UI.TextSize(Kl, Tw, Th, Small, Sc * 1.1f, ERDType::Label);
+		UI.Text(Kl, RDInk, B.X - Pd - In - Tw, A.Y + 9.f * Sc, Small, Sc * 1.1f, ERDType::Label);
 		// (a painted bar: its frame Bh tall, its fill inside; the text goes in its open part)
 		auto ArtBar = [&](FName Fr0, FName Fill, float Y0, float F, const FLinearColor& FillTint, const FLinearColor& FrameTint, FVector2D& I0, FVector2D& I1)
 		{
@@ -316,9 +316,9 @@ void ARDHUD::DrawCombat(float Sc)
 			Frame(H0, H1, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 1.5f * Sc);
 		}
 		const FString Hp = FString::Printf(TEXT("HP  %.0f / %.0f"), FMath::CeilToFloat(Cb->GetHealth()), Cb->GetMaxHealth());
-		GetTextSize(Hp, Tw, Th, Small, Sc * 1.2f);
-		if (bArtBars) DrawText(Hp, FLinearColor(0.f, 0.f, 0.f, 0.8f), (H0.X + H1.X - Tw) * 0.5f + 1.5f * Sc, (H0.Y + H1.Y - Th) * 0.5f + 1.5f * Sc, Small, Sc * 1.2f);
-		DrawText(Hp, FLinearColor::White, (H0.X + H1.X - Tw) * 0.5f, (H0.Y + H1.Y - Th) * 0.5f, Small, Sc * 1.2f);
+		UI.TextSize(Hp, Tw, Th, Small, Sc * 1.2f, ERDType::Label);
+		if (bArtBars) UI.Text(Hp, FLinearColor(0.f, 0.f, 0.f, 0.8f), (H0.X + H1.X - Tw) * 0.5f + 1.5f * Sc, (H0.Y + H1.Y - Th) * 0.5f + 1.5f * Sc, Small, Sc * 1.2f, ERDType::Label);
+		UI.Text(Hp, FLinearColor::White, (H0.X + H1.X - Tw) * 0.5f, (H0.Y + H1.Y - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Label);
 		// mana (blue; it flashes when a cast was refused for want of it)
 		if (bMana)
 		{
@@ -336,9 +336,9 @@ void ARDHUD::DrawCombat(float Sc)
 			}
 			if (bArtBars && Flash > 0.f) Frame(M0, M1, FLinearColor(1.f, 0.3f, 0.25f, Flash), 2.f * Sc);
 			const FString Mt = FString::Printf(TEXT("MANA  %.0f / %.0f"), FMath::FloorToFloat(Cb->GetMana()), Cb->GetMaxMana());
-			GetTextSize(Mt, Tw, Th, Small, Sc * 1.05f);
-			if (bArtBars) DrawText(Mt, FLinearColor(0.f, 0.f, 0.f, 0.8f), (M0.X + M1.X - Tw) * 0.5f + 1.5f * Sc, (M0.Y + M1.Y - Th) * 0.5f + 1.5f * Sc, Small, Sc * 1.05f);
-			DrawText(Mt, FLinearColor::White, (M0.X + M1.X - Tw) * 0.5f, (M0.Y + M1.Y - Th) * 0.5f, Small, Sc * 1.05f);
+			UI.TextSize(Mt, Tw, Th, Small, Sc * 1.05f, ERDType::Label);
+			if (bArtBars) UI.Text(Mt, FLinearColor(0.f, 0.f, 0.f, 0.8f), (M0.X + M1.X - Tw) * 0.5f + 1.5f * Sc, (M0.Y + M1.Y - Th) * 0.5f + 1.5f * Sc, Small, Sc * 1.05f, ERDType::Label);
+			UI.Text(Mt, FLinearColor::White, (M0.X + M1.X - Tw) * 0.5f, (M0.Y + M1.Y - Th) * 0.5f, Small, Sc * 1.05f, ERDType::Label);
 		}
 		// the weapons
 		const int32 Num = Gen->Weapons.Num();
@@ -370,38 +370,39 @@ void ARDHUD::DrawCombat(float Sc)
 			FString Key = Wp.bAlongside ? FString(TEXT("RMB / E")) : FString::Printf(TEXT("%d"), I + 1);
 			if (bPad) Key = Wp.bAlongside ? FString(TEXT("LB")) : (Wp.bSpell && Cb->GetAlongsideSpell() < 0) ? FString(TEXT("LB / RB")) : FString(TEXT("RB"));
 			if (bPad && Gen->bRogueControls) Key = bOn ? FString(TEXT("RB")) : FString(TEXT("Y"));      // (the rogue: Y draws it, RB uses it)
-			DrawText(Key, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc);
+			UI.Text(Key, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc, ERDType::Title);
 			const FString N = Wp.Name.ToString().ToUpper();
 			if (bIcon)
 			{
 				// (beside the picture: the name, the damage, the mana a cast takes, a line each)
 				const float Cx0 = S0.X + Iw + 10.f * Sc, Cx1 = S1.X - 6.f * Sc;
-				GetTextSize(N, Tw, Th, Small, Sc * 1.05f);
-				DrawText(N, Tc, (Cx0 + Cx1 - Tw) * 0.5f, S0.Y + 9.f * Sc, Small, Sc * 1.05f);
+				UI.TextSize(N, Tw, Th, Small, Sc * 1.05f, ERDType::Label);
+				UI.Text(N, Tc, (Cx0 + Cx1 - Tw) * 0.5f, S0.Y + 9.f * Sc, Small, Sc * 1.05f, ERDType::Label);
 				const FString D = FString::Printf(TEXT("%.0f damage"), Cb->GetDamageOf(I));
-				GetTextSize(D, Tw, Th, Small, Sc * 0.95f);
-				DrawText(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (Cx0 + Cx1 - Tw) * 0.5f, S0.Y + 29.f * Sc, Small, Sc * 0.95f);
+				UI.TextSize(D, Tw, Th, Small, Sc * 0.95f);
+				UI.Text(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (Cx0 + Cx1 - Tw) * 0.5f, S0.Y + 29.f * Sc, Small, Sc * 0.95f);
 				if (Wp.ManaCost > 0.f)
 				{
 					const FString Mc = FString::Printf(TEXT("%.0f mana"), Wp.ManaCost);
-					GetTextSize(Mc, Tw, Th, Small, Sc * 0.95f);
-					DrawText(Mc, FLinearColor(0.55f, 0.7f, 1.f), (Cx0 + Cx1 - Tw) * 0.5f, S0.Y + 45.f * Sc, Small, Sc * 0.95f);
+					UI.TextSize(Mc, Tw, Th, Small, Sc * 0.95f);
+					UI.Text(Mc, FLinearColor(0.55f, 0.7f, 1.f), (Cx0 + Cx1 - Tw) * 0.5f, S0.Y + 45.f * Sc, Small, Sc * 0.95f);
 				}
 				continue;
 			}
-			GetTextSize(N, Tw, Th, Small, Sc * 1.15f);
-			DrawText(N, Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 16.f * Sc, Small, Sc * 1.15f);
+			UI.TextSize(N, Tw, Th, Small, Sc * 1.15f, ERDType::Label);
+			UI.Text(N, Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 16.f * Sc, Small, Sc * 1.15f, ERDType::Label);
 			const FString D = Wp.ManaCost > 0.f ? FString::Printf(TEXT("%.0f damage  ·  %.0f mana"), Cb->GetDamageOf(I), Wp.ManaCost) : FString::Printf(TEXT("%.0f damage"), Cb->GetDamageOf(I));
-			GetTextSize(D, Tw, Th, Small, Sc);
-			DrawText(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 40.f * Sc, Small, Sc);
+			UI.TextSize(D, Tw, Th, Small, Sc);
+			UI.Text(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + 40.f * Sc, Small, Sc);
 		}
-		if (!Gen->ControlsHint.IsEmpty()) DrawText(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
+		if (!Gen->ControlsHint.IsEmpty()) UI.Text(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
 	}
 	// ---- the controls (upper left, the magic levels): those of the device in use, and whether she walks or runs
 	const TArray<FString>& Lines = bPad ? Gen->ControlsPad : Gen->ControlsKeys;
 	if (Gen->bCasterControls && Lines.Num() > 0)
 	{
 		const float Ext = UI.Has(TEXT("panel_wide")) ? 20.f * Sc : 0.f;
+		const float In = Ext > 0.f ? 16.f * Sc : 0.f, Dn = Ext > 0.f ? 6.f * Sc : 0.f;      // (level 4: clear of the board's frame and corner ornaments)
 		const float Mg = 24.f * Sc + Ext, Pd = 14.f * Sc, Lh = 23.f * Sc, K = Sc * 1.05f;
 		TArray<FString> Keys, Whats;
 		float Kw = 0.f, Ww = 0.f, Tw, Th;
@@ -410,27 +411,27 @@ void ARDHUD::DrawCombat(float Sc)
 			FString Kt, Wt;
 			if (!S.Split(TEXT("|"), &Kt, &Wt)) { Kt = S; Wt = FString(); }
 			Keys.Add(Kt); Whats.Add(Wt);
-			GetTextSize(Kt, Tw, Th, Small, K); Kw = FMath::Max(Kw, Tw);
-			GetTextSize(Wt, Tw, Th, Small, K); Ww = FMath::Max(Ww, Tw);
+			UI.TextSize(Kt, Tw, Th, Small, K, ERDType::Label); Kw = FMath::Max(Kw, Tw);
+			UI.TextSize(Wt, Tw, Th, Small, K); Ww = FMath::Max(Ww, Tw);
 		}
 		const FString Title = bPad ? TEXT("CONTROLS  -  GAMEPAD") : TEXT("CONTROLS  -  KEYBOARD & MOUSE");
 		const FString Mode = Cb->IsRunMode() ? TEXT("RUNNING") : TEXT("WALKING");
 		float Tiw, Mw;
-		GetTextSize(Title, Tiw, Th, Small, Sc * 1.1f); GetTextSize(Mode, Mw, Th, Small, Sc * 1.1f);
-		const float W = FMath::Max(Kw + 18.f * Sc + Ww, Tiw + 24.f * Sc + Mw) + Pd * 2.f;
-		const FVector2D A(Mg, Mg), B(Mg + W, Mg + 40.f * Sc + Lh * Lines.Num() + 8.f * Sc);
+		UI.TextSize(Title, Tiw, Th, Small, Sc * 1.1f, ERDType::Title); UI.TextSize(Mode, Mw, Th, Small, Sc * 1.1f, ERDType::Label);
+		const float W = FMath::Max(Kw + 18.f * Sc + Ww, Tiw + 24.f * Sc + Mw) + Pd * 2.f + In * 2.f;
+		const FVector2D A(Mg, Mg), B(Mg + W, Mg + 40.f * Sc + Lh * Lines.Num() + 8.f * Sc + Dn * 2.f);
 		if (!Board(TEXT("panel_wide"), A, B, Sc, Ext))
 		{
 			Box(A, B, FLinearColor(0.04f, 0.05f, 0.07f, 0.72f));
 			Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 		}
-		DrawText(Title, RDInk, A.X + Pd, A.Y + 9.f * Sc, Small, Sc * 1.1f);
-		DrawText(Mode, Cb->IsRunMode() ? FLinearColor(1.f, 0.62f, 0.25f) : RDCyan, B.X - Pd - Mw, A.Y + 9.f * Sc, Small, Sc * 1.1f);
+		UI.Text(Title, RDInk, A.X + Pd + In, A.Y + 9.f * Sc + Dn, Small, Sc * 1.1f, ERDType::Title);
+		UI.Text(Mode, Cb->IsRunMode() ? FLinearColor(1.f, 0.62f, 0.25f) : RDCyan, B.X - Pd - In - Mw, A.Y + 9.f * Sc + Dn, Small, Sc * 1.1f, ERDType::Label);
 		for (int32 I = 0; I < Keys.Num(); ++I)
 		{
-			const float Y = A.Y + 40.f * Sc + Lh * I;
-			DrawText(Keys[I], FLinearColor(1.f, 0.82f, 0.35f), A.X + Pd, Y, Small, K);
-			DrawText(Whats[I], FLinearColor(0.86f, 0.84f, 0.78f), A.X + Pd + Kw + 18.f * Sc, Y, Small, K);
+			const float Y = A.Y + 40.f * Sc + Dn * 1.5f + Lh * I;
+			UI.Text(Keys[I], FLinearColor(1.f, 0.82f, 0.35f), A.X + Pd + In, Y, Small, K, ERDType::Label);
+			UI.Text(Whats[I], FLinearColor(0.86f, 0.84f, 0.78f), A.X + Pd + In + Kw + 18.f * Sc, Y, Small, K);
 		}
 	}
 	// ---- she is down
@@ -438,11 +439,11 @@ void ARDHUD::DrawCombat(float Sc)
 	{
 		Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.10f, 0.f, 0.f, FMath::Clamp((Now - Cb->DeathTime) / 1.2f, 0.f, 0.55f)));
 		const FString T = TEXT("YOU HAVE FALLEN");
-		float Tw, Th; GetTextSize(T, Tw, Th, Medium, Sc * 2.6f);
-		DrawText(T, FLinearColor(0.95f, 0.2f, 0.15f), (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f, Medium, Sc * 2.6f);
+		float Tw, Th; UI.TextSize(T, Tw, Th, Medium, Sc * 2.6f, ERDType::Title);
+		UI.Text(T, FLinearColor(0.95f, 0.2f, 0.15f), (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f, Medium, Sc * 2.6f, ERDType::Title);
 		const FString U = TEXT("back to the middle of the dungeon...");
-		GetTextSize(U, Tw, Th, Small, Sc * 1.3f);
-		DrawText(U, RDInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f + 62.f * Sc, Small, Sc * 1.3f);
+		UI.TextSize(U, Tw, Th, Small, Sc * 1.3f);
+		UI.Text(U, RDInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f + 62.f * Sc, Small, Sc * 1.3f);
 	}
 }
 
@@ -454,8 +455,8 @@ void ARDHUD::DrawHUD()
 	if (!Gen) return;
 	// (play began without a hero: the menu is being opened, the dungeon is not shown)
 	if (Gen->bOpeningMenu) { Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor::Black); return; }
-	ArtDrawn.Reset();
-	UI.Hud = this; UI.Art = &Gen->UIArt; UI.Drawn = &ArtDrawn;
+	ArtDrawn.Reset(); StarsDrawn.Reset();
+	UI.Hud = this; UI.Art = &Gen->UIArt; UI.Drawn = &ArtDrawn; UI.Fonts = &Gen->UIFonts; UI.FontCache = &FontCache;
 	APawn* P = GetOwningPawn();
 	if (!P) return;
 	const float Sc = Canvas->ClipY / 1080.f;
@@ -540,21 +541,21 @@ void ARDHUD::DrawHUD()
 		}
 		Frame(S0, S1, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 		DrawPlayerArrow((S0 + S1) * 0.5f, Yaw - 90.f, 9.f * Sc);
-		DrawText(TEXT("DUNGEON"), RDInk, S0.X, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
+		UI.Text(TEXT("DUNGEON"), RDInk, S0.X, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
 		const FString Cnt = FString::Printf(TEXT("%d / %d rooms"), Disc, All);
-		float Tw, Th; GetTextSize(Cnt, Tw, Th, Small, Sc * 1.1f);
-		DrawText(Cnt, RDInk, S1.X - Tw, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
-		DrawText(TEXT("N"), RDInk, (S0.X + S1.X) * 0.5f - 4.f * Sc, S0.Y + 2.f * Sc, Small, Sc);
-		DrawText(bPadMap ? TEXT("Back  map") : TEXT("M  map"), FLinearColor(0.7f, 0.68f, 0.62f), S0.X, S1.Y + 6.f * Sc, Small, Sc);
+		float Tw, Th; UI.TextSize(Cnt, Tw, Th, Small, Sc * 1.1f);
+		UI.Text(Cnt, RDInk, S1.X - Tw, S0.Y - 28.f * Sc, Small, Sc * 1.1f);
+		UI.Text(TEXT("N"), RDInk, (S0.X + S1.X) * 0.5f - 4.f * Sc, S0.Y + 2.f * Sc, Small, Sc);
+		UI.Text(bPadMap ? TEXT("Back  map") : TEXT("M  map"), FLinearColor(0.7f, 0.68f, 0.62f), S0.X, S1.Y + 6.f * Sc, Small, Sc);
 	}
 
 	// ---- new section banner
 	if (Now - Gen->LastRevealTime < 3.5f)
 	{
 		const float A = FMath::Clamp(FMath::Min((Now - Gen->LastRevealTime) / 0.3f, (3.5f - (Now - Gen->LastRevealTime)) / 0.8f), 0.f, 1.f);
-		const FString T = TEXT("▲ NEW DUNGEON SECTION GENERATED");
-		float Tw, Th; GetTextSize(T, Tw, Th, Medium, Sc * 1.4f);
-		DrawText(T, FLinearColor(RDCyan.R, RDCyan.G, RDCyan.B, A), (Canvas->ClipX - Tw) * 0.5f, 90.f * Sc, Medium, Sc * 1.4f);
+		const FString T = UI.HasFonts() ? FString(TEXT("NEW DUNGEON SECTION GENERATED")) : FString(TEXT("▲ NEW DUNGEON SECTION GENERATED"));
+		float Tw, Th; UI.TextSize(T, Tw, Th, Medium, Sc * 1.4f, ERDType::Title);
+		UI.Text(T, FLinearColor(RDCyan.R, RDCyan.G, RDCyan.B, A), (Canvas->ClipX - Tw) * 0.5f, 90.f * Sc, Medium, Sc * 1.4f, ERDType::Title);
 	}
 
 	// ---- interaction prompt
@@ -563,10 +564,10 @@ void ARDHUD::DrawHUD()
 	{
 		const URDCombatComponent* Cb = Gen->GetPlayerCombat();
 		const FString T = FString::Printf(TEXT("[%s]  %s"), (Gen->bCasterControls && Cb && Cb->IsUsingGamepad()) ? TEXT("X") : TEXT("F"), *What);
-		float Tw, Th; GetTextSize(T, Tw, Th, Medium, Sc * 1.2f);
+		float Tw, Th; UI.TextSize(T, Tw, Th, Medium, Sc * 1.2f);
 		const float X = (Canvas->ClipX - Tw) * 0.5f, Y = Canvas->ClipY * 0.72f;
 		Box(FVector2D(X - 14.f * Sc, Y - 8.f * Sc), FVector2D(X + Tw + 14.f * Sc, Y + Th + 8.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.6f));
-		DrawText(T, FLinearColor(0.95f, 0.9f, 0.78f), X, Y, Medium, Sc * 1.2f);
+		UI.Text(T, FLinearColor(0.95f, 0.9f, 0.78f), X, Y, Medium, Sc * 1.2f);
 	}
 
 	// ---- random_dungeonmagic_level4: what she found, what the inventory did, the inventory itself
@@ -606,9 +607,9 @@ void ARDHUD::DrawHUD()
 				{
 					// full name when it fits, else a short code (legend below)
 					FString N = ARDDungeonGenerator::KindName(R.Kind);
-					float Tw, Th; GetTextSize(N, Tw, Th, Small, Sc * 0.9f);
-					if (Tw >= Hi.X - Lo.X - 4.f) { N = KindCode(R.Kind); GetTextSize(N, Tw, Th, Small, Sc * 0.85f); }
-					if (Tw < Hi.X - Lo.X - 2.f && Th < Hi.Y - Lo.Y) DrawText(N, FLinearColor(0.22f, 0.15f, 0.08f), (Lo.X + Hi.X - Tw) * 0.5f, (Lo.Y + Hi.Y - Th) * 0.5f, Small, Sc * 0.85f);
+					float Tw, Th; UI.TextSize(N, Tw, Th, Small, Sc * 0.9f);
+					if (Tw >= Hi.X - Lo.X - 4.f) { N = KindCode(R.Kind); UI.TextSize(N, Tw, Th, Small, Sc * 0.85f); }
+					if (Tw < Hi.X - Lo.X - 2.f && Th < Hi.Y - Lo.Y) UI.Text(N, FLinearColor(0.22f, 0.15f, 0.08f), (Lo.X + Hi.X - Tw) * 0.5f, (Lo.Y + Hi.Y - Th) * 0.5f, Small, Sc * 0.85f);
 				}
 			}
 			for (const FVector2D& D : M.Doors)
@@ -627,18 +628,18 @@ void ARDHUD::DrawHUD()
 				if (Q.X > A0.X && Q.Y > A0.Y && Q.X < A1.X && Q.Y < A1.Y) Box(Q - FVector2D(4.f * Sc), Q + FVector2D(4.f * Sc), FLinearColor(0.95f, 0.15f, 0.12f, 1.f));
 			}
 		DrawPlayerArrow(ToS(FVector2D(L.X, L.Y)), Yaw - 90.f, 12.f * Sc);
-		DrawText(TEXT("DUNGEON MAP"), RDInk, 80.f * Sc, 40.f * Sc, Medium, Sc * 1.6f);
+		UI.Text(TEXT("DUNGEON MAP"), RDInk, 80.f * Sc, 40.f * Sc, Medium, Sc * 1.6f);
 		const FString Sub = FString::Printf(TEXT("%d rooms discovered of %d generated  ·  %d sections  ·  %s  close"), Disc, All, Gen->MapData.Num(), bPadMap ? TEXT("Back") : TEXT("M"));
-		DrawText(Sub, FLinearColor(0.75f, 0.72f, 0.65f), 82.f * Sc, 78.f * Sc, Small, Sc * 1.1f);
+		UI.Text(Sub, FLinearColor(0.75f, 0.72f, 0.65f), 82.f * Sc, 78.f * Sc, Small, Sc * 1.1f);
 		// legend: room codes
 		float Y = Canvas->ClipY - 64.f * Sc, X = 82.f * Sc;
 		for (int32 Kd = (int32)ERDRoomKind::Hall; Kd < (int32)ERDRoomKind::Junction; ++Kd)
 		{
 			const FString E = FString::Printf(TEXT("%s %s"), *KindCode((ERDRoomKind)Kd), *ARDDungeonGenerator::KindName((ERDRoomKind)Kd));
-			float Tw, Th; GetTextSize(E, Tw, Th, Small, Sc);
+			float Tw, Th; UI.TextSize(E, Tw, Th, Small, Sc);
 			if (X + Tw > Canvas->ClipX - 80.f * Sc) { X = 82.f * Sc; Y += 22.f * Sc; }
 			if (bStyle) Box(FVector2D(X - 16.f * Sc, Y + 3.f * Sc), FVector2D(X - 4.f * Sc, Y + 15.f * Sc), RDFloor((ERDRoomKind)Kd, false));
-			DrawText(E, FLinearColor(0.75f, 0.72f, 0.65f), X, Y, Small, Sc);
+			UI.Text(E, FLinearColor(0.75f, 0.72f, 0.65f), X, Y, Small, Sc);
 			X += Tw + (bStyle ? 40.f : 24.f) * Sc;
 		}
 	}
@@ -749,9 +750,10 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 		if (!S) continue;
 		for (int32 I = 0; I < S->GetNumContainers(); ++I)
 		{
-			// (the objectives: chests and trunks; the barrels, crates and wardrobes that line the storerooms would bury the map in stars)
+			// (the objectives: chests and trunks not looted yet, open or shut; the barrels, crates and wardrobes that line the
+			// storerooms would bury the map in stars)
 			const FString Kd = S->GetContainerKind(I);
-			if (S->GetContainerOpenAlpha(I) > 0.05f || (Kd != TEXT("chest") && Kd != TEXT("trunk"))) continue;
+			if (S->IsContainerLooted(I) || (Kd != TEXT("chest") && Kd != TEXT("trunk"))) continue;
 			const FVector P = S->GetContainerLocation(I);
 			if (Discovered(P)) Out.Add({ FVector2D(P), 2 });
 		}
@@ -814,7 +816,7 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 	{
 		const FVector2D S = ToS(Pi.W);
 		if (FVector2D::Distance(S, C) > R * 0.94f) continue;
-		if (Pi.Kind == 2) Star(S, 6.5f * Sc, RDTacGold);
+		if (Pi.Kind == 2) { Star(S, 6.5f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else if (Pi.Kind == 3) Diamond(S, 5.5f * Sc, RDTacExit);
 	}
 	for (const FRDPoi& Pi : Pois)
@@ -829,11 +831,11 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
 	const FLinearColor Ink(0.75f, 0.77f, 0.8f, 0.85f);
 	float Tw, Th;
-	DrawText(TEXT("N"), Ink, C.X - 4.f * Sc, C.Y - R * 0.98f, Small, Sc);
+	UI.Text(TEXT("N"), Ink, C.X - 4.f * Sc, C.Y - R * 0.98f, Small, Sc, ERDType::Title);
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 	const FString Under = FString::Printf(TEXT("%d / %d rooms    %s  map"), Disc, All, bPad ? TEXT("Back") : TEXT("M"));
-	GetTextSize(Under, Tw, Th, Small, Sc);
-	DrawText(Under, Ink, C.X - Tw * 0.5f, C.Y + (Ra ? Ring + 4.f * Sc : R * 0.96f), Small, Sc);
+	UI.TextSize(Under, Tw, Th, Small, Sc);
+	UI.Text(Under, Ink, C.X - Tw * 0.5f, C.Y + (Ra ? Ring + 4.f * Sc : R * 0.96f), Small, Sc);
 }
 
 void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
@@ -848,7 +850,10 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	// the vignette: the minimap's feathered dark disc stretched over the area (the board's leather shows in its corners)
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - Hf.X * 1.12f, C.Y - Hf.Y * 1.12f, Hf.X * 2.24f, Hf.Y * 2.24f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.9f), BLEND_Translucent);
 	const float K = (B.Y - A.Y) / (TacticalMapMeters * 100.f), TS = Gen->TileSize;
-	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - L.Y, -(W.X - L.X)) * K; };
+	// (its middle: her, or where the arrow keys scrolled it)
+	const FVector Vw = L + FVector(Gen->MapPan.X, Gen->MapPan.Y, 0.f);
+	MapView = FVector2D(Vw.X, Vw.Y);
+	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - Vw.Y, -(W.X - Vw.X)) * K; };
 	// (everything fades out toward the board as the minimap's terrain does toward its rim: by the distance from the middle
 	// in shares of the area's half sizes)
 	auto Fade = [&](const FVector2D& S) { const FVector2D D = (S - C) / Hf; return FMath::Clamp((1.f - D.Size()) / 0.24f, 0.f, 1.f); };
@@ -858,8 +863,8 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	TSet<FIntPoint> Fresh;
 	for (const auto& KV : Gen->MapData) if (KV.Value.GeneratedTime >= 0.f && Now - KV.Value.GeneratedTime < 4.f) Fresh.Add(KV.Key);
 	const float HX = Hf.Y / K + TS, HY = Hf.X / K + TS;          // (world half extents shown: screen up = world X)
-	const int32 X0 = FMath::FloorToInt((L.X - HX) / TS), X1 = FMath::FloorToInt((L.X + HX) / TS);
-	const int32 Y0 = FMath::FloorToInt((L.Y - HY) / TS), Y1 = FMath::FloorToInt((L.Y + HY) / TS);
+	const int32 X0 = FMath::FloorToInt((Vw.X - HX) / TS), X1 = FMath::FloorToInt((Vw.X + HX) / TS);
+	const int32 Y0 = FMath::FloorToInt((Vw.Y - HY) / TS), Y1 = FMath::FloorToInt((Vw.Y + HY) / TS);
 	// the minimap's terrain: floors dark, hallways darker, what she has not seen darker still; a lit line where a floor
 	// she has seen meets no floor
 	const FLinearColor Room(0.15f, 0.16f, 0.17f, 0.95f), Hall(0.115f, 0.12f, 0.13f, 0.95f), Unknown(0.055f, 0.058f, 0.064f, 0.7f), Wall(0.36f, 0.385f, 0.41f, 0.9f);
@@ -900,13 +905,52 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 			const FVector2D P0 = ToS(D - Half), P1 = ToS(D + Half);
 			DrawLine(P0.X, P0.Y, P1.X, P1.Y, RDTacA(RDTacDoor, 0.9f * Al), 2.5f * Sc);
 		}
+	// the names of the rooms she has found, in the labels' small capitals ("GREAT HALL" is written "Great Hall"), in the
+	// middle of each room: on two lines when one is too wide, smaller when that is too, left out when nothing fits; faded
+	// out toward the board as the tiles are
+	RoomLabels.Reset();
+	{
+		const FLinearColor RoomInk(0.90f, 0.82f, 0.62f, 1.f);
+		for (const auto& KV : Gen->MapData)
+			for (const FRDMapRect& R : KV.Value.Rects)
+			{
+				if (!R.bDiscovered || R.bCorridor || R.Kind == ERDRoomKind::Junction) continue;
+				const FVector2D Pa = ToS(FVector2D(R.Min) * TS), Pb = ToS(FVector2D(R.Max) * TS);
+				const FVector2D Lo(FMath::Min(Pa.X, Pb.X), FMath::Min(Pa.Y, Pb.Y)), Hi(FMath::Max(Pa.X, Pb.X), FMath::Max(Pa.Y, Pb.Y)), Mid = (Lo + Hi) * 0.5f;
+				const float Al = Fade(Mid);
+				if (!Inside(Mid) || Al < 0.25f) continue;
+				const FString Name = ARDDungeonGenerator::KindName(R.Kind);
+				FString First = Name.ToUpper(), Second;
+				const float RoomW = Hi.X - Lo.X - 10.f * Sc, RoomH = Hi.Y - Lo.Y - 6.f * Sc;
+				float Ks = Sc * 1.3f, W1 = 0.f, H1 = 0.f, W2 = 0.f, H2 = 0.f;
+				UI.TextSize(First, W1, H1, Small, Ks, ERDType::Label);
+				if (W1 > RoomW) First.Split(TEXT(" "), &First, &Second);
+				for (int32 Try = 0; Try < 5; ++Try)
+				{
+					UI.TextSize(First, W1, H1, Small, Ks, ERDType::Label);
+					if (!Second.IsEmpty()) UI.TextSize(Second, W2, H2, Small, Ks, ERDType::Label);
+					if (FMath::Max(W1, W2) <= RoomW && H1 + H2 <= RoomH) break;
+					Ks *= 0.88f;
+				}
+				if (FMath::Max(W1, W2) > RoomW || H1 + H2 > RoomH) continue;
+				const float Lh = H1 * 0.86f, Ty0 = Mid.Y - (Second.IsEmpty() ? H1 : Lh + H2) * 0.5f;
+				auto Line = [&](const FString& S, float Tw, float Y)
+				{
+					UI.Text(S, FLinearColor(0.f, 0.f, 0.f, 0.85f * Al), Mid.X - Tw * 0.5f + 1.5f * Sc, Y + 1.5f * Sc, Small, Ks, ERDType::Label);
+					UI.Text(S, FLinearColor(RoomInk.R, RoomInk.G, RoomInk.B, Al), Mid.X - Tw * 0.5f, Y, Small, Ks, ERDType::Label);
+				};
+				Line(First, W1, Ty0);
+				if (!Second.IsEmpty()) Line(Second, W2, Ty0 + Lh);
+				RoomLabels.Add(Name);
+			}
+	}
 	// the markers, bright over the dark ground (as on the minimap, a little larger)
 	TArray<FRDPoi> Pois; GatherPois(Pois, L, 2500.f);
 	for (const FRDPoi& Pi : Pois)
 	{
 		const FVector2D S = ToS(Pi.W);
 		if (!Inside(S) || Fade(S) < 0.3f) continue;
-		if (Pi.Kind == 2) Star(S, 8.5f * Sc, RDTacGold);
+		if (Pi.Kind == 2) { Star(S, 8.5f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else if (Pi.Kind == 3) Diamond(S, 7.5f * Sc, RDTacExit);
 	}
 	for (const FRDPoi& Pi : Pois)
@@ -916,44 +960,47 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		if (Pi.Kind == 0) { SoftDot(S, 11.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 5.5f * Sc, RDTacRed); }
 		else if (Pi.Kind == 1) { SoftDot(S, 13.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 8.5f * Sc, RDTacElite); }
 	}
-	DrawPlayerArrow(C, Yaw - 90.f, 12.f * Sc);
+	// her arrow where she is (scrolled away from her, it may be out of view)
+	MapArrow = ToS(FVector2D(L.X, L.Y)); bMapArrow = Inside(MapArrow) && Fade(MapArrow) > 0.05f;
+	if (bMapArrow) DrawPlayerArrow(MapArrow, Yaw - 90.f, 12.f * Sc);
 	// the plaque at the top, the compass in the upper right corner, the key in the lower left, the rooms and the key that
 	// closes it at the bottom
 	const FLinearColor Gold(1.f, 0.84f, 0.45f, 1.f), Ink(0.86f, 0.82f, 0.72f, 0.95f);
 	float Tw, Th;
 	const FString Title = TEXT("DUNGEON MAP");
-	GetTextSize(Title, Tw, Th, Medium, Sc * 1.25f);
+	UI.TextSize(Title, Tw, Th, Medium, Sc * 1.25f, ERDType::Title);
 	const float Ph = 58.f * Sc;
 	const FVector2D T0(C.X - Tw * 0.5f - 90.f * Sc, A.Y + 6.f * Sc), T1(C.X + Tw * 0.5f + 90.f * Sc, A.Y + 6.f * Sc + Ph);
 	if (const FRDUIArt* Pa = UI.Find(TEXT("banner"))) UI.Nine(TEXT("banner"), T0, T1, Ph / FMath::Max((float)Pa->Texture->GetSizeY(), 1.f));
-	DrawText(Title, FLinearColor(0.f, 0.f, 0.f, 0.8f), C.X - Tw * 0.5f + 2.f * Sc, (T0.Y + T1.Y - Th) * 0.5f + 2.f * Sc, Medium, Sc * 1.25f);
-	DrawText(Title, Gold, C.X - Tw * 0.5f, (T0.Y + T1.Y - Th) * 0.5f, Medium, Sc * 1.25f);
+	UI.Text(Title, FLinearColor(0.f, 0.f, 0.f, 0.8f), C.X - Tw * 0.5f + 2.f * Sc, (T0.Y + T1.Y - Th) * 0.5f + 2.f * Sc, Medium, Sc * 1.25f, ERDType::Title);
+	UI.Text(Title, Gold, C.X - Tw * 0.5f, (T0.Y + T1.Y - Th) * 0.5f, Medium, Sc * 1.25f, ERDType::Title);
 	const float Cz = 118.f * Sc;
 	// (north is up: an N over the compass's gem)
 	if (UI.Fit(TEXT("compass"), FVector2D(B.X - 40.f * Sc - Cz, A.Y + 46.f * Sc), FVector2D(B.X - 40.f * Sc, A.Y + 46.f * Sc + Cz)))
 	{
-		GetTextSize(TEXT("N"), Tw, Th, Small, Sc * 1.2f);
-		DrawText(TEXT("N"), Gold, B.X - 40.f * Sc - Cz * 0.5f - Tw * 0.5f, A.Y + 46.f * Sc - Th - 1.f * Sc, Small, Sc * 1.2f);
+		UI.TextSize(TEXT("N"), Tw, Th, Small, Sc * 1.2f, ERDType::Title);
+		UI.Text(TEXT("N"), Gold, B.X - 40.f * Sc - Cz * 0.5f - Tw * 0.5f, A.Y + 46.f * Sc - Th - 1.f * Sc, Small, Sc * 1.2f, ERDType::Title);
 	}
 	{
 		float Y = B.Y - 166.f * Sc; const float X = A.X + 44.f * Sc;
-		DrawText(TEXT("KEY"), Gold, X - 6.f * Sc, Y - 30.f * Sc, Small, Sc * 1.05f);
+		UI.Text(TEXT("KEY"), Gold, X - 6.f * Sc, Y - 30.f * Sc, Small, Sc * 1.05f, ERDType::Label);
 		UI.Fit(TEXT("divider"), FVector2D(X - 14.f * Sc, Y - 14.f * Sc), FVector2D(X + 200.f * Sc, Y + 2.f * Sc));
 		auto Key = [&](int32 Kind, const TCHAR* What)
 		{
 			const FVector2D P(X + 6.f * Sc, Y + 8.f * Sc);
 			if (Kind == 0) SoftDot(P, 5.5f * Sc, RDTacRed); else if (Kind == 1) Triangle(P, 7.5f * Sc, RDTacElite); else if (Kind == 2) Star(P, 7.5f * Sc, RDTacGold);
 			else if (Kind == 3) Diamond(P, 6.5f * Sc, RDTacExit); else DrawLine(P.X - 7.f * Sc, P.Y, P.X + 7.f * Sc, P.Y, RDTacDoor, 2.5f * Sc);
-			DrawText(What, Ink, X + 24.f * Sc, Y, Small, Sc);
+			UI.Text(What, Ink, X + 24.f * Sc, Y, Small, Sc);
 			Y += 23.f * Sc;
 		};
-		Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unopened chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
+		Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unlooted chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
 	}
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
-	const FString Under = FString::Printf(TEXT("%d / %d rooms found        %s  close"), Disc, All, bPad ? TEXT("Back") : TEXT("M"));
-	GetTextSize(Under, Tw, Th, Small, Sc * 1.1f);
-	DrawText(Under, Ink, C.X - Tw * 0.5f, B.Y - 34.f * Sc, Small, Sc * 1.1f);
+	const FString Under = FString::Printf(TEXT("%d / %d rooms found      %s  scroll      %s  centre      %s  close"), Disc, All, bPad ? TEXT("D-pad") : TEXT("Arrows"),
+	                                      bPad ? TEXT("R3") : TEXT("C"), bPad ? TEXT("Back") : TEXT("M"));
+	UI.TextSize(Under, Tw, Th, Small, Sc * 1.1f);
+	UI.Text(Under, Ink, C.X - Tw * 0.5f, B.Y - 34.f * Sc, Small, Sc * 1.1f);
 }
 
 void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
@@ -963,13 +1010,15 @@ void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
 	const FVector2D C(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
 	const float K = Canvas->ClipY / (TacticalMapMeters * 100.f), TS = Gen->TileSize;
-	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - L.Y, -(W.X - L.X)) * K; };
+	const FVector Vw = L + FVector(Gen->MapPan.X, Gen->MapPan.Y, 0.f);       // (her, or where the arrow keys scrolled it)
+	MapView = FVector2D(Vw.X, Vw.Y);
+	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - Vw.Y, -(W.X - Vw.X)) * K; };
 	// a light veil only: the game shows through
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.012f, 0.02f, 0.28f));
 	CacheTiles();
 	const float HX = C.Y / K + TS, HY = C.X / K + TS;          // (world half extents shown: screen up = world X)
-	const int32 X0 = FMath::FloorToInt((L.X - HX) / TS), X1 = FMath::FloorToInt((L.X + HX) / TS);
-	const int32 Y0 = FMath::FloorToInt((L.Y - HY) / TS), Y1 = FMath::FloorToInt((L.Y + HY) / TS);
+	const int32 X0 = FMath::FloorToInt((Vw.X - HX) / TS), X1 = FMath::FloorToInt((Vw.X + HX) / TS);
+	const int32 Y0 = FMath::FloorToInt((Vw.Y - HY) / TS), Y1 = FMath::FloorToInt((Vw.Y + HY) / TS);
 	// the wireframe: where a discovered floor tile meets no floor, joined into runs along each grid line
 	TMap<int32, TArray<int32>> AlongY, AlongX;      // (lines of constant world X, running along Y; lines of constant Y, along X)
 	for (int32 X = X0; X <= X1; ++X)
@@ -1028,29 +1077,31 @@ void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
 		if (S.X < 0.f || S.Y < 0.f || S.X > Canvas->ClipX || S.Y > Canvas->ClipY) continue;
 		if (Pi.Kind == 0) { SoftDot(S, 13.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 6.5f * Sc, RDTacRed); }
 		else if (Pi.Kind == 1) { SoftDot(S, 16.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 10.f * Sc, RDTacElite); }
-		else if (Pi.Kind == 2) Star(S, 10.f * Sc, RDTacGold);
+		else if (Pi.Kind == 2) { Star(S, 10.f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else Diamond(S, 9.f * Sc, RDTacExit);
 	}
-	DrawPlayerArrow(C, Yaw - 90.f, 13.f * Sc);
+	MapArrow = ToS(FVector2D(L.X, L.Y));
+	bMapArrow = MapArrow.X >= 0.f && MapArrow.Y >= 0.f && MapArrow.X <= Canvas->ClipX && MapArrow.Y <= Canvas->ClipY;
+	if (bMapArrow) DrawPlayerArrow(MapArrow, Yaw - 90.f, 13.f * Sc);
 	// title, compass and key
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 	float Tw, Th;
 	const FString Title = TEXT("MAP");
-	GetTextSize(Title, Tw, Th, Medium, Sc * 1.3f);
-	DrawText(Title, RDTacA(RDTacWire, 0.95f), C.X - Tw * 0.5f, 30.f * Sc, Medium, Sc * 1.3f);
-	const FString Sub = FString::Printf(TEXT("N up   ·   %s  close"), bPad ? TEXT("Back") : TEXT("M"));
-	GetTextSize(Sub, Tw, Th, Small, Sc);
-	DrawText(Sub, FLinearColor(0.8f, 0.92f, 0.95f, 0.85f), C.X - Tw * 0.5f, 30.f * Sc + 36.f * Sc, Small, Sc);
+	UI.TextSize(Title, Tw, Th, Medium, Sc * 1.3f);
+	UI.Text(Title, RDTacA(RDTacWire, 0.95f), C.X - Tw * 0.5f, 30.f * Sc, Medium, Sc * 1.3f);
+	const FString Sub = FString::Printf(TEXT("N up   ·   %s  scroll   ·   %s  centre   ·   %s  close"), bPad ? TEXT("D-pad") : TEXT("Arrows"), bPad ? TEXT("R3") : TEXT("C"), bPad ? TEXT("Back") : TEXT("M"));
+	UI.TextSize(Sub, Tw, Th, Small, Sc);
+	UI.Text(Sub, FLinearColor(0.8f, 0.92f, 0.95f, 0.85f), C.X - Tw * 0.5f, 30.f * Sc + 36.f * Sc, Small, Sc);
 	float Y = Canvas->ClipY - 150.f * Sc; const float X = 40.f * Sc;
 	auto Key = [&](int32 Kind, const TCHAR* What)
 	{
 		const FVector2D P(X, Y + 8.f * Sc);
 		if (Kind == 0) SoftDot(P, 6.f * Sc, RDTacRed); else if (Kind == 1) Triangle(P, 8.f * Sc, RDTacElite); else if (Kind == 2) Star(P, 8.f * Sc, RDTacGold);
 		else if (Kind == 3) Diamond(P, 7.f * Sc, RDTacExit); else DrawLine(P.X - 8.f * Sc, P.Y, P.X + 8.f * Sc, P.Y, RDTacDoor, 3.f * Sc);
-		DrawText(What, FLinearColor(0.85f, 0.92f, 0.95f, 0.9f), X + 18.f * Sc, Y, Small, Sc);
+		UI.Text(What, FLinearColor(0.85f, 0.92f, 0.95f, 0.9f), X + 18.f * Sc, Y, Small, Sc);
 		Y += 24.f * Sc;
 	};
-	Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unopened chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
+	Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unlooted chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
 }
 
 FString ARDHUD::KindCode(ERDRoomKind K)
@@ -1095,7 +1146,7 @@ void ARDHUD::DrawNotices(float Sc)
 		const FString N = Gen->LastFound.ToString();
 		const FString Hint = bPad ? TEXT("Start  inventory") : TEXT("I  inventory");
 		float Nw, Nh, Lw, Lh, Hw, Hh;
-		GetTextSize(N, Nw, Nh, Medium, Sc * 1.35f); GetTextSize(TEXT("FOUND"), Lw, Lh, Small, Sc * 1.1f); GetTextSize(Hint, Hw, Hh, Small, Sc);
+		UI.TextSize(N, Nw, Nh, Medium, Sc * 1.35f, ERDType::Title); UI.TextSize(TEXT("FOUND"), Lw, Lh, Small, Sc * 1.1f, ERDType::Label); UI.TextSize(Hint, Hw, Hh, Small, Sc);
 		// (level 4: on the painted plaque, with the item's picture on its left)
 		const FName Ic = ItemIcon(Gen->LastFound);
 		const bool bPlaque = UI.Has(TEXT("banner"));
@@ -1115,16 +1166,16 @@ void ARDHUD::DrawNotices(float Sc)
 		}
 		const float Cx = (A.X + B.X + Ih) * 0.5f;          // (the text's middle: right of the picture)
 		if (Ih > 0.f) UI.Fit(Ic, FVector2D(A.X + Ends + 12.f * Sc, A.Y + 2.f * Sc), FVector2D(A.X + Ends + 12.f * Sc + Ih - 8.f * Sc, B.Y - 2.f * Sc), FLinearColor(1.f, 1.f, 1.f, Al));
-		DrawText(TEXT("FOUND"), FLinearColor(1.f, 0.82f, 0.3f, Al), Cx - Lw * 0.5f, Y, Small, Sc * 1.1f);
-		DrawText(N, FLinearColor(1.f, 0.97f, 0.88f, Al), Cx - Nw * 0.5f, Y + Lh + 4.f * Sc, Medium, Sc * 1.35f);
-		DrawText(Hint, FLinearColor(0.75f, 0.72f, 0.65f, Al), Cx - Hw * 0.5f, Y + Lh + Nh + 10.f * Sc, Small, Sc);
+		UI.Text(TEXT("FOUND"), FLinearColor(1.f, 0.82f, 0.3f, Al), Cx - Lw * 0.5f, Y, Small, Sc * 1.1f, ERDType::Label);
+		UI.Text(N, FLinearColor(1.f, 0.97f, 0.88f, Al), Cx - Nw * 0.5f, Y + Lh + 4.f * Sc, Medium, Sc * 1.35f, ERDType::Title);
+		UI.Text(Hint, FLinearColor(0.75f, 0.72f, 0.65f, Al), Cx - Hw * 0.5f, Y + Lh + Nh + 10.f * Sc, Small, Sc);
 	}
 	// what the inventory did, or a cast refused (not over the open inventory: it shows it itself)
 	const float Ma = Now - Cb->MessageTime;
 	if (!Cb->IsInventoryOpen() && Ma >= 0.f && Ma < 2.6f && !Cb->Message.IsEmpty())
 	{
 		const float Al = FMath::Clamp((2.6f - Ma) / 0.5f, 0.f, 1.f);
-		float Tw, Th; GetTextSize(Cb->Message, Tw, Th, Small, Sc * 1.3f);
+		float Tw, Th; UI.TextSize(Cb->Message, Tw, Th, Small, Sc * 1.3f);
 		const float X = (Canvas->ClipX - Tw) * 0.5f, Y = Canvas->ClipY * 0.30f;
 		if (const FRDUIArt* Pa = UI.Find(TEXT("banner")))
 		{
@@ -1133,7 +1184,7 @@ void ARDHUD::DrawNotices(float Sc)
 			UI.Nine(TEXT("banner"), FVector2D(X - Ends, Y - 20.f * Sc), FVector2D(X + Tw + Ends, Y + Th + 20.f * Sc), Px, FLinearColor(1.f, 1.f, 1.f, Al));
 		}
 		else Box(FVector2D(X - 14.f * Sc, Y - 7.f * Sc), FVector2D(X + Tw + 14.f * Sc, Y + Th + 7.f * Sc), FLinearColor(0.03f, 0.03f, 0.04f, 0.65f * Al));
-		DrawText(Cb->Message, FLinearColor(0.95f, 0.92f, 0.82f, Al), X, Y, Small, Sc * 1.3f);
+		UI.Text(Cb->Message, FLinearColor(0.95f, 0.92f, 0.82f, Al), X, Y, Small, Sc * 1.3f);
 	}
 }
 
@@ -1160,17 +1211,18 @@ void ARDHUD::DrawInventory(float Sc)
 		Frame(A, B, Line, 2.f * Sc);
 	}
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
-	DrawText(TEXT("INVENTORY"), RDInk, A.X + Pd, A.Y + 16.f * Sc, Medium, Sc * 1.5f);
+	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;      // (the title row clear of the board's corner ornaments)
+	UI.Text(TEXT("INVENTORY"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
-	GetTextSize(Gen->PlayerTitle, Tw, Th, Small, Sc * 1.2f);
-	DrawText(Gen->PlayerTitle, Gold, B.X - Pd - Tw, A.Y + 18.f * Sc, Small, Sc * 1.2f);
-	DrawText(TEXT("the game is paused"), Dim, B.X - Pd - 150.f * Sc, A.Y + 42.f * Sc, Small, Sc * 0.95f);
+	UI.TextSize(Gen->PlayerTitle, Tw, Th, Small, Sc * 1.2f, ERDType::Title);
+	UI.Text(Gen->PlayerTitle, Gold, B.X - Pd - Tin - Tw, A.Y + 18.f * Sc, Small, Sc * 1.2f, ERDType::Title);
+	{ float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 42.f * Sc, Small, Sc * 0.95f); }
 	// ---- the list (left): her weapons, then what she carries
 	const float Lx = A.X + Pd, Lw = W * 0.5f - Pd;
 	float Y = A.Y + 76.f * Sc;
 	auto Header = [&](const TCHAR* T)
 	{
-		DrawText(T, Dim, Lx, Y, Small, Sc * 1.05f); Y += 26.f * Sc;
+		UI.Text(T, Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
 		if (bDivider) UI.Fit(TEXT("divider"), FVector2D(Lx - 8.f * Sc, Y - 18.f * Sc), FVector2D(Lx + Lw + 8.f * Sc, Y + 12.f * Sc));
 		else Box(FVector2D(Lx, Y - 4.f * Sc), FVector2D(Lx + Lw, Y - 3.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
 		Y += 4.f * Sc;
@@ -1188,8 +1240,8 @@ void ARDHUD::DrawInventory(float Sc)
 		}
 		float Ix = 0.f;
 		if (UI.Has(Icon)) { Ix = Rh; UI.Fit(Icon, FVector2D(R0.X + 8.f * Sc, R0.Y - 2.f * Sc), FVector2D(R0.X + 4.f * Sc + Rh, R1.Y + 2.f * Sc)); }
-		DrawText(Name, bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 6.f * Sc, Small, Sc * 1.15f);
-		if (!Tag.IsEmpty()) { GetTextSize(Tag, Tw, Th, Small, Sc); DrawText(Tag, TagC, R1.X - 12.f * Sc - Tw, R0.Y + 8.f * Sc, Small, Sc); }
+		UI.Text(Name, bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 6.f * Sc, Small, Sc * 1.15f);
+		if (!Tag.IsEmpty()) { UI.TextSize(Tag, Tw, Th, Small, Sc, ERDType::Label); UI.Text(Tag, TagC, R1.X - 12.f * Sc - Tw, R0.Y + 8.f * Sc, Small, Sc, ERDType::Label); }
 		Y += Rh;
 	};
 	Header(TEXT("WEAPONS AND SPELLS"));
@@ -1201,7 +1253,7 @@ void ARDHUD::DrawInventory(float Sc)
 	}
 	Y += 12.f * Sc;
 	Header(TEXT("POTIONS AND FOOD"));
-	if (NumItems <= 0) { DrawText(TEXT("nothing yet: the chests, trunks and barrels hold some"), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc); }
+	if (NumItems <= 0) { UI.Text(TEXT("nothing yet: the chests, trunks and barrels hold some"), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc); }
 	for (int32 I = NumWeapons; I < Lines.Num(); ++I)
 	{
 		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
@@ -1221,11 +1273,11 @@ void ARDHUD::DrawInventory(float Sc)
 		for (const FString& Wd : Words)
 		{
 			const FString Try = Cur2.IsEmpty() ? Wd : Cur2 + TEXT(" ") + Wd;
-			GetTextSize(Try, Tw, Th, Small, K);
-			if (Tw > Rw && !Cur2.IsEmpty()) { DrawText(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; Cur2 = Wd; }
+			UI.TextSize(Try, Tw, Th, Small, K);
+			if (Tw > Rw && !Cur2.IsEmpty()) { UI.Text(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; Cur2 = Wd; }
 			else Cur2 = Try;
 		}
-		if (!Cur2.IsEmpty()) { GetTextSize(Cur2, Tw, Th, Small, K); DrawText(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; }
+		if (!Cur2.IsEmpty()) { UI.TextSize(Cur2, Tw, Th, Small, K); UI.Text(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; }
 	};
 	if (Sel.Num() >= 2)
 	{
@@ -1236,10 +1288,10 @@ void ARDHUD::DrawInventory(float Sc)
 			const float Sz = 104.f * Sc;
 			UI.Fit(TEXT("slot"), FVector2D(Rx, Ry), FVector2D(Rx + Sz, Ry + Sz));
 			UI.Fit(Ic, FVector2D(Rx + 16.f * Sc, Ry + 14.f * Sc), FVector2D(Rx + Sz - 16.f * Sc, Ry + Sz - 14.f * Sc));
-			DrawText(Sel[1].ToUpper(), FLinearColor::White, Rx + Sz + 16.f * Sc, Ry + Sz * 0.5f - 16.f * Sc, Medium, Sc * 1.15f);
+			UI.Text(Sel[1].ToUpper(), FLinearColor::White, Rx + Sz + 16.f * Sc, Ry + Sz * 0.5f - 16.f * Sc, Medium, Sc * 1.15f, ERDType::Title);
 			Ry += Sz + 12.f * Sc;
 		}
-		else { DrawText(Sel[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f); Ry += 40.f * Sc; }
+		else { UI.Text(Sel[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f, ERDType::Title); Ry += 40.f * Sc; }
 		if (Sel[0] == TEXT("weapon") && Gen->Weapons.IsValidIndex(Cur))
 		{
 			const FRDWeaponDef& Wp = Gen->Weapons[Cur];
@@ -1270,8 +1322,8 @@ void ARDHUD::DrawInventory(float Sc)
 	const float Fy = B.Y - 92.f * Sc;
 	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(A.X + Pd, Fy - 20.f * Sc), FVector2D(B.X - Pd, Fy + 20.f * Sc));
 	else Box(FVector2D(A.X + Pd, Fy), FVector2D(B.X - Pd, Fy + 1.f), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
-	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) DrawText(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd, Fy + 14.f * Sc, Small, Sc * 1.15f);
+	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) UI.Text(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd + Tin, Fy + 14.f * Sc, Small, Sc * 1.15f);
 	const FString Keys = bPad ? TEXT("D-pad / left stick  select      A  wield or use      Start or B  close")
 	                          : TEXT("W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close");
-	DrawText(Keys, Dim, A.X + Pd, Fy + 50.f * Sc, Small, Sc * 1.05f);
+	UI.Text(Keys, Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
 }

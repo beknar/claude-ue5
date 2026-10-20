@@ -23,6 +23,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "RDTypes.h"
+#include "RDFace.h"
 #include "RDDungeonGenerator.generated.h"
 
 class ARDSection;
@@ -168,13 +169,28 @@ public:
 	/** what she found last (HUD) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") FName LastFound;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") int32 ItemsFound = 0;
+	TSet<FIntVector> LootedContainers;
 	float LastFoundTime = -100.f;
 	/** the item a container of a section holds (NAME_None: none) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") FName LootOf(FIntPoint Section, int32 Index) const;
+	/** the containers looted this run (section, container key): a container gives what it holds once, whatever happens to
+	 *  its section afterwards; RestartPlay empties it (a new run) */
+	void MarkContainerLooted(FIntPoint Section, int32 Key) { LootedContainers.Add(FIntVector(Section.X, Section.Y, Key)); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") bool IsContainerLooted(FIntPoint Section, int32 Key) const { return LootedContainers.Contains(FIntVector(Section.X, Section.Y, Key)); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") int32 GetNumLooted() const { return LootedContainers.Num(); }
+	/** tests: drop a generated section and queue it again (as when she walks far away and comes back) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") bool ReloadSection(FIntPoint Coord);
 
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
+	/** random_dungeonmagic_level4: its lettering by role ("title", "text", "label"; pipeline/unreal/830). Without it the HUD
+	 *  writes in the engine's font. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIFont> UIFonts;
+	/** random_dungeonmagic_level5 (the Summoner): her face's expression channels and the occasions that show them (834).
+	 *  With them the generator gives her pawn a URDFaceComponent in play (its blinks seeded from the session seed). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") TArray<FRDFaceChannel> FaceChannels;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") TMap<FName, FRDFaceCue> FaceCues;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") URDCombatComponent* GetPlayerCombat() const { return PlayerCombat; }
 	/** her average damage a blow over the weapons */
@@ -277,6 +293,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 SectionsGenerated = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 SectionsRemoved = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") bool bMapOpen = false;
+	/** the tactical big map's scroll, world cm from her (X north, Y east): the arrow keys (the D-pad on the gamepad) scroll
+	 *  it while it is open, C (the right stick pressed) brings it back over her; it opens over her */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon") FVector2D MapPan = FVector2D::ZeroVector;
+	/** how fast it scrolls (cm of the dungeon a second) and how far from her it may go */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MapPanSpeed = 4000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MapPanMax = 40000.f;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void CenterMap() { MapPan = FVector2D::ZeroVector; }
 
 	/** (editor) clear everything and build the start section with StartSeed; saved with the level */
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "RandomDungeon") void BuildStartSection();
@@ -300,7 +323,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString DescribeNearest(FVector From, float MaxDistance = 260.f) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumMonsters() const;
 	/** what M does (scripts / tests) */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetMapOpen(bool bOpen) { bMapOpen = bOpen; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetMapOpen(bool bOpen) { if (bOpen && !bMapOpen) MapPan = FVector2D::ZeroVector; bMapOpen = bOpen; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<ARDMonster*> GetMonsters() const;
 	/** discovered rooms / all rooms (generated) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void GetDiscoveryStats(int32& DiscoveredRooms, int32& GeneratedRooms) const;
@@ -324,6 +347,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "RandomDungeon|Reveal") TObjectPtr<UPostProcessComponent> RevealPost;
 	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> RevealMID;
 	UPROPERTY(Transient) TObjectPtr<ARDSection> Building;
+	/** while the big map is open: an input context over the pawn's own that takes the arrow keys (the project's move action
+	 *  has them too: scrolling walked her) */
+	UPROPERTY(Transient) TObjectPtr<class UInputMappingContext> MapScrollContext;
+	UPROPERTY(Transient) TObjectPtr<class UInputAction> MapScrollAction;
+	bool bMapScrollInput = false;
+	void UpdateMapScrollInput(APlayerController* PC);
 	UPROPERTY(Transient) TObjectPtr<URDCombatComponent> PlayerCombat;
 	UPROPERTY(Transient) TObjectPtr<URDBloodComponent> Blood;
 	/** the fall safety net: where the player last stood on the ground */

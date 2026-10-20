@@ -1,0 +1,421 @@
+{
+ "tag": "m14",
+ "plan": [
+  "setup",
+  "keys",
+  "pad",
+  "walls",
+  "cast",
+  "nothing",
+  "far",
+  "kill:3",
+  "tier"
+ ],
+ "level": "random_dungeonmagic_level",
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_RDM_CasterCharacter_C",
+   "mesh": "SK_JRPG_Caster",
+   "in_her_right_hand": null,
+   "hit_points": 100.0,
+   "weapons": [
+    "Fire"
+   ],
+   "spell": true,
+   "from_start_room_cm": 0,
+   "title": "GIRL-CASTER",
+   "caster_controls": true,
+   "keys": [
+    "W A S D|move",
+    "Mouse|look / turn the camera",
+    "Space|jump",
+    "R|switch walk / run",
+    "Shift (held)|run",
+    "Left mouse / E|fire spell",
+    "F|open door or container",
+    "M|map"
+   ],
+   "pad": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "LB / RB|fire spell",
+    "X|open door or container",
+    "Back|map"
+   ]
+  },
+  {
+   "step": "keys",
+   "ok": true,
+   "context_active": false,
+   "move_keys": [
+    "A",
+    "D",
+    "Down",
+    "Gamepad_Left2D",
+    "Left",
+    "Right",
+    "S",
+    "Up",
+    "W"
+   ],
+   "run_keys": [
+    "Gamepad_LeftThumbstick",
+    "LeftShift"
+   ],
+   "actions_on_E_and_left_mouse": [
+    "IA_Hook",
+    "IA_Jab",
+    "IA_TurnRight"
+   ],
+   "her_handlers": [
+    "Jump",
+    "Look",
+    "MouseLook",
+    "Move",
+    "Sprint"
+   ],
+   "clash": [],
+   "walk_cm_s": 119.7,
+   "her_walk": 119.71,
+   "run_cm_s": 381.7,
+   "her_run": 381.69,
+   "speeds": {
+    "walk": 119.7,
+    "run": 381.7,
+    "A": 119.7,
+    "S": 119.7,
+    "D": 119.7
+   },
+   "headings_deg": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "wanted_headings": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "attacks_by_key": {
+    "E": {
+     "attacks": 1,
+     "bolts": 1
+    },
+    "LeftMouseButton": {
+     "attacks": 1,
+     "bolts": 1
+    }
+   }
+  },
+  {
+   "step": "pad",
+   "ok": true,
+   "her_walk": 119.71,
+   "her_run": 381.69,
+   "device": {
+    "after_W": "keyboard",
+    "after_pad_button": "gamepad",
+    "after_W_again": "keyboard"
+   },
+   "stick_walk": {
+    "cm_s": 119.7,
+    "heading_deg": 0,
+    "running": false
+   },
+   "stick_run": {
+    "cm_s": 381.7,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_run": {
+    "cm_s": 381.7,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_walk": {
+    "cm_s": 119.7,
+    "heading_deg": 0,
+    "running": false
+   },
+   "switch": {
+    "LT_runs": true,
+    "LT_again_walks": true,
+    "R_runs": true,
+    "R_again_walks": true
+   },
+   "A_jump_cm": 103,
+   "right_stick_turned_deg": 57.5,
+   "RB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     0
+    ]
+   },
+   "LB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     0
+    ]
+   },
+   "RT": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "Y": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "X": {
+    "prompt": "open chest",
+    "container": "chest",
+    "open_alpha": 1.0,
+    "attacks": 0,
+    "device": "gamepad"
+   },
+   "Back": {
+    "opens_map": true,
+    "closes_it": true
+   }
+  },
+  {
+   "step": "walls",
+   "ok": true,
+   "sections": 1,
+   "segments": 763,
+   "by_piece": {
+    "Wall_Rough_5": 163,
+    "Wall_Rough_3": 153,
+    "Wall_Rough": 151,
+    "Wall_Rough_4": 142,
+    "Wall_Rough_2": 154
+   },
+   "rays": 58203,
+   "face": 51377,
+   "hole": 6826,
+   "leak": 0,
+   "leaks": [],
+   "without_backing": {
+    "segments": 600,
+    "rays": 45747,
+    "face": 38921,
+    "hole": 358,
+    "leak": 6468
+   },
+   "walk_in": {
+    "tries": [
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 85,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     }
+    ],
+    "ok": true
+   },
+   "fall": {
+    "resets": 1,
+    "put_back_cm_from_where_she_stood": 0.0,
+    "ok": true
+   },
+   "cells": {
+    "cells": 49,
+    "cell_sides_with_bars": 49,
+    "doors_open": 0,
+    "rays": 2352,
+    "leak": 0,
+    "leaks": [],
+    "hay": 49,
+    "hay_blocks": 49,
+    "hay_tops_cm": [
+     143,
+     143,
+     143
+    ],
+    "ok": true
+   }
+  },
+  {
+   "step": "cast",
+   "ok": true,
+   "monster": "Daemon",
+   "gap_cm": 900,
+   "hand": "hand_r",
+   "started": true,
+   "target_is_it": true,
+   "montage": true,
+   "hand_moved_cm": 52,
+   "charge_particles": 385,
+   "bolt_left_at_s": 0.43,
+   "bolt_speed_cm_s": 1700,
+   "spell_speed": 1700.0,
+   "particles_round_the_bolt": 755,
+   "on_monster": 1,
+   "elsewhere": 0,
+   "flown_cm": 566,
+   "it_lost": 25.0,
+   "damage": 25.0,
+   "burst_particles": 594,
+   "burst_at": [
+    660,
+    -3450,
+    129
+   ],
+   "sounds": {
+    "Player.Charge.Fire": 1,
+    "Player.Cast.Fire": 1,
+    "Player.Hit.Fire": 1
+   }
+  },
+  {
+   "step": "nothing",
+   "ok": true,
+   "stuck_in_the_wall": null,
+   "target": null,
+   "turned_deg": 0.0,
+   "off_her_heading_deg": 0.3,
+   "flown_cm": 1239,
+   "reach": 1400.0,
+   "damage_dealt": 0.0
+  },
+  {
+   "step": "far",
+   "ok": true,
+   "monster": "Spider",
+   "distance_cm": 1799,
+   "reach": 1400.0,
+   "target": null
+  },
+  {
+   "step": "kill",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Spider",
+     "hit_points": 30.0,
+     "casts": 1,
+     "bolts_on_it": 1,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 0.9,
+     "ok": true
+    },
+    {
+     "monster": "Mutant",
+     "hit_points": 49.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 1.7,
+     "ok": true
+    },
+    {
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 1.8,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 3
+  },
+  {
+   "step": "tier",
+   "ok": true,
+   "section": [
+    1,
+    0
+   ],
+   "monsters": 14,
+   "average_hit_points": 95.7,
+   "hers": 100.0,
+   "average_damage": 19.9,
+   "spell_damage": 20.0
+  }
+ ],
+ "error": null,
+ "rolls": 0,
+ "dodged": 0,
+ "kills": 3,
+ "casts": 12,
+ "bolts": 12,
+ "bolts_on_monsters": 6,
+ "bolts_elsewhere": 6,
+ "deaths": 0,
+ "damage_dealt": 162.5,
+ "damage_taken": 0.0
+}

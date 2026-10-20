@@ -385,9 +385,9 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 				if (Generator->bCasterControls) TickCasterInput(PC);      // (the magic levels' layout)
 				else
 				{
-					if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
-					if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
-					if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
+					if (PC->WasInputKeyJustPressed(EKeys::One) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left))) SelectWeapon(0);
+					if (PC->WasInputKeyJustPressed(EKeys::Two) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up))) SelectWeapon(1);
+					if (PC->WasInputKeyJustPressed(EKeys::Three) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right))) SelectWeapon(2);
 					// the drawn weapon: left mouse (X, RT); E too when it is a spell. A spell cast alongside it: right mouse or E (Y, LT)
 					const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
 					if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Left) || PC->GetInputAnalogKeyState(EKeys::Gamepad_RightTriggerAxis) > 0.5f
@@ -650,9 +650,9 @@ void URDCombatComponent::TickDevice(const APlayerController* PC)
 
 void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 {
-	if (PC->WasInputKeyJustPressed(EKeys::One) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left)) SelectWeapon(0);
-	if (PC->WasInputKeyJustPressed(EKeys::Two) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up)) SelectWeapon(1);
-	if (PC->WasInputKeyJustPressed(EKeys::Three) || PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right)) SelectWeapon(2);
+	if (PC->WasInputKeyJustPressed(EKeys::One) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left))) SelectWeapon(0);
+	if (PC->WasInputKeyJustPressed(EKeys::Two) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up))) SelectWeapon(1);
+	if (PC->WasInputKeyJustPressed(EKeys::Three) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right))) SelectWeapon(2);
 	if (Generator->bRogueControls)
 	{
 		// (the rogue: the wheel or Y switch weapons, the left mouse button or RB uses the one in her hands, B rolls)

@@ -1,4 +1,5 @@
-# random_dungeon_level walk test: start PIE, arm 771 with a plan, wait for a NEW "RDWALK done | <tag>" line, stop PIE.
+# random_dungeon_level walk test (any dungeon level that is open): start PIE, arm 771 with a plan, wait for a NEW "RDWALK done | <tag>" line, stop PIE.
+# rd.HeroMenu is 0 for the walk (random_dungeonmagic_level4 played without ?Hero= would open its menu instead) and 1 again after it.
 # Args: plan tag [maxSeconds]   e.g.  .\772_rd_walk.ps1 "rooms:5,expand:+x,rooms:4,home" w1
 param([string]$plan, [string]$tag, [int]$maxs = 1200)
 $py = $env:UE_PY; if (-not $py) { $py = "python" }
@@ -6,9 +7,13 @@ $ex = Join-Path $PSScriptRoot "..\blender_numpy\ue_exec.py"
 $log = Join-Path $PSScriptRoot "..\..\claude_ue5\Saved\Logs\claude_ue5.log"
 $pat = "RDWALK done \| $tag \|"
 $n0 = (Select-String -Path $log -Pattern $pat | Measure-Object).Count
+$e0 = (Select-String -Path $log -Pattern "RDWALK error" | Select-Object -Last 1).LineNumber; if (-not $e0) { $e0 = 0 }
 $stop = "import unreal; unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_end_play()"
 $begin = "import unreal; unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_begin_play(); print('pie requested')"
 $isup = "import unreal; print('PIE', unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world() is not None)"
+$cvar = "import unreal; unreal.SystemLibrary.execute_console_command(None, 'rd.HeroMenu {0}'); print('rd.HeroMenu', unreal.SystemLibrary.get_console_variable_int_value('rd.HeroMenu'))"
+function Restore { & $py $ex -c ($cvar -f 1) 2>$null | Out-Null }
+& $py $ex -c ($cvar -f 0) 2>$null | Out-Null
 & $py $ex -c $begin 2>$null | Out-Null
 $up = $false
 for ($k = 0; $k -lt 30 -and -not $up; $k++) {
@@ -17,17 +22,19 @@ for ($k = 0; $k -lt 30 -and -not $up; $k++) {
     if ("$o" -match "PIE True") { $up = $true }
     elseif ($k % 6 -eq 5) { & $py $ex -c $begin 2>$null | Out-Null }
 }
-if (-not $up) { "PIE did not start"; exit 1 }
+if (-not $up) { Restore; "PIE did not start"; exit 1 }
 Start-Sleep 8
 $o = & $py $ex (Join-Path $PSScriptRoot "771_rd_walk_test.py") $plan $tag 2>$null
-if (-not ("$o" -match "walk test armed")) { & $py $ex -c $stop | Out-Null; "arm failed: $o"; exit 1 }
+if (-not ("$o" -match "walk test armed")) { & $py $ex -c $stop | Out-Null; Restore; "arm failed: $o"; exit 1 }
 $t = 0; $line = $null
 while ($t -lt $maxs) {
     Start-Sleep 10; $t += 10
     if (-not (Get-Process UnrealEditor -ErrorAction SilentlyContinue)) { "EDITOR GONE"; exit 1 }
+    if (Select-String -Path $log -Pattern "RDWALK error" | Select-Object -Last 1 | Where-Object { $_.LineNumber -gt $e0 }) { break }
     $all = Select-String -Path $log -Pattern $pat
     if (($all | Measure-Object).Count -gt $n0) { $line = ($all | Select-Object -Last 1).Line; break }
     if (Select-String -Path $log -Pattern "RDWALK error" -SimpleMatch | Where-Object { $_.LineNumber -gt 0 } | Select-Object -Last 1 | Where-Object { $_.Line -match "RDWALK error" -and $t -gt 15 }) { }
 }
 Start-Sleep 3; & $py $ex -c $stop 2>$null | Out-Null; Start-Sleep 6
+Restore
 if ($line) { $line.Substring($line.IndexOf("RDWALK")) } else { "no result after $maxs s"; (Select-String -Path $log -Pattern "RDWALK " | Select-Object -Last 5).Line }

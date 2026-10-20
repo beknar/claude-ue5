@@ -10,10 +10,12 @@ Sound: under the menu, the music pack's menu track ("Menu" by name, continuing f
 game's own mix of that render (its .wav); the menu music levelled to the runs' loudness; short fades at every join.
 With the painted interface (ui_art_dir: rdm4_ui_cut.py --export's folder) the menu's card, bars, dividers, name plates,
 arrows and START are drawn with the painted pieces where ARDHeroSelectHUD draws them (rdm4_ui_draw.py), and the runs are
-taken from <hud_prefix><hero> (rdm_reel_overlay.py with the same folder).
+taken from <hud_prefix><hero> (rdm_reel_overlay.py with the same folder). Its lettering is then the game's (rdm4_fonts.py's
+files, ARDHeroSelectHUD's roles): Cinzel for the titles, names, START and keys, Alegreya for the text, Alegreya SC for the
+labels (written "Mana Back": sc()).
 Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix]
   work_dir holds final_menu (the menu's frames), hud_<hero> (her run with the HUD) and final_<hero> (her run's .wav)"""
-import sys, os, glob, json, math
+import sys, os, glob, json, math, re
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy.io import wavfile
@@ -38,6 +40,20 @@ def font(name, size):
     return ImageFont.load_default()
 f_big, f_title, f_name, f_tab, f_line, f_small, f_key, f_cap = (font("segoeuib.ttf", 56), font("segoeuib.ttf", 40), font("segoeuib.ttf", 58), font("seguisb.ttf", 24),
                                                                  font("segoeui.ttf", 23), font("seguisb.ttf", 18), font("segoeuib.ttf", 30), font("seguisb.ttf", 26))
+# ---- with the painted interface: the game's lettering (sizes: Alegreya a tenth larger than the Segoe UI it replaces)
+FD = os.path.join(SRC, "fonts")
+LETTERS = bool(UI) and os.path.exists(os.path.join(FD, "Cinzel-700.ttf"))
+def lfont(fn, size): return ImageFont.truetype(os.path.join(FD, fn + ".ttf"), int(size * K))
+def sc(s):
+    """a label for the small-capitals face (FRDUIDraw's RDUISmallCaps)"""
+    if not LETTERS: return s
+    return re.sub(r"[^\W\d_]{3,}", lambda m: m.group(0)[0] + m.group(0)[1:].lower() if m.group(0).isupper() else m.group(0), s)
+if LETTERS:
+    f_big, f_title, f_name, f_tab, f_key, f_cap = (lfont("Cinzel-700", 56), lfont("Cinzel-700", 40), lfont("Cinzel-700", 58), lfont("Cinzel-700", 24),
+                                                   lfont("Cinzel-700", 30), lfont("Cinzel-700", 26))
+    f_line, fx_small, fl_small, ft_line, f_capt = lfont("Alegreya-500", 25), lfont("Alegreya-500", 20), lfont("AlegreyaSC-700", 19), lfont("Cinzel-700", 22), lfont("Alegreya-500", 29)
+else:
+    fx_small, fl_small, ft_line, f_capt = f_small, f_small, f_line, f_cap
 def lin(c, a=1.0): return tuple(int(255 * min(1.0, max(0.0, v)) ** (1 / 2.2)) for v in c[:3]) + (int(255 * min(1.0, max(0.0, a))),)
 INK, DIM, LINE = (0.93, 0.88, 0.76), (0.68, 0.66, 0.60), (0.75, 0.65, 0.45)
 def row(f): return ROWS.get(min(max(f, 0), LAST)) or ROWS[min(ROWS, key=lambda k: abs(k - f))]
@@ -48,7 +64,7 @@ def menu_hud(f, k, fl):
     o = Image.new("RGBA", (W * K, H * K), (0, 0, 0, 0)); d = ImageDraw.Draw(o, "RGBA")
     fade = max(0.0, min(1.0, r["shown_ago"] / 0.35)); acc = tuple(h["accent"])
     ink = lambda c, a=1.0: lin(c, a * fade)
-    d.text((80 * K, 44 * K), "RANDOM DUNGEON", font=f_small, fill=lin(DIM)); d.text((78 * K, 64 * K), "CHOOSE YOUR HERO", font=f_title, fill=lin(INK))
+    d.text((80 * K, 44 * K), sc("RANDOM DUNGEON"), font=fl_small, fill=lin(DIM)); d.text((78 * K, 64 * K), "CHOOSE YOUR HERO", font=f_title, fill=lin(INK))
     # ---- her card (laid out twice: measured, then drawn on its panel)
     ax, ay, x = 80 * K, 160 * K, (114 + (18 if (UI and UI.has("panel")) else 0)) * K; wd = 720 * K - x - 30 * K     # (clear of the board's corner ornaments)
     def card(draw):
@@ -62,17 +78,17 @@ def menu_hud(f, k, fl):
                 # (ARDHeroSelectHUD: the painted frame, its fill as far as she has against the strongest)
                 bh = 38 * K
                 if draw:
-                    d.text((x, y + 4 * K), lab, font=f_small, fill=ink(DIM))
+                    d.text((x, y + 4 * K), sc(lab), font=fl_small, fill=ink(DIM))
                     a0, a1 = (x + 120 * K, y - 6 * K), (x + wd - 80 * K, y - 6 * K + bh)
                     UI.bar(o, fr0, fi0, a0, a1, UI.height_px(fr0, bh), min(1.0, v / mx), (1, 1, 1, fade), (1, 1, 1, fade))
-                    d.text((a1[0] + 12 * K, y + 4 * K), note, font=f_small, fill=ink(INK))
+                    d.text((a1[0] + 12 * K, y + 4 * K), note, font=fx_small, fill=ink(INK))
                 y += 44 * K
                 continue
             if draw:
-                d.text((x, y), lab, font=f_small, fill=ink(DIM)); b0x, b1x = x + 130 * K, x + wd - 90 * K
+                d.text((x, y), sc(lab), font=fl_small, fill=ink(DIM)); b0x, b1x = x + 130 * K, x + wd - 90 * K
                 d.rectangle((b0x, y + 2 * K, b1x, y + 20 * K), fill=lin((0.08, 0.08, 0.1), 0.9 * fade))
                 d.rectangle((b0x, y + 2 * K, b0x + (b1x - b0x) * min(1.0, v / mx), y + 20 * K), fill=ink(col))
-                d.text((b1x + 12 * K, y), note, font=f_small, fill=ink(INK))
+                d.text((b1x + 12 * K, y), note, font=fx_small, fill=ink(INK))
             y += 32 * K
         # her other numbers on one line (ARDHeroSelectHUD): the mana that comes back, her bonuses, the roll
         st = []
@@ -82,16 +98,16 @@ def menu_hud(f, k, fl):
         if h.get("roll"): st.append(("DODGE", "roll"))
         sx = x
         for a_, b_ in st:
-            if draw: d.text((sx, y), a_, font=f_small, fill=ink(DIM))
-            sx += d.textlength(a_, font=f_small) + 8 * K
-            if draw: d.text((sx, y), b_, font=f_small, fill=ink(acc))
-            sx += d.textlength(b_, font=f_small) + 28 * K
+            if draw: d.text((sx, y), sc(a_), font=fl_small, fill=ink(DIM))
+            sx += d.textlength(sc(a_), font=fl_small) + 8 * K
+            if draw: d.text((sx, y), b_, font=fx_small, fill=ink(acc))
+            sx += d.textlength(b_, font=fx_small) + 28 * K
         if st: y += 28 * K
         y += 14 * K
         def section(s):
             nonlocal y
             if draw:
-                d.text((x, y), s, font=f_small, fill=ink(acc))
+                d.text((x, y), sc(s), font=fl_small, fill=ink(acc))
                 if UI and UI.has("divider"): UI.fit(o, "divider", (x - 6 * K, y + 8 * K), (x + wd + 6 * K, y + 36 * K), (1, 1, 1, fade))
                 else: d.rectangle((x, y + 21 * K, x + wd, y + 22 * K), fill=lin(LINE, 0.35 * fade))
             y += 30 * K
@@ -130,8 +146,8 @@ def menu_hud(f, k, fl):
                         "%.0f damage a %s, flies %.0f m" % (w_["damage"] * (1 + bonus), "bolt" if w_["bolt"] else "cast", w_["reach"] / 100.0))
                 if w_["mana"] > 0: what += ", %.0f mana" % w_["mana"]
                 if draw:
-                    d.text((tx, y + 2 * K), w_["name"].upper(), font=f_line, fill=ink(INK))
-                    d.text((tx, y + 31 * K), what, font=f_small, fill=ink(DIM))
+                    d.text((tx, y + 2 * K), w_["name"].upper(), font=ft_line, fill=ink(INK))
+                    d.text((tx, y + 31 * K), what, font=fx_small, fill=ink(DIM))
                 y += rh + 8 * K
         return y
     by = min(card(False) + 18 * K, H * K - 170 * K)
@@ -175,9 +191,9 @@ def menu_hud(f, k, fl):
         p1 = (W * K - 80 * K, H * K - 170 * K); p0 = (p1[0] - tw - 60 * K, p1[1] - 72 * K)
         d.rectangle((*p0, *p1), fill=lin(tuple(c * (0.85 if pressed else 0.45) * pulse for c in acc), 0.95), outline=lin((1, 1, 1)) if pressed else lin(acc), width=(5 if pressed else 3) * K)
     d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), st, font=f_cap, fill=(255, 255, 255, 255), anchor="mm")
-    keys = "A / D, arrows or wheel  another hero      Enter or Space  start      or click"; tw = d.textlength(keys, font=f_small)
+    keys = "A / D, arrows or wheel  another hero      Enter or Space  start      or click"; tw = d.textlength(keys, font=fx_small)
     d.rectangle((W * K / 2 - tw / 2 - 16 * K, H * K - 62 * K, W * K / 2 + tw / 2 + 16 * K, H * K - 30 * K), fill=lin((0.03, 0.035, 0.05), 0.75))
-    d.text((W * K / 2, H * K - 46 * K), keys, font=f_small, fill=lin(INK), anchor="mm")
+    d.text((W * K / 2, H * K - 46 * K), keys, font=fx_small, fill=lin(INK), anchor="mm")
     # ---- the reel's own: which hero of four, the key being pressed, the opening title
     d.text((W * K - 80 * K, 46 * K), "HERO %d OF 4" % (k + 1), font=f_tab, fill=lin(INK), anchor="ra")
     if r["key"]:
@@ -190,7 +206,7 @@ def menu_hud(f, k, fl):
         a = max(0.0, min(1.0, (3.4 - t) / 0.7))
         v = Image.new("RGBA", o.size, (8, 7, 6, int(215 * a))); dv = ImageDraw.Draw(v, "RGBA")
         dv.text((W * K / 2, 470 * K), "random_dungeonmagic_level4", font=f_big, fill=(255, 255, 255, int(255 * a)), anchor="mm")
-        dv.text((W * K / 2, 545 * K), "choose a hero in the menu, then the dungeon: four heroes, four runs", font=f_cap, fill=(232, 236, 240, int(235 * a)), anchor="mm")
+        dv.text((W * K / 2, 545 * K), "choose a hero in the menu, then the dungeon: four heroes, four runs", font=f_capt, fill=(232, 236, 240, int(235 * a)), anchor="mm")
         o.alpha_composite(v); d = ImageDraw.Draw(o, "RGBA")
     # (each passage fades in and out through black)
     edge = min(fl, PASS - 1 - fl)

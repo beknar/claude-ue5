@@ -1,0 +1,86 @@
+{
+ "fps": 30,
+ "seconds": 30.0,
+ "captions": [
+  {
+   "t0": 0.3,
+   "t1": 3.5,
+   "head": "THE SUMMONER",
+   "lines": [
+    "random_dungeonmagic_level5  \u00b7  the Mage's spells and clips, retargeted onto her",
+    "and a face that moves: shapes made in Blender, patches painted on her texture"
+   ]
+  },
+  {
+   "t0": 3.8,
+   "t1": 7.3,
+   "head": "JOY",
+   "lines": [
+    "she finds something in a chest",
+    "the smile shape (mouth corners, cheeks, lower lids up) and the happy-eyes patch"
+   ]
+  },
+  {
+   "t0": 7.6,
+   "t1": 11.7,
+   "head": "FOCUS",
+   "lines": [
+    "each cast of the fire",
+    "the brows down and the jaw open, the narrowed-eyes and open-mouth patches"
+   ]
+  },
+  {
+   "t0": 12.0,
+   "t1": 15.3,
+   "head": "ANGER",
+   "lines": [
+    "while a monster is after her",
+    "brows down, a frown, the narrowed eyes"
+   ]
+  },
+  {
+   "t0": 15.6,
+   "t1": 18.5,
+   "head": "PAIN",
+   "lines": [
+    "she is hit",
+    "a squint and a frown, the screwed-up eyes"
+   ]
+  },
+  {
+   "t0": 18.8,
+   "t1": 22.1,
+   "head": "SHOUT",
+   "lines": [
+    "a cast with her whole voice",
+    "the jaw dropped, the open mouth"
+   ]
+  },
+  {
+   "t0": 22.4,
+   "t1": 25.7,
+   "head": "FEAR",
+   "lines": [
+    "her hit points run low",
+    "the brows raised, the sad brows' patch"
+   ]
+  },
+  {
+   "t0": 26.0,
+   "t1": 29.8,
+   "head": "DEATH",
+   "lines": [
+    "eyes shut",
+    "in play every one of these follows what happens to her; blinks come at random"
+   ]
+  }
+ ],
+ "casts": [
+  8.175,
+  10.358,
+  19.508
+ ],
+ "flinch": 15.8,
+ "death": 26.6,
+ "exposure": -3.5
+}

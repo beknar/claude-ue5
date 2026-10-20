@@ -32,6 +32,12 @@ claude_ue5/Content/
 *.npz
 *.mat
 *.bak
+# fonts (fetched by pipeline/blender_numpy/rdm4_fonts.py, with their licences)
+*.ttf
+*.otf
+*.woff
+*.woff2
+claude_ue5/SourceArt/random_dungeon_magic4/fonts/
 
 # the project's own AI-made models (CC BY 4.0, see "ai models/LICENSE") are the one model exception
 !ai models/*.glb

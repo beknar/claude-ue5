@@ -1,0 +1,373 @@
+{
+  "_note": "The Summoner's face (ai models/Summoner.glb, GLB space: metres, her front -Y, her left +X). Landmarks measured on a front orthographic render of the face (summoner_face.py --front). Shapes: pushes on the face's skin and eye pieces (the welded mesh piece under the nose and the pieces under the eyes; the bangs are pieces of their own and stay), each a move at full weight that falls off smoothly to 0 at its radius, mirrored to her other side when 'mirror'. Patches: painted on the front render and baked into her colour texture (summoner_face.py). The moves are 1.6 times the first ones: at 2-3 mm her small painted features hardly changed in a close render.",
+  "render": {
+    "center": [
+      0.003,
+      1.505
+    ],
+    "size_m": 0.16,
+    "pixels": 1200
+  },
+  "landmarks": {
+    "eye_r": [
+      -0.045,
+      1.5303
+    ],
+    "eye_l": [
+      0.043,
+      1.5303
+    ],
+    "eye_half": [
+      0.0253,
+      0.0153
+    ],
+    "brow_r": [
+      -0.033,
+      1.5597
+    ],
+    "brow_l": [
+      0.039,
+      1.561
+    ],
+    "nose": [
+      0.0003,
+      1.5063
+    ],
+    "mouth": [
+      -0.0003,
+      1.473
+    ],
+    "mouth_corner_l": [
+      0.0183,
+      1.4737
+    ],
+    "mouth_corner_r": [
+      -0.0183,
+      1.4737
+    ],
+    "chin": [
+      0.003,
+      1.438
+    ],
+    "cheek_l": [
+      0.047,
+      1.505
+    ],
+    "cheek_r": [
+      -0.047,
+      1.505
+    ]
+  },
+  "shapes": {
+    "Smile": [
+      {
+        "center": [
+          0.0183,
+          1.4737
+        ],
+        "radius": 0.011,
+        "move": [
+          0.00192,
+          0.0,
+          0.00416
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.047,
+          1.505
+        ],
+        "radius": 0.02,
+        "move": [
+          0.0,
+          0.0,
+          0.0024
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.044,
+          1.518
+        ],
+        "radius": 0.012,
+        "move": [
+          0.0,
+          0.0,
+          0.0016
+        ],
+        "mirror": true
+      }
+    ],
+    "Frown": [
+      {
+        "center": [
+          0.0183,
+          1.4737
+        ],
+        "radius": 0.011,
+        "move": [
+          -0.00128,
+          0.0,
+          -0.00416
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.0,
+          1.466
+        ],
+        "radius": 0.012,
+        "move": [
+          0.0,
+          0.0,
+          -0.00096
+        ],
+        "mirror": false
+      }
+    ],
+    "BrowsDown": [
+      {
+        "center": [
+          0.024,
+          1.556
+        ],
+        "radius": 0.016,
+        "move": [
+          -0.00192,
+          0.0,
+          -0.0048
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.058,
+          1.562
+        ],
+        "radius": 0.014,
+        "move": [
+          0.0,
+          0.0,
+          -0.00128
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.04,
+          1.542
+        ],
+        "radius": 0.012,
+        "move": [
+          0.0,
+          0.0,
+          -0.00192
+        ],
+        "mirror": true
+      }
+    ],
+    "BrowsUp": [
+      {
+        "center": [
+          0.024,
+          1.556
+        ],
+        "radius": 0.016,
+        "move": [
+          0.0,
+          0.0,
+          0.0056
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.058,
+          1.562
+        ],
+        "radius": 0.014,
+        "move": [
+          0.0,
+          0.0,
+          0.0016
+        ],
+        "mirror": true
+      }
+    ],
+    "Squint": [
+      {
+        "center": [
+          0.044,
+          1.518
+        ],
+        "radius": 0.014,
+        "move": [
+          0.0,
+          0.0,
+          0.0032
+        ],
+        "mirror": true
+      },
+      {
+        "center": [
+          0.047,
+          1.505
+        ],
+        "radius": 0.02,
+        "move": [
+          0.0,
+          0.0,
+          0.00192
+        ],
+        "mirror": true
+      }
+    ],
+    "JawOpen": [
+      {
+        "center": [
+          0.0,
+          1.452
+        ],
+        "radius": 0.03,
+        "move": [
+          0.0,
+          0.0,
+          -0.0048
+        ],
+        "mirror": false,
+        "below": 1.4715
+      }
+    ]
+  },
+  "patch_order": [
+    "BrowsSad",
+    "EyesAngry",
+    "EyesHappy",
+    "EyesClosed",
+    "EyesPain",
+    "MouthOpen"
+  ],
+  "channels": {
+    "Blink": {
+      "morphs": {},
+      "params": {
+        "EyesClosed": 1.0
+      }
+    },
+    "Joy": {
+      "morphs": {
+        "Smile": 1.0,
+        "Squint": 0.4
+      },
+      "params": {
+        "EyesHappy": 1.0
+      }
+    },
+    "Anger": {
+      "morphs": {
+        "BrowsDown": 1.0,
+        "Frown": 0.7
+      },
+      "params": {
+        "EyesAngry": 0.85
+      }
+    },
+    "Pain": {
+      "morphs": {
+        "Squint": 1.0,
+        "Frown": 0.8,
+        "BrowsDown": 0.5
+      },
+      "params": {
+        "EyesPain": 1.0
+      }
+    },
+    "Fear": {
+      "morphs": {
+        "BrowsUp": 1.0,
+        "Frown": 0.7,
+        "JawOpen": 0.3
+      },
+      "params": {
+        "BrowsSad": 1.0
+      }
+    },
+    "Shout": {
+      "morphs": {
+        "JawOpen": 1.0,
+        "BrowsDown": 1.0
+      },
+      "params": {
+        "MouthOpen": 1.0,
+        "EyesAngry": 0.9
+      }
+    },
+    "Focus": {
+      "morphs": {
+        "BrowsDown": 0.8,
+        "JawOpen": 0.6
+      },
+      "params": {
+        "EyesAngry": 0.8,
+        "MouthOpen": 0.85
+      }
+    },
+    "Dead": {
+      "morphs": {
+        "JawOpen": 0.5,
+        "BrowsUp": 0.3
+      },
+      "params": {
+        "EyesClosed": 1.0
+      }
+    }
+  },
+  "cues": {
+    "Hurt": {
+      "channel": "Pain",
+      "weight": 1.0,
+      "in": 0.06,
+      "hold": 0.45,
+      "out": 0.35
+    },
+    "Cast": {
+      "channel": "Focus",
+      "weight": 1.0,
+      "in": 0.12,
+      "hold": 0.45,
+      "out": 0.3
+    },
+    "Loot": {
+      "channel": "Joy",
+      "weight": 1.0,
+      "in": 0.15,
+      "hold": 1.1,
+      "out": 0.4
+    },
+    "Fight": {
+      "channel": "Anger",
+      "weight": 0.8,
+      "in": 0.4,
+      "hold": -1,
+      "out": 0.8
+    },
+    "LowHealth": {
+      "channel": "Fear",
+      "weight": 0.8,
+      "in": 0.6,
+      "hold": -1,
+      "out": 0.8
+    },
+    "Death": {
+      "channel": "Dead",
+      "weight": 1.0,
+      "in": 0.3,
+      "hold": -1,
+      "out": 0.3
+    }
+  },
+  "_channels": "Each channel at full weight: its morph targets' weights and its patches' blends (summed over the channels, held to 0..1). Cues: what the game shows, by occasion: a channel coming in, staying (hold seconds; -1: held while the occasion lasts) and going. patch_order: the order the material lays the patches on (a later one covers an earlier)."
+}

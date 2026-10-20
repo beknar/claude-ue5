@@ -78,6 +78,8 @@ public:
 	float ShownTime = -100.f;
 	/** the painted interface (as the dungeon generator's UIArt; pipeline/unreal/830): the card, the names, the arrows, START */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
+	/** its lettering by role, as the dungeon generator's UIFonts */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIFont> UIFonts;
 
 protected:
 	virtual void BeginPlay() override;
@@ -104,4 +106,6 @@ public:
 private:
 	UPROPERTY(Transient) TObjectPtr<ARDHeroSelect> Sel;
 	TArray<FName> ArtDrawn;
+	/** the lettering's fonts made in play, one per role and size (FRDUIDraw::Text) */
+	UPROPERTY(Transient) TMap<int32, TObjectPtr<class UFont>> FontCache;
 };

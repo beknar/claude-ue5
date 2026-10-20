@@ -17,7 +17,7 @@ that comes at her first meets the sword).
 In level 3 (the Rogue) a fight is the crossbow and the daggers: up to two bolts from range (2 draws it), then the daggers
 (1) and she closes in and stabs; when the monster swings at her up close she rolls back out of it (B), twice a fight at
 most. The record then also has her rolls, the blows that missed her in a roll, and what the tactical minimap marks
-(unopened chests and trunks, the hallway exits toward sections she has not seen, the strongest monsters).
+(chests and trunks not looted yet, the hallway exits toward sections she has not seen, the strongest monsters).
 In level 4 (the choice of hero) the hero is an argument and the pilot puts her in place of the level's default one
 (ARDDungeonGenerator.SwitchHero, while the render warms up); she fights as in her own level (the Warrior closes in with
 the sword; the Mage casts, dark fire first; the Warlock and the Rogue as in levels 2 and 3), goes the way the argument
@@ -462,7 +462,7 @@ def tier(m):
     if key not in S["tier"]: S["tier"][key] = G["gen"].get_monster_health(k)
     return S["tier"][key]
 def pois(l, rad=5200.0):
-    """what the tactical minimap marks near her (ARDHUD::GatherPois): unopened chests and trunks [x, y, 2], and the
+    """what the tactical minimap marks near her (ARDHUD::GatherPois): chests and trunks not looted yet [x, y, 2], and the
     hallway exits whose next section has nothing discovered [x, y, 3] (the overlay keeps the chests in rooms she has seen)"""
     gen = G["gen"]; out = []; md = gen.get_editor_property("map_data")
     for k in gen.get_section_coords():
@@ -480,7 +480,7 @@ def pois(l, rad=5200.0):
             S["poi_static"][key] = (ch, ex)
         ch, ex = S["poi_static"][key]
         for i, q in ch:
-            if d2(q, l) < rad and sec.get_container_open_alpha(i) <= 0.05: out.append([round(q.x), round(q.y), 2])
+            if d2(q, l) < rad and not sec.is_container_looted(i): out.append([round(q.x), round(q.y), 2])
         for q, nxt in ex:
             if d2(q, l) > rad: continue
             m = md.get(IP(*nxt))

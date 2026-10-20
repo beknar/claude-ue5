@@ -1,5 +1,5 @@
 {
- "tag": "d12",
+ "tag": "d15",
  "plan": [
   "setup",
   "keys",
@@ -162,7 +162,7 @@
     "R_again_walks": true
    },
    "A_jump_cm": 103,
-   "right_stick_turned_deg": 52.5,
+   "right_stick_turned_deg": 55.0,
    "RB": {
     "attacks": 1,
     "bolts": 0,
@@ -211,40 +211,40 @@
     "hair_fr": 2
    },
    "peak_tip_offset_cm": {
-    "run": 29.3,
-    "stop": 20.5,
-    "settling after the stop": 6.1,
-    "standing after the stop": 3.8,
-    "jump": 27.3,
-    "settling after the jump": 17.7,
-    "standing after the jump": 4.1,
-    "after a teleport": 4.1,
-    "standing after the teleport": 3.1
+    "run": 30.5,
+    "stop": 20.9,
+    "settling after the stop": 5.4,
+    "standing after the stop": 4.0,
+    "jump": 28.9,
+    "settling after the jump": 14.7,
+    "standing after the jump": 3.3,
+    "after a teleport": 3.3,
+    "standing after the teleport": 2.6
    },
    "standing_jitter_cm": {
-    "standing after the stop": 0.9,
-    "standing after the jump": 2.5,
-    "standing after the teleport": 0.8
+    "standing after the stop": 1.6,
+    "standing after the jump": 1.1,
+    "standing after the teleport": 0.7
    },
-   "worst_bone_stretch": 1.368,
+   "worst_bone_stretch": 1.403,
    "worst_stretch_where": [
     "hair_b2_2",
     "hair_b2_3",
     "jump"
    ],
    "stretch_by_phase": {
-    "run": 1.358,
-    "stop": 1.35,
-    "settling after the stop": 1.006,
+    "run": 1.378,
+    "stop": 1.312,
+    "settling after the stop": 1.005,
     "standing after the stop": 1.001,
-    "jump": 1.368,
-    "settling after the jump": 1.018,
+    "jump": 1.403,
+    "settling after the jump": 1.015,
     "standing after the jump": 1.001,
     "after a teleport": 1.001,
     "standing after the teleport": 1.001
    },
-   "back_tips_spread_change_cm": 13.0,
-   "closest_to_a_limit_cm": 2.4,
+   "back_tips_spread_change_cm": 14.1,
+   "closest_to_a_limit_cm": 2.3,
    "closest_where": [
     "hair_b3",
     "spine_03 plane",
@@ -372,17 +372,17 @@
    "bolt_left_at_s": 0.44,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 732,
+   "particles_round_the_bolt": 730,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 591,
+   "flown_cm": 645,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 566,
+   "burst_particles": 576,
    "burst_at": [
-    2232,
-    -3450,
-    129
+    150,
+    3004,
+    122
    ],
    "sounds": {
     "Player.Charge.Fire": 1,
@@ -399,7 +399,7 @@
    "attack_weapon_while_casting": [
     1
    ],
-   "bolt_from_left_hand_cm": 16,
+   "bolt_from_left_hand_cm": 17,
    "cut_started": true,
    "cut_weapon": 0,
    "bolts_by_the_cut": 0
@@ -418,8 +418,8 @@
   {
    "step": "far",
    "ok": true,
-   "monster": "Spider",
-   "distance_cm": 1804,
+   "monster": "Horned",
+   "distance_cm": 1740,
    "reach": 1400.0,
    "target": null
   },
@@ -428,21 +428,21 @@
    "ok": true,
    "fights": [
     {
-     "monster": "Spider",
-     "hit_points": 30.0,
-     "casts": 2,
-     "bolts_on_it": 2,
-     "bolts_needed": 2,
+     "monster": "Horned",
+     "hit_points": 59.0,
+     "casts": 3,
+     "bolts_on_it": 3,
+     "bolts_needed": 3,
      "killed": true,
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 1.7,
+     "seconds": 2.5,
      "ok": true
     },
     {
-     "monster": "Mutant",
-     "hit_points": 49.0,
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
      "casts": 2,
      "bolts_on_it": 2,
      "bolts_needed": 2,
@@ -465,27 +465,27 @@
      "hit_points": 54.0,
      "weapon": "Sword",
      "damage": 22.0,
+     "blows": 2,
+     "blows_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "bolts_cast": 0,
+     "seconds": 1.4,
+     "ok": true
+    },
+    {
+     "monster": "Daemon",
+     "hit_points": 54.0,
+     "weapon": "Sword",
+     "damage": 22.0,
      "blows": 3,
      "blows_needed": 3,
      "killed": true,
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 2.3,
-     "ok": true
-    },
-    {
-     "monster": "Ripper_dog",
-     "hit_points": 34.0,
-     "weapon": "Sword",
-     "damage": 22.0,
-     "blows": 2,
-     "blows_needed": 2,
-     "killed": true,
-     "kills_counted": 1,
-     "each_blow_took_the_damage": true,
-     "bolts_cast": 0,
-     "seconds": 1.6,
+     "seconds": 2.2,
      "ok": true
     }
    ]
@@ -497,10 +497,10 @@
     1,
     0
    ],
-   "monsters": 11,
-   "average_hit_points": 89.5,
+   "monsters": 13,
+   "average_hit_points": 91.7,
    "hers": 100.0,
-   "average_damage": 20.5,
+   "average_damage": 20.8,
    "spell_damage": 22.0
   }
  ],
@@ -508,11 +508,11 @@
  "rolls": 0,
  "dodged": 0,
  "kills": 4,
- "casts": 19,
- "bolts": 11,
- "bolts_on_monsters": 5,
+ "casts": 20,
+ "bolts": 12,
+ "bolts_on_monsters": 6,
  "bolts_elsewhere": 6,
  "deaths": 0,
- "damage_dealt": 235.0,
- "damage_taken": 0.0
+ "damage_dealt": 260.0,
+ "damage_taken": 11.0
 }

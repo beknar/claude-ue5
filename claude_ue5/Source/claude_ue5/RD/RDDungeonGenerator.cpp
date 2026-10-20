@@ -25,6 +25,10 @@
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "InputCoreTypes.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+#include "Engine/LocalPlayer.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeonGen, Log, All);
 
@@ -294,6 +298,35 @@ FName ARDDungeonGenerator::LootOf(FIntPoint Section, int32 Index) const
 	return Items.Last().Name;
 }
 
+void ARDDungeonGenerator::UpdateMapScrollInput(APlayerController* PC)
+{
+	const bool bWant = bMapOpen && bTacticalMaps;
+	if (bWant == bMapScrollInput || !PC || !PC->GetLocalPlayer()) return;
+	UEnhancedInputLocalPlayerSubsystem* EI = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+	if (!EI) return;
+	if (!MapScrollContext)
+	{
+		// (an action that consumes its keys: the contexts under it do not see them; the generator reads the keys itself)
+		MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll"));
+		MapScrollAction->bConsumeInput = true;
+		MapScrollContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapScroll"));
+		for (const FKey& K : { EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right }) MapScrollContext->MapKey(MapScrollAction, K);
+	}
+	if (bWant) EI->AddMappingContext(MapScrollContext, 1000);
+	else EI->RemoveMappingContext(MapScrollContext);
+	bMapScrollInput = bWant;
+}
+
+bool ARDDungeonGenerator::ReloadSection(FIntPoint Coord)
+{
+	if (IsStartSection(Coord)) return false;
+	TObjectPtr<ARDSection>* S = Sections.Find(Coord);
+	if (!S || !*S || *S == Building) return false;
+	(*S)->Destroy(); Sections.Remove(Coord); ++SectionsRemoved;
+	Enqueue(Coord);
+	return true;
+}
+
 void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, const FVector& At)
 {
 	if (!Section || !PlayerCombat) return;
@@ -338,7 +371,8 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	if (Blood) Blood->Clear();
 	SoundCounts.Reset(); LastSoundPick.Reset(); SoundR.Initialize(RDSoundSeed);
 	StopMusic();
-	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; LastRevealTime = -100.f;
+	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; MapPan = FVector2D::ZeroVector; LastRevealTime = -100.f;
+	LootedContainers.Reset();
 	for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (PlayerCombat)
 	{
@@ -481,6 +515,13 @@ void ARDDungeonGenerator::Tick(float Dt)
 				PlayerCombat->RegisterComponent();
 				PlayerCombat->Init(this);
 			}
+			// (a face that moves: the level's expression channels on her pawn)
+			if (FaceChannels.Num() > 0 && !P->FindComponentByClass<URDFaceComponent>())
+			{
+				URDFaceComponent* F = NewObject<URDFaceComponent>(P, TEXT("RDFace"));
+				F->Channels = FaceChannels; F->Cues = FaceCues; F->Seed = (int32)HashCombine((uint32)SessionSeed, 0x6A11u);
+				F->RegisterComponent();
+			}
 			// what she hears fades with the distance to her, not to the camera behind her
 			if (Sounds.Num() > 0) PC->SetAudioListenerAttenuationOverride(P->GetRootComponent(), FVector::ZeroVector);
 		}
@@ -517,7 +558,18 @@ void ARDDungeonGenerator::Tick(float Dt)
 			}
 		}
 		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P) InteractNearest(P->GetActorLocation());
-		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) bMapOpen = !bMapOpen;
+		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) SetMapOpen(!bMapOpen);
+		// the big map scrolls under the arrow keys (the D-pad), C (the right stick pressed) brings it back over her
+		UpdateMapScrollInput(PC);
+		if (bMapOpen && bTacticalMaps)
+		{
+			auto Down = [&](const FKey& K) { return PC->IsInputKeyDown(K) ? 1.f : 0.f; };
+			const float N = Down(EKeys::Up) + Down(EKeys::Gamepad_DPad_Up) - Down(EKeys::Down) - Down(EKeys::Gamepad_DPad_Down);
+			const float E = Down(EKeys::Right) + Down(EKeys::Gamepad_DPad_Right) - Down(EKeys::Left) - Down(EKeys::Gamepad_DPad_Left);
+			MapPan += FVector2D(FMath::Clamp(N, -1.f, 1.f), FMath::Clamp(E, -1.f, 1.f)) * MapPanSpeed * Dt;
+			if (MapPan.Size() > MapPanMax) MapPan = MapPan.GetSafeNormal() * MapPanMax;
+			if (PC->WasInputKeyJustPressed(EKeys::C) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) CenterMap();
+		}
 	}
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
 	else TickMusic(Dt);         // (the self test measures single sounds: no music under them, only the room tone)

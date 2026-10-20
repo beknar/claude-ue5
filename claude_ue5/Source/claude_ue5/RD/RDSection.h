@@ -80,6 +80,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") bool IsDoorCell(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetContainerLocation(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") float GetContainerOpenAlpha(int32 Index) const;
+	/** it was opened once: what it held was found (a wardrobe's two doors are one container). Kept by the generator, so a
+	 *  section dropped and generated again has its looted containers looted still; it never fills again */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsContainerLooted(int32 Index) const;
+	/** the index a container's loot is kept under (a wardrobe's two doors: the lower) */
+	int32 ContainerKey(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString GetContainerKind(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString GetRoomKind(int32 Index) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetRoomCenter(int32 Index) const;

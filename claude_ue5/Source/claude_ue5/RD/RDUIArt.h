@@ -7,12 +7,28 @@
 #include "RDTypes.h"
 
 class AHUD;
+class UFont;
+
+/** what a piece of text is, for the lettering: a line of text (Alegreya), a label (Alegreya SC: "MANA BACK" is written
+ *  "Mana Back", the rest of each word in small capitals), a title, a name, a key or a number standing alone (Cinzel) */
+enum class ERDType : uint8 { Text, Label, Title };
 
 struct FRDUIDraw
 {
 	AHUD* Hud = nullptr;
 	const TMap<FName, FRDUIArt>* Art = nullptr;
 	TArray<FName>* Drawn = nullptr;
+	/** the lettering by role ("text", "label", "title"); none (or a role missing): the engine font given to Text */
+	const TMap<FName, FRDUIFont>* Fonts = nullptr;
+	/** where the fonts made for each role and size are kept (a UPROPERTY of the HUD: they must not be collected) */
+	TMap<int32, TObjectPtr<UFont>>* FontCache = nullptr;
+
+	/** AHUD::DrawText in the role's typeface, as tall as Engine would be at scale K (Engine itself without the lettering) */
+	void Text(const FString& S, const FLinearColor& C, float X, float Y, UFont* Engine, float K, ERDType Role = ERDType::Text) const;
+	/** AHUD::GetTextSize of what Text draws */
+	void TextSize(const FString& S, float& OutW, float& OutH, UFont* Engine, float K, ERDType Role = ERDType::Text) const;
+	/** the painted interface's lettering is there (else the engine font) */
+	bool HasFonts() const { return Fonts && Fonts->Num() > 0; }
 
 	const FRDUIArt* Find(FName Name) const;
 	bool Has(FName Name) const { return Find(Name) != nullptr; }
@@ -29,6 +45,9 @@ struct FRDUIDraw
 	/** where a frame's open inside is when it is stretched to A..B as Nine draws it */
 	void InnerBox(FName Frame, const FVector2D& A, const FVector2D& B, float Px, FVector2D& OutA, FVector2D& OutB) const;
 private:
+	/** the font a role is drawn in at the size Engine has at scale K, and the scale left over to draw it at (the glyphs are
+	 *  rendered at about the size they are shown: a font scaled up from small glyphs is blurred) */
+	UFont* Pick(UFont* Engine, float K, ERDType Role, float& OutK, FString& InOutS, float& OutRaise) const;
 	void Tile(class UTexture2D* T, float X, float Y, float W, float H, float U, float V, float UW, float VH, const FLinearColor& Tint) const;
 	void Note(FName Name) const { if (Drawn) Drawn->AddUnique(Name); }
 };

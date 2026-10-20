@@ -189,6 +189,21 @@ struct FRDUIArt
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector4 Inner = FVector4(0.0, 0.0, 1.0, 1.0);
 };
 
+/** random_dungeonmagic_level4: a typeface of the painted interface's lettering (pipeline/blender_numpy/rdm4_fonts.py
+ *  fetches it, pipeline/unreal/830 imports it). The HUDs keep it under a role: "title" (Cinzel), "text" (Alegreya),
+ *  "label" (Alegreya SC). Size: against the engine's Roboto that the plain HUD draws with, so that the same scale gives
+ *  letters as tall (Alegreya's are smaller at the same point size). Lift: how much higher it is drawn (shares of the
+ *  engine font's em at that scale) so that its capitals start where Roboto's would: its line has more room above the
+ *  capitals than Roboto's, and the HUD's layouts were made for Roboto (the line height reported is Roboto's too). */
+USTRUCT(BlueprintType)
+struct FRDUIFont
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UFontFace> Face = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Size = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Lift = 0.f;
+};
+
 /** random_dungeonmagic_level4: what a potion or a food does */
 UENUM(BlueprintType)
 enum class ERDItemKind : uint8

@@ -1,5 +1,5 @@
 {
- "tag": "r7",
+ "tag": "r10",
  "plan": [
   "setup",
   "weapons",
@@ -218,7 +218,7 @@
     "R_again_walks": true
    },
    "A_jump_cm": 103,
-   "right_stick_turned_deg": 57.5,
+   "right_stick_turned_deg": 60.0,
    "RB": {
     "attacks": 1,
     "bolts": 0,
@@ -375,7 +375,7 @@
   {
    "step": "cast",
    "ok": true,
-   "monster": "Daemon",
+   "monster": "Horned",
    "gap_cm": 900,
    "hand": "hand_r",
    "started": true,
@@ -383,20 +383,20 @@
    "montage": true,
    "hand_moved_cm": 31,
    "charge_particles": 0,
-   "bolt_left_at_s": 0.43,
+   "bolt_left_at_s": 0.41,
    "bolt_speed_cm_s": 4500,
    "spell_speed": 4500.0,
-   "particles_round_the_bolt": 250,
+   "particles_round_the_bolt": 200,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 585,
+   "flown_cm": 519,
    "it_lost": 34.0,
    "damage": 34.0,
    "burst_particles": 15,
    "burst_at": [
-    2161,
-    -3474,
-    130
+    -1565,
+    -3421,
+    116
    ],
    "sounds": {
     "Player.Charge.Crossbow": 1,
@@ -425,7 +425,7 @@
    "step": "far",
    "ok": true,
    "monster": "Horned",
-   "distance_cm": 2933,
+   "distance_cm": 2938,
    "reach": 2600.0,
    "target": null
   },
@@ -443,7 +443,7 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 2.1,
+     "seconds": 2.0,
      "ok": true
     },
     {
@@ -481,17 +481,17 @@
      "ok": true
     },
     {
-     "monster": "Daemon",
-     "hit_points": 54.0,
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
      "weapon": "Daggers",
      "damage": 15.0,
-     "blows": 4,
-     "blows_needed": 4,
+     "blows": 3,
+     "blows_needed": 3,
      "killed": true,
      "kills_counted": 1,
      "each_blow_took_the_damage": true,
      "bolts_cast": 0,
-     "seconds": 2.2,
+     "seconds": 1.6,
      "ok": true
     }
    ]
@@ -512,7 +512,7 @@
    "walking": {
     "rolls": 1,
     "back": false,
-    "moved_x_cm": 518,
+    "moved_x_cm": 492,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
     "middle_lowest_cm": -86,
@@ -521,16 +521,16 @@
    "twice": {
     "rolls": 1,
     "back": true,
-    "moved_x_cm": -466,
+    "moved_x_cm": -447,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
-    "middle_lowest_cm": -85,
+    "middle_lowest_cm": -86,
     "upright_after": true
    },
    "pad": {
     "rolls": 1,
     "back": true,
-    "moved_x_cm": -436,
+    "moved_x_cm": -438,
     "moved_y_cm": 0,
     "turned_deg": 0.0,
     "middle_lowest_cm": -86,
@@ -554,10 +554,10 @@
     1,
     0
    ],
-   "monsters": 13,
-   "average_hit_points": 111.3,
+   "monsters": 11,
+   "average_hit_points": 113.8,
    "hers": 100.0,
-   "average_damage": 26.5,
+   "average_damage": 26.8,
    "spell_damage": 24.5
   }
  ],
@@ -565,11 +565,11 @@
  "rolls": 6,
  "dodged": 1,
  "kills": 4,
- "casts": 19,
+ "casts": 18,
  "bolts": 8,
  "bolts_on_monsters": 4,
  "bolts_elsewhere": 4,
  "deaths": 0,
- "damage_dealt": 256.0,
- "damage_taken": 22.0
+ "damage_dealt": 241.0,
+ "damage_taken": 10.0
 }

@@ -10,6 +10,9 @@ hay pile blocks.
 Plan (comma separated): rooms:N (visit N random rooms of the current section, opening one container in each),
 expand:+x|-x|+y|-y (walk out through that edge's hallway into the next section), home (back to the great hall),
 shot:name (HighResShot), map:name (open the M map, HighResShot, close it).
+On a level that fights (the generator's bCombat: the combat and magic levels) the monsters do not notice her during the
+walk (the generator's AggroDistance 0, LoseDistance 1 cm; put back at the end): they still wander, but a fight would
+stop the walk or kill her on the way. The record names the level.
 Args: plan tag   -> SourceArt/random_dungeon/walk_<tag>.json and a log line "RDWALK done | <tag> | ..."
 """
 import unreal, sys, json, math, random, time, os
@@ -21,8 +24,12 @@ GEN = unreal.GameplayStatics.get_actor_of_class(W, unreal.RDDungeonGenerator)
 PC = unreal.GameplayStatics.get_player_controller(W, 0)
 V = unreal.Vector
 rng = random.Random(7)
-R = {"tag": TAG, "plan": PLAN, "falls": 0, "stuck": 0, "doors_opened": 0, "doors_failed": 0, "containers_opened": 0, "containers_failed": 0,
+R = {"tag": TAG, "level": W.get_path_name().split(".")[-1].replace("UEDPIE_0_", ""), "plan": PLAN, "falls": 0, "stuck": 0, "doors_opened": 0, "doors_failed": 0, "containers_opened": 0, "containers_failed": 0,
      "rooms_visited": [], "sections": [], "events": [], "frame_ms": [], "gen_frame_ms": [], "shots": []}
+# (a level that fights: the monsters leave her alone for the walk)
+QUIET = (GEN.get_editor_property("aggro_distance"), GEN.get_editor_property("lose_distance")) if GEN.get_editor_property("combat") else None
+if QUIET: GEN.set_editor_property("aggro_distance", 0.0); GEN.set_editor_property("lose_distance", 1.0)
+R["monsters_quiet"] = QUIET is not None
 def log(msg):
     R["events"].append(msg); unreal.log("RDWALK " + msg)
 def pawn(): return PC.get_controlled_pawn()
@@ -105,6 +112,7 @@ def finish():
     ok = R["falls"] == 0 and R["doors_failed"] == 0 and R["containers_failed"] == 0 and not fit["faults"] and fit["containers"] > 0 and wr["segments"] > 0 and wr["leak"] == 0 and ce["ok"]
     unreal.log(f"RDWALK done | {TAG} | {'ok' if ok else 'ISSUES'} | falls {R['falls']} stuck {R['stuck']} | doors {R['doors_opened']} (failed {R['doors_failed']}) containers {R['containers_opened']} (failed {R['containers_failed']}) | lids and doors in place {fit['containers'] - len(fit['faults'])}/{fit['containers']} ({fit['open']} open) | broken wall segments {wr['segments']}: rays on the wall {wr['face']}, through a hole on the backing {wr['hole']}, beyond the wall {wr['leak']} | prison cells {ce['cells']}: rays out of a cell {ce['leak']} of {ce['rays']}, hay piles that block {ce['hay_blocks']}/{ce['hay']} | rooms {len(R['rooms_visited'])} | sections {R['sections_final']} | monsters {R['monsters']} | frames {R['frame_stats']} | discovered {d}/{g}")
     unreal.unregister_slate_post_tick_callback(S["h"])
+    if QUIET: GEN.set_editor_property("aggro_distance", QUIET[0]); GEN.set_editor_property("lose_distance", QUIET[1])
 def tick(dt):
     try: _tick(dt)
     except Exception as e:

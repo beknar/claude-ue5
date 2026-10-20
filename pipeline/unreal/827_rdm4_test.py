@@ -31,13 +31,20 @@
             turntable shows the Warrior, there is no generator; select then goes on from there
   menuui    (the menu, before select) each hero's card drawn with the painted pieces (830): board, framed bars and fills,
             dividers, plates, arrows, a slot with the picture of each of her weapons and spells (the HUD's GetArtDrawn);
-            a HighResShot of each card
+            a HighResShot of each card; its lettering in the three typefaces (830's UIFonts: Cinzel titles, Alegreya text,
+            Alegreya SC labels; the HUD notes "font_<role>" for what it wrote in each)
+  stars     (the dungeon) a chest's star on the map stands for what it still holds: a chest of the great hall has its star;
+            opened, the star goes, and shut again it does not come back; opened again it gives nothing; a container of a
+            section generated in play, opened, is looted still after the section is dropped and generated again
   map       (the dungeon) M opens the big map in the minimap's painted style (board, plaque, compass, the key's divider;
-            no minimap ring); she walks a second along a clear line with it open; M closes it and the ring is back;
-            HighResShots
+            no minimap ring; its title, key and lines in the three typefaces; the rooms she has found named on it, the great
+            hall among them); the right arrow held half a second scrolls it east by MapPanSpeed x 0.5 and her arrow on it
+            west, the up arrow north, while she stands where she was; C brings its middle back over her; she walks a
+            second along a clear line with it open; M closes it and the ring is back; HighResShots
   ui        (the dungeon) each hero's status panel with the painted board, bars (mana only when she has it), weapon slots
             with her weapons' pictures, the minimap's ring; the effect chips' pictures; FOUND on the plaque with the item's
-            picture; the inventory's board, dividers, plate and pictures; HighResShots of each
+            picture; the inventory's board, dividers, plate and pictures; the generator's UIFonts are Cinzel, Alegreya and
+            Alegreya SC, and the panel, the plaque and the inventory are written in all three; HighResShots of each
 Writes SourceArt/random_dungeon_magic4/test_<tag>.json and logs "RDM4TEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -430,6 +437,11 @@ def step_noregen():
     step_result("noregen", ok, before=h0, after_9s=h1, hits_taken=c.hits_taken - k0, regen_per_second=G["gen"].get_editor_property("regen_per_second"))
 
 # ------------------------------------------------------------------------------------------------ the painted interface
+FONTS = {"font_title", "font_text", "font_label"}
+FACES = {"title": "FF_RDM4_Cinzel_700", "text": "FF_RDM4_Alegreya_500", "label": "FF_RDM4_AlegreyaSC_700"}
+def faces(actor):
+    """the lettering an actor (the generator, the menu) has by role: the font face's name"""
+    return {str(k): (v.face.get_name() if v.face else None) for k, v in actor.get_editor_property("ui_fonts").items()}
 def hud_art():
     h = G["pc"].get_hud() if G.get("pc") else None
     return sorted(str(n) for n in h.get_art_drawn()) if h else []
@@ -442,7 +454,7 @@ def step_menuui():
     s = G["sel"]; assert s, "open random_dungeonmagic_level4_select for the menuui step"
     sim = lambda k, d: G["sel"].simulate_key(k, d)
     have = sorted(str(k) for k in s.get_editor_property("ui_art").keys())
-    want = {"panel", "button", "arrow", "bar_health", "fill_health", "bar_mana", "fill_mana", "divider"}
+    want = {"panel", "button", "arrow", "bar_health", "fill_health", "bar_mana", "fill_mana", "divider"} | FONTS
     out = []
     yield from wait(0.6)
     for i in range(len(s.heroes)):
@@ -453,8 +465,9 @@ def step_menuui():
         shot(f"menu_{out[-1]['hero']}"); yield from rwait(1.5)
         yield from press("D", sim=sim)
     yield from wait(0.5)
-    ok = want <= set(have) and all(not o["missing"] for o in out) and str(s.get_hero_name()) == out[0]["hero"]
-    step_result("menuui", ok, pieces=have, cards=out)
+    fs = faces(s)
+    ok = (want - FONTS) <= set(have) and all(not o["missing"] for o in out) and str(s.get_hero_name()) == out[0]["hero"] and fs == FACES
+    step_result("menuui", ok, pieces=have, fonts=fs, cards=out)
 def step_ui():
     """(the dungeon) for each hero the status panel's board, the framed bars and their fills (mana only for those who have
     it), the weapon slots with her weapons' pictures and the minimap's ring are drawn; with a speed potion and food in her
@@ -470,7 +483,7 @@ def step_ui():
         yield from switch(h); quiet(True); c = cb()
         yield from wait(0.5)
         icons = [str(w.icon) for w in g.get_editor_property("weapons")]
-        want = {"panel_wide", "bar_health", "fill_health", "slot", "minimap_ring"} | set(icons) | ({"bar_mana", "fill_mana"} if c.get_max_mana() > 0 else set())
+        want = {"panel_wide", "bar_health", "fill_health", "slot", "minimap_ring"} | FONTS | set(icons) | ({"bar_mana", "fill_mana"} if c.get_max_mana() > 0 else set())
         d = hud_art()
         heroes.append({"hero": h, "weapon_icons": icons, "drawn": d, "missing": sorted(want - set(d)),
                        "mana_bar_without_mana": c.get_max_mana() <= 0 and "bar_mana" in d})
@@ -488,18 +501,19 @@ def step_ui():
         if g.items_found > f0: found = str(g.last_found); break
     yield from wait(0.6)
     fd = hud_art(); shot("found"); yield from rwait(1.5)
-    found_ok = found is not None and "banner" in fd and item_icons.get(found, "None") in fd
+    found_ok = found is not None and "banner" in fd and item_icons.get(found, "None") in fd and {"font_title", "font_label", "font_text"} <= set(fd)
     # the inventory (it pauses the game: real time)
     for n in ("Small Healing Potion", "Fish"): c.add_item(n, 1)
     yield from press("I"); yield from rwait(0.5)
     inv = hud_art(); shot("inventory"); yield from rwait(1.5)
     carried = [str(n) for n in c.get_inventory_lines()]
-    want_inv = {"panel_wide", "divider", "button", "slot", "w_daggers", "w_crossbow", item_icons["Small Healing Potion"], item_icons["Fish"]}
+    want_inv = {"panel_wide", "divider", "button", "slot", "w_daggers", "w_crossbow", item_icons["Small Healing Potion"], item_icons["Fish"]} | FONTS
     yield from press("I")
     quiet(False)
-    ok = (textures and not [x for x in heroes if x["missing"] or x["mana_bar_without_mana"]] and {"chip_speed", "chip_regen"} <= set(chips)
+    fs = faces(g)
+    ok = (textures and fs == FACES and not [x for x in heroes if x["missing"] or x["mana_bar_without_mana"]] and {"chip_speed", "chip_regen"} <= set(chips)
           and found_ok and want_inv <= set(inv) and all(v != "None" for v in item_icons.values()))
-    step_result("ui", ok, pieces=pieces, textures=textures, item_icons=item_icons, heroes=heroes, chips=chips, found=found, found_drawn=fd,
+    step_result("ui", ok, pieces=pieces, textures=textures, fonts=fs, item_icons=item_icons, heroes=heroes, chips=chips, found=found, found_drawn=fd,
                 inventory_drawn=inv, inventory_missing=sorted(want_inv - set(inv)), carried=carried)
 
 def step_menufirst():
@@ -520,6 +534,50 @@ def step_menufirst():
           and G.get("gen") is None and str(s.get_hero_name()) == "Warrior" and str(s.target_level).endswith("random_dungeonmagic_level4") and cvar == 1)
     step_result("menufirst", ok, played=played, generator_said=menu_line, now_in=world, menu=s is not None, generator=G.get("gen") is not None,
                 shown=str(s.get_hero_name()) if s else None, target=str(s.target_level) if s else None, hero_menu_cvar=cvar)
+def step_stars():
+    """a chest's star stands for what it still holds, not for the lid: it goes when she opens the chest and stays gone when
+    it is shut; opened again it gives nothing; a section dropped and generated again keeps its looted containers looted"""
+    yield from switch("Warrior"); g = G["gen"]; quiet(True)
+    g.restart_play(0); yield from wait(0.8); refresh(); quiet(True)
+    hud = G["pc"].get_hud(); s0 = g.get_section(unreal.IntPoint(0, 0))
+    near = lambda q: any(math.hypot(w.x - q.x, w.y - q.y) < 60.0 for w in hud.get_stars_drawn())
+    ctr = g.get_start_room_center(); room = s0.room_at(ctr)
+    cands = [i for i in range(s0.get_num_containers()) if s0.get_container_kind(i) in ("chest", "trunk") and s0.room_at(s0.get_container_location(i)) == room]
+    i = cands[0]; q = s0.get_container_location(i)
+    yield from wait(0.5)
+    before = near(q); looted0 = bool(s0.is_container_looted(i))
+    f0 = g.items_found; s0.toggle_container(i); yield from wait(1.2)
+    opened = s0.get_container_open_alpha(i) > 0.9; after_open = near(q); got = g.items_found - f0
+    s0.toggle_container(i); yield from wait(1.2)
+    shut = s0.get_container_open_alpha(i) < 0.05; after_shut = near(q); looted1 = bool(s0.is_container_looted(i))
+    f1 = g.items_found; s0.toggle_container(i); yield from wait(1.2); again = g.items_found - f1; s0.toggle_container(i); yield from wait(1.0)
+    others = [bool(near(s0.get_container_location(j))) for j in cands[1:]]
+    shot("stars"); yield from rwait(1.5)
+    # a section generated in play, one of its containers opened, the section dropped and generated again
+    c1 = unreal.IntPoint(1, 0)
+    def built(c):
+        t0 = time.time()
+        while time.time() - t0 < 30:
+            x = g.get_section(c)
+            if x and not x.is_building(): return
+            yield
+    g.generate_section_now(c1); yield from built(c1)
+    s1 = g.get_section(c1); j = 0; kind = s1.get_container_kind(j)
+    s1.toggle_container(j); yield from wait(0.3)
+    l1 = bool(s1.is_container_looted(j)); removed0 = g.get_editor_property("sections_removed")
+    reloaded = bool(g.reload_section(c1)); yield
+    g.generate_section_now(c1); yield from built(c1)
+    s2 = g.get_section(c1); removed = g.get_editor_property("sections_removed") - removed0
+    same = s2 is not None and s2.get_container_kind(j) == kind and s2.get_container_open_alpha(j) < 0.05
+    l2 = bool(s2.is_container_looted(j)) if s2 else False
+    f2 = g.items_found; s2.toggle_container(j); yield from wait(0.3); again2 = g.items_found - f2
+    quiet(False)
+    ok = (before and not looted0 and got == 1 and opened and not after_open and shut and not after_shut and looted1 and again == 0
+          and reloaded and removed == 1 and same and l1 and l2 and again2 == 0)
+    step_result("stars", ok, chest=i, kind=s0.get_container_kind(i), star_before=before, gave=got, star_while_open=after_open, star_after_shut=after_shut,
+                opened_again_gave=again, other_chests_of_the_hall_starred=others, generated_container=[j, kind], looted_before_the_reload=l1,
+                section_reloaded=reloaded, sections_removed=removed, same_container=same, looted_after_the_reload=l2, reopened_gave=again2)
+
 def step_map():
     """(the dungeon) M opens the big map in the minimap's painted style: the board, the plaque, the compass, the key's
     divider, no minimap ring; she walks with it open (W, a second); M closes it and the minimap's ring is back"""
@@ -533,7 +591,28 @@ def step_map():
     before = hud_art()
     yield from press("M"); yield from wait(0.4)
     opened = bool(g.get_editor_property("map_open")); d = hud_art()
+    rooms = [str(x) for x in G["pc"].get_hud().get_room_labels()]
     shot("map"); yield from rwait(1.5)
+    # scrolled with the arrow keys, centred again with C (she stands where she is)
+    hud = G["pc"].get_hud(); spd = g.get_editor_property("map_pan_speed")
+    def arrow():
+        r = hud.get_map_arrow(); return (r is not None, r)          # (the screen point, or None out of view)
+    xy = lambda v: (round(v.x), round(v.y))
+    pp0 = G["pawn"].get_actor_location(); v0 = hud.get_map_view(); a0 = arrow()
+    c.simulate_key(key("Right"), True); yield from wait(0.5); c.simulate_key(key("Right"), False); yield from wait(0.1)
+    v1 = hud.get_map_view(); a1 = arrow()
+    c.simulate_key(key("Up"), True); yield from wait(0.5); c.simulate_key(key("Up"), False); yield from wait(0.1)
+    v2 = hud.get_map_view()
+    shot("map_scrolled"); yield from rwait(1.5)
+    yield from press("C"); yield from wait(0.2)
+    v3 = hud.get_map_view(); pp3 = G["pawn"].get_actor_location()
+    east, north = v1.y - v0.y, v2.x - v1.x; stood = math.hypot(pp3.x - pp0.x, pp3.y - pp0.y)
+    arrow_west = (a0[1].x - a1[1].x) if (a0[1] is not None and a1[1] is not None and a0[0] and a1[0]) else None
+    scroll = {"view_at_open_from_her_cm": round(math.hypot(v0.x - pp0.x, v0.y - pp0.y)), "east_cm": round(east), "north_cm": round(north), "want_cm": round(spd * 0.5),
+              "sideways_cm": round(abs(v1.x - v0.x) + abs(v2.y - v1.y)), "her_arrow_west_px": round(arrow_west) if arrow_west is not None else None,
+              "she_moved_cm": round(stood), "after_c_from_her_cm": round(math.hypot(v3.x - pp3.x, v3.y - pp3.y))}
+    scroll_ok = (scroll["view_at_open_from_her_cm"] < 5 and 0.6 * spd * 0.5 < east < 1.4 * spd * 0.5 and 0.6 * spd * 0.5 < north < 1.4 * spd * 0.5
+                 and scroll["sideways_cm"] < 60 and arrow_west is not None and arrow_west > 50 and stood < 30 and scroll["after_c_from_her_cm"] < 5)
     p0 = G["pawn"].get_actor_location(); c.set_run_mode(True)
     c.simulate_key(key("W"), True); yield from wait(1.0); c.simulate_key(key("W"), False)
     moved = (G["pawn"].get_actor_location() - p0).length()
@@ -541,13 +620,14 @@ def step_map():
     yield from press("M"); yield from wait(0.4)
     closed = not g.get_editor_property("map_open"); after = hud_art()
     quiet(False)
-    want = {"panel_wide", "banner", "compass", "divider"}
-    ok = ("minimap_ring" in before and opened and want <= set(d) and "minimap_ring" not in d and moved > 150.0 and closed and "minimap_ring" in after and "compass" not in after)
-    step_result("map", ok, opened=opened, drawn=d, missing=sorted(want - set(d)), walked_cm=round(moved), closed=closed, after=after)
+    want = {"panel_wide", "banner", "compass", "divider"} | FONTS
+    ok = ("minimap_ring" in before and opened and want <= set(d) and "minimap_ring" not in d and moved > 150.0 and closed and "minimap_ring" in after and "compass" not in after
+          and "Great hall" in rooms and scroll_ok)
+    step_result("map", ok, opened=opened, drawn=d, room_labels=rooms, scroll=scroll, missing=sorted(want - set(d)), walked_cm=round(moved), closed=closed, after=after)
 
 STEPS = {"select": step_select, "heroes": step_heroes, "inventory": step_inventory, "mana": step_mana, "bonus": step_bonus, "loot": step_loot,
          "potions": step_potions, "food": step_food, "speed": step_speed, "noregen": step_noregen, "menuui": step_menuui, "ui": step_ui,
-         "menufirst": step_menufirst, "map": step_map}
+         "menufirst": step_menufirst, "map": step_map, "stars": step_stars}
 def run():
     for s in PLAN:
         yield from STEPS[s]()
