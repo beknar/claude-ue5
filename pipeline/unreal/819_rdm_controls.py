@@ -1,9 +1,9 @@
 """The magic levels' walk / run switch: BP_RDM_CasterCharacter (random_dungeonmagic_level), BP_RDM2_DarkCasterCharacter
 (random_dungeonmagic_level2), BP_RDM3_RogueCharacter (random_dungeonmagic_level3), BP_RDM4_WarriorCharacter (the
-Warrior of random_dungeonmagic_level4) and BP_RDM5_SummonerCharacter (random_dungeonmagic_level5) get a bool RunMode, which URDCombatComponent::SetRunMode sets (R on the keyboard, the left
+Warrior of random_dungeonmagic_level4), BP_RDM5_SummonerCharacter, BP_RDM5_Summoner2Character and BP_RDM5_Summoner3Character (random_dungeonmagic_level5) get a bool RunMode, which URDCombatComponent::SetRunMode sets (R on the keyboard, the left
 trigger on the gamepad: generator bCasterControls), and a MoveScale of their own that picks her run speed while RunMode is
 on or the run action (Shift, the left stick's click) is held, her walk speed otherwise; a stick pushed part way scales it
-down as before (620's MoveScale, with RunMode). Run after 810 / 817 / 822 / 824 / 832 (their characters), before 811 / 818 / 823 / 825 / 833. Idempotent.
+down as before (620's MoveScale, with RunMode). Run after 810 / 817 / 822 / 824 / 832 / 847 / 852 (their characters), before 811 / 818 / 823 / 825 / 833. Idempotent.
 Args: none"""
 import unreal
 import editor_toolset.toolsets.blueprint as BT
@@ -11,9 +11,13 @@ T = BT.BlueprintTools
 eal = unreal.EditorAssetLibrary
 for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), ("DarkCaster", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"),
                  ("Rogue", "/Game/RandomDungeon/Blueprints/BP_RDM3_RogueCharacter"), ("Fem5", "/Game/RandomDungeon/Blueprints/BP_RDM4_WarriorCharacter"),
-                 ("Summoner", "/Game/RandomDungeon/Blueprints/BP_RDM5_SummonerCharacter")):
-    bp = unreal.load_asset(PATH); assert bp, PATH + ": run 810 / 817 / 822 / 824 / 832 first"
-    WALK, RUN = [float(v) for v in open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + CH.lower() + r"\speeds.txt").read().split()]
+                 ("Summoner", "/Game/RandomDungeon/Blueprints/BP_RDM5_SummonerCharacter"), ("summoner2", "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner2Character"),
+                 ("Summoner3", "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner3Character")):
+    bp = unreal.load_asset(PATH)
+    if not bp and CH in ("summoner2", "Summoner3"): print(f"RDMCONTROLS (no {CH} yet: 847 / 852 make her)"); continue
+    assert bp, PATH + ": run 810 / 817 / 822 / 824 / 832 first"
+    SP = r"E:\code\claude-ue5\claude_ue5\SourceArt" + ("\\summoner2" if CH == "summoner2" else "\\jrpg_" + CH.lower()) + r"\speeds.txt"
+    WALK, RUN = [float(v) for v in open(SP).read().split()]
     cdo = unreal.get_default_object(bp.generated_class())
     try: cdo.get_editor_property("RunMode")
     except Exception: T.add_variable(bp, "RunMode", "bool")

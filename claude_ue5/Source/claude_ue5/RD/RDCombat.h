@@ -156,6 +156,8 @@ public:
 	float NoManaTime = -100.f;
 	/** items she carries (the generator's Items by name) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void AddItem(FName Name, int32 Count = 1);
+	/** nothing carried, no armour on (the generator's RestartPlay) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void ClearItems();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetItemCount(FName Name) const;
 	/** drinks or eats one: false when she has none, or it would do nothing (full hit points or mana, no mana at all) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool UseItem(FName Name);
@@ -181,8 +183,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveInventoryCursor(int32 Step);
 	/** wields the weapon / uses the item under the cursor */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool UseInventoryEntry();
-	/** the inventory's lines: "weapon|Sword" (her weapons, in the generator's order), then "item|<name>|<count>" (tests, HUD) */
+	/** the inventory's lines: "weapon|Sword" (her weapons, in the generator's order), then "item|<name>|<count>" (potions,
+	 *  food), then "armour|<name>|<1 when she wears it>" (tests, HUD) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetInventoryLines() const;
+
+	// ---- random_dungeonmagic_level5: armour (an item of kind Armour she carries). Worn, its meshes (the fit made for her
+	// hero) follow her body's pose; a blow on her takes its share less. One set at a time: wearing another takes the first
+	// off; wearing the one she has on takes it off.
+	/** puts the set on (or takes it off when she wears it): false when she does not carry it or it was not made for her */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool WearArmour(FName Item);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void TakeOffArmour();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") FName GetWornArmour() const { return WornArmour; }
+	/** the share of a blow her armour takes off (0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmour() const;
+	/** the worn set's meshes on her (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<USkeletalMeshComponent*> GetArmourMeshes() const;
+	/** tests: whether the worn armour follows her body as she is posed now, for a spread of the armour's vertices (Samples
+	 *  in all) skinned on the CPU as they are drawn. Her skin: each one's nearest vertex of her body in the reference pose,
+	 *  the change of their distance (cm; a plate skirt's vertex nearest the other leg changes as she runs). Her bones: a
+	 *  vertex moved by one bone alone (98 %), its distance from where her bone of that name puts it (cm), and the same
+	 *  had the armour stayed in its reference pose. Returns [skin samples, skin median, skin p95, bone samples, bone p95,
+	 *  bone max, bone p95 left in the reference pose]; empty when a mesh's vertices cannot be read */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") TArray<float> MeasureArmourFollow(int32 Samples = 400);
+	/** a blow's damage before her armour and what it did (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastBlowBefore = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastBlowTaken = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ArmourChanges = 0;
 	void TickInventory(APlayerController* PC);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -194,6 +220,8 @@ private:
 	/** per weapon (2 x its index, + 1 the off hand): its meshes carried on her while it is not drawn */
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> HolsterComps;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> LoadedBoltComp;
+	UPROPERTY(Transient) TArray<TObjectPtr<USkeletalMeshComponent>> ArmourComps;
+	FName WornArmour;
 	void ShowLoadedBolt(bool bShow);
 	// ---- the roll
 	float RollTime = -1.f, RollLen = 0.f, RollReadyAt = -100.f;

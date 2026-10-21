@@ -1,0 +1,27 @@
+{
+ "_note": "Summoner2's MetaHuman look (843; skin u is lightness, v the undertone: u 0 v 0.65 is the palest, hue 13, saturation 0.32 unlit; iris u blue-hazel-brown, v dark-light), matched to ai models/Summoner2-sample1.jpg and -sample2.jpg: skin (cheek hue 13-18 deg, saturation 0.26-0.32 in the photos), lips (hue 357-1, saturation 0.51-0.57, a gradient tint), dark brown eyes, rosy cheeks, the hair dark at the roots and magenta (hue 343-345) below. Colours are linear.",
+ "skin": {"u": 0.0, "v": 0.65, "roughness": 0.95, "face_texture_index": 7, "body_texture_index": 0, "show_top_underwear": false},
+ "accents": {"cheeks": {"redness": 0.5, "saturation": 0.5, "lightness": 0.5}, "lips": {"redness": 0.6, "saturation": 0.55, "lightness": 0.5}, "nose": {"redness": 0.5, "saturation": 0.5, "lightness": 0.52}},
+ "freckles": "NONE",
+ "eyes": {"primary_color_u": 0.92, "primary_color_v": 0.05, "secondary_color_u": 0.92, "secondary_color_v": 0.02, "global_saturation": 0.75, "pattern": "IRIS001", "dilation": 1.0},
+ "lashes": {"type": "LONG_CURL", "melanin": 0.95, "redness": 0.15},
+ "makeup": {
+  "foundation": {"apply": false, "color": [0.80, 0.62, 0.56], "intensity": 0.0, "roughness": 0.55, "concealer": 0.0},
+  "eyes": {"type": "THIN_LINER", "color": [0.03, 0.015, 0.012], "opacity": 0.4, "roughness": 0.6},
+  "blush": {"type": "APPLE", "color": [0.85, 0.35, 0.40], "intensity": 0.14, "roughness": 0.55},
+  "lips": {"type": "NATURAL", "color": [0.80, 0.16, 0.13], "opacity": 0.7, "roughness": 0.3, "metalness": 0.0}
+ },
+ "grooms": {
+  "Hair": {"item": "/MetaHumanCharacter/Optional/Grooms/Bindings/Hair/WI_Hair_L_StraightBangs"},
+  "Eyebrows": {"item": "/MetaHumanCharacter/Optional/Grooms/Bindings/Eyebrows/WI_Eyebrows_M_Natural"},
+  "Peachfuzz": {"item": "/MetaHumanCharacter/Optional/Grooms/Bindings/Peachfuzz/WI_Peachfuzz_M_Thin"}
+ },
+ "hair_material": {
+  "parent": "/MetaHumanCharacter/Materials/MI_Hair",
+  "_note": "Ombre on: hairMelanin / hairRedness colour the roots, the Ombre* parameters the lengths; OmbreShift where the lengths' colour starts (0.2 just under the crown, 0.5 at the shoulders: measured in play). Hers starts about the ears, a deep magenta.",
+  "scalars": {"hairMelanin": 1.0, "hairRedness": 0.1, "Ombre": 1.0, "OmbreShift": 0.35, "OmbreContrast": 0.35, "OmbreIntensity": 1.0, "OmbreMelanin": 0.3, "OmbreRedness": 0.5},
+  "vectors": {"OmbrehairDye": [0.85, 0.12, 0.38, 1.0]}
+ },
+ "brow_material": {"scalars": {"hairMelanin": 0.75, "hairRedness": 0.3}},
+ "lash_material": {"scalars": {"hairMelanin": 0.95}}
+}

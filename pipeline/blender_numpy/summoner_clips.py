@@ -96,7 +96,7 @@ def transfer(sumr, mager, mframes, prev=None):
             Rm0 = mager.rest[src].to_3x3().normalized(); Rm = Wm[src].to_3x3().normalized()
             Dm = Rm @ Rm0.inverted()                  # (the Mage bone's turn in the world from its rest)
             if src in AIM and AIM[src] in mager.rest and (AIM.get(n) in sumr.rest or n in FOLLOW):
-                tip_s = SUM_TIP.get(n, AIM.get(n))
+                tip_s = SUM_TIP.get(n) if SUM_TIP.get(n) in sumr.rest else AIM.get(n)     # (a rig without a fourth spine bone: Summoner3)
                 dm0 = mager.head0(AIM[src]) - mager.head0(src); dm = Wm[AIM[src]].translation - Wm[src].translation
                 ds0 = sumr.head0(tip_s) - sumr.head0(n)
                 axes = [Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))]

@@ -3,8 +3,9 @@ its sound. Each caption (SourceArt/summoner/reel_plan.json, written by 835: an e
 what makes it) is drawn in the lower left in the level 4 lettering (Cinzel for the name, Alegreya for the lines;
 rdm4_fonts.py's files), on a dark box, fading in and out; the reel fades in from black and out to it. The sound: a music
 track from the library (chosen by its name, "Emotional Main Theme": nobody here hears it), from its start for the reel's
-length, levelled to an RMS of 0.1 with half a second in and two seconds out.
-Usage: rdm5_face_reel.py <frames_dir> <out_dir> <music.wav> <out_track.wav>"""
+length, levelled to an RMS of 0.1 with half a second in and two seconds out. The second face reel (841, her MetaHuman
+face) passes its own plan: reel_plan_mh.json.
+Usage: rdm5_face_reel.py <frames_dir> <out_dir> <music.wav> <out_track.wav> [plan.json]"""
 import sys, os, glob, json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -12,7 +13,7 @@ from scipy.io import wavfile
 SRC, OUT, MUSIC, TRACK = sys.argv[1:5]
 HERE = os.path.dirname(os.path.abspath(__file__))
 SA = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt")
-P = json.load(open(os.path.join(SA, "summoner", "reel_plan.json")))
+P = json.load(open(sys.argv[5] if len(sys.argv) > 5 else os.path.join(SA, "summoner", "reel_plan.json")))
 FD = os.path.join(SA, "random_dungeon_magic4", "fonts")
 FPS = P["fps"]; W, H, K = 1920, 1080, 2
 f_head = ImageFont.truetype(os.path.join(FD, "Cinzel-700.ttf"), 40 * K)

@@ -109,7 +109,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void ToggleContainer(int32 Index);
 	bool IsDoorOpenIndex(int32 Index) const;
 	/** open or opening (target) */
-	bool IsTargetOpen(bool bDoor, int32 Index) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsTargetOpen(bool bDoor, int32 Index) const;
 
 	// ---- monsters (tile pathing)
 	FIntPoint WorldToLocal(const FVector& L) const;

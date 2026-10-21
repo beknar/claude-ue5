@@ -797,6 +797,101 @@
    1.0
   ]
  },
+ "armour_PlateArmour": {
+  "kind": "icon",
+  "size": [
+   199,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_BearArmour": {
+  "kind": "icon",
+  "size": [
+   256,
+   253
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_TieflingArmour": {
+  "kind": "icon",
+  "size": [
+   97,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_DemonicArmour": {
+  "kind": "icon",
+  "size": [
+   205,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_OrcArmour": {
+  "kind": "icon",
+  "size": [
+   256,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
  "_icons": {
   "Small Healing Potion": "healing_vial",
   "Medium Healing Potion": "healing_flask",
@@ -830,7 +925,12 @@
   "Hardtack": "hardtack",
   "Travel Cake": "travel_cake",
   "Sweet Roll": "sweet_roll",
-  "Well Done Steak": "steak"
+  "Well Done Steak": "steak",
+  "Plate Armour": "armour_PlateArmour",
+  "Bear Warrior\u2019s Armour": "armour_BearArmour",
+  "Tiefling\u2019s Armour": "armour_TieflingArmour",
+  "Demonic Armour": "armour_DemonicArmour",
+  "Orc Veteran\u2019s Armour": "armour_OrcArmour"
  },
  "_weapons": {
   "Warrior/Sword": "w_sword_shield",
@@ -839,6 +939,8 @@
   "Warlock/Sword": "w_sword",
   "Warlock/Fire": "w_dark_fire",
   "Rogue/Daggers": "w_daggers",
-  "Rogue/Crossbow": "w_crossbow"
+  "Rogue/Crossbow": "w_crossbow",
+  "Summoner/Fire": "w_fire",
+  "Summoner/Dark Fire": "w_dark_fire"
  }
 }

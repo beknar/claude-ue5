@@ -10,6 +10,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
+#include "Rendering/SkeletalMeshLODRenderData.h"
+#include "Rendering/SkeletalMeshRenderData.h"
+#include "Rendering/SkinWeightVertexBuffer.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -314,6 +318,10 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 {
 	if (bDead || Amount <= 0.f) return;
 	if (IsDodging()) { ++DodgedHits; return; }
+	// (her armour takes its share off)
+	LastBlowBefore = Amount;
+	Amount *= 1.f - FMath::Clamp(GetArmour(), 0.f, 0.95f);
+	LastBlowTaken = Amount;
 	const float Now = GetWorld()->GetTimeSeconds();
 	Health = FMath::Max(0.f, Health - Amount);
 	DamageTaken += Amount; ++HitsTaken; LastHurtTime = Now;
@@ -430,6 +438,13 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 	N += Count;
 }
 
+void URDCombatComponent::ClearItems()
+{
+	TakeOffArmour();
+	Carried.Reset(); CarriedOrder.Reset();
+	InventoryCursor = 0;
+}
+
 int32 URDCombatComponent::GetItemCount(FName Name) const
 {
 	const int32* N = Carried.Find(Name);
@@ -445,6 +460,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	if (Ix < 0) return false;
 	const FRDItemDef& It = Generator->Items[Ix];
 	const FString Lb = RDItemLabel(Name);
+	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
 	switch (It.Kind)
 	{
 	case ERDItemKind::Healing:
@@ -512,8 +528,154 @@ TArray<FString> URDCombatComponent::GetInventoryLines() const
 	TArray<FString> Out;
 	if (Generator)
 		for (const FRDWeaponDef& W : Generator->Weapons) Out.Add(FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
-	for (const FName& N : CarriedOrder) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
+	auto IsArmour = [this](FName N) { const int32 Ix = Generator ? Generator->FindItem(N) : -1; return Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour; };
+	for (const FName& N : CarriedOrder) if (!IsArmour(N)) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
+	for (const FName& N : CarriedOrder) if (IsArmour(N)) Out.Add(FString::Printf(TEXT("armour|%s|%d"), *N.ToString(), N == WornArmour ? 1 : 0));
 	return Out;
+}
+
+// ------------------------------------------------------------------------------------------------ armour (level 5)
+float URDCombatComponent::GetArmour() const
+{
+	if (WornArmour.IsNone() || !Generator) return 0.f;
+	const int32 Ix = Generator->FindItem(WornArmour);
+	return Ix >= 0 ? Generator->Items[Ix].Amount : 0.f;
+}
+
+TArray<USkeletalMeshComponent*> URDCombatComponent::GetArmourMeshes() const
+{
+	TArray<USkeletalMeshComponent*> Out;
+	for (USkeletalMeshComponent* C : ArmourComps) if (C) Out.Add(C);
+	return Out;
+}
+
+namespace
+{
+	struct FRDCSkin { TArray<FVector> Posed; TArray<FVector> Rest; TArray<int32> Bone; TArray<float> BoneWeight; };
+	// a spread of a skinned mesh's vertices (every one with Want 0): where it draws them now (world) and in its reference pose
+	bool RDCSkinSample(USkinnedMeshComponent* M, int32 Want, FRDCSkin& Out)
+	{
+		if (!M) return false;
+		const FSkeletalMeshRenderData* RD = M->GetSkeletalMeshRenderData();
+		if (!RD || RD->LODRenderData.Num() == 0) return false;
+		const int32 LODIdx = FMath::Clamp(RD->GetPendingFirstLODIdx(0), 0, RD->LODRenderData.Num() - 1);
+		const FSkeletalMeshLODRenderData& LOD = RD->LODRenderData[LODIdx];
+		const FPositionVertexBuffer& PB = LOD.StaticVertexBuffers.PositionVertexBuffer;
+		FSkinWeightVertexBuffer* SW = M->GetSkinWeightBuffer(LODIdx);
+		const int32 Num = PB.GetNumVertices();
+		if (Num <= 0 || !PB.GetVertexData() || !SW || !SW->GetNeedsCPUAccess() || (int32)SW->GetNumVertices() != Num) return false;
+		TArray<FMatrix44f> RefToLocals;
+		M->CacheRefToLocalMatrices(RefToLocals);             // (a follower's come from its leader's bones)
+		const FTransform Xf = M->GetComponentTransform();
+		const int32 Step = Want > 0 ? FMath::Max(1, Num / Want) : 1;
+		for (int32 V = 0; V < Num; V += Step)
+		{
+			Out.Posed.Add(Xf.TransformPosition(FVector(USkinnedMeshComponent::GetSkinnedVertexPosition(M, V, LOD, *SW, RefToLocals))));
+			Out.Rest.Add(FVector(PB.VertexPosition(V)));
+			// (the bone that moves it most, as a bone of the mesh's skeleton, and its share)
+			int32 Sec = 0, SecV = 0;
+			LOD.GetSectionFromVertexIndex(V, Sec, SecV);
+			const FSkinWeightInfo Wi = SW->GetVertexSkinWeights(V);
+			int32 BestB = INDEX_NONE; float BestW = 0.f, Tot = 0.f;
+			for (int32 K = 0; K < MAX_TOTAL_INFLUENCES; ++K)
+			{
+				const float Wk = (float)Wi.InfluenceWeights[K];
+				Tot += Wk;
+				if (Wk > BestW && LOD.RenderSections.IsValidIndex(Sec) && LOD.RenderSections[Sec].BoneMap.IsValidIndex(Wi.InfluenceBones[K]))
+				{ BestW = Wk; BestB = LOD.RenderSections[Sec].BoneMap[Wi.InfluenceBones[K]]; }
+			}
+			Out.Bone.Add(BestB); Out.BoneWeight.Add(Tot > 0.f ? BestW / Tot : 0.f);
+		}
+		return true;
+	}
+}
+
+TArray<float> URDCombatComponent::MeasureArmourFollow(int32 Samples)
+{
+	TArray<float> Out;
+	USkeletalMeshComponent* M = Body();
+	FRDCSkin B;
+	if (!M || ArmourComps.Num() == 0 || !RDCSkinSample(M, 0, B)) return Out;
+	TArray<float> Change, Rigid, RigidStill;
+	for (USkeletalMeshComponent* C : ArmourComps)
+	{
+		FRDCSkin A;
+		USkeletalMesh* AM = C ? C->GetSkeletalMeshAsset() : nullptr;
+		if (!AM || !RDCSkinSample(C, FMath::Max(1, Samples / ArmourComps.Num()), A)) return TArray<float>();
+		const TArray<FMatrix44f>& Inv = AM->GetRefBasesInvMatrix();
+		const FReferenceSkeleton& RS = AM->GetRefSkeleton();
+		const FTransform CX = C->GetComponentTransform();
+		for (int32 i = 0; i < A.Rest.Num(); ++i)
+		{
+			// her skin: the nearest vertex of her body in the reference pose, and how their distance changed
+			int32 Best = 0; double BD = MAX_dbl;
+			for (int32 j = 0; j < B.Rest.Num(); ++j) { const double D = FVector::DistSquared(A.Rest[i], B.Rest[j]); if (D < BD) { BD = D; Best = j; } }
+			Change.Add((float)FMath::Abs(FVector::Dist(A.Posed[i], B.Posed[Best]) - FMath::Sqrt(BD)));
+			// her bones: a vertex moved by one bone alone is where her bone of that name puts it (its place on the bone in
+			// the reference pose, carried by her bone as it is now); left in its reference pose it would not be
+			const int32 Bn = A.Bone[i];
+			if (A.BoneWeight[i] < 0.98f || !Inv.IsValidIndex(Bn) || !RS.IsValidIndex(Bn)) continue;
+			const int32 HerB = M->GetBoneIndex(RS.GetBoneName(Bn));
+			if (HerB == INDEX_NONE) continue;
+			const FVector OnBone = FVector(Inv[Bn].TransformPosition(FVector3f(A.Rest[i])));
+			const FVector Want = M->GetBoneTransform(HerB).TransformPosition(OnBone);
+			Rigid.Add((float)FVector::Dist(Want, A.Posed[i]));
+			RigidStill.Add((float)FVector::Dist(Want, CX.TransformPosition(A.Rest[i])));
+		}
+	}
+	if (Change.Num() == 0 || Rigid.Num() == 0) return Out;
+	Change.Sort(); Rigid.Sort(); RigidStill.Sort();
+	auto Q = [](const TArray<float>& S, float F) { return S[FMath::Clamp(FMath::FloorToInt32(F * (S.Num() - 1)), 0, S.Num() - 1)]; };
+	Out = { (float)Change.Num(), Q(Change, 0.5f), Q(Change, 0.95f), (float)Rigid.Num(), Q(Rigid, 0.95f), Rigid.Last(), Q(RigidStill, 0.95f) };
+	return Out;
+}
+
+void URDCombatComponent::TakeOffArmour()
+{
+	for (USkeletalMeshComponent* C : ArmourComps) if (C) C->DestroyComponent();
+	ArmourComps.Reset();
+	WornArmour = NAME_None;
+}
+
+bool URDCombatComponent::WearArmour(FName Item)
+{
+	if (!Generator || bDead || GetItemCount(Item) <= 0) return false;
+	const int32 Ix = Generator->FindItem(Item);
+	if (Ix < 0 || Generator->Items[Ix].Kind != ERDItemKind::Armour) return false;
+	const FRDItemDef& It = Generator->Items[Ix];
+	const FString Lb = RDItemLabel(Item);
+	if (WornArmour == Item)
+	{
+		TakeOffArmour(); ++ArmourChanges;
+		SetMessage(FString::Printf(TEXT("You take off the %s"), *Lb));
+		if (AActor* O = GetOwner()) Generator->PlaySoundAt(TEXT("Player.Inventory"), O->GetActorLocation());
+		return true;
+	}
+	const FRDArmourFit* Fit = It.Fits.FindByPredicate([this](const FRDArmourFit& F) { return F.Hero == Generator->CurrentHero; });
+	USkeletalMeshComponent* M = Body();
+	if (!Fit || Fit->Meshes.Num() == 0 || !M)
+	{
+		SetMessage(FString::Printf(TEXT("The %s was not made for the %s"), *Lb, *Generator->PlayerTitle.ToLower()));
+		return false;
+	}
+	TakeOffArmour();
+	AActor* O = GetOwner();
+	for (USkeletalMesh* Mesh : Fit->Meshes)
+	{
+		if (!Mesh) continue;
+		USkeletalMeshComponent* C = NewObject<USkeletalMeshComponent>(O, NAME_None, RF_Transient);
+		C->SetSkeletalMeshAsset(Mesh);
+		C->SetupAttachment(M);
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		C->SetCastShadow(true);
+		C->RegisterComponent();
+		C->SetLeaderPoseComponent(M);              // (her bones move it: it was made on her skeleton, in her rest pose)
+		ArmourComps.Add(C);
+	}
+	WornArmour = Item; ++ArmourChanges;
+	SetMessage(FString::Printf(TEXT("You put on the %s:  blows take %.0f%% less"), *Lb, It.Amount * 100.f));
+	if (O) Generator->PlaySoundAt(TEXT("Player.Inventory"), O->GetActorLocation());
+	return true;
 }
 
 void URDCombatComponent::SetInventoryOpen(bool bOpen)
@@ -548,7 +710,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		SetMessage(FString::Printf(TEXT("You wield the %s"), *W.Name.ToString().ToLower()));
 		return true;
 	}
-	if (P.Num() >= 2 && P[0] == TEXT("item"))
+	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));

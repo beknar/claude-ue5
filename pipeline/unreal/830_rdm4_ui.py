@@ -1,6 +1,9 @@
 """random_dungeonmagic_level4's painted interface: imports the pieces and gives them to the level and its menu.
 
-    830_rdm4_ui.py <export_dir> [fonts_dir]
+    830_rdm4_ui.py <export_dir> [fonts_dir] [--level 5]
+
+--level 5: the same for random_dungeonmagic_level5 and its menu random_dungeonmagic_level5_select (the Summoner's
+level, a Save As copy of level 4 with the armour's icons); the textures are the same assets for both levels.
 
 <export_dir> is what pipeline/blender_numpy/rdm4_ui_cut.py --export wrote: <piece>.png and layout.json (each
 piece's stretch border and a frame's open inside; which icon each item and each hero's weapon shows). Each
@@ -19,8 +22,12 @@ it and their plain boxes where it has not.
 import json, os, sys
 import unreal
 
-SRC = sys.argv[1]
-FONT_DIR = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic4", "fonts")
+ARGS = list(sys.argv[1:])
+LV = "4"
+if "--level" in ARGS:
+    i = ARGS.index("--level"); LV = ARGS[i + 1]; del ARGS[i:i + 2]
+SRC = ARGS[0]
+FONT_DIR = ARGS[1] if len(ARGS) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic4", "fonts")
 # role -> (file, size against Roboto, where its capitals start below its line's top in em): Cinzel for titles, names,
 # keys and numbers alone; Alegreya for the text; Alegreya SC for labels. Measured with FreeType (Pillow): Roboto's
 # x-height is 0.53 em, Alegreya's 0.47, Alegreya SC's small capitals 0.52, Cinzel's capitals Roboto's height; Roboto's
@@ -31,8 +38,8 @@ ROBOTO_CAP_TOP = 0.217
 FDEST = "/Game/RandomDungeon/UI/Fonts"
 L = json.load(open(os.path.join(SRC, "layout.json")))
 DEST = "/Game/RandomDungeon/UI"
-LEVEL = "/Game/RandomDungeon/Maps/random_dungeonmagic_level4"
-SELECT = "/Game/RandomDungeon/Maps/random_dungeonmagic_level4_select"
+LEVEL = f"/Game/RandomDungeon/Maps/random_dungeonmagic_level{LV}"
+SELECT = LEVEL + "_select"
 EAL = unreal.EditorAssetLibrary
 
 # ---- the textures

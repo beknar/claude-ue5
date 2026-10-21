@@ -8,14 +8,25 @@
 //    play's streams are never drawn from: a reel must repeat);
 //  - from outside: SetManual (tests, ARDFacePuppet's keyed properties in a sequence).
 // A channel's weight is the largest of what sets it. Cues push the held states and the blinks down while they play.
+//
+// A MetaHuman face (FRDMetaFace; the Summoner's second face, 837-840): a MetaHuman's face mesh set on a body that is not
+// a MetaHuman. The component makes it in play (or in the editor for a puppet): the face mesh attached to the body at
+// Placement (her rest pose: its eyes on hers), its neck and head bones following the body's (URDMetaFaceAnimInstance: each
+// face bone moves as the body bone it follows moved from its rest), its brows and lashes (grooms) on it, the body given a
+// material that cuts her own face away. A channel's Curves are then the MetaHuman's control curves
+// (CTRL_expressions_browDownL ...): RigLogic (the face mesh's post-process AnimBP) turns them into its joints, its blend
+// shapes and its wrinkle maps.
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameFramework/Actor.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimInstanceProxy.h"
 #include "RDFace.generated.h"
 
-/** an expression channel: at full weight, each morph target's weight and each material parameter's value */
+/** an expression channel: at full weight, each morph target's weight, each material parameter's value and each control
+ *  curve's value (a MetaHuman face's) */
 USTRUCT(BlueprintType)
 struct FRDFaceChannel
 {
@@ -23,6 +34,72 @@ struct FRDFaceChannel
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> Morphs;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> Params;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> Curves;
+};
+
+/** a groom on a MetaHuman face (hair, brows, lashes): its asset, its binding to the face mesh, a material for all its
+ *  slots (none: the groom's own), scalar parameters for its material (hairMelanin: 0 blond ... 1 black) */
+USTRUCT(BlueprintType)
+struct FRDMetaFaceGroom
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UGroomAsset> Groom;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UGroomBindingAsset> Binding;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UMaterialInterface> Material;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> Scalars;
+};
+
+/** a MetaHuman's face on another body */
+USTRUCT(BlueprintType)
+struct FRDMetaFace
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class USkeletalMesh> Mesh;
+	/** the face mesh's place on the body mesh (component space; the body in its rest pose) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform Placement;
+	/** face bone -> the body bone it follows (spine_05 -> spine_04, neck_01 -> neck_01, head -> head ...) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, FName> Bones;
+	/** given to every slot of the body (her own face cut away, her hair skull pushed over the MetaHuman's scalp) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UMaterialInterface> BodyMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDMetaFaceGroom> Grooms;
+	/** meshes on the body's skeleton that follow its pose (leader pose: Summoner2's bikini on her MetaHuman body) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<class USkeletalMesh>> Outfits;
+	/** the face's LOD held, and its grooms' (-1: the engine's choice; 0: the full rig's blend shapes and the hair as
+	 *  strands at every distance) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 ForcedLOD = 0;
+};
+
+/** the face mesh's animation: its neck and head bones following the body's, the control curves set by the face component
+ *  (RigLogic, the mesh's post-process AnimBP, does the rest) */
+UCLASS(Transient, NotBlueprintable)
+class CLAUDE_UE5_API URDMetaFaceAnimInstance : public UAnimInstance
+{
+	GENERATED_BODY()
+public:
+	TWeakObjectPtr<class USkeletalMeshComponent> Body;
+	FTransform Placement;
+	TArray<TPair<FName, FName>> Bones;
+	TMap<FName, float> Curves;
+protected:
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) override;
+};
+
+struct FRDMetaFaceProxy : public FAnimInstanceProxy
+{
+	FRDMetaFaceProxy() {}
+	FRDMetaFaceProxy(UAnimInstance* I) : FAnimInstanceProxy(I) {}
+	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
+	virtual bool Evaluate(FPoseContext& Output) override;
+	// (copied on the game thread for the evaluation)
+	struct FBoneMove { FName Bone; FName Parent; FTransform RefCS, ParentRefCS, Move; int32 Depth = 0; };
+	TArray<FBoneMove> Moves;
+	TArray<TPair<FName, float>> CurveValues;
+	// (cached once: the rests)
+	TWeakObjectPtr<const class USkeletalMesh> CachedFace, CachedBody;
+	TMap<FName, FTransform> FaceRefCS, BodyRefCS;
+	TMap<FName, FName> FaceParent;
+	TMap<FName, int32> FaceDepth;
 };
 
 /** an occasion's expression: its channel, how strong, the seconds it takes to come in (FadeIn), stays (Hold), takes to go
@@ -76,6 +153,22 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Face") FName GetExpression() const;
 	/** the mesh it moves (the owner's first skeletal mesh when not set) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") TObjectPtr<class USkeletalMeshComponent> Mesh;
+	/** a MetaHuman face set on Mesh (made at the first step when MetaFace.Mesh is set) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") FRDMetaFace MetaFace;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Face") class USkeletalMeshComponent* GetFaceMesh() const { return FaceMesh; }
+	/** the control curve's value given to the MetaHuman face in the last step */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Face") float GetCurveValue(FName Curve) const { const float* V = CurveValues.Find(Curve); return V ? *V : 0.f; }
+	/** what the face mesh's animation evaluated for a curve (after RigLogic: 0 when the curve never reached it) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Face") float GetFaceAnimCurve(FName Curve) const;
+	/** a bone of the MetaHuman face, in world space (tests: the jaw, the eyelids, the brows move) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Face") FTransform GetFaceBoneTransform(FName Bone) const;
+	/** the MetaHuman face made again (a test that changed MetaFace) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Face") void RebuildMetaFace();
+	/** the face mesh's animation evaluated now (its curves through RigLogic onto its joints and blend shapes): the editor
+	 *  world does not tick animation, and a capture in the same Python call would see the last frame */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Face") void EvaluateFaceNow(float Dt = 0.f);
+	/** one step now (tests and probes in the editor, where the component does not tick) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Face") void StepNow(float Dt) { Step(Dt); }
 
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -85,9 +178,15 @@ public:
 private:
 	struct FPlaying { FName Occasion; FRDFaceCue Cue; float Age = 0.f; };
 	TArray<FPlaying> Playing;
-	TMap<FName, float> Manual, Held, Weights, ParamValues;
+	TMap<FName, float> Manual, Held, Weights, ParamValues, CurveValues;
 	TMap<FName, int32> CueCounts;
 	UPROPERTY(Transient) TArray<TObjectPtr<class UMaterialInstanceDynamic>> MIDs;
+	UPROPERTY(Transient) TObjectPtr<class USkeletalMeshComponent> FaceMesh;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UGroomComponent>> FaceGrooms;
+	UPROPERTY(Transient) TArray<TObjectPtr<class USkeletalMeshComponent>> FaceOutfits;
+	void SetupMetaFace();
+	void TearDownMetaFace();
+	virtual void OnUnregister() override;
 	FRandomStream Stream;
 	float NextBlink = 2.f, BlinkAge = -1.f;
 	int32 Blinks = 0;
@@ -118,6 +217,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Focus = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Blink = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Dead = 0.f;
+	// (more expressions for the MetaHuman face)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Surprise = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Sad = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Disgust = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float Effort = 0.f;
+	/** where the eyes look: +right / +up, -1..1 (the MetaHuman face's eyeLook curves) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float LookRight = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "RandomDungeon|Face") float LookUp = 0.f;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 };

@@ -286,16 +286,54 @@ int32 ARDDungeonGenerator::FindItem(FName Name) const
 
 FName ARDDungeonGenerator::LootOf(FIntPoint Section, int32 Index) const
 {
-	if (!bStartLoot || !IsStartSection(Section) || Items.Num() == 0) return NAME_None;
+	const TArray<FName> L = LootListOf(Section, Index);
+	return L.Num() > 0 ? L[0] : NAME_None;
+}
+
+TArray<int32> ARDDungeonGenerator::GetStartRoomContainers() const
+{
+	TArray<int32> Out;
+	ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (!S) return Out;
+	const int32 Room = S->RoomAt(GetStartRoomCenter());
+	if (Room < 0) return Out;
+	for (int32 I = 0; I < S->GetNumContainers(); ++I)
+		if (S->RoomAt(S->GetContainerLocation(I)) == Room) Out.Add(I);
+	return Out;
+}
+
+TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) const
+{
+	TArray<FName> Out;
+	if (!bStartLoot || !IsStartSection(Section) || Items.Num() == 0) return Out;
+	const int32 Max = FMath::Max(MaxItemsPerContainer, 1);
+	// what is put in the start room's containers: one to each in turn
+	if (StartRoomItems.Num() > 0)
+	{
+		const TArray<int32> Room = GetStartRoomContainers();
+		const int32 K = Room.Find(Index);
+		if (K != INDEX_NONE)
+			for (int32 J = K; J < StartRoomItems.Num() && Out.Num() < Max; J += Room.Num())
+				if (FindItem(StartRoomItems[J]) >= 0) Out.Add(StartRoomItems[J]);
+	}
 	float Sum = 0.f;
 	for (const FRDItemDef& It : Items) Sum += FMath::Max(It.Weight, 0.f);
-	if (Sum <= 0.f) return NAME_None;
+	if (Sum <= 0.f) return Out;
 	// (a stream of its own for each container: what it holds does not depend on the order she opens them in, and the
-	// play's streams are not drawn from)
+	// play's streams are not drawn from; the first pick is the one level 4 had)
 	FRandomStream R((int32)HashCombine(HashCombine((uint32)SessionSeed, GetTypeHash(Section)), GetTypeHash(Index * 7907 + 11)));
-	float U = R.FRand() * Sum;
-	for (const FRDItemDef& It : Items) { U -= FMath::Max(It.Weight, 0.f); if (U < 0.f) return It.Name; }
-	return Items.Last().Name;
+	auto Pick = [&]() -> FName
+	{
+		float U = R.FRand() * Sum;
+		for (const FRDItemDef& It : Items) { U -= FMath::Max(It.Weight, 0.f); if (U < 0.f) return It.Name; }
+		return Items.Last().Name;
+	};
+	const FName First = Pick();
+	const int32 N = Max > 1 ? R.RandRange(1, Max) : 1;
+	TArray<FName> Picked = { First };
+	while (Picked.Num() < N) Picked.Add(Pick());
+	for (const FName& P : Picked) if (Out.Num() < Max) Out.Add(P);
+	return Out;
 }
 
 void ARDDungeonGenerator::UpdateMapScrollInput(APlayerController* PC)
@@ -330,12 +368,13 @@ bool ARDDungeonGenerator::ReloadSection(FIntPoint Coord)
 void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, const FVector& At)
 {
 	if (!Section || !PlayerCombat) return;
-	const FName Item = LootOf(Section->Coord, Index);
-	if (Item.IsNone()) return;
-	PlayerCombat->AddItem(Item, 1);
-	LastFound = Item; LastFoundTime = GetWorld()->GetTimeSeconds(); ++ItemsFound;
+	const TArray<FName> List = LootListOf(Section->Coord, Index);
+	if (List.Num() == 0) return;
+	for (const FName& Item : List) PlayerCombat->AddItem(Item, 1);
+	LastFound = List[0]; LastFoundList = List; LastFoundTime = GetWorld()->GetTimeSeconds(); ItemsFound += List.Num();
 	PlaySoundAt(TEXT("Player.Loot"), At);
-	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDLOOT %s from container %d of section (%d, %d)"), *Item.ToString(), Index, Section->Coord.X, Section->Coord.Y);
+	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDLOOT %s from container %d of section (%d, %d)"), *FString::JoinBy(List, TEXT(", "), [](const FName& N) { return N.ToString(); }),
+		Index, Section->Coord.X, Section->Coord.Y);
 }
 
 void ARDDungeonGenerator::MeanMonsterFactors(float& Health, float& Damage) const
@@ -373,9 +412,11 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	StopMusic();
 	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; MapPan = FVector2D::ZeroVector; LastRevealTime = -100.f;
 	LootedContainers.Reset();
+	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
 	for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (PlayerCombat)
 	{
+		PlayerCombat->ClearItems();                // (nothing found yet, no armour on)
 		PlayerCombat->Revive(true);
 		PlayerCombat->Kills = PlayerCombat->AttacksMade = PlayerCombat->HitsLanded = PlayerCombat->HitsTaken = PlayerCombat->Deaths = 0;
 		PlayerCombat->DamageDealt = PlayerCombat->DamageTaken = 0.f;
@@ -520,6 +561,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 			{
 				URDFaceComponent* F = NewObject<URDFaceComponent>(P, TEXT("RDFace"));
 				F->Channels = FaceChannels; F->Cues = FaceCues; F->Seed = (int32)HashCombine((uint32)SessionSeed, 0x6A11u);
+				F->MetaFace = FaceMeta;
+				if (ACharacter* PCh = Cast<ACharacter>(P)) F->Mesh = PCh->GetMesh();
 				F->RegisterComponent();
 			}
 			// what she hears fades with the distance to her, not to the camera behind her

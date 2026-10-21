@@ -58,6 +58,7 @@ else:
         q.set_editor_property("hold", float(c["hold"])); q.set_editor_property("fade_out", float(c["out"]))
         q.set_editor_property("channel", c["channel"]); cues[occ] = q
     gen.set_editor_property("face_channels", chans); gen.set_editor_property("face_cues", cues)
+    gen.set_editor_property("face_meta", unreal.RDMetaFace())      # (her own face: 840 puts the MetaHuman's on her instead)
     ws = w.get_world_settings()
     ws.set_editor_property("default_game_mode", unreal.load_asset("/Game/RandomDungeon/Blueprints/BP_RDM5_GameMode").generated_class())
     # the face camera (a test cannot spawn into a play world: it is placed here and found by its tag)

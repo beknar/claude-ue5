@@ -13,7 +13,10 @@ arrows and START are drawn with the painted pieces where ARDHeroSelectHUD draws 
 taken from <hud_prefix><hero> (rdm_reel_overlay.py with the same folder). Its lettering is then the game's (rdm4_fonts.py's
 files, ARDHeroSelectHUD's roles): Cinzel for the titles, names, START and keys, Alegreya for the text, Alegreya SC for the
 labels (written "Mana Back": sc()).
-Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix]
+Level 5 (the seventh argument "5"; the Summoner's armour reel): the menu of random_dungeonmagic_level5 (829 with level 5:
+one passage, the five heroes looked through and the Summoner started) and her run (815 with level 5), from
+SourceArt/random_dungeon_magic5.
+Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4 or 5]]
   work_dir holds final_menu (the menu's frames), hud_<hero> (her run with the HUD) and final_<hero> (her run's .wav)"""
 import sys, os, glob, json, math, re
 import numpy as np
@@ -26,9 +29,12 @@ UI, HUD = None, "hud_"
 if len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
-SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic4")
-M = json.load(open(os.path.join(SRC, "cine_menu.json")))
-ORDER = ["Warrior", "Mage", "Warlock", "Rogue"]
+LV = sys.argv[7] if len(sys.argv) > 7 else "4"
+SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + LV)
+M = json.load(open(os.path.join(SRC, "cine_menu.json"), encoding="utf-8"))
+ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
+TITLE, SUB = (("random_dungeonmagic_level5", "choose the summoner in the menu, then the great hall: five armour sets to find and wear") if LV == "5" else
+              ("random_dungeonmagic_level4", "choose a hero in the menu, then the dungeon: four heroes, four runs"))
 FPS = M["fps"]; PASS = int(round(M["passage"] * FPS)); ROWS = {r["frame"]: r for r in M["rows"]}; LAST = max(ROWS)
 HEROES = M["heroes"]
 W, H, K = 1920, 1080, 2
@@ -41,7 +47,7 @@ def font(name, size):
 f_big, f_title, f_name, f_tab, f_line, f_small, f_key, f_cap = (font("segoeuib.ttf", 56), font("segoeuib.ttf", 40), font("segoeuib.ttf", 58), font("seguisb.ttf", 24),
                                                                  font("segoeui.ttf", 23), font("seguisb.ttf", 18), font("segoeuib.ttf", 30), font("seguisb.ttf", 26))
 # ---- with the painted interface: the game's lettering (sizes: Alegreya a tenth larger than the Segoe UI it replaces)
-FD = os.path.join(SRC, "fonts")
+FD = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic4", "fonts")       # (level 5 uses level 4's)
 LETTERS = bool(UI) and os.path.exists(os.path.join(FD, "Cinzel-700.ttf"))
 def lfont(fn, size): return ImageFont.truetype(os.path.join(FD, fn + ".ttf"), int(size * K))
 def sc(s):
@@ -195,7 +201,7 @@ def menu_hud(f, k, fl):
     d.rectangle((W * K / 2 - tw / 2 - 16 * K, H * K - 62 * K, W * K / 2 + tw / 2 + 16 * K, H * K - 30 * K), fill=lin((0.03, 0.035, 0.05), 0.75))
     d.text((W * K / 2, H * K - 46 * K), keys, font=fx_small, fill=lin(INK), anchor="mm")
     # ---- the reel's own: which hero of four, the key being pressed, the opening title
-    d.text((W * K - 80 * K, 46 * K), "HERO %d OF 4" % (k + 1), font=f_tab, fill=lin(INK), anchor="ra")
+    if len(ORDER) > 1: d.text((W * K - 80 * K, 46 * K), "HERO %d OF %d" % (k + 1, len(ORDER)), font=f_tab, fill=lin(INK), anchor="ra")
     if r["key"]:
         kc = "ENTER" if r["key"] == "Enter" else r["key"]; kw = (130 if kc == "ENTER" else 64) * K; kx, ky = W * K - 80 * K - kw, 84 * K
         d.rounded_rectangle((kx, ky, kx + kw, ky + 60 * K), 10 * K, fill=(238, 214, 150, 255), outline=(255, 236, 180, 255), width=2 * K)
@@ -205,8 +211,8 @@ def menu_hud(f, k, fl):
         # (the reel's title over the menu, veiled, for its first seconds; the menu comes up from under it)
         a = max(0.0, min(1.0, (3.4 - t) / 0.7))
         v = Image.new("RGBA", o.size, (8, 7, 6, int(215 * a))); dv = ImageDraw.Draw(v, "RGBA")
-        dv.text((W * K / 2, 470 * K), "random_dungeonmagic_level4", font=f_big, fill=(255, 255, 255, int(255 * a)), anchor="mm")
-        dv.text((W * K / 2, 545 * K), "choose a hero in the menu, then the dungeon: four heroes, four runs", font=f_capt, fill=(232, 236, 240, int(235 * a)), anchor="mm")
+        dv.text((W * K / 2, 470 * K), TITLE, font=f_big, fill=(255, 255, 255, int(255 * a)), anchor="mm")
+        dv.text((W * K / 2, 545 * K), SUB, font=f_capt, fill=(232, 236, 240, int(235 * a)), anchor="mm")
         o.alpha_composite(v); d = ImageDraw.Draw(o, "RGBA")
     # (each passage fades in and out through black)
     edge = min(fl, PASS - 1 - fl)

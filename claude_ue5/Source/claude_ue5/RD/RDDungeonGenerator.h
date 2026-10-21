@@ -171,8 +171,21 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") int32 ItemsFound = 0;
 	TSet<FIntVector> LootedContainers;
 	float LastFoundTime = -100.f;
-	/** the item a container of a section holds (NAME_None: none) */
+	/** the first item a container of a section holds (NAME_None: none) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") FName LootOf(FIntPoint Section, int32 Index) const;
+	/** random_dungeonmagic_level5: how many items a container may hold (each holds 1 to this many, picked by the
+	 *  weights; level 4: 1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") int32 MaxItemsPerContainer = 1;
+	/** random_dungeonmagic_level5: items put in the containers of the start room (the great hall she starts in), one to
+	 *  each container in turn (more to one when there are more items than containers); they come first in a container
+	 *  and count toward MaxItemsPerContainer */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") TArray<FName> StartRoomItems;
+	/** everything a container holds, in the order found */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") TArray<FName> LootListOf(FIntPoint Section, int32 Index) const;
+	/** the containers of the start room (start section indices, in their order; tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") TArray<int32> GetStartRoomContainers() const;
+	/** everything the last container she opened held (HUD) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") TArray<FName> LastFoundList;
 	/** the containers looted this run (section, container key): a container gives what it holds once, whatever happens to
 	 *  its section afterwards; RestartPlay empties it (a new run) */
 	void MarkContainerLooted(FIntPoint Section, int32 Key) { LootedContainers.Add(FIntVector(Section.X, Section.Y, Key)); }
@@ -191,6 +204,9 @@ public:
 	 *  With them the generator gives her pawn a URDFaceComponent in play (its blinks seeded from the session seed). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") TArray<FRDFaceChannel> FaceChannels;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") TMap<FName, FRDFaceCue> FaceCues;
+	/** a MetaHuman face on her (840: MHC_Summoner's face mesh, its brows and lashes, her body's cut-away material); its
+	 *  channels' Curves drive it. Empty: her own face (the shapes and the painted patches) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Face") FRDMetaFace FaceMeta;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") URDCombatComponent* GetPlayerCombat() const { return PlayerCombat; }
 	/** her average damage a blow over the weapons */

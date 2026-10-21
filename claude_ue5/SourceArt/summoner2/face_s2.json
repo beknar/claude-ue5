@@ -1,0 +1,14 @@
+{
+ "_note": "Summoner2's MetaHuman face on her own MetaHuman body (848 via rdm5_mh_face.py): the built face mesh at its own place on the body (placement identity: the face and the body come from the same character), its bones following the body's of the same names, no body material (her body is the MetaHuman's), the built hair, brows and lashes with 843's colours (not the peach fuzz: along her jaw it read as stubble) (844 gave the grooms their materials), the bikini as an outfit (845), and the first MetaHuman face's sixteen expression channels (face_mh.json's: FACS action units as control curves).",
+ "face_mesh": "/Game/JRPG/MetaHuman/Summoner2/Face/SKM_MHC_Summoner2_FaceMesh",
+ "placement": "identity",
+ "bones": {"spine_04": "spine_04", "spine_05": "spine_05", "neck_01": "neck_01", "neck_02": "neck_02", "head": "head"},
+ "body_material": null,
+ "grooms": [
+  {"groom": "/Game/JRPG/MetaHuman/Summoner2/Grooms/Hair_L_StraightBangs", "binding": "/Game/JRPG/MetaHuman/Summoner2/Grooms/Hair_L_StraightBangs_Binding", "scalars": {}},
+  {"groom": "/Game/JRPG/MetaHuman/Summoner2/Grooms/Eyebrows_M_Natural", "binding": "/Game/JRPG/MetaHuman/Summoner2/Grooms/Eyebrows_M_Natural_Binding", "scalars": {}},
+  {"groom": "/Game/JRPG/MetaHuman/Summoner2/Grooms/Eyelashes_L_Curl", "binding": "/Game/JRPG/MetaHuman/Summoner2/Grooms/Eyelashes_L_Curl_Binding", "scalars": {}}
+ ],
+ "outfits": ["/Game/JRPG/MetaHuman/Summoner2/Outfit/s2_bikini_skinned"],
+ "channels_from": "summoner/face_mh.json"
+}

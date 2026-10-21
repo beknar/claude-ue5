@@ -7,19 +7,33 @@ Warlock's sword, the Rogue's two daggers), the others where she carries them (th
 has spells only. The HUD (ARDHeroSelectHUD) shows her card: hit points, mana, abilities, armour, what she starts with.
 The game mode is ARDHeroSelectGameMode (no pawn: the view is the studio camera); START opens random_dungeonmagic_level4
 with ?Hero=<name>. Play this level to play random_dungeonmagic_level4 with a hero of your choice.
-Run after 825. Idempotent (actors tagged rdm4_select). Args: none"""
-import unreal
+Run after 825. Idempotent (actors tagged rdm4_select).
+With the argument 5 it makes random_dungeonmagic_level5's menu instead (random_dungeonmagic_level5_select: its five
+heroes, 852; START opens random_dungeonmagic_level5), its painted pieces and lettering those 830 gave level 4's menu.
+Args: [4 | 5]"""
+import sys, unreal
+LV = sys.argv[1] if len(sys.argv) > 1 else "4"
 eal = unreal.EditorAssetLibrary
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 V = unreal.Vector; Rot = unreal.Rotator
-DUNGEON = "/Game/RandomDungeon/Maps/random_dungeonmagic_level4"; LEVEL = DUNGEON + "_select"
-TAG = unreal.Name("rdm4_select")
+DUNGEON = "/Game/RandomDungeon/Maps/random_dungeonmagic_level" + LV; LEVEL = DUNGEON + "_select"
+TAG = unreal.Name(f"rdm{LV}_select")
+UIART = UIFONTS = None
+if LV != "4":
+    # (the painted menu as level 4's has it: 830 gave its HeroSelect the pieces and the lettering)
+    les.load_level("/Game/RandomDungeon/Maps/random_dungeonmagic_level4_select")
+    s4 = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDHeroSelect))
+    # (as text: the maps Python hands back point into that actor, which is gone once another level is loaded; set from
+    # them, the editor hung)
+    UIART = {str(k): v.export_text() for k, v in s4.get_editor_property("ui_art").items()}
+    UIFONTS = {str(k): v.export_text() for k, v in s4.get_editor_property("ui_fonts").items()}
+    del s4
 L = lambda p: unreal.load_asset(p.split(".")[0])
 # ---- the heroes, as the dungeon has them (as text: nothing of that level is kept once this one is opened)
 if not ues.get_editor_world().get_path_name().startswith(DUNGEON + "."): les.load_level(DUNGEON)
 gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
-HTXT = [h.export_text() for h in gen.get_editor_property("heroes")]; assert len(HTXT) == 4, len(HTXT)
+HTXT = [h.export_text() for h in gen.get_editor_property("heroes")]; assert len(HTXT) >= 4, len(HTXT)
 del gen
 # ---- the level
 if eal.does_asset_exist(LEVEL): les.load_level(LEVEL)
@@ -109,10 +123,17 @@ sel = spawn(unreal.RDHeroSelect, (0, 0, 0), label="HeroSelect")
 sel.set_editor_property("heroes", heroes); sel.set_editor_property("figures", figures)
 sel.set_editor_property("turntable", plinth); sel.set_editor_property("camera", cam)
 sel.set_editor_property("target_level", DUNGEON); sel.set_editor_property("front_yaw", 0.0); sel.set_editor_property("turn_rate", 28.0)
+if UIART is not None:
+    def back(d, cls):
+        out = {}
+        for k, txt in d.items():
+            v = cls(); v.import_text(txt); out[unreal.Name(k)] = v
+        return out
+    sel.set_editor_property("ui_art", back(UIART, unreal.RDUIArt)); sel.set_editor_property("ui_fonts", back(UIFONTS, unreal.RDUIFont))
 ps = spawn(unreal.PlayerStart, (0, 300, 100), label="Select_PlayerStart")
 ws = w.get_world_settings(); ws.set_editor_property("default_game_mode", unreal.RDHeroSelectGameMode.static_class())
 les.save_current_level()
-print("RDM4SELECT", LEVEL, "| heroes", [str(h.name) for h in sel.heroes], "| figures", [f.get_actor_label() for f in sel.figures],
+print(f"RDM{LV}SELECT", LEVEL, "| heroes", [str(h.name) for h in sel.heroes], "| figures", [f.get_actor_label() for f in sel.figures],
       "| anim", [str(f.skeletal_mesh_component.get_editor_property("anim_class").get_name()) if f.skeletal_mesh_component.get_editor_property("anim_class") else None for f in figures],
       "| attached", [len(f.get_attached_actors()) for f in figures], "| game mode", ws.get_editor_property("default_game_mode").get_name())
 import gc

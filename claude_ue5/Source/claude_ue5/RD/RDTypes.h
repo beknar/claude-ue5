@@ -204,16 +204,26 @@ struct FRDUIFont
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Lift = 0.f;
 };
 
-/** random_dungeonmagic_level4: what a potion or a food does */
+/** random_dungeonmagic_level4: what a potion or a food does (random_dungeonmagic_level5: or a set of armour she wears) */
 UENUM(BlueprintType)
 enum class ERDItemKind : uint8
 {
-	Healing, Mana, Speed, Food
+	Healing, Mana, Speed, Food, Armour
+};
+
+/** random_dungeonmagic_level5: a set of armour made to fit one hero: its meshes, on her skeleton, follow her pose */
+USTRUCT(BlueprintType)
+struct FRDArmourFit
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Hero;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<USkeletalMesh>> Meshes;
 };
 
 /** random_dungeonmagic_level4: a potion or a food found in a container. Amount is a share: of her hit points at once
  *  (Healing), of her mana at once (Mana), of her speed for Seconds (Speed), of her hit points every second for Seconds
- *  (Food). Weight: how likely a container holds it against the others (the item table's rarity). */
+ *  (Food), of each blow she takes that it takes off while she wears it (Armour: worn, not used up; one set at a time).
+ *  Weight: how likely a container holds it against the others (the item table's rarity; 0: only where it is put). */
 USTRUCT(BlueprintType)
 struct FRDItemDef
 {
@@ -225,6 +235,10 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
 	/** its picture among the generator's UIArt (none: the HUD shows its name only) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
+	/** armour: the heroes it fits (made for each: SourceArt/summoner3/armour.json, 849-851) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDArmourFit> Fits;
+	/** armour: a line of what it is (the inventory shows it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Looks;
 };
 
 /** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the

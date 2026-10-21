@@ -1,0 +1,1517 @@
+{
+ "tag": "s4",
+ "plan": [
+  "setup",
+  "keys",
+  "pad",
+  "walls",
+  "cast",
+  "nothing",
+  "far",
+  "kill:3",
+  "tier",
+  "face"
+ ],
+ "level": "random_dungeonmagic_level5",
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_RDM5_Summoner2Character_C",
+   "mesh": "SKM_MHC_Summoner2_BodyMesh",
+   "in_her_right_hand": null,
+   "hit_points": 100.0,
+   "weapons": [
+    "Fire"
+   ],
+   "spell": true,
+   "from_start_room_cm": 0,
+   "title": "SUMMONER",
+   "caster_controls": true,
+   "keys": [
+    "W A S D|move",
+    "Mouse|look / turn the camera",
+    "Space|jump",
+    "R|switch walk / run",
+    "Shift (held)|run",
+    "Left mouse / E|fire spell",
+    "F|open door or container",
+    "M|map"
+   ],
+   "pad": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "LB / RB|fire spell",
+    "X|open door or container",
+    "Back|map"
+   ]
+  },
+  {
+   "step": "keys",
+   "ok": true,
+   "context_active": false,
+   "move_keys": [
+    "A",
+    "D",
+    "Down",
+    "Gamepad_Left2D",
+    "Left",
+    "Right",
+    "S",
+    "Up",
+    "W"
+   ],
+   "run_keys": [
+    "Gamepad_LeftThumbstick",
+    "LeftShift"
+   ],
+   "actions_on_E_and_left_mouse": [
+    "IA_Hook",
+    "IA_Jab",
+    "IA_TurnRight"
+   ],
+   "her_handlers": [
+    "Jump",
+    "Look",
+    "MouseLook",
+    "Move",
+    "Sprint"
+   ],
+   "clash": [],
+   "walk_cm_s": 260.9,
+   "her_walk": 260.94,
+   "run_cm_s": 522.2,
+   "her_run": 522.19,
+   "speeds": {
+    "walk": 260.9,
+    "run": 522.2,
+    "A": 260.9,
+    "S": 260.9,
+    "D": 260.9
+   },
+   "headings_deg": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "wanted_headings": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "attacks_by_key": {
+    "E": {
+     "attacks": 1,
+     "bolts": 1
+    },
+    "LeftMouseButton": {
+     "attacks": 1,
+     "bolts": 1
+    }
+   }
+  },
+  {
+   "step": "pad",
+   "ok": true,
+   "her_walk": 260.94,
+   "her_run": 522.19,
+   "device": {
+    "after_W": "keyboard",
+    "after_pad_button": "gamepad",
+    "after_W_again": "keyboard"
+   },
+   "stick_walk": {
+    "cm_s": 260.9,
+    "heading_deg": 0,
+    "running": false
+   },
+   "stick_run": {
+    "cm_s": 522.2,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_run": {
+    "cm_s": 522.2,
+    "heading_deg": 0,
+    "running": true
+   },
+   "W_walk": {
+    "cm_s": 260.9,
+    "heading_deg": 0,
+    "running": false
+   },
+   "switch": {
+    "LT_runs": true,
+    "LT_again_walks": true,
+    "R_runs": true,
+    "R_again_walks": true
+   },
+   "A_jump_cm": 103,
+   "right_stick_turned_deg": 37.5,
+   "RB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     0
+    ]
+   },
+   "LB": {
+    "attacks": 1,
+    "bolts": 1,
+    "weapons": [
+     0
+    ]
+   },
+   "RT": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "Y": {
+    "attacks": 0,
+    "bolts": 0,
+    "weapons": []
+   },
+   "X": {
+    "prompt": "open chest",
+    "container": "chest",
+    "open_alpha": 1.0,
+    "attacks": 0,
+    "device": "gamepad"
+   },
+   "Back": {
+    "opens_map": true,
+    "closes_it": true
+   }
+  },
+  {
+   "step": "walls",
+   "ok": true,
+   "sections": 1,
+   "segments": 763,
+   "by_piece": {
+    "Wall_Rough_5": 163,
+    "Wall_Rough_3": 153,
+    "Wall_Rough": 151,
+    "Wall_Rough_4": 142,
+    "Wall_Rough_2": 154
+   },
+   "rays": 58203,
+   "face": 51377,
+   "hole": 6826,
+   "leak": 0,
+   "leaks": [],
+   "without_backing": {
+    "segments": 600,
+    "rays": 45747,
+    "face": 38921,
+    "hole": 358,
+    "leak": 6468
+   },
+   "walk_in": {
+    "tries": [
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 85,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_4",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough",
+      "hole_height_cm": 120,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     },
+     {
+      "piece": "Wall_Rough_2",
+      "hole_height_cm": 190,
+      "closest_to_wall_line_cm": 66.0,
+      "capsule_radius": 36,
+      "kept_out": true
+     }
+    ],
+    "ok": true
+   },
+   "fall": {
+    "resets": 1,
+    "put_back_cm_from_where_she_stood": 0.0,
+    "ok": true
+   },
+   "cells": {
+    "cells": 49,
+    "cell_sides_with_bars": 49,
+    "doors_open": 0,
+    "rays": 2352,
+    "leak": 0,
+    "leaks": [],
+    "hay": 49,
+    "hay_blocks": 49,
+    "hay_tops_cm": [
+     143,
+     143,
+     143
+    ],
+    "ok": true
+   }
+  },
+  {
+   "step": "cast",
+   "ok": true,
+   "monster": "Daemon",
+   "gap_cm": 900,
+   "hand": "hand_r",
+   "started": true,
+   "target_is_it": true,
+   "montage": true,
+   "hand_moved_cm": 79,
+   "charge_particles": 338,
+   "bolt_left_at_s": 0.41,
+   "bolt_speed_cm_s": 1700,
+   "spell_speed": 1700.0,
+   "particles_round_the_bolt": 692,
+   "on_monster": 1,
+   "elsewhere": 0,
+   "flown_cm": 581,
+   "it_lost": 25.0,
+   "damage": 25.0,
+   "burst_particles": 557,
+   "burst_at": [
+    355,
+    -3450,
+    128
+   ],
+   "sounds": {
+    "Player.Charge.Fire": 1,
+    "Player.Cast.Fire": 1,
+    "Player.Hit.Fire": 1
+   }
+  },
+  {
+   "step": "nothing",
+   "ok": true,
+   "stuck_in_the_wall": null,
+   "target": null,
+   "turned_deg": 0.0,
+   "off_her_heading_deg": 0.3,
+   "flown_cm": 1231,
+   "reach": 1400.0,
+   "damage_dealt": 0.0
+  },
+  {
+   "step": "far",
+   "ok": true,
+   "monster": "Horned",
+   "distance_cm": 1798,
+   "reach": 1400.0,
+   "target": null
+  },
+  {
+   "step": "kill",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Horned",
+     "hit_points": 59.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 1.7,
+     "ok": true
+    },
+    {
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 1.6,
+     "ok": true
+    },
+    {
+     "monster": "Daemon",
+     "hit_points": 54.0,
+     "casts": 3,
+     "bolts_on_it": 3,
+     "bolts_needed": 3,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 2.5,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 3
+  },
+  {
+   "step": "tier",
+   "ok": true,
+   "section": [
+    1,
+    0
+   ],
+   "monsters": 12,
+   "average_hit_points": 94.5,
+   "hers": 100.0,
+   "average_damage": 19.4,
+   "spell_damage": 20.0
+  },
+  {
+   "step": "face",
+   "ok": true,
+   "channels": {
+    "Blink": {
+     "face_changed": 0.0067,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_eyeBlinkL": [
+       1.0,
+       1.0
+      ],
+      "CTRL_expressions_eyeBlinkR": [
+       1.0,
+       1.0
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Joy": {
+     "face_changed": 0.0396,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_mouthCornerPullL": [
+       0.85,
+       0.85
+      ],
+      "CTRL_expressions_mouthCornerPullR": [
+       0.85,
+       0.85
+      ],
+      "CTRL_expressions_eyeCheekRaiseL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_eyeCheekRaiseR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthCornerWideL": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_mouthCornerWideR": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_noseNasolabialDeepenL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_noseNasolabialDeepenR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthDimpleL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthDimpleR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_jawOpen": [
+       0.08,
+       0.08
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Anger": {
+     "face_changed": 0.0204,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browDownL": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browDownR": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_eyeUpperLidUpL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_eyeUpperLidUpR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_eyeLidPressL": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_eyeLidPressR": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_mouthLipsPressL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsPressR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsTightenUL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthLipsTightenUR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthLipsTightenDL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthLipsTightenDR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_noseWrinkleL": [
+       0.25,
+       0.25
+      ],
+      "CTRL_expressions_noseWrinkleR": [
+       0.25,
+       0.25
+      ],
+      "CTRL_expressions_jawClenchL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_jawClenchR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthCornerDepressL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthCornerDepressR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_neckStretchL": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_neckStretchR": [
+       0.2,
+       0.2
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Pain": {
+     "face_changed": 0.0621,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browDownL": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_browDownR": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_browRaiseInL": [
+       0.35,
+       0.35
+      ],
+      "CTRL_expressions_browRaiseInR": [
+       0.35,
+       0.35
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_eyeCheekRaiseL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_eyeCheekRaiseR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_eyeFaceScrunchL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_eyeFaceScrunchR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_eyeBlinkL": [
+       0.55,
+       0.55
+      ],
+      "CTRL_expressions_eyeBlinkR": [
+       0.55,
+       0.55
+      ],
+      "CTRL_expressions_noseWrinkleL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_noseWrinkleR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_noseWrinkleUpperL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_noseWrinkleUpperR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_mouthStretchL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthStretchR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_jawOpen": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthCornerDepressL": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_mouthCornerDepressR": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_jawClenchL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_jawClenchR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_neckStretchL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_neckStretchR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_neckMastoidContractL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_neckMastoidContractR": [
+       0.3,
+       0.3
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Fear": {
+     "face_changed": 0.0475,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browRaiseInL": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browRaiseInR": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browRaiseOuterL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_browRaiseOuterR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeWidenL": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_eyeWidenR": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_eyeUpperLidUpL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeUpperLidUpR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthStretchL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_mouthStretchR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_jawOpen": [
+       0.25,
+       0.25
+      ],
+      "CTRL_expressions_mouthLowerLipDepressL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_mouthLowerLipDepressR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_neckStretchL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_neckStretchR": [
+       0.4,
+       0.4
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Surprise": {
+     "face_changed": 0.0488,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browRaiseInL": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browRaiseInR": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browRaiseOuterL": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_browRaiseOuterR": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_eyeWidenL": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_eyeWidenR": [
+       0.9,
+       0.9
+      ],
+      "CTRL_expressions_eyeUpperLidUpL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_eyeUpperLidUpR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_jawOpen": [
+       0.45,
+       0.45
+      ],
+      "CTRL_expressions_mouthFunnelUL": [
+       0.1,
+       0.1
+      ],
+      "CTRL_expressions_mouthFunnelUR": [
+       0.1,
+       0.1
+      ],
+      "CTRL_expressions_mouthFunnelDL": [
+       0.1,
+       0.1
+      ],
+      "CTRL_expressions_mouthFunnelDR": [
+       0.1,
+       0.1
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Sad": {
+     "face_changed": 0.0256,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browRaiseInL": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_browRaiseInR": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_browDownL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_browDownR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_eyeBlinkL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_eyeBlinkR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_eyeLookDownL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_eyeLookDownR": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthCornerDepressL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_mouthCornerDepressR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_jawChinRaiseDL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_jawChinRaiseDR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLowerLipDepressL": [
+       0.1,
+       0.1
+      ],
+      "CTRL_expressions_mouthLowerLipDepressR": [
+       0.1,
+       0.1
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Disgust": {
+     "face_changed": 0.0336,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_noseWrinkleL": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_noseWrinkleR": [
+       0.8,
+       0.8
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_browDownL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_browDownR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeCheekRaiseL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeCheekRaiseR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthCornerDepressL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthCornerDepressR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthLowerLipDepressL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthLowerLipDepressR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_jawChinRaiseDL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_jawChinRaiseDR": [
+       0.3,
+       0.3
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Shout": {
+     "face_changed": 0.0431,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_jawOpen": [
+       0.75,
+       0.75
+      ],
+      "CTRL_expressions_browDownL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_browDownR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLowerLipDepressL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_mouthLowerLipDepressR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_mouthStretchL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthStretchR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_noseWrinkleL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_noseWrinkleR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_neckStretchL": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_neckStretchR": [
+       0.7,
+       0.7
+      ],
+      "CTRL_expressions_neckMastoidContractL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_neckMastoidContractR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_mouthCornerPullL": [
+       0.15,
+       0.15
+      ],
+      "CTRL_expressions_mouthCornerPullR": [
+       0.15,
+       0.15
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Focus": {
+     "face_changed": 0.0152,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browDownL": [
+       0.45,
+       0.45
+      ],
+      "CTRL_expressions_browDownR": [
+       0.45,
+       0.45
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.45,
+       0.45
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.45,
+       0.45
+      ],
+      "CTRL_expressions_eyeLidPressL": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_eyeLidPressR": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_mouthLipsPressL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsPressR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthPressUL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_mouthPressUR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_mouthPressDL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_mouthPressDR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_jawClenchL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_jawClenchR": [
+       0.3,
+       0.3
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Effort": {
+     "face_changed": 0.0249,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_browDownL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_browDownR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_browLateralL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_browLateralR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeSquintInnerL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_eyeSquintInnerR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_eyeCheekRaiseL": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_eyeCheekRaiseR": [
+       0.4,
+       0.4
+      ],
+      "CTRL_expressions_jawClenchL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_jawClenchR": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_mouthStretchL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthStretchR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsTightenUL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsTightenUR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsTightenDL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthLipsTightenDR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseL": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_mouthUpperLipRaiseR": [
+       0.3,
+       0.3
+      ],
+      "CTRL_expressions_neckStretchL": [
+       0.6,
+       0.6
+      ],
+      "CTRL_expressions_neckStretchR": [
+       0.6,
+       0.6
+      ]
+     },
+     "numbers_ok": true
+    },
+    "Dead": {
+     "face_changed": 0.0136,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_eyeBlinkL": [
+       0.92,
+       0.92
+      ],
+      "CTRL_expressions_eyeBlinkR": [
+       0.92,
+       0.92
+      ],
+      "CTRL_expressions_eyeRelaxL": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_eyeRelaxR": [
+       0.5,
+       0.5
+      ],
+      "CTRL_expressions_jawOpen": [
+       0.2,
+       0.2
+      ],
+      "CTRL_expressions_mouthCornerDepressL": [
+       0.05,
+       0.05
+      ],
+      "CTRL_expressions_mouthCornerDepressR": [
+       0.05,
+       0.05
+      ]
+     },
+     "numbers_ok": true
+    },
+    "LookRight": {
+     "face_changed": 0.0035,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_eyeLookRightL": [
+       1.0,
+       1.0
+      ],
+      "CTRL_expressions_eyeLookRightR": [
+       1.0,
+       1.0
+      ]
+     },
+     "numbers_ok": true
+    },
+    "LookLeft": {
+     "face_changed": 0.0034,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_eyeLookLeftL": [
+       1.0,
+       1.0
+      ],
+      "CTRL_expressions_eyeLookLeftR": [
+       1.0,
+       1.0
+      ]
+     },
+     "numbers_ok": true
+    },
+    "LookUp": {
+     "face_changed": 0.0067,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_eyeLookUpL": [
+       1.0,
+       1.0
+      ],
+      "CTRL_expressions_eyeLookUpR": [
+       1.0,
+       1.0
+      ]
+     },
+     "numbers_ok": true
+    },
+    "LookDown": {
+     "face_changed": 0.0075,
+     "morphs": {},
+     "params": {},
+     "curves_given_evaluated": {
+      "CTRL_expressions_eyeLookDownL": [
+       1.0,
+       1.0
+      ],
+      "CTRL_expressions_eyeLookDownR": [
+       1.0,
+       1.0
+      ]
+     },
+     "numbers_ok": true
+    },
+    "_stays_on_her": {
+     "largest_drift_cm": 0.0,
+     "samples": [
+      [
+       0.0,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.059,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.124,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.188,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.255,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.316,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       1.857,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       1.903,
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      [
+       1.952,
+       -0.0,
+       -0.0,
+       0.0
+      ]
+     ]
+    }
+   },
+   "morphs_alone": {
+    "jawOpen": {
+     "given": 1.0,
+     "evaluated": 1.0,
+     "face_changed": 0.0392,
+     "jaw_turned_deg": 22.19
+    },
+    "eyeBlinkL": {
+     "given": 1.0,
+     "evaluated": 1.0,
+     "face_changed": 0.0052
+    },
+    "eyeBlinkR": {
+     "given": 1.0,
+     "evaluated": 1.0,
+     "face_changed": 0.0055
+    },
+    "browRaiseInL": {
+     "given": 1.0,
+     "evaluated": 1.0,
+     "face_changed": 0.0165
+    },
+    "mouthCornerPullR": {
+     "given": 1.0,
+     "evaluated": 1.0,
+     "face_changed": 0.0269
+    },
+    "noseWrinkleL": {
+     "given": 1.0,
+     "evaluated": 1.0,
+     "face_changed": 0.0235
+    }
+   },
+   "occasions": {
+    "_peaks": {
+     "Pain": 1.0,
+     "Focus": 1.0
+    },
+    "hurt": {
+     "peak": 1.0,
+     "after_1.7s": 0.0
+    },
+    "cast": {
+     "peak": 1.0
+    },
+    "low_health": {
+     "held": 0.8,
+     "after_recovery": 0.0
+    },
+    "fight": {
+     "monster": "Ripper_dog",
+     "aggro": true,
+     "anger": 0.8,
+     "anger_after_it_left": 0.0,
+     "its_aggro_after": false
+    },
+    "death": {
+     "dead": 1.0,
+     "eyes_shut": 0.92
+    },
+    "after_revive_dead": 0.0,
+    "blinks": {
+     "in_12s": 3,
+     "eyes_shut_most": 1.0,
+     "least": 0.0
+    }
+   },
+   "cue_counts": {
+    "Cast": 15,
+    "Fight": 1,
+    "Hurt": 1,
+    "LowHealth": 1,
+    "Death": 1
+   },
+   "rest_noise": 0.0,
+   "face_lit_share": 0.31,
+   "failed": [],
+   "pictures": "../../../../../../code/claude-ue5/claude_ue5/Saved/FaceTest\\s4"
+  }
+ ],
+ "error": null,
+ "rolls": 0,
+ "dodged": 0,
+ "kills": 3,
+ "casts": 15,
+ "bolts": 15,
+ "bolts_on_monsters": 8,
+ "bolts_elsewhere": 7,
+ "deaths": 1,
+ "damage_dealt": 212.5,
+ "damage_taken": 1004.0
+}

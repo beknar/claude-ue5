@@ -1,7 +1,10 @@
 """Cut out and measure rdm4_ui_gen.py's pictures, and lay them out on a contact sheet.
 
-    python rdm4_ui_cut.py <ui_art.json> <out_dir> [--sheet name.jpg] [--export <dir>]
+    python rdm4_ui_cut.py <ui_art.json> <out_dir> [--sheet name.jpg] [--export <dir>] [--merge]
 
+--merge (with --export): a batch made in a folder of its own (its <out_dir> holds only the new elements)
+adds its picks to the <dir> already exported: the pieces of layout.json that this batch has no picture
+for are kept as they were, and its own picks replace or join them.
 --export writes the picks at the sizes the game draws them (SIZES: the longer side) as <dir>/<element>.png
 and <dir>/layout.json, which pipeline/unreal/830 reads: per piece its `border` (left, top, right, bottom
 shares kept when it is stretched: the element's `slice`, else its kind's default; a hollow frame's border
@@ -52,6 +55,9 @@ if "--sheet" in args:
     i = args.index("--sheet"); SHEET = args[i + 1]; del args[i:i + 2]
 if "--export" in args:
     i = args.index("--export"); EXPORT = args[i + 1]; del args[i:i + 2]
+MERGE = "--merge" in args
+if MERGE:
+    args.remove("--merge")
 DATA, OUT = args
 D = json.load(open(DATA, encoding="utf-8"))
 EL = {e["name"]: e for e in D["elements"]}
@@ -249,7 +255,9 @@ if picks and not ONLY:
     for name, seed in picks.items():
         r = by.get((name, seed))
         if r is None:
-            print("PICK MISSING", name, seed); continue
+            if not MERGE:
+                print("PICK MISSING", name, seed)
+            continue
         if r["flags"]:
             print("PICK FLAGGED", name, seed, r["flags"])
         chosen[name] = Image.open(os.path.join(CUT, r["file"]))
@@ -289,6 +297,10 @@ if picks and not ONLY:
                  "icon": [0, 0, 0, 0], "ring": [0, 0, 0, 0], "texture": [0, 0, 0, 0]}
         os.makedirs(EXPORT, exist_ok=True)
         layout = {}
+        if MERGE:
+            old = json.load(open(os.path.join(EXPORT, "layout.json")))
+            layout = {k: v for k, v in old.items() if not k.startswith("_")}
+            print("merging into", len(layout), "pieces already exported")
         for name, im in chosen.items():
             e = EL[name]
             s = SIZES[e["kind"]] / max(im.size)
@@ -314,4 +326,4 @@ if picks and not ONLY:
         layout["_icons"] = {k: v for k, v in D.get("icons", {}).items() if not k.startswith("_")}
         layout["_weapons"] = {k: v for k, v in D.get("weapons", {}).items() if not k.startswith("_")}
         json.dump(layout, open(os.path.join(EXPORT, "layout.json"), "w"), indent=1)
-        print("exported", len(chosen), "pieces ->", EXPORT)
+        print("exported", len(chosen), "pieces ->", EXPORT, "| layout holds", len([k for k in layout if not k.startswith("_")]))

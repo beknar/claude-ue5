@@ -1127,6 +1127,14 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	case ERDItemKind::Mana: return Mp > 0.f ? FString::Printf(TEXT("Restores %.0f%% of your mana  (%.0f)"), It.Amount * 100.f, It.Amount * Mp) : FString(TEXT("No use to you: you have no mana"));
 	case ERDItemKind::Speed: return FString::Printf(TEXT("You move %.0f%% faster for %.0f seconds"), It.Amount * 100.f, It.Seconds);
 	case ERDItemKind::Food: return FString::Printf(TEXT("Restores %.0f%% of your hit points a second for %.0f s  (%.1f HP/s)"), It.Amount * 100.f, It.Seconds, It.Amount * Hp);
+	case ERDItemKind::Armour:
+	{
+		const bool bFits = Gen && It.Fits.ContainsByPredicate([this](const FRDArmourFit& F) { return F.Hero == Gen->CurrentHero; });
+		FString S = It.Looks.IsEmpty() ? FString() : It.Looks.Left(1).ToUpper() + It.Looks.Mid(1) + TEXT(".  ");
+		S += FString::Printf(TEXT("Worn, each blow on you takes %.0f%% less."), It.Amount * 100.f);
+		if (!bFits) S += FString::Printf(TEXT("  It was not made for the %s."), Gen ? *Gen->PlayerTitle.ToLower() : TEXT("hero"));
+		return S;
+	}
 	}
 	return FString();
 }
@@ -1143,7 +1151,9 @@ void ARDHUD::DrawNotices(float Sc)
 	if (Fa >= 0.f && Fa < 3.2f && !Gen->LastFound.IsNone())
 	{
 		const float Al = FMath::Clamp(FMath::Min(Fa / 0.25f, (3.2f - Fa) / 0.6f), 0.f, 1.f);
-		const FString N = Gen->LastFound.ToString();
+		// (level 5: a container may hold up to six things: the first by name, the others counted)
+		const int32 More = FMath::Max(Gen->LastFoundList.Num() - 1, 0);
+		const FString N = Gen->LastFound.ToString() + (More > 0 ? FString::Printf(TEXT("  and %d more"), More) : FString());
 		const FString Hint = bPad ? TEXT("Start  inventory") : TEXT("I  inventory");
 		float Nw, Nh, Lw, Lh, Hw, Hh;
 		UI.TextSize(N, Nw, Nh, Medium, Sc * 1.35f, ERDType::Title); UI.TextSize(TEXT("FOUND"), Lw, Lh, Small, Sc * 1.1f, ERDType::Label); UI.TextSize(Hint, Hw, Hh, Small, Sc);
@@ -1199,9 +1209,21 @@ void ARDHUD::DrawInventory(float Sc)
 	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Line(0.75f, 0.65f, 0.45f, 0.9f);
 	// the game stands still under it
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.55f));
-	const int32 NumWeapons = Gen->Weapons.Num(), NumItems = Lines.Num() - NumWeapons;
+	const int32 NumWeapons = Gen->Weapons.Num();
+	int32 NumArmour = 0;
+	for (const FString& L : Lines) if (L.StartsWith(TEXT("armour|"))) ++NumArmour;
+	const int32 NumItems = Lines.Num() - NumWeapons - NumArmour;
 	const float Rh = 34.f * Sc, W = 1000.f * Sc, Pd = 22.f * Sc;
-	const float ListH = 46.f * Sc + Rh * NumWeapons + 46.f * Sc + Rh * FMath::Max(NumItems, 1);
+	// (a long list, with up to six items a container: only the rows that fit on the screen, scrolled with the cursor)
+	const float Fixed = 46.f * Sc + 46.f * Sc + (NumItems <= 0 ? Rh : 0.f) + (NumArmour > 0 ? 58.f * Sc : 0.f) + 150.f * Sc;
+	int32 Fit = Lines.Num(), First = 0;
+	if (Fixed + Rh * Lines.Num() > Canvas->ClipY - 80.f * Sc)
+	{
+		Fit = FMath::Clamp(FMath::FloorToInt32((Canvas->ClipY - 80.f * Sc - Fixed - 30.f * Sc) / Rh), 4, Lines.Num());
+		First = FMath::Clamp(Cur - Fit / 2, 0, Lines.Num() - Fit);
+	}
+	auto Shown = [&](int32 I) { return I >= First && I < First + Fit; };
+	const float ListH = Fixed - 150.f * Sc + Rh * Fit + (Fit < Lines.Num() ? 30.f * Sc : 0.f);
 	const float H = FMath::Max(ListH, (UI.Has(TEXT("slot")) ? 400.f : 330.f) * Sc) + 150.f * Sc;     // (the picture of the chosen one takes room)
 	const FVector2D A((Canvas->ClipX - W) * 0.5f, FMath::Max(40.f * Sc, (Canvas->ClipY - H) * 0.5f)), B = A + FVector2D(W, H);
 	// (level 4: the painted board, a divider under each heading, a picture in each row, a lit plate under the chosen row)
@@ -1229,6 +1251,7 @@ void ARDHUD::DrawInventory(float Sc)
 	};
 	auto Row = [&](int32 I, const FString& Name, const FString& Tag, const FLinearColor& TagC, FName Icon)
 	{
+		if (!Shown(I)) return;
 		const bool bOn = I == Cur;
 		const FVector2D R0(Lx, Y), R1(Lx + Lw, Y + Rh - 4.f * Sc);
 		if (bOn)
@@ -1254,10 +1277,27 @@ void ARDHUD::DrawInventory(float Sc)
 	Y += 12.f * Sc;
 	Header(TEXT("POTIONS AND FOOD"));
 	if (NumItems <= 0) { UI.Text(TEXT("nothing yet: the chests, trunks and barrels hold some"), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc); }
-	for (int32 I = NumWeapons; I < Lines.Num(); ++I)
+	for (int32 I = NumWeapons; I < NumWeapons + NumItems; ++I)
 	{
 		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
 		if (P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Gold, ItemIcon(FName(*P[1])));
+	}
+	// (level 5: the armour she found; WORN on the set she has on)
+	if (NumArmour > 0)
+	{
+		Y += 12.f * Sc;
+		Header(TEXT("ARMOUR"));
+		for (int32 I = NumWeapons + NumItems; I < Lines.Num(); ++I)
+		{
+			TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
+			if (P.Num() >= 3) Row(I, P[1], P[2] == TEXT("1") ? TEXT("WORN") : TEXT(""), RDCyan, ItemIcon(FName(*P[1])));
+		}
+	}
+	if (Fit < Lines.Num())
+	{
+		const FString More = FString::Printf(TEXT("%d more above,  %d more below"), First, Lines.Num() - First - Fit);
+		UI.Text(More, Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc * 0.95f);
+		Y += 30.f * Sc;
 	}
 	// ---- the one under the cursor (right): what it does; then hers
 	const float Rx = A.X + W * 0.5f + Pd, Rw = W * 0.5f - Pd * 2.f;
@@ -1310,11 +1350,20 @@ void ARDHUD::DrawInventory(float Sc)
 			Ry += 6.f * Sc;
 			Para(bPad ? TEXT("A  use it") : TEXT("Enter  use it"), Gold, Sc * 1.05f);
 		}
+		else if (Sel[0] == TEXT("armour"))
+		{
+			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
+			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
+			Ry += 6.f * Sc;
+			const bool bWorn = Sel.Num() >= 3 && Sel[2] == TEXT("1");
+			Para(bWorn ? (bPad ? TEXT("A  take it off") : TEXT("Enter  take it off")) : (bPad ? TEXT("A  put it on") : TEXT("Enter  put it on")), Gold, Sc * 1.05f);
+		}
 	}
 	// her state
 	Ry = FMath::Max(Ry + 18.f * Sc, A.Y + 250.f * Sc);
 	Para(FString::Printf(TEXT("Hit points  %.0f / %.0f"), FMath::CeilToFloat(Cb->GetHealth()), Cb->GetMaxHealth()), FLinearColor(0.5f, 0.9f, 0.55f), Sc * 1.05f);
 	if (Cb->GetMaxMana() > 0.f) Para(FString::Printf(TEXT("Mana  %.0f / %.0f"), FMath::FloorToFloat(Cb->GetMana()), Cb->GetMaxMana()), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.05f);
+	if (!Cb->GetWornArmour().IsNone()) Para(FString::Printf(TEXT("Armour  %s,  blows %.0f%% less"), *Cb->GetWornArmour().ToString(), Cb->GetArmour() * 100.f), RDCyan, Sc * 1.05f);
 	for (const URDCombatComponent::FEffect& E : Cb->GetEffects())
 		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 		                                 : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left)), RDCyan, Sc);

@@ -1,0 +1,125 @@
+{
+ "fps": 30,
+ "seconds": 30.0,
+ "captions": [
+  {
+   "t0": 0.3,
+   "t1": 2.7,
+   "head": "THE SUMMONER",
+   "lines": [
+    "her face is a MetaHuman now: Epic's preset Aera in her colouring, under her own hair",
+    "RigLogic moves 858 blend shapes and the face's joints from FACS control curves"
+   ]
+  },
+  {
+   "t0": 3.0,
+   "t1": 5.5,
+   "head": "JOY",
+   "lines": [
+    "she finds something in a chest",
+    "AU 6 + 12: the cheeks raised, the lip corners pulled up"
+   ]
+  },
+  {
+   "t0": 5.8,
+   "t1": 8.1,
+   "head": "SURPRISE",
+   "lines": [
+    "a door opens on her",
+    "AU 1 + 2 + 5 + 26: brows raised, lids up, the jaw dropped"
+   ]
+  },
+  {
+   "t0": 8.4,
+   "t1": 11.1,
+   "head": "FOCUS",
+   "lines": [
+    "a cast of the fire",
+    "AU 4 + 7 + 24: brows drawn down, lids tightened, lips pressed"
+   ]
+  },
+  {
+   "t0": 11.4,
+   "t1": 13.9,
+   "head": "ANGER",
+   "lines": [
+    "a monster comes at her",
+    "AU 4 + 5 + 7 + 23: brows down and together, a glare, lips tight"
+   ]
+  },
+  {
+   "t0": 14.2,
+   "t1": 16.7,
+   "head": "PAIN",
+   "lines": [
+    "she is hit",
+    "AU 4 + 6 + 7 + 9 + 10 + 43: the face screwed up, the eyes closing"
+   ]
+  },
+  {
+   "t0": 17.0,
+   "t1": 19.7,
+   "head": "SHOUT",
+   "lines": [
+    "a cast with her whole voice",
+    "AU 4 + 10 + 16 + 27: the jaw wide, the neck straining"
+   ]
+  },
+  {
+   "t0": 20.0,
+   "t1": 22.1,
+   "head": "DISGUST",
+   "lines": [
+    "what is in the barrel",
+    "AU 9 + 10 + 15: the nose wrinkled, the upper lip raised"
+   ]
+  },
+  {
+   "t0": 22.4,
+   "t1": 24.5,
+   "head": "FEAR",
+   "lines": [
+    "her hit points run low",
+    "AU 1 + 2 + 4 + 5 + 20: brows up and drawn, the lips stretched"
+   ]
+  },
+  {
+   "t0": 24.8,
+   "t1": 26.9,
+   "head": "SADNESS",
+   "lines": [
+    "AU 1 + 4 + 15 + 17: the inner brows raised, the mouth's corners down"
+   ]
+  },
+  {
+   "t0": 27.2,
+   "t1": 29.8,
+   "head": "DEATH",
+   "lines": [
+    "her eyes shut, the jaw slack",
+    "in play: hurt, cast, loot, a fight, low health and death each show their own"
+   ]
+  }
+ ],
+ "casts": [
+  8.875,
+  17.608
+ ],
+ "flinch": 14.3,
+ "death": 27.45,
+ "exposure": -3.5,
+ "face": {
+  "eyes_rest": [
+   -0.0,
+   8.92,
+   163.57
+  ],
+  "eyes_apart_cm": 6.01,
+  "scale": 0.93,
+  "eyes_at": [
+   0.0,
+   11.0,
+   152.0
+  ]
+ }
+}

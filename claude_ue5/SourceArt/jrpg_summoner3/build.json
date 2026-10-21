@@ -1,0 +1,19 @@
+{
+ "clips": {
+  "Run": 31,
+  "Walk": 57,
+  "Idle": 78,
+  "Cast1": 31,
+  "Cast2": 33,
+  "Cast3": 33,
+  "Death": 49,
+  "Flinch": 33
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_summoner3\\T_Summoner3_Color.png",
+  "Normal": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_summoner3\\T_Summoner3_Normal.png",
+  "MetalRough": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_summoner3\\T_Summoner3_MetalRough.png"
+ },
+ "height_cm": 165.0,
+ "hair": null
+}

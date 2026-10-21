@@ -4,7 +4,8 @@ It only gives the render its length (45 s at 30 fps) and its one shot: the reel 
 through the game's own functions, and the picture is the player's view (her third-person camera, turned by the pilot),
 so the sequence has no tracks. Rebuilt on every run: an existing one is emptied, not deleted (deleting a loaded sequence
 and making it again under its name gives None, and left it deleted for the session). Level 4: LS_RDM4_Showcase (one hero's
-run), and "4select": LS_RDM4select_Showcase (the menu, 829). Args: [seconds] [level: 1, 2, 3, 4 or 4select]"""
+run), and "4select": LS_RDM4select_Showcase (the menu, 829); level 5 and "5select" the same for the Summoner's armour
+reel. Args: [seconds] [level: 1, 2, 3, 4, 4select, 5 or 5select]"""
 import sys, unreal
 SEC = float(sys.argv[1]) if len(sys.argv) > 1 else 45.0
 LV = sys.argv[2] if len(sys.argv) > 2 else "1"

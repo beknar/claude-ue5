@@ -31,14 +31,18 @@ while the big map is open (the record's "mapo") it is drawn as ARDHUD::DrawPaint
 lettering is the game's (rdm4_fonts.py's files, the roles of ARDHUD's FRDUIDraw::Text): Cinzel for titles, names, keys and
 numbers standing alone, Alegreya for the text, Alegreya SC for labels ("MANA BACK" written "Mana Back": sc()); the reel's
 own captions follow the same roles. The other levels keep Segoe UI.
-Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1, 2, 3 or 4] [level 4: hero] [level 4: ui art dir]"""
+Level 5 (the Summoner's armour reel, 815's cine_summoner.json) is drawn as level 4 is, with what level 5's HUD adds: FOUND
+names the first thing a container held "and N more", the inventory has its ARMOUR section (WORN on the set she has on;
+scrolled to keep the chosen row in view when the list is longer than the screen, as ARDHUD::DrawInventory does) and her
+armour under her hit points, and the captions say what each set is and what it takes off the blows on her.
+Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1, 2, 3, 4 or 5] [level 4 / 5: hero] [level 4 / 5: ui art dir]"""
 import sys, os, re, json, glob, math
 from PIL import Image, ImageDraw, ImageFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
-LV = sys.argv[4] if len(sys.argv) > 4 else "1"; L4 = LV == "4"
-HERO = sys.argv[5] if len(sys.argv) > 5 else "Rogue"            # (level 4: whose run: 815 wrote cine_<hero>.json)
+LV = sys.argv[4] if len(sys.argv) > 4 else "1"; L5 = LV == "5"; L4 = LV == "4" or L5     # (level 5: level 4's HUD and the armour)
+HERO = sys.argv[5] if len(sys.argv) > 5 else ("Summoner" if L5 else "Rogue")            # (level 4: whose run: 815 wrote cine_<hero>.json)
 UI = None
 if L4 and len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
@@ -48,8 +52,9 @@ def iicon(name): return UI.icons.get(name) if UI else None
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("" if LV == "1" else LV))
 SND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_combat")      # (the sounds are the combat level's)
-R = json.load(open(os.path.join(SRC, f"cine_{HERO.lower()}.json" if L4 else "cine_render.json")))
-HJ = {h["name"]: h for h in json.load(open(os.path.join(SRC, "heroes.json")))["heroes"]} if L4 else {}
+R = json.load(open(os.path.join(SRC, f"cine_{HERO.lower()}.json" if L4 else "cine_render.json"), encoding="utf-8"))
+HJ = ({h["name"]: h for h in json.load(open(os.path.join(SRC, "heroes.json")))["heroes"]} if LV == "4" else
+      {"Summoner": json.load(open(os.path.join(SRC, "summoner_hero.json"), encoding="utf-8"))} if L5 else {})
 FPS = R["fps"]; ROWS = {r["frame"]: r for r in R["rows"]}; LASTF = max(ROWS); C = R["const"]; EV = R["events"]
 TS = C["tile"]; NT = C["section_tiles"]
 W, H, K = 1920, 1080, 2                       # the layer is drawn K times larger and scaled down (smooth edges)
@@ -92,6 +97,7 @@ HEARD.sort()
 # ---- level 4: what she found, used and was told, the inventory's lines as they were
 FOUND = [e for e in EV if e["kind"] == "found"]; USED = [e for e in EV if e["kind"] == "used"]; INVS = [e for e in EV if e["kind"] == "inventory"]
 LINES = [e for e in EV if e["kind"] == "lines"]; MSGS = [e for e in EV if e["kind"] == "message"]
+WORN = [e for e in EV if e["kind"] == "worn"]; BLOWS = [e for e in EV if e["kind"] == "blow_on_her"]       # (level 5)
 ITEMS = {it["name"]: it for it in C.get("items", [])}
 def last_at(evs, t):
     out = None
@@ -487,6 +493,9 @@ def describe(it, r):
     if it["kind"] == "healing": return "Restores %d%% of your hit points  (%d HP)" % (round(it["amount"] * 100), round(it["amount"] * hp))
     if it["kind"] == "mana": return ("Restores %d%% of your mana  (%d)" % (round(it["amount"] * 100), round(it["amount"] * mp))) if mp > 0 else "No use to you: you have no mana"
     if it["kind"] == "speed": return "You move %d%% faster for %d seconds" % (round(it["amount"] * 100), it["seconds"])
+    if it["kind"] == "armour":
+        lk = it.get("looks", "")
+        return ((lk[:1].upper() + lk[1:] + ".  ") if lk else "") + "Worn, each blow on you takes %d%% less." % round(it["amount"] * 100)
     return "Restores %d%% of your hit points a second for %d s  (%.1f HP/s)" % (round(it["amount"] * 100), it["seconds"], it["amount"] * hp)
 def l4_panels(o, r, t, ua):
     """level 4: FOUND under the middle of the view, what the inventory said, and the inventory while it is open (the
@@ -496,7 +505,10 @@ def l4_panels(o, r, t, ua):
     fe = last_at(FOUND, t)
     if fe and 0 <= t - fe["t"] < 3.2 and not inv[0]:
         a = max(0.0, min(1.0, (t - fe["t"]) / 0.25, (3.2 - (t - fe["t"])) / 0.6)) * ua
-        y = H * K * 0.60; nw = d.textlength(fe["item"], font=f_head)
+        # (level 5: a container may hold up to six things: the first by name, the others counted)
+        more = len(fe.get("items", [])) - 1
+        fname = fe["item"] + ("  and %d more" % more if more > 0 else "")
+        y = H * K * 0.60; nw = d.textlength(fname, font=f_head)
         ic = iicon(fe["item"])
         if UI and UI.has("banner"):
             # (ARDHUD::DrawNotices: the painted plaque, the item's picture on its left, the text right of it)
@@ -512,7 +524,7 @@ def l4_panels(o, r, t, ua):
             bw = max(nw, 200 * K) + 48 * K; cx = W * K / 2
             d.rectangle((W * K / 2 - bw / 2, y - 10 * K, W * K / 2 + bw / 2, y + 96 * K), fill=lin((0.05, 0.04, 0.02), 0.78 * a), outline=lin(gold, 0.95 * a), width=2 * K)
         text_c(d, (cx, y + 6 * K), sc("FOUND"), fl_small, lin(gold, a), "mt", False)
-        text_c(d, (cx, y + 30 * K), fe["item"], f_head, lin((1.0, 0.97, 0.88), a), "mt", False)
+        text_c(d, (cx, y + 30 * K), fname, f_head, lin((1.0, 0.97, 0.88), a), "mt", False)
         text_c(d, (cx, y + 70 * K), "I  inventory", f_tiny, lin((0.75, 0.72, 0.65), a), "mt", False)
     me = last_at(MSGS, t)
     if not inv[0] and me and me["text"] and 0 <= t - me["t"] < 2.6:
@@ -525,11 +537,17 @@ def l4_panels(o, r, t, ua):
         text_c(d, (W * K / 2, y), me["text"], f_line, lin((0.95, 0.92, 0.82), a), "mt", False)
     if not inv[0]: return
     le = last_at(LINES, t); lines = le["lines"] if le else []
-    nwp = sum(1 for x in lines if x.startswith("weapon|")); nit = len(lines) - nwp; cur = inv[1]
+    nwp = sum(1 for x in lines if x.startswith("weapon|")); narm = sum(1 for x in lines if x.startswith("armour|")); nit = len(lines) - nwp - narm; cur = inv[1]
     # (a layer of its own, put over the rest: drawing on the HUD's layer replaces what is there instead of blending)
     top = o; o = Image.new("RGBA", top.size, (0, 0, 3, int(140 * ua))); d = ImageDraw.Draw(o, "RGBA")
     rh, pw, pd = 34 * K, 1000 * K, 22 * K
-    lh = 46 * K + rh * nwp + 46 * K + rh * max(nit, 1); ph = max(lh, (400 if (UI and UI.has("slot")) else 330) * K) + 150 * K
+    # (level 5: a list longer than the screen shows the rows that fit, scrolled with the cursor: ARDHUD::DrawInventory)
+    fixed = 46 * K + 46 * K + (rh if nit <= 0 else 0) + (58 * K if narm else 0) + 150 * K
+    fit, first = len(lines), 0
+    if fixed + rh * len(lines) > H * K - 80 * K:
+        fit = max(4, min(len(lines), int((H * K - 80 * K - fixed - 30 * K) // rh))); first = max(0, min(cur - fit // 2, len(lines) - fit))
+    shown = lambda i: first <= i < first + fit
+    lh = fixed - 150 * K + rh * fit + (30 * K if fit < len(lines) else 0); ph = max(lh, (400 if (UI and UI.has("slot")) else 330) * K) + 150 * K
     ax, ay = (W * K - pw) / 2, max(40 * K, (H * K - ph) / 2); bx, by = ax + pw, ay + ph
     # (ARDHUD::DrawInventory with the painted pieces: the board, dividers, a lit plate under the chosen row, pictures)
     if UI and UI.has("panel_wide"): UI.board(o, "panel_wide", (ax, ay), (bx, by), 44 * K); d = ImageDraw.Draw(o, "RGBA")
@@ -547,6 +565,7 @@ def l4_panels(o, r, t, ua):
         y += 4 * K
     def rowl(i, name, tag, tagc, icon=None):
         nonlocal y, d
+        if not shown(i): return
         on = i == cur
         if on:
             if plate:
@@ -564,8 +583,15 @@ def l4_panels(o, r, t, ua):
         rowl(i, wd["name"], "ALWAYS AT HAND" if wd.get("alongside") else ("IN YOUR HANDS" if i == r["w"] else ""), CYAN if wd.get("alongside") else gold, wicon(wd["name"]))
     y += 12 * K; header("POTIONS AND FOOD")
     if nit <= 0: d.text((lx + 12 * K, y + 6 * K), "nothing yet: the chests, trunks and barrels hold some", font=f_tiny, fill=lin((0.70, 0.68, 0.62)))
-    for i in range(nwp, len(lines)):
+    for i in range(nwp, nwp + nit):
         p_ = lines[i].split("|"); rowl(i, p_[1], "x %s" % p_[2], gold, iicon(p_[1]))
+    if narm:
+        # (level 5: the armour she found; WORN on the set she has on)
+        y += 12 * K; header("ARMOUR")
+        for i in range(nwp + nit, len(lines)):
+            p_ = lines[i].split("|"); rowl(i, p_[1], "WORN" if p_[2] == "1" else "", CYAN, iicon(p_[1]))
+    if fit < len(lines):
+        d.text((lx + 12 * K, y + 6 * K), "%d more above,  %d more below" % (first, len(lines) - first - fit), font=f_tiny, fill=lin((0.70, 0.68, 0.62))); y += 30 * K
     rx, rw = ax + pw * 0.5 + pd, pw * 0.5 - pd * 2; ry = ay + 76 * K
     d.rectangle((rx - pd / 2, ry, rx - pd / 2 + K, by - 110 * K), fill=lin((0.75, 0.65, 0.45), 0.4))
     def para(s, c, f_):
@@ -594,10 +620,12 @@ def l4_panels(o, r, t, ua):
         else:
             it = ITEMS.get(p_[1])
             if it: para(describe(it, r), lin(INK), f_line)
-            ry += 6 * K; para("Enter  use it", lin(gold), f_line)
+            ry += 6 * K
+            para(("Enter  take it off" if len(p_) > 2 and p_[2] == "1" else "Enter  put it on") if p_[0] == "armour" else "Enter  use it", lin(gold), f_line)
     ry = max(ry + 18 * K, ay + 250 * K)
     para("Hit points  %d / %d" % (math.ceil(r["hp"]), r["mhp"]), lin((0.5, 0.9, 0.55)), f_line)
     if r.get("mmana", 0) > 0: para("Mana  %d / %d" % (math.floor(r["mana"]), r["mmana"]), lin((0.55, 0.7, 1.0)), f_line)
+    if r.get("arm", "None") != "None": para("Armour  %s,  blows %d%% less" % (r["arm"], round(r.get("armv", 0) * 100)), lin(CYAN), f_line)
     fy = by - 92 * K
     if divider: UI.fit(o, "divider", (ax + pd, fy - 20 * K), (bx - pd, fy + 20 * K)); d = ImageDraw.Draw(o, "RGBA")
     else: d.rectangle((ax + pd, fy, bx - pd, fy + K), fill=lin((0.75, 0.65, 0.45), 0.4))
@@ -740,8 +768,8 @@ def overlay(f):
     if L3: caps = [("W", mv != ""), ("A", False), ("S", False), ("D", False), ("SHIFT", mv == "run"), ("1", kh == "1"), ("2", kh == "2"), ("LMB", kh == "lmb"), ("B", kh == "b" or r.get("rolling", 0) == 1), ("F", kh == "f")]
     inv_open = L4 and r.get("inv", [0, 0])[0] == 1
     if L4:
-        caps = [("W", mv != ""), ("A", False), ("S", kh == "s"), ("D", False), ("SHIFT", mv == "run")]
-        caps += ({"Mage": [("1", kh == "1"), ("2", kh == "2"), ("E", kh == "e")], "Warlock": [("LMB", kh == "lmb"), ("E", kh == "e")],
+        caps = [("W", mv != "" or kh == "w"), ("A", False), ("S", kh == "s"), ("D", False), ("SHIFT", mv == "run")]
+        caps += ({"Mage": [("1", kh == "1"), ("2", kh == "2"), ("E", kh == "e")], "Summoner": [("1", kh == "1"), ("2", kh == "2"), ("E", kh == "e")], "Warlock": [("LMB", kh == "lmb"), ("E", kh == "e")],
                   "Rogue": [("1", kh == "1"), ("2", kh == "2"), ("LMB", kh == "lmb"), ("B", kh == "b" or r.get("rolling", 0) == 1)]}.get(HERO, [("LMB", kh == "lmb")]))
         caps += [("I", kh == "i" or inv_open)] + ([("ENTER", kh == "enter")] if inv_open else []) + [("F", kh == "f"), ("M", kh == "m" or mapo)]
         if mapo: caps = [("W", mv != ""), ("SHIFT", mv == "run"), ("M", True)]         # (only what she uses: the row fits beside the map's board)
@@ -761,11 +789,13 @@ def overlay(f):
         drawn = C["weapons"][r["w"]]["name"].lower() if 0 <= r["w"] < len(C["weapons"]) else ""
         lab = ("roll" if (kh == "b" or r.get("rolling", 0)) else "shoot the crossbow" if (kh == "lmb" and drawn == "crossbow") else "strike with the daggers" if kh == "lmb"
                else "draw the daggers" if kh == "1" else "draw the crossbow" if kh == "2" else "open" if kh == "f" else ("run" if mv == "run" else "walk" if mv == "walk" else ""))
-    if L4 and kh in ("i", "s", "enter", "e", "1", "2", "m") or (L4 and HERO in ("Warrior", "Warlock") and kh == "lmb"):
+    if L4 and kh in ("i", "s", "w", "enter", "e", "1", "2", "m") or (L4 and HERO in ("Warrior", "Warlock") and kh == "lmb"):
         drawn = C["weapons"][r["w"]]["name"].lower() if 0 <= r["w"] < len(C["weapons"]) else ""
-        lab = {"i": "close the inventory" if not inv_open else "open the inventory", "s": "down the list", "enter": "use it",
+        le_ = last_at(USED, t)
+        use = ("put it on" if le_ and le_["entry"].startswith("armour|") else "use it")
+        lab = {"i": "close the inventory" if not inv_open else "open the inventory", "s": "down the list", "w": "up the list", "enter": use,
                "m": "open the map" if mapo else "close the map",
-               "e": ("cast the " + drawn) if HERO == "Mage" else "cast the fire", "1": "draw the " + C["weapons"][0]["name"].lower(),
+               "e": ("cast the " + drawn) if HERO in ("Mage", "Summoner") else "cast the fire", "1": "draw the " + C["weapons"][0]["name"].lower(),
                "2": "draw the " + (C["weapons"][1]["name"].lower() if len(C["weapons"]) > 1 else ""), "lmb": "swing the sword"}[kh]
     if lab: text_c(d, ((k0x + kx) / 2, ky - 24 * K), lab, f_line, (244, 240, 228, int(240 * ua)))
     # ---- the banner when a section is generated
@@ -776,7 +806,8 @@ def overlay(f):
     a = fade(t, 0.3, 4.6)
     if a > 0:
         d.text((44 * K, 34 * K), "random_dungeonmagic_level" + ("" if LV == "1" else LV), font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 86 * K), (("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), HJ[HERO]["starts_with"].lower())) if L4 else
+        d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  the summoner, chosen in the menu  \u00b7  five armour sets to find and wear" if L5 else
+                                  ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), HJ[HERO]["starts_with"].lower())) if L4 else
                                   "procedural dungeon  \u00b7  two daggers, a crossbow and a roll  \u00b7  the Rogue" if L3 else
                                   "procedural dungeon  \u00b7  fire from the left hand, a sword in the right  \u00b7  girl-darkcaster-tripo" if L2 else
                                   "procedural dungeon  \u00b7  a fire spell at medium range  \u00b7  girl-caster-tripo"), font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
@@ -786,12 +817,23 @@ def overlay(f):
     XB = next((w_ for w_ in C["weapons"] if w_.get("spell")), None); DG = next((w_ for w_ in C["weapons"] if not w_.get("spell")), None)
     if L4:
         hj = HJ[HERO]
-        caps.append((0.8, min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "THE " + HERO.upper(), ["  ·  ".join(hj["abilities"]),
+        # (level 5: her caption stays until the first chest's takes over)
+        caps.append((0.8, (INVS[0]["t"] if INVS else 30.0) if L5 else min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "THE " + HERO.upper(), ["  ·  ".join(hj["abilities"]),
                      "%d hit points%s  ·  %s" % (hj["health"], ("  ·  %d mana, %.1f a second back" % (hj["mana"], hj["mana_per_second"])) if hj["mana"] else "", hj["starts_with"].lower())], tuple(int(255 * v) for v in hj["accent"])))
         for e in INVS:
             # (what she does there is said once she has done it)
             u = next((x for x in USED if x["t"] >= e["t"]), None); end = (u["t"] + 1.9) if u else e["t"] + 2.6
             head, first = "I  ·  HER INVENTORY", "what the containers held goes in with her weapons; she wields and uses them from here (in play the game pauses)"
+            if L5 and e.get("why") == "armour" and u:
+                # (level 5: a set put on; said while the camera goes round her)
+                nm = u["entry"].split("|")[1]; it = ITEMS.get(nm, {}); n_ = sum(1 for x in USED if x["entry"].startswith("armour|") and x["t"] <= u["t"])
+                nxt = next((x["t"] for x in INVS if x["t"] > e["t"]), u["t"] + 5.0)
+                caps.append((e["t"], u["t"], "I  ·  ENTER  ·  ARMOUR", ["the five sets she found are in her inventory; one is worn at a time (in play the game pauses here)",
+                             "she goes down the list to the %s and puts it on" % nm.lower()], (255, 226, 150)))
+                caps.append((u["t"], min(nxt - 0.05, u["t"] + 4.6), nm.upper() + ("" if n_ < 6 else "  ·  AGAIN"),
+                             [(it.get("looks", "")[:1].upper() + it.get("looks", "")[1:]) + "  ·  each blow on her takes %d%% less" % round(it.get("amount", 0) * 100),
+                              "made for her body from a Fab warrior's armour: it moves with her skeleton (the game puts the set's mesh on her bones)"], lin(CYAN)[:3]))
+                continue
             if u:
                 caps.append((e["t"], u["t"], head, [first, "she goes down the list to what helps her now"], (255, 226, 150)))
                 caps.append((u["t"], end, head, [first, u["message"]], (255, 226, 150)))
@@ -810,6 +852,12 @@ def overlay(f):
         caps.append((0.8, min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "A FIRE CASTER", ["girl-caster-tripo: her own walk and run, and an idle and three casts made for her in Blender",
                      "WASD walk  \u00b7  Shift run  \u00b7  left mouse or E: the fire spell  \u00b7  F opens doors and containers"], (255, 240, 214)))
     for e in CHESTS:
+        if L5:
+            fd = next((x for x in FOUND if x["t"] >= e["t"] - 0.05), None); held = fd.get("items", []) if fd else []
+            arm = [x for x in held if ITEMS.get(x, {}).get("kind") == "armour"]
+            caps.append((e["t"] - 0.3, e["t"] + 2.4, "F  \u00b7  A CHEST OF THE GREAT HALL", ["up to six things in a container: this one held %d%s" % (len(held), (", " + " and ".join(a.lower() for a in arm)) if arm else ""),
+                         "the five armour sets are in the great hall's chests, the first room"], (255, 226, 150)))
+            continue
         caps.append((e["t"] - 0.3, e["t"] + 1.6, "F  \u00b7  THE %s OPENS" % e["what"].split()[-1].upper(), ["every door and container of the dungeon opens: chests, trunks, wardrobes, barrels, crates"], (255, 226, 150)))
     for e in GENS[:1]:
         caps.append((e["t"], min(e["t"] + 4.2, t_first - 0.1 if t_first > e["t"] else 99), ("" if LETTERS else "\u25b2 ") + "THE NEXT 252 m x 252 m OF DUNGEON IS GENERATED", ["as she nears the edge of what there is  \u00b7  never saved: a new dungeon every time"], lin(CYAN)[:3]))
@@ -828,9 +876,14 @@ def overlay(f):
                     ("the crossbow bolt: %.0f m reach, %.0f m/s, straight at the monster she turned to; it sticks where it strikes a wall" % (SPELL["reach"] / 100.0, SPELL["speed"] / 100.0),
                      "the daggers strike fast, one hand, the other, then both",
                      "the music turns to a battle track when a monster comes at her")[min(i, 2)])
-        if L4:
+        if L5 and e.get("take"):
+            # (level 5: she lets it come; its blows land on her armour)
+            bl = [b for b in BLOWS if e["t"] <= b["t"] <= min(end, t)]
+            note = "she lets it come in the %s: each of its blows on her loses %d%%" % ((e.get("armour") or "armour").lower(), round(bl[0]["armour"] * 100) if bl else 0)
+            more = ("its blows: " + ",  ".join("%s reached her as %s" % (("%.2f" % b["before"]).rstrip("0").rstrip("."), ("%.2f" % b["reached"]).rstrip("0").rstrip(".")) for b in bl)) if bl else "it comes at her"
+        elif L4:
             note = "the monsters are the same whoever she is: the first square's are weaker than her" if list(e["section"][:2]) == [0, 0] and tier == "start section" else note
-            if i == 0:
+            if i == 0 and HERO != "Summoner":
                 more = ({"Warrior": lambda: "her melee bonus: +%d%% on every blow (the sword's %.0f is %.1f)" % (round(C["melee_bonus"] * 100), C["weapons"][0]["base_damage"], C["weapons"][0]["damage"]),
                          "Mage": lambda: "every cast takes mana: fire %.0f, dark fire %.0f; it comes back at %.1f a second" % (C["weapons"][0]["mana"], C["weapons"][1]["mana"], C["mana_per_second"]),
                          "Warlock": lambda: "fire from her left hand takes %.0f mana; the sword in her right takes none" % next(w_["mana"] for w_ in C["weapons"] if w_.get("spell")),

@@ -1,0 +1,2368 @@
+{
+"fps": 30,
+"passage": 7.0,
+"rows": [
+{
+"frame": 0,
+"t": 0.0,
+"hero": 0,
+"shown_ago": 0.0,
+"start_ago": 101.102,
+"turned": 30.86,
+"yaw": 30.86,
+"key": ""
+},
+{
+"frame": 1,
+"t": 0.0604,
+"hero": 0,
+"shown_ago": 0.06,
+"start_ago": 101.163,
+"turned": 32.55,
+"yaw": 32.55,
+"key": ""
+},
+{
+"frame": 2,
+"t": 0.0938,
+"hero": 0,
+"shown_ago": 0.094,
+"start_ago": 101.196,
+"turned": 33.48,
+"yaw": 33.48,
+"key": ""
+},
+{
+"frame": 3,
+"t": 0.1271,
+"hero": 0,
+"shown_ago": 0.127,
+"start_ago": 101.229,
+"turned": 34.42,
+"yaw": 34.42,
+"key": ""
+},
+{
+"frame": 4,
+"t": 0.1604,
+"hero": 0,
+"shown_ago": 0.16,
+"start_ago": 101.263,
+"turned": 35.35,
+"yaw": 35.35,
+"key": ""
+},
+{
+"frame": 5,
+"t": 0.1938,
+"hero": 0,
+"shown_ago": 0.194,
+"start_ago": 101.296,
+"turned": 36.28,
+"yaw": 36.28,
+"key": ""
+},
+{
+"frame": 6,
+"t": 0.2271,
+"hero": 0,
+"shown_ago": 0.227,
+"start_ago": 101.329,
+"turned": 37.22,
+"yaw": 37.22,
+"key": ""
+},
+{
+"frame": 7,
+"t": 0.2604,
+"hero": 0,
+"shown_ago": 0.26,
+"start_ago": 101.363,
+"turned": 38.15,
+"yaw": 38.15,
+"key": ""
+},
+{
+"frame": 8,
+"t": 0.2938,
+"hero": 0,
+"shown_ago": 0.294,
+"start_ago": 101.396,
+"turned": 39.08,
+"yaw": 39.08,
+"key": ""
+},
+{
+"frame": 9,
+"t": 0.3271,
+"hero": 0,
+"shown_ago": 0.327,
+"start_ago": 101.429,
+"turned": 40.02,
+"yaw": 40.02,
+"key": ""
+},
+{
+"frame": 10,
+"t": 0.3604,
+"hero": 0,
+"shown_ago": 0.36,
+"start_ago": 101.463,
+"turned": 40.95,
+"yaw": 40.95,
+"key": ""
+},
+{
+"frame": 11,
+"t": 0.3938,
+"hero": 0,
+"shown_ago": 0.394,
+"start_ago": 101.496,
+"turned": 41.88,
+"yaw": 41.88,
+"key": ""
+},
+{
+"frame": 12,
+"t": 0.4271,
+"hero": 0,
+"shown_ago": 0.427,
+"start_ago": 101.529,
+"turned": 42.82,
+"yaw": 42.82,
+"key": ""
+},
+{
+"frame": 13,
+"t": 0.4604,
+"hero": 0,
+"shown_ago": 0.46,
+"start_ago": 101.563,
+"turned": 43.75,
+"yaw": 43.75,
+"key": ""
+},
+{
+"frame": 14,
+"t": 0.4938,
+"hero": 0,
+"shown_ago": 0.494,
+"start_ago": 101.596,
+"turned": 44.68,
+"yaw": 44.68,
+"key": ""
+},
+{
+"frame": 15,
+"t": 0.5271,
+"hero": 0,
+"shown_ago": 0.527,
+"start_ago": 101.629,
+"turned": 45.62,
+"yaw": 45.62,
+"key": ""
+},
+{
+"frame": 16,
+"t": 0.5604,
+"hero": 0,
+"shown_ago": 0.56,
+"start_ago": 101.663,
+"turned": 46.55,
+"yaw": 46.55,
+"key": ""
+},
+{
+"frame": 17,
+"t": 0.5938,
+"hero": 0,
+"shown_ago": 0.594,
+"start_ago": 101.696,
+"turned": 47.48,
+"yaw": 47.48,
+"key": ""
+},
+{
+"frame": 18,
+"t": 0.6271,
+"hero": 0,
+"shown_ago": 0.627,
+"start_ago": 101.729,
+"turned": 48.42,
+"yaw": 48.42,
+"key": ""
+},
+{
+"frame": 19,
+"t": 0.6604,
+"hero": 0,
+"shown_ago": 0.66,
+"start_ago": 101.763,
+"turned": 49.35,
+"yaw": 49.35,
+"key": ""
+},
+{
+"frame": 20,
+"t": 0.6938,
+"hero": 0,
+"shown_ago": 0.694,
+"start_ago": 101.796,
+"turned": 50.28,
+"yaw": 50.28,
+"key": ""
+},
+{
+"frame": 21,
+"t": 0.7271,
+"hero": 0,
+"shown_ago": 0.727,
+"start_ago": 101.829,
+"turned": 51.22,
+"yaw": 51.22,
+"key": ""
+},
+{
+"frame": 22,
+"t": 0.7604,
+"hero": 0,
+"shown_ago": 0.76,
+"start_ago": 101.863,
+"turned": 52.15,
+"yaw": 52.15,
+"key": ""
+},
+{
+"frame": 23,
+"t": 0.7938,
+"hero": 0,
+"shown_ago": 0.794,
+"start_ago": 101.896,
+"turned": 53.08,
+"yaw": 53.08,
+"key": ""
+},
+{
+"frame": 24,
+"t": 0.8271,
+"hero": 0,
+"shown_ago": 0.827,
+"start_ago": 101.929,
+"turned": 54.02,
+"yaw": 54.02,
+"key": ""
+},
+{
+"frame": 25,
+"t": 0.8604,
+"hero": 0,
+"shown_ago": 0.86,
+"start_ago": 101.963,
+"turned": 54.95,
+"yaw": 54.95,
+"key": ""
+},
+{
+"frame": 26,
+"t": 0.8938,
+"hero": 0,
+"shown_ago": 0.894,
+"start_ago": 101.996,
+"turned": 55.88,
+"yaw": 55.88,
+"key": ""
+},
+{
+"frame": 27,
+"t": 0.9271,
+"hero": 0,
+"shown_ago": 0.927,
+"start_ago": 102.029,
+"turned": 56.82,
+"yaw": 56.82,
+"key": ""
+},
+{
+"frame": 28,
+"t": 0.9604,
+"hero": 0,
+"shown_ago": 0.96,
+"start_ago": 102.063,
+"turned": 57.75,
+"yaw": 57.75,
+"key": ""
+},
+{
+"frame": 29,
+"t": 0.9938,
+"hero": 0,
+"shown_ago": 0.994,
+"start_ago": 102.096,
+"turned": 58.68,
+"yaw": 58.68,
+"key": ""
+},
+{
+"frame": 30,
+"t": 1.0271,
+"hero": 0,
+"shown_ago": 1.027,
+"start_ago": 102.129,
+"turned": 59.62,
+"yaw": 59.62,
+"key": ""
+},
+{
+"frame": 31,
+"t": 1.0604,
+"hero": 0,
+"shown_ago": 1.06,
+"start_ago": 102.163,
+"turned": 60.55,
+"yaw": 60.55,
+"key": ""
+},
+{
+"frame": 32,
+"t": 1.0938,
+"hero": 0,
+"shown_ago": 1.094,
+"start_ago": 102.196,
+"turned": 61.48,
+"yaw": 61.48,
+"key": ""
+},
+{
+"frame": 33,
+"t": 1.1271,
+"hero": 0,
+"shown_ago": 1.127,
+"start_ago": 102.229,
+"turned": 62.42,
+"yaw": 62.42,
+"key": ""
+},
+{
+"frame": 34,
+"t": 1.1604,
+"hero": 0,
+"shown_ago": 1.16,
+"start_ago": 102.263,
+"turned": 63.35,
+"yaw": 63.35,
+"key": ""
+},
+{
+"frame": 35,
+"t": 1.1938,
+"hero": 0,
+"shown_ago": 1.194,
+"start_ago": 102.296,
+"turned": 64.28,
+"yaw": 64.28,
+"key": ""
+},
+{
+"frame": 36,
+"t": 1.2271,
+"hero": 1,
+"shown_ago": 0.008,
+"start_ago": 102.329,
+"turned": 65.22,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 37,
+"t": 1.2604,
+"hero": 1,
+"shown_ago": 0.042,
+"start_ago": 102.363,
+"turned": 66.15,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 38,
+"t": 1.2938,
+"hero": 1,
+"shown_ago": 0.075,
+"start_ago": 102.396,
+"turned": 67.08,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 39,
+"t": 1.3271,
+"hero": 1,
+"shown_ago": 0.108,
+"start_ago": 102.429,
+"turned": 68.02,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 40,
+"t": 1.3604,
+"hero": 1,
+"shown_ago": 0.142,
+"start_ago": 102.463,
+"turned": 68.95,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 41,
+"t": 1.3938,
+"hero": 1,
+"shown_ago": 0.175,
+"start_ago": 102.496,
+"turned": 69.88,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 42,
+"t": 1.4271,
+"hero": 1,
+"shown_ago": 0.208,
+"start_ago": 102.529,
+"turned": 70.82,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 43,
+"t": 1.4604,
+"hero": 1,
+"shown_ago": 0.242,
+"start_ago": 102.563,
+"turned": 71.75,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 44,
+"t": 1.4938,
+"hero": 1,
+"shown_ago": 0.275,
+"start_ago": 102.596,
+"turned": 72.68,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 45,
+"t": 1.5271,
+"hero": 1,
+"shown_ago": 0.308,
+"start_ago": 102.629,
+"turned": 73.62,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 46,
+"t": 1.5604,
+"hero": 1,
+"shown_ago": 0.342,
+"start_ago": 102.663,
+"turned": 74.55,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 47,
+"t": 1.5938,
+"hero": 1,
+"shown_ago": 0.375,
+"start_ago": 102.696,
+"turned": 75.48,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 48,
+"t": 1.6271,
+"hero": 1,
+"shown_ago": 0.408,
+"start_ago": 102.729,
+"turned": 76.42,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 49,
+"t": 1.6604,
+"hero": 1,
+"shown_ago": 0.442,
+"start_ago": 102.763,
+"turned": 77.35,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 50,
+"t": 1.6938,
+"hero": 1,
+"shown_ago": 0.475,
+"start_ago": 102.796,
+"turned": 78.28,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 51,
+"t": 1.7271,
+"hero": 1,
+"shown_ago": 0.508,
+"start_ago": 102.829,
+"turned": 79.22,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 52,
+"t": 1.7604,
+"hero": 1,
+"shown_ago": 0.542,
+"start_ago": 102.863,
+"turned": 80.15,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 53,
+"t": 1.7938,
+"hero": 1,
+"shown_ago": 0.575,
+"start_ago": 102.896,
+"turned": 81.08,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 54,
+"t": 1.8271,
+"hero": 1,
+"shown_ago": 0.608,
+"start_ago": 102.929,
+"turned": 82.02,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 55,
+"t": 1.8604,
+"hero": 1,
+"shown_ago": 0.642,
+"start_ago": 102.963,
+"turned": 82.95,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 56,
+"t": 1.8938,
+"hero": 1,
+"shown_ago": 0.675,
+"start_ago": 102.996,
+"turned": 83.88,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 57,
+"t": 1.9271,
+"hero": 1,
+"shown_ago": 0.708,
+"start_ago": 103.029,
+"turned": 84.82,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 58,
+"t": 1.9604,
+"hero": 1,
+"shown_ago": 0.742,
+"start_ago": 103.063,
+"turned": 85.75,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 59,
+"t": 1.9938,
+"hero": 1,
+"shown_ago": 0.775,
+"start_ago": 103.096,
+"turned": 86.68,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 60,
+"t": 2.0271,
+"hero": 1,
+"shown_ago": 0.808,
+"start_ago": 103.129,
+"turned": 87.62,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 61,
+"t": 2.0604,
+"hero": 1,
+"shown_ago": 0.842,
+"start_ago": 103.163,
+"turned": 88.55,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 62,
+"t": 2.0938,
+"hero": 1,
+"shown_ago": 0.875,
+"start_ago": 103.196,
+"turned": 89.48,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 63,
+"t": 2.1271,
+"hero": 1,
+"shown_ago": 0.908,
+"start_ago": 103.229,
+"turned": 90.42,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 64,
+"t": 2.1604,
+"hero": 1,
+"shown_ago": 0.942,
+"start_ago": 103.263,
+"turned": 91.35,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 65,
+"t": 2.1938,
+"hero": 1,
+"shown_ago": 0.975,
+"start_ago": 103.296,
+"turned": 92.28,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 66,
+"t": 2.2271,
+"hero": 2,
+"shown_ago": 0.008,
+"start_ago": 103.329,
+"turned": 93.22,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 67,
+"t": 2.2604,
+"hero": 2,
+"shown_ago": 0.042,
+"start_ago": 103.363,
+"turned": 94.15,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 68,
+"t": 2.2938,
+"hero": 2,
+"shown_ago": 0.075,
+"start_ago": 103.396,
+"turned": 95.08,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 69,
+"t": 2.3271,
+"hero": 2,
+"shown_ago": 0.108,
+"start_ago": 103.429,
+"turned": 96.02,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 70,
+"t": 2.3604,
+"hero": 2,
+"shown_ago": 0.142,
+"start_ago": 103.463,
+"turned": 96.95,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 71,
+"t": 2.3938,
+"hero": 2,
+"shown_ago": 0.175,
+"start_ago": 103.496,
+"turned": 97.88,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 72,
+"t": 2.4271,
+"hero": 2,
+"shown_ago": 0.208,
+"start_ago": 103.529,
+"turned": 98.82,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 73,
+"t": 2.4604,
+"hero": 2,
+"shown_ago": 0.242,
+"start_ago": 103.563,
+"turned": 99.75,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 74,
+"t": 2.4938,
+"hero": 2,
+"shown_ago": 0.275,
+"start_ago": 103.596,
+"turned": 100.68,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 75,
+"t": 2.5271,
+"hero": 2,
+"shown_ago": 0.308,
+"start_ago": 103.629,
+"turned": 101.62,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 76,
+"t": 2.5604,
+"hero": 2,
+"shown_ago": 0.342,
+"start_ago": 103.663,
+"turned": 102.55,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 77,
+"t": 2.5938,
+"hero": 2,
+"shown_ago": 0.375,
+"start_ago": 103.696,
+"turned": 103.48,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 78,
+"t": 2.6271,
+"hero": 2,
+"shown_ago": 0.408,
+"start_ago": 103.729,
+"turned": 104.42,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 79,
+"t": 2.6604,
+"hero": 2,
+"shown_ago": 0.442,
+"start_ago": 103.763,
+"turned": 105.35,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 80,
+"t": 2.6938,
+"hero": 2,
+"shown_ago": 0.475,
+"start_ago": 103.796,
+"turned": 106.28,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 81,
+"t": 2.7271,
+"hero": 2,
+"shown_ago": 0.508,
+"start_ago": 103.829,
+"turned": 107.22,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 82,
+"t": 2.7604,
+"hero": 2,
+"shown_ago": 0.542,
+"start_ago": 103.863,
+"turned": 108.15,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 83,
+"t": 2.7938,
+"hero": 2,
+"shown_ago": 0.575,
+"start_ago": 103.896,
+"turned": 109.08,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 84,
+"t": 2.8271,
+"hero": 2,
+"shown_ago": 0.608,
+"start_ago": 103.929,
+"turned": 110.02,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 85,
+"t": 2.8604,
+"hero": 2,
+"shown_ago": 0.642,
+"start_ago": 103.963,
+"turned": 110.95,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 86,
+"t": 2.8938,
+"hero": 2,
+"shown_ago": 0.675,
+"start_ago": 103.996,
+"turned": 111.88,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 87,
+"t": 2.9271,
+"hero": 2,
+"shown_ago": 0.708,
+"start_ago": 104.029,
+"turned": 112.82,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 88,
+"t": 2.9604,
+"hero": 2,
+"shown_ago": 0.742,
+"start_ago": 104.063,
+"turned": 113.75,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 89,
+"t": 2.9938,
+"hero": 2,
+"shown_ago": 0.775,
+"start_ago": 104.096,
+"turned": 114.68,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 90,
+"t": 3.0271,
+"hero": 2,
+"shown_ago": 0.808,
+"start_ago": 104.129,
+"turned": 115.62,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 91,
+"t": 3.0604,
+"hero": 2,
+"shown_ago": 0.842,
+"start_ago": 104.163,
+"turned": 116.55,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 92,
+"t": 3.0938,
+"hero": 2,
+"shown_ago": 0.875,
+"start_ago": 104.196,
+"turned": 117.48,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 93,
+"t": 3.1271,
+"hero": 2,
+"shown_ago": 0.908,
+"start_ago": 104.229,
+"turned": 118.42,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 94,
+"t": 3.1604,
+"hero": 2,
+"shown_ago": 0.942,
+"start_ago": 104.263,
+"turned": 119.35,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 95,
+"t": 3.1938,
+"hero": 2,
+"shown_ago": 0.975,
+"start_ago": 104.296,
+"turned": 120.28,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 96,
+"t": 3.2271,
+"hero": 3,
+"shown_ago": 0.008,
+"start_ago": 104.329,
+"turned": 121.22,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 97,
+"t": 3.2604,
+"hero": 3,
+"shown_ago": 0.042,
+"start_ago": 104.363,
+"turned": 122.15,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 98,
+"t": 3.2938,
+"hero": 3,
+"shown_ago": 0.075,
+"start_ago": 104.396,
+"turned": 123.08,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 99,
+"t": 3.3271,
+"hero": 3,
+"shown_ago": 0.108,
+"start_ago": 104.429,
+"turned": 124.02,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 100,
+"t": 3.3604,
+"hero": 3,
+"shown_ago": 0.142,
+"start_ago": 104.463,
+"turned": 124.95,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 101,
+"t": 3.3938,
+"hero": 3,
+"shown_ago": 0.175,
+"start_ago": 104.496,
+"turned": 125.88,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 102,
+"t": 3.4271,
+"hero": 3,
+"shown_ago": 0.208,
+"start_ago": 104.529,
+"turned": 126.82,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 103,
+"t": 3.4604,
+"hero": 3,
+"shown_ago": 0.242,
+"start_ago": 104.563,
+"turned": 127.75,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 104,
+"t": 3.4938,
+"hero": 3,
+"shown_ago": 0.275,
+"start_ago": 104.596,
+"turned": 128.68,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 105,
+"t": 3.5271,
+"hero": 3,
+"shown_ago": 0.308,
+"start_ago": 104.629,
+"turned": 129.62,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 106,
+"t": 3.5604,
+"hero": 3,
+"shown_ago": 0.342,
+"start_ago": 104.663,
+"turned": 130.55,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 107,
+"t": 3.5938,
+"hero": 3,
+"shown_ago": 0.375,
+"start_ago": 104.696,
+"turned": 131.48,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 108,
+"t": 3.6271,
+"hero": 3,
+"shown_ago": 0.408,
+"start_ago": 104.729,
+"turned": 132.42,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 109,
+"t": 3.6604,
+"hero": 3,
+"shown_ago": 0.442,
+"start_ago": 104.763,
+"turned": 133.35,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 110,
+"t": 3.6938,
+"hero": 3,
+"shown_ago": 0.475,
+"start_ago": 104.796,
+"turned": 134.28,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 111,
+"t": 3.7271,
+"hero": 3,
+"shown_ago": 0.508,
+"start_ago": 104.829,
+"turned": 135.22,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 112,
+"t": 3.7604,
+"hero": 3,
+"shown_ago": 0.542,
+"start_ago": 104.863,
+"turned": 136.15,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 113,
+"t": 3.7938,
+"hero": 3,
+"shown_ago": 0.575,
+"start_ago": 104.896,
+"turned": 137.08,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 114,
+"t": 3.8271,
+"hero": 3,
+"shown_ago": 0.608,
+"start_ago": 104.929,
+"turned": 138.02,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 115,
+"t": 3.8604,
+"hero": 3,
+"shown_ago": 0.642,
+"start_ago": 104.963,
+"turned": 138.95,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 116,
+"t": 3.8938,
+"hero": 3,
+"shown_ago": 0.675,
+"start_ago": 104.996,
+"turned": 139.88,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 117,
+"t": 3.9271,
+"hero": 3,
+"shown_ago": 0.708,
+"start_ago": 105.029,
+"turned": 140.82,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 118,
+"t": 3.9604,
+"hero": 3,
+"shown_ago": 0.742,
+"start_ago": 105.063,
+"turned": 141.75,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 119,
+"t": 3.9938,
+"hero": 3,
+"shown_ago": 0.775,
+"start_ago": 105.096,
+"turned": 142.68,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 120,
+"t": 4.0271,
+"hero": 3,
+"shown_ago": 0.808,
+"start_ago": 105.129,
+"turned": 143.62,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 121,
+"t": 4.0604,
+"hero": 3,
+"shown_ago": 0.842,
+"start_ago": 105.163,
+"turned": 144.55,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 122,
+"t": 4.0938,
+"hero": 3,
+"shown_ago": 0.875,
+"start_ago": 105.196,
+"turned": 145.48,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 123,
+"t": 4.1271,
+"hero": 3,
+"shown_ago": 0.908,
+"start_ago": 105.229,
+"turned": 146.42,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 124,
+"t": 4.1604,
+"hero": 3,
+"shown_ago": 0.942,
+"start_ago": 105.263,
+"turned": 147.35,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 125,
+"t": 4.1938,
+"hero": 3,
+"shown_ago": 0.975,
+"start_ago": 105.296,
+"turned": 148.28,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 126,
+"t": 4.2271,
+"hero": 4,
+"shown_ago": 0.008,
+"start_ago": 105.329,
+"turned": 149.22,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 127,
+"t": 4.2604,
+"hero": 4,
+"shown_ago": 0.042,
+"start_ago": 105.363,
+"turned": 150.15,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 128,
+"t": 4.2938,
+"hero": 4,
+"shown_ago": 0.075,
+"start_ago": 105.396,
+"turned": 151.08,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 129,
+"t": 4.3271,
+"hero": 4,
+"shown_ago": 0.108,
+"start_ago": 105.429,
+"turned": 152.02,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 130,
+"t": 4.3604,
+"hero": 4,
+"shown_ago": 0.142,
+"start_ago": 105.463,
+"turned": 152.95,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 131,
+"t": 4.3938,
+"hero": 4,
+"shown_ago": 0.175,
+"start_ago": 105.496,
+"turned": 153.88,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 132,
+"t": 4.4271,
+"hero": 4,
+"shown_ago": 0.208,
+"start_ago": 105.529,
+"turned": 154.82,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 133,
+"t": 4.4604,
+"hero": 4,
+"shown_ago": 0.242,
+"start_ago": 105.563,
+"turned": 155.75,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 134,
+"t": 4.4938,
+"hero": 4,
+"shown_ago": 0.275,
+"start_ago": 105.596,
+"turned": 156.68,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 135,
+"t": 4.5271,
+"hero": 4,
+"shown_ago": 0.308,
+"start_ago": 105.629,
+"turned": 157.62,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 136,
+"t": 4.5604,
+"hero": 4,
+"shown_ago": 0.342,
+"start_ago": 105.663,
+"turned": 158.55,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 137,
+"t": 4.5938,
+"hero": 4,
+"shown_ago": 0.375,
+"start_ago": 105.696,
+"turned": 159.48,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 138,
+"t": 4.6271,
+"hero": 4,
+"shown_ago": 0.408,
+"start_ago": 105.729,
+"turned": 160.42,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 139,
+"t": 4.6604,
+"hero": 4,
+"shown_ago": 0.442,
+"start_ago": 105.763,
+"turned": 161.35,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 140,
+"t": 4.6938,
+"hero": 4,
+"shown_ago": 0.475,
+"start_ago": 105.796,
+"turned": 162.28,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 141,
+"t": 4.7271,
+"hero": 4,
+"shown_ago": 0.508,
+"start_ago": 105.829,
+"turned": 163.22,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 142,
+"t": 4.7604,
+"hero": 4,
+"shown_ago": 0.542,
+"start_ago": 105.863,
+"turned": 164.15,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 143,
+"t": 4.7938,
+"hero": 4,
+"shown_ago": 0.575,
+"start_ago": 105.896,
+"turned": 165.08,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 144,
+"t": 4.8271,
+"hero": 4,
+"shown_ago": 0.608,
+"start_ago": 105.929,
+"turned": 166.02,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 145,
+"t": 4.8604,
+"hero": 4,
+"shown_ago": 0.642,
+"start_ago": 105.963,
+"turned": 166.95,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 146,
+"t": 4.8938,
+"hero": 4,
+"shown_ago": 0.675,
+"start_ago": 105.996,
+"turned": 167.88,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 147,
+"t": 4.9271,
+"hero": 4,
+"shown_ago": 0.708,
+"start_ago": 106.029,
+"turned": 168.82,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 148,
+"t": 4.9604,
+"hero": 4,
+"shown_ago": 0.742,
+"start_ago": 106.063,
+"turned": 169.75,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 149,
+"t": 4.9938,
+"hero": 4,
+"shown_ago": 0.775,
+"start_ago": 106.096,
+"turned": 170.68,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 150,
+"t": 5.0271,
+"hero": 4,
+"shown_ago": 0.808,
+"start_ago": 106.129,
+"turned": 171.62,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 151,
+"t": 5.0604,
+"hero": 4,
+"shown_ago": 0.842,
+"start_ago": 106.163,
+"turned": 172.55,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 152,
+"t": 5.0938,
+"hero": 4,
+"shown_ago": 0.875,
+"start_ago": 106.196,
+"turned": 173.48,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 153,
+"t": 5.1271,
+"hero": 4,
+"shown_ago": 0.908,
+"start_ago": 106.229,
+"turned": 174.42,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 154,
+"t": 5.1604,
+"hero": 4,
+"shown_ago": 0.942,
+"start_ago": 106.263,
+"turned": 175.35,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 155,
+"t": 5.1938,
+"hero": 4,
+"shown_ago": 0.975,
+"start_ago": 106.296,
+"turned": 176.28,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 156,
+"t": 5.2271,
+"hero": 4,
+"shown_ago": 1.008,
+"start_ago": 106.329,
+"turned": 177.22,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 157,
+"t": 5.2604,
+"hero": 4,
+"shown_ago": 1.042,
+"start_ago": 106.363,
+"turned": 178.15,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 158,
+"t": 5.2938,
+"hero": 4,
+"shown_ago": 1.075,
+"start_ago": 106.396,
+"turned": 179.08,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 159,
+"t": 5.3271,
+"hero": 4,
+"shown_ago": 1.108,
+"start_ago": 106.429,
+"turned": 180.02,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 160,
+"t": 5.3604,
+"hero": 4,
+"shown_ago": 1.142,
+"start_ago": 106.463,
+"turned": 180.95,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 161,
+"t": 5.3938,
+"hero": 4,
+"shown_ago": 1.175,
+"start_ago": 106.496,
+"turned": 181.88,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 162,
+"t": 5.4271,
+"hero": 4,
+"shown_ago": 1.208,
+"start_ago": 106.529,
+"turned": 182.82,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 163,
+"t": 5.4604,
+"hero": 4,
+"shown_ago": 1.242,
+"start_ago": 106.563,
+"turned": 183.75,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 164,
+"t": 5.4938,
+"hero": 4,
+"shown_ago": 1.275,
+"start_ago": 106.596,
+"turned": 184.68,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 165,
+"t": 5.5271,
+"hero": 4,
+"shown_ago": 1.308,
+"start_ago": 106.629,
+"turned": 185.62,
+"yaw": 37.16,
+"key": ""
+},
+{
+"frame": 166,
+"t": 5.5604,
+"hero": 4,
+"shown_ago": 1.342,
+"start_ago": 106.663,
+"turned": 186.55,
+"yaw": 38.09,
+"key": ""
+},
+{
+"frame": 167,
+"t": 5.5938,
+"hero": 4,
+"shown_ago": 1.375,
+"start_ago": 106.696,
+"turned": 187.48,
+"yaw": 39.02,
+"key": ""
+},
+{
+"frame": 168,
+"t": 5.6271,
+"hero": 4,
+"shown_ago": 1.408,
+"start_ago": 106.729,
+"turned": 188.42,
+"yaw": 39.96,
+"key": ""
+},
+{
+"frame": 169,
+"t": 5.6604,
+"hero": 4,
+"shown_ago": 1.442,
+"start_ago": 106.763,
+"turned": 189.35,
+"yaw": 40.89,
+"key": ""
+},
+{
+"frame": 170,
+"t": 5.6938,
+"hero": 4,
+"shown_ago": 1.475,
+"start_ago": 106.796,
+"turned": 190.28,
+"yaw": 41.82,
+"key": ""
+},
+{
+"frame": 171,
+"t": 5.7271,
+"hero": 4,
+"shown_ago": 1.508,
+"start_ago": 0.008,
+"turned": 191.22,
+"yaw": 42.76,
+"key": "Enter"
+},
+{
+"frame": 172,
+"t": 5.7604,
+"hero": 4,
+"shown_ago": 1.542,
+"start_ago": 0.042,
+"turned": 192.15,
+"yaw": 43.69,
+"key": "Enter"
+},
+{
+"frame": 173,
+"t": 5.7938,
+"hero": 4,
+"shown_ago": 1.575,
+"start_ago": 0.075,
+"turned": 193.08,
+"yaw": 44.63,
+"key": "Enter"
+},
+{
+"frame": 174,
+"t": 5.8271,
+"hero": 4,
+"shown_ago": 1.608,
+"start_ago": 0.108,
+"turned": 194.02,
+"yaw": 45.56,
+"key": "Enter"
+},
+{
+"frame": 175,
+"t": 5.8604,
+"hero": 4,
+"shown_ago": 1.642,
+"start_ago": 0.142,
+"turned": 194.95,
+"yaw": 46.49,
+"key": "Enter"
+},
+{
+"frame": 176,
+"t": 5.8938,
+"hero": 4,
+"shown_ago": 1.675,
+"start_ago": 0.175,
+"turned": 195.88,
+"yaw": 47.43,
+"key": "Enter"
+},
+{
+"frame": 177,
+"t": 5.9271,
+"hero": 4,
+"shown_ago": 1.708,
+"start_ago": 0.208,
+"turned": 196.82,
+"yaw": 48.36,
+"key": "Enter"
+},
+{
+"frame": 178,
+"t": 5.9604,
+"hero": 4,
+"shown_ago": 1.742,
+"start_ago": 0.242,
+"turned": 197.75,
+"yaw": 49.29,
+"key": "Enter"
+},
+{
+"frame": 179,
+"t": 5.9938,
+"hero": 4,
+"shown_ago": 1.775,
+"start_ago": 0.275,
+"turned": 198.68,
+"yaw": 50.23,
+"key": "Enter"
+},
+{
+"frame": 180,
+"t": 6.0271,
+"hero": 4,
+"shown_ago": 1.808,
+"start_ago": 0.308,
+"turned": 199.62,
+"yaw": 51.16,
+"key": "Enter"
+},
+{
+"frame": 181,
+"t": 6.0604,
+"hero": 4,
+"shown_ago": 1.842,
+"start_ago": 0.342,
+"turned": 200.55,
+"yaw": 52.09,
+"key": "Enter"
+},
+{
+"frame": 182,
+"t": 6.0938,
+"hero": 4,
+"shown_ago": 1.875,
+"start_ago": 0.375,
+"turned": 201.48,
+"yaw": 53.03,
+"key": "Enter"
+},
+{
+"frame": 183,
+"t": 6.1271,
+"hero": 4,
+"shown_ago": 1.908,
+"start_ago": 0.408,
+"turned": 202.42,
+"yaw": 53.96,
+"key": "Enter"
+},
+{
+"frame": 184,
+"t": 6.1604,
+"hero": 4,
+"shown_ago": 1.942,
+"start_ago": 0.442,
+"turned": 203.35,
+"yaw": 54.89,
+"key": ""
+},
+{
+"frame": 185,
+"t": 6.1938,
+"hero": 4,
+"shown_ago": 1.975,
+"start_ago": 0.475,
+"turned": 204.28,
+"yaw": 55.83,
+"key": ""
+},
+{
+"frame": 186,
+"t": 6.2271,
+"hero": 4,
+"shown_ago": 2.008,
+"start_ago": 0.508,
+"turned": 205.22,
+"yaw": 56.76,
+"key": ""
+},
+{
+"frame": 187,
+"t": 6.2604,
+"hero": 4,
+"shown_ago": 2.042,
+"start_ago": 0.542,
+"turned": 206.15,
+"yaw": 57.69,
+"key": ""
+},
+{
+"frame": 188,
+"t": 6.2938,
+"hero": 4,
+"shown_ago": 2.075,
+"start_ago": 0.575,
+"turned": 207.08,
+"yaw": 58.63,
+"key": ""
+},
+{
+"frame": 189,
+"t": 6.3271,
+"hero": 4,
+"shown_ago": 2.108,
+"start_ago": 0.608,
+"turned": 208.02,
+"yaw": 59.56,
+"key": ""
+},
+{
+"frame": 190,
+"t": 6.3604,
+"hero": 4,
+"shown_ago": 2.142,
+"start_ago": 0.642,
+"turned": 208.95,
+"yaw": 60.49,
+"key": ""
+},
+{
+"frame": 191,
+"t": 6.3938,
+"hero": 4,
+"shown_ago": 2.175,
+"start_ago": 0.675,
+"turned": 209.88,
+"yaw": 61.43,
+"key": ""
+},
+{
+"frame": 192,
+"t": 6.4271,
+"hero": 4,
+"shown_ago": 2.208,
+"start_ago": 0.708,
+"turned": 210.82,
+"yaw": 62.36,
+"key": ""
+},
+{
+"frame": 193,
+"t": 6.4604,
+"hero": 4,
+"shown_ago": 2.242,
+"start_ago": 0.742,
+"turned": 211.75,
+"yaw": 63.29,
+"key": ""
+},
+{
+"frame": 194,
+"t": 6.4938,
+"hero": 4,
+"shown_ago": 2.275,
+"start_ago": 0.775,
+"turned": 212.68,
+"yaw": 64.23,
+"key": ""
+},
+{
+"frame": 195,
+"t": 6.5271,
+"hero": 4,
+"shown_ago": 2.308,
+"start_ago": 0.808,
+"turned": 213.62,
+"yaw": 65.16,
+"key": ""
+},
+{
+"frame": 196,
+"t": 6.5604,
+"hero": 4,
+"shown_ago": 2.342,
+"start_ago": 0.842,
+"turned": 214.55,
+"yaw": 66.09,
+"key": ""
+},
+{
+"frame": 197,
+"t": 6.5938,
+"hero": 4,
+"shown_ago": 2.375,
+"start_ago": 0.875,
+"turned": 215.48,
+"yaw": 67.03,
+"key": ""
+},
+{
+"frame": 198,
+"t": 6.6271,
+"hero": 4,
+"shown_ago": 2.408,
+"start_ago": 0.908,
+"turned": 216.42,
+"yaw": 67.96,
+"key": ""
+},
+{
+"frame": 199,
+"t": 6.6604,
+"hero": 4,
+"shown_ago": 2.442,
+"start_ago": 0.942,
+"turned": 217.35,
+"yaw": 68.89,
+"key": ""
+},
+{
+"frame": 200,
+"t": 6.6938,
+"hero": 4,
+"shown_ago": 2.475,
+"start_ago": 0.975,
+"turned": 218.28,
+"yaw": 69.83,
+"key": ""
+},
+{
+"frame": 201,
+"t": 6.7271,
+"hero": 4,
+"shown_ago": 2.508,
+"start_ago": 1.008,
+"turned": 219.22,
+"yaw": 70.76,
+"key": ""
+},
+{
+"frame": 202,
+"t": 6.7604,
+"hero": 4,
+"shown_ago": 2.542,
+"start_ago": 1.042,
+"turned": 220.15,
+"yaw": 71.69,
+"key": ""
+},
+{
+"frame": 203,
+"t": 6.7938,
+"hero": 4,
+"shown_ago": 2.575,
+"start_ago": 1.075,
+"turned": 221.08,
+"yaw": 72.63,
+"key": ""
+},
+{
+"frame": 204,
+"t": 6.8271,
+"hero": 4,
+"shown_ago": 2.608,
+"start_ago": 1.108,
+"turned": 222.02,
+"yaw": 73.56,
+"key": ""
+},
+{
+"frame": 205,
+"t": 6.8604,
+"hero": 4,
+"shown_ago": 2.642,
+"start_ago": 1.142,
+"turned": 222.95,
+"yaw": 74.49,
+"key": ""
+},
+{
+"frame": 206,
+"t": 6.8938,
+"hero": 4,
+"shown_ago": 2.675,
+"start_ago": 1.175,
+"turned": 223.88,
+"yaw": 75.43,
+"key": ""
+},
+{
+"frame": 207,
+"t": 6.9271,
+"hero": 4,
+"shown_ago": 2.708,
+"start_ago": 1.208,
+"turned": 224.82,
+"yaw": 76.36,
+"key": ""
+},
+{
+"frame": 208,
+"t": 6.9604,
+"hero": 4,
+"shown_ago": 2.742,
+"start_ago": 1.242,
+"turned": 225.75,
+"yaw": 77.29,
+"key": ""
+},
+{
+"frame": 209,
+"t": 6.9938,
+"hero": 4,
+"shown_ago": 2.775,
+"start_ago": 1.275,
+"turned": 226.68,
+"yaw": 78.23,
+"key": ""
+}
+],
+"events": [
+{
+"t": 0.0,
+"kind": "begin"
+},
+{
+"t": 1.2,
+"frame": 35,
+"kind": "key",
+"key": "D",
+"passage": 0
+},
+{
+"t": 2.2,
+"frame": 65,
+"kind": "key",
+"key": "D",
+"passage": 0
+},
+{
+"t": 3.2,
+"frame": 95,
+"kind": "key",
+"key": "D",
+"passage": 0
+},
+{
+"t": 4.2,
+"frame": 125,
+"kind": "key",
+"key": "D",
+"passage": 0
+},
+{
+"t": 5.7,
+"frame": 170,
+"kind": "key",
+"key": "Enter",
+"passage": 0
+},
+{
+"t": 5.719,
+"frame": 170,
+"kind": "start",
+"hero": "Summoner",
+"opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Summoner",
+"passage": 0
+}
+],
+"heroes": [
+{
+"name": "Warrior",
+"title": "WARRIOR",
+"hp": 140.0,
+"mana": 0.0,
+"abilities": [
+"Wields all weapons",
+"Wears all armour",
+"High melee damage: +30% to her melee weapons' damage",
+"The highest hit points"
+],
+"armour": "All armour",
+"starts_with": "Sword and shield",
+"accent": [
+0.949999988079071,
+0.699999988079071,
+0.2800000011920929
+],
+"mana_per_second": 0.0,
+"melee_bonus": 0.30000001192092896,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Sword",
+"icon": "w_sword_shield",
+"damage": 22.0,
+"reach": 170.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+}
+]
+},
+{
+"name": "Mage",
+"title": "MAGE",
+"hp": 70.0,
+"mana": 100.0,
+"abilities": [
+"Casts and learns all spells: fire and dark fire",
+"Mana 100: it comes back slowly, and every cast takes some",
+"The lowest hit points"
+],
+"armour": "",
+"starts_with": "Spells only: fire and dark fire",
+"accent": [
+1.0,
+0.47999998927116394,
+0.18000000715255737
+],
+"mana_per_second": 2.0,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Fire",
+"icon": "w_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 8.0
+},
+{
+"name": "Dark Fire",
+"icon": "w_dark_fire",
+"damage": 38.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 14.0
+}
+]
+},
+{
+"name": "Warlock",
+"title": "WARLOCK",
+"hp": 100.0,
+"mana": 60.0,
+"abilities": [
+"Wields all weapons",
+"Casts and learns a limited set of spells: fire",
+"Mana 60: it comes back slowly, and every cast takes some",
+"Balanced hit points"
+],
+"armour": "Leather armour only",
+"starts_with": "Arming sword and the fire spell",
+"accent": [
+0.7200000286102295,
+0.44999998807907104,
+1.0
+],
+"mana_per_second": 1.2000000476837158,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Sword",
+"icon": "w_sword",
+"damage": 22.0,
+"reach": 170.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+},
+{
+"name": "Fire",
+"icon": "w_dark_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 10.0
+}
+]
+},
+{
+"name": "Rogue",
+"title": "ROGUE",
+"hp": 100.0,
+"mana": 0.0,
+"abilities": [
+"Wields daggers and ranged weapons",
+"Ranged damage: +30% to her ranged weapons' damage",
+"Uncanny dodge (B): she rolls out of a blow",
+"Balanced hit points"
+],
+"armour": "Leather armour only",
+"starts_with": "Two daggers and a crossbow",
+"accent": [
+0.41999998688697815,
+0.8799999952316284,
+0.550000011920929
+],
+"mana_per_second": 0.0,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.30000001192092896,
+"roll": true,
+"weapons": [
+{
+"name": "Daggers",
+"icon": "w_daggers",
+"damage": 15.0,
+"reach": 150.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+},
+{
+"name": "Crossbow",
+"icon": "w_crossbow",
+"damage": 34.0,
+"reach": 2600.0,
+"spell": true,
+"bolt": true,
+"mana": 0.0
+}
+]
+},
+{
+"name": "Summoner",
+"title": "SUMMONER",
+"hp": 85.0,
+"mana": 90.0,
+"abilities": [
+"Casts fire and dark fire, as the Mage does",
+"Wears the armour she finds: five sets were made for her",
+"Worn armour takes a share off every blow"
+],
+"armour": "Any set she finds: plate, the bear warrior's, the tiefling's, demonic, the orc veteran's",
+"starts_with": "Spells only: fire and dark fire; no armour",
+"accent": [
+0.949999988079071,
+0.3499999940395355,
+0.6499999761581421
+],
+"mana_per_second": 1.600000023841858,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Fire",
+"icon": "w_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 8.0
+},
+{
+"name": "Dark Fire",
+"icon": "w_dark_fire",
+"damage": 38.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 14.0
+}
+]
+}
+],
+"picked": [
+"Summoner"
+],
+"want": [
+"Summoner"
+],
+"error": null
+}

@@ -80,7 +80,12 @@
   {"name": "travel_cake", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a dense round travel cake studded with dried fruit and nuts, half wrapped in a green leaf, slight three-quarter view from above"},
   {"name": "sweet_roll", "kind": "icon", "size": [1024, 1024], "backdrop": "alone on a plain flat medium teal background, soft even light from the front",
    "prompt": "a game item illustration of one glazed spiral sweet roll with white icing dripping down its sides, slight three-quarter view from above"},
-  {"name": "steak", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of one thick well-done grilled steak with dark grill marks, slight three-quarter view from above"}
+  {"name": "steak", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of one thick well-done grilled steak with dark grill marks, slight three-quarter view from above"},
+  {"name": "armour_PlateArmour", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a closed blackened steel knight's helm with a narrow visor slit and riveted plates, slight three-quarter view"},
+  {"name": "armour_BearArmour", "kind": "icon", "size": [1024, 1024], "enclosed": true, "prompt": "a game item illustration of a layered black iron lamellar arm guard laced with dark leather cords, slight three-quarter view"},
+  {"name": "armour_TieflingArmour", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of one tall dark leather armoured boot with steel shin plates trimmed in gold, slight three-quarter view"},
+  {"name": "armour_DemonicArmour", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a scorched black steel demon war mask with two curved horns and glowing ember-red cracks, slight three-quarter view"},
+  {"name": "armour_OrcArmour", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a heavy crude dark iron shoulder pauldron with short spikes, lashed with worn leather straps, slight three-quarter view"}
  ],
  "picks": {
   "_note": "the seed chosen for each element, by its measurements (no flag) and by eye: no symbol, signature, plate or backdrop; the sweet roll from the teal round",
@@ -95,12 +100,15 @@
   "w_sword_shield": 620405862, "w_sword": 364690411, "w_fire": 1681666306, "w_dark_fire": 861080181, "w_daggers": 1432819164,
   "w_crossbow": 644552446, "chip_speed": 703695256, "chip_regen": 268942997,
   "compass": 1342630170,
+  "armour_PlateArmour": 726126638, "armour_BearArmour": 1331709922, "armour_TieflingArmour": 1234010398, "armour_DemonicArmour": 605120791,
+  "armour_OrcArmour": 1640411390,
   "_compass": "the big map's compass: every candidate was flagged (FLUX painted a grungy paper edge round the white, a backdrop the cut drops with the loose pieces; five of six were lopsided or cut off); this one is clean on a dark ground, its gem on the north point"
  },
  "weapons": {
   "_note": "which icon each hero's weapon shows (hero/weapon name): the Warlock's fire looks like the Mage's dark fire (it is the same effect)",
   "Warrior/Sword": "w_sword_shield", "Mage/Fire": "w_fire", "Mage/Dark Fire": "w_dark_fire",
-  "Warlock/Sword": "w_sword", "Warlock/Fire": "w_dark_fire", "Rogue/Daggers": "w_daggers", "Rogue/Crossbow": "w_crossbow"
+  "Warlock/Sword": "w_sword", "Warlock/Fire": "w_dark_fire", "Rogue/Daggers": "w_daggers", "Rogue/Crossbow": "w_crossbow",
+  "Summoner/Fire": "w_fire", "Summoner/Dark Fire": "w_dark_fire"
  },
  "icons": {
   "Small Healing Potion": "healing_vial", "Medium Healing Potion": "healing_flask", "Large Healing Potion": "healing_large",
@@ -113,6 +121,8 @@
   "Uncommon Speed Potion": "speed_flask", "Wondrous Speed Potion": "speed_large", "Rare Speed Potion": "speed_ornate",
   "Very Rare Speed Potion": "speed_ornate", "Legendary Speed Potion": "speed_ornate",
   "Bread": "bread", "Fish": "fish", "Fruit": "fruit", "Nuts and Seeds": "nuts", "Jerky": "jerky", "Hardtack": "hardtack",
-  "Travel Cake": "travel_cake", "Sweet Roll": "sweet_roll", "Well Done Steak": "steak"
+  "Travel Cake": "travel_cake", "Sweet Roll": "sweet_roll", "Well Done Steak": "steak",
+  "Plate Armour": "armour_PlateArmour", "Bear Warrior’s Armour": "armour_BearArmour", "Tiefling’s Armour": "armour_TieflingArmour",
+  "Demonic Armour": "armour_DemonicArmour", "Orc Veteran’s Armour": "armour_OrcArmour"
  }
 }

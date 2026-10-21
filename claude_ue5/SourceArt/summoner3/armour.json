@@ -1,0 +1,108 @@
+{
+ "_note": "The armour sets of random_dungeonmagic_level5 (849-851): each the pieces of one Fab character’s armour (the gallery’s objects.json), refitted to Summoner3 by blender_numpy/summoner3_armour.py; armour = the share of a blow it takes off.",
+ "sets": [
+  {
+   "key": "PlateArmour",
+   "title": "Plate Armour",
+   "gallery": "arm_knights_pack_plate_armour",
+   "pack": "Knights (Pack)",
+   "armour": 0.4,
+   "looks": "blackened plate: a closed helm, articulated arm plates, a plate skirt and greaves",
+   "pieces": [
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knigh_03_Body_Armors_01",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Arms_Armors_01",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Arms_Armors_02",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Arms_Armors_03",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Arms_Armors_04",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Arms_Armors_05",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Helmet_01",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_01",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_02",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_03",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_04",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_05",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_06",
+    "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_07"
+   ]
+  },
+  {
+   "key": "BearArmour",
+   "title": "Bear Warrior’s Armour",
+   "gallery": "arm_animals_warrior_pack_bear_warrior_s_armour",
+   "pack": "Animals Warrior Pack",
+   "armour": 0.3,
+   "looks": "black leather leg armour, iron arm guards and heavy boots",
+   "pieces": [
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_01",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_02",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_03",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_04",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_05",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_06",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_07",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_08",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_09",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_10",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_11",
+    "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_12"
+   ]
+  },
+  {
+   "key": "TieflingArmour",
+   "title": "Tiefling’s Armour",
+   "gallery": "arm_warriors_pack_tiefling_s_armour",
+   "pack": "Fantasy Warriors (Pack)",
+   "armour": 0.15,
+   "looks": "leather pauldrons, bracers, a gorget and boots trimmed in gold",
+   "pieces": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_01",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_02",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_03",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_04"
+   ]
+  },
+  {
+   "key": "DemonicArmour",
+   "title": "Demonic Armour",
+   "gallery": "arm_warriors_pack_demonic_armour",
+   "pack": "Fantasy Warriors (Pack)",
+   "armour": 0.25,
+   "looks": "scorched plate on one arm, a horned mask, boots and greaves",
+   "pieces": [
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_01",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_02",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_03",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_04",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_05",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_06",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_07",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_08",
+    "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Mask"
+   ]
+  },
+  {
+   "key": "OrcArmour",
+   "title": "Orc Veteran’s Armour",
+   "gallery": "arm_orcs_pack_orc_veteran_s_armour",
+   "pack": "14 Orcs Pack",
+   "armour": 0.3,
+   "looks": "bone-and-iron pauldrons, a plate skirt and heavy boots",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_01",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_02",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_03",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_04",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_05",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_06",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_07",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_09",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_10",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_11",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_12",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_13",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_14",
+    "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_15"
+   ]
+  }
+ ]
+}

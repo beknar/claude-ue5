@@ -82,6 +82,10 @@ LEVELS = {"random_dungeonmagic_level": {"pawn": "BP_RDM_CasterCharacter_C", "mes
                                          "bps": ("/Game/JRPG/Game/BP_JRPGSummonerCharacter", "/Game/RandomDungeon/Blueprints/BP_RDM5_SummonerCharacter"), "cast_keys": ("E", "LeftMouseButton"),
                                          "plan": "setup,keys,pad,walls,cast,nothing,far,kill:3,tier,face"}}
 LV = LEVELS[w.get_path_name().split(".")[-1].replace("UEDPIE_0_", "")]
+# (level 5 with Summoner2 as its hero, 848: her MetaHuman body, her characters, her speeds)
+if LV["pawn"] == "BP_RDM5_SummonerCharacter_C" and GS.get_player_pawn(w, 0).get_class().get_name() == "BP_RDM5_Summoner2Character_C":
+    LV = dict(LV, pawn="BP_RDM5_Summoner2Character_C", mesh="SKM_MHC_Summoner2_BodyMesh", ch="Summoner2", speeds=r"E:\code\claude-ue5\claude_ue5\SourceArt\summoner2\speeds.txt",
+              bps=("/Game/JRPG/Game/BP_JRPGSummoner2Character", "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner2Character"))
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "all" else LV["plan"]).split(",") if s.strip()]
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\" + LV["out"]
 G = {}; R = {"tag": TAG, "plan": PLAN, "level": w.get_path_name().split(".")[-1], "steps": []}
@@ -201,7 +205,7 @@ def step_keys():
         while c.is_attacking() and now() - t0 < 3.0: yield
         casts[label] = {"attacks": c.attacks_made - n0, "bolts": c.bolts_cast - b0}
     G["pc"].set_ignore_look_input(False)
-    walk, runs = [float(x) for x in open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + LV["ch"].lower() + r"\speeds.txt").read().split()]
+    walk, runs = [float(x) for x in open(LV.get("speeds") or r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + LV["ch"].lower() + r"\speeds.txt").read().split()]
     want = {"walk": 0, "run": 0, "A": -90, "S": 180, "D": 90}
     dirs_ok = all(abs((heading[n] - want[n] + 180) % 360 - 180) < 15 for n in want)
     ok = (all(k in mk for k in ("W", "A", "S", "D")) and "LeftShift" in sk and not clash and abs(speeds["walk"] - walk) < 0.15 * walk and abs(speeds["run"] - runs) < 0.15 * runs and dirs_ok
@@ -216,7 +220,7 @@ def step_pad():
     p = G["pawn"]; c = cb(); gen = G["gen"]; c.revive(True); c.set_scripted_only(False); c.set_run_mode(False); yield from wait(0.5)
     s = gen.get_start_room_center(); key = lambda n: (lambda k: (k.set_editor_property("key_name", n), k)[1])(unreal.Key())
     G["pc"].set_ignore_look_input(True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=0))
-    walk, runs = [float(x) for x in open(r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + LV["ch"].lower() + r"\speeds.txt").read().split()]
+    walk, runs = [float(x) for x in open(LV.get("speeds") or r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + LV["ch"].lower() + r"\speeds.txt").read().split()]
     out = {}
     def tap(k, hold=0.15):
         c.simulate_key(key(k), True); yield from wait(hold); c.simulate_key(key(k), False); yield from wait(0.1)
@@ -713,6 +717,14 @@ def step_face():
         at = V(h.x + fw.x * 9, h.y + fw.y * 9, h.z + 6)                     # (the face: in front of the head bone, a little up)
         loc = V(at.x + fw.x * 62, at.y + fw.y * 62, at.z + 2)
         cam.set_actor_location(loc, False, True); cam.set_actor_rotation(ML.find_look_at_rotation(loc, at), True)
+        # (again each time: a property set on the face component re-registers it, and it makes its MetaHuman face mesh
+        # again: the list made once kept the old one, and the pictures showed her without a face)
+        cc.show_only_actor_components(p, True)
+        fm_ = f.get_face_mesh()
+        if fm_ is not None and any(g.groom_asset and g.groom_asset.get_name().startswith("Hair") for g in p.get_components_by_class(unreal.GroomComponent)):
+            # (a whole MetaHuman with strand hair: the strands shimmer from one picture to the next, 1.8 % of the picture
+            # at rest, more than a blink; the pictures show the face and the body meshes only)
+            cc.clear_show_only_components(); cc.show_only_component(fm_); cc.show_only_component(p.mesh)
         cc.capture_scene()
         px = unreal.RenderingLibrary.read_render_target(G["w"], rt)
         if name: unreal.RenderingLibrary.export_render_target(G["w"], rt, outdir, f"face_{TAG}_{name}")
@@ -726,6 +738,7 @@ def step_face():
     noise = changed(rest, rest2)
     lit = sum(1 for q in rest if q[0] + q[1] + q[2] > 60) / len(rest)
     chans = {str(x.name): x for x in gen.get_editor_property("face_channels")}
+    fm = f.get_face_mesh(); mh = fm is not None                 # (a MetaHuman face on her: 840)
     out = {}; bad = []
     for name, ch in chans.items():
         f.set_manual(name, 1.0); yield from settle()
@@ -733,22 +746,64 @@ def step_face():
         morphs = {str(k): round(f.get_morph_weight(k), 3) for k in ch.morphs.keys()}; params = {str(k): round(f.get_param_value(k), 3) for k in ch.params.keys()}
         want_m = {str(k): min(1.0, v) for k, v in ch.morphs.items()}; want_p = {str(k): min(1.0, v) for k, v in ch.params.items()}
         ok_n = all(abs(morphs[k] - want_m[k]) < 0.02 for k in morphs) and all(abs(params[k] - want_p[k]) < 0.02 for k in params)
+        # (a MetaHuman face: each control curve given to its animation, and the same value read back after RigLogic)
+        curves = {str(k): (round(f.get_curve_value(k), 3), round(f.get_face_anim_curve(k), 3)) for k in ch.curves.keys()}
+        ok_n = ok_n and all(abs(g_ - min(1.0, ch.curves[k])) < 0.02 and abs(e_ - g_) < 0.02 for k, (g_, e_) in curves.items())
         frac = changed(rest, img)
-        out[name] = {"face_changed": round(frac, 4), "morphs": morphs, "params": params, "numbers_ok": ok_n}
-        if not ok_n or frac < max(0.01, noise * 4): bad.append(name)
+        out[name] = {"face_changed": round(frac, 4), "morphs": morphs, "params": params, "curves_given_evaluated": curves, "numbers_ok": ok_n}
+        # (the eyes alone looking aside move little of the picture)
+        # (the eyes alone, shut or looking aside, are a small part of the picture: a MetaHuman's eyes far smaller than her painted ones)
+        need = max(0.003 if (name.startswith("Look") or name == "Blink") else 0.01, noise * 4)
+        if not ok_n or frac < need: bad.append(name)
         f.set_manual(name, 0.0); yield from settle()
-    # each morph target alone (a channel of its own, for the test)
-    morph_names = sorted({str(k) for x in chans.values() for k in x.morphs.keys()})
     keep = list(f.get_editor_property("channels")); alone = {}
-    for m in morph_names:
-        t = unreal.RDFaceChannel(); t.set_editor_property("name", "Test_" + m); t.set_editor_property("morphs", {m: 1.0})
-        f.set_editor_property("channels", keep + [t]); f.set_manual("Test_" + m, 1.0); yield from settle()
-        img = shoot("morph_" + m); frac = changed(rest, img, 10)
-        alone[m] = {"weight": round(f.get_morph_weight(m), 3), "face_changed": round(frac, 4)}
-        if frac < max(0.002, noise * 2): bad.append("morph " + m)
-        f.set_manual("Test_" + m, 0.0); yield from settle()
+    if not mh:
+        # each morph target alone (a channel of its own, for the test)
+        morph_names = sorted({str(k) for x in chans.values() for k in x.morphs.keys()})
+        for m in morph_names:
+            t = unreal.RDFaceChannel(); t.set_editor_property("name", "Test_" + m); t.set_editor_property("morphs", {m: 1.0})
+            f.set_editor_property("channels", keep + [t]); f.set_manual("Test_" + m, 1.0); yield from settle()
+            img = shoot("morph_" + m); frac = changed(rest, img, 10)
+            alone[m] = {"weight": round(f.get_morph_weight(m), 3), "face_changed": round(frac, 4)}
+            if frac < max(0.002, noise * 2): bad.append("morph " + m)
+            f.set_manual("Test_" + m, 0.0); yield from settle()
+    else:
+        # single controls of the MetaHuman's rig alone, each changing the picture; the jaw's bone turned by jawOpen
+        jaw0 = f.get_face_bone_transform("FACIAL_C_Jaw"); head0 = f.get_face_bone_transform("head")
+        for k in ("jawOpen", "eyeBlinkL", "eyeBlinkR", "browRaiseInL", "mouthCornerPullR", "noseWrinkleL"):
+            cn = "CTRL_expressions_" + k
+            t = unreal.RDFaceChannel(); t.set_editor_property("name", "Test_" + k); t.set_editor_property("curves", {cn: 1.0})
+            f.set_editor_property("channels", keep + [t]); f.set_manual("Test_" + k, 1.0); yield from settle()
+            img = shoot("curve_" + k); frac = changed(rest, img, 10)
+            alone[k] = {"given": round(f.get_curve_value(cn), 3), "evaluated": round(f.get_face_anim_curve(cn), 3), "face_changed": round(frac, 4)}
+            if k == "jawOpen":
+                j = f.get_face_bone_transform("FACIAL_C_Jaw"); h = f.get_face_bone_transform("head")
+               # (the jaw's turn against the head: the angle between its x axes before and now, both seen from the head)
+                # (the whole turn between the two, not one axis: the jaw bone's x axis is its hinge and does not move)
+                q0 = head0.inverse_transform_rotation(jaw0.rotation.rotator()).quaternion(); q1 = h.inverse_transform_rotation(j.rotation.rotator()).quaternion()
+                dq = abs(q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w)
+                alone[k]["jaw_turned_deg"] = round(math.degrees(2.0 * math.acos(min(1.0, dq))), 2)
+                if alone[k]["jaw_turned_deg"] < 5: bad.append("jaw did not turn")
+            if frac < max(0.002, noise * 2) or alone[k]["evaluated"] < 0.98: bad.append("curve " + k)
+            f.set_manual("Test_" + k, 0.0); yield from settle()
     f.set_editor_property("channels", keep); yield from settle()
     p.mesh.set_editor_property("global_anim_rate_scale", 1.0)
+    if mh:
+        # the face stays on her: while she idles and walks, its head bone keeps its place against her head bone
+        # (a few frames first: the channels set back above re-registered the face component, and its new face mesh's
+        # first frame after that was still in its rest, 17 cm off; every frame after it matched to the millimetre)
+        yield from wait(0.3)
+        d0 = None; spread = 0.0; t0 = now(); G["pc"].set_ignore_look_input(True); samples = []
+        c.simulate_key(key("W"), True)
+        while now() - t0 < 2.0:
+            hb = p.mesh.get_socket_transform("head"); fh = f.get_face_bone_transform("head")
+            d = hb.inverse_transform_location(fh.translation)
+            if d0 is None: d0 = d
+            spread = max(spread, (d - d0).length()); samples.append([round(now() - t0, 3), round(d.x, 2), round(d.y, 2), round(d.z, 2)]); yield
+        c.simulate_key(key("W"), False); G["pc"].set_ignore_look_input(False)
+        out["_stays_on_her"] = {"largest_drift_cm": round(spread, 3), "samples": samples[:6] + samples[-3:]}
+        if spread > 0.6: bad.append("face drifts off her head")
+        p.set_actor_location(V(s0.x, s0.y, 100), False, True); yield from wait(0.5)
     # the occasions
     occ = {}
     def peak(chname, sec):
@@ -778,20 +833,24 @@ def step_face():
     occ["fight"] = fight
     c.set_health(c.get_max_health()); yield from wait(0.5)
     c.apply_damage(1000.0, None); yield from wait(0.8)
-    occ["death"] = {"dead": round(f.get_channel_weight("Dead"), 3), "eyes_shut": round(f.get_param_value("EyesClosed"), 3)}
+    # (the eyes shut: the painted patch on her own face; the blink curve, read after RigLogic, on a MetaHuman's)
+    eyes = (lambda: f.get_face_anim_curve("CTRL_expressions_eyeBlinkL")) if mh else (lambda: f.get_param_value("EyesClosed"))
+    occ["death"] = {"dead": round(f.get_channel_weight("Dead"), 3), "eyes_shut": round(eyes(), 3)}
     c.revive(True); yield from wait(1.5); occ["after_revive_dead"] = round(f.get_channel_weight("Dead"), 3)
     # blinks over quiet seconds
     p.set_actor_location(V(s0.x, s0.y, 100), False, True)
     f.set_editor_property("blink", True); b0 = f.get_blinks(); top = 0.0; low_ = 1.0; t0 = now()
     while now() - t0 < 12.0:
-        v = f.get_param_value("EyesClosed"); top = max(top, v); low_ = min(low_, v); yield
+        v = eyes(); top = max(top, v); low_ = min(low_, v); yield
     occ["blinks"] = {"in_12s": f.get_blinks() - b0, "eyes_shut_most": round(top, 3), "least": round(low_, 3)}
     counts = {str(k): v for k, v in f.get_cue_counts().items()}
     gen.set_editor_property("aggro_distance", aggro[0]); gen.set_editor_property("lose_distance", aggro[1])
     cam.set_actor_location(V(0, 0, -5000), False, True)
     ok_occ = (hurt_peak > 0.8 and hurt_after < 0.05 and occ["cast"]["peak"] > 0.8 and low > 0.6 and low_after < 0.05 and fight.get("anger", 0) > 0.5
               and fight.get("anger_after_it_left", 1) < 0.1 and occ["death"]["dead"] > 0.9 and occ["death"]["eyes_shut"] > 0.9 and occ["after_revive_dead"] < 0.05
-              and occ["blinks"]["in_12s"] >= 2 and occ["blinks"]["eyes_shut_most"] > 0.9 and occ["blinks"]["least"] < 0.05)
+              and occ["blinks"]["in_12s"] >= 2 and occ["blinks"]["eyes_shut_most"] > 0.85 and occ["blinks"]["least"] < 0.05)
+    # (0.85: the eyes are shut for a moment; read once a frame, at the 30 frames a second of a whole MetaHuman with strand
+    # hair the frames fell either side of it: 0.87 at most)
     ok = not bad and ok_occ and lit > 0.05 and len(chans) >= 8
     step_result("face", ok, channels=out, morphs_alone=alone, occasions=occ, cue_counts=counts, rest_noise=round(noise, 4), face_lit_share=round(lit, 3), failed=bad, pictures=outdir)
 

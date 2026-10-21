@@ -4,7 +4,89 @@
 #include "RD/RDMonster.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Engine/SkeletalMesh.h"
+#include "GroomComponent.h"
+#include "GroomAsset.h"
+#include "GroomBindingAsset.h"
 #include "EngineUtils.h"
+
+// ------------------------------------------------------------------------------------------------ the MetaHuman face's animation
+FAnimInstanceProxy* URDMetaFaceAnimInstance::CreateAnimInstanceProxy() { return new FRDMetaFaceProxy(this); }
+void URDMetaFaceAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) { delete static_cast<FRDMetaFaceProxy*>(InProxy); }
+
+static void RDFaceRefCS(const USkeletalMesh* M, TMap<FName, FTransform>& CS, TMap<FName, FName>* Parent, TMap<FName, int32>* Depth)
+{
+	CS.Reset();
+	const FReferenceSkeleton& R = M->GetRefSkeleton();
+	const TArray<FTransform>& L = R.GetRefBonePose();
+	TArray<FTransform> C; C.SetNum(R.GetNum()); TArray<int32> D; D.SetNum(R.GetNum());
+	for (int32 I = 0; I < R.GetNum(); ++I)
+	{
+		const int32 P = R.GetParentIndex(I);
+		C[I] = P >= 0 ? L[I] * C[P] : L[I];
+		D[I] = P >= 0 ? D[P] + 1 : 0;
+		CS.Add(R.GetBoneName(I), C[I]);
+		if (Parent) Parent->Add(R.GetBoneName(I), P >= 0 ? R.GetBoneName(P) : NAME_None);
+		if (Depth) Depth->Add(R.GetBoneName(I), D[I]);
+	}
+}
+
+void FRDMetaFaceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds)
+{
+	FAnimInstanceProxy::PreUpdate(InAnimInstance, DeltaSeconds);
+	URDMetaFaceAnimInstance* A = Cast<URDMetaFaceAnimInstance>(InAnimInstance);
+	Moves.Reset(); CurveValues.Reset();
+	if (!A) return;
+	for (const auto& KV : A->Curves) CurveValues.Add({ KV.Key, KV.Value });
+	const USkeletalMeshComponent* Face = A->GetSkelMeshComponent();
+	const USkeletalMeshComponent* Body = A->Body.Get();
+	const USkeletalMesh* FM = Face ? Face->GetSkeletalMeshAsset() : nullptr;
+	const USkeletalMesh* BM = Body ? Body->GetSkeletalMeshAsset() : nullptr;
+	if (!FM || !BM) return;
+	if (CachedFace.Get() != FM) { RDFaceRefCS(FM, FaceRefCS, &FaceParent, &FaceDepth); CachedFace = FM; }
+	if (CachedBody.Get() != BM) { RDFaceRefCS(BM, BodyRefCS, nullptr, nullptr); CachedBody = BM; }
+	// each face bone b moves as its body bone s moved from its rest, seen in the face's space:
+	// now(b) = ref(b) * Placement * [ref(s)^-1 * now(s)] * Placement^-1   (component spaces; UE's order: left applied first)
+	const FTransform& Pl = A->Placement;
+	const FTransform PlInv = Pl.Inverse();
+	for (const auto& BS : A->Bones)
+	{
+		const FTransform* FR = FaceRefCS.Find(BS.Key); const FTransform* BR = BodyRefCS.Find(BS.Value);
+		const int32 BI = Body->GetBoneIndex(BS.Value);
+		if (!FR || !BR || BI == INDEX_NONE) continue;
+		const FTransform Now = Body->GetBoneTransform(BI, FTransform::Identity);
+		if (Now.GetScale3D().GetMin() < 0.01f) continue;          // (a body not evaluated yet: the face stays in its rest)
+		const FTransform Delta = BR->Inverse() * Now;
+		FBoneMove Mv;
+		Mv.Bone = BS.Key; Mv.Parent = FaceParent.FindRef(BS.Key); Mv.Depth = FaceDepth.FindRef(BS.Key);
+		Mv.RefCS = *FR; const FTransform* PR = FaceRefCS.Find(Mv.Parent); Mv.ParentRefCS = PR ? *PR : FTransform::Identity;
+		Mv.Move = Pl * Delta * PlInv;
+		Moves.Add(Mv);
+	}
+	Moves.Sort([](const FBoneMove& X, const FBoneMove& Y) { return X.Depth < Y.Depth; });
+}
+
+bool FRDMetaFaceProxy::Evaluate(FPoseContext& Output)
+{
+	Output.Pose.ResetToRefPose();
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	TMap<FName, FTransform> NewCS;
+	for (const FBoneMove& Mv : Moves)
+	{
+		const FTransform CS = Mv.RefCS * Mv.Move;
+		NewCS.Add(Mv.Bone, CS);
+		const FTransform* PN = NewCS.Find(Mv.Parent);
+		const FTransform ParentCS = PN ? *PN : Mv.ParentRefCS;       // (the bones above the moved ones stay in their rest)
+		const int32 MeshIdx = BC.GetPoseBoneIndexForBoneName(Mv.Bone);
+		if (MeshIdx == INDEX_NONE) continue;
+		const FCompactPoseBoneIndex CI = BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(MeshIdx));
+		if (CI == INDEX_NONE) continue;
+		FTransform Local = CS.GetRelativeTransform(ParentCS); Local.NormalizeRotation();
+		Output.Pose[CI] = Local;
+	}
+	for (const auto& KV : CurveValues) Output.Curve.Set(KV.Key, KV.Value);
+	return true;
+}
 
 URDFaceComponent::URDFaceComponent()
 {
@@ -99,10 +181,107 @@ void URDFaceComponent::Watch(float Dt)
 	if (Cb->IsDead()) Playing.Reset();
 }
 
+void URDFaceComponent::SetupMetaFace()
+{
+	if (FaceMesh || !Mesh || !MetaFace.Mesh || !GetOwner()) return;
+	AActor* O = GetOwner();
+	FaceMesh = NewObject<USkeletalMeshComponent>(O, NAME_None, RF_Transient);
+	FaceMesh->SetSkeletalMeshAsset(MetaFace.Mesh);
+	FaceMesh->SetupAttachment(Mesh);
+	FaceMesh->SetRelativeTransform(MetaFace.Placement);
+	FaceMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	FaceMesh->SetAnimInstanceClass(URDMetaFaceAnimInstance::StaticClass());
+	FaceMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FaceMesh->bCastDynamicShadow = true; FaceMesh->SetCastShadow(true);
+	FaceMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	if (MetaFace.ForcedLOD >= 0) FaceMesh->SetForcedLOD(MetaFace.ForcedLOD + 1);
+	FaceMesh->RegisterComponent();
+	FaceMesh->AddTickPrerequisiteComponent(Mesh);           // (her pose first: the face follows it the same frame)
+	if (URDMetaFaceAnimInstance* A = Cast<URDMetaFaceAnimInstance>(FaceMesh->GetAnimInstance()))
+	{
+		A->Body = Mesh; A->Placement = MetaFace.Placement;
+		for (const auto& KV : MetaFace.Bones) A->Bones.Add({ KV.Key, KV.Value });
+	}
+	for (const FRDMetaFaceGroom& G : MetaFace.Grooms)
+	{
+		if (!G.Groom) continue;
+		UGroomComponent* GC = NewObject<UGroomComponent>(O, NAME_None, RF_Transient);
+		GC->SetupAttachment(FaceMesh);
+		GC->SetGroomAsset(G.Groom, G.Binding);
+		GC->RegisterComponent();
+		if (MetaFace.ForcedLOD >= 0) GC->SetForcedLOD(MetaFace.ForcedLOD);   // (strands at every distance, not cards)
+		if (G.Material)
+			for (int32 I = 0; I < GC->GetNumMaterials(); ++I) GC->SetMaterial(I, G.Material);
+		if (G.Scalars.Num() > 0)
+			for (int32 I = 0; I < GC->GetNumMaterials(); ++I)
+				if (UMaterialInstanceDynamic* D = GC->CreateDynamicMaterialInstance(I))
+					for (const auto& S : G.Scalars) D->SetScalarParameterValue(S.Key, S.Value);
+		FaceGrooms.Add(GC);
+	}
+	if (MetaFace.BodyMaterial)
+		for (int32 I = 0; I < Mesh->GetNumMaterials(); ++I) Mesh->SetMaterial(I, MetaFace.BodyMaterial);
+	for (USkeletalMesh* OM : MetaFace.Outfits)
+	{
+		if (!OM) continue;
+		USkeletalMeshComponent* C = NewObject<USkeletalMeshComponent>(O, NAME_None, RF_Transient);
+		C->SetSkeletalMeshAsset(OM);
+		C->SetupAttachment(Mesh);
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		C->SetCastShadow(true);
+		C->RegisterComponent();
+		C->SetLeaderPoseComponent(Mesh);
+		FaceOutfits.Add(C);
+	}
+}
+
+void URDFaceComponent::TearDownMetaFace()
+{
+	for (UGroomComponent* G : FaceGrooms) if (G) G->DestroyComponent();
+	FaceGrooms.Reset();
+	for (USkeletalMeshComponent* C : FaceOutfits) if (C) C->DestroyComponent();
+	FaceOutfits.Reset();
+	if (FaceMesh) FaceMesh->DestroyComponent();
+	FaceMesh = nullptr;
+}
+
+void URDFaceComponent::RebuildMetaFace() { TearDownMetaFace(); SetupMetaFace(); }
+
+void URDFaceComponent::EvaluateFaceNow(float Dt)
+{
+	if (!FaceMesh) return;
+	// (her body is left as it is: refreshed here in the editor with no animation, its bones collapsed to the origin and
+	// the face followed them)
+	FaceMesh->TickAnimation(Dt, false);
+	FaceMesh->RefreshBoneTransforms();            // (no tick function: evaluated here, curves applied to the blend shapes)
+	FaceMesh->MarkRenderDynamicDataDirty();
+}
+
+void URDFaceComponent::OnUnregister()
+{
+	TearDownMetaFace();
+	Super::OnUnregister();
+}
+
+float URDFaceComponent::GetFaceAnimCurve(FName Curve) const
+{
+	const UAnimInstance* A = FaceMesh ? FaceMesh->GetAnimInstance() : nullptr;
+	if (!A) return 0.f;
+	float V = 0.f;
+	if (const UAnimInstance* PP = FaceMesh->GetPostProcessInstance()) if (PP->GetCurveValue(Curve, V)) return V;
+	A->GetCurveValue(Curve, V);
+	return V;
+}
+
+FTransform URDFaceComponent::GetFaceBoneTransform(FName Bone) const
+{
+	return (FaceMesh && FaceMesh->GetBoneIndex(Bone) != INDEX_NONE) ? FaceMesh->GetSocketTransform(Bone) : FTransform::Identity;
+}
+
 void URDFaceComponent::Step(float Dt)
 {
 	if (!Mesh) Mesh = GetOwner() ? GetOwner()->FindComponentByClass<USkeletalMeshComponent>() : nullptr;
 	if (!Mesh) return;
+	if (MetaFace.Mesh && !FaceMesh) SetupMetaFace();
 	if (bGameDriven && GetWorld() && GetWorld()->IsGameWorld()) Watch(Dt);
 	// the cues
 	float CueTop = 0.f;
@@ -144,12 +323,19 @@ void URDFaceComponent::Step(float Dt)
 
 void URDFaceComponent::Apply()
 {
-	TMap<FName, float> Morph, Param;
+	TMap<FName, float> Morph, Param, Curve;
 	for (const FRDFaceChannel& C : Channels)
 	{
 		const float Wc = Weights.FindRef(C.Name);
 		for (const auto& M : C.Morphs) Morph.FindOrAdd(M.Key) += M.Value * Wc;
 		for (const auto& P : C.Params) Param.FindOrAdd(P.Key) += P.Value * Wc;
+		for (const auto& K : C.Curves) Curve.FindOrAdd(K.Key) += K.Value * Wc;
+	}
+	if (FaceMesh)
+	{
+		CurveValues.Reset();
+		for (const auto& K : Curve) CurveValues.Add(K.Key, FMath::Clamp(K.Value, 0.f, 1.f));
+		if (URDMetaFaceAnimInstance* A = Cast<URDMetaFaceAnimInstance>(FaceMesh->GetAnimInstance())) A->Curves = CurveValues;
 	}
 	for (const auto& M : Morph) Mesh->SetMorphTarget(M.Key, FMath::Clamp(M.Value, 0.f, 1.f), false);
 	if (Param.Num() > 0)
@@ -183,8 +369,11 @@ void ARDFacePuppet::Tick(float DeltaSeconds)
 	if (!Face) return;
 	Face->Mesh = Mesh;
 	const TPair<const TCHAR*, float> Keys[] = { { TEXT("Joy"), Joy }, { TEXT("Anger"), Anger }, { TEXT("Pain"), Pain }, { TEXT("Fear"), Fear },
-	                                             { TEXT("Shout"), Shout }, { TEXT("Focus"), Focus }, { TEXT("Blink"), Blink }, { TEXT("Dead"), Dead } };
+	                                             { TEXT("Shout"), Shout }, { TEXT("Focus"), Focus }, { TEXT("Blink"), Blink }, { TEXT("Dead"), Dead },
+	                                             { TEXT("Surprise"), Surprise }, { TEXT("Sad"), Sad }, { TEXT("Disgust"), Disgust }, { TEXT("Effort"), Effort },
+	                                             { TEXT("LookRight"), FMath::Max(LookRight, 0.f) }, { TEXT("LookLeft"), FMath::Max(-LookRight, 0.f) },
+	                                             { TEXT("LookUp"), FMath::Max(LookUp, 0.f) }, { TEXT("LookDown"), FMath::Max(-LookUp, 0.f) } };
 	for (const auto& K : Keys) Face->SetManual(FName(K.Key), K.Value);
-	// (in the editor the component does not tick: step it here)
-	if (!GetWorld() || !GetWorld()->IsGameWorld()) Face->Step(DeltaSeconds);
+	// (in the editor the component does not tick and the face mesh's animation is not evaluated: do both here)
+	if (!GetWorld() || !GetWorld()->IsGameWorld()) { Face->Step(DeltaSeconds); Face->EvaluateFaceNow(DeltaSeconds); }
 }

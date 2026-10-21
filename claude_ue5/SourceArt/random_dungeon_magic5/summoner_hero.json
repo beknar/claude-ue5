@@ -1,0 +1,24 @@
+{
+ "_note": "random_dungeonmagic_level5's fifth hero (852): Summoner3 (ai models/Summoner3.glb), the Mage's two spells cast with her own clips (the Mage's casts retargeted onto her: summoner3_clips.py), and the armour she finds (SourceArt/summoner3/armour.json). The other four heroes are level 4's (the level is its Save As copy).",
+ "name": "Summoner",
+ "title": "SUMMONER",
+ "pawn": "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner3Character",
+ "health": 85,
+ "mana": 90,
+ "mana_per_second": 1.6,
+ "accent": [0.95, 0.35, 0.65],
+ "spells_like": "Mage",
+ "clips": {"casts": ["/Game/JRPG/Summoner3Anims/AS_Summoner3_Cast1", "/Game/JRPG/Summoner3Anims/AS_Summoner3_Cast2", "/Game/JRPG/Summoner3Anims/AS_Summoner3_Cast3"],
+           "flinch": "/Game/JRPG/Summoner3Anims/AS_Summoner3_Flinch", "death": "/Game/JRPG/Summoner3Anims/AS_Summoner3_Death"},
+ "abilities": [
+  "Casts fire and dark fire, as the Mage does",
+  "Wears the armour she finds: five sets were made for her",
+  "Worn armour takes a share off every blow"
+ ],
+ "armour": "Any set she finds: plate, the bear warrior's, the tiefling's, demonic, the orc veteran's",
+ "starts_with": "Spells only: fire and dark fire; no armour",
+ "keys_extra": "Enter (inventory)|put on / take off armour",
+ "pad_extra": "A (inventory)|put on / take off armour",
+ "default": true,
+ "max_items_per_container": 6
+}

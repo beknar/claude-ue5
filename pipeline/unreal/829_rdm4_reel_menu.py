@@ -7,12 +7,15 @@ the Rogue, START. START does not leave the menu in the reel (bStayOnConfirm: the
 rendered on its own, a run for each hero, 815 with level 4). The reel's overlay (rdm4_reel_assemble.py) cuts the render
 into the four passages and draws the menu over it from this record, which has every frame's hero shown, when she was
 shown, when START was pressed, the turntable's turn and the key pressed. Writes SourceArt/random_dungeon_magic4/cine_menu.json
-and logs "RDM4MENU saved". Keeps its namespace (tick callback). Args: [seconds a passage, 7]"""
+and logs "RDM4MENU saved". Keeps its namespace (tick callback).
+Level 5 (random_dungeonmagic_level5_select, LS_RDM5select_Showcase; the Summoner's armour reel): one passage, in which
+she looks through the five heroes with D from the Warrior to the Summoner and presses START; the record goes to
+SourceArt/random_dungeon_magic5/cine_menu.json. Args: [seconds a passage, 7] [level: 4 or 5]"""
 import unreal, sys, json, os
 __keep__ = True
 PASSAGE = float(sys.argv[1]) if len(sys.argv) > 1 else 7.0
-FPS = 30; DUR = PASSAGE * 4
-OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\random_dungeon_magic4\cine_menu.json"
+LV = sys.argv[2] if len(sys.argv) > 2 else "4"
+OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\random_dungeon_magic%s\cine_menu.json" % LV
 GS = unreal.GameplayStatics; ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 # (seconds into a passage, key); the passages in the reel's order: Warrior, Mage, Warlock, Rogue
 PLAN = [[(1.1, "D"), (2.2, "D"), (3.4, "A"), (4.5, "A"), (5.7, "Enter")],
@@ -20,15 +23,15 @@ PLAN = [[(1.1, "D"), (2.2, "D"), (3.4, "A"), (4.5, "A"), (5.7, "Enter")],
         [(1.4, "D"), (3.0, "D"), (4.0, "A"), (5.5, "Enter")],
         [(1.6, "D"), (4.8, "Enter")]]
 WANT = ["Warrior", "Mage", "Warlock", "Rogue"]
+if LV == "5":
+    PLAN = [[(1.2, "D"), (2.2, "D"), (3.2, "D"), (4.2, "D"), (5.7, "Enter")]]; WANT = ["Summoner"]
+FPS = 30; DUR = PASSAGE * len(PLAN)
 G = {}; S = {"rows": {}, "events": [], "saved": False}
 if getattr(unreal, "_rdm4_menu", None) is not None:
     try: unreal.unregister_slate_post_tick_callback(unreal._rdm4_menu)
     except Exception: pass
 def key(n): k = unreal.Key(); k.set_editor_property("key_name", n); return k
-def save(why=None):
-    if S["saved"]: return
-    S["saved"] = True
-    s = G.get("sel")
+def card_data(s):
     heroes = []
     if s is not None:
         for h in s.heroes:
@@ -38,6 +41,11 @@ def save(why=None):
                            "melee_bonus": h.melee_bonus, "ranged_bonus": h.ranged_bonus, "roll": h.roll_clip is not None,
                            "weapons": [{"name": str(w.name), "icon": str(w.icon), "damage": w.damage, "reach": w.reach, "spell": bool(w.spell),
                                         "bolt": w.bolt_mesh is not None, "mana": w.mana_cost} for w in h.weapons]})
+    return heroes
+def save(why=None):
+    if S["saved"]: return
+    S["saved"] = True
+    heroes = G.get("heroes", [])          # (read when it was armed: at the render's end the menu's actor may be gone)
     rows = [S["rows"][k] for k in sorted(S["rows"])]
     picked = [e["hero"] for e in S["events"] if e["kind"] == "start"]
     out = {"fps": FPS, "passage": PASSAGE, "rows": rows, "events": S["events"], "heroes": heroes, "picked": picked, "want": WANT, "error": why}
@@ -55,9 +63,9 @@ def body():
         sels = GS.get_all_actors_of_class(w, unreal.RDHeroSelect); lsa = GS.get_all_actors_of_class(w, unreal.LevelSequenceActor)
         if not sels or not lsa or lsa[0].get_editor_property("sequence_player") is None: return
         G.update({"w": w, "sel": sels[0], "player": lsa[0].get_editor_property("sequence_player"), "going": False, "down": [], "done": set()})
-        sels[0].set_editor_property("stay_on_confirm", True)
+        sels[0].set_editor_property("stay_on_confirm", True); G["heroes"] = card_data(sels[0])
         unreal.log("RDM4MENU armed, %d passages of %.1f s" % (len(PLAN), PASSAGE))
-    if w is None: stop(None if G.get("t", 0.0) >= DUR - 0.05 else "the world ended"); return
+    if w is None or not unreal.SystemLibrary.is_valid(G["sel"]): stop(None if G.get("t", 0.0) >= DUR - 0.05 else "the world ended"); return
     if S["saved"]: return
     s = G["sel"]; wt = GS.get_time_seconds(G["w"])
     sec = unreal.TimeManagementLibrary.conv_qualified_frame_time_to_seconds(G["player"].get_current_time())
