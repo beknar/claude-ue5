@@ -9,6 +9,7 @@ The characters this project uses in its current and future scenes, made with [Tr
 | `Warlock.glb` | `girl-darkcaster-tripo.glb` | Dark caster (spell in the left hand, sword in the right) | random_dungeonmagic_level2, the Tripo trio and quartet showcases |
 | `Rogue.glb` | (none) | Hooded rogue (two daggers, a crossbow) | random_dungeonmagic_level3 (tag `Rogue`), the Tripo quartet showcase |
 | `Summoner.glb` | (none) | Twin-tailed summoner (the Mage's spells; a face that shows expressions) | the first random_dungeonmagic_level5 (character `Summoner`, scripts `832`-`841`) and its face reels |
+| `Summoner2.glb` | (none) | Realistic summoner (made from two AI-generated pictures), fitted with a whole MetaHuman | the Summoner2 version of random_dungeonmagic_level5 (scripts `842`-`848`; set aside) |
 | `Summoner3.glb` | (none) | Summoner (the Mage's spells; wears the armour she finds) | random_dungeonmagic_level5 (character `Summoner3`, the fifth hero) and its armour showcase |
 
 ## Renamed models
