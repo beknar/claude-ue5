@@ -453,3 +453,41 @@ Every other folder in `Content/` was made by this project's scripts or comes wit
 | `Developers` | the editor's per-user folder | `E:\code\claude-ue5\claude_ue5\Content\Developers` |
 | `__ExternalActors__` | World Partition's one-file-per-actor data of the packs' maps and the project's levels | `E:\code\claude-ue5\claude_ue5\Content\__ExternalActors__` |
 | `__ExternalObjects__` | World Partition's external objects of the same maps | `E:\code\claude-ue5\claude_ue5\Content\__ExternalObjects__` |
+
+## Directories that hold assets
+
+Every directory the locations above are in, once each; none of them is inside another. The asset library on `I:\game assets` is read only.
+
+| Directory | What it holds |
+|---|---|
+| `C:\Users\kestanol\AppData\Roaming\kitbash3d\kits` | KitBash3D kits downloaded by Cargo |
+| `C:\Windows\Fonts` | Arial and Segoe UI Symbol |
+| `E:\code\claude-ue5\ai models` | the project's own Tripo characters (`.glb`) |
+| `E:\code\claude-ue5\CitySubwayTunnel` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\claude_ue5\Content` | the project's Unreal content: the packs added to it and the project's own folders |
+| `E:\code\claude-ue5\claude_ue5\SourceArt` | files the scripts made, converted or unpacked: characters' sources, Unity packs unpacked, converted sounds, interface art, fonts |
+| `E:\code\claude-ue5\FrozenNorseEnvironment` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperActorHealthSystemv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperAttributeManagerv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperBuildingSystemv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperCaveBuildingToolkitv` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperCharacterPreviewerv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperCombatFrameworkv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperFarmingSystemv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperLockandLockpickingSy` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\HyperObjectPoolerv4` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\IndustrialEnvironmen1900s` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\LootDropsVol2Niagara` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\old models` | the earlier Tripo and Meshy characters (`.glb`) |
+| `E:\code\claude-ue5\PostApocalypticMansionAlb` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\QuarantineMedicalTent` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\code\claude-ue5\SteampunkZeppelinStation` | a Fab project download opened as a project of its own (ignored by git) |
+| `E:\Program Files\Epic Games\UE_5.8\Engine\Content` | the engine's own content (shapes, textures, materials) |
+| `E:\Program Files\Epic Games\UE_5.8\Engine\Plugins\Marketplace` | engine plugins from Fab (Leartes Studios' tools, Cargo) |
+| `E:\Program Files\Epic Games\UE_5.8\Engine\Plugins\Runtime\HDRIBackdrop` | the engine's HDRI Backdrop plugin |
+| `I:\game assets\3d epicgames media packs\VaultCache\FabLibrary` | Fab downloads as Unity packages or FBX files |
+| `I:\game assets\3d fab library data cache\VaultCache` | Fab downloads in Unreal's format (the launcher's vault) |
+| `I:\game assets\complete rpg creator bundle` | sound libraries: voices, combat, monsters, ambience, spells, survival |
+| `I:\game assets\epicgames media packs\VaultCache\FabLibrary` | a second copy of the Unity and FBX downloads |
+| `I:\game assets\fanatical bundle packs` | sound libraries: RPG sound effects, fantasy music |
+| `I:\game assets\humble bundle - 2d game creation mega bundle` | sound libraries: Quest Game, monster sounds |
