@@ -1,0 +1,12 @@
+{
+ "clips": {
+  "Run": 31,
+  "Walk": 57,
+  "W5_Bow": 29
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic5\\w5_clips\\Rogue\\T_Rogue_Color.png"
+ },
+ "height_cm": 170.0,
+ "hair": null
+}

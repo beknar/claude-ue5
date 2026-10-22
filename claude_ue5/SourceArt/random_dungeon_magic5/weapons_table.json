@@ -1,0 +1,40 @@
+{
+ "_note": "random_dungeonmagic_level5's weapons table (the user's, 2026-10-21): type, speed and damage ratings (1 the worst, 10 the best), the tiers of rooms whose containers hold it, durability (blows that land before it breaks), rarity (its weight among the items a container may hold, as level 4's item table). gallery: the entry of SourceArt/object_gallery/objects.json whose model it is. Read by pipeline/unreal/854 (and the clips' and grips' scripts).",
+ "rules": {
+  "damage": "8 + 3 x the damage rating (1: 11 ... 10: 38)",
+  "cycle": "one attack every 1.6 - (speed rating - 1) x 1.05 / 9 seconds (1: 1.6 s ... 10: 0.55 s): her clip is played at its own length / this",
+  "durability": "1 off for every blow or bolt that hits a monster; at 0 it breaks and is gone",
+  "who": {"Warrior": "all", "Warlock": "all", "Rogue": ["short blades", "ranged"], "Mage": [], "Summoner": []}
+ },
+ "weapons": [
+  {"name": "Viking Shortsword",    "type": "short sword",               "speed": 7,  "damage": 4,  "tiers": [1],    "durability": 67,  "rarity": 33, "gallery": "vikings_viking_seax"},
+  {"name": "Sherwood Sword",       "type": "short sword",               "speed": 7,  "damage": 4,  "tiers": [1],    "durability": 68,  "rarity": 33, "gallery": "hive_sherwood_sherwood_sword"},
+  {"name": "Orc Cleaver",          "type": "short sword",               "speed": 6,  "damage": 5,  "tiers": [2],    "durability": 69,  "rarity": 33, "gallery": "orcs_pack_orc_cleaver"},
+  {"name": "Toothed Bone Sword",   "type": "short sword",               "speed": 5,  "damage": 6,  "tiers": [2],    "durability": 70,  "rarity": 33, "gallery": "primitive_characters_pack_elder_s_staff"},
+  {"name": "Arming Sword",         "type": "one handed sword",          "speed": 5,  "damage": 6,  "tiers": [1],    "durability": 86,  "rarity": 33, "gallery": "medieval_weapons_arming_sword"},
+  {"name": "Longsword",            "type": "one handed sword",          "speed": 4,  "damage": 7,  "tiers": [1],    "durability": 87,  "rarity": 33, "gallery": "medieval_weapons_longsword"},
+  {"name": "Viking Sword",         "type": "one handed sword",          "speed": 4,  "damage": 7,  "tiers": [1],    "durability": 88,  "rarity": 33, "gallery": "vikings_viking_sword"},
+  {"name": "Veteran's Sword",      "type": "one handed sword",          "speed": 3,  "damage": 8,  "tiers": [2],    "durability": 89,  "rarity": 33, "gallery": "fantasy_pack_veteran_s_sword"},
+  {"name": "Templar Sword",        "type": "one handed sword",          "speed": 3,  "damage": 8,  "tiers": [2],    "durability": 90,  "rarity": 33, "gallery": "knights_pack_templar_sword"},
+  {"name": "Plate Knight's Sword", "type": "two handed sword",          "speed": 2,  "damage": 9,  "tiers": [1],    "durability": 97,  "rarity": 33, "gallery": "knights_pack_plate_knight_s_sword"},
+  {"name": "Paladin's Sword",      "type": "two handed sword",          "speed": 2,  "damage": 9,  "tiers": [2],    "durability": 98,  "rarity": 33, "gallery": "knights_pack_paladin_s_sword"},
+  {"name": "Dark Knight's Sword",  "type": "two handed sword",          "speed": 1,  "damage": 10, "tiers": [3],    "durability": 99,  "rarity": 33, "gallery": "warriors_pack_dark_knight_s_sword"},
+  {"name": "Ursag's Horn Blade",   "type": "two handed sword",          "speed": 1,  "damage": 10, "tiers": [4, 5], "durability": 100, "rarity": 33, "gallery": "orcs_pack_ursag_s_weapon"},
+  {"name": "Eastern Sabre",        "type": "curved and eastern sword",  "speed": 7,  "damage": 4,  "tiers": [1],    "durability": 78,  "rarity": 33, "gallery": "knights_pack_eastern_sabre"},
+  {"name": "Katana",               "type": "curved and eastern sword",  "speed": 6,  "damage": 5,  "tiers": [2],    "durability": 79,  "rarity": 33, "gallery": "samurai_katana"},
+  {"name": "Wakizashi",            "type": "curved and eastern sword",  "speed": 5,  "damage": 6,  "tiers": [3],    "durability": 80,  "rarity": 33, "gallery": "samurai_wakizashi"},
+  {"name": "Dagger",               "type": "short blades",              "speed": 10, "damage": 1,  "tiers": [1],    "durability": 52,  "rarity": 33, "gallery": "medieval_weapons_dagger"},
+  {"name": "Leaf-Blade Knife",     "type": "short blades",              "speed": 10, "damage": 1,  "tiers": [1],    "durability": 53,  "rarity": 33, "gallery": "houseforge_01_hunting_knife"},
+  {"name": "Obsidian Knife",       "type": "short blades",              "speed": 10, "damage": 1,  "tiers": [2],    "durability": 54,  "rarity": 33, "gallery": "primitive_characters_pack_stone_axe"},
+  {"name": "Bone Blade",           "type": "short blades",              "speed": 9,  "damage": 2,  "tiers": [2],    "durability": 55,  "rarity": 33, "gallery": "primitive_characters_pack_stone_hammer"},
+  {"name": "Combat Knife",         "type": "short blades",              "speed": 9,  "damage": 2,  "tiers": [3],    "durability": 56,  "rarity": 33, "gallery": "fps_pistol_knife_combat_knife_fps"},
+  {"name": "Survival Knife",       "type": "short blades",              "speed": 9,  "damage": 2,  "tiers": [3],    "durability": 57,  "rarity": 33, "gallery": "fps_starter_pack_kitchen_knife_fps"},
+  {"name": "Kukri",                "type": "short blades",              "speed": 8,  "damage": 3,  "tiers": [4],    "durability": 58,  "rarity": 33, "gallery": "military_pack_military_knife"},
+  {"name": "Sniper's Knife",       "type": "short blades",              "speed": 8,  "damage": 3,  "tiers": [4],    "durability": 59,  "rarity": 33, "gallery": "sniper_sniper_s_knife"},
+  {"name": "Wrist Blade",          "type": "short blades",              "speed": 8,  "damage": 3,  "tiers": [5],    "durability": 60,  "rarity": 33, "gallery": "dystopia_pack_dystopian_sword"},
+  {"name": "Longbow",              "type": "ranged",                    "speed": 7,  "damage": 4,  "tiers": [1],    "durability": 72,  "rarity": 33, "gallery": "medieval_weapons_longbow"},
+  {"name": "Viking Bow",           "type": "ranged",                    "speed": 7,  "damage": 4,  "tiers": [2],    "durability": 73,  "rarity": 33, "gallery": "houseforge_01_viking_bow"},
+  {"name": "Crossbow",             "type": "ranged",                    "speed": 6,  "damage": 5,  "tiers": [3],    "durability": 74,  "rarity": 33, "gallery": "medieval_weapons_crossbow"},
+  {"name": "Dwarf Crossbow",       "type": "ranged",                    "speed": 5,  "damage": 6,  "tiers": [4, 5], "durability": 75,  "rarity": 33, "gallery": "dwarf_pack_dwarf_crossbow"}
+ ]
+}

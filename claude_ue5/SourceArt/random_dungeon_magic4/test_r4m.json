@@ -1,0 +1,320 @@
+{
+ "tag": "r4m",
+ "plan": [
+  "menufirst",
+  "menuui",
+  "select",
+  "map"
+ ],
+ "level": "random_dungeonmagic_level4_select",
+ "steps": [
+  {
+   "step": "menufirst",
+   "ok": true,
+   "played": "random_dungeonmagic_level4",
+   "generator_said": "no hero chosen: opening the menu /Game/RandomDungeon/Maps/random_dungeonmagic_level4_select",
+   "now_in": "random_dungeonmagic_level4_select",
+   "menu": true,
+   "generator": false,
+   "shown": "Warrior",
+   "target": "/Game/RandomDungeon/Maps/random_dungeonmagic_level4",
+   "hero_menu_cvar": 1
+  },
+  {
+   "step": "menuui",
+   "ok": true,
+   "pieces": [
+    "arrow",
+    "banner",
+    "bar_health",
+    "bar_mana",
+    "bread",
+    "button",
+    "chip_regen",
+    "chip_speed",
+    "compass",
+    "divider",
+    "fill_health",
+    "fill_mana",
+    "fish",
+    "fruit",
+    "hardtack",
+    "healing_flask",
+    "healing_large",
+    "healing_ornate",
+    "healing_vial",
+    "jerky",
+    "mana_flask",
+    "mana_large",
+    "mana_ornate",
+    "mana_vial",
+    "minimap_ring",
+    "nuts",
+    "panel",
+    "panel_wide",
+    "slot",
+    "speed_flask",
+    "speed_large",
+    "speed_ornate",
+    "speed_vial",
+    "steak",
+    "sweet_roll",
+    "travel_cake",
+    "w_crossbow",
+    "w_daggers",
+    "w_dark_fire",
+    "w_fire",
+    "w_sword",
+    "w_sword_shield"
+   ],
+   "fonts": {
+    "title": "FF_RDM4_Cinzel_700",
+    "text": "FF_RDM4_Alegreya_500",
+    "label": "FF_RDM4_AlegreyaSC_700"
+   },
+   "cards": [
+    {
+     "hero": "Warrior",
+     "drawn": [
+      "arrow",
+      "bar_health",
+      "bar_mana",
+      "button",
+      "divider",
+      "fill_health",
+      "fill_mana",
+      "font_label",
+      "font_text",
+      "font_title",
+      "panel",
+      "slot",
+      "w_sword_shield"
+     ],
+     "weapon_icons": [
+      "w_sword_shield"
+     ],
+     "missing": []
+    },
+    {
+     "hero": "Mage",
+     "drawn": [
+      "arrow",
+      "bar_health",
+      "bar_mana",
+      "button",
+      "divider",
+      "fill_health",
+      "fill_mana",
+      "font_label",
+      "font_text",
+      "font_title",
+      "panel",
+      "slot",
+      "w_dark_fire",
+      "w_fire"
+     ],
+     "weapon_icons": [
+      "w_dark_fire",
+      "w_fire"
+     ],
+     "missing": []
+    },
+    {
+     "hero": "Warlock",
+     "drawn": [
+      "arrow",
+      "bar_health",
+      "bar_mana",
+      "button",
+      "divider",
+      "fill_health",
+      "fill_mana",
+      "font_label",
+      "font_text",
+      "font_title",
+      "panel",
+      "slot",
+      "w_dark_fire",
+      "w_sword"
+     ],
+     "weapon_icons": [
+      "w_dark_fire",
+      "w_sword"
+     ],
+     "missing": []
+    },
+    {
+     "hero": "Rogue",
+     "drawn": [
+      "arrow",
+      "bar_health",
+      "bar_mana",
+      "button",
+      "divider",
+      "fill_health",
+      "fill_mana",
+      "font_label",
+      "font_text",
+      "font_title",
+      "panel",
+      "slot",
+      "w_crossbow",
+      "w_daggers"
+     ],
+     "weapon_icons": [
+      "w_crossbow",
+      "w_daggers"
+     ],
+     "missing": []
+    }
+   ]
+  },
+  {
+   "step": "select",
+   "ok": true,
+   "heroes": [
+    "Warrior",
+    "Mage",
+    "Warlock",
+    "Rogue"
+   ],
+   "first": "Warrior",
+   "first_seen": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "weapons_on_figures": [
+    2,
+    0,
+    1,
+    3
+   ],
+   "turn": {
+    "rate": 28.0,
+    "want": 28.0,
+    "figure_yaw_moved": 56.4,
+    "with_turntable": true
+   },
+   "keys": [
+    {
+     "key": "D",
+     "index": 1,
+     "want": 1,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "Right",
+     "index": 2,
+     "want": 2,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "A",
+     "index": 1,
+     "want": 1,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "Left",
+     "index": 0,
+     "want": 0,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "Left",
+     "index": 3,
+     "want": 3,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "Gamepad_DPad_Right",
+     "index": 0,
+     "want": 0,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "D",
+     "index": 1,
+     "want": 1,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "D",
+     "index": 2,
+     "want": 2,
+     "only_that_one_seen": true
+    },
+    {
+     "key": "D",
+     "index": 3,
+     "want": 3,
+     "only_that_one_seen": true
+    }
+   ],
+   "picked": "Rogue",
+   "opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level4?Hero=Rogue",
+   "dungeon_hero": "Rogue",
+   "pawn": "BP_RDM3_RogueCharacter_C",
+   "want_pawn": "BP_RDM3_RogueCharacter_C"
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "opened": true,
+   "drawn": [
+    "banner",
+    "bar_health",
+    "compass",
+    "divider",
+    "fill_health",
+    "font_label",
+    "font_text",
+    "font_title",
+    "panel_wide",
+    "slot",
+    "w_crossbow",
+    "w_daggers"
+   ],
+   "room_labels": [
+    "Great hall"
+   ],
+   "scroll": {
+    "view_at_open_from_her_cm": 0,
+    "east_cm": 2001,
+    "north_cm": 2093,
+    "want_cm": 2000,
+    "sideways_cm": 0,
+    "her_arrow_west_px": 215,
+    "she_moved_cm": 0,
+    "after_c_from_her_cm": 0
+   },
+   "missing": [],
+   "walked_cm": 323,
+   "closed": true,
+   "after": [
+    "bar_health",
+    "fill_health",
+    "font_label",
+    "font_text",
+    "font_title",
+    "minimap_ring",
+    "panel_wide",
+    "slot",
+    "w_crossbow",
+    "w_daggers"
+   ]
+  }
+ ],
+ "shots": [
+  "rdm4_r4m_menu_Warrior.png",
+  "rdm4_r4m_menu_Mage.png",
+  "rdm4_r4m_menu_Warlock.png",
+  "rdm4_r4m_menu_Rogue.png",
+  "rdm4_r4m_map.png",
+  "rdm4_r4m_map_scrolled.png",
+  "rdm4_r4m_map_walked.png"
+ ],
+ "error": null
+}

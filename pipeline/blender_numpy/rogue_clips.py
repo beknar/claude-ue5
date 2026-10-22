@@ -279,9 +279,11 @@ def solve_arm(arm_obj, ctx, side, op):
         for al in range(-90, 91, 15): cands.append((Uw, Quaternion(Uw, math.radians(al)) @ op[2].normalized(), 0.002 * al * al))
     else:
         _, at, pole, want, exact = op
-        if at[0] == "crossbow":                                   # (cm along the crossbow in the right hand: forward, up, to her left)
+        if at[0] in ("crossbow", "palm_on"):                      # (cm along the crossbow in the right hand: forward, up, to her left)
             R_ = ctx["arms"]["r"]; qr = P["hand_r"].matrix.to_quaternion(); fw, uw = qr @ R_["local"]["front"], qr @ R_["local"]["up"]
             goal = P["hand_r"].head + qr @ R_["palm_pt"] + (fw * at[1] + uw * at[2] + uw.cross(fw) * at[3]) * ctx["cm"]
+            # ('palm_on': that place is for the palm, not the wrist: a second hand on a two-handed hilt, weapon5_clips.py)
+            if at[0] == "palm_on" and exact: goal = goal - exact_hand(A, exact["front"], exact["up"]) @ A["palm_pt"]
         else:
             goal = P["neck_01"].head + (C.OUT["r"] * at[0] + F * at[1] + U * at[2]) * ctx["cm"]
         a, b = A["a"], A["b"]; d = goal - S; dist = min(d.length, (a + b) * 0.999); dn = d.normalized()

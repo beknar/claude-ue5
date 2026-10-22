@@ -1,0 +1,393 @@
+{
+ "tag": "w5",
+ "plan": [
+  "tiers",
+  "loot",
+  "damage",
+  "ui"
+ ],
+ "level": "random_dungeonmagic_level5",
+ "steps": [
+  {
+   "step": "tiers",
+   "ok": false,
+   "max_tier": 5,
+   "open_at_start": 2,
+   "tiers_of": [
+    1,
+    2,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "sizes": [
+    1,
+    8,
+    16,
+    24,
+    32
+   ],
+   "allowed_at_start": [
+    true,
+    true,
+    false,
+    false,
+    false
+   ],
+   "set_before": {
+    "tier": 2,
+    "rooms": 43,
+    "explored": 0,
+    "chests": 107,
+    "looted": 0,
+    "monsters": 13,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_rooms": {
+    "tier": 2,
+    "rooms": 43,
+    "explored": 43,
+    "chests": 107,
+    "looted": 0,
+    "monsters": 13,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_chests": {
+    "tier": 2,
+    "rooms": 43,
+    "explored": 43,
+    "chests": 107,
+    "looted": 107,
+    "monsters": 13,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_kills": {
+    "tier": 2,
+    "rooms": 43,
+    "explored": 43,
+    "chests": 107,
+    "looted": 107,
+    "monsters": 13,
+    "killed": 13,
+    "cleared": true
+   },
+   "monsters_killed": 13,
+   "notice": "SET CLEARED  -  TIER 2: 1 / 8",
+   "tier2_cleared": 1,
+   "seals_of_set": {
+    "grating": 3,
+    "wall": 0,
+    "into": [
+     "3"
+    ]
+   },
+   "tier3_generated": false,
+   "seal_prompt": "Sealed: clear every set of rooms of tier 2 to open tier 3  (1 / 8 cleared)",
+   "seal_blocks_a_body": {
+    "hit": true,
+    "at_cm_from_border": -76.0
+   },
+   "walked_past_the_border_cm": -78.1,
+   "regenerated": {
+    "monsters": 0,
+    "progress": {
+     "tier": 2,
+     "rooms": 43,
+     "explored": 43,
+     "chests": 107,
+     "looted": 107,
+     "monsters": 13,
+     "killed": 13,
+     "cleared": true
+    }
+   },
+   "after_tier2": {
+    "cleared": 8,
+    "open": 3,
+    "notice": "TIER 3 IS OPEN",
+    "tier3_allowed": true
+   },
+   "seals_of_set_after": 0,
+   "tier3_generated_when_near": true,
+   "after_tier3": {
+    "cleared": 15,
+    "open": 3,
+    "notice": "SET CLEARED  -  TIER 3: 15 / 16",
+    "not_cleared": [
+     {
+      "set": [
+       2,
+       0
+      ],
+      "generated": true,
+      "progress": null
+     }
+    ]
+   },
+   "after_tier4": {
+    "cleared": 24,
+    "open": 3,
+    "notice": "TIER 4 CLEARED",
+    "not_cleared": []
+   },
+   "tier5_section": {
+    "walls": 3,
+    "gratings": 9,
+    "walls_lead_to_tier": [
+     6
+    ],
+    "tier6_allowed": false,
+    "seal_kind_east": 2
+   }
+  },
+  {
+   "step": "loot",
+   "ok": true,
+   "containers": 1015,
+   "great_hall": [
+    232,
+    233,
+    234,
+    235
+   ],
+   "hall_lists": {
+    "232": [
+     "Plate Armour",
+     "Orc Veteran’s Armour",
+     "Medium Healing Potion",
+     "Leaf-Blade Knife"
+    ],
+    "233": [
+     "Bear Warrior’s Armour",
+     "Arming Sword",
+     "Fish"
+    ],
+    "234": [
+     "Tiefling’s Armour",
+     "Medium Mana Potion",
+     "Fruit",
+     "Small Healing Potion",
+     "Medium Mana Potion"
+    ],
+    "235": [
+     "Demonic Armour",
+     "Wondrous Mana Potion",
+     "Small Healing Potion",
+     "Medium Mana Potion",
+     "Bread",
+     "Wondrous Healing Potion"
+    ]
+   },
+   "armour_elsewhere": [],
+   "start_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "more": 6000,
+   "counts": {
+    "1": 1001,
+    "2": 1059,
+    "3": 991,
+    "4": 975,
+    "5": 978,
+    "6": 996
+   },
+   "worst_sd": 2.04,
+   "armour_in_more": 0,
+   "by_f": {
+    "container": 232,
+    "found": 4,
+    "list": [
+     "Plate Armour",
+     "Orc Veteran’s Armour",
+     "Medium Healing Potion",
+     "Leaf-Blade Knife"
+    ],
+    "found_list": [
+     "Plate Armour",
+     "Orc Veteran’s Armour",
+     "Medium Healing Potion",
+     "Leaf-Blade Knife"
+    ]
+   },
+   "wrong": [],
+   "wrong_count": 0,
+   "items_kinds": 48,
+   "carried_matches": true,
+   "opened_again_gave": 0,
+   "generated_containers": 808,
+   "generated_armour": 0
+  },
+  {
+   "step": "damage",
+   "ok": true,
+   "blows": [
+    {
+     "set": null,
+     "armour": 0.0,
+     "hits": 1,
+     "blow": 12.0,
+     "reached_her": 12.0,
+     "hp_fell": 12.0,
+     "monster": "RDMonster_21",
+     "ok": true
+    },
+    {
+     "set": "Plate Armour",
+     "armour": 0.4,
+     "hits": 2,
+     "blow": 9.0,
+     "reached_her": 5.4,
+     "hp_fell": 10.8,
+     "monster": "RDMonster_671",
+     "ok": true
+    },
+    {
+     "set": "Bear Warrior’s Armour",
+     "armour": 0.3,
+     "hits": 2,
+     "blow": 9.0,
+     "reached_her": 6.3,
+     "hp_fell": 12.6,
+     "monster": "RDMonster_671",
+     "ok": true
+    },
+    {
+     "set": "Tiefling’s Armour",
+     "armour": 0.15,
+     "hits": 1,
+     "blow": 12.0,
+     "reached_her": 10.2,
+     "hp_fell": 10.2,
+     "monster": "RDMonster_13",
+     "ok": true
+    },
+    {
+     "set": "Demonic Armour",
+     "armour": 0.25,
+     "hits": 1,
+     "blow": 12.0,
+     "reached_her": 9.0,
+     "hp_fell": 9.0,
+     "monster": "RDMonster_13",
+     "ok": true
+    },
+    {
+     "set": "Orc Veteran’s Armour",
+     "armour": 0.3,
+     "hits": 1,
+     "blow": 9.0,
+     "reached_her": 6.3,
+     "hp_fell": 6.3,
+     "monster": "RDMonster_657",
+     "ok": true
+    }
+   ]
+  },
+  {
+   "step": "ui",
+   "ok": true,
+   "armour_icons": [
+    "armour_PlateArmour",
+    "armour_BearArmour",
+    "armour_TieflingArmour",
+    "armour_DemonicArmour",
+    "armour_OrcArmour"
+   ],
+   "icons_imported": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "found_container": 235,
+   "found_items": 6,
+   "found_first": "Demonic Armour",
+   "found_drawn": [
+    "armour_DemonicArmour",
+    "banner",
+    "bar_health",
+    "bar_mana",
+    "fill_health",
+    "fill_mana",
+    "font_label",
+    "font_text",
+    "font_title",
+    "minimap_ring",
+    "panel_wide",
+    "slot",
+    "w_dark_fire",
+    "w_fire"
+   ],
+   "plaque_gone": true,
+   "lines": 69,
+   "top_drawn": [
+    "bar_health",
+    "bar_mana",
+    "bread",
+    "button",
+    "divider",
+    "fill_health",
+    "fill_mana",
+    "font_label",
+    "font_text",
+    "font_title",
+    "healing_flask",
+    "healing_large",
+    "healing_ornate",
+    "healing_vial",
+    "mana_flask",
+    "mana_large",
+    "mana_ornate",
+    "mana_vial",
+    "minimap_ring",
+    "panel_wide",
+    "slot",
+    "w_dark_fire",
+    "w_fire"
+   ],
+   "bottom_drawn": [
+    "armour_BearArmour",
+    "armour_DemonicArmour",
+    "armour_OrcArmour",
+    "armour_PlateArmour",
+    "armour_TieflingArmour",
+    "bar_health",
+    "bar_mana",
+    "button",
+    "divider",
+    "fill_health",
+    "fill_mana",
+    "font_label",
+    "font_text",
+    "font_title",
+    "hardtack",
+    "minimap_ring",
+    "panel_wide",
+    "slot",
+    "steak",
+    "sweet_roll",
+    "travel_cake",
+    "w_dark_fire",
+    "w_fire"
+   ]
+  }
+ ],
+ "shots": [
+  "rdm5_w5_tier_seal.png",
+  "rdm5_w5_found.png",
+  "rdm5_w5_inventory_top.png",
+  "rdm5_w5_inventory_bottom.png"
+ ],
+ "error": null
+}

@@ -194,6 +194,9 @@ void ARDDungeonGenerator::BuildStartSection()
 bool ARDDungeonGenerator::GenerateSectionNow(FIntPoint S)
 {
 	if (IsSectionGenerated(S)) return false;
+	// (one being built over frames is finished first: SpawnSection takes Building over, and the other one was left half
+	// built for good, never recorded, its set never cleared)
+	if (Building) { while (!Building->ContinueGenerate(1e9)) {} Building = nullptr; }
 	ARDSection* Sec = SpawnSection(S, false, true);
 	if (Sec && Building == Sec) { while (!Sec->ContinueGenerate(1e9)) {} Building = nullptr; }
 	return Sec != nullptr;
@@ -201,7 +204,144 @@ bool ARDDungeonGenerator::GenerateSectionNow(FIntPoint S)
 
 void ARDDungeonGenerator::Enqueue(FIntPoint S)
 {
-	if (!IsSectionGenerated(S) && !Queue.Contains(S)) Queue.Add(S);
+	if (!IsSectionGenerated(S) && !Queue.Contains(S) && IsSectionAllowed(S)) Queue.Add(S);
+}
+
+// ------------------------------------------------------------------------------------------------ tiers (level 5)
+bool ARDDungeonGenerator::IsTierOpen(int32 Tier) const
+{
+	if (MaxTier <= 0) return true;
+	if (Tier > MaxTier) return false;
+	// (every tier before it open and the one just before cleared: tiers open in order)
+	return Tier <= 2 || (GetTierCleared(Tier - 1) >= TierSize(Tier - 1) && IsTierOpen(Tier - 1));
+}
+
+bool ARDDungeonGenerator::IsSectionAllowed(FIntPoint S) const
+{
+	return MaxTier <= 0 || IsTierOpen(TierOf(S));
+}
+
+int32 ARDDungeonGenerator::GetTierCleared(int32 Tier) const
+{
+	int32 Num = 0;
+	for (const auto& KV : Progress) if (KV.Value.bCleared && TierOf(KV.Key) == Tier) ++Num;
+	return Num;
+}
+
+int32 ARDDungeonGenerator::GetOpenTiers() const
+{
+	if (MaxTier <= 0) return 0;
+	int32 T = 1;
+	while (T < MaxTier && IsTierOpen(T + 1)) ++T;
+	return T;
+}
+
+bool ARDDungeonGenerator::GetSectionProgress(FIntPoint S, FRDSectionProgress& Out) const
+{
+	const FRDSectionProgress* P = Progress.Find(S);
+	if (!P) return false;
+	Out = *P;
+	return true;
+}
+
+int32 ARDDungeonGenerator::GetSealKind(FIntPoint S, FIntPoint Next) const
+{
+	if (MaxTier <= 0 || IsSectionAllowed(Next)) return 0;
+	return TierOf(Next) > MaxTier ? 2 : 1;
+}
+
+bool ARDDungeonGenerator::IsMonsterKilled(FIntPoint S, int32 Index) const
+{
+	const FRDSectionProgress* P = Progress.Find(S);
+	return P && P->Killed.Contains(Index);
+}
+
+void ARDDungeonGenerator::RecordSection(ARDSection* S)
+{
+	if (!S || MaxTier <= 0) return;
+	FRDSectionProgress& P = Progress.FindOrAdd(S->Coord);
+	if (P.Rooms == 0 && P.Chests.Num() == 0 && P.Monsters == 0)
+	{
+		// (the first time it is generated: what there is to do in it; a section generated again has the same)
+		P.Coord = S->Coord; P.Tier = TierOf(S->Coord);
+		if (const FRDSectionMap* M = MapData.Find(S->Coord)) for (const FRDMapRect& R : M->Rects) if (!R.bCorridor) ++P.Rooms;
+		P.Chests = S->GetChestKeys();
+		P.Monsters = S->MonstersPlanned;
+		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDTIER section (%d,%d) tier %d: %d rooms, %d chests and trunks, %d monsters"), S->Coord.X, S->Coord.Y, P.Tier, P.Rooms, P.Chests.Num(), P.Monsters);
+	}
+	UpdateProgress(S->Coord);
+}
+
+void ARDDungeonGenerator::UpdateProgress(FIntPoint S)
+{
+	FRDSectionProgress* P = Progress.Find(S);
+	if (!P || MaxTier <= 0) return;
+	P->RoomsExplored = 0;
+	if (const FRDSectionMap* M = MapData.Find(S)) for (const FRDMapRect& R : M->Rects) if (!R.bCorridor && R.bDiscovered) ++P->RoomsExplored;
+	P->ChestsLooted = 0;
+	for (const int32 K : P->Chests) if (IsContainerLooted(S, K)) ++P->ChestsLooted;
+	if (P->bCleared) return;
+	if (P->RoomsExplored < P->Rooms || P->ChestsLooted < P->Chests.Num() || P->Killed.Num() < P->Monsters) return;
+	P->bCleared = true;
+	const int32 T = P->Tier, Done = GetTierCleared(T), All = TierSize(T);
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	TierNoticeTime = Now;
+	if (Done >= All && T < MaxTier && IsTierOpen(T + 1))
+	{
+		TierNotice = FString::Printf(TEXT("TIER %d IS OPEN"), T + 1);
+		RefreshSeals();
+		if (const AActor* Who = GetTrackedActor()) PlaySoundAt(TEXT("Env.Generate"), Who->GetActorLocation());
+	}
+	else if (Done >= All && T >= MaxTier) TierNotice = FString::Printf(TEXT("TIER %d CLEARED: THE DUNGEON IS YOURS"), T);
+	else if (Done >= All) TierNotice = FString::Printf(TEXT("TIER %d CLEARED"), T);       // (a tier before it is not cleared yet)
+	else TierNotice = FString::Printf(TEXT("SET CLEARED  -  TIER %d: %d / %d"), T, Done, All);
+	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDTIER section (%d,%d) cleared: tier %d %d / %d%s"), S.X, S.Y, T, Done, All, Done >= All ? TEXT(" (tier done)") : TEXT(""));
+}
+
+void ARDDungeonGenerator::RefreshSeals()
+{
+	for (auto& KV : Sections) if (KV.Value && !KV.Value->IsBuilding()) KV.Value->UpdateSeals();
+}
+
+bool ARDDungeonGenerator::DebugClearSection(FIntPoint S, int32 LeaveMonsters, FVector Near)
+{
+	ARDSection* Sec = GetSection(S);
+	FRDSectionProgress* P = Progress.Find(S);
+	if (!Sec || !P || Sec->IsBuilding()) return false;        // (still being built: nothing recorded yet)
+	if (FRDSectionMap* M = MapData.Find(S)) for (FRDMapRect& R : M->Rects) R.bDiscovered = true;
+	for (const int32 K : P->Chests) LootedContainers.Add(FIntVector(S.X, S.Y, K));
+	// (the ones left alive: the nearest to Near)
+	TArray<ARDMonster*> Live;
+	for (ARDMonster* Mo : Sec->SpawnedMonsters) if (Mo && !Mo->IsDead()) Live.Add(Mo);
+	Live.Sort([Near](const ARDMonster& A, const ARDMonster& B) { return FVector::DistSquared(A.GetActorLocation(), Near) < FVector::DistSquared(B.GetActorLocation(), Near); });
+	TSet<int32> Keep;
+	for (int32 I = 0; I < Live.Num() && I < LeaveMonsters; ++I) Keep.Add(Live[I]->SpawnIndex);
+	for (int32 I = 0; I < P->Monsters; ++I) if (!Keep.Contains(I)) P->Killed.AddUnique(I);
+	for (ARDMonster* Mo : Live) if (!Keep.Contains(Mo->SpawnIndex)) Mo->Destroy();
+	Sec->SpawnedMonsters.RemoveAll([](const TObjectPtr<ARDMonster>& M) { return !IsValid(M); });
+	UpdateProgress(S);
+	return P->bCleared;
+}
+
+FString ARDDungeonGenerator::DescribeSealNear(FVector From, float MaxDistance) const
+{
+	if (MaxTier <= 0) return FString();
+	const FIntPoint Here = WorldToSection(From);
+	for (int32 Dx = -1; Dx <= 1; ++Dx)
+		for (int32 Dy = -1; Dy <= 1; ++Dy)
+			if (const ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy)))
+			{
+				TArray<int32> Kinds;
+				const TArray<FVector> At = S->GetSealPoints(Kinds);
+				for (int32 I = 0; I < At.Num(); ++I)
+				{
+					if (FVector::Dist2D(At[I], From) > MaxDistance) continue;
+					if (Kinds[I] == 2) return TEXT("The dungeon ends here");
+					const int32 T = TierOf(S->Coord) + 1;
+					return FString::Printf(TEXT("Sealed: clear every set of rooms of tier %d to open tier %d  (%d / %d cleared)"), T - 1, T, GetTierCleared(T - 1), TierSize(T - 1));
+				}
+			}
+	return FString();
 }
 
 int32 ARDDungeonGenerator::GetNumMonsters() const { return GetMonsters().Num(); }
@@ -305,10 +445,13 @@ TArray<int32> ARDDungeonGenerator::GetStartRoomContainers() const
 TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) const
 {
 	TArray<FName> Out;
-	if (!bStartLoot || !IsStartSection(Section) || Items.Num() == 0) return Out;
+	if (!bStartLoot || Items.Num() == 0 || (!IsStartSection(Section) && !bLootAllSections)) return Out;
 	const int32 Max = FMath::Max(MaxItemsPerContainer, 1);
+	// (level 5: an item may be found only in some tiers of rooms; level 4's items have no tiers: everywhere)
+	const int32 Tier = TierOf(Section);
+	auto InTier = [Tier](const FRDItemDef& It) { return It.Tiers.Num() == 0 || It.Tiers.Contains(Tier); };
 	// what is put in the start room's containers: one to each in turn
-	if (StartRoomItems.Num() > 0)
+	if (StartRoomItems.Num() > 0 && IsStartSection(Section))
 	{
 		const TArray<int32> Room = GetStartRoomContainers();
 		const int32 K = Room.Find(Index);
@@ -317,7 +460,7 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 				if (FindItem(StartRoomItems[J]) >= 0) Out.Add(StartRoomItems[J]);
 	}
 	float Sum = 0.f;
-	for (const FRDItemDef& It : Items) Sum += FMath::Max(It.Weight, 0.f);
+	for (const FRDItemDef& It : Items) if (InTier(It)) Sum += FMath::Max(It.Weight, 0.f);
 	if (Sum <= 0.f) return Out;
 	// (a stream of its own for each container: what it holds does not depend on the order she opens them in, and the
 	// play's streams are not drawn from; the first pick is the one level 4 had)
@@ -325,8 +468,14 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 	auto Pick = [&]() -> FName
 	{
 		float U = R.FRand() * Sum;
-		for (const FRDItemDef& It : Items) { U -= FMath::Max(It.Weight, 0.f); if (U < 0.f) return It.Name; }
-		return Items.Last().Name;
+		FName Last = NAME_None;
+		for (const FRDItemDef& It : Items)
+		{
+			if (!InTier(It) || It.Weight <= 0.f) continue;
+			Last = It.Name; U -= It.Weight;
+			if (U < 0.f) return It.Name;
+		}
+		return Last;
 	};
 	const FName First = Pick();
 	const int32 N = Max > 1 ? R.RandRange(1, Max) : 1;
@@ -388,6 +537,9 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 {
 	++MonstersKilled;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
+	// (the tiers: it stays dead, also when its section is generated again)
+	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
+		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord)) { P->Killed.AddUnique(Monster->SpawnIndex); UpdateProgress(Monster->Section->Coord); }
 }
 
 void ARDDungeonGenerator::AddHitText(const FVector& At, float Amount, bool bOnPlayer)
@@ -412,10 +564,14 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	StopMusic();
 	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; MapPan = FVector2D::ZeroVector; LastRevealTime = -100.f;
 	LootedContainers.Reset();
+	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tiers 1 and 2 open)
 	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
+	// (the weapons she found are gone: hers are the hero's again)
+	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) Weapons = H->Weapons;
 	for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (PlayerCombat)
 	{
+		PlayerCombat->ResetWeapons();
 		PlayerCombat->ClearItems();                // (nothing found yet, no armour on)
 		PlayerCombat->Revive(true);
 		PlayerCombat->Kills = PlayerCombat->AttacksMade = PlayerCombat->HitsLanded = PlayerCombat->HitsTaken = PlayerCombat->Deaths = 0;
@@ -481,13 +637,15 @@ void ARDDungeonGenerator::UpdateDiscovery(const FVector& L)
 	const FIntPoint S = WorldToSection(L);
 	FRDSectionMap* M = MapData.Find(S);
 	if (!M) return;
+	bool bRoom = false;
 	for (FRDMapRect& R : M->Rects)
 	{
 		if (R.bDiscovered) continue;
 		// rooms: once she is inside (or in their doorway); hallways: within 4 tiles of her along them
 		const int32 Pad = R.bCorridor ? 4 : 0;
-		if (T.X >= R.Min.X - Pad && T.Y >= R.Min.Y - Pad && T.X < R.Max.X + Pad && T.Y < R.Max.Y + Pad) R.bDiscovered = true;
+		if (T.X >= R.Min.X - Pad && T.Y >= R.Min.Y - Pad && T.X < R.Max.X + Pad && T.Y < R.Max.Y + Pad) { R.bDiscovered = true; bRoom |= !R.bCorridor; }
 	}
+	if (bRoom) UpdateProgress(S);       // (a room explored: the tiers count it)
 }
 
 void ARDDungeonGenerator::BeginPlay()

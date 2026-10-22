@@ -1,0 +1,141 @@
+{
+ "tag": "w6",
+ "plan": [
+  "tiers"
+ ],
+ "level": "random_dungeonmagic_level5",
+ "steps": [
+  {
+   "step": "tiers",
+   "ok": true,
+   "max_tier": 5,
+   "open_at_start": 2,
+   "tiers_of": [
+    1,
+    2,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "sizes": [
+    1,
+    8,
+    16,
+    24,
+    32
+   ],
+   "allowed_at_start": [
+    true,
+    true,
+    false,
+    false,
+    false
+   ],
+   "set_before": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 0,
+    "chests": 160,
+    "looted": 0,
+    "monsters": 12,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_rooms": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 40,
+    "chests": 160,
+    "looted": 0,
+    "monsters": 12,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_chests": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 40,
+    "chests": 160,
+    "looted": 160,
+    "monsters": 12,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_kills": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 40,
+    "chests": 160,
+    "looted": 160,
+    "monsters": 12,
+    "killed": 12,
+    "cleared": true
+   },
+   "monsters_killed": 12,
+   "notice": "SET CLEARED  -  TIER 2: 1 / 8",
+   "tier2_cleared": 1,
+   "seals_of_set": {
+    "grating": 3,
+    "wall": 0,
+    "into": [
+     "3"
+    ]
+   },
+   "tier3_generated": false,
+   "seal_prompt": "Sealed: clear every set of rooms of tier 2 to open tier 3  (1 / 8 cleared)",
+   "seal_blocks_a_body": {
+    "hit": true,
+    "at_cm_from_border": -76.0
+   },
+   "walked_past_the_border_cm": -78.1,
+   "regenerated": {
+    "monsters": 0,
+    "progress": {
+     "tier": 2,
+     "rooms": 40,
+     "explored": 40,
+     "chests": 160,
+     "looted": 160,
+     "monsters": 12,
+     "killed": 12,
+     "cleared": true
+    }
+   },
+   "after_tier2": {
+    "cleared": 8,
+    "open": 3,
+    "notice": "TIER 3 IS OPEN",
+    "tier3_allowed": true
+   },
+   "seals_of_set_after": 0,
+   "tier3_generated_when_near": true,
+   "after_tier3": {
+    "cleared": 16,
+    "open": 4,
+    "notice": "TIER 4 IS OPEN",
+    "not_cleared": []
+   },
+   "after_tier4": {
+    "cleared": 24,
+    "open": 5,
+    "notice": "TIER 5 IS OPEN",
+    "not_cleared": []
+   },
+   "tier5_section": {
+    "walls": 3,
+    "gratings": 0,
+    "walls_lead_to_tier": [
+     6
+    ],
+    "tier6_allowed": false,
+    "seal_kind_east": 2
+   }
+  }
+ ],
+ "shots": [
+  "rdm5_w6_tier_seal.png"
+ ],
+ "error": null
+}

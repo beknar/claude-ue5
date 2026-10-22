@@ -188,11 +188,55 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") TArray<FName> LastFoundList;
 	/** the containers looted this run (section, container key): a container gives what it holds once, whatever happens to
 	 *  its section afterwards; RestartPlay empties it (a new run) */
-	void MarkContainerLooted(FIntPoint Section, int32 Key) { LootedContainers.Add(FIntVector(Section.X, Section.Y, Key)); }
+	void MarkContainerLooted(FIntPoint Section, int32 Key) { LootedContainers.Add(FIntVector(Section.X, Section.Y, Key)); UpdateProgress(Section); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") bool IsContainerLooted(FIntPoint Section, int32 Key) const { return LootedContainers.Contains(FIntVector(Section.X, Section.Y, Key)); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") int32 GetNumLooted() const { return LootedContainers.Num(); }
 	/** tests: drop a generated section and queue it again (as when she walks far away and comes back) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") bool ReloadSection(FIntPoint Coord);
+	/** random_dungeonmagic_level5: the containers of every section hold items, not only the start section's: each picked by
+	 *  the items' weights among those whose Tiers have the section's tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") bool bLootAllSections = false;
+
+	// ---- random_dungeonmagic_level5: tiers of rooms. A section's tier is its ring round the start section plus one (the
+	// start section 1, the 8 round it 2, the 16 round those 3...). Tier 2 is generated as she walks toward it; tier T > 2
+	// only once every section of tier T - 1 is cleared (every room explored, every chest and trunk looted, every monster
+	// spawned there killed). Nothing beyond MaxTier is generated. A hallway that leads to a section not to be generated is
+	// sealed where it leaves its section: a grating (SealPiece, twice across the hallway) while the tier is shut, a wall
+	// (EndPiece) at the end of the dungeon, both with a blocker as tall as the hallway.
+	/** the last tier (0: no tiers, the dungeon goes on for ever) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 MaxTier = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName SealPiece = TEXT("CellFrame");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName EndPiece = TEXT("Wall_Corr");
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierOf(FIntPoint Section) const { return FMath::Max(FMath::Abs(Section.X), FMath::Abs(Section.Y)) + 1; }
+	/** sections in a tier: 1, 8, 16, 24... */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierSize(int32 Tier) const { return Tier <= 1 ? 1 : 8 * (Tier - 1); }
+	/** its sections may be generated (tiers 1 and 2 always; another once the tier before it is cleared; none past MaxTier) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool IsTierOpen(int32 Tier) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool IsSectionAllowed(FIntPoint Section) const;
+	/** sections of a tier cleared */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 GetTierCleared(int32 Tier) const;
+	/** the highest tier open now */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 GetOpenTiers() const;
+	/** what she did in a section (false: it was never generated) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool GetSectionProgress(FIntPoint Section, FRDSectionProgress& Out) const;
+	/** tests and the reel: a generated section as if cleared (its rooms explored, its chests and trunks looted, its
+	 *  monsters killed), but for the LeaveMonsters monsters nearest to Near (left alive: the section is not cleared then) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Tiers") bool DebugClearSection(FIntPoint Section, int32 LeaveMonsters = 0, FVector Near = FVector::ZeroVector);
+	/** a hallway end of Section toward its neighbour Next is sealed (0: open, 1: a shut tier, 2: the end of the dungeon) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 GetSealKind(FIntPoint Section, FIntPoint Next) const;
+	/** what a seal near her says ("" none near) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") FString DescribeSealNear(FVector From, float MaxDistance = 450.f) const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tiers") TMap<FIntPoint, FRDSectionProgress> Progress;
+	/** a section was generated (or activated): its rooms, chests and trunks, monsters are recorded the first time */
+	void RecordSection(ARDSection* S);
+	bool IsMonsterKilled(FIntPoint Section, int32 SpawnIndex) const;
+	/** counts what she did in a section again, and announces a set cleared or a tier opened */
+	void UpdateProgress(FIntPoint Section);
+	/** "SET CLEARED" / "TIER 3 IS OPEN" (HUD) and when */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Tiers") FString TierNotice;
+	float TierNoticeTime = -100.f;
+	/** seals on every generated section as the tiers are now */
+	void RefreshSeals();
 
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
@@ -306,6 +350,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TMap<FIntPoint, TObjectPtr<ARDSection>> Sections;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TMap<FIntPoint, FRDSectionMap> MapData;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 SessionSeed = 0;
+	/** tests and the reels: the session seed alone (what the containers hold follows it; nothing is rebuilt: RestartPlay
+	 *  for that). A reel looks for a seed whose containers hold what it wants to show. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetSessionSeed(int32 Seed) { SessionSeed = Seed; }
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 SectionsGenerated = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 SectionsRemoved = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") bool bMapOpen = false;

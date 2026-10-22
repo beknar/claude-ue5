@@ -1,0 +1,17 @@
+{
+ "clips": {
+  "Idle": 369,
+  "Run": 31,
+  "Walk": 57,
+  "W5_TwoHand1": 32,
+  "W5_TwoHand2": 33,
+  "W5_TwoHand3": 31,
+  "W5_Bow": 29,
+  "W5_Shoot": 24
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic5\\w5_clips\\DarkCaster\\T_DarkCaster_Color.png"
+ },
+ "height_cm": 170.0,
+ "hair": null
+}

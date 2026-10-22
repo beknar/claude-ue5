@@ -1,0 +1,1301 @@
+{
+ "_note": "854's measurements: each weapon's frame in its own mesh space (cm): origin where the hand closes on it (a crossbow: the right hand), x the blade's / bow's limbs' / crossbow's front way, y the edge's / the arrow's way / the crossbow's left, z square to them (a crossbow: up, its rail); a crossbow's muzzle and ready bolt's tip",
+ "weapons": {
+  "template_sword": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_1",
+   "verts": 10328,
+   "kind": "blade",
+   "origin": [
+    -0.046,
+    0.0,
+    63.677
+   ],
+   "x": [
+    0.001,
+    0.0,
+    -1.0
+   ],
+   "y": [
+    -1.0,
+    -0.0,
+    -0.001
+   ],
+   "z": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "length": 88.238,
+   "handle": 28.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 60.238,
+   "blade_width": 18.119,
+   "single_edged": false,
+   "edge_thickness": [
+    0.8,
+    0.69
+   ],
+   "ends": [
+    2.5,
+    3.0,
+    0.21,
+    0.44
+   ],
+   "handle_size": 2.75
+  },
+  "template_dagger": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Dagger",
+   "verts": 2755,
+   "kind": "blade",
+   "origin": [
+    -0.004,
+    -0.0,
+    27.054
+   ],
+   "x": [
+    0.001,
+    0.0,
+    -1.0
+   ],
+   "y": [
+    -1.0,
+    0.0,
+    -0.001
+   ],
+   "z": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "length": 34.373,
+   "handle": 11.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 23.373,
+   "blade_width": 6.354,
+   "single_edged": false,
+   "edge_thickness": [
+    0.24,
+    0.23
+   ],
+   "ends": [
+    1.4,
+    1.2,
+    0.15,
+    0.97
+   ],
+   "handle_size": 1.22
+  },
+  "template_crossbow": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Crossbow",
+   "verts": 8522,
+   "kind": "crossbow",
+   "origin": [
+    31.0,
+    -0.0,
+    0.5
+   ],
+   "x": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "y": [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   "z": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "length": 89.299,
+   "muzzle": [
+    -32.0,
+    0.0,
+    5.6
+   ],
+   "loaded_tip": [
+    -30.0,
+    0.0,
+    5.6
+   ]
+  },
+  "VikingShortsword": {
+   "mesh": "/Game/Vikings/Mesh_Weapon/SM_Viking_Knife_01",
+   "verts": 3352,
+   "kind": "blade",
+   "origin": [
+    0.008,
+    0.001,
+    16.495
+   ],
+   "x": [
+    -0.001,
+    -0.001,
+    1.0
+   ],
+   "y": [
+    1.0,
+    -0.002,
+    0.001
+   ],
+   "z": [
+    0.002,
+    1.0,
+    0.001
+   ],
+   "length": 65.847,
+   "handle": 20.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 45.847,
+   "blade_width": 10.866,
+   "single_edged": false,
+   "edge_thickness": [
+    0.32,
+    0.32
+   ],
+   "ends": [
+    2.5,
+    0.7,
+    0.99,
+    0.26
+   ],
+   "handle_size": 2.15
+  },
+  "SherwoodSword": {
+   "mesh": "/Game/Hive_Sherwood/Mesh/SM_Sword_01",
+   "verts": 250,
+   "kind": "blade",
+   "origin": [
+    0.031,
+    0.182,
+    14.482
+   ],
+   "x": [
+    -0.007,
+    0.001,
+    1.0
+   ],
+   "y": [
+    -1.0,
+    0.004,
+    -0.007
+   ],
+   "z": [
+    -0.004,
+    -1.0,
+    0.001
+   ],
+   "length": 79.204,
+   "handle": 18.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 61.204,
+   "blade_width": 14.049,
+   "single_edged": false,
+   "edge_thickness": [
+    0.49,
+    0.49
+   ],
+   "ends": [
+    5.5,
+    0.0,
+    0.78,
+    0.0
+   ],
+   "handle_size": 3.73
+  },
+  "OrcCleaver": {
+   "mesh": "/Game/Orcs_Pack/Orc_Gira/Mesh/SM_Gira_Sword",
+   "verts": 412,
+   "kind": "blade",
+   "origin": [
+    0.0,
+    -1.778,
+    32.211
+   ],
+   "x": [
+    -0.0,
+    -0.028,
+    1.0
+   ],
+   "y": [
+    -0.005,
+    1.0,
+    0.028
+   ],
+   "z": [
+    -1.0,
+    -0.005,
+    -0.0
+   ],
+   "length": 110.508,
+   "handle": 36.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 74.508,
+   "blade_width": 6.837,
+   "single_edged": true,
+   "edge_thickness": [
+    0.73,
+    1.32
+   ],
+   "ends": [
+    2.8,
+    1.4,
+    0.38,
+    0.68
+   ],
+   "handle_size": 1.77
+  },
+  "ToothedBoneSword": {
+   "mesh": "/Game/Primitive_Characters_Pack/Mesh/Primitive_03/Mesh_Weapons/SM_Primitive_03_Weapon_01",
+   "verts": 1271,
+   "kind": "blade",
+   "origin": [
+    0.18,
+    0.203,
+    20.278
+   ],
+   "x": [
+    -0.001,
+    -0.092,
+    0.996
+   ],
+   "y": [
+    -0.021,
+    -0.996,
+    -0.092
+   ],
+   "z": [
+    1.0,
+    -0.021,
+    -0.001
+   ],
+   "length": 56.712,
+   "handle": 25.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 31.712,
+   "blade_width": 8.151,
+   "single_edged": true,
+   "edge_thickness": [
+    1.91,
+    1.3
+   ],
+   "ends": [
+    4.8,
+    2.5,
+    0.76,
+    0.54
+   ],
+   "handle_size": 2.48
+  },
+  "ArmingSword": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_1",
+   "verts": 10328,
+   "kind": "blade",
+   "origin": [
+    -0.046,
+    0.0,
+    63.677
+   ],
+   "x": [
+    0.001,
+    0.0,
+    -1.0
+   ],
+   "y": [
+    -1.0,
+    -0.0,
+    -0.001
+   ],
+   "z": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "length": 88.238,
+   "handle": 28.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 60.238,
+   "blade_width": 18.119,
+   "single_edged": false,
+   "edge_thickness": [
+    0.8,
+    0.69
+   ],
+   "ends": [
+    2.5,
+    3.0,
+    0.21,
+    0.44
+   ],
+   "handle_size": 2.75
+  },
+  "Longsword": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Sword_3",
+   "verts": 4839,
+   "kind": "blade",
+   "origin": [
+    -0.0,
+    -0.0,
+    79.36
+   ],
+   "x": [
+    -0.001,
+    -0.0,
+    -1.0
+   ],
+   "y": [
+    -1.0,
+    -0.0,
+    0.001
+   ],
+   "z": [
+    -0.0,
+    1.0,
+    -0.0
+   ],
+   "length": 92.688,
+   "handle": 18.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 74.688,
+   "blade_width": 22.31,
+   "single_edged": false,
+   "edge_thickness": [
+    1.1,
+    1.07
+   ],
+   "ends": [
+    0.2,
+    3.0,
+    0.26,
+    0.76
+   ],
+   "handle_size": 1.73
+  },
+  "VikingSword": {
+   "mesh": "/Game/Vikings/Mesh_Weapon/SM_Viking_Sword_01",
+   "verts": 2683,
+   "kind": "blade",
+   "origin": [
+    0.181,
+    0.204,
+    19.266
+   ],
+   "x": [
+    -0.004,
+    0.0,
+    1.0
+   ],
+   "y": [
+    1.0,
+    -0.0,
+    0.004
+   ],
+   "z": [
+    0.0,
+    1.0,
+    -0.0
+   ],
+   "length": 109.421,
+   "handle": 22.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 87.421,
+   "blade_width": 21.731,
+   "single_edged": false,
+   "edge_thickness": [
+    0.4,
+    0.43
+   ],
+   "ends": [
+    4.0,
+    0.4,
+    0.95,
+    0.11
+   ],
+   "handle_size": 2.42
+  },
+  "VeteranSSword": {
+   "mesh": "/Game/Fantasy_Pack/Characters/Warrior/Mesh/SM_Sword",
+   "verts": 497,
+   "kind": "blade",
+   "origin": [
+    0.0,
+    0.02,
+    21.259
+   ],
+   "x": [
+    -0.0,
+    0.001,
+    1.0
+   ],
+   "y": [
+    -0.0,
+    1.0,
+    -0.001
+   ],
+   "z": [
+    -1.0,
+    -0.0,
+    -0.0
+   ],
+   "length": 146.15,
+   "handle": 25.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 121.15,
+   "blade_width": 27.449,
+   "single_edged": false,
+   "edge_thickness": [
+    0.9,
+    0.9
+   ],
+   "ends": [
+    6.9,
+    0.7,
+    0.88,
+    0.22
+   ],
+   "handle_size": 2.77
+  },
+  "TemplarSword": {
+   "mesh": "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Sword",
+   "verts": 6831,
+   "kind": "blade",
+   "origin": [
+    -0.002,
+    0.002,
+    18.795
+   ],
+   "x": [
+    0.0,
+    -0.0,
+    1.0
+   ],
+   "y": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "z": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "length": 108.958,
+   "handle": 22.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 86.958,
+   "blade_width": 22.764,
+   "single_edged": false,
+   "edge_thickness": [
+    0.56,
+    0.56
+   ],
+   "ends": [
+    6.0,
+    3.4,
+    0.76,
+    0.26
+   ],
+   "handle_size": 3.74
+  },
+  "PlateKnightSSword": {
+   "mesh": "/Game/Knights_Pack/Meshes/Knight_03/Weapon/SM_Knight_03_Sword",
+   "verts": 6505,
+   "kind": "blade",
+   "origin": [
+    0.0,
+    -0.013,
+    26.378
+   ],
+   "x": [
+    -0.0,
+    0.002,
+    1.0
+   ],
+   "y": [
+    0.0,
+    1.0,
+    -0.002
+   ],
+   "z": [
+    -1.0,
+    0.0,
+    -0.0
+   ],
+   "length": 141.029,
+   "handle": 31.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 110.029,
+   "blade_width": 25.385,
+   "single_edged": false,
+   "edge_thickness": [
+    0.46,
+    0.47
+   ],
+   "ends": [
+    3.5,
+    1.5,
+    0.98,
+    0.15
+   ],
+   "handle_size": 2.87
+  },
+  "PaladinSSword": {
+   "mesh": "/Game/Knights_Pack/Meshes/Knight_05/Weapon/SM_Knight_05_Sword",
+   "verts": 18544,
+   "kind": "blade",
+   "origin": [
+    -0.0,
+    -0.161,
+    30.387
+   ],
+   "x": [
+    -0.0,
+    -0.003,
+    1.0
+   ],
+   "y": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "z": [
+    -0.0,
+    1.0,
+    0.003
+   ],
+   "length": 158.996,
+   "handle": 34.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 124.996,
+   "blade_width": 24.019,
+   "single_edged": false,
+   "edge_thickness": [
+    0.98,
+    0.98
+   ],
+   "ends": [
+    5.0,
+    0.5,
+    0.79,
+    0.2
+   ],
+   "handle_size": 3.29
+  },
+  "DarkKnightSSword": {
+   "mesh": "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SM_Dark_Knight_02_Sword",
+   "verts": 2274,
+   "kind": "blade",
+   "origin": [
+    0.012,
+    0.132,
+    30.638
+   ],
+   "x": [
+    0.0,
+    -0.001,
+    1.0
+   ],
+   "y": [
+    -1.0,
+    -0.001,
+    0.0
+   ],
+   "z": [
+    0.001,
+    -1.0,
+    -0.001
+   ],
+   "length": 157.691,
+   "handle": 34.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 123.691,
+   "blade_width": 32.122,
+   "single_edged": false,
+   "edge_thickness": [
+    0.97,
+    0.97
+   ],
+   "ends": [
+    4.8,
+    0.1,
+    0.98,
+    0.31
+   ],
+   "handle_size": 2.23
+  },
+  "UrsagSHornBlade": {
+   "mesh": "/Game/RandomDungeon/Magic5/Weapons/SM_W5_UrsagSHornBlade",
+   "verts": 221,
+   "kind": "blade",
+   "origin": [
+    0.076,
+    -4.351,
+    40.012
+   ],
+   "x": [
+    0.023,
+    0.208,
+    0.978
+   ],
+   "y": [
+    -0.021,
+    0.978,
+    -0.207
+   ],
+   "z": [
+    -1.0,
+    -0.015,
+    0.027
+   ],
+   "length": 89.756,
+   "handle": 42.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 47.756,
+   "blade_width": 26.183,
+   "single_edged": true,
+   "edge_thickness": [
+    1.15,
+    3.11
+   ],
+   "ends": [
+    9.9,
+    8.5,
+    0.7,
+    0.09
+   ],
+   "handle_size": 3.84
+  },
+  "EasternSabre": {
+   "mesh": "/Game/Knights_Pack/Meshes/Knight_02/Weapons/SM_Knight_02_Sword",
+   "verts": 2716,
+   "kind": "blade",
+   "origin": [
+    0.016,
+    -0.867,
+    12.206
+   ],
+   "x": [
+    0.0,
+    -0.099,
+    0.995
+   ],
+   "y": [
+    0.0,
+    0.995,
+    0.099
+   ],
+   "z": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "length": 116.072,
+   "handle": 16.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 100.072,
+   "blade_width": 4.26,
+   "single_edged": false,
+   "edge_thickness": [
+    0.59,
+    0.67
+   ],
+   "ends": [
+    5.8,
+    2.1,
+    0.57,
+    0.6
+   ],
+   "handle_size": 3.81
+  },
+  "Katana": {
+   "mesh": "/Game/Samurai/Mesh_UE4/Weapon/SM_Samurai_Sword_01",
+   "verts": 2037,
+   "kind": "blade",
+   "origin": [
+    -0.381,
+    0.793,
+    12.519
+   ],
+   "x": [
+    -0.0,
+    -0.014,
+    1.0
+   ],
+   "y": [
+    -0.001,
+    1.0,
+    0.014
+   ],
+   "z": [
+    -1.0,
+    -0.001,
+    -0.0
+   ],
+   "length": 133.117,
+   "handle": 40.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 93.117,
+   "blade_width": 4.505,
+   "single_edged": true,
+   "edge_thickness": [
+    0.2,
+    0.48
+   ],
+   "ends": [
+    5.8,
+    2.3,
+    0.6,
+    0.13
+   ],
+   "handle_size": 3.82
+  },
+  "Wakizashi": {
+   "mesh": "/Game/Samurai/Mesh_UE4/Weapon/SM_Samurai_Sword_02",
+   "verts": 1806,
+   "kind": "blade",
+   "origin": [
+    -0.378,
+    1.397,
+    12.511
+   ],
+   "x": [
+    -0.0,
+    0.011,
+    1.0
+   ],
+   "y": [
+    -0.002,
+    1.0,
+    -0.011
+   ],
+   "z": [
+    -1.0,
+    -0.002,
+    -0.0
+   ],
+   "length": 102.435,
+   "handle": 40.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 62.435,
+   "blade_width": 4.507,
+   "single_edged": true,
+   "edge_thickness": [
+    0.23,
+    0.45
+   ],
+   "ends": [
+    5.8,
+    2.3,
+    0.62,
+    0.26
+   ],
+   "handle_size": 3.42
+  },
+  "Dagger": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Dagger",
+   "verts": 2755,
+   "kind": "blade",
+   "origin": [
+    -0.004,
+    -0.0,
+    27.054
+   ],
+   "x": [
+    0.001,
+    0.0,
+    -1.0
+   ],
+   "y": [
+    -1.0,
+    0.0,
+    -0.001
+   ],
+   "z": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "length": 34.373,
+   "handle": 11.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 23.373,
+   "blade_width": 6.354,
+   "single_edged": false,
+   "edge_thickness": [
+    0.24,
+    0.23
+   ],
+   "ends": [
+    1.4,
+    1.2,
+    0.15,
+    0.97
+   ],
+   "handle_size": 1.22
+  },
+  "LeafBladeKnife": {
+   "mesh": "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WeaponKnife/SM_WeaponKnife_01a",
+   "verts": 628,
+   "kind": "blade",
+   "origin": [
+    0.035,
+    0.002,
+    -4.301
+   ],
+   "x": [
+    -0.01,
+    0.006,
+    1.0
+   ],
+   "y": [
+    -1.0,
+    0.022,
+    -0.01
+   ],
+   "z": [
+    -0.022,
+    -1.0,
+    0.006
+   ],
+   "length": 41.588,
+   "handle": 21.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 20.588,
+   "blade_width": 10.817,
+   "single_edged": false,
+   "edge_thickness": [
+    0.51,
+    0.53
+   ],
+   "ends": [
+    2.2,
+    0.7,
+    0.63,
+    0.53
+   ],
+   "handle_size": 3.69
+  },
+  "ObsidianKnife": {
+   "mesh": "/Game/Primitive_Characters_Pack/Mesh/Primitive_01/Mesh_Weapon/SM_Primitive_Weapon_03",
+   "verts": 676,
+   "kind": "blade",
+   "origin": [
+    0.055,
+    -0.544,
+    10.242
+   ],
+   "x": [
+    -0.002,
+    -0.012,
+    1.0
+   ],
+   "y": [
+    -0.0,
+    1.0,
+    0.012
+   ],
+   "z": [
+    -1.0,
+    -0.0,
+    -0.002
+   ],
+   "length": 28.439,
+   "handle": 15.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 13.439,
+   "blade_width": 4.953,
+   "single_edged": false,
+   "edge_thickness": [
+    0.43,
+    0.45
+   ],
+   "ends": [
+    4.8,
+    2.1,
+    0.72,
+    0.39
+   ],
+   "handle_size": 4.19
+  },
+  "BoneBlade": {
+   "mesh": "/Game/Primitive_Characters_Pack/Mesh/Primitive_01/Mesh_Weapon/SM_Primitive_Weapon_04",
+   "verts": 416,
+   "kind": "blade",
+   "origin": [
+    0.006,
+    -0.679,
+    4.619
+   ],
+   "x": [
+    0.004,
+    0.083,
+    0.997
+   ],
+   "y": [
+    0.004,
+    0.997,
+    -0.083
+   ],
+   "z": [
+    -1.0,
+    0.005,
+    0.004
+   ],
+   "length": 31.639,
+   "handle": 9.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 22.639,
+   "blade_width": 6.121,
+   "single_edged": false,
+   "edge_thickness": [
+    0.65,
+    0.78
+   ],
+   "ends": [
+    3.4,
+    2.3,
+    0.9,
+    0.41
+   ],
+   "handle_size": 3.04
+  },
+  "CombatKnife": {
+   "mesh": "/Game/FPS_Pistol_Knife/Mesh/SM_Mesh/SM_Knife",
+   "verts": 1903,
+   "kind": "blade",
+   "origin": [
+    -0.0,
+    0.014,
+    10.399
+   ],
+   "x": [
+    -0.0,
+    0.01,
+    1.0
+   ],
+   "y": [
+    -0.0,
+    1.0,
+    -0.01
+   ],
+   "z": [
+    -1.0,
+    -0.0,
+    -0.0
+   ],
+   "length": 36.682,
+   "handle": 14.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 22.682,
+   "blade_width": 3.813,
+   "single_edged": true,
+   "edge_thickness": [
+    0.15,
+    0.29
+   ],
+   "ends": [
+    3.4,
+    2.1,
+    1.0,
+    0.28
+   ],
+   "handle_size": 2.7
+  },
+  "SurvivalKnife": {
+   "mesh": "/Game/FPS_Starter_Pack/Mesh/SM_Weapon/SM_Knife_01",
+   "verts": 1764,
+   "kind": "blade",
+   "origin": [
+    0.0,
+    -1.469,
+    10.458
+   ],
+   "x": [
+    0.0,
+    -0.097,
+    0.995
+   ],
+   "y": [
+    0.0,
+    0.995,
+    0.097
+   ],
+   "z": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "length": 35.891,
+   "handle": 15.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 20.891,
+   "blade_width": 4.962,
+   "single_edged": true,
+   "edge_thickness": [
+    0.25,
+    0.45
+   ],
+   "ends": [
+    5.4,
+    2.1,
+    0.32,
+    0.51
+   ],
+   "handle_size": 3.84
+  },
+  "Kukri": {
+   "mesh": "/Game/Military_Pack/Mesh/Soldier_Marine/SM_Knife",
+   "verts": 1157,
+   "kind": "blade",
+   "origin": [
+    0.0,
+    -1.348,
+    14.868
+   ],
+   "x": [
+    0.0,
+    -0.079,
+    0.997
+   ],
+   "y": [
+    0.001,
+    0.997,
+    0.079
+   ],
+   "z": [
+    -1.0,
+    0.001,
+    0.0
+   ],
+   "length": 53.414,
+   "handle": 18.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 35.414,
+   "blade_width": 6.427,
+   "single_edged": true,
+   "edge_thickness": [
+    0.35,
+    0.56
+   ],
+   "ends": [
+    5.9,
+    0.3,
+    0.61,
+    0.26
+   ],
+   "handle_size": 3.69
+  },
+  "SniperSKnife": {
+   "mesh": "/Game/Sniper/Mesh/Sniper_UE4/SM_Mesh/SM_Sniper_Knife_02",
+   "verts": 1592,
+   "kind": "blade",
+   "origin": [
+    0.036,
+    -0.307,
+    8.613
+   ],
+   "x": [
+    -0.001,
+    0.007,
+    1.0
+   ],
+   "y": [
+    -0.033,
+    -0.999,
+    0.007
+   ],
+   "z": [
+    0.999,
+    -0.033,
+    0.001
+   ],
+   "length": 32.898,
+   "handle": 13.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 19.898,
+   "blade_width": 3.76,
+   "single_edged": true,
+   "edge_thickness": [
+    0.29,
+    0.15
+   ],
+   "ends": [
+    4.2,
+    2.0,
+    0.49,
+    0.16
+   ],
+   "handle_size": 3.43
+  },
+  "WristBlade": {
+   "mesh": "/Game/Dystopia_Pack/Dystopia_Mech/Mesh_UE4/Weapon_Full/SM_Sword_Full",
+   "verts": 6267,
+   "kind": "blade",
+   "origin": [
+    0.081,
+    38.103,
+    2.15
+   ],
+   "x": [
+    0.0,
+    0.997,
+    -0.076
+   ],
+   "y": [
+    1.0,
+    -0.0,
+    0.0
+   ],
+   "z": [
+    0.0,
+    -0.076,
+    -0.997
+   ],
+   "length": 84.398,
+   "handle": 63.0,
+   "grip_from_guard": 4.5,
+   "blade_len": 21.398,
+   "blade_width": 10.918,
+   "single_edged": false,
+   "edge_thickness": [
+    0.51,
+    0.51
+   ],
+   "ends": [
+    4.4,
+    20.5,
+    0.07,
+    0.21
+   ],
+   "handle_size": 9.51
+  },
+  "Longbow": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Bow",
+   "verts": 6613,
+   "kind": "bow",
+   "origin": [
+    11.738,
+    -0.136,
+    5.036
+   ],
+   "x": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "y": [
+    0.999,
+    -0.045,
+    -0.0
+   ],
+   "z": [
+    0.045,
+    0.999,
+    -0.0
+   ],
+   "length": 122.117,
+   "depth": 29.629
+  },
+  "VikingBow": {
+   "mesh": "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WeaponBow/SM_WeaponBow_01a",
+   "verts": 920,
+   "kind": "bow",
+   "origin": [
+    9.085,
+    -0.242,
+    5.563
+   ],
+   "x": [
+    0.002,
+    0.001,
+    1.0
+   ],
+   "y": [
+    0.995,
+    0.098,
+    -0.002
+   ],
+   "z": [
+    -0.098,
+    0.995,
+    -0.001
+   ],
+   "length": 129.495,
+   "depth": 21.172
+  },
+  "Crossbow": {
+   "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Crossbow",
+   "verts": 8522,
+   "kind": "crossbow",
+   "origin": [
+    31.0,
+    -0.0,
+    0.5
+   ],
+   "x": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "y": [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   "z": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "length": 89.299,
+   "muzzle": [
+    -32.0,
+    0.0,
+    5.6
+   ],
+   "loaded_tip": [
+    -30.0,
+    0.0,
+    5.6
+   ]
+  },
+  "DwarfCrossbow": {
+   "mesh": "/Game/RandomDungeon/Magic5/Weapons/SM_W5_DwarfCrossbow",
+   "verts": 974,
+   "kind": "crossbow",
+   "origin": [
+    0.183,
+    -33.78,
+    4.677
+   ],
+   "x": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "y": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "z": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "length": 100.306,
+   "muzzle": [
+    0.021,
+    34.557,
+    10.843
+   ],
+   "loaded_tip": [
+    0.0,
+    32.557,
+    10.843
+   ]
+  }
+ }
+}

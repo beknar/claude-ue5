@@ -5,6 +5,8 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
@@ -1353,6 +1355,8 @@ bool ARDSection::ContinueGenerate(double Budget)
 		SpawnMonsters(RM);
 		CollectFlicker();
 		RegisterMap();          // (again: the containers and lights are there now)
+		Generator->RecordSection(this);
+		UpdateSeals();
 	}
 	GenerateMs = ShellMs + FurnishMs;
 	UE_LOG(LogRandomDungeon, Log, TEXT("RDSECTION (%d,%d) seed %d: %d rooms, %d hallways, %d doors, %d containers, %d instances, %d lights, %d monsters, shell %.0f ms + furnish %.0f ms over %d frames (%.1f s)%s"),
@@ -1389,6 +1393,8 @@ void ARDSection::ActivateForPlay()
 	SpawnMonsters(RM);
 	RegisterMap();
 	CollectFlicker();
+	Generator->RecordSection(this);
+	UpdateSeals();
 	UE_LOG(LogRandomDungeon, Log, TEXT("RDSECTION (%d,%d) activated for play: %d rooms, %d doors, %d containers, %d monsters"), Coord.X, Coord.Y, Rooms.Num(), Doors.Num(), Containers.Num(), SpawnedMonsters.Num());
 }
 
@@ -1408,9 +1414,12 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 		Want = FMath::RoundToInt(Order.Num() * Generator->MonsterCoverage);
 		for (int32 I = Order.Num() - 1; I > 0; --I) Order.Swap(I, R.RandRange(0, I));
 	}
+	// (each one's place in this order is its SpawnIndex: one she killed is drawn as before and skipped, so a section
+	// generated again has the others where they were and the dead stay dead)
+	int32 Count = 0;
 	for (const int32 RI : Order)
 	{
-		if (SpawnedMonsters.Num() >= Want) break;
+		if (Count >= Want) break;
 		const FRoom& Rm = Rooms[RI];
 		if (!Generator->bCombat && R.FRand() >= Generator->MonsterCoverage) continue;
 		// a free tile of the room (not where the player starts)
@@ -1423,12 +1432,18 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 		float U = R.FRand() * WSum; const FRDMonsterDef* Def = nullptr;
 		for (const FRDMonsterDef& D : Generator->Monsters) { if (!D.Mesh) continue; U -= D.Weight; if (U <= 0.f) { Def = &D; break; } }
 		if (!Def) Def = &Generator->Monsters.Last();
+		const int32 Index = Count++;
+		const float Yaw = R.FRandRange(0, 360);
+		const int32 MSeed = R.RandHelper(1 << 30);
+		if (Generator->IsMonsterKilled(Coord, Index)) continue;
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		ARDMonster* M = W->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, R.FRandRange(0, 360), 0), P + FVector(0, 0, Def->CapsuleHalfHeight + 5.f)), Sp);
+		ARDMonster* M = W->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), P + FVector(0, 0, Def->CapsuleHalfHeight + 5.f)), Sp);
 		if (!M) continue;
-		M->Setup(this, *Def, R.RandHelper(1 << 30));
+		M->SpawnIndex = Index;
+		M->Setup(this, *Def, MSeed);
 		SpawnedMonsters.Add(M);
 	}
+	MonstersPlanned = Count;
 }
 
 FRDSectionMap ARDSection::BuildMapData() const
@@ -1608,6 +1623,97 @@ TArray<FVector> ARDSection::GetPortalPoints() const
 	TArray<FVector> Out;
 	for (const FIntPoint& P : Portals) Out.Add(TileWorld(P));
 	return Out;
+}
+
+FIntPoint ARDSection::PortalNeighbour(int32 Portal, FVector& Border, FVector& Outward) const
+{
+	const FIntPoint P = Portals.IsValidIndex(Portal) ? Portals[Portal] : FIntPoint::ZeroValue;
+	// (a hallway end lies on the first or last row or column of tiles: it leaves the section that way)
+	FIntPoint D(0, 0);
+	if (P.X == 0) D.X = -1; else if (P.X == N - 1) D.X = 1; else if (P.Y == 0) D.Y = -1; else D.Y = 1;
+	Outward = FVector(D.X, D.Y, 0.f);
+	const float TS = Generator ? Generator->TileSize : 300.f;
+	Border = TileWorld(P) + Outward * (TS * 0.5f);
+	return Coord + D;
+}
+
+TArray<int32> ARDSection::GetChestKeys() const
+{
+	TArray<int32> Out;
+	for (int32 I = 0; I < Containers.Num(); ++I)
+		if (Containers[I].Kind == TEXT("chest") || Containers[I].Kind == TEXT("trunk")) Out.AddUnique(ContainerKey(I));
+	return Out;
+}
+
+int32 ARDSection::GetNumSeals(int32 Kind) const
+{
+	int32 Num = 0;
+	for (const int32 K : SealKinds) if (Kind == 0 || K == Kind) ++Num;
+	return Num;
+}
+
+void ARDSection::UpdateSeals()
+{
+	for (USceneComponent* C : SealComps) if (C) C->DestroyComponent();
+	SealComps.Reset(); SealAt.Reset(); SealKinds.Reset();
+	UWorld* W = GetWorld();
+	if (!Generator || Generator->MaxTier <= 0 || !W || !W->IsGameWorld()) return;
+	const float TS = Generator->TileSize, Hh = Generator->CorridorHeight;
+	for (int32 I = 0; I < Portals.Num(); ++I)
+	{
+		FVector Border, Out;
+		const FIntPoint Next = PortalNeighbour(I, Border, Out);
+		const int32 Kind = Generator->GetSealKind(Coord, Next);
+		if (Kind == 0) continue;
+		// the piece's front (+X) faces back into this section; it stands just inside the border, across the hallway
+		const FRotator Yaw = (-Out).Rotation();
+		const FVector Across = FVector::CrossProduct(FVector::UpVector, Out);
+		auto Place = [&](FName Piece, const FVector& At)
+		{
+			const FRDPiece* P = Generator->Piece(Piece);
+			if (!P || !P->Mesh) return;
+			UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
+			C->SetMobility(EComponentMobility::Movable);
+			C->SetStaticMesh(P->Mesh);
+			C->SetupAttachment(RootComponent);
+			C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			C->RegisterComponent();
+			C->SetWorldTransform(P->Adjust * FTransform(Yaw, At));
+			SealComps.Add(C);
+		};
+		if (Kind == 2)
+		{
+			const FRDPiece* P = Generator->Piece(Generator->EndPiece);
+			Place(Generator->EndPiece, Border - Out * ((P ? P->Size.X : 60.f) * 0.5f + 2.f));
+		}
+		else
+		{
+			// (the end wall at the border, the grating in front of it: the tier beyond is not generated, and through the bars
+			// the void showed as flat sky; a wall past the border, out from under the hallway's ceiling, glowed in the sky
+			// light. Both go when the tier opens)
+			const FRDPiece* E = Generator->Piece(Generator->EndPiece);
+			const float Back = E && E->Mesh ? E->Size.X + 6.f : 0.f;
+			if (Back > 0.f) Place(Generator->EndPiece, Border - Out * (E->Size.X * 0.5f + 2.f));
+			// (the grating is a half-width piece: two of them across the hallway)
+			const FRDPiece* P = Generator->Piece(Generator->SealPiece);
+			const float Half = P ? P->Size.Y * 0.5f : TS * 0.25f, Dp = Back + (P ? P->Size.X : 40.f) * 0.5f + 2.f;
+			Place(Generator->SealPiece, Border - Out * Dp + Across * Half);
+			Place(Generator->SealPiece, Border - Out * Dp - Across * Half);
+		}
+		// the blocker: the hallway's full width and height (nobody climbs over it), at the grating or the wall
+		const FRDPiece* Ep = Kind == 1 ? Generator->Piece(Generator->EndPiece) : nullptr;
+		const float Front = (Ep && Ep->Mesh) ? Ep->Size.X + 6.f : 0.f;
+		UBoxComponent* B = NewObject<UBoxComponent>(this);
+		B->SetMobility(EComponentMobility::Movable);
+		B->SetupAttachment(RootComponent);
+		B->SetBoxExtent(FVector(20.f, TS * 0.5f, Hh * 0.5f));
+		B->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+		B->SetHiddenInGame(true);
+		B->RegisterComponent();
+		B->SetWorldLocationAndRotation(Border - Out * (22.f + Front) + FVector(0, 0, Hh * 0.5f), Yaw);
+		SealComps.Add(B);
+		SealAt.Add(Border); SealKinds.Add(Kind);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------ pathing

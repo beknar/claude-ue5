@@ -1,0 +1,42 @@
+{
+ "tag": "w8",
+ "plan": [
+  "select"
+ ],
+ "level": "random_dungeonmagic_level5_select",
+ "steps": [
+  {
+   "step": "select",
+   "ok": true,
+   "heroes": [
+    "Warrior",
+    "Mage",
+    "Warlock",
+    "Rogue",
+    "Summoner"
+   ],
+   "first": "Warrior",
+   "picked": "Summoner",
+   "seen": [
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "target": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5",
+   "opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Summoner",
+   "dungeon_hero": "Summoner",
+   "pawn": "BP_RDM5_Summoner3Character_C",
+   "want_pawn": "BP_RDM5_Summoner3Character_C",
+   "health_mana": [
+    85.0,
+    90.0
+   ]
+  }
+ ],
+ "shots": [
+  "rdm5_w8_menu_summoner.png"
+ ],
+ "error": null
+}

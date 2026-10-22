@@ -1,0 +1,274 @@
+{
+ "tag": "g1",
+ "plan": [
+  "setup",
+  "weapons",
+  "monsters",
+  "kill:3",
+  "hurt",
+  "tier",
+  "death",
+  "regen",
+  "map"
+ ],
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_SFC_Fem5Character_C",
+   "hit_points": 100.0,
+   "from_start_room_cm": 0,
+   "start_room_from_section_middle_cm": 0,
+   "weapon": "Sword",
+   "weapons": 3,
+   "combat": true
+  },
+  {
+   "step": "weapons",
+   "ok": true,
+   "weapons": [
+    {
+     "weapon": "Sword",
+     "mesh": "SM_Sword_1",
+     "bone": "hand_r",
+     "cm_from_hand": 69.3,
+     "shield": "SM_Shield_1",
+     "damage": 22.0,
+     "reach": 170.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 56,
+     "attack_seconds": 0.85,
+     "grip": {
+      "hand_at_mesh_z": 69.0,
+      "mesh_z": [
+       -1,
+       87
+      ],
+      "mesh_there_cm": [
+       2.9,
+       2.9
+      ],
+      "axis_from_hand_cm": 6.9,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": 54.9,
+     "ok": true
+    },
+    {
+     "weapon": "Spear",
+     "mesh": "SM_Spear",
+     "bone": "hand_r",
+     "cm_from_hand": 95.3,
+     "shield": "SM_Shield_1",
+     "damage": 17.0,
+     "reach": 260.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 85,
+     "attack_seconds": 0.66,
+     "grip": {
+      "hand_at_mesh_z": 95.0,
+      "mesh_z": [
+       1,
+       245
+      ],
+      "mesh_there_cm": [
+       2.5,
+       2.5
+      ],
+      "axis_from_hand_cm": 7.0,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": 54.0,
+     "ok": true
+    },
+    {
+     "weapon": "Axe",
+     "mesh": "SM_Axe",
+     "bone": "hand_r",
+     "cm_from_hand": 9.8,
+     "shield": null,
+     "damage": 36.0,
+     "reach": 190.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 75,
+     "attack_seconds": 1.29,
+     "grip": {
+      "hand_at_mesh_z": 7.0,
+      "mesh_z": [
+       -19,
+       72
+      ],
+      "mesh_there_cm": [
+       4.2,
+       4.0
+      ],
+      "axis_from_hand_cm": 6.9,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": null,
+     "ok": true
+    }
+   ]
+  },
+  {
+   "step": "monsters",
+   "ok": true,
+   "monsters": 14,
+   "rooms": 46,
+   "coverage": 0.3,
+   "wanted": 0.30000001192092896,
+   "average_hit_points": 46.3,
+   "hers": 100.0,
+   "average_damage": 10.8,
+   "her_average_blow": 25.0,
+   "kinds": [
+    "Daemon",
+    "Horned",
+    "Mutant",
+    "Ripper_dog",
+    "Spider",
+    "Troll"
+   ],
+   "room_kinds": [
+    "Armory",
+    "Barracks",
+    "Chapel",
+    "Crypt",
+    "Forge",
+    "Great hall",
+    "Guard room",
+    "Hallway junction",
+    "Kitchen",
+    "Library",
+    "Prison cells",
+    "Storeroom",
+    "Torture chamber",
+    "Treasury"
+   ]
+  },
+  {
+   "step": "kill",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Ripper_dog",
+     "hit_points": 34.0,
+     "weapon": "Sword",
+     "damage": 22.0,
+     "blows": 2,
+     "blows_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "it_fought_back": true,
+     "she_lost": 0,
+     "seconds": 1.6,
+     "ok": true
+    },
+    {
+     "monster": "Spider",
+     "hit_points": 30.0,
+     "weapon": "Spear",
+     "damage": 17.0,
+     "blows": 2,
+     "blows_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "it_fought_back": true,
+     "she_lost": 0,
+     "seconds": 1.6,
+     "ok": true
+    },
+    {
+     "monster": "Daemon",
+     "hit_points": 54.0,
+     "weapon": "Axe",
+     "damage": 36.0,
+     "blows": 2,
+     "blows_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_blow_took_the_damage": true,
+     "it_fought_back": true,
+     "she_lost": 12,
+     "seconds": 2.5,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 3
+  },
+  {
+   "step": "hurt",
+   "ok": true,
+   "monster": "Horned",
+   "its_damage": 13.0,
+   "she_lost": 13.0,
+   "its_attacks": 0,
+   "its_hits": 1,
+   "seconds": 0.3,
+   "aggro": true
+  },
+  {
+   "step": "tier",
+   "ok": true,
+   "section": [
+    1,
+    0
+   ],
+   "generated": true,
+   "monsters": 13,
+   "average_hit_points": 92.4,
+   "hers": 100.0,
+   "average_damage": 23.6,
+   "her_average_blow": 25.0,
+   "rooms": 49
+  },
+  {
+   "step": "death",
+   "ok": true,
+   "went_down": true,
+   "could_attack_while_down": false,
+   "seconds_down": 3.5,
+   "back_at_the_start_cm": 0,
+   "hit_points": 100.0
+  },
+  {
+   "step": "regen",
+   "ok": true,
+   "after_the_blow": 60.0,
+   "before_the_delay_is_over": 60.0,
+   "four_seconds_on": 72.3,
+   "per_second": 4.0
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "stylized": true,
+   "tactical": true,
+   "rooms_and_hallways": 119,
+   "doors": 122,
+   "chests": 984,
+   "torches": 505,
+   "sections_on_the_map": 3,
+   "opened": true,
+   "with_the_big_map_open": {
+    "walked_cm": 323,
+    "attacks": 1
+   }
+  }
+ ],
+ "error": null,
+ "kills": 3,
+ "attacks": 10,
+ "hits": 7,
+ "deaths": 1,
+ "damage_dealt": 186.0,
+ "damage_taken": 1065.0
+}

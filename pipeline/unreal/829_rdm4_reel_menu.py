@@ -10,7 +10,9 @@ shown, when START was pressed, the turntable's turn and the key pressed. Writes 
 and logs "RDM4MENU saved". Keeps its namespace (tick callback).
 Level 5 (random_dungeonmagic_level5_select, LS_RDM5select_Showcase; the Summoner's armour reel): one passage, in which
 she looks through the five heroes with D from the Warrior to the Summoner and presses START; the record goes to
-SourceArt/random_dungeon_magic5/cine_menu.json. Args: [seconds a passage, 7] [level: 4 or 5]"""
+SourceArt/random_dungeon_magic5/cine_menu.json. Level 5 with "Warrior" (the weapons and tiers reel): she looks through all
+five and round to the Warrior again, START on her (cine_menu_warrior.json).
+Args: [seconds a passage, 7] [level: 4 or 5] [level 5: the hero picked, Summoner or Warrior]"""
 import unreal, sys, json, os
 __keep__ = True
 PASSAGE = float(sys.argv[1]) if len(sys.argv) > 1 else 7.0
@@ -23,7 +25,12 @@ PLAN = [[(1.1, "D"), (2.2, "D"), (3.4, "A"), (4.5, "A"), (5.7, "Enter")],
         [(1.4, "D"), (3.0, "D"), (4.0, "A"), (5.5, "Enter")],
         [(1.6, "D"), (4.8, "Enter")]]
 WANT = ["Warrior", "Mage", "Warlock", "Rogue"]
-if LV == "5":
+PICK = sys.argv[3] if len(sys.argv) > 3 else "Summoner"
+if LV == "5" and PICK == "Warrior":
+    # (the weapons and tiers reel: all five looked at, round to the Warrior again (the list wraps), START on her)
+    PLAN = [[(1.0, "D"), (1.9, "D"), (2.8, "D"), (3.7, "D"), (4.6, "D"), (5.9, "Enter")]]; WANT = ["Warrior"]
+    OUT = OUT.replace("cine_menu.json", "cine_menu_warrior.json")
+elif LV == "5":
     PLAN = [[(1.2, "D"), (2.2, "D"), (3.2, "D"), (4.2, "D"), (5.7, "Enter")]]; WANT = ["Summoner"]
 FPS = 30; DUR = PASSAGE * len(PLAN)
 G = {}; S = {"rows": {}, "events": [], "saved": False}

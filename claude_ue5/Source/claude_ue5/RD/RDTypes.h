@@ -173,6 +173,44 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaCost = 0.f;
 	/** random_dungeonmagic_level4: its picture among the generator's UIArt (none: the HUD shows its name only) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
+	// ---- random_dungeonmagic_level5: a weapon found in a container (an item of kind Weapon, made for her hero)
+	/** its sounds are those of this name ("Player.Hit.<SoundKey>", "Player.Cast.<SoundKey>"...; none: its own Name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SoundKey = NAME_None;
+	/** blows (or bolts) that land before it breaks (0: it never breaks: the weapons she starts with) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Durability = 0.f;
+	/** the weapons table's ratings (1 the worst, 10 the best; 0: none) and its type, for the inventory */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 SpeedRating = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 DamageRating = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString WeaponType;
+	/** the item it came from (none: one she starts with) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Item = NAME_None;
+};
+
+/** random_dungeonmagic_level5: a found weapon as one hero wields it (her clips for its type, its mesh in her hand) */
+USTRUCT(BlueprintType)
+struct FRDWeaponFit
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Hero;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FRDWeaponDef Weapon;
+};
+
+/** random_dungeonmagic_level5: how far a section (a set of rooms) is from cleared. Its rooms (not the hallway junctions),
+ *  its chests and trunks (container keys) and its monsters (by the order they were spawned in) are recorded when it is
+ *  first generated; what she did there is kept when it is dropped and generated again. */
+USTRUCT(BlueprintType)
+struct FRDSectionProgress
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly) FIntPoint Coord = FIntPoint::ZeroValue;
+	UPROPERTY(BlueprintReadOnly) int32 Tier = 1;
+	UPROPERTY(BlueprintReadOnly) int32 Rooms = 0;
+	UPROPERTY(BlueprintReadOnly) int32 RoomsExplored = 0;
+	UPROPERTY(BlueprintReadOnly) TArray<int32> Chests;
+	UPROPERTY(BlueprintReadOnly) int32 ChestsLooted = 0;
+	UPROPERTY(BlueprintReadOnly) int32 Monsters = 0;
+	UPROPERTY(BlueprintReadOnly) TArray<int32> Killed;
+	UPROPERTY(BlueprintReadOnly) bool bCleared = false;
 };
 
 /** random_dungeonmagic_level4: a painted piece of the interface (SourceArt/random_dungeon_magic4/ui_art.json, made on an
@@ -208,7 +246,7 @@ struct FRDUIFont
 UENUM(BlueprintType)
 enum class ERDItemKind : uint8
 {
-	Healing, Mana, Speed, Food, Armour
+	Healing, Mana, Speed, Food, Armour, Weapon
 };
 
 /** random_dungeonmagic_level5: a set of armour made to fit one hero: its meshes, on her skeleton, follow her pose */
@@ -239,6 +277,11 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDArmourFit> Fits;
 	/** armour: a line of what it is (the inventory shows it) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Looks;
+	/** random_dungeonmagic_level5: the tiers of rooms whose containers may hold it (empty: every tier) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<int32> Tiers;
+	/** a weapon (kind Weapon): how each hero who can wield it does (none for a hero: she carries it but cannot wield it).
+	 *  Amount is its durability. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponFit> WeaponFits;
 };
 
 /** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the

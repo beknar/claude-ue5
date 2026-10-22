@@ -15,5 +15,12 @@ if (-not $hasNetFx -and -not $env:UE_SDKS_ROOT) {
     if (-not (Test-Path "$inc\mscoree.h")) { Set-Content -Path "$inc\mscoree.h" -Value "// stand-in for UnrealBuildTool (SwarmInterface rules)" }
     $env:UE_SDKS_ROOT = $root
 }
-& "$ue\Engine\Build\BatchFiles\Build.bat" claude_ue5Editor Win64 $Config "-Project=$repo\claude_ue5\claude_ue5.uproject" -WaitMutex -NoHotReloadFromIDE
+# A Fab plugin installed in the engine without its source (KitBash3D's Cargo: binaries only) stops UnrealBuildTool
+# ("Could not find definition for module"). Such plugins are left out of the build; the editor still loads their own
+# binaries.
+$skip = @()
+foreach ($u in Get-ChildItem "$ue\Engine\Plugins\Marketplace" -Recurse -Depth 2 -Filter *.uplugin -ErrorAction SilentlyContinue) {
+    if (-not (Test-Path (Join-Path $u.DirectoryName "Source"))) { $skip += "-DisablePlugin=$($u.BaseName)" }
+}
+& "$ue\Engine\Build\BatchFiles\Build.bat" claude_ue5Editor Win64 $Config "-Project=$repo\claude_ue5\claude_ue5.uproject" -WaitMutex -NoHotReloadFromIDE @skip
 exit $LASTEXITCODE

@@ -25,7 +25,7 @@ There are **19 levels**: 18 to play, and the photo studio for stills. Two of the
 | `random_dungeonmagic_level2` | dungeon game: sword and spell | the Warlock | `BP_RDM2_GameMode` | `813` | `RandomDungeonMagic2_DarkCaster_Showcase` |
 | `random_dungeonmagic_level3` | dungeon game: daggers and crossbow | the Rogue | `BP_RDM3_GameMode` | `813` | `RandomDungeonMagic3_Rogue_Showcase` |
 | `random_dungeonmagic_level4` | dungeon game: choice of hero, items | Warrior, Mage, Warlock, Rogue (menu) | `BP_RDM4_GameMode` | `827` / `828` hero test | `RandomDungeonMagic4_Heroes_`, `_UI_`, `_Lettering_Showcase` |
-| `random_dungeonmagic_level5` | dungeon game: five heroes, armour | Warrior, Mage, Warlock, Rogue, Summoner (menu; Summoner by default) | `BP_RDM4_GameMode` | `853` (through `828 -lv 5`) | `RandomDungeonMagic5_Summoner_Armour_`, `_Faces_`, `_MetaHuman_Faces_Showcase` |
+| `random_dungeonmagic_level5` | dungeon game: five heroes, armour, a weapons table, five tiers of rooms | Warrior, Mage, Warlock, Rogue, Summoner (menu; Summoner by default) | `BP_RDM4_GameMode` | `853` (through `828 -lv 5`) | `RandomDungeonMagic5_Summoner_Armour_`, `_Faces_`, `_MetaHuman_Faces_Showcase` |
 | `starship_level` | space flight | a space fighter | `SSGameMode` | `802` / `803` flight test | `Starship_Fighter_Showcase` |
 
 The editor starts on `L_Fig4_Meadow`, and a packaged game would too (`GameDefaultMap` in `Config/DefaultEngine.ini`). Each `*_Showcase` reel is also in a `_20MB` copy; `Fig4_Locomotion_Meadow.mp4`, the oldest, is not.
@@ -216,8 +216,47 @@ Level 4's game with a fifth hero, the Summoner, and armour to find and wear.
   | Demonic Armour | Fantasy Warriors (Pack) | 25 % |
   | Tiefling's Armour | Fantasy Warriors (Pack) | 15 % |
 
+- **Tiers of rooms:** each 252 m section is a set of rooms, and its tier is its ring around the start plus one:
+
+  | Tier | Sets of rooms | Opens when |
+  |---|---|---|
+  | 1 | 1 (the start) | at the start |
+  | 2 | 8 around it | at the start, as she walks to them |
+  | 3 | 16 around those | all 8 sets of tier 2 are cleared |
+  | 4 | 24 | all 16 sets of tier 3 are cleared |
+  | 5 | 32 | all 24 sets of tier 4 are cleared; nothing is made beyond tier 5 |
+
+  A set is cleared when every room in it has been entered, every chest and trunk opened and every monster in it killed. Monsters she killed stay dead when a set is dropped and generated again. A hallway into a tier that isn't open is barred by a grating, and the hallways out of tier 5 are walled. The maps mark these with a red cross. A panel under the minimap shows her tier, its sets cleared, and the rooms, chests and monsters left in her set.
+- **Weapons table:** 29 weapons in the containers of their tiers, each with a speed and a damage rating (1 to 10), a durability and a rarity (`SourceArt/random_dungeon_magic5/weapons_table.json`):
+
+  | Type | Weapons (tiers) |
+  |---|---|
+  | Short sword | Viking Shortsword (1), Sherwood Sword (1), Orc Cleaver (2), Toothed Bone Sword (2) |
+  | One-handed sword | Arming Sword (1), Longsword (1), Viking Sword (1), Veteran's Sword (2), Templar Sword (2) |
+  | Two-handed sword | Plate Knight's Sword (1), Paladin's Sword (2), Dark Knight's Sword (3), Ursag's Horn Blade (4, 5) |
+  | Curved and eastern sword | Eastern Sabre (1), Katana (2), Wakizashi (3) |
+  | Short blades | Dagger (1), Leaf-Blade Knife (1), Obsidian Knife (2), Bone Blade (2), Combat Knife (3), Survival Knife (3), Kukri (4), Sniper's Knife (4), Wrist Blade (5) |
+  | Ranged | Longbow (1), Viking Bow (2), Crossbow (3), Dwarf Crossbow (4, 5) |
+
+  - **Damage:** 8 + 3 × the damage rating, from 11 (rating 1) to 38 (rating 10), with the hero's bonus on top.
+  - **Speed:** one attack every 1.6 − (speed − 1) × 1.05 / 9 seconds, from 1.6 s (rating 1) to 0.55 s (rating 10).
+  - **Durability:** each attack that hits a monster takes 1 off. At 0 the weapon breaks and she draws the next one. The weapons she starts with never break.
+  - **Rarity:** 33 for every weapon, used as its weight among the items a container may hold.
+- **Who wields what:** as the hero cards say:
+
+  | Hero | Can wield |
+  |---|---|
+  | Warrior, Warlock | all 29 |
+  | Rogue | short blades and ranged weapons (13) |
+  | Mage, Summoner | none: they carry what they find but can't wield it |
+
+  - **One-handed weapons:** the hero's own animations: the Warrior's sword and shield, the Warlock's sword cuts, the Rogue's dagger strikes (a found blade in both hands).
+  - **Two-handed swords:** three new cuts with both hands on the hilt.
+  - **Bows:** a new shot, with the bow in the left hand.
+  - **Crossbows:** the Rogue's shot (made for the Warrior and the Warlock too).
+  - **Where the hand goes:** each weapon is held where its handle was measured on its model.
 - **Properties:**
-  - 38 items: the 33 potions and foods and the five sets.
+  - 67 items: the 33 potions and foods, the five sets of armour and the 29 weapons. The containers of every tier hold items, not only the start's.
   - A container holds up to six things; the inventory scrolls.
 - **Her face:** the Summoner had a face that showed what happened to her. It was first painted and then a MetaHuman face, with expressions on being hurt, casting, finding something, a monster after her, low hit points and death (`URDFaceComponent`, scripts `832`-`841`).
 - **Earlier versions:** before the Summoner3 rebuild, the level was played by:
@@ -225,7 +264,7 @@ Level 4's game with a fifth hero, the Summoner, and armour to find and wear.
   - then Summoner2 (`BP_RDM5_Summoner2Character`, a whole MetaHuman fitted to `Summoner2.glb`, game mode `BP_RDM5S2_GameMode`, scripts `842`-`848`).
 
   Their characters and game modes are still in the project, but the level no longer uses them.
-- **Scripts:** `849`-`853`.
+- **Scripts:** `849`-`853`; the weapons and the tiers `854`, `855` (with `blender_numpy/weapon5_clips.py`).
 
 ## Space
 

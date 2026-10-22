@@ -116,6 +116,85 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 			}
 		}
 	LoadedBoltComp = Make(TEXT("RDLoadedBolt")); LoadedBoltComp->SetVisibility(false);
+	SyncWear();
+	SelectWeapon(0);
+}
+
+// ------------------------------------------------------------------------------------------------ found weapons (level 5)
+void URDCombatComponent::SyncWear()
+{
+	if (!Generator) return;
+	// (a weapon the list has more of than the wear array: full durability; the list's own order otherwise)
+	while (Wear.Num() < Generator->Weapons.Num()) Wear.Add(Generator->Weapons[Wear.Num()].Durability);
+	Wear.SetNum(Generator->Weapons.Num());
+}
+
+float URDCombatComponent::GetWeaponDurability(int32 Index) const
+{
+	return Generator && Generator->Weapons.IsValidIndex(Index) ? Generator->Weapons[Index].Durability : 0.f;
+}
+
+void URDCombatComponent::WearOut(int32 Index)
+{
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index) || Generator->Weapons[Index].Durability <= 0.f) return;
+	SyncWear();
+	if (Wear[Index] <= 0.f) return;
+	Wear[Index] = FMath::Max(0.f, Wear[Index] - 1.f);
+	if (Wear[Index] <= 0.f) PendingBreak.AddUnique(Index);
+}
+
+void URDCombatComponent::BreakWeapon(int32 Index)
+{
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index)) return;
+	const FRDWeaponDef W = Generator->Weapons[Index];
+	if (AttackTime >= 0.f && AttackIndex == Index) EndAttack();
+	const bool bDrawn = Index == WeaponIndex;
+	Generator->Weapons.RemoveAt(Index);
+	if (Wear.IsValidIndex(Index)) Wear.RemoveAt(Index);
+	if (NextOf.IsValidIndex(Index)) NextOf.RemoveAt(Index);
+	// (the bolts still on their way: theirs is gone, the others' indices move down)
+	Bolts.RemoveAll([Index](const FBolt& B) { return B.Weapon == Index; });
+	for (FBolt& B : Bolts) if (B.Weapon > Index) --B.Weapon;
+	for (int32& P : PendingBreak) if (P > Index) --P;
+	if (AttackIndex > Index) --AttackIndex;
+	++WeaponsBroken; LastBroken = W.Name;
+	SetMessage(FString::Printf(TEXT("Your %s broke"), *W.Name.ToString().ToLower()));
+	if (AActor* O = GetOwner()) Generator->PlaySoundAt(TEXT("Player.Break"), O->GetActorLocation());
+	UE_LOG(LogTemp, Log, TEXT("RDWEAPON %s broke (%d weapons left)"), *W.Name.ToString(), Generator->Weapons.Num());
+	if (bDrawn)
+	{
+		// (she draws the first of her weapons that is not cast alongside: one she started with)
+		WeaponIndex = -1;
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (!Generator->Weapons[I].bAlongside) { SelectWeapon(I); break; }
+	}
+	else if (WeaponIndex > Index) --WeaponIndex;
+	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
+}
+
+bool URDCombatComponent::TakeWeapon(FName Item)
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	if (Ix < 0 || Generator->Items[Ix].Kind != ERDItemKind::Weapon) return false;
+	const FRDItemDef& It = Generator->Items[Ix];
+	const FRDWeaponFit* Fit = It.WeaponFits.FindByPredicate([this](const FRDWeaponFit& F) { return F.Hero == Generator->CurrentHero; });
+	if (!Fit) return false;
+	SyncWear();
+	FRDWeaponDef W = Fit->Weapon;
+	W.Item = Item;
+	if (W.Durability <= 0.f) W.Durability = It.Amount;
+	Generator->Weapons.Add(W);
+	Wear.Add(W.Durability);
+	++WeaponsTaken;
+	return true;
+}
+
+void URDCombatComponent::ResetWeapons()
+{
+	if (AttackTime >= 0.f) EndAttack();
+	Bolts.Reset(); PendingBreak.Reset(); NextOf.Reset(); Wear.Reset();
+	WeaponIndex = -1;
+	WeaponsBroken = WeaponsTaken = 0; LastBroken = NAME_None;
+	SyncWear();
 	SelectWeapon(0);
 }
 
@@ -253,7 +332,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 			}
 		StopCharge();
 		if (W->ChargeEffect) ChargeComp = SpawnFx(W->ChargeEffect, FVector::ZeroVector, FRotator::ZeroRotator, W->ChargeEffectScale, M, W->SpellBone);
-		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Charge.%s"), *W->Name.ToString())), GetOwner()->GetActorLocation());
+		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Charge.%s"), *WeaponSound(*W).ToString())), GetOwner()->GetActorLocation());
 	}
 	// she turns to the nearest monster in front of her that the weapon could reach in a step (no need to line up by hand)
 	else if (AActor* O = GetOwner())
@@ -296,14 +375,14 @@ void URDCombatComponent::Strike()
 		if (Dist > W->Reach || FMath::Abs(Mo->GetActorLocation().Z - L.Z) > 260.f) continue;
 		// (a big monster right against her is in the arc whatever the angle to its middle)
 		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
-		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *W->Name.ToString())), Mo->GetActorLocation());
+		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(*W).ToString())), Mo->GetActorLocation());
 		const float Dmg = GetDamageOf(AttackIndex);         // (with her melee bonus)
 		const bool bKilled = Mo->ApplyDamage(Dmg, O);
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false);
 		DamageDealt += Dmg; ++HitsLanded; bAny = true;
 		if (bKilled) ++Kills;
 	}
-	if (bAny) LastHitTime = GetWorld()->GetTimeSeconds();
+	if (bAny) { LastHitTime = GetWorld()->GetTimeSeconds(); WearOut(AttackIndex); }      // (a blow that landed wears the weapon)
 }
 
 void URDCombatComponent::EndAttack()
@@ -375,6 +454,13 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 {
 	Super::TickComponent(Dt, TickType, ThisTickFunction);
 	if (!Generator) return;
+	// (weapons worn out last tick break now, the last in the list first: the indices before it stay as they are)
+	if (PendingBreak.Num() > 0)
+	{
+		TArray<int32> Br = PendingBreak; PendingBreak.Reset();
+		Br.Sort([](int32 A, int32 B) { return A > B; });
+		for (const int32 I : Br) BreakWeapon(I);
+	}
 	const float Now = GetWorld()->GetTimeSeconds();
 	TickSounds(Dt, Now);
 	TickBolts(Dt);
@@ -433,6 +519,16 @@ void URDCombatComponent::SetMessage(const FString& Text)
 void URDCombatComponent::AddItem(FName Name, int32 Count)
 {
 	if (Name.IsNone() || Count <= 0) return;
+	// (a weapon made for her hero joins her weapons, each with its own durability; one not for her stays an item)
+	const int32 Ix = Generator ? Generator->FindItem(Name) : -1;
+	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Weapon)
+	{
+		int32 Left = Count;
+		while (Left > 0 && TakeWeapon(Name)) --Left;
+		if (Left < Count) InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
+		Count = Left;
+		if (Count <= 0) return;
+	}
 	int32& N = Carried.FindOrAdd(Name);
 	if (N == 0) CarriedOrder.AddUnique(Name);
 	N += Count;
@@ -461,6 +557,12 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FRDItemDef& It = Generator->Items[Ix];
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
+	if (It.Kind == ERDItemKind::Weapon)
+	{
+		// (one she carries is not made for her hero: had it been, it would be among her weapons)
+		SetMessage(FString::Printf(TEXT("The %s cannot wield the %s"), *Generator->PlayerTitle.ToLower(), *Lb));
+		return false;
+	}
 	switch (It.Kind)
 	{
 	case ERDItemKind::Healing:
@@ -527,10 +629,17 @@ TArray<FString> URDCombatComponent::GetInventoryLines() const
 {
 	TArray<FString> Out;
 	if (Generator)
-		for (const FRDWeaponDef& W : Generator->Weapons) Out.Add(FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
-	auto IsArmour = [this](FName N) { const int32 Ix = Generator ? Generator->FindItem(N) : -1; return Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour; };
-	for (const FName& N : CarriedOrder) if (!IsArmour(N)) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
-	for (const FName& N : CarriedOrder) if (IsArmour(N)) Out.Add(FString::Printf(TEXT("armour|%s|%d"), *N.ToString(), N == WornArmour ? 1 : 0));
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+		{
+			// (a found weapon: what is left of its durability, and its full durability)
+			const FRDWeaponDef& W = Generator->Weapons[I];
+			Out.Add(W.Durability > 0.f ? FString::Printf(TEXT("weapon|%s|%.0f|%.0f"), *W.Name.ToString(), GetWeaponWear(I), W.Durability) : FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
+		}
+	auto KindOf = [this](FName N) { const int32 Ix = Generator ? Generator->FindItem(N) : -1; return Ix >= 0 ? Generator->Items[Ix].Kind : ERDItemKind::Healing; };
+	for (const FName& N : CarriedOrder) if (KindOf(N) != ERDItemKind::Armour && KindOf(N) != ERDItemKind::Weapon) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Armour) Out.Add(FString::Printf(TEXT("armour|%s|%d"), *N.ToString(), N == WornArmour ? 1 : 0));
+	// (level 5: weapons she found that her hero cannot wield)
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Weapon) Out.Add(FString::Printf(TEXT("carried|%s|%d"), *N.ToString(), GetItemCount(N)));
 	return Out;
 }
 
@@ -710,7 +819,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		SetMessage(FString::Printf(TEXT("You wield the %s"), *W.Name.ToString().ToLower()));
 		return true;
 	}
-	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour")))
+	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
@@ -990,7 +1099,7 @@ void URDCombatComponent::LaunchBolt()
 	}
 	Bolts.Add(B);
 	++BoltsCast; LastBoltFrom = B.At;
-	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Cast.%s"), *W->Name.ToString())), B.At);
+	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Cast.%s"), *WeaponSound(*W).ToString())), B.At);
 }
 
 void URDCombatComponent::PlaceBoltMesh(UStaticMeshComponent* C, const FRDWeaponDef& W, const FVector& At, const FVector& Dir) const
@@ -1006,7 +1115,7 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	if (W.BurstEffect) SpawnFx(W.BurstEffect, At, B.Vel.Rotation(), W.BurstEffectScale);
 	if (W.BurstFlameEffect)
 		if (UFXSystemComponent* Fl = SpawnFx(W.BurstFlameEffect, At, FRotator::ZeroRotator, W.BurstFlameEffectScale)) TimedFx.Add({ Fl, W.BurstFlameSeconds });
-	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *W.Name.ToString())), At);
+	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(W).ToString())), At);
 	// the flames on the bolt die away where they are (their particles finish); its light flares and fades
 	if (UFXSystemComponent* F = B.Fx.Get()) F->Deactivate();
 	if (UFXSystemComponent* F = B.Core.Get()) F->Deactivate();
@@ -1029,7 +1138,7 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 		if (Gap > W.BoltSplash || FMath::Abs(C.Z - At.Z) > Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 80.f) continue;
 		Hurt(Mo, Dmg * 0.5f, C + ((At - C) * FVector(1, 1, 0)).GetSafeNormal() * Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.8f);
 	}
-	if (bAny) LastHitTime = GetWorld()->GetTimeSeconds();
+	if (bAny) { LastHitTime = GetWorld()->GetTimeSeconds(); WearOut(B.Weapon); }       // (a bolt that hit wears its weapon)
 	(Direct ? BoltsOnMonsters : BoltsElsewhere)++;
 	LastBurstAt = At; LastBoltFlown = B.Flown;
 }

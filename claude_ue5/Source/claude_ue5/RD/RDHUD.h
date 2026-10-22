@@ -78,10 +78,15 @@ private:
 	void SoftDot(const FVector2D& P, float R, const FLinearColor& C);
 	void Star(const FVector2D& P, float R, const FLinearColor& C);
 	void Diamond(const FVector2D& P, float R, const FLinearColor& C);
+	/** level 5: a hallway end sealed (a tier not open yet, or the end of the dungeon) */
+	void SealMark(const FVector2D& P, float R);
+	/** level 5: the tier she is in, its sets cleared, what is left to do in this set (under the minimap) */
+	void DrawTiers(float Sc, const FVector2D& At);
 	void Triangle(const FVector2D& P, float R, const FLinearColor& C);
 	/** a monster much stronger than its section's average (the strongest kinds) */
 	bool IsElite(const class ARDMonster* M) const;
-	/** what the maps mark, in world XY: 0 monster, 1 elite, 2 unopened chest or trunk, 3 hallway exit to a section not yet generated */
+	/** what the maps mark, in world XY: 0 monster, 1 elite, 2 unopened chest or trunk, 3 hallway exit to a section not yet
+	 *  generated, 5 a sealed hallway end (level 5) */
 	struct FRDPoi { FVector2D W; int32 Kind; };
 	void GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance);
 	static FString KindCode(ERDRoomKind Kind);

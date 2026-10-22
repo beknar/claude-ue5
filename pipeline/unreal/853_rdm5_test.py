@@ -19,6 +19,24 @@
   ui       (the dungeon) a great hall container's FOUND plaque with its first item's picture; the inventory with
            all 33 potions and foods besides the armour scrolls: at the top the armour's pictures are not drawn, at
            the bottom they are, each set's picture; HighResShots of each
+  tiers    (the dungeon) the five tiers (855: MaxTier 5): a section's tier is its ring plus one (8, 16, 24, 32 sections
+           round the start); at the start tiers 1 and 2 are open. One set of tier 2 cleared as she would clear it: walked
+           into room by room (explored only once she is in each), every chest and trunk opened, every monster killed: it
+           counts as cleared ("SET CLEARED"). Tier 3 is not generated past it; its hallways into tier 3 are sealed: a
+           capsule is stopped at the grating and she, walking at it for 2.5 s, stays on her side of the border; the seal
+           says what opens it. The set dropped and generated again has no monsters (her kills stay killed) and is still
+           cleared. The other seven sets cleared (the debug clear): "TIER 3 IS OPEN", the gratings go, walking on she gets
+           tier 3 generated. Tiers 3 and 4 cleared: tier 5 opens; a tier 5 section's hallways out of the dungeon are
+           walled (they lead to tier 6, which is never allowed)
+  tierloot the containers of each tier (2500 each, any section of it): a weapon only in its tiers (the table's), every
+           weapon of a tier found, their share of what is found as their weights say (within 4.5 sd)
+  weapons  each hero given all 29 weapons: the ones her card allows join her weapons (Warrior, Warlock: all; Rogue: short
+           blades and ranged), the others stay in her pack as weapons she cannot wield (the Mage and the Summoner: all,
+           and using one says she cannot); each one drawn: its mesh in her hand with its handle's grip point within 7 cm
+           of her palm, its damage (8 + 3 x rating, her bonus), its attack's length (the table's speed: 1.6 - (speed - 1)
+           x 1.05 / 9 s); a two-handed sword at the blow has her left palm on the hilt below the right; a blow that lands
+           takes 1 off its durability, and at 0 it breaks: gone from her weapons, her first one drawn, "broke"; pictures
+           from in front of her (the face camera, her alone) at the blow
 Writes SourceArt/random_dungeon_magic5/test_<tag>.json and logs "RDM5TEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -185,6 +203,8 @@ def step_loot():
     ls = lines(c)
     have = {l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("item|")}
     have.update({l.split("|")[1]: 1 for l in ls if l.startswith("armour|")})
+    # (855's weapons: the Summoner cannot wield them, so she carries them as items: "carried|<name>|<count>")
+    have.update({l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("carried|")})
     # opened again: nothing more
     yield from wait(1.0); i0 = hall[0]; f0 = g.items_found
     s0.toggle_container(i0); yield from wait(1.0); s0.toggle_container(i0); yield from wait(0.5)
@@ -284,7 +304,8 @@ def step_damage():
         yield from wait(0.05)
         e = {"set": t, "armour": round(c.get_armour(), 3), "hits": c.hits_taken - n0, "blow": round(c.last_blow_before, 3), "reached_her": round(c.last_blow_taken, 3),
              "hp_fell": round(h0 - c.get_health(), 3), "monster": m.get_name()}
-        e["ok"] = (e["hits"] == 1 and e["blow"] > 0 and abs(e["reached_her"] - e["blow"] * (1 - e["armour"])) < 0.01 and abs(e["hp_fell"] - e["reached_her"]) < 0.01
+        # (a second blow may land before the reading: her hit points then fell by two of them)
+        e["ok"] = (e["hits"] in (1, 2) and e["blow"] > 0 and abs(e["reached_her"] - e["blow"] * (1 - e["armour"])) < 0.01 and abs(e["hp_fell"] - e["reached_her"] * e["hits"]) < 0.01
                    and (t is None) == (e["armour"] == 0.0))
         res.append(e)
     ok = len(res) == 6 and all(e.get("ok") for e in res)
@@ -309,7 +330,8 @@ def step_ui():
     for it in g.get_editor_property("items"): c.add_item(it.name, 1)
     yield from press("I"); yield from rwait(0.4)
     top = hud_art(); shot("inventory_top"); yield from rwait(1.5)
-    ls = lines(c); yield from cursor_to(c, len(ls) - 1); yield from rwait(0.3)
+    # (down to the last armour row: with 855's weapons the list ends with the ones she cannot wield)
+    ls = lines(c); yield from cursor_to(c, max(i for i, l in enumerate(ls) if l.startswith("armour|"))); yield from rwait(0.3)
     bottom = hud_art(); shot("inventory_bottom"); yield from rwait(1.5)
     yield from press("I"); quiet(False)
     ok = (all(a in ua for a in arm_icons) and found_ok and gone and not (set(arm_icons) & set(top)) and set(arm_icons) <= set(bottom)
@@ -317,7 +339,269 @@ def step_ui():
     step_result("ui", ok, armour_icons=arm_icons, icons_imported=[a in ua for a in arm_icons], found_container=i, found_items=n_in, found_first=first,
                 found_drawn=fd, plaque_gone=gone, lines=len(ls), top_drawn=top, bottom_drawn=bottom)
 
-STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "follow": step_follow, "damage": step_damage, "ui": step_ui}
+# ------------------------------------------------------------------------------------------------ the weapons table, the tiers
+W5 = json.load(open(os.path.join(OUT, "weapons_table.json"), encoding="utf-8"))
+W5F = json.load(open(os.path.join(OUT, "weapon_frames.json"), encoding="utf-8"))["weapons"]
+wkey = lambda name: "".join(ch for ch in name.title() if ch.isalnum())
+def cycle(speed): return 1.6 - (speed - 1) * 1.05 / 9.0
+I2 = unreal.IntPoint
+def out_tuple(r):
+    """(a UFUNCTION's return value, its out parameter) as Python gives them: a bool function that returns false gives None"""
+    if r is None: return (False, None)
+    return r if isinstance(r, tuple) else (True, r)
+def progress(S):
+    ok, p = out_tuple(G["gen"].get_section_progress(S))
+    if not ok: return None
+    return {"tier": p.tier, "rooms": p.rooms, "explored": p.rooms_explored, "chests": len(p.chests), "looted": p.chests_looted, "monsters": p.monsters,
+            "killed": len(p.killed), "cleared": p.cleared}
+def built(S, sec=40.0):
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        s = G["gen"].get_section(S)
+        if s and not s.is_building(): return s
+        yield
+    return None
+def make_and_clear(S):
+    """a section generated now and cleared at once (the debug clear: its rooms explored, its chests looted, its monsters gone)"""
+    g = G["gen"]
+    if not g.is_section_generated(S): g.generate_section_now(S)
+    yield from built(S)                     # (one generated as she walked by may still be being built)
+    ok = g.debug_clear_section(S); yield
+    return ok
+def seals(s):
+    pts, kinds = s.get_seal_points()          # (the points returned, the kinds as the out parameter)
+    return list(zip(list(pts), list(kinds)))
+def seal_out(s, b):
+    """the way out of section s through the border point b (the axis it is on)"""
+    mn = s.get_section_min(); size = G["gen"].tile_size * G["gen"].section_tiles
+    cx, cy = mn.x + size / 2, mn.y + size / 2; dx, dy = b.x - cx, b.y - cy
+    return V(1 if dx > 0 else -1, 0, 0) if abs(dx) > abs(dy) else V(0, 1 if dy > 0 else -1, 0)
+
+def step_tiers():
+    g = G["gen"]; c = yield from restart(); quiet(True); p = G["pawn"]
+    res = {"max_tier": g.max_tier, "open_at_start": g.get_open_tiers(),
+           "tiers_of": [g.tier_of(I2(*xy)) for xy in ((0, 0), (1, 0), (-1, 1), (2, -1), (3, 3), (4, 0), (5, 0))],
+           "sizes": [g.tier_size(t) for t in range(1, 6)],
+           "allowed_at_start": [g.is_section_allowed(I2(*xy)) for xy in ((1, 0), (1, 1), (2, 0), (4, 0), (5, 0))]}
+    # one set of tier 2 cleared as she would: every room walked into, every chest and trunk opened, every monster killed
+    S = I2(1, 0); g.generate_section_now(S); s = yield from built(S)
+    before = progress(S)
+    rooms = [i for i in range(s.get_num_rooms()) if s.get_room_kind(i) != "Hallway junction"]
+    c.set_health(c.get_max_health())
+    for i in rooms:
+        rc = s.get_room_center(i); p.set_actor_location(V(rc.x, rc.y, 100.0), False, True); yield from wait(0.06)
+    after_rooms = progress(S)
+    for i in range(s.get_num_containers()):
+        if s.get_container_kind(i) in ("chest", "trunk") and not s.is_container_looted(i): s.toggle_container(i)
+    yield from wait(0.1); after_chests = progress(S)
+    kills0 = g.monsters_killed
+    for m in list(s.spawned_monsters):
+        if alive(m): m.apply_damage(1.0e6, p)
+    yield from wait(0.3); after = progress(S)
+    res.update({"set_before": before, "after_rooms": after_rooms, "after_chests": after_chests, "after_kills": after, "monsters_killed": g.monsters_killed - kills0,
+                "notice": str(g.tier_notice), "tier2_cleared": g.get_tier_cleared(2)})
+    # tier 3 stays shut: nothing generated past her set, its hallways sealed; the seal stops a body and stops her walking
+    near = [(b, k) for b, k in seals(s)]
+    res["seals_of_set"] = {"grating": sum(1 for _, k in near if k == 1), "wall": sum(1 for _, k in near if k == 2),
+                           "into": sorted({str(g.tier_of(g.world_to_section(b + seal_out(s, b) * 200.0))) for b, _ in near})}
+    res["tier3_generated"] = g.is_section_generated(I2(2, 0))
+    blocked = walked_out = None
+    if near:
+        b, _ = next(((b, k) for b, k in near if seal_out(s, b).x > 0), near[0]); out = seal_out(s, b)
+        a0 = V(b.x - out.x * 150, b.y - out.y * 150, 110.0); a1 = V(b.x + out.x * 150, b.y + out.y * 150, 110.0)
+        h = unreal.SystemLibrary.capsule_trace_single(G["w"], a0, a1, 34.0, 80.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [p], unreal.DrawDebugTrace.NONE, True)
+        hit = h.to_tuple() if h else None
+        blocked = {"hit": bool(hit and hit[0]), "at_cm_from_border": round((hit[4].x - b.x) * out.x + (hit[4].y - b.y) * out.y, 1) if hit and hit[0] else None}
+        p.set_actor_location(V(b.x - out.x * 260, b.y - out.y * 260, 100.0), False, True)
+        yaw = math.degrees(math.atan2(out.y, out.x)); p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=yaw))
+        yield from wait(0.2)
+        sim = lambda k, d: c.simulate_key(k, d)
+        sim(key("W"), True); yield from wait(2.5); sim(key("W"), False)
+        q = p.get_actor_location(); walked_out = round((q.x - b.x) * out.x + (q.y - b.y) * out.y, 1)
+        shot("tier_seal"); yield from rwait(1.5)
+        res["seal_prompt"] = str(g.describe_seal_near(q, 450.0))
+    res.update({"seal_blocks_a_body": blocked, "walked_past_the_border_cm": walked_out})
+    # the set generated again (dropped and made anew): her kills stay killed, it stays cleared
+    p.set_actor_location(V(0, 0, 100.0), False, True); yield from wait(0.3)
+    g.reload_section(S); s = yield from built(S)
+    res["regenerated"] = {"monsters": len(s.spawned_monsters) if s else None, "progress": progress(S)}
+    # the other seven sets of tier 2: tier 3 opens, the seals toward it go; walking on, tier 3 is generated
+    for xy in ((1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)):
+        yield from make_and_clear(I2(*xy))
+    res["after_tier2"] = {"cleared": g.get_tier_cleared(2), "open": g.get_open_tiers(), "notice": str(g.tier_notice), "tier3_allowed": g.is_section_allowed(I2(2, 0))}
+    p.set_actor_location(V(s.get_section_min().x + 12000, s.get_section_min().y + 12600, 100.0), False, True); yield from wait(0.5)
+    s = G["gen"].get_section(S) or (yield from built(S))
+    res["seals_of_set_after"] = sum(1 for _, k in seals(s) if k == 1) if s else None
+    t0 = time.time(); p.set_actor_location(V(s.get_section_min().x + 24500, s.get_section_min().y + 12600, 100.0), False, True)
+    while time.time() - t0 < 40 and not g.is_section_generated(I2(2, 0)): yield
+    res["tier3_generated_when_near"] = g.is_section_generated(I2(2, 0))
+    # tiers 3 and 4 cleared (the debug clear): tier 5 opens, and nothing past it is ever made
+    for t in (3, 4):
+        r = t - 1; failed = []
+        for x in range(-r, r + 1):
+            for y in range(-r, r + 1):
+                if max(abs(x), abs(y)) != r: continue
+                ok_ = yield from make_and_clear(I2(x, y))
+                if not ok_: failed.append({"set": [x, y], "generated": g.is_section_generated(I2(x, y)), "progress": progress(I2(x, y))})
+        res[f"after_tier{t}"] = {"cleared": g.get_tier_cleared(t), "open": g.get_open_tiers(), "notice": str(g.tier_notice), "not_cleared": failed}
+    g.generate_section_now(I2(4, 0)); s4 = yield from built(I2(4, 0))
+    sl = seals(s4) if s4 else []
+    res["tier5_section"] = {"walls": sum(1 for _, k in sl if k == 2), "gratings": sum(1 for _, k in sl if k == 1),
+                            "walls_lead_to_tier": sorted({g.tier_of(g.world_to_section(b + seal_out(s4, b) * 200.0)) for b, k in sl if k == 2}),
+                            "tier6_allowed": g.is_section_allowed(I2(5, 0)), "seal_kind_east": g.get_seal_kind(I2(4, 0), I2(5, 0))}
+    p.set_actor_location(V(0, 0, 100.0), False, True); quiet(False)
+    a = res["after_kills"]; ar = res["after_rooms"]
+    ok = (res["max_tier"] == 5 and res["open_at_start"] == 2 and res["tiers_of"] == [1, 2, 2, 3, 4, 5, 6] and res["sizes"] == [1, 8, 16, 24, 32]
+          and res["allowed_at_start"] == [True, True, False, False, False]
+          and res["set_before"] and not res["set_before"]["cleared"] and ar["explored"] == ar["rooms"] and not ar["cleared"]
+          and a["cleared"] and a["looted"] == a["chests"] and a["killed"] == a["monsters"] and res["monsters_killed"] == a["monsters"] and "SET CLEARED" in res["notice"]
+          and res["seals_of_set"]["grating"] > 0 and res["seals_of_set"]["into"] == ["3"] and not res["tier3_generated"]
+          and blocked and blocked["hit"] and walked_out is not None and walked_out < 0 and "Sealed" in res.get("seal_prompt", "")
+          and res["regenerated"]["monsters"] == 0 and res["regenerated"]["progress"]["cleared"]
+          and res["after_tier2"]["cleared"] == 8 and res["after_tier2"]["open"] == 3 and res["after_tier2"]["notice"] == "TIER 3 IS OPEN" and res["after_tier2"]["tier3_allowed"]
+          and res["seals_of_set_after"] == 0 and res["tier3_generated_when_near"]
+          and res["after_tier3"]["cleared"] == 16 and res["after_tier3"]["open"] == 4 and res["after_tier4"]["cleared"] == 24 and res["after_tier4"]["open"] == 5
+          and res["tier5_section"]["walls"] > 0 and res["tier5_section"]["walls_lead_to_tier"] == [6] and not res["tier5_section"]["tier6_allowed"]
+          and res["tier5_section"]["seal_kind_east"] == 2)
+    step_result("tiers", ok, **res)
+
+def step_tierloot():
+    """what each tier's containers hold: a weapon only in the tiers of its rooms; potions and food everywhere; the
+    weapons' share as their weights say"""
+    g = G["gen"]; c = yield from restart()
+    wt = {w["name"]: set(w["tiers"]) for w in W5["weapons"]}
+    items = [it for it in g.get_editor_property("items") if it.weight > 0]
+    res = {}; ok = True; N = 2500
+    for t in range(1, 6):
+        S = I2(t - 1, 0); cnt = {}; wrong = set(); n = 0; nw = 0
+        for i in range(N):
+            for x in g.loot_list_of(S, 300000 + i):
+                x = str(x); n += 1
+                if x in wt:
+                    nw += 1; cnt[x] = cnt.get(x, 0) + 1
+                    if t not in wt[x]: wrong.add(x)
+            if i % 250 == 0: yield
+        inw = sum(it.weight for it in items if (not it.tiers or t in list(it.tiers)) and str(it.name) in wt)
+        alls = sum(it.weight for it in items if not it.tiers or t in list(it.tiers))
+        share, want = nw / max(n, 1), inw / alls
+        sd = math.sqrt(want * (1 - want) / max(n, 1))
+        e = {"items": n, "weapons": sorted(cnt), "want": sorted(k for k, v in wt.items() if t in v), "wrong_tier": sorted(wrong),
+             "weapon_share": round(share, 4), "expected": round(want, 4), "sd_off": round(abs(share - want) / sd, 2)}
+        e["ok"] = e["weapons"] == e["want"] and not wrong and e["sd_off"] < 4.5
+        ok = ok and e["ok"]; res[f"tier{t}"] = e
+    step_result("tierloot", ok, **res)
+
+def step_weapons():
+    g = G["gen"]; c = yield from restart(); quiet(True)
+    rules = W5["rules"]["who"]; out = {}; shots_ = []
+    cams = [a for a in GS.get_all_actors_of_class(G["w"], unreal.SceneCapture2D) if a.actor_has_tag("RDM5_WeaponCam")]
+    cam = cams[0] if cams else None
+    shot_dir = os.path.join(unreal.Paths.project_saved_dir(), "W5Test", TAG)
+    def front_shot(name, dist=300.0, height=30.0):
+        """her alone, unlit (the colour as painted: the great hall is lit by torches), from her front-right and her right side"""
+        if not cam: return
+        p = G["pawn"]; l = p.get_actor_location(); f = p.get_actor_forward_vector(); r = p.get_actor_right_vector()
+        cc = cam.capture_component2d
+        cc.set_editor_property("primitive_render_mode", unreal.SceneCapturePrimitiveRenderMode.PRM_USE_SHOW_ONLY_LIST)
+        cc.set_editor_property("capture_source", unreal.SceneCaptureSource.SCS_BASE_COLOR)
+        for view, way in (("front", f * 0.85 + r * 0.5), ("side", r)):
+            at_ = l + way.normal() * dist + V(0, 0, height)
+            cam.set_actor_location(at_, False, True)
+            d = l + V(0, 0, 20) - at_; cam.set_actor_rotation(unreal.Rotator(roll=0, pitch=math.degrees(math.atan2(d.z, math.hypot(d.x, d.y))), yaw=math.degrees(math.atan2(d.y, d.x))), True)
+            cc.clear_show_only_components(); cc.show_only_actor_components(p, True); cc.capture_scene()
+            unreal.RenderingLibrary.export_render_target(G["w"], cc.texture_target, shot_dir, f"{name}_{view}.png"); shots_.append(f"{name}_{view}.png")
+    def palm_local(body, bone):
+        """her palm point on the hand bone (the grips' place: 6.5 cm along the forearm, 2.5 below, in her reference pose)"""
+        ref = unreal.AnimPoseExtensions.get_reference_pose(body.skeletal_mesh_asset.skeleton)
+        bp = lambda n: unreal.AnimPoseExtensions.get_bone_pose(ref, n, unreal.AnimPoseSpaces.WORLD)
+        h = bp(bone); s_ = bone[-1]; fore = (h.translation - bp(f"lowerarm_{s_}").translation).normal()
+        return unreal.MathLibrary.inverse_transform_location(h, h.translation + fore * 6.5 + V(0, 0, -2.5))
+    for hero in ("Warrior", "Warlock", "Rogue", "Mage", "Summoner"):
+        if str(g.current_hero) != hero: g.switch_hero(hero); yield from wait(0.6); refresh()
+        c = cb(); quiet(True); body = G["pawn"].mesh
+        n0 = len(g.weapons)
+        for w in W5["weapons"]: c.add_item(w["name"], 1)
+        took = [str(x.name) for x in g.weapons][n0:]
+        carried = sorted(l.split("|")[1] for l in lines(c) if l.startswith("carried|"))
+        allowed = rules[hero]
+        want = [w["name"] for w in W5["weapons"] if allowed == "all" or w["type"] in allowed]
+        e = {"took": len(took), "carried": len(carried), "took_right": took == want, "carried_right": carried == sorted(w["name"] for w in W5["weapons"] if w["name"] not in want)}
+        if not took:
+            msg_ok = not c.use_item(W5["weapons"][0]["name"]) and "cannot wield" in str(c.message)
+            e["refused"] = msg_ok; out[hero] = e; continue
+        pr = palm_local(body, "hand_r"); pl = palm_local(body, "hand_l")
+        hands, nums = [], []
+        for wi, name in enumerate(took):
+            i = n0 + wi; wd = g.weapons[i]; fr = W5F[wkey(name)]; w = next(x for x in W5["weapons"] if x["name"] == name)
+            c.select_weapon(i); yield
+            comp = c.get_weapon_mesh(); bone = str(wd.hand_bone)
+            xf = comp.get_world_transform(); grip = xf.transform_location(V(*fr["origin"]))
+            palm = body.get_socket_transform(bone, unreal.RelativeTransformSpace.RTS_WORLD).transform_location(pl if bone == "hand_l" else pr)
+            bonus = (g.melee_bonus if not wd.get_editor_property("spell") else g.ranged_bonus)
+            h = {"weapon": name, "mesh_ok": comp.static_mesh == wd.mesh, "bone": bone, "grip_to_palm_cm": round((grip - palm).length(), 1),
+                 "damage": round(c.get_damage_of(i), 2), "want_damage": round((8 + 3 * w["damage"]) * (1 + bonus), 2), "durability": c.get_weapon_durability(i), "wear": c.get_weapon_wear(i)}
+            # the attacks' length (each of her clips at the weapon's rate: their mean is the table's speed) and, for two
+            # hands, the left palm on the hilt at each blow
+            lens = []; offs = []; alongs = []
+            for k in range(len(wd.attacks)):
+                if not c.start_attack(): break
+                lens.append(c.get_attack_length())
+                hit_at = (wd.hit_times[k] - (wd.attack_starts[k] if len(wd.attack_starts) > k else 0.0)) / wd.play_rate
+                yield from wait(hit_at)
+                if w["type"] == "two handed sword":
+                    xf = comp.get_world_transform(); o_ = xf.transform_location(V(*fr["origin"])); x_ = xf.transform_direction(V(*fr["x"])).normal()
+                    lp = body.get_socket_transform("hand_l", unreal.RelativeTransformSpace.RTS_WORLD).transform_location(pl)
+                    tt = (lp - o_).dot(x_); alongs.append(round(tt, 1)); offs.append(round((lp - (o_ + x_ * tt)).length(), 1))
+                if k == 0 and (wi == 0 or name in ("Katana", "Plate Knight's Sword", "Ursag's Horn Blade", "Kukri", "Longbow", "Viking Bow", "Crossbow", "Dwarf Crossbow")):
+                    front_shot(f"{hero}_{wkey(name)}")
+                t0 = now()
+                while c.is_attacking() and now() - t0 < 3.0: yield
+                yield from wait(0.12)
+            if lens: h["attack_s"] = round(sum(lens) / len(lens), 3); h["attacks"] = len(lens); h["want_s"] = round(cycle(w["speed"]), 3)
+            if offs: h["left_palm_off_hilt_cm"] = max(offs); h["left_palm_along_hilt_cm"] = alongs
+            hands.append(h)
+        # a blow that lands takes 1 off; at 0 it breaks and she draws her first weapon
+        i = n0; name = took[0]; c.select_weapon(i); yield
+        ms = start_monsters(); ms.sort(key=lambda m: (m.get_actor_location() - G["pawn"].get_actor_location()).length())
+        brk = {"weapon": name}
+        gap = 110 if not g.weapons[i].get_editor_property("spell") else 600
+        def by_a_monster():
+            """next to the nearest monster of the start section, facing it (a quiet monster wanders off between blows)"""
+            ms_ = start_monsters(); ms_.sort(key=lambda m: (m.get_actor_location() - G["pawn"].get_actor_location()).length())
+            return any(stand_off(m, gap) for m in ms_)
+        by_a_monster()
+        c.set_weapon_wear(i, 2.0); h0 = c.hits_landed; b0 = c.weapons_broken
+        t0 = now()
+        while now() - t0 < 6.0 and c.hits_landed == h0:
+            if not c.is_attacking(): c.start_attack()
+            yield
+        yield from wait(0.3); brk["wear_after_one"] = c.get_weapon_wear(i) if str(g.weapons[i].name) == name else None
+        t0 = now(); h1 = c.hits_landed
+        while now() - t0 < 10.0 and c.weapons_broken == b0:
+            if str(c.get_weapon_name()) == name and not c.is_attacking():
+                if c.hits_landed == h1 and now() - t0 > 1.5: by_a_monster(); t0b = now()
+                c.start_attack()
+            yield
+        yield from wait(0.2)
+        brk.update({"broke": c.weapons_broken - b0, "last_broken": str(c.last_broken), "still_carried": name in [str(x.name) for x in g.weapons], "now_in_hand": str(c.get_weapon_name()),
+                    "message": str(c.message)})
+        e.update({"hands": hands, "break": brk})
+        out[hero] = e
+    quiet(False)
+    def hero_ok(hero, e):
+        if not e["took_right"] or not e["carried_right"]: return False
+        if not e.get("hands"): return e.get("refused", False)
+        for h in e["hands"]:
+            if not (h["mesh_ok"] and h["grip_to_palm_cm"] < 7.0 and abs(h["damage"] - h["want_damage"]) < 0.01 and abs(h.get("attack_s", -9) - h.get("want_s", 9)) < 0.03): return False
+            if "left_palm_off_hilt_cm" in h and not (h["left_palm_off_hilt_cm"] < 4.0 and all(-14.0 < a < -2.0 for a in h["left_palm_along_hilt_cm"])): return False
+        b = e["break"]
+        return b.get("wear_after_one") == 1.0 and b["broke"] == 1 and b["last_broken"] == b["weapon"] and not b["still_carried"] and b["now_in_hand"] != b["weapon"] and "broke" in b["message"]
+    ok = all(hero_ok(h, e) for h, e in out.items()) and len(out) == 5
+    R.setdefault("shots", []).extend(shots_)
+    step_result("weapons", ok, heroes=out, front_shots=shots_)
+
+STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "follow": step_follow, "damage": step_damage, "ui": step_ui,
+         "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons}
 def run():
     for s in PLAN:
         yield from STEPS[s]()

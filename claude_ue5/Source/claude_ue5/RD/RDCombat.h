@@ -211,6 +211,27 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ArmourChanges = 0;
 	void TickInventory(APlayerController* PC);
 
+	// ---- random_dungeonmagic_level5: weapons found in the containers (items of kind Weapon). One her hero can wield (the
+	// item has a fit for her) joins her weapons as she finds it, with its durability: every attack of it that hits a monster
+	// (a blow, a bolt) takes 1 off, and at 0 it breaks and is gone (she draws the next one). The weapons she starts with
+	// never break. One she cannot wield stays among her items.
+	/** what is left of a weapon's durability, and its full durability (0, 0: it never breaks) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetWeaponWear(int32 Index) const { return Wear.IsValidIndex(Index) ? Wear[Index] : 0.f; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetWeaponDurability(int32 Index) const;
+	/** weapons that broke */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 WeaponsBroken = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") FName LastBroken;
+	/** found weapons she took up (wieldable) / kept as items (not for her) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 WeaponsTaken = 0;
+	/** tests: set what is left of a weapon's durability */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetWeaponWear(int32 Index, float Value) { if (Wear.IsValidIndex(Index)) Wear[Index] = Value; }
+	/** the hero's own weapons again, the first drawn (the generator's RestartPlay) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void ResetWeapons();
+	/** a weapon item: she takes it up (true) or it is not made for her hero (false) */
+	bool TakeWeapon(FName Item);
+	/** the sound name of a weapon (its SoundKey, else its name) */
+	static FName WeaponSound(const FRDWeaponDef& W) { return W.SoundKey.IsNone() ? W.Name : W.SoundKey; }
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
@@ -244,6 +265,13 @@ private:
 	int32 WeaponIndex = -1, AttackIndex = -1;
 	/** per weapon: which of its attack clips comes next */
 	TArray<int32> NextOf;
+	/** per weapon of the generator's list: what is left of its durability (0: it never breaks) */
+	TArray<float> Wear;
+	/** weapons whose durability ran out this tick (broken at the end of it: a bolt may still be on its way) */
+	TArray<int32> PendingBreak;
+	void SyncWear();
+	void WearOut(int32 Index);
+	void BreakWeapon(int32 Index);
 	float AttackTime = -1.f, AttackLen = 0.f, AttackHit = 0.f, SavedWalkSpeed = 0.f;
 	bool bHitDone = false, bDead = false, bScriptedOnly = false, bSlowed = false;
 	float StaggerUntil = -100.f;

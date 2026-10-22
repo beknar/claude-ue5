@@ -100,6 +100,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 CountReachableRooms() const;
 	/** world points of the hallway ends on this section's border (walk test) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FVector> GetPortalPoints() const;
+	/** the section a hallway end leads into; Border: where the hallway meets the section's border (world, on the floor),
+	 *  Outward: the way out of this section */
+	FIntPoint PortalNeighbour(int32 Portal, FVector& Border, FVector& Outward) const;
+	int32 GetNumPortals() const { return Portals.Num(); }
+
+	// ---- random_dungeonmagic_level5: tiers
+	/** monsters its spawning order planned (the killed ones too) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 MonstersPlanned = 0;
+	/** its chests and trunks, by container key (what the tiers count as its loot) */
+	TArray<int32> GetChestKeys() const;
+	/** a grating across each hallway end into a section the generator will not generate yet, a wall at the end of the
+	 *  dungeon (GetSealKind), each with a blocker as tall as the hallway; rebuilt as the tiers open */
+	void UpdateSeals();
+	/** hallway ends sealed now (Kind 1: a grating, 2: a wall; 0: both) and where (world, on the border) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumSeals(int32 Kind = 0) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<FVector> GetSealPoints(TArray<int32>& Kinds) const { Kinds = SealKinds; return SealAt; }
 
 	// ---- interaction (doors, containers)
 	/** nearest door / container within MaxDistance: returns distance (or 1e9) */
@@ -187,6 +203,9 @@ private:
 	TArray<FMover> Containers;
 	TArray<FFlicker> Flickers;
 	TArray<FTransform> MonsterSpawns;
+	UPROPERTY(Transient) TArray<TObjectPtr<USceneComponent>> SealComps;
+	TArray<FVector> SealAt;
+	TArray<int32> SealKinds;
 
 	int32 Idx(FIntPoint T) const { return T.Y * N + T.X; }
 	bool In(FIntPoint T) const { return T.X >= 0 && T.Y >= 0 && T.X < N && T.Y < N; }
