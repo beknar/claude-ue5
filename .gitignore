@@ -47,6 +47,30 @@ claude_ue5/SourceArt/sf_city/reach.json
 claude_ue5/SourceArt/sf_city/walk_r*.json
 claude_ue5/SourceArt/sf_city/walk_s*.json
 
+# --- Fab pack downloads at the repository root (licensed, not redistributable) ---
+/CitySubwayTunnel/
+/Compact3DServerRoomEnviro/
+/FrozenNorseEnvironment/
+/HyperActorHealthSystemv4/
+/HyperAttributeManagerv4/
+/HyperBuildingSystemv4/
+/HyperCaveBuildingToolkitv/
+/HyperCharacterPreviewerv4/
+/HyperCombatFrameworkv4/
+/HyperFarmingSystemv4/
+/HyperLockandLockpickingSy/
+/HyperObjectPoolerv4/
+/IndustrialEnvironmen1900s/
+/LootDropsVol2Niagara/
+/Modern3DCityEnvironmentL/
+/ParkingGarageParkingLot3/
+/PostApocalypticMansionAlb/
+/QuarantineMedicalTent/
+/RealisticKitchenEnvironme/
+/SteampunkZeppelinStation/
+# the packs' documentation PDFs, put beside the project file by the launcher
+/claude_ue5/*.pdf
+
 # --- Packaged games (hold cooked pack content) ---
 builds/
 
