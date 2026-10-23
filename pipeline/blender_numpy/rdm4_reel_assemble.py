@@ -16,8 +16,9 @@ labels (written "Mana Back": sc()).
 Level 5 (the seventh argument "5"; the Summoner's armour reel): the menu of random_dungeonmagic_level5 (829 with level 5:
 one passage, the five heroes looked through and the Summoner started) and her run (815 with level 5), from
 SourceArt/random_dungeon_magic5.
-Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4, 5 or 5w]]
-  (5w: level 5's weapons and tiers reel, the Warrior picked in the menu)
+Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4, 5, 5w or 5h]]
+  (5w: level 5's weapons and tiers reel, the Warrior picked in the menu; 5h: the four heroes' weapons reel, each of the
+  Warrior, Mage, Warlock and Rogue picked in a passage of her own and followed by her run, as level 4's reel)
   work_dir holds final_menu (the menu's frames), hud_<hero> (her run with the HUD) and final_<hero> (her run's .wav)"""
 import sys, os, glob, json, math, re
 import numpy as np
@@ -31,11 +32,13 @@ if len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
 LV = sys.argv[7] if len(sys.argv) > 7 else "4"
-W5 = LV == "5w"; LV = LV[:1]          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json)
+W5 = LV == "5w"; Q5 = LV == "5h"; LV = LV[:1]          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
+                                                       #  "5h": the four heroes' weapons reel, cine_menu_quartet.json)
 SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + LV)
-M = json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu.json"), encoding="utf-8"))
+M = json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
 ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
-TITLE, SUB = (("random_dungeonmagic_level5", "choose the warrior in the menu: a table of 29 weapons to find, wield and wear out, and five tiers of rooms") if W5 else
+TITLE, SUB = (("random_dungeonmagic_level5", "four heroes, one weapons table: who wields what, a weapon that breaks, and the tiers of rooms") if Q5 else
+              ("random_dungeonmagic_level5", "choose the warrior in the menu: a table of 29 weapons to find, wield and wear out, and five tiers of rooms") if W5 else
               ("random_dungeonmagic_level5", "choose the summoner in the menu, then the great hall: five armour sets to find and wear") if LV == "5" else
               ("random_dungeonmagic_level4", "choose a hero in the menu, then the dungeon: four heroes, four runs"))
 FPS = M["fps"]; PASS = int(round(M["passage"] * FPS)); ROWS = {r["frame"]: r for r in M["rows"]}; LAST = max(ROWS)

@@ -46,6 +46,10 @@ claude_ue5/SourceArt/random_dungeon_magic4/fonts/
 claude_ue5/SourceArt/sf_city/reach.json
 claude_ue5/SourceArt/sf_city/walk_r*.json
 claude_ue5/SourceArt/sf_city/walk_s*.json
+# a Blender build's console logs and the reel pilot's real-time rehearsal record (scratch, rewritten every run)
+claude_ue5/SourceArt/**/build_log.txt
+claude_ue5/SourceArt/**/build_err.txt
+claude_ue5/SourceArt/**/cine_rehearsal.json
 
 # --- Fab pack downloads at the repository root (licensed, not redistributable) ---
 /CitySubwayTunnel/

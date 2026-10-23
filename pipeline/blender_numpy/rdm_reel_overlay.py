@@ -41,7 +41,9 @@ from PIL import Image, ImageDraw, ImageFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
-LV = sys.argv[4] if len(sys.argv) > 4 else "1"; L5 = LV == "5"; L4 = LV == "4" or L5     # (level 5: level 4's HUD and the armour)
+LV = sys.argv[4] if len(sys.argv) > 4 else "1"
+Q5 = LV == "5h"; LV = "5" if Q5 else LV        # ("5h": level 5's four heroes' weapons reel, 815's run5h: cine_quartet_<hero>.json)
+L5 = LV == "5"; L4 = LV == "4" or L5     # (level 5: level 4's HUD and the armour)
 HERO = sys.argv[5] if len(sys.argv) > 5 else ("Summoner" if L5 else "Rogue")            # (level 4: whose run: 815 wrote cine_<hero>.json)
 UI = None
 if L4 and len(sys.argv) > 6:
@@ -52,8 +54,12 @@ def iicon(name): return UI.icons.get(name) if UI else None
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("" if LV == "1" else LV))
 SND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_combat")      # (the sounds are the combat level's)
-R = json.load(open(os.path.join(SRC, f"cine_{HERO.lower()}.json" if L4 else "cine_render.json"), encoding="utf-8"))
-W5 = L5 and HERO == "Warrior"          # (level 5's weapons and tiers reel: 815's run5w, the Warrior)
+R = json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
+W5 = L5 and (HERO == "Warrior" or Q5)          # (level 5's weapons and tiers reels: 815's run5w, the Warrior; run5h, any of four)
+# (who wields what: the weapons table's rules, weapons_table.json "who")
+WHO = {"Warrior": "the Warrior wields every weapon of the table", "Warlock": "the Warlock wields every weapon of the table",
+       "Rogue": "the Rogue wields short blades and ranged weapons only", "Mage": "the Mage wields none of the table's weapons: her spells are hers",
+       "Summoner": "the Summoner wields none of the table's weapons"}
 HJ = ({h["name"]: h for h in json.load(open(os.path.join(SRC, "heroes.json")))["heroes"]} if LV == "4" else
       {h["name"]: h for h in json.load(open(os.path.join(SRC, "..", "random_dungeon_magic4", "heroes.json")))["heroes"]} if W5 else
       {"Summoner": json.load(open(os.path.join(SRC, "summoner_hero.json"), encoding="utf-8"))} if L5 else {})
@@ -535,9 +541,16 @@ def describe(it, r):
     if it["kind"] == "healing": return "Restores %d%% of your hit points  (%d HP)" % (round(it["amount"] * 100), round(it["amount"] * hp))
     if it["kind"] == "mana": return ("Restores %d%% of your mana  (%d)" % (round(it["amount"] * 100), round(it["amount"] * mp))) if mp > 0 else "No use to you: you have no mana"
     if it["kind"] == "speed": return "You move %d%% faster for %d seconds" % (round(it["amount"] * 100), it["seconds"])
+    title = C.get("title", HERO).lower()
     if it["kind"] == "armour":
         lk = it.get("looks", "")
-        return ((lk[:1].upper() + lk[1:] + ".  ") if lk else "") + "Worn, each blow on you takes %d%% less." % round(it["amount"] * 100)
+        return ((lk[:1].upper() + lk[1:] + ".  ") if lk else "") + "Worn, each blow on you takes %d%% less." % round(it["amount"] * 100) + (
+            "  It was not made for the %s." % title if "fits" in it and HERO not in it["fits"] else "")
+    if it["kind"] == "weapon":
+        # (level 5: a weapon she carries; its type and ratings, its durability, and whether her hero can wield it)
+        lk = it.get("looks", "")
+        return ((lk[:1].upper() + lk[1:] + ".  ") if lk else "") + "Durability %d." % round(it["amount"]) + (
+            "  The %s cannot wield it." % title if "wielded_by" in it and HERO not in it["wielded_by"] else "")
     return "Restores %d%% of your hit points a second for %d s  (%.1f HP/s)" % (round(it["amount"] * 100), it["seconds"], it["amount"] * hp)
 def l4_panels(o, r, t, ua):
     """level 4: FOUND under the middle of the view, what the inventory said, and the inventory while it is open (the
@@ -579,12 +592,13 @@ def l4_panels(o, r, t, ua):
         text_c(d, (W * K / 2, y), me["text"], f_line, lin((0.95, 0.92, 0.82), a), "mt", False)
     if not inv[0]: return
     le = last_at(LINES, t); lines = le["lines"] if le else []
-    nwp = sum(1 for x in lines if x.startswith("weapon|")); narm = sum(1 for x in lines if x.startswith("armour|")); nit = len(lines) - nwp - narm; cur = inv[1]
+    nwp = sum(1 for x in lines if x.startswith("weapon|")); narm = sum(1 for x in lines if x.startswith("armour|")); cur = inv[1]
+    ncar = sum(1 for x in lines if x.startswith("carried|")); nit = len(lines) - nwp - narm - ncar      # (level 5: weapons her hero cannot wield, last)
     # (a layer of its own, put over the rest: drawing on the HUD's layer replaces what is there instead of blending)
     top = o; o = Image.new("RGBA", top.size, (0, 0, 3, int(140 * ua))); d = ImageDraw.Draw(o, "RGBA")
     rh, pw, pd = 34 * K, 1000 * K, 22 * K
     # (level 5: a list longer than the screen shows the rows that fit, scrolled with the cursor: ARDHUD::DrawInventory)
-    fixed = 46 * K + 46 * K + (rh if nit <= 0 else 0) + (58 * K if narm else 0) + 150 * K
+    fixed = 46 * K + 46 * K + (rh if nit <= 0 else 0) + (58 * K if narm else 0) + (58 * K if ncar else 0) + 150 * K
     fit, first = len(lines), 0
     if fixed + rh * len(lines) > H * K - 80 * K:
         fit = max(4, min(len(lines), int((H * K - 80 * K - fixed - 30 * K) // rh))); first = max(0, min(cur - fit // 2, len(lines) - fit))
@@ -633,8 +647,13 @@ def l4_panels(o, r, t, ua):
     if narm:
         # (level 5: the armour she found; WORN on the set she has on)
         y += 12 * K; header("ARMOUR")
-        for i in range(nwp + nit, len(lines)):
+        for i in range(nwp + nit, nwp + nit + narm):
             p_ = lines[i].split("|"); rowl(i, p_[1], "WORN" if p_[2] == "1" else "", CYAN, iicon(p_[1]))
+    if ncar:
+        # (level 5: weapons found that her hero cannot wield: ARDHUD::DrawInventory)
+        y += 12 * K; header("WEAPONS THE %s CANNOT WIELD" % C.get("title", HERO).upper())
+        for i in range(nwp + nit + narm, len(lines)):
+            p_ = lines[i].split("|"); rowl(i, p_[1], "x %s" % p_[2], (0.70, 0.68, 0.62), iicon(p_[1]))
     if fit < len(lines):
         d.text((lx + 12 * K, y + 6 * K), "%d more above,  %d more below" % (first, len(lines) - first - fit), font=f_tiny, fill=lin((0.70, 0.68, 0.62))); y += 30 * K
     rx, rw = ax + pw * 0.5 + pd, pw * 0.5 - pd * 2; ry = ay + 76 * K
@@ -670,7 +689,8 @@ def l4_panels(o, r, t, ua):
             it = ITEMS.get(p_[1])
             if it: para(describe(it, r), lin(INK), f_line)
             ry += 6 * K
-            para(("Enter  take it off" if len(p_) > 2 and p_[2] == "1" else "Enter  put it on") if p_[0] == "armour" else "Enter  use it", lin(gold), f_line)
+            if p_[0] != "carried":            # (a weapon she cannot wield: no action line, as in the game)
+                para(("Enter  take it off" if len(p_) > 2 and p_[2] == "1" else "Enter  put it on") if p_[0] == "armour" else "Enter  use it", lin(gold), f_line)
     ry = max(ry + 18 * K, ay + 250 * K)
     para("Hit points  %d / %d" % (math.ceil(r["hp"]), r["mhp"]), lin((0.5, 0.9, 0.55)), f_line)
     if r.get("mmana", 0) > 0: para("Mana  %d / %d" % (math.floor(r["mana"]), r["mmana"]), lin((0.55, 0.7, 1.0)), f_line)
@@ -866,9 +886,10 @@ def overlay(f):
                "m": "open the map" if mapo else "close the map",
                "e": ("cast the " + drawn) if HERO in ("Mage", "Summoner") else "cast the fire", "1": "draw the " + C["weapons"][0]["name"].lower(),
                "2": "draw the " + (C["weapons"][1]["name"].lower() if len(C["weapons"]) > 1 else ""), "lmb": "swing the sword"}[kh]
-        if W5 and kh == "lmb":
-            wl_ = weapons_at(t); wn_ = wl_[r["w"]] if 0 <= r.get("w", -1) < len(wl_) else None
-            if wn_: lab = ("shoot the " if wn_.get("ranged") else "swing the ") + wn_["name"].lower()
+    if W5 and kh == "lmb":
+        # (the weapons reels: the weapon in her hands now, found ones too; the Rogue's as well)
+        wl_ = weapons_at(t); wn_ = wl_[r["w"]] if 0 <= r.get("w", -1) < len(wl_) else None
+        if wn_: lab = ("shoot the " if wn_.get("ranged") else "strike with the " if HERO == "Rogue" else "swing the ") + wn_["name"].lower()
     if lab: text_c(d, ((k0x + kx) / 2, ky - 24 * K), lab, f_line, (244, 240, 228, int(240 * ua)))
     # ---- the banner when a section is generated (the weapons reel: not the sets the reel made behind its card)
     for e in GENS:
@@ -889,7 +910,8 @@ def overlay(f):
     a = fade(t, 0.3, 4.6)
     if a > 0:
         d.text((44 * K, 34 * K), "random_dungeonmagic_level" + ("" if LV == "1" else LV), font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  the warrior, chosen in the menu  \u00b7  a weapons table and five tiers of rooms" if W5 else
+        d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), WHO[HERO].replace("the %s " % HERO, "she ", 1)) if Q5 else
+                                  "procedural dungeon  \u00b7  the warrior, chosen in the menu  \u00b7  a weapons table and five tiers of rooms" if W5 else
                                   "procedural dungeon  \u00b7  the summoner, chosen in the menu  \u00b7  five armour sets to find and wear" if L5 else
                                   ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), HJ[HERO]["starts_with"].lower())) if L4 else
                                   "procedural dungeon  \u00b7  two daggers, a crossbow and a roll  \u00b7  the Rogue" if L3 else
@@ -919,13 +941,25 @@ def overlay(f):
                                  "she wields the %s again (%d of %d durability left)" % (nm.lower(), round(wd["wear"]), wd["durability"]) if wd else "she wields the %s again" % nm.lower()], (255, 226, 150)))
                     continue
                 if wd and wd.get("speed"):
+                    bonus = wd["damage"] / max(wd["base_damage"], 1e-3) - 1.0
                     caps.append((cl, min(nxt - 0.05, cl + 6.5), "I  ·  ENTER  ·  " + nm.upper(),
-                                 ["from her inventory: what she finds joins her weapons, and the Warrior wields every weapon of the table",
-                                  "%s  ·  speed %d / 10: an attack every %.2f s  ·  damage %d / 10: %.0f a blow (8 + 3 x %d), %.1f with her +30%%" % (
-                                  wd["type"], wd["speed"], 1.6 - (wd["speed"] - 1) * 1.05 / 9.0, wd["rating"], wd["base_damage"], wd["rating"], wd["damage"]),
-                                  "durability %d: each blow that lands takes 1 off, at 0 it breaks  ·  %s" % (wd["durability"],
+                                 ["from her inventory: what she finds joins her weapons, and %s" % WHO[HERO],
+                                  "%s  ·  speed %d / 10: an attack every %.2f s  ·  damage %d / 10: %.0f a %s (8 + 3 x %d)%s" % (
+                                  wd["type"], wd["speed"], 1.6 - (wd["speed"] - 1) * 1.05 / 9.0, wd["rating"], wd["base_damage"], "shot" if wd.get("ranged") else "blow", wd["rating"],
+                                  (", %.1f with her +%d%%" % (wd["damage"], round(bonus * 100))) if bonus > 0.005 else ""),
+                                  "durability %d: each %s that lands takes 1 off, at 0 it breaks  ·  %s" % (wd["durability"], "arrow" if wd.get("ranged") else "blow",
                                   "a bow shot made in Blender for her: the bow in her left hand, drawn to her cheek" if wd.get("ranged") and "bow" in nm.lower() else
-                                  "two-handed cuts made in Blender for her: both hands on the hilt" if wd["type"] == "two handed sword" else "her own sword clips")], (255, 226, 150)))
+                                  "two-handed cuts made in Blender for her: both hands on the hilt" if wd["type"] == "two handed sword" else
+                                  "her own dagger strikes" if HERO == "Rogue" else "her own sword cuts")], (255, 226, 150)))
+                continue
+            if Q5 and e.get("why") == "refused" and u:
+                # (run5h: Enter on what her hero cannot use; the game's words, then why: said once the inventory is shut)
+                cl = inv_closed_after(u["t"]); nxt = next((x["t"] for x in INVS if x["t"] > e["t"]), cl + 9.0)
+                it = ITEMS.get(e.get("item", ""), {})
+                why = (["the five armour sets are fitted to the Summoner's body only: the other heroes carry them, they cannot wear them"] if e.get("what") == "armour" else
+                       ["%s: what she cannot wield goes into her bag under its own heading" % WHO[HERO],
+                        "the %s: %s  ·  wielded by %s" % (e.get("item", "").lower(), it.get("looks", "").split("  ")[0], " and ".join("the " + h_.lower() for h_ in it.get("wielded_by", [])) or "nobody")])
+                caps.append((cl, min(nxt - 0.05, cl + 3.6), "I  ·  ENTER  ·  " + u["message"].upper(), why, (255, 170, 130)))
                 continue
             if L5 and e.get("why") == "armour" and u:
                 # (level 5: a set put on; said while the camera goes round her)
@@ -959,7 +993,8 @@ def overlay(f):
             fd = next((x for x in FOUND if x["t"] >= e["t"] - 0.05), None); held = fd.get("items", []) if fd else []
             wp = [x for x in held if ITEMS.get(x, {}).get("kind") == "weapon"]
             caps.append((e["t"] - 0.3, e["t"] + 2.6, "F  ·  A CHEST OF THE GREAT HALL", ["it held %d things%s" % (len(held), (": " + " and ".join(x.lower() for x in wp) + " among them") if wp else ""),
-                         "the table's weapons are in the containers of their tiers of rooms: these are tier 1's  ·  as rare as their rarity"], (255, 226, 150)))
+                         "the table's weapons are in the containers of their tiers of rooms: these are tier 1's  ·  " +
+                         ("one session seed for the four heroes: the same chests hold the same weapons" if Q5 else "as rare as their rarity")], (255, 226, 150)))
             continue
         if L5:
             fd = next((x for x in FOUND if x["t"] >= e["t"] - 0.05), None); held = fd.get("items", []) if fd else []
@@ -1005,17 +1040,30 @@ def overlay(f):
             wl_ = weapons_at(e["t"] + 0.05)
             if not e.get("weapon"): e = dict(e, weapon=wl_[0]["name"], damage=wl_[0]["damage"])      # (a fight on the way to a chest: her own sword)
             wd = next((w_ for w_ in wl_ if w_["name"] == e.get("weapon")), None) or {}
+            if e.get("damage") is None: e = dict(e, damage=wd.get("damage", 0))
             ws_ = WEAR_SET if (WEAR_SET and WEAR_SET["t"] <= e["t"] and (not BROKE or e["t"] <= BROKE["t"])) else None
             lm = LAST_M if (LAST_M and abs(LAST_M["t"] - e["t"]) < 0.5) else None
-            l1 = "%.0f hit points, %.0f damage a blow  ·  she has %.0f  ·  in her hands: the %s, %s a blow%s" % (e["its_hit_points"], e["its_damage"], C["max_health"],
-                 (e.get("weapon") or "").lower(), ("%.1f" % e.get("damage", 0)).rstrip("0").rstrip("."), (", %s from %.0f m" % ("shot", e["from_m"]) if wd.get("ranged") else ""))
+            unit = "cast" if (wd.get("spell") and not wd.get("ranged")) else "shot" if wd.get("ranged") else "blow"
+            own = "her own %s: the weapons a hero starts with are kept and never break" % (e.get("weapon") or "").lower()
+            l1 = "%.0f hit points, %.0f damage a blow  ·  she has %.0f  ·  in her hands: the %s, %s a %s%s" % (e["its_hit_points"], e["its_damage"], C["max_health"],
+                 (e.get("weapon") or "").lower(), ("%.1f" % e.get("damage", 0)).rstrip("0").rstrip("."), unit, (", shot from %.0f m" % e["from_m"] if wd.get("ranged") else ""))
+            if e.get("spells"):
+                # (run5h's Mage: her spells; none of the table's weapons)
+                fi = next((w_ for w_ in wl_ if w_["name"] == "Fire"), {}); df = next((w_ for w_ in wl_ if w_["name"] == "Dark Fire"), {})
+                l1 = "%.0f hit points, %.0f damage a blow  ·  she has %.0f  ·  dark fire %s a cast, then fire %s" % (e["its_hit_points"], e["its_damage"], C["max_health"],
+                     ("%.1f" % df.get("damage", 0)).rstrip("0").rstrip("."), ("%.1f" % fi.get("damage", 0)).rstrip("0").rstrip("."))
+                l2 = "every cast takes mana: dark fire %d, fire %d; it comes back at %.1f a second" % (df.get("mana", 0), fi.get("mana", 0), C.get("mana_per_second", 0))
+                l3 = WHO[HERO] + " (the weapons she found are in her bag)"
+                caps.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), [l1, l2, l3], (255, 226, 150)))
+                continue
             if lm: l2, l3 = "tier 2's last set: one monster left in it", "when it falls every set of tier 2 is cleared and tier 3 opens"
             elif tr >= 3: l2, l3 = "a monster of tier 3: its hit points and blows grow with the tier of its set", \
-                                   "the %s: %d of %d durability left" % ((e.get("weapon") or "").lower(), round(wd.get("wear", 0)), wd.get("durability", 0)) if wd.get("durability") else "her own sword: never breaks"
-            elif ws_: l2, l3 = "the reel started the %s at 3 of its %d durability: each blow that lands takes 1 off" % (ws_["weapon"].lower(), ws_["durability"]), "at 0 it breaks and is gone; the sword she started with never breaks"
+                                   "the %s: %d of %d durability left" % ((e.get("weapon") or "").lower(), round(wd.get("wear", 0)), wd.get("durability", 0)) if wd.get("durability") else own
+            elif ws_: l2, l3 = "the reel started the %s at 3 of its %d durability: each blow that lands takes 1 off" % (ws_["weapon"].lower(), ws_["durability"]), \
+                               "at 0 it breaks and is gone; the %s she started with never breaks" % (wl_[0]["name"].lower() if wl_ else "sword")
             elif wd.get("speed"): l2, l3 = "speed %d / 10: an attack every %.2f s (the clip played at %.2f x)  ·  damage %d / 10" % (wd["speed"], 1.6 - (wd["speed"] - 1) * 1.05 / 9.0, wd.get("rate", 1.0), wd["rating"]), \
                                           "durability %d of %d: 1 off each blow that lands" % (round(wd["wear"]), wd["durability"])
-            else: l2, l3 = "the sword she started with: kept, never breaks", "the monsters' strength follows the tier of their set"
+            else: l2, l3 = own, "the monsters' strength follows the tier of their set"
             caps.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), [l1, l2, l3], (255, 226, 150)))
             continue
         if L5 and e.get("take"):
