@@ -1,0 +1,937 @@
+{
+ "made": "2026-10-22",
+ "dirs": [
+  {
+   "dir": "I:\\game assets\\3d platformer assets",
+   "files": 30,
+   "gb": 0.0,
+   "mb": 0.1,
+   "kinds": {
+    "3D model": 20,
+    "Godot": 10
+   },
+   "top_types": [
+    [
+     ".mtl",
+     10
+    ],
+    [
+     ".obj",
+     10
+    ],
+    [
+     ".import",
+     10
+    ]
+   ],
+   "newest": "2023-01-27",
+   "what": "3D models: 20 3D models, 10 Godot files"
+  },
+  {
+   "dir": "I:\\game assets\\HAS Overworld 2.1",
+   "files": 90,
+   "gb": 0.003,
+   "mb": 3.1,
+   "kinds": {
+    "image": 88,
+    "document": 2
+   },
+   "top_types": [
+    [
+     ".png",
+     87
+    ],
+    [
+     ".txt",
+     2
+    ],
+    [
+     ".gif",
+     1
+    ]
+   ],
+   "newest": "2020-11-09",
+   "what": "2D art: 88 pictures, 2 documents"
+  },
+  {
+   "dir": "I:\\game assets\\Jewels and Gems",
+   "files": 153,
+   "gb": 0.007,
+   "mb": 6.7,
+   "kinds": {
+    "image": 153
+   },
+   "top_types": [
+    [
+     ".png",
+     153
+    ]
+   ],
+   "newest": "2023-09-11",
+   "what": "2D art: 153 pictures"
+  },
+  {
+   "dir": "I:\\game assets\\Multi_Platformer_Tileset_v2",
+   "files": 208,
+   "gb": 0.0,
+   "mb": 0.4,
+   "kinds": {
+    "image": 207,
+    "document": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     207
+    ],
+    [
+     ".txt",
+     1
+    ]
+   ],
+   "newest": "2022-08-16",
+   "what": "2D art: 207 pictures, 1 document"
+  },
+  {
+   "dir": "I:\\game assets\\NinjaAdventure",
+   "files": 1129,
+   "gb": 0.048,
+   "mb": 48.2,
+   "kinds": {
+    "image": 1033,
+    "sound": 93,
+    "document": 2,
+    "font": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     971
+    ],
+    [
+     ".gif",
+     62
+    ],
+    [
+     ".wav",
+     62
+    ],
+    [
+     ".ogg",
+     31
+    ],
+    [
+     ".txt",
+     1
+    ],
+    [
+     ".md",
+     1
+    ]
+   ],
+   "newest": "2023-08-30",
+   "what": "2D art: 1,033 pictures, 93 sound files, 1 font, 2 documents"
+  },
+  {
+   "dir": "I:\\game assets\\NinjaAdventure - additional art",
+   "files": 4,
+   "gb": 0.0,
+   "mb": 0.0,
+   "kinds": {
+    "image": 4
+   },
+   "top_types": [
+    [
+     ".png",
+     4
+    ]
+   ],
+   "newest": "2023-10-21",
+   "what": "2D art: 4 pictures"
+  },
+  {
+   "dir": "I:\\game assets\\Pixel Art Infinite Runner - Pack",
+   "files": 177,
+   "gb": 0.019,
+   "mb": 19.2,
+   "kinds": {
+    "image": 172,
+    "document": 4,
+    "sound": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     159
+    ],
+    [
+     ".gif",
+     7
+    ],
+    [
+     ".psd",
+     6
+    ],
+    [
+     ".txt",
+     4
+    ],
+    [
+     ".wav",
+     1
+    ]
+   ],
+   "newest": "2017-12-07",
+   "what": "2D art: 172 pictures, 1 sound file, 4 documents"
+  },
+  {
+   "dir": "I:\\game assets\\Pixelart_Medieval_Fantasy_Characters_Pack",
+   "files": 2077,
+   "gb": 0.021,
+   "mb": 20.6,
+   "kinds": {
+    "image": 2038,
+    "other": 39
+   },
+   "top_types": [
+    [
+     ".png",
+     2021
+    ],
+    [
+     "(none)",
+     37
+    ],
+    [
+     ".psd",
+     17
+    ],
+    [
+     ".json",
+     2
+    ]
+   ],
+   "newest": "2019-11-28",
+   "what": "2D art: 2,038 pictures"
+  },
+  {
+   "dir": "I:\\game assets\\SpaceShooter-Full",
+   "files": 326,
+   "gb": 0.139,
+   "mb": 138.6,
+   "kinds": {
+    "image": 236,
+    "sound": 90
+   },
+   "top_types": [
+    [
+     ".png",
+     236
+    ],
+    [
+     ".wav",
+     78
+    ],
+    [
+     ".mp3",
+     6
+    ],
+    [
+     ".ogg",
+     6
+    ]
+   ],
+   "newest": "2021-12-14",
+   "what": "2D art: 236 pictures, 90 sound files"
+  },
+  {
+   "dir": "I:\\game assets\\Time Fantasy packs",
+   "files": 4954,
+   "gb": 0.011,
+   "mb": 11.1,
+   "kinds": {
+    "image": 4948,
+    "document": 6
+   },
+   "top_types": [
+    [
+     ".png",
+     4948
+    ],
+    [
+     ".txt",
+     6
+    ]
+   ],
+   "newest": "2018-04-07",
+   "what": "2D art: 4,948 pictures, 6 documents"
+  },
+  {
+   "dir": "I:\\game assets\\antarcticbees asset packs",
+   "files": 583,
+   "gb": 0.006,
+   "mb": 5.9,
+   "kinds": {
+    "image": 583
+   },
+   "top_types": [
+    [
+     ".png",
+     316
+    ],
+    [
+     ".gif",
+     267
+    ]
+   ],
+   "newest": "2026-09-27",
+   "what": "2D art: 583 pictures"
+  },
+  {
+   "dir": "I:\\game assets\\cozy farm art pack",
+   "files": 410,
+   "gb": 0.003,
+   "mb": 2.6,
+   "kinds": {
+    "image": 407,
+    "document": 3
+   },
+   "top_types": [
+    [
+     ".gif",
+     344
+    ],
+    [
+     ".png",
+     63
+    ],
+    [
+     ".txt",
+     3
+    ]
+   ],
+   "newest": "2021-12-06",
+   "what": "2D art: 407 pictures, 3 documents"
+  },
+  {
+   "dir": "I:\\game assets\\cozy people art pack",
+   "files": 1039,
+   "gb": 0.016,
+   "mb": 16.1,
+   "kinds": {
+    "image": 1036,
+    "document": 3
+   },
+   "top_types": [
+    [
+     ".png",
+     1036
+    ],
+    [
+     ".txt",
+     3
+    ]
+   ],
+   "newest": "2022-02-24",
+   "what": "2D art: 1,036 pictures, 3 documents"
+  },
+  {
+   "dir": "I:\\game assets\\fonts",
+   "files": 1,
+   "gb": 0.0,
+   "mb": 0.3,
+   "kinds": {
+    "font": 1
+   },
+   "top_types": [
+    [
+     ".ttf",
+     1
+    ]
+   ],
+   "newest": "2010-03-12",
+   "what": "fonts: 1 font"
+  },
+  {
+   "dir": "I:\\game assets\\gamedevmarket assets",
+   "files": 5069,
+   "gb": 74.448,
+   "mb": 74447.6,
+   "kinds": {
+    "sound": 4969,
+    "archive": 46,
+    "other": 42,
+    "image": 8,
+    "document": 4
+   },
+   "top_types": [
+    [
+     ".wav",
+     4969
+    ],
+    [
+     ".zip",
+     46
+    ],
+    [
+     "(none)",
+     27
+    ],
+    [
+     ".ds_store",
+     15
+    ],
+    [
+     ".png",
+     8
+    ],
+    [
+     ".txt",
+     4
+    ]
+   ],
+   "newest": "2026-03-14",
+   "what": "sound and music: 8 pictures, 4,969 sound files, 46 archives, 4 documents"
+  },
+  {
+   "dir": "I:\\game assets\\gen AI",
+   "files": 34,
+   "gb": 0.039,
+   "mb": 38.9,
+   "kinds": {
+    "sound": 13,
+    "image": 11,
+    "video": 6,
+    "other": 4
+   },
+   "top_types": [
+    [
+     ".mp3",
+     13
+    ],
+    [
+     ".png",
+     11
+    ],
+    [
+     ".mp4",
+     6
+    ],
+    [
+     ".jfif",
+     4
+    ]
+   ],
+   "newest": "2024-03-21",
+   "what": "sound and music: 11 pictures, 13 sound files, 6 videos"
+  },
+  {
+   "dir": "I:\\game assets\\huge asset pack",
+   "files": 19,
+   "gb": 0.012,
+   "mb": 11.8,
+   "kinds": {
+    "image": 14,
+    "other": 2,
+    "archive": 2,
+    "document": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     13
+    ],
+    [
+     ".zip",
+     2
+    ],
+    [
+     ".afdesign",
+     1
+    ],
+    [
+     ".eps",
+     1
+    ],
+    [
+     ".svg",
+     1
+    ],
+    [
+     ".txt",
+     1
+    ]
+   ],
+   "newest": "2023-10-12",
+   "what": "2D art: 14 pictures, 2 archives, 1 document"
+  },
+  {
+   "dir": "I:\\game assets\\humble bundle - asset compendium",
+   "files": 23303,
+   "gb": 6.741,
+   "mb": 6740.8,
+   "kinds": {
+    "image": 22053,
+    "other": 772,
+    "sound": 351,
+    "document": 105,
+    "font": 12,
+    "Tiled map": 8,
+    "archive": 2
+   },
+   "top_types": [
+    [
+     ".png",
+     22013
+    ],
+    [
+     ".efkefc",
+     320
+    ],
+    [
+     ".json",
+     261
+    ],
+    [
+     ".ogg",
+     247
+    ],
+    [
+     ".js",
+     144
+    ],
+    [
+     ".m4a",
+     104
+    ]
+   ],
+   "newest": "2023-09-07",
+   "what": "2D tiles and tile maps: 22,053 pictures, 351 sound files, 12 fonts, 2 archives, 8 Tiled maps"
+  },
+  {
+   "dir": "I:\\game assets\\kenney game assets all-in-1",
+   "files": 84975,
+   "gb": 1.199,
+   "mb": 1199.4,
+   "kinds": {
+    "image": 59281,
+    "3D model": 22580,
+    "sound": 1342,
+    "other": 1187,
+    "document": 379,
+    "Unity": 64,
+    "archive": 59,
+    "font": 50,
+    "Tiled map": 33
+   },
+   "top_types": [
+    [
+     ".png",
+     54429
+    ],
+    [
+     ".fbx",
+     5063
+    ],
+    [
+     ".mtl",
+     4990
+    ],
+    [
+     ".obj",
+     4990
+    ],
+    [
+     ".svg",
+     4846
+    ],
+    [
+     ".glb",
+     4724
+    ]
+   ],
+   "newest": "2026-03-11",
+   "what": "2D tiles and tile maps: 59,281 pictures, 1,342 sound files, 22,580 3D models, 50 fonts, 59 archives"
+  },
+  {
+   "dir": "I:\\game assets\\kenney-particle-pack-7e801dc538996622a91327bb1dd5879cf977aa09",
+   "files": 97,
+   "gb": 0.005,
+   "mb": 5.0,
+   "kinds": {
+    "image": 96,
+    "document": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     96
+    ],
+    [
+     ".txt",
+     1
+    ]
+   ],
+   "newest": "2020-11-28",
+   "what": "2D art: 96 pictures, 1 document"
+  },
+  {
+   "dir": "I:\\game assets\\kenney_space-shooter-redux",
+   "files": 314,
+   "gb": 0.002,
+   "mb": 1.5,
+   "kinds": {
+    "image": 302,
+    "sound": 7,
+    "font": 2,
+    "other": 2,
+    "document": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     301
+    ],
+    [
+     ".ogg",
+     7
+    ],
+    [
+     ".ttf",
+     2
+    ],
+    [
+     ".txt",
+     1
+    ],
+    [
+     ".xml",
+     1
+    ],
+    [
+     ".svg",
+     1
+    ]
+   ],
+   "newest": "2014-01-29",
+   "what": "2D art: 302 pictures, 7 sound files, 2 fonts, 1 document"
+  },
+  {
+   "dir": "I:\\game assets\\kenney_tower-defense-top-down",
+   "files": 606,
+   "gb": 0.004,
+   "mb": 4.0,
+   "kinds": {
+    "image": 604,
+    "document": 1,
+    "other": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     603
+    ],
+    [
+     ".txt",
+     1
+    ],
+    [
+     ".svg",
+     1
+    ],
+    [
+     ".swf",
+     1
+    ]
+   ],
+   "newest": "2016-07-29",
+   "what": "2D art: 604 pictures, 1 document"
+  },
+  {
+   "dir": "I:\\game assets\\mega 12 pack - by pixeljad",
+   "files": 986,
+   "gb": 0.005,
+   "mb": 5.2,
+   "kinds": {
+    "image": 974,
+    "document": 12
+   },
+   "top_types": [
+    [
+     ".png",
+     971
+    ],
+    [
+     ".txt",
+     12
+    ],
+    [
+     ".psd",
+     2
+    ],
+    [
+     ".gif",
+     1
+    ]
+   ],
+   "newest": "2023-06-16",
+   "what": "2D art: 974 pictures, 12 documents"
+  },
+  {
+   "dir": "I:\\game assets\\mighty game music pack",
+   "files": 77,
+   "gb": 4.478,
+   "mb": 4478.3,
+   "kinds": {
+    "sound": 77
+   },
+   "top_types": [
+    [
+     ".mp3",
+     77
+    ]
+   ],
+   "newest": "2023-10-03",
+   "what": "sound and music: 77 sound files"
+  },
+  {
+   "dir": "I:\\game assets\\mighty pixel game asset pocket pack",
+   "files": 32,
+   "gb": 0.001,
+   "mb": 0.9,
+   "kinds": {
+    "image": 32
+   },
+   "top_types": [
+    [
+     ".png",
+     28
+    ],
+    [
+     ".psd",
+     4
+    ]
+   ],
+   "newest": "2023-09-23",
+   "what": "2D art: 32 pictures"
+  },
+  {
+   "dir": "I:\\game assets\\mystic_woods_2.1",
+   "files": 35,
+   "gb": 0.0,
+   "mb": 0.1,
+   "kinds": {
+    "image": 33,
+    "other": 1,
+    "document": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     33
+    ],
+    [
+     ".url",
+     1
+    ],
+    [
+     ".txt",
+     1
+    ]
+   ],
+   "newest": "2022-12-01",
+   "what": "2D art: 33 pictures, 1 document"
+  },
+  {
+   "dir": "I:\\game assets\\mystic_woods_2.2",
+   "files": 38,
+   "gb": 0.0,
+   "mb": 0.1,
+   "kinds": {
+    "image": 35,
+    "document": 2,
+    "other": 1
+   },
+   "top_types": [
+    [
+     ".png",
+     35
+    ],
+    [
+     ".txt",
+     2
+    ],
+    [
+     ".url",
+     1
+    ]
+   ],
+   "newest": "2024-05-07",
+   "what": "2D art: 35 pictures, 2 documents"
+  },
+  {
+   "dir": "I:\\game assets\\pixabay audio",
+   "files": 19,
+   "gb": 0.009,
+   "mb": 9.1,
+   "kinds": {
+    "sound": 18,
+    "video": 1
+   },
+   "top_types": [
+    [
+     ".mp3",
+     16
+    ],
+    [
+     ".m4a",
+     1
+    ],
+    [
+     ".wav",
+     1
+    ],
+    [
+     ".mp4",
+     1
+    ]
+   ],
+   "newest": "2023-11-22",
+   "what": "sound and music: 18 sound files, 1 video"
+  },
+  {
+   "dir": "I:\\game assets\\pixel crawler",
+   "files": 333,
+   "gb": 0.019,
+   "mb": 19.3,
+   "kinds": {
+    "image": 313,
+    "other": 13,
+    "document": 7
+   },
+   "top_types": [
+    [
+     ".aseprite",
+     152
+    ],
+    [
+     ".png",
+     151
+    ],
+    [
+     ".png~",
+     13
+    ],
+    [
+     ".gif",
+     10
+    ],
+    [
+     ".txt",
+     7
+    ]
+   ],
+   "newest": "2023-10-24",
+   "what": "2D art: 313 pictures, 7 documents"
+  },
+  {
+   "dir": "I:\\game assets\\sunny side world",
+   "files": 11269,
+   "gb": 0.037,
+   "mb": 36.5,
+   "kinds": {
+    "image": 10156,
+    "other": 1104,
+    "archive": 9
+   },
+   "top_types": [
+    [
+     ".png",
+     9944
+    ],
+    [
+     ".yy",
+     992
+    ],
+    [
+     ".gif",
+     169
+    ],
+    [
+     "(none)",
+     86
+    ],
+    [
+     ".aseprite",
+     30
+    ],
+    [
+     ".ds_store",
+     22
+    ]
+   ],
+   "newest": "2023-04-10",
+   "what": "2D art: 10,156 pictures, 9 archives"
+  },
+  {
+   "dir": "I:\\game assets\\survival game godot series art",
+   "files": 15,
+   "gb": 0.0,
+   "mb": 0.1,
+   "kinds": {
+    "image": 15
+   },
+   "top_types": [
+    [
+     ".png",
+     15
+    ]
+   ],
+   "newest": "2023-11-29",
+   "what": "2D art: 15 pictures"
+  },
+  {
+   "dir": "I:\\game assets\\ultimate rpg pack",
+   "files": 346,
+   "gb": 0.007,
+   "mb": 7.0,
+   "kinds": {
+    "image": 318,
+    "archive": 28
+   },
+   "top_types": [
+    [
+     ".png",
+     295
+    ],
+    [
+     ".zip",
+     28
+    ],
+    [
+     ".aseprite",
+     23
+    ]
+   ],
+   "newest": "2023-10-28",
+   "what": "2D art: 318 pictures, 28 archives"
+  },
+  {
+   "dir": "G:\\fab-quixel downloads",
+   "files": 4,
+   "gb": 9.156,
+   "mb": 9155.5,
+   "kinds": {
+    "archive": 4
+   },
+   "top_types": [
+    [
+     ".zip",
+     4
+    ]
+   ],
+   "newest": "2024-10-23",
+   "what": "archives not unpacked: 4 archives"
+  }
+ ]
+}

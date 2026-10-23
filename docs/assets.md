@@ -1,6 +1,6 @@
 # Asset attribution
 
-Every visual and sound asset of this project, and where it comes from; and every other Unreal Engine asset on the project owner's machine: packs in the project that nothing uses yet, Fab downloads not added to it, engine plugins, packs in other formats and the KitBash3D kits.
+Every visual and sound asset of this project, and where it comes from; and every other Unreal Engine asset on the project owner's machine: packs in the project that nothing uses yet, Fab downloads not added to it, engine plugins, packs in other formats and the KitBash3D kits; and the other asset libraries on disk that are not Unreal content (2D and pixel-art packs, sound and music, fonts, a Quixel download not unpacked).
 
 The repository holds none of these assets: only scripts, source code and small data files. Packs, sounds and characters stay on the project owner's machine and are used under their store licences. The pictures committed under `docs/images` are renders made by this project.
 
@@ -492,6 +492,46 @@ Every other folder in `Content/` was made by this project's scripts or comes wit
 | `__ExternalActors__` | World Partition's one-file-per-actor data of the packs' maps and the project's levels | `E:\code\claude-ue5\claude_ue5\Content\__ExternalActors__` |
 | `__ExternalObjects__` | World Partition's external objects of the same maps | `E:\code\claude-ue5\claude_ue5\Content\__ExternalObjects__` |
 
+## Other asset libraries on disk (not Unreal content)
+
+The asset library's folders on `I:\game assets` that hold no Unreal content, and other download folders. Nothing in the project uses them yet. Surveyed by `pipeline/blender_numpy/asset_dirs_survey.py` (`asset_survey/asset_dirs.json`): each folder's files counted by kind, its most common file types, its size and its newest file.
+
+| Directory | What it holds | Main file types | Size | Newest file |
+|---|---|---|---|---|
+| `I:\game assets\3d platformer assets` | 3D models: 20 3D models, 10 Godot files | .mtl 10, .obj 10, .import 10 | under 1 MB | 2023-01-27 |
+| `I:\game assets\HAS Overworld 2.1` | 2D art: 88 pictures, 2 documents | .png 87, .txt 2, .gif 1 | 3 MB | 2020-11-09 |
+| `I:\game assets\Jewels and Gems` | 2D art: 153 pictures | .png 153 | 7 MB | 2023-09-11 |
+| `I:\game assets\Multi_Platformer_Tileset_v2` | 2D art: 207 pictures, 1 document | .png 207, .txt 1 | under 1 MB | 2022-08-16 |
+| `I:\game assets\NinjaAdventure` | 2D art: 1,033 pictures, 93 sound files, 1 font, 2 documents | .png 971, .gif 62, .wav 62, .ogg 31 | 48 MB | 2023-08-30 |
+| `I:\game assets\NinjaAdventure - additional art` | 2D art: 4 pictures | .png 4 | under 1 MB | 2023-10-21 |
+| `I:\game assets\Pixel Art Infinite Runner - Pack` | 2D art: 172 pictures, 1 sound file, 4 documents | .png 159, .gif 7, .psd 6, .txt 4 | 19 MB | 2017-12-07 |
+| `I:\game assets\Pixelart_Medieval_Fantasy_Characters_Pack` | 2D art: 2,038 pictures | .png 2,021, (none) 37, .psd 17, .json 2 | 21 MB | 2019-11-28 |
+| `I:\game assets\SpaceShooter-Full` | 2D art: 236 pictures, 90 sound files | .png 236, .wav 78, .mp3 6, .ogg 6 | 139 MB | 2021-12-14 |
+| `I:\game assets\Time Fantasy packs` | 2D art: 4,948 pictures, 6 documents | .png 4,948, .txt 6 | 11 MB | 2018-04-07 |
+| `I:\game assets\antarcticbees asset packs` | 2D art: 583 pictures | .png 316, .gif 267 | 6 MB | 2026-09-27 |
+| `I:\game assets\cozy farm art pack` | 2D art: 407 pictures, 3 documents | .gif 344, .png 63, .txt 3 | 3 MB | 2021-12-06 |
+| `I:\game assets\cozy people art pack` | 2D art: 1,036 pictures, 3 documents | .png 1,036, .txt 3 | 16 MB | 2022-02-24 |
+| `I:\game assets\fonts` | fonts: 1 font | .ttf 1 | under 1 MB | 2010-03-12 |
+| `I:\game assets\gamedevmarket assets` | sound and music: 8 pictures, 4,969 sound files, 46 archives, 4 documents | .wav 4,969, .zip 46, (none) 27, .ds_store 15 | 74.4 GB | 2026-03-14 |
+| `I:\game assets\gen AI` | sound and music: 11 pictures, 13 sound files, 6 videos | .mp3 13, .png 11, .mp4 6, .jfif 4 | 39 MB | 2024-03-21 |
+| `I:\game assets\huge asset pack` | 2D art: 14 pictures, 2 archives, 1 document | .png 13, .zip 2, .afdesign 1, .eps 1 | 12 MB | 2023-10-12 |
+| `I:\game assets\humble bundle - asset compendium` | 2D tiles and tile maps: 22,053 pictures, 351 sound files, 12 fonts, 2 archives, 8 Tiled maps | .png 22,013, .efkefc 320, .json 261, .ogg 247 | 6.7 GB | 2023-09-07 |
+| `I:\game assets\kenney game assets all-in-1` | 2D tiles and tile maps: 59,281 pictures, 1,342 sound files, 22,580 3D models, 50 fonts, 59 archives | .png 54,429, .fbx 5,063, .mtl 4,990, .obj 4,990 | 1.2 GB | 2026-03-11 |
+| `I:\game assets\kenney-particle-pack-7e801dc538996622a91327bb1dd5879cf977aa09` | 2D art: 96 pictures, 1 document | .png 96, .txt 1 | 5 MB | 2020-11-28 |
+| `I:\game assets\kenney_space-shooter-redux` | 2D art: 302 pictures, 7 sound files, 2 fonts, 1 document | .png 301, .ogg 7, .ttf 2, .txt 1 | 2 MB | 2014-01-29 |
+| `I:\game assets\kenney_tower-defense-top-down` | 2D art: 604 pictures, 1 document | .png 603, .txt 1, .svg 1, .swf 1 | 4 MB | 2016-07-29 |
+| `I:\game assets\mega 12 pack - by pixeljad` | 2D art: 974 pictures, 12 documents | .png 971, .txt 12, .psd 2, .gif 1 | 5 MB | 2023-06-16 |
+| `I:\game assets\mighty game music pack` | sound and music: 77 sound files | .mp3 77 | 4.5 GB | 2023-10-03 |
+| `I:\game assets\mighty pixel game asset pocket pack` | 2D art: 32 pictures | .png 28, .psd 4 | under 1 MB | 2023-09-23 |
+| `I:\game assets\mystic_woods_2.1` | 2D art: 33 pictures, 1 document | .png 33, .url 1, .txt 1 | under 1 MB | 2022-12-01 |
+| `I:\game assets\mystic_woods_2.2` | 2D art: 35 pictures, 2 documents | .png 35, .txt 2, .url 1 | under 1 MB | 2024-05-07 |
+| `I:\game assets\pixabay audio` | sound and music: 18 sound files, 1 video | .mp3 16, .m4a 1, .wav 1, .mp4 1 | 9 MB | 2023-11-22 |
+| `I:\game assets\pixel crawler` | 2D art: 313 pictures, 7 documents | .aseprite 152, .png 151, .png~ 13, .gif 10 | 19 MB | 2023-10-24 |
+| `I:\game assets\sunny side world` | 2D art: 10,156 pictures, 9 archives | .png 9,944, .yy 992, .gif 169, (none) 86 | 36 MB | 2023-04-10 |
+| `I:\game assets\survival game godot series art` | 2D art: 15 pictures | .png 15 | under 1 MB | 2023-11-29 |
+| `I:\game assets\ultimate rpg pack` | 2D art: 318 pictures, 28 archives | .png 295, .zip 28, .aseprite 23 | 7 MB | 2023-10-28 |
+| `G:\fab-quixel downloads` | archives not unpacked: 4 archives | .zip 4 | 9.2 GB | 2024-10-23 |
+
 ## Directories that hold assets
 
 Every directory the locations above are in, once each; none of them is inside another. The asset library on `I:\game assets` is read only.
@@ -528,9 +568,42 @@ Every directory the locations above are in, once each; none of them is inside an
 | `E:\Program Files\Epic Games\UE_5.8\Engine\Content` | the engine's own content (shapes, textures, materials) |
 | `E:\Program Files\Epic Games\UE_5.8\Engine\Plugins\Marketplace` | engine plugins from Fab (Leartes Studios' tools, Cargo) |
 | `E:\Program Files\Epic Games\UE_5.8\Engine\Plugins\Runtime\HDRIBackdrop` | the engine's HDRI Backdrop plugin |
+| `G:\fab-quixel downloads` | archives not unpacked (not Unreal content; see above) |
 | `I:\game assets\3d epicgames media packs\VaultCache\FabLibrary` | Fab downloads as Unity packages or FBX files |
 | `I:\game assets\3d fab library data cache\VaultCache` | Fab downloads in Unreal's format (the launcher's vault) |
+| `I:\game assets\3d platformer assets` | 3D models (not Unreal content; see above) |
+| `I:\game assets\antarcticbees asset packs` | 2D art (not Unreal content; see above) |
 | `I:\game assets\complete rpg creator bundle` | sound libraries: voices, combat, monsters, ambience, spells, survival |
+| `I:\game assets\cozy farm art pack` | 2D art (not Unreal content; see above) |
+| `I:\game assets\cozy people art pack` | 2D art (not Unreal content; see above) |
 | `I:\game assets\epicgames media packs\VaultCache\FabLibrary` | a second copy of the Unity and FBX downloads |
 | `I:\game assets\fanatical bundle packs` | sound libraries: RPG sound effects, fantasy music |
+| `I:\game assets\fonts` | fonts (not Unreal content; see above) |
+| `I:\game assets\gamedevmarket assets` | sound and music (not Unreal content; see above) |
+| `I:\game assets\gen AI` | sound and music (not Unreal content; see above) |
+| `I:\game assets\HAS Overworld 2.1` | 2D art (not Unreal content; see above) |
+| `I:\game assets\huge asset pack` | 2D art (not Unreal content; see above) |
 | `I:\game assets\humble bundle - 2d game creation mega bundle` | sound libraries: Quest Game, monster sounds |
+| `I:\game assets\humble bundle - asset compendium` | 2D tiles and tile maps (not Unreal content; see above) |
+| `I:\game assets\Jewels and Gems` | 2D art (not Unreal content; see above) |
+| `I:\game assets\kenney game assets all-in-1` | 2D tiles and tile maps (not Unreal content; see above) |
+| `I:\game assets\kenney-particle-pack-7e801dc538996622a91327bb1dd5879cf977aa09` | 2D art (not Unreal content; see above) |
+| `I:\game assets\kenney_space-shooter-redux` | 2D art (not Unreal content; see above) |
+| `I:\game assets\kenney_tower-defense-top-down` | 2D art (not Unreal content; see above) |
+| `I:\game assets\mega 12 pack - by pixeljad` | 2D art (not Unreal content; see above) |
+| `I:\game assets\mighty game music pack` | sound and music (not Unreal content; see above) |
+| `I:\game assets\mighty pixel game asset pocket pack` | 2D art (not Unreal content; see above) |
+| `I:\game assets\Multi_Platformer_Tileset_v2` | 2D art (not Unreal content; see above) |
+| `I:\game assets\mystic_woods_2.1` | 2D art (not Unreal content; see above) |
+| `I:\game assets\mystic_woods_2.2` | 2D art (not Unreal content; see above) |
+| `I:\game assets\NinjaAdventure` | 2D art (not Unreal content; see above) |
+| `I:\game assets\NinjaAdventure - additional art` | 2D art (not Unreal content; see above) |
+| `I:\game assets\pixabay audio` | sound and music (not Unreal content; see above) |
+| `I:\game assets\Pixel Art Infinite Runner - Pack` | 2D art (not Unreal content; see above) |
+| `I:\game assets\pixel crawler` | 2D art (not Unreal content; see above) |
+| `I:\game assets\Pixelart_Medieval_Fantasy_Characters_Pack` | 2D art (not Unreal content; see above) |
+| `I:\game assets\SpaceShooter-Full` | 2D art (not Unreal content; see above) |
+| `I:\game assets\sunny side world` | 2D art (not Unreal content; see above) |
+| `I:\game assets\survival game godot series art` | 2D art (not Unreal content; see above) |
+| `I:\game assets\Time Fantasy packs` | 2D art (not Unreal content; see above) |
+| `I:\game assets\ultimate rpg pack` | 2D art (not Unreal content; see above) |
