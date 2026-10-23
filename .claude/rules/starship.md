@@ -1,0 +1,25 @@
+---
+paths:
+  - "claude_ue5/Source/claude_ue5/SS/**"
+  - "pipeline/unreal/80*.py"
+  - "pipeline/package_starship.ps1"
+  - "pipeline/blender_numpy/ss_*.py"
+---
+
+# starship_level
+
+<!-- moved from CLAUDE.md (2026-10-23) to load only when these files are opened -->
+
+- **starship_level:** C++ `ASSFighter` / `ASSMissile` / `ASSArena` / `ASSTarget` / `ASSPlayerController` / `ASSHUD` / `ASSGameMode` / `USSFXLibrary` (`Source/claude_ue5/SS`); `800` then `801` build it (`800` without `fighter` clears the level, so `801` must follow).
+  - The fighter is data: `Parts` (pack meshes in the ship frame, +X forward; `bFlame` parts stretch along the mesh's own Y with the throttle, `Rail` parts are the missiles on their rails), `CannonMuzzles`, `MissileRails`, `Thrusters`. It stands in the level and possesses itself (`ASSGameMode` has no default pawn). Pack-only by the user's choice: no modelled parts.
+  - It has no collision of its own: each frame it sweeps a sphere against the *complex* collision of whatever is there (the pack meshes mostly have no simple collision), bolts and missiles line-trace the same way (`ECC_Visibility`). Static clutter needs `BlockAll`.
+  - Destructible targets (asteroid fields, containers, drones) are spawned by the arena in play from its data and are never saved; the station and the big asteroids are level actors tagged `ss_clutter`. `KeepOut` spheres keep spawns out of them.
+  - Effects: Mega_City's `NS_ship*` are *traffic* (they spawn whole ship meshes), not trails. Contrails are copies of the Cascade ribbon `P_ArrowTrail` tuned by `USSFXLibrary.tune_particle_system` (a particle system's `Emitters` are protected from Python and from the MCP object tools; `describe_particle_system` dumps them). No Niagara system can be authored from Python here.
+  - The kit's planet materials shade themselves from a `Light_direction` parameter (toward the sun, world space), not from the level's lights: `800` makes instances with this level's sun.
+  - Exposure is fixed (as in the village): a point light near the camera wants hundreds of candelas, not tens of thousands; a lamp meant to light something 300 m away wants ~500 000.
+  - Tests must call `set_scripted_only(True)` on the controller: PIE captures the real mouse, and whoever moves it flies the fighter.
+  - The mouse is read as raw counts (`PlayerInput->GetRawKeyValue`). `GetInputMouseDelta` is the counts x the project's axis sensitivity (0.07) x a field-of-view scale, so a test that feeds "counts" through the scripted inputs can pass while the real mouse is 40 times weaker: that happened. The mouse has turn rates, a response and a grip of its own (`MousePitchRate` ...); `PitchRate`, `YawRate`, `TurnResponse` and `Grip` are the stick's and were left alone by the user's wish.
+  - Mega_City's `SM_tunnel` has a black disc with collision closing one end (material slot `Black`). The gate course uses `SM_SS_Gate`, a copy made by `801` with that section invisible and without collision. A flight test that never flew through the gates did not notice they were shut: a path meant to be flown needs a test that flies it (805's `gate` events).
+  - `800` puts the fighter at the start corner; `801` moves it onto the first gate's axis, facing it (from the corner, flying straight on met the first gate's rim after two seconds). `800 fighter` leaves it where it is. A test that respawns is in the gate course 2 s later: keep each check short, or count `collisions`, since a bounce turns the nose and spoils a measurement.
+  - Standalone package (`pipeline/package_starship.ps1`, editor closed): BuildCookRun with `-map`, `-nocompileeditor` and `-applocaldirectory` (the runtime DLLs beside the executable instead of the redistributable installer). A packaged game starts on `GameDefaultMap`, and the installed engine cannot build a target with `CustomConfig` (it needs a unique build environment), so the script swaps `GameDefaultMap` / `GlobalDefaultGameMode` in `DefaultEngine.ini` for the run and restores the file in a `finally` (check `git status` if a run is killed). Verify a package with its own self test (`-RenderOffScreen -SSSelfTest=12`: report + picture), not with a desktop screenshot. Output goes to `builds/` (ignored: cooked pack content).
+  - Demo reel (`804`-`806`, `ss_reel_overlay.py`): rendered on the playable level, `soft_game_mode_override` = `SSGameMode`, a sequence without tracks (the picture is the player's view; the fighter's `SetChaseCamera` / `SetWatchCamera` / `SnapCamera` do the camera work). The queue does not draw the HUD (the overlay does). It steps the game unevenly inside a frame: the temporal samples are short steps while the shutter is open (motion blur amount x the frame), then one long step, so scripted input must be per tick (`AddScriptedMouseCounts`), never a rate times the last tick's length, and keys tapped for a whole frame. The world runs for a varying time before frame 0: the pilot calls `ASSArena.restart()` and `ASSFighter.relaunch(0)` on the first frame, after which two renders log the same events to the hundredth of a second.

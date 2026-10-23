@@ -16,6 +16,7 @@
   "Worn armour takes a share off every blow"
  ],
  "armour": "Any set she finds: plate, the bear warrior's, the tiefling's, demonic, the orc veteran's",
+ "wears": ["light", "medium", "heavy"],
  "starts_with": "Spells only: fire and dark fire; no armour",
  "keys_extra": "Enter (inventory)|put on / take off armour",
  "pad_extra": "A (inventory)|put on / take off armour",

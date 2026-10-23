@@ -249,6 +249,13 @@ enum class ERDItemKind : uint8
 	Healing, Mana, Speed, Food, Armour, Weapon
 };
 
+/** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */
+UENUM(BlueprintType)
+enum class ERDArmourWeight : uint8
+{
+	Light, Medium, Heavy
+};
+
 /** random_dungeonmagic_level5: a set of armour made to fit one hero: its meshes, on her skeleton, follow her pose */
 USTRUCT(BlueprintType)
 struct FRDArmourFit
@@ -277,6 +284,8 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDArmourFit> Fits;
 	/** armour: a line of what it is (the inventory shows it) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Looks;
+	/** armour: light, medium or heavy (a hero wears only the weights her Wears lists) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDArmourWeight ArmourWeight = ERDArmourWeight::Light;
 	/** random_dungeonmagic_level5: the tiers of rooms whose containers may hold it (empty: every tier) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<int32> Tiers;
 	/** a weapon (kind Weapon): how each hero who can wield it does (none for a hero: she carries it but cannot wield it).
@@ -314,6 +323,8 @@ struct FRDHeroDef
 	/** the menu: a line each for her main abilities, what she can wear, the weapons she starts with, a colour of her own */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Abilities;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Armour;
+	/** the weights of armour she can wear (empty: none); a set of one of them is worn when a fit was made for her */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDArmourWeight> Wears;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString StartsWith;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Accent = FLinearColor(1.f, 0.8f, 0.4f);
 };

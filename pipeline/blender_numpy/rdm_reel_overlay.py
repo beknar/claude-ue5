@@ -107,6 +107,18 @@ FOUND = [e for e in EV if e["kind"] == "found"]; USED = [e for e in EV if e["kin
 LINES = [e for e in EV if e["kind"] == "lines"]; MSGS = [e for e in EV if e["kind"] == "message" and e["t"] > 0.3]     # (not one left from before the restart)
 WORN = [e for e in EV if e["kind"] == "worn"]; BLOWS = [e for e in EV if e["kind"] == "blow_on_her"]       # (level 5)
 ITEMS = {it["name"]: it for it in C.get("items", [])}
+# (run5h: for her fights the pilot lets the monsters notice her from farther than in play; the first fight after says so)
+LURES = [e for e in EV if e["kind"] == "lure" and e.get("on")]
+def wears_line(it):
+    """(run5h) what her hero wears, and the set's weight: why it goes on or not"""
+    ws = [x for x in ("light", "medium", "heavy") if x in (C.get("wears") or [])]
+    who = "the %s wears %s" % (HERO.lower(), "no armour" if not ws else ("all armour: light, medium and heavy" if len(ws) == 3 else "only " + " and ".join(ws) + " armour"))
+    return "%s  ·  the %s is %s  ·  each set was fitted to the bodies of the heroes who wear its weight" % (who, it.get("name", "set").lower(), it.get("weight", "?"))
+def lured(e):
+    if not LURES: return None
+    first = next((f for f in EV if f["kind"] == "fight" and f["t"] >= LURES[0]["t"]), None)
+    if first is None or abs(first["t"] - e["t"]) > 1e-3: return None
+    return "for this reel the monsters notice her from %.0f m (in play %.0f m): they come to her" % (LURES[0]["aggro_cm"] / 100.0, LURES[0]["game_aggro_cm"] / 100.0)
 # (the weapons reel: her weapons as they were (found ones join, broken ones go, their wear), the tiers' notices, the jump)
 WPNS = [e for e in EV if e["kind"] == "weapons"]; TNOTE = [e for e in EV if e["kind"] == "tier_notice" and e["text"]]
 def last_at(evs, t):
@@ -543,9 +555,15 @@ def describe(it, r):
     if it["kind"] == "speed": return "You move %d%% faster for %d seconds" % (round(it["amount"] * 100), it["seconds"])
     title = C.get("title", HERO).lower()
     if it["kind"] == "armour":
-        lk = it.get("looks", "")
-        return ((lk[:1].upper() + lk[1:] + ".  ") if lk else "") + "Worn, each blow on you takes %d%% less." % round(it["amount"] * 100) + (
-            "  It was not made for the %s." % title if "fits" in it and HERO not in it["fits"] else "")
+        # (ARDHUD::DescribeItem / ARDDungeonGenerator::ArmourRefusal: its weight, and why her hero cannot wear it)
+        lk = it.get("looks", ""); wt = it.get("weight")
+        s = (("%s armour.  " % wt.capitalize()) if wt else "") + ((lk[:1].upper() + lk[1:] + ".  ") if lk else "") + "Worn, each blow on you takes %d%% less." % round(it["amount"] * 100)
+        wears = C.get("wears")
+        if wt and wears is not None and wt not in wears:
+            ws = [x for x in ("light", "medium", "heavy") if x in wears]
+            s += ("  The %s wears no armour." % title) if not ws else ("  The %s is %s: the %s wears only %s armour." % (it["name"].lower(), wt, title, ws[0] if len(ws) == 1 else ", ".join(ws[:-1]) + " and " + ws[-1]))
+        elif "fits" in it and HERO not in it["fits"]: s += "  The %s was not made for the %s." % (it["name"].lower(), title)
+        return s
     if it["kind"] == "weapon":
         # (level 5: a weapon she carries; its type and ratings, its durability, and whether her hero can wield it)
         lk = it.get("looks", "")
@@ -956,7 +974,7 @@ def overlay(f):
                 # (run5h: Enter on what her hero cannot use; the game's words, then why: said once the inventory is shut)
                 cl = inv_closed_after(u["t"]); nxt = next((x["t"] for x in INVS if x["t"] > e["t"]), cl + 9.0)
                 it = ITEMS.get(e.get("item", ""), {})
-                why = (["the five armour sets are fitted to the Summoner's body only: the other heroes carry them, they cannot wear them"] if e.get("what") == "armour" else
+                why = ([wears_line(it), "the %s: %s" % (e.get("item", "").lower(), it.get("looks", ""))] if e.get("what") == "armour" else
                        ["%s: what she cannot wield goes into her bag under its own heading" % WHO[HERO],
                         "the %s: %s  ·  wielded by %s" % (e.get("item", "").lower(), it.get("looks", "").split("  ")[0], " and ".join("the " + h_.lower() for h_ in it.get("wielded_by", [])) or "nobody")])
                 caps.append((cl, min(nxt - 0.05, cl + 3.6), "I  ·  ENTER  ·  " + u["message"].upper(), why, (255, 170, 130)))
@@ -965,11 +983,11 @@ def overlay(f):
                 # (level 5: a set put on; said while the camera goes round her)
                 nm = u["entry"].split("|")[1]; it = ITEMS.get(nm, {}); n_ = sum(1 for x in USED if x["entry"].startswith("armour|") and x["t"] <= u["t"])
                 nxt = next((x["t"] for x in INVS if x["t"] > e["t"]), u["t"] + 5.0)
-                caps.append((e["t"], u["t"], "I  ·  ENTER  ·  ARMOUR", ["the five sets she found are in her inventory; one is worn at a time (in play the game pauses here)",
+                caps.append((e["t"], u["t"], "I  ·  ENTER  ·  ARMOUR", [("the sets she found are in her inventory; " if Q5 else "the five sets she found are in her inventory; ") + "one is worn at a time (in play the game pauses here)",
                              "she goes down the list to the %s and puts it on" % nm.lower()], (255, 226, 150)))
                 caps.append((u["t"], min(nxt - 0.05, u["t"] + 4.6), nm.upper() + ("" if n_ < 6 else "  ·  AGAIN"),
-                             [(it.get("looks", "")[:1].upper() + it.get("looks", "")[1:]) + "  ·  each blow on her takes %d%% less" % round(it.get("amount", 0) * 100),
-                              "made for her body from a Fab warrior's armour: it moves with her skeleton (the game puts the set's mesh on her bones)"], lin(CYAN)[:3]))
+                             [(("%s armour  ·  " % it["weight"]) if it.get("weight") else "") + (it.get("looks", "")[:1].upper() + it.get("looks", "")[1:]) + "  ·  each blow on her takes %d%% less" % round(it.get("amount", 0) * 100),
+                              wears_line(it) if Q5 else "made for her body from a Fab warrior's armour: it moves with her skeleton (the game puts the set's mesh on her bones)"], lin(CYAN)[:3]))
                 continue
             if u:
                 caps.append((e["t"], u["t"], head, [first, "she goes down the list to what helps her now"], (255, 226, 150)))
@@ -1054,6 +1072,7 @@ def overlay(f):
                      ("%.1f" % df.get("damage", 0)).rstrip("0").rstrip("."), ("%.1f" % fi.get("damage", 0)).rstrip("0").rstrip("."))
                 l2 = "every cast takes mana: dark fire %d, fire %d; it comes back at %.1f a second" % (df.get("mana", 0), fi.get("mana", 0), C.get("mana_per_second", 0))
                 l3 = WHO[HERO] + " (the weapons she found are in her bag)"
+                if lured(e): l3 = lured(e)
                 caps.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), [l1, l2, l3], (255, 226, 150)))
                 continue
             if lm: l2, l3 = "tier 2's last set: one monster left in it", "when it falls every set of tier 2 is cleared and tier 3 opens"
@@ -1064,6 +1083,7 @@ def overlay(f):
             elif wd.get("speed"): l2, l3 = "speed %d / 10: an attack every %.2f s (the clip played at %.2f x)  ·  damage %d / 10" % (wd["speed"], 1.6 - (wd["speed"] - 1) * 1.05 / 9.0, wd.get("rate", 1.0), wd["rating"]), \
                                           "durability %d of %d: 1 off each blow that lands" % (round(wd["wear"]), wd["durability"])
             else: l2, l3 = own, "the monsters' strength follows the tier of their set"
+            if lured(e): l3 = lured(e)
             caps.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), [l1, l2, l3], (255, 226, 150)))
             continue
         if L5 and e.get("take"):

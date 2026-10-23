@@ -150,6 +150,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float MeleeBonus = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float RangedBonus = 0.f;
 	const FRDHeroDef* FindHero(FName Name) const;
+	/** why the hero in play cannot wear that armour ("" when she can): its weight is not one she wears (the hero's Wears),
+	 *  or no fit was made for her. Label: the item's name as the messages write it. */
+	FString ArmourRefusal(const FRDItemDef& It, const FString& Label) const;
 	/** the hero of this play: ?Hero= of the level's URL, else DefaultHero, else the first */
 	FName ChosenHero() const;
 	/** puts a hero's data into the generator's fields (her pawn must be hers: see SwitchHero) */

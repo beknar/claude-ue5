@@ -760,11 +760,13 @@ bool URDCombatComponent::WearArmour(FName Item)
 		if (AActor* O = GetOwner()) Generator->PlaySoundAt(TEXT("Player.Inventory"), O->GetActorLocation());
 		return true;
 	}
+	// (her hero must wear armour of its weight, and a fit must have been made for her)
+	const FString No = Generator->ArmourRefusal(It, Lb);
 	const FRDArmourFit* Fit = It.Fits.FindByPredicate([this](const FRDArmourFit& F) { return F.Hero == Generator->CurrentHero; });
 	USkeletalMeshComponent* M = Body();
-	if (!Fit || Fit->Meshes.Num() == 0 || !M)
+	if (!No.IsEmpty() || !Fit || Fit->Meshes.Num() == 0 || !M)
 	{
-		SetMessage(FString::Printf(TEXT("The %s was not made for the %s"), *Lb, *Generator->PlayerTitle.ToLower()));
+		SetMessage(No.IsEmpty() ? FString::Printf(TEXT("The %s was not made for the %s"), *Lb, *Generator->PlayerTitle.ToLower()) : No);
 		return false;
 	}
 	TakeOffArmour();

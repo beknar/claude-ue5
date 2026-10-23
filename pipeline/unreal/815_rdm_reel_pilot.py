@@ -46,12 +46,17 @@ gratings go) and walks on through into tier 3, which is generated ahead of her. 
 change (found, worn, broken), the tier panel's numbers, a seal's prompt near her, the tiers' notices, the sealed passages.
 Level 5 with the way "heroes" (the four heroes' weapons reel, run5h; Warrior, Mage, Warlock or Rogue, every one with the
 same session seed, so the great hall's chests hold the same weapons for each and the rules of who wields what show): the
-hall's chests with weapons as in run5w, then her own part: the Warrior tries on an armour set (made for the Summoner
-only: refused), wields the two-handed sword and the bow and kills with each; the Mage wields none of the table's weapons
-(Enter on the sword: refused), fights with her spells and drinks a mana potion; the Warlock wields a found short sword
-started at 3 of its durability and fights until it breaks; the Rogue (short blades and ranged weapons only) is refused
-the two-handed sword, wields the found dagger and kills with it, then the bow, and takes the tiers' part of run5w (its
-last 24 s). The record also has, for each item, the heroes it fits.
+hall's chests with weapons as in run5w, then her own part (who wears what: 856; the chests also hold the plate armour,
+the orc veteran's (both heavy) and the tiefling's (light)): the Warrior puts on the plate armour (she wears all), wields
+the two-handed sword and the bow and kills with each in it; the Mage wields none of the table's weapons (Enter on the
+sword: refused) and wears no armour (refused), fights with her spells and drinks a mana potion; the Warlock is refused the
+plate armour (heavy: she wears light and medium), puts on the tiefling's, wields a found short sword started at 3 of its
+durability and fights until it breaks; the Rogue (short blades and ranged weapons only, light armour only) is refused the
+two-handed sword and the plate armour, puts on the tiefling's, wields the found dagger and kills with it, then the bow,
+and takes the tiers' part of run5w (its last 24 s). The record also has, for each item, the heroes it fits. For her fights (not the chests, the inventory or
+the tiers' part) the monsters notice her from REEL_AGGRO cm instead of the game's AggroDistance (the "lure" event says
+so; put back after): the great hall's nearest monsters are 35 to 57 m off by the way, and the renders showed her running
+empty hallways after them for the rest of her run; lured, they come to her in the hall.
 Writes SourceArt/random_dungeon_magic[2|3]/cine_render.json (level 4: random_dungeon_magic4/cine_<hero>.json; level 5:
 random_dungeon_magic5/cine_summoner.json, the way "heroes" cine_quartet_<hero>.json; rehearse: cine_rehearsal.json) and
 logs "RDMREEL saved".
@@ -170,6 +175,14 @@ def path(a, b):
 def wide_here():
     l = loc(); sec = section_of(l)
     return sec is not None and sec.room_at(l) >= 0 and "unction" not in sec.get_room_kind(sec.room_at(l))
+REEL_AGGRO = 4500.0
+def lure(on=True):
+    """(run5h) her fights: the monsters notice her from REEL_AGGRO cm (on) or from the game's own distance again (off)"""
+    gen = G["gen"]
+    if "aggro0" not in G: G["aggro0"] = (gen.get_editor_property("aggro_distance"), gen.get_editor_property("lose_distance"))
+    a0, l0 = G["aggro0"]
+    gen.set_editor_property("aggro_distance", REEL_AGGRO if on else a0); gen.set_editor_property("lose_distance", max(l0, REEL_AGGRO + 1500.0) if on else l0)
+    event("lure", on=on, aggro_cm=REEL_AGGRO if on else a0, game_aggro_cm=a0)
 def threat():
     """the monster to fight: one that is after her, or one she can see within the spell's reach"""
     l = loc(); best = None
@@ -576,7 +589,6 @@ def nearest_monster(sec_coord=None, max_steps=40, max_len=1e9):
         pts = path(l, q.get_actor_location())
         if not 1 < len(pts) <= max_steps: continue
         ln = d2(l, pts[0]) + sum(d2(pts[k], pts[k + 1]) for k in range(len(pts) - 1))
-        if W5H and str(q.monster_name) == "Ripper_dog": ln += 5000.0         # (run5h: the dogs never came at her in the renders: others first)
         if ln <= max_len and (best is None or ln < best[0]): best = (ln, q)
     return best[1] if best else None
 def fights_w(kills=1, tries=4, steps=40):
@@ -585,6 +597,11 @@ def fights_w(kills=1, tries=4, steps=40):
     c = G["combat"]; k0 = sum(1 for e in S["events"] if e["kind"] == "kill")
     for _ in range(tries):
         if T() > G.get("until", 1e9) - 6.0: return
+        # (run5h, lured: one coming at her is waited for a moment where she stands, before she sets out after the nearest)
+        if W5H and "aggro0" in G and threat() is None:
+            tw = T()
+            while threat() is None and T() - tw < 2.5 and T() < G.get("until", 1e9) - 6.0:
+                camera(side=25.0, pitch=-12.0, rate=25.0); yield
         m = threat() or nearest_monster(IP(0, 0), 60)
         if m is None: return
         # (run5h's Mage: her spells, dark fire first: level 4's fight)
@@ -755,6 +772,14 @@ def linger():
             seg("fight"); G["casts0"] = c.attacks_made
             yield from (fight(m) if HERO == "Mage" else fight_w(m)); seg("weapon"); continue
         yield from pause(0.5, lambda: camera(side=40.0, pitch=-11.0, rate=12.0))
+def heaviest_armour(weights, lightest=False):
+    """(run5h) the heaviest (or lightest) set she carries of those weights"""
+    gen = G["gen"]; order = {"light": 0, "medium": 1, "heavy": 2}
+    wt = {str(it.name): str(it.armour_weight.name).lower() for it in gen.get_editor_property("items") if it.kind == unreal.RDItemKind.ARMOUR}
+    have = [str(x).split("|")[1] for x in G["combat"].get_inventory_lines() if str(x).startswith("armour|")]
+    cand = [n_ for n_ in have if wt.get(n_) in weights]
+    if not cand: return None
+    return (min if lightest else max)(cand, key=lambda n_: order[wt[n_]])
 def run5h():
     """(level 5, the four heroes' weapons reel) the great hall's chests that hold weapons (the same seed for every hero:
     the same weapons), then what the rules let her hero do with them (the weapons table's "who": the Warrior and the
@@ -771,12 +796,16 @@ def run5h():
     G["until"] = DUR - 29.0 if tiers else DUR + 1.0       # (the Rogue's run ends with the bow drawn and the tiers' part: its last 29 s)
     seg("weapon")
     if HERO == "Warrior":
-        # an armour set: made for the Summoner, not her; then the two-handed sword and the bow, a kill with each
-        arm = next((str(x).split("|")[1] for x in c.get_inventory_lines() if str(x).startswith("armour|")), None)
-        if arm: yield from refuse("armour", arm)
+        # the heaviest set the chests gave (she wears all armour), shown round her; then the two-handed sword and the
+        # bow, a kill with each
+        arm = heaviest_armour(["light", "medium", "heavy"])
+        if arm:
+            yield from wield(arm, "armour", "armour")
+            yield from swing_to(150.0, 0.7, -9.0); yield from orbit(3.0, 150.0, 200.0, -8.0)
         if two:
             yield from wield(two[0])
             yield from swing_to(150.0, 0.7, -9.0); yield from orbit(3.0, 150.0, 200.0, -8.0)
+        lure()
         yield from fights_w(1, 4, 25)
         if ranged and T() < DUR - 12.0:
             yield from wield(ranged[0])
@@ -786,16 +815,26 @@ def run5h():
         # none of the table's weapons: Enter on one says so; her spells, and a mana potion when her mana is down
         nm = (two or swords or ranged or short or [None])[0]
         if nm: yield from refuse("carried", nm)
+        arm = heaviest_armour(["light", "medium", "heavy"], lightest=True)       # (she wears none: Enter says so)
+        if arm: yield from refuse("armour", arm)
+        lure()
         yield from fights_w(1, 4)
         mp = next((str(x).split("|")[1] for x in c.get_inventory_lines() if str(x).startswith("item|") and "Mana" in str(x)), None)
         if mp and c.get_mana() < c.get_max_mana() - 1.0 and T() < DUR - 6.0: yield from wield(mp, "item", "item")
     elif HERO == "Warlock":
         # a found short sword, started at 3 of its durability: it breaks on her third hit
         brk = (swords or two or [None])[0]
+        no = heaviest_armour(["heavy"])
+        if no: yield from refuse("armour", no)
+        arm = heaviest_armour(["light", "medium"])
+        if arm:
+            yield from wield(arm, "armour", "armour")
+            yield from swing_to(140.0, 0.6, -9.0); yield from orbit(2.4, 140.0, 140.0, -8.0)
         if brk:
             yield from wield(brk)
             yield from swing_to(140.0, 0.6, -9.0); yield from orbit(2.4, 140.0, 140.0, -8.0)
             i = c.get_weapon_index(); c.set_weapon_wear(i, 3.0); event("wear_set", weapon=brk, wear=3.0, durability=c.get_weapon_durability(i))
+            lure()
             while c.weapons_broken == 0 and T() < DUR - 3.0:
                 m = threat() or nearest_monster(IP(0, 0), 60)
                 if m is None: break
@@ -806,10 +845,16 @@ def run5h():
         # the two-handed sword is not hers (Enter says so); the dagger she found and a kill with it; the bow; the tiers
         nm = (two or swords or [None])[0]
         if nm: yield from refuse("carried", nm)
+        no = heaviest_armour(["medium", "heavy"])
+        if no: yield from refuse("armour", no)
+        arm = heaviest_armour(["light"])
+        if arm: yield from wield(arm, "armour", "armour")
         if short:
             yield from wield(short[0])
             yield from swing_to(140.0, 0.6, -9.0); yield from orbit(2.4, 140.0, 140.0, -8.0)
+            lure()
             yield from fights_w(1, 4, 40)
+            lure(False)                                  # (the tiers' part as the weapons and tiers reel has it)
         if ranged: yield from wield(ranged[0])         # (tier 2's last monster and tier 3's from range: the knife does 11 a blow)
         yield from tiers_part()
     G["until"] = DUR + 1.0
@@ -1122,6 +1167,7 @@ def stop(why=None):
             if G.get("combat") is not None and ues.get_game_world() is not None:
                 G["combat"].set_scripted_only(False); G["pc"].set_ignore_look_input(False)
                 if L4: G["combat"].set_inventory_open(False)          # (left open, it keeps her from attacking in the next run)
+                if "aggro0" in G: G["gen"].set_editor_property("aggro_distance", G["aggro0"][0]); G["gen"].set_editor_property("lose_distance", G["aggro0"][1])
         except Exception: pass
         G.clear()
 def body():
@@ -1167,7 +1213,10 @@ def body():
                                                 "alongside": bool(d.alongside), "mana": d.mana_cost, "ranged": bool(d.spell and d.bolt_mesh)} for i, d in enumerate(ws_)],
                                    "melee_bonus": gen.get_editor_property("melee_bonus"), "ranged_bonus": gen.get_editor_property("ranged_bonus"),
                                    "items": [{"name": str(it.name), "kind": str(it.kind.name).lower(), "amount": it.amount, "seconds": it.seconds, "looks": str(it.looks),
-                                              **({"fits": [str(x.hero) for x in it.fits], "wielded_by": [str(x.hero) for x in it.weapon_fits]} if L5 else {})} for it in gen.get_editor_property("items")],
+                                              **({"fits": [str(x.hero) for x in it.fits if len(x.meshes)], "wielded_by": [str(x.hero) for x in it.weapon_fits],
+                                                    "weight": str(it.armour_weight.name).lower()} if L5 else {})} for it in gen.get_editor_property("items")],
+                                   # (level 5: the weights of armour her hero wears)
+                                   "wears": [str(x.name).lower() for h_ in gen.get_editor_property("heroes") if str(h_.name) == str(gen.get_editor_property("current_hero")) for x in h_.wears] if L5 else None,
                                    "keys": list(gen.get_editor_property("controls_keys")), "pad": list(gen.get_editor_property("controls_pad")), "rogue_controls": bool(gen.get_editor_property("rogue_controls"))})
     if MODE == "render":
         sec = unreal.TimeManagementLibrary.conv_qualified_frame_time_to_seconds(G["player"].get_current_time())

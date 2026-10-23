@@ -37,7 +37,7 @@ W5 = LV == "5w"; Q5 = LV == "5h"; LV = LV[:1]          # ("5w": level 5's weapon
 SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + LV)
 M = json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
 ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
-TITLE, SUB = (("random_dungeonmagic_level5", "four heroes, one weapons table: who wields what, a weapon that breaks, and the tiers of rooms") if Q5 else
+TITLE, SUB = (("random_dungeonmagic_level5", "four heroes, the weapons and the armour: who wields and wears what, a weapon that breaks, the tiers of rooms") if Q5 else
               ("random_dungeonmagic_level5", "choose the warrior in the menu: a table of 29 weapons to find, wield and wear out, and five tiers of rooms") if W5 else
               ("random_dungeonmagic_level5", "choose the summoner in the menu, then the great hall: five armour sets to find and wear") if LV == "5" else
               ("random_dungeonmagic_level4", "choose a hero in the menu, then the dungeon: four heroes, four runs"))

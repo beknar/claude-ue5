@@ -14,13 +14,22 @@ What is left inside her skin (the scale fits most, not all) is pushed out along 
 pieces are joined into one mesh (their materials kept by name), skinned with the pieces' own weights to her skeleton in
 her rest pose, and written as armour_fit/<set>.fbx with her armature; armour_fit/fit.json says per set how many vertices
 were pushed out and how far, and per bone the scales; check renders armour_fit/<set>_{front,side,back}.png.
-    blender -b -P summoner3_armour.py -- <SourceArt/summoner3> [set key ...]"""
+Another hero (the heroes share her bone names; --pct: the percentile of her skin's distance taken, 95): --hero <mesh name> (Fem5, DarkCaster, Rogue ...) takes armour_src/
+SK_JRPG_<name>.fbx (849 heroes) and writes armour_fit/<name>/<set>.fbx, its renders and fit.json there.
+    blender -b -P summoner3_armour.py -- <SourceArt/summoner3> [--hero <name>] [set key ...]"""
 import bpy, sys, os, json, math, numpy as np, mathutils
 from mathutils.bvhtree import BVHTree
 argv = sys.argv[sys.argv.index("--") + 1:]
-SA = argv[0]; ONLY = set(argv[1:])
+SA = argv[0]; rest = argv[1:]; HERO = "Summoner3"
+if "--hero" in rest: k = rest.index("--hero"); HERO = rest[k + 1]; rest = rest[:k] + rest[k + 2:]
+# (how far out her skin is round a bone: this percentile of its vertices' distance; straps and holsters on a hero's thigh
+# made 95 balloon the bear warrior's trousers on the Warrior)
+PCT = 95.0
+if "--pct" in rest: k = rest.index("--pct"); PCT = float(rest[k + 1]); rest = rest[:k] + rest[k + 2:]
+ONLY = set(rest)
 J = json.load(open(os.path.join(SA, "armour.json"), encoding="utf-8"))
-SRC = os.path.join(SA, "armour_src"); OUT = os.path.join(SA, "armour_fit"); os.makedirs(OUT, exist_ok=True)
+SRC = os.path.join(SA, "armour_src"); OUT = os.path.join(SA, "armour_fit", *([] if HERO == "Summoner3" else [HERO])); os.makedirs(OUT, exist_ok=True)
+PREFIX = "SK_S3_" if HERO == "Summoner3" else f"SK_{HERO}_"
 GAP, PUSH = 0.006, 0.003
 SIDES = ("l", "r"); FING = ("thumb", "index", "middle", "ring", "pinky")
 AIM = {"pelvis": "spine_01", "spine_01": "spine_02", "spine_02": "spine_03", "spine_03": "neck_01", "neck_01": "head"}
@@ -102,7 +111,7 @@ def her_profile(her, hv, hW, names):
         for a in range(24):
             for b in range(NY):
                 s = rho[(tb == a) & (yb == b)]
-                if len(s) >= 3: G[a, b] = np.percentile(s, 95)
+                if len(s) >= 3: G[a, b] = np.percentile(s, PCT)
         # (holes: the nearest filled bin along the ring, then along the bone)
         for _ in range(24):
             if not np.isnan(G).any(): break
@@ -184,7 +193,7 @@ def fit_set(s, her, hb, hv, hW, hnames, bvh_h, report):
     for o in bpy.context.scene.objects: o.select_set(o in pieces)
     bpy.context.view_layer.objects.active = pieces[0]
     bpy.ops.object.join()
-    a = bpy.context.active_object; a.name = a.data.name = "SK_S3_" + s["key"]
+    a = bpy.context.active_object; a.name = a.data.name = PREFIX + s["key"]
     a.parent = hb; a.matrix_parent_inverse = hb.matrix_world.inverted()
     mod = a.modifiers.new("Armature", "ARMATURE"); mod.object = hb
     return a
@@ -194,7 +203,7 @@ report_all = {}
 for s in J["sets"]:
     if ONLY and s["key"] not in ONLY: continue
     clear()
-    hb, hm = imp_fbx(os.path.join(SRC, "SK_JRPG_Summoner3.fbx")); hm = hm[0]
+    hb, hm = imp_fbx(os.path.join(SRC, f"SK_JRPG_{HERO}.fbx")); hm = hm[0]
     her = Rig(hb); hnames = [g.name for g in hm.vertex_groups]
     dg = bpy.context.evaluated_depsgraph_get(); ev = hm.evaluated_get(dg); me_ = ev.to_mesh()
     hv = np.array([hm.matrix_world @ v.co for v in me_.vertices]); me_.calc_loop_triangles()

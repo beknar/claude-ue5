@@ -10,7 +10,12 @@
            opened give theirs, she carries exactly what they held, opened again they give nothing
   wear     (the dungeon) with the keys (I, S / W to the set, Enter) each set goes on: one set's meshes on her at a
            time, following her body (leader pose), her armour the set's share; Enter again takes it off; the
-           Mage given a set cannot wear it (it was not made for her)
+           Mage given a set cannot wear it (she wears no armour)
+  heroarmour (the dungeon) each of the four heroes given all five sets: the weights her card allows go on (856: the
+           Warrior light, medium and heavy, the Warlock light and medium, the Rogue light, the Mage none), with the fit
+           made for her (SK_<her mesh>_<set>) on her body as leader; the others are refused and the message says why (the
+           weight, or that she wears no armour); in her heaviest set she runs and the armour stays on her bones (as follow);
+           a picture of each in it, from in front
   follow   (the dungeon) in plate armour she runs and casts: skinned on the CPU as drawn, the armour's vertices
            keep their distance to her body's nearest vertices (median, 95th percentile against the same armour
            left in its reference pose on her, which falls behind her limbs)
@@ -256,8 +261,55 @@ def step_wear():
     mage = {"switched": ok_sw, "wore": m.wear_armour(SETS[0]), "worn": str(m.get_worn_armour()), "meshes": len(m.get_armour_meshes()), "message": str(m.message)}
     g.switch_hero("Summoner"); yield from wait(0.6); refresh(); quiet(False)
     ok = (all(e["ok"] for e in out) and off["worn"] == "None" and off["armour"] == 0.0 and off["meshes"] == 0 and "take off" in off["message"]
-          and mage["switched"] and not mage["wore"] and mage["worn"] == "None" and mage["meshes"] == 0 and "not made for" in mage["message"])
+          and mage["switched"] and not mage["wore"] and mage["worn"] == "None" and mage["meshes"] == 0 and "wears no armour" in mage["message"])
     step_result("wear", ok, sets=out, taken_off=off, mage=mage)
+
+HERO_MESH = {"Warrior": "Fem5", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue"}
+def step_heroarmour():
+    """each hero tries on all five sets: the weights she wears go on with her own fit, the others are refused with why;
+    her heaviest set stays on her bones as she runs"""
+    g = G["gen"]; HJ4 = {h["name"]: h for h in json.load(open(os.path.join(SA, "random_dungeon_magic4", "heroes.json"), encoding="utf-8"))["heroes"]}
+    weight = {s["title"]: s["weight"] for s in AJ["sets"]}; skey = {s["title"]: s["key"] for s in AJ["sets"]}
+    order = {"light": 0, "medium": 1, "heavy": 2}; res = {}
+    for h in ("Warrior", "Mage", "Warlock", "Rogue"):
+        c = yield from restart(); quiet(True)
+        ok_sw = g.switch_hero(h); yield from wait(0.6); refresh(); c = cb(); quiet(True)
+        body = G["pawn"].get_component_by_class(unreal.SkeletalMeshComponent)
+        for t in SETS: c.add_item(t, 1)
+        wears = HJ4[h]["wears"]; tries = []
+        for t in SETS:
+            if str(c.get_worn_armour()) != "None": c.wear_armour(str(c.get_worn_armour()))      # (off first: a wrong one must not stay on)
+            wore = bool(c.wear_armour(t)); ms = list(c.get_armour_meshes())
+            e = {"set": t, "weight": weight[t], "wore": wore, "worn": str(c.get_worn_armour()), "message": str(c.message),
+                 "meshes": [m.skeletal_mesh_asset.get_name() if m.skeletal_mesh_asset else None for m in ms],
+                 "follows_her": all(m.leader_pose_component == body and m.get_attach_parent() == body for m in ms)}
+            allowed = weight[t] in wears
+            e["ok"] = (wore and e["worn"] == t and e["meshes"] == ["SK_%s_%s" % (HERO_MESH[h], skey[t])] and e["follows_her"]) if allowed else \
+                      (not wore and e["worn"] == "None" and not e["meshes"]
+                       and (("wears no armour" in e["message"]) if not wears else ("wears only" in e["message"] and weight[t] in e["message"])))
+            tries.append(e)
+        # her heaviest set, running: on her bones within a centimetre
+        heavy = max((t for t in SETS if weight[t] in wears), key=lambda t: order[weight[t]], default=None)
+        follow = None
+        if heavy:
+            if str(c.get_worn_armour()) != heavy: c.wear_armour(heavy)
+            yield from wait(0.3)
+            sim = lambda k, d: c.simulate_key(k, d); sim(key("LeftShift"), True); sim(key("W"), True)
+            rs = []
+            for k in range(4):
+                yield from wait(0.25); r = list(c.measure_armour_follow(600)); rs.append(r)
+            sim(key("W"), False); sim(key("LeftShift"), False); yield from wait(0.4)
+            follow = {"set": heavy, "bone_max": round(max(r[5] for r in rs), 3) if all(rs) else None, "skin_median": round(max(r[1] for r in rs), 2) if all(rs) else None,
+                      "bone_n": min(int(r[3]) for r in rs) if all(rs) else 0}
+            # a picture of her in it, from in front
+            p = G["pawn"]; l = p.get_actor_location(); yaw = p.get_actor_rotation().yaw
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yaw + 180.0)); yield from wait(0.5)
+            shot("armour_" + h); yield from rwait(1.5)
+        res[h] = {"switched": bool(ok_sw), "wears": wears, "tries": tries, "follow": follow,
+                  "ok": bool(ok_sw) and all(e["ok"] for e in tries) and (follow is None or (follow["bone_n"] > 50 and follow["bone_max"] < 1.0 and follow["skin_median"] < 0.5))
+                        and (heavy is not None) == bool(wears)}
+    g.switch_hero("Summoner"); yield from wait(0.6); refresh(); quiet(False)
+    step_result("heroarmour", all(v["ok"] for v in res.values()), heroes=res)
 
 def step_follow():
     g = G["gen"]; c = yield from restart(); quiet(True)
@@ -600,7 +652,7 @@ def step_weapons():
     R.setdefault("shots", []).extend(shots_)
     step_result("weapons", ok, heroes=out, front_shots=shots_)
 
-STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "follow": step_follow, "damage": step_damage, "ui": step_ui,
+STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "heroarmour": step_heroarmour, "follow": step_follow, "damage": step_damage, "ui": step_ui,
          "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons}
 def run():
     for s in PLAN:

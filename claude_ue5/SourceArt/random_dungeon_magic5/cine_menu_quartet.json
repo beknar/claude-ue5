@@ -1,0 +1,8770 @@
+{
+"fps": 30,
+"passage": 7.0,
+"rows": [
+{
+"frame": 0,
+"t": 0.0,
+"hero": 0,
+"shown_ago": 0.0,
+"start_ago": 101.102,
+"turned": 30.86,
+"yaw": 30.86,
+"key": ""
+},
+{
+"frame": 1,
+"t": 0.0604,
+"hero": 0,
+"shown_ago": 0.06,
+"start_ago": 101.163,
+"turned": 32.55,
+"yaw": 32.55,
+"key": ""
+},
+{
+"frame": 2,
+"t": 0.0938,
+"hero": 0,
+"shown_ago": 0.094,
+"start_ago": 101.196,
+"turned": 33.48,
+"yaw": 33.48,
+"key": ""
+},
+{
+"frame": 3,
+"t": 0.1271,
+"hero": 0,
+"shown_ago": 0.127,
+"start_ago": 101.229,
+"turned": 34.42,
+"yaw": 34.42,
+"key": ""
+},
+{
+"frame": 4,
+"t": 0.1604,
+"hero": 0,
+"shown_ago": 0.16,
+"start_ago": 101.263,
+"turned": 35.35,
+"yaw": 35.35,
+"key": ""
+},
+{
+"frame": 5,
+"t": 0.1938,
+"hero": 0,
+"shown_ago": 0.194,
+"start_ago": 101.296,
+"turned": 36.28,
+"yaw": 36.28,
+"key": ""
+},
+{
+"frame": 6,
+"t": 0.2271,
+"hero": 0,
+"shown_ago": 0.227,
+"start_ago": 101.329,
+"turned": 37.22,
+"yaw": 37.22,
+"key": ""
+},
+{
+"frame": 7,
+"t": 0.2604,
+"hero": 0,
+"shown_ago": 0.26,
+"start_ago": 101.363,
+"turned": 38.15,
+"yaw": 38.15,
+"key": ""
+},
+{
+"frame": 8,
+"t": 0.2938,
+"hero": 0,
+"shown_ago": 0.294,
+"start_ago": 101.396,
+"turned": 39.08,
+"yaw": 39.08,
+"key": ""
+},
+{
+"frame": 9,
+"t": 0.3271,
+"hero": 0,
+"shown_ago": 0.327,
+"start_ago": 101.429,
+"turned": 40.02,
+"yaw": 40.02,
+"key": ""
+},
+{
+"frame": 10,
+"t": 0.3604,
+"hero": 0,
+"shown_ago": 0.36,
+"start_ago": 101.463,
+"turned": 40.95,
+"yaw": 40.95,
+"key": ""
+},
+{
+"frame": 11,
+"t": 0.3938,
+"hero": 0,
+"shown_ago": 0.394,
+"start_ago": 101.496,
+"turned": 41.88,
+"yaw": 41.88,
+"key": ""
+},
+{
+"frame": 12,
+"t": 0.4271,
+"hero": 0,
+"shown_ago": 0.427,
+"start_ago": 101.529,
+"turned": 42.82,
+"yaw": 42.82,
+"key": ""
+},
+{
+"frame": 13,
+"t": 0.4604,
+"hero": 0,
+"shown_ago": 0.46,
+"start_ago": 101.563,
+"turned": 43.75,
+"yaw": 43.75,
+"key": ""
+},
+{
+"frame": 14,
+"t": 0.4938,
+"hero": 0,
+"shown_ago": 0.494,
+"start_ago": 101.596,
+"turned": 44.68,
+"yaw": 44.68,
+"key": ""
+},
+{
+"frame": 15,
+"t": 0.5271,
+"hero": 0,
+"shown_ago": 0.527,
+"start_ago": 101.629,
+"turned": 45.62,
+"yaw": 45.62,
+"key": ""
+},
+{
+"frame": 16,
+"t": 0.5604,
+"hero": 0,
+"shown_ago": 0.56,
+"start_ago": 101.663,
+"turned": 46.55,
+"yaw": 46.55,
+"key": ""
+},
+{
+"frame": 17,
+"t": 0.5938,
+"hero": 0,
+"shown_ago": 0.594,
+"start_ago": 101.696,
+"turned": 47.48,
+"yaw": 47.48,
+"key": ""
+},
+{
+"frame": 18,
+"t": 0.6271,
+"hero": 0,
+"shown_ago": 0.627,
+"start_ago": 101.729,
+"turned": 48.42,
+"yaw": 48.42,
+"key": ""
+},
+{
+"frame": 19,
+"t": 0.6604,
+"hero": 0,
+"shown_ago": 0.66,
+"start_ago": 101.763,
+"turned": 49.35,
+"yaw": 49.35,
+"key": ""
+},
+{
+"frame": 20,
+"t": 0.6938,
+"hero": 0,
+"shown_ago": 0.694,
+"start_ago": 101.796,
+"turned": 50.28,
+"yaw": 50.28,
+"key": ""
+},
+{
+"frame": 21,
+"t": 0.7271,
+"hero": 0,
+"shown_ago": 0.727,
+"start_ago": 101.829,
+"turned": 51.22,
+"yaw": 51.22,
+"key": ""
+},
+{
+"frame": 22,
+"t": 0.7604,
+"hero": 0,
+"shown_ago": 0.76,
+"start_ago": 101.863,
+"turned": 52.15,
+"yaw": 52.15,
+"key": ""
+},
+{
+"frame": 23,
+"t": 0.7938,
+"hero": 0,
+"shown_ago": 0.794,
+"start_ago": 101.896,
+"turned": 53.08,
+"yaw": 53.08,
+"key": ""
+},
+{
+"frame": 24,
+"t": 0.8271,
+"hero": 0,
+"shown_ago": 0.827,
+"start_ago": 101.929,
+"turned": 54.02,
+"yaw": 54.02,
+"key": ""
+},
+{
+"frame": 25,
+"t": 0.8604,
+"hero": 0,
+"shown_ago": 0.86,
+"start_ago": 101.963,
+"turned": 54.95,
+"yaw": 54.95,
+"key": ""
+},
+{
+"frame": 26,
+"t": 0.8938,
+"hero": 0,
+"shown_ago": 0.894,
+"start_ago": 101.996,
+"turned": 55.88,
+"yaw": 55.88,
+"key": ""
+},
+{
+"frame": 27,
+"t": 0.9271,
+"hero": 0,
+"shown_ago": 0.927,
+"start_ago": 102.029,
+"turned": 56.82,
+"yaw": 56.82,
+"key": ""
+},
+{
+"frame": 28,
+"t": 0.9604,
+"hero": 0,
+"shown_ago": 0.96,
+"start_ago": 102.063,
+"turned": 57.75,
+"yaw": 57.75,
+"key": ""
+},
+{
+"frame": 29,
+"t": 0.9938,
+"hero": 0,
+"shown_ago": 0.994,
+"start_ago": 102.096,
+"turned": 58.68,
+"yaw": 58.68,
+"key": ""
+},
+{
+"frame": 30,
+"t": 1.0271,
+"hero": 0,
+"shown_ago": 1.027,
+"start_ago": 102.129,
+"turned": 59.62,
+"yaw": 59.62,
+"key": ""
+},
+{
+"frame": 31,
+"t": 1.0604,
+"hero": 0,
+"shown_ago": 1.06,
+"start_ago": 102.163,
+"turned": 60.55,
+"yaw": 60.55,
+"key": ""
+},
+{
+"frame": 32,
+"t": 1.0938,
+"hero": 0,
+"shown_ago": 1.094,
+"start_ago": 102.196,
+"turned": 61.48,
+"yaw": 61.48,
+"key": ""
+},
+{
+"frame": 33,
+"t": 1.1271,
+"hero": 1,
+"shown_ago": 0.008,
+"start_ago": 102.229,
+"turned": 62.42,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 34,
+"t": 1.1604,
+"hero": 1,
+"shown_ago": 0.042,
+"start_ago": 102.263,
+"turned": 63.35,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 35,
+"t": 1.1938,
+"hero": 1,
+"shown_ago": 0.075,
+"start_ago": 102.296,
+"turned": 64.28,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 36,
+"t": 1.2271,
+"hero": 1,
+"shown_ago": 0.108,
+"start_ago": 102.329,
+"turned": 65.22,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 37,
+"t": 1.2604,
+"hero": 1,
+"shown_ago": 0.142,
+"start_ago": 102.363,
+"turned": 66.15,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 38,
+"t": 1.2938,
+"hero": 1,
+"shown_ago": 0.175,
+"start_ago": 102.396,
+"turned": 67.08,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 39,
+"t": 1.3271,
+"hero": 1,
+"shown_ago": 0.208,
+"start_ago": 102.429,
+"turned": 68.02,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 40,
+"t": 1.3604,
+"hero": 1,
+"shown_ago": 0.242,
+"start_ago": 102.463,
+"turned": 68.95,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 41,
+"t": 1.3938,
+"hero": 1,
+"shown_ago": 0.275,
+"start_ago": 102.496,
+"turned": 69.88,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 42,
+"t": 1.4271,
+"hero": 1,
+"shown_ago": 0.308,
+"start_ago": 102.529,
+"turned": 70.82,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 43,
+"t": 1.4604,
+"hero": 1,
+"shown_ago": 0.342,
+"start_ago": 102.563,
+"turned": 71.75,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 44,
+"t": 1.4938,
+"hero": 1,
+"shown_ago": 0.375,
+"start_ago": 102.596,
+"turned": 72.68,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 45,
+"t": 1.5271,
+"hero": 1,
+"shown_ago": 0.408,
+"start_ago": 102.629,
+"turned": 73.62,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 46,
+"t": 1.5604,
+"hero": 1,
+"shown_ago": 0.442,
+"start_ago": 102.663,
+"turned": 74.55,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 47,
+"t": 1.5938,
+"hero": 1,
+"shown_ago": 0.475,
+"start_ago": 102.696,
+"turned": 75.48,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 48,
+"t": 1.6271,
+"hero": 1,
+"shown_ago": 0.508,
+"start_ago": 102.729,
+"turned": 76.42,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 49,
+"t": 1.6604,
+"hero": 1,
+"shown_ago": 0.542,
+"start_ago": 102.763,
+"turned": 77.35,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 50,
+"t": 1.6938,
+"hero": 1,
+"shown_ago": 0.575,
+"start_ago": 102.796,
+"turned": 78.28,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 51,
+"t": 1.7271,
+"hero": 1,
+"shown_ago": 0.608,
+"start_ago": 102.829,
+"turned": 79.22,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 52,
+"t": 1.7604,
+"hero": 1,
+"shown_ago": 0.642,
+"start_ago": 102.863,
+"turned": 80.15,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 53,
+"t": 1.7938,
+"hero": 1,
+"shown_ago": 0.675,
+"start_ago": 102.896,
+"turned": 81.08,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 54,
+"t": 1.8271,
+"hero": 1,
+"shown_ago": 0.708,
+"start_ago": 102.929,
+"turned": 82.02,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 55,
+"t": 1.8604,
+"hero": 1,
+"shown_ago": 0.742,
+"start_ago": 102.963,
+"turned": 82.95,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 56,
+"t": 1.8938,
+"hero": 1,
+"shown_ago": 0.775,
+"start_ago": 102.996,
+"turned": 83.88,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 57,
+"t": 1.9271,
+"hero": 1,
+"shown_ago": 0.808,
+"start_ago": 103.029,
+"turned": 84.82,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 58,
+"t": 1.9604,
+"hero": 1,
+"shown_ago": 0.842,
+"start_ago": 103.063,
+"turned": 85.75,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 59,
+"t": 1.9938,
+"hero": 1,
+"shown_ago": 0.875,
+"start_ago": 103.096,
+"turned": 86.68,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 60,
+"t": 2.0271,
+"hero": 1,
+"shown_ago": 0.908,
+"start_ago": 103.129,
+"turned": 87.62,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 61,
+"t": 2.0604,
+"hero": 1,
+"shown_ago": 0.942,
+"start_ago": 103.163,
+"turned": 88.55,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 62,
+"t": 2.0938,
+"hero": 1,
+"shown_ago": 0.975,
+"start_ago": 103.196,
+"turned": 89.48,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 63,
+"t": 2.1271,
+"hero": 1,
+"shown_ago": 1.008,
+"start_ago": 103.229,
+"turned": 90.42,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 64,
+"t": 2.1604,
+"hero": 1,
+"shown_ago": 1.042,
+"start_ago": 103.263,
+"turned": 91.35,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 65,
+"t": 2.1938,
+"hero": 1,
+"shown_ago": 1.075,
+"start_ago": 103.296,
+"turned": 92.28,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 66,
+"t": 2.2271,
+"hero": 2,
+"shown_ago": 0.008,
+"start_ago": 103.329,
+"turned": 93.22,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 67,
+"t": 2.2604,
+"hero": 2,
+"shown_ago": 0.042,
+"start_ago": 103.363,
+"turned": 94.15,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 68,
+"t": 2.2938,
+"hero": 2,
+"shown_ago": 0.075,
+"start_ago": 103.396,
+"turned": 95.08,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 69,
+"t": 2.3271,
+"hero": 2,
+"shown_ago": 0.108,
+"start_ago": 103.429,
+"turned": 96.02,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 70,
+"t": 2.3604,
+"hero": 2,
+"shown_ago": 0.142,
+"start_ago": 103.463,
+"turned": 96.95,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 71,
+"t": 2.3938,
+"hero": 2,
+"shown_ago": 0.175,
+"start_ago": 103.496,
+"turned": 97.88,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 72,
+"t": 2.4271,
+"hero": 2,
+"shown_ago": 0.208,
+"start_ago": 103.529,
+"turned": 98.82,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 73,
+"t": 2.4604,
+"hero": 2,
+"shown_ago": 0.242,
+"start_ago": 103.563,
+"turned": 99.75,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 74,
+"t": 2.4938,
+"hero": 2,
+"shown_ago": 0.275,
+"start_ago": 103.596,
+"turned": 100.68,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 75,
+"t": 2.5271,
+"hero": 2,
+"shown_ago": 0.308,
+"start_ago": 103.629,
+"turned": 101.62,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 76,
+"t": 2.5604,
+"hero": 2,
+"shown_ago": 0.342,
+"start_ago": 103.663,
+"turned": 102.55,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 77,
+"t": 2.5938,
+"hero": 2,
+"shown_ago": 0.375,
+"start_ago": 103.696,
+"turned": 103.48,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 78,
+"t": 2.6271,
+"hero": 2,
+"shown_ago": 0.408,
+"start_ago": 103.729,
+"turned": 104.42,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 79,
+"t": 2.6604,
+"hero": 2,
+"shown_ago": 0.442,
+"start_ago": 103.763,
+"turned": 105.35,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 80,
+"t": 2.6938,
+"hero": 2,
+"shown_ago": 0.475,
+"start_ago": 103.796,
+"turned": 106.28,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 81,
+"t": 2.7271,
+"hero": 2,
+"shown_ago": 0.508,
+"start_ago": 103.829,
+"turned": 107.22,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 82,
+"t": 2.7604,
+"hero": 2,
+"shown_ago": 0.542,
+"start_ago": 103.863,
+"turned": 108.15,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 83,
+"t": 2.7938,
+"hero": 2,
+"shown_ago": 0.575,
+"start_ago": 103.896,
+"turned": 109.08,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 84,
+"t": 2.8271,
+"hero": 2,
+"shown_ago": 0.608,
+"start_ago": 103.929,
+"turned": 110.02,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 85,
+"t": 2.8604,
+"hero": 2,
+"shown_ago": 0.642,
+"start_ago": 103.963,
+"turned": 110.95,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 86,
+"t": 2.8938,
+"hero": 2,
+"shown_ago": 0.675,
+"start_ago": 103.996,
+"turned": 111.88,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 87,
+"t": 2.9271,
+"hero": 2,
+"shown_ago": 0.708,
+"start_ago": 104.029,
+"turned": 112.82,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 88,
+"t": 2.9604,
+"hero": 2,
+"shown_ago": 0.742,
+"start_ago": 104.063,
+"turned": 113.75,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 89,
+"t": 2.9938,
+"hero": 2,
+"shown_ago": 0.775,
+"start_ago": 104.096,
+"turned": 114.68,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 90,
+"t": 3.0271,
+"hero": 2,
+"shown_ago": 0.808,
+"start_ago": 104.129,
+"turned": 115.62,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 91,
+"t": 3.0604,
+"hero": 2,
+"shown_ago": 0.842,
+"start_ago": 104.163,
+"turned": 116.55,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 92,
+"t": 3.0938,
+"hero": 2,
+"shown_ago": 0.875,
+"start_ago": 104.196,
+"turned": 117.48,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 93,
+"t": 3.1271,
+"hero": 2,
+"shown_ago": 0.908,
+"start_ago": 104.229,
+"turned": 118.42,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 94,
+"t": 3.1604,
+"hero": 2,
+"shown_ago": 0.942,
+"start_ago": 104.263,
+"turned": 119.35,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 95,
+"t": 3.1938,
+"hero": 2,
+"shown_ago": 0.975,
+"start_ago": 104.296,
+"turned": 120.28,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 96,
+"t": 3.2271,
+"hero": 2,
+"shown_ago": 1.008,
+"start_ago": 104.329,
+"turned": 121.22,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 97,
+"t": 3.2604,
+"hero": 2,
+"shown_ago": 1.042,
+"start_ago": 104.363,
+"turned": 122.15,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 98,
+"t": 3.2938,
+"hero": 2,
+"shown_ago": 1.075,
+"start_ago": 104.396,
+"turned": 123.08,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 99,
+"t": 3.3271,
+"hero": 2,
+"shown_ago": 1.108,
+"start_ago": 104.429,
+"turned": 124.02,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 100,
+"t": 3.3604,
+"hero": 2,
+"shown_ago": 1.142,
+"start_ago": 104.463,
+"turned": 124.95,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 101,
+"t": 3.3938,
+"hero": 2,
+"shown_ago": 1.175,
+"start_ago": 104.496,
+"turned": 125.88,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 102,
+"t": 3.4271,
+"hero": 1,
+"shown_ago": 0.008,
+"start_ago": 104.529,
+"turned": 126.82,
+"yaw": 0.76,
+"key": "A"
+},
+{
+"frame": 103,
+"t": 3.4604,
+"hero": 1,
+"shown_ago": 0.042,
+"start_ago": 104.563,
+"turned": 127.75,
+"yaw": 1.69,
+"key": "A"
+},
+{
+"frame": 104,
+"t": 3.4938,
+"hero": 1,
+"shown_ago": 0.075,
+"start_ago": 104.596,
+"turned": 128.68,
+"yaw": 2.63,
+"key": "A"
+},
+{
+"frame": 105,
+"t": 3.5271,
+"hero": 1,
+"shown_ago": 0.108,
+"start_ago": 104.629,
+"turned": 129.62,
+"yaw": 3.56,
+"key": "A"
+},
+{
+"frame": 106,
+"t": 3.5604,
+"hero": 1,
+"shown_ago": 0.142,
+"start_ago": 104.663,
+"turned": 130.55,
+"yaw": 4.49,
+"key": "A"
+},
+{
+"frame": 107,
+"t": 3.5938,
+"hero": 1,
+"shown_ago": 0.175,
+"start_ago": 104.696,
+"turned": 131.48,
+"yaw": 5.43,
+"key": "A"
+},
+{
+"frame": 108,
+"t": 3.6271,
+"hero": 1,
+"shown_ago": 0.208,
+"start_ago": 104.729,
+"turned": 132.42,
+"yaw": 6.36,
+"key": "A"
+},
+{
+"frame": 109,
+"t": 3.6604,
+"hero": 1,
+"shown_ago": 0.242,
+"start_ago": 104.763,
+"turned": 133.35,
+"yaw": 7.29,
+"key": "A"
+},
+{
+"frame": 110,
+"t": 3.6938,
+"hero": 1,
+"shown_ago": 0.275,
+"start_ago": 104.796,
+"turned": 134.28,
+"yaw": 8.23,
+"key": "A"
+},
+{
+"frame": 111,
+"t": 3.7271,
+"hero": 1,
+"shown_ago": 0.308,
+"start_ago": 104.829,
+"turned": 135.22,
+"yaw": 9.16,
+"key": "A"
+},
+{
+"frame": 112,
+"t": 3.7604,
+"hero": 1,
+"shown_ago": 0.342,
+"start_ago": 104.863,
+"turned": 136.15,
+"yaw": 10.09,
+"key": "A"
+},
+{
+"frame": 113,
+"t": 3.7938,
+"hero": 1,
+"shown_ago": 0.375,
+"start_ago": 104.896,
+"turned": 137.08,
+"yaw": 11.03,
+"key": "A"
+},
+{
+"frame": 114,
+"t": 3.8271,
+"hero": 1,
+"shown_ago": 0.408,
+"start_ago": 104.929,
+"turned": 138.02,
+"yaw": 11.96,
+"key": "A"
+},
+{
+"frame": 115,
+"t": 3.8604,
+"hero": 1,
+"shown_ago": 0.442,
+"start_ago": 104.963,
+"turned": 138.95,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 116,
+"t": 3.8938,
+"hero": 1,
+"shown_ago": 0.475,
+"start_ago": 104.996,
+"turned": 139.88,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 117,
+"t": 3.9271,
+"hero": 1,
+"shown_ago": 0.508,
+"start_ago": 105.029,
+"turned": 140.82,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 118,
+"t": 3.9604,
+"hero": 1,
+"shown_ago": 0.542,
+"start_ago": 105.063,
+"turned": 141.75,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 119,
+"t": 3.9938,
+"hero": 1,
+"shown_ago": 0.575,
+"start_ago": 105.096,
+"turned": 142.68,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 120,
+"t": 4.0271,
+"hero": 1,
+"shown_ago": 0.608,
+"start_ago": 105.129,
+"turned": 143.62,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 121,
+"t": 4.0604,
+"hero": 1,
+"shown_ago": 0.642,
+"start_ago": 105.163,
+"turned": 144.55,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 122,
+"t": 4.0938,
+"hero": 1,
+"shown_ago": 0.675,
+"start_ago": 105.196,
+"turned": 145.48,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 123,
+"t": 4.1271,
+"hero": 1,
+"shown_ago": 0.708,
+"start_ago": 105.229,
+"turned": 146.42,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 124,
+"t": 4.1604,
+"hero": 1,
+"shown_ago": 0.742,
+"start_ago": 105.263,
+"turned": 147.35,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 125,
+"t": 4.1938,
+"hero": 1,
+"shown_ago": 0.775,
+"start_ago": 105.296,
+"turned": 148.28,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 126,
+"t": 4.2271,
+"hero": 1,
+"shown_ago": 0.808,
+"start_ago": 105.329,
+"turned": 149.22,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 127,
+"t": 4.2604,
+"hero": 1,
+"shown_ago": 0.842,
+"start_ago": 105.363,
+"turned": 150.15,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 128,
+"t": 4.2938,
+"hero": 1,
+"shown_ago": 0.875,
+"start_ago": 105.396,
+"turned": 151.08,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 129,
+"t": 4.3271,
+"hero": 1,
+"shown_ago": 0.908,
+"start_ago": 105.429,
+"turned": 152.02,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 130,
+"t": 4.3604,
+"hero": 1,
+"shown_ago": 0.942,
+"start_ago": 105.463,
+"turned": 152.95,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 131,
+"t": 4.3938,
+"hero": 1,
+"shown_ago": 0.975,
+"start_ago": 105.496,
+"turned": 153.88,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 132,
+"t": 4.4271,
+"hero": 1,
+"shown_ago": 1.008,
+"start_ago": 105.529,
+"turned": 154.82,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 133,
+"t": 4.4604,
+"hero": 1,
+"shown_ago": 1.042,
+"start_ago": 105.563,
+"turned": 155.75,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 134,
+"t": 4.4938,
+"hero": 1,
+"shown_ago": 1.075,
+"start_ago": 105.596,
+"turned": 156.68,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 135,
+"t": 4.5271,
+"hero": 0,
+"shown_ago": 0.008,
+"start_ago": 105.629,
+"turned": 157.62,
+"yaw": 0.76,
+"key": "A"
+},
+{
+"frame": 136,
+"t": 4.5604,
+"hero": 0,
+"shown_ago": 0.042,
+"start_ago": 105.663,
+"turned": 158.55,
+"yaw": 1.69,
+"key": "A"
+},
+{
+"frame": 137,
+"t": 4.5938,
+"hero": 0,
+"shown_ago": 0.075,
+"start_ago": 105.696,
+"turned": 159.48,
+"yaw": 2.63,
+"key": "A"
+},
+{
+"frame": 138,
+"t": 4.6271,
+"hero": 0,
+"shown_ago": 0.108,
+"start_ago": 105.729,
+"turned": 160.42,
+"yaw": 3.56,
+"key": "A"
+},
+{
+"frame": 139,
+"t": 4.6604,
+"hero": 0,
+"shown_ago": 0.142,
+"start_ago": 105.763,
+"turned": 161.35,
+"yaw": 4.49,
+"key": "A"
+},
+{
+"frame": 140,
+"t": 4.6938,
+"hero": 0,
+"shown_ago": 0.175,
+"start_ago": 105.796,
+"turned": 162.28,
+"yaw": 5.43,
+"key": "A"
+},
+{
+"frame": 141,
+"t": 4.7271,
+"hero": 0,
+"shown_ago": 0.208,
+"start_ago": 105.829,
+"turned": 163.22,
+"yaw": 6.36,
+"key": "A"
+},
+{
+"frame": 142,
+"t": 4.7604,
+"hero": 0,
+"shown_ago": 0.242,
+"start_ago": 105.863,
+"turned": 164.15,
+"yaw": 7.29,
+"key": "A"
+},
+{
+"frame": 143,
+"t": 4.7938,
+"hero": 0,
+"shown_ago": 0.275,
+"start_ago": 105.896,
+"turned": 165.08,
+"yaw": 8.23,
+"key": "A"
+},
+{
+"frame": 144,
+"t": 4.8271,
+"hero": 0,
+"shown_ago": 0.308,
+"start_ago": 105.929,
+"turned": 166.02,
+"yaw": 9.16,
+"key": "A"
+},
+{
+"frame": 145,
+"t": 4.8604,
+"hero": 0,
+"shown_ago": 0.342,
+"start_ago": 105.963,
+"turned": 166.95,
+"yaw": 10.09,
+"key": "A"
+},
+{
+"frame": 146,
+"t": 4.8938,
+"hero": 0,
+"shown_ago": 0.375,
+"start_ago": 105.996,
+"turned": 167.88,
+"yaw": 11.03,
+"key": "A"
+},
+{
+"frame": 147,
+"t": 4.9271,
+"hero": 0,
+"shown_ago": 0.408,
+"start_ago": 106.029,
+"turned": 168.82,
+"yaw": 11.96,
+"key": "A"
+},
+{
+"frame": 148,
+"t": 4.9604,
+"hero": 0,
+"shown_ago": 0.442,
+"start_ago": 106.063,
+"turned": 169.75,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 149,
+"t": 4.9938,
+"hero": 0,
+"shown_ago": 0.475,
+"start_ago": 106.096,
+"turned": 170.68,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 150,
+"t": 5.0271,
+"hero": 0,
+"shown_ago": 0.508,
+"start_ago": 106.129,
+"turned": 171.62,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 151,
+"t": 5.0604,
+"hero": 0,
+"shown_ago": 0.542,
+"start_ago": 106.163,
+"turned": 172.55,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 152,
+"t": 5.0938,
+"hero": 0,
+"shown_ago": 0.575,
+"start_ago": 106.196,
+"turned": 173.48,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 153,
+"t": 5.1271,
+"hero": 0,
+"shown_ago": 0.608,
+"start_ago": 106.229,
+"turned": 174.42,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 154,
+"t": 5.1604,
+"hero": 0,
+"shown_ago": 0.642,
+"start_ago": 106.263,
+"turned": 175.35,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 155,
+"t": 5.1938,
+"hero": 0,
+"shown_ago": 0.675,
+"start_ago": 106.296,
+"turned": 176.28,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 156,
+"t": 5.2271,
+"hero": 0,
+"shown_ago": 0.708,
+"start_ago": 106.329,
+"turned": 177.22,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 157,
+"t": 5.2604,
+"hero": 0,
+"shown_ago": 0.742,
+"start_ago": 106.363,
+"turned": 178.15,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 158,
+"t": 5.2938,
+"hero": 0,
+"shown_ago": 0.775,
+"start_ago": 106.396,
+"turned": 179.08,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 159,
+"t": 5.3271,
+"hero": 0,
+"shown_ago": 0.808,
+"start_ago": 106.429,
+"turned": 180.02,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 160,
+"t": 5.3604,
+"hero": 0,
+"shown_ago": 0.842,
+"start_ago": 106.463,
+"turned": 180.95,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 161,
+"t": 5.3938,
+"hero": 0,
+"shown_ago": 0.875,
+"start_ago": 106.496,
+"turned": 181.88,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 162,
+"t": 5.4271,
+"hero": 0,
+"shown_ago": 0.908,
+"start_ago": 106.529,
+"turned": 182.82,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 163,
+"t": 5.4604,
+"hero": 0,
+"shown_ago": 0.942,
+"start_ago": 106.563,
+"turned": 183.75,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 164,
+"t": 5.4938,
+"hero": 0,
+"shown_ago": 0.975,
+"start_ago": 106.596,
+"turned": 184.68,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 165,
+"t": 5.5271,
+"hero": 0,
+"shown_ago": 1.008,
+"start_ago": 106.629,
+"turned": 185.62,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 166,
+"t": 5.5604,
+"hero": 0,
+"shown_ago": 1.042,
+"start_ago": 106.663,
+"turned": 186.55,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 167,
+"t": 5.5938,
+"hero": 0,
+"shown_ago": 1.075,
+"start_ago": 106.696,
+"turned": 187.48,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 168,
+"t": 5.6271,
+"hero": 0,
+"shown_ago": 1.108,
+"start_ago": 106.729,
+"turned": 188.42,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 169,
+"t": 5.6604,
+"hero": 0,
+"shown_ago": 1.142,
+"start_ago": 106.763,
+"turned": 189.35,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 170,
+"t": 5.6938,
+"hero": 0,
+"shown_ago": 1.175,
+"start_ago": 106.796,
+"turned": 190.28,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 171,
+"t": 5.7271,
+"hero": 0,
+"shown_ago": 1.208,
+"start_ago": 0.008,
+"turned": 191.22,
+"yaw": 34.36,
+"key": "Enter"
+},
+{
+"frame": 172,
+"t": 5.7604,
+"hero": 0,
+"shown_ago": 1.242,
+"start_ago": 0.042,
+"turned": 192.15,
+"yaw": 35.29,
+"key": "Enter"
+},
+{
+"frame": 173,
+"t": 5.7938,
+"hero": 0,
+"shown_ago": 1.275,
+"start_ago": 0.075,
+"turned": 193.08,
+"yaw": 36.22,
+"key": "Enter"
+},
+{
+"frame": 174,
+"t": 5.8271,
+"hero": 0,
+"shown_ago": 1.308,
+"start_ago": 0.108,
+"turned": 194.02,
+"yaw": 37.16,
+"key": "Enter"
+},
+{
+"frame": 175,
+"t": 5.8604,
+"hero": 0,
+"shown_ago": 1.342,
+"start_ago": 0.142,
+"turned": 194.95,
+"yaw": 38.09,
+"key": "Enter"
+},
+{
+"frame": 176,
+"t": 5.8938,
+"hero": 0,
+"shown_ago": 1.375,
+"start_ago": 0.175,
+"turned": 195.88,
+"yaw": 39.02,
+"key": "Enter"
+},
+{
+"frame": 177,
+"t": 5.9271,
+"hero": 0,
+"shown_ago": 1.408,
+"start_ago": 0.208,
+"turned": 196.82,
+"yaw": 39.96,
+"key": "Enter"
+},
+{
+"frame": 178,
+"t": 5.9604,
+"hero": 0,
+"shown_ago": 1.442,
+"start_ago": 0.242,
+"turned": 197.75,
+"yaw": 40.89,
+"key": "Enter"
+},
+{
+"frame": 179,
+"t": 5.9938,
+"hero": 0,
+"shown_ago": 1.475,
+"start_ago": 0.275,
+"turned": 198.68,
+"yaw": 41.82,
+"key": "Enter"
+},
+{
+"frame": 180,
+"t": 6.0271,
+"hero": 0,
+"shown_ago": 1.508,
+"start_ago": 0.308,
+"turned": 199.62,
+"yaw": 42.76,
+"key": "Enter"
+},
+{
+"frame": 181,
+"t": 6.0604,
+"hero": 0,
+"shown_ago": 1.542,
+"start_ago": 0.342,
+"turned": 200.55,
+"yaw": 43.69,
+"key": "Enter"
+},
+{
+"frame": 182,
+"t": 6.0938,
+"hero": 0,
+"shown_ago": 1.575,
+"start_ago": 0.375,
+"turned": 201.48,
+"yaw": 44.63,
+"key": "Enter"
+},
+{
+"frame": 183,
+"t": 6.1271,
+"hero": 0,
+"shown_ago": 1.608,
+"start_ago": 0.408,
+"turned": 202.42,
+"yaw": 45.56,
+"key": "Enter"
+},
+{
+"frame": 184,
+"t": 6.1604,
+"hero": 0,
+"shown_ago": 1.642,
+"start_ago": 0.442,
+"turned": 203.35,
+"yaw": 46.49,
+"key": ""
+},
+{
+"frame": 185,
+"t": 6.1938,
+"hero": 0,
+"shown_ago": 1.675,
+"start_ago": 0.475,
+"turned": 204.28,
+"yaw": 47.43,
+"key": ""
+},
+{
+"frame": 186,
+"t": 6.2271,
+"hero": 0,
+"shown_ago": 1.708,
+"start_ago": 0.508,
+"turned": 205.22,
+"yaw": 48.36,
+"key": ""
+},
+{
+"frame": 187,
+"t": 6.2604,
+"hero": 0,
+"shown_ago": 1.742,
+"start_ago": 0.542,
+"turned": 206.15,
+"yaw": 49.29,
+"key": ""
+},
+{
+"frame": 188,
+"t": 6.2938,
+"hero": 0,
+"shown_ago": 1.775,
+"start_ago": 0.575,
+"turned": 207.08,
+"yaw": 50.23,
+"key": ""
+},
+{
+"frame": 189,
+"t": 6.3271,
+"hero": 0,
+"shown_ago": 1.808,
+"start_ago": 0.608,
+"turned": 208.02,
+"yaw": 51.16,
+"key": ""
+},
+{
+"frame": 190,
+"t": 6.3604,
+"hero": 0,
+"shown_ago": 1.842,
+"start_ago": 0.642,
+"turned": 208.95,
+"yaw": 52.09,
+"key": ""
+},
+{
+"frame": 191,
+"t": 6.3938,
+"hero": 0,
+"shown_ago": 1.875,
+"start_ago": 0.675,
+"turned": 209.88,
+"yaw": 53.03,
+"key": ""
+},
+{
+"frame": 192,
+"t": 6.4271,
+"hero": 0,
+"shown_ago": 1.908,
+"start_ago": 0.708,
+"turned": 210.82,
+"yaw": 53.96,
+"key": ""
+},
+{
+"frame": 193,
+"t": 6.4604,
+"hero": 0,
+"shown_ago": 1.942,
+"start_ago": 0.742,
+"turned": 211.75,
+"yaw": 54.89,
+"key": ""
+},
+{
+"frame": 194,
+"t": 6.4938,
+"hero": 0,
+"shown_ago": 1.975,
+"start_ago": 0.775,
+"turned": 212.68,
+"yaw": 55.83,
+"key": ""
+},
+{
+"frame": 195,
+"t": 6.5271,
+"hero": 0,
+"shown_ago": 2.008,
+"start_ago": 0.808,
+"turned": 213.62,
+"yaw": 56.76,
+"key": ""
+},
+{
+"frame": 196,
+"t": 6.5604,
+"hero": 0,
+"shown_ago": 2.042,
+"start_ago": 0.842,
+"turned": 214.55,
+"yaw": 57.69,
+"key": ""
+},
+{
+"frame": 197,
+"t": 6.5938,
+"hero": 0,
+"shown_ago": 2.075,
+"start_ago": 0.875,
+"turned": 215.48,
+"yaw": 58.63,
+"key": ""
+},
+{
+"frame": 198,
+"t": 6.6271,
+"hero": 0,
+"shown_ago": 2.108,
+"start_ago": 0.908,
+"turned": 216.42,
+"yaw": 59.56,
+"key": ""
+},
+{
+"frame": 199,
+"t": 6.6604,
+"hero": 0,
+"shown_ago": 2.142,
+"start_ago": 0.942,
+"turned": 217.35,
+"yaw": 60.49,
+"key": ""
+},
+{
+"frame": 200,
+"t": 6.6938,
+"hero": 0,
+"shown_ago": 2.175,
+"start_ago": 0.975,
+"turned": 218.28,
+"yaw": 61.43,
+"key": ""
+},
+{
+"frame": 201,
+"t": 6.7271,
+"hero": 0,
+"shown_ago": 2.208,
+"start_ago": 1.008,
+"turned": 219.22,
+"yaw": 62.36,
+"key": ""
+},
+{
+"frame": 202,
+"t": 6.7604,
+"hero": 0,
+"shown_ago": 2.242,
+"start_ago": 1.042,
+"turned": 220.15,
+"yaw": 63.29,
+"key": ""
+},
+{
+"frame": 203,
+"t": 6.7938,
+"hero": 0,
+"shown_ago": 2.275,
+"start_ago": 1.075,
+"turned": 221.08,
+"yaw": 64.23,
+"key": ""
+},
+{
+"frame": 204,
+"t": 6.8271,
+"hero": 0,
+"shown_ago": 2.308,
+"start_ago": 1.108,
+"turned": 222.02,
+"yaw": 65.16,
+"key": ""
+},
+{
+"frame": 205,
+"t": 6.8604,
+"hero": 0,
+"shown_ago": 2.342,
+"start_ago": 1.142,
+"turned": 222.95,
+"yaw": 66.09,
+"key": ""
+},
+{
+"frame": 206,
+"t": 6.8938,
+"hero": 0,
+"shown_ago": 2.375,
+"start_ago": 1.175,
+"turned": 223.88,
+"yaw": 67.03,
+"key": ""
+},
+{
+"frame": 207,
+"t": 6.9271,
+"hero": 0,
+"shown_ago": 2.408,
+"start_ago": 1.208,
+"turned": 224.82,
+"yaw": 67.96,
+"key": ""
+},
+{
+"frame": 208,
+"t": 6.9604,
+"hero": 0,
+"shown_ago": 2.442,
+"start_ago": 1.242,
+"turned": 225.75,
+"yaw": 68.89,
+"key": ""
+},
+{
+"frame": 209,
+"t": 6.9938,
+"hero": 0,
+"shown_ago": 2.475,
+"start_ago": 1.275,
+"turned": 226.68,
+"yaw": 69.83,
+"key": ""
+},
+{
+"frame": 210,
+"t": 7.0271,
+"hero": 0,
+"shown_ago": 2.508,
+"start_ago": 1.308,
+"turned": 227.62,
+"yaw": 70.76,
+"key": ""
+},
+{
+"frame": 211,
+"t": 7.0604,
+"hero": 0,
+"shown_ago": 2.542,
+"start_ago": 1.342,
+"turned": 228.55,
+"yaw": 71.69,
+"key": ""
+},
+{
+"frame": 212,
+"t": 7.0938,
+"hero": 0,
+"shown_ago": 2.575,
+"start_ago": 1.375,
+"turned": 229.48,
+"yaw": 72.63,
+"key": ""
+},
+{
+"frame": 213,
+"t": 7.1271,
+"hero": 0,
+"shown_ago": 2.608,
+"start_ago": 1.408,
+"turned": 230.42,
+"yaw": 73.56,
+"key": ""
+},
+{
+"frame": 214,
+"t": 7.1604,
+"hero": 0,
+"shown_ago": 2.642,
+"start_ago": 1.442,
+"turned": 231.35,
+"yaw": 74.49,
+"key": ""
+},
+{
+"frame": 215,
+"t": 7.1938,
+"hero": 0,
+"shown_ago": 2.675,
+"start_ago": 1.475,
+"turned": 232.28,
+"yaw": 75.43,
+"key": ""
+},
+{
+"frame": 216,
+"t": 7.2271,
+"hero": 0,
+"shown_ago": 2.708,
+"start_ago": 1.508,
+"turned": 233.22,
+"yaw": 76.36,
+"key": ""
+},
+{
+"frame": 217,
+"t": 7.2604,
+"hero": 0,
+"shown_ago": 2.742,
+"start_ago": 1.542,
+"turned": 234.15,
+"yaw": 77.29,
+"key": ""
+},
+{
+"frame": 218,
+"t": 7.2938,
+"hero": 0,
+"shown_ago": 2.775,
+"start_ago": 1.575,
+"turned": 235.08,
+"yaw": 78.23,
+"key": ""
+},
+{
+"frame": 219,
+"t": 7.3271,
+"hero": 0,
+"shown_ago": 2.808,
+"start_ago": 1.608,
+"turned": 236.02,
+"yaw": 79.16,
+"key": ""
+},
+{
+"frame": 220,
+"t": 7.3604,
+"hero": 0,
+"shown_ago": 2.842,
+"start_ago": 1.642,
+"turned": 236.95,
+"yaw": 80.09,
+"key": ""
+},
+{
+"frame": 221,
+"t": 7.3938,
+"hero": 0,
+"shown_ago": 2.875,
+"start_ago": 1.675,
+"turned": 237.88,
+"yaw": 81.03,
+"key": ""
+},
+{
+"frame": 222,
+"t": 7.4271,
+"hero": 0,
+"shown_ago": 2.908,
+"start_ago": 1.708,
+"turned": 238.82,
+"yaw": 81.96,
+"key": ""
+},
+{
+"frame": 223,
+"t": 7.4604,
+"hero": 0,
+"shown_ago": 2.942,
+"start_ago": 1.742,
+"turned": 239.75,
+"yaw": 82.89,
+"key": ""
+},
+{
+"frame": 224,
+"t": 7.4938,
+"hero": 0,
+"shown_ago": 2.975,
+"start_ago": 1.775,
+"turned": 240.68,
+"yaw": 83.83,
+"key": ""
+},
+{
+"frame": 225,
+"t": 7.5271,
+"hero": 0,
+"shown_ago": 3.008,
+"start_ago": 1.808,
+"turned": 241.62,
+"yaw": 84.76,
+"key": ""
+},
+{
+"frame": 226,
+"t": 7.5604,
+"hero": 0,
+"shown_ago": 3.042,
+"start_ago": 1.842,
+"turned": 242.55,
+"yaw": 85.69,
+"key": ""
+},
+{
+"frame": 227,
+"t": 7.5938,
+"hero": 0,
+"shown_ago": 3.075,
+"start_ago": 1.875,
+"turned": 243.48,
+"yaw": 86.63,
+"key": ""
+},
+{
+"frame": 228,
+"t": 7.6271,
+"hero": 0,
+"shown_ago": 3.108,
+"start_ago": 1.908,
+"turned": 244.42,
+"yaw": 87.56,
+"key": ""
+},
+{
+"frame": 229,
+"t": 7.6604,
+"hero": 0,
+"shown_ago": 3.142,
+"start_ago": 1.942,
+"turned": 245.35,
+"yaw": 88.49,
+"key": ""
+},
+{
+"frame": 230,
+"t": 7.6938,
+"hero": 0,
+"shown_ago": 3.175,
+"start_ago": 1.975,
+"turned": 246.28,
+"yaw": 89.43,
+"key": ""
+},
+{
+"frame": 231,
+"t": 7.7271,
+"hero": 0,
+"shown_ago": 3.208,
+"start_ago": 2.008,
+"turned": 247.22,
+"yaw": 90.36,
+"key": ""
+},
+{
+"frame": 232,
+"t": 7.7604,
+"hero": 0,
+"shown_ago": 3.242,
+"start_ago": 2.042,
+"turned": 248.15,
+"yaw": 91.29,
+"key": ""
+},
+{
+"frame": 233,
+"t": 7.7938,
+"hero": 0,
+"shown_ago": 3.275,
+"start_ago": 2.075,
+"turned": 249.08,
+"yaw": 92.23,
+"key": ""
+},
+{
+"frame": 234,
+"t": 7.8271,
+"hero": 0,
+"shown_ago": 3.308,
+"start_ago": 2.108,
+"turned": 250.02,
+"yaw": 93.16,
+"key": ""
+},
+{
+"frame": 235,
+"t": 7.8604,
+"hero": 0,
+"shown_ago": 3.342,
+"start_ago": 2.142,
+"turned": 250.95,
+"yaw": 94.09,
+"key": ""
+},
+{
+"frame": 236,
+"t": 7.8938,
+"hero": 0,
+"shown_ago": 3.375,
+"start_ago": 2.175,
+"turned": 251.88,
+"yaw": 95.03,
+"key": ""
+},
+{
+"frame": 237,
+"t": 7.9271,
+"hero": 0,
+"shown_ago": 3.408,
+"start_ago": 2.208,
+"turned": 252.82,
+"yaw": 95.96,
+"key": ""
+},
+{
+"frame": 238,
+"t": 7.9604,
+"hero": 0,
+"shown_ago": 3.442,
+"start_ago": 2.242,
+"turned": 253.75,
+"yaw": 96.89,
+"key": ""
+},
+{
+"frame": 239,
+"t": 7.9938,
+"hero": 0,
+"shown_ago": 3.475,
+"start_ago": 2.275,
+"turned": 254.68,
+"yaw": 97.83,
+"key": ""
+},
+{
+"frame": 240,
+"t": 8.0271,
+"hero": 0,
+"shown_ago": 3.508,
+"start_ago": 2.308,
+"turned": 255.62,
+"yaw": 98.76,
+"key": ""
+},
+{
+"frame": 241,
+"t": 8.0604,
+"hero": 0,
+"shown_ago": 3.542,
+"start_ago": 2.342,
+"turned": 256.55,
+"yaw": 99.69,
+"key": ""
+},
+{
+"frame": 242,
+"t": 8.0938,
+"hero": 0,
+"shown_ago": 3.575,
+"start_ago": 2.375,
+"turned": 257.48,
+"yaw": 100.63,
+"key": ""
+},
+{
+"frame": 243,
+"t": 8.1271,
+"hero": 0,
+"shown_ago": 3.608,
+"start_ago": 2.408,
+"turned": 258.42,
+"yaw": 101.56,
+"key": ""
+},
+{
+"frame": 244,
+"t": 8.1604,
+"hero": 0,
+"shown_ago": 3.642,
+"start_ago": 2.442,
+"turned": 259.35,
+"yaw": 102.49,
+"key": ""
+},
+{
+"frame": 245,
+"t": 8.1938,
+"hero": 0,
+"shown_ago": 3.675,
+"start_ago": 2.475,
+"turned": 260.28,
+"yaw": 103.43,
+"key": ""
+},
+{
+"frame": 246,
+"t": 8.2271,
+"hero": 0,
+"shown_ago": 3.708,
+"start_ago": 2.508,
+"turned": 261.22,
+"yaw": 104.36,
+"key": ""
+},
+{
+"frame": 247,
+"t": 8.2604,
+"hero": 0,
+"shown_ago": 3.742,
+"start_ago": 2.542,
+"turned": 262.15,
+"yaw": 105.29,
+"key": ""
+},
+{
+"frame": 248,
+"t": 8.2938,
+"hero": 0,
+"shown_ago": 3.775,
+"start_ago": 2.575,
+"turned": 263.08,
+"yaw": 106.23,
+"key": ""
+},
+{
+"frame": 249,
+"t": 8.3271,
+"hero": 0,
+"shown_ago": 3.808,
+"start_ago": 2.608,
+"turned": 264.02,
+"yaw": 107.16,
+"key": ""
+},
+{
+"frame": 250,
+"t": 8.3604,
+"hero": 0,
+"shown_ago": 3.842,
+"start_ago": 2.642,
+"turned": 264.95,
+"yaw": 108.09,
+"key": ""
+},
+{
+"frame": 251,
+"t": 8.3938,
+"hero": 0,
+"shown_ago": 3.875,
+"start_ago": 2.675,
+"turned": 265.88,
+"yaw": 109.03,
+"key": ""
+},
+{
+"frame": 252,
+"t": 8.4271,
+"hero": 0,
+"shown_ago": 3.908,
+"start_ago": 2.708,
+"turned": 266.82,
+"yaw": 109.96,
+"key": ""
+},
+{
+"frame": 253,
+"t": 8.4604,
+"hero": 0,
+"shown_ago": 3.942,
+"start_ago": 2.742,
+"turned": 267.75,
+"yaw": 110.89,
+"key": ""
+},
+{
+"frame": 254,
+"t": 8.4938,
+"hero": 0,
+"shown_ago": 3.975,
+"start_ago": 2.775,
+"turned": 268.68,
+"yaw": 111.83,
+"key": ""
+},
+{
+"frame": 255,
+"t": 8.5271,
+"hero": 0,
+"shown_ago": 4.008,
+"start_ago": 2.808,
+"turned": 269.62,
+"yaw": 112.76,
+"key": ""
+},
+{
+"frame": 256,
+"t": 8.5604,
+"hero": 0,
+"shown_ago": 4.042,
+"start_ago": 2.842,
+"turned": 270.55,
+"yaw": 113.69,
+"key": ""
+},
+{
+"frame": 257,
+"t": 8.5938,
+"hero": 0,
+"shown_ago": 4.075,
+"start_ago": 2.875,
+"turned": 271.48,
+"yaw": 114.63,
+"key": ""
+},
+{
+"frame": 258,
+"t": 8.6271,
+"hero": 1,
+"shown_ago": 0.008,
+"start_ago": 2.908,
+"turned": 272.42,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 259,
+"t": 8.6604,
+"hero": 1,
+"shown_ago": 0.042,
+"start_ago": 2.942,
+"turned": 273.35,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 260,
+"t": 8.6938,
+"hero": 1,
+"shown_ago": 0.075,
+"start_ago": 2.975,
+"turned": 274.28,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 261,
+"t": 8.7271,
+"hero": 1,
+"shown_ago": 0.108,
+"start_ago": 3.008,
+"turned": 275.22,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 262,
+"t": 8.7604,
+"hero": 1,
+"shown_ago": 0.142,
+"start_ago": 3.042,
+"turned": 276.15,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 263,
+"t": 8.7938,
+"hero": 1,
+"shown_ago": 0.175,
+"start_ago": 3.075,
+"turned": 277.08,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 264,
+"t": 8.8271,
+"hero": 1,
+"shown_ago": 0.208,
+"start_ago": 3.108,
+"turned": 278.02,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 265,
+"t": 8.8604,
+"hero": 1,
+"shown_ago": 0.242,
+"start_ago": 3.142,
+"turned": 278.95,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 266,
+"t": 8.8938,
+"hero": 1,
+"shown_ago": 0.275,
+"start_ago": 3.175,
+"turned": 279.88,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 267,
+"t": 8.9271,
+"hero": 1,
+"shown_ago": 0.308,
+"start_ago": 3.208,
+"turned": 280.81,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 268,
+"t": 8.9604,
+"hero": 1,
+"shown_ago": 0.342,
+"start_ago": 3.242,
+"turned": 281.75,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 269,
+"t": 8.9938,
+"hero": 1,
+"shown_ago": 0.375,
+"start_ago": 3.275,
+"turned": 282.68,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 270,
+"t": 9.0271,
+"hero": 1,
+"shown_ago": 0.408,
+"start_ago": 3.308,
+"turned": 283.61,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 271,
+"t": 9.0604,
+"hero": 1,
+"shown_ago": 0.442,
+"start_ago": 3.342,
+"turned": 284.55,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 272,
+"t": 9.0938,
+"hero": 1,
+"shown_ago": 0.475,
+"start_ago": 3.375,
+"turned": 285.48,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 273,
+"t": 9.1271,
+"hero": 1,
+"shown_ago": 0.508,
+"start_ago": 3.408,
+"turned": 286.41,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 274,
+"t": 9.1604,
+"hero": 1,
+"shown_ago": 0.542,
+"start_ago": 3.442,
+"turned": 287.35,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 275,
+"t": 9.1938,
+"hero": 1,
+"shown_ago": 0.575,
+"start_ago": 3.475,
+"turned": 288.28,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 276,
+"t": 9.2271,
+"hero": 1,
+"shown_ago": 0.608,
+"start_ago": 3.508,
+"turned": 289.21,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 277,
+"t": 9.2604,
+"hero": 1,
+"shown_ago": 0.642,
+"start_ago": 3.542,
+"turned": 290.15,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 278,
+"t": 9.2938,
+"hero": 1,
+"shown_ago": 0.675,
+"start_ago": 3.575,
+"turned": 291.08,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 279,
+"t": 9.3271,
+"hero": 1,
+"shown_ago": 0.708,
+"start_ago": 3.608,
+"turned": 292.01,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 280,
+"t": 9.3604,
+"hero": 1,
+"shown_ago": 0.742,
+"start_ago": 3.642,
+"turned": 292.95,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 281,
+"t": 9.3938,
+"hero": 1,
+"shown_ago": 0.775,
+"start_ago": 3.675,
+"turned": 293.88,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 282,
+"t": 9.4271,
+"hero": 1,
+"shown_ago": 0.808,
+"start_ago": 3.708,
+"turned": 294.81,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 283,
+"t": 9.4604,
+"hero": 1,
+"shown_ago": 0.842,
+"start_ago": 3.742,
+"turned": 295.75,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 284,
+"t": 9.4938,
+"hero": 1,
+"shown_ago": 0.875,
+"start_ago": 3.775,
+"turned": 296.68,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 285,
+"t": 9.5271,
+"hero": 1,
+"shown_ago": 0.908,
+"start_ago": 3.808,
+"turned": 297.61,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 286,
+"t": 9.5604,
+"hero": 1,
+"shown_ago": 0.942,
+"start_ago": 3.842,
+"turned": 298.55,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 287,
+"t": 9.5938,
+"hero": 1,
+"shown_ago": 0.975,
+"start_ago": 3.875,
+"turned": 299.48,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 288,
+"t": 9.6271,
+"hero": 1,
+"shown_ago": 1.008,
+"start_ago": 3.908,
+"turned": 300.41,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 289,
+"t": 9.6604,
+"hero": 1,
+"shown_ago": 1.042,
+"start_ago": 3.942,
+"turned": 301.35,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 290,
+"t": 9.6938,
+"hero": 1,
+"shown_ago": 1.075,
+"start_ago": 3.975,
+"turned": 302.28,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 291,
+"t": 9.7271,
+"hero": 1,
+"shown_ago": 1.108,
+"start_ago": 4.008,
+"turned": 303.21,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 292,
+"t": 9.7604,
+"hero": 1,
+"shown_ago": 1.142,
+"start_ago": 4.042,
+"turned": 304.15,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 293,
+"t": 9.7938,
+"hero": 1,
+"shown_ago": 1.175,
+"start_ago": 4.075,
+"turned": 305.08,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 294,
+"t": 9.8271,
+"hero": 1,
+"shown_ago": 1.208,
+"start_ago": 4.108,
+"turned": 306.01,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 295,
+"t": 9.8604,
+"hero": 1,
+"shown_ago": 1.242,
+"start_ago": 4.142,
+"turned": 306.95,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 296,
+"t": 9.8938,
+"hero": 1,
+"shown_ago": 1.275,
+"start_ago": 4.175,
+"turned": 307.88,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 297,
+"t": 9.9271,
+"hero": 1,
+"shown_ago": 1.308,
+"start_ago": 4.208,
+"turned": 308.81,
+"yaw": 37.16,
+"key": ""
+},
+{
+"frame": 298,
+"t": 9.9604,
+"hero": 1,
+"shown_ago": 1.342,
+"start_ago": 4.242,
+"turned": 309.74,
+"yaw": 38.09,
+"key": ""
+},
+{
+"frame": 299,
+"t": 9.9938,
+"hero": 1,
+"shown_ago": 1.375,
+"start_ago": 4.275,
+"turned": 310.68,
+"yaw": 39.02,
+"key": ""
+},
+{
+"frame": 300,
+"t": 10.0271,
+"hero": 1,
+"shown_ago": 1.408,
+"start_ago": 4.308,
+"turned": 311.61,
+"yaw": 39.96,
+"key": ""
+},
+{
+"frame": 301,
+"t": 10.0604,
+"hero": 1,
+"shown_ago": 1.442,
+"start_ago": 4.342,
+"turned": 312.54,
+"yaw": 40.89,
+"key": ""
+},
+{
+"frame": 302,
+"t": 10.0938,
+"hero": 1,
+"shown_ago": 1.475,
+"start_ago": 4.375,
+"turned": 313.48,
+"yaw": 41.82,
+"key": ""
+},
+{
+"frame": 303,
+"t": 10.1271,
+"hero": 1,
+"shown_ago": 1.508,
+"start_ago": 4.408,
+"turned": 314.41,
+"yaw": 42.76,
+"key": ""
+},
+{
+"frame": 304,
+"t": 10.1604,
+"hero": 1,
+"shown_ago": 1.542,
+"start_ago": 4.442,
+"turned": 315.34,
+"yaw": 43.69,
+"key": ""
+},
+{
+"frame": 305,
+"t": 10.1938,
+"hero": 1,
+"shown_ago": 1.575,
+"start_ago": 4.475,
+"turned": 316.28,
+"yaw": 44.63,
+"key": ""
+},
+{
+"frame": 306,
+"t": 10.2271,
+"hero": 1,
+"shown_ago": 1.608,
+"start_ago": 4.508,
+"turned": 317.21,
+"yaw": 45.56,
+"key": ""
+},
+{
+"frame": 307,
+"t": 10.2604,
+"hero": 1,
+"shown_ago": 1.642,
+"start_ago": 4.542,
+"turned": 318.14,
+"yaw": 46.49,
+"key": ""
+},
+{
+"frame": 308,
+"t": 10.2938,
+"hero": 1,
+"shown_ago": 1.675,
+"start_ago": 4.575,
+"turned": 319.08,
+"yaw": 47.43,
+"key": ""
+},
+{
+"frame": 309,
+"t": 10.3271,
+"hero": 1,
+"shown_ago": 1.708,
+"start_ago": 4.608,
+"turned": 320.01,
+"yaw": 48.36,
+"key": ""
+},
+{
+"frame": 310,
+"t": 10.3604,
+"hero": 1,
+"shown_ago": 1.742,
+"start_ago": 4.642,
+"turned": 320.94,
+"yaw": 49.29,
+"key": ""
+},
+{
+"frame": 311,
+"t": 10.3938,
+"hero": 1,
+"shown_ago": 1.775,
+"start_ago": 4.675,
+"turned": 321.88,
+"yaw": 50.23,
+"key": ""
+},
+{
+"frame": 312,
+"t": 10.4271,
+"hero": 1,
+"shown_ago": 1.808,
+"start_ago": 4.708,
+"turned": 322.81,
+"yaw": 51.16,
+"key": ""
+},
+{
+"frame": 313,
+"t": 10.4604,
+"hero": 1,
+"shown_ago": 1.842,
+"start_ago": 4.742,
+"turned": 323.74,
+"yaw": 52.09,
+"key": ""
+},
+{
+"frame": 314,
+"t": 10.4938,
+"hero": 1,
+"shown_ago": 1.875,
+"start_ago": 4.775,
+"turned": 324.68,
+"yaw": 53.03,
+"key": ""
+},
+{
+"frame": 315,
+"t": 10.5271,
+"hero": 1,
+"shown_ago": 1.908,
+"start_ago": 4.808,
+"turned": 325.61,
+"yaw": 53.96,
+"key": ""
+},
+{
+"frame": 316,
+"t": 10.5604,
+"hero": 1,
+"shown_ago": 1.942,
+"start_ago": 4.842,
+"turned": 326.54,
+"yaw": 54.89,
+"key": ""
+},
+{
+"frame": 317,
+"t": 10.5938,
+"hero": 1,
+"shown_ago": 1.975,
+"start_ago": 4.875,
+"turned": 327.48,
+"yaw": 55.83,
+"key": ""
+},
+{
+"frame": 318,
+"t": 10.6271,
+"hero": 1,
+"shown_ago": 2.008,
+"start_ago": 4.908,
+"turned": 328.41,
+"yaw": 56.76,
+"key": ""
+},
+{
+"frame": 319,
+"t": 10.6604,
+"hero": 1,
+"shown_ago": 2.042,
+"start_ago": 4.942,
+"turned": 329.34,
+"yaw": 57.69,
+"key": ""
+},
+{
+"frame": 320,
+"t": 10.6938,
+"hero": 1,
+"shown_ago": 2.075,
+"start_ago": 4.975,
+"turned": 330.28,
+"yaw": 58.63,
+"key": ""
+},
+{
+"frame": 321,
+"t": 10.7271,
+"hero": 1,
+"shown_ago": 2.108,
+"start_ago": 5.008,
+"turned": 331.21,
+"yaw": 59.56,
+"key": ""
+},
+{
+"frame": 322,
+"t": 10.7604,
+"hero": 1,
+"shown_ago": 2.142,
+"start_ago": 5.042,
+"turned": 332.14,
+"yaw": 60.49,
+"key": ""
+},
+{
+"frame": 323,
+"t": 10.7938,
+"hero": 1,
+"shown_ago": 2.175,
+"start_ago": 5.075,
+"turned": 333.08,
+"yaw": 61.43,
+"key": ""
+},
+{
+"frame": 324,
+"t": 10.8271,
+"hero": 1,
+"shown_ago": 2.208,
+"start_ago": 5.108,
+"turned": 334.01,
+"yaw": 62.36,
+"key": ""
+},
+{
+"frame": 325,
+"t": 10.8604,
+"hero": 1,
+"shown_ago": 2.242,
+"start_ago": 5.142,
+"turned": 334.94,
+"yaw": 63.29,
+"key": ""
+},
+{
+"frame": 326,
+"t": 10.8938,
+"hero": 1,
+"shown_ago": 2.275,
+"start_ago": 5.175,
+"turned": 335.88,
+"yaw": 64.23,
+"key": ""
+},
+{
+"frame": 327,
+"t": 10.9271,
+"hero": 1,
+"shown_ago": 2.308,
+"start_ago": 5.208,
+"turned": 336.81,
+"yaw": 65.16,
+"key": ""
+},
+{
+"frame": 328,
+"t": 10.9604,
+"hero": 1,
+"shown_ago": 2.342,
+"start_ago": 5.242,
+"turned": 337.74,
+"yaw": 66.09,
+"key": ""
+},
+{
+"frame": 329,
+"t": 10.9938,
+"hero": 1,
+"shown_ago": 2.375,
+"start_ago": 5.275,
+"turned": 338.68,
+"yaw": 67.03,
+"key": ""
+},
+{
+"frame": 330,
+"t": 11.0271,
+"hero": 1,
+"shown_ago": 2.408,
+"start_ago": 5.308,
+"turned": 339.61,
+"yaw": 67.96,
+"key": ""
+},
+{
+"frame": 331,
+"t": 11.0604,
+"hero": 1,
+"shown_ago": 2.442,
+"start_ago": 5.342,
+"turned": 340.54,
+"yaw": 68.89,
+"key": ""
+},
+{
+"frame": 332,
+"t": 11.0938,
+"hero": 1,
+"shown_ago": 2.475,
+"start_ago": 5.375,
+"turned": 341.47,
+"yaw": 69.83,
+"key": ""
+},
+{
+"frame": 333,
+"t": 11.1271,
+"hero": 1,
+"shown_ago": 2.508,
+"start_ago": 5.408,
+"turned": 342.41,
+"yaw": 70.76,
+"key": ""
+},
+{
+"frame": 334,
+"t": 11.1604,
+"hero": 1,
+"shown_ago": 2.542,
+"start_ago": 5.442,
+"turned": 343.34,
+"yaw": 71.69,
+"key": ""
+},
+{
+"frame": 335,
+"t": 11.1938,
+"hero": 1,
+"shown_ago": 2.575,
+"start_ago": 5.475,
+"turned": 344.27,
+"yaw": 72.63,
+"key": ""
+},
+{
+"frame": 336,
+"t": 11.2271,
+"hero": 1,
+"shown_ago": 2.608,
+"start_ago": 5.508,
+"turned": 345.21,
+"yaw": 73.56,
+"key": ""
+},
+{
+"frame": 337,
+"t": 11.2604,
+"hero": 1,
+"shown_ago": 2.642,
+"start_ago": 5.542,
+"turned": 346.14,
+"yaw": 74.49,
+"key": ""
+},
+{
+"frame": 338,
+"t": 11.2938,
+"hero": 1,
+"shown_ago": 2.675,
+"start_ago": 5.575,
+"turned": 347.07,
+"yaw": 75.43,
+"key": ""
+},
+{
+"frame": 339,
+"t": 11.3271,
+"hero": 1,
+"shown_ago": 2.708,
+"start_ago": 5.608,
+"turned": 348.01,
+"yaw": 76.36,
+"key": ""
+},
+{
+"frame": 340,
+"t": 11.3604,
+"hero": 1,
+"shown_ago": 2.742,
+"start_ago": 5.642,
+"turned": 348.94,
+"yaw": 77.29,
+"key": ""
+},
+{
+"frame": 341,
+"t": 11.3938,
+"hero": 1,
+"shown_ago": 2.775,
+"start_ago": 5.675,
+"turned": 349.87,
+"yaw": 78.23,
+"key": ""
+},
+{
+"frame": 342,
+"t": 11.4271,
+"hero": 1,
+"shown_ago": 2.808,
+"start_ago": 5.708,
+"turned": 350.81,
+"yaw": 79.16,
+"key": ""
+},
+{
+"frame": 343,
+"t": 11.4604,
+"hero": 1,
+"shown_ago": 2.842,
+"start_ago": 5.742,
+"turned": 351.74,
+"yaw": 80.09,
+"key": ""
+},
+{
+"frame": 344,
+"t": 11.4938,
+"hero": 1,
+"shown_ago": 2.875,
+"start_ago": 5.775,
+"turned": 352.67,
+"yaw": 81.03,
+"key": ""
+},
+{
+"frame": 345,
+"t": 11.5271,
+"hero": 1,
+"shown_ago": 2.908,
+"start_ago": 5.808,
+"turned": 353.61,
+"yaw": 81.96,
+"key": ""
+},
+{
+"frame": 346,
+"t": 11.5604,
+"hero": 1,
+"shown_ago": 2.942,
+"start_ago": 5.842,
+"turned": 354.54,
+"yaw": 82.89,
+"key": ""
+},
+{
+"frame": 347,
+"t": 11.5938,
+"hero": 1,
+"shown_ago": 2.975,
+"start_ago": 5.875,
+"turned": 355.47,
+"yaw": 83.83,
+"key": ""
+},
+{
+"frame": 348,
+"t": 11.6271,
+"hero": 1,
+"shown_ago": 3.008,
+"start_ago": 0.008,
+"turned": 356.41,
+"yaw": 84.76,
+"key": "Enter"
+},
+{
+"frame": 349,
+"t": 11.6604,
+"hero": 1,
+"shown_ago": 3.042,
+"start_ago": 0.042,
+"turned": 357.34,
+"yaw": 85.69,
+"key": "Enter"
+},
+{
+"frame": 350,
+"t": 11.6938,
+"hero": 1,
+"shown_ago": 3.075,
+"start_ago": 0.075,
+"turned": 358.27,
+"yaw": 86.63,
+"key": "Enter"
+},
+{
+"frame": 351,
+"t": 11.7271,
+"hero": 1,
+"shown_ago": 3.108,
+"start_ago": 0.108,
+"turned": 359.21,
+"yaw": 87.56,
+"key": "Enter"
+},
+{
+"frame": 352,
+"t": 11.7604,
+"hero": 1,
+"shown_ago": 3.142,
+"start_ago": 0.142,
+"turned": 360.14,
+"yaw": 88.49,
+"key": "Enter"
+},
+{
+"frame": 353,
+"t": 11.7938,
+"hero": 1,
+"shown_ago": 3.175,
+"start_ago": 0.175,
+"turned": 361.07,
+"yaw": 89.43,
+"key": "Enter"
+},
+{
+"frame": 354,
+"t": 11.8271,
+"hero": 1,
+"shown_ago": 3.208,
+"start_ago": 0.208,
+"turned": 362.01,
+"yaw": 90.36,
+"key": "Enter"
+},
+{
+"frame": 355,
+"t": 11.8604,
+"hero": 1,
+"shown_ago": 3.242,
+"start_ago": 0.242,
+"turned": 362.94,
+"yaw": 91.29,
+"key": "Enter"
+},
+{
+"frame": 356,
+"t": 11.8938,
+"hero": 1,
+"shown_ago": 3.275,
+"start_ago": 0.275,
+"turned": 363.87,
+"yaw": 92.23,
+"key": "Enter"
+},
+{
+"frame": 357,
+"t": 11.9271,
+"hero": 1,
+"shown_ago": 3.308,
+"start_ago": 0.308,
+"turned": 364.81,
+"yaw": 93.16,
+"key": "Enter"
+},
+{
+"frame": 358,
+"t": 11.9604,
+"hero": 1,
+"shown_ago": 3.342,
+"start_ago": 0.342,
+"turned": 365.74,
+"yaw": 94.09,
+"key": "Enter"
+},
+{
+"frame": 359,
+"t": 11.9938,
+"hero": 1,
+"shown_ago": 3.375,
+"start_ago": 0.375,
+"turned": 366.67,
+"yaw": 95.03,
+"key": "Enter"
+},
+{
+"frame": 360,
+"t": 12.0271,
+"hero": 1,
+"shown_ago": 3.408,
+"start_ago": 0.408,
+"turned": 367.61,
+"yaw": 95.96,
+"key": "Enter"
+},
+{
+"frame": 361,
+"t": 12.0604,
+"hero": 1,
+"shown_ago": 3.442,
+"start_ago": 0.442,
+"turned": 368.54,
+"yaw": 96.89,
+"key": ""
+},
+{
+"frame": 362,
+"t": 12.0938,
+"hero": 1,
+"shown_ago": 3.475,
+"start_ago": 0.475,
+"turned": 369.47,
+"yaw": 97.83,
+"key": ""
+},
+{
+"frame": 363,
+"t": 12.1271,
+"hero": 1,
+"shown_ago": 3.508,
+"start_ago": 0.508,
+"turned": 370.4,
+"yaw": 98.76,
+"key": ""
+},
+{
+"frame": 364,
+"t": 12.1604,
+"hero": 1,
+"shown_ago": 3.542,
+"start_ago": 0.542,
+"turned": 371.34,
+"yaw": 99.69,
+"key": ""
+},
+{
+"frame": 365,
+"t": 12.1938,
+"hero": 1,
+"shown_ago": 3.575,
+"start_ago": 0.575,
+"turned": 372.27,
+"yaw": 100.63,
+"key": ""
+},
+{
+"frame": 366,
+"t": 12.2271,
+"hero": 1,
+"shown_ago": 3.608,
+"start_ago": 0.608,
+"turned": 373.2,
+"yaw": 101.56,
+"key": ""
+},
+{
+"frame": 367,
+"t": 12.2604,
+"hero": 1,
+"shown_ago": 3.642,
+"start_ago": 0.642,
+"turned": 374.14,
+"yaw": 102.49,
+"key": ""
+},
+{
+"frame": 368,
+"t": 12.2938,
+"hero": 1,
+"shown_ago": 3.675,
+"start_ago": 0.675,
+"turned": 375.07,
+"yaw": 103.43,
+"key": ""
+},
+{
+"frame": 369,
+"t": 12.3271,
+"hero": 1,
+"shown_ago": 3.708,
+"start_ago": 0.708,
+"turned": 376.0,
+"yaw": 104.36,
+"key": ""
+},
+{
+"frame": 370,
+"t": 12.3604,
+"hero": 1,
+"shown_ago": 3.742,
+"start_ago": 0.742,
+"turned": 376.94,
+"yaw": 105.29,
+"key": ""
+},
+{
+"frame": 371,
+"t": 12.3938,
+"hero": 1,
+"shown_ago": 3.775,
+"start_ago": 0.775,
+"turned": 377.87,
+"yaw": 106.23,
+"key": ""
+},
+{
+"frame": 372,
+"t": 12.4271,
+"hero": 1,
+"shown_ago": 3.808,
+"start_ago": 0.808,
+"turned": 378.8,
+"yaw": 107.16,
+"key": ""
+},
+{
+"frame": 373,
+"t": 12.4604,
+"hero": 1,
+"shown_ago": 3.842,
+"start_ago": 0.842,
+"turned": 379.74,
+"yaw": 108.09,
+"key": ""
+},
+{
+"frame": 374,
+"t": 12.4938,
+"hero": 1,
+"shown_ago": 3.875,
+"start_ago": 0.875,
+"turned": 380.67,
+"yaw": 109.03,
+"key": ""
+},
+{
+"frame": 375,
+"t": 12.5271,
+"hero": 1,
+"shown_ago": 3.908,
+"start_ago": 0.908,
+"turned": 381.6,
+"yaw": 109.96,
+"key": ""
+},
+{
+"frame": 376,
+"t": 12.5604,
+"hero": 1,
+"shown_ago": 3.942,
+"start_ago": 0.942,
+"turned": 382.54,
+"yaw": 110.89,
+"key": ""
+},
+{
+"frame": 377,
+"t": 12.5938,
+"hero": 1,
+"shown_ago": 3.975,
+"start_ago": 0.975,
+"turned": 383.47,
+"yaw": 111.83,
+"key": ""
+},
+{
+"frame": 378,
+"t": 12.6271,
+"hero": 1,
+"shown_ago": 4.008,
+"start_ago": 1.008,
+"turned": 384.4,
+"yaw": 112.76,
+"key": ""
+},
+{
+"frame": 379,
+"t": 12.6604,
+"hero": 1,
+"shown_ago": 4.042,
+"start_ago": 1.042,
+"turned": 385.34,
+"yaw": 113.69,
+"key": ""
+},
+{
+"frame": 380,
+"t": 12.6938,
+"hero": 1,
+"shown_ago": 4.075,
+"start_ago": 1.075,
+"turned": 386.27,
+"yaw": 114.63,
+"key": ""
+},
+{
+"frame": 381,
+"t": 12.7271,
+"hero": 1,
+"shown_ago": 4.108,
+"start_ago": 1.108,
+"turned": 387.2,
+"yaw": 115.56,
+"key": ""
+},
+{
+"frame": 382,
+"t": 12.7604,
+"hero": 1,
+"shown_ago": 4.142,
+"start_ago": 1.142,
+"turned": 388.14,
+"yaw": 116.49,
+"key": ""
+},
+{
+"frame": 383,
+"t": 12.7938,
+"hero": 1,
+"shown_ago": 4.175,
+"start_ago": 1.175,
+"turned": 389.07,
+"yaw": 117.43,
+"key": ""
+},
+{
+"frame": 384,
+"t": 12.8271,
+"hero": 1,
+"shown_ago": 4.208,
+"start_ago": 1.208,
+"turned": 390.0,
+"yaw": 118.36,
+"key": ""
+},
+{
+"frame": 385,
+"t": 12.8604,
+"hero": 1,
+"shown_ago": 4.242,
+"start_ago": 1.242,
+"turned": 390.94,
+"yaw": 119.29,
+"key": ""
+},
+{
+"frame": 386,
+"t": 12.8938,
+"hero": 1,
+"shown_ago": 4.275,
+"start_ago": 1.275,
+"turned": 391.87,
+"yaw": 120.23,
+"key": ""
+},
+{
+"frame": 387,
+"t": 12.9271,
+"hero": 1,
+"shown_ago": 4.308,
+"start_ago": 1.308,
+"turned": 392.8,
+"yaw": 121.16,
+"key": ""
+},
+{
+"frame": 388,
+"t": 12.9604,
+"hero": 1,
+"shown_ago": 4.342,
+"start_ago": 1.342,
+"turned": 393.74,
+"yaw": 122.09,
+"key": ""
+},
+{
+"frame": 389,
+"t": 12.9938,
+"hero": 1,
+"shown_ago": 4.375,
+"start_ago": 1.375,
+"turned": 394.67,
+"yaw": 123.03,
+"key": ""
+},
+{
+"frame": 390,
+"t": 13.0271,
+"hero": 1,
+"shown_ago": 4.408,
+"start_ago": 1.408,
+"turned": 395.6,
+"yaw": 123.96,
+"key": ""
+},
+{
+"frame": 391,
+"t": 13.0604,
+"hero": 1,
+"shown_ago": 4.442,
+"start_ago": 1.442,
+"turned": 396.54,
+"yaw": 124.89,
+"key": ""
+},
+{
+"frame": 392,
+"t": 13.0938,
+"hero": 1,
+"shown_ago": 4.475,
+"start_ago": 1.475,
+"turned": 397.47,
+"yaw": 125.83,
+"key": ""
+},
+{
+"frame": 393,
+"t": 13.1271,
+"hero": 1,
+"shown_ago": 4.508,
+"start_ago": 1.508,
+"turned": 398.4,
+"yaw": 126.76,
+"key": ""
+},
+{
+"frame": 394,
+"t": 13.1604,
+"hero": 1,
+"shown_ago": 4.542,
+"start_ago": 1.542,
+"turned": 399.33,
+"yaw": 127.69,
+"key": ""
+},
+{
+"frame": 395,
+"t": 13.1938,
+"hero": 1,
+"shown_ago": 4.575,
+"start_ago": 1.575,
+"turned": 400.27,
+"yaw": 128.63,
+"key": ""
+},
+{
+"frame": 396,
+"t": 13.2271,
+"hero": 1,
+"shown_ago": 4.608,
+"start_ago": 1.608,
+"turned": 401.2,
+"yaw": 129.56,
+"key": ""
+},
+{
+"frame": 397,
+"t": 13.2604,
+"hero": 1,
+"shown_ago": 4.642,
+"start_ago": 1.642,
+"turned": 402.13,
+"yaw": 130.49,
+"key": ""
+},
+{
+"frame": 398,
+"t": 13.2938,
+"hero": 1,
+"shown_ago": 4.675,
+"start_ago": 1.675,
+"turned": 403.07,
+"yaw": 131.43,
+"key": ""
+},
+{
+"frame": 399,
+"t": 13.3271,
+"hero": 1,
+"shown_ago": 4.708,
+"start_ago": 1.708,
+"turned": 404.0,
+"yaw": 132.36,
+"key": ""
+},
+{
+"frame": 400,
+"t": 13.3604,
+"hero": 1,
+"shown_ago": 4.742,
+"start_ago": 1.742,
+"turned": 404.93,
+"yaw": 133.29,
+"key": ""
+},
+{
+"frame": 401,
+"t": 13.3938,
+"hero": 1,
+"shown_ago": 4.775,
+"start_ago": 1.775,
+"turned": 405.87,
+"yaw": 134.23,
+"key": ""
+},
+{
+"frame": 402,
+"t": 13.4271,
+"hero": 1,
+"shown_ago": 4.808,
+"start_ago": 1.808,
+"turned": 406.8,
+"yaw": 135.16,
+"key": ""
+},
+{
+"frame": 403,
+"t": 13.4604,
+"hero": 1,
+"shown_ago": 4.842,
+"start_ago": 1.842,
+"turned": 407.73,
+"yaw": 136.09,
+"key": ""
+},
+{
+"frame": 404,
+"t": 13.4938,
+"hero": 1,
+"shown_ago": 4.875,
+"start_ago": 1.875,
+"turned": 408.67,
+"yaw": 137.03,
+"key": ""
+},
+{
+"frame": 405,
+"t": 13.5271,
+"hero": 1,
+"shown_ago": 4.908,
+"start_ago": 1.908,
+"turned": 409.6,
+"yaw": 137.96,
+"key": ""
+},
+{
+"frame": 406,
+"t": 13.5604,
+"hero": 1,
+"shown_ago": 4.942,
+"start_ago": 1.942,
+"turned": 410.53,
+"yaw": 138.89,
+"key": ""
+},
+{
+"frame": 407,
+"t": 13.5938,
+"hero": 1,
+"shown_ago": 4.975,
+"start_ago": 1.975,
+"turned": 411.47,
+"yaw": 139.83,
+"key": ""
+},
+{
+"frame": 408,
+"t": 13.6271,
+"hero": 1,
+"shown_ago": 5.008,
+"start_ago": 2.008,
+"turned": 412.4,
+"yaw": 140.76,
+"key": ""
+},
+{
+"frame": 409,
+"t": 13.6604,
+"hero": 1,
+"shown_ago": 5.042,
+"start_ago": 2.042,
+"turned": 413.33,
+"yaw": 141.69,
+"key": ""
+},
+{
+"frame": 410,
+"t": 13.6938,
+"hero": 1,
+"shown_ago": 5.075,
+"start_ago": 2.075,
+"turned": 414.27,
+"yaw": 142.63,
+"key": ""
+},
+{
+"frame": 411,
+"t": 13.7271,
+"hero": 1,
+"shown_ago": 5.108,
+"start_ago": 2.108,
+"turned": 415.2,
+"yaw": 143.56,
+"key": ""
+},
+{
+"frame": 412,
+"t": 13.7604,
+"hero": 1,
+"shown_ago": 5.142,
+"start_ago": 2.142,
+"turned": 416.13,
+"yaw": 144.49,
+"key": ""
+},
+{
+"frame": 413,
+"t": 13.7938,
+"hero": 1,
+"shown_ago": 5.175,
+"start_ago": 2.175,
+"turned": 417.07,
+"yaw": 145.43,
+"key": ""
+},
+{
+"frame": 414,
+"t": 13.8271,
+"hero": 1,
+"shown_ago": 5.208,
+"start_ago": 2.208,
+"turned": 418.0,
+"yaw": 146.36,
+"key": ""
+},
+{
+"frame": 415,
+"t": 13.8604,
+"hero": 1,
+"shown_ago": 5.242,
+"start_ago": 2.242,
+"turned": 418.93,
+"yaw": 147.29,
+"key": ""
+},
+{
+"frame": 416,
+"t": 13.8938,
+"hero": 1,
+"shown_ago": 5.275,
+"start_ago": 2.275,
+"turned": 419.87,
+"yaw": 148.23,
+"key": ""
+},
+{
+"frame": 417,
+"t": 13.9271,
+"hero": 1,
+"shown_ago": 5.308,
+"start_ago": 2.308,
+"turned": 420.8,
+"yaw": 149.16,
+"key": ""
+},
+{
+"frame": 418,
+"t": 13.9604,
+"hero": 1,
+"shown_ago": 5.342,
+"start_ago": 2.342,
+"turned": 421.73,
+"yaw": 150.09,
+"key": ""
+},
+{
+"frame": 419,
+"t": 13.9938,
+"hero": 1,
+"shown_ago": 5.375,
+"start_ago": 2.375,
+"turned": 422.67,
+"yaw": 151.03,
+"key": ""
+},
+{
+"frame": 420,
+"t": 14.0271,
+"hero": 1,
+"shown_ago": 5.408,
+"start_ago": 2.408,
+"turned": 423.6,
+"yaw": 151.96,
+"key": ""
+},
+{
+"frame": 421,
+"t": 14.0604,
+"hero": 1,
+"shown_ago": 5.442,
+"start_ago": 2.442,
+"turned": 424.53,
+"yaw": 152.89,
+"key": ""
+},
+{
+"frame": 422,
+"t": 14.0938,
+"hero": 1,
+"shown_ago": 5.475,
+"start_ago": 2.475,
+"turned": 425.47,
+"yaw": 153.83,
+"key": ""
+},
+{
+"frame": 423,
+"t": 14.1271,
+"hero": 1,
+"shown_ago": 5.508,
+"start_ago": 2.508,
+"turned": 426.4,
+"yaw": 154.76,
+"key": ""
+},
+{
+"frame": 424,
+"t": 14.1604,
+"hero": 1,
+"shown_ago": 5.542,
+"start_ago": 2.542,
+"turned": 427.33,
+"yaw": 155.69,
+"key": ""
+},
+{
+"frame": 425,
+"t": 14.1938,
+"hero": 1,
+"shown_ago": 5.575,
+"start_ago": 2.575,
+"turned": 428.26,
+"yaw": 156.63,
+"key": ""
+},
+{
+"frame": 426,
+"t": 14.2271,
+"hero": 1,
+"shown_ago": 5.608,
+"start_ago": 2.608,
+"turned": 429.2,
+"yaw": 157.56,
+"key": ""
+},
+{
+"frame": 427,
+"t": 14.2604,
+"hero": 1,
+"shown_ago": 5.642,
+"start_ago": 2.642,
+"turned": 430.13,
+"yaw": 158.49,
+"key": ""
+},
+{
+"frame": 428,
+"t": 14.2938,
+"hero": 1,
+"shown_ago": 5.675,
+"start_ago": 2.675,
+"turned": 431.06,
+"yaw": 159.43,
+"key": ""
+},
+{
+"frame": 429,
+"t": 14.3271,
+"hero": 1,
+"shown_ago": 5.708,
+"start_ago": 2.708,
+"turned": 432.0,
+"yaw": 160.36,
+"key": ""
+},
+{
+"frame": 430,
+"t": 14.3604,
+"hero": 1,
+"shown_ago": 5.742,
+"start_ago": 2.742,
+"turned": 432.93,
+"yaw": 161.29,
+"key": ""
+},
+{
+"frame": 431,
+"t": 14.3938,
+"hero": 1,
+"shown_ago": 5.775,
+"start_ago": 2.775,
+"turned": 433.86,
+"yaw": 162.23,
+"key": ""
+},
+{
+"frame": 432,
+"t": 14.4271,
+"hero": 1,
+"shown_ago": 5.808,
+"start_ago": 2.808,
+"turned": 434.8,
+"yaw": 163.16,
+"key": ""
+},
+{
+"frame": 433,
+"t": 14.4604,
+"hero": 1,
+"shown_ago": 5.842,
+"start_ago": 2.842,
+"turned": 435.73,
+"yaw": 164.09,
+"key": ""
+},
+{
+"frame": 434,
+"t": 14.4938,
+"hero": 1,
+"shown_ago": 5.875,
+"start_ago": 2.875,
+"turned": 436.66,
+"yaw": 165.03,
+"key": ""
+},
+{
+"frame": 435,
+"t": 14.5271,
+"hero": 1,
+"shown_ago": 5.908,
+"start_ago": 2.908,
+"turned": 437.6,
+"yaw": 165.96,
+"key": ""
+},
+{
+"frame": 436,
+"t": 14.5604,
+"hero": 1,
+"shown_ago": 5.942,
+"start_ago": 2.942,
+"turned": 438.53,
+"yaw": 166.89,
+"key": ""
+},
+{
+"frame": 437,
+"t": 14.5938,
+"hero": 1,
+"shown_ago": 5.975,
+"start_ago": 2.975,
+"turned": 439.46,
+"yaw": 167.83,
+"key": ""
+},
+{
+"frame": 438,
+"t": 14.6271,
+"hero": 1,
+"shown_ago": 6.008,
+"start_ago": 3.008,
+"turned": 440.4,
+"yaw": 168.76,
+"key": ""
+},
+{
+"frame": 439,
+"t": 14.6604,
+"hero": 1,
+"shown_ago": 6.042,
+"start_ago": 3.042,
+"turned": 441.33,
+"yaw": 169.69,
+"key": ""
+},
+{
+"frame": 440,
+"t": 14.6938,
+"hero": 1,
+"shown_ago": 6.075,
+"start_ago": 3.075,
+"turned": 442.26,
+"yaw": 170.63,
+"key": ""
+},
+{
+"frame": 441,
+"t": 14.7271,
+"hero": 1,
+"shown_ago": 6.108,
+"start_ago": 3.108,
+"turned": 443.2,
+"yaw": 171.56,
+"key": ""
+},
+{
+"frame": 442,
+"t": 14.7604,
+"hero": 1,
+"shown_ago": 6.142,
+"start_ago": 3.142,
+"turned": 444.13,
+"yaw": 172.49,
+"key": ""
+},
+{
+"frame": 443,
+"t": 14.7938,
+"hero": 1,
+"shown_ago": 6.175,
+"start_ago": 3.175,
+"turned": 445.06,
+"yaw": 173.43,
+"key": ""
+},
+{
+"frame": 444,
+"t": 14.8271,
+"hero": 1,
+"shown_ago": 6.208,
+"start_ago": 3.208,
+"turned": 446.0,
+"yaw": 174.36,
+"key": ""
+},
+{
+"frame": 445,
+"t": 14.8604,
+"hero": 1,
+"shown_ago": 6.242,
+"start_ago": 3.242,
+"turned": 446.93,
+"yaw": 175.29,
+"key": ""
+},
+{
+"frame": 446,
+"t": 14.8938,
+"hero": 1,
+"shown_ago": 6.275,
+"start_ago": 3.275,
+"turned": 447.86,
+"yaw": 176.23,
+"key": ""
+},
+{
+"frame": 447,
+"t": 14.9271,
+"hero": 1,
+"shown_ago": 6.308,
+"start_ago": 3.308,
+"turned": 448.8,
+"yaw": 177.16,
+"key": ""
+},
+{
+"frame": 448,
+"t": 14.9604,
+"hero": 1,
+"shown_ago": 6.342,
+"start_ago": 3.342,
+"turned": 449.73,
+"yaw": 178.09,
+"key": ""
+},
+{
+"frame": 449,
+"t": 14.9938,
+"hero": 1,
+"shown_ago": 6.375,
+"start_ago": 3.375,
+"turned": 450.66,
+"yaw": 179.03,
+"key": ""
+},
+{
+"frame": 450,
+"t": 15.0271,
+"hero": 1,
+"shown_ago": 6.408,
+"start_ago": 3.408,
+"turned": 451.6,
+"yaw": 179.96,
+"key": ""
+},
+{
+"frame": 451,
+"t": 15.0604,
+"hero": 1,
+"shown_ago": 6.442,
+"start_ago": 3.442,
+"turned": 452.53,
+"yaw": -179.11,
+"key": ""
+},
+{
+"frame": 452,
+"t": 15.0938,
+"hero": 1,
+"shown_ago": 6.475,
+"start_ago": 3.475,
+"turned": 453.46,
+"yaw": -178.17,
+"key": ""
+},
+{
+"frame": 453,
+"t": 15.1271,
+"hero": 1,
+"shown_ago": 6.508,
+"start_ago": 3.508,
+"turned": 454.4,
+"yaw": -177.24,
+"key": ""
+},
+{
+"frame": 454,
+"t": 15.1604,
+"hero": 1,
+"shown_ago": 6.542,
+"start_ago": 3.542,
+"turned": 455.33,
+"yaw": -176.31,
+"key": ""
+},
+{
+"frame": 455,
+"t": 15.1938,
+"hero": 1,
+"shown_ago": 6.575,
+"start_ago": 3.575,
+"turned": 456.26,
+"yaw": -175.37,
+"key": ""
+},
+{
+"frame": 456,
+"t": 15.2271,
+"hero": 1,
+"shown_ago": 6.608,
+"start_ago": 3.608,
+"turned": 457.19,
+"yaw": -174.44,
+"key": ""
+},
+{
+"frame": 457,
+"t": 15.2604,
+"hero": 1,
+"shown_ago": 6.642,
+"start_ago": 3.642,
+"turned": 458.13,
+"yaw": -173.51,
+"key": ""
+},
+{
+"frame": 458,
+"t": 15.2938,
+"hero": 1,
+"shown_ago": 6.675,
+"start_ago": 3.675,
+"turned": 459.06,
+"yaw": -172.57,
+"key": ""
+},
+{
+"frame": 459,
+"t": 15.3271,
+"hero": 1,
+"shown_ago": 6.708,
+"start_ago": 3.708,
+"turned": 459.99,
+"yaw": -171.64,
+"key": ""
+},
+{
+"frame": 460,
+"t": 15.3604,
+"hero": 1,
+"shown_ago": 6.742,
+"start_ago": 3.742,
+"turned": 460.93,
+"yaw": -170.71,
+"key": ""
+},
+{
+"frame": 461,
+"t": 15.3938,
+"hero": 1,
+"shown_ago": 6.775,
+"start_ago": 3.775,
+"turned": 461.86,
+"yaw": -169.77,
+"key": ""
+},
+{
+"frame": 462,
+"t": 15.4271,
+"hero": 2,
+"shown_ago": 0.008,
+"start_ago": 3.808,
+"turned": 462.79,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 463,
+"t": 15.4604,
+"hero": 2,
+"shown_ago": 0.042,
+"start_ago": 3.842,
+"turned": 463.73,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 464,
+"t": 15.4938,
+"hero": 2,
+"shown_ago": 0.075,
+"start_ago": 3.875,
+"turned": 464.66,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 465,
+"t": 15.5271,
+"hero": 2,
+"shown_ago": 0.108,
+"start_ago": 3.908,
+"turned": 465.59,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 466,
+"t": 15.5604,
+"hero": 2,
+"shown_ago": 0.142,
+"start_ago": 3.942,
+"turned": 466.53,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 467,
+"t": 15.5938,
+"hero": 2,
+"shown_ago": 0.175,
+"start_ago": 3.975,
+"turned": 467.46,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 468,
+"t": 15.6271,
+"hero": 2,
+"shown_ago": 0.208,
+"start_ago": 4.008,
+"turned": 468.39,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 469,
+"t": 15.6604,
+"hero": 2,
+"shown_ago": 0.242,
+"start_ago": 4.042,
+"turned": 469.33,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 470,
+"t": 15.6938,
+"hero": 2,
+"shown_ago": 0.275,
+"start_ago": 4.075,
+"turned": 470.26,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 471,
+"t": 15.7271,
+"hero": 2,
+"shown_ago": 0.308,
+"start_ago": 4.108,
+"turned": 471.19,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 472,
+"t": 15.7604,
+"hero": 2,
+"shown_ago": 0.342,
+"start_ago": 4.142,
+"turned": 472.13,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 473,
+"t": 15.7938,
+"hero": 2,
+"shown_ago": 0.375,
+"start_ago": 4.175,
+"turned": 473.06,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 474,
+"t": 15.8271,
+"hero": 2,
+"shown_ago": 0.408,
+"start_ago": 4.208,
+"turned": 473.99,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 475,
+"t": 15.8604,
+"hero": 2,
+"shown_ago": 0.442,
+"start_ago": 4.242,
+"turned": 474.93,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 476,
+"t": 15.8938,
+"hero": 2,
+"shown_ago": 0.475,
+"start_ago": 4.275,
+"turned": 475.86,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 477,
+"t": 15.9271,
+"hero": 2,
+"shown_ago": 0.508,
+"start_ago": 4.308,
+"turned": 476.79,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 478,
+"t": 15.9604,
+"hero": 2,
+"shown_ago": 0.542,
+"start_ago": 4.342,
+"turned": 477.73,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 479,
+"t": 15.9938,
+"hero": 2,
+"shown_ago": 0.575,
+"start_ago": 4.375,
+"turned": 478.66,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 480,
+"t": 16.0271,
+"hero": 2,
+"shown_ago": 0.608,
+"start_ago": 4.408,
+"turned": 479.59,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 481,
+"t": 16.0604,
+"hero": 2,
+"shown_ago": 0.642,
+"start_ago": 4.442,
+"turned": 480.53,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 482,
+"t": 16.0938,
+"hero": 2,
+"shown_ago": 0.675,
+"start_ago": 4.475,
+"turned": 481.46,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 483,
+"t": 16.1271,
+"hero": 2,
+"shown_ago": 0.708,
+"start_ago": 4.508,
+"turned": 482.39,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 484,
+"t": 16.1604,
+"hero": 2,
+"shown_ago": 0.742,
+"start_ago": 4.542,
+"turned": 483.33,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 485,
+"t": 16.1938,
+"hero": 2,
+"shown_ago": 0.775,
+"start_ago": 4.575,
+"turned": 484.26,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 486,
+"t": 16.2271,
+"hero": 2,
+"shown_ago": 0.808,
+"start_ago": 4.608,
+"turned": 485.19,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 487,
+"t": 16.2604,
+"hero": 2,
+"shown_ago": 0.842,
+"start_ago": 4.642,
+"turned": 486.12,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 488,
+"t": 16.2938,
+"hero": 2,
+"shown_ago": 0.875,
+"start_ago": 4.675,
+"turned": 487.06,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 489,
+"t": 16.3271,
+"hero": 2,
+"shown_ago": 0.908,
+"start_ago": 4.708,
+"turned": 487.99,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 490,
+"t": 16.3604,
+"hero": 2,
+"shown_ago": 0.942,
+"start_ago": 4.742,
+"turned": 488.92,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 491,
+"t": 16.3938,
+"hero": 2,
+"shown_ago": 0.975,
+"start_ago": 4.775,
+"turned": 489.86,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 492,
+"t": 16.4271,
+"hero": 2,
+"shown_ago": 1.008,
+"start_ago": 4.808,
+"turned": 490.79,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 493,
+"t": 16.4604,
+"hero": 2,
+"shown_ago": 1.042,
+"start_ago": 4.842,
+"turned": 491.72,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 494,
+"t": 16.4938,
+"hero": 2,
+"shown_ago": 1.075,
+"start_ago": 4.875,
+"turned": 492.66,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 495,
+"t": 16.5271,
+"hero": 2,
+"shown_ago": 1.108,
+"start_ago": 4.908,
+"turned": 493.59,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 496,
+"t": 16.5604,
+"hero": 2,
+"shown_ago": 1.142,
+"start_ago": 4.942,
+"turned": 494.52,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 497,
+"t": 16.5938,
+"hero": 2,
+"shown_ago": 1.175,
+"start_ago": 4.975,
+"turned": 495.46,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 498,
+"t": 16.6271,
+"hero": 2,
+"shown_ago": 1.208,
+"start_ago": 5.008,
+"turned": 496.39,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 499,
+"t": 16.6604,
+"hero": 2,
+"shown_ago": 1.242,
+"start_ago": 5.042,
+"turned": 497.32,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 500,
+"t": 16.6938,
+"hero": 2,
+"shown_ago": 1.275,
+"start_ago": 5.075,
+"turned": 498.26,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 501,
+"t": 16.7271,
+"hero": 2,
+"shown_ago": 1.308,
+"start_ago": 5.108,
+"turned": 499.19,
+"yaw": 37.16,
+"key": ""
+},
+{
+"frame": 502,
+"t": 16.7604,
+"hero": 2,
+"shown_ago": 1.342,
+"start_ago": 5.142,
+"turned": 500.12,
+"yaw": 38.09,
+"key": ""
+},
+{
+"frame": 503,
+"t": 16.7938,
+"hero": 2,
+"shown_ago": 1.375,
+"start_ago": 5.175,
+"turned": 501.06,
+"yaw": 39.02,
+"key": ""
+},
+{
+"frame": 504,
+"t": 16.8271,
+"hero": 2,
+"shown_ago": 1.408,
+"start_ago": 5.208,
+"turned": 501.99,
+"yaw": 39.96,
+"key": ""
+},
+{
+"frame": 505,
+"t": 16.8604,
+"hero": 2,
+"shown_ago": 1.442,
+"start_ago": 5.242,
+"turned": 502.92,
+"yaw": 40.89,
+"key": ""
+},
+{
+"frame": 506,
+"t": 16.8938,
+"hero": 2,
+"shown_ago": 1.475,
+"start_ago": 5.275,
+"turned": 503.86,
+"yaw": 41.82,
+"key": ""
+},
+{
+"frame": 507,
+"t": 16.9271,
+"hero": 2,
+"shown_ago": 1.508,
+"start_ago": 5.308,
+"turned": 504.79,
+"yaw": 42.76,
+"key": ""
+},
+{
+"frame": 508,
+"t": 16.9604,
+"hero": 2,
+"shown_ago": 1.542,
+"start_ago": 5.342,
+"turned": 505.72,
+"yaw": 43.69,
+"key": ""
+},
+{
+"frame": 509,
+"t": 16.9938,
+"hero": 2,
+"shown_ago": 1.575,
+"start_ago": 5.375,
+"turned": 506.66,
+"yaw": 44.63,
+"key": ""
+},
+{
+"frame": 510,
+"t": 17.0271,
+"hero": 3,
+"shown_ago": 0.008,
+"start_ago": 5.408,
+"turned": 507.59,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 511,
+"t": 17.0604,
+"hero": 3,
+"shown_ago": 0.042,
+"start_ago": 5.442,
+"turned": 508.52,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 512,
+"t": 17.0938,
+"hero": 3,
+"shown_ago": 0.075,
+"start_ago": 5.475,
+"turned": 509.46,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 513,
+"t": 17.1271,
+"hero": 3,
+"shown_ago": 0.108,
+"start_ago": 5.508,
+"turned": 510.39,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 514,
+"t": 17.1604,
+"hero": 3,
+"shown_ago": 0.142,
+"start_ago": 5.542,
+"turned": 511.32,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 515,
+"t": 17.1938,
+"hero": 3,
+"shown_ago": 0.175,
+"start_ago": 5.575,
+"turned": 512.26,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 516,
+"t": 17.2271,
+"hero": 3,
+"shown_ago": 0.208,
+"start_ago": 5.608,
+"turned": 513.19,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 517,
+"t": 17.2604,
+"hero": 3,
+"shown_ago": 0.242,
+"start_ago": 5.642,
+"turned": 514.12,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 518,
+"t": 17.2938,
+"hero": 3,
+"shown_ago": 0.275,
+"start_ago": 5.675,
+"turned": 515.06,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 519,
+"t": 17.3271,
+"hero": 3,
+"shown_ago": 0.308,
+"start_ago": 5.708,
+"turned": 515.99,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 520,
+"t": 17.3604,
+"hero": 3,
+"shown_ago": 0.342,
+"start_ago": 5.742,
+"turned": 516.92,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 521,
+"t": 17.3938,
+"hero": 3,
+"shown_ago": 0.375,
+"start_ago": 5.775,
+"turned": 517.86,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 522,
+"t": 17.4271,
+"hero": 3,
+"shown_ago": 0.408,
+"start_ago": 5.808,
+"turned": 518.79,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 523,
+"t": 17.4604,
+"hero": 3,
+"shown_ago": 0.442,
+"start_ago": 5.842,
+"turned": 519.72,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 524,
+"t": 17.4938,
+"hero": 3,
+"shown_ago": 0.475,
+"start_ago": 5.875,
+"turned": 520.66,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 525,
+"t": 17.5271,
+"hero": 3,
+"shown_ago": 0.508,
+"start_ago": 5.908,
+"turned": 521.59,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 526,
+"t": 17.5604,
+"hero": 3,
+"shown_ago": 0.542,
+"start_ago": 5.942,
+"turned": 522.52,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 527,
+"t": 17.5938,
+"hero": 3,
+"shown_ago": 0.575,
+"start_ago": 5.975,
+"turned": 523.46,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 528,
+"t": 17.6271,
+"hero": 3,
+"shown_ago": 0.608,
+"start_ago": 6.008,
+"turned": 524.39,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 529,
+"t": 17.6604,
+"hero": 3,
+"shown_ago": 0.642,
+"start_ago": 6.042,
+"turned": 525.32,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 530,
+"t": 17.6938,
+"hero": 3,
+"shown_ago": 0.675,
+"start_ago": 6.075,
+"turned": 526.26,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 531,
+"t": 17.7271,
+"hero": 3,
+"shown_ago": 0.708,
+"start_ago": 6.108,
+"turned": 527.19,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 532,
+"t": 17.7604,
+"hero": 3,
+"shown_ago": 0.742,
+"start_ago": 6.142,
+"turned": 528.12,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 533,
+"t": 17.7938,
+"hero": 3,
+"shown_ago": 0.775,
+"start_ago": 6.175,
+"turned": 529.06,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 534,
+"t": 17.8271,
+"hero": 3,
+"shown_ago": 0.808,
+"start_ago": 6.208,
+"turned": 529.99,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 535,
+"t": 17.8604,
+"hero": 3,
+"shown_ago": 0.842,
+"start_ago": 6.242,
+"turned": 530.92,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 536,
+"t": 17.8938,
+"hero": 3,
+"shown_ago": 0.875,
+"start_ago": 6.275,
+"turned": 531.86,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 537,
+"t": 17.9271,
+"hero": 3,
+"shown_ago": 0.908,
+"start_ago": 6.308,
+"turned": 532.79,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 538,
+"t": 17.9604,
+"hero": 3,
+"shown_ago": 0.942,
+"start_ago": 6.342,
+"turned": 533.73,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 539,
+"t": 17.9938,
+"hero": 3,
+"shown_ago": 0.975,
+"start_ago": 6.375,
+"turned": 534.66,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 540,
+"t": 18.0271,
+"hero": 2,
+"shown_ago": 0.008,
+"start_ago": 6.408,
+"turned": 535.59,
+"yaw": 0.76,
+"key": "A"
+},
+{
+"frame": 541,
+"t": 18.0604,
+"hero": 2,
+"shown_ago": 0.042,
+"start_ago": 6.442,
+"turned": 536.53,
+"yaw": 1.69,
+"key": "A"
+},
+{
+"frame": 542,
+"t": 18.0938,
+"hero": 2,
+"shown_ago": 0.075,
+"start_ago": 6.475,
+"turned": 537.46,
+"yaw": 2.63,
+"key": "A"
+},
+{
+"frame": 543,
+"t": 18.1271,
+"hero": 2,
+"shown_ago": 0.108,
+"start_ago": 6.508,
+"turned": 538.39,
+"yaw": 3.56,
+"key": "A"
+},
+{
+"frame": 544,
+"t": 18.1604,
+"hero": 2,
+"shown_ago": 0.142,
+"start_ago": 6.542,
+"turned": 539.33,
+"yaw": 4.49,
+"key": "A"
+},
+{
+"frame": 545,
+"t": 18.1938,
+"hero": 2,
+"shown_ago": 0.175,
+"start_ago": 6.575,
+"turned": 540.26,
+"yaw": 5.43,
+"key": "A"
+},
+{
+"frame": 546,
+"t": 18.2271,
+"hero": 2,
+"shown_ago": 0.208,
+"start_ago": 6.608,
+"turned": 541.19,
+"yaw": 6.36,
+"key": "A"
+},
+{
+"frame": 547,
+"t": 18.2604,
+"hero": 2,
+"shown_ago": 0.242,
+"start_ago": 6.642,
+"turned": 542.13,
+"yaw": 7.29,
+"key": "A"
+},
+{
+"frame": 548,
+"t": 18.2938,
+"hero": 2,
+"shown_ago": 0.275,
+"start_ago": 6.675,
+"turned": 543.06,
+"yaw": 8.23,
+"key": "A"
+},
+{
+"frame": 549,
+"t": 18.3271,
+"hero": 2,
+"shown_ago": 0.308,
+"start_ago": 6.708,
+"turned": 543.99,
+"yaw": 9.16,
+"key": "A"
+},
+{
+"frame": 550,
+"t": 18.3604,
+"hero": 2,
+"shown_ago": 0.342,
+"start_ago": 6.742,
+"turned": 544.93,
+"yaw": 10.09,
+"key": "A"
+},
+{
+"frame": 551,
+"t": 18.3938,
+"hero": 2,
+"shown_ago": 0.375,
+"start_ago": 6.775,
+"turned": 545.86,
+"yaw": 11.03,
+"key": "A"
+},
+{
+"frame": 552,
+"t": 18.4271,
+"hero": 2,
+"shown_ago": 0.408,
+"start_ago": 6.808,
+"turned": 546.79,
+"yaw": 11.96,
+"key": "A"
+},
+{
+"frame": 553,
+"t": 18.4604,
+"hero": 2,
+"shown_ago": 0.442,
+"start_ago": 6.842,
+"turned": 547.73,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 554,
+"t": 18.4938,
+"hero": 2,
+"shown_ago": 0.475,
+"start_ago": 6.875,
+"turned": 548.66,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 555,
+"t": 18.5271,
+"hero": 2,
+"shown_ago": 0.508,
+"start_ago": 6.908,
+"turned": 549.59,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 556,
+"t": 18.5604,
+"hero": 2,
+"shown_ago": 0.542,
+"start_ago": 6.942,
+"turned": 550.53,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 557,
+"t": 18.5938,
+"hero": 2,
+"shown_ago": 0.575,
+"start_ago": 6.975,
+"turned": 551.46,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 558,
+"t": 18.6271,
+"hero": 2,
+"shown_ago": 0.608,
+"start_ago": 7.008,
+"turned": 552.39,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 559,
+"t": 18.6604,
+"hero": 2,
+"shown_ago": 0.642,
+"start_ago": 7.042,
+"turned": 553.33,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 560,
+"t": 18.6938,
+"hero": 2,
+"shown_ago": 0.675,
+"start_ago": 7.075,
+"turned": 554.26,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 561,
+"t": 18.7271,
+"hero": 2,
+"shown_ago": 0.708,
+"start_ago": 7.108,
+"turned": 555.2,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 562,
+"t": 18.7604,
+"hero": 2,
+"shown_ago": 0.742,
+"start_ago": 7.142,
+"turned": 556.13,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 563,
+"t": 18.7938,
+"hero": 2,
+"shown_ago": 0.775,
+"start_ago": 7.175,
+"turned": 557.06,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 564,
+"t": 18.8271,
+"hero": 2,
+"shown_ago": 0.808,
+"start_ago": 7.208,
+"turned": 558.0,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 565,
+"t": 18.8604,
+"hero": 2,
+"shown_ago": 0.842,
+"start_ago": 7.242,
+"turned": 558.93,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 566,
+"t": 18.8938,
+"hero": 2,
+"shown_ago": 0.875,
+"start_ago": 7.275,
+"turned": 559.86,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 567,
+"t": 18.9271,
+"hero": 2,
+"shown_ago": 0.908,
+"start_ago": 7.308,
+"turned": 560.8,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 568,
+"t": 18.9604,
+"hero": 2,
+"shown_ago": 0.942,
+"start_ago": 7.342,
+"turned": 561.73,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 569,
+"t": 18.9938,
+"hero": 2,
+"shown_ago": 0.975,
+"start_ago": 7.375,
+"turned": 562.66,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 570,
+"t": 19.0271,
+"hero": 2,
+"shown_ago": 1.008,
+"start_ago": 7.408,
+"turned": 563.6,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 571,
+"t": 19.0604,
+"hero": 2,
+"shown_ago": 1.042,
+"start_ago": 7.442,
+"turned": 564.53,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 572,
+"t": 19.0938,
+"hero": 2,
+"shown_ago": 1.075,
+"start_ago": 7.475,
+"turned": 565.46,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 573,
+"t": 19.1271,
+"hero": 2,
+"shown_ago": 1.108,
+"start_ago": 7.508,
+"turned": 566.4,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 574,
+"t": 19.1604,
+"hero": 2,
+"shown_ago": 1.142,
+"start_ago": 7.542,
+"turned": 567.33,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 575,
+"t": 19.1938,
+"hero": 2,
+"shown_ago": 1.175,
+"start_ago": 7.575,
+"turned": 568.26,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 576,
+"t": 19.2271,
+"hero": 2,
+"shown_ago": 1.208,
+"start_ago": 7.608,
+"turned": 569.2,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 577,
+"t": 19.2604,
+"hero": 2,
+"shown_ago": 1.242,
+"start_ago": 7.642,
+"turned": 570.13,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 578,
+"t": 19.2938,
+"hero": 2,
+"shown_ago": 1.275,
+"start_ago": 7.675,
+"turned": 571.06,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 579,
+"t": 19.3271,
+"hero": 2,
+"shown_ago": 1.308,
+"start_ago": 7.708,
+"turned": 572.0,
+"yaw": 37.16,
+"key": ""
+},
+{
+"frame": 580,
+"t": 19.3604,
+"hero": 2,
+"shown_ago": 1.342,
+"start_ago": 7.742,
+"turned": 572.93,
+"yaw": 38.09,
+"key": ""
+},
+{
+"frame": 581,
+"t": 19.3938,
+"hero": 2,
+"shown_ago": 1.375,
+"start_ago": 7.775,
+"turned": 573.86,
+"yaw": 39.02,
+"key": ""
+},
+{
+"frame": 582,
+"t": 19.4271,
+"hero": 2,
+"shown_ago": 1.408,
+"start_ago": 7.808,
+"turned": 574.8,
+"yaw": 39.96,
+"key": ""
+},
+{
+"frame": 583,
+"t": 19.4604,
+"hero": 2,
+"shown_ago": 1.442,
+"start_ago": 7.842,
+"turned": 575.73,
+"yaw": 40.89,
+"key": ""
+},
+{
+"frame": 584,
+"t": 19.4938,
+"hero": 2,
+"shown_ago": 1.475,
+"start_ago": 7.875,
+"turned": 576.67,
+"yaw": 41.82,
+"key": ""
+},
+{
+"frame": 585,
+"t": 19.5271,
+"hero": 2,
+"shown_ago": 1.508,
+"start_ago": 0.008,
+"turned": 577.6,
+"yaw": 42.76,
+"key": "Enter"
+},
+{
+"frame": 586,
+"t": 19.5604,
+"hero": 2,
+"shown_ago": 1.542,
+"start_ago": 0.042,
+"turned": 578.53,
+"yaw": 43.69,
+"key": "Enter"
+},
+{
+"frame": 587,
+"t": 19.5938,
+"hero": 2,
+"shown_ago": 1.575,
+"start_ago": 0.075,
+"turned": 579.47,
+"yaw": 44.63,
+"key": "Enter"
+},
+{
+"frame": 588,
+"t": 19.6271,
+"hero": 2,
+"shown_ago": 1.608,
+"start_ago": 0.108,
+"turned": 580.4,
+"yaw": 45.56,
+"key": "Enter"
+},
+{
+"frame": 589,
+"t": 19.6604,
+"hero": 2,
+"shown_ago": 1.642,
+"start_ago": 0.142,
+"turned": 581.33,
+"yaw": 46.49,
+"key": "Enter"
+},
+{
+"frame": 590,
+"t": 19.6938,
+"hero": 2,
+"shown_ago": 1.675,
+"start_ago": 0.175,
+"turned": 582.27,
+"yaw": 47.43,
+"key": "Enter"
+},
+{
+"frame": 591,
+"t": 19.7271,
+"hero": 2,
+"shown_ago": 1.708,
+"start_ago": 0.208,
+"turned": 583.2,
+"yaw": 48.36,
+"key": "Enter"
+},
+{
+"frame": 592,
+"t": 19.7604,
+"hero": 2,
+"shown_ago": 1.742,
+"start_ago": 0.242,
+"turned": 584.13,
+"yaw": 49.29,
+"key": "Enter"
+},
+{
+"frame": 593,
+"t": 19.7938,
+"hero": 2,
+"shown_ago": 1.775,
+"start_ago": 0.275,
+"turned": 585.07,
+"yaw": 50.23,
+"key": "Enter"
+},
+{
+"frame": 594,
+"t": 19.8271,
+"hero": 2,
+"shown_ago": 1.808,
+"start_ago": 0.308,
+"turned": 586.0,
+"yaw": 51.16,
+"key": "Enter"
+},
+{
+"frame": 595,
+"t": 19.8604,
+"hero": 2,
+"shown_ago": 1.842,
+"start_ago": 0.342,
+"turned": 586.93,
+"yaw": 52.09,
+"key": "Enter"
+},
+{
+"frame": 596,
+"t": 19.8938,
+"hero": 2,
+"shown_ago": 1.875,
+"start_ago": 0.375,
+"turned": 587.87,
+"yaw": 53.03,
+"key": "Enter"
+},
+{
+"frame": 597,
+"t": 19.9271,
+"hero": 2,
+"shown_ago": 1.908,
+"start_ago": 0.408,
+"turned": 588.8,
+"yaw": 53.96,
+"key": "Enter"
+},
+{
+"frame": 598,
+"t": 19.9604,
+"hero": 2,
+"shown_ago": 1.942,
+"start_ago": 0.442,
+"turned": 589.73,
+"yaw": 54.89,
+"key": ""
+},
+{
+"frame": 599,
+"t": 19.9938,
+"hero": 2,
+"shown_ago": 1.975,
+"start_ago": 0.475,
+"turned": 590.67,
+"yaw": 55.83,
+"key": ""
+},
+{
+"frame": 600,
+"t": 20.0271,
+"hero": 2,
+"shown_ago": 2.008,
+"start_ago": 0.508,
+"turned": 591.6,
+"yaw": 56.76,
+"key": ""
+},
+{
+"frame": 601,
+"t": 20.0604,
+"hero": 2,
+"shown_ago": 2.042,
+"start_ago": 0.542,
+"turned": 592.53,
+"yaw": 57.69,
+"key": ""
+},
+{
+"frame": 602,
+"t": 20.0938,
+"hero": 2,
+"shown_ago": 2.075,
+"start_ago": 0.575,
+"turned": 593.47,
+"yaw": 58.63,
+"key": ""
+},
+{
+"frame": 603,
+"t": 20.1271,
+"hero": 2,
+"shown_ago": 2.108,
+"start_ago": 0.608,
+"turned": 594.4,
+"yaw": 59.56,
+"key": ""
+},
+{
+"frame": 604,
+"t": 20.1604,
+"hero": 2,
+"shown_ago": 2.142,
+"start_ago": 0.642,
+"turned": 595.33,
+"yaw": 60.49,
+"key": ""
+},
+{
+"frame": 605,
+"t": 20.1938,
+"hero": 2,
+"shown_ago": 2.175,
+"start_ago": 0.675,
+"turned": 596.27,
+"yaw": 61.43,
+"key": ""
+},
+{
+"frame": 606,
+"t": 20.2271,
+"hero": 2,
+"shown_ago": 2.208,
+"start_ago": 0.708,
+"turned": 597.2,
+"yaw": 62.36,
+"key": ""
+},
+{
+"frame": 607,
+"t": 20.2604,
+"hero": 2,
+"shown_ago": 2.242,
+"start_ago": 0.742,
+"turned": 598.13,
+"yaw": 63.29,
+"key": ""
+},
+{
+"frame": 608,
+"t": 20.2938,
+"hero": 2,
+"shown_ago": 2.275,
+"start_ago": 0.775,
+"turned": 599.07,
+"yaw": 64.23,
+"key": ""
+},
+{
+"frame": 609,
+"t": 20.3271,
+"hero": 2,
+"shown_ago": 2.308,
+"start_ago": 0.808,
+"turned": 600.0,
+"yaw": 65.16,
+"key": ""
+},
+{
+"frame": 610,
+"t": 20.3604,
+"hero": 2,
+"shown_ago": 2.342,
+"start_ago": 0.842,
+"turned": 600.94,
+"yaw": 66.09,
+"key": ""
+},
+{
+"frame": 611,
+"t": 20.3938,
+"hero": 2,
+"shown_ago": 2.375,
+"start_ago": 0.875,
+"turned": 601.87,
+"yaw": 67.03,
+"key": ""
+},
+{
+"frame": 612,
+"t": 20.4271,
+"hero": 2,
+"shown_ago": 2.408,
+"start_ago": 0.908,
+"turned": 602.8,
+"yaw": 67.96,
+"key": ""
+},
+{
+"frame": 613,
+"t": 20.4604,
+"hero": 2,
+"shown_ago": 2.442,
+"start_ago": 0.942,
+"turned": 603.74,
+"yaw": 68.89,
+"key": ""
+},
+{
+"frame": 614,
+"t": 20.4938,
+"hero": 2,
+"shown_ago": 2.475,
+"start_ago": 0.975,
+"turned": 604.67,
+"yaw": 69.83,
+"key": ""
+},
+{
+"frame": 615,
+"t": 20.5271,
+"hero": 2,
+"shown_ago": 2.508,
+"start_ago": 1.008,
+"turned": 605.6,
+"yaw": 70.76,
+"key": ""
+},
+{
+"frame": 616,
+"t": 20.5604,
+"hero": 2,
+"shown_ago": 2.542,
+"start_ago": 1.042,
+"turned": 606.54,
+"yaw": 71.69,
+"key": ""
+},
+{
+"frame": 617,
+"t": 20.5938,
+"hero": 2,
+"shown_ago": 2.575,
+"start_ago": 1.075,
+"turned": 607.47,
+"yaw": 72.63,
+"key": ""
+},
+{
+"frame": 618,
+"t": 20.6271,
+"hero": 2,
+"shown_ago": 2.608,
+"start_ago": 1.108,
+"turned": 608.4,
+"yaw": 73.56,
+"key": ""
+},
+{
+"frame": 619,
+"t": 20.6604,
+"hero": 2,
+"shown_ago": 2.642,
+"start_ago": 1.142,
+"turned": 609.34,
+"yaw": 74.49,
+"key": ""
+},
+{
+"frame": 620,
+"t": 20.6938,
+"hero": 2,
+"shown_ago": 2.675,
+"start_ago": 1.175,
+"turned": 610.27,
+"yaw": 75.43,
+"key": ""
+},
+{
+"frame": 621,
+"t": 20.7271,
+"hero": 2,
+"shown_ago": 2.708,
+"start_ago": 1.208,
+"turned": 611.2,
+"yaw": 76.36,
+"key": ""
+},
+{
+"frame": 622,
+"t": 20.7604,
+"hero": 2,
+"shown_ago": 2.742,
+"start_ago": 1.242,
+"turned": 612.14,
+"yaw": 77.29,
+"key": ""
+},
+{
+"frame": 623,
+"t": 20.7938,
+"hero": 2,
+"shown_ago": 2.775,
+"start_ago": 1.275,
+"turned": 613.07,
+"yaw": 78.23,
+"key": ""
+},
+{
+"frame": 624,
+"t": 20.8271,
+"hero": 2,
+"shown_ago": 2.808,
+"start_ago": 1.308,
+"turned": 614.0,
+"yaw": 79.16,
+"key": ""
+},
+{
+"frame": 625,
+"t": 20.8604,
+"hero": 2,
+"shown_ago": 2.842,
+"start_ago": 1.342,
+"turned": 614.94,
+"yaw": 80.09,
+"key": ""
+},
+{
+"frame": 626,
+"t": 20.8938,
+"hero": 2,
+"shown_ago": 2.875,
+"start_ago": 1.375,
+"turned": 615.87,
+"yaw": 81.03,
+"key": ""
+},
+{
+"frame": 627,
+"t": 20.9271,
+"hero": 2,
+"shown_ago": 2.908,
+"start_ago": 1.408,
+"turned": 616.8,
+"yaw": 81.96,
+"key": ""
+},
+{
+"frame": 628,
+"t": 20.9604,
+"hero": 2,
+"shown_ago": 2.942,
+"start_ago": 1.442,
+"turned": 617.74,
+"yaw": 82.89,
+"key": ""
+},
+{
+"frame": 629,
+"t": 20.9938,
+"hero": 2,
+"shown_ago": 2.975,
+"start_ago": 1.475,
+"turned": 618.67,
+"yaw": 83.83,
+"key": ""
+},
+{
+"frame": 630,
+"t": 21.0271,
+"hero": 2,
+"shown_ago": 3.008,
+"start_ago": 1.508,
+"turned": 619.6,
+"yaw": 84.76,
+"key": ""
+},
+{
+"frame": 631,
+"t": 21.0604,
+"hero": 2,
+"shown_ago": 3.042,
+"start_ago": 1.542,
+"turned": 620.54,
+"yaw": 85.69,
+"key": ""
+},
+{
+"frame": 632,
+"t": 21.0938,
+"hero": 2,
+"shown_ago": 3.075,
+"start_ago": 1.575,
+"turned": 621.47,
+"yaw": 86.63,
+"key": ""
+},
+{
+"frame": 633,
+"t": 21.1271,
+"hero": 2,
+"shown_ago": 3.108,
+"start_ago": 1.608,
+"turned": 622.41,
+"yaw": 87.56,
+"key": ""
+},
+{
+"frame": 634,
+"t": 21.1604,
+"hero": 2,
+"shown_ago": 3.142,
+"start_ago": 1.642,
+"turned": 623.34,
+"yaw": 88.49,
+"key": ""
+},
+{
+"frame": 635,
+"t": 21.1938,
+"hero": 2,
+"shown_ago": 3.175,
+"start_ago": 1.675,
+"turned": 624.27,
+"yaw": 89.43,
+"key": ""
+},
+{
+"frame": 636,
+"t": 21.2271,
+"hero": 2,
+"shown_ago": 3.208,
+"start_ago": 1.708,
+"turned": 625.21,
+"yaw": 90.36,
+"key": ""
+},
+{
+"frame": 637,
+"t": 21.2604,
+"hero": 2,
+"shown_ago": 3.242,
+"start_ago": 1.742,
+"turned": 626.14,
+"yaw": 91.29,
+"key": ""
+},
+{
+"frame": 638,
+"t": 21.2938,
+"hero": 2,
+"shown_ago": 3.275,
+"start_ago": 1.775,
+"turned": 627.07,
+"yaw": 92.23,
+"key": ""
+},
+{
+"frame": 639,
+"t": 21.3271,
+"hero": 2,
+"shown_ago": 3.308,
+"start_ago": 1.808,
+"turned": 628.01,
+"yaw": 93.16,
+"key": ""
+},
+{
+"frame": 640,
+"t": 21.3604,
+"hero": 2,
+"shown_ago": 3.342,
+"start_ago": 1.842,
+"turned": 628.94,
+"yaw": 94.09,
+"key": ""
+},
+{
+"frame": 641,
+"t": 21.3938,
+"hero": 2,
+"shown_ago": 3.375,
+"start_ago": 1.875,
+"turned": 629.87,
+"yaw": 95.03,
+"key": ""
+},
+{
+"frame": 642,
+"t": 21.4271,
+"hero": 2,
+"shown_ago": 3.408,
+"start_ago": 1.908,
+"turned": 630.81,
+"yaw": 95.96,
+"key": ""
+},
+{
+"frame": 643,
+"t": 21.4604,
+"hero": 2,
+"shown_ago": 3.442,
+"start_ago": 1.942,
+"turned": 631.74,
+"yaw": 96.89,
+"key": ""
+},
+{
+"frame": 644,
+"t": 21.4938,
+"hero": 2,
+"shown_ago": 3.475,
+"start_ago": 1.975,
+"turned": 632.67,
+"yaw": 97.83,
+"key": ""
+},
+{
+"frame": 645,
+"t": 21.5271,
+"hero": 2,
+"shown_ago": 3.508,
+"start_ago": 2.008,
+"turned": 633.61,
+"yaw": 98.76,
+"key": ""
+},
+{
+"frame": 646,
+"t": 21.5604,
+"hero": 2,
+"shown_ago": 3.542,
+"start_ago": 2.042,
+"turned": 634.54,
+"yaw": 99.69,
+"key": ""
+},
+{
+"frame": 647,
+"t": 21.5938,
+"hero": 2,
+"shown_ago": 3.575,
+"start_ago": 2.075,
+"turned": 635.47,
+"yaw": 100.63,
+"key": ""
+},
+{
+"frame": 648,
+"t": 21.6271,
+"hero": 2,
+"shown_ago": 3.608,
+"start_ago": 2.108,
+"turned": 636.41,
+"yaw": 101.56,
+"key": ""
+},
+{
+"frame": 649,
+"t": 21.6604,
+"hero": 2,
+"shown_ago": 3.642,
+"start_ago": 2.142,
+"turned": 637.34,
+"yaw": 102.49,
+"key": ""
+},
+{
+"frame": 650,
+"t": 21.6938,
+"hero": 2,
+"shown_ago": 3.675,
+"start_ago": 2.175,
+"turned": 638.27,
+"yaw": 103.43,
+"key": ""
+},
+{
+"frame": 651,
+"t": 21.7271,
+"hero": 2,
+"shown_ago": 3.708,
+"start_ago": 2.208,
+"turned": 639.21,
+"yaw": 104.36,
+"key": ""
+},
+{
+"frame": 652,
+"t": 21.7604,
+"hero": 2,
+"shown_ago": 3.742,
+"start_ago": 2.242,
+"turned": 640.14,
+"yaw": 105.29,
+"key": ""
+},
+{
+"frame": 653,
+"t": 21.7938,
+"hero": 2,
+"shown_ago": 3.775,
+"start_ago": 2.275,
+"turned": 641.07,
+"yaw": 106.23,
+"key": ""
+},
+{
+"frame": 654,
+"t": 21.8271,
+"hero": 2,
+"shown_ago": 3.808,
+"start_ago": 2.308,
+"turned": 642.01,
+"yaw": 107.16,
+"key": ""
+},
+{
+"frame": 655,
+"t": 21.8604,
+"hero": 2,
+"shown_ago": 3.842,
+"start_ago": 2.342,
+"turned": 642.94,
+"yaw": 108.09,
+"key": ""
+},
+{
+"frame": 656,
+"t": 21.8938,
+"hero": 2,
+"shown_ago": 3.875,
+"start_ago": 2.375,
+"turned": 643.88,
+"yaw": 109.03,
+"key": ""
+},
+{
+"frame": 657,
+"t": 21.9271,
+"hero": 2,
+"shown_ago": 3.908,
+"start_ago": 2.408,
+"turned": 644.81,
+"yaw": 109.96,
+"key": ""
+},
+{
+"frame": 658,
+"t": 21.9604,
+"hero": 2,
+"shown_ago": 3.942,
+"start_ago": 2.442,
+"turned": 645.74,
+"yaw": 110.89,
+"key": ""
+},
+{
+"frame": 659,
+"t": 21.9938,
+"hero": 2,
+"shown_ago": 3.975,
+"start_ago": 2.475,
+"turned": 646.68,
+"yaw": 111.83,
+"key": ""
+},
+{
+"frame": 660,
+"t": 22.0271,
+"hero": 2,
+"shown_ago": 4.008,
+"start_ago": 2.508,
+"turned": 647.61,
+"yaw": 112.76,
+"key": ""
+},
+{
+"frame": 661,
+"t": 22.0604,
+"hero": 2,
+"shown_ago": 4.042,
+"start_ago": 2.542,
+"turned": 648.54,
+"yaw": 113.69,
+"key": ""
+},
+{
+"frame": 662,
+"t": 22.0938,
+"hero": 2,
+"shown_ago": 4.075,
+"start_ago": 2.575,
+"turned": 649.48,
+"yaw": 114.63,
+"key": ""
+},
+{
+"frame": 663,
+"t": 22.1271,
+"hero": 2,
+"shown_ago": 4.108,
+"start_ago": 2.608,
+"turned": 650.41,
+"yaw": 115.56,
+"key": ""
+},
+{
+"frame": 664,
+"t": 22.1604,
+"hero": 2,
+"shown_ago": 4.142,
+"start_ago": 2.642,
+"turned": 651.34,
+"yaw": 116.49,
+"key": ""
+},
+{
+"frame": 665,
+"t": 22.1938,
+"hero": 2,
+"shown_ago": 4.175,
+"start_ago": 2.675,
+"turned": 652.28,
+"yaw": 117.43,
+"key": ""
+},
+{
+"frame": 666,
+"t": 22.2271,
+"hero": 3,
+"shown_ago": 0.008,
+"start_ago": 2.708,
+"turned": 653.21,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 667,
+"t": 22.2604,
+"hero": 3,
+"shown_ago": 0.042,
+"start_ago": 2.742,
+"turned": 654.14,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 668,
+"t": 22.2938,
+"hero": 3,
+"shown_ago": 0.075,
+"start_ago": 2.775,
+"turned": 655.08,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 669,
+"t": 22.3271,
+"hero": 3,
+"shown_ago": 0.108,
+"start_ago": 2.808,
+"turned": 656.01,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 670,
+"t": 22.3604,
+"hero": 3,
+"shown_ago": 0.142,
+"start_ago": 2.842,
+"turned": 656.94,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 671,
+"t": 22.3938,
+"hero": 3,
+"shown_ago": 0.175,
+"start_ago": 2.875,
+"turned": 657.88,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 672,
+"t": 22.4271,
+"hero": 3,
+"shown_ago": 0.208,
+"start_ago": 2.908,
+"turned": 658.81,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 673,
+"t": 22.4604,
+"hero": 3,
+"shown_ago": 0.242,
+"start_ago": 2.942,
+"turned": 659.74,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 674,
+"t": 22.4938,
+"hero": 3,
+"shown_ago": 0.275,
+"start_ago": 2.975,
+"turned": 660.68,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 675,
+"t": 22.5271,
+"hero": 3,
+"shown_ago": 0.308,
+"start_ago": 3.008,
+"turned": 661.61,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 676,
+"t": 22.5604,
+"hero": 3,
+"shown_ago": 0.342,
+"start_ago": 3.042,
+"turned": 662.54,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 677,
+"t": 22.5938,
+"hero": 3,
+"shown_ago": 0.375,
+"start_ago": 3.075,
+"turned": 663.48,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 678,
+"t": 22.6271,
+"hero": 3,
+"shown_ago": 0.408,
+"start_ago": 3.108,
+"turned": 664.41,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 679,
+"t": 22.6604,
+"hero": 3,
+"shown_ago": 0.442,
+"start_ago": 3.142,
+"turned": 665.34,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 680,
+"t": 22.6938,
+"hero": 3,
+"shown_ago": 0.475,
+"start_ago": 3.175,
+"turned": 666.28,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 681,
+"t": 22.7271,
+"hero": 3,
+"shown_ago": 0.508,
+"start_ago": 3.208,
+"turned": 667.21,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 682,
+"t": 22.7604,
+"hero": 3,
+"shown_ago": 0.542,
+"start_ago": 3.242,
+"turned": 668.15,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 683,
+"t": 22.7938,
+"hero": 3,
+"shown_ago": 0.575,
+"start_ago": 3.275,
+"turned": 669.08,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 684,
+"t": 22.8271,
+"hero": 3,
+"shown_ago": 0.608,
+"start_ago": 3.308,
+"turned": 670.01,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 685,
+"t": 22.8604,
+"hero": 3,
+"shown_ago": 0.642,
+"start_ago": 3.342,
+"turned": 670.95,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 686,
+"t": 22.8938,
+"hero": 3,
+"shown_ago": 0.675,
+"start_ago": 3.375,
+"turned": 671.88,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 687,
+"t": 22.9271,
+"hero": 3,
+"shown_ago": 0.708,
+"start_ago": 3.408,
+"turned": 672.81,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 688,
+"t": 22.9604,
+"hero": 3,
+"shown_ago": 0.742,
+"start_ago": 3.442,
+"turned": 673.75,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 689,
+"t": 22.9938,
+"hero": 3,
+"shown_ago": 0.775,
+"start_ago": 3.475,
+"turned": 674.68,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 690,
+"t": 23.0271,
+"hero": 3,
+"shown_ago": 0.808,
+"start_ago": 3.508,
+"turned": 675.61,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 691,
+"t": 23.0604,
+"hero": 3,
+"shown_ago": 0.842,
+"start_ago": 3.542,
+"turned": 676.55,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 692,
+"t": 23.0938,
+"hero": 3,
+"shown_ago": 0.875,
+"start_ago": 3.575,
+"turned": 677.48,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 693,
+"t": 23.1271,
+"hero": 3,
+"shown_ago": 0.908,
+"start_ago": 3.608,
+"turned": 678.41,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 694,
+"t": 23.1604,
+"hero": 3,
+"shown_ago": 0.942,
+"start_ago": 3.642,
+"turned": 679.35,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 695,
+"t": 23.1938,
+"hero": 3,
+"shown_ago": 0.975,
+"start_ago": 3.675,
+"turned": 680.28,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 696,
+"t": 23.2271,
+"hero": 3,
+"shown_ago": 1.008,
+"start_ago": 3.708,
+"turned": 681.21,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 697,
+"t": 23.2604,
+"hero": 3,
+"shown_ago": 1.042,
+"start_ago": 3.742,
+"turned": 682.15,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 698,
+"t": 23.2938,
+"hero": 3,
+"shown_ago": 1.075,
+"start_ago": 3.775,
+"turned": 683.08,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 699,
+"t": 23.3271,
+"hero": 3,
+"shown_ago": 1.108,
+"start_ago": 3.808,
+"turned": 684.01,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 700,
+"t": 23.3604,
+"hero": 3,
+"shown_ago": 1.142,
+"start_ago": 3.842,
+"turned": 684.95,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 701,
+"t": 23.3938,
+"hero": 3,
+"shown_ago": 1.175,
+"start_ago": 3.875,
+"turned": 685.88,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 702,
+"t": 23.4271,
+"hero": 3,
+"shown_ago": 1.208,
+"start_ago": 3.908,
+"turned": 686.81,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 703,
+"t": 23.4604,
+"hero": 3,
+"shown_ago": 1.242,
+"start_ago": 3.942,
+"turned": 687.75,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 704,
+"t": 23.4938,
+"hero": 3,
+"shown_ago": 1.275,
+"start_ago": 3.975,
+"turned": 688.68,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 705,
+"t": 23.5271,
+"hero": 3,
+"shown_ago": 1.308,
+"start_ago": 4.008,
+"turned": 689.62,
+"yaw": 37.16,
+"key": ""
+},
+{
+"frame": 706,
+"t": 23.5604,
+"hero": 3,
+"shown_ago": 1.342,
+"start_ago": 4.042,
+"turned": 690.55,
+"yaw": 38.09,
+"key": ""
+},
+{
+"frame": 707,
+"t": 23.5938,
+"hero": 3,
+"shown_ago": 1.375,
+"start_ago": 4.075,
+"turned": 691.48,
+"yaw": 39.02,
+"key": ""
+},
+{
+"frame": 708,
+"t": 23.6271,
+"hero": 4,
+"shown_ago": 0.008,
+"start_ago": 4.108,
+"turned": 692.42,
+"yaw": 0.76,
+"key": "D"
+},
+{
+"frame": 709,
+"t": 23.6604,
+"hero": 4,
+"shown_ago": 0.042,
+"start_ago": 4.142,
+"turned": 693.35,
+"yaw": 1.69,
+"key": "D"
+},
+{
+"frame": 710,
+"t": 23.6938,
+"hero": 4,
+"shown_ago": 0.075,
+"start_ago": 4.175,
+"turned": 694.28,
+"yaw": 2.63,
+"key": "D"
+},
+{
+"frame": 711,
+"t": 23.7271,
+"hero": 4,
+"shown_ago": 0.108,
+"start_ago": 4.208,
+"turned": 695.22,
+"yaw": 3.56,
+"key": "D"
+},
+{
+"frame": 712,
+"t": 23.7604,
+"hero": 4,
+"shown_ago": 0.142,
+"start_ago": 4.242,
+"turned": 696.15,
+"yaw": 4.49,
+"key": "D"
+},
+{
+"frame": 713,
+"t": 23.7938,
+"hero": 4,
+"shown_ago": 0.175,
+"start_ago": 4.275,
+"turned": 697.08,
+"yaw": 5.43,
+"key": "D"
+},
+{
+"frame": 714,
+"t": 23.8271,
+"hero": 4,
+"shown_ago": 0.208,
+"start_ago": 4.308,
+"turned": 698.02,
+"yaw": 6.36,
+"key": "D"
+},
+{
+"frame": 715,
+"t": 23.8604,
+"hero": 4,
+"shown_ago": 0.242,
+"start_ago": 4.342,
+"turned": 698.95,
+"yaw": 7.29,
+"key": "D"
+},
+{
+"frame": 716,
+"t": 23.8938,
+"hero": 4,
+"shown_ago": 0.275,
+"start_ago": 4.375,
+"turned": 699.88,
+"yaw": 8.23,
+"key": "D"
+},
+{
+"frame": 717,
+"t": 23.9271,
+"hero": 4,
+"shown_ago": 0.308,
+"start_ago": 4.408,
+"turned": 700.82,
+"yaw": 9.16,
+"key": "D"
+},
+{
+"frame": 718,
+"t": 23.9604,
+"hero": 4,
+"shown_ago": 0.342,
+"start_ago": 4.442,
+"turned": 701.75,
+"yaw": 10.09,
+"key": "D"
+},
+{
+"frame": 719,
+"t": 23.9938,
+"hero": 4,
+"shown_ago": 0.375,
+"start_ago": 4.475,
+"turned": 702.68,
+"yaw": 11.03,
+"key": "D"
+},
+{
+"frame": 720,
+"t": 24.0271,
+"hero": 4,
+"shown_ago": 0.408,
+"start_ago": 4.508,
+"turned": 703.62,
+"yaw": 11.96,
+"key": "D"
+},
+{
+"frame": 721,
+"t": 24.0604,
+"hero": 4,
+"shown_ago": 0.442,
+"start_ago": 4.542,
+"turned": 704.55,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 722,
+"t": 24.0938,
+"hero": 4,
+"shown_ago": 0.475,
+"start_ago": 4.575,
+"turned": 705.48,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 723,
+"t": 24.1271,
+"hero": 4,
+"shown_ago": 0.508,
+"start_ago": 4.608,
+"turned": 706.42,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 724,
+"t": 24.1604,
+"hero": 4,
+"shown_ago": 0.542,
+"start_ago": 4.642,
+"turned": 707.35,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 725,
+"t": 24.1938,
+"hero": 4,
+"shown_ago": 0.575,
+"start_ago": 4.675,
+"turned": 708.28,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 726,
+"t": 24.2271,
+"hero": 4,
+"shown_ago": 0.608,
+"start_ago": 4.708,
+"turned": 709.22,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 727,
+"t": 24.2604,
+"hero": 4,
+"shown_ago": 0.642,
+"start_ago": 4.742,
+"turned": 710.15,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 728,
+"t": 24.2938,
+"hero": 4,
+"shown_ago": 0.675,
+"start_ago": 4.775,
+"turned": 711.08,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 729,
+"t": 24.3271,
+"hero": 4,
+"shown_ago": 0.708,
+"start_ago": 4.808,
+"turned": 712.02,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 730,
+"t": 24.3604,
+"hero": 4,
+"shown_ago": 0.742,
+"start_ago": 4.842,
+"turned": 712.95,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 731,
+"t": 24.3938,
+"hero": 4,
+"shown_ago": 0.775,
+"start_ago": 4.875,
+"turned": 713.89,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 732,
+"t": 24.4271,
+"hero": 4,
+"shown_ago": 0.808,
+"start_ago": 4.908,
+"turned": 714.82,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 733,
+"t": 24.4604,
+"hero": 4,
+"shown_ago": 0.842,
+"start_ago": 4.942,
+"turned": 715.75,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 734,
+"t": 24.4938,
+"hero": 4,
+"shown_ago": 0.875,
+"start_ago": 4.975,
+"turned": 716.69,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 735,
+"t": 24.5271,
+"hero": 4,
+"shown_ago": 0.908,
+"start_ago": 5.008,
+"turned": 717.62,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 736,
+"t": 24.5604,
+"hero": 4,
+"shown_ago": 0.942,
+"start_ago": 5.042,
+"turned": 718.55,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 737,
+"t": 24.5938,
+"hero": 4,
+"shown_ago": 0.975,
+"start_ago": 5.075,
+"turned": 719.49,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 738,
+"t": 24.6271,
+"hero": 4,
+"shown_ago": 1.008,
+"start_ago": 5.108,
+"turned": 720.42,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 739,
+"t": 24.6604,
+"hero": 4,
+"shown_ago": 1.042,
+"start_ago": 5.142,
+"turned": 721.35,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 740,
+"t": 24.6938,
+"hero": 4,
+"shown_ago": 1.075,
+"start_ago": 5.175,
+"turned": 722.29,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 741,
+"t": 24.7271,
+"hero": 4,
+"shown_ago": 1.108,
+"start_ago": 5.208,
+"turned": 723.22,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 742,
+"t": 24.7604,
+"hero": 4,
+"shown_ago": 1.142,
+"start_ago": 5.242,
+"turned": 724.15,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 743,
+"t": 24.7938,
+"hero": 4,
+"shown_ago": 1.175,
+"start_ago": 5.275,
+"turned": 725.09,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 744,
+"t": 24.8271,
+"hero": 4,
+"shown_ago": 1.208,
+"start_ago": 5.308,
+"turned": 726.02,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 745,
+"t": 24.8604,
+"hero": 4,
+"shown_ago": 1.242,
+"start_ago": 5.342,
+"turned": 726.95,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 746,
+"t": 24.8938,
+"hero": 4,
+"shown_ago": 1.275,
+"start_ago": 5.375,
+"turned": 727.89,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 747,
+"t": 24.9271,
+"hero": 3,
+"shown_ago": 0.008,
+"start_ago": 5.408,
+"turned": 728.82,
+"yaw": 0.76,
+"key": "A"
+},
+{
+"frame": 748,
+"t": 24.9604,
+"hero": 3,
+"shown_ago": 0.042,
+"start_ago": 5.442,
+"turned": 729.75,
+"yaw": 1.69,
+"key": "A"
+},
+{
+"frame": 749,
+"t": 24.9938,
+"hero": 3,
+"shown_ago": 0.075,
+"start_ago": 5.475,
+"turned": 730.69,
+"yaw": 2.63,
+"key": "A"
+},
+{
+"frame": 750,
+"t": 25.0271,
+"hero": 3,
+"shown_ago": 0.108,
+"start_ago": 5.508,
+"turned": 731.62,
+"yaw": 3.56,
+"key": "A"
+},
+{
+"frame": 751,
+"t": 25.0604,
+"hero": 3,
+"shown_ago": 0.142,
+"start_ago": 5.542,
+"turned": 732.55,
+"yaw": 4.49,
+"key": "A"
+},
+{
+"frame": 752,
+"t": 25.0938,
+"hero": 3,
+"shown_ago": 0.175,
+"start_ago": 5.575,
+"turned": 733.49,
+"yaw": 5.43,
+"key": "A"
+},
+{
+"frame": 753,
+"t": 25.1271,
+"hero": 3,
+"shown_ago": 0.208,
+"start_ago": 5.608,
+"turned": 734.42,
+"yaw": 6.36,
+"key": "A"
+},
+{
+"frame": 754,
+"t": 25.1604,
+"hero": 3,
+"shown_ago": 0.242,
+"start_ago": 5.642,
+"turned": 735.36,
+"yaw": 7.29,
+"key": "A"
+},
+{
+"frame": 755,
+"t": 25.1938,
+"hero": 3,
+"shown_ago": 0.275,
+"start_ago": 5.675,
+"turned": 736.29,
+"yaw": 8.23,
+"key": "A"
+},
+{
+"frame": 756,
+"t": 25.2271,
+"hero": 3,
+"shown_ago": 0.308,
+"start_ago": 5.708,
+"turned": 737.22,
+"yaw": 9.16,
+"key": "A"
+},
+{
+"frame": 757,
+"t": 25.2604,
+"hero": 3,
+"shown_ago": 0.342,
+"start_ago": 5.742,
+"turned": 738.16,
+"yaw": 10.09,
+"key": "A"
+},
+{
+"frame": 758,
+"t": 25.2938,
+"hero": 3,
+"shown_ago": 0.375,
+"start_ago": 5.775,
+"turned": 739.09,
+"yaw": 11.03,
+"key": "A"
+},
+{
+"frame": 759,
+"t": 25.3271,
+"hero": 3,
+"shown_ago": 0.408,
+"start_ago": 5.808,
+"turned": 740.02,
+"yaw": 11.96,
+"key": "A"
+},
+{
+"frame": 760,
+"t": 25.3604,
+"hero": 3,
+"shown_ago": 0.442,
+"start_ago": 5.842,
+"turned": 740.96,
+"yaw": 12.89,
+"key": ""
+},
+{
+"frame": 761,
+"t": 25.3938,
+"hero": 3,
+"shown_ago": 0.475,
+"start_ago": 5.875,
+"turned": 741.89,
+"yaw": 13.83,
+"key": ""
+},
+{
+"frame": 762,
+"t": 25.4271,
+"hero": 3,
+"shown_ago": 0.508,
+"start_ago": 5.908,
+"turned": 742.82,
+"yaw": 14.76,
+"key": ""
+},
+{
+"frame": 763,
+"t": 25.4604,
+"hero": 3,
+"shown_ago": 0.542,
+"start_ago": 5.942,
+"turned": 743.76,
+"yaw": 15.69,
+"key": ""
+},
+{
+"frame": 764,
+"t": 25.4938,
+"hero": 3,
+"shown_ago": 0.575,
+"start_ago": 5.975,
+"turned": 744.69,
+"yaw": 16.63,
+"key": ""
+},
+{
+"frame": 765,
+"t": 25.5271,
+"hero": 3,
+"shown_ago": 0.608,
+"start_ago": 6.008,
+"turned": 745.62,
+"yaw": 17.56,
+"key": ""
+},
+{
+"frame": 766,
+"t": 25.5604,
+"hero": 3,
+"shown_ago": 0.642,
+"start_ago": 6.042,
+"turned": 746.56,
+"yaw": 18.49,
+"key": ""
+},
+{
+"frame": 767,
+"t": 25.5938,
+"hero": 3,
+"shown_ago": 0.675,
+"start_ago": 6.075,
+"turned": 747.49,
+"yaw": 19.42,
+"key": ""
+},
+{
+"frame": 768,
+"t": 25.6271,
+"hero": 3,
+"shown_ago": 0.708,
+"start_ago": 6.108,
+"turned": 748.42,
+"yaw": 20.36,
+"key": ""
+},
+{
+"frame": 769,
+"t": 25.6604,
+"hero": 3,
+"shown_ago": 0.742,
+"start_ago": 6.142,
+"turned": 749.36,
+"yaw": 21.29,
+"key": ""
+},
+{
+"frame": 770,
+"t": 25.6938,
+"hero": 3,
+"shown_ago": 0.775,
+"start_ago": 6.175,
+"turned": 750.29,
+"yaw": 22.22,
+"key": ""
+},
+{
+"frame": 771,
+"t": 25.7271,
+"hero": 3,
+"shown_ago": 0.808,
+"start_ago": 6.208,
+"turned": 751.22,
+"yaw": 23.16,
+"key": ""
+},
+{
+"frame": 772,
+"t": 25.7604,
+"hero": 3,
+"shown_ago": 0.842,
+"start_ago": 6.242,
+"turned": 752.16,
+"yaw": 24.09,
+"key": ""
+},
+{
+"frame": 773,
+"t": 25.7938,
+"hero": 3,
+"shown_ago": 0.875,
+"start_ago": 6.275,
+"turned": 753.09,
+"yaw": 25.02,
+"key": ""
+},
+{
+"frame": 774,
+"t": 25.8271,
+"hero": 3,
+"shown_ago": 0.908,
+"start_ago": 6.308,
+"turned": 754.02,
+"yaw": 25.96,
+"key": ""
+},
+{
+"frame": 775,
+"t": 25.8604,
+"hero": 3,
+"shown_ago": 0.942,
+"start_ago": 6.342,
+"turned": 754.96,
+"yaw": 26.89,
+"key": ""
+},
+{
+"frame": 776,
+"t": 25.8938,
+"hero": 3,
+"shown_ago": 0.975,
+"start_ago": 6.375,
+"turned": 755.89,
+"yaw": 27.82,
+"key": ""
+},
+{
+"frame": 777,
+"t": 25.9271,
+"hero": 3,
+"shown_ago": 1.008,
+"start_ago": 6.408,
+"turned": 756.83,
+"yaw": 28.76,
+"key": ""
+},
+{
+"frame": 778,
+"t": 25.9604,
+"hero": 3,
+"shown_ago": 1.042,
+"start_ago": 6.442,
+"turned": 757.76,
+"yaw": 29.69,
+"key": ""
+},
+{
+"frame": 779,
+"t": 25.9938,
+"hero": 3,
+"shown_ago": 1.075,
+"start_ago": 6.475,
+"turned": 758.69,
+"yaw": 30.62,
+"key": ""
+},
+{
+"frame": 780,
+"t": 26.0271,
+"hero": 3,
+"shown_ago": 1.108,
+"start_ago": 6.508,
+"turned": 759.63,
+"yaw": 31.56,
+"key": ""
+},
+{
+"frame": 781,
+"t": 26.0604,
+"hero": 3,
+"shown_ago": 1.142,
+"start_ago": 6.542,
+"turned": 760.56,
+"yaw": 32.49,
+"key": ""
+},
+{
+"frame": 782,
+"t": 26.0938,
+"hero": 3,
+"shown_ago": 1.175,
+"start_ago": 6.575,
+"turned": 761.49,
+"yaw": 33.42,
+"key": ""
+},
+{
+"frame": 783,
+"t": 26.1271,
+"hero": 3,
+"shown_ago": 1.208,
+"start_ago": 6.608,
+"turned": 762.43,
+"yaw": 34.36,
+"key": ""
+},
+{
+"frame": 784,
+"t": 26.1604,
+"hero": 3,
+"shown_ago": 1.242,
+"start_ago": 6.642,
+"turned": 763.36,
+"yaw": 35.29,
+"key": ""
+},
+{
+"frame": 785,
+"t": 26.1938,
+"hero": 3,
+"shown_ago": 1.275,
+"start_ago": 6.675,
+"turned": 764.29,
+"yaw": 36.22,
+"key": ""
+},
+{
+"frame": 786,
+"t": 26.2271,
+"hero": 3,
+"shown_ago": 1.308,
+"start_ago": 6.708,
+"turned": 765.23,
+"yaw": 37.16,
+"key": ""
+},
+{
+"frame": 787,
+"t": 26.2604,
+"hero": 3,
+"shown_ago": 1.342,
+"start_ago": 6.742,
+"turned": 766.16,
+"yaw": 38.09,
+"key": ""
+},
+{
+"frame": 788,
+"t": 26.2938,
+"hero": 3,
+"shown_ago": 1.375,
+"start_ago": 6.775,
+"turned": 767.09,
+"yaw": 39.02,
+"key": ""
+},
+{
+"frame": 789,
+"t": 26.3271,
+"hero": 3,
+"shown_ago": 1.408,
+"start_ago": 0.008,
+"turned": 768.03,
+"yaw": 39.96,
+"key": "Enter"
+},
+{
+"frame": 790,
+"t": 26.3604,
+"hero": 3,
+"shown_ago": 1.442,
+"start_ago": 0.042,
+"turned": 768.96,
+"yaw": 40.89,
+"key": "Enter"
+},
+{
+"frame": 791,
+"t": 26.3938,
+"hero": 3,
+"shown_ago": 1.475,
+"start_ago": 0.075,
+"turned": 769.89,
+"yaw": 41.82,
+"key": "Enter"
+},
+{
+"frame": 792,
+"t": 26.4271,
+"hero": 3,
+"shown_ago": 1.508,
+"start_ago": 0.108,
+"turned": 770.83,
+"yaw": 42.76,
+"key": "Enter"
+},
+{
+"frame": 793,
+"t": 26.4604,
+"hero": 3,
+"shown_ago": 1.542,
+"start_ago": 0.142,
+"turned": 771.76,
+"yaw": 43.69,
+"key": "Enter"
+},
+{
+"frame": 794,
+"t": 26.4938,
+"hero": 3,
+"shown_ago": 1.575,
+"start_ago": 0.175,
+"turned": 772.69,
+"yaw": 44.63,
+"key": "Enter"
+},
+{
+"frame": 795,
+"t": 26.5271,
+"hero": 3,
+"shown_ago": 1.608,
+"start_ago": 0.208,
+"turned": 773.63,
+"yaw": 45.56,
+"key": "Enter"
+},
+{
+"frame": 796,
+"t": 26.5604,
+"hero": 3,
+"shown_ago": 1.642,
+"start_ago": 0.242,
+"turned": 774.56,
+"yaw": 46.49,
+"key": "Enter"
+},
+{
+"frame": 797,
+"t": 26.5938,
+"hero": 3,
+"shown_ago": 1.675,
+"start_ago": 0.275,
+"turned": 775.49,
+"yaw": 47.43,
+"key": "Enter"
+},
+{
+"frame": 798,
+"t": 26.6271,
+"hero": 3,
+"shown_ago": 1.708,
+"start_ago": 0.308,
+"turned": 776.43,
+"yaw": 48.36,
+"key": "Enter"
+},
+{
+"frame": 799,
+"t": 26.6604,
+"hero": 3,
+"shown_ago": 1.742,
+"start_ago": 0.342,
+"turned": 777.36,
+"yaw": 49.29,
+"key": "Enter"
+},
+{
+"frame": 800,
+"t": 26.6938,
+"hero": 3,
+"shown_ago": 1.775,
+"start_ago": 0.375,
+"turned": 778.29,
+"yaw": 50.23,
+"key": "Enter"
+},
+{
+"frame": 801,
+"t": 26.7271,
+"hero": 3,
+"shown_ago": 1.808,
+"start_ago": 0.408,
+"turned": 779.23,
+"yaw": 51.16,
+"key": "Enter"
+},
+{
+"frame": 802,
+"t": 26.7604,
+"hero": 3,
+"shown_ago": 1.842,
+"start_ago": 0.442,
+"turned": 780.16,
+"yaw": 52.09,
+"key": ""
+},
+{
+"frame": 803,
+"t": 26.7938,
+"hero": 3,
+"shown_ago": 1.875,
+"start_ago": 0.475,
+"turned": 781.1,
+"yaw": 53.03,
+"key": ""
+},
+{
+"frame": 804,
+"t": 26.8271,
+"hero": 3,
+"shown_ago": 1.908,
+"start_ago": 0.508,
+"turned": 782.03,
+"yaw": 53.96,
+"key": ""
+},
+{
+"frame": 805,
+"t": 26.8604,
+"hero": 3,
+"shown_ago": 1.942,
+"start_ago": 0.542,
+"turned": 782.96,
+"yaw": 54.89,
+"key": ""
+},
+{
+"frame": 806,
+"t": 26.8938,
+"hero": 3,
+"shown_ago": 1.975,
+"start_ago": 0.575,
+"turned": 783.9,
+"yaw": 55.83,
+"key": ""
+},
+{
+"frame": 807,
+"t": 26.9271,
+"hero": 3,
+"shown_ago": 2.008,
+"start_ago": 0.608,
+"turned": 784.83,
+"yaw": 56.76,
+"key": ""
+},
+{
+"frame": 808,
+"t": 26.9604,
+"hero": 3,
+"shown_ago": 2.042,
+"start_ago": 0.642,
+"turned": 785.76,
+"yaw": 57.69,
+"key": ""
+},
+{
+"frame": 809,
+"t": 26.9938,
+"hero": 3,
+"shown_ago": 2.075,
+"start_ago": 0.675,
+"turned": 786.7,
+"yaw": 58.63,
+"key": ""
+},
+{
+"frame": 810,
+"t": 27.0271,
+"hero": 3,
+"shown_ago": 2.108,
+"start_ago": 0.708,
+"turned": 787.63,
+"yaw": 59.56,
+"key": ""
+},
+{
+"frame": 811,
+"t": 27.0604,
+"hero": 3,
+"shown_ago": 2.142,
+"start_ago": 0.742,
+"turned": 788.56,
+"yaw": 60.49,
+"key": ""
+},
+{
+"frame": 812,
+"t": 27.0938,
+"hero": 3,
+"shown_ago": 2.175,
+"start_ago": 0.775,
+"turned": 789.5,
+"yaw": 61.43,
+"key": ""
+},
+{
+"frame": 813,
+"t": 27.1271,
+"hero": 3,
+"shown_ago": 2.208,
+"start_ago": 0.808,
+"turned": 790.43,
+"yaw": 62.36,
+"key": ""
+},
+{
+"frame": 814,
+"t": 27.1604,
+"hero": 3,
+"shown_ago": 2.242,
+"start_ago": 0.842,
+"turned": 791.36,
+"yaw": 63.29,
+"key": ""
+},
+{
+"frame": 815,
+"t": 27.1938,
+"hero": 3,
+"shown_ago": 2.275,
+"start_ago": 0.875,
+"turned": 792.3,
+"yaw": 64.23,
+"key": ""
+},
+{
+"frame": 816,
+"t": 27.2271,
+"hero": 3,
+"shown_ago": 2.308,
+"start_ago": 0.908,
+"turned": 793.23,
+"yaw": 65.16,
+"key": ""
+},
+{
+"frame": 817,
+"t": 27.2604,
+"hero": 3,
+"shown_ago": 2.342,
+"start_ago": 0.942,
+"turned": 794.16,
+"yaw": 66.09,
+"key": ""
+},
+{
+"frame": 818,
+"t": 27.2938,
+"hero": 3,
+"shown_ago": 2.375,
+"start_ago": 0.975,
+"turned": 795.1,
+"yaw": 67.03,
+"key": ""
+},
+{
+"frame": 819,
+"t": 27.3271,
+"hero": 3,
+"shown_ago": 2.408,
+"start_ago": 1.008,
+"turned": 796.03,
+"yaw": 67.96,
+"key": ""
+},
+{
+"frame": 820,
+"t": 27.3604,
+"hero": 3,
+"shown_ago": 2.442,
+"start_ago": 1.042,
+"turned": 796.96,
+"yaw": 68.89,
+"key": ""
+},
+{
+"frame": 821,
+"t": 27.3938,
+"hero": 3,
+"shown_ago": 2.475,
+"start_ago": 1.075,
+"turned": 797.9,
+"yaw": 69.83,
+"key": ""
+},
+{
+"frame": 822,
+"t": 27.4271,
+"hero": 3,
+"shown_ago": 2.508,
+"start_ago": 1.108,
+"turned": 798.83,
+"yaw": 70.76,
+"key": ""
+},
+{
+"frame": 823,
+"t": 27.4604,
+"hero": 3,
+"shown_ago": 2.542,
+"start_ago": 1.142,
+"turned": 799.76,
+"yaw": 71.69,
+"key": ""
+},
+{
+"frame": 824,
+"t": 27.4938,
+"hero": 3,
+"shown_ago": 2.575,
+"start_ago": 1.175,
+"turned": 800.7,
+"yaw": 72.63,
+"key": ""
+},
+{
+"frame": 825,
+"t": 27.5271,
+"hero": 3,
+"shown_ago": 2.608,
+"start_ago": 1.208,
+"turned": 801.63,
+"yaw": 73.56,
+"key": ""
+},
+{
+"frame": 826,
+"t": 27.5604,
+"hero": 3,
+"shown_ago": 2.642,
+"start_ago": 1.242,
+"turned": 802.57,
+"yaw": 74.49,
+"key": ""
+},
+{
+"frame": 827,
+"t": 27.5938,
+"hero": 3,
+"shown_ago": 2.675,
+"start_ago": 1.275,
+"turned": 803.5,
+"yaw": 75.43,
+"key": ""
+},
+{
+"frame": 828,
+"t": 27.6271,
+"hero": 3,
+"shown_ago": 2.708,
+"start_ago": 1.308,
+"turned": 804.43,
+"yaw": 76.36,
+"key": ""
+},
+{
+"frame": 829,
+"t": 27.6604,
+"hero": 3,
+"shown_ago": 2.742,
+"start_ago": 1.342,
+"turned": 805.37,
+"yaw": 77.29,
+"key": ""
+},
+{
+"frame": 830,
+"t": 27.6938,
+"hero": 3,
+"shown_ago": 2.775,
+"start_ago": 1.375,
+"turned": 806.3,
+"yaw": 78.23,
+"key": ""
+},
+{
+"frame": 831,
+"t": 27.7271,
+"hero": 3,
+"shown_ago": 2.808,
+"start_ago": 1.408,
+"turned": 807.23,
+"yaw": 79.16,
+"key": ""
+},
+{
+"frame": 832,
+"t": 27.7604,
+"hero": 3,
+"shown_ago": 2.842,
+"start_ago": 1.442,
+"turned": 808.17,
+"yaw": 80.09,
+"key": ""
+},
+{
+"frame": 833,
+"t": 27.7938,
+"hero": 3,
+"shown_ago": 2.875,
+"start_ago": 1.475,
+"turned": 809.1,
+"yaw": 81.03,
+"key": ""
+},
+{
+"frame": 834,
+"t": 27.8271,
+"hero": 3,
+"shown_ago": 2.908,
+"start_ago": 1.508,
+"turned": 810.03,
+"yaw": 81.96,
+"key": ""
+},
+{
+"frame": 835,
+"t": 27.8604,
+"hero": 3,
+"shown_ago": 2.942,
+"start_ago": 1.542,
+"turned": 810.97,
+"yaw": 82.89,
+"key": ""
+},
+{
+"frame": 836,
+"t": 27.8938,
+"hero": 3,
+"shown_ago": 2.975,
+"start_ago": 1.575,
+"turned": 811.9,
+"yaw": 83.83,
+"key": ""
+},
+{
+"frame": 837,
+"t": 27.9271,
+"hero": 3,
+"shown_ago": 3.008,
+"start_ago": 1.608,
+"turned": 812.83,
+"yaw": 84.76,
+"key": ""
+},
+{
+"frame": 838,
+"t": 27.9604,
+"hero": 3,
+"shown_ago": 3.042,
+"start_ago": 1.642,
+"turned": 813.77,
+"yaw": 85.69,
+"key": ""
+},
+{
+"frame": 839,
+"t": 27.9938,
+"hero": 3,
+"shown_ago": 3.075,
+"start_ago": 1.675,
+"turned": 814.7,
+"yaw": 86.63,
+"key": ""
+}
+],
+"events": [
+{
+"t": 0.0,
+"kind": "begin"
+},
+{
+"t": 1.1,
+"frame": 32,
+"kind": "key",
+"key": "D",
+"passage": 0
+},
+{
+"t": 2.2,
+"frame": 65,
+"kind": "key",
+"key": "D",
+"passage": 0
+},
+{
+"t": 3.4,
+"frame": 101,
+"kind": "key",
+"key": "A",
+"passage": 0
+},
+{
+"t": 4.5,
+"frame": 134,
+"kind": "key",
+"key": "A",
+"passage": 0
+},
+{
+"t": 5.7,
+"frame": 170,
+"kind": "key",
+"key": "Enter",
+"passage": 0
+},
+{
+"t": 5.719,
+"frame": 170,
+"kind": "start",
+"hero": "Warrior",
+"opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Warrior",
+"passage": 0
+},
+{
+"t": 8.6,
+"frame": 257,
+"kind": "key",
+"key": "D",
+"passage": 1
+},
+{
+"t": 11.6,
+"frame": 347,
+"kind": "key",
+"key": "Enter",
+"passage": 1
+},
+{
+"t": 11.619,
+"frame": 347,
+"kind": "start",
+"hero": "Mage",
+"opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Mage",
+"passage": 1
+},
+{
+"t": 15.4,
+"frame": 461,
+"kind": "key",
+"key": "D",
+"passage": 2
+},
+{
+"t": 17.0,
+"frame": 509,
+"kind": "key",
+"key": "D",
+"passage": 2
+},
+{
+"t": 18.0,
+"frame": 539,
+"kind": "key",
+"key": "A",
+"passage": 2
+},
+{
+"t": 19.5,
+"frame": 584,
+"kind": "key",
+"key": "Enter",
+"passage": 2
+},
+{
+"t": 19.519,
+"frame": 584,
+"kind": "start",
+"hero": "Warlock",
+"opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Warlock",
+"passage": 2
+},
+{
+"t": 22.2,
+"frame": 665,
+"kind": "key",
+"key": "D",
+"passage": 3
+},
+{
+"t": 23.6,
+"frame": 707,
+"kind": "key",
+"key": "D",
+"passage": 3
+},
+{
+"t": 24.9,
+"frame": 746,
+"kind": "key",
+"key": "A",
+"passage": 3
+},
+{
+"t": 26.3,
+"frame": 788,
+"kind": "key",
+"key": "Enter",
+"passage": 3
+},
+{
+"t": 26.319,
+"frame": 788,
+"kind": "start",
+"hero": "Rogue",
+"opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Rogue",
+"passage": 3
+}
+],
+"heroes": [
+{
+"name": "Warrior",
+"title": "WARRIOR",
+"hp": 140.0,
+"mana": 0.0,
+"abilities": [
+"Wields all weapons",
+"Wears all armour",
+"High melee damage: +30% to her melee weapons' damage",
+"The highest hit points"
+],
+"armour": "All armour: light, medium and heavy",
+"starts_with": "Sword and shield",
+"accent": [
+0.949999988079071,
+0.699999988079071,
+0.2800000011920929
+],
+"mana_per_second": 0.0,
+"melee_bonus": 0.30000001192092896,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Sword",
+"icon": "w_sword_shield",
+"damage": 22.0,
+"reach": 170.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+}
+]
+},
+{
+"name": "Mage",
+"title": "MAGE",
+"hp": 70.0,
+"mana": 100.0,
+"abilities": [
+"Casts and learns all spells: fire and dark fire",
+"Mana 100: it comes back slowly, and every cast takes some",
+"The lowest hit points"
+],
+"armour": "No armour",
+"starts_with": "Spells only: fire and dark fire",
+"accent": [
+1.0,
+0.47999998927116394,
+0.18000000715255737
+],
+"mana_per_second": 2.0,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Fire",
+"icon": "w_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 8.0
+},
+{
+"name": "Dark Fire",
+"icon": "w_dark_fire",
+"damage": 38.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 14.0
+}
+]
+},
+{
+"name": "Warlock",
+"title": "WARLOCK",
+"hp": 100.0,
+"mana": 60.0,
+"abilities": [
+"Wields all weapons",
+"Wears only light and medium armour",
+"Casts and learns a limited set of spells: fire",
+"Mana 60: it comes back slowly, and every cast takes some",
+"Balanced hit points"
+],
+"armour": "Light and medium armour only",
+"starts_with": "Arming sword and the fire spell",
+"accent": [
+0.7200000286102295,
+0.44999998807907104,
+1.0
+],
+"mana_per_second": 1.2000000476837158,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Sword",
+"icon": "w_sword",
+"damage": 22.0,
+"reach": 170.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+},
+{
+"name": "Fire",
+"icon": "w_dark_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 10.0
+}
+]
+},
+{
+"name": "Rogue",
+"title": "ROGUE",
+"hp": 100.0,
+"mana": 0.0,
+"abilities": [
+"Wields daggers and ranged weapons",
+"Ranged damage: +30% to her ranged weapons' damage",
+"Wears only light armour",
+"Uncanny dodge (B): she rolls out of a blow",
+"Balanced hit points"
+],
+"armour": "Light armour only",
+"starts_with": "Two daggers and a crossbow",
+"accent": [
+0.41999998688697815,
+0.8799999952316284,
+0.550000011920929
+],
+"mana_per_second": 0.0,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.30000001192092896,
+"roll": true,
+"weapons": [
+{
+"name": "Daggers",
+"icon": "w_daggers",
+"damage": 15.0,
+"reach": 150.0,
+"spell": false,
+"bolt": false,
+"mana": 0.0
+},
+{
+"name": "Crossbow",
+"icon": "w_crossbow",
+"damage": 34.0,
+"reach": 2600.0,
+"spell": true,
+"bolt": true,
+"mana": 0.0
+}
+]
+},
+{
+"name": "Summoner",
+"title": "SUMMONER",
+"hp": 85.0,
+"mana": 90.0,
+"abilities": [
+"Casts fire and dark fire, as the Mage does",
+"Wears the armour she finds: five sets were made for her",
+"Worn armour takes a share off every blow"
+],
+"armour": "Any set she finds: plate, the bear warrior's, the tiefling's, demonic, the orc veteran's",
+"starts_with": "Spells only: fire and dark fire; no armour",
+"accent": [
+0.949999988079071,
+0.3499999940395355,
+0.6499999761581421
+],
+"mana_per_second": 1.600000023841858,
+"melee_bonus": 0.0,
+"ranged_bonus": 0.0,
+"roll": false,
+"weapons": [
+{
+"name": "Fire",
+"icon": "w_fire",
+"damage": 25.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 8.0
+},
+{
+"name": "Dark Fire",
+"icon": "w_dark_fire",
+"damage": 38.0,
+"reach": 1400.0,
+"spell": true,
+"bolt": false,
+"mana": 14.0
+}
+]
+}
+],
+"picked": [
+"Warrior",
+"Mage",
+"Warlock",
+"Rogue"
+],
+"want": [
+"Warrior",
+"Mage",
+"Warlock",
+"Rogue"
+],
+"error": null
+}

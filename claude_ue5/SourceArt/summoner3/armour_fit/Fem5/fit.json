@@ -1,0 +1,172 @@
+{
+ "BearArmour": {
+  "bones": {
+   "lowerarm_l": [
+    0.642,
+    0.554,
+    0.5,
+    0.592
+   ],
+   "lowerarm_r": [
+    0.5,
+    0.567,
+    0.683,
+    0.613
+   ],
+   "upperarm_l": [
+    0.546,
+    0.593,
+    0.5,
+    0.546
+   ],
+   "upperarm_r": [
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "pelvis": [
+    0.528,
+    0.558,
+    0.631,
+    0.515
+   ],
+   "spine_01": [
+    0.541,
+    0.548,
+    0.556,
+    0.548
+   ],
+   "thigh_l": [
+    1.175,
+    0.871,
+    0.894,
+    1.211
+   ],
+   "calf_l": [
+    0.527,
+    0.68,
+    0.618,
+    0.858
+   ],
+   "foot_l": [
+    1.204,
+    1.498,
+    1.591,
+    1.7
+   ],
+   "thigh_r": [
+    0.751,
+    0.678,
+    0.938,
+    0.975
+   ],
+   "calf_r": [
+    0.742,
+    0.734,
+    0.569,
+    0.65
+   ],
+   "foot_r": [
+    1.49,
+    1.596,
+    1.598,
+    1.7
+   ],
+   "ball_l": [
+    0.691,
+    0.91,
+    0.751,
+    0.784
+   ],
+   "ball_r": [
+    0.813,
+    0.972,
+    0.609,
+    0.798
+   ]
+  },
+  "pieces": {
+   "SK_Bear_Armor_01.001": {
+    "verts": 1968,
+    "pushed": 8,
+    "pushed_max_cm": 0.16,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_02.001": {
+    "verts": 3114,
+    "pushed": 98,
+    "pushed_max_cm": 0.6,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_03.001": {
+    "verts": 1861,
+    "pushed": 27,
+    "pushed_max_cm": 0.45,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_04.001": {
+    "verts": 2194,
+    "pushed": 130,
+    "pushed_max_cm": 2.73,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_05.001": {
+    "verts": 1295,
+    "pushed": 327,
+    "pushed_max_cm": 1.24,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_06.001": {
+    "verts": 6610,
+    "pushed": 839,
+    "pushed_max_cm": 1.87,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_07.001": {
+    "verts": 868,
+    "pushed": 17,
+    "pushed_max_cm": 2.29,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_09.001": {
+    "verts": 3376,
+    "pushed": 19,
+    "pushed_max_cm": 0.57,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_10.001": {
+    "verts": 5262,
+    "pushed": 97,
+    "pushed_max_cm": 0.71,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_11.001": {
+    "verts": 1040,
+    "pushed": 55,
+    "pushed_max_cm": 0.84,
+    "unweighted": 0
+   },
+   "SK_Bear_Armor_12.001": {
+    "verts": 850,
+    "pushed": 0,
+    "pushed_max_cm": 0.0,
+    "unweighted": 0
+   }
+  },
+  "materials": [
+   "M_Bear_Armors",
+   "M_Bear_Armors.001",
+   "M_Bear_Armors.002",
+   "M_Bear_Armors.003",
+   "M_Bear_Armors.004",
+   "M_Bear_Armors.005",
+   "M_Bear_Armors.006",
+   "M_Bear_Armors.007",
+   "M_Bear_Armors.008",
+   "M_Bear_Armors.009",
+   "Fbx Default Material 0"
+  ],
+  "verts": 28438
+ }
+}

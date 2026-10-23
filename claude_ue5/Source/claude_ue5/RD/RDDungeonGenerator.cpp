@@ -424,6 +424,25 @@ int32 ARDDungeonGenerator::FindItem(FName Name) const
 	return -1;
 }
 
+FString ARDDungeonGenerator::ArmourRefusal(const FRDItemDef& It, const FString& Label) const
+{
+	static const TCHAR* WeightName[3] = { TEXT("light"), TEXT("medium"), TEXT("heavy") };
+	const FString Who = PlayerTitle.ToLower();
+	if (const FRDHeroDef* H = FindHero(CurrentHero))
+		if (!H->Wears.Contains(It.ArmourWeight))
+		{
+			if (H->Wears.Num() == 0) return FString::Printf(TEXT("The %s wears no armour"), *Who);
+			TArray<FString> Ws;
+			for (int32 K = 0; K < 3; ++K) if (H->Wears.Contains((ERDArmourWeight)K)) Ws.Add(WeightName[K]);
+			FString List = Ws.Last();
+			if (Ws.Num() > 1) { Ws.Pop(); List = FString::Join(Ws, TEXT(", ")) + TEXT(" and ") + List; }
+			return FString::Printf(TEXT("The %s is %s: the %s wears only %s armour"), *Label, WeightName[(int32)It.ArmourWeight], *Who, *List);
+		}
+	if (!It.Fits.ContainsByPredicate([this](const FRDArmourFit& F) { return F.Hero == CurrentHero && F.Meshes.Num() > 0; }))
+		return FString::Printf(TEXT("The %s was not made for the %s"), *Label, *Who);
+	return FString();
+}
+
 FName ARDDungeonGenerator::LootOf(FIntPoint Section, int32 Index) const
 {
 	const TArray<FName> L = LootListOf(Section, Index);

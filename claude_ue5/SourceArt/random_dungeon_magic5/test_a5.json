@@ -1,8 +1,10 @@
 {
- "tag": "w7",
+ "tag": "a5",
  "plan": [
+  "select",
   "loot",
   "wear",
+  "heroarmour",
   "follow",
   "damage",
   "ui",
@@ -10,8 +12,37 @@
   "weapons",
   "tierloot"
  ],
- "level": "random_dungeonmagic_level5",
+ "level": "random_dungeonmagic_level5_select",
  "steps": [
+  {
+   "step": "select",
+   "ok": true,
+   "heroes": [
+    "Warrior",
+    "Mage",
+    "Warlock",
+    "Rogue",
+    "Summoner"
+   ],
+   "first": "Warrior",
+   "picked": "Summoner",
+   "seen": [
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "target": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5",
+   "opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Summoner",
+   "dungeon_hero": "Summoner",
+   "pawn": "BP_RDM5_Summoner3Character_C",
+   "want_pawn": "BP_RDM5_Summoner3Character_C",
+   "health_mana": [
+    85.0,
+    90.0
+   ]
+  },
   {
    "step": "loot",
    "ok": true,
@@ -26,24 +57,30 @@
     "232": [
      "Plate Armour",
      "Orc Veteran’s Armour",
-     "Medium Speed Potion"
+     "Medium Healing Potion",
+     "Arming Sword"
     ],
     "233": [
      "Bear Warrior’s Armour",
-     "Arming Sword",
-     "Large Healing Potion"
+     "Medium Speed Potion",
+     "Small Speed Potion",
+     "Small Healing Potion",
+     "Medium Mana Potion",
+     "Fruit"
     ],
     "234": [
      "Tiefling’s Armour",
-     "Uncommon Mana Potion",
-     "Very Rare Mana Potion",
-     "Longbow",
-     "Uncommon Speed Potion"
+     "Bread",
+     "Medium Healing Potion",
+     "Large Healing Potion"
     ],
     "235": [
      "Demonic Armour",
-     "Medium Speed Potion",
-     "Eastern Sabre"
+     "Medium Healing Potion",
+     "Wondrous Mana Potion",
+     "Wondrous Speed Potion",
+     "Large Mana Potion",
+     "Dagger"
     ]
    },
    "armour_elsewhere": [],
@@ -57,27 +94,29 @@
    ],
    "more": 6000,
    "counts": {
-    "1": 975,
-    "2": 996,
-    "3": 1028,
-    "4": 1008,
-    "5": 965,
-    "6": 1028
+    "1": 945,
+    "2": 1038,
+    "3": 977,
+    "4": 1009,
+    "5": 1039,
+    "6": 992
    },
-   "worst_sd": 1.21,
+   "worst_sd": 1.91,
    "armour_in_more": 0,
    "by_f": {
     "container": 232,
-    "found": 3,
+    "found": 4,
     "list": [
      "Plate Armour",
      "Orc Veteran’s Armour",
-     "Medium Speed Potion"
+     "Medium Healing Potion",
+     "Arming Sword"
     ],
     "found_list": [
      "Plate Armour",
      "Orc Veteran’s Armour",
-     "Medium Speed Potion"
+     "Medium Healing Potion",
+     "Arming Sword"
     ]
    },
    "wrong": [],
@@ -85,7 +124,7 @@
    "items_kinds": 48,
    "carried_matches": true,
    "opened_again_gave": 0,
-   "generated_containers": 634,
+   "generated_containers": 766,
    "generated_armour": 0
   },
   {
@@ -174,7 +213,287 @@
     "wore": false,
     "worn": "None",
     "meshes": 0,
-    "message": "The plate armour was not made for the mage"
+    "message": "The mage wears no armour"
+   }
+  },
+  {
+   "step": "heroarmour",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "switched": true,
+     "wears": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "tries": [
+      {
+       "set": "Plate Armour",
+       "weight": "heavy",
+       "wore": true,
+       "worn": "Plate Armour",
+       "message": "You put on the plate armour:  blows take 40% less",
+       "meshes": [
+        "SK_Fem5_PlateArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Bear Warrior’s Armour",
+       "weight": "medium",
+       "wore": true,
+       "worn": "Bear Warrior’s Armour",
+       "message": "You put on the bear warrior’s armour:  blows take 30% less",
+       "meshes": [
+        "SK_Fem5_BearArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Tiefling’s Armour",
+       "weight": "light",
+       "wore": true,
+       "worn": "Tiefling’s Armour",
+       "message": "You put on the tiefling’s armour:  blows take 15% less",
+       "meshes": [
+        "SK_Fem5_TieflingArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Demonic Armour",
+       "weight": "medium",
+       "wore": true,
+       "worn": "Demonic Armour",
+       "message": "You put on the demonic armour:  blows take 25% less",
+       "meshes": [
+        "SK_Fem5_DemonicArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Orc Veteran’s Armour",
+       "weight": "heavy",
+       "wore": true,
+       "worn": "Orc Veteran’s Armour",
+       "message": "You put on the orc veteran’s armour:  blows take 30% less",
+       "meshes": [
+        "SK_Fem5_OrcArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      }
+     ],
+     "follow": {
+      "set": "Plate Armour",
+      "bone_max": 0.399,
+      "skin_median": 0.08,
+      "bone_n": 226
+     },
+     "ok": true
+    },
+    "Mage": {
+     "switched": true,
+     "wears": [],
+     "tries": [
+      {
+       "set": "Plate Armour",
+       "weight": "heavy",
+       "wore": false,
+       "worn": "None",
+       "message": "The mage wears no armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Bear Warrior’s Armour",
+       "weight": "medium",
+       "wore": false,
+       "worn": "None",
+       "message": "The mage wears no armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Tiefling’s Armour",
+       "weight": "light",
+       "wore": false,
+       "worn": "None",
+       "message": "The mage wears no armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Demonic Armour",
+       "weight": "medium",
+       "wore": false,
+       "worn": "None",
+       "message": "The mage wears no armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Orc Veteran’s Armour",
+       "weight": "heavy",
+       "wore": false,
+       "worn": "None",
+       "message": "The mage wears no armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      }
+     ],
+     "follow": null,
+     "ok": true
+    },
+    "Warlock": {
+     "switched": true,
+     "wears": [
+      "light",
+      "medium"
+     ],
+     "tries": [
+      {
+       "set": "Plate Armour",
+       "weight": "heavy",
+       "wore": false,
+       "worn": "None",
+       "message": "The plate armour is heavy: the warlock wears only light and medium armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Bear Warrior’s Armour",
+       "weight": "medium",
+       "wore": true,
+       "worn": "Bear Warrior’s Armour",
+       "message": "You put on the bear warrior’s armour:  blows take 30% less",
+       "meshes": [
+        "SK_DarkCaster_BearArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Tiefling’s Armour",
+       "weight": "light",
+       "wore": true,
+       "worn": "Tiefling’s Armour",
+       "message": "You put on the tiefling’s armour:  blows take 15% less",
+       "meshes": [
+        "SK_DarkCaster_TieflingArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Demonic Armour",
+       "weight": "medium",
+       "wore": true,
+       "worn": "Demonic Armour",
+       "message": "You put on the demonic armour:  blows take 25% less",
+       "meshes": [
+        "SK_DarkCaster_DemonicArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Orc Veteran’s Armour",
+       "weight": "heavy",
+       "wore": false,
+       "worn": "None",
+       "message": "The orc veteran’s armour is heavy: the warlock wears only light and medium armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      }
+     ],
+     "follow": {
+      "set": "Bear Warrior’s Armour",
+      "bone_max": 0.285,
+      "skin_median": 0.13,
+      "bone_n": 404
+     },
+     "ok": true
+    },
+    "Rogue": {
+     "switched": true,
+     "wears": [
+      "light"
+     ],
+     "tries": [
+      {
+       "set": "Plate Armour",
+       "weight": "heavy",
+       "wore": false,
+       "worn": "None",
+       "message": "The plate armour is heavy: the rogue wears only light armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Bear Warrior’s Armour",
+       "weight": "medium",
+       "wore": false,
+       "worn": "None",
+       "message": "The bear warrior’s armour is medium: the rogue wears only light armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Tiefling’s Armour",
+       "weight": "light",
+       "wore": true,
+       "worn": "Tiefling’s Armour",
+       "message": "You put on the tiefling’s armour:  blows take 15% less",
+       "meshes": [
+        "SK_Rogue_TieflingArmour"
+       ],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Demonic Armour",
+       "weight": "medium",
+       "wore": false,
+       "worn": "None",
+       "message": "The demonic armour is medium: the rogue wears only light armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      },
+      {
+       "set": "Orc Veteran’s Armour",
+       "weight": "heavy",
+       "wore": false,
+       "worn": "None",
+       "message": "The orc veteran’s armour is heavy: the rogue wears only light armour",
+       "meshes": [],
+       "follows_her": true,
+       "ok": true
+      }
+     ],
+     "follow": {
+      "set": "Tiefling’s Armour",
+      "bone_max": 0.0,
+      "skin_median": 0.04,
+      "bone_n": 544
+     },
+     "ok": true
+    }
    }
   },
   {
@@ -194,102 +513,102 @@
     {
      "when": "running 0",
      "n": 603,
-     "skin_median": 0.07,
-     "skin_p95": 9.62,
+     "skin_median": 0.08,
+     "skin_p95": 5.37,
      "bone_n": 223,
-     "bone_p95": 0.056,
-     "bone_max": 0.145,
-     "bone_p95_left_in_rest_pose": 42.36
+     "bone_p95": 0.069,
+     "bone_max": 0.186,
+     "bone_p95_left_in_rest_pose": 54.09
     },
     {
      "when": "running 1",
      "n": 603,
-     "skin_median": 0.13,
-     "skin_p95": 8.48,
+     "skin_median": 0.14,
+     "skin_p95": 9.27,
      "bone_n": 223,
-     "bone_p95": 0.212,
-     "bone_max": 0.459,
-     "bone_p95_left_in_rest_pose": 127.31
+     "bone_p95": 0.215,
+     "bone_max": 0.466,
+     "bone_p95_left_in_rest_pose": 127.59
     },
     {
      "when": "running 2",
      "n": 603,
-     "skin_median": 0.12,
-     "skin_p95": 21.48,
+     "skin_median": 0.13,
+     "skin_p95": 16.62,
      "bone_n": 223,
-     "bone_p95": 0.207,
-     "bone_max": 0.424,
-     "bone_p95_left_in_rest_pose": 126.32
+     "bone_p95": 0.206,
+     "bone_max": 0.435,
+     "bone_p95_left_in_rest_pose": 126.34
     },
     {
      "when": "running 3",
      "n": 603,
      "skin_median": 0.12,
-     "skin_p95": 37.51,
+     "skin_p95": 35.8,
      "bone_n": 223,
-     "bone_p95": 0.145,
+     "bone_p95": 0.151,
      "bone_max": 0.326,
-     "bone_p95_left_in_rest_pose": 125.09
+     "bone_p95_left_in_rest_pose": 124.97
     },
     {
      "when": "running 4",
      "n": 603,
      "skin_median": 0.09,
-     "skin_p95": 54.35,
+     "skin_p95": 53.69,
      "bone_n": 223,
-     "bone_p95": 0.172,
-     "bone_max": 0.448,
-     "bone_p95_left_in_rest_pose": 126.71
+     "bone_p95": 0.168,
+     "bone_max": 0.439,
+     "bone_p95_left_in_rest_pose": 126.77
     },
     {
      "when": "running 5",
      "n": 603,
      "skin_median": 0.13,
-     "skin_p95": 49.37,
+     "skin_p95": 47.1,
      "bone_n": 223,
-     "bone_p95": 0.118,
-     "bone_max": 0.425,
-     "bone_p95_left_in_rest_pose": 129.86
+     "bone_p95": 0.127,
+     "bone_max": 0.393,
+     "bone_p95_left_in_rest_pose": 129.91
     },
     {
      "when": "casting 0",
      "n": 603,
      "skin_median": 0.06,
-     "skin_p95": 10.31,
+     "skin_p95": 10.29,
      "bone_n": 223,
-     "bone_p95": 0.066,
-     "bone_max": 0.123,
-     "bone_p95_left_in_rest_pose": 15.07
+     "bone_p95": 0.067,
+     "bone_max": 0.125,
+     "bone_p95_left_in_rest_pose": 13.4
     },
     {
      "when": "casting 1",
      "n": 603,
      "skin_median": 0.06,
-     "skin_p95": 10.17,
+     "skin_p95": 10.16,
      "bone_n": 223,
-     "bone_p95": 0.079,
-     "bone_max": 0.137,
-     "bone_p95_left_in_rest_pose": 23.0
+     "bone_p95": 0.081,
+     "bone_max": 0.138,
+     "bone_p95_left_in_rest_pose": 23.16
     },
     {
      "when": "casting 2",
      "n": 603,
      "skin_median": 0.06,
-     "skin_p95": 10.32,
+     "skin_p95": 10.31,
      "bone_n": 223,
      "bone_p95": 0.065,
      "bone_max": 0.123,
-     "bone_p95_left_in_rest_pose": 22.41
+     "bone_p95_left_in_rest_pose": 22.54
     },
     {
      "when": "casting 3",
      "n": 603,
      "skin_median": 0.05,
-     "skin_p95": 10.47,
+     "skin_p95": 10.45,
      "bone_n": 223,
-     "bone_p95": 0.053,
-     "bone_max": 0.111,
-     "bone_p95_left_in_rest_pose": 19.95
+     "bone_p95": 0.055,
+     "bone_max": 0.113,
+     "bone_p95_left_in_rest_pose": 20.72
     }
    ]
   },
@@ -304,7 +623,7 @@
      "blow": 9.0,
      "reached_her": 9.0,
      "hp_fell": 9.0,
-     "monster": "RDMonster_56",
+     "monster": "RDMonster_112",
      "ok": true
     },
     {
@@ -314,7 +633,7 @@
      "blow": 9.0,
      "reached_her": 5.4,
      "hp_fell": 5.4,
-     "monster": "RDMonster_42",
+     "monster": "RDMonster_126",
      "ok": true
     },
     {
@@ -324,7 +643,7 @@
      "blow": 9.0,
      "reached_her": 6.3,
      "hp_fell": 6.3,
-     "monster": "RDMonster_98",
+     "monster": "RDMonster_126",
      "ok": true
     },
     {
@@ -334,7 +653,7 @@
      "blow": 9.0,
      "reached_her": 7.65,
      "hp_fell": 7.65,
-     "monster": "RDMonster_42",
+     "monster": "RDMonster_154",
      "ok": true
     },
     {
@@ -344,7 +663,7 @@
      "blow": 9.0,
      "reached_her": 6.75,
      "hp_fell": 6.75,
-     "monster": "RDMonster_98",
+     "monster": "RDMonster_126",
      "ok": true
     },
     {
@@ -354,7 +673,7 @@
      "blow": 9.0,
      "reached_her": 6.3,
      "hp_fell": 6.3,
-     "monster": "RDMonster_42",
+     "monster": "RDMonster_168",
      "ok": true
     }
    ]
@@ -376,11 +695,11 @@
     true,
     true
    ],
-   "found_container": 234,
-   "found_items": 5,
-   "found_first": "Tiefling’s Armour",
+   "found_container": 233,
+   "found_items": 6,
+   "found_first": "Bear Warrior’s Armour",
    "found_drawn": [
-    "armour_TieflingArmour",
+    "armour_BearArmour",
     "banner",
     "bar_health",
     "bar_mana",
@@ -407,18 +726,19 @@
     "font_label",
     "font_text",
     "font_title",
+    "fruit",
     "healing_flask",
     "healing_large",
     "healing_ornate",
     "healing_vial",
     "mana_flask",
     "mana_large",
-    "mana_ornate",
     "mana_vial",
     "minimap_ring",
     "panel_wide",
     "slot",
     "speed_flask",
+    "speed_vial",
     "w_dark_fire",
     "w_fire"
    ],
@@ -438,6 +758,7 @@
     "font_text",
     "font_title",
     "hardtack",
+    "jerky",
     "minimap_ring",
     "panel_wide",
     "slot",
@@ -478,9 +799,9 @@
    ],
    "set_before": {
     "tier": 2,
-    "rooms": 42,
+    "rooms": 44,
     "explored": 0,
-    "chests": 166,
+    "chests": 193,
     "looted": 0,
     "monsters": 13,
     "killed": 0,
@@ -488,9 +809,9 @@
    },
    "after_rooms": {
     "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 166,
+    "rooms": 44,
+    "explored": 44,
+    "chests": 193,
     "looted": 0,
     "monsters": 13,
     "killed": 0,
@@ -498,20 +819,20 @@
    },
    "after_chests": {
     "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 166,
-    "looted": 166,
+    "rooms": 44,
+    "explored": 44,
+    "chests": 193,
+    "looted": 193,
     "monsters": 13,
     "killed": 0,
     "cleared": false
    },
    "after_kills": {
     "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 166,
-    "looted": 166,
+    "rooms": 44,
+    "explored": 44,
+    "chests": 193,
+    "looted": 193,
     "monsters": 13,
     "killed": 13,
     "cleared": true
@@ -537,10 +858,10 @@
     "monsters": 0,
     "progress": {
      "tier": 2,
-     "rooms": 42,
-     "explored": 42,
-     "chests": 166,
-     "looted": 166,
+     "rooms": 44,
+     "explored": 44,
+     "chests": 193,
+     "looted": 193,
      "monsters": 13,
      "killed": 13,
      "cleared": true
@@ -715,11 +1036,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.3,
+       "left_palm_off_hilt_cm": 3.0,
        "left_palm_along_hilt_cm": [
-        -7.5,
-        -7.3,
-        -5.9
+        -7.4,
+        -7.0,
+        -5.1
        ]
       },
       {
@@ -734,11 +1055,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 0.8,
+       "left_palm_off_hilt_cm": 3.2,
        "left_palm_along_hilt_cm": [
         -7.4,
-        -7.0,
-        -6.5
+        -7.1,
+        -5.2
        ]
       },
       {
@@ -753,11 +1074,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 3.3,
+       "left_palm_off_hilt_cm": 2.9,
        "left_palm_along_hilt_cm": [
         -7.5,
-        -7.2,
-        -5.7
+        -6.9,
+        -5.1
        ]
       },
       {
@@ -772,11 +1093,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 2.3,
+       "left_palm_off_hilt_cm": 1.0,
        "left_palm_along_hilt_cm": [
         -7.5,
-        -7.2,
-        -5.2
+        -6.9,
+        -6.3
        ]
       },
       {
@@ -1133,11 +1454,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.1,
+       "left_palm_off_hilt_cm": 1.3,
        "left_palm_along_hilt_cm": [
-        -7.5,
-        -7.1,
-        -7.1
+        -7.6,
+        -7.4,
+        -6.8
        ]
       },
       {
@@ -1154,7 +1475,7 @@
        "want_s": 1.483,
        "left_palm_off_hilt_cm": 0.7,
        "left_palm_along_hilt_cm": [
-        -7.7,
+        -7.5,
         -7.2,
         -7.3
        ]
@@ -1171,11 +1492,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 1.0,
+       "left_palm_off_hilt_cm": 0.5,
        "left_palm_along_hilt_cm": [
-        -7.6,
-        -7.2,
-        -7.1
+        -7.5,
+        -7.5,
+        -7.4
        ]
       },
       {
@@ -1190,11 +1511,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 0.5,
+       "left_palm_off_hilt_cm": 0.8,
        "left_palm_along_hilt_cm": [
-        -7.7,
         -7.5,
-        -7.4
+        -7.5,
+        -7.3
        ]
       },
       {
@@ -1672,7 +1993,7 @@
    "step": "tierloot",
    "ok": true,
    "tier1": {
-    "items": 8581,
+    "items": 8563,
     "weapons": [
      "Arming Sword",
      "Dagger",
@@ -1698,13 +2019,13 @@
      "Viking Sword"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.1842,
+    "weapon_share": 0.1798,
     "expected": 0.1859,
-    "sd_off": 0.4,
+    "sd_off": 1.44,
     "ok": true
    },
    "tier2": {
-    "items": 8535,
+    "items": 8915,
     "weapons": [
      "Bone Blade",
      "Katana",
@@ -1728,13 +2049,13 @@
      "Viking Bow"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.1735,
+    "weapon_share": 0.1724,
     "expected": 0.1705,
-    "sd_off": 0.74,
+    "sd_off": 0.48,
     "ok": true
    },
    "tier3": {
-    "items": 8767,
+    "items": 8729,
     "weapons": [
      "Combat Knife",
      "Crossbow",
@@ -1750,13 +2071,13 @@
      "Wakizashi"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.1021,
+    "weapon_share": 0.0983,
     "expected": 0.1025,
-    "sd_off": 0.12,
+    "sd_off": 1.29,
     "ok": true
    },
    "tier4": {
-    "items": 8847,
+    "items": 8576,
     "weapons": [
      "Dwarf Crossbow",
      "Kukri",
@@ -1770,13 +2091,13 @@
      "Ursag's Horn Blade"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.0849,
+    "weapon_share": 0.085,
     "expected": 0.0837,
-    "sd_off": 0.4,
+    "sd_off": 0.44,
     "ok": true
    },
    "tier5": {
-    "items": 8767,
+    "items": 8745,
     "weapons": [
      "Dwarf Crossbow",
      "Ursag's Horn Blade",
@@ -1788,19 +2109,23 @@
      "Wrist Blade"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.0648,
+    "weapon_share": 0.0629,
     "expected": 0.0641,
-    "sd_off": 0.26,
+    "sd_off": 0.47,
     "ok": true
    }
   }
  ],
  "shots": [
-  "rdm5_w7_follow.png",
-  "rdm5_w7_found.png",
-  "rdm5_w7_inventory_top.png",
-  "rdm5_w7_inventory_bottom.png",
-  "rdm5_w7_tier_seal.png",
+  "rdm5_a5_menu_summoner.png",
+  "rdm5_a5_armour_Warrior.png",
+  "rdm5_a5_armour_Warlock.png",
+  "rdm5_a5_armour_Rogue.png",
+  "rdm5_a5_follow.png",
+  "rdm5_a5_found.png",
+  "rdm5_a5_inventory_top.png",
+  "rdm5_a5_inventory_bottom.png",
+  "rdm5_a5_tier_seal.png",
   "Warrior_VikingShortsword_front.png",
   "Warrior_VikingShortsword_side.png",
   "Warrior_PlateKnightSSword_front.png",

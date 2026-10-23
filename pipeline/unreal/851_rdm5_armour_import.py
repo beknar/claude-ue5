@@ -2,8 +2,10 @@
 SourceArt/summoner3/armour_fit/<set>.fbx, each set one mesh skinned to her skeleton in her rest pose) imported onto her
 skeleton (SK_JRPG_Summoner3's) as /Game/JRPG/Summoner3Armour/SK_S3_<set>, each material slot given back the pack's
 material of its name (849's materials.json; the Blender names carry .001 ... suffixes). Prints each mesh's bones and slots.
-Args: none"""
-import json, os, re, unreal
+Args: none (Summoner3, every set), or a hero's mesh name (Fem5, DarkCaster, Rogue ...) and the sets' keys: armour_fit/
+<name>/<set>.fbx onto SK_JRPG_<name>'s skeleton as /Game/JRPG/HeroArmour/<name>/SK_<name>_<set>."""
+import json, os, re, sys, unreal
+HERO = sys.argv[1] if len(sys.argv) > 1 else "Summoner3"; KEYS = set(sys.argv[2:])
 SA = r"E:\code\claude-ue5\claude_ue5\SourceArt\summoner3"
 J = json.load(open(os.path.join(SA, "armour.json"), encoding="utf-8"))
 MATS = json.load(open(os.path.join(SA, "armour_src", "materials.json")))
@@ -11,13 +13,15 @@ byname = {}
 for slots in MATS.values():
     for p in slots.values():
         if p: byname[p.split(".")[-1]] = p
-D = "/Game/JRPG/Summoner3Armour"; eal = unreal.EditorAssetLibrary
-skel = unreal.load_asset("/Game/JRPG/Character/SK_JRPG_Summoner3").get_editor_property("skeleton")
+D = "/Game/JRPG/Summoner3Armour" if HERO == "Summoner3" else f"/Game/JRPG/HeroArmour/{HERO}"; eal = unreal.EditorAssetLibrary
+PRE = "SK_S3_" if HERO == "Summoner3" else f"SK_{HERO}_"; FIT = os.path.join(SA, "armour_fit", *([] if HERO == "Summoner3" else [HERO]))
+skel = unreal.load_asset(f"/Game/JRPG/Character/SK_JRPG_{HERO}").get_editor_property("skeleton")
 def setp(obj, name, val):
     try: obj.set_editor_property(name, val)
     except Exception as e: print("  (skip)", name, str(e)[:80])
 for s in J["sets"]:
-    f = os.path.join(SA, "armour_fit", s["key"] + ".fbx"); dst = f"{D}/SK_S3_{s['key']}"
+    if KEYS and s["key"] not in KEYS: continue
+    f = os.path.join(FIT, s["key"] + ".fbx"); dst = f"{D}/{PRE}{s['key']}"
     pipe = unreal.InterchangeGenericAssetsPipeline()
     setp(pipe.common_skeletal_meshes_and_animations_properties, "skeleton", skel)
     mp = pipe.mesh_pipeline

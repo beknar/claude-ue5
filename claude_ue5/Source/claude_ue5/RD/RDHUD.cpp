@@ -1231,10 +1231,12 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	case ERDItemKind::Food: return FString::Printf(TEXT("Restores %.0f%% of your hit points a second for %.0f s  (%.1f HP/s)"), It.Amount * 100.f, It.Seconds, It.Amount * Hp);
 	case ERDItemKind::Armour:
 	{
-		const bool bFits = Gen && It.Fits.ContainsByPredicate([this](const FRDArmourFit& F) { return F.Hero == Gen->CurrentHero; });
-		FString S = It.Looks.IsEmpty() ? FString() : It.Looks.Left(1).ToUpper() + It.Looks.Mid(1) + TEXT(".  ");
+		static const TCHAR* WeightName[3] = { TEXT("Light"), TEXT("Medium"), TEXT("Heavy") };
+		FString S = FString::Printf(TEXT("%s armour.  "), WeightName[(int32)It.ArmourWeight]);
+		if (!It.Looks.IsEmpty()) S += It.Looks.Left(1).ToUpper() + It.Looks.Mid(1) + TEXT(".  ");
 		S += FString::Printf(TEXT("Worn, each blow on you takes %.0f%% less."), It.Amount * 100.f);
-		if (!bFits) S += FString::Printf(TEXT("  It was not made for the %s."), Gen ? *Gen->PlayerTitle.ToLower() : TEXT("hero"));
+		const FString No = Gen ? Gen->ArmourRefusal(It, It.Name.ToString().ToLower()) : FString();
+		if (!No.IsEmpty()) S += TEXT("  ") + No + TEXT(".");
 		return S;
 	}
 	case ERDItemKind::Weapon:

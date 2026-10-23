@@ -23,7 +23,8 @@
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_05",
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_06",
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_07"
-   ]
+   ],
+   "weight": "heavy"
   },
   {
    "key": "BearArmour",
@@ -45,7 +46,8 @@
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_10",
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_11",
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_12"
-   ]
+   ],
+   "weight": "medium"
   },
   {
    "key": "TieflingArmour",
@@ -59,7 +61,8 @@
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_02",
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_03",
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_04"
-   ]
+   ],
+   "weight": "light"
   },
   {
    "key": "DemonicArmour",
@@ -78,7 +81,8 @@
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_07",
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_08",
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Mask"
-   ]
+   ],
+   "weight": "medium"
   },
   {
    "key": "OrcArmour",
@@ -102,7 +106,9 @@
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_13",
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_14",
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_15"
-   ]
+   ],
+   "weight": "heavy"
   }
- ]
+ ],
+ "_weights": "light: leather (the tiefling's); medium: leather with iron or plate on one arm (the bear warrior's, the demonic); heavy: a plate skirt or full plate (the orc veteran's, the plate). A hero wears only the weights her 'wears' lists (heroes.json, summoner_hero.json; 856)."
 }
