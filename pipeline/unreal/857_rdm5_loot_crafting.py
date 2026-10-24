@@ -77,12 +77,11 @@ def tier_of(name):
     return []
 
 
-# potions and food (level 4's, now with tiers); the first word picks the rank ("Very Rare" before "Rare")
+# potions and food (level 4's, now with tiers): the rank its name starts with ("Very Rare X" does not start with "Rare ")
 for i in old:
     if i.kind in (unreal.RDItemKind.HEALING, unreal.RDItemKind.MANA, unreal.RDItemKind.SPEED, unreal.RDItemKind.FOOD):
         n = str(i.name)
-        t = tier_of(n) if not n.startswith("Rare ") else list(tiers["Rare"])
-        if n.startswith("Very Rare"): t = list(tiers["Very Rare"])
+        t = tier_of(n)
         assert t, "no tier for " + n
         i.tiers = t; items.append(i)
 # weapons (855's) as they are

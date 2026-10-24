@@ -74,9 +74,10 @@ def remap_groups(me, known):
         t = REMAP.get(g.name)
         if t is None: unknown.add(g.name); continue
         tg = me.vertex_groups.get(t) or me.vertex_groups.new(name=t)
-        for v in me.data.vertices:
-            for e in v.groups:
-                if e.group == g.index and e.weight > 0: tg.add([v.index], e.weight, "ADD"); moved += 1
+        # (read first, then add: adding to a vertex's groups while reading them can move its weights in memory)
+        pairs = [(v.index, e.weight) for v in me.data.vertices for e in v.groups if e.group == g.index and e.weight > 0]
+        for vi, wt in pairs: tg.add([vi], wt, "ADD")
+        moved += len(pairs)
         me.vertex_groups.remove(g)
     return moved, unknown
 
@@ -240,9 +241,12 @@ def fit_set(s, her, hb, hv, hW, hnames, bvh_h, report):
             NEW[~ok] = V[~ok]; NEW[ok] /= WS[ok, None]
             # what is left inside her skin, pushed out
             pushed = 0; depth = []
+            # (--legs: the legs' vertices may lie deeper inside her, and are looked for 4 cm farther; the rest as before)
+            legc = [names.index(k) for k in names if k.startswith(LEGS)]
+            on_legs = W[:, legc].sum(1) > 0.5 if legc else np.zeros(len(NEW), bool)
             for i in range(len(NEW)):
                 p = mathutils.Vector(NEW[i]); q, n, _, d = bvh_h.find_nearest(p)
-                if q is None or d > 0.05 + (0.04 if NEED_LEGS < 90 else 0.0): continue
+                if q is None or d > 0.05 + (0.04 if (NEED_LEGS < 90 and on_legs[i]) else 0.0): continue
                 sd = (p - q).dot(n)
                 if sd < PUSH:
                     NEW[i] = np.array(q + n * PUSH); pushed += 1; depth.append(PUSH - sd)

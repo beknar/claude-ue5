@@ -1351,7 +1351,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	GenStart = FPlatformTime::Seconds();
 	Generator = InGenerator; Coord = InCoord; Seed = InSeed; bEditorBuilt = bEditorBuild;
 	bBuildStatic = true; bBuildInteractive = true;
-	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset();
+	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1;
 	GenR.Initialize(Seed);
 	Plan(GenR);
 	ShellPrepare(GenR);
@@ -1424,7 +1424,7 @@ void ARDSection::ActivateForPlay()
 	// same plan as the editor build (same seed); only the interactive part is instantiated
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
-	FirePoints.Reset(); AnvilPoints.Reset();
+	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1;
 	const int32 Inst = NumInstances, Lights = NumLights;
 	FRandomStream R(Seed);
 	Plan(R);

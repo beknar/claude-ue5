@@ -538,7 +538,7 @@ void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, co
 	if (!Section || !PlayerCombat) return;
 	const TArray<FName> List = LootListOf(Section->Coord, Index);
 	if (List.Num() == 0) return;
-	for (int32 K = 0; K < List.Num(); ++K) PlayerCombat->AddItem(List[K], LootCountOf(Section->Coord, Index, K));
+	for (int32 K = 0; K < List.Num(); ++K) PlayerCombat->AddItem(List[K], LootCountIn(List, Section->Coord, Index, K));
 	LastFound = List[0]; LastFoundList = List; LastFoundTime = GetWorld()->GetTimeSeconds(); ItemsFound += List.Num();
 	PlaySoundAt(TEXT("Player.Loot"), At);
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDLOOT %s from container %d of section (%d, %d)"), *FString::JoinBy(List, TEXT(", "), [](const FName& N) { return N.ToString(); }),
@@ -657,16 +657,16 @@ int32 ARDDungeonGenerator::FindRecipe(FName Item) const
 
 bool ARDDungeonGenerator::FindNearestAnvil(FVector From, float MaxDistance, FVector& At) const
 {
+	// (an anvil of the room she is in: not one behind a wall, in the room or the section next door)
 	bool bFound = false; float BestD = MaxDistance;
-	const FIntPoint Here = WorldToSection(From);
-	for (int32 Dx = -1; Dx <= 1; ++Dx)
-		for (int32 Dy = -1; Dy <= 1; ++Dy)
-			if (const ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy)))
-				for (const FVector& A : S->GetAnvilPoints())
-				{
-					const float D = FVector::Dist2D(A, From);
-					if (D < BestD) { BestD = D; At = A; bFound = true; }
-				}
+	const ARDSection* S = GetSection(WorldToSection(From));
+	const int32 Room = S ? S->RoomAt(From) : -1;
+	if (Room < 0) return false;
+	for (const FVector& A : S->GetAnvilPoints())
+	{
+		const float D = FVector::Dist2D(A, From);
+		if (D < BestD && S->RoomAt(A) == Room) { BestD = D; At = A; bFound = true; }
+	}
 	return bFound;
 }
 
@@ -679,7 +679,11 @@ TArray<FVector> ARDDungeonGenerator::GetAllAnvils() const
 
 int32 ARDDungeonGenerator::LootCountOf(FIntPoint Section, int32 Index, int32 Pick) const
 {
-	const TArray<FName> L = LootListOf(Section, Index);
+	return LootCountIn(LootListOf(Section, Index), Section, Index, Pick);
+}
+
+int32 ARDDungeonGenerator::LootCountIn(const TArray<FName>& L, FIntPoint Section, int32 Index, int32 Pick) const
+{
 	if (!L.IsValidIndex(Pick)) return 0;
 	const int32 Ix = FindItem(L[Pick]);
 	const int32 Max = Ix >= 0 ? FMath::Max(Items[Ix].FoundMax, 1) : 1;

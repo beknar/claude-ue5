@@ -248,6 +248,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetCraftLines() const;
 	/** how many of a recipe part she carries (any of its kinds together) */
 	int32 PartHave(const FRDRecipePart& Part) const;
+	/** what making a recipe takes of each kind, all its parts drawn from one count (false: she lacks some) */
+	bool PlanCraft(const FRDRecipe& Recipe, TMap<FName, int32>& Take) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool CanCraft(FName Item) const;
 	/** makes one (false: no such recipe, or she lacks what it takes); uses the parts up */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool Craft(FName Item);

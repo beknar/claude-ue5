@@ -1,5 +1,5 @@
 {
- "tag": "c2",
+ "tag": "c7",
  "plan": [
   "loot",
   "wear",
@@ -32,29 +32,31 @@
     "232": [
      "Templar’s Armour",
      "Orc Warrior’s Armour",
-     "Medium Speed Potion",
-     "Dagger",
-     "Iron Ingot",
-     "Bronze Ingot"
+     "Fish",
+     "Fish",
+     "Medium Healing Potion",
+     "Slickstone"
     ],
     "233": [
      "Eastern Knight’s Armour",
-     "Arming Sword",
-     "Bread",
-     "Plate Knight's Sword"
+     "Small Healing Potion",
+     "Small Healing Potion",
+     "Viking Sword",
+     "Fish",
+     "Copper Ingot"
     ],
     "234": [
      "Desert Hero’s Armour",
-     "Small Mana Potion",
-     "Timber",
-     "Medium Mana Potion",
-     "Leather Strips",
-     "Medium Mana Potion"
+     "Small Speed Potion",
+     "Viking Shortsword",
+     "Dagger",
+     "Leaf-Blade Knife"
     ],
     "235": [
      "Tiefling’s Armour",
-     "Arming Sword",
-     "Longsword",
+     "Medium Healing Potion",
+     "Small Mana Potion",
+     "Cured Leather Strip",
      "Medium Mana Potion"
     ]
    },
@@ -69,14 +71,14 @@
    ],
    "more": 6000,
    "counts": {
-    "1": 1006,
-    "2": 1082,
-    "3": 959,
-    "4": 979,
-    "5": 981,
-    "6": 993
+    "1": 1055,
+    "2": 1029,
+    "3": 960,
+    "4": 969,
+    "5": 958,
+    "6": 1029
    },
-   "worst_sd": 2.84,
+   "worst_sd": 1.91,
    "armour_in_more": 0,
    "by_f": {
     "container": 232,
@@ -84,26 +86,26 @@
     "list": [
      "Templar’s Armour",
      "Orc Warrior’s Armour",
-     "Medium Speed Potion",
-     "Dagger",
-     "Iron Ingot",
-     "Bronze Ingot"
+     "Fish",
+     "Fish",
+     "Medium Healing Potion",
+     "Slickstone"
     ],
     "found_list": [
      "Templar’s Armour",
      "Orc Warrior’s Armour",
-     "Medium Speed Potion",
-     "Dagger",
-     "Iron Ingot",
-     "Bronze Ingot"
+     "Fish",
+     "Fish",
+     "Medium Healing Potion",
+     "Slickstone"
     ],
     "counts": [
      1,
      1,
      1,
      1,
-     3,
-     3
+     1,
+     1
     ]
    },
    "wrong": [],
@@ -111,7 +113,7 @@
    "items_kinds": 46,
    "carried_matches": true,
    "opened_again_gave": 0,
-   "generated_containers": 956,
+   "generated_containers": 636,
    "generated_armour": 0
   },
   {
@@ -528,102 +530,102 @@
     {
      "when": "running 0",
      "n": 603,
-     "skin_median": 0.08,
-     "skin_p95": 5.06,
+     "skin_median": 0.06,
+     "skin_p95": 11.75,
      "bone_n": 223,
-     "bone_p95": 0.071,
-     "bone_max": 0.191,
-     "bone_p95_left_in_rest_pose": 58.07
+     "bone_p95": 0.049,
+     "bone_max": 0.119,
+     "bone_p95_left_in_rest_pose": 36.18
     },
     {
      "when": "running 1",
      "n": 603,
      "skin_median": 0.11,
-     "skin_p95": 10.28,
+     "skin_p95": 11.92,
      "bone_n": 223,
-     "bone_p95": 0.166,
-     "bone_max": 0.359,
-     "bone_p95_left_in_rest_pose": 90.62
+     "bone_p95": 0.165,
+     "bone_max": 0.351,
+     "bone_p95_left_in_rest_pose": 90.4
     },
     {
      "when": "running 2",
      "n": 603,
-     "skin_median": 0.09,
-     "skin_p95": 30.95,
+     "skin_median": 0.08,
+     "skin_p95": 31.82,
      "bone_n": 223,
-     "bone_p95": 0.162,
-     "bone_max": 0.302,
-     "bone_p95_left_in_rest_pose": 88.82
+     "bone_p95": 0.155,
+     "bone_max": 0.307,
+     "bone_p95_left_in_rest_pose": 88.95
     },
     {
      "when": "running 3",
      "n": 603,
      "skin_median": 0.09,
-     "skin_p95": 16.7,
+     "skin_p95": 15.68,
      "bone_n": 223,
-     "bone_p95": 0.092,
-     "bone_max": 0.32,
-     "bone_p95_left_in_rest_pose": 89.45
+     "bone_p95": 0.095,
+     "bone_max": 0.322,
+     "bone_p95_left_in_rest_pose": 89.51
     },
     {
      "when": "running 4",
      "n": 603,
      "skin_median": 0.1,
-     "skin_p95": 14.51,
+     "skin_p95": 11.82,
      "bone_n": 223,
-     "bone_p95": 0.164,
-     "bone_max": 0.34,
-     "bone_p95_left_in_rest_pose": 88.79
+     "bone_p95": 0.163,
+     "bone_max": 0.352,
+     "bone_p95_left_in_rest_pose": 88.93
     },
     {
      "when": "running 5",
      "n": 603,
      "skin_median": 0.09,
-     "skin_p95": 32.56,
+     "skin_p95": 32.23,
      "bone_n": 223,
      "bone_p95": 0.166,
-     "bone_max": 0.315,
-     "bone_p95_left_in_rest_pose": 89.44
+     "bone_max": 0.313,
+     "bone_p95_left_in_rest_pose": 89.46
     },
     {
      "when": "casting 0",
      "n": 603,
      "skin_median": 0.06,
-     "skin_p95": 10.31,
+     "skin_p95": 10.28,
      "bone_n": 223,
-     "bone_p95": 0.066,
-     "bone_max": 0.123,
-     "bone_p95_left_in_rest_pose": 15.04
+     "bone_p95": 0.068,
+     "bone_max": 0.126,
+     "bone_p95_left_in_rest_pose": 12.27
     },
     {
      "when": "casting 1",
      "n": 603,
-     "skin_median": 0.07,
-     "skin_p95": 10.15,
+     "skin_median": 0.06,
+     "skin_p95": 10.24,
      "bone_n": 223,
-     "bone_p95": 0.082,
-     "bone_max": 0.14,
-     "bone_p95_left_in_rest_pose": 23.27
+     "bone_p95": 0.072,
+     "bone_max": 0.129,
+     "bone_p95_left_in_rest_pose": 22.5
     },
     {
      "when": "casting 2",
      "n": 603,
-     "skin_median": 0.06,
-     "skin_p95": 10.31,
+     "skin_median": 0.05,
+     "skin_p95": 10.35,
      "bone_n": 223,
-     "bone_p95": 0.065,
-     "bone_max": 0.123,
-     "bone_p95_left_in_rest_pose": 22.61
+     "bone_p95": 0.062,
+     "bone_max": 0.12,
+     "bone_p95_left_in_rest_pose": 21.85
     },
     {
      "when": "casting 3",
      "n": 603,
-     "skin_median": 0.05,
-     "skin_p95": 10.46,
+     "skin_median": 0.04,
+     "skin_p95": 10.54,
      "bone_n": 223,
-     "bone_p95": 0.054,
-     "bone_max": 0.112,
-     "bone_p95_left_in_rest_pose": 20.39
+     "bone_p95": 0.047,
+     "bone_max": 0.105,
+     "bone_p95_left_in_rest_pose": 18.08
     }
    ]
   },
@@ -638,7 +640,7 @@
      "blow": 9.0,
      "reached_her": 9.0,
      "hp_fell": 9.0,
-     "monster": "RDMonster_56",
+     "monster": "RDMonster_55",
      "wear_fell": 0.0,
      "ok": true
     },
@@ -649,7 +651,7 @@
      "blow": 9.0,
      "reached_her": 8.55,
      "hp_fell": 8.55,
-     "monster": "RDMonster_84",
+     "monster": "RDMonster_41",
      "wear_fell": 1.0,
      "ok": true
     },
@@ -660,7 +662,7 @@
      "blow": 9.0,
      "reached_her": 6.75,
      "hp_fell": 6.75,
-     "monster": "RDMonster_56",
+     "monster": "RDMonster_97",
      "wear_fell": 1.0,
      "ok": true
     },
@@ -671,7 +673,7 @@
      "blow": 9.0,
      "reached_her": 4.5,
      "hp_fell": 4.5,
-     "monster": "RDMonster_112",
+     "monster": "RDMonster_41",
      "wear_fell": 1.0,
      "ok": true
     }
@@ -761,6 +763,7 @@
     "divider",
     "fill_health",
     "fill_mana",
+    "fish",
     "font_label",
     "font_text",
     "font_title",
@@ -776,7 +779,6 @@
     "minimap_ring",
     "panel_wide",
     "slot",
-    "speed_flask",
     "speed_vial",
     "w_dark_fire",
     "w_fire"
@@ -1372,14 +1374,14 @@
     "weapon|1|Viking Shortsword|10|67|60"
    ],
    "armour": {
-    "wear": 158.0,
+    "wear": 157.5,
     "share": 0.2,
     "kits": 1,
     "message": "Mended with the patch kit: your templar’s armour,  0 to 158 of 210"
    },
-   "armour_want": 158.0,
+   "armour_want": 157.5,
    "weapon": {
-    "wear": 60.0,
+    "wear": 60.25,
     "full": 67.0,
     "kits": 0,
     "picking_after_last_kit": false,
@@ -1401,8 +1403,8 @@
    "in_great_hall": 1,
    "generated": {
     "1,0": {
-     "anvils": 6,
-     "forges": 2,
+     "anvils": 5,
+     "forges": 1,
      "forges_have_one": true,
      "added_in_room": -1
     },
@@ -1419,7 +1421,7 @@
      "added_in_room": -1
     },
     "0,-1": {
-     "anvils": 4,
+     "anvils": 6,
      "forges": 2,
      "forges_have_one": true,
      "added_in_room": -1
@@ -1503,10 +1505,10 @@
     ]
    },
    "minimap_t2": [
-    "Kitchen|2"
+    "Guard room|2"
    ],
    "bigmap_t2": [
-    "Kitchen|2"
+    "Guard room|2"
    ],
    "bigmap_t2_anvils": []
   },
@@ -1526,18 +1528,18 @@
     -10950,
     -10500
    ],
-   "rms_floor": 0.001351,
-   "rms_now": 0.002998,
-   "rms_before": 0.00762,
-   "fire_db_change": -8.95,
-   "fire_over_floor_db_now": 6.92,
-   "wavs": "../../../../../../code/claude-ue5/claude_ue5/Saved/RDM5Fire\\c2"
+   "rms_floor": 0.001322,
+   "rms_now": 0.002682,
+   "rms_before": 0.0068,
+   "fire_db_change": -9.12,
+   "fire_over_floor_db_now": 6.14,
+   "wavs": "../../../../../../code/claude-ue5/claude_ue5/Saved/RDM5Fire\\c7"
   },
   {
    "step": "tierloot",
    "ok": true,
    "tier1": {
-    "items": 8683,
+    "items": 8826,
     "weapons": [
      "Arming Sword",
      "Dagger",
@@ -1563,9 +1565,9 @@
      "Viking Sword"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.2023,
+    "weapon_share": 0.2078,
     "expected": 0.2043,
-    "sd_off": 0.46,
+    "sd_off": 0.81,
     "armour": [
      "Desert Hero’s Armour",
      "Eastern Knight’s Armour",
@@ -1586,14 +1588,14 @@
      "Templar’s Armour",
      "Tiefling’s Armour"
     ],
-    "armour_share": 0.0974,
+    "armour_share": 0.0947,
     "armour_expected": 0.0991,
-    "armour_sd_off": 0.51,
+    "armour_sd_off": 1.37,
     "everywhere_missing": [],
     "ok": true
    },
    "tier2": {
-    "items": 8745,
+    "items": 8697,
     "weapons": [
      "Bone Blade",
      "Katana",
@@ -1617,9 +1619,9 @@
      "Viking Bow"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.2156,
+    "weapon_share": 0.2139,
     "expected": 0.2149,
-    "sd_off": 0.15,
+    "sd_off": 0.24,
     "armour": [
      "Bedvar’s Armour",
      "Crocodile Warrior’s Armour",
@@ -1636,14 +1638,14 @@
      "Orc Raider’s Armour",
      "Split Armour"
     ],
-    "armour_share": 0.0835,
+    "armour_share": 0.0851,
     "armour_expected": 0.0868,
-    "armour_sd_off": 1.11,
+    "armour_sd_off": 0.58,
     "everywhere_missing": [],
     "ok": true
    },
    "tier3": {
-    "items": 8925,
+    "items": 8781,
     "weapons": [
      "Combat Knife",
      "Crossbow",
@@ -1659,9 +1661,9 @@
      "Wakizashi"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.1563,
+    "weapon_share": 0.1531,
     "expected": 0.1571,
-    "sd_off": 0.22,
+    "sd_off": 1.05,
     "armour": [
      "Bear Warrior’s Armour",
      "Elephant Warrior’s Armour",
@@ -1674,14 +1676,14 @@
      "Executioner’s Armour",
      "Gnur’s Armour"
     ],
-    "armour_share": 0.0826,
+    "armour_share": 0.0716,
     "armour_expected": 0.0762,
-    "armour_sd_off": 2.27,
+    "armour_sd_off": 1.61,
     "everywhere_missing": [],
     "ok": true
    },
    "tier4": {
-    "items": 8687,
+    "items": 8767,
     "weapons": [
      "Dwarf Crossbow",
      "Kukri",
@@ -1695,9 +1697,9 @@
      "Ursag's Horn Blade"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.1459,
+    "weapon_share": 0.1556,
     "expected": 0.154,
-    "sd_off": 2.11,
+    "sd_off": 0.4,
     "armour": [
      "Broddi’s Dwarf Armour",
      "Dardan’s Armour",
@@ -1714,14 +1716,14 @@
      "Paladin’s Armour",
      "Plate Armour"
     ],
-    "armour_share": 0.1364,
+    "armour_share": 0.1405,
     "armour_expected": 0.14,
-    "armour_sd_off": 0.97,
+    "armour_sd_off": 0.14,
     "everywhere_missing": [],
     "ok": true
    },
    "tier5": {
-    "items": 8762,
+    "items": 8729,
     "weapons": [
      "Dwarf Crossbow",
      "Ursag's Horn Blade",
@@ -1733,9 +1735,9 @@
      "Wrist Blade"
     ],
     "wrong_tier": [],
-    "weapon_share": 0.1409,
+    "weapon_share": 0.132,
     "expected": 0.1358,
-    "sd_off": 1.41,
+    "sd_off": 1.04,
     "armour": [
      "Costalmed’s Armour",
      "Epic Plate (Female)",
@@ -1746,9 +1748,9 @@
      "Epic Plate (Female)",
      "Epic Plate (Male)"
     ],
-    "armour_share": 0.0792,
+    "armour_share": 0.0849,
     "armour_expected": 0.0823,
-    "armour_sd_off": 1.06,
+    "armour_sd_off": 0.88,
     "everywhere_missing": [],
     "ok": true
    }
@@ -2092,7 +2094,7 @@
      ],
      "follow": {
       "set": "Plate Armour",
-      "bone_max": 0.345,
+      "bone_max": 0.347,
       "skin_median": 0.06,
       "bone_n": 226
      },
@@ -2690,8 +2692,8 @@
      ],
      "follow": {
       "set": "Crocodile Warrior’s Armour",
-      "bone_max": 0.324,
-      "skin_median": 0.24,
+      "bone_max": 0.281,
+      "skin_median": 0.26,
       "bone_n": 162
      },
      "ok": true
@@ -2990,7 +2992,7 @@
      "follow": {
       "set": "Desert Hero’s Armour",
       "bone_max": 0.0,
-      "skin_median": 0.1,
+      "skin_median": 0.11,
       "bone_n": 606
      },
      "ok": true
@@ -3136,11 +3138,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 2.6,
+       "left_palm_off_hilt_cm": 3.2,
        "left_palm_along_hilt_cm": [
-        -7.4,
-        -7.2,
-        -5.1
+        -7.3,
+        -7.1,
+        -5.3
        ]
       },
       {
@@ -3155,11 +3157,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.2,
+       "left_palm_off_hilt_cm": 0.5,
        "left_palm_along_hilt_cm": [
         -7.5,
-        -7.1,
-        -6.1
+        -7.2,
+        -7.2
        ]
       },
       {
@@ -3174,11 +3176,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 1.9,
+       "left_palm_off_hilt_cm": 2.9,
        "left_palm_along_hilt_cm": [
         -7.5,
         -7.3,
-        -5.4
+        -5.1
        ]
       },
       {
@@ -3193,11 +3195,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 3.1,
+       "left_palm_off_hilt_cm": 0.5,
        "left_palm_along_hilt_cm": [
         -7.5,
-        -6.9,
-        -5.1
+        -7.2,
+        -6.9
        ]
       },
       {
@@ -3554,11 +3556,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.2,
+       "left_palm_off_hilt_cm": 0.6,
        "left_palm_along_hilt_cm": [
         -7.5,
-        -7.3,
-        -7.0
+        -7.2,
+        -7.3
        ]
       },
       {
@@ -3573,11 +3575,11 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.3,
+       "left_palm_off_hilt_cm": 0.7,
        "left_palm_along_hilt_cm": [
-        -7.6,
-        -7.1,
-        -6.8
+        -7.5,
+        -7.3,
+        -7.4
        ]
       },
       {
@@ -3595,8 +3597,8 @@
        "left_palm_off_hilt_cm": 1.3,
        "left_palm_along_hilt_cm": [
         -7.5,
-        -7.4,
-        -6.8
+        -7.2,
+        -6.7
        ]
       },
       {
@@ -3611,11 +3613,11 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 1.3,
+       "left_palm_off_hilt_cm": 0.7,
        "left_palm_along_hilt_cm": [
-        -7.7,
-        -7.2,
-        -6.8
+        -7.5,
+        -7.4,
+        -7.4
        ]
       },
       {
@@ -4119,45 +4121,45 @@
    ],
    "set_before": {
     "tier": 2,
-    "rooms": 42,
+    "rooms": 39,
     "explored": 0,
-    "chests": 194,
+    "chests": 218,
     "looted": 0,
-    "monsters": 13,
+    "monsters": 12,
     "killed": 0,
     "cleared": false
    },
    "after_rooms": {
     "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 194,
+    "rooms": 39,
+    "explored": 39,
+    "chests": 218,
     "looted": 0,
-    "monsters": 13,
+    "monsters": 12,
     "killed": 0,
     "cleared": false
    },
    "after_chests": {
     "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 194,
-    "looted": 194,
-    "monsters": 13,
+    "rooms": 39,
+    "explored": 39,
+    "chests": 218,
+    "looted": 218,
+    "monsters": 12,
     "killed": 0,
     "cleared": false
    },
    "after_kills": {
     "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 194,
-    "looted": 194,
-    "monsters": 13,
-    "killed": 13,
+    "rooms": 39,
+    "explored": 39,
+    "chests": 218,
+    "looted": 218,
+    "monsters": 12,
+    "killed": 12,
     "cleared": true
    },
-   "monsters_killed": 13,
+   "monsters_killed": 12,
    "notice": "SET CLEARED  -  TIER 2: 1 / 8",
    "tier2_cleared": 1,
    "seals_of_set": {
@@ -4178,12 +4180,12 @@
     "monsters": 0,
     "progress": {
      "tier": 2,
-     "rooms": 42,
-     "explored": 42,
-     "chests": 194,
-     "looted": 194,
-     "monsters": 13,
-     "killed": 13,
+     "rooms": 39,
+     "explored": 39,
+     "chests": 218,
+     "looted": 218,
+     "monsters": 12,
+     "killed": 12,
      "cleared": true
     }
    },
@@ -4219,18 +4221,18 @@
   }
  ],
  "shots": [
-  "rdm5_c2_follow.png",
-  "rdm5_c2_found.png",
-  "rdm5_c2_inventory_top.png",
-  "rdm5_c2_inventory_bottom.png",
-  "rdm5_c2_repair_list.png",
-  "rdm5_c2_crafting.png",
-  "rdm5_c2_minimap_t1.png",
-  "rdm5_c2_bigmap_t1.png",
-  "rdm5_c2_bigmap_t2.png",
-  "rdm5_c2_armour_Warrior.png",
-  "rdm5_c2_armour_Warlock.png",
-  "rdm5_c2_armour_Rogue.png",
+  "rdm5_c7_follow.png",
+  "rdm5_c7_found.png",
+  "rdm5_c7_inventory_top.png",
+  "rdm5_c7_inventory_bottom.png",
+  "rdm5_c7_repair_list.png",
+  "rdm5_c7_crafting.png",
+  "rdm5_c7_minimap_t1.png",
+  "rdm5_c7_bigmap_t1.png",
+  "rdm5_c7_bigmap_t2.png",
+  "rdm5_c7_armour_Warrior.png",
+  "rdm5_c7_armour_Warlock.png",
+  "rdm5_c7_armour_Rogue.png",
   "Warrior_VikingShortsword_front.png",
   "Warrior_VikingShortsword_side.png",
   "Warrior_PlateKnightSSword_front.png",
@@ -4279,7 +4281,7 @@
   "Rogue_Crossbow_side.png",
   "Rogue_DwarfCrossbow_front.png",
   "Rogue_DwarfCrossbow_side.png",
-  "rdm5_c2_tier_seal.png"
+  "rdm5_c7_tier_seal.png"
  ],
  "error": null
 }

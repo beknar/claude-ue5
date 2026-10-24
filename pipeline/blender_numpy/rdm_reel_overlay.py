@@ -922,7 +922,7 @@ def c5_caps():
     tc0 = next((e["t"] for e in EV if e["kind"] == "to_chest"), None); tc1 = CHESTS[0]["t"] if CHESTS else None
     if tc0 is not None and tc1 is not None:
         out.append((tc0, tc1 - 0.35, "THE FIRES ARE QUIETER", ["the crackle of the torches, braziers and hearths is about 8 dB lower than in the earlier reels",
-                    "measured in the game's own output 2.5 m from a torch: -9.5 dB (853's fire step)"], (255, 200, 150)))
+                    "measured in the game's own output 2.5 m from a torch: -8.7 dB (853's fire step)"], (255, 200, 150)))
     for e in CHESTS:
         fd = next((x for x in FOUND if x["t"] >= e["t"] - 0.05), None); held = fd.get("items", []) if fd else []
         kinds = [ITEMS.get(x, {}).get("kind") for x in held]

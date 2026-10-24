@@ -791,9 +791,9 @@ def step_repair():
     whole = {"strips": c.get_item_count("Leather Strips"), "message": str(c.message)}
     yield from press("BackSpace"); back = {"picking": c.is_picking_repair(), "inventory_open": c.is_inventory_open()}
     yield from press("I"); g.switch_hero("Summoner"); yield from wait(0.6); refresh(); quiet(False)
-    want_arm = min(210.0, 0.0 + round(210 * 0.75))
-    ok = (ok_sw and picking and abs(worn_share - 0.1) < 1e-4 and len(rl) == 2 and arm["wear"] == want_arm and abs(arm["share"] - 0.2) < 1e-4 and arm["kits"] == 1 and still
-          and abs(wp["wear"] - min(wfull, 10 + round(wfull * 0.75))) < 0.5 and wp["kits"] == 0 and not wp["picking_after_last_kit"]
+    want_arm = min(210.0, 0.0 + 210 * 0.75)
+    ok = (ok_sw and picking and abs(worn_share - 0.1) < 1e-4 and len(rl) == 2 and abs(arm["wear"] - want_arm) < 1e-3 and abs(arm["share"] - 0.2) < 1e-4 and arm["kits"] == 1 and still
+          and abs(wp["wear"] - min(wfull, 10 + wfull * 0.75)) < 1e-3 and wp["kits"] == 0 and not wp["picking_after_last_kit"]
           and whole["strips"] == 1 and "whole already" in whole["message"] and not back["picking"] and back["inventory_open"])
     step_result("repair", ok, switched=ok_sw, worn_out_share=round(worn_share, 4), lines=rl, armour=arm, armour_want=want_arm, weapon=wp, whole=whole, back=back)
 
@@ -875,11 +875,22 @@ def rms_of(path):
     if not len(data): return 0.0
     return math.sqrt(sum(float(x) * x for x in data) / len(data)) / 32768.0
 def step_fire():
-    g = G["gen"]; g.set_editor_property("music_volume", 0.0)
+    g = G["gen"]; mv0 = g.get_editor_property("music_volume"); g.set_editor_property("music_volume", 0.0)
+    try:
+        res = yield from fire_measure(g)
+    finally:
+        g.set_editor_property("music_volume", mv0); quiet(False)
+        lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings")
+        if "bg_audio" in G: lms.set_editor_property("bAllowBackgroundAudio", G.pop("bg_audio"))
+    ok = (res.get("spot") is not None and res.get("far") is not None and res.get("fire_db_change") is not None and -10.0 < res["fire_db_change"] < -6.0
+          and res["rms_before"] > res["rms_now"] > res["rms_floor"] and all(abs(v_ - w_) < 1e-3 for v_, w_ in zip(res["volumes_now"].values(), (0.22, 0.26, 0.34))))
+    step_result("fire", ok, **res)
+def fire_measure(g):
+    """(the fire step) the recordings and their levels"""
     c = yield from restart(); quiet(True); p = G["pawn"]
     unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
     # (the editor sets the volume to 0 while it is not in front, unless its Allow Background Audio is on: on for the step)
-    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); bg0 = lms.get_editor_property("bAllowBackgroundAudio")
+    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); G["bg_audio"] = lms.get_editor_property("bAllowBackgroundAudio")
     lms.set_editor_property("bAllowBackgroundAudio", True)
     s0 = g.get_section(I2(0, 0)); fires = [(s0.get_fire_point(i), s0.get_fire_kind(i)) for i in range(s0.get_num_fire_points())]
     torches = [f for f, k in fires if k == 0]
@@ -910,7 +921,9 @@ def step_fire():
     def set_vol(scale):
         snd = g.get_editor_property("sounds")
         for k_, v_ in VOLS.items():
-            st = snd[k_]; st.volume = v_ * scale; snd[k_] = st
+            # (one loop file per set for the step: a voice picks one of a set's files at random, and two files' own
+            # loudness differs by more than the change measured)
+            st = snd[k_]; st.volume = v_ * scale; st.sounds = list(st.sounds)[:1]; snd[k_] = st
         G["fire_scale"] = scale
         g.set_editor_property("sounds", snd)
     VOLS = {k_: g.get_editor_property("sounds")[k_].volume for k_ in ("Env.Torch", "Env.Brazier", "Env.Hearth")}
@@ -923,10 +936,7 @@ def step_fire():
         db = 20 * math.log10(fire_new / fire_old) if fire_new > 0 and fire_old > 0 else None
         res.update({"rms_floor": round(floor, 6), "rms_now": round(new, 6), "rms_before": round(old, 6), "fire_db_change": round(db, 2) if db is not None else None,
                     "fire_over_floor_db_now": round(20 * math.log10(max(new, 1e-9) / max(floor, 1e-9)), 2), "wavs": out})
-    g.set_editor_property("music_volume", 1.0); quiet(False); lms.set_editor_property("bAllowBackgroundAudio", bg0)
-    ok = (spot is not None and far is not None and res.get("fire_db_change") is not None and -10.0 < res["fire_db_change"] < -6.0
-          and res["rms_before"] > res["rms_now"] > res["rms_floor"] and all(abs(v_ - w_) < 1e-3 for v_, w_ in zip(VOLS.values(), (0.22, 0.26, 0.34))))
-    step_result("fire", ok, **res)
+    return res
 
 STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "heroarmour": step_heroarmour, "follow": step_follow, "damage": step_damage, "ui": step_ui,
          "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons, "armourtable": step_armourtable, "repair": step_repair, "craft": step_craft,

@@ -785,19 +785,19 @@ bool URDCombatComponent::RepairEntry(int32 Line)
 	TArray<FString> P; L[I].ParseIntoArray(P, TEXT("|"));
 	const bool bArmour = P[0] == TEXT("armour");
 	if (P.Num() < (bArmour ? 5 : 6)) return false;
+	// (the line names what is mended; its numbers are the real wear, not the line's rounded text)
 	const FString Name = bArmour ? P[1] : P[2];
-	const float Left = FCString::Atof(*P[bArmour ? 2 : 3]), Full = FCString::Atof(*P[bArmour ? 3 : 4]), After = FCString::Atof(*P[bArmour ? 4 : 5]);
+	const int32 Ri = Generator->FindItem(RepairWith);
+	const float Share = Ri >= 0 ? Generator->Items[Ri].Amount : 0.f;
+	const int32 Wi = bArmour ? -1 : FCString::Atoi(*P[1]);
+	if (!bArmour) { SyncWear(); if (!Wear.IsValidIndex(Wi) || !Generator->Weapons.IsValidIndex(Wi)) return false; }
+	const float Left = bArmour ? GetArmourWear(FName(*Name)) : Wear[Wi];
+	const float Full = bArmour ? GetArmourDurability(FName(*Name)) : Generator->Weapons[Wi].Durability;
+	const float After = FMath::Min(Full, Left + Full * Share);
 	const FString Kit = RepairWith.ToString().ToLower();
 	if (Left >= Full) { SetMessage(FString::Printf(TEXT("Your %s is whole already"), *Name.ToLower())); return false; }
 	if (bArmour) ArmourWear.Add(FName(*Name), After);
-	else
-	{
-		const int32 Wi = FCString::Atoi(*P[1]);
-		SyncWear();
-		if (!Wear.IsValidIndex(Wi)) return false;
-		Wear[Wi] = After;
-		PendingBreak.Remove(Wi);
-	}
+	else { Wear[Wi] = After; PendingBreak.Remove(Wi); }
 	const FName Used = RepairWith;
 	RemoveCarried(Used, 1);
 	++ItemsRepaired;
@@ -852,7 +852,29 @@ bool URDCombatComponent::CanCraft(FName Item) const
 {
 	const int32 R = Generator ? Generator->FindRecipe(Item) : -1;
 	if (R < 0) return false;
-	for (const FRDRecipePart& Pt : Generator->Recipes[R].Parts) if (PartHave(Pt) < Pt.Count) return false;
+	TMap<FName, int32> Take;
+	return PlanCraft(Generator->Recipes[R], Take);
+}
+
+bool URDCombatComponent::PlanCraft(const FRDRecipe& Rc, TMap<FName, int32>& Take) const
+{
+	// what making it takes of each kind, the parts drawn from one running count (for each part the kinds she has most of
+	// left go first); false when a part cannot be met
+	Take.Reset();
+	auto Left = [&](const FName& K) { const int32* T = Take.Find(K); return GetItemCount(K) - (T ? *T : 0); };
+	for (const FRDRecipePart& Pt : Rc.Parts)
+	{
+		TArray<FName> Kinds = Pt.AnyOf;
+		Kinds.Sort([&](const FName& A, const FName& B) { return Left(A) > Left(B); });
+		int32 Need = Pt.Count;
+		for (const FName& K : Kinds)
+		{
+			const int32 N = FMath::Min(Need, Left(K));
+			if (N > 0) { Take.FindOrAdd(K) += N; Need -= N; }
+			if (Need <= 0) break;
+		}
+		if (Need > 0) return false;
+	}
 	return true;
 }
 
@@ -867,24 +889,15 @@ bool URDCombatComponent::Craft(FName Item)
 	// ("a whetstone", "an ...", "leather strips")
 	const FString Lb = Item.ToString().ToLower();
 	const FString One = Lb.EndsWith(TEXT("s")) ? Lb : FString::Printf(TEXT("%s %s"), FCString::Strchr(TEXT("aeiou"), Lb.Len() ? Lb[0] : 'x') ? TEXT("an") : TEXT("a"), *Lb);
-	if (Missing.Num() > 0)
+	TMap<FName, int32> Take;
+	if (Missing.Num() > 0 || !PlanCraft(Rc, Take))
 	{
-		SetMessage(FString::Printf(TEXT("For %s you need %s more"), *One, *FString::Join(Missing, TEXT(", "))));
+		// (parts whose kinds overlap can each be there on their own and not all together)
+		SetMessage(Missing.Num() > 0 ? FString::Printf(TEXT("For %s you need %s more"), *One, *FString::Join(Missing, TEXT(", ")))
+		                             : FString::Printf(TEXT("For %s you need more materials"), *One));
 		return false;
 	}
-	for (const FRDRecipePart& Pt : Rc.Parts)
-	{
-		// (any of its kinds: the ones she has most of go first)
-		TArray<FName> Kinds = Pt.AnyOf;
-		Kinds.Sort([this](const FName& A, const FName& B) { return GetItemCount(A) > GetItemCount(B); });
-		int32 Left = Pt.Count;
-		for (const FName& K : Kinds)
-		{
-			const int32 Take = FMath::Min(Left, GetItemCount(K));
-			RemoveCarried(K, Take); Left -= Take;
-			if (Left <= 0) break;
-		}
-	}
+	for (const TPair<FName, int32>& T : Take) RemoveCarried(T.Key, T.Value);
 	AddItem(Item, 1);
 	++ItemsCrafted;
 	SetMessage(FString::Printf(TEXT("You make %s at the anvil"), *One));

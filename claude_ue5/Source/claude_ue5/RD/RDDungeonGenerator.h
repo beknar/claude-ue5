@@ -201,6 +201,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") bool bLootAllSections = false;
 	/** how many of an item a container gives (1 to the item's FoundMax; a hash of the container and the pick, no stream) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") int32 LootCountOf(FIntPoint Section, int32 Index, int32 Pick) const;
+	/** the same, given the container's list (LootListOf) already made */
+	int32 LootCountIn(const TArray<FName>& List, FIntPoint Section, int32 Index, int32 Pick) const;
 
 	// ---- random_dungeonmagic_level5: crafting at anvils. The furniture's anvils (AnvilPiece: a forge's, an armory's, and
 	// one more in every section that has none when bAnvilEverySection is on); F (X) at one opens her crafting panel
@@ -211,7 +213,7 @@ public:
 	/** how near (cm) she must stand to use an anvil */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Crafting") float AnvilReach = 260.f;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Crafting") int32 FindRecipe(FName Item) const;
-	/** the nearest anvil of the sections round From within MaxDistance (false: none) */
+	/** the nearest anvil within MaxDistance in the room From is in (false: none) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Crafting") bool FindNearestAnvil(FVector From, float MaxDistance, FVector& At) const;
 	/** every anvil of the generated sections (tests, the reel) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Crafting") TArray<FVector> GetAllAnvils() const;
