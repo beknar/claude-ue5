@@ -264,8 +264,8 @@ void URDCombatComponent::UpdateWalkSpeed()
 	ACharacter* C = Cast<ACharacter>(GetOwner());
 	if (!C) return;
 	UCharacterMovementComponent* CM = C->GetCharacterMovement();
-	// her own top speed while nothing changes it; slowed in an attack, faster under a speed potion
-	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus());
+	// her own top speed while nothing changes it; slowed in an attack, faster under a speed potion, slower in armour
+	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus()) * (1.f - FMath::Clamp(GetArmourSlow(), 0.f, 0.9f));
 	if (FMath::IsNearlyEqual(K, 1.f))
 	{
 		if (bSpeedOverride) { CM->MaxWalkSpeed = SavedWalkSpeed; bSpeedOverride = false; }
@@ -300,7 +300,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 {
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
-	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen) return false;
+	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen || bCraftOpen) return false;
 	// (a spell that costs more mana than she has is not cast)
 	if (W->ManaCost > 0.f && Mana < W->ManaCost)
 	{
@@ -401,6 +401,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	LastBlowBefore = Amount;
 	Amount *= 1.f - FMath::Clamp(GetArmour(), 0.f, 0.95f);
 	LastBlowTaken = Amount;
+	WearDownArmour();             // (level 5: the blow reached her: her armour loses 1 of its durability)
 	const float Now = GetWorld()->GetTimeSeconds();
 	Health = FMath::Max(0.f, Health - Amount);
 	DamageTaken += Amount; ++HitsTaken; LastHurtTime = Now;
@@ -529,6 +530,14 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 		Count = Left;
 		if (Count <= 0) return;
 	}
+	// (level 5: a set of armour is carried once, with its durability; one found again mends hers to full)
+	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour)
+	{
+		const float Full = Generator->Items[Ix].Durability;
+		if (GetItemCount(Name) > 0) { if (Full > 0.f) ArmourWear.Add(Name, Full); return; }
+		ArmourWear.Add(Name, Full);
+		Count = 1;
+	}
 	int32& N = Carried.FindOrAdd(Name);
 	if (N == 0) CarriedOrder.AddUnique(Name);
 	N += Count;
@@ -537,8 +546,27 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 void URDCombatComponent::ClearItems()
 {
 	TakeOffArmour();
-	Carried.Reset(); CarriedOrder.Reset();
+	Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
+	RepairWith = NAME_None; RepairCursor = 0;
+	if (bCraftOpen) SetCraftingOpen(false);
+	CraftCursor = 0;
 	InventoryCursor = 0;
+	ArmourWornOut = ItemsRepaired = ItemsCrafted = 0;
+	UpdateWalkSpeed();
+}
+
+void URDCombatComponent::RemoveCarried(FName Name, int32 Count)
+{
+	int32* N = Carried.Find(Name);
+	if (!N || Count <= 0) return;
+	*N -= Count;
+	if (*N <= 0) { Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name); }
+}
+
+void URDCombatComponent::PlayUiSound(FName Key, FName Fallback)
+{
+	if (!Generator || !GetOwner()) return;
+	Generator->PlaySoundAt(Generator->HasSound(Key) ? Key : Fallback, GetOwner()->GetActorLocation());
 }
 
 int32 URDCombatComponent::GetItemCount(FName Name) const
@@ -557,6 +585,12 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FRDItemDef& It = Generator->Items[Ix];
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
+	if (It.Kind == ERDItemKind::Repair) return BeginRepair(Name);         // (then she chooses what it mends)
+	if (It.Kind == ERDItemKind::Component)
+	{
+		SetMessage(FString::Printf(TEXT("The %s is a crafting material: an anvil makes repair items from it (F at an anvil)"), *Lb));
+		return false;
+	}
 	if (It.Kind == ERDItemKind::Weapon)
 	{
 		// (one she carries is not made for her hero: had it been, it would be among her weapons)
@@ -636,8 +670,13 @@ TArray<FString> URDCombatComponent::GetInventoryLines() const
 			Out.Add(W.Durability > 0.f ? FString::Printf(TEXT("weapon|%s|%.0f|%.0f"), *W.Name.ToString(), GetWeaponWear(I), W.Durability) : FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
 		}
 	auto KindOf = [this](FName N) { const int32 Ix = Generator ? Generator->FindItem(N) : -1; return Ix >= 0 ? Generator->Items[Ix].Kind : ERDItemKind::Healing; };
-	for (const FName& N : CarriedOrder) if (KindOf(N) != ERDItemKind::Armour && KindOf(N) != ERDItemKind::Weapon) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
-	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Armour) Out.Add(FString::Printf(TEXT("armour|%s|%d"), *N.ToString(), N == WornArmour ? 1 : 0));
+	auto Usable = [](ERDItemKind K) { return K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed || K == ERDItemKind::Food; };
+	for (const FName& N : CarriedOrder) if (Usable(KindOf(N))) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Repair) Out.Add(FString::Printf(TEXT("repair|%s|%d"), *N.ToString(), GetItemCount(N)));
+	for (const FName& N : CarriedOrder)
+		if (KindOf(N) == ERDItemKind::Armour)
+			Out.Add(FString::Printf(TEXT("armour|%s|%d|%.0f|%.0f"), *N.ToString(), N == WornArmour ? 1 : 0, GetArmourWear(N), GetArmourDurability(N)));
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Component) Out.Add(FString::Printf(TEXT("component|%s|%d"), *N.ToString(), GetItemCount(N)));
 	// (level 5: weapons she found that her hero cannot wield)
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Weapon) Out.Add(FString::Printf(TEXT("carried|%s|%d"), *N.ToString(), GetItemCount(N)));
 	return Out;
@@ -648,7 +687,215 @@ float URDCombatComponent::GetArmour() const
 {
 	if (WornArmour.IsNone() || !Generator) return 0.f;
 	const int32 Ix = Generator->FindItem(WornArmour);
-	return Ix >= 0 ? Generator->Items[Ix].Amount : 0.f;
+	if (Ix < 0) return 0.f;
+	// (worn out, its durability at 0: half its share)
+	const FRDItemDef& It = Generator->Items[Ix];
+	return It.Amount * (It.Durability > 0.f && GetArmourWear(WornArmour) <= 0.f ? 0.5f : 1.f);
+}
+
+float URDCombatComponent::GetArmourSlow() const
+{
+	if (WornArmour.IsNone() || !Generator) return 0.f;
+	const int32 Ix = Generator->FindItem(WornArmour);
+	return Ix >= 0 ? Generator->Items[Ix].Slower : 0.f;
+}
+
+float URDCombatComponent::GetArmourDurability(FName Item) const
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	return Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour ? Generator->Items[Ix].Durability : 0.f;
+}
+
+void URDCombatComponent::SetArmourWear(FName Item, float Value)
+{
+	if (GetItemCount(Item) <= 0 || GetArmourDurability(Item) <= 0.f) return;
+	ArmourWear.Add(Item, FMath::Clamp(Value, 0.f, GetArmourDurability(Item)));
+}
+
+void URDCombatComponent::WearDownArmour()
+{
+	if (WornArmour.IsNone() || GetArmourDurability(WornArmour) <= 0.f) return;
+	float& W = ArmourWear.FindOrAdd(WornArmour);
+	if (W <= 0.f) return;
+	W = FMath::Max(0.f, W - 1.f);
+	if (W > 0.f) return;
+	++ArmourWornOut;
+	SetMessage(FString::Printf(TEXT("Your %s is worn out: blows take only %.0f%% less until it is mended"), *WornArmour.ToString().ToLower(), GetArmour() * 100.f));
+	if (Generator && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Break"), GetOwner()->GetActorLocation());
+	UE_LOG(LogTemp, Log, TEXT("RDARMOUR %s worn out"), *WornArmour.ToString());
+}
+
+// ------------------------------------------------------------------------------------------------ repairs (level 5)
+bool URDCombatComponent::BeginRepair(FName Item)
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	if (Ix < 0 || Generator->Items[Ix].Kind != ERDItemKind::Repair || GetItemCount(Item) <= 0 || bDead) return false;
+	RepairWith = Item;
+	if (GetRepairLines().Num() == 0)
+	{
+		RepairWith = NAME_None;
+		SetMessage(FString::Printf(TEXT("Nothing to mend: the %s mends armour and the weapons you found"), *Item.ToString().ToLower()));
+		return false;
+	}
+	RepairCursor = 0;
+	SetMessage(FString::Printf(TEXT("Choose what to mend with the %s"), *Item.ToString().ToLower()));
+	PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
+	return true;
+}
+
+void URDCombatComponent::CancelRepair()
+{
+	RepairWith = NAME_None; RepairCursor = 0;
+}
+
+TArray<FString> URDCombatComponent::GetRepairLines() const
+{
+	TArray<FString> Out;
+	const int32 Ix = Generator && !RepairWith.IsNone() ? Generator->FindItem(RepairWith) : -1;
+	if (Ix < 0) return Out;
+	const float Share = Generator->Items[Ix].Amount;
+	for (const FName& N : CarriedOrder)
+	{
+		const float Full = GetArmourDurability(N);
+		if (Full <= 0.f) continue;
+		const float Left = GetArmourWear(N);
+		Out.Add(FString::Printf(TEXT("armour|%s|%.0f|%.0f|%.0f"), *N.ToString(), Left, Full, FMath::Min(Full, Left + Full * Share)));
+	}
+	for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+	{
+		const FRDWeaponDef& W = Generator->Weapons[I];
+		if (W.Durability <= 0.f) continue;
+		const float Left = GetWeaponWear(I);
+		Out.Add(FString::Printf(TEXT("weapon|%d|%s|%.0f|%.0f|%.0f"), I, *W.Name.ToString(), Left, W.Durability, FMath::Min(W.Durability, Left + W.Durability * Share)));
+	}
+	return Out;
+}
+
+void URDCombatComponent::MoveRepairCursor(int32 Step)
+{
+	const int32 N = GetRepairLines().Num();
+	if (N > 0) RepairCursor = ((RepairCursor + Step) % N + N) % N;
+}
+
+bool URDCombatComponent::RepairEntry(int32 Line)
+{
+	const TArray<FString> L = GetRepairLines();
+	const int32 I = Line >= 0 ? Line : RepairCursor;
+	if (!L.IsValidIndex(I) || !Generator) return false;
+	TArray<FString> P; L[I].ParseIntoArray(P, TEXT("|"));
+	const bool bArmour = P[0] == TEXT("armour");
+	if (P.Num() < (bArmour ? 5 : 6)) return false;
+	const FString Name = bArmour ? P[1] : P[2];
+	const float Left = FCString::Atof(*P[bArmour ? 2 : 3]), Full = FCString::Atof(*P[bArmour ? 3 : 4]), After = FCString::Atof(*P[bArmour ? 4 : 5]);
+	const FString Kit = RepairWith.ToString().ToLower();
+	if (Left >= Full) { SetMessage(FString::Printf(TEXT("Your %s is whole already"), *Name.ToLower())); return false; }
+	if (bArmour) ArmourWear.Add(FName(*Name), After);
+	else
+	{
+		const int32 Wi = FCString::Atoi(*P[1]);
+		SyncWear();
+		if (!Wear.IsValidIndex(Wi)) return false;
+		Wear[Wi] = After;
+		PendingBreak.Remove(Wi);
+	}
+	const FName Used = RepairWith;
+	RemoveCarried(Used, 1);
+	++ItemsRepaired;
+	SetMessage(FString::Printf(TEXT("Mended with the %s: your %s,  %.0f to %.0f of %.0f"), *Kit, *Name.ToLower(), Left, After, Full));
+	PlayUiSound(TEXT("Player.Repair"), TEXT("Player.Inventory"));
+	UE_LOG(LogTemp, Log, TEXT("RDREPAIR %s mended %s %.0f -> %.0f / %.0f"), *Used.ToString(), *Name, Left, After, Full);
+	if (GetItemCount(Used) <= 0) CancelRepair();
+	if (bArmour && FName(*Name) == WornArmour) UpdateWalkSpeed();
+	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
+	return true;
+}
+
+// ------------------------------------------------------------------------------------------------ crafting (level 5)
+void URDCombatComponent::SetCraftingOpen(bool bOpen)
+{
+	if (bOpen == bCraftOpen || (bOpen && (bDead || !Generator || Generator->Recipes.Num() == 0))) return;
+	if (bOpen && bInventoryOpen) SetInventoryOpen(false);
+	bCraftOpen = bOpen;
+	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, Generator->Recipes.Num() - 1)); }
+	else CraftClosedFrame = GFrameCounter;
+	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
+	PlayUiSound(bOpen ? FName(TEXT("Player.Anvil")) : FName(TEXT("Player.Inventory")), TEXT("Player.Inventory"));
+}
+
+void URDCombatComponent::MoveCraftCursor(int32 Step)
+{
+	const int32 N = Generator ? Generator->Recipes.Num() : 0;
+	if (N > 0) CraftCursor = ((CraftCursor + Step) % N + N) % N;
+}
+
+int32 URDCombatComponent::PartHave(const FRDRecipePart& Part) const
+{
+	int32 N = 0;
+	for (const FName& K : Part.AnyOf) N += GetItemCount(K);
+	return N;
+}
+
+TArray<FString> URDCombatComponent::GetCraftLines() const
+{
+	TArray<FString> Out;
+	if (!Generator) return Out;
+	for (const FRDRecipe& Rc : Generator->Recipes)
+	{
+		TArray<FString> Ps;
+		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
+		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s"), *Rc.Item.ToString(), CanCraft(Rc.Item) ? 1 : 0, *FString::Join(Ps, TEXT(";"))));
+	}
+	return Out;
+}
+
+bool URDCombatComponent::CanCraft(FName Item) const
+{
+	const int32 R = Generator ? Generator->FindRecipe(Item) : -1;
+	if (R < 0) return false;
+	for (const FRDRecipePart& Pt : Generator->Recipes[R].Parts) if (PartHave(Pt) < Pt.Count) return false;
+	return true;
+}
+
+bool URDCombatComponent::Craft(FName Item)
+{
+	const int32 R = Generator && !bDead ? Generator->FindRecipe(Item) : -1;
+	if (R < 0) return false;
+	const FRDRecipe Rc = Generator->Recipes[R];
+	TArray<FString> Missing;
+	for (const FRDRecipePart& Pt : Rc.Parts)
+		if (PartHave(Pt) < Pt.Count) Missing.Add(FString::Printf(TEXT("%d %s"), Pt.Count - PartHave(Pt), *Pt.Label));
+	// ("a whetstone", "an ...", "leather strips")
+	const FString Lb = Item.ToString().ToLower();
+	const FString One = Lb.EndsWith(TEXT("s")) ? Lb : FString::Printf(TEXT("%s %s"), FCString::Strchr(TEXT("aeiou"), Lb.Len() ? Lb[0] : 'x') ? TEXT("an") : TEXT("a"), *Lb);
+	if (Missing.Num() > 0)
+	{
+		SetMessage(FString::Printf(TEXT("For %s you need %s more"), *One, *FString::Join(Missing, TEXT(", "))));
+		return false;
+	}
+	for (const FRDRecipePart& Pt : Rc.Parts)
+	{
+		// (any of its kinds: the ones she has most of go first)
+		TArray<FName> Kinds = Pt.AnyOf;
+		Kinds.Sort([this](const FName& A, const FName& B) { return GetItemCount(A) > GetItemCount(B); });
+		int32 Left = Pt.Count;
+		for (const FName& K : Kinds)
+		{
+			const int32 Take = FMath::Min(Left, GetItemCount(K));
+			RemoveCarried(K, Take); Left -= Take;
+			if (Left <= 0) break;
+		}
+	}
+	AddItem(Item, 1);
+	++ItemsCrafted;
+	SetMessage(FString::Printf(TEXT("You make %s at the anvil"), *One));
+	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
+	UE_LOG(LogTemp, Log, TEXT("RDCRAFT %s made (%d crafted)"), *Item.ToString(), ItemsCrafted);
+	return true;
+}
+
+bool URDCombatComponent::CraftEntry()
+{
+	return Generator && Generator->Recipes.IsValidIndex(CraftCursor) && Craft(Generator->Recipes[CraftCursor].Item);
 }
 
 TArray<USkeletalMeshComponent*> URDCombatComponent::GetArmourMeshes() const
@@ -744,6 +991,7 @@ void URDCombatComponent::TakeOffArmour()
 	for (USkeletalMeshComponent* C : ArmourComps) if (C) C->DestroyComponent();
 	ArmourComps.Reset();
 	WornArmour = NAME_None;
+	UpdateWalkSpeed();           // (her armour's weight is off her)
 }
 
 bool URDCombatComponent::WearArmour(FName Item)
@@ -784,7 +1032,9 @@ bool URDCombatComponent::WearArmour(FName Item)
 		ArmourComps.Add(C);
 	}
 	WornArmour = Item; ++ArmourChanges;
-	SetMessage(FString::Printf(TEXT("You put on the %s:  blows take %.0f%% less"), *Lb, It.Amount * 100.f));
+	UpdateWalkSpeed();
+	SetMessage(It.Slower > 0.f ? FString::Printf(TEXT("You put on the %s:  blows take %.0f%% less,  you move %.0f%% slower"), *Lb, GetArmour() * 100.f, It.Slower * 100.f)
+	                           : FString::Printf(TEXT("You put on the %s:  blows take %.0f%% less"), *Lb, GetArmour() * 100.f));
 	if (O) Generator->PlaySoundAt(TEXT("Player.Inventory"), O->GetActorLocation());
 	return true;
 }
@@ -792,6 +1042,8 @@ bool URDCombatComponent::WearArmour(FName Item)
 void URDCombatComponent::SetInventoryOpen(bool bOpen)
 {
 	if (bOpen == bInventoryOpen || (bOpen && bDead)) return;
+	if (bOpen && bCraftOpen) SetCraftingOpen(false);
+	if (!bOpen) CancelRepair();
 	bInventoryOpen = bOpen;
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1)); }
 	// (the game stands still while it is open; the generator, which ticks while paused, works the inventory)
@@ -821,7 +1073,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		SetMessage(FString::Printf(TEXT("You wield the %s"), *W.Name.ToString().ToLower()));
 		return true;
 	}
-	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried")))
+	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
@@ -834,20 +1086,42 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 {
 	if (!PC || bScriptedOnly) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
-	const bool bToggle = Pressed({ EKeys::I, EKeys::Tab, EKeys::Gamepad_Special_Right });
-	if (!bInventoryOpen) { if (bToggle && !bDead) SetInventoryOpen(true); return; }
-	if (bToggle || Pressed({ EKeys::Gamepad_FaceButton_Right })) { SetInventoryOpen(false); return; }
-	if (Pressed({ EKeys::W, EKeys::Up, EKeys::MouseScrollUp, EKeys::Gamepad_DPad_Up })) MoveInventoryCursor(-1);
-	if (Pressed({ EKeys::S, EKeys::Down, EKeys::MouseScrollDown, EKeys::Gamepad_DPad_Down })) MoveInventoryCursor(1);
-	// (the left stick: a step when it is pushed, then one every 0.22 s while it is held)
-	const float Sy = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
-	if (FMath::Abs(Sy) > 0.6f)
+	// a list's cursor: the keys and the wheel step it; the left stick a step when it is pushed, then one every 0.22 s held
+	auto Steer = [&](TFunctionRef<void(int32)> Move)
 	{
-		const float Now = FPlatformTime::Seconds();
-		if (Now > InventoryRepeat) { MoveInventoryCursor(Sy > 0.f ? -1 : 1); InventoryRepeat = Now + (InventoryRepeat > 0.f ? 0.22f : 0.4f); }
+		if (Pressed({ EKeys::W, EKeys::Up, EKeys::MouseScrollUp, EKeys::Gamepad_DPad_Up })) Move(-1);
+		if (Pressed({ EKeys::S, EKeys::Down, EKeys::MouseScrollDown, EKeys::Gamepad_DPad_Down })) Move(1);
+		const float Sy = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
+		if (FMath::Abs(Sy) > 0.6f)
+		{
+			const float Now = FPlatformTime::Seconds();
+			if (Now > InventoryRepeat) { Move(Sy > 0.f ? -1 : 1); InventoryRepeat = Now + (InventoryRepeat > 0.f ? 0.22f : 0.4f); }
+		}
+		else InventoryRepeat = 0.f;
+	};
+	const bool bUse = Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::LeftMouseButton, EKeys::Gamepad_FaceButton_Bottom });
+	const bool bToggle = Pressed({ EKeys::I, EKeys::Tab, EKeys::Gamepad_Special_Right });
+	// (level 5: the anvil's crafting panel, opened by the generator's F)
+	if (bCraftOpen)
+	{
+		if (bToggle || Pressed({ EKeys::F, EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_FaceButton_Left })) { SetCraftingOpen(false); return; }
+		Steer([this](int32 S) { MoveCraftCursor(S); });
+		if (bUse) CraftEntry();
+		return;
 	}
-	else InventoryRepeat = 0.f;
-	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::LeftMouseButton, EKeys::Gamepad_FaceButton_Bottom })) UseInventoryEntry();
+	if (!bInventoryOpen) { if (bToggle && !bDead) SetInventoryOpen(true); return; }
+	// (level 5: choosing what a repair item mends; Backspace or B back to the inventory)
+	if (IsPickingRepair())
+	{
+		if (bToggle) { SetInventoryOpen(false); return; }
+		if (Pressed({ EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right })) { CancelRepair(); return; }
+		Steer([this](int32 S) { MoveRepairCursor(S); });
+		if (bUse) RepairEntry();
+		return;
+	}
+	if (bToggle || Pressed({ EKeys::Gamepad_FaceButton_Right })) { SetInventoryOpen(false); return; }
+	Steer([this](int32 S) { MoveInventoryCursor(S); });
+	if (bUse) UseInventoryEntry();
 }
 
 // ------------------------------------------------------------------------------------------------ sound

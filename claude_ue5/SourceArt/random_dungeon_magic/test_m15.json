@@ -1,5 +1,5 @@
 {
- "tag": "m14",
+ "tag": "m15",
  "plan": [
   "setup",
   "keys",
@@ -306,21 +306,21 @@
    "target_is_it": true,
    "montage": true,
    "hand_moved_cm": 52,
-   "charge_particles": 385,
-   "bolt_left_at_s": 0.43,
+   "charge_particles": 370,
+   "bolt_left_at_s": 0.42,
    "bolt_speed_cm_s": 1700,
    "spell_speed": 1700.0,
-   "particles_round_the_bolt": 755,
+   "particles_round_the_bolt": 740,
    "on_monster": 1,
    "elsewhere": 0,
-   "flown_cm": 566,
+   "flown_cm": 558,
    "it_lost": 25.0,
    "damage": 25.0,
-   "burst_particles": 594,
+   "burst_particles": 587,
    "burst_at": [
-    660,
+    674,
     -3450,
-    129
+    128
    ],
    "sounds": {
     "Player.Charge.Fire": 1,
@@ -335,7 +335,7 @@
    "target": null,
    "turned_deg": 0.0,
    "off_her_heading_deg": 0.3,
-   "flown_cm": 1239,
+   "flown_cm": 1233,
    "reach": 1400.0,
    "damage_dealt": 0.0
   },
@@ -343,7 +343,7 @@
    "step": "far",
    "ok": true,
    "monster": "Spider",
-   "distance_cm": 1799,
+   "distance_cm": 1733,
    "reach": 1400.0,
    "target": null
   },
@@ -354,14 +354,14 @@
     {
      "monster": "Spider",
      "hit_points": 30.0,
-     "casts": 1,
-     "bolts_on_it": 1,
+     "casts": 2,
+     "bolts_on_it": 2,
      "bolts_needed": 2,
      "killed": true,
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 0.9,
+     "seconds": 1.8,
      "ok": true
     },
     {
@@ -374,7 +374,7 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 1.7,
+     "seconds": 1.6,
      "ok": true
     },
     {
@@ -387,7 +387,7 @@
      "kills_counted": 1,
      "each_bolt_took_the_damage": true,
      "she_lost": 0,
-     "seconds": 1.8,
+     "seconds": 1.7,
      "ok": true
     }
    ],
@@ -400,10 +400,10 @@
     1,
     0
    ],
-   "monsters": 14,
-   "average_hit_points": 95.7,
+   "monsters": 11,
+   "average_hit_points": 101.3,
    "hers": 100.0,
-   "average_damage": 19.9,
+   "average_damage": 20.4,
    "spell_damage": 20.0
   }
  ],
@@ -411,11 +411,11 @@
  "rolls": 0,
  "dodged": 0,
  "kills": 3,
- "casts": 12,
- "bolts": 12,
- "bolts_on_monsters": 6,
+ "casts": 13,
+ "bolts": 13,
+ "bolts_on_monsters": 7,
  "bolts_elsewhere": 6,
  "deaths": 0,
- "damage_dealt": 162.5,
+ "damage_dealt": 175.0,
  "damage_taken": 0.0
 }

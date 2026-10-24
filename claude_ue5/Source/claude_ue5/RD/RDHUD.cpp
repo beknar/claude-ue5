@@ -493,7 +493,7 @@ void ARDHUD::DrawHUD()
 	if (!Gen) return;
 	// (play began without a hero: the menu is being opened, the dungeon is not shown)
 	if (Gen->bOpeningMenu) { Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor::Black); return; }
-	ArtDrawn.Reset(); StarsDrawn.Reset();
+	ArtDrawn.Reset(); StarsDrawn.Reset(); AnvilsDrawn.Reset(); MiniTierLabels.Reset();
 	UI.Hud = this; UI.Art = &Gen->UIArt; UI.Drawn = &ArtDrawn; UI.Fonts = &Gen->UIFonts; UI.FontCache = &FontCache;
 	APawn* P = GetOwningPawn();
 	if (!P) return;
@@ -631,6 +631,7 @@ void ARDHUD::DrawHUD()
 	{
 		if (!bBigMap) DrawNotices(Sc);
 		if (Gen->GetPlayerCombat()->IsInventoryOpen()) DrawInventory(Sc);
+		if (Gen->GetPlayerCombat()->IsCraftingOpen()) DrawCrafting(Sc);
 	}
 
 	// ---- full map (M): everything discovered, fitted to the screen, north up
@@ -769,6 +770,20 @@ void ARDHUD::SealMark(const FVector2D& P, float R)
 	DrawLine(P.X - R, P.Y + R, P.X + R, P.Y - R, C, FMath::Max(R * 0.38f, 1.5f));
 }
 
+void ARDHUD::AnvilMark(const FVector2D& P, float R)
+{
+	// a small anvil: the painted one (map_anvil) on a dark spot, else drawn (horn to the left, its face, waist and foot)
+	SoftDot(P, R * 1.5f, FLinearColor(0.f, 0.f, 0.f, 0.5f));
+	// (the painted anvil is dark iron: on the dark map it stands on a bright warm disc, a forge's glow)
+	SoftDot(P, R * 1.25f, FLinearColor(1.f, 0.62f, 0.25f, 0.95f));
+	if (UI.Fit(TEXT("map_anvil"), P - FVector2D(R * 0.95f), P + FVector2D(R * 0.95f))) return;
+	static const FVector2D Shape[] = { { -1.0f, -0.32f }, { -0.45f, -0.52f }, { 0.85f, -0.52f }, { 0.85f, -0.14f }, { 0.35f, -0.08f }, { 0.22f, 0.22f },
+	                                   { 0.55f, 0.42f }, { 0.55f, 0.58f }, { -0.55f, 0.58f }, { -0.55f, 0.42f }, { -0.22f, 0.22f }, { -0.32f, -0.08f }, { -0.62f, -0.12f } };
+	TArray<FVector2D> V;
+	for (const FVector2D& Q : Shape) V.Add(P + Q * R);
+	RDFan(this, P + FVector2D(0.f, -0.1f * R), V, FLinearColor(0.80f, 0.82f, 0.88f, 1.f), FLinearColor(0.12f, 0.12f, 0.14f, 1.f));
+}
+
 void ARDHUD::Diamond(const FVector2D& P, float R, const FLinearColor& C)
 {
 	RDFan(this, P, { P + FVector2D(0, -R), P + FVector2D(R * 0.75f, 0), P + FVector2D(0, R), P + FVector2D(-R * 0.75f, 0) }, C, FLinearColor(0.85f, 1.f, 1.f, C.A));
@@ -822,6 +837,9 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 			const FVector P = S->GetContainerLocation(I);
 			if (Discovered(P)) Out.Add({ FVector2D(P), 2 });
 		}
+		// (level 5: the anvils she has seen, where repair items are made)
+		if (Gen->Recipes.Num() > 0)
+			for (const FVector& A : S->GetAnvilPoints()) if (Discovered(A)) Out.Add({ FVector2D(A), 6 });
 		// a hallway end on the section's border that leads where she has not been: the next section is not generated, or
 		// nothing of it is discovered (it is generated as she nears it, so "not generated" alone was hardly ever seen)
 		const FVector2D Mid = (FVector2D(Gen->SectionMinTile(S->Coord)) + FVector2D(Gen->SectionTiles * 0.5f)) * TS;
@@ -886,6 +904,25 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 		if (Pi.Kind == 2) { Star(S, 6.5f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else if (Pi.Kind == 3) Diamond(S, 5.5f * Sc, RDTacExit);
 		else if (Pi.Kind == 5) SealMark(S, 5.f * Sc);
+		else if (Pi.Kind == 6) { AnvilMark(S, 10.f * Sc); AnvilsDrawn.Add(Pi.W); }
+	}
+	// (level 5: the tier of each room she has found, small, in its middle)
+	if (Gen->MaxTier > 0)
+	{
+		const FLinearColor TierInk(0.95f, 0.80f, 0.45f, 1.f);
+		for (const auto& KV : Gen->MapData)
+			for (const FRDMapRect& Rr : KV.Value.Rects)
+			{
+				if (!Rr.bDiscovered || Rr.bCorridor || Rr.Kind == ERDRoomKind::Junction) continue;
+				const FVector2D M = ToS((FVector2D(Rr.Min) + FVector2D(Rr.Max)) * 0.5f * TS);
+				const float A = Fade(M);
+				if (FVector2D::Distance(M, C) > R * 0.86f || A < 0.3f) continue;
+				const FString Tt = FString::Printf(TEXT("T%d"), Gen->TierOf(KV.Key));
+				float Tw2, Th2; UI.TextSize(Tt, Tw2, Th2, Small, Sc * 0.95f, ERDType::Label);
+				UI.Text(Tt, FLinearColor(0.f, 0.f, 0.f, 0.8f * A), M.X - Tw2 * 0.5f + 1.f * Sc, M.Y - Th2 * 0.5f + 1.f * Sc, Small, Sc * 0.95f, ERDType::Label);
+				UI.Text(Tt, FLinearColor(TierInk.R, TierInk.G, TierInk.B, A), M.X - Tw2 * 0.5f, M.Y - Th2 * 0.5f, Small, Sc * 0.95f, ERDType::Label);
+				MiniTierLabels.Add(FString::Printf(TEXT("%s|%d"), *ARDDungeonGenerator::KindName(Rr.Kind), Gen->TierOf(KV.Key)));
+			}
 	}
 	for (const FRDPoi& Pi : Pois)
 	{
@@ -1005,9 +1042,9 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	// the names of the rooms she has found, in the labels' small capitals ("GREAT HALL" is written "Great Hall"), in the
 	// middle of each room: on two lines when one is too wide, smaller when that is too, left out when nothing fits; faded
 	// out toward the board as the tiles are
-	RoomLabels.Reset();
+	RoomLabels.Reset(); MapTierLabels.Reset();
 	{
-		const FLinearColor RoomInk(0.90f, 0.82f, 0.62f, 1.f);
+		const FLinearColor RoomInk(0.90f, 0.82f, 0.62f, 1.f), TierInk(1.f, 0.78f, 0.38f, 1.f);
 		for (const auto& KV : Gen->MapData)
 			for (const FRDMapRect& R : KV.Value.Rects)
 			{
@@ -1019,25 +1056,34 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 				const FString Name = ARDDungeonGenerator::KindName(R.Kind);
 				FString First = Name.ToUpper(), Second;
 				const float RoomW = Hi.X - Lo.X - 10.f * Sc, RoomH = Hi.Y - Lo.Y - 6.f * Sc;
-				float Ks = Sc * 1.3f, W1 = 0.f, H1 = 0.f, W2 = 0.f, H2 = 0.f;
+				// (level 5: a line under the name with the room's tier, a little smaller)
+				const int32 Tier = Gen->MaxTier > 0 ? Gen->TierOf(KV.Key) : 0;
+				const FString TierS = Tier > 0 ? FString::Printf(TEXT("TIER %d"), Tier) : FString();
+				float Ks = Sc * 1.3f, W1 = 0.f, H1 = 0.f, W2 = 0.f, H2 = 0.f, W3 = 0.f, H3 = 0.f;
 				UI.TextSize(First, W1, H1, Small, Ks, ERDType::Label);
 				if (W1 > RoomW) First.Split(TEXT(" "), &First, &Second);
-				for (int32 Try = 0; Try < 5; ++Try)
+				for (int32 Try = 0; Try < 6; ++Try)
 				{
 					UI.TextSize(First, W1, H1, Small, Ks, ERDType::Label);
 					if (!Second.IsEmpty()) UI.TextSize(Second, W2, H2, Small, Ks, ERDType::Label);
-					if (FMath::Max(W1, W2) <= RoomW && H1 + H2 <= RoomH) break;
+					if (Tier > 0) UI.TextSize(TierS, W3, H3, Small, Ks * 0.8f, ERDType::Label);
+					if (FMath::Max3(W1, W2, W3) <= RoomW && H1 + H2 + H3 <= RoomH) break;
 					Ks *= 0.88f;
 				}
-				if (FMath::Max(W1, W2) > RoomW || H1 + H2 > RoomH) continue;
-				const float Lh = H1 * 0.86f, Ty0 = Mid.Y - (Second.IsEmpty() ? H1 : Lh + H2) * 0.5f;
-				auto Line = [&](const FString& S, float Tw, float Y)
+				if (FMath::Max3(W1, W2, W3) > RoomW || H1 + H2 + H3 > RoomH) continue;
+				const float Lh = H1 * 0.86f, Ty0 = Mid.Y - ((Second.IsEmpty() ? H1 : Lh + H2) + (Tier > 0 ? H3 * 0.9f : 0.f)) * 0.5f;
+				auto Line = [&](const FString& S, float Tw, float Y, float K_, const FLinearColor& Ink_)
 				{
-					UI.Text(S, FLinearColor(0.f, 0.f, 0.f, 0.85f * Al), Mid.X - Tw * 0.5f + 1.5f * Sc, Y + 1.5f * Sc, Small, Ks, ERDType::Label);
-					UI.Text(S, FLinearColor(RoomInk.R, RoomInk.G, RoomInk.B, Al), Mid.X - Tw * 0.5f, Y, Small, Ks, ERDType::Label);
+					UI.Text(S, FLinearColor(0.f, 0.f, 0.f, 0.85f * Al), Mid.X - Tw * 0.5f + 1.5f * Sc, Y + 1.5f * Sc, Small, K_, ERDType::Label);
+					UI.Text(S, FLinearColor(Ink_.R, Ink_.G, Ink_.B, Al), Mid.X - Tw * 0.5f, Y, Small, K_, ERDType::Label);
 				};
-				Line(First, W1, Ty0);
-				if (!Second.IsEmpty()) Line(Second, W2, Ty0 + Lh);
+				Line(First, W1, Ty0, Ks, RoomInk);
+				if (!Second.IsEmpty()) Line(Second, W2, Ty0 + Lh, Ks, RoomInk);
+				if (Tier > 0)
+				{
+					Line(TierS, W3, Ty0 + (Second.IsEmpty() ? Lh : Lh + H2 * 0.86f), Ks * 0.8f, TierInk);
+					MapTierLabels.Add(FString::Printf(TEXT("%s|%d"), *Name, Tier));
+				}
 				RoomLabels.Add(Name);
 			}
 	}
@@ -1050,6 +1096,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		if (Pi.Kind == 2) { Star(S, 8.5f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else if (Pi.Kind == 3) Diamond(S, 7.5f * Sc, RDTacExit);
 		else if (Pi.Kind == 5) SealMark(S, 7.f * Sc);
+		else if (Pi.Kind == 6) { AnvilMark(S, 13.f * Sc); AnvilsDrawn.Add(Pi.W); }
 	}
 	for (const FRDPoi& Pi : Pois)
 	{
@@ -1080,19 +1127,22 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		UI.Text(TEXT("N"), Gold, B.X - 40.f * Sc - Cz * 0.5f - Tw * 0.5f, A.Y + 46.f * Sc - Th - 1.f * Sc, Small, Sc * 1.2f, ERDType::Title);
 	}
 	{
-		float Y = B.Y - (Gen->MaxTier > 0 ? 189.f : 166.f) * Sc; const float X = A.X + 44.f * Sc;      // (level 5: a line more, the sealed passages)
+		// (level 5: a line more, the sealed passages; another, the anvils)
+		float Y = B.Y - ((Gen->MaxTier > 0 ? 189.f : 166.f) + (Gen->Recipes.Num() > 0 ? 23.f : 0.f)) * Sc; const float X = A.X + 44.f * Sc;
 		UI.Text(TEXT("KEY"), Gold, X - 6.f * Sc, Y - 30.f * Sc, Small, Sc * 1.05f, ERDType::Label);
 		UI.Fit(TEXT("divider"), FVector2D(X - 14.f * Sc, Y - 14.f * Sc), FVector2D(X + 200.f * Sc, Y + 2.f * Sc));
 		auto Key = [&](int32 Kind, const TCHAR* What)
 		{
 			const FVector2D P(X + 6.f * Sc, Y + 8.f * Sc);
 			if (Kind == 0) SoftDot(P, 5.5f * Sc, RDTacRed); else if (Kind == 1) Triangle(P, 7.5f * Sc, RDTacElite); else if (Kind == 2) Star(P, 7.5f * Sc, RDTacGold);
-			else if (Kind == 3) Diamond(P, 6.5f * Sc, RDTacExit); else if (Kind == 5) SealMark(P, 6.f * Sc); else DrawLine(P.X - 7.f * Sc, P.Y, P.X + 7.f * Sc, P.Y, RDTacDoor, 2.5f * Sc);
+			else if (Kind == 3) Diamond(P, 6.5f * Sc, RDTacExit); else if (Kind == 5) SealMark(P, 6.f * Sc); else if (Kind == 6) AnvilMark(P, 9.f * Sc);
+			else DrawLine(P.X - 7.f * Sc, P.Y, P.X + 7.f * Sc, P.Y, RDTacDoor, 2.5f * Sc);
 			UI.Text(What, Ink, X + 24.f * Sc, Y, Small, Sc);
 			Y += 23.f * Sc;
 		};
 		Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unlooted chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
 		if (Gen->MaxTier > 0) Key(5, TEXT("sealed passage"));
+		if (Gen->Recipes.Num() > 0) Key(6, TEXT("anvil: make repair items"));
 	}
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
@@ -1232,11 +1282,34 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	case ERDItemKind::Armour:
 	{
 		static const TCHAR* WeightName[3] = { TEXT("Light"), TEXT("Medium"), TEXT("Heavy") };
-		FString S = FString::Printf(TEXT("%s armour.  "), WeightName[(int32)It.ArmourWeight]);
+		FString S = FString::Printf(TEXT("%s armour"), WeightName[(int32)It.ArmourWeight]);
+		if (!It.ArmourType.IsEmpty()) S += FString::Printf(TEXT(" (%s)"), *It.ArmourType);
+		S += TEXT(".  ");
 		if (!It.Looks.IsEmpty()) S += It.Looks.Left(1).ToUpper() + It.Looks.Mid(1) + TEXT(".  ");
-		S += FString::Printf(TEXT("Worn, each blow on you takes %.0f%% less."), It.Amount * 100.f);
+		if (It.DamageRating > 0) S += FString::Printf(TEXT("Damage reduction %d / 10, speed %d / 10.  "), It.DamageRating, It.SpeedRating);
+		S += FString::Printf(TEXT("Worn, each blow on you takes %.0f%% less"), It.Amount * 100.f);
+		S += It.Slower > 0.f ? FString::Printf(TEXT(" and you move %.0f%% slower."), It.Slower * 100.f) : FString(TEXT("."));
+		if (It.Durability > 0.f)
+		{
+			const float Left = Cb ? Cb->GetArmourWear(It.Name) : It.Durability;
+			S += FString::Printf(TEXT("  Durability %.0f / %.0f: each blow that reaches you takes 1 off; at 0 it takes off half as much."), Left, It.Durability);
+			if (Left <= 0.f) S += TEXT("  It is worn out: mend it with a repair item.");
+		}
 		const FString No = Gen ? Gen->ArmourRefusal(It, It.Name.ToString().ToLower()) : FString();
 		if (!No.IsEmpty()) S += TEXT("  ") + No + TEXT(".");
+		return S;
+	}
+	case ERDItemKind::Repair:
+		return FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's full durability, up to full.  Enter, then choose what it mends."), It.Amount * 100.f);
+	case ERDItemKind::Component:
+	{
+		// (the repair items that take it)
+		TArray<FString> Uses;
+		if (Gen)
+			for (const FRDRecipe& Rc : Gen->Recipes)
+				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); })) Uses.Add(Rc.Item.ToString().ToLower());
+		FString S = TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
+		if (Uses.Num() > 0) S += TEXT("  It goes into: ") + FString::Join(Uses, TEXT(", ")) + TEXT(".");
 		return S;
 	}
 	case ERDItemKind::Weapon:
@@ -1293,9 +1366,9 @@ void ARDHUD::DrawNotices(float Sc)
 		UI.Text(N, FLinearColor(1.f, 0.97f, 0.88f, Al), Cx - Nw * 0.5f, Y + Lh + 4.f * Sc, Medium, Sc * 1.35f, ERDType::Title);
 		UI.Text(Hint, FLinearColor(0.75f, 0.72f, 0.65f, Al), Cx - Hw * 0.5f, Y + Lh + Nh + 10.f * Sc, Small, Sc);
 	}
-	// what the inventory did, or a cast refused (not over the open inventory: it shows it itself)
+	// what the inventory did, or a cast refused (not over the open inventory or crafting panel: they show it themselves)
 	const float Ma = Now - Cb->MessageTime;
-	if (!Cb->IsInventoryOpen() && Ma >= 0.f && Ma < 2.6f && !Cb->Message.IsEmpty())
+	if (!Cb->IsInventoryOpen() && !Cb->IsCraftingOpen() && Ma >= 0.f && Ma < 2.6f && !Cb->Message.IsEmpty())
 	{
 		const float Al = FMath::Clamp((2.6f - Ma) / 0.5f, 0.f, 1.f);
 		float Tw, Th; UI.TextSize(Cb->Message, Tw, Th, Small, Sc * 1.3f);
@@ -1317,26 +1390,64 @@ void ARDHUD::DrawInventory(float Sc)
 	UFont* Small = GEngine->GetSmallFont();
 	UFont* Medium = GEngine->GetMediumFont();
 	const bool bPad = Cb->IsUsingGamepad();
-	const TArray<FString> Lines = Cb->GetInventoryLines();
-	const int32 Cur = Cb->GetInventoryCursor();
-	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Line(0.75f, 0.65f, 0.45f, 0.9f);
+	// (level 5: choosing what a repair item mends: its list in place of the inventory's)
+	const bool bRepair = Cb->IsPickingRepair();
+	const TArray<FString> Lines = bRepair ? Cb->GetRepairLines() : Cb->GetInventoryLines();
+	const int32 Cur = bRepair ? Cb->GetRepairCursor() : Cb->GetInventoryCursor();
+	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Line(0.75f, 0.65f, 0.45f, 0.9f), Worn(1.f, 0.45f, 0.35f);
 	// the game stands still under it
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.55f));
-	const int32 NumWeapons = Gen->Weapons.Num();
-	int32 NumArmour = 0, NumCarried = 0;
-	for (const FString& L : Lines) { if (L.StartsWith(TEXT("armour|"))) ++NumArmour; if (L.StartsWith(TEXT("carried|"))) ++NumCarried; }
-	const int32 NumItems = Lines.Num() - NumWeapons - NumArmour - NumCarried;
-	const float Rh = 34.f * Sc, W = 1000.f * Sc, Pd = 22.f * Sc;
-	// (a long list, with up to six items a container: only the rows that fit on the screen, scrolled with the cursor)
-	const float Fixed = 46.f * Sc + 46.f * Sc + (NumItems <= 0 ? Rh : 0.f) + (NumArmour > 0 ? 58.f * Sc : 0.f) + (NumCarried > 0 ? 58.f * Sc : 0.f) + 150.f * Sc;
-	int32 Fit = Lines.Num(), First = 0;
-	if (Fixed + Rh * Lines.Num() > Canvas->ClipY - 80.f * Sc)
+	// the list's sections in order: each line's kind (its first field), the heading over it, shown empty or not
+	struct FSec { FString Kind; FString Head; bool bAlways; };
+	TArray<FSec> Secs;
+	if (bRepair)
 	{
-		Fit = FMath::Clamp(FMath::FloorToInt32((Canvas->ClipY - 80.f * Sc - Fixed - 30.f * Sc) / Rh), 4, Lines.Num());
-		First = FMath::Clamp(Cur - Fit / 2, 0, Lines.Num() - Fit);
+		const int32 Ri = Gen->FindItem(Cb->GetRepairItem());
+		Secs.Add({ TEXT("armour"), FString::Printf(TEXT("MEND WITH THE %s  (+%.0f%%)"), *Cb->GetRepairItem().ToString().ToUpper(), Ri >= 0 ? Gen->Items[Ri].Amount * 100.f : 0.f), false });
+		Secs.Add({ TEXT("weapon"), TEXT("WEAPONS YOU FOUND"), false });
+	}
+	else
+	{
+		Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true });
+		Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true });
+		Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false });
+		Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), false });
+		Secs.Add({ TEXT("component"), TEXT("MATERIALS"), false });
+		Secs.Add({ TEXT("carried"), FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false });
+	}
+	TArray<int32> SecOf; TArray<int32> SecCount; SecCount.Init(0, Secs.Num());
+	for (const FString& L : Lines)
+	{
+		int32 K = Secs.IndexOfByPredicate([&L](const FSec& S) { return L.StartsWith(S.Kind + TEXT("|")); });
+		if (K < 0) K = 0;
+		SecOf.Add(K); ++SecCount[K];
+	}
+	const float Rh = 34.f * Sc, W = 1000.f * Sc, Pd = 22.f * Sc, HeadH = 58.f * Sc;
+	// (a long list: only the rows that fit on the screen, scrolled with the cursor; a heading only over rows shown)
+	auto Heads = [&](int32 F0, int32 F1)
+	{
+		int32 N = 0;
+		for (int32 K = 0; K < Secs.Num(); ++K)
+		{
+			bool bShown = Secs[K].bAlways && SecCount[K] == 0;
+			for (int32 I = F0; I < F1 && !bShown; ++I) bShown = SecOf[I] == K;
+			N += bShown ? 1 : 0;
+		}
+		return N;
+	};
+	const float Room = Canvas->ClipY - 80.f * Sc - 150.f * Sc - 30.f * Sc;
+	int32 Fit = Lines.Num(), First = 0;
+	for (int32 Pass = 0; Pass < 3; ++Pass)
+	{
+		const int32 Nh = Heads(First, First + Fit);
+		const float Empty = (Secs.Num() > 1 && Secs[1].bAlways && SecCount[1] == 0) ? Rh : 0.f;
+		if (HeadH * Nh + Empty + Rh * Lines.Num() <= Room) { Fit = Lines.Num(); First = 0; break; }
+		Fit = FMath::Clamp(FMath::FloorToInt32((Room - HeadH * Nh - Empty) / Rh), 4, Lines.Num());
+		First = FMath::Clamp(Cur - Fit / 2, 0, FMath::Max(0, Lines.Num() - Fit));
 	}
 	auto Shown = [&](int32 I) { return I >= First && I < First + Fit; };
-	const float ListH = Fixed - 150.f * Sc + Rh * Fit + (Fit < Lines.Num() ? 30.f * Sc : 0.f);
+	const int32 NhShown = Heads(First, First + Fit);
+	const float ListH = 46.f * Sc + HeadH * NhShown + Rh * Fit + (Fit < Lines.Num() ? 30.f * Sc : 0.f) + ((Secs.Num() > 1 && Secs[1].bAlways && SecCount[1] == 0) ? Rh : 0.f);
 	const float H = FMath::Max(ListH, (UI.Has(TEXT("slot")) ? 400.f : 330.f) * Sc) + 150.f * Sc;     // (the picture of the chosen one takes room)
 	const FVector2D A((Canvas->ClipX - W) * 0.5f, FMath::Max(40.f * Sc, (Canvas->ClipY - H) * 0.5f)), B = A + FVector2D(W, H);
 	// (level 4: the painted board, a divider under each heading, a picture in each row, a lit plate under the chosen row)
@@ -1347,15 +1458,15 @@ void ARDHUD::DrawInventory(float Sc)
 	}
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
 	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;      // (the title row clear of the board's corner ornaments)
-	UI.Text(TEXT("INVENTORY"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	UI.Text(bRepair ? TEXT("REPAIR") : TEXT("INVENTORY"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
 	UI.TextSize(Gen->PlayerTitle, Tw, Th, Small, Sc * 1.2f, ERDType::Title);
 	UI.Text(Gen->PlayerTitle, Gold, B.X - Pd - Tin - Tw, A.Y + 18.f * Sc, Small, Sc * 1.2f, ERDType::Title);
-	{ float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 42.f * Sc, Small, Sc * 0.95f); }
-	// ---- the list (left): her weapons, then what she carries
+	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 42.f * Sc, Small, Sc * 0.95f); }
+	// ---- the list (left)
 	const float Lx = A.X + Pd, Lw = W * 0.5f - Pd;
 	float Y = A.Y + 76.f * Sc;
-	auto Header = [&](const TCHAR* T)
+	auto Header = [&](const FString& T)
 	{
 		UI.Text(T, Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
 		if (bDivider) UI.Fit(TEXT("divider"), FVector2D(Lx - 8.f * Sc, Y - 18.f * Sc), FVector2D(Lx + Lw + 8.f * Sc, Y + 12.f * Sc));
@@ -1376,49 +1487,68 @@ void ARDHUD::DrawInventory(float Sc)
 		}
 		float Ix = 0.f;
 		if (UI.Has(Icon)) { Ix = Rh; UI.Fit(Icon, FVector2D(R0.X + 8.f * Sc, R0.Y - 2.f * Sc), FVector2D(R0.X + 4.f * Sc + Rh, R1.Y + 2.f * Sc)); }
-		UI.Text(Name, bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 6.f * Sc, Small, Sc * 1.15f);
-		if (!Tag.IsEmpty()) { UI.TextSize(Tag, Tw, Th, Small, Sc, ERDType::Label); UI.Text(Tag, TagC, R1.X - 12.f * Sc - Tw, R0.Y + 8.f * Sc, Small, Sc, ERDType::Label); }
+		float Gw = 0.f, Gh = 0.f;
+		if (!Tag.IsEmpty()) UI.TextSize(Tag, Gw, Gh, Small, Sc, ERDType::Label);
+		// (a name too long beside its tag is drawn smaller)
+		float Nw, Nh, Nk = Sc * 1.15f;
+		UI.TextSize(Name, Nw, Nh, Small, Nk);
+		const float Avail = Lw - 24.f * Sc - Ix - (Gw > 0.f ? Gw + 14.f * Sc : 0.f);
+		if (Nw > Avail && Nw > 0.f) Nk *= FMath::Max(Avail / Nw, 0.7f);
+		UI.Text(Name, bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 6.f * Sc, Small, Nk);
+		if (!Tag.IsEmpty()) UI.Text(Tag, TagC, R1.X - 12.f * Sc - Gw, R0.Y + 8.f * Sc, Small, Sc, ERDType::Label);
 		Y += Rh;
 	};
-	Header(TEXT("WEAPONS AND SPELLS"));
-	for (int32 I = 0; I < NumWeapons; ++I)
+	int32 LastSec = -1;
+	auto Open = [&](int32 K)
 	{
-		const FRDWeaponDef& Wp = Gen->Weapons[I];
-		FString Tag = Wp.bAlongside ? TEXT("ALWAYS AT HAND") : I == Cb->GetWeaponIndex() ? TEXT("IN YOUR HANDS") : TEXT("");
-		// (level 5: a found weapon's durability left)
-		if (Wp.Durability > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + FString::Printf(TEXT("%.0f / %.0f"), Cb->GetWeaponWear(I), Wp.Durability);
-		Row(I, Wp.Name.ToString(), Tag, Wp.bAlongside ? RDCyan : Gold, Wp.Icon);
-	}
-	Y += 12.f * Sc;
-	Header(TEXT("POTIONS AND FOOD"));
-	if (NumItems <= 0) { UI.Text(TEXT("nothing yet: the chests, trunks and barrels hold some"), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc); }
-	for (int32 I = NumWeapons; I < NumWeapons + NumItems; ++I)
+		// (the headings from the last one drawn up to this section: the always-shown empty ones between say so)
+		for (int32 J = LastSec + 1; J <= K; ++J)
+		{
+			const bool bRows = SecCount[J] > 0;
+			if (!bRows && !Secs[J].bAlways) continue;
+			if (bRows && J < K) continue;           // (a section with rows gets its heading with its first row shown)
+			if (LastSec >= 0 || J > 0) Y += 12.f * Sc;
+			Header(Secs[J].Head);
+			if (!bRows) { UI.Text(TEXT("nothing yet: the chests, trunks and barrels hold some"), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc); Y += Rh; }
+		}
+		LastSec = K;
+	};
+	for (int32 I = 0; I < Lines.Num(); ++I)
 	{
+		if (!Shown(I)) continue;
+		if (SecOf[I] != LastSec) Open(SecOf[I]);
 		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
-		if (P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Gold, ItemIcon(FName(*P[1])));
-	}
-	// (level 5: the armour she found; WORN on the set she has on)
-	if (NumArmour > 0)
-	{
-		Y += 12.f * Sc;
-		Header(TEXT("ARMOUR"));
-		for (int32 I = NumWeapons + NumItems; I < NumWeapons + NumItems + NumArmour; ++I)
+		const FString& Kd = P.Num() > 0 ? P[0] : FString();
+		if (bRepair)
 		{
-			TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
-			if (P.Num() >= 3) Row(I, P[1], P[2] == TEXT("1") ? TEXT("WORN") : TEXT(""), RDCyan, ItemIcon(FName(*P[1])));
+			// "armour|<set>|<left>|<full>|<after>", "weapon|<index>|<name>|<left>|<full>|<after>"
+			const bool bArm = Kd == TEXT("armour");
+			if (P.Num() < (bArm ? 5 : 6)) continue;
+			const FString Nm = bArm ? P[1] : P[2];
+			const float Left = FCString::Atof(*P[bArm ? 2 : 3]), Full = FCString::Atof(*P[bArm ? 3 : 4]), After = FCString::Atof(*P[bArm ? 4 : 5]);
+			const FString Tag = Left >= Full ? FString::Printf(TEXT("%.0f / %.0f  WHOLE"), Left, Full) : FString::Printf(TEXT("%.0f  TO  %.0f / %.0f"), Left, After, Full);
+			Row(I, Nm, Tag, Left >= Full ? Dim : Gold, bArm ? ItemIcon(FName(*Nm)) : WeaponIcon(FCString::Atoi(*P[1])));
+			continue;
 		}
-	}
-	// (level 5: weapons found that her hero cannot wield)
-	if (NumCarried > 0)
-	{
-		Y += 12.f * Sc;
-		Header(*FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()));
-		for (int32 I = NumWeapons + NumItems + NumArmour; I < Lines.Num(); ++I)
+		if (Kd == TEXT("weapon"))
 		{
-			TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
-			if (P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Dim, ItemIcon(FName(*P[1])));
+			const FRDWeaponDef& Wp = Gen->Weapons[I];
+			FString Tag = Wp.bAlongside ? TEXT("ALWAYS AT HAND") : I == Cb->GetWeaponIndex() ? TEXT("IN YOUR HANDS") : TEXT("");
+			// (level 5: a found weapon's durability left)
+			if (Wp.Durability > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + FString::Printf(TEXT("%.0f / %.0f"), Cb->GetWeaponWear(I), Wp.Durability);
+			Row(I, Wp.Name.ToString(), Tag, Wp.bAlongside ? RDCyan : Gold, Wp.Icon);
 		}
+		else if (Kd == TEXT("armour") && P.Num() >= 3)
+		{
+			// (level 5: WORN on the set she has on; what is left of its durability)
+			const float Left = P.Num() >= 5 ? FCString::Atof(*P[3]) : 0.f, Full = P.Num() >= 5 ? FCString::Atof(*P[4]) : 0.f;
+			FString Tag = P[2] == TEXT("1") ? TEXT("WORN") : TEXT("");
+			if (Full > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + (Left <= 0.f ? FString(TEXT("WORN OUT")) : FString::Printf(TEXT("%.0f / %.0f"), Left, Full));
+			Row(I, P[1], Tag, Full > 0.f && Left <= 0.f ? Worn : RDCyan, ItemIcon(FName(*P[1])));
+		}
+		else if (P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), (Kd == TEXT("carried") || Kd == TEXT("component")) ? Dim : Gold, ItemIcon(FName(*P[1])));
 	}
+	if (Lines.Num() == 0 || LastSec < Secs.Num() - 1) Open(Secs.Num() - 1);       // (the empty always-shown sections after the last row)
 	if (Fit < Lines.Num())
 	{
 		const FString More = FString::Printf(TEXT("%d more above,  %d more below"), First, Lines.Num() - First - Fit);
@@ -1445,19 +1575,42 @@ void ARDHUD::DrawInventory(float Sc)
 		}
 		if (!Cur2.IsEmpty()) { UI.TextSize(Cur2, Tw, Th, Small, K); UI.Text(Cur2, C, Rx, Ry, Small, K); Ry += Th + 4.f * Sc; }
 	};
-	if (Sel.Num() >= 2)
+	auto Picture = [&](FName Ic, const FString& Title)
 	{
 		// (level 4: its picture large, in a slot, beside its name)
-		const FName Ic = Sel[0] == TEXT("weapon") ? WeaponIcon(Cur) : ItemIcon(FName(*Sel[1]));
 		if (UI.Has(Ic))
 		{
 			const float Sz = 104.f * Sc;
 			UI.Fit(TEXT("slot"), FVector2D(Rx, Ry), FVector2D(Rx + Sz, Ry + Sz));
 			UI.Fit(Ic, FVector2D(Rx + 16.f * Sc, Ry + 14.f * Sc), FVector2D(Rx + Sz - 16.f * Sc, Ry + Sz - 14.f * Sc));
-			UI.Text(Sel[1].ToUpper(), FLinearColor::White, Rx + Sz + 16.f * Sc, Ry + Sz * 0.5f - 16.f * Sc, Medium, Sc * 1.15f, ERDType::Title);
+			float Nw, Nh, Nk = Sc * 1.15f;
+			UI.TextSize(Title.ToUpper(), Nw, Nh, Medium, Nk, ERDType::Title);
+			if (Nw > Rw - Sz - 20.f * Sc) Nk *= FMath::Max((Rw - Sz - 20.f * Sc) / Nw, 0.6f);
+			UI.Text(Title.ToUpper(), FLinearColor::White, Rx + Sz + 16.f * Sc, Ry + Sz * 0.5f - 16.f * Sc, Medium, Nk, ERDType::Title);
 			Ry += Sz + 12.f * Sc;
 		}
-		else { UI.Text(Sel[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f, ERDType::Title); Ry += 40.f * Sc; }
+		else { UI.Text(Title.ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f, ERDType::Title); Ry += 40.f * Sc; }
+	};
+	if (bRepair && Sel.Num() >= 5)
+	{
+		const bool bArm = Sel[0] == TEXT("armour");
+		const FString Nm = bArm ? Sel[1] : (Sel.Num() >= 6 ? Sel[2] : FString());
+		const float Left = FCString::Atof(*Sel[bArm ? 2 : 3]), Full = FCString::Atof(*Sel[bArm ? 3 : 4]), After = Sel.Num() > (bArm ? 4 : 5) ? FCString::Atof(*Sel[bArm ? 4 : 5]) : Left;
+		Picture(bArm ? ItemIcon(FName(*Nm)) : WeaponIcon(FCString::Atoi(*Sel[1])), Nm);
+		Para(FString::Printf(TEXT("Durability now %.0f / %.0f"), Left, Full), RDInk, Sc * 1.1f);
+		if (Left >= Full) Para(TEXT("It is whole: nothing to mend"), Dim, Sc * 1.05f);
+		else
+		{
+			Para(FString::Printf(TEXT("The %s gives it back %.0f:  %.0f / %.0f after"), *Cb->GetRepairItem().ToString().ToLower(), After - Left, After, Full), FLinearColor(0.6f, 0.95f, 0.6f), Sc * 1.1f);
+			if (bArm && Left <= 0.f) Para(TEXT("Worn out now: mended, it takes off its whole share again"), RDCyan, Sc * 1.05f);
+		}
+		Ry += 6.f * Sc;
+		Para(FString::Printf(TEXT("%s  mend it      %s  back"), bPad ? TEXT("A") : TEXT("Enter"), bPad ? TEXT("B") : TEXT("Backspace")), Gold, Sc * 1.05f);
+		Para(FString::Printf(TEXT("%d %s left"), Cb->GetItemCount(Cb->GetRepairItem()), *Cb->GetRepairItem().ToString().ToLower()), Dim, Sc);
+	}
+	else if (!bRepair && Sel.Num() >= 2)
+	{
+		Picture(Sel[0] == TEXT("weapon") ? WeaponIcon(Cur) : ItemIcon(FName(*Sel[1])), Sel[1]);
 		if (Sel[0] == TEXT("weapon") && Gen->Weapons.IsValidIndex(Cur))
 		{
 			const FRDWeaponDef& Wp = Gen->Weapons[Cur];
@@ -1468,40 +1621,36 @@ void ARDHUD::DrawInventory(float Sc)
 			if (Wp.SpeedRating > 0)
 			{
 				Para(FString::Printf(TEXT("%s%s  ·  speed %d / 10  ·  damage %d / 10"), *Wp.WeaponType.Left(1).ToUpper(), *Wp.WeaponType.Mid(1), Wp.SpeedRating, Wp.DamageRating), RDInk, Sc * 1.05f);
-				Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks"), Cb->GetWeaponWear(Cur), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
+				Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks; a repair item mends it"), Cb->GetWeaponWear(Cur), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
 			}
 			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Cur), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
 			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
 			Ry += 6.f * Sc;
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Cur == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 		}
-		else if (Sel[0] == TEXT("item"))
+		else
 		{
 			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
 			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
 			Ry += 6.f * Sc;
-			Para(bPad ? TEXT("A  use it") : TEXT("Enter  use it"), Gold, Sc * 1.05f);
-		}
-		else if (Sel[0] == TEXT("armour"))
-		{
-			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
-			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
-			Ry += 6.f * Sc;
-			const bool bWorn = Sel.Num() >= 3 && Sel[2] == TEXT("1");
-			Para(bWorn ? (bPad ? TEXT("A  take it off") : TEXT("Enter  take it off")) : (bPad ? TEXT("A  put it on") : TEXT("Enter  put it on")), Gold, Sc * 1.05f);
-		}
-		else if (Sel[0] == TEXT("carried"))
-		{
-			// (level 5: a weapon her hero cannot wield)
-			const int32 Ix = Gen->FindItem(FName(*Sel[1]));
-			if (Ix >= 0) Para(DescribeItem(Gen->Items[Ix]), RDInk, Sc * 1.1f);
+			const FString Use = bPad ? TEXT("A") : TEXT("Enter");
+			if (Sel[0] == TEXT("item")) Para(Use + TEXT("  use it"), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("repair")) Para(Use + TEXT("  choose what it mends"), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("armour")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  take it off") : TEXT("  put it on")), Gold, Sc * 1.05f);
 		}
 	}
 	// her state
 	Ry = FMath::Max(Ry + 18.f * Sc, A.Y + 250.f * Sc);
 	Para(FString::Printf(TEXT("Hit points  %.0f / %.0f"), FMath::CeilToFloat(Cb->GetHealth()), Cb->GetMaxHealth()), FLinearColor(0.5f, 0.9f, 0.55f), Sc * 1.05f);
 	if (Cb->GetMaxMana() > 0.f) Para(FString::Printf(TEXT("Mana  %.0f / %.0f"), FMath::FloorToFloat(Cb->GetMana()), Cb->GetMaxMana()), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.05f);
-	if (!Cb->GetWornArmour().IsNone()) Para(FString::Printf(TEXT("Armour  %s,  blows %.0f%% less"), *Cb->GetWornArmour().ToString(), Cb->GetArmour() * 100.f), RDCyan, Sc * 1.05f);
+	if (!Cb->GetWornArmour().IsNone())
+	{
+		const FName Wa = Cb->GetWornArmour();
+		FString S = FString::Printf(TEXT("Armour  %s,  blows %.0f%% less"), *Wa.ToString(), Cb->GetArmour() * 100.f);
+		if (Cb->GetArmourSlow() > 0.f) S += FString::Printf(TEXT(",  %.0f%% slower"), Cb->GetArmourSlow() * 100.f);
+		if (Cb->GetArmourDurability(Wa) > 0.f) S += FString::Printf(TEXT(",  durability %.0f / %.0f"), Cb->GetArmourWear(Wa), Cb->GetArmourDurability(Wa));
+		Para(S, RDCyan, Sc * 1.05f);
+	}
 	for (const URDCombatComponent::FEffect& E : Cb->GetEffects())
 		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))
 		                                 : FString::Printf(TEXT("Regenerating %.1f HP/s: %.0f s left"), E.Amount * Cb->GetMaxHealth(), FMath::CeilToFloat(E.Left)), RDCyan, Sc);
@@ -1510,7 +1659,112 @@ void ARDHUD::DrawInventory(float Sc)
 	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(A.X + Pd, Fy - 20.f * Sc), FVector2D(B.X - Pd, Fy + 20.f * Sc));
 	else Box(FVector2D(A.X + Pd, Fy), FVector2D(B.X - Pd, Fy + 1.f), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
 	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) UI.Text(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd + Tin, Fy + 14.f * Sc, Small, Sc * 1.15f);
-	const FString Keys = bPad ? TEXT("D-pad / left stick  select      A  wield or use      Start or B  close")
-	                          : TEXT("W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close");
+	const FString Keys = bRepair ? (bPad ? TEXT("D-pad / left stick  select      A  mend it      B  back      Start  close")
+	                                     : TEXT("W S / arrows / wheel  select      Enter or E  mend it      Backspace  back      I or Tab  close"))
+	                             : (bPad ? TEXT("D-pad / left stick  select      A  wield or use      Start or B  close")
+	                                     : TEXT("W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close"));
+	UI.Text(Keys, Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
+}
+
+void ARDHUD::DrawCrafting(float Sc)
+{
+	// the anvil's panel: the recipes on the left (CAN MAKE on those she has everything for), the chosen one on the right:
+	// its picture, what it mends, and each part with what she carries of it against what it takes
+	URDCombatComponent* Cb = Gen->GetPlayerCombat();
+	UFont* Small = GEngine->GetSmallFont();
+	UFont* Medium = GEngine->GetMediumFont();
+	const bool bPad = Cb->IsUsingGamepad();
+	const TArray<FString> Lines = Cb->GetCraftLines();
+	const int32 Cur = Cb->GetCraftCursor();
+	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Have(0.55f, 0.95f, 0.55f), Lack(1.f, 0.5f, 0.4f);
+	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.55f));
+	const float Rh = 40.f * Sc, W = 1000.f * Sc, Pd = 22.f * Sc, H = 640.f * Sc;
+	const FVector2D A((Canvas->ClipX - W) * 0.5f, FMath::Max(40.f * Sc, (Canvas->ClipY - H) * 0.5f)), B = A + FVector2D(W, H);
+	if (!Board(TEXT("panel_wide"), A, B, Sc, 44.f * Sc))
+	{
+		Box(A, B, FLinearColor(0.035f, 0.04f, 0.055f, 0.94f));
+		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
+	}
+	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
+	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;
+	UI.Text(TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	float Tw, Th;
+	const FString Sub = TEXT("make repair items from your materials");
+	UI.TextSize(Sub, Tw, Th, Small, Sc * 1.05f);
+	UI.Text(Sub, Gold, B.X - Pd - Tin - Tw, A.Y + 22.f * Sc, Small, Sc * 1.05f);
+	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 46.f * Sc, Small, Sc * 0.95f); }
+	const float Lx = A.X + Pd, Lw = W * 0.42f - Pd;
+	float Y = A.Y + 80.f * Sc;
+	UI.Text(TEXT("RECIPES"), Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
+	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(Lx - 8.f * Sc, Y - 18.f * Sc), FVector2D(Lx + Lw + 8.f * Sc, Y + 12.f * Sc));
+	Y += 4.f * Sc;
+	TArray<TArray<FString>> Parsed;
+	for (int32 I = 0; I < Lines.Num(); ++I)
+	{
+		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"), false);
+		Parsed.Add(P);
+		if (P.Num() < 3) continue;
+		const bool bOn = I == Cur, bCan = P[2] == TEXT("1");
+		const FVector2D R0(Lx, Y), R1(Lx + Lw, Y + Rh - 4.f * Sc);
+		if (bOn)
+		{
+			const FRDUIArt* Pl = UI.Find(TEXT("button"));
+			if (bPlate) UI.Nine(TEXT("button"), R0 - FVector2D(4.f * Sc), R1 + FVector2D(4.f * Sc), (Rh + 4.f * Sc) / FMath::Max((float)Pl->Texture->GetSizeY(), 1.f), FLinearColor(1.25f, 1.05f, 0.7f));
+			else Box(R0, R1, FLinearColor(0.36f, 0.27f, 0.10f, 0.95f));
+			Frame(R0, R1, Gold, 2.f * Sc);
+		}
+		float Ix = 0.f;
+		const FName Ic = ItemIcon(FName(*P[1]));
+		if (UI.Has(Ic)) { Ix = Rh; UI.Fit(Ic, FVector2D(R0.X + 8.f * Sc, R0.Y - 2.f * Sc), FVector2D(R0.X + 4.f * Sc + Rh, R1.Y + 2.f * Sc)); }
+		UI.Text(P[1], bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 8.f * Sc, Small, Sc * 1.15f);
+		const FString Tag = bCan ? TEXT("CAN MAKE") : FString::Printf(TEXT("x %d"), Cb->GetItemCount(FName(*P[1])));
+		UI.TextSize(Tag, Tw, Th, Small, Sc, ERDType::Label);
+		UI.Text(Tag, bCan ? Have : Dim, R1.X - 12.f * Sc - Tw, R0.Y + 10.f * Sc, Small, Sc, ERDType::Label);
+		Y += Rh;
+	}
+	// ---- the chosen recipe
+	const float Rx = A.X + W * 0.42f + Pd, Rw = W * 0.58f - Pd * 2.f;
+	float Ry = A.Y + 80.f * Sc;
+	Box(FVector2D(Rx - Pd * 0.5f, Ry), FVector2D(Rx - Pd * 0.5f + 1.f, B.Y - 110.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
+	if (Parsed.IsValidIndex(Cur) && Parsed[Cur].Num() >= 3)
+	{
+		const TArray<FString>& P = Parsed[Cur];
+		const FName Item(*P[1]);
+		const FName Ic = ItemIcon(Item);
+		if (UI.Has(Ic))
+		{
+			const float Sz = 104.f * Sc;
+			UI.Fit(TEXT("slot"), FVector2D(Rx, Ry), FVector2D(Rx + Sz, Ry + Sz));
+			UI.Fit(Ic, FVector2D(Rx + 16.f * Sc, Ry + 14.f * Sc), FVector2D(Rx + Sz - 16.f * Sc, Ry + Sz - 14.f * Sc));
+			UI.Text(P[1].ToUpper(), FLinearColor::White, Rx + Sz + 16.f * Sc, Ry + Sz * 0.5f - 16.f * Sc, Medium, Sc * 1.15f, ERDType::Title);
+			Ry += Sz + 12.f * Sc;
+		}
+		else { UI.Text(P[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.15f, ERDType::Title); Ry += 40.f * Sc; }
+		const int32 Ix = Gen->FindItem(Item);
+		if (Ix >= 0) { UI.Text(FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's durability"), Gen->Items[Ix].Amount * 100.f), RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc; }
+		UI.Text(TEXT("IT TAKES"), Dim, Rx, Ry, Small, Sc, ERDType::Label); Ry += 24.f * Sc;
+		TArray<FString> Parts; if (P.Num() >= 4) P[3].ParseIntoArray(Parts, TEXT(";"));
+		// (two columns of parts: label, what she has / what it takes, green when she has enough)
+		const float Cw = Rw * 0.5f;
+		for (int32 K = 0; K < Parts.Num(); ++K)
+		{
+			TArray<FString> Q; Parts[K].ParseIntoArray(Q, TEXT(":"), false);
+			if (Q.Num() < 3) continue;
+			const int32 Hv = FCString::Atoi(*Q[1]), Nd = FCString::Atoi(*Q[2]);
+			const float Px = Rx + (K % 2) * Cw, Py = Ry + (K / 2) * 27.f * Sc;
+			UI.Text(Q[0], FLinearColor(0.86f, 0.84f, 0.78f), Px, Py, Small, Sc * 1.0f);
+			const FString N = FString::Printf(TEXT("%d / %d"), Hv, Nd);
+			UI.TextSize(N, Tw, Th, Small, Sc, ERDType::Label);
+			UI.Text(N, Hv >= Nd ? Have : Lack, Px + Cw - 16.f * Sc - Tw, Py + 1.f * Sc, Small, Sc, ERDType::Label);
+		}
+		Ry += ((Parts.Num() + 1) / 2) * 27.f * Sc + 14.f * Sc;
+		UI.Text(P[2] == TEXT("1") ? (bPad ? TEXT("A  make it") : TEXT("Enter  make it")) : TEXT("You lack some of what it takes: the containers hold materials"),
+		        P[2] == TEXT("1") ? Gold : Dim, Rx, Ry, Small, Sc * 1.05f);
+	}
+	const float Fy = B.Y - 92.f * Sc;
+	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(A.X + Pd, Fy - 20.f * Sc), FVector2D(B.X - Pd, Fy + 20.f * Sc));
+	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) UI.Text(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd + Tin, Fy + 14.f * Sc, Small, Sc * 1.15f);
+	const FString Keys = bPad ? TEXT("D-pad / left stick  select      A  make it      B or X  close")
+	                          : TEXT("W S / arrows / wheel  select      Enter or E  make it      F, Backspace or Tab  close");
 	UI.Text(Keys, Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
 }

@@ -54,6 +54,10 @@ public:
 	 *  how many cell sides got bars. Tests. */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FTransform> GetPrisonCells(TArray<FVector>& Hay) const { Hay = CellHay; return CellFrames; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetPrisonCellSides() const { return CellSides; }
+	/** random_dungeonmagic_level5: where its anvils stand (the furniture's AnvilPiece; play also for the saved start section) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<FVector> GetAnvilPoints() const { return AnvilPoints; }
+	/** the room the anvil added by EnsureAnvil stands in (-1: none was added) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 AnvilRoom = -1;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FVector GetFirePoint(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].At : FVector::ZeroVector; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetFireKind(int32 Index) const { return FirePoints.IsValidIndex(Index) ? FirePoints[Index].Kind : -1; }
 	/** prefab actors (bookshelves, candle stands...) owned by the section */
@@ -230,6 +234,9 @@ private:
 	FName WallVariant(FName Name, const FIntPoint& T, int32 Side, int32 Layer);
 	int32 ShellX = 0;
 	void Furnish(FRandomStream& R, int32 RoomIndex);
+	/** level 5 (generator bAnvilEverySection): an anvil for a section whose furniture brought none */
+	void EnsureAnvil();
+	TArray<FVector> AnvilPoints;
 	void DecorateCorridor(FRandomStream& R, int32 CorrIndex);
 	void ClearInteractive();
 	void SpawnMonsters(FRandomStream& R);

@@ -16,7 +16,12 @@ her rest pose, and written as armour_fit/<set>.fbx with her armature; armour_fit
 were pushed out and how far, and per bone the scales; check renders armour_fit/<set>_{front,side,back}.png.
 Another hero (the heroes share her bone names; --pct: the percentile of her skin's distance taken, 95): --hero <mesh name> (Fem5, DarkCaster, Rogue ...) takes armour_src/
 SK_JRPG_<name>.fbx (849 heroes) and writes armour_fit/<name>/<set>.fbx, its renders and fit.json there.
-    blender -b -P summoner3_armour.py -- <SourceArt/summoner3> [--hero <name>] [set key ...]"""
+A piece's FBX carries only the bones that piece uses (MysticDungeon's arm piece has no feet, its torso no calves): each
+set's source rig is all its pieces' bones together (one character's bind pose), and the way it faces comes from the feet,
+else the clavicles, else the thighs. Pieces marked skeleton "ue5" in armour.json may use UE5 mannequin bones the heroes
+lack (spine_04, spine_05, neck_02, the metacarpals): their weights go to the UE4 bone they lie in (REMAP) before the fit.
+fit.json keeps the sets fitted in earlier runs.
+    blender -b -P summoner3_armour.py -- <SourceArt/summoner3> [--hero <name>] [--pct N] [set key ...]"""
 import bpy, sys, os, json, math, numpy as np, mathutils
 from mathutils.bvhtree import BVHTree
 argv = sys.argv[sys.argv.index("--") + 1:]
@@ -26,6 +31,13 @@ if "--hero" in rest: k = rest.index("--hero"); HERO = rest[k + 1]; rest = rest[:
 # made 95 balloon the bear warrior's trousers on the Warrior)
 PCT = 95.0
 if "--pct" in rest: k = rest.index("--pct"); PCT = float(rest[k + 1]); rest = rest[:k] + rest[k + 2:]
+# (the share of a bone's armour vertices the scale puts outside her skin, 90; on the legs inner straps, belts and pouch
+# backs near the bone pushed whole trousers out at 90 (the orc raider's, the crocodile warrior's, the epic plate's): --legs 60
+# for the hips, thighs and calves, the rest pushed out to her skin afterwards. 60 on the torso let her chest through a
+# breastplate)
+NEED = 90.0; NEED_LEGS = 90.0
+if "--legs" in rest: k = rest.index("--legs"); NEED_LEGS = float(rest[k + 1]); rest = rest[:k] + rest[k + 2:]
+LEGS = ("pelvis", "thigh_", "calf_")
 ONLY = set(rest)
 J = json.load(open(os.path.join(SA, "armour.json"), encoding="utf-8"))
 SRC = os.path.join(SA, "armour_src"); OUT = os.path.join(SA, "armour_fit", *([] if HERO == "Summoner3" else [HERO])); os.makedirs(OUT, exist_ok=True)
@@ -45,6 +57,30 @@ for s in SIDES:
     for f in FING: ALONG[f"{f}_03_{s}"] = f"{f}_02_{s}"
 
 
+# (the UE5 mannequin's bones the UE4 one lacks -> the bone they lie in)
+REMAP = {"spine_04": "spine_03", "spine_05": "spine_03", "neck_02": "neck_01"}
+for s in SIDES:
+    for f in ("index", "middle", "ring", "pinky"): REMAP[f"{f}_metacarpal_{s}"] = f"hand_{s}"
+    REMAP.update({f"upperarm_twist_02_{s}": f"upperarm_twist_01_{s}", f"lowerarm_twist_02_{s}": f"lowerarm_twist_01_{s}",
+                  f"thigh_twist_02_{s}": f"thigh_twist_01_{s}", f"calf_twist_02_{s}": f"calf_twist_01_{s}"})
+
+
+def remap_groups(me, known):
+    """a UE5 piece's weights on bones she lacks moved to the bone they lie in (REMAP; a bone neither hers nor in REMAP: its
+    nearest ancestor of hers is not known here, so it is reported)"""
+    moved, unknown = 0, set()
+    for g in list(me.vertex_groups):
+        if g.name in known: continue
+        t = REMAP.get(g.name)
+        if t is None: unknown.add(g.name); continue
+        tg = me.vertex_groups.get(t) or me.vertex_groups.new(name=t)
+        for v in me.data.vertices:
+            for e in v.groups:
+                if e.group == g.index and e.weight > 0: tg.add([v.index], e.weight, "ADD"); moved += 1
+        me.vertex_groups.remove(g)
+    return moved, unknown
+
+
 def clear():
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
@@ -55,12 +91,25 @@ def imp_fbx(path):
     return next(o for o in new if o.type == "ARMATURE"), [o for o in new if o.type == "MESH"]
 
 
+def facing(head):
+    """the way a rig faces (level): from its feet, else its clavicles or thighs (left to right, turned a quarter about up)"""
+    if all(("ball_" + s) in head and ("foot_" + s) in head for s in SIDES):
+        f = sum((head["ball_" + s] - head["foot_" + s] for s in SIDES))
+    else:
+        pair = next(p for p in (("clavicle_l", "clavicle_r"), ("upperarm_l", "upperarm_r"), ("thigh_l", "thigh_r")) if p[0] in head and p[1] in head)
+        r = head[pair[1]] - head[pair[0]]; f = np.cross(np.array([0, 0, 1.0]), r)
+    f = np.array(f, float); f[2] = 0
+    return f / np.linalg.norm(f)
+
+
 class Rig:
-    def __init__(self, arm):
+    def __init__(self, arm, extra=None):
         self.arm = arm; mw = arm.matrix_world
         self.head = {b.name: np.array(mw @ b.head_local) for b in arm.data.bones}
         self.parent = {b.name: (b.parent.name if b.parent else None) for b in arm.data.bones}
-        f = sum((self.head["ball_" + s] - self.head["foot_" + s] for s in SIDES)); f[2] = 0; self.front = f / np.linalg.norm(f)
+        for n, (h, p) in (extra or {}).items():
+            if n not in self.head: self.head[n] = h; self.parent[n] = p
+        self.front = facing(self.head)
         self.frames = {}
         for n in self.head: self.frames[n] = self.frame(n)
     def key(self, n):
@@ -135,13 +184,29 @@ def skin_r(prof, k, th, y):
     return G[a, b]
 
 
+def set_bones(key):
+    """all the set's pieces' bones (world heads, parents): one character's bind pose, each piece carrying only some"""
+    out = {}
+    for f in sorted(os.listdir(os.path.join(SRC, key))):
+        if not f.lower().endswith(".fbx"): continue
+        before = set(bpy.data.objects); arm, meshes = imp_fbx(os.path.join(SRC, key, f))
+        for b in arm.data.bones:
+            if b.name not in out: out[b.name] = (np.array(arm.matrix_world @ b.head_local), b.parent.name if b.parent else None)
+        for o in [o for o in bpy.data.objects if o not in before]: bpy.data.objects.remove(o, do_unlink=True)
+    return out
+
+
 def fit_set(s, her, hb, hv, hW, hnames, bvh_h, report):
-    pieces = []
+    pieces = []; allb = set_bones(s["key"])
     for f in sorted(os.listdir(os.path.join(SRC, s["key"]))):
         if not f.lower().endswith(".fbx"): continue
         arm, meshes = imp_fbx(os.path.join(SRC, s["key"], f))
-        src = Rig(arm)
+        src = Rig(arm, allb)
         for me in meshes:
+            if s.get("skeleton") == "ue5":
+                mv, unk = remap_groups(me, set(her.head))
+                print("S3ARM remap", me.name, "| weights moved", mv, "| bones she lacks, not mapped", sorted(unk))
+                report.setdefault("remap", {})[me.name] = {"moved": mv, "unmapped": sorted(unk)}
             names = [g.name for g in me.vertex_groups]
             W = weights(me, names)
             V = np.array([me.matrix_world @ v.co for v in me.data.vertices])
@@ -161,7 +226,7 @@ def fit_set(s, her, hb, hv, hW, hnames, bvh_h, report):
                     need = (skin_r(prof, kb, th[dom], loc[dom, 1]) + GAP) / np.maximum(rho[dom], 1e-4)
                     q = (((th[dom] + math.pi / 4) % (2 * math.pi)) / (math.pi / 2)).astype(int) % 4
                     for i in range(4):
-                        if (q == i).sum() >= 12: sq[i] = np.clip(np.percentile(need[q == i], 90), 0.5, 1.7)
+                        if (q == i).sum() >= 12: sq[i] = np.clip(np.percentile(need[q == i], NEED_LEGS if kb.startswith(LEGS) else NEED), 0.5, 1.7)
                         else: sq[i] = np.nan
                     sq = np.where(np.isnan(sq), np.nanmean(sq) if not np.isnan(sq).all() else 1.0, sq)
                     report.setdefault("bones", {})[kb] = [round(float(x), 3) for x in sq]
@@ -177,7 +242,7 @@ def fit_set(s, her, hb, hv, hW, hnames, bvh_h, report):
             pushed = 0; depth = []
             for i in range(len(NEW)):
                 p = mathutils.Vector(NEW[i]); q, n, _, d = bvh_h.find_nearest(p)
-                if q is None or d > 0.05: continue
+                if q is None or d > 0.05 + (0.04 if NEED_LEGS < 90 else 0.0): continue
                 sd = (p - q).dot(n)
                 if sd < PUSH:
                     NEW[i] = np.array(q + n * PUSH); pushed += 1; depth.append(PUSH - sd)
@@ -199,7 +264,8 @@ def fit_set(s, her, hb, hv, hW, hnames, bvh_h, report):
     return a
 
 
-report_all = {}
+FJ = os.path.join(OUT, "fit.json")
+report_all = json.load(open(FJ)) if os.path.exists(FJ) else {}
 for s in J["sets"]:
     if ONLY and s["key"] not in ONLY: continue
     clear()
@@ -213,7 +279,7 @@ for s in J["sets"]:
     prof = her_profile(her, hv, hW, hnames)
     rep = {}
     a = fit_set(s, her, hb, hv, hW, hnames, bvh_h, rep)
-    rep["materials"] = [m.name for m in a.data.materials if m]
+    rep["materials"] = [m.name for m in a.data.materials if m]; rep["pct"] = PCT; rep["need_legs"] = NEED_LEGS
     rep["verts"] = len(a.data.vertices)
     report_all[s["key"]] = rep
     for o in bpy.context.scene.objects: o.select_set(o in (hb, a))
@@ -239,5 +305,5 @@ for s in J["sets"]:
         cam.location = ctr + d * 5; cam.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler(); cd.ortho_scale = hgt * 1.08
         sc.render.resolution_x, sc.render.resolution_y = 520, 900
         sc.render.filepath = os.path.join(OUT, f"{s['key']}_{nm}.png"); bpy.ops.render.render(write_still=True)
-json.dump(report_all, open(os.path.join(OUT, "fit.json"), "w"), indent=1)
+json.dump(report_all, open(FJ, "w"), indent=1)
 print("S3ARM done")

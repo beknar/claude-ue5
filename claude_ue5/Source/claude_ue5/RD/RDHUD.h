@@ -43,13 +43,19 @@ public:
 	 *  (false: scrolled out of view) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FVector2D GetMapView() const { return MapView; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool GetMapArrow(FVector2D& Screen) const { Screen = MapArrow; return bMapArrow; }
+	/** tests (level 5): the anvils drawn on the minimap / the big map in the last frame (world XY), and the rooms whose tier
+	 *  the minimap / the big map wrote ("<room kind>|<tier>") */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector2D> GetAnvilsDrawn() const { return AnvilsDrawn; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMiniTierLabels() const { return MiniTierLabels; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMapTierLabels() const { return MapTierLabels; }
 
 private:
 	// ---- random_dungeonmagic_level4's painted interface (the generator's UIArt; none on the other levels: plain boxes)
 	FRDUIDraw UI;
 	TArray<FName> ArtDrawn;
 	TArray<FString> RoomLabels;
-	TArray<FVector2D> StarsDrawn;
+	TArray<FVector2D> StarsDrawn, AnvilsDrawn;
+	TArray<FString> MiniTierLabels, MapTierLabels;
 	FVector2D MapView = FVector2D::ZeroVector, MapArrow = FVector2D::ZeroVector;
 	bool bMapArrow = false;
 	/** the lettering's fonts made in play, one per role and size (FRDUIDraw::Text) */
@@ -85,8 +91,10 @@ private:
 	void Triangle(const FVector2D& P, float R, const FLinearColor& C);
 	/** a monster much stronger than its section's average (the strongest kinds) */
 	bool IsElite(const class ARDMonster* M) const;
+	/** level 5: an anvil on the maps (the painted map_anvil, else a drawn anvil) */
+	void AnvilMark(const FVector2D& P, float R);
 	/** what the maps mark, in world XY: 0 monster, 1 elite, 2 unopened chest or trunk, 3 hallway exit to a section not yet
-	 *  generated, 5 a sealed hallway end (level 5) */
+	 *  generated, 5 a sealed hallway end (level 5), 6 an anvil (level 5) */
 	struct FRDPoi { FVector2D W; int32 Kind; };
 	void GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance);
 	static FString KindCode(ERDRoomKind Kind);
@@ -103,4 +111,6 @@ private:
 	void DrawInventory(float Sc);
 	/** what an item does, for her (its share in her hit points or mana) */
 	FString DescribeItem(const FRDItemDef& It) const;
+	/** level 5: the anvil's crafting panel (it pauses the game): the recipes, what each takes against what she carries */
+	void DrawCrafting(float Sc);
 };

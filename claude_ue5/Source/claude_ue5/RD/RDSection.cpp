@@ -210,6 +210,8 @@ void ARDSection::Plan(FRandomStream& R)
 // ------------------------------------------------------------------------------------------------ instancing helpers
 void ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollision)
 {
+	// (level 5: where the anvils stand, in play also for the saved start section, whose furniture is not built again)
+	if (Generator && Name == Generator->AnvilPiece && Generator->Piece(Name)) AnvilPoints.Add(T.GetLocation());
 	if (!bBuildStatic) return;
 	const FRDPiece* P = Generator->Piece(Name);
 	if (!P) return;
@@ -751,6 +753,50 @@ void ARDSection::LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex)
 			for (const FVector& W : WallSlots(Rm, Side, Spacing, 40.f, 140.f))
 				AddTorch(W + FVector(0, 0, 250.f), InwardYaw(Side), TorchCd * R.FRandRange(0.8f, 1.2f), R.FRand() >= Unlit);
 	if (FillCd > 0.f) AddLight(Ctr + FVector(0, 0, Generator->RoomHeight - 120.f), Fill, FillCd * Big / 900.f, Big * 0.9f, false, 0.f);
+}
+
+void ARDSection::EnsureAnvil()
+{
+	// (level 5: every set of rooms has an anvil; one with none from its forge or armory gets one in its start room or its
+	// largest rooms, on a free tile off the lanes with free tiles all round it. No random stream is drawn: the layout stays)
+	if (!Generator || !Generator->bAnvilEverySection) return;
+	const FRDPiece* P = Generator->Piece(Generator->AnvilPiece);
+	if (!P) return;
+	// (the great hall: the start section's room at the origin tile, as GetStartRoomCenter finds it; this section may not be
+	// among the generator's yet while it is built). The start section's great hall gets one whatever its forges have; any
+	// other section one when it has none.
+	const int32 Start = Generator->IsStartSection(Coord) ? RoomAt(FVector(Generator->TileSize * 0.5f, Generator->TileSize * 0.5f, 0.f)) : -1;
+	if (Start >= 0 ? AnvilPoints.ContainsByPredicate([&](const FVector& A) { return RoomAt(A) == Start; }) : AnvilPoints.Num() > 0) return;
+	TArray<int32> Order;
+	for (int32 RI = 0; RI < Rooms.Num(); ++RI) if (Rooms[RI].Kind != ERDRoomKind::Junction && (Start < 0 || RI == Start || AnvilPoints.Num() == 0)) Order.Add(RI);
+	auto Area = [this](int32 RI) { const FRoom& Rm = Rooms[RI]; return (Rm.Max.X - Rm.Min.X) * (Rm.Max.Y - Rm.Min.Y); };
+	Order.Sort([&](int32 A, int32 B) { if ((A == Start) != (B == Start)) return A == Start; return Area(A) != Area(B) ? Area(A) > Area(B) : A < B; });
+	for (const int32 RI : Order)
+	{
+		const FRoom& Rm = Rooms[RI];
+		auto Free = [&](FIntPoint T) { return In(T) && Type[Idx(T)] == 1 && !Blocked[Idx(T)] && RoomAtLocal(T) == RI; };
+		const FVector2D Mid((Rm.Min.X + Rm.Max.X) * 0.5f, (Rm.Min.Y + Rm.Max.Y) * 0.5f);
+		// (a free tile off the lanes and off the walls' row, its four neighbours free; one not beside a lane before one
+		// beside it, then the nearest the room's middle. The great hall's quadrant corners are full of furniture.)
+		FIntPoint Pick(-1, -1); float PickD = MAX_flt;
+		for (int32 X = Rm.Min.X + 1; X < Rm.Max.X - 1; ++X)
+			for (int32 Y = Rm.Min.Y + 1; Y < Rm.Max.Y - 1; ++Y)
+			{
+				if (X == Rm.Lane.X || Y == Rm.Lane.Y) continue;
+				const FIntPoint T(X, Y);
+				if (!Free(T) || !Free(T + FIntPoint(1, 0)) || !Free(T + FIntPoint(-1, 0)) || !Free(T + FIntPoint(0, 1)) || !Free(T + FIntPoint(0, -1))) continue;
+				const bool bBeside = FMath::Abs(X - Rm.Lane.X) <= 1 || FMath::Abs(Y - Rm.Lane.Y) <= 1;
+				const float D = FVector2D::DistSquared(FVector2D(X + 0.5f, Y + 0.5f), Mid) + (bBeside ? 1e6f : 0.f);
+				if (D < PickD) { PickD = D; Pick = T; }
+			}
+		if (Pick.X < 0) continue;
+		const FVector At = TileWorld(Pick);
+		const float Yaw = FMath::Abs(Pick.X - Rm.Lane.X) > FMath::Abs(Pick.Y - Rm.Lane.Y) ? 90.f : 0.f;
+		AddPieceAt(Generator->AnvilPiece, At, Yaw);
+		if (P->bCollision) MarkBlocked(At, Yaw, FVector2D(P->Size.X, P->Size.Y));
+		AnvilRoom = RI;
+		return;
+	}
 }
 
 void ARDSection::Furnish(FRandomStream& R, int32 RI)
@@ -1305,7 +1351,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	GenStart = FPlatformTime::Seconds();
 	Generator = InGenerator; Coord = InCoord; Seed = InSeed; bEditorBuilt = bEditorBuild;
 	bBuildStatic = true; bBuildInteractive = true;
-	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0;
+	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset();
 	GenR.Initialize(Seed);
 	Plan(GenR);
 	ShellPrepare(GenR);
@@ -1343,6 +1389,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 	}
 	FurnishMs += (FPlatformTime::Seconds() - T0) * 1000.0;
 	if (NextRoom < Rooms.Num() || NextCorr < Corrs.Num()) return false;
+	EnsureAnvil();
 	// the instanced furniture goes in at once (one rebuild per mesh instead of one per frame)
 	const double T1 = FPlatformTime::Seconds();
 	FlushInstances();
@@ -1377,7 +1424,7 @@ void ARDSection::ActivateForPlay()
 	// same plan as the editor build (same seed); only the interactive part is instantiated
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
-	FirePoints.Reset();
+	FirePoints.Reset(); AnvilPoints.Reset();
 	const int32 Inst = NumInstances, Lights = NumLights;
 	FRandomStream R(Seed);
 	Plan(R);
@@ -1387,6 +1434,7 @@ void ARDSection::ActivateForPlay()
 	bNoBlock = true;
 	for (int32 CI = 0; CI < Corrs.Num(); ++CI) DecorateCorridor(R, CI);
 	bNoBlock = false;
+	EnsureAnvil();
 	NumInstances = Inst; NumLights = Lights;
 	bBuildStatic = true;
 	FRandomStream RM(Seed ^ 0x5f3759df);

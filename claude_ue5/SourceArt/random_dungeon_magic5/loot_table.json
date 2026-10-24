@@ -1,0 +1,46 @@
+{
+ "_note": "random_dungeonmagic_level5's loot besides weapons (weapons_table.json) and armour (summoner3/armour.json): the user's table of 2026-10-23, written into the level by pipeline/unreal/857. tiers: the tiers of rooms whose containers may hold it (none: every tier). rarity: how likely a container holds it against the other items of its tier (the item's Weight). The potions and foods are level 4's items (random_dungeon_magic4/items.json: amount, seconds, rarity) with tiers; components and repair items are new. found_max: a container that holds it gives 1 to that many (components come in bundles: the table gives no count, the recipes ask for 5 to 45 of a kind).",
+ "tiers": {
+  "_note": "by the potions' rank (small, medium, large, uncommon, wondrous, rare, very rare, legendary) and by food",
+  "Small": [1], "Medium": [1], "Large": [2], "Uncommon": [2], "Wondrous": [3], "Rare": [3], "Very Rare": [4], "Legendary": [5],
+  "Bread": [1], "Fish": [1], "Fruit": [2], "Nuts and Seeds": [2], "Jerky": [3], "Hardtack": [3], "Travel Cake": [4], "Sweet Roll": [5], "Well Done Steak": [5]
+ },
+ "components": {
+  "_note": "found anywhere, rarity 25 each",
+  "rarity": 25, "found_max": 3,
+  "items": ["Iron Ingot", "Copper Ingot", "Bronze Ingot", "Steel Ingot", "Hardwood", "Timber", "Wood Log", "Coarse Hide", "Light Leather", "Cured Leather Strip", "Epoxy", "Glue", "Wood Glue", "Straw Rope", "Oils"]
+ },
+ "repair": {
+  "_note": "found anywhere; repairs: the share of a set of armour's or a found weapon's full durability it gives back (up to full)",
+  "items": [
+   {"name": "Repair Kit", "repairs": 1.00, "rarity": 10},
+   {"name": "Patch Kit", "repairs": 0.75, "rarity": 20},
+   {"name": "Whetstone", "repairs": 0.50, "rarity": 30},
+   {"name": "Slickstone", "repairs": 0.40, "rarity": 40},
+   {"name": "Leather Strips", "repairs": 0.30, "rarity": 50}
+  ]
+ },
+ "recipes": {
+  "_note": "made at an anvil. 'wood (any)' is hardwood, timber and wood logs together; 'glue' is Glue (wood glue and epoxy are materials of their own); 'iron', 'bronze', 'copper', 'steel' are the ingots",
+  "groups": {
+   "straw rope": ["Straw Rope"], "glue": ["Glue"], "cured leather strip": ["Cured Leather Strip"], "wood (any)": ["Hardwood", "Timber", "Wood Log"],
+   "oils": ["Oils"], "coarse hide": ["Coarse Hide"], "light leather": ["Light Leather"], "epoxy": ["Epoxy"], "iron": ["Iron Ingot"],
+   "bronze": ["Bronze Ingot"], "copper": ["Copper Ingot"], "steel": ["Steel Ingot"]
+  },
+  "items": [
+   {"name": "Leather Strips", "takes": {"straw rope": 5, "glue": 5, "cured leather strip": 5, "wood (any)": 5}},
+   {"name": "Slickstone", "takes": {"straw rope": 10, "glue": 10, "cured leather strip": 10, "wood (any)": 10, "oils": 5, "coarse hide": 5}},
+   {"name": "Whetstone", "takes": {"straw rope": 15, "glue": 15, "cured leather strip": 15, "wood (any)": 15, "oils": 10, "coarse hide": 10, "light leather": 5, "epoxy": 5, "iron": 5}},
+   {"name": "Patch Kit", "takes": {"straw rope": 25, "glue": 25, "cured leather strip": 25, "wood (any)": 25, "oils": 15, "coarse hide": 15, "light leather": 10, "epoxy": 10, "iron": 10, "bronze": 5, "copper": 5, "steel": 5}},
+   {"name": "Repair Kit", "takes": {"straw rope": 45, "glue": 45, "cured leather strip": 45, "wood (any)": 45, "oils": 25, "coarse hide": 25, "light leather": 20, "epoxy": 20, "iron": 20, "bronze": 10, "copper": 10, "steel": 10}}
+  ]
+ },
+ "start_room_armour": {
+  "_note": "the great hall's containers (StartRoomItems): tier-1 sets only (the start section is tier 1), one of each weight the first tier has",
+  "items": ["Templar’s Armour", "Eastern Knight’s Armour", "Desert Hero’s Armour", "Tiefling’s Armour", "Orc Warrior’s Armour"]
+ },
+ "fire_volume": {
+  "_note": "the fires' crackle (the user: too loud): sounds.json's Env.Torch, Env.Brazier and Env.Hearth volumes were 0.55, 0.65, 0.85; now x 0.4 (-8 dB)",
+  "scale": 0.4
+ }
+}

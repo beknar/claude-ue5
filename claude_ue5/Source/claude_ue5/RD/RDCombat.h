@@ -183,8 +183,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveInventoryCursor(int32 Step);
 	/** wields the weapon / uses the item under the cursor */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool UseInventoryEntry();
-	/** the inventory's lines: "weapon|Sword" (her weapons, in the generator's order), then "item|<name>|<count>" (potions,
-	 *  food), then "armour|<name>|<1 when she wears it>" (tests, HUD) */
+	/** the inventory's lines: "weapon|Sword" (her weapons, in the generator's order; a found one "weapon|<name>|<left>|
+	 *  <full>"), then "item|<name>|<count>" (potions, food), "repair|<name>|<count>" (repair items), "armour|<name>|<1 when
+	 *  she wears it>|<durability left>|<full>", "component|<name>|<count>" (crafting materials), "carried|<name>|<count>"
+	 *  (weapons her hero cannot wield) (tests, HUD) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetInventoryLines() const;
 
 	// ---- random_dungeonmagic_level5: armour (an item of kind Armour she carries). Worn, its meshes (the fit made for her
@@ -210,6 +212,49 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastBlowTaken = 0.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ArmourChanges = 0;
 	void TickInventory(APlayerController* PC);
+	/** armour's durability (the item's Durability): what is left of a set she carries (0, 0: none / it never wears). Each
+	 *  blow that reaches her takes 1 off the worn set; at 0 it takes off half its share. A set found again while she carries
+	 *  it is not kept twice: its pieces mend the one she has to full. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourWear(FName Item) const { const float* W = ArmourWear.Find(Item); return W ? *W : 0.f; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourDurability(FName Item) const;
+	/** tests and the reel: set what is left of a set's durability */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetArmourWear(FName Item, float Value);
+	/** the share of her speed the worn set takes (0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourSlow() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ArmourWornOut = 0;
+
+	// ---- random_dungeonmagic_level5: repairs. Enter on a repair item in the inventory lists what it can mend (her armour
+	// sets, the weapons she found); Enter on one gives it back the item's share of its full durability (up to full) and
+	// uses the item up; Backspace or B goes back to the inventory.
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool BeginRepair(FName Item);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void CancelRepair();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsPickingRepair() const { return !RepairWith.IsNone(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") FName GetRepairItem() const { return RepairWith; }
+	/** what the repair item can mend: "armour|<set>|<left>|<full>|<after>", "weapon|<index>|<name>|<left>|<full>|<after>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetRepairLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetRepairCursor() const { return RepairCursor; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveRepairCursor(int32 Step);
+	/** mends the line under the cursor (or Line, when 0 or more) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool RepairEntry(int32 Line = -1);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ItemsRepaired = 0;
+
+	// ---- random_dungeonmagic_level5: crafting at an anvil (the generator opens it: F or X at an anvil). The game pauses as
+	// for the inventory; W / S choose a recipe, Enter makes it, F, I, Tab, Backspace or B close it.
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetCraftingOpen(bool bOpen);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsCraftingOpen() const { return bCraftOpen; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetCraftCursor() const { return CraftCursor; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveCraftCursor(int32 Step);
+	/** the recipes: "recipe|<item>|<1 she can make it>|<part label>:<have>:<need>;..." */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetCraftLines() const;
+	/** how many of a recipe part she carries (any of its kinds together) */
+	int32 PartHave(const FRDRecipePart& Part) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool CanCraft(FName Item) const;
+	/** makes one (false: no such recipe, or she lacks what it takes); uses the parts up */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool Craft(FName Item);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool CraftEntry();
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ItemsCrafted = 0;
+	/** the frame the crafting panel was shut on (the generator's F, read after it in the same frame, must not open it again) */
+	uint64 CraftClosedFrame = 0;
 
 	// ---- random_dungeonmagic_level5: weapons found in the containers (items of kind Weapon). One her hero can wield (the
 	// item has a fit for her) joins her weapons as she finds it, with its durability: every attack of it that hits a monster
@@ -259,6 +304,14 @@ private:
 	bool bInventoryOpen = false;
 	int32 InventoryCursor = 0;
 	float InventoryRepeat = 0.f;
+	TMap<FName, float> ArmourWear;
+	FName RepairWith;
+	int32 RepairCursor = 0;
+	bool bCraftOpen = false;
+	int32 CraftCursor = 0;
+	void WearDownArmour();
+	void RemoveCarried(FName Name, int32 Count);
+	void PlayUiSound(FName Key, FName Fallback);
 	void SetMessage(const FString& Text);
 	void UpdateWalkSpeed();
 	void TickEffects(float Dt);
