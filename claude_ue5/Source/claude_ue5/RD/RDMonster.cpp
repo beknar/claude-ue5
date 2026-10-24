@@ -18,6 +18,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 
 ARDMonster::ARDMonster()
 {
@@ -75,13 +76,43 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 	{
 		for (UAnimationAsset* A : Def.Attacks) if (A) { AttackAnims.Add(A); HitTimes.Add(Def.HitTimes.IsValidIndex(AttackAnims.Num() - 1) ? Def.HitTimes[AttackAnims.Num() - 1] : RDClipLength(A) * 0.45f); }
 		GetHitAnim = Def.GetHit; DeathAnim = Def.Death;
-		float MeanH = 1.f, MeanD = 1.f; G->MeanMonsterFactors(MeanH, MeanD);
+		float MeanH = 1.f, MeanD = 1.f; G->MeanMonsterFactors(MeanH, MeanD, Section->Coord);
 		MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(G->GetMonsterHealth(Section->Coord) * Def.HealthFactor / MeanH));
 		Damage = FMath::Max(1.f, FMath::RoundToFloat(G->GetMonsterDamage(Section->Coord) * Def.DamageFactor / MeanD));
 		Reach = Def.Reach; AttackInterval = Def.AttackInterval;
 		AttackCooldown = R.FRandRange(0.f, 0.6f);
 		// (it must keep its pose up to date while she fights it at the edge of the view)
 		M->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+		// (level 5: the tier of its rooms makes it faster, quicker to strike, and its ability stronger)
+		Tier = G->TierOf(Section->Coord); Ability = Def.Ability; Title = Def.Title;
+		if (G->MaxTier > 0)
+		{
+			SpeedScale = ARDDungeonGenerator::TierValue(G->TierSpeed, Tier, 1.f);
+			WalkSpeed *= SpeedScale; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+			AttackInterval *= ARDDungeonGenerator::TierValue(G->TierAttackInterval, Tier, 1.f);
+			AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, Tier, 1.f);
+			MaxChaseScale = SpeedScale;
+		}
+	}
+	// (level 5: parts made on its skeleton follow its body; a weapon in its hand)
+	for (USkeletalMesh* PartMesh : Def.Parts)
+	{
+		if (!PartMesh) continue;
+		USkeletalMeshComponent* C = NewObject<USkeletalMeshComponent>(this);
+		C->SetSkeletalMeshAsset(PartMesh);
+		C->SetupAttachment(M);
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		C->RegisterComponent();
+		C->SetLeaderPoseComponent(M);
+	}
+	if (Def.WeaponMesh)
+	{
+		UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
+		C->SetStaticMesh(Def.WeaponMesh);
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		C->SetupAttachment(M, Def.WeaponBone);
+		C->RegisterComponent();
+		C->SetRelativeTransform(Def.WeaponGrip);
 	}
 #if WITH_EDITOR
 	SetActorLabel(FString::Printf(TEXT("RD_Monster_%s"), *Def.Name.ToString()));
@@ -185,10 +216,22 @@ bool ARDMonster::ApplyDamage(float Amount, AActor* From)
 
 bool ARDMonster::ApplyDamageAt(float Amount, AActor* From, const FVector* At)
 {
+	return ApplyDamageEx(Amount, From, At, true, true);
+}
+
+bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bool bFlinch, bool bWound)
+{
 	if (!bCombat || bDead || Amount <= 0.f) return false;
+	Amount *= 1.f + GetCurseShare();            // (cursed: it takes more)
 	Health = FMath::Max(0.f, Health - Amount);
 	LastHurtTime = GetWorld()->GetTimeSeconds();
 	bAggro = true; WaitTime = 0.f;
+	if (!bWound)
+	{
+		// (a burn, a cloud: no wound, no flinch; it dies all the same)
+		if (Health <= 0.f) { if (Section && Section->Generator) Section->Generator->PlaySoundAt(SndDeath, GetActorLocation()); Die(); return true; }
+		return false;
+	}
 	// the wound: where the weapon is nearest to it, on the attacker's side
 	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
 	const FVector Center = GetActorLocation();
@@ -217,6 +260,7 @@ bool ARDMonster::ApplyDamageAt(float Amount, AActor* From, const FVector* At)
 		VoiceTimer = FMath::Max(VoiceTimer, 2.5f);
 	}
 	if (Health <= 0.f) { Die(); return true; }
+	if (!bFlinch) return false;
 	// a flinch: the blow it was winding up is lost
 	AttackTime = -1.f; AttackCooldown = FMath::Max(AttackCooldown, 0.45f);
 	Stun = 0.3f;
@@ -227,20 +271,238 @@ bool ARDMonster::ApplyDamageAt(float Amount, AActor* From, const FVector* At)
 void ARDMonster::Die()
 {
 	bDead = true; bAggro = false; AttackTime = -1.f; Stun = 0.f; DeadTime = 0.f;
+	Burns.Reset(); CurrentFoe = nullptr;
 	Path.Reset();
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);       // (the body is no obstacle)
+	GetMesh()->SetPlayRate(1.f);
 	if (DeathAnim) GetMesh()->PlayAnimation(DeathAnim, false);
-	if (Section && Section->Generator) Section->Generator->OnMonsterKilled(this);
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	// (level 5: the dead stay; one of her allies falls and is gone, its death long counted)
+	bCorpse = G && G->bKeepCorpses && !bAlly;
+	if (G && !bAlly) G->OnMonsterKilled(this);
+}
+
+// ------------------------------------------------------------------------------------------------ level 5: corpses, allies, the spells' hold
+void ARDMonster::LayDead()
+{
+	bDead = true; bCorpse = true; bBodyDown = true; bAggro = false; Health = 0.f;
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (DeathAnim) { GetMesh()->PlayAnimation(DeathAnim, false); GetMesh()->SetPosition(RDClipLength(DeathAnim)); }
+	// (it is frozen a moment later, once its pose at the clip's end has been taken)
+	bFrozen = false; DeadTime = 0.f; FreezeAt = 0.25f;
+}
+
+void ARDMonster::Freeze()
+{
+	// (a corpse costs nothing: its pose held, no ticking)
+	bFrozen = true;
+	GetMesh()->bPauseAnims = true;
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+	SetActorTickEnabled(false);
+}
+
+void ARDMonster::BecomeAlly(float Seconds, float InHealth, float InDamage)
+{
+	const bool bRise = bDead;
+	bAlly = true; bDead = false; bCorpse = false; bFrozen = false; bBodyDown = false;
+	MaxHealth = Health = FMath::Max(1.f, InHealth); Damage = FMath::Max(1.f, InDamage);
+	AllySeconds = Seconds; AllyLeft = Seconds;
+	bAggro = false; AttackTime = -1.f; Path.Reset(); DeadTime = 0.f; CurrentFoe = nullptr; Burns.Reset(); SlowUntil = CurseUntil = -100.f;
+	SetActorTickEnabled(true);
+	USkeletalMeshComponent* M = GetMesh();
+	M->bPauseAnims = false;
+	M->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	// (she walks through her allies, and they through each other and the monsters)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	// (and her camera passes them: one behind her pulled it into her back)
+	TArray<UPrimitiveComponent*> Prims; GetComponents<UPrimitiveComponent>(Prims);
+	for (UPrimitiveComponent* P : Prims) if (P) P->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	if (bRise && DeathAnim)
+	{
+		// (a corpse rises: its death clip played backward)
+		const float L = RDClipLength(DeathAnim);
+		M->PlayAnimation(DeathAnim, false); M->SetPosition(L); M->SetPlayRate(-1.4f);
+		Stun = L / 1.4f;
+	}
+	else { bWalkingAnim = true; SetWalkingAnim(false); }
+}
+
+float ARDMonster::GetSlowShare() const
+{
+	const UWorld* W = GetWorld();
+	return W && W->GetTimeSeconds() < SlowUntil ? SlowShare : 0.f;
+}
+
+float ARDMonster::GetCurseShare() const
+{
+	const UWorld* W = GetWorld();
+	return W && W->GetTimeSeconds() < CurseUntil ? CurseShare : 0.f;
+}
+
+void ARDMonster::SlowFor(float Share, float Seconds)
+{
+	if (bDead) return;
+	const float Now = GetWorld()->GetTimeSeconds();
+	SlowShare = Now < SlowUntil ? FMath::Max(SlowShare, Share) : Share;
+	SlowUntil = FMath::Max(SlowUntil, Now + Seconds);
+}
+
+void ARDMonster::CurseFor(float Share, float Seconds)
+{
+	if (bDead) return;
+	const float Now = GetWorld()->GetTimeSeconds();
+	CurseShare = Now < CurseUntil ? FMath::Max(CurseShare, Share) : Share;
+	CurseUntil = FMath::Max(CurseUntil, Now + Seconds);
+}
+
+void ARDMonster::AddBurn(float PerSecond, float Seconds, float DrainShare)
+{
+	if (bDead || PerSecond <= 0.f || Seconds <= 0.f) return;
+	Burns.Add({ PerSecond, Seconds, DrainShare });
+}
+
+void ARDMonster::Knock(const FVector& Velocity)
+{
+	if (bDead) return;
+	LaunchCharacter(Velocity + FVector(0, 0, 160.f), true, true);
+	AttackTime = -1.f; Stun = FMath::Max(Stun, 0.45f);
+}
+
+void ARDMonster::PullToward(const FVector& To, float Speed, float Dt)
+{
+	if (bDead) return;
+	const FVector D = (To - GetActorLocation()) * FVector(1, 1, 0);
+	if (D.Size() < 60.f) return;
+	AddActorWorldOffset(D.GetSafeNormal() * FMath::Min(Speed * Dt, D.Size() - 50.f), true);
+}
+
+void ARDMonster::TickStatus(float Dt)
+{
+	if (bDead || Burns.Num() == 0) return;
+	// (burns: their hurt a second, counted out every half second; a share of it goes back to her)
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	URDCombatComponent* Pc = G ? G->GetPlayerCombat() : nullptr;
+	float Drain = 0.f;
+	for (int32 I = Burns.Num() - 1; I >= 0; --I)
+	{
+		FBurn& B = Burns[I];
+		const float T = FMath::Min(Dt, B.Left);
+		BurnAcc += B.PerSecond * T; Drain += B.PerSecond * T * B.Drain;
+		if ((B.Left -= Dt) <= 0.f) Burns.RemoveAt(I);
+	}
+	if (Pc && Drain > 0.f) Pc->HealBy(Drain);
+	BurnTick -= Dt;
+	if (BurnTick <= 0.f || Burns.Num() == 0)
+	{
+		BurnTick = 0.5f;
+		const float A = BurnAcc; BurnAcc = 0.f;
+		if (A > 0.f)
+		{
+			AActor* From = Pc ? Pc->GetOwner() : nullptr;
+			if (G) G->AddHitText(GetActorLocation() + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), A, false);
+			if (Pc) Pc->CountSpellDamage(A);
+			if (ApplyDamageEx(A, From, nullptr, false, false) && Pc) ++Pc->Kills;
+		}
+	}
+}
+
+AActor* ARDMonster::PickFoe(URDCombatComponent* Pc, bool& bFoePlayer) const
+{
+	bFoePlayer = false;
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	if (!G) return nullptr;
+	const FVector L = GetActorLocation();
+	AActor* Best = nullptr; float BestD = 0.f;
+	if (bAlly)
+	{
+		// (her ally: the nearest monster within reach of its senses that is not far from her)
+		const AActor* Her = Pc ? Pc->GetOwner() : nullptr;
+		BestD = G->AggroDistance * 0.9f;
+		for (ARDMonster* Mo : G->GetMonsters())
+		{
+			if (!Mo || Mo->IsDead() || FMath::Abs(Mo->GetActorLocation().Z - L.Z) > 300.f) continue;
+			if (Her && FVector::Dist2D(Mo->GetActorLocation(), Her->GetActorLocation()) > 1800.f) continue;
+			const float D = FVector::Dist2D(Mo->GetActorLocation(), L);
+			if (D < BestD) { BestD = D; Best = Mo; }
+		}
+		return Best;
+	}
+	// (a monster: her, unless she is veiled; or one of her allies nearer)
+	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsVeiled())
+	{
+		Best = Pc->GetOwner(); bFoePlayer = true;
+		BestD = FVector::Dist2D(Best->GetActorLocation(), L);
+	}
+	for (ARDMonster* A : G->GetAllies())
+	{
+		const float D = FVector::Dist2D(A->GetActorLocation(), L);
+		if (D > G->AggroDistance || FMath::Abs(A->GetActorLocation().Z - L.Z) > 300.f) continue;
+		if (!Best || D < BestD * 0.85f) { Best = A; BestD = D; bFoePlayer = false; }
+	}
+	return Best;
+}
+
+bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
+{
+	const AActor* Her = Pc ? Pc->GetOwner() : nullptr;
+	CurrentFoe = nullptr;
+	if (!Her) { SetWalkingAnim(false); return true; }
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	const FVector L = GetActorLocation(), Hl = Her->GetActorLocation();
+	const float Dist = FVector::Dist2D(L, Hl);
+	// (left far behind, or on another floor: it comes to her side, left or right of her (behind her is where her camera
+	// is), the side with room)
+	if (Dist > 2600.f || FMath::Abs(Hl.Z - L.Z) > 500.f)
+	{
+		const float Sgn = (GetUniqueID() & 1) ? 1.f : -1.f;
+		FVector Side = Hl + Her->GetActorRightVector() * (240.f * Sgn) - Her->GetActorForwardVector() * 40.f;
+		FHitResult Hh; FCollisionQueryParams Qp(SCENE_QUERY_STAT(RDAllySide), false, this); Qp.AddIgnoredActor(Her);
+		if (GetWorld()->SweepSingleByChannel(Hh, Hl, Side, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(45.f), Qp))
+		{
+			const FVector Other = Hl - Her->GetActorRightVector() * (240.f * Sgn) - Her->GetActorForwardVector() * 40.f;
+			FHitResult H2;
+			Side = GetWorld()->SweepSingleByChannel(H2, Hl, Other, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(45.f), Qp)
+				? Hl + Her->GetActorForwardVector() * 200.f : Other;
+		}
+		SetActorLocation(Side + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
+		Path.Reset();
+		return true;
+	}
+	if (Dist < 380.f) { SetWalkingAnim(false); Path.Reset(); return true; }
+	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * (G ? G->ChaseSpeedScale : 1.5f), 330.f) * SpeedMul();
+	ChaseTimer -= Dt;
+	if (ChaseTimer <= 0.f || Path.Num() == 0)
+	{
+		ChaseTimer = 0.5f;
+		TArray<FIntPoint> Tiles; Path.Reset();
+		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Hl);
+		if (Section && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) SetPathFromTiles(Tiles);
+		if (Path.Num() == 0) Path.Add(Hl);
+	}
+	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
+	if (WaitForDoor(L, Dir2)) return true;
+	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
+	AddMovementInput(Dir2.GetSafeNormal(), 1.f);
+	const float Speed = GetVelocity().Size2D();
+	SetWalkingAnim(Speed > 25.f);
+	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 2.2f));
+	return true;
 }
 
 bool ARDMonster::TickCombat(float Dt)
 {
 	ARDDungeonGenerator* G = Section->Generator;
+	TickStatus(Dt);
 	if (bDead)
 	{
-		// the body lies a while, then sinks into the floor and is gone
+		// the body lies a while, then sinks into the floor and is gone (level 5: it stays; an ally of hers is gone)
 		DeadTime += Dt;
 		if (!bBodyDown && DeadTime > 0.8f)
 		{
@@ -250,28 +512,45 @@ bool ARDMonster::TickCombat(float Dt)
 			G->PlaySoundAt(TEXT("Env.BodyFall"), Body);
 			if (URDBloodComponent* B = G->GetBlood()) B->Pool(Body, 150.f + 2.f * GetCapsuleComponent()->GetScaledCapsuleRadius());
 		}
+		if (bAlly) { if (DeadTime > 2.5f) G->ConsumeCorpse(this); return true; }
+		if (bCorpse)
+		{
+			// (frozen once its death clip has played; one laid dead at once, a moment after)
+			if (!bFrozen && DeadTime > (FreezeAt > 0.f ? FreezeAt : (DeathAnim ? RDClipLength(DeathAnim) + 0.3f : 1.f))) Freeze();
+			return true;
+		}
 		if (DeadTime > G->CorpseSeconds) AddActorWorldOffset(FVector(0, 0, -45.f * Dt));
 		if (DeadTime > G->CorpseSeconds + 3.f) { Section->SpawnedMonsters.Remove(this); Destroy(); }
 		return true;
 	}
+	// (her ally: its time runs out, and it falls)
+	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
 	if (Stun > 0.f)
 	{
 		Stun -= Dt;
-		if (Stun <= 0.f) { bWalkingAnim = true; SetWalkingAnim(false); }
+		if (Stun <= 0.f) { bWalkingAnim = true; GetMesh()->SetPlayRate(1.f); SetWalkingAnim(false); }
 		return true;
 	}
 	URDCombatComponent* Pc = G->GetPlayerCombat();
-	const AActor* P = Pc ? Pc->GetOwner() : nullptr;
-	if (!P || Pc->IsDead())
+	// the one it fights (level 5: her or her allies; her ally fights the monsters)
+	bool bFoePlayer = false;
+	AActor* P = AttackTime >= 0.f && CurrentFoe.IsValid() ? CurrentFoe.Get() : PickFoe(Pc, bFoePlayer);
+	if (AttackTime >= 0.f && P) bFoePlayer = Pc && P == Pc->GetOwner();
+	if (const ARDMonster* Fm = Cast<ARDMonster>(P); Fm && Fm->IsDead()) P = nullptr;
+	if (!P || (bFoePlayer && Pc->IsDead()))
 	{
-		if (bAggro || AttackTime >= 0.f) { bAggro = false; AttackTime = -1.f; Path.Reset(); WaitTime = 1.f; bWalkingAnim = true; SetWalkingAnim(false); GetCharacterMovement()->MaxWalkSpeed = WalkSpeed; }
+		CurrentFoe = nullptr;
+		if (bAlly) return FollowPlayer(Dt, Pc);
+		if (bAggro || AttackTime >= 0.f) { bAggro = false; AttackTime = -1.f; Path.Reset(); WaitTime = 1.f; bWalkingAnim = true; SetWalkingAnim(false); GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); }
 		return false;
 	}
 	const FVector L = GetActorLocation(), Pl = P->GetActorLocation();
 	FVector D = Pl - L; const float Dz = FMath::Abs(D.Z); D.Z = 0.f;
 	const float Dist = D.Size();
-	const float Gap = Dist - GetCapsuleComponent()->GetScaledCapsuleRadius() - 36.f;       // (between the two capsules)
+	const ARDMonster* FoeMo = Cast<ARDMonster>(P);
+	const float FoeRad = FoeMo ? FoeMo->GetCapsuleComponent()->GetScaledCapsuleRadius() : 36.f;
+	const float Gap = Dist - GetCapsuleComponent()->GetScaledCapsuleRadius() - FoeRad;       // (between the two capsules)
 	if (AttackTime >= 0.f)
 	{
 		AttackTime += Dt;
@@ -279,28 +558,38 @@ bool ARDMonster::TickCombat(float Dt)
 		if (!bHitDone && AttackTime >= AttackHit)
 		{
 			bHitDone = true;
-			// the blow lands if she is still in reach and in front of it
-			if (Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f) { Pc->ApplyDamage(Damage, this); ++HitsLanded; }
+			// the blow lands if its foe is still in reach and in front of it (a curse on it: weaker)
+			if (Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f)
+			{
+				const float Dmg = Damage * (1.f - GetCurseShare());
+				if (bFoePlayer) { Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
+				else if (ARDMonster* Fm = Cast<ARDMonster>(P)) { Fm->ApplyDamageAt(Dmg, this, nullptr); G->AddHitText(Fm->GetActorLocation() + FVector(0, 0, Fm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false); }
+				++HitsLanded;
+			}
 		}
 		if (AttackTime >= AttackLen) { AttackTime = -1.f; AttackCooldown = AttackInterval; bWalkingAnim = true; SetWalkingAnim(false); }
 		return true;
 	}
 	ChaseTimer -= Dt;
-	if (!bAggro)
+	const bool bSameSection = !FoeMo || FoeMo->Section == Section;
+	if (!bAggro && !bAlly)
 	{
-		// it notices her when she is near and there is a way to her that is not much longer than the straight line
+		// it notices its foe when it is near and there is a way to it that is not much longer than the straight line
 		if (Dist > G->AggroDistance || Dz > 300.f || ChaseTimer > 0.f) return false;
 		ChaseTimer = 0.4f;
 		TArray<FIntPoint> Tiles;
 		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
-		if (From != To && (!Section->FindPath(From, To, Tiles) || Tiles.Num() * G->TileSize > Dist * 2.f + 1200.f)) return false;
+		if (bSameSection && From != To && (!Section->FindPath(From, To, Tiles) || Tiles.Num() * G->TileSize > Dist * 2.f + 1200.f)) return false;
+		if (!bSameSection && Dist > G->AggroDistance * 0.6f) return false;
 		bAggro = true; Path.Reset(); WaitTime = 0.f; ChaseTimer = 0.f; StuckTime = 0.f;
 		Roar();
 	}
+	bAggro = true;
+	CurrentFoe = P;
 	if (Dist > G->LoseDistance || Dz > 400.f)
 	{
-		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-		return false;
+		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;
+		return bAlly ? FollowPlayer(Dt, Pc) : false;
 	}
 	if (Gap <= Reach * 0.7f)
 	{
@@ -317,7 +606,7 @@ bool ARDMonster::TickCombat(float Dt)
 		else SetWalkingAnim(false);
 		return true;
 	}
-	// the chase: over the tile grid to her tile, then straight at her
+	// the chase: over the tile grid to its foe's tile, then straight at it (across a section's border: straight)
 	if (ChaseTimer <= 0.f || Path.Num() == 0)
 	{
 		ChaseTimer = 0.35f;
@@ -325,10 +614,15 @@ bool ARDMonster::TickCombat(float Dt)
 		TArray<FIntPoint> Tiles;
 		Path.Reset();
 		if (From == To || FMath::Abs(From.X - To.X) + FMath::Abs(From.Y - To.Y) == 1) Path.Add(Pl);
-		else if (Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) { SetPathFromTiles(Tiles); if (Path.Num() > 0) Path.Last() = Pl; }
-		if (Path.Num() == 0) { bAggro = false; WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed; return false; }
+		else if (bSameSection && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) { SetPathFromTiles(Tiles); if (Path.Num() > 0) Path.Last() = Pl; }
+		else if (!bSameSection && Dist < 900.f) Path.Add(Pl);
+		if (Path.Num() == 0)
+		{
+			bAggro = false; WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;
+			return bAlly ? FollowPlayer(Dt, Pc) : false;
+		}
 	}
-	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * G->ChaseSpeedScale, G->MaxChaseSpeed);
+	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * G->ChaseSpeedScale, G->MaxChaseSpeed * MaxChaseScale) * SpeedMul();
 	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
 	if (WaitForDoor(L, Dir2)) return true;
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
@@ -348,6 +642,20 @@ void ARDMonster::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	if (!Section) return;
+	if (bAlly)
+	{
+		// (an ally the player's camera is in, or nearly: hidden while it is, so it never fills the view)
+		const APlayerCameraManager* Cm = UGameplayStatics::GetPlayerCameraManager(this, 0);
+		if (Cm)
+		{
+			const UCapsuleComponent* Cap = GetCapsuleComponent();
+			const float Cr = Cap->GetScaledCapsuleRadius(), Ch = Cap->GetScaledCapsuleHalfHeight();
+			const FVector Cc = GetActorLocation(), A0 = Cc - FVector(0, 0, Ch), A1 = Cc + FVector(0, 0, Ch);
+			const float Cd = FMath::PointDistToSegment(Cm->GetCameraLocation(), A0, A1);
+			const bool bHide = Cd < Cr + 70.f;
+			if (bHide != IsHidden()) SetActorHiddenInGame(bHide);
+		}
+	}
 	TickSounds(Dt);
 	if (bCombat && TickCombat(Dt)) return;
 	if (WaitTime > 0.f)
@@ -361,6 +669,7 @@ void ARDMonster::Tick(float Dt)
 	const FVector L = GetActorLocation();
 	const FVector Target = Path[0];
 	const FVector Dir2 = FVector(Target.X - L.X, Target.Y - L.Y, 0);
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul();      // (level 5: a spell may slow it)
 	// a closed door between here and the next waypoint: push it open and wait
 	if (WaitForDoor(L, Dir2)) return;
 	// the player ahead: step aside toward the wall away from her (hallways are 3 m wide), wait if she is right there

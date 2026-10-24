@@ -6,6 +6,6 @@ public class claude_ue5 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		PublicIncludePaths.Add(ModuleDirectory);
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "Niagara", "EnhancedInput", "RenderCore", "AudioMixer", "SlateCore", "HairStrandsCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "Niagara", "EnhancedInput", "RenderCore", "AudioMixer", "SlateCore", "Slate", "HairStrandsCore" });
 	}
 }

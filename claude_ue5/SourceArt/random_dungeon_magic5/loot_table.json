@@ -35,6 +35,31 @@
    {"name": "Repair Kit", "takes": {"straw rope": 45, "glue": 45, "cured leather strip": 45, "wood (any)": 45, "oils": 25, "coarse hide": 25, "light leather": 20, "epoxy": 20, "iron": 20, "bronze": 10, "copper": 10, "steel": 10}}
   ]
  },
+ "container_chance": {
+  "_note": "the user's, 2026-10-24: a container holds anything at all one time in three; when it does, 1 to 6 items as before (the great hall's armour, start_room_armour, is there whatever)",
+  "chance": 0.33
+ },
+ "rings": {
+  "_note": "the user's table, 2026-10-24: three kinds of ten. magic potency: +10% to +100% maximum mana (the user's choice of what 'mana effect' means), for the spellcasters (Mage, Warlock, Summoner); hp potency: +10% to +100% hit points, the Warrior and the Warlock; dexterity: +10% to +100% ranged weapon damage, the Rogue. Rings 1-2 tier 1, 3-4 tier 2, 5-6 tier 3, 7-8 tier 4, 9-10 tier 5; rarity 25 each. One of each kind is worn at a time (rings of a kind do not add up); a hero carries rings she cannot wear.",
+  "rarity": 25,
+  "kinds": [
+   {"kind": "Magic", "name": "Magic Potency Ring", "who": ["Mage", "Warlock", "Summoner"]},
+   {"kind": "Health", "name": "HP Potency Ring", "who": ["Warrior", "Warlock"]},
+   {"kind": "Dexterity", "name": "Dexterity Ring", "who": ["Rogue"]}
+  ]
+ },
+ "tomes": {
+  "_note": "a spell tome is one more item a container may hold (rarity 25, like a ring, every tier); which spell it teaches follows the spell table's drop chances among the spells of the room's tier (spells.json: the user's choice). A hero who learns its type learns it when she finds it; one who cannot carries it.",
+  "name": "Spell Tome", "rarity": 25
+ },
+ "breakdown": {
+  "_note": "a found weapon broken down at an anvil (the user's choice: by type): blades into steel and iron ingots and cured leather strips, bows into timber, glue and straw rope, crossbows into hardwood, steel and epoxy; each count is per_tier x the weapon's tier (the lowest tier its item is found in)",
+  "types": [
+   {"types": ["short blades", "short sword", "one handed sword", "curved and eastern sword", "two handed sword"], "gives": {"Steel Ingot": 2, "Iron Ingot": 3, "Cured Leather Strip": 2}},
+   {"types": ["bow"], "gives": {"Timber": 3, "Glue": 2, "Straw Rope": 3}},
+   {"types": ["crossbow"], "gives": {"Hardwood": 3, "Steel Ingot": 2, "Epoxy": 2}}
+  ]
+ },
  "start_room_armour": {
   "_note": "the great hall's containers (StartRoomItems): tier-1 sets only (the start section is tier 1), one of each weight the first tier has",
   "items": ["Templar’s Armour", "Eastern Knight’s Armour", "Desert Hero’s Armour", "Tiefling’s Armour", "Orc Warrior’s Armour"]

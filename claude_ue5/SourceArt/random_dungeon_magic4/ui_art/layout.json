@@ -1709,6 +1709,652 @@
    1.0
   ]
  },
+ "spell_fire_bolt": {
+  "kind": "icon",
+  "size": [
+   256,
+   192
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_dark_fire": {
+  "kind": "icon",
+  "size": [
+   229,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_ash_ward": {
+  "kind": "icon",
+  "size": [
+   256,
+   248
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_frost_shard": {
+  "kind": "icon",
+  "size": [
+   229,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_shadow_lash": {
+  "kind": "icon",
+  "size": [
+   172,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_iron_skin": {
+  "kind": "icon",
+  "size": [
+   256,
+   253
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_bone_spear": {
+  "kind": "icon",
+  "size": [
+   241,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_dispel_hex": {
+  "kind": "icon",
+  "size": [
+   256,
+   143
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_life_drain": {
+  "kind": "icon",
+  "size": [
+   256,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_chain_lightning": {
+  "kind": "icon",
+  "size": [
+   144,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_bone_armor": {
+  "kind": "icon",
+  "size": [
+   256,
+   255
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_plague_cloud": {
+  "kind": "icon",
+  "size": [
+   228,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_shadow_veil": {
+  "kind": "icon",
+  "size": [
+   214,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_curse_of_frailty": {
+  "kind": "icon",
+  "size": [
+   243,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_fireball": {
+  "kind": "icon",
+  "size": [
+   256,
+   249
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_raise_dead": {
+  "kind": "icon",
+  "size": [
+   241,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_rune_of_warding": {
+  "kind": "icon",
+  "size": [
+   254,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_blood_nova": {
+  "kind": "icon",
+  "size": [
+   256,
+   254
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_mirror_of_retribution": {
+  "kind": "icon",
+  "size": [
+   209,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_soul_rend": {
+  "kind": "icon",
+  "size": [
+   201,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_blizzard": {
+  "kind": "icon",
+  "size": [
+   226,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_corpse_explosion": {
+  "kind": "icon",
+  "size": [
+   245,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_spectral_bulwark": {
+  "kind": "icon",
+  "size": [
+   167,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_hellfire_pillar": {
+  "kind": "icon",
+  "size": [
+   238,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_void_rift": {
+  "kind": "icon",
+  "size": [
+   169,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_undying_pact": {
+  "kind": "icon",
+  "size": [
+   256,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_summon_abyssal_knight": {
+  "kind": "icon",
+  "size": [
+   187,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_meteor_storm": {
+  "kind": "icon",
+  "size": [
+   253,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_null_sanctum": {
+  "kind": "icon",
+  "size": [
+   256,
+   164
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "spell_apocalypse": {
+  "kind": "icon",
+  "size": [
+   245,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "ring_magic": {
+  "kind": "icon",
+  "size": [
+   256,
+   129
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "ring_health": {
+  "kind": "icon",
+  "size": [
+   238,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "ring_dexterity": {
+  "kind": "icon",
+  "size": [
+   232,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "tome": {
+  "kind": "icon",
+  "size": [
+   220,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
  "_icons": {
   "Small Healing Potion": "healing_vial",
   "Medium Healing Potion": "healing_flask",
@@ -1789,7 +2435,68 @@
   "Patch Kit": "rep_patch_kit",
   "Whetstone": "rep_whetstone",
   "Slickstone": "rep_slickstone",
-  "Leather Strips": "rep_leather_strips"
+  "Leather Strips": "rep_leather_strips",
+  "Magic Potency Ring 1": "ring_magic",
+  "Magic Potency Ring 2": "ring_magic",
+  "Magic Potency Ring 3": "ring_magic",
+  "Magic Potency Ring 4": "ring_magic",
+  "Magic Potency Ring 5": "ring_magic",
+  "Magic Potency Ring 6": "ring_magic",
+  "Magic Potency Ring 7": "ring_magic",
+  "Magic Potency Ring 8": "ring_magic",
+  "Magic Potency Ring 9": "ring_magic",
+  "Magic Potency Ring 10": "ring_magic",
+  "HP Potency Ring 1": "ring_health",
+  "HP Potency Ring 2": "ring_health",
+  "HP Potency Ring 3": "ring_health",
+  "HP Potency Ring 4": "ring_health",
+  "HP Potency Ring 5": "ring_health",
+  "HP Potency Ring 6": "ring_health",
+  "HP Potency Ring 7": "ring_health",
+  "HP Potency Ring 8": "ring_health",
+  "HP Potency Ring 9": "ring_health",
+  "HP Potency Ring 10": "ring_health",
+  "Dexterity Ring 1": "ring_dexterity",
+  "Dexterity Ring 2": "ring_dexterity",
+  "Dexterity Ring 3": "ring_dexterity",
+  "Dexterity Ring 4": "ring_dexterity",
+  "Dexterity Ring 5": "ring_dexterity",
+  "Dexterity Ring 6": "ring_dexterity",
+  "Dexterity Ring 7": "ring_dexterity",
+  "Dexterity Ring 8": "ring_dexterity",
+  "Dexterity Ring 9": "ring_dexterity",
+  "Dexterity Ring 10": "ring_dexterity",
+  "Spell Tome": "tome",
+  "Tome of Fire Bolt": "spell_fire_bolt",
+  "Tome of Dark Fire": "spell_dark_fire",
+  "Tome of Ash Ward": "spell_ash_ward",
+  "Tome of Frost Shard": "spell_frost_shard",
+  "Tome of Shadow Lash": "spell_shadow_lash",
+  "Tome of Iron Skin": "spell_iron_skin",
+  "Tome of Bone Spear": "spell_bone_spear",
+  "Tome of Dispel Hex": "spell_dispel_hex",
+  "Tome of Life Drain": "spell_life_drain",
+  "Tome of Chain Lightning": "spell_chain_lightning",
+  "Tome of Bone Armor": "spell_bone_armor",
+  "Tome of Plague Cloud": "spell_plague_cloud",
+  "Tome of Shadow Veil": "spell_shadow_veil",
+  "Tome of Curse of Frailty": "spell_curse_of_frailty",
+  "Tome of Fireball": "spell_fireball",
+  "Tome of Raise Dead": "spell_raise_dead",
+  "Tome of Rune of Warding": "spell_rune_of_warding",
+  "Tome of Blood Nova": "spell_blood_nova",
+  "Tome of Mirror of Retribution": "spell_mirror_of_retribution",
+  "Tome of Soul Rend": "spell_soul_rend",
+  "Tome of Blizzard": "spell_blizzard",
+  "Tome of Corpse Explosion": "spell_corpse_explosion",
+  "Tome of Spectral Bulwark": "spell_spectral_bulwark",
+  "Tome of Hellfire Pillar": "spell_hellfire_pillar",
+  "Tome of Void Rift": "spell_void_rift",
+  "Tome of Undying Pact": "spell_undying_pact",
+  "Tome of Summon Abyssal Knight": "spell_summon_abyssal_knight",
+  "Tome of Meteor Storm": "spell_meteor_storm",
+  "Tome of Null Sanctum": "spell_null_sanctum",
+  "Tome of Apocalypse": "spell_apocalypse"
  },
  "_weapons": {
   "Warrior/Sword": "w_sword_shield",

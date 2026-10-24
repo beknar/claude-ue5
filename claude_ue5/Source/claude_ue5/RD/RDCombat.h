@@ -172,6 +172,8 @@ public:
 	/** the last thing the inventory did ("Drank a small healing potion  +10 HP") and when (HUD) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") FString Message;
 	float MessageTime = -100.f;
+	/** a line the HUD shows for a moment (level 5: a container that held nothing) */
+	void ShowMessage(const FString& Text) { SetMessage(Text); }
 	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
 	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A
 	 *  wield or use the one under it; I, Tab, Start or B close it. The generator works it every tick, paused or not. */
@@ -279,9 +281,103 @@ public:
 	/** the sound name of a weapon (its SoundKey, else its name) */
 	static FName WeaponSound(const FRDWeaponDef& W) { return W.SoundKey.IsNone() ? W.Name : W.SoundKey; }
 
+	// ---- random_dungeonmagic_level5: the spell table (the generator's Spells). A spell of her weapons (FRDWeaponDef::SpellIndex)
+	// does at its release what its Kind says; spells have cooldowns; tomes teach new ones (Learns on her hero's card).
+	// Monsters' abilities poison, weaken or slow her; Dispel Hex ends them. Rings add to her mana, hit points or ranged
+	// damage. At an anvil she breaks the weapons she found down into crafting materials.
+	bool IsScriptedOnly() const { return bScriptedOnly; }
+	/** seconds before a weapon of the generator's list can be cast again (0: ready) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetCooldownLeft(int32 Index) const;
+	/** the spell joins her weapons (false: her hero does not learn its type, or she knows it) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") bool LearnSpell(FName Spell);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool KnowsSpell(FName Spell) const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 SpellsLearned = 0;
+	/** spells released (each kind's own count: tests), blows a ward took, blows turned back, deaths cheated, blows she
+	 *  slipped under a veil, blows a sanctum or rune took */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") TMap<FName, int32> SpellsReleased;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 WardBlocks = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 Reflected = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 PactSaves = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 Evaded = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 ZoneBlocks = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 CooldownRefusals = 0;
+	/** hit points back (a drain, a dark fire's burn) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") void HealBy(float Amount);
+	/** a burn's or a cloud's hurt counts as hers */
+	void CountSpellDamage(float Amount);
+	/** monsters do not see her (Shadow Veil) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool IsVeiled() const;
+	/** what is on her: "<label>|<seconds left>|<good 1 / bad 0>" (spells, poison, weakness, slowness) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") TArray<FString> GetBuffLines() const;
+	/** a monster's blow carried its ability (poison, weaken, slow) with Power (its tier's) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") void ApplyMonsterAbility(ERDMonsterAbility Ability, float Power, float Blow);
+	/** her poison, weakness and slowness end (Dispel Hex) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") void ClearAfflictions();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool IsPoisoned() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetWeakness() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetSlowness() const;
+	/** the shares her shields take now (tests): ward hits left, ward pool left, armour from Iron Skin */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") int32 GetWardHits() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetWardPool() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetSkinBonus() const;
+	/** the spells' areas on the ground now (clouds, burning ground, rifts, meteor storms; tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") int32 GetSpellAreas() const { return Areas.Num(); }
+	/** tests: the release of a spell of her weapons without its clip (at the monster she faces, or Target) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") bool CastSpellNow(int32 Index, ARDMonster* Target = nullptr);
+	// ---- rings
+	/** puts a ring on (the one of its kind she wore comes off) or takes it off; false: she does not carry it, or her hero
+	 *  does not wear its kind */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Rings") bool WearRing(FName Item);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rings") FName GetWornRing(ERDRingKind Kind) const { const FName* N = WornRings.Find((uint8)Kind); return N ? *N : NAME_None; }
+	/** the share more her worn ring of a kind gives (0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Rings") float GetRingBonus(ERDRingKind Kind) const;
+	// ---- breaking found weapons down at an anvil
+	/** a found weapon of her weapons (Index) or one she carries but cannot wield (Item) broken into materials */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownWeapon(int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownItem(FName Item);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Crafting") int32 WeaponsBrokenDown = 0;
+	/** what a weapon item breaks into ("<item>:<count>;...", "" none) */
+	FString BreakdownText(FName Item, const FString& Type) const;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	// ---- level 5: spells on her and around her
+	TMap<FName, float> ReadyAt;
+	TMap<uint8, FName> WornRings;
+	FRandomStream SpellR;
+	float WardUntil = -100.f, WardPool = 0.f; int32 WardHits = 0;
+	float SkinUntil = -100.f, SkinShare = 0.f, VeilUntil = -100.f, VeilEvade = 0.f, MirrorUntil = -100.f, MirrorShare = 0.f;
+	float PactUntil = -100.f, PactShare = 0.f, DispelUntil = -100.f;
+	FVector RuneAt = FVector::ZeroVector, SanctumAt = FVector::ZeroVector;
+	float RuneRadius = 0.f, RuneUntil = -100.f, RuneShare = 0.f, SanctumRadius = 0.f, SanctumUntil = -100.f;
+	float PoisonDps = 0.f, PoisonUntil = -100.f, PoisonAcc = 0.f, WeakShare = 0.f, WeakUntil = -100.f, SlowMeShare = 0.f, SlowMeUntil = -100.f;
+	bool bSlowMeOn = false;
+	TWeakObjectPtr<ARDMonster> DrainTarget;
+	float DrainUntil = -100.f, DrainDps = 0.f, DrainShare = 0.f, DrainTick = 0.f, DrainWisp = 0.f; int32 DrainSpell = -1;
+	struct FArea
+	{
+		ERDSpellKind Kind = ERDSpellKind::Cloud; FVector At = FVector::ZeroVector;
+		float Radius = 0.f, Left = 0.f, Dps = 0.f, Slow = 0.f, Every = 0.f, FxTimer = 0.f, HurtTimer = 0.f, StrikeTimer = 0.f;
+		int32 Spell = -1, Strikes = 0;
+		TWeakObjectPtr<UFXSystemComponent> Fx;
+	};
+	TArray<FArea> Areas;
+	/** the shields and glows on her, by the spell kind that put them there */
+	TMap<uint8, TWeakObjectPtr<UFXSystemComponent>> Auras;
+	const FRDSpellDef* SpellOf(int32 WeaponIndex) const;
+	void ReleaseSpell(int32 WeaponIndex);
+	void TickSpells(float Dt, float Now);
+	void SetAura(ERDSpellKind Kind, const FRDSpellDef* S, bool bOn, float Seconds = 0.f);
+	FVector SpellTargetPoint(float Reach) const;
+	/** a spell's hurt on a monster (its numbers, its kill counted as hers) */
+	void SpellHurt(ARDMonster* Mo, float Dmg, const FVector& Where, bool bWound);
+	UFXSystemComponent* SpawnSpellFx(UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, const FRDSpellDef* S, USceneComponent* AttachTo = nullptr, FName Socket = NAME_None);
+	/** her hit points fall by Amount (poison, a nova's price): she falls at 0 unless a pact holds */
+	void LoseHealth(float Amount);
+	void Fall();
+	void UpdateMaxima();
+	float WeakMul() const;
 	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Generator;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> WeaponComp;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> OffHandComp;
@@ -355,7 +451,17 @@ private:
 		TWeakObjectPtr<UStaticMeshComponent> Mesh;
 		float Flown = 0.f;
 		int32 Weapon = 0;
+		// level 5: a spell's bolt (its spell, its damage when not its weapon's), the monsters it passed through or jumped
+		// from, jumps left; one that flies to a point (a meteor) or back to her (a drain's wisp: no hurt)
+		int32 Spell = -1;
+		float Dmg = -1.f;
+		int32 ChainLeft = 0;
+		bool bPierce = false, bGoal = false, bWisp = false;
+		FVector Goal = FVector::ZeroVector;
+		TArray<TWeakObjectPtr<ARDMonster>> Done;
 	};
+	void LaunchSpellBolt(int32 Spell, const FVector& From, ARDMonster* Target, float Dmg, int32 ChainLeft, const TArray<TWeakObjectPtr<ARDMonster>>& Done);
+	void LaunchGoalBolt(int32 Spell, const FVector& From, const FVector& To, float Speed, bool bWisp);
 	TArray<FBolt> Bolts;
 	TWeakObjectPtr<ARDMonster> LastTarget;
 	UPROPERTY(Transient) TObjectPtr<UFXSystemComponent> ChargeComp;
@@ -364,7 +470,7 @@ private:
 	struct FFlash { TWeakObjectPtr<UPointLightComponent> Light; float Age = 0.f; float Peak = 0.f; };
 	TArray<FFlash> Flashes;
 	/** effects to stop after a while (the burst's flames) */
-	struct FTimedFx { TWeakObjectPtr<UFXSystemComponent> Fx; float Left = 0.f; };
+	struct FTimedFx { TWeakObjectPtr<UFXSystemComponent> Fx; float Left = 0.f; bool bKill = false; };   // (bKill: gone at once at the end, not left to die away)
 	TArray<FTimedFx> TimedFx;
 	/** bolts stuck where they struck, and how long they stay */
 	struct FStuck { TWeakObjectPtr<UStaticMeshComponent> Mesh; float Left = 0.f; };
@@ -377,5 +483,9 @@ private:
 	void LaunchBolt();
 	void TickBolts(float Dt);
 	void Burst(FBolt& B, const FVector& At, ARDMonster* Direct);
+	/** level 5: a spell's bolt bursts (or a meteor lands): its hurt, slow, burn, explosion, its next jump */
+	void SpellBurst(FBolt& B, const FVector& At, ARDMonster* Direct);
+	/** level 5: a piercing bolt passes through a monster: it is hurt, the bolt flies on */
+	void SpellPierce(FBolt& B, ARDMonster* Mo, const FVector& At);
 	void StopCharge();
 };

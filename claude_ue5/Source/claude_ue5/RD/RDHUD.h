@@ -113,4 +113,9 @@ private:
 	FString DescribeItem(const FRDItemDef& It) const;
 	/** level 5: the anvil's crafting panel (it pauses the game): the recipes, what each takes against what she carries */
 	void DrawCrafting(float Sc);
+	/** level 5: her weapons and spells as a bar of slots (keys 1 to 0): the drawn one lit, a cooldown's shade, the mana each
+	 *  takes (red when she has too little) */
+	void DrawHotbar(float Sc);
+	/** level 5: the Escape menu: the four volumes as sliders, then its buttons (the generator keeps the boxes for the mouse) */
+	void DrawMenu(float Sc);
 };
