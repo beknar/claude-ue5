@@ -892,6 +892,823 @@
    1.0
   ]
  },
+ "armour_LadyKnightArmour": {
+  "kind": "icon",
+  "size": [
+   161,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_PaladinArmour": {
+  "kind": "icon",
+  "size": [
+   155,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_DarkKnightArmour": {
+  "kind": "icon",
+  "size": [
+   186,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_BroddiArmour": {
+  "kind": "icon",
+  "size": [
+   210,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_EpicPlateMale": {
+  "kind": "icon",
+  "size": [
+   235,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_EpicPlateFemale": {
+  "kind": "icon",
+  "size": [
+   256,
+   249
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_ElephantArmour": {
+  "kind": "icon",
+  "size": [
+   174,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_CrocodileArmour": {
+  "kind": "icon",
+  "size": [
+   179,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_SplitArmour": {
+  "kind": "icon",
+  "size": [
+   187,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_DesertHeroArmour": {
+  "kind": "icon",
+  "size": [
+   181,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_OrmeArmour": {
+  "kind": "icon",
+  "size": [
+   183,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_TemplarArmour": {
+  "kind": "icon",
+  "size": [
+   196,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_EasternKnightArmour": {
+  "kind": "icon",
+  "size": [
+   122,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_BedvarArmour": {
+  "kind": "icon",
+  "size": [
+   135,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_ExecutionerArmour": {
+  "kind": "icon",
+  "size": [
+   256,
+   163
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_OrcWarriorArmour": {
+  "kind": "icon",
+  "size": [
+   214,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_OrcSkirmisherArmour": {
+  "kind": "icon",
+  "size": [
+   173,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_OrcBruiserArmour": {
+  "kind": "icon",
+  "size": [
+   256,
+   238
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_OrcRaiderArmour": {
+  "kind": "icon",
+  "size": [
+   216,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_GnurArmour": {
+  "kind": "icon",
+  "size": [
+   256,
+   234
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_DardanArmour": {
+  "kind": "icon",
+  "size": [
+   147,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "armour_CostalmedArmour": {
+  "kind": "icon",
+  "size": [
+   251,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_iron_ingot": {
+  "kind": "icon",
+  "size": [
+   256,
+   195
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_copper_ingot": {
+  "kind": "icon",
+  "size": [
+   256,
+   180
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_bronze_ingot": {
+  "kind": "icon",
+  "size": [
+   256,
+   253
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_steel_ingot": {
+  "kind": "icon",
+  "size": [
+   256,
+   215
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_hardwood": {
+  "kind": "icon",
+  "size": [
+   256,
+   205
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_timber": {
+  "kind": "icon",
+  "size": [
+   256,
+   179
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_wood_log": {
+  "kind": "icon",
+  "size": [
+   256,
+   223
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_coarse_hide": {
+  "kind": "icon",
+  "size": [
+   256,
+   231
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_light_leather": {
+  "kind": "icon",
+  "size": [
+   239,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_cured_leather_strip": {
+  "kind": "icon",
+  "size": [
+   211,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_epoxy": {
+  "kind": "icon",
+  "size": [
+   206,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_glue": {
+  "kind": "icon",
+  "size": [
+   169,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_wood_glue": {
+  "kind": "icon",
+  "size": [
+   256,
+   227
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_straw_rope": {
+  "kind": "icon",
+  "size": [
+   256,
+   163
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "comp_oils": {
+  "kind": "icon",
+  "size": [
+   152,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "rep_repair_kit": {
+  "kind": "icon",
+  "size": [
+   256,
+   205
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "rep_patch_kit": {
+  "kind": "icon",
+  "size": [
+   256,
+   247
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "rep_whetstone": {
+  "kind": "icon",
+  "size": [
+   256,
+   197
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "rep_slickstone": {
+  "kind": "icon",
+  "size": [
+   201,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "rep_leather_strips": {
+  "kind": "icon",
+  "size": [
+   256,
+   226
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "map_anvil": {
+  "kind": "icon",
+  "size": [
+   256,
+   191
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
  "_icons": {
   "Small Healing Potion": "healing_vial",
   "Medium Healing Potion": "healing_flask",
@@ -930,7 +1747,49 @@
   "Bear Warrior\u2019s Armour": "armour_BearArmour",
   "Tiefling\u2019s Armour": "armour_TieflingArmour",
   "Demonic Armour": "armour_DemonicArmour",
-  "Orc Veteran\u2019s Armour": "armour_OrcArmour"
+  "Orc Veteran\u2019s Armour": "armour_OrcArmour",
+  "Lady Knight\u2019s Armour": "armour_LadyKnightArmour",
+  "Paladin\u2019s Armour": "armour_PaladinArmour",
+  "Dark Knight\u2019s Armour": "armour_DarkKnightArmour",
+  "Broddi\u2019s Dwarf Armour": "armour_BroddiArmour",
+  "Epic Plate (Male)": "armour_EpicPlateMale",
+  "Epic Plate (Female)": "armour_EpicPlateFemale",
+  "Elephant Warrior\u2019s Armour": "armour_ElephantArmour",
+  "Crocodile Warrior\u2019s Armour": "armour_CrocodileArmour",
+  "Split Armour": "armour_SplitArmour",
+  "Desert Hero\u2019s Armour": "armour_DesertHeroArmour",
+  "Orme\u2019s Armour": "armour_OrmeArmour",
+  "Templar\u2019s Armour": "armour_TemplarArmour",
+  "Eastern Knight\u2019s Armour": "armour_EasternKnightArmour",
+  "Bedvar\u2019s Armour": "armour_BedvarArmour",
+  "Executioner\u2019s Armour": "armour_ExecutionerArmour",
+  "Orc Warrior\u2019s Armour": "armour_OrcWarriorArmour",
+  "Orc Skirmisher\u2019s Armour": "armour_OrcSkirmisherArmour",
+  "Orc Bruiser\u2019s Armour": "armour_OrcBruiserArmour",
+  "Orc Raider\u2019s Armour": "armour_OrcRaiderArmour",
+  "Gnur\u2019s Armour": "armour_GnurArmour",
+  "Dardan\u2019s Armour": "armour_DardanArmour",
+  "Costalmed\u2019s Armour": "armour_CostalmedArmour",
+  "Iron Ingot": "comp_iron_ingot",
+  "Copper Ingot": "comp_copper_ingot",
+  "Bronze Ingot": "comp_bronze_ingot",
+  "Steel Ingot": "comp_steel_ingot",
+  "Hardwood": "comp_hardwood",
+  "Timber": "comp_timber",
+  "Wood Log": "comp_wood_log",
+  "Coarse Hide": "comp_coarse_hide",
+  "Light Leather": "comp_light_leather",
+  "Cured Leather Strip": "comp_cured_leather_strip",
+  "Epoxy": "comp_epoxy",
+  "Glue": "comp_glue",
+  "Wood Glue": "comp_wood_glue",
+  "Straw Rope": "comp_straw_rope",
+  "Oils": "comp_oils",
+  "Repair Kit": "rep_repair_kit",
+  "Patch Kit": "rep_patch_kit",
+  "Whetstone": "rep_whetstone",
+  "Slickstone": "rep_slickstone",
+  "Leather Strips": "rep_leather_strips"
  },
  "_weapons": {
   "Warrior/Sword": "w_sword_shield",

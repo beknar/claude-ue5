@@ -246,7 +246,11 @@ struct FRDUIFont
 UENUM(BlueprintType)
 enum class ERDItemKind : uint8
 {
-	Healing, Mana, Speed, Food, Armour, Weapon
+	Healing, Mana, Speed, Food, Armour, Weapon,
+	/** random_dungeonmagic_level5: a crafting material (an anvil makes repair items from them) */
+	Component,
+	/** random_dungeonmagic_level5: mends Amount of an armour set's or a found weapon's full durability (up to full) */
+	Repair
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */
@@ -291,6 +295,37 @@ struct FRDItemDef
 	/** a weapon (kind Weapon): how each hero who can wield it does (none for a hero: she carries it but cannot wield it).
 	 *  Amount is its durability. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponFit> WeaponFits;
+	/** armour: its full durability (each blow that reaches her takes 1 off; at 0 Amount counts half; 0: it never wears) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Durability = 0.f;
+	/** armour: the share of her speed she loses while she wears it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Slower = 0.f;
+	/** armour: the table's ratings (1-10: damage reduction, the lowest to the best; speed, the most slowing to the least)
+	 *  and its type (full plate, heavy, medium, light, partial, orc); the inventory shows them */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 DamageRating = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 SpeedRating = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString ArmourType;
+	/** a container that holds it gives 1 to this many of it (components come in bundles) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 FoundMax = 1;
+};
+
+/** random_dungeonmagic_level5: what a recipe takes of one kind: Count of any of AnyOf together ("wood (any)": hardwood,
+ *  timber and wood logs) */
+USTRUCT(BlueprintType)
+struct FRDRecipePart
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Label;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> AnyOf;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Count = 1;
+};
+
+/** random_dungeonmagic_level5: an item an anvil makes, and what it takes */
+USTRUCT(BlueprintType)
+struct FRDRecipe
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Item;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDRecipePart> Parts;
 };
 
 /** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the

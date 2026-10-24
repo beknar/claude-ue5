@@ -538,7 +538,7 @@ void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, co
 	if (!Section || !PlayerCombat) return;
 	const TArray<FName> List = LootListOf(Section->Coord, Index);
 	if (List.Num() == 0) return;
-	for (const FName& Item : List) PlayerCombat->AddItem(Item, 1);
+	for (int32 K = 0; K < List.Num(); ++K) PlayerCombat->AddItem(List[K], LootCountIn(List, Section->Coord, Index, K));
 	LastFound = List[0]; LastFoundList = List; LastFoundTime = GetWorld()->GetTimeSeconds(); ItemsFound += List.Num();
 	PlaySoundAt(TEXT("Player.Loot"), At);
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDLOOT %s from container %d of section (%d, %d)"), *FString::JoinBy(List, TEXT(", "), [](const FName& N) { return N.ToString(); }),
@@ -626,10 +626,70 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 				const float D = S->FindNearestInteractive(From, BestD, bDoor, I);
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
+	// (level 5: an anvil nearer than any door or container opens her crafting panel)
+	FVector Anvil;
+	if (PlayerCombat && Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil))
+	{
+		PlayerCombat->SetCraftingOpen(true);
+		return TEXT("anvil");
+	}
 	if (!Best) return FString();
 	if (bBestDoor) { Best->ToggleDoor(BestI, From); return Best->IsDoorCell(BestI) ? TEXT("cell door") : TEXT("door"); }
 	Best->ToggleContainer(BestI);
 	return Best->GetContainerKind(BestI);
+}
+
+void ARDDungeonGenerator::StartRecordingOutput(float Seconds)
+{
+	UAudioMixerBlueprintLibrary::StartRecordingOutput(this, Seconds, nullptr);
+}
+
+void ARDDungeonGenerator::StopRecordingOutput(const FString& Dir, const FString& Name)
+{
+	UAudioMixerBlueprintLibrary::StopRecordingOutput(this, EAudioRecordingExportType::WavFile, Name, Dir, nullptr, nullptr);
+}
+
+int32 ARDDungeonGenerator::FindRecipe(FName Item) const
+{
+	for (int32 I = 0; I < Recipes.Num(); ++I) if (Recipes[I].Item == Item) return I;
+	return -1;
+}
+
+bool ARDDungeonGenerator::FindNearestAnvil(FVector From, float MaxDistance, FVector& At) const
+{
+	// (an anvil of the room she is in: not one behind a wall, in the room or the section next door)
+	bool bFound = false; float BestD = MaxDistance;
+	const ARDSection* S = GetSection(WorldToSection(From));
+	const int32 Room = S ? S->RoomAt(From) : -1;
+	if (Room < 0) return false;
+	for (const FVector& A : S->GetAnvilPoints())
+	{
+		const float D = FVector::Dist2D(A, From);
+		if (D < BestD && S->RoomAt(A) == Room) { BestD = D; At = A; bFound = true; }
+	}
+	return bFound;
+}
+
+TArray<FVector> ARDDungeonGenerator::GetAllAnvils() const
+{
+	TArray<FVector> Out;
+	for (const auto& KV : Sections) if (KV.Value) Out.Append(KV.Value->GetAnvilPoints());
+	return Out;
+}
+
+int32 ARDDungeonGenerator::LootCountOf(FIntPoint Section, int32 Index, int32 Pick) const
+{
+	return LootCountIn(LootListOf(Section, Index), Section, Index, Pick);
+}
+
+int32 ARDDungeonGenerator::LootCountIn(const TArray<FName>& L, FIntPoint Section, int32 Index, int32 Pick) const
+{
+	if (!L.IsValidIndex(Pick)) return 0;
+	const int32 Ix = FindItem(L[Pick]);
+	const int32 Max = Ix >= 0 ? FMath::Max(Items[Ix].FoundMax, 1) : 1;
+	if (Max <= 1) return 1;
+	const uint32 H = HashCombine(HashCombine((uint32)SessionSeed ^ 0x2C3Du, GetTypeHash(Section)), GetTypeHash(Index * 131 + Pick * 17 + 5));
+	return 1 + (int32)(H % (uint32)Max);
 }
 
 FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) const
@@ -644,6 +704,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				const float D = S->FindNearestInteractive(From, BestD, bDoor, I);
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
+	FVector Anvil;
+	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
 	if (!Best) return FString();
 	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : TEXT("door")) : Best->GetContainerKind(BestI);
 	What.ReplaceInline(TEXT("2"), TEXT(""));
@@ -777,7 +839,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 				if (PC->GetAudioListenerAttenuationOverridePosition(Att)) AD->SetListenerAttenuationOverride(0, Att);
 			}
 		}
-		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P) InteractNearest(P->GetActorLocation());
+		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P
+			&& !(PlayerCombat && (PlayerCombat->IsCraftingOpen() || PlayerCombat->CraftClosedFrame == GFrameCounter))) InteractNearest(P->GetActorLocation());
 		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) SetMapOpen(!bMapOpen);
 		// the big map scrolls under the arrow keys (the D-pad), C (the right stick pressed) brings it back over her
 		UpdateMapScrollInput(PC);

@@ -96,9 +96,9 @@
     "Monster.Spider.Hurt": {"from": [["guild", "(^|/)Sand_Monster_Attack_\\d+\\.wav$"], ["guild", "(^|/)Monster_Little_\\d+\\.wav$"]], "max": 5, "level": -18, "volume": 0.95, "pitch_var": 0.08, "inner": 250, "falloff": 3200},
     "Monster.Spider.Death": {"from": [["guild", "(^|/)Arachnid_Crush(_\\d+)?\\.wav$"], ["guild", "(^|/)Sand_Monster_\\d+\\.wav$"]], "max": 3, "level": -17, "volume": 1.0, "pitch_var": 0.05, "inner": 250, "falloff": 3400},
 
-    "Env.Torch": {"from": [["rpgsfx", "S_Flame_of_Torch_Loop_Mono_\\d+\\.wav$"]], "max": 3, "loop": true, "level": -24, "volume": 0.55, "pitch_var": 0.05, "inner": 110, "falloff": 1300},
-    "Env.Brazier": {"from": [["rpgsfx", "S_Flame_Loop_Mono_\\d+\\.wav$"]], "max": 3, "loop": true, "level": -23, "volume": 0.65, "pitch_var": 0.05, "inner": 140, "falloff": 1600},
-    "Env.Hearth": {"from": [["khron", "Enviroment/Bonfire/FIREBurn_Bonfire Loop 01_KRST\\.wav$"]], "loop": true, "level": -22, "volume": 0.85, "pitch_var": 0.03, "inner": 200, "falloff": 2000},
+    "Env.Torch": {"from": [["rpgsfx", "S_Flame_of_Torch_Loop_Mono_\\d+\\.wav$"]], "max": 3, "loop": true, "level": -24, "volume": 0.22, "pitch_var": 0.05, "inner": 110, "falloff": 1300},
+    "Env.Brazier": {"from": [["rpgsfx", "S_Flame_Loop_Mono_\\d+\\.wav$"]], "max": 3, "loop": true, "level": -23, "volume": 0.26, "pitch_var": 0.05, "inner": 140, "falloff": 1600},
+    "Env.Hearth": {"from": [["khron", "Enviroment/Bonfire/FIREBurn_Bonfire Loop 01_KRST\\.wav$"]], "loop": true, "level": -22, "volume": 0.34, "pitch_var": 0.03, "inner": 200, "falloff": 2000},
     "Env.DoorOpen": {"from": [["khron", "Wood_Door/Open_Wood_Door/DOORWood_Open Wood Door \\d+_KRST\\.wav$"]], "max": 3, "max_len": 2.2, "level": -20, "volume": 0.9, "pitch_var": 0.05, "inner": 250, "falloff": 3000},
     "Env.DoorClose": {"from": [["khron", "Wood_Door/Close_Wood_Door/DOORWood_Close Wood Door( With Creak)? \\d+_KRST\\.wav$"]], "max": 6, "max_len": 2.2, "level": -20, "volume": 0.9, "pitch_var": 0.05, "inner": 250, "falloff": 3000},
     "Env.CellOpen": {"from": [["khron", "Metal_Door/Open_Metal_Door/.*\\.wav$"]], "max": 4, "max_len": 2.5, "level": -20, "volume": 0.9, "pitch_var": 0.05, "inner": 250, "falloff": 3000},

@@ -157,5 +157,490 @@
  },
  "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_15": {
   "19 - Default": "/Game/Orcs_Pack/Orc_02/Materials/M_Orc_02_Armor.M_Orc_02_Armor"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_01": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_02": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_03": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_04": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_05": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Helmet": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_01": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_02": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_03": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_04": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_05": {
+  "Knight_04_Armors": "/Game/Knights_Pack/Materials/Knight_04/Knight_04_Armors/M_Knight_04_Armors_1.M_Knight_04_Armors_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_01": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_02": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_03": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_04": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_05": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_01": {
+  "Body": "/Game/Knights_Pack/Materials/Knight_05/Body/M_Knight_05_Body_1.M_Knight_05_Body_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_02": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_03": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_04": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Helmet": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_01": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_02": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_03": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_04": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_05/Details/M_Knight_05_Details_1.M_Knight_05_Details_1"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_01": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_02": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_03": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_04": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_05": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_06": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Legs_01": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Legs_02": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Legs_03": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Helmet": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Dark_Knight_02/M_Dark_Knight_02_01.M_Dark_Knight_02_01"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_01": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_02": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_03": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_04": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_05": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_06": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Helmet": {
+  "17 - Default": "/Game/Dwarf_Pack/Broddi/Materials/M_Broddi_Body.M_Broddi_Body"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorArms": {
+  "EpicArmor": "/Game/MysticDungeon/ModularCharacter/Materials/MI_MaleEpicArmoor.MI_MaleEpicArmoor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorLegs": {
+  "EpicArmor": "/Game/MysticDungeon/ModularCharacter/Materials/MI_MaleEpicArmoor.MI_MaleEpicArmoor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorShoulders": {
+  "EpicArmor": "/Game/MysticDungeon/ModularCharacter/Materials/MI_MaleEpicArmoor.MI_MaleEpicArmoor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorTorso": {
+  "EpicArmor1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_MaleEpicArmoor.MI_MaleEpicArmoor",
+  "EpicArmor": "/Game/MysticDungeon/ModularCharacter/Materials/MI_MaleEpicArmoor.MI_MaleEpicArmoor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorGloves": {
+  "EpicArmor1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_FemaleEpicArmor.MI_FemaleEpicArmor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorLegs": {
+  "EpicArmor1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_FemaleEpicArmor.MI_FemaleEpicArmor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorShoulders": {
+  "EpicArmor1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_FemaleEpicArmor.MI_FemaleEpicArmor"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorTorso": {
+  "EpicArmor1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_FemaleEpicArmor.MI_FemaleEpicArmor"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_01": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_02": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_03": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_04": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_05": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_06": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_07": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_08": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_09": {
+  "Cloth": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_10": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_11": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_12": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Elephant/M_Elephant_Amors.M_Elephant_Amors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_01_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_02_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_03_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_04_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_05_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_06_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_07_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_08_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_09_Mesh": {
+  "13 - Default": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_10_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_11_Mesh": {
+  "Armors": "/Game/Animals_Warrior_Pack/Materials/Crocodile/M_Crocodile_Armors.M_Crocodile_Armors"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Dress01": {
+  "ArmorSplitMAT": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Gloves01": {
+  "ArmorSplitMAT": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit",
+  "ArmorSplitMAT1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit",
+  "Fbx Default Material 1": null
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Pants01": {
+  "ArmorSplitMAT1": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit",
+  "EyebrowMAT": null,
+  "ExtrasMAT": null,
+  "FullBodyMAT": null
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Shoes02": {
+  "ArmorSplitMAT": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Shoulder01": {
+  "ArmorSplitMAT": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit"
+ },
+ "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Waist01": {
+  "ArmorSplitMAT": "/Game/MysticDungeon/ModularCharacter/Materials/MI_Male_ArmorSplit.MI_Male_ArmorSplit"
+ },
+ "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Arms_Armors_01": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Fantasy_Hero_02/M_Fantasy_Hero_02_01.M_Fantasy_Hero_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Arms_Armors_02": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Fantasy_Hero_02/M_Fantasy_Hero_02_01.M_Fantasy_Hero_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Body_Armors": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Fantasy_Hero_02/M_Fantasy_Hero_02_01.M_Fantasy_Hero_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Legs_Armors": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Fantasy_Hero_02/M_Fantasy_Hero_02_01.M_Fantasy_Hero_02_01"
+ },
+ "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Shoulder_Armors": {
+  "19 - Default": "/Game/Warriors_Pack/Materials/Fantasy_Hero_02/M_Fantasy_Hero_02_01.M_Fantasy_Hero_02_01"
+ },
+ "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_01": {
+  "Body": "/Game/Dwarf_Pack/Orme/Materials/M_Orme_Body.M_Orme_Body"
+ },
+ "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_02": {
+  "Body": "/Game/Dwarf_Pack/Orme/Materials/M_Orme_Body.M_Orme_Body"
+ },
+ "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_03": {
+  "Body": "/Game/Dwarf_Pack/Orme/Materials/M_Orme_Body.M_Orme_Body"
+ },
+ "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_04": {
+  "Body": "/Game/Dwarf_Pack/Orme/Materials/M_Orme_Body.M_Orme_Body"
+ },
+ "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_05": {
+  "Body": "/Game/Dwarf_Pack/Orme/Materials/M_Orme_Body.M_Orme_Body"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Armors_Knees": {
+  "Cloth_01": "/Game/Knights_Pack/Materials/Knight_01/Knight_01_Cloth_01/M_Knight_01_Cloth_01_1.M_Knight_01_Cloth_01_1",
+  "Details": "/Game/Knights_Pack/Materials/Knight_01/Knight_01_Details/M_Knight_01_Details_1.M_Knight_01_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Armors_Legs": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_01/Knight_01_Details/M_Knight_01_Details_1.M_Knight_01_Details_1",
+  "Cloth_01": "/Game/Knights_Pack/Materials/Knight_01/Knight_01_Cloth_01/M_Knight_01_Cloth_01_1.M_Knight_01_Cloth_01_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Helmet": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_01/Knight_01_Details/M_Knight_01_Details_1.M_Knight_01_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Shoulders_Armors": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_01/Knight_01_Details/M_Knight_01_Details_1.M_Knight_01_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Armor_Body": {
+  "Body_Cloth": "/Game/Knights_Pack/Materials/Knight_02/Body_Cloth/M_Knight_02_Body_Cloth_1.M_Knight_02_Body_Cloth_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Forearm_Armors": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_02/Details/M_Knight_02_Details_1.M_Knight_02_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Helmet": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_02/Details/M_Knight_02_Details_1.M_Knight_02_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Legs_Armors": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_02/Details/M_Knight_02_Details_1.M_Knight_02_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Mask": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_02/Details/M_Knight_02_Details_1.M_Knight_02_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Shoulder_Armor_L": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_02/Details/M_Knight_02_Details_1.M_Knight_02_Details_1"
+ },
+ "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Shoulder_Armor_R": {
+  "Details": "/Game/Knights_Pack/Materials/Knight_02/Details/M_Knight_02_Details_1.M_Knight_02_Details_1"
+ },
+ "/Game/Dwarf_Pack/Bedvar/Mesh/SK_Dwarf_Bedvar_Armor_Hands_Mesh": {
+  "Bidy": "/Game/Dwarf_Pack/Bedvar/Materials/M_Bedvar_Body.M_Bedvar_Body"
+ },
+ "/Game/Dwarf_Pack/Bedvar/Mesh/SK_Dwarf_Bedvar_Armor_Shoulders_Mesh": {
+  "Bidy": "/Game/Dwarf_Pack/Bedvar/Materials/M_Bedvar_Body.M_Bedvar_Body"
+ },
+ "/Game/Fantasy_Enemies_Pack/Meshes/Executioner/Mesh_UE4/Separate/SK_Executioner_Armor_01": {
+  "Body": "/Game/Fantasy_Enemies_Pack/Materials/Executioner/M_Executioner.M_Executioner"
+ },
+ "/Game/Fantasy_Enemies_Pack/Meshes/Executioner/Mesh_UE4/Separate/SK_Executioner_Armor_02": {
+  "Body": "/Game/Fantasy_Enemies_Pack/Materials/Executioner/M_Executioner.M_Executioner"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_01": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_02": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_03": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_04": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_05": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_06": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_07": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_08": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_09": {
+  "04 - Default": "/Game/Orcs_Pack/Orc_01/Materials/M_Orc_01_Armor.M_Orc_01_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_01": {
+  "Armors": "/Game/Orcs_Pack/Orc_03/Materials/M_Orc_03_Armor.M_Orc_03_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_02": {
+  "Armors": "/Game/Orcs_Pack/Orc_03/Materials/M_Orc_03_Armor.M_Orc_03_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_03": {
+  "Armors": "/Game/Orcs_Pack/Orc_03/Materials/M_Orc_03_Armor.M_Orc_03_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_04": {
+  "Armors": "/Game/Orcs_Pack/Orc_03/Materials/M_Orc_03_Armor.M_Orc_03_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_05": {
+  "Armors": "/Game/Orcs_Pack/Orc_03/Materials/M_Orc_03_Armor.M_Orc_03_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Helmet": {
+  "Armors": "/Game/Orcs_Pack/Orc_03/Materials/M_Orc_03_Armor.M_Orc_03_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_01_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_02_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_03_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_04_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_05_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_06_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_07_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_08_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_09_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_10_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_05/Materials/M_Orc_05_Armors.M_Orc_05_Armors"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_01_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_02_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_03_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_04_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_05_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_06_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_07_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_08_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_09_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_10_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_11_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_12_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_13_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_14_Mesh": {
+  "Armors": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Armor.M_Orc_06_Armor"
+ },
+ "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Mask_Mesh": {
+  "Body": "/Game/Orcs_Pack/Orc_06/Materials/M_Orc_06_Body.M_Orc_06_Body"
+ },
+ "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_01_Mesh": {
+  "07 - Default": "/Game/Orcs_Pack/Orc_Gnur/Materials/MAT_Orc_Gnur.MAT_Orc_Gnur"
+ },
+ "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_02_Mesh": {
+  "07 - Default": "/Game/Orcs_Pack/Orc_Gnur/Materials/MAT_Orc_Gnur.MAT_Orc_Gnur"
+ },
+ "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_03_Mesh": {
+  "07 - Default": "/Game/Orcs_Pack/Orc_Gnur/Materials/MAT_Orc_Gnur.MAT_Orc_Gnur"
+ },
+ "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_04_Mesh": {
+  "07 - Default": "/Game/Orcs_Pack/Orc_Gnur/Materials/MAT_Orc_Gnur.MAT_Orc_Gnur"
+ },
+ "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_05_Mesh": {
+  "07 - Default": "/Game/Orcs_Pack/Orc_Gnur/Materials/MAT_Orc_Gnur.MAT_Orc_Gnur"
+ },
+ "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_06_Mesh": {
+  "07 - Default": "/Game/Orcs_Pack/Orc_Gnur/Materials/MAT_Orc_Gnur.MAT_Orc_Gnur"
+ },
+ "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_01": {
+  "default": "/Game/Orcs_Pack/Orc_Dardan/Material/MAT_Orc_Dardan.MAT_Orc_Dardan"
+ },
+ "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_02": {
+  "default": "/Game/Orcs_Pack/Orc_Dardan/Material/MAT_Orc_Dardan.MAT_Orc_Dardan"
+ },
+ "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_03": {
+  "default": "/Game/Orcs_Pack/Orc_Dardan/Material/MAT_Orc_Dardan.MAT_Orc_Dardan"
+ },
+ "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_04": {
+  "default": "/Game/Orcs_Pack/Orc_Dardan/Material/MAT_Orc_Dardan.MAT_Orc_Dardan"
+ },
+ "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Arm_01_Mesh": {
+  "Orc": "/Game/Orcs_Pack/Orc_Costalmed/Material/MAT_Orc_Costalmed.MAT_Orc_Costalmed"
+ },
+ "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Arm_02_Mesh": {
+  "Orc": "/Game/Orcs_Pack/Orc_Costalmed/Material/MAT_Orc_Costalmed.MAT_Orc_Costalmed"
+ },
+ "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Belt_Mesh": {
+  "07___Default": "/Game/Orcs_Pack/Orc_Costalmed/Material/MAT_Orc_Costalmed.MAT_Orc_Costalmed"
+ },
+ "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Leg_01_Mesh": {
+  "Orc": "/Game/Orcs_Pack/Orc_Costalmed/Material/MAT_Orc_Costalmed.MAT_Orc_Costalmed"
+ },
+ "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Leg_02_Mesh": {
+  "Orc": "/Game/Orcs_Pack/Orc_Costalmed/Material/MAT_Orc_Costalmed.MAT_Orc_Costalmed"
  }
 }

@@ -12,10 +12,10 @@
            "flinch": "/Game/JRPG/Summoner3Anims/AS_Summoner3_Flinch", "death": "/Game/JRPG/Summoner3Anims/AS_Summoner3_Death"},
  "abilities": [
   "Casts fire and dark fire, as the Mage does",
-  "Wears the armour she finds: five sets were made for her",
+  "Wears all the armour she finds: every set was made for her",
   "Worn armour takes a share off every blow"
  ],
- "armour": "Any set she finds: plate, the bear warrior's, the tiefling's, demonic, the orc veteran's",
+ "armour": "Any set she finds: all 27 of the armour table, light, medium and heavy",
  "wears": ["light", "medium", "heavy"],
  "starts_with": "Spells only: fire and dark fire; no armour",
  "keys_extra": "Enter (inventory)|put on / take off armour",

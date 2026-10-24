@@ -1,12 +1,23 @@
 {
- "_note": "The armour sets of random_dungeonmagic_level5 (849-851): each the pieces of one Fab character’s armour (the gallery’s objects.json), refitted to Summoner3 by blender_numpy/summoner3_armour.py; armour = the share of a blow it takes off.",
+ "_note": "The armour sets of random_dungeonmagic_level5 (the user's table, 2026-10-23; 849-851, 856, 857): each the pieces of one Fab character's armour (the gallery's objects.json), refitted to each hero who wears its weight by blender_numpy/summoner3_armour.py. type, damage_rating (1-10, the lowest to the best), speed_rating (1-10, the most slowing to the least), durability and tiers are the user's; armour = damage_rating x 5 % (the share of a blow it takes off; half that once its durability is 0), slower = (10 - speed_rating) x 3 % (her walking and running speed while she wears it), each blow that reaches her takes 1 off its durability. rarity: how likely a container of its tiers holds it against the other items (the table gives none for armour: 20 for every set). skeleton ue5: the pieces are skinned to the UE5 mannequin (MysticDungeon), the fit maps its extra bones onto the UE4 ones.",
+ "_weights": "full plate and heavy: heavy (the Warrior); medium and partial: medium (the Warrior, the Warlock); light: light (the Warrior, the Warlock, the Rogue); orc armour by its speed rating: 7-10 light, 4-6 medium, 1-3 heavy. The Mage wears none; the Summoner wears all. A hero wears only the weights her 'wears' lists (heroes.json, summoner_hero.json; 856).",
  "sets": [
   {
    "key": "PlateArmour",
    "title": "Plate Armour",
    "gallery": "arm_knights_pack_plate_armour",
    "pack": "Knights (Pack)",
+   "type": "full plate",
+   "damage_rating": 8,
+   "speed_rating": 3,
+   "durability": 510,
+   "tiers": [
+    4
+   ],
+   "weight": "heavy",
    "armour": 0.4,
+   "slower": 0.21,
+   "rarity": 20,
    "looks": "blackened plate: a closed helm, articulated arm plates, a plate skirt and greaves",
    "pieces": [
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knigh_03_Body_Armors_01",
@@ -23,15 +34,196 @@
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_05",
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_06",
     "/Game/Knights_Pack/Meshes/Knight_03/Mesh_UE4/Separate/SK_Knight_03_Legs_Armor_07"
+   ]
+  },
+  {
+   "key": "LadyKnightArmour",
+   "title": "Lady Knight’s Armour",
+   "gallery": "arm_knights_pack_lady_knight_s_armour",
+   "pack": "Knights (Pack)",
+   "type": "full plate",
+   "damage_rating": 8,
+   "speed_rating": 3,
+   "durability": 525,
+   "tiers": [
+    4
    ],
-   "weight": "heavy"
+   "weight": "heavy",
+   "armour": 0.4,
+   "slower": 0.21,
+   "rarity": 20,
+   "looks": "black and gold plate for the arms and legs under a plumed half-mask helm",
+   "pieces": [
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_01",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_02",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_03",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_04",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Arms_Armor_05",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Helmet",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_01",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_02",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_03",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_04",
+    "/Game/Knights_Pack/Meshes/Knight_04/Mesh_UE4/Separated_Mesh/SK_Knight_04_Legs_Armors_05"
+   ]
+  },
+  {
+   "key": "PaladinArmour",
+   "title": "Paladin’s Armour",
+   "gallery": "arm_knights_pack_paladin_s_armour",
+   "pack": "Knights (Pack)",
+   "type": "full plate",
+   "damage_rating": 8,
+   "speed_rating": 3,
+   "durability": 525,
+   "tiers": [
+    4
+   ],
+   "weight": "heavy",
+   "armour": 0.4,
+   "slower": 0.21,
+   "rarity": 20,
+   "looks": "gilded, spiked plate from crested helm to sabatons",
+   "pieces": [
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_01",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_02",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_03",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_04",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Arms_Armors_05",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_01",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_02",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_03",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Body_Armors_04",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Helmet",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_01",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_02",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_03",
+    "/Game/Knights_Pack/Meshes/Knight_05/Mesh_UE4/Separate/SK_Knight_05_Legs_Armors_04"
+   ]
+  },
+  {
+   "key": "DarkKnightArmour",
+   "title": "Dark Knight’s Armour",
+   "gallery": "arm_warriors_pack_dark_knight_s_armour",
+   "pack": "Fantasy Warriors (Pack)",
+   "type": "full plate",
+   "damage_rating": 9,
+   "speed_rating": 2,
+   "durability": 550,
+   "tiers": [
+    4
+   ],
+   "weight": "heavy",
+   "armour": 0.45,
+   "slower": 0.24,
+   "rarity": 20,
+   "looks": "dark plate with spiked pauldrons and a caged faceplate",
+   "pieces": [
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_01",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_02",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_03",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_04",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_05",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Body_06",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Legs_01",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Legs_02",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Armor_Legs_03",
+    "/Game/Warriors_Pack/Mesh/Dark_Knight_02/Mesh_UE4/Separate/SK_Dark_Knight_02_Helmet"
+   ]
+  },
+  {
+   "key": "BroddiArmour",
+   "title": "Broddi’s Dwarf Armour",
+   "gallery": "arm_dwarf_pack_broddi_s_armour",
+   "pack": "Dwarfs Pack",
+   "type": "full plate",
+   "damage_rating": 9,
+   "speed_rating": 2,
+   "durability": 575,
+   "tiers": [
+    4
+   ],
+   "weight": "heavy",
+   "armour": 0.45,
+   "slower": 0.24,
+   "rarity": 20,
+   "looks": "heavy dwarven plate in pale gold with a squared full helm",
+   "pieces": [
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_01",
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_02",
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_03",
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_04",
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_05",
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Armor_06",
+    "/Game/Dwarf_Pack/Broddi/Mesh/SK_Dwarf_BroddI_Helmet"
+   ]
+  },
+  {
+   "key": "EpicPlateMale",
+   "title": "Epic Plate (Male)",
+   "gallery": "arm_mysticdungeon_epic_plate_male",
+   "pack": "Dungeon Builder: Modular Top Down RPG Environment Kit",
+   "type": "full plate",
+   "damage_rating": 10,
+   "speed_rating": 1,
+   "durability": 600,
+   "tiers": [
+    5
+   ],
+   "weight": "heavy",
+   "armour": 0.5,
+   "slower": 0.27,
+   "rarity": 20,
+   "looks": "a complete dark steel suit: cuirass, pauldrons, gauntlets and legs",
+   "pieces": [
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorArms",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorLegs",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorShoulders",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_EpicArmorTorso"
+   ],
+   "skeleton": "ue5"
+  },
+  {
+   "key": "EpicPlateFemale",
+   "title": "Epic Plate (Female)",
+   "gallery": "arm_mysticdungeon_epic_plate_female",
+   "pack": "Dungeon Builder: Modular Top Down RPG Environment Kit",
+   "type": "full plate",
+   "damage_rating": 10,
+   "speed_rating": 1,
+   "durability": 600,
+   "tiers": [
+    5
+   ],
+   "weight": "heavy",
+   "armour": 0.5,
+   "slower": 0.27,
+   "rarity": 20,
+   "looks": "the same dark steel suit cut for a woman",
+   "pieces": [
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorGloves",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorLegs",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorShoulders",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_EpicArmorTorso"
+   ],
+   "skeleton": "ue5"
   },
   {
    "key": "BearArmour",
    "title": "Bear Warrior’s Armour",
    "gallery": "arm_animals_warrior_pack_bear_warrior_s_armour",
    "pack": "Animals Warrior Pack",
-   "armour": 0.3,
+   "type": "heavy",
+   "damage_rating": 7,
+   "speed_rating": 6,
+   "durability": 475,
+   "tiers": [
+    3
+   ],
+   "weight": "heavy",
+   "armour": 0.35,
+   "slower": 0.12,
+   "rarity": 20,
    "looks": "black leather leg armour, iron arm guards and heavy boots",
    "pieces": [
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_01",
@@ -46,30 +238,239 @@
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_10",
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_11",
     "/Game/Animals_Warrior_Pack/Mesh/Bear/SK_Bear_Armor_12"
+   ]
+  },
+  {
+   "key": "ElephantArmour",
+   "title": "Elephant Warrior’s Armour",
+   "gallery": "arm_animals_warrior_pack_elephant_warrior_s_armour",
+   "pack": "Animals Warrior Pack",
+   "type": "heavy",
+   "damage_rating": 7,
+   "speed_rating": 7,
+   "durability": 500,
+   "tiers": [
+    3
    ],
-   "weight": "medium"
+   "weight": "heavy",
+   "armour": 0.35,
+   "slower": 0.09,
+   "rarity": 20,
+   "looks": "steel plate armour cut for a giant",
+   "pieces": [
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_01",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_02",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_03",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_04",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_05",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_06",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_07",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_08",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_09",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_10",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_11",
+    "/Game/Animals_Warrior_Pack/Mesh/Elephant/SK_Elephant_Armor_12"
+   ]
+  },
+  {
+   "key": "CrocodileArmour",
+   "title": "Crocodile Warrior’s Armour",
+   "gallery": "arm_animals_warrior_pack_crocodile_warrior_s_armour",
+   "pack": "Animals Warrior Pack",
+   "type": "medium",
+   "damage_rating": 6,
+   "speed_rating": 5,
+   "durability": 400,
+   "tiers": [
+    2
+   ],
+   "weight": "medium",
+   "armour": 0.3,
+   "slower": 0.15,
+   "rarity": 20,
+   "looks": "a studded leather cuirass with a skull belt and greaves",
+   "pieces": [
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_01_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_02_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_03_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_04_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_05_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_06_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_07_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_08_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_09_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_10_Mesh",
+    "/Game/Animals_Warrior_Pack/Mesh/Crocodile/SK_Crocodile_Armor_11_Mesh"
+   ]
+  },
+  {
+   "key": "SplitArmour",
+   "title": "Split Armour",
+   "gallery": "arm_mysticdungeon_split_armour_male",
+   "pack": "Dungeon Builder: Modular Top Down RPG Environment Kit",
+   "type": "medium",
+   "damage_rating": 5,
+   "speed_rating": 6,
+   "durability": 375,
+   "tiers": [
+    2
+   ],
+   "weight": "medium",
+   "armour": 0.25,
+   "slower": 0.12,
+   "rarity": 20,
+   "looks": "steel cuirass and pauldrons over a blue gambeson, with gloves and boots",
+   "pieces": [
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Dress01",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Gloves01",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Pants01",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Shoes02",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Shoulder01",
+    "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleArmor_Waist01"
+   ],
+   "skeleton": "ue5"
+  },
+  {
+   "key": "DesertHeroArmour",
+   "title": "Desert Hero’s Armour",
+   "gallery": "arm_warriors_pack_desert_hero_s_armour",
+   "pack": "Fantasy Warriors (Pack)",
+   "type": "light",
+   "damage_rating": 4,
+   "speed_rating": 6,
+   "durability": 200,
+   "tiers": [
+    1
+   ],
+   "weight": "light",
+   "armour": 0.2,
+   "slower": 0.12,
+   "rarity": 20,
+   "looks": "studded leather pauldrons, bracers and high boots",
+   "pieces": [
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Arms_Armors_01",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Arms_Armors_02",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Body_Armors",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Legs_Armors",
+    "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/Mesh_UE4/Separate/SK_Fantasy_Hero_02_Shoulder_Armors"
+   ]
   },
   {
    "key": "TieflingArmour",
    "title": "Tiefling’s Armour",
    "gallery": "arm_warriors_pack_tiefling_s_armour",
    "pack": "Fantasy Warriors (Pack)",
+   "type": "light",
+   "damage_rating": 3,
+   "speed_rating": 7,
+   "durability": 175,
+   "tiers": [
+    1
+   ],
+   "weight": "light",
    "armour": 0.15,
+   "slower": 0.09,
+   "rarity": 20,
    "looks": "leather pauldrons, bracers, a gorget and boots trimmed in gold",
    "pieces": [
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_01",
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_02",
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_03",
     "/Game/Warriors_Pack/Mesh/Fantasy_Hero/Mesh_UE4/Separate/SK_UE4_Fantasy_Hero_Armors_04"
+   ]
+  },
+  {
+   "key": "OrmeArmour",
+   "title": "Orme’s Armour",
+   "gallery": "arm_dwarf_pack_orme_s_armour",
+   "pack": "Dwarfs Pack",
+   "type": "light",
+   "damage_rating": 2,
+   "speed_rating": 8,
+   "durability": 150,
+   "tiers": [
+    1
    ],
-   "weight": "light"
+   "weight": "light",
+   "armour": 0.1,
+   "slower": 0.06,
+   "rarity": 20,
+   "looks": "copper pauldrons, bracers and knee pieces",
+   "pieces": [
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_01",
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_02",
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_03",
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_04",
+    "/Game/Dwarf_Pack/Orme/Mesh/SK_Dwarf_Orme_Armor_05"
+   ]
+  },
+  {
+   "key": "TemplarArmour",
+   "title": "Templar’s Armour",
+   "gallery": "arm_knights_pack_templar_s_armour",
+   "pack": "Knights (Pack)",
+   "type": "partial",
+   "damage_rating": 4,
+   "speed_rating": 6,
+   "durability": 210,
+   "tiers": [
+    1
+   ],
+   "weight": "medium",
+   "armour": 0.2,
+   "slower": 0.12,
+   "rarity": 20,
+   "looks": "great helm, plate pauldrons and arms, knee cops and greaves; the tabard and mail are the body's",
+   "pieces": [
+    "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Armors_Knees",
+    "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Armors_Legs",
+    "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Helmet",
+    "/Game/Knights_Pack/Meshes/Knight_01/Mesh_UE4/Knight_01_Parts/SK_Knight_01_Shoulders_Armors"
+   ]
+  },
+  {
+   "key": "EasternKnightArmour",
+   "title": "Eastern Knight’s Armour",
+   "gallery": "arm_knights_pack_eastern_knight_s_armour",
+   "pack": "Knights (Pack)",
+   "type": "partial",
+   "damage_rating": 4,
+   "speed_rating": 6,
+   "durability": 225,
+   "tiers": [
+    1
+   ],
+   "weight": "medium",
+   "armour": 0.2,
+   "slower": 0.12,
+   "rarity": 20,
+   "looks": "spiked turban helm and mask, a scale breastplate, pauldrons, bracers and boots",
+   "pieces": [
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Armor_Body",
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Forearm_Armors",
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Helmet",
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Legs_Armors",
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Mask",
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Shoulder_Armor_L",
+    "/Game/Knights_Pack/Meshes/Knight_02/Mesh_UE4/Separate/SK_Knight_02_Shoulder_Armor_R"
+   ]
   },
   {
    "key": "DemonicArmour",
    "title": "Demonic Armour",
    "gallery": "arm_warriors_pack_demonic_armour",
    "pack": "Fantasy Warriors (Pack)",
+   "type": "partial",
+   "damage_rating": 5,
+   "speed_rating": 5,
+   "durability": 250,
+   "tiers": [
+    2
+   ],
+   "weight": "medium",
    "armour": 0.25,
+   "slower": 0.15,
+   "rarity": 20,
    "looks": "scorched plate on one arm, a horned mask, boots and greaves",
    "pieces": [
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_01",
@@ -81,15 +482,97 @@
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_07",
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Armor_08",
     "/Game/Warriors_Pack/Mesh/Demonic_Warrior/Mesh_UE4/Separate/SK_Demonic_Warrior_Mask"
+   ]
+  },
+  {
+   "key": "BedvarArmour",
+   "title": "Bedvar’s Armour",
+   "gallery": "arm_dwarf_pack_bedvar_s_armour",
+   "pack": "Dwarfs Pack",
+   "type": "partial",
+   "damage_rating": 5,
+   "speed_rating": 5,
+   "durability": 275,
+   "tiers": [
+    2
    ],
-   "weight": "medium"
+   "weight": "medium",
+   "armour": 0.25,
+   "slower": 0.15,
+   "rarity": 20,
+   "looks": "gilded pauldrons and gauntlets",
+   "pieces": [
+    "/Game/Dwarf_Pack/Bedvar/Mesh/SK_Dwarf_Bedvar_Armor_Hands_Mesh",
+    "/Game/Dwarf_Pack/Bedvar/Mesh/SK_Dwarf_Bedvar_Armor_Shoulders_Mesh"
+   ]
+  },
+  {
+   "key": "ExecutionerArmour",
+   "title": "Executioner’s Armour",
+   "gallery": "arm_fantasy_enemies_pack_executioner_s_armour",
+   "pack": "Fantasy Enemies (Pack)",
+   "type": "partial",
+   "damage_rating": 6,
+   "speed_rating": 4,
+   "durability": 300,
+   "tiers": [
+    3
+   ],
+   "weight": "medium",
+   "armour": 0.3,
+   "slower": 0.18,
+   "rarity": 20,
+   "looks": "spiked pauldrons and bracers",
+   "pieces": [
+    "/Game/Fantasy_Enemies_Pack/Meshes/Executioner/Mesh_UE4/Separate/SK_Executioner_Armor_01",
+    "/Game/Fantasy_Enemies_Pack/Meshes/Executioner/Mesh_UE4/Separate/SK_Executioner_Armor_02"
+   ]
+  },
+  {
+   "key": "OrcWarriorArmour",
+   "title": "Orc Warrior’s Armour",
+   "gallery": "arm_orcs_pack_orc_warrior_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 1,
+   "speed_rating": 10,
+   "durability": 125,
+   "tiers": [
+    1
+   ],
+   "weight": "light",
+   "armour": 0.05,
+   "slower": 0.0,
+   "rarity": 20,
+   "looks": "spiked shoulder and arm guards, a skull belt, knee plates and greaves",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_01",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_02",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_03",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_04",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_05",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_06",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_07",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_08",
+    "/Game/Orcs_Pack/Orc_01/Mesh/SK_Orc_01_Armor_09"
+   ]
   },
   {
    "key": "OrcArmour",
    "title": "Orc Veteran’s Armour",
    "gallery": "arm_orcs_pack_orc_veteran_s_armour",
    "pack": "14 Orcs Pack",
-   "armour": 0.3,
+   "type": "orc",
+   "damage_rating": 2,
+   "speed_rating": 9,
+   "durability": 150,
+   "tiers": [
+    1
+   ],
+   "weight": "light",
+   "armour": 0.1,
+   "slower": 0.03,
+   "rarity": 20,
    "looks": "bone-and-iron pauldrons, a plate skirt and heavy boots",
    "pieces": [
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_01",
@@ -106,9 +589,173 @@
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_13",
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_14",
     "/Game/Orcs_Pack/Orc_02/Mesh/SK_Orc_02_Armor_15"
+   ]
+  },
+  {
+   "key": "OrcSkirmisherArmour",
+   "title": "Orc Skirmisher’s Armour",
+   "gallery": "arm_orcs_pack_orc_skirmisher_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 3,
+   "speed_rating": 8,
+   "durability": 175,
+   "tiers": [
+    1
    ],
-   "weight": "heavy"
+   "weight": "light",
+   "armour": 0.15,
+   "slower": 0.06,
+   "rarity": 20,
+   "looks": "a spiked cage helmet, a belt plate and thigh-high leg armour",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_01",
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_02",
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_03",
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_04",
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Armor_05",
+    "/Game/Orcs_Pack/Orc_03/Mesh/SK_Orc_03_Helmet"
+   ]
+  },
+  {
+   "key": "OrcBruiserArmour",
+   "title": "Orc Bruiser’s Armour",
+   "gallery": "arm_orcs_pack_orc_bruiser_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 4,
+   "speed_rating": 7,
+   "durability": 200,
+   "tiers": [
+    2
+   ],
+   "weight": "light",
+   "armour": 0.2,
+   "slower": 0.09,
+   "rarity": 20,
+   "looks": "a round helm, shoulder pieces, a wide plate skirt and boots",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_01_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_02_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_03_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_04_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_05_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_06_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_07_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_08_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_09_Mesh",
+    "/Game/Orcs_Pack/Orc_05/Mesh/Orc_05/SK_Orc_05_Armor_10_Mesh"
+   ]
+  },
+  {
+   "key": "OrcRaiderArmour",
+   "title": "Orc Raider’s Armour",
+   "gallery": "arm_orcs_pack_orc_raider_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 5,
+   "speed_rating": 6,
+   "durability": 375,
+   "tiers": [
+    2
+   ],
+   "weight": "medium",
+   "armour": 0.25,
+   "slower": 0.12,
+   "rarity": 20,
+   "looks": "a mask and layered leather and iron from shoulders to boots",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_01_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_02_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_03_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_04_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_05_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_06_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_07_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_08_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_09_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_10_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_11_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_12_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_13_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Armor_14_Mesh",
+    "/Game/Orcs_Pack/Orc_06/Mesh/SK_Orc_06_Mask_Mesh"
+   ]
+  },
+  {
+   "key": "GnurArmour",
+   "title": "Gnur’s Armour",
+   "gallery": "arm_orcs_pack_gnur_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 6,
+   "speed_rating": 5,
+   "durability": 400,
+   "tiers": [
+    3
+   ],
+   "weight": "medium",
+   "armour": 0.3,
+   "slower": 0.15,
+   "rarity": 20,
+   "looks": "a spiked chest harness, pauldrons, a plated skirt and greaves",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_01_Mesh",
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_02_Mesh",
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_03_Mesh",
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_04_Mesh",
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_05_Mesh",
+    "/Game/Orcs_Pack/Orc_Gnur/Mesh/SK_Gnur_Armor_06_Mesh"
+   ]
+  },
+  {
+   "key": "DardanArmour",
+   "title": "Dardan’s Armour",
+   "gallery": "arm_orcs_pack_dardan_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 7,
+   "speed_rating": 4,
+   "durability": 475,
+   "tiers": [
+    4
+   ],
+   "weight": "medium",
+   "armour": 0.35,
+   "slower": 0.18,
+   "rarity": 20,
+   "looks": "spiked bracers and greaves",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_01",
+    "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_02",
+    "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_03",
+    "/Game/Orcs_Pack/Orc_Dardan/Mesh/SK_Dardan_Armor_04"
+   ]
+  },
+  {
+   "key": "CostalmedArmour",
+   "title": "Costalmed’s Armour",
+   "gallery": "arm_orcs_pack_costalmed_s_armour",
+   "pack": "14 Orcs Pack",
+   "type": "orc",
+   "damage_rating": 8,
+   "speed_rating": 3,
+   "durability": 510,
+   "tiers": [
+    5
+   ],
+   "weight": "heavy",
+   "armour": 0.4,
+   "slower": 0.21,
+   "rarity": 20,
+   "looks": "rusty plate on one shoulder and arm, and on both legs",
+   "pieces": [
+    "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Arm_01_Mesh",
+    "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Arm_02_Mesh",
+    "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Belt_Mesh",
+    "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Leg_01_Mesh",
+    "/Game/Orcs_Pack/Orc_Costalmed/Mesh/SK_Orc_Costalmed_Armor_Leg_02_Mesh"
+   ]
   }
- ],
- "_weights": "light: leather (the tiefling's); medium: leather with iron or plate on one arm (the bear warrior's, the demonic); heavy: a plate skirt or full plate (the orc veteran's, the plate). A hero wears only the weights her 'wears' lists (heroes.json, summoner_hero.json; 856)."
+ ]
 }

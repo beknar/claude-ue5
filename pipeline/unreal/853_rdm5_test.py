@@ -3,11 +3,12 @@
   select   (the menu level random_dungeonmagic_level5_select) five heroes, the Summoner last; Left from the first
            shows her and only her figure; Enter opens random_dungeonmagic_level5?Hero=Summoner, where her pawn is
            BP_RDM5_Summoner3Character with her hit points and mana
-  loot     (the dungeon) the great hall's containers hold the five sets between them, each once, and no other
-           container of the start section or of a generated one holds any; every container of the start section
-           holds 1 to 6 items, and over 6000 more containers each count from 1 to 6 comes about a sixth of the time;
-           F by a great hall container opens it and gives everything on its list (the FOUND list too), the others
-           opened give theirs, she carries exactly what they held, opened again they give nothing
+  loot     (the dungeon) the great hall's containers hold the tier-1 sets of loot_table.json's start_room_armour
+           between them; any other armour in the start section (tier 1) or in a generated tier-2 section is of that
+           tier; every container of the start section holds 1 to 6 items, and over 6000 more containers each count from
+           1 to 6 comes about a sixth of the time; F by a great hall container opens it and gives everything on its list
+           (the FOUND list too), the others opened give theirs, she carries exactly what they held (a material 1 to 3 at
+           a time, a set of armour once), opened again they give nothing
   wear     (the dungeon) with the keys (I, S / W to the set, Enter) each set goes on: one set's meshes on her at a
            time, following her body (leader pose), her armour the set's share; Enter again takes it off; the
            Mage given a set cannot wear it (she wears no armour)
@@ -19,11 +20,30 @@
   follow   (the dungeon) in plate armour she runs and casts: skinned on the CPU as drawn, the armour's vertices
            keep their distance to her body's nearest vertices (median, 95th percentile against the same armour
            left in its reference pose on her, which falls behind her limbs)
-  damage   (the dungeon) a monster's blows on her without armour and in each set: what reached her is the blow
-           less the set's share, and her hit points fell by that
+  damage   (the dungeon) a monster's blows on her without armour and in a light, a medium and the heaviest set:
+           what reached her is the blow less the set's share, her hit points fell by that, and the set's durability by
+           1 a blow
   ui       (the dungeon) a great hall container's FOUND plaque with its first item's picture; the inventory with
-           all 33 potions and foods besides the armour scrolls: at the top the armour's pictures are not drawn, at
-           the bottom they are, each set's picture; HighResShots of each
+           every item scrolls: at the top the armour's pictures are not drawn; walked down to the end every armour set,
+           material and repair item has its own picture drawn; HighResShots of the top and the bottom
+  armourtable (the dungeon) the 27 sets as the game has them against armour.json (the user's table): the share of a
+           blow (damage rating x 5 %), the speed lost ((10 - speed rating) x 3 %), durability, tiers, rarity 20, the
+           weight by type; on the Summoner her top speed and her measured running speed without armour, in a set that
+           does not slow her and in the heaviest; blows that reach her take 1 each off the worn set, at 0 it takes off
+           half its share (and the next blow shows it)
+  repair   (the dungeon) the Warrior with a worn set and a found weapon worn down, two patch kits and leather strips:
+           with the keys (I, to the patch kit, Enter) the repair list shows both; Enter on each gives back 75 % of its
+           full durability (up to full) and uses a kit; leather strips on a whole set are refused and kept; Backspace
+           goes back to the inventory; a worn-out set takes off half its share, mended its whole share
+  craft    (the dungeon) an anvil in the great hall and in every generated set of rooms (and in each forge); F by the
+           hall's anvil ("use the anvil") opens the crafting panel and pauses the game; without materials nothing can
+           be made and Enter says what is missing; given what leather strips take (the wood from three kinds) Enter
+           makes one and uses exactly that up; F shuts it; a picture of the panel
+  maps     (the dungeon) the minimap and the big map write each room's tier (1 in the start section, 2 in a tier-2
+           section she walks into) and draw the anvils she has seen; the big map's key names the anvil; pictures
+  fire     (the dungeon) the audio device's output recorded 2.5 m from a torch (music off, monsters quiet) with the
+           fires' volumes as they are and as they were (sounds.json's before the change), and far from every fire: the
+           fire's own level (the recording less the floor) fell by about 8 dB
   tiers    (the dungeon) the five tiers (855: MaxTier 5): a section's tier is its ring plus one (8, 16, 24, 32 sections
            round the start); at the start tiers 1 and 2 are open. One set of tier 2 cleared as she would clear it: walked
            into room by room (explored only once she is in each), every chest and trunk opened, every monster killed: it
@@ -33,8 +53,9 @@
            cleared. The other seven sets cleared (the debug clear): "TIER 3 IS OPEN", the gratings go, walking on she gets
            tier 3 generated. Tiers 3 and 4 cleared: tier 5 opens; a tier 5 section's hallways out of the dungeon are
            walled (they lead to tier 6, which is never allowed)
-  tierloot the containers of each tier (2500 each, any section of it): a weapon only in its tiers (the table's), every
-           weapon of a tier found, their share of what is found as their weights say (within 4.5 sd)
+  tierloot the containers of each tier (2500 each, any section of it): a weapon, an armour set, a potion or a food only
+           in its tiers (the tables'), every weapon and every set of a tier found, the materials and repair items in
+           every tier; the weapons' and the armour's share of what is found as their weights say (within 4.5 sd)
   weapons  each hero given all 29 weapons: the ones her card allows join her weapons (Warrior, Warlock: all; Rogue: short
            blades and ranged), the others stay in her pack as weapons she cannot wield (the Mage and the Summoner: all,
            and using one says she cannot); each one drawn: its mesh in her hand with its handle's grip point within 7 cm
@@ -51,6 +72,9 @@ SA = r"E:\code\claude-ue5\claude_ue5\SourceArt"
 OUT = os.path.join(SA, "random_dungeon_magic5")
 HJ = json.load(open(os.path.join(OUT, "summoner_hero.json"), encoding="utf-8"))
 AJ = json.load(open(os.path.join(SA, "summoner3", "armour.json"), encoding="utf-8"))
+LT = json.load(open(os.path.join(SA, "random_dungeon_magic5", "loot_table.json"), encoding="utf-8"))
+START_ARMOUR = list(LT["start_room_armour"]["items"])
+SET_TIERS = {s["title"]: set(s["tiers"]) for s in AJ["sets"]}
 SETS = [s["title"] for s in AJ["sets"]]
 LEVEL = "random_dungeonmagic_level5"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
@@ -164,13 +188,14 @@ def step_loot():
     s0 = g.get_section(S0); n = s0.get_num_containers(); hall = list(g.get_start_room_containers())
     lists = {i: [str(x) for x in g.loot_list_of(S0, i)] for i in range(n)}
     in_hall = [x for i in hall for x in lists[i] if x in SETS]
-    elsewhere = [(i, x) for i in range(n) if i not in hall for x in lists[i] if x in SETS]
+    # (armour anywhere else in the start section: tier-1 sets only)
+    elsewhere = [(i, x) for i in range(n) if i not in hall for x in lists[i] if x in SETS and 1 not in SET_TIERS[x]]
     lens_start = sorted({len(v) for v in lists.values()})
     # many more containers: the counts 1..6 about a sixth each, never armour
     N = 6000; cnt = {}; arm_more = 0
     for i in range(N):
         l_ = [str(x) for x in g.loot_list_of(S0, 100000 + i)]
-        cnt[len(l_)] = cnt.get(len(l_), 0) + 1; arm_more += sum(1 for x in l_ if x in SETS)
+        cnt[len(l_)] = cnt.get(len(l_), 0) + 1; arm_more += sum(1 for x in l_ if x in SETS and 1 not in SET_TIERS[x])
     p6 = 1.0 / 6.0; sd = math.sqrt(p6 * (1 - p6) / N)
     worst = max(abs(cnt.get(k, 0) / N - p6) / sd for k in range(1, 7))
     # F by a great hall container
@@ -189,24 +214,27 @@ def step_loot():
             opened = [j for j in hall if s0.get_container_open_alpha(j) > 0.0]
             if opened:
                 j = opened[0]
-                fpress = {"container": j, "found": g.items_found - f0, "list": lists[j], "found_list": [str(x) for x in g.last_found_list]}
+                fpress = {"container": j, "found": g.items_found - f0, "list": lists[j], "found_list": [str(x) for x in g.last_found_list],
+                          "counts": [g.loot_count_of(S0, j, k) for k in range(len(lists[j]))]}
             break
         if fpress: break
     # the rest of the hall, and every other container of the start section
     # (a wardrobe's two doors are one container, the lower index's: opening one opens both, and the other is skipped)
-    bad = []; opened_lists = [fpress["list"]] if fpress else []
+    bad = []; opened_lists = [list(zip(fpress["list"], fpress["counts"]))] if fpress else []
     for i in range(n):
         if s0.is_target_open(False, i): continue
         f0 = g.items_found; s0.toggle_container(i)
         if i in hall or i % 10 == 0: yield
         got = g.items_found - f0; fl = [str(x) for x in g.last_found_list]
-        opened_lists.append(fl if got else [])
+        opened_lists.append(list(zip(fl, [g.loot_count_of(S0, i, k) for k in range(len(fl))])) if got else [])
         if got != len(lists[i]) or fl != lists[i]: bad.append({"container": i, "found": got, "found_list": fl, "list": lists[i]})
     want = {}
     for v in opened_lists:
-        for x in v: want[x] = want.get(x, 0) + 1
+        for x, k in v: want[x] = want.get(x, 0) + k
+    for x in want:
+        if x in SETS: want[x] = 1                     # (a set found again mends hers: it is carried once)
     ls = lines(c)
-    have = {l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("item|")}
+    have = {l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.split("|")[0] in ("item", "repair", "component")}
     have.update({l.split("|")[1]: 1 for l in ls if l.startswith("armour|")})
     # (855's weapons: the Summoner cannot wield them, so she carries them as items: "carried|<name>|<count>")
     have.update({l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("carried|")})
@@ -221,8 +249,9 @@ def step_loot():
         if s1 and not s1.is_building(): break
         yield
     s1 = g.get_section(unreal.IntPoint(1, 0)); n1 = s1.get_num_containers() if s1 else 0
-    gen_armour = sum(1 for i in range(n1) for x in g.loot_list_of(unreal.IntPoint(1, 0), i) if str(x) in SETS)
-    ok = (len(hall) > 0 and sorted(in_hall) == sorted(SETS) and not elsewhere and lens_start[0] >= 1 and lens_start[-1] <= 6
+    gen_armour = sum(1 for i in range(n1) for x in g.loot_list_of(unreal.IntPoint(1, 0), i) if str(x) in SETS and 2 not in SET_TIERS[str(x)])
+    counts_ok = fpress is not None and all(1 <= k <= 3 for k in fpress["counts"])
+    ok = (len(hall) > 0 and set(START_ARMOUR) <= set(in_hall) and not elsewhere and counts_ok and lens_start[0] >= 1 and lens_start[-1] <= 6
           and min(cnt) >= 1 and max(cnt) <= 6 and len(cnt) == 6 and worst < 4.5 and arm_more == 0
           and fpress is not None and fpress["found"] == len(fpress["list"]) and fpress["found_list"] == fpress["list"]
           and not bad and have == want and again == 0 and n1 > 0 and gen_armour == 0)
@@ -250,7 +279,7 @@ def step_wear():
              "follows_her": all(m.leader_pose_component == body and m.get_attach_parent() == body for m in ms), "message": str(c.message),
              "line": next(l for l in lines(c) if l.startswith("armour|" + t + "|"))}
         e["ok"] = (e["cursor"] == i and e["worn"] == t and abs(e["armour"] - (amount.get(t) or -1)) < 1e-4 and e["meshes"] == [want_mesh[t]]
-                   and e["follows_her"] and e["line"].endswith("|1") and c.armour_changes == ch0 + 1)
+                   and e["follows_her"] and e["line"].split("|")[2] == "1" and c.armour_changes == ch0 + 1)
         out.append(e)
     # Enter again on the worn set: off
     t = SETS[-1]; yield from press("Enter")
@@ -342,7 +371,7 @@ def step_follow():
 
 def step_damage():
     g = G["gen"]; res = []
-    for t in [None] + SETS:
+    for t in [None, "Orc Warrior\u2019s Armour", "Demonic Armour", "Epic Plate (Female)"]:
         c = yield from restart()
         if t: c.add_item(t, 1); c.wear_armour(t)
         ms = start_monsters(); p = G["pawn"]
@@ -351,16 +380,16 @@ def step_damage():
             if stand_off(m, 150): break
         else:
             res.append({"set": t, "error": "no place by a monster"}); continue
-        c.set_health(c.get_max_health()); h0, n0 = c.get_health(), c.hits_taken; t0 = now()
+        c.set_health(c.get_max_health()); h0, n0 = c.get_health(), c.hits_taken; t0 = now(); w0 = c.get_armour_wear(t) if t else 0.0
         while now() - t0 < 10.0 and c.hits_taken == n0: yield
         yield from wait(0.05)
         e = {"set": t, "armour": round(c.get_armour(), 3), "hits": c.hits_taken - n0, "blow": round(c.last_blow_before, 3), "reached_her": round(c.last_blow_taken, 3),
-             "hp_fell": round(h0 - c.get_health(), 3), "monster": m.get_name()}
+             "hp_fell": round(h0 - c.get_health(), 3), "monster": m.get_name(), "wear_fell": (w0 - c.get_armour_wear(t)) if t else 0.0}
         # (a second blow may land before the reading: her hit points then fell by two of them)
         e["ok"] = (e["hits"] in (1, 2) and e["blow"] > 0 and abs(e["reached_her"] - e["blow"] * (1 - e["armour"])) < 0.01 and abs(e["hp_fell"] - e["reached_her"] * e["hits"]) < 0.01
-                   and (t is None) == (e["armour"] == 0.0))
+                   and (t is None) == (e["armour"] == 0.0) and (t is None or abs(e["wear_fell"] - e["hits"]) < 1e-3))
         res.append(e)
-    ok = len(res) == 6 and all(e.get("ok") for e in res)
+    ok = len(res) == 4 and all(e.get("ok") for e in res)
     step_result("damage", ok, blows=res)
 
 def step_ui():
@@ -382,14 +411,20 @@ def step_ui():
     for it in g.get_editor_property("items"): c.add_item(it.name, 1)
     yield from press("I"); yield from rwait(0.4)
     top = hud_art(); shot("inventory_top"); yield from rwait(1.5)
-    # (down to the last armour row: with 855's weapons the list ends with the ones she cannot wield)
-    ls = lines(c); yield from cursor_to(c, max(i for i, l in enumerate(ls) if l.startswith("armour|"))); yield from rwait(0.3)
+    # (walked down the whole list: each row's picture is drawn while it is in view)
+    ls = lines(c); seen = set(top)
+    for k in range(len(ls)):
+        c.move_inventory_cursor(1) if k else None; yield; yield
+        seen |= set(hud_art())
     bottom = hud_art(); shot("inventory_bottom"); yield from rwait(1.5)
     yield from press("I"); quiet(False)
-    ok = (all(a in ua for a in arm_icons) and found_ok and gone and not (set(arm_icons) & set(top)) and set(arm_icons) <= set(bottom)
-          and "panel_wide" in bottom)
-    step_result("ui", ok, armour_icons=arm_icons, icons_imported=[a in ua for a in arm_icons], found_container=i, found_items=n_in, found_first=first,
-                found_drawn=fd, plaque_gone=gone, lines=len(ls), top_drawn=top, bottom_drawn=bottom)
+    kinds = {str(it.name): it.kind for it in g.get_editor_property("items")}
+    new_icons = sorted({icons[n_] for n_, k_ in kinds.items() if k_ in (unreal.RDItemKind.COMPONENT, unreal.RDItemKind.REPAIR)})
+    want_seen = set(arm_icons) | set(new_icons)
+    ok = (all(a in ua for a in arm_icons + new_icons) and found_ok and gone and not (set(arm_icons) & set(top)) and want_seen <= seen
+          and "panel_wide" in bottom and len(set(arm_icons)) == len(SETS) and len(new_icons) == 20)
+    step_result("ui", ok, armour_icons=arm_icons, new_icons=new_icons, not_imported=[a for a in arm_icons + new_icons if a not in ua], found_container=i,
+                found_items=n_in, found_first=first, found_drawn=fd, plaque_gone=gone, lines=len(ls), top_drawn=top, not_seen=sorted(want_seen - seen))
 
 # ------------------------------------------------------------------------------------------------ the weapons table, the tiers
 W5 = json.load(open(os.path.join(OUT, "weapons_table.json"), encoding="utf-8"))
@@ -523,23 +558,31 @@ def step_tierloot():
     g = G["gen"]; c = yield from restart()
     wt = {w["name"]: set(w["tiers"]) for w in W5["weapons"]}
     items = [it for it in g.get_editor_property("items") if it.weight > 0]
+    tiered = {str(it.name): set(it.tiers) for it in items if len(it.tiers)}
+    anywhere = {str(it.name) for it in items if not len(it.tiers)}
     res = {}; ok = True; N = 2500
     for t in range(1, 6):
-        S = I2(t - 1, 0); cnt = {}; wrong = set(); n = 0; nw = 0
+        S = I2(t - 1, 0); cnt = {}; wrong = set(); n = 0; nw = 0; na = 0; arm = set(); seen_all = set()
         for i in range(N):
             for x in g.loot_list_of(S, 300000 + i):
-                x = str(x); n += 1
+                x = str(x); n += 1; seen_all.add(x)
+                if x in tiered and t not in tiered[x]: wrong.add(x)
+                if x in SETS: na += 1; arm.add(x)
                 if x in wt:
                     nw += 1; cnt[x] = cnt.get(x, 0) + 1
-                    if t not in wt[x]: wrong.add(x)
             if i % 250 == 0: yield
         inw = sum(it.weight for it in items if (not it.tiers or t in list(it.tiers)) and str(it.name) in wt)
         alls = sum(it.weight for it in items if not it.tiers or t in list(it.tiers))
         share, want = nw / max(n, 1), inw / alls
         sd = math.sqrt(want * (1 - want) / max(n, 1))
+        ina = sum(it.weight for it in items if (not it.tiers or t in list(it.tiers)) and str(it.name) in SETS)
+        sa, wa = na / max(n, 1), ina / alls; sda = math.sqrt(max(wa * (1 - wa), 1e-9) / max(n, 1))
         e = {"items": n, "weapons": sorted(cnt), "want": sorted(k for k, v in wt.items() if t in v), "wrong_tier": sorted(wrong),
-             "weapon_share": round(share, 4), "expected": round(want, 4), "sd_off": round(abs(share - want) / sd, 2)}
-        e["ok"] = e["weapons"] == e["want"] and not wrong and e["sd_off"] < 4.5
+             "weapon_share": round(share, 4), "expected": round(want, 4), "sd_off": round(abs(share - want) / sd, 2),
+             "armour": sorted(arm), "armour_want": sorted(k for k, v in SET_TIERS.items() if t in v), "armour_share": round(sa, 4), "armour_expected": round(wa, 4),
+             "armour_sd_off": round(abs(sa - wa) / sda, 2), "everywhere_missing": sorted(anywhere - seen_all)}
+        e["ok"] = (e["weapons"] == e["want"] and not wrong and e["sd_off"] < 4.5 and e["armour"] == e["armour_want"] and e["armour_sd_off"] < 4.5
+                   and not e["everywhere_missing"])
         ok = ok and e["ok"]; res[f"tier{t}"] = e
     step_result("tierloot", ok, **res)
 
@@ -652,8 +695,252 @@ def step_weapons():
     R.setdefault("shots", []).extend(shots_)
     step_result("weapons", ok, heroes=out, front_shots=shots_)
 
+# ------------------------------------------------------------------------------------------------ the armour table, repairs, crafting
+WT = {"full plate": "heavy", "heavy": "heavy", "medium": "medium", "partial": "medium", "light": "light"}
+def clear_run(p, length=1100.0):
+    """a direction from where she stands with a body-wide sweep clear for `length`"""
+    l = p.get_actor_location(); best = None
+    for k in range(24):
+        a = k * math.pi / 12; d = V(math.cos(a), math.sin(a), 0.0)
+        h = unreal.SystemLibrary.sphere_trace_single(G["w"], V(l.x, l.y, l.z), V(l.x + d.x * length, l.y + d.y * length, l.z), 45.0,
+                                                     unreal.TraceTypeQuery.ECC_VISIBILITY, False, [p], unreal.DrawDebugTrace.NONE, True)
+        if h is None or not h.to_tuple()[0]: best = a; break
+    return best
+def run_speed(c, p, yaw):
+    """her running speed (cm/s) along yaw: run 1.6 s, measured over the last 0.8 s"""
+    p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=math.degrees(yaw)), True)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=math.degrees(yaw)))
+    sim = lambda k_, d_: c.simulate_key(k_, d_)
+    sim(key("LeftShift"), True); sim(key("W"), True)
+    yield from wait(0.8); a = p.get_actor_location(); t0 = now()
+    yield from wait(0.8); b = p.get_actor_location(); t1 = now()
+    sim(key("W"), False); sim(key("LeftShift"), False); yield from wait(0.5)
+    return math.hypot(b.x - a.x, b.y - a.y) / max(t1 - t0, 1e-3)
+
+def step_armourtable():
+    g = G["gen"]; c = yield from restart(); quiet(True)
+    items = {str(i.name): i for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.ARMOUR}
+    rows = []
+    for s_ in AJ["sets"]:
+        it = items.get(s_["title"])
+        ww = WT.get(s_["type"]) or ("light" if s_["speed_rating"] >= 7 else "medium" if s_["speed_rating"] >= 4 else "heavy")
+        e = {"set": s_["title"], "type": s_["type"], "dr": s_["damage_rating"], "sp": s_["speed_rating"]}
+        if it is None: e["ok"] = False; rows.append(e); continue
+        e.update({"share": round(it.amount, 4), "slower": round(it.slower, 4), "durability": it.durability, "tiers": list(it.tiers), "weight": str(it.armour_weight.name).lower(),
+                  "rarity": it.weight, "ratings": [it.damage_rating, it.speed_rating], "type_in_game": str(it.armour_type)})
+        e["ok"] = (abs(it.amount - 0.05 * s_["damage_rating"]) < 1e-4 and abs(it.slower - 0.03 * (10 - s_["speed_rating"])) < 1e-4 and it.durability == s_["durability"]
+                   and list(it.tiers) == s_["tiers"] and e["weight"] == ww and it.weight == 20.0 and e["ratings"] == [s_["damage_rating"], s_["speed_rating"]]
+                   and e["type_in_game"] == s_["type"])
+        rows.append(e)
+    # her speed: none, a set that does not slow her (speed 10), the heaviest (speed 1)
+    p = G["pawn"]; start = p.get_actor_location(); cm = p.get_component_by_class(unreal.CharacterMovementComponent)
+    yaw = clear_run(p); speeds = {}
+    for t in (None, "Orc Warrior\u2019s Armour", "Epic Plate (Female)"):
+        if t: c.add_item(t, 1); c.wear_armour(t) if str(c.get_worn_armour()) != t else None
+        else: c.take_off_armour()
+        p.set_actor_location(start, False, True); yield from wait(0.4)
+        top = cm.get_editor_property("max_walk_speed"); slow = c.get_armour_slow()
+        v = (yield from run_speed(c, p, yaw)) if yaw is not None else 0.0
+        speeds[t or "none"] = {"top": round(top, 1), "slow": round(slow, 3), "ran": round(v, 1)}
+    s0_, s1_, s2_ = speeds["none"], speeds["Orc Warrior\u2019s Armour"], speeds["Epic Plate (Female)"]
+    speed_ok = (yaw is not None and abs(s1_["top"] - s0_["top"]) < 0.5 and abs(s2_["top"] / s0_["top"] - 0.73) < 0.005
+                and abs(s1_["ran"] / max(s0_["ran"], 1) - 1.0) < 0.05 and abs(s2_["ran"] / max(s0_["ran"], 1) - 0.73) < 0.05)
+    # durability: three blows that reach her take 3 off; at 0 half its share
+    t = "Epic Plate (Female)"; full = c.get_armour_durability(t); c.set_health(c.get_max_health())
+    w0 = c.get_armour_wear(t)
+    for _ in range(3): c.apply_damage(10.0, None); yield from wait(0.25)
+    w3 = c.get_armour_wear(t); share_full = c.get_armour()
+    c.set_armour_wear(t, 1.0); c.set_health(c.get_max_health()); c.apply_damage(10.0, None); yield from wait(0.2)
+    took_last = c.last_blow_taken; at0 = {"wear": c.get_armour_wear(t), "share": round(c.get_armour(), 4), "message": str(c.message)}
+    c.apply_damage(10.0, None); yield from wait(0.2)
+    took_worn = c.last_blow_taken; line = next(l for l in lines(c) if l.startswith("armour|" + t + "|"))
+    dur = {"full": full, "before": w0, "after_3": w3, "share_full": round(share_full, 4), "blow_at_1_left": round(took_last, 3), "at_0": at0,
+           "blow_worn_out": round(took_worn, 3), "line": line}
+    dur_ok = (full == 600 and w0 == 600 and w3 == 597 and abs(share_full - 0.5) < 1e-4 and abs(took_last - 5.0) < 0.01 and at0["wear"] == 0
+              and abs(at0["share"] - 0.25) < 1e-4 and "worn out" in at0["message"] and abs(took_worn - 7.5) < 0.01 and line.endswith("|0|600"))
+    c.take_off_armour(); quiet(False)
+    ok = all(r["ok"] for r in rows) and len(rows) == 27 and speed_ok and dur_ok
+    step_result("armourtable", ok, sets=rows, speed=speeds, speed_ok=speed_ok, durability=dur, durability_ok=dur_ok)
+
+def step_repair():
+    g = G["gen"]; c = yield from restart(); quiet(True)
+    ok_sw = g.switch_hero("Warrior"); yield from wait(0.6); refresh(); c = cb(); c.set_scripted_only(False)
+    t = "Templar\u2019s Armour"; c.add_item(t, 1); c.wear_armour(t); c.set_armour_wear(t, 0.0)
+    worn_share = c.get_armour()
+    wpn = "Viking Shortsword"; c.add_item(wpn, 1)
+    wl_ = list(g.get_editor_property("weapons")); wi = next(i for i in range(len(wl_)) if str(wl_[i].name) == wpn); wfull = c.get_weapon_durability(wi); c.set_weapon_wear(wi, 10.0)
+    c.add_item("Patch Kit", 2); c.add_item("Leather Strips", 1)
+    yield from press("I"); ls = lines(c)
+    yield from cursor_to(c, next(i for i, l in enumerate(ls) if l.startswith("repair|Patch Kit|")))
+    yield from press("Enter")
+    picking = c.is_picking_repair(); rl = [str(x) for x in c.get_repair_lines()]
+    shot("repair_list"); yield from rwait(1.5)
+    def rcursor(i):
+        while c.get_repair_cursor() < i: yield from press("S")
+        while c.get_repair_cursor() > i: yield from press("W")
+    ai = next(i for i, l in enumerate(rl) if l.startswith("armour|" + t + "|")); yield from rcursor(ai); yield from press("Enter")
+    arm = {"wear": c.get_armour_wear(t), "share": round(c.get_armour(), 4), "kits": c.get_item_count("Patch Kit"), "message": str(c.message)}
+    rl2 = [str(x) for x in c.get_repair_lines()]; still = c.is_picking_repair()
+    wl = next(i for i, l in enumerate(rl2) if l.startswith("weapon|%d|" % wi)); yield from rcursor(wl); yield from press("Enter")
+    wp = {"wear": c.get_weapon_wear(wi), "full": wfull, "kits": c.get_item_count("Patch Kit"), "picking_after_last_kit": c.is_picking_repair(), "message": str(c.message)}
+    # leather strips on the whole (mended) weapon: refused, kept
+    ls = lines(c); yield from cursor_to(c, next(i for i, l in enumerate(ls) if l.startswith("repair|Leather Strips|")))
+    c.set_weapon_wear(wi, wfull); c.set_armour_wear(t, c.get_armour_durability(t))
+    yield from press("Enter"); rl3 = [str(x) for x in c.get_repair_lines()]
+    yield from rcursor(0); yield from press("Enter")
+    whole = {"strips": c.get_item_count("Leather Strips"), "message": str(c.message)}
+    yield from press("BackSpace"); back = {"picking": c.is_picking_repair(), "inventory_open": c.is_inventory_open()}
+    yield from press("I"); g.switch_hero("Summoner"); yield from wait(0.6); refresh(); quiet(False)
+    want_arm = min(210.0, 0.0 + 210 * 0.75)
+    ok = (ok_sw and picking and abs(worn_share - 0.1) < 1e-4 and len(rl) == 2 and abs(arm["wear"] - want_arm) < 1e-3 and abs(arm["share"] - 0.2) < 1e-4 and arm["kits"] == 1 and still
+          and abs(wp["wear"] - min(wfull, 10 + wfull * 0.75)) < 1e-3 and wp["kits"] == 0 and not wp["picking_after_last_kit"]
+          and whole["strips"] == 1 and "whole already" in whole["message"] and not back["picking"] and back["inventory_open"])
+    step_result("repair", ok, switched=ok_sw, worn_out_share=round(worn_share, 4), lines=rl, armour=arm, armour_want=want_arm, weapon=wp, whole=whole, back=back)
+
+def step_craft():
+    g = G["gen"]; c = yield from restart(); quiet(True); p = G["pawn"]
+    s0 = g.get_section(I2(0, 0)); hall_room = s0.room_at(g.get_start_room_center())
+    anv0 = [a for a in s0.get_anvil_points()]; in_hall = [a for a in anv0 if s0.room_at(a) == hall_room]
+    gen_ = {}
+    for S in (I2(1, 0), I2(0, 1), I2(-1, 0), I2(0, -1)):
+        if not g.get_section(S): g.generate_section_now(S)
+        s = yield from built(S)
+        forges = [i for i in range(s.get_num_rooms()) if s.get_room_kind(i) == "Forge"]
+        forge_ok = all(any(s.room_at(a) == i for a in s.get_anvil_points()) for i in forges)
+        gen_["%d,%d" % (S.x, S.y)] = {"anvils": len(s.get_anvil_points()), "forges": len(forges), "forges_have_one": forge_ok, "added_in_room": s.anvil_room}
+    # by the hall's anvil
+    a = in_hall[0] if in_hall else None; opened = {}
+    if a:
+        for k in range(16):
+            ang = k * math.pi / 8; q = V(a.x + math.cos(ang) * 150, a.y + math.sin(ang) * 150, 100)
+            if s0.room_at(q) != hall_room: continue
+            p.set_actor_location(q, False, True); yield from wait(0.3)
+            if g.describe_nearest(p.get_actor_location(), 260.0) == "use the anvil": break
+        yaw = math.degrees(math.atan2(a.y - q.y, a.x - q.x)); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=yaw))
+        said = g.describe_nearest(p.get_actor_location(), 260.0)
+        yield from press("F"); yield from rwait(0.3)
+        cl = [str(x) for x in c.get_craft_lines()]
+        opened = {"prompt": said, "open": c.is_crafting_open(), "paused": GS.is_game_paused(G["w"]), "lines": cl}
+        # nothing to make it with
+        yield from rwait(0.2); yield from press("Enter")
+        refused = {"made": c.items_crafted, "message": str(c.message), "can": [l.split("|")[2] for l in cl]}
+        # what leather strips take, the wood from three kinds
+        give = {"Straw Rope": 5, "Glue": 5, "Cured Leather Strip": 5, "Hardwood": 2, "Timber": 2, "Wood Log": 3}
+        for n_, k_ in give.items(): c.add_item(n_, k_)
+        cl2 = [str(x) for x in c.get_craft_lines()]
+        shot("crafting"); yield from rwait(1.5)
+        yield from press("Enter")
+        left = {n_: c.get_item_count(n_) for n_ in give}; made = {"strips": c.get_item_count("Leather Strips"), "crafted": c.items_crafted, "message": str(c.message)}
+        yield from press("F"); yield from rwait(0.3)
+        closed = {"open": c.is_crafting_open(), "paused": GS.is_game_paused(G["w"])}
+    quiet(False)
+    wood_left = left.get("Hardwood", 9) + left.get("Timber", 9) + left.get("Wood Log", 9) if a else None
+    ok = (len(in_hall) >= 1 and all(v["anvils"] >= 1 and v["forges_have_one"] for v in gen_.values()) and opened.get("prompt") == "use the anvil" and opened.get("open")
+          and opened.get("paused") and len(opened.get("lines", [])) == 5 and refused["made"] == 0 and "need" in refused["message"] and set(refused["can"]) == {"0"}
+          and cl2[0].split("|")[2] == "1" and made["strips"] == 1 and made["crafted"] == 1 and left["Straw Rope"] == 0 and left["Glue"] == 0
+          and left["Cured Leather Strip"] == 0 and wood_left == 2 and not closed["open"] and not closed["paused"])
+    step_result("craft", ok, start_anvils=len(anv0), in_great_hall=len(in_hall), generated=gen_, opened=opened, refused=refused if a else None,
+                lines_given=cl2 if a else None, made=made if a else None, left=left if a else None, closed=closed if a else None)
+
+def step_maps():
+    g = G["gen"]; c = yield from restart(); quiet(True); p = G["pawn"]; hud = G["pc"].get_hud()
+    s0 = g.get_section(I2(0, 0)); hall_room = s0.room_at(g.get_start_room_center())
+    hall_anvil = next((a for a in s0.get_anvil_points() if s0.room_at(a) == hall_room), None)
+    yield from wait(0.5)
+    mini = {"tiers": sorted(set(str(x) for x in hud.get_mini_tier_labels())), "anvils": [[round(v.x), round(v.y)] for v in hud.get_anvils_drawn()]}
+    shot("minimap_t1"); yield from rwait(1.5)
+    yield from press("M"); yield from rwait(0.5)
+    big = {"tiers": sorted(set(str(x) for x in hud.get_map_tier_labels())), "anvils": [[round(v.x), round(v.y)] for v in hud.get_anvils_drawn()]}
+    shot("bigmap_t1"); yield from rwait(1.5); yield from press("M")
+    # into a tier-2 set of rooms
+    S = I2(1, 0)
+    if not g.get_section(S): g.generate_section_now(S)
+    s = yield from built(S)
+    rooms = [i for i in range(s.get_num_rooms()) if s.get_room_kind(i) != "Hallway junction"]
+    rc = s.get_room_center(rooms[0]); p.set_actor_location(V(rc.x, rc.y, 100), False, True); yield from wait(1.0)
+    mini2 = sorted(set(str(x) for x in hud.get_mini_tier_labels()))
+    yield from press("M"); yield from rwait(0.5)
+    big2 = sorted(set(str(x) for x in hud.get_map_tier_labels())); anv2 = [[round(v.x), round(v.y)] for v in hud.get_anvils_drawn()]
+    shot("bigmap_t2"); yield from rwait(1.5); yield from press("M"); quiet(False)
+    ha = [round(hall_anvil.x), round(hall_anvil.y)] if hall_anvil else None
+    t_of = lambda labels: sorted({l.split("|")[1] for l in labels})
+    ok = (ha is not None and mini["tiers"] and t_of(mini["tiers"]) == ["1"] and ha in mini["anvils"] and big["tiers"] and t_of(big["tiers"]) == ["1"]
+          and ha in big["anvils"] and "2" in t_of(mini2) and "2" in t_of(big2))
+    step_result("maps", ok, hall_anvil=ha, minimap_t1=mini, bigmap_t1=big, minimap_t2=mini2, bigmap_t2=big2, bigmap_t2_anvils=anv2)
+
+def rms_of(path):
+    """the root mean square of a 16-bit wav (both channels)"""
+    import wave, array
+    w = wave.open(path, "rb"); n = w.getnframes(); data = array.array("h", w.readframes(n)); w.close()
+    if not len(data): return 0.0
+    return math.sqrt(sum(float(x) * x for x in data) / len(data)) / 32768.0
+def step_fire():
+    g = G["gen"]; mv0 = g.get_editor_property("music_volume"); g.set_editor_property("music_volume", 0.0)
+    try:
+        res = yield from fire_measure(g)
+    finally:
+        g.set_editor_property("music_volume", mv0); quiet(False)
+        lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings")
+        if "bg_audio" in G: lms.set_editor_property("bAllowBackgroundAudio", G.pop("bg_audio"))
+    ok = (res.get("spot") is not None and res.get("far") is not None and res.get("fire_db_change") is not None and -10.0 < res["fire_db_change"] < -6.0
+          and res["rms_before"] > res["rms_now"] > res["rms_floor"] and all(abs(v_ - w_) < 1e-3 for v_, w_ in zip(res["volumes_now"].values(), (0.22, 0.26, 0.34))))
+    step_result("fire", ok, **res)
+def fire_measure(g):
+    """(the fire step) the recordings and their levels"""
+    c = yield from restart(); quiet(True); p = G["pawn"]
+    unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
+    # (the editor sets the volume to 0 while it is not in front, unless its Allow Background Audio is on: on for the step)
+    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); G["bg_audio"] = lms.get_editor_property("bAllowBackgroundAudio")
+    lms.set_editor_property("bAllowBackgroundAudio", True)
+    s0 = g.get_section(I2(0, 0)); fires = [(s0.get_fire_point(i), s0.get_fire_kind(i)) for i in range(s0.get_num_fire_points())]
+    torches = [f for f, k in fires if k == 0]
+    # a place 2.5 m in front of a torch, in its room, with no other fire within 9 m
+    spot = None
+    for f in torches:
+        if any((o - f).length() > 1.0 and (o - f).length() < 900.0 for o, _ in fires): continue
+        for k in range(16):
+            a = k * math.pi / 8; q = V(f.x + math.cos(a) * 250, f.y + math.sin(a) * 250, 100)
+            if s0.room_at(q) >= 0: spot = (q, f); break
+        if spot: break
+    # (somewhere out of that torch's earshot, to stop its voice: every room has fires of its own, so the floor is measured
+    # at the spot with the fires' volume at 0)
+    far = None
+    if spot:
+        for r_ in range(s0.get_num_rooms()):
+            q = s0.get_room_center(r_); q = V(q.x, q.y, 100)
+            if s0.get_room_kind(r_) != "Hallway junction" and (q - spot[1]).length() > 2200: far = q; break
+    out = os.path.join(unreal.Paths.project_saved_dir(), "RDM5Fire", TAG); os.makedirs(out, exist_ok=True)
+    def record(name, at, sec=4.0):
+        p.set_actor_location(far, False, True); yield from wait(0.8)        # (away from every fire: its voice stops)
+        p.set_actor_location(at, False, True); yield from wait(1.6)                                   # (back: it starts with the set's volume)
+        g.start_recording_output(sec + 1.0)
+        yield from rwait(sec)
+        g.stop_recording_output(out, name)
+        yield from rwait(0.5)
+        return rms_of(os.path.join(out, name + ".wav"))
+    def set_vol(scale):
+        snd = g.get_editor_property("sounds")
+        for k_, v_ in VOLS.items():
+            # (one loop file per set for the step: a voice picks one of a set's files at random, and two files' own
+            # loudness differs by more than the change measured)
+            st = snd[k_]; st.volume = v_ * scale; st.sounds = list(st.sounds)[:1]; snd[k_] = st
+        G["fire_scale"] = scale
+        g.set_editor_property("sounds", snd)
+    VOLS = {k_: g.get_editor_property("sounds")[k_].volume for k_ in ("Env.Torch", "Env.Brazier", "Env.Hearth")}
+    res = {"volumes_now": {k_: round(v_, 3) for k_, v_ in VOLS.items()}, "spot": [round(spot[0].x), round(spot[0].y)] if spot else None, "far": [round(far.x), round(far.y)] if far else None}
+    if spot and far:
+        set_vol(0.0); floor = yield from record("floor", spot[0]); set_vol(1.0)
+        new = yield from record("fire_now", spot[0])
+        set_vol(1.0 / 0.4); old = yield from record("fire_before", spot[0]); set_vol(1.0)
+        fire_new = math.sqrt(max(new * new - floor * floor, 0.0)); fire_old = math.sqrt(max(old * old - floor * floor, 0.0))
+        db = 20 * math.log10(fire_new / fire_old) if fire_new > 0 and fire_old > 0 else None
+        res.update({"rms_floor": round(floor, 6), "rms_now": round(new, 6), "rms_before": round(old, 6), "fire_db_change": round(db, 2) if db is not None else None,
+                    "fire_over_floor_db_now": round(20 * math.log10(max(new, 1e-9) / max(floor, 1e-9)), 2), "wavs": out})
+    return res
+
 STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "heroarmour": step_heroarmour, "follow": step_follow, "damage": step_damage, "ui": step_ui,
-         "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons}
+         "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons, "armourtable": step_armourtable, "repair": step_repair, "craft": step_craft,
+         "maps": step_maps, "fire": step_fire}
 def run():
     for s in PLAN:
         yield from STEPS[s]()
