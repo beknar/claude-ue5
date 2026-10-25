@@ -91,8 +91,14 @@ Keeps its namespace (tick callback); a pilot left armed by an earlier run is dro
 In real time (rehearse) the monsters come at her differently every run; the queue repeats a run exactly. A fight is left
 for the next monster when its monster keeps away (3 s no nearer, or 10 m off after 8 s), and turned on another that is on
 her and nearer; the weapons reel's tiers part keeps its last 24 s.
+Level 5 with the way "grip" (the two-handed grip close up, run5g; the Warrior): she stands in the great hall's middle,
+facing the way with most room, with the Plate Knight's Sword (given, then drawn); the game's camera, its boom shortened to
+165 cm, aimed 38 cm higher and its view narrowed to 40 degrees, looks at her from the front; her three two-handed cuts
+(W5_TwoHand1-3) at full speed, then the same three at a third of the speed (her own time dilation: the world's does not
+slow a Movie Render Queue render);
+the monsters near her are moved off and leave her be. Writes cine_grip_<hero>.json.
 Args: [render|rehearse] [seconds] [level: "2", "3", "4" or "5"] [level 4: hero] [level 4: east|north|west|south; level 5:
-weapons, heroes, craft or spells] [session seed]"""
+weapons, heroes, craft, spells or grip] [session seed]"""
 import unreal, sys, json, math, os
 __keep__ = True
 MODE = sys.argv[1] if len(sys.argv) > 1 else "render"
@@ -110,6 +116,7 @@ WAY = sys.argv[5] if len(sys.argv) > 5 else "east"
 W5H = L5 and WAY == "heroes"            # (level 5: the four heroes' weapons reel: run5h)
 W5C = L5 and WAY == "craft"             # (level 5: the armour table, loot and crafting reel: run5c)
 W5S = L5 and WAY == "spells"            # (level 5: the spells, rings, monsters by tier, corpses and menu reel: run5s)
+W5G = L5 and WAY == "grip"              # (level 5: the two-handed grip close up: run5g)
 W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
 W5K = W5C or W5S                        # (the crafting panel's and the repair list's recording)
 DX, DY = {"east": (1, 0), "north": (0, 1), "west": (-1, 0), "south": (0, -1)}.get(WAY, (1, 0))
@@ -120,7 +127,7 @@ CHESTS = L3 or L4                  # (she opens the containers she passes)
 if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner"].index(HERO) + 7
 if len(sys.argv) > 6: SEED = int(sys.argv[6])        # (level 4: a session seed of the reel's choosing: what the containers on her way hold)
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
-    ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
+    ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
     if MODE == "render" else ("cine_rehearsal_spells_%s.json" % HERO.lower() if W5S else "cine_rehearsal.json"))
 SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3"}[HERO] if L4 else
                                                              {"1": "caster", "2": "darkcaster", "3": "rogue"}[LV]) + r"\speeds.txt"
@@ -1389,8 +1396,69 @@ def run5s():
         if HERO == "Mage": G["casts0"] = c.attacks_made; seg("fight"); yield from fight_s(m, ["Fireball", "Frost Shard", "Fire"])
         else: yield from s5_fight(m)
 
+# ---------------------------------------------------------------- run5g: the two-handed grip, close and from the front
+GRIP_CUTS = ["a diagonal cut, from over her right shoulder down to her left", "an overhead chop, raised over her head, down in front of her",
+             "a horizontal sweep, from her right round to her left, turned at the waist"]
+def run5g():
+    """(level 5, the two-handed grip close up) the Warrior in the great hall with the Plate Knight's Sword, the camera
+    close in front of her (her upper body); her three cuts at full speed, then the same three at a third of the speed;
+    the monsters leave her be"""
+    gen, p = G["gen"], G["pawn"]
+    seg("start")
+    while T() <= 0.0 or G["combat"] is None:
+        yield
+    def start_count(): return sum(1 for q in gen.get_monsters() if alive(q) and q.get_editor_property("section").get_editor_property("coord") == IP(0, 0))
+    while T() < 0.5 or (start_count() < 10 and T() < 1.2):
+        yield
+    c = G["combat"]; c.set_inventory_open(False); c.set_crafting_open(False)
+    G["aggro0"] = (gen.get_editor_property("aggro_distance"), gen.get_editor_property("lose_distance"))
+    gen.set_editor_property("aggro_distance", 0.0); gen.set_editor_property("lose_distance", 1.0); event("quiet", on=True)
+    # (her place: the hall's middle, facing the way with the most room in front of her (the camera stands there))
+    centre = gen.get_start_room_center(); st = V(centre.x, centre.y, 100.0); best = None
+    for k in range(16):
+        yaw = 22.5 * k; d = V(math.cos(math.radians(yaw)), math.sin(math.radians(yaw)), 0.0)
+        room = next((r_ for r_ in (600.0, 450.0, 300.0, 200.0) if sweep_clear(st, V(st.x + d.x * r_, st.y + d.y * r_, 100.0), 60.0)), 0.0)
+        if best is None or room > best[0]: best = (room, yaw)
+    face = best[1]
+    for q in gen.get_monsters():                 # (none near her: a cut turns her to a monster in its reach)
+        if alive(q) and d2(q.get_actor_location(), st) < 900.0: q.set_actor_location(V(st.x - 1500.0, st.y, q.get_actor_location().z), False, True)
+    p.set_actor_location(st, False, True); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=face), True)
+    # (the sword: given, then drawn: a found weapon joins her weapons)
+    c.add_item("Plate Knight's Sword", 1)
+    wi = next((i for i, d in enumerate(gen.get_editor_property("weapons")) if str(d.name) == "Plate Knight's Sword"), None)
+    if wi is not None: c.select_weapon(wi)
+    wd = gen.get_editor_property("weapons")[wi] if wi is not None else None
+    clips = [str(a.get_name()) for a in wd.attacks] if wd else []
+    # (the camera: the game's own, its boom shortened and its view narrowed, turned to look at her from the front)
+    boom = next(iter(p.get_components_by_class(unreal.SpringArmComponent)), None); cam = next(iter(p.get_components_by_class(unreal.CameraComponent)), None)
+    if boom:
+        G["boom0"] = (boom.target_arm_length, boom.do_collision_test, boom.socket_offset, boom.target_offset)
+        boom.target_arm_length = 165.0; boom.do_collision_test = False; boom.socket_offset = V(0.0, 0.0, 0.0); boom.target_offset = V(0.0, 0.0, 38.0)
+    if cam: G["fov0"] = cam.field_of_view; cam.field_of_view = 40.0
+    G["grip_cam"] = (face + 180.0, -7.0)
+    event("start", at=[round(st.x), round(st.y)], face=round(face, 1), room_m=best[0] / 100.0, weapon=wd and str(wd.name), clips=clips, way="the two-handed grip, close up")
+    seg("grip")
+    yield from pause(1.6)
+    # (slowed: her own time dilation (her animation and her attack's clock); the world's did not slow the render)
+    for speed in (1.0, 1.0 / 3.0):
+        p.set_editor_property("custom_time_dilation", speed); event("speed", speed=round(speed, 3))
+        yield from pause(0.3)
+        for k in range(3):
+            p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=face), True)
+            ok = c.start_attack(); key_hit("lmb")
+            event("cut", n=k, clip=clips[k % len(clips)] if clips else "", what=GRIP_CUTS[k], speed=round(speed, 3), ok=bool(ok))
+            t0 = T()
+            while c.is_attacking() and T() - t0 < 4.0 / speed: p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=face), True); yield
+            yield from pause(0.45)
+        yield from pause(0.6)
+    p.set_editor_property("custom_time_dilation", 1.0); event("speed", speed=1.0)
+    save()
+    while True: yield
+
 def run():
     gen, pc, p = G["gen"], G["pc"], G["pawn"]
+    if W5G:
+        yield from run5g(); return
     if W5S:
         yield from run5s(); return
     if W5C:
@@ -1743,6 +1811,12 @@ def stop(why=None):
                     G["gen"].set_menu_open(False); G["gen"].set_editor_property("menu_pauses_game", True)
                     for i, v in enumerate(G.get("vol0", [])): G["gen"].set_user_volume(i, v)
                 if "aggro0" in G: G["gen"].set_editor_property("aggro_distance", G["aggro0"][0]); G["gen"].set_editor_property("lose_distance", G["aggro0"][1])
+                if W5G:
+                    # (the game's own speed and camera again)
+                    G["pawn"].set_editor_property("custom_time_dilation", 1.0)
+                    boom = next(iter(G["pawn"].get_components_by_class(unreal.SpringArmComponent)), None); cam = next(iter(G["pawn"].get_components_by_class(unreal.CameraComponent)), None)
+                    if boom and "boom0" in G: boom.target_arm_length, boom.do_collision_test, boom.socket_offset, boom.target_offset = G["boom0"]
+                    if cam and "fov0" in G: cam.field_of_view = G["fov0"]
         except Exception: pass
         G.clear()
 def body():
@@ -1820,6 +1894,7 @@ def body():
         if W5K: S["craftl"] = None; S["repl"] = None
         if W5S: S["rel"] = {str(k): v for k, v in G["combat"].spells_released.items()}; S["ssig"] = None; S["menul"] = None
     next(G["run"])
+    if W5G and "grip_cam" in G: G["pc"].set_control_rotation(Rot(roll=0.0, pitch=G["grip_cam"][1], yaw=G["grip_cam"][0]))       # (run5g: the camera in front of her)
     if G["going"] and G["combat"] is not None:
         hits(); heard()
         n = len(gen.get_section_coords())

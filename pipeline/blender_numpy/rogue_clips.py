@@ -295,9 +295,19 @@ def solve_arm(arm_obj, ctx, side, op):
             Uw = dn * math.cos(ang) + p * math.sin(ang); E = S + Uw * a
             cands.append((Uw, (S + dn * dist - E).normalized(), 0.0004 * math.degrees(p.angle(pole - dn * pole.dot(dn))) ** 2))
     qx = exact_hand(A, exact["front"], exact["up"]) if exact else None
+    # (a head to keep the elbow and forearm out of (weapon5_clips' head_ball, in the head's rest frame): the elbow chosen for
+    # the wrist alone went behind her head for a hilt raised over it)
+    hb = ctx.get("head_ball"); hc = None
+    if hb is not None:
+        Bh = arm_obj.data.bones["head"]; hc = P["head"].matrix @ (Bh.matrix_local.inverted() @ hb[0]); hr = hb[1] + 4.0 * ctx["cm"]
     aims = [(A["local"][k], v.normalized(), {"blade": 0.012, "axis": 0.002, "palm": 0.003}[k]) for k, v in (want or {}).items()]
     best = None
     for Uw, L, c0 in cands:
+        if hc is not None:
+            E = S + Uw * A["a"]
+            for p_ in (E, E + L * (A["b"] * 0.5)):
+                dd = ((p_ - hc).length - hr) / ctx["cm"]
+                if dd < 0.0: c0 = c0 + 2.0 * dd * dd
         qmin = (qu0 @ Y).rotation_difference(Uw) @ qu0
         bend = math.degrees(Uw.angle(L)); h = qmin @ A["hinge"]; h = h - Uw * h.dot(Uw)
         bax = Uw.cross(L)
@@ -306,8 +316,15 @@ def solve_arm(arm_obj, ctx, side, op):
             # the upper arm's turn about itself (from the shortest swing there): her cape is skinned to it, and a big
             # one lifted the cape off her back
             roll = (math.degrees(sh) + ds + 180.0) % 360.0 - 180.0
-            c1 = c0 + 0.02 * (ds * min(1.0, bend / 25.0)) ** 2 + roll_cost(roll)
             qu = Quaternion(Uw, sh + math.radians(ds)) @ qmin
+            # (a clip solved frame by frame (weapon5_clips' two-handed cuts): the upper arm rather as it was a frame ago;
+            # chosen afresh, it jumped 140 to 225 degrees between frames and the engine's blend spun the arm through her.
+            # The roll's limit then counts for little: measured from the shortest swing from the T-pose, it flips half a
+            # turn when the arm reaches across her body, and kept, it forced the arm to flip with it)
+            prev = ctx.get("prev_arm", {}).get(side)
+            c1 = c0 + 0.02 * (ds * min(1.0, bend / 25.0)) ** 2 + roll_cost(roll) * (ctx.get("roll_scale", 1.0) if prev is not None else ctx.get("roll_scale_key", 1.0))
+            if prev is not None:
+                da = math.degrees(qu.rotation_difference(prev).angle); da = min(da, 360.0 - da); c1 += ctx.get("cont_w", 0.01) * da * da
             qfi = qu @ A["rel_e"]; qf = (qfi @ Y).rotation_difference(L) @ qfi
             if qx is not None:
                 w = wrist_of(A, qf, qx); c = c1 + wrist_cost(*w)

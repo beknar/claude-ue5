@@ -636,6 +636,12 @@ def step_tierloot():
         ok = ok and e["ok"]; res[f"tier{t}"] = e
     step_result("tierloot", ok, **res)
 
+HILT_SPACING = {}
+for _h, _ch in (("Warrior", "Fem5"), ("Warlock", "DarkCaster")):
+    try: HILT_SPACING[_h] = float(json.load(open(os.path.join(SA, "random_dungeon_magic5", "w5_clips", _ch, "w5_times.json")))["left_on_hilt"])
+    except Exception: pass
+
+
 def step_weapons():
     g = G["gen"]; c = yield from restart(); quiet(True)
     rules = W5["rules"]["who"]; out = {}; shots_ = []
@@ -738,7 +744,10 @@ def step_weapons():
         if not e.get("hands"): return e.get("refused", False)
         for h in e["hands"]:
             if not (h["mesh_ok"] and h["grip_to_palm_cm"] < 7.0 and abs(h["damage"] - h["want_damage"]) < 0.01 and abs(h.get("attack_s", -9) - h.get("want_s", 9)) < 0.03): return False
-            if "left_palm_off_hilt_cm" in h and not (h["left_palm_off_hilt_cm"] < 4.0 and all(-14.0 < a < -2.0 for a in h["left_palm_along_hilt_cm"])): return False
+            # (the left palm a fist's span below the right on the hilt, as weapon5_clips measured her fists (w5_times.json), within
+            # 3 cm, at each blow; within 4 cm of the hilt's line)
+            L = HILT_SPACING.get(hero, 7.5)
+            if "left_palm_off_hilt_cm" in h and not (h["left_palm_off_hilt_cm"] < 4.0 and all(-(L + 3.0) < a < -(L - 3.0) for a in h["left_palm_along_hilt_cm"])): return False
         b = e["break"]
         return b.get("wear_after_one") == 1.0 and b["broke"] == 1 and b["last_broken"] == b["weapon"] and not b["still_carried"] and b["now_in_hand"] != b["weapon"] and "broke" in b["message"]
     ok = all(hero_ok(h, e) for h, e in out.items()) and len(out) == 5
