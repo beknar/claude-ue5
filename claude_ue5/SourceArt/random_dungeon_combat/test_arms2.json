@@ -1,0 +1,120 @@
+{
+ "tag": "arms2",
+ "plan": [
+  "setup",
+  "weapons"
+ ],
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_SFC_Fem5Character_C",
+   "hit_points": 100.0,
+   "from_start_room_cm": 0,
+   "start_room_from_section_middle_cm": 0,
+   "weapon": "Sword",
+   "weapons": 3,
+   "combat": true
+  },
+  {
+   "step": "weapons",
+   "ok": true,
+   "weapons": [
+    {
+     "weapon": "Sword",
+     "mesh": "SM_Sword_1",
+     "bone": "hand_r",
+     "cm_from_hand": 69.3,
+     "shield": "SM_Shield_1",
+     "damage": 22.0,
+     "reach": 170.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 81,
+     "attack_seconds": 0.84,
+     "grip": {
+      "hand_at_mesh_z": 69.0,
+      "mesh_z": [
+       -1,
+       87
+      ],
+      "mesh_there_cm": [
+       2.9,
+       2.9
+      ],
+      "axis_from_hand_cm": 6.9,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": 55.4,
+     "ok": true
+    },
+    {
+     "weapon": "Spear",
+     "mesh": "SM_Spear",
+     "bone": "hand_r",
+     "cm_from_hand": 95.3,
+     "shield": "SM_Shield_1",
+     "damage": 17.0,
+     "reach": 260.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 103,
+     "attack_seconds": 0.67,
+     "grip": {
+      "hand_at_mesh_z": 95.0,
+      "mesh_z": [
+       1,
+       245
+      ],
+      "mesh_there_cm": [
+       2.5,
+       2.5
+      ],
+      "axis_from_hand_cm": 7.0,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": 54.0,
+     "ok": true
+    },
+    {
+     "weapon": "Axe",
+     "mesh": "SM_Axe",
+     "bone": "hand_r",
+     "cm_from_hand": 9.8,
+     "shield": null,
+     "damage": 36.0,
+     "reach": 190.0,
+     "attack_started": true,
+     "second_refused": true,
+     "montage": true,
+     "hand_moved_cm": 103,
+     "attack_seconds": 1.3,
+     "grip": {
+      "hand_at_mesh_z": 7.0,
+      "mesh_z": [
+       -19,
+       72
+      ],
+      "mesh_there_cm": [
+       4.2,
+       4.0
+      ],
+      "axis_from_hand_cm": 6.9,
+      "on_handle": true
+     },
+     "shield_top_over_point_cm": null,
+     "ok": true
+    }
+   ]
+  }
+ ],
+ "error": null,
+ "kills": 0,
+ "attacks": 3,
+ "hits": 0,
+ "deaths": 0,
+ "damage_dealt": 0.0,
+ "damage_taken": 0.0
+}

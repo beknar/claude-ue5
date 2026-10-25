@@ -13,5 +13,35 @@
   "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic5\\w5_clips\\DarkCaster\\T_DarkCaster_Color.png"
  },
  "height_cm": 170.0,
- "hair": null
+ "hair": null,
+ "proportions": {
+  "r": {
+   "shoulder_to_wrist_before": 0.20427,
+   "after": 0.28598
+  },
+  "l": {
+   "shoulder_to_wrist_before": 0.20027,
+   "after": 0.28037
+  },
+  "factor": 1.4,
+  "vertices_moved": {
+   "SK_JRPG_DarkCaster": 8877
+  },
+  "shoulders": {
+   "r": {
+    "collarbone_before": 0.04718,
+    "after": 0.06605
+   },
+   "l": {
+    "collarbone_before": 0.04718,
+    "after": 0.06605
+   },
+   "joints_before": 0.13275,
+   "joints_after": 0.17023,
+   "factor": 1.4,
+   "vertices_moved": {
+    "SK_JRPG_DarkCaster": 15796
+   }
+  }
+ }
 }

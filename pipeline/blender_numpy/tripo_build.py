@@ -5,6 +5,8 @@ Clips in the mesh FBX would make UE rebind the skin to a clip pose, hence two fi
 clip_maker: a Python file with make_clips(arm, scene, clips) -> {name: frames} (frames as sampled here: per frame, each pose
 bone's matrix_basis decomposed, on the GLB's own armature) for clips the GLB lacks (caster_clips.py: an idle and spell casts).
 hair.json: hair chains added to the rig and the hair skinned to them (tripo_hair.py; the bones get no keys in the clips).
+Proportions: a hero listed in tripo_proportions.py (by tag) is changed after her own clips are sampled and before the clip
+maker runs (the Warrior's and the Warlock's arms lengthened).
 Blender: -b -P tripo_build.py -- model.glb out_dir name tag [height_cm] [clip_maker.py | -] [hair.json]"""
 import bpy, sys, os, json
 from mathutils import Matrix
@@ -52,6 +54,11 @@ ad.action = None
 for a in list(bpy.data.actions): bpy.data.actions.remove(a)
 for pb in arm.pose.bones: pb.matrix_basis.identity()
 bpy.context.view_layer.update()
+# (her proportions changed (tripo_proportions: the Warrior's and the Warlock's arms lengthened) after her own clips are
+# sampled (turns from the rest: they carry over) and before any clip is made, so every clip is made and exported on it)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import tripo_proportions
+PROPORTIONS = tripo_proportions.apply(arm, meshes, TAG)
 if MAKER:
     import importlib.util
     spec = importlib.util.spec_from_file_location("clip_maker", MAKER); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
@@ -112,5 +119,6 @@ bpy.ops.export_scene.fbx(filepath=os.path.join(out, NAME + "_Clips.fbx"), use_se
                          bake_anim=True, bake_anim_use_all_actions=True, bake_anim_use_nla_strips=False, bake_anim_force_startend_keying=True,
                          bake_anim_simplify_factor=0.0, apply_unit_scale=True, apply_scale_options='FBX_SCALE_NONE',
                          use_armature_deform_only=False, mesh_smooth_type='FACE', use_tspace=True, path_mode='STRIP')
-json.dump({"clips": {k: len(v) for k, v in clips.items()}, "textures": tex, "height_cm": HEIGHT_CM, "hair": hair_report}, open(os.path.join(out, "build.json"), "w"), indent=1)
+json.dump({"clips": {k: len(v) for k, v in clips.items()}, "textures": tex, "height_cm": HEIGHT_CM, "hair": hair_report,
+           "proportions": PROPORTIONS}, open(os.path.join(out, "build.json"), "w"), indent=1)
 print("EXPORT DONE")

@@ -62,7 +62,7 @@
            blades and ranged), the others stay in her pack as weapons she cannot wield (the Mage and the Summoner: all,
            and using one says she cannot); each one drawn: its mesh in her hand with its handle's grip point within 7 cm
            of her palm, its damage (8 + 3 x rating, her bonus), its attack's length (the table's speed: 1.6 - (speed - 1)
-           x 1.05 / 9 s); a two-handed sword at the blow has her left palm on the hilt below the right; a blow that lands
+           x 1.05 / 9 s); a two-handed sword is wielded as her one-handed sword (her sword's clips, nothing in her other hand at the blow); a blow that lands
            takes 1 off its durability, and at 0 it breaks: gone from her weapons, her first one drawn, "broke"; pictures
            from in front of her (the face camera, her alone) at the blow
   (the user's list of 2026-10-24)
@@ -700,16 +700,18 @@ def step_weapons():
                 hit_at = (wd.hit_times[k] - (wd.attack_starts[k] if len(wd.attack_starts) > k else 0.0)) / wd.play_rate
                 yield from wait(hit_at)
                 if w["type"] == "two handed sword":
-                    xf = comp.get_world_transform(); o_ = xf.transform_location(V(*fr["origin"])); x_ = xf.transform_direction(V(*fr["x"])).normal()
-                    lp = body.get_socket_transform("hand_l", unreal.RelativeTransformSpace.RTS_WORLD).transform_location(pl)
-                    tt = (lp - o_).dot(x_); alongs.append(round(tt, 1)); offs.append(round((lp - (o_ + x_ * tt)).length(), 1))
+                    # (wielded as her one-handed sword: her sword's clips, nothing in her other hand at the blow)
+                    oh = c.get_off_hand_mesh()
+                    offs.append(bool(oh is not None and oh.static_mesh is not None and oh.is_visible()))
                 if k == 0 and (wi == 0 or name in ("Katana", "Plate Knight's Sword", "Ursag's Horn Blade", "Kukri", "Longbow", "Viking Bow", "Crossbow", "Dwarf Crossbow")):
                     front_shot(f"{hero}_{wkey(name)}")
                 t0 = now()
                 while c.is_attacking() and now() - t0 < 3.0: yield
                 yield from wait(0.12)
             if lens: h["attack_s"] = round(sum(lens) / len(lens), 3); h["attacks"] = len(lens); h["want_s"] = round(cycle(w["speed"]), 3)
-            if offs: h["left_palm_off_hilt_cm"] = max(offs); h["left_palm_along_hilt_cm"] = alongs
+            if w["type"] == "two handed sword":
+                h["off_hand_shown"] = any(offs)
+                h["sword_clips"] = [a.get_name() for a in wd.attacks] == [a.get_name() for a in g.weapons[0].attacks]
             hands.append(h)
         # a blow that lands takes 1 off; at 0 it breaks and she draws her first weapon
         i = n0; name = took[0]; c.select_weapon(i); yield
@@ -744,10 +746,8 @@ def step_weapons():
         if not e.get("hands"): return e.get("refused", False)
         for h in e["hands"]:
             if not (h["mesh_ok"] and h["grip_to_palm_cm"] < 7.0 and abs(h["damage"] - h["want_damage"]) < 0.01 and abs(h.get("attack_s", -9) - h.get("want_s", 9)) < 0.03): return False
-            # (the left palm a fist's span below the right on the hilt, as weapon5_clips measured her fists (w5_times.json), within
-            # 3 cm, at each blow; within 4 cm of the hilt's line)
-            L = HILT_SPACING.get(hero, 7.5)
-            if "left_palm_off_hilt_cm" in h and not (h["left_palm_off_hilt_cm"] < 4.0 and all(-(L + 3.0) < a < -(L - 3.0) for a in h["left_palm_along_hilt_cm"])): return False
+            # (a two-handed sword wielded as her one-handed sword: her sword's clips, nothing in her other hand)
+            if "sword_clips" in h and not (h["sword_clips"] and not h["off_hand_shown"]): return False
         b = e["break"]
         return b.get("wear_after_one") == 1.0 and b["broke"] == 1 and b["last_broken"] == b["weapon"] and not b["still_carried"] and b["now_in_hand"] != b["weapon"] and "broke" in b["message"]
     ok = all(hero_ok(h, e) for h, e in out.items()) and len(out) == 5

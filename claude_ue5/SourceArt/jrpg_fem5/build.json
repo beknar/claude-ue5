@@ -7,5 +7,36 @@
  "textures": {
   "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_fem5\\T_Fem5_Color.png"
  },
- "height_cm": 165.0
+ "height_cm": 165.0,
+ "hair": null,
+ "proportions": {
+  "r": {
+   "shoulder_to_wrist_before": 0.19785,
+   "after": 0.29677
+  },
+  "l": {
+   "shoulder_to_wrist_before": 0.1982,
+   "after": 0.29729
+  },
+  "factor": 1.5,
+  "vertices_moved": {
+   "SK_JRPG_Fem5": 6125
+  },
+  "shoulders": {
+   "r": {
+    "collarbone_before": 0.0587,
+    "after": 0.07924
+   },
+   "l": {
+    "collarbone_before": 0.0587,
+    "after": 0.07924
+   },
+   "joints_before": 0.14056,
+   "joints_after": 0.18155,
+   "factor": 1.35,
+   "vertices_moved": {
+    "SK_JRPG_Fem5": 8468
+   }
+  }
+ }
 }

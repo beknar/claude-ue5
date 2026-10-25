@@ -1,5 +1,5 @@
 {
- "tag": "g3",
+ "tag": "g6",
  "plan": [
   "weapons",
   "breakdown"
@@ -137,7 +137,7 @@
        "weapon": "Plate Knight's Sword",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 45.5,
        "want_damage": 45.5,
        "durability": 97.0,
@@ -145,18 +145,14 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.0,
-       "left_palm_along_hilt_cm": [
-        -11.4,
-        -11.7,
-        -11.4
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Paladin's Sword",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 45.5,
        "want_damage": 45.5,
        "durability": 98.0,
@@ -164,18 +160,14 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 0.9,
-       "left_palm_along_hilt_cm": [
-        -11.4,
-        -11.6,
-        -11.4
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Dark Knight's Sword",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 49.4,
        "want_damage": 49.4,
        "durability": 99.0,
@@ -183,18 +175,14 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 0.7,
-       "left_palm_along_hilt_cm": [
-        -11.4,
-        -11.6,
-        -11.5
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Ursag's Horn Blade",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 49.4,
        "want_damage": 49.4,
        "durability": 100.0,
@@ -202,12 +190,8 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 1.2,
-       "left_palm_along_hilt_cm": [
-        -11.4,
-        -11.6,
-        -11.3
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Eastern Sabre",
@@ -555,7 +539,7 @@
        "weapon": "Plate Knight's Sword",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 35.0,
        "want_damage": 35.0,
        "durability": 97.0,
@@ -563,18 +547,14 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.3,
-       "left_palm_along_hilt_cm": [
-        -14.0,
-        -14.6,
-        -13.9
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Paladin's Sword",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 35.0,
        "want_damage": 35.0,
        "durability": 98.0,
@@ -582,18 +562,14 @@
        "attack_s": 1.483,
        "attacks": 3,
        "want_s": 1.483,
-       "left_palm_off_hilt_cm": 1.4,
-       "left_palm_along_hilt_cm": [
-        -14.0,
-        -14.6,
-        -14.0
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Dark Knight's Sword",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 38.0,
        "want_damage": 38.0,
        "durability": 99.0,
@@ -601,18 +577,14 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 1.4,
-       "left_palm_along_hilt_cm": [
-        -14.0,
-        -14.4,
-        -13.9
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Ursag's Horn Blade",
        "mesh_ok": true,
        "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
+       "grip_to_palm_cm": 5.3,
        "damage": 38.0,
        "want_damage": 38.0,
        "durability": 100.0,
@@ -620,12 +592,8 @@
        "attack_s": 1.6,
        "attacks": 3,
        "want_s": 1.6,
-       "left_palm_off_hilt_cm": 1.0,
-       "left_palm_along_hilt_cm": [
-        -14.0,
-        -14.6,
-        -14.3
-       ]
+       "off_hand_shown": false,
+       "sword_clips": true
       },
       {
        "weapon": "Eastern Sabre",

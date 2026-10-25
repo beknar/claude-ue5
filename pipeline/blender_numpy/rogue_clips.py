@@ -132,7 +132,8 @@ def shoot(ctx, k):
     up, back = {"aim": (0.0, 0.0), "kick": (2.5, 2.5), "hold": (0.8, 1.0)}[k]
     sp = C.body(ctx, twist=STANCE, lean=4 - 0.8 * up, knees=9, look=0.95)
     front = D("r", 0.0, 1.0, 0.03 + 0.03 * up)
-    sp.update(reach("r", (XB_HAND[0], XB_HAND[1] - back, XB_HAND[2] + up), D("r", 0.6, 0.0, -0.8), None, {"front": front, "up": U}))
+    xh = ctx.get("xb_hand", XB_HAND)                          # (weapon5_clips' heroes: their own, for their longer arms)
+    sp.update(reach("r", (xh[0], xh[1] - back, xh[2] + up), D("r", 0.6, 0.0, -0.8), None, {"front": front, "up": U}))
     sp.update(DC.fist("r"))
     sp.update(reach("l", ("crossbow",) + XB_SUPPORT, D("l", 0.3, 0.1, -1.0), {"axis": D("l", -0.55, 0.8, 0.15), "palm": U}))
     for fn in C.FINGERS:
@@ -257,6 +258,47 @@ def wrist_cost(fl, dv, tw):
     return 0.5 * (ex(fl, FLEX) ** 2 + ex(dv, DEV) ** 2 + ex(tw, TWIST) ** 2) + 0.0004 * (fl * fl + dv * dv + tw * tw)
 
 
+# (cm from the bone line to her skin: the arm's own thickness, so the arm may lie against her ribs but not go into her;
+# 5 / 4.5 cm and a weight of 2 forbade the touch of a resting upper arm too, and every frame gave its wrists up for it)
+ARM_CLEAR = {"upper": 4.0, "elbow": 3.5, "fore": 3.5, "wrist": 3.0}
+
+
+def comfort_cost(ctx, fl, dv, tw):
+    """(ctx["wrist_comfort"]: {"flex", "dev", "twist": ranges, "w": weight}) a wrist bent past the range it holds a weapon
+    in without strain, squared: the limits alone let a two-handed grip bend 50 to 60 degrees (inside them, nearly free);
+    held as in a katana's guards, the wrists stay near straight and the forearms' turn and the elbows set the blade"""
+    wc = ctx.get("wrist_comfort")
+    if not wc: return 0.0
+    ex = lambda x, r: max(0.0, r[0] - x, x - r[1])
+    return wc["w"] * (ex(fl, wc["flex"]) ** 2 + ex(dv, wc["dev"]) ** 2 + ex(tw, wc["twist"]) ** 2)
+
+
+def elbow_off(Ev, dn, out, cm, er):
+    """(Ev: shoulder to elbow; dn: the way shoulder to hand) how far the elbow points in toward her middle and up off
+    the line from the shoulder to the hand, past what er allows (cm; <= 0 within)"""
+    perp = Ev - dn * Ev.dot(dn)
+    return perp.dot(-out) / cm - er["in"], perp.dot(U) / cm - er["up"]
+
+
+def torso_now(arm_obj, ctx):
+    """(ctx["torso_pts"]: per bone, points of her torso's skin and their outward ways in the bone's rest space) those
+    points and ways as the pose carries them now, two arrays (armature space)"""
+    import numpy as np
+    P = arm_obj.pose.bones; B = arm_obj.data.bones; qs, ns = [], []
+    for b, pts, nrm in ctx["torso_pts"]:
+        M = P[b].matrix; R3 = np.array(M.to_3x3()); t = np.array(M.translation)     # (the points are in the bone's own rest space)
+        qs.append(pts @ R3.T + t); ns.append(nrm @ R3.T)
+    return np.vstack(qs), np.vstack(ns)
+
+
+def body_short(TQ, TN, p, margin, cm):
+    """how far the point p falls short of `margin` cm outside her torso (the nearest skin point's outward way)"""
+    import numpy as np
+    d2 = ((TQ - np.array(p)) ** 2).sum(1); i = int(d2.argmin())
+    d = float(np.dot(np.array(p) - TQ[i], TN[i])) / cm
+    return margin - d
+
+
 def exact_hand(A, front, up):
     """the hand's turn that puts the weapon's front and rail (its own frame: A["local"]) on front and up"""
     def frame(x, z):
@@ -301,13 +343,33 @@ def solve_arm(arm_obj, ctx, side, op):
     if hb is not None:
         Bh = arm_obj.data.bones["head"]; hc = P["head"].matrix @ (Bh.matrix_local.inverted() @ hb[0]); hr = hb[1] + 4.0 * ctx["cm"]
     aims = [(A["local"][k], v.normalized(), {"blade": 0.012, "axis": 0.002, "palm": 0.003}[k]) for k, v in (want or {}).items()]
+    # (ctx["elbow_rules"]: the elbow kept as in a katana's guards: off the line from the shoulder to the hand it points
+    # out to its own side and down, never in toward her middle nor up (er["in"], er["up"]: cm allowed); the elbow chosen
+    # for the wrist alone folded up and in across her chest)
+    er = ctx.get("elbow_rules") if op[0] != "hold" else None
+    # (ctx["torso_pts"]: the whole arm, upper arm, elbow, forearm and wrist, kept outside her torso by ARM_CLEAR (cm, the
+    # bone line to her skin): the elbow placed for the hands alone hung down and in, and the upper arms went through her
+    # chest as she raised the sword (the user saw it); kept out, the elbows flare to the sides or forward)
+    TQ = None
+    if ctx.get("torso_pts") and op[0] != "hold": TQ, TN = torso_now(arm_obj, ctx)
     best = None
     for Uw, L, c0 in cands:
+        if er:
+            c0 = c0 + er["w"] * sum(max(0.0, v) ** 2 for v in elbow_off(Uw * A["a"], dn, C.OUT[side], ctx["cm"], er))
+        if hc is not None or TQ is not None:
+            E = S + Uw * A["a"]; Wr = E + L * A["b"]
+            # (the upper arm from three quarters along: nearer the shoulder it meets her body in the armpit's fold whenever
+            # the arm is raised, and counting it there dragged the Warlock's raised hilts down to her waist)
+            arm_pts = [(S.lerp(E, 0.75), ARM_CLEAR["upper"]), (E, ARM_CLEAR["elbow"]),
+                       (E.lerp(Wr, 0.35), ARM_CLEAR["fore"]), (E.lerp(Wr, 0.7), ARM_CLEAR["fore"]), (Wr, ARM_CLEAR["wrist"])]
         if hc is not None:
-            E = S + Uw * A["a"]
-            for p_ in (E, E + L * (A["b"] * 0.5)):
+            for p_, _m in arm_pts:
                 dd = ((p_ - hc).length - hr) / ctx["cm"]
                 if dd < 0.0: c0 = c0 + 2.0 * dd * dd
+        if TQ is not None:
+            for p_, m_ in arm_pts:
+                sh_ = body_short(TQ, TN, p_, m_, ctx["cm"])
+                if sh_ > 0.0: c0 = c0 + ctx.get("torso_w", 1.0) * sh_ * sh_
         qmin = (qu0 @ Y).rotation_difference(Uw) @ qu0
         bend = math.degrees(Uw.angle(L)); h = qmin @ A["hinge"]; h = h - Uw * h.dot(Uw)
         bax = Uw.cross(L)
@@ -327,11 +389,11 @@ def solve_arm(arm_obj, ctx, side, op):
                 da = math.degrees(qu.rotation_difference(prev).angle); da = min(da, 360.0 - da); c1 += ctx.get("cont_w", 0.01) * da * da
             qfi = qu @ A["rel_e"]; qf = (qfi @ Y).rotation_difference(L) @ qfi
             if qx is not None:
-                w = wrist_of(A, qf, qx); c = c1 + wrist_cost(*w)
+                w = wrist_of(A, qf, qx); c = c1 + wrist_cost(*w) + comfort_cost(ctx, *w)
                 if best is None or c < best[0]: best = (c, qu, qf, qx, w, c1, roll)
                 continue
             for fl, dv, tw, Wr in A["grid"]:
-                qh = qf @ Wr; c = c1 + wrist_cost(fl, dv, tw)
+                qh = qf @ Wr; c = c1 + wrist_cost(fl, dv, tw) + comfort_cost(ctx, fl, dv, tw)
                 for v, aim, wt in aims: c += wt * math.degrees((qh @ v).angle(aim)) ** 2
                 if best is None or c < best[0]: best = (c, qu, qf, qh, (fl, dv, tw), c1, roll)
     c, qu, qf, qh, w, c1, roll = best
@@ -341,7 +403,7 @@ def solve_arm(arm_obj, ctx, side, op):
             for fl in (fl0 - step, fl0, fl0 + step):
                 for dv in (dv0 - step, dv0, dv0 + step):
                     for tw in (tw0 - 2 * step, tw0, tw0 + 2 * step):
-                        qh_ = qf @ wrist_q(A, fl, dv, tw) @ A["rel_h"]; c_ = c1 + wrist_cost(fl, dv, tw)
+                        qh_ = qf @ wrist_q(A, fl, dv, tw) @ A["rel_h"]; c_ = c1 + wrist_cost(fl, dv, tw) + comfort_cost(ctx, fl, dv, tw)
                         for v, aim, wt in aims: c_ += wt * math.degrees((qh_ @ v).angle(aim)) ** 2
                         if c_ < c: c, qh, w = c_, qh_, (fl, dv, tw)
         w = wrist_of(A, qf, qh)

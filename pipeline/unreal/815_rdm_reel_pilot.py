@@ -1402,7 +1402,8 @@ GRIP_CUTS = ["a diagonal cut, from over her right shoulder down to her left", "a
 def run5g():
     """(level 5, the two-handed grip close up) the Warrior in the great hall with the Plate Knight's Sword, the camera
     close in front of her (her upper body); her three cuts at full speed, then the same three at a third of the speed;
-    the monsters leave her be"""
+    the monsters leave her be. (Level 5 now wields a two-handed sword with her sword's clips and no shield: the cuts
+    are those.)"""
     gen, p = G["gen"], G["pawn"]
     seg("start")
     while T() <= 0.0 or G["combat"] is None:
@@ -1436,7 +1437,7 @@ def run5g():
         boom.target_arm_length = 165.0; boom.do_collision_test = False; boom.socket_offset = V(0.0, 0.0, 0.0); boom.target_offset = V(0.0, 0.0, 38.0)
     if cam: G["fov0"] = cam.field_of_view; cam.field_of_view = 40.0
     G["grip_cam"] = (face + 180.0, -7.0)
-    event("start", at=[round(st.x), round(st.y)], face=round(face, 1), room_m=best[0] / 100.0, weapon=wd and str(wd.name), clips=clips, way="the two-handed grip, close up")
+    event("start", at=[round(st.x), round(st.y)], face=round(face, 1), room_m=best[0] / 100.0, weapon=wd and str(wd.name), clips=clips, way="the Plate Knight's Sword, close up")
     seg("grip")
     yield from pause(1.6)
     # (slowed: her own time dilation (her animation and her attack's clock); the world's did not slow the render)
@@ -1446,7 +1447,8 @@ def run5g():
         for k in range(3):
             p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=face), True)
             ok = c.start_attack(); key_hit("lmb")
-            event("cut", n=k, clip=clips[k % len(clips)] if clips else "", what=GRIP_CUTS[k], speed=round(speed, 3), ok=bool(ok))
+            clip = clips[k % len(clips)] if clips else ""   # (the two-handed cuts' words only for those clips: level 5 wields it as a sword)
+            event("cut", n=k, clip=clip, what=GRIP_CUTS[k] if "TwoHand" in clip else "", speed=round(speed, 3), ok=bool(ok))
             t0 = T()
             while c.is_attacking() and T() - t0 < 4.0 / speed: p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=face), True); yield
             yield from pause(0.45)

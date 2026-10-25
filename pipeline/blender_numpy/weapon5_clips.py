@@ -46,7 +46,7 @@ LEFT_ON_HILT = 7.5          # (cm of her 170: Tripo's heroes have short arms, 34
                             # make_clips sets it from her fists: their span on the hilt, measured on the mesh, and FIST_GAP)
 FIST_GAP = 1.0              # cm between the two fists on the hilt (7.5 put 37 to 48 of the left hand's vertices inside the right)
 GAP_MIN = 5.0               # cm the two forearms keep apart (the hilt at her breastbone crossed them over her chest)
-GAP_W = 30.0                # what a cm short of GAP_MIN costs, squared, against a wrist's degree past its limits
+GAP_W = 100.0                # what a cm short of GAP_MIN costs, squared, against a wrist's degree past its limits
 TIMES = {"W5_TwoHand1": (0.40, 0.58, 0.82, 1.30), "W5_TwoHand2": (0.44, 0.62, 0.86, 1.35), "W5_TwoHand3": (0.38, 0.56, 0.80, 1.25)}
 BOW = {"raise": 0.26, "draw": 0.52, "release": 0.58, "loose": 0.64, "hold": 0.82, "end": 1.15}
 RELEASE = {"Bow": BOW["release"]}
@@ -105,8 +105,9 @@ def two_hands(at, blade, edge, pole_r=None, pole_l=None, phi=0.0):
 # her breastbone: both forearms lay across her chest, one over the other, and the left wrist folded 69 degrees past its
 # limits to close round the hilt.)
 def guard2():
-    """the two-handed middle guard: the hilt forward at her waist, the blade forward and up"""
-    return 8, 2, 7, (2, 26, -24), D("r", 0.05, 0.60, 0.80), D("r", 0.0, 0.8, -0.6)
+    """the guard (the katana's middle guard): the hands well out in front of her lower belly, the left (on the pommel)
+    lower, the blade rising toward an opponent's throat, the elbows down beside her"""
+    return 5, 2, 8, (2, 38, -26), D("r", 0.0, 0.78, 0.62), D("r", 0.0, 0.62, -0.78)
 
 
 # (her chest reaches 16 cm forward of her neck's base from 10 to 20 cm below it, 6 to 9 cm at her shoulders and 12 cm at
@@ -131,8 +132,7 @@ OVERHEAD_POLES = ((0.9, 0.15, 0.4), (0.9, 0.15, 0.4))
 # Warlock's head and hair stand higher and wider, so her arms raised for the chop at (2, 4, 24) were 6.5 cm short of
 # clearing them; her diagonal's follow-through, her sweep's blow and her chop's blow and follow-through were 1 to 2 cm
 # into her at the Warrior's places. Picked by the clip folder's name, or W5_HERO)
-HERO_PLACES = {"DarkCaster": {("two2", "wind"): (6, 4, 22), ("two1", "follow"): (-20, 34, -14), ("two3", "release"): (-6, 36, -18),
-                              ("two2", "release"): ((1, 40, -20), (0.0, 0.8, 0.6)), ("two2", "follow"): (8, 38, -16)}}
+HERO_PLACES = {}
 
 
 def hero_key(p, v):
@@ -147,31 +147,76 @@ def hero_name():
 
 
 def two1(k):
-    """a diagonal cut: from over her right shoulder, down across to her left"""
-    if k == "wind": return 35, -3, 8, (16, 10, 18), D("r", 0.35, -0.55, 0.75), D("r", -0.3, 0.8, -0.4)
-    if k == "release": return -15, 9, 13, (-6, 36, -20), D("r", -0.2, 0.7, 0.68), D("r", -0.6, 0.2, -0.8)
-    return -40, 7, 11, (-22, 30, -20), D("r", -0.55, 0.83, 0.05), D("r", -0.2, 0.6, -0.5)
+    """a diagonal cut: from beside her raised right shoulder (the blade up and back over it), down across her at full
+    reach (struck at her chest's height), on low to her left hip"""
+    if k == "mid": return None
+    if k == "wind": return 35, -3, 8, (14, 12, 20), D("r", 0.3, -0.45, 0.85), D("r", -0.3, 0.8, -0.4)
+    if k == "release": return -15, 9, 13, (-4, 46, -16), D("r", -0.35, 0.8, 0.5), D("r", -0.6, 0.2, -0.8)
+    return -40, 7, 11, (-18, 36, -32), D("r", -0.55, 0.65, -0.5), D("r", -0.2, 0.6, -0.5)
 
 
 def two2(k):
-    """an overhead chop: raised over her head (the blade lying back, her elbows out and up), down in front of her, landing
-    with the hilt at her chest and the blade rising; on, well out in front of her lower chest, the blade dipping a little
-    (lower or nearer, her left forearm lies on her breast); her chest square to it"""
-    if k == "wind": return 0, -8, 6, (2, 4, 24), D("r", 0.0, -0.95, 0.30), D("r", 0.0, 0.3, 1.0), OVERHEAD_POLES
-    if k == "release": return 0, 15, 16, (1, 36, -18), D("r", 0.0, 0.75, 0.66), D("r", 0.0, 0.3, -1.0)
-    return 0, 12, 14, (3, 38, -18), D("r", 0.0, 0.97, -0.25), D("r", 0.0, -0.7, -0.7)
+    """an overhead chop: from the raised guard (the hands well over her head, the blade back over it, the elbows out
+    and forward), down to full reach at her chest's height (the blade rising a little, as a kendo strike lands), back to
+    the middle guard's height"""
+    # (half way up: the sword upright, the hands in front of her forehead, as the reference's raised guard begins. Eased
+    # straight from the middle guard to the blade back over her head, it turned 150 degrees and the wrists went 34 to 55
+    # past their range)
+    if k == "mid": return 0, -4, 6, (0, 26, 12), D("r", 0.0, 0.15, 0.99), D("r", 0.0, 1.0, -0.15)
+    if k == "wind": return 0, -8, 6, (0, 18, 40), D("r", 0.0, -0.7, 0.7), D("r", 0.0, 0.7, 0.7), OVERHEAD_POLES
+    if k == "release": return 0, 15, 16, (0, 48, -6), D("r", 0.0, 0.85, 0.5), D("r", 0.0, 0.3, -1.0)
+    return 0, 12, 14, (0, 42, -24), D("r", 0.0, 0.85, -0.52), D("r", 0.0, -0.6, -0.8)
 
 
 def two3(k):
-    """a horizontal sweep from her right to her left, turned at the waist: wound back by her right side, then her chest
-    turning with the blade, landing well out in front of her with the blade rising, on round to her left"""
-    if k == "wind": return 50, -2, 9, (24, 8, -10), D("r", 0.55, -0.80, 0.20), D("r", -0.45, -0.35, 0.0)
-    if k == "release": return -25, 6, 12, (-10, 38, -18), D("r", -0.35, 0.8, 0.48), D("r", -0.6, -0.8, 0.0)
-    return -55, 5, 10, (-22, 34, -16), D("r", -0.82, 0.56, 0.12), D("r", 0.3, 0.9, 0.0)
+    """a horizontal sweep from her right round to her left, turned at the waist: from by the right of her chest (the
+    blade up and back over her right shoulder, as a bat is held), round to full reach at her waist's height, the blade
+    level, on to her left side"""
+    # (half way, just before the blow: the blade level and out to her right, the hands coming round in front of her right
+    # side. Eased straight from the wind-up to the blow, the blade turned 165 degrees in four frames and the left wrist
+    # went 98 degrees past its range, the forearms 1 to 2 cm apart)
+    if k == "mid": return 15, 2, 10, (12, 36, -14), D("r", 0.75, 0.65, 0.12), D("r", -0.6, 0.75, 0.0)
+    if k == "wind": return 50, -2, 9, (20, 30, 8), D("r", 0.05, -0.25, 0.97), D("r", -0.45, -0.35, 0.0)
+    if k == "release": return -25, 6, 12, (-4, 46, -24), D("r", -0.45, 0.88, 0.15), D("r", -0.6, -0.8, 0.0)
+    return -55, 5, 10, (-24, 34, -26), D("r", -0.85, 0.5, 0.1), D("r", 0.3, 0.9, 0.0)
 
 
 POLES = [((0.7, -0.1, -0.7), (0.7, -0.1, -0.7)), ((0.7, -0.1, -0.7), (1.0, 0.0, -0.25)), ((0.7, -0.1, -0.7), (0.85, -0.4, -0.35)),
          ((1.0, 0.0, -0.25), (1.0, 0.0, -0.25)), ((0.7, -0.1, -0.7), (0.6, 0.35, -0.7)), ((1.0, 0.0, -0.25), (0.85, -0.4, -0.35)), OVERHEAD_POLES]
+
+
+# (the user's reference, a katana held through its guards (examples/katana_2handed.mp4): the wrists near straight, the
+# blade set by the forearms' turn and the elbows; the elbows out to their own sides of the hands and down, never folded
+# up and in across her chest. COMFORT: the ranges a wrist holds the grip in without strain (the limits, FLEX / DEV /
+# TWIST, let it bend 50 to 60 degrees nearly free: the user saw the right wrist bent too far); ELBOWS: rogue_clips'
+# elbow rules (in, up: how far the elbow may point in toward her middle and up off the line from shoulder to hand, cm)
+COMFORT = {"flex": (-20.0, 20.0), "dev": (-35.0, 5.0), "twist": (-60.0, 60.0), "w": 0.5}
+ELBOWS = {"in": 2.0, "up": 3.0, "w": 0.2}
+AIM_CONE = 40.0          # (degrees a key's blade may turn from its written way: solve2's aim)
+MID_UP = {"two2"}        # (cuts whose "mid" key comes half way up, from the guard to the wind-up)
+AIM_RELEASE = 15.0       # (at the blow: the blade's way there is the cut; with 40 the chop and the sweep struck with it upright)
+
+
+def strain(w):
+    """a wrist's degrees past its comfortable range (COMFORT), and past its limits again"""
+    ex = lambda x, r: max(0.0, r[0] - x, x - r[1])
+    return max(ex(w[0], COMFORT["flex"]), ex(w[1], COMFORT["dev"]), ex(w[2], COMFORT["twist"])) + R.over(*w)
+
+
+def elbow_cost(arm_obj, ctx):
+    """the elbows' cost as posed now: ELBOWS' cm past its allowance, squared, both sides (as a wrist's degrees count)"""
+    return sum(i_ * i_ + u_ * u_ for i_, u_, _ in elbows(arm_obj, ctx).values())
+
+
+def elbows(arm_obj, ctx):
+    """per side (r, l): how far the elbow points in toward her middle and up, off the line from her shoulder to her hand,
+    past ELBOWS' allowance (cm, 0 within), and the elbow's bend (degrees, 180 straight)"""
+    P = arm_obj.pose.bones; cm = ctx["cm"]; res = {}
+    for s in "rl":
+        S, E, Hh = P[f"upperarm_{s}"].head, P[f"lowerarm_{s}"].head, P[f"hand_{s}"].head
+        i_, u_ = R.elbow_off(E - S, (Hh - S).normalized(), C.OUT[s], cm, ELBOWS)
+        res[s] = (max(0.0, i_), max(0.0, u_), math.degrees((S - E).angle(Hh - E)))
+    return res
 
 
 def poles_of(prm):
@@ -211,7 +256,22 @@ def spec2(ctx, prm, edge):
 # torso as the pose deforms it (the faces whose vertices follow the pelvis and spine bones) and the hilt moved out until
 # the bone lines of both forearms and hands are CLEAR cm outside it (the bone runs through the middle of the forearm).
 TORSO = ("pelvis", "spine_01", "spine_02", "spine_03", "spine_04", "spine_05")
-CLEAR = {"fore": 4.5, "hand": 3.5}
+BODY_EXTRA = ("clavicle_r", "clavicle_l", "neck_01")   # (also kept clear of: an arm crossing her upper chest or her neck)
+CLEAR = {"upper": 4.0, "fore": 4.0, "hand": 3.0}
+
+
+def body_skin(arm_obj, o, p_arm):
+    """a skin point (armature space, rest) that is her body, not what hangs off it: the Warlock's cape is skinned to her
+    spine and collarbones and counted as her chest and back (her arms were "inside" it beside her shoulders); it lies
+    more than BODY_BACK cm behind her neck's line or BODY_SIDE cm out to a side"""
+    B = arm_obj.data.bones; cm = R.model_height(bpy.context.scene) / 170.0; r = p_arm - B["neck_01"].head_local
+    # (nor the shoulder's cap, SHOULDER_CAP cm round each shoulder joint: it moves with the arm, and the Warlock's
+    # shoulder armour, skinned to her collarbones, made every raised arm "inside" her)
+    if any((p_arm - B[f"upperarm_{s}"].head_local).length / cm < SHOULDER_CAP for s in "rl"): return False
+    return r.dot(F) / cm > -BODY_BACK and abs(r.dot(C.OUT["r"])) / cm < BODY_SIDE
+
+
+BODY_BACK, BODY_SIDE, SHOULDER_CAP = 14.0, 16.0, 10.0
 
 
 def torso_context(arm_obj, scene, ctx):
@@ -219,12 +279,27 @@ def torso_context(arm_obj, scene, ctx):
     parts = []
     for o in scene.objects:
         if o.type != 'MESH' or not o.vertex_groups: continue
-        names = {g.index: g.name for g in o.vertex_groups}
-        keep = [v.index for v in o.data.vertices if v.groups and names.get(max(v.groups, key=lambda g: g.weight).group) in TORSO]
+        names = {g.index: g.name for g in o.vertex_groups}; m_ = arm_obj.matrix_world.inverted() @ o.matrix_world
+        keep = [v.index for v in o.data.vertices if v.groups and names.get(max(v.groups, key=lambda g: g.weight).group) in TORSO + BODY_EXTRA
+                and body_skin(arm_obj, o, m_ @ v.co)]
         pos = {vi: i for i, vi in enumerate(keep)}
         polys = [[pos[v] for v in p.vertices] for p in o.data.polygons if all(v in pos for v in p.vertices)]
         if keep and polys: parts.append((o, keep, polys))
     ctx["torso"] = parts
+    # (the same skin with her collarbones and neck, as points with their outward ways in their bones' rest spaces, for
+    # rogue_clips.solve_arm to keep each elbow's whole arm out of her: every 6th vertex)
+    import numpy as np
+    Bn = arm_obj.data.bones; inv = arm_obj.matrix_world.inverted(); per = {}
+    for o in scene.objects:
+        if o.type != 'MESH' or not o.vertex_groups: continue
+        names = {g.index: g.name for g in o.vertex_groups}; m = inv @ o.matrix_world; m3 = m.to_3x3()
+        for v in (o.data.vertices[i] for i in range(0, len(o.data.vertices), 6)):
+            if not v.groups: continue
+            b = names.get(max(v.groups, key=lambda g: g.weight).group)
+            if b not in TORSO + BODY_EXTRA or not body_skin(arm_obj, o, m @ v.co): continue
+            Li = Bn[b].matrix_local.inverted()
+            per.setdefault(b, ([], []))[0].append(tuple(Li @ (m @ v.co))); per[b][1].append(tuple((Li.to_3x3() @ (m3 @ v.normal)).normalized()))
+    ctx["torso_pts"] = [(b, np.array(p), np.array(n)) for b, (p, n) in per.items()]
     # (her head, a ball: the face's vertices (those that follow the head bone, in front of it and below its top: her
     # hair hangs behind and beside it) give its size; a raised arm's elbow went behind it, the arm through it)
     B = arm_obj.data.bones; hz = B["head"].head_local; pts = []
@@ -247,17 +322,20 @@ def clearance(arm_obj, ctx):
         ev.to_mesh_clear()
     bvh = BVHTree.FromPolygons(verts, polys); P = arm_obj.pose.bones; cm = ctx["cm"]; worst = None
     if "head_ball" in ctx:
-        # (her head: the elbows and forearms CLEAR outside its ball, which turns with her neck)
+        # (her head: the arms CLEAR outside its ball, which turns with her neck)
         c0, r0 = ctx["head_ball"]; Bh = arm_obj.data.bones["head"]
         c = P["head"].matrix @ (Bh.matrix_local.inverted() @ c0)
         for s in "rl":
-            a, b = P[f"lowerarm_{s}"].head, P[f"hand_{s}"].head
-            for p in [a] + [a.lerp(b, t) for t in (0.35, 0.7, 1.0)]:
+            u, a, b = P[f"upperarm_{s}"].head, P[f"lowerarm_{s}"].head, P[f"hand_{s}"].head
+            for p in [u.lerp(a, 0.75), a] + [a.lerp(b, t) for t in (0.35, 0.7, 1.0)]:
                 d = ((p - c).length - r0) / cm; short = CLEAR["fore"] - d; n = (p - c).normalized()
                 if worst is None or short > worst[0]: worst = (short, d, n)
-        a, b = P[f"lowerarm_{s}"].head, P[f"hand_{s}"].head
+    # (both arms, the upper arm and elbow too: this was measured for the left forearm and hand only, the right arm and the
+    # upper arms never, while the upper arms went through her chest)
+    for s in "rl":
+        u, a, b = P[f"upperarm_{s}"].head, P[f"lowerarm_{s}"].head, P[f"hand_{s}"].head
         palm = b + P[f"hand_{s}"].matrix.to_quaternion() @ ctx["arms"][s]["palm_pt"]
-        for kind, p in [("fore", a.lerp(b, t)) for t in (0.35, 0.55, 0.75, 1.0)] + [("hand", palm)]:
+        for kind, p in [("upper", u.lerp(a, 0.75)), ("fore", a)] + [("fore", a.lerp(b, t)) for t in (0.35, 0.55, 0.75, 1.0)] + [("hand", palm)]:
             loc, nrm, _, dist = bvh.find_nearest(p)
             if loc is None: continue
             d = (p - loc).dot(nrm) / cm
@@ -360,10 +438,11 @@ def search_place(arm_obj, ctx, prm, edge):
     def put(at, poles):
         p = prm[:3] + (at,) + prm[4:6] + (poles,) + prm[7:]
         n0 = len(ctx.get("wrists", [])); R.apply(arm_obj, spec2(ctx, p, edge), ctx); ws = ctx["wrists"][n0:]; del ctx["wrists"][n0:]
-        return clearance(arm_obj, ctx)[0], hilt_miss(arm_obj, ctx, at), max([R.over(*w) for _, w in ws] or [0.0]), forearms_gap(arm_obj, ctx)
+        # ("wrist": the worst wrist's degrees past its comfortable range, and the elbows' cm past theirs)
+        return clearance(arm_obj, ctx)[0], hilt_miss(arm_obj, ctx, at), max([strain(w) for _, w in ws] or [0.0]) + math.sqrt(elbow_cost(arm_obj, ctx)), forearms_gap(arm_obj, ctx)
     at0 = Vector(prm[3]); short0, miss0, wr0, gap0 = put(tuple(at0), poles_of(prm))
     print("W5SEARCH at (%.0f, %.0f, %.0f): short of CLEAR %.1f cm, miss %.1f cm, wrist %.0f deg past, forearms %.1f cm apart" % (*prm[3], short0, miss0, wr0, gap0))
-    if short0 <= 0.0 and gap0 >= GAP_MIN and wr0 <= 18.0: return prm
+    if short0 <= 0.0 and gap0 >= GAP_MIN and wr0 <= 8.0: return prm
     best = None
     for pi, poles in enumerate(POLES):
         for dz in (4, 0, -4, -8, -12):
@@ -379,7 +458,7 @@ def search_place(arm_obj, ctx, prm, edge):
     return prm if best is None else prm[:3] + (tuple(best[1]),) + prm[4:6] + (best[2],) + prm[7:]
 
 
-def solve2(arm_obj, ctx, prm, rolls=16):
+def solve2(arm_obj, ctx, prm, rolls=16, cone=AIM_CONE):
     """a two-handed key pose: the blade exactly its way, turned about it the way that leaves both wrists nearest their
     limits, the hilt moved where her arms clear her body (search_place); returns the pose (each bone's matrix_basis), the
     edge chosen, the spec, the params as moved"""
@@ -389,7 +468,7 @@ def solve2(arm_obj, ctx, prm, rolls=16):
             e = Quaternion(b, math.radians(360.0 * k / rolls)) @ h
             sp = spec2(ctx, prm, e)
             n0 = len(ctx.get("wrists", [])); R.apply(arm_obj, sp, ctx); ws = ctx["wrists"][n0:]; del ctx["wrists"][n0:]
-            cost = sum(R.over(*w) ** 2 for _, w in ws) + 0.002 * math.degrees(e.angle(h)) ** 2 + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2
+            cost = sum(strain(w) ** 2 for _, w in ws) + elbow_cost(arm_obj, ctx) + 0.002 * math.degrees(e.angle(h)) ** 2 + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2
             if best is None or cost < best[0]: best = (cost, e)
         return best[1]
     def turn_left(prm, e):
@@ -398,9 +477,25 @@ def solve2(arm_obj, ctx, prm, rolls=16):
         for ph in range(-60, 61, 15):            # (more than 60 degrees from the right's, the grip itself looks twisted)
             p = with_phi(prm, float(ph))
             n0 = len(ctx.get("wrists", [])); R.apply(arm_obj, spec2(ctx, p, e), ctx); ws = ctx["wrists"][n0:]; del ctx["wrists"][n0:]
-            c = sum(R.over(*w) ** 2 for s_, w in ws if s_ == "l") + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2 + 0.004 * ph * ph
+            c = sum(strain(w) ** 2 for s_, w in ws if s_ == "l") + elbow_cost(arm_obj, ctx) + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2 + 0.004 * ph * ph
             if best is None or c < best[0]: best = (c, p)
         return best[1]
+    def aim(prm):
+        # (the key's blade way is what the cut means; within AIM_CONE of it, the way her wrists and elbows take most
+        # easily: a fist holds the grip across the palm, so a blade written along the forearms (down and ahead from low
+        # hands) bent the wrists 35 to 50 degrees aside; turned, the hands below and the blade rising out of them)
+        b0 = prm[4].normalized(); side_ = b0.cross(U); side_ = side_.normalized() if side_.length > 1e-3 else C.OUT["r"].copy()
+        up_ = side_.cross(b0).normalized(); best = None
+        for pa in (-cone, -cone / 2, 0.0, cone / 2, cone):
+            for ya in (-cone, -cone / 2, 0.0, cone / 2, cone):
+                b = (Quaternion(U, math.radians(ya)) @ Quaternion(side_, math.radians(pa)) @ b0).normalized()
+                p = prm[:4] + (b,) + prm[5:]; e = roll(p)
+                n0 = len(ctx.get("wrists", [])); R.apply(arm_obj, spec2(ctx, p, e), ctx); ws = ctx["wrists"][n0:]; del ctx["wrists"][n0:]
+                c = (sum(strain(w) ** 2 for _, w in ws) + elbow_cost(arm_obj, ctx) + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2
+                     + 10.0 * max(0.0, clearance(arm_obj, ctx)[0]) ** 2 + 0.08 * math.degrees(b.angle(b0)) ** 2)
+                if best is None or c < best[0]: best = (c, p)
+        return best[1]
+    prm = aim(prm)
     e = roll(prm); prm = turn_left(prm, e); prm = search_place(arm_obj, ctx, prm, e); e = roll(prm); prm = turn_left(prm, e)
     prm, _ = clear_pose(arm_obj, ctx, prm, e)
     return R.apply(arm_obj, spec2(ctx, prm, e), ctx), e, spec2(ctx, prm, e), prm
@@ -433,7 +528,9 @@ def swing(arm_obj, ctx, keys, round_blade=False):
         u = C.ease(min(max((t - t0) / (t1 - t0), 0.0), 1.0))
         lerp = lambda x, y: x + (y - x) * u
         turn = lambda v0, v1: Quaternion((1.0, 0.0, 0.0, 0.0)).slerp(v0.normalized().rotation_difference(v1.normalized()), u) @ v0.normalized()
-        blade = round_turn(a[4].normalized(), b[4].normalized(), u) if round_blade else turn(a[4], b[4]); edge = turn(ea, eb)
+        # (round her only from the wind-up on: from the guard to the wind-up the blade rises up and back, and swung round
+        # her right side there the Warlock's wrists went 28 to 53 degrees past their range)
+        blade = round_turn(a[4].normalized(), b[4].normalized(), u) if round_blade and j >= 1 else turn(a[4], b[4]); edge = turn(ea, eb)
         # (the edge carried from the frame before by the blade's own turn: the edge eased on its own came nearly along a
         # fast-turning blade and its square flipped to the other side, half a turn of the hands from one frame to the next)
         if carry is not None:
@@ -458,7 +555,7 @@ def swing(arm_obj, ctx, keys, round_blade=False):
             # (the turn also decides from which side each forearm comes to the hilt: forearms closer than GAP_MIN pay)
             ke = key_edge.get(fi)
             anchor = 0.2 * math.degrees(e.angle((ke - prm[4].normalized() * ke.dot(prm[4].normalized())).normalized())) ** 2 if ke is not None else 0.0
-            row.append(sum(R.over(*w) ** 2 for _, w in ws) + 0.01 * deg * deg + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2 + anchor)
+            row.append(sum(strain(w) ** 2 for _, w in ws) + elbow_cost(arm_obj, ctx) + 0.01 * deg * deg + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2 + anchor)
         cost.append(row)
     # (no more than 30 degrees from one frame to the next: the forearms' gap bought a 90-degree turn of both hands in a frame)
     step = lambda a, b: 0.15 * min(abs(a - b), 360.0 - abs(a - b)) ** 2 + (1e6 if min(abs(a - b), 360.0 - abs(a - b)) > 30.0 else 0.0)
@@ -481,7 +578,7 @@ def swing(arm_obj, ctx, keys, round_blade=False):
             p = with_phi(prm, phi_of(prm) + ph)
             if abs(phi_of(p)) > 60.0: row.append(1e6); continue
             n0 = len(ctx.get("wrists", [])); R.apply(arm_obj, spec2(ctx, p, edge), ctx); ws = ctx["wrists"][n0:]; del ctx["wrists"][n0:]
-            row.append(sum(R.over(*w) ** 2 for s_, w in ws if s_ == "l") + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2 + 0.004 * phi_of(p) ** 2)
+            row.append(sum(strain(w) ** 2 for s_, w in ws if s_ == "l") + elbow_cost(arm_obj, ctx) + GAP_W * max(0.0, GAP_MIN - forearms_gap(arm_obj, ctx)) ** 2 + 0.004 * phi_of(p) ** 2)
         pc.append(row)
     acc = [pc[0][:]]; back = []
     for i in range(1, len(pc)):
@@ -505,7 +602,7 @@ def swing(arm_obj, ctx, keys, round_blade=False):
     # spread over its neighbours carried the diagonal cut's wind-up 35 cm, to where its right wrist bent 65 degrees past)
     keyf = {int(round(k[0] * FPS)) for k in keys}
     smooth = [Vector() if i in keyf else (v if v.length <= 10.0 else v.normalized() * 10.0) for i, v in enumerate(smooth)]
-    frames, worst = [], -99.0; ctx["swing_keyoff"] = []; ctx["swing_capped"] = []; ctx["swing_wrists"] = []; ctx["swing_gaps"] = []; ctx["swing_short"] = []; ctx["swing_refits"] = []; ctx.pop("prev_arm", None)
+    frames, worst = [], -99.0; ctx["swing_keyoff"] = []; ctx["swing_capped"] = []; ctx["swing_elbows"] = []; ctx["swing_wrists"] = []; ctx["swing_gaps"] = []; ctx["swing_short"] = []; ctx["swing_refits"] = []; ctx.pop("prev_arm", None)
     ctx["roll_scale"] = 0.02          # (the roll's limit is for the Rogue's cape: here the arm's last frame counts first)
     ctx["cont_w"] = 0.025             # (a degree of the upper arm's turn from its last frame, squared: at 0.01 it still swung 60 to 110 degrees in a frame; at 0.05 it held the sweep's forearms crossed, 2 cm apart, through its follow-through)
     # (from the blow on to the follow-through: the arms led, a share each frame, to the follow-through key's own upper
@@ -529,7 +626,11 @@ def swing(arm_obj, ctx, keys, round_blade=False):
             while f_ > 0.0 and miss_at(put(f_)) > max(m0, 0.5) + 1.0: f_ = round(f_ - 0.25, 2)
             ctx.setdefault("swing_capped", []).append((i, f_)) if f_ < 1.0 else None
         prm = put(f_)
-        prm, short = clear_pose(arm_obj, ctx, prm, edge)
+        # (a key frame keeps its key's place: moved out again here, the Warlock's raised guard was played 21 cm from where
+        # its key was solved, a pose nobody solved)
+        if i in keyf:
+            n0_ = len(ctx.get("wrists", [])); R.apply(arm_obj, spec2(ctx, prm, edge), ctx); del ctx["wrists"][n0_:]; short = clearance(arm_obj, ctx)[0]
+        else: prm, short = clear_pose(arm_obj, ctx, prm, edge)
         worst = max(worst, short); ctx.setdefault("swing_short", []).append((i, short, tuple(prm[3])))
         n0 = len(ctx.get("wrists", []))
         frames.append(R.apply(arm_obj, spec2(ctx, prm, edge), ctx))
@@ -545,7 +646,8 @@ def swing(arm_obj, ctx, keys, round_blade=False):
                 ctx.setdefault("swing_refits", []).append((i, round(turned(), 0)))
         # (the next frame's arms rather as these: rogue_clips.solve_arm)
         ctx["prev_arm"] = {s_: arm_obj.pose.bones[f"upperarm_{s_}"].matrix.to_quaternion() for s_ in "rl"}
-        ctx["swing_wrists"].append((i, max([R.over(*w) for _, w in ctx["wrists"][n0:]] or [0.0])))
+        ctx["swing_wrists"].append((i, max([strain(w) for _, w in ctx["wrists"][n0:]] or [0.0])))
+        eb_ = elbows(arm_obj, ctx); ctx.setdefault("swing_elbows", []).append((i, max(eb_["r"][0], eb_["l"][0]), max(eb_["r"][1], eb_["l"][1])))
         if i in key_edge:             # (a key frame against its key: the edge's turn, the left hand's turn, the hilt's place)
             kp = next(k[1] for k in keys if int(round(k[0] * FPS)) == i); ke = key_edge[i]; b_ = prm[4].normalized()
             ke = (ke - b_ * ke.dot(b_)).normalized()
@@ -553,6 +655,14 @@ def swing(arm_obj, ctx, keys, round_blade=False):
         ctx.setdefault("swing_gaps", []).append((i, forearms_gap(arm_obj, ctx)))
     ctx.pop("prev_arm", None); ctx.pop("roll_scale", None); ctx.pop("cont_w", None)
     return frames, worst
+
+
+# (the bow hand out at the target, cm from her neck; the crossbow's right hand on the stock (rogue_clips.XB_HAND is the
+# Rogue's). Set for the Warrior's and the Warlock's arms as tripo_proportions lengthened them: at the places written for
+# their old arms, 34 cm to the wrist, the bow wrist went 28 degrees past its limits; at the new place, none. The crossbow's
+# right wrist goes 9 to 17 degrees past (0 to 5 on the old arms) wherever the hand was tried: the Rogue's place is kept)
+BOW_LEFT = (-4, 58, 0)      # (her bow arm straight: the stance turns her shoulders, bringing the left one forward)
+XB_HAND_W5 = None
 
 
 def bow_pose(ctx, k):
@@ -565,7 +675,7 @@ def bow_pose(ctx, k):
         sp.update(C.arm("r", D("r", 0.21, 0.05, -1), D("r", 0.12, 0.30, -1), D("r", 0.05, 0.36, -1), curl=16, thumb=8))
         return sp
     sp = C.body(ctx, twist=55, lean=2, knees=8, look=0.95)
-    sp.update(R.reach("l", (-5, 36, -1), D("l", 0.6, 0.0, -0.8), None, {"front": F, "up": U}))
+    sp.update(R.reach("l", BOW_LEFT, D("l", 0.6, 0.0, -0.8), None, {"front": F, "up": U}))
     sp.update(DC.fist("l"))
     hand_r = {"raise": (2, 14, -3), "draw": (3, 4, 3), "loose": (6, -2, 4)}[k]
     sp.update(R.reach("r", hand_r, D("r", 0.6, -0.6, 0.3), {"axis": D("r", -0.25, 1.0, 0.0), "palm": D("r", -1.0, 0.0, 0.0)}))
@@ -595,13 +705,17 @@ def make_clips(arm_obj, scene, clips):
             got = Pb[f"hand_{s}"].head + Pb[f"hand_{s}"].matrix.to_quaternion() @ ctx["arms"][s]["palm_pt"] if at[0] == "palm_on" else Pb[f"hand_{s}"].head
             miss.append("%s %.1f cm" % (s, (got - goal).length / ctx["cm"]))
         ws = ctx.get("wrists", [])[n0:]
-        report.append("W5POSE %-18s wrist past limits %s | from its place %s" % (label, ", ".join("%s %.0f" % (s, R.over(*w)) for s, w in ws) or "-", ", ".join(miss) or "-"))
+        eb_ = elbows(arm_obj, ctx)
+        report.append("W5POSE %-18s wrist past limits %s, past the comfortable range %s | from its place %s | elbows pointing in r %.0f l %.0f, up r %.0f l %.0f cm, bent to r %.0f l %.0f deg" % (
+            label, ", ".join("%s %.0f" % (s, R.over(*w)) for s, w in ws) or "-", ", ".join("%s %.0f" % (s, strain(w) - R.over(*w)) for s, w in ws) or "-", ", ".join(miss) or "-",
+            eb_["r"][0], eb_["l"][0], eb_["r"][1], eb_["l"][1], eb_["r"][2], eb_["l"][2]))
         return res
     out = {}
     if "TwoHand" in want:
         use(ctx, "sword"); torso_context(arm_obj, scene, ctx)
         # (the upper arm's roll limit is for the Rogue's cape: here it pulled a raised elbow in behind her head)
         ctx["roll_scale_key"] = 0.05
+        ctx["wrist_comfort"] = COMFORT; ctx["elbow_rules"] = ELBOWS
         # (the left fist a fist's span below the right on the hilt: measured twice, the second with the first's spacing)
         global LEFT_ON_HILT
         for _ in range(2):
@@ -609,13 +723,17 @@ def make_clips(arm_obj, scene, clips):
         report.append("W5POSE fists on the hilt: the right reaches %.1f cm toward the pommel, the left %.1f cm toward the guard: palms %.1f cm apart" % (below_r, above_l, LEFT_ON_HILT))
         def key2(prm, label):
             at0 = prm[3]
-            res, e, sp, prm = solve2(arm_obj, ctx, prm)
+            res, e, sp, prm = solve2(arm_obj, ctx, prm, cone=AIM_RELEASE if "release" in label else AIM_CONE)
             P(sp, label)                     # (once more, for the report)
             ctx.setdefault("key_arms", {})[id(prm)] = {s_: arm_obj.pose.bones[f"upperarm_{s_}"].matrix.to_quaternion() for s_ in "rl"}
             short, d, _ = clearance(arm_obj, ctx)
             report.append("W5POSE %-18s hilt moved out (%s) -> (%s) cm, elbows %d; her arms' nearest point %.1f cm outside her torso (short of CLEAR by %.1f); forearms %.1f cm apart"
                           % (label, ", ".join("%.0f" % v for v in at0), ", ".join("%.1f" % v for v in prm[3]), POLES.index(poles_of(prm)), d, max(short, 0.0), forearms_gap(arm_obj, ctx)))
             return prm, e
+        def key_score(k):
+            # (a solved key's strain: the wrists past their range, the elbows past theirs, her arms short of CLEAR)
+            n0 = len(ctx.get("wrists", [])); R.apply(arm_obj, spec2(ctx, k[0], k[1]), ctx); ws = ctx["wrists"][n0:]; del ctx["wrists"][n0:]
+            return sum(strain(w) ** 2 for _, w in ws) + elbow_cost(arm_obj, ctx) + 10.0 * max(0.0, clearance(arm_obj, ctx)[0]) ** 2
         g = key2(guard2(), "guard2")
         places = HERO_PLACES.get(hero_name(), {})
         if places: report.append("W5POSE %s's own places: %s" % (hero_name(), "; ".join("%s %s %s" % (a, b, v) for (a, b), v in places.items())))
@@ -629,13 +747,30 @@ def make_clips(arm_obj, scene, clips):
             # its clear place with the left elbow on the other side, 150 degrees round from where the swing brought it;
             # the swing then held the elbow where it came, 1 to 5 cm into her and a wrist 25 degrees past)
             ctx["prev_arm"] = {s_: arm_obj.pose.bones[f"upperarm_{s_}"].matrix.to_quaternion() for s_ in "rl"}; ctx["cont_w"] = 0.025; ctx["roll_scale"] = 0.02
-            fo = key2(fn("follow"), name + " follow")
+            fo = key2(fn("follow"), name + " follow"); sc_c = key_score(fo)
             for k_ in ("prev_arm", "cont_w", "roll_scale"): ctx.pop(k_, None)
+            # (and solved freely: kept on from the blow, the diagonal's held end had the left elbow 9 cm in and the arm in
+            # her chest, its free solve clear; the swing leads the arms to it from the blow on. The better of the two)
+            fo_f = key2(fn("follow"), name + " follow (free)"); sc_f = key_score(fo_f)
+            if sc_f < sc_c - 5.0: fo = fo_f
+            report.append("W5POSE %-18s follow-through solved on from the blow %.0f, freely %.0f: %s" % (name, sc_c, sc_f, "free" if fo is fo_f else "on from the blow"))
             ks = [(0.0,) + g, (tw,) + kw, (tr,) + kr, (tf,) + fo, (te,) + fo]
+            if fn("mid") is not None:
+                # (a key half way: on the way up for the chop (MID_UP: from the guard to the raised guard the blade
+                # turned 150 degrees with nothing between), else from the wind-up to the blow (the sweep)
+                up = fname in MID_UP; frm = g if up else kw
+                ctx["prev_arm"] = dict(ctx.get("key_arms", {}).get(id(frm[0]), {})) or None
+                if ctx["prev_arm"] is None: ctx.pop("prev_arm")
+                else: ctx["cont_w"] = 0.025; ctx["roll_scale"] = 0.02
+                km = key2(fn("mid"), name + " mid")
+                for k_ in ("prev_arm", "cont_w", "roll_scale"): ctx.pop(k_, None)
+                if up: ks.insert(1, (0.5 * tw,) + km)
+                else: ks.insert(2, (0.5 * (tw + tr),) + km)
             out[name], short = swing(arm_obj, ctx, ks, round_blade=(fname == "two3"))      # (the sweep's blade swings round in front of her, not over)
             report.append("W5POSE %-18s her arms against her torso, the worst frame: short of CLEAR (forearm %.1f, hand %.1f cm outside) by %.1f cm"
                           % (name, CLEAR["fore"], CLEAR["hand"], max(short, 0.0)))
-            report.append("W5POSE %-18s wrists past their limits per frame: %s" % (name, " ".join("%d:%.0f" % iw for iw in ctx["swing_wrists"])))
+            report.append("W5POSE %-18s wrists past their comfortable range (and limits) per frame: %s" % (name, " ".join("%d:%.0f" % iw for iw in ctx["swing_wrists"])))
+            report.append("W5POSE %-18s elbows per frame, pointing in / up past the allowance (cm, the worse side): %s" % (name, " ".join("%d:%.0f/%.0f" % e_ for e_ in ctx["swing_elbows"])))
             report.append("W5POSE %-18s forearms apart per frame (cm): %s" % (name, " ".join("%d:%.0f" % ig for ig in ctx["swing_gaps"])))
             report.append("W5POSE %-18s short of CLEAR per frame (cm) at the hilt: %s" % (name, " ".join("%d:%.1f@(%.0f,%.0f,%.0f)" % (i, sh, *a) for i, sh, a in ctx["swing_short"] if sh > 0.0)))
             report.append("W5POSE %-18s the left hand's own turn about the hilt per frame (deg): %s" % (name, " ".join("%d:%.0f" % (i, v) for i, v in enumerate(ctx["swing_phis"]))))
@@ -654,6 +789,9 @@ def make_clips(arm_obj, scene, clips):
                 got = Pb["hand_l"].head + Pb["hand_l"].matrix.to_quaternion() @ ctx["arms"]["l"]["palm_pt"]
                 worst = max(worst, (got - goal).length / ctx["cm"])
             report.append("W5POSE %-18s the left palm off its place on the hilt, worst frame: %.1f cm" % (name, worst))
+        for k_ in ("wrist_comfort", "elbow_rules"): ctx.pop(k_, None)
+    ctx["wrist_comfort"] = COMFORT
+    if XB_HAND_W5: ctx["xb_hand"] = XB_HAND_W5
     if "Bow" in want:
         use(ctx, "bow"); r0 = P(bow_pose(ctx, "rest"), "bow rest"); up = P(bow_pose(ctx, "raise"), "bow raise")
         dr = P(bow_pose(ctx, "draw"), "bow draw"); lo = P(bow_pose(ctx, "loose"), "bow loose")

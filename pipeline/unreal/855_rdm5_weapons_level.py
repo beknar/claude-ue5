@@ -12,8 +12,9 @@ blender_numpy/tripo_build.py with weapon5_clips.py as its clip maker into Source
       blade in both hands), the new blade held where hers is: the grip maps the weapon's frame (854: where the hand
       closes, the blade's way, its edge) onto her weapon's frame in her hand. A one-edged blade's edge is turned the
       way her knuckles lead (her middle finger's way in her reference pose)
-    two handed sword: the W5_TwoHand cuts; the grip from her hand as weapon5_clips.py holds it (the blade her thumb's way
-      leaning 25 degrees toward her fingers, the edge her fingers' way, at her palm); no shield
+    two handed sword: wielded as her one-handed sword (the user's choice for this level): her own sword's clips, flinch
+      and death, the blade held where her sword is (as the one-handed blades), and nothing in her other hand (the
+      Warrior's shield left off). The W5_TwoHand cuts are still imported but no weapon uses them
     bows: the W5_Bow shot, in her left hand (the limbs her thumb's way leaning 15 degrees, the arrow's way her forearm's);
       an arrow (the crossbow's bolt mesh, 0.75 long) shot from the bow's grip straight at the monster she faces
     crossbows: the crossbow shot (the Rogue's own; the others W5_Shoot), held as 822 holds the Rogue's (the front her
@@ -199,9 +200,9 @@ for w in T["weapons"]:
                 sound = SOUND.get(typ, "Sword")
             wd.reach, wd.arc = REACH[typ]
         elif typ == "two handed sword":
+            # (as her one-handed sword, without the shield: the user's choice for this level)
             wd = copy_def(tmpl[hero]); wd.mesh = mesh; wd.off_hand_mesh = None
-            wd.grip = grip_from(hand_frame(ch, "r", "twohand"), k)
-            wd.attacks = [x[0] for x in twohand[hero]]; wd.attack_starts = [0.0] * 3; wd.attack_ends = [x[2] for x in twohand[hero]]; wd.hit_times = [x[1] for x in twohand[hero]]
+            wd.grip = mapped("template_sword", tmpl[hero].grip, k, ch, "r")
             wd.reach, wd.arc = REACH[typ]; sound = SOUND[typ]
         elif fr["kind"] == "bow":
             wd = copy_def(tmpl["RogueXbow"]); wd.mesh = mesh; wd.hand_bone = "hand_l"; wd.off_hand_mesh = None
