@@ -55,6 +55,41 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAttacking() const { return AttackTime >= 0.f; }
 	/** world time it was last hurt (HUD: its bar shows for a while) */
 	float LastHurtTime = -100.f;
+	/** the same as ApplyDamageAt; a burn or a cloud's hurt neither makes it flinch nor wounds it */
+	bool ApplyDamageEx(float Amount, AActor* From, const FVector* At, bool bFlinch, bool bWound);
+
+	// ---- random_dungeonmagic_level5
+	/** the tier of rooms it was spawned in, its ability and how strong (the generator's TierAbility) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 Tier = 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") ERDMonsterAbility Ability = ERDMonsterAbility::None;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float AbilityPower = 0.f;
+	/** the gallery's name (the HUD's bar) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FString Title;
+	/** a corpse that stays (the generator's bKeepCorpses): dead, lying where it fell */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsCorpse() const { return bDead && bCorpse; }
+	/** a section generated again lays the one she killed there: dead at once, at the end of its death clip, silent */
+	void LayDead();
+	/** it fights on her side for Seconds (0: until it falls), with these hit points and damage (a corpse rises first) */
+	void BecomeAlly(float Seconds, float InHealth, float InDamage);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAlly() const { return bAlly; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetAllyTimeLeft() const { return AllySeconds > 0.f ? AllyLeft : 0.f; }
+	void SetChampion(bool b) { bChampion = b; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsChampion() const { return bChampion; }
+	/** the spells' hold on it: slowed (a share of its speed) for Seconds, a burn (hit points a second, a share of it back to
+	 *  her), a curse (it takes Share more and deals Share less), a push, a pull toward a point */
+	void SlowFor(float Share, float Seconds);
+	void AddBurn(float PerSecond, float Seconds, float DrainShare);
+	void CurseFor(float Share, float Seconds);
+	void Knock(const FVector& Velocity);
+	void PullToward(const FVector& To, float Speed, float Dt);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetSlowShare() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetCurseShare() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsBurning() const { return Burns.Num() > 0; }
+	/** walking speed now (its kind's, by its tier, slowed) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetWalkSpeed() const { return WalkSpeed; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetAttackInterval() const { return AttackInterval; }
+	/** the one it fights now (none: nobody) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") AActor* GetFoe() const { return CurrentFoe.Get(); }
 
 	// ---- wounds
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumWounds() const { return Wounds.Num(); }
@@ -88,6 +123,20 @@ private:
 	float Health = 1.f, MaxHealth = 1.f, Damage = 0.f, Reach = 110.f, AttackInterval = 1.6f;
 	float AttackTime = -1.f, AttackLen = 0.f, AttackHit = 0.f, AttackCooldown = 0.f, Stun = 0.f, DeadTime = 0.f, ChaseTimer = 0.f;
 	TArray<float> HitTimes;
+	// level 5: corpses, allies, the spells' hold
+	bool bCorpse = false, bFrozen = false, bAlly = false, bChampion = false;
+	float AllySeconds = 0.f, AllyLeft = 0.f, SpeedScale = 1.f, MaxChaseScale = 1.f;
+	float SlowShare = 0.f, SlowUntil = -100.f, CurseShare = 0.f, CurseUntil = -100.f, BurnAcc = 0.f, BurnTick = 0.f, FreezeAt = 0.f;
+	struct FBurn { float PerSecond = 0.f; float Left = 0.f; float Drain = 0.f; };
+	TArray<FBurn> Burns;
+	TWeakObjectPtr<AActor> CurrentFoe;
+	void TickStatus(float Dt);
+	float SpeedMul() const { return 1.f - GetSlowShare(); }
+	/** the one to fight: hers (her, or an ally of hers nearer), or for an ally of hers the nearest monster near her */
+	AActor* PickFoe(class URDCombatComponent* Pc, bool& bFoePlayer) const;
+	/** an ally with nobody to fight keeps near her */
+	bool FollowPlayer(float Dt, class URDCombatComponent* Pc);
+	void Freeze();
 	void PickTrip();
 	void SetWalkingAnim(bool bWalk);
 	void SetPathFromTiles(const TArray<FIntPoint>& Tiles);

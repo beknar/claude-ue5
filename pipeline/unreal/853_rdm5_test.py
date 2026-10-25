@@ -45,7 +45,9 @@
            fires' volumes as they are and as they were (sounds.json's before the change), and far from every fire: the
            fire's own level (the recording less the floor) fell by about 8 dB
   tiers    (the dungeon) the five tiers (855: MaxTier 5): a section's tier is its ring plus one (8, 16, 24, 32 sections
-           round the start); at the start tiers 1 and 2 are open. One set of tier 2 cleared as she would clear it: walked
+           round the start); at the start only tier 1 is open (2026-10-24): the start section's hallways are barred and
+           nothing is generated as she walks to its border; the start section cleared, "TIER 2 IS OPEN" and its gratings
+           go. One set of tier 2 cleared as she would clear it: walked
            into room by room (explored only once she is in each), every chest and trunk opened, every monster killed: it
            counts as cleared ("SET CLEARED"). Tier 3 is not generated past it; its hallways into tier 3 are sealed: a
            capsule is stopped at the grating and she, walking at it for 2.5 s, stays on her side of the border; the seal
@@ -63,6 +65,31 @@
            x 1.05 / 9 s); a two-handed sword at the blow has her left palm on the hilt below the right; a blow that lands
            takes 1 off its durability, and at 0 it breaks: gone from her weapons, her first one drawn, "broke"; pictures
            from in front of her (the face camera, her alone) at the blow
+  (the user's list of 2026-10-24)
+  chance   one container in three holds anything (6000 drawn, within 4.5 sd), then 1 to 6 items a sixth each; the great
+           hall's armour is in its containers whatever the draw; a container of the start section that holds nothing,
+           opened, says "Empty: nothing inside", gives nothing and is counted (ContainersEmpty)
+  corpses  three monsters of a tier-2 set killed: after the corpse time and more they lie where they fell, frozen (no
+           ticking); the set dropped and generated again lays each where it lay, dead, the kills still counted
+  monsters each tier's section (1 to 5) spawns only the gallery monsters of that tier (monster_tiers.json): their hit points
+           about the tier's average (rising tier by tier), their walking speed and their blows' pace the tier's multiple of
+           their kind's; abilities only from tier 3
+  abilities a tier 3+ monster of each ability (poison, weaken, slow) strikes her: she is poisoned (and loses hit points
+           to it), weakened, slowed; on the Mage Dispel Hex ends them all, and none takes hold right after
+  spells   the Warrior learns no spell (her tome is carried), the Warlock only offense and curses, the Mage all 30 (28 new:
+           her fire bolt and dark fire are the table's); each released at a monster of a tier-3 set (or by her) does
+           what its line says, measured: the monsters' hit points (and slow, curse, burn), her own (a ward's blocks, Iron
+           Skin's and the rune's share, the mirror turning a blow back, the sanctum, the pact, the veil's misses, a drain
+           giving back), allies raised and summoned, corpses burst; its effects' particles near it; a picture each; a
+           cooldown refuses the next cast, a spell dearer than her mana is refused and says so
+  rings    the Mage's magic potency rings add their share to her mana (one of a kind: the next replaces it; off, back), an
+           hp ring refused; the Warrior's hp ring adds to her hit points and what she has; the Rogue's dexterity ring to
+           her crossbow's damage
+  breakdown at the anvil the Warrior's found two-handed sword is listed and breaks down (cursor, Enter) into the table's
+           materials x its tier and is gone; the one in her hands is refused; the Mage's carried bow breaks down too
+  menu     Escape opens the menu and pauses; the environment volume set to half with the keys (saved in the user
+           settings); the fire at 2.5 m recorded at 1 and at 0.5 (about -6 dB); the buttons say what they would do (a dry
+           run); Resume and Escape go back
 Writes SourceArt/random_dungeon_magic5/test_<tag>.json and logs "RDM5TEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -196,8 +223,10 @@ def step_loot():
     for i in range(N):
         l_ = [str(x) for x in g.loot_list_of(S0, 100000 + i)]
         cnt[len(l_)] = cnt.get(len(l_), 0) + 1; arm_more += sum(1 for x in l_ if x in SETS and 1 not in SET_TIERS[x])
-    p6 = 1.0 / 6.0; sd = math.sqrt(p6 * (1 - p6) / N)
-    worst = max(abs(cnt.get(k, 0) / N - p6) / sd for k in range(1, 7))
+    # (2026-10-24: a container holds anything one time in three: the counts 1..6 are a sixth each of those that do)
+    held = sum(v for k, v in cnt.items() if k > 0)
+    p6 = 1.0 / 6.0; sd = math.sqrt(p6 * (1 - p6) / max(held, 1))
+    worst = max(abs(cnt.get(k, 0) / max(held, 1) - p6) / sd for k in range(1, 7))
     # F by a great hall container
     p = G["pawn"]; fpress = None
     for i in hall:
@@ -227,15 +256,19 @@ def step_loot():
         if i in hall or i % 10 == 0: yield
         got = g.items_found - f0; fl = [str(x) for x in g.last_found_list]
         opened_lists.append(list(zip(fl, [g.loot_count_of(S0, i, k) for k in range(len(fl))])) if got else [])
-        if got != len(lists[i]) or fl != lists[i]: bad.append({"container": i, "found": got, "found_list": fl, "list": lists[i]})
+        # (an empty one finds nothing: the found list is the last container's still)
+        if got != len(lists[i]) or (got and fl != lists[i]): bad.append({"container": i, "found": got, "found_list": fl if got else [], "list": lists[i]})
     want = {}
     for v in opened_lists:
         for x, k in v: want[x] = want.get(x, 0) + k
     for x in want:
         if x in SETS: want[x] = 1                     # (a set found again mends hers: it is carried once)
+    # (a tome teaches her its spell when she finds it: it is not carried)
+    for x in [x for x in want if x.startswith("Tome of ") and c.knows_spell(x[8:])]: del want[x]
     ls = lines(c)
-    have = {l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.split("|")[0] in ("item", "repair", "component")}
+    have = {l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.split("|")[0] in ("item", "repair", "component", "tome")}
     have.update({l.split("|")[1]: 1 for l in ls if l.startswith("armour|")})
+    have.update({l.split("|")[1]: int(l.split("|")[3]) for l in ls if l.startswith("ring|")})
     # (855's weapons: the Summoner cannot wield them, so she carries them as items: "carried|<name>|<count>")
     have.update({l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("carried|")})
     # opened again: nothing more
@@ -251,8 +284,8 @@ def step_loot():
     s1 = g.get_section(unreal.IntPoint(1, 0)); n1 = s1.get_num_containers() if s1 else 0
     gen_armour = sum(1 for i in range(n1) for x in g.loot_list_of(unreal.IntPoint(1, 0), i) if str(x) in SETS and 2 not in SET_TIERS[str(x)])
     counts_ok = fpress is not None and all(1 <= k <= 3 for k in fpress["counts"])
-    ok = (len(hall) > 0 and set(START_ARMOUR) <= set(in_hall) and not elsewhere and counts_ok and lens_start[0] >= 1 and lens_start[-1] <= 6
-          and min(cnt) >= 1 and max(cnt) <= 6 and len(cnt) == 6 and worst < 4.5 and arm_more == 0
+    ok = (len(hall) > 0 and set(START_ARMOUR) <= set(in_hall) and not elsewhere and counts_ok and lens_start[-1] <= 6
+          and min(cnt) >= 0 and max(cnt) <= 6 and len([k for k in cnt if k > 0]) == 6 and worst < 4.5 and arm_more == 0
           and fpress is not None and fpress["found"] == len(fpress["list"]) and fpress["found_list"] == fpress["list"]
           and not bad and have == want and again == 0 and n1 > 0 and gen_armour == 0)
     step_result("loot", ok, containers=n, great_hall=hall, hall_lists={str(i): lists[i] for i in hall}, armour_elsewhere=elsewhere,
@@ -470,6 +503,17 @@ def step_tiers():
            "tiers_of": [g.tier_of(I2(*xy)) for xy in ((0, 0), (1, 0), (-1, 1), (2, -1), (3, 3), (4, 0), (5, 0))],
            "sizes": [g.tier_size(t) for t in range(1, 6)],
            "allowed_at_start": [g.is_section_allowed(I2(*xy)) for xy in ((1, 0), (1, 1), (2, 0), (4, 0), (5, 0))]}
+    # (2026-10-24: tier 2 waits for the start section, as the tiers after it wait for theirs: its hallways barred, nothing
+    # generated as she walks to its border; the start section cleared, tier 2 opens and its gratings go)
+    s0 = g.get_section(I2(0, 0))
+    res["start_seals"] = {"grating": sum(1 for _, k in seals(s0) if k == 1), "wall": sum(1 for _, k in seals(s0) if k == 2)}
+    mn = s0.get_section_min(); size = g.tile_size * g.section_tiles
+    p.set_actor_location(V(mn.x + size - 900, mn.y + size * 0.5 + 150, 100.0), False, True); yield from wait(3.0)
+    res["tier2_generated_while_shut"] = any(g.is_section_generated(I2(*xy)) for xy in ((1, 0), (1, 1), (1, -1)))
+    p.set_actor_location(V(0, 0, 100.0), False, True); yield from wait(0.3)
+    g.debug_clear_section(I2(0, 0)); yield from wait(0.3)
+    res["start_cleared"] = {"notice": str(g.tier_notice), "open": g.get_open_tiers(), "tier2_allowed": g.is_section_allowed(I2(1, 0)),
+                            "gratings_left": sum(1 for _, k in seals(g.get_section(I2(0, 0))) if k == 1)}
     # one set of tier 2 cleared as she would: every room walked into, every chest and trunk opened, every monster killed
     S = I2(1, 0); g.generate_section_now(S); s = yield from built(S)
     before = progress(S)
@@ -511,7 +555,9 @@ def step_tiers():
     # the set generated again (dropped and made anew): her kills stay killed, it stays cleared
     p.set_actor_location(V(0, 0, 100.0), False, True); yield from wait(0.3)
     g.reload_section(S); s = yield from built(S)
-    res["regenerated"] = {"monsters": len(s.spawned_monsters) if s else None, "progress": progress(S)}
+    # (her kills lie there as corpses: none of them alive)
+    res["regenerated"] = {"monsters": len([m for m in s.spawned_monsters if alive(m)]) if s else None, "corpses": len([m for m in s.spawned_monsters if unreal.SystemLibrary.is_valid(m) and m.is_corpse()]) if s else None,
+                          "progress": progress(S)}
     # the other seven sets of tier 2: tier 3 opens, the seals toward it go; walking on, tier 3 is generated
     for xy in ((1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)):
         yield from make_and_clear(I2(*xy))
@@ -538,8 +584,10 @@ def step_tiers():
                             "tier6_allowed": g.is_section_allowed(I2(5, 0)), "seal_kind_east": g.get_seal_kind(I2(4, 0), I2(5, 0))}
     p.set_actor_location(V(0, 0, 100.0), False, True); quiet(False)
     a = res["after_kills"]; ar = res["after_rooms"]
-    ok = (res["max_tier"] == 5 and res["open_at_start"] == 2 and res["tiers_of"] == [1, 2, 2, 3, 4, 5, 6] and res["sizes"] == [1, 8, 16, 24, 32]
-          and res["allowed_at_start"] == [True, True, False, False, False]
+    sc = res["start_cleared"]
+    ok = (res["max_tier"] == 5 and res["open_at_start"] == 1 and res["tiers_of"] == [1, 2, 2, 3, 4, 5, 6] and res["sizes"] == [1, 8, 16, 24, 32]
+          and res["allowed_at_start"] == [False, False, False, False, False] and res["start_seals"]["grating"] > 0 and not res["tier2_generated_while_shut"]
+          and sc["notice"] == "TIER 2 IS OPEN" and sc["open"] == 2 and sc["tier2_allowed"] and sc["gratings_left"] == 0
           and res["set_before"] and not res["set_before"]["cleared"] and ar["explored"] == ar["rooms"] and not ar["cleared"]
           and a["cleared"] and a["looted"] == a["chests"] and a["killed"] == a["monsters"] and res["monsters_killed"] == a["monsters"] and "SET CLEARED" in res["notice"]
           and res["seals_of_set"]["grating"] > 0 and res["seals_of_set"]["into"] == ["3"] and not res["tier3_generated"]
@@ -559,7 +607,9 @@ def step_tierloot():
     wt = {w["name"]: set(w["tiers"]) for w in W5["weapons"]}
     items = [it for it in g.get_editor_property("items") if it.weight > 0]
     tiered = {str(it.name): set(it.tiers) for it in items if len(it.tiers)}
-    anywhere = {str(it.name) for it in items if not len(it.tiers)}
+    # (a Spell Tome is found as the tome of a spell of the room's tier: those are checked by their own tiers)
+    tiered.update({str(it.name): set(it.tiers) for it in g.get_editor_property("items") if it.kind == unreal.RDItemKind.TOME and len(it.tiers)})
+    anywhere = {str(it.name) for it in items if not len(it.tiers) and it.kind != unreal.RDItemKind.TOME}
     res = {}; ok = True; N = 2500
     for t in range(1, 6):
         S = I2(t - 1, 0); cnt = {}; wrong = set(); n = 0; nw = 0; na = 0; arm = set(); seen_all = set()
@@ -585,6 +635,12 @@ def step_tierloot():
                    and not e["everywhere_missing"])
         ok = ok and e["ok"]; res[f"tier{t}"] = e
     step_result("tierloot", ok, **res)
+
+HILT_SPACING = {}
+for _h, _ch in (("Warrior", "Fem5"), ("Warlock", "DarkCaster")):
+    try: HILT_SPACING[_h] = float(json.load(open(os.path.join(SA, "random_dungeon_magic5", "w5_clips", _ch, "w5_times.json")))["left_on_hilt"])
+    except Exception: pass
+
 
 def step_weapons():
     g = G["gen"]; c = yield from restart(); quiet(True)
@@ -688,7 +744,10 @@ def step_weapons():
         if not e.get("hands"): return e.get("refused", False)
         for h in e["hands"]:
             if not (h["mesh_ok"] and h["grip_to_palm_cm"] < 7.0 and abs(h["damage"] - h["want_damage"]) < 0.01 and abs(h.get("attack_s", -9) - h.get("want_s", 9)) < 0.03): return False
-            if "left_palm_off_hilt_cm" in h and not (h["left_palm_off_hilt_cm"] < 4.0 and all(-14.0 < a < -2.0 for a in h["left_palm_along_hilt_cm"])): return False
+            # (the left palm a fist's span below the right on the hilt, as weapon5_clips measured her fists (w5_times.json), within
+            # 3 cm, at each blow; within 4 cm of the hilt's line)
+            L = HILT_SPACING.get(hero, 7.5)
+            if "left_palm_off_hilt_cm" in h and not (h["left_palm_off_hilt_cm"] < 4.0 and all(-(L + 3.0) < a < -(L - 3.0) for a in h["left_palm_along_hilt_cm"])): return False
         b = e["break"]
         return b.get("wear_after_one") == 1.0 and b["broke"] == 1 and b["last_broken"] == b["weapon"] and not b["still_carried"] and b["now_in_hand"] != b["weapon"] and "broke" in b["message"]
     ok = all(hero_ok(h, e) for h, e in out.items()) and len(out) == 5
@@ -938,9 +997,396 @@ def fire_measure(g):
                     "fire_over_floor_db_now": round(20 * math.log10(max(new, 1e-9) / max(floor, 1e-9)), 2), "wavs": out})
     return res
 
+# ------------------------------------------------------------------------------------------------ 2026-10-24: the user's second list
+SPJ = json.load(open(os.path.join(OUT, "spells.json"), encoding="utf-8"))
+MTJ = json.load(open(os.path.join(OUT, "monster_tiers.json"), encoding="utf-8"))
+
+def step_chance():
+    """a container holds anything one time in three; then 1 to 6 items as before; the great hall's armour whatever"""
+    g = G["gen"]; c = yield from restart(); S = I2(0, 0)
+    N = 6000; held = 0; cnt = {}; mism = 0
+    for i in range(N):
+        idx = 200000 + i; n = len(g.loot_list_of(S, idx))
+        if n: held += 1; cnt[n] = cnt.get(n, 0) + 1
+        if bool(g.container_holds_loot(S, idx)) != (n > 0): mism += 1
+        if i % 500 == 0: yield
+    want = float(LT["container_chance"]["chance"]); share = held / N; sd = math.sqrt(want * (1 - want) / N)
+    p6 = 1.0 / 6.0; sd6 = math.sqrt(p6 * (1 - p6) / max(held, 1))
+    worst = max(abs(cnt.get(k, 0) / max(held, 1) - p6) / sd6 for k in range(1, 7))
+    hall = list(g.get_start_room_containers())
+    hall_items = {str(x) for i in hall for x in g.loot_list_of(S, i)}
+    # (one of the start section's containers that holds nothing, opened: it says so, and nothing is found)
+    s0 = g.get_section(S); empty = {}
+    ei = next((i for i in range(s0.get_num_containers()) if i not in hall and not s0.is_target_open(False, i) and not len(g.loot_list_of(S, i))), None)
+    if ei is not None:
+        f0 = g.items_found; e0 = g.containers_empty; s0.toggle_container(ei); yield from wait(0.3)
+        empty = {"container": ei, "kind": str(s0.get_container_kind(ei)), "message": str(c.message), "found": g.items_found - f0, "counted": g.containers_empty - e0}
+    ok_empty = bool(empty) and empty["message"] == "Empty: nothing inside" and empty["found"] == 0 and empty["counted"] == 1
+    ok = abs(share - want) / sd < 4.5 and sorted(cnt) == [1, 2, 3, 4, 5, 6] and worst < 4.5 and mism == 0 and set(START_ARMOUR) <= hall_items and ok_empty
+    step_result("chance", ok, containers=N, holding=held, share=round(share, 4), wanted=want, sd_off=round(abs(share - want) / sd, 2),
+                counts={str(k): cnt[k] for k in sorted(cnt)}, counts_worst_sd=round(worst, 2), draw_mismatch=mism, hall=hall, hall_armour=sorted(hall_items & set(SETS)), empty_opened=empty)
+
+def step_corpses():
+    """the dead stay where they fell (no sinking, no vanishing), frozen; the set generated again lays them where they lay"""
+    g = G["gen"]; c = yield from restart(); quiet(True); p = G["pawn"]
+    S = I2(1, 0); g.generate_section_now(S); s = yield from built(S)
+    ms = [m for m in s.spawned_monsters if alive(m)][:3]
+    for m in ms: m.apply_damage(1.0e6, p)
+    before = [(m.get_actor_location(), m.spawn_index, str(m.monster_name)) for m in ms]
+    yield from wait(g.corpse_seconds + 5.0)
+    stay = [bool(unreal.SystemLibrary.is_valid(m) and m.is_corpse() and (m.get_actor_location() - b).length() < 5.0) for m, (b, _, _) in zip(ms, before)]
+    frozen = [bool(unreal.SystemLibrary.is_valid(m) and not m.is_actor_tick_enabled()) for m in ms]
+    pr = progress(S)
+    # (dropped and generated again: its corpses lie where they fell, dead; the rest alive as before)
+    p.set_actor_location(V(0, 0, 100.0), False, True); yield from wait(0.3)
+    g.reload_section(S); yield from wait(0.2)
+    if not g.is_section_generated(S): g.generate_section_now(S)
+    s = yield from built(S)
+    laid = {m.spawn_index: m for m in s.spawned_monsters if unreal.SystemLibrary.is_valid(m) and m.is_corpse()} if s else {}
+    again = [bool(i in laid and (laid[i].get_actor_location() - b).length() < 30.0 and str(laid[i].monster_name) == n) for b, i, n in before]
+    pr2 = progress(S); quiet(False)
+    ok = len(ms) >= 2 and all(stay) and all(frozen) and all(again) and pr2["killed"] == pr["killed"] >= len(ms)
+    step_result("corpses", ok, killed=len(ms), stayed_put_after_s=round(g.corpse_seconds + 5.0, 1), stayed=stay, frozen=frozen, laid_again_in_place=again,
+                killed_counted=[pr["killed"], pr2["killed"]])
+
+def step_monsters():
+    """each tier's sections spawn the gallery monsters of that tier, in their own colours (no tint), their hit points,
+    damage, speed and blows' pace by the tier"""
+    g = G["gen"]; c = yield from restart(); quiet(True)
+    defs = {str(d.name): d for d in g.get_editor_property("monsters")}
+    res = {}; ok = True; avg = []
+    for t in range(1, 6):
+        S = I2(t - 1, 0)
+        if t > 1: g.generate_section_now(S)
+        s = yield from built(S)
+        ms = [m for m in s.spawned_monsters if alive(m)] if s else []
+        kinds = sorted({str(m.monster_name) for m in ms})
+        wrong = sorted({k for k in kinds if defs[k].tier != t})
+        hp = [m.get_max_health() for m in ms]; dmg = [m.get_damage() for m in ms]
+        # (her kind's walking speed times the tier's; a blow's pace the tier's)
+        spd = [round(m.get_walk_speed() / max(defs[str(m.monster_name)].walk_speed, 1.0), 3) for m in ms]
+        gap = [round(m.get_attack_interval() / max(defs[str(m.monster_name)].attack_interval, 0.01), 3) for m in ms]
+        abil = sorted({str(m.ability.name) for m in ms})
+        want_spd = MTJ["tiers"]["speed"][t - 1]; want_gap = MTJ["tiers"]["attack_interval"][t - 1]
+        e = {"monsters": len(ms), "kinds": kinds, "wrong_tier": wrong, "mean_hp": round(sum(hp) / max(len(hp), 1), 1), "tier_hp": round(g.get_monster_health(S), 1),
+             "mean_damage": round(sum(dmg) / max(len(dmg), 1), 1), "tier_damage": round(g.get_monster_damage(S), 1),
+             "speed_x": sorted(set(spd)), "want_speed_x": want_spd, "blow_gap_x": sorted(set(gap)), "want_gap_x": want_gap, "abilities": abil}
+        e["ok"] = (len(ms) > 0 and not wrong and all(abs(x - want_spd) < 0.01 for x in spd) and all(abs(x - want_gap) < 0.01 for x in gap)
+                   and abs(e["mean_hp"] - e["tier_hp"]) < 0.35 * e["tier_hp"] and (t >= 3 or abil == ["NONE"]))
+        ok = ok and e["ok"]; res[f"tier{t}"] = e; avg.append(e["mean_hp"])
+        if t <= 2: shot(f"monsters_tier{t}")
+    ok = ok and all(avg[i] < avg[i + 1] for i in range(4))
+    quiet(False)
+    step_result("monsters", ok, **res)
+
+def step_abilities():
+    """a tier 3+ monster's blow carries its ability: poison eats her hit points, weakening takes off her blows, slowing her
+    speed; Dispel Hex ends them all and none takes hold while it lasts"""
+    g = G["gen"]; c = yield from restart(); p = G["pawn"]
+    for xy in ((2, 0), (3, 0), (-2, 0), (0, 2), (-3, 0)): g.generate_section_now(I2(*xy))
+    for xy in ((2, 0), (3, 0), (-2, 0), (0, 2), (-3, 0)): yield from built(I2(*xy))
+    by = {}
+    for xy in ((2, 0), (3, 0), (-2, 0), (0, 2), (-3, 0)):
+        for m in g.get_section(I2(*xy)).spawned_monsters:
+            if alive(m) and str(m.ability.name) != "NONE": by.setdefault(str(m.ability.name), m)
+    res = {"found": sorted(by)}
+    hp0 = c.get_max_health()
+    for ab, m in by.items():
+        c.clear_afflictions(); c.set_health(c.get_max_health())
+        if not stand_near(m, (150.0, 200.0, 260.0, 330.0)): res[ab] = "no place by it"; continue
+        h0 = m.hits_landed; t0 = time.time()
+        while m.hits_landed == h0 and time.time() - t0 < 12: yield
+        quiet(True)                     # (no more blows: what follows is the ability's alone)
+        e = {"monster": str(m.title), "tier": m.tier, "power": round(m.ability_power, 2), "hits": m.hits_landed - h0,
+             "poisoned": c.is_poisoned(), "weakness": round(c.get_weakness(), 3), "slowness": round(c.get_slowness(), 3), "buffs": [str(x) for x in c.get_buff_lines()]}
+        if ab == "POISON":
+            hp_a = c.get_health(); yield from wait(1.5); e["poison_took"] = round(hp_a - c.get_health(), 1)
+        res[ab] = e
+        quiet(False)
+    # (Dispel Hex ends them; then none takes hold while it lasts)
+    c.apply_monster_ability(unreal.RDMonsterAbility.POISON, 1.4, 20.0); c.apply_monster_ability(unreal.RDMonsterAbility.SLOW, 1.4, 20.0); c.apply_monster_ability(unreal.RDMonsterAbility.WEAKEN, 1.4, 20.0)
+    before = [c.is_poisoned(), c.get_slowness() > 0, c.get_weakness() > 0]
+    g.switch_hero("Mage"); yield from wait(0.5); refresh(); c = cb(); c.add_item("Tome of Dispel Hex")
+    wi = next(i for i, l in enumerate(lines(c)) if l.startswith("weapon|Dispel Hex"))
+    c.apply_monster_ability(unreal.RDMonsterAbility.POISON, 1.4, 20.0); c.apply_monster_ability(unreal.RDMonsterAbility.SLOW, 1.4, 20.0)
+    on = [c.is_poisoned(), c.get_slowness() > 0]
+    c.cast_spell_now(wi, None)
+    after = [c.is_poisoned(), c.get_slowness() > 0, c.get_weakness() > 0]
+    c.apply_monster_ability(unreal.RDMonsterAbility.POISON, 1.4, 20.0); immune = not c.is_poisoned()
+    res.update({"set_by_hand": before, "on_the_mage": on, "after_dispel": after, "immune_after": immune})
+    g.switch_hero(g.get_editor_property("default_hero")); yield from wait(0.5); refresh()
+    ok = (set(res["found"]) == {"POISON", "WEAKEN", "SLOW"} and isinstance(res.get("POISON"), dict) and res["POISON"]["poisoned"] and res["POISON"].get("poison_took", 0) > 0
+          and isinstance(res.get("WEAKEN"), dict) and res["WEAKEN"]["weakness"] > 0 and isinstance(res.get("SLOW"), dict) and res["SLOW"]["slowness"] > 0
+          and all(before) and all(on) and not any(after) and immune)
+    step_result("abilities", ok, **res)
+
+def stand_near(m, gaps):
+    """stand_off at the first of these distances where there is a place"""
+    for gp in gaps:
+        if stand_off(m, gp): return True
+    return False
+
+def fresh_monster(g, exclude):
+    for xy in ((2, 0), (-2, 0), (0, 2), (0, -2), (2, 2), (-2, -2), (3, 0), (-3, 0)):
+        s = g.get_section(I2(*xy))
+        if not s: continue
+        for m in s.spawned_monsters:
+            if alive(m) and not m.is_ally() and m not in exclude: return m
+    return None
+
+def step_spells():
+    """the 30 spells of the table: the Mage learns them from tomes (key and message), the Warlock only offense and curses,
+    the Warrior none; each released by its weapon at a monster of a tier-3 set (or round her) does what its line says,
+    measured on the monsters and on her; its effects are there (particles near it); a picture of each; a cooldown and a
+    want of mana refuse a cast"""
+    g = G["gen"]; c = yield from restart(); quiet(True); p = G["pawn"]
+    for xy in ((2, 0), (-2, 0), (0, 2), (0, -2), (2, 2), (-2, -2), (3, 0), (-3, 0)): g.generate_section_now(I2(*xy))
+    for xy in ((2, 0), (-2, 0), (0, 2), (0, -2), (2, 2), (-2, -2), (3, 0), (-3, 0)): yield from built(I2(*xy))
+    res = {}
+    # who learns what
+    learn = {}
+    for hero, tomes in (("Warrior", ["Tome of Fireball"]), ("Warlock", ["Tome of Frost Shard", "Tome of Ash Ward", "Tome of Curse of Frailty", "Tome of Fire Bolt", "Tome of Raise Dead"])):
+        g.switch_hero(hero); yield from wait(0.5); refresh(); c = cb()
+        for t in tomes: c.add_item(t)
+        learn[hero] = {"weapons": [l.split("|")[1] for l in lines(c) if l.startswith("weapon|")], "tomes_carried": [l.split("|")[1] for l in lines(c) if l.startswith("tome|")]}
+    g.switch_hero("Mage"); yield from wait(0.5); refresh(); c = cb(); p = G["pawn"]
+    for s in SPJ["spells"]: c.add_item("Tome of " + s["name"])
+    weaps = [l.split("|")[1] for l in lines(c) if l.startswith("weapon|")]
+    learn["Mage"] = {"weapons": len(weaps), "learned": c.spells_learned, "message": str(c.message)}
+    res["learn"] = learn
+    # each spell released
+    sp_out = {}; used = []
+    name_of_w = {"Fire Bolt": "Fire"}
+    for s in SPJ["spells"]:
+        nm = s["name"]; wname = name_of_w.get(nm, nm)
+        wi = next((i for i, w in enumerate(weaps) if w == wname), -1)
+        e = {"weapon": wi}
+        if wi < 0: sp_out[nm] = e; continue
+        c.clear_afflictions(); c.set_health(c.get_max_health()); c.set_mana(c.get_max_mana())
+        kind = s["kind"]
+        close = kind in ("Lash", "Ward", "Skin", "Mirror", "Rune", "Sanctum", "Pact", "Veil", "Nova", "Raise", "Knight", "Dispel")
+        # (a monster with room beside it: the next one when there is none (one in a corner left Ash Ward untried))
+        m = None; tried = 0
+        for _ in range(4):
+            q = fresh_monster(g, used)
+            if q is None: break
+            tried += 1
+            if stand_near(q, (160.0, 220.0, 280.0, 340.0) if close else (520.0, 440.0, 600.0, 360.0)): m = q; break
+            used.append(q)
+        if m is None:
+            e["no_monster" if tried == 0 else "no_place"] = True; e["monsters_tried"] = tried; sp_out[nm] = e; continue
+        yield from wait(0.2)
+        near = [x for x in g.get_monsters() if alive(x) and (x.get_actor_location() - p.get_actor_location()).length() < 1500]
+        if kind == "Drain": c.set_health(c.get_max_health() * 0.5)         # (hurt: the drain has something to give back)
+        hp0 = {x.get_name(): x.get_health() for x in near}; her0 = c.get_health()
+        # (what needs a corpse: monsters near her killed first; the one she faces too, for Raise Dead)
+        if kind in ("Raise", "Corpse"):
+            victims = [x for x in near if x != m and (x.get_actor_location() - p.get_actor_location()).length() < 1000][:2]
+            if kind == "Raise" or not victims: victims.append(m)
+            for x in victims: x.apply_damage(1.0e6, p)
+            yield from wait(1.2)
+            e["corpses_near"] = len(g.get_corpses_near(p.get_actor_location(), 1400.0))
+        rel0 = {str(k_): v_ for k_, v_ in dict(c.get_editor_property("spells_released")).items()}
+        corpse_at = [x.get_actor_location() for x in g.get_corpses_near(p.get_actor_location(), 1400.0)] if kind == "Corpse" else []
+        c.cast_spell_now(wi, m if alive(m) else None)
+        yield from wait(0.25)
+        if corpse_at:
+            # (the bursts are where the corpses lay: their particles there, now and a moment later)
+            best = 0
+            for _ in range(3):
+                for q in corpse_at: best = max(best, c.get_spell_particles(q, 450.0)[0])
+                yield from wait(0.3)
+            e["particles_at_corpses"] = best
+        # (what holds a while: looked at now, before it wears off)
+        if kind == "Curse": e["cursed"] = sum(1 for x in near if unreal.SystemLibrary.is_valid(x) and x.get_curse_share() > 0)
+        n_, sys_ = c.get_spell_particles(m.get_actor_location() if unreal.SystemLibrary.is_valid(m) else p.get_actor_location(), 900.0)
+        n2, sys2 = c.get_spell_particles(p.get_actor_location(), 600.0)
+        e["particles"] = max(n_, n2, e.get("particles_at_corpses", 0)); e["systems"] = max(sys_, sys2)
+        shot("spell_" + "".join(ch if ch.isalnum() else "_" for ch in nm.lower()))
+        # what it did
+        if kind == "Ward":
+            hits0 = c.ward_blocks; h0 = c.get_health()
+            for _ in range(int(s.get("count", 0)) or 1): c.apply_damage(15.0, m)
+            if s.get("amount"): c.apply_damage(c.get_max_health() * 0.3, m)
+            e.update({"blocked": c.ward_blocks - hits0, "health_lost": round(h0 - c.get_health(), 1)})
+            e["ok"] = e["blocked"] >= (int(s.get("count", 0)) or 1) and e["health_lost"] < 1.0
+        elif kind == "Skin":
+            c.apply_damage(40.0, m); e["blow_taken"] = round(c.last_blow_taken, 1); e["ok"] = abs(e["blow_taken"] - 40.0 * (1 - s["amount"])) < 0.5
+        elif kind == "Dispel":
+            e["ok"] = not c.is_poisoned()
+        elif kind == "Mirror":
+            mh = m.get_health(); h0 = c.get_health(); c.apply_damage(30.0, m)
+            e.update({"monster_lost": round(mh - m.get_health(), 1), "she_lost": round(h0 - c.get_health(), 1), "reflected": c.reflected}); e["ok"] = e["monster_lost"] >= 29.0 and e["she_lost"] < 1.0
+        elif kind == "Rune":
+            c.apply_damage(40.0, m); e["blow"] = round(c.last_blow_before, 1); e["ok"] = abs(e["blow"] - 40.0 * (1 - s["amount"])) < 0.5
+        elif kind == "Sanctum":
+            h0 = c.get_health(); c.apply_damage(40.0, m); e["she_lost"] = round(h0 - c.get_health(), 1); e["ok"] = e["she_lost"] < 0.5
+        elif kind == "Pact":
+            c.set_health(5.0); c.apply_damage(100.0, m); e.update({"alive": not c.is_dead(), "health": round(c.get_health(), 1), "saves": c.pact_saves})
+            e["ok"] = e["alive"] and abs(e["health"] - c.get_max_health() * s["amount"]) < 1.0
+        elif kind == "Veil":
+            ev0 = c.evaded
+            for _ in range(40): c.apply_damage(5.0, m)
+            e["evaded_of_40"] = c.evaded - ev0; e["veiled"] = c.is_veiled(); e["ok"] = e["veiled"] and 20 <= e["evaded_of_40"] <= 38
+        elif kind == "Knight":
+            yield from wait(1.0)
+            al = g.get_allies(); e.update({"allies": len(al), "champion": [str(a.title) for a in al if a.is_champion()]}); e["ok"] = len(e["champion"]) == 1
+        elif kind == "Raise":
+            yield from wait(1.5)
+            al = [a for a in g.get_allies() if not a.is_champion()]; e.update({"raised": len(al), "alive": all(alive(a) for a in al)}); e["ok"] = len(al) >= 1
+            if al:
+                # (her camera passes her allies, and one it is in is hidden: an ally behind her filled the reel's view)
+                a = al[0]; cm = G["pc"].player_camera_manager; a0 = a.get_actor_location()
+                cam_ignored = a.capsule_component.get_collision_response_to_channel(unreal.CollisionChannel.ECC_CAMERA) == unreal.CollisionResponseType.ECR_IGNORE
+                a.set_actor_location(cm.get_camera_location(), False, True); yield from wait(0.2)
+                hid_at_cam = bool(a.get_editor_property("hidden"))
+                a.set_actor_location(a0, False, True); yield from wait(0.2)
+                e.update({"camera_ignores_ally": cam_ignored, "hidden_at_camera": hid_at_cam, "shown_away": not a.get_editor_property("hidden")})
+                e["ok"] = e["ok"] and cam_ignored and hid_at_cam and e["shown_away"]
+        else:
+            # (offense, curses: the monsters near her hurt; what lasts: over its duration; a slow looked at as it holds)
+            if s.get("slow"):
+                yield from wait(0.5); e["slowed"] = sum(1 for x in near if unreal.SystemLibrary.is_valid(x) and x.get_slow_share() > 0)
+            yield from wait(max(float(s.get("duration", 0)), 0.8) + (2.8 if kind == "Meteors" else 0.6))
+            hurt = {k_: round(v_ - (x.get_health() if unreal.SystemLibrary.is_valid(x) else 0.0), 1) for x in near for k_, v_ in hp0.items() if k_ == x.get_name()}
+            e["hurt"] = sum(1 for v_ in hurt.values() if v_ > 0.5); e["damage_dealt"] = round(sum(v_ for v_ in hurt.values() if v_ > 0.5), 1)
+            if kind == "Nova": e["her_price"] = round(her0 - c.get_health(), 1)
+            if kind == "Drain": e["she_gained"] = round(c.get_health() - her0, 1)
+            if kind == "Corpse": e["corpses_left"] = len(g.get_corpses_near(p.get_actor_location(), 1400.0))
+            e["ok"] = (e["hurt"] >= 1 if kind not in ("Curse", "Corpse") else e.get("cursed", 0) >= 1 if kind == "Curse" else e["corpses_left"] < e.get("corpses_near", 0))
+            if kind == "Bolt":
+                # (where the bolt ended, against the monster aimed at: a miss says where it went)
+                ba = c.last_burst_at; e.update({"monster": str(m.title) if unreal.SystemLibrary.is_valid(m) else "?", "flown_m": round(c.last_bolt_flown / 100.0, 1),
+                                                "burst_from_monster_m": round((ba - m.get_actor_location()).length() / 100.0, 1) if unreal.SystemLibrary.is_valid(m) else None})
+            if kind == "Bolt" and s.get("count"): e["ok"] = e["ok"] and e["hurt"] >= min(2, len(near))
+            if kind == "Nova": e["ok"] = e["ok"] and e["her_price"] > 0
+        rel = {str(k_): v_ for k_, v_ in dict(c.get_editor_property("spells_released")).items()}; e["released"] = rel.get(nm, 0) - rel0.get(nm, 0)
+        if s.get("slow"): e["ok"] = e.get("ok") and e.get("slowed", 0) >= 1
+        e["ok"] = bool(e.get("ok")) and e["particles"] > 0
+        sp_out[nm] = e; used.append(m)
+        yield from rwait(0.6)
+    res["spells"] = sp_out
+    # a cooldown refuses the next cast; a spell costing more than her mana is refused and says so
+    wi = weaps.index("Ash Ward"); c.set_mana(c.get_max_mana())
+    a1 = c.start_attack_with(wi); yield from wait(2.0); a2 = c.start_attack_with(wi)
+    res["cooldown"] = {"first": a1, "second": a2, "left": round(c.get_cooldown_left(wi), 1), "refusals": c.cooldown_refusals}
+    wi = weaps.index("Apocalypse"); r0 = c.casts_refused; yield from wait(1.0); a3 = c.start_attack_with(wi)
+    res["too_dear"] = {"cast": a3, "refused": c.casts_refused - r0, "message": str(c.message)}
+    g.switch_hero(g.get_editor_property("default_hero")); yield from wait(0.5); refresh(); quiet(False)
+    lw = learn["Warlock"]
+    ok = (learn["Warrior"]["weapons"] == ["Sword"] and learn["Warrior"]["tomes_carried"] == ["Tome of Fireball"]
+          and "Frost Shard" in lw["weapons"] and "Curse of Frailty" in lw["weapons"] and "Ash Ward" not in lw["weapons"] and "Raise Dead" not in lw["weapons"]
+          and sorted(lw["tomes_carried"]) == ["Tome of Ash Ward", "Tome of Raise Dead"] and learn["Mage"]["learned"] == 28 and learn["Mage"]["weapons"] == 30
+          and all(v.get("ok") for v in sp_out.values()) and a1 and not a2 and res["cooldown"]["refusals"] >= 1 and not a3 and res["too_dear"]["refused"] == 1
+          and "more than you have" in res["too_dear"]["message"])
+    step_result("spells", ok, failed=sorted(k for k, v in sp_out.items() if not v.get("ok")), **res)
+
+def step_rings():
+    """rings: a magic ring adds its share to her mana (spellcasters), an hp ring to her hit points (Warrior, Warlock), a
+    dexterity ring to her ranged damage (Rogue); one of a kind at a time (another replaces it); the others refused"""
+    g = G["gen"]; c = yield from restart(); res = {}
+    g.switch_hero("Mage"); yield from wait(0.5); refresh(); c = cb()
+    m0 = c.get_max_mana()
+    for r in ("Magic Potency Ring 5", "Magic Potency Ring 9", "HP Potency Ring 3"): c.add_item(r)
+    w5 = c.wear_ring("Magic Potency Ring 5"); m5 = c.get_max_mana(); w9 = c.wear_ring("Magic Potency Ring 9"); m9 = c.get_max_mana()
+    worn = str(c.get_worn_ring(unreal.RDRingKind.MAGIC)); hp_r = c.wear_ring("HP Potency Ring 3"); msg = str(c.message)
+    off = c.wear_ring("Magic Potency Ring 9"); m_off = c.get_max_mana()
+    res["Mage"] = {"mana": [m0, m5, m9, m_off], "worn_after_9": worn, "hp_ring_refused": not hp_r, "message": msg, "lines": [l for l in lines(c) if l.startswith("ring|")]}
+    g.switch_hero("Warrior"); yield from wait(0.5); refresh(); c = cb()
+    h0 = c.get_max_health(); hp_now = c.get_health(); c.add_item("HP Potency Ring 4"); c.wear_ring("HP Potency Ring 4")
+    res["Warrior"] = {"health": [h0, c.get_max_health()], "health_now": [hp_now, c.get_health()]}
+    g.switch_hero("Rogue"); yield from wait(0.5); refresh(); c = cb()
+    xi = next(i for i, l in enumerate(lines(c)) if l.startswith("weapon|Crossbow")); d0 = c.get_damage_of(xi)
+    c.add_item("Dexterity Ring 10"); c.wear_ring("Dexterity Ring 10"); d1 = c.get_damage_of(xi)
+    res["Rogue"] = {"crossbow": [round(d0, 2), round(d1, 2)]}
+    g.switch_hero(g.get_editor_property("default_hero")); yield from wait(0.5); refresh()
+    M = res["Mage"]["mana"]; W = res["Warrior"]
+    ok = (abs(M[1] - M[0] * 1.5) < 0.5 and abs(M[2] - M[0] * 1.9) < 0.5 and abs(M[3] - M[0]) < 0.5 and res["Mage"]["worn_after_9"] == "Magic Potency Ring 9"
+          and res["Mage"]["hp_ring_refused"] and abs(W["health"][1] - W["health"][0] * 1.4) < 0.5 and abs((W["health_now"][1] - W["health_now"][0]) - W["health"][0] * 0.4) < 0.5
+          and abs(res["Rogue"]["crossbow"][1] / res["Rogue"]["crossbow"][0] - (1.3 + 1.0) / 1.3) < 0.01)
+    step_result("rings", ok, **res)
+
+def step_breakdown():
+    """at an anvil the weapons she found break down into materials by type and tier (loot_table.json's breakdown); the one
+    in her hands is refused; one she carries but cannot wield breaks down too"""
+    g = G["gen"]; c = yield from restart(); res = {}
+    BD = {tuple(b["types"]): b["gives"] for b in LT["breakdown"]["types"]}
+    wt = {w["name"]: w for w in W5["weapons"]}
+    def gives(name):
+        w = wt[name]; t = w["type"] if w["type"] != "ranged" else ("crossbow" if "crossbow" in name.lower() else "bow")
+        g_ = next(v for k, v in BD.items() if t in k); tier = min(w["tiers"])
+        return {k: v * tier for k, v in g_.items()}
+    g.switch_hero("Warrior"); yield from wait(0.5); refresh(); c = cb()
+    blade = next(w["name"] for w in W5["weapons"] if w["type"] == "two handed sword")
+    c.add_item(blade); c.set_crafting_open(True); yield from rwait(0.3)
+    cl = [str(l) for l in c.get_craft_lines()]; bl = [l for l in cl if l.startswith("breakdown|")]
+    have0 = {k: c.get_item_count(k) for k in gives(blade)}
+    # (the cursor to its line, Enter)
+    li = next(i for i, l in enumerate(cl) if l.startswith("breakdown|" + blade + "|"))
+    while c.get_craft_cursor() != li: yield from press("S")
+    yield from press("Enter")
+    got = {k: c.get_item_count(k) - have0[k] for k in have0}
+    still = any(l.startswith("weapon|" + blade) for l in lines(c))
+    c.set_crafting_open(False); yield from rwait(0.3)
+    # (the one in her hands: refused)
+    c.add_item(blade); wi = next(i for i, l in enumerate(lines(c)) if l.startswith("weapon|" + blade)); c.select_weapon(wi)
+    drawn = c.break_down_weapon(wi); drawn_msg = str(c.message)
+    res["Warrior"] = {"breakdown_lines": bl, "gave": got, "wanted": gives(blade), "weapon_still_there": still, "drawn_refused": not drawn, "message": drawn_msg}
+    g.switch_hero("Mage"); yield from wait(0.5); refresh(); c = cb()
+    bow = next(w["name"] for w in W5["weapons"] if w["type"] == "ranged")
+    c.add_item(bow); h0 = {k: c.get_item_count(k) for k in gives(bow)}
+    ok_i = c.break_down_item(bow); got_b = {k: c.get_item_count(k) - h0[k] for k in h0}
+    res["Mage"] = {"carried": bow, "broke": ok_i, "gave": got_b, "wanted": gives(bow), "left": c.get_item_count(bow)}
+    g.switch_hero(g.get_editor_property("default_hero")); yield from wait(0.5); refresh()
+    ok = (len(bl) == 1 and res["Warrior"]["gave"] == res["Warrior"]["wanted"] and not still and res["Warrior"]["drawn_refused"]
+          and ok_i and res["Mage"]["gave"] == res["Mage"]["wanted"] and res["Mage"]["left"] == 0)
+    step_result("breakdown", ok, **res)
+
+def step_menu():
+    """Escape opens the menu and pauses the game; W / S choose, A / D set a volume (saved in the user settings); a volume
+    measured on what she hears (a fire at 2.5 m recorded with the environment volume at 1 and at 0.5: about -6 dB);
+    the buttons (a dry run: they say what they would do): Choose another hero, Quit; Resume and Escape go back"""
+    g = G["gen"]; c = yield from restart(); res = {}
+    g.set_editor_property("menu_dry_run", True)
+    for k in range(4): g.set_user_volume(k, 1.0)
+    yield from press("Escape"); yield from rwait(0.3)
+    res["open"] = g.is_menu_open(); res["paused"] = GS.is_game_paused(G["w"]); res["lines"] = [str(l) for l in g.get_menu_lines()]
+    shot("menu"); yield from rwait(1.5)
+    # (to Environment sounds, ten steps down)
+    while g.get_menu_cursor() != 2: yield from press("S")
+    for _ in range(10): yield from press("A", 0.06)
+    res["environment"] = round(g.get_user_volume(2), 3)
+    ini = os.path.join(unreal.Paths.project_saved_dir(), "Config", "WindowsEditor", "GameUserSettings.ini")
+    res["saved"] = "Environment=0.5" in (open(ini, encoding="utf-8", errors="ignore").read() if os.path.exists(ini) else "")
+    for want, idx in (("hero", 5), ("quit", 6)):
+        while g.get_menu_cursor() != idx: yield from press("S")
+        g.set_editor_property("last_menu_action", ""); yield from press("Enter"); res[want] = str(g.last_menu_action)
+    while g.get_menu_cursor() != 4: yield from press("W")
+    yield from press("Enter"); yield from rwait(0.3)
+    res["resumed"] = not g.is_menu_open() and not GS.is_game_paused(G["w"])
+    yield from press("Escape"); yield from rwait(0.2); o2 = g.is_menu_open(); yield from press("Escape"); yield from rwait(0.2)
+    res["escape_toggles"] = o2 and not g.is_menu_open()
+    # (what she hears: the fire step's recording at the environment volume 1 and 0.5)
+    mv0 = g.get_editor_property("music_volume"); g.set_editor_property("music_volume", 0.0)
+    try:
+        g.set_user_volume(2, 1.0); r1 = yield from fire_measure(g)
+        g.set_user_volume(2, 0.5); r2 = yield from fire_measure(g)
+    finally:
+        g.set_editor_property("music_volume", mv0); quiet(False); g.set_user_volume(2, 1.0)
+        lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings")
+        if "bg_audio" in G: lms.set_editor_property("bAllowBackgroundAudio", G.pop("bg_audio"))
+    def own(r): return math.sqrt(max(r["rms_now"] ** 2 - r["rms_floor"] ** 2, 0.0)) if r.get("rms_now") else 0.0
+    db = 20 * math.log10(own(r2) / own(r1)) if own(r1) > 0 and own(r2) > 0 else None
+    res["fire_at_half_db"] = round(db, 2) if db is not None else None
+    g.set_editor_property("menu_dry_run", False)
+    ok = (res["open"] and res["paused"] and len(res["lines"]) == 7 and res["environment"] == 0.5 and res["saved"] and res["hero"] == "hero" and res["quit"] == "quit"
+          and res["resumed"] and res["escape_toggles"] and db is not None and -8.0 < db < -4.0)
+    step_result("menu", ok, **res)
+
 STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "heroarmour": step_heroarmour, "follow": step_follow, "damage": step_damage, "ui": step_ui,
          "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons, "armourtable": step_armourtable, "repair": step_repair, "craft": step_craft,
-         "maps": step_maps, "fire": step_fire}
+         "maps": step_maps, "fire": step_fire, "chance": step_chance, "corpses": step_corpses, "monsters": step_monsters, "abilities": step_abilities,
+         "spells": step_spells, "rings": step_rings, "breakdown": step_breakdown, "menu": step_menu}
 def run():
     for s in PLAN:
         yield from STEPS[s]()

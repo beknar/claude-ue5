@@ -1450,8 +1450,10 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 {
 	UWorld* W = GetWorld();
 	if (!W || !W->IsGameWorld() || Generator->Monsters.Num() == 0) return;
-	float WSum = 0.f; for (const FRDMonsterDef& D : Generator->Monsters) if (D.Mesh) WSum += D.Weight;
-	if (WSum <= 0.f) return;
+	// (level 5: the kinds of this section's tier of rooms)
+	TArray<int32> Kinds; Generator->MonsterKindsFor(Coord, Kinds);
+	float WSum = 0.f; for (const int32 K : Kinds) WSum += Generator->Monsters[K].Weight;
+	if (WSum <= 0.f || Kinds.Num() == 0) return;
 	const FVector Start = Generator->GetStartRoomCenter();
 	// which rooms get a monster: a coin for each room, or (the combat dungeon) exactly the wanted share of the rooms,
 	// taken in a shuffled order (a room without a free tile or next to the player's start is passed over for the next)
@@ -1478,13 +1480,25 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 		const FVector P = TileWorld(T);
 		if (FVector::Dist2D(P, Start) < 1500.f) continue;
 		float U = R.FRand() * WSum; const FRDMonsterDef* Def = nullptr;
-		for (const FRDMonsterDef& D : Generator->Monsters) { if (!D.Mesh) continue; U -= D.Weight; if (U <= 0.f) { Def = &D; break; } }
-		if (!Def) Def = &Generator->Monsters.Last();
+		for (const int32 K : Kinds) { U -= Generator->Monsters[K].Weight; if (U <= 0.f) { Def = &Generator->Monsters[K]; break; } }
+		if (!Def) Def = &Generator->Monsters[Kinds.Last()];
 		const int32 Index = Count++;
 		const float Yaw = R.FRandRange(0, 360);
 		const int32 MSeed = R.RandHelper(1 << 30);
-		if (Generator->IsMonsterKilled(Coord, Index)) continue;
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		if (Generator->IsMonsterKilled(Coord, Index))
+		{
+			// (level 5: the dead stay: its corpse where it lay)
+			const FTransform* Xf = Generator->bKeepCorpses ? Generator->CorpseOf(Coord, Index) : nullptr;
+			if (!Xf) continue;
+			ARDMonster* C = W->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), *Xf, Sp);
+			if (!C) continue;
+			C->SpawnIndex = Index;
+			C->Setup(this, *Def, MSeed);
+			C->LayDead();
+			SpawnedMonsters.Add(C);
+			continue;
+		}
 		ARDMonster* M = W->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), P + FVector(0, 0, Def->CapsuleHalfHeight + 5.f)), Sp);
 		if (!M) continue;
 		M->SpawnIndex = Index;

@@ -29,6 +29,13 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "Engine/LocalPlayer.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Framework/Commands/InputBindingManager.h"
+#include "Framework/Commands/UICommandInfo.h"
+#include "Framework/Commands/InputChord.h"
+#include "Misc/ConfigCacheIni.h"
+#include "NiagaraSystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeonGen, Log, All);
 
@@ -212,8 +219,9 @@ bool ARDDungeonGenerator::IsTierOpen(int32 Tier) const
 {
 	if (MaxTier <= 0) return true;
 	if (Tier > MaxTier) return false;
-	// (every tier before it open and the one just before cleared: tiers open in order)
-	return Tier <= 2 || (GetTierCleared(Tier - 1) >= TierSize(Tier - 1) && IsTierOpen(Tier - 1));
+	// (every tier before it open and the one just before cleared: tiers open in order; tier 2 too, once the start section
+	// is cleared: the user's rule, 2026-10-24)
+	return Tier <= 1 || (GetTierCleared(Tier - 1) >= TierSize(Tier - 1) && IsTierOpen(Tier - 1));
 }
 
 bool ARDDungeonGenerator::IsSectionAllowed(FIntPoint S) const
@@ -355,12 +363,17 @@ float ARDDungeonGenerator::GetAverageWeaponDamage() const
 
 float ARDDungeonGenerator::GetMonsterHealth(FIntPoint Section) const
 {
-	return (MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth) * (IsStartSection(Section) ? StartMonsterHealth : RuntimeMonsterHealth);
+	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
+	// (level 5: by the tier of its rooms)
+	if (MaxTier > 0 && TierHealth.Num() > 0) return Ref * TierValue(TierHealth, TierOf(Section), 1.f);
+	return Ref * (IsStartSection(Section) ? StartMonsterHealth : RuntimeMonsterHealth);
 }
 
 float ARDDungeonGenerator::GetMonsterDamage(FIntPoint Section) const
 {
-	return (MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage()) * (IsStartSection(Section) ? StartMonsterDamage : RuntimeMonsterDamage);
+	const float Ref = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
+	if (MaxTier > 0 && TierDamage.Num() > 0) return Ref * TierValue(TierDamage, TierOf(Section), 1.f);
+	return Ref * (IsStartSection(Section) ? StartMonsterDamage : RuntimeMonsterDamage);
 }
 
 // ------------------------------------------------------------------------------------------------ heroes, items
@@ -478,6 +491,8 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 			for (int32 J = K; J < StartRoomItems.Num() && Out.Num() < Max; J += Room.Num())
 				if (FindItem(StartRoomItems[J]) >= 0) Out.Add(StartRoomItems[J]);
 	}
+	// (level 5: a container holds anything at all only so often; the start room's own items are there whatever it says)
+	if (!ContainerHoldsLoot(Section, Index)) return Out;
 	float Sum = 0.f;
 	for (const FRDItemDef& It : Items) if (InTier(It)) Sum += FMath::Max(It.Weight, 0.f);
 	if (Sum <= 0.f) return Out;
@@ -500,8 +515,345 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 	const int32 N = Max > 1 ? R.RandRange(1, Max) : 1;
 	TArray<FName> Picked = { First };
 	while (Picked.Num() < N) Picked.Add(Pick());
-	for (const FName& P : Picked) if (Out.Num() < Max) Out.Add(P);
+	for (int32 K = 0; K < Picked.Num(); ++K)
+	{
+		if (Out.Num() >= Max) break;
+		// (level 5: a spell tome is one of the spells of the section's tier, by the table's drop chances)
+		const int32 Ix = FindItem(Picked[K]);
+		if (Ix >= 0 && Items[Ix].Kind == ERDItemKind::Tome && Items[Ix].Spell.IsNone())
+		{
+			const FName Sp = TomeSpellOf(Section, Index, K);
+			if (!Sp.IsNone() && FindItem(TomeItemName(Sp)) >= 0) Out.Add(TomeItemName(Sp));
+			continue;
+		}
+		Out.Add(Picked[K]);
+	}
 	return Out;
+}
+
+bool ARDDungeonGenerator::ContainerHoldsLoot(FIntPoint Section, int32 Index) const
+{
+	if (ContainerLootChance >= 1.f) return true;
+	const uint32 H = HashCombine(HashCombine((uint32)SessionSeed ^ 0x51A7u, GetTypeHash(Section)), GetTypeHash(Index * 37 + 3));
+	return (float)(H % 100000u) / 100000.f < ContainerLootChance;
+}
+
+// ------------------------------------------------------------------------------------------------ spells, rings (level 5)
+int32 ARDDungeonGenerator::FindSpell(FName Name) const
+{
+	for (int32 I = 0; I < Spells.Num(); ++I) if (Spells[I].Name == Name) return I;
+	return -1;
+}
+
+FName ARDDungeonGenerator::TomeSpellOf(FIntPoint Section, int32 Index, int32 Pick) const
+{
+	const int32 Tier = TierOf(Section);
+	float Sum = 0.f;
+	for (const FRDSpellDef& S : Spells) if (S.Tier == Tier) Sum += FMath::Max(S.DropChance, 0.f);
+	if (Sum <= 0.f) return NAME_None;
+	const uint32 H = HashCombine(HashCombine((uint32)SessionSeed ^ 0x70E3u, GetTypeHash(Section)), GetTypeHash(Index * 211 + Pick * 13 + 1));
+	float U = (float)(H % 1000003u) / 1000003.f * Sum;
+	FName Last = NAME_None;
+	for (const FRDSpellDef& S : Spells)
+	{
+		if (S.Tier != Tier || S.DropChance <= 0.f) continue;
+		Last = S.Name; U -= S.DropChance;
+		if (U < 0.f) return S.Name;
+	}
+	return Last;
+}
+
+bool ARDDungeonGenerator::HeroLearns(ERDSpellType Type) const
+{
+	const FRDHeroDef* H = FindHero(CurrentHero);
+	return H && H->Learns.Contains(Type);
+}
+
+bool ARDDungeonGenerator::HeroWearsRing(ERDRingKind Kind) const
+{
+	const FRDHeroDef* H = FindHero(CurrentHero);
+	return H && H->RingKinds.Contains(Kind);
+}
+
+bool ARDDungeonGenerator::MakeSpellWeapon(int32 SpellIndex, FRDWeaponDef& Out) const
+{
+	const FRDHeroDef* H = FindHero(CurrentHero);
+	if (!H || !Spells.IsValidIndex(SpellIndex)) return false;
+	// (her cast clips: those of her first spell that is not a crossbow's)
+	const FRDWeaponDef* Base = H->Weapons.FindByPredicate([](const FRDWeaponDef& W) { return W.bSpell && !W.BoltMesh; });
+	if (!Base) return false;
+	const FRDSpellDef& S = Spells[SpellIndex];
+	Out = *Base;
+	Out.Name = S.Name; Out.SpellIndex = SpellIndex; Out.bAlongside = false;
+	Out.Damage = S.Damage; Out.ManaCost = S.Mana; Out.Cooldown = S.Cooldown; Out.Reach = S.Reach;
+	Out.BoltSpeed = S.BoltSpeed; Out.BoltTurnRate = 260.f; Out.BoltSplash = S.Splash;
+	Out.ChargeEffect = S.CastFx; Out.ChargeEffectScale = S.CastFxScale;
+	Out.BoltEffect = S.BoltFx; Out.BoltEffectScale = S.BoltFxScale; Out.BoltCoreEffect = nullptr;
+	Out.BurstEffect = S.ImpactFx; Out.BurstEffectScale = S.ImpactFxScale; Out.BurstFlameEffect = nullptr;
+	Out.SpellLightColor = S.LightColor; Out.SpellLightIntensity = S.LightIntensity;
+	Out.SoundKey = S.SoundKey; Out.Icon = S.Icon;
+	Out.Durability = 0.f; Out.Item = NAME_None; Out.SpeedRating = Out.DamageRating = 0; Out.WeaponType.Reset();
+	return true;
+}
+
+bool ARDDungeonGenerator::BreakdownOf(const FString& Type, int32 Tier, TArray<FName>& OutItems, TArray<int32>& Counts) const
+{
+	OutItems.Reset(); Counts.Reset();
+	for (const FRDBreakdown& B : Breakdowns)
+	{
+		if (!B.Types.ContainsByPredicate([&Type](const FString& T) { return T.Equals(Type, ESearchCase::IgnoreCase); })) continue;
+		for (int32 K = 0; K < B.Gives.Num(); ++K)
+		{
+			OutItems.Add(B.Gives[K]);
+			Counts.Add(FMath::Max(1, (B.PerTier.IsValidIndex(K) ? B.PerTier[K] : 1) * FMath::Max(Tier, 1)));
+		}
+		return OutItems.Num() > 0;
+	}
+	return false;
+}
+
+void ARDDungeonGenerator::MonsterKindsFor(FIntPoint Section, TArray<int32>& Out) const
+{
+	Out.Reset();
+	const int32 Tier = TierOf(Section);
+	const bool bTiers = MaxTier > 0 && Monsters.ContainsByPredicate([](const FRDMonsterDef& D) { return D.Tier > 0; });
+	for (int32 I = 0; I < Monsters.Num(); ++I)
+		if (Monsters[I].Mesh && Monsters[I].Weight > 0.f && (!bTiers || Monsters[I].Tier == Tier)) Out.Add(I);
+	// (a tier without kinds of its own: the nearest tier's below it, then above)
+	for (int32 D = 1; bTiers && Out.Num() == 0 && D < 6; ++D)
+		for (int32 I = 0; I < Monsters.Num(); ++I)
+			if (Monsters[I].Mesh && Monsters[I].Weight > 0.f && (Monsters[I].Tier == Tier - D || Monsters[I].Tier == Tier + D)) Out.Add(I);
+}
+
+// ------------------------------------------------------------------------------------------------ allies, corpses (level 5)
+TArray<ARDMonster*> ARDDungeonGenerator::GetAllies() const
+{
+	TArray<ARDMonster*> Out;
+	for (ARDMonster* A : Allies) if (IsValid(A) && !A->IsDead()) Out.Add(A);
+	return Out;
+}
+
+TArray<ARDMonster*> ARDDungeonGenerator::GetCorpsesNear(FVector At, float Radius) const
+{
+	TArray<ARDMonster*> Out;
+	for (const auto& KV : Sections)
+		if (KV.Value) for (ARDMonster* M : KV.Value->SpawnedMonsters)
+			if (IsValid(M) && M->IsDead() && M->IsCorpse() && FVector::Dist2D(M->GetActorLocation(), At) <= Radius) Out.Add(M);
+	Out.Sort([At](const ARDMonster& A, const ARDMonster& B) { return FVector::DistSquared(A.GetActorLocation(), At) < FVector::DistSquared(B.GetActorLocation(), At); });
+	return Out;
+}
+
+void ARDDungeonGenerator::ConsumeCorpse(ARDMonster* Corpse)
+{
+	if (!Corpse) return;
+	if (Corpse->Section && Corpse->SpawnIndex >= 0)
+		if (FRDSectionProgress* P = Progress.Find(Corpse->Section->Coord)) { P->Consumed.AddUnique(Corpse->SpawnIndex); P->Corpses.Remove(Corpse->SpawnIndex); }
+	if (Corpse->Section) Corpse->Section->SpawnedMonsters.Remove(Corpse);
+	Allies.Remove(Corpse);
+	Corpse->Destroy();
+}
+
+bool ARDDungeonGenerator::RaiseAlly(ARDMonster* Corpse, float Seconds, float HealthShare)
+{
+	if (!IsValid(Corpse) || !Corpse->IsDead() || !Corpse->IsCorpse()) return false;
+	// (it leaves its section's monsters: her blows and spells pass it by; its death stays counted)
+	if (Corpse->Section && Corpse->SpawnIndex >= 0)
+		if (FRDSectionProgress* P = Progress.Find(Corpse->Section->Coord)) { P->Consumed.AddUnique(Corpse->SpawnIndex); P->Corpses.Remove(Corpse->SpawnIndex); }
+	if (Corpse->Section) Corpse->Section->SpawnedMonsters.Remove(Corpse);
+	Corpse->BecomeAlly(Seconds, Corpse->GetMaxHealth() * HealthShare, Corpse->GetDamage());
+	Allies.AddUnique(Corpse);
+	return true;
+}
+
+ARDMonster* ARDDungeonGenerator::SummonAlly(FName Kind, FVector At, float Strength)
+{
+	// (one at a time: the champion she has is healed and comes to her)
+	for (ARDMonster* A : Allies)
+		if (IsValid(A) && !A->IsDead() && A->IsChampion())
+		{
+			A->BecomeAlly(0.f, A->GetMaxHealth(), A->GetDamage());
+			A->SetActorLocation(At + FVector(0, 0, A->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.f), false, nullptr, ETeleportType::TeleportPhysics);
+			return A;
+		}
+	const FRDMonsterDef* Def = Monsters.FindByPredicate([Kind](const FRDMonsterDef& D) { return D.Name == Kind && D.Mesh; });
+	ARDSection* Sec = GetSection(WorldToSection(At));
+	if (!Def || !Sec) return nullptr;
+	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator::ZeroRotator, At + FVector(0, 0, Def->CapsuleHalfHeight + 5.f)), Sp);
+	if (!M) return nullptr;
+	M->Setup(Sec, *Def, (int32)HashCombine((uint32)SessionSeed, 0x4B11u));
+	// (as strong as Strength of a monster of the last tier)
+	const int32 T = FMath::Max(MaxTier, 1);
+	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
+	const float Blow = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
+	M->BecomeAlly(0.f, FMath::RoundToFloat(Ref * TierValue(TierHealth, T, 1.f) * Strength), FMath::RoundToFloat(Blow * TierValue(TierDamage, T, 1.f) * Strength));
+	M->SetChampion(true);
+	Allies.Add(M);
+	return M;
+}
+
+void ARDDungeonGenerator::TickAllies(float Dt)
+{
+	Allies.RemoveAll([](const TObjectPtr<ARDMonster>& A) { return !IsValid(A); });
+	// (an ally walks the tile grid of the section it is in: it moves to another section's as it crosses into it)
+	for (ARDMonster* A : Allies)
+	{
+		if (A->IsDead()) continue;
+		ARDSection* S = GetSection(WorldToSection(A->GetActorLocation()));
+		if (S && S != A->Section) A->Section = S;
+		if (!IsValid(A->Section)) A->Section = GetSection(FIntPoint::ZeroValue);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------ volumes, the menu (level 5)
+int32 ARDDungeonGenerator::SoundCategory(FName Key)
+{
+	const FString K = Key.ToString();
+	if (K.StartsWith(TEXT("Music."))) return 3;
+	if (K.StartsWith(TEXT("Env.")) || K.StartsWith(TEXT("Atmos."))) return 2;
+	return 1;
+}
+
+void ARDDungeonGenerator::LoadUserVolumes()
+{
+	static const TCHAR* Names[4] = { TEXT("Overall"), TEXT("Action"), TEXT("Environment"), TEXT("Music") };
+	for (int32 I = 0; I < 4; ++I)
+	{
+		float V = 1.f;
+		if (GConfig && GConfig->GetFloat(TEXT("RandomDungeon.Volume"), Names[I], V, GGameUserSettingsIni)) UserVolumes[I] = FMath::Clamp(V, 0.f, 1.f);
+	}
+}
+
+void ARDDungeonGenerator::SetUserVolume(int32 Category, float Value)
+{
+	static const TCHAR* Names[4] = { TEXT("Overall"), TEXT("Action"), TEXT("Environment"), TEXT("Music") };
+	const int32 C = FMath::Clamp(Category, 0, 3);
+	UserVolumes[C] = FMath::Clamp(FMath::RoundToFloat(Value * 100.f) / 100.f, 0.f, 1.f);
+	if (GConfig) { GConfig->SetFloat(TEXT("RandomDungeon.Volume"), Names[C], UserVolumes[C], GGameUserSettingsIni); GConfig->Flush(false, GGameUserSettingsIni); }
+	ApplyUserVolumes();
+}
+
+void ARDDungeonGenerator::ApplyUserVolumes()
+{
+	// (what is playing now: the music and atmosphere layers, the fires' loops; a one-shot gets it when it starts)
+	for (int32 L = 0; L < MusicComps.Num(); ++L)
+		if (UAudioComponent* A = MusicComps[L]) A->SetVolumeMultiplier(UserVolumeOf(RDMusicKeys[L]));
+	for (int32 I = 0; I < FireComps.Num() && I < FireVoices.Num(); ++I)
+	{
+		const FRDSoundSet* Set = Sounds.Find(RDFireKeys[FMath::Min<int32>(FireVoices[I].Kind, 2)]);
+		if (FireComps[I] && Set) FireComps[I]->SetVolumeMultiplier(Set->Volume * SoundVolume * UserVolumeOf(RDFireKeys[0]));
+	}
+}
+
+TArray<FString> ARDDungeonGenerator::GetMenuLines() const
+{
+	return {
+		FString::Printf(TEXT("volume|Overall volume|%.2f"), UserVolumes[0]),
+		FString::Printf(TEXT("volume|Action sounds|%.2f"), UserVolumes[1]),
+		FString::Printf(TEXT("volume|Environment sounds|%.2f"), UserVolumes[2]),
+		FString::Printf(TEXT("volume|Music|%.2f"), UserVolumes[3]),
+		TEXT("button|Resume"), TEXT("button|Choose another hero"), TEXT("button|Quit") };
+}
+
+void ARDDungeonGenerator::SetMenuOpen(bool bOpen)
+{
+	if (bOpen == bMenuOpen || !bEscapeMenu) return;
+	bMenuOpen = bOpen; bMenuDragging = false;
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (bOpen)
+	{
+		// (the inventory or the anvil open under it are shut first: one panel at a time)
+		if (PlayerCombat) { PlayerCombat->SetInventoryOpen(false); PlayerCombat->SetCraftingOpen(false); }
+		MenuCursor = 0;
+		if (bMenuPausesGame) UGameplayStatics::SetGamePaused(this, true);
+		if (PC) { PC->SetShowMouseCursor(true); FInputModeGameAndUI M; M.SetHideCursorDuringCapture(false); PC->SetInputMode(M); }
+	}
+	else
+	{
+		UGameplayStatics::SetGamePaused(this, false);
+		if (PC) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
+	}
+	if (PlayerCombat && PlayerCombat->GetOwner()) PlaySoundAt(TEXT("Player.Inventory"), PlayerCombat->GetOwner()->GetActorLocation());
+}
+
+void ARDDungeonGenerator::MoveMenuCursor(int32 Step)
+{
+	MenuCursor = ((MenuCursor + Step) % MenuLineCount + MenuLineCount) % MenuLineCount;
+}
+
+void ARDDungeonGenerator::StepMenuValue(int32 Step)
+{
+	if (MenuCursor < 4) SetUserVolume(MenuCursor, UserVolumes[MenuCursor] + 0.05f * Step);
+}
+
+bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
+{
+	const int32 L = Line >= 0 ? Line : MenuCursor;
+	if (L < 4) return false;
+	if (L == 4) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
+	if (L == 5)
+	{
+		LastMenuAction = TEXT("hero");
+		if (bMenuDryRun || MenuLevel.IsEmpty()) return !MenuLevel.IsEmpty();
+		SetMenuOpen(false);
+		UGameplayStatics::OpenLevel(this, FName(*MenuLevel));
+		return true;
+	}
+	LastMenuAction = TEXT("quit");
+	if (bMenuDryRun) return true;
+	SetMenuOpen(false);
+	// (in the editor this ends play and leaves the editor as it was; a game quits)
+	UKismetSystemLibrary::QuitGame(this, UGameplayStatics::GetPlayerController(this, 0), EQuitPreference::Quit, false);
+	return true;
+}
+
+void ARDDungeonGenerator::TickMenu(APlayerController* PC)
+{
+	if (!bEscapeMenu || !PC) return;
+	if (PlayerCombat && PlayerCombat->IsScriptedOnly()) return;
+	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { SetMenuOpen(!bMenuOpen); return; }
+	if (!bMenuOpen) return;
+	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
+	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
+	if (Pressed({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down })) MoveMenuCursor(1);
+	if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left })) StepMenuValue(-1);
+	if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right })) StepMenuValue(1);
+	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom })) { ActivateMenuLine(); return; }
+	if (Pressed({ EKeys::Gamepad_FaceButton_Right })) { SetMenuOpen(false); return; }
+	// the mouse: a line under it is chosen; a click on a button presses it, on a slider's track (or dragging along it)
+	// sets the volume where it is
+	float Mx = 0.f, My = 0.f;
+	if (!PC->GetMousePosition(Mx, My)) return;
+	const FVector2D M(Mx, My);
+	float Dx = 0.f, Dy = 0.f;
+	PC->GetInputMouseDelta(Dx, Dy);
+	if (!PC->IsInputKeyDown(EKeys::LeftMouseButton)) bMenuDragging = false;
+	for (int32 I = 0; I < MenuRowBoxes.Num() && I < MenuLineCount; ++I)
+	{
+		const bool bIn = MenuRowBoxes[I].IsInside(M);
+		if (bIn && (Dx != 0.f || Dy != 0.f || PC->WasInputKeyJustPressed(EKeys::LeftMouseButton))) MenuCursor = I;
+		if (I < 4 && MenuTrackBoxes.IsValidIndex(I))
+		{
+			const FBox2D& T = MenuTrackBoxes[I];
+			const bool bOnTrack = T.ExpandBy(10.f).IsInside(M);
+			if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) && bOnTrack) { bMenuDragging = true; MenuCursor = I; }
+			if (bMenuDragging && MenuCursor == I && PC->IsInputKeyDown(EKeys::LeftMouseButton) && T.GetSize().X > 1.f)
+				SetUserVolume(I, (M.X - T.Min.X) / T.GetSize().X);
+		}
+		else if (bIn && PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) { ActivateMenuLine(I); return; }
+	}
+}
+
+FString ARDDungeonGenerator::MoveEditorStopKey(bool bShift)
+{
+	// (the editor's "stop play" command, Escape by default, is the PlayWorld context's StopPlaySession)
+	const TSharedPtr<FUICommandInfo> Cmd = FInputBindingManager::Get().FindCommandInContext(TEXT("PlayWorld"), TEXT("StopPlaySession"));
+	if (!Cmd.IsValid()) return TEXT("no PlayWorld.StopPlaySession command (no editor?)");
+	const FInputChord Want(EKeys::Escape, bShift ? EModifierKey::Shift : EModifierKey::None);
+	Cmd->SetActiveChord(Want, EMultipleKeyBindingIndex::Primary);
+	FInputBindingManager::Get().NotifyActiveChordChanged(*Cmd, EMultipleKeyBindingIndex::Primary);
+	FInputBindingManager::Get().SaveInputBindings();
+	return FString::Printf(TEXT("PlayWorld.StopPlaySession: %s"), *Cmd->GetInputText().ToString());
 }
 
 void ARDDungeonGenerator::UpdateMapScrollInput(APlayerController* PC)
@@ -537,7 +889,12 @@ void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, co
 {
 	if (!Section || !PlayerCombat) return;
 	const TArray<FName> List = LootListOf(Section->Coord, Index);
-	if (List.Num() == 0) return;
+	if (List.Num() == 0)
+	{
+		// (level 5: one container in three holds anything; one that held nothing says so)
+		if (ContainerLootChance < 1.f) { PlayerCombat->ShowMessage(TEXT("Empty: nothing inside")); ++ContainersEmpty; }
+		return;
+	}
 	for (int32 K = 0; K < List.Num(); ++K) PlayerCombat->AddItem(List[K], LootCountIn(List, Section->Coord, Index, K));
 	LastFound = List[0]; LastFoundList = List; LastFoundTime = GetWorld()->GetTimeSeconds(); ItemsFound += List.Num();
 	PlaySoundAt(TEXT("Player.Loot"), At);
@@ -545,10 +902,11 @@ void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, co
 		Index, Section->Coord.X, Section->Coord.Y);
 }
 
-void ARDDungeonGenerator::MeanMonsterFactors(float& Health, float& Damage) const
+void ARDDungeonGenerator::MeanMonsterFactors(float& Health, float& Damage, FIntPoint Section) const
 {
 	float W = 0.f, H = 0.f, D = 0.f;
-	for (const FRDMonsterDef& M : Monsters) if (M.Mesh) { W += M.Weight; H += M.Weight * M.HealthFactor; D += M.Weight * M.DamageFactor; }
+	TArray<int32> Kinds; MonsterKindsFor(Section, Kinds);
+	for (const int32 K : Kinds) { const FRDMonsterDef& M = Monsters[K]; W += M.Weight; H += M.Weight * M.HealthFactor; D += M.Weight * M.DamageFactor; }
 	Health = W > 0.f && H > 0.f ? H / W : 1.f; Damage = W > 0.f && D > 0.f ? D / W : 1.f;
 }
 
@@ -558,7 +916,13 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
 	// (the tiers: it stays dead, also when its section is generated again)
 	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
-		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord)) { P->Killed.AddUnique(Monster->SpawnIndex); UpdateProgress(Monster->Section->Coord); }
+		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord))
+		{
+			P->Killed.AddUnique(Monster->SpawnIndex);
+			// (level 5: where it lies, for its corpse when the section is generated again)
+			if (bKeepCorpses) P->Corpses.Add(Monster->SpawnIndex, Monster->GetActorTransform());
+			UpdateProgress(Monster->Section->Coord);
+		}
 }
 
 void ARDDungeonGenerator::AddHitText(const FVector& At, float Amount, bool bOnPlayer)
@@ -583,7 +947,9 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	StopMusic();
 	SectionsGenerated = Sections.Num(); SectionsRemoved = 0; MonstersKilled = 0; bMapOpen = false; MapPan = FVector2D::ZeroVector; LastRevealTime = -100.f;
 	LootedContainers.Reset();
-	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tiers 1 and 2 open)
+	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tier 1 open)
+	for (ARDMonster* A : Allies) if (A) A->Destroy();
+	Allies.Reset();
 	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
 	// (the weapons she found are gone: hers are the hero's again)
 	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) Weapons = H->Weapons;
@@ -740,6 +1106,7 @@ void ARDDungeonGenerator::BeginPlay()
 		RevealPost->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.f, RevealMID));
 	}
 	SoundR.Initialize(RDSoundSeed);
+	if (bEscapeMenu) LoadUserVolumes();
 	// (the non-realtime audio device loses spatialised sources: see bSpatializeSounds)
 	bSpatializeNow = bSpatializeSounds && !FParse::Param(FCommandLine::Get(), TEXT("deterministicaudio"));
 	Attenuations.Reset();
@@ -765,6 +1132,17 @@ void ARDDungeonGenerator::BeginPlay()
 	}
 	// (the hero chosen in the menu: her weapons, hit points and controls become the generator's before anything reads them)
 	if (Heroes.Num() > 0) ApplyHero(ChosenHero());
+#if WITH_EDITORONLY_DATA
+	// (level 5: in the editor a pack's effect is compiled the first time it is used, and shows nothing for the seconds that
+	// takes (the Apocalypse's: 9 s after its cast): every spell's effects are asked for now, while she walks the first rooms)
+	if (Spells.Num() > 0)
+	{
+		TSet<UNiagaraSystem*> Seen;
+		auto Warm = [&Seen](UFXSystemAsset* A) { if (UNiagaraSystem* N = Cast<UNiagaraSystem>(A); N && !Seen.Contains(N)) { Seen.Add(N); N->RequestCompile(false); } };
+		for (const FRDSpellDef& S : Spells) { Warm(S.CastFx); Warm(S.BoltFx); Warm(S.ImpactFx); Warm(S.AreaFx); Warm(S.ShieldFx); }
+		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDSPELL %d effects asked to compile"), Seen.Num());
+	}
+#endif
 	MapData.Reset();
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
 	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
@@ -776,11 +1154,14 @@ void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	if (bOpeningMenu) return;
-	// (it ticks while the game is paused: then only her inventory, which paused it, is worked)
+	// (it ticks while the game is paused: then only her inventory or the Escape menu, which paused it, is worked)
 	const bool bPaused = GetWorld()->IsPaused();
+	if (APlayerController* MPC = UGameplayStatics::GetPlayerController(this, 0)) TickMenu(MPC);
+	if (bMenuOpen) return;
 	if (Heroes.Num() > 0 && PlayerCombat)
 		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) PlayerCombat->TickInventory(PC);
 	if (bPaused) return;
+	TickAllies(Dt);
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{
@@ -963,7 +1344,7 @@ bool ARDDungeonGenerator::PlaySoundAt(FName Key, FVector At, float VolumeScale, 
 	Last = I;
 	USoundBase* Snd = S->Sounds[I];
 	if (!Snd) return false;
-	const float Volume = S->Volume * VolumeScale * SoundVolume;
+	const float Volume = S->Volume * VolumeScale * SoundVolume * UserVolumeOf(Key);
 	const float Pitch = S->Pitch * PitchScale * (1.f + SoundR.FRandRange(-S->PitchVariation, S->PitchVariation));
 	if (S->b2D) UGameplayStatics::PlaySound2D(this, Snd, Volume, Pitch);
 	else UGameplayStatics::PlaySoundAtLocation(this, Snd, At, FRotator::ZeroRotator, Volume, Pitch, 0.f, GetAttenuation(*S));
@@ -1026,7 +1407,7 @@ void ARDDungeonGenerator::UpdateFireLoops(const FVector& L)
 		A->SetWorldLocation(C.At);
 		A->SetSound(Snd);
 		A->AttenuationSettings = GetAttenuation(Set);
-		A->SetVolumeMultiplier(Set.Volume * SoundVolume);
+		A->SetVolumeMultiplier(Set.Volume * SoundVolume * UserVolumeOf(RDFireKeys[0]));
 		A->SetPitchMultiplier(Set.Pitch * (1.f + SoundR.FRandRange(-Set.PitchVariation, Set.PitchVariation)));
 		// (each fire starts somewhere else in its loop, or two torches side by side would beat as one)
 		const USoundWave* Wave = Cast<USoundWave>(Snd);
@@ -1086,6 +1467,7 @@ void ARDDungeonGenerator::StartMusicLayer(int32 Layer, float FadeSeconds, bool b
 	UAudioComponent* A = MusicComps[Layer];
 	A->SetSound(Snd);
 	A->SetPitchMultiplier(Set->Pitch);
+	A->SetVolumeMultiplier(UserVolumeOf(RDMusicKeys[Layer]));        // (the player's volumes: the menu changes it as it plays)
 	A->FadeIn(FadeSeconds, Set->Volume * MusicVolume, Start);
 }
 

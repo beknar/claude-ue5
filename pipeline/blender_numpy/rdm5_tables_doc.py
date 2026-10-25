@@ -6,9 +6,15 @@
 - the loot: SourceArt/random_dungeon_magic5/loot_table.json with level 4's items.json (potions and food by tier and rarity,
   the materials, the repair items) and the anvil's recipes;
 - the weapons table: SourceArt/random_dungeon_magic5/weapons_table.json (type, speed and damage ratings, the damage and the
-  attack's length they give, durability, rarity, tiers) and who wields each type.
+  attack's length they give, durability, rarity, tiers) and who wields each type;
+- the spell table: SourceArt/random_dungeon_magic5/spells.json (the user's 30 spells: type, effect, drop chance, mana,
+  cooldown, duration; the tier of its tome, what it does in the game, who learns it);
+- the rings and the weapons broken down at an anvil: loot_table.json's rings and breakdown;
+- the monsters by tier: SourceArt/random_dungeon_magic5/monster_tiers.json (the gallery's monsters of each tier, the tier's
+  hit points, damage, speed, blows' pace and abilities).
 Each table goes between its markers in README.md (<!-- rdm5:heroes -->, <!-- rdm5:armour -->, <!-- rdm5:weapons -->,
-<!-- rdm5:loot -->, <!-- rdm5:recipes -->, each closed by <!-- /rdm5:... -->). Args: none (python 3, no other packages)"""
+<!-- rdm5:loot -->, <!-- rdm5:recipes -->, <!-- rdm5:spells -->, <!-- rdm5:rings -->, <!-- rdm5:breakdown -->,
+<!-- rdm5:monsters -->, each closed by <!-- /rdm5:... -->). Args: none (python 3, no other packages)"""
 import json, os, re
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.join(HERE, "..", ".."); SA = os.path.join(ROOT, "claude_ue5", "SourceArt")
 HJ = json.load(open(os.path.join(SA, "random_dungeon_magic4", "heroes.json"), encoding="utf-8"))["heroes"]
@@ -94,8 +100,74 @@ def weapons_table():
     return out
 
 
+SP = json.load(open(os.path.join(SA, "random_dungeon_magic5", "spells.json"), encoding="utf-8"))
+MT = json.load(open(os.path.join(SA, "random_dungeon_magic5", "monster_tiers.json"), encoding="utf-8"))
+def tier_of_mana(m): return 1 if m <= 15 else 2 if m <= 30 else 3 if m <= 60 else 4 if m <= 110 else 5
+KIND = {"Bolt": "a bolt", "Lash": "an arc before her", "Ward": "a shield on her", "Skin": "armour on her", "Dispel": "cleanses her", "Drain": "a channel",
+        "Cloud": "an area that lingers", "Veil": "on her", "Curse": "an area", "Raise": "corpses rise", "Rune": "a zone at her feet", "Nova": "a ring round her",
+        "Mirror": "on her", "Rend": "the one she faces", "Corpse": "corpses burst", "Pillar": "a column, burning ground", "Rift": "a rift that pulls",
+        "Pact": "on her", "Knight": "a champion", "Meteors": "a storm of strikes", "Sanctum": "a zone at her feet", "Apocalypse": "every monster in sight"}
+def what_spell(s):
+    k = s["kind"]; d = s.get("damage", 0); per = s.get("per_second") and s["duration"] > 0
+    dmg = ("%g a second" % round(d / s["duration"], 1)) if per else ("%d" % d if d else "")
+    bits = []
+    if dmg: bits.append(dmg + " damage" + (" each" if k in ("Meteors", "Corpse") else ""))
+    if s.get("burn"): bits.append("then %d %% more over %d s, %d %% of it back to her" % (round(s["burn"] * 100), s["duration"], round(s.get("drain", 0) * 100)))
+    if s.get("pierce"): bits.append("passes through")
+    if s.get("slow"): bits.append("slows %d %%" % round(s["slow"] * 100))
+    if k == "Bolt" and s.get("count"): bits.append("jumps %d times within %g m" % (s["count"], s["radius"] / 100.0))
+    if k == "Bolt" and s.get("radius") and not s.get("count"): bits.append("all of it within %g m" % (s["radius"] / 100.0))
+    if k == "Ward": bits.append(("takes %d %% of her hit points" % round(s["amount"] * 100)) if s.get("amount") else "takes %d blows whole" % s["count"])
+    if k == "Skin": bits.append("armour +%d %%" % round(s["amount"] * 100))
+    if k == "Lash": bits.append("pushes %g m" % (s["amount"] / 100.0))
+    if k == "Drain": bits.append("%d %% back to her" % round(s["drain"] * 100))
+    if k == "Veil": bits.append("monsters lose her; %d %% of blows miss" % round(s["amount"] * 100))
+    if k == "Curse": bits.append("they take %d %% more, deal %d %% less" % (round(s["amount"] * 100), round(s["amount"] * 100)))
+    if k == "Raise": bits.append("up to %d, %d %% of their hit points" % (s["count"], round(s["amount"] * 100)))
+    if k == "Rune": bits.append("blows on her %d %% less inside" % round(s["amount"] * 100))
+    if k == "Nova": bits.append("costs %d %% of her hit points" % round(s["amount"] * 100))
+    if k == "Mirror": bits.append("blows turned back on the attacker")
+    if k == "Pact": bits.append("a killing blow leaves her %d %% of her hit points, once" % round(s["amount"] * 100))
+    if k == "Knight": bits.append("the %s on her side (%d %% of a tier-5 monster)" % (SP["knight"]["monster"], round(SP["knight"]["strength"] * 100)))
+    if k == "Meteors": bits.append("%d strikes within %g m" % (s["count"], s["radius"] / 100.0))
+    if k == "Sanctum": bits.append("no blow hurts her inside")
+    if s.get("radius") and k in ("Cloud", "Curse", "Nova", "Rune", "Sanctum", "Rift", "Pillar", "Corpse"): bits.append("%g m round" % (s["radius"] / 100.0))
+    return "%s: %s" % (KIND[k], ", ".join(bits))
+def spells_table():
+    who = {t: [h for h, ts in SP["learns"].items() if t in ts] for t in ("Offense", "Protection", "Curse", "Summon")}
+    out = ["| # | Spell | Type | The table's effect | Drop chance | Mana | Cooldown | Duration | Tier of its tome | In the game | Learned by |",
+           "|---|---|---|---|---|---|---|---|---|---|---|"]
+    for s in SP["spells"]:
+        out.append("| %d | %s | %s | %s | %.2f %% | %d | %s | %s | %d | %s | %s |" % (s["n"], s["name"], s["type"], s["effect"], s["drop"], s["mana"],
+                   ("%d s" % s["cooldown"]) if s["cooldown"] else "none", ("%d s" % s["duration"]) if s["duration"] else "instant", tier_of_mana(s["mana"]),
+                   what_spell(s), ", ".join(who[s["type"]]) or "nobody"))
+    return out
+def rings_table():
+    R = LT["rings"]; out = ["| Ring | Kind | While worn | Tiers | Rarity | Worn by |", "|---|---|---|---|---|---|"]
+    what = {"Magic": "mana", "Health": "hit points", "Dexterity": "ranged weapons' damage"}
+    for k in R["kinds"]:
+        for n in range(1, 11):
+            out.append("| %s %d | %s | +%d %% %s | %d | %d | %s |" % (k["name"], n, k["kind"].lower(), n * 10, what[k["kind"]], (n + 1) // 2, R["rarity"], ", ".join(k["who"])))
+    return out
+def breakdown_table():
+    out = ["| Weapon types | An anvil breaks one into (a tier-1 weapon; x its tier) |", "|---|---|"]
+    for b in LT["breakdown"]["types"]:
+        out.append("| %s | %s |" % (", ".join(b["types"]), ", ".join("%d %s" % (v, k) for k, v in b["gives"].items())))
+    return out
+def monsters_table():
+    T = MT["tiers"]; out = ["| Tier | Hit points / damage (x her reference: 100 / 25) | Speed | A blow every | Abilities' strength | Monsters (gallery rank; ability) |",
+                            "|---|---|---|---|---|---|"]
+    for t in range(1, 6):
+        ms = [m for m in MT["monsters"] if m["tier"] == t]
+        out.append("| %d | %d / %g | x %g | x %g | %s | %s |" % (t, round(100 * T["health"][t - 1]), round(25 * T["damage"][t - 1], 1), T["speed"][t - 1], T["attack_interval"][t - 1],
+                   ("x %g" % T["ability"][t - 1]) if T["ability"][t - 1] else "none",
+                   ", ".join("%s (%d%s)" % (m["name"], m["rank"], "" if m["ability"] == "None" else "; " + m["ability"].lower()) for m in ms)))
+    return out
+
+
 p = os.path.join(ROOT, "README.md"); s = open(p, encoding="utf-8").read()
-for key, rows in (("heroes", heroes_table()), ("armour", armour_table()), ("weapons", weapons_table()), ("loot", loot_table()), ("recipes", recipes_table())):
+for key, rows in (("heroes", heroes_table()), ("armour", armour_table()), ("weapons", weapons_table()), ("loot", loot_table()), ("recipes", recipes_table()),
+                  ("spells", spells_table()), ("rings", rings_table()), ("breakdown", breakdown_table()), ("monsters", monsters_table())):
     a, b = "<!-- rdm5:%s -->" % key, "<!-- /rdm5:%s -->" % key
     assert s.count(a) == 1 and s.count(b) == 1, key
     s = re.sub(re.escape(a) + r".*?" + re.escape(b), lambda m: a + "\n" + "\n".join(rows) + "\n" + b, s, flags=re.S)

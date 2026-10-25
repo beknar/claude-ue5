@@ -1,0 +1,389 @@
+{
+ "tag": "s6",
+ "plan": [
+  "spells"
+ ],
+ "level": "random_dungeonmagic_level5",
+ "steps": [
+  {
+   "step": "spells",
+   "ok": true,
+   "failed": [],
+   "learn": {
+    "Warrior": {
+     "weapons": [
+      "Sword"
+     ],
+     "tomes_carried": [
+      "Tome of Fireball"
+     ]
+    },
+    "Warlock": {
+     "weapons": [
+      "Sword",
+      "Fire",
+      "Frost Shard",
+      "Curse of Frailty"
+     ],
+     "tomes_carried": [
+      "Tome of Ash Ward",
+      "Tome of Raise Dead"
+     ]
+    },
+    "Mage": {
+     "weapons": 30,
+     "learned": 28,
+     "message": "You learn Apocalypse:  the wheel"
+    }
+   },
+   "spells": {
+    "Fire Bolt": {
+     "weapon": 0,
+     "particles": 61,
+     "systems": 2,
+     "hurt": 1,
+     "damage_dealt": 25.0,
+     "ok": true,
+     "monster": "Insect",
+     "flown_m": 4.7,
+     "burst_from_monster_m": 0.1,
+     "released": 1
+    },
+    "Dark Fire": {
+     "weapon": 1,
+     "particles": 71,
+     "systems": 2,
+     "hurt": 1,
+     "damage_dealt": 60.8,
+     "ok": true,
+     "monster": "Azrak",
+     "flown_m": 5.2,
+     "burst_from_monster_m": 0.5,
+     "released": 1
+    },
+    "Ash Ward": {
+     "weapon": 2,
+     "particles": 7,
+     "systems": 1,
+     "blocked": 3,
+     "health_lost": 0.0,
+     "ok": true,
+     "released": 1
+    },
+    "Frost Shard": {
+     "weapon": 3,
+     "particles": 72,
+     "systems": 2,
+     "slowed": 1,
+     "hurt": 1,
+     "damage_dealt": 31.0,
+     "ok": true,
+     "monster": "Devourer",
+     "flown_m": 10.8,
+     "burst_from_monster_m": 8.6,
+     "released": 1
+    },
+    "Shadow Lash": {
+     "weapon": 4,
+     "particles": 31,
+     "systems": 1,
+     "hurt": 1,
+     "damage_dealt": 46.0,
+     "ok": true,
+     "released": 1
+    },
+    "Iron Skin": {
+     "weapon": 5,
+     "particles": 6,
+     "systems": 1,
+     "blow_taken": 24.0,
+     "ok": true,
+     "released": 1
+    },
+    "Bone Spear": {
+     "weapon": 6,
+     "particles": 279,
+     "systems": 3,
+     "hurt": 1,
+     "damage_dealt": 50.0,
+     "ok": true,
+     "monster": "Magur",
+     "flown_m": 15.4,
+     "burst_from_monster_m": 11.4,
+     "released": 1
+    },
+    "Dispel Hex": {
+     "weapon": 7,
+     "particles": 78,
+     "systems": 3,
+     "ok": true,
+     "released": 1
+    },
+    "Life Drain": {
+     "weapon": 8,
+     "particles": 238,
+     "systems": 4,
+     "hurt": 1,
+     "damage_dealt": 52.2,
+     "she_gained": 31.3,
+     "ok": true,
+     "released": 1
+    },
+    "Chain Lightning": {
+     "weapon": 9,
+     "particles": 81,
+     "systems": 3,
+     "hurt": 1,
+     "damage_dealt": 68.0,
+     "ok": true,
+     "monster": "Magur",
+     "flown_m": 4.3,
+     "burst_from_monster_m": 0.2,
+     "released": 1
+    },
+    "Bone Armor": {
+     "weapon": 10,
+     "particles": 43,
+     "systems": 2,
+     "blocked": 5,
+     "health_lost": 0.0,
+     "ok": true,
+     "released": 1
+    },
+    "Plague Cloud": {
+     "weapon": 11,
+     "particles": 21,
+     "systems": 2,
+     "hurt": 1,
+     "damage_dealt": 81.0,
+     "ok": true,
+     "released": 1
+    },
+    "Shadow Veil": {
+     "weapon": 12,
+     "particles": 44,
+     "systems": 2,
+     "evaded_of_40": 31,
+     "veiled": true,
+     "ok": true,
+     "released": 1
+    },
+    "Curse of Frailty": {
+     "weapon": 13,
+     "cursed": 1,
+     "particles": 108,
+     "systems": 3,
+     "hurt": 0,
+     "damage_dealt": 0,
+     "ok": true,
+     "released": 1
+    },
+    "Fireball": {
+     "weapon": 14,
+     "particles": 215,
+     "systems": 2,
+     "hurt": 1,
+     "damage_dealt": 91.0,
+     "ok": true,
+     "monster": "Gnur",
+     "flown_m": 3.9,
+     "burst_from_monster_m": 0.3,
+     "released": 1
+    },
+    "Raise Dead": {
+     "weapon": 15,
+     "corpses_near": 1,
+     "particles": 213,
+     "systems": 2,
+     "raised": 1,
+     "alive": true,
+     "ok": true,
+     "camera_ignores_ally": true,
+     "hidden_at_camera": true,
+     "shown_away": true,
+     "released": 1
+    },
+    "Rune of Warding": {
+     "weapon": 16,
+     "particles": 21,
+     "systems": 2,
+     "blow": 20.0,
+     "ok": true,
+     "released": 1
+    },
+    "Blood Nova": {
+     "weapon": 17,
+     "particles": 11,
+     "systems": 2,
+     "hurt": 1,
+     "damage_dealt": 64.0,
+     "her_price": 10.5,
+     "ok": true,
+     "released": 1
+    },
+    "Mirror of Retribution": {
+     "weapon": 18,
+     "particles": 4,
+     "systems": 1,
+     "monster_lost": 30.0,
+     "she_lost": 0.0,
+     "reflected": 1,
+     "ok": true,
+     "released": 1
+    },
+    "Soul Rend": {
+     "weapon": 19,
+     "particles": 47,
+     "systems": 2,
+     "hurt": 1,
+     "damage_dealt": 121.0,
+     "ok": true,
+     "monster": "Orc 05",
+     "flown_m": 1.6,
+     "burst_from_monster_m": 1.2,
+     "released": 1
+    },
+    "Blizzard": {
+     "weapon": 20,
+     "particles": 35,
+     "systems": 3,
+     "slowed": 1,
+     "hurt": 1,
+     "damage_dealt": 140.8,
+     "ok": true,
+     "released": 1
+    },
+    "Corpse Explosion": {
+     "weapon": 21,
+     "corpses_near": 1,
+     "particles_at_corpses": 158,
+     "particles": 158,
+     "systems": 1,
+     "hurt": 1,
+     "damage_dealt": 41.0,
+     "corpses_left": 0,
+     "ok": true,
+     "released": 1
+    },
+    "Spectral Bulwark": {
+     "weapon": 22,
+     "particles": 6,
+     "systems": 1,
+     "blocked": 2,
+     "health_lost": 0.0,
+     "ok": true,
+     "released": 1
+    },
+    "Hellfire Pillar": {
+     "weapon": 23,
+     "particles": 33,
+     "systems": 3,
+     "hurt": 1,
+     "damage_dealt": 128.0,
+     "ok": true,
+     "released": 1
+    },
+    "Void Rift": {
+     "weapon": 24,
+     "particles": 189,
+     "systems": 3,
+     "hurt": 1,
+     "damage_dealt": 167.0,
+     "ok": true,
+     "released": 1
+    },
+    "Undying Pact": {
+     "weapon": 25,
+     "particles": 6,
+     "systems": 1,
+     "alive": true,
+     "health": 28.0,
+     "saves": 1,
+     "ok": true,
+     "released": 1
+    },
+    "Summon Abyssal Knight": {
+     "weapon": 26,
+     "particles": 840,
+     "systems": 2,
+     "allies": 1,
+     "champion": [
+      "Daemon"
+     ],
+     "ok": true,
+     "released": 1
+    },
+    "Meteor Storm": {
+     "weapon": 27,
+     "particles": 101,
+     "systems": 1,
+     "hurt": 1,
+     "damage_dealt": 158.0,
+     "ok": true,
+     "released": 1
+    },
+    "Null Sanctum": {
+     "weapon": 28,
+     "particles": 4,
+     "systems": 1,
+     "she_lost": 0.0,
+     "ok": true,
+     "released": 1
+    },
+    "Apocalypse": {
+     "weapon": 29,
+     "particles": 765,
+     "systems": 3,
+     "hurt": 1,
+     "damage_dealt": 187.0,
+     "ok": true,
+     "released": 1
+    }
+   },
+   "cooldown": {
+    "first": true,
+    "second": false,
+    "left": 8.0,
+    "refusals": 1
+   },
+   "too_dear": {
+    "cast": false,
+    "refused": 1,
+    "message": "Apocalypse takes 300 mana: more than you have (100)"
+   }
+  }
+ ],
+ "shots": [
+  "rdm5_s6_spell_fire_bolt.png",
+  "rdm5_s6_spell_dark_fire.png",
+  "rdm5_s6_spell_ash_ward.png",
+  "rdm5_s6_spell_frost_shard.png",
+  "rdm5_s6_spell_shadow_lash.png",
+  "rdm5_s6_spell_iron_skin.png",
+  "rdm5_s6_spell_bone_spear.png",
+  "rdm5_s6_spell_dispel_hex.png",
+  "rdm5_s6_spell_life_drain.png",
+  "rdm5_s6_spell_chain_lightning.png",
+  "rdm5_s6_spell_bone_armor.png",
+  "rdm5_s6_spell_plague_cloud.png",
+  "rdm5_s6_spell_shadow_veil.png",
+  "rdm5_s6_spell_curse_of_frailty.png",
+  "rdm5_s6_spell_fireball.png",
+  "rdm5_s6_spell_raise_dead.png",
+  "rdm5_s6_spell_rune_of_warding.png",
+  "rdm5_s6_spell_blood_nova.png",
+  "rdm5_s6_spell_mirror_of_retribution.png",
+  "rdm5_s6_spell_soul_rend.png",
+  "rdm5_s6_spell_blizzard.png",
+  "rdm5_s6_spell_corpse_explosion.png",
+  "rdm5_s6_spell_spectral_bulwark.png",
+  "rdm5_s6_spell_hellfire_pillar.png",
+  "rdm5_s6_spell_void_rift.png",
+  "rdm5_s6_spell_undying_pact.png",
+  "rdm5_s6_spell_summon_abyssal_knight.png",
+  "rdm5_s6_spell_meteor_storm.png",
+  "rdm5_s6_spell_null_sanctum.png",
+  "rdm5_s6_spell_apocalypse.png"
+ ],
+ "error": null
+}

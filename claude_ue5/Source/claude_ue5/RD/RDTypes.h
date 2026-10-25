@@ -37,6 +37,13 @@ struct FRDPiece
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TSubclassOf<AActor> ActorClass;
 };
 
+/** random_dungeonmagic_level5: what a monster's blow does to her besides its damage */
+UENUM(BlueprintType)
+enum class ERDMonsterAbility : uint8
+{
+	None, Poison, Weaken, Slow
+};
+
 /** A wandering monster type: its own skeletal mesh and idle / walk clips (played directly, no AnimBP). */
 USTRUCT(BlueprintType)
 struct FRDMonsterDef
@@ -72,6 +79,20 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SoundSet;
 	/** ground covered between two footstep sounds (cm) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StepLength = 80.f;
+	// ---- random_dungeonmagic_level5: the monster gallery's tiers (docs/monsters.md, pipeline/unreal/859)
+	/** the tier of rooms it lives in (0: any; with the generator's MaxTier a section spawns only the kinds of its tier) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 0;
+	/** what its blow does to her besides its damage (none, poison: hit points over a few seconds, weaken: her blows and
+	 *  spells do less for a while, slow: she moves slower for a while); the generator's tier scales how strong */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDMonsterAbility Ability = ERDMonsterAbility::None;
+	/** parts that follow its body (on its skeleton: a head, a weapon made on the same skeleton) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<USkeletalMesh>> Parts;
+	/** a weapon in its hand (a static mesh on HandBone, placed by WeaponGrip) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> WeaponMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName WeaponBone = NAME_None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform WeaponGrip;
+	/** the gallery's name (the HUD's bar shows it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
 };
 
 /** Sounds for one occasion ("Player.Hurt", "Env.DoorOpen", "Monster.Troll.Roar"...): one of them is played each time,
@@ -184,6 +205,149 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString WeaponType;
 	/** the item it came from (none: one she starts with) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Item = NAME_None;
+	// ---- random_dungeonmagic_level5: the spell table (the generator's Spells)
+	/** the spell of the generator's Spells it casts (-1: none, a weapon or a plain bolt); its release does what the spell's
+	 *  Kind says, the bolt (for the spells that fly) with the spell's effects */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 SpellIndex = -1;
+	/** seconds before it can be cast again (0: none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Cooldown = 0.f;
+};
+
+/** random_dungeonmagic_level5: the spell table's types; a hero learns the types her card lists (FRDHeroDef::Learns) */
+UENUM(BlueprintType)
+enum class ERDSpellType : uint8
+{
+	Offense, Protection, Curse, Summon
+};
+
+/** random_dungeonmagic_level5: what a spell does when it is released (each is played by URDCombatComponent::ReleaseSpell) */
+UENUM(BlueprintType)
+enum class ERDSpellKind : uint8
+{
+	/** a bolt after the monster she faces: Damage, Splash (cm; a fireball's whole Damage within it), Pierce (on through
+	 *  monsters), Slow (a share of their speed for Duration), Burn (Amount of Damage again over Duration, a share Drain
+	 *  back to her), Count jumps to the next monster within Radius (chain lightning) */
+	Bolt,
+	/** an arc in front of her (Reach, Radius the arc in degrees): Damage and a push of Amount cm */
+	Lash,
+	/** a shield on her that takes the next Count blows whole (or Amount of her hit points, when Amount > 0) for Duration */
+	Ward,
+	/** her armour's share of a blow up by Amount for Duration */
+	Skin,
+	/** her poison, weakness and slowness end; none takes hold for Duration */
+	Dispel,
+	/** a channel for Duration: Damage a second to the monster she faces, Amount of it back to her as hit points */
+	Drain,
+	/** an area round the target (Radius) for Duration: Damage a second, Slow on the monsters in it */
+	Cloud,
+	/** monsters lose her for Duration (and do not see her); Amount of their blows miss her; it ends when she attacks */
+	Veil,
+	/** an area round the target (Radius): monsters take Amount more and deal Amount less for Duration */
+	Curse,
+	/** up to Count corpses within Reach rise as her allies for Duration */
+	Raise,
+	/** a zone at her feet (Radius) for Duration: blows on her inside it take Amount less */
+	Rune,
+	/** she spends Amount of her hit points: a ring of Damage round her (Radius) */
+	Nova,
+	/** for Duration blows on her are turned back on the attacker (Amount of them; she takes the rest) */
+	Mirror,
+	/** at once on the monster she faces: Damage */
+	Rend,
+	/** corpses within Reach of the target (Count at most) burst: Damage within Radius of each */
+	Corpse,
+	/** a column at the target: Damage within Radius at once, then burning ground (Damage a second) for Duration */
+	Pillar,
+	/** a rift at the target for Duration: monsters within Radius are pulled toward it, Damage a second */
+	Rift,
+	/** once within Duration, a blow that would kill her leaves her at Amount of her hit points instead */
+	Pact,
+	/** a champion fights for her until it falls (one at a time; casting again heals it) */
+	Knight,
+	/** Count strikes over Duration within Radius of the target, Damage within Splash of each */
+	Meteors,
+	/** a zone at her feet (Radius) for Duration: no blow hurts her (or her allies) inside it */
+	Sanctum,
+	/** every monster she can see within Reach: Damage */
+	Apocalypse
+};
+
+/** random_dungeonmagic_level5: one entry of the spell table (SourceArt/random_dungeon_magic5/spells.json, pipeline/unreal/858).
+ *  A tome found in a container teaches it to a hero whose card learns its type; it then joins her weapons as a spell
+ *  (FRDWeaponDef::SpellIndex) cast with her own cast clips. */
+USTRUCT(BlueprintType)
+struct FRDSpellDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Number = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDSpellType Type = ERDSpellType::Offense;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDSpellKind Kind = ERDSpellKind::Bolt;
+	/** the table's line (the inventory shows it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Effect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Mana = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Cooldown = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Duration = 0.f;
+	/** the table's drop chance (a share: the 30 add up to 1): how likely a tome is this spell among those of its tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DropChance = 0.f;
+	/** the tier of rooms whose tomes may teach it (by its mana) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Damage = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Reach = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Radius = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Splash = 170.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Amount = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Count = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Slow = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Burn = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Drain = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bPierce = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltSpeed = 1700.f;
+	/** effects (MagicProjectilesVol4 / 5, ToonExplosionVol1 / ToonExplosionsVol2, StylizedShieldsVol1): on her hand while
+	 *  she casts, on the bolt, where it strikes (or where the spell lands), over its area while it lasts (fired again every
+	 *  AreaEvery seconds when it plays once), on her while it lasts (a shield) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> CastFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BoltFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> ImpactFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> AreaFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> ShieldFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float CastFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ImpactFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AreaFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ShieldFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AreaEvery = 0.f;
+	/** the projectile packs' colours (User.Color01..03), set when bUseColors */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bUseColors = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FLinearColor> Colors;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor LightColor = FLinearColor(1.f, 0.45f, 0.12f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float LightIntensity = 0.f;
+	/** its sounds: "Player.Charge.<SoundKey>", "Player.Cast.<SoundKey>", "Player.Hit.<SoundKey>" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SoundKey = TEXT("Fire");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
+};
+
+/** random_dungeonmagic_level5: the rings' kinds */
+UENUM(BlueprintType)
+enum class ERDRingKind : uint8
+{
+	/** her mana: Amount more of it (spellcasters) */
+	Magic,
+	/** her hit points: Amount more of them */
+	Health,
+	/** her ranged weapons' damage: Amount more */
+	Dexterity
+};
+
+/** random_dungeonmagic_level5: what an anvil breaks a found weapon of these types into (each part Count a tier of the
+ *  weapon: the lowest tier its item is found in) */
+USTRUCT(BlueprintType)
+struct FRDBreakdown
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Types;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> Gives;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<int32> PerTier;
 };
 
 /** random_dungeonmagic_level5: a found weapon as one hero wields it (her clips for its type, its mesh in her hand) */
@@ -211,6 +375,10 @@ struct FRDSectionProgress
 	UPROPERTY(BlueprintReadOnly) int32 Monsters = 0;
 	UPROPERTY(BlueprintReadOnly) TArray<int32> Killed;
 	UPROPERTY(BlueprintReadOnly) bool bCleared = false;
+	/** where each one she killed lies (by spawn index): a section generated again lays its corpse there */
+	UPROPERTY(BlueprintReadOnly) TMap<int32, FTransform> Corpses;
+	/** corpses gone for good (burst, or risen and fallen again) */
+	UPROPERTY(BlueprintReadOnly) TArray<int32> Consumed;
 };
 
 /** random_dungeonmagic_level4: a painted piece of the interface (SourceArt/random_dungeon_magic4/ui_art.json, made on an
@@ -250,7 +418,12 @@ enum class ERDItemKind : uint8
 	/** random_dungeonmagic_level5: a crafting material (an anvil makes repair items from them) */
 	Component,
 	/** random_dungeonmagic_level5: mends Amount of an armour set's or a found weapon's full durability (up to full) */
-	Repair
+	Repair,
+	/** random_dungeonmagic_level5: a ring (RingKind: Amount more mana, hit points or ranged damage while she wears it; one
+	 *  of each kind at a time) */
+	Ring,
+	/** random_dungeonmagic_level5: a tome that teaches its Spell to a hero who learns spells of its type */
+	Tome
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */
@@ -306,6 +479,12 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString ArmourType;
 	/** a container that holds it gives 1 to this many of it (components come in bundles) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 FoundMax = 1;
+	/** a ring: its kind */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDRingKind RingKind = ERDRingKind::Magic;
+	/** a tome: the spell it teaches (the generator's Spells by name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Spell = NAME_None;
+	/** a weapon: its type in the weapons table (what an anvil breaks it into) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString WeaponType;
 };
 
 /** random_dungeonmagic_level5: what a recipe takes of one kind: Count of any of AnyOf together ("wood (any)": hardwood,
@@ -362,6 +541,10 @@ struct FRDHeroDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDArmourWeight> Wears;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString StartsWith;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Accent = FLinearColor(1.f, 0.8f, 0.4f);
+	/** random_dungeonmagic_level5: the types of spell she learns from tomes (empty: none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDSpellType> Learns;
+	/** random_dungeonmagic_level5: the kinds of ring she can wear */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDRingKind> RingKinds;
 };
 
 UENUM(BlueprintType)

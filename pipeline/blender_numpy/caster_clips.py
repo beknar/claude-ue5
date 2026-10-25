@@ -36,18 +36,22 @@ def arm(side, up, low, hand, curl=12.0, thumb=6.0, twist=0.0):
     return sp
 
 
-def body(ctx, twist=0.0, lean=0.0, knees=3.0, look=0.7):
+def body(ctx, twist=0.0, lean=0.0, knees=3.0, look=0.7, hips=0.0):
     """twist: degrees her shoulders turn to her right (negative: left); lean: forward; knees: bend; look: share of the
-    twist the neck takes back (her eyes stay on the target)"""
+    twist the neck takes back (her eyes stay on the target); hips: share of the twist her hips (the pelvis) take, the
+    thighs turned back so her feet stay where they are (a sweep turns at the waist: the spine alone looked stiff)"""
     sp = {}
     for b, w in (("spine_01", 0.3), ("spine_02", 0.35), ("spine_03", 0.35)):
-        sp[b] = [("rot", U, -twist * w), ("rot", LEAN, lean * w)]
+        sp[b] = [("rot", U, -twist * w * (1.0 - hips)), ("rot", LEAN, lean * w)]
     sp["neck_01"] = [("rot", U, twist * look), ("rot", LEAN, -lean * 0.4)]
+    if hips:
+        sp["pelvis"] = [("rot", U, -twist * hips)]
+        for s in "lr": sp[f"thigh_{s}"] = [("rot", U, twist * hips)]
     if knees:
         drop = ctx["legs"] * (1.0 - math.cos(math.radians(knees)))
-        sp["pelvis"] = [("move", Vector((0.0, 0.0, -drop)))]
+        sp.setdefault("pelvis", []).append(("move", Vector((0.0, 0.0, -drop))))
         for s in "lr":
-            sp[f"thigh_{s}"] = [("toward", F, knees)]
+            sp.setdefault(f"thigh_{s}", []).append(("toward", F, knees))
             sp[f"calf_{s}"] = [("toward", -F, 2.0 * knees)]
             sp[f"foot_{s}"] = [("rest",)]
     return sp

@@ -118,6 +118,8 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 	LoadedBoltComp = Make(TEXT("RDLoadedBolt")); LoadedBoltComp->SetVisibility(false);
 	SyncWear();
 	SelectWeapon(0);
+	// (level 5: the spells' own stream: a veil's misses; never the play's)
+	SpellR.Initialize(Generator ? (int32)HashCombine((uint32)Generator->SessionSeed, 0x5E11u) : 7);
 }
 
 // ------------------------------------------------------------------------------------------------ found weapons (level 5)
@@ -265,7 +267,7 @@ void URDCombatComponent::UpdateWalkSpeed()
 	if (!C) return;
 	UCharacterMovementComponent* CM = C->GetCharacterMovement();
 	// her own top speed while nothing changes it; slowed in an attack, faster under a speed potion, slower in armour
-	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus()) * (1.f - FMath::Clamp(GetArmourSlow(), 0.f, 0.9f));
+	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus()) * (1.f - FMath::Clamp(GetArmourSlow(), 0.f, 0.9f)) * (1.f - GetSlowness());
 	if (FMath::IsNearlyEqual(K, 1.f))
 	{
 		if (bSpeedOverride) { CM->MaxWalkSpeed = SavedWalkSpeed; bSpeedOverride = false; }
@@ -286,9 +288,10 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 {
 	if (!Generator || !Generator->Weapons.IsValidIndex(Index)) return 0.f;
 	const FRDWeaponDef& W = Generator->Weapons[Index];
-	// (a melee weapon: no bolt; a ranged one: a spell whose bolt is a mesh, the crossbow; magic has no bonus)
-	const float Bonus = !W.bSpell ? Generator->MeleeBonus : W.BoltMesh ? Generator->RangedBonus : 0.f;
-	return W.Damage * (1.f + Bonus);
+	// (a melee weapon: no bolt; a ranged one: a spell whose bolt is a mesh, the crossbow; magic has no bonus; level 5: a
+	// dexterity ring adds to the ranged bonus, a monster's weakening takes off)
+	const float Bonus = !W.bSpell ? Generator->MeleeBonus : W.BoltMesh ? Generator->RangedBonus + GetRingBonus(ERDRingKind::Dexterity) : 0.f;
+	return W.Damage * (1.f + Bonus) * WeakMul();
 }
 
 bool URDCombatComponent::StartAttack()
@@ -305,9 +308,27 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	if (W->ManaCost > 0.f && Mana < W->ManaCost)
 	{
 		const float Now = GetWorld()->GetTimeSeconds();
-		if (Now - NoManaTime > 0.6f) { ++CastsRefused; SetMessage(FString::Printf(TEXT("Not enough mana for %s"), *W->Name.ToString())); Generator->PlaySoundAt(TEXT("Player.NoMana"), GetOwner()->GetActorLocation()); }
+		if (Now - NoManaTime > 0.6f)
+		{
+			++CastsRefused;
+			SetMessage(W->ManaCost > MaxMana ? FString::Printf(TEXT("%s takes %.0f mana: more than you have (%.0f)"), *W->Name.ToString(), W->ManaCost, MaxMana)
+			                                 : FString::Printf(TEXT("Not enough mana for %s"), *W->Name.ToString()));
+			Generator->PlaySoundAt(TEXT("Player.NoMana"), GetOwner()->GetActorLocation());
+		}
 		NoManaTime = Now;
 		return false;
+	}
+	// (level 5: a spell with a cooldown waits for it)
+	if (W->Cooldown > 0.f)
+	{
+		const float Left = GetCooldownLeft(Index);
+		if (Left > 0.f)
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			if (Now - NoManaTime > 0.6f) { ++CooldownRefusals; SetMessage(FString::Printf(TEXT("%s is not ready:  %.0f s"), *W->Name.ToString(), FMath::CeilToFloat(Left))); }
+			NoManaTime = Now;
+			return false;
+		}
 	}
 	UAnimInstance* AI = M->GetAnimInstance();
 	if (NextOf.Num() < Generator->Weapons.Num()) NextOf.SetNumZeroed(Generator->Weapons.Num());
@@ -354,6 +375,8 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
 	++NextOf[Index]; ++AttacksMade;
 	if (W->ManaCost > 0.f) Mana = FMath::Max(0.f, Mana - W->ManaCost);
+	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
+	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	SetSlowed(true);
 	return true;
 }
@@ -397,15 +420,46 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 {
 	if (bDead || Amount <= 0.f) return;
 	if (IsDodging()) { ++DodgedHits; return; }
-	// (her armour takes its share off)
+	const float Now = GetWorld()->GetTimeSeconds();
+	AActor* O = GetOwner();
+	// (level 5: her spells take their part first: a sanctum takes it all, a veil lets it miss, a ward takes it, a mirror
+	// turns it back, a rune takes a share)
+	if (O && Now < SanctumUntil && FVector::Dist2D(O->GetActorLocation(), SanctumAt) <= SanctumRadius) { ++ZoneBlocks; return; }
+	if (Now < VeilUntil && SpellR.FRand() < VeilEvade) { ++Evaded; return; }
+	if (Now < WardUntil)
+	{
+		if (WardPool > 0.f)
+		{
+			const float T = FMath::Min(WardPool, Amount);
+			WardPool -= T; Amount -= T; ++WardBlocks;
+			if (WardPool <= 0.f) { WardUntil = Now; SetAura(ERDSpellKind::Ward, nullptr, false); }
+			if (Amount <= 0.f) return;
+		}
+		else if (WardHits > 0)
+		{
+			++WardBlocks;
+			if (--WardHits <= 0) { WardUntil = Now; SetAura(ERDSpellKind::Ward, nullptr, false); }
+			return;
+		}
+	}
+	if (Now < MirrorUntil && MirrorShare > 0.f)
+		if (ARDMonster* Mo = Cast<ARDMonster>(From); Mo && !Mo->IsDead())
+		{
+			const float Back = Amount * MirrorShare;
+			SpellHurt(Mo, Back, Mo->GetActorLocation() + FVector(0, 0, 40.f), true);
+			Amount -= Back; ++Reflected;
+			if (Amount <= 0.f) return;
+		}
+	if (O && Now < RuneUntil && FVector::Dist2D(O->GetActorLocation(), RuneAt) <= RuneRadius) { Amount *= 1.f - RuneShare; ++ZoneBlocks; }
+	// (her armour takes its share off; Iron Skin adds to it)
 	LastBlowBefore = Amount;
-	Amount *= 1.f - FMath::Clamp(GetArmour(), 0.f, 0.95f);
+	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus(), 0.f, 0.95f);
 	LastBlowTaken = Amount;
 	WearDownArmour();             // (level 5: the blow reached her: her armour loses 1 of its durability)
-	const float Now = GetWorld()->GetTimeSeconds();
 	Health = FMath::Max(0.f, Health - Amount);
+	// (level 5: a pact cheats death once)
+	if (Health <= 0.f && Now < PactUntil) { Health = FMath::Max(1.f, MaxHealth * PactShare); PactUntil = Now; ++PactSaves; SetAura(ERDSpellKind::Pact, nullptr, false); SetMessage(TEXT("Your pact holds: you rise again")); }
 	DamageTaken += Amount; ++HitsTaken; LastHurtTime = Now;
-	AActor* O = GetOwner();
 	if (Generator && O)
 	{
 		Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), Amount, true);
@@ -421,15 +475,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	USkeletalMeshComponent* M = Body();
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
 	const FRDWeaponDef* W = Weapon();
-	if (Health <= 0.f)
-	{
-		bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
-		EndAttack(); EndRoll();
-		if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
-		if (AI && W && W->Death)
-			if (UAnimMontage* Mo = AI->PlaySlotAnimationAsDynamicMontage(W->Death, RDCombatSlot, 0.12f, 0.2f, 1.f, 1, -1.f, 0.f)) Mo->bEnableAutoBlendOut = false;      // (she stays down)
-		return;
-	}
+	if (Health <= 0.f) { Fall(); return; }
 	// a flinch, unless she is in the middle of a swing or flinched a moment ago
 	if (AI && W && W->GetHit && AttackTime < 0.f && Now > StaggerUntil)
 	{
@@ -438,9 +484,33 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	}
 }
 
+void URDCombatComponent::Fall()
+{
+	const float Now = GetWorld()->GetTimeSeconds();
+	AActor* O = GetOwner();
+	USkeletalMeshComponent* M = Body();
+	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
+	const FRDWeaponDef* W = Weapon();
+	Health = 0.f;
+	bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
+	EndAttack(); EndRoll();
+	if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
+	if (AI && W && W->Death)
+		if (UAnimMontage* Mo = AI->PlaySlotAnimationAsDynamicMontage(W->Death, RDCombatSlot, 0.12f, 0.2f, 1.f, 1, -1.f, 0.f)) Mo->bEnableAutoBlendOut = false;      // (she stays down)
+}
+
 void URDCombatComponent::Revive(bool bToStart)
 {
 	AActor* O = GetOwner();
+	// (level 5: what was on her is gone: her spells, poison, weakness, slowness, the areas she left, the channel)
+	WardUntil = SkinUntil = VeilUntil = MirrorUntil = PactUntil = DispelUntil = RuneUntil = SanctumUntil = DrainUntil = -100.f;
+	WardHits = 0; WardPool = 0.f; DrainTarget = nullptr;
+	ClearAfflictions();
+	for (FArea& Ar : Areas) if (UFXSystemComponent* F = Ar.Fx.Get()) F->Deactivate();
+	Areas.Reset();
+	for (const TPair<uint8, TWeakObjectPtr<UFXSystemComponent>>& Au : Auras) if (UFXSystemComponent* F = Au.Value.Get()) F->Deactivate();
+	Auras.Reset();
+	UpdateMaxima();
 	bDead = false; Health = MaxHealth; Mana = MaxMana; AttackTime = -1.f; StaggerUntil = -100.f; StopCharge(); EndRoll(); ShowLoadedBolt(true);
 	Effects.Reset(); SetSlowed(false); UpdateWalkSpeed();
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
@@ -465,6 +535,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	const float Now = GetWorld()->GetTimeSeconds();
 	TickSounds(Dt, Now);
 	TickBolts(Dt);
+	TickSpells(Dt, Now);
 	if (bDead)
 	{
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
@@ -501,7 +572,15 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 		AttackTime += Dt;
 		const bool bSpell = IsSpell();
 		if (!bWhooshDone && !bSpell && AttackTime >= AttackHit - 0.16f) { bWhooshDone = true; Generator->PlaySoundAt(TEXT("Player.Whoosh"), GetOwner()->GetActorLocation()); }
-		if (!bHitDone && AttackTime >= AttackHit) { bHitDone = true; if (bSpell) LaunchBolt(); else Strike(); }
+		if (!bHitDone && AttackTime >= AttackHit)
+		{
+			bHitDone = true;
+			// (level 5: a spell of the table that does not fly does what its kind says)
+			const FRDSpellDef* S = bSpell ? SpellOf(AttackIndex) : nullptr;
+			if (S && S->Kind != ERDSpellKind::Bolt) ReleaseSpell(AttackIndex);
+			else if (bSpell) LaunchBolt();
+			else Strike();
+		}
 		if (AttackTime >= AttackLen) EndAttack();
 	}
 	// out of a fight the hit points come back (not in random_dungeonmagic_level4: RegenPerSecond 0); mana comes back slowly
@@ -530,6 +609,14 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 		Count = Left;
 		if (Count <= 0) return;
 	}
+	// (level 5: a tome teaches its spell at once to a hero who learns its type; one she knows already is no use; one her
+	// hero cannot learn is carried)
+	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Tome)
+	{
+		const FName Sp = Generator->Items[Ix].Spell;
+		if (KnowsSpell(Sp)) { SetMessage(FString::Printf(TEXT("You know %s already"), *Sp.ToString())); return; }
+		if (LearnSpell(Sp)) return;
+	}
 	// (level 5: a set of armour is carried once, with its durability; one found again mends hers to full)
 	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour)
 	{
@@ -546,6 +633,8 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 void URDCombatComponent::ClearItems()
 {
 	TakeOffArmour();
+	WornRings.Reset(); UpdateMaxima();
+	ReadyAt.Reset(); SpellsLearned = WeaponsBrokenDown = 0;
 	Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
 	RepairWith = NAME_None; RepairCursor = 0;
 	if (bCraftOpen) SetCraftingOpen(false);
@@ -560,7 +649,12 @@ void URDCombatComponent::RemoveCarried(FName Name, int32 Count)
 	int32* N = Carried.Find(Name);
 	if (!N || Count <= 0) return;
 	*N -= Count;
-	if (*N <= 0) { Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name); }
+	if (*N <= 0)
+	{
+		Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name);
+		// (a ring she no longer has is not on her)
+		for (auto It = WornRings.CreateIterator(); It; ++It) if (It->Value == Name) { It.RemoveCurrent(); UpdateMaxima(); break; }
+	}
 }
 
 void URDCombatComponent::PlayUiSound(FName Key, FName Fallback)
@@ -586,6 +680,14 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
 	if (It.Kind == ERDItemKind::Repair) return BeginRepair(Name);         // (then she chooses what it mends)
+	if (It.Kind == ERDItemKind::Ring) return WearRing(Name);              // (level 5: worn, one of each kind)
+	if (It.Kind == ERDItemKind::Tome)
+	{
+		if (KnowsSpell(It.Spell)) { SetMessage(FString::Printf(TEXT("You know %s already"), *It.Spell.ToString())); return false; }
+		if (!LearnSpell(It.Spell)) return false;
+		RemoveCarried(Name, 1);
+		return true;
+	}
 	if (It.Kind == ERDItemKind::Component)
 	{
 		SetMessage(FString::Printf(TEXT("The %s is a crafting material: an anvil makes repair items from it (F at an anvil)"), *Lb));
@@ -676,6 +778,15 @@ TArray<FString> URDCombatComponent::GetInventoryLines() const
 	for (const FName& N : CarriedOrder)
 		if (KindOf(N) == ERDItemKind::Armour)
 			Out.Add(FString::Printf(TEXT("armour|%s|%d|%.0f|%.0f"), *N.ToString(), N == WornArmour ? 1 : 0, GetArmourWear(N), GetArmourDurability(N)));
+	// (level 5: her rings, worn or not; tomes her hero cannot learn)
+	for (const FName& N : CarriedOrder)
+		if (KindOf(N) == ERDItemKind::Ring)
+		{
+			bool bOn = false;
+			for (const TPair<uint8, FName>& R : WornRings) bOn |= R.Value == N;
+			Out.Add(FString::Printf(TEXT("ring|%s|%d|%d"), *N.ToString(), bOn ? 1 : 0, GetItemCount(N)));
+		}
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Tome) Out.Add(FString::Printf(TEXT("tome|%s|%d"), *N.ToString(), GetItemCount(N)));
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Component) Out.Add(FString::Printf(TEXT("component|%s|%d"), *N.ToString(), GetItemCount(N)));
 	// (level 5: weapons she found that her hero cannot wield)
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Weapon) Out.Add(FString::Printf(TEXT("carried|%s|%d"), *N.ToString(), GetItemCount(N)));
@@ -816,7 +927,7 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 	if (bOpen == bCraftOpen || (bOpen && (bDead || !Generator || Generator->Recipes.Num() == 0))) return;
 	if (bOpen && bInventoryOpen) SetInventoryOpen(false);
 	bCraftOpen = bOpen;
-	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, Generator->Recipes.Num() - 1)); }
+	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); }
 	else CraftClosedFrame = GFrameCounter;
 	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
 	PlayUiSound(bOpen ? FName(TEXT("Player.Anvil")) : FName(TEXT("Player.Inventory")), TEXT("Player.Inventory"));
@@ -824,7 +935,7 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 
 void URDCombatComponent::MoveCraftCursor(int32 Step)
 {
-	const int32 N = Generator ? Generator->Recipes.Num() : 0;
+	const int32 N = GetCraftLines().Num();
 	if (N > 0) CraftCursor = ((CraftCursor + Step) % N + N) % N;
 }
 
@@ -845,7 +956,84 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s"), *Rc.Item.ToString(), CanCraft(Rc.Item) ? 1 : 0, *FString::Join(Ps, TEXT(";"))));
 	}
+	// (level 5: the weapons she found, to break down: "breakdown|<name>|w<weapon index> or i<item>|<1 drawn>|<item>:<count>;...")
+	if (Generator->Breakdowns.Num() > 0)
+	{
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+		{
+			const FRDWeaponDef& W = Generator->Weapons[I];
+			if (W.Item.IsNone()) continue;
+			const FString Gives = BreakdownText(W.Item, W.WeaponType);
+			if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|w%d|%d|%s"), *W.Name.ToString(), I, I == WeaponIndex ? 1 : 0, *Gives));
+		}
+		for (const FName& N : CarriedOrder)
+		{
+			const int32 Ix = Generator->FindItem(N);
+			if (Ix < 0 || Generator->Items[Ix].Kind != ERDItemKind::Weapon) continue;
+			const FString Gives = BreakdownText(N, Generator->Items[Ix].WeaponType);
+			if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|i%s|0|%s"), *N.ToString(), *N.ToString(), *Gives));
+		}
+	}
 	return Out;
+}
+
+FString URDCombatComponent::BreakdownText(FName Item, const FString& Type) const
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	// (the item's own type first: the table's "ranged" is a bow or a crossbow there)
+	const FString T = Ix >= 0 && !Generator->Items[Ix].WeaponType.IsEmpty() ? Generator->Items[Ix].WeaponType : Type;
+	int32 Tier = 1;
+	if (Ix >= 0 && Generator->Items[Ix].Tiers.Num() > 0) { Tier = Generator->Items[Ix].Tiers[0]; for (const int32 Ti : Generator->Items[Ix].Tiers) Tier = FMath::Min(Tier, Ti); }
+	TArray<FName> Gives; TArray<int32> Counts;
+	if (T.IsEmpty() || !Generator->BreakdownOf(T, Tier, Gives, Counts)) return FString();
+	TArray<FString> Ps;
+	for (int32 K = 0; K < Gives.Num(); ++K) Ps.Add(FString::Printf(TEXT("%s:%d"), *Gives[K].ToString(), Counts[K]));
+	return FString::Join(Ps, TEXT(";"));
+}
+
+bool URDCombatComponent::BreakDownWeapon(int32 Index)
+{
+	if (!Generator || bDead || !Generator->Weapons.IsValidIndex(Index)) return false;
+	const FRDWeaponDef W = Generator->Weapons[Index];
+	if (W.Item.IsNone()) { SetMessage(FString::Printf(TEXT("Your own %s is not to be broken"), *W.Name.ToString().ToLower())); return false; }
+	if (Index == WeaponIndex) { SetMessage(FString::Printf(TEXT("The %s is in your hands: draw another first"), *W.Name.ToString().ToLower())); return false; }
+	const FString Gives = BreakdownText(W.Item, W.WeaponType);
+	if (Gives.IsEmpty()) return false;
+	// (it is gone from her weapons as a broken one would be, without the breaking's message)
+	if (AttackTime >= 0.f && AttackIndex == Index) EndAttack();
+	Generator->Weapons.RemoveAt(Index);
+	if (Wear.IsValidIndex(Index)) Wear.RemoveAt(Index);
+	if (NextOf.IsValidIndex(Index)) NextOf.RemoveAt(Index);
+	Bolts.RemoveAll([Index](const FBolt& B) { return B.Weapon == Index; });
+	for (FBolt& B : Bolts) if (B.Weapon > Index) --B.Weapon;
+	for (int32& P : PendingBreak) if (P > Index) --P;
+	PendingBreak.Remove(Index);
+	if (WeaponIndex > Index) --WeaponIndex;
+	TArray<FString> Ps; Gives.ParseIntoArray(Ps, TEXT(";"));
+	TArray<FString> Got;
+	for (const FString& P : Ps) { FString N, C; if (P.Split(TEXT(":"), &N, &C)) { AddItem(FName(*N), FCString::Atoi(*C)); Got.Add(FString::Printf(TEXT("%s %s"), *C, *N.ToLower())); } }
+	++WeaponsBrokenDown;
+	SetMessage(FString::Printf(TEXT("You break down the %s:  %s"), *W.Name.ToString().ToLower(), *FString::Join(Got, TEXT(", "))));
+	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
+	UE_LOG(LogTemp, Log, TEXT("RDBREAKDOWN %s -> %s"), *W.Name.ToString(), *Gives);
+	return true;
+}
+
+bool URDCombatComponent::BreakDownItem(FName Item)
+{
+	const int32 Ix = Generator && !bDead ? Generator->FindItem(Item) : -1;
+	if (Ix < 0 || Generator->Items[Ix].Kind != ERDItemKind::Weapon || GetItemCount(Item) <= 0) return false;
+	const FString Gives = BreakdownText(Item, Generator->Items[Ix].WeaponType);
+	if (Gives.IsEmpty()) return false;
+	RemoveCarried(Item, 1);
+	TArray<FString> Ps; Gives.ParseIntoArray(Ps, TEXT(";"));
+	TArray<FString> Got;
+	for (const FString& P : Ps) { FString N, C; if (P.Split(TEXT(":"), &N, &C)) { AddItem(FName(*N), FCString::Atoi(*C)); Got.Add(FString::Printf(TEXT("%s %s"), *C, *N.ToLower())); } }
+	++WeaponsBrokenDown;
+	SetMessage(FString::Printf(TEXT("You break down the %s:  %s"), *Item.ToString().ToLower(), *FString::Join(Got, TEXT(", "))));
+	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
+	UE_LOG(LogTemp, Log, TEXT("RDBREAKDOWN %s -> %s"), *Item.ToString(), *Gives);
+	return true;
 }
 
 bool URDCombatComponent::CanCraft(FName Item) const
@@ -908,7 +1096,16 @@ bool URDCombatComponent::Craft(FName Item)
 
 bool URDCombatComponent::CraftEntry()
 {
-	return Generator && Generator->Recipes.IsValidIndex(CraftCursor) && Craft(Generator->Recipes[CraftCursor].Item);
+	if (!Generator) return false;
+	if (Generator->Recipes.IsValidIndex(CraftCursor)) return Craft(Generator->Recipes[CraftCursor].Item);
+	// (level 5: a weapon to break down)
+	const TArray<FString> L = GetCraftLines();
+	if (!L.IsValidIndex(CraftCursor)) return false;
+	TArray<FString> P; L[CraftCursor].ParseIntoArray(P, TEXT("|"));
+	if (P.Num() < 3 || P[0] != TEXT("breakdown")) return false;
+	const bool bOk = P[2].StartsWith(TEXT("w")) ? BreakDownWeapon(FCString::Atoi(*P[2].Mid(1))) : BreakDownItem(FName(*P[2].Mid(1)));
+	CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1));
+	return bOk;
 }
 
 TArray<USkeletalMeshComponent*> URDCombatComponent::GetArmourMeshes() const
@@ -1086,7 +1283,8 @@ bool URDCombatComponent::UseInventoryEntry()
 		SetMessage(FString::Printf(TEXT("You wield the %s"), *W.Name.ToString().ToLower()));
 		return true;
 	}
-	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")))
+	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")
+		|| P[0] == TEXT("ring") || P[0] == TEXT("tome")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
@@ -1213,6 +1411,11 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 	if (PC->WasInputKeyJustPressed(EKeys::One) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Left))) SelectWeapon(0);
 	if (PC->WasInputKeyJustPressed(EKeys::Two) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Up))) SelectWeapon(1);
 	if (PC->WasInputKeyJustPressed(EKeys::Three) || (!Generator->bMapOpen && PC->WasInputKeyJustPressed(EKeys::Gamepad_DPad_Right))) SelectWeapon(2);
+	// (level 5: with spells learned there may be many: 4 to 0 draw the fourth to the tenth)
+	{
+		static const FKey More[] = { EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine, EKeys::Zero };
+		for (int32 K = 0; K < UE_ARRAY_COUNT(More); ++K) if (PC->WasInputKeyJustPressed(More[K])) SelectWeapon(3 + K);
+	}
 	if (Generator->bRogueControls)
 	{
 		// (the rogue: the wheel or Y switch weapons, the left mouse button or RB uses the one in her hands, B rolls)
@@ -1370,8 +1573,11 @@ void URDCombatComponent::LaunchBolt()
 	}
 	else B.Vel = Fw * W->BoltSpeed;
 	const FRotator R = B.Vel.Rotation();
+	// (level 5: a spell of the table: its bolt pierces, jumps, carries its colours)
+	const FRDSpellDef* S = SpellOf(AttackIndex);
+	if (S) { B.Spell = W->SpellIndex; B.bPierce = S->bPierce; B.ChainLeft = S->Count > 0 && S->Radius > 0.f ? S->Count : 0; }
 	if (Grown) { Grown->SetWorldLocationAndRotation(B.At, R); B.Fx = Grown; }
-	else if (W->BoltEffect) B.Fx = SpawnFx(W->BoltEffect, B.At, R, W->BoltEffectScale);
+	else if (W->BoltEffect) B.Fx = S ? SpawnSpellFx(W->BoltEffect, B.At, R, W->BoltEffectScale, S) : SpawnFx(W->BoltEffect, B.At, R, W->BoltEffectScale);
 	if (W->BoltCoreEffect) B.Core = SpawnFx(W->BoltCoreEffect, B.At, R, W->BoltCoreEffectScale);
 	B.Light = MakeLight(B.At, W->SpellLightColor, W->SpellLightIntensity, 900.f);
 	if (W->BoltMesh)
@@ -1398,6 +1604,7 @@ void URDCombatComponent::PlaceBoltMesh(UStaticMeshComponent* C, const FRDWeaponD
 
 void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 {
+	if (B.Spell >= 0) { SpellBurst(B, At, Direct); return; }      // (level 5: a spell of the table)
 	if (!Generator->Weapons.IsValidIndex(B.Weapon)) return;
 	const FRDWeaponDef& W = Generator->Weapons[B.Weapon];
 	AActor* O = GetOwner();
@@ -1447,7 +1654,7 @@ void URDCombatComponent::TickBolts(float Dt)
 	{
 		TimedFx[I].Left -= Dt;
 		if (TimedFx[I].Left > 0.f && TimedFx[I].Fx.IsValid()) continue;
-		if (UFXSystemComponent* F = TimedFx[I].Fx.Get()) F->Deactivate();
+		if (UFXSystemComponent* F = TimedFx[I].Fx.Get()) { if (TimedFx[I].bKill) { F->DeactivateImmediate(); F->DestroyComponent(); } else F->Deactivate(); }
 		TimedFx.RemoveAt(I);
 	}
 	for (int32 I = Stuck.Num() - 1; I >= 0; --I)
@@ -1465,8 +1672,30 @@ void URDCombatComponent::TickBolts(float Dt)
 	for (int32 I = Bolts.Num() - 1; I >= 0; --I)
 	{
 		FBolt& B = Bolts[I];
-		if (!Generator->Weapons.IsValidIndex(B.Weapon)) { Bolts.RemoveAt(I); continue; }
-		const FRDWeaponDef& W = Generator->Weapons[B.Weapon];
+		// (level 5: a spell's bolt may outlive its weapon (a chain's jump, a meteor): the spell's numbers then)
+		const FRDSpellDef* Sp = B.Spell >= 0 && Generator->Spells.IsValidIndex(B.Spell) ? &Generator->Spells[B.Spell] : nullptr;
+		const bool bWeapon = Generator->Weapons.IsValidIndex(B.Weapon) && (B.Spell < 0 || Generator->Weapons[B.Weapon].SpellIndex == B.Spell);
+		if (!bWeapon && !Sp) { Bolts.RemoveAt(I); continue; }
+		FRDWeaponDef SpellW;
+		if (!bWeapon) { SpellW.Reach = Sp->Reach; SpellW.BoltTurnRate = 260.f; }
+		const FRDWeaponDef& W = bWeapon ? Generator->Weapons[B.Weapon] : SpellW;
+		// (a meteor falls to its point, a drain's wisp flies back to her hand)
+		if (B.bGoal)
+		{
+			if (B.bWisp && O) B.Goal = O->GetActorLocation() + FVector(0, 0, 40.f);
+			const FVector To = B.Goal - B.At;
+			const float Step = B.Vel.Size() * Dt;
+			if (To.Size() <= FMath::Max(Step, 20.f))
+			{
+				if (!B.bWisp) SpellBurst(B, B.Goal, nullptr);
+				else { if (UFXSystemComponent* F = B.Fx.Get()) F->Deactivate(); if (UPointLightComponent* L = B.Light.Get()) L->DestroyComponent(); }
+				Bolts.RemoveAt(I); continue;
+			}
+			B.Vel = To.GetSafeNormal() * B.Vel.Size(); B.At += B.Vel * Dt; B.Flown += Step;
+			if (UFXSystemComponent* F = B.Fx.Get()) F->SetWorldLocationAndRotation(B.At, B.Vel.Rotation());
+			if (UPointLightComponent* L = B.Light.Get()) L->SetWorldLocation(B.At);
+			continue;
+		}
 		// it steers after its monster (as far as it can turn)
 		const float Speed = B.Vel.Size();
 		if (ARDMonster* Tg = B.Target.Get())
@@ -1484,6 +1713,7 @@ void URDCombatComponent::TickBolts(float Dt)
 		for (ARDMonster* Mo : Generator->GetMonsters())
 		{
 			if (!Mo || Mo->IsDead()) continue;
+			if (B.Done.Contains(Mo)) continue;           // (one it passed through, or jumped from)
 			const UCapsuleComponent* Cap = Mo->GetCapsuleComponent();
 			const float R = Cap->GetScaledCapsuleRadius(), Hh = Cap->GetScaledCapsuleHalfHeight();
 			const FVector C = Mo->GetActorLocation(), A0 = C - FVector(0, 0, Hh - R), A1 = C + FVector(0, 0, Hh - R);
@@ -1506,7 +1736,14 @@ void URDCombatComponent::TickBolts(float Dt)
 			}
 			Bolts.RemoveAt(I); continue;
 		}
-		if (HitMo)
+		if (HitMo && B.bPierce)
+		{
+			// (level 5: a piercing bolt hurts it and flies on)
+			SpellPierce(B, HitMo, HitAt);
+			B.Done.Add(HitMo);
+			B.Target = nullptr;
+		}
+		else if (HitMo)
 		{
 			B.Flown += (HitAt - B.At).Size();
 			Burst(B, HitAt, HitMo);

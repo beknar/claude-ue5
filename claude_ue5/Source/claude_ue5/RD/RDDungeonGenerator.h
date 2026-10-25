@@ -93,6 +93,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float ChaseSpeedScale = 1.6f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float MaxChaseSpeed = 290.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float CorpseSeconds = 8.f;
+	/** random_dungeonmagic_level5: the dead stay where they fell (no sinking away; a section generated again lays its
+	 *  corpses where they lay) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") bool bKeepCorpses = false;
+	/** random_dungeonmagic_level5: per tier of rooms (index 0: tier 1), what the average monster's hit points and damage are
+	 *  against MonsterReferenceHealth / Blow, its speed and the time between its attacks against its kind's own, and how
+	 *  strong its ability is (empty: the start / runtime factors) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") TArray<float> TierHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") TArray<float> TierDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") TArray<float> TierSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") TArray<float> TierAttackInterval;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") TArray<float> TierAbility;
+	/** a tier's value of one of those lists (Def when the list has none) */
+	static float TierValue(const TArray<float>& List, int32 Tier, float Def) { return List.Num() > 0 ? List[FMath::Clamp(Tier - 1, 0, List.Num() - 1)] : Def; }
+	/** the monster kinds a section spawns: those of its tier (with MaxTier and kinds that have tiers), else all */
+	void MonsterKindsFor(FIntPoint Section, TArray<int32>& Out) const;
 	/** her hit points come back at RegenPerSecond once she has not been hurt for RegenDelay seconds */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float RegenDelay = 6.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") float RegenPerSecond = 4.f;
@@ -203,6 +218,49 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") int32 LootCountOf(FIntPoint Section, int32 Index, int32 Pick) const;
 	/** the same, given the container's list (LootListOf) already made */
 	int32 LootCountIn(const TArray<FName>& List, FIntPoint Section, int32 Index, int32 Pick) const;
+	/** random_dungeonmagic_level5: the chance that a container holds anything (then it holds 1 to MaxItemsPerContainer);
+	 *  the start room's StartRoomItems are there whatever it says. A hash of the container decides (no stream). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Items") float ContainerLootChance = 1.f;
+	/** containers opened that held nothing (each says so: "Empty: nothing inside") */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Items") int32 ContainersEmpty = 0;
+	/** whether a container's draw came up (tests: the share of containers that hold something) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Items") bool ContainerHoldsLoot(FIntPoint Section, int32 Index) const;
+
+	// ---- random_dungeonmagic_level5: the spell table, tomes and rings (pipeline/unreal/858)
+	/** every spell a tome may teach (the hero's own spells point into it too: FRDWeaponDef::Spell) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Spells") TArray<FRDSpellDef> Spells;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") int32 FindSpell(FName Name) const;
+	/** the spell a tome of a container teaches, picked by the spells' drop chances among those of the section's tier (a
+	 *  hash of the container and the pick: the container's other picks stay as they were) */
+	FName TomeSpellOf(FIntPoint Section, int32 Index, int32 Pick) const;
+	/** the item a found tome is in her inventory under ("Tome of <spell>") */
+	static FName TomeItemName(FName Spell) { return FName(*FString::Printf(TEXT("Tome of %s"), *Spell.ToString())); }
+	/** the spell's weapon for the hero in play: her cast clips (those of her first spell) with the spell's numbers */
+	bool MakeSpellWeapon(int32 SpellIndex, FRDWeaponDef& Out) const;
+	/** a hero learns spells of this type (her card's Learns) */
+	bool HeroLearns(ERDSpellType Type) const;
+	bool HeroWearsRing(ERDRingKind Kind) const;
+	/** a monster kind that comes to her side for the Summon Abyssal Knight spell (the Monsters' name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Spells") FName KnightMonster;
+	/** its hit points and damage against a monster of the last tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Spells") float KnightStrength = 0.6f;
+
+	// ---- random_dungeonmagic_level5: found weapons broken down at an anvil into crafting materials
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Crafting") TArray<FRDBreakdown> Breakdowns;
+	/** what a weapon of this type and tier breaks into (false: none) */
+	bool BreakdownOf(const FString& Type, int32 Tier, TArray<FName>& Items, TArray<int32>& Counts) const;
+
+	// ---- random_dungeonmagic_level5: her allies (raised corpses, the summoned champion): monsters that fight on her side
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Spells") TArray<TObjectPtr<ARDMonster>> Allies;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") TArray<ARDMonster*> GetAllies() const;
+	/** corpses (dead monsters of the generated sections) within Radius of At, nearest first */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") TArray<ARDMonster*> GetCorpsesNear(FVector At, float Radius) const;
+	/** a corpse is gone for good (burst, or risen and fallen again): it is not laid again when its section is */
+	void ConsumeCorpse(ARDMonster* Corpse);
+	/** a dead monster rises on her side for Seconds (0: until it falls) with HealthShare of its hit points */
+	bool RaiseAlly(ARDMonster* Corpse, float Seconds, float HealthShare);
+	/** a monster of the named kind on her side, near her (the Knight spell; one at a time: casting again heals it) */
+	ARDMonster* SummonAlly(FName Kind, FVector At, float Strength);
 
 	// ---- random_dungeonmagic_level5: crafting at anvils. The furniture's anvils (AnvilPiece: a forge's, an armory's, and
 	// one more in every section that has none when bAnvilEverySection is on); F (X) at one opens her crafting panel
@@ -219,9 +277,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Crafting") TArray<FVector> GetAllAnvils() const;
 
 	// ---- random_dungeonmagic_level5: tiers of rooms. A section's tier is its ring round the start section plus one (the
-	// start section 1, the 8 round it 2, the 16 round those 3...). Tier 2 is generated as she walks toward it; tier T > 2
-	// only once every section of tier T - 1 is cleared (every room explored, every chest and trunk looted, every monster
-	// spawned there killed). Nothing beyond MaxTier is generated. A hallway that leads to a section not to be generated is
+	// start section 1, the 8 round it 2, the 16 round those 3...). A tier T > 1 is generated only once every section of
+	// tier T - 1 is cleared (every room explored, every chest and trunk looted, every monster spawned there killed): tier 2
+	// once the start section is. Nothing beyond MaxTier is generated. A hallway that leads to a section not to be generated is
 	// sealed where it leaves its section: a grating (SealPiece, twice across the hallway) while the tier is shut, a wall
 	// (EndPiece) at the end of the dungeon, both with a blocker as tall as the hallway.
 	/** the last tier (0: no tiers, the dungeon goes on for ever) */
@@ -231,7 +289,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierOf(FIntPoint Section) const { return FMath::Max(FMath::Abs(Section.X), FMath::Abs(Section.Y)) + 1; }
 	/** sections in a tier: 1, 8, 16, 24... */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierSize(int32 Tier) const { return Tier <= 1 ? 1 : 8 * (Tier - 1); }
-	/** its sections may be generated (tiers 1 and 2 always; another once the tier before it is cleared; none past MaxTier) */
+	/** its sections may be generated (tier 1 always; another once the tier before it is cleared; none past MaxTier) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool IsTierOpen(int32 Tier) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool IsSectionAllowed(FIntPoint Section) const;
 	/** sections of a tier cleared */
@@ -251,6 +309,8 @@ public:
 	/** a section was generated (or activated): its rooms, chests and trunks, monsters are recorded the first time */
 	void RecordSection(ARDSection* S);
 	bool IsMonsterKilled(FIntPoint Section, int32 SpawnIndex) const;
+	/** where a monster she killed lies (none: no corpse kept, or it is gone for good) */
+	const FTransform* CorpseOf(FIntPoint S, int32 I) const { const FRDSectionProgress* P = Progress.Find(S); return P && !P->Consumed.Contains(I) ? P->Corpses.Find(I) : nullptr; }
 	/** counts what she did in a section again, and announces a set cleared or a tier opened */
 	void UpdateProgress(FIntPoint Section);
 	/** "SET CLEARED" / "TIER 3 IS OPEN" (HUD) and when */
@@ -279,8 +339,9 @@ public:
 	/** hit points / damage of the average monster of a section */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetMonsterHealth(FIntPoint Section) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetMonsterDamage(FIntPoint Section) const;
-	/** weighted means of the monster kinds' factors (a monster's values are divided by them) */
-	void MeanMonsterFactors(float& Health, float& Damage) const;
+	/** weighted means of the monster kinds' factors (a monster's values are divided by them; with tiers, of the kinds of
+	 *  that section's tier) */
+	void MeanMonsterFactors(float& Health, float& Damage, FIntPoint Section = FIntPoint(0, 0)) const;
 	void OnMonsterKilled(ARDMonster* Monster);
 	/** a number that floats up where a blow landed (HUD) */
 	struct FHitText { FVector At; float Amount; float Time; bool bOnPlayer; };
@@ -356,6 +417,43 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") FString DescribeListener() const;
 	/** tests: how loud the game is while its window does not have the focus (the engine's default is silent) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sound") static void SetUnfocusedVolume(float Multiplier);
+
+	// ---- random_dungeonmagic_level5: the player's volumes (the Escape menu's sliders), kept in the game's user settings:
+	// overall, action (her, the monsters, the fighting, the spells), environment (fires, doors, containers, the dungeon's
+	// own sounds and the atmosphere layers), music. 0..1 each; a sound plays at overall x its category.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") float GetUserVolume(int32 Category) const { return UserVolumes[FMath::Clamp(Category, 0, 3)]; }
+	/** sets one (0 overall, 1 action, 2 environment, 3 music), applies it to what is playing and saves it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void SetUserVolume(int32 Category, float Value);
+	/** the category a sound occasion belongs to (1 action, 2 environment, 3 music) */
+	static int32 SoundCategory(FName Key);
+	/** overall x the category of an occasion */
+	float UserVolumeOf(FName Key) const { return UserVolumes[0] * UserVolumes[SoundCategory(Key)]; }
+
+	// ---- random_dungeonmagic_level5: the Escape menu (Escape opens and closes it; it pauses the game). Its lines: the four
+	// volumes, then RESUME, CHOOSE ANOTHER HERO (the menu level), QUIT (ends play in the editor, quits the game).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Menu") bool bEscapeMenu = false;
+	/** the open menu pauses the game (off for a reel: the Movie Render Queue renders a world that goes on) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Menu") bool bMenuPausesGame = true;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void SetMenuOpen(bool bOpen);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") bool IsMenuOpen() const { return bMenuOpen; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") int32 GetMenuCursor() const { return MenuCursor; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void MoveMenuCursor(int32 Step);
+	/** a slider under the cursor one step (Step: -1 / 1) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void StepMenuValue(int32 Step);
+	/** the line under the cursor (or Line): a button is pressed; false on a slider */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") bool ActivateMenuLine(int32 Line = -1);
+	/** the menu's lines: "volume|<label>|<value>" and "button|<label>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") TArray<FString> GetMenuLines() const;
+	static constexpr int32 MenuLineCount = 7;
+	/** the HUD's last drawing of the menu: each line's box on the screen and a slider's track (the mouse reads them) */
+	TArray<FBox2D> MenuRowBoxes, MenuTrackBoxes;
+	/** what the last button did ("quit", "hero", "resume"; tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Menu") FString LastMenuAction;
+	/** a test does not leave or quit: the button only says what it would do */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Menu") bool bMenuDryRun = false;
+	/** the editor's own key for stopping play (Escape) is moved to Shift+Escape, so that Escape reaches the game in
+	 *  play-in-editor (pipeline/unreal/858; it is saved in the project's editor key bindings) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") static FString MoveEditorStopKey(bool bShift);
 
 	// ---- generation indicator (same materials as random_level: M_RT_RevealPP / M_RT_RevealCurtain)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Reveal") bool bRevealEffect = true;
@@ -448,6 +546,15 @@ private:
 	bool bHasSafeSpot = false;
 	UPROPERTY(Transient) TMap<int32, TObjectPtr<USoundAttenuation>> Attenuations;
 	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> FireComps;
+	float UserVolumes[4] = { 1.f, 1.f, 1.f, 1.f };
+	bool bMenuOpen = false;
+	int32 MenuCursor = 0;
+	float MenuRepeat = 0.f;
+	bool bMenuDragging = false;
+	void LoadUserVolumes();
+	void ApplyUserVolumes();
+	void TickMenu(APlayerController* PC);
+	void TickAllies(float Dt);
 	/** wandering music, battle music, wandering atmosphere, battle atmosphere */
 	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> MusicComps;
 	float MusicPos[4] = { 0.f, 0.f, 0.f, 0.f };
