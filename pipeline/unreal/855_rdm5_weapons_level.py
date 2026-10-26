@@ -1,7 +1,8 @@
 """random_dungeonmagic_level5's weapons table (SourceArt/random_dungeon_magic5/weapons_table.json) and its five tiers of
 rooms, on the level. Run after 854 (the meshes and their frames: weapon_frames.json) and after the clips were built by
 blender_numpy/tripo_build.py with weapon5_clips.py as its clip maker into SourceArt/random_dungeon_magic5/w5_clips/<CH>
-(Fem5 and DarkCaster: W5_TwoHand1-3, W5_Bow, W5_Shoot; Rogue: W5_Bow).
+(DarkCaster: W5_TwoHand1-3, W5_Bow, W5_Shoot; Rogue: W5_Bow; the Warrior is Warrior3 since 2026-10-26, her clips built
+with warrior3_clips.py: W5_Bow, W5_Shoot, her own Slash and slash.json).
 - the clips imported onto each hero's skeleton: /Game/RandomDungeon/Magic5/Anims/<CH>/AS_<CH>_W5_<clip>; a cut's blow
   lands where her right hand moves fastest after the wind-up (as 822 measures), the arrow and the bolt leave at the
   release weapon5_clips.py wrote (w5_times.json)
@@ -12,9 +13,13 @@ blender_numpy/tripo_build.py with weapon5_clips.py as its clip maker into Source
       blade in both hands), the new blade held where hers is: the grip maps the weapon's frame (854: where the hand
       closes, the blade's way, its edge) onto her weapon's frame in her hand. A one-edged blade's edge is turned the
       way her knuckles lead (her middle finger's way in her reference pose)
-    two handed sword: wielded as her one-handed sword (the user's choice for this level): her own sword's clips, flinch
-      and death, the blade held where her sword is (as the one-handed blades), and nothing in her other hand (the
-      Warrior's shield left off). The W5_TwoHand cuts are still imported but no weapon uses them
+    two handed sword: the Warrior (Warrior3) swings it with her own slash (Tripo's clip in Warrior3.glb, the user's
+      choice): its swing (slash.json's 'swing': from the wind-up's start to standing again), the blow where her right
+      hand is fastest, the sword in her right hand with its grip point where the clip's left palm comes along the hilt
+      (slash.json's left_on: she holds it above the right; the left hand is left where the clip puts it), nothing in the
+      other hand. The Warlock wields it as her one-handed sword (the user's choice for this level): her own sword's
+      clips, flinch and death, the blade held where her sword is, nothing in her other hand. The W5_TwoHand cuts are
+      imported for her but no weapon uses them
     bows: the W5_Bow shot, in her left hand (the limbs her thumb's way leaning 15 degrees, the arrow's way her forearm's);
       an arrow (the crossbow's bolt mesh, 0.75 long) shot from the bow's grip straight at the monster she faces
     crossbows: the crossbow shot (the Rogue's own; the others W5_Shoot), held as 822 holds the Rogue's (the front her
@@ -33,7 +38,7 @@ MAP = "/Game/RandomDungeon/Maps/random_dungeonmagic_level5"
 ANIMS = "/Game/RandomDungeon/Magic5/Anims"
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools(); APE = unreal.AnimPoseExtensions; ML = unreal.MathLibrary
 V = unreal.Vector
-CH = {"Warrior": "Fem5", "Warlock": "DarkCaster", "Rogue": "Rogue"}
+CH = {"Warrior": "Warrior3", "Warlock": "DarkCaster", "Rogue": "Rogue"}
 WHO = T["rules"]["who"]
 ONE_HAND = ("short sword", "one handed sword", "curved and eastern sword", "short blades")
 REACH = {"short blades": (150.0, 110.0), "short sword": (165.0, 120.0), "one handed sword": (175.0, 130.0), "curved and eastern sword": (180.0, 135.0),
@@ -111,11 +116,12 @@ def hand_bits(ch, s):
     return hand, h + fore * 6.5 + V(0, 0, -2.5), fore, th, along
 def slant(th, fore, deg):
     g = math.radians(deg); return (th * math.cos(g) + fore * math.sin(g)).normal()
-def hand_frame(ch, s, kind):
-    """where a weapon's frame goes in her hand (hand-bone space), as weapon5_clips.py / 822 hold it"""
+def hand_frame(ch, s, kind, out=0.0):
+    """where a weapon's frame goes in her hand (hand-bone space), as weapon5_clips.py / 822 hold it; `out` cm further
+    along the weapon's x (Warrior3's slash: the grip point under the left palm, above the right)"""
     hand, palm, fore, th, along = hand_bits(ch, s)
     if kind == "twohand":
-        x = slant(th, fore, 25.0); y = along - x * along.dot(x)
+        x = slant(th, fore, 25.0); y = along - x * along.dot(x); palm = palm + x.normal() * out
     elif kind == "bow":
         x = slant(th, fore, 15.0); y = fore - x * fore.dot(x)
     else:                                  # crossbow: the front its x, the rail its z (up), so y = z cross x
@@ -171,13 +177,19 @@ for hero, ch in CH.items():
     print("W5LEVEL clips", hero, sorted(clips[hero]))
 tmpl = {"Warrior": heroes["Warrior"].weapons[0], "Warlock": heroes["Warlock"].weapons[0], "Rogue": heroes["Rogue"].weapons[0], "RogueXbow": heroes["Rogue"].weapons[1]}
 twohand = {}
-for hero in ("Warrior", "Warlock"):
+for hero in [h_ for h_ in ("Warrior", "Warlock") if "TwoHand" in times[h_] and "W5_TwoHand1" in clips[h_]]:
     tw = times[hero]["TwoHand"]; at_ = []
     for name in ("W5_TwoHand1", "W5_TwoHand2", "W5_TwoHand3"):
         a = clips[hero][name]; L, hit = fastest(a, "hand_r", tw[name]["wind"])
         at_.append((a, hit, min(L, hit + 0.45)))
     twohand[hero] = at_
     print("W5LEVEL", hero, "two-handed cuts land at", [round(x[1], 2) for x in at_], "of", [round(unreal.AnimationLibrary.get_sequence_length(x[0]), 2) for x in at_])
+# (Warrior3's slash: her own clip, imported by 600 with her character)
+SL = json.load(open(os.path.join(SA, "w5_clips", "Warrior3", "slash.json")))
+slash = unreal.load_asset("/Game/JRPG/Warrior3Anims/AS_Warrior3_Slash"); assert slash, "600 Warrior3 first"
+slash.set_editor_property("enable_root_motion", False); slash.set_editor_property("force_root_lock", True); eal.save_loaded_asset(slash, False)
+print("W5LEVEL Warrior two-handed: Warrior3's slash, its swing %.2f..%.2f s of %.2f, the blow at %.2f s, the left palm %.1f cm above the right"
+      % (SL["swing"][0], SL["swing"][1], unreal.AnimationLibrary.get_sequence_length(slash), SL["blow"], SL["left_on"]))
 bow_bolt = ML.compose_transforms(unreal.Transform(V(0, 0, 0), ML.make_rot_from_zx(V(1, 0, 0), V(0, 0, -1)), V(BOW["thick"], BOW["thick"], BOW["len_scale"])),
                                  unreal.Transform(V(-48.28 * BOW["len_scale"], 0, 0), unreal.Rotator(0, 0, 0), V(1, 1, 1)))
 items = [it for it in gen.get_editor_property("items") if it.kind != unreal.RDItemKind.WEAPON]
@@ -200,9 +212,14 @@ for w in T["weapons"]:
                 sound = SOUND.get(typ, "Sword")
             wd.reach, wd.arc = REACH[typ]
         elif typ == "two handed sword":
-            # (as her one-handed sword, without the shield: the user's choice for this level)
             wd = copy_def(tmpl[hero]); wd.mesh = mesh; wd.off_hand_mesh = None
-            wd.grip = mapped("template_sword", tmpl[hero].grip, k, ch, "r")
+            if hero == "Warrior":
+                # (Warrior3's own slash: the user's choice)
+                wd.grip = grip_from(hand_frame(ch, "r", "twohand", SL["left_on"]), k)
+                wd.attacks = [slash]; wd.attack_starts = [float(SL["swing"][0])]; wd.attack_ends = [float(SL["swing"][1])]; wd.hit_times = [float(SL["blow"])]
+            else:
+                # (as her one-handed sword, without the shield: the user's choice for this level)
+                wd.grip = mapped("template_sword", tmpl[hero].grip, k, ch, "r")
             wd.reach, wd.arc = REACH[typ]; sound = SOUND[typ]
         elif fr["kind"] == "bow":
             wd = copy_def(tmpl["RogueXbow"]); wd.mesh = mesh; wd.hand_bone = "hand_l"; wd.off_hand_mesh = None

@@ -1,0 +1,15 @@
+{
+ "blow": 2.042,
+ "blow_speed_cm_s": 510,
+ "left_on": 20.8,
+ "left_off": {
+  "median": 7.7,
+  "most": 11.3,
+  "frames": 78
+ },
+ "swing": [
+  0.792,
+  3.792
+ ],
+ "length": 6.583
+}

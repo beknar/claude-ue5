@@ -6,12 +6,13 @@ The characters this project uses in its current and future scenes, made with [Tr
 |---|---|---|---|
 | `Warrior.glb` | `jrpg-fem5-tripo.glb` | JRPG heroine (sword, shield, spear, axe) | random_level, random_dungeon_level, random_isometric_village_level, random_dungeoncombat_level, the Tripo trio and quartet showcases |
 | `Warrior2.glb` | (none) | The Warrior's mesh, weights and texture with Tripo's clips: `chop`, `slash` (the same motion) and a horizontal two-handed sweep | random_dungeonmagic_level5's chop test only (character `Warrior2`, script `861`); the heroes do not use it |
+| `Warrior3.glb` | (none) | The Warrior of random_dungeonmagic_level5 since 2026-10-26: a new Tripo model (her own proportions) with Tripo's clips: idle, walk, run, slash, five hit reactions, two boxing moves, a kick, a clap, a dance, a wave | random_dungeonmagic_level5 (character `Warrior3`, script `862`: the hero "Warrior"; her slash for two-handed swords) and its reels |
 | `Mage.glb` | `girl-caster-tripo.glb` | Fire caster | random_dungeonmagic_level, the Tripo trio and quartet showcases |
 | `Warlock.glb` | `girl-darkcaster-tripo.glb` | Dark caster (spell in the left hand, sword in the right) | random_dungeonmagic_level2, the Tripo trio and quartet showcases |
 | `Rogue.glb` | (none) | Hooded rogue (two daggers, a crossbow) | random_dungeonmagic_level3 (tag `Rogue`), the Tripo quartet showcase |
 | `Summoner.glb` | (none) | Twin-tailed summoner (the Mage's spells; a face that shows expressions) | the first random_dungeonmagic_level5 (character `Summoner`, scripts `832`-`841`) and its face reels |
 | `Summoner2.glb` | (none) | Realistic summoner (made from two AI-generated pictures), fitted with a whole MetaHuman | the Summoner2 version of random_dungeonmagic_level5 (scripts `842`-`848`; set aside) |
-| `Summoner3.glb` | (none) | Summoner (the Mage's spells; wears the armour she finds) | random_dungeonmagic_level5 (character `Summoner3`, the fifth hero) and its armour showcase |
+| `Summoner3.glb` | (none) | Summoner (the Mage's spells; wears the armour she finds) | random_dungeonmagic_level5 (character `Summoner3`, the fifth hero; off the hero menu since 2026-10-26) and its armour showcase |
 
 ## Renamed models
 

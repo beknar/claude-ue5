@@ -13,8 +13,9 @@ she looks through the five heroes with D from the Warrior to the Summoner and pr
 SourceArt/random_dungeon_magic5/cine_menu.json. Level 5 with "Warrior" (the weapons and tiers reel): she looks through all
 five and round to the Warrior again, START on her (cine_menu_warrior.json). Level 5 with "quartet" (the four heroes'
 weapons reel, 815's run5h): level 4's four passages on level 5's menu, START on the Warrior, the Mage, the Warlock and the
-Rogue in turn, the Summoner never picked (cine_menu_quartet.json).
-Args: [seconds a passage, 7] [level: 4 or 5] [level 5: the hero picked, Summoner or Warrior, or quartet]"""
+Rogue in turn, the Summoner never picked (cine_menu_quartet.json). Level 5 with "caps" (the four heroes' capabilities
+reel, 815's run5x; the menu's four heroes since 2026-10-26): level 4's four passages as they are (cine_menu_caps.json).
+Args: [seconds a passage, 7] [level: 4 or 5] [level 5: the hero picked, Summoner or Warrior, or quartet, or caps]"""
 import unreal, sys, json, os
 __keep__ = True
 PASSAGE = float(sys.argv[1]) if len(sys.argv) > 1 else 7.0
@@ -28,7 +29,11 @@ PLAN = [[(1.1, "D"), (2.2, "D"), (3.4, "A"), (4.5, "A"), (5.7, "Enter")],
         [(1.6, "D"), (4.8, "Enter")]]
 WANT = ["Warrior", "Mage", "Warlock", "Rogue"]
 PICK = sys.argv[3] if len(sys.argv) > 3 else "Summoner"
-if LV == "5" and PICK == "quartet":
+if LV == "5" and PICK == "caps":
+    # (the four heroes' capabilities reel, 815's run5x: the menu has four heroes since 2026-10-26 (the Summoner left off,
+    # the Warrior Warrior3): level 4's four passages as they are)
+    OUT = OUT.replace("cine_menu.json", "cine_menu_caps.json")
+elif LV == "5" and PICK == "quartet":
     # (the four heroes' weapons reel: level 4's passages; in the last the Summoner is looked at (D) and left (A))
     PLAN = PLAN[:3] + [[(1.2, "D"), (2.6, "D"), (3.9, "A"), (5.3, "Enter")]]
     OUT = OUT.replace("cine_menu.json", "cine_menu_quartet.json")

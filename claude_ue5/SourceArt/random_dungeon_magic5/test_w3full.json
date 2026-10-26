@@ -1,21 +1,21 @@
 {
- "tag": "full10",
+ "tag": "w3full",
  "plan": [
-  "select",
+  "warrior3",
   "loot",
   "wear",
   "heroarmour",
   "follow",
   "damage",
   "ui",
-  "tiers",
-  "tierloot",
-  "weapons",
   "armourtable",
   "repair",
   "craft",
   "maps",
   "fire",
+  "tiers",
+  "tierloot",
+  "weapons",
   "chance",
   "corpses",
   "monsters",
@@ -25,36 +25,76 @@
   "breakdown",
   "menu"
  ],
- "level": "random_dungeonmagic_level5_select",
+ "level": "random_dungeonmagic_level5",
  "steps": [
   {
-   "step": "select",
+   "step": "warrior3",
    "ok": true,
-   "heroes": [
-    "Warrior",
-    "Mage",
-    "Warlock",
-    "Rogue",
-    "Summoner"
-   ],
-   "first": "Warrior",
-   "picked": "Summoner",
-   "seen": [
-    false,
-    false,
-    false,
-    false,
-    true
-   ],
-   "target": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5",
-   "opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Summoner",
-   "dungeon_hero": "Summoner",
-   "pawn": "BP_RDM5_Summoner3Character_C",
-   "want_pawn": "BP_RDM5_Summoner3Character_C",
-   "health_mana": [
-    85.0,
-    90.0
-   ]
+   "who": {
+    "switched": true,
+    "pawn": "BP_RDM5_Warrior3Character_C",
+    "mesh": "SK_JRPG_Warrior3",
+    "health": 140.0,
+    "weapons": [
+     "Sword"
+    ]
+   },
+   "container": {
+    "container": 232,
+    "found": 2,
+    "list": [
+     "Templar’s Armour",
+     "Orc Warrior’s Armour"
+    ],
+    "found_list": [
+     "Templar’s Armour",
+     "Orc Warrior’s Armour"
+    ],
+    "weapons_joined": 0,
+    "weapons_in_list": 0
+   },
+   "craft": {
+    "open": true,
+    "strips_made": 1,
+    "message": "You make leather strips at the anvil",
+    "broke_down": true,
+    "breakdown_message": "You break down the plate knight's sword:  2 steel ingot, 3 iron ingot, 2 cured leather strip",
+    "closed": true
+   },
+   "armour": {
+    "set": "Plate Armour",
+    "worn": true,
+    "meshes": [
+     "SK_Warrior3_PlateArmour"
+    ],
+    "follows_her": true
+   },
+   "sword": {
+    "hits": 2,
+    "killed": true,
+    "attacks": [
+     "Anim_Weapon_Shield_Attack_01_Warrior3",
+     "Anim_Weapon_Shield_Attack_03_Warrior3",
+     "Anim_Weapon_Shield_Attack_08_Warrior3"
+    ]
+   },
+   "slash": {
+    "hits": 1,
+    "attacks": [
+     "AS_Warrior3_Slash"
+    ]
+   },
+   "flinch": {
+    "blows_taken": 1,
+    "montage_after_blow": true,
+    "get_hit": "Anim_Weapon_Shield_Get_Hit_Warrior3"
+   },
+   "map": {
+    "tiers": [
+     "Barracks|1",
+     "Great hall|1"
+    ]
+   }
   },
   {
    "step": "loot",
@@ -72,13 +112,21 @@
      "Orc Warrior’s Armour"
     ],
     "233": [
-     "Eastern Knight’s Armour"
+     "Eastern Knight’s Armour",
+     "Medium Healing Potion",
+     "Small Healing Potion",
+     "Copper Ingot",
+     "Medium Speed Potion",
+     "Bread"
     ],
     "234": [
      "Desert Hero’s Armour"
     ],
     "235": [
-     "Tiefling’s Armour"
+     "Tiefling’s Armour",
+     "Leather Strips",
+     "Copper Ingot",
+     "Dexterity Ring 2"
     ]
    },
    "armour_elsewhere": [],
@@ -93,15 +141,15 @@
    ],
    "more": 6000,
    "counts": {
-    "0": 4011,
-    "1": 378,
-    "2": 312,
-    "3": 309,
-    "4": 311,
-    "5": 340,
-    "6": 339
+    "0": 3993,
+    "1": 356,
+    "2": 319,
+    "3": 338,
+    "4": 291,
+    "5": 350,
+    "6": 353
    },
-   "worst_sd": 2.8,
+   "worst_sd": 2.61,
    "armour_in_more": 0,
    "by_f": {
     "container": 232,
@@ -124,7 +172,7 @@
    "items_kinds": 52,
    "carried_matches": true,
    "opened_again_gave": 0,
-   "generated_containers": 979,
+   "generated_containers": 865,
    "generated_armour": 0
   },
   {
@@ -543,7 +591,7 @@
        "worn": "Plate Armour",
        "message": "You put on the plate armour:  blows take 40% less,  you move 21% slower",
        "meshes": [
-        "SK_Fem5_PlateArmour"
+        "SK_Warrior3_PlateArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -555,7 +603,7 @@
        "worn": "Lady Knight’s Armour",
        "message": "You put on the lady knight’s armour:  blows take 40% less,  you move 21% slower",
        "meshes": [
-        "SK_Fem5_LadyKnightArmour"
+        "SK_Warrior3_LadyKnightArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -567,7 +615,7 @@
        "worn": "Paladin’s Armour",
        "message": "You put on the paladin’s armour:  blows take 40% less,  you move 21% slower",
        "meshes": [
-        "SK_Fem5_PaladinArmour"
+        "SK_Warrior3_PaladinArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -579,7 +627,7 @@
        "worn": "Dark Knight’s Armour",
        "message": "You put on the dark knight’s armour:  blows take 45% less,  you move 24% slower",
        "meshes": [
-        "SK_Fem5_DarkKnightArmour"
+        "SK_Warrior3_DarkKnightArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -591,7 +639,7 @@
        "worn": "Broddi’s Dwarf Armour",
        "message": "You put on the broddi’s dwarf armour:  blows take 45% less,  you move 24% slower",
        "meshes": [
-        "SK_Fem5_BroddiArmour"
+        "SK_Warrior3_BroddiArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -603,7 +651,7 @@
        "worn": "Epic Plate (Male)",
        "message": "You put on the epic plate (male):  blows take 50% less,  you move 27% slower",
        "meshes": [
-        "SK_Fem5_EpicPlateMale"
+        "SK_Warrior3_EpicPlateMale"
        ],
        "follows_her": true,
        "ok": true
@@ -615,7 +663,7 @@
        "worn": "Epic Plate (Female)",
        "message": "You put on the epic plate (female):  blows take 50% less,  you move 27% slower",
        "meshes": [
-        "SK_Fem5_EpicPlateFemale"
+        "SK_Warrior3_EpicPlateFemale"
        ],
        "follows_her": true,
        "ok": true
@@ -627,7 +675,7 @@
        "worn": "Bear Warrior’s Armour",
        "message": "You put on the bear warrior’s armour:  blows take 35% less,  you move 12% slower",
        "meshes": [
-        "SK_Fem5_BearArmour"
+        "SK_Warrior3_BearArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -639,7 +687,7 @@
        "worn": "Elephant Warrior’s Armour",
        "message": "You put on the elephant warrior’s armour:  blows take 35% less,  you move 9% slower",
        "meshes": [
-        "SK_Fem5_ElephantArmour"
+        "SK_Warrior3_ElephantArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -651,7 +699,7 @@
        "worn": "Crocodile Warrior’s Armour",
        "message": "You put on the crocodile warrior’s armour:  blows take 30% less,  you move 15% slower",
        "meshes": [
-        "SK_Fem5_CrocodileArmour"
+        "SK_Warrior3_CrocodileArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -663,7 +711,7 @@
        "worn": "Split Armour",
        "message": "You put on the split armour:  blows take 25% less,  you move 12% slower",
        "meshes": [
-        "SK_Fem5_SplitArmour"
+        "SK_Warrior3_SplitArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -675,7 +723,7 @@
        "worn": "Desert Hero’s Armour",
        "message": "You put on the desert hero’s armour:  blows take 20% less,  you move 12% slower",
        "meshes": [
-        "SK_Fem5_DesertHeroArmour"
+        "SK_Warrior3_DesertHeroArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -687,7 +735,7 @@
        "worn": "Tiefling’s Armour",
        "message": "You put on the tiefling’s armour:  blows take 15% less,  you move 9% slower",
        "meshes": [
-        "SK_Fem5_TieflingArmour"
+        "SK_Warrior3_TieflingArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -699,7 +747,7 @@
        "worn": "Orme’s Armour",
        "message": "You put on the orme’s armour:  blows take 10% less,  you move 6% slower",
        "meshes": [
-        "SK_Fem5_OrmeArmour"
+        "SK_Warrior3_OrmeArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -711,7 +759,7 @@
        "worn": "Templar’s Armour",
        "message": "You put on the templar’s armour:  blows take 20% less,  you move 12% slower",
        "meshes": [
-        "SK_Fem5_TemplarArmour"
+        "SK_Warrior3_TemplarArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -723,7 +771,7 @@
        "worn": "Eastern Knight’s Armour",
        "message": "You put on the eastern knight’s armour:  blows take 20% less,  you move 12% slower",
        "meshes": [
-        "SK_Fem5_EasternKnightArmour"
+        "SK_Warrior3_EasternKnightArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -735,7 +783,7 @@
        "worn": "Demonic Armour",
        "message": "You put on the demonic armour:  blows take 25% less,  you move 15% slower",
        "meshes": [
-        "SK_Fem5_DemonicArmour"
+        "SK_Warrior3_DemonicArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -747,7 +795,7 @@
        "worn": "Bedvar’s Armour",
        "message": "You put on the bedvar’s armour:  blows take 25% less,  you move 15% slower",
        "meshes": [
-        "SK_Fem5_BedvarArmour"
+        "SK_Warrior3_BedvarArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -759,7 +807,7 @@
        "worn": "Executioner’s Armour",
        "message": "You put on the executioner’s armour:  blows take 30% less,  you move 18% slower",
        "meshes": [
-        "SK_Fem5_ExecutionerArmour"
+        "SK_Warrior3_ExecutionerArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -771,7 +819,7 @@
        "worn": "Orc Warrior’s Armour",
        "message": "You put on the orc warrior’s armour:  blows take 5% less",
        "meshes": [
-        "SK_Fem5_OrcWarriorArmour"
+        "SK_Warrior3_OrcWarriorArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -783,7 +831,7 @@
        "worn": "Orc Veteran’s Armour",
        "message": "You put on the orc veteran’s armour:  blows take 10% less,  you move 3% slower",
        "meshes": [
-        "SK_Fem5_OrcArmour"
+        "SK_Warrior3_OrcArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -795,7 +843,7 @@
        "worn": "Orc Skirmisher’s Armour",
        "message": "You put on the orc skirmisher’s armour:  blows take 15% less,  you move 6% slower",
        "meshes": [
-        "SK_Fem5_OrcSkirmisherArmour"
+        "SK_Warrior3_OrcSkirmisherArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -807,7 +855,7 @@
        "worn": "Orc Bruiser’s Armour",
        "message": "You put on the orc bruiser’s armour:  blows take 20% less,  you move 9% slower",
        "meshes": [
-        "SK_Fem5_OrcBruiserArmour"
+        "SK_Warrior3_OrcBruiserArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -819,7 +867,7 @@
        "worn": "Orc Raider’s Armour",
        "message": "You put on the orc raider’s armour:  blows take 25% less,  you move 12% slower",
        "meshes": [
-        "SK_Fem5_OrcRaiderArmour"
+        "SK_Warrior3_OrcRaiderArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -831,7 +879,7 @@
        "worn": "Gnur’s Armour",
        "message": "You put on the gnur’s armour:  blows take 30% less,  you move 15% slower",
        "meshes": [
-        "SK_Fem5_GnurArmour"
+        "SK_Warrior3_GnurArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -843,7 +891,7 @@
        "worn": "Dardan’s Armour",
        "message": "You put on the dardan’s armour:  blows take 35% less,  you move 18% slower",
        "meshes": [
-        "SK_Fem5_DardanArmour"
+        "SK_Warrior3_DardanArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -855,7 +903,7 @@
        "worn": "Costalmed’s Armour",
        "message": "You put on the costalmed’s armour:  blows take 40% less,  you move 21% slower",
        "meshes": [
-        "SK_Fem5_CostalmedArmour"
+        "SK_Warrior3_CostalmedArmour"
        ],
        "follows_her": true,
        "ok": true
@@ -863,9 +911,9 @@
      ],
      "follow": {
       "set": "Plate Armour",
-      "bone_max": 0.342,
-      "skin_median": 0.06,
-      "bone_n": 226
+      "bone_max": 0.355,
+      "skin_median": 0.1,
+      "bone_n": 232
      },
      "ok": true
     },
@@ -1461,9 +1509,9 @@
      ],
      "follow": {
       "set": "Crocodile Warrior’s Armour",
-      "bone_max": 0.329,
-      "skin_median": 0.24,
-      "bone_n": 162
+      "bone_max": 0.212,
+      "skin_median": 0.23,
+      "bone_n": 161
      },
      "ok": true
     },
@@ -1786,81 +1834,81 @@
      "when": "running 0",
      "n": 603,
      "skin_median": 0.08,
-     "skin_p95": 5.47,
+     "skin_p95": 5.84,
      "bone_n": 223,
-     "bone_p95": 0.067,
-     "bone_max": 0.183,
-     "bone_p95_left_in_rest_pose": 53.35
+     "bone_p95": 0.066,
+     "bone_max": 0.179,
+     "bone_p95_left_in_rest_pose": 51.37
     },
     {
      "when": "running 1",
      "n": 603,
      "skin_median": 0.1,
-     "skin_p95": 13.7,
+     "skin_p95": 12.49,
      "bone_n": 223,
      "bone_p95": 0.166,
-     "bone_max": 0.338,
-     "bone_p95_left_in_rest_pose": 90.6
+     "bone_max": 0.347,
+     "bone_p95_left_in_rest_pose": 90.63
     },
     {
      "when": "running 2",
      "n": 603,
-     "skin_median": 0.08,
-     "skin_p95": 32.09,
+     "skin_median": 0.09,
+     "skin_p95": 31.8,
      "bone_n": 223,
-     "bone_p95": 0.137,
-     "bone_max": 0.309,
-     "bone_p95_left_in_rest_pose": 88.99
+     "bone_p95": 0.162,
+     "bone_max": 0.306,
+     "bone_p95_left_in_rest_pose": 88.87
     },
     {
      "when": "running 3",
      "n": 603,
-     "skin_median": 0.1,
-     "skin_p95": 13.33,
+     "skin_median": 0.09,
+     "skin_p95": 15.31,
      "bone_n": 223,
-     "bone_p95": 0.103,
-     "bone_max": 0.33,
-     "bone_p95_left_in_rest_pose": 89.5
+     "bone_p95": 0.096,
+     "bone_max": 0.323,
+     "bone_p95_left_in_rest_pose": 89.53
     },
     {
      "when": "running 4",
      "n": 603,
-     "skin_median": 0.09,
-     "skin_p95": 17.58,
+     "skin_median": 0.1,
+     "skin_p95": 14.17,
      "bone_n": 223,
-     "bone_p95": 0.167,
-     "bone_max": 0.316,
-     "bone_p95_left_in_rest_pose": 88.49
+     "bone_p95": 0.164,
+     "bone_max": 0.343,
+     "bone_p95_left_in_rest_pose": 88.81
     },
     {
      "when": "running 5",
      "n": 603,
-     "skin_median": 0.08,
-     "skin_p95": 32.39,
+     "skin_median": 0.09,
+     "skin_p95": 33.2,
      "bone_n": 223,
-     "bone_p95": 0.133,
-     "bone_max": 0.321,
-     "bone_p95_left_in_rest_pose": 89.44
+     "bone_p95": 0.157,
+     "bone_max": 0.319,
+     "bone_p95_left_in_rest_pose": 89.41
     },
     {
      "when": "casting 0",
      "n": 603,
      "skin_median": 0.06,
-     "skin_p95": 10.31,
+     "skin_p95": 10.29,
      "bone_n": 223,
-     "bone_p95": 0.066,
-     "bone_max": 0.123,
-     "bone_p95_left_in_rest_pose": 15.12
+     "bone_p95": 0.067,
+     "bone_max": 0.125,
+     "bone_p95_left_in_rest_pose": 12.92
     },
     {
      "when": "casting 1",
      "n": 603,
-     "skin_median": 0.07,
-     "skin_p95": 10.15,
+     "skin_median": 0.06,
+     "skin_p95": 10.16,
      "bone_n": 223,
-     "bone_p95": 0.082,
-     "bone_max": 0.14,
-     "bone_p95_left_in_rest_pose": 23.26
+     "bone_p95": 0.081,
+     "bone_max": 0.138,
+     "bone_p95_left_in_rest_pose": 23.12
     },
     {
      "when": "casting 2",
@@ -1870,17 +1918,17 @@
      "bone_n": 223,
      "bone_p95": 0.066,
      "bone_max": 0.123,
-     "bone_p95_left_in_rest_pose": 22.61
+     "bone_p95_left_in_rest_pose": 22.63
     },
     {
      "when": "casting 3",
      "n": 603,
      "skin_median": 0.05,
-     "skin_p95": 10.45,
+     "skin_p95": 10.47,
      "bone_n": 223,
-     "bone_p95": 0.055,
-     "bone_max": 0.113,
-     "bone_p95_left_in_rest_pose": 20.66
+     "bone_p95": 0.053,
+     "bone_max": 0.111,
+     "bone_p95_left_in_rest_pose": 20.06
     }
    ]
   },
@@ -1895,7 +1943,7 @@
      "blow": 12.0,
      "reached_her": 12.0,
      "hp_fell": 12.0,
-     "monster": "RDMonster_112",
+     "monster": "RDMonster_5",
      "wear_fell": 0.0,
      "ok": true
     },
@@ -1906,7 +1954,7 @@
      "blow": 12.0,
      "reached_her": 11.4,
      "hp_fell": 11.4,
-     "monster": "RDMonster_140",
+     "monster": "RDMonster_153",
      "wear_fell": 1.0,
      "ok": true
     },
@@ -1917,7 +1965,7 @@
      "blow": 12.0,
      "reached_her": 9.0,
      "hp_fell": 9.0,
-     "monster": "RDMonster_140",
+     "monster": "RDMonster_153",
      "wear_fell": 1.0,
      "ok": true
     },
@@ -1928,7 +1976,7 @@
      "blow": 12.0,
      "reached_her": 6.0,
      "hp_fell": 6.0,
-     "monster": "RDMonster_112",
+     "monster": "RDMonster_139",
      "wear_fell": 1.0,
      "ok": true
     }
@@ -1989,11 +2037,11 @@
     "rep_whetstone"
    ],
    "not_imported": [],
-   "found_container": 232,
-   "found_items": 2,
-   "found_first": "Templar’s Armour",
+   "found_container": 233,
+   "found_items": 6,
+   "found_first": "Eastern Knight’s Armour",
    "found_drawn": [
-    "armour_TemplarArmour",
+    "armour_EasternKnightArmour",
     "banner",
     "bar_health",
     "bar_mana",
@@ -2025,1462 +2073,30 @@
     "minimap_ring",
     "panel_wide",
     "slot",
+    "spell_ash_ward",
+    "spell_blizzard",
+    "spell_blood_nova",
+    "spell_bone_armor",
+    "spell_bone_spear",
+    "spell_chain_lightning",
+    "spell_corpse_explosion",
+    "spell_curse_of_frailty",
+    "spell_dispel_hex",
+    "spell_fireball",
+    "spell_frost_shard",
+    "spell_iron_skin",
+    "spell_life_drain",
+    "spell_mirror_of_retribution",
+    "spell_plague_cloud",
+    "spell_raise_dead",
+    "spell_rune_of_warding",
+    "spell_shadow_lash",
+    "spell_shadow_veil",
+    "spell_soul_rend",
     "w_dark_fire",
     "w_fire"
    ],
    "not_seen": []
-  },
-  {
-   "step": "tiers",
-   "ok": true,
-   "max_tier": 5,
-   "open_at_start": 1,
-   "tiers_of": [
-    1,
-    2,
-    2,
-    3,
-    4,
-    5,
-    6
-   ],
-   "sizes": [
-    1,
-    8,
-    16,
-    24,
-    32
-   ],
-   "allowed_at_start": [
-    false,
-    false,
-    false,
-    false,
-    false
-   ],
-   "start_seals": {
-    "grating": 12,
-    "wall": 0
-   },
-   "tier2_generated_while_shut": false,
-   "start_cleared": {
-    "notice": "TIER 2 IS OPEN",
-    "open": 2,
-    "tier2_allowed": true,
-    "gratings_left": 0
-   },
-   "set_before": {
-    "tier": 2,
-    "rooms": 42,
-    "explored": 0,
-    "chests": 91,
-    "looted": 0,
-    "monsters": 13,
-    "killed": 0,
-    "cleared": false
-   },
-   "after_rooms": {
-    "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 91,
-    "looted": 0,
-    "monsters": 13,
-    "killed": 0,
-    "cleared": false
-   },
-   "after_chests": {
-    "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 91,
-    "looted": 91,
-    "monsters": 13,
-    "killed": 0,
-    "cleared": false
-   },
-   "after_kills": {
-    "tier": 2,
-    "rooms": 42,
-    "explored": 42,
-    "chests": 91,
-    "looted": 91,
-    "monsters": 13,
-    "killed": 13,
-    "cleared": true
-   },
-   "monsters_killed": 13,
-   "notice": "SET CLEARED  -  TIER 2: 1 / 8",
-   "tier2_cleared": 1,
-   "seals_of_set": {
-    "grating": 3,
-    "wall": 0,
-    "into": [
-     "3"
-    ]
-   },
-   "tier3_generated": false,
-   "seal_prompt": "Sealed: clear every set of rooms of tier 2 to open tier 3  (1 / 8 cleared)",
-   "seal_blocks_a_body": {
-    "hit": true,
-    "at_cm_from_border": -150.0
-   },
-   "walked_past_the_border_cm": -153.6,
-   "regenerated": {
-    "monsters": 0,
-    "corpses": 13,
-    "progress": {
-     "tier": 2,
-     "rooms": 42,
-     "explored": 42,
-     "chests": 91,
-     "looted": 91,
-     "monsters": 13,
-     "killed": 13,
-     "cleared": true
-    }
-   },
-   "after_tier2": {
-    "cleared": 8,
-    "open": 3,
-    "notice": "TIER 3 IS OPEN",
-    "tier3_allowed": true
-   },
-   "seals_of_set_after": 0,
-   "tier3_generated_when_near": true,
-   "after_tier3": {
-    "cleared": 16,
-    "open": 4,
-    "notice": "TIER 4 IS OPEN",
-    "not_cleared": []
-   },
-   "after_tier4": {
-    "cleared": 24,
-    "open": 5,
-    "notice": "TIER 5 IS OPEN",
-    "not_cleared": []
-   },
-   "tier5_section": {
-    "walls": 3,
-    "gratings": 0,
-    "walls_lead_to_tier": [
-     6
-    ],
-    "tier6_allowed": false,
-    "seal_kind_east": 2
-   }
-  },
-  {
-   "step": "tierloot",
-   "ok": true,
-   "tier1": {
-    "items": 3090,
-    "weapons": [
-     "Arming Sword",
-     "Dagger",
-     "Eastern Sabre",
-     "Leaf-Blade Knife",
-     "Longbow",
-     "Longsword",
-     "Plate Knight's Sword",
-     "Sherwood Sword",
-     "Viking Shortsword",
-     "Viking Sword"
-    ],
-    "want": [
-     "Arming Sword",
-     "Dagger",
-     "Eastern Sabre",
-     "Leaf-Blade Knife",
-     "Longbow",
-     "Longsword",
-     "Plate Knight's Sword",
-     "Sherwood Sword",
-     "Viking Shortsword",
-     "Viking Sword"
-    ],
-    "wrong_tier": [],
-    "weapon_share": 0.1913,
-    "expected": 0.1844,
-    "sd_off": 0.99,
-    "armour": [
-     "Desert Hero’s Armour",
-     "Eastern Knight’s Armour",
-     "Orc Skirmisher’s Armour",
-     "Orc Veteran’s Armour",
-     "Orc Warrior’s Armour",
-     "Orme’s Armour",
-     "Templar’s Armour",
-     "Tiefling’s Armour"
-    ],
-    "armour_want": [
-     "Desert Hero’s Armour",
-     "Eastern Knight’s Armour",
-     "Orc Skirmisher’s Armour",
-     "Orc Veteran’s Armour",
-     "Orc Warrior’s Armour",
-     "Orme’s Armour",
-     "Templar’s Armour",
-     "Tiefling’s Armour"
-    ],
-    "armour_share": 0.0939,
-    "armour_expected": 0.0894,
-    "armour_sd_off": 0.87,
-    "everywhere_missing": [],
-    "ok": true
-   },
-   "tier2": {
-    "items": 2914,
-    "weapons": [
-     "Bone Blade",
-     "Katana",
-     "Obsidian Knife",
-     "Orc Cleaver",
-     "Paladin's Sword",
-     "Templar Sword",
-     "Toothed Bone Sword",
-     "Veteran's Sword",
-     "Viking Bow"
-    ],
-    "want": [
-     "Bone Blade",
-     "Katana",
-     "Obsidian Knife",
-     "Orc Cleaver",
-     "Paladin's Sword",
-     "Templar Sword",
-     "Toothed Bone Sword",
-     "Veteran's Sword",
-     "Viking Bow"
-    ],
-    "wrong_tier": [],
-    "weapon_share": 0.1942,
-    "expected": 0.1908,
-    "sd_off": 0.48,
-    "armour": [
-     "Bedvar’s Armour",
-     "Crocodile Warrior’s Armour",
-     "Demonic Armour",
-     "Orc Bruiser’s Armour",
-     "Orc Raider’s Armour",
-     "Split Armour"
-    ],
-    "armour_want": [
-     "Bedvar’s Armour",
-     "Crocodile Warrior’s Armour",
-     "Demonic Armour",
-     "Orc Bruiser’s Armour",
-     "Orc Raider’s Armour",
-     "Split Armour"
-    ],
-    "armour_share": 0.083,
-    "armour_expected": 0.0771,
-    "armour_sd_off": 1.21,
-    "everywhere_missing": [],
-    "ok": true
-   },
-   "tier3": {
-    "items": 3066,
-    "weapons": [
-     "Combat Knife",
-     "Crossbow",
-     "Dark Knight's Sword",
-     "Survival Knife",
-     "Wakizashi"
-    ],
-    "want": [
-     "Combat Knife",
-     "Crossbow",
-     "Dark Knight's Sword",
-     "Survival Knife",
-     "Wakizashi"
-    ],
-    "wrong_tier": [],
-    "weapon_share": 0.1396,
-    "expected": 0.1347,
-    "sd_off": 0.8,
-    "armour": [
-     "Bear Warrior’s Armour",
-     "Elephant Warrior’s Armour",
-     "Executioner’s Armour",
-     "Gnur’s Armour"
-    ],
-    "armour_want": [
-     "Bear Warrior’s Armour",
-     "Elephant Warrior’s Armour",
-     "Executioner’s Armour",
-     "Gnur’s Armour"
-    ],
-    "armour_share": 0.0656,
-    "armour_expected": 0.0653,
-    "armour_sd_off": 0.06,
-    "everywhere_missing": [],
-    "ok": true
-   },
-   "tier4": {
-    "items": 2914,
-    "weapons": [
-     "Dwarf Crossbow",
-     "Kukri",
-     "Sniper's Knife",
-     "Ursag's Horn Blade"
-    ],
-    "want": [
-     "Dwarf Crossbow",
-     "Kukri",
-     "Sniper's Knife",
-     "Ursag's Horn Blade"
-    ],
-    "wrong_tier": [],
-    "weapon_share": 0.1108,
-    "expected": 0.1279,
-    "sd_off": 2.76,
-    "armour": [
-     "Broddi’s Dwarf Armour",
-     "Dardan’s Armour",
-     "Dark Knight’s Armour",
-     "Lady Knight’s Armour",
-     "Paladin’s Armour",
-     "Plate Armour"
-    ],
-    "armour_want": [
-     "Broddi’s Dwarf Armour",
-     "Dardan’s Armour",
-     "Dark Knight’s Armour",
-     "Lady Knight’s Armour",
-     "Paladin’s Armour",
-     "Plate Armour"
-    ],
-    "armour_share": 0.1222,
-    "armour_expected": 0.1163,
-    "armour_sd_off": 0.99,
-    "everywhere_missing": [],
-    "ok": true
-   },
-   "tier5": {
-    "items": 2921,
-    "weapons": [
-     "Dwarf Crossbow",
-     "Ursag's Horn Blade",
-     "Wrist Blade"
-    ],
-    "want": [
-     "Dwarf Crossbow",
-     "Ursag's Horn Blade",
-     "Wrist Blade"
-    ],
-    "wrong_tier": [],
-    "weapon_share": 0.1106,
-    "expected": 0.1095,
-    "sd_off": 0.18,
-    "armour": [
-     "Costalmed’s Armour",
-     "Epic Plate (Female)",
-     "Epic Plate (Male)"
-    ],
-    "armour_want": [
-     "Costalmed’s Armour",
-     "Epic Plate (Female)",
-     "Epic Plate (Male)"
-    ],
-    "armour_share": 0.0661,
-    "armour_expected": 0.0664,
-    "armour_sd_off": 0.06,
-    "everywhere_missing": [],
-    "ok": true
-   }
-  },
-  {
-   "step": "weapons",
-   "ok": true,
-   "heroes": {
-    "Warrior": {
-     "took": 29,
-     "carried": 0,
-     "took_right": true,
-     "carried_right": true,
-     "hands": [
-      {
-       "weapon": "Viking Shortsword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 67.0,
-       "wear": 67.0,
-       "attack_s": 0.9,
-       "attacks": 3,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Sherwood Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 68.0,
-       "wear": 68.0,
-       "attack_s": 0.9,
-       "attacks": 3,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Orc Cleaver",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 29.9,
-       "want_damage": 29.9,
-       "durability": 69.0,
-       "wear": 69.0,
-       "attack_s": 1.017,
-       "attacks": 3,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Toothed Bone Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 33.8,
-       "want_damage": 33.8,
-       "durability": 70.0,
-       "wear": 70.0,
-       "attack_s": 1.133,
-       "attacks": 3,
-       "want_s": 1.133
-      },
-      {
-       "weapon": "Arming Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 33.8,
-       "want_damage": 33.8,
-       "durability": 86.0,
-       "wear": 86.0,
-       "attack_s": 1.133,
-       "attacks": 3,
-       "want_s": 1.133
-      },
-      {
-       "weapon": "Longsword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 37.7,
-       "want_damage": 37.7,
-       "durability": 87.0,
-       "wear": 87.0,
-       "attack_s": 1.25,
-       "attacks": 3,
-       "want_s": 1.25
-      },
-      {
-       "weapon": "Viking Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 37.7,
-       "want_damage": 37.7,
-       "durability": 88.0,
-       "wear": 88.0,
-       "attack_s": 1.25,
-       "attacks": 3,
-       "want_s": 1.25
-      },
-      {
-       "weapon": "Veteran's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 41.6,
-       "want_damage": 41.6,
-       "durability": 89.0,
-       "wear": 89.0,
-       "attack_s": 1.367,
-       "attacks": 3,
-       "want_s": 1.367
-      },
-      {
-       "weapon": "Templar Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 41.6,
-       "want_damage": 41.6,
-       "durability": 90.0,
-       "wear": 90.0,
-       "attack_s": 1.367,
-       "attacks": 3,
-       "want_s": 1.367
-      },
-      {
-       "weapon": "Plate Knight's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 45.5,
-       "want_damage": 45.5,
-       "durability": 97.0,
-       "wear": 97.0,
-       "attack_s": 1.483,
-       "attacks": 3,
-       "want_s": 1.483,
-       "left_palm_off_hilt_cm": 2.7,
-       "left_palm_along_hilt_cm": [
-        -7.1,
-        -7.2,
-        -5.0
-       ]
-      },
-      {
-       "weapon": "Paladin's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 45.5,
-       "want_damage": 45.5,
-       "durability": 98.0,
-       "wear": 98.0,
-       "attack_s": 1.483,
-       "attacks": 3,
-       "want_s": 1.483,
-       "left_palm_off_hilt_cm": 2.7,
-       "left_palm_along_hilt_cm": [
-        -7.2,
-        -7.1,
-        -4.9
-       ]
-      },
-      {
-       "weapon": "Dark Knight's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 49.4,
-       "want_damage": 49.4,
-       "durability": 99.0,
-       "wear": 99.0,
-       "attack_s": 1.6,
-       "attacks": 3,
-       "want_s": 1.6,
-       "left_palm_off_hilt_cm": 2.3,
-       "left_palm_along_hilt_cm": [
-        -6.9,
-        -7.0,
-        -6.0
-       ]
-      },
-      {
-       "weapon": "Ursag's Horn Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 49.4,
-       "want_damage": 49.4,
-       "durability": 100.0,
-       "wear": 100.0,
-       "attack_s": 1.6,
-       "attacks": 3,
-       "want_s": 1.6,
-       "left_palm_off_hilt_cm": 2.6,
-       "left_palm_along_hilt_cm": [
-        -7.2,
-        -7.0,
-        -4.6
-       ]
-      },
-      {
-       "weapon": "Eastern Sabre",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 78.0,
-       "wear": 78.0,
-       "attack_s": 0.9,
-       "attacks": 3,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Katana",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 29.9,
-       "want_damage": 29.9,
-       "durability": 79.0,
-       "wear": 79.0,
-       "attack_s": 1.017,
-       "attacks": 3,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Wakizashi",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 33.8,
-       "want_damage": 33.8,
-       "durability": 80.0,
-       "wear": 80.0,
-       "attack_s": 1.133,
-       "attacks": 3,
-       "want_s": 1.133
-      },
-      {
-       "weapon": "Dagger",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 14.3,
-       "want_damage": 14.3,
-       "durability": 52.0,
-       "wear": 52.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Leaf-Blade Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 14.3,
-       "want_damage": 14.3,
-       "durability": 53.0,
-       "wear": 53.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Obsidian Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 14.3,
-       "want_damage": 14.3,
-       "durability": 54.0,
-       "wear": 54.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Bone Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 18.2,
-       "want_damage": 18.2,
-       "durability": 55.0,
-       "wear": 55.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Combat Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 18.2,
-       "want_damage": 18.2,
-       "durability": 56.0,
-       "wear": 56.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Survival Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 18.2,
-       "want_damage": 18.2,
-       "durability": 57.0,
-       "wear": 57.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Kukri",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 22.1,
-       "want_damage": 22.1,
-       "durability": 58.0,
-       "wear": 58.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Sniper's Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 22.1,
-       "want_damage": 22.1,
-       "durability": 59.0,
-       "wear": 59.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Wrist Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 22.1,
-       "want_damage": 22.1,
-       "durability": 60.0,
-       "wear": 60.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Longbow",
-       "mesh_ok": true,
-       "bone": "hand_l",
-       "grip_to_palm_cm": 0.0,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 72.0,
-       "wear": 72.0,
-       "attack_s": 0.9,
-       "attacks": 1,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Viking Bow",
-       "mesh_ok": true,
-       "bone": "hand_l",
-       "grip_to_palm_cm": 0.0,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 73.0,
-       "wear": 73.0,
-       "attack_s": 0.9,
-       "attacks": 1,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Crossbow",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 23.0,
-       "want_damage": 23.0,
-       "durability": 74.0,
-       "wear": 74.0,
-       "attack_s": 1.017,
-       "attacks": 1,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Dwarf Crossbow",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 75.0,
-       "wear": 75.0,
-       "attack_s": 1.133,
-       "attacks": 1,
-       "want_s": 1.133
-      }
-     ],
-     "break": {
-      "weapon": "Viking Shortsword",
-      "wear_after_one": 1.0,
-      "broke": 1,
-      "last_broken": "Viking Shortsword",
-      "still_carried": false,
-      "now_in_hand": "Sword",
-      "message": "Your viking shortsword broke"
-     }
-    },
-    "Warlock": {
-     "took": 29,
-     "carried": 0,
-     "took_right": true,
-     "carried_right": true,
-     "hands": [
-      {
-       "weapon": "Viking Shortsword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 67.0,
-       "wear": 67.0,
-       "attack_s": 0.9,
-       "attacks": 3,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Sherwood Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 68.0,
-       "wear": 68.0,
-       "attack_s": 0.9,
-       "attacks": 3,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Orc Cleaver",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 23.0,
-       "want_damage": 23.0,
-       "durability": 69.0,
-       "wear": 69.0,
-       "attack_s": 1.017,
-       "attacks": 3,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Toothed Bone Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 70.0,
-       "wear": 70.0,
-       "attack_s": 1.133,
-       "attacks": 3,
-       "want_s": 1.133
-      },
-      {
-       "weapon": "Arming Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 86.0,
-       "wear": 86.0,
-       "attack_s": 1.133,
-       "attacks": 3,
-       "want_s": 1.133
-      },
-      {
-       "weapon": "Longsword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 29.0,
-       "want_damage": 29.0,
-       "durability": 87.0,
-       "wear": 87.0,
-       "attack_s": 1.25,
-       "attacks": 3,
-       "want_s": 1.25
-      },
-      {
-       "weapon": "Viking Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 29.0,
-       "want_damage": 29.0,
-       "durability": 88.0,
-       "wear": 88.0,
-       "attack_s": 1.25,
-       "attacks": 3,
-       "want_s": 1.25
-      },
-      {
-       "weapon": "Veteran's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 32.0,
-       "want_damage": 32.0,
-       "durability": 89.0,
-       "wear": 89.0,
-       "attack_s": 1.367,
-       "attacks": 3,
-       "want_s": 1.367
-      },
-      {
-       "weapon": "Templar Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 32.0,
-       "want_damage": 32.0,
-       "durability": 90.0,
-       "wear": 90.0,
-       "attack_s": 1.367,
-       "attacks": 3,
-       "want_s": 1.367
-      },
-      {
-       "weapon": "Plate Knight's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 35.0,
-       "want_damage": 35.0,
-       "durability": 97.0,
-       "wear": 97.0,
-       "attack_s": 1.483,
-       "attacks": 3,
-       "want_s": 1.483,
-       "left_palm_off_hilt_cm": 3.6,
-       "left_palm_along_hilt_cm": [
-        -6.6,
-        -12.5,
-        -6.8
-       ]
-      },
-      {
-       "weapon": "Paladin's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 35.0,
-       "want_damage": 35.0,
-       "durability": 98.0,
-       "wear": 98.0,
-       "attack_s": 1.483,
-       "attacks": 3,
-       "want_s": 1.483,
-       "left_palm_off_hilt_cm": 3.1,
-       "left_palm_along_hilt_cm": [
-        -6.8,
-        -12.3,
-        -7.1
-       ]
-      },
-      {
-       "weapon": "Dark Knight's Sword",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 38.0,
-       "want_damage": 38.0,
-       "durability": 99.0,
-       "wear": 99.0,
-       "attack_s": 1.6,
-       "attacks": 3,
-       "want_s": 1.6,
-       "left_palm_off_hilt_cm": 2.6,
-       "left_palm_along_hilt_cm": [
-        -6.7,
-        -12.2,
-        -7.6
-       ]
-      },
-      {
-       "weapon": "Ursag's Horn Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 38.0,
-       "want_damage": 38.0,
-       "durability": 100.0,
-       "wear": 100.0,
-       "attack_s": 1.6,
-       "attacks": 3,
-       "want_s": 1.6,
-       "left_palm_off_hilt_cm": 0.9,
-       "left_palm_along_hilt_cm": [
-        -6.9,
-        -12.3,
-        -7.4
-       ]
-      },
-      {
-       "weapon": "Eastern Sabre",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 78.0,
-       "wear": 78.0,
-       "attack_s": 0.9,
-       "attacks": 3,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Katana",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 23.0,
-       "want_damage": 23.0,
-       "durability": 79.0,
-       "wear": 79.0,
-       "attack_s": 1.017,
-       "attacks": 3,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Wakizashi",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 80.0,
-       "wear": 80.0,
-       "attack_s": 1.133,
-       "attacks": 3,
-       "want_s": 1.133
-      },
-      {
-       "weapon": "Dagger",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 11.0,
-       "want_damage": 11.0,
-       "durability": 52.0,
-       "wear": 52.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Leaf-Blade Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 11.0,
-       "want_damage": 11.0,
-       "durability": 53.0,
-       "wear": 53.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Obsidian Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 11.0,
-       "want_damage": 11.0,
-       "durability": 54.0,
-       "wear": 54.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Bone Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 14.0,
-       "want_damage": 14.0,
-       "durability": 55.0,
-       "wear": 55.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Combat Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 14.0,
-       "want_damage": 14.0,
-       "durability": 56.0,
-       "wear": 56.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Survival Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 14.0,
-       "want_damage": 14.0,
-       "durability": 57.0,
-       "wear": 57.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Kukri",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 17.0,
-       "want_damage": 17.0,
-       "durability": 58.0,
-       "wear": 58.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Sniper's Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 17.0,
-       "want_damage": 17.0,
-       "durability": 59.0,
-       "wear": 59.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Wrist Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 5.3,
-       "damage": 17.0,
-       "want_damage": 17.0,
-       "durability": 60.0,
-       "wear": 60.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Longbow",
-       "mesh_ok": true,
-       "bone": "hand_l",
-       "grip_to_palm_cm": 0.0,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 72.0,
-       "wear": 72.0,
-       "attack_s": 0.9,
-       "attacks": 1,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Viking Bow",
-       "mesh_ok": true,
-       "bone": "hand_l",
-       "grip_to_palm_cm": 0.0,
-       "damage": 20.0,
-       "want_damage": 20.0,
-       "durability": 73.0,
-       "wear": 73.0,
-       "attack_s": 0.9,
-       "attacks": 1,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Crossbow",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 23.0,
-       "want_damage": 23.0,
-       "durability": 74.0,
-       "wear": 74.0,
-       "attack_s": 1.017,
-       "attacks": 1,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Dwarf Crossbow",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 75.0,
-       "wear": 75.0,
-       "attack_s": 1.133,
-       "attacks": 1,
-       "want_s": 1.133
-      }
-     ],
-     "break": {
-      "weapon": "Viking Shortsword",
-      "wear_after_one": 1.0,
-      "broke": 1,
-      "last_broken": "Viking Shortsword",
-      "still_carried": false,
-      "now_in_hand": "Sword",
-      "message": "Your viking shortsword broke"
-     }
-    },
-    "Rogue": {
-     "took": 13,
-     "carried": 16,
-     "took_right": true,
-     "carried_right": true,
-     "hands": [
-      {
-       "weapon": "Dagger",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 11.0,
-       "want_damage": 11.0,
-       "durability": 52.0,
-       "wear": 52.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Leaf-Blade Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 11.0,
-       "want_damage": 11.0,
-       "durability": 53.0,
-       "wear": 53.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Obsidian Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 11.0,
-       "want_damage": 11.0,
-       "durability": 54.0,
-       "wear": 54.0,
-       "attack_s": 0.55,
-       "attacks": 3,
-       "want_s": 0.55
-      },
-      {
-       "weapon": "Bone Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 14.0,
-       "want_damage": 14.0,
-       "durability": 55.0,
-       "wear": 55.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Combat Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 14.0,
-       "want_damage": 14.0,
-       "durability": 56.0,
-       "wear": 56.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Survival Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 14.0,
-       "want_damage": 14.0,
-       "durability": 57.0,
-       "wear": 57.0,
-       "attack_s": 0.667,
-       "attacks": 3,
-       "want_s": 0.667
-      },
-      {
-       "weapon": "Kukri",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 17.0,
-       "want_damage": 17.0,
-       "durability": 58.0,
-       "wear": 58.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Sniper's Knife",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 17.0,
-       "want_damage": 17.0,
-       "durability": 59.0,
-       "wear": 59.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Wrist Blade",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 1.4,
-       "damage": 17.0,
-       "want_damage": 17.0,
-       "durability": 60.0,
-       "wear": 60.0,
-       "attack_s": 0.783,
-       "attacks": 3,
-       "want_s": 0.783
-      },
-      {
-       "weapon": "Longbow",
-       "mesh_ok": true,
-       "bone": "hand_l",
-       "grip_to_palm_cm": 0.0,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 72.0,
-       "wear": 72.0,
-       "attack_s": 0.9,
-       "attacks": 1,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Viking Bow",
-       "mesh_ok": true,
-       "bone": "hand_l",
-       "grip_to_palm_cm": 0.0,
-       "damage": 26.0,
-       "want_damage": 26.0,
-       "durability": 73.0,
-       "wear": 73.0,
-       "attack_s": 0.9,
-       "attacks": 1,
-       "want_s": 0.9
-      },
-      {
-       "weapon": "Crossbow",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 29.9,
-       "want_damage": 29.9,
-       "durability": 74.0,
-       "wear": 74.0,
-       "attack_s": 1.017,
-       "attacks": 1,
-       "want_s": 1.017
-      },
-      {
-       "weapon": "Dwarf Crossbow",
-       "mesh_ok": true,
-       "bone": "hand_r",
-       "grip_to_palm_cm": 0.0,
-       "damage": 33.8,
-       "want_damage": 33.8,
-       "durability": 75.0,
-       "wear": 75.0,
-       "attack_s": 1.133,
-       "attacks": 1,
-       "want_s": 1.133
-      }
-     ],
-     "break": {
-      "weapon": "Dagger",
-      "wear_after_one": 1.0,
-      "broke": 1,
-      "last_broken": "Dagger",
-      "still_carried": false,
-      "now_in_hand": "Daggers",
-      "message": "Your dagger broke"
-     }
-    },
-    "Mage": {
-     "took": 0,
-     "carried": 29,
-     "took_right": true,
-     "carried_right": true,
-     "refused": true
-    },
-    "Summoner": {
-     "took": 0,
-     "carried": 29,
-     "took_right": true,
-     "carried_right": true,
-     "refused": true
-    }
-   },
-   "front_shots": [
-    "Warrior_VikingShortsword_front.png",
-    "Warrior_VikingShortsword_side.png",
-    "Warrior_PlateKnightSSword_front.png",
-    "Warrior_PlateKnightSSword_side.png",
-    "Warrior_UrsagSHornBlade_front.png",
-    "Warrior_UrsagSHornBlade_side.png",
-    "Warrior_Katana_front.png",
-    "Warrior_Katana_side.png",
-    "Warrior_Kukri_front.png",
-    "Warrior_Kukri_side.png",
-    "Warrior_Longbow_front.png",
-    "Warrior_Longbow_side.png",
-    "Warrior_VikingBow_front.png",
-    "Warrior_VikingBow_side.png",
-    "Warrior_Crossbow_front.png",
-    "Warrior_Crossbow_side.png",
-    "Warrior_DwarfCrossbow_front.png",
-    "Warrior_DwarfCrossbow_side.png",
-    "Warlock_VikingShortsword_front.png",
-    "Warlock_VikingShortsword_side.png",
-    "Warlock_PlateKnightSSword_front.png",
-    "Warlock_PlateKnightSSword_side.png",
-    "Warlock_UrsagSHornBlade_front.png",
-    "Warlock_UrsagSHornBlade_side.png",
-    "Warlock_Katana_front.png",
-    "Warlock_Katana_side.png",
-    "Warlock_Kukri_front.png",
-    "Warlock_Kukri_side.png",
-    "Warlock_Longbow_front.png",
-    "Warlock_Longbow_side.png",
-    "Warlock_VikingBow_front.png",
-    "Warlock_VikingBow_side.png",
-    "Warlock_Crossbow_front.png",
-    "Warlock_Crossbow_side.png",
-    "Warlock_DwarfCrossbow_front.png",
-    "Warlock_DwarfCrossbow_side.png",
-    "Rogue_Dagger_front.png",
-    "Rogue_Dagger_side.png",
-    "Rogue_Kukri_front.png",
-    "Rogue_Kukri_side.png",
-    "Rogue_Longbow_front.png",
-    "Rogue_Longbow_side.png",
-    "Rogue_VikingBow_front.png",
-    "Rogue_VikingBow_side.png",
-    "Rogue_Crossbow_front.png",
-    "Rogue_Crossbow_side.png",
-    "Rogue_DwarfCrossbow_front.png",
-    "Rogue_DwarfCrossbow_side.png"
-   ]
   },
   {
    "step": "armourtable",
@@ -4100,26 +2716,26 @@
    "in_great_hall": 1,
    "generated": {
     "1,0": {
-     "anvils": 5,
-     "forges": 1,
+     "anvils": 6,
+     "forges": 2,
      "forges_have_one": true,
      "added_in_room": -1
     },
     "0,1": {
-     "anvils": 4,
+     "anvils": 5,
      "forges": 2,
      "forges_have_one": true,
      "added_in_room": -1
     },
     "-1,0": {
-     "anvils": 4,
-     "forges": 2,
+     "anvils": 5,
+     "forges": 1,
      "forges_have_one": true,
      "added_in_room": -1
     },
     "0,-1": {
-     "anvils": 5,
-     "forges": 1,
+     "anvils": 6,
+     "forges": 2,
      "forges_have_one": true,
      "added_in_room": -1
     }
@@ -4225,30 +2841,1450 @@
     -10950,
     -10500
    ],
-   "rms_floor": 3.2e-05,
-   "rms_now": 0.002687,
-   "rms_before": 0.006746,
-   "fire_db_change": -8.0,
-   "fire_over_floor_db_now": 38.61,
-   "wavs": "../../../../../../code/claude-ue5/claude_ue5/Saved/RDM5Fire\\full10"
+   "rms_floor": 5.2e-05,
+   "rms_now": 0.0027,
+   "rms_before": 0.006815,
+   "fire_db_change": -8.04,
+   "fire_over_floor_db_now": 34.38,
+   "wavs": "../../../../../../code/claude-ue5/claude_ue5/Saved/RDM5Fire\\w3full"
+  },
+  {
+   "step": "tiers",
+   "ok": true,
+   "max_tier": 5,
+   "open_at_start": 1,
+   "tiers_of": [
+    1,
+    2,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "sizes": [
+    1,
+    8,
+    16,
+    24,
+    32
+   ],
+   "allowed_at_start": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "start_seals": {
+    "grating": 12,
+    "wall": 0
+   },
+   "tier2_generated_while_shut": false,
+   "start_cleared": {
+    "notice": "TIER 2 IS OPEN",
+    "open": 2,
+    "tier2_allowed": true,
+    "gratings_left": 0
+   },
+   "set_before": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 0,
+    "chests": 115,
+    "looted": 0,
+    "monsters": 12,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_rooms": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 40,
+    "chests": 115,
+    "looted": 0,
+    "monsters": 12,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_chests": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 40,
+    "chests": 115,
+    "looted": 115,
+    "monsters": 12,
+    "killed": 0,
+    "cleared": false
+   },
+   "after_kills": {
+    "tier": 2,
+    "rooms": 40,
+    "explored": 40,
+    "chests": 115,
+    "looted": 115,
+    "monsters": 12,
+    "killed": 12,
+    "cleared": true
+   },
+   "monsters_killed": 12,
+   "notice": "SET CLEARED  -  TIER 2: 1 / 8",
+   "tier2_cleared": 1,
+   "seals_of_set": {
+    "grating": 3,
+    "wall": 0,
+    "into": [
+     "3"
+    ]
+   },
+   "tier3_generated": false,
+   "seal_prompt": "Sealed: clear every set of rooms of tier 2 to open tier 3  (1 / 8 cleared)",
+   "seal_blocks_a_body": {
+    "hit": true,
+    "at_cm_from_border": -150.0
+   },
+   "walked_past_the_border_cm": -153.6,
+   "regenerated": {
+    "monsters": 0,
+    "corpses": 12,
+    "progress": {
+     "tier": 2,
+     "rooms": 40,
+     "explored": 40,
+     "chests": 115,
+     "looted": 115,
+     "monsters": 12,
+     "killed": 12,
+     "cleared": true
+    }
+   },
+   "after_tier2": {
+    "cleared": 8,
+    "open": 3,
+    "notice": "TIER 3 IS OPEN",
+    "tier3_allowed": true
+   },
+   "seals_of_set_after": 0,
+   "tier3_generated_when_near": true,
+   "after_tier3": {
+    "cleared": 16,
+    "open": 4,
+    "notice": "TIER 4 IS OPEN",
+    "not_cleared": []
+   },
+   "after_tier4": {
+    "cleared": 24,
+    "open": 5,
+    "notice": "TIER 5 IS OPEN",
+    "not_cleared": []
+   },
+   "tier5_section": {
+    "walls": 3,
+    "gratings": 0,
+    "walls_lead_to_tier": [
+     6
+    ],
+    "tier6_allowed": false,
+    "seal_kind_east": 2
+   }
+  },
+  {
+   "step": "tierloot",
+   "ok": true,
+   "tier1": {
+    "items": 2750,
+    "weapons": [
+     "Arming Sword",
+     "Dagger",
+     "Eastern Sabre",
+     "Leaf-Blade Knife",
+     "Longbow",
+     "Longsword",
+     "Plate Knight's Sword",
+     "Sherwood Sword",
+     "Viking Shortsword",
+     "Viking Sword"
+    ],
+    "want": [
+     "Arming Sword",
+     "Dagger",
+     "Eastern Sabre",
+     "Leaf-Blade Knife",
+     "Longbow",
+     "Longsword",
+     "Plate Knight's Sword",
+     "Sherwood Sword",
+     "Viking Shortsword",
+     "Viking Sword"
+    ],
+    "wrong_tier": [],
+    "weapon_share": 0.1895,
+    "expected": 0.1844,
+    "sd_off": 0.69,
+    "armour": [
+     "Desert Hero’s Armour",
+     "Eastern Knight’s Armour",
+     "Orc Skirmisher’s Armour",
+     "Orc Veteran’s Armour",
+     "Orc Warrior’s Armour",
+     "Orme’s Armour",
+     "Templar’s Armour",
+     "Tiefling’s Armour"
+    ],
+    "armour_want": [
+     "Desert Hero’s Armour",
+     "Eastern Knight’s Armour",
+     "Orc Skirmisher’s Armour",
+     "Orc Veteran’s Armour",
+     "Orc Warrior’s Armour",
+     "Orme’s Armour",
+     "Templar’s Armour",
+     "Tiefling’s Armour"
+    ],
+    "armour_share": 0.0924,
+    "armour_expected": 0.0894,
+    "armour_sd_off": 0.55,
+    "everywhere_missing": [],
+    "ok": true
+   },
+   "tier2": {
+    "items": 2889,
+    "weapons": [
+     "Bone Blade",
+     "Katana",
+     "Obsidian Knife",
+     "Orc Cleaver",
+     "Paladin's Sword",
+     "Templar Sword",
+     "Toothed Bone Sword",
+     "Veteran's Sword",
+     "Viking Bow"
+    ],
+    "want": [
+     "Bone Blade",
+     "Katana",
+     "Obsidian Knife",
+     "Orc Cleaver",
+     "Paladin's Sword",
+     "Templar Sword",
+     "Toothed Bone Sword",
+     "Veteran's Sword",
+     "Viking Bow"
+    ],
+    "wrong_tier": [],
+    "weapon_share": 0.1893,
+    "expected": 0.1908,
+    "sd_off": 0.19,
+    "armour": [
+     "Bedvar’s Armour",
+     "Crocodile Warrior’s Armour",
+     "Demonic Armour",
+     "Orc Bruiser’s Armour",
+     "Orc Raider’s Armour",
+     "Split Armour"
+    ],
+    "armour_want": [
+     "Bedvar’s Armour",
+     "Crocodile Warrior’s Armour",
+     "Demonic Armour",
+     "Orc Bruiser’s Armour",
+     "Orc Raider’s Armour",
+     "Split Armour"
+    ],
+    "armour_share": 0.0793,
+    "armour_expected": 0.0771,
+    "armour_sd_off": 0.44,
+    "everywhere_missing": [],
+    "ok": true
+   },
+   "tier3": {
+    "items": 2591,
+    "weapons": [
+     "Combat Knife",
+     "Crossbow",
+     "Dark Knight's Sword",
+     "Survival Knife",
+     "Wakizashi"
+    ],
+    "want": [
+     "Combat Knife",
+     "Crossbow",
+     "Dark Knight's Sword",
+     "Survival Knife",
+     "Wakizashi"
+    ],
+    "wrong_tier": [],
+    "weapon_share": 0.1312,
+    "expected": 0.1347,
+    "sd_off": 0.52,
+    "armour": [
+     "Bear Warrior’s Armour",
+     "Elephant Warrior’s Armour",
+     "Executioner’s Armour",
+     "Gnur’s Armour"
+    ],
+    "armour_want": [
+     "Bear Warrior’s Armour",
+     "Elephant Warrior’s Armour",
+     "Executioner’s Armour",
+     "Gnur’s Armour"
+    ],
+    "armour_share": 0.0702,
+    "armour_expected": 0.0653,
+    "armour_sd_off": 1.02,
+    "everywhere_missing": [],
+    "ok": true
+   },
+   "tier4": {
+    "items": 2706,
+    "weapons": [
+     "Dwarf Crossbow",
+     "Kukri",
+     "Sniper's Knife",
+     "Ursag's Horn Blade"
+    ],
+    "want": [
+     "Dwarf Crossbow",
+     "Kukri",
+     "Sniper's Knife",
+     "Ursag's Horn Blade"
+    ],
+    "wrong_tier": [],
+    "weapon_share": 0.1249,
+    "expected": 0.1279,
+    "sd_off": 0.47,
+    "armour": [
+     "Broddi’s Dwarf Armour",
+     "Dardan’s Armour",
+     "Dark Knight’s Armour",
+     "Lady Knight’s Armour",
+     "Paladin’s Armour",
+     "Plate Armour"
+    ],
+    "armour_want": [
+     "Broddi’s Dwarf Armour",
+     "Dardan’s Armour",
+     "Dark Knight’s Armour",
+     "Lady Knight’s Armour",
+     "Paladin’s Armour",
+     "Plate Armour"
+    ],
+    "armour_share": 0.1201,
+    "armour_expected": 0.1163,
+    "armour_sd_off": 0.62,
+    "everywhere_missing": [],
+    "ok": true
+   },
+   "tier5": {
+    "items": 2750,
+    "weapons": [
+     "Dwarf Crossbow",
+     "Ursag's Horn Blade",
+     "Wrist Blade"
+    ],
+    "want": [
+     "Dwarf Crossbow",
+     "Ursag's Horn Blade",
+     "Wrist Blade"
+    ],
+    "wrong_tier": [],
+    "weapon_share": 0.1058,
+    "expected": 0.1095,
+    "sd_off": 0.62,
+    "armour": [
+     "Costalmed’s Armour",
+     "Epic Plate (Female)",
+     "Epic Plate (Male)"
+    ],
+    "armour_want": [
+     "Costalmed’s Armour",
+     "Epic Plate (Female)",
+     "Epic Plate (Male)"
+    ],
+    "armour_share": 0.0669,
+    "armour_expected": 0.0664,
+    "armour_sd_off": 0.11,
+    "everywhere_missing": [],
+    "ok": true
+   }
+  },
+  {
+   "step": "weapons",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "took": 29,
+     "carried": 0,
+     "took_right": true,
+     "carried_right": true,
+     "hands": [
+      {
+       "weapon": "Viking Shortsword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 67.0,
+       "wear": 67.0,
+       "attack_s": 0.9,
+       "attacks": 3,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Sherwood Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 68.0,
+       "wear": 68.0,
+       "attack_s": 0.9,
+       "attacks": 3,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Orc Cleaver",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 29.9,
+       "want_damage": 29.9,
+       "durability": 69.0,
+       "wear": 69.0,
+       "attack_s": 1.017,
+       "attacks": 3,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Toothed Bone Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 33.8,
+       "want_damage": 33.8,
+       "durability": 70.0,
+       "wear": 70.0,
+       "attack_s": 1.133,
+       "attacks": 3,
+       "want_s": 1.133
+      },
+      {
+       "weapon": "Arming Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 33.8,
+       "want_damage": 33.8,
+       "durability": 86.0,
+       "wear": 86.0,
+       "attack_s": 1.133,
+       "attacks": 3,
+       "want_s": 1.133
+      },
+      {
+       "weapon": "Longsword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 37.7,
+       "want_damage": 37.7,
+       "durability": 87.0,
+       "wear": 87.0,
+       "attack_s": 1.25,
+       "attacks": 3,
+       "want_s": 1.25
+      },
+      {
+       "weapon": "Viking Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 37.7,
+       "want_damage": 37.7,
+       "durability": 88.0,
+       "wear": 88.0,
+       "attack_s": 1.25,
+       "attacks": 3,
+       "want_s": 1.25
+      },
+      {
+       "weapon": "Veteran's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 41.6,
+       "want_damage": 41.6,
+       "durability": 89.0,
+       "wear": 89.0,
+       "attack_s": 1.367,
+       "attacks": 3,
+       "want_s": 1.367
+      },
+      {
+       "weapon": "Templar Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 41.6,
+       "want_damage": 41.6,
+       "durability": 90.0,
+       "wear": 90.0,
+       "attack_s": 1.367,
+       "attacks": 3,
+       "want_s": 1.367
+      },
+      {
+       "weapon": "Plate Knight's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 45.5,
+       "want_damage": 45.5,
+       "durability": 97.0,
+       "wear": 97.0,
+       "attack_s": 1.483,
+       "attacks": 1,
+       "want_s": 1.483,
+       "off_hand_shown": false,
+       "slash_clips": true
+      },
+      {
+       "weapon": "Paladin's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 45.5,
+       "want_damage": 45.5,
+       "durability": 98.0,
+       "wear": 98.0,
+       "attack_s": 1.483,
+       "attacks": 1,
+       "want_s": 1.483,
+       "off_hand_shown": false,
+       "slash_clips": true
+      },
+      {
+       "weapon": "Dark Knight's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 49.4,
+       "want_damage": 49.4,
+       "durability": 99.0,
+       "wear": 99.0,
+       "attack_s": 1.6,
+       "attacks": 1,
+       "want_s": 1.6,
+       "off_hand_shown": false,
+       "slash_clips": true
+      },
+      {
+       "weapon": "Ursag's Horn Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 49.4,
+       "want_damage": 49.4,
+       "durability": 100.0,
+       "wear": 100.0,
+       "attack_s": 1.6,
+       "attacks": 1,
+       "want_s": 1.6,
+       "off_hand_shown": false,
+       "slash_clips": true
+      },
+      {
+       "weapon": "Eastern Sabre",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 78.0,
+       "wear": 78.0,
+       "attack_s": 0.9,
+       "attacks": 3,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Katana",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 29.9,
+       "want_damage": 29.9,
+       "durability": 79.0,
+       "wear": 79.0,
+       "attack_s": 1.017,
+       "attacks": 3,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Wakizashi",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 33.8,
+       "want_damage": 33.8,
+       "durability": 80.0,
+       "wear": 80.0,
+       "attack_s": 1.133,
+       "attacks": 3,
+       "want_s": 1.133
+      },
+      {
+       "weapon": "Dagger",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 14.3,
+       "want_damage": 14.3,
+       "durability": 52.0,
+       "wear": 52.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Leaf-Blade Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 14.3,
+       "want_damage": 14.3,
+       "durability": 53.0,
+       "wear": 53.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Obsidian Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 14.3,
+       "want_damage": 14.3,
+       "durability": 54.0,
+       "wear": 54.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Bone Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 18.2,
+       "want_damage": 18.2,
+       "durability": 55.0,
+       "wear": 55.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Combat Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 18.2,
+       "want_damage": 18.2,
+       "durability": 56.0,
+       "wear": 56.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Survival Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 18.2,
+       "want_damage": 18.2,
+       "durability": 57.0,
+       "wear": 57.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Kukri",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 22.1,
+       "want_damage": 22.1,
+       "durability": 58.0,
+       "wear": 58.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Sniper's Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 22.1,
+       "want_damage": 22.1,
+       "durability": 59.0,
+       "wear": 59.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Wrist Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 22.1,
+       "want_damage": 22.1,
+       "durability": 60.0,
+       "wear": 60.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Longbow",
+       "mesh_ok": true,
+       "bone": "hand_l",
+       "grip_to_palm_cm": 0.0,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 72.0,
+       "wear": 72.0,
+       "attack_s": 0.9,
+       "attacks": 1,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Viking Bow",
+       "mesh_ok": true,
+       "bone": "hand_l",
+       "grip_to_palm_cm": 0.0,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 73.0,
+       "wear": 73.0,
+       "attack_s": 0.9,
+       "attacks": 1,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Crossbow",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 23.0,
+       "want_damage": 23.0,
+       "durability": 74.0,
+       "wear": 74.0,
+       "attack_s": 1.017,
+       "attacks": 1,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Dwarf Crossbow",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 75.0,
+       "wear": 75.0,
+       "attack_s": 1.133,
+       "attacks": 1,
+       "want_s": 1.133
+      }
+     ],
+     "break": {
+      "weapon": "Viking Shortsword",
+      "wear_after_one": 1.0,
+      "broke": 1,
+      "last_broken": "Viking Shortsword",
+      "still_carried": false,
+      "now_in_hand": "Sword",
+      "message": "Your viking shortsword broke"
+     }
+    },
+    "Warlock": {
+     "took": 29,
+     "carried": 0,
+     "took_right": true,
+     "carried_right": true,
+     "hands": [
+      {
+       "weapon": "Viking Shortsword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 67.0,
+       "wear": 67.0,
+       "attack_s": 0.9,
+       "attacks": 3,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Sherwood Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 68.0,
+       "wear": 68.0,
+       "attack_s": 0.9,
+       "attacks": 3,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Orc Cleaver",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 23.0,
+       "want_damage": 23.0,
+       "durability": 69.0,
+       "wear": 69.0,
+       "attack_s": 1.017,
+       "attacks": 3,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Toothed Bone Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 70.0,
+       "wear": 70.0,
+       "attack_s": 1.133,
+       "attacks": 3,
+       "want_s": 1.133
+      },
+      {
+       "weapon": "Arming Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 86.0,
+       "wear": 86.0,
+       "attack_s": 1.133,
+       "attacks": 3,
+       "want_s": 1.133
+      },
+      {
+       "weapon": "Longsword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 29.0,
+       "want_damage": 29.0,
+       "durability": 87.0,
+       "wear": 87.0,
+       "attack_s": 1.25,
+       "attacks": 3,
+       "want_s": 1.25
+      },
+      {
+       "weapon": "Viking Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 29.0,
+       "want_damage": 29.0,
+       "durability": 88.0,
+       "wear": 88.0,
+       "attack_s": 1.25,
+       "attacks": 3,
+       "want_s": 1.25
+      },
+      {
+       "weapon": "Veteran's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 32.0,
+       "want_damage": 32.0,
+       "durability": 89.0,
+       "wear": 89.0,
+       "attack_s": 1.367,
+       "attacks": 3,
+       "want_s": 1.367
+      },
+      {
+       "weapon": "Templar Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 32.0,
+       "want_damage": 32.0,
+       "durability": 90.0,
+       "wear": 90.0,
+       "attack_s": 1.367,
+       "attacks": 3,
+       "want_s": 1.367
+      },
+      {
+       "weapon": "Plate Knight's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 35.0,
+       "want_damage": 35.0,
+       "durability": 97.0,
+       "wear": 97.0,
+       "attack_s": 1.483,
+       "attacks": 3,
+       "want_s": 1.483,
+       "off_hand_shown": false,
+       "sword_clips": true
+      },
+      {
+       "weapon": "Paladin's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 35.0,
+       "want_damage": 35.0,
+       "durability": 98.0,
+       "wear": 98.0,
+       "attack_s": 1.483,
+       "attacks": 3,
+       "want_s": 1.483,
+       "off_hand_shown": false,
+       "sword_clips": true
+      },
+      {
+       "weapon": "Dark Knight's Sword",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 38.0,
+       "want_damage": 38.0,
+       "durability": 99.0,
+       "wear": 99.0,
+       "attack_s": 1.6,
+       "attacks": 3,
+       "want_s": 1.6,
+       "off_hand_shown": false,
+       "sword_clips": true
+      },
+      {
+       "weapon": "Ursag's Horn Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 38.0,
+       "want_damage": 38.0,
+       "durability": 100.0,
+       "wear": 100.0,
+       "attack_s": 1.6,
+       "attacks": 3,
+       "want_s": 1.6,
+       "off_hand_shown": false,
+       "sword_clips": true
+      },
+      {
+       "weapon": "Eastern Sabre",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 78.0,
+       "wear": 78.0,
+       "attack_s": 0.9,
+       "attacks": 3,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Katana",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 23.0,
+       "want_damage": 23.0,
+       "durability": 79.0,
+       "wear": 79.0,
+       "attack_s": 1.017,
+       "attacks": 3,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Wakizashi",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 80.0,
+       "wear": 80.0,
+       "attack_s": 1.133,
+       "attacks": 3,
+       "want_s": 1.133
+      },
+      {
+       "weapon": "Dagger",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 11.0,
+       "want_damage": 11.0,
+       "durability": 52.0,
+       "wear": 52.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Leaf-Blade Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 11.0,
+       "want_damage": 11.0,
+       "durability": 53.0,
+       "wear": 53.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Obsidian Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 11.0,
+       "want_damage": 11.0,
+       "durability": 54.0,
+       "wear": 54.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Bone Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 14.0,
+       "want_damage": 14.0,
+       "durability": 55.0,
+       "wear": 55.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Combat Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 14.0,
+       "want_damage": 14.0,
+       "durability": 56.0,
+       "wear": 56.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Survival Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 14.0,
+       "want_damage": 14.0,
+       "durability": 57.0,
+       "wear": 57.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Kukri",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 17.0,
+       "want_damage": 17.0,
+       "durability": 58.0,
+       "wear": 58.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Sniper's Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 17.0,
+       "want_damage": 17.0,
+       "durability": 59.0,
+       "wear": 59.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Wrist Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 5.3,
+       "damage": 17.0,
+       "want_damage": 17.0,
+       "durability": 60.0,
+       "wear": 60.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Longbow",
+       "mesh_ok": true,
+       "bone": "hand_l",
+       "grip_to_palm_cm": 0.0,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 72.0,
+       "wear": 72.0,
+       "attack_s": 0.9,
+       "attacks": 1,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Viking Bow",
+       "mesh_ok": true,
+       "bone": "hand_l",
+       "grip_to_palm_cm": 0.0,
+       "damage": 20.0,
+       "want_damage": 20.0,
+       "durability": 73.0,
+       "wear": 73.0,
+       "attack_s": 0.9,
+       "attacks": 1,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Crossbow",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 23.0,
+       "want_damage": 23.0,
+       "durability": 74.0,
+       "wear": 74.0,
+       "attack_s": 1.017,
+       "attacks": 1,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Dwarf Crossbow",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 75.0,
+       "wear": 75.0,
+       "attack_s": 1.133,
+       "attacks": 1,
+       "want_s": 1.133
+      }
+     ],
+     "break": {
+      "weapon": "Viking Shortsword",
+      "wear_after_one": 1.0,
+      "broke": 1,
+      "last_broken": "Viking Shortsword",
+      "still_carried": false,
+      "now_in_hand": "Sword",
+      "message": "Your viking shortsword broke"
+     }
+    },
+    "Rogue": {
+     "took": 13,
+     "carried": 16,
+     "took_right": true,
+     "carried_right": true,
+     "hands": [
+      {
+       "weapon": "Dagger",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 11.0,
+       "want_damage": 11.0,
+       "durability": 52.0,
+       "wear": 52.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Leaf-Blade Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 11.0,
+       "want_damage": 11.0,
+       "durability": 53.0,
+       "wear": 53.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Obsidian Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 11.0,
+       "want_damage": 11.0,
+       "durability": 54.0,
+       "wear": 54.0,
+       "attack_s": 0.55,
+       "attacks": 3,
+       "want_s": 0.55
+      },
+      {
+       "weapon": "Bone Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 14.0,
+       "want_damage": 14.0,
+       "durability": 55.0,
+       "wear": 55.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Combat Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 14.0,
+       "want_damage": 14.0,
+       "durability": 56.0,
+       "wear": 56.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Survival Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 14.0,
+       "want_damage": 14.0,
+       "durability": 57.0,
+       "wear": 57.0,
+       "attack_s": 0.667,
+       "attacks": 3,
+       "want_s": 0.667
+      },
+      {
+       "weapon": "Kukri",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 17.0,
+       "want_damage": 17.0,
+       "durability": 58.0,
+       "wear": 58.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Sniper's Knife",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 17.0,
+       "want_damage": 17.0,
+       "durability": 59.0,
+       "wear": 59.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Wrist Blade",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 1.4,
+       "damage": 17.0,
+       "want_damage": 17.0,
+       "durability": 60.0,
+       "wear": 60.0,
+       "attack_s": 0.783,
+       "attacks": 3,
+       "want_s": 0.783
+      },
+      {
+       "weapon": "Longbow",
+       "mesh_ok": true,
+       "bone": "hand_l",
+       "grip_to_palm_cm": 0.0,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 72.0,
+       "wear": 72.0,
+       "attack_s": 0.9,
+       "attacks": 1,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Viking Bow",
+       "mesh_ok": true,
+       "bone": "hand_l",
+       "grip_to_palm_cm": 0.0,
+       "damage": 26.0,
+       "want_damage": 26.0,
+       "durability": 73.0,
+       "wear": 73.0,
+       "attack_s": 0.9,
+       "attacks": 1,
+       "want_s": 0.9
+      },
+      {
+       "weapon": "Crossbow",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 29.9,
+       "want_damage": 29.9,
+       "durability": 74.0,
+       "wear": 74.0,
+       "attack_s": 1.017,
+       "attacks": 1,
+       "want_s": 1.017
+      },
+      {
+       "weapon": "Dwarf Crossbow",
+       "mesh_ok": true,
+       "bone": "hand_r",
+       "grip_to_palm_cm": 0.0,
+       "damage": 33.8,
+       "want_damage": 33.8,
+       "durability": 75.0,
+       "wear": 75.0,
+       "attack_s": 1.133,
+       "attacks": 1,
+       "want_s": 1.133
+      }
+     ],
+     "break": {
+      "weapon": "Dagger",
+      "wear_after_one": 1.0,
+      "broke": 1,
+      "last_broken": "Dagger",
+      "still_carried": false,
+      "now_in_hand": "Daggers",
+      "message": "Your dagger broke"
+     }
+    },
+    "Mage": {
+     "took": 0,
+     "carried": 29,
+     "took_right": true,
+     "carried_right": true,
+     "refused": true
+    },
+    "Summoner": {
+     "took": 0,
+     "carried": 29,
+     "took_right": true,
+     "carried_right": true,
+     "refused": true
+    }
+   },
+   "front_shots": [
+    "Warrior_VikingShortsword_front.png",
+    "Warrior_VikingShortsword_side.png",
+    "Warrior_PlateKnightSSword_front.png",
+    "Warrior_PlateKnightSSword_side.png",
+    "Warrior_UrsagSHornBlade_front.png",
+    "Warrior_UrsagSHornBlade_side.png",
+    "Warrior_Katana_front.png",
+    "Warrior_Katana_side.png",
+    "Warrior_Kukri_front.png",
+    "Warrior_Kukri_side.png",
+    "Warrior_Longbow_front.png",
+    "Warrior_Longbow_side.png",
+    "Warrior_VikingBow_front.png",
+    "Warrior_VikingBow_side.png",
+    "Warrior_Crossbow_front.png",
+    "Warrior_Crossbow_side.png",
+    "Warrior_DwarfCrossbow_front.png",
+    "Warrior_DwarfCrossbow_side.png",
+    "Warlock_VikingShortsword_front.png",
+    "Warlock_VikingShortsword_side.png",
+    "Warlock_PlateKnightSSword_front.png",
+    "Warlock_PlateKnightSSword_side.png",
+    "Warlock_UrsagSHornBlade_front.png",
+    "Warlock_UrsagSHornBlade_side.png",
+    "Warlock_Katana_front.png",
+    "Warlock_Katana_side.png",
+    "Warlock_Kukri_front.png",
+    "Warlock_Kukri_side.png",
+    "Warlock_Longbow_front.png",
+    "Warlock_Longbow_side.png",
+    "Warlock_VikingBow_front.png",
+    "Warlock_VikingBow_side.png",
+    "Warlock_Crossbow_front.png",
+    "Warlock_Crossbow_side.png",
+    "Warlock_DwarfCrossbow_front.png",
+    "Warlock_DwarfCrossbow_side.png",
+    "Rogue_Dagger_front.png",
+    "Rogue_Dagger_side.png",
+    "Rogue_Kukri_front.png",
+    "Rogue_Kukri_side.png",
+    "Rogue_Longbow_front.png",
+    "Rogue_Longbow_side.png",
+    "Rogue_VikingBow_front.png",
+    "Rogue_VikingBow_side.png",
+    "Rogue_Crossbow_front.png",
+    "Rogue_Crossbow_side.png",
+    "Rogue_DwarfCrossbow_front.png",
+    "Rogue_DwarfCrossbow_side.png"
+   ]
   },
   {
    "step": "chance",
    "ok": true,
    "containers": 6000,
-   "holding": 1960,
-   "share": 0.3267,
+   "holding": 1943,
+   "share": 0.3238,
    "wanted": 0.33,
-   "sd_off": 0.55,
+   "sd_off": 1.02,
    "counts": {
-    "1": 319,
-    "2": 346,
-    "3": 339,
-    "4": 291,
-    "5": 318,
-    "6": 347
+    "1": 356,
+    "2": 338,
+    "3": 287,
+    "4": 344,
+    "5": 310,
+    "6": 308
    },
-   "counts_worst_sd": 2.16,
+   "counts_worst_sd": 2.24,
    "draw_mismatch": 0,
    "hall": [
     232,
@@ -4262,7 +4298,14 @@
     "Orc Warrior’s Armour",
     "Templar’s Armour",
     "Tiefling’s Armour"
-   ]
+   ],
+   "empty_opened": {
+    "container": 4,
+    "kind": "chest",
+    "message": "Empty: nothing inside",
+    "found": 0,
+    "counted": 1
+   }
   },
   {
    "step": "corpses",
@@ -4293,7 +4336,7 @@
    "step": "monsters",
    "ok": true,
    "tier1": {
-    "monsters": 132,
+    "monsters": 65,
     "kinds": [
      "Chicken",
      "Drinker",
@@ -4304,9 +4347,9 @@
      "Soldier"
     ],
     "wrong_tier": [],
-    "mean_hp": 50.8,
+    "mean_hp": 50.5,
     "tier_hp": 50.0,
-    "mean_damage": 11.4,
+    "mean_damage": 11.3,
     "tier_damage": 11.2,
     "speed_x": [
      1.0
@@ -4322,19 +4365,19 @@
     "ok": true
    },
    "tier2": {
-    "monsters": 13,
+    "monsters": 12,
     "kinds": [
      "Fat",
+     "Gunner",
      "Mask",
      "Monster",
-     "Orc_03",
-     "Parasit",
-     "Parasites_Fat"
+     "Parasites_Fat",
+     "Sufferer"
     ],
     "wrong_tier": [],
-    "mean_hp": 104.5,
+    "mean_hp": 94.8,
     "tier_hp": 100.0,
-    "mean_damage": 26.2,
+    "mean_damage": 23.6,
     "tier_damage": 25.0,
     "speed_x": [
      1.05
@@ -4350,20 +4393,22 @@
     "ok": true
    },
    "tier3": {
-    "monsters": 13,
+    "monsters": 14,
     "kinds": [
      "Alien",
      "Azrak",
      "Costalmed",
      "Dardan",
+     "Devourer",
      "Gnur",
      "Kanit",
+     "Orc_06",
      "Pangolin",
      "Tank",
      "Warrior_02_the_leopard"
     ],
     "wrong_tier": [],
-    "mean_hp": 158.8,
+    "mean_hp": 159.0,
     "tier_hp": 160.0,
     "mean_damage": 33.4,
     "tier_damage": 33.8,
@@ -4385,20 +4430,20 @@
    "tier4": {
     "monsters": 12,
     "kinds": [
-     "Bull_Warrior",
-     "Elephant_Warrior",
+     "Bug",
+     "Crocodile_Warrior",
+     "Daemon",
      "Exterminator",
      "Fantasy_Animal_raptor_mount",
      "Horned",
-     "Mutant",
      "Orc_02",
-     "Shell",
-     "Ursag"
+     "Orc_04",
+     "Ripper_dog"
     ],
     "wrong_tier": [],
-    "mean_hp": 233.8,
+    "mean_hp": 241.8,
     "tier_hp": 240.0,
-    "mean_damage": 42.8,
+    "mean_damage": 44.3,
     "tier_damage": 43.8,
     "speed_x": [
      1.15
@@ -4416,18 +4461,18 @@
     "ok": true
    },
    "tier5": {
-    "monsters": 12,
+    "monsters": 13,
     "kinds": [
+     "Alfa",
      "Hunter",
-     "Nasty",
      "Rock",
      "Spider",
      "Titan"
     ],
     "wrong_tier": [],
-    "mean_hp": 342.2,
+    "mean_hp": 334.8,
     "tier_hp": 340.0,
-    "mean_damage": 55.2,
+    "mean_damage": 54.2,
     "tier_damage": 55.0,
     "speed_x": [
      1.2
@@ -4453,18 +4498,6 @@
     "SLOW",
     "WEAKEN"
    ],
-   "WEAKEN": {
-    "monster": "Dardan",
-    "tier": 3,
-    "power": 1.0,
-    "hits": 1,
-    "poisoned": false,
-    "weakness": 0.15,
-    "slowness": 0.0,
-    "buffs": [
-     "WEAKENED -15%|5.0|0"
-    ]
-   },
    "SLOW": {
     "monster": "Tank",
     "tier": 3,
@@ -4475,6 +4508,18 @@
     "slowness": 0.2,
     "buffs": [
      "SLOWED -20%|3.0|0"
+    ]
+   },
+   "WEAKEN": {
+    "monster": "Warrior 02 (the leopard)",
+    "tier": 3,
+    "power": 1.0,
+    "hits": 1,
+    "poisoned": false,
+    "weakness": 0.15,
+    "slowness": 0.0,
+    "buffs": [
+     "WEAKENED -15%|5.0|0"
     ]
    },
    "POISON": {
@@ -4508,10 +4553,8 @@
   },
   {
    "step": "spells",
-   "ok": false,
-   "failed": [
-    "Ash Ward"
-   ],
+   "ok": true,
+   "failed": [],
    "learn": {
     "Warrior": {
      "weapons": [
@@ -4542,39 +4585,53 @@
    "spells": {
     "Fire Bolt": {
      "weapon": 0,
-     "particles": 71,
+     "particles": 83,
      "systems": 2,
      "hurt": 1,
      "damage_dealt": 25.0,
      "ok": true,
+     "monster": "Tank",
+     "flown_m": 4.6,
+     "burst_from_monster_m": 0.4,
      "released": 1
     },
     "Dark Fire": {
      "weapon": 1,
-     "particles": 20,
+     "particles": 19,
      "systems": 1,
      "hurt": 1,
      "damage_dealt": 60.8,
      "ok": true,
+     "monster": "Warrior 02 (the leopard)",
+     "flown_m": 5.3,
+     "burst_from_monster_m": 0.4,
      "released": 1
     },
     "Ash Ward": {
      "weapon": 2,
-     "no_place": true
+     "particles": 10,
+     "systems": 1,
+     "blocked": 3,
+     "health_lost": 0.0,
+     "ok": true,
+     "released": 1
     },
     "Frost Shard": {
      "weapon": 3,
-     "particles": 71,
+     "particles": 69,
      "systems": 2,
      "slowed": 1,
      "hurt": 1,
      "damage_dealt": 31.0,
      "ok": true,
+     "monster": "Gnur",
+     "flown_m": 6.6,
+     "burst_from_monster_m": 4.3,
      "released": 1
     },
     "Shadow Lash": {
      "weapon": 4,
-     "particles": 40,
+     "particles": 39,
      "systems": 1,
      "hurt": 1,
      "damage_dealt": 46.0,
@@ -4593,21 +4650,24 @@
      "weapon": 6,
      "particles": 281,
      "systems": 3,
-     "hurt": 2,
-     "damage_dealt": 100.0,
+     "hurt": 1,
+     "damage_dealt": 50.0,
      "ok": true,
+     "monster": "Kanit",
+     "flown_m": 11.2,
+     "burst_from_monster_m": 5.7,
      "released": 1
     },
     "Dispel Hex": {
      "weapon": 7,
-     "particles": 81,
+     "particles": 84,
      "systems": 3,
      "ok": true,
      "released": 1
     },
     "Life Drain": {
      "weapon": 8,
-     "particles": 247,
+     "particles": 243,
      "systems": 4,
      "hurt": 1,
      "damage_dealt": 52.2,
@@ -4617,16 +4677,19 @@
     },
     "Chain Lightning": {
      "weapon": 9,
-     "particles": 145,
-     "systems": 5,
-     "hurt": 2,
-     "damage_dealt": 125.8,
+     "particles": 91,
+     "systems": 3,
+     "hurt": 1,
+     "damage_dealt": 68.0,
      "ok": true,
+     "monster": "Pangolin",
+     "flown_m": 4.7,
+     "burst_from_monster_m": 0.4,
      "released": 1
     },
     "Bone Armor": {
      "weapon": 10,
-     "particles": 47,
+     "particles": 44,
      "systems": 2,
      "blocked": 5,
      "health_lost": 0.0,
@@ -4635,8 +4698,8 @@
     },
     "Plague Cloud": {
      "weapon": 11,
-     "particles": 20,
-     "systems": 2,
+     "particles": 59,
+     "systems": 3,
      "hurt": 1,
      "damage_dealt": 81.0,
      "ok": true,
@@ -4646,7 +4709,7 @@
      "weapon": 12,
      "particles": 44,
      "systems": 2,
-     "evaded_of_40": 32,
+     "evaded_of_40": 33,
      "veiled": true,
      "ok": true,
      "released": 1
@@ -4654,7 +4717,7 @@
     "Curse of Frailty": {
      "weapon": 13,
      "cursed": 1,
-     "particles": 101,
+     "particles": 109,
      "systems": 3,
      "hurt": 0,
      "damage_dealt": 0,
@@ -4663,26 +4726,32 @@
     },
     "Fireball": {
      "weapon": 14,
-     "particles": 253,
-     "systems": 2,
+     "particles": 237,
+     "systems": 1,
      "hurt": 1,
      "damage_dealt": 91.0,
      "ok": true,
+     "monster": "Orc 06",
+     "flown_m": 5.5,
+     "burst_from_monster_m": 0.4,
      "released": 1
     },
     "Raise Dead": {
      "weapon": 15,
-     "corpses_near": 1,
-     "particles": 275,
-     "systems": 2,
-     "raised": 1,
+     "corpses_near": 3,
+     "particles": 500,
+     "systems": 4,
+     "raised": 3,
      "alive": true,
      "ok": true,
+     "camera_ignores_ally": true,
+     "hidden_at_camera": true,
+     "shown_away": true,
      "released": 1
     },
     "Rune of Warding": {
      "weapon": 16,
-     "particles": 19,
+     "particles": 20,
      "systems": 2,
      "blow": 20.0,
      "ok": true,
@@ -4690,7 +4759,7 @@
     },
     "Blood Nova": {
      "weapon": 17,
-     "particles": 11,
+     "particles": 9,
      "systems": 2,
      "hurt": 1,
      "damage_dealt": 64.0,
@@ -4710,11 +4779,14 @@
     },
     "Soul Rend": {
      "weapon": 19,
-     "particles": 56,
+     "particles": 69,
      "systems": 3,
      "hurt": 1,
      "damage_dealt": 121.0,
      "ok": true,
+     "monster": "Insect",
+     "flown_m": 4.9,
+     "burst_from_monster_m": 0.1,
      "released": 1
     },
     "Blizzard": {
@@ -4723,25 +4795,25 @@
      "systems": 3,
      "slowed": 1,
      "hurt": 1,
-     "damage_dealt": 132.0,
+     "damage_dealt": 128.0,
      "ok": true,
      "released": 1
     },
     "Corpse Explosion": {
      "weapon": 21,
      "corpses_near": 1,
-     "particles_at_corpses": 156,
-     "particles": 156,
+     "particles_at_corpses": 158,
+     "particles": 158,
      "systems": 1,
      "hurt": 1,
-     "damage_dealt": 138.0,
+     "damage_dealt": 133.0,
      "corpses_left": 0,
      "ok": true,
      "released": 1
     },
     "Spectral Bulwark": {
      "weapon": 22,
-     "particles": 6,
+     "particles": 7,
      "systems": 1,
      "blocked": 2,
      "health_lost": 0.0,
@@ -4750,19 +4822,19 @@
     },
     "Hellfire Pillar": {
      "weapon": 23,
-     "particles": 32,
+     "particles": 35,
      "systems": 3,
      "hurt": 1,
-     "damage_dealt": 192.0,
+     "damage_dealt": 177.0,
      "ok": true,
      "released": 1
     },
     "Void Rift": {
      "weapon": 24,
-     "particles": 191,
+     "particles": 188,
      "systems": 3,
      "hurt": 1,
-     "damage_dealt": 190.0,
+     "damage_dealt": 177.0,
      "ok": true,
      "released": 1
     },
@@ -4778,7 +4850,7 @@
     },
     "Summon Abyssal Knight": {
      "weapon": 26,
-     "particles": 816,
+     "particles": 815,
      "systems": 2,
      "allies": 1,
      "champion": [
@@ -4792,7 +4864,7 @@
      "particles": 101,
      "systems": 1,
      "hurt": 1,
-     "damage_dealt": 172.0,
+     "damage_dealt": 128.0,
      "ok": true,
      "released": 1
     },
@@ -4806,10 +4878,10 @@
     },
     "Apocalypse": {
      "weapon": 29,
-     "particles": 715,
+     "particles": 760,
      "systems": 3,
      "hurt": 1,
-     "damage_dealt": 182.0,
+     "damage_dealt": 172.0,
      "ok": true,
      "released": 1
     }
@@ -4851,8 +4923,8 @@
      196.0
     ],
     "health_now": [
-     130.0,
-     186.0
+     140.0,
+     196.0
     ]
    },
    "Rogue": {
@@ -4919,19 +4991,26 @@
    "quit": "quit",
    "resumed": true,
    "escape_toggles": true,
-   "fire_at_half_db": -6.1
+   "fire_at_half_db": -6.04
   }
  ],
  "shots": [
-  "rdm5_full10_menu_summoner.png",
-  "rdm5_full10_armour_Warrior.png",
-  "rdm5_full10_armour_Warlock.png",
-  "rdm5_full10_armour_Rogue.png",
-  "rdm5_full10_follow.png",
-  "rdm5_full10_found.png",
-  "rdm5_full10_inventory_top.png",
-  "rdm5_full10_inventory_bottom.png",
-  "rdm5_full10_tier_seal.png",
+  "rdm5_w3full_warrior3_armour.png",
+  "rdm5_w3full_warrior3_sword.png",
+  "rdm5_w3full_warrior3_map.png",
+  "rdm5_w3full_armour_Warrior.png",
+  "rdm5_w3full_armour_Warlock.png",
+  "rdm5_w3full_armour_Rogue.png",
+  "rdm5_w3full_follow.png",
+  "rdm5_w3full_found.png",
+  "rdm5_w3full_inventory_top.png",
+  "rdm5_w3full_inventory_bottom.png",
+  "rdm5_w3full_repair_list.png",
+  "rdm5_w3full_crafting.png",
+  "rdm5_w3full_minimap_t1.png",
+  "rdm5_w3full_bigmap_t1.png",
+  "rdm5_w3full_bigmap_t2.png",
+  "rdm5_w3full_tier_seal.png",
   "Warrior_VikingShortsword_front.png",
   "Warrior_VikingShortsword_side.png",
   "Warrior_PlateKnightSSword_front.png",
@@ -4980,43 +5059,39 @@
   "Rogue_Crossbow_side.png",
   "Rogue_DwarfCrossbow_front.png",
   "Rogue_DwarfCrossbow_side.png",
-  "rdm5_full10_repair_list.png",
-  "rdm5_full10_crafting.png",
-  "rdm5_full10_minimap_t1.png",
-  "rdm5_full10_bigmap_t1.png",
-  "rdm5_full10_bigmap_t2.png",
-  "rdm5_full10_monsters_tier1.png",
-  "rdm5_full10_monsters_tier2.png",
-  "rdm5_full10_spell_fire_bolt.png",
-  "rdm5_full10_spell_dark_fire.png",
-  "rdm5_full10_spell_frost_shard.png",
-  "rdm5_full10_spell_shadow_lash.png",
-  "rdm5_full10_spell_iron_skin.png",
-  "rdm5_full10_spell_bone_spear.png",
-  "rdm5_full10_spell_dispel_hex.png",
-  "rdm5_full10_spell_life_drain.png",
-  "rdm5_full10_spell_chain_lightning.png",
-  "rdm5_full10_spell_bone_armor.png",
-  "rdm5_full10_spell_plague_cloud.png",
-  "rdm5_full10_spell_shadow_veil.png",
-  "rdm5_full10_spell_curse_of_frailty.png",
-  "rdm5_full10_spell_fireball.png",
-  "rdm5_full10_spell_raise_dead.png",
-  "rdm5_full10_spell_rune_of_warding.png",
-  "rdm5_full10_spell_blood_nova.png",
-  "rdm5_full10_spell_mirror_of_retribution.png",
-  "rdm5_full10_spell_soul_rend.png",
-  "rdm5_full10_spell_blizzard.png",
-  "rdm5_full10_spell_corpse_explosion.png",
-  "rdm5_full10_spell_spectral_bulwark.png",
-  "rdm5_full10_spell_hellfire_pillar.png",
-  "rdm5_full10_spell_void_rift.png",
-  "rdm5_full10_spell_undying_pact.png",
-  "rdm5_full10_spell_summon_abyssal_knight.png",
-  "rdm5_full10_spell_meteor_storm.png",
-  "rdm5_full10_spell_null_sanctum.png",
-  "rdm5_full10_spell_apocalypse.png",
-  "rdm5_full10_menu.png"
+  "rdm5_w3full_monsters_tier1.png",
+  "rdm5_w3full_monsters_tier2.png",
+  "rdm5_w3full_spell_fire_bolt.png",
+  "rdm5_w3full_spell_dark_fire.png",
+  "rdm5_w3full_spell_ash_ward.png",
+  "rdm5_w3full_spell_frost_shard.png",
+  "rdm5_w3full_spell_shadow_lash.png",
+  "rdm5_w3full_spell_iron_skin.png",
+  "rdm5_w3full_spell_bone_spear.png",
+  "rdm5_w3full_spell_dispel_hex.png",
+  "rdm5_w3full_spell_life_drain.png",
+  "rdm5_w3full_spell_chain_lightning.png",
+  "rdm5_w3full_spell_bone_armor.png",
+  "rdm5_w3full_spell_plague_cloud.png",
+  "rdm5_w3full_spell_shadow_veil.png",
+  "rdm5_w3full_spell_curse_of_frailty.png",
+  "rdm5_w3full_spell_fireball.png",
+  "rdm5_w3full_spell_raise_dead.png",
+  "rdm5_w3full_spell_rune_of_warding.png",
+  "rdm5_w3full_spell_blood_nova.png",
+  "rdm5_w3full_spell_mirror_of_retribution.png",
+  "rdm5_w3full_spell_soul_rend.png",
+  "rdm5_w3full_spell_blizzard.png",
+  "rdm5_w3full_spell_corpse_explosion.png",
+  "rdm5_w3full_spell_spectral_bulwark.png",
+  "rdm5_w3full_spell_hellfire_pillar.png",
+  "rdm5_w3full_spell_void_rift.png",
+  "rdm5_w3full_spell_undying_pact.png",
+  "rdm5_w3full_spell_summon_abyssal_knight.png",
+  "rdm5_w3full_spell_meteor_storm.png",
+  "rdm5_w3full_spell_null_sanctum.png",
+  "rdm5_w3full_spell_apocalypse.png",
+  "rdm5_w3full_menu.png"
  ],
  "error": null
 }

@@ -1,0 +1,42 @@
+{
+ "tag": "w3c",
+ "plan": [
+  "select"
+ ],
+ "level": "random_dungeonmagic_level5_select",
+ "steps": [
+  {
+   "step": "select",
+   "ok": true,
+   "heroes": [
+    "Warrior",
+    "Mage",
+    "Warlock",
+    "Rogue"
+   ],
+   "warrior_mesh": "SK_JRPG_Warrior3",
+   "first": "Warrior",
+   "picked": "Rogue",
+   "seen": [
+    false,
+    false,
+    false,
+    true
+   ],
+   "target": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5",
+   "opened": "/Game/RandomDungeon/Maps/random_dungeonmagic_level5?Hero=Rogue",
+   "dungeon_hero": "Rogue",
+   "pawn": "BP_RDM3_RogueCharacter_C",
+   "want_pawn": "BP_RDM3_RogueCharacter_C",
+   "health_mana": [
+    100.0,
+    0.0
+   ]
+  }
+ ],
+ "shots": [
+  "rdm5_w3c_menu_warrior.png",
+  "rdm5_w3c_menu_rogue.png"
+ ],
+ "error": null
+}

@@ -1,8 +1,9 @@
 """random_dungeonmagic_level5 test: the Summoner, the armour she finds and wears, up to six items a container
 (play-in-editor; 828 with -lv 5 starts it). Steps (plan, comma separated):
-  select   (the menu level random_dungeonmagic_level5_select) five heroes, the Summoner last; Left from the first
-           shows her and only her figure; Enter opens random_dungeonmagic_level5?Hero=Summoner, where her pawn is
-           BP_RDM5_Summoner3Character with her hit points and mana
+  select   (the menu level random_dungeonmagic_level5_select) four heroes, Warrior, Mage, Warlock, Rogue (the Summoner off
+           the menu since 2026-10-26), the Warrior's figure Warrior3's mesh; Left from the first shows the Rogue and only
+           her figure; Enter opens random_dungeonmagic_level5?Hero=Rogue, where her pawn is BP_RDM3_RogueCharacter with
+           her hit points and mana
   loot     (the dungeon) the great hall's containers hold the tier-1 sets of loot_table.json's start_room_armour
            between them; any other armour in the start section (tier 1) or in a generated tier-2 section is of that
            tier; every container of the start section holds 1 to 6 items, and over 6000 more containers each count from
@@ -62,9 +63,14 @@
            blades and ranged), the others stay in her pack as weapons she cannot wield (the Mage and the Summoner: all,
            and using one says she cannot); each one drawn: its mesh in her hand with its handle's grip point within 7 cm
            of her palm, its damage (8 + 3 x rating, her bonus), its attack's length (the table's speed: 1.6 - (speed - 1)
-           x 1.05 / 9 s); a two-handed sword is wielded as her one-handed sword (her sword's clips, nothing in her other hand at the blow); a blow that lands
+           x 1.05 / 9 s); a two-handed sword: the Warrior (Warrior3) swings it with her own slash, its grip point where her left
+           palm comes along the hilt (her right palm within 7 cm of its place below it); the Warlock as her one-handed sword
+           (her sword's clips); nothing in the other hand at the blow; a blow that lands
            takes 1 off its durability, and at 0 it breaks: gone from her weapons, her first one drawn, "broke"; pictures
            from in front of her (the face camera, her alone) at the blow
+  warrior3 (2026-10-26) as the Warrior, Warrior3: her pawn and mesh; F at a great hall container; the anvil: crafting
+           and a two-handed sword broken down; plate armour on her own fit; her sword and shield kill a monster; her
+           slash lands; a blow taken plays her flinch; M opens the big map
   (the user's list of 2026-10-24)
   chance   one container in three holds anything (6000 drawn, within 4.5 sd), then 1 to 6 items a sixth each; the great
            hall's armour is in its containers whatever the draw; a container of the start section that holds nothing,
@@ -181,10 +187,18 @@ def step_select():
     yield from wait(0.6)
     names = [str(h.name) for h in s.heroes]
     first = str(s.get_hero_name())
+    # (the Warrior's figure is Warrior3 (862): her mesh on the turntable)
+    def fig_mesh(i):
+        try:
+            sk_ = s.figures[i].get_component_by_class(unreal.SkeletalMeshComponent); return sk_.get_skinned_asset().get_name()
+        except Exception: return None
+    warrior_mesh = fig_mesh(0)
+    shot("menu_warrior"); yield from rwait(1.5)
+    # (Left from the first wraps round to the last: the Rogue, since the Summoner is off the menu)
     yield from press("Left", sim=sim); yield from wait(0.2)
     shown = [s.is_figure_shown(i) for i in range(len(names))]
     pick = str(s.get_hero_name()); target = str(s.target_level)
-    shot("menu_summoner"); yield from rwait(1.5)
+    shot("menu_rogue"); yield from rwait(1.5)
     sim(key("Enter"), True)
     opened = ""; G["traveling"] = True; t0 = time.time(); arrived = False
     while time.time() - t0 < 60:
@@ -200,12 +214,13 @@ def step_select():
     c = cb() if arrived else None
     hero = str(G["gen"].current_hero) if arrived else None
     pawn = G["pawn"].get_class().get_name() if arrived else None
-    want_pawn = os.path.basename(HJ["pawn"]) + "_C"
+    RJ = next(h for h in json.load(open(os.path.join(SA, "random_dungeon_magic4", "heroes.json"), encoding="utf-8"))["heroes"] if h["name"] == "Rogue")
+    want_pawn = os.path.basename(RJ["pawn"]) + "_C"
     stats = [c.get_max_health(), c.get_max_mana()] if c else None
-    ok = (len(names) == 5 and names[-1] == "Summoner" and first == "Warrior" and pick == "Summoner" and shown == [False] * 4 + [True]
-          and target.endswith(LEVEL) and opened.endswith(LEVEL + "?Hero=Summoner") and arrived and hero == "Summoner" and pawn == want_pawn
-          and stats == [float(HJ["health"]), float(HJ["mana"])])
-    step_result("select", ok, heroes=names, first=first, picked=pick, seen=shown, target=target, opened=opened, dungeon_hero=hero, pawn=pawn,
+    ok = (names == ["Warrior", "Mage", "Warlock", "Rogue"] and warrior_mesh == "SK_JRPG_Warrior3" and first == "Warrior" and pick == "Rogue" and shown == [False] * 3 + [True]
+          and target.endswith(LEVEL) and opened.endswith(LEVEL + "?Hero=Rogue") and arrived and hero == "Rogue" and pawn == want_pawn
+          and stats == [float(RJ["health"]), float(RJ["mana"])])
+    step_result("select", ok, heroes=names, warrior_mesh=warrior_mesh, first=first, picked=pick, seen=shown, target=target, opened=opened, dungeon_hero=hero, pawn=pawn,
                 want_pawn=want_pawn, health_mana=stats)
 
 # ------------------------------------------------------------------------------------------------ the loot
@@ -326,7 +341,7 @@ def step_wear():
           and mage["switched"] and not mage["wore"] and mage["worn"] == "None" and mage["meshes"] == 0 and "wears no armour" in mage["message"])
     step_result("wear", ok, sets=out, taken_off=off, mage=mage)
 
-HERO_MESH = {"Warrior": "Fem5", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue"}
+HERO_MESH = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue"}
 def step_heroarmour():
     """each hero tries on all five sets: the weights she wears go on with her own fit, the others are refused with why;
     her heaviest set stays on her bones as she runs"""
@@ -636,8 +651,9 @@ def step_tierloot():
         ok = ok and e["ok"]; res[f"tier{t}"] = e
     step_result("tierloot", ok, **res)
 
+W3SLASH = json.load(open(os.path.join(SA, "random_dungeon_magic5", "w5_clips", "Warrior3", "slash.json")))
 HILT_SPACING = {}
-for _h, _ch in (("Warrior", "Fem5"), ("Warlock", "DarkCaster")):
+for _h, _ch in (("Warrior", "Warrior3"), ("Warlock", "DarkCaster")):
     try: HILT_SPACING[_h] = float(json.load(open(os.path.join(SA, "random_dungeon_magic5", "w5_clips", _ch, "w5_times.json")))["left_on_hilt"])
     except Exception: pass
 
@@ -687,6 +703,10 @@ def step_weapons():
             c.select_weapon(i); yield
             comp = c.get_weapon_mesh(); bone = str(wd.hand_bone)
             xf = comp.get_world_transform(); grip = xf.transform_location(V(*fr["origin"]))
+            # (Warrior3's slash: the grip point lies where the clip's left palm comes along the hilt, the right palm
+            # slash.json's left_on below it)
+            slash = w["type"] == "two handed sword" and hero == "Warrior"
+            if slash: grip = grip - xf.transform_direction(V(*fr["x"])).normal() * W3SLASH["left_on"]
             palm = body.get_socket_transform(bone, unreal.RelativeTransformSpace.RTS_WORLD).transform_location(pl if bone == "hand_l" else pr)
             bonus = (g.melee_bonus if not wd.get_editor_property("spell") else g.ranged_bonus)
             h = {"weapon": name, "mesh_ok": comp.static_mesh == wd.mesh, "bone": bone, "grip_to_palm_cm": round((grip - palm).length(), 1),
@@ -711,7 +731,8 @@ def step_weapons():
             if lens: h["attack_s"] = round(sum(lens) / len(lens), 3); h["attacks"] = len(lens); h["want_s"] = round(cycle(w["speed"]), 3)
             if w["type"] == "two handed sword":
                 h["off_hand_shown"] = any(offs)
-                h["sword_clips"] = [a.get_name() for a in wd.attacks] == [a.get_name() for a in g.weapons[0].attacks]
+                if slash: h["slash_clips"] = [a.get_name() for a in wd.attacks] == ["AS_Warrior3_Slash"]
+                else: h["sword_clips"] = [a.get_name() for a in wd.attacks] == [a.get_name() for a in g.weapons[0].attacks]
             hands.append(h)
         # a blow that lands takes 1 off; at 0 it breaks and she draws her first weapon
         i = n0; name = took[0]; c.select_weapon(i); yield
@@ -748,6 +769,8 @@ def step_weapons():
             if not (h["mesh_ok"] and h["grip_to_palm_cm"] < 7.0 and abs(h["damage"] - h["want_damage"]) < 0.01 and abs(h.get("attack_s", -9) - h.get("want_s", 9)) < 0.03): return False
             # (a two-handed sword wielded as her one-handed sword: her sword's clips, nothing in her other hand)
             if "sword_clips" in h and not (h["sword_clips"] and not h["off_hand_shown"]): return False
+            # (the Warrior, Warrior3: her own slash, nothing in her other hand)
+            if "slash_clips" in h and not (h["slash_clips"] and not h["off_hand_shown"]): return False
         b = e["break"]
         return b.get("wear_after_one") == 1.0 and b["broke"] == 1 and b["last_broken"] == b["weapon"] and not b["still_carried"] and b["now_in_hand"] != b["weapon"] and "broke" in b["message"]
     ok = all(hero_ok(h, e) for h, e in out.items()) and len(out) == 5
@@ -1383,7 +1406,118 @@ def step_menu():
           and res["resumed"] and res["escape_toggles"] and db is not None and -8.0 < db < -4.0)
     step_result("menu", ok, **res)
 
-STEPS = {"select": step_select, "loot": step_loot, "wear": step_wear, "heroarmour": step_heroarmour, "follow": step_follow, "damage": step_damage, "ui": step_ui,
+def step_warrior3():
+    """(2026-10-26) the Warrior is Warrior3 (862): as her, everything the Warrior does. Her pawn and mesh, her hit points;
+    F at a great hall container: what she found is its loot list (weapons she wields join her weapons); F at the hall's
+    anvil opens the crafting panel and leather strips are made; a two-handed sword broken down there; plate armour on
+    (her own fit, SK_Warrior3_<set>); her sword and shield kill a monster of the start section; a two-handed sword's
+    blow (her slash) lands; a monster's blow plays her flinch; M opens the big map"""
+    g = G["gen"]; c = yield from restart(); quiet(True); res = {}
+    ok_sw = g.switch_hero("Warrior"); yield from wait(0.8); refresh(); c = cb(); c.set_scripted_only(False); p = G["pawn"]
+    mesh = p.mesh.get_skinned_asset().get_name()
+    res["who"] = {"switched": bool(ok_sw), "pawn": p.get_class().get_name(), "mesh": mesh, "health": c.get_max_health(), "weapons": [str(w.name) for w in g.weapons]}
+    S0 = I2(0, 0); s0 = g.get_section(S0); hall = list(g.get_start_room_containers()); hall_room = s0.room_at(g.get_start_room_center())
+    # (a container by F)
+    fpress = None
+    for i in hall:
+        cl = s0.get_container_location(i); lst = [str(x) for x in g.loot_list_of(S0, i)]
+        if not lst or s0.get_container_open_alpha(i) > 0.0: continue
+        for k in range(16):
+            a = k * math.pi / 8; q = V(cl.x + math.cos(a) * 130, cl.y + math.sin(a) * 130, 100)
+            if s0.room_at(q) < 0: continue
+            d = g.describe_nearest(q, 260.0) or ""
+            if not d.startswith("open") or "door" in d: continue
+            p.set_actor_location(q, False, True); yield from wait(0.3)
+            n_w = len(g.weapons); f0 = g.items_found; yield from press("F"); yield from wait(0.6)
+            opened = [j for j in hall if s0.get_container_open_alpha(j) > 0.0]
+            if opened:
+                j = opened[0]; lj = [str(x) for x in g.loot_list_of(S0, j)]
+                fpress = {"container": j, "found": g.items_found - f0, "list": lj, "found_list": [str(x) for x in g.last_found_list], "weapons_joined": len(g.weapons) - n_w,
+                          "weapons_in_list": sum(1 for x in lj if x in {w_["name"] for w_ in W5["weapons"]})}
+            break
+        if fpress: break
+    res["container"] = fpress
+    # (the anvil: crafting)
+    a = next((x for x in s0.get_anvil_points() if s0.room_at(x) == hall_room), None); craft = {}
+    if a is not None:
+        for k in range(16):
+            ang = k * math.pi / 8; q = V(a.x + math.cos(ang) * 150, a.y + math.sin(ang) * 150, 100)
+            if s0.room_at(q) != hall_room: continue
+            p.set_actor_location(q, False, True); yield from wait(0.3)
+            if g.describe_nearest(p.get_actor_location(), 260.0) == "use the anvil": break
+        give = {"Straw Rope": 5, "Glue": 5, "Cured Leather Strip": 5, "Hardwood": 2, "Timber": 2, "Wood Log": 3}
+        for n_, k_ in give.items(): c.add_item(n_, k_)
+        s_before = c.get_item_count("Leather Strips")
+        yield from press("F"); yield from rwait(0.3)
+        craft["open"] = c.is_crafting_open(); cl_ = [str(x) for x in c.get_craft_lines()]
+        li = next((i for i, l in enumerate(cl_) if "Leather Strips" in l), 0)
+        while c.get_craft_cursor() != li: yield from press("S")
+        yield from press("Enter"); craft["strips_made"] = c.get_item_count("Leather Strips") - s_before; craft["message"] = str(c.message)
+        # (and a two-handed sword broken down there)
+        blade = next(w_["name"] for w_ in W5["weapons"] if w_["type"] == "two handed sword"); c.add_item(blade)
+        cl_ = [str(x) for x in c.get_craft_lines()]; li = next((i for i, l in enumerate(cl_) if l.startswith("breakdown|" + blade + "|")), None)
+        if li is not None:
+            while c.get_craft_cursor() != li: yield from press("S")
+            yield from press("Enter")
+        craft["broke_down"] = li is not None and not any(l.startswith("weapon|" + blade) for l in lines(c)); craft["breakdown_message"] = str(c.message)
+        yield from press("F"); yield from rwait(0.3); craft["closed"] = not c.is_crafting_open()
+    res["craft"] = craft
+    # (plate armour, her own fit)
+    heavy = [s_["title"] for s_ in AJ["sets"] if s_["weight"] == "heavy"]; pl = "Plate Armour" if "Plate Armour" in heavy else heavy[0]
+    c.add_item(pl, 1); worn = c.wear_armour(pl); yield from wait(0.3); ms_ = list(c.get_armour_meshes())
+    res["armour"] = {"set": pl, "worn": bool(worn) and str(c.get_worn_armour()) == pl, "meshes": [m.skeletal_mesh_asset.get_name() if m.skeletal_mesh_asset else None for m in ms_],
+                     "follows_her": all(m.leader_pose_component == p.mesh and m.get_attach_parent() == p.mesh for m in ms_)}
+    shot("warrior3_armour"); yield from rwait(1.0)
+    c.wear_armour(pl)            # (worn again: off)
+    # (her sword and shield kill a monster)
+    sw = next(i for i, w_ in enumerate(g.weapons) if str(w_.name) == "Sword"); c.select_weapon(sw); yield
+    ms = start_monsters(); ms.sort(key=lambda m: (m.get_actor_location() - p.get_actor_location()).length())
+    target = None
+    for m in ms:
+        if stand_off(m, 110): target = m; break
+    h0 = c.hits_landed; t0 = now(); kills0 = g.get_editor_property("monsters_killed") if hasattr(g, "monsters_killed") else None
+    while target is not None and alive(target) and now() - t0 < 25.0:
+        if not c.is_attacking():
+            if (target.get_actor_location() - p.get_actor_location()).length() > 200: stand_off(target, 110)
+            c.start_attack()
+        yield
+    res["sword"] = {"hits": c.hits_landed - h0, "killed": target is not None and not alive(target), "attacks": [x.get_name() for x in g.weapons[sw].attacks]}
+    shot("warrior3_sword"); yield from rwait(1.0)
+    # (a two-handed sword: her slash lands)
+    c.add_item(blade); bi = next(i for i, w_ in enumerate(g.weapons) if str(w_.name) == blade); c.select_weapon(bi); yield
+    ms = start_monsters(); ms.sort(key=lambda m: (m.get_actor_location() - p.get_actor_location()).length())
+    for m in ms:
+        if stand_off(m, 120): break
+    h0 = c.hits_landed; t0 = now(); shot_done = False
+    while c.hits_landed == h0 and now() - t0 < 12.0:
+        if not c.is_attacking(): c.start_attack()
+        if not shot_done and c.is_attacking() and now() - t0 > 0.6: shot("warrior3_slash"); shot_done = True
+        yield
+    res["slash"] = {"hits": c.hits_landed - h0, "attacks": [x.get_name() for x in g.weapons[bi].attacks]}
+    # (a blow taken: her flinch)
+    quiet(False); taken0 = c.hits_taken; t0 = now(); flinch = None; ai = p.mesh.get_anim_instance()
+    while now() - t0 < 20.0:
+        if c.hits_taken > taken0:
+            yield; mt = ai.get_current_active_montage() if ai else None
+            flinch = mt is not None; break
+        yield
+    quiet(True)
+    res["flinch"] = {"blows_taken": c.hits_taken - taken0, "montage_after_blow": flinch, "get_hit": g.weapons[sw].get_hit.get_name() if g.weapons[sw].get_hit else None}
+    # (the big map)
+    hud = G["pc"].get_hud(); yield from press("M"); yield from rwait(0.4)
+    res["map"] = {"tiers": sorted(set(str(x) for x in hud.get_map_tier_labels()))}; shot("warrior3_map"); yield from rwait(1.0); yield from press("M")
+    g.switch_hero(g.get_editor_property("default_hero")); yield from wait(0.5); refresh(); quiet(False)
+    fp = res["container"]; cr = res["craft"]; am = res["armour"]
+    ok = (res["who"]["switched"] and res["who"]["pawn"] == "BP_RDM5_Warrior3Character_C" and mesh == "SK_JRPG_Warrior3" and res["who"]["health"] == 140.0
+          and fp is not None and fp["found"] == len(fp["list"]) and fp["found_list"] == fp["list"] and fp["weapons_joined"] == fp["weapons_in_list"]
+          and cr.get("open") and cr.get("strips_made") == 1 and cr.get("broke_down") and cr.get("closed")
+          and am["worn"] and am["meshes"] and all(str(m_).startswith("SK_Warrior3_") for m_ in am["meshes"]) and am["follows_her"]
+          and res["sword"]["killed"] and res["sword"]["hits"] >= 1 and all(x.endswith("_Warrior3") for x in res["sword"]["attacks"])
+          and res["slash"]["hits"] >= 1 and res["slash"]["attacks"] == ["AS_Warrior3_Slash"]
+          and res["flinch"]["blows_taken"] >= 1 and res["flinch"]["montage_after_blow"] and res["map"]["tiers"])
+    step_result("warrior3", ok, **res)
+
+STEPS = {"warrior3": step_warrior3, "select": step_select, "loot": step_loot, "wear": step_wear, "heroarmour": step_heroarmour, "follow": step_follow, "damage": step_damage, "ui": step_ui,
          "tiers": step_tiers, "tierloot": step_tierloot, "weapons": step_weapons, "armourtable": step_armourtable, "repair": step_repair, "craft": step_craft,
          "maps": step_maps, "fire": step_fire, "chance": step_chance, "corpses": step_corpses, "monsters": step_monsters, "abilities": step_abilities,
          "spells": step_spells, "rings": step_rings, "breakdown": step_breakdown, "menu": step_menu}

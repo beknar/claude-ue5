@@ -53,7 +53,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
 LV = sys.argv[4] if len(sys.argv) > 4 else "1"
-Q5 = LV == "5h"; C5 = LV == "5c"; S5 = LV == "5s"; LV = "5" if (Q5 or C5 or S5) else LV        # ("5h": level 5's four heroes' weapons reel, 815's run5h: cine_quartet_<hero>.json; "5c": run5c, cine_craft_<hero>.json; "5s": run5s, cine_spells_<hero>.json)
+X5 = LV == "5x"; Q5 = LV == "5h"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; LV = "5" if (Q5 or C5 or S5) else LV        # ("5x": the four heroes' capabilities reel, 815's run5x: cine_caps_<hero>.json, run5c's captions and the tiers' part)
+        # ("5h": level 5's four heroes' weapons reel, 815's run5h: cine_quartet_<hero>.json; "5c": run5c, cine_craft_<hero>.json; "5s": run5s, cine_spells_<hero>.json)
 K5 = C5 or S5                 # (the anvils and the rooms' tiers on the maps, the crafting panel)
 L5 = LV == "5"; L4 = LV == "4" or L5     # (level 5: level 4's HUD and the armour)
 HERO = sys.argv[5] if len(sys.argv) > 5 else ("Summoner" if L5 else "Rogue")            # (level 4: whose run: 815 wrote cine_<hero>.json)
@@ -66,7 +67,7 @@ def iicon(name): return UI.icons.get(name) if UI else None
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("" if LV == "1" else LV))
 SND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_combat")      # (the sounds are the combat level's)
-R = json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_craft_{HERO.lower()}.json" if C5 else f"cine_spells_{HERO.lower()}.json" if S5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
+R = json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_caps_{HERO.lower()}.json" if X5 else f"cine_craft_{HERO.lower()}.json" if C5 else f"cine_spells_{HERO.lower()}.json" if S5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
 W5 = L5 and (HERO == "Warrior" or Q5 or C5 or S5)          # (level 5's weapons and tiers reels: 815's run5w, the Warrior; run5h, any of four; run5c's tiers too)
 # (who wields what: the weapons table's rules, weapons_table.json "who")
 WHO = {"Warrior": "the Warrior wields every weapon of the table", "Warlock": "the Warlock wields every weapon of the table",
@@ -1060,6 +1061,29 @@ def c5_caps():
             l3 = lured(e) or l3 or "the monsters' strength follows the tier of their set"
             out.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), max(abs(e["section"][0]), abs(e["section"][1])) + 1),
                         ["%.0f hit points, %.0f damage a blow  ·  she has %.0f" % (e["its_hit_points"], e["its_damage"], C["max_health"]), l2, l3], gold))
+    if X5:
+        # (run5x: her fights, the tiers' part: the card, the sealed grating, the tier opening, tier 3 generated, its map)
+        for i, e in enumerate(FIGHTS):
+            if CARD and CARD[0] - 0.2 <= e["t"] <= CARD[1]: continue
+            end = next((k["t"] for k in KILLS if k["t"] > e["t"]), e["t"] + 6.0) + 1.2
+            if i + 1 < len(FIGHTS): end = min(end, FIGHTS[i + 1]["t"] - 0.1)
+            tr = max(abs(e["section"][0]), abs(e["section"][1])) + 1
+            lm = LAST_M if (LAST_M and abs(LAST_M["t"] - e["t"]) < 0.5) else None
+            l2 = ("tier 2's last set: one monster left in it" if lm else "a monster of tier %d: its hit points and blows grow with the tier of its set" % tr)
+            l3 = ("when it falls every set of tier 2 is cleared and tier 3 opens" if lm else lured(e) or WHO.get(HERO, ""))
+            out.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), ["%.0f hit points, %.0f damage a blow  ·  she has %.0f" % (e["its_hit_points"], e["its_damage"], C["max_health"]), l2, l3], gold))
+        if CARD:
+            t_lm = LAST_M["t"] if LAST_M else CARD[1] + 6.0
+            out.append((CARD[1] - 0.2, t_lm, "A SEALED GRATING  ·  TIER 2 TO TIER 3", ["the ways out of a tier are barred until all of its sets are cleared:",
+                        "every room walked into, every chest and trunk opened, every monster killed  ·  under the minimap: each tier's sets cleared"], (255, 200, 120)))
+        if OPENED:
+            out.append((OPENED["t"], OPENED["t"] + 4.4, OPENED["text"], ["the last set of tier 2 cleared: the gratings toward tier 3 are gone",
+                        "tier 3's 16 sets open tier 4's 24, and those open tier 5, the last: past it stand walls"], (255, 200, 120)))
+            g3 = next((e for e in GENS if e["t"] > OPENED["t"]), None)
+            if g3: out.append((max(g3["t"], OPENED["t"] + 4.5), max(g3["t"], OPENED["t"] + 4.5) + 4.2, ("" if LETTERS else "▲ ") + "TIER 3 IS GENERATED AS SHE NEARS IT",
+                               ["a set of 252 m x 252 m: stronger monsters, and the table's weapons and armour of tier 3 in its chests", "never saved: a new dungeon every time"], lin(CYAN)[:3]))
+        for e in [x for x in maps_ if CARD and x["t"] > CARD[1]]:
+            out.append((e["t"], close(e), "M  ·  THE BIG MAP IN TIER 3", ["the rooms she has found, each written with its tier", "the sealed ways show as red crosses until their tier opens"], gold))
     return out
 def r_arm_at(t):
     """the set she wore at t (the rows' arm)"""
@@ -1521,7 +1545,8 @@ def overlay(f):
     if a > 0:
         d.text((44 * K, 34 * K), "random_dungeonmagic_level" + ("" if LV == "1" else LV), font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
         d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  spells from tomes, rings, monsters by tier, the dead stay, the menu" % HERO.lower() if S5 else
-                                  "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  armour by its table, loot by tier, repair items made at anvils" % HERO.lower() if C5 else
+                                  "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  the map, chests, armour, the anvil, fights, new rooms tier by tier" % HERO.lower() if X5 else
+                 "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  armour by its table, loot by tier, repair items made at anvils" % HERO.lower() if C5 else
                                   "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), WHO[HERO].replace("the %s " % HERO, "she ", 1)) if Q5 else
                                   "procedural dungeon  \u00b7  the warrior, chosen in the menu  \u00b7  a weapons table and five tiers of rooms" if W5 else
                                   "procedural dungeon  \u00b7  the summoner, chosen in the menu  \u00b7  five armour sets to find and wear" if L5 else
@@ -1750,10 +1775,13 @@ def overlay(f):
         text_c(d, (W * K / 2, H * K * 0.36), "TIER 3" if S5 else "TIER 2", f_title, (255, 214, 140, int(255 * k)))
         for i, s_ in enumerate(["the eight sets round the great hall's set: tier 2",
                                 "for the reel she is put in one of them, generated as she arrives",
-                                "its rooms are written TIER 2 on the maps"] if C5 else
+                                "its rooms are written TIER 2 on the maps"] if (C5 and not X5) else
                                ["the sixteen sets round tier 2: tier 3, open once every set of tiers 1 and 2 is cleared",
                                 "for the reel she is put in one of them, generated as she arrives, with her hit points and mana full",
                                 "its monsters are tier 3's: stronger, and their blows carry poison, weakness or slowness"] if S5 else
+                               ["tier 2 opens once the start set is cleared, tier 3 once all of tier 2's eight sets are: every room, chest and monster",
+                                "for the reel the generator's debug clear does the start set, seven of tier 2's and all but one monster of the eighth",
+                                "she stands in the eighth, at a grating into tier 3"] if X5 else
                                ["the eight sets round the start square, each to clear: every room, every chest and trunk, every monster",
                                 "for the reel the generator's debug clear does seven of them and all but one monster of the eighth",
                                 "she stands in the eighth, at a grating into tier 3"]):

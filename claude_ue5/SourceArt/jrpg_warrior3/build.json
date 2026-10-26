@@ -1,0 +1,27 @@
+{
+ "clips": {
+  "Box_01": 54,
+  "Box_03": 62,
+  "Clap": 329,
+  "Dance_01": 557,
+  "Front_kick_02": 34,
+  "Hit_to_body_01": 32,
+  "Hit_to_body_02": 42,
+  "Hit_to_head": 45,
+  "Hit_to_side": 31,
+  "Hit_to_stomach": 38,
+  "Idle": 369,
+  "Run": 31,
+  "Slash": 159,
+  "Walk": 57,
+  "Wave_goodbye_02": 142,
+  "W5_Bow": 29,
+  "W5_Shoot": 24
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_warrior3\\T_Warrior3_Color.png"
+ },
+ "height_cm": 165.0,
+ "hair": null,
+ "proportions": null
+}

@@ -8,8 +8,9 @@ has spells only. The HUD (ARDHeroSelectHUD) shows her card: hit points, mana, ab
 The game mode is ARDHeroSelectGameMode (no pawn: the view is the studio camera); START opens random_dungeonmagic_level4
 with ?Hero=<name>. Play this level to play random_dungeonmagic_level4 with a hero of your choice.
 Run after 825. Idempotent (actors tagged rdm4_select).
-With the argument 5 it makes random_dungeonmagic_level5's menu instead (random_dungeonmagic_level5_select: its five
-heroes, 852; START opens random_dungeonmagic_level5), its painted pieces and lettering those 830 gave level 4's menu.
+With the argument 5 it makes random_dungeonmagic_level5's menu instead (random_dungeonmagic_level5_select: its heroes
+but the Summoner, who is left off the menu since 2026-10-26 (the Warrior is Warrior3: 862); START opens
+random_dungeonmagic_level5), its painted pieces and lettering those 830 gave level 4's menu.
 Args: [4 | 5]"""
 import sys, unreal
 LV = sys.argv[1] if len(sys.argv) > 1 else "4"
@@ -33,7 +34,10 @@ L = lambda p: unreal.load_asset(p.split(".")[0])
 # ---- the heroes, as the dungeon has them (as text: nothing of that level is kept once this one is opened)
 if not ues.get_editor_world().get_path_name().startswith(DUNGEON + "."): les.load_level(DUNGEON)
 gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
-HTXT = [h.export_text() for h in gen.get_editor_property("heroes")]; assert len(HTXT) >= 4, len(HTXT)
+# (level 5's menu leaves the Summoner out (the user's of 2026-10-26): she stays one of the generator's heroes (its default
+# in the editor and the tests), but cannot be chosen)
+OFF_MENU = ("Summoner",) if LV == "5" else ()
+HTXT = [h.export_text() for h in gen.get_editor_property("heroes") if str(h.name) not in OFF_MENU]; assert len(HTXT) >= 4, len(HTXT)
 del gen
 # ---- the level
 if eal.does_asset_exist(LEVEL): les.load_level(LEVEL)

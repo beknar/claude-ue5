@@ -115,11 +115,12 @@ HERO = sys.argv[4] if len(sys.argv) > 4 else ("Summoner" if L5 else "Rogue")
 WAY = sys.argv[5] if len(sys.argv) > 5 else "east"
 W5H = L5 and WAY == "heroes"            # (level 5: the four heroes' weapons reel: run5h)
 W5C = L5 and WAY == "craft"             # (level 5: the armour table, loot and crafting reel: run5c)
+W5X = L5 and WAY == "caps"              # (level 5: the four heroes' capabilities reel: run5x)
 W5S = L5 and WAY == "spells"            # (level 5: the spells, rings, monsters by tier, corpses and menu reel: run5s)
 W5G = L5 and WAY == "grip"              # (level 5: the two-handed grip close up: run5g)
 W5W2 = L5 and WAY == "chop2"            # (level 5: Warrior2's chop test, Warrior2 alone (861 placed her): run5w2)
-W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
-W5K = W5C or W5S                        # (the crafting panel's and the repair list's recording)
+W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
+W5K = W5C or W5S or W5X                 # (the crafting panel's and the repair list's recording)
 DX, DY = {"east": (1, 0), "north": (0, 1), "west": (-1, 0), "south": (0, -1)}.get(WAY, (1, 0))
 # (level 4: the hero fights as in her own level)
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
@@ -128,7 +129,7 @@ CHESTS = L3 or L4                  # (she opens the containers she passes)
 if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner"].index(HERO) + 7
 if len(sys.argv) > 6: SEED = int(sys.argv[6])        # (level 4: a session seed of the reel's choosing: what the containers on her way hold)
 OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
-    ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else "cine_chop2_warrior2.json" if W5W2 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
+    ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else f"cine_caps_{HERO.lower()}.json" if W5X else "cine_chop2_warrior2.json" if W5W2 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
     if MODE == "render" else ("cine_rehearsal_spells_%s.json" % HERO.lower() if W5S else "cine_rehearsal.json"))
 SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3"}[HERO] if L4 else
                                                              {"1": "caster", "2": "darkcaster", "3": "rogue"}[LV]) + r"\speeds.txt"
@@ -772,6 +773,8 @@ def tiers_part():
     for xy in ring:
         if not gen.is_section_generated(IP(*xy)): gen.generate_section_now(IP(*xy))
     yield
+    # (run5x: the start set too: since 2026-10-24 tier 2 opens only once it is cleared, and tier 3 only after tier 2)
+    if W5X: gen.debug_clear_section(IP(0, 0), 0, V(0, 0, 0))
     for xy in ring[1:]: gen.debug_clear_section(IP(*xy), 0, V(0, 0, 0))
     s10 = gen.get_section(IP(1, 0)); pts, kinds_ = s10.get_seal_points()
     east = [b for b, k in zip(list(pts), list(kinds_)) if k == 1 and b.x > s10.get_section_min().x + 20000.0]
@@ -789,9 +792,20 @@ def tiers_part():
     yield from pause(2.4, lambda: camera(side=-30.0, pitch=-10.0, rate=40.0))
     # the set's last monster
     m = next((q for q in gen.get_monsters() if alive(q) and q.get_editor_property("section").get_editor_property("coord") == IP(1, 0)), None)
+    if W5X and m is not None:
+        # (run5x: fought in the room nearest the grating: in the hallway by it the camera, behind her as she faced a
+        # monster coming down the hallway, was pushed into her against the grating and the walls)
+        rooms = [i for i in range(s10.get_num_rooms()) if "unction" not in s10.get_room_kind(i)]
+        if rooms:
+            rc_ = min((s10.get_room_center(i) for i in rooms), key=lambda q: d2(q, b)); rc_ = V(rc_.x, rc_.y, 100.0)
+            event("to_room", at=[round(rc_.x), round(rc_.y)])
+            ag_ = (gen.get_editor_property("aggro_distance"), gen.get_editor_property("lose_distance")); G["quiet"] = True
+            gen.set_editor_property("aggro_distance", 0.0); gen.set_editor_property("lose_distance", 1.0)
+            yield from to_point(rc_, 8.0, 150.0)
+            gen.set_editor_property("aggro_distance", ag_[0]); gen.set_editor_property("lose_distance", ag_[1]); G["quiet"] = False
     if m is not None:
         event("last_monster", monster=str(m.monster_name), m=round(d2(loc(), m.get_actor_location()) / 100.0))
-        seg("fight"); G["casts0"] = c.attacks_made; yield from fight_w(m); seg("tiers")
+        seg("fight"); G["casts0"] = c.attacks_made; yield from (fight(m) if HERO == "Mage" else fight_w(m)); seg("tiers")
     yield from pause(1.5, lambda: camera(side=15.0, rate=60.0))
     # back to the grating, gone now, and on into tier 3
     route = Route(path(loc(), V(b.x - 120.0, b.y, 100.0)) + [V(b.x + 600.0, b.y, 100.0), V(b.x + 2400.0, b.y, 100.0)])
@@ -802,7 +816,17 @@ def tiers_part():
             # (in tier 3: the nearest of its monsters, stronger than tier 2's)
             m = nearest_monster(t3, 40); hunted = True
             if m is not None: event("tier3_monster", monster=str(m.monster_name), m=round(d2(loc(), m.get_actor_location()) / 100.0))
-        if m is not None: seg("fight"); G["casts0"] = c.attacks_made; yield from fight_w(m); seg("tiers")
+        if m is not None: seg("fight"); G["casts0"] = c.attacks_made; yield from (fight(m) if HERO == "Mage" else fight_w(m)); seg("tiers")
+        if W5X and not G.get("map3") and hunted and m is None and loc().x > b.x + 1500.0:
+            # (run5x: the big map once in tier 3: its rooms written TIER 3)
+            G["map3"] = True; gen.set_map_open(True); key_hit("m"); event("map", open=True)
+            yield from pause(2.8, lambda: camera(side=-10.0, pitch=-15.0, rate=40.0))
+            gen.set_map_open(False); key_hit("m"); event("map", open=False)
+        if W5X and loc().x > b.x - 260.0 and not (gen.is_section_generated(t3) and not gen.get_section(t3).is_building()):
+            # (run5x: she waits at the opened grating until the set beyond is built: walking on, the camera went into the
+            # hallway while the set was still being built over frames and the whole picture was the void for a second)
+            if not G.get("waited"): G["waited"] = True; event("wait_built", section=[t3.x, t3.y])
+            camera(side=-10.0, pitch=-15.0, rate=60.0); yield; continue
         move(pulled(route), run=True); doors(); camera(side=-10.0, pitch=-15.0, rate=80.0); yield
 
 def linger():
@@ -1433,11 +1457,14 @@ def run5g():
     clips = [str(a.get_name()) for a in wd.attacks] if wd else []
     # (the camera: the game's own, its boom shortened and its view narrowed, turned to look at her from the front)
     boom = next(iter(p.get_components_by_class(unreal.SpringArmComponent)), None); cam = next(iter(p.get_components_by_class(unreal.CameraComponent)), None)
+    # (Warrior3's slash bends her deep and raises the sword over her head: her whole body in the shot, as Warrior2's chop
+    # test learned; the older cuts close on her upper body)
+    deep = any("Slash" in x and "Warrior3" in x for x in clips)
     if boom:
         G["boom0"] = (boom.target_arm_length, boom.do_collision_test, boom.socket_offset, boom.target_offset)
-        boom.target_arm_length = 165.0; boom.do_collision_test = False; boom.socket_offset = V(0.0, 0.0, 0.0); boom.target_offset = V(0.0, 0.0, 38.0)
-    if cam: G["fov0"] = cam.field_of_view; cam.field_of_view = 40.0
-    G["grip_cam"] = (face + 180.0, -7.0)
+        boom.target_arm_length = 360.0 if deep else 165.0; boom.do_collision_test = False; boom.socket_offset = V(0.0, 0.0, 0.0); boom.target_offset = V(0.0, 0.0, 0.0 if deep else 38.0)
+    if cam: G["fov0"] = cam.field_of_view; cam.field_of_view = 50.0 if deep else 40.0
+    G["grip_cam"] = (face + 180.0, -10.0 if deep else -7.0)
     event("start", at=[round(st.x), round(st.y)], face=round(face, 1), room_m=best[0] / 100.0, weapon=wd and str(wd.name), clips=clips, way="the Plate Knight's Sword, close up")
     seg("grip")
     yield from pause(1.6)
@@ -1516,8 +1543,115 @@ def run5w2():
     save()
     while True: yield
 
+# ---------------------------------------------------------------- run5x: the four heroes' capabilities
+def run5x():
+    """(level 5, the four heroes' capabilities reel, way "caps"; Warrior, Mage, Warlock or Rogue, the same session seed for
+    each) run5c's start by the great hall's anvil and its big map (the rooms' tiers, the anvil); two of the hall's
+    containers (one with the set her hero wears); the set on, the camera round her (the Mage refused); at the anvil her
+    recipe (what it lacks given, said by the caption) made; a fight (lured), her own weapons or spells; then the tiers'
+    part of the weapons reels (tiers_part: behind a card tier 2's sets generated and cleared by the generator's debug
+    clear but the last monster of one, at its grating into tier 3, the monster killed, the gratings gone, tier 3 generated
+    ahead of her as she walks in, a fight there). The rules hold: who wields and wears what (her inventory refuses the
+    rest), a tier opens only once the one before is cleared, the containers hold their tiers' items"""
+    gen, p = G["gen"], G["pawn"]
+    seg("start")
+    while T() <= 0.0 or G["combat"] is None:
+        camera(rate=1e6); yield
+    def start_count(): return sum(1 for q in gen.get_monsters() if alive(q) and q.get_editor_property("section").get_editor_property("coord") == IP(0, 0))
+    while T() < 0.5 or (start_count() < 10 and T() < 1.2):
+        camera(rate=1e6); yield
+    c = G["combat"]; c.set_inventory_open(False); c.set_crafting_open(False); G["until"] = DUR - 30.0
+    s0 = gen.get_section(IP(0, 0)); centre = gen.get_start_room_center(); hall_room = s0.room_at(centre)
+    anvil = next((a for a in s0.get_anvil_points() if s0.room_at(a) == hall_room), None)
+    hall_ = list(gen.get_start_room_containers())
+    lists = {i: [str(x) for x in gen.loot_list_of(IP(0, 0), i)] for i in hall_}
+    S["note"]["hall"] = {str(i): v for i, v in lists.items()}
+    pick = CRAFT_SET[HERO]; recipe = CRAFT_RECIPE[HERO]
+    # ---- the start: by the hall's anvil, facing it; the big map
+    a0 = anvil or centre; tow = V(centre.x - a0.x, centre.y - a0.y, 0.0)
+    st = V(a0.x + tow.normal().x * 520.0, a0.y + tow.normal().y * 520.0, 100.0) if tow.length() > 1 else V(a0.x + 520.0, a0.y, 100.0)
+    p.set_actor_location(st, False, True); G["heading"] = yaw_to(st, a0); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), True)
+    G["cam_yaw"] = G["heading"] - 25.0; G["cam_pitch"] = -20.0
+    event("start", at=[round(st.x), round(st.y)], anvil=[round(a0.x), round(a0.y)] if anvil else None, hall=hall_, way="great hall, by its anvil")
+    yield from pause(2.0, lambda: camera(side=-25.0, pitch=-20.0, rate=40.0))
+    seg("map"); gen.set_map_open(True); key_hit("m"); event("map", open=True)
+    yield from pause(3.3, lambda: camera(side=-25.0, pitch=-20.0, rate=20.0))
+    gen.set_map_open(False); key_hit("m"); event("map", open=False)
+    # ---- two of the hall's containers: one with her set, the nearest other
+    seg("chest")
+    with_set = [i for i in hall_ if pick in lists[i]]
+    others = sorted((i for i in hall_ if i not in with_set), key=lambda i: d2(loc(), s0.get_container_location(i)))
+    tour = (with_set[:1] + others[:1]) or others[:2]
+    tour.sort(key=lambda i: d2(loc(), s0.get_container_location(i)))
+    event("tour", containers=tour, lists={str(i): lists[i] for i in tour})
+    for i in tour:
+        if s0.is_target_open(False, i): continue
+        at = s0.get_container_location(i); st_ = stand_by_chest(at, loc(), tol=450.0)
+        if st_ is None: event("chest_missed", why="no place to stand", container=i); continue
+        S["seg_back"] = "chest"; yield from open_chest(at, st_)
+        yield from pause(0.3, lambda: camera(side=-30.0, pitch=-26.0, rate=70.0))
+    if c.get_item_count(pick) == 0: c.add_item(pick, 1); event("given", items={pick: 1}, why="armour")
+    # ---- her set on (the Mage: refused), the camera round her
+    seg("armour")
+    if HERO == "Mage": yield from refuse("armour", pick)
+    else:
+        yield from wield(pick, "armour", "armour")
+        yield from swing_to(150.0, 0.5, -9.0); yield from orbit(1.9, 150.0, 200.0, -8.0)
+    # (the crafting panel pauses the game in play; the reel's world goes on: the monsters leave her be meanwhile)
+    if "aggro0" not in G: G["aggro0"] = (gen.get_editor_property("aggro_distance"), gen.get_editor_property("lose_distance"))
+    gen.set_editor_property("aggro_distance", 0.0); gen.set_editor_property("lose_distance", 1.0); event("quiet", on=True); G["quiet"] = True
+    # ---- to the anvil, F: her recipe; given what it lacks; made
+    seg("craft"); S["seg_back"] = "craft"; stand = None
+    if anvil is not None:
+        for r_ in (150.0, 190.0):
+            for k in range(16):
+                q = V(anvil.x + math.cos(k * math.pi / 8) * r_, anvil.y + math.sin(k * math.pi / 8) * r_, 100.0)
+                if s0.room_at(q) == hall_room and str(gen.describe_nearest(q, 260.0)) == "use the anvil" and len(path(loc(), q)):
+                    if stand is None or d2(loc(), q) < d2(loc(), stand): stand = q
+            if stand: break
+    if stand is not None: yield from to_point(stand, 15.0, 45.0)
+    G["heading"] = yaw_to(loc(), anvil) if anvil else G["heading"]; p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    yield from pause(0.4, lambda: camera(side=-35.0, pitch=-22.0, rate=70.0))
+    said = str(gen.interact_nearest(loc(), 260.0)); key_hit("f"); event("craft_open", what=said, open=bool(c.is_crafting_open()))
+    yield from pause(1.2)
+    ri = next((i for i, x in enumerate(c.get_craft_lines()) if str(x).split("|")[1] == recipe), 0)
+    while c.get_craft_cursor() != ri:
+        c.move_craft_cursor(1 if ri > c.get_craft_cursor() else -1); key_hit("s"); yield from pause(0.35)
+    yield from pause(1.4)
+    rc = next(r_ for r_ in gen.get_editor_property("recipes") if str(r_.item) == recipe)
+    give = {}
+    for pt in rc.parts:
+        have = sum(c.get_item_count(k_) for k_ in pt.any_of)
+        if have < pt.count:
+            kinds_ = [str(k_) for k_ in pt.any_of]; lack = pt.count - have
+            for j, k_ in enumerate(kinds_):
+                n_ = lack // len(kinds_) + (1 if j < lack % len(kinds_) else 0)
+                if n_: give[k_] = give.get(k_, 0) + n_
+    for k_, n_ in give.items(): c.add_item(k_, n_)
+    event("given", items=give, why="craft", recipe=recipe)
+    yield from pause(1.8)
+    ok = c.craft_entry(); key_hit("enter"); event("crafted", item=recipe, ok=bool(ok), message=str(c.message), have=c.get_item_count(recipe))
+    yield from pause(1.6)
+    c.set_crafting_open(False); key_hit("f")
+    yield from pause(0.5, lambda: camera(side=20.0, rate=60.0))
+    # ---- a fight in the great hall's set (lured): her own weapons or spells
+    a0_, l0_ = G["aggro0"]; gen.set_editor_property("aggro_distance", a0_); gen.set_editor_property("lose_distance", l0_); event("quiet", on=False); G["quiet"] = False
+    seg("fight"); lure()
+    tw = T()
+    while threat() is None and T() - tw < 4.0: camera(side=25.0, pitch=-12.0, rate=25.0); yield
+    m = threat() or nearest_monster(IP(0, 0), 60)
+    if m is not None and T() < DUR - 34.0:
+        G["casts0"] = c.attacks_made; yield from (fight(m) if HERO == "Mage" else fight_w(m))
+    lure(False)
+    # ---- the tiers: behind a card the start set cleared too (tier 2 opens only once it is: the rule of 2026-10-24) and
+    # tier 2's sets but one monster; a grating into tier 3, on into tier 3 as it is generated
+    while T() < DUR - 30.0: camera(side=30.0, pitch=-11.0, rate=15.0); yield
+    yield from tiers_part()
+
 def run():
     gen, pc, p = G["gen"], G["pc"], G["pawn"]
+    if W5X:
+        yield from run5x(); return
     if W5W2:
         yield from run5w2(); return
     if W5G:

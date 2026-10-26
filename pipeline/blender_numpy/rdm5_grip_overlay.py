@@ -40,13 +40,17 @@ ONE_HAND = not any("TwoHand" in e["clip"] for e in CUTS)
 # (Warrior2's chop test: Tripo's clip as it is, but for its pelvis)
 W2_PARTS = {"whole": ("the chop, the whole clip", "Tripo's chop as made: the sword raised over her head, brought down as she bends into it"),
             "swing": ("the chop's swing", "its frames 20 to 92: from the wind-up to standing again")}
+# (Warrior3, the Warrior since 2026-10-26: her own slash for every two-handed sword)
+W3 = any(e["clip"] == "AS_Warrior3_Slash" for e in CUTS)
+W3_SLASH = ("the slash", "her own clip: both fists raised over her head, brought down as she bends into it, the blade ending forward")
 def clip_words(e):
+    if e["clip"] == "AS_Warrior3_Slash": return W3_SLASH
     if e["clip"].endswith("Warrior2_Chop"): return W2_PARTS.get(e.get("part"), ("the chop", ""))
     if e["clip"] in CLIPS: return CLIPS[e["clip"]]
     if "TwoHand" in e["clip"]: return TWO_HAND.get(e["clip"][-1], (e["clip"], e.get("what", "")))
     return (e["clip"], e.get("what", ""))
-TITLE = "Warrior2's chop test: her own clip on her own rig, the Plate Knight's Sword" if W2 else ("the %s's Plate Knight's Sword in one hand, no shield, close up" if ONE_HAND else "the %s's two-handed grip, close up: the Plate Knight's Sword") % HERO.lower()
-HOLD = "only its pelvis set right (Tripo's clip dragged her hips to the floor); the left hand where the clip puts it" if W2 else ("the two-handed sword wielded as her one-handed sword: in her right hand alone, the left hand empty" if ONE_HAND
+TITLE = "Warrior3, the warrior: the Plate Knight's Sword, her own two-handed slash" if W3 else "Warrior2's chop test: her own clip on her own rig, the Plate Knight's Sword" if W2 else ("the %s's Plate Knight's Sword in one hand, no shield, close up" if ONE_HAND else "the %s's two-handed grip, close up: the Plate Knight's Sword") % HERO.lower()
+HOLD = "Tripo's clip in Warrior3.glb, at the weapon's speed; the sword in her right hand, the left hand where the clip puts it" if W3 else "only its pelvis set right (Tripo's clip dragged her hips to the floor); the left hand where the clip puts it" if W2 else ("the two-handed sword wielded as her one-handed sword: in her right hand alone, the left hand empty" if ONE_HAND
         else "both fists on the hilt, a fist apart; the hands below the blade, the blade rising out of the fists")
 def fade(t, t0, t1, a=0.25, b=0.35): return max(0.0, min(1.0, (t - t0) / a, (t1 - t) / b))
 def caption(f):

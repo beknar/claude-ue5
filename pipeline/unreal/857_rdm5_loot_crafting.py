@@ -29,7 +29,7 @@ HJ = {h["name"]: h for h in json.load(open(os.path.join(SA, "random_dungeon_magi
 SUM = json.load(open(os.path.join(SA, "random_dungeon_magic5", "summoner_hero.json"), encoding="utf-8"))
 MAPS = "/Game/RandomDungeon/Maps/"
 LEVEL = MAPS + "random_dungeonmagic_level5"
-MESH = {"Warrior": "Fem5", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "Summoner": "Summoner3"}
+MESH = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "Summoner": "Summoner3"}
 WEARS = {n: h.get("wears", []) for n, h in HJ.items()}; WEARS["Summoner"] = SUM["wears"]
 WEIGHT = {"light": unreal.RDArmourWeight.LIGHT, "medium": unreal.RDArmourWeight.MEDIUM, "heavy": unreal.RDArmourWeight.HEAVY}
 eal = unreal.EditorAssetLibrary; les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)

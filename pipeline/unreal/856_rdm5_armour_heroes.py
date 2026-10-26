@@ -5,7 +5,7 @@ Warlock and Rogue; random_dungeon_magic5/summoner_hero.json for the Summoner):
   Summoner: light, medium and heavy (every set was made for her: 849-851)
 A set is worn by a hero only when it is of a weight she wears and a fit was made for her: the Summoner's are 851's
 (/Game/JRPG/Summoner3Armour/SK_S3_<set>); the other heroes' are 849 heroes + summoner3_armour.py --hero + 851 <mesh>
-(/Game/JRPG/HeroArmour/<mesh>/SK_<mesh>_<set>; the Warrior is Fem5, the Warlock DarkCaster, the Rogue Rogue).
+(/Game/JRPG/HeroArmour/<mesh>/SK_<mesh>_<set>; the Warrior is Warrior3 since 2026-10-26 (Fem5 before), the Warlock DarkCaster, the Rogue Rogue).
 Sets the game: each armour item's ArmourWeight and Fits (random_dungeonmagic_level5), and every hero's Wears, Abilities and
 Armour line (the card) on random_dungeonmagic_level5 and level4 and their menus (_select): the four heroes' text from
 heroes.json, so that the card says what the game does. Run after 852 (level 5's heroes and items) and 826 (the menus).
@@ -15,7 +15,7 @@ SA = r"E:\code\claude-ue5\claude_ue5\SourceArt"
 AJ = json.load(open(os.path.join(SA, "summoner3", "armour.json"), encoding="utf-8"))
 HJ = {h["name"]: h for h in json.load(open(os.path.join(SA, "random_dungeon_magic4", "heroes.json"), encoding="utf-8"))["heroes"]}
 SJ = json.load(open(os.path.join(SA, "random_dungeon_magic5", "summoner_hero.json"), encoding="utf-8"))
-MESH = {"Warrior": "Fem5", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "Summoner": "Summoner3"}
+MESH = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "Summoner": "Summoner3"}
 WEIGHT = {"light": unreal.RDArmourWeight.LIGHT, "medium": unreal.RDArmourWeight.MEDIUM, "heavy": unreal.RDArmourWeight.HEAVY}
 WEARS = {n: h.get("wears", []) for n, h in HJ.items()}; WEARS["Summoner"] = SJ["wears"]
 eal = unreal.EditorAssetLibrary; les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
