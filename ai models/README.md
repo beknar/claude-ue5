@@ -5,6 +5,7 @@ The characters this project uses in its current and future scenes, made with [Tr
 | Model | Former name | What it is | Used in |
 |---|---|---|---|
 | `Warrior.glb` | `jrpg-fem5-tripo.glb` | JRPG heroine (sword, shield, spear, axe) | random_level, random_dungeon_level, random_isometric_village_level, random_dungeoncombat_level, the Tripo trio and quartet showcases |
+| `Warrior2.glb` | (none) | The Warrior's mesh, weights and texture with Tripo's clips: `chop`, `slash` (the same motion) and a horizontal two-handed sweep | random_dungeonmagic_level5's chop test only (character `Warrior2`, script `861`); the heroes do not use it |
 | `Mage.glb` | `girl-caster-tripo.glb` | Fire caster | random_dungeonmagic_level, the Tripo trio and quartet showcases |
 | `Warlock.glb` | `girl-darkcaster-tripo.glb` | Dark caster (spell in the left hand, sword in the right) | random_dungeonmagic_level2, the Tripo trio and quartet showcases |
 | `Rogue.glb` | (none) | Hooded rogue (two daggers, a crossbow) | random_dungeonmagic_level3 (tag `Rogue`), the Tripo quartet showcase |

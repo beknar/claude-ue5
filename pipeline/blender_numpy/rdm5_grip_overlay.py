@@ -4,13 +4,16 @@ captions over the Movie Render Queue's frames, from the pilot's record (SourceAr
 the title for the first seconds, then for each cut its clip, what it is and the speed it plays at (full, or a third: her
 own time dilation). Lettering: level 4's painted interface's (Cinzel for the heads, Alegreya for the text), Segoe UI
 without it.
+The hero "Warrior2": the chop test of ai models/Warrior2.glb (815's way "chop2", record cine_chop2_warrior2.json): her own
+chop, the whole clip at its own speed and its swing at a third.
 Usage (a Python with Pillow): rdm5_grip_overlay.py <frames_dir> <out_dir> [hero]"""
 import sys, os, glob, json
 from PIL import Image, ImageDraw, ImageFont
 src, dst = sys.argv[1], sys.argv[2]
 HERO = sys.argv[3] if len(sys.argv) > 3 else "Warrior"
 HERE = os.path.dirname(os.path.abspath(__file__)); SA = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt")
-R = json.load(open(os.path.join(SA, "random_dungeon_magic5", f"cine_grip_{HERO.lower()}.json"), encoding="utf-8"))
+W2 = HERO == "Warrior2"
+R = json.load(open(os.path.join(SA, "random_dungeon_magic5", "cine_chop2_warrior2.json" if W2 else f"cine_grip_{HERO.lower()}.json"), encoding="utf-8"))
 FPS = R["fps"]; CUTS = [e for e in R["events"] if e["kind"] == "cut" and e.get("clip")]
 W, H = 1920, 1080
 FD = os.path.join(SA, "random_dungeon_magic4", "fonts")
@@ -34,12 +37,16 @@ TWO_HAND = {"1": ("the diagonal cut", "from over her right shoulder, down across
             "2": ("the overhead chop", "raised over her head, elbows out, brought down in front of her"),
             "3": ("the horizontal sweep", "from her right side round to her left, her waist turning with it")}
 ONE_HAND = not any("TwoHand" in e["clip"] for e in CUTS)
+# (Warrior2's chop test: Tripo's clip as it is, but for its pelvis)
+W2_PARTS = {"whole": ("the chop, the whole clip", "Tripo's chop as made: the sword raised over her head, brought down as she bends into it"),
+            "swing": ("the chop's swing", "its frames 20 to 92: from the wind-up to standing again")}
 def clip_words(e):
+    if e["clip"].endswith("Warrior2_Chop"): return W2_PARTS.get(e.get("part"), ("the chop", ""))
     if e["clip"] in CLIPS: return CLIPS[e["clip"]]
     if "TwoHand" in e["clip"]: return TWO_HAND.get(e["clip"][-1], (e["clip"], e.get("what", "")))
     return (e["clip"], e.get("what", ""))
-TITLE = ("the %s's Plate Knight's Sword in one hand, no shield, close up" if ONE_HAND else "the %s's two-handed grip, close up: the Plate Knight's Sword") % HERO.lower()
-HOLD = ("the two-handed sword wielded as her one-handed sword: in her right hand alone, the left hand empty" if ONE_HAND
+TITLE = "Warrior2's chop test: her own clip on her own rig, the Plate Knight's Sword" if W2 else ("the %s's Plate Knight's Sword in one hand, no shield, close up" if ONE_HAND else "the %s's two-handed grip, close up: the Plate Knight's Sword") % HERO.lower()
+HOLD = "only its pelvis set right (Tripo's clip dragged her hips to the floor); the left hand where the clip puts it" if W2 else ("the two-handed sword wielded as her one-handed sword: in her right hand alone, the left hand empty" if ONE_HAND
         else "both fists on the hilt, a fist apart; the hands below the blade, the blade rising out of the fists")
 def fade(t, t0, t1, a=0.25, b=0.35): return max(0.0, min(1.0, (t - t0) / a, (t1 - t) / b))
 def caption(f):
@@ -54,7 +61,7 @@ def caption(f):
         k = fade(t, t0 - 0.1, t1)
         if k <= 0: continue
         name, what = clip_words(e); slow = e.get("speed", 1.0) < 0.9
-        head = "%s  ·  %s" % (name.upper(), "A THIRD OF THE SPEED" if slow else "FULL SPEED")
+        head = "%s  ·  %s" % (name.upper(), ("A THIRD OF ITS SPEED" if slow else "ITS OWN SPEED") if W2 else ("A THIRD OF THE SPEED" if slow else "FULL SPEED"))
         lines = [what, HOLD]
         wd = max([d.textlength(head, font=f_head)] + [d.textlength(s, font=f_line) for s in lines])
         y = H - 64 - 36 - 36 * len(lines)

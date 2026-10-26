@@ -1,0 +1,16 @@
+{
+ "clips": {
+  "Character_performs_a_horizontal_two_handed_sword_sweep_from_rig": 192,
+  "Chop": 159,
+  "Idle": 369,
+  "Run": 31,
+  "Slash": 159,
+  "Walk": 57
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_warrior2\\T_Warrior2_Color.png"
+ },
+ "height_cm": 165.0,
+ "hair": null,
+ "proportions": null
+}

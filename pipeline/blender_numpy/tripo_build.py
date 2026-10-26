@@ -8,7 +8,7 @@ hair.json: hair chains added to the rig and the hair skinned to them (tripo_hair
 Proportions: a hero listed in tripo_proportions.py (by tag) is changed after her own clips are sampled and before the clip
 maker runs (the Warrior's and the Warlock's arms lengthened).
 Blender: -b -P tripo_build.py -- model.glb out_dir name tag [height_cm] [clip_maker.py | -] [hair.json]"""
-import bpy, sys, os, json
+import bpy, sys, os, json, re
 from mathutils import Matrix
 argv = sys.argv[sys.argv.index("--") + 1:]
 src, out, NAME, TAG = argv[0], argv[1], argv[2], argv[3]; HEIGHT_CM = float(argv[4]) if len(argv) > 4 else 165.0
@@ -43,6 +43,7 @@ for pb in arm.pose.bones: pb.rotation_mode = 'QUATERNION'
 clips = {}
 for act in list(bpy.data.actions):
     name = act.name.split(".")[0]; name = name[:1].upper() + name[1:]
+    name = re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")     # (Warrior2.glb's sweep is named with a sentence)
     ad.action = act
     if hasattr(ad, "action_slot") and act.slots: ad.action_slot = act.slots[0]
     f0, f1 = [int(round(v)) for v in act.frame_range]
