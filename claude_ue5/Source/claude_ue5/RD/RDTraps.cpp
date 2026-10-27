@@ -43,15 +43,17 @@ void ARDSection::PlaceTraps()
 		if (Generator->Traps[I].MinTier <= Tier && Generator->Traps[I].Weight > 0.f) { Kinds.Add(I); WSum += Generator->Traps[I].Weight; }
 	if (Kinds.Num() == 0) return;
 	FRandomStream R((int32)HashCombine((uint32)Seed ^ 0x7A11u, 5u));
-	auto PickKind = [&](float U, bool bDoorway) -> int32
+	auto PickKind = [&](float U, bool bDoorway, bool bRoomLane) -> int32
 	{
-		// (a ward goes across a way through: a doorway or a hallway; the others anywhere)
+		// (a ward goes across a way through: a doorway or a hallway; a spring plate on a room's way (it throws her along the
+		// room); the others anywhere)
+		auto Fits = [&](int32 K) { const ERDTrapKind Kd = Generator->Traps[K].Kind; return (bDoorway || Kd != ERDTrapKind::Ward) && (bRoomLane || Kd != ERDTrapKind::Push); };
 		float Sum = 0.f;
-		for (const int32 K : Kinds) if (bDoorway || Generator->Traps[K].Kind != ERDTrapKind::Ward) Sum += Generator->Traps[K].Weight;
+		for (const int32 K : Kinds) if (Fits(K)) Sum += Generator->Traps[K].Weight;
 		float V = U * Sum;
 		for (const int32 K : Kinds)
 		{
-			if (!bDoorway && Generator->Traps[K].Kind == ERDTrapKind::Ward) continue;
+			if (!Fits(K)) continue;
 			V -= Generator->Traps[K].Weight;
 			if (V <= 0.f) return K;
 		}
@@ -77,7 +79,7 @@ void ARDSection::PlaceTraps()
 		const TArray<FIntPoint>& From = bOnLane ? Lane : (Free.Num() > 0 ? Free : Lane);
 		if (From.Num() == 0) continue;
 		const FIntPoint T = From[Pick % From.Num()];
-		FTrapInst Ti; Ti.Def = PickKind(K, bOnLane); Ti.At = TileWorld(T); Ti.Room = RI;
+		FTrapInst Ti; Ti.Def = PickKind(K, bOnLane, bOnLane); Ti.At = TileWorld(T); Ti.Room = RI;
 		Ti.Yaw = (T.Y == Rm.Lane.Y) ? 0.f : 90.f;          // (a ward stands across the way)
 		TrapList.Add(Ti);
 	}
@@ -89,7 +91,7 @@ void ARDSection::PlaceTraps()
 		if (Len < 5 || U >= Generator->TrapHallShare) continue;
 		const FIntPoint T = C.bHoriz ? FIntPoint(C.Min.X + Len / 2, C.Min.Y) : FIntPoint(C.Min.X, C.Min.Y + Len / 2);
 		if (!In(T) || Type[Idx(T)] != 2) continue;
-		FTrapInst Ti; Ti.Def = PickKind(K, true); Ti.At = TileWorld(T); Ti.bHall = true; Ti.Yaw = C.bHoriz ? 0.f : 90.f;
+		FTrapInst Ti; Ti.Def = PickKind(K, true, false); Ti.At = TileWorld(T); Ti.bHall = true; Ti.Yaw = C.bHoriz ? 0.f : 90.f;
 		TrapList.Add(Ti);
 	}
 	for (int32 I = 0; I < TrapList.Num(); ++I)
@@ -399,33 +401,99 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 					if (D.TriggerFx) RDMSpawnFx(this, D.TriggerFx, L, FRotator::ZeroRotator, D.TriggerFxScale, nullptr, true, true);
 					if (Ch) { Ch->SetActorLocation(To, false, nullptr, ETeleportType::TeleportPhysics); Ch->GetCharacterMovement()->StopMovementImmediately(); }
 					if (D.TriggerFx) RDMSpawnFx(this, D.TriggerFx, To, FRotator::ZeroRotator, D.TriggerFxScale, nullptr, true, true);
-					const bool bMonsters = (H >> 8) % 2 == 0;
-					if (bMonsters)
-					{
-						TArray<int32> Kinds; Generator->MonsterKindsFor(Dst.Key->Coord, Kinds);
-						const TArray<FVector> Fr = Dst.Key->GetRoomFreeTiles(Dst.Key->RoomAt(Dst.Value));
-						for (int32 K = 0; K < 3 && Kinds.Num() > 0 && Fr.Num() > 0; ++K)
-							Generator->SpawnMonsterKind(Kinds[(H + K * 7) % (uint32)Kinds.Num()], Fr[(H / 3 + K * 5) % (uint32)Fr.Num()], Generator->TierOf(Dst.Key->Coord));
-						Pc->ShowMessage(TEXT("A teleport trap carries you off: into a room of monsters"));
-					}
-					else
-					{
-						// (glyphs round her, going off one after the other: she must move)
-						const int32 Glyph = Generator->Traps.IndexOfByPredicate([](const FRDTrapDef& G) { return G.Kind == ERDTrapKind::Glyph; });
-						// (the room may be one of this set: adding them can move this list, and T with it: T is not used after this)
-						for (int32 K = 0; K < 4 && Glyph >= 0; ++K)
-						{
-							const int32 Gi = Dst.Key->AddTrapAt(Glyph, Dst.Value + FRotator(0, 90.f * K + 45.f, 0).Vector() * 170.f, 1);
-							if (Dst.Key->TrapList.IsValidIndex(Gi)) Dst.Key->TrapList[Gi].Time = -0.6f * K - 0.8f;
-						}
-						Pc->ShowMessage(TEXT("A teleport trap carries you off: into a ring of glyphs"));
-					}
-					UE_LOG(LogRDTraps, Log, TEXT("RDTRAP teleport to (%.0f, %.0f) in (%d,%d): %s"), To.X, To.Y, Dst.Key->Coord.X, Dst.Key->Coord.Y, bMonsters ? TEXT("monsters") : TEXT("glyphs"));
+					// (the room may be one of this set: the glyphs added can move this list, and T with it: T is not used after this)
+					Dst.Key->TrapAmbush(Dst.Value, H, TEXT("A teleport trap carries you off"));
+					UE_LOG(LogRDTraps, Log, TEXT("RDTRAP teleport to (%.0f, %.0f) in (%d,%d): %s"), To.X, To.Y, Dst.Key->Coord.X, Dst.Key->Coord.Y, *Dst.Key->LastAmbush);
 				}
 			}
 			if (TrapList[I].Time > 1.5f) SpendTrap(I, 2);          // (TrapList[I], not T: see the glyphs above)
 			break;
+		case ERDTrapKind::Push:
+		{
+			// (directional: a spring plate on the room's way hurls her along it, away from the side she came by, to the room's far
+			// end; there monsters wait or a ring of glyphs (TrapAmbush))
+			ACharacter* Ch = Cast<ACharacter>(Her);
+			if (T.Step == 0)
+			{
+				T.Step = 1;
+				FVector Dir = FRotator(0, T.Yaw, 0).Vector();
+				const FVector Came = Her ? (Her->GetVelocity().Size2D() > 60.f ? Her->GetVelocity() : (T.At - L)) : Dir;
+				if (FVector::DotProduct(Dir, Came) < 0.f) Dir = -Dir;
+				// the last free tile of the room along that way (her body clear of what stands there)
+				const FIntPoint T0 = WorldToLocal(T.At);
+				const FIntPoint Step(FMath::RoundToInt(Dir.X), FMath::RoundToInt(Dir.Y));
+				FIntPoint Last = T0;
+				for (FIntPoint P = T0 + Step; In(P) && Owner[Idx(P)] == T.Room && IsWalkable(P) && !Blocked[Idx(P)]; P += Step) Last = P;
+				T.Goal = FVector(TileWorld(Last).X, TileWorld(Last).Y, T.At.Z);
+				T.Next = (float)(FMath::Abs(Last.X - T0.X) + FMath::Abs(Last.Y - T0.Y));       // (tiles to go)
+				if (Pc) { Pc->HoldFor(2.f); Pc->ShowMessage(FString::Printf(TEXT("A %s hurls you across the room!"), *D.Label)); }
+				if (D.HitFx) RDMSpawnFx(this, D.HitFx, T.At + FVector(0, 0, 10), FRotator::ZeroRotator, D.HitFxScale, nullptr, false, true);
+				Generator->PlaySoundAt(TEXT("Player.Whoosh"), T.At + FVector(0, 0, 100));
+				T.Stay = 0.f;
+			}
+			if (T.Step == 1)
+			{
+				// (carried at 14 m/s, swept: what stands in the way stops her where it stands)
+				bool bArrived = !Ch || T.Next < 1.f;
+				if (Ch)
+				{
+					const FVector D2 = FVector(T.Goal.X - L.X, T.Goal.Y - L.Y, 0.f);
+					const float Left = D2.Size();
+					if (Left < 25.f || T.Time > 2.5f) bArrived = true;
+					else
+					{
+						const FVector Before = Ch->GetActorLocation();
+						Ch->SetActorLocation(Before + D2 / Left * FMath::Min(Left, 1400.f * Dt), true);
+						T.Stay = FVector::Dist2D(Ch->GetActorLocation(), Before) < 1.f ? T.Stay + Dt : 0.f;
+						if (T.Stay > 0.12f) bArrived = true;
+					}
+				}
+				if (bArrived)
+				{
+					T.Step = 2;
+					const FVector Landed = Ch ? Ch->GetActorLocation() : T.Goal;
+					TrapStrike(I, FVector(Landed.X, Landed.Y, T.At.Z), 200.f, Share);
+					Generator->PlaySoundAt(TEXT("Env.BodyFall"), Landed);
+					const uint32 H = HashCombine((uint32)Generator->SessionSeed, GetTypeHash(FIntVector(Coord.X, Coord.Y, I)));
+					TrapAmbush(FVector(Landed.X, Landed.Y, T.At.Z), H, *FString::Printf(TEXT("A %s hurls you across the room"), *D.Label));
+					UE_LOG(LogRDTraps, Log, TEXT("RDTRAP push in (%d,%d) from (%.0f, %.0f) to (%.0f, %.0f): %s"), Coord.X, Coord.Y, TrapList[I].At.X, TrapList[I].At.Y, Landed.X, Landed.Y, *LastAmbush);
+				}
+			}
+			// (TrapList[I], not T: the glyphs may have been added to this list)
+			if (TrapList[I].Step == 2 && TrapList[I].Time > 0.3f) SpendTrap(I, 2);
+			break;
 		}
+		}
+	}
+}
+
+void ARDSection::TrapAmbush(const FVector& At, uint32 H, const TCHAR* How)
+{
+	if (!Generator) return;
+	URDCombatComponent* Pc = Generator->GetPlayerCombat();
+	const bool bMonsters = (H >> 8) % 2 == 0;
+	if (bMonsters)
+	{
+		TArray<int32> Kinds; Generator->MonsterKindsFor(Coord, Kinds);
+		const TArray<FVector> Fr = GetRoomFreeTiles(RoomAt(At));
+		int32 Made = 0;
+		for (int32 K = 0; K < 3 && Kinds.Num() > 0 && Fr.Num() > 0; ++K)
+			if (Generator->SpawnMonsterKind(Kinds[(H + K * 7) % (uint32)Kinds.Num()], Fr[(H / 3 + K * 5) % (uint32)Fr.Num()], Generator->TierOf(Coord))) ++Made;
+		LastAmbush = FString::Printf(TEXT("monsters|%d|%.0f|%.0f"), Made, At.X, At.Y);
+		if (Pc) Pc->ShowMessage(FString::Printf(TEXT("%s: into a room of monsters"), How));
+	}
+	else
+	{
+		// (glyphs round her, going off one after the other: she must move)
+		const int32 Glyph = Generator->Traps.IndexOfByPredicate([](const FRDTrapDef& G) { return G.Kind == ERDTrapKind::Glyph; });
+		int32 Made = 0;
+		for (int32 K = 0; K < 4 && Glyph >= 0; ++K)
+		{
+			const int32 Gi = AddTrapAt(Glyph, At + FRotator(0, 90.f * K + 45.f, 0).Vector() * 170.f, 1);
+			if (TrapList.IsValidIndex(Gi)) { TrapList[Gi].Time = -0.6f * K - 0.8f; ++Made; }
+		}
+		LastAmbush = FString::Printf(TEXT("glyphs|%d|%.0f|%.0f"), Made, At.X, At.Y);
+		if (Pc) Pc->ShowMessage(FString::Printf(TEXT("%s: into a ring of glyphs"), How));
 	}
 }
 

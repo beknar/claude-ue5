@@ -1,6 +1,7 @@
 #include "RD/RDHeroSelect.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDUIArt.h"
+#include "RD/RDInputSim.h"
 #include "Engine/Canvas.h"
 #include "Engine/Texture2D.h"
 #include "Engine/Engine.h"
@@ -97,6 +98,10 @@ bool ARDHeroSelect::Confirm()
 	Opened = FString::Printf(TEXT("%s?%s"), *TargetLevel, *Options);
 	ConfirmTime = GetWorld()->GetTimeSeconds();
 	UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT start: %s%s"), *Opened, bStayOnConfirm ? TEXT(" (stays: the reel)") : TEXT(""));
+	// (mistward: the game's own mode back before the dungeon: the menu's free pointer would stay on, and the camera would
+	// turn only while a button is held)
+	if (bMouseUI && !bStayOnConfirm)
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
 	if (!bStayOnConfirm) UGameplayStatics::OpenLevel(this, FName(*TargetLevel), true, Options);
 	return true;
 }
@@ -110,8 +115,17 @@ void ARDHeroSelect::Tick(float Dt)
 		{
 			PC->SetViewTarget(Camera);
 			PC->bShowMouseCursor = true; PC->bEnableClickEvents = true; PC->bEnableMouseOverEvents = true;
+			// (mistward: the pointer stays shown and free: the game's mode hid it and captured it on the first click)
+			if (bMouseUI)
+			{
+				FInputModeGameAndUI M;
+				M.SetHideCursorDuringCapture(false);
+				M.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+				PC->SetInputMode(M);
+			}
 			bViewSet = true;
 		}
+		if (bMouseUI) TickPointer(PC);
 		auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 		if (Pressed({ EKeys::A, EKeys::Left, EKeys::MouseScrollUp, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftShoulder })) Step(-1);
 		if (Pressed({ EKeys::D, EKeys::Right, EKeys::MouseScrollDown, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_RightShoulder })) Step(1);
@@ -139,6 +153,40 @@ void ARDHeroSelect::Tick(float Dt)
 	if (Figures.IsValidIndex(Index) && Figures[Index]) Figures[Index]->SetActorRotation(R);
 }
 
+void ARDHeroSelect::TickPointer(APlayerController* PC)
+{
+	float Mx = 0.f, My = 0.f;
+	Hovered = NAME_None;
+	if (!PC->GetMousePosition(Mx, My)) return;
+	const FVector2D M(Mx, My);
+	for (const TPair<FName, FBox2D>& B : Buttons) if (B.Value.IsInside(M)) { Hovered = B.Key; break; }
+	if (Hovered.IsNone() || !PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) return;
+	++Clicks;
+	const FString B = Hovered.ToString();
+	if (B == TEXT("Prev")) Step(-1);
+	else if (B == TEXT("Next")) Step(1);
+	else if (B == TEXT("Start")) Confirm();
+	else if (B.StartsWith(TEXT("Hero_")))
+	{
+		// (her name again, once she is shown: start as her)
+		const int32 I = FCString::Atoi(*B.RightChop(5));
+		if (I == Index) Confirm(); else Show(I);
+	}
+}
+
+TArray<FString> ARDHeroSelect::GetButtons() const
+{
+	TArray<FString> Out;
+	for (const TPair<FName, FBox2D>& B : Buttons) Out.Add(FString::Printf(TEXT("%s|%.1f|%.1f|%.1f|%.1f"), *B.Key.ToString(), B.Value.Min.X, B.Value.Min.Y, B.Value.Max.X, B.Value.Max.Y));
+	return Out;
+}
+
+FString ARDHeroSelect::SlateKey(FKey Key, bool bDown) { return RDInputSim::Key(GetWorld(), Key, bDown); }
+FString ARDHeroSelect::SlateMouseMove(FVector2D Pixel) { return RDInputSim::MouseMove(GetWorld(), Pixel); }
+FString ARDHeroSelect::SlateMouseButton(FVector2D Pixel, FKey Button, bool bDown) { return RDInputSim::MouseButton(GetWorld(), Pixel, Button, bDown); }
+FString ARDHeroSelect::SlateClearView() { return RDInputSim::ClearView(GetWorld()); }
+int32 ARDHeroSelect::SlateRestoreView() { return RDInputSim::RestoreView(); }
+
 // ------------------------------------------------------------------------------------------------ the menu's HUD
 static const FLinearColor RDHSInk(0.93f, 0.88f, 0.76f, 1.f);
 static const FLinearColor RDHSDim(0.68f, 0.66f, 0.60f, 1.f);
@@ -147,7 +195,7 @@ static const FLinearColor RDHSLine(0.75f, 0.65f, 0.45f, 0.9f);
 void ARDHeroSelectHUD::NotifyHitBoxClick(FName BoxName)
 {
 	Super::NotifyHitBoxClick(BoxName);
-	if (!Sel) return;
+	if (!Sel || Sel->bMouseUI) return;          // (mistward: the menu's own pointer does it, ARDHeroSelect::TickPointer)
 	const FString B = BoxName.ToString();
 	if (B == TEXT("Prev")) Sel->Step(-1);
 	else if (B == TEXT("Next")) Sel->Step(1);
@@ -317,6 +365,15 @@ void ARDHeroSelectHUD::DrawHUD()
 	bDraw = true;
 	Card();
 	// ---- the heroes along the bottom (a click shows one), the arrows, START
+	// (mistward: kept for the menu's own pointer, not as the engine's hit boxes: a hit box that takes a click keeps it from the
+	// player controller's keys; the one the pointer is over gets a lit frame)
+	Sel->Buttons.Reset();
+	auto Button = [&](const FVector2D& P0, const FVector2D& P1, FName Name)
+	{
+		if (!Sel->bMouseUI) { AddHitBox(P0, P1 - P0, Name, true); return; }
+		Sel->Buttons.Add({ Name, FBox2D(P0, P1) });
+		if (Sel->Hovered == Name) Frame(P0 - FVector2D(3.f * Sc), P1 + FVector2D(3.f * Sc), FLinearColor(1.f, 0.85f, 0.45f, 0.95f), 2.f * Sc);
+	};
 	const int32 N = Sel->Heroes.Num();
 	const float Tb = 210.f * Sc, Tg = 14.f * Sc, Ty = Canvas->ClipY - 130.f * Sc, Tbh = 52.f * Sc;
 	const float T0 = (Canvas->ClipX - (N * Tb + (N - 1) * Tg)) * 0.5f;
@@ -340,7 +397,7 @@ void ARDHeroSelectHUD::DrawHUD()
 		const FString Nm = O.Name.ToString().ToUpper();
 		UI.TextSize(Nm, Tw, Th, Medium, Sc * 1.1f, ERDType::Title);
 		UI.Text(Nm, bOn ? FLinearColor::White : RDHSDim, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.1f, ERDType::Title);
-		AddHitBox(P0, P1 - P0, FName(*FString::Printf(TEXT("Hero_%d"), I)), true);
+		Button(P0, P1, FName(*FString::Printf(TEXT("Hero_%d"), I)));
 	}
 	// the arrows either side
 	{
@@ -356,7 +413,7 @@ void ARDHeroSelectHUD::DrawHUD()
 				UI.TextSize(G, Tw, Th, Medium, Sc * 1.4f);
 				UI.Text(G, RDHSInk, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.4f);
 			}
-			AddHitBox(P0, P1 - P0, K == 0 ? FName(TEXT("Prev")) : FName(TEXT("Next")), true);
+			Button(P0, P1, K == 0 ? FName(TEXT("Prev")) : FName(TEXT("Next")));
 		}
 	}
 	// START (bottom right)
@@ -379,11 +436,12 @@ void ARDHeroSelectHUD::DrawHUD()
 		}
 		if (Wide > 0.f) UI.Text(St, FLinearColor(0.f, 0.f, 0.f, 0.8f), (P0.X + P1.X - Tw) * 0.5f + 2.f * Sc, (P0.Y + P1.Y - Th) * 0.5f + 2.f * Sc, Medium, Sc * 1.3f, ERDType::Title);
 		UI.Text(St, FLinearColor::White, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.3f, ERDType::Title);
-		AddHitBox(P0, P1 - P0, TEXT("Start"), true);
+		Button(P0, P1, TEXT("Start"));
 	}
 	// the keys
 	const FString Keys = bPad ? TEXT("D-pad, left stick or LB / RB  another hero      A  start")
-	                          : TEXT("A / D, arrows or wheel  another hero      Enter or Space  start      or click");
+	                          : Sel->bMouseUI ? TEXT("click a name  that hero      click START or her name again  start      A / D, arrows or wheel  another hero      Enter  start")
+	                                          : TEXT("A / D, arrows or wheel  another hero      Enter or Space  start      or click");
 	UI.TextSize(Keys, Tw, Th, Small, Sc * 1.1f);
 	Rect(FVector2D((Canvas->ClipX - Tw) * 0.5f - 16.f * Sc, Canvas->ClipY - 62.f * Sc), FVector2D((Canvas->ClipX + Tw) * 0.5f + 16.f * Sc, Canvas->ClipY - 50.f * Sc + Th), FLinearColor(0.03f, 0.035f, 0.05f, 0.75f));
 	UI.Text(Keys, RDHSInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY - 56.f * Sc, Small, Sc * 1.1f);

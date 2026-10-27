@@ -329,6 +329,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bAlphabeticalCrafting = false;
 	/** a key held in the inventory, the crafting panel or the repair list walks it (after 0.35 s, a line every 0.08 s) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bKeyRepeat = false;
+	/** the mouse in the inventory and the repair list (the user's of 2026-10-27): the pointer is shown while it is open, the
+	 *  row under it is chosen when it moves, a click on the chosen row (or a double click) uses it, the wheel scrolls the list */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bMouseUI = false;
+	/** tests: input sent the way a keyboard, mouse or gamepad sends it (into Slate, then the viewport: RDInputSim); "" when
+	 *  sent, else why not. A pixel is the HUD canvas's. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") FString SlateKey(FKey Key, bool bDown);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") FString SlateMouseMove(FVector2D Pixel);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") FString SlateMouseButton(FVector2D Pixel, FKey Button, bool bDown);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") FString SlateWheel(FVector2D Pixel, float Delta);
+	/** tests: the editor's windows over the game's view hidden while a test sends it input (their titles), and shown again */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") FString SlateClearView();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") int32 SlateRestoreView();
+	/** the same with no play world (the test's driver after play stops): RDDungeonGenerator.slate_restore_any_view() */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") static int32 SlateRestoreAnyView();
+	/** tests: the live particles of every Niagara effect in this world within Radius of At (a trap's effects are spawned in
+	 *  the world, not on their set of rooms) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") int32 GetParticlesNear(FVector At, float Radius) const;
 	/** the tiers' rings to guard, put once the frame's container has given what it held (a ring found as the tier opened is no duplicate) */
 	TArray<int32> PendingRingTiers;
 	/** a container once opened stays open (and is built open when its section is generated again) */

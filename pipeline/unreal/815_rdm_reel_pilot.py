@@ -101,15 +101,15 @@ mistward_castle (level "mw", the way "mistward": run5m; the user's list of 2026-
 session seed of her own: the Warrior opens a great hall chest that holds a shield (it stays open; F again does nothing),
 puts the shield on from the inventory, breaks down her Heater Shield at the anvil (its lists in alphabetical order), lets two
 blows land on the shield in a fight; then (a card: the reel's shortcut, the start set cleared by the generator but a fifth
-of its monsters) tier 1 at 75 % opens tier 2, a boss waits in a room she has seen (the big map's mark), and she fights it.
+of its monsters) tier 1 at 50 % opens tier 2, a boss waits in a room she has seen (the big map's mark), and she fights it.
 The Mage is given the torch's materials and a bag of others (said), holds S in the inventory (the list walks), makes the
 torch at the anvil and lights it; then (a card) in tier 2's castle keep she sets a prisoner free (F at the cell door: thanks,
 a thing, the prisoner walks off) and a caged monster breaks out as she comes near. The Warlock is shown rooms of other shapes
 in the start set (cards: a dome, a stepped pyramid, a round room), then (a card) tier 2's first set's teleporter: F takes its
 ring, the ring used carries her to the great hall's pad, F there back; a fight she loses (the reel takes her hit points
 down, said): her things in a pile where she fell (their pictures, the Loot Drops effect), back on her feet; (a card) F at the
-pile takes them up. The Rogue sees a trap from 8 m, disarms it (F), walks onto another (said); then (a card) tier 1 at 75 %:
-the dexterity ring she never found lies guarded in a room she has seen (the big map), the guards fought, the ring taken.
+pile takes them up. The Rogue sees a trap from 8 m, disarms it (F), walks onto another (said); then (a card) tier 1 at 50 %:
+the magic potency ring she never found lies guarded in a room she has seen (the big map), the guards fought, the ring taken.
 The record also has the frame rate the game shows, her shield (worn, in her hand), the torch, what F would do near her, the
 disarm bar, the castle's map marks (a boss, a guarded ring, her things, a teleporter, a trap she has seen), each room's
 shape (the map's masks) and the traps, teleports, prisoners and deaths as events. Writes SourceArt/mistward/cine_mw_<hero>.json.
@@ -1730,7 +1730,7 @@ def mw_craft_line(kind, name):
     return ok
 def mw_open_tier2(leave=0):
     """(run5m) the reel's shortcut, said by its card: the start set cleared by the generator's debug clear (`leave` monsters
-    left: still 75 % or more); tier 2 opens"""
+    left: still 50 % or more killed); tier 2 opens"""
     gen = G["gen"]
     gen.debug_clear_section(IP(0, 0), leave, gen.get_start_room_center())
     # (the tally right after a restart can still be counting: the clear again every half second until the tier opens)
@@ -1751,7 +1751,9 @@ def mw_near_point(at, dist, sec=None):
         a = k * math.pi / 12; q = V(at.x + math.cos(a) * dist, at.y + math.sin(a) * dist, 100.0)
         if room >= 0 and sec.room_at(q) != room: continue
         pts = list(sec.find_path_world(q, at))
-        if len(pts) and d2(pts[0], q) < 140.0 and sweep_clear(q, at, 30.0):
+        # (the way clear up to 1.2 m short of it: a ring in a chest is in the chest, and a sweep to it always struck the chest)
+        short = at + (q - at) * (min(120.0, dist * 0.5) / max(dist, 1.0))
+        if len(pts) and d2(pts[0], q) < 140.0 and sweep_clear(q, V(short.x, short.y, 100.0), 30.0):
             return q
     return None
 def mw_map(sec=3.0):
@@ -1772,7 +1774,7 @@ def run5m():
 def mw_warrior(s0, centre, room, anvil):
     """the Warrior: a hall chest with a shield in it (the seed's): opened, it stays open; the found shield on her arm from the
     inventory; at the anvil (its lists in alphabetical order) her Heater Shield broken down; a fight, two blows let land on
-    the shield; then tier 1 at 75 %: tier 2 opens, a boss waits (the big map's marks) and she goes for it"""
+    the shield; then tier 1 at 50 %: tier 2 opens, a boss waits (the big map's marks) and she goes for it"""
     gen, c, p = G["gen"], G["combat"], G["pawn"]
     kinds = {str(it.name): str(it.kind.name).lower() for it in gen.get_editor_property("items")}
     hall_ = list(gen.get_start_room_containers()); lists = {i: [str(x) for x in gen.loot_list_of(IP(0, 0), i)] for i in hall_}
@@ -1792,7 +1794,7 @@ def mw_warrior(s0, centre, room, anvil):
     yield from pause(2.2, lambda: camera(side=-40.0, pitch=-24.0, rate=40.0))
     found = next((x for x in lists[ch] if kinds.get(x) == "shield"), None)
     if found is None:
-        found = "Village Shield"; c.add_item(found, 1); event("given", items={found: 1}, why="shield")
+        found = "Village Shield (blue and white)"; c.add_item(found, 1); event("given", items={found: 1}, why="shield")
     # ---- the found shield on her arm (from the inventory), the camera round her
     seg("shield"); yield from wield(found, "shield", "shield")
     yield from swing_to(120.0, 0.6, -9.0); yield from orbit(2.4, 120.0, 140.0, -8.0)
@@ -1811,11 +1813,11 @@ def mw_warrior(s0, centre, room, anvil):
     if m is not None: G["casts0"] = c.attacks_made; yield from fight_w(m, take=2)
     lure(False)
     while T() < DUR - 26.0: camera(side=30.0, pitch=-11.0, rate=15.0); yield
-    # ---- tier 1 at 75 %: tier 2 opens, a boss waits
+    # ---- tier 1 at 50 %: tier 2 opens, a boss waits
     G["until"] = DUR + 1.0; lure(False); mw_quiet(True)
-    mw_card("TIER 1 AT 75 %", "the reel's shortcut: the start set cleared by the generator but for a quarter of its monsters")
+    mw_card("TIER 1 AT 50 %", "the reel's shortcut: the start set cleared by the generator but for a little under half of its monsters")
     n_mon = sum(1 for q_ in gen.get_monsters() if alive(q_) and q_.get_editor_property("section").get_editor_property("coord") == IP(0, 0) and q_.get_editor_property("spawn_index") >= 0)
-    yield from mw_open_tier2(leave=max(0, int(n_mon * 0.2)))
+    yield from mw_open_tier2(leave=max(0, int(n_mon * 0.45)))
     boss = next((e for e in mw_encounters() if e["kind"] == "boss"), None)
     if boss is not None:
         stand = mw_near_point(boss["at"], 1300.0) or mw_near_point(boss["at"], 900.0)
@@ -1993,7 +1995,7 @@ def mw_warlock(s0, centre, room, anvil):
 
 def mw_rogue(s0, centre, room, anvil):
     """the Rogue: a trap seen from 8 m (its mark on the map), disarmed with F; another walked onto (said); then tier 1 at
-    75 %: tier 2 opens, and the dexterity ring she never found lies guarded in a room she has seen: the big map's mark, the
+    50 %: tier 2 opens, and the magic potency ring she never found lies guarded in a room she has seen: the big map's mark, the
     guards fought, the ring taken"""
     gen, c, p = G["gen"], G["combat"], G["pawn"]
     traps = []
@@ -2041,13 +2043,19 @@ def mw_rogue(s0, centre, room, anvil):
         while d2(loc(), other["at"]) > 40.0 and T() - t0 < 4.0: move(other["at"], run=False); camera(side=-30.0, pitch=-20.0, rate=60.0); yield
         yield from pause(3.0, lambda: camera(side=-40.0, pitch=-22.0, rate=30.0))
     c.set_health(c.get_max_health()); mw_quiet(False)
-    # ---- tier 1 at 75 %: the guarded ring
-    mw_card("TIER 1 AT 75 %", "the reel's shortcut: the start set cleared by the generator but for a quarter of its monsters")
+    # ---- tier 1 at 50 %: the guarded ring
+    mw_card("TIER 1 AT 50 %", "the reel's shortcut: the start set cleared by the generator but for a little under half of its monsters")
     n_mon = sum(1 for q_ in gen.get_monsters() if alive(q_) and q_.get_editor_property("section").get_editor_property("coord") == IP(0, 0) and q_.get_editor_property("spawn_index") >= 0)
-    yield from mw_open_tier2(leave=max(0, int(n_mon * 0.2)))
-    ring = next((e for e in mw_encounters() if e["kind"] == "ring"), None)
+    yield from mw_open_tier2(leave=max(0, int(n_mon * 0.45)))
+    # (the ring is put a tick after the tier opens; at 50 % the tier opened at the first clear, in the same tick, and the run
+    # went on without it)
+    t0 = T(); ring = None
+    while ring is None and T() - t0 < 2.0:
+        yield; ring = next((e for e in mw_encounters() if e["kind"] == "ring"), None)
     if ring is not None:
-        st = mw_near_point(ring["at"], 1400.0) or mw_near_point(ring["at"], 1000.0)
+        # (nearer where the room is small: the castle's small chambers are 9 to 12 m across, and a stand point 10 m off in the
+        # room did not exist: she was left 88 m away)
+        st = next((q_ for q_ in (mw_near_point(ring["at"], d_) for d_ in (1400.0, 1000.0, 700.0, 450.0, 300.0)) if q_ is not None), None)
         if st is not None: mw_set(st, face_to=ring["at"], side=-20.0, pitch=-16.0)
         event("at_ring", ring=ring["name"], m=round(d2(loc(), ring["at"]) / 100.0, 1))
     yield from pause(MW_CARD + 0.2, lambda: camera(side=-20.0, pitch=-16.0, rate=1e6))
@@ -2337,9 +2345,18 @@ def tier_row(l):
     gen = G["gen"]; s = gen.world_to_section(l); t_ = gen.tier_of(s)
     r_ = gen.get_section_progress(s); ok, pr = r_ if isinstance(r_, tuple) else (True, r_)
     near = str(gen.describe_nearest(l, 260.0))
-    return {"tier": [t_, gen.get_tier_cleared(t_), gen.tier_size(t_), pr.rooms_explored if ok else -1, pr.rooms if ok else -1, pr.chests_looted if ok else -1, len(pr.chests) if ok else -1,
-                     len(pr.killed) if ok else -1, pr.monsters if ok else -1, int(pr.cleared) if ok else 0, gen.get_open_tiers(), gen.max_tier],
-            "seal": "" if near else str(gen.describe_seal_near(l, 450.0))}
+    out = {"tier": [t_, gen.get_tier_cleared(t_), gen.tier_size(t_), pr.rooms_explored if ok else -1, pr.rooms if ok else -1, pr.chests_looted if ok else -1, len(pr.chests) if ok else -1,
+                    len(pr.killed) if ok else -1, pr.monsters if ok else -1, int(pr.cleared) if ok else 0, gen.get_open_tiers(), gen.max_tier],
+           "seal": "" if near else str(gen.describe_seal_near(l, 450.0))}
+    # (mistward: the share rule's line, as ARDHUD::DrawTiers writes it: the open tier's counts against what it needs)
+    share = gen.get_editor_property("tier_open_share")
+    if share < 1.0 and gen.get_open_tiers() < gen.max_tier:
+        r2 = gen.get_tier_tally(gen.get_open_tiers())
+        if r2 is not None:
+            ok2, d2_, a2_ = r2 if isinstance(r2, tuple) and len(r2) == 3 else (True,) + tuple(r2)
+            out["tally"] = [round(share, 3), [d2_.x, d2_.y, d2_.z], [a2_.x, a2_.y, a2_.z]] if ok2 else [round(share, 3)]
+        else: out["tally"] = [round(share, 3)]
+    return out
 def hits():
     c = G["combat"]; p = G["pawn"]; now = {}
     for m in G["gen"].get_monsters():

@@ -1268,6 +1268,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 				PlayerCombat = NewObject<URDCombatComponent>(P, TEXT("RDCombat"));
 				PlayerCombat->RegisterComponent();
 				PlayerCombat->Init(this);
+				// (mistward: the game's own input mode, whatever the menu left: the camera follows the mouse unpressed)
+				if (bMouseUI) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
 				// (mistward: the shield her hero starts with, on her arm)
 				if (const FName* Sh = StartShield.Find(CurrentHero); Sh && FindItem(*Sh) >= 0) { PlayerCombat->AddItem(*Sh, 1); PlayerCombat->WearShield(*Sh); }
 			}

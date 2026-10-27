@@ -3,6 +3,7 @@ paths:
   - "claude_ue5/Source/claude_ue5/RD/RDMistward*"
   - "claude_ue5/Source/claude_ue5/RD/RDTraps.cpp"
   - "claude_ue5/Source/claude_ue5/RD/RDGear.cpp"
+  - "claude_ue5/Source/claude_ue5/RD/RDInputSim*"
   - "pipeline/unreal/86*.py"
   - "pipeline/unreal/868_mistward_test.ps1"
   - "pipeline/blender_numpy/mw_*.py"
@@ -11,7 +12,7 @@ paths:
 
 # mistward_castle (`863`-`868`; the user's list of 2026-10-26, `docs/improvements.txt`)
 
-Level 5's Save As copy with the castle's rules. Every rule is a switch on the generator ("Mistward" category), off on the other levels: level 5 itself must stay as it was. Its test is `868_mistward_test.ps1`; its reel is 815 / 816 / 829 with level `mw` (`mwselect` for the menu) and `rdm_reel_overlay.py ... mw`.
+Level 5's Save As copy with the castle's rules (and the user's second list of 2026-10-27). Every rule is a switch on the generator ("Mistward" category), off on the other levels: level 5 itself must stay as it was. Its test is `868_mistward_test.ps1`; its reel is 815 / 816 / 829 with level `mw` (`mwselect` for the menu) and `rdm_reel_overlay.py ... mw`.
 
 ## Building it
 
@@ -38,7 +39,18 @@ Level 5's Save As copy with the castle's rules. Every rule is a switch on the ge
 - **A trap is recorded spent when it goes off** (`FireTrap`, wards excepted: they set themselves again), not only when it finishes: a set dropped while a lingering or teleport trap was still going off laid it armed again.
 - **A guarded ring's pile is not hers**: its prompt and message name the ring ("take the ..."), not "your things". Taking a pile back never wears a set she carries once (`bArmourStacks` off) below what it is.
 - **Name new UFUNCTIONs off the engine's**: `TeleportTo(int32)` hid `AActor::TeleportTo` (C4263/C4264) and took Python's `teleport_to` (the engine's `K2_TeleportTo`): `TeleportToTier`.
-- **Footprints**: a piece's nominal size can be smaller than its mesh (a table's top over a wardrobe's way in): `ARDSection::FootOf` takes the mesh's box where it is bigger, centred where the box is. Pieces still touch by up to 6 cm (3 cm under their sizes on each side, so pieces set by their sizes fit).
+- **Footprints**: a piece's nominal size can be smaller than its mesh (a table's top over a wardrobe's way in): `ARDSection::FootOf` takes the mesh's box where it is bigger, centred where the box is. Pieces touch by at most 1 cm (0.5 cm under their sizes on each side, so pieces set by their sizes fit; 6 cm until 2026-10-27).
+
+## The user's second list (2026-10-27)
+
+- **Ask which level the user played**: the user reported "the FPS counter is missing, held keys don't scroll, beds and chests intersect, the cells hold a rock, containers close" while every one of those was on in Mistward: the editor's log showed they had played `random_dungeonmagic_level5` (`RDSELECT start: ...level5?Hero=`), where the castle's switches are off. Read the log's `RDSELECT start` / `Created PIE world` lines before chasing a report. They chose Mistward only.
+- **Input the way the devices send it** (`RDInputSim`, the generator's and the menu's `SlateKey` / `SlateMouseMove` / `SlateMouseButton` / `SlateWheel`): into Slate, which hands it to the viewport, which hands it to the player controller. `SimulateKey` starts at the player controller and skips focus, capture and where the pointer is. They refuse (and say why) when the game's viewport does not have the keyboard focus or the point is not over it.
+- **A floating Message Log covered the game's view** (it opens at start-up for the Kitchen Asset Kit's unloadable textures): Slate sent the clicks to it. `SlateClearView` hides the editor's windows over the view while a test runs and `SlateRestoreView` (or `RDDungeonGenerator.slate_restore_any_view()`, the driver's) shows them again. The editor here is on a high-DPI screen: PowerShell's window rectangles are scaled down (the view is 2440 x 1616 pixels).
+- **The pointer**: the game's own input mode captures the mouse and hides it on a click: with the pointer up the mode is game-and-UI (`HideCursorDuringCapture` off, no lock), and the game's own mode is set back when the list closes, when the menu opens the dungeon and when her combat component is made (or the camera turned only with a button held). A hit box that takes a click (`AddHitBox(..., true)`) keeps it from the player controller's keys: the castle's menu keeps its buttons itself (`ARDHeroSelect::Buttons`). A row chosen by the pointer holds the list where it is: following the cursor, a long list re-centred on the row and slid another row under the pointer (the click chose instead of using). The probe on a short list passed: test on a list longer than the screen.
+- **RestartPlay doubled the start set's monsters**: `ActivateForPlay` spawned them again beside the ones standing (28 of 14 after one restart; the debug clear then kept the wrong ones and the tiers step saw "11 of 14 killed" at its first kill). The castle's sections destroy theirs first; the other levels still double them (tests and reels only: normal play never restarts).
+- **A container's way in is checked at its whole size**: `FootFree` took 3 cm off each side, and a shelf stood 5 cm into a barrel's way. That slack is 0.5 cm now (`RDFootSlack`; the test allows 1.5): at 3 cm a chest could stand 6 cm into a bed's foot board, which reads as one set into the other. A barracks chest goes 10 cm past the bed's front as its mesh measures (`FootOf`), not its nominal size.
+- **Room sizes** come from a stream of their own (small chambers 3-4 tiles, galleries the block's length by 3-4, the largest), so the layout's stream is unchanged; the start section's furniture is saved: run `865` again after a change to the plan (it rebuilds it).
+- **The torch's light is measured in pictures**: 640 x 360 `HighResShot`s lit and put out, read with `zlib` (the editor's Python has no image library): 136 against 98.
 
 ## The test (`868`)
 
@@ -46,7 +58,7 @@ Level 5's Save As copy with the castle's rules. Every rule is a switch on the ge
 - A set of rooms still being built is skipped by the traps' tick: wait for `is_building()` to be false, not only for its progress record.
 - Sets far from her are dropped and built again as she moves: read the traps' lines again for each trial; which kinds exist depends on the sets generated (the chain and the lingering trap are tier 3's): generate tier 3 sets until all twelve are there.
 - `bLogTraps` (the generator) logs what the traps' tick sees once a second (`RDTRAPTICK`).
-- The 75 % rule is checked kill by kill (the debug clear leaving fewer each time): the tier opens at the first share of 75 % or more.
+- The share rule (50 % since 2026-10-27, 75 % before) is checked kill by kill (the debug clear leaving fewer each time, once every planned monster of the start set stands): the tier opens at the first share of 50 % or more, and was shut at the kill before.
 - Wardrobes: two doors, two containers, one body: count the body once.
 
 ## The reel (815 `mw ... mistward`, `rdm_reel_overlay.py ... mw`)
@@ -56,4 +68,5 @@ Level 5's Save As copy with the castle's rules. Every rule is a switch on the ge
 - **A disarm can fumble** (15 %, from a stream seeded by the session seed): the render repeats the rehearsal's outcome; pick a seed whose disarm works (the Rogue's 13422).
 - **A caged monster next to the prisoner's cell breaks out** as she frees the prisoner: the pilot picks a prisoner with no monster's cell within 6.5 m and a monster's cell 9 m or more away.
 - The overlay draws the castle's pictures from `blender_numpy/mw_ui_art.py`'s folder (the painted interface plus `867`'s pictures).
-- The frame rate the HUD shows in a render is the render's own tick, not play's.
+- The frame rate the HUD shows in a render is the render's own tick, not play's (383 FPS in the second reel).
+- **The second reel (2026-10-27)**: at 50 % the shortcut opened tier 2 at the first debug clear, in the tick the pilot asked for the encounters, and the guarded ring (put a tick later) was missed: the pilot waits for it. The ring lay in a chest of a 4 x 4 guard room: `mw_near_point`'s sweep went all the way into the chest and refused every stand point (she was left 88 m off): it sweeps to 1.2 m short of it, and tries nearer distances for the castle's small rooms. Read each run's events (`cine_mw_<hero>.json`: at_ring's distance, fights, ring_taken) before the overlays.

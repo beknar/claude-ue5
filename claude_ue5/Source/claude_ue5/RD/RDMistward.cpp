@@ -4,6 +4,8 @@
 #include "RD/RDSection.h"
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
+#include "RD/RDInputSim.h"
+#include "UObject/UObjectIterator.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/MaterialBillboardComponent.h"
@@ -88,10 +90,10 @@ void ARDLootPile::Init(ARDDungeonGenerator* G, const TArray<FName>& InThings, co
 {
 	Things = InThings; Wear = InWear;
 	if (!G) return;
-	// (a ring of pictures over it, one for each kind of thing, at most twelve)
+	// (rings of pictures over it, one for each kind of thing: twelve to a ring, each ring wider and higher than the last
+	// (until 2026-10-27 at most twelve: a richer pack showed only part of what lay there))
 	TArray<FName> Kinds;
 	for (const FName& N : Things) Kinds.AddUnique(N);
-	if (Kinds.Num() > 12) Kinds.SetNum(12);
 	const int32 Num = Kinds.Num();
 	for (int32 I = 0; I < Num; ++I)
 	{
@@ -105,11 +107,10 @@ void ARDLootPile::Init(ARDDungeonGenerator* G, const TArray<FName>& InThings, co
 		Mi->SetTextureParameterValue(TEXT("Icon"), Art->Texture);
 		UMaterialBillboardComponent* B = NewObject<UMaterialBillboardComponent>(this);
 		B->SetupAttachment(Root);
-		const float A = 2.f * PI * I / FMath::Max(Num, 1), Rr = Num > 1 ? 55.f : 0.f;
-		B->SetRelativeLocation(FVector(FMath::Cos(A) * Rr, FMath::Sin(A) * Rr, 95.f + 18.f * (I % 2)));
 		B->AddElement(Mi, nullptr, false, 26.f, 26.f, nullptr);
 		B->RegisterComponent();
 		Icons.Add(B);
+		B->SetRelativeLocation(IconPlace(Icons.Num() - 1, 0.f));
 	}
 	Pictures = Icons.Num();
 	if (G->LootPileFx) Fx = RDMSpawnFx(this, G->LootPileFx, FVector::ZeroVector, FRotator::ZeroRotator, G->LootPileFxScale, Root, false, false);
@@ -128,13 +129,17 @@ void ARDLootPile::Tick(float Dt)
 	Super::Tick(Dt);
 	Age += Dt;
 	// (the pictures turn slowly round it and bob)
-	const int32 Num = Icons.Num();
-	for (int32 I = 0; I < Num; ++I)
-		if (UMaterialBillboardComponent* B = Icons[I])
-		{
-			const float A = 2.f * PI * I / FMath::Max(Num, 1) + Age * 0.6f, Rr = Num > 1 ? 55.f : 0.f;
-			B->SetRelativeLocation(FVector(FMath::Cos(A) * Rr, FMath::Sin(A) * Rr, 95.f + 18.f * (I % 2) + 6.f * FMath::Sin(Age * 2.f + I)));
-		}
+	for (int32 I = 0; I < Icons.Num(); ++I) if (UMaterialBillboardComponent* B = Icons[I]) B->SetRelativeLocation(IconPlace(I, Age));
+}
+
+FVector ARDLootPile::IconPlace(int32 I, float T) const
+{
+	// (twelve to a ring; the last ring holds what is left over)
+	const int32 Num = FMath::Max(Pictures > 0 ? Pictures : Icons.Num(), 1);
+	const int32 Ring = I / 12, InRing = FMath::Min(12, Num - Ring * 12);
+	const float A = 2.f * PI * (I % 12) / FMath::Max(InRing, 1) + T * (Ring % 2 ? -0.45f : 0.6f);
+	const float Rr = Num > 1 ? 55.f + 32.f * Ring : 0.f;
+	return FVector(FMath::Cos(A) * Rr, FMath::Sin(A) * Rr, 95.f + 34.f * Ring + 18.f * (I % 2) + 6.f * FMath::Sin(T * 2.f + I));
 }
 
 // ================================================================================================ the teleporter
@@ -444,12 +449,11 @@ void ARDDungeonGenerator::PlaceBoss(int32 Tier)
 
 void ARDDungeonGenerator::PlaceRingGuard(int32 Tier)
 {
-	// (the rings of the tier before: 2(T-1)-1 and 2(T-1) of her kind; magic potency for the casters, hit points for the
-	// Warrior, dexterity for the Rogue)
-	const FRDHeroDef* H = FindHero(CurrentHero);
-	ERDRingKind Kind = ERDRingKind::Magic;
-	if (H && !H->RingKinds.Contains(ERDRingKind::Magic) && H->RingKinds.Num() > 0) Kind = H->RingKinds[0];
-	const TCHAR* Base = Kind == ERDRingKind::Magic ? TEXT("Magic Potency Ring") : Kind == ERDRingKind::Health ? TEXT("HP Potency Ring") : TEXT("Dexterity Ring");
+	// (the rings of the tier before: 2(T-1)-1 and 2(T-1); the Magic Potency Ring, as the user's list names it ("the magic
+	// potency ring 1 or 2"), for every hero. Until 2026-10-27 it was her kind of ring (hit points for the Warrior, dexterity
+	// for the Rogue): the audit of the list found that departed from its words)
+	const ERDRingKind Kind = ERDRingKind::Magic;
+	const TCHAR* Base = TEXT("Magic Potency Ring");
 	const int32 A = 2 * (Tier - 1) - 1, B = 2 * (Tier - 1);
 	const FName RA(*FString::Printf(TEXT("%s %d"), Base, A)), RB(*FString::Printf(TEXT("%s %d"), Base, B));
 	const URDCombatComponent* Pc = GetPlayerCombat();
@@ -545,6 +549,24 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
 	Best->Destroy();
 	return true;
+}
+
+// ================================================================================================ tests' input, as the devices send it
+FString ARDDungeonGenerator::SlateKey(FKey Key, bool bDown) { return RDInputSim::Key(GetWorld(), Key, bDown); }
+FString ARDDungeonGenerator::SlateMouseMove(FVector2D Pixel) { return RDInputSim::MouseMove(GetWorld(), Pixel); }
+FString ARDDungeonGenerator::SlateMouseButton(FVector2D Pixel, FKey Button, bool bDown) { return RDInputSim::MouseButton(GetWorld(), Pixel, Button, bDown); }
+FString ARDDungeonGenerator::SlateWheel(FVector2D Pixel, float Delta) { return RDInputSim::Wheel(GetWorld(), Pixel, Delta); }
+FString ARDDungeonGenerator::SlateClearView() { return RDInputSim::ClearView(GetWorld()); }
+int32 ARDDungeonGenerator::SlateRestoreView() { return RDInputSim::RestoreView(); }
+int32 ARDDungeonGenerator::SlateRestoreAnyView() { return RDInputSim::RestoreView(); }
+
+int32 ARDDungeonGenerator::GetParticlesNear(FVector At, float Radius) const
+{
+	int32 Num = 0;
+	const UWorld* W = GetWorld();
+	for (TObjectIterator<UNiagaraComponent> It; It; ++It)
+		if (It->GetWorld() == W && FVector::DistSquared(It->GetComponentLocation(), At) <= Radius * Radius) Num += RDNiagaraParticles(*It);
+	return Num;
 }
 
 // ================================================================================================ teleporters

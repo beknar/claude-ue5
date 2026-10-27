@@ -241,8 +241,10 @@ if LETTERS:
     f_title, f_head, f_num, f_ban = lfont("Cinzel-700", 40), lfont("Cinzel-700", 30), lfont("Cinzel-700", 30), lfont("Cinzel-700", 30)
     f_sub, f_line, f_small, f_tiny = lfont("Alegreya-500", 26), lfont("Alegreya-500", 26), lfont("Alegreya-500", 19), lfont("Alegreya-500", 15.5)
     fl_small, fl_tiny, ft_small, ft_tiny = lfont("AlegreyaSC-700", 18), lfont("AlegreyaSC-700", 15), lfont("Cinzel-700", 17), lfont("Cinzel-700", 14)
+    fl_fps = lfont("AlegreyaSC-700", 24)          # (mistward's frame rate: the HUD's label at 1.5 since 2026-10-27)
 else:
     fl_small, fl_tiny, ft_small, ft_tiny = f_small, f_tiny, f_small, f_tiny
+    fl_fps = f_small
 def fade(t, t0, t1, fin=0.35, fout=0.5):
     if t < t0 or t > t1: return 0.0
     return min(1.0, (t - t0) / fin, (t1 - t) / fout)
@@ -431,7 +433,17 @@ def tactical(o, r, t, maps, disc, cx, cy, R, half, ua, under=None):
         tr = r["tier"]; t_, done, size, rx_, rn, cl_, cn, kl, mn, clr, opn, mx = tr
         ls = [("TIER %d  ·  SETS CLEARED %d / %d" % (t_, done, size), (1.0, 0.82, 0.35))]
         if rn >= 0: ls.append(("this set of rooms is cleared" if clr else "rooms %d/%d   chests %d/%d   monsters %d/%d" % (rx_, rn, cl_, cn, kl, mn), (0.45, 0.95, 0.5) if clr else (0.86, 0.84, 0.78)))
-        ls.append(("tier %d opens when all of tier %d is cleared" % (opn + 1, opn) if opn < mx else "all %d tiers are open" % mx, (0.7, 0.72, 0.75)))
+        ta = r.get("tally")
+        if ta and opn < mx:
+            # (mistward: the share rule, as ARDHUD::DrawTiers writes it: each count against what the next tier needs)
+            pct = round(ta[0] * 100)
+            if len(ta) == 3:
+                need = [math.ceil(a_ * ta[0] - 1e-3) for a_ in ta[2]]
+                ls.append(("tier %d opens at %d%% of tier %d" % (opn + 1, pct, opn), (0.7, 0.72, 0.75)))
+                ls.append(("rooms %d/%d   monsters %d/%d   chests %d/%d" % (ta[1][0], need[0], ta[1][1], need[1], ta[1][2], need[2]), (0.86, 0.84, 0.78)))
+            else: ls.append(("tier %d opens at %d%% of tier %d (counting...)" % (opn + 1, pct, opn), (0.7, 0.72, 0.75)))
+        else:
+            ls.append(("tier %d opens when all of tier %d is cleared" % (opn + 1, opn) if opn < mx else "all %d tiers are open" % mx, (0.7, 0.72, 0.75)))
         y = cy + max(R * 0.96, under or 0) + 30 * K; wmax = max(d.textlength(sc(s), font=fl_small) for s, _ in ls)
         d.rectangle((cx - wmax / 2 - 10 * K, y - 4 * K, cx + wmax / 2 + 10 * K, y + 26 * K * len(ls) + 4 * K), fill=(5, 5, 8, int(140 * ua)))
         for s, c in ls:
@@ -915,8 +927,11 @@ def l4_panels(o, r, t, ua):
     else: d.rectangle((ax + pd, fy, bx - pd, fy + K), fill=lin((0.75, 0.65, 0.45), 0.4))
     op = last_at(INVS, t)
     if me and me["text"] and op and me["t"] >= op["t"]: d.text((ax + pd + tin, fy + 14 * K), me["text"], font=f_line, fill=lin((1.0, 0.93, 0.75)))
-    d.text((ax + pd + tin, fy + 52 * K), ("W S / arrows / wheel  select      Enter or E  mend it      Backspace  back      I or Tab  close" if picking else
-                                          "W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close"), font=f_small, fill=lin((0.70, 0.68, 0.62)))
+    # (mistward: the pointer too, as ARDHUD writes it with the generator's bMouseUI)
+    d.text((ax + pd + tin, fy + 52 * K), (("W S / pointer  select     Enter or click  mend it     wheel  scroll     Backspace  back     Tab  close" if picking else
+                                           "W S / pointer  select      Enter or click  wield or use      wheel  scroll      I or Tab  close") if M5 else
+                                          ("W S / arrows / wheel  select      Enter or E  mend it      Backspace  back      I or Tab  close" if picking else
+                                           "W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close")), font=f_small, fill=lin((0.70, 0.68, 0.62)))
     top.alpha_composite(o)
 def craft_panel(top, r, t, ua, me):
     """ARDHUD::DrawCrafting: the anvil's panel; the recipes on the left (CAN MAKE where she has everything), the chosen one on
@@ -1217,13 +1232,13 @@ def m5_caps():
                     ["  ·  ".join("a blow of %.1f: the shield took %.1f, %.1f reached her" % (x["before"], x["took"], x["reached"]) for x in b_[:2]),
                      "the shield loses what it takes: its durability falls by it, and at 0 it breaks"], cyan))
     for e in ev("tier2"):
-        out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 4.0, e["notice"] or "TIER 2 IS OPEN", ["a tier opens once the tier before has 75 % of its rooms explored, monsters killed and chests looted",
+        out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 4.0, e["notice"] or "TIER 2 IS OPEN", ["a tier opens once the tier before has 50 % of its rooms explored, monsters killed and chests looted",
                     "then a boss and 3 to 6 monsters of the new tier wait in a room she has seen (not hers): on the maps"], warm))
     for e in ev("at_boss"):
         out.append((e["t"] + MW_CARD + 4.0, e["t"] + MW_CARD + 8.0, "THE BOSS:  %s" % e["boss"].replace("_", " ").upper(), ["the strongest kind of tier 2, bigger, three times its hit points, its blows 1.6 times as hard",
                     "%.0f m off, in a room of the start set she has explored" % e["m"]], (255, 150, 120)))
     for e in ev("at_ring"):
-        out.append((e["t"] + MW_CARD + 4.0, e["t"] + MW_CARD + 8.0, "A RING SHE NEVER FOUND:  %s" % e["ring"].upper(), ["her kind of potency ring of the tier before, not found when the tier opened:",
+        out.append((e["t"] + MW_CARD + 4.0, e["t"] + MW_CARD + 8.0, "A RING SHE NEVER FOUND:  %s" % e["ring"].upper(), ["the magic potency ring of the tier before (1 or 2), not found when the tier opened:",
                     "put in a room she has seen and guarded by 4 monsters of the new tier; the maps mark it"], (255, 150, 120)))
     for e in [x for x in EV if x["kind"] == "map" and x.get("open")]:
         e1 = next((x["t"] for x in EV if x["kind"] == "map" and not x.get("open") and x["t"] > e["t"]), e["t"] + 3.0)
@@ -1278,9 +1293,14 @@ def mw_hud(o, d, r, t, ua, mapo):
     do near her, the disarm bar, the fallen banner"""
     fps = r.get("fps", 0.0)
     if fps > 0:
-        s_ = "%d FPS  ·  %.1f MS" % (round(fps), 1000.0 / fps); tw = d.textlength(s_, font=fl_small)
-        blend_box(o, (24 * K, 14 * K, 44 * K + tw, 46 * K), 6 * K, (8, 8, 10, int(170 * ua))); d = ImageDraw.Draw(o, "RGBA")
-        d.text((34 * K, 30 * K), s_, font=fl_small, fill=lin((0.85, 0.95, 0.75), ua), anchor="lm")
+        # (as ARDHUD draws it since 2026-10-27: in the corner over the controls, larger, on a dark framed plate, green / amber /
+        # red by the rate)
+        s_ = "%d FPS  ·  %.1f MS" % (round(fps), 1000.0 / fps); tw = d.textlength(s_, font=fl_fps); mg = 44 * K
+        x0, y0, x1, y1 = mg, mg - 6 * K, mg + tw + 24 * K, mg + 34 * K
+        blend_box(o, (x0, y0, x1, y1), 4 * K, (3, 3, 4, int(215 * ua))); d = ImageDraw.Draw(o, "RGBA")
+        d.rectangle((x0, y0, x1, y1), outline=lin((0.75, 0.65, 0.45), 0.9 * ua), width=max(1, int(1.5 * K)))
+        fc = (0.55, 1.0, 0.6) if fps >= 50 else (1.0, 0.85, 0.35) if fps >= 30 else (1.0, 0.4, 0.3)
+        d.text((x0 + 12 * K, (y0 + y1) / 2), s_, font=fl_fps, fill=lin(fc, ua), anchor="lm")
     if not mapo:
         P = 300 * K; mg = 24 * K
         text_c(d, (W * K - mg - P / 2, 8 * K), sc((C.get("game_title") or "").upper()), fl_small, lin((1.0, 0.84, 0.45), ua), "mt")

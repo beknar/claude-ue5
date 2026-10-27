@@ -15,12 +15,15 @@
 - armour: kept set by set (several of one kind), broken down at the anvil by its type (the table's breakdown types)
 - the Plate Knight's Sword: tier 2 only (it was tier 1)
 - traps (the generator's Traps): pit, darts, deadfall, crusher, snare (mechanical), glyph, ward, emanation, cursed rune stone
-  (magical: the spells' own effects), chain and lingering (complex), teleport; the Rogue finds and disarms them
+  (magical: the spells' own effects), chain and lingering (complex), teleport, spring plate (directional: thrown along a
+  room's way to its far end); the Rogue finds and disarms them
 - prisoners: the NPC Prisoners pack's ten (their own idle and walk), what a freed prisoner gives
 - her things where she falls: Loot Drops Vol. 2's NS_LootDrop03_lvl5_yellow and a picture of each thing (a material made
   here: M_RD_LootIcon, unlit, see-through, its texture parameter Icon)
-- the switches: the frame rate, the inventory walked by a held key, the anvil's alphabetical lists, containers that stay open, tidy furniture, shaped rooms, the
-  75 % rule, the boss and the guarded ring at each tier's opening, dropping on death, teleporters
+- the switches: the frame rate, the inventory walked by a held key and by the mouse (mouse_ui), the anvil's alphabetical
+  lists, containers that stay open, tidy furniture (no hay mound in the cells), shaped rooms (and more sizes), the tiers'
+  rule (50 % since 2026-10-27; 75 % before), the boss and the guarded ring at each tier's opening, dropping on death,
+  teleporters
 Args: none"""
 import unreal, json, math, os
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools()
@@ -106,7 +109,7 @@ def arm_frame(depth):
 RANK_TIER = lambda r: [5] if r <= 4 else [4] if r <= 8 else [3] if r <= 13 else [2] if r <= 17 else [1]
 grips = {}
 for s in SH["shields"]:
-    o = OBJ[s["name"]]
+    o = OBJ[s.get("gallery", s["name"])]          # (the table's name, the gallery's where they differ)
     path = o["meshes"][0].split(".")[0]
     m = unreal.load_asset(path)
     if isinstance(m, unreal.SkeletalMesh): m = static_copy(path, "SM_" + s["name"].replace(" ", "").replace("'", "").replace("(", "").replace(")", "").replace("-", ""))
@@ -255,6 +258,9 @@ traps = [
     td("Chain", K.CHAIN, "chain of traps", False, 0.2, 90, 0, 3, 0.6, PLATE, PLATE_XF, ROCK, unreal.Transform(V(0, 0, 0), unreal.Rotator(0, 0, 0), V(0.25, 0.25, 0.25)), hit=sfx("nova", "impact_fx") or DUST),
     td("Lingering", K.LINGERING, "lingering trap", True, 0.18, 110, 0, 3, 0.6, PLATE, PLATE_XF, ARROW, unreal.Transform(V(0, 0, 0), unreal.Rotator(0, 0, 0), V(1.2, 1.2, 1.2)), hit=sfx("pillar", "impact_fx") or sfx("bolt", "impact_fx")),
     td("Teleport", K.TELEPORT, "teleport trap", True, 0.0, 85, 0, 2, 0.6, idle=sfx("rift", "area_fx"), trig=L("/Game/Medieval_Weapons/VFX/NS_TeleportRing"), isc=0.5, tsc=1.4, color=(.5, .3, 1)),
+    # (directional, the list's "directional or transportation traps": a spring plate on a room's way throws her along it to the
+    # room's far end, into monsters or a ring of glyphs)
+    td("Spring", K.PUSH, "spring plate", False, 0.08, 80, 0, 1, 0.7, PLATE, PLATE_XF, hit=DUST, hsc=0.6),
 ]
 gen.set_editor_property("traps", traps)
 gen.set_editor_property("trap_finders", ["Rogue"])
@@ -301,7 +307,7 @@ if not eal.does_asset_exist(MAT):
 gen.set_editor_property("icon_material", L(MAT))
 # ---------------------------------------------------------------- the switches
 for k, v in (("show_fps", True), ("alphabetical_crafting", True), ("key_repeat", True), ("containers_stay_open", True), ("tidy_furniture", True), ("shaped_rooms", True),
-             ("shaped_room_share", 0.6), ("tier_open_share", 0.75), ("drop_on_death", True), ("ring_guards", True), ("guard_count", 4),
+             ("shaped_room_share", 0.6), ("tier_open_share", 0.5), ("drop_on_death", True), ("ring_guards", True), ("guard_count", 4), ("mouse_ui", True),
              ("boss_encounters", True), ("boss_minions", unreal.IntPoint(3, 6)), ("boss_health", 3.0), ("boss_damage", 1.6), ("boss_scale", 1.35)):
     gen.set_editor_property(k, v)
 # (the start section again, under the castle's own rules (tidy furniture, its cells): its furniture is saved with the map, and

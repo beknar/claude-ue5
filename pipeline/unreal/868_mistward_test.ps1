@@ -2,15 +2,20 @@
 # starts PIE, waits for UEDPIE_0_mistward_castle, arms 868_mistward_test.py with the plan, waits for a NEW "MWTEST done | <tag>" line,
 # stops PIE, sets rd.HeroMenu back to 1 and leaves the editor on mistward_castle with play stopped.
 # Args: plan tag [maxSeconds]   e.g.  .\868_mistward_test.ps1 "basics,shields,torch" m1     (plan "all": every step, 868's order)
+# The plan "menu" plays the menu level (mistward_castle_select) instead: its step ends in mistward_castle, opened by START.
 param([string]$plan, [string]$tag, [int]$maxs = 2400)
 if ($plan -eq "all") { $plan = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death" }
-$L = "mistward_castle"
+$L = if ($plan -eq "menu") { "mistward_castle_select" } else { "mistward_castle" }
 $py = $env:UE_PY; if (-not $py) { $py = "python" }
 $ex = Join-Path $PSScriptRoot "..\blender_numpy\ue_exec.py"
 $log = Join-Path $PSScriptRoot "..\..\claude_ue5\Saved\Logs\claude_ue5.log"
 $open = "import unreal; les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world(); print('LEVEL', w.get_name() == '$L' or les.load_level('/Game/RandomDungeon/Maps/$L'))"
 $cvar = "import unreal; unreal.SystemLibrary.execute_console_command(None, 'rd.HeroMenu {0}'); print('rd.HeroMenu', unreal.SystemLibrary.get_console_variable_int_value('rd.HeroMenu'))"
-function Restore { & $py $ex -c ($cvar -f 1) 2>$null | Out-Null }
+function Restore {
+    & $py $ex -c ($cvar -f 1) 2>$null | Out-Null
+    # (the editor's windows the test hid from over the game's view, shown again whatever became of the test)
+    & $py $ex -c "import unreal; print('windows shown again', unreal.RDDungeonGenerator.slate_restore_any_view())" 2>$null | Out-Null
+}
 & $py $ex -c $open 2>$null | Out-Null
 & $py $ex -c ($cvar -f 0) 2>$null | Out-Null
 $pat = "MWTEST done \| $tag \|"

@@ -525,7 +525,10 @@ enum class ERDTrapKind : uint8
 	/** complex: the longer she stays the worse it gets (darts, then fire, then the ceiling) */
 	Lingering,
 	/** a teleport: she is carried off to a room with monsters, or a room of traps */
-	Teleport
+	Teleport,
+	/** directional: a spring plate on a room's way hurls her along it to the room's far end, where monsters wait or a ring
+	 *  of glyphs (the list's "directional ... traps", added 2026-10-27) */
+	Push
 };
 
 /** mistward_castle: one kind of trap (the generator's Traps; pipeline/unreal/86x). Damage is a share of her hit points. */

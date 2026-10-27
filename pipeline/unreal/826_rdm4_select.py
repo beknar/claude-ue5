@@ -13,7 +13,7 @@ but the Summoner, who is left off the menu since 2026-10-26 (the Warrior is Warr
 random_dungeonmagic_level5), its painted pieces and lettering those 830 gave level 4's menu.
 With the argument mistward it makes mistward_castle's menu (mistward_castle_select: level 5's four heroes as mistward_castle
 has them, the Warrior with the shield she starts with there (the generator's StartShield, its fit on her arm), the menu's
-title "Mistward Castle"; START opens mistward_castle).
+title "Mistward Castle"; START opens mistward_castle; the mouse chooses: ARDHeroSelect.bMouseUI).
 Args: [4 | 5 | mistward]"""
 import sys, unreal
 LV = sys.argv[1] if len(sys.argv) > 1 else "4"
@@ -146,6 +146,8 @@ sel.set_editor_property("heroes", heroes); sel.set_editor_property("figures", fi
 sel.set_editor_property("turntable", plinth); sel.set_editor_property("camera", cam)
 sel.set_editor_property("target_level", DUNGEON); sel.set_editor_property("front_yaw", 0.0); sel.set_editor_property("turn_rate", 28.0)
 sel.set_editor_property("game_title", "Mistward Castle" if MISTWARD else "Random Dungeon")
+# (mistward: the mouse chooses: the pointer stays free, a click on a name shows her, on her name again or START starts)
+sel.set_editor_property("mouse_ui", MISTWARD)
 if UIART is not None:
     def back(d, cls):
         out = {}

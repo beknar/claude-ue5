@@ -156,6 +156,11 @@ public:
 	void TrapShoot(int32 Index, uint8 Kind, const FVector& From, const FVector& To, float Speed);
 	/** tests: a trap of a kind added where she stands (it goes off at once) */
 	int32 AddTrapAt(int32 Def, const FVector& At, uint8 State);
+	/** where a teleport or a spring plate puts her: three monsters of the set's tier round At, or four glyphs going off one
+	 *  after the other round her (by H); the message names the trap (How). Adds to TrapList: hold no reference into it. */
+	void TrapAmbush(const FVector& At, uint32 H, const TCHAR* How);
+	/** tests: what the last ambush was ("monsters" / "glyphs") and where */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") FString LastAmbush;
 	bool FireTrap(int32 Index);
 	void SpendTrap(int32 Index, uint8 State);
 	/** the prison cells and who is in each (0 nobody, 1 a prisoner, 2 a monster), the cell door's index */

@@ -47,6 +47,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumThings() const { return Things.Num(); }
 	/** the effect on it is alive (particles a frame old, tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetEffectParticles() const;
+	/** where picture I hangs over the pile at time T (rings of twelve) */
+	FVector IconPlace(int32 I, float T) const;
 protected:
 	virtual void Tick(float Dt) override;
 private:
