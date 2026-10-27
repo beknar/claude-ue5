@@ -355,8 +355,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool GetTierTally(int32 Tier, FIntVector& Done, FIntVector& All) const;
 	/** found armour is kept set by set (several of one kind), and an anvil breaks armour down as it does weapons */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bArmourStacks = false;
-	/** her shield's speed: the share she loses for each point its speed rating is under 10; its share of a blow per damage point */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float ShieldSlowPerPoint = 0.03f;
 	/** what she starts with in her left hand (an item of kind Shield; her hero must have its fit), worn when play begins */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TMap<FName, FName> StartShield;
 	/** the torch in her hand: its flame, its light */
@@ -437,8 +435,6 @@ public:
 	/** what F does at a pad near her (taking the ring, teleporting); "" none */
 	FString UsePadNear(const FVector& From);
 	FString DescribePadNear(const FVector& From) const;
-	/** what she does at a cell door: a prisoner or monster within (InteractNearest) */
-	bool bCellDoorUsed = false;
 	/** the pads: tier -> where (world, on the floor); a tier's ring lies on its pad until she takes it */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") TMap<int32, FVector> Pads;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") TArray<int32> PadRingsTaken;
@@ -446,7 +442,7 @@ public:
 	/** a tier's teleport ring item (by TeleportTier) */
 	FName TeleportRingOf(int32 Tier) const;
 	/** she is carried to a tier's pad (generating its set of rooms first) */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool TeleportTo(int32 Tier);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool TeleportToTier(int32 Tier);
 	/** the pad nearest her within Reach (0: none) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") int32 PadNear(FVector From, float Reach = 220.f) const;
 	/** the first tier's pad: the tiers it can take her to (their rings in her pack), and the one chosen (cycles with F) */
@@ -705,6 +701,7 @@ private:
 	/** what a set of rooms she has not reached holds (rooms, chests and trunks, monsters): counted once, a few a frame */
 	mutable TMap<FIntPoint, FIntVector> CensusCache;
 	mutable TArray<FIntPoint> CensusQueue;
+	float CensusLookTime = -100.f;
 	void TickCensus();
 	void CheckTierOpenings();
 	void OnTierOpened(int32 Tier);
@@ -712,7 +709,6 @@ private:
 	void PlaceRingGuard(int32 Tier);
 	/** an explored room of a tier to set something in (not the one she is in, generated now); false: none */
 	bool PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const;
-	float LastFpsTime = 0.f;
 	UPROPERTY(VisibleAnywhere, Category = "RandomDungeon|Reveal") TObjectPtr<UPostProcessComponent> RevealPost;
 	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> RevealMID;
 	UPROPERTY(Transient) TObjectPtr<ARDSection> Building;

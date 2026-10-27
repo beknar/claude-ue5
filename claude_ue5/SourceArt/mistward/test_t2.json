@@ -23,7 +23,7 @@
    "title": "Mistward Castle",
    "max_tier": 5,
    "show_fps": true,
-   "fps": 34.5,
+   "fps": 40.7,
    "recipes": [
     "Leather Strips",
     "Patch Kit",
@@ -220,7 +220,7 @@
    ],
    "all": {
     "Rat": [
-     -0.2,
+     -0.1,
      -0.0,
      0.0
     ],
@@ -231,8 +231,8 @@
     ],
     "Parasite_Slider": [
      -0.1,
-     0.1,
-     0.6
+     0.2,
+     0.5
     ],
     "Half_Creature_05": [
      -0.4,
@@ -240,228 +240,228 @@
      0.1
     ],
     "Drinker": [
-     0.1,
-     0.6,
+     -0.0,
+     -0.0,
      1.0
     ],
     "Medic": [
      -0.3,
-     -0.3,
-     0.6
+     0.2,
+     0.9
     ],
     "Chicken": [
+     -0.1,
      -0.0,
-     0.0,
-     1.4
+     1.5
     ],
     "Soldier": [
      -0.1,
-     0.3,
+     0.0,
      0.7
     ],
     "Sufferer": [
      -0.0,
-     1.3,
-     2.7
+     1.4,
+     3.0
     ],
     "Fat": [
-     -0.7,
-     0.2,
-     2.7
+     0.0,
+     0.5,
+     2.5
     ],
     "Mask": [
-     -0.9,
+     -0.8,
      -0.7,
-     1.7
+     2.0
     ],
     "Monster": [
      0.7,
-     1.3,
+     1.2,
      2.3
     ],
     "Gunner": [
      0.8,
-     2.3,
-     4.7
+     0.9,
+     4.4
     ],
     "Parasites_Fat": [
      -0.1,
-     0.0,
+     0.3,
      0.6
     ],
     "Parasit": [
      0.9,
      0.9,
-     1.6
+     1.7
     ],
     "Orc_03": [
-     -0.0,
-     1.0,
-     2.8
+     -0.1,
+     0.7,
+     2.7
     ],
     "Magur": [
      -0.3,
-     0.2,
-     2.1
+     0.4,
+     1.6
     ],
     "Azrak": [
-     -2.1,
-     -1.1,
+     -1.6,
+     -1.3,
      -0.1
     ],
     "Warrior_02_the_leopard": [
-     -0.3,
-     2.8,
-     4.9
+     -0.2,
+     2.9,
+     5.2
     ],
     "Kanit": [
      -0.1,
-     0.6,
-     2.2
+     0.3,
+     1.9
     ],
     "Gnur": [
-     -0.1,
-     0.4,
-     1.5
+     -0.9,
+     -0.7,
+     1.7
     ],
     "Dardan": [
-     0.1,
-     0.4,
-     1.0
+     -0.4,
+     0.7,
+     1.5
     ],
     "Costalmed": [
      -0.1,
-     0.3,
-     2.6
+     0.0,
+     1.9
     ],
     "Orc_05": [
-     0.0,
-     0.9,
-     2.2
+     -0.0,
+     0.8,
+     2.0
     ],
     "Orc_06": [
      0.0,
-     0.6,
-     2.1
+     0.8,
+     1.5
     ],
     "Alien": [
-     -2.6,
+     -2.8,
      -0.7,
      -0.0
     ],
     "Devourer": [
-     -1.5,
-     -0.0,
-     0.3
+     -0.7,
+     0.2,
+     2.6
     ],
     "Insect": [
      -1.7,
-     -0.5,
-     9.9
+     -0.0,
+     23.3
     ],
     "Pangolin": [
-     -1.2,
-     0.6,
-     0.9
+     -0.7,
+     -0.0,
+     0.7
     ],
     "Tank": [
-     1.1,
-     1.1,
-     4.3
+     1.0,
+     3.0,
+     3.7
     ],
     "Orc_01": [
      -0.0,
-     0.5,
-     2.0
+     0.1,
+     1.8
     ],
     "Orc_02": [
-     -1.4,
-     1.0,
-     1.9
+     -1.5,
+     0.2,
+     2.0
     ],
     "Ursag": [
      -0.1,
-     0.3,
-     2.4
+     0.7,
+     1.7
     ],
     "Orc_04": [
      0.0,
-     2.0,
-     3.1
+     1.6,
+     3.0
     ],
     "Bear_Warrior": [
      0.8,
-     2.2,
-     3.8
+     2.7,
+     3.7
     ],
     "Bull_Warrior": [
-     -0.0,
-     3.7,
+     -0.1,
+     3.4,
      4.5
     ],
     "Crocodile_Warrior": [
      -1.4,
-     -0.6,
-     0.7
+     -0.9,
+     0.4
     ],
     "Elephant_Warrior": [
      -0.4,
-     -0.3,
-     4.9
+     4.2,
+     5.6
     ],
     "Alien_Warrior_05": [
-     0.3,
-     1.0,
-     3.8
+     0.8,
+     1.1,
+     3.2
     ],
     "Exterminator": [
-     0.0,
-     0.9,
+     -0.0,
+     0.5,
      1.2
     ],
     "Shell": [
-     -0.2,
+     -0.1,
      -0.0,
-     3.2
+     4.1
     ],
     "Bug": [
-     -0.0,
-     1.7,
-     2.2
+     0.1,
+     1.6,
+     2.0
     ],
     "Horned": [
-     -1.2,
+     -2.8,
      0.0,
-     1.4
-    ],
-    "Mutant": [
-     -1.1,
-     0.6,
      1.5
     ],
+    "Mutant": [
+     -0.9,
+     0.4,
+     1.9
+    ],
     "Ripper_dog": [
+     -0.6,
      0.2,
-     0.5,
-     0.7
+     0.5
     ],
     "Daemon": [
-     -0.5,
-     0.0,
-     2.5
+     -1.0,
+     2.3,
+     2.8
     ],
     "Troll": [
-     0.0,
-     0.8,
+     -0.0,
+     0.3,
      2.4
     ],
     "Parasite_Spider": [
-     -0.2,
-     1.5,
-     5.6
+     -0.3,
+     0.1,
+     5.8
     ],
     "Fantasy_Animal_raptor_mount": [
      0.0,
-     1.6,
+     2.7,
      4.0
     ],
     "Alfa": [
@@ -471,28 +471,28 @@
     ],
     "Spider": [
      -1.3,
-     -0.1,
-     4.6
+     0.5,
+     5.2
     ],
     "Rock": [
-     -0.5,
-     1.1,
-     4.8
+     -0.4,
+     0.8,
+     4.6
     ],
     "Titan": [
-     -2.2,
-     -0.7,
-     -0.3
+     -1.5,
+     -0.5,
+     0.1
     ],
     "Hunter": [
-     -0.0,
-     0.1,
+     -0.8,
+     1.8,
      2.5
     ],
     "Nasty": [
-     -2.6,
+     -3.9,
      0.1,
-     11.4
+     10.7
     ]
    }
   },
@@ -516,6 +516,18 @@
     ]
    },
    "kills": [
+    {
+     "killed": 9,
+     "of": 14,
+     "share": 0.643,
+     "open": false
+    },
+    {
+     "killed": 10,
+     "of": 14,
+     "share": 0.714,
+     "open": false
+    },
     {
      "killed": 10,
      "of": 14,
@@ -576,14 +588,14 @@
     ]
    },
    "open_enough": true,
-   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE BARRACKS (SEE YOUR MAP)",
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
    "tier2": {
     "boss": [
      {
       "kind": "boss",
       "at": [
-       3750.0,
-       -7350.0,
+       4050.0,
+       3450.0,
        124.0
       ],
       "name": "Orc_03",
@@ -593,18 +605,18 @@
       "max_health": 360.0
      }
     ],
-    "band": 5,
+    "band": 4,
     "guards": 4,
     "ring": [
      {
       "kind": "ring",
       "at": [
-       7738.0,
-       450.0,
-       119.0
+       3365.0,
+       3990.0,
+       41.0
       ],
       "name": "HP Potency Ring 1",
-      "key": 157,
+      "key": 240,
       "tier": 2,
       "section": [
        0,
@@ -617,9 +629,7 @@
     "boss_scale": 1.35,
     "boss_mesh_scale": 1.35,
     "band_health": [
-     91.0,
-     109.0,
-     114.0,
+     86.0,
      120.0
     ],
     "ring_first_in_container": [
@@ -643,21 +653,21 @@
     "SET CLEARED  -  TIER 2: 3 / 8",
     "SET CLEARED  -  TIER 2: 4 / 8",
     "SET CLEARED  -  TIER 2: 5 / 8",
+    "SET CLEARED  -  TIER 2: 6 / 8",
     "TIER 3 IS OPEN  -  A BOSS WAITS IN THE STOREROOM (SEE YOUR MAP)",
-    "SET CLEARED  -  TIER 2: 7 / 8",
     "TIER 2 CLEARED"
    ],
    "tally2": {
     "ok": true,
     "done": [
-     336,
-     101,
-     775
+     330,
+     99,
+     824
     ],
     "all": [
-     336,
-     101,
-     775
+     330,
+     99,
+     824
     ]
    },
    "open3": true,
@@ -671,8 +681,8 @@
      {
       "kind": "boss",
       "at": [
-       -13650.0,
-       -10950.0,
+       -18150.0,
+       -14850.0,
        122.0
       ],
       "name": "Tank",
@@ -682,22 +692,22 @@
       "max_health": 576.0
      }
     ],
-    "band": 5,
+    "band": 6,
     "guards": 4,
     "ring": [
      {
       "kind": "ring",
       "at": [
-       -12965.0,
-       -11910.0,
-       41.0
+       -8338.0,
+       -19410.0,
+       21.0
       ],
       "name": "HP Potency Ring 3",
-      "key": 32,
+      "key": 285,
       "tier": 3,
       "section": [
-       -1,
-       0
+       0,
+       -1
       ]
      }
     ],
@@ -706,9 +716,9 @@
     "boss_scale": 1.35,
     "boss_mesh_scale": 1.35,
     "band_health": [
-     138.0,
-     148.0,
+     143.0,
      153.0,
+     167.0,
      192.0
     ],
     "ring_first_in_container": [
@@ -716,7 +726,7 @@
     ],
     "ring_kind_ok": true
    },
-   "seconds": 8.1
+   "seconds": 7.1
   },
   {
    "step": "open",
@@ -725,7 +735,7 @@
     2,
     0
    ],
-   "container": 12,
+   "container": 0,
    "kind": "chest",
    "describe_before": "open chest",
    "first_f": "chest",
@@ -744,18 +754,18 @@
    "ok": true,
    "sections": 8,
    "shapes": {
-    "circle": 9,
+    "circle": 13,
     "dome": 10,
-    "octagon": 19,
-    "T": 9,
+    "octagon": 15,
+    "T": 13,
     "step pyramid": 12,
-    "hexagon": 12,
-    "pyramid": 14,
+    "hexagon": 15,
+    "pyramid": 12,
     "diamond": 15,
-    "tall": 7,
-    "triangle": 11,
-    "U": 7,
-    "L": 14
+    "tall": 10,
+    "triangle": 16,
+    "U": 9,
+    "L": 6
    },
    "shaped_bad": [],
    "themes": {
@@ -808,8 +818,8 @@
      "dwarf": true
     }
    },
-   "furniture": 3009,
-   "containers": 2590,
+   "furniture": 2682,
+   "containers": 2591,
    "overlaps": [],
    "n_overlaps": 0,
    "blocked": [],
@@ -828,7 +838,7 @@
   {
    "step": "traps",
    "ok": true,
-   "traps": 168,
+   "traps": 137,
    "kinds_present": [
     "Chain",
     "Crusher",
@@ -924,10 +934,10 @@
     "Emanation": {
      "present": true,
      "kind": "7",
-     "hp_lost": 47.0,
+     "hp_lost": 53.8,
      "held": false,
      "moved_m": 0.0,
-     "hits": 7,
+     "hits": 8,
      "triggered": 1,
      "state": 1,
      "says": "You are slowed"
@@ -957,10 +967,10 @@
     "Lingering": {
      "present": true,
      "kind": "10",
-     "hp_lost": 24.2,
+     "hp_lost": 32.3,
      "held": false,
      "moved_m": 0.0,
-     "hits": 3,
+     "hits": 4,
      "triggered": 1,
      "state": 1,
      "says": "A trap: lingering trap!"
@@ -968,13 +978,13 @@
     "Teleport": {
      "present": true,
      "kind": "11",
-     "hp_lost": 0.0,
+     "hp_lost": 38.3,
      "held": false,
-     "moved_m": 574.2,
-     "hits": 0,
+     "moved_m": 15.3,
+     "hits": 4,
      "triggered": 1,
-     "state": 1,
-     "says": "A teleport trap carries you off: into a room of monsters"
+     "state": 2,
+     "says": "A trap: teleport trap!"
     }
    },
    "warrior_seen": 0,
@@ -987,7 +997,7 @@
     ],
     "describe": "disarm the pit trap",
     "f": "disarm",
-    "progress": 0.22,
+    "progress": 0.23,
     "state_after": 3,
     "disarmed": 1,
     "says": "You disarm the pit trap"
@@ -1016,7 +1026,8 @@
     3
    ],
    "pad_actors": [
-    1
+    1,
+    3
    ],
    "ring_on_2": true,
    "describe_2": "take the teleport ring of tier 2",
@@ -1038,27 +1049,78 @@
   {
    "step": "cells",
    "ok": true,
-   "cells": 118,
-   "prisoners": 43,
-   "monsters": 28,
-   "empty": 47,
+   "cells": 156,
+   "prisoners": 55,
+   "monsters": 39,
+   "empty": 62,
    "prisoner": {
     "describe": "unlock the cell: free the prisoner",
     "f": "prisoner",
     "freed": 1,
-    "says": "The prisoner thanks you and gives you small speed potion",
-    "found": "Small Speed Potion",
+    "says": "The prisoner thanks you and gives you medium healing potion",
+    "found": "Medium Healing Potion",
     "carried_more": 1,
     "gone": true,
     "door_open": true
    },
    "monster": {
     "caged_before": true,
+    "lonely": true,
+    "far_d": 460,
     "opened_far": 0,
+    "near_d": 250,
+    "track": [
+     [
+      155,
+      45
+     ],
+     [
+      242,
+      59
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ],
+     [
+      265,
+      63
+     ]
+    ],
+    "her": [
+     400,
+     73
+    ],
+    "door_alpha": 1.0,
     "breakouts": 1,
     "caged_after": false,
-    "came_m": -0.2,
-    "hp_lost": 9.6
+    "came_m": 1.9,
+    "hp_lost": 22.4,
+    "out_of_cell_m": 2.73
    }
   },
   {
@@ -1083,7 +1145,7 @@
      "Plate Armour"
     ],
     "pictures": 5,
-    "particles": 17,
+    "particles": 16,
     "from_her_m": 0.0
    },
    "carried_after": {

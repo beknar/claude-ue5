@@ -440,7 +440,8 @@ The Rogue alone sees them, within 8 m (a message and a red X on the maps). F by 
 **Prison cells** (`PrisonerDefs`; the NPC Prisoners pack's ten prisoners with their own idle and walk):
 - 60 % of the cells hold someone.
 - A prisoner: F at the door unlocks the cell, and the prisoner thanks her, gives her a thing of the tier, walks out and is gone.
-- 35 % hold a monster instead. It unlocks its own cell as she comes within 5.2 m, walks out through the door and comes for her.
+- 35 % hold a monster instead. It unlocks its own cell as she comes within 5.2 m, walks out through the door's gap and comes for her (the test follows it 2.7 m out of its cell to strike her).
+- A cell at the end of a row whose door would open against the room's wall is barred all across (the wall left too narrow a way out); the straw lies on the barred half.
 
 **Smaller things**:
 - The frame rate and frame time are shown in the upper left, over the controls.
@@ -751,7 +752,7 @@ Scripts are numbered roughly in build order. Each one's docstring states its pur
 1. Build the C++ module (`pipeline\build_cpp.ps1`, editor closed), relaunch. random_dungeonmagic_level5 must exist.
 2. `863_mistward_level.py`: the first run saves random_dungeonmagic_level5 as `mistward_castle` and stops: restart the editor, run it again (its title, its menu level `mistward_castle_select`, five tiers). Then `826_rdm4_select.py mistward` (the menu level: the four heroes, the Warrior with her starting shield, "Mistward Castle" over CHOOSE YOUR HERO).
 3. `864_mistward_pieces.py [CASTLE_FRONT]`: the themes' pieces (the castle keep's walls are Castle of Eternal Mist's blind arches, faced `+y`: Medieval Castle's walls have doorways and windows through them), the tiers' themes, the start section built again.
-4. `865_mistward_items.py` (reads `SourceArt/mistward/shields.json`): the 22 shields with a grip each on the Warrior's forearm, measured from the shield's mesh (its face, which way is up, which end is wider; `flip` / `turn` in the JSON where play showed it wrong: six were turned), the torch (a grip for each hero), the teleport rings and pads, the traps with the spells' effects, the prisoners, the loot pile's effect and its picture material, the breakdowns, the switches.
+4. `865_mistward_items.py` (reads `SourceArt/mistward/shields.json`): the 22 shields with a grip each on the Warrior's forearm, measured from the shield's mesh (its face, which way is up, which end is wider; `flip` / `turn` in the JSON where play showed it wrong: six were turned), the torch (a grip for each hero), the teleport rings and pads, the traps with the spells' effects, the prisoners, the loot pile's effect and its picture material, the breakdowns, the switches; then builds the start section again under the castle's switches (its furniture is saved with the map, and the copy had level 5's).
 5. `866_monster_heights.py measure` in play (`rd.HeroMenu 0`; it writes `SourceArt/mistward/monster_heights.json`), then `866_monster_heights.py apply /Game/RandomDungeon/Maps/mistward_castle` and the same for `random_dungeonmagic_level5` (each kind's MeshZ from the MeshZ it had when measured, its lowest drawn point and `RAISE`: the same result however often it runs).
 6. The pictures: `867_mistward_icons.py shoot <dir>` (play stopped: the editor world, a tick callback, texture streaming off), `python pipeline\blender_numpy\mw_icons.py <dir> --sheet <contact.jpg>` (look at the sheet: a shield seen from behind shows its grip and needs `flip`), `867_mistward_icons.py import <dir>`.
 7. Test: `868_mistward_test.ps1 all <tag>` (about 25 minutes; or a comma-separated plan of its steps, see `868_mistward_test.py`); results in `SourceArt/mistward/test_<tag>.json`, pictures in `Saved/Screenshots`.

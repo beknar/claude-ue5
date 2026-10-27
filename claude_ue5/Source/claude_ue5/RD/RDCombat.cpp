@@ -2,6 +2,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDMonster.h"
 #include "RD/RDBlood.h"
+#include "RD/RDMistward.h"
 #include "Sound/SoundBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
@@ -752,7 +753,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	if (It.Kind == ERDItemKind::Teleport)
 	{
 		if (bInventoryOpen) SetInventoryOpen(false);
-		if (!Generator->TeleportTo(1)) { SetMessage(TEXT("The ring is cold: the first tier's teleporter is gone")); return false; }
+		if (!Generator->TeleportToTier(1)) { SetMessage(TEXT("The ring is cold: the first tier's teleporter is gone")); return false; }
 		return true;
 	}
 	if (It.Kind == ERDItemKind::Repair) return BeginRepair(Name);         // (then she chooses what it mends)
@@ -1597,13 +1598,7 @@ int32 URDCombatComponent::GetSpellParticles(FVector Location, float Radius, int3
 	{
 		if (!IsValid(C) || (Radius > 0.f && FVector::DistSquared(C->GetComponentLocation(), Location) > Radius * Radius)) continue;
 		int32 N = 0;
-		if (const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C))
-		{
-			const FNiagaraSystemInstanceControllerConstPtr Ctl = Nc->GetSystemInstanceController();
-			if (Ctl.IsValid() && Ctl->IsValid())
-				if (const FNiagaraSystemInstance* SI = Ctl->GetSystemInstance_Unsafe())
-					for (const FNiagaraEmitterInstanceRef& E : SI->GetEmitters()) N += E->GetNumParticles();
-		}
+		if (const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C)) N = RDNiagaraParticles(Nc);
 		else if (const UParticleSystemComponent* Pc = Cast<UParticleSystemComponent>(C)) N = Pc->GetNumActiveParticles();
 		else continue;
 		Num += N; if (N > 0) ++Systems;

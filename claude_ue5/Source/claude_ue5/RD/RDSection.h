@@ -218,6 +218,9 @@ private:
 	/** mistward: a piece of the set's theme ("<Theme>.<Name>") or else the plain one, and the name that resolves to */
 	const FRDPiece* Pc(FName Name) const;
 	FName PcName(FName Name) const;
+	/** PcName's answers for the theme they were found for (a name formatted and looked up once per piece name, not per piece) */
+	mutable TMap<FName, FName> ThemeNames;
+	mutable FName ThemeNamesOf;
 	/** mistward (bTidyFurniture): footprints placed in the room being furnished; a container's way in */
 	struct FFoot { FVector2D C; FVector2D H; float Yaw = 0.f; bool bAccess = false; FName Name; };
 	TArray<FFoot> Feet;

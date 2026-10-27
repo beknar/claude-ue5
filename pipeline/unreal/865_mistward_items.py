@@ -115,6 +115,7 @@ for s in SH["shields"]:
     grip = ML.make_relative_transform(ML.compose_transforms(frame, w), elbow)
     it = unreal.RDItemDef()
     it.name = s["name"]; it.kind = unreal.RDItemKind.SHIELD
+    # (the user's rules: 4 % of a blow per damage point, 3 % slower per speed point under 10; the item carries both)
     it.amount = s["damage"] * 0.04; it.slower = (10 - s["speed"]) * 0.03; it.durability = float(s["durability"])
     it.damage_rating = s["damage"]; it.speed_rating = s["speed"]
     it.tiers = RANK_TIER(s["rank"]); it.weight = float(SH["rarity"]); it.found_max = 1
@@ -301,9 +302,11 @@ gen.set_editor_property("icon_material", L(MAT))
 # ---------------------------------------------------------------- the switches
 for k, v in (("show_fps", True), ("alphabetical_crafting", True), ("key_repeat", True), ("containers_stay_open", True), ("tidy_furniture", True), ("shaped_rooms", True),
              ("shaped_room_share", 0.6), ("tier_open_share", 0.75), ("drop_on_death", True), ("ring_guards", True), ("guard_count", 4),
-             ("boss_encounters", True), ("boss_minions", unreal.IntPoint(3, 6)), ("boss_health", 3.0), ("boss_damage", 1.6), ("boss_scale", 1.35),
-             ("shield_slow_per_point", 0.03)):
+             ("boss_encounters", True), ("boss_minions", unreal.IntPoint(3, 6)), ("boss_health", 3.0), ("boss_damage", 1.6), ("boss_scale", 1.35)):
     gen.set_editor_property(k, v)
+# (the start section again, under the castle's own rules (tidy furniture, its cells): its furniture is saved with the map, and
+# the copy of level 5 had it as level 5 built it)
+gen.modify(); gen.build_start_section()
 les.save_current_level()
 json.dump(grips, open(OUT + r"\shield_grips.json", "w"), indent=1)
 print("MISTWARD items", len(items), "| shields", sum(1 for i in items if i.kind == unreal.RDItemKind.SHIELD), "| breakdowns", len(bds), "| recipes", [str(r.item) for r in recipes])

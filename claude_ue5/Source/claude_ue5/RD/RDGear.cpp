@@ -2,6 +2,7 @@
 // traps that hold her. URDCombatComponent's (RDCombat.h).
 #include "RD/RDCombat.h"
 #include "RD/RDDungeonGenerator.h"
+#include "RD/RDMistward.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -11,8 +12,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NiagaraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
-
-UFXSystemComponent* RDMSpawnFx(UObject* Ctx, UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, USceneComponent* AttachTo, bool bUserScale, bool bAutoDestroy);
 
 // ------------------------------------------------------------------------------------------------ held by a trap
 void URDCombatComponent::HoldFor(float Seconds)
@@ -196,7 +195,7 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 	}
 }
 
-void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn)
+void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers)
 {
 	if (!Generator) return;
 	int32 Got = 0;
@@ -218,10 +217,13 @@ void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<floa
 		{
 			if (Before == 0) ArmourWear.Add(N, W);
 			else if (TArray<float>* Sp = Spares.Find(N); Sp && Sp->Num() > 0) Sp->Last() = W;
-			else ArmourWear.Add(N, W);
+			// (kept once (bArmourStacks off): AddItem mended hers to full, as a set found again does; the copy taken up does
+			// not wear it down again)
+			else { float& Cur = ArmourWear.FindOrAdd(N); Cur = FMath::Max(Cur, W); }
 		}
 	}
-	SetMessage(FString::Printf(TEXT("You take up your things again (%d)"), Got));
+	if (bHers) SetMessage(FString::Printf(TEXT("You take up your things again (%d)"), Got));
+	else SetMessage(Things.Num() == 1 ? FString::Printf(TEXT("You take the %s"), *Things[0].ToString().ToLower()) : FString::Printf(TEXT("You take up what lies here (%d)"), Got));
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
 }
 

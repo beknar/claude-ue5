@@ -926,20 +926,17 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 	}
 	// (mistward: what the tiers' openings set waiting (a boss: wherever it is; a guarded ring until its container is opened),
 	// her dropped things, the teleporter pads she has seen)
-	for (const FString& E : Gen->GetEncounterLines())
+	const URDCombatComponent* Pc_ = Gen->GetPlayerCombat();
+	for (const ARDDungeonGenerator::FEncounter& E : Gen->Encounters)
 	{
-		TArray<FString> P; E.ParseIntoArray(P, TEXT("|"));
-		if (P.Num() < 6) continue;
-		const FVector2D W(FCString::Atof(*P[1]), FCString::Atof(*P[2]));
-		if (P[0] == TEXT("boss") && P[5] == TEXT("1")) Out.Add({ W, 7 });
-		else if (P[0] == TEXT("ring") && P.Num() >= 9)
+		// (a boss while it lives, wherever it has gone)
+		if (E.bBoss && E.Live.Num() > 0)
+			if (const ARDMonster* M = E.Live[0].Get(); M && !M->IsDead()) Out.Add({ FVector2D(M->GetActorLocation()), 7 });
+		// (a guarded ring until she has it: its container opened, or the pile it lies in taken up)
+		if (!E.Ring.IsNone())
 		{
-			const FIntPoint Sc(FCString::Atoi(*P[7]), FCString::Atoi(*P[8]));
-			const int32 Key = FCString::Atoi(*P[5]);
-			// (until she has it: its container opened, or the pile it lies in taken up)
-			const URDCombatComponent* Pc_ = Gen->GetPlayerCombat();
-			const bool bHas = Pc_ && Pc_->GetItemCount(FName(*P[4])) > 0;
-			if (!bHas && (Key < 0 || !Gen->IsContainerLooted(Sc, Key))) Out.Add({ W, 8 });
+			const bool bHas = Pc_ && Pc_->GetItemCount(E.Ring) > 0;
+			if (!bHas && (E.RingKey.Z < 0 || !Gen->IsContainerLooted(E.Section, E.RingKey.Z))) Out.Add({ FVector2D(E.At), 8 });
 		}
 	}
 	for (const ARDLootPile* Lp : Gen->LootPiles) if (IsValid(Lp) && Lp->bHers) Out.Add({ FVector2D(Lp->GetActorLocation()), 9 });

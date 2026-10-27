@@ -30,7 +30,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward, Log, All);
 
-/** an effect at a place or on a component (a Niagara system or a Cascade one); bUserScale: the magic packs' User.Scale */
 UFXSystemComponent* RDMSpawnFx(UObject* Ctx, UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, USceneComponent* AttachTo, bool bUserScale, bool bAutoDestroy)
 {
 	if (!Asset || !Ctx) return nullptr;
@@ -51,15 +50,30 @@ UFXSystemComponent* RDMSpawnFx(UObject* Ctx, UFXSystemAsset* Asset, const FVecto
 	return nullptr;
 }
 
-static int32 RDMParticles(const UFXSystemComponent* F)
+int32 RDNiagaraParticles(const UNiagaraComponent* C)
 {
-	const UNiagaraComponent* C = Cast<UNiagaraComponent>(F);
-	if (!C) return F && F->IsActive() ? 1 : 0;
+	if (!C) return 0;
 	const FNiagaraSystemInstanceControllerConstPtr Ctl = C->GetSystemInstanceController();
 	if (!Ctl.IsValid() || !Ctl->IsValid()) return 0;
 	int32 Num = 0;
 	if (const FNiagaraSystemInstance* SI = Ctl->GetSystemInstance_Unsafe()) for (const FNiagaraEmitterInstanceRef& E : SI->GetEmitters()) Num += E->GetNumParticles();
 	return Num;
+}
+
+/** the way out of a prison cell (its frame: the cell's middle, facing the room): the door's half of the front is [-2, 148] from
+ *  the front's middle (RDSection's prison cells); Doorway inside in front of that gap, Exit out in the room before it */
+static void RDMCellWay(const FTransform& Frame, float TileSize, FVector& Doorway, FVector& Exit)
+{
+	const FVector Fw = Frame.GetRotation().GetForwardVector(), Rt = Frame.GetRotation().GetRightVector();
+	const FVector Gap = Frame.GetLocation() + Fw * (TileSize * 0.5f) + Rt * 73.f;
+	Doorway = Gap - Fw * 70.f;
+	Exit = Gap + Fw * (TileSize * 0.6f);
+}
+
+static int32 RDMParticles(const UFXSystemComponent* F)
+{
+	if (const UNiagaraComponent* C = Cast<UNiagaraComponent>(F)) return RDNiagaraParticles(C);
+	return F && F->IsActive() ? 1 : 0;
 }
 
 // ================================================================================================ the loot pile
@@ -193,7 +207,7 @@ ARDPrisoner::ARDPrisoner()
 	Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 }
 
-void ARDPrisoner::Init(const FRDPrisonerDef& Def, const FVector& Exit, const FVector& Away)
+void ARDPrisoner::Init(const FRDPrisonerDef& Def, const FVector& Doorway, const FVector& Exit, const FVector& Away)
 {
 	Title = Def.Title.IsEmpty() ? Def.Name.ToString() : Def.Title;
 	Body->SetSkeletalMeshAsset(Def.Mesh);
@@ -210,7 +224,7 @@ void ARDPrisoner::Init(const FRDPrisonerDef& Def, const FVector& Exit, const FVe
 	}
 	IdleAnim = Def.Idle; WalkAnim = Def.Walk; ThanksAnim = Def.Thanks;
 	Speed = Def.WalkSpeed; ClipSpeed = FMath::Max(Def.WalkClipSpeed, 10.f);
-	ExitAt = Exit; AwayAt = Away;
+	DoorAt = Doorway; ExitAt = Exit; AwayAt = Away; Leg = 0;
 	if (IdleAnim) { Body->PlayAnimation(IdleAnim, true); Body->SetPosition(FMath::FRandRange(0.f, 2.f)); }
 }
 
@@ -243,9 +257,11 @@ void ARDPrisoner::Tick(float Dt)
 	}
 	if (State == 2)
 	{
-		// (out of the cell, then away down the room; gone after a while whatever)
-		const bool bOut = StateTime > 0.f && WalkTo(StateTime < 2.5f ? ExitAt : AwayAt);
-		if ((bOut && StateTime > 2.5f) || StateTime > 9.f) { State = 3; StateTime = 0.f; }
+		// (to the door's gap, out of the cell, then away down the room; gone after a while whatever. Straight from the cell's
+		// middle she walked through its bars.)
+		const FVector Legs[3] = { DoorAt, ExitAt, AwayAt };
+		if (Leg < 3 && StateTime > 0.f && WalkTo(Legs[Leg])) ++Leg;
+		if (Leg >= 3 || StateTime > 9.f) { State = 3; StateTime = 0.f; }
 		return;
 	}
 	if (State == 3)
@@ -524,7 +540,7 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	ARDLootPile* Best = nullptr; float BestD = Reach;
 	for (ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < BestD) { BestD = D; Best = P; } }
 	if (!Best || !Pc) return false;
-	Pc->TakeBack(Best->Things, Best->Wear);
+	Pc->TakeBack(Best->Things, Best->Wear, Best->bHers);
 	LootPiles.Remove(Best);
 	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
 	Best->Destroy();
@@ -555,7 +571,7 @@ TArray<int32> ARDDungeonGenerator::GetPadDestinations() const
 	return Out;
 }
 
-bool ARDDungeonGenerator::TeleportTo(int32 Tier)
+bool ARDDungeonGenerator::TeleportToTier(int32 Tier)
 {
 	const FVector* At = Pads.Find(Tier);
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
@@ -603,10 +619,10 @@ FString ARDDungeonGenerator::UsePadNear(const FVector& From)
 		PlaySoundAt(TEXT("Player.Loot"), From);
 		return TEXT("ring");
 	}
-	if (T > 1) { TeleportTo(1); return TEXT("teleport"); }
+	if (T > 1) { TeleportToTier(1); return TEXT("teleport"); }
 	const TArray<int32> D = GetPadDestinations();
 	if (D.Num() == 0) { Pc->ShowMessage(TEXT("The teleporter is dark: find a tier's teleport ring on its pad first")); return TEXT("pad"); }
-	TeleportTo(D.Contains(PadChoice) ? PadChoice : D.Last());
+	TeleportToTier(D.Contains(PadChoice) ? PadChoice : D.Last());
 	return TEXT("teleport");
 }
 
@@ -662,9 +678,9 @@ void ARDSection::PlaceCellOccupants()
 			const FVector At = In_ + Fw * 45.f;
 			ARDPrisoner* P = W->SpawnActor<ARDPrisoner>(ARDPrisoner::StaticClass(), FTransform(FRotator(0, Fw.Rotation().Yaw, 0), At), Sp);
 			if (!P) continue;
-			// (out through the door, then away across the room)
-			const FVector Exit = In_ + Fw * (Generator->TileSize * 1.1f);
-			P->Init(D, Exit, Exit + Fw * 600.f);
+			// (out through the door's gap, then away across the room)
+			FVector Doorway, Exit; RDMCellWay(C.Frame, Generator->TileSize, Doorway, Exit);
+			P->Init(D, Doorway, Exit, Exit + Fw * 600.f);
 			MistActors.Add(P);
 			C.Occupant = 1; C.Who = P;
 		}
@@ -719,7 +735,8 @@ bool ARDSection::OpenCell(int32 Door)
 	}
 	else if (ARDMonster* M = Cast<ARDMonster>(C.Who.Get()))
 	{
-		M->Release(C.Frame.GetLocation() + C.Frame.GetRotation().GetForwardVector() * (Generator->TileSize * 1.1f));
+		FVector Doorway, Exit; RDMCellWay(C.Frame, Generator->TileSize, Doorway, Exit);
+		M->Release(Doorway, Exit);
 		++Generator->CellBreakouts;
 		UE_LOG(LogRDMistward, Log, TEXT("RDPRISONER the monster in cell %d of (%d,%d) is out"), Ci, Coord.X, Coord.Y);
 	}
@@ -733,8 +750,9 @@ TArray<FString> ARDSection::GetCellLines() const
 	{
 		const FCell& C = Cells[I]; const FVector L = C.Frame.GetLocation();
 		const AActor* Who = C.Who.Get(); const FVector WL = Who ? Who->GetActorLocation() : FVector::ZeroVector;
-		Out.Add(FString::Printf(TEXT("%d|%d|%d|%d|%.0f|%.0f|%.0f|%d|%.0f|%.0f|%.0f"), I, C.Door, (int32)C.Occupant, C.bOpened ? 1 : 0, L.X, L.Y, L.Z,
-			Who ? 1 : 0, WL.X, WL.Y, WL.Z));
+		// (cell|door|occupant|opened|middle x y z|someone|where x y z|yaw: the way the cell faces, into the room)
+		Out.Add(FString::Printf(TEXT("%d|%d|%d|%d|%.0f|%.0f|%.0f|%d|%.0f|%.0f|%.0f|%.1f"), I, C.Door, (int32)C.Occupant, C.bOpened ? 1 : 0, L.X, L.Y, L.Z,
+			Who ? 1 : 0, WL.X, WL.Y, WL.Z, C.Frame.Rotator().Yaw));
 	}
 	return Out;
 }

@@ -312,12 +312,13 @@ void ARDSection::ShapeRoom(FRandomStream& R, int32 RI)
 // ------------------------------------------------------------------------------------------------ themes (mistward)
 FName ARDSection::PcName(FName Name) const
 {
-	if (!Theme.IsNone() && Generator)
-	{
-		const FName T(*FString::Printf(TEXT("%s.%s"), *Theme.ToString(), *Name.ToString()));
-		if (Generator->Piece(T)) return T;
-	}
-	return Name;
+	if (Theme.IsNone() || !Generator) return Name;
+	if (ThemeNamesOf != Theme) { ThemeNames.Reset(); ThemeNamesOf = Theme; }
+	if (const FName* Known = ThemeNames.Find(Name)) return *Known;
+	const FName T(*FString::Printf(TEXT("%s.%s"), *Theme.ToString(), *Name.ToString()));
+	const FName Out = Generator->Piece(T) ? T : Name;
+	ThemeNames.Add(Name, Out);
+	return Out;
 }
 
 const FRDPiece* ARDSection::Pc(FName Name) const { return Generator ? Generator->Piece(PcName(Name)) : nullptr; }
@@ -544,10 +545,7 @@ int32 ARDSection::GetEffectParticlesNear(FVector Location, float Radius) const
 	for (const UNiagaraComponent* C : Cs)
 	{
 		if (!C || FVector::DistSquared(C->GetComponentLocation(), Location) > Radius * Radius) continue;
-		const FNiagaraSystemInstanceControllerConstPtr Ctl = C->GetSystemInstanceController();
-		if (!Ctl.IsValid() || !Ctl->IsValid()) continue;
-		if (const FNiagaraSystemInstance* SI = Ctl->GetSystemInstance_Unsafe())
-			for (const FNiagaraEmitterInstanceRef& E : SI->GetEmitters()) Num += E->GetNumParticles();
+		Num += RDNiagaraParticles(C);
 	}
 	return Num;
 }
@@ -1217,7 +1215,13 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				if (!LaneFree(Rm, Inner, S * 0.5f - 10.f)) continue;
 				// grating across the cell front (piece runs along Y), cell door in its middle as a separate leaf
 				// (the bars have no usable collision of their own: invisible blockers stand in for them)
-				if (R.FRand() < 0.5f)
+				// (mistward: the door's half of the front is the cell's right; at a row's end against the room's wall, that wall's
+				// seal stood in the doorway and a released monster could not get out: such a cell is barred all across. The draw
+				// stays, so the layout's stream does not move.)
+				const FIntPoint NextT = WorldToLocal(Inner + Rt.RotateVector(FVector(0, S, 0)));
+				const bool bDoorAtWall = Generator->bTidyFurniture && !(In(NextT) && Owner[Idx(NextT)] == RI);
+				const bool bWithDoor = R.FRand() < 0.5f;
+				if (bWithDoor && !bDoorAtWall)
 				{
 					AddPieceAt(TEXT("CellFrame"), Front, Yaw);
 					AddPieceAt(TEXT("CellBlockHalf"), Front, Yaw);
@@ -1232,7 +1236,9 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				}
 				else { AddPieceAt(TEXT("Grating"), Front, Yaw); AddPieceAt(TEXT("CellBlock"), Front, Yaw); }
 				// (the hay pile is a mound as tall as she is, which looked like rock: it blocks)
-				const FVector Hay = Inner + Rt.RotateVector(FVector(-30, R.FRandRange(-60, 60), 0));
+				// (mistward: on the barred half, out of the way to the door)
+				const float HaySide = R.FRandRange(-60, 60);
+				const FVector Hay = Inner + Rt.RotateVector(FVector(-30, Generator->bTidyFurniture ? -30.f - FMath::Abs(HaySide) : HaySide, 0));
 				AddPieceAt(TEXT("HayPile"), Hay, R.FRandRange(0, 360));
 				if (R.FRand() < 0.5f) AddPieceAt(TEXT("Bones"), Inner + Rt.RotateVector(FVector(20, R.FRandRange(-80, 80), 0)), R.FRandRange(0, 360), 1.f, true);
 				AddPieceAt(TEXT("Shackles"), W + Rt.RotateVector(FVector(6, 0, 160)), Yaw, 1.f, true);
@@ -1635,6 +1641,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	bBuildStatic = true; bBuildInteractive = true;
 	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1;
 	Theme = Generator->ThemeOf(Coord);
+	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	GenR.Initialize(Seed);
 	Plan(GenR);
 	ShellPrepare(GenR);
@@ -1745,6 +1752,7 @@ void ARDSection::ActivateForPlay()
 	ClearInteractive();
 	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1;
 	Theme = Generator->ThemeOf(Coord);
+	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	const int32 Inst = NumInstances, Lights = NumLights;
 	FRandomStream R(Seed);
 	Plan(R);

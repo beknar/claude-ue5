@@ -1147,7 +1147,13 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
 	// (mistward: her dropped things, a pad, a trap she sees)
-	for (const ARDLootPile* Lp : LootPiles) if (IsValid(Lp) && FVector::Dist2D(Lp->GetActorLocation(), From) < 260.f) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());
+	for (const ARDLootPile* Lp : LootPiles)
+		if (IsValid(Lp) && FVector::Dist2D(Lp->GetActorLocation(), From) < 260.f)
+		{
+			// (hers, where she fell; or something the rules laid on the floor: the guarded ring)
+			if (Lp->bHers) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());
+			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
+		}
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
@@ -1328,7 +1334,13 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (TierOpenShare < 1.f && MaxTier > 0)
 	{
 		// (the open tiers' sets are counted ahead, a few a frame, so that the next tier opens the moment it should)
-		if (CensusQueue.Num() == 0) for (int32 T = 1; T < MaxTier && IsTierOpen(T); ++T) { FIntVector D, A; GetTierTally(T, D, A); if (CensusQueue.Num() > 0) break; }
+		// (looked for twice a second: once all are counted the tallies say nothing new)
+		const float Now_ = GetWorld()->GetTimeSeconds();
+		if (CensusQueue.Num() == 0 && Now_ - CensusLookTime > 0.5f)
+		{
+			CensusLookTime = Now_;
+			for (int32 T = 1; T < MaxTier && IsTierOpen(T); ++T) { FIntVector D, A; GetTierTally(T, D, A); if (CensusQueue.Num() > 0) break; }
+		}
 		if (CensusQueue.Num() > 0) TickCensus();
 	}
 	if (Traps.Num() > 0) TickTraps(Dt);

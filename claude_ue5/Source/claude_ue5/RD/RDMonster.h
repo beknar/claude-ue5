@@ -97,8 +97,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bBoss = false;
 	/** locked in a prison cell: it waits there, unseen by the fight, until the cell is opened */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bCaged = false;
-	/** out of its cell: first to Exit (in front of the cell's door), then at her */
-	void Release(const FVector& Exit = FVector::ZeroVector);
+	/** out of its cell: to Doorway (inside, in front of the door's gap), out to Exit (in front of the cell), then at her */
+	void Release(const FVector& Doorway = FVector::ZeroVector, const FVector& Exit = FVector::ZeroVector);
+	FVector CellDoorway = FVector::ZeroVector;
 	FVector CellExit = FVector::ZeroVector;
 	float ReleasedUntil = -1.f;
 	/** the lowest point of its body as it is drawn now (its skinned vertices), against the bottom of its capsule (cm):

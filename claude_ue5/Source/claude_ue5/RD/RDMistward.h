@@ -18,7 +18,15 @@ class UStaticMeshComponent;
 class USkeletalMeshComponent;
 class UMaterialBillboardComponent;
 class UFXSystemComponent;
+class UFXSystemAsset;
+class UNiagaraComponent;
 class UPointLightComponent;
+
+/** an effect at a place or on a component (a Niagara system or a Cascade one); bUserScale: the magic packs' User.Scale.
+ *  The castle's effects (traps, the torch, piles, pads); a spell's go through URDCombatComponent::SpawnSpellFx (its colours). */
+CLAUDE_UE5_API UFXSystemComponent* RDMSpawnFx(UObject* Ctx, UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, USceneComponent* AttachTo, bool bUserScale, bool bAutoDestroy);
+/** the live particles of a Niagara component (0 with no system instance): the tests' "is the effect alive" */
+CLAUDE_UE5_API int32 RDNiagaraParticles(const UNiagaraComponent* C);
 
 UCLASS()
 class CLAUDE_UE5_API ARDLootPile : public AActor
@@ -81,7 +89,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FString Title;
 	/** 0 waiting in the cell, 1 thanking her, 2 walking out, 3 fading, 4 gone */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 State = 0;
-	void Init(const FRDPrisonerDef& Def, const FVector& Exit, const FVector& Away);
+	void Init(const FRDPrisonerDef& Def, const FVector& Doorway, const FVector& Exit, const FVector& Away);
 	/** the cell is opened: thanks, then out and away */
 	void Free();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsFreed() const { return State > 0; }
@@ -94,6 +102,7 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UAnimationAsset> IdleAnim;
 	UPROPERTY(Transient) TObjectPtr<UAnimationAsset> WalkAnim;
 	UPROPERTY(Transient) TObjectPtr<UAnimationAsset> ThanksAnim;
-	FVector ExitAt = FVector::ZeroVector, AwayAt = FVector::ZeroVector;
+	FVector DoorAt = FVector::ZeroVector, ExitAt = FVector::ZeroVector, AwayAt = FVector::ZeroVector;
+	int32 Leg = 0;
 	float Speed = 120.f, ClipSpeed = 120.f, StateTime = 0.f;
 };

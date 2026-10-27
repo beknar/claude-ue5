@@ -51,6 +51,7 @@ OUT = os.path.join(SA, "mistward")
 SH = {s["name"]: s for s in json.load(open(os.path.join(OUT, "shields.json"), encoding="utf-8"))["shields"]}
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
+G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
 DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
@@ -673,17 +674,35 @@ def cells():
         for l in S.get_cell_lines():
             p = str(l).split("|")
             out.append({"s": sc, "cell": int(p[0]), "door": int(p[1]), "occ": int(p[2]), "opened": int(p[3]), "at": V(float(p[4]), float(p[5]), float(p[6])),
-                        "who": int(p[7]), "who_at": V(float(p[8]), float(p[9]), float(p[10]))})
+                        "who": int(p[7]), "who_at": V(float(p[8]), float(p[9]), float(p[10])), "yaw": float(p[11])})
     return out
+def cell_gap(x, d):
+    # (a point d cm out from the cell's door gap, on the line through it; the gap is the door's half of the front, 73 cm to the
+    # cell's right of the front's middle: the door's hinge is at the cell's corner, and a line from the cell's middle through
+    # the hinge left the room at a row's end (she was put in the void))
+    a = math.radians(x["yaw"]); fw = (math.cos(a), math.sin(a)); rt = (-math.sin(a), math.cos(a))
+    k = G["gen"].tile_size * 0.5 + d
+    return V(x["at"].x + fw[0] * k + rt[0] * 73.0, x["at"].y + fw[1] * k + rt[1] * 73.0, x["at"].z)
+def stand_by_cell(x, ds, others):
+    # (the first of the distances that is on the floor (she is still there after a moment) and in no other cell)
+    for d in ds:
+        p = cell_gap(x, d)
+        if any(dist2(p, y["at"]) < 170 for y in others): continue
+        put(p, x["yaw"] + 180); yield from wait(0.4)
+        q = G["pawn"].get_actor_location()
+        if dist2(q, p) < 60 and abs(q.z - (p.z + 90)) < 60: return d
+    return None
 def step_cells():
     g = G["gen"]; c = cb()
     C = cells(); res = {"cells": len(C), "prisoners": sum(1 for x in C if x["occ"] == 1), "monsters": sum(1 for x in C if x["occ"] == 2), "empty": sum(1 for x in C if x["occ"] == 0)}
-    pr = next((x for x in C if x["occ"] == 1 and not x["opened"]), None)
+    # (a prisoner with no caged monster within 6.5 m: one would break out as she frees the prisoner)
+    caged = [x for x in C if x["occ"] == 2 and not x["opened"]]
+    pr = next((x for x in C if x["occ"] == 1 and not x["opened"] and all(dist2(x["at"], y["at"]) >= 650 for y in caged)),
+              next((x for x in C if x["occ"] == 1 and not x["opened"]), None))
     if pr:
         quiet(True)
-        S = g.get_section(pr["s"]); door = S.get_door_location(pr["door"])
-        a = math.atan2(door.y - pr["at"].y, door.x - pr["at"].x)
-        put(V(door.x + math.cos(a) * 90, door.y + math.sin(a) * 90, door.z), math.degrees(a) + 180); yield from wait(0.5)
+        S = g.get_section(pr["s"])
+        put(cell_gap(pr, 90), pr["yaw"] + 180); yield from wait(0.5)
         r = {"describe": str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))}
         n0 = len(lines(c)); f0 = g.prisoners_freed
         shot("cell_prisoner_before"); yield from rwait(0.6)
@@ -695,24 +714,73 @@ def step_cells():
         after = [x for x in cells() if x["s"] == pr["s"] and x["cell"] == pr["cell"]][0]
         r["gone"] = after["who"] == 0; r["door_open"] = S.get_door_open_alpha(pr["door"]) > 0.5
         res["prisoner"] = r; quiet(False)
-    mo = next((x for x in C if x["occ"] == 2 and not x["opened"]), None)
+    # (a monster's cell with no other caged monster within 9 m: standing by one cell must not let out its neighbours too)
+    C = cells()          # (again: what the prisoner's part let out)
+    mons = [x for x in C if x["occ"] == 2 and not x["opened"]]
+    mo = next((x for x in mons if all(dist2(x["at"], y["at"]) >= 900 for y in mons if y is not x)), mons[0] if mons else None)
     if mo:
-        a0 = g.get_editor_property("aggro_distance")
-        S = g.get_section(mo["s"]); door = S.get_door_location(mo["door"])
-        a = math.atan2(door.y - mo["at"].y, door.x - mo["at"].x)
+        others = [y for y in C if y is not mo]
         mon = sorted([m for m in g.get_monsters() if alive(m) and m.caged and dist2(m.get_actor_location(), mo["who_at"]) < 60], key=lambda m: dist2(m.get_actor_location(), mo["who_at"]))
-        r = {"caged_before": bool(mon)}
+        r = {"caged_before": bool(mon), "lonely": all(dist2(mo["at"], y["at"]) >= 900 for y in mons if y is not mo)}
         b0 = g.cell_breakouts
-        put(V(door.x + math.cos(a) * 600, door.y + math.sin(a) * 600, door.z), math.degrees(a) + 180); yield from wait(0.5)
+        # (first out of its reach, 5.2 m from the cell's middle: 4 to 4.6 m out from the gap, where there is floor)
+        r["far_d"] = yield from stand_by_cell(mo, (460, 430, 400), others)
         r["opened_far"] = g.cell_breakouts - b0
-        # (then nearer: 2.5 m from the door, about 4 m from the cell's middle)
-        put(V(door.x + math.cos(a) * 250, door.y + math.sin(a) * 250, door.z), math.degrees(a) + 180)
+        # (then nearer: 2.5 m out from the gap, about 4 m from the cell's middle)
+        r["near_d"] = yield from stand_by_cell(mo, (250, 220, 190), others)
         c.set_health(c.get_max_health()); h0 = c.get_health(); d0 = dist2(mon[0].get_actor_location(), G["pawn"].get_actor_location()) if mon else None
-        yield from wait(5.0)
+        # (where it goes, in the cell's axes: forward out of the cell, right toward the door's half of the front)
+        ya = math.radians(mo["yaw"]); r["track"] = []
+        def local(p): dx, dy = p.x - mo["at"].x, p.y - mo["at"].y; return [round(dx * math.cos(ya) + dy * math.sin(ya)), round(-dx * math.sin(ya) + dy * math.cos(ya))]
+        for _k in range(10):
+            yield from wait(0.5)
+            if mon and alive(mon[0]): r["track"].append(local(mon[0].get_actor_location()))
+        r["her"] = local(G["pawn"].get_actor_location())
+        r["door_alpha"] = round(g.get_section(mo["s"]).get_door_open_alpha(mo["door"]), 2)
         r["breakouts"] = g.cell_breakouts - b0; r["caged_after"] = bool(mon) and mon[0].caged
         r["came_m"] = round((d0 - dist2(mon[0].get_actor_location(), G["pawn"].get_actor_location())) / 100, 1) if mon and alive(mon[0]) else None
         r["hp_lost"] = round(h0 - c.get_health(), 1)
+        # (out of its cell: past the front, 1.5 m from the cell's middle; a monster stuck at its bars once struck her through them)
+        r["out_of_cell_m"] = round(dist2(mon[0].get_actor_location(), mo["at"]) / 100, 2) if mon and alive(mon[0]) else None
         shot("cell_monster"); yield from rwait(0.6)
+        if G.get("probe_cells"):
+            # (what stands in the door's gap: a capsule swept from inside the cell out through it)
+            def at_local(f, s_, z):
+                return V(mo["at"].x + f * math.cos(ya) - s_ * math.sin(ya), mo["at"].y + f * math.sin(ya) + s_ * math.cos(ya), mo["at"].z + z)
+            ign = [G["pawn"]] + [m for m in mon]
+            for lat in (40, 73, 100):
+                hit = unreal.SystemLibrary.capsule_trace_single(G["w"], at_local(108, lat, 95), at_local(300, lat, 95), 38.0, 80.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ign, unreal.DrawDebugTrace.NONE, True)
+                if hit:
+                    # (BreakHitResult's order: blocking, initial overlap, time, distance, location, impact point, normal, impact
+                    # normal, material, actor, component, ...)
+                    t = hit.to_tuple(); comp = t[10]
+                    r["gap_%d" % lat] = {"x": local(t[4])[0], "initial": bool(t[1]), "actor": str(t[9].get_name()) if t[9] else None,
+                                         "comp": str(comp.get_name()) if comp else None,
+                                         "mesh": str(comp.get_editor_property("static_mesh").get_name()) if comp and isinstance(comp, unreal.StaticMeshComponent) and comp.get_editor_property("static_mesh") else None}
+                else: r["gap_%d" % lat] = None
+            # (what overlaps a 30 cm capsule along the way out through the gap)
+            ov = {}
+            for f in (60, 90, 120, 150, 180):
+                comps = unreal.SystemLibrary.capsule_overlap_components(G["w"], at_local(f, 73, 95), 30.0, 80.0, [unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY1, unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY2], None, ign)
+                if isinstance(comps, tuple): comps = comps[-1]
+                names = []
+                for cp in (comps or []):
+                    nm = cp.get_name()
+                    if isinstance(cp, unreal.StaticMeshComponent) and cp.get_editor_property("static_mesh"): nm += ":" + cp.get_editor_property("static_mesh").get_name()
+                    if isinstance(cp, unreal.InstancedStaticMeshComponent):
+                        try:
+                            for ii in list(cp.get_instances_overlapping_sphere(at_local(f, 73, 95), 30.0, True))[:2]:
+                                tr = cp.get_instance_transform(ii, True)
+                                if isinstance(tr, tuple): tr = tr[-1]
+                                lp = local(tr.translation); sc_ = tr.scale3d
+                                nm += " @(%d,%d) yaw %.0f scale (%.2f,%.2f,%.2f)" % (lp[0], lp[1], tr.rotation.rotator().yaw - mo["yaw"], sc_.x, sc_.y, sc_.z)
+                        except Exception as e_: nm += " (" + str(e_)[:80] + ")"
+                    names.append(nm)
+                ov[str(f)] = names
+            r["overlaps_73"] = ov
+            # (a look at the cell from in front, with the monsters quiet)
+            quiet(True); yield from stand_by_cell(mo, (330, 300, 270), others); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=mo["yaw"] + 180))
+            yield from wait(0.5); shot("cell_monster_front"); yield from rwait(0.6); quiet(False)
         for m in mon:
             try: m.set_actor_location(V(0, 0, -50000), False, True)
             except Exception: pass
@@ -720,7 +788,8 @@ def step_cells():
         res["monster"] = r
     p_, m_ = res.get("prisoner", {}), res.get("monster", {})
     ok = (bool(pr) and bool(mo) and p_.get("freed") == 1 and p_.get("carried_more", 0) >= 1 and "thanks" in p_.get("says", "") and p_.get("gone")
-          and m_.get("caged_before") and m_.get("opened_far") == 0 and m_.get("breakouts") == 1 and not m_.get("caged_after") and ((m_.get("came_m") or 0) > 0.5 or m_.get("hp_lost", 0) > 0))
+          and m_.get("caged_before") and m_.get("opened_far") == 0 and m_.get("breakouts") == 1 and not m_.get("caged_after")
+          and m_.get("near_d") is not None and (m_.get("out_of_cell_m") or 0) > 1.6)
     step_result("cells", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ her things where she falls

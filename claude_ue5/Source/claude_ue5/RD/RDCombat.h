@@ -366,7 +366,7 @@ public:
 	/** everything she found (not the weapons her hero starts with): what drops when she falls; Wear: durability left (-1 none) */
 	void GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut) const;
 	/** her dropped things taken up again */
-	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn);
+	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers = true);
 	/** breaking a set of armour or a shield down at an anvil (a spare first; the one worn only when it is the last) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownGear(FName Item);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 GearBrokenDown = 0;

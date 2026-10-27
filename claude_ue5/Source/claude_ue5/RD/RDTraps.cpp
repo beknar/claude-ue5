@@ -26,8 +26,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDTraps, Log, All);
 
-UFXSystemComponent* RDMSpawnFx(UObject* Ctx, UFXSystemAsset* Asset, const FVector& At, const FRotator& Rot, float Scale, USceneComponent* AttachTo, bool bUserScale, bool bAutoDestroy);
-
 static const FName RDTrapTag(TEXT("RDInteractive"));
 
 
@@ -158,6 +156,9 @@ bool ARDSection::FireTrap(int32 I)
 	if (T.State != 0) return false;
 	const FRDTrapDef& D = Generator->Traps[T.Def];
 	T.State = 1; T.Time = 0.f; T.Next = 0.f; T.Step = 0; T.Stay = 0.f;
+	// (spent from now on for the set's next generation: dropped while it is still going off, it must not come back armed; a ward
+	// sets itself again)
+	if (D.Kind != ERDTrapKind::Ward) Generator->SpentTraps.Add(FIntVector(Coord.X, Coord.Y, I), 2);
 	const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	T.Goal = Her ? Her->GetActorLocation() : T.At;
 	++Generator->TrapsTriggered; Generator->LastTrap = D.Label;
@@ -411,8 +412,7 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 					{
 						// (glyphs round her, going off one after the other: she must move)
 						const int32 Glyph = Generator->Traps.IndexOfByPredicate([](const FRDTrapDef& G) { return G.Kind == ERDTrapKind::Glyph; });
-						// (room for them first: the room may be one of this set, and T is a reference into this list)
-						Dst.Key->TrapList.Reserve(Dst.Key->TrapList.Num() + 4);
+						// (the room may be one of this set: adding them can move this list, and T with it: T is not used after this)
 						for (int32 K = 0; K < 4 && Glyph >= 0; ++K)
 						{
 							const int32 Gi = Dst.Key->AddTrapAt(Glyph, Dst.Value + FRotator(0, 90.f * K + 45.f, 0).Vector() * 170.f, 1);
@@ -423,7 +423,7 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 					UE_LOG(LogRDTraps, Log, TEXT("RDTRAP teleport to (%.0f, %.0f) in (%d,%d): %s"), To.X, To.Y, Dst.Key->Coord.X, Dst.Key->Coord.Y, bMonsters ? TEXT("monsters") : TEXT("glyphs"));
 				}
 			}
-			if (T.Time > 1.5f) SpendTrap(I, 2);
+			if (TrapList[I].Time > 1.5f) SpendTrap(I, 2);          // (TrapList[I], not T: see the glyphs above)
 			break;
 		}
 	}

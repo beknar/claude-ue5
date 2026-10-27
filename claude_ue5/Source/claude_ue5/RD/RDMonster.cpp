@@ -325,14 +325,14 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 	if (!InTitle.IsEmpty()) Title = InTitle;
 }
 
-void ARDMonster::Release(const FVector& Exit)
+void ARDMonster::Release(const FVector& Doorway, const FVector& Exit)
 {
 	if (!bCaged) return;
 	// (out of its cell it comes for her at once: noticing her needs a tile path, and from inside its cell there was none,
 	// so a freed monster stood in the open cell)
 	bCaged = false; bAggro = true; Path.Reset(); ChaseTimer = 0.f; WaitTime = 0.f; StuckTime = 0.f;
 	// (the tile path from inside its cell to her may not exist: it walks out through the door first)
-	CellExit = Exit; ReleasedUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + 8.f : -1.f;
+	CellDoorway = Doorway; CellExit = Exit; ReleasedUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + 8.f : -1.f;
 	Roar();
 }
 
@@ -692,10 +692,14 @@ bool ARDMonster::TickCombat(float Dt)
 		return true;
 	}
 	// (mistward: just out of its cell: through its door first, then at her)
+	// (the middle of a cell's front is where its bars meet its door: straight from the cell's middle to the exit it walked
+	// into the bars and stuck there; it goes to the door's gap first)
 	if (!CellExit.IsZero())
 	{
-		if (FVector::Dist2D(L, CellExit) < 90.f || GetWorld()->GetTimeSeconds() > ReleasedUntil) CellExit = FVector::ZeroVector;
-		else { Path.Reset(); Path.Add(CellExit); Path.Add(Pl); ChaseTimer = 0.35f; }
+		const bool bLate = GetWorld()->GetTimeSeconds() > ReleasedUntil;
+		if (!CellDoorway.IsZero() && (bLate || FVector::Dist2D(L, CellDoorway) < 75.f)) CellDoorway = FVector::ZeroVector;
+		if (FVector::Dist2D(L, CellExit) < 90.f || bLate) CellExit = FVector::ZeroVector;
+		else { Path.Reset(); if (!CellDoorway.IsZero()) Path.Add(CellDoorway); Path.Add(CellExit); Path.Add(Pl); ChaseTimer = 0.35f; }
 	}
 	// the chase: over the tile grid to its foe's tile, then straight at it (across a section's border: straight)
 	if (ChaseTimer <= 0.f || Path.Num() == 0)
