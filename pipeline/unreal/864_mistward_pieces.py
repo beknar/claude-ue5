@@ -73,7 +73,9 @@ P["Dwarf.Wall_Rough"] = piece(DW + "SM_ST_BrickWall_Displace", front="+y", mode=
 P["Dwarf.Wall_Rough_2"] = piece(DW + "SM_ST_MainHall_BrickWall_06", front="+y", mode="wallface", scale=(0.75, 1, 0.75))
 P["Dwarf.Wall_Rough_3"] = piece(DW + "SM_ST_BrickWall_05", front="+y", mode="wallface", scale=(0.75, 1, 0.75))
 for name, n, s in (("Floor_Stone", "SM_ST_FloorTile_01", 400), ("Floor_Stone_Alt", "SM_ST_FloorTile_04_M01", 400), ("Floor_Brick", "SM_ST_FloorTile_04", 400),
-                   ("Floor_Brick_Alt", "SM_ST_FloorTile_04_M02", 400), ("Floor_Brick2", "SM_ST_MainHall_PillarFloor_M_01", 300), ("Floor_Random", "SM_ST_FloorTile_04", 400),
+                   # (Floor_Brick2 was SM_ST_MainHall_PillarFloor_M_01 until 2026-10-27: drawn, but its complex-as-simple collision
+                   # has nothing in it, and she fell through every room it floored (868's floor traces found whole rooms))
+                   ("Floor_Brick_Alt", "SM_ST_FloorTile_04_M02", 400), ("Floor_Brick2", "SM_ST_FloorTile_04_M01", 400), ("Floor_Random", "SM_ST_FloorTile_04", 400),
                    ("Floor_Random_Alt", "SM_ST_FloorTile_01", 400), ("Floor_Tiles", "SM_ST_TreasureRoomFloor_02", 406), ("Floor_Tiles_Alt", "SM_ST_TreasureRoomFloor_01", 409),
                    ("Floor_Wood", "SM_ST_FloorTile_04", 400), ("Floor_Corr", "SM_ST_FloorTile_01", 400), ("Floor_Corr_Alt", "SM_ST_FloorTile_04", 400)):
     P["Dwarf." + name] = piece(DW + n, front="+x", mode="floor", scale=(300.0 / s, 300.0 / s, 1))

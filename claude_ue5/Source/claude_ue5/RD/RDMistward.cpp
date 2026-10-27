@@ -110,9 +110,10 @@ void ARDLootPile::Init(ARDDungeonGenerator* G, const TArray<FName>& InThings, co
 		B->AddElement(Mi, nullptr, false, 26.f, 26.f, nullptr);
 		B->RegisterComponent();
 		Icons.Add(B);
-		B->SetRelativeLocation(IconPlace(Icons.Num() - 1, 0.f));
 	}
+	// (placed once all are made: a ring's spacing is by how many there are)
 	Pictures = Icons.Num();
+	for (int32 I = 0; I < Icons.Num(); ++I) if (Icons[I]) Icons[I]->SetRelativeLocation(IconPlace(I, 0.f));
 	if (G->LootPileFx) Fx = RDMSpawnFx(this, G->LootPileFx, FVector::ZeroVector, FRotator::ZeroRotator, G->LootPileFxScale, Root, false, false);
 	Light = NewObject<UPointLightComponent>(this);
 	Light->SetupAttachment(Root);
@@ -544,7 +545,7 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	ARDLootPile* Best = nullptr; float BestD = Reach;
 	for (ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < BestD) { BestD = D; Best = P; } }
 	if (!Best || !Pc) return false;
-	Pc->TakeBack(Best->Things, Best->Wear, Best->bHers);
+	Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
 	LootPiles.Remove(Best);
 	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
 	Best->Destroy();

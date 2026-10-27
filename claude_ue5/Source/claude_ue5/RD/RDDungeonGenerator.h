@@ -332,6 +332,8 @@ public:
 	/** the mouse in the inventory and the repair list (the user's of 2026-10-27): the pointer is shown while it is open, the
 	 *  row under it is chosen when it moves, a click on the chosen row (or a double click) uses it, the wheel scrolls the list */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bMouseUI = false;
+	/** the player controller this ticks after (bMouseUI) */
+	TWeakObjectPtr<APlayerController> TickAfterController;
 	/** tests: input sent the way a keyboard, mouse or gamepad sends it (into Slate, then the viewport: RDInputSim); "" when
 	 *  sent, else why not. A pixel is the HUD canvas's. */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") FString SlateKey(FKey Key, bool bDown);

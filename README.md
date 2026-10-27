@@ -388,26 +388,26 @@ The minimap in its painted ring, with the tier panel under it, is in the top rig
 
 ## mistward_castle: the castle
 
-`mistward_castle` (stages `863`-`868`, the user's list of 2026-10-26 in `docs/improvements.txt`, and their second list of 2026-10-27) is level 5's game (a Save As copy of `random_dungeonmagic_level5`: its four heroes, menu, armour, weapons, spells, rings, crafting and tiers) rebuilt as a castle, with these rules on top. Each is a switch of its own on the generator (`ARDDungeonGenerator`, "Mistward" category; the menu's `ARDHeroSelect.bMouseUI`), off on every other level: `random_dungeonmagic_level5` plays as it did. Play it from `mistward_castle` (its menu opens first) or `mistward_castle_select`. Its test is `868_mistward_test.ps1` (`868_mistward_test.py`: 13 steps in the dungeon and a menu step, results in `SourceArt/mistward/test_<tag>.json`; `test_t6.json`: 12 of 13, the crusher missed when the test put her on a set of rooms still being built, fixed in the test; `test_t7.json`: tiers and traps again; `test_m3.json`: the menu). Its reels are `MistwardCastle_Heroes2_Showcase` (the four heroes on the level as it is now) and the first, `MistwardCastle_Heroes_Showcase` (4:38).
+`mistward_castle` (stages `863`-`868`, the user's list of 2026-10-26 in `docs/improvements.txt`, and their second list of 2026-10-27) is level 5's game (a Save As copy of `random_dungeonmagic_level5`: its four heroes, menu, armour, weapons, spells, rings, crafting and tiers) rebuilt as a castle, with these rules on top. Each is a switch of its own on the generator (`ARDDungeonGenerator`, "Mistward" category; the menu's `ARDHeroSelect.bMouseUI`), off on every other level: `random_dungeonmagic_level5` plays as it did. Play it from `mistward_castle` (its menu opens first) or `mistward_castle_select`. Its test is `868_mistward_test.ps1` (`868_mistward_test.py`: 13 steps in the dungeon and a menu step, results in `SourceArt/mistward/test_<tag>.json`; `test_t10.json`: all 13; `test_m5.json`: the menu). Its reels are `MistwardCastle_Heroes2_Showcase` (the four heroes on the level as it is now) and the first, `MistwardCastle_Heroes_Showcase` (4:38).
 
 **The castle.** Its name, "Mistward Castle", is on the menu over CHOOSE YOUR HERO, over the minimap and on the big map's plaque. It has five tiers (1, 8, 16, 24 and 32 sets of rooms round the great hall), each with a look of its own (`864`, the user's choice):
 - tier 1: the stone dungeon and crypt (the dungeon's own pieces);
 - tier 2: a castle keep and its cells (Castle of Eternal Mist's blind arched walls, Medieval Castle's stone floors and wooden ceilings);
-- tier 3: dwarven deep halls (Dwarven Citadel's brick and hall walls, floors and ceilings);
+- tier 3: dwarven deep halls (Dwarven Citadel's brick and hall walls, floors and ceilings; until 2026-10-27 one of its floors, the main hall's pillar floor, had no collision and she fell through every room it floored: `868` now traces every room tile for a floor);
 - tiers 4 and 5: the three mixed, a look for each set of rooms.
 
 A theme's pieces are the generator's `Pieces` named `<Theme>.<Name>`; a piece a theme does not have falls back to the plain one.
 
-**Rooms of other shapes.** About 60 % of the rooms (`ShapedRoomShare`; never the prison or the great hall) are round, octagonal, hexagonal, triangular, a diamond, an L, a T or a U, or have a dome, a pyramid, a stepped pyramid or a high ceiling. Their tiles are cut from the rectangle, keeping the way to every door; walls follow the shape; the ceilings stand at each tile's height with risers between the steps. The maps draw the shapes (`FRDMapRect::Mask`). Measured in 8 generated sets (`868`'s layout step): 97 shaped rooms of every kind (13 octagons, 10 circles, 9 each of stepped pyramids, pyramids and triangles, 8 hexagons, 8 diamonds, 7 each of high halls, U's and T's, 6 L's, 4 domes), each one's tiles fewer than its rectangle's and the domes' and pyramids' ceiling heights varying.
+**Rooms of other shapes.** About 60 % of the rooms (`ShapedRoomShare`; never the prison or the great hall) are round, octagonal, hexagonal, triangular, a diamond, an L, a T or a U, or have a dome, a pyramid, a stepped pyramid or a high ceiling. Their tiles are cut from the rectangle, keeping the way to every door; walls follow the shape; the ceilings stand at each tile's height with risers between the steps. The maps draw the shapes (`FRDMapRect::Mask`). Measured in 7 generated sets (`868`'s layout step): 71 shaped rooms of every kind (8 each of octagons, high halls and stepped pyramids, 7 pyramids, 6 each of circles, hexagons, triangles and U's, 5 L's, 4 diamonds, 4 T's, 3 domes), each one's tiles fewer than its rectangle's and the domes' and pyramids' ceiling heights varying.
 
-**Rooms of other sizes** (since 2026-10-27, from a stream of their own so that nothing else in the layout moves): a room is a small chamber (3 or 4 tiles a side, 9 to 12 m) one time in six, a long gallery (the block's 10 tiles by 3 or 4) one in six, and the block's largest (10 × 10) one in ten; the rest keep their kind's sizes (5 to 10 tiles). Never the great hall or a prison. Measured in those 8 sets: of 329 rooms, 45 small chambers, 52 galleries and 31 of the largest.
+**Rooms of other sizes** (since 2026-10-27, from a stream of their own so that nothing else in the layout moves): a room is a small chamber (3 or 4 tiles a side, 9 to 12 m) one time in six, a long gallery (the block's 10 tiles by 3 or 4) one in six, and the block's largest (10 × 10) one in ten; the rest keep their kind's sizes (5 to 10 tiles). Never the great hall or a prison. Measured in those 7 sets: of 288 rooms, 41 small chambers, 37 galleries and 37 of the largest.
 
 **Furniture that never gets in the way** (`bTidyFurniture`):
 - Each piece's footprint is its mesh's box as built (or its nominal size where that is bigger, centred where the box is).
 - A piece is placed only where its footprint meets no other: two beds or two chests never overlap. Pieces may touch by 1 cm at most (0.5 cm under their sizes on each side; 6 cm until 2026-10-27, which let a chest stand into a bed's foot board).
 - A barracks chest stands at its bed's foot, 10 cm clear of the bed's frame as its mesh measures.
 - A container also needs 95 cm in front of it, clear and on its room's floor, so it is never boxed in between beds or behind a table.
-- Measured on the meshes as built in 8 sets (2487 pieces of furniture, 2355 containers): no two overlap by more than 1.5 cm, every container's way in is clear and on its room's floor, and no container stands between two beds. Pictures of tier 1's barracks are taken for a look.
+- Measured on the meshes as built in 7 sets (2342 pieces of furniture, 2104 containers): no two overlap by more than 1.5 cm, every container's way in is clear and on its room's floor, and no container stands between two beds. Pictures of tier 1's barracks are taken for a look.
 
 **Containers stay open** (`bContainersStayOpen`): F opens a chest once; F again does nothing and no longer offers it, so she cannot close one; its set of rooms built again builds it open.
 
@@ -421,7 +421,7 @@ A theme's pieces are the generator's `Pieces` named `<Theme>.<Name>`; a piece a 
 **Shields** (the Warrior; `SourceArt/mistward/shields.json`, the user's table of the 22 fantasy shields of `docs/objects.md`):
 - Each shield has a damage rating, a speed rating and a durability. A blow takes damage × 4 % less (after her armour), and she moves (10 − speed) × 3 % slower (the user's choices).
 - The shield loses what it takes and breaks at 0; a spare of the same kind takes its place.
-- Shields are found in the containers by rank: the best five in tier 5, down to the plainest in tier 1 (measured in the generated sets' containers: four of tier 1's five, all four of tier 2's, all five of tier 3's, each of its own tier's ranks). Rank 17 is "Village Shield (blue and white)", as the table names it.
+- Shields are found in the containers by rank: the best five in tier 5, down to the plainest in tier 1 (measured in the generated sets' containers: all five of tier 1's, all four of tier 2's, four of tier 3's five, each of its own tier's ranks). Rank 17 is "Village Shield (blue and white)", as the table names it.
 - She starts with the Heater Shield on her arm. It is held only with a one-handed weapon: not with a spell, a bow or a two-handed sword.
 - In the inventory's SHIELDS section Enter puts one on or takes it off. Several are carried, each with its own durability.
 - At the anvil a shield breaks down into iron and steel or timber and iron, × its tier.
@@ -429,12 +429,12 @@ A theme's pieces are the generator's `Pieces` named `<Theme>.<Name>`; a piece a 
 
 **Armour by the set** (`bArmourStacks`): two of one set are two sets, each with its own durability, and the anvil breaks a set down by its type (`shields.json`'s `armour_breakdown`). The worn one, if it is the last, is refused.
 
-**The torch.** An anvil makes it from 2 wood (any kind), 2 straw rope and 1 oils. Any of the four heroes carries it in her left hand: the Medieval Castle pack's torch in her fist, its head turned 20° up, the dungeon's torch flame on it and an 80 cd light. It takes her left hand: the Warrior's shield is slung while it burns. Its light measured in the game's picture: round her, 138 lit against 100 put out (mean brightness of 255).
+**The torch.** An anvil makes it from 2 wood (any kind), 2 straw rope and 1 oils. Any of the four heroes carries it in her left hand: the Medieval Castle pack's torch in her fist, its head turned 20° up, the dungeon's torch flame on it and an 80 cd light. It takes her left hand: the Warrior's shield is slung while it burns. Its light measured in the game's picture: round her, 138 lit against 99 put out (mean brightness of 255).
 
 **Her things where she falls** (`bDropOnDeath`):
 - All of her equipment (found weapons, armour, shields and the one she started with, rings, potions, materials, the torch, teleport rings) drops in a pile where she fell. Only her hero's own weapons and spells stay with her: they are not things of the item table. (Until 2026-10-27 her starting shield stayed hers.)
 - Each kind of thing is shown over the pile as its picture, twelve to a ring and a wider, higher ring for more, with Loot Drops Vol. 2's effect and a light. Measured with 16 kinds: 16 pictures.
-- She comes back in the great hall. F at the pile takes everything back, each as worn as it was, her starting shield back on her arm; the maps mark the pile with a sack.
+- She comes back in the great hall. F at the pile takes everything back, each as worn as it was, the shield she wore back on her arm; the maps mark the pile with a sack.
 
 **Traps** (`RDTraps.cpp`, 13 kinds, from streams of their own so the layout does not change; about 30 % of rooms and 12 % of hallway stretches):
 - **Mechanical**: a pit (it drops and holds her), darts from the walls, a deadfall of stones, a crusher's block, a snare (it holds her).
@@ -463,11 +463,11 @@ The Rogue alone sees them, within 8 m (a message and a red X on the maps). F by 
 - A prisoner: F at the door unlocks the cell, and the prisoner thanks her, gives her a thing of the tier, walks out and is gone.
 - 35 % hold a monster instead. It unlocks its own cell as she comes within 5.2 m, walks out through the door's gap and comes for her (the test follows it 2.7 m out of its cell to strike her).
 - A cell at the end of a row whose door would open against the room's wall is barred all across (the wall left too narrow a way out); it stays empty.
-- Since 2026-10-27 the cells hold no straw: the mound was as tall as she is and read as a big rock in every cell. A cell holds a prisoner, a monster or nobody (in 8 generated sets: 156 cells, 62 prisoners, 37 monsters, 57 empty).
+- Since 2026-10-27 the cells hold no straw: the mound was as tall as she is and read as a big rock in every cell. A cell holds a prisoner, a monster or nobody (in 7 generated sets: 104 cells, 44 prisoners, 21 monsters, 39 empty).
 
 **The mouse** (since 2026-10-27; `bMouseUI`):
 - On the hero menu the pointer stays shown and free; the name it is over gets a lit frame. A click on a name shows that hero, a click on her name again or on START starts, and the arrows step.
-- In the inventory (and the repair list) the pointer is shown while it is open. Moved onto a row it chooses it, a click on the chosen row uses it (a double click: choose and use), and the wheel scrolls the list three rows a notch while the chosen row stays. A row chosen by the pointer holds the list still. The keys work as before.
+- In the inventory (and the repair list) the pointer is shown while it is open. Moved onto a row it chooses it, a click on the chosen row uses it (a double click uses it once), and the wheel scrolls the list three rows a notch while the chosen row stays. A row chosen by the pointer holds the list still. The keys work as before. The anvil's panel keeps the keys, the wheel and the click.
 - The game's own mouse mode comes back when the list closes and when the menu opens the dungeon, so the camera turns with the mouse.
 - `868` sends these the way the devices do: into Slate, then the viewport, then the player controller.
   - It hides the editor's windows that lie over the game's view while it runs: a floating Message Log once took the clicks.

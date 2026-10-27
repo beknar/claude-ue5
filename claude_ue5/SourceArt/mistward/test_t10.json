@@ -1,5 +1,5 @@
 {
- "tag": "t6",
+ "tag": "t10",
  "plan": [
   "basics",
   "shields",
@@ -23,11 +23,11 @@
    "title": "Mistward Castle",
    "max_tier": 5,
    "show_fps": true,
-   "fps": 42.3,
+   "fps": 41.1,
    "fps_box": [
     66,
     57,
-    310,
+    307,
     108
    ],
    "recipes": [
@@ -135,8 +135,8 @@
      "hand_to_shaft_cm": 6.5,
      "torch_length_cm": 79.8,
      "light_to_hand_cm": 75.3,
-     "luma_lit": 137.9,
-     "luma_out": 100.3,
+     "luma_lit": 137.51,
+     "luma_out": 99.13,
      "after_out": {
       "is_held": false,
       "shield_in_hand": true,
@@ -220,23 +220,25 @@
    "pointer_shown": true,
    "cursor_shown": true,
    "refused": [],
-   "hold_s": 14,
+   "hold_s": 15,
    "hold_w": -9,
-   "hold_dpad_down": 14,
+   "hold_dpad_down": 15,
    "hold_dpad_up": -9,
    "one_press": 1,
    "rows_drawn": 18,
    "mouse": {
-    "row": 2,
-    "item": "Medium Healing Potion",
+    "row": 4,
+    "item": "Uncommon Healing Potion",
     "chosen_by_pointer": true,
     "used": 1,
     "mouse_uses": 1,
-    "says": "Drank the medium healing potion:  +28 HP",
-    "first_before": 2,
-    "first_after_wheel_down": 8,
+    "says": "Drank the uncommon healing potion:  +56 HP",
+    "first_before": 4,
+    "first_after_wheel_down": 10,
     "cursor_kept": true,
-    "first_after_wheel_up": 5
+    "first_after_wheel_up": 7,
+    "double_click_drank": 1,
+    "double_click_uses": 1
    },
    "pointer_after_close": false,
    "cursor_after_close": false
@@ -251,7 +253,7 @@
    "half_creature_05": [
     -0.4,
     -0.1,
-    0.1
+    0.2
    ],
    "all": {
     "Rat": [
@@ -260,69 +262,69 @@
      0.0
     ],
     "Half_Creature_04": [
-     -0.0,
-     0.0,
-     0.4
+     -0.1,
+     0.1,
+     0.3
     ],
     "Parasite_Slider": [
+     -0.1,
      0.0,
-     0.2,
      0.7
     ],
     "Half_Creature_05": [
      -0.4,
      -0.1,
-     0.1
+     0.2
     ],
     "Drinker": [
      -0.0,
-     -0.0,
+     0.4,
      1.0
     ],
     "Medic": [
-     -0.1,
-     0.5,
+     -0.3,
+     0.4,
      0.9
     ],
     "Chicken": [
-     -0.1,
-     1.3,
-     1.5
+     -0.0,
+     1.2,
+     1.6
     ],
     "Soldier": [
      -0.1,
-     0.5,
+     0.1,
      0.7
     ],
     "Sufferer": [
      0.0,
      1.5,
-     3.1
+     3.0
     ],
     "Fat": [
-     -0.8,
+     -0.5,
      0.8,
-     2.4
+     2.1
     ],
     "Mask": [
      -0.9,
-     -0.4,
-     1.8
+     -0.7,
+     1.5
     ],
     "Monster": [
-     0.8,
+     0.7,
      1.3,
-     2.2
+     2.4
     ],
     "Gunner": [
      0.8,
-     0.9,
-     4.4
+     2.2,
+     4.7
     ],
     "Parasites_Fat": [
      -0.1,
-     0.4,
-     0.6
+     0.3,
+     0.5
     ],
     "Parasit": [
      0.9,
@@ -330,34 +332,34 @@
      1.7
     ],
     "Orc_03": [
-     0.0,
-     0.9,
-     2.9
+     -0.1,
+     0.5,
+     2.4
     ],
     "Magur": [
      -0.3,
      0.4,
-     2.2
+     1.8
     ],
     "Azrak": [
-     -2.0,
-     -1.2,
-     0.1
+     -1.8,
+     -1.0,
+     -0.2
     ],
     "Warrior_02_the_leopard": [
-     2.6,
-     3.1,
-     4.9
+     -0.3,
+     -0.1,
+     4.3
     ],
     "Kanit": [
      -0.1,
-     0.2,
-     2.1
+     0.6,
+     2.0
     ],
     "Gnur": [
-     -0.9,
-     -0.7,
-     1.0
+     -0.8,
+     0.4,
+     2.1
     ],
     "Dardan": [
      -0.4,
@@ -365,138 +367,138 @@
      1.7
     ],
     "Costalmed": [
-     0.1,
-     0.9,
-     2.3
+     -0.1,
+     0.7,
+     2.0
     ],
     "Orc_05": [
-     0.1,
-     0.9,
+     -0.0,
+     0.4,
      2.3
     ],
     "Orc_06": [
      0.0,
-     0.9,
-     2.3
+     0.8,
+     2.7
     ],
     "Alien": [
-     -3.4,
-     -0.7,
+     -3.3,
+     -0.8,
      -0.0
     ],
     "Devourer": [
-     -2.5,
+     -1.7,
      -0.0,
-     0.4
+     2.0
     ],
     "Insect": [
-     -1.5,
-     0.3,
-     26.8
+     -1.7,
+     -0.1,
+     8.6
     ],
     "Pangolin": [
      -0.2,
-     0.1,
+     0.5,
      0.8
     ],
     "Tank": [
-     0.7,
-     3.1,
-     4.6
+     0.8,
+     3.0,
+     4.7
     ],
     "Orc_01": [
-     0.3,
-     0.8,
-     2.0
+     0.0,
+     0.9,
+     1.9
     ],
     "Orc_02": [
-     -1.3,
-     1.1,
-     2.0
+     -1.5,
+     0.0,
+     2.1
     ],
     "Ursag": [
      -0.1,
      0.7,
-     1.9
+     1.7
     ],
     "Orc_04": [
-     0.0,
-     1.9,
-     2.7
+     0.1,
+     1.8,
+     2.6
     ],
     "Bear_Warrior": [
-     2.0,
-     2.7,
-     3.8
+     0.8,
+     0.9,
+     4.0
     ],
     "Bull_Warrior": [
-     -0.1,
-     3.4,
-     4.4
+     -0.0,
+     3.5,
+     4.5
     ],
     "Crocodile_Warrior": [
      -1.4,
-     -0.9,
-     0.1
+     -0.6,
+     1.1
     ],
     "Elephant_Warrior": [
-     2.1,
-     4.5,
+     -0.4,
+     4.3,
      5.6
     ],
     "Alien_Warrior_05": [
-     0.8,
-     1.4,
-     3.9
+     0.7,
+     1.3,
+     3.0
     ],
     "Exterminator": [
-     0.0,
-     0.9,
-     1.2
+     -0.0,
+     0.4,
+     1.1
     ],
     "Shell": [
-     -0.1,
-     0.8,
-     4.0
+     -0.2,
+     0.9,
+     4.3
     ],
     "Bug": [
-     0.1,
+     0.2,
      1.6,
-     2.1
+     2.0
     ],
     "Horned": [
-     -3.0,
-     -0.2,
-     1.9
+     -1.5,
+     0.0,
+     0.0
     ],
     "Mutant": [
-     -1.1,
-     0.4,
+     -0.9,
+     0.9,
      2.1
     ],
     "Ripper_dog": [
-     -0.0,
      0.0,
+     0.4,
      0.6
     ],
     "Daemon": [
-     -0.2,
-     2.2,
-     2.7
+     -0.8,
+     1.6,
+     2.9
     ],
     "Troll": [
-     0.8,
-     1.8,
+     0.0,
+     1.6,
      2.4
     ],
     "Parasite_Spider": [
-     0.0,
-     1.6,
-     6.0
+     -0.1,
+     0.1,
+     5.5
     ],
     "Fantasy_Animal_raptor_mount": [
      0.0,
-     2.7,
+     2.6,
      4.0
     ],
     "Alfa": [
@@ -505,29 +507,29 @@
      1.3
     ],
     "Spider": [
-     -1.5,
-     0.7,
-     5.5
+     -1.6,
+     -0.1,
+     4.5
     ],
     "Rock": [
-     -0.1,
-     0.7,
-     3.5
+     -0.4,
+     1.1,
+     4.1
     ],
     "Titan": [
-     -1.8,
-     -0.5,
-     -0.2
+     -2.0,
+     -0.6,
+     -0.1
     ],
     "Hunter": [
-     -0.4,
-     1.6,
-     2.7
+     -0.9,
+     1.4,
+     3.0
     ],
     "Nasty": [
-     -2.4,
-     0.1,
-     11.6
+     -2.3,
+     0.4,
+     10.3
     ]
    }
   },
@@ -618,15 +620,15 @@
     ]
    },
    "open_enough": true,
-   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE ARMORY (SEE YOUR MAP)",
    "tier2": {
     "boss": [
      {
       "kind": "boss",
       "at": [
-       -7350.0,
-       -3750.0,
-       124.0
+       -471.0,
+       -6760.0,
+       123.0
       ],
       "name": "Orc_03",
       "alive": 1,
@@ -635,15 +637,15 @@
       "max_health": 360.0
      }
     ],
-    "band": 5,
+    "band": 6,
     "guards": 4,
     "ring": [
      {
       "kind": "ring",
       "at": [
-       3600.0,
-       -7200.0,
-       102.0
+       7500.0,
+       3750.0,
+       1.0
       ],
       "name": "Magic Potency Ring 1",
       "key": -1,
@@ -659,9 +661,10 @@
     "boss_scale": 1.35,
     "boss_mesh_scale": 1.35,
     "band_health": [
+     80.0,
      91.0,
      97.0,
-     114.0
+     120.0
     ],
     "ring_first_in_container": [
      "Magic Potency Ring 1"
@@ -683,8 +686,8 @@
     "SET CLEARED  -  TIER 2: 1 / 8",
     "SET CLEARED  -  TIER 2: 2 / 8",
     "SET CLEARED  -  TIER 2: 3 / 8",
-    "SET CLEARED  -  TIER 2: 4 / 8",
-    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE CRYPT (SEE YOUR MAP)",
+    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE PRISON CELLS (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 5 / 8",
     "SET CLEARED  -  TIER 2: 6 / 8",
     "SET CLEARED  -  TIER 2: 7 / 8",
     "TIER 2 CLEARED"
@@ -692,14 +695,14 @@
    "tally2": {
     "ok": true,
     "done": [
-     332,
-     100,
-     621
+     324,
+     97,
+     714
     ],
     "all": [
-     332,
-     100,
-     621
+     324,
+     97,
+     714
     ]
    },
    "open3": true,
@@ -713,8 +716,8 @@
      {
       "kind": "boss",
       "at": [
-       3450.0,
-       -17850.0,
+       -25350.0,
+       14250.0,
        122.0
       ],
       "name": "Tank",
@@ -724,18 +727,18 @@
       "max_health": 576.0
      }
     ],
-    "band": 5,
+    "band": 6,
     "guards": 4,
     "ring": [
      {
       "kind": "ring",
       "at": [
-       -11635.0,
-       -14830.0,
+       -3835.0,
+       -18690.0,
        41.0
       ],
       "name": "Magic Potency Ring 3",
-      "key": 174,
+      "key": 285,
       "tier": 3,
       "section": [
        0,
@@ -748,18 +751,18 @@
     "boss_scale": 1.35,
     "boss_mesh_scale": 1.35,
     "band_health": [
+     128.0,
      138.0,
-     143.0,
      153.0,
-     167.0,
-     177.0
+     172.0,
+     187.0
     ],
     "ring_first_in_container": [
      "Magic Potency Ring 3"
     ],
     "ring_kind_ok": true
    },
-   "seconds": 7.0
+   "seconds": 6.7
   },
   {
    "step": "open",
@@ -768,13 +771,13 @@
     2,
     0
    ],
-   "container": 33,
+   "container": 0,
    "kind": "chest",
    "describe_before": "open chest",
    "first_f": "chest",
    "alpha_open": 1.0,
-   "describe_after": "teleporter: a tier's teleport ring takes you on",
-   "second_f": "pad",
+   "describe_after": "",
+   "second_f": "",
    "alpha_after_second_f": 1.0,
    "alpha_after_toggle": 1.0,
    "reloaded": true,
@@ -785,20 +788,20 @@
   {
    "step": "layout",
    "ok": true,
-   "sections": 8,
+   "sections": 7,
    "shapes": {
-    "circle": 10,
-    "dome": 4,
-    "octagon": 13,
-    "hexagon": 8,
-    "pyramid": 9,
-    "diamond": 8,
-    "tall": 7,
-    "U": 7,
-    "L": 6,
-    "step pyramid": 9,
-    "T": 7,
-    "triangle": 9
+    "circle": 6,
+    "dome": 3,
+    "octagon": 8,
+    "hexagon": 6,
+    "pyramid": 7,
+    "diamond": 4,
+    "tall": 8,
+    "U": 6,
+    "L": 5,
+    "triangle": 6,
+    "step pyramid": 8,
+    "T": 4
    },
    "shaped_bad": [],
    "themes": {
@@ -807,12 +810,6 @@
      "theme": "None",
      "castle": false,
      "dwarf": false
-    },
-    "2,-1": {
-     "tier": 3,
-     "theme": "Dwarf",
-     "castle": false,
-     "dwarf": true
     },
     "0,-1": {
      "tier": 2,
@@ -851,8 +848,8 @@
      "dwarf": true
     }
    },
-   "furniture": 2487,
-   "containers": 2355,
+   "furniture": 2342,
+   "containers": 2104,
    "overlaps": [],
    "n_overlaps": 0,
    "blocked": [],
@@ -869,36 +866,36 @@
     "tier1_barracks_0",
     "tier1_barracks_1"
    ],
-   "rooms": 329,
-   "small_rooms": 45,
-   "long_galleries": 52,
-   "largest_rooms": 31,
+   "rooms": 288,
+   "small_rooms": 41,
+   "long_galleries": 37,
+   "largest_rooms": 37,
    "sizes": {
-    "10x10": 31,
-    "4x10": 30,
-    "3x4": 24,
-    "3x10": 22,
-    "8x9": 18,
-    "6x7": 17,
-    "4x4": 17,
-    "7x9": 16,
-    "8x10": 16,
-    "7x7": 14,
-    "7x8": 14,
-    "8x8": 12,
-    "6x8": 12,
-    "5x7": 11,
+    "10x10": 37,
+    "3x4": 20,
+    "4x10": 19,
+    "9x10": 18,
+    "3x10": 18,
+    "6x7": 16,
+    "5x7": 15,
+    "7x9": 12,
+    "3x3": 12,
+    "6x9": 11,
+    "7x8": 11,
+    "7x10": 10,
     "5x6": 10,
-    "6x9": 9,
-    "7x10": 9,
-    "9x10": 7,
-    "9x9": 7,
+    "7x7": 9,
+    "6x8": 9,
+    "4x4": 9,
+    "8x10": 9,
+    "5x5": 8,
     "6x6": 7,
-    "6x10": 7,
-    "5x9": 6,
-    "5x5": 5,
+    "8x8": 6,
+    "9x9": 6,
+    "5x9": 5,
+    "8x9": 4,
     "5x8": 4,
-    "3x3": 4
+    "6x10": 3
    },
    "hay_piles": 0,
    "shields_in_containers": {
@@ -906,27 +903,30 @@
      "Painted Viking Shield",
      "Viking Round Shield",
      "Viking Shield (green and white)",
-     "Village Shield (green)"
-    ],
-    "3": [
-     "Beast Shield",
-     "Eastern Shield",
-     "Heater Shield",
-     "Rider's Shield",
-     "War Camp Shield"
+     "Village Shield (green)",
+     "Village Shield (red)"
     ],
     "2": [
      "Dock Shield",
      "Heraldic Shield",
      "Viking Shield (iron-bound)",
      "Village Shield (blue and white)"
+    ],
+    "3": [
+     "Beast Shield",
+     "Eastern Shield",
+     "Heater Shield",
+     "Rider's Shield"
     ]
-   }
+   },
+   "floor_tiles": 14601,
+   "tiles_without_floor": 0,
+   "without_floor": []
   },
   {
    "step": "traps",
-   "ok": false,
-   "traps": 132,
+   "ok": true,
+   "traps": 142,
    "kinds_present": [
     "Chain",
     "Crusher",
@@ -957,15 +957,16 @@
        15.7
       ]
      ],
-     "held_at": 0.13,
+     "held_at": 0.12,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 285,
+     "particles": 269,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
      "state": 2,
-     "says": "A trap: pit trap!"
+     "says": "A trap: pit trap!",
+     "fell_through": []
     },
     "Darts": {
      "present": true,
@@ -981,11 +982,11 @@
        5.9
       ],
       [
-       0.49,
+       0.51,
        5.9
       ],
       [
-       0.8,
+       0.81,
        5.9
       ]
      ],
@@ -997,7 +998,8 @@
      "hits": 3,
      "triggered": 1,
      "state": 2,
-     "says": "A trap: dart trap!"
+     "says": "A trap: dart trap!",
+     "fell_through": []
     },
     "Deadfall": {
      "present": true,
@@ -1009,46 +1011,53 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.84,
+       0.82,
        9.0
       ],
       [
-       1.11,
+       1.09,
        9.0
       ],
       [
-       1.37,
+       1.35,
        9.0
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 1427,
+     "particles": 1507,
      "ambush": {},
      "hits": 3,
      "triggered": 1,
      "state": 2,
-     "says": "A trap: deadfall!"
+     "says": "A trap: deadfall!",
+     "fell_through": []
     },
     "Crusher": {
      "present": true,
      "kind": "3",
-     "hp_lost": 0.0,
+     "hp_lost": 33.6,
      "held": false,
-     "moved_m": 459.2,
-     "farthest_m": 459.2,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
      "peak_speed": 0,
-     "drops": [],
+     "drops": [
+      [
+       0.72,
+       33.6
+      ]
+     ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 291,
+     "particles": 568,
      "ambush": {},
-     "hits": 0,
+     "hits": 1,
      "triggered": 1,
-     "state": 1,
-     "says": "A trap: crusher!"
+     "state": 2,
+     "says": "A trap: crusher!",
+     "fell_through": []
     },
     "Snare": {
      "present": true,
@@ -1060,11 +1069,11 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.12,
+       0.13,
        5.6
       ]
      ],
-     "held_at": 0.12,
+     "held_at": 0.13,
      "weakness": 0.0,
      "slowness": 0.0,
      "particles": 1,
@@ -1072,55 +1081,58 @@
      "hits": 1,
      "triggered": 1,
      "state": 2,
-     "says": "A trap: snare!"
+     "says": "A trap: snare!",
+     "fell_through": []
     },
     "Glyph": {
      "present": true,
      "kind": "5",
      "hp_lost": 24.6,
      "held": false,
-     "moved_m": 584.4,
-     "farthest_m": 584.4,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
      "peak_speed": 0,
      "drops": [
       [
-       0.64,
+       0.67,
        24.6
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 102,
+     "particles": 96,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
-     "state": 1,
-     "says": "A trap: glyph of fire!"
+     "state": 2,
+     "says": "A trap: glyph of fire!",
+     "fell_through": []
     },
     "Ward": {
      "present": true,
      "kind": "6",
      "hp_lost": 13.4,
      "held": false,
-     "moved_m": 1.0,
-     "farthest_m": 1.0,
-     "peak_speed": 611,
+     "moved_m": 1.6,
+     "farthest_m": 1.6,
+     "peak_speed": 608,
      "drops": [
       [
-       0.12,
+       0.13,
        13.4
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 89,
+     "particles": 81,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
-     "state": 1,
-     "says": "A trap: warding barrier!"
+     "state": 0,
+     "says": "A trap: warding barrier!",
+     "fell_through": []
     },
     "Emanation": {
      "present": true,
@@ -1132,47 +1144,48 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.12,
+       0.15,
        6.7
       ],
       [
-       0.64,
+       0.7,
        6.7
       ],
       [
-       1.15,
+       1.25,
        6.7
       ],
       [
-       1.71,
+       1.8,
        6.7
       ],
       [
-       2.28,
+       2.31,
        6.7
       ],
       [
-       2.84,
+       2.87,
        6.7
       ],
       [
-       3.4,
+       3.42,
        6.7
       ],
       [
-       3.9,
+       3.95,
        6.7
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.4,
-     "particles": 19,
+     "particles": 10,
      "ambush": {},
      "hits": 8,
      "triggered": 1,
      "state": 1,
-     "says": "You are slowed"
+     "says": "You are slowed",
+     "fell_through": []
     },
     "Cursed": {
      "present": true,
@@ -1184,19 +1197,20 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.13,
+       0.12,
        6.7
       ]
      ],
      "held_at": null,
      "weakness": 0.45,
      "slowness": 0.4,
-     "particles": 39,
+     "particles": 44,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
      "state": 2,
-     "says": "The cursed rune stone curses you: your blows are weaker"
+     "says": "The cursed rune stone curses you: your blows are weaker",
+     "fell_through": []
     },
     "Chain": {
      "present": true,
@@ -1208,27 +1222,28 @@
      "peak_speed": 0,
      "drops": [
       [
-       1.53,
+       1.38,
        17.9
       ],
       [
-       1.6,
+       1.43,
        9.0
       ],
       [
-       2.08,
+       2.1,
        13.4
       ]
      ],
-     "held_at": 0.12,
+     "held_at": 0.13,
      "weakness": 0.45,
      "slowness": 0.0,
-     "particles": 346,
+     "particles": 304,
      "ambush": {},
      "hits": 4,
      "triggered": 1,
      "state": 2,
-     "says": "A trap: chain of traps!"
+     "says": "A trap: chain of traps!",
+     "fell_through": []
     },
     "Lingering": {
      "present": true,
@@ -1240,19 +1255,19 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.18,
+       0.15,
        14.1
       ],
       [
-       1.45,
+       1.42,
        10.1
       ],
       [
-       3.45,
+       3.39,
        8.1
       ],
       [
-       4.17,
+       4.12,
        14.1
       ],
       [
@@ -1268,54 +1283,57 @@
      "hits": 7,
      "triggered": 1,
      "state": 1,
-     "says": "A trap: lingering trap!"
+     "says": "A trap: lingering trap!",
+     "fell_through": []
     },
     "Teleport": {
      "present": true,
      "kind": "11",
      "hp_lost": 0.0,
      "held": false,
-     "moved_m": 191.7,
-     "farthest_m": 191.7,
+     "moved_m": 141.1,
+     "farthest_m": 141.1,
      "peak_speed": 0,
      "drops": [],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 103,
+     "particles": 18,
      "ambush": {
-      "2,-1": "glyphs|4|54450|-14250"
+      "0,-1": "monsters|3|-6750|-18150"
      },
      "hits": 0,
      "triggered": 1,
      "state": 2,
-     "says": "A teleport trap carries you off: into a ring of glyphs"
+     "says": "A teleport trap carries you off: into a room of monsters",
+     "fell_through": []
     },
     "Spring": {
      "present": true,
      "kind": "12",
      "hp_lost": 9.0,
      "held": true,
-     "moved_m": 2.8,
-     "farthest_m": 2.8,
+     "moved_m": 2.9,
+     "farthest_m": 2.9,
      "peak_speed": 0,
      "drops": [
       [
-       0.33,
+       0.3,
        9.0
       ]
      ],
-     "held_at": 0.13,
+     "held_at": 0.09,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 548,
+     "particles": 535,
      "ambush": {
-      "0,0": "glyphs|4|7350|-9467"
+      "0,0": "glyphs|4|7350|-9462"
      },
      "hits": 1,
      "triggered": 1,
      "state": 2,
-     "says": "A spring plate hurls you across the room: into a ring of glyphs"
+     "says": "A spring plate hurls you across the room: into a ring of glyphs",
+     "fell_through": []
     }
    },
    "warrior_seen": 0,
@@ -1337,7 +1355,7 @@
     "Pit": true,
     "Darts": true,
     "Deadfall": true,
-    "Crusher": false,
+    "Crusher": true,
     "Snare": true,
     "Glyph": true,
     "Ward": true,
@@ -1358,8 +1376,7 @@
     3
    ],
    "pad_actors": [
-    1,
-    3
+    1
    ],
    "ring_on_2": true,
    "describe_2": "take the teleport ring of tier 2",
@@ -1393,16 +1410,16 @@
   {
    "step": "cells",
    "ok": true,
-   "cells": 156,
-   "prisoners": 62,
-   "monsters": 37,
-   "empty": 57,
+   "cells": 104,
+   "prisoners": 44,
+   "monsters": 21,
+   "empty": 39,
    "prisoner": {
     "describe": "unlock the cell: free the prisoner",
     "f": "prisoner",
     "freed": 1,
-    "says": "The prisoner thanks you and gives you small mana potion",
-    "found": "Small Mana Potion",
+    "says": "The prisoner thanks you and gives you repair kit",
+    "found": "Repair Kit",
     "carried_more": 1,
     "gone": true,
     "door_open": true
@@ -1415,44 +1432,44 @@
     "near_d": 250,
     "track": [
      [
-      130,
-      44
+      133,
+      41
      ],
      [
-      214,
-      56
+      215,
+      54
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ],
      [
-      266,
-      64
+      263,
+      62
      ]
     ],
     "her": [
@@ -1462,9 +1479,9 @@
     "door_alpha": 1.0,
     "breakouts": 1,
     "caged_after": false,
-    "came_m": 2.2,
-    "hp_lost": 22.4,
-    "out_of_cell_m": 2.74
+    "came_m": 2.1,
+    "hp_lost": 11.2,
+    "out_of_cell_m": 2.71
    }
   },
   {
@@ -1510,7 +1527,7 @@
      "Epoxy"
     ],
     "pictures": 16,
-    "particles": 16,
+    "particles": 17,
     "from_her_m": 0.0
    },
    "carried_after": {
@@ -1563,28 +1580,28 @@
  ],
  "windows_hidden": "Message Log",
  "shots": [
-  "mw_t6_hud_fps.png",
-  "mw_t6_shield_kite.png",
-  "mw_t6_torch_warrior.png",
-  "mw_t6_torch_lit.png",
-  "mw_t6_torch_out.png",
-  "mw_t6_inventory_mouse.png",
-  "mw_t6_map_tier2.png",
-  "mw_t6_room_circle.png",
-  "mw_t6_room_dome.png",
-  "mw_t6_room_triangle.png",
-  "mw_t6_room_L.png",
-  "mw_t6_room_U.png",
-  "mw_t6_room_octagon.png",
-  "mw_t6_room_step_pyramid.png",
-  "mw_t6_tier1_barracks_0.png",
-  "mw_t6_tier1_barracks_1.png",
-  "mw_t6_trap_rogue.png",
-  "mw_t6_pad_tier2.png",
-  "mw_t6_cell_prisoner_before.png",
-  "mw_t6_cell_prisoner_out.png",
-  "mw_t6_cell_monster.png",
-  "mw_t6_death_pile.png"
+  "mw_t10_hud_fps.png",
+  "mw_t10_shield_kite.png",
+  "mw_t10_torch_warrior.png",
+  "mw_t10_torch_lit.png",
+  "mw_t10_torch_out.png",
+  "mw_t10_inventory_mouse.png",
+  "mw_t10_map_tier2.png",
+  "mw_t10_room_circle.png",
+  "mw_t10_room_dome.png",
+  "mw_t10_room_triangle.png",
+  "mw_t10_room_L.png",
+  "mw_t10_room_U.png",
+  "mw_t10_room_octagon.png",
+  "mw_t10_room_step_pyramid.png",
+  "mw_t10_tier1_barracks_0.png",
+  "mw_t10_tier1_barracks_1.png",
+  "mw_t10_trap_rogue.png",
+  "mw_t10_pad_tier2.png",
+  "mw_t10_cell_prisoner_before.png",
+  "mw_t10_cell_prisoner_out.png",
+  "mw_t10_cell_monster.png",
+  "mw_t10_death_pile.png"
  ],
  "error": null,
  "windows_shown_again": 1

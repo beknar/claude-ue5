@@ -1,5 +1,5 @@
 {
- "tag": "m3",
+ "tag": "m5",
  "plan": [
   "menu"
  ],
@@ -56,7 +56,7 @@
  ],
  "windows_hidden": "Message Log",
  "shots": [
-  "mw_m3_menu_mouse.png"
+  "mw_m5_menu_mouse.png"
  ],
  "error": null,
  "windows_shown_again": 1

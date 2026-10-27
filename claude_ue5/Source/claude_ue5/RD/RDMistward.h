@@ -43,6 +43,8 @@ public:
 	/** her own things (she fell here); false: something the rules laid on the floor (a guarded ring in a room whose containers
 	 *  she had all opened) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHers = true;
+	/** the shield on her arm when she fell (none: she wore none): it goes back on when she takes the pile up */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FName WornShield;
 	void Init(ARDDungeonGenerator* InGenerator, const TArray<FName>& InThings, const TArray<float>& InWear);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumThings() const { return Things.Num(); }
 	/** the effect on it is alive (particles a frame old, tests) */

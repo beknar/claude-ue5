@@ -1247,6 +1247,13 @@ void ARDDungeonGenerator::Tick(float Dt)
 		const float Real = (float)FApp::GetDeltaTime();
 		if (Real > 1e-5f) FpsSmoothed = FpsSmoothed <= 0.f ? 1.f / Real : FMath::Lerp(FpsSmoothed, 1.f / Real, FMath::Clamp(Real * 2.f, 0.02f, 1.f));
 	}
+	// (mistward's pointer: after the player controller, every frame. A click is read as "just pressed", which holds for the
+	// frame after the controller took it in: in an order that changed between frames, a quick click was not seen at all)
+	if (bMouseUI)
+		if (APlayerController* PPC = UGameplayStatics::GetPlayerController(this, 0); PPC && PPC != TickAfterController.Get())
+		{
+			AddTickPrerequisiteActor(PPC); TickAfterController = PPC;
+		}
 	// (it ticks while the game is paused: then only her inventory or the Escape menu, which paused it, is worked)
 	const bool bPaused = GetWorld()->IsPaused();
 	if (APlayerController* MPC = UGameplayStatics::GetPlayerController(this, 0)) TickMenu(MPC);

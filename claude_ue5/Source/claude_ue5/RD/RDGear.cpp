@@ -195,7 +195,7 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 	}
 }
 
-void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers)
+void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers, FName Rewear)
 {
 	if (!Generator) return;
 	int32 Got = 0;
@@ -222,9 +222,8 @@ void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<floa
 			else { float& Cur = ArmourWear.FindOrAdd(N); Cur = FMath::Max(Cur, W); }
 		}
 	}
-	// (her own pile: the shield her hero starts with goes back on her arm, as it was before she fell)
-	if (bHers && WornShield.IsNone())
-		if (const FName* Own = Generator->StartShield.Find(Generator->CurrentHero); Own && GetItemCount(*Own) > 0) WearShield(*Own);
+	// (her own pile: the shield that was on her arm when she fell goes back on (a found one, or none if she wore none))
+	if (bHers && WornShield.IsNone() && !Rewear.IsNone() && GetItemCount(Rewear) > 0) WearShield(Rewear);
 	if (bHers) SetMessage(FString::Printf(TEXT("You take up your things again (%d)"), Got));
 	else SetMessage(Things.Num() == 1 ? FString::Printf(TEXT("You take the %s"), *Things[0].ToString().ToLower()) : FString::Printf(TEXT("You take up what lies here (%d)"), Got));
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));

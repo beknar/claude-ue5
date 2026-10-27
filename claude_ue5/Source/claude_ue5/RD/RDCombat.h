@@ -378,7 +378,7 @@ public:
 	/** everything she found (not the weapons her hero starts with): what drops when she falls; Wear: durability left (-1 none) */
 	void GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut) const;
 	/** her dropped things taken up again */
-	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers = true);
+	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers = true, FName Rewear = NAME_None);
 	/** breaking a set of armour or a shield down at an anvil (a spare first; the one worn only when it is the last) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownGear(FName Item);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 GearBrokenDown = 0;
@@ -467,6 +467,10 @@ private:
 	/** mistward: the pointer shown, where it was last tick (a row is chosen only when it moves) */
 	bool bPointerShown = false;
 	FVector2D LastPointer = FVector2D(-1.f, -1.f);
+	/** the row the pointer used last and when: the second click of a double click is a press too, and used it again */
+	int32 LastUseRow = -1;
+	double LastUseTime = -100.0;
+	void ResetListView();
 	void ShowPointer(bool bShow);
 	/** the mouse on a list: hover chooses, a click on the chosen row uses it, the wheel scrolls; true when it acted */
 	void TickPointerList(APlayerController* PC, int32 Cur, TFunctionRef<void(int32)> Choose, TFunctionRef<void()> Use);

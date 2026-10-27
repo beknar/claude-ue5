@@ -514,12 +514,14 @@ void URDCombatComponent::Fall()
 	{
 		TArray<FName> Things; TArray<float> ThingWear;
 		GatherDroppable(Things, ThingWear);
+		// (the lists shut whatever she had: the pointer and the game's input mode with them)
+		if (bInventoryOpen) SetInventoryOpen(false);
+		if (bCraftOpen) SetCraftingOpen(false);
 		if (Things.Num() > 0)
 		{
-			Generator->DropLoot(O->GetActorLocation(), Things, ThingWear);
-			if (bInventoryOpen) SetInventoryOpen(false);
-			if (bCraftOpen) SetCraftingOpen(false);
-			// (all of it, the shield she started with too: she takes it up again with the rest (TakeBack wears it))
+			// (the pile remembers the shield on her arm, which goes back on when she takes it up; none if she wore none)
+			if (ARDLootPile* Pile = Generator->DropLoot(O->GetActorLocation(), Things, ThingWear)) Pile->WornShield = WornShield;
+			// (all of it, the shield she started with too: she takes it up again with the rest (TakeBack wears the one she wore))
 			TakeOffArmour(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None;
 			WornRings.Reset(); Spares.Reset(); Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
 			UpdateMaxima();
@@ -937,6 +939,7 @@ bool URDCombatComponent::BeginRepair(FName Item)
 		return false;
 	}
 	RepairCursor = 0;
+	ResetListView();          // (another list: the inventory's scroll and rows are not its)
 	SetMessage(FString::Printf(TEXT("Choose what to mend with the %s"), *Item.ToString().ToLower()));
 	PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));
 	return true;
@@ -944,7 +947,14 @@ bool URDCombatComponent::BeginRepair(FName Item)
 
 void URDCombatComponent::CancelRepair()
 {
+	if (!RepairWith.IsNone()) ResetListView();
 	RepairWith = NAME_None; RepairCursor = 0;
+}
+
+void URDCombatComponent::ResetListView()
+{
+	// (mistward's pointer: the list shown changes, so its scroll, its rows and where the pointer was last go)
+	ListScroll = -1; ListRows.Reset(); LastPointer = FVector2D(-1.f, -1.f); LastUseRow = -1;
 }
 
 TArray<FString> URDCombatComponent::GetRepairLines() const
@@ -1372,7 +1382,7 @@ void URDCombatComponent::SetInventoryOpen(bool bOpen)
 	bInventoryOpen = bOpen;
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1)); }
 	// (mistward: the pointer while it is open, to point at a row and click it)
-	ListScroll = -1; ListRows.Reset();
+	ResetListView();
 	if (Generator && Generator->bMouseUI) ShowPointer(bOpen && !bScriptedOnly);
 	// (the game stands still while it is open; the generator, which ticks while paused, works the inventory)
 	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
@@ -1456,8 +1466,11 @@ void URDCombatComponent::TickPointerList(APlayerController* PC, int32 Cur, TFunc
 	// a click on the chosen row uses it (a double click: the first chooses, the second uses); on another row it chooses it
 	if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) && Under >= 0)
 	{
-		if (Under == Cur) { ++MouseUses; Use(); }
-		else PointAt(Under);
+		// (a double click's second press comes as a press too: the row it used a moment ago is not used again (two potions
+		// drunk, a shield put on and taken off))
+		const double Now = FPlatformTime::Seconds();
+		if (Under == Cur && !(Under == LastUseRow && Now - LastUseTime < 0.4)) { ++MouseUses; LastUseRow = Under; LastUseTime = Now; Use(); }
+		else if (Under != Cur) PointAt(Under);
 	}
 	// the wheel scrolls the list, three rows a notch; the cursor stays where it is
 	const int32 Wh = (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) ? 1 : 0) - (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp) ? 1 : 0);
@@ -1468,7 +1481,8 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 {
 	if (!PC || bScriptedOnly) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
-	const bool bMouse = Generator && Generator->bMouseUI;
+	// (mistward's pointer is the inventory's and the repair list's: the anvil's panel keeps the wheel and the click as they were)
+	const bool bMouse = Generator && Generator->bMouseUI && !bCraftOpen;
 	// a list's cursor: the keys and the wheel step it; the left stick a step when it is pushed, then one every 0.22 s held
 	// (mistward: the wheel scrolls the list instead (TickPointerList); a key that moves the cursor brings the list back to it)
 	auto Steer = [&](TFunctionRef<void(int32)> MoveTo)

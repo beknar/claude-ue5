@@ -118,6 +118,7 @@ void ARDHeroSelect::Tick(float Dt)
 			// (mistward: the pointer stays shown and free: the game's mode hid it and captured it on the first click)
 			if (bMouseUI)
 			{
+				AddTickPrerequisiteActor(PC);           // (a click read the frame after the controller took it in, every frame)
 				FInputModeGameAndUI M;
 				M.SetHideCursorDuringCapture(false);
 				M.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -208,6 +209,7 @@ void ARDHeroSelectHUD::DrawHUD()
 	Super::DrawHUD();
 	if (!Canvas) return;
 	if (!Sel) for (TActorIterator<ARDHeroSelect> It(GetWorld()); It; ++It) { Sel = *It; break; }
+	if (Sel) Sel->Buttons.Reset();           // (a frame that draws none leaves none behind for the pointer)
 	if (!Sel || !Sel->Heroes.IsValidIndex(Sel->GetIndex())) return;
 	const FRDHeroDef& H = Sel->Heroes[Sel->GetIndex()];
 	const float Sc = Canvas->ClipY / 1080.f, Now = GetWorld()->GetTimeSeconds();
@@ -367,7 +369,6 @@ void ARDHeroSelectHUD::DrawHUD()
 	// ---- the heroes along the bottom (a click shows one), the arrows, START
 	// (mistward: kept for the menu's own pointer, not as the engine's hit boxes: a hit box that takes a click keeps it from the
 	// player controller's keys; the one the pointer is over gets a lit frame)
-	Sel->Buttons.Reset();
 	auto Button = [&](const FVector2D& P0, const FVector2D& P1, FName Name)
 	{
 		if (!Sel->bMouseUI) { AddHitBox(P0, P1 - P0, Name, true); return; }

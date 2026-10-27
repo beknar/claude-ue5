@@ -372,6 +372,23 @@ def step_inventory():
         m["first_before"] = f0; m["first_after_wheel_down"] = c.get_list_first(); m["cursor_kept"] = c.get_inventory_cursor() == k0
         why = str(g.slate_wheel(mid(b), 1.0)); yield from rwait(0.15)
         m["first_after_wheel_up"] = c.get_list_first()
+        # (a double click on a row of three small potions: one drunk, not two (the second press of a double click is a press too))
+        c.add_item("Small Healing Potion", 3); c.set_health(c.get_max_health() * 0.3); yield from rwait(0.3)
+        # (the keys walk the cursor to its row, which brings the wheel-scrolled list back to the cursor)
+        want_ = next((i for i, l_ in enumerate(lines(c)) if l_.startswith("item|Small Healing Potion|")), None)
+        for _ in range(60):
+            if want_ is None or c.get_inventory_cursor() == want_: break
+            yield from slate_hold("S" if c.get_inventory_cursor() < want_ else "W", 0.05)
+        R2 = rows(c); L2 = lines(c); sp_ = next((i for i in sorted(R2) if L2[i].startswith("item|Small Healing Potion|")), None)
+        if sp_ is not None:
+            b2 = R2[sp_]; g.slate_mouse_move(unreal.Vector2D(b2[0] + 30, b2[1] - 60)); yield from rwait(0.25)
+            g.slate_mouse_move(mid(b2)); yield from rwait(0.3)
+            n2 = c.get_item_count("Small Healing Potion"); u2 = c.mouse_uses
+            for _ in range(2):
+                g.slate_mouse_button(mid(b2), key("LeftMouseButton"), True); yield from rwait(0.05)
+                g.slate_mouse_button(mid(b2), key("LeftMouseButton"), False); yield from rwait(0.08)
+            yield from rwait(0.3)
+            m["double_click_drank"] = n2 - c.get_item_count("Small Healing Potion"); m["double_click_uses"] = c.mouse_uses - u2
     res["mouse"] = m
     shot("inventory_mouse"); yield from rwait(0.6)
     c.set_inventory_open(False); yield from rwait(0.2)
@@ -380,7 +397,7 @@ def step_inventory():
           and res["hold_dpad_down"] > 8 and res["hold_dpad_up"] < -4 and res["one_press"] == 1
           and m.get("chosen_by_pointer") and m.get("used") == 1 and m.get("mouse_uses") == 1
           and m.get("first_after_wheel_down", 0) >= m.get("first_before", 0) + 3 and m.get("cursor_kept")
-          and m.get("first_after_wheel_up", 99) < m.get("first_after_wheel_down", 0)
+          and m.get("first_after_wheel_up", 99) < m.get("first_after_wheel_down", 0) and m.get("double_click_drank") == 1
           and not res["pointer_after_close"] and not res["cursor_after_close"])
     step_result("inventory", ok, **res)
 
@@ -617,7 +634,7 @@ def step_layout():
     # (the cells' hay: the mound read as a big rock in every cell (the user's of 2026-10-27): none in the castle)
     pcs_ = g.get_editor_property("pieces")
     hay_paths = {p.mesh.get_path_name() for p in [pcs_.get(unreal.Name(k)) for k in ("HayPile", "Castle.HayPile", "Dwarf.HayPile")] if p and p.mesh}
-    hay_path = next(iter(hay_paths), None); n_hay = 0; shields_found = {}
+    hay_path = next(iter(hay_paths), None); n_hay = 0; shields_found = {}; n_floor = 0; n_no_floor = 0; no_floor = []
     for sc in secs:
         S = g.get_section(sc); t = g.tier_of(sc)
         for i in range(S.get_num_rooms()):
@@ -644,6 +661,17 @@ def step_layout():
             if comp.static_mesh: packs.add(comp.static_mesh.get_path_name().split("/")[2])
             if comp.static_mesh and comp.static_mesh.get_path_name() in hay_paths: n_hay += comp.get_instance_count()
         theme_meshes[f"{sc.x},{sc.y}"] = {"tier": t, "theme": g.get_theme_name(sc), "castle": "CastleofEternalMist" in packs or "Medieval_Castle" in packs, "dwarf": "DwarvenCitadel" in packs}
+        # (a floor under every room tile, by a trace down at its middle: one of the Dwarven floors was drawn with no collision,
+        # and she fell through whole rooms of tier 3)
+        for i in range(S.get_num_rooms()):
+            r_ = S.get_room_tiles(i); tl_ = r_[0] if isinstance(r_, tuple) else r_
+            for p_ in tl_:
+                n_floor += 1
+                h_ = unreal.SystemLibrary.line_trace_single(G["w"], V(p_.x + 37, p_.y + 23, 250), V(p_.x + 37, p_.y + 23, -400), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                tt_ = h_.to_tuple() if h_ else None
+                if not tt_ or tt_[4].z < -60:
+                    if len(no_floor) < 30: no_floor.append({"section": [sc.x, sc.y], "room": i, "kind": str(S.get_room_kind(i)), "at": [round(p_.x), round(p_.y)]})
+                    n_no_floor += 1
         # (shields in its containers' lists (found as loot, not given by the test), by the set's tier)
         for i in range(S.get_num_containers()):
             for x in g.loot_list_of(sc, i):
@@ -706,11 +734,12 @@ def step_layout():
     ok = (len(shapes) >= 6 and all(s["ok"] for s in shaped_ok) and th_ok and not overlaps and not blocked and not between_beds and n_cont > 0
           and small >= 3 and long_ >= 3 and big >= 3 and n_hay == 0 and hay_path is not None
           and all(SH[n]["rank"] >= {1: 18, 2: 14, 3: 9, 4: 5, 5: 1}[t_] and SH[n]["rank"] <= {1: 22, 2: 17, 3: 13, 4: 8, 5: 4}[t_] for t_, ns in shields_found.items() for n in ns)
-          and sum(len(v) for v in shields_found.values()) >= 2)
+          and sum(len(v) for v in shields_found.values()) >= 2 and n_floor > 1000 and n_no_floor == 0)
     step_result("layout", ok, sections=len(secs), shapes=shapes, shaped_bad=[s for s in shaped_ok if not s["ok"]][:20], themes=theme_meshes,
                 furniture=n_furn, containers=n_cont, overlaps=overlaps[:30], n_overlaps=len(overlaps), blocked=blocked[:30], n_blocked=len(blocked),
                 between_beds=between_beds[:10], pictures=pics, rooms=len(sizes), small_rooms=small, long_galleries=long_, largest_rooms=big,
-                sizes=dict(sorted(hist.items(), key=lambda kv: -kv[1])), hay_piles=n_hay, shields_in_containers={k: sorted(v) for k, v in shields_found.items()})
+                sizes=dict(sorted(hist.items(), key=lambda kv: -kv[1])), hay_piles=n_hay, shields_in_containers={k: sorted(v) for k, v in shields_found.items()},
+                floor_tiles=n_floor, tiles_without_floor=n_no_floor, without_floor=no_floor)
 
 # ------------------------------------------------------------------------------------------------ traps
 def trap_lines():
@@ -738,7 +767,24 @@ def step_traps():
                 cand = [t for t in trap_lines() if t["name"] == name and t["state"] == 0]
                 if cand: break
         if not cand: res["by_kind"][name] = {"present": False}; continue
-        t = cand[0]
+        falls = []
+        for t in cand[:2]:
+            r_ = yield from trap_trial(name, t, c)
+            # (the fall guard moved her (she was below the floor at the trap's spot): said in the record, tried once more on
+            # another of its kind. Seen once, on a lingering trap in a built set whose floor traces found no hole)
+            if name not in ("Teleport",) and r_["farthest_m"] > 30: falls.append({"at": [round(t["at"].x), round(t["at"].y)], "section": [t["s"].x, t["s"].y], "moved_m": r_["moved_m"]}); continue
+            break
+        r_["fell_through"] = falls
+        res["by_kind"][name] = r_
+    # (who sees them: the Warrior none; the Rogue within range, and she disarms one)
+    T = trap_lines(); fresh = [t for t in T if t["state"] == 0]
+    res["warrior_seen"] = sum(t["seen"] for t in T)
+    yield from traps_rogue(res, T, fresh)
+
+def trap_trial(name, t, c):
+    """one trap set off on her: what it did, measured every frame"""
+    g = G["gen"]
+    if True:
         # (its set of rooms built through first: one generated again a moment before had no floor yet, she fell through it and
         # the fall guard put her back 459 m away, the crusher untested)
         yield from built(t["s"])
@@ -757,7 +803,10 @@ def step_traps():
         hits0 = g.trap_hits; trig0 = g.traps_triggered
         g.set_editor_property("log_traps", True)
         amb0 = {(s_.x, s_.y): str(g.get_section(s_).last_ambush) for s_ in g.get_section_coords() if g.is_section_generated(s_) and g.get_section(s_)}
-        put(t["at"], 0.0); p0 = G["pawn"].get_actor_location(); held = False; low = h0
+        # (onto it facing the way she came from the step off it: a ward throws her back that way, along open floor (faced a
+        # fixed way, "back" was often a wall a metre behind her))
+        face = math.degrees(math.atan2(t["at"].y - off.y, t["at"].x - off.x)) if off else 0.0
+        put(t["at"], face); p0 = G["pawn"].get_actor_location(); held = False; low = h0
         # (what it does to her, sampled every frame: hit points (each drop and when), held, weakened, slowed, how far from where
         # she stood on it, the live particles of the effects round the trap and round her)
         t0 = now(); last = h0; drops = []; t_held = None; weak = 0.0; slow = 0.0; far = 0.0; parts = 0; peak = 0.0
@@ -774,7 +823,7 @@ def step_traps():
         p1 = G["pawn"].get_actor_location(); st = [x for x in trap_lines() if x["s"] == t["s"] and x["i"] == t["i"]]
         amb = {f"{k[0]},{k[1]}": str(g.get_section(I2(*k)).last_ambush) for k in [(s_.x, s_.y) for s_ in g.get_section_coords() if g.is_section_generated(s_) and g.get_section(s_)]
                if str(g.get_section(I2(*k)).last_ambush) != amb0.get(k, "")}
-        res["by_kind"][name] = {"present": True, "kind": t["kind"], "hp_lost": round(h0 - low, 1), "held": held, "moved_m": round(dist2(p0, p1) / 100, 1),
+        r_ = {"present": True, "kind": t["kind"], "hp_lost": round(h0 - low, 1), "held": held, "moved_m": round(dist2(p0, p1) / 100, 1),
                                 "farthest_m": round(far / 100, 1), "peak_speed": round(peak), "drops": drops[:12], "held_at": t_held, "weakness": round(weak, 2), "slowness": round(slow, 2),
                                 "particles": parts, "ambush": amb, "hits": g.trap_hits - hits0, "triggered": g.traps_triggered - trig0,
                                 "state": st[0]["state"] if st else None, "says": str(c.message)}
@@ -786,9 +835,11 @@ def step_traps():
                         m_.set_actor_location(V(0, 0, -50000), False, True); m_.set_actor_tick_enabled(False)
                 except Exception: pass
         c.set_health(mx); g.set_editor_property("log_traps", False); yield from wait(0.3)
-    # (who sees them: the Warrior none; the Rogue within range, and she disarms one)
-    T = trap_lines(); fresh = [t for t in T if t["state"] == 0]
-    res["warrior_seen"] = sum(t["seen"] for t in T)
+        return r_
+
+def traps_rogue(res, T, fresh):
+    """(the traps step's end) the Rogue sees a trap and disarms it; then every kind's result judged"""
+    g = G["gen"]
     g.switch_hero("Rogue"); yield from wait(0.6); refresh(); c = cb(); g.set_editor_property("disarm_chance", 1.0)
     t = fresh[0] if fresh else None; r = {}
     if t:
@@ -1116,7 +1167,7 @@ def step_menu():
     G.pop("travel_until", None)
     ok = (res["mouse_ui"] and res["cursor_shown"] and not res["refused"] and [x[1] for x in seq] == [2, 3, 2, 0] and all(x[3] for x in seq)
           and res["opened_before"] == "" and res["opened_by_name_again"].endswith("mistward_castle?Hero=Warrior")
-          and res.get("world_after", "").endswith("mistward_castle") and res.get("hero_after") == "Rogue" and res.get("cursor_after") is False)
+          and (res.get("world_after") or "").endswith("mistward_castle") and res.get("hero_after") == "Rogue" and res.get("cursor_after") is False)
     step_result("menu", ok, **res)
 
 STEPS = {"menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,

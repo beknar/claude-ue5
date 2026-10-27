@@ -57,7 +57,9 @@ void ARDSection::PlaceTraps()
 			V -= Generator->Traps[K].Weight;
 			if (V <= 0.f) return K;
 		}
-		return Kinds.Last();
+		// (rounding past the end: the last kind that fits here, not the list's last (a spring plate in a hallway); none fits: -1)
+		for (int32 J = Kinds.Num() - 1; J >= 0; --J) if (Fits(Kinds[J])) return Kinds[J];
+		return -1;
 	};
 	const int32 StartRoom = Generator->IsStartSection(Coord) ? RoomAt(FVector(Generator->TileSize * 0.5f, Generator->TileSize * 0.5f, 0.f)) : -1;
 	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
@@ -80,6 +82,7 @@ void ARDSection::PlaceTraps()
 		if (From.Num() == 0) continue;
 		const FIntPoint T = From[Pick % From.Num()];
 		FTrapInst Ti; Ti.Def = PickKind(K, bOnLane, bOnLane); Ti.At = TileWorld(T); Ti.Room = RI;
+		if (Ti.Def < 0) continue;
 		Ti.Yaw = (T.Y == Rm.Lane.Y) ? 0.f : 90.f;          // (a ward stands across the way)
 		TrapList.Add(Ti);
 	}
@@ -92,6 +95,7 @@ void ARDSection::PlaceTraps()
 		const FIntPoint T = C.bHoriz ? FIntPoint(C.Min.X + Len / 2, C.Min.Y) : FIntPoint(C.Min.X, C.Min.Y + Len / 2);
 		if (!In(T) || Type[Idx(T)] != 2) continue;
 		FTrapInst Ti; Ti.Def = PickKind(K, true, false); Ti.At = TileWorld(T); Ti.bHall = true; Ti.Yaw = C.bHoriz ? 0.f : 90.f;
+		if (Ti.Def < 0) continue;
 		TrapList.Add(Ti);
 	}
 	for (int32 I = 0; I < TrapList.Num(); ++I)
@@ -434,7 +438,8 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 			if (T.Step == 1)
 			{
 				// (carried at 14 m/s, swept: what stands in the way stops her where it stands)
-				bool bArrived = !Ch || T.Next < 1.f;
+				// (she fell mid-flight, or is another pawn now: the throw ends where she is)
+				bool bArrived = !Ch || T.Next < 1.f || !Pc || Pc->IsDead() || Pc->GetOwner() != Ch;
 				if (Ch)
 				{
 					const FVector D2 = FVector(T.Goal.X - L.X, T.Goal.Y - L.Y, 0.f);

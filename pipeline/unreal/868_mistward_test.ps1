@@ -15,6 +15,8 @@ function Restore {
     & $py $ex -c ($cvar -f 1) 2>$null | Out-Null
     # (the editor's windows the test hid from over the game's view, shown again whatever became of the test)
     & $py $ex -c "import unreal; print('windows shown again', unreal.RDDungeonGenerator.slate_restore_any_view())" 2>$null | Out-Null
+    # (the menu's plan played the menu level: the editor is left on the castle, playable)
+    if ($L -ne "mistward_castle") { & $py $ex -c "import unreal; unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/RandomDungeon/Maps/mistward_castle')" 2>$null | Out-Null }
 }
 & $py $ex -c $open 2>$null | Out-Null
 & $py $ex -c ($cvar -f 0) 2>$null | Out-Null
