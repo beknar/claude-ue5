@@ -2,6 +2,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDMonster.h"
 #include "RD/RDBlood.h"
+#include "RD/RDMistward.h"
 #include "Sound/SoundBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
@@ -93,6 +94,7 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 		return C;
 	};
 	WeaponComp = Make(TEXT("RDWeapon")); OffHandComp = Make(TEXT("RDOffHand"));
+	LeftComp = Make(TEXT("RDLeftHand")); LeftComp->SetVisibility(false);          // (mistward: her shield or her torch)
 	// (the weapons carried on her body while another is drawn, the bolt lying on the crossbow)
 	HolsterComps.Reset();
 	if (Generator)
@@ -221,6 +223,8 @@ void URDCombatComponent::SelectWeapon(int32 Index)
 	};
 	Hold(WeaponComp, W.Mesh, W.HandBone, W.Grip);
 	Hold(OffHandComp, W.OffHandMesh, W.OffHandBone, W.OffHandGrip);
+	UpdateLeftHand();          // (mistward: a shield or a torch in her left hand instead)
+	UpdateWalkSpeed();
 	for (int32 I = 0; I < HolsterComps.Num(); ++I)
 		if (UStaticMeshComponent* C = HolsterComps[I]) C->SetVisibility(I / 2 != Index);
 	if (LoadedBoltComp)
@@ -267,7 +271,11 @@ void URDCombatComponent::UpdateWalkSpeed()
 	if (!C) return;
 	UCharacterMovementComponent* CM = C->GetCharacterMovement();
 	// her own top speed while nothing changes it; slowed in an attack, faster under a speed potion, slower in armour
-	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus()) * (1.f - FMath::Clamp(GetArmourSlow(), 0.f, 0.9f)) * (1.f - GetSlowness());
+	// (mistward: slower with a shield in her hand by its speed rating; held fast by a snare or a pit)
+	float ShieldSlow = 0.f;
+	if (IsShieldInHand()) { const int32 Si = Generator->FindItem(WornShield); if (Si >= 0) ShieldSlow = Generator->Items[Si].Slower; }
+	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus()) * (1.f - FMath::Clamp(GetArmourSlow(), 0.f, 0.9f)) * (1.f - GetSlowness())
+		* (1.f - FMath::Clamp(ShieldSlow, 0.f, 0.9f)) * (bHeldOn ? 0.f : 1.f);
 	if (FMath::IsNearlyEqual(K, 1.f))
 	{
 		if (bSpeedOverride) { CM->MaxWalkSpeed = SavedWalkSpeed; bSpeedOverride = false; }
@@ -454,6 +462,14 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	// (her armour takes its share off; Iron Skin adds to it)
 	LastBlowBefore = Amount;
 	Amount *= 1.f - FMath::Clamp(GetArmour() + GetSkinBonus(), 0.f, 0.95f);
+	// (mistward: her shield takes its share of what is left, and wears by what it took)
+	LastShieldTook = 0.f;
+	if (IsShieldInHand())
+	{
+		const float Took = Amount * FMath::Clamp(GetShieldShare(), 0.f, 0.9f);
+		Amount -= Took; LastShieldTook = Took;
+		if (Took > 0.f) { ++ShieldBlocks; WearDownShield(Took); }
+	}
 	LastBlowTaken = Amount;
 	WearDownArmour();             // (level 5: the blow reached her: her armour loses 1 of its durability)
 	Health = FMath::Max(0.f, Health - Amount);
@@ -492,8 +508,38 @@ void URDCombatComponent::Fall()
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
 	const FRDWeaponDef* W = Weapon();
 	Health = 0.f;
-	bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
 	EndAttack(); EndRoll();
+	// (mistward: everything she found drops where she falls; she comes back with what her hero started with)
+	if (Generator && Generator->bDropOnDeath && O)
+	{
+		TArray<FName> Things; TArray<float> ThingWear;
+		GatherDroppable(Things, ThingWear);
+		if (Things.Num() > 0)
+		{
+			Generator->DropLoot(O->GetActorLocation(), Things, ThingWear);
+			if (bInventoryOpen) SetInventoryOpen(false);
+			if (bCraftOpen) SetCraftingOpen(false);
+			// (her hero's own shield stays hers, as it was)
+			const FName* OwnP = Generator->StartShield.Find(Generator->CurrentHero);
+			const FName Own = OwnP && GetItemCount(*OwnP) > 0 ? *OwnP : NAME_None;
+			const float OwnWear = Own.IsNone() ? 0.f : GetArmourWear(Own);
+			const bool bOwnWorn = !Own.IsNone() && WornShield == Own;
+			TakeOffArmour(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None;
+			WornRings.Reset(); Spares.Reset(); Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
+			if (!Own.IsNone()) { AddItem(Own, 1); ArmourWear.Add(Own, OwnWear); if (bOwnWorn) WornShield = Own; }
+			UpdateMaxima();
+			if (const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero)) Generator->Weapons = H->Weapons;
+			// (her spells learned from tomes stay: they are in her head; the found weapons go)
+			const int32 Keep = WeaponIndex;
+			Wear.Reset(); NextOf.Reset(); PendingBreak.Reset(); Bolts.Reset();
+			SyncWear();
+			WeaponIndex = -1;
+			SelectWeapon(Generator->Weapons.IsValidIndex(Keep) && !Generator->Weapons[Keep].bAlongside ? Keep : 0);
+			UpdateLeftHand();
+			SetMessage(FString::Printf(TEXT("Your things (%d) lie where you fell: go back for them (F)"), Things.Num()));
+		}
+	}
+	bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
 	if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
 	if (AI && W && W->Death)
 		if (UAnimMontage* Mo = AI->PlaySlotAnimationAsDynamicMontage(W->Death, RDCombatSlot, 0.12f, 0.2f, 1.f, 1, -1.f, 0.f)) Mo->bEnableAutoBlendOut = false;      // (she stays down)
@@ -536,6 +582,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickSounds(Dt, Now);
 	TickBolts(Dt);
 	TickSpells(Dt, Now);
+	if (bHeldOn && Now >= HeldUntil) { bHeldOn = false; UpdateWalkSpeed(); }       // (mistward: the snare lets go)
 	if (bDead)
 	{
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
@@ -617,14 +664,27 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 		if (KnowsSpell(Sp)) { SetMessage(FString::Printf(TEXT("You know %s already"), *Sp.ToString())); return; }
 		if (LearnSpell(Sp)) return;
 	}
+	// (mistward: armour (bArmourStacks) and shields are kept copy by copy, each with its own durability)
+	const bool bStacks = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Shield || (Generator->bArmourStacks && Generator->Items[Ix].Kind == ERDItemKind::Armour));
+	if (bStacks)
+	{
+		const float Full = Generator->Items[Ix].Durability;
+		for (int32 K = 0; K < Count; ++K)
+		{
+			if (GetItemCount(Name) + K == 0) ArmourWear.Add(Name, Full);
+			else Spares.FindOrAdd(Name).Add(Full);
+		}
+	}
 	// (level 5: a set of armour is carried once, with its durability; one found again mends hers to full)
-	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour)
+	else if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour)
 	{
 		const float Full = Generator->Items[Ix].Durability;
 		if (GetItemCount(Name) > 0) { if (Full > 0.f) ArmourWear.Add(Name, Full); return; }
 		ArmourWear.Add(Name, Full);
 		Count = 1;
 	}
+	// (mistward: one teleport ring of a tier is enough)
+	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Teleport && GetItemCount(Name) > 0) return;
 	int32& N = Carried.FindOrAdd(Name);
 	if (N == 0) CarriedOrder.AddUnique(Name);
 	N += Count;
@@ -636,6 +696,8 @@ void URDCombatComponent::ClearItems()
 	WornRings.Reset(); UpdateMaxima();
 	ReadyAt.Reset(); SpellsLearned = WeaponsBrokenDown = 0;
 	Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
+	Spares.Reset(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None; ShieldBlocks = ShieldsBroken = GearBrokenDown = 0; HeldUntil = -100.f; bHeldOn = false;
+	UpdateLeftHand();
 	RepairWith = NAME_None; RepairCursor = 0;
 	if (bCraftOpen) SetCraftingOpen(false);
 	CraftCursor = 0;
@@ -648,12 +710,18 @@ void URDCombatComponent::RemoveCarried(FName Name, int32 Count)
 {
 	int32* N = Carried.Find(Name);
 	if (!N || Count <= 0) return;
+	// (mistward: a spare copy goes first)
+	for (int32 K = 0; K < Count; ++K) if (TArray<float>* Sp = Spares.Find(Name); Sp && Sp->Num() > 0) Sp->Pop();
 	*N -= Count;
 	if (*N <= 0)
 	{
-		Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name);
+		Carried.Remove(Name); CarriedOrder.Remove(Name); ArmourWear.Remove(Name); Spares.Remove(Name);
 		// (a ring she no longer has is not on her)
 		for (auto It = WornRings.CreateIterator(); It; ++It) if (It->Value == Name) { It.RemoveCurrent(); UpdateMaxima(); break; }
+		// (mistward: nor a set, a shield or a torch)
+		if (WornArmour == Name) TakeOffArmour();
+		if (WornShield == Name) { WornShield = NAME_None; UpdateLeftHand(); UpdateWalkSpeed(); }
+		if (TorchItem == Name) { bTorchHeld = false; TorchItem = NAME_None; UpdateLeftHand(); }
 	}
 }
 
@@ -679,6 +747,15 @@ bool URDCombatComponent::UseItem(FName Name)
 	const FRDItemDef& It = Generator->Items[Ix];
 	const FString Lb = RDItemLabel(Name);
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
+	// (mistward: a shield to her left hand, the torch lit or put out, a teleport ring used)
+	if (It.Kind == ERDItemKind::Shield) return WearShield(Name);
+	if (It.Kind == ERDItemKind::Torch) { TorchItem = Name; return HoldTorch(!bTorchHeld); }
+	if (It.Kind == ERDItemKind::Teleport)
+	{
+		if (bInventoryOpen) SetInventoryOpen(false);
+		if (!Generator->TeleportToTier(1)) { SetMessage(TEXT("The ring is cold: the first tier's teleporter is gone")); return false; }
+		return true;
+	}
 	if (It.Kind == ERDItemKind::Repair) return BeginRepair(Name);         // (then she chooses what it mends)
 	if (It.Kind == ERDItemKind::Ring) return WearRing(Name);              // (level 5: worn, one of each kind)
 	if (It.Kind == ERDItemKind::Tome)
@@ -777,7 +854,23 @@ TArray<FString> URDCombatComponent::GetInventoryLines() const
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Repair) Out.Add(FString::Printf(TEXT("repair|%s|%d"), *N.ToString(), GetItemCount(N)));
 	for (const FName& N : CarriedOrder)
 		if (KindOf(N) == ERDItemKind::Armour)
-			Out.Add(FString::Printf(TEXT("armour|%s|%d|%.0f|%.0f"), *N.ToString(), N == WornArmour ? 1 : 0, GetArmourWear(N), GetArmourDurability(N)));
+		{
+			// (mistward: how many copies she carries, when more than one)
+			const int32 Cnt = GetItemCount(N);
+			Out.Add(Cnt > 1 ? FString::Printf(TEXT("armour|%s|%d|%.0f|%.0f|%d"), *N.ToString(), N == WornArmour ? 1 : 0, GetArmourWear(N), GetArmourDurability(N), Cnt)
+			                : FString::Printf(TEXT("armour|%s|%d|%.0f|%.0f"), *N.ToString(), N == WornArmour ? 1 : 0, GetArmourWear(N), GetArmourDurability(N)));
+		}
+	// (mistward: shields "shield|<name>|<1 in her hand>|<left>|<full>|<count>", the torch "torch|<name>|<1 lit>|<count>",
+	// teleport rings "teleport|<name>|<tier>")
+	for (const FName& N : CarriedOrder)
+		if (KindOf(N) == ERDItemKind::Shield)
+		{
+			const int32 Ix = Generator->FindItem(N);
+			Out.Add(FString::Printf(TEXT("shield|%s|%d|%.0f|%.0f|%d"), *N.ToString(), N == WornShield ? 1 : 0, GetShieldWear(N), Ix >= 0 ? Generator->Items[Ix].Durability : 0.f, GetItemCount(N)));
+		}
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Torch) Out.Add(FString::Printf(TEXT("torch|%s|%d|%d"), *N.ToString(), bTorchHeld && TorchItem == N ? 1 : 0, GetItemCount(N)));
+	for (const FName& N : CarriedOrder)
+		if (KindOf(N) == ERDItemKind::Teleport) { const int32 Ix = Generator->FindItem(N); Out.Add(FString::Printf(TEXT("teleport|%s|%d"), *N.ToString(), Ix >= 0 ? Generator->Items[Ix].TeleportTier : 0)); }
 	// (level 5: her rings, worn or not; tomes her hero cannot learn)
 	for (const FName& N : CarriedOrder)
 		if (KindOf(N) == ERDItemKind::Ring)
@@ -926,6 +1019,7 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 {
 	if (bOpen == bCraftOpen || (bOpen && (bDead || !Generator || Generator->Recipes.Num() == 0))) return;
 	if (bOpen && bInventoryOpen) SetInventoryOpen(false);
+	KeyRepeatDir = 0;
 	bCraftOpen = bOpen;
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); }
 	else CraftClosedFrame = GFrameCounter;
@@ -950,11 +1044,29 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 {
 	TArray<FString> Out;
 	if (!Generator) return Out;
+	// (mistward: in alphabetical order, the recipes first, then what she can break down)
+	auto ByName = [](const FString& A, const FString& B)
+	{
+		TArray<FString> Pa, Pb; A.ParseIntoArray(Pa, TEXT("|")); B.ParseIntoArray(Pb, TEXT("|"));
+		return (Pa.Num() > 1 ? Pa[1] : A) < (Pb.Num() > 1 ? Pb[1] : B);
+	};
 	for (const FRDRecipe& Rc : Generator->Recipes)
 	{
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s"), *Rc.Item.ToString(), CanCraft(Rc.Item) ? 1 : 0, *FString::Join(Ps, TEXT(";"))));
+	}
+	if (Generator->bAlphabeticalCrafting) Out.Sort(ByName);
+	const int32 NumRecipes = Out.Num();
+	// (mistward: armour (bArmourStacks) and shields she carries break down too: "breakdown|<name>|g<name>|<1 worn>|...")
+	for (const FName& N : CarriedOrder)
+	{
+		const int32 Ix = Generator->FindItem(N);
+		if (Ix < 0) continue;
+		const ERDItemKind K = Generator->Items[Ix].Kind;
+		if (!(K == ERDItemKind::Shield || (K == ERDItemKind::Armour && Generator->bArmourStacks))) continue;
+		const FString Gives = BreakdownText(N, Generator->Items[Ix].WeaponType);
+		if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|g%s|%d|%s"), *N.ToString(), *N.ToString(), (N == WornArmour || N == WornShield) ? 1 : 0, *Gives));
 	}
 	// (level 5: the weapons she found, to break down: "breakdown|<name>|w<weapon index> or i<item>|<1 drawn>|<item>:<count>;...")
 	if (Generator->Breakdowns.Num() > 0)
@@ -973,6 +1085,12 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 			const FString Gives = BreakdownText(N, Generator->Items[Ix].WeaponType);
 			if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|i%s|0|%s"), *N.ToString(), *N.ToString(), *Gives));
 		}
+	}
+	if (Generator->bAlphabeticalCrafting && Out.Num() > NumRecipes)
+	{
+		TArray<FString> Tail(Out.GetData() + NumRecipes, Out.Num() - NumRecipes);
+		Tail.Sort(ByName);
+		for (int32 I = 0; I < Tail.Num(); ++I) Out[NumRecipes + I] = Tail[I];
 	}
 	return Out;
 }
@@ -1097,13 +1215,14 @@ bool URDCombatComponent::Craft(FName Item)
 bool URDCombatComponent::CraftEntry()
 {
 	if (!Generator) return false;
-	if (Generator->Recipes.IsValidIndex(CraftCursor)) return Craft(Generator->Recipes[CraftCursor].Item);
-	// (level 5: a weapon to break down)
+	// (the line under the cursor says what it is: a recipe, or a weapon, set of armour or shield to break down)
 	const TArray<FString> L = GetCraftLines();
 	if (!L.IsValidIndex(CraftCursor)) return false;
 	TArray<FString> P; L[CraftCursor].ParseIntoArray(P, TEXT("|"));
+	if (P.Num() >= 2 && P[0] == TEXT("recipe")) return Craft(FName(*P[1]));
 	if (P.Num() < 3 || P[0] != TEXT("breakdown")) return false;
-	const bool bOk = P[2].StartsWith(TEXT("w")) ? BreakDownWeapon(FCString::Atoi(*P[2].Mid(1))) : BreakDownItem(FName(*P[2].Mid(1)));
+	const bool bOk = P[2].StartsWith(TEXT("w")) ? BreakDownWeapon(FCString::Atoi(*P[2].Mid(1)))
+	               : P[2].StartsWith(TEXT("g")) ? BreakDownGear(FName(*P[2].Mid(1))) : BreakDownItem(FName(*P[2].Mid(1)));
 	CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1));
 	return bOk;
 }
@@ -1253,6 +1372,7 @@ void URDCombatComponent::SetInventoryOpen(bool bOpen)
 {
 	if (bOpen == bInventoryOpen || (bOpen && bDead)) return;
 	if (bOpen && bCraftOpen) SetCraftingOpen(false);
+	KeyRepeatDir = 0;
 	if (!bOpen) CancelRepair();
 	bInventoryOpen = bOpen;
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1)); }
@@ -1284,7 +1404,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		return true;
 	}
 	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")
-		|| P[0] == TEXT("ring") || P[0] == TEXT("tome")))
+		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
@@ -1302,6 +1422,18 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 	{
 		if (Pressed({ EKeys::W, EKeys::Up, EKeys::MouseScrollUp, EKeys::Gamepad_DPad_Up })) Move(-1);
 		if (Pressed({ EKeys::S, EKeys::Down, EKeys::MouseScrollDown, EKeys::Gamepad_DPad_Down })) Move(1);
+		// (a key held down: the cursor goes on after a moment, a step every 80 ms, as long as it is held; the user's of 2026-10-26)
+		if (Generator && Generator->bKeyRepeat)
+		{
+			// (armed only by a key pressed while the list is open: one held from before (W walking her) does not run it)
+			auto Down = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->IsInputKeyDown(K)) return true; return false; };
+			const int32 Dir = Down({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up }) ? -1 : Down({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down }) ? 1 : 0;
+			const bool bJust = Dir < 0 ? Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up }) : Dir > 0 ? Pressed({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down }) : false;
+			const double Now = FPlatformTime::Seconds();
+			if (Dir == 0) KeyRepeatDir = 0;
+			else if (bJust) { KeyRepeatDir = Dir; KeyRepeatAt = Now + 0.35; }
+			else if (Dir == KeyRepeatDir && Now >= KeyRepeatAt) { Move(Dir); KeyRepeatAt = Now + 0.08; }
+		}
 		const float Sy = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
 		if (FMath::Abs(Sy) > 0.6f)
 		{
@@ -1466,13 +1598,7 @@ int32 URDCombatComponent::GetSpellParticles(FVector Location, float Radius, int3
 	{
 		if (!IsValid(C) || (Radius > 0.f && FVector::DistSquared(C->GetComponentLocation(), Location) > Radius * Radius)) continue;
 		int32 N = 0;
-		if (const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C))
-		{
-			const FNiagaraSystemInstanceControllerConstPtr Ctl = Nc->GetSystemInstanceController();
-			if (Ctl.IsValid() && Ctl->IsValid())
-				if (const FNiagaraSystemInstance* SI = Ctl->GetSystemInstance_Unsafe())
-					for (const FNiagaraEmitterInstanceRef& E : SI->GetEmitters()) N += E->GetNumParticles();
-		}
+		if (const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C)) N = RDNiagaraParticles(Nc);
 		else if (const UParticleSystemComponent* Pc = Cast<UParticleSystemComponent>(C)) N = Pc->GetNumActiveParticles();
 		else continue;
 		Num += N; if (N > 0) ++Systems;

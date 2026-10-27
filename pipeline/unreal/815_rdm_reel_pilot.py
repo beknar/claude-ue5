@@ -97,8 +97,24 @@ facing the way with most room, with the Plate Knight's Sword (given, then drawn)
 (W5_TwoHand1-3) at full speed, then the same three at a third of the speed (her own time dilation: the world's does not
 slow a Movie Render Queue render);
 the monsters near her are moved off and leave her be. Writes cine_grip_<hero>.json.
-Args: [render|rehearse] [seconds] [level: "2", "3", "4" or "5"] [level 4: hero] [level 4: east|north|west|south; level 5:
-weapons, heroes, craft, spells or grip] [session seed]"""
+mistward_castle (level "mw", the way "mistward": run5m; the user's list of 2026-10-26, docs/improvements.txt), each hero with a
+session seed of her own: the Warrior opens a great hall chest that holds a shield (it stays open; F again does nothing),
+puts the shield on from the inventory, breaks down her Heater Shield at the anvil (its lists in alphabetical order), lets two
+blows land on the shield in a fight; then (a card: the reel's shortcut, the start set cleared by the generator but a fifth
+of its monsters) tier 1 at 75 % opens tier 2, a boss waits in a room she has seen (the big map's mark), and she fights it.
+The Mage is given the torch's materials and a bag of others (said), holds S in the inventory (the list walks), makes the
+torch at the anvil and lights it; then (a card) in tier 2's castle keep she sets a prisoner free (F at the cell door: thanks,
+a thing, the prisoner walks off) and a caged monster breaks out as she comes near. The Warlock is shown rooms of other shapes
+in the start set (cards: a dome, a stepped pyramid, a round room), then (a card) tier 2's first set's teleporter: F takes its
+ring, the ring used carries her to the great hall's pad, F there back; a fight she loses (the reel takes her hit points
+down, said): her things in a pile where she fell (their pictures, the Loot Drops effect), back on her feet; (a card) F at the
+pile takes them up. The Rogue sees a trap from 8 m, disarms it (F), walks onto another (said); then (a card) tier 1 at 75 %:
+the dexterity ring she never found lies guarded in a room she has seen (the big map), the guards fought, the ring taken.
+The record also has the frame rate the game shows, her shield (worn, in her hand), the torch, what F would do near her, the
+disarm bar, the castle's map marks (a boss, a guarded ring, her things, a teleporter, a trap she has seen), each room's
+shape (the map's masks) and the traps, teleports, prisoners and deaths as events. Writes SourceArt/mistward/cine_mw_<hero>.json.
+Args: [render|rehearse] [seconds] [level: "2", "3", "4", "5" or "mw"] [level 4: hero] [level 4: east|north|west|south; level 5:
+weapons, heroes, craft, spells or grip; mw: mistward] [session seed]"""
 import unreal, sys, json, math, os
 __keep__ = True
 MODE = sys.argv[1] if len(sys.argv) > 1 else "render"
@@ -109,8 +125,10 @@ _lv = "1"
 for _w in unreal.ObjectIterator(unreal.World):
     for _n in ("2", "3", "4", "5"):
         if _w.get_name().endswith("random_dungeonmagic_level" + _n): _lv = _n
+    if _w.get_name().endswith("mistward_castle"): _lv = "mw"
 LV = sys.argv[3] if len(sys.argv) > 3 else _lv           # (the argument wins: the editor may have another level open)
-L5 = LV == "5"; L4 = LV == "4" or L5                     # (level 5 is level 4's Save As copy: its machinery, the armour's plan)
+MW = LV == "mw"                                          # (mistward_castle: level 5's Save As copy)
+L5 = LV == "5" or MW; L4 = LV == "4" or L5                # (level 5 is level 4's Save As copy: its machinery, the armour's plan)
 HERO = sys.argv[4] if len(sys.argv) > 4 else ("Summoner" if L5 else "Rogue")
 WAY = sys.argv[5] if len(sys.argv) > 5 else "east"
 W5H = L5 and WAY == "heroes"            # (level 5: the four heroes' weapons reel: run5h)
@@ -119,8 +137,9 @@ W5X = L5 and WAY == "caps"              # (level 5: the four heroes' capabilitie
 W5S = L5 and WAY == "spells"            # (level 5: the spells, rings, monsters by tier, corpses and menu reel: run5s)
 W5G = L5 and WAY == "grip"              # (level 5: the two-handed grip close up: run5g)
 W5W2 = L5 and WAY == "chop2"            # (level 5: Warrior2's chop test, Warrior2 alone (861 placed her): run5w2)
-W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
-W5K = W5C or W5S or W5X                 # (the crafting panel's and the repair list's recording)
+W5M = MW and WAY == "mistward"          # (mistward_castle: the four heroes and the castle's rules: run5m)
+W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
+W5K = W5C or W5S or W5X or W5M          # (the crafting panel's and the repair list's recording)
 DX, DY = {"east": (1, 0), "north": (0, 1), "west": (-1, 0), "south": (0, -1)}.get(WAY, (1, 0))
 # (level 4: the hero fights as in her own level)
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
@@ -128,7 +147,7 @@ MELEE = L4 and HERO == "Warrior"
 CHESTS = L3 or L4                  # (she opens the containers she passes)
 if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner"].index(HERO) + 7
 if len(sys.argv) > 6: SEED = int(sys.argv[6])        # (level 4: a session seed of the reel's choosing: what the containers on her way hold)
-OUT = "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
+OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + ("cine_mw_%s.json" if MODE == "render" else "cine_mw_rehearsal_%s.json") % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
     ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else f"cine_caps_{HERO.lower()}.json" if W5X else "cine_chop2_warrior2.json" if W5W2 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
     if MODE == "render" else ("cine_rehearsal_spells_%s.json" % HERO.lower() if W5S else "cine_rehearsal.json"))
 SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3"}[HERO] if L4 else
@@ -268,8 +287,8 @@ def open_chest(at, stand=None):
         if d2(l, stand) < 45.0: break
         # (level 5: close enough already when F names a container and the chest is within its reach)
         if L5 and d2(l, at) < 175.0 and str(gen.describe_nearest(l, 200.0)).startswith("open") and "door" not in str(gen.describe_nearest(l, 200.0)): break
-        if L5:
-            # (a monster that comes at her on the way is dealt with first; then on to the chest)
+        if L5 and not G.get("quiet"):
+            # (a monster that comes at her on the way is dealt with first; then on to the chest (not while the reel has them leave her be))
             m = threat()
             if m is not None:
                 # (run5h: with the weapon in her hands, as her later fights; the Mage with her spells)
@@ -1648,8 +1667,411 @@ def run5x():
     while T() < DUR - 30.0: camera(side=30.0, pitch=-11.0, rate=15.0); yield
     yield from tiers_part()
 
+# ---------------------------------------------------------------- run5m: Mistward Castle (the user's list of 2026-10-26)
+def mw_card(text, sub=""):
+    """(run5m) the reel skips ahead: a card over the picture says what changed (the overlay draws it for MW_CARD s)"""
+    seg("jump"); event("card", text=text, sub=sub)
+MW_CARD = 3.0
+def mw_set(at, face_to=None, yaw=None, side=-22.0, pitch=-20.0):
+    """(run5m) she is put at `at` (on the floor), facing a point or a way; the camera behind her at once"""
+    p = G["pawn"]; p.set_actor_location(V(at.x, at.y, 100.0), False, True)
+    G["heading"] = yaw if yaw is not None else (yaw_to(at, face_to) if face_to is not None else G.get("heading", 0.0))
+    p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), True)
+    G["cam_yaw"] = G["heading"] + side; G["cam_pitch"] = pitch
+def mw_quiet(on):
+    """(run5m) the monsters leave her be (the crafting panel and the inventory pause the game in play; the reel's world goes on)"""
+    gen = G["gen"]
+    if "aggro0" not in G: G["aggro0"] = (gen.get_editor_property("aggro_distance"), gen.get_editor_property("lose_distance"))
+    a0, l0 = G["aggro0"]
+    gen.set_editor_property("aggro_distance", 0.0 if on else a0); gen.set_editor_property("lose_distance", 1.0 if on else l0)
+    G["quiet"] = on; event("quiet", on=on)
+def mw_start():
+    gen = G["gen"]
+    seg("start")
+    while T() <= 0.0 or G["combat"] is None:
+        camera(rate=1e6); yield
+    def start_count(): return sum(1 for q in gen.get_monsters() if alive(q) and q.get_editor_property("section").get_editor_property("coord") == IP(0, 0))
+    while T() < 0.5 or (start_count() < 10 and T() < 1.2):
+        camera(rate=1e6); yield
+    c = G["combat"]; c.set_inventory_open(False); c.set_crafting_open(False)
+    # (the monsters leave her be until a fight of the plan's: the great hall's came at her on the way to its first chest)
+    mw_quiet(True)
+    S["note"]["fps_note"] = "the frame rate the game shows is its own tick's: in a render the queue steps it at the reel's rate"
+def mw_hall():
+    gen = G["gen"]; s0 = gen.get_section(IP(0, 0)); centre = gen.get_start_room_center(); room = s0.room_at(centre)
+    anvil = next((a for a in s0.get_anvil_points() if s0.room_at(a) == room), None)
+    return s0, centre, room, anvil
+def mw_anvil(anvil, room):
+    """(run5m) to the hall's anvil and F: the crafting panel"""
+    gen, c = G["gen"], G["combat"]; s0 = gen.get_section(IP(0, 0)); stand = None
+    for r_ in (150.0, 190.0):
+        for k in range(16):
+            q = V(anvil.x + math.cos(k * math.pi / 8) * r_, anvil.y + math.sin(k * math.pi / 8) * r_, 100.0)
+            if s0.room_at(q) == room and str(gen.describe_nearest(q, 260.0)) == "use the anvil" and len(path(loc(), q)):
+                if stand is None or d2(loc(), q) < d2(loc(), stand): stand = q
+        if stand: break
+    if stand is not None: yield from to_point(stand, 12.0, 45.0)
+    G["heading"] = yaw_to(loc(), anvil); G["pawn"].set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    yield from pause(0.4, lambda: camera(side=-35.0, pitch=-22.0, rate=70.0))
+    said = str(gen.interact_nearest(loc(), 260.0)); key_hit("f"); event("craft_open", what=said, open=bool(c.is_crafting_open()))
+    yield from pause(1.6)
+def mw_craft_line(kind, name):
+    """(run5m) the crafting panel's cursor down (S) to a line, then Enter"""
+    c = G["combat"]
+    lines = [str(x).split("|") for x in c.get_craft_lines()]
+    i = next((k for k, x in enumerate(lines) if x[0] == kind and x[1] == name), None)
+    event("craft_want", line_kind=kind, name=name, index=i, lines=["|".join(x[:2]) for x in lines])
+    if i is None: return False
+    while c.get_craft_cursor() != i:
+        c.move_craft_cursor(1 if i > c.get_craft_cursor() else -1); key_hit("s" if i > c.get_craft_cursor() else "w"); yield from pause(0.3)
+    yield from pause(1.2)
+    ok = c.craft_entry(); key_hit("enter"); event("crafted", item=name, line_kind=kind, ok=bool(ok), message=str(c.message))
+    yield from pause(2.0)
+    return ok
+def mw_open_tier2(leave=0):
+    """(run5m) the reel's shortcut, said by its card: the start set cleared by the generator's debug clear (`leave` monsters
+    left: still 75 % or more); tier 2 opens"""
+    gen = G["gen"]
+    gen.debug_clear_section(IP(0, 0), leave, gen.get_start_room_center())
+    # (the tally right after a restart can still be counting: the clear again every half second until the tier opens)
+    t0 = T(); t1 = T()
+    while not gen.is_tier_open(2) and T() - t0 < 4.0:
+        if T() - t1 > 0.5: t1 = T(); gen.debug_clear_section(IP(0, 0), leave, gen.get_start_room_center())
+        yield
+    event("tier2", open=bool(gen.is_tier_open(2)), notice=str(gen.tier_notice), encounters=[str(x) for x in gen.get_encounter_lines()])
+def mw_encounters():
+    out = []
+    for l in G["gen"].get_encounter_lines():
+        p_ = str(l).split("|"); out.append({"kind": p_[0], "at": V(float(p_[1]), float(p_[2]), float(p_[3])), "name": p_[4], "rest": p_[5:]})
+    return out
+def mw_near_point(at, dist, sec=None):
+    """a floor point `dist` from `at` in the same room, she can walk from to it (by the tile path)"""
+    sec = sec or section_of(at); room = sec.room_at(at); best = None
+    for k in range(24):
+        a = k * math.pi / 12; q = V(at.x + math.cos(a) * dist, at.y + math.sin(a) * dist, 100.0)
+        if room >= 0 and sec.room_at(q) != room: continue
+        pts = list(sec.find_path_world(q, at))
+        if len(pts) and d2(pts[0], q) < 140.0 and sweep_clear(q, at, 30.0):
+            return q
+    return None
+def mw_map(sec=3.0):
+    gen = G["gen"]; gen.set_map_open(True); key_hit("m"); event("map", open=True)
+    yield from pause(sec, lambda: camera(side=-15.0, pitch=-15.0, rate=20.0))
+    gen.set_map_open(False); key_hit("m"); event("map", open=False)
+
+def run5m():
+    """(mistward_castle, the user's list of 2026-10-26; the four heroes, each her own session seed) what each hero can do now,
+    and the castle's new rules (see the module docstring)"""
+    yield from mw_start()
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    s0, centre, room, anvil = mw_hall()
+    S["note"]["themes"] = {t: gen.get_theme_name(IP(t - 1, 0)) for t in range(1, 6)}
+    yield from {"Warrior": mw_warrior, "Mage": mw_mage, "Warlock": mw_warlock, "Rogue": mw_rogue}[HERO](s0, centre, room, anvil)
+    while True: yield from pause(0.5, lambda: camera(side=30.0, pitch=-12.0, rate=12.0))
+
+def mw_warrior(s0, centre, room, anvil):
+    """the Warrior: a hall chest with a shield in it (the seed's): opened, it stays open; the found shield on her arm from the
+    inventory; at the anvil (its lists in alphabetical order) her Heater Shield broken down; a fight, two blows let land on
+    the shield; then tier 1 at 75 %: tier 2 opens, a boss waits (the big map's marks) and she goes for it"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    kinds = {str(it.name): str(it.kind.name).lower() for it in gen.get_editor_property("items")}
+    hall_ = list(gen.get_start_room_containers()); lists = {i: [str(x) for x in gen.loot_list_of(IP(0, 0), i)] for i in hall_}
+    S["note"]["hall"] = {str(i): v for i, v in lists.items()}
+    with_sh = [i for i in hall_ if any(kinds.get(x) == "shield" for x in lists[i])]
+    ch = (with_sh or hall_)[0]; at = s0.get_container_location(ch)
+    st = stand_by_chest(at, centre, tol=450.0) or V(at.x + 200, at.y, 100)
+    q = V(st.x + (st.x - at.x) * 2.5, st.y + (st.y - at.y) * 2.5, 100.0)
+    mw_set(q if s0.room_at(q) == room else st, face_to=at)
+    event("start", at=[round(loc().x), round(loc().y)], chest=ch, holds=lists[ch], way="great hall, a chest with a shield")
+    yield from pause(2.6, lambda: camera(side=-22.0, pitch=-20.0, rate=40.0))
+    seg("chest"); yield from open_chest(at, st)
+    yield from pause(0.8, lambda: camera(side=-30.0, pitch=-26.0, rate=70.0))
+    # (F again: nothing to close, nothing offered)
+    what = str(gen.describe_nearest(loc(), 200.0)); gen.interact_nearest(loc(), 200.0); key_hit("f")
+    event("f_again", describe=what, open_alpha=round(s0.get_container_open_alpha(ch), 2))
+    yield from pause(2.2, lambda: camera(side=-40.0, pitch=-24.0, rate=40.0))
+    found = next((x for x in lists[ch] if kinds.get(x) == "shield"), None)
+    if found is None:
+        found = "Village Shield"; c.add_item(found, 1); event("given", items={found: 1}, why="shield")
+    # ---- the found shield on her arm (from the inventory), the camera round her
+    seg("shield"); yield from wield(found, "shield", "shield")
+    yield from swing_to(120.0, 0.6, -9.0); yield from orbit(2.4, 120.0, 140.0, -8.0)
+    # ---- at the anvil: the lists in alphabetical order; her Heater Shield broken down
+    mw_quiet(True); seg("craft"); S["seg_back"] = "craft"
+    if anvil is not None:
+        yield from mw_anvil(anvil, room)
+        yield from mw_craft_line("breakdown", "Heater Shield")
+        c.set_crafting_open(False); key_hit("f")
+    yield from pause(0.4)
+    mw_quiet(False)
+    # ---- a fight (lured): two blows let land on her shield
+    mw_quiet(False); seg("fight"); lure(); G["until"] = DUR - 27.0; tw = T()
+    while threat() is None and T() - tw < 4.0: camera(side=25.0, pitch=-12.0, rate=25.0); yield
+    m = threat() or nearest_monster(IP(0, 0), 60)
+    if m is not None: G["casts0"] = c.attacks_made; yield from fight_w(m, take=2)
+    lure(False)
+    while T() < DUR - 26.0: camera(side=30.0, pitch=-11.0, rate=15.0); yield
+    # ---- tier 1 at 75 %: tier 2 opens, a boss waits
+    G["until"] = DUR + 1.0; lure(False); mw_quiet(True)
+    mw_card("TIER 1 AT 75 %", "the reel's shortcut: the start set cleared by the generator but for a quarter of its monsters")
+    n_mon = sum(1 for q_ in gen.get_monsters() if alive(q_) and q_.get_editor_property("section").get_editor_property("coord") == IP(0, 0) and q_.get_editor_property("spawn_index") >= 0)
+    yield from mw_open_tier2(leave=max(0, int(n_mon * 0.2)))
+    boss = next((e for e in mw_encounters() if e["kind"] == "boss"), None)
+    if boss is not None:
+        stand = mw_near_point(boss["at"], 1300.0) or mw_near_point(boss["at"], 900.0)
+        if stand is not None: mw_set(stand, face_to=boss["at"], side=-18.0, pitch=-14.0)
+        event("at_boss", boss=boss["name"], m=round(d2(loc(), boss["at"]) / 100.0, 1))
+    c.set_health(c.get_max_health())
+    yield from pause(MW_CARD + 0.2, lambda: camera(side=-18.0, pitch=-14.0, rate=1e6))
+    seg("boss"); yield from mw_map(3.0)
+    mw_quiet(False); lure()
+    while True:
+        m = threat() or (nearest_monster(None, 40, 3000.0) if T() < DUR - 3.0 else None)
+        if m is None: yield from pause(0.5, lambda: camera(side=20.0, rate=20.0)); continue
+        G["casts0"] = c.attacks_made; yield from fight_w(m)
+
+def mw_mage(s0, centre, room, anvil):
+    """the Mage: by the anvil, with the torch's materials and a bag of others (given, said): the inventory walked by holding S;
+    the torch made at the anvil, lit from the inventory; then tier 2's castle keep: a prisoner set free, a caged monster
+    breaking out"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    a0 = anvil or centre; tow = V(centre.x - a0.x, centre.y - a0.y, 0.0)
+    st = V(a0.x + tow.normal().x * 520.0, a0.y + tow.normal().y * 520.0, 100.0) if tow.length() > 1 else V(a0.x + 520.0, a0.y, 100.0)
+    mw_set(st, face_to=a0, side=-25.0, pitch=-20.0)
+    event("start", at=[round(st.x), round(st.y)], way="great hall, by its anvil")
+    yield from pause(2.6, lambda: camera(side=-25.0, pitch=-20.0, rate=40.0))
+    give = {"Hardwood": 1, "Timber": 1, "Straw Rope": 2, "Oils": 1}
+    for it in [i for i in gen.get_editor_property("items") if i.kind == unreal.RDItemKind.COMPONENT][:14]: give.setdefault(str(it.name), 1)
+    for k_, n_ in give.items(): c.add_item(k_, n_)
+    event("given", items=give, why="torch")
+    # ---- the inventory: holding S walks the list
+    mw_quiet(True); seg("inventory")
+    c.set_inventory_open(True); key_hit("i"); yield from pause(1.0)
+    ks = unreal.Key(); ks.set_editor_property("key_name", "S"); kw_ = unreal.Key(); kw_.set_editor_property("key_name", "W")
+    # (a held key is the game's own input: the pilot's scripted-only mode, which leaves her keys to the pilot, is off for it)
+    c.set_scripted_only(False)
+    c0 = c.get_inventory_cursor(); c.simulate_key(ks, True); event("hold", key="s"); t0 = T()
+    while T() - t0 < 1.6: G["key_hit"] = "s"; G["keys_t"] = T(); yield
+    c.simulate_key(ks, False); event("held", key="s", lines=c.get_inventory_cursor() - c0, seconds=1.6)
+    yield from pause(0.8)
+    c0 = c.get_inventory_cursor(); c.simulate_key(kw_, True); event("hold", key="w"); t0 = T()
+    while T() - t0 < 1.2: G["key_hit"] = "w"; G["keys_t"] = T(); yield
+    c.simulate_key(kw_, False); event("held", key="w", lines=c0 - c.get_inventory_cursor(), seconds=1.2)
+    c.set_scripted_only(True)
+    yield from pause(0.6); c.set_inventory_open(False); key_hit("i"); yield from pause(0.4)
+    # ---- the torch made at the anvil, lit
+    seg("craft"); S["seg_back"] = "craft"
+    if anvil is not None:
+        yield from mw_anvil(anvil, room)
+        yield from mw_craft_line("recipe", "Torch")
+        c.set_crafting_open(False); key_hit("f"); yield from pause(0.4)
+    seg("torch"); yield from wield("Torch", "torch", "torch")
+    yield from swing_to(140.0, 0.6, -9.0); yield from orbit(2.4, 140.0, 120.0, -8.0)
+    mw_quiet(False)
+    # ---- tier 2, the castle keep: a prisoner's cell and a caged monster's
+    mw_card("TIER 2: THE CASTLE KEEP'S PRISON", "the reel's shortcut: the start set cleared by the generator; tier 2's sets generated")
+    yield from mw_open_tier2(0)
+    pick = None
+    for xy in [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (-1, -1), (1, -1)]:
+        sc_ = IP(*xy)
+        if not gen.is_section_generated(sc_): gen.generate_section_now(sc_)
+        S_ = gen.get_section(sc_)
+        cells = [str(x).split("|") for x in S_.get_cell_lines()]
+        pr = [x for x in cells if x[2] == "1" and x[3] == "0"]; mo = [x for x in cells if x[2] == "2" and x[3] == "0"]
+        dd = lambda a_, b_: math.hypot(float(a_[4]) - float(b_[4]), float(a_[5]) - float(b_[5]))
+        # (a prisoner with no caged monster within 6.5 m (one would break out as she frees the prisoner), and a monster's cell
+        # 9 m or more from it: the nearest such pair)
+        pr = [a_ for a_ in pr if all(dd(a_, b_) > 650.0 for b_ in mo)]
+        pairs = [(a_, b_) for a_ in pr for b_ in mo if dd(a_, b_) >= 900.0]
+        if pairs:
+            best = min(pairs, key=lambda ab: dd(*ab)); pick = (S_, best[0], best[1]); break
+    if pick is None:
+        event("no_cells"); yield from pause(MW_CARD); return
+    S_, pr, mo = pick
+    door = S_.get_door_location(int(pr[1])); cell = V(float(pr[4]), float(pr[5]), 0.0)
+    a = math.atan2(door.y - cell.y, door.x - cell.x); st = V(door.x + math.cos(a) * 110, door.y + math.sin(a) * 110, 100.0)
+    mw_set(st, face_to=cell, side=-28.0, pitch=-16.0); c.set_health(c.get_max_health())
+    event("at_cell", section=[S_.coord.x, S_.coord.y], cell=int(pr[0]), theme=gen.get_theme_name(S_.coord))
+    mw_quiet(True)
+    yield from pause(MW_CARD + 1.0, lambda: camera(side=-28.0, pitch=-16.0, rate=1e6))
+    seg("cell")
+    said = str(gen.describe_nearest(loc(), 260.0)); r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+    event("cell_open", what=said, did=r_, freed=gen.prisoners_freed, message=str(c.message))
+    yield from pause(4.5, lambda: camera(side=-50.0, pitch=-14.0, rate=18.0))
+    # ---- the caged monster's cell: it opens as she comes near (the others leave her be until it does)
+    mdoor = S_.get_door_location(int(mo[1])); mcell = V(float(mo[4]), float(mo[5]), 0.0)
+    a = math.atan2(mdoor.y - mcell.y, mdoor.x - mcell.x); toward = V(mdoor.x + math.cos(a) * 110, mdoor.y + math.sin(a) * 110, 100.0)
+    seg("walk"); b0 = gen.cell_breakouts; yield from to_point(toward, 6.0, 80.0)
+    t0 = T()
+    while gen.cell_breakouts == b0 and T() - t0 < 2.0: camera(side=-20.0, pitch=-14.0, rate=40.0); yield
+    event("breakout", n=gen.cell_breakouts - b0)
+    m = min((q for q in gen.get_monsters() if alive(q)), key=lambda q: d2(q.get_actor_location(), mcell), default=None)
+    mw_quiet(False)
+    # (a few steps back into the room: she fights it in the open, not against the bars)
+    back = V(mdoor.x + math.cos(a) * 520, mdoor.y + math.sin(a) * 520, 100.0); t0 = T()
+    while d2(loc(), back) > 80.0 and T() - t0 < 1.6: move(back, run=True); camera(side=150.0, pitch=-14.0, rate=90.0); yield
+    G["heading"] = yaw_to(loc(), mcell); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    while True:
+        if m is not None and alive(m): G["casts0"] = c.attacks_made; seg("fight"); yield from fight(m)
+        m = threat()
+        if m is None: yield from pause(0.5, lambda: camera(side=20.0, rate=20.0))
+
+def mw_warlock(s0, centre, room, anvil):
+    """the Warlock: rooms of other shapes (a dome, a stepped pyramid, a round room) in the start set; then tier 2: its first
+    set's teleporter with its ring (F takes it), the ring used (back to the great hall's pad), the pad (back to tier 2);
+    a fight there that she loses (the reel takes her hit points down, said): her things in a pile where she fell, back on
+    her feet in the great hall; later, at the pile, F takes them up"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    # (the nearest chest of the great hall first: what she finds is what she will drop when she falls)
+    hall_ = list(gen.get_start_room_containers()); ch = min(hall_, key=lambda i: d2(s0.get_container_location(i), centre)) if hall_ else None
+    at = s0.get_container_location(ch) if ch is not None else centre
+    st = stand_by_chest(at, centre, tol=450.0) if ch is not None else None
+    mw_set(st if st else V(centre.x, centre.y, 100.0), face_to=at)
+    event("start", at=[round(loc().x), round(loc().y)], way="great hall, its nearest chest")
+    yield from pause(2.4, lambda: camera(side=-20.0, pitch=-18.0, rate=40.0))
+    if st is not None: seg("chest"); yield from open_chest(at, st); yield from pause(0.8, lambda: camera(side=-30.0, pitch=-26.0, rate=70.0))
+    mw_quiet(True)
+    shown = 0
+    for want, title in (("dome", "A DOMED ROOM"), ("step pyramid", "A STEPPED PYRAMID OF A CEILING"), ("circle", "A ROUND ROOM")):
+        rm = next((i for i in range(s0.get_num_rooms()) if str(s0.get_room_shape(i)) == want), None)
+        if rm is None: continue
+        rc = s0.get_room_center(rm)
+        mw_card(title, "in the start set: a room of another shape (the castle's rooms: round, octagonal, triangular, L, T, U, domes, pyramids)")
+        mw_set(V(rc.x - 250, rc.y, 100.0), yaw=0.0, side=180.0, pitch=8.0)
+        yield from pause(MW_CARD, lambda: camera(side=180.0, pitch=8.0, rate=1e6))
+        seg("shape"); event("shape", shape=want, room=rm)
+        yield from orbit(3.2, 180.0, 70.0, 22.0)
+        shown += 1
+        if shown >= 3 or T() > 22.0: break
+    # ---- tier 2's first set's teleporter
+    mw_card("TIER 2: ITS FIRST SET'S TELEPORTER", "the reel's shortcut: the start set cleared by the generator, tier 2 opened")
+    yield from mw_open_tier2(0)
+    if not gen.is_section_generated(IP(1, 0)): gen.generate_section_now(IP(1, 0))
+    yield
+    pads = {int(k): v for k, v in gen.pads.items()}
+    if 2 not in pads: event("no_pad"); yield from pause(MW_CARD); return
+    st = mw_near_point(pads[2], 420.0) or V(pads[2].x - 420, pads[2].y, 100)
+    mw_set(st, face_to=pads[2], side=-25.0, pitch=-18.0)
+    yield from pause(MW_CARD + 0.2, lambda: camera(side=-25.0, pitch=-18.0, rate=1e6))
+    seg("pad"); yield from to_point(V(pads[2].x, pads[2].y, 100.0), 4.0, 70.0)
+    said = str(gen.describe_nearest(loc(), 260.0)); r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+    event("pad", what=said, did=r_, tier=2)
+    yield from pause(1.8, lambda: camera(side=-40.0, pitch=-20.0, rate=40.0))
+    ring = next((str(i.name) for i in gen.get_editor_property("items") if i.kind == unreal.RDItemKind.TELEPORT and i.teleport_tier == 2), "Teleport Ring II")
+    n0 = gen.teleports
+    yield from wield(ring, "teleport", "teleport")
+    event("teleported", to=1, n=gen.teleports - n0, m_from_pad1=round(d2(loc(), pads[1]) / 100.0, 1))
+    yield from pause(2.4, lambda: camera(side=-30.0, pitch=-20.0, rate=40.0))
+    said = str(gen.describe_nearest(loc(), 260.0)); r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+    event("pad", what=said, did=r_, tier=1, m_from_pad2=round(d2(loc(), pads[2]) / 100.0, 1))
+    yield from pause(2.2, lambda: camera(side=-30.0, pitch=-18.0, rate=40.0))
+    mw_quiet(False)
+    # ---- a fight she loses: her things where she fell
+    seg("fight"); lure()
+    c.set_health(c.get_max_health() * 0.12); event("hp_set", hp=round(c.get_health(), 1), why="the reel takes her hit points down: a fight she loses")
+    deaths0 = c.deaths; fell_at = None
+    while c.deaths == deaths0 and T() < DUR - 14.0:
+        m = threat() or nearest_monster(None, 40, 4000.0)
+        if m is None: yield from pause(0.3, lambda: camera(side=20.0, rate=30.0)); continue
+        G["casts0"] = c.attacks_made; yield from fight_w(m, take=2)          # (she stands her ground until its blows land)
+    lure(False)
+    if c.deaths > deaths0:
+        fell_at = loc(); seg("dead"); event("fell", at=[round(fell_at.x), round(fell_at.y)], piles=len([x for x in gen.loot_piles if x]))
+        mw_quiet(True)
+        while c.is_dead(): camera(side=60.0, pitch=-30.0, rate=10.0); yield
+        yield from pause(1.6, lambda: camera(side=20.0, pitch=-16.0, rate=40.0))
+        pile = next((x for x in gen.loot_piles if x and x.hers), None)
+        if pile is not None:
+            mw_card("LATER: BACK WHERE SHE FELL", "the reel takes her there")
+            pl = pile.get_actor_location(); st = mw_near_point(pl, 260.0) or V(pl.x - 260, pl.y, 100)
+            mw_set(st, face_to=pl, side=-30.0, pitch=-22.0)
+            yield from pause(MW_CARD + 0.2, lambda: camera(side=-30.0, pitch=-22.0, rate=1e6))
+            seg("pile"); yield from to_point(V(pl.x, pl.y, 100.0), 3.0, 90.0)
+            said = str(gen.describe_nearest(loc(), 260.0)); r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+            event("took_back", what=said, did=r_, message=str(c.message))
+        mw_quiet(False)
+
+def mw_rogue(s0, centre, room, anvil):
+    """the Rogue: a trap seen from 8 m (its mark on the map), disarmed with F; another walked onto (said); then tier 1 at
+    75 %: tier 2 opens, and the dexterity ring she never found lies guarded in a room she has seen: the big map's mark, the
+    guards fought, the ring taken"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    traps = []
+    for l in gen.get_trap_lines():
+        q = str(l).split("|")
+        if q[0] == "0" and q[1] == "0" and q[8] == "0": traps.append({"i": int(q[2]), "name": q[3], "at": V(float(q[5]), float(q[6]), float(q[7]))})
+    traps.sort(key=lambda t_: d2(t_["at"], centre))
+    first = next((t_ for t_ in traps if t_["name"] in ("Pit", "Snare", "Darts", "Deadfall")), traps[0] if traps else None)
+    if first is None: event("no_traps"); return
+    st = None
+    for dist in (1100.0, 1000.0, 900.0):
+        for k in range(24):
+            a = k * math.pi / 12; q = V(first["at"].x + math.cos(a) * dist, first["at"].y + math.sin(a) * dist, 100.0)
+            pts = path(q, first["at"])
+            if 1 < len(pts) and d2(pts[0], q) < 140.0: st = q; break
+        if st: break
+    mw_set(st or V(first["at"].x - 1000, first["at"].y, 100), face_to=first["at"])
+    event("start", at=[round(loc().x), round(loc().y)], trap=first["name"], m=round(d2(loc(), first["at"]) / 100.0, 1))
+    mw_quiet(True)
+    yield from pause(2.4, lambda: camera(side=-22.0, pitch=-20.0, rate=40.0))
+    # ---- toward it: she sees it (8 m), stops by it, F: disarmed
+    seg("trap"); route = Route(path(loc(), first["at"])); t0 = T()
+    while d2(loc(), first["at"]) > 190.0 and T() - t0 < 8.0:
+        move(pulled(route), run=False); doors(); camera(side=-20.0, pitch=-20.0, rate=60.0); yield
+    G["heading"] = yaw_to(loc(), first["at"]); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    yield from pause(0.8, lambda: camera(side=-35.0, pitch=-24.0, rate=50.0))
+    said = str(gen.describe_nearest(loc(), 260.0)); r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+    event("disarm", what=said, did=r_)
+    t0 = T()
+    while T() - t0 < gen.disarm_seconds + 0.6: camera(side=-40.0, pitch=-26.0, rate=20.0); yield
+    event("disarmed", n=gen.traps_disarmed, message=str(c.message))
+    yield from pause(1.0)
+    # ---- another, walked onto (the reel's choice, said)
+    pref = ("Glyph", "Darts", "Deadfall", "Snare", "Cursed", "Pit")
+    others = sorted((t_ for t_ in traps if t_ is not first and t_["name"] != first["name"]), key=lambda t_: (pref.index(t_["name"]) if t_["name"] in pref else 9, d2(t_["at"], first["at"])))
+    other = others[0] if others else None
+    if other is not None:
+        # (behind a card: 4 m from another trap of the start set, which she walks onto (the reel's choice, said))
+        mw_card("ANOTHER TRAP", "the reel walks her onto it: what a trap does to whoever steps on it")
+        st2 = mw_near_point(other["at"], 420.0) or V(other["at"].x - 420.0, other["at"].y, 100.0)
+        mw_set(st2, face_to=other["at"], side=-30.0, pitch=-20.0)
+        yield from pause(MW_CARD + 0.4, lambda: camera(side=-30.0, pitch=-20.0, rate=1e6))
+        seg("trap2"); event("onto", trap=other["name"], why="the reel walks her onto a trap she has seen")
+        route = Route([V(other["at"].x, other["at"].y, 100.0)]); t0 = T()
+        while d2(loc(), other["at"]) > 40.0 and T() - t0 < 4.0: move(other["at"], run=False); camera(side=-30.0, pitch=-20.0, rate=60.0); yield
+        yield from pause(3.0, lambda: camera(side=-40.0, pitch=-22.0, rate=30.0))
+    c.set_health(c.get_max_health()); mw_quiet(False)
+    # ---- tier 1 at 75 %: the guarded ring
+    mw_card("TIER 1 AT 75 %", "the reel's shortcut: the start set cleared by the generator but for a quarter of its monsters")
+    n_mon = sum(1 for q_ in gen.get_monsters() if alive(q_) and q_.get_editor_property("section").get_editor_property("coord") == IP(0, 0) and q_.get_editor_property("spawn_index") >= 0)
+    yield from mw_open_tier2(leave=max(0, int(n_mon * 0.2)))
+    ring = next((e for e in mw_encounters() if e["kind"] == "ring"), None)
+    if ring is not None:
+        st = mw_near_point(ring["at"], 1400.0) or mw_near_point(ring["at"], 1000.0)
+        if st is not None: mw_set(st, face_to=ring["at"], side=-20.0, pitch=-16.0)
+        event("at_ring", ring=ring["name"], m=round(d2(loc(), ring["at"]) / 100.0, 1))
+    yield from pause(MW_CARD + 0.2, lambda: camera(side=-20.0, pitch=-16.0, rate=1e6))
+    seg("ring"); yield from mw_map(3.0)
+    lure()
+    while ring is not None and T() < DUR - 6.0:
+        guards = [q_ for q_ in gen.get_monsters() if alive(q_) and d2(q_.get_actor_location(), ring["at"]) < 2200.0]
+        m = threat() or (min(guards, key=lambda q_: d2(q_.get_actor_location(), loc())) if guards else None)
+        if m is None: break
+        G["casts0"] = c.attacks_made; seg("fight"); yield from fight3(m)
+    lure(False)
+    if ring is not None and T() < DUR - 4.0:
+        seg("ring")
+        pile = next((x for x in gen.loot_piles if x and not x.hers), None)
+        if pile is not None:
+            pl = pile.get_actor_location(); yield from to_point(V(pl.x, pl.y, 100.0), 6.0, 90.0)
+            r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f"); event("ring_taken", did=r_, has=c.get_item_count(ring["name"]))
+        else:
+            yield from open_chest(ring["at"]); event("ring_taken", did="chest", has=c.get_item_count(ring["name"]))
+
 def run():
     gen, pc, p = G["gen"], G["pc"], G["pawn"]
+    if W5M:
+        yield from run5m(); return
     if W5X:
         yield from run5x(); return
     if W5W2:
@@ -1811,7 +2233,7 @@ def snap_maps():
         key = "%d,%d" % (c.x, c.y); sig = (len(m.rects), len(m.chests), len(m.torches))
         if S["mapsig"].get(key) != sig:
             S["mapsig"][key] = sig
-            S["maps"].append({"t": round(max(T(), 0.0), 3), "coord": [c.x, c.y], "rects": [[r.min.x, r.min.y, r.max.x, r.max.y, r.kind.name, int(r.corridor)] for r in m.rects],
+            S["maps"].append({"t": round(max(T(), 0.0), 3), "coord": [c.x, c.y], "rects": [[r.min.x, r.min.y, r.max.x, r.max.y, r.kind.name, int(r.corridor)] + ([list(r.mask), str(r.shape)] if MW and len(r.mask) else []) for r in m.rects],
                               "doors": [[round(d.x), round(d.y)] for d in m.doors], "chests": [[round(d.x), round(d.y)] for d in m.chests], "torches": [[round(d.x), round(d.y)] for d in m.torches]})
         disc = [i for i, r in enumerate(m.rects) if r.discovered]
         if S["disc"].get(key) != disc:
@@ -1850,6 +2272,24 @@ def pois(l, rad=5200.0):
             if W5R and gen.get_seal_kind(k, IP(*nxt)) > 0: out.append([round(q.x), round(q.y), 5]); continue
             m = md.get(IP(*nxt))
             if m is None or not any(r.discovered for r in m.rects): out.append([round(q.x), round(q.y), 3])
+    if MW: out += mw_marks(l, rad)
+    return out
+def mw_marks(l, rad):
+    """(mistward) ARDHUD::GatherPois's marks: 7 a boss (alive), 8 a guarded ring (until she has it or its container is
+    opened), 9 her things, 10 a teleporter, 11 a trap she has seen"""
+    gen = G["gen"]; c = G["combat"]; out = []
+    for e in gen.get_encounter_lines():
+        q = str(e).split("|"); x, y = float(q[1]), float(q[2])
+        if math.hypot(x - l.x, y - l.y) > rad: continue
+        if q[0] == "boss" and q[5] == "1": out.append([round(x), round(y), 7])
+        elif q[0] == "ring" and len(q) >= 9 and c.get_item_count(q[4]) == 0 and (int(q[5]) < 0 or not gen.is_container_looted(IP(int(q[7]), int(q[8])), int(q[5]))): out.append([round(x), round(y), 8])
+    for pl in gen.loot_piles:
+        if pl and pl.hers and d2(pl.get_actor_location(), l) < rad: out.append([round(pl.get_actor_location().x), round(pl.get_actor_location().y), 9])
+    for k, v in gen.pads.items():
+        if d2(v, l) < rad: out.append([round(v.x), round(v.y), 10])
+    for e in gen.get_trap_lines():
+        q = str(e).split("|")
+        if q[9] == "1" and q[8] == "0" and math.hypot(float(q[5]) - l.x, float(q[6]) - l.y) < rad: out.append([round(float(q[5])), round(float(q[6])), 11])
     return out
 def sample():
     gen, pc, p, c = G["gen"], G["pc"], G["pawn"], G["combat"]; cm = pc.player_camera_manager; l = p.get_actor_location(); cr = cm.get_camera_rotation()
@@ -1888,7 +2328,10 @@ def sample():
                 "tierhere": gen.tier_of(gen.world_to_section(l))} if W5K else {}),
             **({"cd": [round(c.get_cooldown_left(i), 2) for i in range(len(gen.get_editor_property("weapons")))], "buffs": [str(x) for x in c.get_buff_lines()],
                 "menu": [int(gen.is_menu_open()), gen.get_menu_cursor(), [round(gen.get_user_volume(i), 2) for i in range(4)]], "ally": allies, "atki": c.get_attack_index()} if W5S else {}),
-            **(tier_row(l) if W5R else {})}
+            **(tier_row(l) if W5R else {}),
+            **({"fps": round(gen.get_fps(), 1), "sh": str(c.get_worn_shield()) if str(c.get_worn_shield()) != "None" else "", "shin": int(c.is_shield_in_hand()),
+                "torch": int(c.is_torch_held()), "dis": round(gen.get_disarm_progress(), 2), "near": str(gen.describe_nearest(l, 260.0)), "held": int(c.is_held()),
+                "msg": str(c.message), "mapo": int(gen.get_editor_property("map_open"))} if MW else {})}
 def tier_row(l):
     """(the weapons and tiers reel) what the HUD's tier panel shows (ARDHUD::DrawTiers) and a seal's prompt near her"""
     gen = G["gen"]; s = gen.world_to_section(l); t_ = gen.tier_of(s)
@@ -1963,6 +2406,20 @@ def hits():
             tn = str(g.tier_notice)
             if tn != S.get("tnotice", ""): S["tnotice"] = tn; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "tier_notice", "text": tn})
         if str(c.message) != S.get("msg", ""): S["msg"] = str(c.message); S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "message", "text": S["msg"]})
+        if MW:
+            # (mistward: the traps, teleports, cells, the shield's blows, deaths and the piles, as they happen)
+            mw = (g.traps_triggered, g.traps_disarmed, g.trap_hits, g.teleports, g.prisoners_freed, g.cell_breakouts, c.shield_blocks, c.deaths, len([x for x in g.loot_piles if x]), str(c.get_worn_shield()), int(c.is_torch_held()))
+            old = S.get("mwsig")
+            if old is not None and mw != old:
+                names = ["trap", "disarmed", "trap_hit", "teleport", "freed", "breakout", "shield_block", "died", "piles", "shield", "torch"]
+                for k_, a_, b_ in zip(names, old, mw):
+                    if a_ == b_: continue
+                    ev = {"t": round(T(), 3), "frame": G["frame"], "kind": "mw_" + k_, "now": b_, "was": a_}
+                    if k_ == "trap": ev["label"] = str(g.last_trap)
+                    if k_ == "shield_block": ev.update({"took": round(c.last_shield_took, 2), "before": round(c.last_blow_before, 2), "reached": round(c.last_blow_taken, 2), "shield": str(c.get_worn_shield())})
+                    if k_ == "piles": ev["things"] = [[str(x) for x in pl.things] for pl in g.loot_piles if pl]; ev["pictures"] = [pl.pictures for pl in g.loot_piles if pl]
+                    S["events"].append(ev)
+            S["mwsig"] = mw
         if c.casts_refused > S.get("refused", 0): S["refused"] = c.casts_refused; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "no_mana"})
     n = c.bolts_on_monsters + c.bolts_elsewhere
     if n > S.get("bursts_n", 0): S["bursts_n"] = n; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "burst", "at": r3(c.last_burst_at), "flown_m": round(c.last_bolt_flown / 100.0, 1)})
@@ -2046,7 +2503,7 @@ def body():
             G["combat"].set_scripted_only(True)
             if L4: G["combat"].set_editor_property("inventory_pauses_game", False)
             wd = next((d for d in gen.get_editor_property("weapons") if d.spell), None) or gen.get_editor_property("weapons")[0]
-            G["const"] = {"level": int(LV), "tactical": bool(gen.get_editor_property("tactical_maps")), "roll_distance": gen.get_editor_property("roll_distance"),
+            G["const"] = {"level": 5 if MW else int(LV), "mistward": MW, "game_title": str(gen.get_editor_property("dungeon_title")), "tactical": bool(gen.get_editor_property("tactical_maps")), "roll_distance": gen.get_editor_property("roll_distance"),
                           "stylized_minimap_m": 84.0, "weapons": [{"name": str(d.name), "damage": d.damage, "reach": d.reach, "spell": bool(d.spell)} for d in gen.get_editor_property("weapons")], "tile": gen.get_editor_property("tile_size"),
                           "section_tiles": gen.get_editor_property("section_tiles"), "max_health": G["combat"].get_max_health(), "average_blow": gen.get_average_weapon_damage(),
                           "start_tier": [gen.get_monster_health(IP(0, 0)), gen.get_monster_damage(IP(0, 0))], "runtime_tier": [gen.get_monster_health(IP(1, 0)), gen.get_monster_damage(IP(1, 0))],

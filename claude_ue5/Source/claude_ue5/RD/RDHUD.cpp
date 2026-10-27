@@ -3,6 +3,7 @@
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
 #include "RD/RDSection.h"
+#include "RD/RDMistward.h"
 #include "Engine/Texture2D.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Canvas.h"
@@ -480,6 +481,7 @@ void ARDHUD::DrawCombat(float Sc)
 		const float Ext = UI.Has(TEXT("panel_wide")) ? 20.f * Sc : 0.f;
 		const float In = Ext > 0.f ? 16.f * Sc : 0.f, Dn = Ext > 0.f ? 6.f * Sc : 0.f;      // (level 4: clear of the board's frame and corner ornaments)
 		const float Mg = 24.f * Sc + Ext, Pd = 14.f * Sc, Lh = 23.f * Sc, K = Sc * 1.05f;
+		const float FpsRoom = Gen->bShowFps ? 34.f * Sc : 0.f;           // (mistward: the frame rate above it)
 		TArray<FString> Keys, Whats;
 		float Kw = 0.f, Ww = 0.f, Tw, Th;
 		for (const FString& S : Lines)
@@ -495,7 +497,7 @@ void ARDHUD::DrawCombat(float Sc)
 		float Tiw, Mw;
 		UI.TextSize(Title, Tiw, Th, Small, Sc * 1.1f, ERDType::Title); UI.TextSize(Mode, Mw, Th, Small, Sc * 1.1f, ERDType::Label);
 		const float W = FMath::Max(Kw + 18.f * Sc + Ww, Tiw + 24.f * Sc + Mw) + Pd * 2.f + In * 2.f;
-		const FVector2D A(Mg, Mg), B(Mg + W, Mg + 40.f * Sc + Lh * Lines.Num() + 8.f * Sc + Dn * 2.f);
+		const FVector2D A(Mg, Mg + FpsRoom), B(Mg + W, Mg + FpsRoom + 40.f * Sc + Lh * Lines.Num() + 8.f * Sc + Dn * 2.f);
 		if (!Board(TEXT("panel_wide"), A, B, Sc, Ext))
 		{
 			Box(A, B, FLinearColor(0.04f, 0.05f, 0.07f, 0.72f));
@@ -510,6 +512,27 @@ void ARDHUD::DrawCombat(float Sc)
 			UI.Text(Whats[I], FLinearColor(0.86f, 0.84f, 0.78f), A.X + Pd + In + Kw + 18.f * Sc, Y, Small, K);
 		}
 	}
+	// ---- mistward: the frame rate, in the upper left over the controls
+	if (Gen->bShowFps)
+	{
+		const float Mg = 24.f * Sc + (UI.Has(TEXT("panel_wide")) ? 20.f * Sc : 0.f);
+		const FString F = FString::Printf(TEXT("%.0f FPS  ·  %.1f ms"), Gen->FpsSmoothed, Gen->FpsSmoothed > 0.f ? 1000.f / Gen->FpsSmoothed : 0.f);
+		float Tw0, Th0; UI.TextSize(F, Tw0, Th0, Small, Sc * 1.15f, ERDType::Label);
+		Box(FVector2D(Mg, Mg - 4.f * Sc), FVector2D(Mg + Tw0 + 20.f * Sc, Mg + Th0 + 6.f * Sc), FLinearColor(0.02f, 0.02f, 0.03f, 0.7f));
+		const FLinearColor Fc = Gen->FpsSmoothed >= 50.f ? FLinearColor(0.55f, 1.f, 0.6f) : Gen->FpsSmoothed >= 30.f ? FLinearColor(1.f, 0.85f, 0.35f) : FLinearColor(1.f, 0.4f, 0.3f);
+		UI.Text(F, Fc, Mg + 10.f * Sc, Mg, Small, Sc * 1.15f, ERDType::Label);
+	}
+	// ---- mistward: the Rogue disarming a trap: how far she has got
+	if (Gen->GetDisarmProgress() >= 0.f)
+	{
+		const float Pr = Gen->GetDisarmProgress(), Bw = 320.f * Sc, Bh = 16.f * Sc;
+		const FVector2D A((Canvas->ClipX - Bw) * 0.5f, Canvas->ClipY * 0.66f);
+		Box(A - FVector2D(3.f * Sc), A + FVector2D(Bw, Bh) + FVector2D(3.f * Sc), FLinearColor(0.02f, 0.02f, 0.02f, 0.8f));
+		Box(A, A + FVector2D(Bw * Pr, Bh), FLinearColor(1.f, 0.75f, 0.25f));
+		const FString T = TEXT("DISARMING  -  HOLD STILL");
+		float Tw0, Th0; UI.TextSize(T, Tw0, Th0, Small, Sc * 1.1f, ERDType::Label);
+		UI.Text(T, FLinearColor(1.f, 0.9f, 0.7f), (Canvas->ClipX - Tw0) * 0.5f, A.Y - Th0 - 6.f * Sc, Small, Sc * 1.1f, ERDType::Label);
+	}
 	// ---- she is down
 	if (Cb->IsDead())
 	{
@@ -517,7 +540,7 @@ void ARDHUD::DrawCombat(float Sc)
 		const FString T = TEXT("YOU HAVE FALLEN");
 		float Tw, Th; UI.TextSize(T, Tw, Th, Medium, Sc * 2.6f, ERDType::Title);
 		UI.Text(T, FLinearColor(0.95f, 0.2f, 0.15f), (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f, Medium, Sc * 2.6f, ERDType::Title);
-		const FString U = TEXT("back to the middle of the dungeon...");
+		const FString U = Gen->bDropOnDeath && Gen->LootPiles.ContainsByPredicate([](const ARDLootPile* Lp) { return IsValid(Lp) && Lp->bHers; }) ? TEXT("your things lie where you fell: back to the great hall...") : TEXT("back to the middle of the dungeon...");
 		UI.TextSize(U, Tw, Th, Small, Sc * 1.3f);
 		UI.Text(U, RDInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f + 62.f * Sc, Small, Sc * 1.3f);
 	}
@@ -531,7 +554,7 @@ void ARDHUD::DrawHUD()
 	if (!Gen) return;
 	// (play began without a hero: the menu is being opened, the dungeon is not shown)
 	if (Gen->bOpeningMenu) { Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor::Black); return; }
-	ArtDrawn.Reset(); StarsDrawn.Reset(); AnvilsDrawn.Reset(); MiniTierLabels.Reset();
+	ArtDrawn.Reset(); StarsDrawn.Reset(); AnvilsDrawn.Reset(); MiniTierLabels.Reset(); MarksDrawn.Reset();
 	UI.Hud = this; UI.Art = &Gen->UIArt; UI.Drawn = &ArtDrawn; UI.Fonts = &Gen->UIFonts; UI.FontCache = &FontCache;
 	APawn* P = GetOwningPawn();
 	if (!P) return;
@@ -853,7 +876,11 @@ void ARDHUD::CacheTiles()
 	for (const auto& KV : Gen->MapData)
 		for (const FRDMapRect& R : KV.Value.Rects)
 			for (int32 X = R.Min.X; X < R.Max.X; ++X)
-				for (int32 Y = R.Min.Y; Y < R.Max.Y; ++Y) Tiles.FindOrAdd(FIntPoint(X, Y)) |= 1 | (R.bDiscovered ? 2 : 0) | (R.bCorridor ? 4 : 0);
+				for (int32 Y = R.Min.Y; Y < R.Max.Y; ++Y)
+				{
+					if (R.Mask.Num() > 0 && !R.HasTile(FIntPoint(X, Y))) continue;      // (mistward: a shaped room's floor only)
+					Tiles.FindOrAdd(FIntPoint(X, Y)) |= 1 | (R.bDiscovered ? 2 : 0) | (R.bCorridor ? 4 : 0);
+				}
 }
 
 void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance)
@@ -894,6 +921,56 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 			const FRDSectionMap* M = Gen->MapData.Find(Next);
 			if (!M || !M->Rects.ContainsByPredicate([](const FRDMapRect& R) { return R.bDiscovered; })) Out.Add({ FVector2D(P), 3 });
 		}
+		// (mistward: the traps she has seen: the Rogue's)
+		for (const ARDSection::FTrapInst& T : S->TrapList) if (T.bSeen && T.State == 0) Out.Add({ FVector2D(T.At), 11 });
+	}
+	// (mistward: what the tiers' openings set waiting (a boss: wherever it is; a guarded ring until its container is opened),
+	// her dropped things, the teleporter pads she has seen)
+	const URDCombatComponent* Pc_ = Gen->GetPlayerCombat();
+	for (const ARDDungeonGenerator::FEncounter& E : Gen->Encounters)
+	{
+		// (a boss while it lives, wherever it has gone)
+		if (E.bBoss && E.Live.Num() > 0)
+			if (const ARDMonster* M = E.Live[0].Get(); M && !M->IsDead()) Out.Add({ FVector2D(M->GetActorLocation()), 7 });
+		// (a guarded ring until she has it: its container opened, or the pile it lies in taken up)
+		if (!E.Ring.IsNone())
+		{
+			const bool bHas = Pc_ && Pc_->GetItemCount(E.Ring) > 0;
+			if (!bHas && (E.RingKey.Z < 0 || !Gen->IsContainerLooted(E.Section, E.RingKey.Z))) Out.Add({ FVector2D(E.At), 8 });
+		}
+	}
+	for (const ARDLootPile* Lp : Gen->LootPiles) if (IsValid(Lp) && Lp->bHers) Out.Add({ FVector2D(Lp->GetActorLocation()), 9 });
+	for (const TPair<int32, FVector>& Pd : Gen->Pads) if (Discovered(Pd.Value) || Pd.Key == 1) Out.Add({ FVector2D(Pd.Value), 10 });
+}
+
+void ARDHUD::MistMark(int32 Kind, const FVector2D& S, float Sz)
+{
+	// (mistward's markers: 7 a boss (a crowned red ring), 8 a guarded ring (a gold ring with a red dot), 9 her things (a gold
+	// sack), 10 a teleporter (a blue ring), 11 a trap she has seen (a red X))
+	static const FLinearColor BossC(1.f, 0.12f, 0.1f, 1.f), RingC(1.f, 0.84f, 0.3f, 1.f), PadC(0.35f, 0.75f, 1.f, 1.f);
+	auto Circle = [&](float R, const FLinearColor& C, float T)
+	{
+		const int32 N = 16;
+		for (int32 I = 0; I < N; ++I)
+		{
+			const float A0 = 2.f * PI * I / N, A1 = 2.f * PI * (I + 1) / N;
+			DrawLine(S.X + FMath::Cos(A0) * R, S.Y + FMath::Sin(A0) * R, S.X + FMath::Cos(A1) * R, S.Y + FMath::Sin(A1) * R, C, T);
+		}
+	};
+	switch (Kind)
+	{
+	case 7:
+		SoftDot(S, Sz * 2.2f, RDTacA(BossC, 0.4f)); Circle(Sz, BossC, Sz * 0.3f);
+		Triangle(S - FVector2D(0.f, Sz * 1.35f), Sz * 0.55f, RingC);
+		break;
+	case 8: SoftDot(S, Sz * 1.8f, RDTacA(RingC, 0.3f)); Circle(Sz * 0.8f, RingC, Sz * 0.28f); SoftDot(S, Sz * 0.35f, BossC); break;
+	case 9: SoftDot(S, Sz * 1.8f, RDTacA(RingC, 0.35f)); Box(S - FVector2D(Sz * 0.6f), S + FVector2D(Sz * 0.6f), RingC); Box(S - FVector2D(Sz * 0.25f, Sz * 0.9f), S + FVector2D(Sz * 0.25f, -Sz * 0.55f), RingC); break;
+	case 10: SoftDot(S, Sz * 1.9f, RDTacA(PadC, 0.35f)); Circle(Sz, PadC, Sz * 0.25f); Circle(Sz * 0.5f, PadC, Sz * 0.2f); break;
+	case 11:
+		DrawLine(S.X - Sz * 0.7f, S.Y - Sz * 0.7f, S.X + Sz * 0.7f, S.Y + Sz * 0.7f, BossC, Sz * 0.3f);
+		DrawLine(S.X - Sz * 0.7f, S.Y + Sz * 0.7f, S.X + Sz * 0.7f, S.Y - Sz * 0.7f, BossC, Sz * 0.3f);
+		break;
+	default: break;
 	}
 }
 
@@ -911,6 +988,13 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 	// the feathered backdrop, no frame
 	if (UTexture2D* T = GetSoftDisc()) DrawTexture(T, C.X - R * 1.3f, C.Y - R * 1.3f, R * 2.6f, R * 2.6f, 0.f, 0.f, 1.f, 1.f, FLinearColor(0.004f, 0.005f, 0.007f, 0.92f), BLEND_Translucent);
 	CacheTiles();
+	// (mistward: the dungeon's name over the minimap)
+	if (!Gen->DungeonTitle.IsEmpty())
+	{
+		float Tw0, Th0; UI.TextSize(Gen->DungeonTitle.ToUpper(), Tw0, Th0, Small, Sc * 1.1f, ERDType::Title);
+		UI.Text(Gen->DungeonTitle.ToUpper(), FLinearColor(0.f, 0.f, 0.f, 0.8f), C.X - Tw0 * 0.5f + 1.5f * Sc, C.Y - Ring - Th0 - 2.f * Sc + 1.5f * Sc, Small, Sc * 1.1f, ERDType::Title);
+		UI.Text(Gen->DungeonTitle.ToUpper(), FLinearColor(1.f, 0.84f, 0.5f, 1.f), C.X - Tw0 * 0.5f, C.Y - Ring - Th0 - 2.f * Sc, Small, Sc * 1.1f, ERDType::Title);
+	}
 	const float Now = GetWorld()->GetTimeSeconds();
 	TSet<FIntPoint> Fresh;           // (sections generated in the last 4 s: their tiles tinted)
 	for (const auto& KV : Gen->MapData) if (KV.Value.GeneratedTime >= 0.f && Now - KV.Value.GeneratedTime < 4.f) Fresh.Add(KV.Key);
@@ -968,10 +1052,16 @@ void ARDHUD::DrawTacticalMinimap(float Sc, const FVector& L, float Yaw)
 	}
 	for (const FRDPoi& Pi : Pois)
 	{
-		const FVector2D S = ToS(Pi.W);
-		if (FVector2D::Distance(S, C) > R * 0.94f) continue;
+		FVector2D S = ToS(Pi.W);
+		// (mistward: a boss or a guarded ring beyond the rim is drawn on it, the way to it)
+		if (FVector2D::Distance(S, C) > R * 0.94f)
+		{
+			if (Pi.Kind != 7 && Pi.Kind != 8) continue;
+			S = C + (S - C).GetSafeNormal() * R * 0.86f;
+		}
 		if (Pi.Kind == 0) { SoftDot(S, 9.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 4.6f * Sc, RDTacRed); }
 		else if (Pi.Kind == 1) { SoftDot(S, 11.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 7.f * Sc, RDTacElite); }
+		else if (Pi.Kind >= 7) { MistMark(Pi.Kind, S, 6.f * Sc); MarksDrawn.Add(FVector(Pi.W.X, Pi.W.Y, (float)Pi.Kind)); }
 	}
 	DrawPlayerArrow(C, Yaw - 90.f, 9.f * Sc);
 	if (Ra) UI.Fit(TEXT("minimap_ring"), C - FVector2D(Ring), C + FVector2D(Ring));
@@ -1001,6 +1091,20 @@ void ARDHUD::DrawTiers(float Sc, const FVector2D& At)
 		Ls.Add({ Pr.bCleared ? FString(TEXT("this set of rooms is cleared"))
 		                     : FString::Printf(TEXT("rooms %d/%d   chests %d/%d   monsters %d/%d"), Pr.RoomsExplored, Pr.Rooms, Pr.ChestsLooted, Pr.Chests.Num(), Pr.Killed.Num(), Pr.Monsters),
 		         Pr.bCleared ? FLinearColor(0.45f, 0.95f, 0.5f) : FLinearColor(0.86f, 0.84f, 0.78f) });
+	if (Gen->TierOpenShare < 1.f && Open < Gen->MaxTier)
+	{
+		// (mistward: the share rule: how far tier Open is toward it, each count against what it needs)
+		FIntVector D, A;
+		const int32 Pct = FMath::RoundToInt(Gen->TierOpenShare * 100.f);
+		if (Gen->GetTierTally(Open, D, A))
+		{
+			auto Need = [&](int32 All) { return FMath::CeilToInt(All * Gen->TierOpenShare - 1e-3f); };
+			Ls.Add({ FString::Printf(TEXT("tier %d opens at %d%% of tier %d"), Open + 1, Pct, Open), FLinearColor(0.7f, 0.72f, 0.75f) });
+			Ls.Add({ FString::Printf(TEXT("rooms %d/%d   monsters %d/%d   chests %d/%d"), D.X, Need(A.X), D.Y, Need(A.Y), D.Z, Need(A.Z)), FLinearColor(0.86f, 0.84f, 0.78f) });
+		}
+		else Ls.Add({ FString::Printf(TEXT("tier %d opens at %d%% of tier %d (counting...)"), Open + 1, Pct, Open), FLinearColor(0.7f, 0.72f, 0.75f) });
+	}
+	else
 	Ls.Add({ Open < Gen->MaxTier ? FString::Printf(TEXT("tier %d opens when all of tier %d is cleared"), Open + 1, Open) : FString::Printf(TEXT("all %d tiers are open"), Gen->MaxTier),
 	         FLinearColor(0.7f, 0.72f, 0.75f) });
 	float Y = At.Y, Wmax = 0.f, Tw = 0.f, Th = 0.f;
@@ -1142,10 +1246,17 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	}
 	for (const FRDPoi& Pi : Pois)
 	{
-		const FVector2D S = ToS(Pi.W);
-		if (!Inside(S) || Fade(S) < 0.3f) continue;
+		FVector2D S = ToS(Pi.W);
+		if (!Inside(S) || Fade(S) < 0.3f)
+		{
+			// (mistward: a boss or a guarded ring beyond the board's edge is drawn near it, the way to it)
+			if (Pi.Kind != 7 && Pi.Kind != 8) continue;
+			const FVector2D D = (S - C) / Hf;
+			S = C + (S - C) * (0.7f / FMath::Max(D.Size(), 1e-3f));
+		}
 		if (Pi.Kind == 0) { SoftDot(S, 11.f * Sc, RDTacA(RDTacRed, 0.35f)); SoftDot(S, 5.5f * Sc, RDTacRed); }
 		else if (Pi.Kind == 1) { SoftDot(S, 13.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 8.5f * Sc, RDTacElite); }
+		else if (Pi.Kind >= 7) { MistMark(Pi.Kind, S, 8.f * Sc); MarksDrawn.Add(FVector(Pi.W.X, Pi.W.Y, (float)Pi.Kind)); }
 	}
 	// her arrow where she is (scrolled away from her, it may be out of view)
 	MapArrow = ToS(FVector2D(L.X, L.Y)); bMapArrow = Inside(MapArrow) && Fade(MapArrow) > 0.05f;
@@ -1154,7 +1265,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	// closes it at the bottom
 	const FLinearColor Gold(1.f, 0.84f, 0.45f, 1.f), Ink(0.86f, 0.82f, 0.72f, 0.95f);
 	float Tw, Th;
-	const FString Title = TEXT("DUNGEON MAP");
+	const FString Title = Gen->DungeonTitle.IsEmpty() ? FString(TEXT("DUNGEON MAP")) : Gen->DungeonTitle.ToUpper();
 	UI.TextSize(Title, Tw, Th, Medium, Sc * 1.25f, ERDType::Title);
 	const float Ph = 58.f * Sc;
 	const FVector2D T0(C.X - Tw * 0.5f - 90.f * Sc, A.Y + 6.f * Sc), T1(C.X + Tw * 0.5f + 90.f * Sc, A.Y + 6.f * Sc + Ph);
@@ -1185,6 +1296,17 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		Key(0, TEXT("monster")); Key(1, TEXT("elite")); Key(2, TEXT("unlooted chest or trunk")); Key(3, TEXT("unexplored passage")); Key(4, TEXT("door"));
 		if (Gen->MaxTier > 0) Key(5, TEXT("sealed passage"));
 		if (Gen->Recipes.Num() > 0) Key(6, TEXT("anvil: make repair items"));
+		// (mistward: its own markers, a column of their own to the right of the key)
+		if (Gen->bBossEncounters || Gen->bRingGuards || Gen->bDropOnDeath || Gen->bTeleporters || Gen->Traps.Num() > 0)
+		{
+			float Y2 = B.Y - 166.f * Sc; const float X2 = X + 250.f * Sc;
+			auto Key2 = [&](int32 Kind, const TCHAR* What) { MistMark(Kind, FVector2D(X2 + 6.f * Sc, Y2 + 8.f * Sc), 6.f * Sc); UI.Text(What, Ink, X2 + 24.f * Sc, Y2, Small, Sc); Y2 += 23.f * Sc; };
+			if (Gen->bBossEncounters) Key2(7, TEXT("a tier's boss"));
+			if (Gen->bRingGuards) Key2(8, TEXT("a guarded ring"));
+			if (Gen->bDropOnDeath) Key2(9, TEXT("your dropped things"));
+			if (Gen->bTeleporters) Key2(10, TEXT("teleporter"));
+			if (Gen->Traps.Num() > 0 && Gen->HeroFindsTraps()) Key2(11, TEXT("a trap you have seen"));
+		}
 	}
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
@@ -1270,6 +1392,7 @@ void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
 		else if (Pi.Kind == 1) { SoftDot(S, 16.f * Sc, RDTacA(RDTacElite, 0.35f)); Triangle(S, 10.f * Sc, RDTacElite); }
 		else if (Pi.Kind == 2) { Star(S, 10.f * Sc, RDTacGold); StarsDrawn.Add(Pi.W); }
 		else if (Pi.Kind == 5) SealMark(S, 8.f * Sc);
+		else if (Pi.Kind >= 7) { MistMark(Pi.Kind, S, 9.f * Sc); MarksDrawn.Add(FVector(Pi.W.X, Pi.W.Y, (float)Pi.Kind)); }
 		else Diamond(S, 9.f * Sc, RDTacExit);
 	}
 	MapArrow = ToS(FVector2D(L.X, L.Y));
@@ -1384,6 +1507,22 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		if (!bFits) S += FString::Printf(TEXT("  The %s cannot wield it."), Gen ? *Gen->PlayerTitle.ToLower() : TEXT("hero"));
 		return S;
 	}
+	case ERDItemKind::Shield:
+	{
+		// (mistward: the table's ratings, what it does in her hand, how much it can take)
+		const bool bFits = Gen && It.WeaponFits.ContainsByPredicate([this](const FRDWeaponFit& F) { return F.Hero == Gen->CurrentHero; });
+		FString S = It.Looks.IsEmpty() ? FString() : It.Looks.Left(1).ToUpper() + It.Looks.Mid(1) + TEXT(".  ");
+		S += FString::Printf(TEXT("Damage reduction %d / 10, speed %d / 10.  In your left hand with a one-handed weapon each blow takes %.0f%% less"), It.DamageRating, It.SpeedRating, It.Amount * 100.f);
+		S += It.Slower > 0.f ? FString::Printf(TEXT(" and you move %.0f%% slower."), It.Slower * 100.f) : FString(TEXT("."));
+		const float Left = Cb ? Cb->GetShieldWear(It.Name) : It.Durability;
+		S += FString::Printf(TEXT("  Durability %.0f / %.0f: it loses what it takes from each blow, and at 0 it breaks."), Left, It.Durability);
+		if (!bFits) S += FString::Printf(TEXT("  The %s carries no shield."), Gen ? *Gen->PlayerTitle.ToLower() : TEXT("hero"));
+		return S;
+	}
+	case ERDItemKind::Torch:
+		return TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile).");
+	case ERDItemKind::Teleport:
+		return FString::Printf(TEXT("Found on the teleporter of tier %d.  Used, it carries you to the first tier's teleporter in the great hall; that teleporter takes you back to tier %d's while you hold this ring."), It.TeleportTier, It.TeleportTier);
 	}
 	return FString();
 }
@@ -1475,6 +1614,9 @@ void ARDHUD::DrawInventory(float Sc)
 		Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true });
 		Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false });
 		Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), false });
+		Secs.Add({ TEXT("shield"), TEXT("SHIELDS"), false });                 // (mistward)
+		Secs.Add({ TEXT("torch"), TEXT("TORCH"), false });
+		Secs.Add({ TEXT("teleport"), TEXT("TELEPORT RINGS"), false });
 		Secs.Add({ TEXT("ring"), TEXT("RINGS"), false });
 		Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false });
 		Secs.Add({ TEXT("component"), TEXT("MATERIALS"), false });
@@ -1609,8 +1751,20 @@ void ARDHUD::DrawInventory(float Sc)
 			const float Left = P.Num() >= 5 ? FCString::Atof(*P[3]) : 0.f, Full = P.Num() >= 5 ? FCString::Atof(*P[4]) : 0.f;
 			FString Tag = P[2] == TEXT("1") ? TEXT("WORN") : TEXT("");
 			if (Full > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + (Left <= 0.f ? FString(TEXT("WORN OUT")) : FString::Printf(TEXT("%.0f / %.0f"), Left, Full));
+			if (P.Num() >= 6) Tag += FString::Printf(TEXT("   x %s"), *P[5]);          // (mistward: copies of it)
 			Row(I, P[1], Tag, Full > 0.f && Left <= 0.f ? Worn : RDCyan, ItemIcon(FName(*P[1])));
 		}
+		else if (Kd == TEXT("shield") && P.Num() >= 6)
+		{
+			// (mistward: IN HAND when it is on her arm with a one-handed weapon, SLUNG when worn but not usable now)
+			const bool bWorn = P[2] == TEXT("1");
+			FString Tag = bWorn ? (Cb->IsShieldInHand() ? TEXT("IN HAND") : TEXT("SLUNG")) : TEXT("");
+			Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + FString::Printf(TEXT("%.0f / %.0f"), FCString::Atof(*P[3]), FCString::Atof(*P[4]));
+			if (P[5] != TEXT("1")) Tag += FString::Printf(TEXT("   x %s"), *P[5]);
+			Row(I, P[1], Tag, RDCyan, ItemIcon(FName(*P[1])));
+		}
+		else if (Kd == TEXT("torch") && P.Num() >= 4) Row(I, P[1], P[2] == TEXT("1") ? FString(TEXT("LIT")) : FString::Printf(TEXT("x %s"), *P[3]), P[2] == TEXT("1") ? FLinearColor(1.f, 0.6f, 0.25f) : Gold, ItemIcon(FName(*P[1])));
+		else if (Kd == TEXT("teleport") && P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("TIER %s"), *P[2]), RDCyan, ItemIcon(FName(*P[1])));
 		else if (Kd == TEXT("ring") && P.Num() >= 4)
 		{
 			// (level 5: WORN on the one of its kind she has on)
@@ -1721,6 +1875,9 @@ void ARDHUD::DrawInventory(float Sc)
 			if (Sel[0] == TEXT("item")) Para(Use + TEXT("  use it"), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("repair")) Para(Use + TEXT("  choose what it mends"), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("armour") || Sel[0] == TEXT("ring")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  take it off") : TEXT("  put it on")), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("shield")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  put it away") : TEXT("  take it up (left hand)")), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("torch")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  put it out") : TEXT("  light it (left hand)")), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("teleport")) Para(Use + TEXT("  go to the first tier's teleporter"), Gold, Sc * 1.05f);
 		}
 	}
 	// her state
@@ -1734,6 +1891,14 @@ void ARDHUD::DrawInventory(float Sc)
 		if (Cb->GetArmourSlow() > 0.f) S += FString::Printf(TEXT(",  %.0f%% slower"), Cb->GetArmourSlow() * 100.f);
 		if (Cb->GetArmourDurability(Wa) > 0.f) S += FString::Printf(TEXT(",  durability %.0f / %.0f"), Cb->GetArmourWear(Wa), Cb->GetArmourDurability(Wa));
 		Para(S, RDCyan, Sc * 1.05f);
+	}
+	// (mistward: her shield)
+	if (!Cb->GetWornShield().IsNone())
+	{
+		const FName Ws = Cb->GetWornShield();
+		const int32 Si = Gen->FindItem(Ws);
+		Para(Cb->IsShieldInHand() ? FString::Printf(TEXT("Shield  %s,  blows %.0f%% less,  durability %.0f / %.0f"), *Ws.ToString(), Cb->GetShieldShare() * 100.f, Cb->GetShieldWear(Ws), Si >= 0 ? Gen->Items[Si].Durability : 0.f)
+		                          : FString::Printf(TEXT("Shield  %s,  slung (it takes nothing with this weapon%s)"), *Ws.ToString(), Cb->IsTorchHeld() ? TEXT(" or the torch") : TEXT("")), RDCyan, Sc * 1.05f);
 	}
 	for (const URDCombatComponent::FEffect& E : Cb->GetEffects())
 		Para(E.Kind == ERDItemKind::Speed ? FString::Printf(TEXT("Speed +%.0f%%: %.0f s left"), E.Amount * 100.f, FMath::CeilToFloat(E.Left))

@@ -1,0 +1,39 @@
+{
+ "_note": "mistward_castle's shields: the user's table of 2026-10-26 (docs/improvements.txt; the 22 fantasy shields of docs/objects.md). damage: the damage reduction rating (a blow takes damage x 4 % less, the user's choice), speed: the speed rating (she is (10 - speed) x 3 % slower), durability: the hurt it takes before it breaks. material: what an anvil breaks it into (shield_breakdown, x its tier). flip / turn: set when the look in play showed its face or its height measured the wrong way (865 measures both from the mesh). rarity: how likely a container holds one against the other items of its tier. 865 reads it.",
+ "rarity": 12,
+ "start_shield": "Heater Shield",
+ "shields": [
+  {"rank": 1, "name": "Broddi's Shield", "damage": 10, "speed": 2, "durability": 300, "material": "metal"},
+  {"rank": 2, "name": "Scutum", "damage": 9, "speed": 1, "durability": 240, "material": "wood"},
+  {"rank": 3, "name": "Crusader Shield", "damage": 8, "speed": 3, "durability": 230, "material": "wood"},
+  {"rank": 4, "name": "War Tower Shield", "damage": 8, "speed": 2, "durability": 260, "material": "metal"},
+  {"rank": 5, "name": "Plate Knight's Shield", "damage": 7, "speed": 5, "durability": 250, "material": "metal"},
+  {"rank": 6, "name": "Lady Knight's Shield", "damage": 7, "speed": 5, "durability": 240, "material": "metal", "flip": true},
+  {"rank": 7, "name": "Kite Shield", "damage": 6, "speed": 6, "durability": 230, "material": "metal"},
+  {"rank": 8, "name": "Desert Shield", "damage": 6, "speed": 6, "durability": 210, "material": "metal"},
+  {"rank": 9, "name": "Heater Shield", "damage": 5, "speed": 7, "durability": 220, "material": "metal"},
+  {"rank": 10, "name": "Eastern Shield", "damage": 5, "speed": 7, "durability": 200, "material": "metal"},
+  {"rank": 11, "name": "Beast Shield", "damage": 4, "speed": 8, "durability": 190, "material": "metal"},
+  {"rank": 12, "name": "Rider's Shield", "damage": 4, "speed": 5, "durability": 130, "material": "wood"},
+  {"rank": 13, "name": "War Camp Shield", "damage": 4, "speed": 6, "durability": 130, "material": "wood", "flip": true},
+  {"rank": 14, "name": "Heraldic Shield", "damage": 3, "speed": 8, "durability": 150, "material": "wood", "flip": true},
+  {"rank": 15, "name": "Dock Shield", "damage": 3, "speed": 7, "durability": 150, "material": "wood"},
+  {"rank": 16, "name": "Viking Shield (iron-bound)", "damage": 3, "speed": 8, "durability": 160, "material": "wood"},
+  {"rank": 17, "name": "Village Shield", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
+  {"rank": 18, "name": "Village Shield (red)", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
+  {"rank": 19, "name": "Village Shield (green)", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
+  {"rank": 20, "name": "Viking Round Shield", "damage": 1, "speed": 10, "durability": 100, "material": "wood", "flip": true},
+  {"rank": 21, "name": "Painted Viking Shield", "damage": 1, "speed": 10, "durability": 100, "material": "wood", "flip": true},
+  {"rank": 22, "name": "Viking Shield (green and white)", "damage": 1, "speed": 10, "durability": 100, "material": "wood", "flip": true}
+ ],
+ "shield_breakdown": {"metal": {"Iron Ingot": 2, "Steel Ingot": 1}, "wood": {"Timber": 2, "Iron Ingot": 1}},
+ "armour_breakdown": {
+  "_note": "a set of armour broken down at an anvil, by its type (armour.json's), each count x its tier",
+  "full plate": {"Steel Ingot": 3, "Iron Ingot": 3, "Cured Leather Strip": 1},
+  "heavy": {"Iron Ingot": 3, "Steel Ingot": 2, "Cured Leather Strip": 1},
+  "medium": {"Iron Ingot": 2, "Light Leather": 2, "Cured Leather Strip": 1},
+  "light": {"Light Leather": 3, "Coarse Hide": 2},
+  "partial": {"Iron Ingot": 1, "Light Leather": 2},
+  "orc": {"Iron Ingot": 2, "Coarse Hide": 2}
+ }
+}

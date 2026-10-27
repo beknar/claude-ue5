@@ -319,6 +319,151 @@ public:
 	/** seals on every generated section as the tiers are now */
 	void RefreshSeals();
 
+	// ---- mistward_castle (pipeline/unreal/863-): the rules of 2026-10-26 (docs/improvements.txt). Every one is a switch of
+	// its own here, off on the other levels.
+	/** the dungeon's name (the minimap's label, the notices) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") FString DungeonTitle;
+	/** frames a second in the upper left, over the controls */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bShowFps = false;
+	/** the anvil's lists in alphabetical order */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bAlphabeticalCrafting = false;
+	/** a key held in the inventory, the crafting panel or the repair list walks it (after 0.35 s, a line every 0.08 s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bKeyRepeat = false;
+	/** the tiers' rings to guard, put once the frame's container has given what it held (a ring found as the tier opened is no duplicate) */
+	TArray<int32> PendingRingTiers;
+	/** a container once opened stays open (and is built open when its section is generated again) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bContainersStayOpen = false;
+	/** furniture never overlaps (beds, chests), and nothing stands in front of a container */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bTidyFurniture = false;
+	/** rooms of other shapes (round, octagonal, polygonal, triangular, L, T, U) and heights (a dome, a stepped pyramid, a
+	 *  high hall); the share of the rooms that get one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bShapedRooms = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float ShapedRoomShare = 0.6f;
+	/** the look of each tier (index 0: tier 1): a theme's pieces are the Pieces "<Theme>.<Name>" (the others the plain
+	 *  ones); "Mixed": each set of rooms one of MixedThemes, by a hash of where it is */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TArray<FName> TierThemes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TArray<FName> MixedThemes;
+	/** the theme of a set of rooms (NAME_None: the plain pieces) */
+	FName ThemeOf(FIntPoint Section) const;
+	/** tests: ThemeOf as text ("None": the plain pieces) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") FString GetThemeName(FIntPoint Section) const { return ThemeOf(Section).ToString(); }
+	/** a tier opens when the one before it has this share of its rooms explored, of its monsters killed and of its chests
+	 *  and trunks looted, each over all of its sets of rooms (1: every set cleared, the rule of 2026-10-24) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float TierOpenShare = 1.f;
+	/** what there is to do in a tier: rooms (explored / all), monsters (killed / all), chests and trunks (looted / all);
+	 *  false while a set of it has not been counted yet */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool GetTierTally(int32 Tier, FIntVector& Done, FIntVector& All) const;
+	/** found armour is kept set by set (several of one kind), and an anvil breaks armour down as it does weapons */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bArmourStacks = false;
+	/** what she starts with in her left hand (an item of kind Shield; her hero must have its fit), worn when play begins */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TMap<FName, FName> StartShield;
+	/** the torch in her hand: its flame, its light */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UFXSystemAsset> TorchFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float TorchFxScale = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") FVector TorchFlame = FVector(0, 0, 60);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float TorchLight = 120.f;
+	/** when she falls everything she found drops where she fell, a pile she can take up again (F) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bDropOnDeath = false;
+	/** the pile: its effect (Loot Drops Vol. 2), the material its pictures are drawn with (a texture parameter "Icon") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UFXSystemAsset> LootPileFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float LootPileFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UMaterialInterface> IconMaterial = nullptr;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Mistward") TArray<TObjectPtr<class ARDLootPile>> LootPiles;
+	/** her things where she fell (the loot pile) */
+	ARDLootPile* DropLoot(const FVector& At, const TArray<FName>& Things, const TArray<float>& Wear);
+	/** takes up the pile nearest to her within Reach (false: none) */
+	bool TakeLootNear(const FVector& From, float Reach);
+	/** a tier opens (2 to 5): if she found neither potency ring of the tier before (her kind of ring), one is put in a
+	 *  container of a room she explored there, marked on the map and guarded by GuardCount monsters of the new tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bRingGuards = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") int32 GuardCount = 4;
+	/** a tier opens: a boss and 3 to 6 monsters of the new tier wait in a room she explored (not the one she is in) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bBossEncounters = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") FIntPoint BossMinions = FIntPoint(3, 6);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float BossHealth = 3.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float BossDamage = 1.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float BossScale = 1.35f;
+	/** a monster of a kind (the Monsters' index) at a place, as strong as tier Tier's times the multipliers; it belongs to the
+	 *  set of rooms it stands in but is not one of its planned monsters (no SpawnIndex) */
+	ARDMonster* SpawnMonsterKind(int32 Kind, const FVector& At, int32 Tier, float HealthMul = 1.f, float DamageMul = 1.f, float ScaleMul = 1.f, const FString& Title = FString());
+	/** tests: the same by the kind's name */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") ARDMonster* SpawnMonsterNamed(FName Kind, FVector At, int32 Tier, float HealthMul = 1.f, float DamageMul = 1.f, float ScaleMul = 1.f);
+	/** what a tier's opening set waiting for her: "<kind>|<x>|<y>|<z>|<label>|<alive>" (boss, guard), the forced ring */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") TArray<FString> GetEncounterLines() const;
+	/** the tiers opened so far (2 to 5), in order */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") TArray<int32> TiersOpened;
+	/** a container's items put there by the rules (the guarded ring): (section, key) -> items */
+	TMap<FIntVector, TArray<FName>> ForcedLoot;
+	/** traps (RDTraps.cpp): their kinds, the share of rooms and hallway stretches with one, how far the Rogue sees them */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TArray<FRDTrapDef> Traps;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float TrapRoomShare = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float TrapHallShare = 0.12f;
+	/** the heroes who see traps (within TrapSenseRange) and can disarm them (F, DisarmSeconds; DisarmChance it works) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TArray<FName> TrapFinders;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float TrapSenseRange = 800.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float DisarmSeconds = 1.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float DisarmChance = 0.85f;
+	bool HeroFindsTraps() const { return TrapFinders.Contains(CurrentHero); }
+	/** traps set off, struck her, disarmed (tests, the reel) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 TrapsTriggered = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 TrapsDisarmed = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 TrapHits = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") FString LastTrap;
+	/** tests: log what the traps' tick sees (her section, the sets ticked, the nearest trap and why it does not go off) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bLogTraps = false;
+	float TrapLogTime = -100.f;
+	/** the traps of the generated sets: "<section x>|<y>|<index>|<name>|<kind>|<x>|<y>|<z>|<state>|<seen>" (state 0 set,
+	 *  1 going off, 2 spent, 3 disarmed) (tests, HUD) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") TArray<FString> GetTrapLines() const;
+	/** tests: a trap set off now (as if she stepped on it) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool TriggerTrap(FIntPoint Section, int32 Index);
+	/** the disarming going on (0..1; -1 none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") float GetDisarmProgress() const;
+	/** teleporters: the pad (mesh, effect) in the great hall and in each tier's first set of rooms with its ring on it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bTeleporters = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UStaticMesh> PadMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") FTransform PadTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UFXSystemAsset> PadFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float PadFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UFXSystemAsset> TeleportFx = nullptr;
+	/** the ring that lies on a pad */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TObjectPtr<UStaticMesh> TeleportRingMesh = nullptr;
+	/** where each tier's pad is: tier -> its set of rooms */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") TMap<int32, FIntPoint> PadSections;
+	/** the first tier's pad: the tier F takes her to (G picks another) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 PadChoice = 0;
+	/** what F does at a pad near her (taking the ring, teleporting); "" none */
+	FString UsePadNear(const FVector& From);
+	FString DescribePadNear(const FVector& From) const;
+	/** the pads: tier -> where (world, on the floor); a tier's ring lies on its pad until she takes it */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") TMap<int32, FVector> Pads;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") TArray<int32> PadRingsTaken;
+	UPROPERTY(Transient) TMap<int32, TObjectPtr<class ARDTeleporter>> PadActors;
+	/** a tier's teleport ring item (by TeleportTier) */
+	FName TeleportRingOf(int32 Tier) const;
+	/** she is carried to a tier's pad (generating its set of rooms first) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool TeleportToTier(int32 Tier);
+	/** the pad nearest her within Reach (0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") int32 PadNear(FVector From, float Reach = 220.f) const;
+	/** the first tier's pad: the tiers it can take her to (their rings in her pack), and the one chosen (cycles with F) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") TArray<int32> GetPadDestinations() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 Teleports = 0;
+	/** prison cells with someone in them: who (PrisonerDefs), the share of cells taken, the share of those a monster; what a
+	 *  prisoner set free gives (an item of these, by the tier) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TArray<FRDPrisonerDef> PrisonerDefs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float CellOccupied = 0.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") float CellMonsterShare = 0.35f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") TArray<FName> PrisonerRewards;
+	/** cells she opened (section, cell) and what came of it (tests): prisoners freed, cell monsters that broke out */
+	TSet<FIntVector> CellsOpened;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 PrisonersFreed = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 CellBreakouts = 0;
+	/** the frame rate the HUD shows (smoothed) */
+	float FpsSmoothed = 0.f;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") float GetFps() const { return FpsSmoothed; }
+	/** monsters' height: each kind's lowest drawn point against the floor as it stands now (tests, the fix stage) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") TArray<FString> MeasureMonsterHeights();
+
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
@@ -529,7 +674,41 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+public:
+	// ---- mistward_castle: what the tiers' openings set waiting (a boss and its band, a guarded ring)
+	struct FEncounter
+	{
+		int32 Tier = 2; bool bBoss = false; FIntPoint Section = FIntPoint::ZeroValue; int32 Room = -1; FVector At = FVector::ZeroVector;
+		TArray<int32> Kinds; TArray<FVector> Spots; TArray<bool> Dead; TArray<TWeakObjectPtr<ARDMonster>> Live;
+		FName Ring = NAME_None; FIntVector RingKey = FIntVector(0, 0, -1); FString Label;
+	};
+	TArray<FEncounter> Encounters;
+	/** a set of rooms is generated (again): the encounters in it come back (the living ones) */
+	void RespawnEncounters(ARDSection* S);
+	/** the traps already spent or disarmed (section, index): they stay so */
+	TMap<FIntVector, uint8> SpentTraps;
+	/** the trap she is disarming (section, index), when she began, where she stood */
+	FIntVector DisarmKey = FIntVector(0, 0, -1);
+	float DisarmStart = -100.f;
+	FVector DisarmFrom = FVector::ZeroVector;
+	FRandomStream TrapR;
+	void TickTraps(float Dt);
+	bool BeginDisarmNear(const FVector& From);
+	FString DescribeTrapNear(const FVector& From) const;
+
 private:
+	// ---- mistward_castle
+	/** what a set of rooms she has not reached holds (rooms, chests and trunks, monsters): counted once, a few a frame */
+	mutable TMap<FIntPoint, FIntVector> CensusCache;
+	mutable TArray<FIntPoint> CensusQueue;
+	float CensusLookTime = -100.f;
+	void TickCensus();
+	void CheckTierOpenings();
+	void OnTierOpened(int32 Tier);
+	void PlaceBoss(int32 Tier);
+	void PlaceRingGuard(int32 Tier);
+	/** an explored room of a tier to set something in (not the one she is in, generated now); false: none */
+	bool PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const;
 	UPROPERTY(VisibleAnywhere, Category = "RandomDungeon|Reveal") TObjectPtr<UPostProcessComponent> RevealPost;
 	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> RevealMID;
 	UPROPERTY(Transient) TObjectPtr<ARDSection> Building;

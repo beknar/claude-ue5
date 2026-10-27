@@ -16,7 +16,9 @@ labels (written "Mana Back": sc()).
 Level 5 (the seventh argument "5"; the Summoner's armour reel): the menu of random_dungeonmagic_level5 (829 with level 5:
 one passage, the five heroes looked through and the Summoner started) and her run (815 with level 5), from
 SourceArt/random_dungeon_magic5.
-Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4, 5, 5w, 5h, 5c, 5s or 5x]]
+Level "mw" (mistward_castle, 815's run5m): its menu (829 with "mw": cine_menu_mw.json, the castle's name over CHOOSE YOUR HERO)
+and the four runs, from SourceArt/mistward.
+Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4, 5, 5w, 5h, 5c, 5s, 5x or mw]]
   (5w: level 5's weapons and tiers reel, the Warrior picked in the menu; 5h: the four heroes' weapons reel, each of the
   Warrior, Mage, Warlock and Rogue picked in a passage of her own and followed by her run, as level 4's reel; 5c: the
   armour table, loot and crafting reel, the same passages and runs; 5s: the spells, rings, monsters by tier, corpses and
@@ -34,12 +36,13 @@ if len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
 LV = sys.argv[7] if len(sys.argv) > 7 else "4"
-W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
+MW = LV == "mw"; W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
                                                        #  "5h": the four heroes' weapons reel, cine_menu_quartet.json)
-SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + LV)
-M = json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
+SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "mistward" if MW else "random_dungeon_magic" + LV)
+M = json.load(open(os.path.join(SRC, "cine_menu_mw.json"), encoding="utf-8")) if MW else json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
 ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
-TITLE, SUB = (("random_dungeonmagic_level5", "four heroes: the map, chests, armour, crafting at the anvil, fights, new rooms generated tier by tier") if X5 else
+TITLE, SUB = (("mistward_castle", "four heroes in Mistward Castle: shields, the torch, traps, prisoners, teleporters, bosses, rooms of other shapes") if MW else
+              ("random_dungeonmagic_level5", "four heroes: the map, chests, armour, crafting at the anvil, fights, new rooms generated tier by tier") if X5 else
               ("random_dungeonmagic_level5", "four heroes: spells learned from tomes, rings, monsters by tier, the dead stay, the Esc menu") if S5 else
               ("random_dungeonmagic_level5", "four heroes: armour by its table, loot by tier, repair items made at anvils, the tiers on the maps") if C5 else
               ("random_dungeonmagic_level5", "four heroes, the weapons and the armour: who wields and wears what, a weapon that breaks, the tiers of rooms") if Q5 else
@@ -81,7 +84,7 @@ def menu_hud(f, k, fl):
     o = Image.new("RGBA", (W * K, H * K), (0, 0, 0, 0)); d = ImageDraw.Draw(o, "RGBA")
     fade = max(0.0, min(1.0, r["shown_ago"] / 0.35)); acc = tuple(h["accent"])
     ink = lambda c, a=1.0: lin(c, a * fade)
-    d.text((80 * K, 44 * K), sc("RANDOM DUNGEON"), font=fl_small, fill=lin(DIM)); d.text((78 * K, 64 * K), "CHOOSE YOUR HERO", font=f_title, fill=lin(INK))
+    d.text((80 * K, 44 * K), sc((M.get("game_title") or "Random Dungeon").upper()), font=fl_small, fill=lin(DIM)); d.text((78 * K, 64 * K), "CHOOSE YOUR HERO", font=f_title, fill=lin(INK))
     # ---- her card (laid out twice: measured, then drawn on its panel)
     ax, ay, x = 80 * K, 160 * K, (114 + (18 if (UI and UI.has("panel")) else 0)) * K; wd = 720 * K - x - 30 * K     # (clear of the board's corner ornaments)
     def card(draw):

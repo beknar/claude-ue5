@@ -26,6 +26,7 @@ There are **19 levels**: 18 to play, and the photo studio for stills. Two of the
 | `random_dungeonmagic_level3` | dungeon game: daggers and crossbow | the Rogue | `BP_RDM3_GameMode` | `813` | `RandomDungeonMagic3_Rogue_Showcase` |
 | `random_dungeonmagic_level4` | dungeon game: choice of hero, items | Warrior, Mage, Warlock, Rogue (menu) | `BP_RDM4_GameMode` | `827` / `828` hero test | `RandomDungeonMagic4_Heroes_`, `_UI_`, `_Lettering_Showcase` |
 | `random_dungeonmagic_level5` | dungeon game: five heroes, armour, a weapons table, five tiers of rooms | Warrior, Mage, Warlock, Rogue, Summoner (menu; Summoner by default) | `BP_RDM4_GameMode` | `853` (through `828 -lv 5`) | `RandomDungeonMagic5_Summoner_Armour_`, `_Faces_`, `_MetaHuman_Faces_Showcase` |
+| `mistward_castle` | level 5's game as a castle: themed tiers, rooms of other shapes, traps, prisoners, shields, a torch, teleporters, bosses | Warrior (Warrior3), Mage, Warlock, Rogue (menu `mistward_castle_select`) | `BP_RDM4_GameMode` | `868` (`868_mistward_test.ps1`) | `MistwardCastle_Heroes_Showcase` |
 | `starship_level` | space flight | a space fighter | `SSGameMode` | `802` / `803` flight test | `Starship_Fighter_Showcase` |
 
 The editor starts on `L_Fig4_Meadow`, and a packaged game would too (`GameDefaultMap` in `Config/DefaultEngine.ini`). Each `*_Showcase` reel is also in a `_20MB` copy; `Fig4_Locomotion_Meadow.mp4`, the oldest, is not.
@@ -196,6 +197,12 @@ The dungeon with a choice of hero, mana, items and an inventory.
   - There are no armour items in this level: armour is on the cards only.
 - **Scripts:** `824`-`831`.
 
+### `mistward_castle`
+Level 5's game (a Save As copy of `random_dungeonmagic_level5`) as a castle: README's [mistward_castle: the castle](../README.md#mistward_castle-the-castle) has the whole of it.
+- **Menu first:** through `mistward_castle_select`, "Mistward Castle" over CHOOSE YOUR HERO: the four heroes of level 5's menu (the Warrior is Warrior3, with the Heater Shield on her arm).
+- **Characters:** level 5's, with the same numbers; the Warrior alone carries shields, every hero the torch, the Rogue alone sees and disarms traps.
+- **Scripts:** `863`-`868`.
+
 ### `random_dungeonmagic_level5`
 Level 4's game with a fifth hero, the Summoner, and armour to find and wear.
 - **Menu first:** as level 4, through `random_dungeonmagic_level5_select` with five heroes.
@@ -310,7 +317,7 @@ These are in the project's own folders but are not levels to play on their own.
 
 | Map | What it is |
 |---|---|
-| `random_dungeonmagic_level4_select`, `random_dungeonmagic_level5_select` | the hero menus of levels 4 and 5 (`RDHeroSelectGameMode`): they open the dungeon with the hero chosen |
+| `random_dungeonmagic_level4_select`, `random_dungeonmagic_level5_select`, `mistward_castle_select` | the hero menus of levels 4 and 5 and of Mistward Castle (`RDHeroSelectGameMode`): they open the dungeon with the hero chosen |
 | `L_Fig4_Meadow_Cine`, `L_Meshy_Meadow_Cine`, `soldier_level_Cine`, `ff_level_Cine`, `ff2_level_Cine`, `castle_level_Cine`, `sf-city-level_Cine`, `random_level_Cine`, `random_dungeon_level_Cine`, `random_isometric_village_level_Cine` | copies for the demo reels (`MoviePipelineGameMode`): an AI demo character runs a recorded route on the sequence clock. The dungeon games and the fighter have no copy: their reels are rendered on the level itself, with a pilot script playing the game |
 | `fcl_lake_village`, `sfc_monolith` | sublevels streamed into `fantasy_castle_level` and `sf-city-level` |
 | `L_Tripo_Trio_Showcase`, `L_Tripo_Quartet_Showcase` | stages of the trio and quartet reels (`TripoTrio_Showcase`, `TripoQuartet_Showcase`: the Warrior, Mage, Warlock and then the Rogue on plinths) |

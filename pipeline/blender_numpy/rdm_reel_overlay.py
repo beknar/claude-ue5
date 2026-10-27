@@ -46,14 +46,20 @@ their seconds, each cast's mana), the chips of her spells on her and the monster
 name with CURSED / SLOWED / BURNING, her allies' green bars, the inventory's RINGS and TOMES sections, the anvil's BREAK
 DOWN list, Esc's menu (ARDHUD::DrawMenu: the four volumes and the three buttons), the number keys and Esc in the keys row,
 and the captions of each beat (the captions and the heard lines stand above the hotbar).
-Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1, 2, 3, 4, 5, 5h, 5c or 5s] [level 4 / 5: hero] [level 4 / 5: ui art dir]"""
+Level "mw" (mistward_castle, 815's run5m: SourceArt/mistward/cine_mw_<hero>.json) is drawn as "5c" is, with what the castle's
+HUD adds: the rooms' shapes on both maps (the record's masks), its marks (a boss, a guarded ring, her things, a teleporter, a
+trap she has seen: ARDHUD::MistMark; a far boss or ring at the map's edge), the castle's name over the minimap and on the big
+map's plaque, the frame rate in the upper left (as the game ticked in the render), what F would do near her, the disarm bar,
+the fallen banner, the inventory's SHIELDS, TORCH and TELEPORT RINGS, the reel's cards and its captions.
+Usage: rdm_reel_overlay.py frames_dir out_dir [step] [level: 1, 2, 3, 4, 5, 5h, 5c, 5s or mw] [level 4 / 5: hero] [level 4 / 5: ui art dir]"""
 import sys, os, re, json, glob, math
 from PIL import Image, ImageDraw, ImageFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
 LV = sys.argv[4] if len(sys.argv) > 4 else "1"
-X5 = LV == "5x"; Q5 = LV == "5h"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; LV = "5" if (Q5 or C5 or S5) else LV        # ("5x": the four heroes' capabilities reel, 815's run5x: cine_caps_<hero>.json, run5c's captions and the tiers' part)
+M5 = LV == "mw"                # (mistward_castle: 815's run5m)
+X5 = LV == "5x"; Q5 = LV == "5h"; C5 = LV in ("5c", "5x", "mw"); S5 = LV == "5s"; LV = "5" if (Q5 or C5 or S5) else LV        # ("5x": the four heroes' capabilities reel, 815's run5x: cine_caps_<hero>.json, run5c's captions and the tiers' part)
         # ("5h": level 5's four heroes' weapons reel, 815's run5h: cine_quartet_<hero>.json; "5c": run5c, cine_craft_<hero>.json; "5s": run5s, cine_spells_<hero>.json)
 K5 = C5 or S5                 # (the anvils and the rooms' tiers on the maps, the crafting panel)
 L5 = LV == "5"; L4 = LV == "4" or L5     # (level 5: level 4's HUD and the armour)
@@ -66,8 +72,9 @@ def wicon(name): return UI.weapons.get("%s/%s" % (HERO, name)) if UI else None
 def iicon(name): return UI.icons.get(name) if UI else None
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("" if LV == "1" else LV))
+MWSRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "mistward")
 SND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_combat")      # (the sounds are the combat level's)
-R = json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_caps_{HERO.lower()}.json" if X5 else f"cine_craft_{HERO.lower()}.json" if C5 else f"cine_spells_{HERO.lower()}.json" if S5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
+R = json.load(open(os.path.join(MWSRC, f"cine_mw_{HERO.lower()}.json"), encoding="utf-8")) if M5 else json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_caps_{HERO.lower()}.json" if X5 else f"cine_craft_{HERO.lower()}.json" if C5 else f"cine_spells_{HERO.lower()}.json" if S5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
 W5 = L5 and (HERO == "Warrior" or Q5 or C5 or S5)          # (level 5's weapons and tiers reels: 815's run5w, the Warrior; run5h, any of four; run5c's tiers too)
 # (who wields what: the weapons table's rules, weapons_table.json "who")
 WHO = {"Warrior": "the Warrior wields every weapon of the table", "Warlock": "the Warlock wields every weapon of the table",
@@ -343,7 +350,8 @@ def tactical(o, r, t, maps, disc, cx, cy, R, half, ua, under=None):
         for i, q in enumerate(m["rects"]):
             fl = 1 | (2 if i in seen else 0) | (4 if q[5] else 0)
             for X in range(q[0], q[2]):
-                for Y in range(q[1], q[3]): tiles[(X, Y)] = tiles.get((X, Y), 0) | fl
+                for Y in range(q[1], q[3]):
+                    if has_tile(q, X, Y): tiles[(X, Y)] = tiles.get((X, Y), 0) | fl
     fresh = set()
     for e in GENS:
         if 0.0 <= t - e["t"] < 4.0:
@@ -384,6 +392,13 @@ def tactical(o, r, t, maps, disc, cx, cy, R, half, ua, under=None):
             for a0, b0 in (((x - s_, y - s_), (x + s_, y + s_)), ((x - s_, y + s_), (x + s_, y - s_))): d.line((a0, b0), fill=lin((1.0, 0.22, 0.16), ua), width=max(2, int(s_ * 0.38)))
         elif kind == 6 and tiles.get((int(math.floor(wx / TS)), int(math.floor(wy / TS))), 0) & 2:
             d = anvil_mark(o, d, x, y, 10.0 * K, ua)          # (level 5: an anvil she has seen)
+        elif kind >= 7: mist_mark(d, x, y, kind, 6.0 * K, ua)
+    if M5:
+        # (mistward: a boss or a guarded ring beyond the rim sits on it, the way to it)
+        for wx, wy, kind in pois_at(int(round(t * FPS))):
+            x, y = ToS(wx, wy)
+            if kind in (7, 8) and not inside(x, y):
+                dd = math.hypot(x - cx, y - cy); mist_mark(d, cx + (x - cx) / dd * R * 0.86, cy + (y - cy) / dd * R * 0.86, kind, 6.0 * K, ua)
     if K5:
         # (level 5: each room she has found writes its tier, small, in its middle: ARDHUD::DrawTacticalMinimap)
         for c, m in maps.items():
@@ -476,7 +491,8 @@ def painted_map(o, r, t, maps, disc, ua):
         for i, q in enumerate(m["rects"]):
             fl = 1 | (2 if i in seen else 0) | (4 if q[5] else 0)
             for X in range(q[0], q[2]):
-                for Y in range(q[1], q[3]): tiles[(X, Y)] = tiles.get((X, Y), 0) | fl
+                for Y in range(q[1], q[3]):
+                    if has_tile(q, X, Y): tiles[(X, Y)] = tiles.get((X, Y), 0) | fl
     fresh = set()
     for e in GENS:
         if 0.0 <= t - e["t"] < 4.0:
@@ -557,6 +573,12 @@ def painted_map(o, r, t, maps, disc, ua):
             s_ = 7.0 * K; rr = s_ * 1.7; d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=(0, 0, 0, int(140 * ua)))
             for a0, b0 in (((x - s_, y - s_), (x + s_, y + s_)), ((x - s_, y + s_), (x + s_, y - s_))): d.line((a0, b0), fill=lin((1.0, 0.22, 0.16), ua), width=max(2, int(s_ * 0.38)))
         elif kind == 6 and K5 and tiles.get((int(math.floor(wx / TS)), int(math.floor(wy / TS))), 0) & 2: d = anvil_mark(lay, d, x, y, 13.0 * K, ua)
+        elif kind >= 7: mist_mark(d, x, y, kind, 8.0 * K, ua)
+    if M5:
+        for wx, wy, kind in pois_at(int(round(t * FPS))):
+            x, y = ToS(wx, wy)
+            if kind in (7, 8) and not ok(x, y):
+                dd = math.hypot((x - cx) / hx, (y - cy) / hy); mist_mark(d, cx + (x - cx) * 0.7 / dd, cy + (y - cy) * 0.7 / dd, kind, 8.0 * K, ua)
     for mo in r["mon"]:
         if mo[8] or math.hypot(mo[2] - px0, mo[3] - py0) > 2500.0: continue
         x, y = ToS(mo[2], mo[3])
@@ -569,17 +591,17 @@ def painted_map(o, r, t, maps, disc, ua):
     o.alpha_composite(lay); d = ImageDraw.Draw(o, "RGBA")
     # the plaque, the compass (an N over its gem), the key, the rooms and the key that closes it
     gold, ink = lin((1.0, 0.84, 0.45), ua), lin((0.86, 0.82, 0.72), 0.95 * ua)
-    title = "DUNGEON MAP"; tw = d.textlength(title, font=f_head); ph = 58 * K
+    title = (C.get("game_title") or "DUNGEON MAP").upper() if M5 else "DUNGEON MAP"; tw = d.textlength(title, font=f_head); ph = 58 * K
     t0, t1 = (cx - tw / 2 - 90 * K, A_[1] + 6 * K), (cx + tw / 2 + 90 * K, A_[1] + 6 * K + ph)
     if UI.has("banner"): UI.nine(o, "banner", t0, t1, UI.height_px("banner", ph), (1, 1, 1, ua)); d = ImageDraw.Draw(o, "RGBA")
     d.text((cx + 2 * K, (t0[1] + t1[1]) / 2 + 2 * K), title, font=f_head, fill=(0, 0, 0, int(200 * ua)), anchor="mm"); d.text((cx, (t0[1] + t1[1]) / 2), title, font=f_head, fill=gold, anchor="mm")
     cz = 118 * K
     if UI.fit(o, "compass", (B_[0] - 40 * K - cz, A_[1] + 46 * K), (B_[0] - 40 * K, A_[1] + 46 * K + cz), (1, 1, 1, ua)):
         d = ImageDraw.Draw(o, "RGBA"); d.text((B_[0] - 40 * K - cz / 2, A_[1] + 45 * K), "N", font=ft_small, fill=gold, anchor="md")
-    x, y = A_[0] + 44 * K, B_[1] - (166 + (23 + 23 if K5 else 0)) * K       # (level 5: the sealed passages and the anvils, a line each)
+    x, y = A_[0] + 44 * K, B_[1] - (166 + (23 + 23 if K5 else 0) + (23 * len(MW_KEY) if M5 else 0)) * K       # (level 5: the sealed passages and the anvils, a line each; mistward: its marks)
     d.text((x - 6 * K, y - 30 * K), sc("KEY"), font=fl_small, fill=gold)
     if UI.fit(o, "divider", (x - 14 * K, y - 14 * K), (x + 200 * K, y + 2 * K), (1, 1, 1, ua)): d = ImageDraw.Draw(o, "RGBA")
-    for kind, what in ((0, "monster"), (1, "elite"), (2, "unlooted chest or trunk"), (3, "unexplored passage"), (4, "door")) + (((5, "sealed passage"), (6, "anvil: make repair items")) if K5 else ()):
+    for kind, what in ((0, "monster"), (1, "elite"), (2, "unlooted chest or trunk"), (3, "unexplored passage"), (4, "door")) + (((5, "sealed passage"), (6, "anvil: make repair items")) if K5 else ()) + (MW_KEY if M5 else ()):
         mx, my = x + 6 * K, y + 10 * K
         if kind == 0: soft(mx, my, 5.5 * K, TAC["red"], 1.0)
         elif kind == 1: tri(mx, my, 7.5 * K, TAC["elite"])
@@ -589,6 +611,7 @@ def painted_map(o, r, t, maps, disc, ua):
             s_ = 6.0 * K; d.ellipse((mx - s_ * 1.7, my - s_ * 1.7, mx + s_ * 1.7, my + s_ * 1.7), fill=(0, 0, 0, int(140 * ua)))
             for a0, b0 in (((mx - s_, my - s_), (mx + s_, my + s_)), ((mx - s_, my + s_), (mx + s_, my - s_))): d.line((a0, b0), fill=lin((1.0, 0.22, 0.16), ua), width=max(2, int(s_ * 0.38)))
         elif kind == 6: d = anvil_mark(o, d, mx, my, 9.0 * K, ua)
+        elif kind >= 7: mist_mark(d, mx, my, kind, 6.0 * K, ua)
         else: d.line(((mx - 7 * K, my), (mx + 7 * K, my)), fill=lin((1.0, 0.90, 0.50), ua), width=int(2.5 * K))
         d.text((x + 24 * K, y), what, font=f_small, fill=ink); y += 23 * K
     rooms = sum(1 for m in maps.values() for q in m["rects"] if not q[5]); seen = sum(1 for c, m in maps.items() for i, q in enumerate(m["rects"]) if not q[5] and i in disc.get(c, set()))
@@ -649,6 +672,11 @@ def describe(it, r):
         s = "Teaches %s (%s): %s.  %d mana" % (sp["name"], {"summon": "summoning"}.get(sp["type"], sp["type"]), sp["effect"], sp["mana"]) + (", cooldown %d s" % sp["cooldown"] if sp["cooldown"] > 0 else "") + "."
         if sp["type"] not in C.get("learns", []): s += "  The %s cannot learn it." % title
         return s
+    if it["kind"] == "shield":
+        return "A shield: damage reduction %d / 10, each blow takes %d%% less; speed %d / 10, you move %d%% slower.  Durability %d: it loses what it takes; at 0 it breaks.  On your arm with a one-handed weapon." % (
+            it.get("dr", 0), round(it.get("amount", 0) * 100), it.get("sr", 0), round(it.get("slower", 0) * 100), it.get("durability", 0))
+    if it["kind"] == "torch": return "A torch for your left hand: its flame lights your way.  Made at an anvil."
+    if it["kind"] == "teleport": return "A teleporter's ring: used, it carries you to the great hall's teleporter, and that one back to its tier."
     if it["kind"] == "repair":
         return "Mends %d%% of a set of armour's or a found weapon's full durability, up to full.  Enter, then choose what it mends." % round(it["amount"] * 100)
     if it["kind"] == "component":
@@ -718,6 +746,7 @@ def l4_panels(o, r, t, ua):
         secs = [("weapon", "WEAPONS AND SPELLS", True), ("item", "POTIONS AND FOOD", True), ("repair", "REPAIR ITEMS", False), ("armour", "ARMOUR", False),
                 ("component", "MATERIALS", False), ("carried", "WEAPONS THE %s CANNOT WIELD" % C.get("title", HERO).upper(), False)]
         if S5: secs[4:4] = [("ring", "RINGS", False), ("tome", "TOMES THE %s CANNOT LEARN" % C.get("title", HERO).upper(), False)]
+        if M5: secs[4:4] = [("shield", "SHIELDS", False), ("torch", "TORCH", False), ("teleport", "TELEPORT RINGS", False), ("ring", "RINGS", False), ("tome", "TOMES THE %s CANNOT LEARN" % C.get("title", HERO).upper(), False)]
     sec_of = []; count = [0] * len(secs)
     for x in lines:
         k_ = next((j for j, sv in enumerate(secs) if x.startswith(sv[0] + "|")), 0); sec_of.append(k_); count[k_] += 1
@@ -805,6 +834,11 @@ def l4_panels(o, r, t, ua):
             tag = "WORN" if p_[2] == "1" else ""
             if full > 0: tag = (tag + "   " if tag else "") + ("WORN OUT" if left <= 0 else "%d / %d" % (left, full))
             rowl(i, p_[1], tag, (1.0, 0.45, 0.35) if (full > 0 and left <= 0) else CYAN, iicon(p_[1]))
+        elif p_[0] == "shield" and len(p_) >= 6:
+            tag = ("IN HAND" if p_[2] == "1" else "") + ("   x %s" % p_[5] if p_[5] != "1" else "") + "   %d / %d" % (float(p_[3]), float(p_[4]))
+            rowl(i, p_[1], tag.strip(), CYAN, iicon(p_[1]))
+        elif p_[0] == "torch" and len(p_) >= 4: rowl(i, p_[1], "LIT" if p_[2] == "1" else ("x %s" % p_[3] if p_[3] != "1" else ""), (1.0, 0.7, 0.35), iicon(p_[1]))
+        elif p_[0] == "teleport" and len(p_) >= 3: rowl(i, p_[1], "TIER %s" % p_[2], (0.5, 0.8, 1.0), iicon(p_[1]))
         elif p_[0] == "ring" and len(p_) >= 4:
             rowl(i, p_[1], "WORN" if p_[2] == "1" else ("x %s" % p_[3] if p_[3] != "1" else ""), CYAN, iicon(p_[1]))
         else: rowl(i, p_[1], "x %s" % p_[2], (0.70, 0.68, 0.62) if p_[0] in ("carried", "component", "tome") else gold, iicon(p_[1]))
@@ -865,7 +899,9 @@ def l4_panels(o, r, t, ua):
                 ry += 6 * K
                 if p_[0] == "item": para("Enter  use it", lin(gold), f_line)
                 elif p_[0] == "repair": para("Enter  choose what it mends", lin(gold), f_line)
-                elif p_[0] in ("armour", "ring"): para("Enter  take it off" if len(p_) > 2 and p_[2] == "1" else "Enter  put it on", lin(gold), f_line)
+                elif p_[0] in ("armour", "ring", "shield"): para("Enter  take it off" if len(p_) > 2 and p_[2] == "1" else "Enter  put it on", lin(gold), f_line)
+                elif p_[0] == "torch": para("Enter  put it out" if p_[2] == "1" else "Enter  light it", lin(gold), f_line)
+                elif p_[0] == "teleport": para("Enter  to the great hall's teleporter", lin(gold), f_line)
     ry = max(ry + 18 * K, ay + 250 * K)
     para("Hit points  %d / %d" % (math.ceil(r["hp"]), r["mhp"]), lin((0.5, 0.9, 0.55)), f_line)
     if r.get("mmana", 0) > 0: para("Mana  %d / %d" % (math.floor(r["mana"]), r["mmana"]), lin((0.55, 0.7, 1.0)), f_line)
@@ -1089,6 +1125,180 @@ def r_arm_at(t):
     """the set she wore at t (the rows' arm)"""
     return row(int(t * FPS)).get("arm", "None")
 C5CAPS = None
+def mist_mark(d, x, y, kind, s_, ua):
+    """ARDHUD::MistMark: 7 a boss (a red ring with a crown), 8 a guarded ring (a gold ring, a red dot), 9 her things (a gold
+    sack), 10 a teleporter (a blue ring), 11 a trap she has seen (a red X)"""
+    rr = s_ * 1.6; d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=(0, 0, 0, int(130 * ua)))
+    if kind == 7:
+        d.ellipse((x - s_, y - s_, x + s_, y + s_), outline=lin((1.0, 0.2, 0.15), ua), width=max(2, int(s_ * 0.35)))
+        pts = [(x - s_ * 0.8, y - s_ * 0.9), (x - s_ * 0.5, y - s_ * 1.6), (x - s_ * 0.15, y - s_ * 1.05), (x, y - s_ * 1.75), (x + s_ * 0.15, y - s_ * 1.05), (x + s_ * 0.5, y - s_ * 1.6), (x + s_ * 0.8, y - s_ * 0.9)]
+        d.polygon(pts, fill=lin((1.0, 0.82, 0.3), ua))
+    elif kind == 8:
+        d.ellipse((x - s_, y - s_, x + s_, y + s_), outline=lin((1.0, 0.84, 0.35), ua), width=max(2, int(s_ * 0.38)))
+        q = s_ * 0.38; d.ellipse((x - q, y - q, x + q, y + q), fill=lin((1.0, 0.2, 0.15), ua))
+    elif kind == 9:
+        d.ellipse((x - s_ * 0.85, y - s_ * 0.55, x + s_ * 0.85, y + s_ * 1.0), fill=lin((0.95, 0.72, 0.25), ua))
+        d.polygon([(x - s_ * 0.35, y - s_ * 0.55), (x + s_ * 0.35, y - s_ * 0.55), (x + s_ * 0.2, y - s_ * 1.0), (x - s_ * 0.2, y - s_ * 1.0)], fill=lin((0.8, 0.55, 0.18), ua))
+    elif kind == 10:
+        d.ellipse((x - s_, y - s_, x + s_, y + s_), outline=lin((0.4, 0.75, 1.0), ua), width=max(2, int(s_ * 0.38)))
+        q = s_ * 0.3; d.ellipse((x - q, y - q, x + q, y + q), fill=lin((0.7, 0.9, 1.0), ua))
+    elif kind == 11:
+        for a0, b0 in (((x - s_, y - s_), (x + s_, y + s_)), ((x - s_, y + s_), (x + s_, y - s_))): d.line((a0, b0), fill=lin((1.0, 0.25, 0.2), ua), width=max(2, int(s_ * 0.4)))
+MW_KEY = ((7, "a boss"), (8, "a ring you never found, guarded"), (9, "your dropped things"), (10, "a teleporter"), (11, "a trap you have seen"))
+CARDS = [e for e in EV if e["kind"] == "card"]
+MW_CARD = 3.0
+def has_tile(q, X, Y):
+    """(mistward) a shaped room's tile: its mask (row by row) says where it has floor"""
+    if len(q) > 6 and q[6]:
+        wq = q[2] - q[0]; i = (Y - q[1]) * wq + (X - q[0])
+        return 0 <= i < len(q[6]) and q[6][i] != 0
+    return True
+M5CAPS = None
+def m5_caps():
+    """(mistward, 815's run5m) the captions of the castle's reel, each from what the record says happened"""
+    out = []; gold = (255, 226, 150); warm = (255, 200, 120); cyan = lin(CYAN)[:3]
+    hj = HJ.get(HERO, {}); acc = tuple(int(255 * v) for v in hj.get("accent", (1.0, 0.94, 0.84)))
+    ev = lambda k: [e for e in EV if e["kind"] == k]
+    first = min([e["t"] for e in EV if e["kind"] in ("to_chest", "chest", "inventory", "hold", "craft_open", "card", "disarm", "trap_spot") and e["t"] > 1.0] + [6.0])
+    who = {"Warrior": "a shield on her arm now: found, put on and off, broken down at the anvil",
+           "Mage": "a torch she makes at the anvil and carries in her left hand",
+           "Warlock": "the castle's rooms of other shapes, its teleporters, and what happens when she falls",
+           "Rogue": "she sees the castle's traps and disarms them"}[HERO]
+    out.append((0.8, first - 0.1, "THE %s IN MISTWARD CASTLE" % HERO.upper(), ["level 5's dungeon in five themed tiers: the stone dungeon, the castle keep, the dwarven halls, then all three",
+                who, "upper left: the frame rate the game shows (in this render its own tick; in play the test measured 36 to 41)"], acc))
+    for e in CHESTS:
+        fd = next((x for x in FOUND if x["t"] >= e["t"] - 0.05), None); held = fd.get("items", []) if fd else []
+        out.append((e["t"] - 0.3, e["t"] + 2.4, "F  ·  A CHEST: IT STAYS OPEN", ["it held %d things: %s" % (len(held), ", ".join(x.lower() for x in held[:4]) + (" ..." if len(held) > 4 else "")),
+                    "in the castle an opened container stays open, also when its set of rooms is built again"], gold))
+    for e in ev("f_again"):
+        out.append((e["t"], e["t"] + 2.2, "F  AGAIN:  NOTHING", ["the open chest is not shut again, and F no longer offers it" + (": it names \"%s\" instead" % e["describe"] if e.get("describe") else ""),
+                    "the chest's lid stays up (%d %% open)" % round(100 * e.get("open_alpha", 1.0))], gold))
+    for e in INVS:
+        u = next((x for x in USED if x["t"] >= e["t"]), None)
+        if not u: continue
+        cl = inv_closed_after(u["t"]); nxt = next((x["t"] for x in EV if x["t"] > u["t"] + 0.2 and x["kind"] in ("inventory", "quiet", "craft_open", "card", "lure")), cl + 5.0)
+        nm = u["entry"].split("|")[1] if "|" in u["entry"] else ""; it = ITEMS.get(nm, {})
+        if e.get("why") == "shield":
+            out.append((e["t"], cl, "I  ·  ENTER  ·  SHIELDS", ["her inventory has a SHIELDS heading: each shield she carries, several of one kind each with its own durability",
+                        "she takes up the %s" % nm.lower()], gold))
+            out.append((cl, nxt - 0.05, nm.upper(), ["damage reduction %d / 10: a blow takes %d%% less  ·  speed %d / 10: she moves %d%% slower" % (it.get("dr", 0), round(it.get("amount", 0) * 100), it.get("sr", 0), round(it.get("slower", 0) * 100)),
+                        "durability %d: it loses what it takes off her blows and breaks at 0  ·  on her arm with a one-handed weapon only" % it.get("durability", 0)], cyan))
+        elif e.get("why") == "torch":
+            out.append((e["t"], cl, "I  ·  ENTER  ·  THE TORCH", ["the torch is in her inventory under its own heading", "Enter lights it"], gold))
+            out.append((cl, nxt - 0.05, "THE TORCH, LIT", ["in her left hand, its flame and its light going with her",
+                        "it takes her left hand: the Warrior's shield is slung while it burns  ·  every hero can carry one"], cyan))
+        elif e.get("why") == "teleport":
+            tl = next((x for x in ev("teleported") if x["t"] >= u["t"]), None)
+            out.append((e["t"], cl, "I  ·  ENTER  ·  TELEPORT RING II", ["the ring she took up from tier 2's teleporter", "used from the inventory"], gold))
+            out.append((cl, nxt - 0.05, "TO THE GREAT HALL'S TELEPORTER", ["the ring carries her to the first tier's pad%s" % (" (%.1f m from it)" % tl["m_from_pad1"] if tl else ""),
+                        "there F takes her back to any tier whose ring she holds (G picks which)"], cyan))
+    co = ev("craft_open")
+    for e in co:
+        cw = next((x for x in ev("craft_want") if x["t"] >= e["t"]), None); cr = next((x for x in ev("crafted") if x["t"] >= e["t"]), None)
+        out.append((e["t"], (cw["t"] + 1.0) if cw else e["t"] + 3.0, "F  ·  THE ANVIL:  ITS LISTS IN ALPHABETICAL ORDER", ["the recipes A to Z, then what she can break down, A to Z: " +
+                    ", ".join(x.split("|")[1].lower() for x in (cw["lines"] if cw else [])[:7]) + " ...",
+                    "in play the panel pauses the game; for the reel the world goes on and the monsters leave her be"], gold))
+        if cr:
+            out.append((cr["t"] - 1.2, cr["t"] + 2.6, "ENTER  ·  " + ("BREAK DOWN THE " + cr["item"].upper() if cr["line_kind"] == "breakdown" else cr["item"].upper() + " MADE"),
+                        [cr["message"], ("a shield breaks down as weapons do: by what it is made of (metal or wood) and its tier" if cr["line_kind"] == "breakdown" else
+                                         "2 wood (any kind), 2 straw rope, 1 oils, used up")], cyan))
+    for e in [x for x in EV if x["kind"] == "given"]:
+        out.append((e["t"], e["t"] + 2.4, "THE REEL GIVES HER %s" % ("THE TORCH'S MATERIALS AND A BAG OF OTHERS" if e.get("why") == "torch" else "A SHIELD" if e.get("why") == "shield" else "THINGS"),
+                    [", ".join("%d %s" % (n_, k_.lower()) for k_, n_ in list(e["items"].items())[:8]) + (" ..." if len(e["items"]) > 8 else ""), "in play they come from the containers"], warm))
+    for e in ev("hold"):
+        h1 = next((x for x in ev("held") if x["t"] >= e["t"] and x.get("key") == e["key"]), None)
+        out.append((e["t"], (h1["t"] + 1.4) if h1 else e["t"] + 2.5, "HOLDING %s:  THE LIST WALKS" % e["key"].upper(), ["a key held moves the cursor on by itself: after a third of a second, then a line every 0.08 s",
+                    ("%d lines in %.1f s" % (h1["lines"], h1["seconds"])) if h1 else ""], gold))
+    blocks = [e for e in EV if e["kind"] == "mw_shield_block"]
+    if blocks:
+        f0 = next((f for f in FIGHTS if f["t"] <= blocks[0]["t"]), None)
+        b_ = blocks[:3]
+        out.append((blocks[0]["t"] - 0.1, blocks[-1]["t"] + 2.4, "THE %s TAKES ITS SHARE" % (b_[0].get("shield") or "SHIELD").upper(),
+                    ["  ·  ".join("a blow of %.1f: the shield took %.1f, %.1f reached her" % (x["before"], x["took"], x["reached"]) for x in b_[:2]),
+                     "the shield loses what it takes: its durability falls by it, and at 0 it breaks"], cyan))
+    for e in ev("tier2"):
+        out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 4.0, e["notice"] or "TIER 2 IS OPEN", ["a tier opens once the tier before has 75 % of its rooms explored, monsters killed and chests looted",
+                    "then a boss and 3 to 6 monsters of the new tier wait in a room she has seen (not hers): on the maps"], warm))
+    for e in ev("at_boss"):
+        out.append((e["t"] + MW_CARD + 4.0, e["t"] + MW_CARD + 8.0, "THE BOSS:  %s" % e["boss"].replace("_", " ").upper(), ["the strongest kind of tier 2, bigger, three times its hit points, its blows 1.6 times as hard",
+                    "%.0f m off, in a room of the start set she has explored" % e["m"]], (255, 150, 120)))
+    for e in ev("at_ring"):
+        out.append((e["t"] + MW_CARD + 4.0, e["t"] + MW_CARD + 8.0, "A RING SHE NEVER FOUND:  %s" % e["ring"].upper(), ["her kind of potency ring of the tier before, not found when the tier opened:",
+                    "put in a room she has seen and guarded by 4 monsters of the new tier; the maps mark it"], (255, 150, 120)))
+    for e in [x for x in EV if x["kind"] == "map" and x.get("open")]:
+        e1 = next((x["t"] for x in EV if x["kind"] == "map" and not x.get("open") and x["t"] > e["t"]), e["t"] + 3.0)
+        out.append((e["t"], e1, "M  ·  THE BIG MAP:  MISTWARD CASTLE", ["its marks: a crowned red ring for a boss, a gold ring for a guarded ring, a sack for her things,",
+                    "a blue ring for a teleporter, a red X for a trap she has seen  ·  a far boss or ring sits at the edge, the way to it"], gold))
+    for e in ev("cell_open"):
+        out.append((e["t"], e["t"] + 4.4, "F  ·  A PRISONER SET FREE", [e.get("message") or "the prisoner thanks her", "the prisoner gives her a thing of the tier, walks out and is gone  ·  the castle keep's cells (tier 2)"], cyan))
+    for e in ev("breakout"):
+        out.append((e["t"], e["t"] + 4.0, "A CAGED MONSTER BREAKS OUT", ["a cell may hold a monster: it unlocks its cell itself as she comes near, and comes for her", "the castle keep: tier 2's look"], (255, 150, 120)))
+    for e in ev("shape"):
+        out.append((e["t"], e["t"] + 3.2, {"dome": "A DOMED ROOM", "step pyramid": "A STEPPED PYRAMID", "circle": "A ROUND ROOM"}.get(e["shape"], e["shape"].upper()),
+                    ["rooms of other shapes: round, octagonal, hexagonal, triangular, L, T, U, a diamond; ceilings in domes, pyramids, steps",
+                     "about 60 % of the castle's rooms; the maps draw their shapes"], gold))
+    for e in ev("pad"):
+        out.append((e["t"], e["t"] + 2.6, "F  ·  %s" % ("TIER 2'S TELEPORTER:  ITS RING" if e.get("tier") == 2 else "THE GREAT HALL'S TELEPORTER:  BACK TO TIER 2"),
+                    [e.get("what", ""), "a teleporter in the great hall and in each tier's first set of rooms, its ring lying on it" if e.get("tier") == 2 else
+                     "it takes her to the pad of a tier whose ring she holds"], cyan))
+    for e in ev("hp_set"):
+        out.append((e["t"], e["t"] + 3.0, "THE REEL TAKES HER HIT POINTS DOWN", ["to %.0f: a fight she loses" % e["hp"], "to show what happens when she falls"], warm))
+    for e in ev("fell"):
+        pl = next((x for x in EV if x["kind"] == "mw_piles" and x["t"] >= e["t"] - 2.0), None)
+        things = pl["things"][-1] if pl and pl.get("things") else []          # (her pile: the newest)
+        out.append((e["t"], e["t"] + 5.0, "SHE FALLS:  HER THINGS STAY WHERE SHE FELL", ["%d things in a pile: %s" % (len(things), ", ".join(x.lower() for x in things[:5]) + (" ..." if len(things) > 5 else "")),
+                    "each shown as its picture over it, with a Loot Drops effect; the maps mark it; she comes back in the great hall with what her hero started with"], (255, 150, 120)))
+    for e in ev("took_back"):
+        out.append((e["t"], e["t"] + 3.4, "F  ·  HER THINGS TAKEN UP", [e.get("message", ""), "each as worn as it was"], cyan))
+    for e in ev("disarm"):
+        d1 = next((x for x in ev("disarmed") if x["t"] >= e["t"]), None)
+        out.append((e["t"], (d1["t"] + 1.6) if d1 else e["t"] + 3.0, "F  ·  DISARMING", ["the Rogue alone sees traps (from 8 m: the message, the map's red X) and disarms them: F, then a moment's stillness",
+                    (d1.get("message") if d1 else "") or "it may go off if she fumbles it"], cyan))
+    st = ev1("start")
+    if HERO == "Rogue" and st and st.get("trap"):
+        sp = next((x for x in MSGS if "spot a trap" in x["text"]), None)
+        if sp: out.append((sp["t"], sp["t"] + 2.6, "SHE SPOTS A TRAP", [sp["text"], "pits, darts, deadfalls, crushers, snares; glyphs, wards, emanations, cursed stones; chains, lingering traps, teleport traps"], gold))
+    for e in ev("onto"):
+        tr = next((x for x in EV if x["kind"] == "mw_trap" and x["t"] >= e["t"]), None)
+        out.append((e["t"], (tr["t"] + 3.0) if tr else e["t"] + 4.0, "THE REEL WALKS HER ONTO A TRAP:  %s" % e["trap"].upper(), ["one she has seen: what a trap does to whoever steps on it",
+                    ("it went off: %s" % tr.get("label", "")) if tr else ""], warm))
+    for e in ev("ring_taken"):
+        out.append((e["t"], e["t"] + 3.4, "THE RING TAKEN", ["the guards fallen, the ring is hers: the map's mark goes", "if every container of that room was open already, it lies on the floor (F takes it)"], cyan))
+    for i, e in enumerate(FIGHTS):
+        end = next((k["t"] for k in KILLS if k["t"] > e["t"]), e["t"] + 6.0) + 1.2
+        if i + 1 < len(FIGHTS): end = min(end, FIGHTS[i + 1]["t"] - 0.1)
+        tr = max(abs(e["section"][0]), abs(e["section"][1])) + 1
+        boss = any(b["boss"] == e["monster"] for b in ev("at_boss")) and e["its_hit_points"] > 250
+        out.append((e["t"], end, ("BOSS  %s  ·  OF TIER %d" % (e["monster"].replace("_", " ").upper(), tr + 1)) if boss else "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), ["%.0f hit points, %.0f damage a blow  ·  she has %.0f" % (e["its_hit_points"], e["its_damage"], C["max_health"]),
+                    lured(e) or ("its tier's strength: a boss three times its kind's" if boss else "the monsters' strength follows the tier of their set")], gold))
+    return out
+
+def mw_hud(o, d, r, t, ua, mapo):
+    """(mistward) what the castle's HUD adds: the frame rate (upper left), the castle's name over the minimap, what F would
+    do near her, the disarm bar, the fallen banner"""
+    fps = r.get("fps", 0.0)
+    if fps > 0:
+        s_ = "%d FPS  ·  %.1f MS" % (round(fps), 1000.0 / fps); tw = d.textlength(s_, font=fl_small)
+        blend_box(o, (24 * K, 14 * K, 44 * K + tw, 46 * K), 6 * K, (8, 8, 10, int(170 * ua))); d = ImageDraw.Draw(o, "RGBA")
+        d.text((34 * K, 30 * K), s_, font=fl_small, fill=lin((0.85, 0.95, 0.75), ua), anchor="lm")
+    if not mapo:
+        P = 300 * K; mg = 24 * K
+        text_c(d, (W * K - mg - P / 2, 8 * K), sc((C.get("game_title") or "").upper()), fl_small, lin((1.0, 0.84, 0.45), ua), "mt")
+    near = r.get("near", "")
+    if near and not r.get("inv", [0])[0] and not r.get("craft", [0])[0] and not r.get("dead"):
+        s_ = "[F]  " + near; tw = d.textlength(s_, font=f_line); y_ = H * K * 0.72
+        blend_box(o, (W * K / 2 - tw / 2 - 16 * K, y_ - 6 * K, W * K / 2 + tw / 2 + 16 * K, y_ + 38 * K), 8 * K, (8, 8, 10, int(160 * ua))); d = ImageDraw.Draw(o, "RGBA")
+        d.text((W * K / 2, y_), s_, font=f_line, fill=lin((0.95, 0.92, 0.82), ua), anchor="ma")
+    dis = r.get("dis", -1.0)
+    if dis is not None and dis >= 0:
+        bw, bh = 360 * K, 18 * K; x0, y0 = W * K / 2 - bw / 2, H * K * 0.72 + 50 * K
+        d.rectangle((x0 - 2 * K, y0 - 2 * K, x0 + bw + 2 * K, y0 + bh + 2 * K), fill=(0, 0, 0, int(180 * ua)))
+        d.rectangle((x0, y0, x0 + bw * dis, y0 + bh), fill=lin((0.95, 0.8, 0.3), ua))
+        text_c(d, (W * K / 2, y0 + bh + 6 * K), "disarming  %d%%" % round(dis * 100), f_small, lin(INK, ua), "mt")
+    if r.get("dead"):
+        text_c(d, (W * K / 2, H * K * 0.45), "YOU HAVE FALLEN", f_title, lin((1.0, 0.3, 0.25), ua))
+        text_c(d, (W * K / 2, H * K * 0.45 + 60 * K), "your things lie where you fell: back to the great hall...", f_line, lin(INK, ua))
+    return d
 # ---------------------------------------------------------------- run5s: the spells, rings, monsters by tier, corpses and menu reel
 SPELLS = {s_["name"]: s_ for s_ in C.get("spells", [])}
 SPELL_EV = [e for e in EV if e["kind"] == "spell"]; MENU_EV = [e for e in EV if e["kind"] == "menu"]
@@ -1542,7 +1752,11 @@ def overlay(f):
     if S5 and r.get("menu", [0])[0]: menu_panel(o, r, t, ua); d = ImageDraw.Draw(o, "RGBA")
     # ---- the reel's own: title, captions (bottom left)
     a = fade(t, 0.3, 4.6)
-    if a > 0:
+    if a > 0 and M5:
+        d.text((44 * K, 50 * K), "mistward_castle", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
+        d.text((46 * K, 94 * K), "Mistward Castle  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), {"Warrior": "shields, the anvil, a boss", "Mage": "the torch, the prison's cells",
+               "Warlock": "rooms of other shapes, teleporters, her things where she falls", "Rogue": "traps, a guarded ring"}[HERO]), font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
+    elif a > 0:
         d.text((44 * K, 34 * K), "random_dungeonmagic_level" + ("" if LV == "1" else LV), font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
         d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  spells from tomes, rings, monsters by tier, the dead stay, the menu" % HERO.lower() if S5 else
                                   "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  the map, chests, armour, the anvil, fights, new rooms tier by tier" % HERO.lower() if X5 else
@@ -1734,6 +1948,10 @@ def overlay(f):
         global S5CAPS
         if S5CAPS is None: S5CAPS = s5_caps()
         caps = S5CAPS
+    if M5:
+        global M5CAPS
+        if M5CAPS is None: M5CAPS = m5_caps()
+        caps = M5CAPS
     lift = 96 if S5 else 0          # (run5s: the captions and the heard lines above the hotbar)
     # (one caption at a time, in the one place: the one that began last; an earlier one still running shows again after it)
     live = [cp for cp in caps if fade(t, cp[0], cp[1]) > 0]
@@ -1767,8 +1985,16 @@ def overlay(f):
         blend_box(o, (32 * K, y - 19 * K, 96 * K + tw, y + 19 * K), 10 * K, (12, 11, 9, int(150 * k))); d = ImageDraw.Draw(o, "RGBA")
         d.text((48 * K, y), "\u266a", font=f_note, fill=(150, 220, 255, int(255 * k)), anchor="lm"); d.text((80 * K, y), s, font=f_line, fill=(236, 240, 244, int(245 * k)), anchor="lm")
         y -= 44 * K
+    if M5: d = mw_hud(o, d, r, t, ua, mapo)
     if L4: l4_panels(o, r, t, ua); d = ImageDraw.Draw(o, "RGBA")
-    if W5 and CARD and CARD[0] - 0.35 <= t <= CARD[1] + 0.5:
+    if M5:
+        cd = last_at(CARDS, t)
+        if cd and cd["t"] - 0.35 <= t <= cd["t"] + MW_CARD + 0.5:
+            k = max(0.0, min(1.0, (t - cd["t"] + 0.35) / 0.35, (cd["t"] + MW_CARD + 0.5 - t) / 0.5))
+            d.rectangle((0, 0, W * K, H * K), fill=(4, 4, 6, int(255 * k)))
+            text_c(d, (W * K / 2, H * K * 0.40), cd["text"], f_title, (255, 214, 140, int(255 * k)))
+            if cd.get("sub"): text_c(d, (W * K / 2, H * K * 0.40 + 90 * K), cd["sub"], f_line, (236, 236, 240, int(235 * k)))
+    if W5 and not M5 and CARD and CARD[0] - 0.35 <= t <= CARD[1] + 0.5:
         # (the card over the reel's shortcut: what the generator's debug clear did, said as it is)
         k = max(0.0, min(1.0, (t - CARD[0] + 0.35) / 0.35, (CARD[1] + 0.5 - t) / 0.5))
         d.rectangle((0, 0, W * K, H * K), fill=(4, 4, 6, int(255 * k)))

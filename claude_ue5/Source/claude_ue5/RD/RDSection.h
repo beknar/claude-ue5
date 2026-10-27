@@ -121,6 +121,57 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumSeals(int32 Kind = 0) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<FVector> GetSealPoints(TArray<int32>& Kinds) const { Kinds = SealKinds; return SealAt; }
 
+	// ---- mistward_castle
+	/** the set's theme (its pieces "<Theme>.<Name>") */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FName Theme;
+	/** a room's shape ("rect", "circle", "octagon", "hexagon", "triangle", "L", "T", "U", "dome", "pyramid", "tall") */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") FString GetRoomShape(int32 Index) const;
+	/** a room's floor tiles (world, tile centres) and the height of the ceiling over each */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<FVector> GetRoomTiles(int32 Index, TArray<float>& Heights) const;
+	/** furniture that collides, as placed (tests): each footprint's middle, half size (x, y) and yaw; the containers'
+	 *  ways in (the space before their fronts) as the same */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<FVector> GetFootprints(TArray<FVector>& HalfYaw, TArray<FString>& Names) const;
+	/** counts what a set of rooms would hold without building it: rooms (not the hallway junctions), chests and trunks, the
+	 *  monsters its spawning plans (the tiers' share rule for sets she has not reached) */
+	static bool Census(ARDDungeonGenerator* InGenerator, FIntPoint InCoord, int32 InSeed, int32& OutRooms, int32& OutChests, int32& OutMonsters);
+	/** its traps: their kind, where, whether set off, spent, disarmed, seen by her (RDTraps.cpp) */
+	struct FTrapInst
+	{
+		int32 Def = 0; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Room = -1; bool bHall = false;
+		uint8 State = 0;          // 0 set, 1 going off, 2 spent, 3 disarmed
+		bool bSeen = false;
+		float Time = 0.f, Next = 0.f, Stay = 0.f; int32 Step = 0;
+		FVector Goal = FVector::ZeroVector;
+		TArray<TWeakObjectPtr<USceneComponent>> Comps;
+		TWeakObjectPtr<UStaticMeshComponent> Moving;
+		TArray<TWeakObjectPtr<class UFXSystemComponent>> Fx;
+	};
+	TArray<FTrapInst> TrapList;
+	/** what a trap throws or drops, on its way: darts, stones, the crusher's block */
+	struct FTrapShot { TWeakObjectPtr<UStaticMeshComponent> C; FVector Vel = FVector::ZeroVector; FVector Goal = FVector::ZeroVector; int32 Trap = -1; uint8 Kind = 0; bool bDone = false; float Life = 0.f; };
+	TArray<FTrapShot> TrapShots;
+	void TickTraps(float Dt, class APawn* Her, class URDCombatComponent* Pc);
+	/** a trap's strike on her (its share of her hit points) if she is within Radius of At */
+	void TrapStrike(int32 Index, const FVector& At, float Radius, float Share);
+	void TrapShoot(int32 Index, uint8 Kind, const FVector& From, const FVector& To, float Speed);
+	/** tests: a trap of a kind added where she stands (it goes off at once) */
+	int32 AddTrapAt(int32 Def, const FVector& At, uint8 State);
+	bool FireTrap(int32 Index);
+	void SpendTrap(int32 Index, uint8 State);
+	/** the prison cells and who is in each (0 nobody, 1 a prisoner, 2 a monster), the cell door's index */
+	struct FCell { FTransform Frame; int32 Door = -1; uint8 Occupant = 0; int32 Def = 0; TWeakObjectPtr<AActor> Who; bool bOpened = false; };
+	TArray<FCell> Cells;
+	/** the cell whose door this is (-1: none) */
+	int32 CellOfDoor(int32 Door) const;
+	/** what F at a cell door does (mistward: a locked cell with someone in it); "" not a cell of these */
+	FString DescribeCell(int32 Door) const;
+	bool OpenCell(int32 Door);
+	void TickCells(float Dt, class APawn* Her);
+	/** the cells (tests): "<cell>|<door>|<occupant 0 none, 1 prisoner, 2 monster>|<opened>|<x>|<y>|<z>|<who there>|<who x>|<y>|<z>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") TArray<FString> GetCellLines() const;
+	/** the room with this section's teleporter pad (-1: none) */
+	int32 PadRoom = -1;
+
 	// ---- interaction (doors, containers)
 	/** nearest door / container within MaxDistance: returns distance (or 1e9) */
 	float FindNearestInteractive(const FVector& From, float MaxDistance, bool& bDoor, int32& Index) const;
@@ -157,7 +208,40 @@ private:
 		int32 Block = 0;
 		FIntPoint Lane;           // local tile: centre row (Y) and centre column (X) kept free (door lines)
 		bool bDoorSide[4] = { false, false, false, false };    // -X, +X, -Y, +Y
+		uint8 Shape = 0;          // mistward: 0 rect (see RDShapeName)
 	};
+	/** mistward: a room tile's ceiling height (0: the room's or hallway's own) */
+	TArray<float> CeilH;
+	float CeilAt(FIntPoint T) const;
+	/** mistward: the room's shape cut out of its rectangle (tiles outside it void), the ceiling heights of the shapes that rise */
+	void ShapeRoom(FRandomStream& R, int32 RI);
+	/** mistward: a piece of the set's theme ("<Theme>.<Name>") or else the plain one, and the name that resolves to */
+	const FRDPiece* Pc(FName Name) const;
+	FName PcName(FName Name) const;
+	/** PcName's answers for the theme they were found for (a name formatted and looked up once per piece name, not per piece) */
+	mutable TMap<FName, FName> ThemeNames;
+	mutable FName ThemeNamesOf;
+	/** mistward (bTidyFurniture): footprints placed in the room being furnished; a container's way in */
+	struct FFoot { FVector2D C; FVector2D H; float Yaw = 0.f; bool bAccess = false; FName Name; };
+	TArray<FFoot> Feet;
+	int32 FurnRoom = -1;
+	bool FootFree(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess) const;
+	/** on the room's own floor (every tile under it is the room's) */
+	bool OnRoomFloor(const FVector& Loc, float Yaw, const FVector2D& Size, int32 RI) const;
+	void AddFoot(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess, FName Name);
+	/** a piece's footprint as built: its nominal size, or its mesh's box where that is bigger (a table's top, a wardrobe's
+	 *  cornice), centred where the box is; and how far its front (+X) reaches from where it is placed */
+	void FootOf(const struct FRDPiece* P, const FTransform& T, FVector& OutCenter, FVector2D& OutSize, float& OutFront) const;
+	bool bCensus = false;
+	int32 CensusChests = 0;
+	void BuildShellCensus(FRandomStream& R);
+	/** mistward: actors of its own (prisoners, the teleporter pad), gone with it */
+	UPROPERTY(Transient) TArray<TObjectPtr<AActor>> MistActors;
+	/** mistward: its traps, prisoners and pad (after the furniture, from streams of their own) */
+	void PlaceTraps();
+	void PlaceCellOccupants();
+	void PlacePad();
+	void BuildTrapVisual(int32 Index);
 	struct FCorr { FIntPoint Min, Max; bool bHoriz = true; int32 Theme = 0; };
 	struct FMover
 	{
@@ -247,14 +331,15 @@ private:
 
 	// placement helpers (world space)
 	FVector TileWorld(FIntPoint Local, float Z = 0.f) const;
-	void AddPiece(FName Name, const FTransform& T, bool bForceNoCollision = false);
-	void AddPieceAt(FName Name, const FVector& Loc, float Yaw, float Scale = 1.f, bool bForceNoCollision = false);
+	/** false: not placed (no such piece; mistward: it would overlap other furniture or stand where a container is opened) */
+	bool AddPiece(FName Name, const FTransform& T, bool bForceNoCollision = false);
+	bool AddPieceAt(FName Name, const FVector& Loc, float Yaw, float Scale = 1.f, bool bForceNoCollision = false);
 	UPointLightComponent* AddLight(const FVector& Loc, const FLinearColor& Color, float Candelas, float Radius, bool bShadows, float Flicker);
 	void AddEffect(FName Name, const FVector& Loc, float Scale = 1.f);
 	void AddTorch(const FVector& WallPoint, float InYaw, float Candelas, bool bLit = true);
 	void AddDoor(FIntPoint RoomTile, FIntPoint OutTile, int32 RoomIndex);
 	void AddCellDoor(const FVector& HingeWorld, float Yaw, float Width);
-	void AddContainer(FName Name, const FVector& Loc, float Yaw, const FString& Kind);
+	bool AddContainer(FName Name, const FVector& Loc, float Yaw, const FString& Kind);
 	void MarkBlocked(const FVector& Loc, float Yaw, const FVector2D& Size, bool bLaneToo = false);
 	USceneComponent* AddPivot(USceneComponent* Parent, const FTransform& Rel);
 	UStaticMeshComponent* AddMesh(USceneComponent* Parent, UStaticMesh* Mesh, const FTransform& Rel, bool bCollision);

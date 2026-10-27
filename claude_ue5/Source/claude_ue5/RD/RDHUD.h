@@ -46,6 +46,7 @@ public:
 	/** tests (level 5): the anvils drawn on the minimap / the big map in the last frame (world XY), and the rooms whose tier
 	 *  the minimap / the big map wrote ("<room kind>|<tier>") */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector2D> GetAnvilsDrawn() const { return AnvilsDrawn; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector> GetMarksDrawn() const { return MarksDrawn; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMiniTierLabels() const { return MiniTierLabels; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMapTierLabels() const { return MapTierLabels; }
 
@@ -55,6 +56,8 @@ private:
 	TArray<FName> ArtDrawn;
 	TArray<FString> RoomLabels;
 	TArray<FVector2D> StarsDrawn, AnvilsDrawn;
+	/** mistward: the marks drawn this frame (world x, y; the kind in z: 7 boss, 8 guarded ring, 9 her things, 10 pad, 11 trap) */
+	TArray<FVector> MarksDrawn;
 	TArray<FString> MiniTierLabels, MapTierLabels;
 	FVector2D MapView = FVector2D::ZeroVector, MapArrow = FVector2D::ZeroVector;
 	bool bMapArrow = false;
@@ -97,6 +100,8 @@ private:
 	 *  generated, 5 a sealed hallway end (level 5), 6 an anvil (level 5) */
 	struct FRDPoi { FVector2D W; int32 Kind; };
 	void GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance);
+	/** mistward: 7 a boss, 8 a guarded ring, 9 her dropped things, 10 a teleporter pad, 11 a trap she has seen */
+	void MistMark(int32 Kind, const FVector2D& S, float Size);
 	static FString KindCode(ERDRoomKind Kind);
 	void DrawPlayerArrow(const FVector2D& P, float Yaw, float Size);
 	void Box(const FVector2D& A, const FVector2D& B, const FLinearColor& C);

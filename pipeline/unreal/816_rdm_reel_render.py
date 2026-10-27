@@ -10,7 +10,8 @@ when the editor was started with -deterministicaudio (the non-realtime audio dev
 or silent and the log says so. Level "4select" is random_dungeonmagic_level4's menu (LS_RDM4select_Showcase on
 random_dungeonmagic_level4_select under ARDHeroSelectGameMode; 829 pilots it); "5" and "5select" the same for
 random_dungeonmagic_level5 (under level 4's BP_RDM4_GameMode: it is level 4's Save As copy) and its menu.
-Args: out_dir preview|final [file_prefix] [level: 1, 2, 3, 4, 4select, 5 or 5select]"""
+"mw" and "mwselect": mistward_castle (level 5's Save As copy: BP_RDM4_GameMode) and its menu mistward_castle_select.
+Args: out_dir preview|final [file_prefix] [level: 1, 2, 3, 4, 4select, 5, 5select, mw or mwselect]"""
 import sys, unreal
 OUT = sys.argv[1]; MODE = sys.argv[2] if len(sys.argv) > 2 else "preview"; PREFIX = sys.argv[3] if len(sys.argv) > 3 else "rdm"
 LV = sys.argv[4] if len(sys.argv) > 4 else "1"; SUF = "" if LV == "1" else LV
@@ -20,7 +21,8 @@ j = queue.allocate_new_job(unreal.MoviePipelineExecutorJob)
 j.job_name = "DungeonMagic%s_%s" % (SUF, MODE)
 SEL = LV.endswith("select")                     # (level 4's or 5's menu: 829)
 MAP = f"/Game/RandomDungeon/Maps/random_dungeonmagic_level{LV[:-6]}_select" if SEL else f"/Game/RandomDungeon/Maps/random_dungeonmagic_level{SUF}"
-GM = "BP_RDM4_GameMode" if SUF == "5" else f"BP_RDM{SUF}_GameMode"      # (level 5 is level 4's Save As copy: its game mode)
+if LV.startswith("mw"): MAP = "/Game/RandomDungeon/Maps/mistward_castle" + ("_select" if SEL else "")
+GM = "BP_RDM4_GameMode" if SUF in ("5", "mw") else f"BP_RDM{SUF}_GameMode"      # (level 5 is level 4's Save As copy: its game mode; mistward_castle level 5's)
 j.sequence = unreal.SoftObjectPath(f"/Game/RandomDungeon/Cinematics/LS_RDM{SUF}_Showcase"); j.map = unreal.SoftObjectPath(MAP)
 cfg = j.get_configuration()
 o = cfg.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting)

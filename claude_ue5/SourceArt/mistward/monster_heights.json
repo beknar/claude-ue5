@@ -1,0 +1,225 @@
+{
+ "_note": "866: each kind's lowest drawn point against its capsule's bottom in its idle (cm), and its MeshZ then",
+ "kinds": {
+  "Rat": {
+   "bottom": 50.27,
+   "mesh_z": -39.36
+  },
+  "Half_Creature_04": {
+   "bottom": -50.66,
+   "mesh_z": -139.67
+  },
+  "Parasite_Slider": {
+   "bottom": 46.1,
+   "mesh_z": -44.22
+  },
+  "Half_Creature_05": {
+   "bottom": -48.74,
+   "mesh_z": -137.48
+  },
+  "Drinker": {
+   "bottom": -3.28,
+   "mesh_z": -93.94
+  },
+  "Medic": {
+   "bottom": -0.31,
+   "mesh_z": -90.32
+  },
+  "Chicken": {
+   "bottom": -8.77,
+   "mesh_z": -98.83
+  },
+  "Soldier": {
+   "bottom": -0.07,
+   "mesh_z": -89.88
+  },
+  "Sufferer": {
+   "bottom": -3.12,
+   "mesh_z": -94.04
+  },
+  "Fat": {
+   "bottom": -9.92,
+   "mesh_z": -99.92
+  },
+  "Mask": {
+   "bottom": -0.66,
+   "mesh_z": -91.21
+  },
+  "Monster": {
+   "bottom": 1.03,
+   "mesh_z": -89.49
+  },
+  "Gunner": {
+   "bottom": 0.9,
+   "mesh_z": -89.55
+  },
+  "Parasites_Fat": {
+   "bottom": -1.73,
+   "mesh_z": -92.24
+  },
+  "Parasit": {
+   "bottom": 0.86,
+   "mesh_z": -89.79
+  },
+  "Orc_03": {
+   "bottom": -2.64,
+   "mesh_z": -92.38
+  },
+  "Magur": {
+   "bottom": -0.19,
+   "mesh_z": -89.62
+  },
+  "Azrak": {
+   "bottom": -1.35,
+   "mesh_z": -91.37
+  },
+  "Warrior_02_the_leopard": {
+   "bottom": -0.26,
+   "mesh_z": -91.77
+  },
+  "Kanit": {
+   "bottom": -2.73,
+   "mesh_z": -92.41
+  },
+  "Gnur": {
+   "bottom": -0.87,
+   "mesh_z": -90.92
+  },
+  "Dardan": {
+   "bottom": 0.41,
+   "mesh_z": -89.85
+  },
+  "Costalmed": {
+   "bottom": -4.15,
+   "mesh_z": -93.12
+  },
+  "Orc_05": {
+   "bottom": -4.61,
+   "mesh_z": -93.07
+  },
+  "Orc_06": {
+   "bottom": -2.53,
+   "mesh_z": -91.76
+  },
+  "Alien": {
+   "bottom": -8.99,
+   "mesh_z": -100.16
+  },
+  "Devourer": {
+   "bottom": -9.06,
+   "mesh_z": -99.25
+  },
+  "Insect": {
+   "bottom": 23.73,
+   "mesh_z": -152.78
+  },
+  "Pangolin": {
+   "bottom": 6.13,
+   "mesh_z": -84.74
+  },
+  "Tank": {
+   "bottom": 1.06,
+   "mesh_z": -90.48
+  },
+  "Orc_01": {
+   "bottom": -1.65,
+   "mesh_z": -91.65
+  },
+  "Orc_02": {
+   "bottom": -1.38,
+   "mesh_z": -90.82
+  },
+  "Ursag": {
+   "bottom": -6.94,
+   "mesh_z": -97.12
+  },
+  "Orc_04": {
+   "bottom": -27.48,
+   "mesh_z": -118.23
+  },
+  "Bear_Warrior": {
+   "bottom": 0.8,
+   "mesh_z": -89.82
+  },
+  "Bull_Warrior": {
+   "bottom": -6.17,
+   "mesh_z": -97.3
+  },
+  "Crocodile_Warrior": {
+   "bottom": -0.94,
+   "mesh_z": -90.27
+  },
+  "Elephant_Warrior": {
+   "bottom": -0.38,
+   "mesh_z": -91.8
+  },
+  "Alien_Warrior_05": {
+   "bottom": 1.12,
+   "mesh_z": -90.33
+  },
+  "Exterminator": {
+   "bottom": -9.73,
+   "mesh_z": -98.96
+  },
+  "Shell": {
+   "bottom": -10.08,
+   "mesh_z": -99.95
+  },
+  "Bug": {
+   "bottom": -9.56,
+   "mesh_z": -98.62
+  },
+  "Horned": {
+   "bottom": -13.25,
+   "mesh_z": -103.31
+  },
+  "Mutant": {
+   "bottom": -10.03,
+   "mesh_z": -99.52
+  },
+  "Ripper_dog": {
+   "bottom": -4.09,
+   "mesh_z": -94.15
+  },
+  "Daemon": {
+   "bottom": -15.28,
+   "mesh_z": -107.84
+  },
+  "Troll": {
+   "bottom": -8.74,
+   "mesh_z": -99.22
+  },
+  "Parasite_Spider": {
+   "bottom": -3.91,
+   "mesh_z": -99.21
+  },
+  "Fantasy_Animal_raptor_mount": {
+   "bottom": -9.54,
+   "mesh_z": -102.1
+  },
+  "Alfa": {
+   "bottom": -16.98,
+   "mesh_z": -108.08
+  },
+  "Spider": {
+   "bottom": -25.7,
+   "mesh_z": -124.75
+  },
+  "Rock": {
+   "bottom": -73.05,
+   "mesh_z": -165.83
+  },
+  "Titan": {
+   "bottom": -34.61,
+   "mesh_z": -124.88
+  },
+  "Hunter": {
+   "bottom": -33.71,
+   "mesh_z": -123.72
+  },
+  "Nasty": {
+   "bottom": -31.9,
+   "mesh_z": -129.25
+  }
+ }
+}
