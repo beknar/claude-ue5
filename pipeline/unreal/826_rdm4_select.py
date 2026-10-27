@@ -11,14 +11,20 @@ Run after 825. Idempotent (actors tagged rdm4_select).
 With the argument 5 it makes random_dungeonmagic_level5's menu instead (random_dungeonmagic_level5_select: its heroes
 but the Summoner, who is left off the menu since 2026-10-26 (the Warrior is Warrior3: 862); START opens
 random_dungeonmagic_level5), its painted pieces and lettering those 830 gave level 4's menu.
-Args: [4 | 5]"""
+With the argument mistward it makes mistward_castle's menu (mistward_castle_select: level 5's four heroes as mistward_castle
+has them, the Warrior with the shield she starts with there (the generator's StartShield, its fit on her arm), the menu's
+title "Mistward Castle"; START opens mistward_castle).
+Args: [4 | 5 | mistward]"""
 import sys, unreal
 LV = sys.argv[1] if len(sys.argv) > 1 else "4"
 eal = unreal.EditorAssetLibrary
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 V = unreal.Vector; Rot = unreal.Rotator
-DUNGEON = "/Game/RandomDungeon/Maps/random_dungeonmagic_level" + LV; LEVEL = DUNGEON + "_select"
+MISTWARD = LV == "mistward"
+DUNGEON = "/Game/RandomDungeon/Maps/mistward_castle" if MISTWARD else "/Game/RandomDungeon/Maps/random_dungeonmagic_level" + LV
+LEVEL = DUNGEON + "_select"
+if MISTWARD: LV = "5"
 TAG = unreal.Name(f"rdm{LV}_select")
 UIART = UIFONTS = None
 if LV != "4":
@@ -38,6 +44,15 @@ gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDunge
 # in the editor and the tests), but cannot be chosen)
 OFF_MENU = ("Summoner",) if LV == "5" else ()
 HTXT = [h.export_text() for h in gen.get_editor_property("heroes") if str(h.name) not in OFF_MENU]; assert len(HTXT) >= 4, len(HTXT)
+# (mistward: the shield each hero starts with, as the fit of its item for her: (mesh, bone, grip) as text)
+START_SHIELDS = {}
+if MISTWARD:
+    ss = {str(k): str(v) for k, v in gen.get_editor_property("start_shield").items()}
+    for it in gen.get_editor_property("items"):
+        for hero, item in ss.items():
+            if str(it.name) == item:
+                for f in it.weapon_fits:
+                    if str(f.hero) == hero: START_SHIELDS[hero] = f.weapon.export_text()
 del gen
 # ---- the level
 if eal.does_asset_exist(LEVEL): les.load_level(LEVEL)
@@ -121,12 +136,16 @@ for h in heroes:
             hold(d.mesh, d.hand_bone, d.grip, f"{d.name}_Hand"); hold(d.off_hand_mesh, d.off_hand_bone, d.off_hand_grip, f"{d.name}_OffHand")
         else:
             hold(d.mesh, d.holster_bone, d.holster_grip, f"{d.name}_Carried"); hold(d.off_hand_mesh, d.off_hand_holster_bone, d.off_hand_holster_grip, f"{d.name}_OffCarried")
+    if str(h.name) in START_SHIELDS:
+        sw = unreal.RDWeaponDef(); sw.import_text(START_SHIELDS[str(h.name)])
+        hold(sw.off_hand_mesh, sw.off_hand_bone, sw.off_hand_grip, "StartShield")
     fig.set_actor_hidden_in_game(len(figures) > 0)
     figures.append(fig)
 sel = spawn(unreal.RDHeroSelect, (0, 0, 0), label="HeroSelect")
 sel.set_editor_property("heroes", heroes); sel.set_editor_property("figures", figures)
 sel.set_editor_property("turntable", plinth); sel.set_editor_property("camera", cam)
 sel.set_editor_property("target_level", DUNGEON); sel.set_editor_property("front_yaw", 0.0); sel.set_editor_property("turn_rate", 28.0)
+sel.set_editor_property("game_title", "Mistward Castle" if MISTWARD else "Random Dungeon")
 if UIART is not None:
     def back(d, cls):
         out = {}

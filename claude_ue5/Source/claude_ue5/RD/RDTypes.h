@@ -423,7 +423,15 @@ enum class ERDItemKind : uint8
 	 *  of each kind at a time) */
 	Ring,
 	/** random_dungeonmagic_level5: a tome that teaches its Spell to a hero who learns spells of its type */
-	Tome
+	Tome,
+	/** mistward_castle: a shield carried in the left hand (WeaponFits: its mesh on her left arm, OffHand fields); Amount
+	 *  the share of a blow it takes, Slower the share of her speed, Durability the hurt it can take before it breaks */
+	Shield,
+	/** mistward_castle: a torch carried in the left hand (WeaponFits: its mesh in her hand); it lights her way */
+	Torch,
+	/** mistward_castle: a teleport ring (TeleportTier): used, it takes her to the first tier's teleporter, whose pad takes
+	 *  her back to the teleporter of that tier */
+	Teleport
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */
@@ -483,8 +491,96 @@ struct FRDItemDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDRingKind RingKind = ERDRingKind::Magic;
 	/** a tome: the spell it teaches (the generator's Spells by name) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Spell = NAME_None;
-	/** a weapon: its type in the weapons table (what an anvil breaks it into) */
+	/** a weapon: its type in the weapons table (what an anvil breaks it into; mistward_castle: armour and shields too, by
+	 *  the breakdown table's types) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString WeaponType;
+	/** mistward_castle: a teleport ring's tier (2 to 5) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 TeleportTier = 0;
+};
+
+/** mistward_castle: the kinds of trap */
+UENUM(BlueprintType)
+enum class ERDTrapKind : uint8
+{
+	/** mechanical: the floor gives way (she falls in, hurt, held a moment) */
+	Pit,
+	/** mechanical: darts or arrows from the walls */
+	Missiles,
+	/** mechanical: stones fall from the ceiling */
+	Deadfall,
+	/** mechanical: a stone block slams down */
+	Crusher,
+	/** mechanical: a rope snare holds her */
+	Snare,
+	/** magical: a rune on the floor bursts */
+	Glyph,
+	/** magical: a barrier across the way burns and throws her back */
+	Ward,
+	/** magical: a cloud that hurts and slows her while she stays in it */
+	Emanation,
+	/** magical: a cursed object (a skull on a plinth): touched, it weakens her */
+	Cursed,
+	/** complex: a chain of traps one after the other (a snare, then the deadfall, then a glyph) */
+	Chain,
+	/** complex: the longer she stays the worse it gets (darts, then fire, then the ceiling) */
+	Lingering,
+	/** a teleport: she is carried off to a room with monsters, or a room of traps */
+	Teleport
+};
+
+/** mistward_castle: one kind of trap (the generator's Traps; pipeline/unreal/86x). Damage is a share of her hit points. */
+USTRUCT(BlueprintType)
+struct FRDTrapDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDTrapKind Kind = ERDTrapKind::Pit;
+	/** what the HUD calls it ("pit trap", "glyph of fire") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Label;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bMagic = false;
+	/** the share of her hit points a strike takes, the radius it is set off within (cm), how long it holds her, burns or
+	 *  curses her (s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Damage = 0.15f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Radius = 110.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Seconds = 2.f;
+	/** the first tier of rooms it is set in, and how likely it is against the others */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 MinTier = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	/** what is seen of it before it goes off (a pressure plate, a rune, a skull; none: nothing) and what it throws or drops
+	 *  (a dart, a stone, the crusher's block) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform MeshTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Missile = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform MissileTransform;
+	/** effects: on it while it waits (a rune's glow), when it goes off, where it strikes */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> IdleFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> TriggerFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> HitFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float IdleFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float TriggerFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HitFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Color = FLinearColor(1.f, 0.4f, 0.1f);
+	/** its sounds: "Trap.<SoundKey>.Trigger", "Trap.<SoundKey>.Hit" (none: the generator's Env sounds) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SoundKey = NAME_None;
+};
+
+/** mistward_castle: someone locked in a prison cell (the NPC packs): a mesh and its clips (idle, walking out, thanks) */
+USTRUCT(BlueprintType)
+struct FRDPrisonerDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<USkeletalMesh>> Parts;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Idle = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Walk = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Thanks = nullptr;
+	/** mesh relative to its feet (z) and turned so that it faces +X (yaw) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshZ = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = -90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkSpeed = 120.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkClipSpeed = 120.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
 };
 
 /** random_dungeonmagic_level5: what a recipe takes of one kind: Count of any of AnyOf together ("wood (any)": hardwood,
@@ -564,6 +660,18 @@ struct FRDMapRect
 	/** room (false) or corridor (true) */
 	UPROPERTY(BlueprintReadOnly) bool bCorridor = false;
 	UPROPERTY(BlueprintReadOnly) bool bDiscovered = false;
+	/** mistward_castle: a room of another shape than its rectangle: its tiles, row by row (Y, then X), 1 where it has floor
+	 *  (empty: the whole rectangle); its shape's name */
+	UPROPERTY(BlueprintReadOnly) TArray<uint8> Mask;
+	UPROPERTY(BlueprintReadOnly) FString Shape;
+	/** a tile of the rectangle (global) is the room's */
+	bool HasTile(const FIntPoint& T) const
+	{
+		if (T.X < Min.X || T.Y < Min.Y || T.X >= Max.X || T.Y >= Max.Y) return false;
+		if (Mask.Num() == 0) return true;
+		const int32 W = Max.X - Min.X, I = (T.Y - Min.Y) * W + (T.X - Min.X);
+		return Mask.IsValidIndex(I) && Mask[I] != 0;
+	}
 };
 
 /** map data of one section: kept for the whole session (also after the section is unloaded) */

@@ -20,6 +20,8 @@
 #include "NiagaraEmitterInstance.h"
 #include "TimerManager.h"
 #include "HAL/PlatformTime.h"
+#include "Misc/ScopeExit.h"
+#include "RD/RDMistward.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeon, Log, All);
 
@@ -90,8 +92,8 @@ void ARDSection::Plan(FRandomStream& R)
 {
 	N = Generator->SectionTiles;
 	const int32 B = Generator->BlockTiles, NB = N / B;
-	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset();
-	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N);
+	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset();
+	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
 	const bool bStart = Generator->IsStartSection(Coord);
 	// room kinds: weighted, a few per section capped
 	struct FW { ERDRoomKind K; float W; int32 MinSize; int32 MaxSize; int32 Cap; };
@@ -205,16 +207,235 @@ void ARDSection::Plan(FRandomStream& R)
 			if (In(Out) && Type[Idx(Out)] == 2) DoorEdges.Add(EdgeKey(In_, Out), DI++);
 		}
 	}
+	// (mistward: rooms of other shapes and heights; a stream of its own, so the layout above is what it was)
+	if (Generator->bShapedRooms)
+	{
+		FRandomStream RS(R.GetInitialSeed() ^ 0x5A4E3D21);
+		for (int32 RI = 0; RI < Rooms.Num(); ++RI) ShapeRoom(RS, RI);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------ shapes (mistward)
+static const TCHAR* RDShapeNames[] = { TEXT("rect"), TEXT("circle"), TEXT("octagon"), TEXT("hexagon"), TEXT("triangle"), TEXT("L"), TEXT("T"), TEXT("U"),
+	TEXT("dome"), TEXT("pyramid"), TEXT("tall"), TEXT("diamond"), TEXT("step pyramid") };
+
+FString ARDSection::GetRoomShape(int32 I) const
+{
+	if (!Rooms.IsValidIndex(I)) return FString();
+	const int32 S = Rooms[I].Shape;
+	return S < (int32)UE_ARRAY_COUNT(RDShapeNames) ? RDShapeNames[S] : TEXT("rect");
+}
+
+float ARDSection::CeilAt(FIntPoint T) const
+{
+	if (!In(T) || Type.Num() != N * N || !Generator) return 0.f;
+	if (CeilH.Num() == N * N && CeilH[Idx(T)] > 0.f) return CeilH[Idx(T)];
+	const int16 O = Owner[Idx(T)];
+	const bool bLow = O >= 1000 || O < 0 || Rooms[O].Kind == ERDRoomKind::Junction;
+	return bLow ? Generator->CorridorHeight : Generator->RoomHeight;
+}
+
+void ARDSection::ShapeRoom(FRandomStream& R, int32 RI)
+{
+	FRoom& Rm = Rooms[RI];
+	const float Pick = R.FRand();                      // (drawn for every room: one room's choice never moves another's)
+	const int32 Which = R.RandRange(1, 12);
+	const float Tall = R.FRandRange(0.f, 1.f);
+	if (Rm.Kind == ERDRoomKind::Junction || Rm.Kind == ERDRoomKind::Prison) return;
+	if (Generator->IsStartSection(Coord) && Rm.Kind == ERDRoomKind::Hall) return;
+	const int32 W = Rm.Max.X - Rm.Min.X, H = Rm.Max.Y - Rm.Min.Y;
+	if (W < 6 || H < 6 || Pick >= Generator->ShapedRoomShare) return;
+	Rm.Shape = (uint8)Which;
+	const float Cx = (Rm.Min.X + Rm.Max.X) * 0.5f, Cy = (Rm.Min.Y + Rm.Max.Y) * 0.5f;
+	const float RH = Generator->RoomHeight;
+	// (the U's notch and the T's and L's cut corners on a side without a door, so the doors stay on the floor)
+	int32 Free = -1;
+	for (int32 S = 0; S < 4; ++S) if (!Rm.bDoorSide[S]) { Free = S; break; }
+	if ((Rm.Shape == 7 || Rm.Shape == 6) && Free < 0) Rm.Shape = 2;
+	auto Inside = [&](float U, float V) -> bool
+	{
+		// (U, V: the tile's middle, -1..1 across the rectangle; a side "down" is the free side for L, T and U)
+		float A = U, B = V;
+		if (Free == 0) { A = V; B = -U; } else if (Free == 1) { A = V; B = U; } else if (Free == 2) { A = U; B = -V; }
+		switch (Rm.Shape)
+		{
+		case 1: case 8: return U * U + V * V <= 1.08f;                                         // circle, dome
+		case 2: return FMath::Abs(U) + FMath::Abs(V) <= 1.5f;                                 // octagon
+		case 3: return FMath::Abs(V) <= 0.95f && FMath::Abs(U) + 0.55f * FMath::Abs(V) <= 1.02f;     // hexagon
+		case 4: case 12: return FMath::Abs(U) <= (V + 1.1f) * 0.5f;                           // triangle, its point at -V
+		case 5: return !(U > 0.15f && V > 0.15f);                                              // L
+		case 6: return !(B > 0.2f && FMath::Abs(A) > 0.38f);                                   // T: the free side's corners cut
+		case 7: return !(B > 0.05f && FMath::Abs(A) < 0.36f);                                  // U: a notch in from the free side
+		case 11: return FMath::Abs(U) + FMath::Abs(V) <= 1.12f;                               // diamond
+		default: return true;                                                                  // pyramid, tall: the rectangle
+		}
+	};
+	// the lane from each door to the lane's crossing stays (the doors open on floor)
+	auto OnLane = [&](int32 X, int32 Y)
+	{
+		if (X == Rm.Lane.X && Y == Rm.Lane.Y) return true;
+		if (Y == Rm.Lane.Y && ((Rm.bDoorSide[0] && X <= Rm.Lane.X) || (Rm.bDoorSide[1] && X >= Rm.Lane.X))) return true;
+		if (X == Rm.Lane.X && ((Rm.bDoorSide[2] && Y <= Rm.Lane.Y) || (Rm.bDoorSide[3] && Y >= Rm.Lane.Y))) return true;
+		return false;
+	};
+	TArray<FIntPoint> Keep;
+	for (int32 X = Rm.Min.X; X < Rm.Max.X; ++X)
+		for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y)
+		{
+			const float U = (X + 0.5f - Cx) / (W * 0.5f), V = (Y + 0.5f - Cy) / (H * 0.5f);
+			if (Inside(U, V) || OnLane(X, Y)) Keep.Add(FIntPoint(X, Y));
+			else { Type[Idx(FIntPoint(X, Y))] = 0; Owner[Idx(FIntPoint(X, Y))] = -1; }
+		}
+	// (what is not joined to the lane's crossing goes too: one floor)
+	TSet<FIntPoint> Seen; TArray<FIntPoint> Q = { Rm.Lane }; Seen.Add(Rm.Lane);
+	for (int32 H0 = 0; H0 < Q.Num(); ++H0)
+		for (int32 D = 0; D < 4; ++D)
+		{
+			const FIntPoint Nb = Q[H0] + Dir4[D];
+			if (!Seen.Contains(Nb) && In(Nb) && Owner[Idx(Nb)] == RI) { Seen.Add(Nb); Q.Add(Nb); }
+		}
+	for (const FIntPoint& T : Keep) if (!Seen.Contains(T)) { Type[Idx(T)] = 0; Owner[Idx(T)] = -1; }
+	// heights: a dome rises round its middle, a pyramid in square steps, a step pyramid (the triangle) toward its far
+	// end, a tall hall all over (100 cm steps: the walls stack on them)
+	for (const FIntPoint& T : Seen)
+	{
+		const float U = (T.X + 0.5f - Cx) / (W * 0.5f), V = (T.Y + 0.5f - Cy) / (H * 0.5f);
+		float Hh = 0.f;
+		if (Rm.Shape == 8) Hh = RH + 700.f * FMath::Clamp(1.f - FMath::Sqrt(U * U + V * V), 0.f, 1.f);
+		else if (Rm.Shape == 9) Hh = RH + 800.f * FMath::Clamp(1.f - FMath::Max(FMath::Abs(U), FMath::Abs(V)), 0.f, 1.f);
+		else if (Rm.Shape == 12) Hh = RH + 500.f * FMath::Clamp((V + 1.f) * 0.5f, 0.f, 1.f);
+		else if (Rm.Shape == 10) Hh = RH + 300.f + 300.f * FMath::RoundToFloat(Tall * 2.f);
+		if (Hh > 0.f) CeilH[Idx(T)] = FMath::RoundToFloat(Hh / 100.f) * 100.f;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------ themes (mistward)
+FName ARDSection::PcName(FName Name) const
+{
+	if (!Theme.IsNone() && Generator)
+	{
+		const FName T(*FString::Printf(TEXT("%s.%s"), *Theme.ToString(), *Name.ToString()));
+		if (Generator->Piece(T)) return T;
+	}
+	return Name;
+}
+
+const FRDPiece* ARDSection::Pc(FName Name) const { return Generator ? Generator->Piece(PcName(Name)) : nullptr; }
+
+// ------------------------------------------------------------------------------------------------ tidy furniture (mistward)
+namespace
+{
+	struct FRDObb { FVector2D C; FVector2D Ax[2]; FVector2D H; };
+	FRDObb RDObb(const FVector2D& C, const FVector2D& H, float Yaw)
+	{
+		const float Rr = FMath::DegreesToRadians(Yaw);
+		FRDObb O; O.C = C; O.H = H; O.Ax[0] = FVector2D(FMath::Cos(Rr), FMath::Sin(Rr)); O.Ax[1] = FVector2D(-FMath::Sin(Rr), FMath::Cos(Rr));
+		return O;
+	}
+	bool RDOverlap(const FRDObb& A, const FRDObb& B)
+	{
+		const FVector2D D = B.C - A.C;
+		for (const FRDObb* O : { &A, &B })
+			for (int32 K = 0; K < 2; ++K)
+			{
+				const FVector2D L = O->Ax[K];
+				const float Ra = A.H.X * FMath::Abs(FVector2D::DotProduct(A.Ax[0], L)) + A.H.Y * FMath::Abs(FVector2D::DotProduct(A.Ax[1], L));
+				const float Rb = B.H.X * FMath::Abs(FVector2D::DotProduct(B.Ax[0], L)) + B.H.Y * FMath::Abs(FVector2D::DotProduct(B.Ax[1], L));
+				if (FMath::Abs(FVector2D::DotProduct(D, L)) > Ra + Rb) return false;
+			}
+		return true;
+	}
+}
+
+bool ARDSection::FootFree(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess) const
+{
+	// (a hair under its size: pieces set side by side as their sizes say still fit)
+	const FRDObb A = RDObb(FVector2D(Loc.X, Loc.Y), FVector2D(FMath::Max(Size.X * 0.5f - 3.f, 1.f), FMath::Max(Size.Y * 0.5f - 3.f, 1.f)), Yaw);
+	for (const FFoot& F : Feet)
+	{
+		if (bAccess && F.bAccess) continue;              // (two ways in may share the floor)
+		if (RDOverlap(A, RDObb(F.C, F.H, F.Yaw))) return false;
+	}
+	return true;
+}
+
+void ARDSection::AddFoot(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess, FName Name)
+{
+	FFoot F; F.C = FVector2D(Loc.X, Loc.Y); F.H = FVector2D(FMath::Max(Size.X * 0.5f - 3.f, 1.f), FMath::Max(Size.Y * 0.5f - 3.f, 1.f)); F.Yaw = Yaw; F.bAccess = bAccess; F.Name = Name;
+	Feet.Add(F);
+}
+
+bool ARDSection::OnRoomFloor(const FVector& Loc, float Yaw, const FVector2D& Size, int32 RI) const
+{
+	// the footprint's corners and middle stand on the room's tiles
+	const FRotator Rt(0, Yaw, 0);
+	const FVector2D Hh = Size * 0.5f - FVector2D(12.f);
+	for (const FVector2D& C : { FVector2D(0, 0), FVector2D(-Hh.X, -Hh.Y), FVector2D(Hh.X, -Hh.Y), FVector2D(Hh.X, Hh.Y), FVector2D(-Hh.X, Hh.Y) })
+	{
+		const FIntPoint T = WorldToLocal(Loc + Rt.RotateVector(FVector(C.X, C.Y, 0)));
+		if (!In(T) || Type[Idx(T)] != 1 || Owner[Idx(T)] != RI) return false;
+	}
+	return true;
+}
+
+void ARDSection::FootOf(const FRDPiece* P, const FTransform& T, FVector& OutCenter, FVector2D& OutSize, float& OutFront) const
+{
+	const FVector Sc = T.GetScale3D();
+	FVector2D Half(P->Size.X * 0.5f, P->Size.Y * 0.5f);
+	FVector2D Mid(0.f, 0.f);
+	if (P->Mesh)
+	{
+		// (the mesh's box in the piece's frame (its Adjust): the larger of it and the nominal size, centred between them)
+		const FBox B = P->Mesh->GetBoundingBox().TransformBy(P->Adjust);
+		const float X0 = FMath::Min(-Half.X, (float)B.Min.X), X1 = FMath::Max(Half.X, (float)B.Max.X);
+		const float Y0 = FMath::Min(-Half.Y, (float)B.Min.Y), Y1 = FMath::Max(Half.Y, (float)B.Max.Y);
+		Half = FVector2D((X1 - X0) * 0.5f, (Y1 - Y0) * 0.5f); Mid = FVector2D((X0 + X1) * 0.5f, (Y0 + Y1) * 0.5f);
+	}
+	OutSize = FVector2D(Half.X * 2.f * Sc.X, Half.Y * 2.f * Sc.Y);
+	OutCenter = T.GetLocation() + T.GetRotation().RotateVector(FVector(Mid.X * Sc.X, Mid.Y * Sc.Y, 0.f));
+	OutFront = (Mid.X + Half.X) * Sc.X;
+}
+
+TArray<FVector> ARDSection::GetFootprints(TArray<FVector>& HalfYaw, TArray<FString>& Names) const
+{
+	TArray<FVector> Out; HalfYaw.Reset(); Names.Reset();
+	for (const FFoot& F : Feet) { Out.Add(FVector(F.C, 0.f)); HalfYaw.Add(FVector(F.H, F.Yaw)); Names.Add(F.bAccess ? TEXT("access:") + F.Name.ToString() : F.Name.ToString()); }
+	return Out;
+}
+
+TArray<FVector> ARDSection::GetRoomTiles(int32 I, TArray<float>& Heights) const
+{
+	TArray<FVector> Out; Heights.Reset();
+	if (!Rooms.IsValidIndex(I)) return Out;
+	const FRoom& Rm = Rooms[I];
+	for (int32 X = Rm.Min.X; X < Rm.Max.X; ++X)
+		for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y)
+			if (Owner[Idx(FIntPoint(X, Y))] == I) { Out.Add(TileWorld(FIntPoint(X, Y))); Heights.Add(CeilAt(FIntPoint(X, Y))); }
+	return Out;
 }
 
 // ------------------------------------------------------------------------------------------------ instancing helpers
-void ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollision)
+bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollision)
 {
+	const FRDPiece* P = Pc(Name);
+	if (!P) return true;              // (false only for the castle's refusals below: callers go on as they did before)
+	// (mistward: furniture stands on its room's floor (a shaped room has no floor outside its shape), never on another piece
+	// and never where a container is opened; what hangs on a wall or from the ceiling is not on the floor)
+	if (FurnRoom >= 0 && T.GetLocation().Z < 30.f && Rooms.IsValidIndex(FurnRoom))
+	{
+		FVector Fc; FVector2D Sz; float Front;
+		FootOf(P, T, Fc, Sz, Front);
+		const float Yaw = T.Rotator().Yaw;
+		if (Generator->bShapedRooms && Rooms[FurnRoom].Shape != 0 && !OnRoomFloor(Fc, Yaw, Sz, FurnRoom)) return false;
+		if (Generator->bTidyFurniture && P->bCollision && !bForceNoCollision)
+		{
+			if (!FootFree(Fc, Yaw, Sz, false)) return false;
+			AddFoot(Fc, Yaw, Sz, false, Name);
+		}
+	}
 	// (level 5: where the anvils stand, in play also for the saved start section, whose furniture is not built again)
-	if (Generator && Name == Generator->AnvilPiece && Generator->Piece(Name)) AnvilPoints.Add(T.GetLocation());
-	if (!bBuildStatic) return;
-	const FRDPiece* P = Generator->Piece(Name);
-	if (!P) return;
+	if (Generator && Name == Generator->AnvilPiece) AnvilPoints.Add(T.GetLocation());
+	if (!bBuildStatic) return true;
 	const FTransform W = P->Adjust * T;
 	if (P->ActorClass)
 	{
@@ -228,9 +449,9 @@ void ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 #endif
 			OtherActors.Add(A);
 		}
-		return;
+		return true;
 	}
-	if (!P->Mesh) return;
+	if (!P->Mesh) return true;
 	const bool bCol = (P->bCollision && !bForceNoCollision) || P->bHidden;
 	(P->bHidden ? PendingHidden : bCol ? Pending : PendingNoCol).FindOrAdd(P->Mesh).Add(W);
 	TMap<UStaticMesh*, UInstancedStaticMeshComponent*>& Map = P->bHidden ? HismsHidden : bCol ? Hisms : HismsNoCol;
@@ -248,11 +469,12 @@ void ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 		Map.Add(P->Mesh, H);
 	}
 	++NumInstances;
+	return true;
 }
 
-void ARDSection::AddPieceAt(FName Name, const FVector& Loc, float Yaw, float Scale, bool bForceNoCollision)
+bool ARDSection::AddPieceAt(FName Name, const FVector& Loc, float Yaw, float Scale, bool bForceNoCollision)
 {
-	AddPiece(Name, FTransform(FRotator(0, Yaw, 0), Loc, FVector(Scale)), bForceNoCollision);
+	return AddPiece(Name, FTransform(FRotator(0, Yaw, 0), Loc, FVector(Scale)), bForceNoCollision);
 }
 
 void ARDSection::FlushInstances()
@@ -333,7 +555,7 @@ int32 ARDSection::GetEffectParticlesNear(FVector Location, float Radius) const
 void ARDSection::AddTorch(const FVector& WallPoint, float InYaw, float Candelas, bool bLit)
 {
 	// sconce on the wall (piece frame: back on the wall at x = 0, flame above its origin at FlameOffset = Hinge)
-	const FRDPiece* P = Generator->Piece(TEXT("Torch"));
+	const FRDPiece* P = this->Pc(TEXT("Torch"));
 	AddPieceAt(TEXT("Torch"), WallPoint, InYaw, 1.f, true);
 	if (!bLit || !P) return;
 	const FVector Flame = WallPoint + FRotator(0, InYaw, 0).RotateVector(P->Hinge);
@@ -378,7 +600,7 @@ void ARDSection::AddDoor(FIntPoint RoomTile, FIntPoint OutTile, int32 RoomIndex)
 {
 	if (!bBuildInteractive) return;
 	// two leaves hinged on the doorway jambs (piece "DoorLeaf": leaf spans +Y from its origin, Hinge.Y = opening half width)
-	const FRDPiece* P = Generator->Piece(TEXT("DoorLeaf"));
+	const FRDPiece* P = this->Pc(TEXT("DoorLeaf"));
 	if (!P) return;
 	const FVector A = TileWorld(RoomTile), Bw = TileWorld(OutTile);
 	const FVector Mid = (A + Bw) * 0.5f;
@@ -408,7 +630,7 @@ void ARDSection::AddDoor(FIntPoint RoomTile, FIntPoint OutTile, int32 RoomIndex)
 void ARDSection::AddCellDoor(const FVector& HingeWorld, float Yaw, float Width)
 {
 	if (!bBuildInteractive) return;
-	const FRDPiece* P = Generator->Piece(TEXT("CellDoor"));
+	const FRDPiece* P = this->Pc(TEXT("CellDoor"));
 	if (!P) return;
 	USceneComponent* Pv = AddPivot(RootComponent, FTransform(FRotator(0, Yaw, 0), HingeWorld - GetActorLocation()));
 	UStaticMeshComponent* M = AddMesh(Pv, P->Mesh, P->Adjust, true);
@@ -419,12 +641,32 @@ void ARDSection::AddCellDoor(const FVector& HingeWorld, float Yaw, float Width)
 	Doors.Add(Mv);
 }
 
-void ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const FString& Kind)
+bool ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const FString& Kind)
 {
-	const FRDPiece* P = Generator->Piece(Name);
-	if (!P) return;
+	const FRDPiece* P = Pc(Name);
+	if (!P) return true;              // (as AddPiece: false only for the castle's refusals)
+	// (mistward: on its room's floor, on no other piece, and the space in front of it (where she stands to open it, the
+	// lid's or doors' swing) clear of furniture and on the floor)
+	if (FurnRoom >= 0 && Rooms.IsValidIndex(FurnRoom) && (Generator->bTidyFurniture || (Generator->bShapedRooms && Rooms[FurnRoom].Shape != 0)))
+	{
+		FVector Fc; FVector2D Sz; float Front;
+		FootOf(P, FTransform(FRotator(0, Yaw, 0), Loc), Fc, Sz, Front);
+		const FVector2D Way(95.f, FMath::Max(Sz.Y, 90.f));
+		const FVector WayAt = Loc + FRotator(0, Yaw, 0).RotateVector(FVector(Front + Way.X * 0.5f + 2.f, 0, 0));
+		if (!OnRoomFloor(Fc, Yaw, Sz, FurnRoom) || !OnRoomFloor(WayAt, Yaw, Way, FurnRoom)) return false;
+		if (Generator->bTidyFurniture)
+		{
+			if (!FootFree(Fc, Yaw, Sz, false) || !FootFree(WayAt, Yaw, Way, true)) return false;
+			// (the way in on a lane is fine; on a tile already blocked it is not)
+			const FIntPoint Wt = WorldToLocal(WayAt);
+			if (In(Wt) && Blocked[Idx(Wt)]) return false;
+			AddFoot(Fc, Yaw, Sz, false, Name);
+			AddFoot(WayAt, Yaw, Way, true, Name);
+		}
+	}
 	MarkBlocked(Loc, Yaw, FVector2D(P->Size.X, P->Size.Y));
-	if (!bBuildInteractive || !P->Moving) return;
+	if (bCensus && P->Moving && (Kind == TEXT("chest") || Kind == TEXT("trunk"))) ++CensusChests;
+	if (!bBuildInteractive || !P->Moving) return true;
 	USceneComponent* Base = AddPivot(RootComponent, FTransform(FRotator(0, Yaw, 0), Loc - GetActorLocation()));
 	AddMesh(Base, P->Mesh, P->Adjust, true);
 	// moving part(s): a pivot at the hinge (piece frame)
@@ -462,6 +704,13 @@ void ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 		const int32 I1 = AddMoving(P->Moving2, P->Hinge2, bWardrobe, I0);
 		Containers[I0].Partner = I1;
 	}
+	// (mistward: one she has opened stays open, also when its set of rooms is generated again)
+	if (Generator->bContainersStayOpen && Generator->IsContainerLooted(Coord, I0))
+	{
+		Containers[I0].Target = 1.f; Containers[I0].bLooted = true;
+		if (Containers.IsValidIndex(Containers[I0].Partner)) { Containers[Containers[I0].Partner].Target = 1.f; Containers[Containers[I0].Partner].bLooted = true; }
+	}
+	return true;
 }
 
 void ARDSection::MarkBlocked(const FVector& Loc, float Yaw, const FVector2D& Size, bool bLaneToo)
@@ -532,10 +781,12 @@ FName ARDSection::WallVariant(FName Name, const FIntPoint& T, int32 Side, int32 
 	{
 		V = &WallVariants.Add(Name);
 		V->Add(Name);
+		// (mistward: a theme's wall takes the theme's variants only)
+		const bool bThemed = PcName(Name) != Name;
 		for (int32 I = 2; I < 16; ++I)
 		{
 			const FName Nm(*FString::Printf(TEXT("%s_%d"), *Name.ToString(), I));
-			if (!Generator->Piece(Nm)) break;
+			if (!Pc(Nm) || (PcName(Nm) != Nm) != bThemed) break;
 			V->Add(Nm);
 		}
 	}
@@ -581,7 +832,7 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 	const TArray<FName>& RoomWall = ShellWall;
 	auto Stack = [this](FName Name, const FVector& Base, float Yaw, float Z0, float Z1, const FIntPoint& Tile, int32 Side)
 	{
-		const FRDPiece* P = Generator->Piece(Name);
+		const FRDPiece* P = Pc(Name);
 		if (!P) return;
 		const float H = FMath::Max(P->Size.Z - 2.f, 50.f);
 		int32 Layer = Z0 > 1.f ? 1 : 0;
@@ -590,7 +841,9 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 		// stone plate inside the wall's thickness, the back of a cavity seen through a hole) and a seal ("<name>_Seal": an
 		// invisible box over the wall's face that keeps her out of the holes).
 		const FName Back(*(Name.ToString() + TEXT("_Back"))), Seal(*(Name.ToString() + TEXT("_Seal")));
-		const bool bBack = Generator->Piece(Back) != nullptr, bSeal = Generator->Piece(Seal) != nullptr;
+		// (mistward: a theme's wall has its own backing or none: the plain wall's would not fit it)
+		const bool bThemed = PcName(Name) != Name;
+		const bool bBack = Pc(Back) != nullptr && (PcName(Back) != Back) == bThemed, bSeal = Pc(Seal) != nullptr && (PcName(Seal) != Seal) == bThemed;
 		for (float Z = Z0; Z < Z1 - 5.f; Z += H, ++Layer)
 		{
 			const FName Pick = WallVariant(Name, Tile, Side, Layer);
@@ -611,11 +864,12 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 			const bool bRoom = O < 1000;
 			const ERDRoomKind K = bRoom ? Rooms[O].Kind : ERDRoomKind::Junction;
 			const bool bLow = !bRoom || K == ERDRoomKind::Junction;
-			const float Hgt = bLow ? Generator->CorridorHeight : Generator->RoomHeight;
+			// (mistward: a dome's or a pyramid's tiles each have a ceiling of their own)
+			const float Hgt = CeilAt(T) > 0.f ? CeilAt(T) : (bLow ? Generator->CorridorHeight : Generator->RoomHeight);
 			const FVector C = TileWorld(T);
 			// floor (occasional damaged / variant tiles), ceiling
 			FName F = bRoom ? RoomFloor[O] : FName(TEXT("Floor_Corr"));
-			if (R.FRand() < 0.12f && Generator->Piece(FName(*(F.ToString() + TEXT("_Alt"))))) F = FName(*(F.ToString() + TEXT("_Alt")));
+			if (R.FRand() < 0.12f && Pc(FName(*(F.ToString() + TEXT("_Alt"))))) F = FName(*(F.ToString() + TEXT("_Alt")));
 			AddPieceAt(F, C, 90.f * R.RandRange(0, 3));
 			AddPieceAt(bLow ? TEXT("Ceil_Corr") : TEXT("Ceil_Room"), C + FVector(0, 0, Hgt), 90.f * R.RandRange(0, 3));
 			// walls
@@ -631,6 +885,11 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 				{
 					if (DoorEdges.Contains(EdgeKey(T, Nb))) bDoorway = bRoom && K != ERDRoomKind::Junction;
 				}
+				else if (bRoom && CeilAt(Nb) < Hgt - 5.f)
+				{
+					// (mistward: the step up to this tile's higher ceiling, seen from under it)
+					Stack(RoomWall[O], Edge, Yaw, CeilAt(Nb), Hgt, T, Side);
+				}
 				if (bWall)
 				{
 					const FName WN = bRoom ? RoomWall[O] : FName(TEXT("Wall_Corr"));
@@ -639,7 +898,7 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 				else if (bDoorway)
 				{
 					AddPieceAt(TEXT("Doorway"), Edge, Yaw);
-					const FRDPiece* D = Generator->Piece(TEXT("Doorway"));
+					const FRDPiece* D = Pc(TEXT("Doorway"));
 					Stack(RoomWall[O], Edge, Yaw, D ? D->Size.Z - 2.f : 300.f, Hgt, T, Side);
 				}
 			}
@@ -652,14 +911,14 @@ void ARDSection::ShellCorners()
 	// room corners: columns hide the wall joints
 	for (const FRoom& Rm : Rooms)
 	{
-		if (Rm.Kind == ERDRoomKind::Junction) continue;
+		if (Rm.Kind == ERDRoomKind::Junction || Rm.Shape != 0) continue;       // (mistward: a shaped room's corners are elsewhere)
 		const FVector A = TileWorld(Rm.Min) - FVector(S * 0.5f, S * 0.5f, 0), Bv = TileWorld(Rm.Max - FIntPoint(1, 1)) + FVector(S * 0.5f, S * 0.5f, 0);
 		const FVector Cn[4] = { FVector(A.X, A.Y, 0), FVector(Bv.X, A.Y, 0), FVector(Bv.X, Bv.Y, 0), FVector(A.X, Bv.Y, 0) };
 		for (int32 I = 0; I < 4; ++I)
 		{
 			const FVector In_ = ((A + Bv) * 0.5f - Cn[I]).GetSafeNormal2D();
 			const FVector P = Cn[I] + In_ * 25.f;
-			const FRDPiece* Pc = Generator->Piece(TEXT("CornerColumn"));
+			const FRDPiece* Pc = this->Pc(TEXT("CornerColumn"));
 			if (!Pc) break;
 			for (float Z = 0.f; Z < Generator->RoomHeight - 5.f; Z += Pc->Size.Z - 2.f) AddPieceAt(TEXT("CornerColumn"), P + FVector(0, 0, Z), 45.f + 90.f * I);
 		}
@@ -695,11 +954,21 @@ TArray<FVector> ARDSection::WallSlots(const FRoom& Rm, int32 Side, float Spacing
 	const float Wl = Side == 0 ? B.Min.X : Side == 1 ? B.Max.X : Side == 2 ? B.Min.Y : B.Max.Y;
 	const int32 Cnt = FMath::Max(1, FMath::FloorToInt((A1 - A0) / Spacing) + 1);
 	const float Step = Cnt > 1 ? (A1 - A0) / (Cnt - 1) : 0.f;
+	// (mistward: a shaped room has its rectangle's wall only where its floor reaches it)
+	const int32 RI = (int32)(&Rm - Rooms.GetData());
+	const bool bShaped = Rooms.IsValidIndex(RI) && Rm.Shape != 0;
 	for (int32 I = 0; I < Cnt; ++I)
 	{
 		const float A = Cnt > 1 ? A0 + Step * I : (A0 + A1) * 0.5f;
 		if (FMath::Abs(A - Lane) < S * 0.5f + Clear) continue;
-		Out.Add(bAlongY ? FVector(Wl, A, 0) : FVector(A, Wl, 0));
+		const FVector W = bAlongY ? FVector(Wl, A, 0) : FVector(A, Wl, 0);
+		if (bShaped)
+		{
+			const FVector Inward = FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(S * 0.5f, 0, 0));
+			const FIntPoint T = WorldToLocal(W + Inward);
+			if (!In(T) || Owner[Idx(T)] != RI) continue;
+		}
+		Out.Add(W);
 	}
 	return Out;
 }
@@ -712,13 +981,13 @@ void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FN
 		{
 			if (R.FRand() > Chance) continue;
 			const FName Nm = Names[R.RandRange(0, Names.Num() - 1)];
-			const FRDPiece* P = Generator->Piece(Nm);
+			const FRDPiece* P = this->Pc(Nm);
 			if (!P) continue;
 			const float Yaw = InwardYaw(Side);
 			const FVector Pos = W + FRotator(0, Yaw, 0).RotateVector(FVector(P->Size.X * 0.5f + 32.f, 0, 0));
 			if (!LaneFree(Rm, Pos, FMath::Max(P->Size.X, P->Size.Y) * 0.5f)) continue;
 			if (bContainers && P->Moving) AddContainer(Nm, Pos, Yaw, Nm.ToString().ToLower());
-			else { AddPieceAt(Nm, Pos, Yaw); MarkBlocked(Pos, Yaw, FVector2D(P->Size.X, P->Size.Y)); }
+			else if (AddPieceAt(Nm, Pos, Yaw)) MarkBlocked(Pos, Yaw, FVector2D(P->Size.X, P->Size.Y));
 		}
 }
 
@@ -760,7 +1029,7 @@ void ARDSection::EnsureAnvil()
 	// (level 5: every set of rooms has an anvil; one with none from its forge or armory gets one in its start room or its
 	// largest rooms, on a free tile off the lanes with free tiles all round it. No random stream is drawn: the layout stays)
 	if (!Generator || !Generator->bAnvilEverySection) return;
-	const FRDPiece* P = Generator->Piece(Generator->AnvilPiece);
+	const FRDPiece* P = this->Pc(Generator->AnvilPiece);
 	if (!P) return;
 	// (the great hall: the start section's room at the origin tile, as GetStartRoomCenter finds it; this section may not be
 	// among the generator's yet while it is built). The start section's great hall gets one whatever its forges have; any
@@ -818,17 +1087,25 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			if (X1 - X0 >= 280.f && Y1 - Y0 >= 280.f) { Quads.Add(FVector((X0 + X1) * 0.5f, (Y0 + Y1) * 0.5f, 0)); QuadBoxes.Add(FBox2D(FVector2D(X0, Y0), FVector2D(X1, Y1))); }
 		}
 	auto QuadSize = [&](const FVector& Q) { return FVector2D(FMath::Min(Q.X - B.Min.X, B.Max.X - Q.X) * 2.f - (FMath::Abs(Q.X - Lc.X) < 1 ? 0 : 0), FMath::Min(Q.Y - B.Min.Y, B.Max.Y - Q.Y) * 2.f); };
-	auto Center = [&](FName Nm, const FVector& P, float Yaw, bool bBlock = true, bool bLaneToo = false)
+	// (mistward: the footprints placed in this room, so that nothing is set on anything else)
+	FurnRoom = RI; Feet.Reset();
+	ON_SCOPE_EXIT { FurnRoom = -1; };
+	auto Center = [&](FName Nm, const FVector& P, float Yaw, bool bBlock = true, bool bLaneToo = false) -> bool
 	{
-		const FRDPiece* Pc = Generator->Piece(Nm);
-		if (!Pc) return;
-		AddPieceAt(Nm, P, Yaw);
+		const FRDPiece* Pc = this->Pc(Nm);
+		if (!Pc) return false;
+		if (!AddPieceAt(Nm, P, Yaw)) return false;
 		if (bBlock && Pc->bCollision) MarkBlocked(P, Yaw, FVector2D(Pc->Size.X, Pc->Size.Y), bLaneToo);
+		return true;
 	};
 	auto Hang = [&](FName Nm, const FVector& P, float Yaw)   // from the ceiling (piece bottom at z 0: placed at ceiling - height)
 	{
-		const FRDPiece* Pc = Generator->Piece(Nm);
-		if (Pc) AddPieceAt(Nm, P + FVector(0, 0, RH - Pc->Size.Z), Yaw, 1.f, true);
+		const FRDPiece* Pc = this->Pc(Nm);
+		// (mistward: under its own tile's ceiling: a dome's is higher; not over a tile cut out of a shaped room)
+		const FIntPoint Tl = WorldToLocal(P);
+		if (Rm.Shape != 0 && (!In(Tl) || Owner[Idx(Tl)] != RI)) return;
+		const float Ch = Rm.Shape != 0 ? CeilAt(Tl) : RH;
+		if (Pc) AddPieceAt(Nm, P + FVector(0, 0, Ch - Pc->Size.Z), Yaw, 1.f, true);
 	};
 	auto Candles = [&](const FVector& P, float Cd)
 	{
@@ -838,11 +1115,11 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	};
 	auto TableSet = [&](const FVector& Q, float Yaw, FName Table, FName Seat, bool bCandles)
 	{
-		const FRDPiece* T = Generator->Piece(Table);
+		const FRDPiece* T = this->Pc(Table);
 		if (!T) return;
-		Center(Table, Q, Yaw);
+		if (!Center(Table, Q, Yaw)) return;
 		const FRotator Rt(0, Yaw, 0);
-		const FRDPiece* St = Generator->Piece(Seat);
+		const FRDPiece* St = this->Pc(Seat);
 		if (St)
 		{
 			const float Off = T->Size.X * 0.5f + St->Size.X * 0.5f + 15.f;
@@ -876,7 +1153,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		{
 			// the dais sits on the far wall; it is off the lane only when that wall has no door
 			const int32 Far = bX ? 1 : 3;
-			if (!Rm.bDoorSide[Far]) { Center(TEXT("Dais"), Dais, DaisYaw, true, true); const FRDPiece* D = Generator->Piece(TEXT("Dais")); Center(TEXT("Throne"), Dais + FVector(0, 0, D ? D->Size.Z : 0), DaisYaw, true, true); }
+			if (!Rm.bDoorSide[Far]) { Center(TEXT("Dais"), Dais, DaisYaw, true, true); const FRDPiece* D = this->Pc(TEXT("Dais")); Center(TEXT("Throne"), Dais + FVector(0, 0, D ? D->Size.Z : 0), DaisYaw, true, true); }
 		}
 		for (int32 Side = 0; Side < 4; ++Side)
 			for (const FVector& W : WallSlots(Rm, Side, 600.f, 120.f, 450.f))
@@ -889,7 +1166,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, 0), FVector(B.Max.X - 150, B.Min.Y + 150, 0), FVector(B.Min.X + 150, B.Max.Y - 150, 0), FVector(B.Max.X - 150, B.Max.Y - 150, 0) })
 		{
 			Center(TEXT("Brazier"), Cn, 0.f);
-			const FRDPiece* Bz = Generator->Piece(TEXT("Brazier"));
+			const FRDPiece* Bz = this->Pc(TEXT("Brazier"));
 			const float Hz = Bz ? Bz->Size.Z : 110.f;
 			AddEffect(TEXT("BrazierFire"), Cn + FVector(0, 0, Hz + RDBrazierFlameUp), RDBrazierFlame);
 			AddLight(Cn + FVector(0, 0, Hz + 40.f), FLinearColor(1.f, 0.5f, 0.2f), 220.f, 1800.f, true, 0.2f);
@@ -904,14 +1181,16 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			for (const FVector& W : WallSlots(Rm, Side, 190.f, 110.f, 130.f))
 			{
 				const float Yaw = InwardYaw(Side);
-				const FRDPiece* Bd = Generator->Piece(TEXT("Bed"));
+				const FRDPiece* Bd = this->Pc(TEXT("Bed"));
 				if (!Bd) break;
 				const FVector P = W + FRotator(0, Yaw, 0).RotateVector(FVector(Bd->Size.X * 0.5f + 32.f, 0, 0));
 				if (!LaneFree(Rm, P, Bd->Size.Y * 0.5f) || R.FRand() < 0.15f) continue;
-				Center(TEXT("Bed"), P, Yaw);
+				// (mistward: a bed that would lie in another (the corners, where two walls' rows meet) is not set, nor its chest)
+				const bool bBed = Center(TEXT("Bed"), P, Yaw);
+				if (!bBed && Generator->bTidyFurniture) continue;
 				if (R.FRand() < 0.6f)
 				{
-					const FRDPiece* Ch = Generator->Piece(TEXT("Chest"));
+					const FRDPiece* Ch = this->Pc(TEXT("Chest"));
 					const FVector Cp = P + FRotator(0, Yaw, 0).RotateVector(FVector(Bd->Size.X * 0.5f + (Ch ? Ch->Size.X * 0.5f : 30.f) + 10.f, 0, 0));
 					if (LaneFree(Rm, Cp, 40.f)) AddContainer(TEXT("Chest"), Cp, Yaw, TEXT("chest"));
 				}
@@ -942,11 +1221,14 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				{
 					AddPieceAt(TEXT("CellFrame"), Front, Yaw);
 					AddPieceAt(TEXT("CellBlockHalf"), Front, Yaw);
-					const FRDPiece* Cd = Generator->Piece(TEXT("CellDoor"));
+					const FRDPiece* Cd = this->Pc(TEXT("CellDoor"));
 					// (the half grating covers [-150, 0] of the front, the door the other half: hinged 5 cm in from the
 					// corner, its leaf (3 cm past the hinge to 147 short of it) covers [-2, 148], overlapping the bars' blocker.
 					// Hinged at +75 it covered [-72, 75] twice over and left a 75 cm gap at the corner.)
-					if (Cd) AddCellDoor(Front + Rt.RotateVector(FVector(0, S * 0.5f - 5.f, 0)), Yaw + 180.f, Cd->Size.Y);
+					const int32 DoorIdx = Doors.Num();
+				if (Cd) AddCellDoor(Front + Rt.RotateVector(FVector(0, S * 0.5f - 5.f, 0)), Yaw + 180.f, Cd->Size.Y);
+				// (mistward: a cell with a door may hold someone)
+				if (Doors.Num() > DoorIdx) { FCell Cl; Cl.Frame = FTransform(Rt, Inner); Cl.Door = DoorIdx; Cells.Add(Cl); }
 				}
 				else { AddPieceAt(TEXT("Grating"), Front, Yaw); AddPieceAt(TEXT("CellBlock"), Front, Yaw); }
 				// (the hay pile is a mound as tall as she is, which looked like rock: it blocks)
@@ -1004,7 +1286,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			const FVector P = (Q + Lc) * 0.5f;
 			if (!LaneFree(Rm, P, 60.f)) continue;
 			Center(TEXT("Brazier"), P, 0.f);
-			const FRDPiece* Bp = Generator->Piece(TEXT("Brazier"));
+			const FRDPiece* Bp = this->Pc(TEXT("Brazier"));
 			const float Hz = Bp ? Bp->Size.Z : 110.f;
 			AddEffect(TEXT("BrazierFire"), P + FVector(0, 0, Hz + RDBrazierFlameUp), RDBrazierFlame);
 			AddLight(P + FVector(0, 0, Hz + 40.f), FLinearColor(1.f, 0.32f, 0.12f), 140.f, 1500.f, true, 0.3f);
@@ -1057,7 +1339,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			if (I == 1) { Center(TEXT("Anvil"), Q, R.FRandRange(0, 360)); Center(TEXT("QuenchTub"), Q + FVector(110, 0, 0), 0.f); continue; }
 			const float Yaw = QuadBoxes[I].GetSize().X >= QuadBoxes[I].GetSize().Y ? 90.f : 0.f;
 			Center(TEXT("TableLong"), Q, Yaw);
-			const FRDPiece* T = Generator->Piece(TEXT("TableLong"));
+			const FRDPiece* T = this->Pc(TEXT("TableLong"));
 			if (!T) continue;
 			const FRotator Rt(0, Yaw, 0);
 			for (int32 K = 0; K < 4; ++K)
@@ -1082,7 +1364,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			const FBox2D Bx = B;
 			FVector Wall = HearthSide == 0 ? FVector(Bx.Min.X, Lc.Y, 0) : HearthSide == 1 ? FVector(Bx.Max.X, Lc.Y, 0) : HearthSide == 2 ? FVector(Lc.X, Bx.Min.Y, 0) : FVector(Lc.X, Bx.Max.Y, 0);
 			if (bHearthOnDoor) Wall += (HearthSide < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f;      // every wall has a door: off the doorway lane
-			const FRDPiece* Fp = Generator->Piece(TEXT("Fireplace"));
+			const FRDPiece* Fp = this->Pc(TEXT("Fireplace"));
 			if (Fp)
 			{
 				const FVector P = Wall + Rt.RotateVector(FVector(Fp->Size.X * 0.5f + 30.f, 0, 0));
@@ -1107,7 +1389,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		{
 			const float Yaw = R.RandBool() ? 0.f : 90.f;
 			Center(TEXT("Desk"), Q, Yaw);
-			const FRDPiece* D = Generator->Piece(TEXT("Desk"));
+			const FRDPiece* D = this->Pc(TEXT("Desk"));
 			const float Hz = D ? D->Size.Z : 90.f;
 			Center(TEXT("Chair"), Q + FRotator(0, Yaw, 0).RotateVector(FVector(-(D ? D->Size.X * 0.5f + 45.f : 90.f), 0, 0)), Yaw, false);
 			AddPieceAt(TEXT("Books"), Q + FVector(R.FRandRange(-30, 30), R.FRandRange(-30, 30), Hz), R.FRandRange(0, 360), 1.f, true);
@@ -1129,7 +1411,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			+ (bAltarOnDoor ? (AltarSide < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
 		const FVector Altar = Wall + Rt.RotateVector(FVector(160.f, 0, 0));
 		Center(TEXT("Altar"), Altar, Yaw, true, true);
-		const FRDPiece* Al = Generator->Piece(TEXT("Altar"));
+		const FRDPiece* Al = this->Pc(TEXT("Altar"));
 		Candles(Altar + FVector(0, 0, Al ? Al->Size.Z : 100.f) + Rt.RotateVector(FVector(0, -50, 0)), 30.f);
 		Candles(Altar + FVector(0, 0, Al ? Al->Size.Z : 100.f) + Rt.RotateVector(FVector(0, 50, 0)), 30.f);
 		AddPieceAt(TEXT("Painting"), Wall + Rt.RotateVector(FVector(12, 0, 0)) + FVector(0, 0, 330.f), Yaw, 1.f, true);
@@ -1195,7 +1477,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		for (const FVector& Q : Quads)
 		{
 			Center(TEXT("Pedestal"), Q, 0.f);
-			const FRDPiece* Pd = Generator->Piece(TEXT("Pedestal"));
+			const FRDPiece* Pd = this->Pc(TEXT("Pedestal"));
 			const float Hz = Pd ? Pd->Size.Z : 100.f;
 			AddPieceAt(TEXT("Crystal"), Q + FVector(0, 0, Hz), R.FRandRange(0, 360), 1.f, true);
 			AddLight(Q + FVector(0, 0, Hz + 80.f), FLinearColor(0.55f, 0.6f, 1.f), 45.f, 900.f, false, 0.05f);
@@ -1222,7 +1504,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		const FRotator Rt(0, Yaw, 0);
 		const FVector Wall = (Sd0 == 0 ? FVector(B.Min.X, Lc.Y, 0) : Sd0 == 1 ? FVector(B.Max.X, Lc.Y, 0) : Sd0 == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0))
 			+ (bForgeOnDoor ? (Sd0 < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
-		const FRDPiece* Fg = Generator->Piece(TEXT("Forge"));
+		const FRDPiece* Fg = this->Pc(TEXT("Forge"));
 		if (Fg)
 		{
 			const FVector P = Wall + Rt.RotateVector(FVector(Fg->Size.X * 0.5f + 35.f, 0, 0));
@@ -1289,7 +1571,7 @@ void ARDSection::DecorateCorridor(FRandomStream& R, int32 CI)
 		const FRotator Rt(0, Yaw, 0);
 		auto Against = [&](FName Nm, float Along)
 		{
-			const FRDPiece* P = Generator->Piece(Nm);
+			const FRDPiece* P = this->Pc(Nm);
 			if (!P) return;
 			const FVector Pos = Wall + Rt.RotateVector(FVector(P->Size.X * 0.5f + 32.f, Along, 0));
 			if (P->Moving) AddContainer(Nm, Pos, Yaw, Nm.ToString().ToLower());
@@ -1310,7 +1592,7 @@ void ARDSection::DecorateCorridor(FRandomStream& R, int32 CI)
 		{
 			if (U < 0.12f) AddPieceAt(TEXT("BonePile2"), Wall + Rt.RotateVector(FVector(45, 0, 0)), R.FRandRange(0, 360), 1.f, true);
 			else if (U < 0.22f) AddPieceAt(TEXT("Shackles"), Wall + FVector(0, 0, 150), Yaw, 1.f, true);
-			else if (U < 0.3f) { const FRDPiece* Ch = Generator->Piece(TEXT("Chain")); if (Ch) AddPieceAt(TEXT("Chain"), TileWorld(T) + Rt.RotateVector(FVector(-90, 0, 0)) + FVector(0, 0, Generator->CorridorHeight - Ch->Size.Z), R.FRandRange(0, 360), 1.f, true); }
+			else if (U < 0.3f) { const FRDPiece* Ch = this->Pc(TEXT("Chain")); if (Ch) AddPieceAt(TEXT("Chain"), TileWorld(T) + Rt.RotateVector(FVector(-90, 0, 0)) + FVector(0, 0, Generator->CorridorHeight - Ch->Size.Z), R.FRandRange(0, 360), 1.f, true); }
 			else if (U < 0.38f) AddPieceAt(TEXT("Debris"), Wall + Rt.RotateVector(FVector(50, 0, 0)), R.FRandRange(0, 360), 1.f, true);
 		}
 	}
@@ -1352,6 +1634,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	Generator = InGenerator; Coord = InCoord; Seed = InSeed; bEditorBuilt = bEditorBuild;
 	bBuildStatic = true; bBuildInteractive = true;
 	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1;
+	Theme = Generator->ThemeOf(Coord);
 	GenR.Initialize(Seed);
 	Plan(GenR);
 	ShellPrepare(GenR);
@@ -1400,6 +1683,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 	{
 		FRandomStream RM(Seed ^ 0x5f3759df);
 		SpawnMonsters(RM);
+		PlaceTraps(); PlaceCellOccupants(); PlacePad();          // (mistward)
 		CollectFlicker();
 		RegisterMap();          // (again: the containers and lights are there now)
 		Generator->RecordSection(this);
@@ -1418,6 +1702,41 @@ void ARDSection::Generate(ARDDungeonGenerator* InGenerator, FIntPoint InCoord, i
 	while (!ContinueGenerate(1e9)) {}
 }
 
+bool ARDSection::Census(ARDDungeonGenerator* InGenerator, FIntPoint InCoord, int32 InSeed, int32& OutRooms, int32& OutChests, int32& OutMonsters)
+{
+	OutRooms = OutChests = OutMonsters = 0;
+	if (!InGenerator) return false;
+	// (a section of nobody's world: planned and furnished in a count-only mode, nothing built, nothing spawned)
+	ARDSection* S = NewObject<ARDSection>(GetTransientPackage());
+	S->Generator = InGenerator; S->Coord = InCoord; S->Seed = InSeed; S->bEditorBuilt = false;
+	S->bCensus = true; S->bBuildStatic = false; S->bBuildInteractive = false; S->CensusChests = 0;
+	const FIntPoint T0 = InGenerator->SectionMinTile(InCoord);
+	if (USceneComponent* Rt = S->GetRootComponent()) Rt->SetRelativeLocation(FVector(T0.X * InGenerator->TileSize, T0.Y * InGenerator->TileSize, 0.f));
+	S->Theme = InGenerator->ThemeOf(InCoord);
+	FRandomStream R(InSeed);
+	S->Plan(R);
+	S->BuildShellCensus(R);
+	for (int32 RI = 0; RI < S->Rooms.Num(); ++RI) S->Furnish(R, RI);
+	S->bNoBlock = true;
+	for (int32 CI = 0; CI < S->Corrs.Num(); ++CI) S->DecorateCorridor(R, CI);
+	S->bNoBlock = false;
+	S->EnsureAnvil();
+	for (const FRoom& Rm : S->Rooms) if (Rm.Kind != ERDRoomKind::Junction) ++OutRooms;
+	OutChests = S->CensusChests;
+	FRandomStream RM(InSeed ^ 0x5f3759df);
+	S->SpawnMonsters(RM);
+	OutMonsters = S->MonstersPlanned;
+	S->MarkAsGarbage();
+	return true;
+}
+
+void ARDSection::BuildShellCensus(FRandomStream& R)
+{
+	// (the shell draws from the stream too: the same draws as BuildShell, nothing placed)
+	ShellPrepare(R);
+	for (int32 X = 0; X < N; ++X) ShellColumn(R, X);
+}
+
 void ARDSection::ActivateForPlay()
 {
 	if (!Generator) return;
@@ -1425,6 +1744,7 @@ void ARDSection::ActivateForPlay()
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
 	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1;
+	Theme = Generator->ThemeOf(Coord);
 	const int32 Inst = NumInstances, Lights = NumLights;
 	FRandomStream R(Seed);
 	Plan(R);
@@ -1439,6 +1759,7 @@ void ARDSection::ActivateForPlay()
 	bBuildStatic = true;
 	FRandomStream RM(Seed ^ 0x5f3759df);
 	SpawnMonsters(RM);
+	PlaceTraps(); PlaceCellOccupants(); PlacePad();          // (mistward)
 	RegisterMap();
 	CollectFlicker();
 	Generator->RecordSection(this);
@@ -1449,7 +1770,7 @@ void ARDSection::ActivateForPlay()
 void ARDSection::SpawnMonsters(FRandomStream& R)
 {
 	UWorld* W = GetWorld();
-	if (!W || !W->IsGameWorld() || Generator->Monsters.Num() == 0) return;
+	if ((!bCensus && (!W || !W->IsGameWorld())) || Generator->Monsters.Num() == 0) return;
 	// (level 5: the kinds of this section's tier of rooms)
 	TArray<int32> Kinds; Generator->MonsterKindsFor(Coord, Kinds);
 	float WSum = 0.f; for (const int32 K : Kinds) WSum += Generator->Monsters[K].Weight;
@@ -1485,6 +1806,7 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 		const int32 Index = Count++;
 		const float Yaw = R.FRandRange(0, 360);
 		const int32 MSeed = R.RandHelper(1 << 30);
+		if (bCensus) continue;             // (mistward: only counted)
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		if (Generator->IsMonsterKilled(Coord, Index))
 		{
@@ -1512,9 +1834,17 @@ FRDSectionMap ARDSection::BuildMapData() const
 {
 	FRDSectionMap M; M.Coord = Coord; M.bStart = Generator && Generator->IsStartSection(Coord);
 	const FIntPoint G0 = Generator ? Generator->SectionMinTile(Coord) : FIntPoint::ZeroValue;
-	for (const FRoom& Rm : Rooms)
+	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
 	{
+		const FRoom& Rm = Rooms[RI];
 		FRDMapRect Rc; Rc.Min = G0 + Rm.Min; Rc.Max = G0 + Rm.Max; Rc.Kind = Rm.Kind; Rc.bCorridor = Rm.Kind == ERDRoomKind::Junction;
+		// (mistward: a shaped room's tiles)
+		if (Rm.Shape != 0)
+		{
+			Rc.Shape = GetRoomShape(RI);
+			for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y)
+				for (int32 X = Rm.Min.X; X < Rm.Max.X; ++X) Rc.Mask.Add(Owner[Idx(FIntPoint(X, Y))] == RI ? 1 : 0);
+		}
 		M.Rects.Add(Rc);
 	}
 	for (const FCorr& C : Corrs)
@@ -1570,6 +1900,8 @@ void ARDSection::Destroyed()
 	SpawnedMonsters.Reset();
 	for (AActor* A : OtherActors) if (A) A->Destroy();
 	OtherActors.Reset();
+	for (AActor* A : MistActors) if (A) A->Destroy();
+	MistActors.Reset();
 	Super::Destroyed();
 }
 
@@ -1585,6 +1917,8 @@ float ARDSection::FindNearestInteractive(const FVector& From, float MaxDistance,
 	}
 	for (int32 I = 0; I < Containers.Num(); ++I)
 	{
+		// (mistward: an open container stays open: there is nothing more to do with it)
+		if (Generator && Generator->bContainersStayOpen && Containers[I].Target > 0.5f) continue;
 		const FVector D = Containers[I].Center - From;
 		const float H = FVector2D(D.X, D.Y).Size() + 20.f;     // a door at the same distance wins
 		if (H < Best && FMath::Abs(D.Z) < 200.f) { Best = H; Index = I; bDoor = false; }
@@ -1625,6 +1959,7 @@ void ARDSection::ToggleContainer(int32 I)
 {
 	if (!Containers.IsValidIndex(I)) return;
 	FMover& M = Containers[I];
+	if (Generator && Generator->bContainersStayOpen && M.Target > 0.5f) return;        // (mistward: it stays open)
 	M.Target = M.Target > 0.5f ? 0.f : 1.f;
 	if (Containers.IsValidIndex(M.Partner)) Containers[M.Partner].Target = M.Target;
 	if (Generator) Generator->PlaySoundAt(M.Target > 0.5f ? TEXT("Env.ChestOpen") : TEXT("Env.ChestClose"), M.Center);
@@ -1732,7 +2067,7 @@ void ARDSection::UpdateSeals()
 		const FVector Across = FVector::CrossProduct(FVector::UpVector, Out);
 		auto Place = [&](FName Piece, const FVector& At)
 		{
-			const FRDPiece* P = Generator->Piece(Piece);
+			const FRDPiece* P = this->Pc(Piece);
 			if (!P || !P->Mesh) return;
 			UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
 			C->SetMobility(EComponentMobility::Movable);
@@ -1745,7 +2080,7 @@ void ARDSection::UpdateSeals()
 		};
 		if (Kind == 2)
 		{
-			const FRDPiece* P = Generator->Piece(Generator->EndPiece);
+			const FRDPiece* P = this->Pc(Generator->EndPiece);
 			Place(Generator->EndPiece, Border - Out * ((P ? P->Size.X : 60.f) * 0.5f + 2.f));
 		}
 		else
@@ -1753,17 +2088,17 @@ void ARDSection::UpdateSeals()
 			// (the end wall at the border, the grating in front of it: the tier beyond is not generated, and through the bars
 			// the void showed as flat sky; a wall past the border, out from under the hallway's ceiling, glowed in the sky
 			// light. Both go when the tier opens)
-			const FRDPiece* E = Generator->Piece(Generator->EndPiece);
+			const FRDPiece* E = this->Pc(Generator->EndPiece);
 			const float Back = E && E->Mesh ? E->Size.X + 6.f : 0.f;
 			if (Back > 0.f) Place(Generator->EndPiece, Border - Out * (E->Size.X * 0.5f + 2.f));
 			// (the grating is a half-width piece: two of them across the hallway)
-			const FRDPiece* P = Generator->Piece(Generator->SealPiece);
+			const FRDPiece* P = this->Pc(Generator->SealPiece);
 			const float Half = P ? P->Size.Y * 0.5f : TS * 0.25f, Dp = Back + (P ? P->Size.X : 40.f) * 0.5f + 2.f;
 			Place(Generator->SealPiece, Border - Out * Dp + Across * Half);
 			Place(Generator->SealPiece, Border - Out * Dp - Across * Half);
 		}
 		// the blocker: the hallway's full width and height (nobody climbs over it), at the grating or the wall
-		const FRDPiece* Ep = Kind == 1 ? Generator->Piece(Generator->EndPiece) : nullptr;
+		const FRDPiece* Ep = Kind == 1 ? this->Pc(Generator->EndPiece) : nullptr;
 		const float Front = (Ep && Ep->Mesh) ? Ep->Size.X + 6.f : 0.f;
 		UBoxComponent* B = NewObject<UBoxComponent>(this);
 		B->SetMobility(EComponentMobility::Movable);

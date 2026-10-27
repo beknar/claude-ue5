@@ -91,6 +91,20 @@ public:
 	/** the one it fights now (none: nobody) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") AActor* GetFoe() const { return CurrentFoe.Get(); }
 
+	// ---- mistward_castle
+	/** as strong as a monster of tier InTier, times the multipliers, bigger by ScaleMul; its bar's name (a boss, a guard) */
+	void Empower(int32 InTier, float HealthMul, float DamageMul, float ScaleMul, const FString& InTitle);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bBoss = false;
+	/** locked in a prison cell: it waits there, unseen by the fight, until the cell is opened */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bCaged = false;
+	/** out of its cell: first to Exit (in front of the cell's door), then at her */
+	void Release(const FVector& Exit = FVector::ZeroVector);
+	FVector CellExit = FVector::ZeroVector;
+	float ReleasedUntil = -1.f;
+	/** the lowest point of its body as it is drawn now (its skinned vertices), against the bottom of its capsule (cm):
+	 *  under 0 it is in the floor, over 0 it floats */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") float GetDrawnBottom(float Percentile = 0.01f, bool bBodyOnly = true) const;
+
 	// ---- wounds
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumWounds() const { return Wounds.Num(); }
 	/** where a wound is now (world), and its size (cm) */

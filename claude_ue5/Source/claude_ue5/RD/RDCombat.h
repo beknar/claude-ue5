@@ -339,6 +339,38 @@ public:
 	/** what a weapon item breaks into ("<item>:<count>;...", "" none) */
 	FString BreakdownText(FName Item, const FString& Type) const;
 
+	// ---- mistward_castle: traps hold her (a snare, a pit), shields, a torch, armour kept set by set, her things dropped
+	/** she cannot move for Seconds (a snare, a pit) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") void HoldFor(float Seconds);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool IsHeld() const;
+	/** the shield in her left hand (an item of kind Shield; none: none), and its share of a blow now (0 while it is not in
+	 *  her hand: a two-handed weapon or a bow drawn, the torch held) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") FName GetWornShield() const { return WornShield; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") float GetShieldShare() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool IsShieldInHand() const;
+	/** what is left of a carried shield's (or armour set's) durability: the copy worn (or the first), and the spare copies */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") float GetShieldWear(FName Item) const { const float* W = ArmourWear.Find(Item); return W ? *W : 0.f; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") TArray<float> GetSpares(FName Item) const { const TArray<float>* S = Spares.Find(Item); return S ? *S : TArray<float>(); }
+	/** puts the shield in her left hand (or takes it off when it is there): false when she does not carry it or cannot */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool WearShield(FName Item);
+	/** the torch in her left hand (on / off; false: she has none) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool HoldTorch(bool bHold);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool IsTorchHeld() const { return bTorchHeld; }
+	/** the torch's light on her (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") UPointLightComponent* GetTorchLight() const { return TorchLight; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") UStaticMeshComponent* GetLeftHandMesh() const { return LeftComp; }
+	/** blows her shield took, shields broken */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 ShieldBlocks = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 ShieldsBroken = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") float LastShieldTook = 0.f;
+	/** everything she found (not the weapons her hero starts with): what drops when she falls; Wear: durability left (-1 none) */
+	void GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut) const;
+	/** her dropped things taken up again */
+	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn);
+	/** breaking a set of armour or a shield down at an anvil (a spare first; the one worn only when it is the last) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownGear(FName Item);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 GearBrokenDown = 0;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
@@ -386,6 +418,24 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> LoadedBoltComp;
 	UPROPERTY(Transient) TArray<TObjectPtr<USkeletalMeshComponent>> ArmourComps;
 	FName WornArmour;
+	// ---- mistward
+	FName WornShield;
+	bool bTorchHeld = false;
+	FName TorchItem;
+	/** a list's cursor held on a key: it steps again after a moment, then quickly */
+	int32 KeyRepeatDir = 0;
+	double KeyRepeatAt = 0.0;
+	float HeldUntil = -100.f;
+	bool bHeldOn = false;
+	/** the spare copies of a set of armour or a shield she carries (each copy's durability left) */
+	TMap<FName, TArray<float>> Spares;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> LeftComp;
+	UPROPERTY(Transient) TObjectPtr<UPointLightComponent> TorchLight;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemComponent> TorchFlame;
+	/** what her left hand shows: the drawn weapon's own off-hand mesh, her shield, or the torch */
+	void UpdateLeftHand();
+	const FRDWeaponFit* FitOf(FName Item) const;
+	void WearDownShield(float Took);
 	void ShowLoadedBolt(bool bShow);
 	// ---- the roll
 	float RollTime = -1.f, RollLen = 0.f, RollReadyAt = -100.f;

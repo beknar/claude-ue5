@@ -35,7 +35,9 @@
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/InputChord.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Misc/ScopeExit.h"
 #include "NiagaraSystem.h"
+#include "RD/RDMistward.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeonGen, Log, All);
 
@@ -219,9 +221,22 @@ bool ARDDungeonGenerator::IsTierOpen(int32 Tier) const
 {
 	if (MaxTier <= 0) return true;
 	if (Tier > MaxTier) return false;
+	if (Tier <= 1) return true;
+	// (mistward: the share rule of 2026-10-26: TierOpenShare of the tier before's rooms explored, monsters killed, chests
+	// and trunks looted, each over all of its sets of rooms, the ones she has not reached counted without building them)
+	if (TierOpenShare < 1.f)
+	{
+		// (once open, open for good: a set found bigger when built than its census said must not shut it again)
+		if (TiersOpened.Contains(Tier)) return true;
+		if (!IsTierOpen(Tier - 1)) return false;
+		FIntVector Done, All;
+		if (!GetTierTally(Tier - 1, Done, All)) return false;
+		auto Enough = [this](int32 D, int32 A) { return D >= FMath::CeilToInt(A * TierOpenShare - 1e-3f); };
+		return Enough(Done.X, All.X) && Enough(Done.Y, All.Y) && Enough(Done.Z, All.Z);
+	}
 	// (every tier before it open and the one just before cleared: tiers open in order; tier 2 too, once the start section
 	// is cleared: the user's rule, 2026-10-24)
-	return Tier <= 1 || (GetTierCleared(Tier - 1) >= TierSize(Tier - 1) && IsTierOpen(Tier - 1));
+	return GetTierCleared(Tier - 1) >= TierSize(Tier - 1) && IsTierOpen(Tier - 1);
 }
 
 bool ARDDungeonGenerator::IsSectionAllowed(FIntPoint S) const
@@ -276,7 +291,13 @@ void ARDDungeonGenerator::RecordSection(ARDSection* S)
 		P.Chests = S->GetChestKeys();
 		P.Monsters = S->MonstersPlanned;
 		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDTIER section (%d,%d) tier %d: %d rooms, %d chests and trunks, %d monsters"), S->Coord.X, S->Coord.Y, P.Tier, P.Rooms, P.Chests.Num(), P.Monsters);
+		// (mistward: what it was counted to hold before it was built must be what it holds)
+		if (const FIntVector* C = CensusCache.Find(S->Coord))
+			if (C->X != P.Rooms || C->Y != P.Chests.Num() || C->Z != P.Monsters)
+				UE_LOG(LogRandomDungeonGen, Warning, TEXT("RDCENSUS (%d,%d) counted %d rooms, %d chests, %d monsters; built %d, %d, %d"), S->Coord.X, S->Coord.Y, C->X, C->Y, C->Z, P.Rooms, P.Chests.Num(), P.Monsters);
 	}
+	// (mistward: the boss and the guards of a room of it come back with it)
+	if (Encounters.Num() > 0) RespawnEncounters(S);
 	UpdateProgress(S->Coord);
 }
 
@@ -288,13 +309,16 @@ void ARDDungeonGenerator::UpdateProgress(FIntPoint S)
 	if (const FRDSectionMap* M = MapData.Find(S)) for (const FRDMapRect& R : M->Rects) if (!R.bCorridor && R.bDiscovered) ++P->RoomsExplored;
 	P->ChestsLooted = 0;
 	for (const int32 K : P->Chests) if (IsContainerLooted(S, K)) ++P->ChestsLooted;
+	// (mistward: the share rule opens a tier when enough of the one before is done, whether a set is cleared or not)
+	ON_SCOPE_EXIT { if (TierOpenShare < 1.f) CheckTierOpenings(); };
 	if (P->bCleared) return;
 	if (P->RoomsExplored < P->Rooms || P->ChestsLooted < P->Chests.Num() || P->Killed.Num() < P->Monsters) return;
 	P->bCleared = true;
 	const int32 T = P->Tier, Done = GetTierCleared(T), All = TierSize(T);
 	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 	TierNoticeTime = Now;
-	if (Done >= All && T < MaxTier && IsTierOpen(T + 1))
+	if (TierOpenShare < 1.f) TierNotice = Done >= All ? FString::Printf(TEXT("TIER %d CLEARED"), T) : FString::Printf(TEXT("SET CLEARED  -  TIER %d: %d / %d"), T, Done, All);
+	else if (Done >= All && T < MaxTier && IsTierOpen(T + 1))
 	{
 		TierNotice = FString::Printf(TEXT("TIER %d IS OPEN"), T + 1);
 		RefreshSeals();
@@ -322,6 +346,8 @@ bool ARDDungeonGenerator::DebugClearSection(FIntPoint S, int32 LeaveMonsters, FV
 	TArray<ARDMonster*> Live;
 	for (ARDMonster* Mo : Sec->SpawnedMonsters) if (Mo && !Mo->IsDead()) Live.Add(Mo);
 	Live.Sort([Near](const ARDMonster& A, const ARDMonster& B) { return FVector::DistSquared(A.GetActorLocation(), Near) < FVector::DistSquared(B.GetActorLocation(), Near); });
+	// (mistward: a boss, a guard, a monster in a cell is none of the set's planned monsters: it stays)
+	Live.RemoveAll([](const ARDMonster* M) { return M->SpawnIndex < 0; });
 	TSet<int32> Keep;
 	for (int32 I = 0; I < Live.Num() && I < LeaveMonsters; ++I) Keep.Add(Live[I]->SpawnIndex);
 	for (int32 I = 0; I < P->Monsters; ++I) if (!Keep.Contains(I)) P->Killed.AddUnique(I);
@@ -346,6 +372,15 @@ FString ARDDungeonGenerator::DescribeSealNear(FVector From, float MaxDistance) c
 					if (FVector::Dist2D(At[I], From) > MaxDistance) continue;
 					if (Kinds[I] == 2) return TEXT("The dungeon ends here");
 					const int32 T = TierOf(S->Coord) + 1;
+					if (TierOpenShare < 1.f)
+					{
+						FIntVector D, A;
+						const bool bAll = GetTierTally(T - 1, D, A);
+						const int32 Pct = FMath::RoundToInt(TierOpenShare * 100.f);
+						if (!bAll) return FString::Printf(TEXT("Sealed: tier %d opens at %d%% of tier %d's rooms, monsters and chests"), T, Pct, T - 1);
+						return FString::Printf(TEXT("Sealed: tier %d opens at %d%% of tier %d  -  rooms %d / %d   monsters %d / %d   chests %d / %d"), T, Pct, T - 1,
+							D.X, FMath::CeilToInt(A.X * TierOpenShare - 1e-3f), D.Y, FMath::CeilToInt(A.Y * TierOpenShare - 1e-3f), D.Z, FMath::CeilToInt(A.Z * TierOpenShare - 1e-3f));
+					}
 					return FString::Printf(TEXT("Sealed: clear every set of rooms of tier %d to open tier %d  (%d / %d cleared)"), T - 1, T, GetTierCleared(T - 1), TierSize(T - 1));
 				}
 			}
@@ -477,6 +512,8 @@ TArray<int32> ARDDungeonGenerator::GetStartRoomContainers() const
 TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) const
 {
 	TArray<FName> Out;
+	// (mistward: what the rules put in it come first: the guarded ring)
+	if (const TArray<FName>* F = ForcedLoot.Find(FIntVector(Section.X, Section.Y, Index))) Out.Append(*F);
 	if (!bStartLoot || Items.Num() == 0 || (!IsStartSection(Section) && !bLootAllSections)) return Out;
 	const int32 Max = FMath::Max(MaxItemsPerContainer, 1);
 	// (level 5: an item may be found only in some tiers of rooms; level 4's items have no tiers: everywhere)
@@ -914,6 +951,14 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 {
 	++MonstersKilled;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
+	// (mistward: one of a boss's band or a ring's guards stays dead)
+	for (FEncounter& E : Encounters)
+		for (int32 I = 0; I < E.Live.Num(); ++I)
+			if (E.Live[I].Get() == Monster)
+			{
+				E.Dead[I] = true;
+				if (E.bBoss && I == 0) { TierNotice = FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds(); }
+			}
 	// (the tiers: it stays dead, also when its section is generated again)
 	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
 		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord))
@@ -950,6 +995,23 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tier 1 open)
 	for (ARDMonster* A : Allies) if (A) A->Destroy();
 	Allies.Reset();
+	// (mistward: what the rules set waiting, her dropped things, the pads, the cells, the traps start again)
+	for (const FEncounter& E : Encounters) for (const TWeakObjectPtr<ARDMonster>& M : E.Live) if (M.IsValid()) M->Destroy();
+	// (and every other monster that is none of a set's planned ones (a boss's band, a guard, one a teleport trap brought, a
+	// caged one): the start set is kept, and a restart left 60 of them standing in it after a few runs)
+	for (auto& KV : Sections)
+		if (ARDSection* S = KV.Value)
+		{
+			for (ARDMonster* M : S->SpawnedMonsters) if (IsValid(M) && M->SpawnIndex < 0) M->Destroy();
+			S->SpawnedMonsters.RemoveAll([](const TObjectPtr<ARDMonster>& M) { return !IsValid(M) || M->IsActorBeingDestroyed(); });
+		}
+	Encounters.Reset(); ForcedLoot.Reset(); TiersOpened.Reset(); CensusCache.Reset(); CensusQueue.Reset();
+	for (ARDLootPile* P : LootPiles) if (IsValid(P)) P->Destroy();
+	LootPiles.Reset();
+	Pads.Reset(); PadSections.Reset(); PadRingsTaken.Reset(); PadActors.Reset(); PadChoice = 0; Teleports = 0;
+	CellsOpened.Reset(); PrisonersFreed = CellBreakouts = 0;
+	SpentTraps.Reset(); DisarmKey = FIntVector(0, 0, -1); TrapsTriggered = TrapsDisarmed = TrapHits = 0; LastTrap.Reset();
+	TrapR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x7D15u)); PendingRingTiers.Reset();
 	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
 	// (the weapons she found are gone: hers are the hero's again)
 	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) Weapons = H->Weapons;
@@ -959,6 +1021,8 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		PlayerCombat->ResetWeapons();
 		PlayerCombat->ClearItems();                // (nothing found yet, no armour on)
 		PlayerCombat->Revive(true);
+		// (after Revive: WearShield refuses while she is down)
+		if (const FName* Sh = StartShield.Find(CurrentHero); Sh && FindItem(*Sh) >= 0) { PlayerCombat->AddItem(*Sh, 1); PlayerCombat->WearShield(*Sh); }
 		PlayerCombat->Kills = PlayerCombat->AttacksMade = PlayerCombat->HitsLanded = PlayerCombat->HitsTaken = PlayerCombat->Deaths = 0;
 		PlayerCombat->DamageDealt = PlayerCombat->DamageTaken = 0.f;
 		PlayerCombat->LastHurtTime = PlayerCombat->LastHitTime = PlayerCombat->DeathTime = -100.f;
@@ -992,6 +1056,10 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 				const float D = S->FindNearestInteractive(From, BestD, bDoor, I);
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
+	// (mistward: her dropped things, a teleporter pad, a trap she has seen (the Rogue disarms it) come before the rest)
+	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
+	if (bTeleporters) { const FString Pd = UsePadNear(From); if (!Pd.IsEmpty()) return Pd; }
+	if (Traps.Num() > 0 && BeginDisarmNear(From)) return TEXT("disarm");
 	// (level 5: an anvil nearer than any door or container opens her crafting panel)
 	FVector Anvil;
 	if (PlayerCombat && Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil))
@@ -1000,6 +1068,14 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 		return TEXT("anvil");
 	}
 	if (!Best) return FString();
+	if (bBestDoor && Best->IsDoorCell(BestI) && !Best->DescribeCell(BestI).IsEmpty())
+	{
+		// (mistward: a locked cell: a prisoner is let out; a monster's is locked from within, and opens when she is near)
+		const int32 C = Best->CellOfDoor(BestI);
+		if (Best->Cells.IsValidIndex(C) && Best->Cells[C].Occupant == 1) { Best->OpenCell(BestI); return TEXT("prisoner"); }
+		if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The cell is locked from within"));
+		return TEXT("cell locked");
+	}
 	if (bBestDoor) { Best->ToggleDoor(BestI, From); return Best->IsDoorCell(BestI) ? TEXT("cell door") : TEXT("door"); }
 	Best->ToggleContainer(BestI);
 	return Best->GetContainerKind(BestI);
@@ -1070,9 +1146,14 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				const float D = S->FindNearestInteractive(From, BestD, bDoor, I);
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
+	// (mistward: her dropped things, a pad, a trap she sees)
+	for (const ARDLootPile* Lp : LootPiles) if (IsValid(Lp) && FVector::Dist2D(Lp->GetActorLocation(), From) < 260.f) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());
+	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
+	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
 	if (!Best) return FString();
+	if (bBestDoor && Best->IsDoorCell(BestI)) { const FString Cl = Best->DescribeCell(BestI); if (!Cl.IsEmpty()) return Cl; }
 	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : TEXT("door")) : Best->GetContainerKind(BestI);
 	What.ReplaceInline(TEXT("2"), TEXT(""));
 	return FString::Printf(TEXT("%s %s"), Best->IsTargetOpen(bBestDoor, BestI) ? TEXT("close") : TEXT("open"), *What);
@@ -1154,6 +1235,12 @@ void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	if (bOpeningMenu) return;
+	// (mistward: the frame rate, smoothed over about a second of frames, from the real time between frames)
+	if (bShowFps)
+	{
+		const float Real = (float)FApp::GetDeltaTime();
+		if (Real > 1e-5f) FpsSmoothed = FpsSmoothed <= 0.f ? 1.f / Real : FMath::Lerp(FpsSmoothed, 1.f / Real, FMath::Clamp(Real * 2.f, 0.02f, 1.f));
+	}
 	// (it ticks while the game is paused: then only her inventory or the Escape menu, which paused it, is worked)
 	const bool bPaused = GetWorld()->IsPaused();
 	if (APlayerController* MPC = UGameplayStatics::GetPlayerController(this, 0)) TickMenu(MPC);
@@ -1175,6 +1262,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 				PlayerCombat = NewObject<URDCombatComponent>(P, TEXT("RDCombat"));
 				PlayerCombat->RegisterComponent();
 				PlayerCombat->Init(this);
+				// (mistward: the shield her hero starts with, on her arm)
+				if (const FName* Sh = StartShield.Find(CurrentHero); Sh && FindItem(*Sh) >= 0) { PlayerCombat->AddItem(*Sh, 1); PlayerCombat->WearShield(*Sh); }
 			}
 			// (a face that moves: the level's expression channels on her pawn)
 			if (FaceChannels.Num() > 0 && !P->FindComponentByClass<URDFaceComponent>())
@@ -1235,6 +1324,28 @@ void ARDDungeonGenerator::Tick(float Dt)
 			if (PC->WasInputKeyJustPressed(EKeys::C) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightThumbstick)) CenterMap();
 		}
 	}
+	// (mistward: the census of the sets she has not reached, the traps, the cells; G picks the first tier pad's destination)
+	if (TierOpenShare < 1.f && MaxTier > 0)
+	{
+		// (the open tiers' sets are counted ahead, a few a frame, so that the next tier opens the moment it should)
+		if (CensusQueue.Num() == 0) for (int32 T = 1; T < MaxTier && IsTierOpen(T); ++T) { FIntVector D, A; GetTierTally(T, D, A); if (CensusQueue.Num() > 0) break; }
+		if (CensusQueue.Num() > 0) TickCensus();
+	}
+	if (Traps.Num() > 0) TickTraps(Dt);
+	// (mistward: the rings to guard of a tier opened by the last container she opened, now that it has given what it held)
+	if (PendingRingTiers.Num() > 0) { const TArray<int32> Ts = PendingRingTiers; PendingRingTiers.Reset(); for (const int32 T : Ts) PlaceRingGuard(T); }
+	if (PrisonerDefs.Num() > 0)
+		if (APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0))
+		{
+			const FIntPoint Here = WorldToSection(Her->GetActorLocation());
+			for (int32 Dx = -1; Dx <= 1; ++Dx) for (int32 Dy = -1; Dy <= 1; ++Dy) if (ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy))) S->TickCells(Dt, Her);
+		}
+	if (bTeleporters)
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0); PC && PC->GetPawn() && PC->WasInputKeyJustPressed(EKeys::G) && PadNear(PC->GetPawn()->GetActorLocation()) == 1)
+		{
+			const TArray<int32> D = GetPadDestinations();
+			if (D.Num() > 0) { const int32 I = D.Find(PadChoice); PadChoice = D[(I == INDEX_NONE ? 0 : I + 1) % D.Num()]; }
+		}
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
 	else TickMusic(Dt);         // (the self test measures single sounds: no music under them, only the room tone)
 	const AActor* Pawn = GetTrackedActor();

@@ -178,7 +178,7 @@ void ARDHeroSelectHUD::DrawHUD()
 	};
 	float Tw, Th;
 	// ---- the title
-	UI.Text(TEXT("RANDOM DUNGEON"), RDHSDim, 80.f * Sc, 44.f * Sc, Small, Sc * 1.3f, ERDType::Label);
+	UI.Text(Sel && !Sel->GameTitle.IsEmpty() ? Sel->GameTitle.ToUpper() : FString(TEXT("RANDOM DUNGEON")), RDHSDim, 80.f * Sc, 44.f * Sc, Small, Sc * 1.3f, ERDType::Label);
 	UI.Text(TEXT("CHOOSE YOUR HERO"), RDHSInk, 78.f * Sc, 68.f * Sc, Medium, Sc * 2.1f, ERDType::Title);
 	// ---- her card (left)
 	const float Fade = FMath::Clamp((Now - Sel->ShownTime) / 0.35f, 0.f, 1.f);

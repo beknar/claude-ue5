@@ -1,0 +1,120 @@
+create a new level called mistward_castle, and it is the same level as random_dungeonmagic_level5 but has the following properties
+and corrections:
+call this dungeon type with 5 levels Mistward Castle - this is of the theme Stone Dungeon and Crypt, plus Castle Keep and its
+cells, plus Dwarven Deep Halls.  These are types 1-3 combined together in docs/dungeon_types.md
+there should be an FPS counter in the top left, above the controls panel
+holding down a key should scroll the list in the inventory instead of having to press multiple times
+two beds in the barracks should never intersect each other 
+two chests should not intersect each other
+chests should be in reasonable places instead of being hidden and hard to find like in between two beds
+have more variation in the sizes and shapes of rooms.  currently all rooms are rectangles.  some can be
+circular, others can be triangle shaped, still yet others can have variable heights, others can be
+of various types of pyramid, some can be dome shaped, some can be L shaped and T shaped, there are U shaped rooms,
+octagons and polygons are possible
+plate knight swords should be found in tier 2 rooms, not tier 1 rooms
+the next tier room can now be generated if the player has cleared 75% of the rooms, monsters and chests
+if the magic potency ring 1 or 2 hasn't been found when the tier 2 room is eligible to be generated, show where it
+is on the map and generate 4 monsters of the appropriate tier there.  enable this capability for tier 2, tier 3, 
+tier 4, and tier 5
+once tier 2 is eligible to be generated, generate a 'boss encounter' in one of the previously explored rooms that is
+not the current room, where there are 3-6 of that tier's monsters as well as a boss monster that is somewhat above 
+the capabilities of the character at that level
+objects should never block containers, for example: a table should not block a dresser or chest
+characters can get extra suits of armor in the inventory and they can be broken down just like weapons at an anvil
+the creature named Half Creature 05 is invisible -- why?  is there a model assigned to this monster?
+make an item called 'torch' that can be crafted using the crafting materials at an anvil, and when carried in the left 
+hand, provides light
+shields can now be found using the shields in the docs/objects.md file, can be wielded in the left hand, can be taken 
+off and be put on, and have these values in this table:
+┌──────┬─────────────────────┬────────┬─────────────┬───────┬────────────┐
+│ Rank │       Shield        │ Size   │   Damage    │ Speed │ Durability │
+│      │                     │  (cm)  │  reduction  │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 1    │ Broddi's Shield     │ 136 ×  │ 10          │ 2     │ 300        │
+│      │                     │ 78     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 2    │ Scutum              │ 151 ×  │ 9           │ 1     │ 240        │
+│      │                     │ 88     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 3    │ Crusader Shield     │ 122 ×  │ 8           │ 3     │ 230        │
+│      │                     │ 94     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 4    │ War Tower Shield    │ 122 ×  │ 8           │ 2     │ 260        │
+│      │                     │ 73     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 5    │ Plate Knight's      │ 108 ×  │ 7           │ 5     │ 250        │
+│      │ Shield              │ 48     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 6    │ Lady Knight's       │ 103 ×  │ 7           │ 5     │ 240        │
+│      │ Shield              │ 53     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 7    │ Kite Shield         │ 90 ×   │ 6           │ 6     │ 230        │
+│      │                     │ 57     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 8    │ Desert Shield       │ 82 ×   │ 6           │ 6     │ 210        │
+│      │                     │ 82     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 9    │ Heater Shield       │ 76 ×   │ 5           │ 7     │ 220        │
+│      │                     │ 60     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 10   │ Eastern Shield      │ 77 ×   │ 5           │ 7     │ 200        │
+│      │                     │ 77     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 11   │ Beast Shield        │ 69 ×   │ 4           │ 8     │ 190        │
+│      │                     │ 67     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 12   │ Rider's Shield      │ 113 ×  │ 4           │ 5     │ 130        │
+│      │                     │ 113    │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 13   │ War Camp Shield     │ 88 ×   │ 4           │ 6     │ 130        │
+│      │                     │ 88     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 14   │ Heraldic Shield     │ 79 ×   │ 3           │ 8     │ 150        │
+│      │                     │ 52     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 15   │ Dock Shield         │ 78 ×   │ 3           │ 7     │ 150        │
+│      │                     │ 78     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 16   │ Viking Shield       │ 71 ×   │ 3           │ 8     │ 160        │
+│      │ (iron-bound)        │ 70     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 17   │ Village Shield      │ 78 ×   │ 2           │ 7     │ 120        │
+│      │ (blue and white)    │ 78     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 18   │ Village Shield      │ 78 ×   │ 2           │ 7     │ 120        │
+│      │ (red)               │ 78     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 19   │ Village Shield      │ 78 ×   │ 2           │ 7     │ 120        │
+│      │ (green)             │ 78     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 20   │ Viking Round Shield │ 66 ×   │ 1           │ 10    │ 100        │
+│      │                     │ 66     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 21   │ Painted Viking      │ 66 ×   │ 1           │ 10    │ 100        │
+│      │ Shield              │ 66     │             │       │            │
+├──────┼─────────────────────┼────────┼─────────────┼───────┼────────────┤
+│ 22   │ Viking Shield       │ 66 ×   │ 1           │ 10    │ 100        │
+│      │ (green and white)   │ 66     │             │       │            │
+└──────┴─────────────────────┴────────┴─────────────┴───────┴────────────┘
+multiple shields can now be picked up by the character and can be broken down in the vault
+when the character dies, all of her equipment drops in that room with the loot being represented as their image and the
+loot drops vol. 2 - niagra visual effects pack in the fab 3d fab library data cache in I:\game assets directory
+when a container is opened, it remains open, this is to make sure a character doesn't keep searching containers
+implement the following types of traps: mechanical traps (pit, missiles, dead falls, crushers, snares), 
+magical (glyphs, wards, emanation and cursed objects) - use the magical effects found in the fab cache, complex
+multi-effect traps that are a combination of mechanical and magical that happen one after the other or the longer
+a character stays in an area, directional or transportation trapes that put the character in a room with monsters
+or even more traps.  the rogue character can detect the traps and disarm them -- enable a system for this
+the items in the anvil menu should be in alphabetical order
+implement a teleport ring starting at tier 2 that can teleport a character back to a tier 1 teleporter which can also
+teleport the character back to tier 2, once tier 2 has been generated.  do the same for tier 3, 4 and 5.
+cells should hold either prisoners who can be freed by the player unlocking the cells, who could then reward the
+player with an item, who would then de-spawn after that, or a monster who would unlock his own cell and attack the
+player.  use NPCs from the 3d fab cache asset packs
+once the above changes are made, record all new capabilities in readme.md, then create a demo reel for all four
+characters showing off the new things they can do, as well as all the new features in the Mistward Castle level
+if processing stops due to memory problems and the unreal editor has to be shut down, restart processing from the
+point it stopped and try to reduce memory usage for the next run.
+once all reels have been made, commit to a PR, review the PR, fix any problems in it, then merge it if it is
+mergeable.
+

@@ -48,6 +48,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") TObjectPtr<AActor> Camera;
 	/** what START opens (with ?Hero=<name>) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") FString TargetLevel = TEXT("/Game/RandomDungeon/Maps/random_dungeonmagic_level4");
+	/** the line over "CHOOSE YOUR HERO" (mistward_castle: its name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") FString GameTitle = TEXT("RANDOM DUNGEON");
 	/** degrees a second */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float TurnRate = 28.f;
 	/** the turntable's yaw when a hero is first shown (her face to the camera) */

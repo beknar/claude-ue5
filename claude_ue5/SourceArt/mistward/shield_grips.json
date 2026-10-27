@@ -1,0 +1,156 @@
+{
+ "Broddi's Shield": {
+  "mesh": "/Game/Dwarf_Pack/Broddi/Mesh/SM_Dwarf_BroddI_Shield_Dwarf_Broddi_Sheld_Mesh.SM_Dwarf_BroddI_Shield_Dwarf_Broddi_Sheld_Mesh",
+  "depth": 12.6,
+  "tiers": [
+   5
+  ]
+ },
+ "Scutum": {
+  "mesh": "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Separate_Details/SM_Shield_06.SM_Shield_06",
+  "depth": 26.3,
+  "tiers": [
+   5
+  ]
+ },
+ "Crusader Shield": {
+  "mesh": "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Separate_Details/SM_Shield_04.SM_Shield_04",
+  "depth": 23.9,
+  "tiers": [
+   5
+  ]
+ },
+ "War Tower Shield": {
+  "mesh": "/Game/RandomDungeon/Mistward/SM_WarTowerShield.SM_WarTowerShield",
+  "depth": 62.0,
+  "tiers": [
+   5
+  ]
+ },
+ "Plate Knight's Shield": {
+  "mesh": "/Game/Knights_Pack/Meshes/Knight_03/Weapon/SM_Knight_03_Shield.SM_Knight_03_Shield",
+  "depth": 12.8,
+  "tiers": [
+   4
+  ]
+ },
+ "Lady Knight's Shield": {
+  "mesh": "/Game/Knights_Pack/Meshes/Knight_04/Weapon/SM_Knight_04_Shield.SM_Knight_04_Shield",
+  "depth": 22.3,
+  "tiers": [
+   4
+  ]
+ },
+ "Kite Shield": {
+  "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_3.SM_Shield_3",
+  "depth": 24.8,
+  "tiers": [
+   4
+  ]
+ },
+ "Desert Shield": {
+  "mesh": "/Game/Warriors_Pack/Mesh/Fantasy_Hero_02/SM_Mesh/SM_Fantasy_Hero_02_Shield.SM_Fantasy_Hero_02_Shield",
+  "depth": 16.2,
+  "tiers": [
+   4
+  ]
+ },
+ "Heater Shield": {
+  "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_1.SM_Shield_1",
+  "depth": 12.6,
+  "tiers": [
+   3
+  ]
+ },
+ "Eastern Shield": {
+  "mesh": "/Game/Knights_Pack/Meshes/Knight_02/Weapons/SM_Knight_02_Shield.SM_Knight_02_Shield",
+  "depth": 20.0,
+  "tiers": [
+   3
+  ]
+ },
+ "Beast Shield": {
+  "mesh": "/Game/Medieval_Weapons/Meshes/VOL2/SM_Shield_2.SM_Shield_2",
+  "depth": 13.6,
+  "tiers": [
+   3
+  ]
+ },
+ "Rider's Shield": {
+  "mesh": "/Game/Animals_Pack/Mesh/Fantasy_Elephant/Fantasy_Elephant_Build_Mesh/Separate_Details/SM_Shield_03.SM_Shield_03",
+  "depth": 8.2,
+  "tiers": [
+   3
+  ]
+ },
+ "War Camp Shield": {
+  "mesh": "/Game/WarCamp_Collection/Props/SM_Shield/Meshes/FBX/SM_Shield.SM_Shield",
+  "depth": 9.8,
+  "tiers": [
+   3
+  ]
+ },
+ "Heraldic Shield": {
+  "mesh": "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Shield.SM_Knight_01_Shield",
+  "depth": 13.0,
+  "tiers": [
+   2
+  ]
+ },
+ "Dock Shield": {
+  "mesh": "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/SM_Shield_01.SM_Shield_01",
+  "depth": 13.4,
+  "tiers": [
+   2
+  ]
+ },
+ "Viking Shield (iron-bound)": {
+  "mesh": "/Game/Vikings/Mesh_Weapon/SM_Viking_Shield_02.SM_Viking_Shield_02",
+  "depth": 10.6,
+  "tiers": [
+   2
+  ]
+ },
+ "Village Shield": {
+  "mesh": "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/VikingShield/SM_VikingShield_01a.SM_VikingShield_01a",
+  "depth": 17.5,
+  "tiers": [
+   2
+  ]
+ },
+ "Village Shield (red)": {
+  "mesh": "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/VikingShield/SM_VikingShield_01b.SM_VikingShield_01b",
+  "depth": 17.5,
+  "tiers": [
+   1
+  ]
+ },
+ "Village Shield (green)": {
+  "mesh": "/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/VikingShield/SM_VikingShield_01c.SM_VikingShield_01c",
+  "depth": 17.5,
+  "tiers": [
+   1
+  ]
+ },
+ "Viking Round Shield": {
+  "mesh": "/Game/Vikings/Mesh_Weapon/SM_Viking_Shield_01.SM_Viking_Shield_01",
+  "depth": 10.6,
+  "tiers": [
+   1
+  ]
+ },
+ "Painted Viking Shield": {
+  "mesh": "/Game/Vikings/Mesh_Weapon/SM_Viking_Shield_03.SM_Viking_Shield_03",
+  "depth": 10.6,
+  "tiers": [
+   1
+  ]
+ },
+ "Viking Shield (green and white)": {
+  "mesh": "/Game/Vikings/Mesh_Weapon/SM_Viking_Shield_04.SM_Viking_Shield_04",
+  "depth": 10.6,
+  "tiers": [
+   1
+  ]
+ }
+}

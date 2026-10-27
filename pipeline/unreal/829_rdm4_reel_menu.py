@@ -15,7 +15,9 @@ five and round to the Warrior again, START on her (cine_menu_warrior.json). Leve
 weapons reel, 815's run5h): level 4's four passages on level 5's menu, START on the Warrior, the Mage, the Warlock and the
 Rogue in turn, the Summoner never picked (cine_menu_quartet.json). Level 5 with "caps" (the four heroes' capabilities
 reel, 815's run5x; the menu's four heroes since 2026-10-26): level 4's four passages as they are (cine_menu_caps.json).
-Args: [seconds a passage, 7] [level: 4 or 5] [level 5: the hero picked, Summoner or Warrior, or quartet, or caps]"""
+Level "mw" (mistward_castle_select, LS_RDMmwselect_Showcase; 815's run5m): level 4's four passages as they are; the record
+(SourceArt/mistward/cine_menu_mw.json) also has the game's title over the menu (ARDHeroSelect's GameTitle, "Mistward Castle").
+Args: [seconds a passage, 7] [level: 4, 5 or mw] [level 5: the hero picked, Summoner or Warrior, or quartet, or caps]"""
 import unreal, sys, json, os
 __keep__ = True
 PASSAGE = float(sys.argv[1]) if len(sys.argv) > 1 else 7.0
@@ -29,7 +31,9 @@ PLAN = [[(1.1, "D"), (2.2, "D"), (3.4, "A"), (4.5, "A"), (5.7, "Enter")],
         [(1.6, "D"), (4.8, "Enter")]]
 WANT = ["Warrior", "Mage", "Warlock", "Rogue"]
 PICK = sys.argv[3] if len(sys.argv) > 3 else "Summoner"
-if LV == "5" and PICK == "caps":
+if LV == "mw":
+    OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\mistward\cine_menu_mw.json"
+elif LV == "5" and PICK == "caps":
     # (the four heroes' capabilities reel, 815's run5x: the menu has four heroes since 2026-10-26 (the Summoner left off,
     # the Warrior Warrior3): level 4's four passages as they are)
     OUT = OUT.replace("cine_menu.json", "cine_menu_caps.json")
@@ -66,7 +70,7 @@ def save(why=None):
     heroes = G.get("heroes", [])          # (read when it was armed: at the render's end the menu's actor may be gone)
     rows = [S["rows"][k] for k in sorted(S["rows"])]
     picked = [e["hero"] for e in S["events"] if e["kind"] == "start"]
-    out = {"fps": FPS, "passage": PASSAGE, "rows": rows, "events": S["events"], "heroes": heroes, "picked": picked, "want": WANT, "error": why}
+    out = {"fps": FPS, "passage": PASSAGE, "rows": rows, "events": S["events"], "heroes": heroes, "picked": picked, "want": WANT, "error": why, "game_title": G.get("title", "")}
     os.makedirs(os.path.dirname(OUT), exist_ok=True); json.dump(out, open(OUT, "w"), indent=0)
     ok = picked == WANT and not why
     (unreal.log if ok else unreal.log_error)("RDM4MENU %s | %d frames | picked %s | %s" % ("saved" if ok else "failed", len(rows), picked, why or ""))
@@ -81,7 +85,7 @@ def body():
         sels = GS.get_all_actors_of_class(w, unreal.RDHeroSelect); lsa = GS.get_all_actors_of_class(w, unreal.LevelSequenceActor)
         if not sels or not lsa or lsa[0].get_editor_property("sequence_player") is None: return
         G.update({"w": w, "sel": sels[0], "player": lsa[0].get_editor_property("sequence_player"), "going": False, "down": [], "done": set()})
-        sels[0].set_editor_property("stay_on_confirm", True); G["heroes"] = card_data(sels[0])
+        sels[0].set_editor_property("stay_on_confirm", True); G["heroes"] = card_data(sels[0]); G["title"] = str(sels[0].get_editor_property("game_title"))
         unreal.log("RDM4MENU armed, %d passages of %.1f s" % (len(PLAN), PASSAGE))
     if w is None or not unreal.SystemLibrary.is_valid(G["sel"]): stop(None if G.get("t", 0.0) >= DUR - 0.05 else "the world ended"); return
     if S["saved"]: return

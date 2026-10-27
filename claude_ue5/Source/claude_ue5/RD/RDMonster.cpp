@@ -284,6 +284,89 @@ void ARDMonster::Die()
 	if (G && !bAlly) G->OnMonsterKilled(this);
 }
 
+// ------------------------------------------------------------------------------------------------ mistward
+void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float ScaleMul, const FString& InTitle)
+{
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	if (!G || !bCombat) return;
+	// (its kind's share of its tier's average, as Setup does for its own section's tier)
+	const FRDMonsterDef* Def = G->Monsters.FindByPredicate([this](const FRDMonsterDef& D) { return D.Name == MonsterName; });
+	const float Hf = Def ? Def->HealthFactor : 1.f, Df = Def ? Def->DamageFactor : 1.f;
+	const float RefH = G->MonsterReferenceHealth > 0.f ? G->MonsterReferenceHealth : G->PlayerMaxHealth;
+	const float RefD = G->MonsterReferenceBlow > 0.f ? G->MonsterReferenceBlow : G->GetAverageWeaponDamage();
+	float MeanH = 1.f, MeanD = 1.f;
+	// (the means of the kinds of that tier: a set of rooms of it)
+	const FIntPoint TierSection(FMath::Max(InTier - 1, 0), 0);
+	G->MeanMonsterFactors(MeanH, MeanD, TierSection);
+	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(RefH * ARDDungeonGenerator::TierValue(G->TierHealth, InTier, 1.f) * Hf / MeanH * HealthMul));
+	Damage = FMath::Max(1.f, FMath::RoundToFloat(RefD * ARDDungeonGenerator::TierValue(G->TierDamage, InTier, 1.f) * Df / MeanD * DamageMul));
+	Tier = InTier;
+	if (G->MaxTier > 0)
+	{
+		const float Sp = ARDDungeonGenerator::TierValue(G->TierSpeed, InTier, 1.f);
+		WalkSpeed = (Def ? Def->WalkSpeed : WalkSpeed) * Sp; SpeedScale = Sp; MaxChaseScale = Sp;
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		AttackInterval = (Def ? Def->AttackInterval : AttackInterval) * ARDDungeonGenerator::TierValue(G->TierAttackInterval, InTier, 1.f);
+		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, InTier, 1.f);
+	}
+	if (ScaleMul != 1.f)
+	{
+		// (bigger: its capsule and its mesh, its feet kept on the floor; its reach grows with it)
+		UCapsuleComponent* Cap = GetCapsuleComponent();
+		const float R0 = Cap->GetUnscaledCapsuleRadius(), H0 = Cap->GetUnscaledCapsuleHalfHeight();
+		Cap->SetCapsuleSize(R0 * ScaleMul, H0 * ScaleMul);
+		USkeletalMeshComponent* M = GetMesh();
+		const FVector Rel = M->GetRelativeLocation();
+		M->SetRelativeLocation(FVector(Rel.X, Rel.Y, Rel.Z * ScaleMul));
+		M->SetRelativeScale3D(M->GetRelativeScale3D() * ScaleMul);
+		AddActorWorldOffset(FVector(0, 0, H0 * (ScaleMul - 1.f) + 2.f));
+		Reach *= ScaleMul;
+	}
+	if (!InTitle.IsEmpty()) Title = InTitle;
+}
+
+void ARDMonster::Release(const FVector& Exit)
+{
+	if (!bCaged) return;
+	// (out of its cell it comes for her at once: noticing her needs a tile path, and from inside its cell there was none,
+	// so a freed monster stood in the open cell)
+	bCaged = false; bAggro = true; Path.Reset(); ChaseTimer = 0.f; WaitTime = 0.f; StuckTime = 0.f;
+	// (the tile path from inside its cell to her may not exist: it walks out through the door first)
+	CellExit = Exit; ReleasedUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + 8.f : -1.f;
+	Roar();
+}
+
+float ARDMonster::GetDrawnBottom(float Percentile, bool bBodyOnly) const
+{
+	// (its skinned vertices as drawn now, a spread of them: its body's (or with the parts made on its skeleton: a weapon
+	// part's tip on the floor would lift a whole orc); the Percentile-th lowest of them, not the lowest: a tail or a strap
+	// dragging is not where it stands)
+	TArray<float> Zs;
+	TInlineComponentArray<USkeletalMeshComponent*> Ms(this);
+	for (USkeletalMeshComponent* M : Ms)
+	{
+		if (bBodyOnly && M != GetMesh()) continue;
+		const FSkeletalMeshRenderData* RD = M ? M->GetSkeletalMeshRenderData() : nullptr;
+		if (!RD || RD->LODRenderData.Num() == 0) continue;
+		const int32 LODIdx = FMath::Clamp(RD->GetPendingFirstLODIdx(0), 0, RD->LODRenderData.Num() - 1);
+		const FSkeletalMeshLODRenderData& LOD = RD->LODRenderData[LODIdx];
+		const FPositionVertexBuffer& PB = LOD.StaticVertexBuffers.PositionVertexBuffer;
+		FSkinWeightVertexBuffer* SW = M->GetSkinWeightBuffer(LODIdx);
+		const int32 Num = (int32)PB.GetNumVertices();
+		if (Num <= 0 || !PB.GetVertexData() || !SW || !SW->GetNeedsCPUAccess() || (int32)SW->GetNumVertices() != Num) continue;
+		TArray<FMatrix44f> RefToLocals;
+		M->CacheRefToLocalMatrices(RefToLocals);
+		const FTransform Xf = M->GetComponentTransform();
+		const int32 Step = FMath::Max(1, Num / 6000);
+		for (int32 V = 0; V < Num; V += Step)
+			Zs.Add((float)Xf.TransformPosition(FVector(USkinnedMeshComponent::GetSkinnedVertexPosition(M, V, LOD, *SW, RefToLocals))).Z);
+	}
+	if (Zs.Num() == 0) return 0.f;
+	Zs.Sort();
+	const float Lo = Zs[FMath::Clamp(FMath::FloorToInt32(Percentile * (Zs.Num() - 1)), 0, Zs.Num() - 1)];
+	return Lo - (GetActorLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+}
+
 // ------------------------------------------------------------------------------------------------ level 5: corpses, allies, the spells' hold
 void ARDMonster::LayDead()
 {
@@ -533,6 +616,8 @@ bool ARDMonster::TickCombat(float Dt)
 		return true;
 	}
 	URDCombatComponent* Pc = G->GetPlayerCombat();
+	// (mistward: locked in its cell, it waits)
+	if (bCaged) { SetWalkingAnim(false); return true; }
 	// the one it fights (level 5: her or her allies; her ally fights the monsters)
 	bool bFoePlayer = false;
 	AActor* P = AttackTime >= 0.f && CurrentFoe.IsValid() ? CurrentFoe.Get() : PickFoe(Pc, bFoePlayer);
@@ -605,6 +690,12 @@ bool ARDMonster::TickCombat(float Dt)
 		}
 		else SetWalkingAnim(false);
 		return true;
+	}
+	// (mistward: just out of its cell: through its door first, then at her)
+	if (!CellExit.IsZero())
+	{
+		if (FVector::Dist2D(L, CellExit) < 90.f || GetWorld()->GetTimeSeconds() > ReleasedUntil) CellExit = FVector::ZeroVector;
+		else { Path.Reset(); Path.Add(CellExit); Path.Add(Pl); ChaseTimer = 0.35f; }
 	}
 	// the chase: over the tile grid to its foe's tile, then straight at it (across a section's border: straight)
 	if (ChaseTimer <= 0.f || Path.Num() == 0)
