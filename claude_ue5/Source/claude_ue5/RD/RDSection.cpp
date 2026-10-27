@@ -104,6 +104,8 @@ void ARDSection::Plan(FRandomStream& R)
 		{ ERDRoomKind::Treasury, 3, 5, 7, 2 }, { ERDRoomKind::GuardRoom, 8, 5, 7, 6 }, { ERDRoomKind::Forge, 4, 6, 9, 2 },
 		{ ERDRoomKind::Hall, 2, 9, 10, 1 }, { ERDRoomKind::Junction, 10, 3, 3, 12 } };
 	TMap<ERDRoomKind, int32> Used;
+	// (mistward: rooms' sizes from a stream of their own (the user's list: "more variation in the sizes"))
+	FRandomStream RZ(R.GetInitialSeed() ^ 0x2B1E5C07);
 	for (int32 By = 0; By < NB; ++By)
 		for (int32 Bx = 0; Bx < NB; ++Bx)
 		{
@@ -130,7 +132,20 @@ void ARDSection::Plan(FRandomStream& R)
 			}
 			else
 			{
-				const int32 W = R.RandRange(MinS, MaxS), H = R.RandRange(MinS, MaxS);
+				int32 W = R.RandRange(MinS, MaxS), H = R.RandRange(MinS, MaxS);
+				// (mistward: small chambers (3 or 4 tiles a side), long galleries (the block's length by 3 or 4), and more of the
+				// block's largest; not the great hall nor a prison (its cells want room). Drawn for every room: one room's
+				// size never moves another's)
+				{
+					const float U = RZ.FRand(); const int32 S1 = RZ.RandRange(3, 4), S2 = RZ.RandRange(3, 4); const bool bAlongX = RZ.RandBool();
+					const int32 Long = B - 2;
+					if (Generator->bShapedRooms && Rm.Kind != ERDRoomKind::Hall && Rm.Kind != ERDRoomKind::Prison)
+					{
+						if (U < 0.16f) { W = S1; H = S2; }
+						else if (U < 0.32f) { W = bAlongX ? Long : S1; H = bAlongX ? S1 : Long; }
+						else if (U < 0.42f) { W = H = Long; }
+					}
+				}
 				const int32 X0 = R.RandRange(FMath::Max(1, B / 2 + 1 - W), FMath::Min(B / 2, B - 1 - W));
 				const int32 Y0 = R.RandRange(FMath::Max(1, B / 2 + 1 - H), FMath::Min(B / 2, B - 1 - H));
 				Rm.Min = FIntPoint(Bx * B + X0, By * B + Y0); Rm.Max = Rm.Min + FIntPoint(W, H);
@@ -348,10 +363,13 @@ namespace
 	}
 }
 
+// (a hair under its size, so that pieces set side by side as their sizes say still fit. It was 3 cm a side: two pieces could
+// stand 6 cm into each other, and a chest against a bed's foot board looked set into it (the user's of 2026-10-27))
+static constexpr float RDFootSlack = 0.5f;
+
 bool ARDSection::FootFree(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess) const
 {
-	// (a hair under its size: pieces set side by side as their sizes say still fit)
-	const FRDObb A = RDObb(FVector2D(Loc.X, Loc.Y), FVector2D(FMath::Max(Size.X * 0.5f - 3.f, 1.f), FMath::Max(Size.Y * 0.5f - 3.f, 1.f)), Yaw);
+	const FRDObb A = RDObb(FVector2D(Loc.X, Loc.Y), FVector2D(FMath::Max(Size.X * 0.5f - RDFootSlack, 1.f), FMath::Max(Size.Y * 0.5f - RDFootSlack, 1.f)), Yaw);
 	for (const FFoot& F : Feet)
 	{
 		if (bAccess && F.bAccess) continue;              // (two ways in may share the floor)
@@ -362,7 +380,7 @@ bool ARDSection::FootFree(const FVector& Loc, float Yaw, const FVector2D& Size, 
 
 void ARDSection::AddFoot(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess, FName Name)
 {
-	FFoot F; F.C = FVector2D(Loc.X, Loc.Y); F.H = FVector2D(FMath::Max(Size.X * 0.5f - 3.f, 1.f), FMath::Max(Size.Y * 0.5f - 3.f, 1.f)); F.Yaw = Yaw; F.bAccess = bAccess; F.Name = Name;
+	FFoot F; F.C = FVector2D(Loc.X, Loc.Y); F.H = FVector2D(FMath::Max(Size.X * 0.5f - RDFootSlack, 1.f), FMath::Max(Size.Y * 0.5f - RDFootSlack, 1.f)); F.Yaw = Yaw; F.bAccess = bAccess; F.Name = Name;
 	Feet.Add(F);
 }
 
@@ -649,7 +667,8 @@ bool ARDSection::AddContainer(FName Name, const FVector& Loc, float Yaw, const F
 	{
 		FVector Fc; FVector2D Sz; float Front;
 		FootOf(P, FTransform(FRotator(0, Yaw, 0), Loc), Fc, Sz, Front);
-		const FVector2D Way(95.f, FMath::Max(Sz.Y, 90.f));
+		// (the way in at its whole size: FootFree takes its slack off each side (a shelf once stood 5 cm into a barrel's way))
+		const FVector2D Way(95.f + 2.f * RDFootSlack, FMath::Max(Sz.Y, 90.f) + 2.f * RDFootSlack);
 		const FVector WayAt = Loc + FRotator(0, Yaw, 0).RotateVector(FVector(Front + Way.X * 0.5f + 2.f, 0, 0));
 		if (!OnRoomFloor(Fc, Yaw, Sz, FurnRoom) || !OnRoomFloor(WayAt, Yaw, Way, FurnRoom)) return false;
 		if (Generator->bTidyFurniture)
@@ -1189,7 +1208,17 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				if (R.FRand() < 0.6f)
 				{
 					const FRDPiece* Ch = this->Pc(TEXT("Chest"));
-					const FVector Cp = P + FRotator(0, Yaw, 0).RotateVector(FVector(Bd->Size.X * 0.5f + (Ch ? Ch->Size.X * 0.5f : 30.f) + 10.f, 0, 0));
+					// (at the bed's foot, 10 cm clear of it: mistward measures both from their meshes (the bed's frame reaches past
+					// its nominal size); the other levels keep the nominal sizes)
+					float Off = Bd->Size.X * 0.5f + (Ch ? Ch->Size.X * 0.5f : 30.f) + 10.f;
+					if (Generator->bTidyFurniture && Ch)
+					{
+						FVector Bc, Cc; FVector2D Bs, Cs; float BFront, CFront;
+						FootOf(Bd, FTransform::Identity, Bc, Bs, BFront);
+						FootOf(Ch, FTransform::Identity, Cc, Cs, CFront);
+						Off = BFront + (Cs.X * 0.5f - Cc.X) + 10.f;       // (the bed's front, the chest's back from its origin)
+					}
+					const FVector Cp = P + FRotator(0, Yaw, 0).RotateVector(FVector(Off, 0, 0));
 					if (LaneFree(Rm, Cp, 40.f)) AddContainer(TEXT("Chest"), Cp, Yaw, TEXT("chest"));
 				}
 			}
@@ -1239,7 +1268,10 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 				// (mistward: on the barred half, out of the way to the door)
 				const float HaySide = R.FRandRange(-60, 60);
 				const FVector Hay = Inner + Rt.RotateVector(FVector(-30, Generator->bTidyFurniture ? -30.f - FMath::Abs(HaySide) : HaySide, 0));
-				AddPieceAt(TEXT("HayPile"), Hay, R.FRandRange(0, 360));
+				// (mistward: no mound: it read as a big rock taking half the cell (the user's of 2026-10-27); a cell holds a
+				// prisoner, a monster or nothing. Its turn is still drawn: the stream stays where it was)
+				const float HayYaw = R.FRandRange(0, 360);
+				if (!Generator->bTidyFurniture) AddPieceAt(TEXT("HayPile"), Hay, HayYaw);
 				if (R.FRand() < 0.5f) AddPieceAt(TEXT("Bones"), Inner + Rt.RotateVector(FVector(20, R.FRandRange(-80, 80), 0)), R.FRandRange(0, 360), 1.f, true);
 				AddPieceAt(TEXT("Shackles"), W + Rt.RotateVector(FVector(6, 0, 160)), Yaw, 1.f, true);
 				const FIntPoint T = WorldToLocal(Inner);
@@ -1765,6 +1797,13 @@ void ARDSection::ActivateForPlay()
 	EnsureAnvil();
 	NumInstances = Inst; NumLights = Lights;
 	bBuildStatic = true;
+	// (mistward: the monsters it had go first: RestartPlay activates the kept start set again, and every planned monster
+	// stood there twice after one restart (28 of 14), three times after two; the tests' counts and the reels saw them)
+	if (Generator->bTidyFurniture)
+	{
+		for (ARDMonster* M : SpawnedMonsters) if (IsValid(M)) M->Destroy();
+		SpawnedMonsters.Reset();
+	}
 	FRandomStream RM(Seed ^ 0x5f3759df);
 	SpawnMonsters(RM);
 	PlaceTraps(); PlaceCellOccupants(); PlacePad();          // (mistward)

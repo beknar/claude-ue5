@@ -175,11 +175,12 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 {
 	Things.Reset(); WearOut.Reset();
 	if (!Generator) return;
-	// (the weapons she found, each with what is left of it; her hero's own stay hers)
+	// (the weapons she found, each with what is left of it; her hero's own are not things of the item table (her hands, her
+	// spells): they stay hers)
 	for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
 		if (!Generator->Weapons[I].Item.IsNone()) { Things.Add(Generator->Weapons[I].Item); WearOut.Add(GetWeaponWear(I)); }
-	// (the shield her hero starts with is hers, as her own weapons are: one copy of it stays with her)
-	const FName* Own = Generator->StartShield.Find(Generator->CurrentHero);
+	// (everything she carries, the shield she started with too: "all of her equipment drops" (the list's words; until
+	// 2026-10-27 one copy of that shield stayed with her))
 	for (const FName& N : CarriedOrder)
 	{
 		const int32 Cnt = GetItemCount(N);
@@ -188,14 +189,13 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 		const TArray<float>* Sp = Spares.Find(N);
 		for (int32 K = 0; K < Cnt; ++K)
 		{
-			if (Own && *Own == N && K == 0) continue;
 			Things.Add(N);
 			WearOut.Add(!bKept ? -1.f : K == 0 ? GetArmourWear(N) : (Sp && Sp->IsValidIndex(K - 1) ? (*Sp)[K - 1] : -1.f));
 		}
 	}
 }
 
-void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers)
+void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers, FName Rewear)
 {
 	if (!Generator) return;
 	int32 Got = 0;
@@ -222,6 +222,8 @@ void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<floa
 			else { float& Cur = ArmourWear.FindOrAdd(N); Cur = FMath::Max(Cur, W); }
 		}
 	}
+	// (her own pile: the shield that was on her arm when she fell goes back on (a found one, or none if she wore none))
+	if (bHers && WornShield.IsNone() && !Rewear.IsNone() && GetItemCount(Rewear) > 0) WearShield(Rewear);
 	if (bHers) SetMessage(FString::Printf(TEXT("You take up your things again (%d)"), Got));
 	else SetMessage(Things.Num() == 1 ? FString::Printf(TEXT("You take the %s"), *Things[0].ToString().ToLower()) : FString::Printf(TEXT("You take up what lies here (%d)"), Got));
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));

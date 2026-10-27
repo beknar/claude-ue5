@@ -190,6 +190,18 @@ public:
 	 *  she wears it>|<durability left>|<full>", "component|<name>|<count>" (crafting materials), "carried|<name>|<count>"
 	 *  (weapons her hero cannot wield) (tests, HUD) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetInventoryLines() const;
+	/** mistward (the generator's bMouseUI): the list's rows as the HUD drew them last ("<index>|<x0>|<y0>|<x1>|<y1>", canvas
+	 *  pixels), the first row shown, and the first row the wheel scrolled to (-1: the list follows the cursor) (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetListRows() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetListFirst() const { return ListFirst; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetListScroll() const { return ListScroll; }
+	/** the pointer is shown (the inventory open with the mouse in use) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsPointerShown() const { return bPointerShown; }
+	/** things used with a click (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 MouseUses = 0;
+	/** the HUD's rows (written by ARDHUD::DrawInventory each frame) */
+	TArray<TPair<int32, FBox2D>> ListRows;
+	int32 ListFirst = 0, ListFit = 0, ListCount = 0, ListScroll = -1;
 
 	// ---- random_dungeonmagic_level5: armour (an item of kind Armour she carries). Worn, its meshes (the fit made for her
 	// hero) follow her body's pose; a blow on her takes its share less. One set at a time: wearing another takes the first
@@ -366,7 +378,7 @@ public:
 	/** everything she found (not the weapons her hero starts with): what drops when she falls; Wear: durability left (-1 none) */
 	void GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut) const;
 	/** her dropped things taken up again */
-	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers = true);
+	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers = true, FName Rewear = NAME_None);
 	/** breaking a set of armour or a shield down at an anvil (a spare first; the one worn only when it is the last) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownGear(FName Item);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 GearBrokenDown = 0;
@@ -452,6 +464,16 @@ private:
 	bool bInventoryOpen = false;
 	int32 InventoryCursor = 0;
 	float InventoryRepeat = 0.f;
+	/** mistward: the pointer shown, where it was last tick (a row is chosen only when it moves) */
+	bool bPointerShown = false;
+	FVector2D LastPointer = FVector2D(-1.f, -1.f);
+	/** the row the pointer used last and when: the second click of a double click is a press too, and used it again */
+	int32 LastUseRow = -1;
+	double LastUseTime = -100.0;
+	void ResetListView();
+	void ShowPointer(bool bShow);
+	/** the mouse on a list: hover chooses, a click on the chosen row uses it, the wheel scrolls; true when it acted */
+	void TickPointerList(APlayerController* PC, int32 Cur, TFunctionRef<void(int32)> Choose, TFunctionRef<void()> Use);
 	TMap<FName, float> ArmourWear;
 	FName RepairWith;
 	int32 RepairCursor = 0;

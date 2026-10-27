@@ -53,7 +53,7 @@ Each area's lessons are in a rules file that loads when a file of that area is r
 - `.claude/rules/dungeon.md`: random_dungeon_level and random_dungeoncombat_level (every dungeon level is a copy of these)
 - `.claude/rules/dungeon-magic.md`: the magic levels 1 to 3 (casters, the Rogue, the tactical maps, clips made in Blender, the Warlock's hair)
 - `.claude/rules/dungeon-heroes.md`: random_dungeonmagic_level4 and random_dungeonmagic_level5 (the choice of hero, the interface, the Summoner and her faces, armour, weapons, tiers)
-- `.claude/rules/mistward.md`: mistward_castle (themes, shaped rooms, tidy furniture, the 75 % rule, bosses and guarded rings, shields, the torch, traps, teleporters, cells, death drops, monster heights, its icons, test and reel)
+- `.claude/rules/mistward.md`: mistward_castle (themes, shaped rooms and their sizes, tidy furniture, the tiers' share rule, bosses and guarded rings, shields, the torch, traps, teleporters, cells, death drops, monster heights, the mouse and input as the devices send it, its icons, test and reel)
 - `.claude/rules/town-village.md`: random_level (the town) and random_isometric_village_level
 - `.claude/rules/starship.md`: starship_level
 - `.claude/rules/sequencer.md`: Sequencer and Movie Render Queue from Python

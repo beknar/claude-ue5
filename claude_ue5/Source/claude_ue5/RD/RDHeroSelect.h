@@ -74,6 +74,22 @@ public:
 	 *  Movie Render Queue render cannot follow the game into another level; the reel shows the dungeon from renders of its own) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bStayOnConfirm = false;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") float ConfirmTime = -100.f;
+	/** mistward (the user's of 2026-10-27): the mouse chooses. The pointer stays shown and free (the game's own mode hid it
+	 *  and captured it on a click); a click on a hero's name shows her, on the name of the one shown or on START starts; the
+	 *  arrows step. (Without it the HUD's hit boxes do the same through the engine's click events.) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bMouseUI = false;
+	/** tests: input the way the devices send it (RDInputSim); "" when sent, else why not. A pixel is the HUD canvas's. */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateKey(FKey Key, bool bDown);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateMouseMove(FVector2D Pixel);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateMouseButton(FVector2D Pixel, FKey Button, bool bDown);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateClearView();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") int32 SlateRestoreView();
+	/** the HUD's buttons as drawn last frame: "<name>|<x0>|<y0>|<x1>|<y1>" (Hero_<i>, Prev, Next, Start) (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heroes") TArray<FString> GetButtons() const;
+	TArray<TPair<FName, FBox2D>> Buttons;
+	/** a button the pointer is over (the HUD lights it) */
+	FName Hovered;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") int32 Clicks = 0;
 	/** the last input came from a gamepad (the HUD shows its keys) */
 	bool bUsingGamepad = false;
 	/** world time the hero shown changed (the HUD fades the card in) */
@@ -91,6 +107,7 @@ private:
 	int32 Index = 0;
 	float Yaw = 0.f, Turned = 0.f, StickRepeat = 0.f;
 	bool bViewSet = false;
+	void TickPointer(APlayerController* PC);
 	void SetFigureShown(AActor* Figure, bool bShown);
 };
 

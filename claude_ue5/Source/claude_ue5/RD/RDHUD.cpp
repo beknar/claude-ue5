@@ -481,7 +481,7 @@ void ARDHUD::DrawCombat(float Sc)
 		const float Ext = UI.Has(TEXT("panel_wide")) ? 20.f * Sc : 0.f;
 		const float In = Ext > 0.f ? 16.f * Sc : 0.f, Dn = Ext > 0.f ? 6.f * Sc : 0.f;      // (level 4: clear of the board's frame and corner ornaments)
 		const float Mg = 24.f * Sc + Ext, Pd = 14.f * Sc, Lh = 23.f * Sc, K = Sc * 1.05f;
-		const float FpsRoom = Gen->bShowFps ? 34.f * Sc : 0.f;           // (mistward: the frame rate above it)
+		const float FpsRoom = Gen->bShowFps ? 46.f * Sc : 0.f;           // (mistward: the frame rate above it)
 		TArray<FString> Keys, Whats;
 		float Kw = 0.f, Ww = 0.f, Tw, Th;
 		for (const FString& S : Lines)
@@ -516,11 +516,16 @@ void ARDHUD::DrawCombat(float Sc)
 	if (Gen->bShowFps)
 	{
 		const float Mg = 24.f * Sc + (UI.Has(TEXT("panel_wide")) ? 20.f * Sc : 0.f);
+		// (the user's of 2026-10-27: plain to see: larger, bright, on a dark plate with a frame)
 		const FString F = FString::Printf(TEXT("%.0f FPS  ·  %.1f ms"), Gen->FpsSmoothed, Gen->FpsSmoothed > 0.f ? 1000.f / Gen->FpsSmoothed : 0.f);
-		float Tw0, Th0; UI.TextSize(F, Tw0, Th0, Small, Sc * 1.15f, ERDType::Label);
-		Box(FVector2D(Mg, Mg - 4.f * Sc), FVector2D(Mg + Tw0 + 20.f * Sc, Mg + Th0 + 6.f * Sc), FLinearColor(0.02f, 0.02f, 0.03f, 0.7f));
+		const float K = Sc * 1.5f;
+		float Tw0, Th0; UI.TextSize(F, Tw0, Th0, Small, K, ERDType::Label);
+		const FVector2D F0(Mg, Mg - 6.f * Sc), F1(Mg + Tw0 + 24.f * Sc, Mg + Th0 + 6.f * Sc);
+		Box(F0, F1, FLinearColor(0.01f, 0.01f, 0.015f, 0.85f));
+		Frame(F0, F1, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 1.5f * Sc);
 		const FLinearColor Fc = Gen->FpsSmoothed >= 50.f ? FLinearColor(0.55f, 1.f, 0.6f) : Gen->FpsSmoothed >= 30.f ? FLinearColor(1.f, 0.85f, 0.35f) : FLinearColor(1.f, 0.4f, 0.3f);
-		UI.Text(F, Fc, Mg + 10.f * Sc, Mg, Small, Sc * 1.15f, ERDType::Label);
+		UI.Text(F, Fc, Mg + 12.f * Sc, Mg, Small, K, ERDType::Label);
+		FpsBox = FBox2D(F0, F1);
 	}
 	// ---- mistward: the Rogue disarming a trap: how far she has got
 	if (Gen->GetDisarmProgress() >= 0.f)
@@ -554,7 +559,7 @@ void ARDHUD::DrawHUD()
 	if (!Gen) return;
 	// (play began without a hero: the menu is being opened, the dungeon is not shown)
 	if (Gen->bOpeningMenu) { Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor::Black); return; }
-	ArtDrawn.Reset(); StarsDrawn.Reset(); AnvilsDrawn.Reset(); MiniTierLabels.Reset(); MarksDrawn.Reset();
+	ArtDrawn.Reset(); StarsDrawn.Reset(); AnvilsDrawn.Reset(); MiniTierLabels.Reset(); MarksDrawn.Reset(); FpsBox = FBox2D(FVector2D::ZeroVector, FVector2D::ZeroVector);
 	UI.Hud = this; UI.Art = &Gen->UIArt; UI.Drawn = &ArtDrawn; UI.Fonts = &Gen->UIFonts; UI.FontCache = &FontCache;
 	APawn* P = GetOwningPawn();
 	if (!P) return;
@@ -1650,9 +1655,12 @@ void ARDHUD::DrawInventory(float Sc)
 		const float Empty = (Secs.Num() > 1 && Secs[1].bAlways && SecCount[1] == 0) ? Rh : 0.f;
 		if (HeadH * Nh + Empty + Rh * Lines.Num() <= Room) { Fit = Lines.Num(); First = 0; break; }
 		Fit = FMath::Clamp(FMath::FloorToInt32((Room - HeadH * Nh - Empty) / Rh), 4, Lines.Num());
-		First = FMath::Clamp(Cur - Fit / 2, 0, FMath::Max(0, Lines.Num() - Fit));
+		// (mistward: the wheel scrolled it: from the row it scrolled to, wherever the cursor is)
+		First = FMath::Clamp(Cb->ListScroll >= 0 ? Cb->ListScroll : Cur - Fit / 2, 0, FMath::Max(0, Lines.Num() - Fit));
 	}
 	auto Shown = [&](int32 I) { return I >= First && I < First + Fit; };
+	// (the rows where they are drawn, for the pointer)
+	Cb->ListRows.Reset(); Cb->ListFirst = First; Cb->ListFit = Fit; Cb->ListCount = Lines.Num();
 	const int32 NhShown = Heads(First, First + Fit);
 	const float ListH = 46.f * Sc + HeadH * NhShown + Rh * Fit + (Fit < Lines.Num() ? 30.f * Sc : 0.f) + ((Secs.Num() > 1 && Secs[1].bAlways && SecCount[1] == 0) ? Rh : 0.f);
 	const float H = FMath::Max(ListH, (UI.Has(TEXT("slot")) ? 400.f : 330.f) * Sc) + 150.f * Sc;     // (the picture of the chosen one takes room)
@@ -1685,6 +1693,7 @@ void ARDHUD::DrawInventory(float Sc)
 		if (!Shown(I)) return;
 		const bool bOn = I == Cur;
 		const FVector2D R0(Lx, Y), R1(Lx + Lw, Y + Rh - 4.f * Sc);
+		Cb->ListRows.Add({ I, FBox2D(R0, FVector2D(R1.X, Y + Rh)) });
 		if (bOn)
 		{
 			const FRDUIArt* Pl = UI.Find(TEXT("button"));
@@ -1908,10 +1917,13 @@ void ARDHUD::DrawInventory(float Sc)
 	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(A.X + Pd, Fy - 20.f * Sc), FVector2D(B.X - Pd, Fy + 20.f * Sc));
 	else Box(FVector2D(A.X + Pd, Fy), FVector2D(B.X - Pd, Fy + 1.f), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
 	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) UI.Text(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd + Tin, Fy + 14.f * Sc, Small, Sc * 1.15f);
+	const bool bMouse = Gen->bMouseUI;
 	const FString Keys = bRepair ? (bPad ? TEXT("D-pad / left stick  select      A  mend it      B  back      Start  close")
-	                                     : TEXT("W S / arrows / wheel  select      Enter or E  mend it      Backspace  back      I or Tab  close"))
+	                                     : bMouse ? TEXT("W S / pointer  select     Enter or click  mend it     wheel  scroll     Backspace  back     Tab  close")
+	                                              : TEXT("W S / arrows / wheel  select      Enter or E  mend it      Backspace  back      I or Tab  close"))
 	                             : (bPad ? TEXT("D-pad / left stick  select      A  wield or use      Start or B  close")
-	                                     : TEXT("W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close"));
+	                                     : bMouse ? TEXT("W S / pointer  select      Enter or click  wield or use      wheel  scroll      I or Tab  close")
+	                                              : TEXT("W S / arrows / wheel  select      Enter or E  wield or use      I or Tab  close"));
 	UI.Text(Keys, Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
 }
 

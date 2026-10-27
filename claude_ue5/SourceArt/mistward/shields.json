@@ -1,5 +1,5 @@
 {
- "_note": "mistward_castle's shields: the user's table of 2026-10-26 (docs/improvements.txt; the 22 fantasy shields of docs/objects.md). damage: the damage reduction rating (a blow takes damage x 4 % less, the user's choice), speed: the speed rating (she is (10 - speed) x 3 % slower), durability: the hurt it takes before it breaks. material: what an anvil breaks it into (shield_breakdown, x its tier). flip / turn: set when the look in play showed its face or its height measured the wrong way (865 measures both from the mesh). rarity: how likely a container holds one against the other items of its tier. 865 reads it.",
+ "_note": "mistward_castle's shields: the user's table of 2026-10-26 (docs/improvements.txt; the 22 fantasy shields of docs/objects.md). damage: the damage reduction rating (a blow takes damage x 4 % less, the user's choice), speed: the speed rating (she is (10 - speed) x 3 % slower), durability: the hurt it takes before it breaks. material: what an anvil breaks it into (shield_breakdown, x its tier). gallery: its name in docs/objects.md where the table names it otherwise. flip / turn: set when the look in play showed its face or its height measured the wrong way (865 measures both from the mesh). rarity: how likely a container holds one against the other items of its tier. 865 reads it.",
  "rarity": 12,
  "start_shield": "Heater Shield",
  "shields": [
@@ -19,7 +19,7 @@
   {"rank": 14, "name": "Heraldic Shield", "damage": 3, "speed": 8, "durability": 150, "material": "wood", "flip": true},
   {"rank": 15, "name": "Dock Shield", "damage": 3, "speed": 7, "durability": 150, "material": "wood"},
   {"rank": 16, "name": "Viking Shield (iron-bound)", "damage": 3, "speed": 8, "durability": 160, "material": "wood"},
-  {"rank": 17, "name": "Village Shield", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
+  {"rank": 17, "name": "Village Shield (blue and white)", "gallery": "Village Shield", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
   {"rank": 18, "name": "Village Shield (red)", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
   {"rank": 19, "name": "Village Shield (green)", "damage": 2, "speed": 7, "durability": 120, "material": "wood"},
   {"rank": 20, "name": "Viking Round Shield", "damage": 1, "speed": 10, "durability": 100, "material": "wood", "flip": true},

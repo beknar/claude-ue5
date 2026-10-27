@@ -18,7 +18,7 @@ L = json.load(open(os.path.join(SRC, "layout.json")))
 for f in glob.glob(os.path.join(SRC, "*.png")): shutil.copy2(f, OUT)
 def snake(n): return "".join(ch if ch.isalnum() else "_" for ch in n.lower()).strip("_").replace("__", "_")
 objs = {o["name"]: o for o in json.load(open(os.path.join(SA, "object_gallery", "objects.json"), encoding="utf-8"))["objects"]}
-shields = [s["name"] for s in json.load(open(os.path.join(SA, "mistward", "shields.json"), encoding="utf-8"))["shields"]]
+shields = {s["name"]: s.get("gallery", s["name"]) for s in json.load(open(os.path.join(SA, "mistward", "shields.json"), encoding="utf-8"))["shields"]}
 weapons = [w["name"] for w in json.load(open(os.path.join(SA, "random_dungeon_magic5", "weapons_table.json"), encoding="utf-8"))["weapons"]]
 icons, wmap = dict(L.get("_icons", {})), dict(L.get("_weapons", {}))
 added = 0
@@ -29,8 +29,8 @@ def piece(name):
     shutil.copy2(p, OUT); w, h = Image.open(p).size
     L[name] = {"kind": "icon", "size": [w, h], "border": [0, 0, 0, 0], "inner": [0.0, 0.0, 1.0, 1.0]}; added += 1
     return name
-for s in shields:
-    n = piece("mw_" + objs[s]["id"]) if s in objs else None
+for s, g in shields.items():           # (the table's name -> the gallery's, where its picture is)
+    n = piece("mw_" + objs[g]["id"]) if g in objs else None
     if n: icons[s] = n
 if piece("mw_torch"): icons["Torch"] = "mw_torch"
 for w in weapons:
