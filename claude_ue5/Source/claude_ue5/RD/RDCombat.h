@@ -156,6 +156,8 @@ public:
 	float NoManaTime = -100.f;
 	/** items she carries (the generator's Items by name) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void AddItem(FName Name, int32 Count = 1);
+	/** Count of an item taken from what she carries (a spare copy first) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void RemoveItem(FName Name, int32 Count = 1) { RemoveCarried(Name, Count); }
 	/** nothing carried, no armour on (the generator's RestartPlay) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void ClearItems();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetItemCount(FName Name) const;
@@ -190,6 +192,10 @@ public:
 	 *  she wears it>|<durability left>|<full>", "component|<name>|<count>" (crafting materials), "carried|<name>|<count>"
 	 *  (weapons her hero cannot wield) (tests, HUD) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetInventoryLines() const;
+	/** every line whatever the tab (the third list's tabs show one tab's of them; weapons then stacked:
+	 *  "weapon|<name>|<left>|<full>|<index>|<count>|<slash>", and "slash|<name>|<count>", "key|<name>|<count>",
+	 *  "helmet|<1 hidden>|<set>") */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetAllInventoryLines() const;
 	/** mistward (the generator's bMouseUI): the list's rows as the HUD drew them last ("<index>|<x0>|<y0>|<x1>|<y1>", canvas
 	 *  pixels), the first row shown, and the first row the wheel scrolled to (-1: the list follows the cursor) (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetListRows() const;
@@ -383,9 +389,128 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownGear(FName Item);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 GearBrokenDown = 0;
 
+	// ---- the third list (docs/improvements2.txt; RDMistward2.cpp): tabs, stacks, quick slots, the helmet, blocking, slashes
+	/** the inventory's tab (0 weapons, 1 armour, 2 potions and food, 3 crafting, 4 magic) when the generator's bInventoryTabs */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetInventoryTab() const { return InvTab; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void SetInventoryTab(int32 Tab);
+	static constexpr int32 NumTabs = 5;
+	/** the tab a line of the inventory belongs in (by its kind, the first field) */
+	static int32 TabOfLine(const FString& Line);
+	/** the HUD's tabs as it drew them (the pointer clicks them); "<x0>|<y0>|<x1>|<y1>" each (tests) */
+	TArray<FBox2D> TabBoxes;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FString> GetTabBoxes() const
+	{
+		TArray<FString> Out;
+		for (const FBox2D& B : TabBoxes) Out.Add(FString::Printf(TEXT("%.1f|%.1f|%.1f|%.1f"), B.Min.X, B.Min.Y, B.Max.X, B.Max.Y));
+		return Out;
+	}
+	/** the quick slots (bQuickSlots): each the name of a weapon or spell of hers (none: empty) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FName> GetQuickSlots() const { return QuickSlots; }
+	/** a weapon of her list (Index) into a slot (0..9); false: no such weapon, or one cast alongside */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickSlot(int32 Slot, int32 Index);
+	/** draws what a slot holds (false: empty, or not hers any more) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool SelectQuickSlot(int32 Slot);
+	/** the next (Step 1) or the one before (-1) filled slot after the drawn one */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void CycleQuickSlot(int32 Step);
+	/** the slot the drawn weapon is in (-1: none), the slot the gamepad's Y puts the chosen row into */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetQuickSlotOfDrawn() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetAssignSlot() const { return AssignSlot; }
+	/** her weapon list's index of the weapon a slot names (-1: none) */
+	int32 WeaponOfSlot(int32 Slot) const;
+	/** slots filled the first time and as she finds weapons or learns spells */
+	void FillQuickSlots();
+	/** the worn set's helmet shown or hidden (bHelmetToggle); false: the set has none */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool ToggleHelmet();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool HasHelmet() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool IsHelmetHidden() const { return bHelmetHidden; }
+	/** the worn set's meshes that have a helmet (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<USkeletalMeshComponent*> GetHelmetMeshes() const;
+	/** its helmet's sections (those her head bone moves): "<mesh>|<lod>|<section>|<vertices>|<1 hidden>" (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FString> GetHelmetLines() const;
+	/** blocking with the shield (the generator's bShieldBlock): held on the right mouse button or LT; tests set it */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool IsBlocking() const { return bBlocking; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void SetBlocking(bool bOn);
+	/** blows taken while blocking; the share the block took of the last */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") int32 BlockedHits = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") float LastShieldShare = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") float LastShieldWear = 0.f;
+	/** a slash put on a weapon of hers (her list's Index), the one there before back in her pack (false: not hers to put on) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool ApplySlash(FName Slash, int32 Index);
+	/** the slash on a weapon taken off, back into her pack */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool RemoveSlash(int32 Index);
+	/** choosing the weapon a slash goes on (Enter on a slash in the inventory): its lines "weapon|<index>|<name>|<slash on it>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool IsPickingSlash() const { return !SlashWith.IsNone(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") FName GetSlashItem() const { return SlashWith; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FString> GetSlashLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetSlashCursor() const { return SlashCursor; }
+	/** the slash list's cursor a line down or up, as W / S move it (a reel's pilot) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void MoveSlashCursor(int32 Step) { const int32 N = GetSlashLines().Num(); if (N > 0) SlashCursor = ((SlashCursor + Step) % N + N) % N; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool BeginSlash(FName Slash);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void CancelSlash();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool SlashEntry(int32 Line = -1);
+	/** a slash's work, counted by its effect's name (tests): hits that carried it; what each did */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") TMap<FString, int32> SlashProcs;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") float SlashBonusDealt = 0.f;
+	/** the slash's effects on her now: haste (attack speed), evasion, the crystal's shield, deflection (tests, the HUD) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetHaste() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetSlashEvade() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool HasSlashShield() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetSlashDeflect() const;
+	/** tests: a hit of a weapon's slash on a monster now (its bonus and effect), as a blow that landed would */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool ApplySlashHitNow(int32 Index, ARDMonster* Target);
+	/** the slash effects in the world now (swing and hit systems alive; tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetSlashFxAlive() const;
+	/** the slash of a weapon of hers (none) */
+	const FRDSlashDef* SlashOf(int32 Index) const;
+	/** a shrine's blessing on her: its name, until when, and what it gives (her blows' share more, blows on her a share less;
+	 *  swiftness goes in as a speed effect) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void Bless(const FString& Name, float Damage, float Armour, float Speed, float Seconds);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") FString GetBlessing() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetBlessDamage() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetBlessArmour() const;
+	/** a fountain's draught: hit points (a share of hers), speed (a share, seconds), mana (all of it); false: it would do nothing */
+	bool DrinkFountain(ERDRoomKind Kind);
+	/** the shield her hero starts with (bKeepStartGear: it never breaks and stays with her) */
+	FName StartShieldOf() const;
+	/** the slash effects' areas (burning ground, a void's pull) */
+	struct FSlashArea { FVector At = FVector::ZeroVector; float Radius = 0.f, Dps = 0.f, Left = 0.f, Pull = 0.f, Slow = 0.f, Acc = 0.f; TWeakObjectPtr<UFXSystemComponent> Fx; };
+	TArray<FSlashArea> SlashAreas;
+	void TickSlashAreas(float Dt);
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	// ---- the third list
+	FString BlessName;
+	float BlessUntil = -100.f, BlessDmg = 0.f, BlessArm = 0.f;
+	int32 LastWeaponCount = -1;
+	int32 InvTab = 0;
+	TArray<FName> QuickSlots;
+	int32 AssignSlot = 0;
+	bool bHelmetHidden = false;
+	bool bBlocking = false, bBlockKeyDown = false;
+	/** the block's held pose (a paused montage: stopping the slot did not blend it out; it is resumed, then stopped) */
+	TWeakObjectPtr<class UAnimMontage> BlockMontage;
+	FName SlashWith;
+	int32 SlashCursor = 0;
+	float HasteUntil = -100.f, HasteShare = 0.f, SlashEvadeUntil = -100.f, SlashEvadeShare = 0.f, SlashShieldReadyAt = -100.f;
+	bool bSlashShieldUp = false;
+	float DeflectUntil = -100.f, DeflectShare = 0.f;
+	/** per monster (its unique id): when the stun may hold it again */
+	TMap<uint32, float> StunReadyAt;
+	UPROPERTY(Transient) TArray<TObjectPtr<UFXSystemComponent>> SlashFxComps;
+	bool bSwingFxDone = false;
+	/** the swing's slash effect (at the hit's moment, along her facing) */
+	void PlaySwingSlash(const FRDSlashDef& S, const FVector& Dir);
+	/** a hit with a slash on a monster: its bonus (with Dmg, the hit's own damage, for the shares) and effect */
+	void SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dmg, const FVector& At, bool bPrimary = true);
+	void TickBlocking(const class APlayerController* PC);
+	void TickThirdListInput(const class APlayerController* PC);
+	/** the inventory's lines of one tab (bInventoryTabs) */
+	TArray<FString> TabLines(int32 Tab) const;
+	/** the weapon lines with stacks: "weapon|<name>|<left>|<full>|<index>|<count>|<slash>" */
+	void StackedWeaponLines(TArray<FString>& Out) const;
+	void UpdateHelmet();
 	// ---- level 5: spells on her and around her
 	TMap<FName, float> ReadyAt;
 	TMap<uint8, FName> WornRings;

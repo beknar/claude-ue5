@@ -1,0 +1,173 @@
+when a rogue detects a trap, it should be made much more visible, like with a red outline
+if there are multiple copies of an item and they have the same amount of durability, they should stack, just like armors
+warriors should start with no armor, the worst shield and the worst weapon - these they always have
+warriors do not have to wear a shield when they wield a one handed weapon, they can have no shield at all
+tables that have weapons on them should have weapons and items that are appropriate for the tier, and when approached by
+a character, the character should be able to take the item and it should disappear from the table
+at the anvil, when breaking down an item, it should show how many of that item is left
+in the inventory, there should be different tabs for the different kinds of item, one for crafting, one for potions/food/consumables,
+one for armor (shields should be in here too), one for weapons, and one for magical items (tomes, rings)
+inventory tabs can be reachable from the gamepad via the shoulder buttons or the q and e buttons on mouse and keyboard
+or be selectable via the mouse
+warriors should be able to block with the shield, which does +30% more damage reduction, but slows their walk speed by another
+50% while blocking, and the shield takes 5x more damage to durability when hit
+quick equip buttons should be configurable with what weapons or abilities that can be chosen from the inventory screen
+player should be able to quick-equip up to 10 weapons with the D-pad and it should be configurable
+enable a button or way to make the helmet visible or invisible
+implement the other types of rooms: Shrine room, healing fountain, speed potion fountain, mana potion fountain, arena,
+trap gauntlet, vault with a key, throne room
+when a boss is slain, a random weapon flourish/special slash, which can be equipped on any weapon, taken off and then
+applied to a different weapon is given the character with these parameters:
+Tier: 1
+Slash: Ember Slash
+Pack effect: NS_Slash_Fire
+Bonus damage: 6
+Type: Fire
+Effect: Burns: 50 % more over 3 s
+────────────────────────────────────────
+Tier: 1
+Slash: Frost Slash
+Pack effect: NS_Slash_Ice
+Bonus damage: 5
+Type: Frost
+Effect: Slows the monster 25 % for 2 s
+────────────────────────────────────────
+Tier: 1
+Slash: Venom Slash
+Pack effect: NS_Slash_Poison
+Bonus damage: 4
+Type: Poison
+Effect: Poison: 12 over 4 s
+────────────────────────────────────────
+Tier: 1
+Slash: Gale Slash
+Pack effect: NS_Slash_Wind
+Bonus damage: 5
+Type: Physical
+Effect: Her speed +10 % for 4 s after a hit
+────────────────────────────────────────
+Tier: 2
+Slash: Blood Slash
+Pack effect: NS_Slash_Blood
+Bonus damage: 9
+Type: Blood
+Effect: Drain: 30 % of the damage back to her as hit points
+────────────────────────────────────────
+Tier: 2
+Slash: Wave Slash
+Pack effect: NS_Slash_Water
+Bonus damage: 9
+Type: Water
+Effect: Knockback: pushes the monster 3 m
+────────────────────────────────────────
+Tier: 2
+Slash: Verdant Slash
+Pack effect: NS_Slash_Nature
+Bonus damage: 8
+Type: Nature
+Effect: Regeneration: 1.5 hit points a second for 5 s
+────────────────────────────────────────
+Tier: 2
+Slash: Petal Slash
+Pack effect: NS_Slash_Sakura
+Bonus damage: 8
+Type: Physical
+Effect: Evasion: 15 % of blows on her miss for 3 s
+────────────────────────────────────────
+Tier: 3
+Slash: Crystal Slash
+Pack effect: NS_Slash_Crystal
+Bonus damage: 14
+Type: Crystal
+Effect: Damage shield: absorbs her next blow taken (once every 6 s)
+────────────────────────────────────────
+Tier: 3
+Slash: Storm Slash
+Pack effect: NS_Slash_Lightning
+Bonus damage: 15
+Type: Lightning
+Effect: Chains to 2 more monsters within 5 m at half damage
+────────────────────────────────────────
+Tier: 3
+Slash: Ink Slash
+Pack effect: NS_Slash_Ink
+Bonus damage: 13
+Type: Dark
+Effect: Blind: the monster's blows miss 40 % of the time for 3 s
+────────────────────────────────────────
+Tier: 3
+Slash: Tide Slash
+Pack effect: NS_Slash_Water2
+Bonus damage: 14
+Type: Water
+Effect: Sweeps an arc: slows 20 % and pushes 4 m
+────────────────────────────────────────
+Tier: 4
+Slash: Inferno Slash
+Pack effect: NS_Slash_Fire2
+Bonus damage: 24
+Type: Fire
+Effect: Explodes within 2.5 m, burns 40 % more over 4 s
+────────────────────────────────────────
+Tier: 4
+Slash: Shadow Slash
+Pack effect: NS_Slash_Shadow
+Bonus damage: 22
+Type: Shadow
+Effect: Ignores armour; curse: the monster takes 25 % more damage for 5 s
+────────────────────────────────────────
+Tier: 4
+Slash: Neon Slash
+Pack effect: NS_Slash_Neon
+Bonus damage: 20
+Type: Arcane
+Effect: Haste: her attack speed +20 % for 5 s
+────────────────────────────────────────
+Tier: 4
+Slash: Pulse Slash
+Pack effect: NS_Slash_Cyber
+Bonus damage: 20
+Type: Energy
+Effect: Deflection: 25 % of blows on her are turned back on the attacker for 4
+s
+────────────────────────────────────────
+Tier: 5
+Slash: Magma Slash
+Pack effect: NS_Slash_Lava
+Bonus damage: 36
+Type: Fire
+Effect: Burning ground, 3 m around, 10 a second for 4 s
+────────────────────────────────────────
+Tier: 5
+Slash: Void Slash
+Pack effect: NS_Slash_Cosmic
+Bonus damage: 34
+Type: Void
+Effect: Pulls monsters within 5 m to the target and slows them 25 %
+────────────────────────────────────────
+Tier: 5
+Slash: Overload Slash
+Pack effect: NS_Slash_Cyber2
+Bonus damage: 38
+Type: Energy
+Effect: Stun: the monster is held for 1 s (once every 8 s per monster)
+────────────────────────────────────────
+Tier: 5
+Slash: Prismatic Slash
+Pack effect: NS_Slash_Rainbow
+Bonus damage: 32
+Type: All
+Effect: Each hit adds a random effect: burn, slow, poison or drain
+-- 
+the stylized slashes can be found here: I:\game assets\3d fab library data cache\VaultCache\Stylized38b5cd61ab5eV1
+when the player earns the slash from the boss fight, the player can apply that slash to a weapon, meaning that
+there should be that particular visual effect applied for that weapon and then have the game effects take place
+--
+once the above changes are made, record all new capabilities in readme.md, then create a demo reel for all four
+characters showing off the new things they can do, as well as all the new features in the Mistward Castle level
+if processing stops due to memory problems and the unreal editor has to be shut down, restart processing from the
+point it stopped and try to reduce memory usage for the next run.
+once all reels have been made, commit to a PR, review the PR, fix any problems in it, then merge it if it is
+mergeable.
+
+

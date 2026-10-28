@@ -138,8 +138,9 @@ W5S = L5 and WAY == "spells"            # (level 5: the spells, rings, monsters 
 W5G = L5 and WAY == "grip"              # (level 5: the two-handed grip close up: run5g)
 W5W2 = L5 and WAY == "chop2"            # (level 5: Warrior2's chop test, Warrior2 alone (861 placed her): run5w2)
 W5M = MW and WAY == "mistward"          # (mistward_castle: the four heroes and the castle's rules: run5m)
-W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
-W5K = W5C or W5S or W5X or W5M          # (the crafting panel's and the repair list's recording)
+W5M2 = MW and WAY == "mistward2"        # (mistward_castle: the third list (docs/improvements2.txt): run5m2)
+W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward", "mistward2")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
+W5K = W5C or W5S or W5X or W5M or W5M2  # (the crafting panel's and the repair list's recording)
 DX, DY = {"east": (1, 0), "north": (0, 1), "west": (-1, 0), "south": (0, -1)}.get(WAY, (1, 0))
 # (level 4: the hero fights as in her own level)
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
@@ -147,7 +148,7 @@ MELEE = L4 and HERO == "Warrior"
 CHESTS = L3 or L4                  # (she opens the containers she passes)
 if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner"].index(HERO) + 7
 if len(sys.argv) > 6: SEED = int(sys.argv[6])        # (level 4: a session seed of the reel's choosing: what the containers on her way hold)
-OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + ("cine_mw_%s.json" if MODE == "render" else "cine_mw_rehearsal_%s.json") % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
+OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + (("cine_mw2_%s.json" if W5M2 else "cine_mw_%s.json") if MODE == "render" else ("cine_mw2_rehearsal_%s.json" if W5M2 else "cine_mw_rehearsal_%s.json")) % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
     ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else f"cine_caps_{HERO.lower()}.json" if W5X else "cine_chop2_warrior2.json" if W5W2 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
     if MODE == "render" else ("cine_rehearsal_spells_%s.json" % HERO.lower() if W5S else "cine_rehearsal.json"))
 SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3"}[HERO] if L4 else
@@ -2076,10 +2077,404 @@ def mw_rogue(s0, centre, room, anvil):
         else:
             yield from open_chest(ring["at"]); event("ring_taken", did="chest", has=c.get_item_count(ring["name"]))
 
+# ---------------------------------------------------------------- run5m2: the third list (docs/improvements2.txt)
+def mw2_key(name, hold=0.12, label=None):
+    """a key pressed as the game takes it (the pilot's scripted-only mode off for the press): the inventory's tabs, the
+    quick slots, the slash list, H"""
+    c = G["combat"]; k = unreal.Key(); k.set_editor_property("key_name", name)
+    c.set_scripted_only(False); c.simulate_key(k, True); key_hit(label or name.lower())
+    yield from pause(hold)
+    c.simulate_key(k, False); c.set_scripted_only(True)
+    yield from pause(0.08)
+NUMS = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Zero"]
+def mw2_inv(tab, why, **kw):
+    """I, then E to the tab"""
+    c = G["combat"]
+    event("inventory", lines=[str(x) for x in c.get_inventory_lines()], why=why, tab=tab, hp=round(c.get_health(), 1), mana=round(c.get_mana(), 1), **kw)
+    if not c.is_inventory_open(): c.set_inventory_open(True); key_hit("i"); yield from pause(0.9)
+    n = 0
+    while c.get_inventory_tab() != tab and n < 6:
+        yield from mw2_key("E", label="e_tab"); n += 1
+        event("tab", tab=c.get_inventory_tab()); yield from pause(0.7)
+def mw2_cursor(prefix, name):
+    """the cursor down or up the tab's list to a line (S / W)"""
+    c = G["combat"]; lines = [str(x) for x in c.get_inventory_lines()]
+    want = next((i for i, x in enumerate(lines) if x.startswith(prefix + "|" + name + "|") or x == prefix + "|" + name), None)
+    while want is not None and c.get_inventory_cursor() != want:
+        down = want > c.get_inventory_cursor(); c.move_inventory_cursor(1 if down else -1); key_hit("s" if down else "w"); yield from pause(0.32)
+    return want
+def mw2_close():
+    c = G["combat"]; c.set_inventory_open(False); key_hit("i"); yield from pause(0.3)
+def mw2_rooms(kind=None, coord=None):
+    out = []
+    for l in G["gen"].get_special_room_lines():
+        q = str(l).split("|")
+        r = {"s": IP(int(q[0]), int(q[1])), "room": int(q[2]), "kind": q[3], "at": V(float(q[4]), float(q[5]), float(q[6])), "done": int(q[7])}
+        if (kind is None or r["kind"] == kind) and (coord is None or (r["s"].x == coord[0] and r["s"].y == coord[1])): out.append(r)
+    return out
+def mw2_beside(at, room, sec, want=("shrine", "fountain", "take the", "unlock", "vault"), radii=(150.0, 190.0, 230.0, 120.0)):
+    """a floor point beside a fixture, in its room, from which F names it"""
+    gen = G["gen"]
+    for r_ in radii:
+        for k in range(16):
+            q = V(at.x + math.cos(k * math.pi / 8) * r_, at.y + math.sin(k * math.pi / 8) * r_, 100.0)
+            if sec.room_at(q) != room: continue
+            dn = str(gen.describe_nearest(q, 280.0))
+            if any(dn == w_ or (not w_.startswith("take the ") and w_ in dn) for w_ in want): return q
+    return None
+def mw2_go(target, room, sec, card, sub, want, approach=520.0, walk=True):
+    """behind a card, she is put a few metres from a fixture in its room; she walks to it (walk False: she is put beside it)"""
+    st = mw2_beside(target, room, sec, want)
+    far = (mw_near_point(target, approach, sec) or mw_near_point(target, approach * 0.7, sec)) if walk else None
+    if card: mw_card(card, sub)
+    mw_set(far or st or V(target.x - 400, target.y, 100.0), face_to=target, side=-22.0, pitch=-18.0)
+    yield from pause((MW_CARD + 0.3) if card else 0.3, lambda: camera(side=-22.0, pitch=-18.0, rate=1e6))
+    if st is not None and walk: yield from to_point(st, 8.0, 40.0)
+    G["heading"] = yaw_to(loc(), target); G["pawn"].set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    yield from pause(0.5, lambda: camera(side=-30.0, pitch=-20.0, rate=60.0))
+def mw2_f(kind, **kw):
+    gen, c = G["gen"], G["combat"]
+    said = str(gen.describe_nearest(loc(), 280.0)); did = str(gen.interact_nearest(loc(), 280.0)); key_hit("f")
+    event(kind, what=said, did=did, message=str(c.message), hp=round(c.get_health(), 1), mhp=c.get_max_health(), mana=round(c.get_mana(), 1),
+          blessing=str(c.get_blessing()), speed=round(walk_speed_now(), 1), **kw)
+    return did
+def walk_speed_now(): return G["pawn"].get_editor_property("character_movement").get_editor_property("max_walk_speed")
+def mw2_tier2(sets=None):
+    """the reel's shortcut (said by its card): the start set cleared by the generator, tier 2 open, its sets generated"""
+    gen = G["gen"]
+    yield from mw_open_tier2(0)
+    for xy in (sets or [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (-1, -1), (1, -1)]):
+        if not gen.is_section_generated(IP(*xy)): gen.generate_section_now(IP(*xy))
+        yield
+def mw2_hit_down(m, share, why):
+    """the reel takes a monster's hit points down (said)"""
+    hp = m.get_health(); m.apply_damage(hp * share, None); event("hp_down", monster=str(m.monster_name), was=round(hp), now=round(m.get_health()), why=why)
+
+def run5m2():
+    """(mistward_castle, the user's third list of 2026-10-27) each hero's new things and the castle's new rooms"""
+    yield from mw_start()
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    s0, centre, room, anvil = mw_hall()
+    S["note"]["special_rooms"] = [str(x) for x in gen.get_special_room_lines()]
+    yield from {"Warrior": mw2_warrior, "Mage": mw2_mage, "Warlock": mw2_warlock, "Rogue": mw2_rogue}[HERO](s0, centre, room, anvil)
+    # (to the end: whatever comes at her is fought (left idle, a boss's band killed the Rogue in a rehearsal))
+    mw_quiet(False)
+    while True:
+        m = threat()
+        if m is None or not m.is_aggro(): yield from pause(0.5, lambda: camera(side=30.0, pitch=-12.0, rate=12.0)); continue
+        G["casts0"] = c.attacks_made
+        yield from (fight(m) if HERO == "Mage" else fight3(m) if HERO == "Rogue" else fight_w(m))
+
+def mw2_warrior(s0, centre, room, anvil):
+    """the Warrior: what she starts with (the inventory's tabs: the Dagger, the worst shield, no armour); a sword taken from
+    an armory's table (F); it goes into quick slot 2 (the key 2 in the inventory), 1 and 2 draw; she blocks two blows with
+    the right mouse button held; tier 2's boss (its hit points taken down by the reel, said) slain: a slash, put on her
+    sword from the inventory, and a fight with it; a set of armour (given, said): H hides and shows its helmet"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    mw_set(V(centre.x + 250, centre.y + 150, 100.0), yaw=200.0, side=-25.0, pitch=-16.0)
+    event("start", at=[round(loc().x), round(loc().y)], way="great hall", weapons=[str(w.name) for w in gen.get_editor_property("weapons")], shield=str(c.get_worn_shield()), armour=str(c.get_worn_armour()))
+    yield from pause(2.4, lambda: camera(side=-25.0, pitch=-16.0, rate=40.0))
+    # ---- what she starts with: the weapons tab (the Dagger), the armour tab (the worst shield, no armour)
+    seg("inventory"); yield from mw2_inv(0, "start_gear"); yield from pause(2.2)
+    yield from mw2_key("E", label="e_tab"); event("tab", tab=c.get_inventory_tab()); yield from pause(2.4)
+    for _ in range(3): yield from mw2_key("E", label="e_tab"); event("tab", tab=c.get_inventory_tab()); yield from pause(0.6)
+    yield from mw2_key("E", label="e_tab"); event("tab", tab=c.get_inventory_tab()); yield from pause(0.5)
+    yield from mw2_close()
+    # ---- an armory's table: the nearest one-handed sword lying on it
+    picks = [str(x).split("|") for x in gen.get_pickup_lines()]
+    kinds = {str(it.name): it for it in gen.get_editor_property("items")}
+    swords = [q for q in picks if q[0] == "0" and q[1] == "0" and q[7] == "0" and q[8] == "1" and kinds.get(q[3]) and str(kinds[q[3]].kind.name) == "WEAPON"
+              and any(w in q[3] for w in ("Sword", "Sabre", "Shortsword", "Axe"))]
+    pk = min(swords, key=lambda q: math.hypot(float(q[4]) - centre.x, float(q[5]) - centre.y)) if swords else None
+    if pk:
+        at = V(float(pk[4]), float(pk[5]), 0.0); rm = s0.room_at(at)
+        yield from mw2_go(at, rm, s0, "AN ARMORY'S TABLE", "in the start set: its tables hold weapons and shields of the set's tier", ("take the " + pk[3].lower(),), 380.0, walk=False)          # (F must name this sword there: beside it lie shields too)
+        seg("pickup"); did = mw2_f("pickup", item=pk[3])
+        yield from pause(2.2, lambda: camera(side=-40.0, pitch=-26.0, rate=40.0))
+        # ---- quick slot 2: the inventory's weapons tab, the sword's row, the key 2
+        seg("slots"); yield from mw2_inv(0, "slot", item=pk[3]); yield from mw2_cursor("weapon", pk[3]); yield from pause(0.8)
+        yield from mw2_key("Two", label="2"); event("slot", item=pk[3], slots=[str(x) for x in c.get_quick_slots()]); yield from pause(1.6)
+        yield from mw2_close()
+        for k_, lab in (("Two", "2"), ("One", "1"), ("Two", "2")):
+            yield from mw2_key(k_, label=lab); event("draw", key=lab, weapon=str(c.get_weapon_name()), shield_in_hand=bool(c.is_shield_in_hand())); yield from pause(1.3, lambda: camera(side=-35.0, pitch=-14.0, rate=40.0))
+    # ---- a fight: she blocks two blows (the right mouse button held), then fights
+    mw_quiet(False); seg("fight"); lure(); G["until"] = DUR - 34.0; tw = T()
+    while threat() is None and T() - tw < 4.0: camera(side=25.0, pitch=-12.0, rate=25.0); yield
+    m = threat() or nearest_monster(IP(0, 0), 60)
+    if m is not None:
+        # (she closes in (it may hang back); the shield goes up once it is in reach of her, and stays up for two of its blows)
+        t0 = T(); route = None; rt = -9.0
+        while alive(m) and d2(loc(), m.get_actor_location()) - m.capsule_component.get_scaled_capsule_radius() > 140.0 and T() - t0 < 8.0:
+            if route is None or T() - rt > 0.6: route = Route(path(loc(), m.get_actor_location())); rt = T()
+            move(route.target() if len(route.p) > 1 else m.get_actor_location(), run=True); doors()
+            camera(side=30.0, pitch=-12.0, rate=60.0); yield
+        b0 = c.blocked_hits; c.set_blocking(True); key_hit("rmb"); event("block", on=True, monster=str(m.monster_name)); t0 = T()
+        while c.blocked_hits - b0 < 2 and T() - t0 < 9.0 and alive(m):
+            ml = m.get_actor_location()
+            G["heading"] = yaw_to(loc(), ml); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+            if d2(loc(), ml) - m.capsule_component.get_scaled_capsule_radius() > 160.0: move(ml, run=False)          # (blocking, at half speed)
+            G["key_hit"] = "rmb"; G["keys_t"] = T(); camera(side=35.0, pitch=-12.0, rate=60.0); yield
+        c.set_blocking(False); event("block", on=False, blocked=c.blocked_hits - b0, share=round(c.last_shield_share, 3), wear=round(c.last_shield_wear, 2))
+        G["casts0"] = c.attacks_made; yield from fight_w(m)
+    lure(False)
+    # ---- tier 2's boss: slain, a slash
+    G["until"] = DUR + 1.0; mw_quiet(True)
+    mw_card("TIER 2 OPENS: ITS BOSS", "the reel's shortcut: the start set cleared by the generator; the boss's hit points taken down to a fifth")
+    yield from mw2_tier2([])
+    boss = next((e for e in mw_encounters() if e["kind"] == "boss" and "USURPER" not in "|".join(e["rest"])), None)
+    bm = None
+    if boss is not None:
+        stand = mw_near_point(boss["at"], 900.0) or mw_near_point(boss["at"], 600.0)
+        if stand is not None: mw_set(stand, face_to=boss["at"], side=-18.0, pitch=-14.0)
+        bm = min((q for q in gen.get_monsters() if alive(q) and q.boss), key=lambda q: d2(q.get_actor_location(), boss["at"]), default=None)
+        if bm is not None: mw2_hit_down(bm, 0.8, "the reel takes the boss down to a fifth of its hit points")
+        event("at_boss", boss=boss["name"], m=round(d2(loc(), boss["at"]) / 100.0, 1))
+    c.set_health(c.get_max_health())
+    yield from pause(MW_CARD + 0.2, lambda: camera(side=-18.0, pitch=-14.0, rate=1e6))
+    mw_quiet(False); lure(); seg("boss"); g0 = len(gen.slashes_given)
+    if bm is not None:
+        G["casts0"] = c.attacks_made; G["until"] = DUR - 20.0
+        while alive(bm) and T() < DUR - 20.0:
+            yield from fight_w(bm)
+            o = threat()
+            if o is not None and o != bm and alive(bm): yield from fight_w(o)
+    lure(False); mw_quiet(True); G["until"] = DUR + 1.0
+    got = [str(x) for x in gen.slashes_given][g0:]
+    event("slash_given", slashes=got, notice=str(gen.tier_notice))
+    yield from pause(2.6, lambda: camera(side=-30.0, pitch=-18.0, rate=40.0))
+    # ---- the slash on the weapon in her hands: the magic tab, Enter, the weapon, Enter
+    if got:
+        seg("slash"); yield from mw2_inv(0, "slash", slash=got[0]); yield from mw2_key("Q", label="q_tab"); event("tab", tab=c.get_inventory_tab()); yield from pause(0.8)
+        yield from mw2_cursor("slash", got[0]); yield from pause(0.8)
+        ok = c.use_inventory_entry(); key_hit("enter"); event("slash_pick", ok=bool(ok), lines=[str(x) for x in c.get_slash_lines()]); yield from pause(1.4)
+        want = next((i for i, x in enumerate(str(y) for y in c.get_slash_lines()) if x.split("|")[1] == str(c.get_weapon_index())), 0)
+        # (the cursor moved as S moves it: in a render the pointer, resting over the list, took the key's moves back)
+        n_ = 0
+        while c.is_picking_slash() and c.get_slash_cursor() != want and n_ < 8: c.move_slash_cursor(1); key_hit("s"); n_ += 1; yield from pause(0.35)
+        yield from pause(0.8); ok = c.slash_entry(-1); key_hit("enter")
+        event("slash_on", ok=bool(ok), weapon=str(c.get_weapon_name()), slash=got[0], message=str(c.message)); yield from pause(1.8)
+        yield from mw2_close()
+        # ---- a fight with it
+        mw_quiet(False); lure(); seg("fight"); p0 = dict((str(k), v) for k, v in c.slash_procs.items())
+        G["until"] = DUR - 9.0
+        while T() < DUR - 9.0:
+            m = threat() or nearest_monster(None, 40, 3000.0)
+            if m is None: yield from pause(0.4, lambda: camera(side=20.0, rate=20.0)); continue
+            G["casts0"] = c.attacks_made; yield from fight_w(m)
+            if any(v > p0.get(str(k), 0) for k, v in c.slash_procs.items()) and not alive(m): break
+        event("slash_procs", procs={str(k): v for k, v in c.slash_procs.items()}, bonus=round(c.slash_bonus_dealt, 1))
+        lure(False)
+    # ---- a set with a helmet (given, said): H hides it and shows it again
+    G["until"] = DUR + 1.0; mw_quiet(True)
+    arm = "Plate Armour"; c.add_item(arm, 1); event("given", items={arm: 1}, why="helmet")
+    c.wear_armour(arm); event("worn_set", set=arm, helmet=[str(x) for x in c.get_helmet_lines()])
+    yield from orbit(1.6, 150.0, 40.0, -6.0)
+    seg("helmet"); yield from mw2_key("H", label="h"); event("helmet", hidden=bool(c.is_helmet_hidden())); yield from orbit(2.2, 190.0, -30.0, -6.0)
+    yield from mw2_key("H", label="h"); event("helmet", hidden=bool(c.is_helmet_hidden())); yield from orbit(1.8, 160.0, 30.0, -6.0)
+
+def mw2_mage(s0, centre, room, anvil):
+    """the Mage: the inventory's five tabs (her things given, said); the start set's shrine (a blessing); a fight; its fountain
+    of mana; tier 2 (the reel's shortcut): a healing fountain"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    mw_set(V(centre.x - 200, centre.y + 120, 100.0), yaw=30.0, side=-25.0, pitch=-16.0)
+    event("start", at=[round(loc().x), round(loc().y)], way="great hall")
+    give = {"Small Healing Potion": 2, "Small Mana Potion": 2, "Bread": 1, "Iron Ingot": 3, "Timber": 2, "Whetstone": 1}
+    rings = [str(i.name) for i in gen.get_editor_property("items") if i.kind == unreal.RDItemKind.RING and "Magic" in str(i.name)]
+    if rings: give[rings[0]] = 1
+    for k_, n_ in give.items(): c.add_item(k_, n_)
+    event("given", items=give, why="tabs")
+    yield from pause(2.2, lambda: camera(side=-25.0, pitch=-16.0, rate=40.0))
+    seg("inventory"); yield from mw2_inv(0, "tabs"); yield from pause(1.6)
+    for _ in range(4): yield from mw2_key("E", label="e_tab"); event("tab", tab=c.get_inventory_tab()); yield from pause(1.5)
+    yield from mw2_key("Q", label="q_tab"); event("tab", tab=c.get_inventory_tab()); yield from pause(1.2)
+    yield from mw2_close()
+    # ---- the shrine
+    sh = next(iter(mw2_rooms("Shrine", (0, 0))), None)
+    if sh:
+        yield from mw2_go(sh["at"], sh["room"], s0, "A SHRINE", "a room of the start set: pray at it (F) for a blessing", ("shrine",))
+        seg("shrine"); mw2_f("shrine"); yield from pause(2.6, lambda: camera(side=-50.0, pitch=-30.0, rate=40.0))          # (a turn to her front put the camera into her: the fixture stops the boom)
+    # ---- a fight (lured), then the fountain of mana
+    mw_quiet(False); seg("fight"); lure(); G["until"] = DUR - 22.0
+    while T() < DUR - 26.0 and c.get_mana() > c.get_max_mana() * 0.35:
+        m = threat() or nearest_monster(IP(0, 0), 60)
+        if m is None: yield from pause(0.4, lambda: camera(side=20.0, rate=20.0)); continue
+        G["casts0"] = c.attacks_made; yield from fight(m)
+    lure(False); mw_quiet(True)
+    mf = next(iter(mw2_rooms("Fountain of mana", (0, 0))), None)
+    if mf:
+        yield from mw2_go(mf["at"], mf["room"], s0, "A FOUNTAIN OF MANA", "a room of the start set: once, her mana full again", ("fountain",))
+        seg("fountain"); mw2_f("fountain", which="mana"); yield from pause(2.4, lambda: camera(side=-50.0, pitch=-30.0, rate=40.0))
+    # ---- tier 2: a healing fountain
+    t_card = T(); mw_card("TIER 2: A HEALING FOUNTAIN", "the reel's shortcut: the start set cleared by the generator, tier 2's sets generated; her hit points taken down (said)")
+    yield from mw2_tier2()
+    hf = next((r for r in mw2_rooms("Healing fountain") if not (r["s"].x == 0 and r["s"].y == 0)), None) or next(iter(mw2_rooms("Healing fountain")), None)
+    if hf:
+        sec = gen.get_section(hf["s"])
+        c.set_health(c.get_max_health() * 0.3); event("hp_set", hp=round(c.get_health(), 1), why="the reel takes her hit points down: to show the fountain")
+        st = mw2_beside(hf["at"], hf["room"], sec, ("fountain",)) or V(hf["at"].x - 200, hf["at"].y, 100.0)
+        mw_set(st, face_to=hf["at"], side=-22.0, pitch=-18.0)
+        # (the drink after the card: in the render the sets were generated at once and she drank behind it)
+        while T() < t_card + MW_CARD + 0.4: camera(side=-22.0, pitch=-18.0, rate=1e6); yield
+        yield from pause(1.4, lambda: camera(side=-28.0, pitch=-18.0, rate=40.0))
+        seg("fountain"); mw2_f("fountain", which="heal"); yield from pause(2.6, lambda: camera(side=-50.0, pitch=-30.0, rate=40.0))
+    mw_quiet(False); lure()
+    while T() < DUR - 1.0:
+        m = threat() or nearest_monster(None, 40, 3000.0)
+        if m is None: yield from pause(0.4, lambda: camera(side=20.0, rate=20.0)); continue
+        G["casts0"] = c.attacks_made; yield from fight(m)
+
+def mw2_warlock(s0, centre, room, anvil):
+    """the Warlock: the start set's vault (locked: F says so), its key from a chest of another room, the vault opened and
+    a chest of it; the fountain of speed; the arena (its doors shut behind her, three waves, the prize)"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    va = next(iter(mw2_rooms("Vault", (0, 0))), None)
+    if va:
+        doors = list(s0.get_room_doors(va["room"]))
+        rc = s0.get_room_center(va["room"])
+        dl = min((s0.get_door_location(i) for i in doors), key=lambda q: d2(q, centre)) if doors else rc
+        out = V(dl.x + (dl.x - rc.x) / max(d2(dl, rc), 1.0) * 200.0, dl.y + (dl.y - rc.y) / max(d2(dl, rc), 1.0) * 200.0, 100.0)
+        # (a stand point outside the vault from which F names its door, with room behind her for the camera: straight out
+        # from the door a wall stood close behind her and the camera was pressed into her cape)
+        for r_ in (200.0, 240.0, 170.0, 280.0):
+            got = None
+            for k in range(16):
+                q = V(dl.x + math.cos(k * math.pi / 8) * r_, dl.y + math.sin(k * math.pi / 8) * r_, 100.0)
+                if s0.room_at(q) == va["room"] or "vault" not in str(gen.describe_nearest(q, 280.0)): continue
+                bk = V(q.x - dl.x, q.y - dl.y, 0.0); bk = bk * (1.0 / max(bk.length(), 1.0))
+                if sweep_clear(q, V(q.x + bk.x * 380.0, q.y + bk.y * 380.0, 100.0), 35.0): got = q; break
+            if got is not None: out = got; break
+        # (at the vault's door: F names it there (walking up through other doors, F once took a door she had passed))
+        mw_set(out, face_to=dl, side=-20.0, pitch=-34.0)
+        event("start", at=[round(loc().x), round(loc().y)], way="the start set's vault", near=str(gen.describe_nearest(loc(), 280.0)))
+        yield from pause(2.6, lambda: camera(side=-20.0, pitch=-34.0, rate=40.0))
+        seg("vault")
+        mw2_f("vault", step="locked"); yield from pause(2.6, lambda: camera(side=-35.0, pitch=-18.0, rate=30.0))
+        # ---- its key, in a chest of another room of the set
+        kc = [i for i in range(s0.get_num_containers()) if "Vault Key" in [str(x) for x in gen.loot_list_of(IP(0, 0), i)]]
+        if kc:
+            at = s0.get_container_location(kc[0]); st = stand_by_chest(at, at, tol=450.0)
+            if st is not None:
+                mw_card("ITS KEY", "in a chest of another room of the same set of rooms (the reel takes her there)")
+                far = mw_near_point(at, 520.0) or st
+                mw_set(far, face_to=at, side=-22.0, pitch=-18.0)
+                yield from pause(MW_CARD + 0.3, lambda: camera(side=-22.0, pitch=-18.0, rate=1e6))
+                seg("chest"); yield from open_chest(at, st)
+                event("key", has=c.get_item_count("Vault Key"))
+                yield from pause(1.6, lambda: camera(side=-30.0, pitch=-22.0, rate=40.0))
+        mw_card("BACK AT THE VAULT", "the reel takes her back to its door")
+        mw_set(out, face_to=dl, side=-20.0, pitch=-34.0)
+        yield from pause(MW_CARD + 0.3, lambda: camera(side=-20.0, pitch=-34.0, rate=1e6))
+        seg("vault"); mw2_f("vault", step="open", key_left=c.get_item_count("Vault Key")); yield from pause(1.6, lambda: camera(side=-25.0, pitch=-16.0, rate=40.0))
+        vc = [i for i in range(s0.get_num_containers()) if s0.room_at(s0.get_container_location(i)) == va["room"]]
+        if vc:
+            at = min((s0.get_container_location(i) for i in vc), key=lambda q: d2(q, dl)); st = stand_by_chest(at, loc(), tol=450.0)
+            if st is not None: seg("chest"); yield from open_chest(at, st); yield from pause(1.2, lambda: camera(side=-30.0, pitch=-22.0, rate=40.0))
+    # ---- the fountain of speed
+    sf = next(iter(mw2_rooms("Fountain of speed", (0, 0))), None)
+    if sf:
+        yield from mw2_go(sf["at"], sf["room"], s0, "A FOUNTAIN OF SPEED", "a room of the start set: once, 30 % faster for a while", ("fountain",))
+        seg("fountain"); mw2_f("fountain", which="speed"); yield from pause(1.8, lambda: camera(side=-50.0, pitch=-30.0, rate=40.0))
+    # ---- the arena: she steps in, its doors shut, three waves
+    ar = next(iter(mw2_rooms("Arena", (0, 0))), None)
+    if ar:
+        rc = s0.get_room_center(ar["room"]); doors = list(s0.get_room_doors(ar["room"]))
+        dl = min((s0.get_door_location(i) for i in doors), key=lambda q: d2(q, rc)) if doors else rc
+        inside = V(dl.x + (rc.x - dl.x) * 0.25, dl.y + (rc.y - dl.y) * 0.25, 100.0)
+        outside = V(dl.x - (rc.x - dl.x) / max(d2(rc, dl), 1.0) * 300.0, dl.y - (rc.y - dl.y) / max(d2(rc, dl), 1.0) * 300.0, 100.0)
+        mw_card("THE ARENA", "a room of the start set: its doors shut behind her until three waves of monsters are beaten")
+        mw_set(outside, face_to=rc, side=-15.0, pitch=-14.0); c.set_health(c.get_max_health())
+        yield from pause(MW_CARD + 0.3, lambda: camera(side=-15.0, pitch=-14.0, rate=1e6))
+        mw_quiet(False); seg("arena"); yield from to_point(V(rc.x, rc.y, 100.0), 8.0, 200.0)
+        t0 = T()
+        while gen.get_arena_wave() < 0 and T() - t0 < 3.0: camera(side=30.0, pitch=-14.0, rate=30.0); yield
+        event("arena", begun=gen.get_arena_wave() >= 0, doors_open=sum(1 for i in doors if s0.is_target_open(True, i)))
+        def arena_foe():
+            # (one of the arena's own (spawned at its far side, not yet after her), else whoever is after her)
+            ms = [q for q in gen.get_monsters() if alive(q) and s0.room_at(q.get_actor_location()) == ar["room"]]
+            return threat() or (min(ms, key=lambda q: d2(q.get_actor_location(), loc())) if ms else None)
+        while T() < DUR - 6.0 and md_get(gen.room_uses, "arena_won") == 0:
+            m = arena_foe()
+            if m is None: yield from pause(0.3, lambda: camera(side=25.0, pitch=-14.0, rate=30.0)); continue
+            G["casts0"] = c.attacks_made; yield from fight_w(m)
+            event("arena_wave", wave=gen.get_arena_wave(), left=gen.get_arena_left())
+        event("arena_won", won=md_get(gen.room_uses, "arena_won"), doors_open=sum(1 for i in doors if s0.is_target_open(True, i)))
+        pile = next((x for x in gen.loot_piles if x and not x.hers), None)
+        if pile is not None and T() < DUR - 3.0:
+            pl = pile.get_actor_location(); seg("prize"); yield from to_point(V(pl.x, pl.y, 100.0), 4.0, 90.0)
+            r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f"); event("prize", did=r_, message=str(c.message))
+def md_get(m, k):
+    try: return {str(a): b for a, b in m.items()}.get(k, 0)
+    except Exception: return 0
+
+def mw2_rogue(s0, centre, room, anvil):
+    """the Rogue: a trap seen from 8 m outlined in red (its plate, a disc at its reach, a red glow); the trap gauntlet: its
+    traps outlined as she sees them, one disarmed, its chest at the far end; tier 2 (the reel's shortcut): the throne room's
+    usurper (its hit points taken down, said)"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    gt = next(iter(mw2_rooms("Trap gauntlet", (0, 0))), None)
+    traps = []
+    for l in gen.get_trap_lines():
+        q = str(l).split("|")
+        if q[0] == "0" and q[1] == "0" and q[8] == "0": traps.append({"i": int(q[2]), "name": q[3], "at": V(float(q[5]), float(q[6]), float(q[7])), "room": int(q[10]) if len(q) > 10 else -1})
+    # ---- a trap of the gauntlet seen from its door: outlined as she comes within 8 m
+    room_t = [t_ for t_ in traps if gt and t_["room"] == gt["room"]]
+    if not gt or not room_t: event("no_gauntlet"); return
+    rc = s0.get_room_center(gt["room"]); doors = list(s0.get_room_doors(gt["room"]))
+    dl = min((s0.get_door_location(i) for i in doors), key=lambda q: d2(q, centre)) if doors else rc
+    back = V(dl.x - (rc.x - dl.x) / max(d2(rc, dl), 1.0) * 700.0, dl.y - (rc.y - dl.y) / max(d2(rc, dl), 1.0) * 700.0, 100.0)
+    if s0.room_at(back) < 0 and not len(path(back, dl)): back = V(dl.x - (rc.x - dl.x) / max(d2(rc, dl), 1.0) * 300.0, dl.y - (rc.y - dl.y) / max(d2(rc, dl), 1.0) * 300.0, 100.0)
+    mw_set(back, face_to=rc, side=-15.0, pitch=-20.0); mw_quiet(True)
+    event("start", at=[round(loc().x), round(loc().y)], way="the trap gauntlet's door", traps=len(room_t))
+    yield from pause(2.4, lambda: camera(side=-15.0, pitch=-20.0, rate=40.0))
+    seg("trap"); yield from to_point(V(dl.x, dl.y, 100.0), 6.0, 60.0)
+    t0 = T()
+    while T() - t0 < 2.2: camera(side=-10.0, pitch=-28.0, rate=40.0); yield
+    seen = [t_ for t_ in [str(x).split("|") for x in gen.get_trap_lines()] if t_[0] == "0" and t_[1] == "0" and t_[9] == "1"]
+    event("outlined", n=len(seen), names=[x[3] for x in seen])
+    # ---- the nearest of them disarmed (F)
+    first = min(room_t, key=lambda t_: d2(t_["at"], loc()))
+    st = V(first["at"].x + (loc().x - first["at"].x) / max(d2(loc(), first["at"]), 1.0) * 170.0, first["at"].y + (loc().y - first["at"].y) / max(d2(loc(), first["at"]), 1.0) * 170.0, 100.0)
+    yield from to_point(st, 5.0, 30.0)
+    G["heading"] = yaw_to(loc(), first["at"]); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    yield from pause(0.6, lambda: camera(side=-35.0, pitch=-26.0, rate=50.0))
+    said = str(gen.describe_nearest(loc(), 260.0)); r_ = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+    event("disarm", what=said, did=r_)
+    t0 = T()
+    while T() - t0 < gen.disarm_seconds + 0.6: camera(side=-40.0, pitch=-26.0, rate=20.0); yield
+    event("disarmed", n=gen.traps_disarmed, message=str(c.message))
+    # ---- its chest at the far end (the reel's way round the others: the tile path)
+    ch = [i for i in range(s0.get_num_containers()) if s0.room_at(s0.get_container_location(i)) == gt["room"]]
+    if ch:
+        at = s0.get_container_location(ch[0]); st = stand_by_chest(at, loc(), tol=450.0)
+        if st is not None: seg("chest"); yield from open_chest(at, st); yield from pause(1.4, lambda: camera(side=-30.0, pitch=-22.0, rate=40.0))
+    # ---- tier 2: the throne room's usurper
+    mw_card("TIER 2: A THRONE ROOM", "the reel's shortcut: the start set cleared by the generator, tier 2's sets generated; the usurper's hit points taken down (said)")
+    yield from mw2_tier2()
+    th = next(iter(mw2_rooms("Throne room")), None)
+    us = next((e for e in mw_encounters() if "USURPER" in "|".join(e["rest"])), None)
+    if th and us:
+        sec = gen.get_section(th["s"]); um = min((q for q in gen.get_monsters() if alive(q) and q.boss), key=lambda q: d2(q.get_actor_location(), us["at"]), default=None)
+        if um is not None: mw2_hit_down(um, 0.8, "the reel takes the usurper down to a fifth of its hit points")
+        stand = mw_near_point(us["at"], 1100.0, sec) or mw_near_point(us["at"], 800.0, sec)
+        if stand is not None: mw_set(stand, face_to=th["at"], side=-15.0, pitch=-12.0)
+        event("at_throne", usurper=us["name"], label="|".join(us["rest"]), m=round(d2(loc(), us["at"]) / 100.0, 1))
+        c.set_health(c.get_max_health())
+        yield from pause(MW_CARD + 0.3, lambda: camera(side=-15.0, pitch=-12.0, rate=1e6))
+        seg("throne"); yield from orbit(2.4, -20.0, 40.0, -12.0)
+        mw_quiet(False); lure()
+        while um is not None and alive(um) and T() < DUR - 5.0:
+            G["casts0"] = c.attacks_made; seg("fight"); yield from fight3(um)
+            o = threat()
+            if o is not None and o != um and alive(um): yield from fight3(o)
+        lure(False)
+        event("usurper", slain=not alive(um) if um is not None else None, notice=str(gen.tier_notice), uses=md_get(gen.room_uses, "usurper"))
+
 def run():
     gen, pc, p = G["gen"], G["pc"], G["pawn"]
     if W5M:
         yield from run5m(); return
+    if W5M2:
+        yield from run5m2(); return
     if W5X:
         yield from run5x(); return
     if W5W2:
@@ -2339,7 +2734,17 @@ def sample():
             **(tier_row(l) if W5R else {}),
             **({"fps": round(gen.get_fps(), 1), "sh": str(c.get_worn_shield()) if str(c.get_worn_shield()) != "None" else "", "shin": int(c.is_shield_in_hand()),
                 "torch": int(c.is_torch_held()), "dis": round(gen.get_disarm_progress(), 2), "near": str(gen.describe_nearest(l, 260.0)), "held": int(c.is_held()),
-                "msg": str(c.message), "mapo": int(gen.get_editor_property("map_open"))} if MW else {})}
+                "msg": str(c.message), "mapo": int(gen.get_editor_property("map_open"))} if MW else {}),
+            **({"tab": c.get_inventory_tab(), "tabn": tab_counts(c) if c.is_inventory_open() else None, "qs": [str(x) for x in c.get_quick_slots()], "asl": c.get_assign_slot(),
+                "blk": int(c.is_blocking()), "buffs": [str(x) for x in c.get_buff_lines()], "slp": [int(c.is_picking_slash()), c.get_slash_cursor(), str(c.get_slash_item())],
+                "helm": int(c.is_helmet_hidden()), "aw": gen.get_arena_wave(), "al": gen.get_arena_left()} if W5M2 else {})}
+def tab_counts(c):
+    """(run5m2) the inventory's lines per tab, as its tab strip counts them"""
+    n = [0, 0, 0, 0, 0]
+    for l in c.get_all_inventory_lines():
+        k = str(l).split("|")[0]
+        n[0 if k in ("weapon", "carried") else 1 if k in ("armour", "shield", "torch", "helmet") else 2 if k == "item" else 3 if k in ("component", "repair") else 4] += 1
+    return n
 def tier_row(l):
     """(the weapons and tiers reel) what the HUD's tier panel shows (ARDHUD::DrawTiers) and a seal's prompt near her"""
     gen = G["gen"]; s = gen.world_to_section(l); t_ = gen.tier_of(s)
@@ -2411,14 +2816,23 @@ def hits():
             if cl != S.get("craftl"): S["craftl"] = cl; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "craft_lines", "lines": cl})
             rl = [str(x) for x in c.get_repair_lines()] if c.is_picking_repair() else []
             if rl != S.get("repl"): S["repl"] = rl; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "repair_lines", "lines": rl})
+            if W5M2:
+                sl = [str(x) for x in c.get_slash_lines()] if c.is_picking_slash() else []
+                if sl != S.get("slashl"): S["slashl"] = sl; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "slash_lines", "lines": sl})
+                sg = [str(x) for x in g.slashes_given]
+                if sg != S.get("sgiven", []): S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "slash_found", "slashes": sg[len(S.get("sgiven", [])):]}); S["sgiven"] = sg
+                pr = {str(k): v for k, v in c.slash_procs.items()}
+                for k, v in pr.items():
+                    if v > S.setdefault("procs", {}).get(k, 0): S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "slash_proc", "effect": k, "n": v})
+                S["procs"] = pr
         if W5R:
             # (the weapons reel: her weapons as they are now (found ones join, broken ones go, wear goes down), the tiers' notices)
             ws_ = g.get_editor_property("weapons")
             wl = [{"name": str(d.name), "damage": round(c.get_damage_of(i), 2), "base_damage": d.damage, "reach": d.reach, "spell": bool(d.spell), "alongside": bool(d.alongside),
                    "mana": d.mana_cost, "ranged": bool(d.spell and d.bolt_mesh), "wear": c.get_weapon_wear(i), "durability": d.durability, "speed": d.speed_rating,
-                   "rating": d.damage_rating, "type": str(d.weapon_type), "rate": round(d.play_rate, 3),
+                   "rating": d.damage_rating, "type": str(d.weapon_type), "rate": round(d.play_rate, 3), **({"slash": str(d.slash) if str(d.slash) != "None" else ""} if W5M2 else {}),
                    **({"spell_index": d.spell_index, "cooldown": d.cooldown, "icon": str(d.icon)} if W5S else {})} for i, d in enumerate(ws_)]
-            sig = [(w_["name"], w_["wear"], w_["damage"]) for w_ in wl]          # (a ring changes the damage too)
+            sig = [(w_["name"], w_["wear"], w_["damage"], w_.get("slash", "")) for w_ in wl]          # (a ring changes the damage too; run5m2: a slash put on)
             if sig != S.get("wsig"): S["wsig"] = sig; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "weapons", "list": wl})
             tn = str(g.tier_notice)
             if tn != S.get("tnotice", ""): S["tnotice"] = tn; S["events"].append({"t": round(T(), 3), "frame": G["frame"], "kind": "tier_notice", "text": tn})
@@ -2546,7 +2960,9 @@ def body():
                                                for r_ in gen.get_editor_property("recipes")] if L5 else [],
                                    # (level 5: the weights of armour her hero wears)
                                    "wears": [str(x.name).lower() for h_ in gen.get_editor_property("heroes") if str(h_.name) == str(gen.get_editor_property("current_hero")) for x in h_.wears] if L5 else None,
-                                   "keys": list(gen.get_editor_property("controls_keys")), "pad": list(gen.get_editor_property("controls_pad")), "rogue_controls": bool(gen.get_editor_property("rogue_controls"))})
+                                   "keys": list(gen.get_editor_property("controls_keys")), "pad": list(gen.get_editor_property("controls_pad")), "rogue_controls": bool(gen.get_editor_property("rogue_controls")),
+                                   "slashes": [{"name": str(s_.name), "tier": s_.tier, "bonus": s_.bonus, "type": str(s_.get_editor_property("type")), "text": str(s_.text),
+                                                "color": [round(s_.color.r, 3), round(s_.color.g, 3), round(s_.color.b, 3)]} for s_ in gen.get_editor_property("slashes")] if W5M2 else []})
     if MODE == "render":
         sec = unreal.TimeManagementLibrary.conv_qualified_frame_time_to_seconds(G["player"].get_current_time())
         start = not G["going"] and sec > 1e-4 and G["combat"] is not None
@@ -2563,6 +2979,7 @@ def body():
         if L5: S["worn"] = "None"; S["taken"] = G["combat"].hits_taken
         if W5R: S["wsig"] = None; S["tnotice"] = ""
         if W5K: S["craftl"] = None; S["repl"] = None
+        if W5M2: S["slashl"] = None; S["sgiven"] = [str(x) for x in gen.slashes_given]; S["procs"] = {str(k): v for k, v in G["combat"].slash_procs.items()}
         if W5S: S["rel"] = {str(k): v for k, v in G["combat"].spells_released.items()}; S["ssig"] = None; S["menul"] = None
     next(G["run"])
     if (W5G or W5W2) and "grip_cam" in G: G["pc"].set_control_rotation(Rot(roll=0.0, pitch=G["grip_cam"][1], yaw=G["grip_cam"][0]))       # (run5g: the camera in front of her)

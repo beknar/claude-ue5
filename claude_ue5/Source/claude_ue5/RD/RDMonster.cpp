@@ -451,6 +451,29 @@ void ARDMonster::AddBurn(float PerSecond, float Seconds, float DrainShare)
 	Burns.Add({ PerSecond, Seconds, DrainShare });
 }
 
+void ARDMonster::BlindFor(float Share, float Seconds)
+{
+	if (bDead) return;
+	const float Now = GetWorld()->GetTimeSeconds();
+	BlindShare = Now < BlindUntil ? FMath::Max(BlindShare, Share) : Share;
+	BlindUntil = FMath::Max(BlindUntil, Now + Seconds);
+}
+
+float ARDMonster::GetBlindShare() const
+{
+	const UWorld* W = GetWorld();
+	return W && W->GetTimeSeconds() < BlindUntil ? BlindShare : 0.f;
+}
+
+void ARDMonster::StunFor(float Seconds)
+{
+	if (bDead || Seconds <= 0.f) return;
+	// (held where it stands: its swing broken off, its flinch played)
+	AttackTime = -1.f; Stun = FMath::Max(Stun, Seconds); bStunHeld = true;
+	if (GetHitAnim) GetMesh()->PlayAnimation(GetHitAnim, false);
+	GetCharacterMovement()->StopMovementImmediately();
+}
+
 void ARDMonster::Knock(const FVector& Velocity)
 {
 	if (bDead) return;
@@ -612,7 +635,7 @@ bool ARDMonster::TickCombat(float Dt)
 	if (Stun > 0.f)
 	{
 		Stun -= Dt;
-		if (Stun <= 0.f) { bWalkingAnim = true; GetMesh()->SetPlayRate(1.f); SetWalkingAnim(false); }
+		if (Stun <= 0.f) { bStunHeld = false; bWalkingAnim = true; GetMesh()->SetPlayRate(1.f); SetWalkingAnim(false); }
 		return true;
 	}
 	URDCombatComponent* Pc = G->GetPlayerCombat();
@@ -644,7 +667,12 @@ bool ARDMonster::TickCombat(float Dt)
 		{
 			bHitDone = true;
 			// the blow lands if its foe is still in reach and in front of it (a curse on it: weaker)
-			if (Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f)
+			// (the third list: a blinded monster's blow misses its share of the time; the roll a hash of its swings, never a
+			// stream the play draws from)
+			const float Blind = GetBlindShare();
+			const bool bMissBlind = Blind > 0.f && (float)(HashCombine(GetUniqueID(), (uint32)(++Swings * 2654435761u)) % 10000u) / 10000.f < Blind;
+			if (bMissBlind) ++BlindMisses;
+			if (!bMissBlind && Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f)
 			{
 				const float Dmg = Damage * (1.f - GetCurseShare());
 				if (bFoePlayer) { Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
@@ -829,7 +857,13 @@ FVector ARDMonster::AddWound(const FVector& Strike, const FVector& From, float S
 			const FTransform Xf = M->GetComponentTransform();
 			const int32 Step = FMath::Max(1, Num / 1200);
 			float Best = MAX_flt;
-			for (int32 V = SR.RandRange(0, Step - 1); V < Num; V += Step)
+			// (a monster spawned this frame has no bone matrices yet: the skinning read past the empty array (a test's arrow
+			// struck one): the nearest bone below instead)
+			// (a body that follows a leader pose reads the leader's bones through its bone map, which is made on its first tick:
+			// empty before it, read past too)
+			const bool bPose = RefToLocals.Num() > 0 && RefToLocals.Num() >= M->GetNumBones() && (!M->LeaderPoseComponent.IsValid() || M->GetLeaderBoneMap().Num() > 0)
+				&& M->GetNumComponentSpaceTransforms() > 0;
+			for (int32 V = SR.RandRange(0, Step - 1); bPose && V < Num; V += Step)
 			{
 				const FVector P = Xf.TransformPosition(FVector(USkinnedMeshComponent::GetSkinnedVertexPosition(M, V, LOD, *SW, RefToLocals)));
 				float Cost = FVector::Dist(P, Strike) + 0.8f * FVector::DotProduct(P - Center, Away) + 0.5f * FVector::Dist2D(P, Center);

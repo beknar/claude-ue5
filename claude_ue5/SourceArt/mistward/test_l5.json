@@ -1,0 +1,860 @@
+{
+ "tag": "l5",
+ "plan": [
+  "outline",
+  "tabs",
+  "slots",
+  "helmet",
+  "block",
+  "startgear",
+  "pickups",
+  "rooms",
+  "slashes"
+ ],
+ "level": "random_dungeonmagic_level5",
+ "steps": [
+  {
+   "step": "outline",
+   "ok": true,
+   "trials": [
+    {
+     "trap": "Pit",
+     "i": 0,
+     "red_warrior": 0.0,
+     "m": 6.0,
+     "seen": 1,
+     "rings_before": 0,
+     "rings": 1,
+     "ring_scale": 2.0,
+     "plate_outlined": 1,
+     "red_rogue": 0.1959
+    },
+    {
+     "trap": "Cursed",
+     "i": 2,
+     "red_warrior": 0.0007,
+     "m": 6.0,
+     "seen": 1,
+     "rings_before": 0,
+     "rings": 1,
+     "ring_scale": 2.2,
+     "plate_outlined": 1,
+     "red_rogue": 0.2024
+    }
+   ],
+   "traps": 13,
+   "boxes": [
+    [
+     0.394,
+     0.204,
+     0.534,
+     0.384
+    ],
+    [
+     0.416,
+     0.127,
+     0.556,
+     0.307
+    ]
+   ],
+   "warrior": {
+    "seen": 0,
+    "rings": 0
+   }
+  },
+  {
+   "step": "tabs",
+   "ok": true,
+   "tabs": {
+    "0": {
+     "kinds": [
+      "weapon"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    },
+    "1": {
+     "kinds": [
+      "armour",
+      "shield"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    },
+    "2": {
+     "kinds": [
+      "item"
+     ],
+     "lines": 1,
+     "all_its_own": true
+    },
+    "3": {
+     "kinds": [
+      "component",
+      "repair"
+     ],
+     "lines": 2,
+     "all_its_own": true
+    },
+    "4": {
+     "kinds": [
+      "key",
+      "ring",
+      "slash"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    }
+   },
+   "refused": [],
+   "lines_total": 12,
+   "lines_in_tabs": 12,
+   "key_tabs": [
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "tab_boxes": 5,
+   "clicked_tab": 3,
+   "e_on_potions": {
+    "tab_after": 3,
+    "drunk": 0
+   },
+   "daggers_lines": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|52|52|1|2|"
+   ],
+   "daggers_after_wear": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|20|52|1|1|",
+    "weapon|Dagger|52|52|2|1|"
+   ],
+   "anvil_kite": true,
+   "anvil_says": "You break down the kite shield:  8 iron ingot, 4 steel ingot   (1 left)",
+   "anvil_dagger": true,
+   "anvil_dagger_says": "You break down the dagger:  2 steel ingot, 3 iron ingot, 2 cured leather strip   (1 left)"
+  },
+  {
+   "step": "slots",
+   "ok": true,
+   "slots_filled": [
+    "Dagger",
+    "Arming Sword",
+    "Longbow",
+    "Viking Sword",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "refused": [],
+   "after_5": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "Viking Sword",
+    "Longbow",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "assign_slot": 7,
+   "after_y": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "None",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "after_rmb": [
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "Arming Sword",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "drawn_seq": [
+    "Longbow",
+    "Dagger",
+    "Longbow",
+    "Arming Sword",
+    "Longbow"
+   ]
+  },
+  {
+   "step": "helmet",
+   "ok": true,
+   "sets": 27,
+   "with_helmet": [
+    "Plate Armour",
+    "Lady Knight’s Armour",
+    "Paladin’s Armour",
+    "Dark Knight’s Armour",
+    "Broddi’s Dwarf Armour",
+    "Elephant Warrior’s Armour",
+    "Templar’s Armour",
+    "Eastern Knight’s Armour",
+    "Demonic Armour",
+    "Orc Skirmisher’s Armour",
+    "Orc Bruiser’s Armour",
+    "Orc Raider’s Armour"
+   ],
+   "without": [
+    "Epic Plate (Male)",
+    "Epic Plate (Female)",
+    "Bear Warrior’s Armour",
+    "Crocodile Warrior’s Armour",
+    "Split Armour",
+    "Desert Hero’s Armour",
+    "Tiefling’s Armour",
+    "Orme’s Armour",
+    "Bedvar’s Armour",
+    "Executioner’s Armour",
+    "Orc Warrior’s Armour",
+    "Orc Veteran’s Armour",
+    "Gnur’s Armour",
+    "Dardan’s Armour",
+    "Costalmed’s Armour"
+   ],
+   "pick": "Plate Armour",
+   "h_refused": "",
+   "hidden": true,
+   "lines_hidden": [
+    "SK_Warrior3_PlateArmour|0|6|10121|1"
+   ],
+   "pixels": [
+    2560,
+    2560
+   ],
+   "head_diff": 9.08,
+   "luma_on": 0.0,
+   "luma_off": 0.0,
+   "helmet_row": "helmet|1|Plate Armour",
+   "shown_by_row": true
+  },
+  {
+   "step": "block",
+   "ok": true,
+   "shield": "Kite Shield",
+   "share": 0.24,
+   "refused": [],
+   "hand_rest": [
+    6.3,
+    8.5
+   ],
+   "plain": {
+    "lost": 30.4,
+    "shield_lost": 9.6,
+    "share": 0.24
+   },
+   "blocking": true,
+   "hand_block": [
+    21.4,
+    39.9
+   ],
+   "blocked": {
+    "lost": 18.4,
+    "shield_lost": 108.0,
+    "share": 0.54,
+    "hits": 1
+   },
+   "swing_refused": true,
+   "after_release": {
+    "blocking": false,
+    "speed": 311.0,
+    "hand": [
+     6.1,
+     8.5
+    ]
+   },
+   "lt_blocking": true,
+   "speed": {
+    "normal": 311.0,
+    "blocking": 155.5,
+    "ratio": 0.5
+   },
+   "mage_blocking": false
+  },
+  {
+   "step": "startgear",
+   "ok": true,
+   "weapons": [
+    [
+     "Dagger",
+     "None",
+     0.0
+    ]
+   ],
+   "worn_shield": "Painted Viking Shield",
+   "start_shield": "Painted Viking Shield",
+   "worst_shield": "Painted Viking Shield",
+   "worn_armour": "None",
+   "shield_wear": [
+    100.0,
+    100.0
+   ],
+   "pile": null,
+   "after_fall": {
+    "shield": "Kite Shield",
+    "count": 1,
+    "weapons": [
+     "Dagger",
+     "Arming Sword"
+    ]
+   },
+   "drop_on_death": false
+  },
+  {
+   "step": "pickups",
+   "ok": true,
+   "pickups": 24,
+   "items": [
+    "Arming Sword",
+    "Dagger",
+    "Eastern Sabre",
+    "Longbow",
+    "Longsword",
+    "Painted Viking Shield",
+    "Plate Knight's Sword",
+    "Sherwood Sword",
+    "Viking Round Shield",
+    "Viking Shortsword",
+    "Viking Sword",
+    "Village Shield (green)",
+    "Village Shield (red)"
+   ],
+   "drawn": 24,
+   "tier_ok": true,
+   "stand": {
+    "room": 20,
+    "at": [
+     10126,
+     -4189
+    ],
+    "st": [
+     10246,
+     -4189
+    ],
+    "her": [
+     10246,
+     -4189,
+     84
+    ],
+    "her_d": 120
+   },
+   "describe": "take the viking round shield",
+   "f_refused": "",
+   "took": {
+    "item": "Viking Round Shield",
+    "gained": 1,
+    "taken_flag": "1",
+    "drawn": "0",
+    "taken_total": 1
+   }
+  },
+  {
+   "step": "rooms",
+   "ok": true,
+   "kinds": {
+    "Trap gauntlet": 6,
+    "Fountain of speed": 5,
+    "Vault": 5,
+    "Arena": 5,
+    "Shrine": 6,
+    "Healing fountain": 6,
+    "Fountain of mana": 5,
+    "Throne room": 4
+   },
+   "refused": [],
+   "shrine": {
+    "describe": "pray at the shrine",
+    "f": "shrine",
+    "blessing": "Blessing of the bulwark",
+    "damage_x": 1.0,
+    "armour": 0.25,
+    "speed": 0.0,
+    "again": "shrine used"
+   },
+   "heal": {
+    "f": "fountain",
+    "hp_gain": 0.6,
+    "speed_x": 1.0,
+    "speed_bonus": 0.0,
+    "again": "fountain dry",
+    "particles": 14
+   },
+   "speed": {
+    "f": "fountain",
+    "hp_gain": 0.0,
+    "speed_x": 1.3,
+    "speed_bonus": 0.3,
+    "again": "fountain dry",
+    "particles": 11
+   },
+   "mana": {
+    "f": "fountain",
+    "mana": [
+     0.0,
+     100.0,
+     100.0
+    ],
+    "again": "fountain dry"
+   },
+   "arena": {
+    "doors": 8,
+    "open_before": 8,
+    "began": true,
+    "doors_open_after_begin": 0,
+    "pushed_open": false,
+    "waves": [
+     {
+      "wave": 0,
+      "left": 3
+     },
+     {
+      "wave": 1,
+      "left": 3
+     },
+     {
+      "wave": 2,
+      "left": 3
+     },
+     {
+      "wave": -1,
+      "left": 0
+     }
+    ],
+    "won": 1,
+    "prize": [
+     [
+      "Dagger",
+      "Desert Hero’s Armour",
+      "Slickstone"
+     ]
+    ],
+    "opens_after": true
+   },
+   "gauntlet": {
+    "traps": 13,
+    "kinds": [
+     "Cursed",
+     "Darts",
+     "Deadfall",
+     "Glyph",
+     "Pit",
+     "Spring"
+    ],
+    "chests": 1,
+    "chest_loot": [
+     "Longsword",
+     "Orc Warrior’s Armour",
+     "Dexterity Ring 1"
+    ]
+   },
+   "vault": {
+    "doors": 6,
+    "locked_f": "vault locked",
+    "open_without_key": false,
+    "key_chests": 1,
+    "key_room": 27,
+    "key_chest_f": "trunk",
+    "other_opened": 0,
+    "has_key": 1,
+    "f": "vault",
+    "open_with_key": true,
+    "key_after": 0,
+    "vault_chests": 25,
+    "vault_loot": [
+     "Rare Healing Potion",
+     "Dexterity Ring 5"
+    ],
+    "tier_beyond": [
+     [
+      3
+     ],
+     [
+      3
+     ]
+    ]
+   },
+   "throne": {
+    "encounters": 4,
+    "label": "THE USURPER: ORC 03",
+    "alive": 1,
+    "slain_notice": "THE USURPER IS SLAIN  -  THE VERDANT SLASH IS YOURS",
+    "usurper_uses": 1,
+    "slashes_given": [
+     "Verdant Slash"
+    ],
+    "slash_in_pack": [
+     "slash|Verdant Slash|1"
+    ]
+   }
+  },
+  {
+   "step": "slashes",
+   "ok": true,
+   "refused": [],
+   "boss_gave": [],
+   "boss_slash_tier": [],
+   "tab": 4,
+   "picking": true,
+   "pick_lines": [
+    "weapon|0|Dagger|",
+    "weapon|1|Longbow|"
+   ],
+   "on_dagger": "Ember Slash",
+   "off_dagger": "None",
+   "back_in_pack": 1,
+   "on_bow": true,
+   "bow_slash": "Ember Slash",
+   "swing": {
+    "started": true,
+    "fx_max": 31,
+    "bonus": 6.0,
+    "monster_lost": 22.2,
+    "pictured": true
+   },
+   "shot": {
+    "bonus": 6.0,
+    "procs": 2
+   },
+   "each": {
+    "Ember Slash": {
+     "applied": true,
+     "effect": "burn",
+     "hit": true,
+     "bonus": 6.0,
+     "want_bonus": 6.0,
+     "fx": 30,
+     "procs": {
+      "burn": 1
+     },
+     "burning": true,
+     "dot": 10.06,
+     "want_dot": 10.1,
+     "ok": true
+    },
+    "Frost Slash": {
+     "applied": true,
+     "effect": "slow",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 42,
+     "procs": {
+      "slow": 1
+     },
+     "slow": 0.25,
+     "ok": true
+    },
+    "Venom Slash": {
+     "applied": true,
+     "effect": "poison",
+     "hit": true,
+     "bonus": 4.0,
+     "want_bonus": 4.0,
+     "fx": 29,
+     "procs": {
+      "poison": 1
+     },
+     "burning": true,
+     "dot": 11.92,
+     "want_dot": 12.0,
+     "ok": true
+    },
+    "Gale Slash": {
+     "applied": true,
+     "effect": "swift",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 26,
+     "procs": {
+      "swift": 1
+     },
+     "speed_bonus": 0.1,
+     "ok": true
+    },
+    "Blood Slash": {
+     "applied": true,
+     "effect": "drain",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 46,
+     "procs": {
+      "drain": 1
+     },
+     "healed": 6.99,
+     "want": 6.99,
+     "ok": true
+    },
+    "Wave Slash": {
+     "applied": true,
+     "effect": "knockback",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 65,
+     "procs": {
+      "knockback": 1
+     },
+     "moved_cm": 305,
+     "want_cm": 300.0,
+     "ok": true
+    },
+    "Verdant Slash": {
+     "applied": true,
+     "effect": "regen",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 26,
+     "procs": {
+      "regen": 1
+     },
+     "regen": 1.5,
+     "ok": true
+    },
+    "Petal Slash": {
+     "applied": true,
+     "effect": "evade",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 27,
+     "procs": {
+      "evade": 1
+     },
+     "evade": 0.15,
+     "ok": true
+    },
+    "Crystal Slash": {
+     "applied": true,
+     "effect": "shield",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 29,
+     "procs": {
+      "shield": 1
+     },
+     "up": true,
+     "absorbed": true,
+     "down_after": true,
+     "ok": true
+    },
+    "Storm Slash": {
+     "applied": true,
+     "effect": "chain",
+     "hit": true,
+     "bonus": 44.3,
+     "want_bonus": 15.0,
+     "fx": 46,
+     "procs": {
+      "chain": 1
+     },
+     "spawned": [
+      true,
+      true,
+      true
+     ],
+     "others_lost": [
+      14.7,
+      14.7,
+      0.0
+     ],
+     "ok": true
+    },
+    "Ink Slash": {
+     "applied": true,
+     "effect": "blind",
+     "hit": true,
+     "bonus": 13.0,
+     "want_bonus": 13.0,
+     "fx": 30,
+     "procs": {
+      "blind": 1
+     },
+     "blind": 0.4,
+     "ok": true
+    },
+    "Tide Slash": {
+     "applied": true,
+     "effect": "tide",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 66,
+     "procs": {
+      "tide": 1
+     },
+     "slow": 0.2,
+     "moved_cm": 413,
+     "ok": true
+    },
+    "Inferno Slash": {
+     "applied": true,
+     "effect": "inferno",
+     "hit": true,
+     "bonus": 100.6,
+     "want_bonus": 24.0,
+     "fx": 53,
+     "procs": {
+      "inferno": 1
+     },
+     "near_lost": 38.6,
+     "near_burning": true,
+     "far_lost": 0.0,
+     "ok": true
+    },
+    "Shadow Slash": {
+     "applied": true,
+     "effect": "curse",
+     "hit": true,
+     "bonus": 22.0,
+     "want_bonus": 22.0,
+     "fx": 26,
+     "procs": {
+      "curse": 1
+     },
+     "curse": 0.25,
+     "ok": true
+    },
+    "Neon Slash": {
+     "applied": true,
+     "effect": "haste",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 36,
+     "procs": {
+      "haste": 1
+     },
+     "haste": 0.2,
+     "swing_s": 0.479,
+     "ok": true
+    },
+    "Pulse Slash": {
+     "applied": true,
+     "effect": "deflect",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 34,
+     "procs": {
+      "deflect": 1
+     },
+     "deflect": 0.25,
+     "ok": true
+    },
+    "Magma Slash": {
+     "applied": true,
+     "effect": "magma",
+     "hit": true,
+     "bonus": 36.0,
+     "want_bonus": 36.0,
+     "fx": 25,
+     "procs": {
+      "magma": 1
+     },
+     "burning": false,
+     "dot": 40.0,
+     "want_dot": 36.0,
+     "ok": true
+    },
+    "Void Slash": {
+     "applied": true,
+     "effect": "void",
+     "hit": true,
+     "bonus": 34.0,
+     "want_bonus": 34.0,
+     "fx": 40,
+     "procs": {
+      "void": 1
+     },
+     "closer_cm": [
+      151,
+      149,
+      0
+     ],
+     "slow": 0.25,
+     "ok": true
+    },
+    "Overload Slash": {
+     "applied": true,
+     "effect": "stun",
+     "hit": true,
+     "bonus": 38.0,
+     "want_bonus": 38.0,
+     "fx": 14,
+     "procs": {
+      "stun": 1
+     },
+     "stunned": true,
+     "second_waits": true,
+     "ok": true
+    },
+    "Prismatic Slash": {
+     "applied": true,
+     "effect": "prismatic",
+     "hit": true,
+     "bonus": 32.0,
+     "want_bonus": 32.0,
+     "fx": 37,
+     "procs": {
+      "drain": 1,
+      "prismatic": 1
+     },
+     "ok": true
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l5_outline_warrior_Pit.png",
+  "mw_l5_outline_warrior_Cursed.png",
+  "mw_l5_outline_rogue_Pit.png",
+  "mw_l5_outline_rogue_Cursed.png",
+  "mw_l5_tabs_weapons.png",
+  "mw_l5_tabs_magic.png",
+  "mw_l5_tabs_anvil.png",
+  "mw_l5_slots_inventory.png",
+  "mw_l5_slots_bar.png",
+  "mw_l5_helmet_on.png",
+  "mw_l5_helmet_off.png",
+  "mw_l5_block_on.png",
+  "mw_l5_block_off.png",
+  "mw_l5_pickup_before.png",
+  "mw_l5_pickup_after.png",
+  "mw_l5_room_shrine.png",
+  "mw_l5_room_heal.png",
+  "mw_l5_room_speed.png",
+  "mw_l5_room_mana.png",
+  "mw_l5_room_gauntlet.png",
+  "mw_l5_room_vault.png",
+  "mw_l5_room_throne.png",
+  "mw_l5_slash_pick.png",
+  "mw_l5_slash_swing.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

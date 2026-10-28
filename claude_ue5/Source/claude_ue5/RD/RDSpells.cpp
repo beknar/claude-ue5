@@ -110,6 +110,13 @@ TArray<FString> URDCombatComponent::GetBuffLines() const
 	if (PoisonDps > 0.f) Add(FString::Printf(TEXT("POISON %.1f/s"), PoisonDps), PoisonUntil, false);
 	Add(FString::Printf(TEXT("WEAKENED -%.0f%%"), WeakShare * 100.f), WeakUntil, false);
 	Add(FString::Printf(TEXT("SLOWED -%.0f%%"), SlowMeShare * 100.f), SlowMeUntil, false);
+	// (the third list: the block, a shrine's blessing, the slashes' holds on her)
+	if (bBlocking && Generator) Out.Add(FString::Printf(TEXT("BLOCKING +%.0f%%|0.0|1"), Generator->BlockShare * 100.f));
+	if (!BlessName.IsEmpty()) Add(BlessName.ToUpper(), BlessUntil, true);
+	Add(FString::Printf(TEXT("HASTE +%.0f%%"), HasteShare * 100.f), HasteUntil, true);
+	Add(FString::Printf(TEXT("EVASION %.0f%%"), SlashEvadeShare * 100.f), SlashEvadeUntil, true);
+	Add(FString::Printf(TEXT("DEFLECT %.0f%%"), DeflectShare * 100.f), DeflectUntil, true);
+	if (bSlashShieldUp) Out.Add(TEXT("CRYSTAL SHIELD|0.0|1"));
 	return Out;
 }
 

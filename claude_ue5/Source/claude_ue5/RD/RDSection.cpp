@@ -93,6 +93,9 @@ void ARDSection::Plan(FRandomStream& R)
 	N = Generator->SectionTiles;
 	const int32 B = Generator->BlockTiles, NB = N / B;
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset();
+	Fixtures.Reset(); SpecialChests.Reset();          // (the third list's: furnishing makes them again)
+	for (FPickup& Pk : Pickups) if (Pk.Mesh.IsValid()) Pk.Mesh->DestroyComponent();
+	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
 	const bool bStart = Generator->IsStartSection(Coord);
 	// room kinds: weighted, a few per section capped
@@ -228,6 +231,8 @@ void ARDSection::Plan(FRandomStream& R)
 		FRandomStream RS(R.GetInitialSeed() ^ 0x5A4E3D21);
 		for (int32 RI = 0; RI < Rooms.Num(); ++RI) ShapeRoom(RS, RI);
 	}
+	// (the third list: shrines, fountains, an arena, a gauntlet, a vault, a throne room; a stream of their own as well)
+	if (Generator->bSpecialRooms) AssignSpecialRooms();
 }
 
 // ------------------------------------------------------------------------------------------------ shapes (mistward)
@@ -1384,7 +1389,14 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			{
 				const FName Wpn = K % 3 == 0 ? TEXT("SwordFlat") : K % 3 == 1 ? TEXT("AxeFlat") : TEXT("SpearFlat");
 				const FVector P = Q + Rt.RotateVector(FVector(R.FRandRange(-15, 15), (K - 1.5f) * T->Size.Y * 0.22f, T->Size.Z));
-				AddPieceAt(Wpn, P, Yaw + 90.f + R.FRandRange(-8, 8), 1.f, true);
+				const float PYaw = Yaw + 90.f + R.FRandRange(-8, 8);
+				// (the third list: the table's weapons are real ones of the room's tier, to take up; the draws stay as they were)
+				if (Generator->bWeaponPickups)
+				{
+					const FName It = Generator->PickupItemFor(Coord, Pickups.Num());
+					if (!It.IsNone()) { AddPickup(It, P, Yaw); continue; }
+				}
+				AddPieceAt(Wpn, P, PYaw, 1.f, true);
 			}
 		}
 		break;
@@ -1558,6 +1570,136 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		FurnishWalls(R, Rm, { TEXT("ToolBoard"), TEXT("Firewood"), TEXT("Barrel"), TEXT("Crate") }, 300.f, 0.6f, true);
 		break;
 	}
+	// ---- the third list's special rooms (the generator's bSpecialRooms; AssignSpecialRooms chose them)
+	case ERDRoomKind::Shrine: case ERDRoomKind::HealFountain: case ERDRoomKind::SpeedFountain: case ERDRoomKind::ManaFountain:
+	{
+		// (the statue or the fountain in a quadrant, off the lanes, facing the room's middle; candles, braziers, a carpet)
+		const bool bShrine = Rm.Kind == ERDRoomKind::Shrine;
+		const FName Main = bShrine ? TEXT("ShrineStatue") : TEXT("Fountain");
+		TArray<FVector> Spots = Quads;
+		Spots.Sort([&Ctr](const FVector& A, const FVector& Bq) { return FVector::DistSquared(A, Ctr) < FVector::DistSquared(Bq, Ctr); });
+		for (const FVector& Q : Spots)
+		{
+			const float Yaw = ((Ctr - Q) * FVector(1, 1, 0)).Rotation().Yaw;
+			// (a statue on a plinth when there is one, else standing on the floor as the fountain does)
+			const FRDPiece* Pl = bShrine ? this->Pc(TEXT("ShrinePlinth")) : nullptr;
+			if (Pl)
+			{
+				if (!Center(TEXT("ShrinePlinth"), Q, Yaw)) continue;
+				AddPieceAt(Main, Q + FVector(0, 0, Pl->Size.Z), Yaw, 1.f, true);
+			}
+			else if (!Center(Main, Q, Yaw)) continue;
+			const FRDPiece* Mp = this->Pc(Main);
+			FFixture Fx; Fx.Kind = Rm.Kind; Fx.At = Q; Fx.Room = RI;
+			Fixtures.Add(Fx);
+			const FLinearColor Glow = bShrine ? FLinearColor(0.75f, 0.7f, 1.f) : Rm.Kind == ERDRoomKind::HealFountain ? FLinearColor(1.f, 0.35f, 0.3f)
+				: Rm.Kind == ERDRoomKind::SpeedFountain ? FLinearColor(0.45f, 1.f, 0.4f) : FLinearColor(0.35f, 0.55f, 1.f);
+			AddLight(Q + FVector(0, 0, FMath::Min((Mp ? Mp->Size.Z : 120.f) + 120.f, RH - 60.f)), Glow, 90.f, 900.f, false, 0.05f);
+			break;
+		}
+		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, 0), FVector(B.Max.X - 150, B.Max.Y - 150, 0) })
+			if (LaneFree(Rm, Cn, 60.f)) Candles(Cn, 20.f);
+		for (int32 Side = 0; Side < 4; ++Side)
+			for (const FVector& W : WallSlots(Rm, Side, 600.f, 120.f, 300.f))
+				AddPieceAt(TEXT("Banner"), W + FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(12, 0, 0)) + FVector(0, 0, RH - 40.f), InwardYaw(Side), 1.f, true);
+		break;
+	}
+	case ERDRoomKind::Arena:
+	{
+		// (the floor kept clear for the fight: braziers in the corners, weapons and shields on the walls, banners)
+		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, 0), FVector(B.Max.X - 150, B.Min.Y + 150, 0), FVector(B.Min.X + 150, B.Max.Y - 150, 0), FVector(B.Max.X - 150, B.Max.Y - 150, 0) })
+		{
+			if (!Center(TEXT("Brazier"), Cn, 0.f)) continue;
+			const FRDPiece* Bz = this->Pc(TEXT("Brazier"));
+			const float Hz = Bz ? Bz->Size.Z : 110.f;
+			AddEffect(TEXT("BrazierFire"), Cn + FVector(0, 0, Hz + RDBrazierFlameUp), RDBrazierFlame);
+			AddLight(Cn + FVector(0, 0, Hz + 40.f), FLinearColor(1.f, 0.5f, 0.2f), 200.f, 1800.f, true, 0.2f);
+		}
+		for (int32 Side = 0; Side < 4; ++Side)
+		{
+			const float Yaw = InwardYaw(Side);
+			const FRotator Rt(0, Yaw, 0);
+			int32 K = 0;
+			for (const FVector& W : WallSlots(Rm, Side, 300.f, 120.f, 200.f))
+			{
+				AddPieceAt(TEXT("Shield"), W + Rt.RotateVector(FVector(14, 0, 0)) + FVector(0, 0, 250.f), Yaw, 1.f, true);
+				AddPieceAt((K++ % 2) ? TEXT("Sword") : TEXT("Spear"), W + Rt.RotateVector(FVector(16, 0, 0)) + FVector(0, 0, 150.f), Yaw, 1.f, true);
+			}
+		}
+		FFixture Fx; Fx.Kind = Rm.Kind; Fx.At = Ctr; Fx.Room = RI; Fixtures.Add(Fx);
+		break;
+	}
+	case ERDRoomKind::TrapGauntlet:
+	{
+		// (bare stone, bones and debris along the walls; its chest at the far end from the first door: PlaceTraps lays the run
+		// of traps on the lanes)
+		FurnishWalls(R, Rm, { TEXT("BonePile"), TEXT("Debris"), TEXT("Bones") }, 300.f, 0.5f);
+		int32 DoorSide = 0;
+		for (int32 Side = 0; Side < 4; ++Side) if (Rm.bDoorSide[Side]) { DoorSide = Side; break; }
+		const int32 Far = DoorSide ^ 1;
+		const FVector Wall = Far == 0 ? FVector(B.Min.X, Lc.Y, 0) : Far == 1 ? FVector(B.Max.X, Lc.Y, 0) : Far == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0);
+		const float Yaw = InwardYaw(Far);
+		// (beside the far wall's lane, out of its doorway)
+		const FVector Side2 = (Far < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * (S * 1.f);
+		const int32 Before = Containers.Num();
+		if (!AddContainer(TEXT("Chest"), Wall + FRotator(0, Yaw, 0).RotateVector(FVector(60.f, 0, 0)) + Side2, Yaw, TEXT("chest")) || Containers.Num() == Before)
+			AddContainer(TEXT("Chest"), Wall + FRotator(0, Yaw, 0).RotateVector(FVector(60.f, 0, 0)) - Side2, Yaw, TEXT("chest"));
+		if (Containers.Num() > Before) SpecialChests.Add(ContainerKey(Before));
+		FFixture Fx; Fx.Kind = Rm.Kind; Fx.At = Ctr; Fx.Room = RI; Fixtures.Add(Fx);
+		break;
+	}
+	case ERDRoomKind::Vault:
+	{
+		// (chests and trunks along the walls, crystals on pedestals: its doors stay shut until her key opens them)
+		const int32 Before = Containers.Num();
+		FurnishWalls(R, Rm, { TEXT("Chest"), TEXT("Trunk"), TEXT("Chest") }, 220.f, 0.9f, true);
+		for (int32 I = Before; I < Containers.Num(); ++I) SpecialChests.AddUnique(ContainerKey(I));
+		for (const FVector& Q : Quads)
+		{
+			if (!Center(TEXT("Pedestal"), Q, 0.f)) continue;
+			const FRDPiece* Pd = this->Pc(TEXT("Pedestal"));
+			const float Hz = Pd ? Pd->Size.Z : 100.f;
+			AddPieceAt(TEXT("Crystal"), Q + FVector(0, 0, Hz), R.FRandRange(0, 360), 1.f, true);
+			AddLight(Q + FVector(0, 0, Hz + 80.f), FLinearColor(1.f, 0.82f, 0.4f), 60.f, 900.f, false, 0.05f);
+		}
+		FFixture Fx; Fx.Kind = Rm.Kind; Fx.At = Ctr; Fx.Room = RI; Fixtures.Add(Fx);
+		break;
+	}
+	case ERDRoomKind::ThroneRoom:
+	{
+		// (the great hall's dais and throne on a wall without a door, a carpet up to it, columns, banners, braziers; the
+		// usurper waits before the throne: PlaceSpecial)
+		int32 Far = -1;
+		for (int32 Side = 0; Side < 4 && Far < 0; ++Side) if (!Rm.bDoorSide[Side]) Far = Side;
+		const bool bOnDoor = Far < 0;
+		if (Far < 0) Far = 1;
+		const float Yaw = InwardYaw(Far);
+		const FRotator Rt(0, Yaw, 0);
+		const FVector Wall = (Far == 0 ? FVector(B.Min.X, Lc.Y, 0) : Far == 1 ? FVector(B.Max.X, Lc.Y, 0) : Far == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0))
+			+ (bOnDoor ? (Far < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
+		const FVector Dais = Wall + Rt.RotateVector(FVector(220.f, 0, 0));
+		const FRDPiece* D = this->Pc(TEXT("Dais"));
+		if (Center(TEXT("Dais"), Dais, Yaw, true, true))
+			AddPieceAt(this->Pc(TEXT("ThroneRoyal")) ? TEXT("ThroneRoyal") : TEXT("Throne"), Dais + FVector(0, 0, D ? D->Size.Z : 0), Yaw, 1.f, false);
+		AddPieceAt(TEXT("CarpetLong"), (Dais + Ctr) * 0.5f + FVector(0, 0, 1), Yaw + 90.f, 1.f, true);
+		for (int32 Sd = -1; Sd <= 1; Sd += 2)
+		{
+			const FVector Bz = Dais + Rt.RotateVector(FVector(60.f, Sd * 260.f, 0));
+			if (Center(TEXT("Brazier"), Bz, 0.f))
+			{
+				const FRDPiece* Bp = this->Pc(TEXT("Brazier"));
+				const float Hz = Bp ? Bp->Size.Z : 110.f;
+				AddEffect(TEXT("BrazierFire"), Bz + FVector(0, 0, Hz + RDBrazierFlameUp), RDBrazierFlame);
+				AddLight(Bz + FVector(0, 0, Hz + 40.f), FLinearColor(1.f, 0.5f, 0.2f), 200.f, 1600.f, true, 0.2f);
+			}
+		}
+		for (int32 Side = 0; Side < 4; ++Side)
+			for (const FVector& W : WallSlots(Rm, Side, 450.f, 120.f, 300.f))
+				AddPieceAt(TEXT("Banner"), W + FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(12, 0, 0)) + FVector(0, 0, RH - 40.f), InwardYaw(Side), 1.f, true);
+		for (const FVector& Q : Quads) if (LaneFree(Rm, Q, 80.f)) Center(TEXT("Column"), Q, 0.f);
+		FFixture Fx; Fx.Kind = Rm.Kind; Fx.At = Dais + Rt.RotateVector(FVector(180.f, 0, 0)); Fx.Room = RI; Fixtures.Add(Fx);
+		break;
+	}
 	default: break;
 	}
 	// decoration everywhere: some floor clutter near the walls (no collision)
@@ -1722,7 +1864,7 @@ bool ARDSection::ContinueGenerate(double Budget)
 	{
 		FRandomStream RM(Seed ^ 0x5f3759df);
 		SpawnMonsters(RM);
-		PlaceTraps(); PlaceCellOccupants(); PlacePad();          // (mistward)
+		PlaceTraps(); PlaceCellOccupants(); PlacePad(); PlaceSpecial();          // (mistward; PlaceSpecial: the third list's rooms)
 		CollectFlicker();
 		RegisterMap();          // (again: the containers and lights are there now)
 		Generator->RecordSection(this);
@@ -1806,7 +1948,7 @@ void ARDSection::ActivateForPlay()
 	}
 	FRandomStream RM(Seed ^ 0x5f3759df);
 	SpawnMonsters(RM);
-	PlaceTraps(); PlaceCellOccupants(); PlacePad();          // (mistward)
+	PlaceTraps(); PlaceCellOccupants(); PlacePad(); PlaceSpecial();          // (mistward; PlaceSpecial: the third list's rooms)
 	RegisterMap();
 	CollectFlicker();
 	Generator->RecordSection(this);
@@ -1989,6 +2131,12 @@ void ARDSection::ToggleDoor(int32 I, const FVector& Opener, bool bByMonster)
 	};
 	FMover& M = Doors[I];
 	const float Target = M.Target > 0.5f ? 0.f : 1.f;
+	// (the third list: a vault she has no key for, an arena while it is fought: its doors do not open, for her or a monster)
+	if (Target > 0.5f && Generator && Generator->bSpecialRooms)
+	{
+		const int32 Rm = DoorRoom(I);
+		if (Rm >= 0 && Generator->IsRoomLocked(Coord, Rm)) return;
+	}
 	Set(M, Target);
 	if (Doors.IsValidIndex(M.Partner)) Set(Doors[M.Partner], Target);
 	if (Generator) Generator->PlaySoundAt(Target > 0.5f ? (M.bCell ? TEXT("Env.CellOpen") : TEXT("Env.DoorOpen")) : (M.bCell ? TEXT("Env.CellClose") : TEXT("Env.DoorClose")), M.Center);

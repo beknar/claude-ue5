@@ -1,11 +1,12 @@
 # mistward_castle test: opens mistward_castle in the editor, sets rd.HeroMenu 0 (play stays in the dungeon with its DefaultHero),
 # starts PIE, waits for UEDPIE_0_mistward_castle, arms 868_mistward_test.py with the plan, waits for a NEW "MWTEST done | <tag>" line,
 # stops PIE, sets rd.HeroMenu back to 1 and leaves the editor on mistward_castle with play stopped.
-# Args: plan tag [maxSeconds]   e.g.  .\868_mistward_test.ps1 "basics,shields,torch" m1     (plan "all": every step, 868's order)
+# Args: plan tag [maxSeconds] [-lv level]   e.g.  .\868_mistward_test.ps1 "basics,shields,torch" m1     (plan "all": every step, 868's order)
 # The plan "menu" plays the menu level (mistward_castle_select) instead: its step ends in mistward_castle, opened by START.
-param([string]$plan, [string]$tag, [int]$maxs = 2400)
-if ($plan -eq "all") { $plan = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death" }
-$L = if ($plan -eq "menu") { "mistward_castle_select" } else { "mistward_castle" }
+param([string]$plan, [string]$tag, [int]$maxs = 2400, [string]$lv = "mistward_castle")
+if ($plan -eq "all") { $plan = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes" }
+# (the third list's steps on level 5 too: -lv random_dungeonmagic_level5)
+$L = if ($plan -eq "menu") { "mistward_castle_select" } else { $lv }
 $py = $env:UE_PY; if (-not $py) { $py = "python" }
 $ex = Join-Path $PSScriptRoot "..\blender_numpy\ue_exec.py"
 $log = Join-Path $PSScriptRoot "..\..\claude_ue5\Saved\Logs\claude_ue5.log"

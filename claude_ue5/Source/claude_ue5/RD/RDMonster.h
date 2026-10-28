@@ -82,6 +82,13 @@ public:
 	void CurseFor(float Share, float Seconds);
 	void Knock(const FVector& Velocity);
 	void PullToward(const FVector& To, float Speed, float Dt);
+	/** the third list's slashes: blinded (Share of its blows miss) for Seconds; held (stunned) for Seconds */
+	void BlindFor(float Share, float Seconds);
+	void StunFor(float Seconds);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetBlindShare() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsStunned() const { return Stun > 0.f && bStunHeld; }
+	/** blows it swung that missed for its blindness (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 BlindMisses = 0;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetSlowShare() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetCurseShare() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsBurning() const { return Burns.Num() > 0; }
@@ -142,6 +149,9 @@ private:
 	bool bCorpse = false, bFrozen = false, bAlly = false, bChampion = false;
 	float AllySeconds = 0.f, AllyLeft = 0.f, SpeedScale = 1.f, MaxChaseScale = 1.f;
 	float SlowShare = 0.f, SlowUntil = -100.f, CurseShare = 0.f, CurseUntil = -100.f, BurnAcc = 0.f, BurnTick = 0.f, FreezeAt = 0.f;
+	float BlindShare = 0.f, BlindUntil = -100.f;
+	bool bStunHeld = false;
+	int32 Swings = 0;
 	struct FBurn { float PerSecond = 0.f; float Left = 0.f; float Drain = 0.f; };
 	TArray<FBurn> Burns;
 	TWeakObjectPtr<AActor> CurrentFoe;

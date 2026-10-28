@@ -25,6 +25,8 @@ mel.connect_material_property(L.scalar(mc, "Roughness", 0.7, -400, 200), "", unr
 mel.connect_material_property(L.scalar(mc, "Metallic", 0.0, -400, 300), "", unreal.MaterialProperty.MP_METALLIC)
 em = L.expr(mc, unreal.MaterialExpressionMultiply, -400, 420); L.link(bc, "", em, "A"); L.link(L.scalar(mc, "Emissive", 0.0, -600, 480), "", em, "B")
 mel.connect_material_property(em, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+# (the dungeons draw their pieces as instanced meshes: a packaged game without this usage drew them in the default material)
+mc.set_editor_property("used_with_instanced_static_meshes", True)
 L.finish(mc)
 def mi(name, c, rough=0.7, metal=0.0, emis=0.0, noise_amt=0.0):
     p = f"{D}/Materials/MI_{name}"

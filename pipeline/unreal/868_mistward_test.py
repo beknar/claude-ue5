@@ -55,6 +55,19 @@ Steps (plan, comma separated):
   death    the Warrior with things found (more than twelve kinds) falls: a pile where she fell with all of them and her own
            shield (a picture for each, the Loot Drops effect alive, the map's mark), her pack empty; back on her feet, F at
            the pile gives them back, the shield on her arm again
+The third list (docs/improvements2.txt, 870; also on random_dungeonmagic_level5 with the ps1's -lv):
+  outline  the Rogue's seen trap outlined in red (its plate drawn over, a ring), the red measured in pictures; the Warrior none
+  tabs     five tabs, each its own kinds; Q / E, LB / RB and a click change it; E no longer uses; copies of a found weapon
+           as worn as each other one line; the anvil says how many are left
+  slots    ten quick slots: a number, Y (the D-pad's slot) and the right mouse button put a weapon in one; 1 - 0 and the
+           D-pad left / right draw them
+  helmet   the worn set's helmet sections found on the mesh; H hides and shows them (pictures measured), the armour tab's line
+  block    the right mouse button / LT held: her speed halved, the shield's share + 30 %, five times its wear, no swing; the
+           Mage cannot; her shield hand raised
+  startgear the Warrior: the Dagger, the worst shield, no armour; hers for good (no wear, kept when she falls)
+  pickups  the armories' tables' tier things; F takes one off its table
+  rooms    the eight special rooms: shrine, healing / speed / mana fountains, arena, trap gauntlet, vault and key, throne room
+  slashes  a boss's slash; on a weapon through the inventory, T takes it off, on the bow; a swing and a shot; all twenty measured
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -67,7 +80,7 @@ UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death"
+DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 I2 = unreal.IntPoint
@@ -166,10 +179,13 @@ def step_basics():
 def step_shields():
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     put(g.get_start_room_center(), 0.0); yield from wait(0.5)
-    res = {"start": {"worn": str(c.get_worn_shield()), "in_hand": c.is_shield_in_hand(), "share": round(c.get_shield_share(), 4)}}
+    # (her starting shield: the worst of the table since the third list (2026-10-27); the Heater Shield before)
+    ss = str(md(g.get_editor_property("start_shield")).get("Warrior"))
+    res = {"start": {"worn": str(c.get_worn_shield()), "in_hand": c.is_shield_in_hand(), "share": round(c.get_shield_share(), 4), "start_shield": ss}}
+    res["start"]["want_share"] = SH[ss]["damage"] * 0.04 if ss in SH else None
     heater = SH["Heater Shield"]
-    res["start"]["want_share"] = heater["damage"] * 0.04
-    # (her speed with it and without it)
+    # (a found Heater Shield: her speed with it and without it)
+    c.add_item("Heater Shield", 1); c.wear_shield("Heater Shield"); yield from wait(0.2)
     with_ = walk_speed(); c.wear_shield("Heater Shield"); yield from wait(0.2); without = walk_speed(); off_hand = c.is_shield_in_hand()
     c.wear_shield("Heater Shield"); yield from wait(0.2)
     res["speed"] = {"with": round(with_, 1), "without": round(without, 1), "taken_off_in_hand": off_hand, "back_on": str(c.get_worn_shield()),
@@ -197,7 +213,7 @@ def step_shields():
     c.add_item("Kite Shield", 1); res["mage"] = {"wore": c.wear_shield("Kite Shield"), "says": str(c.message)}
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     s, sp, b, k = res["start"], res["speed"], res["blow"], res["kite"]
-    ok = (s["worn"] == "Heater Shield" and s["in_hand"] and abs(s["share"] - s["want_share"]) < 1e-3
+    ok = (s["worn"] == ss and s["in_hand"] and s["want_share"] is not None and abs(s["share"] - s["want_share"]) < 1e-3
           and not sp["taken_off_in_hand"] and sp["back_on"] == "Heater Shield" and abs(sp["measured_share"] - sp["want_share"]) < 0.01
           and abs(b["lost"] - b["want_lost"]) < 0.6 and b["shield_lost"] > 0
           and k["count"] == 2 and k["spares"] == 1 and k["worn"] == "Kite Shield" and abs(k["share"] - k["want_share"]) < 1e-3
@@ -338,10 +354,14 @@ def step_inventory():
     # (the keys, the gamepad's D-pad and the mouse sent into Slate as the devices send them: through the game's viewport, as in
     # normal play (the user's of 2026-10-27: held keys did not walk the list for them; the mouse could not point or scroll))
     c = yield from restart("Warrior"); g = G["gen"]
-    for it in [i for i in g.get_editor_property("items") if i.kind in (unreal.RDItemKind.COMPONENT, unreal.RDItemKind.HEALING, unreal.RDItemKind.FOOD)][:40]:
+    for it in [i for i in g.get_editor_property("items") if i.kind in (unreal.RDItemKind.HEALING, unreal.RDItemKind.FOOD, unreal.RDItemKind.MANA, unreal.RDItemKind.SPEED)] + \
+              [i for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.COMPONENT][:40]:
         c.add_item(str(it.name), 1)
     c.set_health(c.get_max_health() * 0.5)
-    c.set_inventory_open(True); yield from rwait(0.4)
+    c.set_inventory_open(True); yield from rwait(0.2)
+    # (with the tabs (the third list) the list is one tab's: the potions and food, the longest)
+    if g.get_editor_property("inventory_tabs"): c.set_inventory_tab(2)
+    yield from rwait(0.2)
     n = len(lines(c)); res = {"lines": n, "pointer_shown": c.is_pointer_shown(), "cursor_shown": G["pc"].show_mouse_cursor, "refused": []}
     # ---- held keys: the keyboard's S and W, the gamepad's D-pad down and up
     for nm, sec, k in (("S", 1.5, "hold_s"), ("W", 1.0, "hold_w"), ("Gamepad_DPad_Down", 1.5, "hold_dpad_down"), ("Gamepad_DPad_Up", 1.0, "hold_dpad_up")):
@@ -672,8 +692,11 @@ def step_layout():
                 if not tt_ or tt_[4].z < -60:
                     if len(no_floor) < 30: no_floor.append({"section": [sc.x, sc.y], "room": i, "kind": str(S.get_room_kind(i)), "at": [round(p_.x), round(p_.y)]})
                     n_no_floor += 1
-        # (shields in its containers' lists (found as loot, not given by the test), by the set's tier)
+        # (shields in its containers' lists (found as loot, not given by the test), by the set's tier; not a vault's chests:
+        # they hold the tier above's things, by the third list's rule)
+        vaults = {int(str(l).split("|")[2]) for l in g.get_special_room_lines() if str(l).split("|")[3] == "Vault" and int(str(l).split("|")[0]) == sc.x and int(str(l).split("|")[1]) == sc.y}
         for i in range(S.get_num_containers()):
+            if S.room_at(S.get_container_location(i)) in vaults: continue
             for x in g.loot_list_of(sc, i):
                 if str(x) in SH: shields_found.setdefault(t, set()).add(str(x))
         # (furniture as built)
@@ -746,7 +769,8 @@ def trap_lines():
     out = []
     for l in G["gen"].get_trap_lines():
         p = str(l).split("|")
-        out.append({"s": I2(int(p[0]), int(p[1])), "i": int(p[2]), "name": p[3], "kind": p[4], "at": V(float(p[5]), float(p[6]), float(p[7])), "state": int(p[8]), "seen": int(p[9])})
+        out.append({"s": I2(int(p[0]), int(p[1])), "i": int(p[2]), "name": p[3], "kind": p[4], "at": V(float(p[5]), float(p[6]), float(p[7])), "state": int(p[8]), "seen": int(p[9]),
+                    "room": int(p[10]) if len(p) > 10 else -1})
     return out
 def step_traps():
     g = G["gen"]; c = cb(); quiet(True)
@@ -981,11 +1005,13 @@ def step_cells():
         S = g.get_section(pr["s"])
         put(cell_gap(pr, 90), pr["yaw"] + 180); yield from wait(0.5)
         r = {"describe": str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))}
-        n0 = len(lines(c)); f0 = g.prisoners_freed
+        # (what she carries of every item: her gift may be one she has already (an earlier step gave her potions))
+        names_ = [str(i.name) for i in g.get_editor_property("items")]
+        n0 = {n: c.get_item_count(n) for n in names_}; f0 = g.prisoners_freed
         shot("cell_prisoner_before"); yield from rwait(0.6)
         r["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(1.0)
         r["freed"] = g.prisoners_freed - f0; r["says"] = str(c.message); r["found"] = str(g.last_found)
-        r["carried_more"] = len(lines(c)) - n0
+        r["carried_more"] = sum(c.get_item_count(n) - n0[n] for n in names_)
         yield from wait(2.5); shot("cell_prisoner_out"); yield from rwait(0.6)
         yield from wait(9.0)
         after = [x for x in cells() if x["s"] == pr["s"] and x["cell"] == pr["cell"]][0]
@@ -1081,8 +1107,12 @@ def step_death():
     # (more kinds than one ring of twelve pictures holds: every one is shown)
     give += [str(i.name) for i in items_of(unreal.RDItemKind.COMPONENT)[:11] if str(i.name) not in give]
     for n in give: c.add_item(n, 1)
+    # (her starting shield is hers for good (bKeepStartGear): it stays with her; the found Kite Shield worn drops and goes back on)
+    ss = str(md(g.get_editor_property("start_shield")).get("Warrior"))
+    keep = g.get_editor_property("keep_start_gear")
+    c.wear_shield("Kite Shield")
     yield from wait(0.3)
-    before = sorted(lines(c)); res = {"gave": give, "lines_before": len(before)}
+    before = sorted(lines(c)); res = {"gave": give, "lines_before": len(before), "start_shield": ss, "keep_start_gear": keep}
     # (a blow just past her hit points, as a monster's: one of a million also broke her shield, which takes its share first)
     c.apply_damage(c.get_health() / max(1.0 - c.get_shield_share(), 0.1) + 5.0, None); yield from wait(1.5)
     piles = [p for p in g.loot_piles if p]
@@ -1091,7 +1121,8 @@ def step_death():
         p = piles[0]
         res["pile"] = {"things": [str(x) for x in p.things], "pictures": p.pictures, "particles": p.get_effect_particles(), "from_her_m": round(dist2(p.get_actor_location(), spot) / 100, 2)}
     def have(n): return c.get_item_count(n) + sum(1 for d in g.get_editor_property("weapons") if str(d.item) == n)
-    res["carried_after"] = {n: have(n) for n in give + ["Heater Shield"]}
+    res["carried_after"] = {n: have(n) for n in give}
+    res["start_shield_after"] = have(ss)
     res["marks"] = yield from map_marks(False)
     shot("death_pile")
     yield from rwait(0.8)
@@ -1103,17 +1134,19 @@ def step_death():
         put(piles[0].get_actor_location(), 0.0); yield from wait(0.4)
         res["describe"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
         res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.4)
-        res["carried_back"] = {n: have(n) for n in give + ["Heater Shield"]}
+        res["carried_back"] = {n: have(n) for n in give + [ss]}
         res["shield_worn_again"] = str(c.get_worn_shield())
         res["piles_after"] = len([p for p in g.loot_piles if p])
     quiet(False)
     pl = res.get("pile", {})
-    # (all of her equipment drops (the list's words): the shield she started with too; her hero's own weapons are not items)
-    want = sorted(give + ["Heater Shield"])
+    # (all of her found equipment drops (the list's words); the shield she started with drops too unless it is hers for good
+    # (bKeepStartGear, the third list); her hero's own weapons are not items)
+    want = sorted(give + ([] if keep else [ss]))
     ok = (res["dead"] and res["piles"] == 1 and sorted(pl.get("things", [])) == want and pl.get("pictures", 0) >= len(want) and len(want) > 12
           and pl.get("particles", 0) > 0 and pl.get("from_her_m", 9) < 1.5 and all(v == 0 for v in res["carried_after"].values())
+          and res["start_shield_after"] == (1 if keep else 0)
           and 9 in res["marks"] and res["revived"] and res.get("f") == "loot" and all(v == 1 for v in res.get("carried_back", {"x": 0}).values())
-          and res.get("shield_worn_again") == "Heater Shield" and res.get("piles_after") == 0)
+          and res.get("shield_worn_again") == "Kite Shield" and res.get("piles_after") == 0)
     step_result("death", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ the hero menu with the mouse
@@ -1170,9 +1203,767 @@ def step_menu():
           and (res.get("world_after") or "").endswith("mistward_castle") and res.get("hero_after") == "Rogue" and res.get("cursor_after") is False)
     step_result("menu", ok, **res)
 
+# ================================================================================================ the third list (docs/improvements2.txt)
+def png_stat(path, box, fn):
+    """the mean of fn(r, g, b) over a part of a PNG (fractions of its width and height), read with zlib as png_luma does"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos < len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
+    tot = 0.0; n = 0
+    for y in range(h):
+        f = raw[y * (stride + 1)]; line = bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        if f == 1:
+            for i in range(bpp, stride): line[i] = (line[i] + line[i - bpp]) & 255
+        elif f == 2:
+            for i in range(stride): line[i] = (line[i] + prev[i]) & 255
+        elif f == 3:
+            for i in range(stride): line[i] = (line[i] + (((line[i - bpp] if i >= bpp else 0) + prev[i]) >> 1)) & 255
+        elif f == 4:
+            for i in range(stride):
+                a = line[i - bpp] if i >= bpp else 0; b = prev[i]; c_ = prev[i - bpp] if i >= bpp else 0
+                p = a + b - c_; pa, pb, pc = abs(p - a), abs(p - b), abs(p - c_)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c_)) & 255
+        if y0 <= y < y1:
+            for x in range(x0, x1, 2):
+                i = x * bpp; tot += fn(line[i], line[i + 1], line[i + 2]); n += 1
+        prev = line
+    return round(tot / max(n, 1), 4)
+def red_share(r, g, b): return 1.0 if (r > 110 and g < 0.4 * r and b < 0.4 * r) else 0.0      # (a deep red: torch-lit stone is orange, g 0.5-0.65 of r)
+def shot_stat(name, box, fn, res="640x360"):
+    """a picture of the game now and fn's mean over a part of it (none: the picture did not come)"""
+    p = os.path.join(SHOTS, f"mw_{TAG}_{name}.png")
+    if os.path.exists(p): os.remove(p)
+    shot(name, res); t0 = time.time()
+    while time.time() - t0 < 8:
+        yield from rwait(0.3)
+        if os.path.exists(p) and os.path.getsize(p) > 1000:
+            yield from rwait(0.3)
+            try: return png_stat(p, box, fn)
+            except Exception: continue
+    return None
+def face(at_from, at_to, pitch=-12.0):
+    yaw = math.degrees(math.atan2(at_to.y - at_from.y, at_to.x - at_from.x))
+    G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=yaw))
+    return yaw
+def stand_near(S, room, target, lo=250.0, hi=600.0):
+    """a free tile of a room lo to hi cm from a point, the nearest to the middle of that span (none: the room's farthest)"""
+    tiles = list(S.get_room_free_tiles(room)); best = None
+    for t in tiles:
+        d = dist2(t, target)
+        if lo <= d <= hi and (best is None or abs(d - (lo + hi) / 2) < abs(dist2(best, target) - (lo + hi) / 2)): best = t
+    if best is None and tiles: best = min(tiles, key=lambda t: abs(dist2(t, target) - lo))
+    return best
+def spawn_dummy(at, hmul=30.0):
+    """a harmless monster (no damage) with many hit points, standing where it is put"""
+    g = G["gen"]; kinds = [str(d.name) for d in g.get_editor_property("monsters")]
+    m = g.spawn_monster_named(kinds[0], V(at.x, at.y, at.z), 1, hmul, 0.0, 1.0)
+    return m
+def md(m):
+    """an unreal.Map as a dict with str keys"""
+    try: return {str(k): v for k, v in m.items()}
+    except Exception: return {}
+def cursor_to(c, row):
+    """the inventory's cursor walked to a row with S / W as the keyboard sends them (at most 60 presses)"""
+    for _ in range(60):
+        if row is None or c.get_inventory_cursor() == row: return
+        yield from slate_hold("S" if c.get_inventory_cursor() < row else "W", 0.05)
+def kill_all_near(at, r):
+    for m in G["gen"].get_monsters():
+        if alive(m) and dist2(m.get_actor_location(), at) < r: m.apply_damage(1e7, None)
+def drop(ms):
+    """the trial's monsters killed (destroyed, they stayed in the generator's list a while and a chain or an inferno struck
+    their ghosts: the dead are passed by)"""
+    for m in ms:
+        try:
+            if m and unreal.SystemLibrary.is_valid(m) and not m.is_dead(): m.apply_damage(1e7, None)
+        except Exception: pass
+
+def screen_box(at, half_w=0.07, half_h=0.09):
+    """a box of the picture (fractions) round where a world point is on the screen (none: off the screen)"""
+    ok_ = unreal.GameplayStatics.project_world_to_screen(G["pc"], at, False)
+    ok, sp = (ok_[0], ok_[1]) if isinstance(ok_, tuple) else (ok_ is not None, ok_)
+    if not ok or sp is None: return None
+    vs = unreal.WidgetLayoutLibrary.get_viewport_size(G["w"])
+    fx, fy = sp.x / max(vs.x, 1.0), sp.y / max(vs.y, 1.0)
+    if not (0.05 < fx < 0.95 and 0.05 < fy < 0.95): return None
+    return (max(0.0, fx - half_w), max(0.0, fy - half_h), min(1.0, fx + half_w), min(1.0, fy + half_h))
+
+def outline_view(t, stand):
+    """her at `stand` facing the trap, the camera down at it, her body hidden for the picture (it stood between them)"""
+    put(stand, face(stand, t["at"], -32)); face(stand, t["at"], -32)
+    G["pawn"].set_actor_hidden_in_game(True)
+    yield from wait(0.8)
+
+def step_outline():
+    """the Rogue's traps: a trap she has seen is outlined in red (its plate drawn over, a red ring at its reach); the Warrior
+    sees none and none is outlined. Measured on the components and in pictures: the same place and camera for the Warrior
+    (no outline) and then the Rogue (the trap seen), her body hidden; the red share round the trap's point on the screen"""
+    g = G["gen"]; res = {"trials": []}
+    c = yield from restart("Warrior"); quiet(True)
+    T = [t for t in trap_lines() if t["state"] == 0 and t["s"].x == 0 and t["s"].y == 0]
+    res["traps"] = len(T)
+    om = g.get_editor_property("trap_outline_material")
+    plate = [t for t in T if t["name"] in ("Pit", "Darts", "Deadfall", "Crusher", "Spring", "Lingering", "Chain")]
+    glow = [t for t in T if t["name"] in ("Glyph", "Ward", "Teleport", "Emanation", "Cursed")]
+    picks = plate[:1] + glow[:1]
+    stands = {}
+    # ---- the Warrior: the same view of each, no outline (she sees no trap)
+    for t in picks:
+        S = g.get_section(t["s"]); room = S.room_at(t["at"])
+        st = stand_near(S, room, t["at"], 420.0, 650.0) if room >= 0 else None
+        stands[t["i"]] = st or V(t["at"].x - 500, t["at"].y, 0.0)
+        yield from outline_view(t, stands[t["i"]])
+        box = screen_box(t["at"]); res.setdefault("boxes", []).append([round(v, 3) for v in box] if box else None)
+        red0 = (yield from shot_stat(f"outline_warrior_{t['name']}", box, red_share)) if box else None
+        G["pawn"].set_actor_hidden_in_game(False)
+        res["trials"].append({"trap": t["name"], "i": t["i"], "red_warrior": red0, "m": round(dist2(stands[t["i"]], t["at"]) / 100, 1)})
+    res["warrior"] = {"seen": sum(x["seen"] for x in trap_lines()), "rings": len(g.get_section(I2(0, 0)).get_components_by_tag(unreal.StaticMeshComponent, "RDOutline"))}
+    # ---- the Rogue (the same traps: the restart's seed is the same): from the same place she sees it (8 m)
+    c = yield from restart("Rogue"); quiet(True)
+    for tr, t in zip(res["trials"], picks):
+        S = g.get_section(t["s"])
+        rings0 = len([x for x in S.get_components_by_tag(unreal.StaticMeshComponent, "RDOutline") if dist2(x.get_world_location(), t["at"]) < 50])
+        yield from outline_view(t, stands[t["i"]])
+        t1 = time.time()
+        while time.time() - t1 < 3.0 and not next((x["seen"] for x in trap_lines() if x["s"] == t["s"] and x["i"] == t["i"]), 0): yield
+        seen = next((x["seen"] for x in trap_lines() if x["s"] == t["s"] and x["i"] == t["i"]), 0)
+        yield from wait(0.4)
+        box = screen_box(t["at"])
+        red1 = (yield from shot_stat(f"outline_rogue_{t['name']}", box, red_share)) if box else None
+        G["pawn"].set_actor_hidden_in_game(False)
+        rings = [x for x in S.get_components_by_tag(unreal.StaticMeshComponent, "RDOutline") if dist2(x.get_world_location(), t["at"]) < 50]
+        overl = [x for x in S.get_components_by_class(unreal.StaticMeshComponent) if dist2(x.get_world_location(), t["at"]) < 80 and not x.component_has_tag("RDOutline")
+                 and x.get_overlay_material() is not None and x.get_overlay_material().get_name() == om.get_name()]
+        tr.update({"seen": seen, "rings_before": rings0, "rings": len(rings), "ring_scale": round(rings[0].get_world_scale().x, 2) if rings else None,
+                   "plate_outlined": len(overl), "red_rogue": red1})
+    quiet(False)
+    tr = res["trials"]
+    ok = (len(tr) == 2 and all(x.get("seen") == 1 and x.get("rings_before") == 0 and x.get("rings") == 1 and x.get("red_warrior") is not None and x.get("red_rogue") is not None
+                               and x["red_rogue"] > x["red_warrior"] + 0.02 for x in tr)
+          and tr[0].get("plate_outlined", 0) >= 1 and res["warrior"]["seen"] == 0 and res["warrior"]["rings"] == 0)
+    step_result("outline", ok, **res)
+
+def step_tabs():
+    """the inventory in five tabs: each tab its own kinds; Q / E and LB / RB (sent as the devices send them) and a click on a tab
+    change it; E no longer uses; copies of a found weapon as worn as each other on one line; the anvil says how many are left"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    give = {"Dagger": 2, "Arming Sword": 1, "Small Healing Potion": 2, "Iron Ingot": 3, "Kite Shield": 2, "Vault Key": 1, "Ember Slash": 1, "Whetstone": 1}
+    ring = next((str(i.name) for i in items_of(unreal.RDItemKind.RING)), None); give[ring] = 1
+    arm = next((str(i.name) for i in items_of(unreal.RDItemKind.ARMOUR)), None); give[arm] = 1
+    for n, k in give.items(): c.add_item(n, k)
+    c.set_health(c.get_max_health() * 0.5)
+    c.set_inventory_open(True); yield from rwait(0.4)
+    res = {"tabs": {}, "refused": []}
+    allk = [str(l).split("|")[0] for l in c.get_all_inventory_lines()]
+    want = {0: {"weapon", "carried"}, 1: {"armour", "shield", "torch", "helmet"}, 2: {"item"}, 3: {"component", "repair"}, 4: {"ring", "tome", "teleport", "slash", "key"}}
+    for t in range(5):
+        c.set_inventory_tab(t); yield from rwait(0.15)
+        ks = [str(l).split("|")[0] for l in c.get_inventory_lines()]
+        res["tabs"][t] = {"kinds": sorted(set(ks)), "lines": len(ks), "all_its_own": all(k in want[t] for k in ks)}
+    res["lines_total"] = len(allk); res["lines_in_tabs"] = sum(v["lines"] for v in res["tabs"].values())
+    # (the keys as the devices send them)
+    c.set_inventory_tab(0); yield from rwait(0.2); seq = []
+    for nm in ("E", "E", "Q", "Gamepad_RightShoulder", "Gamepad_LeftShoulder"):
+        why = yield from slate_hold(nm, 0.08)
+        if why: res["refused"].append(f"{nm}: {why}")
+        seq.append(c.get_inventory_tab())
+    res["key_tabs"] = seq
+    # (a click on the fourth tab, where the HUD drew it)
+    yield from rwait(0.3)
+    tb = [tuple(float(v) for v in str(b).split("|")) for b in c.get_tab_boxes()]
+    res["tab_boxes"] = len(tb)
+    if len(tb) == 5:
+        why = yield from slate_click(unreal.Vector2D((tb[3][0] + tb[3][2]) / 2, (tb[3][1] + tb[3][3]) / 2))
+        if why: res["refused"].append("click: " + why)
+        res["clicked_tab"] = c.get_inventory_tab()
+    # (E on the potions' tab: the tab changes, nothing is drunk)
+    c.set_inventory_tab(2); yield from rwait(0.2); n0 = c.get_item_count("Small Healing Potion")
+    yield from slate_hold("E", 0.08); res["e_on_potions"] = {"tab_after": c.get_inventory_tab(), "drunk": n0 - c.get_item_count("Small Healing Potion")}
+    # (stacks: the two found daggers as one line "x 2"; one worn down: two lines)
+    c.set_inventory_tab(0); yield from rwait(0.2)
+    dl = [str(l) for l in c.get_inventory_lines() if str(l).startswith("weapon|Dagger|")]
+    res["daggers_lines"] = dl
+    found = [i for i, d in enumerate(g.get_editor_property("weapons")) if str(d.name) == "Dagger" and str(d.item) != "None"]
+    if found: c.set_weapon_wear(found[0], 20.0); yield from rwait(0.1)
+    res["daggers_after_wear"] = [str(l) for l in c.get_inventory_lines() if str(l).startswith("weapon|Dagger|")]
+    shot("tabs_weapons"); yield from rwait(0.5)
+    c.set_inventory_tab(4); yield from rwait(0.2); shot("tabs_magic"); yield from rwait(0.5)
+    c.set_inventory_open(False); yield from rwait(0.2)
+    # (the anvil: how many are left of what is broken down)
+    c.set_crafting_open(True); yield from rwait(0.3)
+    res["anvil_kite"] = c.break_down_gear("Kite Shield"); res["anvil_says"] = str(c.message)
+    wi = next((i for i, d in enumerate(g.get_editor_property("weapons")) if str(d.name) == "Dagger" and str(d.item) != "None"), -1)
+    res["anvil_dagger"] = c.break_down_weapon(wi) if wi >= 0 else False; res["anvil_dagger_says"] = str(c.message)
+    shot("tabs_anvil"); yield from rwait(0.5)
+    c.set_crafting_open(False); quiet(False)
+    tbs = res["tabs"]
+    ok = (all(v["all_its_own"] for v in tbs.values()) and res["lines_in_tabs"] == res["lines_total"] and all(tbs[t]["lines"] > 0 for t in range(5))
+          and res["key_tabs"] == [1, 2, 1, 2, 1] and not res["refused"] and res.get("clicked_tab") == 3
+          and res["e_on_potions"]["tab_after"] == 3 and res["e_on_potions"]["drunk"] == 0
+          and any(l.split("|")[5] == "2" for l in res["daggers_lines"]) and len(res["daggers_after_wear"]) == len(res["daggers_lines"]) + 1
+          and res["anvil_kite"] and "(1 left)" in res["anvil_says"] and res["anvil_dagger"] and "(1 left)" in res["anvil_dagger_says"])
+    step_result("tabs", ok, **res)
+
+def step_slots():
+    """ten quick slots: filled as weapons come; in the inventory a weapon's number (sent as the keyboard sends it) puts it in that
+    slot, the gamepad's Y in the slot the D-pad left / right chose, the right mouse button too; outside, 1 to 0 draw a slot's,
+    the D-pad left / right step through the filled ones"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    for n in ("Arming Sword", "Longbow", "Viking Sword"): c.add_item(n, 1)
+    yield from wait(0.3)
+    res = {"slots_filled": [str(s) for s in c.get_quick_slots()], "refused": []}
+    def row_of(name):
+        L_ = lines(c); return next((i for i, l in enumerate(L_) if l.startswith(f"weapon|{name}|")), None)
+    c.set_inventory_open(True); c.set_inventory_tab(0); yield from rwait(0.3)
+    # (the Longbow into slot 5 with the key 5)
+    r_ = row_of("Longbow")
+    yield from cursor_to(c, r_)
+    why = yield from slate_hold("Five", 0.08)
+    if why: res["refused"].append("5: " + why)
+    res["after_5"] = [str(s) for s in c.get_quick_slots()]
+    # (the Viking Sword into slot 8: D-pad right three times from slot 5 (the slot chosen follows the last), then Y)
+    r_ = row_of("Viking Sword")
+    yield from cursor_to(c, r_)
+    for _ in range(3): yield from slate_hold("Gamepad_DPad_Right", 0.06)
+    res["assign_slot"] = c.get_assign_slot()
+    yield from slate_hold("Gamepad_FaceButton_Top", 0.08)
+    res["after_y"] = [str(s) for s in c.get_quick_slots()]
+    # (the Arming Sword with the right mouse button on its row, into the slot chosen: D-pad left back to slot 7)
+    yield from slate_hold("Gamepad_DPad_Left", 0.06)
+    yield from rwait(0.3); R_ = rows(c); r_ = row_of("Arming Sword")
+    if r_ in R_:
+        b = R_[r_]; g.slate_mouse_move(unreal.Vector2D(b[0] + 30, b[1] - 50)); yield from rwait(0.2); g.slate_mouse_move(mid(b)); yield from rwait(0.25)
+        why = str(g.slate_mouse_button(mid(b), key("RightMouseButton"), True)); yield from rwait(0.08); g.slate_mouse_button(mid(b), key("RightMouseButton"), False); yield from rwait(0.25)
+        if why: res["refused"].append("rmb: " + why)
+    res["after_rmb"] = [str(s) for s in c.get_quick_slots()]
+    shot("slots_inventory"); yield from rwait(0.5)
+    c.set_inventory_open(False); yield from rwait(0.3)
+    # (outside: 5 draws the Longbow, 1 the Dagger, the D-pad right the next filled slot, left back)
+    seq = []
+    for nm in ("Five", "One", "Gamepad_DPad_Right", "Gamepad_DPad_Right", "Gamepad_DPad_Left"):
+        why = yield from slate_hold(nm, 0.08); yield from wait(0.25)
+        if why: res["refused"].append(f"{nm}: {why}")
+        seq.append(str(c.get_weapon_name()))
+    res["drawn_seq"] = seq
+    shot("slots_bar"); yield from rwait(0.5)
+    quiet(False)
+    s5, sy, sr = res["after_5"], res["after_y"], res["after_rmb"]
+    filled = [s for s in sy if s != "None"]
+    ok = (not res["refused"] and res["slots_filled"][0] == "Dagger" and s5[4] == "Longbow" and s5.count("Longbow") == 1 and res["assign_slot"] == 7 and sy[7] == "Viking Sword"
+          and sr[6] == "Arming Sword" and seq[0] == "Longbow" and seq[1] == "Dagger" and seq[2] != "Dagger" and seq[4] == seq[2] and len(filled) >= 3)
+    step_result("slots", ok, **res)
+
+def step_helmet():
+    """the helmet: of each set of armour the sections her head bone moves (the helmet), found on the mesh; H (as the keyboard
+    sends it) hides them and shows them again, the armour tab's helmet line too; a picture of her head each way and the
+    difference measured in it"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    sets = [str(i.name) for i in items_of(unreal.RDItemKind.ARMOUR)]
+    res = {"sets": len(sets), "with_helmet": [], "without": []}
+    for s in sets:
+        c.add_item(s, 1)
+        if not c.wear_armour(s): continue
+        yield from wait(0.05)
+        hl = [str(x) for x in c.get_helmet_lines()]
+        (res["with_helmet"] if hl else res["without"]).append(s)
+    pick = "Plate Armour" if "Plate Armour" in res["with_helmet"] else (res["with_helmet"][0] if res["with_helmet"] else None)
+    res["pick"] = pick
+    if pick:
+        c.wear_armour(pick); yield from wait(0.3)
+        # (her face from the front, close)
+        p = G["pawn"]; L = p.get_actor_location(); fw = p.get_actor_forward_vector()
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=p.get_actor_rotation().yaw + 180)); yield from wait(0.5)
+        # (her head in the picture: the third-person view puts it a little left of the middle, under the upper third; the
+        # pixels there compared one by one between the two pictures (a mean brightness hardly moved: dark hair for dark iron))
+        box = (0.40, 0.33, 0.50, 0.55)
+        PX = []
+        l0 = yield from shot_stat("helmet_on", box, lambda r, g_, b: PX.append((r, g_, b)) or 0.0)
+        n_on = len(PX)
+        why = yield from slate_hold("H", 0.08); yield from wait(0.4)
+        res["h_refused"] = why; res["hidden"] = c.is_helmet_hidden(); res["lines_hidden"] = [str(x) for x in c.get_helmet_lines()]
+        l1 = yield from shot_stat("helmet_off", box, lambda r, g_, b: PX.append((r, g_, b)) or 0.0)
+        A_, B_ = PX[:n_on], PX[n_on:]
+        res["pixels"] = [len(A_), len(B_)]
+        res["head_diff"] = round(sum(abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2]) for a, b in zip(A_, B_)) / 3.0 / max(1, min(len(A_), len(B_))), 2) if A_ and len(A_) == len(B_) else None
+        res["luma_on"] = l0; res["luma_off"] = l1
+        # (the armour tab's line shows it again)
+        c.set_inventory_open(True); c.set_inventory_tab(1); yield from rwait(0.2)
+        hrow = next((i for i, l in enumerate(lines(c)) if l.startswith("helmet|")), None)
+        res["helmet_row"] = lines(c)[hrow] if hrow is not None else None
+        if hrow is not None:
+            yield from cursor_to(c, hrow)
+            yield from slate_hold("Enter", 0.08)
+        res["shown_by_row"] = not c.is_helmet_hidden()
+        c.set_inventory_open(False); yield from wait(0.3)
+    quiet(False)
+    ok = (pick is not None and not res.get("h_refused") and res.get("hidden") and all(x.endswith("|1") for x in res.get("lines_hidden", [])) and res.get("lines_hidden")
+          and (res.get("head_diff") or 0) > 8.0 and res.get("helmet_row") and res.get("shown_by_row"))
+    step_result("helmet", ok, **res)
+
+def step_block():
+    """the Warrior's block: the right mouse button held (as the mouse sends it): blocking, her speed halved, a blow takes the
+    shield's share + 30 % less and wears the shield five times as much, no swing while she blocks; LT the same; the Mage cannot
+    block; her left hand raised before her chest (the pose), pictures"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    c.add_item("Kite Shield", 1); c.wear_shield("Kite Shield"); yield from wait(0.3)
+    share = c.get_shield_share(); body = G["pawn"].get_editor_property("mesh")
+    def hand(): h = body.get_socket_location("hand_l"); s = G["pawn"].get_actor_location(); f = G["pawn"].get_actor_forward_vector(); d = h - s; return round(d.dot(f), 1), round(d.z, 1)
+    res = {"shield": str(c.get_worn_shield()), "share": round(share, 3), "refused": []}
+    s0 = walk_speed(); res["hand_rest"] = hand()
+    # (a blow without the block)
+    c.set_health(c.get_max_health()); w0 = c.get_shield_wear("Kite Shield"); h0 = c.get_health()
+    c.apply_damage(40.0, None); yield from wait(0.1)
+    res["plain"] = {"lost": round(h0 - c.get_health(), 2), "shield_lost": round(w0 - c.get_shield_wear("Kite Shield"), 2), "share": round(c.last_shield_share, 3)}
+    # (the right mouse button held)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=G["pawn"].get_actor_rotation().yaw + 110)); yield from wait(0.3)
+    why = str(g.slate_key(key("RightMouseButton"), True)); yield from rwait(0.5)
+    if why: res["refused"].append("rmb: " + why)
+    res["blocking"] = c.is_blocking(); s1 = walk_speed(); res["hand_block"] = hand()
+    c.set_health(c.get_max_health()); w1 = c.get_shield_wear("Kite Shield"); h1 = c.get_health(); bh = c.blocked_hits
+    c.apply_damage(40.0, None); yield from wait(0.1)
+    res["blocked"] = {"lost": round(h1 - c.get_health(), 2), "shield_lost": round(w1 - c.get_shield_wear("Kite Shield"), 2), "share": round(c.last_shield_share, 3), "hits": c.blocked_hits - bh}
+    res["swing_refused"] = not c.start_attack()
+    shot("block_on"); yield from rwait(0.6)
+    g.slate_key(key("RightMouseButton"), False); yield from rwait(0.5)
+    res["after_release"] = {"blocking": c.is_blocking(), "speed": round(walk_speed(), 1), "hand": hand()}
+    shot("block_off"); yield from rwait(0.6)
+    # (LT held: the gamepad's)
+    why = str(g.slate_key(key("Gamepad_LeftTrigger"), True)); yield from rwait(0.4)
+    res["lt_blocking"] = c.is_blocking(); g.slate_key(key("Gamepad_LeftTrigger"), False); yield from rwait(0.3)
+    if why: res["refused"].append("lt: " + why)
+    res["speed"] = {"normal": round(s0, 1), "blocking": round(s1, 1), "ratio": round(s1 / max(s0, 1), 3)}
+    # (the Mage: no shield, no block)
+    g.switch_hero("Mage"); yield from wait(0.6); refresh(); c = cb()
+    g.slate_key(key("RightMouseButton"), True); yield from rwait(0.4); res["mage_blocking"] = c.is_blocking(); g.slate_key(key("RightMouseButton"), False); yield from rwait(0.2)
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
+    p_, b_ = res["plain"], res["blocked"]
+    want_share = min(share + 0.3, 0.95)
+    ok = (not res["refused"] and res["blocking"] and abs(res["speed"]["ratio"] - 0.5) < 0.03 and abs(b_["share"] - want_share) < 0.005 and b_["hits"] == 1
+          and b_["lost"] < p_["lost"] * 0.8 and p_["shield_lost"] > 0 and abs(b_["shield_lost"] / max(p_["shield_lost"], 1e-3) - 5.0 * (want_share / max(share, 1e-3))) < 1.0
+          and res["swing_refused"] and not res["after_release"]["blocking"] and res["after_release"]["speed"] > s1 * 1.8
+          and res["hand_block"][1] > res["hand_rest"][1] + 15 and res["after_release"]["hand"][1] < res["hand_block"][1] - 10
+          and res["lt_blocking"] and not res["mage_blocking"])
+    step_result("block", ok, **res)
+
+def step_startgear():
+    """the Warrior starts with no armour, the worst weapon she can wield (the Dagger) and the worst shield; both are hers for good:
+    the shield takes blows without wearing, and when she falls both stay with her (her found things drop)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    W = g.get_editor_property("weapons"); ss = str(md(g.get_editor_property("start_shield")).get("Warrior"))
+    shields = sorted(items_of(unreal.RDItemKind.SHIELD), key=lambda i: (i.amount, str(i.name)))
+    res = {"weapons": [(str(w.name), str(w.item), w.durability) for w in W], "worn_shield": str(c.get_worn_shield()), "start_shield": ss,
+           "worst_shield": str(shields[0].name), "worn_armour": str(c.get_worn_armour())}
+    w0 = c.get_shield_wear(ss)
+    for _ in range(5): c.set_health(c.get_max_health()); c.apply_damage(30.0, None); yield from wait(0.05)
+    res["shield_wear"] = [round(w0, 1), round(c.get_shield_wear(ss), 1)]
+    # (she falls with a found sword and shield worn: they drop, hers stay)
+    c.add_item("Arming Sword", 1); c.add_item("Kite Shield", 1); c.wear_shield("Kite Shield"); yield from wait(0.2)
+    c.apply_damage(c.get_health() * 4.0 + 50.0, None); yield from wait(1.2)
+    piles = [p for p in g.loot_piles if p]
+    res["pile"] = sorted(str(x) for x in piles[0].things) if piles else None
+    res["after_fall"] = {"shield": str(c.get_worn_shield()), "count": c.get_item_count(ss), "weapons": [str(w.name) for w in g.get_editor_property("weapons")]}
+    t0 = time.time()
+    while c.is_dead() and time.time() - t0 < 20: yield
+    yield from wait(0.8)
+    if piles:
+        put(piles[0].get_actor_location(), 0.0); yield from wait(0.4)
+        res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.3)
+        res["back"] = {"shield": str(c.get_worn_shield()), "kite": c.get_item_count("Kite Shield"), "start": c.get_item_count(ss)}
+    quiet(False)
+    # (a level without the castle's drop on death (level 5): nothing drops, hers stay hers)
+    res["drop_on_death"] = g.get_editor_property("drop_on_death")
+    fall_ok = ((res["pile"] is not None and ss not in res["pile"] and "Kite Shield" in res["pile"] and "Arming Sword" in res["pile"]
+                and res["after_fall"]["shield"] == ss and res["after_fall"]["count"] == 1 and res["after_fall"]["weapons"] == ["Dagger"]
+                and res.get("f") == "loot" and res.get("back", {}).get("shield") == "Kite Shield" and res.get("back", {}).get("start") == 1) if res["drop_on_death"] else
+               (res["pile"] is None and res["after_fall"]["count"] == 1 and "Dagger" in res["after_fall"]["weapons"]))
+    ok = (len(res["weapons"]) == 1 and res["weapons"][0][0] == "Dagger" and res["weapons"][0][1] == "None" and res["weapons"][0][2] == 0
+          and res["worn_shield"] == ss == res["worst_shield"] and res["worn_armour"] == "None" and res["shield_wear"][0] == res["shield_wear"][1] and fall_ok)
+    step_result("startgear", ok, **res)
+
+def step_pickups():
+    """the armories' tables: weapons and shields of the set's tier lie on them (meshes drawn); F (as the keyboard sends it) takes
+    the nearest: it is in her pack and gone from the table"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    P = [str(l).split("|") for l in g.get_pickup_lines()]
+    tiers = {str(i.name): list(i.tiers) for i in g.get_editor_property("items")}
+    res = {"pickups": len(P), "items": sorted({p[3] for p in P}), "drawn": sum(int(p[8]) for p in P), "tier_ok": all(not tiers.get(p[3]) or 1 in tiers[p[3]] for p in P if p[0] == "0" and p[1] == "0")}
+    if P:
+        p = P[0]; at = V(float(p[4]), float(p[5]), 0.0); S = g.get_section(I2(int(p[0]), int(p[1]))); room = S.room_at(at)
+        # (beside its table, in its room: the room's free tiles are 3 m apart, too far for F's 2 m)
+        st = None
+        for r_ in (120.0, 150.0, 175.0):
+            for k in range(16):
+                q = V(at.x + math.cos(k * math.pi / 8) * r_, at.y + math.sin(k * math.pi / 8) * r_, 0.0)
+                if S.room_at(q) != room: continue
+                put(q, face(q, at, -30)); yield from wait(0.15)
+                hl = G["pawn"].get_actor_location()
+                if dist2(hl, at) < 190.0 and str(g.describe_nearest(hl, 260.0)).startswith("take the"): st = q; break
+            if st: break
+        st = st or V(at.x - 150, at.y, 0)
+        put(st, face(st, at, -30)); face(st, at, -30); yield from wait(0.5)
+        hl = G["pawn"].get_actor_location()
+        res["stand"] = {"room": room, "at": [round(at.x), round(at.y)], "st": [round(st.x), round(st.y)], "her": [round(hl.x), round(hl.y), round(hl.z)], "her_d": round(dist2(hl, at))}
+        res["describe"] = str(g.describe_nearest(hl, 260.0))
+        shot("pickup_before"); yield from rwait(0.6)
+        n0 = c.get_item_count(p[3]) + sum(1 for d in g.get_editor_property("weapons") if str(d.item) == p[3])
+        why = yield from slate_hold("F", 0.08); yield from wait(0.3)
+        res["f_refused"] = why
+        n1 = c.get_item_count(p[3]) + sum(1 for d in g.get_editor_property("weapons") if str(d.item) == p[3])
+        after = [str(l).split("|") for l in g.get_pickup_lines()]
+        mine = next((a for a in after if a[0] == p[0] and a[1] == p[1] and a[2] == p[2]), None)
+        res["took"] = {"item": p[3], "gained": n1 - n0, "taken_flag": mine[7] if mine else None, "drawn": mine[8] if mine else None, "taken_total": g.pickups_taken}
+        shot("pickup_after"); yield from rwait(0.6)
+    quiet(False)
+    t = res.get("took", {})
+    ok = (res["pickups"] >= 4 and res["drawn"] == res["pickups"] and res["tier_ok"] and res.get("describe", "").startswith("take the") and not res.get("f_refused")
+          and t.get("gained") == 1 and t.get("taken_flag") == "1" and t.get("drawn") == "0" and t.get("taken_total") == 1)
+    step_result("pickups", ok, **res)
+
+def special_rooms():
+    out = []
+    for l in G["gen"].get_special_room_lines():
+        p = str(l).split("|"); out.append({"s": I2(int(p[0]), int(p[1])), "room": int(p[2]), "kind": p[3], "at": V(float(p[4]), float(p[5]), float(p[6])), "done": int(p[7])})
+    return out
+def step_rooms():
+    """the special rooms: shrines (a blessing), healing / speed / mana fountains (once each), an arena (its doors shut, three
+    waves, won: its doors open, a prize), a trap gauntlet (its traps, a chest), a vault (locked; its key in another room's
+    chest; opened, its chests hold the tier beyond's things), a throne room (its usurper slain: a slash for the Warrior)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    res = {"kinds": {}, "refused": []}
+    # (more sets of rooms: tier 2 opened (the start set cleared), its four nearest sets generated)
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1), I2(1, 1)):
+        if g.is_tier_open(2) and not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+    SR = special_rooms()
+    for r in SR: res["kinds"].setdefault(r["kind"], 0); res["kinds"][r["kind"]] += 1
+    def first(kind): return next((r for r in special_rooms() if r["kind"] == kind and r["done"] == 0), None)
+    def go(r, lo=120, hi=230):
+        S = g.get_section(r["s"]); st = stand_near(S, r["room"], r["at"], lo, hi) or V(r["at"].x - 180, r["at"].y, 0)
+        put(st, face(st, r["at"], -15)); face(st, r["at"], -15); return S
+    def go_use(r):
+        """beside a fixture, within F's reach (2.8 m): points round it in its room, the first from which F names it"""
+        S = g.get_section(r["s"])
+        for r_ in (150.0, 190.0, 230.0, 120.0):
+            for k in range(16):
+                q = V(r["at"].x + math.cos(k * math.pi / 8) * r_, r["at"].y + math.sin(k * math.pi / 8) * r_, 0.0)
+                if S.room_at(q) != r["room"]: continue
+                put(q, face(q, r["at"], -15)); yield from wait(0.12)
+                hl = G["pawn"].get_actor_location()
+                dn = str(g.describe_nearest(hl, 280.0))
+                if dist2(hl, r["at"]) < 260.0 and any(w_ in dn for w_ in ("shrine", "fountain")): return S
+        return go(r)
+    # ---- the shrine
+    r = first("Shrine")
+    if r:
+        yield from go_use(r); yield from wait(0.5)
+        d0 = c.get_damage_of(0); a0 = c.get_bless_armour(); sp0 = c.get_speed_bonus()
+        res["shrine"] = {"describe": str(g.describe_nearest(G["pawn"].get_actor_location(), 280.0)), "f": str(g.interact_nearest(G["pawn"].get_actor_location(), 280.0))}
+        yield from wait(0.3)
+        res["shrine"].update({"blessing": str(c.get_blessing()), "damage_x": round(c.get_damage_of(0) / max(d0, 1e-3), 3), "armour": round(c.get_bless_armour() - a0, 3),
+                              "speed": round(c.get_speed_bonus() - sp0, 3), "again": str(g.interact_nearest(G["pawn"].get_actor_location(), 280.0))})
+        shot("room_shrine"); yield from rwait(0.6)
+    # ---- the fountains (the mana one as the Mage)
+    for kind, key_ in (("Healing fountain", "heal"), ("Fountain of speed", "speed")):
+        r = first(kind)
+        if not r: continue
+        yield from go_use(r); yield from wait(0.4)
+        c.set_health(c.get_max_health() * 0.3); h0 = c.get_health(); s0 = walk_speed()
+        f = str(g.interact_nearest(G["pawn"].get_actor_location(), 280.0)); yield from wait(0.3)
+        res[key_] = {"f": f, "hp_gain": round((c.get_health() - h0) / c.get_max_health(), 3), "speed_x": round(walk_speed() / max(s0, 1), 3), "speed_bonus": round(c.get_speed_bonus(), 3),
+                     "again": str(g.interact_nearest(G["pawn"].get_actor_location(), 280.0)), "particles": g.get_particles_near(r["at"], 400)}
+        shot(f"room_{key_}"); yield from rwait(0.6)
+    r = first("Fountain of mana")
+    if r:
+        g.switch_hero("Mage"); yield from wait(0.6); refresh(); c = cb(); quiet(True)
+        yield from go_use(r); yield from wait(0.4); c.set_mana(0.0); m0 = c.get_mana()
+        f = str(g.interact_nearest(G["pawn"].get_actor_location(), 280.0)); yield from wait(0.3)
+        res["mana"] = {"f": f, "mana": [round(m0, 1), round(c.get_mana(), 1), round(c.get_max_mana(), 1)], "again": str(g.interact_nearest(G["pawn"].get_actor_location(), 280.0))}
+        shot("room_mana"); yield from rwait(0.6)
+        g.switch_hero("Warrior"); yield from wait(0.6); refresh(); c = cb(); quiet(True)
+    # ---- the arena
+    r = first("Arena")
+    if r:
+        S = g.get_section(r["s"]); doors = list(S.get_room_doors(r["room"]))
+        for d in doors:
+            if not S.is_target_open(True, d): S.push_door(d, S.get_door_location(d))
+        yield from wait(0.5)
+        res["arena"] = {"doors": len(doors), "open_before": sum(1 for d in doors if S.is_target_open(True, d)), "began": g.start_arena(r["s"], r["room"])}
+        yield from wait(1.5)
+        res["arena"]["doors_open_after_begin"] = sum(1 for d in doors if S.is_target_open(True, d))
+        # (a door pushed while it is fought: stays shut)
+        if doors: S.push_door(doors[0], S.get_door_location(doors[0]))
+        yield from wait(0.2); res["arena"]["pushed_open"] = S.is_target_open(True, doors[0]) if doors else None
+        res["arena"]["waves"] = []
+        for _ in range(4):
+            res["arena"]["waves"].append({"wave": g.get_arena_wave(), "left": g.get_arena_left()})
+            if g.get_arena_wave() < 0: break
+            kill_all_near(r["at"], 2500); yield from wait(1.0)
+        res["arena"]["won"] = md(g.room_uses).get("arena_won", 0)
+        res["arena"]["prize"] = [sorted(str(x) for x in p.things) for p in g.loot_piles if p and not p.hers and dist2(p.get_actor_location(), S.get_room_center(r["room"])) < 400]
+        if doors: S.push_door(doors[0], S.get_door_location(doors[0]))
+        yield from wait(0.3); res["arena"]["opens_after"] = S.is_target_open(True, doors[0]) if doors else None
+    # ---- the trap gauntlet
+    r = first("Trap gauntlet")
+    if r:
+        T = [t for t in trap_lines() if t["s"] == r["s"] and t["room"] == r["room"]]
+        S = g.get_section(r["s"])
+        chest = [i for i in range(S.get_num_containers()) if S.room_at(S.get_container_location(i)) == r["room"]]
+        res["gauntlet"] = {"traps": len(T), "kinds": sorted({t["name"] for t in T}), "chests": len(chest),
+                           "chest_loot": [str(x) for x in g.loot_list_of(r["s"], chest[0])] if chest else None}
+        go(r, 300, 700); yield from wait(0.5); shot("room_gauntlet"); yield from rwait(0.6)
+    # ---- the vault: one whose key's chest is still shut (the debug clear that opened tier 2 opened every container of the start set)
+    def key_chest(rr):
+        S_ = g.get_section(rr["s"])
+        k_ = [i for i in range(S_.get_num_containers()) if "Vault Key" in [str(x) for x in g.loot_list_of(rr["s"], i)]]
+        return k_[0] if k_ and not S_.is_container_looted(k_[0]) else None
+    def vault_ready(): return next((rr for rr in special_rooms() if rr["kind"] == "Vault" and rr["done"] == 0 and key_chest(rr) is not None), None)
+    r = vault_ready()
+    for s_ in (I2(-1, -1), I2(1, -1), I2(-1, 1), I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1), I2(1, 1)):
+        # (which sets are built depends on where she has been: more of tier 2's until one holds such a vault)
+        if r is not None: break
+        if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+        r = vault_ready()
+    r = r or first("Vault")
+    if r:
+        S = g.get_section(r["s"]); doors = list(S.get_room_doors(r["room"]))
+        v = {"doors": len(doors)}
+        if doors:
+            dl = S.get_door_location(doors[0]); room_c = S.get_room_center(r["room"])
+            out = V(dl.x + (dl.x - room_c.x) / max(dist2(dl, room_c), 1) * 150, dl.y + (dl.y - room_c.y) / max(dist2(dl, room_c), 1) * 150, 0)
+            put(out, face(out, dl)); yield from wait(0.4)
+            v["locked_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.3)
+            v["open_without_key"] = S.is_target_open(True, doors[0])
+            # (its key: in a chest of another room of the set)
+            kc = [i for i in range(S.get_num_containers()) if "Vault Key" in [str(x) for x in g.loot_list_of(r["s"], i)]]
+            v["key_chests"] = len(kc)
+            if kc:
+                cl = S.get_container_location(kc[0]); v["key_room"] = S.room_at(cl)
+                # (F at its chest: points round it, the first from which F names a container)
+                # (nearest first: F opens the nearest container, which beside a shelf of chests may be another one)
+                v["key_chest_f"] = None; v["other_opened"] = 0
+                for r_ in (95.0, 120.0, 150.0, 180.0):
+                    for k in range(16):
+                        q = V(cl.x + math.cos(k * math.pi / 8) * r_, cl.y + math.sin(k * math.pi / 8) * r_, 0.0)
+                        if S.room_at(q) != v["key_room"]: continue
+                        put(q, face(q, cl, -25)); yield from wait(0.12)
+                        if not str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0)).startswith("open"): continue
+                        v["key_chest_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.6)
+                        if S.is_container_looted(kc[0]): break
+                        v["other_opened"] += 1
+                    if S.is_container_looted(kc[0]): break
+                v["has_key"] = c.get_item_count("Vault Key")
+                if v["has_key"] == 0:
+                    c.add_item("Vault Key", 1); v["key_given_by_test"] = True
+                put(out, face(out, dl)); yield from wait(0.4)
+                v["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.8)
+                v["open_with_key"] = S.is_target_open(True, doors[0]); v["key_after"] = c.get_item_count("Vault Key")
+                vc = [i for i in range(S.get_num_containers()) if S.room_at(S.get_container_location(i)) == r["room"]]
+                v["vault_chests"] = len(vc); v["vault_loot"] = [str(x) for x in g.loot_list_of(r["s"], vc[0])] if vc else None
+                tier = g.tier_of(r["s"]); tiers = {str(i.name): list(i.tiers) for i in g.get_editor_property("items")}
+                v["tier_beyond"] = [tiers.get(x, []) for x in (v["vault_loot"] or [])][:2]
+                go(r, 200, 500); yield from wait(0.4); shot("room_vault"); yield from rwait(0.6)
+        res["vault"] = v
+    # ---- the throne room
+    r = first("Throne room")
+    if r:
+        E_ = [str(l).split("|") for l in g.get_encounter_lines()]
+        us = [e for e in E_ if "USURPER" in e[7]]
+        t = {"encounters": len(us), "label": us[0][7] if us else None}
+        go(r, 300, 700); yield from wait(0.6); shot("room_throne"); yield from rwait(0.6)
+        given0 = len(g.slashes_given)
+        # (a usurper standing now: one whose set of rooms was dropped (far from her) has no monster until it is built again)
+        pick_ = None
+        for u_ in us:
+            at = V(float(u_[1]), float(u_[2]), float(u_[3]))
+            ms = [m for m in g.get_monsters() if alive(m) and m.boss and dist2(m.get_actor_location(), at) < 800]
+            if ms: pick_ = (u_, at, ms); break
+        if pick_:
+            u_, at, ms = pick_
+            t["alive"] = len(ms)
+            for m in ms: m.apply_damage(1e7, None)
+            yield from wait(0.8)
+            t["slain_notice"] = str(g.tier_notice); t["usurper_uses"] = md(g.room_uses).get("usurper", 0)
+            t["slashes_given"] = [str(x) for x in g.slashes_given][given0:]
+            t["slash_in_pack"] = [str(x) for x in c.get_all_inventory_lines() if str(x).startswith("slash|")]
+        res["throne"] = t
+    quiet(False)
+    k = res["kinds"]; sh, he, spd, mn, ar, ga, va, th = (res.get(x, {}) for x in ("shrine", "heal", "speed", "mana", "arena", "gauntlet", "vault", "throne"))
+    bless_ok = sh.get("f") == "shrine" and sh.get("again") == "shrine used" and (abs(sh.get("damage_x", 0) - 1.25) < 0.01 or abs(sh.get("armour", 0) - 0.25) < 0.01 or abs(sh.get("speed", 0) - 0.2) < 0.01)
+    ok = (len(k) == 8 and bless_ok
+          and he.get("f") == "fountain" and abs(he.get("hp_gain", 0) - 0.6) < 0.02 and he.get("again") == "fountain dry"
+          and spd.get("f") == "fountain" and abs(spd.get("speed_bonus", 0) - 0.3) < 0.005 and spd.get("again") == "fountain dry"
+          and mn.get("f") == "fountain" and mn.get("mana", [0, 0, 1])[1] == mn.get("mana", [0, 0, 1])[2] and mn.get("again") == "fountain dry"
+          and ar.get("began") and ar.get("doors_open_after_begin") == 0 and ar.get("pushed_open") is False and ar.get("won") == 1 and ar.get("prize") and ar.get("opens_after")
+          and [w["left"] > 0 for w in ar.get("waves", [])][:3] == [True, True, True]
+          and ga.get("traps", 0) >= 3 and ga.get("chests", 0) >= 1 and len(ga.get("chest_loot") or []) >= 3
+          and va.get("locked_f") == "vault locked" and va.get("open_without_key") is False and va.get("key_chests") == 1 and va.get("key_room") != None and va.get("has_key") == 1 and not va.get("key_given_by_test")
+          and va.get("f") == "vault" and va.get("open_with_key") and va.get("key_after") == 0 and va.get("vault_chests", 0) >= 1 and va.get("vault_loot")
+          and th.get("encounters", 0) >= 1 and th.get("alive") == 1 and th.get("usurper_uses") == 1 and len(th.get("slashes_given", [])) == 1)
+    step_result("rooms", ok, **res)
+
+def slash_trial(c, name, idx):
+    """one slash on her drawn weapon (Index), struck at a harmless monster before her (as a blow that lands, ApplySlashHitNow);
+    its effect measured on the monster, on others round it, or on her"""
+    g = G["gen"]; p = G["pawn"]; L = p.get_actor_location(); f = p.get_actor_forward_vector(); r_ = p.get_actor_right_vector()
+    sd = next(s for s in g.get_editor_property("slashes") if str(s.name) == name)
+    eff = sd.effect.name.lower()
+    if c.get_item_count(name) < 1: c.add_item(name, 1)
+    applied = c.apply_slash(name, idx)
+    at0 = V(L.x + f.x * 150, L.y + f.y * 150, L.z - 90)
+    main = spawn_dummy(at0); others = []
+    if eff in ("chain", "inferno", "void", "tide"):
+        # (two within reach of it, one well beyond)
+        # (two within its reach (2.3 m before it and 2.3 m beside it), one well beyond (11 m))
+        for off, side in ((230, 0.0), (0, 2.3), (1100, 0.0)):
+            q = V(at0.x + f.x * off + r_.x * side * 100, at0.y + f.y * off + r_.y * side * 100, at0.z); others.append(spawn_dummy(q))
+    yield from wait(0.4)
+    hp = lambda m: m.get_health() if alive(m) else None
+    pos = lambda m: m.get_actor_location() if alive(m) else None
+    h0 = hp(main); o_h0 = [hp(m) for m in others]; o_p0 = [pos(m) for m in others]; m_p0 = pos(main)
+    c.set_health(c.get_max_health() * 0.5); her0 = c.get_health()
+    procs0 = md(c.slash_procs); bonus0 = c.slash_bonus_dealt
+    ok_hit = c.apply_slash_hit_now(idx, main)
+    fx_now = c.get_slash_fx_alive(); yield from rwait(0.15); fx_soon = c.get_slash_fx_alive()
+    r = {"applied": applied, "effect": eff, "hit": ok_hit, "bonus": round(c.slash_bonus_dealt - bonus0, 2), "want_bonus": sd.bonus, "fx": max(fx_now, fx_soon)}
+    r["procs"] = {k: v - procs0.get(k, 0) for k, v in md(c.slash_procs).items() if v != procs0.get(k, 0)}
+    yield from wait(0.25)
+    h1 = hp(main)
+    if eff == "burn" or eff == "poison" or eff == "magma":
+        r["burning"] = main.is_burning() if alive(main) else None
+        yield from wait(max(sd.seconds, 1.0) + 0.6); r["dot"] = round((h1 or 0) - (hp(main) or 0), 2)
+        r["want_dot"] = round((c.get_damage_of(idx) + sd.bonus) * sd.amount if eff == "burn" else sd.amount if eff == "poison" else sd.amount * sd.seconds * 0.9, 1)
+        r["ok"] = r["dot"] > r["want_dot"] * 0.6
+    elif eff == "slow": r["slow"] = round(main.get_slow_share(), 3); r["ok"] = abs(r["slow"] - sd.amount) < 0.01
+    elif eff == "swift": r["speed_bonus"] = round(c.get_speed_bonus(), 3); r["ok"] = abs(r["speed_bonus"] - sd.amount) < 0.01
+    elif eff == "drain": r["healed"] = round(c.get_health() - her0, 2); r["want"] = round((c.get_damage_of(idx) + sd.bonus) * sd.amount, 2); r["ok"] = abs(r["healed"] - r["want"]) < 1.0
+    elif eff == "knockback":
+        yield from wait(1.2); r["moved_cm"] = round(dist2(pos(main), m_p0)) if alive(main) else None; r["want_cm"] = sd.amount
+        r["ok"] = sd.amount * 0.6 < (r["moved_cm"] or 0) < sd.amount * 1.6
+    elif eff == "regen": r["regen"] = round(c.get_regen_per_second(), 3); r["ok"] = abs(r["regen"] - sd.amount) < 0.05
+    elif eff == "evade": r["evade"] = round(c.get_slash_evade(), 3); r["ok"] = abs(r["evade"] - sd.amount) < 0.01
+    elif eff == "shield":
+        # (her hit points can rise meanwhile: the regeneration slash's trial may still be healing her; the shield's own count says it)
+        # (the petal slash's evasion from the trial before may still be on: it dodged the test's blow before the shield took it)
+        t_ = time.time()
+        while c.get_slash_evade() > 0 and time.time() - t_ < 5.0: yield
+        r["up"] = c.has_slash_shield(); hb = c.get_health(); st0 = md(c.slash_procs).get("shield_took", 0); c.apply_damage(20.0, None); yield from wait(0.1)
+        r["absorbed"] = md(c.slash_procs).get("shield_took", 0) - st0 == 1 and c.get_health() >= hb - 0.01; r["down_after"] = not c.has_slash_shield(); r["ok"] = r["up"] and r["absorbed"] and r["down_after"]
+    elif eff == "chain":
+        r["spawned"] = [bool(m) for m in others]
+        r["others_lost"] = [round((a or 0) - (hp(m) or 0), 1) for a, m in zip(o_h0, others)]; r["ok"] = all(r["spawned"]) and r["others_lost"][0] > 0 and r["others_lost"][1] > 0 and r["others_lost"][2] == 0
+    elif eff == "blind": r["blind"] = round(main.get_blind_share(), 3); r["ok"] = abs(r["blind"] - sd.amount) < 0.01
+    elif eff == "tide":
+        yield from wait(0.6); r["slow"] = round(main.get_slow_share(), 3); r["moved_cm"] = round(dist2(pos(main), m_p0)) if alive(main) else None
+        r["ok"] = abs(r["slow"] - sd.amount) < 0.01 and (r["moved_cm"] or 0) > 120
+    elif eff == "inferno":
+        r["near_lost"] = round((o_h0[0] or 0) - (hp(others[0]) or 0), 1); r["near_burning"] = others[0].is_burning() if alive(others[0]) else None
+        r["far_lost"] = round((o_h0[2] or 0) - (hp(others[2]) or 0), 1); r["ok"] = r["near_lost"] > 0 and r["near_burning"] and r["far_lost"] == 0
+    elif eff == "curse": r["curse"] = round(main.get_curse_share(), 3); r["ok"] = abs(r["curse"] - sd.amount) < 0.01
+    elif eff == "haste":
+        r["haste"] = round(c.get_haste(), 3)
+        c.start_attack(); yield from wait(0.05); r["swing_s"] = round(c.get_attack_length(), 3); yield from wait(1.5)
+        r["ok"] = abs(r["haste"] - sd.amount) < 0.01
+    elif eff == "deflect": r["deflect"] = round(c.get_slash_deflect(), 3); r["ok"] = abs(r["deflect"] - sd.amount) < 0.01
+    elif eff == "void":
+        yield from wait(1.0)
+        r["closer_cm"] = [round(dist2(a, m_p0) - dist2(pos(m), m_p0)) if (a and alive(m)) else None for a, m in zip(o_p0, others)]; r["slow"] = round(others[0].get_slow_share(), 3) if alive(others[0]) else None
+        r["ok"] = (r["closer_cm"][0] or 0) > 60 and (r["closer_cm"][2] or 0) < 30 and abs((r["slow"] or 0) - sd.amount) < 0.01
+    elif eff == "stun":
+        r["stunned"] = main.is_stunned(); c.apply_slash_hit_now(idx, main); r["second_waits"] = md(c.slash_procs).get("stun_wait", 0) > procs0.get("stun_wait", 0)
+        r["ok"] = r["stunned"] and r["second_waits"]
+    elif eff == "prismatic":
+        r["ok"] = r["procs"].get("prismatic", 0) == 1 and any(k in r["procs"] for k in ("burn", "slow", "poison", "drain"))
+    # (the bonus on the monster struck; a chain or an inferno deal more to the others round it, counted too)
+    r["ok"] = bool(r.get("ok")) and applied and ok_hit and (abs(r["bonus"] - sd.bonus) < 0.6 or (eff in ("chain", "inferno") and r["bonus"] >= sd.bonus - 0.6)) and r["fx"] > 0
+    drop([main] + others); c.remove_slash(idx)
+    return r
+
+def step_slashes():
+    """the slashes: a boss slain gives the Warrior one of its tier; through the inventory (keys as the keyboard sends them) it goes
+    on a weapon, T takes it off, it goes on another (the bow); a real swing with it (its effect seen, its bonus dealt); then each of
+    the twenty measured on a monster (or on her): burn, slow, poison, speed, drain, knockback, regeneration, evasion, the crystal
+    shield, the chain, blindness, the tide, the inferno, the curse, haste, deflection, magma, the void, the stun, the prism"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
+    res = {"refused": []}
+    # (a boss: Mistward's at tier 2's opening (the start set cleared); level 5 has none: a throne room's usurper (the rooms step))
+    given0 = len(g.slashes_given)
+    if g.get_editor_property("boss_encounters"):
+        g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(1.5)
+        E_ = [str(l).split("|") for l in g.get_encounter_lines()]; boss = [e for e in E_ if e[0] == "boss" and "USURPER" not in e[7]]
+        if boss:
+            at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3]))
+            for m in g.get_monsters():
+                if alive(m) and dist2(m.get_actor_location(), at) < 600: m.apply_damage(1e7, None)
+            yield from wait(0.8)
+    res["boss_gave"] = [str(x) for x in g.slashes_given][given0:]
+    tiers = {str(s.name): s.tier for s in g.get_editor_property("slashes")}
+    res["boss_slash_tier"] = [tiers.get(x) for x in res["boss_gave"]]
+    # (through the inventory: the magic tab, its row, Enter, Enter on the Dagger)
+    for n in ("Ember Slash", "Longbow"): c.add_item(n, 1)
+    c.set_inventory_open(True); yield from rwait(0.3)
+    for nm in ("E", "E", "E", "E"): yield from slate_hold(nm, 0.06)
+    res["tab"] = c.get_inventory_tab()
+    srow = next((i for i, l in enumerate(lines(c)) if l == "slash|Ember Slash|1"), None)
+    yield from cursor_to(c, srow)
+    yield from slate_hold("Enter", 0.08); res["picking"] = c.is_picking_slash(); res["pick_lines"] = [str(x) for x in c.get_slash_lines()]
+    shot("slash_pick"); yield from rwait(0.5)
+    yield from slate_hold("Enter", 0.08)
+    W = g.get_editor_property("weapons"); res["on_dagger"] = str(W[0].slash)
+    # (T on the Dagger's row: off again; then onto the Longbow)
+    c.set_inventory_tab(0); yield from rwait(0.2)
+    yield from cursor_to(c, 0)
+    yield from slate_hold("T", 0.08); res["off_dagger"] = str(g.get_editor_property("weapons")[0].slash); res["back_in_pack"] = c.get_item_count("Ember Slash")
+    bi = next(i for i, w in enumerate(g.get_editor_property("weapons")) if str(w.name) == "Longbow")
+    res["on_bow"] = c.apply_slash("Ember Slash", bi); res["bow_slash"] = str(g.get_editor_property("weapons")[bi].slash)
+    c.set_inventory_open(False); yield from rwait(0.3)
+    # (a real swing with the Ember Slash on the Dagger, at a monster before her: its effect alive, its bonus dealt; a picture at the hit)
+    c.remove_slash(bi); c.apply_slash("Ember Slash", 0); c.select_weapon(0); yield from wait(0.3)
+    p = G["pawn"]; L = p.get_actor_location(); f = p.get_actor_forward_vector()
+    m = spawn_dummy(V(L.x + f.x * 130, L.y + f.y * 130, L.z - 90)); yield from wait(0.4)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=p.get_actor_rotation().yaw + 40))
+    b0 = c.slash_bonus_dealt; h0 = m.get_health() if alive(m) else None
+    res["swing"] = {"started": c.start_attack()}
+    t0 = time.time(); fx_max = 0; shot_done = False
+    while time.time() - t0 < 1.6:
+        yield
+        fx_max = max(fx_max, c.get_slash_fx_alive())
+        if not shot_done and c.get_slash_fx_alive() > 0: shot("slash_swing"); shot_done = True
+    res["swing"].update({"fx_max": fx_max, "bonus": round(c.slash_bonus_dealt - b0, 2), "monster_lost": round((h0 or 0) - (m.get_health() if alive(m) else 0), 1), "pictured": shot_done})
+    drop([m]); c.remove_slash(0)
+    # (the ranged one: the Ember Slash on the Longbow, a shot at a monster)
+    c.apply_slash("Ember Slash", bi); c.select_weapon(bi); yield from wait(0.4)
+    m = spawn_dummy(V(L.x + f.x * 600, L.y + f.y * 600, L.z - 90)); yield from wait(0.4)
+    b0 = c.slash_bonus_dealt; c.start_attack(); yield from wait(2.0)
+    res["shot"] = {"bonus": round(c.slash_bonus_dealt - b0, 2), "procs": md(c.slash_procs).get("burn", 0)}
+    drop([m]); c.remove_slash(bi); c.select_weapon(0); yield from wait(0.3)
+    # (each of the twenty on the Dagger; the monsters near her cleared first: a chain or a void reaches whoever is near)
+    kill_all_near(G["pawn"].get_actor_location(), 2500); yield from wait(0.5)
+    res["each"] = {}
+    for sd in g.get_editor_property("slashes"):
+        try: res["each"][str(sd.name)] = yield from slash_trial(c, str(sd.name), 0)
+        except Exception as e: res["each"][str(sd.name)] = {"ok": False, "error": str(e)}
+        yield from wait(0.3)
+    quiet(False)
+    ev = res["each"]; sw = res["swing"]
+    ok = ((not g.get_editor_property("boss_encounters") or (len(res["boss_gave"]) == 1 and res["boss_slash_tier"] == [2]))
+          and res["tab"] == 4 and res["picking"] and res["on_dagger"] == "Ember Slash" and res["off_dagger"] == "None" and res["back_in_pack"] == 1
+          and res["on_bow"] and res["bow_slash"] == "Ember Slash" and sw["started"] and sw["fx_max"] > 0 and abs(sw["bonus"] - 6.0) < 0.6 and sw["monster_lost"] > 6
+          and res["shot"]["bonus"] > 0 and len(ev) == 20 and all(v.get("ok") for v in ev.values()))
+    step_result("slashes", ok, **res)
+
 STEPS = {"menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
-         "death": step_death}
+         "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
+         "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes}
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

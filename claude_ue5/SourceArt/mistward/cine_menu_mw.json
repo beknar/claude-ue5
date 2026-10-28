@@ -8545,7 +8545,7 @@
 "The highest hit points"
 ],
 "armour": "All armour: light, medium and heavy",
-"starts_with": "Sword and shield",
+"starts_with": "Dagger and the painted viking shield: hers for good (they never break, never drop)",
 "accent": [
 0.949999988079071,
 0.699999988079071,
@@ -8557,10 +8557,10 @@
 "roll": false,
 "weapons": [
 {
-"name": "Sword",
-"icon": "w_sword_shield",
-"damage": 22.0,
-"reach": 170.0,
+"name": "Dagger",
+"icon": "mw_w_dagger",
+"damage": 11.0,
+"reach": 150.0,
 "spell": false,
 "bolt": false,
 "mana": 0.0
