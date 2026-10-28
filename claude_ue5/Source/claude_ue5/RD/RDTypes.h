@@ -211,6 +211,82 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 SpellIndex = -1;
 	/** seconds before it can be cast again (0: none) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Cooldown = 0.f;
+	/** mistward_castle (docs/improvements2.txt): the slash put on it (the generator's Slashes by name; none: none). Its
+	 *  effect plays on every swing (or shot) and its bonus and effect land with every hit */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Slash = NAME_None;
+};
+
+/** mistward_castle (docs/improvements2.txt): what a slash does with a hit, besides its bonus damage */
+UENUM(BlueprintType)
+enum class ERDSlashEffect : uint8
+{
+	/** Amount more of the hit over Seconds (fire) */
+	Burn,
+	/** the monster Amount slower for Seconds (frost) */
+	Slow,
+	/** Amount of hurt over Seconds (poison) */
+	Poison,
+	/** her speed Amount more for Seconds */
+	Swift,
+	/** Amount of the hit's damage back to her as hit points */
+	Drain,
+	/** the monster pushed Amount cm */
+	Knockback,
+	/** Amount hit points a second for Seconds */
+	Regen,
+	/** Amount of the blows on her miss for Seconds */
+	Evade,
+	/** her next blow taken is absorbed (at most once every Seconds) */
+	Shield,
+	/** Count more monsters within Radius take Amount of the hit */
+	Chain,
+	/** the monster's blows miss Amount of the time for Seconds */
+	Blind,
+	/** an arc in front of her: every monster in it slowed Amount for Seconds and pushed Radius cm */
+	Tide,
+	/** every monster within Radius takes the hit too, and burns Amount more of it over Seconds */
+	Inferno,
+	/** the hit ignores armour; the monster takes Amount more damage for Seconds */
+	Curse,
+	/** her attacks Amount faster for Seconds */
+	Haste,
+	/** Amount of the blows on her are turned back on the attacker for Seconds */
+	Deflect,
+	/** burning ground within Radius: Amount hurt a second for Seconds */
+	Magma,
+	/** monsters within Radius pulled to the one she hit and slowed Amount */
+	Void,
+	/** the monster held for Seconds (once every Radius seconds for each monster) */
+	Stun,
+	/** each hit one of Burn, Slow, Poison, Drain at random */
+	Prismatic
+};
+
+/** mistward_castle (docs/improvements2.txt): a weapon flourish a boss gives (the Stylized Slashes pack's effects): it goes on
+ *  any weapon her hero can put one on, comes off again and goes on another */
+USTRUCT(BlueprintType)
+struct FRDSlashDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 1;
+	/** the swing's effect and the hit's (NS_Slash_<x>, NS_SlashImpact_<x>) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> Fx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> ImpactFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ImpactFxScale = 1.f;
+	/** its bonus damage on every hit, its damage type's name (the table's), what it does */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Bonus = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Type;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDSlashEffect Effect = ERDSlashEffect::Burn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Amount = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Seconds = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Radius = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Count = 0;
+	/** the table's line (the inventory shows it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Text;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Color = FLinearColor(1.f, 0.5f, 0.2f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
 };
 
 /** random_dungeonmagic_level5: the spell table's types; a hero learns the types her card lists (FRDHeroDef::Learns) */
@@ -431,7 +507,12 @@ enum class ERDItemKind : uint8
 	Torch,
 	/** mistward_castle: a teleport ring (TeleportTier): used, it takes her to the first tier's teleporter, whose pad takes
 	 *  her back to the teleporter of that tier */
-	Teleport
+	Teleport,
+	/** mistward_castle (docs/improvements2.txt): a slash (the generator's Slashes by the item's name): used, she chooses the
+	 *  weapon it goes on */
+	Slash,
+	/** mistward_castle (docs/improvements2.txt): a vault's key: F at the vault's door with it opens the vault (used up) */
+	Key
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */
@@ -649,7 +730,11 @@ struct FRDHeroDef
 UENUM(BlueprintType)
 enum class ERDRoomKind : uint8
 {
-	Hall, Barracks, Prison, Torture, Storeroom, Armory, Kitchen, Library, Chapel, Crypt, Treasury, GuardRoom, Forge, Junction
+	Hall, Barracks, Prison, Torture, Storeroom, Armory, Kitchen, Library, Chapel, Crypt, Treasury, GuardRoom, Forge, Junction,
+	/** mistward_castle (docs/improvements2.txt, the generator's bSpecialRooms): a statue's blessing; fountains that heal, give
+	 *  speed, give mana; an arena of waves; a hall of traps with a chest at its end; a vault its key opens; a throne room and
+	 *  its usurper */
+	Shrine, HealFountain, SpeedFountain, ManaFountain, Arena, TrapGauntlet, Vault, ThroneRoom
 };
 
 /** map data of one room or corridor (tile rectangle, global tile coords, max exclusive) */

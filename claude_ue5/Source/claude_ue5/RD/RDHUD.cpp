@@ -32,7 +32,13 @@ static FLinearColor RDFloor(ERDRoomKind K, bool bCorridor)
 	case ERDRoomKind::Kitchen: return FLinearColor(0.58f, 0.48f, 0.36f); case ERDRoomKind::Library: return FLinearColor(0.49f, 0.38f, 0.30f);
 	case ERDRoomKind::Chapel: return FLinearColor(0.61f, 0.59f, 0.51f); case ERDRoomKind::Crypt: return FLinearColor(0.36f, 0.39f, 0.37f);
 	case ERDRoomKind::Treasury: return FLinearColor(0.66f, 0.56f, 0.27f); case ERDRoomKind::GuardRoom: return FLinearColor(0.48f, 0.44f, 0.38f);
-	case ERDRoomKind::Forge: return FLinearColor(0.54f, 0.35f, 0.24f); default: return FLinearColor(0.40f, 0.38f, 0.35f);
+	case ERDRoomKind::Forge: return FLinearColor(0.54f, 0.35f, 0.24f);
+	// (mistward's special rooms: each its own tint on the map)
+	case ERDRoomKind::Shrine: return FLinearColor(0.62f, 0.58f, 0.70f); case ERDRoomKind::HealFountain: return FLinearColor(0.62f, 0.38f, 0.40f);
+	case ERDRoomKind::SpeedFountain: return FLinearColor(0.42f, 0.58f, 0.40f); case ERDRoomKind::ManaFountain: return FLinearColor(0.36f, 0.44f, 0.66f);
+	case ERDRoomKind::Arena: return FLinearColor(0.60f, 0.40f, 0.24f); case ERDRoomKind::TrapGauntlet: return FLinearColor(0.52f, 0.30f, 0.34f);
+	case ERDRoomKind::Vault: return FLinearColor(0.70f, 0.60f, 0.30f); case ERDRoomKind::ThroneRoom: return FLinearColor(0.58f, 0.32f, 0.46f);
+	default: return FLinearColor(0.40f, 0.38f, 0.35f);
 	}
 }
 
@@ -1439,6 +1445,23 @@ FString ARDHUD::KindCode(ERDRoomKind K)
 }
 
 // ------------------------------------------------------------------------------------------------ random_dungeonmagic_level4
+int32 ARDHUD::BreakdownCount(const FString& Ref) const
+{
+	const URDCombatComponent* Cb = Gen ? Gen->GetPlayerCombat() : nullptr;
+	if (!Cb || Ref.Len() < 2) return 0;
+	if (Ref.StartsWith(TEXT("w")))
+	{
+		// (copies of a found weapon among hers)
+		const int32 I = FCString::Atoi(*Ref.Mid(1));
+		if (!Gen->Weapons.IsValidIndex(I)) return 0;
+		const FName It = Gen->Weapons[I].Item;
+		int32 N = 0;
+		for (const FRDWeaponDef& W : Gen->Weapons) if (W.Item == It) ++N;
+		return N;
+	}
+	return Cb->GetItemCount(FName(*Ref.Mid(1)));
+}
+
 FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 {
 	const URDCombatComponent* Cb = Gen ? Gen->GetPlayerCombat() : nullptr;
@@ -1528,6 +1551,19 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		return TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile).");
 	case ERDItemKind::Teleport:
 		return FString::Printf(TEXT("Found on the teleporter of tier %d.  Used, it carries you to the first tier's teleporter in the great hall; that teleporter takes you back to tier %d's while you hold this ring."), It.TeleportTier, It.TeleportTier);
+	case ERDItemKind::Slash:
+	{
+		// (the third list: a boss's slash: its numbers, and who can put it on a weapon)
+		const int32 Si = Gen ? Gen->FindSlash(It.Name) : -1;
+		if (Si < 0) return TEXT("A weapon's slash");
+		const FRDSlashDef& S = Gen->Slashes[Si];
+		FString T = FString::Printf(TEXT("Tier %d slash.  On a weapon, every hit does %.0f more (%s) and: %s.  Enter, then choose the weapon; T (X) takes it off a weapon again."),
+			S.Tier, S.Bonus, *S.Type.ToLower(), *S.Text);
+		if (Gen && !Gen->HeroSlashes()) T += FString::Printf(TEXT("  Only the Warrior's weapons take it."));
+		return T;
+	}
+	case ERDItemKind::Key:
+		return TEXT("The key of a vault of these rooms: F at the vault's door opens it (the key is used up).  Its chests hold things of the tier beyond.");
 	}
 	return FString();
 }
@@ -1599,8 +1635,11 @@ void ARDHUD::DrawInventory(float Sc)
 	const bool bPad = Cb->IsUsingGamepad();
 	// (level 5: choosing what a repair item mends: its list in place of the inventory's)
 	const bool bRepair = Cb->IsPickingRepair();
-	const TArray<FString> Lines = bRepair ? Cb->GetRepairLines() : Cb->GetInventoryLines();
-	const int32 Cur = bRepair ? Cb->GetRepairCursor() : Cb->GetInventoryCursor();
+	// (the third list: choosing the weapon a slash goes on; the inventory in tabs)
+	const bool bSlashPick = !bRepair && Cb->IsPickingSlash();
+	const bool bTabs = Gen->bInventoryTabs && !bRepair && !bSlashPick;
+	const TArray<FString> Lines = bRepair ? Cb->GetRepairLines() : bSlashPick ? Cb->GetSlashLines() : Cb->GetInventoryLines();
+	const int32 Cur = bRepair ? Cb->GetRepairCursor() : bSlashPick ? Cb->GetSlashCursor() : Cb->GetInventoryCursor();
 	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Line(0.75f, 0.65f, 0.45f, 0.9f), Worn(1.f, 0.45f, 0.35f);
 	// the game stands still under it
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.55f));
@@ -1612,6 +1651,20 @@ void ARDHUD::DrawInventory(float Sc)
 		const int32 Ri = Gen->FindItem(Cb->GetRepairItem());
 		Secs.Add({ TEXT("armour"), FString::Printf(TEXT("MEND WITH THE %s  (+%.0f%%)"), *Cb->GetRepairItem().ToString().ToUpper(), Ri >= 0 ? Gen->Items[Ri].Amount * 100.f : 0.f), false });
 		Secs.Add({ TEXT("weapon"), TEXT("WEAPONS YOU FOUND"), false });
+	}
+	else if (bSlashPick) Secs.Add({ TEXT("weapon"), FString::Printf(TEXT("PUT THE %s ON"), *Cb->GetSlashItem().ToString().ToUpper()), true });
+	else if (bTabs)
+	{
+		// (one tab's sections; its first is shown empty or not)
+		switch (Cb->GetInventoryTab())
+		{
+		case 0: Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true }); Secs.Add({ TEXT("carried"), FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false }); break;
+		case 1: Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), true }); Secs.Add({ TEXT("helmet"), TEXT("HELMET"), false }); Secs.Add({ TEXT("shield"), TEXT("SHIELDS"), false }); Secs.Add({ TEXT("torch"), TEXT("TORCH"), false }); break;
+		case 2: Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true }); break;
+		case 3: Secs.Add({ TEXT("component"), TEXT("MATERIALS"), true }); Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false }); break;
+		default: Secs.Add({ TEXT("slash"), TEXT("SLASHES"), true }); Secs.Add({ TEXT("ring"), TEXT("RINGS"), false }); Secs.Add({ TEXT("key"), TEXT("KEYS"), false });
+			Secs.Add({ TEXT("teleport"), TEXT("TELEPORT RINGS"), false }); Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false }); break;
+		}
 	}
 	else
 	{
@@ -1635,6 +1688,10 @@ void ARDHUD::DrawInventory(float Sc)
 		SecOf.Add(K); ++SecCount[K];
 	}
 	const float Rh = 34.f * Sc, W = 1000.f * Sc, Pd = 22.f * Sc, HeadH = 58.f * Sc;
+	// (the always-shown sections with nothing in them each take a row: "nothing yet"; the third list's tab strip takes room)
+	float EmptyRows = 0.f;
+	for (int32 K = 0; K < Secs.Num(); ++K) if (Secs[K].bAlways && SecCount[K] == 0) EmptyRows += Rh;
+	const float TabH = bTabs ? 46.f * Sc : 0.f;
 	// (a long list: only the rows that fit on the screen, scrolled with the cursor; a heading only over rows shown)
 	auto Heads = [&](int32 F0, int32 F1)
 	{
@@ -1647,12 +1704,12 @@ void ARDHUD::DrawInventory(float Sc)
 		}
 		return N;
 	};
-	const float Room = Canvas->ClipY - 80.f * Sc - 150.f * Sc - 30.f * Sc;
+	const float Room = Canvas->ClipY - 80.f * Sc - 150.f * Sc - 30.f * Sc - TabH;
 	int32 Fit = Lines.Num(), First = 0;
 	for (int32 Pass = 0; Pass < 3; ++Pass)
 	{
 		const int32 Nh = Heads(First, First + Fit);
-		const float Empty = (Secs.Num() > 1 && Secs[1].bAlways && SecCount[1] == 0) ? Rh : 0.f;
+		const float Empty = EmptyRows;
 		if (HeadH * Nh + Empty + Rh * Lines.Num() <= Room) { Fit = Lines.Num(); First = 0; break; }
 		Fit = FMath::Clamp(FMath::FloorToInt32((Room - HeadH * Nh - Empty) / Rh), 4, Lines.Num());
 		// (mistward: the wheel scrolled it: from the row it scrolled to, wherever the cursor is)
@@ -1662,7 +1719,7 @@ void ARDHUD::DrawInventory(float Sc)
 	// (the rows where they are drawn, for the pointer)
 	Cb->ListRows.Reset(); Cb->ListFirst = First; Cb->ListFit = Fit; Cb->ListCount = Lines.Num();
 	const int32 NhShown = Heads(First, First + Fit);
-	const float ListH = 46.f * Sc + HeadH * NhShown + Rh * Fit + (Fit < Lines.Num() ? 30.f * Sc : 0.f) + ((Secs.Num() > 1 && Secs[1].bAlways && SecCount[1] == 0) ? Rh : 0.f);
+	const float ListH = 46.f * Sc + HeadH * NhShown + Rh * Fit + (Fit < Lines.Num() ? 30.f * Sc : 0.f) + EmptyRows + TabH;
 	const float H = FMath::Max(ListH, (UI.Has(TEXT("slot")) ? 400.f : 330.f) * Sc) + 150.f * Sc;     // (the picture of the chosen one takes room)
 	const FVector2D A((Canvas->ClipX - W) * 0.5f, FMath::Max(40.f * Sc, (Canvas->ClipY - H) * 0.5f)), B = A + FVector2D(W, H);
 	// (level 4: the painted board, a divider under each heading, a picture in each row, a lit plate under the chosen row)
@@ -1673,14 +1730,36 @@ void ARDHUD::DrawInventory(float Sc)
 	}
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
 	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;      // (the title row clear of the board's corner ornaments)
-	UI.Text(bRepair ? TEXT("REPAIR") : TEXT("INVENTORY"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	UI.Text(bRepair ? TEXT("REPAIR") : bSlashPick ? TEXT("SLASH") : TEXT("INVENTORY"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	// (the third list: the tabs, Q / E or LB / RB between them, a click on one)
+	Cb->TabBoxes.Reset();
+	if (bTabs)
+	{
+		static const TCHAR* TabNames[5] = { TEXT("WEAPONS"), TEXT("ARMOUR"), TEXT("POTIONS / FOOD"), TEXT("CRAFTING"), TEXT("MAGIC") };
+		const TArray<FString> All = Cb->GetAllInventoryLines();
+		int32 PerTab[5] = { 0, 0, 0, 0, 0 };
+		for (const FString& L : All) ++PerTab[FMath::Clamp(URDCombatComponent::TabOfLine(L), 0, 4)];
+		const float Tx0 = A.X + Pd + Tin, Ty = A.Y + 64.f * Sc, Tw0 = (W - 2.f * (Pd + Tin)) / 5.f, Th0 = 34.f * Sc;
+		for (int32 T = 0; T < 5; ++T)
+		{
+			const FVector2D T0(Tx0 + T * Tw0 + 3.f * Sc, Ty), T1(Tx0 + (T + 1) * Tw0 - 3.f * Sc, Ty + Th0);
+			const bool bOn = T == Cb->GetInventoryTab();
+			if (bOn && bPlate) UI.Nine(TEXT("button"), T0, T1, Th0 / FMath::Max((float)UI.Find(TEXT("button"))->Texture->GetSizeY(), 1.f), FLinearColor(1.25f, 1.05f, 0.7f));
+			else Box(T0, T1, bOn ? FLinearColor(0.36f, 0.27f, 0.10f, 0.95f) : FLinearColor(0.08f, 0.07f, 0.06f, 0.85f));
+			Frame(T0, T1, bOn ? Gold : FLinearColor(0.55f, 0.48f, 0.34f, 0.8f), (bOn ? 2.f : 1.f) * Sc);
+			const FString Lb = FString::Printf(TEXT("%s  %d"), TabNames[T], PerTab[T]);
+			float Lw, Lh; UI.TextSize(Lb, Lw, Lh, Small, Sc * 0.95f, ERDType::Label);
+			UI.Text(Lb, bOn ? FLinearColor::White : Dim, (T0.X + T1.X - Lw) * 0.5f, T0.Y + (Th0 - Lh) * 0.5f, Small, Sc * 0.95f, ERDType::Label);
+			Cb->TabBoxes.Add(FBox2D(T0, T1));
+		}
+	}
 	float Tw, Th;
 	UI.TextSize(Gen->PlayerTitle, Tw, Th, Small, Sc * 1.2f, ERDType::Title);
 	UI.Text(Gen->PlayerTitle, Gold, B.X - Pd - Tin - Tw, A.Y + 18.f * Sc, Small, Sc * 1.2f, ERDType::Title);
 	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 42.f * Sc, Small, Sc * 0.95f); }
 	// ---- the list (left)
 	const float Lx = A.X + Pd, Lw = W * 0.5f - Pd;
-	float Y = A.Y + 76.f * Sc;
+	float Y = A.Y + 76.f * Sc + TabH;
 	auto Header = [&](const FString& T)
 	{
 		UI.Text(T, Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
@@ -1746,14 +1825,31 @@ void ARDHUD::DrawInventory(float Sc)
 			Row(I, Nm, Tag, Left >= Full ? Dim : Gold, bArm ? ItemIcon(FName(*Nm)) : WeaponIcon(FCString::Atoi(*P[1])));
 			continue;
 		}
+		if (bSlashPick)
+		{
+			// (the third list: "weapon|<index>|<name>|<slash on it>")
+			if (P.Num() < 3) continue;
+			const int32 Wi = FCString::Atoi(*P[1]);
+			Row(I, P[2], P.Num() >= 4 && !P[3].IsEmpty() ? FString::Printf(TEXT("HAS %s"), *P[3].ToUpper()) : FString(TEXT("NO SLASH")), P.Num() >= 4 && !P[3].IsEmpty() ? RDCyan : Dim, WeaponIcon(Wi));
+			continue;
+		}
 		if (Kd == TEXT("weapon"))
 		{
-			const FRDWeaponDef& Wp = Gen->Weapons[I];
-			FString Tag = Wp.bAlongside ? TEXT("ALWAYS AT HAND") : I == Cb->GetWeaponIndex() ? TEXT("IN YOUR HANDS") : TEXT("");
+			// (the third list's lines name their weapon: "weapon|<name>|<left>|<full>|<index>|<count>|<slash>")
+			const int32 Wi = P.Num() >= 5 ? FCString::Atoi(*P[4]) : I;
+			if (!Gen->Weapons.IsValidIndex(Wi)) continue;
+			const FRDWeaponDef& Wp = Gen->Weapons[Wi];
+			FString Tag = Wp.bAlongside ? TEXT("ALWAYS AT HAND") : Wi == Cb->GetWeaponIndex() ? TEXT("IN YOUR HANDS") : TEXT("");
 			// (level 5: a found weapon's durability left)
-			if (Wp.Durability > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + FString::Printf(TEXT("%.0f / %.0f"), Cb->GetWeaponWear(I), Wp.Durability);
-			Row(I, Wp.Name.ToString(), Tag, Wp.bAlongside ? RDCyan : Gold, Wp.Icon);
+			if (Wp.Durability > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + FString::Printf(TEXT("%.0f / %.0f"), Cb->GetWeaponWear(Wi), Wp.Durability);
+			if (P.Num() >= 6 && FCString::Atoi(*P[5]) > 1) Tag += FString::Printf(TEXT("   x %s"), *P[5]);
+			// (its quick slot's number, its slash)
+			if (Gen->bQuickSlots) { const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name); if (Qs != INDEX_NONE) Tag += FString::Printf(TEXT("   [%d]"), (Qs + 1) % 10); }
+			const FString Nm = !Wp.Slash.IsNone() ? FString::Printf(TEXT("%s  +  %s"), *Wp.Name.ToString(), *Wp.Slash.ToString()) : Wp.Name.ToString();
+			Row(I, Nm, Tag, Wp.bAlongside ? RDCyan : Gold, Wp.Icon);
 		}
+		else if (Kd == TEXT("helmet") && P.Num() >= 2) Row(I, P.Num() >= 3 ? FString::Printf(TEXT("Helmet of the %s"), *P[2]) : FString(TEXT("Helmet")), P[1] == TEXT("1") ? TEXT("HIDDEN") : TEXT("SHOWN"), P[1] == TEXT("1") ? Dim : RDCyan, NAME_None);
+		else if ((Kd == TEXT("slash") || Kd == TEXT("key")) && P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Kd == TEXT("slash") ? RDCyan : Gold, ItemIcon(FName(*P[1])));
 		else if (Kd == TEXT("armour") && P.Num() >= 3)
 		{
 			// (level 5: WORN on the set she has on; what is left of its durability)
@@ -1791,7 +1887,7 @@ void ARDHUD::DrawInventory(float Sc)
 	}
 	// ---- the one under the cursor (right): what it does; then hers
 	const float Rx = A.X + W * 0.5f + Pd, Rw = W * 0.5f - Pd * 2.f;
-	float Ry = A.Y + 76.f * Sc;
+	float Ry = A.Y + 76.f * Sc + TabH;
 	Box(FVector2D(Rx - Pd * 0.5f, Ry), FVector2D(Rx - Pd * 0.5f + 1.f, B.Y - 110.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
 	TArray<FString> Sel;
 	if (Lines.IsValidIndex(Cur)) Lines[Cur].ParseIntoArray(Sel, TEXT("|"));
@@ -1842,12 +1938,35 @@ void ARDHUD::DrawInventory(float Sc)
 		Para(FString::Printf(TEXT("%s  mend it      %s  back"), bPad ? TEXT("A") : TEXT("Enter"), bPad ? TEXT("B") : TEXT("Backspace")), Gold, Sc * 1.05f);
 		Para(FString::Printf(TEXT("%d %s left"), Cb->GetItemCount(Cb->GetRepairItem()), *Cb->GetRepairItem().ToString().ToLower()), Dim, Sc);
 	}
+	else if (bSlashPick && Sel.Num() >= 3)
+	{
+		// (the third list: the weapon chosen, the slash it gets, the one it would give back)
+		const int32 Wi = FCString::Atoi(*Sel[1]);
+		Picture(WeaponIcon(Wi), Sel[2]);
+		const int32 Si = Gen->FindSlash(Cb->GetSlashItem());
+		if (Si >= 0)
+		{
+			const FRDSlashDef& S = Gen->Slashes[Si];
+			Para(FString::Printf(TEXT("The %s:  +%.0f %s on every hit;  %s"), *S.Name.ToString(), S.Bonus, *S.Type.ToLower(), *S.Text), RDInk, Sc * 1.05f);
+		}
+		if (Sel.Num() >= 4 && !Sel[3].IsEmpty()) Para(FString::Printf(TEXT("The %s on it now goes back into your pack"), *Sel[3].ToLower()), Dim, Sc);
+		Ry += 6.f * Sc;
+		Para(FString::Printf(TEXT("%s  put it on      %s  back"), bPad ? TEXT("A") : TEXT("Enter"), bPad ? TEXT("B") : TEXT("Backspace")), Gold, Sc * 1.05f);
+	}
 	else if (!bRepair && Sel.Num() >= 2)
 	{
-		Picture(Sel[0] == TEXT("weapon") ? WeaponIcon(Cur) : ItemIcon(FName(*Sel[1])), Sel[1]);
-		if (Sel[0] == TEXT("weapon") && Gen->Weapons.IsValidIndex(Cur))
+		// (the third list's weapon lines name their weapon's index)
+		const int32 Wi = Sel[0] == TEXT("weapon") && Sel.Num() >= 5 ? FCString::Atoi(*Sel[4]) : Cur;
+		Picture(Sel[0] == TEXT("weapon") ? WeaponIcon(Wi) : Sel[0] == TEXT("helmet") ? NAME_None : ItemIcon(FName(*Sel[1])), Sel[0] == TEXT("helmet") ? FString(TEXT("Helmet")) : Sel[1]);
+		if (Sel[0] == TEXT("helmet"))
 		{
-			const FRDWeaponDef& Wp = Gen->Weapons[Cur];
+			Para(TEXT("The worn set's helmet: shown or hidden (its share of the blows stays the same)"), RDInk, Sc * 1.05f);
+			Ry += 6.f * Sc;
+			Para(FString::Printf(TEXT("%s  %s it      H  the same anywhere"), bPad ? TEXT("A") : TEXT("Enter"), Sel[1] == TEXT("1") ? TEXT("show") : TEXT("hide")), Gold, Sc * 1.05f);
+		}
+		else if (Sel[0] == TEXT("weapon") && Gen->Weapons.IsValidIndex(Wi))
+		{
+			const FRDWeaponDef& Wp = Gen->Weapons[Wi];
 			const bool bRanged = Wp.bSpell && Wp.BoltMesh, bMagic = Wp.bSpell && !Wp.BoltMesh;
 			const float Bonus = !Wp.bSpell ? Gen->MeleeBonus : bRanged ? Gen->RangedBonus : 0.f;
 			// (level 5: a spell of the table: its line, its type, its cooldown and how long it lasts)
@@ -1860,7 +1979,7 @@ void ARDHUD::DrawInventory(float Sc)
 				if (Sp->Cooldown > 0.f) Num += FString::Printf(TEXT("cooldown %.0f s"), Sp->Cooldown);
 				if (Sp->Duration > 0.f) Num += (Num.IsEmpty() ? FString() : FString(TEXT("  ·  "))) + FString::Printf(TEXT("lasts %.0f s"), Sp->Duration);
 				if (!Num.IsEmpty()) Para(Num, Dim, Sc * 1.0f);
-				if (Cb->GetCooldownLeft(Cur) > 0.f) Para(FString::Printf(TEXT("Ready in %.0f s"), FMath::CeilToFloat(Cb->GetCooldownLeft(Cur))), FLinearColor(1.f, 0.6f, 0.4f), Sc);
+				if (Cb->GetCooldownLeft(Wi) > 0.f) Para(FString::Printf(TEXT("Ready in %.0f s"), FMath::CeilToFloat(Cb->GetCooldownLeft(Wi))), FLinearColor(1.f, 0.6f, 0.4f), Sc);
 			}
 			else
 			Para(bMagic ? TEXT("A spell: a bolt flies after the monster you face") : bRanged ? TEXT("A ranged weapon: its bolts fly straight at the monster you face") : TEXT("A melee weapon"), Dim, Sc * 1.05f);
@@ -1868,12 +1987,17 @@ void ARDHUD::DrawInventory(float Sc)
 			if (Wp.SpeedRating > 0)
 			{
 				Para(FString::Printf(TEXT("%s%s  ·  speed %d / 10  ·  damage %d / 10"), *Wp.WeaponType.Left(1).ToUpper(), *Wp.WeaponType.Mid(1), Wp.SpeedRating, Wp.DamageRating), RDInk, Sc * 1.05f);
-				Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks; a repair item mends it"), Cb->GetWeaponWear(Cur), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
+				// (a weapon her hero starts with never breaks: the third list's "these they always have")
+				if (Wp.Durability <= 0.f) Para(TEXT("Yours for good: it never breaks, and it stays with you when you fall"), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
+				else Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks; a repair item mends it"), Cb->GetWeaponWear(Wi), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
 			}
-			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Cur), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
+			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Wi), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
 			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
 			Ry += 6.f * Sc;
-			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Cur == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
+			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
+			// (the third list: its slash, its quick slot)
+			if (const FRDSlashDef* Sl = Cb->SlashOf(Wi)) Para(FString::Printf(TEXT("%s:  +%.0f %s on every hit;  %s   (T / X takes it off)"), *Sl->Name.ToString(), Sl->Bonus, *Sl->Type.ToLower(), *Sl->Text), RDCyan, Sc * 1.05f);
+			if (Gen->bQuickSlots && !Wp.bAlongside) { const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name); Para(Qs != INDEX_NONE ? FString::Printf(TEXT("In quick slot %d  ·  1-0 another slot (Y: slot %d, D-pad left / right)"), (Qs + 1) % 10, (Cb->GetAssignSlot() + 1) % 10) : FString::Printf(TEXT("In no quick slot  ·  1-0 puts it in one (Y: slot %d)"), (Cb->GetAssignSlot() + 1) % 10), Dim, Sc); }
 		}
 		else
 		{
@@ -1887,6 +2011,7 @@ void ARDHUD::DrawInventory(float Sc)
 			else if (Sel[0] == TEXT("shield")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  put it away") : TEXT("  take it up (left hand)")), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("torch")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  put it out") : TEXT("  light it (left hand)")), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("teleport")) Para(Use + TEXT("  go to the first tier's teleporter"), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("slash")) Para(Use + TEXT("  choose the weapon it goes on"), Gold, Sc * 1.05f);
 		}
 	}
 	// her state
@@ -1918,6 +2043,21 @@ void ARDHUD::DrawInventory(float Sc)
 	else Box(FVector2D(A.X + Pd, Fy), FVector2D(B.X - Pd, Fy + 1.f), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
 	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) UI.Text(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd + Tin, Fy + 14.f * Sc, Small, Sc * 1.15f);
 	const bool bMouse = Gen->bMouseUI;
+	// (the third list's keys: the tabs, the quick slots, a slash taken off)
+	if (bTabs)
+	{
+		const FString K3 = bPad ? FString::Printf(TEXT("LB RB  tabs      Y  into quick slot %d (D-pad left / right another)      X  take its slash off      A  use      B  close"), (Cb->GetAssignSlot() + 1) % 10)
+		                        : FString::Printf(TEXT("Q E or click  tabs      1-0%s  quick slot      T  take its slash off      Enter%s  use      %s  scroll      I or Tab  close"),
+		                              bMouse ? TEXT(" or right click") : TEXT(""), bMouse ? TEXT(" or click") : TEXT(""), bMouse ? TEXT("wheel") : TEXT("W S"));
+		UI.Text(K3, Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.0f);
+		return;
+	}
+	if (bSlashPick)
+	{
+		UI.Text(bPad ? TEXT("D-pad / left stick  select      A  put it on      B  back      Start  close") : TEXT("W S / pointer  select      Enter or click  put it on      Backspace  back      Tab  close"),
+			Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
+		return;
+	}
 	const FString Keys = bRepair ? (bPad ? TEXT("D-pad / left stick  select      A  mend it      B  back      Start  close")
 	                                     : bMouse ? TEXT("W S / pointer  select     Enter or click  mend it     wheel  scroll     Backspace  back     Tab  close")
 	                                              : TEXT("W S / arrows / wheel  select      Enter or E  mend it      Backspace  back      I or Tab  close"))
@@ -1995,7 +2135,9 @@ void ARDHUD::DrawCrafting(float Sc)
 			UI.TextSize(P[1], Nw, Nh, Small, Nk);
 			if (Nw > Lw - Ix - 150.f * Sc) Nk *= FMath::Max((Lw - Ix - 150.f * Sc) / Nw, 0.7f);
 			UI.Text(P[1], bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 8.f * Sc, Small, Nk);
-			const FString Tag = bDrawn ? TEXT("IN YOUR HANDS") : TEXT("BREAK DOWN");
+			FString Tag = bDrawn ? TEXT("IN YOUR HANDS") : TEXT("BREAK DOWN");
+			// (the third list: how many of it she has)
+			if (Gen->bInventoryTabs) Tag += FString::Printf(TEXT("   x %d"), BreakdownCount(P[2]));
 			UI.TextSize(Tag, Tw, Th, Small, Sc, ERDType::Label);
 			UI.Text(Tag, bDrawn ? Dim : Gold, R1.X - 12.f * Sc - Tw, R0.Y + 10.f * Sc, Small, Sc, ERDType::Label);
 			Y += Rh;
@@ -2042,6 +2184,12 @@ void ARDHUD::DrawCrafting(float Sc)
 			Ry += Sz + 12.f * Sc;
 		}
 		else { UI.Text(P[1].ToUpper(), FLinearColor::White, Rx, Ry, Medium, Sc * 1.1f, ERDType::Title); Ry += 40.f * Sc; }
+		if (Gen->bInventoryTabs)
+		{
+			// (the third list: how many of it are left to break down)
+			const int32 Left = BreakdownCount(P[2]);
+			UI.Text(FString::Printf(TEXT("You have %d of it%s"), Left, Left > 1 ? TEXT(": one is broken down at a time") : TEXT("")), RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc;
+		}
 		UI.Text(TEXT("IT BREAKS DOWN INTO"), Dim, Rx, Ry, Small, Sc, ERDType::Label); Ry += 24.f * Sc;
 		TArray<FString> Gives; P[4].ParseIntoArray(Gives, TEXT(";"));
 		for (const FString& G : Gives)
@@ -2108,17 +2256,33 @@ void ARDHUD::DrawHotbar(float Sc)
 	URDCombatComponent* Cb = Gen->GetPlayerCombat();
 	if (!Cb || Cb->IsInventoryOpen() || Cb->IsCraftingOpen()) return;
 	UFont* Small = GEngine->GetSmallFont();
-	const int32 N = FMath::Min(Gen->Weapons.Num(), 10);
+	// (the third list: the ten quick slots, empty ones too, each drawing what she put there)
+	const bool bQuick = Gen->bQuickSlots;
+	// (a spell cast alongside the drawn weapon takes no quick slot: it stands after the ten, its key E, its cooldown and mana
+	// shown as before (the PR review's find: the Warlock's fire had gone from the bar))
+	TArray<int32> Along;
+	if (bQuick) for (int32 I = 0; I < Gen->Weapons.Num(); ++I) if (Gen->Weapons[I].bAlongside) Along.Add(I);
+	const int32 N = bQuick ? 10 + Along.Num() : FMath::Min(Gen->Weapons.Num(), 10);
 	if (N <= 0) return;
 	const float S = 64.f * Sc, Gp = 8.f * Sc, W = N * S + (N - 1) * Gp;
 	const float X0 = (Canvas->ClipX - W) * 0.5f, Y0 = Canvas->ClipY - S - 26.f * Sc;
 	const bool bSlot = UI.Has(TEXT("slot"));
 	float Tw, Th;
-	for (int32 I = 0; I < N; ++I)
+	for (int32 Si = 0; Si < N; ++Si)
 	{
+		const int32 I = bQuick ? (Si < 10 ? Cb->WeaponOfSlot(Si) : Along[Si - 10]) : Si;
+		if (!Gen->Weapons.IsValidIndex(I))
+		{
+			// (an empty quick slot: dim, its number)
+			const FVector2D A(X0 + Si * (S + Gp), Y0), B = A + FVector2D(S);
+			if (bSlot) { const FRDUIArt* Sa = UI.Find(TEXT("slot")); UI.Nine(TEXT("slot"), A, B, 12.f * Sc / FMath::Max((float)Sa->Border.X * Sa->Texture->GetSizeX(), 1.f), FLinearColor(0.35f, 0.35f, 0.35f)); }
+			else Box(A, B, FLinearColor(0.04f, 0.04f, 0.05f, 0.6f));
+			UI.Text(FString::Printf(TEXT("%d"), (Si + 1) % 10), FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
+			continue;
+		}
 		const FRDWeaponDef& Wp = Gen->Weapons[I];
 		const bool bOn = Wp.bAlongside ? Cb->GetAttackIndex() == I : I == Cb->GetWeaponIndex();
-		const FVector2D A(X0 + I * (S + Gp), Y0), B = A + FVector2D(S);
+		const FVector2D A(X0 + Si * (S + Gp), Y0), B = A + FVector2D(S);
 		const float Cd = Cb->GetCooldownLeft(I);
 		const bool bNoMana = Wp.ManaCost > 0.f && Cb->GetMana() < Wp.ManaCost;
 		if (bSlot)
@@ -2148,8 +2312,10 @@ void ARDHUD::DrawHotbar(float Sc)
 			UI.Text(T, FLinearColor(1.f, 0.9f, 0.6f), (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.3f, ERDType::Title);
 		}
 		if (bOn) Frame(A + FVector2D(1.f), B - FVector2D(1.f), FLinearColor(1.f, 0.82f, 0.35f, 0.95f), 2.5f * Sc);
-		const FString Key = Wp.bAlongside ? FString(TEXT("E")) : FString::Printf(TEXT("%d"), (I + 1) % 10);
+		const FString Key = Wp.bAlongside ? FString(TEXT("E")) : FString::Printf(TEXT("%d"), (Si + 1) % 10);
 		UI.Text(Key, FLinearColor(1.f, 0.82f, 0.35f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
+		// (the third list: a weapon with a slash on it: a band of the slash's colour along the slot's foot)
+		if (const FRDSlashDef* Sl = Cb->SlashOf(I)) Box(FVector2D(A.X + 6.f * Sc, B.Y - 7.f * Sc), FVector2D(B.X - 6.f * Sc, B.Y - 3.f * Sc), FLinearColor(Sl->Color.R, Sl->Color.G, Sl->Color.B, 0.95f));
 		if (Wp.ManaCost > 0.f)
 		{
 			const FString Mc = FString::Printf(TEXT("%.0f"), Wp.ManaCost);

@@ -36,12 +36,13 @@ if len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
 LV = sys.argv[7] if len(sys.argv) > 7 else "4"
-MW = LV == "mw"; W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
+MW2 = LV == "mw2"; MW = LV in ("mw", "mw2"); W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
                                                        #  "5h": the four heroes' weapons reel, cine_menu_quartet.json)
 SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "mistward" if MW else "random_dungeon_magic" + LV)
 M = json.load(open(os.path.join(SRC, "cine_menu_mw.json"), encoding="utf-8")) if MW else json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
 ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
-TITLE, SUB = (("mistward_castle", "four heroes in Mistward Castle: shields, the torch, traps, prisoners, teleporters, bosses, rooms of other shapes") if MW else
+TITLE, SUB = (("mistward_castle", "four heroes in Mistward Castle: start gear, tabs, quick slots, the block, slashes, outlined traps, eight new kinds of rooms") if MW2 else
+              ("mistward_castle", "four heroes in Mistward Castle: shields, the torch, traps, prisoners, teleporters, bosses, rooms of other shapes") if MW else
               ("random_dungeonmagic_level5", "four heroes: the map, chests, armour, crafting at the anvil, fights, new rooms generated tier by tier") if X5 else
               ("random_dungeonmagic_level5", "four heroes: spells learned from tomes, rings, monsters by tier, the dead stay, the Esc menu") if S5 else
               ("random_dungeonmagic_level5", "four heroes: armour by its table, loot by tier, repair items made at anvils, the tiers on the maps") if C5 else

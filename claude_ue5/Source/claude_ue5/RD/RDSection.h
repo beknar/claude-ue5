@@ -177,11 +177,48 @@ public:
 	/** the room with this section's teleporter pad (-1: none) */
 	int32 PadRoom = -1;
 
+	// ---- the third list (docs/improvements2.txt; RDMistward2.cpp)
+	/** a trap she has seen: its outline and its ring on the floor (the generator's bTrapOutline) */
+	void OutlineTrap(int32 Index);
+	/** an armory table's weapon or shield to take up (the generator's bWeaponPickups): the item, where, its mesh */
+	struct FPickup { FName Item; FVector At = FVector::ZeroVector; TWeakObjectPtr<UStaticMeshComponent> Mesh; };
+	TArray<FPickup> Pickups;
+	/** a special room's fixture (a shrine's statue, a fountain), what it is and its glow */
+	struct FFixture { ERDRoomKind Kind = ERDRoomKind::Shrine; FVector At = FVector::ZeroVector; int32 Room = -1;
+		TWeakObjectPtr<class UPointLightComponent> Light; TWeakObjectPtr<class UFXSystemComponent> Fx; };
+	TArray<FFixture> Fixtures;
+	/** the special rooms laid out (the generator's bSpecialRooms), from a stream of their own after the plan's rooms */
+	void AssignSpecialRooms();
+	/** their play part (after the furniture, in play): fixtures' glows, the vault's key and chests, the throne's usurper */
+	void PlaceSpecial();
+	/** the special rooms' containers whose loot the rules set (the vault's chests, the gauntlet's chest): their keys */
+	TArray<int32> SpecialChests;
+	/** a fixture used: its glow dimmed */
+	void DimFixture(int32 Index);
+	/** a room's doors shut (an arena beginning) */
+	void ShutRoomDoors(int32 Room);
+	/** the room a door leads into or out of (-1: a hallway's or a cell's) */
+	int32 DoorRoom(int32 Door) const;
+	/** a room's doors (both leaves of each doorway; tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<int32> GetRoomDoors(int32 Room) const
+	{
+		TArray<int32> Out;
+		for (int32 I = 0; I < Doors.Num(); ++I) if (DoorRoom(I) == Room) Out.Add(I);
+		return Out;
+	}
+	/** a weapon or shield laid flat on a table at P (its longest side across the table, turned Yaw) */
+	void AddPickup(FName Item, const FVector& P, float Yaw);
+	ERDRoomKind GetRoomKindEnum(int32 Index) const { return Rooms.IsValidIndex(Index) ? Rooms[Index].Kind : ERDRoomKind::Junction; }
+	/** free tiles of a room in the order of their distance from its middle (the arena's spawns) */
+	TArray<FVector> GetRoomFreeTilesNear(int32 Index, const FVector& From) const;
+
 	// ---- interaction (doors, containers)
 	/** nearest door / container within MaxDistance: returns distance (or 1e9) */
 	float FindNearestInteractive(const FVector& From, float MaxDistance, bool& bDoor, int32& Index) const;
 	/** opener: who is pushing (the door swings away) */
 	void ToggleDoor(int32 Index, const FVector& Opener, bool bByMonster = false);
+	/** tests: a door pushed by her from Opener, as F does (a locked room's door stays as it is) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void PushDoor(int32 Index, FVector Opener) { if (Doors.IsValidIndex(Index)) ToggleDoor(Index, Opener); }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void ToggleContainer(int32 Index);
 	bool IsDoorOpenIndex(int32 Index) const;
 	/** open or opening (target) */

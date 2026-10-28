@@ -77,6 +77,14 @@ FString ARDDungeonGenerator::KindName(ERDRoomKind K)
 	case ERDRoomKind::Treasury: return TEXT("Treasury");
 	case ERDRoomKind::GuardRoom: return TEXT("Guard room");
 	case ERDRoomKind::Forge: return TEXT("Forge");
+	case ERDRoomKind::Shrine: return TEXT("Shrine");
+	case ERDRoomKind::HealFountain: return TEXT("Healing fountain");
+	case ERDRoomKind::SpeedFountain: return TEXT("Fountain of speed");
+	case ERDRoomKind::ManaFountain: return TEXT("Fountain of mana");
+	case ERDRoomKind::Arena: return TEXT("Arena");
+	case ERDRoomKind::TrapGauntlet: return TEXT("Trap gauntlet");
+	case ERDRoomKind::Vault: return TEXT("Vault");
+	case ERDRoomKind::ThroneRoom: return TEXT("Throne room");
 	default: return TEXT("Hallway junction");
 	}
 }
@@ -957,7 +965,14 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			if (E.Live[I].Get() == Monster)
 			{
 				E.Dead[I] = true;
-				if (E.bBoss && I == 0) { TierNotice = FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds(); }
+				if (E.bBoss && I == 0)
+				{
+					TierNotice = E.bThrone ? FString(TEXT("THE USURPER IS SLAIN")) : FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds();
+					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
+					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
+					const FName Sl = GiveBossSlash(E.Tier, Monster ? Monster->GetActorLocation() : E.At);
+					if (!Sl.IsNone()) TierNotice += FString::Printf(TEXT("  -  THE %s IS YOURS"), *Sl.ToString().ToUpper());
+				}
 			}
 	// (the tiers: it stays dead, also when its section is generated again)
 	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
@@ -1012,6 +1027,11 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	CellsOpened.Reset(); PrisonersFreed = CellBreakouts = 0;
 	SpentTraps.Reset(); DisarmKey = FIntVector(0, 0, -1); TrapsTriggered = TrapsDisarmed = TrapHits = 0; LastTrap.Reset();
 	TrapR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x7D15u)); PendingRingTiers.Reset();
+	// (the third list: the tables' weapons back, the fixtures full, the arenas and vaults as they were, the slashes not given)
+	for (const TWeakObjectPtr<ARDMonster>& M : ArenaMonsters) if (M.IsValid()) M->Destroy();
+	ArenaMonsters.Reset(); ArenaRoom = -1; ArenaWave = 0; ArenaWavesBeaten = 0;
+	TakenPickups.Reset(); PickupsTaken = 0; UsedFixtures.Reset(); ArenasWon.Reset(); VaultsOpened.Reset(); RoomUses.Reset(); SlashesGiven.Reset();
+	SlashR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x51A5u));
 	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
 	// (the weapons she found are gone: hers are the hero's again)
 	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) Weapons = H->Weapons;
@@ -1058,6 +1078,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 			}
 	// (mistward: her dropped things, a teleporter pad, a trap she has seen (the Rogue disarms it) come before the rest)
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
+	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
+	if (bSpecialRooms || bWeaponPickups) { const FString Sp = UseSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = UsePadNear(From); if (!Pd.IsEmpty()) return Pd; }
 	if (Traps.Num() > 0 && BeginDisarmNear(From)) return TEXT("disarm");
 	// (level 5: an anvil nearer than any door or container opens her crafting panel)
@@ -1154,6 +1176,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 			if (Lp->bHers) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());
 			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
 		}
+	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
@@ -1229,7 +1252,17 @@ void ARDDungeonGenerator::BeginPlay()
 		for (const FRDSpellDef& S : Spells) { Warm(S.CastFx); Warm(S.BoltFx); Warm(S.ImpactFx); Warm(S.AreaFx); Warm(S.ShieldFx); }
 		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDSPELL %d effects asked to compile"), Seen.Num());
 	}
+	// (the third list: the slashes' effects and the rooms' glows likewise)
+	if (bBossSlashes || bSpecialRooms)
+	{
+		int32 Num = 0;
+		auto Warm2 = [&Num](UFXSystemAsset* A) { if (UNiagaraSystem* N = Cast<UNiagaraSystem>(A)) { N->RequestCompile(false); ++Num; } };
+		for (const FRDSlashDef& S : Slashes) { Warm2(S.Fx); Warm2(S.ImpactFx); }
+		Warm2(ShrineFx); Warm2(HealFountainFx); Warm2(SpeedFountainFx); Warm2(ManaFountainFx); Warm2(BlessFx);
+		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDSLASH %d effects asked to compile"), Num);
+	}
 #endif
+	SlashR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x51A5u));
 	MapData.Reset();
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
 	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
@@ -1353,6 +1386,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (CensusQueue.Num() > 0) TickCensus();
 	}
 	if (Traps.Num() > 0) TickTraps(Dt);
+	if (bSpecialRooms) TickArena(Dt);          // (the third list: an arena begun, its waves)
 	// (mistward: the rings to guard of a tier opened by the last container she opened, now that it has given what it held)
 	if (PendingRingTiers.Num() > 0) { const TArray<int32> Ts = PendingRingTiers; PendingRingTiers.Reset(); for (const int32 T : Ts) PlaceRingGuard(T); }
 	if (PrisonerDefs.Num() > 0)

@@ -43,7 +43,10 @@ def heroes_table():
     for h in HEROES:
         mana = ("%d (%.1f)" % (h["mana"], h.get("mana_per_second", 0))) if h.get("mana") else "none"
         lvl = " (level 5 only)" if h["name"] == "Summoner" else ""
-        out.append("| %s%s | %s | %d | %s | %s | %s | %s |" % (h["name"], lvl, "; ".join(h["abilities"]), h["health"], mana, h["starts_with"], wears(h), wields(h["name"])))
+        # (level 5's and Mistward's Warrior since the third list, 870 (heroes.json is level 4's, whose Warrior keeps hers))
+        sw = ("The dagger and the worst shield (the Painted Viking Shield), hers for good: they never break or drop; no armour (level 4: sword and shield)"
+              if h["name"] == "Warrior" else h["starts_with"])
+        out.append("| %s%s | %s | %d | %s | %s | %s | %s |" % (h["name"], lvl, "; ".join(h["abilities"]), h["health"], mana, sw, wears(h), wields(h["name"])))
     return out
 
 

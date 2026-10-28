@@ -98,6 +98,30 @@ void ARDSection::PlaceTraps()
 		if (Ti.Def < 0) continue;
 		TrapList.Add(Ti);
 	}
+	// (the third list: a trap gauntlet's run of traps along its lanes, every other tile, from a stream of its own after the
+	// rest: the others keep their indices)
+	if (Generator->bSpecialRooms)
+	{
+		FRandomStream RG((int32)HashCombine((uint32)Seed ^ 0x6A47u, 9u));
+		for (int32 RI = 0; RI < Rooms.Num(); ++RI)
+		{
+			const FRoom& Rm = Rooms[RI];
+			if (Rm.Kind != ERDRoomKind::TrapGauntlet) continue;
+			int32 K = 0;
+			for (int32 X = Rm.Min.X + 1; X < Rm.Max.X - 1; ++X)
+				for (int32 Y = Rm.Min.Y + 1; Y < Rm.Max.Y - 1; ++Y)
+				{
+					const FIntPoint T(X, Y);
+					const bool bLane = X == Rm.Lane.X || Y == Rm.Lane.Y;
+					if (!IsWalkable(T) || Owner[Idx(T)] != RI || (X + Y) % 2 != 0 || (!bLane && RG.FRand() < 0.5f)) continue;
+					FTrapInst Ti; Ti.Def = PickKind(RG.FRand(), bLane, bLane); Ti.At = TileWorld(T); Ti.Room = RI;
+					if (Ti.Def < 0) continue;
+					Ti.Yaw = (T.Y == Rm.Lane.Y) ? 0.f : 90.f;
+					TrapList.Add(Ti); ++K;
+				}
+			UE_LOG(LogRDTraps, Log, TEXT("RDTRAP (%d,%d): a trap gauntlet in room %d, %d traps"), Coord.X, Coord.Y, RI, K);
+		}
+	}
 	for (int32 I = 0; I < TrapList.Num(); ++I)
 	{
 		if (const uint8* St = Generator->SpentTraps.Find(FIntVector(Coord.X, Coord.Y, I))) TrapList[I].State = *St;
@@ -152,6 +176,14 @@ void ARDSection::SpendTrap(int32 I, uint8 State)
 	if (Generator) Generator->SpentTraps.Add(FIntVector(Coord.X, Coord.Y, I), State);
 	for (TWeakObjectPtr<UFXSystemComponent>& F : T.Fx) if (F.IsValid()) { F->DeactivateImmediate(); F->DestroyComponent(); }
 	T.Fx.Reset();
+	// (the third list: its red outline and ring go with it)
+	for (TWeakObjectPtr<USceneComponent>& C : T.Comps)
+	{
+		if (!C.IsValid()) continue;
+		if (C->ComponentHasTag(TEXT("RDOutline"))) { C->DestroyComponent(); continue; }
+		if (UStaticMeshComponent* M = Cast<UStaticMeshComponent>(C.Get())) M->SetOverlayMaterial(nullptr);
+	}
+	T.Comps.RemoveAll([](const TWeakObjectPtr<USceneComponent>& C) { return !C.IsValid() || C->IsBeingDestroyed(); });
 	// (a ward sets itself again; the others are spent)
 }
 
@@ -260,6 +292,7 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 			{
 				T.bSeen = true;
 				if (Pc) Pc->ShowMessage(FString::Printf(TEXT("You spot a trap: %s (F to disarm)"), *D.Label));
+				if (Generator->bTrapOutline) OutlineTrap(I);          // (the third list: much more visible once seen)
 			}
 			if (bNear && Dist < D.Radius && Pc && !Pc->IsDead() && !(Generator->DisarmKey == FIntVector(Coord.X, Coord.Y, I))) FireTrap(I);
 			continue;

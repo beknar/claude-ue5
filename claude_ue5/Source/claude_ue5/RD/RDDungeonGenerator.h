@@ -483,6 +483,97 @@ public:
 	/** monsters' height: each kind's lowest drawn point against the floor as it stands now (tests, the fix stage) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") TArray<FString> MeasureMonsterHeights();
 
+	// ---- the user's third list (docs/improvements2.txt, 2026-10-27): mistward_castle and random_dungeonmagic_level5. Every rule
+	// a switch of its own, off on the other levels (RDMistward2.cpp)
+	/** a trap she has seen (the Rogue) shows a red outline: its plate or rune outlined, a red ring on the floor at its reach */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bTrapOutline = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UMaterialInterface> TrapOutlineMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UStaticMesh> TrapRingMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UMaterialInterface> TrapRingMaterial = nullptr;
+	/** a seen trap's red glow (candelas; 0: none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float TrapGlowCandelas = 60.f;
+	/** the inventory in tabs (weapons, armour, potions and food, crafting, magic: Q / E, LB / RB, or a click on a tab), copies of a
+	 *  found weapon with the same durability (and slash) on one line, the anvil's break-down list says how many are left */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bInventoryTabs = false;
+	/** ten quick slots on the bar: 1 to 0 draw one, the D-pad left / right step through them; in the inventory a weapon or
+	 *  spell goes into a slot with its number (the gamepad: Y into the slot the D-pad left / right chose; the mouse: right click) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bQuickSlots = false;
+	/** H (or the inventory's armour tab) shows or hides the worn set's helmet: the sections of its mesh her head bone moves */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bHelmetToggle = false;
+	/** a hero of BlockHeroes holds the right mouse button or LT to block with the shield in her hand: BlockShare more of a blow
+	 *  taken, BlockSlow of her speed lost, the shield worn BlockWear times as fast */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bShieldBlock = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TArray<FName> BlockHeroes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockShare = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockSlow = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockWear = 5.f;
+	/** a clip and the moment of it held while she blocks (her shield raised; none: no pose) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TMap<FName, TObjectPtr<UAnimSequenceBase>> BlockClip;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TMap<FName, float> BlockClipTime;
+	bool HeroBlocks() const { return bShieldBlock && BlockHeroes.Contains(CurrentHero); }
+	/** what her hero starts with is hers for good: the weapons she starts with and the shield of StartShield never break and stay
+	 *  with her when she falls */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bKeepStartGear = false;
+	/** the armories' weapon tables carry weapons and shields of the room's tier: F takes one up, and it is gone from the table */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bWeaponPickups = false;
+	/** pickups taken (section, index): they stay gone */
+	TSet<FIntVector> TakenPickups;
+	/** what an armory table's place holds: a weapon or shield found in the set's tier, by a hash of the set and the place */
+	FName PickupItemFor(FIntPoint Section, int32 Index) const;
+	/** a pickup item's mesh (its first fit's weapon, or a shield's off-hand mesh) */
+	UStaticMesh* PickupMeshOf(FName Item) const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") int32 PickupsTaken = 0;
+	/** the special rooms (ERDRoomKind::Shrine ...): a share of the rooms of a set (not the great hall, a prison, a junction),
+	 *  from a stream of their own; their effects and how long a blessing or a fountain's draught lasts */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bSpecialRooms = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float SpecialRoomShare = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UFXSystemAsset> ShrineFx = nullptr;
+	/** each fountain's glow while it has water: healing, speed, mana */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UFXSystemAsset> HealFountainFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UFXSystemAsset> SpeedFountainFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UFXSystemAsset> ManaFountainFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TObjectPtr<UFXSystemAsset> BlessFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlessSeconds = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float FountainSpeed = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float FountainSpeedSeconds = 45.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float FountainHeal = 0.6f;
+	/** the arena's waves (each 2 + its tier monsters of the tier, Waves of them) and the vault's key (an item of kind Key) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") int32 ArenaWaves = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") FName VaultKeyItem = TEXT("Vault Key");
+	/** fixtures used (section, room): a shrine's blessing, a fountain's draught (once each); arenas won; vaults opened */
+	TSet<FIntVector> UsedFixtures, ArenasWon, VaultsOpened;
+	/** the arena going on: its set, its room, the wave, its monsters; -1 none */
+	FIntPoint ArenaSection = FIntPoint::ZeroValue;
+	int32 ArenaRoom = -1, ArenaWave = 0;
+	TArray<TWeakObjectPtr<ARDMonster>> ArenaMonsters;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") int32 ArenaWavesBeaten = 0;
+	/** what she has from the special rooms (tests): blessings, draughts, arenas won, vaults opened, usurpers slain */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") TMap<FString, int32> RoomUses;
+	void TickArena(float Dt);
+	/** a room of a set is shut to her (an arena fighting, a vault she has no key for) */
+	bool IsRoomLocked(FIntPoint Section, int32 Room) const;
+	/** the special rooms of the generated sets: "<section x>|<y>|<room>|<kind>|<x>|<y>|<z>|<used / won / opened>" (tests, the reel) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FString> GetSpecialRoomLines() const;
+	/** the pickups of the generated sets: "<section x>|<y>|<index>|<item>|<x>|<y>|<z>|<taken>" (tests, the reel) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FString> GetPickupLines() const;
+	/** F at a fixture (a shrine, a fountain), a pickup or a vault's door near her: what it did ("" none near) */
+	FString UseSpecialNear(const FVector& From);
+	FString DescribeSpecialNear(const FVector& From) const;
+	/** tests: the arena of a room begun now (as if she stepped in) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool StartArena(FIntPoint Section, int32 Room);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetArenaWave() const { return ArenaRoom >= 0 ? ArenaWave : -1; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetArenaLeft() const;
+	/** slashes (the boss's reward): the table, the heroes who put them on weapons, the pack's effects warmed up in the editor */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bBossSlashes = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TArray<FRDSlashDef> Slashes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TArray<FName> SlashHeroes;
+	int32 FindSlash(FName Name) const { for (int32 I = 0; I < Slashes.Num(); ++I) if (Slashes[I].Name == Name) return I; return -1; }
+	bool HeroSlashes() const { return bBossSlashes && SlashHeroes.Contains(CurrentHero); }
+	/** a boss slain: a slash of its tier, chosen from the session's own stream (the one given, when her hero takes slashes) */
+	FName GiveBossSlash(int32 Tier, const FVector& At);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") TArray<FName> SlashesGiven;
+	FRandomStream SlashR;
+
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
@@ -700,6 +791,8 @@ public:
 		int32 Tier = 2; bool bBoss = false; FIntPoint Section = FIntPoint::ZeroValue; int32 Room = -1; FVector At = FVector::ZeroVector;
 		TArray<int32> Kinds; TArray<FVector> Spots; TArray<bool> Dead; TArray<TWeakObjectPtr<ARDMonster>> Live;
 		FName Ring = NAME_None; FIntVector RingKey = FIntVector(0, 0, -1); FString Label;
+		/** the third list: a throne room's usurper (its room, not a tier's opening) */
+		bool bThrone = false;
 	};
 	TArray<FEncounter> Encounters;
 	/** a set of rooms is generated (again): the encounters in it come back (the living ones) */

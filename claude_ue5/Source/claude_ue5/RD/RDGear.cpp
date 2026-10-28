@@ -147,6 +147,8 @@ bool URDCombatComponent::HoldTorch(bool bHold)
 void URDCombatComponent::WearDownShield(float Took)
 {
 	if (WornShield.IsNone() || Took <= 0.f) return;
+	// (the third list, bKeepStartGear: the shield her hero starts with never breaks: "these they always have")
+	if (Generator && Generator->bKeepStartGear && WornShield == StartShieldOf()) return;
 	float& W = ArmourWear.FindOrAdd(WornShield);
 	W = FMath::Max(0.f, W - Took);
 	if (W > 0.f) return;
@@ -178,12 +180,19 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 	// (the weapons she found, each with what is left of it; her hero's own are not things of the item table (her hands, her
 	// spells): they stay hers)
 	for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
-		if (!Generator->Weapons[I].Item.IsNone()) { Things.Add(Generator->Weapons[I].Item); WearOut.Add(GetWeaponWear(I)); }
+		if (!Generator->Weapons[I].Item.IsNone())
+		{
+			Things.Add(Generator->Weapons[I].Item); WearOut.Add(GetWeaponWear(I));
+			// (the third list: a found weapon's slash drops beside it, a thing of its own)
+			if (!Generator->Weapons[I].Slash.IsNone()) { Things.Add(Generator->Weapons[I].Slash); WearOut.Add(-1.f); }
+		}
 	// (everything she carries, the shield she started with too: "all of her equipment drops" (the list's words; until
-	// 2026-10-27 one copy of that shield stayed with her))
+	// 2026-10-27 one copy of that shield stayed with her). The third list: with bKeepStartGear one copy of it stays: "these
+	// they always have")
+	const FName Keep = Generator->bKeepStartGear ? StartShieldOf() : NAME_None;
 	for (const FName& N : CarriedOrder)
 	{
-		const int32 Cnt = GetItemCount(N);
+		const int32 Cnt = GetItemCount(N) - (N == Keep ? 1 : 0);
 		const int32 Ix = Generator->FindItem(N);
 		const bool bKept = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield);
 		const TArray<float>* Sp = Spares.Find(N);
@@ -223,7 +232,9 @@ void URDCombatComponent::TakeBack(const TArray<FName>& Things, const TArray<floa
 		}
 	}
 	// (her own pile: the shield that was on her arm when she fell goes back on (a found one, or none if she wore none))
-	if (bHers && WornShield.IsNone() && !Rewear.IsNone() && GetItemCount(Rewear) > 0) WearShield(Rewear);
+	// (the third list, bKeepStartGear: her starting shield stayed on her arm; the one she wore when she fell goes back on in its place)
+	const bool bFree = WornShield.IsNone() || (Generator->bKeepStartGear && WornShield == StartShieldOf() && Rewear != WornShield);
+	if (bHers && bFree && !Rewear.IsNone() && GetItemCount(Rewear) > 0) WearShield(Rewear);
 	if (bHers) SetMessage(FString::Printf(TEXT("You take up your things again (%d)"), Got));
 	else SetMessage(Things.Num() == 1 ? FString::Printf(TEXT("You take the %s"), *Things[0].ToString().ToLower()) : FString::Printf(TEXT("You take up what lies here (%d)"), Got));
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
@@ -249,7 +260,7 @@ bool URDCombatComponent::BreakDownGear(FName Item)
 	TArray<FString> Got;
 	for (const FString& P : Ps) { FString N, C; if (P.Split(TEXT(":"), &N, &C)) { AddItem(FName(*N), FCString::Atoi(*C)); Got.Add(FString::Printf(TEXT("%s %s"), *C, *N.ToLower())); } }
 	++GearBrokenDown; ++WeaponsBrokenDown;
-	SetMessage(FString::Printf(TEXT("You break down the %s:  %s"), *Lb, *FString::Join(Got, TEXT(", "))));
+	SetMessage(FString::Printf(TEXT("You break down the %s:  %s   (%d left)"), *Lb, *FString::Join(Got, TEXT(", ")), GetItemCount(Item)));
 	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
 	UE_LOG(LogTemp, Log, TEXT("RDBREAKDOWN %s -> %s"), *Item.ToString(), *Gives);
 	return true;
