@@ -484,6 +484,10 @@ private:
 	FString BlessName;
 	float BlessUntil = -100.f, BlessDmg = 0.f, BlessArm = 0.f;
 	int32 LastWeaponCount = -1;
+	uint32 LastWeaponSig = 0;
+	uint32 WeaponSig() const;
+	/** the worn set's helmet, found once (HasHelmet) */
+	mutable FName HelmetCacheFor = NAME_None; mutable int32 HelmetCacheMeshes = -1; mutable bool bHelmetCache = false;
 	int32 InvTab = 0;
 	TArray<FName> QuickSlots;
 	int32 AssignSlot = 0;

@@ -584,8 +584,9 @@ void URDCombatComponent::Revive(bool bToStart)
 	Auras.Reset();
 	UpdateMaxima();
 	// (the third list: no block, no slash's hold on her)
-	bBlocking = false; bSlashShieldUp = false; HasteUntil = SlashEvadeUntil = DeflectUntil = BlessUntil = -100.f;
-	for (FSlashArea& A : SlashAreas) if (UFXSystemComponent* F = A.Fx.Get()) F->Deactivate();
+	// (the block through SetBlocking: its paused montage is resumed and stopped (set false here, she stayed in the pose))
+	SetBlocking(false); bSlashShieldUp = false; HasteUntil = SlashEvadeUntil = DeflectUntil = BlessUntil = -100.f;
+	for (FSlashArea& A : SlashAreas) if (UFXSystemComponent* F = A.Fx.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); }
 	SlashAreas.Reset();
 	bDead = false; Health = MaxHealth; Mana = MaxMana; AttackTime = -1.f; StaggerUntil = -100.f; StopCharge(); EndRoll(); ShowLoadedBolt(true);
 	Effects.Reset(); SetSlowed(false); UpdateWalkSpeed();
@@ -614,8 +615,10 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickSpells(Dt, Now);
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0) TickSlashAreas(Dt);
-	if (Generator->bQuickSlots && Generator->Weapons.Num() != LastWeaponCount) FillQuickSlots();
+	if (Generator->bQuickSlots && (Generator->Weapons.Num() != LastWeaponCount || WeaponSig() != LastWeaponSig)) FillQuickSlots();
 	if (bHeldOn && Now >= HeldUntil) { bHeldOn = false; UpdateWalkSpeed(); }       // (mistward: the snare lets go)
+	// (the third list: a block ends with the shield gone from her hand, a swing begun or a fall, scripted or not (one rule))
+	if (bBlocking && (bDead || !IsShieldInHand() || AttackTime >= 0.f)) SetBlocking(false);
 	if (bDead)
 	{
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
@@ -645,8 +648,6 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 						|| PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f)) StartSpell();
 				}
 			}
-	// (the third list: a block ends with the shield gone from her hand or a swing begun, scripted or not)
-	if (bBlocking && (!IsShieldInHand() || AttackTime >= 0.f)) SetBlocking(false);
 	if (RollTime >= 0.f)
 	{
 		RollTime += Dt;
@@ -749,7 +750,7 @@ void URDCombatComponent::ClearItems()
 	ArmourWornOut = ItemsRepaired = ItemsCrafted = 0;
 	// (the third list's: the tab, the slots, the helmet, the slashes' work, the blessing)
 	SlashWith = NAME_None; SlashCursor = 0; InvTab = 0; AssignSlot = 0; bHelmetHidden = false; QuickSlots.Reset(); LastWeaponCount = -1;
-	SlashProcs.Reset(); SlashBonusDealt = 0.f; BlockedHits = 0; StunReadyAt.Reset(); bBlocking = false; bSlashShieldUp = false;
+	SetBlocking(false); SlashProcs.Reset(); SlashBonusDealt = 0.f; BlockedHits = 0; StunReadyAt.Reset(); bSlashShieldUp = false;
 	HasteUntil = SlashEvadeUntil = DeflectUntil = BlessUntil = -100.f; BlessName.Reset();
 	UpdateWalkSpeed();
 }

@@ -1506,12 +1506,15 @@ def nice(v): return ("%.1f" % v).rstrip("0").rstrip(".")
 def hotbar(o, r, t, ua):
     """ARDHUD::DrawHotbar: a slot for each of her first ten weapons and spells, bottom middle; the one in hand framed in
     gold, a cooldown's share shaded from the top with its seconds, the mana a cast takes (red when she has less)"""
-    d = ImageDraw.Draw(o, "RGBA"); WL = weapons_at(t); n = 10 if MW2 else min(len(WL), 10)
+    d = ImageDraw.Draw(o, "RGBA"); WL = weapons_at(t)
+    along = [k_ for k_, w_ in enumerate(WL) if w_.get("alongside")] if MW2 else []          # (after the ten: a spell cast alongside, key E)
+    n = 10 + len(along) if MW2 else min(len(WL), 10)
     if n <= 0: return
     qs_ = r.get("qs", [])
     def slot_weapon(i):
         """(run5m2) the weapon of a quick slot: the one drawn if it has that name, else the first of the name"""
         if not MW2: return i
+        if i >= 10: return along[i - 10]
         nm_ = qs_[i] if i < len(qs_) else "None"
         if nm_ in ("", "None"): return -1
         if 0 <= r["w"] < len(WL) and WL[r["w"]]["name"] == nm_: return r["w"]

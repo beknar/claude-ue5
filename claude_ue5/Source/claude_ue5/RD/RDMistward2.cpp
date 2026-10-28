@@ -41,6 +41,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDMistward2, Log, All);
 
 static const FName RDM2Slot(TEXT("DefaultSlot"));
 static const FName RDM2Interactive(TEXT("RDInteractive"));
+/** an effect that does not destroy itself, ended for good: a pack's system outlives a plain Deactivate */
+static void RDM2EndFx(UFXSystemComponent* F) { if (F) { F->DeactivateImmediate(); F->DestroyComponent(); } }
 /** how far a knock carries a monster for each cm/s of launch speed (measured: 300 cm/s, 1.09 m) */
 static constexpr float RDM2KnockCmPerSpeed = 0.36f;
 
@@ -139,7 +141,14 @@ void URDCombatComponent::FillQuickSlots()
 		if (E == INDEX_NONE) break;
 		QuickSlots[E] = W.Name;
 	}
-	LastWeaponCount = Generator->Weapons.Num();
+	LastWeaponCount = Generator->Weapons.Num(); LastWeaponSig = WeaponSig();
+}
+
+uint32 URDCombatComponent::WeaponSig() const
+{
+	uint32 H = Generator ? (uint32)Generator->Weapons.Num() : 0u;
+	if (Generator) for (const FRDWeaponDef& W : Generator->Weapons) H = HashCombine(H, GetTypeHash(W.Name));
+	return H;
 }
 
 bool URDCombatComponent::AssignQuickSlot(int32 Slot, int32 Index)
@@ -217,7 +226,13 @@ TArray<USkeletalMeshComponent*> URDCombatComponent::GetHelmetMeshes() const
 	return Out;
 }
 
-bool URDCombatComponent::HasHelmet() const { return GetHelmetMeshes().Num() > 0; }
+bool URDCombatComponent::HasHelmet() const
+{
+	// (the sections are read from the mesh's skin weights: once for the set she wears; the inventory's lines ask for it
+	// several times a frame (the PR review's find))
+	if (HelmetCacheFor != WornArmour || HelmetCacheMeshes != ArmourComps.Num()) { HelmetCacheFor = WornArmour; HelmetCacheMeshes = ArmourComps.Num(); bHelmetCache = GetHelmetMeshes().Num() > 0; }
+	return bHelmetCache;
+}
 
 TArray<FString> URDCombatComponent::GetHelmetLines() const
 {
@@ -292,8 +307,6 @@ void URDCombatComponent::TickBlocking(const APlayerController* PC)
 	const bool bDown = PC && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f);
 	bBlockKeyDown = bDown;
 	if (!bScriptedOnly && bDown != bBlocking) SetBlocking(bDown);
-	// (a shield gone from her hand, a swing begun, a fall: the block ends)
-	if (bBlocking && (!IsShieldInHand() || bDead || AttackTime >= 0.f)) SetBlocking(false);
 }
 
 // ================================================================================================ input of the third list (outside the inventory)
@@ -452,16 +465,24 @@ void URDCombatComponent::SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dm
 	}
 	const FVector L = O->GetActorLocation();
 	const FVector Away = ((Mo->GetActorLocation() - L) * FVector(1, 1, 0)).GetSafeNormal(1e-3f, O->GetActorForwardVector());
+	// (a slash's effect on her is renewed, not added again: food effects add up, and a hit a second (or a sweep's three
+	// monsters) kept several of the Verdant Slash's 1.5 HP/s on her at once (the PR review's find))
+	auto Renew = [this](ERDItemKind Kind, float Amt, float Secs_, FName Name)
+	{
+		FEffect* E = Effects.FindByPredicate([&](const FEffect& X) { return X.Kind == Kind && X.Item == Name; });
+		if (E) { E->Amount = Amt; E->Left = FMath::Max(E->Left, Secs_); }
+		else Effects.Add({ Kind, Amt, Secs_, Name });
+	};
 	switch (E)
 	{
 	case ERDSlashEffect::Burn: if (!Mo->IsDead()) Mo->AddBurn((Dmg + S.Bonus) * Amount / FMath::Max(Secs, 0.1f), Secs, 0.f); break;
 	case ERDSlashEffect::Slow: if (!Mo->IsDead()) Mo->SlowFor(Amount, Secs); break;
 	case ERDSlashEffect::Poison: if (!Mo->IsDead()) Mo->AddBurn(Amount / FMath::Max(Secs, 0.1f), Secs, 0.f); break;
-	case ERDSlashEffect::Swift: Effects.Add({ ERDItemKind::Speed, Amount, Secs, S.Name }); UpdateWalkSpeed(); break;
+	case ERDSlashEffect::Swift: Renew(ERDItemKind::Speed, Amount, Secs, S.Name); UpdateWalkSpeed(); break;
 	case ERDSlashEffect::Drain: HealBy((Dmg + S.Bonus) * Amount); break;
 	// (Knock takes a launch velocity: 300 cm/s carried a monster 1.09 m (the test), so a push of N cm is N / 0.36 cm/s)
 	case ERDSlashEffect::Knockback: if (!Mo->IsDead()) Mo->Knock(Away * Amount / RDM2KnockCmPerSpeed); break;
-	case ERDSlashEffect::Regen: Effects.Add({ ERDItemKind::Food, Amount / FMath::Max(MaxHealth, 1.f), Secs, S.Name }); break;
+	case ERDSlashEffect::Regen: Renew(ERDItemKind::Food, Amount / FMath::Max(MaxHealth, 1.f), Secs, S.Name); break;
 	case ERDSlashEffect::Evade: SlashEvadeShare = Amount; SlashEvadeUntil = Now + Secs; break;
 	case ERDSlashEffect::Shield: if (Now >= SlashShieldReadyAt) { bSlashShieldUp = true; SlashShieldReadyAt = Now + Secs; Impact(L + FVector(0, 0, 40.f)); } break;
 	case ERDSlashEffect::Chain:
@@ -530,10 +551,10 @@ void URDCombatComponent::TickSlashAreas(float Dt)
 			{
 				if (!IsValid(M) || M->IsDead() || M->IsAlly() || FVector::Dist2D(M->GetActorLocation(), A.At) > A.Radius) continue;
 				if (A.Pull > 0.f) M->PullToward(A.At, A.Pull, Dt);
-				if (A.Dps > 0.f && A.Acc >= 0.5f) { M->ApplyDamageEx(A.Dps * 0.5f, GetOwner(), nullptr, false, false); DamageDealt += A.Dps * 0.5f; SlashBonusDealt += A.Dps * 0.5f; }
+				if (A.Dps > 0.f && A.Acc >= 0.5f) { if (M->ApplyDamageEx(A.Dps * 0.5f, GetOwner(), nullptr, false, false)) ++Kills; DamageDealt += A.Dps * 0.5f; SlashBonusDealt += A.Dps * 0.5f; }
 			}
 		if (A.Acc >= 0.5f) A.Acc -= 0.5f;
-		if (A.Left <= 0.f) { if (UFXSystemComponent* F = A.Fx.Get()) { F->Deactivate(); } SlashAreas.RemoveAt(I); }
+		if (A.Left <= 0.f) { RDM2EndFx(A.Fx.Get()); SlashAreas.RemoveAt(I); }
 	}
 }
 
@@ -750,6 +771,14 @@ void ARDDungeonGenerator::TickArena(float Dt)
 	{
 		const int32 Kind = Kinds[HashCombine((uint32)SessionSeed ^ 0xA7E5u, (uint32)(ArenaWave * 31 + K)) % (uint32)Kinds.Num()];
 		if (ARDMonster* M = SpawnMonsterKind(Kind, Spots[K % Spots.Num()], Tier, 1.f, 1.f, 1.f, FString::Printf(TEXT("ARENA  WAVE %d"), ArenaWave + 1))) ArenaMonsters.Add(M);
+	}
+	// (a wave that came to nobody (no free tile, no monster made) is not a wave beaten: the arena ends unwon, its doors
+	// unlocked, no prize (the PR review's find: three empty waves won it))
+	if (ArenaMonsters.Num() == 0)
+	{
+		UE_LOG(LogRDMistward2, Warning, TEXT("RDARENA wave %d spawned nobody: the arena ends unwon"), ArenaWave + 1);
+		ArenaRoom = -1; if (ArenaWave > 0) --ArenaWavesBeaten;
+		return;
 	}
 	TierNotice = FString::Printf(TEXT("THE ARENA  -  WAVE %d OF %d"), ArenaWave + 1, ArenaWaves); TierNoticeTime = GetWorld()->GetTimeSeconds();
 	UE_LOG(LogRDMistward2, Log, TEXT("RDARENA wave %d: %d monsters"), ArenaWave + 1, ArenaMonsters.Num());

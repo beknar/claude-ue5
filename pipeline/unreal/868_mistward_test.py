@@ -1539,6 +1539,10 @@ def step_block():
     res["lt_blocking"] = c.is_blocking(); g.slate_key(key("Gamepad_LeftTrigger"), False); yield from rwait(0.3)
     if why: res["refused"].append("lt: " + why)
     res["speed"] = {"normal": round(s0, 1), "blocking": round(s1, 1), "ratio": round(s1 / max(s0, 1), 3)}
+    # (blocking when play restarts: the held pose let go (the PR review's find: the flag was cleared, the paused clip stayed))
+    c.set_blocking(True); yield from wait(0.5)
+    g.restart_play(0); yield from wait(1.2); refresh(); c = cb(); body = G["pawn"].get_editor_property("mesh")
+    res["after_restart"] = {"blocking": c.is_blocking(), "hand": hand()}
     # (the Mage: no shield, no block)
     g.switch_hero("Mage"); yield from wait(0.6); refresh(); c = cb()
     g.slate_key(key("RightMouseButton"), True); yield from rwait(0.4); res["mage_blocking"] = c.is_blocking(); g.slate_key(key("RightMouseButton"), False); yield from rwait(0.2)
@@ -1549,7 +1553,8 @@ def step_block():
           and b_["lost"] < p_["lost"] * 0.8 and p_["shield_lost"] > 0 and abs(b_["shield_lost"] / max(p_["shield_lost"], 1e-3) - 5.0 * (want_share / max(share, 1e-3))) < 1.0
           and res["swing_refused"] and not res["after_release"]["blocking"] and res["after_release"]["speed"] > s1 * 1.8
           and res["hand_block"][1] > res["hand_rest"][1] + 15 and res["after_release"]["hand"][1] < res["hand_block"][1] - 10
-          and res["lt_blocking"] and not res["mage_blocking"])
+          and res["lt_blocking"] and not res["mage_blocking"]
+          and not res["after_restart"]["blocking"] and res["after_restart"]["hand"][1] < res["hand_block"][1] - 10)
     step_result("block", ok, **res)
 
 def step_startgear():
@@ -1642,6 +1647,10 @@ def step_rooms():
     g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
     for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1), I2(1, 1)):
         if g.is_tier_open(2) and not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+    # (the rarer kinds (a throne room) may be in none of those: the rest of tier 2's sets until all eight are there)
+    for s_ in (I2(-1, 1), I2(-1, -1), I2(1, -1)):
+        if len({r["kind"] for r in special_rooms()}) >= 8: break
+        if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
     SR = special_rooms()
     for r in SR: res["kinds"].setdefault(r["kind"], 0); res["kinds"][r["kind"]] += 1
     def first(kind): return next((r for r in special_rooms() if r["kind"] == kind and r["done"] == 0), None)
@@ -1847,7 +1856,10 @@ def slash_trial(c, name, idx):
     elif eff == "knockback":
         yield from wait(1.2); r["moved_cm"] = round(dist2(pos(main), m_p0)) if alive(main) else None; r["want_cm"] = sd.amount
         r["ok"] = sd.amount * 0.6 < (r["moved_cm"] or 0) < sd.amount * 1.6
-    elif eff == "regen": r["regen"] = round(c.get_regen_per_second(), 3); r["ok"] = abs(r["regen"] - sd.amount) < 0.05
+    elif eff == "regen":
+        # (two more hits: renewed, not added up (the PR review's find: each hit added another 1.5 HP/s))
+        c.apply_slash_hit_now(idx, main); c.apply_slash_hit_now(idx, main)
+        r["regen"] = round(c.get_regen_per_second(), 3); r["ok"] = abs(r["regen"] - sd.amount) < 0.05
     elif eff == "evade": r["evade"] = round(c.get_slash_evade(), 3); r["ok"] = abs(r["evade"] - sd.amount) < 0.01
     elif eff == "shield":
         # (her hit points can rise meanwhile: the regeneration slash's trial may still be healing her; the shield's own count says it)

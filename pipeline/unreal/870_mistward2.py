@@ -17,7 +17,9 @@ levels). Writes into each level's generator (the C++ is RD/RDMistward2.cpp, ever
   a boss gives the Warrior one of its tier
 Level 5 gets Mistward's shields (its Warrior's worst shield) and their breakdowns at the anvil, and its traps (in trap gauntlets only: the room and hallway shares
 0) and the Rogue's trap finding. Each level's start section is built again (its furniture is saved with the map).
-Run on any level (it opens both, mistward_castle first, and ends on mistward_castle). Args: none"""
+Run on any level (it opens both, mistward_castle first, and ends on mistward_castle). Before packaging run 869 again: the
+special rooms' pieces (the fountain, the statue, the throne) are drawn through the sections' instanced meshes and need its
+usage flags. Args: none"""
 import unreal, math
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools()
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)

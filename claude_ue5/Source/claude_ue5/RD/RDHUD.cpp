@@ -2258,7 +2258,11 @@ void ARDHUD::DrawHotbar(float Sc)
 	UFont* Small = GEngine->GetSmallFont();
 	// (the third list: the ten quick slots, empty ones too, each drawing what she put there)
 	const bool bQuick = Gen->bQuickSlots;
-	const int32 N = bQuick ? 10 : FMath::Min(Gen->Weapons.Num(), 10);
+	// (a spell cast alongside the drawn weapon takes no quick slot: it stands after the ten, its key E, its cooldown and mana
+	// shown as before (the PR review's find: the Warlock's fire had gone from the bar))
+	TArray<int32> Along;
+	if (bQuick) for (int32 I = 0; I < Gen->Weapons.Num(); ++I) if (Gen->Weapons[I].bAlongside) Along.Add(I);
+	const int32 N = bQuick ? 10 + Along.Num() : FMath::Min(Gen->Weapons.Num(), 10);
 	if (N <= 0) return;
 	const float S = 64.f * Sc, Gp = 8.f * Sc, W = N * S + (N - 1) * Gp;
 	const float X0 = (Canvas->ClipX - W) * 0.5f, Y0 = Canvas->ClipY - S - 26.f * Sc;
@@ -2266,7 +2270,7 @@ void ARDHUD::DrawHotbar(float Sc)
 	float Tw, Th;
 	for (int32 Si = 0; Si < N; ++Si)
 	{
-		const int32 I = bQuick ? Cb->WeaponOfSlot(Si) : Si;
+		const int32 I = bQuick ? (Si < 10 ? Cb->WeaponOfSlot(Si) : Along[Si - 10]) : Si;
 		if (!Gen->Weapons.IsValidIndex(I))
 		{
 			// (an empty quick slot: dim, its number)

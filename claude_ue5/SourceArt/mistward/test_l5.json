@@ -27,7 +27,7 @@
      "rings": 1,
      "ring_scale": 2.0,
      "plate_outlined": 1,
-     "red_rogue": 0.1959
+     "red_rogue": 0.1532
     },
     {
      "trap": "Cursed",
@@ -39,16 +39,16 @@
      "rings": 1,
      "ring_scale": 2.2,
      "plate_outlined": 1,
-     "red_rogue": 0.2024
+     "red_rogue": 0.2072
     }
    ],
    "traps": 13,
    "boxes": [
     [
-     0.394,
-     0.204,
-     0.534,
-     0.384
+     0.397,
+     0.206,
+     0.537,
+     0.386
     ],
     [
      0.416,
@@ -242,7 +242,7 @@
     2560,
     2560
    ],
-   "head_diff": 9.08,
+   "head_diff": 9.17,
    "luma_on": 0.0,
    "luma_off": 0.0,
    "helmet_row": "helmet|1|Plate Armour",
@@ -255,8 +255,8 @@
    "share": 0.24,
    "refused": [],
    "hand_rest": [
-    6.3,
-    8.5
+    6.1,
+    8.6
    ],
    "plain": {
     "lost": 30.4,
@@ -279,7 +279,7 @@
     "blocking": false,
     "speed": 311.0,
     "hand": [
-     6.1,
+     6.2,
      8.5
     ]
    },
@@ -288,6 +288,13 @@
     "normal": 311.0,
     "blocking": 155.5,
     "ratio": 0.5
+   },
+   "after_restart": {
+    "blocking": false,
+    "hand": [
+     2.0,
+     7.9
+    ]
    },
    "mage_blocking": false
   },
@@ -328,14 +335,13 @@
     "Arming Sword",
     "Dagger",
     "Eastern Sabre",
+    "Leaf-Blade Knife",
     "Longbow",
     "Longsword",
-    "Painted Viking Shield",
     "Plate Knight's Sword",
     "Sherwood Sword",
     "Viking Round Shield",
     "Viking Shortsword",
-    "Viking Sword",
     "Village Shield (green)",
     "Village Shield (red)"
    ],
@@ -358,10 +364,10 @@
     ],
     "her_d": 120
    },
-   "describe": "take the viking round shield",
+   "describe": "take the arming sword",
    "f_refused": "",
    "took": {
-    "item": "Viking Round Shield",
+    "item": "Arming Sword",
     "gained": 1,
     "taken_flag": "1",
     "drawn": "0",
@@ -373,39 +379,39 @@
    "ok": true,
    "kinds": {
     "Trap gauntlet": 6,
-    "Fountain of speed": 5,
-    "Vault": 5,
-    "Arena": 5,
+    "Fountain of speed": 6,
+    "Vault": 6,
+    "Arena": 6,
     "Shrine": 6,
     "Healing fountain": 6,
-    "Fountain of mana": 5,
+    "Fountain of mana": 6,
     "Throne room": 4
    },
    "refused": [],
    "shrine": {
     "describe": "pray at the shrine",
     "f": "shrine",
-    "blessing": "Blessing of the bulwark",
+    "blessing": "Blessing of swiftness",
     "damage_x": 1.0,
-    "armour": 0.25,
-    "speed": 0.0,
+    "armour": 0.0,
+    "speed": 0.2,
     "again": "shrine used"
    },
    "heal": {
     "f": "fountain",
     "hp_gain": 0.6,
     "speed_x": 1.0,
-    "speed_bonus": 0.0,
+    "speed_bonus": 0.2,
     "again": "fountain dry",
-    "particles": 14
+    "particles": 15
    },
    "speed": {
     "f": "fountain",
     "hp_gain": 0.0,
-    "speed_x": 1.3,
+    "speed_x": 1.083,
     "speed_bonus": 0.3,
     "again": "fountain dry",
-    "particles": 11
+    "particles": 8
    },
    "mana": {
     "f": "fountain",
@@ -443,9 +449,9 @@
     "won": 1,
     "prize": [
      [
-      "Dagger",
-      "Desert Hero’s Armour",
-      "Slickstone"
+      "Dexterity Ring 1",
+      "Leather Strips",
+      "Patch Kit"
      ]
     ],
     "opens_after": true
@@ -464,25 +470,26 @@
     "chest_loot": [
      "Longsword",
      "Orc Warrior’s Armour",
-     "Dexterity Ring 1"
+     "Dexterity Ring 1",
+     "Longbow"
     ]
    },
    "vault": {
-    "doors": 6,
+    "doors": 4,
     "locked_f": "vault locked",
     "open_without_key": false,
     "key_chests": 1,
-    "key_room": 27,
-    "key_chest_f": "trunk",
+    "key_room": 20,
+    "key_chest_f": "chest",
     "other_opened": 0,
     "has_key": 1,
     "f": "vault",
     "open_with_key": true,
     "key_after": 0,
-    "vault_chests": 25,
+    "vault_chests": 18,
     "vault_loot": [
-     "Rare Healing Potion",
-     "Dexterity Ring 5"
+     "Magic Potency Ring 6",
+     "Heater Shield"
     ],
     "tier_beyond": [
      [
@@ -497,13 +504,13 @@
     "encounters": 4,
     "label": "THE USURPER: ORC 03",
     "alive": 1,
-    "slain_notice": "THE USURPER IS SLAIN  -  THE VERDANT SLASH IS YOURS",
+    "slain_notice": "THE USURPER IS SLAIN  -  THE BLOOD SLASH IS YOURS",
     "usurper_uses": 1,
     "slashes_given": [
-     "Verdant Slash"
+     "Blood Slash"
     ],
     "slash_in_pack": [
-     "slash|Verdant Slash|1"
+     "slash|Blood Slash|1"
     ]
    }
   },
@@ -575,7 +582,7 @@
       "poison": 1
      },
      "burning": true,
-     "dot": 11.92,
+     "dot": 11.93,
      "want_dot": 12.0,
      "ok": true
     },
@@ -598,7 +605,7 @@
      "hit": true,
      "bonus": 9.0,
      "want_bonus": 9.0,
-     "fx": 46,
+     "fx": 45,
      "procs": {
       "drain": 1
      },
@@ -616,7 +623,7 @@
      "procs": {
       "knockback": 1
      },
-     "moved_cm": 305,
+     "moved_cm": 302,
      "want_cm": 300.0,
      "ok": true
     },
@@ -639,7 +646,7 @@
      "hit": true,
      "bonus": 8.0,
      "want_bonus": 8.0,
-     "fx": 27,
+     "fx": 54,
      "procs": {
       "evade": 1
      },
@@ -707,7 +714,7 @@
       "tide": 1
      },
      "slow": 0.2,
-     "moved_cm": 413,
+     "moved_cm": 415,
      "ok": true
     },
     "Inferno Slash": {
@@ -716,11 +723,11 @@
      "hit": true,
      "bonus": 100.6,
      "want_bonus": 24.0,
-     "fx": 53,
+     "fx": 62,
      "procs": {
       "inferno": 1
      },
-     "near_lost": 38.6,
+     "near_lost": 38.4,
      "near_burning": true,
      "far_lost": 0.0,
      "ok": true
@@ -791,8 +798,8 @@
       "void": 1
      },
      "closer_cm": [
-      151,
-      149,
+      159,
+      135,
       0
      ],
      "slow": 0.25,
@@ -820,7 +827,7 @@
      "want_bonus": 32.0,
      "fx": 37,
      "procs": {
-      "drain": 1,
+      "burn": 1,
       "prismatic": 1
      },
      "ok": true
