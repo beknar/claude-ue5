@@ -210,6 +210,7 @@ void URDCombatComponent::SelectWeapon(int32 Index)
 	if (AttackTime >= 0.f) EndAttack();
 	if (WeaponIndex >= 0 && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Draw"), GetOwner()->GetActorLocation());
 	WeaponIndex = Index;
+	ReadyAbility = NAME_None; UpdateQuickFirst();          // (the quick bar's choice follows the weapon drawn)
 	const FRDWeaponDef& W = Generator->Weapons[Index];
 	USkeletalMeshComponent* M = Body();
 	auto Hold = [&](UStaticMeshComponent* C, UStaticMesh* Mesh, FName Bone, const FTransform& Grip)
@@ -404,6 +405,8 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 		if (Best) O->SetActorRotation(FRotator(0.f, ((Best->GetActorLocation() - L) * FVector(1, 1, 0)).Rotation().Yaw, 0.f));
 	}
 	AI->PlaySlotAnimationAsDynamicMontage(Clip, RDCombatSlot, 0.1f, 0.18f, Rate, 1, -1.f, T0);
+	// (its effects on her fists and legs: each from its time in the clip)
+	EndLimbFx(); LimbOn.SetNum(W->LimbFx.Num()); AttackT0 = T0; AttackRate = Rate;
 	AttackTime = 0.f; AttackLen = (T1 - T0) / Rate; AttackHit = FMath::Clamp((Hit - T0) / Rate, 0.05f, AttackLen); bHitDone = false;
 	bWhooshDone = false;
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
@@ -450,6 +453,7 @@ void URDCombatComponent::EndAttack()
 	AttackTime = -1.f;
 	SetSlowed(false);
 	StopCharge();
+	EndLimbFx();
 	ShowLoadedBolt(true);
 }
 
@@ -599,6 +603,7 @@ void URDCombatComponent::Fall()
 			SetMessage(FString::Printf(TEXT("Your things (%d) lie where you fell: go back for them (F)"), Things.Num()));
 		}
 	}
+	EndLimbFx(true);          // (the effects on her fists and legs gone with her)
 	bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
 	if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
 	if (AI && W && W->Death)
@@ -622,7 +627,7 @@ void URDCombatComponent::Revive(bool bToStart)
 	SetBlocking(false); bSlashShieldUp = false; HasteUntil = SlashEvadeUntil = DeflectUntil = BlessUntil = -100.f;
 	for (FSlashArea& A : SlashAreas) if (UFXSystemComponent* F = A.Fx.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); }
 	SlashAreas.Reset();
-	bDead = false; Health = MaxHealth; Mana = MaxMana; AttackTime = -1.f; StaggerUntil = -100.f; StopCharge(); EndRoll(); ShowLoadedBolt(true);
+	bDead = false; Health = MaxHealth; Mana = MaxMana; AttackTime = -1.f; StaggerUntil = -100.f; StopCharge(); EndLimbFx(true); EndRoll(); ShowLoadedBolt(true);
 	Effects.Reset(); SetSlowed(false); UpdateWalkSpeed();
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
 	if (bToStart && O && Generator)
@@ -696,6 +701,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (AttackTime >= 0.f)
 	{
 		AttackTime += Dt;
+		TickLimbFx();
 		const bool bSpell = IsSpell();
 		if (!bWhooshDone && !bSpell && AttackTime >= AttackHit - 0.16f) { bWhooshDone = true; Generator->PlaySoundAt(TEXT("Player.Whoosh"), GetOwner()->GetActorLocation()); }
 		// (the third list: the slash on the weapon sweeps with the blow)
@@ -789,7 +795,7 @@ void URDCombatComponent::ClearItems()
 	InventoryCursor = 0;
 	ArmourWornOut = ItemsRepaired = ItemsCrafted = 0;
 	// (the third list's: the tab, the slots, the helmet, the slashes' work, the blessing)
-	SlashWith = NAME_None; SlashCursor = 0; InvTab = 0; AssignSlot = 0; bHelmetHidden = false; QuickSlots.Reset(); LastWeaponCount = -1;
+	SlashWith = NAME_None; SlashCursor = 0; InvTab = 0; AssignSlot = 0; bHelmetHidden = false; QuickSlots.Reset(); QuickOff.Reset(); ReadyAbility = NAME_None; QuickFirst = 0; LastWeaponCount = -1;
 	SetBlocking(false); SlashProcs.Reset(); SlashBonusDealt = 0.f; BlockedHits = 0; StunReadyAt.Reset(); bSlashShieldUp = false;
 	HasteUntil = SlashEvadeUntil = DeflectUntil = BlessUntil = -100.f; BlessName.Reset();
 	UpdateWalkSpeed();
@@ -945,6 +951,9 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 			const FRDWeaponDef& W = Generator->Weapons[I];
 			Out.Add(W.Durability > 0.f ? FString::Printf(TEXT("weapon|%s|%.0f|%.0f"), *W.Name.ToString(), GetWeaponWear(I), W.Durability) : FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
 		}
+	// (the quick bar's abilities, after the weapons: "ability|<name>|<its slot, -1: off the bar>")
+	if (Generator && Generator->bQuickSlots)
+		for (const FName& A : GetAbilities()) Out.Add(FString::Printf(TEXT("ability|%s|%d"), *A.ToString().Mid(1), QuickSlots.IndexOfByKey(A)));
 	auto KindOf = [this](FName N) { const int32 Ix = Generator ? Generator->FindItem(N) : -1; return Ix >= 0 ? Generator->Items[Ix].Kind : ERDItemKind::Healing; };
 	auto Usable = [](ERDItemKind K) { return K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed || K == ERDItemKind::Food; };
 	for (const FName& N : CarriedOrder) if (Usable(KindOf(N))) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
@@ -1513,6 +1522,7 @@ bool URDCombatComponent::UseInventoryEntry()
 	if (P.Num() >= 2 && P[0] == TEXT("slash")) return BeginSlash(FName(*P[1]));
 	if (P.Num() >= 1 && P[0] == TEXT("helmet")) return ToggleHelmet();
 	if (P.Num() >= 2 && P[0] == TEXT("key")) { SetMessage(TEXT("The vault's key: F at the vault's door opens it")); return false; }
+	if (P.Num() >= 2 && P[0] == TEXT("ability")) { SetMessage(FString::Printf(TEXT("%s: 1-0 (Y) puts it on the quick bar, its own number again takes it off"), *P[1])); return false; }
 	if (P.Num() >= 2 && P[0] == TEXT("weapon"))
 	{
 		// (the third list's lines name their weapon's index: a tab or a stack is no longer the list's order)
@@ -1678,15 +1688,21 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 		TArray<FString> P;
 		if (L.IsValidIndex(InventoryCursor)) L[InventoryCursor].ParseIntoArray(P, TEXT("|"), false);
 		const int32 Wi = P.Num() >= 5 && P[0] == TEXT("weapon") ? FCString::Atoi(*P[4]) : -1;
+		// (an ability's line: "@<name>" on the bar)
+		const FName Ab = P.Num() >= 2 && P[0] == TEXT("ability") ? FName(*(TEXT("@") + P[1])) : NAME_None;
 		if (Generator->bQuickSlots)
 		{
-			if (Pressed({ EKeys::Gamepad_DPad_Left })) AssignSlot = (AssignSlot + 9) % 10;
-			if (Pressed({ EKeys::Gamepad_DPad_Right })) AssignSlot = (AssignSlot + 1) % 10;
+			// (the slot the gamepad's Y puts it into: any of the bar's, or one past its end (a new slot))
+			const int32 Range = FMath::Max(10, QuickSlots.Num() + 1);
+			if (Pressed({ EKeys::Gamepad_DPad_Left })) AssignSlot = (AssignSlot + Range - 1) % Range;
+			if (Pressed({ EKeys::Gamepad_DPad_Right })) AssignSlot = (AssignSlot + 1) % Range;
+			AssignSlot = FMath::Clamp(AssignSlot, 0, Range - 1);
 			static const FKey Nums[10] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine, EKeys::Zero };
-			if (Wi >= 0)
+			auto Put = [&](int32 S) { if (Wi >= 0) AssignQuickSlot(S, Wi); else AssignQuickEntry(S, Ab); };
+			if (Wi >= 0 || !Ab.IsNone())
 			{
-				for (int32 K = 0; K < 10; ++K) if (Pressed({ Nums[K] })) { AssignQuickSlot(K, Wi); AssignSlot = K; }
-				if (Pressed({ EKeys::Gamepad_FaceButton_Top }) || (bMouse && Pressed({ EKeys::RightMouseButton }))) AssignQuickSlot(AssignSlot, Wi);
+				for (int32 K = 0; K < 10; ++K) if (Pressed({ Nums[K] })) { Put(K); AssignSlot = K; }
+				if (Pressed({ EKeys::Gamepad_FaceButton_Top }) || (bMouse && Pressed({ EKeys::RightMouseButton }))) Put(AssignSlot);
 			}
 		}
 		if (Generator->bBossSlashes && Wi >= 0 && Pressed({ EKeys::T, EKeys::Gamepad_FaceButton_Left })) RemoveSlash(Wi);
@@ -1788,7 +1804,12 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 		if (PC->WasInputKeyJustPressed(EKeys::B) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) StartRoll(FVector::ZeroVector);
 		// (the Martial Artist: V, the right mouse button or RT dashes forward into an attack)
 		if (Generator->DashClip && (PC->WasInputKeyJustPressed(EKeys::V) || PC->WasInputKeyJustPressed(EKeys::RightMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightTrigger))) StartDash();
-		if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder)) StartAttack();
+		// (an ability made ready on the quick bar (the D-pad): the attack button makes it instead of a blow)
+		if (!ReadyAbility.IsNone())
+		{
+			if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) UseAbility(ReadyAbility);
+		}
+		else if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder)) StartAttack();
 		const bool bToggleR = PC->IsInputKeyDown(EKeys::R) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f;
 		if (bToggleR && !bRunToggleDown) SetRunMode(!bRunMode);
 		bRunToggleDown = bToggleR;
@@ -1971,6 +1992,104 @@ void URDCombatComponent::LaunchBolt()
 void URDCombatComponent::PlaceBoltMesh(UStaticMeshComponent* C, const FRDWeaponDef& W, const FVector& At, const FVector& Dir) const
 {
 	if (C) C->SetWorldTransform(W.BoltMeshTransform * FTransform(Dir.Rotation(), At));
+}
+
+UFXSystemComponent* URDCombatComponent::SpawnLimbFx(const FRDLimbFx& L, bool bAttach)
+{
+	USkeletalMeshComponent* M = Body();
+	const AActor* O = GetOwner();
+	UNiagaraSystem* Ns = Cast<UNiagaraSystem>(L.Fx);
+	if (!Ns || !M || !O) return nullptr;
+	// (turned as she faces, Turn on top; where the bone is, Offset in its space)
+	const FRotator R = (FQuat(FRotator(0.f, O->GetActorRotation().Yaw, 0.f)) * FQuat(L.Turn)).Rotator();
+	const FVector At = M->GetSocketTransform(L.Bone).TransformPosition(L.Offset);
+	UNiagaraComponent* C = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, Ns, At, R, FVector(L.bUserScale ? 1.f : L.Scale), false, false, ENCPoolMethod::None, false);
+	if (!C) return nullptr;
+	if (L.bUserScale) C->SetVariableFloat(TEXT("User.Scale"), L.Scale);
+	if (bAttach)
+	{
+		// (a system spawned at a location is absolute in place, turn and scale: attached so it stayed where it was made,
+		// 25 to 130 cm off her moving fist (measured); its place follows the bone, its turn and scale stay her own)
+		C->SetUsingAbsoluteLocation(false); C->SetUsingAbsoluteRotation(true); C->SetUsingAbsoluteScale(true);
+		C->AttachToComponent(M, FAttachmentTransformRules::KeepRelativeTransform, L.Bone);
+		C->SetRelativeLocation(L.Offset);
+		C->SetWorldRotation(R); C->SetWorldScale3D(FVector(L.bUserScale ? 1.f : L.Scale));
+	}
+	C->Activate(true);
+	SpellComps.Add(C); LimbMade.Add(C); ++LimbFxMade;
+	return C;
+}
+
+void URDCombatComponent::TickLimbFx()
+{
+	const FRDWeaponDef* W = AttackWeapon();
+	const AActor* O = GetOwner();
+	if (!W || !O || W->LimbFx.Num() == 0) return;
+	if (LimbOn.Num() != W->LimbFx.Num()) LimbOn.SetNum(W->LimbFx.Num());
+	const float T = AttackT0 + AttackTime * AttackRate;          // (seconds of the clip)
+	const FQuat Face(FRotator(0.f, O->GetActorRotation().Yaw, 0.f));
+	for (int32 K = 0; K < W->LimbFx.Num(); ++K)
+	{
+		const FRDLimbFx& L = W->LimbFx[K];
+		FLimbOn& On = LimbOn[K];
+		const bool bOneShot = L.StopAt <= L.StartAt;
+		if (On.State == 0 && T >= L.StartAt)
+		{
+			On.State = bOneShot ? 2 : 1; On.Life = L.Life;
+			if (UFXSystemComponent* C = SpawnLimbFx(L, !bOneShot))
+			{
+				if (bOneShot) TimedFx.Add({ C, FMath::Max(L.Life, 0.1f), true });
+				else On.Fx = C;
+			}
+		}
+		if (On.State != 1) continue;
+		UFXSystemComponent* C = On.Fx.Get();
+		if (C) C->SetWorldRotation((Face * FQuat(L.Turn)).Rotator());
+		if (T >= L.StopAt)
+		{
+			On.State = 2; On.Fx = nullptr;
+			if (C) { C->Deactivate(); TimedFx.Add({ C, FMath::Max(L.Life, 0.05f), true }); }
+		}
+	}
+}
+
+void URDCombatComponent::EndLimbFx(bool bNow)
+{
+	for (FLimbOn& On : LimbOn)
+		if (UFXSystemComponent* C = On.Fx.Get())
+		{
+			if (bNow) { C->DeactivateImmediate(); C->DestroyComponent(); }
+			else { C->Deactivate(); TimedFx.Add({ C, FMath::Max(On.Life, 0.05f), true }); }
+		}
+	LimbOn.Reset();
+	if (bNow)
+		for (const TWeakObjectPtr<UFXSystemComponent>& F : LimbMade)
+			if (UFXSystemComponent* C = F.Get()) { C->DeactivateImmediate(); C->DestroyComponent(); }
+	LimbMade.RemoveAll([](const TWeakObjectPtr<UFXSystemComponent>& F) { return !F.IsValid(); });
+}
+
+TArray<FString> URDCombatComponent::GetSpellFxLines() const
+{
+	TArray<FString> Out;
+	for (const USceneComponent* C : SpellComps)
+	{
+		const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C);
+		if (!IsValid(Nc)) continue;
+		const int32 N = RDNiagaraParticles(Nc);
+		if (N <= 0) continue;
+		const FVector L = Nc->GetComponentLocation();
+		Out.Add(FString::Printf(TEXT("%s|%d|%.0f|%.0f|%.0f"), Nc->GetAsset() ? *Nc->GetAsset()->GetName() : TEXT("?"), N, L.X, L.Y, L.Z));
+	}
+	return Out;
+}
+
+int32 URDCombatComponent::GetLimbFxParticles(int32& Systems) const
+{
+	int32 Num = 0; Systems = 0;
+	for (const TWeakObjectPtr<UFXSystemComponent>& F : LimbMade)
+		if (const UNiagaraComponent* Nc = Cast<UNiagaraComponent>(F.Get()))
+			if (IsValid(Nc)) { const int32 N = RDNiagaraParticles(Nc); Num += N; if (N > 0) ++Systems; }
+	return Num;
 }
 
 void URDCombatComponent::EndBoltFx(FBolt& B, float Linger)

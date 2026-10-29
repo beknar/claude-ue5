@@ -1,0 +1,1463 @@
+{
+ "tag": "qb2",
+ "plan": [
+  "quickbar",
+  "chilook"
+ ],
+ "level": "martial_arts",
+ "steps": [
+  {
+   "step": "quickbar",
+   "ok": true,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick"
+   ],
+   "bar": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick"
+   ],
+   "abilities": [
+    "@Dodge",
+    "@Dash"
+   ],
+   "refused": [],
+   "dpad": [
+    [
+     "Fists",
+     0,
+     0
+    ],
+    [
+     "Straight Punch",
+     1,
+     0
+    ],
+    [
+     "Side Kick",
+     2,
+     0
+    ],
+    [
+     "Smashing Strike",
+     3,
+     0
+    ],
+    [
+     "Roundhouse Kick",
+     4,
+     0
+    ],
+    [
+     "Chain Punch",
+     5,
+     0
+    ],
+    [
+     "Rear Kick",
+     6,
+     0
+    ],
+    [
+     "Piercing Palm",
+     7,
+     0
+    ],
+    [
+     "Axe Kick",
+     8,
+     0
+    ],
+    [
+     "Meteor Fist",
+     9,
+     0
+    ],
+    [
+     "Spinning Kick",
+     10,
+     1
+    ],
+    [
+     "Fists",
+     0,
+     0
+    ]
+   ],
+   "ability_lines": [
+    "ability|Dodge|-1",
+    "ability|Dash|-1"
+   ],
+   "after_dash": [
+    "Fists",
+    "Straight Punch",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick"
+   ],
+   "after_off": [
+    "Fists",
+    "None",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick"
+   ],
+   "after_found": [
+    "Fists",
+    "Dagger",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick"
+   ],
+   "dash": {
+    "dashes": 1,
+    "abilities_used": 1
+   },
+   "dodge_put": true,
+   "after_dodge": [
+    "Fists",
+    "Dagger",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick",
+    "@Dodge"
+   ],
+   "ready": "@Dodge",
+   "ready_cursor": 12,
+   "ready_first": 3,
+   "roll": {
+    "rolls": 1,
+    "ready_after": "None"
+   }
+  },
+  {
+   "step": "chilook",
+   "ok": true,
+   "chi": {
+    "Straight Punch": {
+     "started": true,
+     "made": 3,
+     "want": 3,
+     "pictures_at": [
+      0.08,
+      0.2,
+      0.34
+     ],
+     "particles_then": [
+      10,
+      21,
+      27
+     ],
+     "most": 27,
+     "left": 0,
+     "places": [
+      [
+       [
+        "hand_r",
+        0.0,
+        0.0,
+        92.4
+       ],
+       [
+        "hand_r",
+        0.0,
+        16.6,
+        483.6
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        20.4,
+        133.4
+       ],
+       [
+        "hand_r",
+        0.0,
+        16.6,
+        483.6
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        50.9,
+        236.7
+       ],
+       [
+        "hand_r",
+        0.0,
+        16.6,
+        483.6
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       17,
+       [
+        "NS_Muzzle_Wind01",
+        "NS_SlashImpact_Wind"
+       ]
+      ],
+      [
+       0.25,
+       15,
+       [
+        "NS_Muzzle_Wind01",
+        "NS_SlashImpact_Wind"
+       ]
+      ],
+      [
+       0.5,
+       7,
+       [
+        "NS_SlashImpact_Wind"
+       ]
+      ],
+      [
+       0.75,
+       3,
+       [
+        "NS_SlashImpact_Wind"
+       ]
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.75
+    },
+    "Side Kick": {
+     "started": true,
+     "made": 3,
+     "want": 3,
+     "pictures_at": [
+      0.18,
+      0.3,
+      0.44
+     ],
+     "particles_then": [
+      58,
+      76,
+      78
+     ],
+     "most": 80,
+     "left": 0,
+     "places": [
+      [
+       [
+        "calf_r",
+        0.0,
+        18.0,
+        478.5
+       ],
+       [
+        "foot_r",
+        0.0,
+        18.0,
+        478.5
+       ]
+      ],
+      [
+       [
+        "calf_r",
+        0.0,
+        18.0,
+        478.5
+       ],
+       [
+        "foot_r",
+        0.0,
+        18.0,
+        478.5
+       ]
+      ],
+      [
+       [
+        "calf_r",
+        0.0,
+        18.0,
+        478.5
+       ],
+       [
+        "foot_r",
+        0.0,
+        18.0,
+        478.5
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       32,
+       [
+        "NS_Muzzle_Lightning01",
+        "NS_SlashImpact_Lightning"
+       ]
+      ],
+      [
+       0.25,
+       28,
+       [
+        "NS_Muzzle_Lightning01",
+        "NS_SlashImpact_Lightning"
+       ]
+      ],
+      [
+       0.5,
+       7,
+       [
+        "NS_SlashImpact_Lightning"
+       ]
+      ],
+      [
+       0.75,
+       2,
+       [
+        "NS_SlashImpact_Lightning"
+       ]
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.75
+    },
+    "Smashing Strike": {
+     "started": true,
+     "made": 2,
+     "want": 2,
+     "pictures_at": [
+      0.38,
+      0.5,
+      0.64
+     ],
+     "particles_then": [
+      30,
+      38,
+      56
+     ],
+     "most": 56,
+     "left": 0,
+     "places": [
+      [
+       [
+        "hand_r",
+        0.0,
+        7.0,
+        243.1
+       ],
+       [
+        "hand_l",
+        0.0,
+        6.4,
+        242.7
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        75.9,
+        246.9
+       ],
+       [
+        "hand_l",
+        0.0,
+        79.7,
+        250.7
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        81.8,
+        264.5
+       ],
+       [
+        "hand_l",
+        0.0,
+        86.0,
+        270.0
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       15,
+       [
+        "NS_SlashImpact_Fire"
+       ]
+      ],
+      [
+       0.25,
+       15,
+       [
+        "NS_SlashImpact_Fire"
+       ]
+      ],
+      [
+       0.5,
+       9,
+       [
+        "NS_SlashImpact_Fire"
+       ]
+      ],
+      [
+       0.75,
+       1,
+       [
+        "NS_SlashImpact_Fire"
+       ]
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.75
+    },
+    "Roundhouse Kick": {
+     "started": true,
+     "made": 2,
+     "want": 2,
+     "pictures_at": [
+      0.18,
+      0.3,
+      0.44
+     ],
+     "particles_then": [
+      14,
+      22,
+      32
+     ],
+     "most": 32,
+     "left": 0,
+     "places": [
+      [
+       [
+        "calf_r",
+        0.0,
+        0.0,
+        150.9
+       ],
+       [
+        "foot_r",
+        0.0,
+        0.0,
+        150.9
+       ]
+      ],
+      [
+       [
+        "calf_r",
+        0.0,
+        0.0,
+        254.8
+       ],
+       [
+        "foot_r",
+        0.0,
+        0.0,
+        254.8
+       ]
+      ],
+      [
+       [
+        "calf_r",
+        0.0,
+        0.0,
+        257.4
+       ],
+       [
+        "foot_r",
+        0.0,
+        21.5,
+        234.4
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       35,
+       [
+        "NS_Shield_Ink_01",
+        "NS_SlashImpact_Ink"
+       ]
+      ],
+      [
+       0.25,
+       15,
+       [
+        "NS_SlashImpact_Ink"
+       ]
+      ],
+      [
+       0.5,
+       10,
+       [
+        "NS_SlashImpact_Ink"
+       ]
+      ],
+      [
+       0.75,
+       4,
+       [
+        "NS_SlashImpact_Ink"
+       ]
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.75
+    },
+    "Chain Punch": {
+     "started": true,
+     "made": 7,
+     "want": 7,
+     "pictures_at": [
+      0.64,
+      0.76,
+      0.9
+     ],
+     "particles_then": [
+      101,
+      117,
+      109
+     ],
+     "most": 117,
+     "left": 0,
+     "places": [
+      [],
+      [],
+      []
+     ],
+     "after_move": [
+      [
+       0.0,
+       82,
+       [
+        "NS_SlashImpact_Cosmic"
+       ]
+      ],
+      [
+       0.25,
+       45,
+       [
+        "NS_SlashImpact_Cosmic"
+       ]
+      ],
+      [
+       0.5,
+       24,
+       [
+        "NS_SlashImpact_Cosmic"
+       ]
+      ],
+      [
+       0.75,
+       3,
+       [
+        "NS_SlashImpact_Cosmic"
+       ]
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.75
+    },
+    "Rear Kick": {
+     "started": true,
+     "made": 3,
+     "want": 3,
+     "pictures_at": [
+      0.32,
+      0.44,
+      0.58
+     ],
+     "particles_then": [
+      129,
+      103,
+      69
+     ],
+     "most": 138,
+     "left": 0,
+     "places": [
+      [
+       [
+        "thigh_r",
+        0.0,
+        0.0,
+        114.3
+       ],
+       [
+        "calf_r",
+        0.0,
+        0.0,
+        114.3
+       ],
+       [
+        "foot_r",
+        0.0,
+        0.0,
+        114.3
+       ]
+      ],
+      [
+       [
+        "thigh_r",
+        0.0,
+        0.0,
+        114.3
+       ],
+       [
+        "calf_r",
+        0.0,
+        0.0,
+        114.3
+       ],
+       [
+        "foot_r",
+        0.0,
+        0.0,
+        114.3
+       ]
+      ],
+      [
+       [
+        "thigh_r",
+        0.0,
+        0.0,
+        114.3
+       ],
+       [
+        "calf_r",
+        0.0,
+        0.0,
+        114.3
+       ],
+       [
+        "foot_r",
+        0.0,
+        0.0,
+        114.3
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       10,
+       [
+        "NS_Hit_RotatingSpheres_V1"
+       ]
+      ],
+      [
+       0.25,
+       59,
+       [
+        "NS_Hit_RotatingSpheres_V1"
+       ]
+      ],
+      [
+       0.5,
+       0,
+       []
+      ],
+      [
+       0.75,
+       0,
+       []
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.25
+    },
+    "Piercing Palm": {
+     "started": true,
+     "made": 3,
+     "want": 3,
+     "pictures_at": [
+      0.3,
+      0.42,
+      0.56
+     ],
+     "particles_then": [
+      212,
+      5,
+      3
+     ],
+     "most": 219,
+     "left": 0,
+     "places": [
+      [
+       [
+        "hand_r",
+        0.0,
+        65.0,
+        217.3
+       ],
+       [
+        "hand_l",
+        0.0,
+        65.0,
+        217.3
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        65.0,
+        217.3
+       ],
+       [
+        "hand_l",
+        0.0,
+        65.0,
+        217.3
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        65.0,
+        217.3
+       ],
+       [
+        "hand_l",
+        0.0,
+        65.0,
+        217.3
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       39,
+       [
+        "NS_Hit_Rod_V1"
+       ]
+      ],
+      [
+       0.25,
+       33,
+       [
+        "NS_Hit_Rod_V1"
+       ]
+      ],
+      [
+       0.5,
+       0,
+       []
+      ],
+      [
+       0.75,
+       0,
+       []
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.25
+    },
+    "Axe Kick": {
+     "started": true,
+     "made": 1,
+     "want": 1,
+     "pictures_at": [
+      0.44,
+      0.5,
+      0.58
+     ],
+     "particles_then": [
+      44,
+      424,
+      841
+     ],
+     "most": 1579,
+     "left": 0,
+     "places": [
+      [],
+      [],
+      []
+     ],
+     "after_move": [
+      [
+       0.0,
+       2916,
+       [
+        "NS_Hit_Fireworks01"
+       ]
+      ],
+      [
+       0.25,
+       3153,
+       [
+        "NS_Hit_Fireworks01"
+       ]
+      ],
+      [
+       0.5,
+       2967,
+       [
+        "NS_Hit_Fireworks01"
+       ]
+      ],
+      [
+       0.75,
+       1439,
+       [
+        "NS_Hit_Fireworks01"
+       ]
+      ],
+      [
+       1.0,
+       76,
+       [
+        "NS_Hit_Fireworks01"
+       ]
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 1.0
+    },
+    "Meteor Fist": {
+     "started": true,
+     "made": 1,
+     "want": 1,
+     "pictures_at": [
+      0.66,
+      0.78,
+      0.92
+     ],
+     "particles_then": [
+      114,
+      115,
+      110
+     ],
+     "most": 116,
+     "left": 0,
+     "places": [
+      [
+       [
+        "hand_r",
+        0.0,
+        31.2,
+        442.5
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        82.4,
+        457.0
+       ]
+      ],
+      [
+       [
+        "hand_r",
+        0.0,
+        82.3,
+        455.4
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       23,
+       [
+        "NS_Hit_Fireball01"
+       ]
+      ],
+      [
+       0.25,
+       3,
+       [
+        "NS_Hit_Fireball01"
+       ]
+      ],
+      [
+       0.5,
+       0,
+       []
+      ],
+      [
+       0.75,
+       0,
+       []
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.25
+    },
+    "Spinning Kick": {
+     "started": true,
+     "made": 6,
+     "want": 6,
+     "pictures_at": [
+      0.43,
+      0.55,
+      0.69
+     ],
+     "particles_then": [
+      124,
+      133,
+      143
+     ],
+     "most": 144,
+     "left": 0,
+     "places": [
+      [
+       [
+        "calf_r",
+        0.0,
+        24.0,
+        637.9
+       ],
+       [
+        "foot_r",
+        0.0,
+        24.0,
+        637.9
+       ],
+       [
+        "thigh_r",
+        0.0,
+        0.0,
+        256.2
+       ],
+       [
+        "calf_r",
+        0.0,
+        35.9,
+        289.3
+       ],
+       [
+        "foot_r",
+        0.0,
+        67.2,
+        324.1
+       ]
+      ],
+      [
+       [
+        "calf_r",
+        0.0,
+        24.0,
+        637.9
+       ],
+       [
+        "foot_r",
+        0.0,
+        24.0,
+        637.9
+       ],
+       [
+        "thigh_r",
+        0.0,
+        0.0,
+        261.1
+       ],
+       [
+        "calf_r",
+        0.0,
+        42.8,
+        273.8
+       ],
+       [
+        "foot_r",
+        0.0,
+        80.8,
+        325.0
+       ]
+      ],
+      [
+       [
+        "calf_r",
+        0.0,
+        24.0,
+        637.9
+       ],
+       [
+        "foot_r",
+        0.0,
+        24.0,
+        637.9
+       ],
+       [
+        "thigh_r",
+        0.0,
+        0.0,
+        261.1
+       ],
+       [
+        "calf_r",
+        0.0,
+        41.0,
+        277.3
+       ],
+       [
+        "foot_r",
+        0.0,
+        74.0,
+        334.6
+       ]
+      ]
+     ],
+     "after_move": [
+      [
+       0.0,
+       50,
+       [
+        "NS_Hit_Lightning01",
+        "NS_Slash_Lightning"
+       ]
+      ],
+      [
+       0.25,
+       15,
+       [
+        "NS_Hit_Lightning01",
+        "NS_Slash_Lightning"
+       ]
+      ],
+      [
+       0.5,
+       0,
+       []
+      ],
+      [
+       0.75,
+       0,
+       []
+      ],
+      [
+       1.0,
+       0,
+       []
+      ],
+      [
+       1.25,
+       0,
+       []
+      ],
+      [
+       1.5,
+       0,
+       []
+      ],
+      [
+       1.75,
+       0,
+       []
+      ],
+      [
+       2.0,
+       0,
+       []
+      ],
+      [
+       2.25,
+       0,
+       []
+      ],
+      [
+       2.5,
+       0,
+       []
+      ]
+     ],
+     "last_particles_s": 0.25
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_qb2_qb_scrolled.png",
+  "mw_qb2_qb_inventory.png",
+  "mw_qb2_qb_ready.png",
+  "mw_qb2_look_StraightPunch_1.png",
+  "mw_qb2_look_StraightPunch_2.png",
+  "mw_qb2_look_StraightPunch_3.png",
+  "mw_qb2_look_SideKick_1.png",
+  "mw_qb2_look_SideKick_2.png",
+  "mw_qb2_look_SideKick_3.png",
+  "mw_qb2_look_SmashingStrike_1.png",
+  "mw_qb2_look_SmashingStrike_2.png",
+  "mw_qb2_look_SmashingStrike_3.png",
+  "mw_qb2_look_RoundhouseKick_1.png",
+  "mw_qb2_look_RoundhouseKick_2.png",
+  "mw_qb2_look_RoundhouseKick_3.png",
+  "mw_qb2_look_ChainPunch_1.png",
+  "mw_qb2_look_ChainPunch_2.png",
+  "mw_qb2_look_ChainPunch_3.png",
+  "mw_qb2_look_RearKick_1.png",
+  "mw_qb2_look_RearKick_2.png",
+  "mw_qb2_look_RearKick_3.png",
+  "mw_qb2_look_PiercingPalm_1.png",
+  "mw_qb2_look_PiercingPalm_2.png",
+  "mw_qb2_look_PiercingPalm_3.png",
+  "mw_qb2_look_AxeKick_1.png",
+  "mw_qb2_look_AxeKick_2.png",
+  "mw_qb2_look_AxeKick_3.png",
+  "mw_qb2_look_MeteorFist_1.png",
+  "mw_qb2_look_MeteorFist_2.png",
+  "mw_qb2_look_MeteorFist_3.png",
+  "mw_qb2_look_SpinningKick_1.png",
+  "mw_qb2_look_SpinningKick_2.png",
+  "mw_qb2_look_SpinningKick_3.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

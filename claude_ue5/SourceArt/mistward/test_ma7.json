@@ -1,7 +1,8 @@
 {
- "tag": "ma5",
+ "tag": "ma7",
  "plan": [
-  "martial"
+  "martial",
+  "slots"
  ],
  "level": "mistward_castle",
  "steps": [
@@ -18,17 +19,18 @@
    ],
    "pawn": "BP_MA_MartialArtistCharacter_C",
    "fists": {
-    "damage_of": 14.0,
+    "damage": 44.0,
+    "damage_of": 44.0,
     "bonus": 0.0,
     "started": true,
-    "lost": 14.0,
+    "lost": 44.0,
     "hits": 1
    },
    "ring_worn": true,
    "ring": {
     "amount": 1.0,
-    "fists": 28.0,
-    "chi": 22.0
+    "fists": 88.0,
+    "chi": 23.0
    },
    "knife": {
     "index": 3,
@@ -40,20 +42,20 @@
     "lost": 25.3
    },
    "ring_off": {
-    "fists": 14.0,
+    "fists": 44.0,
     "knife": 14.3
    },
    "chi": {
     "name": "Straight Punch",
     "started": true,
     "mana": 7.0,
-    "lost": 22.0,
-    "fx": 11,
+    "lost": 23.0,
+    "fx": 43,
     "released": 0,
     "bolts": 1,
-    "damage_of": 22.0,
+    "damage_of": 23.0,
     "pictured": true,
-    "splash_lost": 11.0
+    "splash_lost": 11.5
    },
    "chi_far": {
     "name": "Straight Punch",
@@ -63,7 +65,7 @@
     "fx": 0,
     "released": 0,
     "bolts": 0,
-    "damage_of": 22.0,
+    "damage_of": 23.0,
     "pictured": false
    },
    "dash": {
@@ -73,7 +75,7 @@
     "length": 444.0,
     "at_it": true,
     "attacked": 1,
-    "lost": 14.0,
+    "lost": 44.0,
     "dashes": 1
    },
    "rolls": 1,
@@ -108,15 +110,78 @@
     "Straight Punch",
     "Side Kick"
    ]
+  },
+  {
+   "step": "slots",
+   "ok": true,
+   "slots_filled": [
+    "Dagger",
+    "Arming Sword",
+    "Longbow",
+    "Viking Sword",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "refused": [],
+   "after_5": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "Viking Sword",
+    "Longbow",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "assign_slot": 7,
+   "after_y": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "None",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "after_rmb": [
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "Arming Sword",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "drawn_seq": [
+    "Longbow",
+    "Dagger",
+    "Longbow",
+    "Arming Sword",
+    "Longbow"
+   ]
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "Message Log, Content Browser",
  "shots": [
-  "mw_ma5_ma_knife.png",
-  "mw_ma5_ma_chi_straight.png",
-  "mw_ma5_ma_dash.png",
-  "mw_ma5_ma_armour.png"
+  "mw_ma7_ma_knife.png",
+  "mw_ma7_ma_chi_straight.png",
+  "mw_ma7_ma_dash.png",
+  "mw_ma7_ma_armour.png",
+  "mw_ma7_slots_inventory.png",
+  "mw_ma7_slots_bar.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 2
 }

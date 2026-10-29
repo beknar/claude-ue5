@@ -327,8 +327,10 @@ void URDCombatComponent::SpellBurst(FBolt& B, const FVector& At, ARDMonster* Dir
 	if (!S) { if (UPointLightComponent* L = B.Light.Get()) L->DestroyComponent(); return; }
 	const float Dmg = B.Dmg >= 0.f ? B.Dmg : (Generator->Weapons.IsValidIndex(B.Weapon) ? GetDamageOf(B.Weapon) : S->Damage);
 	UFXSystemComponent* HitFx = SpawnSpellFx(S->ImpactFx, At, B.Vel.IsNearlyZero() ? FRotator::ZeroRotator : B.Vel.Rotation(), S->ImpactFxScale, S);
-	// (a chi bolt's hit (the Martial Artist's: a range of its own) gone for good 2 s on; the Mage's are left as they were)
-	if (HitFx && Generator->Weapons.IsValidIndex(B.Weapon) && Generator->Weapons[B.Weapon].BoltRange > 0.f) TimedFx.Add({ HitFx, 2.f, true });
+	// (a chi bolt's hit (the Martial Artist's: a range of its own) gone for good after its BurstLife (2 s when none); the Mage's
+	// are left as they were)
+	if (HitFx && Generator->Weapons.IsValidIndex(B.Weapon) && Generator->Weapons[B.Weapon].BoltRange > 0.f)
+		TimedFx.Add({ HitFx, Generator->Weapons[B.Weapon].BurstLife > 0.f ? Generator->Weapons[B.Weapon].BurstLife : 2.f, true });
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *S->SoundKey.ToString())), At);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, S->LightIntensity * 3.f }); }
 	// (what stays on a monster it struck: a slow, a burn that gives some back to her)

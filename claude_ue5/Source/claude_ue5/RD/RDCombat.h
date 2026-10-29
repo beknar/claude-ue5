@@ -112,6 +112,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") FVector LastBoltFrom = FVector::ZeroVector;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") FVector LastBurstAt = FVector::ZeroVector;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastBoltFlown = 0.f;
+	/** the effects on her fists and legs (FRDLimbFx): how many were made; the particles of those not yet destroyed, and how
+	 *  many systems have any (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 LimbFxMade = 0;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") int32 GetLimbFxParticles(int32& Systems) const;
+	/** every effect of hers with particles now: "<system>|<particles>|<x>|<y>|<z>" (tests: what lingers, and where) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FString> GetSpellFxLines() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsSpell() const;
 	/** bolts in the air now, and where (tests, the reel's record) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") TArray<FVector> GetBolts() const;
@@ -159,6 +165,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool StartDash();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsDashing() const { return bDashing && RollTime >= 0.f; }
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 Dashes = 0;
+	/** abilities made from the quick bar (UseAbility: a number key, or ready on the D-pad and the attack button) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 AbilitiesUsed = 0;
 	/** what the last dash did: how far she meant to go (cm) and the monster it went at (none: straight ahead) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastDashLength = 0.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") TWeakObjectPtr<ARDMonster> LastDashTarget;
@@ -418,18 +426,36 @@ public:
 		for (const FBox2D& B : TabBoxes) Out.Add(FString::Printf(TEXT("%.1f|%.1f|%.1f|%.1f"), B.Min.X, B.Min.Y, B.Max.X, B.Max.Y));
 		return Out;
 	}
-	/** the quick slots (bQuickSlots): each the name of a weapon or spell of hers (none: empty) */
+	/** the quick bar (bQuickSlots): each slot the name of a weapon or spell of hers, or of an ability ("@Dodge", "@Dash"),
+	 *  or none (empty). Ten slots at least (1 to 0); more when she has more than ten things on it (the user's of
+	 *  2026-10-29): those are reached with the D-pad, and the bar's ten pictures scroll to them */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FName> GetQuickSlots() const { return QuickSlots; }
-	/** a weapon of her list (Index) into a slot (0..9); false: no such weapon, or one cast alongside */
+	/** a weapon of her list (Index) into a slot (AssignQuickEntry); false: no such weapon, or one cast alongside */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickSlot(int32 Slot, int32 Index);
-	/** draws what a slot holds (false: empty, or not hers any more) */
+	/** a weapon's name or an ability ("@Dash") into a slot (0 up to one past the last: a new slot at the end); the one
+	 *  there goes to the slot the entry came from. Put into the slot it is in already, it comes off the bar and stays off
+	 *  (the user's choice: weapons found later still fill empty slots) until put on again */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickEntry(int32 Slot, FName Entry);
+	/** what a slot holds used: a weapon drawn, an ability made at once (a number key, a click); false: empty */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool SelectQuickSlot(int32 Slot);
-	/** the next (Step 1) or the one before (-1) filled slot after the drawn one */
+	/** the next (Step 1) or the one before (-1) filled slot after the one chosen, all of them (the D-pad): a weapon drawn,
+	 *  an ability made ready (the attack button makes it) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void CycleQuickSlot(int32 Step);
 	/** the slot the drawn weapon is in (-1: none), the slot the gamepad's Y puts the chosen row into */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetQuickSlotOfDrawn() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetAssignSlot() const { return AssignSlot; }
-	/** her weapon list's index of the weapon a slot names (-1: none) */
+	/** the slot chosen now (the ready ability's, else the drawn weapon's; -1: none) and the first of the ten shown */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetQuickCursor() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetQuickFirst() const { return QuickFirst; }
+	/** the ability made ready on the bar (none: a weapon) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") FName GetReadyAbility() const { return ReadyAbility; }
+	/** her hero's abilities that can go on the bar ("@Dodge", "@Dash"), and one made (false: not hers, or not now) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FName> GetAbilities() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool UseAbility(FName Ability);
+	static bool IsAbility(FName Entry) { return Entry.ToString().StartsWith(TEXT("@")); }
+	/** a slot's number as the bar shows it: 1 to 9, 0, then 11, 12... (those have no key) */
+	static FString SlotLabel(int32 Slot) { return Slot < 10 ? FString::FromInt((Slot + 1) % 10) : FString::FromInt(Slot + 1); }
+	/** her weapon list's index of the weapon a slot names (-1: none, or an ability) */
 	int32 WeaponOfSlot(int32 Slot) const;
 	/** slots filled the first time and as she finds weapons or learns spells */
 	void FillQuickSlots();
@@ -504,6 +530,11 @@ private:
 	mutable FName HelmetCacheFor = NAME_None; mutable int32 HelmetCacheMeshes = -1; mutable bool bHelmetCache = false;
 	int32 InvTab = 0;
 	TArray<FName> QuickSlots;
+	/** what she took off the bar (not put back by FillQuickSlots); the ability made ready; the first slot shown */
+	TSet<FName> QuickOff;
+	FName ReadyAbility = NAME_None;
+	int32 QuickFirst = 0;
+	void UpdateQuickFirst();
 	int32 AssignSlot = 0;
 	bool bHelmetHidden = false;
 	bool bBlocking = false, bBlockKeyDown = false;
@@ -694,6 +725,17 @@ private:
 	 *  some projectile systems' particles hanging in the air where the bolt burst (the user's of 2026-10-28; measured: up to
 	 *  43 particles 2.5 s after) */
 	void EndBoltFx(FBolt& B, float Linger = 0.4f);
+	/** the attack's effects on her limbs (its weapon's LimbFx): the clip's place (the part's start, the rate), each one's
+	 *  component and state (0 waiting, 1 on, 2 done) */
+	float AttackT0 = 0.f, AttackRate = 1.f;
+	struct FLimbOn { TWeakObjectPtr<UFXSystemComponent> Fx; float Life = 0.4f; uint8 State = 0; };
+	TArray<FLimbOn> LimbOn;
+	/** every limb effect made and not destroyed yet (GetLimbFxParticles) */
+	TArray<TWeakObjectPtr<UFXSystemComponent>> LimbMade;
+	void TickLimbFx();
+	/** every limb effect still on ended: faded for its Life (or at once), then destroyed */
+	void EndLimbFx(bool bNow = false);
+	UFXSystemComponent* SpawnLimbFx(const FRDLimbFx& L, bool bAttach);
 	/** bolts stuck where they struck, and how long they stay */
 	struct FStuck { TWeakObjectPtr<UStaticMeshComponent> Mesh; float Left = 0.f; };
 	TArray<FStuck> Stuck;

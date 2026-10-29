@@ -1,5 +1,5 @@
 {
- "tag": "mr6",
+ "tag": "mr8",
  "plan": [
   "martialroom"
  ],
@@ -40,119 +40,119 @@
      "name": "Straight Punch",
      "started": true,
      "mana": 0.0,
-     "lost": 22.0,
-     "fx": 9,
-     "released": 0,
-     "bolts": 1,
-     "damage_of": 22.0,
-     "pictured": true
-    },
-    {
-     "name": "Side Kick",
-     "started": true,
-     "mana": 0.0,
      "lost": 23.0,
-     "fx": 117,
+     "fx": 43,
      "released": 0,
      "bolts": 1,
      "damage_of": 23.0,
      "pictured": true
     },
     {
-     "name": "Smashing Strike",
+     "name": "Side Kick",
      "started": true,
      "mana": 0.0,
      "lost": 24.0,
-     "fx": 236,
+     "fx": 94,
      "released": 0,
      "bolts": 1,
      "damage_of": 24.0,
      "pictured": true
     },
     {
-     "name": "Roundhouse Kick",
+     "name": "Smashing Strike",
      "started": true,
      "mana": 0.0,
      "lost": 25.0,
-     "fx": 91,
+     "fx": 67,
      "released": 0,
      "bolts": 1,
      "damage_of": 25.0,
      "pictured": true
     },
     {
-     "name": "Chain Punch",
+     "name": "Roundhouse Kick",
      "started": true,
      "mana": 0.0,
      "lost": 26.0,
-     "fx": 208,
+     "fx": 45,
      "released": 0,
      "bolts": 1,
      "damage_of": 26.0,
      "pictured": true
     },
     {
-     "name": "Rear Kick",
+     "name": "Chain Punch",
      "started": true,
      "mana": 0.0,
      "lost": 27.0,
-     "fx": 77,
+     "fx": 132,
      "released": 0,
      "bolts": 1,
      "damage_of": 27.0,
      "pictured": true
     },
     {
-     "name": "Piercing Palm",
+     "name": "Rear Kick",
      "started": true,
      "mana": 0.0,
      "lost": 28.0,
-     "fx": 80,
+     "fx": 138,
      "released": 0,
      "bolts": 1,
      "damage_of": 28.0,
      "pictured": true
     },
     {
-     "name": "Axe Kick",
+     "name": "Piercing Palm",
      "started": true,
      "mana": 0.0,
      "lost": 29.0,
-     "fx": 226,
+     "fx": 220,
      "released": 0,
      "bolts": 1,
      "damage_of": 29.0,
      "pictured": true
     },
     {
-     "name": "Meteor Fist",
+     "name": "Axe Kick",
      "started": true,
      "mana": 0.0,
      "lost": 30.0,
-     "fx": 45,
+     "fx": 2839,
      "released": 0,
      "bolts": 1,
      "damage_of": 30.0,
      "pictured": true
     },
     {
-     "name": "Spinning Kick",
+     "name": "Meteor Fist",
      "started": true,
      "mana": 0.0,
      "lost": 31.0,
-     "fx": 1583,
+     "fx": 131,
      "released": 0,
      "bolts": 1,
      "damage_of": 31.0,
+     "pictured": true
+    },
+    {
+     "name": "Spinning Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 32.0,
+     "fx": 186,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 32.0,
      "pictured": true
     }
    ],
    "free": {
     "started": true,
     "released": 1,
-    "fx": 13,
+    "fx": 31,
     "mana_full": true,
-    "bolt_farthest_m": 4.21,
+    "bolt_farthest_m": 4.26,
     "bolt_frames": 7
    },
    "linger": {
@@ -169,7 +169,7 @@
    },
    "dash": {
     "started": true,
-    "closed_m": 5.03
+    "closed_m": 5.16
    },
    "chi_ok": [
     "Straight Punch",
@@ -185,20 +185,20 @@
    ]
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_mr6_ma_room.png",
-  "mw_mr6_ma_StraightPunch.png",
-  "mw_mr6_ma_SideKick.png",
-  "mw_mr6_ma_SmashingStrike.png",
-  "mw_mr6_ma_RoundhouseKick.png",
-  "mw_mr6_ma_ChainPunch.png",
-  "mw_mr6_ma_RearKick.png",
-  "mw_mr6_ma_PiercingPalm.png",
-  "mw_mr6_ma_AxeKick.png",
-  "mw_mr6_ma_MeteorFist.png",
-  "mw_mr6_ma_SpinningKick.png"
+  "mw_mr8_ma_room.png",
+  "mw_mr8_ma_StraightPunch.png",
+  "mw_mr8_ma_SideKick.png",
+  "mw_mr8_ma_SmashingStrike.png",
+  "mw_mr8_ma_RoundhouseKick.png",
+  "mw_mr8_ma_ChainPunch.png",
+  "mw_mr8_ma_RearKick.png",
+  "mw_mr8_ma_PiercingPalm.png",
+  "mw_mr8_ma_AxeKick.png",
+  "mw_mr8_ma_MeteorFist.png",
+  "mw_mr8_ma_SpinningKick.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 2
 }

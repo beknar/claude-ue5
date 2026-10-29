@@ -138,20 +138,21 @@ W5S = L5 and WAY == "spells"            # (level 5: the spells, rings, monsters 
 W5G = L5 and WAY == "grip"              # (level 5: the two-handed grip close up: run5g)
 W5W2 = L5 and WAY == "chop2"            # (level 5: Warrior2's chop test, Warrior2 alone (861 placed her): run5w2)
 W5M = MW and WAY == "mistward"          # (mistward_castle: the four heroes and the castle's rules: run5m)
-W5M2 = MW and WAY == "mistward2"        # (mistward_castle: the third list (docs/improvements2.txt): run5m2)
-W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward", "mistward2")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
+W5M2 = MW and WAY in ("mistward2", "mistward3")        # (mistward_castle: the third list (docs/improvements2.txt): run5m2; "mistward3": the same with the Martial Artist (mw3_martial))
+W5M3 = MW and WAY == "mistward3"
+W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward", "mistward2", "mistward3")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
 W5K = W5C or W5S or W5X or W5M or W5M2  # (the crafting panel's and the repair list's recording)
 DX, DY = {"east": (1, 0), "north": (0, 1), "west": (-1, 0), "south": (0, -1)}.get(WAY, (1, 0))
 # (level 4: the hero fights as in her own level)
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
 MELEE = L4 and HERO == "Warrior"
 CHESTS = L3 or L4                  # (she opens the containers she passes)
-if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner"].index(HERO) + 7
+if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner", "MartialArtist"].index(HERO) + 7
 if len(sys.argv) > 6: SEED = int(sys.argv[6])        # (level 4: a session seed of the reel's choosing: what the containers on her way hold)
-OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + (("cine_mw2_%s.json" if W5M2 else "cine_mw_%s.json") if MODE == "render" else ("cine_mw2_rehearsal_%s.json" if W5M2 else "cine_mw_rehearsal_%s.json")) % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
+OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + (("cine_mw3_%s.json" if W5M3 else "cine_mw2_%s.json" if W5M2 else "cine_mw_%s.json") if MODE == "render" else ("cine_mw3_rehearsal_%s.json" if W5M3 else "cine_mw2_rehearsal_%s.json" if W5M2 else "cine_mw_rehearsal_%s.json")) % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
     ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else f"cine_caps_{HERO.lower()}.json" if W5X else "cine_chop2_warrior2.json" if W5W2 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
     if MODE == "render" else ("cine_rehearsal_spells_%s.json" % HERO.lower() if W5S else "cine_rehearsal.json"))
-SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3"}[HERO] if L4 else
+SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3", "MartialArtist": "martialartist"}[HERO] if L4 else
                                                              {"1": "caster", "2": "darkcaster", "3": "rogue"}[LV]) + r"\speeds.txt"
 def along(v): return v.x * DX + v.y * DY
 V = unreal.Vector; Rot = unreal.Rotator; GS = unreal.GameplayStatics; IP = unreal.IntPoint
@@ -607,7 +608,8 @@ def fight_w(m, take=0):
             if take and c.hits_taken - taken0 < take and (gap < 260.0 or W5S) and (held is None or T() - held < (6.0 if W5S else 5.0)):
                 # (her armour takes its blows; run5s: she holds fire until they land, what they carry shows)
                 held = held if held is not None else T(); face()
-            elif (ranged and gap < 1500.0 and sees(l, m)) or (not ranged and gap < reach - 10.0):
+            # (the Martial Artist's chi: a bolt with a range of its own (4 m): refused from farther, so she closes in to 3.3 m)
+            elif (ranged and gap < (330.0 if wd.bolt_range > 0 else 1500.0) and sees(l, m)) or (not ranged and gap < reach - 10.0):
                 face()
                 # (run5h: a bow or crossbow shoots where she faces: only once she faces it (a monster behind her took
                 # every arrow into the wall in front of her))
@@ -2156,7 +2158,7 @@ def run5m2():
     gen, c, p = G["gen"], G["combat"], G["pawn"]
     s0, centre, room, anvil = mw_hall()
     S["note"]["special_rooms"] = [str(x) for x in gen.get_special_room_lines()]
-    yield from {"Warrior": mw2_warrior, "Mage": mw2_mage, "Warlock": mw2_warlock, "Rogue": mw2_rogue}[HERO](s0, centre, room, anvil)
+    yield from {"Warrior": mw2_warrior, "Mage": mw2_mage, "Warlock": mw2_warlock, "Rogue": mw2_rogue, "MartialArtist": mw3_martial}[HERO](s0, centre, room, anvil)
     # (to the end: whatever comes at her is fought (left idle, a boss's band killed the Rogue in a rehearsal))
     mw_quiet(False)
     while True:
@@ -2469,6 +2471,130 @@ def mw2_rogue(s0, centre, room, anvil):
         lure(False)
         event("usurper", slain=not alive(um) if um is not None else None, notice=str(gen.tier_notice), uses=md_get(gen.room_uses, "usurper"))
 
+def mw3_slots(why):
+    c = G["combat"]; event("bar", why=why, slots=[str(x) for x in c.get_quick_slots()], first=c.get_quick_first(), cursor=c.get_quick_cursor(),
+                          ready=str(c.get_ready_ability()), weapon=str(c.get_weapon_name()))
+def mw3_cast(name, near=300.0):
+    """(mw3) one chi attack (drawn from the bar) at the nearest monster: she closes to within `near` (a chi reaches 4 m),
+    faces it, strikes; the reel fills her mana first (said by the caption)"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    # (a caged monster, behind its cell's bars, is out of her sight: a chi at it is refused)
+    G.setdefault("skip", set()).update(q.get_name() for q in gen.get_monsters() if alive(q) and q.caged)
+    m = threat()
+    if m is not None and m.get_name() in G.get("skip", ()): m = None          # (one left before: caged, out of her sight)
+    m = m or nearest_monster(IP(0, 0), 60)
+    if m is None: return False
+    t0 = T(); route = None; rt = -9.0
+    while alive(m) and T() - t0 < 6.0:
+        l = loc(); ml = m.get_actor_location(); gap = d2(l, ml) - m.capsule_component.get_scaled_capsule_radius()
+        if gap < near: break
+        if route is None or T() - rt > 0.6: route = Route(path(l, ml)); rt = T()
+        move(route.target() if len(route.p) > 1 and gap > 300.0 else ml, run=True); doors()
+        camera(side=30.0, pitch=-13.0, rate=70.0); yield
+    if not alive(m): return False
+    ml = m.get_actor_location(); G["heading"] = yaw_to(loc(), ml); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    c.set_mana(c.get_max_mana()); h0 = m.get_health(); a0 = c.attacks_made
+    ok = c.start_attack(); key_hit("lmb")
+    if not ok:
+        # (refused: no monster she can see within its 4 m (a pillar between): closer, then once more)
+        t2 = T()
+        while alive(m) and T() - t2 < 4.0 and (d2(loc(), m.get_actor_location()) - m.capsule_component.get_scaled_capsule_radius() > 140.0 or not sees(loc(), m)):
+            move(m.get_actor_location(), run=True); doors(); camera(side=30.0, pitch=-13.0, rate=70.0); yield
+        if not alive(m): return False
+        # (she faces it over a few frames, the camera behind her, and tries again every quarter second)
+        for _ in range(6):
+            t3 = T()
+            while T() - t3 < 0.25:
+                ml = m.get_actor_location(); G["heading"] = yaw_to(loc(), ml); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+                camera(side=20.0, pitch=-13.0, rate=200.0); yield
+            if not alive(m): return False
+            c.set_mana(c.get_max_mana()); ok = c.start_attack(); key_hit("lmb")
+            if ok: break
+        if not ok:
+            # (still refused: one she cannot see (a caged monster behind its bars): left for another)
+            G.setdefault("skip", set()).add(m.get_name()); event("chi_refused", name=name, monster=str(m.monster_name), msg=str(c.message)); return False
+    event("chi", name=name, ok=bool(ok), msg=str(c.message), drawn=str(c.get_weapon_name()), attacking=bool(c.is_attacking()), gap=round(d2(loc(), m.get_actor_location()), 0), dz=round(m.get_actor_location().z - loc().z, 0), monster=str(m.monster_name), damage=round(c.get_damage_of(c.get_weapon_index()), 1), mana=round(gen.get_editor_property("weapons")[c.get_weapon_index()].mana_cost))
+    # (the camera from her front right while the move plays: its look is on her fists and legs)
+    t1 = T()
+    while (c.is_attacking() or T() - t1 < 0.3) and T() - t1 < 2.5:
+        camera(side=125.0, pitch=-10.0, rate=140.0); yield
+    event("chi_done", name=name, lost=round(h0 - (m.get_health() if alive(m) else 0.0), 1), killed=not alive(m))
+    yield from pause(0.5, lambda: camera(side=60.0, pitch=-12.0, rate=60.0))
+    return True
+def mw3_to(name):
+    """(mw3) her number key for a slot of the first ten; past the tenth the D-pad right until the bar's chosen slot draws
+    `name` (an ability on the way is made ready and passed)"""
+    c = G["combat"]; n = 0
+    qs = [str(x) for x in c.get_quick_slots()]
+    if name in qs and qs.index(name) < 10:
+        k = qs.index(name); yield from mw2_key(NUMS[k], label=str((k + 1) % 10)); mw3_slots("key"); yield from pause(0.3); return
+    while (str(c.get_weapon_name()) != name or str(c.get_ready_ability()) != "None") and n < 16:
+        yield from mw2_key("Gamepad_DPad_Right", label="dpad_right"); n += 1; mw3_slots("dpad"); yield from pause(0.25)
+def mw3_martial(s0, centre, room, anvil):
+    """the Martial Artist (the user's of 2026-10-28 and 2026-10-29): the reel teaches her the eight chi attacks four tier
+    bosses would (said); the inventory's weapons tab (the chi attacks' pictures, her abilities); Dash put in quick slot 3
+    (the key 3), Dodge on a new slot after the last (the D-pad to it, Y): thirteen slots; outside the D-pad steps through
+    all of them, the ten pictures scrolling; each of her ten chi attacks drawn from the bar in turn and struck at a lured
+    monster (the reel fills her mana before each, said), its look on her fists and legs; Dash made from the bar (ready on
+    the D-pad, RB) and Dodge; her fists to the end"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    mw_set(V(centre.x + 250, centre.y + 150, 100.0), yaw=200.0, side=-25.0, pitch=-16.0)
+    event("start", at=[round(loc().x), round(loc().y)], way="great hall", weapons=[str(w.name) for w in gen.get_editor_property("weapons")])
+    yield from pause(2.2, lambda: camera(side=-25.0, pitch=-16.0, rate=40.0))
+    got = gen.unlock_hero_weapons(8)
+    event("given", items={"chi attacks": 8}, why="the reel teaches her the eight chi attacks four tier bosses would", unlocked=[str(w.name) for w in gen.get_editor_property("weapons")])
+    yield from pause(1.2); mw3_slots("taught")
+    # ---- the inventory: her weapons and abilities; Dash into slot 3, Dodge after the last
+    seg("inventory"); yield from mw2_inv(0, "quickbar"); yield from pause(2.4)
+    yield from mw2_cursor("ability", "Dash"); yield from pause(1.0)
+    yield from mw2_key("Three", label="3"); mw3_slots("dash_in_3"); yield from pause(2.0)
+    yield from mw2_cursor("ability", "Dodge"); yield from pause(0.8)
+    end = len(c.get_quick_slots()); n = 0
+    while c.get_assign_slot() != end and n < 24: yield from mw2_key("Gamepad_DPad_Right", label="dpad_right"); n += 1; yield from pause(0.12)
+    yield from pause(0.6); yield from mw2_key("Gamepad_FaceButton_Top", label="y"); mw3_slots("dodge_at_end"); yield from pause(2.0)
+    yield from mw2_close()
+    # ---- the D-pad through the whole bar: the pictures scroll past the tenth
+    seg("dpad"); yield from mw2_key("One", label="1"); mw3_slots("one"); yield from pause(0.6)
+    for _ in range(len([x for x in c.get_quick_slots() if str(x) != "None"])):
+        yield from mw2_key("Gamepad_DPad_Right", label="dpad_right"); mw3_slots("dpad"); yield from pause(0.55, lambda: camera(side=-20.0, pitch=-14.0, rate=30.0))
+    # ---- the ten chi attacks in turn, from the bar, at lured monsters; Dash and Dodge from the bar between
+    mw_quiet(False); lure(); seg("chi")
+    chis = [str(w.name) for w in gen.get_editor_property("weapons") if w.spell]
+    for k, nm in enumerate(chis):
+        if T() > DUR - 14.0: break
+        yield from mw3_to(nm)
+        tries = 0
+        while tries < 3 and not (yield from mw3_cast(nm)): tries += 1; yield from pause(0.5)
+        if k == 3:
+            # (Dash: its slot's number (3) makes it at once, at a monster ahead (tried again if she was still in a move))
+            d0 = c.dashes
+            for _ in range(4):
+                while c.is_attacking() or c.is_rolling(): yield
+                m = threat() or nearest_monster(IP(0, 0), 60)
+                if m is not None: G["heading"] = yaw_to(loc(), m.get_actor_location()); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+                yield from mw2_key("Three", label="3"); yield from pause(0.3)
+                if c.dashes > d0: break
+            event("ability", name="Dash", made=c.dashes - d0, how="its slot's number, 3")
+            yield from pause(1.4, lambda: camera(side=40.0, pitch=-12.0, rate=60.0))
+        if k == 6:
+            # (Dodge: on the last slot, past the ten shown: the D-pad left from the first comes round to it, then RB)
+            while c.is_attacking() or c.is_rolling(): yield
+            yield from mw2_key("One", label="1"); yield from mw2_key("Gamepad_DPad_Left", label="dpad_left"); mw3_slots("dodge_ready"); yield from pause(0.6)
+            r0 = c.rolls
+            for _ in range(4):
+                if str(c.get_ready_ability()) != "@Dodge": yield from mw2_key("Gamepad_DPad_Left", label="dpad_left")
+                yield from mw2_key("Gamepad_RightShoulder", label="rb"); yield from pause(0.3)
+                if c.rolls > r0: break
+            event("ability", name="Dodge", made=c.rolls - r0, how="ready on the D-pad, then RB")
+            yield from pause(1.2, lambda: camera(side=40.0, pitch=-12.0, rate=60.0))
+    # ---- her fists to the end
+    yield from mw2_key("One", label="1"); mw3_slots("fists"); seg("fists")
+    while T() < DUR - 1.0:
+        m = threat() or nearest_monster(IP(0, 0), 60)
+        if m is None: yield from pause(0.4, lambda: camera(side=20.0, rate=20.0)); continue
+        G["casts0"] = c.attacks_made; yield from fight_w(m)
+    lure(False)
+
 def run():
     gen, pc, p = G["gen"], G["pc"], G["pawn"]
     if W5M:
@@ -2735,7 +2861,7 @@ def sample():
             **({"fps": round(gen.get_fps(), 1), "sh": str(c.get_worn_shield()) if str(c.get_worn_shield()) != "None" else "", "shin": int(c.is_shield_in_hand()),
                 "torch": int(c.is_torch_held()), "dis": round(gen.get_disarm_progress(), 2), "near": str(gen.describe_nearest(l, 260.0)), "held": int(c.is_held()),
                 "msg": str(c.message), "mapo": int(gen.get_editor_property("map_open"))} if MW else {}),
-            **({"tab": c.get_inventory_tab(), "tabn": tab_counts(c) if c.is_inventory_open() else None, "qs": [str(x) for x in c.get_quick_slots()], "asl": c.get_assign_slot(),
+            **({"tab": c.get_inventory_tab(), "tabn": tab_counts(c) if c.is_inventory_open() else None, "qs": [str(x) for x in c.get_quick_slots()], "asl": c.get_assign_slot(), "qf": c.get_quick_first(), "qc": c.get_quick_cursor(), "ra": str(c.get_ready_ability()),
                 "blk": int(c.is_blocking()), "buffs": [str(x) for x in c.get_buff_lines()], "slp": [int(c.is_picking_slash()), c.get_slash_cursor(), str(c.get_slash_item())],
                 "helm": int(c.is_helmet_hidden()), "aw": gen.get_arena_wave(), "al": gen.get_arena_left()} if W5M2 else {})}
 def tab_counts(c):
@@ -2743,7 +2869,7 @@ def tab_counts(c):
     n = [0, 0, 0, 0, 0]
     for l in c.get_all_inventory_lines():
         k = str(l).split("|")[0]
-        n[0 if k in ("weapon", "carried") else 1 if k in ("armour", "shield", "torch", "helmet") else 2 if k == "item" else 3 if k in ("component", "repair") else 4] += 1
+        n[0 if k in ("weapon", "carried", "ability") else 1 if k in ("armour", "shield", "torch", "helmet") else 2 if k == "item" else 3 if k in ("component", "repair") else 4] += 1
     return n
 def tier_row(l):
     """(the weapons and tiers reel) what the HUD's tier panel shows (ARDHUD::DrawTiers) and a seal's prompt near her"""

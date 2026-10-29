@@ -1,5 +1,5 @@
 {
- "tag": "m5",
+ "tag": "m6",
  "plan": [
   "menu"
  ],
@@ -15,6 +15,7 @@
     "Hero_1",
     "Hero_2",
     "Hero_3",
+    "Hero_4",
     "Next",
     "Prev",
     "Start"
@@ -54,10 +55,10 @@
    "cursor_after": false
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_m5_menu_mouse.png"
+  "mw_m6_menu_mouse.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 2
 }

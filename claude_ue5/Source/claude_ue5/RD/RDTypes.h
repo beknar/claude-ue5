@@ -111,6 +111,26 @@ struct FRDSoundSet
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool b2D = false;
 };
 
+/** An effect on her body during an attack (the Martial Artist's chi attacks, the user's of 2026-10-29: wind round her fist,
+ *  lightning round her leg...). From StartAt to StopAt (seconds of the clip) it follows Bone (Offset in the bone's space),
+ *  turned as she faces (Turn on top: the bones of a Tripo rig point every way); then it fades for Life seconds and is
+ *  destroyed. StopAt <= StartAt: a one-shot (fireworks off the kick, a spark at each punch) left where the bone is at
+ *  StartAt, destroyed after Life. bUserScale: the packs' User.Scale (else the component's scale). */
+USTRUCT(BlueprintType)
+struct FRDLimbFx
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> Fx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Bone = TEXT("hand_r");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector Offset = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FRotator Turn = FRotator::ZeroRotator;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StartAt = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StopAt = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Life = 0.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bUserScale = true;
+};
+
 /** One of the player's melee weapons: the mesh in her hand (and a shield on her other arm), what it does, and the
  *  clips she wields it with (retargeted to her skeleton by pipeline/unreal/790). */
 USTRUCT(BlueprintType)
@@ -154,6 +174,8 @@ struct FRDWeaponDef
 	/** the farthest its bolt flies before it bursts (cm; 0: its Reach and 1.5 m more). The Martial Artist's chi attacks:
 	 *  4 m (the user's of 2026-10-28); with no monster within it, a chi attack is refused unless bChiWithoutTarget */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltRange = 0.f;
+	/** a chi attack's burst effect destroyed this long after it began (s; 0: 2 s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BurstLife = 0.f;
 	/** effects (a Niagara system or a Cascade particle system): on her hand from the start of the cast to the release,
 	 *  on the bolt, and where it bursts; each with its scale. When the charge is the same system as the bolt, the charge
 	 *  itself leaves her hand as the bolt (a system that takes a while to build up is full grown when it flies). */
@@ -171,6 +193,8 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BurstFlameEffect = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BurstFlameEffectScale = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BurstFlameSeconds = 0.6f;
+	/** effects on her fists and legs while the attack plays (FRDLimbFx; the Martial Artist's chi attacks) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDLimbFx> LimbFx;
 	/** the bolt lights what it passes (a point light that goes with it; brighter for a moment where it bursts) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor SpellLightColor = FLinearColor(1.f, 0.45f, 0.12f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpellLightIntensity = 0.f;

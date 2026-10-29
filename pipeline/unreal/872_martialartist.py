@@ -3,14 +3,17 @@ Run after blender_numpy/tripo_build.py with martialartist_clips.py into SourceAr
 620 for MartialArtist (her mesh, her clips, her AnimBP, BP_JRPGMartialArtistCharacter); 819 after this (her walk / run).
 - her flinch and death: Animations_Warrior's Get_Hit_1 and Dead_1 retargeted onto her rig (822's source rig)
 - her fists ("Fists", weapon type "unarmed": a Dexterity ring adds to it): Tripo's own Box_01 and Front_kick_02 (the
-  user's of 2026-10-28), each one attack played whole, its blow where one of her hands or feet moves fastest; 14 damage,
-  1.6 m reach (with "whole" off in martial_arts.json each clip listed is cut into its strikes instead: a peak of at least
+  user's of 2026-10-28), each one attack played whole, its blow where one of her hands or feet moves fastest; 1.6 m reach;
+  her damage (the user's of 2026-10-29) close to the Warrior's with an average weapon of the table: the fists' blow that
+  damage a second times their average clip, the chi table scaled so the ten do it over their moves (printed: "MA damage") (with "whole" off in martial_arts.json each clip listed is cut into its strikes instead: a peak of at least
   half the clip's fastest, 0.4 s or more from the next)
 - her chi attacks (martial_arts.json: the user's table): bolt spells (from her striking hand or foot at the blow of its
   own clip (martialartist_clips.py's `hit`), after the monster she faces, 4 m at most: FRDWeaponDef::BoltRange; the burst
-  hurting others within Splash half as much), each with its mana, damage, tier and a Magic Projectiles Vol 4 / 5 muzzle,
-  projectile and hit (none the spell table uses: asserted), bigger the higher the tier; no tome teaches them (no drop
-  chance). Two are hers from the start, the other eight her hero's LockedWeapons: two more for each tier boss she slays
+  hurting others within Splash half as much), each with its mana, damage and tier; no tome teaches them (no drop chance).
+  Their looks (the user's of 2026-10-29) are on her fists and legs while the move plays (FRDWeaponDef::LimbFx from the
+  json's `look`: wind, lightning, fire, smoke, sparks, rings, rods, fireworks, a fireball, chain lightning); the bolt is
+  unseen but for the Piercing Palm's rod, and its burst on the monster is the json's `hit`. Two are hers from the start,
+  the other eight her hero's LockedWeapons: two more for each tier boss she slays
 - her knives: each short blade of the weapons table wielded in both hands with rogue_clips.py's stabs (as the Rogue does;
   855's grip mapping onto a dagger held as 822 holds it, from her own reference pose); +30 % damage (TypeBonus)
 - her hero: 140 hit points (the Warrior's), 100 mana and 2 a second (the Mage's), light armour, HP and Dexterity rings
@@ -173,8 +176,25 @@ for n in F["clips"]:
         fa.append(a); fs.append(s0); fe.append(s1); fh.append(hit)
     report.append(f"{n} {L:.2f} s: " + ", ".join(f"{h:.2f} ({s0:.2f}-{s1:.2f})" for s0, h, s1 in ss))
 fists.attacks = fa; fists.attack_starts = fs; fists.attack_ends = fe; fists.hit_times = fh
-fists.damage = float(F["damage"]); fists.reach = float(F["reach"]); fists.arc = float(F["arc"]); fists.play_rate = float(F["play_rate"])
-fists.weapon_type = "unarmed"; fists.sound_key = F["sound"]
+# ---- her damage (the user's of 2026-10-29: close to what the Warrior does with an average weapon). The Warrior's average
+# weapon of the table, each by its rules (8 + 3 x its damage rating, +30 % her melee bonus (heroes.json; none on a bow), one
+# blow every 1.6 - (speed - 1) x 1.05 / 9 s): damage a second. Her fists' blow is that times her fists' average clip (each
+# played whole: one blow per clip); her chi attacks' table (the user's) times the share that puts the ten's damage over their
+# moves' seconds at it too
+HJ = {h["name"]: h for h in json.load(open(os.path.join(SA, "random_dungeon_magic4", "heroes.json"), encoding="utf-8"))["heroes"]}
+WB = HJ["Warrior"]["melee_bonus"]
+_d = [(8 + 3 * w["damage"]) * (1.0 + (0.0 if w["type"] == "ranged" else WB)) for w in WT["weapons"]]
+_c = [1.6 - (w["speed"] - 1) * 1.05 / 9.0 for w in WT["weapons"]]
+WARRIOR_DPS = sum(d / c for d, c in zip(_d, _c)) / len(_d)
+FIST_CYCLE = sum(e - s for s, e in zip(fs, fe)) / len(fe) / float(F["play_rate"])
+FIST_DAMAGE = round(WARRIOR_DPS * FIST_CYCLE)
+_cl = sum(TIMES[c["clip"]]["length"] for c in DATA["chi"]); _cd = sum(c["damage"] for c in DATA["chi"])
+CHI_SCALE = WARRIOR_DPS / (_cd / _cl)
+CHI_DAMAGE = {c["name"]: round(c["damage"] * CHI_SCALE) for c in DATA["chi"]}
+print(f"MA damage: the Warrior's average weapon {WARRIOR_DPS:.1f} a second; her fists one blow every {FIST_CYCLE:.2f} s: {FIST_DAMAGE} a blow"
+      f" (was {F['damage']}); the chi table x {CHI_SCALE:.3f} ({_cd / _cl:.1f} a second before): {CHI_DAMAGE}")
+fists.damage = float(FIST_DAMAGE); fists.reach = float(F["reach"]); fists.arc = float(F["arc"]); fists.play_rate = float(F["play_rate"])
+fists.weapon_type = "unarmed"; fists.sound_key = F["sound"]; fists.icon = F.get("icon", "None")          # (874's picture)
 print("MA fists:", " | ".join(report))
 # her knife (both hands): rogue_clips' stabs on her rig
 knife = blank("Knife"); knife.mesh = dm; knife.off_hand_mesh = dm
@@ -192,37 +212,50 @@ for p in eal.list_assets(f"/Game/JRPG/{CH}Anims", recursive=False):
     nm = p.split(".")[-1]
     if nm.startswith(f"AS_{CH}_Chi_") and nm[len(f"AS_{CH}_"):] not in keep: print("MA deleted the old", nm, eal.delete_asset(p.split(".")[0]))
 spells_new, chi_w = [], []
-MP = {"V4": "/Game/MagicProjectilesVol4/Particles/NiagaraSystems/", "V5": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/"}
-def chi_fx(fx):
-    """[pack, muzzle, projectile, hit] (V5: one name for all three, in its Muzzles / Projectiles / Hits folders)"""
-    if fx[0] == "V5": paths = [MP["V5"] + f"{d}/NS_{k}_{fx[1]}" for d, k in (("Muzzles", "Muzzle"), ("Projectiles", "Projectile"), ("Hits", "Hit"))]
-    else: paths = [MP["V4"] + f"NS_{k}_{n}" for k, n in zip(("Muzzle", "Projectile", "Hit"), fx[1:4])]
-    out = [unreal.load_asset(p) for p in paths]
-    for p, a in zip(paths, out): assert a, p
+PACKS = {"MP4": "/Game/MagicProjectilesVol4", "MP5": "/Game/MagicProjectilesVol5", "SL": "/Game/StylizedSlashesV2", "SH": "/Game/StylizedShieldsVol1",
+         "TE1": "/Game/ToonExplosionVol1", "LD": "/Game/LootDropsV2"}
+def fx_of(p):
+    """an effect by its short path (martial_arts.json's note: MP5/Hits/NS_Hit_Orb01 ...); None for none"""
+    if not p: return None
+    k, rest = p.split("/", 1); path = f"{PACKS[k]}/Particles/NiagaraSystems/{rest}"
+    a = unreal.load_asset(path); assert a, path
+    return a
+def limb_fx(c, t):
+    """the chi's look (FRDLimbFx, one per bone listed; `at`: one-shots), within its clip (t: its length)"""
+    out = []
+    for e in c.get("look", []):
+        fx = fx_of(e["fx"])
+        for b in e["bones"]:
+            for (s0, s1) in ([(a, a) for a in e["at"]] if "at" in e else [(e["from"], e["to"])]):
+                assert 0.0 <= s0 <= t["length"] and s1 <= t["length"], f"{c['name']}: {e['fx']} at {s0}-{s1} outside the clip"
+                L = unreal.RDLimbFx(); L.fx = fx; L.bone = b; L.scale = float(e["scale"]); L.start_at = float(s0); L.stop_at = float(s1)
+                L.life = float(e.get("life", 0.4)); L.user_scale = bool(e.get("user_scale", True))
+                if "offset" in e: L.offset = V(*e["offset"])
+                if "turn" in e: L.turn = unreal.Rotator(pitch=e["turn"][0], yaw=e["turn"][1], roll=e["turn"][2])
+                out.append(L)
     return out
-# (no chi effect may be one the spell table (the Mage's) uses)
-SP = json.load(open(os.path.join(SA, "random_dungeon_magic5", "spells.json"), encoding="utf-8"))
-used = {v.split(":", 1)[1].split("/")[-1] for s in SP["spells"] for v in s.get("fx", {}).values()}
 for i, c in enumerate(DATA["chi"]):
-    cast, bolt, hit = chi_fx(c["fx"])
-    clash = [x.get_name() for x in (cast, bolt, hit) if x.get_name() in used]
-    assert not clash, f"{c['name']}: {clash} are the spell table's"
-    sc = float(c["fx_scale"]); spl = float(DATA["splash"][str(c["tier"])])
+    # (the user's of 2026-10-29: each chi's look on her fists or legs (wind, lightning, fire, smoke, sparks, rings, rods,
+    # fireworks, a fireball, chain lightning); the blow itself an unseen bolt, 4 m at most, with its burst on the monster;
+    # only the Piercing Palm's rods fly)
+    t = TIMES[c["clip"]]; a = clip(c["clip"])
+    look = limb_fx(c, t); bolt = fx_of(c.get("bolt")); hit = fx_of(c.get("hit"))
+    bsc = float(c.get("bolt_scale", 1.0)); hsc = float(c.get("hit_scale", 1.0)); spl = float(DATA["splash"][str(c["tier"])])
     s = unreal.RDSpellDef(); s.name = c["name"]; s.number = 100 + i + 1; s.type = unreal.RDSpellType.OFFENSE; s.kind = unreal.RDSpellKind.BOLT
-    s.effect = c["effect"]; s.mana = float(c["mana"]); s.damage = float(c["damage"]); s.tier = int(c["tier"]); s.reach = float(DATA["chi_reach"])
+    s.effect = c["effect"]; s.mana = float(c["mana"]); s.damage = float(CHI_DAMAGE[c["name"]]); s.tier = int(c["tier"]); s.reach = float(DATA["chi_reach"])
     s.splash = spl; s.drop_chance = 0.0; s.cooldown = 0.0; s.bolt_speed = float(DATA["chi_bolt_speed"])
-    s.cast_fx = cast; s.bolt_fx = bolt; s.impact_fx = hit; s.cast_fx_scale = sc; s.bolt_fx_scale = sc; s.impact_fx_scale = sc
+    s.cast_fx = None; s.bolt_fx = bolt; s.impact_fx = hit; s.bolt_fx_scale = bsc; s.impact_fx_scale = hsc
     s.sound_key = "Fire"; s.icon = c["icon"]
     spells_new.append(s)
-    t = TIMES[c["clip"]]; a = clip(c["clip"])
     w = blank(c["name"]); w.spell = True; w.attacks = [a]; w.attack_starts = [0.0]; w.attack_ends = [float(t["length"])]; w.hit_times = [float(t["hit"])]
-    w.damage = float(c["damage"]); w.mana_cost = float(c["mana"]); w.reach = float(DATA["chi_reach"]); w.spell_bone = t["bone"] if t["bone"] != "pelvis" else "hand_r"
+    w.damage = float(CHI_DAMAGE[c["name"]]); w.mana_cost = float(c["mana"]); w.reach = float(DATA["chi_reach"]); w.spell_bone = t["bone"] if t["bone"] != "pelvis" else "hand_r"
     w.sound_key = "Fire"; w.icon = c["icon"]
-    # (her bolt: from the striking hand or foot, after the monster she faces, 4 m at most; the muzzle's flash on the limb as she strikes)
-    w.charge_effect = cast; w.charge_effect_scale = sc; w.bolt_effect = bolt; w.bolt_effect_scale = sc; w.burst_effect = hit; w.burst_effect_scale = sc
+    w.charge_effect = None; w.bolt_effect = bolt; w.bolt_effect_scale = bsc; w.burst_effect = hit; w.burst_effect_scale = hsc; w.limb_fx = look
+    w.burst_life = float(c.get("hit_life", 0.0))
     w.bolt_speed = float(DATA["chi_bolt_speed"]); w.bolt_turn_rate = 260.0; w.bolt_splash = spl; w.bolt_range = float(DATA["chi_range"])
     chi_w.append(w)
-    print(f"MA chi {c['name']}: {cast.get_name()} / {bolt.get_name()} / {hit.get_name()} x {sc}, from {w.spell_bone}, {w.bolt_range:.0f} cm at most")
+    print(f"MA chi {c['name']}: {w.damage:.0f} damage ({c['damage']} in the table), icon {c['icon']}, look {[(L.fx.get_name(), str(L.bone), round(L.start_at, 2), round(L.stop_at, 2)) for L in look]} | bolt {bolt.get_name() if bolt else None}"
+          f" | hit {hit.get_name() if hit else None} | from {w.spell_bone}, {w.bolt_range:.0f} cm at most")
 
 # ---- her dungeon character
 G = "/Game/RandomDungeon/Blueprints"; CHP = f"{G}/BP_MA_MartialArtistCharacter"
@@ -276,7 +309,9 @@ for MAP in MAPS:
     h.set_editor_property("tome_mana", {})
     h.set_editor_property("type_bonus", {k: float(v) for k, v in H["type_bonus"].items()}); h.dexterity_types = H["dexterity_types"]
     h.weapons = [fw] + ws[:DATA["start_chi"]]; h.locked_weapons = ws[DATA["start_chi"]:]; h.unlock_per_boss = DATA["per_boss"]
-    heroes.append(h)
+    # (the fifth hero (the user's of 2026-10-29): before the Summoner, who is off the castle's menu)
+    si = next((k for k, x in enumerate(heroes) if str(x.name) == "Summoner"), len(heroes))
+    heroes.insert(si, h)
     gen.set_editor_property("heroes", heroes)
     # (her knives: each short blade of the table, in both hands)
     items = list(gen.get_editor_property("items")); nfit = 0; narm = 0

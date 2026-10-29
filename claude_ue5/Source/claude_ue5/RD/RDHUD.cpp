@@ -1663,7 +1663,7 @@ void ARDHUD::DrawInventory(float Sc)
 		// (one tab's sections; its first is shown empty or not)
 		switch (Cb->GetInventoryTab())
 		{
-		case 0: Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true }); Secs.Add({ TEXT("carried"), FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false }); break;
+		case 0: Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true }); Secs.Add({ TEXT("ability"), TEXT("ABILITIES  (ON THE QUICK BAR IF YOU PUT THEM THERE)"), false }); Secs.Add({ TEXT("carried"),FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false }); break;
 		case 1: Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), true }); Secs.Add({ TEXT("helmet"), TEXT("HELMET"), false }); Secs.Add({ TEXT("shield"), TEXT("SHIELDS"), false }); Secs.Add({ TEXT("torch"), TEXT("TORCH"), false }); break;
 		case 2: Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true }); break;
 		case 3: Secs.Add({ TEXT("component"), TEXT("MATERIALS"), true }); Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false }); break;
@@ -1674,6 +1674,7 @@ void ARDHUD::DrawInventory(float Sc)
 	else
 	{
 		Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true });
+		Secs.Add({ TEXT("ability"), TEXT("ABILITIES"), false });
 		Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true });
 		Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false });
 		Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), false });
@@ -1849,9 +1850,15 @@ void ARDHUD::DrawInventory(float Sc)
 			if (Wp.Durability > 0.f) Tag = (Tag.IsEmpty() ? FString() : Tag + TEXT("   ")) + FString::Printf(TEXT("%.0f / %.0f"), Cb->GetWeaponWear(Wi), Wp.Durability);
 			if (P.Num() >= 6 && FCString::Atoi(*P[5]) > 1) Tag += FString::Printf(TEXT("   x %s"), *P[5]);
 			// (its quick slot's number, its slash)
-			if (Gen->bQuickSlots) { const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name); if (Qs != INDEX_NONE) Tag += FString::Printf(TEXT("   [%d]"), (Qs + 1) % 10); }
+			if (Gen->bQuickSlots && !Wp.bAlongside) { const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name); Tag += Qs != INDEX_NONE ? FString::Printf(TEXT("   [%s]"), *URDCombatComponent::SlotLabel(Qs)) : FString(TEXT("   OFF THE BAR")); }
 			const FString Nm = !Wp.Slash.IsNone() ? FString::Printf(TEXT("%s  +  %s"), *Wp.Name.ToString(), *Wp.Slash.ToString()) : Wp.Name.ToString();
 			Row(I, Nm, Tag, Wp.bAlongside ? RDCyan : Gold, Wp.Icon);
+		}
+		else if (Kd == TEXT("ability") && P.Num() >= 3)
+		{
+			// (the quick bar's abilities: "ability|<name>|<slot or -1>")
+			const int32 Qs = FCString::Atoi(*P[2]);
+			Row(I, P[1], Qs >= 0 ? FString::Printf(TEXT("[%s]"), *URDCombatComponent::SlotLabel(Qs)) : FString(TEXT("OFF THE BAR")), Qs >= 0 ? Gold : Dim, FName(*(TEXT("ability_") + P[1].ToLower())));
 		}
 		else if (Kd == TEXT("helmet") && P.Num() >= 2) Row(I, P.Num() >= 3 ? FString::Printf(TEXT("Helmet of the %s"), *P[2]) : FString(TEXT("Helmet")), P[1] == TEXT("1") ? TEXT("HIDDEN") : TEXT("SHOWN"), P[1] == TEXT("1") ? Dim : RDCyan, NAME_None);
 		else if ((Kd == TEXT("slash") || Kd == TEXT("key")) && P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Kd == TEXT("slash") ? RDCyan : Gold, ItemIcon(FName(*P[1])));
@@ -1962,8 +1969,22 @@ void ARDHUD::DrawInventory(float Sc)
 	{
 		// (the third list's weapon lines name their weapon's index)
 		const int32 Wi = Sel[0] == TEXT("weapon") && Sel.Num() >= 5 ? FCString::Atoi(*Sel[4]) : Cur;
-		Picture(Sel[0] == TEXT("weapon") ? WeaponIcon(Wi) : Sel[0] == TEXT("helmet") ? NAME_None : ItemIcon(FName(*Sel[1])), Sel[0] == TEXT("helmet") ? FString(TEXT("Helmet")) : Sel[1]);
-		if (Sel[0] == TEXT("helmet"))
+		Picture(Sel[0] == TEXT("weapon") ? WeaponIcon(Wi) : Sel[0] == TEXT("helmet") ? NAME_None : Sel[0] == TEXT("ability") ? FName(*(TEXT("ability_") + Sel[1].ToLower())) : ItemIcon(FName(*Sel[1])),
+			Sel[0] == TEXT("helmet") ? FString(TEXT("Helmet")) : Sel[1]);
+		if (Sel[0] == TEXT("ability"))
+		{
+			// (the quick bar's abilities (the user's of 2026-10-29): what it does, its own key, its slot)
+			Para(Sel[1] == TEXT("Dash") ? TEXT("A dash at the monster ahead (up to 5 m, stopping short of it) and a strike with what you hold")
+			                            : TEXT("A dodge: a roll out of the way; blows miss you while you roll"), RDInk, Sc * 1.05f);
+			Para(Sel[1] == TEXT("Dash") ? (bPad ? TEXT("RT makes it anywhere") : TEXT("V or the right mouse button makes it anywhere")) : (bPad ? TEXT("B makes it anywhere") : TEXT("B makes it anywhere")), Dim, Sc);
+			Ry += 6.f * Sc;
+			const int32 Qs = Sel.Num() >= 3 ? FCString::Atoi(*Sel[2]) : -1;
+			const FString YSlot = URDCombatComponent::SlotLabel(Cb->GetAssignSlot());
+			Para(Qs >= 0 ? FString::Printf(TEXT("In quick slot %s: its number makes it; on the D-pad it is made ready and the attack button makes it"), *URDCombatComponent::SlotLabel(Qs))
+			             : FString(TEXT("Off the quick bar")), Gold, Sc * 1.05f);
+			Para(Qs >= 0 ? FString::Printf(TEXT("1-0 (Y: slot %s, D-pad left / right) moves it, its own slot takes it off the bar"), *YSlot) : FString::Printf(TEXT("1-0 puts it on the bar (Y: slot %s, D-pad left / right)"), *YSlot), Dim, Sc);
+		}
+		else if (Sel[0] == TEXT("helmet"))
 		{
 			Para(TEXT("The worn set's helmet: shown or hidden (its share of the blows stays the same)"), RDInk, Sc * 1.05f);
 			Ry += 6.f * Sc;
@@ -1998,13 +2019,19 @@ void ARDHUD::DrawInventory(float Sc)
 				else Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks; a repair item mends it"), Cb->GetWeaponWear(Wi), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
 			}
 			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Wi), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
-			if (Sp && Wp.BoltRange > 0.f) Para(FString::Printf(TEXT("A chi attack: a bolt at the monster you face that flies %.0f m at most; its burst hurts others within %.1f m, half as much"), Wp.BoltRange / 100.f, Sp->Splash / 100.f), Dim, Sc * 1.0f);
+			if (Sp && Wp.BoltRange > 0.f) Para(FString::Printf(TEXT("A chi attack: its force strikes the monster you face up to %.0f m away; the blast hurts others within %.1f m, half as much"), Wp.BoltRange / 100.f, Sp->Splash / 100.f), Dim, Sc * 1.0f);
 			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
 			Ry += 6.f * Sc;
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 			// (the third list: its slash, its quick slot)
 			if (const FRDSlashDef* Sl = Cb->SlashOf(Wi)) Para(FString::Printf(TEXT("%s:  +%.0f %s on every hit;  %s   (T / X takes it off)"), *Sl->Name.ToString(), Sl->Bonus, *Sl->Type.ToLower(), *Sl->Text), RDCyan, Sc * 1.05f);
-			if (Gen->bQuickSlots && !Wp.bAlongside) { const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name); Para(Qs != INDEX_NONE ? FString::Printf(TEXT("In quick slot %d  ·  1-0 another slot (Y: slot %d, D-pad left / right)"), (Qs + 1) % 10, (Cb->GetAssignSlot() + 1) % 10) : FString::Printf(TEXT("In no quick slot  ·  1-0 puts it in one (Y: slot %d)"), (Cb->GetAssignSlot() + 1) % 10), Dim, Sc); }
+			if (Gen->bQuickSlots && !Wp.bAlongside)
+			{
+				const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name);
+				const FString YSlot = URDCombatComponent::SlotLabel(Cb->GetAssignSlot());
+				Para(Qs != INDEX_NONE ? FString::Printf(TEXT("In quick slot %s  ·  1-0 (Y: slot %s, D-pad left / right) moves it, its own slot takes it off the bar"), *URDCombatComponent::SlotLabel(Qs), *YSlot)
+				                      : FString::Printf(TEXT("Off the quick bar  ·  1-0 puts it on (Y: slot %s)"), *YSlot), Dim, Sc);
+			}
 		}
 		else
 		{
@@ -2269,26 +2296,55 @@ void ARDHUD::DrawHotbar(float Sc)
 	// shown as before (the PR review's find: the Warlock's fire had gone from the bar))
 	TArray<int32> Along;
 	if (bQuick) for (int32 I = 0; I < Gen->Weapons.Num(); ++I) if (Gen->Weapons[I].bAlongside) Along.Add(I);
+	// (the quick bar: ten of its slots in sight, scrolled so the chosen one is among them (the user's of 2026-10-29: past the
+	// tenth the D-pad goes on and the pictures follow it); how many more each way at its ends)
+	const TArray<FName> Qs = bQuick ? Cb->GetQuickSlots() : TArray<FName>();
+	const int32 QFirst = bQuick ? FMath::Clamp(Cb->GetQuickFirst(), 0, FMath::Max(0, Qs.Num() - 10)) : 0;
 	const int32 N = bQuick ? 10 + Along.Num() : FMath::Min(Gen->Weapons.Num(), 10);
 	if (N <= 0) return;
 	const float S = 64.f * Sc, Gp = 8.f * Sc, W = N * S + (N - 1) * Gp;
 	const float X0 = (Canvas->ClipX - W) * 0.5f, Y0 = Canvas->ClipY - S - 26.f * Sc;
 	const bool bSlot = UI.Has(TEXT("slot"));
 	float Tw, Th;
+	if (bQuick && Qs.Num() > 10)
+	{
+		const int32 Before = QFirst, After = Qs.Num() - QFirst - 10;
+		const FLinearColor Mc(1.f, 0.82f, 0.35f);
+		if (Before > 0) { const FString T = FString::Printf(TEXT("< %d"), Before); UI.TextSize(T, Tw, Th, Small, Sc * 1.2f, ERDType::Title); UI.Text(T, Mc, X0 - Tw - 10.f * Sc, Y0 + (S - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Title); }
+		if (After > 0) { const FString T = FString::Printf(TEXT("%d >"), After); UI.TextSize(T, Tw, Th, Small, Sc * 1.2f, ERDType::Title); UI.Text(T, Mc, X0 + 10.f * (S + Gp) - Gp + 10.f * Sc, Y0 + (S - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Title); }
+	}
 	for (int32 Si = 0; Si < N; ++Si)
 	{
-		const int32 I = bQuick ? (Si < 10 ? Cb->WeaponOfSlot(Si) : Along[Si - 10]) : Si;
+		const int32 Q = bQuick && Si < 10 ? QFirst + Si : -1;          // (the bar's slot drawn here)
+		const int32 I = bQuick ? (Si < 10 ? Cb->WeaponOfSlot(Q) : Along[Si - 10]) : Si;
+		const FName QAb = Q >= 0 && Qs.IsValidIndex(Q) && URDCombatComponent::IsAbility(Qs[Q]) ? Qs[Q] : NAME_None;
+		if (!QAb.IsNone())
+		{
+			// (an ability on the bar: its picture, lit while made ready)
+			const FVector2D A(X0 + Si * (S + Gp), Y0), B = A + FVector2D(S);
+			const bool bOn = Cb->GetReadyAbility() == QAb;
+			if (bSlot) { const FRDUIArt* Sa = UI.Find(TEXT("slot")); UI.Nine(TEXT("slot"), A, B, 12.f * Sc / FMath::Max((float)Sa->Border.X * Sa->Texture->GetSizeX(), 1.f), bOn ? FLinearColor(1.15f, 1.05f, 0.85f) : FLinearColor(0.62f, 0.62f, 0.62f)); }
+			else Box(A, B, FLinearColor(0.06f, 0.06f, 0.08f, 0.85f));
+			const FString Nm = QAb.ToString().Mid(1);
+			const FName Ic(*(TEXT("ability_") + Nm.ToLower()));
+			const FLinearColor Tint = bOn ? FLinearColor::White : FLinearColor(0.75f, 0.75f, 0.75f);
+			if (UI.Has(Ic)) UI.Fit(Ic, A + FVector2D(8.f * Sc), B - FVector2D(8.f * Sc), Tint);
+			else { UI.TextSize(Nm.Left(2).ToUpper(), Tw, Th, Small, Sc * 1.4f, ERDType::Title); UI.Text(Nm.Left(2).ToUpper(), Tint, (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.4f, ERDType::Title); }
+			if (bOn) Frame(A + FVector2D(1.f), B - FVector2D(1.f), FLinearColor(0.55f, 0.85f, 1.f, 0.95f), 2.5f * Sc);
+			UI.Text(URDCombatComponent::SlotLabel(Q), Q < 10 ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
+			continue;
+		}
 		if (!Gen->Weapons.IsValidIndex(I))
 		{
 			// (an empty quick slot: dim, its number)
 			const FVector2D A(X0 + Si * (S + Gp), Y0), B = A + FVector2D(S);
 			if (bSlot) { const FRDUIArt* Sa = UI.Find(TEXT("slot")); UI.Nine(TEXT("slot"), A, B, 12.f * Sc / FMath::Max((float)Sa->Border.X * Sa->Texture->GetSizeX(), 1.f), FLinearColor(0.35f, 0.35f, 0.35f)); }
 			else Box(A, B, FLinearColor(0.04f, 0.04f, 0.05f, 0.6f));
-			UI.Text(FString::Printf(TEXT("%d"), (Si + 1) % 10), FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
+			UI.Text(bQuick ? URDCombatComponent::SlotLabel(Q) : FString::Printf(TEXT("%d"), (Si + 1) % 10), FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
 			continue;
 		}
 		const FRDWeaponDef& Wp = Gen->Weapons[I];
-		const bool bOn = Wp.bAlongside ? Cb->GetAttackIndex() == I : I == Cb->GetWeaponIndex();
+		const bool bOn = Wp.bAlongside ? Cb->GetAttackIndex() == I : I == Cb->GetWeaponIndex() && Cb->GetReadyAbility().IsNone();
 		const FVector2D A(X0 + Si * (S + Gp), Y0), B = A + FVector2D(S);
 		const float Cd = Cb->GetCooldownLeft(I);
 		const bool bNoMana = Wp.ManaCost > 0.f && Cb->GetMana() < Wp.ManaCost;
@@ -2319,8 +2375,8 @@ void ARDHUD::DrawHotbar(float Sc)
 			UI.Text(T, FLinearColor(1.f, 0.9f, 0.6f), (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.3f, ERDType::Title);
 		}
 		if (bOn) Frame(A + FVector2D(1.f), B - FVector2D(1.f), FLinearColor(1.f, 0.82f, 0.35f, 0.95f), 2.5f * Sc);
-		const FString Key = Wp.bAlongside ? FString(TEXT("E")) : FString::Printf(TEXT("%d"), (Si + 1) % 10);
-		UI.Text(Key, FLinearColor(1.f, 0.82f, 0.35f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
+		const FString Key = Wp.bAlongside ? FString(TEXT("E")) : bQuick ? URDCombatComponent::SlotLabel(Q) : FString::Printf(TEXT("%d"), (Si + 1) % 10);
+		UI.Text(Key, bQuick && Q >= 10 ? FLinearColor(0.6f, 0.55f, 0.4f) : FLinearColor(1.f, 0.82f, 0.35f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
 		// (the third list: a weapon with a slash on it: a band of the slash's colour along the slot's foot)
 		if (const FRDSlashDef* Sl = Cb->SlashOf(I)) Box(FVector2D(A.X + 6.f * Sc, B.Y - 7.f * Sc), FVector2D(B.X - 6.f * Sc, B.Y - 3.f * Sc), FLinearColor(Sl->Color.R, Sl->Color.G, Sl->Color.B, 0.95f));
 		if (Wp.ManaCost > 0.f)
@@ -2331,10 +2387,19 @@ void ARDHUD::DrawHotbar(float Sc)
 		}
 	}
 	// (the one in her hands, by name over the bar; how many more the wheel reaches)
-	if (Gen->Weapons.IsValidIndex(Cb->GetWeaponIndex()))
+	if (!Cb->GetReadyAbility().IsNone())
+	{
+		// (an ability made ready on the D-pad)
+		const FString T = FString::Printf(TEXT("%s READY  ·  THE ATTACK BUTTON MAKES IT"), *Cb->GetReadyAbility().ToString().Mid(1).ToUpper());
+		UI.TextSize(T, Tw, Th, Small, Sc * 1.05f, ERDType::Label);
+		UI.Text(T, FLinearColor(0.6f, 0.88f, 1.f), (Canvas->ClipX - Tw) * 0.5f, Y0 - Th - 4.f * Sc, Small, Sc * 1.05f, ERDType::Label);
+	}
+	else if (Gen->Weapons.IsValidIndex(Cb->GetWeaponIndex()))
 	{
 		FString T = Gen->Weapons[Cb->GetWeaponIndex()].Name.ToString().ToUpper();
-		if (Gen->Weapons.Num() > 10) T += FString::Printf(TEXT("    (%d more: the wheel)"), Gen->Weapons.Num() - 10);
+		// (the bar longer than ten: where the chosen one is on it)
+		if (bQuick && Qs.Num() > 10) { const int32 C = Cb->GetQuickCursor(); if (C >= 0) T += FString::Printf(TEXT("    (slot %s of %d: the D-pad)"), *URDCombatComponent::SlotLabel(C), Qs.Num()); }
+		else if (!bQuick && Gen->Weapons.Num() > 10) T += FString::Printf(TEXT("    (%d more: the wheel)"), Gen->Weapons.Num() - 10);
 		UI.TextSize(T, Tw, Th, Small, Sc * 1.05f, ERDType::Label);
 		UI.Text(T, RDInk, (Canvas->ClipX - Tw) * 0.5f, Y0 - Th - 4.f * Sc, Small, Sc * 1.05f, ERDType::Label);
 	}
