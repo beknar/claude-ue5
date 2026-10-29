@@ -1524,6 +1524,9 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		if (Sp.Cooldown > 0.f) S += FString::Printf(TEXT(", cooldown %.0f s"), Sp.Cooldown);
 		S += TEXT(".");
 		if (Gen && !Gen->HeroLearns(Sp.Type)) S += FString::Printf(TEXT("  The %s cannot learn it."), *Gen->PlayerTitle.ToLower());
+		// (the user's of 2026-10-28: the Mage's pool grows with Null Sanctum and Apocalypse)
+		else if (const FRDHeroDef* H = Gen ? Gen->FindHero(Gen->CurrentHero) : nullptr)
+			if (const float* Pool = H->TomeMana.Find(Sp.Name)) S += FString::Printf(TEXT("  Learning it raises your mana pool to %.0f."), *Pool);
 		return S;
 	}
 	case ERDItemKind::Weapon:

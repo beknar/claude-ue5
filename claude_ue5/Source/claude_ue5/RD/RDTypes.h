@@ -725,6 +725,10 @@ struct FRDHeroDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDSpellType> Learns;
 	/** random_dungeonmagic_level5: the kinds of ring she can wear */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDRingKind> RingKinds;
+	/** random_dungeonmagic_level5 and mistward_castle (the user's of 2026-10-28): a spell that, once she knows it, makes her
+	 *  mana pool at least this much (rings no longer add past it): the Mage's Null Sanctum 220 and Apocalypse 300, which cost
+	 *  more than the best ring gives (871) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> TomeMana;
 };
 
 UENUM(BlueprintType)

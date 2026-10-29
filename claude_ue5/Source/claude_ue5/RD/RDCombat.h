@@ -309,6 +309,8 @@ public:
 	/** the spell joins her weapons (false: her hero does not learn its type, or she knows it) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") bool LearnSpell(FName Spell);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool KnowsSpell(FName Spell) const;
+	/** the mana pool her known spells give her (her hero's TomeMana: the Mage's Null Sanctum 220, Apocalypse 300; 0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetTomeMana() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Spells") int32 SpellsLearned = 0;
 	/** spells released (each kind's own count: tests), blows a ward took, blows turned back, deaths cheated, blows she
 	 *  slipped under a veil, blows a sanctum or rune took */

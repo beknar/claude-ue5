@@ -551,8 +551,17 @@ void URDCombatComponent::Fall()
 			for (const FRDWeaponDef& Wd : Generator->Weapons) if (Wd.Item.IsNone() && !Wd.Slash.IsNone()) KeptSlashes.Add(Wd.Name, Wd.Slash);
 			TakeOffArmour(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None;
 			WornRings.Reset(); Spares.Reset(); Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
+			if (const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero))
+			{
+				// (her spells learned from tomes stay (a spell weapon of no item that is not on her card); until 2026-10-28 the
+				// card's list replaced them all and she forgot every tome at a death)
+				TArray<FRDWeaponDef> Learned;
+				for (const FRDWeaponDef& Wd : Generator->Weapons)
+					if (Wd.SpellIndex >= 0 && Wd.Item.IsNone() && !H->Weapons.ContainsByPredicate([&](const FRDWeaponDef& C) { return C.Name == Wd.Name; })) Learned.Add(Wd);
+				Generator->Weapons = H->Weapons;
+				Generator->Weapons.Append(Learned);
+			}
 			UpdateMaxima();
-			if (const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero)) Generator->Weapons = H->Weapons;
 			for (FRDWeaponDef& Wd : Generator->Weapons) if (const FName* Ks = KeptSlashes.Find(Wd.Name)) Wd.Slash = *Ks;
 			if (!KeepShield.IsNone()) { AddItem(KeepShield, 1); WornShield = KeepShield; }
 			// (her spells learned from tomes stay: they are in her head; the found weapons go)

@@ -61,10 +61,27 @@ bool URDCombatComponent::LearnSpell(FName Spell)
 	SyncWear();
 	++SpellsLearned;
 	const int32 Key = Generator->Weapons.Num();
-	SetMessage(Key <= 10 ? FString::Printf(TEXT("You learn %s:  key %d"), *S.Name.ToString(), Key % 10) : FString::Printf(TEXT("You learn %s:  the wheel"), *S.Name.ToString()));
+	FString Msg = Key <= 10 ? FString::Printf(TEXT("You learn %s:  key %d"), *S.Name.ToString(), Key % 10) : FString::Printf(TEXT("You learn %s:  the wheel"), *S.Name.ToString());
+	// (the user's of 2026-10-28: a spell that costs more than any ring gives raises her pool by being learned)
+	const float OldMax = MaxMana;
+	UpdateMaxima();
+	if (MaxMana > OldMax + 0.5f)
+	{
+		Msg += FString::Printf(TEXT(".  Your mana pool grows to %.0f"), MaxMana);
+		UE_LOG(LogTemp, Log, TEXT("RDSPELL %s raises her mana pool %.0f -> %.0f"), *S.Name.ToString(), OldMax, MaxMana);
+	}
+	SetMessage(Msg);
 	PlayUiSound(TEXT("Player.Learn"), TEXT("Player.Loot"));
 	UE_LOG(LogTemp, Log, TEXT("RDSPELL learned %s (%d weapons and spells)"), *S.Name.ToString(), Generator->Weapons.Num());
 	return true;
+}
+
+float URDCombatComponent::GetTomeMana() const
+{
+	const FRDHeroDef* H = Generator ? Generator->FindHero(Generator->CurrentHero) : nullptr;
+	float Best = 0.f;
+	if (H) for (const TPair<FName, float>& P : H->TomeMana) if (P.Value > Best && KnowsSpell(P.Key)) Best = P.Value;
+	return Best;
 }
 
 void URDCombatComponent::HealBy(float Amount)
@@ -166,7 +183,7 @@ void URDCombatComponent::UpdateMaxima()
 	if (!Generator) return;
 	const float OldH = MaxHealth, OldM = MaxMana;
 	MaxHealth = FMath::Max(1.f, Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)));
-	MaxMana = Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic));
+	MaxMana = FMath::Max(Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic)), GetTomeMana());
 	// (a ring put on adds its part to what she has; one taken off takes no more than it gave)
 	if (MaxHealth > OldH) Health += MaxHealth - OldH;
 	if (MaxMana > OldM) Mana += MaxMana - OldM;

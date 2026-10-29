@@ -68,6 +68,9 @@ The third list (docs/improvements2.txt, 870; also on random_dungeonmagic_level5 
   pickups  the armories' tables' tier things; F takes one off its table
   rooms    the eight special rooms: shrine, healing / speed / mana fountains, arena, trap gauntlet, vault and key, throne room
   slashes  a boss's slash; on a weapon through the inventory, T takes it off, on the bow; a swing and a shot; all twenty measured
+The user's of 2026-10-28 (871; also on level 5):
+  tomemana the Mage's pool 100, 200 with the best ring; Null Sanctum's tome makes it 220 and the sanctum is cast, Apocalypse's
+           300 and it is cast; the ring off changes nothing; kept through a death, gone at a restart; the Summoner's pool unchanged
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -80,7 +83,7 @@ UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes"
+DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 I2 = unreal.IntPoint
@@ -1972,10 +1975,68 @@ def step_slashes():
           and res["shot"]["bonus"] > 0 and len(ev) == 20 and all(v.get("ok") for v in ev.values()))
     step_result("slashes", ok, **res)
 
+def step_tomemana():
+    """the user's of 2026-10-28 (871): the Mage's pool is 100, 200 with the best Magic Potency Ring; Null Sanctum's tome found
+    makes it 220 (the message says so, her mana goes up by what the pool did) and the sanctum is cast (220 taken); the ring
+    off, it stays 220; Apocalypse's makes it 300 and it is cast (300 taken); she falls and is back: both spells and the 300
+    are still hers; a restart forgets them (100); the Summoner (no TomeMana) learns the sanctum with her pool unchanged"""
+    c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    K = unreal.RDItemKind
+    tome = {str(i.spell): str(i.name) for i in items_of(K.TOME)}
+    ring = max((i for i in items_of(K.RING) if i.ring_kind == unreal.RDRingKind.MAGIC), key=lambda i: i.amount)
+    def widx(sp): return next((k for k, d in enumerate(g.get_editor_property("weapons")) if str(d.name) == sp), -1)
+    res = {"tomes": {s: tome.get(s) for s in ("Null Sanctum", "Apocalypse")}, "ring": str(ring.name), "tome_mana": c.get_tome_mana()}
+    res["base"] = round(c.get_max_mana(), 1)
+    c.add_item(str(ring.name), 1); c.wear_ring(str(ring.name)); yield from wait(0.2)
+    res["ringed"] = round(c.get_max_mana(), 1)
+    def learn_and_cast(sp):
+        c.set_mana(c.get_max_mana()); m0 = c.get_mana(); p0 = c.get_max_mana()
+        c.add_item(tome[sp], 1); yield from wait(0.2)
+        r = {"knows": c.knows_spell(sp), "pool": round(c.get_max_mana(), 1), "pool_before": round(p0, 1), "mana_gain": round(c.get_mana() - m0, 1),
+             "message": str(c.message), "tome_mana": c.get_tome_mana()}
+        i = widx(sp); r["index"] = i
+        c.set_mana(c.get_max_mana()); m1 = c.get_mana()
+        r["cast"] = bool(c.start_attack_with(i)) if i >= 0 else False
+        r["mana_taken"] = round(m1 - c.get_mana(), 1)
+        yield from wait(3.5)
+        return r
+    res["sanctum"] = yield from learn_and_cast("Null Sanctum")
+    c.wear_ring(str(ring.name)); yield from wait(0.2)              # (worn: taken off)
+    res["ring_off"] = round(c.get_max_mana(), 1)
+    res["apocalypse"] = yield from learn_and_cast("Apocalypse")
+    # (she falls and is back: the spells learned stay, and the pool with them)
+    c.apply_damage(c.get_health() + 50.0, None); yield from wait(1.0)
+    res["dead"] = c.is_dead()
+    t0 = time.time()
+    while c.is_dead() and time.time() - t0 < 20: yield
+    yield from wait(1.0)
+    res["after_death"] = {"revived": not c.is_dead(), "knows": [c.knows_spell("Null Sanctum"), c.knows_spell("Apocalypse")], "pool": round(c.get_max_mana(), 1)}
+    g.restart_play(0); yield from wait(1.0); refresh(); c = cb()
+    res["after_restart"] = {"knows": [c.knows_spell("Null Sanctum"), c.knows_spell("Apocalypse")], "pool": round(c.get_max_mana(), 1)}
+    # (the Summoner learns every type but has no TomeMana: her pool stays)
+    if any(str(h.name) == "Summoner" for h in g.get_editor_property("heroes")):
+        g.switch_hero("Summoner"); yield from wait(0.6); refresh(); c = cb()
+        p0 = c.get_max_mana(); c.add_item(tome["Null Sanctum"], 1); yield from wait(0.2)
+        res["summoner"] = {"knows": c.knows_spell("Null Sanctum"), "pool_before": round(p0, 1), "pool": round(c.get_max_mana(), 1)}
+        g.restart_play(0); yield from wait(0.8); refresh()
+        g.switch_hero("Warrior"); yield from wait(0.6); refresh()
+    else: g.switch_hero("Warrior"); yield from wait(0.6); refresh()
+    quiet(False)
+    s_, a_, d_ = res["sanctum"], res["apocalypse"], res["after_death"]
+    ok = (res["base"] == 100 and res["ringed"] == 200 and res["tome_mana"] == 0
+          and s_["knows"] and s_["pool"] == 220 and abs(s_["mana_gain"] - 20) < 0.6 and "grows to 220" in s_["message"] and s_["cast"] and abs(s_["mana_taken"] - 220) < 0.6
+          and res["ring_off"] == 220
+          and a_["knows"] and a_["pool"] == 300 and abs(a_["mana_gain"] - 80) < 0.6 and "grows to 300" in a_["message"] and a_["cast"] and abs(a_["mana_taken"] - 300) < 0.6
+          and res["dead"] and d_["revived"] and all(d_["knows"]) and d_["pool"] == 300
+          and not any(res["after_restart"]["knows"]) and res["after_restart"]["pool"] == 100
+          and (("summoner" not in res) or (res["summoner"]["knows"] and res["summoner"]["pool"] == res["summoner"]["pool_before"])))
+    step_result("tomemana", ok, **res)
+
 STEPS = {"menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
-         "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes}
+         "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana}
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]
