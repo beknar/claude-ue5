@@ -1805,11 +1805,14 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 		// (the Martial Artist: V, the right mouse button or RT dashes forward into an attack)
 		if (Generator->DashClip && (PC->WasInputKeyJustPressed(EKeys::V) || PC->WasInputKeyJustPressed(EKeys::RightMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightTrigger))) StartDash();
 		// (an ability made ready on the quick bar (the D-pad): the attack button makes it instead of a blow)
+		// (the press that made it, still held, makes no blow until it is let go (the PR review's find))
+		const bool bAtkDown = PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder);
+		if (!bAtkDown) bAbilityPressHeld = false;
 		if (!ReadyAbility.IsNone())
 		{
-			if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) UseAbility(ReadyAbility);
+			if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder)) { UseAbility(ReadyAbility); bAbilityPressHeld = true; }
 		}
-		else if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder)) StartAttack();
+		else if (bAtkDown && !bAbilityPressHeld) StartAttack();
 		const bool bToggleR = PC->IsInputKeyDown(EKeys::R) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f;
 		if (bToggleR && !bRunToggleDown) SetRunMode(!bRunMode);
 		bRunToggleDown = bToggleR;

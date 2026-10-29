@@ -535,6 +535,9 @@ private:
 	FName ReadyAbility = NAME_None;
 	int32 QuickFirst = 0;
 	void UpdateQuickFirst();
+	void CompactQuickTail();
+	/** the attack button that made a ready ability, still held: no blow until it is let go */
+	bool bAbilityPressHeld = false;
 	int32 AssignSlot = 0;
 	bool bHelmetHidden = false;
 	bool bBlocking = false, bBlockKeyDown = false;

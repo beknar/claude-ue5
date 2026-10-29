@@ -1,5 +1,5 @@
 {
- "tag": "ma7",
+ "tag": "ma8",
  "plan": [
   "martial",
   "slots"
@@ -50,7 +50,7 @@
     "started": true,
     "mana": 7.0,
     "lost": 23.0,
-    "fx": 43,
+    "fx": 42,
     "released": 0,
     "bolts": 1,
     "damage_of": 23.0,
@@ -175,12 +175,12 @@
  ],
  "windows_hidden": "Message Log, Content Browser",
  "shots": [
-  "mw_ma7_ma_knife.png",
-  "mw_ma7_ma_chi_straight.png",
-  "mw_ma7_ma_dash.png",
-  "mw_ma7_ma_armour.png",
-  "mw_ma7_slots_inventory.png",
-  "mw_ma7_slots_bar.png"
+  "mw_ma8_ma_knife.png",
+  "mw_ma8_ma_chi_straight.png",
+  "mw_ma8_ma_dash.png",
+  "mw_ma8_ma_armour.png",
+  "mw_ma8_slots_inventory.png",
+  "mw_ma8_slots_bar.png"
  ],
  "error": null,
  "windows_shown_again": 2

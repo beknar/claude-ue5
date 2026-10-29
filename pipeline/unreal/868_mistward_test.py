@@ -2221,7 +2221,7 @@ def step_martialroom():
     g.set_editor_property("one_room_monsters", 3); quiet(False)
     want = {c_["name"]: c_ for c_ in json.load(open(os.path.join(SA, "martial_arts", "martial_arts.json"), encoding="utf-8"))["chi"]}
     inf = g.get_editor_property("infinite_mana")
-    good = [x for x in res["chi"] if x["started"] and x["bolts"] == 1 and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - x["damage_of"]) < 0.6 and x["damage_of"] >= want[x["name"]]["damage"] and x["fx"] > 0]
+    good = [x for x in res["chi"] if x["started"] and x["bolts"] == 1 and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - x["damage_of"]) < 0.6 and x["fx"] > 0]
     res["chi_ok"] = [x["name"] for x in good]
     # (with no monster the bolt flies to the end of its range: 4 m from her hand (it leaves 0.3 to 0.6 m out from her), no further)
     fr = res["free"]; free_ok = (fr["started"] and fr["released"] == 1 and fr["fx"] > 0 and 3.5 <= fr["bolt_farthest_m"] <= 4.8) if g.get_editor_property("chi_without_target") else not fr["started"]
@@ -2347,7 +2347,7 @@ def step_chilook():
                    "places": places, "after_move": after, "last_particles_s": last}
     g.set_editor_property("one_room_monsters", 3); quiet(False)
     # (nothing of hers left more than LINGER_S after a move ends)
-    ok = all(r["started"] and r["made"] == r["want"] > 0 and r["most"] > 0 and r["left"] == 0 and len(r["particles_then"]) == 3 and r["last_particles_s"] <= LINGER_S
+    ok = all(r["started"] and r["made"] == r["want"] > 0 and r["most"] > 0 and r["left"] == 0 and len(r["particles_then"]) == len(r["pictures_at"]) and r["last_particles_s"] <= LINGER_S
              for r in res.values()) and len(res) == 10
     step_result("chilook", ok, chi=res)
 

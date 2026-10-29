@@ -636,7 +636,7 @@ bool ARDDungeonGenerator::MakeSpellWeapon(int32 SpellIndex, FRDWeaponDef& Out) c
 	Out.BoltSpeed = S.BoltSpeed; Out.BoltTurnRate = 260.f; Out.BoltSplash = S.Splash;
 	Out.ChargeEffect = S.CastFx; Out.ChargeEffectScale = S.CastFxScale;
 	Out.BoltEffect = S.BoltFx; Out.BoltEffectScale = S.BoltFxScale; Out.BoltCoreEffect = nullptr;
-	Out.BurstEffect = S.ImpactFx; Out.BurstEffectScale = S.ImpactFxScale; Out.BurstFlameEffect = nullptr; Out.LimbFx.Reset();
+	Out.BurstEffect = S.ImpactFx; Out.BurstEffectScale = S.ImpactFxScale; Out.BurstFlameEffect = nullptr; Out.LimbFx.Reset(); Out.BoltRange = 0.f; Out.BurstLife = 0.f;          // (a chi attack's own: the PR review's find)
 	Out.SpellLightColor = S.LightColor; Out.SpellLightIntensity = S.LightIntensity;
 	Out.SoundKey = S.SoundKey; Out.Icon = S.Icon;
 	Out.Durability = 0.f; Out.Item = NAME_None; Out.SpeedRating = Out.DamageRating = 0; Out.WeaponType.Reset();

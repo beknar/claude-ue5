@@ -1572,7 +1572,7 @@ def hotbar(o, r, t, ua):
     qs_ = r.get("qs", [])
     # (mw3, the user's of 2026-10-29: the bar's ten slots in sight from "qf", abilities ("@Dash") in slots, more each way)
     qf = max(0, min(r.get("qf", 0), max(0, len(qs_) - 10))) if MW2 else 0
-    def slot_label(q): return str((q + 1) % 10) if q < 10 else str(q + 1)
+    slot_label = slot_lab
     def slot_weapon(i):
         """(run5m2) the weapon of a quick slot: the one drawn if it has that name, else the first of the name"""
         if not MW2: return i
@@ -1587,7 +1587,7 @@ def hotbar(o, r, t, ua):
     slot = bool(UI and UI.has("slot"))
     if MW2 and len(qs_) > 10:
         if qf > 0: d.text((x0 - 10 * K, y0 + S_ / 2), "< %d" % qf, font=ft_small, fill=lin((1.0, 0.82, 0.35), ua), anchor="rm")
-        if len(qs_) - qf - 10 > 0: d.text((x0 + 10 * (S_ + gp) - gp + 10 * K, y0 + S_ / 2), "%d >" % (len(qs_) - qf - 10), font=ft_small, fill=lin((1.0, 0.82, 0.35), ua), anchor="lm")
+        if len(qs_) - qf - 10 > 0: d.text((x0 + tw_ + 10 * K, y0 + S_ / 2), "%d >" % (len(qs_) - qf - 10), font=ft_small, fill=lin((1.0, 0.82, 0.35), ua), anchor="lm")
     for si in range(n):
         i = slot_weapon(si)
         a, b = (x0 + si * (S_ + gp), y0), (x0 + si * (S_ + gp) + S_, y0 + S_)

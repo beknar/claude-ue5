@@ -143,8 +143,7 @@ void URDCombatComponent::FillQuickSlots()
 		const int32 E = QuickSlots.IndexOfByKey(NAME_None);
 		if (E == INDEX_NONE) QuickSlots.Add(W.Name); else QuickSlots[E] = W.Name;
 	}
-	// (empty slots past the tenth are dropped)
-	while (QuickSlots.Num() > 10 && QuickSlots.Last().IsNone()) QuickSlots.Pop();
+	CompactQuickTail();
 	if (!ReadyAbility.IsNone() && !QuickSlots.Contains(ReadyAbility)) ReadyAbility = NAME_None;
 	LastWeaponCount = Generator->Weapons.Num(); LastWeaponSig = WeaponSig();
 	UpdateQuickFirst();
@@ -155,16 +154,18 @@ TArray<FName> URDCombatComponent::GetAbilities() const
 	TArray<FName> Out;
 	if (!Generator) return Out;
 	if (Generator->RollClip && Generator->bRogueControls) Out.Add(TEXT("@Dodge"));
-	if (Generator->DashClip) Out.Add(TEXT("@Dash"));
+	// (both made with the attack button when ready: the Rogue's controls' (the PR review's find: a dash readied under other
+	// controls could never be made))
+	if (Generator->DashClip && Generator->bRogueControls) Out.Add(TEXT("@Dash"));
 	return Out;
 }
 
 bool URDCombatComponent::UseAbility(FName Ability)
 {
 	if (!GetAbilities().Contains(Ability)) return false;
-	ReadyAbility = NAME_None;
 	const bool bDone = Ability == TEXT("@Dash") ? StartDash() : StartRoll(FVector::ZeroVector);
-	if (bDone) ++AbilitiesUsed;
+	// (made: no longer ready; refused (still in a move): it stays ready for the next press (the PR review's find))
+	if (bDone) { ++AbilitiesUsed; ReadyAbility = NAME_None; }
 	UpdateQuickFirst();
 	return bDone;
 }
@@ -173,6 +174,13 @@ int32 URDCombatComponent::GetQuickCursor() const
 {
 	if (!ReadyAbility.IsNone()) { const int32 R = QuickSlots.IndexOfByKey(ReadyAbility); if (R != INDEX_NONE) return R; }
 	return GetQuickSlotOfDrawn();
+}
+
+void URDCombatComponent::CompactQuickTail()
+{
+	// (an empty slot past the tenth is dropped and the ones after it close up: moving one from slot 11 to a new slot left a
+	// hole the D-pad and the counters stepped over (the PR review's find); the first ten keep their numbers, empty or not)
+	for (int32 I = QuickSlots.Num() - 1; I >= 10; --I) if (QuickSlots[I].IsNone()) QuickSlots.RemoveAt(I);
 }
 
 void URDCombatComponent::UpdateQuickFirst()
@@ -212,7 +220,7 @@ bool URDCombatComponent::AssignQuickEntry(int32 Slot, FName Entry)
 		// (put where it is: off the bar, and kept off)
 		QuickSlots[Slot] = NAME_None; QuickOff.Add(Entry);
 		if (ReadyAbility == Entry) ReadyAbility = NAME_None;
-		while (QuickSlots.Num() > 10 && QuickSlots.Last().IsNone()) QuickSlots.Pop();
+		CompactQuickTail();
 		SetMessage(FString::Printf(TEXT("%s is off the quick bar"), *Nm));
 	}
 	else
@@ -228,7 +236,7 @@ bool URDCombatComponent::AssignQuickEntry(int32 Slot, FName Entry)
 			const int32 E = QuickSlots.IndexOfByKey(NAME_None);
 			if (E == INDEX_NONE) QuickSlots.Add(Was); else QuickSlots[E] = Was;
 		}
-		while (QuickSlots.Num() > 10 && QuickSlots.Last().IsNone()) QuickSlots.Pop();
+		CompactQuickTail();
 		SetMessage(FString::Printf(TEXT("%s in quick slot %s"), *Nm, *SlotLabel(Slot)));
 	}
 	PlayUiSound(TEXT("Player.Inventory"), TEXT("Player.Inventory"));

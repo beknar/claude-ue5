@@ -1,8 +1,9 @@
 {
- "tag": "qb2",
+ "tag": "qb4",
  "plan": [
   "quickbar",
-  "chilook"
+  "chilook",
+  "martialroom"
  ],
  "level": "martial_arts",
  "steps": [
@@ -190,9 +191,9 @@
       0.34
      ],
      "particles_then": [
-      10,
-      21,
-      27
+      9,
+      19,
+      26
      ],
      "most": 27,
      "left": 0,
@@ -215,8 +216,8 @@
        [
         "hand_r",
         0.0,
-        20.4,
-        133.4
+        14.7,
+        125.5
        ],
        [
         "hand_r",
@@ -229,8 +230,8 @@
        [
         "hand_r",
         0.0,
-        50.9,
-        236.7
+        9.7,
+        200.4
        ],
        [
         "hand_r",
@@ -259,14 +260,14 @@
       ],
       [
        0.5,
-       7,
+       8,
        [
         "NS_SlashImpact_Wind"
        ]
       ],
       [
        0.75,
-       3,
+       7,
        [
         "NS_SlashImpact_Wind"
        ]
@@ -321,7 +322,7 @@
      "particles_then": [
       58,
       76,
-      78
+      80
      ],
      "most": 80,
      "left": 0,
@@ -372,7 +373,7 @@
      "after_move": [
       [
        0.0,
-       32,
+       27,
        [
         "NS_Muzzle_Lightning01",
         "NS_SlashImpact_Lightning"
@@ -380,7 +381,7 @@
       ],
       [
        0.25,
-       28,
+       30,
        [
         "NS_Muzzle_Lightning01",
         "NS_SlashImpact_Lightning"
@@ -395,7 +396,7 @@
       ],
       [
        0.75,
-       2,
+       1,
        [
         "NS_SlashImpact_Lightning"
        ]
@@ -459,42 +460,42 @@
        [
         "hand_r",
         0.0,
-        7.0,
-        243.1
+        4.5,
+        239.0
        ],
        [
         "hand_l",
         0.0,
-        6.4,
-        242.7
+        0.6,
+        236.4
        ]
       ],
       [
        [
         "hand_r",
         0.0,
-        75.9,
-        246.9
+        73.5,
+        249.2
        ],
        [
         "hand_l",
         0.0,
-        79.7,
-        250.7
+        78.9,
+        248.6
        ]
       ],
       [
        [
         "hand_r",
         0.0,
-        81.8,
-        264.5
+        76.0,
+        268.6
        ],
        [
         "hand_l",
         0.0,
-        86.0,
-        270.0
+        85.7,
+        279.2
        ]
       ]
      ],
@@ -515,7 +516,7 @@
       ],
       [
        0.5,
-       9,
+       10,
        [
         "NS_SlashImpact_Fire"
        ]
@@ -576,10 +577,10 @@
      ],
      "particles_then": [
       14,
-      22,
-      32
+      24,
+      30
      ],
-     "most": 32,
+     "most": 31,
      "left": 0,
      "places": [
       [
@@ -587,13 +588,13 @@
         "calf_r",
         0.0,
         0.0,
-        150.9
+        155.0
        ],
        [
         "foot_r",
         0.0,
-        0.0,
-        150.9
+        5.2,
+        158.4
        ]
       ],
       [
@@ -601,13 +602,13 @@
         "calf_r",
         0.0,
         0.0,
-        254.8
+        258.8
        ],
        [
         "foot_r",
         0.0,
         0.0,
-        254.8
+        258.8
        ]
       ],
       [
@@ -615,20 +616,20 @@
         "calf_r",
         0.0,
         0.0,
-        257.4
+        261.9
        ],
        [
         "foot_r",
         0.0,
-        21.5,
-        234.4
+        22.6,
+        239.1
        ]
       ]
      ],
      "after_move": [
       [
        0.0,
-       35,
+       37,
        [
         "NS_Shield_Ink_01",
         "NS_SlashImpact_Ink"
@@ -650,7 +651,7 @@
       ],
       [
        0.75,
-       4,
+       1,
        [
         "NS_SlashImpact_Ink"
        ]
@@ -705,7 +706,7 @@
      "particles_then": [
       101,
       117,
-      109
+      113
      ],
      "most": 117,
      "left": 0,
@@ -724,21 +725,21 @@
       ],
       [
        0.25,
-       45,
+       46,
        [
         "NS_SlashImpact_Cosmic"
        ]
       ],
       [
        0.5,
-       24,
+       12,
        [
         "NS_SlashImpact_Cosmic"
        ]
       ],
       [
        0.75,
-       3,
+       2,
        [
         "NS_SlashImpact_Cosmic"
        ]
@@ -791,9 +792,9 @@
       0.58
      ],
      "particles_then": [
-      129,
-      103,
-      69
+      128,
+      94,
+      67
      ],
      "most": 138,
      "left": 0,
@@ -869,7 +870,7 @@
       ],
       [
        0.25,
-       59,
+       53,
        [
         "NS_Hit_RotatingSpheres_V1"
        ]
@@ -932,11 +933,11 @@
       0.56
      ],
      "particles_then": [
-      212,
-      5,
-      3
+      214,
+      0,
+      1
      ],
-     "most": 219,
+     "most": 220,
      "left": 0,
      "places": [
       [
@@ -992,7 +993,7 @@
       ],
       [
        0.25,
-       33,
+       36,
        [
         "NS_Hit_Rod_V1"
        ]
@@ -1055,11 +1056,11 @@
       0.58
      ],
      "particles_then": [
-      44,
-      424,
-      841
+      46,
+      446,
+      885
      ],
-     "most": 1579,
+     "most": 1664,
      "left": 0,
      "places": [
       [],
@@ -1069,35 +1070,35 @@
      "after_move": [
       [
        0.0,
-       2916,
+       2595,
        [
         "NS_Hit_Fireworks01"
        ]
       ],
       [
        0.25,
-       3153,
+       2766,
        [
         "NS_Hit_Fireworks01"
        ]
       ],
       [
        0.5,
-       2967,
+       2563,
        [
         "NS_Hit_Fireworks01"
        ]
       ],
       [
        0.75,
-       1439,
+       1197,
        [
         "NS_Hit_Fireworks01"
        ]
       ],
       [
        1.0,
-       76,
+       104,
        [
         "NS_Hit_Fireworks01"
        ]
@@ -1147,33 +1148,33 @@
      "particles_then": [
       114,
       115,
-      110
+      108
      ],
-     "most": 116,
+     "most": 115,
      "left": 0,
      "places": [
       [
        [
         "hand_r",
         0.0,
-        31.2,
-        442.5
+        33.7,
+        442.3
        ]
       ],
       [
        [
         "hand_r",
         0.0,
-        82.4,
-        457.0
+        81.9,
+        456.3
        ]
       ],
       [
        [
         "hand_r",
         0.0,
-        82.3,
-        455.4
+        82.1,
+        454.5
        ]
       ]
      ],
@@ -1187,7 +1188,7 @@
       ],
       [
        0.25,
-       3,
+       5,
        [
         "NS_Hit_Fireball01"
        ]
@@ -1252,9 +1253,9 @@
      "particles_then": [
       124,
       133,
-      143
+      139
      ],
-     "most": 144,
+     "most": 143,
      "left": 0,
      "places": [
       [
@@ -1274,19 +1275,19 @@
         "thigh_r",
         0.0,
         0.0,
-        256.2
+        255.6
        ],
        [
         "calf_r",
         0.0,
-        35.9,
-        289.3
+        32.2,
+        285.1
        ],
        [
         "foot_r",
         0.0,
-        67.2,
-        324.1
+        71.5,
+        328.7
        ]
       ],
       [
@@ -1306,19 +1307,19 @@
         "thigh_r",
         0.0,
         0.0,
-        261.1
+        260.9
        ],
        [
         "calf_r",
         0.0,
-        42.8,
-        273.8
+        44.3,
+        277.4
        ],
        [
         "foot_r",
         0.0,
-        80.8,
-        325.0
+        82.3,
+        333.9
        ]
       ],
       [
@@ -1338,26 +1339,26 @@
         "thigh_r",
         0.0,
         0.0,
-        261.1
+        260.9
        ],
        [
         "calf_r",
         0.0,
         41.0,
-        277.3
+        282.6
        ],
        [
         "foot_r",
         0.0,
-        74.0,
-        334.6
+        73.5,
+        340.7
        ]
       ]
      ],
      "after_move": [
       [
        0.0,
-       50,
+       54,
        [
         "NS_Hit_Lightning01",
         "NS_Slash_Lightning"
@@ -1365,7 +1366,7 @@
       ],
       [
        0.25,
-       15,
+       11,
        [
         "NS_Hit_Lightning01",
         "NS_Slash_Lightning"
@@ -1420,43 +1421,233 @@
      "last_particles_s": 0.25
     }
    }
+  },
+  {
+   "step": "martialroom",
+   "ok": true,
+   "title": "Martial Arts",
+   "heroes": [
+    "MartialArtist"
+   ],
+   "rooms": 1,
+   "room_tiles": 100,
+   "beyond": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick"
+   ],
+   "monsters": 3,
+   "respawned": 1,
+   "chi": [
+    {
+     "name": "Straight Punch",
+     "started": true,
+     "mana": 0.0,
+     "lost": 23.0,
+     "fx": 43,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 23.0,
+     "pictured": true
+    },
+    {
+     "name": "Side Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 24.0,
+     "fx": 92,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 24.0,
+     "pictured": true
+    },
+    {
+     "name": "Smashing Strike",
+     "started": true,
+     "mana": 0.0,
+     "lost": 25.0,
+     "fx": 67,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 25.0,
+     "pictured": true
+    },
+    {
+     "name": "Roundhouse Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 26.0,
+     "fx": 45,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 26.0,
+     "pictured": true
+    },
+    {
+     "name": "Chain Punch",
+     "started": true,
+     "mana": 0.0,
+     "lost": 27.0,
+     "fx": 132,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 27.0,
+     "pictured": true
+    },
+    {
+     "name": "Rear Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 28.0,
+     "fx": 138,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 28.0,
+     "pictured": true
+    },
+    {
+     "name": "Piercing Palm",
+     "started": true,
+     "mana": 0.0,
+     "lost": 29.0,
+     "fx": 224,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 29.0,
+     "pictured": true
+    },
+    {
+     "name": "Axe Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 30.0,
+     "fx": 2998,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 30.0,
+     "pictured": true
+    },
+    {
+     "name": "Meteor Fist",
+     "started": true,
+     "mana": 0.0,
+     "lost": 31.0,
+     "fx": 128,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 31.0,
+     "pictured": true
+    },
+    {
+     "name": "Spinning Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 32.0,
+     "fx": 192,
+     "released": 0,
+     "bolts": 1,
+     "damage_of": 32.0,
+     "pictured": true
+    }
+   ],
+   "free": {
+    "started": true,
+    "released": 1,
+    "fx": 33,
+    "mana_full": true,
+    "bolt_farthest_m": 4.39,
+    "bolt_frames": 7
+   },
+   "linger": {
+    "Straight Punch": 0,
+    "Side Kick": 0,
+    "Smashing Strike": 0,
+    "Roundhouse Kick": 0,
+    "Chain Punch": 0,
+    "Rear Kick": 0,
+    "Piercing Palm": 0,
+    "Axe Kick": 0,
+    "Meteor Fist": 0,
+    "Spinning Kick": 0
+   },
+   "dash": {
+    "started": true,
+    "closed_m": 5.06
+   },
+   "chi_ok": [
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick"
+   ]
   }
  ],
- "windows_hidden": "Message Log, Content Browser",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_qb2_qb_scrolled.png",
-  "mw_qb2_qb_inventory.png",
-  "mw_qb2_qb_ready.png",
-  "mw_qb2_look_StraightPunch_1.png",
-  "mw_qb2_look_StraightPunch_2.png",
-  "mw_qb2_look_StraightPunch_3.png",
-  "mw_qb2_look_SideKick_1.png",
-  "mw_qb2_look_SideKick_2.png",
-  "mw_qb2_look_SideKick_3.png",
-  "mw_qb2_look_SmashingStrike_1.png",
-  "mw_qb2_look_SmashingStrike_2.png",
-  "mw_qb2_look_SmashingStrike_3.png",
-  "mw_qb2_look_RoundhouseKick_1.png",
-  "mw_qb2_look_RoundhouseKick_2.png",
-  "mw_qb2_look_RoundhouseKick_3.png",
-  "mw_qb2_look_ChainPunch_1.png",
-  "mw_qb2_look_ChainPunch_2.png",
-  "mw_qb2_look_ChainPunch_3.png",
-  "mw_qb2_look_RearKick_1.png",
-  "mw_qb2_look_RearKick_2.png",
-  "mw_qb2_look_RearKick_3.png",
-  "mw_qb2_look_PiercingPalm_1.png",
-  "mw_qb2_look_PiercingPalm_2.png",
-  "mw_qb2_look_PiercingPalm_3.png",
-  "mw_qb2_look_AxeKick_1.png",
-  "mw_qb2_look_AxeKick_2.png",
-  "mw_qb2_look_AxeKick_3.png",
-  "mw_qb2_look_MeteorFist_1.png",
-  "mw_qb2_look_MeteorFist_2.png",
-  "mw_qb2_look_MeteorFist_3.png",
-  "mw_qb2_look_SpinningKick_1.png",
-  "mw_qb2_look_SpinningKick_2.png",
-  "mw_qb2_look_SpinningKick_3.png"
+  "mw_qb4_qb_scrolled.png",
+  "mw_qb4_qb_inventory.png",
+  "mw_qb4_qb_ready.png",
+  "mw_qb4_look_StraightPunch_1.png",
+  "mw_qb4_look_StraightPunch_2.png",
+  "mw_qb4_look_StraightPunch_3.png",
+  "mw_qb4_look_SideKick_1.png",
+  "mw_qb4_look_SideKick_2.png",
+  "mw_qb4_look_SideKick_3.png",
+  "mw_qb4_look_SmashingStrike_1.png",
+  "mw_qb4_look_SmashingStrike_2.png",
+  "mw_qb4_look_SmashingStrike_3.png",
+  "mw_qb4_look_RoundhouseKick_1.png",
+  "mw_qb4_look_RoundhouseKick_2.png",
+  "mw_qb4_look_RoundhouseKick_3.png",
+  "mw_qb4_look_ChainPunch_1.png",
+  "mw_qb4_look_ChainPunch_2.png",
+  "mw_qb4_look_ChainPunch_3.png",
+  "mw_qb4_look_RearKick_1.png",
+  "mw_qb4_look_RearKick_2.png",
+  "mw_qb4_look_RearKick_3.png",
+  "mw_qb4_look_PiercingPalm_1.png",
+  "mw_qb4_look_PiercingPalm_2.png",
+  "mw_qb4_look_PiercingPalm_3.png",
+  "mw_qb4_look_AxeKick_1.png",
+  "mw_qb4_look_AxeKick_2.png",
+  "mw_qb4_look_AxeKick_3.png",
+  "mw_qb4_look_MeteorFist_1.png",
+  "mw_qb4_look_MeteorFist_2.png",
+  "mw_qb4_look_MeteorFist_3.png",
+  "mw_qb4_look_SpinningKick_1.png",
+  "mw_qb4_look_SpinningKick_2.png",
+  "mw_qb4_look_SpinningKick_3.png",
+  "mw_qb4_ma_room.png",
+  "mw_qb4_ma_StraightPunch.png",
+  "mw_qb4_ma_SideKick.png",
+  "mw_qb4_ma_SmashingStrike.png",
+  "mw_qb4_ma_RoundhouseKick.png",
+  "mw_qb4_ma_ChainPunch.png",
+  "mw_qb4_ma_RearKick.png",
+  "mw_qb4_ma_PiercingPalm.png",
+  "mw_qb4_ma_AxeKick.png",
+  "mw_qb4_ma_MeteorFist.png",
+  "mw_qb4_ma_SpinningKick.png"
  ],
  "error": null,
  "windows_shown_again": 2

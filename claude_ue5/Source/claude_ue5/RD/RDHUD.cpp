@@ -1976,7 +1976,7 @@ void ARDHUD::DrawInventory(float Sc)
 			// (the quick bar's abilities (the user's of 2026-10-29): what it does, its own key, its slot)
 			Para(Sel[1] == TEXT("Dash") ? TEXT("A dash at the monster ahead (up to 5 m, stopping short of it) and a strike with what you hold")
 			                            : TEXT("A dodge: a roll out of the way; blows miss you while you roll"), RDInk, Sc * 1.05f);
-			Para(Sel[1] == TEXT("Dash") ? (bPad ? TEXT("RT makes it anywhere") : TEXT("V or the right mouse button makes it anywhere")) : (bPad ? TEXT("B makes it anywhere") : TEXT("B makes it anywhere")), Dim, Sc);
+			Para(Sel[1] == TEXT("Dash") ? (bPad ? TEXT("RT makes it anywhere") : TEXT("V or the right mouse button makes it anywhere")) : TEXT("B makes it anywhere"), Dim, Sc);
 			Ry += 6.f * Sc;
 			const int32 Qs = Sel.Num() >= 3 ? FCString::Atoi(*Sel[2]) : -1;
 			const FString YSlot = URDCombatComponent::SlotLabel(Cb->GetAssignSlot());
@@ -2311,7 +2311,7 @@ void ARDHUD::DrawHotbar(float Sc)
 		const int32 Before = QFirst, After = Qs.Num() - QFirst - 10;
 		const FLinearColor Mc(1.f, 0.82f, 0.35f);
 		if (Before > 0) { const FString T = FString::Printf(TEXT("< %d"), Before); UI.TextSize(T, Tw, Th, Small, Sc * 1.2f, ERDType::Title); UI.Text(T, Mc, X0 - Tw - 10.f * Sc, Y0 + (S - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Title); }
-		if (After > 0) { const FString T = FString::Printf(TEXT("%d >"), After); UI.TextSize(T, Tw, Th, Small, Sc * 1.2f, ERDType::Title); UI.Text(T, Mc, X0 + 10.f * (S + Gp) - Gp + 10.f * Sc, Y0 + (S - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Title); }
+		if (After > 0) { const FString T = FString::Printf(TEXT("%d >"), After); UI.TextSize(T, Tw, Th, Small, Sc * 1.2f, ERDType::Title); UI.Text(T, Mc, X0 + W + 10.f * Sc, Y0 + (S - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Title); }          // (after the whole bar: the alongside slots too)
 	}
 	for (int32 Si = 0; Si < N; ++Si)
 	{

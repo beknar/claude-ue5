@@ -7,7 +7,8 @@ rdm4_ui_cut.py --export into <dir>.
 
 Each <dir>/<name>.png becomes /Game/RandomDungeon/UI/T_RDM4_<name> (a UI texture, as 830's and 867's) and an entry of that
 name in the generator's UIArt on mistward_castle and martial_arts (872 names the chi weapons' Icon chi_<move>; the HUD draws
-an ability's slot from ability_<name>). Saves both maps; the editor ends on mistward_castle."""
+an ability's slot from ability_<name>), and in the menu's (mistward_castle_select's ARDHeroSelect: her card's weapons).
+Saves the three maps; the editor ends on mistward_castle."""
 import unreal, sys, os
 DIR = os.path.abspath(sys.argv[1])
 MAPS = ["/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/martial_arts"]
