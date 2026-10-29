@@ -196,6 +196,7 @@ bool URDCombatComponent::TakeWeapon(FName Item)
 void URDCombatComponent::ResetWeapons()
 {
 	if (AttackTime >= 0.f) EndAttack();
+	for (FBolt& B : Bolts) EndBoltFx(B, 0.f);          // (bolts in flight gone with their effects: dropped, they hung in the air)
 	Bolts.Reset(); PendingBreak.Reset(); NextOf.Reset(); Wear.Reset();
 	WeaponIndex = -1;
 	WeaponsBroken = WeaponsTaken = 0; LastBroken = NAME_None;
@@ -352,10 +353,9 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 			return false;
 		}
 	}
-	// (the Martial Artist's chi attacks (a strike with a blast: Rend with Splash): with no monster within reach that she can
-	// see, none is made and no mana spent; the first test's chi at 6 m took its 7 mana for nothing)
-	if (W->bSpell && !W->BoltMesh)
-		if (const FRDSpellDef* Sd = SpellOf(Index); Sd && Sd->Kind == ERDSpellKind::Rend && Sd->Splash > 0.f && !Generator->bChiWithoutTarget && !PickTarget(W->Reach, true))
+	// (the Martial Artist's chi attacks (bolts with a range of their own): with no monster within it that she can see, none
+	// is made and no mana spent (the first test's chi at 6 m took its 7 mana for nothing); martial_arts: made all the same)
+	if (W->bSpell && W->BoltRange > 0.f && !Generator->bChiWithoutTarget && !PickTarget(W->BoltRange, true))
 		{
 			const float Now = GetWorld()->GetTimeSeconds();
 			if (Now - NoManaTime > 0.6f) { ++CastsRefused; SetMessage(FString::Printf(TEXT("No monster within %.1f m for %s"), W->Reach / 100.f, *W->Name.ToString())); }
@@ -590,6 +590,7 @@ void URDCombatComponent::Fall()
 			if (!KeepShield.IsNone()) { AddItem(KeepShield, 1); WornShield = KeepShield; }
 			// (her spells learned from tomes stay: they are in her head; the found weapons go)
 			const int32 Keep = WeaponIndex;
+			for (FBolt& B : Bolts) EndBoltFx(B, 0.f);
 			Wear.Reset(); NextOf.Reset(); PendingBreak.Reset(); Bolts.Reset();
 			SyncWear();
 			WeaponIndex = -1;
@@ -1909,7 +1910,13 @@ ARDMonster* URDCombatComponent::PickTarget(float Reach, bool bNeedSight) const
 
 void URDCombatComponent::StopCharge()
 {
-	if (ChargeComp) ChargeComp->Deactivate();
+	if (ChargeComp)
+	{
+		ChargeComp->Deactivate();
+		// (the Martial Artist's chi: the muzzle on her fist or foot gone for good a moment later; deactivated only, the Side
+		// Kick's left particles 2.5 s on)
+		if (const FRDWeaponDef* W = AttackWeapon(); W && W->BoltRange > 0.f) TimedFx.Add({ ChargeComp.Get(), 0.5f, true });
+	}
 	ChargeComp = nullptr;
 }
 
@@ -1966,6 +1973,18 @@ void URDCombatComponent::PlaceBoltMesh(UStaticMeshComponent* C, const FRDWeaponD
 	if (C) C->SetWorldTransform(W.BoltMeshTransform * FTransform(Dir.Rotation(), At));
 }
 
+void URDCombatComponent::EndBoltFx(FBolt& B, float Linger)
+{
+	for (UFXSystemComponent* F : { B.Fx.Get(), B.Core.Get() })
+	{
+		if (!F) continue;
+		if (Linger > 0.f) { F->Deactivate(); TimedFx.Add({ F, Linger, true }); }
+		else { F->DeactivateImmediate(); F->DestroyComponent(); }
+	}
+	B.Fx = nullptr; B.Core = nullptr;
+	if (Linger <= 0.f) if (UPointLightComponent* L = B.Light.Get()) L->DestroyComponent();
+}
+
 void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 {
 	if (B.Spell >= 0) { SpellBurst(B, At, Direct); return; }      // (level 5: a spell of the table)
@@ -1976,9 +1995,8 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	if (W.BurstFlameEffect)
 		if (UFXSystemComponent* Fl = SpawnFx(W.BurstFlameEffect, At, FRotator::ZeroRotator, W.BurstFlameEffectScale)) TimedFx.Add({ Fl, W.BurstFlameSeconds });
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(W).ToString())), At);
-	// the flames on the bolt die away where they are (their particles finish); its light flares and fades
-	if (UFXSystemComponent* F = B.Fx.Get()) F->Deactivate();
-	if (UFXSystemComponent* F = B.Core.Get()) F->Deactivate();
+	// the flames on the bolt die away where they are (a moment, then gone: EndBoltFx); its light flares and fades
+	EndBoltFx(B);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, W.SpellLightIntensity * 3.f }); }
 	bool bAny = false;
 	auto Hurt = [&](ARDMonster* Mo, float Amount, const FVector& Where)
@@ -2043,7 +2061,7 @@ void URDCombatComponent::TickBolts(float Dt)
 		// (level 5: a spell's bolt may outlive its weapon (a chain's jump, a meteor): the spell's numbers then)
 		const FRDSpellDef* Sp = B.Spell >= 0 && Generator->Spells.IsValidIndex(B.Spell) ? &Generator->Spells[B.Spell] : nullptr;
 		const bool bWeapon = Generator->Weapons.IsValidIndex(B.Weapon) && (B.Spell < 0 || Generator->Weapons[B.Weapon].SpellIndex == B.Spell);
-		if (!bWeapon && !Sp) { Bolts.RemoveAt(I); continue; }
+		if (!bWeapon && !Sp) { EndBoltFx(B, 0.f); Bolts.RemoveAt(I); continue; }
 		FRDWeaponDef SpellW;
 		if (!bWeapon) { SpellW.Reach = Sp->Reach; SpellW.BoltTurnRate = 260.f; }
 		const FRDWeaponDef& W = bWeapon ? Generator->Weapons[B.Weapon] : SpellW;
@@ -2119,7 +2137,7 @@ void URDCombatComponent::TickBolts(float Dt)
 			Bolts.RemoveAt(I); continue;
 		}
 		B.Flown += (Next - B.At).Size(); B.At = Next;
-		if (B.Flown >= W.Reach + 150.f)
+		if (B.Flown >= (W.BoltRange > 0.f ? W.BoltRange : W.Reach + 150.f))
 		{
 			Burst(B, B.At, nullptr);
 			if (UStaticMeshComponent* C = B.Mesh.Get()) C->DestroyComponent();

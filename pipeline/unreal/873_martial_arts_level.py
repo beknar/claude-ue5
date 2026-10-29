@@ -3,8 +3,8 @@ abilities on, to try her form and function. A Save As copy of mistward_castle (a
 - the generator's bOneRoom: the start section plans its great hall alone (OneRoomTiles 10 a side: 30 m), with no doors, no
   hallways and no other section; three monsters of tier 1 stand in it, one more 4 s after one falls (TickOneRoom)
 - bUnlockAll: all ten of her chi attacks are hers from the start
-- bInfiniteMana: no mana is ever taken; bChiWithoutTarget: a chi attack with no monster in reach goes off all the same,
-  its blast 2.5 m in front of her (the user's of 2026-10-28, to try the moves on their own)
+- bInfiniteMana: no mana is ever taken; bChiWithoutTarget: a chi attack with no monster in range goes off all the same,
+  its bolt flying straight ahead to the end of its 4 m (the user's of 2026-10-28, to try the moves on their own)
 - her alone among the heroes (DefaultHero), no menu (MenuLevel empty), one tier, none of the castle's traps, special
   rooms, ring guards, teleporters or prisoners
 Run as `873 saveas` (it saves the copy and quits the editor: a copied map is opened only after a restart), then, the
@@ -27,7 +27,7 @@ else:
     gen.set_editor_property("heroes", heroes)
     for k, v in (("default_hero", HERO), ("menu_level", ""), ("dungeon_title", "Martial Arts"), ("max_tier", 1),
                  ("one_room", True), ("one_room_tiles", 10), ("one_room_monsters", 3), ("one_room_respawn", 4.0), ("unlock_all", True),
-                 ("infinite_mana", True), ("chi_without_target", True), ("chi_free_distance", 250.0),
+                 ("infinite_mana", True), ("chi_without_target", True),
                  ("special_rooms", False), ("ring_guards", False), ("teleporters", False), ("trap_room_share", 0.0), ("trap_hall_share", 0.0),
                  ("boss_slashes", False), ("weapon_pickups", False)):
         try: gen.set_editor_property(k, v)

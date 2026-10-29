@@ -1998,7 +1998,7 @@ void ARDHUD::DrawInventory(float Sc)
 				else Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks; a repair item mends it"), Cb->GetWeaponWear(Wi), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
 			}
 			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Wi), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
-			if (Sp && Sp->Kind == ERDSpellKind::Rend && Sp->Splash > 0.f) Para(FString::Printf(TEXT("A chi attack: strikes the monster you face within %.1f m; the blast hurts others within %.1f m, half as much"), Sp->Reach / 100.f, Sp->Splash / 100.f), Dim, Sc * 1.0f);
+			if (Sp && Wp.BoltRange > 0.f) Para(FString::Printf(TEXT("A chi attack: a bolt at the monster you face that flies %.0f m at most; its burst hurts others within %.1f m, half as much"), Wp.BoltRange / 100.f, Sp->Splash / 100.f), Dim, Sc * 1.0f);
 			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
 			Ry += 6.f * Sc;
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);

@@ -2,13 +2,14 @@
 Run after blender_numpy/tripo_build.py with martialartist_clips.py into SourceArt/jrpg_martialartist and 600 / 610 / 615 /
 620 for MartialArtist (her mesh, her clips, her AnimBP, BP_JRPGMartialArtistCharacter); 819 after this (her walk / run).
 - her flinch and death: Animations_Warrior's Get_Hit_1 and Dead_1 retargeted onto her rig (822's source rig)
-- her fists ("Fists", weapon type "unarmed": a Dexterity ring adds to it): Tripo's own boxing and kicking clips (Box_01-03,
-  Front_kick_01-02), each cut into its strikes: a strike is where one of her hands or feet moves fastest (a peak of at
-  least half the clip's fastest, 0.4 s or more from the next), lasting from half way after the strike before it to half
-  way to the next; 14 damage, 1.6 m reach
-- her chi attacks (martial_arts.json: the user's table): spells of kind Rend (at once on the monster she faces within
-  4.2 m, the blast hurting others within Splash half as much), each with its own clip (martialartist_clips.py: the blow
-  at its `hit`), mana, damage, tier, and a Toon Explosions effect bigger the higher the tier; no tome teaches them (no drop
+- her fists ("Fists", weapon type "unarmed": a Dexterity ring adds to it): Tripo's own Box_01 and Front_kick_02 (the
+  user's of 2026-10-28), each one attack played whole, its blow where one of her hands or feet moves fastest; 14 damage,
+  1.6 m reach (with "whole" off in martial_arts.json each clip listed is cut into its strikes instead: a peak of at least
+  half the clip's fastest, 0.4 s or more from the next)
+- her chi attacks (martial_arts.json: the user's table): bolt spells (from her striking hand or foot at the blow of its
+  own clip (martialartist_clips.py's `hit`), after the monster she faces, 4 m at most: FRDWeaponDef::BoltRange; the burst
+  hurting others within Splash half as much), each with its mana, damage, tier and a Magic Projectiles Vol 4 / 5 muzzle,
+  projectile and hit (none the spell table uses: asserted), bigger the higher the tier; no tome teaches them (no drop
   chance). Two are hers from the start, the other eight her hero's LockedWeapons: two more for each tier boss she slays
 - her knives: each short blade of the weapons table wielded in both hands with rogue_clips.py's stabs (as the Rogue does;
   855's grip mapping onto a dagger held as 822 holds it, from her own reference pose); +30 % damage (TypeBonus)
@@ -163,6 +164,11 @@ fists = blank("Fists"); fa, fs, fe, fh = [], [], [], []
 report = []
 for n in F["clips"]:
     a = clip(n); L, ss = strikes(a)
+    if F.get("whole"):
+        # (the user's of 2026-10-28: each clip one basic attack, played whole; its blow where her hand or foot is fastest)
+        L2, hit = fastest(a, ["hand_l", "hand_r", "foot_l", "foot_r"])
+        fa.append(a); fs.append(0.0); fe.append(round(L2, 3)); fh.append(round(hit, 3))
+        report.append(f"{n} {L:.2f} s whole, the blow at {hit:.2f} (its strikes {[h for _, h, _ in ss]})"); continue
     for (s0, hit, s1) in ss[:F.get("max_per_clip", 3)]:
         fa.append(a); fs.append(s0); fe.append(s1); fh.append(hit)
     report.append(f"{n} {L:.2f} s: " + ", ".join(f"{h:.2f} ({s0:.2f}-{s1:.2f})" for s0, h, s1 in ss))
@@ -179,20 +185,44 @@ for n, hands in (("Stab1", ["hand_r"]), ("Stab2", ["hand_l"]), ("Stab3", ["hand_
 knife.attacks = ka; knife.attack_starts = [0.0] * 3; knife.attack_ends = ke; knife.hit_times = kh
 knife.weapon_type = "short blades"; knife.sound_key = "Daggers"; knife.reach = 150.0; knife.arc = 110.0
 print("MA knife stabs at", kh)
-# the chi attacks
+# the chi attacks (the clips of moves no longer in the table deleted: the first table's Cannon Punch, Roundhouse Fist,
+# Slashing Palm and Uppercut Punch were made kicks the same day)
+keep = {c["clip"] for c in DATA["chi"]}
+for p in eal.list_assets(f"/Game/JRPG/{CH}Anims", recursive=False):
+    nm = p.split(".")[-1]
+    if nm.startswith(f"AS_{CH}_Chi_") and nm[len(f"AS_{CH}_"):] not in keep: print("MA deleted the old", nm, eal.delete_asset(p.split(".")[0]))
 spells_new, chi_w = [], []
+MP = {"V4": "/Game/MagicProjectilesVol4/Particles/NiagaraSystems/", "V5": "/Game/MagicProjectilesVol5/Particles/NiagaraSystems/"}
+def chi_fx(fx):
+    """[pack, muzzle, projectile, hit] (V5: one name for all three, in its Muzzles / Projectiles / Hits folders)"""
+    if fx[0] == "V5": paths = [MP["V5"] + f"{d}/NS_{k}_{fx[1]}" for d, k in (("Muzzles", "Muzzle"), ("Projectiles", "Projectile"), ("Hits", "Hit"))]
+    else: paths = [MP["V4"] + f"NS_{k}_{n}" for k, n in zip(("Muzzle", "Projectile", "Hit"), fx[1:4])]
+    out = [unreal.load_asset(p) for p in paths]
+    for p, a in zip(paths, out): assert a, p
+    return out
+# (no chi effect may be one the spell table (the Mage's) uses)
+SP = json.load(open(os.path.join(SA, "random_dungeon_magic5", "spells.json"), encoding="utf-8"))
+used = {v.split(":", 1)[1].split("/")[-1] for s in SP["spells"] for v in s.get("fx", {}).values()}
 for i, c in enumerate(DATA["chi"]):
-    s = unreal.RDSpellDef(); s.name = c["name"]; s.number = 100 + i + 1; s.type = unreal.RDSpellType.OFFENSE; s.kind = unreal.RDSpellKind.REND
+    cast, bolt, hit = chi_fx(c["fx"])
+    clash = [x.get_name() for x in (cast, bolt, hit) if x.get_name() in used]
+    assert not clash, f"{c['name']}: {clash} are the spell table's"
+    sc = float(c["fx_scale"]); spl = float(DATA["splash"][str(c["tier"])])
+    s = unreal.RDSpellDef(); s.name = c["name"]; s.number = 100 + i + 1; s.type = unreal.RDSpellType.OFFENSE; s.kind = unreal.RDSpellKind.BOLT
     s.effect = c["effect"]; s.mana = float(c["mana"]); s.damage = float(c["damage"]); s.tier = int(c["tier"]); s.reach = float(DATA["chi_reach"])
-    s.splash = float(DATA["splash"][str(c["tier"])]); s.drop_chance = 0.0; s.cooldown = 0.0
-    fx = unreal.load_asset(c["fx"]); assert fx, c["fx"]
-    s.impact_fx = fx; s.impact_fx_scale = float(c["fx_scale"]); s.sound_key = "Fire"; s.icon = c["icon"]
+    s.splash = spl; s.drop_chance = 0.0; s.cooldown = 0.0; s.bolt_speed = float(DATA["chi_bolt_speed"])
+    s.cast_fx = cast; s.bolt_fx = bolt; s.impact_fx = hit; s.cast_fx_scale = sc; s.bolt_fx_scale = sc; s.impact_fx_scale = sc
+    s.sound_key = "Fire"; s.icon = c["icon"]
     spells_new.append(s)
     t = TIMES[c["clip"]]; a = clip(c["clip"])
     w = blank(c["name"]); w.spell = True; w.attacks = [a]; w.attack_starts = [0.0]; w.attack_ends = [float(t["length"])]; w.hit_times = [float(t["hit"])]
     w.damage = float(c["damage"]); w.mana_cost = float(c["mana"]); w.reach = float(DATA["chi_reach"]); w.spell_bone = t["bone"] if t["bone"] != "pelvis" else "hand_r"
-    w.sound_key = "Fire"; w.icon = c["icon"]; w.bolt_splash = 0.0
+    w.sound_key = "Fire"; w.icon = c["icon"]
+    # (her bolt: from the striking hand or foot, after the monster she faces, 4 m at most; the muzzle's flash on the limb as she strikes)
+    w.charge_effect = cast; w.charge_effect_scale = sc; w.bolt_effect = bolt; w.bolt_effect_scale = sc; w.burst_effect = hit; w.burst_effect_scale = sc
+    w.bolt_speed = float(DATA["chi_bolt_speed"]); w.bolt_turn_rate = 260.0; w.bolt_splash = spl; w.bolt_range = float(DATA["chi_range"])
     chi_w.append(w)
+    print(f"MA chi {c['name']}: {cast.get_name()} / {bolt.get_name()} / {hit.get_name()} x {sc}, from {w.spell_bone}, {w.bolt_range:.0f} cm at most")
 
 # ---- her dungeon character
 G = "/Game/RandomDungeon/Blueprints"; CHP = f"{G}/BP_MA_MartialArtistCharacter"
@@ -224,7 +254,8 @@ for MAP in MAPS:
     if not ues.get_editor_world().get_path_name().startswith(MAP + "."): les.load_level(MAP)
     gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
     names_ = {c["name"] for c in DATA["chi"]}
-    spells = [s for s in gen.get_editor_property("spells") if str(s.name) not in names_]
+    # (every chi spell this made before, by its number (101 on), and any of the table's names: renamed ones went too)
+    spells = [s for s in gen.get_editor_property("spells") if str(s.name) not in names_ and s.number <= 100]
     base = len(spells); spells += [copy(s, unreal.RDSpellDef) for s in spells_new]
     gen.set_editor_property("spells", spells)
     ws = [copy(w, unreal.RDWeaponDef) for w in chi_w]

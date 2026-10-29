@@ -690,6 +690,10 @@ private:
 	/** effects to stop after a while (the burst's flames) */
 	struct FTimedFx { TWeakObjectPtr<UFXSystemComponent> Fx; float Left = 0.f; bool bKill = false; };   // (bKill: gone at once at the end, not left to die away)
 	TArray<FTimedFx> TimedFx;
+	/** a bolt's own effects ended: its trail left a moment to fade (Linger s), then gone for good. A plain Deactivate left
+	 *  some projectile systems' particles hanging in the air where the bolt burst (the user's of 2026-10-28; measured: up to
+	 *  43 particles 2.5 s after) */
+	void EndBoltFx(FBolt& B, float Linger = 0.4f);
 	/** bolts stuck where they struck, and how long they stay */
 	struct FStuck { TWeakObjectPtr<UStaticMeshComponent> Mesh; float Left = 0.f; };
 	TArray<FStuck> Stuck;

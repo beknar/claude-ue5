@@ -176,10 +176,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bUnlockAll = false;
 	/** martial_arts (the user's of 2026-10-28, to try her moves): no mana is ever taken (her pool stays full) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bInfiniteMana = false;
-	/** martial_arts: a chi attack with no monster in reach is made all the same, its blast ChiFreeDistance in front of her
-	 *  (monsters within its splash there take half); off, it is refused and costs nothing */
+	/** martial_arts: a chi attack with no monster within its range is made all the same (its bolt flies straight ahead and
+	 *  bursts at the end of its range); off, it is refused and costs nothing */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bChiWithoutTarget = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") float ChiFreeDistance = 250.f;
 	/** the locked weapons gained so far (her hero's LockedWeapons, in order) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Martial") int32 WeaponsUnlocked = 0;
 	/** her hero's weapons at the start (her card's, and with bUnlockAll all her locked ones) */

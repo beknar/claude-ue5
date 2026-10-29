@@ -121,6 +121,9 @@ def solve_leg(arm_obj, ctx, side, op):
     th, ca, ft = P[f"thigh_{side}"], P[f"calf_{side}"], P[f"foot_{side}"]
     if op[0] == "kick":
         _, tw, cw, fw, pole = op
+        # (the kneecap faces the way the thigh leads the calf (from the bend); `pole` only where the leg is near straight)
+        t_, c_ = tw.normalized(), cw.normalized(); kn = t_ - c_; kn = kn - t_ * kn.dot(t_)
+        if kn.length > 0.15: pole = kn.normalized()
         aim(th, tw, pole, F); aim(ca, cw, pole, F)
         cur = ft.matrix.to_quaternion() @ Vector((0.0, 1.0, 0.0))
         M = ft.matrix.copy(); ft.matrix = Matrix.LocRotScale(M.translation, cur.rotation_difference(fw.normalized()) @ M.to_quaternion(), M.to_scale())
@@ -187,17 +190,17 @@ def straight_punch(ctx, k):
     return sp
 
 
-def cannon_punch(ctx, k):
-    fr = Fr()
-    if k == "wind":
-        sp = body(ctx, fr, twist=55, lean=-4, drop=14); sp.update(plant("l", -4, 20, yaw=-12)); sp.update(plant("r", 6, -22, yaw=-50))
-        sp.update(hand(fr, "l", -6, 46, -2, fr.D("l", 0.4, 0.0, -1.0), axis=F, palm=C.D("l", -1.0, 0.0, 0.0), closed=False))
-        sp.update(hand(fr, "r", 16, -14, -30, fr.D("r", 0.5, -0.6, -0.4), axis=F, palm=U))
+def side_kick(ctx, k):
+    """she turns her right side to the front (the body a quarter turn to her left, on the left foot), the right knee drawn up
+    to her chest, then the leg thrust out sideways at hip height, the blade of the foot first, the body leaning away"""
+    yaw = {"chamber": 60, "hit": 90, "retract": 75}[k]; fr = Fr(yaw)
+    sp = body(ctx, fr, lean=-2, side=30 if k == "hit" else 14, drop=9)
+    sp.update(under("l", 0.0, yaw=yaw - 15, pitch=10))
+    if k == "hit":
+        sp.update(kick("r", fr.D("r", 1.0, 0.0, 0.14), fr.D("r", 1.0, 0.0, 0.16), fr.D("r", 0.15, 0.6, -0.8), fr.v(U)))
     else:
-        ext = 1.0 if k == "release" else 0.9
-        sp = body(ctx, fr, twist=-42, lean=15, drop=22, fwd=18, hips=0.4); sp.update(plant("l", -4, 44, yaw=-4)); sp.update(plant("r", 4, -24, yaw=-14, pitch=30))
-        sp.update(hand(fr, "l", -16, -6, -30, fr.D("l", 0.8, -0.4, -0.5), axis=F, palm=U))
-        sp.update(hand(fr, "r", -2, 64 * ext, -8, fr.D("r", 0.3, 0.0, -1.0), axis=F, palm=-U))
+        sp.update(kick("r", fr.D("r", 0.55, 0.45, 0.70), fr.D("r", -0.35, 0.15, -0.92), fr.D("r", 0.1, 0.7, -0.7), fr.v(F)))
+    sp.update(guard_l(fr)); sp.update(hand(fr, "r", 16, 8, -16, fr.D("r", 0.6, 0.0, -1.0), axis=C.D("r", 0.4, 0.6, -0.3), palm=C.D("r", -1.0, 0.0, 0.0)))
     return sp
 
 
@@ -215,20 +218,19 @@ def smashing_strike(ctx, k):
     return sp
 
 
-def roundhouse_fist(ctx, k):
-    fr = Fr()
-    sp = {}
-    if k == "wind":
-        sp = body(ctx, fr, twist=52, lean=2, drop=10); sp.update(plant("l", -2, 18, yaw=-8)); sp.update(plant("r", 4, -18, yaw=-45))
-        sp.update(guard_l(fr)); sp.update(hand(fr, "r", 38, -4, -8, fr.D("r", 0.6, -0.4, 0.2), axis=C.D("r", 0.6, 0.6, 0.0), palm=-U))
-    elif k == "release":
-        sp = body(ctx, fr, twist=-42, lean=7, drop=12, hips=0.45); sp.update(plant("l", -2, 18, yaw=-2)); sp.update(plant("r", 2, -16, yaw=10, pitch=25))
-        sp.update(hand(fr, "l", -10, 10, -2, fr.D("l", 0.5, 0.0, -1.0), axis=U, palm=C.D("l", -1.0, 0.0, 0.0)))
-        sp.update(hand(fr, "r", -16, 40, -2, fr.D("r", 1.0, 0.1, 0.35), axis=C.D("r", -0.85, 0.5, 0.0), palm=-U))
+def roundhouse_kick(ctx, k):
+    """the right knee raised out to her side with the shin folded back, her hips turning over on the left foot, the shin
+    whipped round through the front at waist height (the instep first), carried on across, then down"""
+    yaw = {"chamber": 30, "hit": 70, "follow": 88}[k]; fr = Fr(yaw); w = Fr()       # (the leg's ways in her starting frame)
+    sp = body(ctx, fr, lean=-3, side=20 if k != "chamber" else 10, drop=8)
+    sp.update(under("l", 0.0, yaw=yaw - 25, pitch=15))
+    if k == "chamber":
+        sp.update(kick("r", w.D("r", 0.55, 0.80, 0.15), w.D("r", 0.65, -0.60, 0.0), w.D("r", 0.6, -0.6, -0.3), w.v(U)))
+    elif k == "hit":
+        sp.update(kick("r", w.D("r", 0.10, 1.0, 0.22), w.D("r", -0.20, 1.0, 0.20), w.D("r", -0.25, 1.0, 0.1), w.D("l", 0.6, 0.0, 0.8)))
     else:
-        sp = body(ctx, fr, twist=-62, lean=6, drop=11, hips=0.45); sp.update(plant("l", -2, 18, yaw=4)); sp.update(plant("r", 2, -16, yaw=20, pitch=25))
-        sp.update(hand(fr, "l", -10, 10, -2, fr.D("l", 0.5, 0.0, -1.0), axis=U, palm=C.D("l", -1.0, 0.0, 0.0)))
-        sp.update(hand(fr, "r", -34, 22, -6, fr.D("r", 1.0, 0.0, 0.3), axis=C.D("r", -1.0, 0.0, 0.0), palm=-U))
+        sp.update(kick("r", w.D("r", -0.35, 0.9, 0.0), w.D("r", -0.7, 0.6, -0.25), w.D("r", -0.7, 0.5, -0.4), w.D("l", 0.6, 0.0, 0.8)))
+    sp.update(guard_l(fr)); sp.update(hand(fr, "r", 22, -6, -18, fr.D("r", 0.6, -0.2, -1.0), axis=C.D("r", 0.3, -0.5, -0.8), palm=C.D("r", -1.0, 0.0, 0.0)))
     return sp
 
 
@@ -244,17 +246,17 @@ def chain_punch(ctx, k):
     return sp
 
 
-def slashing_palm(ctx, k):
-    fr = Fr()
-    if k == "wind":
-        sp = body(ctx, fr, twist=-36, lean=-2, drop=8); sp.update(plant("l", -2, 16, yaw=-8)); sp.update(plant("r", 4, -16, yaw=-30))
-        sp.update(guard_l(fr)); sp.update(hand(fr, "r", -14, 10, 20, fr.D("r", 0.6, 0.0, 0.4), axis=U, palm=C.D("r", 0.0, -1.0, 0.0), closed=False))
-    elif k == "release":
-        sp = body(ctx, fr, twist=30, lean=13, drop=13, hips=0.3); sp.update(plant("l", -2, 22, yaw=-6)); sp.update(plant("r", 4, -14, yaw=-34))
-        sp.update(guard_l(fr)); sp.update(hand(fr, "r", 22, 46, -26, fr.D("r", 1.0, 0.0, 0.0), axis=C.D("r", 0.3, 0.8, -0.5), palm=C.D("r", -0.6, 0.0, -0.8), closed=False))
+def rear_kick(ctx, k):
+    """a half turn away (to her right, on the left foot), the right knee tucked under her, the leg driven straight back at
+    the monster, heel first, the body leaning away over the standing leg; turned back"""
+    yaw = {"turn": -90, "tuck": -180, "hit": -180, "back": -90}[k]; fr = Fr(yaw)
+    sp = body(ctx, fr, lean=34 if k == "hit" else 14, drop=10, look=0.9)
+    sp.update(under("l", 0.0, yaw=yaw, pitch=10))
+    if k == "hit":
+        sp.update(kick("r", fr.D("r", 0.08, -1.0, 0.18), fr.D("r", 0.08, -1.0, 0.20), fr.D("r", 0.0, -0.2, -1.0), fr.v(-U)))
     else:
-        sp = body(ctx, fr, twist=38, lean=12, drop=12, hips=0.3); sp.update(plant("l", -2, 22, yaw=-6)); sp.update(plant("r", 4, -14, yaw=-34))
-        sp.update(guard_l(fr)); sp.update(hand(fr, "r", 32, 30, -42, fr.D("r", 1.0, 0.0, 0.0), axis=C.D("r", 0.5, 0.4, -0.8), palm=C.D("r", -0.6, 0.0, -0.8), closed=False))
+        sp.update(kick("r", fr.D("r", 0.10, 0.75, -0.35), fr.D("r", 0.05, -0.35, -0.95), fr.D("r", 0.0, 0.5, -0.85), fr.v(F)))
+    sp.update(guard_l(fr)); sp.update(guard_r(fr))
     return sp
 
 
@@ -272,15 +274,27 @@ def piercing_palm(ctx, k):
     return sp
 
 
-def uppercut_punch(ctx, k):
+def axe_kick(ctx, k):
+    """the straight right leg swung up in front of her past her head, then chopped straight down, heel first, landing a
+    stride forward"""
     fr = Fr()
-    if k == "wind":
-        sp = body(ctx, fr, twist=30, lean=14, drop=24); sp.update(plant("l", -4, 16, yaw=-8)); sp.update(plant("r", 6, -16, yaw=-40))
-        sp.update(guard_l(fr)); sp.update(hand(fr, "r", 12, 18, -50, fr.D("r", 0.6, -0.2, -0.8), axis=C.D("r", 0.0, 0.6, 0.8), palm=C.D("r", 0.0, -1.0, 0.2)))
+    if k == "land":
+        sp = body(ctx, fr, lean=8, drop=10); sp.update(plant("l", -2, 4, yaw=-6)); sp.update(plant("r", 2, 36, yaw=-10))
+        sp.update(guard_l(fr)); sp.update(guard_r(fr)); return sp
+    lean = {"rise": -6, "top": -14, "hit": 14}[k]
+    sp = body(ctx, fr, lean=lean, drop=6 if k != "hit" else 12)
+    sp.update(plant("l", -2, 6, yaw=-6, pitch=18 if k == "top" else 0))
+    if k == "rise":
+        sp.update(kick("r", fr.D("r", 0.15, 0.80, 0.55), fr.D("r", 0.15, 0.75, 0.62), fr.D("r", 0.1, 0.1, 1.0), fr.v(U)))
+    elif k == "top":
+        sp.update(kick("r", fr.D("r", 0.22, 0.30, 0.95), fr.D("r", 0.22, 0.25, 0.97), fr.D("r", 0.1, -0.6, 0.8), fr.v(-F)))
     else:
-        hi = 1.0 if k == "release" else 1.08
-        sp = body(ctx, fr, twist=-26, lean=-9, drop=-3, hips=0.35); sp.update(plant("l", -2, 16, yaw=-4, pitch=10)); sp.update(plant("r", 4, -14, yaw=-10, pitch=35))
-        sp.update(guard_l(fr)); sp.update(hand(fr, "r", 2, 28, 24 * hi, fr.D("r", 0.3, 0.0, -1.0), axis=U, palm=C.D("r", 0.0, -1.0, 0.0)))
+        sp.update(kick("r", fr.D("r", 0.05, 0.95, -0.25), fr.D("r", 0.02, 0.55, -0.85), fr.D("r", 0.0, 0.7, 0.7), fr.v(U)))
+    if k == "top":
+        sp.update(hand(fr, "l", -32, 10, 0, fr.D("l", 0.3, 0.0, -1.0), axis=C.D("l", 0.8, 0.4, 0.0), palm=-U))
+        sp.update(hand(fr, "r", 30, 6, -2, fr.D("r", 0.3, 0.0, -1.0), axis=C.D("r", 0.8, 0.4, 0.0), palm=-U))
+    else:
+        sp.update(guard_l(fr)); sp.update(guard_r(fr))
     return sp
 
 
@@ -342,14 +356,15 @@ def dash(ctx, k):
 # the chi attacks: (clip, the key poses as (seconds, maker, its key; None the stance), the blow's time, the striking bone)
 CHI = [
     ("Chi_StraightPunch", [(0.0, None, 0), (0.10, straight_punch, "chamber"), (0.20, straight_punch, "release"), (0.34, straight_punch, "follow"), (0.62, None, 0)], 0.20, "hand_r"),
-    ("Chi_CannonPunch", [(0.0, None, 0), (0.32, cannon_punch, "wind"), (0.48, cannon_punch, "release"), (0.70, cannon_punch, "follow"), (1.05, None, 0)], 0.48, "hand_r"),
+    ("Chi_SideKick", [(0.0, None, 0), (0.16, side_kick, "chamber"), (0.30, side_kick, "hit"), (0.46, side_kick, "retract"), (0.80, None, 0)], 0.30, "foot_r"),
     ("Chi_SmashingStrike", [(0.0, None, 0), (0.34, smashing_strike, "wind"), (0.50, smashing_strike, "release"), (0.68, smashing_strike, "follow"), (1.05, None, 0)], 0.50, "hand_r"),
-    ("Chi_RoundhouseFist", [(0.0, None, 0), (0.28, roundhouse_fist, "wind"), (0.44, roundhouse_fist, "release"), (0.60, roundhouse_fist, "follow"), (0.95, None, 0)], 0.44, "hand_r"),
+    ("Chi_RoundhouseKick", [(0.0, None, 0), (0.16, roundhouse_kick, "chamber"), (0.30, roundhouse_kick, "hit"), (0.44, roundhouse_kick, "follow"), (0.80, None, 0)], 0.30, "foot_r"),
     ("Chi_ChainPunch", [(0.0, None, 0), (0.12, chain_punch, "r"), (0.22, chain_punch, "l"), (0.32, chain_punch, "r"), (0.42, chain_punch, "l"),
                         (0.52, chain_punch, "r"), (0.62, chain_punch, "l"), (0.76, chain_punch, "R"), (0.92, chain_punch, "R"), (1.20, None, 0)], 0.76, "hand_r"),
-    ("Chi_SlashingPalm", [(0.0, None, 0), (0.30, slashing_palm, "wind"), (0.46, slashing_palm, "release"), (0.62, slashing_palm, "follow"), (0.95, None, 0)], 0.46, "hand_r"),
+    ("Chi_RearKick", [(0.0, None, 0), (0.16, rear_kick, "turn"), (0.30, rear_kick, "tuck"), (0.44, rear_kick, "hit"), (0.58, rear_kick, "tuck"),
+                      (0.72, rear_kick, "back"), (0.95, None, 0)], 0.44, "foot_r"),
     ("Chi_PiercingPalm", [(0.0, None, 0), (0.28, piercing_palm, "wind"), (0.42, piercing_palm, "release"), (0.58, piercing_palm, "follow"), (0.90, None, 0)], 0.42, "hand_r"),
-    ("Chi_UppercutPunch", [(0.0, None, 0), (0.30, uppercut_punch, "wind"), (0.45, uppercut_punch, "release"), (0.60, uppercut_punch, "follow"), (0.95, None, 0)], 0.45, "hand_r"),
+    ("Chi_AxeKick", [(0.0, None, 0), (0.18, axe_kick, "rise"), (0.32, axe_kick, "top"), (0.44, axe_kick, "hit"), (0.58, axe_kick, "land"), (0.92, None, 0)], 0.44, "foot_r"),
     ("Chi_MeteorFist", [(0.0, None, 0), (0.25, meteor_fist, "crouch"), (0.45, meteor_fist, "rise"), (0.60, meteor_fist, "apex"), (0.78, meteor_fist, "impact"),
                         (1.00, meteor_fist, "impact"), (1.45, None, 0)], 0.78, "hand_r"),
     ("Chi_SpinningKick", [(0.0, None, 0), (0.14, spinning_kick, "chamber"), (0.28, spinning_kick, "turn1"), (0.42, spinning_kick, "turn2"), (0.55, spinning_kick, "hit"),

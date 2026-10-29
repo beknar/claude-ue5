@@ -151,6 +151,9 @@ struct FRDWeaponDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltSpeed = 1600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltTurnRate = 220.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltSplash = 170.f;
+	/** the farthest its bolt flies before it bursts (cm; 0: its Reach and 1.5 m more). The Martial Artist's chi attacks:
+	 *  4 m (the user's of 2026-10-28); with no monster within it, a chi attack is refused unless bChiWithoutTarget */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BoltRange = 0.f;
 	/** effects (a Niagara system or a Cascade particle system): on her hand from the start of the cast to the release,
 	 *  on the bolt, and where it bursts; each with its scale. When the charge is the same system as the bolt, the charge
 	 *  itself leaves her hand as the bolt (a system that takes a while to build up is full grown when it flies). */

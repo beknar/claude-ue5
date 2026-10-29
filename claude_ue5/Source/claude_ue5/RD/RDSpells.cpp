@@ -323,11 +323,12 @@ void URDCombatComponent::SpellPierce(FBolt& B, ARDMonster* Mo, const FVector& At
 void URDCombatComponent::SpellBurst(FBolt& B, const FVector& At, ARDMonster* Direct)
 {
 	const FRDSpellDef* S = Generator && Generator->Spells.IsValidIndex(B.Spell) ? &Generator->Spells[B.Spell] : nullptr;
-	if (UFXSystemComponent* F = B.Fx.Get()) F->Deactivate();
-	if (UFXSystemComponent* F = B.Core.Get()) F->Deactivate();
+	EndBoltFx(B);
 	if (!S) { if (UPointLightComponent* L = B.Light.Get()) L->DestroyComponent(); return; }
 	const float Dmg = B.Dmg >= 0.f ? B.Dmg : (Generator->Weapons.IsValidIndex(B.Weapon) ? GetDamageOf(B.Weapon) : S->Damage);
-	SpawnSpellFx(S->ImpactFx, At, B.Vel.IsNearlyZero() ? FRotator::ZeroRotator : B.Vel.Rotation(), S->ImpactFxScale, S);
+	UFXSystemComponent* HitFx = SpawnSpellFx(S->ImpactFx, At, B.Vel.IsNearlyZero() ? FRotator::ZeroRotator : B.Vel.Rotation(), S->ImpactFxScale, S);
+	// (a chi bolt's hit (the Martial Artist's: a range of its own) gone for good 2 s on; the Mage's are left as they were)
+	if (HitFx && Generator->Weapons.IsValidIndex(B.Weapon) && Generator->Weapons[B.Weapon].BoltRange > 0.f) TimedFx.Add({ HitFx, 2.f, true });
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *S->SoundKey.ToString())), At);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, S->LightIntensity * 3.f }); }
 	// (what stays on a monster it struck: a slow, a burn that gives some back to her)
@@ -528,20 +529,6 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		ARDMonster* T = LastTarget.Get();
 		if (!T || T->IsDead()) T = PickTarget(S->Reach, true);
 		if (T) { SpawnSpellFx(S->ImpactFx, T->GetActorLocation(), FRotator::ZeroRotator, S->ImpactFxScale, S); SpellHurt(T, Dmg, T->GetActorLocation(), true); }
-		// (the Martial Artist's chi attacks: the blast also hurts the others within Splash, half as much; Soul Rend has none)
-		if (T && S->Splash > 0.f)
-		{
-			const FVector C = T->GetActorLocation();
-			Around(C, S->Splash, [&](ARDMonster* Mo) { if (Mo != T) SpellHurt(Mo, Dmg * 0.5f, Mo->GetActorLocation(), true); });
-		}
-		// (martial_arts: no monster in reach, the blast goes off in front of her all the same; any monster in it takes half)
-		else if (!T && S->Splash > 0.f && Generator->bChiWithoutTarget)
-		{
-			const FVector C = L + Fw * Generator->ChiFreeDistance + FVector(0, 0, 20.f);
-			SpawnSpellFx(S->ImpactFx, C, FRotator::ZeroRotator, S->ImpactFxScale, S);
-			Around(C, S->Splash, [&](ARDMonster* Mo) { SpellHurt(Mo, Dmg * 0.5f, Mo->GetActorLocation(), true); });
-			UE_LOG(LogTemp, Log, TEXT("RDMARTIAL %s with no monster in reach: the blast %.0f cm before her"), *S->Name.ToString(), Generator->ChiFreeDistance);
-		}
 		break;
 	}
 	case ERDSpellKind::Corpse:

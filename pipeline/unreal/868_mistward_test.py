@@ -2054,15 +2054,17 @@ def chi_trial(c, i, dist=260.0, splash_at=None, picture=None):
     yield from wait(0.4)
     c.set_mana(c.get_max_mana()); m0 = c.get_mana(); h0 = hp(m); h2 = hp(m2) if m2 else 0.0
     W = g.get_editor_property("weapons")[i]; nm = str(W.name); r0 = md(c.spells_released).get(nm, 0)
-    started = c.start_attack_with(i); taken = round(m0 - c.get_mana(), 1)
+    b0 = c.bolts_cast; started = c.start_attack_with(i); taken = round(m0 - c.get_mana(), 1)
     t0 = time.time(); fx = 0; pic = False; at = m.get_actor_location(); t_fx = None; seq = 0
     while time.time() - t0 < float(W.attack_ends[0]) + 0.8:
         yield
         n = c.get_spell_particles(at, 400.0); n = n[0] if isinstance(n, tuple) else n; fx = max(fx, n)
-        if picture and not pic and n > 0: shot(picture); pic = True; t_fx = time.time()
+        # (the picture when the blow has landed: taken as the bolt left her hand, its long frame made a bolt miss (a chi bolt
+        # flies; a Rend's blow did not))
+        if picture and not pic and h0 - hp(m) > 0: shot(picture); pic = True; t_fx = time.time()
         # (a tag "probe...": the blast also pictured 0.2, 0.4 and 0.7 s after it began)
         if TAG.startswith("probe") and t_fx and seq < 3 and time.time() - t_fx >= (0.2, 0.4, 0.7)[seq]: seq += 1; shot(f"{picture}_{seq}")
-    r = {"name": nm, "started": started, "mana": taken, "lost": round(h0 - hp(m), 1), "fx": fx, "released": md(c.spells_released).get(nm, 0) - r0,
+    r = {"name": nm, "started": started, "mana": taken, "lost": round(h0 - hp(m), 1), "fx": fx, "released": md(c.spells_released).get(nm, 0) - r0, "bolts": c.bolts_cast - b0,
          "damage_of": round(c.get_damage_of(i), 1), "pictured": pic}
     if m2: r["splash_lost"] = round(h2 - hp(m2), 1)
     drop([m] + ([m2] if m2 else [])); yield from wait(0.3)
@@ -2144,8 +2146,8 @@ def step_martial():
     res["after_restart"] = W()
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     f_, ch, dsh = res["fists"], res["chi"], res["dash"]
-    chi4 = ["Smashing Strike", "Roundhouse Fist", "Chain Punch", "Slashing Palm"]
-    ok = (res["hero"] == "MartialArtist" and res["hp"] == 140 and res["mana"] == 100 and res["weapons"] == ["Fists", "Straight Punch", "Cannon Punch"]
+    chi4 = ["Smashing Strike", "Roundhouse Kick", "Chain Punch", "Rear Kick"]
+    ok = (res["hero"] == "MartialArtist" and res["hp"] == 140 and res["mana"] == 100 and res["weapons"] == ["Fists", "Straight Punch", "Side Kick"]
           and f_["damage_of"] == 14 and f_["lost"] >= 14 and abs(res["ring"]["fists"] - 14 * (1 + ring.amount)) < 0.2 and abs(res["ring"]["chi"] - 22) < 0.2
           and res.get("knife", {}).get("both_hands") and abs(res["knife"]["bonus"] - (0.3 + ring.amount)) < 0.01 and res["knife"]["lost"] > 0
           and abs(res["ring_off"]["knife"] - 11 * 1.3) < 0.2 and res["ring_off"]["fists"] == 14
@@ -2156,7 +2158,7 @@ def step_martial():
         ok = ok and res["boss"]["weapons"] == chi4[:2] and res["after_ask"][-2:] == chi4[2:] and all(n in res["after_death"] for n in chi4)
     else:
         ok = ok and res["after_ask"] == chi4[:2] and all(n in res["after_death"] for n in chi4[:2])
-    ok = ok and res["after_restart"] == ["Fists", "Straight Punch", "Cannon Punch"]
+    ok = ok and res["after_restart"] == ["Fists", "Straight Punch", "Side Kick"]
     step_result("martial", ok, **res)
 
 def step_martialroom():
@@ -2190,24 +2192,38 @@ def step_martialroom():
     kill_all_near(G["pawn"].get_actor_location(), 5000); yield from wait(0.5)
     ci = next(i for i, w in enumerate(g.get_editor_property("weapons")) if w.spell)
     c.select_weapon(ci); yield from wait(0.3); r0 = md(c.spells_released).get(str(g.get_editor_property("weapons")[ci].name), 0); m0 = c.get_mana()
-    fa = ahead(250); fa = V(fa.x, fa.y, fa.z + 110); st = c.start_attack_with(ci); fxn = 0
-    for _ in range(90):
+    fa = ahead(250); fa = V(fa.x, fa.y, fa.z + 110); her = G["pawn"].get_actor_location(); bc0 = c.bolts_cast; st = c.start_attack_with(ci); fxn = 0; far = 0.0; seen = 0
+    for _ in range(120):
         yield
         n = c.get_spell_particles(fa, 300.0); n = n[0] if isinstance(n, tuple) else n; fxn = max(fxn, n)
-    res["free"] = {"started": st, "released": md(c.spells_released).get(str(g.get_editor_property("weapons")[ci].name), 0) - r0, "fx": fxn,
-                   "mana_full": c.get_mana() == c.get_max_mana() and m0 == c.get_max_mana()}
+        for b in c.get_bolts(): far = max(far, dist2(b, her)); seen += 1
+    res["free"] = {"started": st, "released": c.bolts_cast - bc0, "fx": fxn,
+                   "mana_full": c.get_mana() == c.get_max_mana() and m0 == c.get_max_mana(), "bolt_farthest_m": round(far / 100, 2), "bolt_frames": seen}
+    # (no bolt stays: each chi fired at nothing, and 2.5 s after its bolt burst none of her spell effects has a particle left
+    # (the user's of 2026-10-28: "some of the bolts stick around, suspended in the air"))
+    res["linger"] = {}
+    if g.get_editor_property("chi_without_target"):
+        for i, w in enumerate(g.get_editor_property("weapons")):
+            if not w.spell: continue
+            put(g.get_start_room_center(), 0.0); c.select_weapon(i); yield from wait(0.3)
+            c.start_attack_with(i); t0 = time.time()
+            while time.time() - t0 < float(w.attack_ends[0]) + 0.3: yield
+            while c.get_bolts() and time.time() - t0 < 5.0: yield
+            yield from wait(2.5)
+            n = c.get_spell_particles(G["pawn"].get_actor_location(), 0.0); res["linger"][str(w.name)] = n[0] if isinstance(n, tuple) else n
     c.select_weapon(0); m = spawn_dummy(ahead(650)); yield from wait(0.5); d0 = dist2(G["pawn"].get_actor_location(), m.get_actor_location())
     res["dash"] = {"started": c.start_dash()}; yield from wait(1.6)
     res["dash"]["closed_m"] = round((d0 - dist2(G["pawn"].get_actor_location(), m.get_actor_location())) / 100, 2); drop([m])
     g.set_editor_property("one_room_monsters", 3); quiet(False)
     want = {c_["name"]: c_ for c_ in json.load(open(os.path.join(SA, "martial_arts", "martial_arts.json"), encoding="utf-8"))["chi"]}
     inf = g.get_editor_property("infinite_mana")
-    good = [x for x in res["chi"] if x["started"] and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - want[x["name"]]["damage"]) < 0.6 and x["fx"] > 0]
+    good = [x for x in res["chi"] if x["started"] and x["bolts"] == 1 and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - want[x["name"]]["damage"]) < 0.6 and x["fx"] > 0]
     res["chi_ok"] = [x["name"] for x in good]
-    fr = res["free"]; free_ok = fr["started"] and fr["released"] == 1 and fr["fx"] > 0 if g.get_editor_property("chi_without_target") else not fr["started"]
+    # (with no monster the bolt flies to the end of its range: 4 m from her hand (it leaves 0.3 to 0.6 m out from her), no further)
+    fr = res["free"]; free_ok = (fr["started"] and fr["released"] == 1 and fr["fx"] > 0 and 3.5 <= fr["bolt_farthest_m"] <= 4.8) if g.get_editor_property("chi_without_target") else not fr["started"]
     ok = (res["heroes"] == ["MartialArtist"] and res["room_tiles"] == 100 and not any(res["beyond"]) and len(res["weapons"]) == 11
           and res["monsters"] >= 3 and res["respawned"] >= 1 and len(good) == 10 and res["dash"]["started"] and res["dash"]["closed_m"] > 2.5
-          and free_ok and (fr["mana_full"] or not inf))
+          and free_ok and (fr["mana_full"] or not inf) and all(v == 0 for v in res["linger"].values()))
     step_result("martialroom", ok, **res)
 
 STEPS = {"menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,

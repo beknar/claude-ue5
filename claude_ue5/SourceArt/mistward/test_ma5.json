@@ -1,5 +1,5 @@
 {
- "tag": "ma2",
+ "tag": "ma5",
  "plan": [
   "martial"
  ],
@@ -14,7 +14,7 @@
    "weapons": [
     "Fists",
     "Straight Punch",
-    "Cannon Punch"
+    "Side Kick"
    ],
    "pawn": "BP_MA_MartialArtistCharacter_C",
    "fists": {
@@ -48,8 +48,9 @@
     "started": true,
     "mana": 7.0,
     "lost": 22.0,
-    "fx": 111,
-    "released": 1,
+    "fx": 11,
+    "released": 0,
+    "bolts": 1,
     "damage_of": 22.0,
     "pictured": true,
     "splash_lost": 11.0
@@ -61,6 +62,7 @@
     "lost": 0.0,
     "fx": 0,
     "released": 0,
+    "bolts": 0,
     "damage_of": 22.0,
     "pictured": false
    },
@@ -81,39 +83,39 @@
    "boss": {
     "weapons": [
      "Smashing Strike",
-     "Roundhouse Fist"
+     "Roundhouse Kick"
     ],
     "unlocked": 2
    },
    "asked": 2,
    "after_ask": [
     "Smashing Strike",
-    "Roundhouse Fist",
+    "Roundhouse Kick",
     "Chain Punch",
-    "Slashing Palm"
+    "Rear Kick"
    ],
    "after_death": [
     "Fists",
     "Straight Punch",
-    "Cannon Punch",
+    "Side Kick",
     "Smashing Strike",
-    "Roundhouse Fist",
+    "Roundhouse Kick",
     "Chain Punch",
-    "Slashing Palm"
+    "Rear Kick"
    ],
    "after_restart": [
     "Fists",
     "Straight Punch",
-    "Cannon Punch"
+    "Side Kick"
    ]
   }
  ],
  "windows_hidden": "Message Log",
  "shots": [
-  "mw_ma2_ma_knife.png",
-  "mw_ma2_ma_chi_straight.png",
-  "mw_ma2_ma_dash.png",
-  "mw_ma2_ma_armour.png"
+  "mw_ma5_ma_knife.png",
+  "mw_ma5_ma_chi_straight.png",
+  "mw_ma5_ma_dash.png",
+  "mw_ma5_ma_armour.png"
  ],
  "error": null,
  "windows_shown_again": 1
