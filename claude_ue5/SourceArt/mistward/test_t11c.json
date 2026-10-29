@@ -1,0 +1,692 @@
+{
+ "tag": "t11c",
+ "plan": [
+  "tiers",
+  "traps"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "tiers",
+   "ok": true,
+   "ok_tier2": true,
+   "ok_tier3": true,
+   "share": 0.5,
+   "tally1_start": {
+    "ok": true,
+    "done": [
+     1,
+     0,
+     0
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "standing_before": 14,
+   "kills": [
+    {
+     "killed": 0,
+     "of": 14,
+     "share": 0.0,
+     "open": false
+    },
+    {
+     "killed": 1,
+     "of": 14,
+     "share": 0.071,
+     "open": false
+    },
+    {
+     "killed": 2,
+     "of": 14,
+     "share": 0.143,
+     "open": false
+    },
+    {
+     "killed": 3,
+     "of": 14,
+     "share": 0.214,
+     "open": false
+    },
+    {
+     "killed": 4,
+     "of": 14,
+     "share": 0.286,
+     "open": false
+    },
+    {
+     "killed": 5,
+     "of": 14,
+     "share": 0.357,
+     "open": false
+    },
+    {
+     "killed": 6,
+     "of": 14,
+     "share": 0.429,
+     "open": false
+    },
+    {
+     "killed": 7,
+     "of": 14,
+     "share": 0.5,
+     "open": true
+    }
+   ],
+   "open_short": false,
+   "opened_at_share": 0.5,
+   "last_shut_share": 0.429,
+   "tally1_enough": {
+    "ok": true,
+    "done": [
+     46,
+     7,
+     71
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "open_enough": true,
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE PRISON CELLS (SEE YOUR MAP)",
+   "tier2": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -4050.0,
+       -3450.0,
+       123.0
+      ],
+      "name": "Orc_03",
+      "alive": 1,
+      "tier": 2,
+      "label": "TIER 2 BOSS: ORC 03",
+      "max_health": 360.0
+     }
+    ],
+    "band": 6,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -7865.0,
+       1438.0,
+       21.0
+      ],
+      "name": "Magic Potency Ring 1",
+      "key": 81,
+      "tier": 2,
+      "section": [
+       0,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 1,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     80.0,
+     86.0,
+     97.0,
+     103.0,
+     109.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 1"
+    ],
+    "ring_kind_ok": true
+   },
+   "marks_minimap": [
+    7,
+    8,
+    10
+   ],
+   "marks_map": [
+    7,
+    8,
+    10
+   ],
+   "notices_tier2": [
+    "SET CLEARED  -  TIER 2: 1 / 8",
+    "SET CLEARED  -  TIER 2: 2 / 8",
+    "SET CLEARED  -  TIER 2: 3 / 8",
+    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE KITCHEN (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 5 / 8",
+    "SET CLEARED  -  TIER 2: 6 / 8",
+    "SET CLEARED  -  TIER 2: 7 / 8",
+    "TIER 2 CLEARED"
+   ],
+   "tally2": {
+    "ok": true,
+    "done": [
+     325,
+     97,
+     769
+    ],
+    "all": [
+     325,
+     97,
+     769
+    ]
+   },
+   "open3": true,
+   "notice3": "TIER 2 CLEARED",
+   "tiers_opened": [
+    2,
+    3
+   ],
+   "tier3": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -7350.0,
+       -14250.0,
+       115.0
+      ],
+      "name": "Tank",
+      "alive": 1,
+      "tier": 3,
+      "label": "TIER 3 BOSS: TANK",
+      "max_health": 576.0
+     }
+    ],
+    "band": 4,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -14400.0,
+       25500.0,
+       102.0
+      ],
+      "name": "Magic Potency Ring 3",
+      "key": -1,
+      "tier": 3,
+      "section": [
+       -1,
+       1
+      ]
+     }
+    ],
+    "boss_tier_of_room": 2,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     148.0,
+     172.0,
+     182.0,
+     192.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 3"
+    ],
+    "ring_in_pile": true,
+    "ring_kind_ok": true
+   },
+   "seconds": 7.2
+  },
+  {
+   "step": "traps",
+   "ok": true,
+   "traps": 226,
+   "kinds_present": [
+    "Chain",
+    "Crusher",
+    "Cursed",
+    "Darts",
+    "Deadfall",
+    "Emanation",
+    "Glyph",
+    "Lingering",
+    "Pit",
+    "Snare",
+    "Spring",
+    "Teleport",
+    "Ward"
+   ],
+   "by_kind": {
+    "Pit": {
+     "present": true,
+     "kind": "0",
+     "hp_lost": 18.8,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.51,
+       18.8
+      ]
+     ],
+     "held_at": 0.34,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 296,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: pit trap!",
+     "fell_through": []
+    },
+    "Darts": {
+     "present": true,
+     "kind": "1",
+     "hp_lost": 21.2,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.22,
+       7.1
+      ],
+      [
+       0.53,
+       7.1
+      ],
+      [
+       0.85,
+       7.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 0,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: dart trap!",
+     "fell_through": []
+    },
+    "Deadfall": {
+     "present": true,
+     "kind": "2",
+     "hp_lost": 32.3,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.84,
+       10.8
+      ],
+      [
+       1.07,
+       10.8
+      ],
+      [
+       1.3,
+       10.8
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1520,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: deadfall!",
+     "fell_through": []
+    },
+    "Crusher": {
+     "present": true,
+     "kind": "3",
+     "hp_lost": 40.3,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.82,
+       40.3
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 558,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: crusher!",
+     "fell_through": []
+    },
+    "Snare": {
+     "present": true,
+     "kind": "4",
+     "hp_lost": 6.7,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.14,
+       6.7
+      ]
+     ],
+     "held_at": 0.14,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: snare!",
+     "fell_through": []
+    },
+    "Glyph": {
+     "present": true,
+     "kind": "5",
+     "hp_lost": 29.6,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.62,
+       29.6
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 111,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: glyph of fire!",
+     "fell_through": []
+    },
+    "Ward": {
+     "present": true,
+     "kind": "6",
+     "hp_lost": 16.1,
+     "held": false,
+     "moved_m": 1.6,
+     "farthest_m": 1.6,
+     "peak_speed": 537,
+     "drops": [
+      [
+       0.16,
+       16.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 105,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 0,
+     "says": "A trap: warding barrier!",
+     "fell_through": []
+    },
+    "Emanation": {
+     "present": true,
+     "kind": "7",
+     "hp_lost": 64.5,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.15,
+       8.1
+      ],
+      [
+       0.66,
+       8.1
+      ],
+      [
+       1.17,
+       8.1
+      ],
+      [
+       1.73,
+       8.1
+      ],
+      [
+       2.29,
+       8.1
+      ],
+      [
+       2.85,
+       8.1
+      ],
+      [
+       3.41,
+       8.1
+      ],
+      [
+       3.98,
+       8.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.4,
+     "particles": 12,
+     "ambush": {},
+     "hits": 8,
+     "triggered": 1,
+     "state": 1,
+     "says": "You are slowed",
+     "fell_through": []
+    },
+    "Cursed": {
+     "present": true,
+     "kind": "8",
+     "hp_lost": 8.1,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.15,
+       8.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.45,
+     "slowness": 0.4,
+     "particles": 47,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "The cursed rune stone curses you: your blows are weaker",
+     "fell_through": []
+    },
+    "Chain": {
+     "present": true,
+     "kind": "9",
+     "hp_lost": 48.4,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.88,
+       10.8
+      ],
+      [
+       1.94,
+       21.5
+      ],
+      [
+       2.41,
+       16.1
+      ]
+     ],
+     "held_at": 0.53,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 341,
+     "ambush": {},
+     "hits": 4,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: chain of traps!",
+     "fell_through": []
+    },
+    "Lingering": {
+     "present": true,
+     "kind": "10",
+     "hp_lost": 75.0,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.19,
+       16.9
+      ],
+      [
+       1.47,
+       12.1
+      ],
+      [
+       3.42,
+       9.7
+      ],
+      [
+       4.16,
+       16.9
+      ],
+      [
+       5.42,
+       19.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 59,
+     "ambush": {},
+     "hits": 7,
+     "triggered": 1,
+     "state": 1,
+     "says": "A trap: lingering trap!",
+     "fell_through": []
+    },
+    "Teleport": {
+     "present": true,
+     "kind": "11",
+     "hp_lost": 0.0,
+     "held": false,
+     "moved_m": 716.6,
+     "farthest_m": 716.6,
+     "peak_speed": 0,
+     "drops": [],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 87,
+     "ambush": {
+      "1,1": "glyphs|4|21450|36750"
+     },
+     "hits": 0,
+     "triggered": 1,
+     "state": 1,
+     "says": "A teleport trap carries you off: into a ring of glyphs",
+     "fell_through": []
+    },
+    "Spring": {
+     "present": true,
+     "kind": "12",
+     "hp_lost": 10.8,
+     "held": true,
+     "moved_m": 2.8,
+     "farthest_m": 2.8,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.32,
+       10.8
+      ]
+     ],
+     "held_at": 0.13,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 549,
+     "ambush": {
+      "0,0": "glyphs|4|7350|-9472"
+     },
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A spring plate hurls you across the room: into a ring of glyphs",
+     "fell_through": []
+    }
+   },
+   "warrior_seen": 0,
+   "rogue": {
+    "seen_from_5m": 1,
+    "marks": [
+     7,
+     8,
+     11
+    ],
+    "describe": "disarm the pit trap",
+    "f": "disarm",
+    "progress": 0.19,
+    "state_after": 3,
+    "disarmed": 1,
+    "says": "You disarm the pit trap"
+   },
+   "kind_ok": {
+    "Pit": true,
+    "Darts": true,
+    "Deadfall": true,
+    "Crusher": true,
+    "Snare": true,
+    "Glyph": true,
+    "Ward": true,
+    "Emanation": true,
+    "Cursed": true,
+    "Chain": true,
+    "Lingering": true,
+    "Teleport": true,
+    "Spring": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_t11c_map_tier2.png",
+  "mw_t11c_trap_rogue.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

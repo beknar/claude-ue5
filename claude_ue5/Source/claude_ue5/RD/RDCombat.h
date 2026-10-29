@@ -151,6 +151,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetMana(float Value) { Mana = FMath::Clamp(Value, 0.f, MaxMana); }
 	/** what a blow or bolt of a weapon of the generator's list takes, with her bonus (melee or ranged) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetDamageOf(int32 Index) const;
+	/** the share more that weapon does in her hands: her melee or ranged bonus, the ranged weapons' Dexterity ring, her
+	 *  hero's TypeBonus and the ring on the types it boosts (the Martial Artist's fists and knives); none on magic */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetBonusOf(int32 Index) const;
+	/** the Martial Artist's dash (the generator's DashClip): forward, at the monster ahead within DashSeek when there is
+	 *  one (she stops short of it), then her attack with the weapon in her hands. False: no dash for her, or not now */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool StartDash();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsDashing() const { return bDashing && RollTime >= 0.f; }
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 Dashes = 0;
+	/** what the last dash did: how far she meant to go (cm) and the monster it went at (none: straight ahead) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastDashLength = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") TWeakObjectPtr<ARDMonster> LastDashTarget;
+	bool bDashing = false;
 	/** casts refused for want of mana; world time of the last */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 CastsRefused = 0;
 	float NoManaTime = -100.f;
@@ -623,7 +635,10 @@ private:
 	TArray<float> Wear;
 	/** weapons whose durability ran out this tick (broken at the end of it: a bolt may still be on its way) */
 	TArray<int32> PendingBreak;
+public:
+	/** the wear list made as long as the generator's weapons (a weapon added: the Martial Artist's chi attack unlocked) */
 	void SyncWear();
+private:
 	void WearOut(int32 Index);
 	void BreakWeapon(int32 Index);
 	float AttackTime = -1.f, AttackLen = 0.f, AttackHit = 0.f, SavedWalkSpeed = 0.f;

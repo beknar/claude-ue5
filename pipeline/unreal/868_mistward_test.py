@@ -71,6 +71,12 @@ The third list (docs/improvements2.txt, 870; also on random_dungeonmagic_level5 
 The user's of 2026-10-28 (871; also on level 5):
   tomemana the Mage's pool 100, 200 with the best ring; Null Sanctum's tome makes it 220 and the sanctum is cast, Apocalypse's
            300 and it is cast; the ring off changes nothing; kept through a death, gone at a restart; the Summoner's pool unchanged
+The Martial Artist (872, 873; the user's of 2026-10-28):
+  martial  in mistward_castle: her numbers, fists, the Dexterity ring on fists and knives (not chi), a knife in both hands
+           (+30 %), a chi attack (mana, damage, the blast's half beside, refused out of reach), the dash, the roll, a tier
+           boss's two chi attacks, kept through a death, forgotten at a restart
+  martialroom  (alone, in martial_arts: -lv martial_arts) the one room, her eleven weapons, the room's monsters coming
+           back, each chi attack cast (mana, damage, effect, a picture), the dash
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -83,7 +89,7 @@ UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana"
+DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 I2 = unreal.IntPoint
@@ -2033,10 +2039,182 @@ def step_tomemana():
           and (("summoner" not in res) or (res["summoner"]["knows"] and res["summoner"]["pool"] == res["summoner"]["pool_before"])))
     step_result("tomemana", ok, **res)
 
+def ahead(cm, side=0.0):
+    """a floor point cm in front of her (side cm to her right)"""
+    p = G["pawn"]; L = p.get_actor_location(); f = p.get_actor_forward_vector(); r = p.get_actor_right_vector()
+    return V(L.x + f.x * cm + r.x * side, L.y + f.y * cm + r.y * side, L.z - 90)
+
+def hp(m): return m.get_health() if alive(m) else 0.0
+
+def chi_trial(c, i, dist=260.0, splash_at=None, picture=None):
+    """one chi attack (weapon i) at a dummy dist cm ahead: the mana it took, what the dummy lost, the effect's particles near
+    it; with splash_at a second dummy that far beside the first (it takes half)"""
+    g = G["gen"]; c.select_weapon(i); yield from wait(0.3)
+    m = spawn_dummy(ahead(dist)); m2 = spawn_dummy(ahead(dist, splash_at)) if splash_at else None
+    yield from wait(0.4)
+    c.set_mana(c.get_max_mana()); m0 = c.get_mana(); h0 = hp(m); h2 = hp(m2) if m2 else 0.0
+    W = g.get_editor_property("weapons")[i]; nm = str(W.name); r0 = md(c.spells_released).get(nm, 0)
+    started = c.start_attack_with(i); taken = round(m0 - c.get_mana(), 1)
+    t0 = time.time(); fx = 0; pic = False; at = m.get_actor_location(); t_fx = None; seq = 0
+    while time.time() - t0 < float(W.attack_ends[0]) + 0.8:
+        yield
+        n = c.get_spell_particles(at, 400.0); n = n[0] if isinstance(n, tuple) else n; fx = max(fx, n)
+        if picture and not pic and n > 0: shot(picture); pic = True; t_fx = time.time()
+        # (a tag "probe...": the blast also pictured 0.2, 0.4 and 0.7 s after it began)
+        if TAG.startswith("probe") and t_fx and seq < 3 and time.time() - t_fx >= (0.2, 0.4, 0.7)[seq]: seq += 1; shot(f"{picture}_{seq}")
+    r = {"name": nm, "started": started, "mana": taken, "lost": round(h0 - hp(m), 1), "fx": fx, "released": md(c.spells_released).get(nm, 0) - r0,
+         "damage_of": round(c.get_damage_of(i), 1), "pictured": pic}
+    if m2: r["splash_lost"] = round(h2 - hp(m2), 1)
+    drop([m] + ([m2] if m2 else [])); yield from wait(0.3)
+    return r
+
+def step_martial():
+    """the Martial Artist (872) in mistward_castle: 140 hit points, 100 mana; her fists (14 a blow, landing on a monster before
+    her), the Dexterity ring adding to them and to her knives but not to her chi; a knife found: in both hands, +30 % (and the
+    ring); a chi attack: its mana taken, its damage on the monster she faces within 4.2 m, the blast's half on one beside it,
+    nothing on one out of reach; the dash: at the monster ahead, stopping short of it, and the strike after; the roll; a tier's
+    boss slain teaches her the next two chi attacks (and two more asked for), kept through a death; a restart forgets them.
+    A chi with no monster within its reach is refused and costs no mana"""
+    c = yield from restart("MartialArtist"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
+    kill_all_near(G["pawn"].get_actor_location(), 1500); yield from wait(0.5)
+    W = lambda: [str(w.name) for w in g.get_editor_property("weapons")]
+    res = {"hero": str(g.get_editor_property("current_hero")), "hp": c.get_max_health(), "mana": c.get_max_mana(), "weapons": W(),
+           "pawn": G["pawn"].get_class().get_name()}
+    # (her fists: a strike at a dummy before her)
+    c.select_weapon(0); yield from wait(0.3)
+    m = spawn_dummy(ahead(120)); yield from wait(0.4); h0 = hp(m)
+    res["fists"] = {"damage_of": round(c.get_damage_of(0), 1), "bonus": round(c.get_bonus_of(0), 3), "started": c.start_attack()}
+    yield from wait(1.6); res["fists"]["lost"] = round(h0 - hp(m), 1); res["fists"]["hits"] = c.hits_landed; drop([m])
+    # (the Dexterity ring: her fists and knives, not her chi)
+    ring = max((i for i in items_of(unreal.RDItemKind.RING) if i.ring_kind == unreal.RDRingKind.DEXTERITY), key=lambda i: i.amount)
+    c.add_item(str(ring.name), 1); res["ring_worn"] = c.wear_ring(str(ring.name)); yield from wait(0.2)
+    res["ring"] = {"amount": ring.amount, "fists": round(c.get_damage_of(0), 1), "chi": round(c.get_damage_of(1), 1)}
+    c.add_item("Dagger", 1); yield from wait(0.3)
+    ki = next((k for k, w in enumerate(g.get_editor_property("weapons")) if str(w.name) == "Dagger"), -1)
+    if ki >= 0:
+        kw = g.get_editor_property("weapons")[ki]
+        res["knife"] = {"index": ki, "damage": kw.damage, "damage_of": round(c.get_damage_of(ki), 1), "bonus": round(c.get_bonus_of(ki), 3),
+                        "both_hands": bool(kw.mesh) and bool(kw.off_hand_mesh), "type": str(kw.weapon_type)}
+        c.select_weapon(ki); yield from wait(0.3)
+        m = spawn_dummy(ahead(120)); yield from wait(0.4); h0 = hp(m); c.start_attack(); yield from wait(1.0)
+        res["knife"]["lost"] = round(h0 - hp(m), 1); drop([m]); shot("ma_knife")
+    c.wear_ring(str(ring.name)); yield from wait(0.2)
+    res["ring_off"] = {"fists": round(c.get_damage_of(0), 1), "knife": round(c.get_damage_of(ki), 1) if ki >= 0 else None}
+    # (a chi attack: Straight Punch at 2.6 m, a second dummy 1 m beside; then one out of reach at 6 m)
+    res["chi"] = yield from chi_trial(c, 1, 260.0, 100.0, "ma_chi_straight")
+    res["chi_far"] = yield from chi_trial(c, 1, 600.0)
+    # (the dash: at a dummy 6 m ahead, with her fists)
+    c.select_weapon(0); yield from wait(0.3)
+    m = spawn_dummy(ahead(600)); yield from wait(0.5); h0 = hp(m)
+    d0 = dist2(G["pawn"].get_actor_location(), m.get_actor_location()); a0 = c.attacks_made
+    res["dash"] = {"started": c.start_dash(), "before_m": round(d0 / 100, 2)}
+    yield from wait(0.25); shot("ma_dash"); yield from wait(1.6)
+    res["dash"].update({"after_m": round(dist2(G["pawn"].get_actor_location(), m.get_actor_location()) / 100, 2), "length": round(c.last_dash_length, 1),
+                        "at_it": c.last_dash_target == m if c.last_dash_target else False, "attacked": c.attacks_made - a0, "lost": round(h0 - hp(m), 1), "dashes": c.dashes})
+    drop([m])
+    r0 = c.rolls; c.start_roll(V(0, 0, 0)); yield from wait(1.0); res["rolls"] = c.rolls - r0
+    # (her armour: a light set worn (her own fit), a medium one refused; a picture of her in it)
+    A = items_of(unreal.RDItemKind.ARMOUR)
+    li = next(str(i.name) for i in A if i.armour_weight == unreal.RDArmourWeight.LIGHT); me = next(str(i.name) for i in A if i.armour_weight == unreal.RDArmourWeight.MEDIUM)
+    for n in (li, me): c.add_item(n, 1)
+    c.wear_armour(me); yield from wait(0.2); res["medium_worn"] = str(c.get_worn_armour())
+    c.wear_armour(li); yield from wait(0.4); res["light_worn"] = str(c.get_worn_armour()); res["armour_share"] = round(c.get_armour(), 3)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=G["pawn"].get_actor_rotation().yaw + 160)); yield from wait(0.5); shot("ma_armour")
+    yield from rwait(0.6)
+    # (a tier's boss slain: the next two; then two more asked for)
+    n0 = len(W())
+    if g.get_editor_property("boss_encounters"):
+        g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(1.5)
+        E_ = [str(l).split("|") for l in g.get_encounter_lines()]; boss = [e for e in E_ if e[0] == "boss" and "USURPER" not in e[7]]
+        if boss:
+            at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3]))
+            for mo in g.get_monsters():
+                if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 600: mo.apply_damage(1e7, None)
+            yield from wait(0.8)
+    res["boss"] = {"weapons": W()[n0:], "unlocked": g.weapons_unlocked}
+    res["asked"] = g.unlock_hero_weapons(2); res["after_ask"] = W()[n0:]
+    # (kept through a death)
+    c.apply_damage(c.get_health() + 500.0, None); yield from wait(1.0)
+    t0 = time.time()
+    while c.is_dead() and time.time() - t0 < 20: yield
+    yield from wait(1.0)
+    res["after_death"] = W()
+    g.restart_play(0); yield from wait(1.0); refresh(); c = cb()
+    res["after_restart"] = W()
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
+    f_, ch, dsh = res["fists"], res["chi"], res["dash"]
+    chi4 = ["Smashing Strike", "Roundhouse Fist", "Chain Punch", "Slashing Palm"]
+    ok = (res["hero"] == "MartialArtist" and res["hp"] == 140 and res["mana"] == 100 and res["weapons"] == ["Fists", "Straight Punch", "Cannon Punch"]
+          and f_["damage_of"] == 14 and f_["lost"] >= 14 and abs(res["ring"]["fists"] - 14 * (1 + ring.amount)) < 0.2 and abs(res["ring"]["chi"] - 22) < 0.2
+          and res.get("knife", {}).get("both_hands") and abs(res["knife"]["bonus"] - (0.3 + ring.amount)) < 0.01 and res["knife"]["lost"] > 0
+          and abs(res["ring_off"]["knife"] - 11 * 1.3) < 0.2 and res["ring_off"]["fists"] == 14
+          and ch["started"] and ch["mana"] == 7 and abs(ch["lost"] - 22) < 0.6 and ch["fx"] > 0 and abs(ch.get("splash_lost", 0) - 11) < 0.6
+          and res["chi_far"]["lost"] == 0 and not res["chi_far"]["started"] and res["chi_far"]["mana"] == 0 and dsh["started"] and dsh["at_it"] and dsh["after_m"] < dsh["before_m"] - 2.5 and dsh["attacked"] >= 1 and dsh["lost"] > 0
+          and res["rolls"] == 1 and res["light_worn"] == li and res["medium_worn"] == "None" and res["armour_share"] > 0)
+    if g.get_editor_property("boss_encounters"):
+        ok = ok and res["boss"]["weapons"] == chi4[:2] and res["after_ask"][-2:] == chi4[2:] and all(n in res["after_death"] for n in chi4)
+    else:
+        ok = ok and res["after_ask"] == chi4[:2] and all(n in res["after_death"] for n in chi4[:2])
+    ok = ok and res["after_restart"] == ["Fists", "Straight Punch", "Cannon Punch"]
+    step_result("martial", ok, **res)
+
+def step_martialroom():
+    """martial_arts (873): one room (its tiles, no section beyond), the Martial Artist alone with her fists and all ten chi
+    attacks; three monsters in the room and one more after one falls; each chi attack cast on a monster within 4.2 m: its
+    mana, its damage, its effect's particles, a picture at its blast; the dash"""
+    c = yield from restart("MartialArtist"); g = G["gen"]
+    S = g.get_section(I2(0, 0)); room = S.room_at(g.get_start_room_center())
+    th = S.get_room_tiles(room); tiles = th[0] if isinstance(th, tuple) else th
+    res = {"title": str(g.dungeon_title), "heroes": [str(h.name) for h in g.get_editor_property("heroes")], "rooms": S.get_num_rooms() if hasattr(S, "get_num_rooms") else None,
+           "room_tiles": len(tiles), "beyond": [g.is_section_generated(I2(dx, dy)) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))],
+           "weapons": [str(w.name) for w in g.get_editor_property("weapons")]}
+    t0 = time.time()
+    while time.time() - t0 < 12 and len([m for m in g.get_monsters() if alive(m)]) < 3: yield
+    res["monsters"] = len([m for m in g.get_monsters() if alive(m)]); s0 = g.one_room_spawned
+    one = next((m for m in g.get_monsters() if alive(m)), None)
+    if one: one.apply_damage(1e7, None)
+    t0 = time.time()
+    while time.time() - t0 < 10 and g.one_room_spawned == s0: yield
+    res["respawned"] = g.one_room_spawned - s0
+    quiet(True); kill_all_near(G["pawn"].get_actor_location(), 5000); yield from wait(0.5)
+    g.set_editor_property("one_room_monsters", 0)          # (none come while the attacks are tried)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.5); shot("ma_room")
+    res["chi"] = []
+    for i, w in enumerate(g.get_editor_property("weapons")):
+        if not w.spell: continue
+        nm = str(w.name).replace(" ", "")
+        res["chi"].append((yield from chi_trial(c, i, 260.0, None, "ma_" + nm)))
+        put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    # (with no monster at all: the chi goes off in front of her (bChiWithoutTarget), and her mana stays full (bInfiniteMana))
+    kill_all_near(G["pawn"].get_actor_location(), 5000); yield from wait(0.5)
+    ci = next(i for i, w in enumerate(g.get_editor_property("weapons")) if w.spell)
+    c.select_weapon(ci); yield from wait(0.3); r0 = md(c.spells_released).get(str(g.get_editor_property("weapons")[ci].name), 0); m0 = c.get_mana()
+    fa = ahead(250); fa = V(fa.x, fa.y, fa.z + 110); st = c.start_attack_with(ci); fxn = 0
+    for _ in range(90):
+        yield
+        n = c.get_spell_particles(fa, 300.0); n = n[0] if isinstance(n, tuple) else n; fxn = max(fxn, n)
+    res["free"] = {"started": st, "released": md(c.spells_released).get(str(g.get_editor_property("weapons")[ci].name), 0) - r0, "fx": fxn,
+                   "mana_full": c.get_mana() == c.get_max_mana() and m0 == c.get_max_mana()}
+    c.select_weapon(0); m = spawn_dummy(ahead(650)); yield from wait(0.5); d0 = dist2(G["pawn"].get_actor_location(), m.get_actor_location())
+    res["dash"] = {"started": c.start_dash()}; yield from wait(1.6)
+    res["dash"]["closed_m"] = round((d0 - dist2(G["pawn"].get_actor_location(), m.get_actor_location())) / 100, 2); drop([m])
+    g.set_editor_property("one_room_monsters", 3); quiet(False)
+    want = {c_["name"]: c_ for c_ in json.load(open(os.path.join(SA, "martial_arts", "martial_arts.json"), encoding="utf-8"))["chi"]}
+    inf = g.get_editor_property("infinite_mana")
+    good = [x for x in res["chi"] if x["started"] and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - want[x["name"]]["damage"]) < 0.6 and x["fx"] > 0]
+    res["chi_ok"] = [x["name"] for x in good]
+    fr = res["free"]; free_ok = fr["started"] and fr["released"] == 1 and fr["fx"] > 0 if g.get_editor_property("chi_without_target") else not fr["started"]
+    ok = (res["heroes"] == ["MartialArtist"] and res["room_tiles"] == 100 and not any(res["beyond"]) and len(res["weapons"]) == 11
+          and res["monsters"] >= 3 and res["respawned"] >= 1 and len(good) == 10 and res["dash"]["started"] and res["dash"]["closed_m"] > 2.5
+          and free_ok and (fr["mana_full"] or not inf))
+    step_result("martialroom", ok, **res)
+
 STEPS = {"menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
-         "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana}
+         "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,
+         "martial": step_martial, "martialroom": step_martialroom}
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

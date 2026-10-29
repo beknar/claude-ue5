@@ -1508,9 +1508,11 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	case ERDItemKind::Ring:
 	{
 		static const TCHAR* What[3] = { TEXT("mana"), TEXT("hit points"), TEXT("ranged weapons' damage") };
-		static const TCHAR* Who[3] = { TEXT("spellcasters"), TEXT("the Warrior and the Warlock"), TEXT("the Rogue") };
+		static const TCHAR* Who[3] = { TEXT("spellcasters"), TEXT("the Warrior, the Warlock and the Martial Artist"), TEXT("the Rogue and the Martial Artist") };
+		// (the Martial Artist's Dexterity ring: her fists and knives, never her chi attacks)
+		const bool bMartialDex = It.RingKind == ERDRingKind::Dexterity && Gen && Gen->DexterityBoosts(TEXT("unarmed"));
 		FString S = FString::Printf(TEXT("+%.0f%% %s while you wear it (%s; one ring of each kind at a time, rings of a kind do not add up)."),
-			It.Amount * 100.f, What[(int32)It.RingKind], Who[(int32)It.RingKind]);
+			It.Amount * 100.f, bMartialDex ? TEXT("damage with your punches, kicks, knives and daggers (not your chi attacks)") : What[(int32)It.RingKind], Who[(int32)It.RingKind]);
 		if (Gen && !Gen->HeroWearsRing(It.RingKind)) S += FString::Printf(TEXT("  The %s cannot wear it."), *Gen->PlayerTitle.ToLower());
 		return S;
 	}
@@ -1971,7 +1973,8 @@ void ARDHUD::DrawInventory(float Sc)
 		{
 			const FRDWeaponDef& Wp = Gen->Weapons[Wi];
 			const bool bRanged = Wp.bSpell && Wp.BoltMesh, bMagic = Wp.bSpell && !Wp.BoltMesh;
-			const float Bonus = !Wp.bSpell ? Gen->MeleeBonus : bRanged ? Gen->RangedBonus : 0.f;
+			// (her whole bonus on it: the Martial Artist's knives, a Dexterity ring on her fists, the Rogue's ring on bolts)
+			const float Bonus = Cb->GetBonusOf(Wi);
 			// (level 5: a spell of the table: its line, its type, its cooldown and how long it lasts)
 			const FRDSpellDef* Sp = Gen->Spells.IsValidIndex(Wp.SpellIndex) ? &Gen->Spells[Wp.SpellIndex] : nullptr;
 			if (Sp)
@@ -1995,6 +1998,7 @@ void ARDHUD::DrawInventory(float Sc)
 				else Para(FString::Printf(TEXT("Durability %.0f / %.0f: a hit takes 1 off, at 0 it breaks; a repair item mends it"), Cb->GetWeaponWear(Wi), Wp.Durability), FLinearColor(0.75f, 0.85f, 0.7f), Sc * 1.05f);
 			}
 			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Wi), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
+			if (Sp && Sp->Kind == ERDSpellKind::Rend && Sp->Splash > 0.f) Para(FString::Printf(TEXT("A chi attack: strikes the monster you face within %.1f m; the blast hurts others within %.1f m, half as much"), Sp->Reach / 100.f, Sp->Splash / 100.f), Dim, Sc * 1.0f);
 			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
 			Ry += 6.f * Sc;
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);

@@ -1,0 +1,38 @@
+{
+ "_note": "The Martial Artist (the user's of 2026-10-28): her chi attacks (the user's table: damage, mana, tier; two to start, two more for each tier boss she slays), her fists, her hero's card. Read by pipeline/unreal/872 (mistward_castle and martial_arts). chi: clip = martialartist_clips.py's; fx = a Toon Explosions system (Vol 1 for the low tiers, Vol 2 for the high), bigger the higher the tier; splash (cm) by tier: the blast's reach round the monster she strikes (others there take half).",
+ "chi_reach": 420,
+ "start_chi": 2,
+ "per_boss": 2,
+ "splash": {"1": 120, "2": 160, "3": 200, "4": 250, "5": 300},
+ "chi": [
+  {"name": "Straight Punch",  "damage": 22, "mana": 7,  "tier": 1, "clip": "Chi_StraightPunch",  "fx": "/Game/ToonExplosionVol1/Particles/NiagaraSystems/NS_360Explosion_01",     "fx_scale": 0.5,  "icon": "spell_fire_bolt",       "effect": "Chi: a straight punch whose force bursts on the monster she faces"},
+  {"name": "Cannon Punch",    "damage": 23, "mana": 17, "tier": 1, "clip": "Chi_CannonPunch",    "fx": "/Game/ToonExplosionVol1/Particles/NiagaraSystems/NS_Grenade_01",          "fx_scale": 0.6,  "icon": "spell_fireball",        "effect": "Chi: a lunging punch fired like a cannon"},
+  {"name": "Smashing Strike", "damage": 24, "mana": 27, "tier": 2, "clip": "Chi_SmashingStrike", "fx": "/Game/ToonExplosionVol1/Particles/NiagaraSystems/NS_GroundExplosion_03",  "fx_scale": 0.7,  "icon": "spell_shadow_lash",     "effect": "Chi: both fists brought down from overhead"},
+  {"name": "Roundhouse Fist", "damage": 25, "mana": 37, "tier": 2, "clip": "Chi_RoundhouseFist", "fx": "/Game/ToonExplosionVol1/Particles/NiagaraSystems/NS_ExplosionsCircle_02", "fx_scale": 0.75, "icon": "spell_blood_nova",      "effect": "Chi: a wide hooking punch"},
+  {"name": "Chain Punch",     "damage": 26, "mana": 47, "tier": 3, "clip": "Chi_ChainPunch",     "fx": "/Game/ToonExplosionsVol2/Particles/NiagaraSystems/NS_Explosion_01",       "fx_scale": 0.55, "icon": "spell_chain_lightning", "effect": "Chi: a flurry of straight punches, the last the strongest"},
+  {"name": "Slashing Palm",   "damage": 27, "mana": 57, "tier": 3, "clip": "Chi_SlashingPalm",   "fx": "/Game/ToonExplosionsVol2/Particles/NiagaraSystems/NS_Explosion_02",       "fx_scale": 0.6,  "icon": "spell_frost_shard",     "effect": "Chi: an open hand chopped down across her"},
+  {"name": "Piercing Palm",   "damage": 28, "mana": 67, "tier": 4, "clip": "Chi_PiercingPalm",   "fx": "/Game/ToonExplosionsVol2/Particles/NiagaraSystems/NS_ExplosionAir_04",    "fx_scale": 0.8,  "icon": "spell_bone_spear",      "effect": "Chi: a lunging spear-hand thrust"},
+  {"name": "Uppercut Punch",  "damage": 29, "mana": 68, "tier": 4, "clip": "Chi_UppercutPunch",  "fx": "/Game/ToonExplosionsVol2/Particles/NiagaraSystems/NS_Explosion_06",       "fx_scale": 0.9,  "icon": "spell_soul_rend",       "effect": "Chi: a rising uppercut from a crouch"},
+  {"name": "Meteor Fist",     "damage": 30, "mana": 78, "tier": 5, "clip": "Chi_MeteorFist",     "fx": "/Game/ToonExplosionsVol2/Particles/NiagaraSystems/NS_BigExplosion_01",    "fx_scale": 0.9,  "icon": "spell_meteor_storm",    "effect": "Chi: she leaps and drives her fist down like a falling star"},
+  {"name": "Spinning Kick",   "damage": 31, "mana": 88, "tier": 5, "clip": "Chi_SpinningKick",   "fx": "/Game/ToonExplosionsVol2/Particles/NiagaraSystems/NS_Explosion_09",       "fx_scale": 1.1,  "icon": "spell_void_rift",       "effect": "Chi: a full turn on one foot and a sweeping kick"}
+ ],
+ "fists": {"clips": ["Box_01", "Box_02", "Box_03", "Front_kick_01", "Front_kick_02"], "max_per_clip": 3, "damage": 14, "reach": 160, "arc": 120, "play_rate": 1.15, "sound": "Axe"},
+ "knife_types": ["short blades"],
+ "hero": {
+  "title": "MARTIAL ARTIST", "health": 140, "mana": 100, "mana_per_second": 2.0, "accent": [0.95, 0.55, 0.72],
+  "type_bonus": {"short blades": 0.30}, "dexterity_types": ["unarmed", "short blades"],
+  "armour": "Light armour only",
+  "starts_with": "Her fists and feet, and two chi attacks: Straight Punch and Cannon Punch",
+  "abilities": ["Punches, kicks and martial arts moves; wields knives and daggers only",
+                "Knives and daggers: +30% to their damage",
+                "Chi attacks (mana, 4.2 m): two to start, two more for each tier boss she slays",
+                "Dodges (B) and dashes forward into a strike (V)",
+                "The Warrior's hit points and the Mage's mana",
+                "HP and Dexterity rings (Dexterity: her punches, kicks and knives, not her chi)"],
+  "controls_keys": ["W A S D|move", "Mouse|look / turn the camera", "Space|jump", "R|switch walk / run", "1 - 0|quick slots", "Shift (held)|run",
+                    "B|dodge (roll)", "V / right mouse|dash into a strike", "Wheel|switch fists / chi", "Left mouse|strike or chi attack",
+                    "I / Tab|inventory", "F|open door or container", "M|map"],
+  "controls_pad": ["Left stick|move", "Right stick|look / turn the camera", "A|jump", "LT|switch walk / run", "D-pad left / right|quick slots",
+                   "B|dodge (roll)", "RT|dash into a strike", "Y|switch weapon", "RB|strike or chi attack", "Start|inventory", "X|open door or container", "Back|map"]
+ }
+}

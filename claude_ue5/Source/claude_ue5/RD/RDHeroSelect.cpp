@@ -277,7 +277,10 @@ void ARDHeroSelectHUD::DrawHUD()
 		if (H.MaxMana > 0.f) St.Add({ TEXT("MANA BACK"), FString::Printf(TEXT("%.1f a second"), H.ManaPerSecond) });
 		if (H.MeleeBonus > 0.f) St.Add({ TEXT("MELEE"), FString::Printf(TEXT("+%.0f%% damage"), H.MeleeBonus * 100.f) });
 		if (H.RangedBonus > 0.f) St.Add({ TEXT("RANGED"), FString::Printf(TEXT("+%.0f%% damage"), H.RangedBonus * 100.f) });
+		// (the Martial Artist: her knives' bonus, her dash)
+		for (const TPair<FString, float>& P : H.TypeBonus) if (P.Value > 0.f) St.Add({ P.Key.Equals(TEXT("short blades")) ? FString(TEXT("KNIVES")) : P.Key.ToUpper(), FString::Printf(TEXT("+%.0f%% damage"), P.Value * 100.f) });
 		if (H.RollClip) St.Add({ TEXT("DODGE"), TEXT("roll") });
+		if (H.DashClip) St.Add({ TEXT("DASH"), TEXT("forward") });
 		float Sx = X;
 		for (const TPair<FString, FString>& P : St)
 		{
@@ -340,7 +343,8 @@ void ARDHeroSelectHUD::DrawHUD()
 				}
 				Tx = X + Rh + 14.f * Sc;
 			}
-			const float Bonus = !W.bSpell ? H.MeleeBonus : (W.BoltMesh ? H.RangedBonus : 0.f);
+			float Bonus = !W.bSpell ? H.MeleeBonus : (W.BoltMesh ? H.RangedBonus : 0.f);
+			if (!W.bSpell || W.BoltMesh) if (const float* Tb = H.TypeBonus.Find(W.WeaponType)) Bonus += *Tb;
 			FString What = !W.bSpell ? FString::Printf(TEXT("%.0f damage a blow, reach %.1f m"), W.Damage * (1.f + Bonus), W.Reach / 100.f)
 			                         : FString::Printf(TEXT("%.0f damage a %s, flies %.0f m"), W.Damage * (1.f + Bonus), W.BoltMesh ? TEXT("bolt") : TEXT("cast"), W.Reach / 100.f);
 			if (W.ManaCost > 0.f) What += FString::Printf(TEXT(", %.0f mana"), W.ManaCost);

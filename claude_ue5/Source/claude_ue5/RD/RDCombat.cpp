@@ -300,8 +300,20 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	const FRDWeaponDef& W = Generator->Weapons[Index];
 	// (a melee weapon: no bolt; a ranged one: a spell whose bolt is a mesh, the crossbow; magic has no bonus; level 5: a
 	// dexterity ring adds to the ranged bonus, a monster's weakening takes off)
-	const float Bonus = !W.bSpell ? Generator->MeleeBonus : W.BoltMesh ? Generator->RangedBonus + GetRingBonus(ERDRingKind::Dexterity) : 0.f;
-	return W.Damage * (1.f + Bonus) * WeakMul() * (1.f + GetBlessDamage());        // (the third list: a shrine's blessing of might)
+	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage());        // (the third list: a shrine's blessing of might)
+}
+
+float URDCombatComponent::GetBonusOf(int32 Index) const
+{
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index)) return 0.f;
+	const FRDWeaponDef& W = Generator->Weapons[Index];
+	const bool bRanged = W.bSpell && W.BoltMesh != nullptr;
+	if (W.bSpell && !bRanged) return 0.f;                     // (magic, and the Martial Artist's chi attacks: no bonus)
+	float Bonus = !W.bSpell ? Generator->MeleeBonus : Generator->RangedBonus + GetRingBonus(ERDRingKind::Dexterity);
+	// (the Martial Artist: her knives' share more, and a Dexterity ring on her fists and knives too)
+	Bonus += Generator->TypeBonusOf(W.WeaponType);
+	if (!bRanged && Generator->DexterityBoosts(W.WeaponType)) Bonus += GetRingBonus(ERDRingKind::Dexterity);
+	return Bonus;
 }
 
 bool URDCombatComponent::StartAttack()
@@ -315,7 +327,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	USkeletalMeshComponent* M = Body();
 	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen || bCraftOpen || bBlocking) return false;
 	// (a spell that costs more mana than she has is not cast)
-	if (W->ManaCost > 0.f && Mana < W->ManaCost)
+	if (W->ManaCost > 0.f && Mana < W->ManaCost && !Generator->bInfiniteMana)
 	{
 		const float Now = GetWorld()->GetTimeSeconds();
 		if (Now - NoManaTime > 0.6f)
@@ -340,6 +352,16 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 			return false;
 		}
 	}
+	// (the Martial Artist's chi attacks (a strike with a blast: Rend with Splash): with no monster within reach that she can
+	// see, none is made and no mana spent; the first test's chi at 6 m took its 7 mana for nothing)
+	if (W->bSpell && !W->BoltMesh)
+		if (const FRDSpellDef* Sd = SpellOf(Index); Sd && Sd->Kind == ERDSpellKind::Rend && Sd->Splash > 0.f && !Generator->bChiWithoutTarget && !PickTarget(W->Reach, true))
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			if (Now - NoManaTime > 0.6f) { ++CastsRefused; SetMessage(FString::Printf(TEXT("No monster within %.1f m for %s"), W->Reach / 100.f, *W->Name.ToString())); }
+			NoManaTime = Now;
+			return false;
+		}
 	UAnimInstance* AI = M->GetAnimInstance();
 	if (NextOf.Num() < Generator->Weapons.Num()) NextOf.SetNumZeroed(Generator->Weapons.Num());
 	const int32 NextAttack = NextOf[Index], K = NextAttack % W->Attacks.Num();
@@ -386,7 +408,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	bWhooshDone = false;
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
 	++NextOf[Index]; ++AttacksMade;
-	if (W->ManaCost > 0.f) Mana = FMath::Max(0.f, Mana - W->ManaCost);
+	if (W->ManaCost > 0.f && !Generator->bInfiniteMana) Mana = FMath::Max(0.f, Mana - W->ManaCost);      // (martial_arts: never taken)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	SetSlowed(true);
@@ -555,10 +577,12 @@ void URDCombatComponent::Fall()
 			{
 				// (her spells learned from tomes stay (a spell weapon of no item that is not on her card); until 2026-10-28 the
 				// card's list replaced them all and she forgot every tome at a death)
-				TArray<FRDWeaponDef> Learned;
+				// (the Martial Artist's chi attacks gained from bosses likewise: spells not on her card)
+				TArray<FRDWeaponDef> Base, Learned;
+				Generator->StartWeaponsOf(*H, Base);
 				for (const FRDWeaponDef& Wd : Generator->Weapons)
-					if (Wd.SpellIndex >= 0 && Wd.Item.IsNone() && !H->Weapons.ContainsByPredicate([&](const FRDWeaponDef& C) { return C.Name == Wd.Name; })) Learned.Add(Wd);
-				Generator->Weapons = H->Weapons;
+					if (Wd.SpellIndex >= 0 && Wd.Item.IsNone() && !Base.ContainsByPredicate([&](const FRDWeaponDef& C) { return C.Name == Wd.Name; })) Learned.Add(Wd);
+				Generator->Weapons = Base;
 				Generator->Weapons.Append(Learned);
 			}
 			UpdateMaxima();
@@ -660,7 +684,13 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (RollTime >= 0.f)
 	{
 		RollTime += Dt;
-		if (RollTime >= RollLen) EndRoll();
+		if (RollTime >= RollLen)
+		{
+			// (the Martial Artist's dash ends in her attack with the weapon in her hands)
+			const bool bWasDash = bDashing;
+			EndRoll();
+			if (bWasDash) StartAttack();
+		}
 	}
 	if (AttackTime >= 0.f)
 	{
@@ -686,7 +716,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	}
 	// out of a fight the hit points come back (not in random_dungeonmagic_level4: RegenPerSecond 0); mana comes back slowly
 	if (Health < MaxHealth && Generator->RegenPerSecond > 0.f && Now - LastHurtTime > Generator->RegenDelay) Health = FMath::Min(MaxHealth, Health + Generator->RegenPerSecond * Dt);
-	if (Mana < MaxMana) Mana = FMath::Min(MaxMana, Mana + Generator->ManaPerSecond * Dt);
+	if (Mana < MaxMana) Mana = Generator->bInfiniteMana ? MaxMana : FMath::Min(MaxMana, Mana + Generator->ManaPerSecond * Dt);
 	TickEffects(Dt);
 }
 
@@ -1755,6 +1785,8 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) NextWeapon(-1);
 		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
 		if (PC->WasInputKeyJustPressed(EKeys::B) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) StartRoll(FVector::ZeroVector);
+		// (the Martial Artist: V, the right mouse button or RT dashes forward into an attack)
+		if (Generator->DashClip && (PC->WasInputKeyJustPressed(EKeys::V) || PC->WasInputKeyJustPressed(EKeys::RightMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightTrigger))) StartDash();
 		if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder)) StartAttack();
 		const bool bToggleR = PC->IsInputKeyDown(EKeys::R) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f;
 		if (bToggleR && !bRunToggleDown) SetRunMode(!bRunMode);
@@ -2103,7 +2135,7 @@ void URDCombatComponent::TickBolts(float Dt)
 // ------------------------------------------------------------------------------------------------ the roll
 bool URDCombatComponent::IsDodging() const
 {
-	if (RollTime < 0.f || RollLen <= 0.f || !Generator) return false;
+	if (RollTime < 0.f || RollLen <= 0.f || !Generator || bDashing) return false;      // (a dash is no dodge)
 	const float K = RollTime / RollLen;
 	return K >= Generator->RollDodge.X && K <= Generator->RollDodge.Y;
 }
@@ -2158,5 +2190,6 @@ void URDCombatComponent::EndRoll()
 	RollSourceId = 0;
 	if (bRollIgnoringMove && C && C->GetController()) C->GetController()->SetIgnoreMoveInput(false);
 	bRollIgnoringMove = false;
-	if (Generator) RollReadyAt = GetWorld()->GetTimeSeconds() + Generator->RollCooldown;
+	if (Generator) RollReadyAt = GetWorld()->GetTimeSeconds() + (bDashing ? Generator->DashCooldown : Generator->RollCooldown);
+	bDashing = false;
 }

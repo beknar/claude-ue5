@@ -1,0 +1,180 @@
+{
+ "tag": "mr3",
+ "plan": [
+  "martialroom"
+ ],
+ "level": "martial_arts",
+ "steps": [
+  {
+   "step": "martialroom",
+   "ok": true,
+   "title": "Martial Arts",
+   "heroes": [
+    "MartialArtist"
+   ],
+   "rooms": 1,
+   "room_tiles": 100,
+   "beyond": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Cannon Punch",
+    "Smashing Strike",
+    "Roundhouse Fist",
+    "Chain Punch",
+    "Slashing Palm",
+    "Piercing Palm",
+    "Uppercut Punch",
+    "Meteor Fist",
+    "Spinning Kick"
+   ],
+   "monsters": 3,
+   "respawned": 1,
+   "chi": [
+    {
+     "name": "Straight Punch",
+     "started": true,
+     "mana": 0.0,
+     "lost": 22.0,
+     "fx": 110,
+     "released": 1,
+     "damage_of": 22.0,
+     "pictured": true
+    },
+    {
+     "name": "Cannon Punch",
+     "started": true,
+     "mana": 0.0,
+     "lost": 23.0,
+     "fx": 116,
+     "released": 1,
+     "damage_of": 23.0,
+     "pictured": true
+    },
+    {
+     "name": "Smashing Strike",
+     "started": true,
+     "mana": 0.0,
+     "lost": 24.0,
+     "fx": 1160,
+     "released": 1,
+     "damage_of": 24.0,
+     "pictured": true
+    },
+    {
+     "name": "Roundhouse Fist",
+     "started": true,
+     "mana": 0.0,
+     "lost": 25.0,
+     "fx": 836,
+     "released": 1,
+     "damage_of": 25.0,
+     "pictured": true
+    },
+    {
+     "name": "Chain Punch",
+     "started": true,
+     "mana": 0.0,
+     "lost": 26.0,
+     "fx": 138,
+     "released": 1,
+     "damage_of": 26.0,
+     "pictured": true
+    },
+    {
+     "name": "Slashing Palm",
+     "started": true,
+     "mana": 0.0,
+     "lost": 27.0,
+     "fx": 117,
+     "released": 1,
+     "damage_of": 27.0,
+     "pictured": true
+    },
+    {
+     "name": "Piercing Palm",
+     "started": true,
+     "mana": 0.0,
+     "lost": 28.0,
+     "fx": 144,
+     "released": 1,
+     "damage_of": 28.0,
+     "pictured": true
+    },
+    {
+     "name": "Uppercut Punch",
+     "started": true,
+     "mana": 0.0,
+     "lost": 29.0,
+     "fx": 206,
+     "released": 1,
+     "damage_of": 29.0,
+     "pictured": true
+    },
+    {
+     "name": "Meteor Fist",
+     "started": true,
+     "mana": 0.0,
+     "lost": 30.0,
+     "fx": 160,
+     "released": 1,
+     "damage_of": 30.0,
+     "pictured": true
+    },
+    {
+     "name": "Spinning Kick",
+     "started": true,
+     "mana": 0.0,
+     "lost": 31.0,
+     "fx": 258,
+     "released": 1,
+     "damage_of": 31.0,
+     "pictured": true
+    }
+   ],
+   "free": {
+    "started": true,
+    "released": 1,
+    "fx": 101,
+    "mana_full": true
+   },
+   "dash": {
+    "started": true,
+    "closed_m": 5.03
+   },
+   "chi_ok": [
+    "Straight Punch",
+    "Cannon Punch",
+    "Smashing Strike",
+    "Roundhouse Fist",
+    "Chain Punch",
+    "Slashing Palm",
+    "Piercing Palm",
+    "Uppercut Punch",
+    "Meteor Fist",
+    "Spinning Kick"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_mr3_ma_room.png",
+  "mw_mr3_ma_StraightPunch.png",
+  "mw_mr3_ma_CannonPunch.png",
+  "mw_mr3_ma_SmashingStrike.png",
+  "mw_mr3_ma_RoundhouseFist.png",
+  "mw_mr3_ma_ChainPunch.png",
+  "mw_mr3_ma_SlashingPalm.png",
+  "mw_mr3_ma_PiercingPalm.png",
+  "mw_mr3_ma_UppercutPunch.png",
+  "mw_mr3_ma_MeteorFist.png",
+  "mw_mr3_ma_SpinningKick.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

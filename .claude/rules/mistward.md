@@ -8,6 +8,10 @@ paths:
   - "pipeline/unreal/868_mistward_test.ps1"
   - "pipeline/blender_numpy/mw_*.py"
   - "claude_ue5/SourceArt/mistward/**"
+  - "claude_ue5/Source/claude_ue5/RD/RDMartial.cpp"
+  - "pipeline/unreal/87*.py"
+  - "pipeline/blender_numpy/martialartist_clips.py"
+  - "claude_ue5/SourceArt/martial_arts/**"
 ---
 
 # mistward_castle (`863`-`868`; the user's list of 2026-10-26, `docs/improvements.txt`)
@@ -84,6 +88,17 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A spell that costs more than any pool holds** (Null Sanctum 220, Apocalypse 300; the best is 200 with the +100 % ring) was learnable and never castable. Learning its tome now makes her pool at least its number (`FRDHeroDef::TomeMana`, read in `UpdateMaxima` through `GetTomeMana`: tied to knowing the spell, so a restart that forgets it takes the pool back). The Mage only; `868`'s `tomemana` step checks the Summoner's stays.
 - **A death forgot every tome**: the death's drop put her hero's starting list back as her weapons (a comment beside it said learned spells stay). Learned spells (a spell weapon with no item, not on her card) are kept now; `UpdateMaxima` runs after the list is rebuilt.
 - `871` sets the hero defs in place: run it again after anything that writes the levels' heroes anew (`825`'s heroes, `862`).
+
+## The Martial Artist (`872`, `873`, `RD/RDMartial.cpp`; the user's of 2026-10-28)
+
+- **Two GLBs, two rigs**: MartialArtist.glb (idle, hit reactions) and MartialArtist2.glb (walk, run, boxing, kicks) share bone names, but their rest frames differ by 53 degrees on average (the right arm's by 200): a clip of one does not go onto the other by local turns. MartialArtist2 is hers; her idle is made (`martialartist_clips.py`), her flinch and death retargeted (822's source rig).
+- **Her arms are a Tripo hero's (about 34 cm shoulder to wrist)**: hand places written for a person's reach fall 20 to 60 cm short (the solver says so: "the r hand falls ... short"); `rogue_clips.solve_arm` then stretches toward the place, which reads right. Judge the poses in the preview's pictures, front, side and three-quarter.
+- **A turn about the up axis turns everything given in her frame**: the spinning kick's spine axes, hand places, poles and leg ways are turned with the pose (`Fr`). Turned anticlockwise, her right leg pointed behind her at the hit (the first preview): she turns clockwise (to her right).
+- **Tripo's combinations are cut into strikes** (872's `strikes`: where a hand or foot is fastest, half way between): one attack of a 2.8 s clip with one blow was not a punch.
+- **A chi attack is `ERDSpellKind::Rend` with Splash** (the blast on the others, half as much); with no monster in reach it is refused before the mana is taken (the first test's chi at 6 m spent its 7 for nothing). Soul Rend (no splash) is as it was.
+- **Her locked chi attacks are spell weapons not on her card**: the death's drop keeps them like learned spells (`StartWeaponsOf` + the ones not in it); with `bUnlockAll` they are part of her start, or a death doubled them.
+- **The Toon Explosions' Vol. 2 blasts begin with black shards** (the first picture of the Chain Punch showed only streaks across the floor): picture a blast over time (`868`'s tag `probe...`: 0.2, 0.4, 0.7 s after it began) before judging it.
+- **A Save As copy is opened after a restart** (`873 saveas` quits the editor); `bOneRoom` keeps the generator from queueing any section but the start one (`Enqueue`), and the start section's plan is the great hall alone.
 
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 

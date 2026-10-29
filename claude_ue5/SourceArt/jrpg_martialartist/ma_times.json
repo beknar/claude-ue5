@@ -1,0 +1,57 @@
+{
+ "Chi_StraightPunch": {
+  "length": 0.62,
+  "hit": 0.2,
+  "bone": "hand_r"
+ },
+ "Chi_CannonPunch": {
+  "length": 1.05,
+  "hit": 0.48,
+  "bone": "hand_r"
+ },
+ "Chi_SmashingStrike": {
+  "length": 1.05,
+  "hit": 0.5,
+  "bone": "hand_r"
+ },
+ "Chi_RoundhouseFist": {
+  "length": 0.95,
+  "hit": 0.44,
+  "bone": "hand_r"
+ },
+ "Chi_ChainPunch": {
+  "length": 1.2,
+  "hit": 0.76,
+  "bone": "hand_r"
+ },
+ "Chi_SlashingPalm": {
+  "length": 0.95,
+  "hit": 0.46,
+  "bone": "hand_r"
+ },
+ "Chi_PiercingPalm": {
+  "length": 0.9,
+  "hit": 0.42,
+  "bone": "hand_r"
+ },
+ "Chi_UppercutPunch": {
+  "length": 0.95,
+  "hit": 0.45,
+  "bone": "hand_r"
+ },
+ "Chi_MeteorFist": {
+  "length": 1.45,
+  "hit": 0.78,
+  "bone": "hand_r"
+ },
+ "Chi_SpinningKick": {
+  "length": 1.15,
+  "hit": 0.55,
+  "bone": "foot_r"
+ },
+ "Dash": {
+  "length": 0.5,
+  "hit": 0.0,
+  "bone": "pelvis"
+ }
+}

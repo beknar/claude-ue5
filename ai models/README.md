@@ -14,7 +14,7 @@ The characters this project uses in its current and future scenes, made with [Tr
 | `Summoner2.glb` | (none) | Realistic summoner (made from two AI-generated pictures), fitted with a whole MetaHuman | the Summoner2 version of random_dungeonmagic_level5 (scripts `842`-`848`; set aside) |
 | `Summoner3.glb` | (none) | Summoner (the Mage's spells; wears the armour she finds) | random_dungeonmagic_level5 (character `Summoner3`, the fifth hero; off the hero menu since 2026-10-26) and its armour showcase |
 | `MartialArtist.glb` | (none) | Martial artist, rigged (61 bones), with Tripo's clips: idle, two boxing moves, two front kicks, four hit reactions (body, side, head) | not used yet |
-| `MartialArtist2.glb` | (none) | Martial artist, rigged (61 bones), with Tripo's clips: walk, run, running upstairs, three boxing moves, two front kicks, a dance | not used yet |
+| `MartialArtist2.glb` | (none) | Martial artist, rigged (61 bones), with Tripo's clips: walk, run, running upstairs, three boxing moves, two front kicks, a dance | The Martial Artist of mistward_castle and martial_arts (character `MartialArtist`, scripts `872` / `873`: her walk, run, boxing and kicks; her idle, knife stabs, roll, dash and ten chi attacks made for her by `martialartist_clips.py`) |
 
 ## Renamed models
 

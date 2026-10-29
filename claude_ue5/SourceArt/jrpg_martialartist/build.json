@@ -1,0 +1,34 @@
+{
+ "clips": {
+  "Box_01": 54,
+  "Box_02": 68,
+  "Box_03": 62,
+  "Front_kick_01": 61,
+  "Front_kick_02": 34,
+  "Run": 31,
+  "Walk": 57,
+  "Stab1": 18,
+  "Stab2": 19,
+  "Stab3": 20,
+  "RollF": 20,
+  "RollB": 20,
+  "Idle": 59,
+  "Chi_StraightPunch": 16,
+  "Chi_CannonPunch": 26,
+  "Chi_SmashingStrike": 26,
+  "Chi_RoundhouseFist": 24,
+  "Chi_ChainPunch": 30,
+  "Chi_SlashingPalm": 24,
+  "Chi_PiercingPalm": 23,
+  "Chi_UppercutPunch": 24,
+  "Chi_MeteorFist": 36,
+  "Chi_SpinningKick": 29,
+  "Dash": 13
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_martialartist\\T_MartialArtist_Color.png"
+ },
+ "height_cm": 165.0,
+ "hair": null,
+ "proportions": null
+}

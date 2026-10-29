@@ -98,6 +98,18 @@ void ARDSection::Plan(FRandomStream& R)
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
 	const bool bStart = Generator->IsStartSection(Coord);
+	// (martial_arts: the great hall alone, OneRoomTiles a side round the middle block's lane: no doors, no hallways, no portals)
+	if (Generator->bOneRoom && bStart)
+	{
+		FRoom Rm; Rm.Block = (NB / 2) * NB + NB / 2; Rm.Kind = ERDRoomKind::Hall;
+		Rm.Lane = FIntPoint((NB / 2) * B + B / 2, (NB / 2) * B + B / 2);
+		const int32 S = FMath::Clamp(Generator->OneRoomTiles, 4, B - 2);
+		Rm.Min = Rm.Lane - FIntPoint(S / 2, S / 2); Rm.Max = Rm.Min + FIntPoint(S, S);
+		const int32 RI = Rooms.Add(Rm);
+		for (int32 X = Rm.Min.X; X < Rm.Max.X; ++X)
+			for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y) { Type[Idx(FIntPoint(X, Y))] = 1; Owner[Idx(FIntPoint(X, Y))] = (int16)RI; }
+		return;
+	}
 	// room kinds: weighted, a few per section capped
 	struct FW { ERDRoomKind K; float W; int32 MinSize; int32 MaxSize; int32 Cap; };
 	const FW Kinds[] = {

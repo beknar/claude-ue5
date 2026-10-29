@@ -729,6 +729,17 @@ struct FRDHeroDef
 	 *  mana pool at least this much (rings no longer add past it): the Mage's Null Sanctum 220 and Apocalypse 300, which cost
 	 *  more than the best ring gives (871) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> TomeMana;
+	/** the Martial Artist (the user's of 2026-10-28, mistward_castle and martial_arts): the share more damage a weapon type
+	 *  does in her hands (her knives and daggers: "short blades") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FString, float> TypeBonus;
+	/** the weapon types a Dexterity ring adds to besides a ranged weapon's bolts (hers: her fists, "unarmed", and her knives;
+	 *  never a spell: her chi attacks are spells) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> DexterityTypes;
+	/** her dash forward (V / the gamepad's X): the clip (in place: the dash carries her); none: no dash */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> DashClip = nullptr;
+	/** weapons (her chi attacks) she gains UnlockPerBoss at a time, in their order, each time she slays a tier's boss */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponDef> LockedWeapons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 UnlockPerBoss = 2;
 };
 
 UENUM(BlueprintType)

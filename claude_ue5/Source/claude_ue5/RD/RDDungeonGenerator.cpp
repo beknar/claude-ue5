@@ -221,6 +221,7 @@ bool ARDDungeonGenerator::GenerateSectionNow(FIntPoint S)
 
 void ARDDungeonGenerator::Enqueue(FIntPoint S)
 {
+	if (bOneRoom && !IsStartSection(S)) return;          // (martial_arts: the one room, nothing beyond it)
 	if (!IsSectionGenerated(S) && !Queue.Contains(S) && IsSectionAllowed(S)) Queue.Add(S);
 }
 
@@ -442,7 +443,8 @@ bool ARDDungeonGenerator::ApplyHero(FName Name)
 	const FRDHeroDef* H = FindHero(Name);
 	if (!H) return false;
 	CurrentHero = H->Name;
-	Weapons = H->Weapons;
+	StartWeaponsOf(*H, Weapons);
+	DashClip = H->DashClip;
 	PlayerMaxHealth = H->MaxHealth;
 	PlayerMaxMana = H->MaxMana; ManaPerSecond = H->ManaPerSecond;
 	MeleeBonus = H->MeleeBonus; RangedBonus = H->RangedBonus;
@@ -972,6 +974,18 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
 					const FName Sl = GiveBossSlash(E.Tier, Monster ? Monster->GetActorLocation() : E.At);
 					if (!Sl.IsNone()) TierNotice += FString::Printf(TEXT("  -  THE %s IS YOURS"), *Sl.ToString().ToUpper());
+					// (the Martial Artist: a tier's boss (not a usurper) teaches her the next of her locked weapons, her chi attacks)
+					if (!E.bThrone)
+						if (const FRDHeroDef* H = FindHero(CurrentHero); H && H->LockedWeapons.Num() > 0)
+						{
+							const int32 Before = WeaponsUnlocked;
+							if (UnlockHeroWeapons(H->UnlockPerBoss) > 0)
+							{
+								TArray<FString> Names;
+								for (int32 K = Before; K < WeaponsUnlocked; ++K) Names.Add(H->LockedWeapons[K].Name.ToString().ToUpper());
+								TierNotice += TEXT("  -  YOU LEARN ") + FString::Join(Names, TEXT(" AND "));
+							}
+						}
 				}
 			}
 	// (the tiers: it stays dead, also when its section is generated again)
@@ -1034,7 +1048,10 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	SlashR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x51A5u));
 	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
 	// (the weapons she found are gone: hers are the hero's again)
-	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) Weapons = H->Weapons;
+	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) StartWeaponsOf(*H, Weapons);
+	// (martial_arts: the room's monsters come again from none)
+	for (const TWeakObjectPtr<ARDMonster>& M : OneRoomLive) if (M.IsValid()) M->Destroy();
+	OneRoomLive.Reset(); OneRoomSpawned = 0; OneRoomNext = 0.f;
 	for (auto& KV : Sections) KV.Value->ActivateForPlay();
 	if (PlayerCombat)
 	{
@@ -1387,6 +1404,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	}
 	if (Traps.Num() > 0) TickTraps(Dt);
 	if (bSpecialRooms) TickArena(Dt);          // (the third list: an arena begun, its waves)
+	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)
 	// (mistward: the rings to guard of a tier opened by the last container she opened, now that it has given what it held)
 	if (PendingRingTiers.Num() > 0) { const TArray<int32> Ts = PendingRingTiers; PendingRingTiers.Reset(); for (const int32 T : Ts) PlaceRingGuard(T); }
 	if (PrisonerDefs.Num() > 0)

@@ -1,0 +1,120 @@
+{
+ "tag": "ma2",
+ "plan": [
+  "martial"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "martial",
+   "ok": true,
+   "hero": "MartialArtist",
+   "hp": 140.0,
+   "mana": 100.0,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Cannon Punch"
+   ],
+   "pawn": "BP_MA_MartialArtistCharacter_C",
+   "fists": {
+    "damage_of": 14.0,
+    "bonus": 0.0,
+    "started": true,
+    "lost": 14.0,
+    "hits": 1
+   },
+   "ring_worn": true,
+   "ring": {
+    "amount": 1.0,
+    "fists": 28.0,
+    "chi": 22.0
+   },
+   "knife": {
+    "index": 3,
+    "damage": 11.0,
+    "damage_of": 25.3,
+    "bonus": 1.3,
+    "both_hands": true,
+    "type": "short blades",
+    "lost": 25.3
+   },
+   "ring_off": {
+    "fists": 14.0,
+    "knife": 14.3
+   },
+   "chi": {
+    "name": "Straight Punch",
+    "started": true,
+    "mana": 7.0,
+    "lost": 22.0,
+    "fx": 111,
+    "released": 1,
+    "damage_of": 22.0,
+    "pictured": true,
+    "splash_lost": 11.0
+   },
+   "chi_far": {
+    "name": "Straight Punch",
+    "started": false,
+    "mana": 0.0,
+    "lost": 0.0,
+    "fx": 0,
+    "released": 0,
+    "damage_of": 22.0,
+    "pictured": false
+   },
+   "dash": {
+    "started": true,
+    "before_m": 6.0,
+    "after_m": 0.76,
+    "length": 444.0,
+    "at_it": true,
+    "attacked": 1,
+    "lost": 14.0,
+    "dashes": 1
+   },
+   "rolls": 1,
+   "medium_worn": "None",
+   "light_worn": "Desert Hero’s Armour",
+   "armour_share": 0.2,
+   "boss": {
+    "weapons": [
+     "Smashing Strike",
+     "Roundhouse Fist"
+    ],
+    "unlocked": 2
+   },
+   "asked": 2,
+   "after_ask": [
+    "Smashing Strike",
+    "Roundhouse Fist",
+    "Chain Punch",
+    "Slashing Palm"
+   ],
+   "after_death": [
+    "Fists",
+    "Straight Punch",
+    "Cannon Punch",
+    "Smashing Strike",
+    "Roundhouse Fist",
+    "Chain Punch",
+    "Slashing Palm"
+   ],
+   "after_restart": [
+    "Fists",
+    "Straight Punch",
+    "Cannon Punch"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_ma2_ma_knife.png",
+  "mw_ma2_ma_chi_straight.png",
+  "mw_ma2_ma_dash.png",
+  "mw_ma2_ma_armour.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

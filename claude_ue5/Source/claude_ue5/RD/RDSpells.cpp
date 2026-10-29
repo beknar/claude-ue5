@@ -528,6 +528,20 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		ARDMonster* T = LastTarget.Get();
 		if (!T || T->IsDead()) T = PickTarget(S->Reach, true);
 		if (T) { SpawnSpellFx(S->ImpactFx, T->GetActorLocation(), FRotator::ZeroRotator, S->ImpactFxScale, S); SpellHurt(T, Dmg, T->GetActorLocation(), true); }
+		// (the Martial Artist's chi attacks: the blast also hurts the others within Splash, half as much; Soul Rend has none)
+		if (T && S->Splash > 0.f)
+		{
+			const FVector C = T->GetActorLocation();
+			Around(C, S->Splash, [&](ARDMonster* Mo) { if (Mo != T) SpellHurt(Mo, Dmg * 0.5f, Mo->GetActorLocation(), true); });
+		}
+		// (martial_arts: no monster in reach, the blast goes off in front of her all the same; any monster in it takes half)
+		else if (!T && S->Splash > 0.f && Generator->bChiWithoutTarget)
+		{
+			const FVector C = L + Fw * Generator->ChiFreeDistance + FVector(0, 0, 20.f);
+			SpawnSpellFx(S->ImpactFx, C, FRotator::ZeroRotator, S->ImpactFxScale, S);
+			Around(C, S->Splash, [&](ARDMonster* Mo) { SpellHurt(Mo, Dmg * 0.5f, Mo->GetActorLocation(), true); });
+			UE_LOG(LogTemp, Log, TEXT("RDMARTIAL %s with no monster in reach: the blast %.0f cm before her"), *S->Name.ToString(), Generator->ChiFreeDistance);
+		}
 		break;
 	}
 	case ERDSpellKind::Corpse:

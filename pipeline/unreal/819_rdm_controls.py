@@ -12,9 +12,10 @@ eal = unreal.EditorAssetLibrary
 for CH, PATH in (("Caster", "/Game/RandomDungeon/Blueprints/BP_RDM_CasterCharacter"), ("DarkCaster", "/Game/RandomDungeon/Blueprints/BP_RDM2_DarkCasterCharacter"),
                  ("Rogue", "/Game/RandomDungeon/Blueprints/BP_RDM3_RogueCharacter"), ("Fem5", "/Game/RandomDungeon/Blueprints/BP_RDM4_WarriorCharacter"),
                  ("Summoner", "/Game/RandomDungeon/Blueprints/BP_RDM5_SummonerCharacter"), ("summoner2", "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner2Character"),
-                 ("Summoner3", "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner3Character"), ("Warrior3", "/Game/RandomDungeon/Blueprints/BP_RDM5_Warrior3Character")):
+                 ("Summoner3", "/Game/RandomDungeon/Blueprints/BP_RDM5_Summoner3Character"), ("Warrior3", "/Game/RandomDungeon/Blueprints/BP_RDM5_Warrior3Character"),
+                 ("MartialArtist", "/Game/RandomDungeon/Blueprints/BP_MA_MartialArtistCharacter")):
     bp = unreal.load_asset(PATH)
-    if not bp and CH in ("summoner2", "Summoner3", "Warrior3"): print(f"RDMCONTROLS (no {CH} yet: 847 / 852 / 862 make her)"); continue
+    if not bp and CH in ("summoner2", "Summoner3", "Warrior3", "MartialArtist"): print(f"RDMCONTROLS (no {CH} yet: 847 / 852 / 862 / 872 make her)"); continue
     assert bp, PATH + ": run 810 / 817 / 822 / 824 / 832 first"
     SP = r"E:\code\claude-ue5\claude_ue5\SourceArt" + ("\\summoner2" if CH == "summoner2" else "\\jrpg_" + CH.lower()) + r"\speeds.txt"
     WALK, RUN = [float(v) for v in open(SP).read().split()]

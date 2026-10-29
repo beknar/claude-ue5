@@ -165,6 +165,40 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float MeleeBonus = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float RangedBonus = 0.f;
 	const FRDHeroDef* FindHero(FName Name) const;
+	// ---- the Martial Artist (the user's of 2026-10-28; RD/RDMartial.cpp)
+	/** hers (ApplyHero): the dash's clip; how far it carries her (at most: it stops short of the monster ahead), the way
+	 *  ahead a monster is looked for to dash at, the pause after one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") TObjectPtr<UAnimSequenceBase> DashClip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") float DashDistance = 500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") float DashSeek = 900.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") float DashCooldown = 0.8f;
+	/** martial_arts: every locked weapon of her hero (her chi attacks) is hers from the start */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bUnlockAll = false;
+	/** martial_arts (the user's of 2026-10-28, to try her moves): no mana is ever taken (her pool stays full) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bInfiniteMana = false;
+	/** martial_arts: a chi attack with no monster in reach is made all the same, its blast ChiFreeDistance in front of her
+	 *  (monsters within its splash there take half); off, it is refused and costs nothing */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bChiWithoutTarget = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") float ChiFreeDistance = 250.f;
+	/** the locked weapons gained so far (her hero's LockedWeapons, in order) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Martial") int32 WeaponsUnlocked = 0;
+	/** her hero's weapons at the start (her card's, and with bUnlockAll all her locked ones) */
+	void StartWeaponsOf(const FRDHeroDef& H, TArray<FRDWeaponDef>& Out) const;
+	/** the next Count of her hero's locked weapons join hers (a tier's boss slain; tests): how many did */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Martial") int32 UnlockHeroWeapons(int32 Count);
+	/** the share more a weapon type does in her hands (TypeBonus), and whether a Dexterity ring adds to it */
+	float TypeBonusOf(const FString& Type) const;
+	bool DexterityBoosts(const FString& Type) const;
+	/** martial_arts: one room only. The start section plans its great hall alone, OneRoomTiles a side, with no doors, no
+	 *  hallways and no other section; OneRoomMonsters of tier 1 stand in it, one more OneRoomRespawn seconds after one falls */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bOneRoom = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") int32 OneRoomTiles = 8;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") int32 OneRoomMonsters = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") float OneRoomRespawn = 4.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Martial") int32 OneRoomSpawned = 0;
+	void TickOneRoom(float Dt);
+	TArray<TWeakObjectPtr<ARDMonster>> OneRoomLive;
+	float OneRoomNext = 0.f;
 	/** why the hero in play cannot wear that armour ("" when she can): its weight is not one she wears (the hero's Wears),
 	 *  or no fit was made for her. Label: the item's name as the messages write it. */
 	FString ArmourRefusal(const FRDItemDef& It, const FString& Label) const;
