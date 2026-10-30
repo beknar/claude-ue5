@@ -72,6 +72,8 @@ if L4 and len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI = UIArt(sys.argv[6])
 # (the Martial Artist's fists and chi attacks: their pictures by name, martial_arts.json's (874 gives the game the same))
+# (her name as the game shows it: "Martial Artist", not "MartialArtist")
+HNAME = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", HERO)
 MA_ICONS = {}
 if HERO == "MartialArtist":
     _mj = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "martial_arts", "martial_arts.json"), encoding="utf-8"))
@@ -1133,7 +1135,7 @@ def c5_caps():
     ws = [x for x in ("light", "medium", "heavy") if x in (C.get("wears") or [])]
     wear_txt = "she wears %s" % ("no armour" if not ws else ("all armour: light, medium and heavy" if len(ws) == 3 else "only " + " and ".join(ws) + " armour"))
     t_map = maps_[0]["t"] if maps_ else 4.0
-    out.append((0.8, t_map - 0.1, "THE " + HERO.upper(), ["  ·  ".join(hj.get("abilities", [])), "%s  ·  %d hit points" % (wear_txt, hj.get("health", 0))], acc))
+    out.append((0.8, t_map - 0.1, "THE " + HNAME.upper(), ["  ·  ".join(hj.get("abilities", [])), "%s  ·  %d hit points" % (wear_txt, hj.get("health", 0))], acc))
     if maps_:
         out.append((maps_[0]["t"], close(maps_[0]), "M  ·  THE BIG MAP:  TIERS AND ANVILS", ["each room she has found is written with its tier: this set is tier 1, the 8 round it tier 2, then 16, 24, 32",
                     "the small anvil: one in every forge, at least one in every set of rooms (here, in the great hall): F there makes repair items"], gold))
@@ -1273,7 +1275,7 @@ def m5_caps():
            "Mage": "a torch she makes at the anvil and carries in her left hand",
            "Warlock": "the castle's rooms of other shapes, its teleporters, and what happens when she falls",
            "Rogue": "she sees the castle's traps and disarms them"}[HERO]
-    out.append((0.8, first - 0.1, "THE %s IN MISTWARD CASTLE" % HERO.upper(), ["level 5's dungeon in five themed tiers: the stone dungeon, the castle keep, the dwarven halls, then all three",
+    out.append((0.8, first - 0.1, "THE %s IN MISTWARD CASTLE" % HNAME.upper(), ["level 5's dungeon in five themed tiers: the stone dungeon, the castle keep, the dwarven halls, then all three",
                 who, "upper left: the frame rate the game shows (in this render its own tick; in play the test measured 36 to 41)"], acc))
     for e in CHESTS:
         fd = next((x for x in FOUND if x["t"] >= e["t"] - 0.05), None); held = fd.get("items", []) if fd else []
@@ -1411,7 +1413,8 @@ def mw3_caps(ev, gold, cyan, warm):
     for e in ch:
         e1 = next((x for x in ev("chi_done") if x["t"] >= e["t"] and x["name"] == e["name"]), None); c_ = chi.get(e["name"], {})
         out.append((e["t"] - 0.4, (e1["t"] + 0.8) if e1 else e["t"] + 2.4, "CHI  ·  %s" % e["name"].upper(), [c_.get("effect", "").replace("Chi: ", ""),
-                    "%d damage (%d to the monster it struck)  ·  %d mana  ·  the reel fills her mana before each" % (round(e["damage"]), round((e1 or {}).get("lost", 0)), e.get("mana", 0))], cyan))
+                    ("%d damage (%s to the monster it struck)" % (round(e["damage"]), nice((e1 or {}).get("lost", 0))) if (e1 or {}).get("lost", 0) > 0 else "%d damage  ·  this one missed: the monster moved off" % round(e["damage"]))
+                    + "  ·  %d mana  ·  the reel fills her mana before each" % e.get("mana", 0)], cyan))
     for e in ev("ability"):
         out.append((e["t"] - 0.8, e["t"] + 1.8, "%s FROM THE QUICK BAR" % e["name"].upper(), [e.get("how", ""), "made: %s" % ("yes" if e.get("made") else "no")], cyan))
     return out
@@ -1429,7 +1432,7 @@ def mw2_caps():
            "Warlock": "a vault and its key; a fountain of speed; the arena",
            "Rogue": "a trap she has seen is outlined in red; the trap gauntlet; the throne room's usurper",
            "MartialArtist": "her chi attacks' looks on her fists and legs and their pictures; a quick bar of any length, the D-pad through all of it; her abilities on it"}[HERO]
-    out.append((0.8, first - 0.1, "THE %s IN MISTWARD CASTLE" % HERO.upper(), ["new: " + who, "eight kinds of rooms of their own in every tier: shrines, three fountains, arenas, trap gauntlets, vaults, throne rooms"], acc))
+    out.append((0.8, first - 0.1, "THE %s IN MISTWARD CASTLE" % HNAME.upper(), ["new: " + who, "eight kinds of rooms of their own in every tier: shrines, three fountains, arenas, trap gauntlets, vaults, throne rooms"], acc))
     inv = ev("inventory"); tabs = ev("tab")
     for e in inv:
         cl = inv_closed_after(e["t"] + 0.1)
@@ -1691,7 +1694,7 @@ def s5_caps():
     learns = C.get("learns", []); rk = C.get("ring_kinds", [])
     RK = {"magic": "magic potency (+% mana)", "health": "hp potency (+% hit points)", "dexterity": "dexterity (+% ranged damage)"}
     t_end0 = (EMPTY0["t"] - 0.1) if EMPTY0 else 4.5
-    out.append((0.8, max(t_end0, 3.6), "THE " + HERO.upper(), [("she learns spells from tomes: " + ", ".join(learns)) if learns else "she learns no spells: a tome stays in her bag",
+    out.append((0.8, max(t_end0, 3.6), "THE " + HNAME.upper(), [("she learns spells from tomes: " + ", ".join(learns)) if learns else "she learns no spells: a tome stays in her bag",
                 "her rings: " + (" and ".join(RK.get(k, k) for k in rk) if rk else "none")], acc))
     if EMPTY0:
         e1 = EMPTY1["t"] if EMPTY1 else EMPTY0["t"] + 6.0
@@ -2065,7 +2068,7 @@ def overlay(f):
     a = fade(t, 0.3, 4.6)
     if a > 0 and M5:
         d.text((44 * K, 50 * K), "mistward_castle", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 94 * K), "Mistward Castle  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), ({"Warrior": "her start gear, an armory's table, quick slots, the block, a boss's slash, the helmet",
+        d.text((46 * K, 94 * K), "Mistward Castle  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HNAME.lower(), ({"Warrior": "her start gear, an armory's table, quick slots, the block, a boss's slash, the helmet",
                "Mage": "the inventory's tabs, a shrine, fountains of mana and healing", "Warlock": "the vault and its key, a fountain of speed, the arena",
                "Rogue": "a seen trap outlined in red, the trap gauntlet, the throne room", "MartialArtist": "her chi attacks' looks, a quick bar of any length, her abilities on it"} if MW2 else {"Warrior": "shields, the anvil, a boss", "Mage": "the torch, the prison's cells",
                "Warlock": "rooms of other shapes, teleporters, her things where she falls", "Rogue": "traps, a guarded ring"})[HERO]), font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
@@ -2074,10 +2077,10 @@ def overlay(f):
         d.text((46 * K, 86 * K), ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  spells from tomes, rings, monsters by tier, the dead stay, the menu" % HERO.lower() if S5 else
                                   "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  the map, chests, armour, the anvil, fights, new rooms tier by tier" % HERO.lower() if X5 else
                  "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  armour by its table, loot by tier, repair items made at anvils" % HERO.lower() if C5 else
-                                  "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), WHO[HERO].replace("the %s " % HERO, "she ", 1)) if Q5 else
+                                  "procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HNAME.lower(), WHO[HERO].replace("the %s " % HERO, "she ", 1)) if Q5 else
                                   "procedural dungeon  \u00b7  the warrior, chosen in the menu  \u00b7  a weapons table and five tiers of rooms" if W5 else
                                   "procedural dungeon  \u00b7  the summoner, chosen in the menu  \u00b7  five armour sets to find and wear" if L5 else
-                                  ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HERO.lower(), HJ[HERO]["starts_with"].lower())) if L4 else
+                                  ("procedural dungeon  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HNAME.lower(), HJ[HERO]["starts_with"].lower())) if L4 else
                                   "procedural dungeon  \u00b7  two daggers, a crossbow and a roll  \u00b7  the Rogue" if L3 else
                                   "procedural dungeon  \u00b7  fire from the left hand, a sword in the right  \u00b7  girl-darkcaster-tripo" if L2 else
                                   "procedural dungeon  \u00b7  a fire spell at medium range  \u00b7  girl-caster-tripo"), font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
@@ -2088,7 +2091,7 @@ def overlay(f):
     if L4:
         hj = HJ[HERO]
         # (level 5: her caption stays until the first chest's takes over)
-        caps.append((0.8, (INVS[0]["t"] if INVS else 30.0) if L5 else min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "THE " + HERO.upper(), ["  ·  ".join(hj["abilities"]),
+        caps.append((0.8, (INVS[0]["t"] if INVS else 30.0) if L5 else min(t_first - 0.2, t_chest - 0.4, (GENS[0]["t"] if GENS else 99) - 0.2), "THE " + HNAME.upper(), ["  ·  ".join(hj["abilities"]),
                      "%d hit points%s  ·  %s" % (hj["health"], ("  ·  %d mana, %.1f a second back" % (hj["mana"], hj["mana_per_second"])) if hj["mana"] else "", hj["starts_with"].lower())], tuple(int(255 * v) for v in hj["accent"])))
         for e in INVS:
             # (what she does there is said once she has done it)

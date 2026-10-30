@@ -2482,7 +2482,14 @@ def mw3_cast(name, near=300.0):
     G.setdefault("skip", set()).update(q.get_name() for q in gen.get_monsters() if alive(q) and q.caged)
     m = threat()
     if m is not None and m.get_name() in G.get("skip", ()): m = None          # (one left before: caged, out of her sight)
-    m = m or nearest_monster(IP(0, 0), 60)
+    # (in the great hall: the lured come to her there (a chase into the hallways put the camera in her hair); only after 5 s
+    # with nobody she goes for the nearest, 25 m at most)
+    t5 = T()
+    while m is None and T() - t5 < 5.0:
+        camera(side=25.0, pitch=-13.0, rate=25.0); yield
+        m = threat()
+        if m is not None and m.get_name() in G.get("skip", ()): m = None
+    m = m or nearest_monster(IP(0, 0), 60, 2500.0)
     if m is None: return False
     t0 = T(); route = None; rt = -9.0
     while alive(m) and T() - t0 < 6.0:
@@ -2515,9 +2522,10 @@ def mw3_cast(name, near=300.0):
             G.setdefault("skip", set()).add(m.get_name()); event("chi_refused", name=name, monster=str(m.monster_name), msg=str(c.message)); return False
     event("chi", name=name, ok=bool(ok), msg=str(c.message), drawn=str(c.get_weapon_name()), attacking=bool(c.is_attacking()), gap=round(d2(loc(), m.get_actor_location()), 0), dz=round(m.get_actor_location().z - loc().z, 0), monster=str(m.monster_name), damage=round(c.get_damage_of(c.get_weapon_index()), 1), mana=round(gen.get_editor_property("weapons")[c.get_weapon_index()].mana_cost))
     # (the camera from her front right while the move plays: its look is on her fists and legs)
-    t1 = T()
+    t1 = T(); wide = wide_here()
     while (c.is_attacking() or T() - t1 < 0.3) and T() - t1 < 2.5:
-        camera(side=125.0, pitch=-10.0, rate=140.0); yield
+        # (from her front right where there is room; in a hallway from behind and above her, as a fight's camera)
+        camera(side=125.0, pitch=-10.0, rate=140.0) if wide else camera(side=8.0, pitch=-25.0, rate=80.0); yield
     event("chi_done", name=name, lost=round(h0 - (m.get_health() if alive(m) else 0.0), 1), killed=not alive(m))
     yield from pause(0.5, lambda: camera(side=60.0, pitch=-12.0, rate=60.0))
     return True

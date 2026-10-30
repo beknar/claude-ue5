@@ -92,7 +92,7 @@ def menu_hud(f, k, fl):
     ax, ay, x = 80 * K, 160 * K, (114 + (18 if (UI and UI.has("panel")) else 0)) * K; wd = 720 * K - x - 30 * K     # (clear of the board's corner ornaments)
     def card(draw):
         y = ay + 22 * K
-        if draw: d.text((x, y), h["name"].upper(), font=f_name, fill=ink(acc))
+        if draw: d.text((x, y), (h.get("title") or h["name"]).upper(), font=f_name, fill=ink(acc))          # (her title, as ARDHeroSelectHUD: "MARTIAL ARTIST")
         y += 74 * K
         mh = max(q["hp"] for q in HEROES); mm = max(max(q["mana"] for q in HEROES), 1.0)
         for lab, v, mx, col, note, fr0, fi0 in (("HIT POINTS", h["hp"], mh, (0.25, 0.75, 0.3), "%d" % h["hp"], "bar_health", "fill_health"),
@@ -190,8 +190,8 @@ def menu_hud(f, k, fl):
             if on: d.rectangle((p0[0] + 2 * K, p0[1] + 2 * K, p1[0] - 2 * K, p1[1] - 2 * K), outline=lin(qa), width=2 * K)
         else:
             d.rectangle((*p0, *p1), fill=lin(tuple(c * 0.35 for c in qa), 0.95) if on else lin((0.04, 0.045, 0.06), 0.85), outline=lin(qa) if on else lin((0.40, 0.38, 0.34)), width=(3 if on else 1) * K)
-        d.text(((p0[0] + p1[0]) / 2 + (2 * K if plate else 0), (p0[1] + p1[1]) / 2 + (2 * K if plate else 0)), q["name"].upper(), font=f_tab, fill=(0, 0, 0, 200), anchor="mm") if plate else None
-        d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), q["name"].upper(), font=f_tab, fill=(255, 255, 255, 255) if on else lin(DIM), anchor="mm")
+        d.text(((p0[0] + p1[0]) / 2 + (2 * K if plate else 0), (p0[1] + p1[1]) / 2 + (2 * K if plate else 0)), (q.get("title") or q["name"]).upper(), font=f_tab, fill=(0, 0, 0, 200), anchor="mm") if plate else None
+        d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), (q.get("title") or q["name"]).upper(), font=f_tab, fill=(255, 255, 255, 255) if on else lin(DIM), anchor="mm")
     for j, g in enumerate("<>"):
         px = t0 - tg - 56 * K if j == 0 else t0 + n * tb + (n - 1) * tg + tg
         hot = (r["key"] in ("A", "Left") and j == 0) or (r["key"] in ("D", "Right") and j == 1)
@@ -201,7 +201,7 @@ def menu_hud(f, k, fl):
             continue
         d.rectangle((px, ty, px + 56 * K, ty + tbh), fill=lin((0.36, 0.27, 0.10), 0.95) if hot else lin((0.04, 0.045, 0.06), 0.85), outline=lin((1.0, 0.82, 0.35)) if hot else lin(LINE), width=(3 if hot else 1) * K)
         d.text((px + 28 * K, ty + tbh / 2), g, font=f_key, fill=lin(INK), anchor="mm")
-    st = "START AS %s" % h["name"].upper(); tw = d.textlength(st, font=f_cap)
+    st = "START AS %s" % (h.get("title") or h["name"]).upper(); tw = d.textlength(st, font=f_cap)
     pressed = 0.0 <= r["start_ago"] < 0.7; pulse = 1.0 if pressed else 0.75 + 0.25 * math.sin(r["t"] * 3.0)
     if plate:
         # (ARDHeroSelectHUD: the plate, lit in her colour, wider for its rim and rivets)

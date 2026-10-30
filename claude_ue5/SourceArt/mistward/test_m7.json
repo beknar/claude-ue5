@@ -1,5 +1,5 @@
 {
- "tag": "m6",
+ "tag": "m7",
  "plan": [
   "menu"
  ],
@@ -55,9 +55,9 @@
    "cursor_after": false
   }
  ],
- "windows_hidden": "Content Browser, Message Log",
+ "windows_hidden": "Message Log, Content Browser",
  "shots": [
-  "mw_m6_menu_mouse.png"
+  "mw_m7_menu_mouse.png"
  ],
  "error": null,
  "windows_shown_again": 2
