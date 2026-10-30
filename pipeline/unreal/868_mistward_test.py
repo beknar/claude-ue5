@@ -139,6 +139,7 @@ def put(at, yaw=None, z=None):
     if yaw is not None:
         p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=yaw))
 def dist2(a, b): return math.hypot(a.x - b.x, a.y - b.y)
+def dist3(a, b): return math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2)
 def walk_speed(): return G["pawn"].get_editor_property("character_movement").get_editor_property("max_walk_speed")
 def items_of(kind): return [i for i in G["gen"].get_editor_property("items") if i.kind == kind]
 def section_at(p): return G["gen"].get_section(G["gen"].world_to_section(p))
@@ -380,7 +381,9 @@ def step_inventory():
     a = c.get_inventory_cursor(); why = yield from slate_hold("S", 0.1); res["one_press"] = c.get_inventory_cursor() - a
     # ---- the mouse: onto a potion's row (it is chosen), a click on it (it is used), the wheel (the list scrolls, the cursor stays)
     yield from rwait(0.2); R_ = rows(c); L_ = lines(c)
-    pot = next((i for i in sorted(R_) if L_[i].startswith("item|") and i != c.get_inventory_cursor()), None)
+    # (one she has two or more of: the last of a kind drunk takes its row away and the rows under it move up, which is not the wheel's doing)
+    cand = [i for i in sorted(R_) if L_[i].startswith("item|") and i != c.get_inventory_cursor()]
+    pot = next((i for i in cand if int(L_[i].split("|")[2] or 0) >= 2), cand[0] if cand else None)
     res["rows_drawn"] = len(R_); m = {}
     if pot is not None:
         nm = L_[pot].split("|")[1]; b = R_[pot]
@@ -398,7 +401,7 @@ def step_inventory():
         for _ in range(2):
             why = str(g.slate_wheel(mid(b), -1.0)); yield from rwait(0.15)
             if why: res["refused"].append("wheel: " + why)
-        m["first_before"] = f0; m["first_after_wheel_down"] = c.get_list_first(); m["cursor_kept"] = c.get_inventory_cursor() == k0
+        m["first_before"] = f0; m["first_after_wheel_down"] = c.get_list_first(); m["cursor_kept"] = c.get_inventory_cursor() == k0; m["cursor"] = [k0, c.get_inventory_cursor()]; m["tab_lines"] = [str(x) for x in lines(c)][:12]
         why = str(g.slate_wheel(mid(b), 1.0)); yield from rwait(0.15)
         m["first_after_wheel_up"] = c.get_list_first()
         # (a double click on a row of three small potions: one drunk, not two (the second press of a double click is a press too))
@@ -2086,7 +2089,8 @@ def step_martial():
     # (her fists: a strike at a dummy before her)
     c.select_weapon(0); yield from wait(0.3)
     m = spawn_dummy(ahead(120)); yield from wait(0.4); h0 = hp(m)
-    res["fists"] = {"damage_of": round(c.get_damage_of(0), 1), "bonus": round(c.get_bonus_of(0), 3), "started": c.start_attack()}
+    FD = g.get_editor_property("weapons")[0].damage; CD = g.get_editor_property("weapons")[1].damage      # (872 sets them from the Warrior's average)
+    res["fists"] = {"damage": FD, "damage_of": round(c.get_damage_of(0), 1), "bonus": round(c.get_bonus_of(0), 3), "started": c.start_attack()}
     yield from wait(1.6); res["fists"]["lost"] = round(h0 - hp(m), 1); res["fists"]["hits"] = c.hits_landed; drop([m])
     # (the Dexterity ring: her fists and knives, not her chi)
     ring = max((i for i in items_of(unreal.RDItemKind.RING) if i.ring_kind == unreal.RDRingKind.DEXTERITY), key=lambda i: i.amount)
@@ -2148,10 +2152,10 @@ def step_martial():
     f_, ch, dsh = res["fists"], res["chi"], res["dash"]
     chi4 = ["Smashing Strike", "Roundhouse Kick", "Chain Punch", "Rear Kick"]
     ok = (res["hero"] == "MartialArtist" and res["hp"] == 140 and res["mana"] == 100 and res["weapons"] == ["Fists", "Straight Punch", "Side Kick"]
-          and f_["damage_of"] == 14 and f_["lost"] >= 14 and abs(res["ring"]["fists"] - 14 * (1 + ring.amount)) < 0.2 and abs(res["ring"]["chi"] - 22) < 0.2
+          and f_["damage_of"] == FD and f_["lost"] >= FD and abs(res["ring"]["fists"] - FD * (1 + ring.amount)) < 0.2 and abs(res["ring"]["chi"] - CD) < 0.2
           and res.get("knife", {}).get("both_hands") and abs(res["knife"]["bonus"] - (0.3 + ring.amount)) < 0.01 and res["knife"]["lost"] > 0
-          and abs(res["ring_off"]["knife"] - 11 * 1.3) < 0.2 and res["ring_off"]["fists"] == 14
-          and ch["started"] and ch["mana"] == 7 and abs(ch["lost"] - 22) < 0.6 and ch["fx"] > 0 and abs(ch.get("splash_lost", 0) - 11) < 0.6
+          and abs(res["ring_off"]["knife"] - 11 * 1.3) < 0.2 and res["ring_off"]["fists"] == FD
+          and ch["started"] and ch["mana"] == 7 and abs(ch["lost"] - CD) < 0.6 and ch["fx"] > 0 and abs(ch.get("splash_lost", 0) - CD / 2) < 0.6
           and res["chi_far"]["lost"] == 0 and not res["chi_far"]["started"] and res["chi_far"]["mana"] == 0 and dsh["started"] and dsh["at_it"] and dsh["after_m"] < dsh["before_m"] - 2.5 and dsh["attacked"] >= 1 and dsh["lost"] > 0
           and res["rolls"] == 1 and res["light_worn"] == li and res["medium_worn"] == "None" and res["armour_share"] > 0)
     if g.get_editor_property("boss_encounters"):
@@ -2217,7 +2221,7 @@ def step_martialroom():
     g.set_editor_property("one_room_monsters", 3); quiet(False)
     want = {c_["name"]: c_ for c_ in json.load(open(os.path.join(SA, "martial_arts", "martial_arts.json"), encoding="utf-8"))["chi"]}
     inf = g.get_editor_property("infinite_mana")
-    good = [x for x in res["chi"] if x["started"] and x["bolts"] == 1 and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - want[x["name"]]["damage"]) < 0.6 and x["fx"] > 0]
+    good = [x for x in res["chi"] if x["started"] and x["bolts"] == 1 and want.get(x["name"]) and x["mana"] == (0 if inf else want[x["name"]]["mana"]) and abs(x["lost"] - x["damage_of"]) < 0.6 and x["fx"] > 0]
     res["chi_ok"] = [x["name"] for x in good]
     # (with no monster the bolt flies to the end of its range: 4 m from her hand (it leaves 0.3 to 0.6 m out from her), no further)
     fr = res["free"]; free_ok = (fr["started"] and fr["released"] == 1 and fr["fx"] > 0 and 3.5 <= fr["bolt_farthest_m"] <= 4.8) if g.get_editor_property("chi_without_target") else not fr["started"]
@@ -2226,7 +2230,128 @@ def step_martialroom():
           and free_ok and (fr["mana_full"] or not inf) and all(v == 0 for v in res["linger"].values()))
     step_result("martialroom", ok, **res)
 
-STEPS = {"menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+def step_quickbar():
+    """the quick bar (the user's of 2026-10-29), on martial_arts (the Martial Artist's eleven weapons): every weapon on the bar
+    (eleven slots: the eleventh past the ten shown); the D-pad right (as the gamepad sends it) from the first reaches the last,
+    the ten pictures scrolled to it, and comes round to the first; in the inventory her abilities: Dash put in slot 3 with the
+    key 3 (Side Kick, there before, moves to an empty slot), Straight Punch taken off with its own slot's key and kept off when
+    a weapon is found; outside, 3 makes the dash; Dodge put on a new slot at the end, the D-pad left from the first makes it
+    ready and RB makes it (a roll)"""
+    c = yield from restart("MartialArtist"); g = G["gen"]; quiet(True)
+    kill_all_near(G["pawn"].get_actor_location(), 5000); g.set_editor_property("one_room_monsters", 0)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.5)
+    S = lambda: [str(s) for s in c.get_quick_slots()]
+    W = [str(w.name) for w in g.get_editor_property("weapons")]
+    res = {"weapons": W, "bar": S(), "abilities": [str(a) for a in c.get_abilities()], "refused": []}
+    def press(nm, hold=0.08):
+        why = yield from slate_hold(nm, hold)
+        if why: res["refused"].append(f"{nm}: {why}")
+        yield from rwait(0.25)          # (real time: the open inventory pauses the game)
+    # (the first slot, then the D-pad right through all of them)
+    yield from press("One")
+    seq = [(str(c.get_weapon_name()), c.get_quick_cursor(), c.get_quick_first())]
+    for _ in range(len([s for s in S() if s != "None"])):
+        yield from press("Gamepad_DPad_Right")
+        seq.append((str(c.get_weapon_name()), c.get_quick_cursor(), c.get_quick_first()))
+        if c.get_quick_cursor() == len(S()) - 1: shot("qb_scrolled")
+    res["dpad"] = seq
+    # (the inventory: Dash into slot 3 with the key 3; Straight Punch off with its own key)
+    def row_of(prefix):
+        L_ = lines(c); return next((i for i, l in enumerate(L_) if l.startswith(prefix)), None)
+    c.set_inventory_open(True); c.set_inventory_tab(0); yield from rwait(0.3)
+    res["ability_lines"] = [l for l in lines(c) if l.startswith("ability|")]
+    yield from cursor_to(c, row_of("ability|Dash|")); yield from press("Three")
+    res["after_dash"] = S()
+    sp = S().index("Straight Punch") if "Straight Punch" in S() else -1
+    yield from cursor_to(c, row_of("weapon|Straight Punch|"))
+    yield from press(["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Zero"][sp] if 0 <= sp < 10 else "One")
+    res["after_off"] = S()
+    shot("qb_inventory"); yield from rwait(0.4)
+    c.set_inventory_open(False); yield from rwait(0.3)
+    c.add_item("Dagger", 1); yield from wait(0.5)
+    res["after_found"] = S()
+    # (outside: 3 makes the dash)
+    d0, a0 = c.dashes, c.abilities_used
+    yield from press("Three"); yield from wait(1.2)
+    res["dash"] = {"dashes": c.dashes - d0, "abilities_used": c.abilities_used - a0}
+    # (Dodge on a new slot at the end; from the first slot the D-pad left comes round to it: ready; RB makes it)
+    res["dodge_put"] = c.assign_quick_entry(len(S()), "@Dodge"); yield from wait(0.2)
+    res["after_dodge"] = S()
+    yield from press("One"); yield from press("Gamepad_DPad_Left")
+    res["ready"] = str(c.get_ready_ability()); res["ready_cursor"] = c.get_quick_cursor(); res["ready_first"] = c.get_quick_first()
+    shot("qb_ready"); yield from rwait(0.4)
+    r0 = c.rolls; yield from press("Gamepad_RightShoulder", 0.1); yield from wait(1.0)
+    res["roll"] = {"rolls": c.rolls - r0, "ready_after": str(c.get_ready_ability())}
+    g.set_editor_property("one_room_monsters", 3); quiet(False)
+    bar, d = res["bar"], res["dpad"]
+    last = len(bar) - 1
+    ok = (not res["refused"] and len(W) == 11 and len(bar) == 11 and bar[10] == W[10] and set(bar) == set(W)
+          and d[0][0] == "Fists" and any(x[1] == last and x[0] == W[10] for x in d) and any(x[2] == 1 for x in d) and d[-1][0] == "Fists" and d[-1][2] == 0
+          and res["abilities"] == ["@Dodge", "@Dash"] and len(res["ability_lines"]) == 2
+          and res["after_dash"][2] == "@Dash" and "Side Kick" in res["after_dash"]
+          and "Straight Punch" not in res["after_off"] and "Straight Punch" not in res["after_found"] and "Dagger" in res["after_found"]
+          and res["dash"]["dashes"] == 1 and res["dash"]["abilities_used"] == 1
+          and res["dodge_put"] and res["after_dodge"][-1] == "@Dodge" and res["ready"] == "@Dodge" and res["ready_cursor"] == len(res["after_dodge"]) - 1
+          and res["ready_first"] == len(res["after_dodge"]) - 10 and res["roll"]["rolls"] == 1 and res["roll"]["ready_after"] == "None")
+    step_result("quickbar", ok, **res)
+
+LINGER_S = 1.25          # (a chi move's effects all gone this long after the move ends)
+def step_chilook():
+    """martial_arts (873): each chi attack's look on her fists and legs (the user's of 2026-10-29), played at nothing with the
+    game slowed to a quarter: pictures from in front of her and to her right at three times of the clip (the look under way,
+    the blow, just after); the particles of her limb effects then; 2.5 s after the move none left"""
+    c = yield from restart("MartialArtist"); g = G["gen"]
+    quiet(True); kill_all_near(G["pawn"].get_actor_location(), 5000); g.set_editor_property("one_room_monsters", 0); yield from wait(0.5)
+    data = {c_["name"]: c_ for c_ in json.load(open(os.path.join(SA, "martial_arts", "martial_arts.json"), encoding="utf-8"))["chi"]}
+    times = json.load(open(os.path.join(SA, "jrpg_martialartist", "ma_times.json")))
+    res = {}
+    for i, w in enumerate(g.get_editor_property("weapons")):
+        if not w.spell: continue
+        nm = str(w.name); d = data[nm]; t = times[d["clip"]]; hit = float(t["hit"])
+        L = list(w.limb_fx); first = min([float(x.start_at) for x in L] or [0.0])
+        at = sorted({round(max(first + 0.06, hit - 0.12), 3), round(hit, 3), round(min(float(t["length"]) - 0.05, hit + 0.14), 3)})
+        put(g.get_start_room_center(), 0.0); c.select_weapon(i); yield from wait(0.4)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=G["pawn"].get_actor_rotation().yaw + 135)); yield from wait(0.6)
+        GS.set_global_time_dilation(G["w"], 0.25)
+        m0 = c.limb_fx_made; st = c.start_attack_with(i); k = 0; most = 0; seen = []; places = []
+        t0 = time.time()
+        while c.is_attacking() and time.time() - t0 < 12:
+            yield
+            n = c.get_limb_fx_particles(); n = n[0] if isinstance(n, tuple) else n; most = max(most, n)
+            if k < len(at) and c.get_attack_time() >= at[k]:
+                seen.append(n); shot(f"look_{nm.replace(' ', '')}_{k + 1}"); k += 1
+                # (where each effect on her is: its component and its particles' bounds against the bone it follows, cm)
+                body = G["pawn"].get_component_by_class(unreal.SkeletalMeshComponent); place = []
+                for fx in body.get_children_components(False):
+                    if not isinstance(fx, unreal.NiagaraComponent): continue
+                    s = fx.get_attach_socket_name(); b = body.get_socket_location(s); o, e, rad = unreal.SystemLibrary.get_component_bounds(fx)
+                    place.append([str(s), round(dist3(fx.get_world_location(), b), 1), round(dist3(o, b), 1), round(rad, 1)])
+                places.append(place)
+        GS.set_global_time_dilation(G["w"], 1.0)
+        yield from wait(2.5)
+        n = c.get_limb_fx_particles(); left = n[0] if isinstance(n, tuple) else n
+        made = c.limb_fx_made - m0
+        # (at full speed: what of her effects is still there after the move, every 0.25 s for 2.5 s (the user's of 2026-10-29:
+        # "piercing palm leaves the particles up for some time after it is done"))
+        put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+        c.start_attack_with(i); t0 = time.time()
+        while c.is_attacking() and time.time() - t0 < 5: yield
+        after = []; t1 = time.time(); k2 = 0
+        while k2 <= 10:
+            yield
+            if time.time() - t1 >= 0.25 * k2:
+                L_ = [str(x) for x in c.get_spell_fx_lines()]
+                after.append([round(0.25 * k2, 2), sum(int(x.split("|")[1]) for x in L_), sorted({x.split("|")[0] for x in L_})]); k2 += 1
+        last = max((a[0] for a in after if a[1] > 0), default=0.0)
+        res[nm] = {"started": st, "made": made, "want": len(L), "pictures_at": at, "particles_then": seen, "most": most, "left": left,
+                   "places": places, "after_move": after, "last_particles_s": last}
+    g.set_editor_property("one_room_monsters", 3); quiet(False)
+    # (nothing of hers left more than LINGER_S after a move ends)
+    ok = all(r["started"] and r["made"] == r["want"] > 0 and r["most"] > 0 and r["left"] == 0 and len(r["particles_then"]) == len(r["pictures_at"]) and r["last_particles_s"] <= LINGER_S
+             for r in res.values()) and len(res) == 10
+    step_result("chilook", ok, chi=res)
+
+STEPS = {"chilook": step_chilook, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

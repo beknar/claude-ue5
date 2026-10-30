@@ -1,0 +1,77 @@
+{
+ "tag": "l5q",
+ "plan": [
+  "slots"
+ ],
+ "level": "random_dungeonmagic_level5",
+ "steps": [
+  {
+   "step": "slots",
+   "ok": true,
+   "slots_filled": [
+    "Dagger",
+    "Arming Sword",
+    "Longbow",
+    "Viking Sword",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "refused": [],
+   "after_5": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "Viking Sword",
+    "Longbow",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "assign_slot": 7,
+   "after_y": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "None",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "after_rmb": [
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "Arming Sword",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "drawn_seq": [
+    "Longbow",
+    "Dagger",
+    "Longbow",
+    "Arming Sword",
+    "Longbow"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_l5q_slots_inventory.png",
+  "mw_l5q_slots_bar.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

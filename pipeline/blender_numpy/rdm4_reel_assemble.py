@@ -17,7 +17,8 @@ Level 5 (the seventh argument "5"; the Summoner's armour reel): the menu of rand
 one passage, the five heroes looked through and the Summoner started) and her run (815 with level 5), from
 SourceArt/random_dungeon_magic5.
 Level "mw" (mistward_castle, 815's run5m): its menu (829 with "mw": cine_menu_mw.json, the castle's name over CHOOSE YOUR HERO)
-and the four runs, from SourceArt/mistward.
+and the four runs, from SourceArt/mistward. Level "mw3" (815's "mistward3"): the menu's five passages (829 "mw five":
+cine_menu_mw5.json), the Martial Artist the fifth, and the five runs (the overlay's "mw3").
 Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4, 5, 5w, 5h, 5c, 5s, 5x or mw]]
   (5w: level 5's weapons and tiers reel, the Warrior picked in the menu; 5h: the four heroes' weapons reel, each of the
   Warrior, Mage, Warlock and Rogue picked in a passage of her own and followed by her run, as level 4's reel; 5c: the
@@ -36,12 +37,13 @@ if len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
 LV = sys.argv[7] if len(sys.argv) > 7 else "4"
-MW2 = LV == "mw2"; MW = LV in ("mw", "mw2"); W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
+MW3 = LV == "mw3"; MW2 = LV in ("mw2", "mw3"); MW = LV in ("mw", "mw2", "mw3"); W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
                                                        #  "5h": the four heroes' weapons reel, cine_menu_quartet.json)
 SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "mistward" if MW else "random_dungeon_magic" + LV)
-M = json.load(open(os.path.join(SRC, "cine_menu_mw.json"), encoding="utf-8")) if MW else json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
+M = json.load(open(os.path.join(SRC, "cine_menu_mw5.json" if MW3 else "cine_menu_mw.json"), encoding="utf-8")) if MW else json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
 ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
-TITLE, SUB = (("mistward_castle", "four heroes in Mistward Castle: start gear, tabs, quick slots, the block, slashes, outlined traps, eight new kinds of rooms") if MW2 else
+TITLE, SUB = (("mistward_castle", "five heroes in Mistward Castle, the martial artist the fifth: her chi attacks' looks, a quick bar of any length, her abilities on it") if MW3 else
+              ("mistward_castle", "four heroes in Mistward Castle: start gear, tabs, quick slots, the block, slashes, outlined traps, eight new kinds of rooms") if MW2 else
               ("mistward_castle", "four heroes in Mistward Castle: shields, the torch, traps, prisoners, teleporters, bosses, rooms of other shapes") if MW else
               ("random_dungeonmagic_level5", "four heroes: the map, chests, armour, crafting at the anvil, fights, new rooms generated tier by tier") if X5 else
               ("random_dungeonmagic_level5", "four heroes: spells learned from tomes, rings, monsters by tier, the dead stay, the Esc menu") if S5 else
@@ -90,7 +92,7 @@ def menu_hud(f, k, fl):
     ax, ay, x = 80 * K, 160 * K, (114 + (18 if (UI and UI.has("panel")) else 0)) * K; wd = 720 * K - x - 30 * K     # (clear of the board's corner ornaments)
     def card(draw):
         y = ay + 22 * K
-        if draw: d.text((x, y), h["name"].upper(), font=f_name, fill=ink(acc))
+        if draw: d.text((x, y), (h.get("title") or h["name"]).upper(), font=f_name, fill=ink(acc))          # (her title, as ARDHeroSelectHUD: "MARTIAL ARTIST")
         y += 74 * K
         mh = max(q["hp"] for q in HEROES); mm = max(max(q["mana"] for q in HEROES), 1.0)
         for lab, v, mx, col, note, fr0, fi0 in (("HIT POINTS", h["hp"], mh, (0.25, 0.75, 0.3), "%d" % h["hp"], "bar_health", "fill_health"),
@@ -188,8 +190,8 @@ def menu_hud(f, k, fl):
             if on: d.rectangle((p0[0] + 2 * K, p0[1] + 2 * K, p1[0] - 2 * K, p1[1] - 2 * K), outline=lin(qa), width=2 * K)
         else:
             d.rectangle((*p0, *p1), fill=lin(tuple(c * 0.35 for c in qa), 0.95) if on else lin((0.04, 0.045, 0.06), 0.85), outline=lin(qa) if on else lin((0.40, 0.38, 0.34)), width=(3 if on else 1) * K)
-        d.text(((p0[0] + p1[0]) / 2 + (2 * K if plate else 0), (p0[1] + p1[1]) / 2 + (2 * K if plate else 0)), q["name"].upper(), font=f_tab, fill=(0, 0, 0, 200), anchor="mm") if plate else None
-        d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), q["name"].upper(), font=f_tab, fill=(255, 255, 255, 255) if on else lin(DIM), anchor="mm")
+        d.text(((p0[0] + p1[0]) / 2 + (2 * K if plate else 0), (p0[1] + p1[1]) / 2 + (2 * K if plate else 0)), (q.get("title") or q["name"]).upper(), font=f_tab, fill=(0, 0, 0, 200), anchor="mm") if plate else None
+        d.text(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), (q.get("title") or q["name"]).upper(), font=f_tab, fill=(255, 255, 255, 255) if on else lin(DIM), anchor="mm")
     for j, g in enumerate("<>"):
         px = t0 - tg - 56 * K if j == 0 else t0 + n * tb + (n - 1) * tg + tg
         hot = (r["key"] in ("A", "Left") and j == 0) or (r["key"] in ("D", "Right") and j == 1)
@@ -199,7 +201,7 @@ def menu_hud(f, k, fl):
             continue
         d.rectangle((px, ty, px + 56 * K, ty + tbh), fill=lin((0.36, 0.27, 0.10), 0.95) if hot else lin((0.04, 0.045, 0.06), 0.85), outline=lin((1.0, 0.82, 0.35)) if hot else lin(LINE), width=(3 if hot else 1) * K)
         d.text((px + 28 * K, ty + tbh / 2), g, font=f_key, fill=lin(INK), anchor="mm")
-    st = "START AS %s" % h["name"].upper(); tw = d.textlength(st, font=f_cap)
+    st = "START AS %s" % (h.get("title") or h["name"]).upper(); tw = d.textlength(st, font=f_cap)
     pressed = 0.0 <= r["start_ago"] < 0.7; pulse = 1.0 if pressed else 0.75 + 0.25 * math.sin(r["t"] * 3.0)
     if plate:
         # (ARDHeroSelectHUD: the plate, lit in her colour, wider for its rim and rivets)

@@ -13,6 +13,9 @@
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
 
+/** a hero's name as the menu shows it: her title ("MARTIAL ARTIST"), else her name */
+static FString RDHSShown(const FRDHeroDef& H) { return (H.Title.IsEmpty() ? H.Name.ToString() : H.Title).ToUpper(); }
+
 DEFINE_LOG_CATEGORY_STATIC(LogRDHeroSelect, Log, All);
 
 // ------------------------------------------------------------------------------------------------ game modes
@@ -244,7 +247,8 @@ void ARDHeroSelectHUD::DrawHUD()
 	auto Card = [&]()
 	{
 	Y = A.Y + 22.f * Sc;
-	Text(H.Name.ToString().ToUpper(), Ac, X, Y, Medium, Sc * 2.6f, ERDType::Title);
+	// (her title, not her name: "MARTIAL ARTIST", not "MARTIALARTIST")
+	Text(RDHSShown(H), Ac, X, Y, Medium, Sc * 2.6f, ERDType::Title);
 	Y += 74.f * Sc;
 	// hit points and mana, as bars against the strongest of the heroes
 	float MaxHp = 1.f, MaxMp = 1.f;
@@ -399,7 +403,7 @@ void ARDHeroSelectHUD::DrawHUD()
 			Rect(P0, P1, bOn ? FLinearColor(O.Accent.R * 0.35f, O.Accent.G * 0.35f, O.Accent.B * 0.35f, 0.95f) : FLinearColor(0.04f, 0.045f, 0.06f, 0.85f));
 			Frame(P0, P1, bOn ? O.Accent : FLinearColor(0.40f, 0.38f, 0.34f), (bOn ? 3.f : 1.f) * Sc);
 		}
-		const FString Nm = O.Name.ToString().ToUpper();
+		const FString Nm = RDHSShown(O);
 		UI.TextSize(Nm, Tw, Th, Medium, Sc * 1.1f, ERDType::Title);
 		UI.Text(Nm, bOn ? FLinearColor::White : RDHSDim, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.1f, ERDType::Title);
 		Button(P0, P1, FName(*FString::Printf(TEXT("Hero_%d"), I)));
@@ -423,7 +427,7 @@ void ARDHeroSelectHUD::DrawHUD()
 	}
 	// START (bottom right)
 	{
-		const FString St = FString::Printf(TEXT("START AS %s"), *H.Name.ToString().ToUpper());
+		const FString St = FString::Printf(TEXT("START AS %s"), *RDHSShown(H));
 		UI.TextSize(St, Tw, Th, Medium, Sc * 1.3f, ERDType::Title);
 		const float Pulse = 0.75f + 0.25f * FMath::Sin(Now * 3.f);
 		const float Wide = UI.Has(TEXT("button")) ? 50.f * Sc : 0.f;      // (the plate's rim and rivets want room)

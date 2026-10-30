@@ -2355,6 +2355,253 @@
    1.0
   ]
  },
+ "chi_straight_punch": {
+  "kind": "icon",
+  "size": [
+   256,
+   243
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_side_kick": {
+  "kind": "icon",
+  "size": [
+   256,
+   193
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_smashing_strike": {
+  "kind": "icon",
+  "size": [
+   256,
+   202
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_roundhouse_kick": {
+  "kind": "icon",
+  "size": [
+   256,
+   221
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_chain_punch": {
+  "kind": "icon",
+  "size": [
+   256,
+   224
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_rear_kick": {
+  "kind": "icon",
+  "size": [
+   191,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_spinning_kick": {
+  "kind": "icon",
+  "size": [
+   231,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "ability_dash": {
+  "kind": "icon",
+  "size": [
+   256,
+   231
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "ability_dodge": {
+  "kind": "icon",
+  "size": [
+   254,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_axe_kick": {
+  "kind": "icon",
+  "size": [
+   256,
+   245
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_meteor_fist": {
+  "kind": "icon",
+  "size": [
+   238,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "chi_piercing_palm": {
+  "kind": "icon",
+  "size": [
+   185,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "ma_fists": {
+  "kind": "icon",
+  "size": [
+   174,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
  "_icons": {
   "Small Healing Potion": "healing_vial",
   "Medium Healing Potion": "healing_flask",

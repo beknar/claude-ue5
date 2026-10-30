@@ -17,7 +17,9 @@ Rogue in turn, the Summoner never picked (cine_menu_quartet.json). Level 5 with 
 reel, 815's run5x; the menu's four heroes since 2026-10-26): level 4's four passages as they are (cine_menu_caps.json).
 Level "mw" (mistward_castle_select, LS_RDMmwselect_Showcase; 815's run5m): level 4's four passages as they are; the record
 (SourceArt/mistward/cine_menu_mw.json) also has the game's title over the menu (ARDHeroSelect's GameTitle, "Mistward Castle").
-Args: [seconds a passage, 7] [level: 4, 5 or mw] [level 5: the hero picked, Summoner or Warrior, or quartet, or caps]"""
+Level "mw" with "five" (the castle's five heroes, the Martial Artist the fifth: 815's "mistward3"): a fifth passage, D to
+her and START (cine_menu_mw5.json).
+Args: [seconds a passage, 7] [level: 4, 5 or mw] [level 5: the hero picked, Summoner or Warrior, or quartet, or caps; mw: five]"""
 import unreal, sys, json, os
 __keep__ = True
 PASSAGE = float(sys.argv[1]) if len(sys.argv) > 1 else 7.0
@@ -33,6 +35,11 @@ WANT = ["Warrior", "Mage", "Warlock", "Rogue"]
 PICK = sys.argv[3] if len(sys.argv) > 3 else "Summoner"
 if LV == "mw":
     OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\mistward\cine_menu_mw.json"
+    if PICK == "five":
+        # (the castle's five heroes (the user's of 2026-10-29: the Martial Artist the fifth): a fifth passage, D from the Rogue to
+        # her, START)
+        PLAN = PLAN + [[(1.6, "D"), (4.8, "Enter")]]; WANT = WANT + ["MartialArtist"]
+        OUT = OUT.replace("cine_menu_mw.json", "cine_menu_mw5.json")
 elif LV == "5" and PICK == "caps":
     # (the four heroes' capabilities reel, 815's run5x: the menu has four heroes since 2026-10-26 (the Summoner left off,
     # the Warrior Warrior3): level 4's four passages as they are)
