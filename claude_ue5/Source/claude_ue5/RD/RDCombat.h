@@ -419,6 +419,10 @@ public:
 	 *  over, she is in a move, a summon she leads enough of); used up when the cast begins */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward3") bool ReadScroll(FName Item);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") int32 ScrollsRead = 0;
+	/** the scroll being read (until its weapon goes) and whether its spell went off: a cast broken off before its hit
+	 *  time (a roll, the inventory, a death) gives the scroll back (the PR review's find) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") FName ScrollItemRead;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") bool bScrollCast = false;
 	/** the scroll's weapon (FRDWeaponDef::bScroll) among the generator's weapons (-1: none) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") int32 GetScrollWeapon() const;
 	/** a summon's mana follows her pool (FRDWeaponDef::ManaShare) */

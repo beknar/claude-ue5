@@ -723,6 +723,8 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 			bHitDone = true;
 			// (level 5: a spell of the table that does not fly does what its kind says)
 			const FRDSpellDef* S = bSpell ? SpellOf(AttackIndex) : nullptr;
+			// (a scroll's spell goes off here: before it, a cast broken off gives the scroll back (TickScrollWeapon))
+			if (Generator && Generator->Weapons.IsValidIndex(AttackIndex) && Generator->Weapons[AttackIndex].bScroll) bScrollCast = true;
 			if (S && S->Kind != ERDSpellKind::Bolt) ReleaseSpell(AttackIndex);
 			else if (bSpell) LaunchBolt();
 			else Strike();
@@ -796,6 +798,7 @@ void URDCombatComponent::ClearItems()
 	ReadyAt.Reset(); SpellsLearned = WeaponsBrokenDown = 0;
 	Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
 	Spares.Reset(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None; ShieldBlocks = ShieldsBroken = GearBrokenDown = 0; HeldUntil = -100.f; bHeldOn = false;
+	HarvestsTaken = ScrollsRead = Summoned = SummonsRefused = 0; ScrollItemRead = NAME_None; bScrollCast = false;       // (the list of 2026-10-30's counters, as the others)
 	UpdateLeftHand();
 	RepairWith = NAME_None; RepairCursor = 0;
 	if (bCraftOpen) SetCraftingOpen(false);

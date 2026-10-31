@@ -1451,7 +1451,13 @@ def mw4_caps():
         if e.get("why") == "tomes" or any(k.startswith("Tome of ") for k in it):
             txt = ", ".join(k.replace("Tome of ", "").lower() for k in it); line2 = "a tome teaches its spell to a hero who learns its type"
         elif e.get("why") == "scroll":
-            txt = "a scroll of Meteor Storm"; line2 = "a scroll casts its spell once at no mana: Meteor Storm costs 200, twice her pool"
+            # (the spell's cost from the table the game is built from (858's spells.json), her pool from the record: the PR
+            # review's find, the numbers had been typed in)
+            ms_ = next((s_ for s_ in json.load(open(os.path.join(os.path.dirname(SRC), "random_dungeon_magic5", "spells.json"), encoding="utf-8"))["spells"]
+                        if s_["name"] == "Meteor Storm"), {}).get("mana", 0)
+            pool_ = C.get("max_mana", 0)
+            txt = "a scroll of Meteor Storm"; line2 = "a scroll casts its spell once at no mana: Meteor Storm costs %d, %s her pool of %d" % (
+                ms_, ("twice" if pool_ and abs(ms_ / pool_ - 2) < 0.01 else "%.1f times" % (ms_ / pool_)) if pool_ else "more than", pool_)
         elif e.get("why") == "sword":
             txt = "a sword"; line2 = "she starts with the worst weapon she can wield (the dagger): the arming sword, one-handed, her shield on her arm with it"
         elif "summonings" in it:
@@ -1465,7 +1471,7 @@ def mw4_caps():
         if lnd and lnd["kind"] == "landed":
             out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 3.6, "TIER %d  ·  %s" % (lnd["tier"], THEME.get(lnd.get("theme", ""), lnd.get("theme", "")).upper()),
                         ["a set of rooms generated as she arrives: %d monsters of tier %d (%s, %d hit points, %d a blow, before her)" % (lnd.get("monsters", 0), lnd["tier"],
-                         lnd["title"].lower(), lnd["its_hit_points"], lnd["its_damage"]), "the monsters' strength follows their tier: a tier-1 one has 50 hit points, a tier-5 one 340"], gold))
+                         lnd["title"].lower(), lnd["its_hit_points"], lnd["its_damage"]), "the monsters' strength follows their tier"], gold))          # (no typed numbers: the review's find)
     for e in ev("tier2"):
         out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 3.4, e.get("notice") or "TIER 2 IS OPEN", ["a tier opens once the tier before has 50 % of its rooms explored, monsters killed and chests looted",
                     "the reel's shortcut cleared the start set; a boss waits in a room she has seen"], warm))

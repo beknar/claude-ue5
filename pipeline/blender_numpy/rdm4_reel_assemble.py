@@ -171,7 +171,9 @@ def menu_hud(f, k, fl):
                         "%.0f damage a %s, flies %.0f m" % (w_["damage"] * (1 + bonus), "bolt" if w_["bolt"] else "cast", w_["reach"] / 100.0))
                 if w_["mana"] > 0: what += ", %.0f mana" % w_["mana"]
                 # (a summoning is no bolt: "0 damage a cast, flies 14 m" said nothing of what it does; RDHeroSelect the same)
-                if str(w_.get("icon", "")).startswith("summon_"): what = "calls fighters to her side, half her mana (%.0f)" % w_["mana"]
+                if str(w_.get("icon", "")).startswith("summon_"):
+                    sh_ = w_["mana"] / h["mana"] if h["mana"] else 0.0          # (its share of her pool, as the game takes it)
+                    what = "calls fighters to her side, %s of her mana (%.0f)" % ("half" if abs(sh_ - 0.5) < 0.01 else "%.0f%%" % (sh_ * 100), w_["mana"])
                 if draw:
                     d.text((tx, y + 2 * K), w_["name"].upper(), font=ft_line, fill=ink(INK))
                     d.text((tx, y + 31 * K), what, font=fx_small, fill=ink(DIM))

@@ -593,9 +593,18 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		const int32 Have = Generator->CountSummoned(S->Name);
 		const FVector Rt = O->GetActorRightVector();
 		const float Side = (Have % 2 == 0 ? 1.f : -1.f) * 70.f * ((Have + 1) / 2);
-		FVector At = L + Fw * 230.f + Rt * Side;
-		FHitResult H; FCollisionQueryParams Q(SCENE_QUERY_STAT(RDSummon), false, O);
-		if (GetWorld()->LineTraceSingleByChannel(H, L, At, ECC_Visibility, Q)) At = L + (At - L).GetSafeNormal() * FMath::Max(H.Distance - 80.f, 0.f);
+		// (in front of her, else to a side, else behind: the first way with room for it; facing a wall from 60 cm the
+		// point came back to her own place, inside her capsule (the PR review's find))
+		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDSummon), false, O);
+		const FVector Ways[4] = { Fw * 230.f + Rt * Side, Rt * 230.f, Rt * -230.f, Fw * -230.f };
+		FVector At = L + Ways[0]; float Room = -1.f;
+		for (const FVector& Wy : Ways)
+		{
+			FHitResult H;
+			const float D = GetWorld()->LineTraceSingleByChannel(H, L, L + Wy, ECC_Visibility, Q) ? H.Distance - 80.f : Wy.Size();
+			if (D > Room) { Room = D; At = L + Wy.GetSafeNormal() * FMath::Max(D, 0.f); }
+			if (D >= 120.f) break;
+		}
 		ARDMonster* K = Generator->SummonKindAlly(S->SummonKind, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
 		if (K)
 		{
@@ -611,7 +620,8 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 			const FRDWeaponDef& Wd = Generator->Weapons[Wi];
 			if (!Generator->bInfiniteMana) Mana = FMath::Min(MaxMana, Mana + Wd.ManaCost);
 			ReadyAt.Remove(Wd.Name);
-			if (Wd.bScroll) AddItem(FName(*FString::Printf(TEXT("Scroll of %s"), *S->Name.ToString())), 1);
+			// (the scroll that was read, by its own name (not one rebuilt from the spell's): the PR review's find)
+			if (Wd.bScroll && !ScrollItemRead.IsNone()) { AddItem(ScrollItemRead, 1); --ScrollsRead; ScrollItemRead = NAME_None; }
 			SetMessage(FString::Printf(TEXT("Nothing answers %s here: what it took is given back"), *S->Name.ToString()));
 		}
 		break;

@@ -16,8 +16,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward3, Log, All);
 
-static const TCHAR* RDM3TypeName(ERDSpellType T) { return RDSpellTypeName(T); }
-
 FString ARDDungeonGenerator::SummonTitleOf(const FRDSpellDef& S) const
 {
 	const int32 Mk = Monsters.IndexOfByPredicate([&S](const FRDMonsterDef& D) { return D.Name == S.SummonKind; });
@@ -123,7 +121,7 @@ FString ARDDungeonGenerator::RecipeRefusal(const FRDRecipe& Rc) const
 	{
 		const int32 Si = FindSpell(Items[Ix].Spell);
 		if (Si >= 0 && !HeroReadsScroll(Spells[Si].Type))
-			return FString::Printf(TEXT("The %s cannot read the %s (%s)"), *PlayerTitle.ToLower(), *Rc.Item.ToString().ToLower(), RDM3TypeName(Spells[Si].Type));
+			return FString::Printf(TEXT("The %s cannot read the %s (%s)"), *PlayerTitle.ToLower(), *Rc.Item.ToString().ToLower(), RDSpellTypeName(Spells[Si].Type));
 	}
 	if (Rc.Tier > 0 && Rc.Tier > GetHighestOpenTier())
 		return FString::Printf(TEXT("The %s is of tier %d: the anvil makes it once tier %d is open"), *Rc.Item.ToString().ToLower(), Rc.Tier, Rc.Tier);
@@ -146,7 +144,7 @@ bool URDCombatComponent::ReadScroll(FName Item)
 	if (Si < 0) return false;
 	const FRDSpellDef& S = Generator->Spells[Si];
 	const FString Lb = Item.ToString().ToLower();
-	if (!Generator->HeroReadsScroll(S.Type)) { SetMessage(FString::Printf(TEXT("The %s cannot read the %s (%s)"), *Generator->PlayerTitle.ToLower(), *Lb, RDM3TypeName(S.Type))); return false; }
+	if (!Generator->HeroReadsScroll(S.Type)) { SetMessage(FString::Printf(TEXT("The %s cannot read the %s (%s)"), *Generator->PlayerTitle.ToLower(), *Lb, RDSpellTypeName(S.Type))); return false; }
 	if (AttackTime >= 0.f || RollTime >= 0.f) { SetMessage(TEXT("Finish your move first")); return false; }
 	// (said before the inventory closes: closed with nothing cast and nothing said looked like the key was lost (the PR review's find))
 	if (bBlocking) { SetMessage(TEXT("Lower your shield first")); return false; }
@@ -169,7 +167,7 @@ bool URDCombatComponent::ReadScroll(FName Item)
 		return false;
 	}
 	RemoveCarried(Item, 1);
-	++ScrollsRead;
+	++ScrollsRead; ScrollItemRead = Item; bScrollCast = false;
 	SetMessage(FString::Printf(TEXT("You read the %s:  %s, no mana"), *Lb, *S.Name.ToString()));
 	UE_LOG(LogRDMistward3, Log, TEXT("RDSCROLL %s read (%s; %d read)"), *Item.ToString(), *S.Name.ToString(), ScrollsRead);
 	return true;
@@ -178,8 +176,18 @@ bool URDCombatComponent::ReadScroll(FName Item)
 void URDCombatComponent::TickScrollWeapon()
 {
 	const int32 Wi = GetScrollWeapon();
-	if (Wi < 0 || (AttackTime >= 0.f && AttackIndex == Wi)) return;
+	if (Wi < 0) { ScrollItemRead = NAME_None; return; }
+	if (AttackTime >= 0.f && AttackIndex == Wi) return;
 	if (Bolts.ContainsByPredicate([Wi](const FBolt& B) { return B.Weapon == Wi; })) return;
+	// (broken off before its spell went off: the scroll back, the cooldown its start set taken off)
+	if (!ScrollItemRead.IsNone() && !bScrollCast)
+	{
+		AddItem(ScrollItemRead, 1); --ScrollsRead;
+		ReadyAt.Remove(Generator->Weapons[Wi].Name);
+		SetMessage(FString::Printf(TEXT("The %s was not read through: you keep it"), *ScrollItemRead.ToString().ToLower()));
+		UE_LOG(LogRDMistward3, Log, TEXT("RDSCROLL %s broken off: given back"), *ScrollItemRead.ToString());
+	}
+	ScrollItemRead = NAME_None; bScrollCast = false;
 	DropWeaponAt(Wi);
 }
 

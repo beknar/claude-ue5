@@ -1192,8 +1192,11 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
 	// (mistward: her dropped things, a pad, a trap she sees)
-	for (const ARDLootPile* Lp : LootPiles)
-		if (IsValid(Lp) && FVector::Dist2D(Lp->GetActorLocation(), From) < 260.f)
+	// (the nearest within reach, the one F takes (TakeLootNear): the first in the list named another pile beside it, the PR
+	// review's find)
+	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
+	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
+	if (Lp)
 		{
 			// (hers, where she fell; or something the rules laid on the floor: the guarded ring; or a dead monster's parts)
 			if (Lp->bHers) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());

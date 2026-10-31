@@ -2548,7 +2548,8 @@ def step_scrolls():
     """scrolls (875): the Mage reads a Scroll of Fireball at a monster: her mana untouched, the monster hurt by Fireball's damage,
     the scroll used up, no new weapon on her bar or in her list once it is done; read again at once: refused (Fireball's
     cooldown), the scroll kept; the spell learned from its tome waits for the same cooldown; the Warrior cannot read one (kept);
-    the Warlock reads an offense scroll but not a protection one; the Summoner reads Ash Ward (her ward up)"""
+    the Warlock reads an offense scroll but not a protection one; the Summoner reads Ash Ward (her ward up); a scroll read
+    and broken off in its wind-up (the inventory opened) comes back, not counted as read"""
     c = yield from restart("Mage"); g = G["gen"]; quiet(True)
     ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
     kill_all_near(G["pawn"].get_actor_location(), 3000); yield from wait(0.5)
@@ -2583,6 +2584,14 @@ def step_scrolls():
     c.add_item("Scroll of Ash Ward", 1); c.set_mana(c.get_max_mana()); m0 = c.get_mana(); yield from wait(0.5)
     res["summoner"] = {"ok": c.read_scroll("Scroll of Ash Ward"), "message": str(c.message)}; yield from wait(1.5)
     res["summoner"].update({"ward_hits": c.get_ward_hits(), "mana_taken": round(m0 - c.get_mana(), 1)})
+    # (a cast broken off before its spell goes off (the inventory opened in its wind-up) gives the scroll back: the PR
+    #  review's find, it was lost with nothing cast)
+    m = spawn_dummy(ahead(500)); yield from wait(0.5)
+    c.add_item("Scroll of Frost Shard", 1); r0 = c.scrolls_read
+    bo = {"ok": c.read_scroll("Scroll of Frost Shard"), "left_read": c.get_item_count("Scroll of Frost Shard")}
+    c.set_inventory_open(True); yield from rwait(0.3); c.set_inventory_open(False); yield from wait(0.5)
+    bo.update({"left_after": c.get_item_count("Scroll of Frost Shard"), "read_after": c.scrolls_read - r0, "message": str(c.message), "scroll_weapon": c.get_scroll_weapon()})
+    res["broken_off"] = bo; drop([m])
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     rd, ag = res["read"], res["again"]
     ok = (rd["ok"] and rd["scroll_weapon"] >= 0 and rd["mana_taken"] == 0 and abs(rd["lost"] - sp.damage) < 1.0 and not ag["ok"] and "not ready" in ag["message"]
@@ -2590,7 +2599,9 @@ def step_scrolls():
           and res["learned"]["index"] >= 0 and (res["learned"]["cooldown_left"] or 0) > 2.0
           and not res["warrior"]["ok"] and "cannot read" in res["warrior"]["message"] and res["warrior"]["kept"] == 1
           and not res["warlock"]["ward"] and "cannot read" in res["warlock"]["ward_message"] and res["warlock"]["frost"]
-          and res["summoner"]["ok"] and res["summoner"]["ward_hits"] > 0 and res["summoner"]["mana_taken"] == 0)
+          and res["summoner"]["ok"] and res["summoner"]["ward_hits"] > 0 and res["summoner"]["mana_taken"] == 0
+          and res["broken_off"]["ok"] and res["broken_off"]["left_read"] == 0 and res["broken_off"]["left_after"] == 1
+          and res["broken_off"]["read_after"] == 0 and "not read through" in res["broken_off"]["message"] and res["broken_off"]["scroll_weapon"] == -1)
     step_result("scrolls", ok, **res)
 
 def step_gearbreak():
