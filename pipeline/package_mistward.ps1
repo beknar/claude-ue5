@@ -25,6 +25,8 @@ $ue = "E:\Program Files\Epic Games\UE_5.8"
 $proj = "$repo\claude_ue5\claude_ue5.uproject"
 $maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/mistward_castle"
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" }
+# (a relative -Out is the caller's folder: handed on as it is, UnrealAutomationTool archived it under the engine's own folder)
+elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
 $exe = "$Out\Windows\claude_ue5.exe"
 if (-not $TestOnly) {
     if (Get-Process UnrealEditor -ErrorAction SilentlyContinue) { "close the editor first"; exit 1 }
@@ -76,11 +78,14 @@ if ($Test -or $TestOnly) {
     $bad = 0
     foreach ($run in @(@{ name = "menu"; args = @() }, @{ name = "castle"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior") })) {
         $before = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
-        # (claude_ue5.exe is a launcher: the game is claude_ue5-Win64-<Config>.exe, which it starts and waits for)
+        # (claude_ue5.exe is a launcher: the game is the exe under claude_ue5\Binaries\Win64, which it starts and waits for:
+        #  claude_ue5-Win64-Shipping.exe, but in a Development package claude_ue5.exe too: found by its folder, not its name
+        #  (by the Shipping name the Development games were never found, nor stopped))
+        $bin = (Join-Path $Out "Windows\claude_ue5\Binaries\Win64").ToLower()
         $t0 = Get-Date
         $l = Start-Process -FilePath $exe -ArgumentList ($run.args + @("-RenderOffScreen", "-ResX=1280", "-ResY=720", "-nosound")) -PassThru
         $p = $null
-        for ($s = 0; $s -lt 30 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5-Win64-*" -ErrorAction SilentlyContinue | Where-Object { $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
+        for ($s = 0; $s -lt 30 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
         [long]$peak = 0; $mem = @()
         if ($p) { for ($s = 0; $s -lt 90 -and -not $p.HasExited; $s += 5) { Start-Sleep 5; $p.Refresh(); if (-not $p.HasExited) { $peak = [math]::Max($peak, $p.WorkingSet64); $mem += [int]($p.WorkingSet64 / 1MB) } } }
         $alive = $p -and -not $p.HasExited
