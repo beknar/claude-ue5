@@ -386,9 +386,13 @@ void ARDHUD::DrawCombat(float Sc)
 			UI.Text(Mt, FLinearColor::White, (M0.X + M1.X - Tw) * 0.5f, (M0.Y + M1.Y - Th) * 0.5f, Small, Sc * 1.05f, ERDType::Label);
 		}
 		// the weapons (level 5: with the ones she found there may be many: four slots at most, round the one in her hands)
-		const int32 Total = Gen->Weapons.Num(), MaxSlots = 3;
+		// (a scroll being read is no weapon of hers, wherever it stands in the list (the PR review's find: weapons gained during
+		// its cast come after it))
+		TArray<int32> Vis;
+		for (int32 Wv = 0; Wv < Gen->Weapons.Num(); ++Wv) if (!Gen->Weapons[Wv].bScroll) Vis.Add(Wv);
+		const int32 Total = Vis.Num(), MaxSlots = 3;
 		const int32 Num = FMath::Min(Total, MaxSlots);
-		const int32 First = Total > MaxSlots ? FMath::Clamp(Cb->GetWeaponIndex() - 1, 0, Total - MaxSlots) : 0;
+		const int32 First = Total > MaxSlots ? FMath::Clamp(Vis.IndexOfByKey(Cb->GetWeaponIndex()) - 1, 0, Total - MaxSlots) : 0;
 		const float Gp = 8.f * Sc, Sw = Num > 0 ? (W - Pd * 2.f - Gp * (Num - 1)) / Num : 0.f;
 		if (Total > MaxSlots)
 		{
@@ -398,7 +402,7 @@ void ARDHUD::DrawCombat(float Sc)
 		}
 		for (int32 J = 0; J < Num; ++J)
 		{
-			const int32 I = First + J;
+			const int32 I = Vis[First + J];
 			const FRDWeaponDef& Wp = Gen->Weapons[I];
 			const bool bOn = Wp.bAlongside ? Cb->GetAttackIndex() == I : I == Cb->GetWeaponIndex();
 			const FVector2D S0(A.X + Pd + J * (Sw + Gp), A.Y + 76.f * Sc + Mb + Hx), S1 = S0 + FVector2D(Sw, 66.f * Sc);
@@ -469,14 +473,15 @@ void ARDHUD::DrawCombat(float Sc)
 			for (int32 Li = 0; Li < NL.Num(); ++Li)
 			{
 				UI.TextSize(NL[Li], Tw, Th, Small, Kn, ERDType::Label);
-				UI.Text(NL[Li], Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + (NL.Num() > 1 ? 13.f + 14.f * Li : 16.f) * Sc, Small, Kn, ERDType::Label);
+				// (two lines start under the key's word: at 13 the Summoner's "wheel" ran into "SUMMON TIER 3")
+				UI.Text(NL[Li], Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + (NL.Num() > 1 ? 18.f + 13.f * Li : 16.f) * Sc, Small, Kn, ERDType::Label);
 			}
 			FString D = Wp.ManaCost > 0.f ? FString::Printf(TEXT("%.0f damage  ·  %.0f mana"), Cb->GetDamageOf(I), Wp.ManaCost) : FString::Printf(TEXT("%.0f damage"), Cb->GetDamageOf(I));
 			if (!Dur.IsEmpty()) D = Total > 3 ? FString::Printf(TEXT("%.0f  ·  %s"), Cb->GetDamageOf(I), *Dur) : D + TEXT("  ·  ") + Dur;
 			float Kd = Sc;
 			UI.TextSize(D, Tw, Th, Small, Kd);
 			if (Tw > Sw - 8.f * Sc) { Kd *= FMath::Max(0.6f, (Sw - 8.f * Sc) / Tw); UI.TextSize(D, Tw, Th, Small, Kd); }
-			UI.Text(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + (NL.Num() > 1 ? 44.f : 40.f) * Sc, Small, Kd);
+			UI.Text(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + (NL.Num() > 1 ? 47.f : 40.f) * Sc, Small, Kd);
 		}
 		if (!Gen->ControlsHint.IsEmpty()) UI.Text(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
 	}
@@ -1496,13 +1501,28 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		return FString::Printf(TEXT("Mends %.0f%% of a set of armour's or a found weapon's full durability, up to full.  Enter, then choose what it mends."), It.Amount * 100.f);
 	case ERDItemKind::Component:
 	{
-		// (the repair items that take it)
+		// (the things an anvil makes with it; mistward, the list of 2026-10-30: a monster's part makes potions and scrolls, and
+		// the recipes listed are those the anvil offers her now)
 		TArray<FString> Uses;
+		const bool bHv = Gen && Gen->bHarvest;
 		if (Gen)
 			for (const FRDRecipe& Rc : Gen->Recipes)
-				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); })) Uses.Add(Rc.Item.ToString().ToLower());
-		FString S = TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
+				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) Uses.Add(Rc.Item.ToString().ToLower());
+		FString S = bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
+		                : TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
+		if (Uses.Num() > 8) { const int32 More = Uses.Num() - 8; Uses.SetNum(8); Uses.Add(FString::Printf(TEXT("%d more"), More)); }
 		if (Uses.Num() > 0) S += TEXT("  It goes into: ") + FString::Join(Uses, TEXT(", ")) + TEXT(".");
+		return S;
+	}
+	case ERDItemKind::Scroll:
+	{
+		const int32 Si = Gen ? Gen->FindSpell(It.Spell) : -1;
+		if (Si < 0) return TEXT("A scroll");
+		const FRDSpellDef& Sp = Gen->Spells[Si];
+		FString S = FString::Printf(TEXT("Read, it casts %s (%s, tier %d) once at no mana: %s."), *Sp.Name.ToString(), RDSpellTypeName(Sp.Type), Sp.Tier, *Sp.Effect);
+		if (Sp.Cooldown > 0.f) S += FString::Printf(TEXT("  Its cooldown is the spell's (%.0f s)."), Sp.Cooldown);
+		S += TEXT("  The scroll is used up.");
+		if (!Gen->HeroReadsScroll(Sp.Type)) S += FString::Printf(TEXT("  The %s cannot read it."), *Gen->PlayerTitle.ToLower());
 		return S;
 	}
 	case ERDItemKind::Ring:
@@ -1521,8 +1541,7 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		const int32 Si = Gen ? Gen->FindSpell(It.Spell) : -1;
 		if (Si < 0) return TEXT("A spell tome");
 		const FRDSpellDef& Sp = Gen->Spells[Si];
-		static const TCHAR* TypeName[4] = { TEXT("offense"), TEXT("protection"), TEXT("curse"), TEXT("summoning") };
-		FString S = FString::Printf(TEXT("Teaches %s (%s): %s.  %.0f mana"), *Sp.Name.ToString(), TypeName[(int32)Sp.Type], *Sp.Effect, Sp.Mana);
+		FString S = FString::Printf(TEXT("Teaches %s (%s): %s.  %.0f mana"), *Sp.Name.ToString(), RDSpellTypeName(Sp.Type), *Sp.Effect, Sp.Mana);
 		if (Sp.Cooldown > 0.f) S += FString::Printf(TEXT(", cooldown %.0f s"), Sp.Cooldown);
 		S += TEXT(".");
 		if (Gen && !Gen->HeroLearns(Sp.Type)) S += FString::Printf(TEXT("  The %s cannot learn it."), *Gen->PlayerTitle.ToLower());
@@ -1667,7 +1686,7 @@ void ARDHUD::DrawInventory(float Sc)
 		case 1: Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), true }); Secs.Add({ TEXT("helmet"), TEXT("HELMET"), false }); Secs.Add({ TEXT("shield"), TEXT("SHIELDS"), false }); Secs.Add({ TEXT("torch"), TEXT("TORCH"), false }); break;
 		case 2: Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true }); break;
 		case 3: Secs.Add({ TEXT("component"), TEXT("MATERIALS"), true }); Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false }); break;
-		default: Secs.Add({ TEXT("slash"), TEXT("SLASHES"), true }); Secs.Add({ TEXT("ring"), TEXT("RINGS"), false }); Secs.Add({ TEXT("key"), TEXT("KEYS"), false });
+		default: Secs.Add({ TEXT("slash"), TEXT("SLASHES"), true }); Secs.Add({ TEXT("scroll"), TEXT("SCROLLS  (CAST ONCE, NO MANA)"), false }); Secs.Add({ TEXT("ring"), TEXT("RINGS"), false }); Secs.Add({ TEXT("key"), TEXT("KEYS"), false });
 			Secs.Add({ TEXT("teleport"), TEXT("TELEPORT RINGS"), false }); Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false }); break;
 		}
 	}
@@ -1682,6 +1701,7 @@ void ARDHUD::DrawInventory(float Sc)
 		Secs.Add({ TEXT("torch"), TEXT("TORCH"), false });
 		Secs.Add({ TEXT("teleport"), TEXT("TELEPORT RINGS"), false });
 		Secs.Add({ TEXT("ring"), TEXT("RINGS"), false });
+		Secs.Add({ TEXT("scroll"), TEXT("SCROLLS"), false });
 		Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false });
 		Secs.Add({ TEXT("component"), TEXT("MATERIALS"), false });
 		Secs.Add({ TEXT("carried"), FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false });
@@ -1888,6 +1908,8 @@ void ARDHUD::DrawInventory(float Sc)
 			const FString Tag = P[2] == TEXT("1") ? FString(TEXT("WORN")) : (P[3] != TEXT("1") ? FString::Printf(TEXT("x %s"), *P[3]) : FString());
 			Row(I, P[1], Tag, RDCyan, ItemIcon(FName(*P[1])));
 		}
+		// (mistward: a scroll her hero cannot read is dim, with no use)
+		else if (Kd == TEXT("scroll") && P.Num() >= 4) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]) + (P[3] == TEXT("1") ? FString() : FString(TEXT("   CANNOT READ"))), P[3] == TEXT("1") ? RDCyan : Dim, ItemIcon(FName(*P[1])));
 		else if (P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), (Kd == TEXT("carried") || Kd == TEXT("component") || Kd == TEXT("tome")) ? Dim : Gold, ItemIcon(FName(*P[1])));
 	}
 	if (Lines.Num() == 0 || LastSec < Secs.Num() - 1) Open(Secs.Num() - 1);       // (the empty always-shown sections after the last row)
@@ -2020,7 +2042,15 @@ void ARDHUD::DrawInventory(float Sc)
 			}
 			Para(FString::Printf(TEXT("%.0f damage%s"), Cb->GetDamageOf(Wi), Bonus > 0.f ? *FString::Printf(TEXT("  (%.0f, +%.0f%% your %s bonus)"), Wp.Damage, Bonus * 100.f, bRanged ? TEXT("ranged") : TEXT("melee")) : TEXT("")), RDInk, Sc * 1.1f);
 			if (Sp && Wp.BoltRange > 0.f) Para(FString::Printf(TEXT("A chi attack: its force strikes the monster you face up to %.0f m away; the blast hurts others within %.1f m, half as much"), Wp.BoltRange / 100.f, Sp->Splash / 100.f), Dim, Sc * 1.0f);
-			if (Wp.ManaCost > 0.f) Para(FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
+			if (Wp.ManaCost > 0.f) Para(Wp.ManaShare > 0.f ? FString::Printf(TEXT("%.0f mana a cast (%.0f%% of your mana)"), Wp.ManaCost, Wp.ManaShare * 100.f) : FString::Printf(TEXT("%.0f mana a cast"), Wp.ManaCost), FLinearColor(0.55f, 0.7f, 1.f), Sc * 1.1f);
+			// (mistward, the Summoner: who answers, how many she leads)
+			if (Sp && Sp->Kind == ERDSpellKind::Summon)
+			{
+				const int32 Mk = Gen->Monsters.IndexOfByPredicate([Sp](const FRDMonsterDef& D) { return D.Name == Sp->SummonKind; });
+				const FString Who = Gen->SummonTitleOf(*Sp);
+				Para(FString::Printf(TEXT("Calls %s (as strong as a tier %d monster) to fight at your side until it falls; you lead %d at most, %d now"),
+					*Who, Mk >= 0 ? FMath::Max(Gen->Monsters[Mk].Tier, 1) : 1, FMath::Max(Sp->Count, 1), Gen->CountSummoned(Sp->Name)), RDCyan, Sc * 1.0f);
+			}
 			Ry += 6.f * Sc;
 			Para(Wp.bAlongside ? TEXT("Cast with RMB or E (LB) while your weapon stays drawn") : Wi == Cb->GetWeaponIndex() ? TEXT("In your hands") : (bPad ? TEXT("A  wield it") : TEXT("Enter  wield it")), Gold, Sc * 1.05f);
 			// (the third list: its slash, its quick slot)
@@ -2040,6 +2070,7 @@ void ARDHUD::DrawInventory(float Sc)
 			Ry += 6.f * Sc;
 			const FString Use = bPad ? TEXT("A") : TEXT("Enter");
 			if (Sel[0] == TEXT("item")) Para(Use + TEXT("  use it"), Gold, Sc * 1.05f);
+			else if (Sel[0] == TEXT("scroll") && Sel.Num() >= 4 && Sel[3] == TEXT("1")) Para(Use + TEXT("  read it: the spell is cast, no mana"), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("repair")) Para(Use + TEXT("  choose what it mends"), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("armour") || Sel[0] == TEXT("ring")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  take it off") : TEXT("  put it on")), Gold, Sc * 1.05f);
 			else if (Sel[0] == TEXT("shield")) Para(Use + (Sel.Num() >= 3 && Sel[2] == TEXT("1") ? TEXT("  put it away") : TEXT("  take it up (left hand)")), Gold, Sc * 1.05f);

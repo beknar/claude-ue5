@@ -11,9 +11,10 @@ Run after 825. Idempotent (actors tagged rdm4_select).
 With the argument 5 it makes random_dungeonmagic_level5's menu instead (random_dungeonmagic_level5_select: its heroes
 but the Summoner, who is left off the menu since 2026-10-26 (the Warrior is Warrior3: 862); START opens
 random_dungeonmagic_level5), its painted pieces and lettering those 830 gave level 4's menu.
-With the argument mistward it makes mistward_castle's menu (mistward_castle_select: level 5's four heroes as mistward_castle
-has them, the Warrior with the shield she starts with there (the generator's StartShield, its fit on her arm), the menu's
-title "Mistward Castle"; START opens mistward_castle; the mouse chooses: ARDHeroSelect.bMouseUI).
+With the argument mistward it makes mistward_castle's menu (mistward_castle_select: its six heroes as mistward_castle has
+them (the Martial Artist since 872, the Summoner since 876), the Warrior with the shield she starts with there (the
+generator's StartShield, its fit on her arm), the menu's title "Mistward Castle"; START opens mistward_castle; the mouse
+chooses: ARDHeroSelect.bMouseUI).
 Args: [4 | 5 | mistward]"""
 import sys, unreal
 LV = sys.argv[1] if len(sys.argv) > 1 else "4"
@@ -41,8 +42,9 @@ L = lambda p: unreal.load_asset(p.split(".")[0])
 if not ues.get_editor_world().get_path_name().startswith(DUNGEON + "."): les.load_level(DUNGEON)
 gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
 # (level 5's menu leaves the Summoner out (the user's of 2026-10-26): she stays one of the generator's heroes (its default
-# in the editor and the tests), but cannot be chosen)
-OFF_MENU = ("Summoner",) if LV == "5" else ()
+# in the editor and the tests), but cannot be chosen. The castle's has her since 2026-10-30 (the user's list: Summoner4,
+# the sixth hero, 876))
+OFF_MENU = ("Summoner",) if LV == "5" and not MISTWARD else ()
 HTXT = [h.export_text() for h in gen.get_editor_property("heroes") if str(h.name) not in OFF_MENU]; assert len(HTXT) >= 4, len(HTXT)
 # (mistward: the shield each hero starts with, as the fit of its item for her: (mesh, bone, grip) as text)
 START_SHIELDS = {}

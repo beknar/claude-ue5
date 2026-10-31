@@ -352,6 +352,10 @@ void ARDHeroSelectHUD::DrawHUD()
 			FString What = !W.bSpell ? FString::Printf(TEXT("%.0f damage a blow, reach %.1f m"), W.Damage * (1.f + Bonus), W.Reach / 100.f)
 			                         : FString::Printf(TEXT("%.0f damage a %s, flies %.0f m"), W.Damage * (1.f + Bonus), W.BoltMesh ? TEXT("bolt") : TEXT("cast"), W.Reach / 100.f);
 			if (W.ManaCost > 0.f) What += FString::Printf(TEXT(", %.0f mana"), W.ManaCost);
+			// (a summoning is no bolt: "0 damage a cast, flies 14 m" said nothing of what it does)
+			if (W.ManaShare > 0.f)
+				What = FMath::IsNearlyEqual(W.ManaShare, 0.5f) ? FString::Printf(TEXT("calls fighters to her side, half her mana (%.0f)"), W.ManaCost)
+				                                               : FString::Printf(TEXT("calls fighters to her side, %.0f%% of her mana (%.0f)"), W.ManaShare * 100.f, W.ManaCost);
 			Text(W.Name.ToString().ToUpper(), Ink(RDHSInk), Tx, Y + 6.f * Sc, Small, Sc * 1.25f, ERDType::Title);
 			Text(What, Ink(RDHSDim), Tx, Y + 31.f * Sc, Small, Sc * 1.05f);
 			Y += Rh + 8.f * Sc;

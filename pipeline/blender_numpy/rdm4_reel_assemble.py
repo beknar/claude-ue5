@@ -18,7 +18,8 @@ one passage, the five heroes looked through and the Summoner started) and her ru
 SourceArt/random_dungeon_magic5.
 Level "mw" (mistward_castle, 815's run5m): its menu (829 with "mw": cine_menu_mw.json, the castle's name over CHOOSE YOUR HERO)
 and the four runs, from SourceArt/mistward. Level "mw3" (815's "mistward3"): the menu's five passages (829 "mw five":
-cine_menu_mw5.json), the Martial Artist the fifth, and the five runs (the overlay's "mw3").
+cine_menu_mw5.json), the Martial Artist the fifth, and the five runs (the overlay's "mw3"). Level "mw4" (815's "mistward4"): the
+menu's six passages (829 "mw six": cine_menu_mw6.json), the Summoner the sixth, and the six runs (the overlay's "mw4").
 Usage (a Python with numpy, scipy and Pillow): rdm4_reel_assemble.py <work_dir> <out_frames_dir> <menu_music.wav> <out_track.wav> [ui_art_dir hud_prefix [level: 4, 5, 5w, 5h, 5c, 5s, 5x or mw]]
   (5w: level 5's weapons and tiers reel, the Warrior picked in the menu; 5h: the four heroes' weapons reel, each of the
   Warrior, Mage, Warlock and Rogue picked in a passage of her own and followed by her run, as level 4's reel; 5c: the
@@ -37,12 +38,13 @@ if len(sys.argv) > 6:
     from rdm4_ui_draw import UIArt
     UI, HUD = UIArt(sys.argv[5]), sys.argv[6]
 LV = sys.argv[7] if len(sys.argv) > 7 else "4"
-MW3 = LV == "mw3"; MW2 = LV in ("mw2", "mw3"); MW = LV in ("mw", "mw2", "mw3"); W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
+MW4 = LV == "mw4"; MW3 = LV == "mw3"; MW2 = LV in ("mw2", "mw3", "mw4"); MW = LV in ("mw", "mw2", "mw3", "mw4"); W5 = LV == "5w"; X5 = LV == "5x"; C5 = LV in ("5c", "5x"); S5 = LV == "5s"; Q5 = LV in ("5h", "5c", "5s", "5x"); LV = LV[:1]     # ("5x": the four heroes' capabilities reel: cine_menu_caps.json)     # ("5c": the armour table, loot and crafting reel: the quartet's menu, four runs)          # ("5w": level 5's weapons and tiers reel, the Warrior: 829's cine_menu_warrior.json;
                                                        #  "5h": the four heroes' weapons reel, cine_menu_quartet.json)
 SRC = os.path.join(HERE, "..", "..", "claude_ue5", "SourceArt", "mistward" if MW else "random_dungeon_magic" + LV)
-M = json.load(open(os.path.join(SRC, "cine_menu_mw5.json" if MW3 else "cine_menu_mw.json"), encoding="utf-8")) if MW else json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
+M = json.load(open(os.path.join(SRC, "cine_menu_mw6.json" if MW4 else "cine_menu_mw5.json" if MW3 else "cine_menu_mw.json"), encoding="utf-8")) if MW else json.load(open(os.path.join(SRC, "cine_menu_warrior.json" if W5 else "cine_menu_caps.json" if X5 else "cine_menu_quartet.json" if Q5 else "cine_menu.json"), encoding="utf-8"))
 ORDER = M.get("want") or ["Warrior", "Mage", "Warlock", "Rogue"]
-TITLE, SUB = (("mistward_castle", "five heroes in Mistward Castle, the martial artist the fifth: her chi attacks' looks, a quick bar of any length, her abilities on it") if MW3 else
+TITLE, SUB = (("mistward_castle", "six heroes in combat at all five tiers, the summoner the sixth: her summonings; monsters' parts harvested; new terrain generated as they come") if MW4 else
+              ("mistward_castle", "five heroes in Mistward Castle, the martial artist the fifth: her chi attacks' looks, a quick bar of any length, her abilities on it") if MW3 else
               ("mistward_castle", "four heroes in Mistward Castle: start gear, tabs, quick slots, the block, slashes, outlined traps, eight new kinds of rooms") if MW2 else
               ("mistward_castle", "four heroes in Mistward Castle: shields, the torch, traps, prisoners, teleporters, bosses, rooms of other shapes") if MW else
               ("random_dungeonmagic_level5", "four heroes: the map, chests, armour, crafting at the anvil, fights, new rooms generated tier by tier") if X5 else
@@ -168,6 +170,10 @@ def menu_hud(f, k, fl):
                 what = ("%.0f damage a blow, reach %.1f m" % (w_["damage"] * (1 + bonus), w_["reach"] / 100.0) if not w_["spell"] else
                         "%.0f damage a %s, flies %.0f m" % (w_["damage"] * (1 + bonus), "bolt" if w_["bolt"] else "cast", w_["reach"] / 100.0))
                 if w_["mana"] > 0: what += ", %.0f mana" % w_["mana"]
+                # (a summoning is no bolt: "0 damage a cast, flies 14 m" said nothing of what it does; RDHeroSelect the same)
+                if str(w_.get("icon", "")).startswith("summon_"):
+                    sh_ = w_["mana"] / h["mana"] if h["mana"] else 0.0          # (its share of her pool, as the game takes it)
+                    what = "calls fighters to her side, %s of her mana (%.0f)" % ("half" if abs(sh_ - 0.5) < 0.01 else "%.0f%%" % (sh_ * 100), w_["mana"])
                 if draw:
                     d.text((tx, y + 2 * K), w_["name"].upper(), font=ft_line, fill=ink(INK))
                     d.text((tx, y + 31 * K), what, font=fx_small, fill=ink(DIM))

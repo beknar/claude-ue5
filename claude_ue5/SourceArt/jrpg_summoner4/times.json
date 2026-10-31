@@ -1,0 +1,37 @@
+{
+ "Shoot": {
+  "release": 0.4,
+  "length": 0.95
+ },
+ "Roll": {
+  "length": 0.8,
+  "turn": [
+   0.1,
+   0.58
+  ]
+ },
+ "Stabs": {
+  "Stab1": {
+   "wind": 0.16,
+   "release": 0.26,
+   "follow": 0.4,
+   "end": 0.7
+  },
+  "Stab2": {
+   "wind": 0.18,
+   "release": 0.29,
+   "follow": 0.44,
+   "end": 0.74
+  },
+  "Stab3": {
+   "wind": 0.2,
+   "release": 0.32,
+   "follow": 0.48,
+   "end": 0.8
+  }
+ },
+ "grip_tilt": {
+  "dagger": 25.0,
+  "crossbow": 45.0
+ }
+}

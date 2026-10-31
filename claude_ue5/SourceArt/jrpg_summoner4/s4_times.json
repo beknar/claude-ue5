@@ -1,0 +1,32 @@
+{
+ "CastBolt": {
+  "length": 0.95,
+  "hit": 0.4,
+  "bone": "hand_r"
+ },
+ "Summon1": {
+  "length": 1.65,
+  "hit": 1.0,
+  "bone": "hand_r"
+ },
+ "Summon2": {
+  "length": 1.45,
+  "hit": 0.6,
+  "bone": "hand_r"
+ },
+ "Summon3": {
+  "length": 2.0,
+  "hit": 0.72,
+  "bone": "hand_r"
+ },
+ "Summon4": {
+  "length": 2.2,
+  "hit": 1.55,
+  "bone": "hand_r"
+ },
+ "Summon5": {
+  "length": 1.95,
+  "hit": 1.24,
+  "bone": "hand_r"
+ }
+}

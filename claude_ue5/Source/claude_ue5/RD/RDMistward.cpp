@@ -125,10 +125,40 @@ void ARDLootPile::Init(ARDDungeonGenerator* G, const TArray<FName>& InThings, co
 
 int32 ARDLootPile::GetEffectParticles() const { return RDMParticles(Fx); }
 
+void ARDLootPile::SetTint(const FLinearColor& Color)
+{
+	if (Light) Light->SetLightColor(Color);
+}
+
+FLinearColor ARDLootPile::GetTint() const { return Light ? Light->GetLightColor() : FLinearColor::White; }
+
+float ARDLootPile::GetPictureHeight() const
+{
+	float Lo = -1.f;
+	for (const UMaterialBillboardComponent* B : Icons) if (B) { const float Z = B->GetRelativeLocation().Z; Lo = Lo < 0.f ? Z : FMath::Min(Lo, Z); }
+	return Lo;
+}
+
 void ARDLootPile::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	Age += Dt;
+	// (one far from her (40 m: the harvests left behind pile up over a session, the PR review's find) puts its light, effect
+	// and pictures away until she comes near again; checked twice a second)
+	if ((FarCheck -= Dt) <= 0.f)
+	{
+		FarCheck = 0.5f;
+		const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
+		const bool bFar = Her && FVector::Dist2D(Her->GetActorLocation(), GetActorLocation()) > 4000.f;
+		if (bFar != bAway)
+		{
+			bAway = bFar;
+			if (Light) Light->SetVisibility(!bFar);
+			if (Fx) { if (bFar) Fx->Deactivate(); else Fx->Activate(true); }
+			for (UMaterialBillboardComponent* B : Icons) if (B) B->SetVisibility(!bFar);
+		}
+	}
+	if (bAway) return;
 	// (the pictures turn slowly round it and bob)
 	for (int32 I = 0; I < Icons.Num(); ++I) if (UMaterialBillboardComponent* B = Icons[I]) B->SetRelativeLocation(IconPlace(I, Age));
 }
@@ -405,7 +435,10 @@ ARDMonster* ARDDungeonGenerator::SpawnMonsterKind(int32 Kind, const FVector& At,
 	if (!Sec) return nullptr;
 	const FRDMonsterDef& Def = Monsters[Kind];
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, FMath::FRandRange(0.f, 360.f), 0), At + FVector(0, 0, Def.CapsuleHalfHeight + 5.f)), Sp);
+	// (its facing from the session seed and the spot, as its setup: the global random made a reel's summons face otherwise
+	// each run (the PR review's find))
+	const float Yaw = (float)(HashCombine((uint32)SessionSeed ^ 0x51D3u, GetTypeHash(At.X * 13.0 + At.Y * 7.0)) % 360u);
+	ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), At + FVector(0, 0, Def.CapsuleHalfHeight + 5.f)), Sp);
 	if (!M) return nullptr;
 	M->SpawnIndex = -1;           // (not one of its set's planned monsters: the tiers do not count it)
 	M->Setup(Sec, Def, (int32)HashCombine((uint32)SessionSeed, GetTypeHash(At.X * 13.0 + At.Y * 7.0)));
@@ -545,7 +578,8 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	ARDLootPile* Best = nullptr; float BestD = Reach;
 	for (ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < BestD) { BestD = D; Best = P; } }
 	if (!Best || !Pc) return false;
-	Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
+	if (Best->bHarvest) Pc->TakeHarvest(Best->Things);
+	else Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
 	LootPiles.Remove(Best);
 	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
 	Best->Destroy();

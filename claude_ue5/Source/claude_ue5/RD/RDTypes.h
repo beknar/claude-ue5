@@ -241,6 +241,12 @@ struct FRDWeaponDef
 	/** mistward_castle (docs/improvements2.txt): the slash put on it (the generator's Slashes by name; none: none). Its
 	 *  effect plays on every swing (or shot) and its bonus and effect land with every hit */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Slash = NAME_None;
+	/** mistward_castle (docs/improvements3.txt, the Summoner's summons): a cast takes this share of her mana pool (0: ManaCost);
+	 *  ManaCost follows her pool (URDCombatComponent::UpdateManaShares) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaShare = 0.f;
+	/** mistward_castle (docs/improvements3.txt): a scroll being read: a spell weapon of no mana that stands after hers for the
+	 *  cast only (not on the bar, not in the inventory, gone when its cast and its bolts are done) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bScroll = false;
 };
 
 /** mistward_castle (docs/improvements2.txt): what a slash does with a hit, besides its bonus damage */
@@ -322,6 +328,11 @@ enum class ERDSpellType : uint8
 {
 	Offense, Protection, Curse, Summon
 };
+/** a spell type's name as the messages and the inventory write it ("offense", "protection", "curse", "summoning") */
+inline const TCHAR* RDSpellTypeName(ERDSpellType T)
+{
+	switch (T) { case ERDSpellType::Offense: return TEXT("offense"); case ERDSpellType::Protection: return TEXT("protection"); case ERDSpellType::Curse: return TEXT("curse"); default: return TEXT("summoning"); }
+}
 
 /** random_dungeonmagic_level5: what a spell does when it is released (each is played by URDCombatComponent::ReleaseSpell) */
 UENUM(BlueprintType)
@@ -372,7 +383,10 @@ enum class ERDSpellKind : uint8
 	/** a zone at her feet (Radius) for Duration: no blow hurts her (or her allies) inside it */
 	Sanctum,
 	/** every monster she can see within Reach: Damage */
-	Apocalypse
+	Apocalypse,
+	/** mistward_castle (docs/improvements3.txt, the Summoner): one monster of SummonKind comes to her side in front of her, as
+	 *  strong as a monster of its own tier, until it falls; she leads Count of them at most (a cast past that is refused) */
+	Summon
 };
 
 /** random_dungeonmagic_level5: one entry of the spell table (SourceArt/random_dungeon_magic5/spells.json, pipeline/unreal/858).
@@ -428,6 +442,19 @@ struct FRDSpellDef
 	/** its sounds: "Player.Charge.<SoundKey>", "Player.Cast.<SoundKey>", "Player.Hit.<SoundKey>" */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SoundKey = TEXT("Fire");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
+	/** a Summon spell: the monster kind that comes (the generator's Monsters by name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SummonKind = NAME_None;
+};
+
+/** mistward_castle (docs/improvements3.txt): a monster family's part, harvested from the dead of these tiers (the family is
+ *  the monster's SoundSet: Troll, Mutant, Daemon, Horned, Dog, Spider) */
+USTRUCT(BlueprintType)
+struct FRDHarvestPart
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Family;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Part;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<int32> Tiers;
 };
 
 /** random_dungeonmagic_level5: the rings' kinds */
@@ -539,7 +566,10 @@ enum class ERDItemKind : uint8
 	 *  weapon it goes on */
 	Slash,
 	/** mistward_castle (docs/improvements2.txt): a vault's key: F at the vault's door with it opens the vault (used up) */
-	Key
+	Key,
+	/** mistward_castle (docs/improvements3.txt): a scroll of its Spell: read, the spell is cast once at no mana (sharing the
+	 *  spell's cooldown) and the scroll is used up; only a hero whose card reads scrolls of the spell's type (ScrollTypes) */
+	Scroll
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */
@@ -712,6 +742,9 @@ struct FRDRecipe
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Item;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDRecipePart> Parts;
+	/** mistward_castle (docs/improvements3.txt, the generator's bRecipeTiers): the anvil offers it once this tier is open (0:
+	 *  always) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 0;
 };
 
 /** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the
@@ -767,6 +800,8 @@ struct FRDHeroDef
 	/** weapons (her chi attacks) she gains UnlockPerBoss at a time, in their order, each time she slays a tier's boss */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponDef> LockedWeapons;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 UnlockPerBoss = 2;
+	/** mistward_castle (docs/improvements3.txt): the types of spell whose scrolls she reads (empty: none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDSpellType> ScrollTypes;
 };
 
 UENUM(BlueprintType)

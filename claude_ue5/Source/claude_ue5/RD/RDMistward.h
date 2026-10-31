@@ -45,7 +45,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHers = true;
 	/** the shield on her arm when she fell (none: she wore none): it goes back on when she takes the pile up */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FName WornShield;
+	/** mistward_castle (docs/improvements3.txt): parts harvested from a dead monster (its tier: the light's tint) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHarvest = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 Tier = 0;
 	void Init(ARDDungeonGenerator* InGenerator, const TArray<FName>& InThings, const TArray<float>& InWear);
+	/** its light's colour (a harvest's tier) */
+	void SetTint(const FLinearColor& Color);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") FLinearColor GetTint() const;
+	/** the height of its lowest picture over the floor it stands on (cm; tests: "about 1 m over the corpse") */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetPictureHeight() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumThings() const { return Things.Num(); }
 	/** the effect on it is alive (particles a frame old, tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetEffectParticles() const;
@@ -59,6 +67,9 @@ private:
 	UPROPERTY() TArray<TObjectPtr<UMaterialBillboardComponent>> Icons;
 	UPROPERTY() TObjectPtr<UPointLightComponent> Light;
 	float Age = 0.f;
+	/** put away while she is far (its light, effect and pictures), checked every FarCheck seconds */
+	bool bAway = false;
+	float FarCheck = 0.f;
 };
 
 UCLASS()

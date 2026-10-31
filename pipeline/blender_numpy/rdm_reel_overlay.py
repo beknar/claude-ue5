@@ -59,7 +59,8 @@ src, dst = sys.argv[1], sys.argv[2]
 step = int(sys.argv[3]) if len(sys.argv) > 3 else 1
 LV = sys.argv[4] if len(sys.argv) > 4 else "1"
 MW3 = LV == "mw3"              # (mistward_castle's five heroes: 815's "mistward3", cine_mw3_<hero>.json; drawn as "mw2")
-if MW3: LV = "mw2"
+MW4 = LV == "mw4"              # (mistward_castle's six heroes in combat at all five tiers: 815's "mistward4", cine_mw4_<hero>.json; drawn as "mw2", its own captions)
+if MW3 or MW4: LV = "mw2"
 M5 = LV in ("mw", "mw2")       # (mistward_castle: 815's run5m)
 MW2 = LV == "mw2"              # (mistward_castle's third list: 815's run5m2)
 X5 = LV == "5x"; Q5 = LV == "5h"; C5 = LV in ("5c", "5x", "mw", "mw2"); S5 = LV == "5s"; LV = "5" if (Q5 or C5 or S5) else LV        # ("5x": the four heroes' capabilities reel, 815's run5x: cine_caps_<hero>.json, run5c's captions and the tiers' part)
@@ -78,16 +79,24 @@ MA_ICONS = {}
 if HERO == "MartialArtist":
     _mj = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "martial_arts", "martial_arts.json"), encoding="utf-8"))
     MA_ICONS = dict({c_["name"]: c_["icon"] for c_ in _mj["chi"]}, Fists=_mj["fists"].get("icon", ""))
+SU4 = None
+if MW4 and HERO == "Summoner":
+    # (the castle's Summoner (876, the user's list of 2026-10-30): her card and her weapons' pictures, summoner4.json's)
+    SU4 = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "mistward", "summoner4.json"), encoding="utf-8"))
+    MA_ICONS = dict(SU4["icons"])
 def wicon(name):
     if not UI: return None
-    return UI.weapons.get("%s/%s" % (HERO, name)) or (MA_ICONS[name] if name in MA_ICONS and UI.has(MA_ICONS[name]) else None)
+    # (a spell learned from a tome in the run is not among her card's weapons: its own picture, spell_<name>)
+    sp = "spell_" + "".join(ch if ch.isalnum() else "_" for ch in name.lower())
+    return UI.weapons.get("%s/%s" % (HERO, name)) or (MA_ICONS[name] if name in MA_ICONS and UI.has(MA_ICONS[name]) else None) \
+        or (sp if UI.has(sp) else None)
 def iicon(name): return UI.icons.get(name) if UI else None
 L2, L3 = LV == "2" or (L4 and HERO == "Warlock"), LV == "3" or (L4 and HERO == "Rogue")
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_magic" + ("" if LV == "1" else LV))
 MWSRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "mistward")
 SND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "random_dungeon_combat")      # (the sounds are the combat level's)
 R = json.load(open(os.environ["OVERLAY_RECORD"], encoding="utf-8")) if os.environ.get("OVERLAY_RECORD") else \
-    json.load(open(os.path.join(MWSRC, f"cine_{'mw3' if MW3 else 'mw2' if MW2 else 'mw'}_{HERO.lower()}.json"), encoding="utf-8")) if M5 else json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_caps_{HERO.lower()}.json" if X5 else f"cine_craft_{HERO.lower()}.json" if C5 else f"cine_spells_{HERO.lower()}.json" if S5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
+    json.load(open(os.path.join(MWSRC, f"cine_{'mw4' if MW4 else 'mw3' if MW3 else 'mw2' if MW2 else 'mw'}_{HERO.lower()}.json"), encoding="utf-8")) if M5 else json.load(open(os.path.join(SRC, (f"cine_quartet_{HERO.lower()}.json" if Q5 else f"cine_caps_{HERO.lower()}.json" if X5 else f"cine_craft_{HERO.lower()}.json" if C5 else f"cine_spells_{HERO.lower()}.json" if S5 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json"), encoding="utf-8"))
 W5 = L5 and (HERO == "Warrior" or Q5 or C5 or S5)          # (level 5's weapons and tiers reels: 815's run5w, the Warrior; run5h, any of four; run5c's tiers too)
 # (who wields what: the weapons table's rules, weapons_table.json "who")
 WHO = {"Warrior": "the Warrior wields every weapon of the table", "Warlock": "the Warlock wields every weapon of the table",
@@ -100,6 +109,7 @@ if HERO == "MartialArtist" and "MartialArtist" not in HJ:
     # (her card is martial_arts.json's: 872 makes her hero from it)
     _mh = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "claude_ue5", "SourceArt", "martial_arts", "martial_arts.json"), encoding="utf-8"))["hero"]
     HJ["MartialArtist"] = dict(_mh, name="MartialArtist")
+if SU4 is not None: HJ["Summoner"] = SU4
 FPS = R["fps"]; ROWS = {r["frame"]: r for r in R["rows"]}; LASTF = max(ROWS); C = R["const"]; EV = R["events"]
 TS = C["tile"]; NT = C["section_tiles"]
 W, H, K = 1920, 1080, 2                       # the layer is drawn K times larger and scaled down (smooth edges)
@@ -1419,6 +1429,97 @@ def mw3_caps(ev, gold, cyan, warm):
         out.append((e["t"] - 0.8, e["t"] + 1.8, "%s FROM THE QUICK BAR" % e["name"].upper(), [e.get("how", ""), "made: %s" % ("yes" if e.get("made") else "no")], cyan))
     return out
 
+def mw4_caps():
+    """(mistward, 815's run5m4: the user's list of 2026-10-30) the six heroes in combat at all five tiers: the captions, each from
+    what the record says happened"""
+    out = []; gold = (255, 226, 150); warm = (255, 200, 120); cyan = lin(CYAN)[:3]; red = (255, 150, 120)
+    hj = HJ.get(HERO, {}); acc = tuple(int(255 * v) for v in hj.get("accent", (1.0, 0.94, 0.84)))
+    ev = lambda k: [e for e in EV if e["kind"] == k]
+    THEME = {"Castle": "the castle keep", "Dwarf": "the dwarven halls", "None": "the stone dungeon", "": "the stone dungeon"}
+    st = ev1("start")
+    first = min([e["t"] for e in EV if e["kind"] in ("given", "card", "fight", "inventory", "summoned") and e["t"] > 0.8] + [5.0])
+    who = {"Warrior": "tiers 1 and 2: her sword and shield; a dead monster's parts; tier 2's new rooms",
+           "Mage": "tier 3: her spells, a scroll of a spell beyond her mana",
+           "Warlock": "tier 2: a curse, a lash and her sword",
+           "Rogue": "tier 3: the crossbow, the daggers, her roll",
+           "MartialArtist": "tier 4: her chi attacks, then her fists",
+           "Summoner": "tiers 1 and 5: the new hero, Summoner4: she calls fighters to her side, a stronger kind for each tier"}.get(HERO, "")
+    out.append((0.8, first - 0.1, "THE %s IN MISTWARD CASTLE" % HNAME.upper(), [who, "%d hit points%s  ·  monsters killed leave their parts floating over them (F takes them)" %
+                (C["max_health"], ("  ·  %d mana" % C.get("max_mana", 0)) if C.get("max_mana") else "")], acc))
+    for e in ev("given"):
+        it = e.get("items", {})
+        if e.get("why") == "tomes" or any(k.startswith("Tome of ") for k in it):
+            txt = ", ".join(k.replace("Tome of ", "").lower() for k in it); line2 = "a tome teaches its spell to a hero who learns its type"
+        elif e.get("why") == "scroll":
+            # (the spell's cost from the table the game is built from (858's spells.json), her pool from the record: the PR
+            # review's find, the numbers had been typed in)
+            ms_ = next((s_ for s_ in json.load(open(os.path.join(os.path.dirname(SRC), "random_dungeon_magic5", "spells.json"), encoding="utf-8"))["spells"]
+                        if s_["name"] == "Meteor Storm"), {}).get("mana", 0)
+            pool_ = C.get("max_mana", 0)
+            txt = "a scroll of Meteor Storm"; line2 = "a scroll casts its spell once at no mana: Meteor Storm costs %d, %s her pool of %d" % (
+                ms_, ("twice" if pool_ and abs(ms_ / pool_ - 2) < 0.01 else "%.1f times" % (ms_ / pool_)) if pool_ else "more than", pool_)
+        elif e.get("why") == "sword":
+            txt = "a sword"; line2 = "she starts with the worst weapon she can wield (the dagger): the arming sword, one-handed, her shield on her arm with it"
+        elif "summonings" in it:
+            txt = "the four summonings four tier bosses would"; line2 = "she starts with Summon Tier 1; each tier boss she slays gives her the next"
+        elif "chi attacks" in it:
+            txt = "the eight chi attacks four tier bosses would"; line2 = "she starts with two; each tier boss she slays teaches her two more"
+        else: txt = ", ".join("%s %s" % (v, k.lower()) for k, v in it.items()); line2 = "in play they come from containers and bosses"
+        out.append((e["t"], e["t"] + 2.4, "THE REEL GIVES HER %s" % txt.upper(), [line2, ""], warm))
+    for e in ev("card"):
+        lnd = next((x for x in EV if x["kind"] in ("landed", "tier2") and x["t"] >= e["t"] - 0.05), None)
+        if lnd and lnd["kind"] == "landed":
+            out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 3.6, "TIER %d  ·  %s" % (lnd["tier"], THEME.get(lnd.get("theme", ""), lnd.get("theme", "")).upper()),
+                        ["a set of rooms generated as she arrives: %d monsters of tier %d (%s, %d hit points, %d a blow, before her)" % (lnd.get("monsters", 0), lnd["tier"],
+                         lnd["title"].lower(), lnd["its_hit_points"], lnd["its_damage"]), "the monsters' strength follows their tier"], gold))          # (no typed numbers: the review's find)
+    for e in ev("tier2"):
+        out.append((e["t"] + MW_CARD, e["t"] + MW_CARD + 3.4, e.get("notice") or "TIER 2 IS OPEN", ["a tier opens once the tier before has 50 % of its rooms explored, monsters killed and chests looted",
+                    "the reel's shortcut cleared the start set; a boss waits in a room she has seen"], warm))
+    for e in ev("new_terrain"):
+        out.append((e["t"], e["t"] + 4.0, "NEW TERRAIN:  TIER %d, %s" % (e["tier"], THEME.get(e.get("theme", ""), e.get("theme", "")).upper()),
+                    ["the next set of rooms is generated as she comes (%.0f m from its hallway): its rooms, furniture, chests, traps and monsters" % e.get("her_m", 0),
+                     "made from the session's seed: the same set every time she comes back"], cyan))
+    for e in ev("summoned"):
+        a = (e.get("allies") or [{}])[0]
+        out.append((e["t"] - 1.0, e["t"] + 2.2, "%s  ·  %s" % (e["spell"].upper(), e.get("monster_kind", "").replace("_", " ").upper()),
+                    ["%s answers her call (%d of %d she may lead)  ·  %s hit points, %s a blow: as strong as a monster of its own tier" % (e.get("monster_kind", "").replace("_", " ").lower(), e["now"], e["most"],
+                     a.get("hp", "?"), a.get("damage", "?")), "each summoning takes half her mana (%d): the reel fills her mana before each" % round(C.get("max_mana", 0) / 2)], cyan))
+    for e in ev("scroll_read"):
+        d_ = next((x for x in ev("scroll_done") if x["t"] >= e["t"]), None)
+        # (what the strikes did only once they are done: from the reading on it said "1 killed" while her kills read 0)
+        out.append((e["t"], d_["t"] if d_ else e["t"] + 5.0, "ENTER  ·  THE SCROLL OF METEOR STORM", [e.get("message", ""),
+                    "its strikes fall round the monster she faces  ·  her mana %d" % e.get("mana_before", 0)], cyan))
+        if d_:
+            out.append((d_["t"], d_["t"] + 3.0, "THE SCROLL OF METEOR STORM", ["%d hit points taken off the monsters there, %d killed" % (d_["lost"], d_["killed"]),
+                        "her mana %d before and after: a scroll casts at no mana" % d_["mana_after"]], cyan))
+    for e in ev("chi"):
+        e1 = next((x for x in ev("chi_done") if x["t"] >= e["t"] and x["name"] == e["name"]), None)
+        out.append((e["t"] - 0.3, (e1["t"] + 0.6) if e1 else e["t"] + 2.0, "CHI  ·  %s" % e["name"].upper(), ["%d damage%s  ·  %d mana (the reel fills her mana before each)" % (round(e["damage"]),
+                    (": %s taken off the %s" % (nice((e1 or {}).get("lost", 0)), e["monster"].replace("_", " ").lower())) if (e1 or {}).get("lost") else "", e.get("mana", 0)), ""], cyan))
+    for e in ev("harvest_taken"):
+        th = next((x for x in ev("to_harvest") if x["t"] <= e["t"]), None)
+        out.append((e["t"] - 1.6, e["t"] + 2.4, "F  ·  A DEAD MONSTER'S PARTS", [e.get("message", ""), "an essence of its tier or below, its kind's part, now and then a material: potions and scrolls are made of them at an anvil"], cyan))
+    blocks = ev("mw_shield_block")
+    if blocks:
+        b_ = blocks[0]
+        out.append((b_["t"] - 0.1, b_["t"] + 2.4, "THE %s TAKES ITS SHARE" % (b_.get("shield") or "SHIELD").upper(), ["a blow of %.1f: the shield took %.1f, %.1f reached her" % (b_["before"], b_["took"], b_["reached"]),
+                    "the shield loses what it takes: at 0 it breaks"], cyan))
+    heals = ev("healed")
+    if heals:
+        out.append((heals[0]["t"], heals[0]["t"] + 3.0, "THE REEL FILLS HER HIT POINTS", ["%d to %d: the higher tiers' blows end a run in a few (it does so again whenever they fall under three quarters)" % (heals[0]["was"], heals[0]["now"]),
+                    "in play she would wear armour and rings found by then"], warm))
+    for e in ev("set_down"):
+        out.append((e["t"] + MW_CARD - 0.2, e["t"] + MW_CARD + 2.6, "ON TO THE NEXT SET OF ROOMS", ["a set is 252 m across: the reel sets her down %.0f m before the hallway out (it was %d m by the way)" % (e["to_portal_m"], e["was_way_m"]),
+                    "the set beyond is generated as she comes"], warm))
+    for i, e in enumerate(FIGHTS):
+        end = next((k["t"] for k in KILLS if k["t"] > e["t"]), e["t"] + 6.0) + 1.0
+        if i + 1 < len(FIGHTS): end = min(end, FIGHTS[i + 1]["t"] - 0.1)
+        tr = e.get("tier") or (max(abs(e["section"][0]), abs(e["section"][1])) + 1)
+        kl = next((k for k in KILLS if k["t"] > e["t"] and k["t"] <= end + 0.1 and k["monster"] == e["monster"]), None)
+        out.append((e["t"], end, "%s  ·  TIER %d" % (e["monster"].replace("_", " ").upper(), tr), ["%.0f hit points, %.0f damage a blow  ·  she has %.0f" % (e["its_hit_points"], e["its_damage"], C["max_health"]),
+                    ("killed in %.1f s" % kl["seconds"]) if kl else (lured(e) or "the monsters' strength follows their tier")], gold))
+    return out
+
 def mw2_caps():
     """(mistward, 815's run5m2: the user's third list) the captions, each from what the record says happened"""
     out = []; gold = (255, 226, 150); warm = (255, 200, 120); cyan = lin(CYAN)[:3]; red = (255, 150, 120)
@@ -1961,12 +2062,13 @@ def overlay(f):
         wmax = max(d.textlength(sc(x), font=fl_small) for x in nl)
         fn_ = fit_font("AlegreyaSC-700", 18, max(0.55, min(1.0, room / wmax))) if LETTERS else fl_small
         for li, x in enumerate(nl):
-            d.text(((sx0 + sx1) / 2, sy0 + ((19 + 14 * li) if len(nl) > 1 else 26) * K), sc(x), font=fn_, fill=tc, anchor="mm")
+            # (two lines start under the key's word: at 19 the Summoner's "wheel" ran into "SUMMON TIER 3"; ARDHUD the same)
+            d.text(((sx0 + sx1) / 2, sy0 + ((24 + 13 * li) if len(nl) > 1 else 26) * K), sc(x), font=fn_, fill=tc, anchor="mm")
         dmg = ("%.0f damage  ·  %.0f mana" % (wd["damage"], wd["mana"])) if wd.get("mana") else ("%.1f damage" % wd["damage"] if abs(wd["damage"] - round(wd["damage"])) > 0.05 else "%.0f damage" % wd["damage"])
         if dur: dmg = ("%.0f" % wd["damage"]) + "  ·  " + dur if total_w > 3 else dmg + "  ·  " + dur
         fd_ = f_tiny; wdm = d.textlength(dmg, font=f_tiny)
         if LETTERS and wdm > sw - 8 * K: fd_ = fit_font("Alegreya-500", 15.5, max(0.6, (sw - 8 * K) / wdm))
-        d.text(((sx0 + sx1) / 2, sy0 + (52 if len(nl) > 1 else 48) * K), dmg, font=fd_, fill=lin((1.0, 0.9, 0.6), A(1.0)) if on else tc, anchor="mm")
+        d.text(((sx0 + sx1) / 2, sy0 + (55 if len(nl) > 1 else 48) * K), dmg, font=fd_, fill=lin((1.0, 0.9, 0.6), A(1.0)) if on else tc, anchor="mm")
     d.text((ax + pd, by - 26 * K), C["hint"], font=f_tiny, fill=lin((0.7, 0.68, 0.62), A(1.0)))
     # ---- the keys that do what she does now (above the status panel): W A S D lit as she moves (W: the way she faces),
     # Shift as she runs, E as she casts, F as she opens a door or chest
@@ -2068,7 +2170,8 @@ def overlay(f):
     a = fade(t, 0.3, 4.6)
     if a > 0 and M5:
         d.text((44 * K, 50 * K), "mistward_castle", font=f_title, fill=(255, 255, 255, int(235 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
-        d.text((46 * K, 94 * K), "Mistward Castle  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HNAME.lower(), ({"Warrior": "her start gear, an armory's table, quick slots, the block, a boss's slash, the helmet",
+        d.text((46 * K, 94 * K), "Mistward Castle  \u00b7  the %s, chosen in the menu  \u00b7  %s" % (HNAME.lower(), ({"Warrior": "tiers 1 and 2: sword and shield, a harvest, new terrain", "Mage": "tier 3: her spells, a scroll", "Warlock": "tier 2: curse, lash and sword",
+               "Rogue": "tier 3: crossbow, daggers, the roll", "MartialArtist": "tier 4: her chi attacks", "Summoner": "tiers 1 and 5: her summoned fighters"} if MW4 else {"Warrior": "her start gear, an armory's table, quick slots, the block, a boss's slash, the helmet",
                "Mage": "the inventory's tabs, a shrine, fountains of mana and healing", "Warlock": "the vault and its key, a fountain of speed, the arena",
                "Rogue": "a seen trap outlined in red, the trap gauntlet, the throne room", "MartialArtist": "her chi attacks' looks, a quick bar of any length, her abilities on it"} if MW2 else {"Warrior": "shields, the anvil, a boss", "Mage": "the torch, the prison's cells",
                "Warlock": "rooms of other shapes, teleporters, her things where she falls", "Rogue": "traps, a guarded ring"})[HERO]), font=f_sub, fill=(232, 236, 240, int(225 * a)), stroke_width=2 * K, stroke_fill=(0, 0, 0, int(140 * a)))
@@ -2266,7 +2369,7 @@ def overlay(f):
         caps = S5CAPS
     if M5:
         global M5CAPS
-        if M5CAPS is None: M5CAPS = mw2_caps() if MW2 else m5_caps()
+        if M5CAPS is None: M5CAPS = mw4_caps() if MW4 else mw2_caps() if MW2 else m5_caps()
         caps = M5CAPS
     lift = 96 if (S5 or MW2) else 0          # (run5s, run5m2: the captions and the heard lines above the hotbar)
     # (one caption at a time, in the one place: the one that began last; an earlier one still running shows again after it)

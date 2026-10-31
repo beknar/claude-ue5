@@ -1,0 +1,27 @@
+{
+ "clips": {
+  "Hit_to_body_01": 32,
+  "Hit_to_body_02": 42,
+  "Hit_to_head": 45,
+  "Hit_to_side": 31,
+  "Hit_to_stomach": 38,
+  "Run": 31,
+  "Walk": 57,
+  "Stab1": 18,
+  "Stab2": 19,
+  "Stab3": 20,
+  "Idle": 59,
+  "CastBolt": 24,
+  "Summon1": 41,
+  "Summon2": 36,
+  "Summon3": 49,
+  "Summon4": 54,
+  "Summon5": 48
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_summoner4\\T_Summoner4_Color.png"
+ },
+ "height_cm": 168.0,
+ "hair": null,
+ "proportions": null
+}

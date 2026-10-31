@@ -245,12 +245,15 @@ bool URDCombatComponent::BreakDownGear(FName Item)
 	const int32 Ix = Generator && !bDead ? Generator->FindItem(Item) : -1;
 	if (Ix < 0 || GetItemCount(Item) <= 0) return false;
 	const FRDItemDef& It = Generator->Items[Ix];
-	if (It.Kind != ERDItemKind::Shield && !(It.Kind == ERDItemKind::Armour && Generator->bArmourStacks)) return false;
+	// (the list of 2026-10-30, bBreakAnyGear: a ring and the torch too)
+	const bool bAny = Generator->bBreakAnyGear && (It.Kind == ERDItemKind::Ring || It.Kind == ERDItemKind::Torch);
+	if (It.Kind != ERDItemKind::Shield && !(It.Kind == ERDItemKind::Armour && Generator->bArmourStacks) && !bAny) return false;
 	const FString Lb = Item.ToString().ToLower();
 	// (the one she wears goes only when it is the last, and then she takes it off first)
-	if ((Item == WornArmour || Item == WornShield) && GetItemCount(Item) <= 1)
+	const bool bOn = Item == WornArmour || Item == WornShield || (It.Kind == ERDItemKind::Ring && GetWornRing(It.RingKind) == Item) || (It.Kind == ERDItemKind::Torch && bTorchHeld && TorchItem == Item);
+	if (bOn && GetItemCount(Item) <= 1)
 	{
-		SetMessage(FString::Printf(TEXT("You wear the %s: take it off first"), *Lb));
+		SetMessage(It.Kind == ERDItemKind::Torch ? FString::Printf(TEXT("The %s burns in your hand: put it out first"), *Lb) : FString::Printf(TEXT("You wear the %s: take it off first"), *Lb));
 		return false;
 	}
 	const FString Gives = BreakdownText(Item, It.WeaponType);

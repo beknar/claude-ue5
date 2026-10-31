@@ -41,7 +41,7 @@ int32 ARDDungeonGenerator::UnlockHeroWeapons(int32 Count)
 		Weapons.Add(W); ++Added;
 		UE_LOG(LogRDMartial, Log, TEXT("RDMARTIAL unlocked %s (%d of %d)"), *W.Name.ToString(), WeaponsUnlocked, H->LockedWeapons.Num());
 	}
-	if (Added > 0 && PlayerCombat) PlayerCombat->SyncWear();
+	if (Added > 0 && PlayerCombat) { PlayerCombat->SyncWear(); PlayerCombat->UpdateManaShares(); }
 	return Added;
 }
 
