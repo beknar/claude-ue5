@@ -98,6 +98,7 @@ void URDCombatComponent::StackedWeaponLines(TArray<FString>& Out) const
 	for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
 	{
 		const FRDWeaponDef& W = Generator->Weapons[I];
+		if (W.bScroll) continue;          // (a scroll being read: no weapon of hers)
 		const FString Key = W.Item.IsNone() || I == WeaponIndex ? FString::Printf(TEXT("#%d"), I)
 			: FString::Printf(TEXT("%s|%.0f|%s"), *W.Item.ToString(), GetWeaponWear(I), *W.Slash.ToString());
 		FRow* R = Rows.FindByPredicate([&Key](const FRow& X) { return X.Key == Key; });
@@ -117,7 +118,7 @@ int32 URDCombatComponent::WeaponOfSlot(int32 Slot) const
 	if (!Generator || !QuickSlots.IsValidIndex(Slot) || QuickSlots[Slot].IsNone() || IsAbility(QuickSlots[Slot])) return -1;
 	const FName N = QuickSlots[Slot];
 	if (Generator->Weapons.IsValidIndex(WeaponIndex) && Generator->Weapons[WeaponIndex].Name == N) return WeaponIndex;
-	for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (Generator->Weapons[I].Name == N && !Generator->Weapons[I].bAlongside) return I;
+	for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (Generator->Weapons[I].Name == N && !Generator->Weapons[I].bAlongside && !Generator->Weapons[I].bScroll) return I;
 	return -1;
 }
 
@@ -136,10 +137,10 @@ void URDCombatComponent::FillQuickSlots()
 	// 2026-10-29: the Martial Artist's eleventh, Spinning Kick, had no slot and the D-pad never reached it))
 	const TArray<FName> Ab = GetAbilities();
 	for (FName& N : QuickSlots)
-		if (!N.IsNone() && (IsAbility(N) ? !Ab.Contains(N) : !Generator->Weapons.ContainsByPredicate([&N](const FRDWeaponDef& W) { return W.Name == N && !W.bAlongside; }))) N = NAME_None;
+		if (!N.IsNone() && (IsAbility(N) ? !Ab.Contains(N) : !Generator->Weapons.ContainsByPredicate([&N](const FRDWeaponDef& W) { return W.Name == N && !W.bAlongside && !W.bScroll; }))) N = NAME_None;
 	for (const FRDWeaponDef& W : Generator->Weapons)
 	{
-		if (W.bAlongside || QuickSlots.Contains(W.Name) || QuickOff.Contains(W.Name)) continue;
+		if (W.bAlongside || W.bScroll || QuickSlots.Contains(W.Name) || QuickOff.Contains(W.Name)) continue;
 		const int32 E = QuickSlots.IndexOfByKey(NAME_None);
 		if (E == INDEX_NONE) QuickSlots.Add(W.Name); else QuickSlots[E] = W.Name;
 	}
@@ -210,7 +211,7 @@ bool URDCombatComponent::AssignQuickEntry(int32 Slot, FName Entry)
 {
 	if (!Generator || Entry.IsNone()) return false;
 	const bool bAbility = IsAbility(Entry);
-	if (bAbility ? !GetAbilities().Contains(Entry) : !Generator->Weapons.ContainsByPredicate([&Entry](const FRDWeaponDef& W) { return W.Name == Entry && !W.bAlongside; })) return false;
+	if (bAbility ? !GetAbilities().Contains(Entry) : !Generator->Weapons.ContainsByPredicate([&Entry](const FRDWeaponDef& W) { return W.Name == Entry && !W.bAlongside && !W.bScroll; })) return false;
 	if (QuickSlots.Num() < 10) QuickSlots.SetNum(10);
 	if (Slot < 0 || Slot > QuickSlots.Num()) return false;
 	const FString Nm = bAbility ? Entry.ToString().Mid(1) : Entry.ToString();
@@ -461,7 +462,7 @@ TArray<FString> URDCombatComponent::GetSlashLines() const
 	for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
 	{
 		const FRDWeaponDef& W = Generator->Weapons[I];
-		if (W.bAlongside || (W.bSpell && !W.BoltMesh)) continue;
+		if (W.bAlongside || W.bScroll || (W.bSpell && !W.BoltMesh)) continue;
 		Out.Add(FString::Printf(TEXT("weapon|%d|%s|%s"), I, *W.Name.ToString(), W.Slash.IsNone() ? TEXT("") : *W.Slash.ToString()));
 	}
 	return Out;
@@ -855,6 +856,8 @@ void ARDDungeonGenerator::TickArena(float Dt)
 		const FVector C = S->GetRoomCenter(ArenaRoom);
 		const TArray<FName> Got = RDM2TierItems(this, Tier, HashCombine((uint32)SessionSeed ^ 0xA7E4u, GetTypeHash(Key)), 3);
 		if (ARDLootPile* Lp = DropLoot(C + FVector(0, 0, 100.f), Got, TArray<float>())) Lp->bHers = false;
+		// (the list of 2026-10-30: an arena won gives a boss's harvest too, beside its prize)
+		if (bHarvest) DropHarvest(C + FVector(160.f, 0.f, 100.f), HarvestOf(NAME_None, Tier, true, HarvestRolls++), Tier);
 		ArenaRoom = -1; ArenaMonsters.Reset();
 		RoomUses.FindOrAdd(TEXT("arena_won"))++;
 		TierNotice = TEXT("THE ARENA IS WON  -  ITS PRIZE LIES IN THE MIDDLE"); TierNoticeTime = GetWorld()->GetTimeSeconds();

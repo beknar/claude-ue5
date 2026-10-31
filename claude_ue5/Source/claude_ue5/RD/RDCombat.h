@@ -411,6 +411,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Crafting") bool BreakDownGear(FName Item);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 GearBrokenDown = 0;
 
+	// ---- the user's list of 2026-10-30 (docs/improvements3.txt; RDMistward3.cpp): harvests, scrolls, the Summoner's summons
+	/** a harvest taken up: each part into her pack, "You harvest: ..." */
+	void TakeHarvest(const TArray<FName>& Things);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") int32 HarvestsTaken = 0;
+	/** a scroll read: its spell cast once at no mana (refused: her hero does not read its type, its spell's cooldown is not
+	 *  over, she is in a move, a summon she leads enough of); used up when the cast begins */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward3") bool ReadScroll(FName Item);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") int32 ScrollsRead = 0;
+	/** the scroll's weapon (FRDWeaponDef::bScroll) among the generator's weapons (-1: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") int32 GetScrollWeapon() const;
+	/** a summon's mana follows her pool (FRDWeaponDef::ManaShare) */
+	void UpdateManaShares();
+	/** casts refused because she leads as many of that summon as it allows */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") int32 SummonsRefused = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") int32 Summoned = 0;
+
 	// ---- the third list (docs/improvements2.txt; RDMistward2.cpp): tabs, stacks, quick slots, the helmet, blocking, slashes
 	/** the inventory's tab (0 weapons, 1 armour, 2 potions and food, 3 crafting, 4 magic) when the generator's bInventoryTabs */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") int32 GetInventoryTab() const { return InvTab; }
@@ -598,6 +614,10 @@ private:
 	void LoseHealth(float Amount);
 	void Fall();
 	void UpdateMaxima();
+	/** a weapon gone from her list (broken down, a scroll's done): the indices after it fixed up everywhere */
+	void DropWeaponAt(int32 Index);
+	/** the scroll's weapon goes once its cast and its bolts are done */
+	void TickScrollWeapon();
 	float WeakMul() const;
 	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Generator;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> WeaponComp;

@@ -77,6 +77,18 @@ The Martial Artist (872, 873; the user's of 2026-10-28):
            boss's two chi attacks, kept through a death, forgotten at a restart
   martialroom  (alone, in martial_arts: -lv martial_arts) the one room, her eleven weapons, the room's monsters coming
            back, each chi attack cast (mana, damage, effect, a picture), the dash
+The user's list of 2026-10-30 (docs/improvements3.txt; 875-877):
+  harvest  a monster of each tier killed: one pile of its parts floating about 1 m over it, lit in its tier's tint, an essence
+           of its tier or below, its family's part only where the table gives one, the any-tier materials; a boss's 3 essences
+           and 2 parts; the pile kept when its set is built again; F takes it; each tier's monsters give enough for its recipes
+  recipes  the anvil by tier: tier 1's potions, not tier 2's until it opens; scrolls only for the heroes who read their type
+           (the Mage and the Summoner 11 at tier 2, the Warlock 8, the others none); Wood Glue in four recipes; the fires x 0.2
+  scrolls  a scroll read: the spell cast at no mana, used up, its cooldown the spell's (a second refused, the learned spell
+           waits too), no weapon left behind; the Warrior cannot read one, the Warlock no protection scroll
+  gearbreak a ring and the torch broken down at the anvil (the worn ring and the lit torch refused)
+  summoner the Summoner: 85 hit points, 50 mana, the Mage's fire and dark fire, Summon Tier 1 (25 mana, two soldiers, a
+           third refused), her soldiers fighting, daggers in both hands and never enchanted, no armour, magic rings only, no
+           tome, the torch; a tier boss: Summon Tier 2 (the Gunner); kept through a death, gone at a restart
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -89,7 +101,7 @@ UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial"
+DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 I2 = unreal.IntPoint
@@ -279,6 +291,8 @@ def step_torch():
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     put(g.get_start_room_center(), 0.0); yield from wait(0.4)
     give = {"Hardwood": 1, "Timber": 1, "Straw Rope": 2, "Oils": 1}
+    # (since the list of 2026-10-30 (875) the torch takes 1 Wood Glue too, on the castle)
+    if any(str(p.label) == "wood glue" for r_ in g.get_editor_property("recipes") if str(r_.item) == "Torch" for p in r_.parts): give["Wood Glue"] = 1
     for n, k in give.items(): c.add_item(n, k)
     c.set_crafting_open(True); yield from rwait(0.2)
     res = {"can": c.can_craft("Torch"), "made": c.craft("Torch"), "torches": c.get_item_count("Torch"),
@@ -1372,7 +1386,7 @@ def step_tabs():
     c.set_inventory_open(True); yield from rwait(0.4)
     res = {"tabs": {}, "refused": []}
     allk = [str(l).split("|")[0] for l in c.get_all_inventory_lines()]
-    want = {0: {"weapon", "carried"}, 1: {"armour", "shield", "torch", "helmet"}, 2: {"item"}, 3: {"component", "repair"}, 4: {"ring", "tome", "teleport", "slash", "key"}}
+    want = {0: {"weapon", "carried"}, 1: {"armour", "shield", "torch", "helmet"}, 2: {"item"}, 3: {"component", "repair"}, 4: {"ring", "tome", "teleport", "slash", "key", "scroll"}}
     for t in range(5):
         c.set_inventory_tab(t); yield from rwait(0.15)
         ks = [str(l).split("|")[0] for l in c.get_inventory_lines()]
@@ -1728,7 +1742,9 @@ def step_rooms():
             if g.get_arena_wave() < 0: break
             kill_all_near(r["at"], 2500); yield from wait(1.0)
         res["arena"]["won"] = md(g.room_uses).get("arena_won", 0)
-        res["arena"]["prize"] = [sorted(str(x) for x in p.things) for p in g.loot_piles if p and not p.hers and dist2(p.get_actor_location(), S.get_room_center(r["room"])) < 400]
+        # (the prize: not the parts the waves' dead left (875's harvests); the arena's own harvest beside it counted apart)
+        res["arena"]["prize"] = [sorted(str(x) for x in p.things) for p in g.loot_piles if p and not p.hers and not p.harvest and dist2(p.get_actor_location(), S.get_room_center(r["room"])) < 400]
+        res["arena"]["harvest_piles"] = sum(1 for p in g.loot_piles if p and p.harvest)
         if doors: S.push_door(doors[0], S.get_door_location(doors[0]))
         yield from wait(0.3); res["arena"]["opens_after"] = S.is_target_open(True, doors[0]) if doors else None
     # ---- the trap gauntlet
@@ -2023,7 +2039,7 @@ def step_tomemana():
     res["after_death"] = {"revived": not c.is_dead(), "knows": [c.knows_spell("Null Sanctum"), c.knows_spell("Apocalypse")], "pool": round(c.get_max_mana(), 1)}
     g.restart_play(0); yield from wait(1.0); refresh(); c = cb()
     res["after_restart"] = {"knows": [c.knows_spell("Null Sanctum"), c.knows_spell("Apocalypse")], "pool": round(c.get_max_mana(), 1)}
-    # (the Summoner learns every type but has no TomeMana: her pool stays)
+    # (the Summoner has no TomeMana: her pool stays; since the user's list of 2026-10-30 (876) she learns no tome at all)
     if any(str(h.name) == "Summoner" for h in g.get_editor_property("heroes")):
         g.switch_hero("Summoner"); yield from wait(0.6); refresh(); c = cb()
         p0 = c.get_max_mana(); c.add_item(tome["Null Sanctum"], 1); yield from wait(0.2)
@@ -2039,7 +2055,7 @@ def step_tomemana():
           and a_["knows"] and a_["pool"] == 300 and abs(a_["mana_gain"] - 80) < 0.6 and "grows to 300" in a_["message"] and a_["cast"] and abs(a_["mana_taken"] - 300) < 0.6
           and res["dead"] and d_["revived"] and all(d_["knows"]) and d_["pool"] == 300
           and not any(res["after_restart"]["knows"]) and res["after_restart"]["pool"] == 100
-          and (("summoner" not in res) or (res["summoner"]["knows"] and res["summoner"]["pool"] == res["summoner"]["pool_before"])))
+          and (("summoner" not in res) or (not res["summoner"]["knows"] and res["summoner"]["pool"] == res["summoner"]["pool_before"])))
     step_result("tomemana", ok, **res)
 
 def ahead(cm, side=0.0):
@@ -2351,11 +2367,350 @@ def step_chilook():
              for r in res.values()) and len(res) == 10
     step_result("chilook", ok, chi=res)
 
+# ------------------------------------------------------------------------------------------------ the user's list of 2026-10-30 (875-877)
+HV = json.load(open(os.path.join(OUT, "harvest.json"), encoding="utf-8"))
+
+def pile_info(p):
+    return {"things": sorted(str(x) for x in p.things), "harvest": bool(p.harvest), "tier": p.tier, "pictures": p.pictures, "particles": p.get_effect_particles(),
+            "picture_cm": round(p.get_picture_height(), 1), "tint": [round(p.get_tint().r, 2), round(p.get_tint().g, 2), round(p.get_tint().b, 2)]}
+
+def tier_kinds():
+    by = {}
+    for m in G["gen"].get_editor_property("monsters"):
+        if m.mesh and m.weight > 0 and 1 <= m.tier <= 5: by.setdefault(m.tier, []).append((str(m.name), str(m.sound_set)))
+    return by
+
+def step_harvest():
+    """monsters harvested (875): a monster of each tier killed before her leaves one pile (bHarvest) floating about 1 m over it
+    (its pictures' height over the floor), lit in its tier's tint, with an essence of its tier or below, its family's part only
+    where the table gives one in that tier, and the any-tier materials only; a big harvest (a boss's) has 3 essences and 2 parts;
+    the pile stays when its set of rooms is dropped and built again; F takes it ("You harvest"), into her pack; a picture of a
+    pile. Then the list's decision 3: each tier's monsters (the census of its sets) and its boss, harvested on paper by the
+    game's own draws, give enough for every recipe of that tier and below (each recipe once, from tiers 1 to t)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 200, ctr.y + 200, ctr.z), 0.0); yield from wait(0.5)
+    kill_all_near(G["pawn"].get_actor_location(), 3000); yield from wait(2.5)
+    for p in list(g.loot_piles):
+        if p: p.destroy_actor()
+    yield from wait(0.3)
+    TK = tier_kinds(); ess = HV["essences"]; parts = {p["family"]: p for p in HV["parts"]}; anyset = set(HV["any"])
+    res = {"kills": [], "bad": []}
+    for t in range(1, 6):
+        for k, (kind, fam) in enumerate(TK.get(t, [])[:3]):
+            n0 = len([p for p in g.loot_piles if p])
+            m = g.spawn_monster_named(kind, ahead(260, (k - 1) * 160), t, 1.0, 0.0, 1.0); yield from wait(0.4)
+            if not m: res["bad"].append(f"{kind}: not spawned"); continue
+            at = m.get_actor_location(); m.apply_damage(1e7, None); yield from wait(0.6)
+            new = [p for p in g.loot_piles if p and dist2(p.get_actor_location(), at) < 150]
+            r = {"kind": kind, "family": fam, "tier": t, "piles": len([p for p in g.loot_piles if p]) - n0}
+            if new: r.update(pile_info(new[0]))
+            res["kills"].append(r)
+            th = r.get("things", [])
+            es = [x for x in th if x in ess]; pa = [x for x in th if x not in ess and x not in anyset]
+            ok_e = len(es) == 1 and ess.index(es[0]) < t
+            fp = parts.get(fam); ok_p = all(fp and x == fp["part"] and t in fp["tiers"] for x in pa) and len(pa) <= 1
+            want_tint = HV["tints"][t - 1]
+            ok_t = all(abs(a - b) < 0.02 for a, b in zip(r.get("tint", [0, 0, 0]), want_tint))
+            if not (r["piles"] == 1 and r.get("harvest") and ok_e and ok_p and ok_t and 60 <= r.get("picture_cm", 0) <= 160 and r.get("pictures", 0) >= 1 and r.get("particles", 0) > 0):
+                res["bad"].append(r)
+            for p in new: p.destroy_actor()
+            g.get_editor_property("loot_piles")
+    # (a big harvest: a boss's, a usurper's, an arena's)
+    big = [list(map(str, g.harvest_of(TK[t][0][0], t, True, 900 + t))) for t in range(1, 6)]
+    res["big"] = big
+    big_ok = all(sum(1 for x in b if x in ess) == HV["boss_essences"] and sum(1 for x in b if x not in ess and x not in anyset) == HV["boss_parts"] for b in big)
+    # (it stays when its set is dropped and built again: a kill in a set of tier 2, the set reloaded)
+    S2 = I2(1, 0)
+    if not g.is_section_generated(S2): g.generate_section_now(S2)
+    yield from built(S2)
+    sec = g.get_section(S2); room = 0; tiles = list(sec.get_room_free_tiles(room)) if sec else []
+    res["reload"] = {}
+    if tiles:
+        put(tiles[0], 0.0); yield from wait(0.4)
+        m = g.spawn_monster_named(TK[2][0][0], ahead(200), 2, 1.0, 0.0, 1.0); yield from wait(0.4)
+        at = m.get_actor_location(); m.apply_damage(1e7, None); yield from wait(0.6)
+        mine = [p for p in g.loot_piles if p and dist2(p.get_actor_location(), at) < 150]
+        res["reload"]["before"] = len(mine)
+        put(ctr, 0.0); yield from wait(0.3)
+        res["reload"]["reloaded"] = g.reload_section(S2); yield from wait(0.5)
+        yield from built(S2)
+        res["reload"]["after"] = sum(1 for p in mine if p and unreal.SystemLibrary.is_valid(p))
+        # (F takes it: the prompt names it, the parts go into her pack, the pile is gone)
+        if mine:
+            p = mine[0]; things = [str(x) for x in p.things]; before = {x: c.get_item_count(x) for x in set(things)}
+            put(p.get_actor_location(), 0.0); yield from wait(0.4)
+            face(G["pawn"].get_actor_location(), p.get_actor_location())
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=G["pawn"].get_actor_rotation().yaw + 180)); yield from wait(0.4)
+            res["reload"]["describe"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+            res["reload"]["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.3)
+            res["reload"]["message"] = str(c.message)
+            res["reload"]["got"] = {x: c.get_item_count(x) - before[x] for x in before}
+            res["reload"]["want"] = {x: things.count(x) for x in set(things)}
+            res["reload"]["gone"] = not unreal.SystemLibrary.is_valid(p)
+    # (a picture of piles floating over the dead: three kills before her)
+    put(V(ctr.x + 200, ctr.y + 200, ctr.z), 0.0); yield from wait(0.4)
+    for k in range(3):
+        m = g.spawn_monster_named(TK[1 + k][0][0], ahead(330, (k - 1) * 170), 1 + k, 1.0, 0.0, 1.0); yield from wait(0.3)
+        if m: m.apply_damage(1e7, None)
+    yield from wait(1.5)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-14, yaw=G["pawn"].get_actor_rotation().yaw)); yield from wait(0.3)
+    shot("harvest_piles"); yield from rwait(0.8)
+    # (decision 3: enough for each tier's recipes)
+    for t in range(1, 6):
+        for _ in range(60):
+            if tally(t) and tally(t)["ok"]: break
+            yield from rwait(0.25)
+    recipes = [r for r in g.get_editor_property("recipes") if r.tier > 0]
+    have = {}; roll = 5000; suff = {}
+    for t in range(1, 6):
+        ta = tally(t); n = ta["all"][1] if ta else 0
+        kinds = TK.get(t, [])
+        for k in range(n):
+            for x in g.harvest_of(kinds[k % len(kinds)][0], t, False, roll): have[str(x)] = have.get(str(x), 0) + 1
+            roll += 1
+        for x in g.harvest_of(kinds[0][0], t, True, roll): have[str(x)] = have.get(str(x), 0) + 1        # (the tier's boss)
+        roll += 1
+        short = []
+        for r in recipes:
+            if r.tier > t: continue
+            for pt in r.parts:
+                got = sum(have.get(str(k), 0) for k in pt.any_of)
+                if str(pt.label).endswith("essence") or any(str(k) in ess or str(k) in [p["part"] for p in HV["parts"]] for k in pt.any_of):
+                    if got < pt.count: short.append(f"{r.item}: {pt.count} {pt.label} ({got})")
+        suff[t] = {"monsters": n, "have": dict(sorted(have.items())), "short": short}
+    res["enough"] = suff
+    quiet(False)
+    rl = res["reload"]
+    ok = (len(res["kills"]) >= 10 and not res["bad"] and big_ok and rl.get("before") == 1 and rl.get("reloaded") and rl.get("after") == 1
+          and str(rl.get("describe", "")).startswith("harvest") and rl.get("f") == "loot" and str(rl.get("message", "")).startswith("You harvest")
+          and rl.get("got") == rl.get("want") and rl.get("gone") and all(not v["short"] for v in suff.values()))
+    step_result("harvest", ok, **res)
+
+def craft_names(c, kind="recipe"):
+    return [str(l).split("|")[1] for l in c.get_craft_lines() if str(l).startswith(kind + "|")]
+
+def step_recipes():
+    """the anvil by tier (875): at tier 1 it offers the tier-1 potions (and the old repair items, the torch), no tier-2 one; a
+    Small Healing Potion made of 1 Faint Essence and 1 Mutant Ichor (used up); a Large one refused ("tier 2"); tier 2 opened
+    (the start set cleared): the tier-2 potions offered, a Large Healing Potion made, tier 3's still not. Scrolls: the Warrior
+    and the Martial Artist are offered none, the Mage all of tiers 1 and 2 (11), the Warlock only their offense and curses (8),
+    the Summoner all 11; the Mage makes a Scroll of Fire Bolt (2 Faint Essence, 1 Venom Sac). Wood Glue in the Slickstone,
+    the Patch Kit, the Repair Kit and the torch (a Slickstone made uses 5). Null Sanctum's and Apocalypse's scrolls take 6
+    Radiant Essence. The fires' volumes are sounds.json's x 0.2"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    R_ = {str(r.item): r for r in g.get_editor_property("recipes")}
+    res = {"highest": g.get_highest_open_tier(), "offered_t1": craft_names(c)}
+    pot1 = ["Small Healing Potion", "Medium Healing Potion", "Small Mana Potion", "Medium Mana Potion"]
+    for n, k in (("Faint Essence", 3), ("Mutant Ichor", 3), ("Dim Essence", 3), ("Troll Heart", 3)): c.add_item(n, k)
+    n0 = c.get_item_count("Small Healing Potion")
+    res["small"] = {"made": c.craft("Small Healing Potion"), "count": c.get_item_count("Small Healing Potion") - n0, "faint_left": c.get_item_count("Faint Essence"), "ichor_left": c.get_item_count("Mutant Ichor")}
+    res["large_t1"] = {"made": c.craft("Large Healing Potion"), "message": str(c.message)}
+    # (tier 2 opened: the start set cleared, as the tiers step does it)
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0))
+    for _ in range(120):
+        if g.is_tier_open(2): break
+        yield from rwait(0.25)
+    yield from wait(0.5)
+    res["highest_after"] = g.get_highest_open_tier(); res["offered_t2"] = craft_names(c)
+    res["large_t2"] = {"made": c.craft("Large Healing Potion"), "count": c.get_item_count("Large Healing Potion")}
+    sc = {}
+    for hero in ("Warrior", "MartialArtist", "Mage", "Warlock", "Summoner"):
+        if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from wait(0.6); refresh()
+        sc[hero] = sorted(n for n in craft_names(cb()) if n.startswith("Scroll of "))
+    res["scrolls"] = {h: len(v) for h, v in sc.items()}; res["mage_scrolls"] = sc["Mage"]; res["warlock_scrolls"] = sc["Warlock"]
+    g.switch_hero("Mage"); yield from wait(0.6); refresh(); c = cb()
+    for n, k in (("Faint Essence", 2), ("Venom Sac", 1)): c.add_item(n, k)
+    res["fire_scroll"] = {"made": c.craft("Scroll of Fire Bolt"), "count": c.get_item_count("Scroll of Fire Bolt"), "faint_left": c.get_item_count("Faint Essence"), "venom_left": c.get_item_count("Venom Sac")}
+    # (Wood Glue)
+    res["wood_glue"] = {n: next((p.count for p in R_[n].parts if str(p.label) == "wood glue"), 0) for n in ("Slickstone", "Patch Kit", "Repair Kit", "Torch")}
+    for n, k in (("Straw Rope", 10), ("Glue", 10), ("Cured Leather Strip", 10), ("Wood Log", 10), ("Oils", 5), ("Coarse Hide", 5), ("Wood Glue", 6)): c.add_item(n, k)
+    res["slickstone"] = {"made": c.craft("Slickstone"), "wood_glue_left": c.get_item_count("Wood Glue")}
+    res["great"] = {n: [(str(p.label), p.count) for p in R_[f"Scroll of {n}"].parts] for n in ("Null Sanctum", "Apocalypse", "Meteor Storm")}
+    SJ = json.load(open(os.path.join(SA, "random_dungeon_combat", "sounds.json"), encoding="utf-8")); sets = SJ.get("sets", SJ)
+    snd = g.get_editor_property("sounds")
+    res["fires"] = {k: [round(snd[k].volume, 4), round(sets[k]["volume"] * HV["fire_scale"], 4)] for k in ("Env.Torch", "Env.Brazier", "Env.Hearth") if k in snd}
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
+    o1, o2 = res["offered_t1"], res["offered_t2"]
+    ok = (res["highest"] == 1 and all(p in o1 for p in pot1) and "Large Healing Potion" not in o1 and "Slickstone" in o1 and "Torch" in o1
+          and res["small"]["made"] and res["small"]["count"] == 1 and res["small"]["faint_left"] == 2 and res["small"]["ichor_left"] == 2
+          and not res["large_t1"]["made"] and "tier 2" in res["large_t1"]["message"]
+          and res["highest_after"] == 2 and "Large Healing Potion" in o2 and "Uncommon Mana Potion" in o2 and "Wondrous Healing Potion" not in o2
+          and res["large_t2"]["made"] and res["large_t2"]["count"] == 1
+          and res["scrolls"] == {"Warrior": 0, "MartialArtist": 0, "Mage": 11, "Warlock": 8, "Summoner": 11}
+          and res["fire_scroll"]["made"] and res["fire_scroll"]["count"] == 1 and res["fire_scroll"]["venom_left"] == 0
+          and res["wood_glue"] == {"Slickstone": 5, "Patch Kit": 10, "Repair Kit": 15, "Torch": 1} and res["slickstone"]["made"] and res["slickstone"]["wood_glue_left"] == 1
+          and res["great"]["Null Sanctum"][0] == ("radiant essence", 6) and res["great"]["Apocalypse"][0] == ("radiant essence", 6) and res["great"]["Meteor Storm"][0] == ("radiant essence", 4)
+          and res["fires"] and all(abs(a - b) < 1e-3 for a, b in res["fires"].values()))
+    step_result("recipes", ok, **res)
+
+def step_scrolls():
+    """scrolls (875): the Mage reads a Scroll of Fireball at a monster: her mana untouched, the monster hurt by Fireball's damage,
+    the scroll used up, no new weapon on her bar or in her list once it is done; read again at once: refused (Fireball's
+    cooldown), the scroll kept; the spell learned from its tome waits for the same cooldown; the Warrior cannot read one (kept);
+    the Warlock reads an offense scroll but not a protection one; the Summoner reads Ash Ward (her ward up)"""
+    c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
+    kill_all_near(G["pawn"].get_actor_location(), 3000); yield from wait(0.5)
+    sp = next(s for s in g.get_editor_property("spells") if str(s.name) == "Fireball")
+    c.add_item("Scroll of Fireball", 2); qs0 = [str(x) for x in c.get_quick_slots()]; w0 = len(g.get_editor_property("weapons"))
+    m = spawn_dummy(ahead(500)); yield from wait(0.5); h0 = hp(m); c.set_mana(c.get_max_mana()); m0 = c.get_mana()
+    res = {"fireball_damage": sp.damage}
+    res["read"] = {"ok": c.read_scroll("Scroll of Fireball"), "message": str(c.message), "scroll_weapon": c.get_scroll_weapon(), "mana_taken": round(m0 - c.get_mana(), 1)}
+    t0 = time.time()
+    while c.get_scroll_weapon() >= 0 and time.time() - t0 < 4.0: yield
+    res["read"]["cast_s"] = round(time.time() - t0, 2); yield from wait(0.1)
+    res["read"]["bar_same"] = [str(x) for x in c.get_quick_slots()] == qs0          # (the scroll took no slot of the bar)
+    res["read"]["weapons_after"] = len(g.get_editor_property("weapons")) - w0
+    # (read again once the cast is done: Fireball's cooldown (4 s) has not run out)
+    res["again"] = {"ok": c.read_scroll("Scroll of Fireball"), "message": str(c.message), "left": c.get_item_count("Scroll of Fireball")}
+    # (the cooldown is the spell's: learned from its tome, Fireball waits for what the scroll began)
+    c.add_item("Tome of Fireball", 1); yield from wait(0.1)
+    fi = next((k for k, w in enumerate(g.get_editor_property("weapons")) if str(w.name) == "Fireball" and not w.scroll), -1)
+    res["learned"] = {"index": fi, "cooldown_left": round(c.get_cooldown_left(fi), 1) if fi >= 0 else None}
+    yield from wait(1.0)
+    res["read"].update({"lost": round(h0 - hp(m), 1), "left_after_two": c.get_item_count("Scroll of Fireball"), "scroll_weapon_after": c.get_scroll_weapon(), "read": c.scrolls_read})
+    drop([m]); yield from wait(3.0)
+    # (the Warrior: none)
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); c = cb()
+    c.add_item("Scroll of Fire Bolt", 1); res["warrior"] = {"ok": c.read_scroll("Scroll of Fire Bolt"), "message": str(c.message), "kept": c.get_item_count("Scroll of Fire Bolt")}
+    g.switch_hero("Warlock"); yield from wait(0.6); refresh(); c = cb()
+    c.add_item("Scroll of Ash Ward", 1); c.add_item("Scroll of Frost Shard", 1)
+    m = spawn_dummy(ahead(500)); yield from wait(0.5)
+    res["warlock"] = {"ward": c.read_scroll("Scroll of Ash Ward"), "ward_message": str(c.message)}
+    yield from wait(0.2); res["warlock"]["frost"] = c.read_scroll("Scroll of Frost Shard"); yield from wait(2.0); drop([m])
+    g.switch_hero("Summoner"); yield from wait(0.6); refresh(); c = cb()
+    c.add_item("Scroll of Ash Ward", 1); c.set_mana(c.get_max_mana()); m0 = c.get_mana(); yield from wait(0.5)
+    res["summoner"] = {"ok": c.read_scroll("Scroll of Ash Ward"), "message": str(c.message)}; yield from wait(1.5)
+    res["summoner"].update({"ward_hits": c.get_ward_hits(), "mana_taken": round(m0 - c.get_mana(), 1)})
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
+    rd, ag = res["read"], res["again"]
+    ok = (rd["ok"] and rd["scroll_weapon"] >= 0 and rd["mana_taken"] == 0 and abs(rd["lost"] - sp.damage) < 1.0 and not ag["ok"] and "not ready" in ag["message"]
+          and ag["left"] == 1 and rd["left_after_two"] == 1 and rd["weapons_after"] == 0 and rd["scroll_weapon_after"] == -1 and rd["bar_same"] and rd["read"] == 1
+          and res["learned"]["index"] >= 0 and (res["learned"]["cooldown_left"] or 0) > 2.0
+          and not res["warrior"]["ok"] and "cannot read" in res["warrior"]["message"] and res["warrior"]["kept"] == 1
+          and not res["warlock"]["ward"] and "cannot read" in res["warlock"]["ward_message"] and res["warlock"]["frost"]
+          and res["summoner"]["ok"] and res["summoner"]["ward_hits"] > 0 and res["summoner"]["mana_taken"] == 0)
+    step_result("scrolls", ok, **res)
+
+def step_gearbreak():
+    """any equipment breaks down (875): at the anvil's list a carried ring and the torch; an HP Potency Ring 3 (tier 2)
+    gives 2 Copper Ingot, 2 Bronze Ingot, 2 Faint Essence; the worn one (the last) is refused; the torch, lit, refused, put out,
+    gives 1 Wood Log, 1 Straw Rope, 1 Oils"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+    ring = "HP Potency Ring 3"; c.add_item(ring, 2); c.add_item("Torch", 1)          # (a ring the Warrior wears)
+    res = {"listed": craft_names(c, "breakdown")}
+    b = {n: c.get_item_count(n) for n in ("Copper Ingot", "Bronze Ingot", "Faint Essence", "Wood Log", "Straw Rope", "Oils")}
+    res["ring"] = {"ok": c.break_down_gear(ring), "left": c.get_item_count(ring)}
+    res["worn"] = c.wear_ring(ring); res["ring_worn"] = {"ok": c.break_down_gear(ring), "message": str(c.message), "left": c.get_item_count(ring)}
+    c.use_item("Torch"); yield from wait(0.2)
+    res["torch_lit"] = {"held": c.is_torch_held(), "ok": c.break_down_gear("Torch"), "message": str(c.message)}
+    c.use_item("Torch"); yield from wait(0.2)
+    res["torch"] = {"held": c.is_torch_held(), "ok": c.break_down_gear("Torch"), "left": c.get_item_count("Torch")}
+    res["got"] = {n: c.get_item_count(n) - v for n, v in b.items()}
+    quiet(False)
+    ok = (ring in res["listed"] and "Torch" in res["listed"] and res["ring"]["ok"] and res["ring"]["left"] == 1
+          and not res["ring_worn"]["ok"] and "take it off" in res["ring_worn"]["message"] and res["ring_worn"]["left"] == 1
+          and res["torch_lit"]["held"] and not res["torch_lit"]["ok"] and not res["torch"]["held"] and res["torch"]["ok"] and res["torch"]["left"] == 0
+          and res["got"] == {"Copper Ingot": 2, "Bronze Ingot": 2, "Faint Essence": 2, "Wood Log": 1, "Straw Rope": 1, "Oils": 1})
+    step_result("gearbreak", ok, **res)
+
+def step_summoner():
+    """the Summoner (876): Summoner4's pawn, 85 hit points, 50 mana (half the Mage's), her weapons Fire, Dark Fire and Summon
+    Tier 1 with the Mage's damage and effects; a fire bolt at a monster (its damage); Summon Tier 1: 25 mana (half her pool), a
+    Soldier at her side as strong as a tier-1 one, a second, a third refused with no mana taken; her soldiers fight a monster
+    near her; a dagger found: in her hands, a slash refused (never enchanted); armour refused, an HP ring refused, a magic ring
+    worn; a tome not learned; the torch held; a tier's boss slain: Summon Tier 2 (the Gunner, 3 at most) is hers, its cast another
+    clip; kept through a death, gone at a restart; a picture of her and her soldiers"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
+    kill_all_near(G["pawn"].get_actor_location(), 3000); yield from wait(0.5)
+    W = lambda: [str(w.name) for w in g.get_editor_property("weapons")]
+    H = {str(h.name): h for h in g.get_editor_property("heroes")}; mage = H["Mage"]
+    ws = g.get_editor_property("weapons")
+    res = {"pawn": G["pawn"].get_class().get_name(), "hp": c.get_max_health(), "mana": c.get_max_mana(), "weapons": W(),
+           "same_as_mage": [(w.damage == mw.damage and w.bolt_effect == mw.bolt_effect and w.burst_effect == mw.burst_effect and w.mana_cost == mw.mana_cost) for w, mw in zip(ws[:2], mage.weapons)],
+           "clips": sorted({w.attacks[0].get_name() for w in list(H["Summoner"].weapons) + list(H["Summoner"].locked_weapons)})}
+    m = spawn_dummy(ahead(450)); yield from wait(0.5); h0 = hp(m); c.set_mana(c.get_max_mana())
+    c.select_weapon(0); yield from wait(0.3); res["fire"] = {"started": c.start_attack()}; yield from wait(2.0); res["fire"]["lost"] = round(h0 - hp(m), 1)
+    # (Summon Tier 1, three times)
+    si = W().index("Summon Tier 1"); res["summon"] = []
+    for k in range(3):
+        c.set_mana(c.get_max_mana()); m0 = c.get_mana(); n0 = g.count_summoned("Summon Tier 1")
+        st = c.start_attack_with(si); taken = round(m0 - c.get_mana(), 1); yield from wait(2.2)          # (taken at once: her mana comes back as she casts)
+        res["summon"].append({"started": st, "mana": taken, "count": g.count_summoned("Summon Tier 1"), "message": str(c.message)})
+    al = [a for a in g.get_allies() if str(a.summon_spell) == "Summon Tier 1"]
+    res["allies"] = [{"kind": str(a.monster_name), "hp": round(a.get_max_health(), 1), "damage": round(a.get_damage(), 1), "m": round(dist2(a.get_actor_location(), G["pawn"].get_actor_location()) / 100, 1)} for a in al]
+    ref = g.spawn_monster_named("Soldier", ahead(-600), 1, 1.0, 1.0, 1.0); yield from wait(0.3)
+    res["tier1_soldier"] = {"hp": round(ref.get_max_health(), 1), "damage": round(ref.get_damage(), 1)} if ref else None
+    drop([ref]); yield from wait(0.5)
+    # (they fight: the dummy before her loses hit points to them)
+    # (allies look for foes within the monsters' aggro distance, which quiet() takes away: given back for this)
+    quiet(False); h1 = hp(m); yield from wait(6.0); res["allies_fight"] = round(h1 - hp(m), 1); quiet(True)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=G["pawn"].get_actor_rotation().yaw + 150)); yield from wait(0.4); shot("summoner_soldiers"); yield from rwait(0.8)
+    drop([m]); yield from wait(0.5)
+    # (her equipment: a dagger, a slash refused, armour and an HP ring refused, a magic ring worn, a tome refused, the torch)
+    c.add_item("Dagger", 1); yield from wait(0.2)
+    di = next((k for k, w in enumerate(g.get_editor_property("weapons")) if str(w.name) == "Dagger"), -1)
+    res["dagger"] = {"index": di, "both_hands": bool(g.get_editor_property("weapons")[di].mesh) and bool(g.get_editor_property("weapons")[di].off_hand_mesh) if di >= 0 else False}
+    sl = next((str(s.name) for s in g.get_editor_property("slashes")), None)
+    if sl: c.add_item(sl, 1); res["slash"] = {"begun": c.begin_slash(sl), "message": str(c.message)}
+    A = items_of(unreal.RDItemKind.ARMOUR); li = next(str(i.name) for i in A if i.armour_weight == unreal.RDArmourWeight.LIGHT)
+    c.add_item(li, 1); c.wear_armour(li); res["armour_worn"] = str(c.get_worn_armour())
+    hr = next(str(i.name) for i in items_of(unreal.RDItemKind.RING) if i.ring_kind == unreal.RDRingKind.HEALTH)
+    mr = next(str(i.name) for i in items_of(unreal.RDItemKind.RING) if i.ring_kind == unreal.RDRingKind.MAGIC)
+    c.add_item(hr, 1); c.add_item(mr, 1); res["hp_ring"] = c.wear_ring(hr); res["magic_ring"] = c.wear_ring(mr); res["mana_ringed"] = c.get_max_mana()
+    res["summon_mana_ringed"] = g.get_editor_property("weapons")[si].mana_cost
+    c.wear_ring(mr)
+    c.add_item("Tome of Frost Shard", 1); res["tome"] = {"knows": c.knows_spell("Frost Shard"), "carried": c.get_item_count("Tome of Frost Shard")}
+    c.add_item("Torch", 1); c.use_item("Torch"); yield from wait(0.2); res["torch"] = c.is_torch_held(); c.use_item("Torch")
+    # (a tier's boss: Summon Tier 2)
+    n0 = len(W())
+    if g.get_editor_property("boss_encounters"):
+        g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(1.5)
+        for _ in range(80):
+            if any(str(l).startswith("boss|") for l in g.get_encounter_lines()): break
+            yield from rwait(0.25)
+        E_ = [str(l).split("|") for l in g.get_encounter_lines()]; boss = [e for e in E_ if e[0] == "boss" and "USURPER" not in e[7]]
+        if boss:
+            at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3]))
+            for mo in g.get_monsters():
+                if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 600: mo.apply_damage(1e7, None)
+            yield from wait(0.8)
+    res["boss"] = {"weapons": W()[n0:], "unlocked": g.weapons_unlocked}
+    if "Summon Tier 2" in W():
+        s2 = W().index("Summon Tier 2"); c.set_mana(c.get_max_mana()); m0 = c.get_mana()
+        res["tier2"] = {"started": c.start_attack_with(s2), "mana": round(m0 - c.get_mana(), 1)}; yield from wait(2.4)
+        al2 = [a for a in g.get_allies() if str(a.summon_spell) == "Summon Tier 2"]
+        res["tier2"]["kinds"] = [str(a.monster_name) for a in al2]
+    c.apply_damage(c.get_health() + 500.0, None); yield from wait(1.0)
+    t0 = time.time()
+    while c.is_dead() and time.time() - t0 < 20: yield
+    yield from wait(1.0)
+    res["after_death"] = W()
+    g.restart_play(0); yield from wait(1.0); refresh(); c = cb()
+    res["after_restart"] = W()
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
+    sm = res["summon"]; t1 = res.get("tier1_soldier") or {}
+    ok = (res["pawn"].startswith("BP_SU4_SummonerCharacter") and res["hp"] == 85 and res["mana"] == 50 and res["weapons"] == ["Fire", "Dark Fire", "Summon Tier 1"]
+          and all(res["same_as_mage"]) and len(res["clips"]) == 6 and res["fire"]["started"] and abs(res["fire"]["lost"] - mage.weapons[0].damage) < 0.6
+          and sm[0]["started"] and sm[0]["mana"] == 25 and sm[0]["count"] == 1 and sm[1]["count"] == 2 and not sm[2]["started"] and sm[2]["mana"] == 0 and sm[2]["count"] == 2
+          and "already" in sm[2]["message"] and len(res["allies"]) == 2 and all(a["kind"] == "Soldier" and abs(a["hp"] - t1.get("hp", -1)) < 1 for a in res["allies"])
+          and res["allies_fight"] > 0 and res["dagger"]["both_hands"] and (not sl or not res["slash"]["begun"]) and res["armour_worn"] == "None"
+          and not res["hp_ring"] and res["magic_ring"] and res["mana_ringed"] > 50 and res["summon_mana_ringed"] == round(res["mana_ringed"] * 0.5)
+          and not res["tome"]["knows"] and res["tome"]["carried"] == 1 and res["torch"]
+          and res["after_restart"] == ["Fire", "Dark Fire", "Summon Tier 1"])
+    if g.get_editor_property("boss_encounters"):
+        ok = ok and res["boss"]["weapons"] == ["Summon Tier 2"] and res.get("tier2", {}).get("started") and res["tier2"]["kinds"] == ["Gunner"] and "Summon Tier 2" in res["after_death"]
+    step_result("summoner", ok, **res)
+
 STEPS = {"chilook": step_chilook, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,
-         "martial": step_martial, "martialroom": step_martialroom}
+         "martial": step_martial, "martialroom": step_martialroom, "harvest": step_harvest, "recipes": step_recipes, "scrolls": step_scrolls,
+         "gearbreak": step_gearbreak, "summoner": step_summoner}
 def view_owner():
     """what clears the game's view of the editor's other windows: the generator, or the menu's turntable"""
     if G.get("gen"): return G["gen"]

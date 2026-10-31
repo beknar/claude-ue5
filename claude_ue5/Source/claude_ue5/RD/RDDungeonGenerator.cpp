@@ -444,6 +444,7 @@ bool ARDDungeonGenerator::ApplyHero(FName Name)
 	if (!H) return false;
 	CurrentHero = H->Name;
 	StartWeaponsOf(*H, Weapons);
+	WeaponsUnlocked = 0;          // (her own locked weapons from the first: the Martial Artist's count kept gave the Summoner's boss nothing (868 all))
 	DashClip = H->DashClip;
 	PlayerMaxHealth = H->MaxHealth;
 	PlayerMaxMana = H->MaxMana; ManaPerSecond = H->ManaPerSecond;
@@ -962,6 +963,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	++MonstersKilled;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
 	// (mistward: one of a boss's band or a ring's guards stays dead)
+	bool bBossKill = false;
 	for (FEncounter& E : Encounters)
 		for (int32 I = 0; I < E.Live.Num(); ++I)
 			if (E.Live[I].Get() == Monster)
@@ -969,6 +971,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 				E.Dead[I] = true;
 				if (E.bBoss && I == 0)
 				{
+					bBossKill = true;
 					TierNotice = E.bThrone ? FString(TEXT("THE USURPER IS SLAIN")) : FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds();
 					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
@@ -988,6 +991,8 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 						}
 				}
 			}
+	// (the list of 2026-10-30: its parts float over it until she takes them; a boss's or a usurper's are more)
+	if (bHarvest && Monster) HarvestKill(Monster, bBossKill);
 	// (the tiers: it stays dead, also when its section is generated again)
 	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
 		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord))
@@ -1036,7 +1041,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 		}
 	Encounters.Reset(); ForcedLoot.Reset(); TiersOpened.Reset(); CensusCache.Reset(); CensusQueue.Reset();
 	for (ARDLootPile* P : LootPiles) if (IsValid(P)) P->Destroy();
-	LootPiles.Reset();
+	LootPiles.Reset(); Harvests = HarvestRolls = 0;
 	Pads.Reset(); PadSections.Reset(); PadRingsTaken.Reset(); PadActors.Reset(); PadChoice = 0; Teleports = 0;
 	CellsOpened.Reset(); PrisonersFreed = CellBreakouts = 0;
 	SpentTraps.Reset(); DisarmKey = FIntVector(0, 0, -1); TrapsTriggered = TrapsDisarmed = TrapHits = 0; LastTrap.Reset();
@@ -1049,6 +1054,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	ItemsFound = 0; LastFound = NAME_None; LastFoundList.Reset();
 	// (the weapons she found are gone: hers are the hero's again)
 	if (const FRDHeroDef* H = Heroes.Num() > 0 ? FindHero(CurrentHero) : nullptr) StartWeaponsOf(*H, Weapons);
+	WeaponsUnlocked = 0;          // (a new run: none of her locked weapons gained yet)
 	// (martial_arts: the room's monsters come again from none)
 	for (const TWeakObjectPtr<ARDMonster>& M : OneRoomLive) if (M.IsValid()) M->Destroy();
 	OneRoomLive.Reset(); OneRoomSpawned = 0; OneRoomNext = 0.f;
@@ -1189,8 +1195,9 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	for (const ARDLootPile* Lp : LootPiles)
 		if (IsValid(Lp) && FVector::Dist2D(Lp->GetActorLocation(), From) < 260.f)
 		{
-			// (hers, where she fell; or something the rules laid on the floor: the guarded ring)
+			// (hers, where she fell; or something the rules laid on the floor: the guarded ring; or a dead monster's parts)
 			if (Lp->bHers) return FString::Printf(TEXT("take up your things (%d)"), Lp->GetNumThings());
+			if (Lp->bHarvest) return FString::Printf(TEXT("harvest the parts (%d)"), Lp->GetNumThings());
 			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
 		}
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }

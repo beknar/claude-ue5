@@ -607,6 +607,52 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") TArray<FName> SlashesGiven;
 	FRandomStream SlashR;
 
+	// ---- mistward_castle, the user's list of 2026-10-30 (docs/improvements3.txt, pipeline/unreal/875; RD/RDMistward3.cpp)
+	/** monsters are harvested when they die: parts float over the corpse (a loot pile, bHarvest) until she takes them (F).
+	 *  Each kill: one essence of the tiers up to its own (its own tier's EssenceOwnTier of the time, else one of the tiers
+	 *  below, evenly), its family's part HarvestPartChance of the time (when the family has one in its tier), one of HarvestAny
+	 *  HarvestAnyChance of the time; a boss or a usurper BossEssences essences and BossParts parts, an arena won the same.
+	 *  The draws are hashes of the session seed and the count of harvests (no stream of the play's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") bool bHarvest = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") TArray<FName> Essences;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") float EssenceOwnTier = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") TArray<FRDHarvestPart> HarvestParts;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") float HarvestPartChance = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") TArray<FName> HarvestAny;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") float HarvestAnyChance = 0.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") int32 BossEssences = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") int32 BossParts = 2;
+	/** the pile's light by the tier of the monster (1 to 5) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") TArray<FLinearColor> HarvestTints;
+	/** piles harvested, and the draws made (the next harvest's hash) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward3") int32 Harvests = 0;
+	int32 HarvestRolls = 0;
+	/** what a monster of this kind and tier gives (Big: a boss, a usurper, an arena won), draw number Roll (tests: the
+	 *  recipes a tier's monsters make possible) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") TArray<FName> HarvestOf(FName Kind, int32 Tier, bool bBig, int32 Roll) const;
+	/** a harvest laid where a monster fell (or an arena's middle): a pile of its things, its light by the tier */
+	ARDLootPile* DropHarvest(const FVector& At, const TArray<FName>& Things, int32 Tier);
+	void HarvestKill(ARDMonster* Monster, bool bBig);
+	/** the anvil offers a recipe only once its tier is open; a scroll's only to a hero who reads scrolls of its spell's type */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") bool bRecipeTiers = false;
+	/** the highest tier open (1 before any other opens; MaxTier 0: every recipe's) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") int32 GetHighestOpenTier() const;
+	/** why the anvil does not offer it ("" when it does) */
+	FString RecipeRefusal(const FRDRecipe& Rc) const;
+	/** a hero reads scrolls of this type (her card's ScrollTypes) */
+	bool HeroReadsScroll(ERDSpellType Type) const;
+	/** rings and the torch break down at an anvil too (the breakdown table's "ring" and "torch") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") bool bBreakAnyGear = false;
+	/** the Summoner's summons: one of Kind at her side, as strong as a monster of its own tier, tagged with the spell */
+	ARDMonster* SummonKindAlly(FName Kind, FVector At, FName Spell);
+	/** her allies brought by this spell, alive */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") int32 CountSummoned(FName Spell) const;
+	/** the name of the monster a Summon spell calls, as the HUD writes it (its gallery title) */
+	FString SummonTitleOf(const FRDSpellDef& S) const;
+	/** tests and reels (a card says so): tiers 2 to UpTo open now, as if each tier before had reached its share (with
+	 *  bEncounters each one's boss and guarded ring are set too); how many opened */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward3") int32 DebugOpenTiers(int32 UpTo, bool bEncounters);
+
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;

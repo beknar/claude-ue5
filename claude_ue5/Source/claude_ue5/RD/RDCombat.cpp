@@ -154,14 +154,9 @@ void URDCombatComponent::BreakWeapon(int32 Index)
 	if (AttackTime >= 0.f && AttackIndex == Index) EndAttack();
 	const bool bDrawn = Index == WeaponIndex;
 	if (!W.Slash.IsNone()) AddItem(W.Slash, 1);            // (the third list: its slash is not lost with it)
-	Generator->Weapons.RemoveAt(Index);
-	if (Wear.IsValidIndex(Index)) Wear.RemoveAt(Index);
-	if (NextOf.IsValidIndex(Index)) NextOf.RemoveAt(Index);
-	// (the bolts still on their way: theirs is gone, the others' indices move down)
-	Bolts.RemoveAll([Index](const FBolt& B) { return B.Weapon == Index; });
-	for (FBolt& B : Bolts) if (B.Weapon > Index) --B.Weapon;
-	for (int32& P : PendingBreak) if (P > Index) --P;
-	if (AttackIndex > Index) --AttackIndex;
+	// (out of her list, its bolts still on their way with it, every index after it moved down: one way for a weapon broken,
+	// broken down or a scroll's done (the PR review's find: the three copies had drifted apart))
+	DropWeaponAt(Index);
 	++WeaponsBroken; LastBroken = W.Name;
 	SetMessage(FString::Printf(TEXT("Your %s broke"), *W.Name.ToString().ToLower()));
 	if (AActor* O = GetOwner()) Generator->PlaySoundAt(TEXT("Player.Break"), O->GetActorLocation());
@@ -170,9 +165,8 @@ void URDCombatComponent::BreakWeapon(int32 Index)
 	{
 		// (she draws the first of her weapons that is not cast alongside: one she started with)
 		WeaponIndex = -1;
-		for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (!Generator->Weapons[I].bAlongside) { SelectWeapon(I); break; }
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (!Generator->Weapons[I].bAlongside && !Generator->Weapons[I].bScroll) { SelectWeapon(I); break; }
 	}
-	else if (WeaponIndex > Index) --WeaponIndex;
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
 }
 
@@ -206,7 +200,7 @@ void URDCombatComponent::ResetWeapons()
 
 void URDCombatComponent::SelectWeapon(int32 Index)
 {
-	if (!Generator || !Generator->Weapons.IsValidIndex(Index) || Index == WeaponIndex || bDead || Generator->Weapons[Index].bAlongside) return;
+	if (!Generator || !Generator->Weapons.IsValidIndex(Index) || Index == WeaponIndex || bDead || Generator->Weapons[Index].bAlongside || Generator->Weapons[Index].bScroll) return;
 	if (AttackTime >= 0.f) EndAttack();
 	if (WeaponIndex >= 0 && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Draw"), GetOwner()->GetActorLocation());
 	WeaponIndex = Index;
@@ -257,7 +251,7 @@ void URDCombatComponent::NextWeapon(int32 Step)
 	for (int32 K = 1; K <= N; ++K)
 	{
 		const int32 I = ((WeaponIndex + Step * K) % N + N) % N;
-		if (!Generator->Weapons[I].bAlongside) { SelectWeapon(I); return; }
+		if (!Generator->Weapons[I].bAlongside && !Generator->Weapons[I].bScroll) { SelectWeapon(I); return; }
 	}
 }
 
@@ -354,6 +348,19 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 			return false;
 		}
 	}
+	// (mistward, the Summoner: a summon she leads as many of as it allows is refused before its mana is taken)
+	if (W->bSpell)
+		if (const FRDSpellDef* Sd = SpellOf(Index); Sd && Sd->Kind == ERDSpellKind::Summon && Generator->CountSummoned(Sd->Name) >= FMath::Max(Sd->Count, 1))
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			if (Now - NoManaTime > 0.6f)
+			{
+				++CastsRefused; ++SummonsRefused;
+				SetMessage(FString::Printf(TEXT("You lead %d of them already (%s): no more answer %s"), FMath::Max(Sd->Count, 1), *Generator->SummonTitleOf(*Sd), *Sd->Name.ToString()));
+			}
+			NoManaTime = Now;
+			return false;
+		}
 	// (the Martial Artist's chi attacks (bolts with a range of their own): with no monster within it that she can see, none
 	// is made and no mana spent (the first test's chi at 6 m took its 7 mana for nothing); martial_arts: made all the same)
 	if (W->bSpell && W->BoltRange > 0.f && !Generator->bChiWithoutTarget && !PickTarget(W->BoltRange, true))
@@ -585,7 +592,7 @@ void URDCombatComponent::Fall()
 				TArray<FRDWeaponDef> Base, Learned;
 				Generator->StartWeaponsOf(*H, Base);
 				for (const FRDWeaponDef& Wd : Generator->Weapons)
-					if (Wd.SpellIndex >= 0 && Wd.Item.IsNone() && !Base.ContainsByPredicate([&](const FRDWeaponDef& C) { return C.Name == Wd.Name; })) Learned.Add(Wd);
+					if (Wd.SpellIndex >= 0 && Wd.Item.IsNone() && !Wd.bScroll && !Base.ContainsByPredicate([&](const FRDWeaponDef& C) { return C.Name == Wd.Name; })) Learned.Add(Wd);
 				Generator->Weapons = Base;
 				Generator->Weapons.Append(Learned);
 			}
@@ -652,6 +659,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickSounds(Dt, Now);
 	TickBolts(Dt);
 	TickSpells(Dt, Now);
+	TickScrollWeapon();          // (mistward: a scroll's weapon gone once its cast and bolts are done)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0) TickSlashAreas(Dt);
 	if (Generator->bQuickSlots && (Generator->Weapons.Num() != LastWeaponCount || WeaponSig() != LastWeaponSig)) FillQuickSlots();
@@ -862,9 +870,11 @@ bool URDCombatComponent::UseItem(FName Name)
 	}
 	if (It.Kind == ERDItemKind::Component)
 	{
-		SetMessage(FString::Printf(TEXT("The %s is a crafting material: an anvil makes repair items from it (F at an anvil)"), *Lb));
+		SetMessage(Generator->bHarvest ? FString::Printf(TEXT("The %s is a crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil)"), *Lb)
+		                               : FString::Printf(TEXT("The %s is a crafting material: an anvil makes repair items from it (F at an anvil)"), *Lb));
 		return false;
 	}
+	if (It.Kind == ERDItemKind::Scroll) return ReadScroll(Name);          // (mistward: cast once, no mana)
 	if (It.Kind == ERDItemKind::Weapon)
 	{
 		// (one she carries is not made for her hero: had it been, it would be among her weapons)
@@ -949,6 +959,7 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 		{
 			// (a found weapon: what is left of its durability, and its full durability)
 			const FRDWeaponDef& W = Generator->Weapons[I];
+			if (W.bScroll) continue;
 			Out.Add(W.Durability > 0.f ? FString::Printf(TEXT("weapon|%s|%.0f|%.0f"), *W.Name.ToString(), GetWeaponWear(I), W.Durability) : FString::Printf(TEXT("weapon|%s"), *W.Name.ToString()));
 		}
 	// (the quick bar's abilities, after the weapons: "ability|<name>|<its slot, -1: off the bar>")
@@ -986,6 +997,13 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 			Out.Add(FString::Printf(TEXT("ring|%s|%d|%d"), *N.ToString(), bOn ? 1 : 0, GetItemCount(N)));
 		}
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Tome) Out.Add(FString::Printf(TEXT("tome|%s|%d"), *N.ToString(), GetItemCount(N)));
+	// (mistward: scrolls "scroll|<name>|<count>|<1 her hero reads it>")
+	for (const FName& N : CarriedOrder)
+		if (KindOf(N) == ERDItemKind::Scroll)
+		{
+			const int32 Ix = Generator->FindItem(N); const int32 Si = Ix >= 0 ? Generator->FindSpell(Generator->Items[Ix].Spell) : -1;
+			Out.Add(FString::Printf(TEXT("scroll|%s|%d|%d"), *N.ToString(), GetItemCount(N), Si >= 0 && Generator->HeroReadsScroll(Generator->Spells[Si].Type) ? 1 : 0));
+		}
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Component) Out.Add(FString::Printf(TEXT("component|%s|%d"), *N.ToString(), GetItemCount(N)));
 	// (level 5: weapons she found that her hero cannot wield)
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Weapon) Out.Add(FString::Printf(TEXT("carried|%s|%d"), *N.ToString(), GetItemCount(N)));
@@ -1170,9 +1188,12 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 	};
 	for (const FRDRecipe& Rc : Generator->Recipes)
 	{
+		// (mistward, the list of 2026-10-30: a recipe of a tier not yet open, or a scroll her hero does not read, is not offered)
+		if (!Generator->RecipeRefusal(Rc).IsEmpty()) continue;
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
-		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s"), *Rc.Item.ToString(), CanCraft(Rc.Item) ? 1 : 0, *FString::Join(Ps, TEXT(";"))));
+		TMap<FName, int32> Take;          // (the recipe as it is, not looked up again by name: the PR review's find, every frame)
+		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s"), *Rc.Item.ToString(), PlanCraft(Rc, Take) ? 1 : 0, *FString::Join(Ps, TEXT(";"))));
 	}
 	if (Generator->bAlphabeticalCrafting) Out.Sort(ByName);
 	const int32 NumRecipes = Out.Num();
@@ -1182,9 +1203,12 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		const int32 Ix = Generator->FindItem(N);
 		if (Ix < 0) continue;
 		const ERDItemKind K = Generator->Items[Ix].Kind;
-		if (!(K == ERDItemKind::Shield || (K == ERDItemKind::Armour && Generator->bArmourStacks))) continue;
+		// (the list of 2026-10-30, bBreakAnyGear: rings and the torch too)
+		const bool bAny = Generator->bBreakAnyGear && (K == ERDItemKind::Ring || K == ERDItemKind::Torch);
+		if (!(K == ERDItemKind::Shield || (K == ERDItemKind::Armour && Generator->bArmourStacks) || bAny)) continue;
 		const FString Gives = BreakdownText(N, Generator->Items[Ix].WeaponType);
-		if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|g%s|%d|%s"), *N.ToString(), *N.ToString(), (N == WornArmour || N == WornShield) ? 1 : 0, *Gives));
+		const bool bOn = N == WornArmour || N == WornShield || (K == ERDItemKind::Ring && GetWornRing(Generator->Items[Ix].RingKind) == N) || (K == ERDItemKind::Torch && bTorchHeld && TorchItem == N);
+		if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|g%s|%d|%s"), *N.ToString(), *N.ToString(), bOn ? 1 : 0, *Gives));
 	}
 	// (level 5: the weapons she found, to break down: "breakdown|<name>|w<weapon index> or i<item>|<1 drawn>|<item>:<count>;...")
 	if (Generator->Breakdowns.Num() > 0)
@@ -1238,14 +1262,7 @@ bool URDCombatComponent::BreakDownWeapon(int32 Index)
 	// (it is gone from her weapons as a broken one would be, without the breaking's message)
 	if (AttackTime >= 0.f && AttackIndex == Index) EndAttack();
 	if (!W.Slash.IsNone()) AddItem(W.Slash, 1);            // (the third list: its slash back in her pack)
-	Generator->Weapons.RemoveAt(Index);
-	if (Wear.IsValidIndex(Index)) Wear.RemoveAt(Index);
-	if (NextOf.IsValidIndex(Index)) NextOf.RemoveAt(Index);
-	Bolts.RemoveAll([Index](const FBolt& B) { return B.Weapon == Index; });
-	for (FBolt& B : Bolts) if (B.Weapon > Index) --B.Weapon;
-	for (int32& P : PendingBreak) if (P > Index) --P;
-	PendingBreak.Remove(Index);
-	if (WeaponIndex > Index) --WeaponIndex;
+	DropWeaponAt(Index);          // (the attack running with a weapon after it keeps its weapon: the PR review's find)
 	TArray<FString> Ps; Gives.ParseIntoArray(Ps, TEXT(";"));
 	TArray<FString> Got;
 	for (const FString& P : Ps) { FString N, C; if (P.Split(TEXT(":"), &N, &C)) { AddItem(FName(*N), FCString::Atoi(*C)); Got.Add(FString::Printf(TEXT("%s %s"), *C, *N.ToLower())); } }
@@ -1277,7 +1294,7 @@ bool URDCombatComponent::BreakDownItem(FName Item)
 bool URDCombatComponent::CanCraft(FName Item) const
 {
 	const int32 R = Generator ? Generator->FindRecipe(Item) : -1;
-	if (R < 0) return false;
+	if (R < 0 || !Generator->RecipeRefusal(Generator->Recipes[R]).IsEmpty()) return false;
 	TMap<FName, int32> Take;
 	return PlanCraft(Generator->Recipes[R], Take);
 }
@@ -1309,6 +1326,7 @@ bool URDCombatComponent::Craft(FName Item)
 	const int32 R = Generator && !bDead ? Generator->FindRecipe(Item) : -1;
 	if (R < 0) return false;
 	const FRDRecipe Rc = Generator->Recipes[R];
+	if (const FString No = Generator->RecipeRefusal(Rc); !No.IsEmpty()) { SetMessage(No); return false; }
 	TArray<FString> Missing;
 	for (const FRDRecipePart& Pt : Rc.Parts)
 		if (PartHave(Pt) < Pt.Count) Missing.Add(FString::Printf(TEXT("%d %s"), Pt.Count - PartHave(Pt), *Pt.Label));
@@ -1536,7 +1554,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		return true;
 	}
 	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")
-		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport")))
+		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport") || P[0] == TEXT("scroll")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));

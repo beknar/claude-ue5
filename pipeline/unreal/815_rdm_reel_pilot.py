@@ -138,9 +138,10 @@ W5S = L5 and WAY == "spells"            # (level 5: the spells, rings, monsters 
 W5G = L5 and WAY == "grip"              # (level 5: the two-handed grip close up: run5g)
 W5W2 = L5 and WAY == "chop2"            # (level 5: Warrior2's chop test, Warrior2 alone (861 placed her): run5w2)
 W5M = MW and WAY == "mistward"          # (mistward_castle: the four heroes and the castle's rules: run5m)
-W5M2 = MW and WAY in ("mistward2", "mistward3")        # (mistward_castle: the third list (docs/improvements2.txt): run5m2; "mistward3": the same with the Martial Artist (mw3_martial))
+W5M2 = MW and WAY in ("mistward2", "mistward3", "mistward4")        # (mistward_castle: the third list (docs/improvements2.txt): run5m2; "mistward3": the same with the Martial Artist (mw3_martial); "mistward4": its recording, run5m4's plan)
 W5M3 = MW and WAY == "mistward3"
-W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward", "mistward2", "mistward3")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
+W5M4 = MW and WAY == "mistward4"         # (the user's list of 2026-10-30: the six heroes in combat at all five tiers: run5m4)
+W5R = L5 and WAY in ("weapons", "heroes", "craft", "spells", "caps", "mistward", "mistward2", "mistward3", "mistward4")       # (level 5: the weapons and tiers reels: run5w, run5h; their recording; run5c's and run5s's too)
 W5K = W5C or W5S or W5X or W5M or W5M2  # (the crafting panel's and the repair list's recording)
 DX, DY = {"east": (1, 0), "north": (0, 1), "west": (-1, 0), "south": (0, -1)}.get(WAY, (1, 0))
 # (level 4: the hero fights as in her own level)
@@ -149,10 +150,10 @@ MELEE = L4 and HERO == "Warrior"
 CHESTS = L3 or L4                  # (she opens the containers she passes)
 if L4: SEED += 101 * ["Warrior", "Mage", "Warlock", "Rogue", "Summoner", "MartialArtist"].index(HERO) + 7
 if len(sys.argv) > 6: SEED = int(sys.argv[6])        # (level 4: a session seed of the reel's choosing: what the containers on her way hold)
-OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + (("cine_mw3_%s.json" if W5M3 else "cine_mw2_%s.json" if W5M2 else "cine_mw_%s.json") if MODE == "render" else ("cine_mw3_rehearsal_%s.json" if W5M3 else "cine_mw2_rehearsal_%s.json" if W5M2 else "cine_mw_rehearsal_%s.json")) % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
+OUT = ("E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\mistward\\" + (("cine_mw4_%s.json" if W5M4 else "cine_mw3_%s.json" if W5M3 else "cine_mw2_%s.json" if W5M2 else "cine_mw_%s.json") if MODE == "render" else ("cine_mw4_rehearsal_%s.json" if W5M4 else "cine_mw3_rehearsal_%s.json" if W5M3 else "cine_mw2_rehearsal_%s.json" if W5M2 else "cine_mw_rehearsal_%s.json")) % HERO.lower()) if MW else "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\random_dungeon_magic" + ("" if LV == "1" else LV) + "\\" + (
     ((f"cine_quartet_{HERO.lower()}.json" if W5H else f"cine_craft_{HERO.lower()}.json" if W5C else f"cine_spells_{HERO.lower()}.json" if W5S else f"cine_grip_{HERO.lower()}.json" if W5G else f"cine_caps_{HERO.lower()}.json" if W5X else "cine_chop2_warrior2.json" if W5W2 else f"cine_{HERO.lower()}.json") if L4 else "cine_render.json")
     if MODE == "render" else ("cine_rehearsal_spells_%s.json" % HERO.lower() if W5S else "cine_rehearsal.json"))
-SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner3", "MartialArtist": "martialartist"}[HERO] if L4 else
+SPEEDS = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + ({"Warrior": "fem5", "Mage": "caster", "Warlock": "darkcaster", "Rogue": "rogue", "Summoner": "summoner4" if MW else "summoner3", "MartialArtist": "martialartist"}[HERO] if L4 else
                                                              {"1": "caster", "2": "darkcaster", "3": "rogue"}[LV]) + r"\speeds.txt"
 def along(v): return v.x * DX + v.y * DY
 V = unreal.Vector; Rot = unreal.Rotator; GS = unreal.GameplayStatics; IP = unreal.IntPoint
@@ -2603,8 +2604,363 @@ def mw3_martial(s0, centre, room, anvil):
         G["casts0"] = c.attacks_made; yield from fight_w(m)
     lure(False)
 
+# ---------------------------------------------------------------- mistward4: the six heroes in combat at all five tiers (the user's of 2026-10-30)
+def mw4_tiers(upto):
+    """(mw4) the reel's shortcut, said by its card: tiers 2 to `upto` open (ARDDungeonGenerator.DebugOpenTiers)"""
+    gen = G["gen"]; n = gen.debug_open_tiers(upto, False)
+    event("tiers_open", upto=upto, opened=n, notice=str(gen.tier_notice))
+def mw4_land(xy, card, sub):
+    """(mw4) behind a card: the set of rooms at xy generated now (its tier's look and monsters); she is set down in one of its
+    rooms 8 to 12 m from one of its monsters, with a clear line to it; her hit points and mana full (the card says so)"""
+    gen, p, c = G["gen"], G["pawn"], G["combat"]
+    mw_quiet(True); mw_card(card, sub)
+    S_ = IP(*xy)
+    # (the generator drops the sets far from her: she is held over the set's middle while it is built (a set 4 away was
+    # dropped as soon as it was made), then set down in it)
+    size = gen.get_editor_property("section_tiles") * gen.get_editor_property("tile_size")
+    hold = V(xy[0] * size, xy[1] * size, 400.0); G["lift_from"] = loc()
+    p.set_actor_location(hold, False, True); p.get_editor_property("character_movement").set_editor_property("gravity_scale", 0.0)
+    yield
+    if not gen.is_section_generated(S_): gen.generate_section_now(S_)
+    sx = gen.get_section(S_); t0 = T()
+    while (sx is None or sx.is_building()) and T() - t0 < 10.0:
+        p.set_actor_location(hold, False, True); p.get_editor_property("character_movement").stop_movement_immediately(); yield; sx = gen.get_section(S_)
+    p.get_editor_property("character_movement").set_editor_property("gravity_scale", 1.0)
+    ms = [m for m in (sx.spawned_monsters if sx else []) if alive(m) and not m.is_ally() and not m.caged]
+    land = tgt = None
+    for m in ms[:8]:
+        ml = m.get_actor_location()
+        for r_ in (1000.0, 800.0, 1200.0, 650.0):
+            for k in range(12):
+                q = V(ml.x + math.cos(k * math.pi / 6) * r_, ml.y + math.sin(k * math.pi / 6) * r_, 100.0)
+                if sx.room_at(q) < 0 or not clear_line(q, ml) or not sweep_clear(q, V(q.x + 10.0, q.y, 100.0), 45.0): continue
+                land, tgt = q, m; break
+            if land: break
+        if land: break
+    if land is None:
+        # (no landing (the set unbuilt, or no point with a clear line): back where she was lifted from, the monsters let loose
+        # again (the PR review's find: she was left in the air and the monsters quiet))
+        event("no_landing", section=list(xy))
+        p.set_actor_location(V(G.get("lift_from", loc()).x, G.get("lift_from", loc()).y, 100.0), False, True)
+        mw_quiet(False); lure()
+        return None
+    mw_set(land, face_to=tgt.get_actor_location(), side=-20.0, pitch=-16.0)
+    c.set_health(c.get_max_health()); c.set_mana(c.get_max_mana())
+    event("landed", at=[round(land.x), round(land.y)], section=list(xy), tier=gen.tier_of(S_), theme=str(gen.get_theme_name(S_)), monster=str(tgt.monster_name),
+          title=str(tgt.title), its_hit_points=tgt.get_max_health(), its_damage=tgt.get_damage(), monsters=len(ms))
+    yield from pause(MW_CARD + 0.3, lambda: camera(side=-20.0, pitch=-16.0, rate=1e6))
+    mw_quiet(False); lure()
+    return tgt
+def mw4_walk_on(dx=None, dy=None, sec=18.0):
+    """(mw4) she leaves her set by a hallway toward a set next to it that is open and not made yet (the nearest such way out;
+    or the side dx, dy): the game generates it as she comes (new terrain), and she walks into it; a monster that comes at her
+    on the way is fought"""
+    gen = G["gen"]; here = gen.world_to_section(loc()); sx = gen.get_section(here)
+    pts = list(sx.get_portal_points()) if sx else []
+    if not pts: event("no_way_on"); return
+    # (each side's hallways out: the one she has the shortest way to (the set's tile path), to a set not generated yet whose
+    # tier is open)
+    best = None
+    for ddx, ddy in ([(dx, dy)] if dx is not None else [(1, 0), (-1, 0), (0, 1), (0, -1)]):
+        n_ = IP(here.x + ddx, here.y + ddy)
+        if gen.is_section_generated(n_) or not gen.is_tier_open(gen.tier_of(n_)): continue
+        top = max(q.x * ddx + q.y * ddy for q in pts)
+        for q in pts:
+            if q.x * ddx + q.y * ddy < top - 400.0: continue
+            w_ = list(sx.find_path_world(loc(), q))
+            if len(w_) > 1 and (best is None or len(w_) < len(best[3])): best = (ddx, ddy, q, w_)
+    if best is None: event("no_way_on", portals=len(pts)); return
+    dx, dy, portal, way = best; nxt = IP(here.x + dx, here.y + dy)
+    if len(way) > 12:
+        # (a set is 252 m across: far from its way out, a card sets her down 30 m before it, on her way there)
+        mw_quiet(True); mw_card("ON TO THE NEXT SET OF ROOMS", "the reel sets her down by the hallway out of this one")
+        st = way[-10]; mw_set(st, face_to=way[-6], side=-15.0, pitch=-15.0)
+        event("set_down", at=[round(st.x), round(st.y)], to_portal_m=round(d2(st, portal) / 100.0, 1), was_way_m=len(way) * 3)
+        yield from pause(MW_CARD + 0.3, lambda: camera(side=-15.0, pitch=-15.0, rate=1e6))
+        mw_quiet(False); lure()
+        way = list(sx.find_path_world(loc(), portal)) or way[-10:]
+    was = bool(gen.is_section_generated(nxt))
+    event("walk_on", to=[nxt.x, nxt.y], tier=gen.tier_of(nxt), theme=str(gen.get_theme_name(nxt)), generated_before=was, way_m=len(way) * 3)
+    route = Route(way + [V(portal.x + 300.0 * k * dx, portal.y + 300.0 * k * dy, portal.z) for k in range(1, 6)])
+    t0 = T(); gen_t = None; stuck = 0.0; last = loc()
+    seg("walk_on")
+    while T() - t0 < sec:
+        if gen_t is None and gen.is_section_generated(nxt):
+            gen_t = T(); event("new_terrain", coord=[nxt.x, nxt.y], tier=gen.tier_of(nxt), theme=str(gen.get_theme_name(nxt)), her_m=round(d2(loc(), portal) / 100.0, 1))
+        w = gen.world_to_section(loc())
+        if w.x == nxt.x and w.y == nxt.y and gen_t is not None and route.done(): break
+        m = mw4_threat()
+        if m is not None and m.is_aggro():
+            tf = T(); yield from mw4_fight(m); t0 += T() - tf          # (the fight's time is not the walk's)
+            back = list(sx.find_path_world(loc(), portal)) if section_of(loc()) == sx else []
+            route = Route(back + route.p[-5:]) if len(back) > 1 else Route(route.p[route.i:]); continue
+        move(route.target(), run=True); doors(); camera(side=-15.0, pitch=-15.0, rate=60.0)
+        stuck = stuck + G["el"] if d2(loc(), last) < 60.0 * G["el"] else 0.0; last = loc()
+        if stuck > 1.2:
+            stuck = 0.0; ps = path(loc(), route.p[-1])
+            if len(ps) > 1: route = Route(ps); event("repath")
+        yield
+    event("walked_on", into=[nxt.x, nxt.y], inside=bool(gen.world_to_section(loc()).x == nxt.x and gen.world_to_section(loc()).y == nxt.y))
+def mw4_heal():
+    """(mw4) the reel fills her hit points when they are low (said: the higher tiers' blows end a run in a few)"""
+    c = G["combat"]
+    if c.get_health() < 0.75 * c.get_max_health():
+        h = c.get_health(); c.set_health(c.get_max_health()); event("healed", was=round(h), now=round(c.get_max_health()))
+MW4_PLAN = {"Mage": ["Frost Shard", "Chain Lightning", "Dark Fire", "Fire"], "Warlock": ["Curse of Frailty", "Shadow Lash", "Fire"]}
+def mw4_cast_summons(names, most=9):
+    """(mw4, the Summoner) each summoning of `names` she has, in turn (at most `most` casts), toward the monster ahead: the
+    reel fills her mana before each (said: a summoning takes half her pool)"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]; done = 0
+    for nm in names:
+        if done >= most: return
+        wi = wi_of(nm)
+        if wi is None: continue
+        sp = gen.get_editor_property("spells")[gen.get_editor_property("weapons")[wi].spell_index]
+        if gen.count_summoned(nm) >= sp.count: continue
+        while c.is_attacking(): yield
+        m = threat() or nearest_monster(None, 60, 3000.0)
+        if m is not None: G["heading"] = yaw_to(loc(), m.get_actor_location()); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+        c.set_mana(c.get_max_mana()); event("mana_full", why=nm)
+        draw(wi); n0 = gen.count_summoned(nm); ok = c.start_attack(); key_hit("lmb"); done += 1
+        t1 = T()
+        while (c.is_attacking() or T() - t1 < 0.4) and T() - t1 < 3.0: camera(side=150.0, pitch=-10.0, rate=120.0) if wide_here() else camera(side=10.0, pitch=-22.0, rate=80.0); yield
+        al = [a for a in gen.get_allies() if str(a.summon_spell) == nm]
+        event("summoned", spell=nm, ok=bool(ok), now=gen.count_summoned(nm), was=n0, most=sp.count, monster_kind=str(sp.summon_kind), message=str(c.message),
+              allies=[{"monster": str(a.monster_name), "hp": round(a.get_max_health()), "damage": round(a.get_damage(), 1)} for a in al][:1])
+        yield from pause(0.6, lambda: camera(side=60.0, pitch=-12.0, rate=60.0))
+def mw4_spells(m, plan, then_sword=False, max_t=16.0):
+    """(mw4) the Mage's and the Warlock's fight: each spell of her plan in turn (one on cooldown or wanting mana passed over,
+    the last over and over), cast when the monster is within 12 m (in the rehearsal fight_s's sight test failed a whole fight
+    in the dwarven halls, at 0.8 m: she cast nothing); the Warlock then her sword"""
+    c = G["combat"]; p = G["pawn"]; gen = G["gen"]; G["fights"] += 1
+    name = str(m.monster_name); hp0 = m.get_max_health(); h0 = c.get_health(); t0 = T(); b0 = c.hits_landed; k = 0; route = None; rt = -9.0
+    event("fight", monster=name, title=str(m.title), its_hit_points=hp0, its_damage=m.get_damage(), ability=str(m.ability.name), tier=m.tier,
+          section=[m.get_editor_property("section").get_editor_property("coord").x, m.get_editor_property("section").get_editor_property("coord").y],
+          from_m=round((d2(loc(), m.get_actor_location())) / 100.0, 1), spells=plan, sword=then_sword)
+    while alive(m) and not c.is_dead() and T() - t0 < max_t and T() < G.get("until", DUR + 1.0):
+        l = loc(); ml = m.get_actor_location(); gap = d2(l, ml) - m.capsule_component.get_scaled_capsule_radius()
+        G["heading"] = yaw_to(l, ml)
+        if not c.is_attacking():
+            p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=turn(p.get_actor_rotation().yaw, yaw_to(l, ml), 720.0 * G["el"])), False)
+            ws = gen.get_editor_property("weapons")
+            if then_sword and k >= len(plan):
+                draw(0)
+                if gap < ws[0].reach - 10.0: c.start_attack() and key_hit("lmb")
+                else:
+                    if route is None or T() - rt > 0.6: route = Route(path(l, ml)); rt = T()
+                    move(route.target() if len(route.p) > 1 and gap > 300.0 else ml, run=True); doors()
+            elif gap < 1200.0 and sees(l, m):          # (one in the next room within 12 m: her bolts burst on the wall between (the rehearsal))
+                nm = plan[min(k, len(plan) - 1)]; wi = wi_of(nm)
+                if wi is None or ((c.get_cooldown_left(wi) > 0.0 or c.get_mana() < ws[wi].mana_cost) and k < len(plan) - 1): k += 1; yield; continue
+                if c.get_mana() >= ws[wi].mana_cost:
+                    draw(wi)
+                    if c.start_attack(): key_hit("lmb" if HERO == "Warlock" else "e"); k += 1
+                elif then_sword: k = len(plan)          # (out of mana: her sword now)
+            else:
+                if route is None or T() - rt > 0.6: route = Route(path(l, ml)); rt = T()
+                move(route.target() if len(route.p) > 1 and gap > 400.0 else ml, run=True); doors()
+        camera(side=28.0 if wide_here() else 8.0, pitch=-14.0 if wide_here() else -25.0, rate=80.0)
+        yield
+        # (no nearer for 4 s and none of her spells cast (no way round to it): another one)
+        if gap < G.get("mw4_best", (None, 1e9))[1] - 100.0 or G.get("mw4_best", (None,))[0] != m.get_name(): G["mw4_best"] = (m.get_name(), gap, T())
+        if T() - G["mw4_best"][2] > 4.0 and c.attacks_made == G.get("casts0", 0): G.setdefault("skip", set()).add(m.get_name()); break
+    G["last_fight"] = T()
+    if not alive(m): event("kill", monster=name, casts=c.attacks_made - G.get("casts0", 0), blows=c.hits_landed - b0, seconds=round(T() - t0, 2), she_lost=round(max(0.0, h0 - c.get_health())), its_hit_points=hp0)
+    else: event("left", monster=name)
+    yield from pause(0.5, lambda: camera(side=18.0, rate=70.0))
+def mw4_chi(m, n=3):
+    """(mw4, the Martial Artist) up to `n` of her chi attacks in turn (each drawn by its number), each within 3.3 m of the
+    monster (a chi reaches 4 m); the reel fills her mana before each (said)"""
+    gen, c, p = G["gen"], G["combat"], G["pawn"]
+    chis = [i for i, w in enumerate(gen.get_editor_property("weapons")) if w.spell]
+    for _ in range(n):
+        if not alive(m) or not chis: return
+        k = G.setdefault("chi_k", 0); G["chi_k"] = k + 1; wi = chis[k % len(chis)]; nm = str(gen.get_editor_property("weapons")[wi].name)
+        t0 = T(); route = None; rt = -9.0
+        while alive(m) and T() - t0 < 6.0:
+            l = loc(); ml = m.get_actor_location(); gap = d2(l, ml) - m.capsule_component.get_scaled_capsule_radius()
+            if gap < 300.0 and sees(l, m): break
+            if route is None or T() - rt > 0.6: route = Route(path(l, ml)); rt = T()
+            move(route.target() if len(route.p) > 1 and gap > 300.0 else ml, run=True); doors(); camera(side=30.0, pitch=-13.0, rate=70.0); yield
+        if not alive(m): return
+        while c.is_attacking(): yield
+        G["heading"] = yaw_to(loc(), m.get_actor_location()); p.set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+        draw(wi); c.set_mana(c.get_max_mana()); h0 = m.get_health()
+        ok = c.start_attack(); key_hit("lmb")
+        event("chi", name=nm, ok=bool(ok), msg=str(c.message), monster=str(m.monster_name), damage=round(c.get_damage_of(wi), 1), mana=round(gen.get_editor_property("weapons")[wi].mana_cost))
+        t1 = T(); wide = wide_here()
+        while (c.is_attacking() or T() - t1 < 0.3) and T() - t1 < 2.5:
+            camera(side=125.0, pitch=-10.0, rate=140.0) if wide else camera(side=8.0, pitch=-25.0, rate=80.0); yield
+        event("chi_done", name=nm, lost=round(h0 - (m.get_health() if alive(m) else 0.0), 1), killed=not alive(m))
+def mw4_fight(m):
+    """(mw4) her kind of fight: the Warrior her sword and shield, the Rogue the crossbow, the daggers and the roll, the Mage and
+    the Warlock their plans of spells (the Warlock then her sword), the Martial Artist her chi attacks then her fists, the
+    Summoner her summonings first, then fire with her summoned at her side"""
+    c = G["combat"]; G["casts0"] = c.attacks_made; mw4_heal(); seg("fight")
+    if HERO == "Mage": yield from mw4_spells(m, MW4_PLAN["Mage"])
+    elif HERO == "Warlock": yield from mw4_spells(m, MW4_PLAN["Warlock"], then_sword=True)
+    elif HERO == "Rogue": yield from fight3(m)
+    elif HERO == "Summoner":
+        yield from mw4_cast_summons(G.get("summons", ["Summon Tier 1"]), most=1)
+        if alive(m): yield from fight(m)
+    elif HERO == "MartialArtist":
+        yield from mw4_chi(m)
+        if alive(m): draw(0); yield from fight_w(m)
+    else: yield from fight_w(m)
+def mw4_threat():
+    """(mw4) threat(), but not a caged monster (behind its cell's bars) nor one she could not reach before (her spells burst on a
+    wall a whole fight in the rehearsal): those are left out"""
+    gen = G["gen"]; G.setdefault("skip", set()).update(q.get_name() for q in gen.get_monsters() if alive(q) and q.caged)
+    l = loc(); best = None
+    for m in gen.get_monsters():
+        if not alive(m) or m.get_name() in G["skip"]: continue
+        ml = m.get_actor_location(); d = d2(l, ml)
+        if abs(ml.z - l.z) > 300: continue
+        if (m.is_aggro() and d < 1500.0) or (d < 1500.0 and sees(l, m)):
+            if best is None or d < best[0]: best = (d, m)
+    return best[1] if best else None
+def mw4_fights(kills, until):
+    """(mw4) lured fights until `kills` fell or the time is up"""
+    c = G["combat"]; k0 = sum(1 for e in S["events"] if e["kind"] == "kill"); u0 = G.get("until", DUR + 1.0); G["until"] = until + 1.5
+    try:
+        for _ in range(12):
+            if T() > until - 3.0: return
+            tw = T()
+            while threat() is None and T() - tw < 2.0: camera(side=25.0, pitch=-12.0, rate=25.0); yield
+            m = mw4_threat() or nearest_monster(None, 90, 6000.0)
+            if m is None: event("no_monster"); return
+            yield from mw4_fight(m)
+            if sum(1 for e in S["events"] if e["kind"] == "kill") - k0 >= kills: return
+    finally: G["until"] = u0
+def mw4_harvest():
+    """(mw4) the nearest harvest over a dead monster: she walks to it and F takes its parts (they float there until then)"""
+    gen, c = G["gen"], G["combat"]
+    # (a near one: a long walk to it ate the reel; within 30 m: in the render the Warrior chased her second monster 18 m
+    #  from the first one's pile, and 10 m found none)
+    piles = [q for q in gen.loot_piles if q and q.harvest and d2(q.get_actor_location(), loc()) < 3000.0]
+    if not piles: event("no_harvest"); return
+    q = min(piles, key=lambda x: d2(x.get_actor_location(), loc())); at = q.get_actor_location()
+    event("to_harvest", things=[str(x) for x in q.things], tier=q.tier, m=round(d2(at, loc()) / 100.0, 1))
+    seg("harvest"); yield from to_point(V(at.x, at.y, 100.0), 10.0, 110.0)
+    G["heading"] = yaw_to(loc(), at); G["pawn"].set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+    yield from pause(0.8, lambda: camera(side=-40.0, pitch=-24.0, rate=60.0))
+    said = str(gen.describe_nearest(loc(), 260.0)); did = str(gen.interact_nearest(loc(), 260.0)); key_hit("f")
+    event("harvest_taken", what=said, did=did, message=str(c.message))
+    yield from pause(2.2, lambda: camera(side=-30.0, pitch=-20.0, rate=40.0))
+def mw4_start(centre, yaw=200.0):
+    mw_set(V(centre.x + 250, centre.y + 150, 100.0), yaw=yaw, side=-25.0, pitch=-16.0)
+    event("start", at=[round(loc().x), round(loc().y)], way="great hall", weapons=[str(w.name) for w in G["gen"].get_editor_property("weapons")],
+          hp=G["combat"].get_max_health(), mana=G["combat"].get_max_mana())
+    yield from pause(2.0, lambda: camera(side=-25.0, pitch=-16.0, rate=40.0))
+def mw4_warrior(s0, centre, room, anvil):
+    """the Warrior (tiers 1 and 2): lured fights in the great hall with her sword and shield; a dead monster's harvest taken;
+    tier 2 opens (the start set cleared, a card); she walks east into tier 2's first set, generated as she comes"""
+    yield from mw4_start(centre)
+    # (she starts with the dagger: the reel gives her a sword, one-handed, her shield on her arm with it)
+    yield from give(["Arming Sword"], "sword"); yield from wield("Arming Sword", "weapon", "sword")
+    mw_quiet(False); lure(); seg("tier1")
+    # (the harvest right after her first kill, by its pile: taken after the second fight, she had chased that one 17 m off
+    #  and the walk back left her 1 kill in the whole run)
+    yield from mw4_fights(1, DUR * 0.3)
+    yield from mw4_harvest()
+    yield from mw4_fights(1, DUR * 0.42)
+    mw_quiet(True); mw_card("TIER 2 OPENS", "the reel's shortcut: the start set cleared by the generator")
+    yield from mw_open_tier2(0); yield from pause(MW_CARD + 0.3, lambda: camera(side=-20.0, pitch=-16.0, rate=30.0))
+    mw_quiet(False); lure()
+    yield from mw4_walk_on()
+    seg("tier2"); yield from mw4_fights(3, DUR - 1.0)
+def mw4_rogue(s0, centre, room, anvil):
+    """the Rogue (tier 3): behind a card a tier-3 set (the dwarven halls); the crossbow, the daggers, her roll; she walks on
+    north into the next set, generated as she comes"""
+    yield from mw4_start(centre)
+    mw4_tiers(3)
+    yield from mw4_land((2, 0), "TIER 3:  THE DWARVEN HALLS", "the reel opens tiers 2 and 3 and sets her down in a set of rooms generated now")
+    seg("tier3"); yield from mw4_fights(2, DUR * 0.6)
+    yield from mw4_walk_on()
+    yield from mw4_fights(3, DUR - 1.0)
+def mw4_mage(s0, centre, room, anvil):
+    """the Mage (tier 3): the reel gives her two tomes (Frost Shard, Chain Lightning) and a scroll of Meteor Storm (a spell
+    beyond her mana: a scroll casts it at none); behind a card a tier-3 set; her spells, the scroll read at a group"""
+    yield from mw4_start(centre)
+    yield from give(["Tome of Frost Shard", "Tome of Chain Lightning"], "tomes")
+    G["combat"].add_item("Scroll of Meteor Storm", 1); event("given", items={"Scroll of Meteor Storm": 1}, why="scroll", message=str(G["combat"].message))
+    yield from pause(1.0)
+    mw4_tiers(3)
+    tgt = yield from mw4_land((-2, 0), "TIER 3:  THE MAGE'S SPELLS", "the reel opens tiers 2 and 3 and sets her down in a set of rooms generated now")
+    seg("tier3")
+    # (the scroll first: Meteor Storm at the monster she was set down facing (its strikes fall round it))
+    gen, c = G["gen"], G["combat"]
+    ms = [q for q in gen.get_monsters() if alive(q) and d2(q.get_actor_location(), loc()) < 2500.0]
+    if alive(tgt):
+        m = tgt
+        G["heading"] = yaw_to(loc(), m.get_actor_location()); G["pawn"].set_actor_rotation(Rot(roll=0.0, pitch=0.0, yaw=G["heading"]), False)
+        yield from pause(0.4)
+        h = {q.get_name(): q.get_health() for q in ms}; m0 = c.get_mana()
+        ok = c.read_scroll("Scroll of Meteor Storm"); key_hit("enter")
+        event("scroll_read", scroll="Scroll of Meteor Storm", ok=bool(ok), message=str(c.message), mana_before=round(m0), monsters=len(ms))
+        yield from pause(5.5, lambda: camera(side=-150.0, pitch=-20.0, rate=40.0))
+        lost = sum(max(0.0, v - (q.get_health() if alive(q) else 0.0)) for q in ms for k_, v in h.items() if q.get_name() == k_)
+        event("scroll_done", lost=round(lost), killed=sum(1 for q in ms if not alive(q)), mana_after=round(c.get_mana()))
+    yield from mw4_fights(2, DUR * 0.55)
+    yield from mw4_walk_on()
+    yield from mw4_fights(3, DUR - 1.0)
+def mw4_warlock(s0, centre, room, anvil):
+    """the Warlock (tier 4): the reel gives her two tomes (Curse of Frailty, Shadow Lash); behind a card a tier-4 set; the
+    curse and the lash, then her sword; she walks on into the next set"""
+    yield from mw4_start(centre)
+    yield from give(["Tome of Curse of Frailty", "Tome of Shadow Lash"], "tomes")
+    mw4_tiers(2)
+    yield from mw4_land((1, 1), "TIER 2:  CURSE, LASH AND SWORD", "the reel opens tier 2 and sets her down in a set of rooms generated now")
+    seg("tier2"); yield from mw4_fights(2, DUR * 0.6)
+    yield from mw4_walk_on()
+    yield from mw4_fights(3, DUR - 1.0)
+def mw4_martial(s0, centre, room, anvil):
+    """the Martial Artist (tier 4): the reel teaches her the eight chi attacks four bosses would; behind a card a tier-4 set;
+    a chi attack from the bar at each monster, then her fists; she walks on into the next set"""
+    yield from mw4_start(centre)
+    gen = G["gen"]; gen.unlock_hero_weapons(8)
+    event("given", items={"chi attacks": 8}, why="the reel teaches her the eight chi attacks four tier bosses would", unlocked=[str(w.name) for w in gen.get_editor_property("weapons")])
+    yield from pause(1.2)
+    mw4_tiers(4)
+    yield from mw4_land((0, 3), "TIER 4:  CHI", "the reel opens tiers 2 to 4 and sets her down in a set of rooms generated now")
+    seg("tier4"); yield from mw4_fights(3, DUR * 0.6)
+    yield from mw4_walk_on()
+    yield from mw4_fights(4, DUR - 1.0)
+def mw4_summoner(s0, centre, room, anvil):
+    """the Summoner (tiers 1 and 5): in the great hall Summon Tier 1, two soldiers, and a lured fight beside them with fire;
+    the reel gives her the four summonings four tier bosses would; behind a card a tier-5 set: the gunners, an orc, an alien
+    warrior and a spider called (the reel fills her mana before each: each takes half her pool), and the fight"""
+    yield from mw4_start(centre)
+    gen = G["gen"]; G["summons"] = ["Summon Tier 1"]
+    mw_quiet(False); lure(); seg("tier1")
+    yield from mw4_cast_summons(["Summon Tier 1", "Summon Tier 1"])
+    yield from mw4_fights(1, DUR * 0.3)
+    gen.unlock_hero_weapons(4)
+    event("given", items={"summonings": 4}, why="the reel gives her the four summonings four tier bosses would", unlocked=[str(w.name) for w in gen.get_editor_property("weapons")])
+    yield from pause(1.4)
+    mw4_tiers(5)
+    yield from mw4_land((4, 0), "TIER 5:  HER SUMMONED", "the reel opens tiers 2 to 5 and sets her down in a set of rooms generated now")
+    seg("tier5")
+    yield from mw4_cast_summons(["Summon Tier 2", "Summon Tier 3", "Summon Tier 4", "Summon Tier 5"])
+    G["summons"] = ["Summon Tier 5", "Summon Tier 4", "Summon Tier 3", "Summon Tier 2"]
+    yield from mw4_fights(2, DUR * 0.72)
+    yield from mw4_walk_on()
+    yield from mw4_fights(4, DUR - 1.0)
+def run5m4():
+    """(mistward_castle, the user's list of 2026-10-30) the six heroes in combat at all five tiers"""
+    yield from mw_start()
+    gen, c = G["gen"], G["combat"]
+    s0, centre, room, anvil = mw_hall()
+    yield from {"Warrior": mw4_warrior, "Mage": mw4_mage, "Warlock": mw4_warlock, "Rogue": mw4_rogue, "MartialArtist": mw4_martial, "Summoner": mw4_summoner}[HERO](s0, centre, room, anvil)
+    while True:
+        m = mw4_threat()
+        if m is None or not m.is_aggro(): yield from pause(0.5, lambda: camera(side=30.0, pitch=-12.0, rate=12.0)); continue
+        yield from mw4_fight(m)
+
 def run():
     gen, pc, p = G["gen"], G["pc"], G["pawn"]
+    if W5M4:
+        yield from run5m4(); return
     if W5M:
         yield from run5m(); return
     if W5M2:
@@ -2882,7 +3238,8 @@ def tab_counts(c):
 def tier_row(l):
     """(the weapons and tiers reel) what the HUD's tier panel shows (ARDHUD::DrawTiers) and a seal's prompt near her"""
     gen = G["gen"]; s = gen.world_to_section(l); t_ = gen.tier_of(s)
-    r_ = gen.get_section_progress(s); ok, pr = r_ if isinstance(r_, tuple) else (True, r_)
+    r_ = gen.get_section_progress(s); ok, pr = r_ if isinstance(r_, tuple) else (r_ is not None, r_)          # (None: a set with no record yet (mw4's jump, held over it while it is built))
+    ok = bool(ok) and pr is not None
     near = str(gen.describe_nearest(l, 260.0))
     out = {"tier": [t_, gen.get_tier_cleared(t_), gen.tier_size(t_), pr.rooms_explored if ok else -1, pr.rooms if ok else -1, pr.chests_looted if ok else -1, len(pr.chests) if ok else -1,
                     len(pr.killed) if ok else -1, pr.monsters if ok else -1, int(pr.cleared) if ok else 0, gen.get_open_tiers(), gen.max_tier],
@@ -3116,6 +3473,7 @@ def body():
         if W5M2: S["slashl"] = None; S["sgiven"] = [str(x) for x in gen.slashes_given]; S["procs"] = {str(k): v for k, v in G["combat"].slash_procs.items()}
         if W5S: S["rel"] = {str(k): v for k, v in G["combat"].spells_released.items()}; S["ssig"] = None; S["menul"] = None
     next(G["run"])
+    if W5M4 and G.get("combat") is not None and T() > 0.0 and not G["combat"].is_dead(): mw4_heal()          # (every frame: tier 3 to 5's blows killed her between two checks)
     if (W5G or W5W2) and "grip_cam" in G: G["pc"].set_control_rotation(Rot(roll=0.0, pitch=G["grip_cam"][1], yaw=G["grip_cam"][0]))       # (run5g: the camera in front of her)
     if G["going"] and G["combat"] is not None:
         hits(); heard()

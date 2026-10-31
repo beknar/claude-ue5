@@ -74,6 +74,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAlly() const { return bAlly; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetAllyTimeLeft() const { return AllySeconds > 0.f ? AllyLeft : 0.f; }
 	void SetChampion(bool b) { bChampion = b; }
+	/** mistward_castle (the Summoner): the Summon spell that brought it to her side (none: it was not summoned so) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FName SummonSpell;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsChampion() const { return bChampion; }
 	/** the spells' hold on it: slowed (a share of its speed) for Seconds, a burn (hit points a second, a share of it back to
 	 *  her), a curse (it takes Share more and deals Share less), a push, a pull toward a point */

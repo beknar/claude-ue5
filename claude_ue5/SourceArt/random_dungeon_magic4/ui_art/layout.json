@@ -2602,6 +2602,386 @@
    1.0
   ]
  },
+ "harvest_faint_essence": {
+  "kind": "icon",
+  "size": [
+   184,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_dim_essence": {
+  "kind": "icon",
+  "size": [
+   180,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_bright_essence": {
+  "kind": "icon",
+  "size": [
+   172,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_brilliant_essence": {
+  "kind": "icon",
+  "size": [
+   181,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_radiant_essence": {
+  "kind": "icon",
+  "size": [
+   205,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_mutant_ichor": {
+  "kind": "icon",
+  "size": [
+   98,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_venom_sac": {
+  "kind": "icon",
+  "size": [
+   152,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_troll_heart": {
+  "kind": "icon",
+  "size": [
+   222,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_horn_shard": {
+  "kind": "icon",
+  "size": [
+   183,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_hound_fang": {
+  "kind": "icon",
+  "size": [
+   256,
+   134
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "scroll_offense": {
+  "kind": "icon",
+  "size": [
+   247,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "scroll_protection": {
+  "kind": "icon",
+  "size": [
+   256,
+   246
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "scroll_curse": {
+  "kind": "icon",
+  "size": [
+   234,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "scroll_summon": {
+  "kind": "icon",
+  "size": [
+   256,
+   229
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "summon_1": {
+  "kind": "icon",
+  "size": [
+   256,
+   211
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "summon_2": {
+  "kind": "icon",
+  "size": [
+   256,
+   225
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "summon_3": {
+  "kind": "icon",
+  "size": [
+   256,
+   189
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "harvest_daemon_ash": {
+  "kind": "icon",
+  "size": [
+   231,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "summon_4": {
+  "kind": "icon",
+  "size": [
+   256,
+   189
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
+ "summon_5": {
+  "kind": "icon",
+  "size": [
+   256,
+   212
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
  "_icons": {
   "Small Healing Potion": "healing_vial",
   "Medium Healing Potion": "healing_flask",

@@ -1,0 +1,16 @@
+{
+ "_note": "the Summoner of mistward_castle (the user's list of 2026-10-30, docs/improvements3.txt; ai models/Summoner4.glb): her card (876 writes her hero from it; the reel's overlay draws her card and captions from it). Mana half the Mage's (100, 2 a second); hit points her old card's; summons: the list's (kind, how many she leads), each costing half her pool, Tier 1 hers from the start, the others one for each tier boss she slays",
+ "name": "Summoner",
+ "title": "SUMMONER",
+ "health": 85,
+ "mana": 50,
+ "mana_per_second": 1.0,
+ "accent": [0.62, 0.95, 0.55],
+ "abilities": ["Fire Bolt and Dark Fire, as the Mage casts them", "Summons fighters: two soldiers to begin with",
+               "Each tier's boss slain: a stronger summoning", "Half the Mage's mana; daggers, never enchanted"],
+ "armour": "No armour",
+ "starts_with": "Fire Bolt, Dark Fire, Summon Tier 1",
+ "wears": [],
+ "summons": [["Soldier", 2], ["Gunner", 3], ["Orc_05", 4], ["Alien_Warrior_05", 5], ["Spider", 5]],
+ "icons": {"Fire": "w_fire", "Dark Fire": "w_dark_fire", "Summon Tier 1": "summon_1", "Summon Tier 2": "summon_2", "Summon Tier 3": "summon_3", "Summon Tier 4": "summon_4", "Summon Tier 5": "summon_5"}
+}

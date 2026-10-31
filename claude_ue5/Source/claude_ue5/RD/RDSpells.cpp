@@ -40,7 +40,7 @@ bool URDCombatComponent::KnowsSpell(FName Spell) const
 {
 	if (!Generator) return false;
 	const int32 Si = Generator->FindSpell(Spell);
-	for (const FRDWeaponDef& W : Generator->Weapons) if ((Si >= 0 && W.SpellIndex == Si) || W.Name == Spell) return true;
+	for (const FRDWeaponDef& W : Generator->Weapons) if (!W.bScroll && ((Si >= 0 && W.SpellIndex == Si) || W.Name == Spell)) return true;
 	return false;
 }
 
@@ -49,10 +49,9 @@ bool URDCombatComponent::LearnSpell(FName Spell)
 	const int32 Si = Generator ? Generator->FindSpell(Spell) : -1;
 	if (Si < 0 || KnowsSpell(Spell)) return false;
 	const FRDSpellDef& S = Generator->Spells[Si];
-	static const TCHAR* TypeName[4] = { TEXT("offense"), TEXT("protection"), TEXT("curse"), TEXT("summoning") };
 	if (!Generator->HeroLearns(S.Type))
 	{
-		SetMessage(FString::Printf(TEXT("The %s cannot learn %s (%s)"), *Generator->PlayerTitle.ToLower(), *S.Name.ToString(), TypeName[(int32)S.Type]));
+		SetMessage(FString::Printf(TEXT("The %s cannot learn %s (%s)"), *Generator->PlayerTitle.ToLower(), *S.Name.ToString(), RDSpellTypeName(S.Type)));
 		return false;
 	}
 	FRDWeaponDef W;
@@ -60,7 +59,8 @@ bool URDCombatComponent::LearnSpell(FName Spell)
 	Generator->Weapons.Add(W);
 	SyncWear();
 	++SpellsLearned;
-	const int32 Key = Generator->Weapons.Num();
+	int32 Key = 0;
+	for (const FRDWeaponDef& Wk : Generator->Weapons) if (!Wk.bScroll) ++Key;          // (a scroll being read is no weapon of hers)
 	FString Msg = Key <= 10 ? FString::Printf(TEXT("You learn %s:  key %d"), *S.Name.ToString(), Key % 10) : FString::Printf(TEXT("You learn %s:  the wheel"), *S.Name.ToString());
 	// (the user's of 2026-10-28: a spell that costs more than any ring gives raises her pool by being learned)
 	const float OldMax = MaxMana;
@@ -188,6 +188,7 @@ void URDCombatComponent::UpdateMaxima()
 	if (MaxHealth > OldH) Health += MaxHealth - OldH;
 	if (MaxMana > OldM) Mana += MaxMana - OldM;
 	Health = FMath::Min(Health, MaxHealth); Mana = FMath::Min(Mana, MaxMana);
+	UpdateManaShares();
 }
 
 bool URDCombatComponent::WearRing(FName Item)
@@ -583,6 +584,35 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 			SpawnSpellFx(S->ImpactFx, K->GetActorLocation(), FRotator::ZeroRotator, S->ImpactFxScale, S);
 			SpawnSpellFx(S->AreaFx, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight() - 5.f), FRotator::ZeroRotator, S->AreaFxScale, S);
 			SetMessage(FString::Printf(TEXT("%s comes to your side"), *(K->Title.IsEmpty() ? K->MonsterName.ToString() : K->Title)));
+		}
+		break;
+	}
+	case ERDSpellKind::Summon:
+	{
+		// (mistward, the Summoner: one of its kind in front of her, beside the ones she leads already)
+		const int32 Have = Generator->CountSummoned(S->Name);
+		const FVector Rt = O->GetActorRightVector();
+		const float Side = (Have % 2 == 0 ? 1.f : -1.f) * 70.f * ((Have + 1) / 2);
+		FVector At = L + Fw * 230.f + Rt * Side;
+		FHitResult H; FCollisionQueryParams Q(SCENE_QUERY_STAT(RDSummon), false, O);
+		if (GetWorld()->LineTraceSingleByChannel(H, L, At, ECC_Visibility, Q)) At = L + (At - L).GetSafeNormal() * FMath::Max(H.Distance - 80.f, 0.f);
+		ARDMonster* K = Generator->SummonKindAlly(S->SummonKind, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
+		if (K)
+		{
+			++Summoned;
+			SpawnSpellFx(S->ImpactFx, K->GetActorLocation(), FRotator::ZeroRotator, S->ImpactFxScale, S);
+			SpawnSpellFx(S->AreaFx, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight() - 5.f), FRotator::ZeroRotator, S->AreaFxScale, S);
+			SetMessage(FString::Printf(TEXT("%s answers your call  (%d of %d)"), *(K->Title.IsEmpty() ? K->MonsterName.ToString() : K->Title), Generator->CountSummoned(S->Name), FMath::Max(S->Count, 1)));
+		}
+		else
+		{
+			// (nothing came (no set under the spot, no such kind): what the cast took is given back (the PR review's find): its
+			// mana, its cooldown, the scroll it was read from)
+			const FRDWeaponDef& Wd = Generator->Weapons[Wi];
+			if (!Generator->bInfiniteMana) Mana = FMath::Min(MaxMana, Mana + Wd.ManaCost);
+			ReadyAt.Remove(Wd.Name);
+			if (Wd.bScroll) AddItem(FName(*FString::Printf(TEXT("Scroll of %s"), *S->Name.ToString())), 1);
+			SetMessage(FString::Printf(TEXT("Nothing answers %s here: what it took is given back"), *S->Name.ToString()));
 		}
 		break;
 	}
