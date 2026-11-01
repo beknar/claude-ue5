@@ -299,7 +299,9 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 		}
 		if (T.State != 1) continue;
 		T.Time += Dt;
-		const float Ceil = CeilAt(WorldToLocal(T.At));
+		// (mistward5: the ceiling over each shot as it is: a vault's height there, below a beamed room's beams; the tile's
+		// height under a vault was the room's, and the stones came out of the air metres under it)
+		auto Ceil = [this](const FVector& P) { const int32 Rm = RoomAt(P); return GetCeilingHeightAt(P) - (Rooms.IsValidIndex(Rm) && Rooms[Rm].Ceil == 2 ? 60.f : 0.f); };
 		const float Share = D.Damage;
 		switch (D.Kind)
 		{
@@ -328,13 +330,13 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 			{
 				const FVector Off(FMath::FRandRange(-90.f, 90.f), FMath::FRandRange(-90.f, 90.f), 0.f);
 				const FVector Aim = (T.Step == 0 && Her ? FVector(L.X, L.Y, T.At.Z) : T.Goal * FVector(1, 1, 0) + FVector(0, 0, T.At.Z)) + Off;
-				TrapShoot(I, 1, Aim + FVector(0, 0, Ceil - 60.f), Aim, 200.f);
+				TrapShoot(I, 1, Aim + FVector(0, 0, Ceil(Aim) - 60.f), Aim, 200.f);
 				++T.Step; T.Next = T.Time + 0.22f;
 			}
 			if (T.Time > 2.5f) SpendTrap(I, 2);
 			break;
 		case ERDTrapKind::Crusher:
-			if (T.Step == 0) { TrapShoot(I, 2, T.At + FVector(0, 0, Ceil - 80.f), T.At, 900.f); T.Step = 1; Generator->PlaySoundAt(TEXT("Env.Generate"), T.At); }
+			if (T.Step == 0) { TrapShoot(I, 2, T.At + FVector(0, 0, Ceil(T.At) - 80.f), T.At, 900.f); T.Step = 1; Generator->PlaySoundAt(TEXT("Env.Generate"), T.At); }
 			if (T.Time > 2.2f) SpendTrap(I, 2);
 			break;
 		case ERDTrapKind::Snare:
@@ -384,7 +386,7 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 			if (T.Step == 0) { if (Pc && Dist < D.Radius * 1.5f) Pc->HoldFor(2.4f); T.Step = 1; }
 			if (T.Step == 1 && T.Time > 0.8f)
 			{
-				for (int32 K = 0; K < 3; ++K) { const FVector A = FVector(L.X, L.Y, T.At.Z) + FVector(FMath::FRandRange(-70.f, 70.f), FMath::FRandRange(-70.f, 70.f), 0.f); TrapShoot(I, 1, A + FVector(0, 0, Ceil - 60.f - 40.f * K), A, 150.f); }
+				for (int32 K = 0; K < 3; ++K) { const FVector A = FVector(L.X, L.Y, T.At.Z) + FVector(FMath::FRandRange(-70.f, 70.f), FMath::FRandRange(-70.f, 70.f), 0.f); TrapShoot(I, 1, A + FVector(0, 0, Ceil(A) - 60.f - 40.f * K), A, 150.f); }
 				T.Step = 2;
 			}
 			if (T.Step == 2 && T.Time > 2.0f)
@@ -406,7 +408,7 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 				const int32 Stage = T.Step++ % 3;
 				if (Stage == 0) for (int32 K = 0; K < 2; ++K) TrapShoot(I, 0, T.At + FRotator(0, T.Yaw + 90.f + 180.f * K, 0).Vector() * (Generator->TileSize * 0.5f - 25.f) + FVector(0, 0, 120.f), L + FVector(0, 0, 20.f) + (L - T.At).GetSafeNormal2D() * 300.f, 2600.f);
 				else if (Stage == 1) { if (D.HitFx) RDMSpawnFx(this, D.HitFx, FVector(L.X, L.Y, T.At.Z + 20.f), FRotator::ZeroRotator, D.HitFxScale, nullptr, true, true); TrapStrike(I, FVector(L.X, L.Y, T.At.Z), 180.f, Share * (0.3f + 0.1f * T.Step)); }
-				else { const FVector A(L.X, L.Y, T.At.Z); TrapShoot(I, 1, A + FVector(0, 0, Ceil - 60.f), A, 250.f); }
+				else { const FVector A(L.X, L.Y, T.At.Z); TrapShoot(I, 1, A + FVector(0, 0, Ceil(A) - 60.f), A, 250.f); }
 			}
 			if (T.Stay > 1.5f || T.Time > 25.f) SpendTrap(I, 2);
 			break;

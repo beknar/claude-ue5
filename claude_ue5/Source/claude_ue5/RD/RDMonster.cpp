@@ -38,7 +38,7 @@ ARDMonster::ARDMonster()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 }
 
-static float RDClipLength(const UAnimationAsset* A)
+float RDClipLength(const UAnimationAsset* A)
 {
 	const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(A);
 	return S ? S->GetPlayLength() : 1.f;

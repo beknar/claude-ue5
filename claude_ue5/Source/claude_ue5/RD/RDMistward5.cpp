@@ -37,16 +37,12 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDMistward5, Log, All);
 
 static constexpr float RD5ShotRadius = 55.f;       // (a shot strikes within this of its way, as a trap's dart)
 
-static float RD5ClipLength(const UAnimationAsset* A)
-{
-	const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(A);
-	return S ? S->GetPlayLength() : 1.f;
-}
 
 // ================================================================================================ a monster's shot
 void ARDMonster::SetupRanged(const FRDMonsterDef& Def)
 {
-	bShoots = Def.bShoots;
+	const ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	bShoots = Def.bShoots && G && G->bMonsterRanged;
 	if (!bShoots) return;
 	RangedRange = Def.RangedRange; RangedMin = Def.RangedMin; RangedShare = Def.RangedDamage; RangedSpeed = FMath::Max(Def.RangedSpeed, 200.f);
 	RangedRelease = FMath::Clamp(Def.RangedRelease, 0.05f, 0.95f); RangedFxScale = Def.RangedFxScale;
@@ -54,7 +50,8 @@ void ARDMonster::SetupRanged(const FRDMonsterDef& Def)
 	RangedFx = Def.RangedFx; RangedMuzzleFx = Def.RangedMuzzleFx; RangedHitFx = Def.RangedHitFx; RangedTheme = Def.RangedTheme;
 	// (its wait scales as its blows' interval does with its tier: always longer than theirs by its kind's own ratio)
 	RangedWait = Def.RangedCooldown * (Def.AttackInterval > 0.f ? AttackInterval / Def.AttackInterval : 1.f);
-	RangedWaitLeft = FMath::Max(RangedWaitLeft, R.FRandRange(0.5f, 1.5f));
+	const uint32 H = HashCombine(GetTypeHash(Def.Name), GetTypeHash(FIntPoint(FMath::RoundToInt(GetActorLocation().X), FMath::RoundToInt(GetActorLocation().Y))));
+	RangedWaitLeft = FMath::Max(RangedWaitLeft, 0.5f + (float)(H % 1000u) / 1000.f);
 }
 
 float ARDMonster::GetShotDamage() const
@@ -82,7 +79,7 @@ bool ARDMonster::TryShoot(AActor* P, const FVector& D, float Dist, float Dz, flo
 	Face(D, Dt);
 	if (FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) < 0.9f) { SetWalkingAnim(false); return true; }      // (turning to aim)
 	GetMesh()->PlayAnimation(RangedClip, false);
-	AttackLen = RD5ClipLength(RangedClip); AttackHit = AttackLen * RangedRelease; AttackTime = 0.f; bHitDone = false; bRangedSwing = true;
+	AttackLen = RDClipLength(RangedClip); AttackHit = AttackLen * RangedRelease; AttackTime = 0.f; bHitDone = false; bRangedSwing = true;
 	ShotAim = To;
 	if (ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr) G->PlaySoundAt(SndAttack, GetActorLocation());
 	VoiceTimer = FMath::Max(VoiceTimer, 2.f);
@@ -106,7 +103,7 @@ void ARDMonster::ReleaseShot(AActor* P)
 	}
 	if (RangedMuzzleFx) RDMSpawnFx(this, RangedMuzzleFx, From, (Aim - From).Rotation(), RangedFxScale, nullptr, true, true);
 	G->FireMonsterShot(this, From, Aim, RangedSpeed, GetShotDamage(), RangedRange * 1.3f, RangedFx, RangedHitFx, RangedFxScale, RangedTheme);
-	++ShotsFired; ++AttacksMade; LastShotTime = GetWorld()->GetTimeSeconds();
+	++ShotsFired; ++AttacksMade;
 }
 
 void ARDDungeonGenerator::FireMonsterShot(ARDMonster* From, const FVector& Muzzle, const FVector& Aim, float Speed, float Damage, float Range, UFXSystemAsset* Fx, UFXSystemAsset* HitFx, float FxScale, const FString& Theme)
@@ -120,6 +117,16 @@ void ARDDungeonGenerator::FireMonsterShot(ARDMonster* From, const FVector& Muzzl
 	ShotStats.FindOrAdd(TEXT("fired"))++;
 	PlaySoundAt(TEXT("Monster.Shot"), Muzzle);
 	UE_LOG(LogRDMistward5, Verbose, TEXT("RDSHOT %s fired %s: %.0f damage at %.0f cm/s"), *S.Kind.ToString(), *Theme, Damage, Speed);
+}
+
+void ARDDungeonGenerator::ResetMistward5()
+{
+	for (FMonsterShot& S : MonsterShots) if (UFXSystemComponent* F = S.Fx.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); }
+	for (auto& E : ShotFxEnding) if (UFXSystemComponent* F = E.Key.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); }
+	MonsterShots.Reset(); ShotFxEnding.Reset(); ShotStats.Reset(); LastShotOnHer.Reset();
+	for (ARDSpectator* A : Crowd) if (IsValid(A)) A->Destroy();
+	Crowd.Reset(); ArenaWaveDue = -1.f; bArenaSheInside = false; CrowdLastLeft = 0;
+	StopAutoplay(TEXT("restart"));
 }
 
 void ARDDungeonGenerator::TickMonsterShots(float Dt)
@@ -399,9 +406,15 @@ FString ARDDungeonGenerator::ArenaDoorNear(const FVector& From) const
 {
 	const ARDSection* S = IsArenaHolding() ? GetSection(ArenaSection) : nullptr;
 	if (!S) return FString();
-	for (const int32 D : S->GetRoomDoors(ArenaRoom))
-		if (FVector::Dist2D(S->GetDoorLocation(D), From) < 240.f) return TEXT("the arena's doors are barred until its last wave falls");
-	return FString();
+	// (only when what F reaches is one of its doors: a pile, a trap she sees, a pad or a container nearer is used as ever (the
+	// PR review's find: every F within 2.4 m of an arena door said it was barred))
+	bool bDoor = false; int32 I = -1;
+	const float D = S->FindNearestInteractive(From, 260.f, bDoor, I);
+	if (I < 0 || !bDoor || S->DoorRoom(I) != ArenaRoom || D > 240.f) return FString();
+	for (const ARDLootPile* P : LootPiles) if (IsValid(P) && FVector::Dist2D(P->GetActorLocation(), From) < 260.f) return FString();
+	if (Traps.Num() > 0 && !DescribeTrapNear(From).IsEmpty()) return FString();
+	if (bTeleporters && PadNear(From) > 0) return FString();
+	return TEXT("the arena's doors are barred until its last wave falls");
 }
 
 bool ARDDungeonGenerator::RefuseArenaExit(const TCHAR* How)
@@ -476,7 +489,7 @@ void ARDDungeonGenerator::ReadAutoplayOption()
 void ARDDungeonGenerator::StartAutoplay(float Seconds, bool bQuitAtEnd)
 {
 	bAutoplay = true; bAutoplayQuit = bQuitAtEnd; AutoplaySeconds = FMath::Max(Seconds, 0.f);
-	AutoplayStart = GetWorld()->GetTimeSeconds(); AutoplayThink = 0.f; AutoplayStuck = 0.f; AutoplayNextAct = 0.f; AutoplayFightSince = -1.f;
+	AutoplayStart = GetWorld()->GetTimeSeconds(); AutoplayThink = 0.f; AutoplayStuck = 0.f; AutoplayNextAct = 0.f; AutoplayUseNext = 0.f; AutoplayGoalKind = 0; AutoplayGoalKey = 0; AutoplayPrey = nullptr;
 	AutoplayPath.Reset(); AutoplayFoe = nullptr; AutoplayRoomsSeen.Reset(); AutoplayRoomsBlocked.Reset(); AutoplayGoal = FVector::ZeroVector;
 	AutoplayStats.Reset(); AutoplayWeaponTurn = 0; AutoplayWalked = 0.f; AutoplayWalkFrom = FVector::ZeroVector;
 	bAutoplayHunting = false; AutoplayHuntNext = 0.f; AutoplayPreyBlocked.Reset();
@@ -557,10 +570,20 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 	// (a key, a click or a stick of the player's: she is theirs again)
 	if (!bAutoplayIgnorePlayer)
 	{
-		static const FKey Take[] = { EKeys::W, EKeys::A, EKeys::S, EKeys::D, EKeys::SpaceBar, EKeys::LeftMouseButton, EKeys::RightMouseButton, EKeys::E, EKeys::F,
-			EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down, EKeys::Gamepad_LeftStick_Left,
-			EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_RightShoulder, EKeys::Gamepad_LeftShoulder };
-		for (const FKey& K : Take) if (PC->WasInputKeyJustPressed(K)) { StopAutoplay(TEXT("player")); return; }
+		static TArray<FKey> Take;
+		if (Take.Num() == 0)
+		{
+			TArray<FKey> All; EKeys::GetAllKeys(All);
+			for (const FKey& K : All)
+				if (K.IsValid() && !K.IsAxis1D() && !K.IsAxis2D() && !K.IsAxis3D() && !K.IsTouch() && !K.IsGesture() && !K.IsModifierKey()
+					&& K != EKeys::LeftCommand && K != EKeys::RightCommand) Take.Add(K);
+		}
+		const bool bChord = PC->IsInputKeyDown(EKeys::LeftAlt) || PC->IsInputKeyDown(EKeys::RightAlt) || PC->IsInputKeyDown(EKeys::LeftCommand) || PC->IsInputKeyDown(EKeys::RightCommand);
+		bool bTake = false;
+		if (!bChord) for (const FKey& K : Take) if (PC->WasInputKeyJustPressed(K)) { bTake = true; break; }
+		for (const FKey& K : { EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY })
+			if (FMath::Abs(PC->GetInputAnalogKeyState(K)) > 0.5f) bTake = true;
+		if (bTake) { StopAutoplay(TEXT("player")); return; }
 	}
 	if (Pc->IsDead()) { AutoplayDoing = TEXT("down"); AutoplayPath.Reset(); AutoplayFoe = nullptr; return; }
 	if (Pc->IsInventoryOpen()) Pc->SetInventoryOpen(false);
@@ -573,7 +596,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 	FVector Move = FVector::ZeroVector;
 	FVector Look = Her->GetActorForwardVector();
 	// ---- hurt: a healing potion or food (the best she has); low on mana in a fight: a mana potion
-	if (Now >= AutoplayNextAct - 10.f)
+	if (Now >= AutoplayUseNext)
 	{
 		const float Hp = Pc->GetHealth() / FMath::Max(Pc->GetMaxHealth(), 1.f);
 		const bool bLowMana = Pc->GetMaxMana() > 0.f && Pc->GetMana() < Pc->GetMaxMana() * 0.25f && AutoplayFoe.IsValid();
@@ -582,9 +605,10 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			const ERDItemKind Want = Hp < 0.45f ? ERDItemKind::Healing : ERDItemKind::Mana;
 			int32 Best = -1; float BestAmt = -1.f;
 			for (int32 I = 0; I < Items.Num(); ++I)
-				if ((Items[I].Kind == Want || (Want == ERDItemKind::Healing && Items[I].Kind == ERDItemKind::Food)) && Pc->GetItemCount(Items[I].Name) > 0 && Items[I].Amount > BestAmt)
+				if ((Items[I].Kind == Want || (Want == ERDItemKind::Healing && Items[I].Kind == ERDItemKind::Food && Pc->GetRegenPerSecond() <= 0.f)) && Pc->GetItemCount(Items[I].Name) > 0 && Items[I].Amount > BestAmt)
 				{ Best = I; BestAmt = Items[I].Amount; }
 			if (Best >= 0 && Pc->UseItem(Items[Best].Name)) { AutoplayStats.FindOrAdd(TEXT("used"))++; AutoplayNextAct = Now + 0.6f; }
+			AutoplayUseNext = Now + 3.f;          // (a potion's or food's effect shows before the next: food heals over time)
 		}
 	}
 	// ---- the one to fight: the nearest she can see within 18 m, or one coming at her
@@ -608,7 +632,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			const float Score = D * (M == Foe ? 0.6f : 1.f) * (bSeen ? 1.f : 1.6f);
 			if (Score < BestD) { BestD = Score; Best = M; }
 		}
-		if (Best != Foe) { Foe = Best; AutoplayPath.Reset(); AutoplayFightSince = Foe ? Now : -1.f; }
+		if (Best != Foe) { Foe = Best; AutoplayPath.Reset(); }
 	}
 	AutoplayThink -= Dt;
 	AutoplayFoe = Foe;
@@ -662,7 +686,6 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 	}
 	else
 	{
-		AutoplayFightSince = -1.f;
 		// ---- things to take or use where she stands: harvests, her things, pickups, chests, shrines, fountains, prisoners
 		if (Now >= AutoplayNextAct)
 		{
@@ -687,13 +710,14 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		if (bAutoplayHunting && Now >= AutoplayHuntNext) { AutoplayGoal = FVector::ZeroVector; AutoplayPath.Reset(); }
 		if (S && (AutoplayGoal.IsZero() || bArrived || AutoplayPath.Num() == 0))
 		{
+			if (bArrived && AutoplayGoalKind == 1) AutoplayRoomsBlocked.Add(AutoplayGoalKey);
 			if (bArrived || AutoplayGoal.IsZero())
 			{
 				const int32 Rm = S->RoomAt(L);
 				if (Rm >= 0) { AutoplayRoomsSeen.Add(FIntVector(S->Coord.X, S->Coord.Y, Rm)); AutoplayStats.FindOrAdd(TEXT("rooms")) = AutoplayRoomsSeen.Num(); }
 			}
-			AutoplayGoal = FVector::ZeroVector; AutoplayPath.Reset(); bAutoplayHunting = false;
-			float BestD = 1500.f;
+			AutoplayGoal = FVector::ZeroVector; AutoplayPath.Reset(); bAutoplayHunting = false; AutoplayGoalKind = 0; AutoplayPrey = nullptr;
+			float BestD = 1500.f; int32 BestKey = 0;
 			for (int32 I = 0; I < S->GetNumContainers(); ++I)
 			{
 				if (S->IsContainerLooted(I) || S->IsTargetOpen(false, I)) continue;
@@ -703,14 +727,14 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 				const int32 Key = (S->Coord.X * 7919 + S->Coord.Y) * 4096 + I;
 				if (AutoplayRoomsBlocked.Contains(-1 - Key)) continue;
 				const float Dd = FVector::Dist2D(Cl, L);
-				if (Dd < BestD) { BestD = Dd; AutoplayGoal = Cl; }
+				if (Dd < BestD) { BestD = Dd; AutoplayGoal = Cl; BestKey = -1 - Key; }
 			}
 			if (!AutoplayGoal.IsZero())
 			{
 				// (a chest stands on a tile off the way: the path's end is the last tile before it, then straight on)
 				AutoplayPath = RD5PathTo(S, L, AutoplayGoal);
-				if (AutoplayPath.Num() == 0) { for (int32 I = 0; I < S->GetNumContainers(); ++I) if (S->GetContainerLocation(I).Equals(AutoplayGoal, 1.f)) AutoplayRoomsBlocked.Add(-1 - ((S->Coord.X * 7919 + S->Coord.Y) * 4096 + I)); AutoplayGoal = FVector::ZeroVector; }
-				else { AutoplayPath.Add(AutoplayGoal); AutoplayDoing = TEXT("to a chest"); }
+				if (AutoplayPath.Num() == 0) { AutoplayRoomsBlocked.Add(BestKey); AutoplayGoal = FVector::ZeroVector; }
+				else { AutoplayPath.Add(AutoplayGoal); AutoplayDoing = TEXT("to a chest"); AutoplayGoalKind = 1; AutoplayGoalKey = BestKey; }
 			}
 			if (AutoplayGoal.IsZero())
 			{
@@ -734,7 +758,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 				{
 					AutoplayPath = PreyPath.Num() > 0 ? PreyPath : TArray<FVector>{ Prey->GetActorLocation() };
 					AutoplayPath.Last() = Prey->GetActorLocation();
-					AutoplayGoal = Prey->GetActorLocation(); bAutoplayHunting = true; AutoplayHuntNext = Now + 1.5f;
+					AutoplayGoal = Prey->GetActorLocation(); bAutoplayHunting = true; AutoplayHuntNext = Now + 1.5f; AutoplayGoalKind = 2; AutoplayPrey = Prey;
 					AutoplayDoing = FString::Printf(TEXT("hunt %s"), *(Prey->Title.IsEmpty() ? Prey->MonsterName.ToString() : Prey->Title));
 				}
 			}
@@ -758,7 +782,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 						AutoplayRoomsBlocked.Add(GetTypeHash(FIntVector(S->Coord.X, S->Coord.Y, Rm)));
 						AutoplayGoal = FVector::ZeroVector;
 					}
-					else AutoplayDoing = FString::Printf(TEXT("to room %d"), S->RoomAt(AutoplayGoal));
+					else { AutoplayDoing = FString::Printf(TEXT("to room %d"), S->RoomAt(AutoplayGoal)); AutoplayGoalKind = 3; AutoplayGoalKey = (int32)GetTypeHash(FIntVector(S->Coord.X, S->Coord.Y, S->RoomAt(AutoplayGoal))); }
 				}
 			}
 			if (AutoplayGoal.IsZero())
@@ -772,7 +796,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 					const FIntPoint Nb = S->PortalNeighbour(P, Border, Outward);
 					bool bSealed = false;
 					for (const FVector& Sl : Seals) if (FVector::Dist2D(Sl, Border) < 500.f) { bSealed = true; break; }
-					if (bSealed) continue;
+					if (bSealed || AutoplayRoomsBlocked.Contains((int32)GetTypeHash(FIntVector(S->Coord.X, S->Coord.Y, -100 - P)))) continue;
 					int32 Seen = 0;
 					for (const FIntVector& K : AutoplayRoomsSeen) if (K.X == Nb.X && K.Y == Nb.Y) ++Seen;
 					const float Score = Seen * 100000.f + FVector::Dist2D(Border, L) + AutoplayR.FRandRange(0.f, 2000.f);
@@ -783,7 +807,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 					AutoplayPath = RD5PathTo(S, L, BestBorder - BestOut * 150.f);
 					AutoplayPath.Add(BestBorder + BestOut * 900.f);
 					AutoplayGoal = BestBorder + BestOut * 900.f;
-					AutoplayDoing = TEXT("on to the next set");
+					AutoplayDoing = TEXT("on to the next set"); AutoplayGoalKind = 4; AutoplayGoalKey = (int32)GetTypeHash(FIntVector(S->Coord.X, S->Coord.Y, -100 - BestP));
 				}
 				else AutoplayRoomsSeen.Reset();          // (nowhere new: round again)
 			}
@@ -817,7 +841,9 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 				AutoplayStats.FindOrAdd(TEXT("stuck"))++;
 				if (AutoplayStats.FindRef(TEXT("stuck")) % 3 == 0)
 				{
-					if (!AutoplayGoal.IsZero() && S) AutoplayRoomsBlocked.Add(GetTypeHash(FIntVector(S->Coord.X, S->Coord.Y, S->RoomAt(AutoplayGoal))));
+					if (AutoplayGoalKind == 2) { if (AutoplayPrey.IsValid()) AutoplayPreyBlocked.Add(AutoplayPrey); }
+					else if (AutoplayGoalKind != 0) AutoplayRoomsBlocked.Add(AutoplayGoalKey);
+					AutoplayGoalKind = 0; AutoplayPrey = nullptr;
 					AutoplayGoal = FVector::ZeroVector; AutoplayPath.Reset(); AutoplayFoe = nullptr; AutoplayThink = 1.5f;
 				}
 				else { AutoplayPath.Insert(L + FVector::CrossProduct(Move, FVector::UpVector) * (AutoplayR.FRand() < 0.5f ? 200.f : -200.f) - Move * 80.f, 0); Her->Jump(); }

@@ -21,6 +21,9 @@
 class ARDSection;
 class UMaterialInstanceDynamic;
 
+/** a clip's length (s; 1 for none or not a sequence) */
+float RDClipLength(const UAnimationAsset* A);
+
 UCLASS()
 class CLAUDE_UE5_API ARDMonster : public ACharacter
 {
@@ -131,8 +134,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetShotWait() const { return RangedWait; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetShotWaitLeft() const { return RangedWaitLeft; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsShooting() const { return AttackTime >= 0.f && bRangedSwing; }
-	/** the world time of its last shot's release (-100: none) */
-	float LastShotTime = -100.f;
 
 	// ---- wounds
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumWounds() const { return Wounds.Num(); }

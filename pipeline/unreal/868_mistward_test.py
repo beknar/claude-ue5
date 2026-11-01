@@ -3127,7 +3127,7 @@ def step_arena5():
         res["put_back"] = g.arena_put_back - pb0; res["back_in_room"] = S.room_at(G["pawn"].get_actor_location()) == room
     res["refused"] = g.arena_escapes_refused - ref0
     # (a kill: claps)
-    ms = [m for m in g.get_monsters() if alive(m) and dist2(m.get_actor_location(), mid) < 2500]
+    ms = [m for m in g.get_monsters() if alive(m) and S.room_at(m.get_actor_location()) == room]          # (one of its waves: a monster beyond it is not the audience's)
     claps0 = g.crowd_claps_made
     if ms: ms[0].apply_damage(1e7, G["pawn"])
     yield from wait(0.9)

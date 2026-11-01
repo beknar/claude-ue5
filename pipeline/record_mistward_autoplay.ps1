@@ -33,8 +33,10 @@ if (-not $cap) { $cap = Join-Path ([Environment]::GetFolderPath("MyVideos")) "Ca
 "Game Bar's captures folder: $cap"
 $rx, $ry = $Res.Split("x")
 $mark = Join-Path $env:TEMP "rd_record_mark.txt"
-$gus = Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"
-$kept = if (Test-Path $gus) { , [byte[]][IO.File]::ReadAllBytes($gus) } else { $null }
+# (the game's settings: a Shipping game's in LocalAppData, a Development game's beside it (as package_mistward.ps1); both kept,
+#  as byte arrays, and put back)
+$gus = @((Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"), (Join-Path (Split-Path $Game) "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"))
+$kept = @{}; foreach ($g in $gus) { $kept[$g] = if (Test-Path $g) { , [byte[]][IO.File]::ReadAllBytes($g) } else { $null } }
 $bin = (Join-Path (Split-Path $Game) "claude_ue5\Binaries\Win64").ToLower()
 $made = @()
 try {
@@ -84,7 +86,7 @@ foreach ($h in $Heroes) {
 }
 finally {
     foreach ($q in Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) }) { Stop-Process -Id $q.Id -Force }
-    if ($null -ne $kept) { [IO.File]::WriteAllBytes($gus, $kept) } elseif (Test-Path $gus) { Remove-Item $gus -Force }
+    foreach ($g in $gus) { if ($null -ne $kept[$g]) { [IO.File]::WriteAllBytes($g, $kept[$g]) } elseif (Test-Path $g) { Remove-Item $g -Force } }
     "the game's settings put back as they were"
 }
 "videos: $($made.Count) of $($Heroes.Count) in $cap"

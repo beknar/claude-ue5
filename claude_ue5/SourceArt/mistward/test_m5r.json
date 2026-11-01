@@ -1,0 +1,1140 @@
+{
+ "tag": "m5r",
+ "plan": [
+  "tiers",
+  "traps",
+  "rooms",
+  "ranged",
+  "arena5",
+  "autoplay"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "tiers",
+   "ok": true,
+   "ok_tier2": true,
+   "ok_tier3": true,
+   "share": 0.5,
+   "tally1_start": {
+    "ok": true,
+    "done": [
+     1,
+     0,
+     0
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "standing_before": 14,
+   "kills": [
+    {
+     "killed": 0,
+     "of": 14,
+     "share": 0.0,
+     "open": false
+    },
+    {
+     "killed": 1,
+     "of": 14,
+     "share": 0.071,
+     "open": false
+    },
+    {
+     "killed": 2,
+     "of": 14,
+     "share": 0.143,
+     "open": false
+    },
+    {
+     "killed": 3,
+     "of": 14,
+     "share": 0.214,
+     "open": false
+    },
+    {
+     "killed": 4,
+     "of": 14,
+     "share": 0.286,
+     "open": false
+    },
+    {
+     "killed": 5,
+     "of": 14,
+     "share": 0.357,
+     "open": false
+    },
+    {
+     "killed": 6,
+     "of": 14,
+     "share": 0.429,
+     "open": false
+    },
+    {
+     "killed": 7,
+     "of": 14,
+     "share": 0.5,
+     "open": true
+    }
+   ],
+   "open_short": false,
+   "opened_at_share": 0.5,
+   "last_shut_share": 0.429,
+   "tally1_enough": {
+    "ok": true,
+    "done": [
+     46,
+     7,
+     71
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "open_enough": true,
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE BARRACKS (SEE YOUR MAP)",
+   "tier2": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       3450.0,
+       -150.0,
+       124.0
+      ],
+      "name": "Orc_03",
+      "alive": 1,
+      "tier": 2,
+      "label": "TIER 2 BOSS: ORC RAIDER",
+      "max_health": 360.0
+     }
+    ],
+    "band": 5,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -4438.0,
+       -7590.0,
+       119.0
+      ],
+      "name": "Magic Potency Ring 1",
+      "key": 27,
+      "tier": 2,
+      "section": [
+       0,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 1,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     80.0,
+     114.0,
+     120.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 1"
+    ],
+    "ring_kind_ok": true
+   },
+   "marks_minimap": [
+    7,
+    8,
+    10
+   ],
+   "marks_map": [
+    7,
+    8,
+    10
+   ],
+   "notices_tier2": [
+    "SET CLEARED  -  TIER 2: 1 / 8",
+    "SET CLEARED  -  TIER 2: 2 / 8",
+    "SET CLEARED  -  TIER 2: 3 / 8",
+    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 5 / 8",
+    "SET CLEARED  -  TIER 2: 6 / 8",
+    "SET CLEARED  -  TIER 2: 7 / 8",
+    "TIER 2 CLEARED"
+   ],
+   "tally2": {
+    "ok": true,
+    "done": [
+     327,
+     99,
+     726
+    ],
+    "all": [
+     327,
+     99,
+     726
+    ]
+   },
+   "open3": true,
+   "notice3": "TIER 2 CLEARED",
+   "tiers_opened": [
+    2,
+    3
+   ],
+   "tier3": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -22050.0,
+       21150.0,
+       115.0
+      ],
+      "name": "Tank",
+      "alive": 1,
+      "tier": 3,
+      "label": "TIER 3 BOSS: ZOMBIE TANK",
+      "max_health": 576.0
+     }
+    ],
+    "band": 5,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -28650.0,
+       -3600.0,
+       102.0
+      ],
+      "name": "Magic Potency Ring 3",
+      "key": -1,
+      "tier": 3,
+      "section": [
+       -1,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 2,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     133.0,
+     148.0,
+     153.0,
+     172.0,
+     187.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 3"
+    ],
+    "ring_in_pile": true,
+    "ring_kind_ok": true
+   },
+   "seconds": 8.9
+  },
+  {
+   "step": "traps",
+   "ok": true,
+   "traps": 262,
+   "kinds_present": [
+    "Chain",
+    "Crusher",
+    "Cursed",
+    "Darts",
+    "Deadfall",
+    "Emanation",
+    "Glyph",
+    "Lingering",
+    "Pit",
+    "Snare",
+    "Spring",
+    "Teleport",
+    "Ward"
+   ],
+   "by_kind": {
+    "Pit": {
+     "present": true,
+     "kind": "0",
+     "hp_lost": 18.8,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.86,
+       18.8
+      ]
+     ],
+     "held_at": 0.56,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 277,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: pit trap!",
+     "fell_through": []
+    },
+    "Darts": {
+     "present": true,
+     "kind": "1",
+     "hp_lost": 21.2,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.27,
+       7.1
+      ],
+      [
+       0.63,
+       7.1
+      ],
+      [
+       0.97,
+       7.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 0,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: dart trap!",
+     "fell_through": []
+    },
+    "Deadfall": {
+     "present": true,
+     "kind": "2",
+     "hp_lost": 32.3,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.96,
+       10.8
+      ],
+      [
+       1.26,
+       10.8
+      ],
+      [
+       1.52,
+       10.8
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1342,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: deadfall!",
+     "fell_through": []
+    },
+    "Crusher": {
+     "present": true,
+     "kind": "3",
+     "hp_lost": 40.3,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.57,
+       40.3
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 567,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: crusher!",
+     "fell_through": []
+    },
+    "Snare": {
+     "present": true,
+     "kind": "4",
+     "hp_lost": 6.7,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.16,
+       6.7
+      ]
+     ],
+     "held_at": 0.16,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: snare!",
+     "fell_through": []
+    },
+    "Glyph": {
+     "present": true,
+     "kind": "5",
+     "hp_lost": 29.6,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.69,
+       29.6
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 117,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: glyph of fire!",
+     "fell_through": []
+    },
+    "Ward": {
+     "present": true,
+     "kind": "6",
+     "hp_lost": 16.1,
+     "held": false,
+     "moved_m": 1.6,
+     "farthest_m": 1.6,
+     "peak_speed": 578,
+     "drops": [
+      [
+       0.15,
+       16.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 95,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 0,
+     "says": "A trap: warding barrier!",
+     "fell_through": []
+    },
+    "Emanation": {
+     "present": true,
+     "kind": "7",
+     "hp_lost": 64.5,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.16,
+       8.1
+      ],
+      [
+       0.66,
+       8.1
+      ],
+      [
+       1.18,
+       8.1
+      ],
+      [
+       1.73,
+       8.1
+      ],
+      [
+       2.25,
+       8.1
+      ],
+      [
+       2.76,
+       8.1
+      ],
+      [
+       3.27,
+       8.1
+      ],
+      [
+       3.84,
+       8.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.4,
+     "particles": 19,
+     "ambush": {},
+     "hits": 8,
+     "triggered": 1,
+     "state": 1,
+     "says": "You are slowed",
+     "fell_through": []
+    },
+    "Cursed": {
+     "present": true,
+     "kind": "8",
+     "hp_lost": 8.1,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.16,
+       8.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.45,
+     "slowness": 0.4,
+     "particles": 35,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "The cursed rune stone curses you: your blows are weaker",
+     "fell_through": []
+    },
+    "Chain": {
+     "present": true,
+     "kind": "9",
+     "hp_lost": 48.4,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.84,
+       10.8
+      ],
+      [
+       1.91,
+       21.5
+      ],
+      [
+       2.41,
+       16.1
+      ]
+     ],
+     "held_at": 0.55,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 336,
+     "ambush": {},
+     "hits": 4,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: chain of traps!",
+     "fell_through": []
+    },
+    "Lingering": {
+     "present": true,
+     "kind": "10",
+     "hp_lost": 75.0,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.49,
+       16.9
+      ],
+      [
+       1.7,
+       12.1
+      ],
+      [
+       4.01,
+       9.7
+      ],
+      [
+       4.45,
+       16.9
+      ],
+      [
+       5.68,
+       19.4
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 72,
+     "ambush": {},
+     "hits": 7,
+     "triggered": 1,
+     "state": 1,
+     "says": "A trap: lingering trap!",
+     "fell_through": []
+    },
+    "Teleport": {
+     "present": true,
+     "kind": "11",
+     "hp_lost": 0.0,
+     "held": false,
+     "moved_m": 582.0,
+     "farthest_m": 582.0,
+     "peak_speed": 0,
+     "drops": [],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 19,
+     "ambush": {
+      "0,1": "monsters|3|3450|29550"
+     },
+     "hits": 0,
+     "triggered": 1,
+     "state": 1,
+     "says": "A teleport trap carries you off: into a room of monsters",
+     "fell_through": []
+    },
+    "Spring": {
+     "present": true,
+     "kind": "12",
+     "hp_lost": 10.8,
+     "held": true,
+     "moved_m": 3.0,
+     "farthest_m": 3.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.36,
+       10.8
+      ]
+     ],
+     "held_at": 0.15,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 523,
+     "ambush": {
+      "0,0": "glyphs|4|7350|-9450"
+     },
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A spring plate hurls you across the room: into a ring of glyphs",
+     "fell_through": []
+    }
+   },
+   "warrior_seen": 0,
+   "rogue": {
+    "seen_from_5m": 1,
+    "marks": [
+     7,
+     8,
+     11
+    ],
+    "describe": "disarm the pit trap",
+    "f": "disarm",
+    "progress": 0.19,
+    "state_after": 3,
+    "disarmed": 1,
+    "says": "You disarm the pit trap"
+   },
+   "kind_ok": {
+    "Pit": true,
+    "Darts": true,
+    "Deadfall": true,
+    "Crusher": true,
+    "Snare": true,
+    "Glyph": true,
+    "Ward": true,
+    "Emanation": true,
+    "Cursed": true,
+    "Chain": true,
+    "Lingering": true,
+    "Teleport": true,
+    "Spring": true
+   }
+  },
+  {
+   "step": "rooms",
+   "ok": true,
+   "kinds": {
+    "Trap gauntlet": 3,
+    "Fountain of speed": 4,
+    "Vault": 5,
+    "Arena": 3,
+    "Shrine": 5,
+    "Fountain of mana": 3,
+    "Healing fountain": 3,
+    "Throne room": 2
+   },
+   "refused": [],
+   "shrine": {
+    "describe": "pray at the shrine",
+    "f": "shrine",
+    "blessing": "Blessing of the bulwark",
+    "damage_x": 1.0,
+    "armour": 0.25,
+    "speed": 0.0,
+    "again": "shrine used"
+   },
+   "heal": {
+    "f": "fountain",
+    "hp_gain": 0.6,
+    "speed_x": 1.0,
+    "speed_bonus": 0.0,
+    "again": "fountain dry",
+    "particles": 58
+   },
+   "speed": {
+    "f": "fountain",
+    "hp_gain": 0.0,
+    "speed_x": 1.3,
+    "speed_bonus": 0.3,
+    "again": "fountain dry",
+    "particles": 11
+   },
+   "mana": {
+    "f": "fountain",
+    "mana": [
+     0.0,
+     100.0,
+     100.0
+    ],
+    "again": "fountain dry"
+   },
+   "arena": {
+    "doors": 8,
+    "open_before": 8,
+    "began": true,
+    "doors_open_after_begin": 0,
+    "pushed_open": false,
+    "waves": [
+     {
+      "wave": 0,
+      "left": 3
+     },
+     {
+      "wave": 1,
+      "left": 3
+     },
+     {
+      "wave": 2,
+      "left": 3
+     },
+     {
+      "wave": -1,
+      "left": 0
+     }
+    ],
+    "won": 1,
+    "prize": [
+     [
+      "Desert Hero’s Armour",
+      "HP Potency Ring 2",
+      "Small Mana Potion"
+     ]
+    ],
+    "harvest_piles": 14,
+    "opens_after": true
+   },
+   "gauntlet": {
+    "traps": 13,
+    "kinds": [
+     "Cursed",
+     "Darts",
+     "Deadfall",
+     "Glyph",
+     "Pit",
+     "Spring"
+    ],
+    "chests": 1,
+    "chest_loot": [
+     "Repair Kit",
+     "Dagger",
+     "Bread"
+    ]
+   },
+   "vault": {
+    "doors": 4,
+    "locked_f": "vault locked",
+    "open_without_key": false,
+    "key_chests": 1,
+    "key_room": 43,
+    "key_chest_f": "chest",
+    "other_opened": 0,
+    "has_key": 1,
+    "f": "vault",
+    "open_with_key": true,
+    "key_after": 0,
+    "vault_chests": 4,
+    "vault_loot": [
+     "Wondrous Speed Potion",
+     "Combat Knife",
+     "Straw Rope"
+    ],
+    "tier_beyond": [
+     [
+      3
+     ],
+     [
+      3
+     ]
+    ]
+   },
+   "throne": {
+    "encounters": 2,
+    "label": "THE USURPER: ORC RAIDER",
+    "alive": 1,
+    "slain_notice": "THE USURPER IS SLAIN  -  THE BLOOD SLASH IS YOURS",
+    "usurper_uses": 1,
+    "slashes_given": [
+     "Blood Slash"
+    ],
+    "slash_in_pack": [
+     "slash|Blood Slash|2"
+    ]
+   }
+  },
+  {
+   "step": "ranged",
+   "ok": true,
+   "shooters": 28,
+   "kinds": 55,
+   "defs_bad": [],
+   "trials": [
+    {
+     "kind": "Soldier",
+     "title": "Rotting Soldier",
+     "dist": 976,
+     "blow": 14.0,
+     "shot": 5.6,
+     "wait": 5.52,
+     "interval": 1.84,
+     "flight": [
+      [
+       916,
+       0,
+       147,
+       1900
+      ],
+      [
+       791,
+       0,
+       141,
+       1900
+      ],
+      [
+       117,
+       0,
+       111,
+       1900
+      ],
+      [
+       861,
+       0,
+       137,
+       1900
+      ],
+      [
+       748,
+       0,
+       133,
+       1900
+      ],
+      [
+       611,
+       0,
+       128,
+       1900
+      ],
+      [
+       513,
+       0,
+       124,
+       1900
+      ],
+      [
+       388,
+       0,
+       120,
+       1900
+      ],
+      [
+       235,
+       0,
+       114,
+       1900
+      ],
+      [
+       136,
+       0,
+       111,
+       1900
+      ]
+     ],
+     "times": [
+      1.25,
+      8.81
+     ],
+     "fired": 2,
+     "on_her": 2,
+     "hp_lost": 10.8,
+     "last_on_her": "Soldier|5.6|14.0|a rifle shot",
+     "gaps": [
+      7.56
+     ],
+     "close": {
+      "shots": 0,
+      "blows": 2
+     }
+    },
+    {
+     "kind": "Medic",
+     "title": "Mad Surgeon",
+     "dist": 600,
+     "blow": 12.0,
+     "shot": 6.6,
+     "wait": 4.05,
+     "interval": 1.84,
+     "flight": [
+      [
+       539,
+       0,
+       134,
+       1400
+      ],
+      [
+       401,
+       0,
+       127,
+       1400
+      ],
+      [
+       536,
+       0,
+       134,
+       1400
+      ],
+      [
+       464,
+       0,
+       130,
+       1400
+      ],
+      [
+       363,
+       0,
+       125,
+       1400
+      ],
+      [
+       275,
+       0,
+       120,
+       1400
+      ],
+      [
+       204,
+       0,
+       116,
+       1400
+      ],
+      [
+       108,
+       0,
+       111,
+       1400
+      ]
+     ],
+     "times": [
+      1.91,
+      8.31
+     ],
+     "fired": 3,
+     "on_her": 3,
+     "hp_lost": 19.0,
+     "last_on_her": "Medic|6.6|12.0|a syringe dart",
+     "gaps": [
+      6.4
+     ],
+     "close": {
+      "shots": 0,
+      "blows": 2
+     }
+    }
+   ]
+  },
+  {
+   "step": "arena5",
+   "ok": false,
+   "room": 18,
+   "began": true,
+   "lead": 3.0,
+   "crowd": 18,
+   "wave_at_half_lead": -1,
+   "facing_middle": 18,
+   "by_a_door": 0,
+   "toward_walls": 18,
+   "meshes": 9,
+   "first_wave_after": 3.05,
+   "cheers_at_wave": 5,
+   "doing_after_wave": [
+    "cheer"
+   ],
+   "ring_used": false,
+   "ring_moved_her": 0,
+   "door_says": "the arena's doors are barred until its last wave falls",
+   "door_f": "arena barred",
+   "door_open": false,
+   "put_back": 1,
+   "back_in_room": true,
+   "refused": 3,
+   "claps_after_kill": 0,
+   "doing_after_kill": [
+    "idle"
+   ],
+   "won": 1,
+   "crowd_after_win": 0,
+   "reactions": null
+  },
+  {
+   "step": "autoplay",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 120,
+     "attacks": 5,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 6,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Mage": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 132,
+     "attacks": 6,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Warlock": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 126,
+     "attacks": 8,
+     "kills": 2,
+     "rooms": 2,
+     "used": 1,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Rogue": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 133,
+     "attacks": 4,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "MartialArtist": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 127,
+     "attacks": 6,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 6,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Summoner": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 112,
+     "attacks": 5,
+     "kills": 2,
+     "rooms": 2,
+     "used": 1,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    }
+   },
+   "takeover": true
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_m5r_map_tier2.png",
+  "mw_m5r_trap_rogue.png",
+  "mw_m5r_room_shrine.png",
+  "mw_m5r_room_heal.png",
+  "mw_m5r_room_speed.png",
+  "mw_m5r_room_mana.png",
+  "mw_m5r_room_gauntlet.png",
+  "mw_m5r_room_vault.png",
+  "mw_m5r_room_throne.png",
+  "mw_m5r_ranged_Soldier.png",
+  "mw_m5r_ranged_Medic.png",
+  "mw_m5r_arena_crowd.png",
+  "mw_m5r_arena_clap.png",
+  "mw_m5r_autoplay_Warrior.png",
+  "mw_m5r_autoplay_Mage.png",
+  "mw_m5r_autoplay_Warlock.png",
+  "mw_m5r_autoplay_Rogue.png",
+  "mw_m5r_autoplay_MartialArtist.png",
+  "mw_m5r_autoplay_Summoner.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

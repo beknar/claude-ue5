@@ -748,6 +748,8 @@ public:
 	TArray<TPair<TWeakObjectPtr<UFXSystemComponent>, float>> ShotFxEnding;
 	void FireMonsterShot(ARDMonster* From, const FVector& Muzzle, const FVector& Aim, float Speed, float Damage, float Range, UFXSystemAsset* Fx, UFXSystemAsset* HitFx, float FxScale, const FString& Theme);
 	void TickMonsterShots(float Dt);
+	/** RestartPlay: the shots in the air, the audience and autoplay ended */
+	void ResetMistward5();
 	/** shots fired, landed on her, on her allies, on monsters (an ally's), on walls, faded at their range (tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") TMap<FString, int32> ShotStats;
 	/** the last shot that struck her: its kind, its damage, the blow's damage of its kind (tests: weaker than the blow) */
@@ -770,7 +772,11 @@ public:
 	/** tests: the player's keys do not take over (a test's own simulated keys would) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bAutoplayIgnorePlayer = false;
 	bool bAutoplay = false, bAutoplayQuit = false;
-	float AutoplaySeconds = 0.f, AutoplayStart = 0.f, AutoplayThink = 0.f, AutoplayStuck = 0.f, AutoplayNextAct = 0.f, AutoplayFightSince = -1.f;
+	float AutoplaySeconds = 0.f, AutoplayStart = 0.f, AutoplayThink = 0.f, AutoplayStuck = 0.f, AutoplayNextAct = 0.f, AutoplayUseNext = 0.f;
+	/** what she heads for: 0 nothing, 1 a chest, 2 a monster (AutoplayPrey), 3 a room, 4 a way out to the next set; its key
+	 *  in AutoplayRoomsBlocked (given up when she sticks on the way, a chest once reached) */
+	int32 AutoplayGoalKind = 0, AutoplayGoalKey = 0;
+	TWeakObjectPtr<ARDMonster> AutoplayPrey;
 	FVector AutoplayLastPos = FVector::ZeroVector, AutoplayWalkFrom = FVector::ZeroVector;
 	float AutoplayWalked = 0.f, AutoplayHuntNext = 0.f;
 	bool bAutoplayHunting = false;

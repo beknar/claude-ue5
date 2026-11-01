@@ -208,8 +208,9 @@ void ARDHeroSelect::Tick(float Dt)
 		// (which device the keys on the screen are for)
 		// (B and Escape too: the quit's prompt names the key of the device used last)
 		static const FKey PadKeys[] = { EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftShoulder,
-			EKeys::Gamepad_RightShoulder, EKeys::Gamepad_Special_Right, EKeys::Gamepad_FaceButton_Right };
-		static const FKey KeyKeys[] = { EKeys::A, EKeys::D, EKeys::Left, EKeys::Right, EKeys::Enter, EKeys::SpaceBar, EKeys::LeftMouseButton, EKeys::Escape };
+			EKeys::Gamepad_RightShoulder, EKeys::Gamepad_Special_Right, EKeys::Gamepad_FaceButton_Right,
+			EKeys::Gamepad_FaceButton_Top, EKeys::Gamepad_DPad_Up, EKeys::Gamepad_DPad_Down };
+		static const FKey KeyKeys[] = { EKeys::A, EKeys::D, EKeys::Left, EKeys::Right, EKeys::Enter, EKeys::SpaceBar, EKeys::LeftMouseButton, EKeys::Escape, EKeys::P, EKeys::LeftBracket, EKeys::RightBracket };
 		for (const FKey& K : PadKeys) if (PC->IsInputKeyDown(K)) bUsingGamepad = true;
 		if (FMath::Abs(Sx) > 0.3f) bUsingGamepad = true;
 		for (const FKey& K : KeyKeys) if (PC->IsInputKeyDown(K)) bUsingGamepad = false;

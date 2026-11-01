@@ -1088,6 +1088,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tier 1 open)
 	for (ARDMonster* A : Allies) if (A) A->Destroy();
 	Allies.Reset();
+	ResetMistward5();          // (mistward5: no shot of before in the air, no audience, autoplay ended)
 	// (mistward: what the rules set waiting, her dropped things, the pads, the cells, the traps start again)
 	for (const FEncounter& E : Encounters) for (const TWeakObjectPtr<ARDMonster>& M : E.Live) if (M.IsValid()) M->Destroy();
 	// (and every other monster that is none of a set's planned ones (a boss's band, a guard, one a teleport trap brought, a
