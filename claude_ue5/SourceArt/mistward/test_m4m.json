@@ -1,0 +1,82 @@
+{
+ "tag": "m4m",
+ "plan": [
+  "menu"
+ ],
+ "level": "mistward_castle_select",
+ "steps": [
+  {
+   "step": "menu",
+   "ok": true,
+   "mouse_ui": true,
+   "cursor_shown": true,
+   "buttons": [
+    "Hero_0",
+    "Hero_1",
+    "Hero_2",
+    "Hero_3",
+    "Hero_4",
+    "Hero_5",
+    "Next",
+    "Prev",
+    "Quit",
+    "Start"
+   ],
+   "refused": [],
+   "clicks": [
+    [
+     "Hero_2",
+     2,
+     "Warlock",
+     true
+    ],
+    [
+     "Next",
+     3,
+     "Rogue",
+     true
+    ],
+    [
+     "Prev",
+     2,
+     "Warlock",
+     true
+    ],
+    [
+     "Hero_0",
+     0,
+     "Warrior",
+     true
+    ]
+   ],
+   "opened_before": "",
+   "opened_by_name_again": "/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior",
+   "quit": {
+    "button": true,
+    "click": {
+     "why": "",
+     "asked": 1
+    },
+    "escape_twice": {
+     "armed_after_one": true,
+     "asked": 1
+    },
+    "escape_lapsed": {
+     "asked": 0,
+     "armed_again": true
+    }
+   },
+   "start_button": true,
+   "world_after": "mistward_castle",
+   "hero_after": "Rogue",
+   "cursor_after": false
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_m4m_menu_mouse.png",
+  "mw_m4m_menu_quit_ask.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

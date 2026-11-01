@@ -282,13 +282,21 @@ def finish(wd, w):
     return wd
 def copy(x, cls):
     n = cls(); n.import_text(x.export_text()); return n
+import sys as _sys, os as _os, importlib as _il
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import rd_spell_index as _rsi
+_il.reload(_rsi)
+repoint_spell_weapons = _rsi.repoint_spell_weapons          # (shared with 876: each stage's spells move the other's)
+
+
 for MAP in MAPS:
     if not eal.does_asset_exist(MAP): print("MA (no", MAP, "yet)"); continue
     if not ues.get_editor_world().get_path_name().startswith(MAP + "."): les.load_level(MAP)
     gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
     names_ = {c["name"] for c in DATA["chi"]}
-    # (every chi spell this made before, by its number (101 on), and any of the table's names: renamed ones went too)
-    spells = [s for s in gen.get_editor_property("spells") if str(s.name) not in names_ and s.number <= 100]
+    # (every chi spell this made before, by its number (101 to 199), and any of the table's names: renamed ones went too;
+    # the Summoner's summons (876, 201 on) stay: "101 on" took them, and her summons started, took mana and called nobody)
+    spells = [s for s in gen.get_editor_property("spells") if str(s.name) not in names_ and not 101 <= s.number <= 199]
     base = len(spells); spells += [copy(s, unreal.RDSpellDef) for s in spells_new]
     gen.set_editor_property("spells", spells)
     ws = [copy(w, unreal.RDWeaponDef) for w in chi_w]
@@ -336,8 +344,10 @@ for MAP in MAPS:
             finish(wd, w); f = unreal.RDWeaponFit(); f.hero = HERO; f.weapon = wd; fits.append(f); nfit += 1
         it.weapon_fits = fits
     gen.set_editor_property("items", items)
+    moved = repoint_spell_weapons(gen)
     gen.modify(); les.save_current_level()
     back = next(x for x in gen.get_editor_property("heroes") if str(x.name) == HERO)
+    print(f"MA {MAP.rsplit('/', 1)[1]}: spell weapons pointed again at their spells by name: {moved}")
     print(f"MA {MAP.rsplit('/', 1)[1]}: hero {back.title} ({back.pawn_class.get_name()}) | weapons {[str(w.name) for w in back.weapons]} | locked {[str(w.name) for w in back.locked_weapons]}"
           f" | spells {len(gen.get_editor_property('spells'))} (chi from {base}) | knife fits {nfit} | armour fits {narm} | heroes {[str(x.name) for x in gen.get_editor_property('heroes')]}")
 if eal.does_asset_exist(MAPS[0]) and not ues.get_editor_world().get_path_name().startswith(MAPS[0] + "."): les.load_level(MAPS[0])

@@ -89,6 +89,12 @@ The user's list of 2026-10-30 (docs/improvements3.txt; 875-877):
   summoner the Summoner: 85 hit points, 50 mana, the Mage's fire and dark fire, Summon Tier 1 (25 mana, two soldiers, a
            third refused), her soldiers fighting, daggers in both hands and never enchanted, no armour, magic rings only, no
            tome, the torch; a tier boss: Summon Tier 2 (the Gunner); kept through a death, gone at a restart
+The user's list of 2026-10-31 (878):
+  options  Escape: the main page (Resume, Options, Choose another hero, Quit); Options: the volumes, the controls hint off
+           (the HUD draws no panel) and on, a display mode and a resolution applied (saved in the editor), Escape back, closed
+  allyspace six of the Summoner's allies called apart; following her and waiting round her they keep apart (sampled; the
+           switch off first: they gather into each other); the summons panel's rows and hit points; their marks on both maps
+  (menu: also the hero menu's QUIT GAME: clicked, Escape twice; Escape once lapses)
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -101,7 +107,7 @@ UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner"
+DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner,options,allyspace,maarm"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 I2 = unreal.IntPoint
@@ -401,6 +407,9 @@ def step_inventory():
     res["rows_drawn"] = len(R_); m = {}
     if pot is not None:
         nm = L_[pot].split("|")[1]; b = R_[pot]
+        # (none of two or more: after the steps before it in a full run she had one of each, the one drunk took its row away
+        # and the wheel's check failed twice in four runs: a second of it given, so its row stays)
+        if c.get_item_count(nm) < 2: c.add_item(nm, 1); yield from rwait(0.2); R_ = rows(c); b = R_.get(pot, b)
         # (a row is chosen when the pointer moves onto it: first somewhere else, a few frames, then onto it)
         why = str(g.slate_mouse_move(unreal.Vector2D(b[0] + 30, b[1] - 60))); yield from rwait(0.25)
         why = why or str(g.slate_mouse_move(mid(b)))
@@ -416,6 +425,13 @@ def step_inventory():
             why = str(g.slate_wheel(mid(b), -1.0)); yield from rwait(0.15)
             if why: res["refused"].append("wheel: " + why)
         m["first_before"] = f0; m["first_after_wheel_down"] = c.get_list_first(); m["cursor_kept"] = c.get_inventory_cursor() == k0; m["cursor"] = [k0, c.get_inventory_cursor()]; m["tab_lines"] = [str(x) for x in lines(c)][:12]
+        # (where the game reads the pointer now, against where the test put it: a move it did not send shows here)
+        mp = G["pc"].get_mouse_position(); m["pointer_sent"] = [round(mid(b).x, 1), round(mid(b).y, 1)]; m["pointer_read"] = [round(mp[0], 1), round(mp[1], 1)] if mp and mp[0] is not None else None
+        # (the real mouse resting over the game's view: as the list scrolled, Slate moved the game's pointer to it (a move as
+        # the device's) and the row under it was chosen, as a real move should: measured (783, 1311) read against (922, 318)
+        # sent. Not the game's fault, and not a measurement of the wheel: said so)
+        if m["pointer_read"] and math.hypot(m["pointer_read"][0] - m["pointer_sent"][0], m["pointer_read"][1] - m["pointer_sent"][1]) > 2.0:
+            res["refused"].append("the real mouse pointer rests over the game's view at (%.0f, %.0f): move it off the editor's game view for this step" % tuple(m["pointer_read"]))
         why = str(g.slate_wheel(mid(b), 1.0)); yield from rwait(0.15)
         m["first_after_wheel_up"] = c.get_list_first()
         # (a double click on a row of three small potions: one drunk, not two (the second press of a double click is a press too))
@@ -1203,6 +1219,22 @@ def step_menu():
     if why: res["refused"].append("again: " + why)
     res["opened_by_name_again"] = str(s.opened)
     shot("menu_mouse"); yield from rwait(0.8)
+    # (QUIT GAME (the list of 2026-10-31): its button clicked; Escape twice; Escape once lapses after 3 s. A dry run: it says
+    # what it would do)
+    res["quit"] = {"button": "Quit" in buttons()}
+    if s.get_editor_property("quit_button"):
+        s.set_editor_property("quit_dry_run", True); q0 = s.quits_asked
+        why = yield from click("Quit")
+        res["quit"]["click"] = {"why": why, "asked": s.quits_asked - q0}
+        def esc():
+            w_ = str(s.slate_key(key("Escape"), True)); yield from rwait(0.08); w_ = w_ or str(s.slate_key(key("Escape"), False)); yield from rwait(0.25)
+            return w_
+        q1 = s.quits_asked; yield from esc(); armed = s.quit_armed_until > GS.get_time_seconds(G["w"]); shot("menu_quit_ask"); yield from rwait(0.6)
+        yield from esc(); res["quit"]["escape_twice"] = {"armed_after_one": armed, "asked": s.quits_asked - q1}
+        q2 = s.quits_asked; yield from esc(); yield from rwait(3.4); yield from esc()
+        res["quit"]["escape_lapsed"] = {"asked": s.quits_asked - q2, "armed_again": s.quit_armed_until > GS.get_time_seconds(G["w"])}
+        yield from rwait(3.2)
+        s.set_editor_property("quit_dry_run", False)
     # (START for real: the dungeon opens as the hero shown (the Rogue, chosen with the pointer))
     why = yield from click("Hero_3")
     if why: res["refused"].append("rogue: " + why)
@@ -1227,6 +1259,9 @@ def step_menu():
     ok = (res["mouse_ui"] and res["cursor_shown"] and not res["refused"] and [x[1] for x in seq] == [2, 3, 2, 0] and all(x[3] for x in seq)
           and res["opened_before"] == "" and res["opened_by_name_again"].endswith("mistward_castle?Hero=Warrior")
           and (res.get("world_after") or "").endswith("mistward_castle") and res.get("hero_after") == "Rogue" and res.get("cursor_after") is False)
+    q = res["quit"]
+    ok = ok and q["button"] and q.get("click", {}).get("asked") == 1 and not q["click"]["why"] and q["escape_twice"]["armed_after_one"] and q["escape_twice"]["asked"] == 1 \
+        and q["escape_lapsed"]["asked"] == 0 and q["escape_lapsed"]["armed_again"]
     step_result("menu", ok, **res)
 
 # ================================================================================================ the third list (docs/improvements2.txt)
@@ -1816,12 +1851,17 @@ def step_rooms():
         t = {"encounters": len(us), "label": us[0][7] if us else None}
         go(r, 300, 700); yield from wait(0.6); shot("room_throne"); yield from rwait(0.6)
         given0 = len(g.slashes_given)
-        # (a usurper standing now: one whose set of rooms was dropped (far from her) has no monster until it is built again)
+        # (a usurper standing now: one whose set of rooms was dropped (far from her) has no monster until it is built again;
+        # looked for over 6 s, within 12 m (it wanders while the monsters are quiet): at 0.6 s and 8 m one full run of four
+        # found none)
         pick_ = None
-        for u_ in us:
-            at = V(float(u_[1]), float(u_[2]), float(u_[3]))
-            ms = [m for m in g.get_monsters() if alive(m) and m.boss and dist2(m.get_actor_location(), at) < 800]
-            if ms: pick_ = (u_, at, ms); break
+        for _ in range(12):
+            for u_ in us:
+                at = V(float(u_[1]), float(u_[2]), float(u_[3]))
+                ms = [m for m in g.get_monsters() if alive(m) and m.boss and dist2(m.get_actor_location(), at) < 1200]
+                if ms: pick_ = (u_, at, ms); break
+            if pick_: break
+            yield from wait(0.5)
         if pick_:
             u_, at, ms = pick_
             t["alive"] = len(ms)
@@ -2397,12 +2437,14 @@ def step_harvest():
     res = {"kills": [], "bad": []}
     for t in range(1, 6):
         for k, (kind, fam) in enumerate(TK.get(t, [])[:3]):
-            n0 = len([p for p in g.loot_piles if p])
+            # (the piles made by this kill: those not there before, by name; a count of all of them before and after was 0 in
+            # a full run: the last kill's pile, destroyed a moment before, was still in the list when counted before)
+            known = {p.get_name() for p in g.loot_piles if p}
             m = g.spawn_monster_named(kind, ahead(260, (k - 1) * 160), t, 1.0, 0.0, 1.0); yield from wait(0.4)
             if not m: res["bad"].append(f"{kind}: not spawned"); continue
             at = m.get_actor_location(); m.apply_damage(1e7, None); yield from wait(0.6)
             new = [p for p in g.loot_piles if p and dist2(p.get_actor_location(), at) < 150]
-            r = {"kind": kind, "family": fam, "tier": t, "piles": len([p for p in g.loot_piles if p]) - n0}
+            r = {"kind": kind, "family": fam, "tier": t, "piles": len([p for p in g.loot_piles if p and p.get_name() not in known])}
             if new: r.update(pile_info(new[0]))
             res["kills"].append(r)
             th = r.get("things", [])
@@ -2716,7 +2758,188 @@ def step_summoner():
         ok = ok and res["boss"]["weapons"] == ["Summon Tier 2"] and res.get("tier2", {}).get("started") and res["tier2"]["kinds"] == ["Gunner"] and "Summon Tier 2" in res["after_death"]
     step_result("summoner", ok, **res)
 
-STEPS = {"chilook": step_chilook, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+# ================================================================================================ the list of 2026-10-31 (878)
+def step_options():
+    """Escape (sent as the keyboard sends it) opens the menu's main page: Resume, Options, Choose another hero, Quit; Options
+    (S, Enter) opens its page: the four volumes, the controls hint, a resolution, a display mode, Apply, Back. D on the
+    controls hint turns the upper left panel off (the HUD draws none; kept in the user settings), again on; a volume
+    steps; the display mode and the resolution change, Apply saves them (in the editor: in the editor's own user settings,
+    not applied; package_mistward.ps1 -Test measures the packaged game's window after -RDApplyDisplay); Escape goes back to
+    the main page, again closes the menu. The settings found are put back."""
+    c = yield from restart("Warrior"); g = G["gen"]; hud = G["pc"].get_hud()
+    GUS = unreal.GameUserSettings.get_game_user_settings()
+    kept = (GUS.get_screen_resolution(), GUS.get_fullscreen_mode(), g.get_user_volume(1), g.is_controls_hint_shown())
+    res = {"controls_before": hud.get_controls_drawn()}
+    why = yield from slate_hold("Escape", 0.08); yield from rwait(0.3)
+    res["open"] = {"why": why, "open": g.is_menu_open(), "page": g.get_menu_page(), "lines": [str(l) for l in g.get_menu_lines()]}
+    yield from slate_hold("S", 0.08); yield from slate_hold("Enter", 0.08); yield from rwait(0.3)
+    L = [str(l) for l in g.get_menu_lines()]
+    res["options"] = {"page": g.get_menu_page(), "lines": L, "action": str(g.last_menu_action)}
+    shot("options_page"); yield from rwait(0.8)
+    # (the controls hint: the cursor to it, D)
+    ci = next(i for i, l in enumerate(L) if l.startswith("choice|Controls hint"))
+    for _ in range(ci - g.get_menu_cursor()): yield from slate_hold("S", 0.06)
+    yield from slate_hold("D", 0.06)
+    res["controls_off"] = {"shown": g.is_controls_hint_shown(), "line": str(g.get_menu_lines()[ci])}
+    # (a volume: the cursor up to Action sounds, A twice)
+    for _ in range(g.get_menu_cursor() - 1): yield from slate_hold("W", 0.06)
+    v0 = g.get_user_volume(1); yield from slate_hold("A", 0.06); yield from slate_hold("A", 0.06)
+    res["volume"] = {"before": round(v0, 2), "after": round(g.get_user_volume(1), 2)}
+    # (the display mode to Windowed, then a resolution: the cursor to each, D)
+    mi = next(i for i, l in enumerate(L) if l.startswith("choice|Display mode")); ri = next(i for i, l in enumerate(L) if l.startswith("choice|Resolution"))
+    # (each at most a dozen presses: a key the viewport refuses (its focus lost) would loop for ever, the review's find)
+    def until(cond, k):
+        for _ in range(12):
+            if cond(): return True
+            yield from slate_hold(k, 0.06)
+        return cond()
+    yield from until(lambda: g.get_menu_cursor() >= mi, "S")
+    yield from until(lambda: g.pending_window_mode == 2, "D")
+    yield from until(lambda: g.get_menu_cursor() <= ri, "W")
+    r0 = (g.pending_resolution.x, g.pending_resolution.y); yield from slate_hold("D", 0.06)
+    res["display"] = {"choices": [str(x) for x in g.get_resolution_choices()], "from": r0, "to": (g.pending_resolution.x, g.pending_resolution.y),
+                      "mode": g.pending_window_mode, "lines": [str(l) for l in g.get_menu_lines()]}
+    want = (g.pending_resolution.x, g.pending_resolution.y)
+    ai = next(i for i, l in enumerate(g.get_menu_lines()) if str(l) == "button|Apply display settings")
+    yield from until(lambda: g.get_menu_cursor() >= ai, "S")
+    yield from slate_hold("Enter", 0.08)
+    GUS2 = unreal.GameUserSettings.get_game_user_settings(); sr = GUS2.get_screen_resolution()
+    res["applied"] = {"said": str(g.last_applied), "saved": (sr.x, sr.y), "mode": str(GUS2.get_fullscreen_mode())}
+    yield from slate_hold("Escape", 0.08); yield from rwait(0.2)
+    res["escape_back"] = {"open": g.is_menu_open(), "page": g.get_menu_page()}
+    yield from slate_hold("Escape", 0.08); yield from rwait(0.4)
+    res["escape_closed"] = {"open": g.is_menu_open(), "paused": GS.is_game_paused(G["w"])}
+    res["controls_drawn_off"] = hud.get_controls_drawn()
+    g.set_controls_hint_shown(True); yield from rwait(0.3); res["controls_drawn_on"] = hud.get_controls_drawn()
+    # (put back what was there)
+    GUS2.set_screen_resolution(kept[0]); GUS2.set_fullscreen_mode(kept[1]); GUS2.save_settings()
+    g.set_user_volume(1, kept[2]); g.set_controls_hint_shown(kept[3])
+    o = res["open"]; op = res["options"]
+    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Options", "button|Choose another hero", "button|Quit"]
+          and op["page"] == 1 and op["action"] == "options" and [l.split("|")[0] for l in op["lines"]] == ["volume"] * 4 + ["choice"] * 3 + ["button"] * 2
+          and res["controls_off"]["shown"] is False and res["controls_off"]["line"].endswith("|Off") and abs(res["volume"]["before"] - res["volume"]["after"] - 0.1) < 0.011
+          and res["display"]["mode"] == 2 and res["display"]["to"] != res["display"]["from"] and res["applied"]["said"].startswith("saved") and res["applied"]["saved"] == want
+          and res["escape_back"]["open"] and res["escape_back"]["page"] == 0 and not res["escape_closed"]["open"] and not res["escape_closed"]["paused"]
+          and res["controls_drawn_off"] is False and res["controls_drawn_on"] is True)
+    step_result("options", ok, **res)
+
+def ally_gaps(g):
+    """per pair of her living allies: the room between their capsules (cm; negative: one in the other)"""
+    al = [a for a in g.get_allies() if alive(a)]; out = []
+    for i in range(len(al)):
+        for j in range(i + 1, len(al)):
+            ri = al[i].capsule_component.get_scaled_capsule_radius(); rj = al[j].capsule_component.get_scaled_capsule_radius()
+            out.append(dist2(al[i].get_actor_location(), al[j].get_actor_location()) - ri - rj)
+    return out
+
+def step_allyspace():
+    """the Summoner's allies keep apart (bAllySpacing): six called (two each of tiers 1 to 3): each to a spot nobody stands on
+    (their capsules apart when called); she walks 9 m off and they follow, she stands and they wait round her: the room
+    between every two capsules sampled; the same with the switch off first (they gather into each other: the test sees it).
+    The HUD's summons panel: a row per summoning, its count of its most, each one's hit points (one hurt: its row says so);
+    the minimap and the big map mark each ally (kind 12)"""
+    c = yield from restart("Summoner"); g = G["gen"]; quiet(True); hud = G["pc"].get_hud()
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
+    kill_all_near(G["pawn"].get_actor_location(), 4000); yield from wait(0.5)
+    g.unlock_hero_weapons(4); yield from wait(0.2)
+    W = [str(w.name) for w in g.get_editor_property("weapons")]
+    res = {"called": []}
+    for sp in ("Summon Tier 1", "Summon Tier 2", "Summon Tier 3"):
+        for k in range(2):
+            c.set_mana(c.get_max_mana()); st = c.start_attack_with(W.index(sp)); yield from wait(2.6)
+            gs = ally_gaps(g)
+            res["called"].append({"spell": sp, "started": st, "allies": len([a for a in g.get_allies() if alive(a)]), "least_gap": round(min(gs), 1) if gs else None})
+    def sample(sec, every=0.25):
+        out = []
+        t0 = now()
+        while now() - t0 < sec:
+            yield from wait(every)
+            gs = ally_gaps(g)
+            if gs: out.append(min(gs))
+        return out
+    def gather(on):
+        g.set_editor_property("ally_spacing", on)
+        here = G["pawn"].get_actor_location()
+        put(V(here.x + (900 if on else -900), here.y, here.z - 100.0)); yield from wait(1.5)          # (she walks off: they follow)
+        moving = yield from sample(5.0)
+        standing = yield from sample(4.0)
+        st_ = standing[4:] or standing
+        return {"moving_least": round(min(moving), 1) if moving else None, "standing_least": round(min(st_), 1) if st_ else None,
+                "standing_overlap_share": round(sum(1 for x in st_ if x < -10.0) / max(len(st_), 1), 2)}
+    res["off"] = yield from gather(False)
+    res["on"] = yield from gather(True)
+    # (left far behind (26 m and more): each brought to her side, to a spot nobody stands on, toward her front, none
+    # behind her where her camera is (the review: all of one side came to one spot, and the first tries were behind her))
+    s0 = g.get_section(I2(0, 0)); here = G["pawn"].get_actor_location()
+    far = next((s0.get_room_center(r) for r in range(s0.get_num_rooms()) if dist2(s0.get_room_center(r), here) > 2800), None)
+    res["far"] = None
+    if far:
+        put(V(far.x, far.y, far.z), 0.0); yield from wait(2.0)
+        her = G["pawn"]; fw = her.get_actor_forward_vector(); hl = her.get_actor_location()
+        al = [a for a in g.get_allies() if alive(a)]
+        behind = sum(1 for a in al if ((a.get_actor_location().x - hl.x) * fw.x + (a.get_actor_location().y - hl.y) * fw.y) / max(dist2(a.get_actor_location(), hl), 1.0) < -0.5)
+        gs = ally_gaps(g)
+        res["far"] = {"moved_m": round(dist2(far, here) / 100, 1), "near_her": sum(1 for a in al if dist2(a.get_actor_location(), hl) < 600), "allies": len(al),
+                      "least_gap": round(min(gs), 1) if gs else None, "behind_her": behind}
+    # (the summons panel)
+    yield from rwait(0.3); rows = [str(r) for r in hud.get_summon_rows()]
+    hurt = next((a for a in g.get_allies() if alive(a) and str(a.summon_spell) == "Summon Tier 2"), None)
+    h0 = hurt.get_health() if hurt else 0.0
+    if hurt: hurt.apply_damage(17.0, None)
+    yield from rwait(0.3); rows2 = [str(r) for r in hud.get_summon_rows()]
+    res["panel"] = {"rows": rows, "after_hurt": rows2, "hurt_hp": [round(h0, 1), round(hurt.get_health(), 1)] if hurt else None}
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=G["pawn"].get_actor_rotation().yaw + 180)); yield from rwait(0.3)
+    shot("summon_panel"); yield from rwait(0.8)
+    # (the maps: a mark for each ally)
+    al = [a for a in g.get_allies() if alive(a)]
+    mini = [v for v in hud.get_marks_drawn() if int(v.z) == 12]
+    yield from press("M"); yield from rwait(0.6)
+    big = [v for v in hud.get_marks_drawn() if int(v.z) == 12]
+    shot("ally_marks_map"); yield from rwait(1.0); yield from press("M")
+    def matched(marks): return sum(1 for a in al if any(math.hypot(m.x - a.get_actor_location().x, m.y - a.get_actor_location().y) < 60.0 for m in marks))
+    res["marks"] = {"allies": len(al), "minimap": len(mini), "minimap_matched": matched(mini), "big": len(big), "big_matched": matched(big)}
+    for a in list(g.get_allies()):
+        if alive(a): a.apply_damage(1e7, None)
+    yield from wait(1.0); quiet(False)
+    called = res["called"]; on = res["on"]; off = res["off"]
+    rows_ok = len(rows) == 3 and all(r.split("|")[1] == "2" for r in rows) and [r.split("|")[2] for r in rows] == ["2", "3", "4"]
+    hurt_ok = bool(res["panel"]["hurt_hp"]) and any(f"{res['panel']['hurt_hp'][1]:.0f}/" in r for r in rows2)
+    ok = (all(x["started"] for x in called) and called[-1]["allies"] == 6 and all(x["least_gap"] is None or x["least_gap"] >= 0.0 for x in called)
+          and on["standing_least"] is not None and on["standing_least"] >= -5.0 and on["standing_overlap_share"] <= 0.05
+          and off["standing_least"] is not None and off["standing_least"] < on["standing_least"]
+          and rows_ok and hurt_ok and res["marks"]["minimap_matched"] == len(al) and res["marks"]["big_matched"] == len(al)
+          and res["far"] is not None and res["far"]["near_her"] == res["far"]["allies"] and (res["far"]["least_gap"] or -99) >= 0.0 and res["far"]["behind_her"] == 0)
+    step_result("allyspace", ok, **res)
+
+def step_maarm():
+    """the Martial Artist's stance in play (her Idle, the start of every chi attack): each elbow's flare (cm out from her
+    chest's middle along the line between her shoulders) and how far it stands out past its shoulder, sampled over a second
+    of the idle from her bones; the right as flared as the left (within 4 cm); a picture from in front"""
+    c = yield from restart("MartialArtist"); g = G["gen"]; quiet(True)
+    ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(1.5)
+    m = G["pawn"].get_editor_property("mesh")
+    def bone(n): return m.get_socket_location(n)
+    samples = []
+    for _ in range(8):
+        yield from wait(0.15)
+        sr, sl = bone("upperarm_r"), bone("upperarm_l")
+        ax = V(sr.x - sl.x, sr.y - sl.y, 0.0); n = math.hypot(ax.x, ax.y); ax = V(ax.x / n, ax.y / n, 0.0)
+        mid = bone("spine_03")          # (world cm: the left and the right compared in the same units)
+        out = {}
+        for s, sgn in (("r", 1.0), ("l", -1.0)):
+            e = bone(f"lowerarm_{s}"); sh = bone(f"upperarm_{s}")
+            out[s] = ((e.x - mid.x) * ax.x * sgn + (e.y - mid.y) * ax.y * sgn, (e.x - sh.x) * ax.x * sgn + (e.y - sh.y) * ax.y * sgn)
+        samples.append(out)
+    res = {"flare_r": round(sum(s["r"][0] for s in samples) / len(samples), 1), "flare_l": round(sum(s["l"][0] for s in samples) / len(samples), 1),
+           "past_shoulder_r": round(sum(s["r"][1] for s in samples) / len(samples), 1), "past_shoulder_l": round(sum(s["l"][1] for s in samples) / len(samples), 1)}
+    yaw = G["pawn"].get_actor_rotation().yaw
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yaw + 180)); yield from rwait(0.6)
+    shot("ma_stance"); yield from rwait(0.8)
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
+    ok = abs(res["flare_r"] - res["flare_l"]) <= 4.0 and res["past_shoulder_r"] > 8.0
+    step_result("maarm", ok, **res)
+
+STEPS = {"chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

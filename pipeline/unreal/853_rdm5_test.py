@@ -991,7 +991,8 @@ def fire_measure(g):
         for r_ in range(s0.get_num_rooms()):
             q = s0.get_room_center(r_); q = V(q.x, q.y, 100)
             if s0.get_room_kind(r_) != "Hallway junction" and (q - spot[1]).length() > 2200: far = q; break
-    out = os.path.join(unreal.Paths.project_saved_dir(), "RDM5Fire", TAG); os.makedirs(out, exist_ok=True)
+    # (absolute: project_saved_dir() is relative to the engine's folder, and Python read the recording from its own)
+    out = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "RDM5Fire", TAG); os.makedirs(out, exist_ok=True)
     def record(name, at, sec=4.0):
         p.set_actor_location(far, False, True); yield from wait(0.8)        # (away from every fire: its voice stops)
         p.set_actor_location(at, False, True); yield from wait(1.6)                                   # (back: it starts with the set's volume)

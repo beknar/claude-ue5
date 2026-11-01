@@ -52,8 +52,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FVector> GetMarksDrawn() const { return MarksDrawn; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMiniTierLabels() const { return MiniTierLabels; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetMapTierLabels() const { return MapTierLabels; }
+	/** tests (mistward4): the upper left controls panel was drawn in the last frame; the summons panel's rows
+	 *  ("<kind>|<count>|<most>|<hp>/<max>,..."), empty when it was not drawn */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool GetControlsDrawn() const { return bControlsDrawn; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetSummonRows() const { return SummonRows; }
 
 private:
+	bool bControlsDrawn = false;
+	TArray<FString> SummonRows;
+	/** mistward4: her summoned allies by kind, in the lower left, its foot level with the status panel's (whose board's top
+	 *  left is StatusA, its width W and height StatusH) */
+	void DrawSummons(float Sc, const FVector2D& StatusA, float W, float StatusH);
 	// ---- random_dungeonmagic_level4's painted interface (the generator's UIArt; none on the other levels: plain boxes)
 	FRDUIDraw UI;
 	TArray<FName> ArtDrawn;
@@ -103,7 +112,8 @@ private:
 	 *  generated, 5 a sealed hallway end (level 5), 6 an anvil (level 5) */
 	struct FRDPoi { FVector2D W; int32 Kind; };
 	void GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistance);
-	/** mistward: 7 a boss, 8 a guarded ring, 9 her dropped things, 10 a teleporter pad, 11 a trap she has seen */
+	/** mistward: 7 a boss, 8 a guarded ring, 9 her dropped things, 10 a teleporter pad, 11 a trap she has seen; mistward4:
+	 *  12 her ally */
 	void MistMark(int32 Kind, const FVector2D& S, float Size);
 	static FString KindCode(ERDRoomKind Kind);
 	void DrawPlayerArrow(const FVector2D& P, float Yaw, float Size);

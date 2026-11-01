@@ -4,7 +4,7 @@
 # Args: plan tag [maxSeconds] [-lv level]   e.g.  .\868_mistward_test.ps1 "basics,shields,torch" m1     (plan "all": every step, 868's order)
 # The plan "menu" plays the menu level (mistward_castle_select) instead: its step ends in mistward_castle, opened by START.
 param([string]$plan, [string]$tag, [int]$maxs = 2400, [string]$lv = "mistward_castle")
-if ($plan -eq "all") { $plan = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner" }
+if ($plan -eq "all") { $plan = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner,options,allyspace,maarm" }
 # (martial_arts, the Martial Artist's one room: .\868_mistward_test.ps1 martialroom <tag> 900 -lv martial_arts; her chi
 #  attacks' looks pictured: chilook)
 # (the third list's steps on level 5 too: -lv random_dungeonmagic_level5)

@@ -255,6 +255,14 @@ for it in items:
         it.fits = [f for f in it.fits if str(f.hero) != HERO]          # (no armour for her: the Mage's equipment)
 gen.set_editor_property("items", items)
 assert HERO not in [str(x) for x in gen.get_editor_property("slash_heroes")], "876: her daggers are never enchanted"
+# (every spell weapon named as a spell of the table pointed at its place again: this stage and 872 each take their spells
+# out and add them at the table's end, and a weapon points at its spell by its place; 872's chi attacks after her
+# summons moved down when the summons went (rd_spell_index.py, shared with 872))
+import sys as _sys, importlib as _il
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import rd_spell_index as _rsi
+_il.reload(_rsi)
+print(f"SU4 spell weapons pointed again at their spells by name: {_rsi.repoint_spell_weapons(gen)}")
 gen.modify(); les.save_current_level()
 back = next(x for x in gen.get_editor_property("heroes") if str(x.name) == HERO)
 print(f"SU4 mistward_castle: hero {back.title} ({back.pawn_class.get_name()}) hp {back.max_health} mana {back.max_mana} ({back.mana_per_second}/s) | weapons {[str(w.name) for w in back.weapons]} "

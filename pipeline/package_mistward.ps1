@@ -76,26 +76,63 @@ if ($Test -or $TestOnly) {
     if (-not (Test-Path $exe)) { "no package at $exe"; exit 1 }
     $crashes = Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Crashes"
     $bad = 0
-    foreach ($run in @(@{ name = "menu"; args = @() }, @{ name = "castle"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior") })) {
+    # (the runs start at 1280 x 720 and the game saves that in its settings: the user's next game then ran at 1280 x 720 on
+    #  a 3840 x 2160 screen and Game Bar recorded it in a corner of its frame. The settings are kept and put back.
+    #  Shipping's are in LocalAppData, a Development game's beside it.)
+    $gus = @((Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"), (Join-Path $Out "Windows\claude_ue5\Saved\Config\Windows\GameUserSettings.ini"))
+    # (as byte arrays: a plain if-expression unrolled an empty file's bytes to $null, and it was then removed, not put back)
+    $kept = @{}; foreach ($g in $gus) { $kept[$g] = if (Test-Path $g) { , [byte[]][IO.File]::ReadAllBytes($g) } else { $null } }
+    # (the window's inside measured as the game's own pixels: this script runs unaware of the screen's scaling)
+    Add-Type -TypeDefinition @'
+using System; using System.Runtime.InteropServices;
+public static class RDWin {
+    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
+    [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr c);
+    [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
+}
+'@
+    # (the runs: the menu and the castle offscreen for 90 s each; then the castle in a window of its own with a display
+    #  setting asked as the Escape menu's Apply sets it (-RDApplyDisplay: 1600 x 900, windowed), its window measured)
+    $runs = @(@{ name = "menu"; args = @(); secs = 90 }, @{ name = "castle"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior"); secs = 90 },
+              @{ name = "display"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true })
+    try {
+    foreach ($run in $runs) {
         $before = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
         # (claude_ue5.exe is a launcher: the game is the exe under claude_ue5\Binaries\Win64, which it starts and waits for:
         #  claude_ue5-Win64-Shipping.exe, but in a Development package claude_ue5.exe too: found by its folder, not its name
         #  (by the Shipping name the Development games were never found, nor stopped))
         $bin = (Join-Path $Out "Windows\claude_ue5\Binaries\Win64").ToLower()
         $t0 = Get-Date
-        $l = Start-Process -FilePath $exe -ArgumentList ($run.args + @("-RenderOffScreen", "-ResX=1280", "-ResY=720", "-nosound")) -PassThru
+        $extra = if ($run.window) { @("-nosound") } else { @("-RenderOffScreen", "-ResX=1280", "-ResY=720", "-nosound") }
+        $l = Start-Process -FilePath $exe -ArgumentList ($run.args + $extra) -PassThru
         $p = $null
         for ($s = 0; $s -lt 30 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
-        [long]$peak = 0; $mem = @()
-        if ($p) { for ($s = 0; $s -lt 90 -and -not $p.HasExited; $s += 5) { Start-Sleep 5; $p.Refresh(); if (-not $p.HasExited) { $peak = [math]::Max($peak, $p.WorkingSet64); $mem += [int]($p.WorkingSet64 / 1MB) } } }
+        [long]$peak = 0; $mem = @(); $client = $null
+        if ($p) { for ($s = 0; $s -lt $run.secs -and -not $p.HasExited; $s += 5) { Start-Sleep 5; $p.Refresh(); if (-not $p.HasExited) { $peak = [math]::Max($peak, $p.WorkingSet64); $mem += [int]($p.WorkingSet64 / 1MB) } } }
         $alive = $p -and -not $p.HasExited
+        if ($run.window -and $alive) {
+            [void][RDWin]::SetThreadDpiAwarenessContext([IntPtr](-4)); $r = New-Object RDWin+RECT
+            if ([RDWin]::GetClientRect($p.MainWindowHandle, [ref]$r)) { $client = "$($r.R - $r.L)x$($r.B - $r.T)" }
+        }
         if ($run.name -eq "castle") { "memory every 5 s (MB): $($mem -join ' ')" }
         foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
         Start-Sleep 2
         $after = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
         $ok = $alive -and $after -eq $before
+        if ($run.window) {
+            # (the window's inside the size asked, and the game's own settings say so: Apply as the menu's)
+            $saved = $gus | Where-Object { Test-Path $_ } | ForEach-Object { Select-String -Path $_ -Pattern '^ResolutionSizeX=1600' } | Select-Object -First 1
+            $ok = $ok -and $client -eq "1600x900" -and [bool]$saved
+            "TEST display: {0} | window inside {1} (asked 1600x900, windowed) | saved in the game's settings: {2}" -f ($(if ($ok) { "ok" } else { "FAILED" })), $client, [bool]$saved
+        }
+        else { "TEST {0}: {1} | ran {6} s: {2} | exit code {3} | new crash reports {4} | peak memory {5:N0} MB" -f $run.name, ($(if ($ok) { "ok" } else { "FAILED" })), $alive, ($(if ($alive) { "-" } else { $p.ExitCode })), ($after - $before), ($peak / 1MB), $run.secs }
         if (-not $ok) { $bad++ }
-        "TEST {0}: {1} | ran 90 s: {2} | exit code {3} | new crash reports {4} | peak memory {5:N0} MB" -f $run.name, ($(if ($ok) { "ok" } else { "FAILED" })), $alive, ($(if ($alive) { "-" } else { $p.ExitCode })), ($after - $before), ($peak / 1MB)
+    }
+    }
+    finally {
+        # (put back whatever stopped the runs: an interrupted test left the user's next game at the test's size)
+        foreach ($g in $gus) { if ($null -ne $kept[$g]) { [IO.File]::WriteAllBytes($g, $kept[$g]) } elseif (Test-Path $g) { Remove-Item $g -Force } }
+        "the game's settings put back as they were"
     }
     if ($bad) { exit 1 }
 }

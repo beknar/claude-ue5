@@ -569,6 +569,17 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 	{
 		const float Sgn = (GetUniqueID() & 1) ? 1.f : -1.f;
 		FVector Side = Hl + Her->GetActorRightVector() * (240.f * Sgn) - Her->GetActorForwardVector() * 40.f;
+		// (mistward4: to a spot no other ally stands on: all of one side came to the same one; toward her front first)
+		if (G && G->bAllySpacing)
+		{
+			FVector Spot;
+			if (G->FindAllySpot(Hl, Her->GetActorRightVector() * Sgn, GetCapsuleComponent()->GetScaledCapsuleRadius(), this, Spot, Her->GetActorForwardVector()))
+			{
+				SetActorLocation(Spot + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
+				Path.Reset();
+				return true;
+			}
+		}
 		FHitResult Hh; FCollisionQueryParams Qp(SCENE_QUERY_STAT(RDAllySide), false, this); Qp.AddIgnoredActor(Her);
 		if (GetWorld()->SweepSingleByChannel(Hh, Hl, Side, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(45.f), Qp))
 		{
@@ -581,7 +592,20 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 		Path.Reset();
 		return true;
 	}
-	if (Dist < 380.f) { SetWalkingAnim(false); Path.Reset(); return true; }
+	// (by her: it waits; mistward4: stepping out of another ally, or out of her, first)
+	const FVector Push = AllySpacingPush();
+	if (Dist < 380.f)
+	{
+		Path.Reset();
+		if (Push.Size() > 0.05f)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul();
+			AddMovementInput(Push.GetSafeNormal(), FMath::Clamp(Push.Size() * 1.5f, 0.35f, 1.f));
+			SetWalkingAnim(GetVelocity().Size2D() > 25.f);
+		}
+		else SetWalkingAnim(false);
+		return true;
+	}
 	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * (G ? G->ChaseSpeedScale : 1.5f), 330.f) * SpeedMul();
 	ChaseTimer -= Dt;
 	if (ChaseTimer <= 0.f || Path.Num() == 0)
@@ -595,7 +619,7 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
 	if (WaitForDoor(L, Dir2)) return true;
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
-	AddMovementInput(Dir2.GetSafeNormal(), 1.f);
+	AddMovementInput(AllySteer(Dir2), 1.f);
 	const float Speed = GetVelocity().Size2D();
 	SetWalkingAnim(Speed > 25.f);
 	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 2.2f));
@@ -716,6 +740,12 @@ bool ARDMonster::TickCombat(float Dt)
 			G->PlaySoundAt(SndAttack, L);
 			VoiceTimer = FMath::Max(VoiceTimer, 2.f);
 		}
+		else if (const FVector Push = AllySpacingPush(); Push.Size() > 0.15f)
+		{
+			// (mistward4: her ally in another one at the foe: a step aside, round the foe, still facing it)
+			AddMovementInput(Push.GetSafeNormal(), 0.6f);
+			SetWalkingAnim(GetVelocity().Size2D() > 25.f);
+		}
 		else SetWalkingAnim(false);
 		return true;
 	}
@@ -751,7 +781,8 @@ bool ARDMonster::TickCombat(float Dt)
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
 	FVector Side = FVector::ZeroVector;
 	if (StuckTime > 0.5f) { const FVector Fw = Dir2.GetSafeNormal(); Side = FVector(-Fw.Y, Fw.X, 0) * (((int32)(StuckTime / 0.8f)) % 2 ? 1.f : -1.f); }
-	AddMovementInput((Dir2.GetSafeNormal() + Side * 0.9f).GetSafeNormal(), 1.f);
+	// (mistward4: her allies chasing one monster keep apart, and come at it from either side)
+	AddMovementInput(bAlly ? AllySteer(Dir2.GetSafeNormal() + Side * 0.9f) : (Dir2.GetSafeNormal() + Side * 0.9f).GetSafeNormal(), 1.f);
 	const float Speed = GetVelocity().Size2D();
 	SetWalkingAnim(Speed > 25.f);
 	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 2.2f));

@@ -1,0 +1,8 @@
+the martial artist's right forearm's starting position merges into her body.  the right elbow should be as flared out as the left elbow
+summoned creatures should not occupy the same space
+there should be an indicator on the hud as to how many creatures you've summoned and how much hp they have
+there should be a way to turn off the controls hint menu on the upper left in the esc menu
+in the hero menu, there should be an option to quit the game
+in the escape menu, the volume controls should be in an options sub-menu
+your summoned allies should have a marker on both the large and mini map
+the esc menu should have a way to choose some common resolutions in the options sub-menu

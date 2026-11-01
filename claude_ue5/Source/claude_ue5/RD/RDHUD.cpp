@@ -484,10 +484,13 @@ void ARDHUD::DrawCombat(float Sc)
 			UI.Text(D, bOn ? FLinearColor(1.f, 0.9f, 0.6f) : Tc, (S0.X + S1.X - Tw) * 0.5f, S0.Y + (NL.Num() > 1 ? 47.f : 40.f) * Sc, Small, Kd);
 		}
 		if (!Gen->ControlsHint.IsEmpty()) UI.Text(Gen->ControlsHint, FLinearColor(0.7f, 0.68f, 0.62f), A.X + Pd, B.Y - 26.f * Sc, Small, Sc);
+		DrawSummons(Sc, A - FVector2D(0.f, Ext), W, H);
 	}
 	// ---- the controls (upper left, the magic levels): those of the device in use, and whether she walks or runs
 	const TArray<FString>& Lines = bPad ? Gen->ControlsPad : Gen->ControlsKeys;
-	if (Gen->bCasterControls && Lines.Num() > 0)
+	// (mistward4: the Options page turns it off)
+	bControlsDrawn = Gen->bCasterControls && Lines.Num() > 0 && (!Gen->bOptionsMenu || Gen->IsControlsHintShown());
+	if (bControlsDrawn)
 	{
 		const float Ext = UI.Has(TEXT("panel_wide")) ? 20.f * Sc : 0.f;
 		const float In = Ext > 0.f ? 16.f * Sc : 0.f, Dn = Ext > 0.f ? 6.f * Sc : 0.f;      // (level 4: clear of the board's frame and corner ornaments)
@@ -559,6 +562,70 @@ void ARDHUD::DrawCombat(float Sc)
 		const FString U = Gen->bDropOnDeath && Gen->LootPiles.ContainsByPredicate([](const ARDLootPile* Lp) { return IsValid(Lp) && Lp->bHers; }) ? TEXT("your things lie where you fell: back to the great hall...") : TEXT("back to the middle of the dungeon...");
 		UI.TextSize(U, Tw, Th, Small, Sc * 1.3f);
 		UI.Text(U, RDInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f + 62.f * Sc, Small, Sc * 1.3f);
+	}
+}
+
+void ARDHUD::DrawSummons(float Sc, const FVector2D& StatusA, float W, float StatusH)
+{
+	// (mistward4, the user's of 2026-10-31: how many she has summoned and how much hit points they have: a row per summoning
+	// (its kind, how many of how many she may lead), a bar per creature with its hit points)
+	SummonRows.Reset();
+	if (!Gen || !Gen->bSummonPanel) return;
+	struct FRow { FName Spell; FString Title; int32 Most = 1; TArray<const ARDMonster*> Ms; };
+	TArray<FRow> Rows;
+	for (const ARDMonster* Al : Gen->GetAllies())
+	{
+		if (!IsValid(Al) || Al->IsDead() || Al->SummonSpell.IsNone()) continue;
+		FRow* R = Rows.FindByPredicate([Al](const FRow& X) { return X.Spell == Al->SummonSpell; });
+		if (!R)
+		{
+			FRow N; N.Spell = Al->SummonSpell;
+			const int32 Si = Gen->FindSpell(Al->SummonSpell);
+			N.Title = Si >= 0 ? Gen->SummonTitleOf(Gen->Spells[Si]) : (Al->Title.IsEmpty() ? Al->MonsterName.ToString() : Al->Title);
+			N.Most = Si >= 0 ? FMath::Max(Gen->Spells[Si].Count, 1) : 1;
+			R = &Rows[Rows.Add(N)];
+		}
+		R->Ms.Add(Al);
+	}
+	if (Rows.Num() == 0) return;
+	Rows.Sort([](const FRow& X, const FRow& Y) { return X.Spell.LexicalLess(Y.Spell); });          // (Summon Tier 1 first)
+	UFont* Small = GEngine->GetSmallFont();
+	const float Ext = UI.Has(TEXT("panel_wide")) ? 28.f * Sc : 0.f, Pd = 14.f * Sc, Rh = 54.f * Sc, Hd = 36.f * Sc;
+	const float H = Hd + Rh * Rows.Num() + 6.f * Sc;
+	// (the lower left, level with the status panel's foot: above it, the minimap's tier lines ran over its title)
+	const float Mg = 24.f * Sc + Ext;
+	const FVector2D A(Mg, StatusA.Y + Ext + StatusH - H), B = A + FVector2D(W, H);
+	if (!Board(TEXT("panel_wide"), A, B, Sc, Ext))
+	{
+		Box(A, B, FLinearColor(0.04f, 0.05f, 0.07f, 0.72f));
+		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
+	}
+	int32 Total = 0; for (const FRow& R : Rows) Total += R.Ms.Num();
+	float Tw, Th;
+	UI.Text(FString::Printf(TEXT("SUMMONED  %d"), Total), RDInk, A.X + Pd, A.Y + 8.f * Sc, Small, Sc * 1.1f, ERDType::Title);
+	const float Bw = (W - Pd * 2.f - 4.f * 6.f * Sc) / 5.f, Bh = 16.f * Sc;
+	float Y = A.Y + Hd;
+	for (const FRow& R : Rows)
+	{
+		const FString Nm = FString::Printf(TEXT("%s  %d / %d"), *R.Title.ToUpper(), R.Ms.Num(), R.Most);
+		UI.Text(Nm, FLinearColor(0.6f, 1.f, 0.65f), A.X + Pd, Y, Small, Sc, ERDType::Label);
+		TArray<FString> Hp;
+		for (int32 K = 0; K < R.Ms.Num(); ++K)
+		{
+			const ARDMonster* M = R.Ms[K];
+			const float F = FMath::Clamp(M->GetHealth() / FMath::Max(M->GetMaxHealth(), 1.f), 0.f, 1.f);
+			// (five to a row: a summoning leads five at most)
+			const FVector2D P0(A.X + Pd + (K % 5) * (Bw + 6.f * Sc), Y + 22.f * Sc), P1 = P0 + FVector2D(Bw, Bh);
+			Box(P0 - FVector2D(1.5f * Sc), P1 + FVector2D(1.5f * Sc), FLinearColor(0.02f, 0.02f, 0.02f, 0.85f));
+			Box(P0, FVector2D(FMath::Lerp(P0.X, P1.X, F), P1.Y), F > 0.5f ? FLinearColor(0.25f, 0.8f, 0.32f) : F > 0.25f ? FLinearColor(0.9f, 0.75f, 0.2f) : FLinearColor(0.9f, 0.3f, 0.2f));
+			const FString T = FString::Printf(TEXT("%.0f"), M->GetHealth());
+			UI.TextSize(T, Tw, Th, Small, Sc * 0.85f, ERDType::Label);
+			UI.Text(T, FLinearColor(0.f, 0.f, 0.f, 0.85f), (P0.X + P1.X - Tw) * 0.5f + 1.f, (P0.Y + P1.Y - Th) * 0.5f + 1.f, Small, Sc * 0.85f, ERDType::Label);
+			UI.Text(T, FLinearColor::White, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Small, Sc * 0.85f, ERDType::Label);
+			Hp.Add(FString::Printf(TEXT("%.0f/%.0f"), M->GetHealth(), M->GetMaxHealth()));
+		}
+		SummonRows.Add(FString::Printf(TEXT("%s|%d|%d|%s"), *R.Title, R.Ms.Num(), R.Most, *FString::Join(Hp, TEXT(","))));
+		Y += Rh;
 	}
 }
 
@@ -957,6 +1024,9 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 	}
 	for (const ARDLootPile* Lp : Gen->LootPiles) if (IsValid(Lp) && Lp->bHers) Out.Add({ FVector2D(Lp->GetActorLocation()), 9 });
 	for (const TPair<int32, FVector>& Pd : Gen->Pads) if (Discovered(Pd.Value) || Pd.Key == 1) Out.Add({ FVector2D(Pd.Value), 10 });
+	// (mistward4: her allies, wherever they are)
+	if (Gen->bAllyMarkers)
+		for (const ARDMonster* Al : Gen->GetAllies()) if (IsValid(Al) && !Al->IsDead()) Out.Add({ FVector2D(Al->GetActorLocation()), 12 });
 }
 
 void ARDHUD::MistMark(int32 Kind, const FVector2D& S, float Sz)
@@ -986,6 +1056,13 @@ void ARDHUD::MistMark(int32 Kind, const FVector2D& S, float Sz)
 		DrawLine(S.X - Sz * 0.7f, S.Y - Sz * 0.7f, S.X + Sz * 0.7f, S.Y + Sz * 0.7f, BossC, Sz * 0.3f);
 		DrawLine(S.X - Sz * 0.7f, S.Y + Sz * 0.7f, S.X + Sz * 0.7f, S.Y - Sz * 0.7f, BossC, Sz * 0.3f);
 		break;
+	case 12:
+	{
+		// (mistward4: her ally, a green ring with a green middle: the monsters are red dots and orange triangles)
+		static const FLinearColor AllyC(0.35f, 1.f, 0.45f, 1.f);
+		SoftDot(S, Sz * 1.7f, RDTacA(AllyC, 0.3f)); Circle(Sz * 0.85f, AllyC, Sz * 0.28f); SoftDot(S, Sz * 0.45f, AllyC);
+		break;
+	}
 	default: break;
 	}
 }
@@ -1313,15 +1390,16 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		if (Gen->MaxTier > 0) Key(5, TEXT("sealed passage"));
 		if (Gen->Recipes.Num() > 0) Key(6, TEXT("anvil: make repair items"));
 		// (mistward: its own markers, a column of their own to the right of the key)
-		if (Gen->bBossEncounters || Gen->bRingGuards || Gen->bDropOnDeath || Gen->bTeleporters || Gen->Traps.Num() > 0)
+		if (Gen->bBossEncounters || Gen->bRingGuards || Gen->bDropOnDeath || Gen->bTeleporters || Gen->Traps.Num() > 0 || Gen->bAllyMarkers)
 		{
-			float Y2 = B.Y - 166.f * Sc; const float X2 = X + 250.f * Sc;
+			float Y2 = B.Y - (Gen->bAllyMarkers ? 189.f : 166.f) * Sc; const float X2 = X + 250.f * Sc;
 			auto Key2 = [&](int32 Kind, const TCHAR* What) { MistMark(Kind, FVector2D(X2 + 6.f * Sc, Y2 + 8.f * Sc), 6.f * Sc); UI.Text(What, Ink, X2 + 24.f * Sc, Y2, Small, Sc); Y2 += 23.f * Sc; };
 			if (Gen->bBossEncounters) Key2(7, TEXT("a tier's boss"));
 			if (Gen->bRingGuards) Key2(8, TEXT("a guarded ring"));
 			if (Gen->bDropOnDeath) Key2(9, TEXT("your dropped things"));
 			if (Gen->bTeleporters) Key2(10, TEXT("teleporter"));
 			if (Gen->Traps.Num() > 0 && Gen->HeroFindsTraps()) Key2(11, TEXT("a trap you have seen"));
+			if (Gen->bAllyMarkers) Key2(12, TEXT("your ally"));
 		}
 	}
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);
@@ -2444,7 +2522,11 @@ void ARDHUD::DrawMenu(float Sc)
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.62f));
 	const TArray<FString> Lines = Gen->GetMenuLines();
 	const float W = 760.f * Sc, Rh = 58.f * Sc, Pd = 34.f * Sc;
-	const float H = 120.f * Sc + Rh * Lines.Num() + 26.f * Sc + 70.f * Sc;
+	// (a gap where one kind of line gives way to another: the sliders, the choices, the buttons)
+	auto KindOf = [&Lines](int32 I) { FString K, Rest; Lines[I].Split(TEXT("|"), &K, &Rest); return K; };
+	int32 Gaps = 0;
+	for (int32 I = 1; I < Lines.Num(); ++I) if (KindOf(I) != KindOf(I - 1)) ++Gaps;
+	const float H = 120.f * Sc + Rh * Lines.Num() + 26.f * Sc * Gaps + 70.f * Sc;
 	const FVector2D A((Canvas->ClipX - W) * 0.5f, (Canvas->ClipY - H) * 0.5f), B = A + FVector2D(W, H);
 	if (!Board(TEXT("panel_wide"), A, B, Sc, 44.f * Sc))
 	{
@@ -2452,8 +2534,9 @@ void ARDHUD::DrawMenu(float Sc)
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 	}
 	float Tw, Th;
-	UI.TextSize(TEXT("PAUSED"), Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
-	UI.Text(TEXT("PAUSED"), RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
+	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : TEXT("PAUSED");
+	UI.TextSize(Head, Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
+	UI.Text(Head, RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
 	Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset();
 	const bool bPlate = UI.Has(TEXT("button"));
 	float Y = A.Y + 100.f * Sc;
@@ -2462,7 +2545,7 @@ void ARDHUD::DrawMenu(float Sc)
 		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
 		if (P.Num() < 2) continue;
 		const bool bOn = I == Gen->GetMenuCursor();
-		if (I == 4) Y += 26.f * Sc;           // (the buttons below the sliders)
+		if (I > 0 && KindOf(I) != KindOf(I - 1)) Y += 26.f * Sc;           // (the buttons below the sliders)
 		const FVector2D R0(A.X + Pd, Y), R1(B.X - Pd, Y + Rh - 10.f * Sc);
 		Gen->MenuRowBoxes.Add(FBox2D(R0, R1));
 		if (bOn)
@@ -2488,6 +2571,15 @@ void ARDHUD::DrawMenu(float Sc)
 			UI.TextSize(Pc, Tw, Th, Small, Sc * 1.15f, ERDType::Label);
 			UI.Text(Pc, bOn ? Gold : Dim, R1.X - 14.f * Sc - Tw, R0.Y + 13.f * Sc, Small, Sc * 1.15f, ERDType::Label);
 		}
+		else if (P[0] == TEXT("choice") && P.Num() >= 3)
+		{
+			// (mistward4: a choice: its label, and its value between arrows (A D or a click change it))
+			Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
+			UI.Text(P[1], bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 14.f * Sc, R0.Y + 12.f * Sc, Small, Sc * 1.2f);
+			const FString V = FString::Printf(TEXT("<  %s  >"), *P[2]);
+			UI.TextSize(V, Tw, Th, Small, Sc * 1.15f, ERDType::Label);
+			UI.Text(V, bOn ? Gold : Dim, R1.X - 14.f * Sc - Tw, R0.Y + 13.f * Sc, Small, Sc * 1.15f, ERDType::Label);
+		}
 		else
 		{
 			Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
@@ -2497,7 +2589,9 @@ void ARDHUD::DrawMenu(float Sc)
 		}
 		Y += Rh;
 	}
-	const FString Keys = TEXT("W S  choose      A D  volume      Enter  press      mouse  click or drag      Esc  back to the game");
+	const FString Keys = !Gen->bOptionsMenu ? FString(TEXT("W S  choose      A D  volume      Enter  press      mouse  click or drag      Esc  back to the game"))
+	                   : Gen->GetMenuPage() == 1 ? FString(TEXT("W S  choose      A D  change      Enter  press      mouse  click or drag      Esc  back"))
+	                                             : FString(TEXT("W S  choose      Enter  press      mouse  click      Esc  back to the game"));
 	UI.TextSize(Keys, Tw, Th, Small, Sc);
 	UI.Text(Keys, Dim, (A.X + B.X - Tw) * 0.5f, B.Y - 48.f * Sc, Small, Sc);
 }
