@@ -597,20 +597,24 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		// point came back to her own place, inside her capsule (the PR review's find))
 		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDSummon), false, O);
 		const FVector Ways[4] = { Fw * 230.f + Rt * Side, Rt * 230.f, Rt * -230.f, Fw * -230.f };
-		FVector At = L + Ways[0]; float Room = -1.f;
-		for (const FVector& Wy : Ways)
-		{
-			FHitResult H;
-			const float D = GetWorld()->LineTraceSingleByChannel(H, L, L + Wy, ECC_Visibility, Q) ? H.Distance - 80.f : Wy.Size();
-			if (D > Room) { Room = D; At = L + Wy.GetSafeNormal() * FMath::Max(D, 0.f); }
-			if (D >= 120.f) break;
-		}
-		// (mistward4: a spot nobody stands on: the first of each spell came to the same place in front of her, the second of
-		// each to the same place beside it)
+		FVector At = L + Ways[0];
+		// (mistward4: a spot nobody stands on, clear of walls too: the first of each spell came to the same place in front
+		// of her, the second of each to the same place beside it; its own roomiest spot when none is clear)
 		if (Generator->bAllySpacing)
 		{
 			const FRDMonsterDef* Kd = Generator->Monsters.FindByPredicate([S](const FRDMonsterDef& D) { return D.Name == S->SummonKind; });
-			Generator->FindAllySpot(L, Fw, Kd ? Kd->CapsuleRadius : 45.f, O, At);
+			Generator->FindAllySpot(L, Fw, Kd ? Kd->CapsuleRadius : 45.f, O, At, Fw);
+		}
+		else
+		{
+			float Room = -1.f;
+			for (const FVector& Wy : Ways)
+			{
+				FHitResult H;
+				const float D = GetWorld()->LineTraceSingleByChannel(H, L, L + Wy, ECC_Visibility, Q) ? H.Distance - 80.f : Wy.Size();
+				if (D > Room) { Room = D; At = L + Wy.GetSafeNormal() * FMath::Max(D, 0.f); }
+				if (D >= 120.f) break;
+			}
 		}
 		ARDMonster* K = Generator->SummonKindAlly(S->SummonKind, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
 		if (K)

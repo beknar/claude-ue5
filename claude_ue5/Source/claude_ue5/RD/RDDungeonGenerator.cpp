@@ -901,6 +901,8 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 		UGameplayStatics::OpenLevel(this, FName(*MenuLevel));
 		return true;
 	}
+	// (only Quit quits: an item without a branch here did, when anything not named fell through to it (the PR review's find))
+	if (Id != TEXT("quit")) return false;
 	LastMenuAction = TEXT("quit");
 	if (bMenuDryRun) return true;
 	SetMenuOpen(false);
@@ -1301,7 +1303,7 @@ void ARDDungeonGenerator::BeginPlay()
 	}
 	SoundR.Initialize(RDSoundSeed);
 	if (bEscapeMenu) LoadUserVolumes();
-	if (bOptionsMenu) LoadOptions();
+	if (bOptionsMenu) { LoadOptions(); ApplyDisplayFromCommandLine(); }
 	// (the non-realtime audio device loses spatialised sources: see bSpatializeSounds)
 	bSpatializeNow = bSpatializeSounds && !FParse::Param(FCommandLine::Get(), TEXT("deterministicaudio"));
 	Attenuations.Reset();

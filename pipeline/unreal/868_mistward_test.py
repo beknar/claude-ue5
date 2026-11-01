@@ -407,6 +407,9 @@ def step_inventory():
     res["rows_drawn"] = len(R_); m = {}
     if pot is not None:
         nm = L_[pot].split("|")[1]; b = R_[pot]
+        # (none of two or more: after the steps before it in a full run she had one of each, the one drunk took its row away
+        # and the wheel's check failed twice in four runs: a second of it given, so its row stays)
+        if c.get_item_count(nm) < 2: c.add_item(nm, 1); yield from rwait(0.2); R_ = rows(c); b = R_.get(pot, b)
         # (a row is chosen when the pointer moves onto it: first somewhere else, a few frames, then onto it)
         why = str(g.slate_mouse_move(unreal.Vector2D(b[0] + 30, b[1] - 60))); yield from rwait(0.25)
         why = why or str(g.slate_mouse_move(mid(b)))
@@ -422,6 +425,13 @@ def step_inventory():
             why = str(g.slate_wheel(mid(b), -1.0)); yield from rwait(0.15)
             if why: res["refused"].append("wheel: " + why)
         m["first_before"] = f0; m["first_after_wheel_down"] = c.get_list_first(); m["cursor_kept"] = c.get_inventory_cursor() == k0; m["cursor"] = [k0, c.get_inventory_cursor()]; m["tab_lines"] = [str(x) for x in lines(c)][:12]
+        # (where the game reads the pointer now, against where the test put it: a move it did not send shows here)
+        mp = G["pc"].get_mouse_position(); m["pointer_sent"] = [round(mid(b).x, 1), round(mid(b).y, 1)]; m["pointer_read"] = [round(mp[0], 1), round(mp[1], 1)] if mp and mp[0] is not None else None
+        # (the real mouse resting over the game's view: as the list scrolled, Slate moved the game's pointer to it (a move as
+        # the device's) and the row under it was chosen, as a real move should: measured (783, 1311) read against (922, 318)
+        # sent. Not the game's fault, and not a measurement of the wheel: said so)
+        if m["pointer_read"] and math.hypot(m["pointer_read"][0] - m["pointer_sent"][0], m["pointer_read"][1] - m["pointer_sent"][1]) > 2.0:
+            res["refused"].append("the real mouse pointer rests over the game's view at (%.0f, %.0f): move it off the editor's game view for this step" % tuple(m["pointer_read"]))
         why = str(g.slate_wheel(mid(b), 1.0)); yield from rwait(0.15)
         m["first_after_wheel_up"] = c.get_list_first()
         # (a double click on a row of three small potions: one drunk, not two (the second press of a double click is a press too))
@@ -1841,12 +1851,17 @@ def step_rooms():
         t = {"encounters": len(us), "label": us[0][7] if us else None}
         go(r, 300, 700); yield from wait(0.6); shot("room_throne"); yield from rwait(0.6)
         given0 = len(g.slashes_given)
-        # (a usurper standing now: one whose set of rooms was dropped (far from her) has no monster until it is built again)
+        # (a usurper standing now: one whose set of rooms was dropped (far from her) has no monster until it is built again;
+        # looked for over 6 s, within 12 m (it wanders while the monsters are quiet): at 0.6 s and 8 m one full run of four
+        # found none)
         pick_ = None
-        for u_ in us:
-            at = V(float(u_[1]), float(u_[2]), float(u_[3]))
-            ms = [m for m in g.get_monsters() if alive(m) and m.boss and dist2(m.get_actor_location(), at) < 800]
-            if ms: pick_ = (u_, at, ms); break
+        for _ in range(12):
+            for u_ in us:
+                at = V(float(u_[1]), float(u_[2]), float(u_[3]))
+                ms = [m for m in g.get_monsters() if alive(m) and m.boss and dist2(m.get_actor_location(), at) < 1200]
+                if ms: pick_ = (u_, at, ms); break
+            if pick_: break
+            yield from wait(0.5)
         if pick_:
             u_, at, ms = pick_
             t["alive"] = len(ms)
@@ -2748,8 +2763,9 @@ def step_options():
     """Escape (sent as the keyboard sends it) opens the menu's main page: Resume, Options, Choose another hero, Quit; Options
     (S, Enter) opens its page: the four volumes, the controls hint, a resolution, a display mode, Apply, Back. D on the
     controls hint turns the upper left panel off (the HUD draws none; kept in the user settings), again on; a volume
-    steps; the display mode and the resolution change, Apply saves them in the game's user settings (in the editor saved,
-    not applied); Escape goes back to the main page, again closes the menu. The settings found are put back."""
+    steps; the display mode and the resolution change, Apply saves them (in the editor: in the editor's own user settings,
+    not applied; package_mistward.ps1 -Test measures the packaged game's window after -RDApplyDisplay); Escape goes back to
+    the main page, again closes the menu. The settings found are put back."""
     c = yield from restart("Warrior"); g = G["gen"]; hud = G["pc"].get_hud()
     GUS = unreal.GameUserSettings.get_game_user_settings()
     kept = (GUS.get_screen_resolution(), GUS.get_fullscreen_mode(), g.get_user_volume(1), g.is_controls_hint_shown())
@@ -2771,15 +2787,21 @@ def step_options():
     res["volume"] = {"before": round(v0, 2), "after": round(g.get_user_volume(1), 2)}
     # (the display mode to Windowed, then a resolution: the cursor to each, D)
     mi = next(i for i, l in enumerate(L) if l.startswith("choice|Display mode")); ri = next(i for i, l in enumerate(L) if l.startswith("choice|Resolution"))
-    while g.get_menu_cursor() < mi: yield from slate_hold("S", 0.06)
-    while g.pending_window_mode != 2: yield from slate_hold("D", 0.06)
-    while g.get_menu_cursor() > ri: yield from slate_hold("W", 0.06)
+    # (each at most a dozen presses: a key the viewport refuses (its focus lost) would loop for ever, the review's find)
+    def until(cond, k):
+        for _ in range(12):
+            if cond(): return True
+            yield from slate_hold(k, 0.06)
+        return cond()
+    yield from until(lambda: g.get_menu_cursor() >= mi, "S")
+    yield from until(lambda: g.pending_window_mode == 2, "D")
+    yield from until(lambda: g.get_menu_cursor() <= ri, "W")
     r0 = (g.pending_resolution.x, g.pending_resolution.y); yield from slate_hold("D", 0.06)
     res["display"] = {"choices": [str(x) for x in g.get_resolution_choices()], "from": r0, "to": (g.pending_resolution.x, g.pending_resolution.y),
                       "mode": g.pending_window_mode, "lines": [str(l) for l in g.get_menu_lines()]}
     want = (g.pending_resolution.x, g.pending_resolution.y)
     ai = next(i for i, l in enumerate(g.get_menu_lines()) if str(l) == "button|Apply display settings")
-    while g.get_menu_cursor() < ai: yield from slate_hold("S", 0.06)
+    yield from until(lambda: g.get_menu_cursor() >= ai, "S")
     yield from slate_hold("Enter", 0.08)
     GUS2 = unreal.GameUserSettings.get_game_user_settings(); sr = GUS2.get_screen_resolution()
     res["applied"] = {"said": str(g.last_applied), "saved": (sr.x, sr.y), "mode": str(GUS2.get_fullscreen_mode())}
@@ -2846,6 +2868,19 @@ def step_allyspace():
                 "standing_overlap_share": round(sum(1 for x in st_ if x < -10.0) / max(len(st_), 1), 2)}
     res["off"] = yield from gather(False)
     res["on"] = yield from gather(True)
+    # (left far behind (26 m and more): each brought to her side, to a spot nobody stands on, toward her front, none
+    # behind her where her camera is (the review: all of one side came to one spot, and the first tries were behind her))
+    s0 = g.get_section(I2(0, 0)); here = G["pawn"].get_actor_location()
+    far = next((s0.get_room_center(r) for r in range(s0.get_num_rooms()) if dist2(s0.get_room_center(r), here) > 2800), None)
+    res["far"] = None
+    if far:
+        put(V(far.x, far.y, far.z), 0.0); yield from wait(2.0)
+        her = G["pawn"]; fw = her.get_actor_forward_vector(); hl = her.get_actor_location()
+        al = [a for a in g.get_allies() if alive(a)]
+        behind = sum(1 for a in al if ((a.get_actor_location().x - hl.x) * fw.x + (a.get_actor_location().y - hl.y) * fw.y) / max(dist2(a.get_actor_location(), hl), 1.0) < -0.5)
+        gs = ally_gaps(g)
+        res["far"] = {"moved_m": round(dist2(far, here) / 100, 1), "near_her": sum(1 for a in al if dist2(a.get_actor_location(), hl) < 600), "allies": len(al),
+                      "least_gap": round(min(gs), 1) if gs else None, "behind_her": behind}
     # (the summons panel)
     yield from rwait(0.3); rows = [str(r) for r in hud.get_summon_rows()]
     hurt = next((a for a in g.get_allies() if alive(a) and str(a.summon_spell) == "Summon Tier 2"), None)
@@ -2872,7 +2907,8 @@ def step_allyspace():
     ok = (all(x["started"] for x in called) and called[-1]["allies"] == 6 and all(x["least_gap"] is None or x["least_gap"] >= 0.0 for x in called)
           and on["standing_least"] is not None and on["standing_least"] >= -5.0 and on["standing_overlap_share"] <= 0.05
           and off["standing_least"] is not None and off["standing_least"] < on["standing_least"]
-          and rows_ok and hurt_ok and res["marks"]["minimap_matched"] == len(al) and res["marks"]["big_matched"] == len(al))
+          and rows_ok and hurt_ok and res["marks"]["minimap_matched"] == len(al) and res["marks"]["big_matched"] == len(al)
+          and res["far"] is not None and res["far"]["near_her"] == res["far"]["allies"] and (res["far"]["least_gap"] or -99) >= 0.0 and res["far"]["behind_her"] == 0)
     step_result("allyspace", ok, **res)
 
 def step_maarm():

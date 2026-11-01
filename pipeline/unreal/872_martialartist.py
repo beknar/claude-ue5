@@ -282,23 +282,11 @@ def finish(wd, w):
     return wd
 def copy(x, cls):
     n = cls(); n.import_text(x.export_text()); return n
-def repoint_spell_weapons(gen):
-    """every spell weapon named as a spell of the table (on every hero, locked or not, and among the generator's weapons)
-    pointed at that spell's place again: this stage and 876 each take their spells out and add them at the table's end,
-    and a weapon points at its spell by its place (FRDWeaponDef::SpellIndex). The table's own spells (the Mage's "Fire"
-    for Fire Bolt) are named otherwise and stay where they were: they are never moved. How many were moved."""
-    by = {str(s.name): i for i, s in enumerate(gen.get_editor_property("spells"))}; n = [0]
-    def fix(ws):
-        out = []
-        for w in ws:
-            i = by.get(str(w.name))
-            if w.spell and i is not None and w.spell_index != i: w.spell_index = i; n[0] += 1
-            out.append(w)
-        return out
-    hs = list(gen.get_editor_property("heroes"))
-    for h_ in hs: h_.weapons = fix(h_.weapons); h_.locked_weapons = fix(h_.locked_weapons)
-    gen.set_editor_property("heroes", hs); gen.set_editor_property("weapons", fix(gen.get_editor_property("weapons")))
-    return n[0]
+import sys as _sys, os as _os, importlib as _il
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import rd_spell_index as _rsi
+_il.reload(_rsi)
+repoint_spell_weapons = _rsi.repoint_spell_weapons          # (shared with 876: each stage's spells move the other's)
 
 
 for MAP in MAPS:

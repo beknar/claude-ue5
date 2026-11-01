@@ -569,11 +569,11 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 	{
 		const float Sgn = (GetUniqueID() & 1) ? 1.f : -1.f;
 		FVector Side = Hl + Her->GetActorRightVector() * (240.f * Sgn) - Her->GetActorForwardVector() * 40.f;
-		// (mistward4: to a spot no other ally stands on: all of one side came to the same one)
+		// (mistward4: to a spot no other ally stands on: all of one side came to the same one; toward her front first)
 		if (G && G->bAllySpacing)
 		{
 			FVector Spot;
-			if (G->FindAllySpot(Hl, Her->GetActorRightVector() * Sgn, GetCapsuleComponent()->GetScaledCapsuleRadius(), this, Spot))
+			if (G->FindAllySpot(Hl, Her->GetActorRightVector() * Sgn, GetCapsuleComponent()->GetScaledCapsuleRadius(), this, Spot, Her->GetActorForwardVector()))
 			{
 				SetActorLocation(Spot + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 80.f), false, nullptr, ETeleportType::TeleportPhysics);
 				Path.Reset();
@@ -619,7 +619,7 @@ bool ARDMonster::FollowPlayer(float Dt, URDCombatComponent* Pc)
 	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
 	if (WaitForDoor(L, Dir2)) return true;
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
-	AddMovementInput((Dir2.GetSafeNormal() + Push * 1.5f).GetSafeNormal(), 1.f);
+	AddMovementInput(AllySteer(Dir2), 1.f);
 	const float Speed = GetVelocity().Size2D();
 	SetWalkingAnim(Speed > 25.f);
 	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 2.2f));
@@ -782,7 +782,7 @@ bool ARDMonster::TickCombat(float Dt)
 	FVector Side = FVector::ZeroVector;
 	if (StuckTime > 0.5f) { const FVector Fw = Dir2.GetSafeNormal(); Side = FVector(-Fw.Y, Fw.X, 0) * (((int32)(StuckTime / 0.8f)) % 2 ? 1.f : -1.f); }
 	// (mistward4: her allies chasing one monster keep apart, and come at it from either side)
-	AddMovementInput((Dir2.GetSafeNormal() + Side * 0.9f + AllySpacingPush() * 1.5f).GetSafeNormal(), 1.f);
+	AddMovementInput(bAlly ? AllySteer(Dir2.GetSafeNormal() + Side * 0.9f) : (Dir2.GetSafeNormal() + Side * 0.9f).GetSafeNormal(), 1.f);
 	const float Speed = GetVelocity().Size2D();
 	SetWalkingAnim(Speed > 25.f);
 	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 2.2f));

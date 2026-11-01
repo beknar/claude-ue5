@@ -679,9 +679,13 @@ public:
 	/** Apply: the chosen resolution and display mode into the game's user settings, applied and saved (in the editor saved
 	 *  only: play in the editor does not own its window) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward4") bool ApplyDisplaySettings();
-	/** a spot for a new ally of Radius near From: in front of Facing first, then round her; clear of walls (a trace from
-	 *  her) and of every ally standing (their capsules and RD4AllyGap); false: none clear, OutAt the roomiest */
-	bool FindAllySpot(const FVector& From, const FVector& Facing, float Radius, const AActor* Ignore, FVector& OutAt) const;
+	/** a spot for a new ally of Radius near From: along Facing first, then round her (of each pair of ways the one toward
+	 *  Prefer first, those behind Prefer last); clear of walls (a sweep from her) and of every ally standing (their capsules
+	 *  and RD4AllyGap); false: none clear, OutAt the roomiest */
+	bool FindAllySpot(const FVector& From, const FVector& Facing, float Radius, const AActor* Ignore, FVector& OutAt, const FVector& Prefer = FVector::ZeroVector) const;
+	/** a display setting asked on the command line (-RDApplyDisplay=<width>x<height>x<mode>, mode 0 fullscreen, 1 windowed
+	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply) */
+	void ApplyDisplayFromCommandLine();
 
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
