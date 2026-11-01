@@ -195,7 +195,7 @@ Made by the scripts in `pipeline/` and the C++ module, from the sources above or
 - the procedural layouts, maps and HUDs;
 - the demo-reel overlays;
 - the armour sets refitted to the Summoner (`summoner3_armour.py`);
-- the README stills and the galleries' pictures.
+- the stills of the level documents and `reels.md`, and the galleries' pictures.
 
 ## Other packs in the local project, not used
 

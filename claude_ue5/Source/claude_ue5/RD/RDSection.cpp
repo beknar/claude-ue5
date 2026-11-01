@@ -245,6 +245,8 @@ void ARDSection::Plan(FRandomStream& R)
 	}
 	// (the third list: shrines, fountains, an arena, a gauntlet, a vault, a throne room; a stream of their own as well)
 	if (Generator->bSpecialRooms) AssignSpecialRooms();
+	// (mistward5: ceilings of more shapes and sizes; a stream of their own too)
+	if (Generator->bCeilingStyles) StyleCeilings();
 }
 
 // ------------------------------------------------------------------------------------------------ shapes (mistward)
@@ -857,6 +859,7 @@ void ARDSection::ShellPrepare(FRandomStream& R)
 	ShellFloor.Reset(); ShellWall.Reset(); WallVariants.Reset(); WallPicks.Reset(); WallCounts.Reset(); WallRepeats = 0;
 	WallSegments.Reset(); WallSegmentNames.Reset(); CellFrames.Reset(); CellHay.Reset(); CellSides = 0;
 	for (const FRoom& Rm : Rooms) { ShellFloor.Add(FloorFor(Rm.Kind, R)); ShellWall.Add(WallFor(Rm.Kind, R)); }
+	RoomWallTop.Init(0.f, Rooms.Num()); VaultMeshes = 0;
 }
 
 void ARDSection::ShellColumn(FRandomStream& R, int32 X)
@@ -878,10 +881,13 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 		// (mistward: a theme's wall has its own backing or none: the plain wall's would not fit it)
 		const bool bThemed = PcName(Name) != Name;
 		const bool bBack = Pc(Back) != nullptr && (PcName(Back) != Back) == bThemed, bSeal = Pc(Seal) != nullptr && (PcName(Seal) != Seal) == bThemed;
+		// (mistward5: where a room's walls end, stacked: a vault springs from the highest)
+		const int32 Ow = In(Tile) ? Owner[Idx(Tile)] : -1;
 		for (float Z = Z0; Z < Z1 - 5.f; Z += H, ++Layer)
 		{
 			const FName Pick = WallVariant(Name, Tile, Side, Layer);
 			const FVector At = Base + FVector(0, 0, Z);
+			if (Ow >= 0 && Ow < 1000 && RoomWallTop.IsValidIndex(Ow)) RoomWallTop[Ow] = FMath::Max(RoomWallTop[Ow], Z + H);
 			AddPieceAt(Pick, At, Yaw);
 			if (!bBack && !bSeal) continue;
 			if (bBack) AddPieceAt(Back, At, Yaw);
@@ -905,7 +911,9 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 			FName F = bRoom ? RoomFloor[O] : FName(TEXT("Floor_Corr"));
 			if (R.FRand() < 0.12f && Pc(FName(*(F.ToString() + TEXT("_Alt"))))) F = FName(*(F.ToString() + TEXT("_Alt")));
 			AddPieceAt(F, C, 90.f * R.RandRange(0, 3));
-			AddPieceAt(bLow ? TEXT("Ceil_Corr") : TEXT("Ceil_Room"), C + FVector(0, 0, Hgt), 90.f * R.RandRange(0, 3));
+			// (mistward5: a vaulted room's ceiling is its vault (ShellVaults); the turn is drawn all the same)
+			const float CeilYaw = 90.f * R.RandRange(0, 3);
+			if (!(bRoom && Rooms[O].Ceil >= 3)) AddPieceAt(bLow ? TEXT("Ceil_Corr") : TEXT("Ceil_Room"), C + FVector(0, 0, Hgt), CeilYaw);
 			// walls
 			for (int32 Side = 0; Side < 4; ++Side)
 			{
@@ -954,9 +962,12 @@ void ARDSection::ShellCorners()
 			const FVector P = Cn[I] + In_ * 25.f;
 			const FRDPiece* Pc = this->Pc(TEXT("CornerColumn"));
 			if (!Pc) break;
-			for (float Z = 0.f; Z < Generator->RoomHeight - 5.f; Z += Pc->Size.Z - 2.f) AddPieceAt(TEXT("CornerColumn"), P + FVector(0, 0, Z), 45.f + 90.f * I);
+			// (mistward5: up to a raised ceiling)
+			const float Top = Rm.Ceil == 1 || Rm.Ceil == 2 ? CeilAt(Rm.Lane) : Generator->RoomHeight;
+			for (float Z = 0.f; Z < Top - 5.f; Z += Pc->Size.Z - 2.f) AddPieceAt(TEXT("CornerColumn"), P + FVector(0, 0, Z), 45.f + 90.f * I);
 		}
 	}
+	if (Generator->bCeilingStyles && bBuildStatic) ShellVaults();
 }
 
 // ------------------------------------------------------------------------------------------------ furnishing
@@ -1138,7 +1149,9 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		// (mistward: under its own tile's ceiling: a dome's is higher; not over a tile cut out of a shaped room)
 		const FIntPoint Tl = WorldToLocal(P);
 		if (Rm.Shape != 0 && (!In(Tl) || Owner[Idx(Tl)] != RI)) return;
-		const float Ch = Rm.Shape != 0 ? CeilAt(Tl) : RH;
+		float Ch = Rm.Shape != 0 || Rm.Ceil != 0 ? CeilAt(Tl) : RH;
+		// (mistward5: under a vault, from the vault at that point)
+		if (const float Vh = VaultHeightAt(RI, P); Vh > 0.f) Ch = Vh;
 		if (Pc) AddPieceAt(Nm, P + FVector(0, 0, Ch - Pc->Size.Z), Yaw, 1.f, true);
 	};
 	auto Candles = [&](const FVector& P, float Cd)

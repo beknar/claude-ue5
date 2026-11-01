@@ -2,7 +2,7 @@
 
 What the game on `random_dungeonmagic_level5` does, requirement by requirement. It is derived from the C++ module (`claude_ue5/Source/claude_ue5/RD`), the level's data files, the pipeline scripts `824`-`859`, the generator of the saved level (its properties read in the editor) and the latest records of the level's test (`853`), on 2026-10-24 (branch `level5-spells-rings-monsters`, commit `cfe1998`).
 
-It describes the game as built. Where the code and an earlier description (README, a card, a table's wording) disagree, the requirement follows the code and [§27](#27-known-deviations-and-open-issues) lists the difference. How the game is put together is in [design.md](design.md).
+It describes the game as built. Where the code and an earlier description (the level's [document](levels/random_dungeonmagic_level5.md), a card, a table's wording) disagree, the requirement follows the code and [§27](#27-known-deviations-and-open-issues) lists the difference. How the game is put together is in [design.md](design.md).
 
 **Conventions**
 - Requirements have an ID (`AREA-n`). A number in a requirement is the code's or the level's value.
@@ -163,7 +163,7 @@ The casters' layout (`bCasterControls` *(level)*). Combat keys are read only whi
 - **LOOT-8** A container that holds nothing says "Empty: nothing inside".
 - **LOOT-9** Taking loot plays `Player.Loot` and shows the FOUND plaque for 3.2 s (the first item's picture and name, "and N more").
 - **LOOT-10** What happens to each item taken: a weapon her hero may wield joins her weapons; one she may not is carried; a tome teaches its spell if her hero learns its type, is carried if not, and is dropped with "You know <spell> already" if she knows it; a set of armour is carried once, and found again it mends hers to full; everything else stacks.
-- **LOOT-11** Items in the level: 170. Healing 8, mana 8, speed 8, food 9 (each with a tier and rarity), armour 27, weapons 29, materials 15, repair items 5, rings 30, tomes 31 (the Spell Tome, rarity 25, and the 30 "Tome of" items, rarity 0, which only a Spell Tome becomes). The per-item tables are in README's [the game now](../README.md#random_dungeonmagic_level5-the-game-now), written from the same data.
+- **LOOT-11** Items in the level: 170. Healing 8, mana 8, speed 8, food 9 (each with a tier and rarity), armour 27, weapons 29, materials 15, repair items 5, rings 30, tomes 31 (the Spell Tome, rarity 25, and the 30 "Tome of" items, rarity 0, which only a Spell Tome becomes). The per-item tables are in the level document's [the game now](levels/random_dungeonmagic_level5.md#random_dungeonmagic_level5-the-game-now), written from the same data.
 - *Measured* (853 `tierloot`, 2500 containers a tier): each tier's containers hold only that tier's weapons and armour; weapons were 19.1 % of the tier-1 picks against 18.4 % expected.
 
 ## 9. Tiers of rooms
@@ -180,7 +180,7 @@ The casters' layout (`bCasterControls` *(level)*). Combat keys are read only whi
 
 ## 10. Monsters
 
-- **MON-1** 55 kinds from the monster gallery ([docs/monsters.md](monsters.md)), each in one tier: 8, 8, 14, 19 and 6 kinds in tiers 1 to 5. Abilities: none (16 kinds, all of tiers 1 and 2), weaken (21), slow (10), poison (8). Nineteen hold a weapon from their pack. README's monster table lists each kind.
+- **MON-1** 55 kinds from the monster gallery ([docs/monsters.md](monsters.md)), each in one tier: 8, 8, 14, 19 and 6 kinds in tiers 1 to 5. Abilities: none (16 kinds, all of tiers 1 and 2), weaken (21), slow (10), poison (8). Nineteen hold a weapon from their pack. The level document's [monster table](levels/random_dungeonmagic_level5.md) lists each kind.
 - **MON-2** With `bCombat` exactly round(rooms × `MonsterCoverage`) of a section's rooms (not junctions) get one monster each, `MonsterCoverage` 0.3 *(level, from `791`)*, on a free tile at least 1500 cm from the start room's centre.
 - **MON-3** A section spawns only the kinds of its tier (if a tier had none, the nearest tier below, then above), by weight (1 each).
 - **MON-4** Hit points = 100 × `TierHealth[tier]` × the kind's factor / the mean factor of the tier's kinds; damage likewise from 25 × `TierDamage`. A kind's factor is 0.8 to 1.2 by its gallery rank within its tier.
@@ -309,7 +309,7 @@ The casters' layout (`bCasterControls` *(level)*). Combat keys are read only whi
 
 ## 15. Armour
 
-- **ARM-1** 27 sets (`SourceArt/summoner3/armour.json`): full plate 7, heavy 2, medium 2, light 3, partial 5, orc 8. A set's share of a blow = its damage-reduction rating × 5 % (5 to 50 %); its slowing = (10 − its speed rating) × 3 % (0 to 27 %); durability 125 to 600; rarity 20; the tiers the table gives. README's armour table lists each set.
+- **ARM-1** 27 sets (`SourceArt/summoner3/armour.json`): full plate 7, heavy 2, medium 2, light 3, partial 5, orc 8. A set's share of a blow = its damage-reduction rating × 5 % (5 to 50 %); its slowing = (10 − its speed rating) × 3 % (0 to 27 %); durability 125 to 600; rarity 20; the tiers the table gives. The level document's [armour table](levels/random_dungeonmagic_level5.md) lists each set.
 - **ARM-2** Weight: full plate and heavy are heavy, medium and partial medium, light light; orc armour by its speed rating (7-10 light, 4-6 medium, 1-3 heavy).
 - **ARM-3** A hero wears only the weights her card names (§3). Refusals: "The mage wears no armour"; "The <set> is <weight>: the <hero> wears only <weights> armour"; "The <set> was not made for the <hero>".
 - **ARM-4** Each set is fitted to the body of every hero who wears its weight (78 fits: a heavy set 2, a medium 3, a light 4). Worn, its meshes follow her skeleton as she moves. *Measured* (853 `follow`): vertices bound to one bone stay within 1 cm of where her bone puts them while running and casting; the same armour left in its rest pose is more than 10 cm off.
@@ -332,7 +332,7 @@ The casters' layout (`bCasterControls` *(level)*). Combat keys are read only whi
 - **REP-2** Enter on one lists her carried sets and found weapons with their durability now and after; Enter mends one (up to full) and uses the item: "Mended with the <kit>: your <x>,  L to A of F". A whole one is refused ("Your <x> is whole already"); with nothing to mend: "Nothing to mend: ...".
 - **CRF-1** Anvils: one in every forge and armory, the great hall always, and every section without one gets one in its largest room (`bAnvilEverySection` *(level)*), on a free tile off the lanes. *Measured* (853 `craft`): the great hall's anvil.
 - **CRF-2** F (X) within 260 cm of an anvil in the room she stands in, nearer than any door or container, opens the anvil panel (pauses like the inventory, `Player.Anvil`).
-- **CRF-3** Five recipes (README's recipe table): Leather Strips, Slickstone, Whetstone, Patch Kit, Repair Kit, each a count of parts where a part may be any of several materials ("wood (any)" is hardwood, timber and wood logs). All parts are planned from one running count, the materials she has most of first. Enter makes one: "You make a whetstone at the anvil"; short: "For a whetstone you need N wood (any) more, ...".
+- **CRF-3** Five recipes (the level document's [recipe table](levels/random_dungeonmagic_level5.md)): Leather Strips, Slickstone, Whetstone, Patch Kit, Repair Kit, each a count of parts where a part may be any of several materials ("wood (any)" is hardwood, timber and wood logs). All parts are planned from one running count, the materials she has most of first. Enter makes one: "You make a whetstone at the anvil"; short: "For a whetstone you need N wood (any) more, ...".
 - **CRF-4** 15 materials, every tier, rarity 25, 1 to 3 at a time.
 - **BRK-1** The anvil panel lists her found weapons and the weapons she carries unwielded under BREAK DOWN. Enter breaks one into materials × its lowest tier: blades 2 steel ingot, 3 iron ingot, 2 cured leather strip; bows 3 timber, 2 glue, 3 straw rope; crossbows 3 hardwood, 2 steel ingot, 2 epoxy. Refused: her own weapons ("Your own <weapon> is not to be broken"), the one in her hands ("... draw another first").
 - *Measured* (853 `repair`, `craft`, `breakdown`): a worn-out set mended by two patch kits to the expected share; a found weapon to min(full, 10 + 0.75 × full); leather strips made from their parts; the Warrior's Plate Knight's Sword broken into 2 steel, 3 iron, 2 cured leather; the Mage's carried Longbow into 3 timber, 2 glue, 3 straw rope.
@@ -456,20 +456,20 @@ Found while deriving this document. None was fixed here.
 | # | What | Where | Effect |
 |---|---|---|---|
 | 1 | `RollDodge` on the saved level is (1, 1), not the intended (0.05, 0.75) | generator property; likely `825` copying a struct read from level 3's actor across a map load | the Rogue's roll almost never dodges on levels 5 (and probably 4); no test checks `DodgedHits` |
-| 2 | Monster capsules from the mesh are never set: the assignments sit after a `#` on the same line | `859_rdm5_monsters_tiers.py:103` | every kind keeps radius 40, half-height 90; tall kinds may sink and small ones float (from the code; not seen in a render). README says "its capsule from its mesh" |
+| 2 | Monster capsules from the mesh are never set: the assignments sit after a `#` on the same line | `859_rdm5_monsters_tiers.py:103` | every kind keeps radius 40, half-height 90; tall kinds may sink and small ones float (from the code; not seen in a render). the level document says "its capsule from its mesh" |
 | 3 | `RestartPlay` adds the start section's monsters again without removing the old ones | `ARDSection::ActivateForPlay` appends to `SpawnedMonsters` | 132 living tier-1 monsters counted in `test_full10` (which restarts before most steps); affects tests and reels, not normal play (her death does not restart) |
-| 4 | No monster can be an elite on level 5 | the HUD's rule (> 1.25 × average) against `859`'s factors (≤ 1.2) | README's "the strongest as orange triangles" never shows here |
-| 5 | The level has no face data | `FaceChannels` / `FaceCues` empty since the rebuild from level 4 | README's "The Summoner has a face that moves" is not true of the current level |
-| 6 | Hellfire Pillar: the instant hit reaches 0.6 × the radius, the ground burns 15 % of the damage *a second* (≈ 90 % more over 6 s) | `RDSpells.cpp` | README says "15 % more over 6 s" |
-| 7 | Shadow Lash launches at 600 cm/s, not a 6 m push | `ARDMonster::Knock` | README says "pushes 6 m" |
+| 4 | No monster can be an elite on level 5 | the HUD's rule (> 1.25 × average) against `859`'s factors (≤ 1.2) | the level document's "the strongest as orange triangles" never shows here |
+| 5 | The level has no face data | `FaceChannels` / `FaceCues` empty since the rebuild from level 4 | the level document's "The Summoner has a face that moves" is not true of the current level |
+| 6 | Hellfire Pillar: the instant hit reaches 0.6 × the radius, the ground burns 15 % of the damage *a second* (≈ 90 % more over 6 s) | `RDSpells.cpp` | the level document says "15 % more over 6 s" |
+| 7 | Shadow Lash launches at 600 cm/s, not a 6 m push | `ARDMonster::Knock` | the level document says "pushes 6 m" |
 | 8 | Null Sanctum, Rune of Warding and Spectral Bulwark protect only her | `URDCombatComponent::ApplyDamage` | the table's wording ("allies", "the whole party") |
 | 9 | Soul Rend is a plain bolt; the `Rend` kind is unused; Mirror reflects only melee blows (monsters have no projectiles) | `spells.json`, `RDSpells.cpp` | "ignores armor", "reflects projectiles and spells" have nothing to act on |
 | 10 | A tome of a known spell is dropped, not carried | `AddItem` | |
 | 11 | Mana and cooldowns are spent at the cast's start, with no refund when it is broken off | `StartAttackWith` | |
 | 12 | `Player.Break` (a weapon breaks, armour wears out) is not in the sound table, so silent; `Player.Repair`, `Anvil`, `Craft`, `Learn` fall back to `Player.Inventory` / `Player.Loot` | the level's `Sounds` | |
-| 13 | The Summoner's card text in the level still says five sets were made for her (`852`'s wording); `856` updates only the four other heroes | `Heroes[Summoner].Armour`, the menu | the menu shows stale text; README's table shows the data file's |
-| 14 | README says 22 spell kinds; the table uses 21 (`Rend` unused) | README | |
-| 15 | The grip test passes at < 7 cm; README says 5.3 cm or less (the measured value) | `853` `weapons` | |
+| 13 | The Summoner's card text in the level still says five sets were made for her (`852`'s wording); `856` updates only the four other heroes | `Heroes[Summoner].Armour`, the menu | the menu shows stale text; the level document's table shows the data file's |
+| 14 | The level document says 22 spell kinds; the table uses 21 (`Rend` unused) | [the level document](levels/random_dungeonmagic_level5.md) | |
+| 15 | The grip test passes at < 7 cm; the level document says 5.3 cm or less (the measured value) | `853` `weapons` | |
 | 16 | CHOOSE ANOTHER HERO opens the menu without `?Hero=`, so it starts on the Warrior, not the hero played | `ActivateMenuLine` | |
 | 17 | No gamepad button opens the Escape menu | `TickMenu` | |
 | 18 | `SwitchHero` resets `Weapons` to the hero's own list: found and learned weapons are lost | `ApplyHero` | tests only |
@@ -477,7 +477,7 @@ Found while deriving this document. None was fixed here.
 | 20 | The kitchen cauldron's flame (a candle effect at scale 2.5) is heard as a brazier | `AddEffect` (any effect scaled > 2 is a brazier) | |
 | 21 | Stale comments: "four slots" at `RDHUD.cpp:381` (three are drawn); the `bStartLoot` header comment describes level 4 | source | |
 | 22 | The controls panel's lines list neither Escape, keys 3 to 0 nor the map's arrows and C | `heroes.json`, `summoner_hero.json` | |
-| 23 | README's measured empty-container share (33.7 %) matches neither latest record (32.7 %, 33.1 %) | README | corrected in README with this document |
+| 23 | The level document's measured empty-container share (33.7 %) matches neither latest record (32.7 %, 33.1 %) | [the level document](levels/random_dungeonmagic_level5.md) | corrected there with this document |
 
 Could not be checked here: the menu level's saved contents (it was not opened), whether the saved level overrides the class defaults marked *(default)*, the Warlock's and the Mage's own weapon numbers as stored on the level, and anything that needs a render (an editor render was running).
 

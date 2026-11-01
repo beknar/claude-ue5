@@ -1088,6 +1088,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tier 1 open)
 	for (ARDMonster* A : Allies) if (A) A->Destroy();
 	Allies.Reset();
+	ResetMistward5();          // (mistward5: no shot of before in the air, no audience, autoplay ended)
 	// (mistward: what the rules set waiting, her dropped things, the pads, the cells, the traps start again)
 	for (const FEncounter& E : Encounters) for (const TWeakObjectPtr<ARDMonster>& M : E.Live) if (M.IsValid()) M->Destroy();
 	// (and every other monster that is none of a set's planned ones (a boss's band, a guard, one a teleport trap brought, a
@@ -1474,6 +1475,10 @@ void ARDDungeonGenerator::Tick(float Dt)
 	}
 	if (Traps.Num() > 0) TickTraps(Dt);
 	if (bSpecialRooms) TickArena(Dt);          // (the third list: an arena begun, its waves)
+	if (bArenaLock || bArenaCrowd) TickArenaHold(Dt);      // (mistward5: no way out; the audience)
+	if (bMonsterRanged) TickMonsterShots(Dt);              // (mistward5: the monsters' shots in the air)
+	if (!bAutoplayOptionRead) ReadAutoplayOption();        // (mistward5: ?Autoplay= / -Autoplay=)
+	if (bAutoplay) TickAutoplay(Dt);
 	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)
 	// (mistward: the rings to guard of a tier opened by the last container she opened, now that it has given what it held)
 	if (PendingRingTiers.Num() > 0) { const TArray<int32> Ts = PendingRingTiers; PendingRingTiers.Reset(); for (const int32 T : Ts) PlaceRingGuard(T); }

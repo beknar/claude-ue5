@@ -93,6 +93,28 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform WeaponGrip;
 	/** the gallery's name (the HUD's bar shows it) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): a shot
+	// from afar in its kind's theme (half the kinds), weaker than its blow and with a longer wait
+	/** it shoots: from RangedMin out to RangedRange (cm), with a sight line; RangedDamage of its blow's damage; then waits
+	 *  RangedCooldown seconds before shooting again (at its kind's AttackInterval: a tier that quickens its blows quickens
+	 *  this as much, so the wait stays longer than its blows'); its blows keep their own interval */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bShoots = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedRange = 800.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedMin = 300.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedDamage = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedCooldown = 4.f;
+	/** the shot's speed (cm/s) and its effects: in flight, at the hand that throws it, where it lands */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedSpeed = 1500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> RangedFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> RangedMuzzleFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> RangedHitFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedFxScale = 1.f;
+	/** the clip it shoots with (its Shout or Shot clip, else its first attack) and when in it the shot leaves (a share of
+	 *  the clip's length) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> RangedClip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedRelease = 0.5f;
+	/** what the shot is ("a thrown axe": the HUD's line when it lands) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString RangedTheme;
 };
 
 /** Sounds for one occasion ("Player.Hurt", "Env.DoorOpen", "Monster.Troll.Roar"...): one of them is played each time,

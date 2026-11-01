@@ -38,7 +38,7 @@ ARDMonster::ARDMonster()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 }
 
-static float RDClipLength(const UAnimationAsset* A)
+float RDClipLength(const UAnimationAsset* A)
 {
 	const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(A);
 	return S ? S->GetPlayLength() : 1.f;
@@ -93,6 +93,7 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 			AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, Tier, 1.f);
 			MaxChaseScale = SpeedScale;
 		}
+		SetupRanged(Def);          // (mistward5: its shot, its wait scaled as its blows' interval)
 	}
 	// (level 5: parts made on its skeleton follow its body; a weapon in its hand)
 	for (USkeletalMesh* PartMesh : Def.Parts)
@@ -309,6 +310,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 		AttackInterval = (Def ? Def->AttackInterval : AttackInterval) * ARDDungeonGenerator::TierValue(G->TierAttackInterval, InTier, 1.f);
 		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, InTier, 1.f);
 	}
+	if (Def) SetupRanged(*Def);    // (mistward5: the shot's wait follows the interval just set)
 	if (ScaleMul != 1.f)
 	{
 		// (bigger: its capsule and its mesh, its feet kept on the floor; its reach grows with it)
@@ -656,6 +658,7 @@ bool ARDMonster::TickCombat(float Dt)
 	// (her ally: its time runs out, and it falls)
 	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
+	RangedWaitLeft = FMath::Max(0.f, RangedWaitLeft - Dt);
 	if (Stun > 0.f)
 	{
 		Stun -= Dt;
@@ -687,7 +690,13 @@ bool ARDMonster::TickCombat(float Dt)
 	{
 		AttackTime += Dt;
 		Face(D, Dt);
-		if (!bHitDone && AttackTime >= AttackHit)
+		if (!bHitDone && AttackTime >= AttackHit && bRangedSwing)
+		{
+			// (mistward5: its shot leaves its hand; the generator flies it)
+			bHitDone = true;
+			ReleaseShot(P);
+		}
+		else if (!bHitDone && AttackTime >= AttackHit)
 		{
 			bHitDone = true;
 			// the blow lands if its foe is still in reach and in front of it (a curse on it: weaker)
@@ -704,7 +713,13 @@ bool ARDMonster::TickCombat(float Dt)
 				++HitsLanded;
 			}
 		}
-		if (AttackTime >= AttackLen) { AttackTime = -1.f; AttackCooldown = AttackInterval; bWalkingAnim = true; SetWalkingAnim(false); }
+		if (AttackTime >= AttackLen)
+		{
+			// (a shot: its own longer wait; its blows may follow at once when its foe closes in)
+			if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
+			else AttackCooldown = AttackInterval;
+			AttackTime = -1.f; bWalkingAnim = true; SetWalkingAnim(false);
+		}
 		return true;
 	}
 	ChaseTimer -= Dt;
@@ -736,6 +751,7 @@ bool ARDMonster::TickCombat(float Dt)
 			const int32 K = R.RandRange(0, AttackAnims.Num() - 1);
 			GetMesh()->PlayAnimation(AttackAnims[K], false);
 			AttackLen = RDClipLength(AttackAnims[K]); AttackHit = FMath::Clamp(HitTimes[K], 0.05f, AttackLen); AttackTime = 0.f; bHitDone = false;
+			bRangedSwing = false;         // (a shot cut short by a flinch or a stun must not make this blow a shot)
 			++AttacksMade;
 			G->PlaySoundAt(SndAttack, L);
 			VoiceTimer = FMath::Max(VoiceTimer, 2.f);
@@ -749,6 +765,8 @@ bool ARDMonster::TickCombat(float Dt)
 		else SetWalkingAnim(false);
 		return true;
 	}
+	// (mistward5: out of reach of its blows, in its range, with a sight line: it stands and shoots)
+	if (bShoots && G->bMonsterRanged && CellExit.IsZero() && TryShoot(P, D, Dist, Dz, Gap, Dt)) return true;
 	// (mistward: just out of its cell: through its door first, then at her)
 	// (the middle of a cell's front is where its bars meet its door: straight from the cell's middle to the exit it walked
 	// into the bars and stuck there; it goes to the door's gap first)

@@ -25,7 +25,7 @@ paths:
 - Warlock: wields all weapons, wears only light and medium armour, casts and learns a limited set of spells (fire), balanced hit points (100).
 - Rogue: wields daggers and ranged weapons (+30 % ranged damage), wears only light armour, uncanny dodge (B), balanced hit points (100).
 - The Summoner (level 5's fifth hero) wears all armour, wields none of the table's weapons, casts the Mage's spells.
-- The cards (`SourceArt/random_dungeon_magic4/heroes.json`, `random_dungeon_magic5/summoner_hero.json`), the game's rules (`FRDHeroDef::Wears`, `weapons_table.json`'s `who`, `spells.json`'s `learns` / `FRDHeroDef::Learns`) and README's tables must say the same. Since `858` spells are learned from tomes found in the dungeon: the Mage and the Summoner every type, the Warlock offense and curses.
+- The cards (`SourceArt/random_dungeon_magic4/heroes.json`, `random_dungeon_magic5/summoner_hero.json`), the game's rules (`FRDHeroDef::Wears`, `weapons_table.json`'s `who`, `spells.json`'s `learns` / `FRDHeroDef::Learns`) and the tables of `docs/levels/random_dungeonmagic_level5.md` must say the same. Since `858` spells are learned from tomes found in the dungeon: the Mage and the Summoner every type, the Warlock offense and curses.
 
 ## Armour by weight (`856`)
 

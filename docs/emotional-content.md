@@ -2,7 +2,7 @@
 
 The question: can the characters' faces show expression during actions in the game, such as a grimace on a swing, a wince when hit, a roar when a monster spots her, or pain on death? This page records what the models can do now and every way found to add expressions. It also covers where the expressions would be seen and how they would be tested.
 
-**What was built since** (random_dungeonmagic_level5, the Summoner; README's rebuild notes):
+**What was built since** (random_dungeonmagic_level5, the Summoner; its [rebuild notes](levels/random_dungeonmagic_level5.md#rebuild)):
 - way 7 first: shapes made in Blender and patches painted on her texture, eight expressions (`832`-`836`);
 - then way 9, which replaced it in play: a MetaHuman face (Epic's preset Aera in her colouring, rigged by Epic's cloud service) set on her body under her own hair, her painted face cut away by her material, sixteen expressions written as MetaHuman control curves from FACS action units, moved by RigLogic (`837`-`841`). It is heavy (858 blend shapes, strand brows and lashes) and stays a different style from her anime body: a realistic face under anime hair. Fitting the MetaHuman to her anime head (Mesh to MetaHuman) gave a grotesque, so the face is a preset.
 

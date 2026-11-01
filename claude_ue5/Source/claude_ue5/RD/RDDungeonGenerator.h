@@ -30,6 +30,7 @@ class ARDSection;
 class ARDMonster;
 class URDCombatComponent;
 class URDBloodComponent;
+class UFXSystemComponent;
 class UStaticMesh;
 class USoundAttenuation;
 class UAudioComponent;
@@ -686,6 +687,121 @@ public:
 	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply); and -RDMarkFile=<path>:
 	 *  "castle|<map>|<hero>" written there (a packaged game's test knows it reached the castle) */
 	void ApplyDisplayFromCommandLine();
+
+	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
+	// switch, off on the other levels
+	/** the kinds whose def says bShoots shoot from afar (FRDMonsterDef's Ranged*): their shots fly here, strike her, her
+	 *  allies (or, an ally's, the monsters) and walls */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bMonsterRanged = false;
+	/** a monster's bar shows its name and its bar only (no hit points, no marks); an arena's monsters keep their names */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bNameOnlyBars = false;
+	/** while an arena is fought there is no way out: its doors stay locked (and say so), the teleport ring and the pads do
+	 *  not carry her, and she is put back inside if she leaves the room by any way */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bArenaLock = false;
+	/** an audience in the arena: townsfolk appear along its walls as it begins, the first wave comes CrowdLead seconds after,
+	 *  they cheer when a wave comes and clap and cheer when a monster falls; they leave when it is won or lost */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bArenaCrowd = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<TObjectPtr<USkeletalMesh>> CrowdMeshes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TObjectPtr<UAnimationAsset> CrowdIdle = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<TObjectPtr<UAnimationAsset>> CrowdClaps;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<TObjectPtr<UAnimationAsset>> CrowdCheers;
+	/** the puff they appear and leave in */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TObjectPtr<UFXSystemAsset> CrowdAppearFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CrowdAppearFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") int32 CrowdMax = 18;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CrowdLead = 3.f;
+	/** how far in from the wall they stand, and apart (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CrowdInset = 70.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CrowdSpacing = 160.f;
+	/** the audience now (tests): who stands, what each does ("idle", "clap", "cheer"), cheers and claps begun */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward5") TArray<FString> GetCrowdLines() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") int32 CrowdCheersMade = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") int32 CrowdClapsMade = 0;
+	/** ways out of an arena refused (the ring, a pad, a door) and times she was put back */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") int32 ArenaEscapesRefused = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") int32 ArenaPutBack = 0;
+	/** an arena holds her now (bArenaLock and one is fought) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward5") bool IsArenaHolding() const { return bArenaLock && ArenaRoom >= 0; }
+	/** world time the first wave is due (the audience's lead; -1 none pending) */
+	float ArenaWaveDue = -1.f;
+	bool bArenaSheInside = false;
+	int32 CrowdLastLeft = 0;
+	UPROPERTY(Transient) TArray<TObjectPtr<class ARDSpectator>> Crowd;
+	void CrowdAppear(ARDSection* S, int32 Room);
+	void CrowdReact(bool bCheer, float Share);
+	void CrowdLeave();
+	/** the arena's doors say they are barred; ring and pads refuse (the message said); true when refused */
+	bool RefuseArenaExit(const TCHAR* How);
+	/** what F says at a door of the arena being fought ("" none near) */
+	FString ArenaDoorNear(const FVector& From) const;
+	void TickArenaHold(float Dt);
+
+	/** shots in the air: from whom, where, its speed, what it does, its effect */
+	struct FMonsterShot
+	{
+		TWeakObjectPtr<ARDMonster> From; bool bAlly = false; FVector At = FVector::ZeroVector, Vel = FVector::ZeroVector;
+		float Damage = 0.f, Life = 0.f; TWeakObjectPtr<UFXSystemComponent> Fx; TObjectPtr<UFXSystemAsset> HitFx = nullptr; float FxScale = 1.f;
+		FName Kind; FString Theme;
+	};
+	TArray<FMonsterShot> MonsterShots;
+	/** effects ending (a shot's trail fades, then goes) */
+	TArray<TPair<TWeakObjectPtr<UFXSystemComponent>, float>> ShotFxEnding;
+	void FireMonsterShot(ARDMonster* From, const FVector& Muzzle, const FVector& Aim, float Speed, float Damage, float Range, UFXSystemAsset* Fx, UFXSystemAsset* HitFx, float FxScale, const FString& Theme);
+	void TickMonsterShots(float Dt);
+	/** RestartPlay: the shots in the air, the audience and autoplay ended */
+	void ResetMistward5();
+	/** shots fired, landed on her, on her allies, on monsters (an ally's), on walls, faded at their range (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") TMap<FString, int32> ShotStats;
+	/** the last shot that struck her: its kind, its damage, the blow's damage of its kind (tests: weaker than the blow) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") FString LastShotOnHer;
+	/** shots in the air now: "<kind>|<x>|<y>|<z>|<speed>" (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward5") TArray<FString> GetShotLines() const;
+
+	/** autoplay: the game plays her hero for Seconds (0: until a key of the player's): it seeks monsters and fights them
+	 *  with her weapons, spells, chi and summons, drinks when hurt, opens chests, harvests, walks on to new rooms and sets;
+	 *  a key, a click or a stick of the player's hands her back. From the command line (-Autoplay=<seconds>, with
+	 *  -RDStartHero=<hero>) the game quits when the time is up; from the menu's AUTOPLAY it hands her back */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bAutoplayMode = false;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward5") void StartAutoplay(float Seconds, bool bQuitAtEnd = false);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward5") void StopAutoplay(const FString& Why);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward5") bool IsAutoplaying() const { return bAutoplay; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward5") float GetAutoplayLeft() const;
+	/** what the pilot does now ("fight Plague Rat", "walk to room 7", "open chest", ...) and its tallies (tests, the HUD) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") FString AutoplayDoing;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward5") TMap<FString, int32> AutoplayStats;
+	/** tests: the player's keys do not take over (a test's own simulated keys would) */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bAutoplayIgnorePlayer = false;
+	bool bAutoplay = false, bAutoplayQuit = false;
+	float AutoplaySeconds = 0.f, AutoplayStart = 0.f, AutoplayThink = 0.f, AutoplayStuck = 0.f, AutoplayNextAct = 0.f, AutoplayUseNext = 0.f;
+	/** what she heads for: 0 nothing, 1 a chest, 2 a monster (AutoplayPrey), 3 a room, 4 a way out to the next set; its key
+	 *  in AutoplayRoomsBlocked (given up when she sticks on the way, a chest once reached) */
+	int32 AutoplayGoalKind = 0, AutoplayGoalKey = 0;
+	TWeakObjectPtr<ARDMonster> AutoplayPrey;
+	FVector AutoplayLastPos = FVector::ZeroVector, AutoplayWalkFrom = FVector::ZeroVector;
+	float AutoplayWalked = 0.f, AutoplayHuntNext = 0.f;
+	bool bAutoplayHunting = false;
+	/** monsters she found no way to (caged behind a wall, in a closed vault...): not hunted again this run */
+	TSet<TWeakObjectPtr<ARDMonster>> AutoplayPreyBlocked;
+	TArray<FVector> AutoplayPath;
+	TWeakObjectPtr<ARDMonster> AutoplayFoe;
+	TSet<FIntVector> AutoplayRoomsSeen;
+	TSet<int32> AutoplayRoomsBlocked;
+	FVector AutoplayGoal = FVector::ZeroVector;
+	int32 AutoplayWeaponTurn = 0;
+	FRandomStream AutoplayR;
+	void TickAutoplay(float Dt);
+	void ReadAutoplayOption();
+	bool bAutoplayOptionRead = false;
+
+	/** ceilings of more shapes and sizes: a rectangular room's ceiling is flat, raised, beamed, a sail dome, a groin vault
+	 *  with ribs, a barrel vault with ribs, a cloister vault or hipped (its own stream: the layout is what it was) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bCeilingStyles = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CeilingStyleShare = 0.8f;
+	/** the ribs' and beams' materials (none: the room's wall's / ceiling's own) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TObjectPtr<UMaterialInterface> CeilingRibMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TObjectPtr<UMaterialInterface> CeilingBeamMaterial = nullptr;
+	/** the highest a vault rises over its springing (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CeilingMaxRise = 900.f;
 
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */

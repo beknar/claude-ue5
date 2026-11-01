@@ -666,6 +666,7 @@ FString ARDDungeonGenerator::UsePadNear(const FVector& From)
 	const int32 T = PadNear(From);
 	URDCombatComponent* Pc = GetPlayerCombat();
 	if (T <= 0 || !Pc) return FString();
+	if (IsArenaHolding()) { RefuseArenaExit(TEXT("pad")); return TEXT("arena barred"); }     // (mistward5)
 	if (T > 1 && !PadRingsTaken.Contains(T))
 	{
 		const FName Ring = TeleportRingOf(T);

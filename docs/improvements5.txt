@@ -1,0 +1,14 @@
+the README.md needs to be refactored into several different sections.  right now it is too long and has too much
+data to manage.  if it is split into several documents, there should be links from the README to those documents.
+the arena room type needs to have the doors locked so that the player cannot just escape.  the arena room also needs
+to look as if there is an audience watching, with peasants that appear watching from the edges of the room just before the 
+monsters spawn.  the peasants clap and cheer when the monsters spawn and when they are slain.
+create the new autoplay mode, make autoplay available for all of the playable characters.  is there a way to control how long 
+the autoplay plays?
+none of the enemies have a ranged attack.  have long and medium attack ranged attacks for half of the enemies using the visual effects 
+from the fab vault caches.  the long and medium ranged attacks should do less damage than melee and should have longer cooldowns
+than their melee attacks.  those ranged attacks should be the same in theme as their type and names.
+enemies should have more meaningful names and should not display their hit points in the name.  they should display only their
+meaningful names and their hit point bars.
+none of the ceilings are domes or differently configured, all are flat.  make the ceilings have more and different configurations
+in size and shape.

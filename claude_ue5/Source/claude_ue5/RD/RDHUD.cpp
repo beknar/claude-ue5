@@ -225,6 +225,17 @@ void ARDHUD::DrawCombat(float Sc)
 		Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, E), C); Box(FVector2D(0, Canvas->ClipY - E), FVector2D(Canvas->ClipX, Canvas->ClipY), C);
 		Box(FVector2D(0, E), FVector2D(E, Canvas->ClipY - E), C); Box(FVector2D(Canvas->ClipX - E, E), FVector2D(Canvas->ClipX, Canvas->ClipY - E), C);
 	}
+	// ---- mistward5: autoplay's line at the top (its time left, what it does, how to take over)
+	if (Gen->IsAutoplaying())
+	{
+		const float Left = Gen->GetAutoplayLeft();
+		const FString T = Left >= 0.f ? FString::Printf(TEXT("AUTOPLAY  %d:%02d    %s    any key takes over"), (int32)Left / 60, (int32)Left % 60, *Gen->AutoplayDoing.ToUpper())
+		                              : FString::Printf(TEXT("AUTOPLAY    %s    any key takes over"), *Gen->AutoplayDoing.ToUpper());
+		float Tw, Th; UI.TextSize(T, Tw, Th, Small, Sc * 1.1f, ERDType::Label);
+		const FVector2D A((Canvas->ClipX - Tw) * 0.5f - 14.f * Sc, 14.f * Sc);
+		Box(A, A + FVector2D(Tw + 28.f * Sc, Th + 12.f * Sc), FLinearColor(0.02f, 0.03f, 0.05f, 0.7f));
+		UI.Text(T, FLinearColor(0.75f, 0.9f, 1.f), A.X + 14.f * Sc, A.Y + 6.f * Sc, Small, Sc * 1.1f, ERDType::Label);
+	}
 	// ---- a bar over each monster in the fight
 	for (const ARDMonster* Mo : Gen->GetMonsters())
 	{
@@ -242,7 +253,8 @@ void ARDHUD::DrawCombat(float Sc)
 		if (Mo->GetCurseShare() > 0.f) Marks += TEXT("  CURSED");
 		if (Mo->GetSlowShare() > 0.f) Marks += TEXT("  SLOWED");
 		if (Mo->IsBurning()) Marks += TEXT("  BURNING");
-		const FString N = FString::Printf(TEXT("%s  %.0f%s"), *Nm.ToUpper(), Mo->GetHealth(), *Marks);
+		// (mistward5, the user's of 2026-11-01: its name and its bar only, no hit points)
+		const FString N = Gen->bNameOnlyBars ? Nm.ToUpper() : FString::Printf(TEXT("%s  %.0f%s"), *Nm.ToUpper(), Mo->GetHealth(), *Marks);
 		float Tw, Th; UI.TextSize(N, Tw, Th, Small, Sc, ERDType::Label);
 		UI.Text(N, RDInk, S.X - Tw * 0.5f, A.Y - Th - 3.f * Sc, Small, Sc, ERDType::Label);
 	}

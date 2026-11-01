@@ -1,4 +1,4 @@
-"""README's tables for random_dungeonmagic_level5, written from the data the game is built from (so they say what it does):
+"""The tables of random_dungeonmagic_level5's document (docs/levels/random_dungeonmagic_level5.md), written from the data the game is built from (so they say what it does):
 - the heroes: SourceArt/random_dungeon_magic4/heroes.json (the Warrior, Mage, Warlock and Rogue: their cards, numbers,
   what they start with, the armour weights they wear) and random_dungeon_magic5/summoner_hero.json (the Summoner);
 - the armour sets: SourceArt/summoner3/armour.json (the user's table: type, damage reduction and speed ratings, durability,
@@ -12,7 +12,7 @@
 - the rings and the weapons broken down at an anvil: loot_table.json's rings and breakdown;
 - the monsters by tier: SourceArt/random_dungeon_magic5/monster_tiers.json (the gallery's monsters of each tier, the tier's
   hit points, damage, speed, blows' pace and abilities).
-Each table goes between its markers in README.md (<!-- rdm5:heroes -->, <!-- rdm5:armour -->, <!-- rdm5:weapons -->,
+Each table goes between its markers in docs/levels/random_dungeonmagic_level5.md (<!-- rdm5:heroes -->, <!-- rdm5:armour -->, <!-- rdm5:weapons -->,
 <!-- rdm5:loot -->, <!-- rdm5:recipes -->, <!-- rdm5:spells -->, <!-- rdm5:rings -->, <!-- rdm5:breakdown -->,
 <!-- rdm5:monsters -->, each closed by <!-- /rdm5:... -->). Args: none (python 3, no other packages)"""
 import json, os, re
@@ -168,7 +168,7 @@ def monsters_table():
     return out
 
 
-p = os.path.join(ROOT, "README.md"); s = open(p, encoding="utf-8").read()
+p = os.path.join(ROOT, "docs", "levels", "random_dungeonmagic_level5.md"); s = open(p, encoding="utf-8").read()
 for key, rows in (("heroes", heroes_table()), ("armour", armour_table()), ("weapons", weapons_table()), ("loot", loot_table()), ("recipes", recipes_table()),
                   ("spells", spells_table()), ("rings", rings_table()), ("breakdown", breakdown_table()), ("monsters", monsters_table())):
     a, b = "<!-- rdm5:%s -->" % key, "<!-- /rdm5:%s -->" % key

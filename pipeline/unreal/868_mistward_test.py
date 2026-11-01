@@ -95,6 +95,17 @@ The user's list of 2026-10-31 (878):
   allyspace six of the Summoner's allies called apart; following her and waiting round her they keep apart (sampled; the
            switch off first: they gather into each other); the summons panel's rows and hit points; their marks on both maps
   (menu: also the hero menu's QUIT GAME: clicked, Escape twice; Escape once lapses)
+The list of 2026-10-31b (docs/improvements5.txt; 879):
+  names    each kind's meaningful name its title (monsters5.json), spawned monsters carry it, the bars show it only; the
+           summon spells' lines name the new names
+  ranged   28 kinds shoot (projectile, hit, clip, a share of the blow, a longer wait); a long and a medium shooter 10 m / 6 m
+           off: shots in flight, striking her for less than a blow, a shot's wait between shots; close in, blows only
+  arena5   townsfolk along the arena's walls facing its middle (none by a door), the first wave after their lead, a cheer
+           at the wave, claps at a kill; the ring, F at its door and a carry out refused (put back); won, they leave
+  ceilings every ceiling style among the start set's and tier 2's rooms; every vault closes its room (lines up from each
+           floor tile meet it, level lines at its band meet a wall); raised rooms higher; pictures looking up
+  autoplay each hero played 40 s: she walks, fights, kills (all together), it ends at its time; W takes over at once
+  (menu: also AUTOPLAY: its length chosen with the arrows, a click opens the castle with ?Autoplay=)
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -107,7 +118,7 @@ UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 G["probe_cells"] = TAG.startswith("probe")          # (a tag "probe...": the cells step also shoots the monster's cell from in front)
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner,options,allyspace,maarm"
+DEFAULT = "basics,shields,torch,armour,inventory,heights,tiers,open,layout,traps,teleport,cells,death,outline,tabs,slots,helmet,block,startgear,pickups,rooms,slashes,tomemana,martial,harvest,recipes,scrolls,gearbreak,summoner,options,allyspace,maarm,names,ranged,arena5,ceilings,autoplay"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 I2 = unreal.IntPoint
@@ -1235,6 +1246,21 @@ def step_menu():
         res["quit"]["escape_lapsed"] = {"asked": s.quits_asked - q2, "armed_again": s.quit_armed_until > GS.get_time_seconds(G["w"])}
         yield from rwait(3.2)
         s.set_editor_property("quit_dry_run", False)
+    # (AUTOPLAY (the list of 2026-10-31b): its length chosen with the arrows beside it, a click on it opens the castle with
+    # ?Autoplay=<seconds>; the turntable's hero stays (stay_on_confirm))
+    res["autoplay"] = {"buttons": [n for n in ("Auto", "AutoLess", "AutoMore") if n in buttons()]}
+    if s.get_editor_property("autoplay_button"):
+        labels = [str(s.get_autoplay_label())]
+        for nm in ("AutoMore", "AutoMore", "AutoLess"):
+            why = yield from click(nm)
+            if why: res["refused"].append(f"{nm}: {why}")
+            labels.append(str(s.get_autoplay_label()))
+        res["autoplay"]["labels"] = labels
+        o0 = str(s.opened)
+        why = yield from click("Auto")
+        if why: res["refused"].append("auto: " + why)
+        res["autoplay"]["opened"] = str(s.opened); res["autoplay"]["changed"] = str(s.opened) != o0
+        shot("menu_autoplay"); yield from rwait(0.8)
     # (START for real: the dungeon opens as the hero shown (the Rogue, chosen with the pointer))
     why = yield from click("Hero_3")
     if why: res["refused"].append("rogue: " + why)
@@ -1262,6 +1288,9 @@ def step_menu():
     q = res["quit"]
     ok = ok and q["button"] and q.get("click", {}).get("asked") == 1 and not q["click"]["why"] and q["escape_twice"]["armed_after_one"] and q["escape_twice"]["asked"] == 1 \
         and q["escape_lapsed"]["asked"] == 0 and q["escape_lapsed"]["armed_again"]
+    au = res["autoplay"]
+    ok = ok and len(au["buttons"]) == 3 and au.get("labels") == ["AUTOPLAY  5 MIN", "AUTOPLAY  10 MIN", "AUTOPLAY  30 MIN", "AUTOPLAY  10 MIN"] \
+        and au.get("opened", "").endswith("mistward_castle?Hero=Warrior?Autoplay=600")
     step_result("menu", ok, **res)
 
 # ================================================================================================ the third list (docs/improvements2.txt)
@@ -1766,7 +1795,7 @@ def step_rooms():
             if not S.is_target_open(True, d): S.push_door(d, S.get_door_location(d))
         yield from wait(0.5)
         res["arena"] = {"doors": len(doors), "open_before": sum(1 for d in doors if S.is_target_open(True, d)), "began": g.start_arena(r["s"], r["room"])}
-        yield from wait(1.5)
+        yield from wait(1.5 + (g.get_editor_property("crowd_lead") if g.get_editor_property("arena_crowd") else 0.0))
         res["arena"]["doors_open_after_begin"] = sum(1 for d in doors if S.is_target_open(True, d))
         # (a door pushed while it is fought: stays shut)
         if doors: S.push_door(doors[0], S.get_door_location(doors[0]))
@@ -2939,7 +2968,267 @@ def step_maarm():
     ok = abs(res["flare_r"] - res["flare_l"]) <= 4.0 and res["past_shoulder_r"] > 8.0
     step_result("maarm", ok, **res)
 
-STEPS = {"chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+# ------------------------------------------------------------------------------------------------ the list of 2026-10-31b (879)
+M5 = json.load(open(os.path.join(OUT, "monsters5.json"), encoding="utf-8"))
+def trace(a, b, ignore=()):
+    """a line from a to b against the world (her ignored): (hit, where, the component's name)"""
+    h = unreal.SystemLibrary.line_trace_single(G["w"], a, b, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]] + list(ignore), unreal.DrawDebugTrace.NONE, True)
+    t = h.to_tuple() if h else None
+    if not t or not t[0]: return False, None, None
+    return True, t[4], (t[10].get_name() if t[10] else None)
+def clear_line(at, yaw0=0.0, dist=1000.0):
+    """a way from `at` dist cm long with nothing on it at chest height (the first of 24 ways), and its end"""
+    for k in range(24):
+        a = math.radians(yaw0 + k * 15.0)
+        e = V(at.x + math.cos(a) * dist, at.y + math.sin(a) * dist, at.z + 60)
+        hit, _, _ = trace(V(at.x, at.y, at.z + 60), e)
+        hit2, _, _ = trace(V(at.x, at.y, at.z + 20), V(e.x, e.y, at.z + 20))
+        if not hit and not hit2: return V(e.x, e.y, at.z), yaw0 + k * 15.0
+    return None, None
+
+def step_ranged():
+    """half the kinds shoot (879, monsters5.json's 28): each with its projectile, its hit, its clip, a share of its blow under 1
+    and a wait longer than its blows' interval. A trial for a long and a medium shooter in the great hall (the others killed):
+    stood 10 m / 6 m off with a clear line, it shoots (its clip, a shot in the air, measured in flight), the shot strikes her
+    for its share of its blow (less than the blow), and it waits its shot's wait before the next; close in, it strikes with its
+    blow instead of shooting; behind a wall, no shot"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    defs = list(g.get_editor_property("monsters"))
+    sh = [d for d in defs if d.get_editor_property("shoots")]
+    res = {"shooters": len(sh), "kinds": len(defs), "defs_bad": []}
+    for d in sh:
+        prob = [n for n, bad in (("projectile", not d.get_editor_property("ranged_fx")), ("hit", not d.get_editor_property("ranged_hit_fx")),
+                                 ("clip", not d.get_editor_property("ranged_clip")), ("share", not 0.0 < d.get_editor_property("ranged_damage") < 1.0),
+                                 ("wait", d.get_editor_property("ranged_cooldown") <= d.get_editor_property("attack_interval")),
+                                 ("range", d.get_editor_property("ranged_range") <= d.get_editor_property("reach") * 1.5),
+                                 ("theme", not str(d.get_editor_property("ranged_theme")))) if bad]
+        if prob: res["defs_bad"].append([str(d.get_editor_property("name")), prob])
+    ctr = g.get_start_room_center()
+    trials = []
+    for kind, dist in (("Soldier", 1000.0), ("Medic", 600.0)):
+        c = yield from restart("Warrior"); quiet(True)
+        kill_all_near(ctr, 20000); yield from wait(0.5)
+        put(ctr, 0.0); yield from wait(0.4)
+        her = G["pawn"].get_actor_location(); her = V(her.x, her.y, her.z - 90)
+        end, yaw = clear_line(her, 0.0, dist)
+        if not end: trials.append({"kind": kind, "error": "no clear line"}); continue
+        put(her, yaw + 0.0); yield from wait(0.2)
+        m = g.spawn_monster_named(kind, end, 1, 50.0, 1.0, 1.0)
+        yield from wait(0.3)
+        mcs = g.get_editor_property("max_chase_speed"); g.set_editor_property("max_chase_speed", 1.0)          # (held where it stands: it would charge in after a shot)
+        c.set_health(c.get_max_health()); hp0 = c.get_health(); st0 = md(g.shot_stats)
+        g.set_editor_property("aggro_distance", 2500.0); g.set_editor_property("lose_distance", 4000.0)
+        t = {"kind": kind, "title": str(m.title), "dist": round(dist2(m.get_actor_location(), G["pawn"].get_actor_location())), "blow": round(m.get_damage(), 1),
+             "shot": round(m.get_shot_damage(), 1), "wait": round(m.get_shot_wait(), 2), "interval": round(m.get_attack_interval(), 2), "flight": [], "times": []}
+        t0 = now(); pictured = False; last_n = 0
+        while now() - t0 < 14.0 and m.shots_fired < 3:
+            yield from wait(0.05)
+            ls = [str(l) for l in g.get_shot_lines()]
+            if ls and len(t["flight"]) < 20: p = ls[0].split("|"); t["flight"].append([round(float(p[1])), round(float(p[2])), round(float(p[3])), round(float(p[4]))])
+            if ls and not pictured: shot(f"ranged_{kind}", "1280x720"); pictured = True
+            if m.shots_fired > last_n: t["times"].append(round(now() - t0, 2)); last_n = m.shots_fired
+        yield from wait(1.5)
+        st1 = md(g.shot_stats)
+        t["fired"] = m.shots_fired; t["on_her"] = st1.get("on_her", 0) - st0.get("on_her", 0)
+        t["hp_lost"] = round(hp0 - c.get_health(), 1); t["last_on_her"] = str(g.last_shot_on_her)
+        t["gaps"] = [round(b - a, 2) for a, b in zip(t["times"], t["times"][1:])]
+        # (close in: blows, not shots)
+        quiet(True); yield from wait(0.2)
+        g.set_editor_property("max_chase_speed", mcs)
+        mp = m.get_actor_location(); drop([m]); yield from wait(0.3)
+        m = g.spawn_monster_named(kind, mp, 1, 50.0, 1.0, 1.0); yield from wait(0.2)          # (a fresh one: the held one stays slowed)
+        put(V(mp.x - 120, mp.y, her.z), 0.0)
+        quiet(False); g.set_editor_property("aggro_distance", 2500.0)
+        f0, a0 = m.shots_fired, m.attacks_made; yield from wait(5.0)
+        t["close"] = {"shots": m.shots_fired - f0, "blows": (m.attacks_made - a0) - (m.shots_fired - f0)}
+        quiet(True); drop([m]); trials.append(t)
+    res["trials"] = trials
+    quiet(False)
+    ok = res["shooters"] == len(M5["ranged"]) and not res["defs_bad"] and len(trials) == 2 and all(
+        "error" not in t and t["fired"] >= 2 and t["on_her"] >= 1 and t["shot"] < t["blow"] and t["wait"] > t["interval"]
+        and all(gp >= t["wait"] * 0.9 for gp in t["gaps"]) and len(t["flight"]) >= 2 and t["close"]["shots"] == 0 and t["close"]["blows"] >= 1 for t in trials)
+    step_result("ranged", ok, **res)
+
+def step_names():
+    """each kind's meaningful name (monsters5.json) is its title, a monster spawned carries it, the bars show it only
+    (bNameOnlyBars); an arena wave's monsters keep their own names; the summons' lines name the new names"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    defs = list(g.get_editor_property("monsters"))
+    wrong = [[str(d.get_editor_property("name")), str(d.get_editor_property("title"))] for d in defs if M5["names"].get(str(d.get_editor_property("name"))) != str(d.get_editor_property("title"))]
+    ctr = g.get_start_room_center(); kill_all_near(ctr, 20000)
+    put(ctr, 0.0); yield from wait(0.4)
+    spawned = []
+    for k in ("Rat", "Orc_03", "Warrior_02_the_leopard", "Spider"):
+        m = g.spawn_monster_named(k, V(ctr.x + 500, ctr.y + 150 * len(spawned) - 200, ctr.z), 1, 50.0, 0.0, 1.0)
+        if m: m.apply_damage(1.0, G["pawn"]); spawned.append(m)
+    yield from wait(0.5)
+    got = [[str(m.monster_name), str(m.title)] for m in spawned]
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=0)); yield from rwait(0.5)
+    shot("names_bars", "1920x1080"); yield from rwait(0.8)
+    drop(spawned)
+    spells = [str(s.get_editor_property("effect")) for s in g.get_editor_property("spells") if s.get_editor_property("kind") == unreal.RDSpellKind.SUMMON]
+    old = [n.replace("_", " ") for n in M5["names"]]
+    stale = [e for e in spells if any(f"calls {o} (" in e for o in old if o not in M5["names"].values())]
+    res = {"wrong_titles": wrong, "spawned": got, "name_only": g.get_editor_property("name_only_bars"), "summon_lines": spells, "stale_lines": stale}
+    ok = not wrong and all(t == M5["names"].get(n) for n, t in got) and res["name_only"] and not stale and len(spells) == 5
+    quiet(False)
+    step_result("names", ok, **res)
+
+def step_arena5():
+    """the arena (879): she steps in: townsfolk appear along its walls (facing its middle, none by a door), the first wave
+    comes after their lead, they cheer at a wave, clap and cheer at a kill (their clips playing); no way out while it is
+    fought: the teleport ring and F at its door are refused, she is put back inside if she is carried out; won, they leave"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    r = None
+    for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1), I2(1, 1), I2(-1, 1), I2(-1, -1), I2(1, -1)):
+        r = next((x for x in special_rooms() if x["kind"] == "Arena" and x["done"] == 0), None)
+        if r: break
+        if g.is_tier_open(2) and not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+    if not r: step_result("arena5", False, error="no arena in tier 2's sets"); return
+    S = g.get_section(r["s"]); room = r["room"]
+    tiles = S.get_room_tiles(room); tiles = tiles[0] if isinstance(tiles, tuple) else tiles
+    mid = S.get_room_center(room)
+    st = min(tiles, key=lambda p: dist2(p, mid))
+    lead = g.get_editor_property("crowd_lead")
+    put(st, 0.0); t0 = now(); yield from wait(0.3)
+    began = g.start_arena(r["s"], room) or len(g.get_crowd_lines()) > 0          # (or it began as she stepped in)
+    yield from wait(0.4)
+    crowd = [str(l).split("|") for l in g.get_crowd_lines()]
+    res = {"room": room, "began": began, "lead": lead, "crowd": len(crowd), "wave_at_half_lead": None}
+    doors = [S.get_door_location(d) for d in S.get_room_doors(room)]
+    faces, by_door, wallish = 0, 0, 0
+    for p in crowd:
+        at = V(float(p[3]), float(p[4]), float(p[5])); yaw = math.radians(float(p[6]))
+        to = V(mid.x - at.x, mid.y - at.y, 0); n = math.hypot(to.x, to.y) or 1
+        if (math.cos(yaw) * to.x + math.sin(yaw) * to.y) / n > 0.9: faces += 1
+        if any(dist2(at, d) < 240 for d in doors): by_door += 1
+        if min(dist2(at, tl) for tl in tiles) > 50: wallish += 1         # (off the tiles' middles: toward a wall)
+    res.update({"facing_middle": faces, "by_a_door": by_door, "toward_walls": wallish, "meshes": len({p[1] for p in crowd})})
+    yield from wait(max(lead * 0.5 - 0.4, 0.1)); res["wave_at_half_lead"] = g.get_arena_wave()
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0)); shot("arena_crowd", "1920x1080")
+    while g.get_arena_wave() < 0 and now() - t0 < lead + 4: yield
+    res["first_wave_after"] = round(now() - t0, 2); res["cheers_at_wave"] = g.crowd_cheers_made
+    yield from wait(0.8)
+    res["doing_after_wave"] = sorted({str(l).split("|")[0] for l in g.get_crowd_lines()})
+    # (the ways out refused)
+    ring = next((i for i in g.get_editor_property("items") if i.kind == unreal.RDItemKind.TELEPORT), None)
+    p0 = G["pawn"].get_actor_location(); ref0 = g.arena_escapes_refused
+    if ring: c.add_item(ring.name, 1); res["ring_used"] = c.use_item(ring.name); yield from wait(0.3)
+    res["ring_moved_her"] = round(dist2(G["pawn"].get_actor_location(), p0))
+    if doors:
+        d0 = doors[0]; put(V(d0.x + (mid.x - d0.x) * 0.15, d0.y + (mid.y - d0.y) * 0.15, st.z)); yield from wait(0.3)
+        res["door_says"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+        res["door_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from wait(0.5)
+        res["door_open"] = any(S.is_target_open(True, d) for d in S.get_room_doors(room))
+        # (carried out: 6 m beyond the door)
+        out = V(d0.x - (mid.x - d0.x) / max(dist2(d0, mid), 1) * 600, d0.y - (mid.y - d0.y) / max(dist2(d0, mid), 1) * 600, st.z)
+        pb0 = g.arena_put_back; put(out); yield from wait(0.6)
+        res["put_back"] = g.arena_put_back - pb0; res["back_in_room"] = S.room_at(G["pawn"].get_actor_location()) == room
+    res["refused"] = g.arena_escapes_refused - ref0
+    # (a kill: claps)
+    ms = [m for m in g.get_monsters() if alive(m) and S.room_at(m.get_actor_location()) == room]          # (one of its waves: a monster beyond it is not the audience's)
+    claps0 = g.crowd_claps_made
+    if ms: ms[0].apply_damage(1e7, G["pawn"])
+    yield from wait(0.9)
+    res["claps_after_kill"] = g.crowd_claps_made - claps0
+    res["doing_after_kill"] = sorted({str(l).split("|")[0] for l in g.get_crowd_lines()})
+    shot("arena_clap", "1920x1080")
+    # (the rest of the waves: won; they leave)
+    for _ in range(12):
+        if g.get_arena_wave() < 0: break
+        kill_all_near(mid, 2500); yield from wait(1.2)
+    res["won"] = md(g.room_uses).get("arena_won", 0)
+    yield from wait(6.0)
+    res["crowd_after_win"] = len(g.get_crowd_lines())
+    res["reactions"] = sum(int(str(l).split("|")[2]) for l in g.get_crowd_lines()) if g.get_crowd_lines() else None
+    quiet(False)
+    ok = (began and res["crowd"] >= 6 and res["facing_middle"] >= res["crowd"] * 0.9 and res["by_a_door"] == 0 and res["meshes"] >= 3
+          and res["wave_at_half_lead"] == -1 and res["first_wave_after"] >= lead - 0.2 and res["cheers_at_wave"] >= 1
+          and ("cheer" in res["doing_after_wave"]) and res.get("ring_moved_her", 999) < 50 and res.get("door_open") is False
+          and res.get("put_back", 0) >= 1 and res.get("back_in_room") and res["refused"] >= 2 and res["claps_after_kill"] >= 1
+          and any(d in ("clap", "cheer") for d in res["doing_after_kill"]) and res["won"] >= 1 and res["crowd_after_win"] == 0)
+    step_result("arena5", ok, **res)
+
+def step_ceilings():
+    """ceilings of more shapes and sizes (bCeilingStyles): over the start set and tier 2's sets, rooms of every style; a
+    vaulted room's vault closes it: from every floor tile a line straight up meets the vault (no gap to the void) between
+    its springing and its crown, and level lines from its middle at the band's height meet its walls or band; a raised
+    room's ceiling stands higher; pictures looking up in a vault of each kind"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    g.debug_clear_section(I2(0, 0), 0, V(0, 0, 0)); yield from wait(0.5)
+    for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1)):
+        if g.is_tier_open(2) and not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+    styles, holes, checked, flat_rooms, pics = {}, [], 0, 0, {}
+    RH = g.get_editor_property("room_height")
+    for sc in (I2(0, 0), I2(1, 0), I2(-1, 0), I2(0, 1)):
+        S = g.get_section(sc)
+        if not S: continue
+        for i in range(S.get_num_rooms()):
+            nm, spring, rise = S.get_room_ceiling(i)
+            if not nm: continue
+            styles[nm] = styles.get(nm, 0) + 1
+            if nm in ("flat", "raised", "beamed"):
+                if nm != "flat" and S.get_ceiling_height_at(S.get_room_center(i)) <= RH + 50: holes.append({"room": i, "style": nm, "not raised": True})
+                continue
+            tiles = S.get_room_tiles(i); tiles = tiles[0] if isinstance(tiles, tuple) else tiles
+            for p in tiles:
+                checked += 1
+                for dx, dy in ((0, 0), (-110, -110), (110, 110)):
+                    a = V(p.x + dx, p.y + dy, p.z + 150); b = V(p.x + dx, p.y + dy, p.z + spring + rise + 400)
+                    hit, at, comp = trace(a, b)
+                    if not hit or at.z > p.z + spring + rise + 60:
+                        if len(holes) < 25: holes.append({"section": [sc.x, sc.y], "room": i, "style": nm, "at": [round(a.x), round(a.y)], "hit": round(at.z - p.z) if hit else None})
+            # (level lines at the band's height, eight ways out of the middle)
+            m = S.get_room_center(i); z = (tiles[0].z if tiles else m.z) + ((RH + spring) * 0.5 if spring > RH + 20 else RH - 30)
+            for k in range(8):
+                a_ = math.radians(k * 45); e = V(m.x + math.cos(a_) * 6000, m.y + math.sin(a_) * 6000, z)
+                hit, at, comp = trace(V(m.x, m.y, z), e)
+                if not hit: holes.append({"section": [sc.x, sc.y], "room": i, "style": nm, "level_way": k * 45})
+            if nm not in pics and len(pics) < 5:
+                pics[nm] = (sc, i)
+    # (pictures: her in the vault's middle, looking up)
+    for nm, (sc, i) in pics.items():
+        S = g.get_section(sc); m = S.get_room_center(i)
+        tiles = S.get_room_tiles(i); tiles = tiles[0] if isinstance(tiles, tuple) else tiles
+        st = min(tiles, key=lambda p: dist2(p, m)) if tiles else m
+        put(st, 30.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=40, yaw=30)); yield from rwait(1.2)
+        shot("ceiling_" + nm.replace(" ", "_"), "1280x720"); yield from rwait(1.0)
+    res = {"styles": styles, "vault_tiles_checked": checked, "holes": holes, "pictures": sorted(pics)}
+    quiet(False)
+    ok = len(styles) >= 6 and sum(v for k, v in styles.items() if k != "flat") >= 6 and checked >= 50 and not holes
+    step_result("ceilings", ok, **res)
+
+def step_autoplay():
+    """autoplay for every hero (40 s of game time each, the player's keys ignored): she walks on (metres), fights (attacks
+    made, kills), uses things, sees rooms; it ends at its time and hands her back; then a key of the player's (W, sent as the
+    keyboard sends it) takes over at once"""
+    heroes = [str(h.name) for h in G["gen"].get_editor_property("heroes")]
+    res = {"heroes": {}}
+    for hero in heroes:
+        c = yield from restart(hero); g = G["gen"]; quiet(False)
+        g.set_editor_property("autoplay_ignore_player", True)
+        k0, a0 = c.kills, c.attacks_made
+        g.start_autoplay(40.0, False); t0 = now(); pic = False
+        while g.is_autoplaying() and now() - t0 < 50.0:
+            yield from wait(0.25)
+            if not pic and now() - t0 > 20: shot(f"autoplay_{hero}", "1280x720"); pic = True
+        st = md(g.autoplay_stats)
+        res["heroes"][hero] = {"ended_after": round(now() - t0, 1), "still_on": g.is_autoplaying(), "metres": st.get("metres", 0), "attacks": c.attacks_made - a0,
+                               "kills": c.kills - k0, "rooms": st.get("rooms", 0), "used": st.get("used", 0), "opened": st.get("opened", 0), "stuck": st.get("stuck", 0),
+                               "deaths": c.deaths, "doing": str(g.autoplay_doing)}
+    # (the player takes over)
+    g = G["gen"]; g.set_editor_property("autoplay_ignore_player", False)
+    g.start_autoplay(0.0, False); yield from wait(1.0)
+    yield from press("W"); yield from wait(0.2)
+    res["takeover"] = not g.is_autoplaying()
+    if g.is_autoplaying(): g.stop_autoplay("test")
+    hs = res["heroes"].values()
+    ok = len(res["heroes"]) >= 6 and res["takeover"] and all(not h["still_on"] and 38 <= h["ended_after"] <= 42 and h["metres"] >= 25 and h["attacks"] >= 3 for h in hs) \
+        and sum(h["kills"] for h in hs) >= 6
+    step_result("autoplay", ok, **res)
+
+STEPS = {"ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

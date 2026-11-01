@@ -1,0 +1,50 @@
+{
+ "tag": "m5r2",
+ "plan": [
+  "arena5"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "arena5",
+   "ok": true,
+   "room": 18,
+   "began": true,
+   "lead": 3.0,
+   "crowd": 18,
+   "wave_at_half_lead": -1,
+   "facing_middle": 18,
+   "by_a_door": 0,
+   "toward_walls": 18,
+   "meshes": 9,
+   "first_wave_after": 3.03,
+   "cheers_at_wave": 1,
+   "doing_after_wave": [
+    "cheer"
+   ],
+   "ring_used": false,
+   "ring_moved_her": 0,
+   "door_says": "the arena's doors are barred until its last wave falls",
+   "door_f": "arena barred",
+   "door_open": false,
+   "put_back": 1,
+   "back_in_room": true,
+   "refused": 3,
+   "claps_after_kill": 1,
+   "doing_after_kill": [
+    "cheer",
+    "clap"
+   ],
+   "won": 1,
+   "crowd_after_win": 0,
+   "reactions": null
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_m5r2_arena_crowd.png",
+  "mw_m5r2_arena_clap.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

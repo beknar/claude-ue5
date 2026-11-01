@@ -59,6 +59,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") void Step(int32 Delta) { Show(Index + Delta); }
 	/** opens the dungeon with the hero shown; false when it cannot (no target) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool Confirm();
+	/** the same with more options on the URL (?Autoplay=...) */
+	bool ConfirmWith(const FString& More);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heroes") int32 GetIndex() const { return Index; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heroes") FName GetHeroName() const { return Heroes.IsValidIndex(Index) ? Heroes[Index].Name : NAME_None; }
 	/** how far the turntable has turned since play began (degrees; tests) */
@@ -82,6 +84,15 @@ public:
 	 *  Escape (or the gamepad's B) asks first and quits when pressed again within 3 s */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bQuitButton = false;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool QuitGame();
+	/** mistward5 (the list of 2026-10-31b): AUTOPLAY over START opens the castle with the hero shown played by the game
+	 *  (?Autoplay=<seconds>); the arrows beside it (or [ and ]) choose how long; P starts it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bAutoplayButton = false;
+	/** the lengths offered (seconds; 0: until a key of the player's) and the one chosen */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") TArray<float> AutoplayLengths = { 60.f, 120.f, 300.f, 600.f, 1800.f, 0.f };
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Heroes") int32 AutoplayChoice = 2;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool ConfirmAutoplay();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heroes") FString GetAutoplayLabel() const;
+	void StepAutoplayLength(int32 Delta) { if (AutoplayLengths.Num() > 0) AutoplayChoice = (AutoplayChoice + Delta + AutoplayLengths.Num()) % AutoplayLengths.Num(); }
 	/** tests: QUIT only says what it would do */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bQuitDryRun = false;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") int32 QuitsAsked = 0;
