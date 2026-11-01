@@ -1,6 +1,6 @@
 # Levels
 
-Every level in the project: what it is, its properties, and which characters can play it. The game modes and pawns were read from the levels' own map files (`claude_ue5/Content/.../*.umap`); the heroes' numbers come from the data the scripts put on the levels (`SourceArt/random_dungeon_magic4/heroes.json`, `SourceArt/random_dungeon_magic5/summoner_hero.json`, `SourceArt/summoner3/armour.json`). README's [Levels](../README.md#levels) table and its Controls list have the full detail of each one. The scripts that build them are in `pipeline/unreal/`, numbered in build order.
+Every level in the project: what it is, its properties, and which characters can play it. The game modes and pawns were read from the levels' own map files (`claude_ue5/Content/.../*.umap`); the heroes' numbers come from the data the scripts put on the levels (`SourceArt/random_dungeon_magic4/heroes.json`, `SourceArt/random_dungeon_magic5/summoner_hero.json`, `SourceArt/summoner3/armour.json`). Each level's document under [levels/](levels/) (linked from README's [Levels](../README.md#levels) table) and [controls.md](controls.md) have the full detail of each one. The scripts that build them are in `pipeline/unreal/`, numbered in build order.
 
 There are **19 levels**: 18 to play, and the photo studio for stills. Two of them open with a menu level first, and ten have a `*_Cine` copy for their demo reel (see [Other maps](#other-maps)).
 
@@ -198,7 +198,7 @@ The dungeon with a choice of hero, mana, items and an inventory.
 - **Scripts:** `824`-`831`.
 
 ### `mistward_castle`
-Level 5's game (a Save As copy of `random_dungeonmagic_level5`) as a castle: README's [mistward_castle: the castle](../README.md#mistward_castle-the-castle) has the whole of it.
+Level 5's game (a Save As copy of `random_dungeonmagic_level5`) as a castle: [mistward_castle: the castle](levels/mistward_castle.md#mistward_castle-the-castle) has the whole of it.
 - **Menu first:** through `mistward_castle_select`, "Mistward Castle" over CHOOSE YOUR HERO: the four heroes of level 5's menu (the Warrior is Warrior3, with the Heater Shield on her arm).
 - **Characters:** level 5's, with the same numbers; the Warrior alone carries shields, every hero the torch, the Rogue alone sees and disarms traps.
 - **Scripts:** `863`-`868`.

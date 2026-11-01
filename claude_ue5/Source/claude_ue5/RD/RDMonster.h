@@ -121,6 +121,19 @@ public:
 	 *  under 0 it is in the floor, over 0 it floats */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") float GetDrawnBottom(float Percentile = 0.01f, bool bBodyOnly = true) const;
 
+	// ---- mistward5 (the list of 2026-10-31b; RDMistward5.cpp): a shot from afar
+	/** its kind shoots (the generator's bMonsterRanged on) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool CanShoot() const { return bShoots; }
+	/** shots it let fly, and its shot's damage now (its blow's times its kind's share, a curse taken off) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 ShotsFired = 0;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetShotDamage() const;
+	/** seconds between two shots, and before the next */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetShotWait() const { return RangedWait; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetShotWaitLeft() const { return RangedWaitLeft; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsShooting() const { return AttackTime >= 0.f && bRangedSwing; }
+	/** the world time of its last shot's release (-100: none) */
+	float LastShotTime = -100.f;
+
 	// ---- wounds
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumWounds() const { return Wounds.Num(); }
 	/** where a wound is now (world), and its size (cm) */
@@ -160,6 +173,21 @@ private:
 	float BlindShare = 0.f, BlindUntil = -100.f;
 	bool bStunHeld = false;
 	int32 Swings = 0;
+	// mistward5: its shot (FRDMonsterDef's Ranged*)
+	bool bShoots = false, bRangedSwing = false;
+	float RangedRange = 800.f, RangedMin = 300.f, RangedShare = 0.5f, RangedWait = 4.f, RangedWaitLeft = 0.f, RangedSpeed = 1500.f, RangedRelease = 0.5f, RangedFxScale = 1.f;
+	UPROPERTY(Transient) TObjectPtr<UAnimationAsset> RangedClip;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemAsset> RangedFx;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemAsset> RangedMuzzleFx;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemAsset> RangedHitFx;
+	FString RangedTheme;
+	FVector ShotAim = FVector::ZeroVector;
+	void SetupRanged(const FRDMonsterDef& Def);
+	/** where its shot leaves it (in front of its chest) */
+	FVector ShotMuzzle() const;
+	/** a shot begun at its foe (P), out of reach of its blows and in its range with a sight line: true when it stands to shoot */
+	bool TryShoot(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt);
+	void ReleaseShot(AActor* P);
 	struct FBurn { float PerSecond = 0.f; float Left = 0.f; float Drain = 0.f; };
 	TArray<FBurn> Burns;
 	TWeakObjectPtr<AActor> CurrentFoe;

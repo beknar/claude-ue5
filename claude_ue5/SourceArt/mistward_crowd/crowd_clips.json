@@ -1,0 +1,193 @@
+{
+ "fps": 30,
+ "fbx": "SK_NPC_Crowd_Clips.fbx",
+ "skeleton_root": "root",
+ "Clap": {
+  "length": 2.0,
+  "frames": 61,
+  "meet": [
+   0.2,
+   0.6,
+   1.0,
+   1.4,
+   1.8
+  ],
+  "loop_first_last_deg": 0.0,
+  "wrist_over_max": 0.0,
+  "arm_to_spine_min": 18.5,
+  "arm_in_body_min": 0.2,
+  "arm_in_body_frames": 0,
+  "arm_body_cross_max": 0,
+  "arm_body_cross_idle": 0,
+  "hands_cross_frames": 0,
+  "cuffs_cross_frames": 5,
+  "wrist_worst": {
+   "frame": 0,
+   "l": [
+    -23.5,
+    10.2,
+    -48.1
+   ],
+   "r": [
+    0.7,
+    -17.9,
+    47.1
+   ]
+  },
+  "claps": [
+   {
+    "t": 0.2,
+    "palm_gap_cm": 0.24,
+    "touch": [
+     "hand_r",
+     "hand_l"
+    ],
+    "skin_gap_cm": 0.2,
+    "skin_points_through": 0,
+    "hands_crossing_triangles": 0,
+    "cuffs_crossing_triangles": 117,
+    "palms_facing_off_deg": 0.0,
+    "palm_middles_apart_cm": 5.8
+   },
+   {
+    "t": 0.6,
+    "palm_gap_cm": 0.24,
+    "touch": [
+     "hand_r",
+     "hand_l"
+    ],
+    "skin_gap_cm": 0.2,
+    "skin_points_through": 0,
+    "hands_crossing_triangles": 0,
+    "cuffs_crossing_triangles": 117,
+    "palms_facing_off_deg": 0.0,
+    "palm_middles_apart_cm": 5.8
+   },
+   {
+    "t": 1.0,
+    "palm_gap_cm": 0.24,
+    "touch": [
+     "hand_r",
+     "hand_l"
+    ],
+    "skin_gap_cm": 0.2,
+    "skin_points_through": 0,
+    "hands_crossing_triangles": 0,
+    "cuffs_crossing_triangles": 117,
+    "palms_facing_off_deg": 0.0,
+    "palm_middles_apart_cm": 5.8
+   },
+   {
+    "t": 1.4,
+    "palm_gap_cm": 0.24,
+    "touch": [
+     "hand_r",
+     "hand_l"
+    ],
+    "skin_gap_cm": 0.2,
+    "skin_points_through": 0,
+    "hands_crossing_triangles": 0,
+    "cuffs_crossing_triangles": 117,
+    "palms_facing_off_deg": 0.0,
+    "palm_middles_apart_cm": 5.8
+   },
+   {
+    "t": 1.8,
+    "palm_gap_cm": 0.24,
+    "touch": [
+     "hand_r",
+     "hand_l"
+    ],
+    "skin_gap_cm": 0.2,
+    "skin_points_through": 0,
+    "hands_crossing_triangles": 0,
+    "cuffs_crossing_triangles": 117,
+    "palms_facing_off_deg": 0.0,
+    "palm_middles_apart_cm": 5.8
+   }
+  ],
+  "skin_gap_min_all_frames": 0.2,
+  "skin_through_frames": 0,
+  "open_palm_gap_cm": 25.2,
+  "clap_style": {
+   "palm_tilt_deg": 10.0,
+   "left_way_deg": 30.0,
+   "right_way_deg": 0.0,
+   "left_wrist_behind_cm": 7.5,
+   "right_wrist_behind_cm": 9.5,
+   "index": 0,
+   "hands_off_meeting_point_cm": 3.91
+  }
+ },
+ "Cheer": {
+  "length": 2.4,
+  "frames": 73,
+  "pump_peaks": [
+   0.7,
+   1.9
+  ],
+  "pump_lows": [
+   0.45,
+   1.65
+  ],
+  "loop_first_last_deg": 0.0,
+  "wrist_over_max": 0.0,
+  "arm_to_spine_min": 32.8,
+  "arm_in_body_min": 99.0,
+  "arm_in_body_frames": 0,
+  "arm_body_cross_max": 0,
+  "arm_body_cross_idle": 0,
+  "hands_cross_frames": 0,
+  "cuffs_cross_frames": 0,
+  "wrist_worst": {
+   "frame": 0,
+   "l": [
+    -0.0,
+    -25.0,
+    -80.0
+   ],
+   "r": [
+    -12.9,
+    -15.0,
+    68.3
+   ]
+  },
+  "wrist_over_head_min_cm": 6.9,
+  "wrist_over_head_max_cm": 22.5,
+  "fists_palm": [
+   -1.0,
+   0.6,
+   0.0
+  ],
+  "pelvis_bounce_cm": 2.9
+ },
+ "fbx_check": {
+  "objects": [
+   "root"
+  ],
+  "armature": "root",
+  "units_x": 1.0,
+  "rest_joint_err_cm": 0.0001,
+  "rest_turn_err_deg": 0.0,
+  "takes": {
+   "root|root|Cheer": [
+    1.0,
+    73.0
+   ],
+   "root|root|Clap": [
+    1.0,
+    61.0
+   ]
+  },
+  "frame_joint_err_cm": {
+   "Clap@0": 0.0,
+   "Clap@20": 0.0,
+   "Clap@60": 0.0,
+   "Cheer@0": 0.0,
+   "Cheer@24": 0.0,
+   "Cheer@72": 0.0
+  },
+  "npc_vs_made_rest_cm": 0.0,
+  "npc_vs_made_rest_deg": 0.0
+ }
+}

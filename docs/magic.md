@@ -108,7 +108,7 @@ These are not 3D, but could help:
 
 ## Used in the project
 
-`random_dungeonmagic_level` and `random_dungeonmagic_level2` (see the README) have a fire spell built from this page.
+`random_dungeonmagic_level` and `random_dungeonmagic_level2` (see [levels/magic_levels_1-3.md](levels/magic_levels_1-3.md)) have a fire spell built from this page.
 - **Bolt:** `NS_FirePool`.
 - **Burst:** `P_Explosion` with `NS_FireWings`.
 - **Charge on her hand:** `P_Sparks`.

@@ -859,6 +859,7 @@ bool URDCombatComponent::UseItem(FName Name)
 	if (It.Kind == ERDItemKind::Teleport)
 	{
 		if (bInventoryOpen) SetInventoryOpen(false);
+		if (Generator->IsArenaHolding()) { Generator->RefuseArenaExit(TEXT("ring")); return false; }     // (mistward5: no way out of an arena)
 		if (!Generator->TeleportToTier(1)) { SetMessage(TEXT("The ring is cold: the first tier's teleporter is gone")); return false; }
 		return true;
 	}

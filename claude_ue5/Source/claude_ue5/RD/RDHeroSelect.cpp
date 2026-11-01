@@ -97,10 +97,25 @@ bool ARDHeroSelect::IsFigureShown(int32 I) const
 	return true;
 }
 
-bool ARDHeroSelect::Confirm()
+bool ARDHeroSelect::Confirm() { return ConfirmWith(FString()); }
+
+bool ARDHeroSelect::ConfirmAutoplay()
+{
+	if (!bAutoplayButton || !AutoplayLengths.IsValidIndex(AutoplayChoice)) return false;
+	return ConfirmWith(FString::Printf(TEXT("?Autoplay=%.0f"), AutoplayLengths[AutoplayChoice]));
+}
+
+FString ARDHeroSelect::GetAutoplayLabel() const
+{
+	const float S = AutoplayLengths.IsValidIndex(AutoplayChoice) ? AutoplayLengths[AutoplayChoice] : 0.f;
+	if (S <= 0.f) return TEXT("AUTOPLAY  UNTIL A KEY");
+	return S < 60.f ? FString::Printf(TEXT("AUTOPLAY  %.0f S"), S) : FString::Printf(TEXT("AUTOPLAY  %.0f MIN"), S / 60.f);
+}
+
+bool ARDHeroSelect::ConfirmWith(const FString& More)
 {
 	if (TargetLevel.IsEmpty() || !Heroes.IsValidIndex(Index)) return false;
-	const FString Options = FString::Printf(TEXT("Hero=%s"), *Heroes[Index].Name.ToString());
+	const FString Options = FString::Printf(TEXT("Hero=%s%s"), *Heroes[Index].Name.ToString(), *More);
 	Opened = FString::Printf(TEXT("%s?%s"), *TargetLevel, *Options);
 	ConfirmTime = GetWorld()->GetTimeSeconds();
 	UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT start: %s%s"), *Opened, bStayOnConfirm ? TEXT(" (stays: the reel)") : TEXT(""));
@@ -176,6 +191,13 @@ void ARDHeroSelect::Tick(float Dt)
 		}
 		else StickRepeat = 0.f;
 		if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_Special_Right })) Confirm();
+		// (mistward5: P (the gamepad's Y) starts her autoplay; [ and ] choose how long)
+		if (bAutoplayButton)
+		{
+			if (Pressed({ EKeys::LeftBracket, EKeys::Gamepad_DPad_Down })) StepAutoplayLength(-1);
+			if (Pressed({ EKeys::RightBracket, EKeys::Gamepad_DPad_Up })) StepAutoplayLength(1);
+			if (Pressed({ EKeys::P, EKeys::Gamepad_FaceButton_Top })) ConfirmAutoplay();
+		}
 		// (mistward4: Escape or B once asks, again within 3 s quits)
 		if (bQuitButton && Pressed({ EKeys::Escape, EKeys::Gamepad_FaceButton_Right }))
 		{
@@ -213,6 +235,9 @@ void ARDHeroSelect::TickPointer(APlayerController* PC)
 	else if (B == TEXT("Next")) Step(1);
 	else if (B == TEXT("Start")) Confirm();
 	else if (B == TEXT("Quit")) QuitGame();
+	else if (B == TEXT("Auto")) ConfirmAutoplay();
+	else if (B == TEXT("AutoLess")) StepAutoplayLength(-1);
+	else if (B == TEXT("AutoMore")) StepAutoplayLength(1);
 	else if (B.StartsWith(TEXT("Hero_")))
 	{
 		// (her name again, once she is shown: start as her)
@@ -248,6 +273,9 @@ void ARDHeroSelectHUD::NotifyHitBoxClick(FName BoxName)
 	else if (B == TEXT("Next")) Sel->Step(1);
 	else if (B == TEXT("Start")) Sel->Confirm();
 	else if (B == TEXT("Quit")) Sel->QuitGame();
+	else if (B == TEXT("Auto")) Sel->ConfirmAutoplay();
+	else if (B == TEXT("AutoLess")) Sel->StepAutoplayLength(-1);
+	else if (B == TEXT("AutoMore")) Sel->StepAutoplayLength(1);
 	else if (B.StartsWith(TEXT("Hero_"))) Sel->Show(FCString::Atoi(*B.RightChop(5)));
 }
 
@@ -474,6 +502,7 @@ void ARDHeroSelectHUD::DrawHUD()
 		}
 	}
 	// START (bottom right)
+	float StartTop = Canvas->ClipY - 240.f * Sc, StartRight = Canvas->ClipX - 80.f * Sc;
 	{
 		const FString St = FString::Printf(TEXT("START AS %s"), *RDHSShown(H));
 		UI.TextSize(St, Tw, Th, Medium, Sc * 1.3f, ERDType::Title);
@@ -494,6 +523,31 @@ void ARDHeroSelectHUD::DrawHUD()
 		if (Wide > 0.f) UI.Text(St, FLinearColor(0.f, 0.f, 0.f, 0.8f), (P0.X + P1.X - Tw) * 0.5f + 2.f * Sc, (P0.Y + P1.Y - Th) * 0.5f + 2.f * Sc, Medium, Sc * 1.3f, ERDType::Title);
 		UI.Text(St, FLinearColor::White, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.3f, ERDType::Title);
 		Button(P0, P1, TEXT("Start"));
+		StartTop = P0.Y; StartRight = P1.X;
+	}
+	// mistward5: AUTOPLAY over START, its length between two arrows
+	if (Sel->bAutoplayButton)
+	{
+		const FString Au = Sel->GetAutoplayLabel();
+		UI.TextSize(Au, Tw, Th, Medium, Sc * 1.0f, ERDType::Title);
+		const float Wide = UI.Has(TEXT("button")) ? 40.f * Sc : 0.f, Ar = 46.f * Sc, Gp = 8.f * Sc;
+		const FVector2D Q1(StartRight - Ar - Gp, StartTop - 18.f * Sc), Q0 = Q1 - FVector2D(Tw + 50.f * Sc + Wide, Th + 22.f * Sc + Wide * 0.5f);
+		if (UI.Has(TEXT("button"))) UI.Nine(TEXT("button"), Q0, Q1, HeightPx(TEXT("button"), Q1.Y - Q0.Y), FLinearColor(0.75f, 0.8f, 0.9f));
+		else { Rect(Q0, Q1, FLinearColor(0.04f, 0.05f, 0.08f, 0.9f)); Frame(Q0, Q1, RDHSLine, 2.f * Sc); }
+		UI.Text(Au, RDHSInk, (Q0.X + Q1.X - Tw) * 0.5f, (Q0.Y + Q1.Y - Th) * 0.5f, Medium, Sc * 1.0f, ERDType::Title);
+		Button(Q0, Q1, TEXT("Auto"));
+		for (int32 K = 0; K < 2; ++K)
+		{
+			const FVector2D A0(K == 0 ? Q0.X - Gp - Ar : Q1.X + Gp, Q0.Y), A1 = A0 + FVector2D(Ar, Q1.Y - Q0.Y);
+			if (!UI.Fit(TEXT("arrow"), A0, A1, FLinearColor::White, K == 0))
+			{
+				Rect(A0, A1, FLinearColor(0.04f, 0.045f, 0.06f, 0.85f)); Frame(A0, A1, RDHSLine, 1.5f * Sc);
+				const TCHAR* G = K == 0 ? TEXT("<") : TEXT(">");
+				UI.TextSize(G, Tw, Th, Medium, Sc * 1.2f);
+				UI.Text(G, RDHSInk, (A0.X + A1.X - Tw) * 0.5f, (A0.Y + A1.Y - Th) * 0.5f, Medium, Sc * 1.2f);
+			}
+			Button(A0, A1, K == 0 ? FName(TEXT("AutoLess")) : FName(TEXT("AutoMore")));
+		}
 	}
 	// mistward4: QUIT (upper right); Escape pressed once: a line asks for it again
 	if (Sel->bQuitButton)
@@ -518,6 +572,7 @@ void ARDHeroSelectHUD::DrawHUD()
 	FString Keys = bPad ? TEXT("D-pad, left stick or LB / RB  another hero      A  start")
 	                    : Sel->bMouseUI ? TEXT("click a name  that hero      click START or her name again  start      A / D, arrows or wheel  another hero      Enter  start")
 	                                    : TEXT("A / D, arrows or wheel  another hero      Enter or Space  start      or click");
+	if (Sel->bAutoplayButton) Keys += bPad ? TEXT("      Y  autoplay") : TEXT("      P  autoplay   [ ]  its length");
 	if (Sel->bQuitButton) Keys += bPad ? TEXT("      B  quit") : TEXT("      Esc  quit");
 	UI.TextSize(Keys, Tw, Th, Small, Sc * 1.1f);
 	Rect(FVector2D((Canvas->ClipX - Tw) * 0.5f - 16.f * Sc, Canvas->ClipY - 62.f * Sc), FVector2D((Canvas->ClipX + Tw) * 0.5f + 16.f * Sc, Canvas->ClipY - 50.f * Sc + Th), FLinearColor(0.03f, 0.035f, 0.05f, 0.75f));

@@ -126,6 +126,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FName Theme;
 	/** a room's shape ("rect", "circle", "octagon", "hexagon", "triangle", "L", "T", "U", "dome", "pyramid", "tall") */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") FString GetRoomShape(int32 Index) const;
+	/** mistward5: a room's ceiling ("flat", "raised", "beamed", "sail dome", "groin vault", "barrel vault", "cloister vault",
+	 *  "hipped"), where its vault springs and how high it rises (cm over the floor; 0 for a flat one) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") FString GetRoomCeiling(int32 Index, float& Spring, float& Rise) const;
+	/** the ceiling's height over the floor at a world point of a room (its vault, else its tile's) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetCeilingHeightAt(FVector Location) const;
+	/** procedural vault meshes built (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 VaultMeshes = 0;
 	/** a room's floor tiles (world, tile centres) and the height of the ceiling over each */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") TArray<FVector> GetRoomTiles(int32 Index, TArray<float>& Heights) const;
 	/** furniture that collides, as placed (tests): each footprint's middle, half size (x, y) and yaw; the containers'
@@ -251,7 +258,19 @@ private:
 		FIntPoint Lane;           // local tile: centre row (Y) and centre column (X) kept free (door lines)
 		bool bDoorSide[4] = { false, false, false, false };    // -X, +X, -Y, +Y
 		uint8 Shape = 0;          // mistward: 0 rect (see RDShapeName)
+		uint8 Ceil = 0;           // mistward5: its ceiling's style (RDCeilNames), how high a vault rises (cm)
+		float CeilRise = 0.f;
 	};
+	/** mistward5: each room's ceiling style (its own stream after the plan) */
+	void StyleCeilings();
+	/** mistward5: the vaults, ribs and beams of the styled rooms (static build), from where their walls end */
+	void ShellVaults();
+	/** the top of each room's walls as stacked (a vault springs from there) */
+	TArray<float> RoomWallTop;
+	/** a vault's height over the floor at P in room RI (-1: the room has none) */
+	float VaultHeightAt(int32 RI, const FVector& P) const;
+	/** the vault's shape at (U, V) in -1..1 across the room: 0 at its walls, 1 at its crown */
+	static float VaultShape(uint8 Style, float U, float V, bool bAlongX);
 	/** mistward: a room tile's ceiling height (0: the room's or hallway's own) */
 	TArray<float> CeilH;
 	float CeilAt(FIntPoint T) const;

@@ -12,6 +12,9 @@ paths:
   - "pipeline/unreal/87*.py"
   - "pipeline/blender_numpy/martialartist_clips.py"
   - "claude_ue5/SourceArt/martial_arts/**"
+  - "claude_ue5/Source/claude_ue5/RD/RDCeilings.cpp"
+  - "pipeline/blender_numpy/crowd_*.py"
+  - "claude_ue5/SourceArt/mistward_crowd/**"
 ---
 
 # mistward_castle (`863`-`868`; the user's list of 2026-10-26, `docs/improvements.txt`)
@@ -150,6 +153,17 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **Two stages share the spell table**: `872` dropped every spell numbered 101 and up to make its chi attacks again, which took `876`'s summons (201-205) with them: her summons started, took mana and called nobody (no RDSUMMON line, no message; the full test's summoner and allyspace). Both stages take out only their own numbers and add theirs at the table's end, and a weapon points at its spell by its place (`FRDWeaponDef::SpellIndex`): each now points every spell weapon named as a spell at its place again after writing the table. Rerunning one stage must leave the other's heroes working: check every hero's spell weapons against the table's names.
 - **The Martial Artist's guard**: her stance turns her shoulders 24 degrees to her right, so the same hand places for both fists tuck the right elbow in (the forearm 1.7 cm inside her body). The right fist is given in her frame turned 40 degrees (`right_guard`), a mirror of the left in her turned chest. The arm solver's pole hardly moves an elbow (`ARM_ROLL` holds the upper arm's turn): move the hand. `weapon5_clips.torso_context` also sets the keep-out the clip build does not use: pop `torso_pts` to probe a pose as the build solves it. That probe takes about 15 minutes (its per-vertex loops).
 
+## The list of 2026-10-31b (`879`, `RD/RDMistward5.cpp`, `RD/RDCeilings.cpp`, `docs/improvements5.txt`)
+
+- **UE's procedural mesh draws a triangle's front where cross(V1 - V0, V2 - V0) points away from the viewer** (the engine's `CreateGridMeshTriangles`: the town's ground, seen from above, has that cross pointing down). The vaults were wound the other way and showed black in every picture while the test's traces (which hit either face) found no gap: look at a new mesh in a picture, not only in traces. `RD5Turn` turns every ceiling triangle over before it goes in.
+- **A vault springs from where the room's walls end, not from the room's height**: wall pieces stack in their own heights and can stand over `RoomHeight` (hidden behind a flat ceiling, they would poke through a vault's rim). `ShellColumn`'s `Stack` records each room's highest wall top (`RoomWallTop`); the vault starts there, a band of the wall's material closes any wall that ends lower, and the vault and band are 2 cm outside the walls' line. Only rectangular rooms get one (a shaped room's walls stand inside its rectangle: a vault over it would leave the void showing over them).
+- **A switch's draws stay off the play's streams**: the ceiling style is three draws a room from a stream of its own, and `ShellColumn` still draws the ceiling tile's turn for a vaulted tile it does not place.
+- **A Python name can be two properties**: `CrowdCheers` (the clips) and `CrowdCheers_` (a count) were both `crowd_cheers`; the script set the int. Name counters with a word (`CrowdCheersMade`).
+- **Interchange took the crowd FBX at 25 frames a second** (Blender wrote 30; every frame is there, 20 % slow). `879` sets each clip's `RateScale` from the length Blender built (`crowd_clips.json`), and the spectator's busy time divides by it.
+- **The library has no cheering crowd** (the ambience pack's seven crowd loops are steady murmurs with a 2-5 dB range) and one person clapping: `crowd_sounds.py` layers nine adult voices' battle cries (never the vocal packs' Kids folders) over the murmur, and builds applause from single claps cut out of Extra_Claps.wav. Nobody here hears them.
+- **A monster that shoots then charges in**: in the first test each shooter shot once and fought hand to hand; the test holds it (`max_chase_speed` 1) to see the wait between two shots. `slow_for` is not a UFUNCTION.
+- **The autoplay pilot**: going chest to chest across a 250 m set it never came within its 18 m sight of a monster (no attack in 40 s): a chest only within 15 m, else it hunts the nearest monster it has a way to. Each new tile path starts at the middle of the tile she stands on, often behind her: dropped, or every re-plan turned her back (the Warrior shuffled at a third of her speed). Her stand-off comes from what she can use now (mana, cooldown), or a caster out of mana stood 9 m off doing nothing.
+- **An arena begun from afar does not hold her**: a test's `start_arena` would have pulled her into it; she is held once she has been inside (`bArenaSheInside`). Put inside an arena not yet won, it begins by itself (2.6 m in) before a test can call it.
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 
 - **Play in the editor hides missing material usages**: the editor sets a usage a material lacks while it draws (in memory only, and the package did not even show as dirty), so the castle looked right in play while the packaged game drew 7 base materials' pieces (the furniture kit's iron, food, embers and flames; DarkHalls, Gothic Props, HallowedDepths, Medieval Weapons) in the default material, and the menu's two Fig4 studio materials lacked the Nanite usage. `869` sets and saves them; the menu's are saved every run. Look for "missing usage flag" in a Development package's log, never only in the editor's.

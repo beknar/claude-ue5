@@ -809,12 +809,14 @@ bool ARDDungeonGenerator::StartArena(FIntPoint Section, int32 Room)
 {
 	ARDSection* S = GetSection(Section);
 	if (!S || S->GetRoomKindEnum(Room) != ERDRoomKind::Arena || ArenaRoom >= 0 || ArenasWon.Contains(FIntVector(Section.X, Section.Y, Room))) return false;
-	ArenaSection = Section; ArenaRoom = Room; ArenaWave = 0; ArenaMonsters.Reset();
+	ArenaSection = Section; ArenaRoom = Room; ArenaWave = 0; ArenaMonsters.Reset(); bArenaSheInside = false;
 	S->ShutRoomDoors(Room);
 	RoomUses.FindOrAdd(TEXT("arena_begun"))++;
 	TierNotice = FString::Printf(TEXT("THE ARENA  -  SURVIVE %d WAVES"), ArenaWaves); TierNoticeTime = GetWorld()->GetTimeSeconds();
 	UE_LOG(LogRDMistward2, Log, TEXT("RDARENA begun in room %d of (%d,%d)"), Room, Section.X, Section.Y);
 	ArenaWave = -1;          // (the first wave comes on the next tick)
+	// (mistward5: the audience appears along its walls first; the first wave comes once they stand)
+	if (bArenaCrowd) { CrowdAppear(S, Room); ArenaWaveDue = GetWorld()->GetTimeSeconds() + CrowdLead; CrowdLastLeft = 0; }
 	return true;
 }
 
@@ -840,9 +842,19 @@ void ARDDungeonGenerator::TickArena(float Dt)
 	if (!S || Pc->IsDead())
 	{
 		for (const TWeakObjectPtr<ARDMonster>& M : ArenaMonsters) if (M.IsValid() && !M->IsDead()) M->Destroy();
-		ArenaMonsters.Reset(); ArenaRoom = -1;
+		ArenaMonsters.Reset(); ArenaRoom = -1; ArenaWaveDue = -1.f;
+		if (bArenaCrowd) CrowdLeave();
 		UE_LOG(LogRDMistward2, Log, TEXT("RDARENA lost"));
 		return;
+	}
+	// (mistward5: the audience's lead before the first wave; a monster fallen: they clap and cheer)
+	if (bArenaCrowd)
+	{
+		if (ArenaWaveDue > 0.f && GetWorld()->GetTimeSeconds() < ArenaWaveDue) return;
+		ArenaWaveDue = -1.f;
+		const int32 Left = GetArenaLeft();
+		if (Left < CrowdLastLeft) CrowdReact(false, (float)(CrowdLastLeft - Left));
+		CrowdLastLeft = Left;
 	}
 	if (GetArenaLeft() > 0) return;
 	++ArenaWave;
@@ -861,6 +873,7 @@ void ARDDungeonGenerator::TickArena(float Dt)
 		ArenaRoom = -1; ArenaMonsters.Reset();
 		RoomUses.FindOrAdd(TEXT("arena_won"))++;
 		TierNotice = TEXT("THE ARENA IS WON  -  ITS PRIZE LIES IN THE MIDDLE"); TierNoticeTime = GetWorld()->GetTimeSeconds();
+		if (bArenaCrowd) { CrowdReact(true, 3.f); CrowdLeave(); }      // (a last cheer; they go a few seconds later)
 		PlaySoundAt(TEXT("Env.Generate"), Her->GetActorLocation());
 		UE_LOG(LogRDMistward2, Log, TEXT("RDARENA won: %d waves, prize %d things"), ArenaWaves, Got.Num());
 		return;
@@ -874,7 +887,8 @@ void ARDDungeonGenerator::TickArena(float Dt)
 	for (int32 K = 0; K < Count && Spots.Num() > 0; ++K)
 	{
 		const int32 Kind = Kinds[HashCombine((uint32)SessionSeed ^ 0xA7E5u, (uint32)(ArenaWave * 31 + K)) % (uint32)Kinds.Num()];
-		if (ARDMonster* M = SpawnMonsterKind(Kind, Spots[K % Spots.Num()], Tier, 1.f, 1.f, 1.f, FString::Printf(TEXT("ARENA  WAVE %d"), ArenaWave + 1))) ArenaMonsters.Add(M);
+		// (mistward5: a wave's monsters keep their own names, the wave is in the notice)
+		if (ARDMonster* M = SpawnMonsterKind(Kind, Spots[K % Spots.Num()], Tier, 1.f, 1.f, 1.f, bNameOnlyBars ? FString() : FString::Printf(TEXT("ARENA  WAVE %d"), ArenaWave + 1))) ArenaMonsters.Add(M);
 	}
 	// (a wave that came to nobody (no free tile, no monster made) is not a wave beaten: the arena ends unwon, its doors
 	// unlocked, no prize (the PR review's find: three empty waves won it))
@@ -885,11 +899,14 @@ void ARDDungeonGenerator::TickArena(float Dt)
 		return;
 	}
 	TierNotice = FString::Printf(TEXT("THE ARENA  -  WAVE %d OF %d"), ArenaWave + 1, ArenaWaves); TierNoticeTime = GetWorld()->GetTimeSeconds();
+	if (bArenaCrowd) { CrowdReact(true, 1.f); CrowdLastLeft = GetArenaLeft(); }     // (the wave comes: they cheer)
 	UE_LOG(LogRDMistward2, Log, TEXT("RDARENA wave %d: %d monsters"), ArenaWave + 1, ArenaMonsters.Num());
 }
 
 FString ARDDungeonGenerator::DescribeSpecialNear(const FVector& From) const
 {
+	// (mistward5: the arena's doors while it is fought)
+	if (IsArenaHolding()) { const FString A = ArenaDoorNear(From); if (!A.IsEmpty()) return A; }
 	const FIntPoint Here = WorldToSection(From);
 	for (int32 Dx = -1; Dx <= 1; ++Dx)
 		for (int32 Dy = -1; Dy <= 1; ++Dy)
@@ -930,6 +947,7 @@ FString ARDDungeonGenerator::UseSpecialNear(const FVector& From)
 {
 	URDCombatComponent* Pc = GetPlayerCombat();
 	if (!Pc) return FString();
+	if (IsArenaHolding() && !ArenaDoorNear(From).IsEmpty()) { RefuseArenaExit(TEXT("door")); return TEXT("arena barred"); }
 	const FIntPoint Here = WorldToSection(From);
 	for (int32 Dx = -1; Dx <= 1; ++Dx)
 		for (int32 Dy = -1; Dy <= 1; ++Dy)

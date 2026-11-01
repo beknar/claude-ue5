@@ -317,7 +317,7 @@ A wound is stored in the monster mesh's reference pose (the nearest skinned vert
 
 ## 11. Build pipeline
 
-Level 5 is a Save As copy of level 4, which descends from the combat level (`790`-`799`) and the base dungeon (`770`-`775`). The order that builds the current level (README's rebuild notes 11-14 have the commands):
+Level 5 is a Save As copy of level 4, which descends from the combat level (`790`-`799`) and the base dungeon (`770`-`775`). The order that builds the current level (the [rebuild notes](levels/random_dungeonmagic_level5.md#rebuild) 11-14 have the commands):
 
 | Step | Scripts | Makes |
 |---|---|---|
@@ -329,7 +329,7 @@ Level 5 is a Save As copy of level 4, which descends from the combat level (`790
 | Armour by weight | `849 heroes`, refits, `851 <mesh>`, `856` | `Wears`, fits, card text |
 | Loot and crafting | `849 sets`, refits, `851`, `857`, icons, `830 --level 5` | 27 sets, loot table, recipes, anvils, fire volumes |
 | Spells, rings, monsters | `build_cpp.ps1` (editor closed), `855`, `858`, `859`, pictures, `830 --level 5` | spells, rings, tomes, breakdown, corpses, Escape menu, 55 monsters |
-| Docs | `rdm5_tables_doc.py` | README's generated tables |
+| Docs | `rdm5_tables_doc.py` | the generated tables of `docs/levels/random_dungeonmagic_level5.md` |
 
 Rules the order depends on: `819` after any script that recreates a caster Blueprint; `825` after `797`; `830` with absolute paths (it runs in the editor's working directory); after a C++ change build with the editor closed and relaunch; after a Blueprint compile from Python fetch class defaults again.
 
@@ -460,4 +460,4 @@ The spec's [§27](spec.md#27-known-deviations-and-open-issues) lists the behavio
 - **The generator is large.** It owns world, loot, tiers, heroes, sound, music, volumes, the menu and the map's input (588-line header). Natural seams if it grows further: a sound/music service, a loot service, a tier service, each a plain struct or component the generator holds, as `FRDUIDraw` already is for drawing.
 - **One HUD file for everything** (122 KB). The panels share only `FRDUIDraw` and the line protocol, so they could be split by panel without changing behaviour.
 - **Behaviour duplicated in Python.** The reel overlay mirrors the HUD's rules; nothing checks that they agree except looking at frames.
-- **Card text is data copied at build time.** The Summoner's card kept `852`'s wording because `856` rewrites only the other heroes; card text written from the tables (as README's are) would stay true.
+- **Card text is data copied at build time.** The Summoner's card kept `852`'s wording because `856` rewrites only the other heroes; card text written from the tables (as the level document's are) would stay true.
