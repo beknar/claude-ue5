@@ -1,0 +1,101 @@
+{
+ "tag": "m4o",
+ "plan": [
+  "options"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "options",
+   "ok": true,
+   "controls_before": true,
+   "open": {
+    "why": "",
+    "open": true,
+    "page": 0,
+    "lines": [
+     "button|Resume",
+     "button|Options",
+     "button|Choose another hero",
+     "button|Quit"
+    ]
+   },
+   "options": {
+    "page": 1,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|1.00",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|On",
+     "choice|Resolution|the screen's own (windowed fullscreen)",
+     "choice|Display mode|Windowed fullscreen",
+     "button|Apply display settings",
+     "button|Back"
+    ],
+    "action": "options"
+   },
+   "controls_off": {
+    "shown": false,
+    "line": "choice|Controls hint|Off"
+   },
+   "volume": {
+    "before": 1.0,
+    "after": 0.9
+   },
+   "display": {
+    "choices": [
+     "1280x720",
+     "1600x900",
+     "1920x1080",
+     "2560x1440",
+     "3840x2160"
+    ],
+    "from": [
+     1920,
+     1080
+    ],
+    "to": [
+     2560,
+     1440
+    ],
+    "mode": 2,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|0.90",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|Off",
+     "choice|Resolution|2560 x 1440",
+     "choice|Display mode|Windowed",
+     "button|Apply display settings",
+     "button|Back"
+    ]
+   },
+   "applied": {
+    "said": "saved 2560x1440 mode 2 in the editor's user settings (the editor's play window keeps its size)",
+    "saved": [
+     2560,
+     1440
+    ],
+    "mode": "<WindowMode.WINDOWED: 2>"
+   },
+   "escape_back": {
+    "open": true,
+    "page": 0
+   },
+   "escape_closed": {
+    "open": false,
+    "paused": false
+   },
+   "controls_drawn_off": false,
+   "controls_drawn_on": true
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_m4o_options_page.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

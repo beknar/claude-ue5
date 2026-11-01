@@ -672,6 +672,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") int32 GetMenuPage() const { return MenuPage; }
 	/** the resolutions the Options page offers (the common ones no larger than the screen), "1920x1080" each */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") TArray<FString> GetResolutionChoices() const;
+	/** the chosen size kept among the chosen display mode's choices (windowed sizes are in the screen's scaled units) */
+	void FitPendingResolution();
 	/** the display settings chosen on the page (not applied yet) and what Apply did ("applied", or why not) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") FIntPoint PendingResolution = FIntPoint::ZeroValue;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") int32 PendingWindowMode = 1;

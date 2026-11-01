@@ -89,12 +89,15 @@ public static class RDWin {
     [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
     [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr c);
     [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr h);
 }
 '@
     # (the runs: the menu and the castle offscreen for 90 s each; then the castle in a window of its own with a display
     #  setting asked as the Escape menu's Apply sets it (-RDApplyDisplay: 1600 x 900, windowed), its window measured)
-    $runs = @(@{ name = "menu"; args = @(); secs = 90 }, @{ name = "castle"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior"); secs = 90 },
-              @{ name = "display"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true })
+    # (into the castle through the menu, -RDStartHero: a Shipping game drops a map named on its command line (the engine's
+    #  GameInstance: "In shipping don't allow a map override"), and its "castle" run had stayed on the menu since 2026-10-27)
+    $runs = @(@{ name = "menu"; args = @(); secs = 90 }, @{ name = "castle"; args = @("-RDStartHero=Warrior"); secs = 90 },
+              @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true })
     try {
     foreach ($run in $runs) {
         $before = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
@@ -113,6 +116,10 @@ public static class RDWin {
         if ($run.window -and $alive) {
             [void][RDWin]::SetThreadDpiAwarenessContext([IntPtr](-4)); $r = New-Object RDWin+RECT
             if ([RDWin]::GetClientRect($p.MainWindowHandle, [ref]$r)) { $client = "$($r.R - $r.L)x$($r.B - $r.T)" }
+            # (the size in the screen's real pixels, and the window handling the screen's scaling itself (its DPI the screen's):
+            #  unaware of it (the engine's default), Windows stretched a 1600 x 900 window to 3200 x 1800 on a 200 % screen)
+            $dpi = [RDWin]::GetDpiForWindow($p.MainWindowHandle); if ($dpi -le 0) { $dpi = 96 }
+            $want = "1600x900"
         }
         if ($run.name -eq "castle") { "memory every 5 s (MB): $($mem -join ' ')" }
         foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
@@ -122,8 +129,8 @@ public static class RDWin {
         if ($run.window) {
             # (the window's inside the size asked, and the game's own settings say so: Apply as the menu's)
             $saved = $gus | Where-Object { Test-Path $_ } | ForEach-Object { Select-String -Path $_ -Pattern '^ResolutionSizeX=1600' } | Select-Object -First 1
-            $ok = $ok -and $client -eq "1600x900" -and [bool]$saved
-            "TEST display: {0} | window inside {1} (asked 1600x900, windowed) | saved in the game's settings: {2}" -f ($(if ($ok) { "ok" } else { "FAILED" })), $client, [bool]$saved
+            $ok = $ok -and $client -eq $want -and [bool]$saved
+            "TEST display: {0} | window inside {1} pixels (asked {4} windowed) | its scaling {3} % (the screen's: the game handles it) | saved in the game's settings: {2}" -f ($(if ($ok) { "ok" } else { "FAILED" })), $client, [bool]$saved, [int]($dpi * 100 / 96), $want
         }
         else { "TEST {0}: {1} | ran {6} s: {2} | exit code {3} | new crash reports {4} | peak memory {5:N0} MB" -f $run.name, ($(if ($ok) { "ok" } else { "FAILED" })), $alive, ($(if ($alive) { "-" } else { $p.ExitCode })), ($after - $before), ($peak / 1MB), $run.secs }
         if (-not $ok) { $bad++ }

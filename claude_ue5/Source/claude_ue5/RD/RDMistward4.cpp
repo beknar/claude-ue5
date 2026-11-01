@@ -36,7 +36,9 @@ void ARDDungeonGenerator::SetControlsHintShown(bool bShow)
 
 TArray<FString> ARDDungeonGenerator::GetResolutionChoices() const
 {
-	// (the common sizes, none larger than the screen: a window larger than it would hang off its edges)
+	// (the common sizes, none larger than the screen: a window larger than it would hang off its edges. The sizes are the
+	// screen's real pixels: the game handles the screen's scaling itself (DefaultEngine.ini's bAllowHighDPIInGameMode;
+	// without it Windows stretched a 1600 x 900 window to 3200 x 1800 on a 200 % screen, blurred))
 	static const FIntPoint Common[5] = { { 1280, 720 }, { 1600, 900 }, { 1920, 1080 }, { 2560, 1440 }, { 3840, 2160 } };
 	FIntPoint Desk(3840, 2160);
 	if (const UGameUserSettings* Gs = GEngine ? GEngine->GetGameUserSettings() : nullptr) Desk = Gs->GetDesktopResolution();
@@ -44,6 +46,23 @@ TArray<FString> ARDDungeonGenerator::GetResolutionChoices() const
 	for (const FIntPoint& R : Common) if (Desk.X <= 0 || (R.X <= Desk.X && R.Y <= Desk.Y)) Out.Add(FString::Printf(TEXT("%dx%d"), R.X, R.Y));
 	if (Out.Num() == 0) Out.Add(TEXT("1280x720"));
 	return Out;
+}
+
+void ARDDungeonGenerator::FitPendingResolution()
+{
+	// (the size chosen kept among the display mode's choices: the largest of them no larger than it)
+	// (none no larger: the smallest of them)
+	const TArray<FString> Ch = GetResolutionChoices();
+	FIntPoint Best(0, 0), Smallest(MAX_int32, MAX_int32);
+	for (const FString& C : Ch)
+	{
+		FString Xs, Ys; C.Split(TEXT("x"), &Xs, &Ys);
+		const FIntPoint R(FCString::Atoi(*Xs), FCString::Atoi(*Ys));
+		if (R.X <= PendingResolution.X && R.Y <= PendingResolution.Y && R.X > Best.X) Best = R;
+		if (R.X < Smallest.X) Smallest = R;
+	}
+	if (Best.X > 0) PendingResolution = Best;
+	else if (Smallest.X < MAX_int32) PendingResolution = Smallest;
 }
 
 void ARDDungeonGenerator::OpenOptionsPage()
@@ -96,6 +115,7 @@ void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
 	TArray<FString> P; S.ParseIntoArray(P, TEXT("x"));
 	if (P.Num() < 3) { UE_LOG(LogRDMistward4, Warning, TEXT("RDOPTIONS -RDApplyDisplay=%s: want <width>x<height>x<mode>"), *S); return; }
 	PendingResolution = FIntPoint(FCString::Atoi(*P[0]), FCString::Atoi(*P[1])); PendingWindowMode = FMath::Clamp(FCString::Atoi(*P[2]), 0, 2);
+	FitPendingResolution();
 	ApplyDisplaySettings();
 }
 
