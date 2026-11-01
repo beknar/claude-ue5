@@ -146,15 +146,21 @@ void ARDHeroSelect::Tick(float Dt)
 		// (-RDStartHero=<name>: that hero started at once, the first time the menu ticks; a Shipping game drops a map named on
 		// its command line ("In shipping don't allow a map override", the engine's GameInstance), so the package's test had
 		// stayed on this menu where it meant to run the castle)
+		// (once a game run: the menu loaded again ("Choose another hero") is a new actor, and started the hero again, the PR
+		// review's find)
+		static bool bRDCommandStartUsed = false;
 		if (!bCommandStartDone)
 		{
 			bCommandStartDone = true;
 			FString Want;
-			if (FParse::Value(FCommandLine::Get(), TEXT("RDStartHero="), Want))
+			if (!bRDCommandStartUsed && FParse::Value(FCommandLine::Get(), TEXT("RDStartHero="), Want))
 			{
+				bRDCommandStartUsed = true;
 				const int32 K = Heroes.IndexOfByPredicate([&Want](const FRDHeroDef& H) { return H.Name.ToString().Equals(Want, ESearchCase::IgnoreCase); });
-				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT command line hero %s: %s"), *Want, K >= 0 ? TEXT("started") : TEXT("no such hero"));
-				if (K >= 0) { Show(K); Confirm(); return; }
+				if (K >= 0) Show(K);
+				const bool bStarted = K >= 0 && Confirm();
+				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT command line hero %s: %s"), *Want, bStarted ? TEXT("started") : K < 0 ? TEXT("no such hero") : TEXT("not started (no level to open)"));
+				if (bStarted) return;
 			}
 		}
 		if (bMouseUI) TickPointer(PC);

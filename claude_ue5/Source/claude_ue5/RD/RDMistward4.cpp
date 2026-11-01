@@ -14,6 +14,7 @@
 #include "Engine/World.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward4, Log, All);
@@ -46,23 +47,6 @@ TArray<FString> ARDDungeonGenerator::GetResolutionChoices() const
 	for (const FIntPoint& R : Common) if (Desk.X <= 0 || (R.X <= Desk.X && R.Y <= Desk.Y)) Out.Add(FString::Printf(TEXT("%dx%d"), R.X, R.Y));
 	if (Out.Num() == 0) Out.Add(TEXT("1280x720"));
 	return Out;
-}
-
-void ARDDungeonGenerator::FitPendingResolution()
-{
-	// (the size chosen kept among the display mode's choices: the largest of them no larger than it)
-	// (none no larger: the smallest of them)
-	const TArray<FString> Ch = GetResolutionChoices();
-	FIntPoint Best(0, 0), Smallest(MAX_int32, MAX_int32);
-	for (const FString& C : Ch)
-	{
-		FString Xs, Ys; C.Split(TEXT("x"), &Xs, &Ys);
-		const FIntPoint R(FCString::Atoi(*Xs), FCString::Atoi(*Ys));
-		if (R.X <= PendingResolution.X && R.Y <= PendingResolution.Y && R.X > Best.X) Best = R;
-		if (R.X < Smallest.X) Smallest = R;
-	}
-	if (Best.X > 0) PendingResolution = Best;
-	else if (Smallest.X < MAX_int32) PendingResolution = Smallest;
 }
 
 void ARDDungeonGenerator::OpenOptionsPage()
@@ -110,12 +94,19 @@ bool ARDDungeonGenerator::ApplyDisplaySettings()
 
 void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
 {
+	// (-RDMarkFile=<path>: the castle writes where it is and as whom, so a test of a packaged game knows it got here: a
+	// Shipping game writes no log, and a run that stayed on the menu had passed as the castle's)
+	FString Mark;
+	if (FParse::Value(FCommandLine::Get(), TEXT("RDMarkFile="), Mark))
+	{
+		const FString Body = FString::Printf(TEXT("castle|%s|%s"), *GetWorld()->GetMapName(), *CurrentHero.ToString());
+		FFileHelper::SaveStringToFile(Body, *Mark);
+	}
 	FString S;
 	if (!FParse::Value(FCommandLine::Get(), TEXT("RDApplyDisplay="), S)) return;
 	TArray<FString> P; S.ParseIntoArray(P, TEXT("x"));
 	if (P.Num() < 3) { UE_LOG(LogRDMistward4, Warning, TEXT("RDOPTIONS -RDApplyDisplay=%s: want <width>x<height>x<mode>"), *S); return; }
 	PendingResolution = FIntPoint(FCString::Atoi(*P[0]), FCString::Atoi(*P[1])); PendingWindowMode = FMath::Clamp(FCString::Atoi(*P[2]), 0, 2);
-	FitPendingResolution();
 	ApplyDisplaySettings();
 }
 

@@ -87,8 +87,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") int32 QuitsAsked = 0;
 	/** Escape pressed once: until when a second one quits (the HUD says so meanwhile) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") float QuitArmedUntil = -100.f;
-	/** -RDStartHero=<name> on the command line: that hero started at once (a Shipping game ignores a map named on the
-	 *  command line, so its test reaches the dungeon through the menu: package_mistward.ps1 -Test) */
+	/** -RDStartHero=<name> on the command line: that hero started at once, once a game run (a Shipping game ignores a map
+	 *  named on the command line, so its test reaches the dungeon through the menu: package_mistward.ps1 -Test) */
 	bool bCommandStartDone = false;
 	/** tests: input the way the devices send it (RDInputSim); "" when sent, else why not. A pixel is the HUD canvas's. */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateKey(FKey Key, bool bDown);

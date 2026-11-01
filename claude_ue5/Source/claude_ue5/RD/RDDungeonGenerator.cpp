@@ -878,7 +878,7 @@ void ARDDungeonGenerator::StepMenuValue(int32 Step)
 		FString Xs, Ys; Ch[K].Split(TEXT("x"), &Xs, &Ys);
 		PendingResolution = FIntPoint(FCString::Atoi(*Xs), FCString::Atoi(*Ys));
 	}
-	else if (Id == TEXT("mode")) { PendingWindowMode = ((PendingWindowMode + Step) % 3 + 3) % 3; FitPendingResolution(); }
+	else if (Id == TEXT("mode")) PendingWindowMode = ((PendingWindowMode + Step) % 3 + 3) % 3;
 }
 
 bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
