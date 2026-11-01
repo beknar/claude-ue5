@@ -72,11 +72,11 @@
    "cursor_after": false
   }
  ],
- "windows_hidden": "",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
   "mw_m4m_menu_mouse.png",
   "mw_m4m_menu_quit_ask.png"
  ],
  "error": null,
- "windows_shown_again": 0
+ "windows_shown_again": 2
 }
