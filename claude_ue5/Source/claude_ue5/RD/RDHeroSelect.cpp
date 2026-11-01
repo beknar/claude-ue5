@@ -13,6 +13,8 @@
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 /** a hero's name as the menu shows it: her title ("MARTIAL ARTIST"), else her name */
 static FString RDHSShown(const FRDHeroDef& H) { return (H.Title.IsEmpty() ? H.Name.ToString() : H.Title).ToUpper(); }
@@ -140,6 +142,26 @@ void ARDHeroSelect::Tick(float Dt)
 				PC->SetInputMode(M);
 			}
 			bViewSet = true;
+		}
+		// (-RDStartHero=<name>: that hero started at once, the first time the menu ticks; a Shipping game drops a map named on
+		// its command line ("In shipping don't allow a map override", the engine's GameInstance), so the package's test had
+		// stayed on this menu where it meant to run the castle)
+		// (once a game run: the menu loaded again ("Choose another hero") is a new actor, and started the hero again, the PR
+		// review's find)
+		static bool bRDCommandStartUsed = false;
+		if (!bCommandStartDone)
+		{
+			bCommandStartDone = true;
+			FString Want;
+			if (!bRDCommandStartUsed && FParse::Value(FCommandLine::Get(), TEXT("RDStartHero="), Want))
+			{
+				bRDCommandStartUsed = true;
+				const int32 K = Heroes.IndexOfByPredicate([&Want](const FRDHeroDef& H) { return H.Name.ToString().Equals(Want, ESearchCase::IgnoreCase); });
+				if (K >= 0) Show(K);
+				const bool bStarted = K >= 0 && Confirm();
+				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT command line hero %s: %s"), *Want, bStarted ? TEXT("started") : K < 0 ? TEXT("no such hero") : TEXT("not started (no level to open)"));
+				if (bStarted) return;
+			}
 		}
 		if (bMouseUI) TickPointer(PC);
 		auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };

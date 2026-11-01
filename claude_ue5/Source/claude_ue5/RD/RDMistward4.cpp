@@ -14,6 +14,7 @@
 #include "Engine/World.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward4, Log, All);
@@ -36,7 +37,9 @@ void ARDDungeonGenerator::SetControlsHintShown(bool bShow)
 
 TArray<FString> ARDDungeonGenerator::GetResolutionChoices() const
 {
-	// (the common sizes, none larger than the screen: a window larger than it would hang off its edges)
+	// (the common sizes, none larger than the screen: a window larger than it would hang off its edges. The sizes are the
+	// screen's real pixels: the game handles the screen's scaling itself (DefaultEngine.ini's bAllowHighDPIInGameMode;
+	// without it Windows stretched a 1600 x 900 window to 3200 x 1800 on a 200 % screen, blurred))
 	static const FIntPoint Common[5] = { { 1280, 720 }, { 1600, 900 }, { 1920, 1080 }, { 2560, 1440 }, { 3840, 2160 } };
 	FIntPoint Desk(3840, 2160);
 	if (const UGameUserSettings* Gs = GEngine ? GEngine->GetGameUserSettings() : nullptr) Desk = Gs->GetDesktopResolution();
@@ -91,6 +94,14 @@ bool ARDDungeonGenerator::ApplyDisplaySettings()
 
 void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
 {
+	// (-RDMarkFile=<path>: the castle writes where it is and as whom, so a test of a packaged game knows it got here: a
+	// Shipping game writes no log, and a run that stayed on the menu had passed as the castle's)
+	FString Mark;
+	if (FParse::Value(FCommandLine::Get(), TEXT("RDMarkFile="), Mark))
+	{
+		const FString Body = FString::Printf(TEXT("castle|%s|%s"), *GetWorld()->GetMapName(), *CurrentHero.ToString());
+		FFileHelper::SaveStringToFile(Body, *Mark);
+	}
 	FString S;
 	if (!FParse::Value(FCommandLine::Get(), TEXT("RDApplyDisplay="), S)) return;
 	TArray<FString> P; S.ParseIntoArray(P, TEXT("x"));

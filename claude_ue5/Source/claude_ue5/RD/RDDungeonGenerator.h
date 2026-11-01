@@ -671,8 +671,7 @@ public:
 	/** the Escape menu's page (0 the main one, 1 Options) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") int32 GetMenuPage() const { return MenuPage; }
 	/** the resolutions the Options page offers (the common ones no larger than the screen), "1920x1080" each */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") TArray<FString> GetResolutionChoices() const;
-	/** the display settings chosen on the page (not applied yet) and what Apply did ("applied", or why not) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") TArray<FString> GetResolutionChoices() const;	/** the display settings chosen on the page (not applied yet) and what Apply did ("applied", or why not) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") FIntPoint PendingResolution = FIntPoint::ZeroValue;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") int32 PendingWindowMode = 1;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") FString LastApplied;
@@ -684,7 +683,8 @@ public:
 	 *  and RD4AllyGap); false: none clear, OutAt the roomiest */
 	bool FindAllySpot(const FVector& From, const FVector& Facing, float Radius, const AActor* Ignore, FVector& OutAt, const FVector& Prefer = FVector::ZeroVector) const;
 	/** a display setting asked on the command line (-RDApplyDisplay=<width>x<height>x<mode>, mode 0 fullscreen, 1 windowed
-	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply) */
+	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply); and -RDMarkFile=<path>:
+	 *  "castle|<map>|<hero>" written there (a packaged game's test knows it reached the castle) */
 	void ApplyDisplayFromCommandLine();
 
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
