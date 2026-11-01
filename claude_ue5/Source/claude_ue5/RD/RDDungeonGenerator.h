@@ -778,7 +778,7 @@ public:
 	int32 AutoplayGoalKind = 0, AutoplayGoalKey = 0;
 	TWeakObjectPtr<ARDMonster> AutoplayPrey;
 	FVector AutoplayLastPos = FVector::ZeroVector, AutoplayWalkFrom = FVector::ZeroVector;
-	float AutoplayWalked = 0.f, AutoplayHuntNext = 0.f;
+	float AutoplayWalked = 0.f, AutoplayHuntNext = 0.f, AutoplayChordUntil = 0.f;
 	bool bAutoplayHunting = false;
 	/** monsters she found no way to (caged behind a wall, in a closed vault...): not hunted again this run */
 	TSet<TWeakObjectPtr<ARDMonster>> AutoplayPreyBlocked;

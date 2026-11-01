@@ -482,6 +482,8 @@ void ARDDungeonGenerator::ReadAutoplayOption()
 	if (Secs < 0.f && !bCommandDone && FParse::Value(FCommandLine::Get(), TEXT("-Autoplay="), C))
 	{
 		bCommandDone = true; Secs = C; bQuit = !FParse::Param(FCommandLine::Get(), TEXT("AutoplayStay"));
+		// (-AutoplayLocked: no key of the player's takes over (a recording: Game Bar's hotkey reaches the game))
+		if (FParse::Param(FCommandLine::Get(), TEXT("AutoplayLocked"))) bAutoplayIgnorePlayer = true;
 	}
 	if (Secs >= 0.f) StartAutoplay(Secs, bQuit);
 }
@@ -506,7 +508,7 @@ void ARDDungeonGenerator::StopAutoplay(const FString& Why)
 	UE_LOG(LogRDMistward5, Log, TEXT("RDAUTOPLAY ended (%s) after %.0f s: %d kills, %d attacks, %d things used, %d opened, %d rooms"), *Why,
 		GetWorld()->GetTimeSeconds() - AutoplayStart, PlayerCombat ? PlayerCombat->Kills : 0, AutoplayStats.FindRef(TEXT("attacks")), AutoplayStats.FindRef(TEXT("used")),
 		AutoplayStats.FindRef(TEXT("opened")), AutoplayRoomsSeen.Num());
-	if (PlayerCombat && Why != TEXT("quit")) PlayerCombat->ShowMessage(Why == TEXT("player") ? FString(TEXT("You take over")) : FString(TEXT("Autoplay ended")));
+	if (PlayerCombat && Why != TEXT("quit")) PlayerCombat->ShowMessage(Why.StartsWith(TEXT("player")) ? FString(TEXT("You take over")) : FString(TEXT("Autoplay ended")));
 }
 
 float ARDDungeonGenerator::GetAutoplayLeft() const
@@ -578,12 +580,15 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 				if (K.IsValid() && !K.IsAxis1D() && !K.IsAxis2D() && !K.IsAxis3D() && !K.IsTouch() && !K.IsGesture() && !K.IsModifierKey()
 					&& K != EKeys::LeftCommand && K != EKeys::RightCommand) Take.Add(K);
 		}
-		const bool bChord = PC->IsInputKeyDown(EKeys::LeftAlt) || PC->IsInputKeyDown(EKeys::RightAlt) || PC->IsInputKeyDown(EKeys::LeftCommand) || PC->IsInputKeyDown(EKeys::RightCommand);
-		bool bTake = false;
-		if (!bChord) for (const FKey& K : Take) if (PC->WasInputKeyJustPressed(K)) { bTake = true; break; }
+		// (Alt or the Windows key down, or down within the last second, the keys are a system chord's (Game Bar's Win+Alt+R
+		// reached the game as an R with no Alt seen down: the Game Bar recordings of 2026-11-01 stood still from their 4th s))
+		if (PC->IsInputKeyDown(EKeys::LeftAlt) || PC->IsInputKeyDown(EKeys::RightAlt) || PC->IsInputKeyDown(EKeys::LeftCommand) || PC->IsInputKeyDown(EKeys::RightCommand)
+			|| PC->WasInputKeyJustReleased(EKeys::LeftAlt) || PC->WasInputKeyJustReleased(EKeys::LeftCommand)) AutoplayChordUntil = Now + 1.f;
+		FKey Took;
+		if (Now >= AutoplayChordUntil) for (const FKey& K : Take) if (PC->WasInputKeyJustPressed(K)) { Took = K; break; }
 		for (const FKey& K : { EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY })
-			if (FMath::Abs(PC->GetInputAnalogKeyState(K)) > 0.5f) bTake = true;
-		if (bTake) { StopAutoplay(TEXT("player")); return; }
+			if (FMath::Abs(PC->GetInputAnalogKeyState(K)) > 0.5f) Took = K;
+		if (Took.IsValid()) { StopAutoplay(FString::Printf(TEXT("player: %s"), *Took.ToString())); return; }
 	}
 	if (Pc->IsDead()) { AutoplayDoing = TEXT("down"); AutoplayPath.Reset(); AutoplayFoe = nullptr; return; }
 	if (Pc->IsInventoryOpen()) Pc->SetInventoryOpen(false);
