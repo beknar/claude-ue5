@@ -40,9 +40,9 @@ for a in eas.get_all_level_actors():
 # (the editor sets a usage it needs while it draws, in memory only: the menu's two read true here while the files on disk,
 # and so the package, did not have them. Such a material is saved too.)
 # (they did not show as dirty either: the menu's Nanite materials are saved every run, the castle's when one is dirty)
-dirty = {p.get_name() for p in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()}
-unsaved = sorted(p for p, (b, props) in need.items() if not p.startswith("/Engine/")
-                 and (b.get_outermost().get_name() in dirty or "used_with_nanite" in props))
+# (every one is saved: the fountain's M_Fountain read true here, was not dirty, and the packaged game drew it in the default
+# material ("missing usage flag InstancedStaticMeshes", the castle run of 2026-11-01): the flag was the editor's, in memory)
+unsaved = sorted(p for p, (b, props) in need.items() if not p.startswith("/Engine/"))
 if not CHECK:
     for p in unsaved: unreal.EditorAssetLibrary.save_loaded_asset(need[p][0], only_if_is_dirty=False)
 for p in unsaved: print("ISMUSAGE  ", "unsaved usage", "saved" if not CHECK else "(check: left)", p)
