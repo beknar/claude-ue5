@@ -72,11 +72,11 @@
    "cursor_after": false
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "",
  "shots": [
   "mw_m4m_menu_mouse.png",
   "mw_m4m_menu_quit_ask.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 0
 }

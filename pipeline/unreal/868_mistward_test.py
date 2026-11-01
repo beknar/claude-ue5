@@ -2422,12 +2422,14 @@ def step_harvest():
     res = {"kills": [], "bad": []}
     for t in range(1, 6):
         for k, (kind, fam) in enumerate(TK.get(t, [])[:3]):
-            n0 = len([p for p in g.loot_piles if p])
+            # (the piles made by this kill: those not there before, by name; a count of all of them before and after was 0 in
+            # a full run: the last kill's pile, destroyed a moment before, was still in the list when counted before)
+            known = {p.get_name() for p in g.loot_piles if p}
             m = g.spawn_monster_named(kind, ahead(260, (k - 1) * 160), t, 1.0, 0.0, 1.0); yield from wait(0.4)
             if not m: res["bad"].append(f"{kind}: not spawned"); continue
             at = m.get_actor_location(); m.apply_damage(1e7, None); yield from wait(0.6)
             new = [p for p in g.loot_piles if p and dist2(p.get_actor_location(), at) < 150]
-            r = {"kind": kind, "family": fam, "tier": t, "piles": len([p for p in g.loot_piles if p]) - n0}
+            r = {"kind": kind, "family": fam, "tier": t, "piles": len([p for p in g.loot_piles if p and p.get_name() not in known])}
             if new: r.update(pile_info(new[0]))
             res["kills"].append(r)
             th = r.get("things", [])
