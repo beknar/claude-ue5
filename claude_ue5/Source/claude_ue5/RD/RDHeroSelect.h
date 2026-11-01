@@ -78,6 +78,15 @@ public:
 	 *  and captured it on a click); a click on a hero's name shows her, on the name of the one shown or on START starts; the
 	 *  arrows step. (Without it the HUD's hit boxes do the same through the engine's click events.) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bMouseUI = false;
+	/** mistward4 (the user's of 2026-10-31): a QUIT button in the upper right ends the game (in the editor: ends play);
+	 *  Escape (or the gamepad's B) asks first and quits when pressed again within 3 s */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bQuitButton = false;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool QuitGame();
+	/** tests: QUIT only says what it would do */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bQuitDryRun = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") int32 QuitsAsked = 0;
+	/** Escape pressed once: until when a second one quits (the HUD says so meanwhile) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") float QuitArmedUntil = -100.f;
 	/** tests: input the way the devices send it (RDInputSim); "" when sent, else why not. A pixel is the HUD canvas's. */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateKey(FKey Key, bool bDown);
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateMouseMove(FVector2D Pixel);

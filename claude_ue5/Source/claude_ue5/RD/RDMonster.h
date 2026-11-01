@@ -71,6 +71,9 @@ public:
 	void LayDead();
 	/** it fights on her side for Seconds (0: until it falls), with these hit points and damage (a corpse rises first) */
 	void BecomeAlly(float Seconds, float InHealth, float InDamage);
+	/** mistward4 (bAllySpacing): the way and strength (0 none; about 1 standing in another) her ally steps to keep clear of
+	 *  her other allies and of her (RDMistward4.cpp) */
+	FVector AllySpacingPush() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsAlly() const { return bAlly; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetAllyTimeLeft() const { return AllySeconds > 0.f ? AllyLeft : 0.f; }
 	void SetChampion(bool b) { bChampion = b; }

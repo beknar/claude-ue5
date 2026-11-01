@@ -605,6 +605,13 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 			if (D > Room) { Room = D; At = L + Wy.GetSafeNormal() * FMath::Max(D, 0.f); }
 			if (D >= 120.f) break;
 		}
+		// (mistward4: a spot nobody stands on: the first of each spell came to the same place in front of her, the second of
+		// each to the same place beside it)
+		if (Generator->bAllySpacing)
+		{
+			const FRDMonsterDef* Kd = Generator->Monsters.FindByPredicate([S](const FRDMonsterDef& D) { return D.Name == S->SummonKind; });
+			Generator->FindAllySpot(L, Fw, Kd ? Kd->CapsuleRadius : 45.f, O, At);
+		}
 		ARDMonster* K = Generator->SummonKindAlly(S->SummonKind, At - FVector(0, 0, O->GetSimpleCollisionHalfHeight()), S->Name);
 		if (K)
 		{

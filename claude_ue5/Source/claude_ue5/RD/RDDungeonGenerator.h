@@ -653,6 +653,36 @@ public:
 	 *  bEncounters each one's boss and guarded ring are set too); how many opened */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward3") int32 DebugOpenTiers(int32 UpTo, bool bEncounters);
 
+	// ---- mistward_castle, the user's list of 2026-10-31 (RDMistward4.cpp; pipeline/unreal/878): each a switch, off on the
+	// other levels (random_dungeonmagic_level5 keeps its Escape menu, maps and HUD as they were)
+	/** the Escape menu in two pages: Resume, Options, Choose another hero, Quit; Options holds the volumes, the controls hint
+	 *  on or off, a resolution and a display mode (applied by Apply, kept in the game's user settings) and Back */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward4") bool bOptionsMenu = false;
+	/** her allies keep apart: a summon is called to a spot nobody stands on, and they step away from each other (and from
+	 *  her) as they follow her, wait and fight */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward4") bool bAllySpacing = false;
+	/** the HUD lists her summoned allies by kind: how many of how many she may lead, each one's hit points */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward4") bool bSummonPanel = false;
+	/** her allies are marked on the minimap and the big map (a green ring) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward4") bool bAllyMarkers = false;
+	/** the upper left controls panel is shown (the Options page's switch; kept in the game's user settings) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") bool IsControlsHintShown() const { return bControlsShown; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward4") void SetControlsHintShown(bool bShow);
+	/** the Escape menu's page (0 the main one, 1 Options) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") int32 GetMenuPage() const { return MenuPage; }
+	/** the resolutions the Options page offers (the common ones no larger than the screen), "1920x1080" each */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") TArray<FString> GetResolutionChoices() const;
+	/** the display settings chosen on the page (not applied yet) and what Apply did ("applied", or why not) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") FIntPoint PendingResolution = FIntPoint::ZeroValue;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") int32 PendingWindowMode = 1;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward4") FString LastApplied;
+	/** Apply: the chosen resolution and display mode into the game's user settings, applied and saved (in the editor saved
+	 *  only: play in the editor does not own its window) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward4") bool ApplyDisplaySettings();
+	/** a spot for a new ally of Radius near From: in front of Facing first, then round her; clear of walls (a trace from
+	 *  her) and of every ally standing (their capsules and RD4AllyGap); false: none clear, OutAt the roomiest */
+	bool FindAllySpot(const FVector& From, const FVector& Facing, float Radius, const AActor* Ignore, FVector& OutAt) const;
+
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;
@@ -778,7 +808,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") bool ActivateMenuLine(int32 Line = -1);
 	/** the menu's lines: "volume|<label>|<value>" and "button|<label>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") TArray<FString> GetMenuLines() const;
-	static constexpr int32 MenuLineCount = 7;
 	/** the HUD's last drawing of the menu: each line's box on the screen and a slider's track (the mouse reads them) */
 	TArray<FBox2D> MenuRowBoxes, MenuTrackBoxes;
 	/** what the last button did ("quit", "hero", "resume"; tests) */
@@ -918,6 +947,12 @@ private:
 	UPROPERTY(Transient) TArray<TObjectPtr<UAudioComponent>> FireComps;
 	float UserVolumes[4] = { 1.f, 1.f, 1.f, 1.f };
 	bool bMenuOpen = false;
+	// (mistward4: the Escape menu's page, the controls hint, the menu's items by name on the page shown)
+	int32 MenuPage = 0;
+	bool bControlsShown = true;
+	TArray<FName> MenuItems() const;
+	void LoadOptions();
+	void OpenOptionsPage();
 	int32 MenuCursor = 0;
 	float MenuRepeat = 0.f;
 	bool bMenuDragging = false;

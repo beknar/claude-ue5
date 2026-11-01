@@ -169,12 +169,26 @@ def stance(ctx, fr=None, k=0.0, drop=7.0):
     sp = body(ctx, fr, twist=24, lean=4, drop=drop + 0.8 * k, look=0.85)
     sp.update(plant("l", -2, 16, yaw=-8)); sp.update(plant("r", 4, -16, yaw=-38))
     sp.update(hand(fr, "l", -12, 26, 2 - 0.6 * k, fr.D("l", 0.5, 0.0, -1.0), axis=C.D("l", -0.2, 0.6, 0.8), palm=C.D("l", -1.0, 0.0, 0.0)))
-    sp.update(hand(fr, "r", 4, 16, -2 - 0.6 * k, fr.D("r", 0.5, 0.0, -1.0), axis=C.D("r", -0.2, 0.5, 0.85), palm=C.D("r", -1.0, 0.0, 0.0)))
+    sp.update(right_guard(fr, 14, 28, 2 - 0.6 * k))
     return sp
 
 
+# Her right fist in the guard (the user's of 2026-10-31: the right forearm merged into her body; the right elbow should flare
+# as the left one does). Her shoulders turn 24 degrees to her right in the stance, which carries the left elbow out and
+# tucked the right one in: the right fist at (4, 16, -2) put the elbow 1.9 cm and the forearm 1.7 cm inside her body, the
+# elbow 4.9 cm out from her chest's middle against the left's 24.2. Its place, elbow and hand are now given in her frame
+# turned 40 degrees to her right (a mirror of the left's in her turned chest): measured (a probe against her body as the
+# pose bends it), the elbow 22.5 cm out, the elbow 13.1 and the forearm 13.6 cm outside her body (the left's 13.8, 13.6).
+RIGHT_GUARD_YAW = -40.0
+
+
+def right_guard(fr, x, y, z):
+    g = Fr(fr.yaw + RIGHT_GUARD_YAW)
+    return hand(g, "r", x, y, z, g.D("r", 0.6, 0.0, -0.8), axis=C.D("r", -0.2, 0.6, 0.8), palm=C.D("r", -1.0, 0.0, 0.0))
+
+
 def guard_l(fr): return hand(fr, "l", -8, 18, 0, fr.D("l", 0.5, 0.0, -1.0), axis=C.D("l", -0.2, 0.5, 0.85), palm=C.D("l", -1.0, 0.0, 0.0))
-def guard_r(fr): return hand(fr, "r", 6, 16, -2, fr.D("r", 0.5, 0.0, -1.0), axis=C.D("r", -0.2, 0.5, 0.85), palm=C.D("r", -1.0, 0.0, 0.0))
+def guard_r(fr): return right_guard(fr, 12, 24, 0)
 
 
 def straight_punch(ctx, k):

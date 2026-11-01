@@ -793,14 +793,44 @@ void ARDDungeonGenerator::ApplyUserVolumes()
 	}
 }
 
+TArray<FName> ARDDungeonGenerator::MenuItems() const
+{
+	// (level 5: the four volumes and its three buttons on one page; mistward4: a main page and an Options page)
+	static const FName Vol[4] = { TEXT("vol0"), TEXT("vol1"), TEXT("vol2"), TEXT("vol3") };
+	if (!bOptionsMenu) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("resume"), TEXT("hero"), TEXT("quit") };
+	if (MenuPage == 0) return { TEXT("resume"), TEXT("options"), TEXT("hero"), TEXT("quit") };
+	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
+}
+
+static int32 RDMenuVolumeOf(const FName& Id)
+{
+	const FString S = Id.ToString();
+	return S.StartsWith(TEXT("vol")) ? FCString::Atoi(*S.RightChop(3)) : -1;
+}
+
 TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 {
-	return {
-		FString::Printf(TEXT("volume|Overall volume|%.2f"), UserVolumes[0]),
-		FString::Printf(TEXT("volume|Action sounds|%.2f"), UserVolumes[1]),
-		FString::Printf(TEXT("volume|Environment sounds|%.2f"), UserVolumes[2]),
-		FString::Printf(TEXT("volume|Music|%.2f"), UserVolumes[3]),
-		TEXT("button|Resume"), TEXT("button|Choose another hero"), TEXT("button|Quit") };
+	static const TCHAR* VolLabel[4] = { TEXT("Overall volume"), TEXT("Action sounds"), TEXT("Environment sounds"), TEXT("Music") };
+	static const TCHAR* ModeName[3] = { TEXT("Fullscreen"), TEXT("Windowed fullscreen"), TEXT("Windowed") };
+	TArray<FString> Out;
+	for (const FName& Id : MenuItems())
+	{
+		const int32 V = RDMenuVolumeOf(Id);
+		if (V >= 0) Out.Add(FString::Printf(TEXT("volume|%s|%.2f"), VolLabel[V], UserVolumes[V]));
+		else if (Id == TEXT("resume")) Out.Add(TEXT("button|Resume"));
+		else if (Id == TEXT("options")) Out.Add(TEXT("button|Options"));
+		else if (Id == TEXT("hero")) Out.Add(TEXT("button|Choose another hero"));
+		else if (Id == TEXT("quit")) Out.Add(TEXT("button|Quit"));
+		else if (Id == TEXT("controls")) Out.Add(FString::Printf(TEXT("choice|Controls hint|%s"), bControlsShown ? TEXT("On") : TEXT("Off")));
+		else if (Id == TEXT("res"))
+			// (windowed fullscreen covers the screen whatever the size chosen: the engine sizes that window to the screen)
+			Out.Add(PendingWindowMode == 1 ? FString(TEXT("choice|Resolution|the screen's own (windowed fullscreen)"))
+			                               : FString::Printf(TEXT("choice|Resolution|%d x %d"), PendingResolution.X, PendingResolution.Y));
+		else if (Id == TEXT("mode")) Out.Add(FString::Printf(TEXT("choice|Display mode|%s"), ModeName[FMath::Clamp(PendingWindowMode, 0, 2)]));
+		else if (Id == TEXT("apply")) Out.Add(TEXT("button|Apply display settings"));
+		else if (Id == TEXT("back")) Out.Add(TEXT("button|Back"));
+	}
+	return Out;
 }
 
 void ARDDungeonGenerator::SetMenuOpen(bool bOpen)
@@ -812,7 +842,7 @@ void ARDDungeonGenerator::SetMenuOpen(bool bOpen)
 	{
 		// (the inventory or the anvil open under it are shut first: one panel at a time)
 		if (PlayerCombat) { PlayerCombat->SetInventoryOpen(false); PlayerCombat->SetCraftingOpen(false); }
-		MenuCursor = 0;
+		MenuCursor = 0; MenuPage = 0;
 		if (bMenuPausesGame) UGameplayStatics::SetGamePaused(this, true);
 		if (PC) { PC->SetShowMouseCursor(true); FInputModeGameAndUI M; M.SetHideCursorDuringCapture(false); PC->SetInputMode(M); }
 	}
@@ -826,20 +856,44 @@ void ARDDungeonGenerator::SetMenuOpen(bool bOpen)
 
 void ARDDungeonGenerator::MoveMenuCursor(int32 Step)
 {
-	MenuCursor = ((MenuCursor + Step) % MenuLineCount + MenuLineCount) % MenuLineCount;
+	const int32 N = FMath::Max(MenuItems().Num(), 1);
+	MenuCursor = ((MenuCursor + Step) % N + N) % N;
 }
 
 void ARDDungeonGenerator::StepMenuValue(int32 Step)
 {
-	if (MenuCursor < 4) SetUserVolume(MenuCursor, UserVolumes[MenuCursor] + 0.05f * Step);
+	const TArray<FName> It = MenuItems();
+	if (!It.IsValidIndex(MenuCursor)) return;
+	const FName Id = It[MenuCursor];
+	const int32 V = RDMenuVolumeOf(Id);
+	if (V >= 0) { SetUserVolume(V, UserVolumes[V] + 0.05f * Step); return; }
+	// (mistward4's choices: the controls hint on / off, a resolution, a display mode; the last two wait for Apply)
+	if (Id == TEXT("controls")) SetControlsHintShown(!bControlsShown);
+	else if (Id == TEXT("res") && PendingWindowMode != 1)
+	{
+		const TArray<FString> Ch = GetResolutionChoices();
+		if (Ch.Num() == 0) return;
+		int32 K = Ch.IndexOfByKey(FString::Printf(TEXT("%dx%d"), PendingResolution.X, PendingResolution.Y));
+		K = K < 0 ? 0 : ((K + Step) % Ch.Num() + Ch.Num()) % Ch.Num();
+		FString Xs, Ys; Ch[K].Split(TEXT("x"), &Xs, &Ys);
+		PendingResolution = FIntPoint(FCString::Atoi(*Xs), FCString::Atoi(*Ys));
+	}
+	else if (Id == TEXT("mode")) PendingWindowMode = ((PendingWindowMode + Step) % 3 + 3) % 3;
 }
 
 bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 {
+	const TArray<FName> It = MenuItems();
 	const int32 L = Line >= 0 ? Line : MenuCursor;
-	if (L < 4) return false;
-	if (L == 4) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
-	if (L == 5)
+	if (!It.IsValidIndex(L)) return false;
+	const FName Id = It[L];
+	if (RDMenuVolumeOf(Id) >= 0) return false;
+	if (Id == TEXT("resume")) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
+	if (Id == TEXT("options")) { LastMenuAction = TEXT("options"); OpenOptionsPage(); return true; }
+	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); MenuPage = 0; MenuCursor = 1; return true; }
+	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
+	if (Id == TEXT("controls") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
+	if (Id == TEXT("hero"))
 	{
 		LastMenuAction = TEXT("hero");
 		if (bMenuDryRun || MenuLevel.IsEmpty()) return !MenuLevel.IsEmpty();
@@ -859,7 +913,8 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 {
 	if (!bEscapeMenu || !PC) return;
 	if (PlayerCombat && PlayerCombat->IsScriptedOnly()) return;
-	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { SetMenuOpen(!bMenuOpen); return; }
+	// (mistward4: Escape on the Options page goes back to the main page; on the main page it closes the menu)
+	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage == 1) { MenuPage = 0; MenuCursor = 1; } else SetMenuOpen(!bMenuOpen); return; }
 	if (!bMenuOpen) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
@@ -867,7 +922,7 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left })) StepMenuValue(-1);
 	if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right })) StepMenuValue(1);
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom })) { ActivateMenuLine(); return; }
-	if (Pressed({ EKeys::Gamepad_FaceButton_Right })) { SetMenuOpen(false); return; }
+	if (Pressed({ EKeys::Gamepad_FaceButton_Right })) { if (MenuPage == 1) { MenuPage = 0; MenuCursor = 1; } else SetMenuOpen(false); return; }
 	// the mouse: a line under it is chosen; a click on a button presses it, on a slider's track (or dragging along it)
 	// sets the volume where it is
 	float Mx = 0.f, My = 0.f;
@@ -876,17 +931,19 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	float Dx = 0.f, Dy = 0.f;
 	PC->GetInputMouseDelta(Dx, Dy);
 	if (!PC->IsInputKeyDown(EKeys::LeftMouseButton)) bMenuDragging = false;
-	for (int32 I = 0; I < MenuRowBoxes.Num() && I < MenuLineCount; ++I)
+	const TArray<FName> It = MenuItems();
+	for (int32 I = 0; I < MenuRowBoxes.Num() && I < It.Num(); ++I)
 	{
 		const bool bIn = MenuRowBoxes[I].IsInside(M);
 		if (bIn && (Dx != 0.f || Dy != 0.f || PC->WasInputKeyJustPressed(EKeys::LeftMouseButton))) MenuCursor = I;
-		if (I < 4 && MenuTrackBoxes.IsValidIndex(I))
+		const int32 V = RDMenuVolumeOf(It[I]);
+		if (V >= 0 && MenuTrackBoxes.IsValidIndex(I))
 		{
 			const FBox2D& T = MenuTrackBoxes[I];
 			const bool bOnTrack = T.ExpandBy(10.f).IsInside(M);
 			if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton) && bOnTrack) { bMenuDragging = true; MenuCursor = I; }
 			if (bMenuDragging && MenuCursor == I && PC->IsInputKeyDown(EKeys::LeftMouseButton) && T.GetSize().X > 1.f)
-				SetUserVolume(I, (M.X - T.Min.X) / T.GetSize().X);
+				SetUserVolume(V, (M.X - T.Min.X) / T.GetSize().X);
 		}
 		else if (bIn && PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) { ActivateMenuLine(I); return; }
 	}
@@ -1244,6 +1301,7 @@ void ARDDungeonGenerator::BeginPlay()
 	}
 	SoundR.Initialize(RDSoundSeed);
 	if (bEscapeMenu) LoadUserVolumes();
+	if (bOptionsMenu) LoadOptions();
 	// (the non-realtime audio device loses spatialised sources: see bSpatializeSounds)
 	bSpatializeNow = bSpatializeSounds && !FParse::Param(FCommandLine::Get(), TEXT("deterministicaudio"));
 	Attenuations.Reset();

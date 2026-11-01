@@ -12,6 +12,7 @@
 #include "InputCoreTypes.h"
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 /** a hero's name as the menu shows it: her title ("MARTIAL ARTIST"), else her name */
 static FString RDHSShown(const FRDHeroDef& H) { return (H.Title.IsEmpty() ? H.Name.ToString() : H.Title).ToUpper(); }
@@ -109,6 +110,17 @@ bool ARDHeroSelect::Confirm()
 	return true;
 }
 
+bool ARDHeroSelect::QuitGame()
+{
+	if (!bQuitButton) return false;
+	++QuitsAsked;
+	UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT quit%s"), bQuitDryRun ? TEXT(" (dry run: the test)") : TEXT(""));
+	if (bQuitDryRun) return true;
+	// (in the editor this ends play and leaves the editor as it was; a game quits)
+	UKismetSystemLibrary::QuitGame(this, UGameplayStatics::GetPlayerController(this, 0), EQuitPreference::Quit, false);
+	return true;
+}
+
 void ARDHeroSelect::Tick(float Dt)
 {
 	Super::Tick(Dt);
@@ -142,6 +154,13 @@ void ARDHeroSelect::Tick(float Dt)
 		}
 		else StickRepeat = 0.f;
 		if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_Special_Right })) Confirm();
+		// (mistward4: Escape or B once asks, again within 3 s quits)
+		if (bQuitButton && Pressed({ EKeys::Escape, EKeys::Gamepad_FaceButton_Right }))
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			if (Now < QuitArmedUntil) { QuitArmedUntil = -100.f; QuitGame(); }
+			else QuitArmedUntil = Now + 3.f;
+		}
 		// (which device the keys on the screen are for)
 		static const FKey PadKeys[] = { EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftShoulder,
 			EKeys::Gamepad_RightShoulder, EKeys::Gamepad_Special_Right };
@@ -170,6 +189,7 @@ void ARDHeroSelect::TickPointer(APlayerController* PC)
 	if (B == TEXT("Prev")) Step(-1);
 	else if (B == TEXT("Next")) Step(1);
 	else if (B == TEXT("Start")) Confirm();
+	else if (B == TEXT("Quit")) QuitGame();
 	else if (B.StartsWith(TEXT("Hero_")))
 	{
 		// (her name again, once she is shown: start as her)
@@ -204,6 +224,7 @@ void ARDHeroSelectHUD::NotifyHitBoxClick(FName BoxName)
 	if (B == TEXT("Prev")) Sel->Step(-1);
 	else if (B == TEXT("Next")) Sel->Step(1);
 	else if (B == TEXT("Start")) Sel->Confirm();
+	else if (B == TEXT("Quit")) Sel->QuitGame();
 	else if (B.StartsWith(TEXT("Hero_"))) Sel->Show(FCString::Atoi(*B.RightChop(5)));
 }
 
@@ -451,10 +472,30 @@ void ARDHeroSelectHUD::DrawHUD()
 		UI.Text(St, FLinearColor::White, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.3f, ERDType::Title);
 		Button(P0, P1, TEXT("Start"));
 	}
+	// mistward4: QUIT (upper right); Escape pressed once: a line asks for it again
+	if (Sel->bQuitButton)
+	{
+		const FString Q = TEXT("QUIT GAME");
+		UI.TextSize(Q, Tw, Th, Medium, Sc * 1.05f, ERDType::Title);
+		const float Wide = UI.Has(TEXT("button")) ? 40.f * Sc : 0.f;
+		const FVector2D P1(Canvas->ClipX - 60.f * Sc, 48.f * Sc + Th + 24.f * Sc + Wide * 0.5f), P0(P1.X - Tw - 50.f * Sc - Wide, 48.f * Sc);
+		const bool bArmed = Now < Sel->QuitArmedUntil;
+		if (UI.Has(TEXT("button"))) UI.Nine(TEXT("button"), P0, P1, HeightPx(TEXT("button"), P1.Y - P0.Y), bArmed ? FLinearColor(1.2f, 0.6f, 0.5f) : FLinearColor(0.7f, 0.68f, 0.66f));
+		else { Rect(P0, P1, FLinearColor(0.04f, 0.045f, 0.06f, 0.88f)); Frame(P0, P1, bArmed ? FLinearColor(1.f, 0.4f, 0.3f) : RDHSLine, 2.f * Sc); }
+		UI.Text(Q, bArmed ? FLinearColor(1.f, 0.75f, 0.65f) : RDHSInk, (P0.X + P1.X - Tw) * 0.5f, (P0.Y + P1.Y - Th) * 0.5f, Medium, Sc * 1.05f, ERDType::Title);
+		Button(P0, P1, TEXT("Quit"));
+		if (bArmed)
+		{
+			const FString Ask = bPad ? TEXT("press B again to quit") : TEXT("press Escape again to quit");
+			UI.TextSize(Ask, Tw, Th, Small, Sc * 1.1f);
+			UI.Text(Ask, FLinearColor(1.f, 0.75f, 0.65f), P1.X - Tw, P1.Y + 10.f * Sc, Small, Sc * 1.1f);
+		}
+	}
 	// the keys
-	const FString Keys = bPad ? TEXT("D-pad, left stick or LB / RB  another hero      A  start")
-	                          : Sel->bMouseUI ? TEXT("click a name  that hero      click START or her name again  start      A / D, arrows or wheel  another hero      Enter  start")
-	                                          : TEXT("A / D, arrows or wheel  another hero      Enter or Space  start      or click");
+	FString Keys = bPad ? TEXT("D-pad, left stick or LB / RB  another hero      A  start")
+	                    : Sel->bMouseUI ? TEXT("click a name  that hero      click START or her name again  start      A / D, arrows or wheel  another hero      Enter  start")
+	                                    : TEXT("A / D, arrows or wheel  another hero      Enter or Space  start      or click");
+	if (Sel->bQuitButton) Keys += bPad ? TEXT("      B  quit") : TEXT("      Esc  quit");
 	UI.TextSize(Keys, Tw, Th, Small, Sc * 1.1f);
 	Rect(FVector2D((Canvas->ClipX - Tw) * 0.5f - 16.f * Sc, Canvas->ClipY - 62.f * Sc), FVector2D((Canvas->ClipX + Tw) * 0.5f + 16.f * Sc, Canvas->ClipY - 50.f * Sc + Th), FLinearColor(0.03f, 0.035f, 0.05f, 0.75f));
 	UI.Text(Keys, RDHSInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY - 56.f * Sc, Small, Sc * 1.1f);

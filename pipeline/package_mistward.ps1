@@ -76,6 +76,11 @@ if ($Test -or $TestOnly) {
     if (-not (Test-Path $exe)) { "no package at $exe"; exit 1 }
     $crashes = Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Crashes"
     $bad = 0
+    # (the runs start at 1280 x 720 and the game saves that in its settings: the user's next game then ran at 1280 x 720 on
+    #  a 3840 x 2160 screen and Game Bar recorded it in a corner of its frame. The settings are kept and put back.
+    #  Shipping's are in LocalAppData, a Development game's beside it.)
+    $gus = @((Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"), (Join-Path $Out "Windows\claude_ue5\Saved\Config\Windows\GameUserSettings.ini"))
+    $kept = @{}; foreach ($g in $gus) { $kept[$g] = if (Test-Path $g) { [IO.File]::ReadAllBytes($g) } else { $null } }
     foreach ($run in @(@{ name = "menu"; args = @() }, @{ name = "castle"; args = @("/Game/RandomDungeon/Maps/mistward_castle?Hero=Warrior") })) {
         $before = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
         # (claude_ue5.exe is a launcher: the game is the exe under claude_ue5\Binaries\Win64, which it starts and waits for:
@@ -97,6 +102,8 @@ if ($Test -or $TestOnly) {
         if (-not $ok) { $bad++ }
         "TEST {0}: {1} | ran 90 s: {2} | exit code {3} | new crash reports {4} | peak memory {5:N0} MB" -f $run.name, ($(if ($ok) { "ok" } else { "FAILED" })), $alive, ($(if ($alive) { "-" } else { $p.ExitCode })), ($after - $before), ($peak / 1MB)
     }
+    foreach ($g in $gus) { if ($null -ne $kept[$g]) { [IO.File]::WriteAllBytes($g, $kept[$g]) } elseif (Test-Path $g) { Remove-Item $g -Force } }
+    "the game's settings put back as they were"
     if ($bad) { exit 1 }
 }
 exit 0
