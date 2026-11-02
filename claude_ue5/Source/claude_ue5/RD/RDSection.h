@@ -247,6 +247,18 @@ public:
 	 *  Mistward Castle); the castle hall's room */
 	FVector TownGate = FVector::ZeroVector, TownGateOut = FVector::ZeroVector, MistgateAt = FVector::ZeroVector, MistgateNormal = FVector::ZeroVector;
 	int32 CastleHallRoom = -1, CastleBld = -1;
+	/** the castle's round corner towers (the user's of 2026-11-02: medieval walls, not the dungeon's arches): their middles
+	 *  (world, z 0), which of them holds the stair up to the wall walk (-1 none), its ground door and its door onto the walk */
+	TArray<FVector> CastleTowers;
+	int32 CastleStairTower = -1;
+	FVector CastleStairDoor = FVector::ZeroVector, CastleWalkDoor = FVector::ZeroVector;
+	/** the wall walk's height (the roof's top over the castle; world z above the section) */
+	float CastleWalkZ = 0.f;
+	/** the trees, bushes and grass of the town as placed (x, y, kind: 1-3 a tree, 4 a bush): the papyrus map draws them */
+	TArray<FVector> TownGreens;
+	/** the castle's towers and stair (tests; world): "tower|<x>|<y>|<stair 0/1>", "stairdoor|<x>|<y>|<z>", "walkdoor|<x>|<y>|<z>",
+	 *  "stairmid|<x>|<y>|<z>", "spiral|<start angle in the castle's frame>|<quarter turns>", "walk|<z>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetCastleShapeLines() const;
 	/** the containers' building (-1 none) and where each townsperson stands or walks (role, the point, the building, wander
 	 *  radius cm) */
 	struct FTownPost { ERDTownRole Role = ERDTownRole::Townsfolk; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; float Wander = 0.f; int32 Index = 0; };
@@ -375,6 +387,12 @@ private:
 	/** the town's static part, a building / the outdoors at a time (static build): NextRoom counts buildings, NextCorr the
 	 *  outdoor steps */
 	void TownShellBuilding(int32 BI);
+	/** the castle's outside (RDTownPlan.cpp): its towers' places, the void under them and the path to the stair turret (the
+	 *  plan; no draws), an outer wall segment (Castle Forge's: slits, windows, the walk's strip, the battlements), the towers */
+	void CastleTowersPlan();
+	float CastleWalkTop() const;
+	void CastleOuterFace(const FVector& Edge, const FVector& OutW, float Yaw, float T, float Z0, float Z1, const FIntPoint& Tl, int32 Side, bool bOverDoor);
+	void CastleTowersBuild(const FTownBld& B);
 	void TownOutdoors(FRandomStream& R, int32 Step);
 	static constexpr int32 TownOutdoorSteps = 6;
 	void TownFurnish(FRandomStream& R, int32 BI);

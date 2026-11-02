@@ -109,14 +109,33 @@ for style, (folder, pre, walls, door, door_drop, hinge, wall_z, gable_out, mat) 
     d = fixed(f"{style}_Door", HF + door, loc=(0, 0, door_drop), yaw=180.0, scale=(-1, 1, 1) if style == "Thatch" else (1, 1, 1), material=mat)
     if d: d.hinge = V(*hinge); d.size = V(12, 107, 214)
 # ---------------------------------------------------------------- the town wall, its gate and towers; the castle's top
-wall = CK + "Walls_Stone/SM_Castle_Stone_Wall_02a_NN"
-piece("CityWall", wall, front="+y")
-piece("Parapet", CK + "Walls_Stone/SM_Castle_Stone_Parapet_01a_NN", front="+y", collision=False)
+# (Castle Forge's walls: 01a is plain stone; 02a, used here until 2026-11-02, has an arched doorway through it, and the town
+# wall was a row of arches; 02h has an arrow slit, 02f / 02g small windows, 02d a tall one)
+WS = CK + "Walls_Stone/"
+piece("CityWall", WS + "SM_Castle_Stone_Wall_01a_NN", front="+y")
+piece("CityWallSlit", WS + "SM_Castle_Stone_Wall_02h_NN", front="+y")
+piece("CityWallWin", WS + "SM_Castle_Stone_Wall_02f_NN", front="+y")
+piece("Parapet", WS + "SM_Castle_Stone_Parapet_01a_NN", front="+y", collision=False)
+# the castle's outside (RDTownPlan.cpp's CastleOuterFace / CastleTowersBuild; the user's of 2026-11-02: medieval walls with
+# windows, arrow slits, towers and a way up to the battlements instead of the dungeon's blind arches)
+for n, m in (("CWall", "01a"), ("CWallSlit", "02h"), ("CWallWin1", "02f"), ("CWallWin2", "02g"), ("CWallWinL", "02d")):
+    piece(n, WS + f"SM_Castle_Stone_Wall_{m}_NN", front="+y")
+# (the round tower's quarters: their origin is the tower's middle, the quarter between +X and +Y (raw: no centring); a slit,
+# a small window, a window, a doorway, plain stone)
+for c in "abcde":
+    piece("TowerRing" + c.upper(), WS + f"SM_Castle_Tower_Wall_02{c}_NN", front="+x", mode="raw", collision=False)
+piece("TowerCone", WS + "SM_Tower_Roof_02a_NN", front="+x", mode="raw", collision=False)
+# (a quarter turn of a spiral stair round its post, 100 cm up, climbing clockwise from its yaw; walked on: complex collision)
+piece("Spiral", WS + "SM_Stone_Stairs_01a_NN", front="+x", mode="raw")
+# (the towers' collision: hidden boxes, the pack's quarters close the foot of their doorways)
+col = piece("Collider", "/Engine/BasicShapes/Cube", front="+x")
+if col: col.hidden = True
 piece("Gate", CK + "Wood_Structures/SM_Main_Gate_03a_NN", front="+y", collision=False)
 piece("GateLeaves", CK + "Wood_Structures/SM_Gate_Door_01c_NN", front="+y", collision=False)
 piece("GateBar", CK + "Wood_Structures/SM_Gate_Door_01e_NN", front="+y", collision=False, mode="raw")
 piece("TowerRoof", CK + "Walls_Stone/SM_Tower_Roof_01d_NN", front="+x", scale=2.4, collision=False)
-piece("CastleRoof", CK + "Walls_Stone/SM_Stone_Floor_01a_NN", front="+x", scale=0.9, collision=False)
+# (the castle's roof is its wall walk since 2026-11-02: walked on)
+piece("CastleRoof", CK + "Walls_Stone/SM_Stone_Floor_01a_NN", front="+x", scale=0.9)
 # ---------------------------------------------------------------- the square, the circle, the graveyard, the yards
 piece("Well", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Stone", front="+x", mode="raw", size=(180, 180, 280))
 piece("WellTop", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Wood", front="+x", mode="raw", collision=False)

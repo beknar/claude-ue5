@@ -1871,14 +1871,15 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 	// or the drawn weapon itself when it is a spell (then the left mouse and RB cast it too)
 	const bool bDrawnSpell = Weapon() && Weapon()->bSpell;
 	const bool bAlongside = GetAlongsideSpell() >= 0;
-	const bool bSpellKey = PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder);
+	// (a hero who blocks holds LB for it: it is not her spell key)
+	const bool bBlocker = Generator && Generator->HeroBlocks();
+	const bool bSpellKey = PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::E) || (!bBlocker && PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder));
 	if (PC->IsInputKeyDown(EKeys::LeftMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_RightShoulder) || (bDrawnSpell && !bAlongside && bSpellKey)) StartAttack();
 	else if (bAlongside && bSpellKey) StartSpell();
 	// walking / running: R, or the left trigger pulled (its button, or the axis past half way for a pad that sends none)
-	// (the third list: a hero who blocks holds LT for it; her run switch on the gamepad is the left stick pressed)
-	const bool bLtRun = !(Generator && Generator->HeroBlocks());
-	const bool bToggle = PC->IsInputKeyDown(EKeys::R) || (bLtRun && (PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f))
-		|| (!bLtRun && PC->IsInputKeyDown(EKeys::Gamepad_LeftThumbstick));
+	// (every hero's run switch is LT; the Warrior blocks with LB, the user's of 2026-11-02: until then she blocked with LT and
+	// switched her run with the left stick pressed, which her controls panel no longer listed)
+	const bool bToggle = PC->IsInputKeyDown(EKeys::R) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f;
 	if (bToggle && !bRunToggleDown) SetRunMode(!bRunMode);
 	bRunToggleDown = bToggle;
 }

@@ -400,6 +400,7 @@ void ARDDungeonGenerator::BeginTownPlay()
 			StartSeed = Want;
 		}
 		UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN play: seed %d (%s)"), StartSeed, GI ? TEXT("the game's") : TEXT("no game instance"));
+		BeginDayNight();
 	}
 	else if (bTownLink && GI)
 	{
@@ -571,6 +572,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
+	if (bTown) TickDayNight(Dt);
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);

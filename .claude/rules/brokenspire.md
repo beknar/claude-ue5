@@ -6,6 +6,8 @@ paths:
   - "pipeline/unreal/882_*.py"
   - "pipeline/unreal/883_*.py"
   - "pipeline/unreal/884_*"
+  - "pipeline/unreal/885_*"
+  - "claude_ue5/Source/claude_ue5/RD/RDTownDay*"
   - "pipeline/blender_numpy/bs_*.py"
   - "claude_ue5/SourceArt/brokenspire/**"
 ---
@@ -39,6 +41,29 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 
 - **The packaged game has no pilot of the town**: autoplay is the castle's (asked in the town, it opens the castle). The tour (`StartTownTour`, `-RDTownTour`) runs on the real clock before the panel's pause returns from the generator's tick (the elder's panel pauses the game). The whole way from the square to the Mistgate is about 210 m, 80 s at her run: while the papyrus map covers the view she is put 100 m before it on the way (`-RDTourRun`). Rehearse it in play (`StartTownTour` from Python; `GetTownTourState`) before packaging: the rehearsal's times held in the recording (the Mistgate at about 45 s with the load).
 - **Game Bar recorded the game this time** (its file named after `claude_ue5`), at 2560 x 1440 and about 26 frames a second though the window was 3840 x 2160, with the game's sound (-28 dB mean): the recorder's checks still apply (a clip of another app is deleted unseen). The output keeps Game Bar's variable frame rate; ffmpeg's null muxer warns of non-monotonic timestamps in the first pass, harmless.
+
+## The user's list after the reel (2026-11-02: `885`, the castle's outside, day and night, the colour map)
+
+- **Look at a pack's pieces before using them by name**: Castle Forge's `SM_Castle_Stone_Wall_02a` (the town wall's piece since 882) has an arched doorway through it, so the whole town wall was a row of arches. `01a` is plain; `02h` is an arrow slit; `02d`-`02g` and `02k` are windows. Picture a kit row in base colour (`SCS_BASE_COLOR`, orthographic) from both faces: the lit picture of the first probe showed only silhouettes.
+- **The round tower's quarters** (`SM_Castle_Tower_Wall_02a`-`e`: a slit, a small window, a window, a doorway, plain) have their origin at the tower's middle and are placed raw (no centring). Their convex collision closes the doorway's foot (a trace through `02d` hit at 50 cm up): the towers have no mesh collision, and 32 hidden boxes round each ring leave the doors open (`Town.Collider`).
+- **The spiral stair piece** (`SM_Stone_Stairs_01a`) is a quarter turn, 100 cm up, climbing clockwise from its own yaw (it spans yaw -90 to 0 with its low step at 0). Trace a stair piece's steps before laying a stair.
+- **What the old shell hid shows from the walk**: the dungeon's 9.6 m columns in the Mistward Hall and the walls over the inner doorways stood through the roof once it was walked on. A piece taller than the town castle's room now ends under its ceiling (`AddPiece`), and the test counts anything through the walk.
+- **Light through seams**: Castle Forge's pieces set edge to edge (a storey on a storey, a segment beside a segment) let the rooms' torchlight through as bright lines. They overlap by 14 cm now.
+- **Moving the castle** a tile forward (so its towers leave the lane behind it) and widening its margin changes every seed's town: the plan's stream is not touched, but the plots see other free ground.
+- **A filter that rewrites a list must be safe to run twice**: 870 turned the Warrior's `LT|` line into `L3|` and dropped any `L3|` line first. Run again, it found no `LT|` line and dropped her run line altogether (the user: "run is no longer mapped to the gamepad"). It writes her lines whole now (`885` and 870).
+- **Day and night**: the sun is the level's atmosphere sun (881's), driven from the town's tick; the moon is a second atmosphere light made in play. Without the exposure's bias at night, the histogram exposure (bias 0.6, minimum 0.5 EV) would light a moonlit town like the day: 1.2 stops less at night, measured by pictures (noon 105, midnight 21 of 255).
+
+- **The PR review's finds (2026-11-02, PR #13)**:
+  - **Test the shape, not a point of it:** the battlements were to stop where a tower stands, but the check measured the segment's middle, which never lies within the ring. Each corner segment is now cut where the ring crosses its line.
+  - **Read a level's base light once:** a second start of the day would have taken the dimmed night sun as the day's. Its moon is made once.
+  - **Light the world at a pace, not every frame:** four times a second.
+  - **The test reads the lights themselves** (their rotation and intensity in the world), not the clock's formula for them.
+  - **The map draws what the world has:** every street is cobbled in TownGround, the side streets too.
+  - **A piece's own material needs the usage too** (869).
+  - **A rule kept in two scripts must say the same:** 870 and 885 both write the Warrior's list.
+  - **One helper for what several drawings share:** the quest mark, the labels' placement.
+- **The reel's hour**: at 17:24 (`-TownHour 17.4`) the low sun left the castle's front in shadow for the whole run (the second reel's first take); the afternoon (15:30) lights it. Look at a take's contact sheet before deleting the one before it: the dark take was deleted before its retake, and the retakes then failed.
+- **Game Bar records whatever app the user is in**: with the user at the machine, two takes of three recorded their browser and Discord (deleted unseen) and the third stopped after 6.6 s. Record when the user leaves the machine alone, or ask.
 
 ## The map's pictures
 

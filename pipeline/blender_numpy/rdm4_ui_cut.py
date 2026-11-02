@@ -5,7 +5,8 @@
 --merge (with --export): a batch made in a folder of its own (its <out_dir> holds only the new elements)
 adds its picks to the <dir> already exported: the pieces of layout.json that this batch has no picture
 for are kept as they were, and its own picks replace or join them.
---export writes the picks at the sizes the game draws them (SIZES: the longer side) as <dir>/<element>.png
+--export writes the picks at the sizes the game draws them (SIZES: the longer side, or the element's own
+`export`) as <dir>/<element>.png
 and <dir>/layout.json, which pipeline/unreal/830 reads: per piece its `border` (left, top, right, bottom
 shares kept when it is stretched: the element's `slice`, else its kind's default; a hollow frame's border
 is everything round its open inside) and `inner` (the open inside of a frame with `holes`, measured on
@@ -303,7 +304,7 @@ if picks and not ONLY:
             print("merging into", len(layout), "pieces already exported")
         for name, im in chosen.items():
             e = EL[name]
-            s = SIZES[e["kind"]] / max(im.size)
+            s = e.get("export", SIZES[e["kind"]]) / max(im.size)     # (an element's own `export` size overrides its kind's)
             im2 = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS) if s < 1 else im.copy()
             im2.save(os.path.join(EXPORT, name + ".png"))
             ent = {"kind": e["kind"], "size": list(im2.size), "border": e.get("slice", SLICE.get(e["kind"], [0, 0, 0, 0])),

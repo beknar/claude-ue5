@@ -1609,7 +1609,8 @@ def step_helmet():
 
 def step_block():
     """the Warrior's block: the right mouse button held (as the mouse sends it): blocking, her speed halved, a blow takes the
-    shield's share + 30 % less and wears the shield five times as much, no swing while she blocks; LT the same; the Mage cannot
+    shield's share + 30 % less and wears the shield five times as much, no swing while she blocks; LB the same (LT switches her
+    run instead, and her controls list says both: the user's of 2026-11-02); the Mage cannot
     block; her left hand raised before her chest (the pose), pictures"""
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     put(g.get_start_room_center(), 0.0); yield from wait(0.3)
@@ -1635,10 +1636,17 @@ def step_block():
     g.slate_key(key("RightMouseButton"), False); yield from rwait(0.5)
     res["after_release"] = {"blocking": c.is_blocking(), "speed": round(walk_speed(), 1), "hand": hand()}
     shot("block_off"); yield from rwait(0.6)
-    # (LT held: the gamepad's)
+    # (LB held: the gamepad's block since 2026-11-02; LT switches her run, as every hero's, and does not block)
+    why = str(g.slate_key(key("Gamepad_LeftShoulder"), True)); yield from rwait(0.4)
+    res["lb_blocking"] = c.is_blocking(); g.slate_key(key("Gamepad_LeftShoulder"), False); yield from rwait(0.3)
+    if why: res["refused"].append("lb: " + why)
+    run0 = c.is_run_mode()
     why = str(g.slate_key(key("Gamepad_LeftTrigger"), True)); yield from rwait(0.4)
     res["lt_blocking"] = c.is_blocking(); g.slate_key(key("Gamepad_LeftTrigger"), False); yield from rwait(0.3)
+    res["lt_run_switched"] = c.is_run_mode() != run0
     if why: res["refused"].append("lt: " + why)
+    if c.is_run_mode() != run0: g.slate_key(key("Gamepad_LeftTrigger"), True); yield from rwait(0.3); g.slate_key(key("Gamepad_LeftTrigger"), False); yield from rwait(0.3)
+    res["pad_list"] = [str(k) for h in g.get_editor_property("heroes") if str(h.name) == "Warrior" for k in h.controls_pad]
     res["speed"] = {"normal": round(s0, 1), "blocking": round(s1, 1), "ratio": round(s1 / max(s0, 1), 3)}
     # (blocking when play restarts: the held pose let go (the PR review's find: the flag was cleared, the paused clip stayed))
     c.set_blocking(True); yield from wait(0.5)
@@ -1654,7 +1662,8 @@ def step_block():
           and b_["lost"] < p_["lost"] * 0.8 and p_["shield_lost"] > 0 and abs(b_["shield_lost"] / max(p_["shield_lost"], 1e-3) - 5.0 * (want_share / max(share, 1e-3))) < 1.0
           and res["swing_refused"] and not res["after_release"]["blocking"] and res["after_release"]["speed"] > s1 * 1.8
           and res["hand_block"][1] > res["hand_rest"][1] + 15 and res["after_release"]["hand"][1] < res["hand_block"][1] - 10
-          and res["lt_blocking"] and not res["mage_blocking"]
+          and res["lb_blocking"] and not res["lt_blocking"] and res["lt_run_switched"] and not res["mage_blocking"]
+          and "LT|switch walk / run" in res["pad_list"] and "LB (hold)|block with the shield" in res["pad_list"]
           and not res["after_restart"]["blocking"] and res["after_restart"]["hand"][1] < res["hand_block"][1] - 10)
     step_result("block", ok, **res)
 

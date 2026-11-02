@@ -81,8 +81,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 	Rooms.Reset(); Corrs.Reset(); DoorEdges.Reset(); Portals.Reset(); Cells.Reset(); Fixtures.Reset(); SpecialChests.Reset();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
-	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset();
-	CastleHallRoom = -1; CastleBld = -1;
+	TownBlds.Reset(); TownSpots.Reset(); TownRoads.Reset(); TownPosts.Reset(); TownGreens.Reset();
+	CastleHallRoom = -1; CastleBld = -1; CastleTowers.Reset(); CastleStairTower = -1;
 	FRDTFrame F; F.O = FMath::Max(4, (N - 160) / 2); F.S = N - 2 * F.O; F.G = R.RandRange(0, 3);
 	const int32 S = F.S;
 	// ---- the ground inside the wall: one hallway
@@ -106,7 +106,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// ---- the main road, the castle, the square, the cross roads
 	const int32 Vc = S / 2 - 1 + R.RandRange(-6, 6);
 	const int32 CD = 17, CW = 21;
-	const int32 Cu0 = S - 2 - CD, Cv0 = Vc - CW / 2;
+	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners)
+	const int32 Cu0 = S - 3 - CD, Cv0 = Vc - CW / 2;
 	const int32 Us = 50 + R.RandRange(-4, 4);           // (the square's near edge)
 	const int32 SqU0 = Us, SqU1 = Us + 14, SqV0 = Vc - 7, SqV1 = Vc + 8;
 	Road(0, Vc - 1, Cu0, Vc + 2);
@@ -130,7 +131,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// the lane inside the wall (trodden, not cobbled)
 	Mark(0, 0, S, 2, 1); Mark(0, S - 2, S, S, 1); Mark(0, 0, 2, S, 1); Mark(S - 2, 0, S, S, 1);
 	// the castle and the square's ground are taken; the gate's mouth kept clear
-	Mark(Cu0 - 1, Cv0 - 1, S, Cv0 + CW + 1, 3);
+	Mark(Cu0 - 2, Cv0 - 2, S, Cv0 + CW + 2, 3);
 	Mark(0, Vc - 4, 6, Vc + 5, 4);
 	// ---- the teleport circle beside the square (a 5 x 5 paved ring), the graveyard, the mill, the still's ground
 	const bool bCircleLow = R.RandBool();
@@ -305,6 +306,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 		B.bBoarded = B.State == 2;
 		B.Label = RDTownKindName(B.Kind);
 	}
+	// ---- the castle's round towers, its stair turret and the path to it (no draws: the plan's stream is untouched)
+	CastleTowersPlan();
 	// ---- the wall's towers (2 x 2 tiles astride the wall at its corners, beside the gate and every 15 tiles or so): void
 	auto Tower = [&](int32 U, int32 V)
 	{
@@ -496,8 +499,8 @@ void ARDSection::TownShellBuilding(int32 BI)
 					const FVector C = TileWorld(Tl);
 					AddPieceAt(Floor, C, 90.f * R.RandRange(0, 3));
 					AddPieceAt(TEXT("Castle.Ceil_Room"), C + FVector(0, 0, H), 90.f * R.RandRange(0, 3));
-					// the roof over it (a flat stone floor seen from above)
-					AddPieceAt(TEXT("Town.CastleRoof"), C + FVector(0, 0, H + 40.f), 90.f * R.RandRange(0, 3), 1.f, true);
+					// the roof over it (a flat stone floor seen from above): the wall walk, walked on
+					AddPieceAt(TEXT("Town.CastleRoof"), C + FVector(0, 0, H + 40.f), 90.f * R.RandRange(0, 3));
 					for (int32 Side = 0; Side < 4; ++Side)
 					{
 						const FIntPoint Nb = Tl + RDTDir4[Side];
@@ -513,39 +516,29 @@ void ARDSection::TownShellBuilding(int32 BI)
 						if (bDoor)
 						{
 							AddPieceAt(TEXT("Doorway"), At, Yaw);
-							for (float Z = Dp ? Dp->Size.Z - 2.f : 300.f; Z < H - 5.f; Z += Wp ? Wp->Size.Z - 2.f : 300.f) AddPieceAt(Wall, At + FVector(0, 0, Z), Yaw);
+							// (the wall over the doorway up to the ceiling, not a whole piece's height: it stood 2.5 m through the
+							// wall walk)
+							for (float Z = Dp ? Dp->Size.Z - 2.f : 300.f; Z < H - 5.f; Z += Wp ? Wp->Size.Z - 2.f : 300.f)
+							{
+								const float Wz = Wp ? FMath::Max((float)Wp->Size.Z, 50.f) : 300.f;
+								AddPiece(Wall, FTransform(FRotator(0, Yaw, 0), At + FVector(0, 0, Z), FVector(1.f, 1.f, FMath::Min(1.f, (H + 10.f - Z) / Wz))));
+							}
 							if (bOut)
 							{
+								// (the gate: the dungeon's doorway turned out, the outer face's stone over it to the wall walk)
 								AddPieceAt(TEXT("Doorway"), Edge + OutW * T, Yaw + 180.f);
-								for (float Z = Dp ? Dp->Size.Z - 2.f : 300.f; Z < H + 550.f; Z += Wp ? Wp->Size.Z - 2.f : 300.f) AddPieceAt(Wall, Edge + OutW * T + FVector(0, 0, Z), Yaw + 180.f);
+								const float Z0 = Dp ? Dp->Size.Z - 2.f : 300.f;
+								CastleOuterFace(Edge, OutW, Yaw, T, Z0, CastleWalkTop(), Tl, Side, true);
 							}
 							continue;
 						}
 						for (float Z = 0.f; Z < H - 5.f; Z += Wp ? Wp->Size.Z - 2.f : 300.f) AddPieceAt(Wall, At + FVector(0, 0, Z), Yaw);
-						if (bOut)
-						{
-							// (the outside face, standing a little higher: the parapet's base)
-							for (float Z = 0.f; Z < H + 550.f; Z += Wp ? Wp->Size.Z - 2.f : 300.f) AddPieceAt(Wall, Edge + OutW * T + FVector(0, 0, Z), Yaw + 180.f);
-							AddPieceAt(TEXT("Town.Parapet"), Edge + OutW * (T + 10.f) + FVector(0, 0, H + 550.f), Yaw + 180.f, 1.f, true);
-						}
+						// (the outside: Castle Forge's stone, arrow slits below, windows above, the walk and its battlements on top)
+						if (bOut) CastleOuterFace(Edge, OutW, Yaw, T, 0.f, CastleWalkTop(), Tl, Side, false);
 					}
 				}
 		}
-		// corner towers of the castle: columns of wall at its four corners, higher, with parapets
-		const FVector A = TileWorld(B.Min) - FVector(M * 0.5f, M * 0.5f, 0), Bv = TileWorld(B.Max - FIntPoint(1, 1)) + FVector(M * 0.5f, M * 0.5f, 0);
-		for (const FVector& Cn : { FVector(A.X, A.Y, 0), FVector(Bv.X, A.Y, 0), FVector(Bv.X, Bv.Y, 0), FVector(A.X, Bv.Y, 0) })
-		{
-			const FVector Out2 = (Cn - (A + Bv) * 0.5f).GetSafeNormal2D() * 160.f;
-			for (int32 K = 0; K < 4; ++K)
-			{
-				// (a wall's face is its +X: turned half round, each face looks out from the tower's middle)
-				const float Yw = 90.f * K;
-				const FVector Off = FRotator(0, Yw, 0).RotateVector(FVector(-150.f, 0, 0));
-				for (float Z = 0.f; Z < H + 1500.f; Z += Wp ? Wp->Size.Z - 2.f : 300.f) AddPieceAt(Wall, Cn + Out2 + Off + FVector(0, 0, Z), Yw + 180.f);
-				AddPieceAt(TEXT("Town.Parapet"), Cn + Out2 + FRotator(0, Yw, 0).RotateVector(FVector(-160.f, 0, 0)) + FVector(0, 0, H + 1500.f), Yw + 180.f, 1.f, true);
-			}
-			AddPieceAt(TEXT("Town.TowerRoof"), Cn + Out2 + FVector(0, 0, H + 1500.f + 230.f), 0.f, 0.62f, true);
-		}
+		CastleTowersBuild(B);
 		// the Mistgate: an arch in the hall's back wall, its glow (play: the generator's)
 		AddPieceAt(TEXT("Town.MistArch"), MistgateAt - MistgateNormal * 30.f, MistgateNormal.Rotation().Yaw, 1.f, true);
 		return;
@@ -833,8 +826,11 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			{
 				const FVector P = From + Dir * (D + Wl * 0.5f);
 				if (FVector::Dist2D(P, TownGate) < 160.f) continue;            // (the gate's gap: its frame stands there)
-				// (a wall piece runs along its +Y, its face toward +X: the parapet's the same)
-				for (int32 K = 0; K < 2; ++K) AddPieceAt(TEXT("Town.CityWall"), P + FVector(0, 0, K * Wh), InYaw);
+				// (a wall piece runs along its +Y, its face toward +X: the parapet's the same; plain stone below, an arrow slit in
+				// one upper segment of three, by a hash of the place: until 2026-11-02 every piece was one with an arched doorway)
+				const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(P.X), FMath::RoundToInt(P.Y))), 0x5117u);
+				AddPieceAt(TEXT("Town.CityWall"), P, InYaw);
+				AddPieceAt(Hh % 3 == 0 && Generator->Piece(TEXT("Town.CityWallSlit")) ? FName(TEXT("Town.CityWallSlit")) : FName(TEXT("Town.CityWall")), P + FVector(0, 0, Wh), InYaw);
 				AddPieceAt(TEXT("Town.Parapet"), P + FVector(0, 0, 2 * Wh), InYaw, 1.f, true);
 			}
 		};
@@ -872,7 +868,14 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				for (int32 Sg = -1; Sg <= 1; Sg += 2)
 				{
 					const FVector Fc = Sp.At + Rt.RotateVector(FVector(-300.f, 150.f * Sg, 0));
-					for (int32 H = 0; H < 3; ++H) AddPieceAt(TEXT("Town.CityWall"), Fc + FVector(0, 0, H * Wh), Yw + 180.f);
+					// (plain below, an arrow slit, a small window at the top)
+					for (int32 H = 0; H < 3; ++H)
+					{
+						FName Nm(TEXT("Town.CityWall"));
+						if (H == 1 && Sg < 0 && Generator->Piece(TEXT("Town.CityWallSlit"))) Nm = TEXT("Town.CityWallSlit");
+						if (H == 2 && Sg > 0 && Generator->Piece(TEXT("Town.CityWallWin"))) Nm = TEXT("Town.CityWallWin");
+						AddPieceAt(Nm, Fc + FVector(0, 0, H * Wh), Yw + 180.f);
+					}
 					AddPieceAt(TEXT("Town.Parapet"), Fc + FVector(0, 0, 3 * Wh), Yw + 180.f, 1.f, true);
 				}
 			}
@@ -1014,6 +1017,10 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			const float U = R.FRand();
 			const FName Nm = U < (bOutside ? 0.5f : 0.22f) ? FName(*FString::Printf(TEXT("Town.Tree%d"), 1 + R.RandRange(0, 2))) : U < 0.6f ? FName(TEXT("Town.Bush")) : FName(TEXT("Town.Grass"));
 			AddPieceAt(Nm, P, R.FRandRange(0, 360), R.FRandRange(0.85f, 1.2f), !Nm.ToString().Contains(TEXT("Tree")));
+			// (the papyrus map draws the trees and bushes where they stand)
+			const FString Ns = Nm.ToString();
+			if (Ns.StartsWith(TEXT("Town.Tree"))) TownGreens.Add(FVector(P.X, P.Y, (float)FCString::Atoi(*Ns.RightChop(9))));
+			else if (Ns == TEXT("Town.Bush")) TownGreens.Add(FVector(P.X, P.Y, 4.f));
 			if (bInside && Nm.ToString().Contains(TEXT("Tree"))) Blocked[Idx(T)] = 1;
 		}
 		break;
@@ -1126,4 +1133,225 @@ void ARDSection::TownGround()
 	Fl->SetHiddenInGame(true);
 	Fl->RegisterComponent();
 	AddInstanceComponent(Fl);
+}
+
+// ------------------------------------------------------------------------------------------------ the castle's outside
+// (the user's of 2026-11-02: "the castle's outer walls look strange being covered with arches; have them look a little more
+// like medieval castle walls, with windows, arrowslits, towers, a way into the battlements". The inside keeps the dungeon's
+// Castle theme; outside: Castle Forge's stone in two storeys to the wall walk (arrow slits below, windows above), the roof a
+// walked wall walk behind crenellated battlements, a round tower at each corner (Castle Forge's tower quarters, a cone roof)
+// and in the front one on the castle's +Y side a stair turret: a spiral stair from a door at its foot to a door onto the walk.)
+namespace
+{
+	/** the castle's towers: their middles stand this far out from the castle's corners (each way), the ring's radius, the
+	 *  angles (the castle's own frame: +X its front) of the stair turret's two doors, the spiral's quarters and its start */
+	constexpr float RDTCTowerOut = 200.f, RDTCTowerR = 314.f, RDTCTowerMid = 284.f;
+	constexpr float RDTCStairDoor = 315.f, RDTCWalkDoor = 225.f, RDTCSpiralStart = 305.f;
+	constexpr int32 RDTCSpiralQuarters = 9;
+	float RDTCAngleDiff(float A, float B) { return FMath::Abs(FMath::FindDeltaAngleDegrees(A, B)); }
+}
+
+float ARDSection::CastleWalkTop() const
+{
+	// (the roof's pieces lie 40 cm over the rooms' height: their top is the walk)
+	const FRDPiece* Rf = Generator ? Generator->Piece(TEXT("Town.CastleRoof")) : nullptr;
+	return (Generator ? Generator->RoomHeight : 600.f) + 40.f + (Rf ? (float)Rf->Size.Z : 21.f);
+}
+
+void ARDSection::CastleTowersPlan()
+{
+	CastleTowers.Reset(); CastleStairTower = -1;
+	if (!TownBlds.IsValidIndex(CastleBld)) return;
+	const FTownBld& B = TownBlds[CastleBld];
+	const float M = Generator->TileSize;
+	const int32 Nx = B.DoorSide < 2 ? B.Max.X - B.Min.X : B.Max.Y - B.Min.Y;
+	const int32 Ny = B.DoorSide < 2 ? B.Max.Y - B.Min.Y : B.Max.X - B.Min.X;
+	const float Hx = Nx * M * 0.5f, Hy = Ny * M * 0.5f, D = RDTCTowerOut;
+	// (the first is the front corner on the castle's +Y side: the stair turret)
+	for (const FIntPoint& Sg : { FIntPoint(1, 1), FIntPoint(1, -1), FIntPoint(-1, -1), FIntPoint(-1, 1) })
+		CastleTowers.Add(TownBldPoint(B, Sg.X * (Hx + D), Sg.Y * (Hy + D), 0.f));
+	CastleStairTower = 0;
+	const float Yaw0 = TownBldYaw(B);
+	auto Dir = [&](float A) { return FRotator(0, Yaw0 + A, 0).RotateVector(FVector(1, 0, 0)); };
+	CastleStairDoor = CastleTowers[0] + Dir(RDTCStairDoor) * (RDTCTowerR + 30.f);
+	CastleWalkZ = GetActorLocation().Z + CastleWalkTop();
+	CastleWalkDoor = CastleTowers[0] + Dir(RDTCWalkDoor) * (RDTCTowerR - 30.f) + FVector(0, 0, CastleWalkTop());
+	// the ground under the towers is void (nobody walks into them, nothing grows there); the stair door's tile stays ground
+	const FIntPoint DoorT = WorldToLocal(CastleStairDoor + Dir(RDTCStairDoor) * 60.f);
+	for (const FVector& C : CastleTowers)
+	{
+		const FIntPoint Ct = WorldToLocal(C);
+		for (int32 X = Ct.X - 3; X <= Ct.X + 3; ++X)
+			for (int32 Y = Ct.Y - 3; Y <= Ct.Y + 3; ++Y)
+			{
+				const FIntPoint T(X, Y);
+				if (!In(T) || T == DoorT || Type[Idx(T)] != 2) continue;
+				if (FVector::Dist2D(TileWorld(T), C) < RDTCTowerR + 70.f) { Type[Idx(T)] = 0; Owner[Idx(T)] = -1; }
+			}
+	}
+	// a cobbled path from the stair door to the forecourt (across the castle's front, then toward its door)
+	auto OnRoad = [&](const FIntPoint& T)
+	{
+		if (TownSquare.Contains(T)) return true;
+		for (const FIntRect& Rr : TownRoads) if (Rr.Contains(T)) return true;
+		return false;
+	};
+	const FIntPoint Tg = B.DoorTile + RDTDir4[B.DoorSide];
+	FIntPoint T = DoorT;
+	for (int32 K = 0; K < 24 && In(T) && !OnRoad(T); ++K)
+	{
+		TownRoads.Add(FIntRect(T, T + FIntPoint(1, 1)));
+		const FIntPoint Dd = Tg - T;
+		const bool bAcrossY = B.DoorSide < 2;
+		const int32 Across = bAcrossY ? Dd.Y : Dd.X, Along = bAcrossY ? Dd.X : Dd.Y;
+		if (Across != 0) T += bAcrossY ? FIntPoint(0, FMath::Sign(Across)) : FIntPoint(FMath::Sign(Across), 0);
+		else if (Along != 0) T += bAcrossY ? FIntPoint(FMath::Sign(Along), 0) : FIntPoint(0, FMath::Sign(Along));
+		else break;
+	}
+}
+
+void ARDSection::CastleOuterFace(const FVector& Edge, const FVector& OutW, float Yaw, float T, float Z0, float Z1, const FIntPoint& Tl, int32 Side, bool bOverDoor)
+{
+	const FRDPiece* Cw = Generator->Piece(TEXT("Town.CWall"));
+	const float M = Generator->TileSize, H = Generator->RoomHeight;
+	if (!Cw)
+	{
+		// (no Castle Forge pieces: the theme's own wall, as before)
+		for (float Z = Z0; Z < Z1 - 5.f; Z += 300.f) AddPieceAt(TEXT("Castle.Wall_Block"), Edge + OutW * T + FVector(0, 0, Z), Yaw + 180.f);
+		return;
+	}
+	const float Th = FMath::Max((float)Cw->Size.X, 40.f), Len = FMath::Max((float)Cw->Size.Y, 100.f), Ht = FMath::Max((float)Cw->Size.Z, 100.f);
+	const FVector P = Edge + OutW * (T * 0.5f + Th * 0.5f);
+	const FRotator Ro(0, Yaw + 180.f, 0);
+	const uint32 Hh = HashCombine(GetTypeHash(Tl), (uint32)Side * 2654435761u);
+	auto Has = [&](const TCHAR* N) { return Generator->Piece(N) != nullptr; };
+	// (pieces a little longer and taller than their slots: set edge to edge, the rooms' torchlight showed through the seams)
+	const float Ls = (M + 14.f) / Len;
+	if (bOverDoor) AddPiece(TEXT("Town.CWall"), FTransform(Ro, P + FVector(0, 0, Z0), FVector(1.f, Ls, (Z1 - Z0 + 4.f) / Ht)));
+	else
+	{
+		const float Hs = (Z1 - Z0) * 0.5f;
+		// (the ground storey: plain stone, an arrow slit in one segment of three)
+		const FName G = (Hh % 3u == 0u && Has(TEXT("Town.CWallSlit"))) ? FName(TEXT("Town.CWallSlit")) : FName(TEXT("Town.CWall"));
+		// (the upper storey: small windows most, now and then a tall one, a slit, plain stone)
+		const uint32 U = (Hh >> 8) % 10u;
+		FName Up = U < 3u ? FName(TEXT("Town.CWall")) : U < 5u ? FName(TEXT("Town.CWallWin1")) : U < 7u ? FName(TEXT("Town.CWallWin2")) : U < 8u ? FName(TEXT("Town.CWallWinL")) : FName(TEXT("Town.CWallSlit"));
+		if (!Generator->Piece(Up)) Up = TEXT("Town.CWall");
+		AddPiece(G, FTransform(Ro, P + FVector(0, 0, Z0), FVector(1.f, Ls, (Hs + 14.f) / Ht)));
+		AddPiece(Up, FTransform(Ro, P + FVector(0, 0, Z0 + Hs), FVector(1.f, Ls, (Hs + 4.f) / Ht)));
+	}
+	// the walk's outer strip over the walls' tops, flush with the roof's top
+	const FRDPiece* Rf = Generator->Piece(TEXT("Town.CastleRoof"));
+	const float Sw = T * 0.5f + 15.f;
+	if (Rf) AddPiece(TEXT("Town.CastleRoof"), FTransform(FRotator(0, Yaw, 0), Edge + OutW * (Sw * 0.5f) + FVector(0, 0, H + 40.f), FVector(Sw / FMath::Max((float)Rf->Size.X, 50.f), 1.f, 1.f)));
+	// the battlements on the outer face, up to where a tower's ring crosses them: a segment the ring crosses is shortened to
+	// its part outside the ring and 20 cm in (the PR review's find: a test of the segment's middle never caught one, and every
+	// corner's ran 40 cm into its tower)
+	const FRDPiece* Pp = Generator->Piece(TEXT("Town.Parapet"));
+	const float Pt = Pp ? FMath::Max((float)Pp->Size.X, 40.f) : 110.f, Pl = Pp ? FMath::Max((float)Pp->Size.Y, 100.f) : 313.f;
+	const FVector Pc = Edge + OutW * (T * 0.5f + Th - Pt * 0.5f);
+	const FVector Along(-OutW.Y, OutW.X, 0.f);
+	float T0 = -M * 0.5f, T1 = M * 0.5f;
+	for (const FVector& C : CastleTowers)
+	{
+		// (where the segment's line Pc + Along t enters and leaves the ring's circle)
+		const FVector2D D(Pc.X - C.X, Pc.Y - C.Y), Al(Along.X, Along.Y);
+		const float B_ = FVector2D::DotProduct(D, Al), Cq = D.SizeSquared() - RDTCTowerR * RDTCTowerR, Disc = B_ * B_ - Cq;
+		if (Disc <= 0.f) continue;
+		const float Ta = -B_ - FMath::Sqrt(Disc), Tb = -B_ + FMath::Sqrt(Disc);
+		if (Tb <= T0 || Ta >= T1) continue;
+		// (keep the longer part outside, reaching 20 cm into the ring)
+		if (Ta - T0 >= T1 - Tb) T1 = FMath::Min(T1, Ta + 20.f); else T0 = FMath::Max(T0, Tb - 20.f);
+	}
+	if (T1 - T0 < 30.f) return;
+	AddPiece(TEXT("Town.Parapet"), FTransform(Ro, Pc + Along * ((T0 + T1) * 0.5f) + FVector(0, 0, Z1), FVector(1.f, (T1 - T0) / Pl, 1.f)), true);
+}
+
+void ARDSection::CastleTowersBuild(const FTownBld& B)
+{
+	const FRDPiece* Rp = Generator->Piece(TEXT("Town.TowerRingA"));
+	if (!Rp || CastleTowers.Num() == 0) return;
+	const float Yaw0 = TownBldYaw(B);
+	// (each storey overlaps the one under it by 14 cm: set edge to edge, the torches inside lit the seams)
+	const float Top = CastleWalkTop(), Hs = FMath::Max((float)Rp->Size.Z - 14.f, 100.f), TowerTop = Top + 2.f * Hs;
+	auto Dir = [&](float A) { return FRotator(0, Yaw0 + A, 0).RotateVector(FVector(1, 0, 0)); };
+	const FRDPiece* Rf = Generator->Piece(TEXT("Town.CastleRoof"));
+	const float RfZ = Rf ? (float)Rf->Size.Z : 21.f, RfX = Rf ? FMath::Max((float)Rf->Size.X, 50.f) : 304.f;
+	const FRDPiece* Sp = Generator->Piece(TEXT("Town.Spiral"));
+	const float SpZ = Sp ? FMath::Max((float)Sp->Size.Z, 50.f) : 100.f;
+	for (int32 I = 0; I < CastleTowers.Num(); ++I)
+	{
+		const FVector C = CastleTowers[I];
+		const bool bStair = I == CastleStairTower && Sp;
+		const FVector Lc = FRotator(0, -Yaw0, 0).RotateVector(C - TownBldPoint(B, 0.f, 0.f, 0.f));
+		const float Out = FMath::RadiansToDegrees(FMath::Atan2(Lc.Y, Lc.X));      // (the way out from the castle's middle)
+		// the ring: four storeys of four quarters (the second stretched to the walk's height), each quarter's look by where
+		// it faces: arrow slits and windows outward, plain stone toward the castle; the stair turret's two doors
+		const float Zs[4] = { 0.f, Hs, Top, Top + Hs };
+		const float Rz = FMath::Max((float)Rp->Size.Z, 100.f);
+		const float Sz[4] = { 1.f, (Top - Hs + 14.f) / Rz, 1.f, 1.f };
+		for (int32 St = 0; St < 4; ++St)
+			for (int32 K = 0; K < 4; ++K)
+			{
+				const float Q = 90.f * K, Mid = Q + 45.f, Rel = RDTCAngleDiff(Mid, Out);
+				TCHAR V = TEXT('E');
+				switch (St)
+				{
+				case 0: V = Rel < 10.f ? TEXT('A') : TEXT('E'); break;
+				case 1: V = Rel < 10.f ? TEXT('B') : Rel < 100.f ? TEXT('A') : TEXT('E'); break;
+				case 2: V = Rel < 10.f ? TEXT('A') : Rel < 100.f ? TEXT('B') : TEXT('E'); break;
+				default: V = Rel < 10.f ? TEXT('C') : Rel < 100.f ? TEXT('A') : TEXT('B'); break;
+				}
+				if (bStair && St == 0 && RDTCAngleDiff(Mid, RDTCStairDoor) < 10.f) V = TEXT('D');
+				if (bStair && St == 2 && RDTCAngleDiff(Mid, RDTCWalkDoor) < 10.f) V = TEXT('D');
+				const FName Nm(*FString::Printf(TEXT("Town.TowerRing%c"), V));
+				AddPiece(Generator->Piece(Nm) ? Nm : FName(TEXT("Town.TowerRingA")), FTransform(FRotator(0, Yaw0 + Q, 0), C + FVector(0, 0, Zs[St]), FVector(1.f, 1.f, Sz[St])), true);
+			}
+		for (int32 K = 0; K < 4; ++K) AddPieceAt(TEXT("Town.TowerCone"), C + FVector(0, 0, TowerTop), Yaw0 + 90.f * K, 1.f, true);
+		// (its collision: the pack's quarters close their doorways' feet; 32 hidden boxes round the ring instead, the doors open)
+		for (int32 J = 0; J < 32; ++J)
+		{
+			const float A = 5.625f + 11.25f * J;
+			const FTransform Bx(FRotator(0, Yaw0 + A, 0), C + Dir(A) * RDTCTowerMid, FVector(0.6f, 0.62f, 1.f));
+			auto Box = [&](float Za, float Zb)
+			{
+				if (Zb - Za < 5.f) return;
+				FTransform T = Bx; T.AddToTranslation(FVector(0, 0, Za)); T.SetScale3D(FVector(0.6f, 0.62f, (Zb - Za) / 100.f));
+				AddPiece(TEXT("Town.Collider"), T);
+			};
+			if (bStair && RDTCAngleDiff(A, RDTCStairDoor) < 11.25f) Box(240.f, TowerTop);
+			else if (bStair && RDTCAngleDiff(A, RDTCWalkDoor) < 11.25f) { Box(0.f, Top); Box(Top + 240.f, TowerTop); }
+			else Box(0.f, TowerTop);
+		}
+		if (!bStair)
+		{
+			// (a floor at the walk's level: the corner between the castle's walls opens into the tower)
+			if (Rf) AddPiece(TEXT("Town.CastleRoof"), FTransform(FRotator(0, Yaw0, 0), C + FVector(0, 0, Top - RfZ), FVector(370.f / RfX, 370.f / RfX, 1.f)));
+			continue;
+		}
+		// the spiral: quarter turns climbing clockwise (each piece from its own yaw down 90 degrees), from beside the foot's door
+		// to the walk's door; a landing over the gap between the last step and the door; a torch
+		const float Qh = Top / RDTCSpiralQuarters;
+		for (int32 K = 0; K < RDTCSpiralQuarters; ++K)
+			AddPiece(TEXT("Town.Spiral"), FTransform(FRotator(0, Yaw0 + RDTCSpiralStart - 90.f * K, 0), C + FVector(0, 0, Qh * K), FVector(1.f, 1.f, Qh / SpZ)));
+		if (Rf) AddPiece(TEXT("Town.CastleRoof"), FTransform(FRotator(0, Yaw0 + RDTCWalkDoor, 0), C + Dir(RDTCWalkDoor) * 250.f + FVector(0, 0, Top - RfZ), FVector(130.f / RfX, 130.f / RfX, 1.f)));
+		AddTorch(C + Dir(45.f) * 250.f + FVector(0, 0, 330.f), Yaw0 + 45.f + 180.f, 120.f);
+		AddTorch(C + Dir(135.f) * 250.f + FVector(0, 0, Top + 150.f), Yaw0 + 135.f + 180.f, 90.f);
+	}
+}
+
+TArray<FString> ARDSection::GetCastleShapeLines() const
+{
+	TArray<FString> Out;
+	for (int32 I = 0; I < CastleTowers.Num(); ++I) Out.Add(FString::Printf(TEXT("tower|%.0f|%.0f|%d"), CastleTowers[I].X, CastleTowers[I].Y, I == CastleStairTower ? 1 : 0));
+	if (CastleStairTower >= 0)
+	{
+		Out.Add(FString::Printf(TEXT("stairdoor|%.0f|%.0f|%.0f"), CastleStairDoor.X, CastleStairDoor.Y, GetActorLocation().Z));
+		// (world heights: the towers' middles are TileWorld's (the section's z), the walk door's its own plus the walk's top)
+		Out.Add(FString::Printf(TEXT("walkdoor|%.0f|%.0f|%.0f"), CastleWalkDoor.X, CastleWalkDoor.Y, CastleWalkDoor.Z));
+		Out.Add(FString::Printf(TEXT("stairmid|%.0f|%.0f|%.0f"), CastleTowers[CastleStairTower].X, CastleTowers[CastleStairTower].Y, CastleTowers[CastleStairTower].Z));
+		Out.Add(FString::Printf(TEXT("spiral|%.0f|%d"), (float)RDTCSpiralStart, RDTCSpiralQuarters));
+	}
+	Out.Add(FString::Printf(TEXT("walk|%.0f"), CastleWalkZ));
+	return Out;
 }

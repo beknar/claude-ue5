@@ -84,6 +84,10 @@ public:
 	/** her things lying where she fell when she left a level (each pile's things, wear and worn shield; its Hero is the
 	 *  level it lay in, "castle" or "town"): laid again where she comes into that level the next time */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FRDCarry> HerPiles;
+	/** the town's time of day (hours, 0-24; -1: a new game, the town starts its day at TownStartHour) and which day it is:
+	 *  kept while she is in the castle (the castle is indoors: its clock stands still there) */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownHour = -1.f;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownDay = 1;
 	/** -RDTownGo has been read (once a game instance) */
 	bool bTownGoRead = false;
 	/** the showcase tour: the castle's autoplay seconds when it comes through the Mistgate (0: none) */

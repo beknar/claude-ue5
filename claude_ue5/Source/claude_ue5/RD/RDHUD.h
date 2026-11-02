@@ -67,6 +67,15 @@ private:
 	// her purse and quests
 	void DrawTownMinimap(float Sc, const FVector& L, float Yaw);
 	void DrawTownMap(float Sc, const FVector& L, float Yaw);
+	/** the painted map in colour (RDTownHUD.cpp: the Fairhill reference's look; "mapc_*" pictures) */
+	void DrawTownMapColour(float Sc, const FVector& L, float Yaw);
+	/** a label of the town's maps: its text, the point it names, the size of the picture there, its colour, type and scale */
+	struct FRDTMapLabel { FString Text; FVector2D P; float Size; FLinearColor Color; ERDType Type; float K; };
+	/** both maps' labels placed where they cover nothing taken before them, each on a halo */
+	void PlaceTownMapLabels(const TArray<FRDTMapLabel>& Pending, TArray<FBox2D>& Taken, float Sc, const FLinearColor& Halo);
+	/** a painted texture laid over a screen box, its picture anchored to the world (W0..W1 in cm, Repeat cm a picture) so
+	 *  that boxes side by side join */
+	bool TownTiled(FName Name, const FVector2D& A, const FVector2D& B, const FVector2D& W0, const FVector2D& W1, float Repeat, const FLinearColor& Tint);
 	void DrawTownPanel(float Sc);
 	void DrawTownTracker(float Sc);
 	void DrawTownNames(float Sc);

@@ -407,7 +407,8 @@ void URDCombatComponent::SetBlocking(bool bOn)
 void URDCombatComponent::TickBlocking(const APlayerController* PC)
 {
 	if (!Generator || !Generator->HeroBlocks()) { if (bBlocking) SetBlocking(false); return; }
-	const bool bDown = PC && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftTriggerAxis) > 0.5f);
+	// (the right mouse button or LB held; LT is her run switch, as every hero's: the user's of 2026-11-02)
+	const bool bDown = PC && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder));
 	bBlockKeyDown = bDown;
 	if (!bScriptedOnly && bDown != bBlocking) SetBlocking(bDown);
 }
