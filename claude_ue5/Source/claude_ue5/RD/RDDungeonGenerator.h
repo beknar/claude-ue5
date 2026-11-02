@@ -960,11 +960,16 @@ public:
 	uint64 TownPanelClosedFrame = 0;
 	// (the showcase tour)
 	void TickTownTour(float RealDt);
-	bool bTourOn = false, bTourCmdRead = false;
-	int32 TourPhase = 0;
-	float TourT = 0.f, TourCastleSeconds = 0.f, TourStuckT = 0.f, TourCheckT = 0.f;
+	void EndTownTour(const FString& Why);
+	bool bTourOn = false, bTourCmdRead = false, bTourJumped = false;
+	int32 TourPhase = 0, TourStuckN = 0;
+	float TourT = 0.f, TourCastleSeconds = 0.f, TourCheckT = 0.f, TourDodgeUntil = -1.f, TourDodgeSign = 1.f;
 	/** how far before the Mistgate the run starts (m; the map hides the move: -RDTourRun=<m>, 0 the whole way) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TourRunMeters = 100.f;
+	/** a run longer than this (s) goes through the Mistgate at once (said in the log and the tour's state) */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TourRunTimeout = 60.f;
+	/** how the tour ended when it did not reach the Mistgate ("" while it runs or when it did) */
+	FString TourResult;
 	FString TourGo;
 	TArray<FVector> TourPath;
 	FVector TourCheckAt = FVector::ZeroVector;

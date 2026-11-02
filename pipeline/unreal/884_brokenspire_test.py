@@ -22,6 +22,8 @@ Steps (plan, comma separated):
             Mistgate: Mistward Castle opens with her things, her purse and her armour on; its Escape menu offers the way back
             to Brokenspire, which opens the town (the same town: its buildings where they were) with her before the castle's door,
             her things still hers
+  tour      the showcase tour (StartTownTour): its phases, the elder's panel with an answer and no quest taken, the papyrus
+            map drawn, the run from about 100 m, the castle with autoplay going; back to the town
   trip      a trip and back (after castle: it starts in the town): in the castle tier 2 opened (no boss set) and she falls
             there (her pile); back in the town the game keeps the pile; in the castle again it lies by the arch in the great
             hall, and tier 2's boss is set again once a room of tier 1 is seen
@@ -40,7 +42,7 @@ OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\brokenspire"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castle,trip"
+DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castle,tour,trip"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 
@@ -455,6 +457,47 @@ def via_menu():
     g = G["gen"]; g.set_menu_open(True)
     lines = [str(l) for l in g.get_menu_lines()]
     g.activate_menu_line(next(i for i, l in enumerate(lines) if "Return to" in l))
+def step_tour():
+    # the showcase tour as the recording plays it (StartTownTour; the castle's autoplay long, so its end does not quit play):
+    # each phase seen, the elder's panel open with a question's answer and no quest taken, the map open, the run from about
+    # 100 m to the Mistgate, the castle with autoplay going; then back to the town by the Escape menu
+    g = G["gen"]; res = {}
+    q0 = sorted(str(l).split("|")[3] for l in g.get_quest_lines())
+    g.set_editor_property("tour_run_meters", 100.0)
+    g.start_town_tour(300.0, "")
+    seen = {}; t0 = time.time(); panel = None; body = ""; mapped = False; run_m = None
+    while time.time() - t0 < 90:
+        yield
+        w = UES.get_game_world()
+        if w is not None and "mistward_castle" in w.get_path_name(): break
+        if w is None: continue
+        st = str(G["gen"].get_town_tour_state()).split("|")
+        ph = int(st[0]); seen.setdefault(ph, round(time.time() - t0, 1))
+        if ph == 3 and G["gen"].is_town_panel_open(): panel = str(G["gen"].get_town_panel()); body = str(G["gen"].get_town_panel_text())
+        if ph == 4 and not mapped: mapped = any(str(a) == "map_papyrus" for a in G["pc"].get_hud().get_art_drawn())
+        if ph == 5 and run_m is None: run_m = float(st[3])
+        if ph == -1: res["ended"] = st[4]; break
+    G["travel_until"] = time.time() + 60
+    t1 = time.time()
+    while time.time() - t1 < 40:
+        yield
+        w = UES.get_game_world()
+        if w is not None and "mistward_castle" in w.get_path_name():
+            refresh()
+            if G.get("gen") and cb(): break
+    refresh(); yield from wait(3.0)
+    res["phases_at_s"] = seen; res["map_drawn"] = mapped; res["panel"] = panel; res["answer"] = body[:80]; res["run_from_m"] = run_m
+    res["castle"] = G["w"].get_path_name().split(".")[-1] if G["w"] else None
+    res["reached_s"] = round(t1 - t0, 1)
+    res["autoplay_left"] = round(G["gen"].get_autoplay_left(), 0) if res["castle"] == "mistward_castle" else None
+    yield from travel("brokenspire", via_menu)
+    res["back"] = G["w"].get_path_name().split(".")[-1]
+    res["quests_same"] = sorted(str(l).split("|")[3] for l in G["gen"].get_quest_lines()) == q0
+    ok = all(p in seen for p in (1, 2, 3, 4, 5)) and res["panel"] == "talk" and len(res["answer"]) > 10 and res["map_drawn"] and res["run_from_m"] is not None \
+        and 80 <= res["run_from_m"] <= 125 and res["castle"] == "mistward_castle" and (res["autoplay_left"] or 0) > 200 and "ended" not in res \
+        and res["back"] == "brokenspire" and res["quests_same"]
+    step_result("tour", ok, **res)
+
 def step_trip():
     # she opens tier 2 in the castle (no boss set: the debug shortcut without encounters) and falls there; back in the town
     # her pile is kept by the game; in the castle again it lies by the arch and tier 2's boss is set once a room is seen
@@ -591,7 +634,7 @@ def step_pictures():
     step_result("pictures", True, shots=R.get("shots", []))
 
 STEPS = {"town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
-         "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "trip": step_trip}
+         "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

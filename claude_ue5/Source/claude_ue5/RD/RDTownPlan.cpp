@@ -729,6 +729,17 @@ int32 ARDSection::BoardedDoorBld(int32 Door) const
 	return -1;
 }
 
+int32 ARDSection::OpenDoorAhead(const FVector& L, const FVector& Dir, float Reach, bool bByMonster)
+{
+	const FIntPoint Cur = WorldToLocal(L), Ahead = WorldToLocal(L + Dir.GetSafeNormal2D() * Reach);
+	if (Ahead == Cur || FMath::Abs(Ahead.X - Cur.X) + FMath::Abs(Ahead.Y - Cur.Y) != 1) return -1;
+	const int32 Dr = DoorBetween(Cur, Ahead);
+	if (Dr < 0 || IsDoorOpenIndex(Dr)) return -1;
+	if (BoardedDoorBld(Dr) >= 0) return 1;
+	if (!IsTargetOpen(true, Dr)) ToggleDoor(Dr, L, bByMonster);
+	return 0;
+}
+
 bool ARDSection::PryBoards(int32 BI)
 {
 	if (!TownBlds.IsValidIndex(BI) || !TownBlds[BI].bBoarded) return false;

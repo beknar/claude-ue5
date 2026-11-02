@@ -21,12 +21,13 @@
 # -RDTownTour=<seconds> -RDTourGo=<file> -RDTourRun=<-TourRun m>: in the town, once the recording has begun (the file), she
 # stands before the elder, his panel opens and a question is asked, the papyrus map opens (while it covers the view she is put
 # -TourRun m before the Mistgate on the way), she runs to the castle and through the Mistgate; in the castle autoplay plays her.
-# -Title <name>: the video's name instead of the hero's.
+# -TourCastle <s>: the castle's autoplay after the tour (else the recording's seconds less the town's 40: the game quits a
+# little after the recording ends). -Title <name>: the video's name instead of the hero's.
 # Args: [-Heroes MartialArtist,Summoner,...] [-Seconds 300] [-Res 3840x2160] [-Game <claude_ue5.exe>] [-Py <python with imageio_ffmpeg>]
 param([string[]]$Heroes = @("MartialArtist", "Summoner", "Warrior", "Mage", "Warlock", "Rogue"), [int]$Seconds = 300, [string]$Res = "3840x2160", [int]$Mode = 1,
       [string]$Game = (Join-Path $PSScriptRoot "..\builds\mistward_castle\Windows\claude_ue5.exe"), [string]$Py = "",
       [string]$Recorder = "ffmpeg", [int]$Fps = 60, [string]$Bitrate = "60M", [string]$Suffix = "", [int]$Presses = 3,
-      [switch]$FromMenu, [string]$Out = "", [switch]$TimeName, [switch]$TownTour, [int]$TourRun = 100, [string]$Title = "")
+      [switch]$FromMenu, [string]$Out = "", [switch]$TimeName, [switch]$TownTour, [int]$TourRun = 100, [int]$TourCastle = 0, [string]$Title = "")
 $ErrorActionPreference = "Stop"
 $Game = (Resolve-Path $Game).Path
 $titles = @{ MartialArtist = "Martial Artist" }
@@ -129,7 +130,7 @@ foreach ($h in $Heroes) {
     $t0 = Get-Date
     # (windowed fullscreen at the resolution, in the settings of both places a packaged game reads them from; put back at the end)
     foreach ($g in $gus) { New-Item -ItemType Directory -Force (Split-Path $g) | Out-Null; [IO.File]::WriteAllText($g, (Settings $g), (New-Object Text.UTF8Encoding $false)) }
-    $gargs = if ($TownTour) { @("-RDStartHero=$h", "-RDTownTour=$Seconds", "-RDTourGo=`"$go`"", "-RDTourRun=$TourRun", "-AutoplayLocked", "-RDMarkFile=$mark") } elseif ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
+    $gargs = if ($TownTour) { @("-RDStartHero=$h", "-RDTownTour=$(if ($TourCastle -gt 0) { $TourCastle } else { [Math]::Max(15, $Seconds - 40) })", "-RDTourGo=`"$go`"", "-RDTourRun=$TourRun", "-AutoplayLocked", "-RDMarkFile=$mark") } elseif ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
     $l = Start-Process -FilePath $Game -ArgumentList $gargs -PassThru
     $p = $null
     for ($s = 0; $s -lt 60 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
@@ -204,7 +205,8 @@ foreach ($h in $Heroes) {
         if ($new) { $last = $new.Length }
     }
     }
-    # (the game quits itself 20 s after the recording's time; stopped if it has not; from the menu it does not quit)
+    # (the game quits itself after its autoplay (the castle's: 60 s after the recording's time, or after the tour's castle
+    #  seconds); stopped if it has not within a minute; from the menu it does not quit)
     for ($s = 0; $s -lt $(if ($FromMenu) { 3 } else { 60 }) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
     foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
     if (-not $new) { "$h : NO VIDEO (the game in front: $front)"; continue }

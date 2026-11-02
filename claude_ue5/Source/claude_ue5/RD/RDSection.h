@@ -259,6 +259,9 @@ public:
 	bool PryBoards(int32 Bld);
 	/** the door of a boarded house that is still boarded (-1: none) */
 	int32 BoardedDoorBld(int32 Door) const;
+	/** a walk from L along Dir (Reach on): the door on the edge to the next tile, if closed, is opened (Opener L): -1 none in the
+	 *  way (or open), 0 being opened (wait for it), 1 boarded (it never opens). The townsfolk's walks and the showcase tour */
+	int32 OpenDoorAhead(const FVector& L, const FVector& Dir, float Reach, bool bByMonster);
 	/** a door's index on the edge between two tiles (the town's walk test) */
 	TArray<FVector> GetTownDoorPoints() const;
 

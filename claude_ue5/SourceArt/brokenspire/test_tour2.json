@@ -1,0 +1,32 @@
+{
+ "tag": "tour2",
+ "plan": [
+  "tour"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "tour",
+   "ok": true,
+   "phases_at_s": {
+    "1": 0.0,
+    "2": 0.1,
+    "3": 1.6,
+    "4": 7.3,
+    "5": 11.9
+   },
+   "map_drawn": true,
+   "panel": "talk",
+   "answer": "Three moons ago the spire on the castle hill cracked in two in a single night. S",
+   "run_from_m": 103.5,
+   "castle": "mistward_castle",
+   "reached_s": 45.5,
+   "autoplay_left": 297.0,
+   "back": "brokenspire",
+   "quests_same": true
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "error": null,
+ "windows_shown_again": 1
+}
