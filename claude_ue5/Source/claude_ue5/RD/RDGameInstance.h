@@ -86,6 +86,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FRDCarry> HerPiles;
 	/** -RDTownGo has been read (once a game instance) */
 	bool bTownGoRead = false;
+	/** the showcase tour: the castle's autoplay seconds when it comes through the Mistgate (0: none) */
+	float TourCastleSeconds = 0.f;
+	bool bTourRead = false;
 
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void Count(const FString& Key, int32 Amount = 1) { Counters.FindOrAdd(Key) += Amount; }
 	/** a counter that holds the highest value seen ("tier") */

@@ -1412,6 +1412,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 		}
 	// (it ticks while the game is paused: then only her inventory or the Escape menu, which paused it, is worked)
 	const bool bPaused = GetWorld()->IsPaused();
+	// (Brokenspire's showcase tour: on the real clock, also while its panel pauses the game)
+	if (bTown && (bTourOn || !bTourCmdRead)) TickTownTour((float)FApp::GetDeltaTime());
 	// (Brokenspire: the town's panel takes the keys while it is open, Escape too)
 	if (IsTownPanelOpen())
 	{

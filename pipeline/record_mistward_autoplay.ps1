@@ -17,11 +17,17 @@
 # makes it when the recording has begun); the video is the seconds from the menu on (the castle's autoplay a little less).
 # -Out <dir>: the video goes there (else the captures folder); -TimeName: named <Hero>-<hour>-<minute> of its start (a colon
 # cannot be in a Windows file name).
+# -TownTour (Brokenspire's showcase; -Game a package with brokenspire): the game is started with -RDStartHero=<hero>
+# -RDTownTour=<seconds> -RDTourGo=<file> -RDTourRun=<-TourRun m>: in the town, once the recording has begun (the file), she
+# stands before the elder, his panel opens and a question is asked, the papyrus map opens (while it covers the view she is put
+# -TourRun m before the Mistgate on the way), she runs to the castle and through the Mistgate; in the castle autoplay plays her.
+# -TourCastle <s>: the castle's autoplay after the tour (else the recording's seconds less the town's 40: the game quits a
+# little after the recording ends). -Title <name>: the video's name instead of the hero's.
 # Args: [-Heroes MartialArtist,Summoner,...] [-Seconds 300] [-Res 3840x2160] [-Game <claude_ue5.exe>] [-Py <python with imageio_ffmpeg>]
 param([string[]]$Heroes = @("MartialArtist", "Summoner", "Warrior", "Mage", "Warlock", "Rogue"), [int]$Seconds = 300, [string]$Res = "3840x2160", [int]$Mode = 1,
       [string]$Game = (Join-Path $PSScriptRoot "..\builds\mistward_castle\Windows\claude_ue5.exe"), [string]$Py = "",
       [string]$Recorder = "ffmpeg", [int]$Fps = 60, [string]$Bitrate = "60M", [string]$Suffix = "", [int]$Presses = 3,
-      [switch]$FromMenu, [string]$Out = "", [switch]$TimeName)
+      [switch]$FromMenu, [string]$Out = "", [switch]$TimeName, [switch]$TownTour, [int]$TourRun = 100, [int]$TourCastle = 0, [string]$Title = "")
 $ErrorActionPreference = "Stop"
 $Game = (Resolve-Path $Game).Path
 $titles = @{ MartialArtist = "Martial Artist" }
@@ -124,7 +130,7 @@ foreach ($h in $Heroes) {
     $t0 = Get-Date
     # (windowed fullscreen at the resolution, in the settings of both places a packaged game reads them from; put back at the end)
     foreach ($g in $gus) { New-Item -ItemType Directory -Force (Split-Path $g) | Out-Null; [IO.File]::WriteAllText($g, (Settings $g), (New-Object Text.UTF8Encoding $false)) }
-    $gargs = if ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
+    $gargs = if ($TownTour) { @("-RDStartHero=$h", "-RDTownTour=$(if ($TourCastle -gt 0) { $TourCastle } else { [Math]::Max(15, $Seconds - 40) })", "-RDTourGo=`"$go`"", "-RDTourRun=$TourRun", "-AutoplayLocked", "-RDMarkFile=$mark") } elseif ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
     $l = Start-Process -FilePath $Game -ArgumentList $gargs -PassThru
     $p = $null
     for ($s = 0; $s -lt 60 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
@@ -146,7 +152,7 @@ foreach ($h in $Heroes) {
     if (-not $front) { "$h : the game could not be brought to the front: not recorded"; foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force } }; continue }
     Start-Sleep 1
     $rect = [RDRec]::RectOf([uint32]$p.Id)
-    $title = $(if ($titles[$h]) { $titles[$h] } else { $h }) + $Suffix
+    $title = $(if ($Title) { $Title } elseif ($titles[$h]) { $titles[$h] } else { $h }) + $Suffix
     $dir = if ($outDir) { $outDir } else { $cap }
     if ($Recorder -eq "ffmpeg") {
         # (the game must cover the screen: the capture is of the screen)
@@ -157,7 +163,7 @@ foreach ($h in $Heroes) {
         while (Test-Path $dst) { $dst = Join-Path $dir "$title ($k).mp4"; $k++ }
         $args_ = @("-hide_banner", "-loglevel", "error", "-init_hw_device", "d3d11va=dx", "-filter_hw_device", "dx", "-f", "lavfi", "-i", "ddagrab=output_idx=0:framerate=$($Fps):draw_mouse=0") + $codec + @("-t", "$Seconds", "-movflags", "+faststart", "`"$dst`"")          # (quoted: Start-Process splits a path at its spaces)
         $fp_ = Start-Process -FilePath $ff -ArgumentList $args_ -PassThru -WindowStyle Hidden -RedirectStandardError (Join-Path $env:TEMP "rd_record_ffmpeg.txt")
-        if ($FromMenu) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (the menu may step to her now)
+        if ($FromMenu -or $TownTour) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (the menu may step to her now; the tour begin)
         # (in front the whole time: checked every 10 s)
         $still = $true
         while (-not $fp_.HasExited) { Start-Sleep 10; if (-not $fp_.HasExited) { $fpid = 0; [void][RDRec]::GetWindowThreadProcessId([RDRec]::GetForegroundWindow(), [ref]$fpid); if ($fpid -ne $p.Id) { $still = $false } } }
@@ -179,7 +185,7 @@ foreach ($h in $Heroes) {
     "$h : Game Bar presses at $($pressT -join ', ') s after launch; started: $started"
     $rec0 = Get-Date
     if (-not $started) { "$h : Game Bar did not start recording ($Presses presses): not recorded"; foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force } }; continue }
-    if ($FromMenu) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (recording: the menu may step to her now)
+    if ($FromMenu -or $TownTour) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (recording: the menu may step to her now; the tour begin)
     Start-Sleep $Seconds
     $still = [RDRec]::Front([uint32]$p.Id)
     GameBarRecord
@@ -199,7 +205,8 @@ foreach ($h in $Heroes) {
         if ($new) { $last = $new.Length }
     }
     }
-    # (the game quits itself 20 s after the recording's time; stopped if it has not; from the menu it does not quit)
+    # (the game quits itself after its autoplay (the castle's: 60 s after the recording's time, or after the tour's castle
+    #  seconds); stopped if it has not within a minute; from the menu it does not quit)
     for ($s = 0; $s -lt $(if ($FromMenu) { 3 } else { 60 }) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
     foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
     if (-not $new) { "$h : NO VIDEO (the game in front: $front)"; continue }
