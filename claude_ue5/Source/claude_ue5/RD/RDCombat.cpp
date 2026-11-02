@@ -475,8 +475,9 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 {
 	if (bDead || Amount <= 0.f) return;
 	if (IsDodging()) { ++DodgedHits; return; }
-	// (mistward6: in stealth no monster finds her: a blow or a shot already on its way passes her by)
-	if (IsStealthed() && Cast<ARDMonster>(From)) { ++Evaded; return; }
+	// (mistward6: in stealth nothing finds her: a blow or a shot already on its way passes her by (a shot whose shooter has
+	// died comes with no From: the PR review's find), and so does a trap that was going off before she hid)
+	if (IsStealthed()) { ++Evaded; return; }
 	const float Now = GetWorld()->GetTimeSeconds();
 	AActor* O = GetOwner();
 	// (level 5: her spells take their part first: a sanctum takes it all, a veil lets it miss, a ward takes it, a mirror
@@ -736,9 +737,13 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 			const FRDSpellDef* S = bSpell ? SpellOf(AttackIndex) : nullptr;
 			// (a scroll's spell goes off here: before it, a cast broken off gives the scroll back (TickScrollWeapon))
 			if (Generator && Generator->Weapons.IsValidIndex(AttackIndex) && Generator->Weapons[AttackIndex].bScroll) bScrollCast = true;
-			if (S && S->Kind != ERDSpellKind::Bolt) ReleaseSpell(AttackIndex);
+			// (mistward6: an ambush's factor holds for this release alone, and is used up by it: a blow, a bolt (its damage goes
+			// with it) or a spell that is no bolt (counted here))
+			bAmbushApplying = bAmbushArmed;
+			if (S && S->Kind != ERDSpellKind::Bolt) { ReleaseSpell(AttackIndex); if (bAmbushArmed) ++Ambushes; }
 			else if (bSpell) LaunchBolt();
 			else Strike();
+			bAmbushApplying = false; bAmbushArmed = false;
 		}
 		if (AttackTime >= AttackLen) EndAttack();
 	}

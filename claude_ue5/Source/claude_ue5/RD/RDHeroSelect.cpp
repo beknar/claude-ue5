@@ -189,7 +189,14 @@ void ARDHeroSelect::Tick(float Dt)
 				MenuPickTarget = Heroes.IndexOfByPredicate([&Pick](const FRDHeroDef& H) { return H.Name.ToString().Equals(Pick, ESearchCase::IgnoreCase); });
 				FParse::Value(FCommandLine::Get(), TEXT("RDMenuGo="), MenuGoFile);
 				float S = -1.f;
-				if (FParse::Value(FCommandLine::Get(), TEXT("RDMenuAutoplay="), S)) { const int32 K = AutoplayLengths.IndexOfByPredicate([S](float L) { return FMath::IsNearlyEqual(L, S, 0.5f); }); if (K >= 0) AutoplayChoice = K; }
+				// (a length the menu does not offer is added to its choices (the PR review's find: it was dropped, and the menu's own
+				// choice used))
+				if (FParse::Value(FCommandLine::Get(), TEXT("RDMenuAutoplay="), S) && S >= 0.f)
+				{
+					int32 K = AutoplayLengths.IndexOfByPredicate([S](float L) { return FMath::IsNearlyEqual(L, S, 0.5f); });
+					if (K < 0) K = AutoplayLengths.Add(S);
+					AutoplayChoice = K;
+				}
 				MenuPickNext = GetWorld()->GetTimeSeconds() + 2.f; bMenuPickHeld = false;
 				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT menu pick %s: %s"), *Pick, MenuPickTarget >= 0 ? TEXT("stepping to her") : TEXT("no such hero"));
 			}

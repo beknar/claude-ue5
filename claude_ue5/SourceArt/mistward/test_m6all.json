@@ -49,11 +49,11 @@
    "title": "Mistward Castle",
    "max_tier": 5,
    "show_fps": true,
-   "fps": 41.8,
+   "fps": 43.5,
    "fps_box": [
     67,
     58,
-    317,
+    318,
     110
    ],
    "recipes": [
@@ -167,8 +167,8 @@
      "hand_to_shaft_cm": 6.5,
      "torch_length_cm": 79.8,
      "light_to_hand_cm": 75.3,
-     "luma_lit": 131.41,
-     "luma_out": 91.69,
+     "luma_lit": 131.82,
+     "luma_out": 92.06,
      "after_out": {
       "is_held": false,
       "shield_in_hand": true,
@@ -309,9 +309,9 @@
    "off": {},
    "errors": [],
    "half_creature_05": [
-    -0.4,
+    -0.3,
     -0.1,
-    0.0
+    0.2
    ],
    "all": {
     "Rat": [
@@ -321,43 +321,43 @@
     ],
     "Half_Creature_04": [
      -0.1,
-     0.0,
-     0.2
+     0.1,
+     0.3
     ],
     "Parasite_Slider": [
      -0.1,
-     0.3,
+     0.2,
      0.6
     ],
     "Half_Creature_05": [
-     -0.4,
+     -0.3,
      -0.1,
-     0.0
+     0.2
     ],
     "Drinker": [
      -0.0,
-     0.2,
-     1.0
+     0.3,
+     0.9
     ],
     "Medic": [
      -0.3,
-     -0.1,
-     0.6
+     0.1,
+     0.7
     ],
     "Chicken": [
      -0.1,
-     0.5,
+     0.0,
      1.5
     ],
     "Soldier": [
      -0.1,
-     0.3,
+     -0.0,
      0.7
     ],
     "Sufferer": [
      -0.0,
-     1.5,
-     2.8
+     0.1,
+     3.2
     ],
     "Fat": [
      0.0,
@@ -366,23 +366,23 @@
     ],
     "Mask": [
      -0.8,
-     0.3,
+     -0.7,
      2.1
     ],
     "Monster": [
      0.7,
      1.2,
-     2.4
+     2.1
     ],
     "Gunner": [
-     0.9,
-     1.9,
-     4.7
+     0.8,
+     2.9,
+     4.9
     ],
     "Parasites_Fat": [
      -0.1,
-     0.0,
-     0.5
+     0.1,
+     0.6
     ],
     "Parasit": [
      0.9,
@@ -392,201 +392,201 @@
     "Orc_03": [
      -0.1,
      0.8,
-     2.6
+     1.7
     ],
     "Magur": [
-     -0.3,
-     0.3,
-     2.1
+     -0.2,
+     -0.1,
+     2.0
     ],
     "Azrak": [
-     -1.8,
+     -2.0,
      -1.3,
-     -0.5
+     0.2
     ],
     "Warrior_02_the_leopard": [
-     -0.3,
+     -0.2,
      2.9,
-     4.9
+     3.9
     ],
     "Kanit": [
      -0.1,
-     0.4,
-     2.3
+     0.3,
+     1.8
     ],
     "Gnur": [
-     -0.8,
+     -0.9,
      0.3,
-     2.1
+     1.4
     ],
     "Dardan": [
-     0.3,
+     -0.4,
      0.5,
-     1.7
+     1.8
     ],
     "Costalmed": [
      -0.1,
-     0.8,
-     2.3
+     0.6,
+     2.1
     ],
     "Orc_05": [
      -0.0,
-     0.8,
-     1.9
+     0.6,
+     2.1
     ],
     "Orc_06": [
      0.0,
-     0.7,
-     2.1
+     0.2,
+     1.5
     ],
     "Alien": [
-     -3.3,
-     -0.5,
+     -2.4,
+     -0.7,
      -0.0
     ],
     "Devourer": [
-     -1.9,
-     0.3,
-     3.7
+     -3.1,
+     -0.0,
+     2.2
     ],
     "Insect": [
-     -1.5,
-     0.2,
-     28.8
+     -1.7,
+     -0.2,
+     29.2
     ],
     "Pangolin": [
-     -0.9,
-     0.3,
-     0.8
+     -1.1,
+     0.4,
+     1.3
     ],
     "Tank": [
-     1.1,
-     1.3,
-     4.0
+     0.8,
+     1.6,
+     4.4
     ],
     "Orc_01": [
      -0.0,
-     0.8,
-     2.4
+     0.5,
+     2.2
     ],
     "Orc_02": [
      -1.4,
-     1.0,
+     0.0,
      2.0
     ],
     "Ursag": [
      -0.1,
-     0.6,
-     1.5
+     0.1,
+     1.4
     ],
     "Orc_04": [
-     -0.0,
-     1.5,
+     0.0,
+     1.8,
      3.0
     ],
     "Bear_Warrior": [
      0.8,
      2.7,
-     3.7
+     3.8
     ],
     "Bull_Warrior": [
      -0.1,
-     3.1,
-     4.5
+     3.2,
+     4.9
     ],
     "Crocodile_Warrior": [
-     -1.4,
-     -0.6,
-     0.4
+     -1.3,
+     -0.7,
+     0.8
     ],
     "Elephant_Warrior": [
      -0.4,
-     3.2,
-     5.5
+     3.0,
+     5.6
     ],
     "Alien_Warrior_05": [
      0.4,
-     1.3,
-     3.8
+     1.1,
+     3.9
     ],
     "Exterminator": [
      -0.0,
-     0.8,
+     0.4,
      1.1
     ],
     "Shell": [
-     -0.2,
+     -0.1,
      -0.0,
-     4.9
+     3.4
     ],
     "Bug": [
      -0.1,
-     1.6,
-     1.7
+     1.5,
+     1.8
     ],
     "Horned": [
-     -2.8,
-     -0.1,
-     0.1
+     -2.9,
+     -0.2,
+     0.0
     ],
     "Mutant": [
-     -0.9,
+     -0.8,
      0.4,
      2.0
     ],
     "Ripper_dog": [
      0.0,
      0.5,
-     0.6
+     0.7
     ],
     "Daemon": [
      -1.0,
-     -0.0,
-     2.9
+     1.2,
+     2.7
     ],
     "Troll": [
-     0.0,
+     -0.0,
      1.4,
      2.4
     ],
     "Parasite_Spider": [
      -0.2,
-     1.0,
+     0.2,
      5.6
     ],
     "Fantasy_Animal_raptor_mount": [
      -0.0,
-     2.5,
+     0.0,
      4.0
     ],
     "Alfa": [
      -0.0,
      1.1,
-     1.2
+     1.3
     ],
     "Spider": [
-     -1.5,
-     0.7,
-     5.5
+     -1.3,
+     0.5,
+     5.0
     ],
     "Rock": [
-     -0.4,
-     0.7,
-     2.7
+     -0.0,
+     0.8,
+     4.6
     ],
     "Titan": [
-     -2.2,
+     -2.1,
      -0.6,
-     -0.1
+     -0.3
     ],
     "Hunter": [
-     -0.0,
-     1.0,
+     -0.8,
+     1.5,
      2.6
     ],
     "Nasty": [
-     -1.9,
-     1.0,
+     -1.7,
+     0.2,
      10.1
     ]
    }
@@ -678,14 +678,14 @@
     ]
    },
    "open_enough": true,
-   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE TORTURE CHAMBER (SEE YOUR MAP)",
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE STOREROOM (SEE YOUR MAP)",
    "tier2": {
     "boss": [
      {
       "kind": "boss",
       "at": [
-       150.0,
-       10650.0,
+       3450.0,
+       7350.0,
        123.0
       ],
       "name": "Orc_03",
@@ -695,18 +695,18 @@
       "max_health": 360.0
      }
     ],
-    "band": 3,
+    "band": 6,
     "guards": 4,
     "ring": [
      {
       "kind": "ring",
       "at": [
-       1143.0,
-       5790.0,
-       42.0
+       7500.0,
+       3750.0,
+       -6.0
       ],
       "name": "Magic Potency Ring 1",
-      "key": 223,
+      "key": -1,
       "tier": 2,
       "section": [
        0,
@@ -721,11 +721,13 @@
     "band_health": [
      80.0,
      91.0,
-     103.0
+     103.0,
+     120.0
     ],
     "ring_first_in_container": [
      "Magic Potency Ring 1"
     ],
+    "ring_in_pile": true,
     "ring_kind_ok": true
    },
    "marks_minimap": [
@@ -742,8 +744,8 @@
     "SET CLEARED  -  TIER 2: 1 / 8",
     "SET CLEARED  -  TIER 2: 2 / 8",
     "SET CLEARED  -  TIER 2: 3 / 8",
-    "SET CLEARED  -  TIER 2: 4 / 8",
     "TIER 3 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 5 / 8",
     "SET CLEARED  -  TIER 2: 6 / 8",
     "SET CLEARED  -  TIER 2: 7 / 8",
     "TIER 2 CLEARED"
@@ -751,14 +753,14 @@
    "tally2": {
     "ok": true,
     "done": [
-     313,
-     93,
-     589
+     329,
+     99,
+     759
     ],
     "all": [
-     313,
-     93,
-     589
+     329,
+     99,
+     759
     ]
    },
    "open3": true,
@@ -772,8 +774,8 @@
      {
       "kind": "boss",
       "at": [
-       -3450.0,
-       -28199.0,
+       11550.0,
+       -29250.0,
        115.0
       ],
       "name": "Tank",
@@ -783,22 +785,22 @@
       "max_health": 576.0
      }
     ],
-    "band": 3,
+    "band": 4,
     "guards": 4,
     "ring": [
      {
       "kind": "ring",
       "at": [
-       -12243.0,
-       20190.0,
-       42.0
+       -14400.0,
+       -6600.0,
+       102.0
       ],
       "name": "Magic Potency Ring 3",
-      "key": 36,
+      "key": -1,
       "tier": 3,
       "section": [
-       0,
-       1
+       -1,
+       0
       ]
      }
     ],
@@ -807,15 +809,18 @@
     "boss_scale": 1.35,
     "boss_mesh_scale": 1.35,
     "band_health": [
-     138.0,
-     172.0
+     133.0,
+     148.0,
+     162.0,
+     192.0
     ],
     "ring_first_in_container": [
      "Magic Potency Ring 3"
     ],
+    "ring_in_pile": true,
     "ring_kind_ok": true
    },
-   "seconds": 7.3
+   "seconds": 8.4
   },
   {
    "step": "open",
@@ -824,7 +829,7 @@
     2,
     0
    ],
-   "container": 30,
+   "container": 3,
    "kind": "trunk",
    "describe_before": "open trunk",
    "first_f": "trunk",
@@ -843,18 +848,18 @@
    "ok": true,
    "sections": 7,
    "shapes": {
-    "circle": 14,
-    "dome": 6,
-    "octagon": 15,
-    "hexagon": 10,
-    "pyramid": 3,
-    "diamond": 7,
-    "tall": 6,
-    "U": 8,
-    "triangle": 3,
-    "step pyramid": 6,
-    "T": 7,
-    "L": 6
+    "circle": 5,
+    "dome": 9,
+    "octagon": 8,
+    "hexagon": 5,
+    "pyramid": 8,
+    "diamond": 6,
+    "tall": 7,
+    "U": 4,
+    "step pyramid": 12,
+    "triangle": 10,
+    "T": 4,
+    "L": 8
    },
    "shaped_bad": [],
    "themes": {
@@ -901,8 +906,8 @@
      "dwarf": true
     }
    },
-   "furniture": 2012,
-   "containers": 1908,
+   "furniture": 2298,
+   "containers": 2044,
    "overlaps": [],
    "n_overlaps": 0,
    "blocked": [],
@@ -919,35 +924,35 @@
     "tier1_barracks_0",
     "tier1_barracks_1"
    ],
-   "rooms": 288,
-   "small_rooms": 35,
-   "long_galleries": 49,
-   "largest_rooms": 28,
+   "rooms": 296,
+   "small_rooms": 31,
+   "long_galleries": 45,
+   "largest_rooms": 33,
    "sizes": {
-    "10x10": 28,
-    "3x10": 25,
-    "4x10": 24,
+    "10x10": 33,
+    "4x10": 25,
+    "3x10": 20,
+    "7x8": 18,
     "6x7": 16,
-    "7x9": 16,
-    "7x7": 16,
+    "8x9": 16,
+    "7x9": 15,
+    "9x10": 15,
     "3x4": 15,
-    "8x10": 14,
-    "8x9": 14,
-    "9x10": 12,
-    "6x9": 12,
-    "7x8": 12,
-    "4x4": 11,
+    "6x9": 14,
+    "7x7": 10,
+    "6x8": 10,
+    "8x10": 10,
     "6x6": 10,
-    "3x3": 9,
-    "8x8": 8,
-    "6x8": 7,
-    "5x7": 7,
-    "5x6": 7,
-    "7x10": 6,
+    "8x8": 9,
+    "5x7": 9,
+    "4x4": 8,
+    "7x10": 8,
+    "5x6": 8,
+    "3x3": 8,
     "9x9": 5,
-    "5x5": 5,
+    "5x5": 4,
+    "5x9": 4,
     "6x10": 4,
-    "5x9": 3,
     "5x8": 2
    },
    "hay_piles": 0,
@@ -973,7 +978,7 @@
      "War Camp Shield"
     ]
    },
-   "floor_tiles": 14423,
+   "floor_tiles": 15172,
    "tiles_without_floor": 0,
    "without_floor": []
   },
@@ -1007,14 +1012,14 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.54,
+       0.33,
        25.5
       ]
      ],
-     "held_at": 0.4,
+     "held_at": 0.15,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 288,
+     "particles": 277,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
@@ -1032,15 +1037,15 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.23,
+       0.22,
        9.6
       ],
       [
-       0.57,
+       0.52,
        9.6
       ],
       [
-       0.92,
+       0.82,
        9.6
       ]
      ],
@@ -1065,22 +1070,22 @@
      "peak_speed": 0,
      "drops": [
       [
-       1.01,
+       1.0,
        14.6
       ],
       [
-       1.31,
+       1.29,
        14.6
       ],
       [
-       1.52,
+       1.58,
        14.6
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 1470,
+     "particles": 1467,
      "ambush": {},
      "hits": 3,
      "triggered": 1,
@@ -1098,14 +1103,14 @@
      "peak_speed": 0,
      "drops": [
       [
-       1.72,
+       1.01,
        54.7
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 573,
+     "particles": 576,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
@@ -1123,11 +1128,11 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.13,
+       0.16,
        9.1
       ]
      ],
-     "held_at": 0.13,
+     "held_at": 0.16,
      "weakness": 0.0,
      "slowness": 0.0,
      "particles": 1,
@@ -1148,14 +1153,14 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.66,
+       0.68,
        40.1
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 113,
+     "particles": 120,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
@@ -1170,17 +1175,17 @@
      "held": false,
      "moved_m": 1.6,
      "farthest_m": 1.6,
-     "peak_speed": 591,
+     "peak_speed": 596,
      "drops": [
       [
-       0.14,
+       0.13,
        21.9
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 79,
+     "particles": 86,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
@@ -1198,7 +1203,7 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.14,
+       0.13,
        10.9
       ],
       [
@@ -1206,7 +1211,7 @@
        10.9
       ],
       [
-       1.21,
+       1.2,
        10.9
       ],
       [
@@ -1214,26 +1219,26 @@
        10.9
       ],
       [
-       2.32,
+       2.34,
        10.9
       ],
       [
-       2.85,
+       2.87,
        10.9
       ],
       [
-       3.36,
+       3.41,
        10.9
       ],
       [
-       3.9,
+       3.93,
        10.9
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.4,
-     "particles": 19,
+     "particles": 11,
      "ambush": {},
      "hits": 8,
      "triggered": 1,
@@ -1251,14 +1256,14 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.15,
+       0.14,
        10.9
       ]
      ],
      "held_at": null,
      "weakness": 0.45,
      "slowness": 0.4,
-     "particles": 41,
+     "particles": 51,
      "ambush": {},
      "hits": 1,
      "triggered": 1,
@@ -1276,22 +1281,18 @@
      "peak_speed": 0,
      "drops": [
       [
-       1.52,
-       14.6
+       2.11,
+       43.8
       ],
       [
-       1.6,
-       29.2
-      ],
-      [
-       2.08,
+       2.45,
        21.9
       ]
      ],
-     "held_at": 0.14,
+     "held_at": 0.5,
      "weakness": 0.45,
      "slowness": 0.0,
-     "particles": 344,
+     "particles": 367,
      "ambush": {},
      "hits": 4,
      "triggered": 1,
@@ -1309,30 +1310,30 @@
      "peak_speed": 0,
      "drops": [
       [
-       0.21,
+       0.35,
        23.0
       ],
       [
-       1.49,
+       1.54,
        16.4
       ],
       [
-       4.08,
+       3.64,
        13.1
       ],
       [
-       4.21,
+       4.3,
        23.0
       ],
       [
-       5.49,
+       5.56,
        26.3
       ]
      ],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 70,
+     "particles": 71,
      "ambush": {},
      "hits": 7,
      "triggered": 1,
@@ -1345,16 +1346,16 @@
      "kind": "11",
      "hp_lost": 0.0,
      "held": false,
-     "moved_m": 281.3,
-     "farthest_m": 281.3,
+     "moved_m": 326.1,
+     "farthest_m": 326.1,
      "peak_speed": 0,
      "drops": [],
      "held_at": null,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 93,
+     "particles": 94,
      "ambush": {
-      "2,0": "glyphs|4|43350|-3750"
+      "2,0": "glyphs|4|61350|3450"
      },
      "hits": 0,
      "triggered": 1,
@@ -1367,21 +1368,21 @@
      "kind": "12",
      "hp_lost": 14.6,
      "held": true,
-     "moved_m": 2.9,
-     "farthest_m": 2.9,
+     "moved_m": 3.0,
+     "farthest_m": 3.0,
      "peak_speed": 0,
      "drops": [
       [
-       0.36,
+       0.35,
        14.6
       ]
      ],
-     "held_at": 0.15,
+     "held_at": 0.14,
      "weakness": 0.0,
      "slowness": 0.0,
-     "particles": 531,
+     "particles": 528,
      "ambush": {
-      "0,0": "glyphs|4|7350|-9459"
+      "0,0": "glyphs|4|7350|-9453"
      },
      "hits": 1,
      "triggered": 1,
@@ -1400,7 +1401,7 @@
     ],
     "describe": "disarm the pit trap",
     "f": "disarm",
-    "progress": 0.22,
+    "progress": 0.21,
     "state_after": 3,
     "disarmed": 1,
     "says": "You disarm the pit trap"
@@ -1423,7 +1424,7 @@
   },
   {
    "step": "teleport",
-   "ok": true,
+   "ok": false,
    "pads": [
     1,
     2,
@@ -1451,92 +1452,91 @@
    "teleports": 3,
    "tier3": {
     "ring_on_3": true,
-    "f_3": "ring",
+    "f_3": "arena barred",
     "ring": "Teleport Ring III",
-    "ring_count": 1,
-    "used": true,
-    "after_ring_to_pad1_m": 1.8,
+    "ring_count": 0,
+    "used": false,
+    "after_ring_to_pad1_m": 402.49,
     "destinations": [
-     2,
-     3
+     2
     ]
    }
   },
   {
    "step": "cells",
-   "ok": true,
-   "cells": 128,
+   "ok": false,
+   "cells": 150,
    "prisoners": 54,
-   "monsters": 26,
-   "empty": 48,
+   "monsters": 34,
+   "empty": 62,
    "prisoner": {
-    "describe": "unlock the cell: free the prisoner",
-    "f": "prisoner",
-    "freed": 1,
-    "says": "The prisoner thanks you and gives you patch kit",
-    "found": "Patch Kit",
-    "carried_more": 1,
-    "gone": true,
-    "door_open": true
+    "describe": "",
+    "f": "",
+    "freed": 0,
+    "says": "The arena holds you: its doors are barred until its last wave falls",
+    "found": "None",
+    "carried_more": 0,
+    "gone": false,
+    "door_open": false
    },
    "monster": {
     "caged_before": true,
     "lonely": true,
-    "far_d": 460,
+    "far_d": null,
     "opened_far": 0,
-    "near_d": 250,
+    "near_d": null,
     "track": [
      [
-      127,
-      42
+      20,
+      0
      ],
      [
-      209,
-      55
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ],
      [
-      266,
-      63
+      20,
+      0
      ]
     ],
     "her": [
-     400,
-     73
+     43200,
+     -1800
     ],
-    "door_alpha": 1.0,
-    "breakouts": 1,
-    "caged_after": false,
-    "came_m": 2.2,
-    "hp_lost": 26.9,
-    "out_of_cell_m": 2.74
+    "door_alpha": 0.0,
+    "breakouts": 0,
+    "caged_after": true,
+    "came_m": 0.0,
+    "hp_lost": 0.0,
+    "out_of_cell_m": 0.2
    }
   },
   {
@@ -1583,7 +1583,7 @@
      "Epoxy"
     ],
     "pictures": 15,
-    "particles": 17,
+    "particles": 16,
     "from_her_m": 0.0
    },
    "carried_after": {
@@ -1640,14 +1640,14 @@
     {
      "trap": "Pit",
      "i": 0,
-     "red_warrior": 0.0085,
+     "red_warrior": 0.0089,
      "m": 6.0,
      "seen": 1,
      "rings_before": 0,
      "rings": 1,
      "ring_scale": 2.0,
      "plate_outlined": 1,
-     "red_rogue": 0.4485
+     "red_rogue": 0.4444
     },
     {
      "trap": "Cursed",
@@ -1659,22 +1659,22 @@
      "rings": 1,
      "ring_scale": 2.2,
      "plate_outlined": 1,
-     "red_rogue": 0.1689
+     "red_rogue": 0.1631
     }
    ],
    "traps": 25,
    "boxes": [
     [
-     0.392,
+     0.393,
      0.211,
-     0.532,
+     0.533,
      0.391
     ],
     [
-     0.448,
-     0.213,
-     0.588,
-     0.393
+     0.455,
+     0.212,
+     0.595,
+     0.392
     ]
    ],
    "warrior": {
@@ -1862,7 +1862,7 @@
     2560,
     2560
    ],
-   "head_diff": 11.61,
+   "head_diff": 11.19,
    "luma_on": 0.0,
    "luma_off": 0.0,
    "helmet_row": "helmet|1|Plate Armour",
@@ -1875,8 +1875,8 @@
    "share": 0.24,
    "refused": [],
    "hand_rest": [
-    5.8,
-    8.5
+    6.3,
+    8.6
    ],
    "plain": {
     "lost": 30.4,
@@ -1964,8 +1964,8 @@
     "Dagger",
     "Eastern Sabre",
     "Leaf-Blade Knife",
-    "Longbow",
-    "Viking Shield (green and white)",
+    "Sherwood Sword",
+    "Viking Round Shield",
     "Viking Sword",
     "Village Shield (green)"
    ],
@@ -1988,10 +1988,10 @@
     ],
     "her_d": 120
    },
-   "describe": "take the viking shield (green and white)",
+   "describe": "take the leaf-blade knife",
    "f_refused": "",
    "took": {
-    "item": "Viking Shield (green and white)",
+    "item": "Leaf-Blade Knife",
     "gained": 1,
     "taken_flag": "1",
     "drawn": "0",
@@ -2004,20 +2004,20 @@
    "kinds": {
     "Trap gauntlet": 4,
     "Fountain of speed": 4,
-    "Vault": 4,
-    "Arena": 4,
-    "Shrine": 5,
+    "Vault": 5,
+    "Arena": 3,
+    "Shrine": 3,
     "Fountain of mana": 3,
-    "Healing fountain": 4,
-    "Throne room": 1
+    "Healing fountain": 3,
+    "Throne room": 4
    },
    "refused": [],
    "shrine": {
     "describe": "pray at the shrine",
     "f": "shrine",
-    "blessing": "Blessing of might",
-    "damage_x": 1.25,
-    "armour": 0.0,
+    "blessing": "Blessing of the bulwark",
+    "damage_x": 1.0,
+    "armour": 0.25,
     "speed": 0.0,
     "again": "shrine used"
    },
@@ -2027,7 +2027,7 @@
     "speed_x": 1.0,
     "speed_bonus": 0.0,
     "again": "fountain dry",
-    "particles": 13
+    "particles": 15
    },
    "speed": {
     "f": "fountain",
@@ -2035,7 +2035,7 @@
     "speed_x": 1.3,
     "speed_bonus": 0.3,
     "again": "fountain dry",
-    "particles": 8
+    "particles": 7
    },
    "mana": {
     "f": "fountain",
@@ -2073,9 +2073,9 @@
     "won": 1,
     "prize": [
      [
-      "Small Speed Potion",
-      "Templar’s Armour",
-      "Whetstone"
+      "Arming Sword",
+      "Medium Speed Potion",
+      "Viking Shortsword"
      ]
     ],
     "harvest_piles": 10,
@@ -2095,10 +2095,7 @@
     "chest_loot": [
      "Repair Kit",
      "Dagger",
-     "Bread",
-     "Slickstone",
-     "Small Speed Potion",
-     "Hardwood"
+     "Bread"
     ]
    },
    "vault": {
@@ -2106,17 +2103,17 @@
     "locked_f": "vault locked",
     "open_without_key": false,
     "key_chests": 1,
-    "key_room": 46,
-    "key_chest_f": "chest",
+    "key_room": 6,
+    "key_chest_f": "trunk",
     "other_opened": 0,
     "has_key": 1,
     "f": "vault",
     "open_with_key": true,
     "key_after": 0,
-    "vault_chests": 23,
+    "vault_chests": 21,
     "vault_loot": [
-     "Jerky",
-     "Dark Knight's Sword"
+     "Rare Speed Potion",
+     "Bear Warrior’s Armour"
     ],
     "tier_beyond": [
      [
@@ -2128,16 +2125,16 @@
     ]
    },
    "throne": {
-    "encounters": 1,
+    "encounters": 4,
     "label": "THE USURPER: ORC RAIDER",
     "alive": 1,
-    "slain_notice": "THE USURPER IS SLAIN  -  THE BLOOD SLASH IS YOURS",
+    "slain_notice": "THE USURPER IS SLAIN  -  THE PETAL SLASH IS YOURS",
     "usurper_uses": 1,
     "slashes_given": [
-     "Blood Slash"
+     "Petal Slash"
     ],
     "slash_in_pack": [
-     "slash|Blood Slash|1"
+     "slash|Petal Slash|1"
     ]
    }
   },
@@ -2146,7 +2143,7 @@
    "ok": true,
    "refused": [],
    "boss_gave": [
-    "Blood Slash"
+    "Petal Slash"
    ],
    "boss_slash_tier": [
     2
@@ -2180,12 +2177,12 @@
      "hit": true,
      "bonus": 6.0,
      "want_bonus": 6.0,
-     "fx": 30,
+     "fx": 31,
      "procs": {
       "burn": 1
      },
      "burning": true,
-     "dot": 10.08,
+     "dot": 10.07,
      "want_dot": 10.1,
      "ok": true
     },
@@ -2213,7 +2210,7 @@
       "poison": 1
      },
      "burning": true,
-     "dot": 11.93,
+     "dot": 11.9,
      "want_dot": 12.0,
      "ok": true
     },
@@ -2250,11 +2247,11 @@
      "hit": true,
      "bonus": 9.0,
      "want_bonus": 9.0,
-     "fx": 65,
+     "fx": 66,
      "procs": {
       "knockback": 1
      },
-     "moved_cm": 298,
+     "moved_cm": 302,
      "want_cm": 300.0,
      "ok": true
     },
@@ -2277,7 +2274,7 @@
      "hit": true,
      "bonus": 8.0,
      "want_bonus": 8.0,
-     "fx": 53,
+     "fx": 54,
      "procs": {
       "evade": 1
      },
@@ -2290,7 +2287,7 @@
      "hit": true,
      "bonus": 14.0,
      "want_bonus": 14.0,
-     "fx": 29,
+     "fx": 31,
      "procs": {
       "shield": 1
      },
@@ -2345,7 +2342,7 @@
       "tide": 1
      },
      "slow": 0.2,
-     "moved_cm": 411,
+     "moved_cm": 403,
      "ok": true
     },
     "Inferno Slash": {
@@ -2409,7 +2406,7 @@
      "hit": true,
      "bonus": 36.0,
      "want_bonus": 36.0,
-     "fx": 26,
+     "fx": 25,
      "procs": {
       "magma": 1
      },
@@ -2424,13 +2421,13 @@
      "hit": true,
      "bonus": 34.0,
      "want_bonus": 34.0,
-     "fx": 41,
+     "fx": 40,
      "procs": {
       "void": 1
      },
      "closer_cm": [
-      151,
-      149,
+      152,
+      159,
       0
      ],
      "slow": 0.25,
@@ -2458,7 +2455,7 @@
      "want_bonus": 32.0,
      "fx": 37,
      "procs": {
-      "poison": 1,
+      "burn": 1,
       "prismatic": 1
      },
      "ok": true
@@ -2565,7 +2562,7 @@
     "started": true,
     "mana": 7.0,
     "lost": 23.0,
-    "fx": 42,
+    "fx": 34,
     "released": 0,
     "bolts": 1,
     "damage_of": 23.0,
@@ -2641,8 +2638,8 @@
      ],
      "harvest": true,
      "pictures": 2,
-     "particles": 16,
-     "picture_cm": 100.6,
+     "particles": 17,
+     "picture_cm": 100.7,
      "tint": [
       0.55,
       1.0,
@@ -2659,8 +2656,8 @@
      ],
      "harvest": true,
      "pictures": 1,
-     "particles": 18,
-     "picture_cm": 100.6,
+     "particles": 16,
+     "picture_cm": 100.7,
      "tint": [
       0.55,
       1.0,
@@ -2678,7 +2675,7 @@
      ],
      "harvest": true,
      "pictures": 2,
-     "particles": 16,
+     "particles": 15,
      "picture_cm": 100.6,
      "tint": [
       0.55,
@@ -2696,7 +2693,7 @@
      ],
      "harvest": true,
      "pictures": 1,
-     "particles": 17,
+     "particles": 18,
      "picture_cm": 100.7,
      "tint": [
       0.45,
@@ -2714,7 +2711,7 @@
      ],
      "harvest": true,
      "pictures": 1,
-     "particles": 17,
+     "particles": 16,
      "picture_cm": 100.6,
      "tint": [
       0.45,
@@ -2734,8 +2731,8 @@
      ],
      "harvest": true,
      "pictures": 3,
-     "particles": 16,
-     "picture_cm": 94.5,
+     "particles": 15,
+     "picture_cm": 94.4,
      "tint": [
       0.45,
       0.7,
@@ -2755,7 +2752,7 @@
      "harvest": true,
      "pictures": 3,
      "particles": 16,
-     "picture_cm": 94.5,
+     "picture_cm": 94.4,
      "tint": [
       0.8,
       0.5,
@@ -2773,8 +2770,8 @@
      ],
      "harvest": true,
      "pictures": 2,
-     "particles": 18,
-     "picture_cm": 100.6,
+     "particles": 16,
+     "picture_cm": 100.7,
      "tint": [
       0.8,
       0.5,
@@ -2792,8 +2789,8 @@
      ],
      "harvest": true,
      "pictures": 2,
-     "particles": 18,
-     "picture_cm": 100.6,
+     "particles": 17,
+     "picture_cm": 100.9,
      "tint": [
       0.8,
       0.5,
@@ -2810,8 +2807,8 @@
      ],
      "harvest": true,
      "pictures": 1,
-     "particles": 15,
-     "picture_cm": 100.7,
+     "particles": 16,
+     "picture_cm": 100.6,
      "tint": [
       1.0,
       0.62,
@@ -2829,8 +2826,8 @@
      ],
      "harvest": true,
      "pictures": 2,
-     "particles": 16,
-     "picture_cm": 100.7,
+     "particles": 15,
+     "picture_cm": 100.6,
      "tint": [
       1.0,
       0.62,
@@ -2848,8 +2845,8 @@
      ],
      "harvest": true,
      "pictures": 2,
-     "particles": 17,
-     "picture_cm": 100.7,
+     "particles": 16,
+     "picture_cm": 100.6,
      "tint": [
       1.0,
       0.62,
@@ -2905,7 +2902,7 @@
      ],
      "harvest": true,
      "pictures": 1,
-     "particles": 16,
+     "particles": 17,
      "picture_cm": 100.6,
      "tint": [
       1.0,
@@ -3222,7 +3219,7 @@
     "message": "You read the scroll of fireball:  Fireball, no mana",
     "scroll_weapon": 2,
     "mana_taken": 0.0,
-    "cast_s": 0.74,
+    "cast_s": 0.76,
     "bar_same": true,
     "weapons_after": 0,
     "lost": 91.0,
@@ -3366,7 +3363,7 @@
     "hp": 60.0,
     "damage": 14.0
    },
-   "allies_fight": 33.6,
+   "allies_fight": 47.6,
    "dagger": {
     "index": 3,
     "both_hands": true
@@ -3538,13 +3535,13 @@
     }
    ],
    "off": {
-    "moving_least": -76.6,
-    "standing_least": -76.1,
+    "moving_least": -76.4,
+    "standing_least": -76.4,
     "standing_overlap_share": 1.0
    },
    "on": {
-    "moving_least": 6.3,
-    "standing_least": 20.2,
+    "moving_least": 0.0,
+    "standing_least": 19.8,
     "standing_overlap_share": 0.0
    },
    "far": {
@@ -3641,70 +3638,70 @@
        1900
       ],
       [
-       198,
+       264,
        0,
-       115,
+       117,
        1900
       ],
       [
-       81,
+       141,
+       0,
+       112,
+       1900
+      ],
+      [
+       805,
+       0,
+       133,
+       1900
+      ],
+      [
+       683,
+       0,
+       129,
+       1900
+      ],
+      [
+       585,
+       0,
+       126,
+       1900
+      ],
+      [
+       442,
+       0,
+       121,
+       1900
+      ],
+      [
+       304,
+       0,
+       116,
+       1900
+      ],
+      [
+       209,
+       0,
+       113,
+       1900
+      ],
+      [
+       86,
        0,
        109,
-       1900
-      ],
-      [
-       911,
-       0,
-       136,
-       1900
-      ],
-      [
-       727,
-       0,
-       130,
-       1900
-      ],
-      [
-       623,
-       0,
-       127,
-       1900
-      ],
-      [
-       499,
-       0,
-       123,
-       1900
-      ],
-      [
-       387,
-       0,
-       119,
-       1900
-      ],
-      [
-       261,
-       0,
-       115,
-       1900
-      ],
-      [
-       155,
-       0,
-       111,
        1900
       ]
      ],
      "times": [
-      1.9,
-      9.45
+      1.94,
+      9.54
      ],
      "fired": 2,
      "on_her": 2,
      "hp_lost": 10.8,
      "last_on_her": "Soldier|5.6|14.0|a rifle shot",
      "gaps": [
-      7.55
+      7.6
      ],
      "close": {
       "shots": 0,
@@ -3721,52 +3718,64 @@
      "interval": 1.84,
      "flight": [
       [
-       539,
+       540,
        0,
        134,
        1400
       ],
       [
-       502,
+       370,
+       0,
+       125,
+       1400
+      ],
+      [
+       501,
        0,
        132,
        1400
       ],
       [
-       411,
+       396,
        0,
-       127,
+       126,
        1400
       ],
       [
-       331,
+       289,
        0,
-       123,
+       121,
        1400
       ],
       [
-       227,
+       217,
        0,
-       118,
+       117,
        1400
       ],
       [
-       135,
+       146,
        0,
        113,
+       1400
+      ],
+      [
+       73,
+       0,
+       110,
        1400
       ]
      ],
      "times": [
-      1.66,
-      8.15
+      1.52,
+      7.96
      ],
      "fired": 3,
      "on_her": 3,
      "hp_lost": 19.0,
      "last_on_her": "Medic|6.6|12.0|a syringe dart",
      "gaps": [
-      6.49
+      6.44
      ],
      "close": {
       "shots": 0,
@@ -3787,7 +3796,7 @@
    "by_a_door": 0,
    "toward_walls": 18,
    "meshes": 7,
-   "first_wave_after": 3.04,
+   "first_wave_after": 3.05,
    "cheers_at_wave": 5,
    "doing_after_wave": [
     "cheer"
@@ -3839,7 +3848,7 @@
     "Warrior": {
      "ended_after": 40.2,
      "still_on": false,
-     "metres": 123,
+     "metres": 122,
      "attacks": 8,
      "kills": 2,
      "rooms": 2,
@@ -3850,7 +3859,7 @@
      "doing": ""
     },
     "Mage": {
-     "ended_after": 40.1,
+     "ended_after": 40.2,
      "still_on": false,
      "metres": 132,
      "attacks": 6,
@@ -3863,7 +3872,7 @@
      "doing": ""
     },
     "Warlock": {
-     "ended_after": 40.2,
+     "ended_after": 40.1,
      "still_on": false,
      "metres": 126,
      "attacks": 8,
@@ -3876,7 +3885,7 @@
      "doing": ""
     },
     "Rogue": {
-     "ended_after": 40.2,
+     "ended_after": 40.0,
      "still_on": false,
      "metres": 140,
      "attacks": 2,
@@ -3889,7 +3898,7 @@
      "doing": ""
     },
     "MartialArtist": {
-     "ended_after": 40.0,
+     "ended_after": 40.1,
      "still_on": false,
      "metres": 136,
      "attacks": 4,
@@ -3902,14 +3911,14 @@
      "doing": ""
     },
     "Summoner": {
-     "ended_after": 40.2,
+     "ended_after": 40.0,
      "still_on": false,
-     "metres": 115,
-     "attacks": 6,
-     "kills": 1,
+     "metres": 114,
+     "attacks": 7,
+     "kills": 2,
      "rooms": 2,
-     "used": 0,
-     "opened": 5,
+     "used": 1,
+     "opened": 6,
      "stuck": 0,
      "deaths": 0,
      "doing": ""
@@ -3938,11 +3947,11 @@
    "lasted": 7.8,
    "regen_in_it": 0.03,
    "ended_by": "time",
-   "regen_after": 1.51,
+   "regen_after": 1.5,
    "monster": {
     "came": {
      "attacks": 1,
-     "m": 1.41
+     "m": 1.42
     },
     "attacks_in_stealth": 0,
     "hp_lost": 0.0,
@@ -4048,7 +4057,7 @@
      ],
      "factors_ok": true,
      "regen": [
-      2.5,
+      2.51,
       2.5
      ],
      "after_restart": [
@@ -4329,7 +4338,7 @@
    }
   }
  ],
- "windows_hidden": "Message Log, Content Browser",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
   "mw_m6all_hud_fps.png",
   "mw_m6all_shield_kite.png",

@@ -623,7 +623,7 @@ private:
 	float PactUntil = -100.f, PactShare = 0.f, DispelUntil = -100.f;
 	// (mistward6: the stealth)
 	float DexEnergy = 0.f, MaxDexEnergy = 0.f, StealthUntil = -100.f;
-	bool bAmbushArmed = false;
+	bool bAmbushArmed = false, bAmbushApplying = false;
 	TSet<uint32> StealthTraps;
 	void TickStealth(float Dt, float Now);
 	FVector RuneAt = FVector::ZeroVector, SanctumAt = FVector::ZeroVector;

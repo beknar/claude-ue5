@@ -184,7 +184,9 @@ void URDCombatComponent::UpdateMaxima()
 	if (!Generator) return;
 	const float OldH = MaxHealth, OldM = MaxMana;
 	// (mistward6: her hit points grow with the tiers opened)
-	MaxHealth = FMath::Max(1.f, FMath::RoundToFloat(Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)) * Generator->TierHealthMul()));
+	// (whole hit points with the growth only: the other levels keep theirs as they were (the PR review's find))
+	const float RawH = Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)) * Generator->TierHealthMul();
+	MaxHealth = FMath::Max(1.f, Generator->bTierGrowth ? FMath::RoundToFloat(RawH) : RawH);
 	MaxMana = FMath::Max(Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic)), GetTomeMana());
 	// (a ring put on adds its part to what she has; one taken off takes no more than it gave)
 	if (MaxHealth > OldH) Health += MaxHealth - OldH;

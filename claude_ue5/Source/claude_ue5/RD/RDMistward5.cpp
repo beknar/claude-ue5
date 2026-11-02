@@ -616,8 +616,10 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			for (int32 I = 0; I < Items.Num(); ++I)
 				if ((Items[I].Kind == Want || (Want == ERDItemKind::Healing && Items[I].Kind == ERDItemKind::Food && Pc->GetRegenPerSecond() <= 0.f)) && Pc->GetItemCount(Items[I].Name) > 0 && Items[I].Amount > BestAmt)
 				{ Best = I; BestAmt = Items[I].Amount; }
-			if (Best >= 0 && Pc->UseItem(Items[Best].Name)) { AutoplayStats.FindOrAdd(TEXT("used"))++; AutoplayNextAct = Now + 0.6f; }
-			AutoplayUseNext = Now + 3.f;          // (a potion's or food's effect shows before the next: food heals over time)
+			// (a potion's or food's effect shows before the next: food heals over time; nothing to use, a short wait: no speed
+			// potion for her energy must not keep a healing one back for 3 s (the PR review's find))
+			if (Best >= 0 && Pc->UseItem(Items[Best].Name)) { AutoplayStats.FindOrAdd(TEXT("used"))++; AutoplayNextAct = Now + 0.6f; AutoplayUseNext = Now + 3.f; }
+			else AutoplayUseNext = Now + 0.5f;
 		}
 	}
 	// ---- the one to fight: the nearest she can see within 18 m, or one coming at her
@@ -655,10 +657,6 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		const FString Name = Foe->Title.IsEmpty() ? Foe->MonsterName.ToString() : Foe->Title;
 		AutoplayDoing = FString::Printf(TEXT("fight %s"), *Name);
 		const TArray<FRD5Arm> Arms = RD5Arms(this);
-		float BestRange = 0.f;
-		for (const FRD5Arm& A : Arms)
-			if (!A.bSummon && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->GetCooldownLeft(A.Index) <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
-		if (BestRange <= 0.f) for (const FRD5Arm& A : Arms) if (!A.bSummon && Weapons[A.Index].ManaCost <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
 		// (mistward6: of her weapons (not her spells) only the best near and the best far by damage a second: she took the
 		// Warrior's dagger in turn with the sword she had found)
 		int32 BestNear = -1, BestFar = -1; float BestNearD = -1.f, BestFarD = -1.f;
@@ -672,6 +670,12 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			else if (Dps > BestNearD) { BestNearD = Dps; BestNear = A.Index; }
 		}
 		auto Lesser = [&](const FRD5Arm& A) { const FRDWeaponDef& Wd = Weapons[A.Index]; return !A.bSummon && (!Wd.bSpell || Wd.BoltMesh) && A.Index != BestNear && A.Index != BestFar; };
+		// (how far she stands off: from the arms she will use (a long weapon she never uses held her where only it reached:
+		// the PR review's find))
+		float BestRange = 0.f;
+		for (const FRD5Arm& A : Arms)
+			if (!A.bSummon && !Lesser(A) && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->GetCooldownLeft(A.Index) <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
+		if (BestRange <= 0.f) for (const FRD5Arm& A : Arms) if (!A.bSummon && !Lesser(A) && Weapons[A.Index].ManaCost <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
 		// (mistward6: stealth, to come at it unseen and strike first, or to get away when hurt (and drink))
 		const float SCost = Pc->GetStealthCost();
 		const float HpF = Pc->GetHealth() / FMath::Max(Pc->GetMaxHealth(), 1.f);
@@ -706,8 +710,10 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			for (int32 K = 0; K < Arms.Num() && !bDid; ++K)
 			{
 				const FRD5Arm& A = Arms[(K + AutoplayWeaponTurn) % Arms.Num()];
-				if (A.bSummon || Gap > A.Range || Lesser(A)) continue;
-				if (bHid && AmbushArm >= 0 && A.Index != AmbushArm) continue;
+				if (A.bSummon || Gap > A.Range) continue;
+				// (hidden: the ambush's weapon only, whether or not it is the best by damage a second; else the best near and far)
+				if (bHid && AmbushArm >= 0) { if (A.Index != AmbushArm) continue; }
+				else if (Lesser(A)) continue;
 				if (Pc->GetMana() < Weapons[A.Index].ManaCost) continue;
 				if (Pc->StartAttackWith(A.Index)) { bDid = true; AutoplayWeaponTurn = (K + AutoplayWeaponTurn + 1) % FMath::Max(Arms.Num(), 1); }
 			}

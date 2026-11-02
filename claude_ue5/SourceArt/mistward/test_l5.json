@@ -28,12 +28,12 @@
      "rings": 1,
      "ring_scale": 2.0,
      "plate_outlined": 1,
-     "red_rogue": 0.1436
+     "red_rogue": 0.1453
     },
     {
      "trap": "Cursed",
      "i": 2,
-     "red_warrior": 0.0014,
+     "red_warrior": 0.0007,
      "m": 6.0,
      "seen": 1,
      "rings_before": 0,
@@ -46,10 +46,10 @@
    "traps": 13,
    "boxes": [
     [
-     0.398,
-     0.206,
-     0.538,
-     0.386
+     0.395,
+     0.204,
+     0.535,
+     0.384
     ],
     [
      0.416,
@@ -243,7 +243,7 @@
     2560,
     2560
    ],
-   "head_diff": 9.26,
+   "head_diff": 9.22,
    "luma_on": 0.0,
    "luma_off": 0.0,
    "helmet_row": "helmet|1|Plate Armour",
@@ -256,7 +256,7 @@
    "share": 0.24,
    "refused": [],
    "hand_rest": [
-    5.5,
+    5.3,
     8.4
    ],
    "plain": {
@@ -293,7 +293,7 @@
    "after_restart": {
     "blocking": false,
     "hand": [
-     2.1,
+     2.0,
      7.9
     ]
    },
@@ -337,13 +337,14 @@
     "Dagger",
     "Eastern Sabre",
     "Leaf-Blade Knife",
+    "Longsword",
     "Painted Viking Shield",
     "Plate Knight's Sword",
     "Sherwood Sword",
-    "Viking Round Shield",
     "Viking Shortsword",
     "Viking Sword",
-    "Village Shield (green)"
+    "Village Shield (green)",
+    "Village Shield (red)"
    ],
    "drawn": 24,
    "tier_ok": true,
@@ -378,40 +379,40 @@
    "step": "rooms",
    "ok": true,
    "kinds": {
-    "Trap gauntlet": 5,
+    "Trap gauntlet": 4,
     "Fountain of speed": 5,
-    "Vault": 4,
-    "Arena": 4,
-    "Shrine": 5,
+    "Vault": 5,
+    "Arena": 3,
+    "Shrine": 6,
     "Healing fountain": 6,
     "Fountain of mana": 6,
-    "Throne room": 5
+    "Throne room": 2
    },
    "refused": [],
    "shrine": {
     "describe": "pray at the shrine",
     "f": "shrine",
-    "blessing": "Blessing of swiftness",
-    "damage_x": 1.0,
+    "blessing": "Blessing of might",
+    "damage_x": 1.25,
     "armour": 0.0,
-    "speed": 0.2,
+    "speed": 0.0,
     "again": "shrine used"
    },
    "heal": {
     "f": "fountain",
     "hp_gain": 0.6,
     "speed_x": 1.0,
-    "speed_bonus": 0.2,
+    "speed_bonus": 0.0,
     "again": "fountain dry",
-    "particles": 16
+    "particles": 13
    },
    "speed": {
     "f": "fountain",
     "hp_gain": 0.0,
-    "speed_x": 1.083,
+    "speed_x": 1.3,
     "speed_bonus": 0.3,
     "again": "fountain dry",
-    "particles": 9
+    "particles": 15
    },
    "mana": {
     "f": "fountain",
@@ -449,9 +450,9 @@
     "won": 1,
     "prize": [
      [
-      "Magic Potency Ring 2",
-      "Plate Knight's Sword",
-      "Slickstone"
+      "Medium Speed Potion",
+      "Orc Veteran’s Armour",
+      "Repair Kit"
      ]
     ],
     "harvest_piles": 0,
@@ -479,38 +480,40 @@
     "locked_f": "vault locked",
     "open_without_key": false,
     "key_chests": 1,
-    "key_room": 37,
+    "key_room": 5,
     "key_chest_f": "chest",
     "other_opened": 0,
     "has_key": 1,
     "f": "vault",
     "open_with_key": true,
     "key_after": 0,
-    "vault_chests": 35,
+    "vault_chests": 24,
     "vault_loot": [
-     "HP Potency Ring 5",
-     "Crossbow"
+     "Whetstone",
+     "Hardtack",
+     "Oils",
+     "Demonic Armour",
+     "Cured Leather Strip",
+     "Glue"
     ],
     "tier_beyond": [
-     [
-      3
-     ],
+     [],
      [
       3
      ]
     ]
    },
    "throne": {
-    "encounters": 5,
+    "encounters": 2,
     "label": "THE USURPER: ORC 03",
     "alive": 1,
-    "slain_notice": "THE USURPER IS SLAIN  -  THE PETAL SLASH IS YOURS",
+    "slain_notice": "THE USURPER IS SLAIN  -  THE VERDANT SLASH IS YOURS",
     "usurper_uses": 1,
     "slashes_given": [
-     "Petal Slash"
+     "Verdant Slash"
     ],
     "slash_in_pack": [
-     "slash|Petal Slash|1"
+     "slash|Verdant Slash|1"
     ]
    }
   },
@@ -535,7 +538,7 @@
     "started": true,
     "fx_max": 31,
     "bonus": 6.0,
-    "monster_lost": 22.3,
+    "monster_lost": 22.2,
     "pictured": true
    },
    "shot": {
@@ -554,7 +557,7 @@
       "burn": 1
      },
      "burning": true,
-     "dot": 10.03,
+     "dot": 10.05,
      "want_dot": 10.1,
      "ok": true
     },
@@ -623,7 +626,7 @@
      "procs": {
       "knockback": 1
      },
-     "moved_cm": 305,
+     "moved_cm": 300,
      "want_cm": 300.0,
      "ok": true
     },
@@ -646,7 +649,7 @@
      "hit": true,
      "bonus": 8.0,
      "want_bonus": 8.0,
-     "fx": 57,
+     "fx": 59,
      "procs": {
       "evade": 1
      },
@@ -714,7 +717,7 @@
       "tide": 1
      },
      "slow": 0.2,
-     "moved_cm": 414,
+     "moved_cm": 415,
      "ok": true
     },
     "Inferno Slash": {
@@ -738,7 +741,7 @@
      "hit": true,
      "bonus": 22.0,
      "want_bonus": 22.0,
-     "fx": 26,
+     "fx": 25,
      "procs": {
       "curse": 1
      },
@@ -798,9 +801,9 @@
       "void": 1
      },
      "closer_cm": [
-      158,
-      148,
-      27
+      174,
+      150,
+      0
      ],
      "slow": 0.25,
      "ok": true

@@ -4,8 +4,9 @@ other tier by tier (SourceArt/mistward/balance6.json; C++ RD/RDMistward6.cpp). O
 - each hero's numbers: hit points; for each tier open past the first, the share more hit points, spell / chi damage and damage
   of her own weapons (her fists, her starting blades and crossbow; a found weapon carries its own tier instead); mana back a
   second as a share of her pool
-- the Rogue: her dexterity energy (100, 2 a second back), a stealth's cost (35) and length (8 s), the ambush (+150 %), her
-  daggers and crossbow (13 and 26: the ambush and her rings are her growth), her card's line and the controls panel's
+- the Rogue: her dexterity energy, a stealth's cost and length, the ambush (balance6.json's numbers: 100, 1.5 a second back,
+  40 a stealth, 8 s, +75 %), her daggers and crossbow (13 and 26: the ambush and her rings are her growth), her card's line
+  and the controls panel's
 - found weapons: 8 + 3 x the damage rating, times weapon_tier_power by the first tier the weapon is found in
 - the Martial Artist's chi attacks: base x (mana / base_mana) ^ power (23 for the Straight Punch's 7 mana, 154 for the
   Spinning Kick's 88), in the spell table and on her weapons and locked weapons

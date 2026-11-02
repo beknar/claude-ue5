@@ -3253,10 +3253,10 @@ def prop(o, n, d=0.0):
     except Exception: return getattr(o, n, d)
 
 def step_stealth():
-    """the Rogue's stealth (880, balance6.json): her dexterity energy (100); Q, as the keyboard sends it, hides her for 8 s at 35
-    of it (the HUD's bar, a picture); none comes back while in it, then 2 a second; a monster after her loses her (no blow, no
-    hit point lost, its chase ended); a trap she stands on stays set (counted as passed); her first blow out of it does +150 %
-    and ends it, a crossbow bolt too; with too little energy it is refused and says so; a speed potion fills it; @Stealth is one
+    """the Rogue's stealth (880; the numbers balance6.json's: 100 energy, 40 a stealth, 8 s, 1.5 back a second, +75 %): Q, as
+    the keyboard sends it, hides her for its seconds at its cost (the HUD's bar, a picture); none comes back while in it, then
+    its rate; a monster after her loses her (no blow, no hit point lost, its chase ended); a trap she stands on stays set
+    (counted as passed); her first blow out of it does the ambush's share more and ends it, a crossbow bolt too; with too little energy it is refused and says so; a speed potion fills it; @Stealth is one
     of her abilities; the Warrior has no stealth"""
     c = yield from restart("Rogue"); g = G["gen"]; quiet(True)
     st = BAL["heroes"]["Rogue"]["stealth"]

@@ -90,6 +90,8 @@ bool URDCombatComponent::StartStealth()
 	const FRDHeroDef* H = Generator && Generator->bStealth && !bDead ? Generator->FindHero(Generator->CurrentHero) : nullptr;
 	if (!H || H->DexEnergy <= 0.f || MaxDexEnergy <= 0.f || !GetOwner()) return false;
 	if (IsStealthed()) { EndStealth(TEXT("ended")); return true; }        // (again while in it: out of it, no energy back)
+	// (not in a swing: its blow would land with her hidden and keep her so (the PR review's find))
+	if (IsAttacking()) return false;
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (DexEnergy < H->StealthCost)
 	{
@@ -152,7 +154,9 @@ void URDCombatComponent::NoteStealthTrap(uint32 Key)
 
 float URDCombatComponent::AmbushMul(int32 Index) const
 {
-	if (!bAmbushArmed || Index != AttackIndex || !Generator) return 1.f;
+	// (only while the ambush's own blow, bolt or spell goes off: a bolt shot earlier that bursts in that window, or the HUD,
+	// gets nothing)
+	if (!bAmbushArmed || !bAmbushApplying || Index != AttackIndex || !Generator) return 1.f;
 	const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero);
 	return H ? 1.f + H->AmbushBonus : 1.f;
 }
