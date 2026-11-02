@@ -57,7 +57,27 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") bool GetControlsDrawn() const { return bControlsDrawn; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetSummonRows() const { return SummonRows; }
 
+	/** tests (Brokenspire): what the papyrus map named the last time it was drawn ("<icon>|<label>"), and the icons it drew */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownLabels() const { return TownLabels; }
+	/** tests (Brokenspire): the townspeople whose names were drawn over them last frame, with their quest marks ("<title>|<mark>") */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownNamesDrawn() const { return TownNamesDrawn; }
+
 private:
+	// ---- Brokenspire (RDTownHUD.cpp): the town's minimap and its papyrus map, the town's panel, the townspeople's names,
+	// her purse and quests
+	void DrawTownMinimap(float Sc, const FVector& L, float Yaw);
+	void DrawTownMap(float Sc, const FVector& L, float Yaw);
+	void DrawTownPanel(float Sc);
+	void DrawTownTracker(float Sc);
+	void DrawTownNames(float Sc);
+	/** the town's tiles by what is on them (-1 void, -2 ground, -3 road or square, a building's index), cached for its seed */
+	TArray<int16> TownGrid;
+	int32 TownGridN = 0, TownGridSeed = -1;
+	FVector2D TownGridMin = FVector2D::ZeroVector;
+	void CacheTownGrid();
+	/** a word-wrapped paragraph (lines of at most W pixels) */
+	TArray<FString> WrapText(const FString& S, float W, class UFont* F, float K) const;
+	TArray<FString> TownLabels, TownNamesDrawn;
 	bool bControlsDrawn = false;
 	TArray<FString> SummonRows;
 	/** mistward4: her summoned allies by kind, in the lower left, its foot level with the status panel's (whose board's top

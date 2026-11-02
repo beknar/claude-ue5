@@ -1,0 +1,38 @@
+{
+ "invoke": {"host": "http://192.168.1.35:9090", "model": "FLUX.1 Krea dev (quantized)", "t5_encoder": "t5_bnb_int8_quantized_encoder",
+            "clip_embed": "clip-vit-large-patch14", "vae": "FLUX.1-schnell_ae", "steps": 30, "guidance": 3.5, "board": "claude-ue5 level4 UI", "seeds": 3},
+ "picks": {"_doc": "the picture chosen of each element (its seed), from the contact sheets of 2026-11-02", "map_papyrus": 1045640484, "mapicon_castle": 1795975515, "mapicon_smithy": 1659119669, "mapicon_store": 1435355624, "mapicon_healer": 1316965659, "mapicon_temple": 932198382, "mapicon_storehouse": 617301851, "mapicon_circle": 2057949467, "mapicon_board": 1921858840, "mapicon_tavern": 477546108, "mapicon_home": 558779821, "mapicon_burned": 989348196, "mapicon_boarded": 455600932, "mapicon_chapel": 857439529, "mapicon_graveyard": 1206094658, "mapicon_barracks": 1184945396, "mapicon_market": 1169314462, "mapicon_well": 1147438131, "mapicon_still": 2090702514, "mapicon_mill": 1926916537, "mapicon_tower": 1959825932, "mapicon_gate": 1756617193, "mapicon_square": 1677574140, "mapicon_witch": 1063638435},
+ "style": "hand-drawn fantasy map art in sepia ink with faded watercolour washes, as drawn on an old parchment map",
+ "backdrop": "alone on a plain pure white background, soft even light from the front",
+ "styles": {
+  "texture": "a flat even texture filling the whole picture edge to edge, with no frame, no border and nothing drawn on it",
+  "icon": "a small stylised map symbol seen from above at a slight angle, the whole symbol inside the picture with a wide empty white margin all around it, a fine dark ink outline"
+ },
+ "elements": [
+  {"name": "map_papyrus", "kind": "texture", "size": [1536, 1536], "backdrop": "", "prompt": "an old sheet of papyrus seen straight on, warm cream and light ochre fibres woven across each other, faint stains and darker blotches, softly worn, the same all over"},
+  {"name": "mapicon_castle", "kind": "icon", "size": [1024, 1024], "prompt": "a grim stone castle keep with four square towers and a dark arched gate, wisps of grey mist curling out of its gate"},
+  {"name": "mapicon_smithy", "kind": "icon", "size": [1024, 1024], "prompt": "a small stone smithy with a tall chimney breathing a curl of smoke, an iron anvil standing before its open front"},
+  {"name": "mapicon_store", "kind": "icon", "size": [1024, 1024], "prompt": "a small timber-framed shop with a striped awning over its front and crates and sacks of goods stacked beside its door"},
+  {"name": "mapicon_healer", "kind": "icon", "size": [1024, 1024], "prompt": "a small cottage with a bundle of green herbs hanging over its door and a stone basin of clear water beside it"},
+  {"name": "mapicon_temple", "kind": "icon", "size": [1024, 1024], "prompt": "a stone temple with tall columns and a domed roof crowned by a golden sun disc"},
+  {"name": "mapicon_storehouse", "kind": "icon", "size": [1024, 1024], "prompt": "a long wooden storehouse barn with wide double doors and an iron-bound chest standing before them"},
+  {"name": "mapicon_circle", "kind": "icon", "size": [1024, 1024], "prompt": "a ring of standing stones around a softly glowing blue rune circle drawn on the ground"},
+  {"name": "mapicon_board", "kind": "icon", "size": [1024, 1024], "prompt": "a wooden notice board on two posts with pinned parchment notes and a small roof over it"},
+  {"name": "mapicon_tavern", "kind": "icon", "size": [1024, 1024], "prompt": "a cosy two-storey timber tavern with a hanging sign shaped like a tankard and a lit window"},
+  {"name": "mapicon_home", "kind": "icon", "size": [1024, 1024], "prompt": "a small thatched cottage with a single chimney and a little garden fence"},
+  {"name": "mapicon_burned", "kind": "icon", "size": [1024, 1024], "prompt": "the blackened ruin of a burned cottage, charred broken beams and a collapsed roof, a thin trail of smoke"},
+  {"name": "mapicon_boarded", "kind": "icon", "size": [1024, 1024], "prompt": "a small abandoned cottage with wooden planks nailed in a cross over its door and windows"},
+  {"name": "mapicon_chapel", "kind": "icon", "size": [1024, 1024], "prompt": "a small stone chapel with a pointed bell tower and a single bell"},
+  {"name": "mapicon_graveyard", "kind": "icon", "size": [1024, 1024], "prompt": "a small graveyard with rows of crooked headstones inside a low iron fence and a bare tree"},
+  {"name": "mapicon_barracks", "kind": "icon", "size": [1024, 1024], "prompt": "a long low stone barracks with crossed spears and a pennant flag on a pole before it"},
+  {"name": "mapicon_market", "kind": "icon", "size": [1024, 1024], "prompt": "three small market stalls with coloured cloth canopies around baskets of fruit"},
+  {"name": "mapicon_well", "kind": "icon", "size": [1024, 1024], "prompt": "a round stone well with a little wooden roof and a hanging bucket"},
+  {"name": "mapicon_still", "kind": "icon", "size": [1024, 1024], "prompt": "a copper still with a round pot, a coiled pipe and wooden barrels beside it"},
+  {"name": "mapicon_mill", "kind": "icon", "size": [1024, 1024], "prompt": "a wooden windmill with four large sails on a stone base"},
+  {"name": "mapicon_tower", "kind": "icon", "size": [1024, 1024], "prompt": "a single square stone watchtower with crenellations on top and a small flag"},
+  {"name": "mapicon_gate", "kind": "icon", "size": [1024, 1024], "prompt": "a heavy closed wooden town gate between two stone gate towers, barred with an iron bar"},
+  {"name": "mapicon_square", "kind": "icon", "size": [1024, 1024], "prompt": "a cobbled town square with a small stone fountain in its middle"},
+  {"name": "mapicon_witch", "kind": "icon", "size": [1024, 1024], "prompt": "a crooked little hut with a bubbling cauldron before it and bundles of dried herbs and a raven on its roof"},
+  {"name": "mapicon_you", "kind": "icon", "size": [1024, 1024], "prompt": "a red wax seal arrowhead pointing upward, flat and simple"}
+ ]
+}

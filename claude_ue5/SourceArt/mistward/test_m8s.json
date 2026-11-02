@@ -1,0 +1,524 @@
+{
+ "tag": "m8s",
+ "plan": [
+  "basics",
+  "tiers",
+  "death",
+  "startgear",
+  "options"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "basics",
+   "ok": true,
+   "title": "Mistward Castle",
+   "max_tier": 5,
+   "show_fps": true,
+   "fps": 40.9,
+   "fps_box": [
+    67,
+    58,
+    314,
+    110
+   ],
+   "recipes": [
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "recipes_sorted": true,
+   "breakdowns": [
+    "Beast Shield",
+    "Dock Shield",
+    "Eastern Shield",
+    "Kite Shield",
+    "Painted Viking Shield"
+   ],
+   "breakdowns_sorted": true,
+   "plate_knight_tiers": [
+    2
+   ],
+   "themes": {
+    "1": "None",
+    "2": "Castle",
+    "3": "Dwarf",
+    "4": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ],
+    "5": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ]
+   }
+  },
+  {
+   "step": "tiers",
+   "ok": true,
+   "ok_tier2": true,
+   "ok_tier3": true,
+   "share": 0.5,
+   "tally1_start": {
+    "ok": true,
+    "done": [
+     1,
+     0,
+     0
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "standing_before": 14,
+   "kills": [
+    {
+     "killed": 0,
+     "of": 14,
+     "share": 0.0,
+     "open": false
+    },
+    {
+     "killed": 1,
+     "of": 14,
+     "share": 0.071,
+     "open": false
+    },
+    {
+     "killed": 2,
+     "of": 14,
+     "share": 0.143,
+     "open": false
+    },
+    {
+     "killed": 3,
+     "of": 14,
+     "share": 0.214,
+     "open": false
+    },
+    {
+     "killed": 4,
+     "of": 14,
+     "share": 0.286,
+     "open": false
+    },
+    {
+     "killed": 5,
+     "of": 14,
+     "share": 0.357,
+     "open": false
+    },
+    {
+     "killed": 6,
+     "of": 14,
+     "share": 0.429,
+     "open": false
+    },
+    {
+     "killed": 7,
+     "of": 14,
+     "share": 0.5,
+     "open": true
+    }
+   ],
+   "open_short": false,
+   "opened_at_share": 0.5,
+   "last_shut_share": 0.429,
+   "tally1_enough": {
+    "ok": true,
+    "done": [
+     46,
+     7,
+     71
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "open_enough": true,
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
+   "tier2": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -7050.0,
+       -6750.0,
+       124.0
+      ],
+      "name": "Orc_03",
+      "alive": 1,
+      "tier": 2,
+      "label": "TIER 2 BOSS: ORC RAIDER",
+      "max_health": 360.0
+     }
+    ],
+    "band": 4,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -8638.0,
+       -7290.0,
+       119.0
+      ],
+      "name": "Magic Potency Ring 1",
+      "key": 17,
+      "tier": 2,
+      "section": [
+       0,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 1,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     86.0,
+     91.0,
+     109.0,
+     120.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 1"
+    ],
+    "ring_kind_ok": true
+   },
+   "marks_minimap": [
+    7,
+    8,
+    10
+   ],
+   "marks_map": [
+    7,
+    8,
+    10
+   ],
+   "notices_tier2": [
+    "SET CLEARED  -  TIER 2: 1 / 8",
+    "SET CLEARED  -  TIER 2: 2 / 8",
+    "SET CLEARED  -  TIER 2: 3 / 8",
+    "SET CLEARED  -  TIER 2: 4 / 8",
+    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE LIBRARY (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 6 / 8",
+    "SET CLEARED  -  TIER 2: 7 / 8",
+    "TIER 2 CLEARED"
+   ],
+   "tally2": {
+    "ok": true,
+    "done": [
+     330,
+     99,
+     762
+    ],
+    "all": [
+     330,
+     99,
+     762
+    ]
+   },
+   "open3": true,
+   "notice3": "TIER 2 CLEARED",
+   "tiers_opened": [
+    2,
+    3
+   ],
+   "tier3": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -2850.0,
+       18150.0,
+       115.0
+      ],
+      "name": "Tank",
+      "alive": 1,
+      "tier": 3,
+      "label": "TIER 3 BOSS: ZOMBIE TANK",
+      "max_health": 576.0
+     }
+    ],
+    "band": 5,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -0.0,
+       -24750.0,
+       1.0
+      ],
+      "name": "Magic Potency Ring 3",
+      "key": -1,
+      "tier": 3,
+      "section": [
+       0,
+       -1
+      ]
+     }
+    ],
+    "boss_tier_of_room": 2,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     133.0,
+     162.0,
+     172.0,
+     177.0,
+     182.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 3"
+    ],
+    "ring_in_pile": true,
+    "ring_kind_ok": true
+   },
+   "seconds": 9.0
+  },
+  {
+   "step": "death",
+   "ok": true,
+   "gave": [
+    "Kite Shield",
+    "Small Healing Potion",
+    "Iron Ingot",
+    "Plate Armour",
+    "Viking Shortsword",
+    "Copper Ingot",
+    "Bronze Ingot",
+    "Steel Ingot",
+    "Hardwood",
+    "Timber",
+    "Wood Log",
+    "Coarse Hide",
+    "Light Leather",
+    "Cured Leather Strip",
+    "Epoxy"
+   ],
+   "lines_before": 2,
+   "start_shield": "Painted Viking Shield",
+   "keep_start_gear": true,
+   "dead": true,
+   "piles": 1,
+   "pile": {
+    "things": [
+     "Viking Shortsword",
+     "Kite Shield",
+     "Small Healing Potion",
+     "Iron Ingot",
+     "Plate Armour",
+     "Copper Ingot",
+     "Bronze Ingot",
+     "Steel Ingot",
+     "Hardwood",
+     "Timber",
+     "Wood Log",
+     "Coarse Hide",
+     "Light Leather",
+     "Cured Leather Strip",
+     "Epoxy"
+    ],
+    "pictures": 15,
+    "particles": 16,
+    "from_her_m": 0.0
+   },
+   "carried_after": {
+    "Kite Shield": 0,
+    "Small Healing Potion": 0,
+    "Iron Ingot": 0,
+    "Plate Armour": 0,
+    "Viking Shortsword": 0,
+    "Copper Ingot": 0,
+    "Bronze Ingot": 0,
+    "Steel Ingot": 0,
+    "Hardwood": 0,
+    "Timber": 0,
+    "Wood Log": 0,
+    "Coarse Hide": 0,
+    "Light Leather": 0,
+    "Cured Leather Strip": 0,
+    "Epoxy": 0
+   },
+   "start_shield_after": 1,
+   "marks": [
+    9,
+    10
+   ],
+   "revived": true,
+   "where_after_m": 6.7,
+   "describe": "take up your things (15)",
+   "f": "loot",
+   "carried_back": {
+    "Kite Shield": 1,
+    "Small Healing Potion": 1,
+    "Iron Ingot": 1,
+    "Plate Armour": 1,
+    "Viking Shortsword": 1,
+    "Copper Ingot": 1,
+    "Bronze Ingot": 1,
+    "Steel Ingot": 1,
+    "Hardwood": 1,
+    "Timber": 1,
+    "Wood Log": 1,
+    "Coarse Hide": 1,
+    "Light Leather": 1,
+    "Cured Leather Strip": 1,
+    "Epoxy": 1,
+    "Painted Viking Shield": 1
+   },
+   "shield_worn_again": "Kite Shield",
+   "piles_after": 0
+  },
+  {
+   "step": "startgear",
+   "ok": true,
+   "weapons": [
+    [
+     "Dagger",
+     "None",
+     0.0
+    ]
+   ],
+   "worn_shield": "Painted Viking Shield",
+   "start_shield": "Painted Viking Shield",
+   "worst_shield": "Painted Viking Shield",
+   "worn_armour": "None",
+   "shield_wear": [
+    100.0,
+    100.0
+   ],
+   "pile": [
+    "Arming Sword",
+    "Kite Shield"
+   ],
+   "after_fall": {
+    "shield": "Painted Viking Shield",
+    "count": 1,
+    "weapons": [
+     "Dagger"
+    ]
+   },
+   "f": "loot",
+   "back": {
+    "shield": "Kite Shield",
+    "kite": 1,
+    "start": 1
+   },
+   "drop_on_death": true
+  },
+  {
+   "step": "options",
+   "ok": true,
+   "controls_before": true,
+   "open": {
+    "why": "",
+    "open": true,
+    "page": 0,
+    "lines": [
+     "button|Resume",
+     "button|Options",
+     "button|Return to Brokenspire",
+     "button|Choose another hero (a new game)",
+     "button|Quit"
+    ]
+   },
+   "options": {
+    "page": 1,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|1.00",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|On",
+     "choice|Resolution|the screen's own (windowed fullscreen)",
+     "choice|Display mode|Windowed fullscreen",
+     "button|Apply display settings",
+     "button|Back"
+    ],
+    "action": "options"
+   },
+   "controls_off": {
+    "shown": false,
+    "line": "choice|Controls hint|Off"
+   },
+   "volume": {
+    "before": 1.0,
+    "after": 0.9
+   },
+   "display": {
+    "choices": [
+     "1280x720",
+     "1600x900",
+     "1920x1080",
+     "2560x1440",
+     "3840x2160"
+    ],
+    "from": [
+     1920,
+     1080
+    ],
+    "to": [
+     2560,
+     1440
+    ],
+    "mode": 2,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|0.90",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|Off",
+     "choice|Resolution|2560 x 1440",
+     "choice|Display mode|Windowed",
+     "button|Apply display settings",
+     "button|Back"
+    ]
+   },
+   "applied": {
+    "said": "saved 2560x1440 mode 2 in the editor's user settings (the editor's play window keeps its size)",
+    "saved": [
+     2560,
+     1440
+    ],
+    "mode": "<WindowMode.WINDOWED: 2>"
+   },
+   "escape_back": {
+    "open": true,
+    "page": 0
+   },
+   "escape_closed": {
+    "open": false,
+    "paused": false
+   },
+   "controls_drawn_off": false,
+   "controls_drawn_on": true
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_m8s_hud_fps.png",
+  "mw_m8s_map_tier2.png",
+  "mw_m8s_death_pile.png",
+  "mw_m8s_options_page.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

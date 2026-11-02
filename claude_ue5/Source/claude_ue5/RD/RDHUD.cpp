@@ -696,10 +696,13 @@ void ARDHUD::DrawHUD()
 	// (the tactical big map is an overlay: the game, its panels and prompts go on under it)
 	const bool bTac = Gen->bTacticalMaps;
 	const bool bBigMap = Gen->bMapOpen && !bTac;
-	if (bTac && Gen->bMapOpen) DrawTacticalMap(Sc, L, Yaw);
-	if (Gen->bCombat && !bBigMap) DrawCombat(Sc);
-	if (Gen->bCombat && !bBigMap && Gen->Spells.Num() > 0) DrawHotbar(Sc);
-	if (bTac && !Gen->bMapOpen) DrawTacticalMinimap(Sc, L, Yaw);
+	// (Brokenspire: the townspeople's names under everything else; the town's maps in place of the dungeon's)
+	if (Gen->bTown && !Gen->bMapOpen) DrawTownNames(Sc);
+	if (bTac && Gen->bMapOpen) { if (Gen->bTown) DrawTownMap(Sc, L, Yaw); else DrawTacticalMap(Sc, L, Yaw); }
+	if (Gen->bCombat && !bBigMap && !(Gen->bTown && Gen->bMapOpen)) DrawCombat(Sc);
+	if (Gen->bCombat && !bBigMap && Gen->Spells.Num() > 0 && !(Gen->bTown && Gen->bMapOpen)) DrawHotbar(Sc);
+	if (bTac && !Gen->bMapOpen) { if (Gen->bTown) DrawTownMinimap(Sc, L, Yaw); else DrawTacticalMinimap(Sc, L, Yaw); }
+	if ((Gen->bTown || Gen->bTownLink) && !Gen->bMapOpen && !Gen->IsTownPanelOpen()) DrawTownTracker(Sc);
 
 	// ---- minimap (top right), north (+X) up: screen right = world +Y, screen up = world +X
 	if (!bTac)
@@ -819,6 +822,9 @@ void ARDHUD::DrawHUD()
 		if (Gen->GetPlayerCombat()->IsInventoryOpen()) DrawInventory(Sc);
 		if (Gen->GetPlayerCombat()->IsCraftingOpen()) DrawCrafting(Sc);
 	}
+	// ---- Brokenspire: the town's panel
+	if (Gen->IsTownPanelOpen()) DrawTownPanel(Sc);
+	else { Gen->TownRowBoxes.Reset(); Gen->TownTabBoxes.Reset(); }
 	// ---- level 5: the Escape menu, over everything
 	if (Gen->IsMenuOpen()) DrawMenu(Sc);
 	else { Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset(); }

@@ -2,6 +2,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDUIArt.h"
 #include "RD/RDInputSim.h"
+#include "RD/RDGameInstance.h"
 #include "Engine/Canvas.h"
 #include "Engine/Texture2D.h"
 #include "Engine/Engine.h"
@@ -124,6 +125,8 @@ bool ARDHeroSelect::ConfirmWith(const FString& More)
 	// turn only while a button is held)
 	if (bMouseUI && !bStayOnConfirm)
 		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
+	// (Brokenspire: a hero chosen is a new game: nothing carried, an empty purse, a new town)
+	if (!bStayOnConfirm) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->NewGame(Heroes[Index].Name);
 	if (!bStayOnConfirm) UGameplayStatics::OpenLevel(this, FName(*TargetLevel), true, Options);
 	return true;
 }

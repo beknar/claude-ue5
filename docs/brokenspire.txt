@@ -1,0 +1,39 @@
+this is for a new level called Brokenspire
+the overhead map has a papyrus or scroll look with stylized icons that look like the actual buildings and labels
+on those icons of what the buildings do.  the mini map will be like the dungeon mini map.
+this will be the spec for a starting town procedural generation.  it won't be a static description:
+the starting town is procedurally generated with .5km x .5km area at start with a starting town called Brokenspire
+the starting town:
+the terrain generation rules for Brokenspire should have the following with functionality:
+    town square, smithy, general store or trader, healer / shrine, temple, somewhere the player
+    can store equipment / crafting / etc, teleport circle that can be used when a corresponding
+    circle is discovered in the wilderness, quest board
+    mistward castle building that's the entrance to the mistward castle dungeon
+    all town buildings and the castle should have functional interiors with working doors,
+    containers, that can be opened and walked through
+    in the castle there should be a central room that the player can walk through that puts them into the
+    mistward_castle level.  this central room is guarded by a random assortment of 5-10 Tier 1 monsters who
+    don't wander outside of that room
+without functionality:
+    tavern or inn, homes either burned down or boarded up or have people living in them,
+    chapel, graveyard at the edge of town, a barracks with soldiers in it, market stalls,
+    a well, a still, a mill, a wall, guard towers, a wall, a gate that opens out into the
+    dangerous wilderness
+townsfolk with functionality:
+    elder, mayor, leader - gives opening quests, explains why he needs your help
+    mysterious stranger / scholar - knows more about what kind of evil is happening
+    guard captain - has quests that send you into the wilderness or into the local Mistward Castle dungeon
+townsfolk without functionality:
+    refugees, drunk at the tavern, children, a town idiot, doomsayer preacher, grieving parent or spouse
+    guards, militia on watch
+    gruff but kind blacksmith, sly/greedy trader, a tired healer, a witch or alchemist who lives at the edge
+    of town
+
+(the user's answers of 2026-11-02)
+- Brokenspire is the hub: the hero menu opens Brokenspire; the castle's central room loads mistward_castle, and her
+  gear, gold and storage go with her (kept across levels); a way back from the castle returns her to town.
+- The wilderness is for later: the gate stays barred, the teleport circle works with the circles found (Brokenspire's
+  only for now), the wilderness quests are written but marked as coming later.
+- Gold is added: it drops from monsters and containers (the castle too); the trader buys and sells, the healer and
+  the smithy charge, prices by tier.
+- Delivery: a PR, reviewed, its problems fixed, merged if mergeable.
