@@ -12,10 +12,16 @@
 # ("Martial Artist.mp4"; an existing name gets " (2)"). The game's own settings are kept and put back.
 # Game Bar must be on and allowed to record the game (Settings > Gaming); nobody here watches the videos: the script checks
 # each file appeared, grew to its end and how long it is (ffprobe through imageio-ffmpeg when a Python with it is given).
+# -FromMenu: the recording starts on the hero menu: the game is started with -RDMenuPick=<hero> -RDMenuGo=<file>
+# -RDMenuAutoplay=<seconds> -AutoplayLocked (the menu steps to her and starts her with AUTOPLAY once the file exists: the script
+# makes it when the recording has begun); the video is the seconds from the menu on (the castle's autoplay a little less).
+# -Out <dir>: the video goes there (else the captures folder); -TimeName: named <Hero>-<hour>-<minute> of its start (a colon
+# cannot be in a Windows file name).
 # Args: [-Heroes MartialArtist,Summoner,...] [-Seconds 300] [-Res 3840x2160] [-Game <claude_ue5.exe>] [-Py <python with imageio_ffmpeg>]
 param([string[]]$Heroes = @("MartialArtist", "Summoner", "Warrior", "Mage", "Warlock", "Rogue"), [int]$Seconds = 300, [string]$Res = "3840x2160", [int]$Mode = 1,
       [string]$Game = (Join-Path $PSScriptRoot "..\builds\mistward_castle\Windows\claude_ue5.exe"), [string]$Py = "",
-      [string]$Recorder = "ffmpeg", [int]$Fps = 60, [string]$Bitrate = "60M", [string]$Suffix = "", [int]$Presses = 3)
+      [string]$Recorder = "ffmpeg", [int]$Fps = 60, [string]$Bitrate = "60M", [string]$Suffix = "", [int]$Presses = 3,
+      [switch]$FromMenu, [string]$Out = "", [switch]$TimeName)
 $ErrorActionPreference = "Stop"
 $Game = (Resolve-Path $Game).Path
 $titles = @{ MartialArtist = "Martial Artist" }
@@ -83,6 +89,8 @@ if (-not $cap) { $cap = Join-Path ([Environment]::GetFolderPath("MyVideos")) "Ca
 "Game Bar's captures folder: $cap"
 $rx, $ry = $Res.Split("x")
 $mark = Join-Path $env:TEMP "rd_record_mark.txt"
+$go = Join-Path $env:TEMP "rd_record_go.txt"
+$outDir = if ($Out) { New-Item -ItemType Directory -Force $Out | Out-Null; (Resolve-Path $Out).Path } else { $null }
 # (the game's settings: a Shipping game's in LocalAppData, a Development game's beside it (as package_mistward.ps1); both kept,
 #  as byte arrays, and put back)
 $gus = @((Join-Path $env:LOCALAPPDATA "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"), (Join-Path (Split-Path $Game) "claude_ue5\Saved\Config\Windows\GameUserSettings.ini"))
@@ -112,16 +120,25 @@ if ($Recorder -eq "ffmpeg") {
 try {
 foreach ($h in $Heroes) {
     if (Test-Path $mark) { Remove-Item $mark -Force }
+    if (Test-Path $go) { Remove-Item $go -Force }
     $t0 = Get-Date
     # (windowed fullscreen at the resolution, in the settings of both places a packaged game reads them from; put back at the end)
     foreach ($g in $gus) { New-Item -ItemType Directory -Force (Split-Path $g) | Out-Null; [IO.File]::WriteAllText($g, (Settings $g), (New-Object Text.UTF8Encoding $false)) }
-    $l = Start-Process -FilePath $Game -ArgumentList @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") -PassThru
+    $gargs = if ($FromMenu) { @("-RDMenuPick=$h", "-RDMenuGo=`"$go`"", "-RDMenuAutoplay=$Seconds", "-AutoplayLocked") } else { @("-RDStartHero=$h", "-Autoplay=$($Seconds + 60)", "-AutoplayLocked", "-RDMarkFile=$mark") }
+    $l = Start-Process -FilePath $Game -ArgumentList $gargs -PassThru
     $p = $null
     for ($s = 0; $s -lt 60 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
     if (-not $p) { "$h : the game did not start"; continue }
-    for ($s = 0; $s -lt 180 -and -not (Test-Path $mark) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
-    if (-not (Test-Path $mark)) { "$h : the castle never began (no mark)"; Stop-Process -Id $p.Id -Force; continue }
-    Start-Sleep 3
+    if ($FromMenu) {
+        # (the menu: its window up, then a while for the menu level to load and draw)
+        for ($s = 0; $s -lt 120 -and [RDRec]::RectOf([uint32]$p.Id) -eq "none" -and -not $p.HasExited; $s++) { Start-Sleep 1 }
+        Start-Sleep 15
+    }
+    else {
+        for ($s = 0; $s -lt 180 -and -not (Test-Path $mark) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
+        if (-not (Test-Path $mark)) { "$h : the castle never began (no mark)"; Stop-Process -Id $p.Id -Force; continue }
+        Start-Sleep 3
+    }
     # (the game in front, checked by the foreground window's process; never recorded otherwise: Game Bar records the window in
     #  front, and a trial with the game behind recorded another window)
     $front = $false
@@ -130,14 +147,17 @@ foreach ($h in $Heroes) {
     Start-Sleep 1
     $rect = [RDRec]::RectOf([uint32]$p.Id)
     $title = $(if ($titles[$h]) { $titles[$h] } else { $h }) + $Suffix
+    $dir = if ($outDir) { $outDir } else { $cap }
     if ($Recorder -eq "ffmpeg") {
         # (the game must cover the screen: the capture is of the screen)
         if ($rect -ne "$($rx)x$($ry) at 0,0") { "$h : the game's window is $rect, not the screen: not recorded"; foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force } }; continue }
-        $dst = Join-Path $cap "$title.mp4"; $k = 2
-        while (Test-Path $dst) { $dst = Join-Path $cap "$title ($k).mp4"; $k++ }
         $rec0 = Get-Date
+        if ($TimeName) { $title += "-" + $rec0.ToString("HH-mm") }
+        $dst = Join-Path $dir "$title.mp4"; $k = 2
+        while (Test-Path $dst) { $dst = Join-Path $dir "$title ($k).mp4"; $k++ }
         $args_ = @("-hide_banner", "-loglevel", "error", "-init_hw_device", "d3d11va=dx", "-filter_hw_device", "dx", "-f", "lavfi", "-i", "ddagrab=output_idx=0:framerate=$($Fps):draw_mouse=0") + $codec + @("-t", "$Seconds", "-movflags", "+faststart", "`"$dst`"")          # (quoted: Start-Process splits a path at its spaces)
         $fp_ = Start-Process -FilePath $ff -ArgumentList $args_ -PassThru -WindowStyle Hidden -RedirectStandardError (Join-Path $env:TEMP "rd_record_ffmpeg.txt")
+        if ($FromMenu) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (the menu may step to her now)
         # (in front the whole time: checked every 10 s)
         $still = $true
         while (-not $fp_.HasExited) { Start-Sleep 10; if (-not $fp_.HasExited) { $fpid = 0; [void][RDRec]::GetWindowThreadProcessId([RDRec]::GetForegroundWindow(), [ref]$fpid); if ($fpid -ne $p.Id) { $still = $false } } }
@@ -159,6 +179,7 @@ foreach ($h in $Heroes) {
     "$h : Game Bar presses at $($pressT -join ', ') s after launch; started: $started"
     $rec0 = Get-Date
     if (-not $started) { "$h : Game Bar did not start recording ($Presses presses): not recorded"; foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force } }; continue }
+    if ($FromMenu) { Start-Sleep 2; Set-Content -Path $go -Value "go" }          # (recording: the menu may step to her now)
     Start-Sleep $Seconds
     $still = [RDRec]::Front([uint32]$p.Id)
     GameBarRecord
@@ -178,17 +199,18 @@ foreach ($h in $Heroes) {
         if ($new) { $last = $new.Length }
     }
     }
-    # (the game quits itself 20 s after the recording's time; stopped if it has not)
-    for ($s = 0; $s -lt 60 -and -not $p.HasExited; $s++) { Start-Sleep 1 }
+    # (the game quits itself 20 s after the recording's time; stopped if it has not; from the menu it does not quit)
+    for ($s = 0; $s -lt $(if ($FromMenu) { 3 } else { 60 }) -and -not $p.HasExited; $s++) { Start-Sleep 1 }
     foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
     if (-not $new) { "$h : NO VIDEO (the game in front: $front)"; continue }
     if ($Recorder -ne "ffmpeg") {
-        $dst = Join-Path $cap "$title.mp4"; $k = 2
-        while (Test-Path $dst) { $dst = Join-Path $cap "$title ($k).mp4"; $k++ }
+        if ($TimeName) { $title += "-" + $rec0.ToString("HH-mm") }
+        $dst = Join-Path $dir "$title.mp4"; $k = 2
+        while (Test-Path $dst) { $dst = Join-Path $dir "$title ($k).mp4"; $k++ }
         "$h : Game Bar named it '$($new.Name)' (the app it recorded)"
         # (a clip of another app is not kept, and not looked at: it can be a private window)
         if ($new.Name -notlike "claude_ue5*") { Remove-Item $new.FullName -Force; "$h : WRONG APP recorded: the clip was deleted unseen"; continue }
-        Rename-Item $new.FullName (Split-Path $dst -Leaf)
+        Move-Item $new.FullName $dst
     }
     $len = ""
     if ($Py) {
@@ -203,4 +225,4 @@ finally {
     foreach ($g in $gus) { if ($null -ne $kept[$g]) { [IO.File]::WriteAllBytes($g, $kept[$g]) } elseif (Test-Path $g) { Remove-Item $g -Force } }
     "the game's settings put back as they were"
 }
-"videos: $($made.Count) of $($Heroes.Count) in $cap"
+"videos: $($made.Count) of $($Heroes.Count) in $(if ($outDir) { $outDir } else { $cap })"

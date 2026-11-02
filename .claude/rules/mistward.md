@@ -10,6 +10,9 @@ paths:
   - "claude_ue5/SourceArt/mistward/**"
   - "claude_ue5/Source/claude_ue5/RD/RDMartial.cpp"
   - "pipeline/unreal/87*.py"
+  - "pipeline/unreal/88*.py"
+  - "pipeline/blender_numpy/mw_balance.py"
+  - "pipeline/record_mistward_autoplay.ps1"
   - "pipeline/blender_numpy/martialartist_clips.py"
   - "claude_ue5/SourceArt/martial_arts/**"
   - "claude_ue5/Source/claude_ue5/RD/RDCeilings.cpp"
@@ -165,6 +168,16 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **The autoplay pilot**: going chest to chest across a 250 m set it never came within its 18 m sight of a monster (no attack in 40 s): a chest only within 15 m, else it hunts the nearest monster it has a way to. Each new tile path starts at the middle of the tile she stands on, often behind her: dropped, or every re-plan turned her back (the Warrior shuffled at a third of her speed). Her stand-off comes from what she can use now (mana, cooldown), or a caster out of mana stood 9 m off doing nothing.
 - **An arena begun from afar does not hold her**: a test's `start_arena` would have pulled her into it; she is held once she has been inside (`bArenaSheInside`). Put inside an arena not yet won, it begins by itself (2.6 m in) before a test can call it.
 - **The PR review's finds (2026-11-01)**: a use gate that subtracted from the next action's time was open every frame (food, which heals over time, was eaten each tick): uses wait 3 s and food waits for the last one to end. A goal given up must be the goal itself (the chest's key, the hunted monster, the room, the way out): blocking the goal's room left an unreachable chest chosen forever; a chest once reached is not chosen again. An arena's door is barred to F only when the door is what F reaches (a pile, a seen trap, a pad come first). Ceiling traps drop from the ceiling over the shot (a vault's height there, under a beamed room's beams), not the room's tile height. "Any key takes over" means every key (`EKeys::GetAllKeys`, not axes or modifiers) and a stick, but not with Alt or the Windows key held (Game Bar's Win+Alt+R). `RestartPlay` ends the shots in the air, the audience and autoplay. A packaged game's settings are beside it as well as in LocalAppData: keep and put back both. A switch's setup draws a hash, never a monster's play stream (`SetupRanged`'s first wait took `R`: a shooter's choices stopped repeating a seed's).
+
+## The list of 2026-11-01 (`880`, `RD/RDMistward6.cpp`, `docs/improvements6.txt`, `SourceArt/mistward/balance6.json`)
+
+- **A balance is measured in play, not on paper**: `868`'s `balance` step plays each hero at each tier with `balance6.json`'s kit under autoplay, against a pack and the tier's boss. The first model's sums said the Mage was the most fragile; the trials showed her losing under 10 % at every tier (autoplay steps back from what comes close and she kills from range), while four of six heroes fell to tier 3's boss (the Zombie Tank: the tier's strongest kind, a cannon and a slowing blow) and the tier-4 boss was beaten by all.
+- **One fight is not a measure**: the same Warrior, kit and seed won the tier-5 boss with 43 % left in one run and fell to it in the next. The boss is fought twice, each time from a restart with the kit (a fall drops her found things: a second fight after a death had no kit).
+- **The trial must give each hero her own way**: the Summoner started with no summons and fell to tier 3's and tier 5's packs; in play her summons stay with her until they fall (`army` in the kit). The pilot took every weapon in turn (the Warrior's dagger with the sword she found: half her damage): only the best near and far now. Hidden, the Rogue's foe lost her and wandered round a corner and the pilot went to the chests with it alive (kept within 15 m now); her ambush with daggers walked her up to a boss and she fell: the ambush takes the hardest-hitting weapon (her crossbow, from afar). Then she was the strongest (a tier-5 boss in 7.6 s, nothing lost: an ambush, hide again, another): the ambush +75 % (was +150), 40 a stealth (was 35), 1.5 back a second; still the quickest killer (a found Dwarf Crossbow and a Dexterity ring: her loot's way, as HP rings are the Warrior's).
+- **Python**: `UpdateMaxima` is private (`RefreshMaxima`, a UFUNCTION, for the generator). The first step of a run that switches hero at once found no combat component (`restart()` waits for it). `AutoplayStats` start again at each `StartAutoplay`: a count taken before it is not the run's.
+- **An aura keyed by its spell's kind is ended by that kind's expiry**: the stealth's look is the Shadow Veil's aura under a key of its own (`RD6StealthAura`), or the veil's `Expire` took it off at once.
+- **A bolt's damage is read when it lands**, after the attack that shot it ended: an ambush's damage goes into the bolt (`FBolt::Dmg`), which the weapons' burst now honours too.
+- **The menu pilot for recordings**: `-RDMenuPick=<hero> -RDMenuGo=<file> -RDMenuAutoplay=<s>` (and `-AutoplayLocked`, now for the menu's autoplay too): the menu steps to her and starts AUTOPLAY once the file exists (`record_mistward_autoplay.ps1 -FromMenu` makes it when Game Bar records).
 
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 

@@ -1,0 +1,14 @@
+other abilities for the rogue: stealth - invisible to creatures, invisible to traps, has a time limit, and from
+a pool of dexterity energy that gets drained every time stealth is used.  the dex energy regenerates slowly over time,
+like mana.  the speed potion replenishes the dex energy bar.
+analyze the current game state, game rules, loot that can be gathered, the way that the loot changes the characters and
+balance all of the characters against each other at each tier in terms of how they advance, how much damage they
+can do, how they deal with monsters and their survivability.  the goal is not to produce the same kind of character
+and same gameplay, but different emergent gameplay for each character that will allow each to advance
+run tests to make sure that regressions aren't happening, then run further tests for new bugs and errors.
+once the re-balancing has been done, update the README.md and its attendant links with the appropriate information
+on the new capabilities and statistics of the game, as the specific hit points, damage, spells, etc will be different
+once that rebalancing happens.
+once the tests are done commit to a PR, review the PR, fix any problems in it, then merge it if it is mergeable.
+make a new reel using the windows game bar, starting from the choose a hero screen, 1 for each hero, running for 5 minutes
+each.  the name of the reel should be something like Mage-hour:minute.mp4 and put in: E:\code\claude-ue5\renders\gamebar renders

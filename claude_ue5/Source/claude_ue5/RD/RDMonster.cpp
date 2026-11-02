@@ -543,7 +543,7 @@ AActor* ARDMonster::PickFoe(URDCombatComponent* Pc, bool& bFoePlayer) const
 		return Best;
 	}
 	// (a monster: her, unless she is veiled; or one of her allies nearer)
-	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsVeiled())
+	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsHidden())          // (mistward6: or in stealth)
 	{
 		Best = Pc->GetOwner(); bFoePlayer = true;
 		BestD = FVector::Dist2D(Best->GetActorLocation(), L);

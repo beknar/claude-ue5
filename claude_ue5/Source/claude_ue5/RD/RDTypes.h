@@ -824,6 +824,20 @@ struct FRDHeroDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 UnlockPerBoss = 2;
 	/** mistward_castle (docs/improvements3.txt): the types of spell whose scrolls she reads (empty: none) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDSpellType> ScrollTypes;
+	/** mistward_castle (docs/improvements6.txt, the generator's bStealth): her dexterity energy (0: none), back a second; a
+	 *  stealth's cost and how long it lasts; the share more her first blow out of it does */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DexEnergy = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DexPerSecond = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StealthCost = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StealthSeconds = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float AmbushBonus = 0.f;
+	/** mistward_castle (the generator's bTierGrowth): for each tier open past the first, the share more hit points, the share
+	 *  more damage of her spells and chi attacks, of her own weapons (her hero's, not found ones: her fists, her crossbow); mana
+	 *  back a second as a share of her pool (0: ManaPerSecond) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HealthPerTier = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpellPowerPerTier = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float OwnWeaponPowerPerTier = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaRegenShare = 0.f;
 };
 
 UENUM(BlueprintType)

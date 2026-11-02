@@ -101,6 +101,11 @@ public:
 	/** -RDStartHero=<name> on the command line: that hero started at once, once a game run (a Shipping game ignores a map
 	 *  named on the command line, so its test reaches the dungeon through the menu: package_mistward.ps1 -Test) */
 	bool bCommandStartDone = false;
+	/** -RDMenuPick=<name>: the hero the menu steps to and starts with AUTOPLAY (-1: none); -RDMenuGo=<file>: not before it exists */
+	int32 MenuPickTarget = -1;
+	float MenuPickNext = 0.f;
+	bool bMenuPickHeld = false;
+	FString MenuGoFile;
 	/** tests: input the way the devices send it (RDInputSim); "" when sent, else why not. A pixel is the HUD canvas's. */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateKey(FKey Key, bool bDown);
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") FString SlateMouseMove(FVector2D Pixel);

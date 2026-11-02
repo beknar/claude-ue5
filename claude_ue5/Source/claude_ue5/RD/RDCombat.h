@@ -347,6 +347,37 @@ public:
 	void CountSpellDamage(float Amount);
 	/** monsters do not see her (Shadow Veil) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool IsVeiled() const;
+	// ---- mistward_castle (docs/improvements6.txt, RDMistward6.cpp): the Rogue's stealth and her dexterity energy
+	/** stealth for her hero's StealthSeconds at its StealthCost of her energy (again while in it: it ends); false: not hers,
+	 *  or too little energy (it says so) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") bool StartStealth();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") void EndStealth(const FString& Why);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") bool IsStealthed() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float GetStealthLeft() const;
+	/** monsters do not see her: veiled or in stealth */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") bool IsHidden() const { return IsVeiled() || IsStealthed(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float GetDexEnergy() const { return DexEnergy; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float GetMaxDexEnergy() const { return MaxDexEnergy; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") void SetDexEnergy(float Value);
+	/** the stealth's cost for her hero (0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float GetStealthCost() const;
+	/** her first blow or bolt out of stealth is armed (it does her hero's AmbushBonus more) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") bool IsAmbushArmed() const { return bAmbushArmed; }
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward6") int32 StealthUses = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward6") int32 StealthRefusals = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward6") int32 Ambushes = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward6") float AmbushDamage = 0.f;
+	/** traps she walked over unseen (each once) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward6") int32 StealthTrapsPassed = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward6") FString StealthEndReason;
+	/** a trap she stands in while hidden (its key: each counted once) */
+	void NoteStealthTrap(uint32 Key);
+	/** her stealth and energy as at a start (bFill: the energy full) */
+	void ResetStealth(bool bFill);
+	/** the ambush's factor on the attack with Index (1: none) */
+	float AmbushMul(int32 Index) const;
+	/** her hit points', mana's and energy's tops again (a tier opened: mistward6's growth) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") void RefreshMaxima() { UpdateMaxima(); }
 	/** what is on her: "<label>|<seconds left>|<good 1 / bad 0>" (spells, poison, weakness, slowness) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") TArray<FString> GetBuffLines() const;
 	/** a monster's blow carried its ability (poison, weaken, slow) with Power (its tier's) */
@@ -590,6 +621,11 @@ private:
 	float WardUntil = -100.f, WardPool = 0.f; int32 WardHits = 0;
 	float SkinUntil = -100.f, SkinShare = 0.f, VeilUntil = -100.f, VeilEvade = 0.f, MirrorUntil = -100.f, MirrorShare = 0.f;
 	float PactUntil = -100.f, PactShare = 0.f, DispelUntil = -100.f;
+	// (mistward6: the stealth)
+	float DexEnergy = 0.f, MaxDexEnergy = 0.f, StealthUntil = -100.f;
+	bool bAmbushArmed = false;
+	TSet<uint32> StealthTraps;
+	void TickStealth(float Dt, float Now);
 	FVector RuneAt = FVector::ZeroVector, SanctumAt = FVector::ZeroVector;
 	float RuneRadius = 0.f, RuneUntil = -100.f, RuneShare = 0.f, SanctumRadius = 0.f, SanctumUntil = -100.f;
 	float PoisonDps = 0.f, PoisonUntil = -100.f, PoisonAcc = 0.f, WeakShare = 0.f, WeakUntil = -100.f, SlowMeShare = 0.f, SlowMeUntil = -100.f;

@@ -1,0 +1,4410 @@
+{
+ "tag": "m6all",
+ "plan": [
+  "basics",
+  "shields",
+  "torch",
+  "armour",
+  "inventory",
+  "heights",
+  "tiers",
+  "open",
+  "layout",
+  "traps",
+  "teleport",
+  "cells",
+  "death",
+  "outline",
+  "tabs",
+  "slots",
+  "helmet",
+  "block",
+  "startgear",
+  "pickups",
+  "rooms",
+  "slashes",
+  "tomemana",
+  "martial",
+  "harvest",
+  "recipes",
+  "scrolls",
+  "gearbreak",
+  "summoner",
+  "options",
+  "allyspace",
+  "maarm",
+  "names",
+  "ranged",
+  "arena5",
+  "ceilings",
+  "autoplay",
+  "stealth",
+  "growth"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "basics",
+   "ok": true,
+   "title": "Mistward Castle",
+   "max_tier": 5,
+   "show_fps": true,
+   "fps": 41.8,
+   "fps_box": [
+    67,
+    58,
+    317,
+    110
+   ],
+   "recipes": [
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "recipes_sorted": true,
+   "breakdowns": [
+    "Beast Shield",
+    "Dock Shield",
+    "Eastern Shield",
+    "Kite Shield",
+    "Painted Viking Shield"
+   ],
+   "breakdowns_sorted": true,
+   "plate_knight_tiers": [
+    2
+   ],
+   "themes": {
+    "1": "None",
+    "2": "Castle",
+    "3": "Dwarf",
+    "4": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ],
+    "5": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ]
+   }
+  },
+  {
+   "step": "shields",
+   "ok": true,
+   "start": {
+    "worn": "Painted Viking Shield",
+    "in_hand": true,
+    "share": 0.04,
+    "start_shield": "Painted Viking Shield",
+    "want_share": 0.04
+   },
+   "speed": {
+    "with": 321.6,
+    "without": 353.4,
+    "taken_off_in_hand": false,
+    "back_on": "Heater Shield",
+    "measured_share": 0.09,
+    "want_share": 0.09
+   },
+   "blow": {
+    "lost": 32.0,
+    "want_lost": 32.0,
+    "shield_lost": 8.0
+   },
+   "kite": {
+    "count": 2,
+    "spares": 1,
+    "worn": "Kite Shield",
+    "share": 0.24,
+    "want_share": 0.24,
+    "broke_down": true,
+    "count_after": 1,
+    "materials": {
+     "Iron Ingot": 8,
+     "Steel Ingot": 4,
+     "Timber": 0
+    },
+    "last_refused": true,
+    "refused_says": "You wear the kite shield: take it off first",
+    "anvil_line": [
+     "breakdown|Kite Shield|gKite Shield|1|Iron Ingot:8;Steel Ingot:4"
+    ]
+   },
+   "mage": {
+    "wore": false,
+    "says": "The mage carries no shield"
+   }
+  },
+  {
+   "step": "torch",
+   "ok": true,
+   "can": true,
+   "made": true,
+   "torches": 1,
+   "left": {
+    "Hardwood": 0,
+    "Timber": 0,
+    "Straw Rope": 0,
+    "Oils": 0,
+    "Wood Glue": 0
+   },
+   "heroes": {
+    "Warrior": {
+     "held": true,
+     "is_held": true,
+     "shield_in_hand": false,
+     "light": 80.0,
+     "light_visible": true,
+     "torch_bone": "hand_l",
+     "hand_to_shaft_cm": 6.5,
+     "torch_length_cm": 79.8,
+     "light_to_hand_cm": 75.3,
+     "luma_lit": 131.41,
+     "luma_out": 91.69,
+     "after_out": {
+      "is_held": false,
+      "shield_in_hand": true,
+      "light_visible": false
+     }
+    },
+    "Mage": {
+     "held": true,
+     "is_held": true,
+     "shield_in_hand": false,
+     "light": 80.0,
+     "light_visible": true,
+     "torch_bone": "hand_l",
+     "hand_to_shaft_cm": 6.6,
+     "torch_length_cm": 79.8,
+     "light_to_hand_cm": 75.3,
+     "after_out": {
+      "is_held": false,
+      "shield_in_hand": false,
+      "light_visible": false
+     }
+    },
+    "Warlock": {
+     "held": true,
+     "is_held": true,
+     "shield_in_hand": false,
+     "light": 80.0,
+     "light_visible": true,
+     "torch_bone": "hand_l",
+     "hand_to_shaft_cm": 6.7,
+     "torch_length_cm": 79.8,
+     "light_to_hand_cm": 75.3,
+     "after_out": {
+      "is_held": false,
+      "shield_in_hand": false,
+      "light_visible": false
+     }
+    },
+    "Rogue": {
+     "held": true,
+     "is_held": true,
+     "shield_in_hand": false,
+     "light": 80.0,
+     "light_visible": true,
+     "torch_bone": "hand_l",
+     "hand_to_shaft_cm": 6.6,
+     "torch_length_cm": 79.8,
+     "light_to_hand_cm": 75.3,
+     "after_out": {
+      "is_held": false,
+      "shield_in_hand": false,
+      "light_visible": false
+     }
+    }
+   }
+  },
+  {
+   "step": "armour",
+   "ok": true,
+   "set": "Plate Armour",
+   "count": 2,
+   "spares": [
+    510.0
+   ],
+   "durability": 510.0,
+   "worn": true,
+   "broke_down": true,
+   "count_after": 1,
+   "materials": {
+    "Iron Ingot": 12,
+    "Steel Ingot": 12,
+    "Cured Leather Strip": 4
+   },
+   "last_refused": true,
+   "says": "You wear the plate armour: take it off first"
+  },
+  {
+   "step": "inventory",
+   "ok": true,
+   "lines": 33,
+   "pointer_shown": true,
+   "cursor_shown": true,
+   "refused": [],
+   "hold_s": 14,
+   "hold_w": -9,
+   "hold_dpad_down": 14,
+   "hold_dpad_up": -9,
+   "one_press": 1,
+   "rows_drawn": 21,
+   "mouse": {
+    "row": 1,
+    "item": "Medium Healing Potion",
+    "chosen_by_pointer": true,
+    "used": 1,
+    "mouse_uses": 1,
+    "says": "Drank the medium healing potion:  +28 HP",
+    "first_before": 1,
+    "first_after_wheel_down": 7,
+    "cursor_kept": true,
+    "cursor": [
+     1,
+     1
+    ],
+    "tab_lines": [
+     "item|Small Healing Potion|1",
+     "item|Medium Healing Potion|1",
+     "item|Large Healing Potion|1",
+     "item|Uncommon Healing Potion|1",
+     "item|Wondrous Healing Potion|1",
+     "item|Rare Healing Potion|1",
+     "item|Very Rare Healing Potion|1",
+     "item|Legendary Healing Potion|1",
+     "item|Small Mana Potion|1",
+     "item|Medium Mana Potion|1",
+     "item|Large Mana Potion|1",
+     "item|Uncommon Mana Potion|1"
+    ],
+    "pointer_sent": [
+     922.5,
+     318.8
+    ],
+    "pointer_read": [
+     922.0,
+     319.0
+    ],
+    "first_after_wheel_up": 4,
+    "double_click_drank": 1,
+    "double_click_uses": 1
+   },
+   "pointer_after_close": false,
+   "cursor_after_close": false
+  },
+  {
+   "step": "heights",
+   "ok": true,
+   "kinds": 55,
+   "measured": 55,
+   "off": {},
+   "errors": [],
+   "half_creature_05": [
+    -0.4,
+    -0.1,
+    0.0
+   ],
+   "all": {
+    "Rat": [
+     -0.1,
+     -0.0,
+     0.0
+    ],
+    "Half_Creature_04": [
+     -0.1,
+     0.0,
+     0.2
+    ],
+    "Parasite_Slider": [
+     -0.1,
+     0.3,
+     0.6
+    ],
+    "Half_Creature_05": [
+     -0.4,
+     -0.1,
+     0.0
+    ],
+    "Drinker": [
+     -0.0,
+     0.2,
+     1.0
+    ],
+    "Medic": [
+     -0.3,
+     -0.1,
+     0.6
+    ],
+    "Chicken": [
+     -0.1,
+     0.5,
+     1.5
+    ],
+    "Soldier": [
+     -0.1,
+     0.3,
+     0.7
+    ],
+    "Sufferer": [
+     -0.0,
+     1.5,
+     2.8
+    ],
+    "Fat": [
+     0.0,
+     0.7,
+     2.4
+    ],
+    "Mask": [
+     -0.8,
+     0.3,
+     2.1
+    ],
+    "Monster": [
+     0.7,
+     1.2,
+     2.4
+    ],
+    "Gunner": [
+     0.9,
+     1.9,
+     4.7
+    ],
+    "Parasites_Fat": [
+     -0.1,
+     0.0,
+     0.5
+    ],
+    "Parasit": [
+     0.9,
+     1.1,
+     1.7
+    ],
+    "Orc_03": [
+     -0.1,
+     0.8,
+     2.6
+    ],
+    "Magur": [
+     -0.3,
+     0.3,
+     2.1
+    ],
+    "Azrak": [
+     -1.8,
+     -1.3,
+     -0.5
+    ],
+    "Warrior_02_the_leopard": [
+     -0.3,
+     2.9,
+     4.9
+    ],
+    "Kanit": [
+     -0.1,
+     0.4,
+     2.3
+    ],
+    "Gnur": [
+     -0.8,
+     0.3,
+     2.1
+    ],
+    "Dardan": [
+     0.3,
+     0.5,
+     1.7
+    ],
+    "Costalmed": [
+     -0.1,
+     0.8,
+     2.3
+    ],
+    "Orc_05": [
+     -0.0,
+     0.8,
+     1.9
+    ],
+    "Orc_06": [
+     0.0,
+     0.7,
+     2.1
+    ],
+    "Alien": [
+     -3.3,
+     -0.5,
+     -0.0
+    ],
+    "Devourer": [
+     -1.9,
+     0.3,
+     3.7
+    ],
+    "Insect": [
+     -1.5,
+     0.2,
+     28.8
+    ],
+    "Pangolin": [
+     -0.9,
+     0.3,
+     0.8
+    ],
+    "Tank": [
+     1.1,
+     1.3,
+     4.0
+    ],
+    "Orc_01": [
+     -0.0,
+     0.8,
+     2.4
+    ],
+    "Orc_02": [
+     -1.4,
+     1.0,
+     2.0
+    ],
+    "Ursag": [
+     -0.1,
+     0.6,
+     1.5
+    ],
+    "Orc_04": [
+     -0.0,
+     1.5,
+     3.0
+    ],
+    "Bear_Warrior": [
+     0.8,
+     2.7,
+     3.7
+    ],
+    "Bull_Warrior": [
+     -0.1,
+     3.1,
+     4.5
+    ],
+    "Crocodile_Warrior": [
+     -1.4,
+     -0.6,
+     0.4
+    ],
+    "Elephant_Warrior": [
+     -0.4,
+     3.2,
+     5.5
+    ],
+    "Alien_Warrior_05": [
+     0.4,
+     1.3,
+     3.8
+    ],
+    "Exterminator": [
+     -0.0,
+     0.8,
+     1.1
+    ],
+    "Shell": [
+     -0.2,
+     -0.0,
+     4.9
+    ],
+    "Bug": [
+     -0.1,
+     1.6,
+     1.7
+    ],
+    "Horned": [
+     -2.8,
+     -0.1,
+     0.1
+    ],
+    "Mutant": [
+     -0.9,
+     0.4,
+     2.0
+    ],
+    "Ripper_dog": [
+     0.0,
+     0.5,
+     0.6
+    ],
+    "Daemon": [
+     -1.0,
+     -0.0,
+     2.9
+    ],
+    "Troll": [
+     0.0,
+     1.4,
+     2.4
+    ],
+    "Parasite_Spider": [
+     -0.2,
+     1.0,
+     5.6
+    ],
+    "Fantasy_Animal_raptor_mount": [
+     -0.0,
+     2.5,
+     4.0
+    ],
+    "Alfa": [
+     -0.0,
+     1.1,
+     1.2
+    ],
+    "Spider": [
+     -1.5,
+     0.7,
+     5.5
+    ],
+    "Rock": [
+     -0.4,
+     0.7,
+     2.7
+    ],
+    "Titan": [
+     -2.2,
+     -0.6,
+     -0.1
+    ],
+    "Hunter": [
+     -0.0,
+     1.0,
+     2.6
+    ],
+    "Nasty": [
+     -1.9,
+     1.0,
+     10.1
+    ]
+   }
+  },
+  {
+   "step": "tiers",
+   "ok": true,
+   "ok_tier2": true,
+   "ok_tier3": true,
+   "share": 0.5,
+   "tally1_start": {
+    "ok": true,
+    "done": [
+     1,
+     0,
+     0
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "standing_before": 14,
+   "kills": [
+    {
+     "killed": 0,
+     "of": 14,
+     "share": 0.0,
+     "open": false
+    },
+    {
+     "killed": 1,
+     "of": 14,
+     "share": 0.071,
+     "open": false
+    },
+    {
+     "killed": 2,
+     "of": 14,
+     "share": 0.143,
+     "open": false
+    },
+    {
+     "killed": 3,
+     "of": 14,
+     "share": 0.214,
+     "open": false
+    },
+    {
+     "killed": 4,
+     "of": 14,
+     "share": 0.286,
+     "open": false
+    },
+    {
+     "killed": 5,
+     "of": 14,
+     "share": 0.357,
+     "open": false
+    },
+    {
+     "killed": 6,
+     "of": 14,
+     "share": 0.429,
+     "open": false
+    },
+    {
+     "killed": 7,
+     "of": 14,
+     "share": 0.5,
+     "open": true
+    }
+   ],
+   "open_short": false,
+   "opened_at_share": 0.5,
+   "last_shut_share": 0.429,
+   "tally1_enough": {
+    "ok": true,
+    "done": [
+     46,
+     7,
+     71
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "open_enough": true,
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE TORTURE CHAMBER (SEE YOUR MAP)",
+   "tier2": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       150.0,
+       10650.0,
+       123.0
+      ],
+      "name": "Orc_03",
+      "alive": 1,
+      "tier": 2,
+      "label": "TIER 2 BOSS: ORC RAIDER",
+      "max_health": 360.0
+     }
+    ],
+    "band": 3,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       1143.0,
+       5790.0,
+       42.0
+      ],
+      "name": "Magic Potency Ring 1",
+      "key": 223,
+      "tier": 2,
+      "section": [
+       0,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 1,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     80.0,
+     91.0,
+     103.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 1"
+    ],
+    "ring_kind_ok": true
+   },
+   "marks_minimap": [
+    7,
+    8,
+    10
+   ],
+   "marks_map": [
+    7,
+    8,
+    10
+   ],
+   "notices_tier2": [
+    "SET CLEARED  -  TIER 2: 1 / 8",
+    "SET CLEARED  -  TIER 2: 2 / 8",
+    "SET CLEARED  -  TIER 2: 3 / 8",
+    "SET CLEARED  -  TIER 2: 4 / 8",
+    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 6 / 8",
+    "SET CLEARED  -  TIER 2: 7 / 8",
+    "TIER 2 CLEARED"
+   ],
+   "tally2": {
+    "ok": true,
+    "done": [
+     313,
+     93,
+     589
+    ],
+    "all": [
+     313,
+     93,
+     589
+    ]
+   },
+   "open3": true,
+   "notice3": "TIER 2 CLEARED",
+   "tiers_opened": [
+    2,
+    3
+   ],
+   "tier3": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -3450.0,
+       -28199.0,
+       115.0
+      ],
+      "name": "Tank",
+      "alive": 1,
+      "tier": 3,
+      "label": "TIER 3 BOSS: ZOMBIE TANK",
+      "max_health": 576.0
+     }
+    ],
+    "band": 3,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -12243.0,
+       20190.0,
+       42.0
+      ],
+      "name": "Magic Potency Ring 3",
+      "key": 36,
+      "tier": 3,
+      "section": [
+       0,
+       1
+      ]
+     }
+    ],
+    "boss_tier_of_room": 2,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     138.0,
+     172.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 3"
+    ],
+    "ring_kind_ok": true
+   },
+   "seconds": 7.3
+  },
+  {
+   "step": "open",
+   "ok": true,
+   "section": [
+    2,
+    0
+   ],
+   "container": 30,
+   "kind": "trunk",
+   "describe_before": "open trunk",
+   "first_f": "trunk",
+   "alpha_open": 1.0,
+   "describe_after": "",
+   "second_f": "",
+   "alpha_after_second_f": 1.0,
+   "alpha_after_toggle": 1.0,
+   "reloaded": true,
+   "rebuilt_new_actor": true,
+   "alpha_rebuilt": 1.0,
+   "looted_rebuilt": true
+  },
+  {
+   "step": "layout",
+   "ok": true,
+   "sections": 7,
+   "shapes": {
+    "circle": 14,
+    "dome": 6,
+    "octagon": 15,
+    "hexagon": 10,
+    "pyramid": 3,
+    "diamond": 7,
+    "tall": 6,
+    "U": 8,
+    "triangle": 3,
+    "step pyramid": 6,
+    "T": 7,
+    "L": 6
+   },
+   "shaped_bad": [],
+   "themes": {
+    "0,0": {
+     "tier": 1,
+     "theme": "None",
+     "castle": false,
+     "dwarf": false
+    },
+    "0,-1": {
+     "tier": 2,
+     "theme": "Castle",
+     "castle": true,
+     "dwarf": false
+    },
+    "0,1": {
+     "tier": 2,
+     "theme": "Castle",
+     "castle": true,
+     "dwarf": false
+    },
+    "1,-1": {
+     "tier": 2,
+     "theme": "Castle",
+     "castle": true,
+     "dwarf": false
+    },
+    "1,0": {
+     "tier": 2,
+     "theme": "Castle",
+     "castle": true,
+     "dwarf": false
+    },
+    "1,1": {
+     "tier": 2,
+     "theme": "Castle",
+     "castle": true,
+     "dwarf": false
+    },
+    "2,0": {
+     "tier": 3,
+     "theme": "Dwarf",
+     "castle": false,
+     "dwarf": true
+    }
+   },
+   "furniture": 2012,
+   "containers": 1908,
+   "overlaps": [],
+   "n_overlaps": 0,
+   "blocked": [],
+   "n_blocked": 0,
+   "between_beds": [],
+   "pictures": [
+    "circle",
+    "dome",
+    "triangle",
+    "L",
+    "U",
+    "octagon",
+    "step pyramid",
+    "tier1_barracks_0",
+    "tier1_barracks_1"
+   ],
+   "rooms": 288,
+   "small_rooms": 35,
+   "long_galleries": 49,
+   "largest_rooms": 28,
+   "sizes": {
+    "10x10": 28,
+    "3x10": 25,
+    "4x10": 24,
+    "6x7": 16,
+    "7x9": 16,
+    "7x7": 16,
+    "3x4": 15,
+    "8x10": 14,
+    "8x9": 14,
+    "9x10": 12,
+    "6x9": 12,
+    "7x8": 12,
+    "4x4": 11,
+    "6x6": 10,
+    "3x3": 9,
+    "8x8": 8,
+    "6x8": 7,
+    "5x7": 7,
+    "5x6": 7,
+    "7x10": 6,
+    "9x9": 5,
+    "5x5": 5,
+    "6x10": 4,
+    "5x9": 3,
+    "5x8": 2
+   },
+   "hay_piles": 0,
+   "shields_in_containers": {
+    "1": [
+     "Painted Viking Shield",
+     "Viking Round Shield",
+     "Viking Shield (green and white)",
+     "Village Shield (green)",
+     "Village Shield (red)"
+    ],
+    "2": [
+     "Dock Shield",
+     "Heraldic Shield",
+     "Viking Shield (iron-bound)",
+     "Village Shield (blue and white)"
+    ],
+    "3": [
+     "Beast Shield",
+     "Eastern Shield",
+     "Heater Shield",
+     "Rider's Shield",
+     "War Camp Shield"
+    ]
+   },
+   "floor_tiles": 14423,
+   "tiles_without_floor": 0,
+   "without_floor": []
+  },
+  {
+   "step": "traps",
+   "ok": true,
+   "traps": 192,
+   "kinds_present": [
+    "Chain",
+    "Crusher",
+    "Cursed",
+    "Darts",
+    "Deadfall",
+    "Emanation",
+    "Glyph",
+    "Lingering",
+    "Pit",
+    "Snare",
+    "Spring",
+    "Teleport",
+    "Ward"
+   ],
+   "by_kind": {
+    "Pit": {
+     "present": true,
+     "kind": "0",
+     "hp_lost": 25.5,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.54,
+       25.5
+      ]
+     ],
+     "held_at": 0.4,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 288,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: pit trap!",
+     "fell_through": []
+    },
+    "Darts": {
+     "present": true,
+     "kind": "1",
+     "hp_lost": 28.7,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.23,
+       9.6
+      ],
+      [
+       0.57,
+       9.6
+      ],
+      [
+       0.92,
+       9.6
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 0,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: dart trap!",
+     "fell_through": []
+    },
+    "Deadfall": {
+     "present": true,
+     "kind": "2",
+     "hp_lost": 43.8,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.01,
+       14.6
+      ],
+      [
+       1.31,
+       14.6
+      ],
+      [
+       1.52,
+       14.6
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1470,
+     "ambush": {},
+     "hits": 3,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: deadfall!",
+     "fell_through": []
+    },
+    "Crusher": {
+     "present": true,
+     "kind": "3",
+     "hp_lost": 54.7,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.72,
+       54.7
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 573,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: crusher!",
+     "fell_through": []
+    },
+    "Snare": {
+     "present": true,
+     "kind": "4",
+     "hp_lost": 9.1,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.13,
+       9.1
+      ]
+     ],
+     "held_at": 0.13,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 1,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: snare!",
+     "fell_through": []
+    },
+    "Glyph": {
+     "present": true,
+     "kind": "5",
+     "hp_lost": 40.1,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.66,
+       40.1
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 113,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: glyph of fire!",
+     "fell_through": []
+    },
+    "Ward": {
+     "present": true,
+     "kind": "6",
+     "hp_lost": 21.9,
+     "held": false,
+     "moved_m": 1.6,
+     "farthest_m": 1.6,
+     "peak_speed": 591,
+     "drops": [
+      [
+       0.14,
+       21.9
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 79,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 0,
+     "says": "A trap: warding barrier!",
+     "fell_through": []
+    },
+    "Emanation": {
+     "present": true,
+     "kind": "7",
+     "hp_lost": 87.6,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.14,
+       10.9
+      ],
+      [
+       0.68,
+       10.9
+      ],
+      [
+       1.21,
+       10.9
+      ],
+      [
+       1.77,
+       10.9
+      ],
+      [
+       2.32,
+       10.9
+      ],
+      [
+       2.85,
+       10.9
+      ],
+      [
+       3.36,
+       10.9
+      ],
+      [
+       3.9,
+       10.9
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.4,
+     "particles": 19,
+     "ambush": {},
+     "hits": 8,
+     "triggered": 1,
+     "state": 1,
+     "says": "You are slowed",
+     "fell_through": []
+    },
+    "Cursed": {
+     "present": true,
+     "kind": "8",
+     "hp_lost": 10.9,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.15,
+       10.9
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.45,
+     "slowness": 0.4,
+     "particles": 41,
+     "ambush": {},
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "The cursed rune stone curses you: your blows are weaker",
+     "fell_through": []
+    },
+    "Chain": {
+     "present": true,
+     "kind": "9",
+     "hp_lost": 65.7,
+     "held": true,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       1.52,
+       14.6
+      ],
+      [
+       1.6,
+       29.2
+      ],
+      [
+       2.08,
+       21.9
+      ]
+     ],
+     "held_at": 0.14,
+     "weakness": 0.45,
+     "slowness": 0.0,
+     "particles": 344,
+     "ambush": {},
+     "hits": 4,
+     "triggered": 1,
+     "state": 2,
+     "says": "A trap: chain of traps!",
+     "fell_through": []
+    },
+    "Lingering": {
+     "present": true,
+     "kind": "10",
+     "hp_lost": 101.8,
+     "held": false,
+     "moved_m": 0.0,
+     "farthest_m": 0.0,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.21,
+       23.0
+      ],
+      [
+       1.49,
+       16.4
+      ],
+      [
+       4.08,
+       13.1
+      ],
+      [
+       4.21,
+       23.0
+      ],
+      [
+       5.49,
+       26.3
+      ]
+     ],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 70,
+     "ambush": {},
+     "hits": 7,
+     "triggered": 1,
+     "state": 1,
+     "says": "A trap: lingering trap!",
+     "fell_through": []
+    },
+    "Teleport": {
+     "present": true,
+     "kind": "11",
+     "hp_lost": 0.0,
+     "held": false,
+     "moved_m": 281.3,
+     "farthest_m": 281.3,
+     "peak_speed": 0,
+     "drops": [],
+     "held_at": null,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 93,
+     "ambush": {
+      "2,0": "glyphs|4|43350|-3750"
+     },
+     "hits": 0,
+     "triggered": 1,
+     "state": 2,
+     "says": "A teleport trap carries you off: into a ring of glyphs",
+     "fell_through": []
+    },
+    "Spring": {
+     "present": true,
+     "kind": "12",
+     "hp_lost": 14.6,
+     "held": true,
+     "moved_m": 2.9,
+     "farthest_m": 2.9,
+     "peak_speed": 0,
+     "drops": [
+      [
+       0.36,
+       14.6
+      ]
+     ],
+     "held_at": 0.15,
+     "weakness": 0.0,
+     "slowness": 0.0,
+     "particles": 531,
+     "ambush": {
+      "0,0": "glyphs|4|7350|-9459"
+     },
+     "hits": 1,
+     "triggered": 1,
+     "state": 2,
+     "says": "A spring plate hurls you across the room: into a ring of glyphs",
+     "fell_through": []
+    }
+   },
+   "warrior_seen": 0,
+   "rogue": {
+    "seen_from_5m": 1,
+    "marks": [
+     7,
+     8,
+     11
+    ],
+    "describe": "disarm the pit trap",
+    "f": "disarm",
+    "progress": 0.22,
+    "state_after": 3,
+    "disarmed": 1,
+    "says": "You disarm the pit trap"
+   },
+   "kind_ok": {
+    "Pit": true,
+    "Darts": true,
+    "Deadfall": true,
+    "Crusher": true,
+    "Snare": true,
+    "Glyph": true,
+    "Ward": true,
+    "Emanation": true,
+    "Cursed": true,
+    "Chain": true,
+    "Lingering": true,
+    "Teleport": true,
+    "Spring": true
+   }
+  },
+  {
+   "step": "teleport",
+   "ok": true,
+   "pads": [
+    1,
+    2,
+    3
+   ],
+   "pad_actors": [
+    1,
+    3
+   ],
+   "ring_on_2": true,
+   "describe_2": "take the teleport ring of tier 2",
+   "f_2": "ring",
+   "ring": "Teleport Ring II",
+   "ring_count": 1,
+   "ring_on_2_after": false,
+   "used": true,
+   "after_ring_to_pad1_m": 1.8,
+   "destinations": [
+    2
+   ],
+   "f_1": "teleport",
+   "after_pad1_to_pad2_m": 1.8,
+   "f_2b": "teleport",
+   "back_to_pad1_m": 1.8,
+   "teleports": 3,
+   "tier3": {
+    "ring_on_3": true,
+    "f_3": "ring",
+    "ring": "Teleport Ring III",
+    "ring_count": 1,
+    "used": true,
+    "after_ring_to_pad1_m": 1.8,
+    "destinations": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "step": "cells",
+   "ok": true,
+   "cells": 128,
+   "prisoners": 54,
+   "monsters": 26,
+   "empty": 48,
+   "prisoner": {
+    "describe": "unlock the cell: free the prisoner",
+    "f": "prisoner",
+    "freed": 1,
+    "says": "The prisoner thanks you and gives you patch kit",
+    "found": "Patch Kit",
+    "carried_more": 1,
+    "gone": true,
+    "door_open": true
+   },
+   "monster": {
+    "caged_before": true,
+    "lonely": true,
+    "far_d": 460,
+    "opened_far": 0,
+    "near_d": 250,
+    "track": [
+     [
+      127,
+      42
+     ],
+     [
+      209,
+      55
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ],
+     [
+      266,
+      63
+     ]
+    ],
+    "her": [
+     400,
+     73
+    ],
+    "door_alpha": 1.0,
+    "breakouts": 1,
+    "caged_after": false,
+    "came_m": 2.2,
+    "hp_lost": 26.9,
+    "out_of_cell_m": 2.74
+   }
+  },
+  {
+   "step": "death",
+   "ok": true,
+   "gave": [
+    "Kite Shield",
+    "Small Healing Potion",
+    "Iron Ingot",
+    "Plate Armour",
+    "Viking Shortsword",
+    "Copper Ingot",
+    "Bronze Ingot",
+    "Steel Ingot",
+    "Hardwood",
+    "Timber",
+    "Wood Log",
+    "Coarse Hide",
+    "Light Leather",
+    "Cured Leather Strip",
+    "Epoxy"
+   ],
+   "lines_before": 2,
+   "start_shield": "Painted Viking Shield",
+   "keep_start_gear": true,
+   "dead": true,
+   "piles": 1,
+   "pile": {
+    "things": [
+     "Viking Shortsword",
+     "Kite Shield",
+     "Small Healing Potion",
+     "Iron Ingot",
+     "Plate Armour",
+     "Copper Ingot",
+     "Bronze Ingot",
+     "Steel Ingot",
+     "Hardwood",
+     "Timber",
+     "Wood Log",
+     "Coarse Hide",
+     "Light Leather",
+     "Cured Leather Strip",
+     "Epoxy"
+    ],
+    "pictures": 15,
+    "particles": 17,
+    "from_her_m": 0.0
+   },
+   "carried_after": {
+    "Kite Shield": 0,
+    "Small Healing Potion": 0,
+    "Iron Ingot": 0,
+    "Plate Armour": 0,
+    "Viking Shortsword": 0,
+    "Copper Ingot": 0,
+    "Bronze Ingot": 0,
+    "Steel Ingot": 0,
+    "Hardwood": 0,
+    "Timber": 0,
+    "Wood Log": 0,
+    "Coarse Hide": 0,
+    "Light Leather": 0,
+    "Cured Leather Strip": 0,
+    "Epoxy": 0
+   },
+   "start_shield_after": 1,
+   "marks": [
+    9,
+    10
+   ],
+   "revived": true,
+   "where_after_m": 6.7,
+   "describe": "take up your things (15)",
+   "f": "loot",
+   "carried_back": {
+    "Kite Shield": 1,
+    "Small Healing Potion": 1,
+    "Iron Ingot": 1,
+    "Plate Armour": 1,
+    "Viking Shortsword": 1,
+    "Copper Ingot": 1,
+    "Bronze Ingot": 1,
+    "Steel Ingot": 1,
+    "Hardwood": 1,
+    "Timber": 1,
+    "Wood Log": 1,
+    "Coarse Hide": 1,
+    "Light Leather": 1,
+    "Cured Leather Strip": 1,
+    "Epoxy": 1,
+    "Painted Viking Shield": 1
+   },
+   "shield_worn_again": "Kite Shield",
+   "piles_after": 0
+  },
+  {
+   "step": "outline",
+   "ok": true,
+   "trials": [
+    {
+     "trap": "Pit",
+     "i": 0,
+     "red_warrior": 0.0085,
+     "m": 6.0,
+     "seen": 1,
+     "rings_before": 0,
+     "rings": 1,
+     "ring_scale": 2.0,
+     "plate_outlined": 1,
+     "red_rogue": 0.4485
+    },
+    {
+     "trap": "Cursed",
+     "i": 8,
+     "red_warrior": 0.0,
+     "m": 6.0,
+     "seen": 1,
+     "rings_before": 0,
+     "rings": 1,
+     "ring_scale": 2.2,
+     "plate_outlined": 1,
+     "red_rogue": 0.1689
+    }
+   ],
+   "traps": 25,
+   "boxes": [
+    [
+     0.392,
+     0.211,
+     0.532,
+     0.391
+    ],
+    [
+     0.448,
+     0.213,
+     0.588,
+     0.393
+    ]
+   ],
+   "warrior": {
+    "seen": 0,
+    "rings": 0
+   }
+  },
+  {
+   "step": "tabs",
+   "ok": true,
+   "tabs": {
+    "0": {
+     "kinds": [
+      "weapon"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    },
+    "1": {
+     "kinds": [
+      "armour",
+      "shield"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    },
+    "2": {
+     "kinds": [
+      "item"
+     ],
+     "lines": 1,
+     "all_its_own": true
+    },
+    "3": {
+     "kinds": [
+      "component",
+      "repair"
+     ],
+     "lines": 2,
+     "all_its_own": true
+    },
+    "4": {
+     "kinds": [
+      "key",
+      "ring",
+      "slash"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    }
+   },
+   "refused": [],
+   "lines_total": 12,
+   "lines_in_tabs": 12,
+   "key_tabs": [
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "tab_boxes": 5,
+   "clicked_tab": 3,
+   "e_on_potions": {
+    "tab_after": 3,
+    "drunk": 0
+   },
+   "daggers_lines": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|52|52|1|2|"
+   ],
+   "daggers_after_wear": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|20|52|1|1|",
+    "weapon|Dagger|52|52|2|1|"
+   ],
+   "anvil_kite": true,
+   "anvil_says": "You break down the kite shield:  8 iron ingot, 4 steel ingot   (1 left)",
+   "anvil_dagger": true,
+   "anvil_dagger_says": "You break down the dagger:  2 steel ingot, 3 iron ingot, 2 cured leather strip   (1 left)"
+  },
+  {
+   "step": "slots",
+   "ok": true,
+   "slots_filled": [
+    "Dagger",
+    "Arming Sword",
+    "Longbow",
+    "Viking Sword",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "refused": [],
+   "after_5": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "Viking Sword",
+    "Longbow",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "assign_slot": 7,
+   "after_y": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "None",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "after_rmb": [
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "Arming Sword",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "drawn_seq": [
+    "Longbow",
+    "Dagger",
+    "Longbow",
+    "Arming Sword",
+    "Longbow"
+   ]
+  },
+  {
+   "step": "helmet",
+   "ok": true,
+   "sets": 27,
+   "with_helmet": [
+    "Plate Armour",
+    "Lady Knight’s Armour",
+    "Paladin’s Armour",
+    "Dark Knight’s Armour",
+    "Broddi’s Dwarf Armour",
+    "Elephant Warrior’s Armour",
+    "Templar’s Armour",
+    "Eastern Knight’s Armour",
+    "Demonic Armour",
+    "Orc Skirmisher’s Armour",
+    "Orc Bruiser’s Armour",
+    "Orc Raider’s Armour"
+   ],
+   "without": [
+    "Epic Plate (Male)",
+    "Epic Plate (Female)",
+    "Bear Warrior’s Armour",
+    "Crocodile Warrior’s Armour",
+    "Split Armour",
+    "Desert Hero’s Armour",
+    "Tiefling’s Armour",
+    "Orme’s Armour",
+    "Bedvar’s Armour",
+    "Executioner’s Armour",
+    "Orc Warrior’s Armour",
+    "Orc Veteran’s Armour",
+    "Gnur’s Armour",
+    "Dardan’s Armour",
+    "Costalmed’s Armour"
+   ],
+   "pick": "Plate Armour",
+   "h_refused": "",
+   "hidden": true,
+   "lines_hidden": [
+    "SK_Warrior3_PlateArmour|0|6|10121|1"
+   ],
+   "pixels": [
+    2560,
+    2560
+   ],
+   "head_diff": 11.61,
+   "luma_on": 0.0,
+   "luma_off": 0.0,
+   "helmet_row": "helmet|1|Plate Armour",
+   "shown_by_row": true
+  },
+  {
+   "step": "block",
+   "ok": true,
+   "shield": "Kite Shield",
+   "share": 0.24,
+   "refused": [],
+   "hand_rest": [
+    5.8,
+    8.5
+   ],
+   "plain": {
+    "lost": 30.4,
+    "shield_lost": 9.6,
+    "share": 0.24
+   },
+   "blocking": true,
+   "hand_block": [
+    21.4,
+    39.9
+   ],
+   "blocked": {
+    "lost": 18.4,
+    "shield_lost": 108.0,
+    "share": 0.54,
+    "hits": 1
+   },
+   "swing_refused": true,
+   "after_release": {
+    "blocking": false,
+    "speed": 311.0,
+    "hand": [
+     6.2,
+     8.5
+    ]
+   },
+   "lt_blocking": true,
+   "speed": {
+    "normal": 311.0,
+    "blocking": 155.5,
+    "ratio": 0.5
+   },
+   "after_restart": {
+    "blocking": false,
+    "hand": [
+     2.0,
+     7.9
+    ]
+   },
+   "mage_blocking": false
+  },
+  {
+   "step": "startgear",
+   "ok": true,
+   "weapons": [
+    [
+     "Dagger",
+     "None",
+     0.0
+    ]
+   ],
+   "worn_shield": "Painted Viking Shield",
+   "start_shield": "Painted Viking Shield",
+   "worst_shield": "Painted Viking Shield",
+   "worn_armour": "None",
+   "shield_wear": [
+    100.0,
+    100.0
+   ],
+   "pile": [
+    "Arming Sword",
+    "Kite Shield"
+   ],
+   "after_fall": {
+    "shield": "Painted Viking Shield",
+    "count": 1,
+    "weapons": [
+     "Dagger"
+    ]
+   },
+   "f": "loot",
+   "back": {
+    "shield": "Kite Shield",
+    "kite": 1,
+    "start": 1
+   },
+   "drop_on_death": true
+  },
+  {
+   "step": "pickups",
+   "ok": true,
+   "pickups": 16,
+   "items": [
+    "Arming Sword",
+    "Dagger",
+    "Eastern Sabre",
+    "Leaf-Blade Knife",
+    "Longbow",
+    "Viking Shield (green and white)",
+    "Viking Sword",
+    "Village Shield (green)"
+   ],
+   "drawn": 16,
+   "tier_ok": true,
+   "stand": {
+    "room": 20,
+    "at": [
+     10497,
+     -2926
+    ],
+    "st": [
+     10617,
+     -2926
+    ],
+    "her": [
+     10617,
+     -2926,
+     84
+    ],
+    "her_d": 120
+   },
+   "describe": "take the viking shield (green and white)",
+   "f_refused": "",
+   "took": {
+    "item": "Viking Shield (green and white)",
+    "gained": 1,
+    "taken_flag": "1",
+    "drawn": "0",
+    "taken_total": 1
+   }
+  },
+  {
+   "step": "rooms",
+   "ok": true,
+   "kinds": {
+    "Trap gauntlet": 4,
+    "Fountain of speed": 4,
+    "Vault": 4,
+    "Arena": 4,
+    "Shrine": 5,
+    "Fountain of mana": 3,
+    "Healing fountain": 4,
+    "Throne room": 1
+   },
+   "refused": [],
+   "shrine": {
+    "describe": "pray at the shrine",
+    "f": "shrine",
+    "blessing": "Blessing of might",
+    "damage_x": 1.25,
+    "armour": 0.0,
+    "speed": 0.0,
+    "again": "shrine used"
+   },
+   "heal": {
+    "f": "fountain",
+    "hp_gain": 0.6,
+    "speed_x": 1.0,
+    "speed_bonus": 0.0,
+    "again": "fountain dry",
+    "particles": 13
+   },
+   "speed": {
+    "f": "fountain",
+    "hp_gain": 0.0,
+    "speed_x": 1.3,
+    "speed_bonus": 0.3,
+    "again": "fountain dry",
+    "particles": 8
+   },
+   "mana": {
+    "f": "fountain",
+    "mana": [
+     0.0,
+     100.0,
+     100.0
+    ],
+    "again": "fountain dry"
+   },
+   "arena": {
+    "doors": 8,
+    "open_before": 8,
+    "began": true,
+    "doors_open_after_begin": 0,
+    "pushed_open": false,
+    "waves": [
+     {
+      "wave": 0,
+      "left": 3
+     },
+     {
+      "wave": 1,
+      "left": 3
+     },
+     {
+      "wave": 2,
+      "left": 3
+     },
+     {
+      "wave": -1,
+      "left": 0
+     }
+    ],
+    "won": 1,
+    "prize": [
+     [
+      "Small Speed Potion",
+      "Templar’s Armour",
+      "Whetstone"
+     ]
+    ],
+    "harvest_piles": 10,
+    "opens_after": true
+   },
+   "gauntlet": {
+    "traps": 13,
+    "kinds": [
+     "Cursed",
+     "Darts",
+     "Deadfall",
+     "Glyph",
+     "Pit",
+     "Spring"
+    ],
+    "chests": 1,
+    "chest_loot": [
+     "Repair Kit",
+     "Dagger",
+     "Bread",
+     "Slickstone",
+     "Small Speed Potion",
+     "Hardwood"
+    ]
+   },
+   "vault": {
+    "doors": 6,
+    "locked_f": "vault locked",
+    "open_without_key": false,
+    "key_chests": 1,
+    "key_room": 46,
+    "key_chest_f": "chest",
+    "other_opened": 0,
+    "has_key": 1,
+    "f": "vault",
+    "open_with_key": true,
+    "key_after": 0,
+    "vault_chests": 23,
+    "vault_loot": [
+     "Jerky",
+     "Dark Knight's Sword"
+    ],
+    "tier_beyond": [
+     [
+      3
+     ],
+     [
+      3
+     ]
+    ]
+   },
+   "throne": {
+    "encounters": 1,
+    "label": "THE USURPER: ORC RAIDER",
+    "alive": 1,
+    "slain_notice": "THE USURPER IS SLAIN  -  THE BLOOD SLASH IS YOURS",
+    "usurper_uses": 1,
+    "slashes_given": [
+     "Blood Slash"
+    ],
+    "slash_in_pack": [
+     "slash|Blood Slash|1"
+    ]
+   }
+  },
+  {
+   "step": "slashes",
+   "ok": true,
+   "refused": [],
+   "boss_gave": [
+    "Blood Slash"
+   ],
+   "boss_slash_tier": [
+    2
+   ],
+   "tab": 4,
+   "picking": true,
+   "pick_lines": [
+    "weapon|0|Dagger|",
+    "weapon|1|Longbow|"
+   ],
+   "on_dagger": "Ember Slash",
+   "off_dagger": "None",
+   "back_in_pack": 1,
+   "on_bow": true,
+   "bow_slash": "Ember Slash",
+   "swing": {
+    "started": true,
+    "fx_max": 31,
+    "bonus": 6.0,
+    "monster_lost": 22.3,
+    "pictured": true
+   },
+   "shot": {
+    "bonus": 6.0,
+    "procs": 2
+   },
+   "each": {
+    "Ember Slash": {
+     "applied": true,
+     "effect": "burn",
+     "hit": true,
+     "bonus": 6.0,
+     "want_bonus": 6.0,
+     "fx": 30,
+     "procs": {
+      "burn": 1
+     },
+     "burning": true,
+     "dot": 10.08,
+     "want_dot": 10.1,
+     "ok": true
+    },
+    "Frost Slash": {
+     "applied": true,
+     "effect": "slow",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 42,
+     "procs": {
+      "slow": 1
+     },
+     "slow": 0.25,
+     "ok": true
+    },
+    "Venom Slash": {
+     "applied": true,
+     "effect": "poison",
+     "hit": true,
+     "bonus": 4.0,
+     "want_bonus": 4.0,
+     "fx": 29,
+     "procs": {
+      "poison": 1
+     },
+     "burning": true,
+     "dot": 11.93,
+     "want_dot": 12.0,
+     "ok": true
+    },
+    "Gale Slash": {
+     "applied": true,
+     "effect": "swift",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 26,
+     "procs": {
+      "swift": 1
+     },
+     "speed_bonus": 0.1,
+     "ok": true
+    },
+    "Blood Slash": {
+     "applied": true,
+     "effect": "drain",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 45,
+     "procs": {
+      "drain": 1
+     },
+     "healed": 6.99,
+     "want": 6.99,
+     "ok": true
+    },
+    "Wave Slash": {
+     "applied": true,
+     "effect": "knockback",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 65,
+     "procs": {
+      "knockback": 1
+     },
+     "moved_cm": 298,
+     "want_cm": 300.0,
+     "ok": true
+    },
+    "Verdant Slash": {
+     "applied": true,
+     "effect": "regen",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 26,
+     "procs": {
+      "regen": 1
+     },
+     "regen": 1.5,
+     "ok": true
+    },
+    "Petal Slash": {
+     "applied": true,
+     "effect": "evade",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 53,
+     "procs": {
+      "evade": 1
+     },
+     "evade": 0.15,
+     "ok": true
+    },
+    "Crystal Slash": {
+     "applied": true,
+     "effect": "shield",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 29,
+     "procs": {
+      "shield": 1
+     },
+     "up": true,
+     "absorbed": true,
+     "down_after": true,
+     "ok": true
+    },
+    "Storm Slash": {
+     "applied": true,
+     "effect": "chain",
+     "hit": true,
+     "bonus": 44.3,
+     "want_bonus": 15.0,
+     "fx": 46,
+     "procs": {
+      "chain": 1
+     },
+     "spawned": [
+      true,
+      true,
+      true
+     ],
+     "others_lost": [
+      14.7,
+      14.7,
+      0.0
+     ],
+     "ok": true
+    },
+    "Ink Slash": {
+     "applied": true,
+     "effect": "blind",
+     "hit": true,
+     "bonus": 13.0,
+     "want_bonus": 13.0,
+     "fx": 30,
+     "procs": {
+      "blind": 1
+     },
+     "blind": 0.4,
+     "ok": true
+    },
+    "Tide Slash": {
+     "applied": true,
+     "effect": "tide",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 66,
+     "procs": {
+      "tide": 1
+     },
+     "slow": 0.2,
+     "moved_cm": 411,
+     "ok": true
+    },
+    "Inferno Slash": {
+     "applied": true,
+     "effect": "inferno",
+     "hit": true,
+     "bonus": 100.6,
+     "want_bonus": 24.0,
+     "fx": 62,
+     "procs": {
+      "inferno": 1
+     },
+     "near_lost": 38.4,
+     "near_burning": true,
+     "far_lost": 0.0,
+     "ok": true
+    },
+    "Shadow Slash": {
+     "applied": true,
+     "effect": "curse",
+     "hit": true,
+     "bonus": 22.0,
+     "want_bonus": 22.0,
+     "fx": 25,
+     "procs": {
+      "curse": 1
+     },
+     "curse": 0.25,
+     "ok": true
+    },
+    "Neon Slash": {
+     "applied": true,
+     "effect": "haste",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 36,
+     "procs": {
+      "haste": 1
+     },
+     "haste": 0.2,
+     "swing_s": 0.479,
+     "ok": true
+    },
+    "Pulse Slash": {
+     "applied": true,
+     "effect": "deflect",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 34,
+     "procs": {
+      "deflect": 1
+     },
+     "deflect": 0.25,
+     "ok": true
+    },
+    "Magma Slash": {
+     "applied": true,
+     "effect": "magma",
+     "hit": true,
+     "bonus": 36.0,
+     "want_bonus": 36.0,
+     "fx": 26,
+     "procs": {
+      "magma": 1
+     },
+     "burning": false,
+     "dot": 40.0,
+     "want_dot": 36.0,
+     "ok": true
+    },
+    "Void Slash": {
+     "applied": true,
+     "effect": "void",
+     "hit": true,
+     "bonus": 34.0,
+     "want_bonus": 34.0,
+     "fx": 41,
+     "procs": {
+      "void": 1
+     },
+     "closer_cm": [
+      151,
+      149,
+      0
+     ],
+     "slow": 0.25,
+     "ok": true
+    },
+    "Overload Slash": {
+     "applied": true,
+     "effect": "stun",
+     "hit": true,
+     "bonus": 38.0,
+     "want_bonus": 38.0,
+     "fx": 14,
+     "procs": {
+      "stun": 1
+     },
+     "stunned": true,
+     "second_waits": true,
+     "ok": true
+    },
+    "Prismatic Slash": {
+     "applied": true,
+     "effect": "prismatic",
+     "hit": true,
+     "bonus": 32.0,
+     "want_bonus": 32.0,
+     "fx": 37,
+     "procs": {
+      "poison": 1,
+      "prismatic": 1
+     },
+     "ok": true
+    }
+   }
+  },
+  {
+   "step": "tomemana",
+   "ok": true,
+   "tomes": {
+    "Null Sanctum": "Tome of Null Sanctum",
+    "Apocalypse": "Tome of Apocalypse"
+   },
+   "ring": "Magic Potency Ring 10",
+   "tome_mana": 0.0,
+   "base": 100.0,
+   "ringed": 200.0,
+   "sanctum": {
+    "knows": true,
+    "pool": 220.0,
+    "pool_before": 200.0,
+    "mana_gain": 20.0,
+    "message": "You learn Null Sanctum:  key 3.  Your mana pool grows to 220",
+    "tome_mana": 220.0,
+    "index": 2,
+    "cast": true,
+    "mana_taken": 220.0
+   },
+   "ring_off": 220.0,
+   "apocalypse": {
+    "knows": true,
+    "pool": 300.0,
+    "pool_before": 220.0,
+    "mana_gain": 80.0,
+    "message": "You learn Apocalypse:  key 4.  Your mana pool grows to 300",
+    "tome_mana": 300.0,
+    "index": 3,
+    "cast": true,
+    "mana_taken": 300.0
+   },
+   "dead": true,
+   "after_death": {
+    "revived": true,
+    "knows": [
+     true,
+     true
+    ],
+    "pool": 300.0
+   },
+   "after_restart": {
+    "knows": [
+     false,
+     false
+    ],
+    "pool": 100.0
+   },
+   "summoner": {
+    "knows": false,
+    "pool_before": 50.0,
+    "pool": 50.0
+   }
+  },
+  {
+   "step": "martial",
+   "ok": true,
+   "hero": "MartialArtist",
+   "hp": 140.0,
+   "mana": 100.0,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ],
+   "pawn": "BP_MA_MartialArtistCharacter_C",
+   "fists": {
+    "damage": 44.0,
+    "damage_of": 44.0,
+    "bonus": 0.0,
+    "started": true,
+    "lost": 44.0,
+    "hits": 1
+   },
+   "ring_worn": true,
+   "ring": {
+    "amount": 1.0,
+    "fists": 88.0,
+    "chi": 23.0
+   },
+   "knife": {
+    "index": 3,
+    "damage": 11.0,
+    "damage_of": 25.3,
+    "bonus": 1.3,
+    "both_hands": true,
+    "type": "short blades",
+    "lost": 25.3
+   },
+   "ring_off": {
+    "fists": 44.0,
+    "knife": 14.3
+   },
+   "chi": {
+    "name": "Straight Punch",
+    "started": true,
+    "mana": 7.0,
+    "lost": 23.0,
+    "fx": 42,
+    "released": 0,
+    "bolts": 1,
+    "damage_of": 23.0,
+    "pictured": true,
+    "splash_lost": 11.5
+   },
+   "chi_far": {
+    "name": "Straight Punch",
+    "started": false,
+    "mana": 0.0,
+    "lost": 0.0,
+    "fx": 0,
+    "released": 0,
+    "bolts": 0,
+    "damage_of": 23.0,
+    "pictured": false
+   },
+   "dash": {
+    "started": true,
+    "before_m": 6.0,
+    "after_m": 0.76,
+    "length": 444.0,
+    "at_it": true,
+    "attacked": 1,
+    "lost": 44.0,
+    "dashes": 1
+   },
+   "rolls": 1,
+   "medium_worn": "None",
+   "light_worn": "Desert Hero’s Armour",
+   "armour_share": 0.2,
+   "boss": {
+    "weapons": [
+     "Smashing Strike",
+     "Roundhouse Kick"
+    ],
+    "unlocked": 2
+   },
+   "asked": 2,
+   "after_ask": [
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_death": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_restart": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ]
+  },
+  {
+   "step": "harvest",
+   "ok": true,
+   "kills": [
+    {
+     "kind": "Rat",
+     "family": "Spider",
+     "tier": 1,
+     "piles": 1,
+     "things": [
+      "Faint Essence",
+      "Venom Sac"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.6,
+     "tint": [
+      0.55,
+      1.0,
+      0.55
+     ]
+    },
+    {
+     "kind": "Half_Creature_04",
+     "family": "Spider",
+     "tier": 1,
+     "piles": 1,
+     "things": [
+      "Faint Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 18,
+     "picture_cm": 100.6,
+     "tint": [
+      0.55,
+      1.0,
+      0.55
+     ]
+    },
+    {
+     "kind": "Parasite_Slider",
+     "family": "Spider",
+     "tier": 1,
+     "piles": 1,
+     "things": [
+      "Faint Essence",
+      "Light Leather"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.6,
+     "tint": [
+      0.55,
+      1.0,
+      0.55
+     ]
+    },
+    {
+     "kind": "Sufferer",
+     "family": "Horned",
+     "tier": 2,
+     "piles": 1,
+     "things": [
+      "Dim Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 17,
+     "picture_cm": 100.7,
+     "tint": [
+      0.45,
+      0.7,
+      1.0
+     ]
+    },
+    {
+     "kind": "Fat",
+     "family": "Troll",
+     "tier": 2,
+     "piles": 1,
+     "things": [
+      "Faint Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 17,
+     "picture_cm": 100.6,
+     "tint": [
+      0.45,
+      0.7,
+      1.0
+     ]
+    },
+    {
+     "kind": "Mask",
+     "family": "Mutant",
+     "tier": 2,
+     "piles": 1,
+     "things": [
+      "Dim Essence",
+      "Mutant Ichor",
+      "Oils"
+     ],
+     "harvest": true,
+     "pictures": 3,
+     "particles": 16,
+     "picture_cm": 94.5,
+     "tint": [
+      0.45,
+      0.7,
+      1.0
+     ]
+    },
+    {
+     "kind": "Magur",
+     "family": "Horned",
+     "tier": 3,
+     "piles": 1,
+     "things": [
+      "Bright Essence",
+      "Glue",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 3,
+     "particles": 16,
+     "picture_cm": 94.5,
+     "tint": [
+      0.8,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "kind": "Azrak",
+     "family": "Horned",
+     "tier": 3,
+     "piles": 1,
+     "things": [
+      "Dim Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 18,
+     "picture_cm": 100.6,
+     "tint": [
+      0.8,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "kind": "Warrior_02_the_leopard",
+     "family": "Horned",
+     "tier": 3,
+     "piles": 1,
+     "things": [
+      "Bright Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 18,
+     "picture_cm": 100.6,
+     "tint": [
+      0.8,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "kind": "Orc_01",
+     "family": "Horned",
+     "tier": 4,
+     "piles": 1,
+     "things": [
+      "Bright Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 15,
+     "picture_cm": 100.7,
+     "tint": [
+      1.0,
+      0.62,
+      0.22
+     ]
+    },
+    {
+     "kind": "Orc_02",
+     "family": "Horned",
+     "tier": 4,
+     "piles": 1,
+     "things": [
+      "Brilliant Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.7,
+     "tint": [
+      1.0,
+      0.62,
+      0.22
+     ]
+    },
+    {
+     "kind": "Ursag",
+     "family": "Horned",
+     "tier": 4,
+     "piles": 1,
+     "things": [
+      "Dim Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 17,
+     "picture_cm": 100.7,
+     "tint": [
+      1.0,
+      0.62,
+      0.22
+     ]
+    },
+    {
+     "kind": "Alfa",
+     "family": "Daemon",
+     "tier": 5,
+     "piles": 1,
+     "things": [
+      "Oils",
+      "Radiant Essence"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.7,
+     "tint": [
+      1.0,
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "kind": "Spider",
+     "family": "Spider",
+     "tier": 5,
+     "piles": 1,
+     "things": [
+      "Bright Essence",
+      "Oils",
+      "Venom Sac"
+     ],
+     "harvest": true,
+     "pictures": 3,
+     "particles": 16,
+     "picture_cm": 94.4,
+     "tint": [
+      1.0,
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "kind": "Rock",
+     "family": "Troll",
+     "tier": 5,
+     "piles": 1,
+     "things": [
+      "Faint Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 16,
+     "picture_cm": 100.6,
+     "tint": [
+      1.0,
+      0.28,
+      0.28
+     ]
+    }
+   ],
+   "bad": [],
+   "big": [
+    [
+     "Faint Essence",
+     "Faint Essence",
+     "Faint Essence",
+     "Venom Sac",
+     "Mutant Ichor"
+    ],
+    [
+     "Dim Essence",
+     "Faint Essence",
+     "Dim Essence",
+     "Horn Shard",
+     "Mutant Ichor"
+    ],
+    [
+     "Dim Essence",
+     "Bright Essence",
+     "Bright Essence",
+     "Horn Shard",
+     "Mutant Ichor"
+    ],
+    [
+     "Dim Essence",
+     "Brilliant Essence",
+     "Dim Essence",
+     "Horn Shard",
+     "Daemon Ash"
+    ],
+    [
+     "Brilliant Essence",
+     "Bright Essence",
+     "Radiant Essence",
+     "Daemon Ash",
+     "Venom Sac"
+    ]
+   ],
+   "reload": {
+    "before": 1,
+    "reloaded": true,
+    "after": 1,
+    "describe": "harvest the parts (2)",
+    "f": "loot",
+    "message": "You harvest:  1 faint essence, 1 wood glue",
+    "got": {
+     "Faint Essence": 1,
+     "Wood Glue": 1
+    },
+    "want": {
+     "Faint Essence": 1,
+     "Wood Glue": 1
+    },
+    "gone": true
+   },
+   "enough": {
+    "1": {
+     "monsters": 14,
+     "have": {
+      "Coarse Hide": 1,
+      "Cured Leather Strip": 1,
+      "Faint Essence": 17,
+      "Glue": 2,
+      "Light Leather": 1,
+      "Mutant Ichor": 3,
+      "Oils": 2,
+      "Venom Sac": 5
+     },
+     "short": []
+    },
+    "2": {
+     "monsters": 100,
+     "have": {
+      "Coarse Hide": 4,
+      "Cured Leather Strip": 13,
+      "Dim Essence": 49,
+      "Epoxy": 6,
+      "Faint Essence": 71,
+      "Glue": 10,
+      "Horn Shard": 13,
+      "Light Leather": 7,
+      "Mutant Ichor": 24,
+      "Oils": 5,
+      "Troll Heart": 14,
+      "Venom Sac": 5,
+      "Wood Glue": 5
+     },
+     "short": []
+    },
+    "3": {
+     "monsters": 201,
+     "have": {
+      "Bright Essence": 112,
+      "Coarse Hide": 13,
+      "Cured Leather Strip": 29,
+      "Dim Essence": 88,
+      "Epoxy": 13,
+      "Faint Essence": 124,
+      "Glue": 25,
+      "Horn Shard": 84,
+      "Hound Fang": 9,
+      "Light Leather": 27,
+      "Mutant Ichor": 32,
+      "Oils": 17,
+      "Troll Heart": 18,
+      "Venom Sac": 20,
+      "Wood Glue": 15
+     },
+     "short": []
+    },
+    "4": {
+     "monsters": 299,
+     "have": {
+      "Bright Essence": 158,
+      "Brilliant Essence": 164,
+      "Coarse Hide": 34,
+      "Cured Leather Strip": 44,
+      "Daemon Ash": 23,
+      "Dim Essence": 142,
+      "Epoxy": 36,
+      "Faint Essence": 162,
+      "Glue": 40,
+      "Horn Shard": 161,
+      "Hound Fang": 22,
+      "Light Leather": 37,
+      "Mutant Ichor": 52,
+      "Oils": 33,
+      "Troll Heart": 25,
+      "Venom Sac": 41,
+      "Wood Glue": 35
+     },
+     "short": []
+    },
+    "5": {
+     "monsters": 403,
+     "have": {
+      "Bright Essence": 215,
+      "Brilliant Essence": 218,
+      "Coarse Hide": 60,
+      "Cured Leather Strip": 67,
+      "Daemon Ash": 123,
+      "Dim Essence": 200,
+      "Epoxy": 63,
+      "Faint Essence": 212,
+      "Glue": 65,
+      "Horn Shard": 161,
+      "Hound Fang": 22,
+      "Light Leather": 59,
+      "Mutant Ichor": 52,
+      "Oils": 59,
+      "Radiant Essence": 187,
+      "Troll Heart": 85,
+      "Venom Sac": 77,
+      "Wood Glue": 58
+     },
+     "short": []
+    }
+   }
+  },
+  {
+   "step": "recipes",
+   "ok": true,
+   "highest": 1,
+   "offered_t1": [
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "small": {
+    "made": true,
+    "count": 1,
+    "faint_left": 2,
+    "ichor_left": 2
+   },
+   "large_t1": {
+    "made": false,
+    "message": "The large healing potion is of tier 2: the anvil makes it once tier 2 is open"
+   },
+   "highest_after": 2,
+   "offered_t2": [
+    "Large Healing Potion",
+    "Large Mana Potion",
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Uncommon Healing Potion",
+    "Uncommon Mana Potion",
+    "Whetstone"
+   ],
+   "large_t2": {
+    "made": true,
+    "count": 1
+   },
+   "scrolls": {
+    "Warrior": 0,
+    "MartialArtist": 0,
+    "Mage": 11,
+    "Warlock": 8,
+    "Summoner": 11
+   },
+   "mage_scrolls": [
+    "Scroll of Ash Ward",
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Dispel Hex",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Iron Skin",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "warlock_scrolls": [
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "fire_scroll": {
+    "made": true,
+    "count": 1,
+    "faint_left": 0,
+    "venom_left": 0
+   },
+   "wood_glue": {
+    "Slickstone": 5,
+    "Patch Kit": 10,
+    "Repair Kit": 15,
+    "Torch": 1
+   },
+   "slickstone": {
+    "made": true,
+    "wood_glue_left": 1
+   },
+   "great": {
+    "Null Sanctum": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "troll heart",
+      3
+     ]
+    ],
+    "Apocalypse": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ],
+    "Meteor Storm": [
+     [
+      "radiant essence",
+      4
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ]
+   },
+   "fires": {
+    "Env.Torch": [
+     0.044,
+     0.044
+    ],
+    "Env.Brazier": [
+     0.052,
+     0.052
+    ],
+    "Env.Hearth": [
+     0.068,
+     0.068
+    ]
+   }
+  },
+  {
+   "step": "scrolls",
+   "ok": true,
+   "fireball_damage": 91.0,
+   "read": {
+    "ok": true,
+    "message": "You read the scroll of fireball:  Fireball, no mana",
+    "scroll_weapon": 2,
+    "mana_taken": 0.0,
+    "cast_s": 0.74,
+    "bar_same": true,
+    "weapons_after": 0,
+    "lost": 91.0,
+    "left_after_two": 1,
+    "scroll_weapon_after": -1,
+    "read": 1
+   },
+   "again": {
+    "ok": false,
+    "message": "Fireball is not ready:  4 s",
+    "left": 1
+   },
+   "learned": {
+    "index": 2,
+    "cooldown_left": 3.0
+   },
+   "warrior": {
+    "ok": false,
+    "message": "The warrior cannot read the scroll of fire bolt (offense)",
+    "kept": 1
+   },
+   "warlock": {
+    "ward": false,
+    "ward_message": "The warlock cannot read the scroll of ash ward (protection)",
+    "frost": true
+   },
+   "summoner": {
+    "ok": true,
+    "message": "You read the scroll of ash ward:  Ash Ward, no mana",
+    "ward_hits": 3,
+    "mana_taken": 0.0
+   },
+   "broken_off": {
+    "ok": true,
+    "left_read": 0,
+    "left_after": 1,
+    "read_after": 0,
+    "message": "The scroll of frost shard was not read through: you keep it",
+    "scroll_weapon": -1
+   }
+  },
+  {
+   "step": "gearbreak",
+   "ok": true,
+   "listed": [
+    "HP Potency Ring 3",
+    "Painted Viking Shield",
+    "Torch"
+   ],
+   "ring": {
+    "ok": true,
+    "left": 1
+   },
+   "worn": true,
+   "ring_worn": {
+    "ok": false,
+    "message": "You wear the hp potency ring 3: take it off first",
+    "left": 1
+   },
+   "torch_lit": {
+    "held": true,
+    "ok": false,
+    "message": "The torch burns in your hand: put it out first"
+   },
+   "torch": {
+    "held": false,
+    "ok": true,
+    "left": 0
+   },
+   "got": {
+    "Copper Ingot": 2,
+    "Bronze Ingot": 2,
+    "Faint Essence": 2,
+    "Wood Log": 1,
+    "Straw Rope": 1,
+    "Oils": 1
+   }
+  },
+  {
+   "step": "summoner",
+   "ok": true,
+   "pawn": "BP_SU4_SummonerCharacter_C",
+   "hp": 85.0,
+   "mana": 50.0,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ],
+   "same_as_mage": [
+    true,
+    true
+   ],
+   "clips": [
+    "AS_Summoner4_CastBolt",
+    "AS_Summoner4_Summon1",
+    "AS_Summoner4_Summon2",
+    "AS_Summoner4_Summon3",
+    "AS_Summoner4_Summon4",
+    "AS_Summoner4_Summon5"
+   ],
+   "fire": {
+    "started": true,
+    "lost": 25.0
+   },
+   "summon": [
+    {
+     "started": true,
+     "mana": 25.0,
+     "count": 1,
+     "message": "Rotting Soldier answers your call  (1 of 2)"
+    },
+    {
+     "started": true,
+     "mana": 25.0,
+     "count": 2,
+     "message": "Rotting Soldier answers your call  (2 of 2)"
+    },
+    {
+     "started": false,
+     "mana": 0.0,
+     "count": 2,
+     "message": "You lead 2 of them already (Rotting Soldier): no more answer Summon Tier 1"
+    }
+   ],
+   "allies": [
+    {
+     "kind": "Soldier",
+     "hp": 60.0,
+     "damage": 14.0,
+     "m": 2.3
+    },
+    {
+     "kind": "Soldier",
+     "hp": 60.0,
+     "damage": 14.0,
+     "m": 2.3
+    }
+   ],
+   "tier1_soldier": {
+    "hp": 60.0,
+    "damage": 14.0
+   },
+   "allies_fight": 33.6,
+   "dagger": {
+    "index": 3,
+    "both_hands": true
+   },
+   "slash": {
+    "begun": false,
+    "message": "Only a warrior's weapons take the ember slash"
+   },
+   "armour_worn": "None",
+   "hp_ring": false,
+   "magic_ring": true,
+   "mana_ringed": 55.0,
+   "summon_mana_ringed": 28.0,
+   "tome": {
+    "knows": false,
+    "carried": 1
+   },
+   "torch": true,
+   "boss": {
+    "weapons": [
+     "Summon Tier 2"
+    ],
+    "unlocked": 1
+   },
+   "tier2": {
+    "started": true,
+    "mana": 25.0,
+    "kinds": [
+     "Gunner"
+    ]
+   },
+   "after_death": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Summon Tier 2"
+   ],
+   "after_restart": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ]
+  },
+  {
+   "step": "options",
+   "ok": true,
+   "controls_before": true,
+   "open": {
+    "why": "",
+    "open": true,
+    "page": 0,
+    "lines": [
+     "button|Resume",
+     "button|Options",
+     "button|Choose another hero",
+     "button|Quit"
+    ]
+   },
+   "options": {
+    "page": 1,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|1.00",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|On",
+     "choice|Resolution|the screen's own (windowed fullscreen)",
+     "choice|Display mode|Windowed fullscreen",
+     "button|Apply display settings",
+     "button|Back"
+    ],
+    "action": "options"
+   },
+   "controls_off": {
+    "shown": false,
+    "line": "choice|Controls hint|Off"
+   },
+   "volume": {
+    "before": 1.0,
+    "after": 0.9
+   },
+   "display": {
+    "choices": [
+     "1280x720",
+     "1600x900",
+     "1920x1080",
+     "2560x1440",
+     "3840x2160"
+    ],
+    "from": [
+     1920,
+     1080
+    ],
+    "to": [
+     2560,
+     1440
+    ],
+    "mode": 2,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|0.90",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|Off",
+     "choice|Resolution|2560 x 1440",
+     "choice|Display mode|Windowed",
+     "button|Apply display settings",
+     "button|Back"
+    ]
+   },
+   "applied": {
+    "said": "saved 2560x1440 mode 2 in the editor's user settings (the editor's play window keeps its size)",
+    "saved": [
+     2560,
+     1440
+    ],
+    "mode": "<WindowMode.WINDOWED: 2>"
+   },
+   "escape_back": {
+    "open": true,
+    "page": 0
+   },
+   "escape_closed": {
+    "open": false,
+    "paused": false
+   },
+   "controls_drawn_off": false,
+   "controls_drawn_on": true
+  },
+  {
+   "step": "allyspace",
+   "ok": true,
+   "called": [
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 1,
+     "least_gap": null
+    },
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 2,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 3,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 4,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 5,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 6,
+     "least_gap": 58.3
+    }
+   ],
+   "off": {
+    "moving_least": -76.6,
+    "standing_least": -76.1,
+    "standing_overlap_share": 1.0
+   },
+   "on": {
+    "moving_least": 6.3,
+    "standing_least": 20.2,
+    "standing_overlap_share": 0.0
+   },
+   "far": {
+    "moved_m": 155.9,
+    "near_her": 6,
+    "allies": 6,
+    "least_gap": 58.3,
+    "behind_her": 0
+   },
+   "panel": {
+    "rows": [
+     "Rotting Soldier|2|2|60/60,60/60",
+     "Grave Gunner|2|3|103/103,103/103",
+     "Orc Skirmisher|2|4|162/162,162/162"
+    ],
+    "after_hurt": [
+     "Rotting Soldier|2|2|60/60,60/60",
+     "Grave Gunner|2|3|86/103,103/103",
+     "Orc Skirmisher|2|4|162/162,162/162"
+    ],
+    "hurt_hp": [
+     103.0,
+     86.0
+    ]
+   },
+   "marks": {
+    "allies": 6,
+    "minimap": 6,
+    "minimap_matched": 6,
+    "big": 6,
+    "big_matched": 6
+   }
+  },
+  {
+   "step": "maarm",
+   "ok": true,
+   "flare_r": 21.7,
+   "flare_l": 23.6,
+   "past_shoulder_r": 13.5,
+   "past_shoulder_l": 15.0
+  },
+  {
+   "step": "names",
+   "ok": true,
+   "wrong_titles": [],
+   "spawned": [
+    [
+     "Rat",
+     "Plague Rat"
+    ],
+    [
+     "Orc_03",
+     "Orc Raider"
+    ],
+    [
+     "Warrior_02_the_leopard",
+     "Leopard Warrior"
+    ],
+    [
+     "Spider",
+     "Giant Spider"
+    ]
+   ],
+   "name_only": true,
+   "summon_lines": [
+    "calls Rotting Soldier (a tier 1 monster) to fight at her side until it falls; 2 at most",
+    "calls Grave Gunner (a tier 2 monster) to fight at her side until it falls; 3 at most",
+    "calls Orc Skirmisher (a tier 3 monster) to fight at her side until it falls; 4 at most",
+    "calls Alien Defender (a tier 4 monster) to fight at her side until it falls; 5 at most",
+    "calls Giant Spider (a tier 5 monster) to fight at her side until it falls; 5 at most"
+   ],
+   "stale_lines": []
+  },
+  {
+   "step": "ranged",
+   "ok": true,
+   "shooters": 28,
+   "kinds": 55,
+   "defs_bad": [],
+   "trials": [
+    {
+     "kind": "Soldier",
+     "title": "Rotting Soldier",
+     "dist": 976,
+     "blow": 14.0,
+     "shot": 5.6,
+     "wait": 5.52,
+     "interval": 1.84,
+     "flight": [
+      [
+       916,
+       0,
+       146,
+       1900
+      ],
+      [
+       198,
+       0,
+       115,
+       1900
+      ],
+      [
+       81,
+       0,
+       109,
+       1900
+      ],
+      [
+       911,
+       0,
+       136,
+       1900
+      ],
+      [
+       727,
+       0,
+       130,
+       1900
+      ],
+      [
+       623,
+       0,
+       127,
+       1900
+      ],
+      [
+       499,
+       0,
+       123,
+       1900
+      ],
+      [
+       387,
+       0,
+       119,
+       1900
+      ],
+      [
+       261,
+       0,
+       115,
+       1900
+      ],
+      [
+       155,
+       0,
+       111,
+       1900
+      ]
+     ],
+     "times": [
+      1.9,
+      9.45
+     ],
+     "fired": 2,
+     "on_her": 2,
+     "hp_lost": 10.8,
+     "last_on_her": "Soldier|5.6|14.0|a rifle shot",
+     "gaps": [
+      7.55
+     ],
+     "close": {
+      "shots": 0,
+      "blows": 2
+     }
+    },
+    {
+     "kind": "Medic",
+     "title": "Mad Surgeon",
+     "dist": 600,
+     "blow": 12.0,
+     "shot": 6.6,
+     "wait": 4.05,
+     "interval": 1.84,
+     "flight": [
+      [
+       539,
+       0,
+       134,
+       1400
+      ],
+      [
+       502,
+       0,
+       132,
+       1400
+      ],
+      [
+       411,
+       0,
+       127,
+       1400
+      ],
+      [
+       331,
+       0,
+       123,
+       1400
+      ],
+      [
+       227,
+       0,
+       118,
+       1400
+      ],
+      [
+       135,
+       0,
+       113,
+       1400
+      ]
+     ],
+     "times": [
+      1.66,
+      8.15
+     ],
+     "fired": 3,
+     "on_her": 3,
+     "hp_lost": 19.0,
+     "last_on_her": "Medic|6.6|12.0|a syringe dart",
+     "gaps": [
+      6.49
+     ],
+     "close": {
+      "shots": 0,
+      "blows": 2
+     }
+    }
+   ]
+  },
+  {
+   "step": "arena5",
+   "ok": true,
+   "room": 18,
+   "began": true,
+   "lead": 3.0,
+   "crowd": 18,
+   "wave_at_half_lead": -1,
+   "facing_middle": 18,
+   "by_a_door": 0,
+   "toward_walls": 18,
+   "meshes": 7,
+   "first_wave_after": 3.04,
+   "cheers_at_wave": 5,
+   "doing_after_wave": [
+    "cheer"
+   ],
+   "ring_used": false,
+   "ring_moved_her": 0,
+   "door_says": "the arena's doors are barred until its last wave falls",
+   "door_f": "arena barred",
+   "door_open": false,
+   "put_back": 1,
+   "back_in_room": true,
+   "refused": 3,
+   "claps_after_kill": 1,
+   "doing_after_kill": [
+    "cheer",
+    "clap"
+   ],
+   "won": 1,
+   "crowd_after_win": 0,
+   "reactions": null
+  },
+  {
+   "step": "ceilings",
+   "ok": true,
+   "styles": {
+    "flat": 81,
+    "raised": 13,
+    "barrel vault": 29,
+    "cloister vault": 7,
+    "sail dome": 20,
+    "groin vault": 18,
+    "beamed": 16,
+    "hipped": 12
+   },
+   "vault_tiles_checked": 3921,
+   "holes": [],
+   "pictures": [
+    "barrel vault",
+    "cloister vault",
+    "groin vault",
+    "hipped",
+    "sail dome"
+   ]
+  },
+  {
+   "step": "autoplay",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 123,
+     "attacks": 8,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 6,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Mage": {
+     "ended_after": 40.1,
+     "still_on": false,
+     "metres": 132,
+     "attacks": 6,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Warlock": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 126,
+     "attacks": 8,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Rogue": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 140,
+     "attacks": 2,
+     "kills": 2,
+     "rooms": 3,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "MartialArtist": {
+     "ended_after": 40.0,
+     "still_on": false,
+     "metres": 136,
+     "attacks": 4,
+     "kills": 2,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    },
+    "Summoner": {
+     "ended_after": 40.2,
+     "still_on": false,
+     "metres": 115,
+     "attacks": 6,
+     "kills": 1,
+     "rooms": 2,
+     "used": 0,
+     "opened": 5,
+     "stuck": 0,
+     "deaths": 0,
+     "doing": ""
+    }
+   },
+   "takeover": true
+  },
+  {
+   "step": "stealth",
+   "ok": true,
+   "energy": 100.0,
+   "cost": 40.0,
+   "abilities": [
+    "@Dodge",
+    "@Stealth"
+   ],
+   "switch": true,
+   "q": {
+    "stealthed": true,
+    "taken": 40.0,
+    "says": "You slip into the shadows: unseen for 8 s (your first blow strikes 75% harder)",
+    "buffs": [
+     "STEALTH"
+    ]
+   },
+   "lasted": 7.8,
+   "regen_in_it": 0.03,
+   "ended_by": "time",
+   "regen_after": 1.51,
+   "monster": {
+    "came": {
+     "attacks": 1,
+     "m": 1.41
+    },
+    "attacks_in_stealth": 0,
+    "hp_lost": 0.0,
+    "aggro": false,
+    "evaded": 0,
+    "still": true
+   },
+   "trap": {
+    "name": "Pit",
+    "triggered": 0,
+    "passed": 1,
+    "hp_lost": 0.0,
+    "state": [
+     0
+    ]
+   },
+   "ambush": {
+    "Daggers": {
+     "plain": 13.0,
+     "ambush": 22.8,
+     "ambushes": 1,
+     "ended_by": "attack",
+     "stealthed": false,
+     "damage_of": 13.0
+    },
+    "Crossbow": {
+     "plain": 33.8,
+     "ambush": 59.2,
+     "ambushes": 1,
+     "ended_by": "attack",
+     "stealthed": false,
+     "damage_of": 33.8
+    }
+   },
+   "refused": {
+    "started": false,
+    "says": "Not enough dexterity energy for stealth (10 of 40)",
+    "stealthed": false
+   },
+   "speed_potion": {
+    "energy": 100.0,
+    "says": "Drank the small speed potion:  +10% speed for 30 s, your dexterity energy full"
+   },
+   "warrior": {
+    "energy": 0.0,
+    "started": false,
+    "abilities": []
+   }
+  },
+  {
+   "step": "growth",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      241.0
+     ],
+     "want_hp": 241,
+     "says": "Tier 5 opens: you grow stronger (241 hit points)",
+     "weapons": [
+      [
+       "Dagger",
+       "own",
+       14.3,
+       14.3
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Mage": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      70.0,
+      112.0
+     ],
+     "want_hp": 112,
+     "says": "Tier 5 opens: you grow stronger (112 hit points, spells +48%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       37.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       56.2
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.5,
+      2.5
+     ],
+     "after_restart": [
+      1,
+      70.0
+     ]
+    },
+    "Warlock": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      200.0
+     ],
+     "want_hp": 200,
+     "says": "Tier 5 opens: you grow stronger (200 hit points, spells +80%, your own weapons +120%)",
+     "weapons": [
+      [
+       "Sword",
+       "own",
+       22.0,
+       48.4
+      ],
+      [
+       "Fire",
+       "spell",
+       25.0,
+       45.0
+      ]
+     ],
+     "factors_ok": true,
+     "found_weapon": [
+      78.0,
+      78
+     ],
+     "regen": [
+      1.51,
+      1.5
+     ],
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "Rogue": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      180.0
+     ],
+     "want_hp": 180,
+     "says": "Tier 5 opens: you grow stronger (180 hit points, your own weapons +32%)",
+     "weapons": [
+      [
+       "Daggers",
+       "own",
+       13.0,
+       17.2
+      ],
+      [
+       "Crossbow",
+       "own",
+       33.8,
+       44.6
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "MartialArtist": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      252.0
+     ],
+     "want_hp": 252,
+     "says": "Tier 5 opens: you grow stronger (252 hit points, chi +48%, fists +48%)",
+     "weapons": [
+      [
+       "Fists",
+       "own",
+       44.0,
+       65.1
+      ],
+      [
+       "Straight Punch",
+       "spell",
+       23.0,
+       34.0
+      ],
+      [
+       "Side Kick",
+       "spell",
+       45.0,
+       66.6
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.01,
+      2.0
+     ],
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Summoner": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      85.0,
+      170.0
+     ],
+     "want_hp": 170,
+     "says": "Tier 5 opens: you grow stronger (170 hit points, spells +60%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       40.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       60.8
+      ],
+      [
+       "Summon Tier 1",
+       "spell",
+       0.0,
+       0.0
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.02,
+      2.0
+     ],
+     "after_restart": [
+      1,
+      85.0
+     ]
+    }
+   },
+   "found": {
+    "Viking Shortsword": [
+     20.0,
+     20
+    ],
+    "Sherwood Sword": [
+     20.0,
+     20
+    ],
+    "Orc Cleaver": [
+     30.0,
+     30
+    ],
+    "Toothed Bone Sword": [
+     34.0,
+     34
+    ],
+    "Arming Sword": [
+     26.0,
+     26
+    ],
+    "Longsword": [
+     29.0,
+     29
+    ],
+    "Viking Sword": [
+     29.0,
+     29
+    ],
+    "Veteran's Sword": [
+     42.0,
+     42
+    ],
+    "Templar Sword": [
+     42.0,
+     42
+    ],
+    "Plate Knight's Sword": [
+     46.0,
+     46
+    ],
+    "Paladin's Sword": [
+     46.0,
+     46
+    ],
+    "Dark Knight's Sword": [
+     63.0,
+     63
+    ],
+    "Ursag's Horn Blade": [
+     78.0,
+     78
+    ],
+    "Eastern Sabre": [
+     20.0,
+     20
+    ],
+    "Katana": [
+     30.0,
+     30
+    ],
+    "Wakizashi": [
+     43.0,
+     43
+    ],
+    "Dagger": [
+     11.0,
+     11
+    ],
+    "Leaf-Blade Knife": [
+     11.0,
+     11
+    ],
+    "Obsidian Knife": [
+     14.0,
+     14
+    ],
+    "Bone Blade": [
+     18.0,
+     18
+    ],
+    "Combat Knife": [
+     23.0,
+     23
+    ],
+    "Survival Knife": [
+     23.0,
+     23
+    ],
+    "Kukri": [
+     35.0,
+     35
+    ],
+    "Sniper's Knife": [
+     35.0,
+     35
+    ],
+    "Wrist Blade": [
+     42.0,
+     42
+    ],
+    "Longbow": [
+     20.0,
+     20
+    ],
+    "Viking Bow": [
+     26.0,
+     26
+    ],
+    "Crossbow": [
+     38.0,
+     38
+    ],
+    "Dwarf Crossbow": [
+     53.0,
+     53
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_m6all_hud_fps.png",
+  "mw_m6all_shield_kite.png",
+  "mw_m6all_torch_warrior.png",
+  "mw_m6all_torch_lit.png",
+  "mw_m6all_torch_out.png",
+  "mw_m6all_inventory_mouse.png",
+  "mw_m6all_map_tier2.png",
+  "mw_m6all_room_circle.png",
+  "mw_m6all_room_dome.png",
+  "mw_m6all_room_triangle.png",
+  "mw_m6all_room_L.png",
+  "mw_m6all_room_U.png",
+  "mw_m6all_room_octagon.png",
+  "mw_m6all_room_step_pyramid.png",
+  "mw_m6all_tier1_barracks_0.png",
+  "mw_m6all_tier1_barracks_1.png",
+  "mw_m6all_trap_rogue.png",
+  "mw_m6all_pad_tier2.png",
+  "mw_m6all_cell_prisoner_before.png",
+  "mw_m6all_cell_prisoner_out.png",
+  "mw_m6all_cell_monster.png",
+  "mw_m6all_death_pile.png",
+  "mw_m6all_outline_warrior_Pit.png",
+  "mw_m6all_outline_warrior_Cursed.png",
+  "mw_m6all_outline_rogue_Pit.png",
+  "mw_m6all_outline_rogue_Cursed.png",
+  "mw_m6all_tabs_weapons.png",
+  "mw_m6all_tabs_magic.png",
+  "mw_m6all_tabs_anvil.png",
+  "mw_m6all_slots_inventory.png",
+  "mw_m6all_slots_bar.png",
+  "mw_m6all_helmet_on.png",
+  "mw_m6all_helmet_off.png",
+  "mw_m6all_block_on.png",
+  "mw_m6all_block_off.png",
+  "mw_m6all_pickup_before.png",
+  "mw_m6all_pickup_after.png",
+  "mw_m6all_room_shrine.png",
+  "mw_m6all_room_heal.png",
+  "mw_m6all_room_speed.png",
+  "mw_m6all_room_mana.png",
+  "mw_m6all_room_gauntlet.png",
+  "mw_m6all_room_vault.png",
+  "mw_m6all_room_throne.png",
+  "mw_m6all_slash_pick.png",
+  "mw_m6all_slash_swing.png",
+  "mw_m6all_ma_knife.png",
+  "mw_m6all_ma_chi_straight.png",
+  "mw_m6all_ma_dash.png",
+  "mw_m6all_ma_armour.png",
+  "mw_m6all_harvest_piles.png",
+  "mw_m6all_summoner_soldiers.png",
+  "mw_m6all_options_page.png",
+  "mw_m6all_summon_panel.png",
+  "mw_m6all_ally_marks_map.png",
+  "mw_m6all_ma_stance.png",
+  "mw_m6all_names_bars.png",
+  "mw_m6all_ranged_Soldier.png",
+  "mw_m6all_ranged_Medic.png",
+  "mw_m6all_arena_crowd.png",
+  "mw_m6all_arena_clap.png",
+  "mw_m6all_ceiling_barrel_vault.png",
+  "mw_m6all_ceiling_cloister_vault.png",
+  "mw_m6all_ceiling_sail_dome.png",
+  "mw_m6all_ceiling_groin_vault.png",
+  "mw_m6all_ceiling_hipped.png",
+  "mw_m6all_autoplay_Warrior.png",
+  "mw_m6all_autoplay_Mage.png",
+  "mw_m6all_autoplay_Warlock.png",
+  "mw_m6all_autoplay_Rogue.png",
+  "mw_m6all_autoplay_MartialArtist.png",
+  "mw_m6all_autoplay_Summoner.png",
+  "mw_m6all_stealth_hud.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

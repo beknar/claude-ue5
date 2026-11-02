@@ -9,7 +9,8 @@
   "startgear",
   "pickups",
   "rooms",
-  "slashes"
+  "slashes",
+  "tomemana"
  ],
  "level": "random_dungeonmagic_level5",
  "steps": [
@@ -27,27 +28,27 @@
      "rings": 1,
      "ring_scale": 2.0,
      "plate_outlined": 1,
-     "red_rogue": 0.1532
+     "red_rogue": 0.1436
     },
     {
      "trap": "Cursed",
      "i": 2,
-     "red_warrior": 0.0007,
+     "red_warrior": 0.0014,
      "m": 6.0,
      "seen": 1,
      "rings_before": 0,
      "rings": 1,
      "ring_scale": 2.2,
      "plate_outlined": 1,
-     "red_rogue": 0.2072
+     "red_rogue": 0.2048
     }
    ],
    "traps": 13,
    "boxes": [
     [
-     0.397,
+     0.398,
      0.206,
-     0.537,
+     0.538,
      0.386
     ],
     [
@@ -242,7 +243,7 @@
     2560,
     2560
    ],
-   "head_diff": 9.17,
+   "head_diff": 9.26,
    "luma_on": 0.0,
    "luma_off": 0.0,
    "helmet_row": "helmet|1|Plate Armour",
@@ -255,8 +256,8 @@
    "share": 0.24,
    "refused": [],
    "hand_rest": [
-    6.1,
-    8.6
+    5.5,
+    8.4
    ],
    "plain": {
     "lost": 30.4,
@@ -292,7 +293,7 @@
    "after_restart": {
     "blocking": false,
     "hand": [
-     2.0,
+     2.1,
      7.9
     ]
    },
@@ -336,14 +337,13 @@
     "Dagger",
     "Eastern Sabre",
     "Leaf-Blade Knife",
-    "Longbow",
-    "Longsword",
+    "Painted Viking Shield",
     "Plate Knight's Sword",
     "Sherwood Sword",
     "Viking Round Shield",
     "Viking Shortsword",
-    "Village Shield (green)",
-    "Village Shield (red)"
+    "Viking Sword",
+    "Village Shield (green)"
    ],
    "drawn": 24,
    "tier_ok": true,
@@ -364,10 +364,10 @@
     ],
     "her_d": 120
    },
-   "describe": "take the arming sword",
+   "describe": "take the eastern sabre",
    "f_refused": "",
    "took": {
-    "item": "Arming Sword",
+    "item": "Eastern Sabre",
     "gained": 1,
     "taken_flag": "1",
     "drawn": "0",
@@ -378,14 +378,14 @@
    "step": "rooms",
    "ok": true,
    "kinds": {
-    "Trap gauntlet": 6,
-    "Fountain of speed": 6,
-    "Vault": 6,
-    "Arena": 6,
-    "Shrine": 6,
+    "Trap gauntlet": 5,
+    "Fountain of speed": 5,
+    "Vault": 4,
+    "Arena": 4,
+    "Shrine": 5,
     "Healing fountain": 6,
     "Fountain of mana": 6,
-    "Throne room": 4
+    "Throne room": 5
    },
    "refused": [],
    "shrine": {
@@ -403,7 +403,7 @@
     "speed_x": 1.0,
     "speed_bonus": 0.2,
     "again": "fountain dry",
-    "particles": 15
+    "particles": 16
    },
    "speed": {
     "f": "fountain",
@@ -411,7 +411,7 @@
     "speed_x": 1.083,
     "speed_bonus": 0.3,
     "again": "fountain dry",
-    "particles": 8
+    "particles": 9
    },
    "mana": {
     "f": "fountain",
@@ -449,11 +449,12 @@
     "won": 1,
     "prize": [
      [
-      "Dexterity Ring 1",
-      "Leather Strips",
-      "Patch Kit"
+      "Magic Potency Ring 2",
+      "Plate Knight's Sword",
+      "Slickstone"
      ]
     ],
+    "harvest_piles": 0,
     "opens_after": true
    },
    "gauntlet": {
@@ -470,26 +471,25 @@
     "chest_loot": [
      "Longsword",
      "Orc Warrior’s Armour",
-     "Dexterity Ring 1",
-     "Longbow"
+     "Dexterity Ring 1"
     ]
    },
    "vault": {
-    "doors": 4,
+    "doors": 6,
     "locked_f": "vault locked",
     "open_without_key": false,
     "key_chests": 1,
-    "key_room": 20,
+    "key_room": 37,
     "key_chest_f": "chest",
     "other_opened": 0,
     "has_key": 1,
     "f": "vault",
     "open_with_key": true,
     "key_after": 0,
-    "vault_chests": 18,
+    "vault_chests": 35,
     "vault_loot": [
-     "Magic Potency Ring 6",
-     "Heater Shield"
+     "HP Potency Ring 5",
+     "Crossbow"
     ],
     "tier_beyond": [
      [
@@ -501,16 +501,16 @@
     ]
    },
    "throne": {
-    "encounters": 4,
+    "encounters": 5,
     "label": "THE USURPER: ORC 03",
     "alive": 1,
-    "slain_notice": "THE USURPER IS SLAIN  -  THE BLOOD SLASH IS YOURS",
+    "slain_notice": "THE USURPER IS SLAIN  -  THE PETAL SLASH IS YOURS",
     "usurper_uses": 1,
     "slashes_given": [
-     "Blood Slash"
+     "Petal Slash"
     ],
     "slash_in_pack": [
-     "slash|Blood Slash|1"
+     "slash|Petal Slash|1"
     ]
    }
   },
@@ -535,7 +535,7 @@
     "started": true,
     "fx_max": 31,
     "bonus": 6.0,
-    "monster_lost": 22.2,
+    "monster_lost": 22.3,
     "pictured": true
    },
    "shot": {
@@ -554,7 +554,7 @@
       "burn": 1
      },
      "burning": true,
-     "dot": 10.06,
+     "dot": 10.03,
      "want_dot": 10.1,
      "ok": true
     },
@@ -582,7 +582,7 @@
       "poison": 1
      },
      "burning": true,
-     "dot": 11.93,
+     "dot": 11.94,
      "want_dot": 12.0,
      "ok": true
     },
@@ -623,7 +623,7 @@
      "procs": {
       "knockback": 1
      },
-     "moved_cm": 302,
+     "moved_cm": 305,
      "want_cm": 300.0,
      "ok": true
     },
@@ -646,7 +646,7 @@
      "hit": true,
      "bonus": 8.0,
      "want_bonus": 8.0,
-     "fx": 54,
+     "fx": 57,
      "procs": {
       "evade": 1
      },
@@ -714,7 +714,7 @@
       "tide": 1
      },
      "slow": 0.2,
-     "moved_cm": 415,
+     "moved_cm": 414,
      "ok": true
     },
     "Inferno Slash": {
@@ -798,9 +798,9 @@
       "void": 1
      },
      "closer_cm": [
-      159,
-      135,
-      0
+      158,
+      148,
+      27
      ],
      "slow": 0.25,
      "ok": true
@@ -827,15 +827,71 @@
      "want_bonus": 32.0,
      "fx": 37,
      "procs": {
-      "burn": 1,
+      "drain": 1,
       "prismatic": 1
      },
      "ok": true
     }
    }
+  },
+  {
+   "step": "tomemana",
+   "ok": true,
+   "tomes": {
+    "Null Sanctum": "Tome of Null Sanctum",
+    "Apocalypse": "Tome of Apocalypse"
+   },
+   "ring": "Magic Potency Ring 10",
+   "tome_mana": 0.0,
+   "base": 100.0,
+   "ringed": 200.0,
+   "sanctum": {
+    "knows": true,
+    "pool": 220.0,
+    "pool_before": 200.0,
+    "mana_gain": 20.0,
+    "message": "You learn Null Sanctum:  key 3.  Your mana pool grows to 220",
+    "tome_mana": 220.0,
+    "index": 2,
+    "cast": true,
+    "mana_taken": 220.0
+   },
+   "ring_off": 220.0,
+   "apocalypse": {
+    "knows": true,
+    "pool": 300.0,
+    "pool_before": 220.0,
+    "mana_gain": 80.0,
+    "message": "You learn Apocalypse:  key 4.  Your mana pool grows to 300",
+    "tome_mana": 300.0,
+    "index": 3,
+    "cast": true,
+    "mana_taken": 300.0
+   },
+   "dead": true,
+   "after_death": {
+    "revived": true,
+    "knows": [
+     true,
+     true
+    ],
+    "pool": 300.0
+   },
+   "after_restart": {
+    "knows": [
+     false,
+     false
+    ],
+    "pool": 100.0
+   },
+   "summoner": {
+    "knows": true,
+    "pool_before": 90.0,
+    "pool": 90.0
+   }
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
   "mw_l5_outline_warrior_Pit.png",
   "mw_l5_outline_warrior_Cursed.png",
@@ -863,5 +919,5 @@
   "mw_l5_slash_swing.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 2
 }

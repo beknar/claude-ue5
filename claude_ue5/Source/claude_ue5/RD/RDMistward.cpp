@@ -381,6 +381,7 @@ void ARDDungeonGenerator::CheckTierOpenings()
 		if (const AActor* Who = GetTrackedActor()) PlaySoundAt(TEXT("Env.Generate"), Who->GetActorLocation());
 		UE_LOG(LogRDMistward, Log, TEXT("RDTIER tier %d is open (%.0f%% of tier %d)"), T, TierOpenShare * 100.f, T - 1);
 		OnTierOpened(T);
+		OnTierGrowth(T);          // (mistward6: she grows)
 	}
 }
 

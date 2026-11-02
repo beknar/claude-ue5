@@ -244,6 +244,7 @@ int32 ARDDungeonGenerator::DebugOpenTiers(int32 UpTo, bool bEncounters)
 	{
 		RefreshSeals();
 		TierNotice = FString::Printf(TEXT("TIERS 2 TO %d ARE OPEN"), FMath::Min(UpTo, MaxTier)); TierNoticeTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+		OnTierGrowth(GetOpenTier());          // (mistward6: she grows)
 	}
 	return N;
 }

@@ -1,0 +1,158 @@
+// mistward_castle, the list of 2026-11-01 (docs/improvements6.txt; pipeline/unreal/880). Each rule a switch on the
+// generator ("Mistward6" category), off on the other levels:
+//   stealth       the Rogue hides for a while from a pool of dexterity energy (back slowly, like mana; a speed potion fills
+//                 it): monsters lose her and no trap goes off under her; her first blow or bolt out of it is an ambush
+//   tier growth   the heroes grow as the tiers open (hit points, spells and chi, fists: each hero her own shares), and mana
+//                 comes back as a share of her pool
+#include "RD/RDDungeonGenerator.h"
+#include "RD/RDCombat.h"
+#include "RD/RDMonster.h"
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogRDMistward6, Log, All);
+
+// (her stealth's look: the Shadow Veil's aura, kept apart from the veil's own (whose end would take it off))
+static const ERDSpellKind RD6StealthAura = (ERDSpellKind)200;
+
+// ================================================================================================ the tiers' growth
+int32 ARDDungeonGenerator::GetOpenTier() const
+{
+	int32 T = 1;
+	for (const int32 O : TiersOpened) T = FMath::Max(T, O);
+	return FMath::Clamp(T, 1, FMath::Max(MaxTier, 1));
+}
+
+float ARDDungeonGenerator::TierHealthMul() const
+{
+	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
+	return H ? 1.f + H->HealthPerTier * (GetOpenTier() - 1) : 1.f;
+}
+
+float ARDDungeonGenerator::TierSpellMul() const
+{
+	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
+	return H ? 1.f + H->SpellPowerPerTier * (GetOpenTier() - 1) : 1.f;
+}
+
+float ARDDungeonGenerator::TierOwnWeaponMul() const
+{
+	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
+	return H ? 1.f + H->OwnWeaponPowerPerTier * (GetOpenTier() - 1) : 1.f;
+}
+
+float ARDDungeonGenerator::TierPowerOf(const FRDWeaponDef& W) const
+{
+	if (!bTierGrowth) return 1.f;
+	// (a spell, a chi attack or a scroll: magic; a bolt that is a mesh is a crossbow's, a weapon; one of her hero's own
+	// weapons (no item: her fists, her starting blades and crossbow); a found one grows by its own tier (880's data))
+	if (W.bSpell && !W.BoltMesh) return TierSpellMul();
+	if (W.Item.IsNone()) return TierOwnWeaponMul();
+	return 1.f;
+}
+
+float ARDDungeonGenerator::GetManaRegen(float Max) const
+{
+	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
+	return H && H->ManaRegenShare > 0.f ? Max * H->ManaRegenShare : ManaPerSecond;
+}
+
+void ARDDungeonGenerator::OnTierGrowth(int32 Tier)
+{
+	if (!bTierGrowth || !PlayerCombat) return;
+	const float OldH = PlayerCombat->GetMaxHealth();
+	PlayerCombat->RefreshMaxima();
+	const FRDHeroDef* H = FindHero(CurrentHero);
+	TArray<FString> What;
+	if (PlayerCombat->GetMaxHealth() > OldH + 0.5f) What.Add(FString::Printf(TEXT("%.0f hit points"), PlayerCombat->GetMaxHealth()));
+	if (H && H->SpellPowerPerTier > 0.f) What.Add(FString::Printf(TEXT("%s +%.0f%%"), H->Name == TEXT("MartialArtist") ? TEXT("chi") : TEXT("spells"), (TierSpellMul() - 1.f) * 100.f));
+	if (H && H->OwnWeaponPowerPerTier > 0.f) What.Add(FString::Printf(TEXT("%s +%.0f%%"), H->Name == TEXT("MartialArtist") ? TEXT("fists") : TEXT("your own weapons"), (TierOwnWeaponMul() - 1.f) * 100.f));
+	if (What.Num() > 0) PlayerCombat->ShowMessage(FString::Printf(TEXT("Tier %d opens: you grow stronger (%s)"), Tier, *FString::Join(What, TEXT(", "))));
+	UE_LOG(LogRDMistward6, Log, TEXT("RDGROW tier %d: %s %.0f hit points (x%.2f), spells x%.2f, own weapons x%.2f"), Tier, *CurrentHero.ToString(),
+		PlayerCombat->GetMaxHealth(), TierHealthMul(), TierSpellMul(), TierOwnWeaponMul());
+}
+
+// ================================================================================================ the Rogue's stealth
+float URDCombatComponent::GetStealthCost() const
+{
+	const FRDHeroDef* H = Generator && Generator->bStealth ? Generator->FindHero(Generator->CurrentHero) : nullptr;
+	return H && H->DexEnergy > 0.f ? H->StealthCost : 0.f;
+}
+
+bool URDCombatComponent::IsStealthed() const { return GetWorld() && GetWorld()->GetTimeSeconds() < StealthUntil; }
+
+float URDCombatComponent::GetStealthLeft() const { return GetWorld() ? FMath::Max(0.f, StealthUntil - GetWorld()->GetTimeSeconds()) : 0.f; }
+
+void URDCombatComponent::SetDexEnergy(float Value) { DexEnergy = FMath::Clamp(Value, 0.f, MaxDexEnergy); }
+
+bool URDCombatComponent::StartStealth()
+{
+	const FRDHeroDef* H = Generator && Generator->bStealth && !bDead ? Generator->FindHero(Generator->CurrentHero) : nullptr;
+	if (!H || H->DexEnergy <= 0.f || MaxDexEnergy <= 0.f || !GetOwner()) return false;
+	if (IsStealthed()) { EndStealth(TEXT("ended")); return true; }        // (again while in it: out of it, no energy back)
+	const float Now = GetWorld()->GetTimeSeconds();
+	if (DexEnergy < H->StealthCost)
+	{
+		++StealthRefusals;
+		if (Now - NoManaTime > 0.6f)
+		{
+			SetMessage(FString::Printf(TEXT("Not enough dexterity energy for stealth (%.0f of %.0f)"), FMath::FloorToFloat(DexEnergy), H->StealthCost));
+			Generator->PlaySoundAt(TEXT("Player.NoMana"), GetOwner()->GetActorLocation());
+		}
+		NoManaTime = Now;
+		return false;
+	}
+	DexEnergy -= H->StealthCost;
+	StealthUntil = Now + H->StealthSeconds; bAmbushArmed = false; StealthEndReason.Reset();
+	++StealthUses;
+	// (her look: the Shadow Veil's dark aura round her while it lasts)
+	const int32 Vi = Generator->Spells.IndexOfByPredicate([](const FRDSpellDef& S) { return S.Kind == ERDSpellKind::Veil; });
+	if (Vi >= 0) SetAura(RD6StealthAura, &Generator->Spells[Vi], true);
+	Generator->PlaySoundAt(TEXT("Player.Whoosh"), GetOwner()->GetActorLocation());
+	SetMessage(FString::Printf(TEXT("You slip into the shadows: unseen for %.0f s (your first blow strikes %.0f%% harder)"), H->StealthSeconds, H->AmbushBonus * 100.f));
+	UE_LOG(LogRDMistward6, Log, TEXT("RDSTEALTH on for %.0f s: energy %.0f of %.0f left"), H->StealthSeconds, DexEnergy, MaxDexEnergy);
+	return true;
+}
+
+void URDCombatComponent::EndStealth(const FString& Why)
+{
+	const bool bWas = StealthUntil > -50.f && GetWorld() && GetWorld()->GetTimeSeconds() < StealthUntil + 0.05f;
+	StealthUntil = -100.f;
+	SetAura(RD6StealthAura, nullptr, false);
+	if (bWas)
+	{
+		StealthEndReason = Why;
+		if (Why == TEXT("time")) SetMessage(TEXT("You step out of the shadows"));
+		UE_LOG(LogRDMistward6, Log, TEXT("RDSTEALTH off (%s)"), *Why);
+	}
+}
+
+void URDCombatComponent::TickStealth(float Dt, float Now)
+{
+	if (MaxDexEnergy <= 0.f) return;
+	if (StealthUntil > -50.f && Now >= StealthUntil) EndStealth(TEXT("time"));
+	const FRDHeroDef* H = Generator ? Generator->FindHero(Generator->CurrentHero) : nullptr;
+	if (H && DexEnergy < MaxDexEnergy && !IsStealthed()) DexEnergy = FMath::Min(MaxDexEnergy, DexEnergy + H->DexPerSecond * Dt);      // (none back while in it)
+}
+
+void URDCombatComponent::ResetStealth(bool bFill)
+{
+	StealthUntil = -100.f; bAmbushArmed = false; StealthTraps.Reset();
+	SetAura(RD6StealthAura, nullptr, false);
+	const FRDHeroDef* H = Generator && Generator->bStealth ? Generator->FindHero(Generator->CurrentHero) : nullptr;
+	MaxDexEnergy = H ? H->DexEnergy : 0.f;
+	DexEnergy = bFill ? MaxDexEnergy : FMath::Min(DexEnergy, MaxDexEnergy);
+}
+
+void URDCombatComponent::NoteStealthTrap(uint32 Key)
+{
+	bool bHad = false; StealthTraps.Add(Key, &bHad);
+	if (!bHad) ++StealthTrapsPassed;
+}
+
+float URDCombatComponent::AmbushMul(int32 Index) const
+{
+	if (!bAmbushArmed || Index != AttackIndex || !Generator) return 1.f;
+	const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero);
+	return H ? 1.f + H->AmbushBonus : 1.f;
+}

@@ -1,0 +1,427 @@
+{
+ "tag": "m6sg",
+ "plan": [
+  "stealth",
+  "growth"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "stealth",
+   "ok": true,
+   "energy": 100.0,
+   "cost": 40.0,
+   "abilities": [
+    "@Dodge",
+    "@Stealth"
+   ],
+   "switch": true,
+   "q": {
+    "stealthed": true,
+    "taken": 40.0,
+    "says": "You slip into the shadows: unseen for 8 s (your first blow strikes 100% harder)",
+    "buffs": [
+     "STEALTH"
+    ]
+   },
+   "lasted": 7.78,
+   "regen_in_it": 0.03,
+   "ended_by": "time",
+   "regen_after": 1.5,
+   "monster": {
+    "came": {
+     "attacks": 1,
+     "m": 1.4
+    },
+    "attacks_in_stealth": 0,
+    "hp_lost": 0.0,
+    "aggro": false,
+    "evaded": 0,
+    "still": true
+   },
+   "trap": {
+    "name": "Pit",
+    "triggered": 0,
+    "passed": 1,
+    "hp_lost": 0.0,
+    "state": [
+     0
+    ]
+   },
+   "ambush": {
+    "Daggers": {
+     "plain": 13.0,
+     "ambush": 26.0,
+     "ambushes": 1,
+     "ended_by": "attack",
+     "stealthed": false,
+     "damage_of": 13.0
+    },
+    "Crossbow": {
+     "plain": 33.8,
+     "ambush": 67.6,
+     "ambushes": 1,
+     "ended_by": "attack",
+     "stealthed": false,
+     "damage_of": 33.8
+    }
+   },
+   "refused": {
+    "started": false,
+    "says": "Not enough dexterity energy for stealth (10 of 40)",
+    "stealthed": false
+   },
+   "speed_potion": {
+    "energy": 100.0,
+    "says": "Drank the small speed potion:  +10% speed for 30 s, your dexterity energy full"
+   },
+   "warrior": {
+    "energy": 0.0,
+    "started": false,
+    "abilities": []
+   }
+  },
+  {
+   "step": "growth",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      241.0
+     ],
+     "want_hp": 241,
+     "says": "Tier 5 opens: you grow stronger (241 hit points)",
+     "weapons": [
+      [
+       "Dagger",
+       "own",
+       14.3,
+       14.3
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Mage": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      70.0,
+      112.0
+     ],
+     "want_hp": 112,
+     "says": "Tier 5 opens: you grow stronger (112 hit points, spells +48%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       37.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       56.2
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.5,
+      2.5
+     ],
+     "after_restart": [
+      1,
+      70.0
+     ]
+    },
+    "Warlock": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      200.0
+     ],
+     "want_hp": 200,
+     "says": "Tier 5 opens: you grow stronger (200 hit points, spells +60%, your own weapons +100%)",
+     "weapons": [
+      [
+       "Sword",
+       "own",
+       22.0,
+       44.0
+      ],
+      [
+       "Fire",
+       "spell",
+       25.0,
+       40.0
+      ]
+     ],
+     "factors_ok": true,
+     "found_weapon": [
+      78.0,
+      78
+     ],
+     "regen": [
+      1.51,
+      1.5
+     ],
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "Rogue": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      180.0
+     ],
+     "want_hp": 180,
+     "says": "Tier 5 opens: you grow stronger (180 hit points, your own weapons +40%)",
+     "weapons": [
+      [
+       "Daggers",
+       "own",
+       13.0,
+       18.2
+      ],
+      [
+       "Crossbow",
+       "own",
+       33.8,
+       47.3
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "MartialArtist": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      252.0
+     ],
+     "want_hp": 252,
+     "says": "Tier 5 opens: you grow stronger (252 hit points, chi +48%, fists +48%)",
+     "weapons": [
+      [
+       "Fists",
+       "own",
+       44.0,
+       65.1
+      ],
+      [
+       "Straight Punch",
+       "spell",
+       23.0,
+       34.0
+      ],
+      [
+       "Side Kick",
+       "spell",
+       45.0,
+       66.6
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.02,
+      2.0
+     ],
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Summoner": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      85.0,
+      170.0
+     ],
+     "want_hp": 170,
+     "says": "Tier 5 opens: you grow stronger (170 hit points, spells +60%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       40.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       60.8
+      ],
+      [
+       "Summon Tier 1",
+       "spell",
+       0.0,
+       0.0
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.0,
+      2.0
+     ],
+     "after_restart": [
+      1,
+      85.0
+     ]
+    }
+   },
+   "found": {
+    "Viking Shortsword": [
+     20.0,
+     20
+    ],
+    "Sherwood Sword": [
+     20.0,
+     20
+    ],
+    "Orc Cleaver": [
+     30.0,
+     30
+    ],
+    "Toothed Bone Sword": [
+     34.0,
+     34
+    ],
+    "Arming Sword": [
+     26.0,
+     26
+    ],
+    "Longsword": [
+     29.0,
+     29
+    ],
+    "Viking Sword": [
+     29.0,
+     29
+    ],
+    "Veteran's Sword": [
+     42.0,
+     42
+    ],
+    "Templar Sword": [
+     42.0,
+     42
+    ],
+    "Plate Knight's Sword": [
+     46.0,
+     46
+    ],
+    "Paladin's Sword": [
+     46.0,
+     46
+    ],
+    "Dark Knight's Sword": [
+     63.0,
+     63
+    ],
+    "Ursag's Horn Blade": [
+     78.0,
+     78
+    ],
+    "Eastern Sabre": [
+     20.0,
+     20
+    ],
+    "Katana": [
+     30.0,
+     30
+    ],
+    "Wakizashi": [
+     43.0,
+     43
+    ],
+    "Dagger": [
+     11.0,
+     11
+    ],
+    "Leaf-Blade Knife": [
+     11.0,
+     11
+    ],
+    "Obsidian Knife": [
+     14.0,
+     14
+    ],
+    "Bone Blade": [
+     18.0,
+     18
+    ],
+    "Combat Knife": [
+     23.0,
+     23
+    ],
+    "Survival Knife": [
+     23.0,
+     23
+    ],
+    "Kukri": [
+     35.0,
+     35
+    ],
+    "Sniper's Knife": [
+     35.0,
+     35
+    ],
+    "Wrist Blade": [
+     42.0,
+     42
+    ],
+    "Longbow": [
+     20.0,
+     20
+    ],
+    "Viking Bow": [
+     26.0,
+     26
+    ],
+    "Crossbow": [
+     38.0,
+     38
+    ],
+    "Dwarf Crossbow": [
+     53.0,
+     53
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_m6sg_stealth_hud.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

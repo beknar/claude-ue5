@@ -118,6 +118,7 @@ TArray<FString> URDCombatComponent::GetBuffLines() const
 	else Add(FString::Printf(TEXT("WARD %d"), WardHits), WardUntil, true);
 	Add(FString::Printf(TEXT("IRON SKIN +%.0f%%"), SkinShare * 100.f), SkinUntil, true);
 	Add(TEXT("VEILED"), VeilUntil, true);
+	Add(TEXT("STEALTH"), StealthUntil, true);
 	Add(TEXT("MIRROR"), MirrorUntil, true);
 	Add(TEXT("UNDYING PACT"), PactUntil, true);
 	if (FVector::Dist2D(L, RuneAt) <= RuneRadius) Add(FString::Printf(TEXT("RUNE -%.0f%%"), RuneShare * 100.f), RuneUntil, true);
@@ -182,12 +183,22 @@ void URDCombatComponent::UpdateMaxima()
 {
 	if (!Generator) return;
 	const float OldH = MaxHealth, OldM = MaxMana;
-	MaxHealth = FMath::Max(1.f, Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)));
+	// (mistward6: her hit points grow with the tiers opened)
+	MaxHealth = FMath::Max(1.f, FMath::RoundToFloat(Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)) * Generator->TierHealthMul()));
 	MaxMana = FMath::Max(Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic)), GetTomeMana());
 	// (a ring put on adds its part to what she has; one taken off takes no more than it gave)
 	if (MaxHealth > OldH) Health += MaxHealth - OldH;
 	if (MaxMana > OldM) Mana += MaxMana - OldM;
 	Health = FMath::Min(Health, MaxHealth); Mana = FMath::Min(Mana, MaxMana);
+	// (mistward6: the Rogue's dexterity energy, her hero's)
+	{
+		const FRDHeroDef* H = Generator->bStealth ? Generator->FindHero(Generator->CurrentHero) : nullptr;
+		const float OldD = MaxDexEnergy;
+		MaxDexEnergy = H ? H->DexEnergy : 0.f;
+		if (MaxDexEnergy > OldD) DexEnergy += MaxDexEnergy - OldD;
+		DexEnergy = FMath::Min(DexEnergy, MaxDexEnergy);
+		if (MaxDexEnergy <= 0.f && StealthUntil > -50.f) EndStealth(TEXT("hero"));
+	}
 	UpdateManaShares();
 }
 
