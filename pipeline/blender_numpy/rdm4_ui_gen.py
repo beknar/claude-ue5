@@ -3,7 +3,7 @@
     python rdm4_ui_gen.py <ui_art.json> <out_dir> [--only a,b] [--model NAME] [--seeds N] [--tag T]
 
 Reads the elements of ui_art.json (prompt + its kind's style + the common style + backdrop, the element's
-own backdrop if it has one; size), queues `seeds` pictures of each
+own `style` in place of the two styles and its own backdrop if it has them; size), queues `seeds` pictures of each
 with FLUX (InvokeAI's own flux_model_loader -> flux_text_encoder -> flux_denoise -> flux_vae_decode graph),
 waits for them and downloads them to <out_dir>/raw/<element>_<tag>_<seed>.png, with a line per picture in
 <out_dir>/raw/manifest.json (element, model, seed, InvokeAI image name, seconds). A picture already
@@ -76,7 +76,10 @@ def graph(prompt, w, h):
 
 
 def full_prompt(e):
-    return f"{e['prompt']}, {D['styles'][e['kind']]}, {D['style']}, {e.get('backdrop', D['backdrop'])}"
+    # (an element's own `style` stands for its kind's style and the common one: a word in those that FLUX
+    # paints into the picture, as "map" painted maps on a board and a compass, can be left out for it alone)
+    style = e["style"] if "style" in e else f"{D['styles'][e['kind']]}, {D['style']}"
+    return f"{e['prompt']}, {style}, {e.get('backdrop', D['backdrop'])}"
 
 
 MAN = os.path.join(RAW, "manifest.json")

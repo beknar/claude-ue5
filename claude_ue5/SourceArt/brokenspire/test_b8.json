@@ -1,0 +1,69 @@
+{
+ "tag": "b8",
+ "plan": [
+  "daynight"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "daynight",
+   "ok": true,
+   "on": true,
+   "day_length": 1800.0,
+   "clock": {
+    "from": 8.165,
+    "to": 8.431,
+    "game_s": 20.01,
+    "hours": 0.266,
+    "day_s": 1805.2
+   },
+   "kept_by_game": true,
+   "pictures": {
+    "noon": {
+     "day": 1,
+     "hour": 12.067,
+     "sun_elev": 61.99,
+     "daylight": 1.0,
+     "sun_lux": 7.5,
+     "moon_lux": 0.0,
+     "sky": 1.6,
+     "bias": 0.6,
+     "luma": 111.75,
+     "clock": "12:04"
+    },
+    "dusk": {
+     "day": 1,
+     "hour": 18.567,
+     "sun_elev": -9.17,
+     "daylight": 0.0,
+     "sun_lux": 0.0,
+     "moon_lux": 0.965,
+     "sky": 0.128,
+     "bias": -0.6,
+     "luma": 18.94,
+     "clock": "18:34"
+    },
+    "night": {
+     "day": 1,
+     "hour": 0.067,
+     "sun_elev": -61.99,
+     "daylight": 0.0,
+     "sun_lux": 0.0,
+     "moon_lux": 1.0,
+     "sky": 0.128,
+     "bias": -0.6,
+     "luma": 21.96,
+     "clock": "00:04"
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "bs_b8_day_noon.png",
+  "bs_b8_day_dusk.png",
+  "bs_b8_day_night.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

@@ -1,0 +1,135 @@
+{
+ "tag": "m9b",
+ "plan": [
+  "basics",
+  "block"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "basics",
+   "ok": true,
+   "title": "Mistward Castle",
+   "max_tier": 5,
+   "show_fps": true,
+   "fps": 37.1,
+   "fps_box": [
+    68,
+    59,
+    319,
+    111
+   ],
+   "recipes": [
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "recipes_sorted": true,
+   "breakdowns": [
+    "Beast Shield",
+    "Dock Shield",
+    "Eastern Shield",
+    "Kite Shield",
+    "Painted Viking Shield"
+   ],
+   "breakdowns_sorted": true,
+   "plate_knight_tiers": [
+    2
+   ],
+   "themes": {
+    "1": "None",
+    "2": "Castle",
+    "3": "Dwarf",
+    "4": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ],
+    "5": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ]
+   }
+  },
+  {
+   "step": "block",
+   "ok": true,
+   "shield": "Kite Shield",
+   "share": 0.24,
+   "refused": [],
+   "hand_rest": [
+    6.1,
+    8.3
+   ],
+   "plain": {
+    "lost": 30.4,
+    "shield_lost": 9.6,
+    "share": 0.24
+   },
+   "blocking": true,
+   "hand_block": [
+    21.4,
+    39.9
+   ],
+   "blocked": {
+    "lost": 18.4,
+    "shield_lost": 108.0,
+    "share": 0.54,
+    "hits": 1
+   },
+   "swing_refused": true,
+   "after_release": {
+    "blocking": false,
+    "speed": 311.0,
+    "hand": [
+     6.2,
+     8.5
+    ]
+   },
+   "lb_blocking": true,
+   "lt_blocking": false,
+   "lt_run_switched": true,
+   "pad_list": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "LB (hold)|block with the shield",
+    "RB|strike",
+    "D-pad left / right|quick slots",
+    "Start|inventory",
+    "X|open door or container",
+    "Back|map"
+   ],
+   "speed": {
+    "normal": 311.0,
+    "blocking": 155.5,
+    "ratio": 0.5
+   },
+   "after_restart": {
+    "blocking": false,
+    "hand": [
+     4.9,
+     8.4
+    ]
+   },
+   "mage_blocking": false
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_m9b_hud_fps.png",
+  "mw_m9b_block_on.png",
+  "mw_m9b_block_off.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

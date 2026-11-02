@@ -4,7 +4,7 @@ levels). Writes into each level's generator (the C++ is RD/RDMistward2.cpp, ever
   reach with a wide pulsing rim (/Engine/BasicShapes/Plane and a material made here, every run), a red light over it
 - bInventoryTabs, bQuickSlots, bHelmetToggle: the inventory in tabs (stacks, the anvil's counts), ten quick slots, the helmet;
   bMouseUI (the inventory's pointer, Mistward's since the second list) on level 5 too: a click on a tab, a right click into a slot
-- bShieldBlock: the Warrior blocks with her shield (RMB / LT held; her run switch on the gamepad moves to the left stick
+- bShieldBlock: the Warrior blocks with her shield (RMB / LB held since 2026-11-02, LT her run switch; until then LT held and her run switch on the gamepad the left stick
   pressed); the pose held: AS_Warrior3_Box_03 at 1.6 s (measured: her left hand 24 cm before her chest, 14 cm over it)
 - bKeepStartGear: the Warrior starts with no armour, the worst weapon she can wield (the weapons table's lowest damage
   rating of tier 1: the Dagger) and the worst shield (the shield table's lowest share, then by name: the Painted Viking
@@ -202,8 +202,11 @@ for MAP in MAPS:
             h.weapons = [w]
             h.starts_with = f"{worst_w[2]} and the {str(worst_s.name).lower()}: hers for good (they never break, never drop)"
             keys.insert(min(len(keys), 4), "RMB (hold)|block with the shield")
-            pad = [("L3|switch walk / run" if k.startswith("LT|") else k) for k in pad]
-            pad.insert(min(len(pad), 4), "LT (hold)|block with the shield")
+            # (LB blocks, LT switches walk / run as for everyone: the user's of 2026-11-02 (885). Until then LT blocked and L3
+            # ran, and a rerun of this filter dropped her run line altogether)
+            pad = [k for k in pad if not k.startswith(("LB (hold)|", "LT|"))]
+            pad.insert(min(len(pad), 3), "LT|switch walk / run")
+            pad.insert(min(len(pad), 5), "LB (hold)|block with the shield")
         h.controls_keys = keys; h.controls_pad = pad
     gen.set_editor_property("heroes", heroes)
     ss = dict(gen.get_editor_property("start_shield")); ss[unreal.Name("Warrior")] = worst_s.name

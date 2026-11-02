@@ -474,7 +474,7 @@ def step_tour():
         st = str(G["gen"].get_town_tour_state()).split("|")
         ph = int(st[0]); seen.setdefault(ph, round(time.time() - t0, 1))
         if ph == 3 and G["gen"].is_town_panel_open(): panel = str(G["gen"].get_town_panel()); body = str(G["gen"].get_town_panel_text())
-        if ph == 4 and not mapped: mapped = any(str(a) == "map_papyrus" for a in G["pc"].get_hud().get_art_drawn())
+        if ph == 4 and not mapped: mapped = any(str(a) in ("map_papyrus", "mapc_parchment") for a in G["pc"].get_hud().get_art_drawn())
         if ph == 5 and run_m is None: run_m = float(st[3])
         if ph == -1: res["ended"] = st[4]; break
     G["travel_until"] = time.time() + 60
@@ -551,6 +551,7 @@ def step_map():
     g.set_map_open(True); yield from rwait(0.5)
     shot("papyrus_map"); yield from rwait(1.5)
     hud = G["pc"].get_hud()
+    drawn_open = [str(a) for a in hud.get_art_drawn()]        # (read while the map is open: closed, the HUD draws others)
     labels = [str(l) for l in hud.get_town_labels()]
     res["labels"] = labels
     g.set_map_open(False); yield from rwait(0.3)
@@ -558,8 +559,15 @@ def step_map():
     need = ("SMITHY", "TRADER", "HEALER", "TEMPLE", "STOREHOUSE", "MISTWARD CASTLE", "GATE", "TELEPORT CIRCLE", "QUEST BOARD", "TAVERN", "CHAPEL", "GRAVEYARD", "BARRACKS", "MILL", "WELL", "MARKET", "TOWN SQUARE")
     res["missing"] = [n for n in need if not any(x.startswith(n) for x in names)]
     res["art"] = sorted(set(l.split("|")[0] for l in labels))
-    res["art_drawn"] = [str(a) for a in hud.get_art_drawn() if str(a).startswith("mapicon_") or str(a) == "map_papyrus"]
-    step_result("map", not res["missing"], **res)
+    res["art_drawn"] = [a for a in drawn_open if a.startswith(("mapicon_", "mapc_")) or a == "map_papyrus"]
+    # (the colour map, the Fairhill reference's look (2026-11-02): its ground, roads, wall, compass, the buildings' and the
+    # trees' pictures drawn, whenever the level has them)
+    colour = [a for a in res["art_drawn"] if a.startswith("mapc_")]
+    has_colour = any(str(k).startswith("mapc_grass") for k in g.get_editor_property("ui_art").keys())
+    res["colour"] = bool(colour); res["colour_art_in_level"] = has_colour
+    want = ("mapc_parchment", "mapc_grass", "mapc_cobble", "mapc_dirt", "mapc_wallstone", "mapc_compass", "mapc_castle", "mapc_tree1", "mapc_tower")
+    res["colour_missing"] = [a for a in want if a not in colour] if has_colour else []
+    step_result("map", not res["missing"] and not res["colour_missing"], **res)
 
 # ------------------------------------------------------------------------------------------------ the townspeople
 def step_folk():
@@ -633,8 +641,190 @@ def step_pictures():
     quiet(False)
     step_result("pictures", True, shots=R.get("shots", []))
 
+# ------------------------------------------------------------------------------------------------ the castle's outside (2026-11-02)
+SHOTS = r"E:\code\claude-ue5\claude_ue5\Saved\Screenshots\WindowsEditor"
+def png_luma(path, box=(0.0, 0.0, 1.0, 1.0)):
+    """the mean brightness (0-255, Rec. 709) of a part of a PNG, read with zlib (868's: the editor's Python has no image library)"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos < len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
+    tot = 0.0; n = 0
+    for y in range(h):
+        f = raw[y * (stride + 1)]; line = bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        if f == 1:
+            for i in range(bpp, stride): line[i] = (line[i] + line[i - bpp]) & 255
+        elif f == 2:
+            for i in range(stride): line[i] = (line[i] + prev[i]) & 255
+        elif f == 3:
+            for i in range(stride): line[i] = (line[i] + (((line[i - bpp] if i >= bpp else 0) + prev[i]) >> 1)) & 255
+        elif f == 4:
+            for i in range(stride):
+                a = line[i - bpp] if i >= bpp else 0; b = prev[i]; c_ = prev[i - bpp] if i >= bpp else 0
+                p = a + b - c_; pa, pb, pc = abs(p - a), abs(p - b), abs(p - c_)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c_)) & 255
+        if y0 <= y < y1:
+            for x in range(x0, x1, 2):
+                i = x * bpp; tot += 0.2126 * line[i] + 0.7152 * line[i + 1] + 0.0722 * line[i + 2]; n += 1
+        prev = line
+    return round(tot / max(n, 1), 2)
+def shot_luma(name, box=(0.0, 0.0, 1.0, 0.85)):
+    """a small picture of the game now and its brightness (none: the picture did not come)"""
+    p = os.path.join(SHOTS, f"bs_{TAG}_{name}.png")
+    if os.path.exists(p): os.remove(p)
+    shot(name, "640x360"); t0 = time.time()
+    while time.time() - t0 < 8:
+        yield from rwait(0.3)
+        if os.path.exists(p) and os.path.getsize(p) > 1000:
+            yield from rwait(0.3)
+            try: return png_luma(p, box)
+            except Exception: continue
+    return None
+def castle_shape():
+    d = {"towers": []}
+    for l in section().get_castle_shape_lines():
+        p = str(l).split("|")
+        if p[0] == "tower": d["towers"].append((V(float(p[1]), float(p[2]), 0), p[3] == "1"))
+        elif p[0] in ("stairdoor", "walkdoor", "stairmid"): d[p[0]] = V(float(p[1]), float(p[2]), float(p[3]))
+        elif p[0] == "walk": d["walk"] = float(p[1])
+    return d
+def ism_instances(mesh_has):
+    """the section's instances of meshes whose name has mesh_has (world places)"""
+    out = []
+    for c in section().get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m = c.get_editor_property("static_mesh")
+        if not m or mesh_has not in m.get_name(): continue
+        for i in range(c.get_instance_count()):
+            t = c.get_instance_transform(i, True)
+            if isinstance(t, tuple): t = t[-1]
+            out.append(t.translation)
+    return out
+def step_castlewalls():
+    """the castle's outside: no blind arch (the dungeon's wall) outside its inner walls' line and no arched doorway piece in the
+    town wall; Castle Forge's walls round it (arrow slits, windows), its battlements, four round towers; the wall walk walked on
+    over the whole roof (traces); she walks in at the stair turret's door, up the spiral stair and out of its top door onto the
+    wall walk (her own movement, steered along the stair); pictures"""
+    g = G["gen"]; res = {}; quiet(True)
+    d = castle_shape(); T = d["towers"]
+    res["towers"] = len(T); res["stair_towers"] = sum(1 for t in T if t[1]); res["walk_z"] = d.get("walk")
+    xs = [t[0].x for t in T]; ys = [t[0].y for t in T]
+    x0, x1, y0, y1 = min(xs) + 200, max(xs) - 200, min(ys) + 200, max(ys) - 200        # (the castle's rectangle: the towers stand 2 m out)
+    arch = ism_instances("SM_ArchWall_Blind")
+    res["blind_arches"] = len(arch)
+    res["blind_arches_outside"] = sum(1 for a in arch if a.x < x0 - 60 or a.x > x1 + 60 or a.y < y0 - 60 or a.y > y1 + 60)
+    res["arched_door_pieces"] = len(ism_instances("SM_Castle_Stone_Wall_02a_NN"))
+    forge = {n: len(ism_instances(n)) for n in ("SM_Castle_Stone_Wall_01a", "SM_Castle_Stone_Wall_02h", "SM_Castle_Stone_Wall_02f", "SM_Castle_Stone_Wall_02g", "SM_Castle_Stone_Wall_02d",
+                                                "SM_Castle_Stone_Parapet_01a", "SM_Castle_Tower_Wall_02", "SM_Tower_Roof_02a", "SM_Stone_Stairs_01a")}
+    res["pieces"] = forge
+    # (nothing from the rooms stands through the walk: the hall's columns did, 3 m)
+    poke = {}
+    walk = d.get("walk") or 661.0
+    for comp in section().get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m = comp.get_editor_property("static_mesh")
+        if not m: continue
+        bz = m.get_bounding_box().max.z
+        for k in range(comp.get_instance_count()):
+            t = comp.get_instance_transform(k, True)
+            if isinstance(t, tuple): t = t[-1]
+            p = t.translation
+            if x0 + 80 < p.x < x1 - 80 and y0 + 80 < p.y < y1 - 80 and p.z < walk - 70 and p.z + bz * t.scale3d.z > walk + 15:
+                poke[m.get_name()] = poke.get(m.get_name(), 0) + 1
+    res["through_the_walk"] = poke
+    # (the walk: traces down over the roof, a metre in from its edges)
+    w = G["w"]; hits = []; miss = 0
+    for ix in range(9):
+        for iy in range(9):
+            x = x0 + 100 + (x1 - x0 - 200) * ix / 8.0; y = y0 + 100 + (y1 - y0 - 200) * iy / 8.0
+            h = unreal.SystemLibrary.line_trace_single(w, V(x, y, 3000), V(x, y, 0), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            h = h.to_tuple() if h else None
+            if h and h[0]: hits.append(h[4].z)
+            else: miss += 1
+    res["walk_traces"] = {"n": len(hits), "miss": miss, "min": round(min(hits), 1) if hits else None, "max": round(max(hits), 1) if hits else None}
+    # (her climb: from outside the foot's door, through it, round the spiral (r 1.2 m, the steps' middle) to the landing and out of
+    # the top door onto the walk; she moves by her own movement input toward each point in turn)
+    C = d["stairmid"]; sd = d["stairdoor"]; wd = d["walkdoor"]
+    a_door = math.degrees(math.atan2(sd.y - C.y, sd.x - C.x)); yaw0 = a_door - 315.0     # (the stair door is at 315 in the castle's frame)
+    def at(ang, r, z=0.0): a = math.radians(yaw0 + ang); return V(C.x + r * math.cos(a), C.y + r * math.sin(a), z)
+    out_dir = V(sd.x - C.x, sd.y - C.y, 0); n_ = math.hypot(out_dir.x, out_dir.y); out_dir = V(out_dir.x / n_, out_dir.y / n_, 0)
+    start = V(sd.x + out_dir.x * 150, sd.y + out_dir.y * 150, 0)
+    pts = [at(315, 200), at(315, 120)] + [at(305 - k * 15, 120) for k in range(0, 55)] + [at(225, 200), at(225, 300), V(wd.x + (x0 + x1) * 0.0, wd.y, 0)]
+    centre = V((x0 + x1) * 0.5, (y0 + y1) * 0.5, 0)
+    pts.append(V(wd.x * 0.7 + centre.x * 0.3, wd.y * 0.7 + centre.y * 0.3, 0))
+    put(start, yaw=math.degrees(math.atan2(-out_dir.y, -out_dir.x))); yield from wait(0.6)
+    i = 0; t0 = now(); last_i, last_t = 0, now(); zmax = -1e9; track = []
+    while i < len(pts) and now() - t0 < 90.0:
+        p = G["pawn"].get_actor_location(); zmax = max(zmax, p.z)
+        while i < len(pts) and math.hypot(pts[i].x - p.x, pts[i].y - p.y) < 45.0: i += 1
+        if i >= len(pts): break
+        if i != last_i: last_i, last_t = i, now()
+        if now() - last_t > 8.0: break
+        dv = V(pts[i].x - p.x, pts[i].y - p.y, 0); n_ = math.hypot(dv.x, dv.y) or 1.0
+        G["pawn"].add_movement_input(V(dv.x / n_, dv.y / n_, 0), 1.0, False)
+        if int((now() - t0) * 2) > len(track): track.append([round(p.x), round(p.y), round(p.z)])
+        yield
+    yield from wait(0.8)
+    p = G["pawn"].get_actor_location()
+    res["climb"] = {"points": len(pts), "reached": i, "seconds": round(now() - t0, 1), "z_max": round(zmax, 1), "end": [round(p.x), round(p.y), round(p.z)],
+                    "on_walk": p.z > (d.get("walk") or 661) + 40 and x0 < p.x < x1 and y0 < p.y < y1, "track": track[::4]}
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=math.degrees(math.atan2(centre.y - p.y, centre.x - p.x)))); yield from wait(0.8)
+    shot("castle_walk"); yield from rwait(1.5)
+    # (from the forecourt: the castle's front, its towers and battlements)
+    b = [x for x in blds() if x["kind"] == "castle"][0]
+    f = door_front(b, 2200.0); f = V(f.x + out_dir.x * 600, f.y + out_dir.y * 600, 0)
+    put(f, yaw=math.degrees(math.atan2(b["c"].y - f.y, b["c"].x - f.x))); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=math.degrees(math.atan2(b["c"].y - f.y, b["c"].x - f.x))))
+    yield from wait(1.5); shot("castle_front"); yield from rwait(1.5)
+    put(V(sd.x + out_dir.x * 700, sd.y + out_dir.y * 700, 0), yaw=math.degrees(math.atan2(-out_dir.y, -out_dir.x))); yield from wait(1.2); shot("castle_stair_tower"); yield from rwait(1.5)
+    quiet(False)
+    wt = res["walk_traces"]
+    ok = (res["towers"] == 4 and res["stair_towers"] == 1 and res["blind_arches_outside"] == 0 and res["arched_door_pieces"] == 0 and not poke
+          and forge["SM_Castle_Stone_Wall_02h"] > 10 and forge["SM_Castle_Stone_Parapet_01a"] > 40 and forge["SM_Castle_Tower_Wall_02"] >= 64 and forge["SM_Stone_Stairs_01a"] >= 9
+          and wt["miss"] == 0 and wt["min"] is not None and abs(wt["min"] - res["walk_z"]) < 25 and abs(wt["max"] - res["walk_z"]) < 25
+          and res["climb"]["on_walk"])
+    step_result("castlewalls", ok, **res)
+
+# ------------------------------------------------------------------------------------------------ day and night (2026-11-02)
+def day_state():
+    p = str(G["gen"].get_day_night_state()).split("|")
+    return {"day": int(p[0]), "hour": float(p[1]), "sun_elev": float(p[2]), "daylight": float(p[3]), "sun_lux": float(p[4]), "moon_lux": float(p[5]), "sky": float(p[6]), "bias": float(p[7])}
+def step_daynight():
+    """the town's day: 24 hours in DayLengthSeconds (1800) of play, measured on the clock over 20 s of play; the sun high at
+    noon, setting at 18, down at midnight with the moon up; pictures from the square at noon, at 18:30 and at midnight (the
+    noon one brighter than the night one), the game instance keeping the hour; back to the hour it was"""
+    g = G["gen"]; res = {}; quiet(True)
+    res["on"] = g.get_editor_property("day_night"); res["day_length"] = g.get_editor_property("day_length_seconds")
+    # (from the castle's wall walk over the town: open sky on every seed; from the square a stall's canopy or a house filled the
+    # picture on one seed)
+    sq = place("square"); d = castle_shape(); T = d["towers"]
+    cc = V(sum(t[0].x for t in T) / 4, sum(t[0].y for t in T) / 4, 0)
+    yw = math.degrees(math.atan2(sq.y - cc.y, sq.x - cc.x))
+    put(V(cc.x + (sq.x - cc.x) * 0.0, cc.y, 0), yaw=yw, z=d.get("walk") or 661.0)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=yw)); yield from wait(0.8)
+    h_was = g.get_town_hour()
+    s0 = day_state(); t0 = now(); yield from wait(20.0); s1 = day_state(); dt = now() - t0
+    gain = (s1["hour"] - s0["hour"]) % 24.0
+    res["clock"] = {"from": s0["hour"], "to": s1["hour"], "game_s": round(dt, 2), "hours": round(gain, 4), "day_s": round(dt * 24.0 / max(gain, 1e-6), 1)}
+    res["kept_by_game"] = abs(G["gi"].get_editor_property("town_hour") - g.get_town_hour()) < 0.01
+    pics = {}
+    for nm, h in (("noon", 12.0), ("dusk", 18.5), ("night", 0.0)):
+        g.set_town_hour(h); yield from wait(5.0)          # (the exposure's adaptation)
+        st = day_state(); lum = yield from shot_luma(f"day_{nm}")
+        pics[nm] = {**st, "luma": lum, "clock": str(g.get_town_clock())}
+    res["pictures"] = pics
+    g.set_town_hour(h_was); quiet(False)
+    n, d_, ni = pics["noon"], pics["dusk"], pics["night"]
+    ok = (res["on"] and abs(res["clock"]["day_s"] - res["day_length"]) < res["day_length"] * 0.05 and res["kept_by_game"]
+          and n["sun_elev"] > 55 and n["daylight"] > 0.99 and n["sun_lux"] > 1.0
+          and -10 < d_["sun_elev"] < 0 and ni["sun_elev"] < -40 and ni["sun_lux"] < 0.01 and ni["moon_lux"] > 0.1 and ni["daylight"] < 0.01
+          and n["luma"] is not None and ni["luma"] is not None and n["luma"] > ni["luma"] * 1.8)
+    step_result("daynight", ok, **res)
+
 STEPS = {"town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
-         "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip}
+         "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip,
+         "castlewalls": step_castlewalls, "daynight": step_daynight}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

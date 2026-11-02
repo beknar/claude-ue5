@@ -1,4 +1,4 @@
-"""mistward_castle for a packaged game: every material its generator's pieces are drawn with gets the InstancedStaticMeshes
+"""mistward_castle and brokenspire for a packaged game: every material their generators' pieces are drawn with gets the InstancedStaticMeshes
 usage. The sections draw every piece through instanced meshes (ARDSection's HISMs). The editor adds a missing usage flag
 while it plays, so play in the editor looked right; a packaged game has no shaders for it and draws the default material
 (the packaged game's log: "Material ... missing usage flag InstancedStaticMeshes! Default Material will be used in game";
@@ -26,6 +26,10 @@ def want(b, prop): need.setdefault(b.get_path_name(), (b, set()))[1].add(prop)
 open_map(MAP)
 gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
 meshes = {p.mesh for p in gen.get_editor_property("pieces").values() if p.mesh}
+# (Brokenspire's pieces too (2026-11-02: the castle's new walls, towers and stair; the town's houses): its generator's own table)
+open_map("/Game/RandomDungeon/Maps/brokenspire")
+gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+meshes |= {p.mesh for p in gen.get_editor_property("pieces").values() if p.mesh}
 for m in meshes:
     for b in bases_of(m): want(b, "used_with_instanced_static_meshes")
 # the menu: its placed meshes; Nanite ones need the Nanite usage

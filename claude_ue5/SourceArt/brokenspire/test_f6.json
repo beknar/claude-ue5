@@ -1,0 +1,98 @@
+{
+ "tag": "f6",
+ "plan": [
+  "folk"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "folk",
+   "ok": true,
+   "fps": {
+    "mean": 30.7,
+    "min": 27.1
+   },
+   "walked": {
+    "Little Wren": 4,
+    "Tobin": 1,
+    "Pip": 2,
+    "Simple Tam": 2,
+    "a militiaman": 1,
+    "a militiawoman": 1
+   },
+   "militia": [
+    {
+     "at": [
+      -7560,
+      -1638
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      12
+     ]
+    },
+    {
+     "at": [
+      -20550,
+      20887
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      -4350,
+      -22749
+     ],
+     "paths": [
+      6,
+      6,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      955,
+      22362
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      13466,
+      -21450
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      8
+     ]
+    }
+   ],
+   "bark": "Old Pell|The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
+   "names": [
+    "Aldric Venn|!",
+    "Pip|"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "bs_f6_names.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

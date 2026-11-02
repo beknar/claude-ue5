@@ -538,7 +538,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bQuickSlots = false;
 	/** H (or the inventory's armour tab) shows or hides the worn set's helmet: the sections of its mesh her head bone moves */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bHelmetToggle = false;
-	/** a hero of BlockHeroes holds the right mouse button or LT to block with the shield in her hand: BlockShare more of a blow
+	/** a hero of BlockHeroes holds the right mouse button or LB to block with the shield in her hand: BlockShare more of a blow
 	 *  taken, BlockSlow of her speed lost, the shield worn BlockWear times as fast */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") bool bShieldBlock = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TArray<FName> BlockHeroes;
@@ -932,6 +932,40 @@ public:
 	TArray<FTownLine> TownLines;
 	FString TownTitle, TownSub, TownBody, TownNote;
 	float TownNoteTime = -100.f;
+
+	// ---- Brokenspire's day and night (RDTownDay.cpp; the user's of 2026-11-02): a full day in DayLengthSeconds of play in the
+	// town; the sun (the level's atmosphere sun) and a moon made in play cross the sky, the sky light, the fog's light and the
+	// exposure follow the daylight
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bDayNight = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float DayLengthSeconds = 1800.f;
+	/** a new game's first hour in the town (-RDTownHour=<h> another, for a reel) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownStartHour = 8.f;
+	/** the sun's height at noon (degrees) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float DayMaxSunElevation = 62.f;
+	/** the moon's light (lux), the sky light's share at night, the exposure's bias added at night (stops) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float MoonLux = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float NightSkyShare = 0.08f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float NightExposureBias = -1.2f;
+	/** the town's hour (0-24) and day; set it (tests, reels) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") float GetTownHour() const { return TownHour; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetTownDay() const { return TownDay; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void SetTownHour(float Hour);
+	/** "HH:MM" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetTownClock() const;
+	/** "<day>|<hour>|<sun elevation>|<daylight 0-1>|<sun lux>|<moon lux>|<sky light>|<exposure bias>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetDayNightState() const;
+	float TownHour = 8.f, DayLight = 1.f;
+	int32 TownDay = 1;
+	void BeginDayNight();
+	void TickDayNight(float Dt);
+	void ApplyDayNight();
+	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DaySun;
+	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DayMoon;
+	UPROPERTY(Transient) TObjectPtr<class USkyLightComponent> DaySky;
+	UPROPERTY(Transient) TObjectPtr<class UExponentialHeightFogComponent> DayFog;
+	UPROPERTY(Transient) TObjectPtr<class APostProcessVolume> DayPost;
+	float DaySunLux = 7.5f, DaySkyLight = 1.f, DayBias = 0.f;
+	FLinearColor DaySunColor = FLinearColor::White, DayFogLight = FLinearColor::White;
 
 	// ---- Brokenspire's runtime (RDTownGame.cpp)
 	void BeginTownPlay();

@@ -474,7 +474,14 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	// (level 5: where the anvils stand, in play also for the saved start section, whose furniture is not built again)
 	if (Generator && Name == Generator->AnvilPiece) AnvilPoints.Add(T.GetLocation());
 	if (!bBuildStatic) return true;
-	const FTransform W = P->Adjust * T;
+	FTransform W = P->Adjust * T;
+	// (Brokenspire: a piece taller than the room it stands in (the dungeon's columns, 9.6 m) ends under its ceiling: the town
+	// castle's roof is a walked wall walk since 2026-11-02, and the columns stood through it)
+	if (Generator && Generator->bTown && FurnRoom >= 0 && P->Size.Z > Generator->RoomHeight + 20.f && T.GetLocation().Z - GetActorLocation().Z < 30.f && P->Mesh)
+	{
+		const float Over = (float)P->Size.Z * T.GetScale3D().Z;
+		if (Over > Generator->RoomHeight) W.SetScale3D(W.GetScale3D() * FVector(1.f, 1.f, Generator->RoomHeight / Over));
+	}
 	if (P->ActorClass)
 	{
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
