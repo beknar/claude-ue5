@@ -22,7 +22,10 @@ Steps (plan, comma separated):
             Mistgate: Mistward Castle opens with her things, her purse and her armour on; its Escape menu offers the way back
             to Brokenspire, which opens the town (the same town: its buildings where they were) with her before the castle's door,
             her things still hers
-  map       M opens the papyrus map: the trades' pictures and what they do written under them, the castle's, the gate's, the
+  trip      a trip and back (after castle: it starts in the town): in the castle tier 2 opened (no boss set) and she falls
+            there (her pile); back in the town the game keeps the pile; in the castle again it lies by the arch in the great
+            hall, and tier 2's boss is set again once a room of tier 1 is seen
+  map      M opens the papyrus map: the trades' pictures and what they do written under them, the castle's, the gate's, the
             square's; pictures of the map and of the minimap
   folk      the townspeople: those who wander walked within 40 s; F at one without a quest: a line of theirs (their bark);
             the names over the people near her, the elder's "!" while he has a quest for her
@@ -37,7 +40,7 @@ OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\brokenspire"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castle"
+DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castle,trip"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 
@@ -435,6 +438,68 @@ def step_castle():
         and res["back_gold"] == before["gold"] and res["back_armour"] == before["armour"] and res["back_lines_same"] and res["same_town"] and res.get("armour") and res["castle_armour"] == res["armour"]
     step_result("castle", ok, **res)
 
+# ------------------------------------------------------------------------------------------------ a trip and back (the PR review's finds)
+def travel(level, start):
+    # (start() begins the trip; waits for the other level's generator and her combat component)
+    G["travel_until"] = time.time() + 60
+    start()
+    t0 = time.time()
+    while time.time() - t0 < 40:
+        yield
+        w = UES.get_game_world()
+        if w is not None and level in w.get_path_name():
+            refresh()
+            if G.get("gen") and cb(): break
+    refresh(); yield from wait(2.0)
+def via_menu():
+    g = G["gen"]; g.set_menu_open(True)
+    lines = [str(l) for l in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(lines) if "Return to" in l))
+def step_trip():
+    # she opens tier 2 in the castle (no boss set: the debug shortcut without encounters) and falls there; back in the town
+    # her pile is kept by the game; in the castle again it lies by the arch and tier 2's boss is set once a room is seen
+    res = {}
+    mg = place("mistgate")
+    yield from travel("mistward_castle", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]; c = cb(); quiet(True)
+    res["castle"] = G["w"].get_path_name().split(".")[-1]
+    res["opened"] = g.debug_open_tiers(2, False)
+    give = ["Small Healing Potion", "Iron Ingot"]
+    for n in give: c.add_item(n, 1)
+    yield from wait(0.3)
+    c.apply_damage(c.get_health() / max(1.0 - c.get_shield_share(), 0.1) + 5.0, None); yield from wait(1.5)
+    piles = [p for p in g.loot_piles if p and p.get_editor_property("hers")]
+    res["piles_at_death"] = len(piles); res["pile_things"] = sorted(str(x) for p in piles for x in p.things)
+    t0 = time.time()
+    while c.is_dead() and time.time() - t0 < 25: yield
+    yield from wait(1.0)
+    res["revived"] = not c.is_dead()
+    quiet(False)
+    yield from travel("brokenspire", via_menu)
+    res["town"] = G["w"].get_path_name().split(".")[-1]
+    hp = list(G["gi"].get_editor_property("her_piles"))
+    res["kept_in_game"] = [{"level": str(p.hero), "things": sorted(str(x) for x in p.things)} for p in hp]
+    mg = place("mistgate")
+    yield from travel("mistward_castle", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]; quiet(True)
+    res["castle_again"] = G["w"].get_path_name().split(".")[-1]
+    res["tier2_open"] = g.is_tier_open(2)
+    ctr = g.get_start_room_center()
+    piles = [p for p in g.loot_piles if p and p.get_editor_property("hers")]
+    res["piles_again"] = [{"things": sorted(str(x) for x in p.things), "from_hall_middle_m": round(dist2(p.get_actor_location(), ctr) / 100, 1)} for p in piles]
+    res["left_in_game"] = len(list(G["gi"].get_editor_property("her_piles")))
+    res["boss_before_seen"] = [l for l in (str(x) for x in g.get_encounter_lines()) if l.startswith("boss|")]
+    # (a room of tier 1 seen: the start set's rooms all discovered)
+    g.debug_clear_section(unreal.IntPoint(0, 0), 0, ctr); yield from wait(2.5)
+    res["boss_after_seen"] = [l for l in (str(x) for x in g.get_encounter_lines()) if l.startswith("boss|")]
+    quiet(False)
+    want = sorted(res["pile_things"])
+    ok = res["castle"] == "mistward_castle" and res["piles_at_death"] >= 1 and res["revived"] and res["town"] == "brokenspire" \
+        and any(p["level"] == "castle" and p["things"] == want for p in res["kept_in_game"]) and res["castle_again"] == "mistward_castle" and res["tier2_open"] \
+        and any(p["things"] == want and p["from_hall_middle_m"] < 15 for p in res["piles_again"]) and res["left_in_game"] == 0 \
+        and not res["boss_before_seen"] and any(l.split("|")[6] == "2" for l in res["boss_after_seen"])
+    step_result("trip", ok, **res)
+
 # ------------------------------------------------------------------------------------------------ the maps
 def step_map():
     g = G["gen"]; res = {}
@@ -526,7 +591,7 @@ def step_pictures():
     step_result("pictures", True, shots=R.get("shots", []))
 
 STEPS = {"town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
-         "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures}
+         "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "trip": step_trip}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

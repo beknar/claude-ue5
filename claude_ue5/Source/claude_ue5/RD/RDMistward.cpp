@@ -455,13 +455,13 @@ ARDMonster* ARDDungeonGenerator::SpawnMonsterNamed(FName Kind, FVector At, int32
 	return SpawnMonsterKind(K, At, Tier, HealthMul, DamageMul, ScaleMul);
 }
 
-void ARDDungeonGenerator::PlaceBoss(int32 Tier)
+bool ARDDungeonGenerator::PlaceBoss(int32 Tier)
 {
 	ARDSection* S = nullptr; int32 Room = -1;
-	if (!PickExploredRoom(Tier - 1, 1, S, Room)) { UE_LOG(LogRDMistward, Warning, TEXT("RDBOSS tier %d: no explored room of tier %d to set it in"), Tier, Tier - 1); return; }
+	if (!PickExploredRoom(Tier - 1, 1, S, Room)) { UE_LOG(LogRDMistward, Warning, TEXT("RDBOSS tier %d: no explored room of tier %d to set it in"), Tier, Tier - 1); return false; }
 	FEncounter E; E.Tier = Tier; E.bBoss = true; E.Section = S->Coord; E.Room = Room; E.At = S->GetRoomCenter(Room);
 	TArray<int32> Kinds; MonsterKindsFor(FIntPoint(Tier - 1, 0), Kinds);
-	if (Kinds.Num() == 0) return;
+	if (Kinds.Num() == 0) return true;
 	FRandomStream R((int32)HashCombine((uint32)SessionSeed ^ 0xB055u, GetTypeHash(Tier)));
 	// (the boss: the strongest kind of the tier; its band: 3 to 6 of the tier's)
 	int32 Boss = Kinds[0];
@@ -469,7 +469,7 @@ void ARDDungeonGenerator::PlaceBoss(int32 Tier)
 	const int32 Band = R.RandRange(BossMinions.X, BossMinions.Y);
 	TArray<FVector> Free = S->GetRoomFreeTiles(Room);
 	Free.Sort([&E](const FVector& A, const FVector& B) { return FVector::DistSquared(A, E.At) < FVector::DistSquared(B, E.At); });
-	if (Free.Num() == 0) return;
+	if (Free.Num() == 0) return true;
 	E.Kinds.Add(Boss); E.Spots.Add(Free[0]);
 	for (int32 I = 0; I < Band && I + 1 < Free.Num(); ++I) { E.Kinds.Add(Kinds[R.RandRange(0, Kinds.Num() - 1)]); E.Spots.Add(Free[FMath::Min(Free.Num() - 1, 1 + I * 2)]); }
 	E.Dead.Init(false, E.Kinds.Num());
@@ -481,9 +481,10 @@ void ARDDungeonGenerator::PlaceBoss(int32 Tier)
 	if (const FRDSectionMap* M = MapData.Find(S->Coord); M && M->Rects.IsValidIndex(Room)) Where = TEXT("THE ") + KindName(M->Rects[Room].Kind).ToUpper();
 	TierNotice = FString::Printf(TEXT("TIER %d IS OPEN  -  A BOSS WAITS IN %s (SEE YOUR MAP)"), Tier, *Where);
 	UE_LOG(LogRDMistward, Log, TEXT("RDBOSS tier %d: %s and %d more in room %d of (%d,%d)"), Tier, *Monsters[Boss].Name.ToString(), E.Kinds.Num() - 1, Room, S->Coord.X, S->Coord.Y);
+	return true;
 }
 
-void ARDDungeonGenerator::PlaceRingGuard(int32 Tier)
+bool ARDDungeonGenerator::PlaceRingGuard(int32 Tier)
 {
 	// (the rings of the tier before: 2(T-1)-1 and 2(T-1); the Magic Potency Ring, as the user's list names it ("the magic
 	// potency ring 1 or 2"), for every hero. Until 2026-10-27 it was her kind of ring (hit points for the Warrior, dexterity
@@ -493,12 +494,12 @@ void ARDDungeonGenerator::PlaceRingGuard(int32 Tier)
 	const int32 A = 2 * (Tier - 1) - 1, B = 2 * (Tier - 1);
 	const FName RA(*FString::Printf(TEXT("%s %d"), Base, A)), RB(*FString::Printf(TEXT("%s %d"), Base, B));
 	const URDCombatComponent* Pc = GetPlayerCombat();
-	if (!Pc || FindItem(RA) < 0) return;
-	if (Pc->GetItemCount(RA) > 0 || Pc->GetItemCount(RB) > 0 || Pc->GetWornRing(Kind) == RA || Pc->GetWornRing(Kind) == RB) return;
+	if (!Pc || FindItem(RA) < 0) return true;
+	if (Pc->GetItemCount(RA) > 0 || Pc->GetItemCount(RB) > 0 || Pc->GetWornRing(Kind) == RA || Pc->GetWornRing(Kind) == RB) return true;
 	ARDSection* S = nullptr; int32 Room = -1;
-	if (!PickExploredRoom(Tier - 1, 2, S, Room)) return;
+	if (!PickExploredRoom(Tier - 1, 2, S, Room)) return false;
 	TArray<int32> Kinds; MonsterKindsFor(FIntPoint(Tier - 1, 0), Kinds);
-	if (Kinds.Num() == 0) return;                // (no guards to set: no ring either)
+	if (Kinds.Num() == 0) return true;                // (no guards to set: no ring either)
 	// (in a container of the room she has not opened; or a chest of it at all; else none: the ring lies on the guards' spot)
 	// (a container's index in the set as built and its key, which stays when the set is built again, are not the same
 	// number: the key goes into ForcedLoot and the map's looted test, the index gives the place)
@@ -520,6 +521,7 @@ void ARDDungeonGenerator::PlaceRingGuard(int32 Tier)
 	Encounters.Add(E);
 	RespawnEncounters(S);
 	UE_LOG(LogRDMistward, Log, TEXT("RDRING tier %d: %s put in container %d of room %d of (%d,%d), %d guards"), Tier, *RA.ToString(), Key, Room, S->Coord.X, S->Coord.Y, E.Kinds.Num());
+	return true;
 }
 
 void ARDDungeonGenerator::RespawnEncounters(ARDSection* S)

@@ -1,0 +1,50 @@
+{
+ "tag": "trip1",
+ "plan": [
+  "trip"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "trip",
+   "ok": true,
+   "castle": "mistward_castle",
+   "opened": 1,
+   "piles_at_death": 1,
+   "pile_things": [
+    "Iron Ingot",
+    "Small Healing Potion"
+   ],
+   "revived": true,
+   "town": "brokenspire",
+   "kept_in_game": [
+    {
+     "level": "castle",
+     "things": [
+      "Iron Ingot",
+      "Small Healing Potion"
+     ]
+    }
+   ],
+   "castle_again": "mistward_castle",
+   "tier2_open": true,
+   "piles_again": [
+    {
+     "things": [
+      "Iron Ingot",
+      "Small Healing Potion"
+     ],
+     "from_hall_middle_m": 3.9
+    }
+   ],
+   "left_in_game": 0,
+   "boss_before_seen": [],
+   "boss_after_seen": [
+    "boss|6916|7350|124|Orc_03|1|2|TIER 2 BOSS: ORC RAIDER|360"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "error": null,
+ "windows_shown_again": 2
+}

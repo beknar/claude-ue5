@@ -491,19 +491,22 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	}
 	if (!P->Mesh) return true;
 	// (Brokenspire: a piece in a material of its own (a burned house's timbers) has its own instanced component, by name)
-	if (P->Material)
+	// (keyed by name and collision: a piece placed once as decor without collision and once as a wall gets two components,
+	// or the first call decided for both (the PR review's find); a hidden piece keeps the hidden path below)
+	if (P->Material && !P->bHidden)
 	{
-		const FName Key = PcName(Name);
+		const bool bColM = P->bCollision && !bForceNoCollision;
+		const FName Key = bColM ? PcName(Name) : FName(*(PcName(Name).ToString() + TEXT("#nc")));
 		PendingMat.FindOrAdd(Key).Add(W);
 		if (!HismsMat.Contains(Key))
 		{
-			const bool bColM = P->bCollision && !bForceNoCollision;
 			UInstancedStaticMeshComponent* H = NewObject<UInstancedStaticMeshComponent>(this, NAME_None, RF_Transactional);
 			H->SetStaticMesh(P->Mesh);
 			for (int32 Sl = 0; Sl < P->Mesh->GetStaticMaterials().Num(); ++Sl) H->SetMaterial(Sl, P->Material);
 			H->SetMobility(EComponentMobility::Static);
 			H->SetupAttachment(RootComponent);
 			H->SetCollisionProfileName(bColM ? TEXT("BlockAll") : TEXT("NoCollision"));
+			if (!bColM) H->SetCanEverAffectNavigation(false);
 			H->RegisterComponent();
 			AddInstanceComponent(H);
 			HismsMat.Add(Key, H);

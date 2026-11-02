@@ -385,6 +385,8 @@ public:
 	/** her poison, weakness and slowness end (Dispel Hex) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Spells") void ClearAfflictions();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool IsPoisoned() const;
+	/** poisoned, weakened or slowed now (Brokenspire's healer prices the cure) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") bool IsAfflicted() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetWeakness() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") float GetSlowness() const;
 	/** the shares her shields take now (tests): ward hits left, ward pool left, armour from Iron Skin */

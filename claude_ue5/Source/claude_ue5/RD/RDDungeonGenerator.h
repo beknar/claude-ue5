@@ -384,6 +384,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") int32 GetParticlesNear(FVector At, float Radius) const;
 	/** the tiers' rings to guard, put once the frame's container has given what it held (a ring found as the tier opened is no duplicate) */
 	TArray<int32> PendingRingTiers;
+	/** Brokenspire: tiers open from an earlier visit to the castle whose boss / guarded ring wait for a room of the tier
+	 *  before she has seen (tried once a second) */
+	TArray<int32> RestoredBossTiers, RestoredRingTiers;
+	float RestoredTryAt = 0.f;
 	/** a container once opened stays open (and is built open when its section is generated again) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward") bool bContainersStayOpen = false;
 	/** furniture never overlaps (beds, chests), and nothing stands in front of a container */
@@ -954,6 +958,7 @@ public:
 	bool TownBuy(FName Item);
 	bool TownSell(const FString& Ref);
 	bool TownHeal();
+	int32 TownHealCost() const;
 	bool TownRepair(const FString& Ref);
 	int32 RepairCost(const FString& Ref) const;
 	bool TownBless();
@@ -1206,8 +1211,9 @@ private:
 	void TickCensus();
 	void CheckTierOpenings();
 	void OnTierOpened(int32 Tier);
-	void PlaceBoss(int32 Tier);
-	void PlaceRingGuard(int32 Tier);
+	/** false: no room of the tier before seen yet to set it in (nothing placed) */
+	bool PlaceBoss(int32 Tier);
+	bool PlaceRingGuard(int32 Tier);
 	/** an explored room of a tier to set something in (not the one she is in, generated now); false: none */
 	bool PickExploredRoom(int32 Tier, int32 Salt, ARDSection*& OutSection, int32& OutRoom) const;
 	UPROPERTY(VisibleAnywhere, Category = "RandomDungeon|Reveal") TObjectPtr<UPostProcessComponent> RevealPost;

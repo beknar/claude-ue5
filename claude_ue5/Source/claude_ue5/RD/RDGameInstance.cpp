@@ -15,7 +15,7 @@ void URDGameInstance::NewGame(FName Hero)
 	StashThings.Reset(); StashWear.Reset();
 	Quests.Reset(); Counters.Reset();
 	CirclesFound = { FName(TEXT("Brokenspire")) };
-	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset();
+	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
 	Arrive.Reset();
 	UE_LOG(LogTemp, Log, TEXT("RDGAME new game %d for %s"), GamesStarted, *Hero.ToString());
 }

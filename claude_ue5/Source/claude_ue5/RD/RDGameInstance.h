@@ -81,6 +81,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;
 	/** the Mistward Hall's guards she killed this game (they do not come back) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<int32> GuardsDead;
+	/** her things lying where she fell when she left a level (each pile's things, wear and worn shield; its Hero is the
+	 *  level it lay in, "castle" or "town"): laid again where she comes into that level the next time */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FRDCarry> HerPiles;
+	/** -RDTownGo has been read (once a game instance) */
+	bool bTownGoRead = false;
 
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void Count(const FString& Key, int32 Amount = 1) { Counters.FindOrAdd(Key) += Amount; }
 	/** a counter that holds the highest value seen ("tier") */

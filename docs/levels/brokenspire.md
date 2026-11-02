@@ -40,6 +40,8 @@ The game keeps (in `URDGameInstance`, while the program runs):
 - **her things:** every found weapon with what is left of it, everything carried, the armour, shield and rings she wears, the spells she learned from tomes, the chi attacks she gained, her hit points and mana, a blessing on her;
 - **her purse:** gold from kills (1 to 4 times the monster's tier, a boss 40 times its tier more) and from containers (one in about two, 3 to 12 times the tier), in the castle and in the town;
 - **her storage** at the storehouse, the town's seed, the containers she opened there, the castle's tiers she opened (they stay open) and the containers of its first set of rooms she opened, the Hall's guards she killed;
+- **her things where she fell:** a pile of hers left lying when she goes is laid again where she comes back into that level (in the castle beside the arch in the great hall, in the town in the square);
+- **the tiers' bosses she killed:** a tier open from an earlier visit gets its boss again (once a room of the tier before is seen) unless she killed it, and its guarded ring unless she has it;
 - **the quests and their counters.**
 
 The hero menu starts a new game: nothing carried, an empty purse and storage, no quests, a new town.
@@ -51,7 +53,7 @@ Each building's service is at its counter, basin, altar, chest or anvil, and its
 | Where | What she can do there | What it costs |
 |---|---|---|
 | Trader's store | buy potions (healing, mana, speed), food, repair items, the torch and the scrolls her hero reads, of the tiers she has opened; sell anything she carries but keys and teleport rings | an item's price: its kind's base (potions 8 + 40 x their share, food 4, repair items 16, scrolls 25, weapons 40, armour 60, rings 80, tomes 120...) times its first tier's factor (1, 2, 3.5, 5.5, 8); she sells for 35 % (a worn weapon less) |
-| Healer's house | be healed and cured (all hit points and mana, poison, weakness and slowness gone); buy healing and mana potions | a quarter of a gold a hit point missing, times her highest tier's factor (2 at least) |
+| Healer's house | be healed and cured (all hit points and mana, poison, weakness and slowness gone); buy healing and mana potions | a quarter of a gold a hit point missing, a tenth a point of mana missing and 5 for a cure, times her highest tier's factor (2 at least; nothing when there is nothing to heal) |
 | Smithy | mend each found weapon, set of armour and shield, or all at once; use the anvil (the crafting panel: repair items, break-downs) | 30 % of the thing's price for its whole durability, by what is missing |
 | Temple | a blessing: 10 % more damage, 10 % less of each blow, for ten minutes (it goes into the castle with her); an offering for the refugees | 20 gold times her highest tier's factor; 5 gold |
 | Storehouse | put a thing in her storage, take it back | free |
@@ -131,7 +133,7 @@ A quest's goal is a counter the game keeps across the levels; its progress is wh
 
 ## The test
 
-`pipeline\unreal\884_brokenspire_test.ps1 <plan> <tag>` (plan `all`: every step); `SourceArt/brokenspire/test_<tag>.json`. `test_ball3.json`: all ten ok on a town of a new seed (every PIE play is a new game, so every run plays another town; the town step plays four seeds more). The frame rate in the square, in the editor's play window at 2440 x 1616: 30 a second (24 at the least). The castle's own test after the town (`868 all`, `test_m7all.json`): 38 of 39, the Escape menu's main page now has Return to Brokenspire (the step's list updated: `test_m7o.json`); `test_m7s.json`: basics, death, start gear, options, harvest, cells and stealth after the last changes, all ok.
+`pipeline\unreal\884_brokenspire_test.ps1 <plan> <tag>` (plan `all`: every step); `SourceArt/brokenspire/test_<tag>.json`. `test_ball4.json`: all ten ok on a town of a new seed after the PR review's fixes, and `test_trip1.json` the trip step ok (the pile laid again 3.9 m from the great hall's middle, tier 2's boss set again once a room was seen); the castle's `test_m8s.json` (basics, tiers, death, start gear, options) ok after them (every PIE play is a new game, so every run plays another town; the town step plays four seeds more). The frame rate in the square, in the editor's play window at 2440 x 1616: 30 a second (24 at the least). The castle's own test after the town (`868 all`, `test_m7all.json`): 38 of 39, the Escape menu's main page now has Return to Brokenspire (the step's list updated: `test_m7o.json`); `test_m7s.json`: basics, death, start gear, options, harvest, cells and stealth after the last changes, all ok.
 
 | Step | What it measures |
 |---|---|
@@ -145,6 +147,7 @@ A quest's goal is a counter the game keeps across the levels; its progress is wh
 | `map` | the papyrus map's pictures and labels; pictures of it and of the minimap |
 | `pictures` | the square, the trades' insides and outsides, the castle, the Mistward Hall |
 | `castle` | with gold, a found weapon, potions and armour worn she walks into the Mistgate: Mistward Castle opens with all of it; its Escape menu's Return to Brokenspire brings her back to the same town, before the castle's door, with all of it |
+| `trip` | in the castle tier 2 opened without its boss, and she falls there; back in the town the game keeps her pile; in the castle again the pile lies by the arch, and tier 2's boss is set once a room of tier 1 is seen |
 
 ## Rebuild notes
 

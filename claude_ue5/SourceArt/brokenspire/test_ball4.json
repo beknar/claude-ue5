@@ -1,5 +1,5 @@
 {
- "tag": "ball3",
+ "tag": "ball4",
  "plan": [
   "town",
   "doors",
@@ -28,18 +28,18 @@
      "barracks": 1,
      "chapel": 1,
      "witch's hut": 1,
-     "home": 169,
+     "home": 168,
      "castle": 1
     },
     "homes": {
-     "lived": 110,
-     "burned": 33,
-     "boarded": 26
+     "lived": 94,
+     "burned": 26,
+     "boarded": 48
     },
     "spots": {
      "circle": 1,
      "mill": 1,
-     "tower": 26,
+     "tower": 25,
      "gate": 1,
      "well": 1,
      "board": 1,
@@ -57,57 +57,57 @@
      "stash": 1
     },
     "square": [
-     1350,
-     8100
+     6900,
+     750
     ],
     "unreached": [],
     "castle_rooms": 4,
     "mistgate": true,
     "trades_at": {
      "temple": [
-      58,
-      100
+      32,
+      -10
      ],
      "tavern": [
-      30,
-      46
+      106,
+      27
      ],
      "smithy": [
-      -8,
-      45
+      48,
+      -34
      ],
      "store": [
-      -48,
-      50
+      108,
+      -10
      ],
      "healer": [
-      -4,
-      112
+      87,
+      58
      ],
      "storehouse": [
-      54,
-      60
+      14,
+      27
      ],
      "barracks": [
-      -9,
-      164
+      207,
+      -14
      ],
      "chapel": [
-      -182,
-      -108
+      -135,
+      184
      ],
      "witch's hut": [
-      -225,
+      -210,
       -225
      ],
      "castle": [
-      14,
-      -208
+      -208,
+      8
      ]
     },
     "gate_at": [
-     14,
-     240
+     240,
+     8
     ]
    },
    "roles": {
@@ -130,7 +130,7 @@
     "Keeper": 1,
     "Soldier": 3,
     "Witch": 1,
-    "Townsfolk": 61
+    "Townsfolk": 53
    },
    "roles_missing": [],
    "seed1111": {
@@ -422,7 +422,7 @@
    "door_open": 1.0,
    "walked_in": true,
    "container": {
-    "kind": "wardrobe",
+    "kind": "chest",
     "looted": true,
     "gold_found": 0,
     "lines": 0
@@ -542,112 +542,109 @@
   {
    "step": "guards",
    "ok": true,
-   "planned": 9,
-   "alive": 9,
+   "planned": 8,
+   "alive": 8,
    "tiers": [
     1
    ],
    "kinds": [
-    "Chicken",
     "Drinker",
     "Half_Creature_04",
-    "Medic",
-    "Parasite_Slider",
+    "Half_Creature_05",
     "Rat"
    ],
-   "home_room": 179,
+   "home_room": 178,
    "home_kind": "Great hall",
-   "aggro_in_hall": 6,
+   "aggro_in_hall": 3,
    "rooms_after": [
-    179,
-    179,
-    179,
-    179,
-    179,
-    179,
-    179,
-    179,
-    179
+    178,
+    178,
+    178,
+    178,
+    178,
+    178,
+    178,
+    178
    ],
    "all_in_hall": true,
    "aggro_after": 0,
-   "gold": 8,
+   "gold": 9,
    "counted": 3,
    "dead_kept": 3,
-   "alive_after_rebuild": 9
+   "alive_after_rebuild": 8
   },
   {
    "step": "folk",
    "ok": true,
    "fps": {
-    "mean": 32.8,
-    "min": 15.4
+    "mean": 31.8,
+    "min": 13.7
    },
    "walked": {
-    "Little Wren": 5,
+    "Little Wren": 19,
     "Tobin": 2,
-    "Pip": 1,
-    "Simple Tam": 1,
+    "Pip": 2,
+    "Simple Tam": 3,
     "a militiaman": 1,
-    "a militiawoman": 6
+    "a militiawoman": 15
    },
    "militia": [
     {
      "at": [
-      3234,
-      9461
+      10751,
+      1050
      ],
      "paths": [
       4,
-      6,
       4,
+      20,
       4
      ]
     },
     {
      "at": [
-      21833,
-      19050
+      18358,
+      -22350
      ],
      "paths": [
+      4,
       4,
       12,
+      4
+     ]
+    },
+    {
+     "at": [
+      4050,
+      21648
+     ],
+     "paths": [
+      4,
+      18,
       4,
       4
      ]
     },
     {
      "at": [
-      -23261,
-      8170
+      -4511,
+      -21452
      ],
      "paths": [
       4,
-      3,
       4,
-      4
+      4,
+      14
      ]
     },
     {
      "at": [
-      21755,
-      -6111
+      -13656,
+      22689
      ],
      "paths": [
       4,
       4,
-      4,
-      4
-     ]
-    },
-    {
-     "at": [
-      -23850,
-      -13388
-     ],
-     "paths": [
-      4,
-      0,
       4,
       4
      ]
@@ -656,7 +653,6 @@
    "bark": "Old Pell|The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
    "names": [
     "Aldric Venn|!",
-    "Brother Kelm|",
     "Little Wren|"
    ]
   },
@@ -714,10 +710,9 @@
     "square"
    ],
    "art_drawn": [
+    "mapicon_temple",
     "mapicon_tavern",
-    "mapicon_smithy",
-    "mapicon_healer",
-    "mapicon_storehouse",
+    "mapicon_store",
     "mapicon_circle",
     "mapicon_board"
    ]
@@ -726,23 +721,23 @@
    "step": "pictures",
    "ok": true,
    "shots": [
-    "bs_ball3_names.png",
-    "bs_ball3_gate.png",
-    "bs_ball3_minimap.png",
-    "bs_ball3_papyrus_map.png",
-    "bs_ball3_square.png",
-    "bs_ball3_inside_smithy.png",
-    "bs_ball3_outside_smithy.png",
-    "bs_ball3_inside_tavern.png",
-    "bs_ball3_outside_tavern.png",
-    "bs_ball3_inside_home.png",
-    "bs_ball3_outside_home.png",
-    "bs_ball3_inside_temple.png",
-    "bs_ball3_outside_temple.png",
-    "bs_ball3_inside_store.png",
-    "bs_ball3_outside_store.png",
-    "bs_ball3_castle.png",
-    "bs_ball3_mistward_hall.png"
+    "bs_ball4_names.png",
+    "bs_ball4_gate.png",
+    "bs_ball4_minimap.png",
+    "bs_ball4_papyrus_map.png",
+    "bs_ball4_square.png",
+    "bs_ball4_inside_smithy.png",
+    "bs_ball4_outside_smithy.png",
+    "bs_ball4_inside_tavern.png",
+    "bs_ball4_outside_tavern.png",
+    "bs_ball4_inside_home.png",
+    "bs_ball4_outside_home.png",
+    "bs_ball4_inside_temple.png",
+    "bs_ball4_outside_temple.png",
+    "bs_ball4_inside_store.png",
+    "bs_ball4_outside_store.png",
+    "bs_ball4_castle.png",
+    "bs_ball4_mistward_hall.png"
    ]
   },
   {
@@ -750,10 +745,10 @@
    "ok": true,
    "weapon": "Viking Shortsword",
    "armour": "Plate Armour",
-   "before_gold": 1221,
+   "before_gold": 1222,
    "before_armour": "Plate Armour",
    "castle_level": "mistward_castle",
-   "castle_gold": 1221,
+   "castle_gold": 1222,
    "castle_armour": "Plate Armour",
    "castle_lines_same": true,
    "entered": 1,
@@ -767,7 +762,7 @@
    "menu_line": "button|Return to Brokenspire",
    "back_level": "brokenspire",
    "at_castle_door_m": 1.5,
-   "back_gold": 1221,
+   "back_gold": 1222,
    "back_armour": "Plate Armour",
    "back_lines_same": true,
    "same_town": true
@@ -775,23 +770,23 @@
  ],
  "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "bs_ball3_names.png",
-  "bs_ball3_gate.png",
-  "bs_ball3_minimap.png",
-  "bs_ball3_papyrus_map.png",
-  "bs_ball3_square.png",
-  "bs_ball3_inside_smithy.png",
-  "bs_ball3_outside_smithy.png",
-  "bs_ball3_inside_tavern.png",
-  "bs_ball3_outside_tavern.png",
-  "bs_ball3_inside_home.png",
-  "bs_ball3_outside_home.png",
-  "bs_ball3_inside_temple.png",
-  "bs_ball3_outside_temple.png",
-  "bs_ball3_inside_store.png",
-  "bs_ball3_outside_store.png",
-  "bs_ball3_castle.png",
-  "bs_ball3_mistward_hall.png"
+  "bs_ball4_names.png",
+  "bs_ball4_gate.png",
+  "bs_ball4_minimap.png",
+  "bs_ball4_papyrus_map.png",
+  "bs_ball4_square.png",
+  "bs_ball4_inside_smithy.png",
+  "bs_ball4_outside_smithy.png",
+  "bs_ball4_inside_tavern.png",
+  "bs_ball4_outside_tavern.png",
+  "bs_ball4_inside_home.png",
+  "bs_ball4_outside_home.png",
+  "bs_ball4_inside_temple.png",
+  "bs_ball4_outside_temple.png",
+  "bs_ball4_inside_store.png",
+  "bs_ball4_outside_store.png",
+  "bs_ball4_castle.png",
+  "bs_ball4_mistward_hall.png"
  ],
  "error": null,
  "windows_shown_again": 2

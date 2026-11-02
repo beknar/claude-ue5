@@ -1041,7 +1041,13 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	if (bTown || bTownLink)
 	{
 		bool bBossOf = false;
-		for (const FEncounter& E : Encounters) if (E.bBoss && !E.bThrone && E.Live.Num() > 0 && E.Live[0].Get() == Monster) bBossOf = true;
+		for (const FEncounter& E : Encounters)
+			if (E.bBoss && !E.bThrone && E.Live.Num() > 0 && E.Live[0].Get() == Monster)
+			{
+				bBossOf = true;
+				// (the tier's boss is dead for the game: coming back into the castle does not set it again)
+				if (bTownLink) TownCountMax(FString::Printf(TEXT("bossdone:%d"), E.Tier), 1);
+			}
 		TownOnKill(Monster, bBossOf);
 	}
 	// (mistward: one of a boss's band or a ring's guards stays dead)
@@ -1128,7 +1134,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Pads.Reset(); PadSections.Reset(); PadRingsTaken.Reset(); PadActors.Reset(); PadChoice = 0; Teleports = 0;
 	CellsOpened.Reset(); PrisonersFreed = CellBreakouts = 0;
 	SpentTraps.Reset(); DisarmKey = FIntVector(0, 0, -1); TrapsTriggered = TrapsDisarmed = TrapHits = 0; LastTrap.Reset();
-	TrapR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x7D15u)); PendingRingTiers.Reset();
+	TrapR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x7D15u)); PendingRingTiers.Reset(); RestoredBossTiers.Reset(); RestoredRingTiers.Reset();
 	// (the third list: the tables' weapons back, the fixtures full, the arenas and vaults as they were, the slashes not given)
 	for (const TWeakObjectPtr<ARDMonster>& M : ArenaMonsters) if (M.IsValid()) M->Destroy();
 	ArenaMonsters.Reset(); ArenaRoom = -1; ArenaWave = 0; ArenaWavesBeaten = 0;
@@ -1521,6 +1527,13 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)
 	// (mistward: the rings to guard of a tier opened by the last container she opened, now that it has given what it held)
 	if (PendingRingTiers.Num() > 0) { const TArray<int32> Ts = PendingRingTiers; PendingRingTiers.Reset(); for (const int32 T : Ts) PlaceRingGuard(T); }
+	// (Brokenspire: the bosses and rings of the tiers open from an earlier visit, once a room of the tier before is seen)
+	if ((RestoredBossTiers.Num() > 0 || RestoredRingTiers.Num() > 0) && GetWorld()->GetTimeSeconds() >= RestoredTryAt)
+	{
+		RestoredTryAt = GetWorld()->GetTimeSeconds() + 1.f;
+		RestoredBossTiers.RemoveAll([this](int32 T) { return PlaceBoss(T); });
+		RestoredRingTiers.RemoveAll([this](int32 T) { return PlaceRingGuard(T); });
+	}
 	if (PrisonerDefs.Num() > 0)
 		if (APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0))
 		{

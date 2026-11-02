@@ -130,7 +130,9 @@ void ARDTownsfolk::Tick(float Dt)
 				const int32 Dr = Section->DoorBetween(Cur, Ahead);
 				if (Dr >= 0 && !Section->IsDoorOpenIndex(Dr))
 				{
-					if (!Section->IsTargetOpen(true, Dr) && Section->BoardedDoorBld(Dr) < 0) Section->ToggleDoor(Dr, L, true);
+					// (a boarded door never opens: the walk is given up, or it waited there for good (the PR review's find))
+					if (Section->BoardedDoorBld(Dr) >= 0) { Path.Reset(); SetClip(false); NextTrip = Now + R.FRandRange(1.f, 3.f); return; }
+					if (!Section->IsTargetOpen(true, Dr)) Section->ToggleDoor(Dr, L, true);
 					SetClip(false);
 					return;
 				}
@@ -174,6 +176,13 @@ void ARDTownsfolk::Tick(float Dt)
 }
 
 // ================================================================================================ her combat component
+bool URDCombatComponent::IsAfflicted() const
+{
+	const UWorld* W = GetWorld();
+	const float Now = W ? W->GetTimeSeconds() : 0.f;
+	return (PoisonDps > 0.f && Now < PoisonUntil) || (WeakShare > 0.f && Now < WeakUntil) || (SlowMeShare > 0.f && Now < SlowMeUntil);
+}
+
 float URDCombatComponent::GetBlessLeft() const
 {
 	const UWorld* W = GetWorld();
@@ -303,6 +312,15 @@ void ARDDungeonGenerator::SaveCarry()
 		for (const FIntVector& K : LootedContainers) if (K.X == 0 && K.Y == 0) GI->CastleStartLooted.AddUnique(K.Z);
 	}
 	else for (const FIntVector& K : LootedContainers) if (K.X == 0 && K.Y == 0) GI->TownLooted.AddUnique(K.Z);
+	// (her things where she fell go with the game, laid again when she comes back to this level (the PR review's find: they
+	// went with the level))
+	const FName Here(bTown ? TEXT("town") : TEXT("castle"));
+	for (const ARDLootPile* Lp : LootPiles)
+		if (IsValid(Lp) && Lp->bHers && Lp->Things.Num() > 0)
+		{
+			FRDCarry Pile; Pile.bValid = true; Pile.Hero = Here; Pile.Things = Lp->Things; Pile.Wear = Lp->Wear; Pile.WornShield = Lp->WornShield;
+			GI->HerPiles.Add(Pile);
+		}
 	UE_LOG(LogRDTownGame, Log, TEXT("RDCARRY saved %s: %d things, armour %s, shield %s, %d rings, %d learned, %.0f hp, %d gold"), *CurrentHero.ToString(), C.Things.Num(),
 		*C.WornArmour.ToString(), *C.WornShield.ToString(), C.WornRings.Num(), C.Learned.Num(), C.Health, GI->Gold);
 }
@@ -396,6 +414,15 @@ void ARDDungeonGenerator::BeginTownPlay()
 		// (Mistward Castle: the tiers she opened stay open, the first set's opened containers stay opened)
 		for (const int32 T : GI->CastleTiers) TiersOpened.AddUnique(T);
 		for (const int32 K : GI->CastleStartLooted) LootedContainers.Add(FIntVector(0, 0, K));
+		// (a tier open from an earlier visit: its boss, if she has not killed it, and its guarded ring (PlaceRingGuard skips a
+		// ring she has) are set again once she has seen a room of the tier before (the PR review's find: CheckTierOpenings
+		// passes an open tier by, so they were never set again))
+		for (const int32 T : GI->CastleTiers)
+		{
+			if (T < 2) continue;
+			if (bBossEncounters && GI->GetCounter(FString::Printf(TEXT("bossdone:%d"), T)) == 0) RestoredBossTiers.AddUnique(T);
+			if (bRingGuards) RestoredRingTiers.AddUnique(T);
+		}
 		GI->Count(TEXT("enter"));
 	}
 }
@@ -403,6 +430,22 @@ void ARDDungeonGenerator::BeginTownPlay()
 void ARDDungeonGenerator::AfterTownBuilt()
 {
 	bTownPlaced = false; bTownTraveling = false;
+	// (her things she left lying in this level when she went: laid again by where she comes in, a pile beside the next)
+	auto LayPiles = [this](const FVector& At, const FVector& Side)
+	{
+		URDGameInstance* GI = URDGameInstance::Of(this);
+		if (!GI || At.IsZero()) return;
+		const FName Here(bTown ? TEXT("town") : TEXT("castle"));
+		int32 N = 0;
+		for (int32 I = GI->HerPiles.Num() - 1; I >= 0; --I)
+		{
+			const FRDCarry Pile = GI->HerPiles[I];
+			if (Pile.Hero != Here) continue;
+			GI->HerPiles.RemoveAt(I);
+			if (ARDLootPile* Lp = DropLoot(At + Side * (-150.f + 150.f * (N % 3)) + FVector(0.f, 0.f, 100.f), Pile.Things, Pile.Wear)) { Lp->bHers = true; Lp->WornShield = Pile.WornShield; ++N; }
+		}
+		if (N > 0) UE_LOG(LogRDTownGame, Log, TEXT("RDCARRY %d of her piles laid again in the %s"), N, *Here.ToString());
+	};
 	if (bTown)
 	{
 		SpawnTownPeople();
@@ -417,6 +460,7 @@ void ARDDungeonGenerator::AfterTownBuilt()
 			for (const ARDSection::FTownSpot& Ts : S->TownSpots)
 				if (Ts.Kind == TS_Circle) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(Ts.At + FVector(0, 0, 3.f)), Sp)) { T->Init(this, 0, false); CircleFx = T; }
 		}
+		LayPiles(GetStartRoomCenter(), FVector(0.f, 1.f, 0.f));
 		return;
 	}
 	if (bTownLink && !TownLevel.IsEmpty())
@@ -436,6 +480,9 @@ void ARDDungeonGenerator::AfterTownBuilt()
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		if (CastleWayBackActor) CastleWayBackActor->Destroy();
 		if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(Best + FVector(0, 0, 3.f)), Sp)) { T->Init(this, 0, false); CastleWayBackActor = T; }
+		// (beside the arch, not on it: F there takes her back to the town)
+		const FVector In = (C - Best).GetSafeNormal2D().IsNearlyZero() ? FVector(1.f, 0.f, 0.f) : (C - Best).GetSafeNormal2D();
+		LayPiles(Best + In * 400.f, FVector(-In.Y, In.X, 0.f));
 	}
 }
 
@@ -494,6 +541,7 @@ void ARDDungeonGenerator::SpawnTownGuards()
 	TArray<int32> Kinds;
 	for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Tier == 1 && Monsters[K].Mesh) Kinds.Add(K);
 	if (Kinds.Num() == 0) MonsterKindsFor(FIntPoint::ZeroValue, Kinds);
+	if (Kinds.Num() == 0) { UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN no monster kind for the Mistward Hall's guards")); return; }
 	TArray<FVector> Free = S->GetRoomFreeTiles(S->CastleHallRoom);
 	for (int32 I = Free.Num() - 1; I > 0; --I) Free.Swap(I, R.RandRange(0, I));
 	// (not within 4 m of the hall's door from the entry, nor in front of the Mistgate: room to come in and to leave)
@@ -555,10 +603,15 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 		bTownPlaced = true;
 		UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN she comes in at (%.0f, %.0f)"), At.X, At.Y);
 	}
-	// (-RDTownGo=castle: a packaged game's test goes on into the castle at once, once a run)
-	static bool bRDTownGoDone = false;
-	FString Go;
-	if (bTown && bTownPlaced && !bRDTownGoDone && FParse::Value(FCommandLine::Get(), TEXT("RDTownGo="), Go) && Go == TEXT("castle")) { bRDTownGoDone = true; EnterCastle(); return; }
+	// (-RDTownGo=castle: a packaged game's test goes on into the castle at once, once a game: read once, kept in the game
+	// instance (a static outlived play-in-editor sessions, and the command line was read every frame: the PR review's find))
+	if (bTown && bTownPlaced)
+		if (URDGameInstance* GI = URDGameInstance::Of(this); GI && !GI->bTownGoRead)
+		{
+			GI->bTownGoRead = true;
+			FString Go;
+			if (FParse::Value(FCommandLine::Get(), TEXT("RDTownGo="), Go) && Go == TEXT("castle")) { EnterCastle(); return; }
+		}
 	// the Mistgate: walked into, Mistward Castle opens
 	if (bTown && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
@@ -728,7 +781,10 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 	if (!GI) return 0;
 	// (counted whole: the highest tier open; the Mistward Hall's guards, who stay dead once killed: ones killed before the
 	// quest was taken count, or the quest could ask for more than are left)
-	if (Q.Goal == TEXT("tier") || Q.Goal == TEXT("guards")) return GI->GetCounter(Q.Goal);
+	// (both read from the state itself, not a counter beside it (the PR review's finds): the tier from the tiers open, so a
+	// tier opened by any way counts; the guards from the ones dead in this town, so a town built again starts over)
+	if (Q.Goal == TEXT("tier")) return FMath::Max(GI->GetCounter(Q.Goal), GetGameTier());
+	if (Q.Goal == TEXT("guards")) return GI->GuardsDead.Num();
 	const FRDQuestState* St = GI->FindQuest(Q.Id);
 	const int32 Base = St ? St->Base : 0;
 	return FMath::Max(0, GI->GetCounter(Q.Goal) - Base);
@@ -915,7 +971,7 @@ void ARDDungeonGenerator::BuildTownLines()
 			if (St == TEXT("later")) Add(TEXT("later"), Q.Title, TEXT("LATER"), Q.Offer + TEXT("\n\n(The wilderness beyond the gate is not open yet: this quest waits for a later chapter.)"), false, Arg);
 			else if (St == TEXT("offered")) Add(TEXT("accept"), FString::Printf(TEXT("Quest: %s"), *Q.Title), Q.Gold > 0 ? FString::Printf(TEXT("%d g"), Q.Gold) : TEXT("NEW"), Q.Offer, true, Arg);
 			else if (St == TEXT("ready")) Add(TEXT("turnin"), FString::Printf(TEXT("Done: %s"), *Q.Title), TEXT("REWARD"), Q.Done, true, Arg);
-			else Add(TEXT("status"), Q.Title, FString::Printf(TEXT("%d / %d"), FMath::Min(P, Q.Count), Q.Count), Q.Hint, false, Arg);
+			else Add(TEXT("status"), Q.Title, FString::Printf(TEXT("%d / %d"), FMath::Min(P, Q.Count), Q.Count), Q.Hint, true, Arg);
 		}
 	};
 	if (TownPanel == TEXT("talk") && Def)
@@ -953,8 +1009,7 @@ void ARDDungeonGenerator::BuildTownLines()
 	{
 		TownTitle = TEXT("The healer's house"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
 		if (TownBody.IsEmpty()) TownBody = TEXT("Clean linen, bitter herbs, a basin of clear water. The healer looks as if she has not slept in days.");
-		const float Miss = PlayerCombat ? PlayerCombat->GetMaxHealth() - PlayerCombat->GetHealth() : 0.f;
-		const int32 Cost = FMath::Max(Miss > 0.5f ? 2 : 0, FMath::RoundToInt(Miss * 0.25f * RDTierPrice(T)));
+		const int32 Cost = TownHealCost();
 		Add(TEXT("heal"), TEXT("Be healed and cured"), Cost > 0 ? FString::Printf(TEXT("%d g"), Cost) : TEXT("FREE"),
 			TEXT("All your hit points and mana back; poison, weakness and slowness taken away."), Gold >= Cost);
 		for (const FName& It : TownStock())
@@ -1095,11 +1150,23 @@ bool ARDDungeonGenerator::TownSell(const FString& Ref)
 	return true;
 }
 
+int32 ARDDungeonGenerator::TownHealCost() const
+{
+	// (all she gets back is priced: hit points, mana and an affliction cured (the PR review's find: a Mage with no mana, or a
+	// poisoned hero with her hit points full, was healed for free); 0 only when there is nothing to do)
+	if (!PlayerCombat) return 0;
+	const float Miss = FMath::Max(0.f, PlayerCombat->GetMaxHealth() - PlayerCombat->GetHealth());
+	const float ManaMiss = FMath::Max(0.f, PlayerCombat->GetMaxMana() - PlayerCombat->GetMana());
+	const bool bCure = PlayerCombat->IsAfflicted();
+	const float K = RDTierPrice(GetGameTier());
+	const int32 C = FMath::RoundToInt((Miss * 0.25f + ManaMiss * 0.1f + (bCure ? 5.f : 0.f)) * K);
+	return Miss > 0.5f || ManaMiss > 0.5f || bCure ? FMath::Max(2, C) : 0;
+}
+
 bool ARDDungeonGenerator::TownHeal()
 {
 	if (!PlayerCombat) return false;
-	const float Miss = PlayerCombat->GetMaxHealth() - PlayerCombat->GetHealth();
-	const int32 Cost = FMath::Max(Miss > 0.5f ? 2 : 0, FMath::RoundToInt(Miss * 0.25f * RDTierPrice(GetGameTier())));
+	const int32 Cost = TownHealCost();
 	if (GetGold() < Cost) { SetTownNote(TEXT("You have too little gold")); return false; }
 	if (Cost > 0) AddGold(-Cost, TEXT("the healer"));
 	PlayerCombat->SetHealth(PlayerCombat->GetMaxHealth()); PlayerCombat->SetMana(PlayerCombat->GetMaxMana());
