@@ -482,9 +482,10 @@ void ARDDungeonGenerator::ReadAutoplayOption()
 	if (Secs < 0.f && !bCommandDone && FParse::Value(FCommandLine::Get(), TEXT("-Autoplay="), C))
 	{
 		bCommandDone = true; Secs = C; bQuit = !FParse::Param(FCommandLine::Get(), TEXT("AutoplayStay"));
-		// (-AutoplayLocked: no key of the player's takes over (a recording: Game Bar's hotkey reaches the game))
-		if (FParse::Param(FCommandLine::Get(), TEXT("AutoplayLocked"))) bAutoplayIgnorePlayer = true;
 	}
+	// (-AutoplayLocked: no key of the player's takes over (a recording: Game Bar's hotkey reaches the game); also for an
+	// autoplay begun from the menu's AUTOPLAY (a recording that starts on the hero menu))
+	if (Secs >= 0.f && FParse::Param(FCommandLine::Get(), TEXT("AutoplayLocked"))) bAutoplayIgnorePlayer = true;
 	if (Secs >= 0.f) StartAutoplay(Secs, bQuit);
 }
 
@@ -495,6 +496,7 @@ void ARDDungeonGenerator::StartAutoplay(float Seconds, bool bQuitAtEnd)
 	AutoplayPath.Reset(); AutoplayFoe = nullptr; AutoplayRoomsSeen.Reset(); AutoplayRoomsBlocked.Reset(); AutoplayGoal = FVector::ZeroVector;
 	AutoplayStats.Reset(); AutoplayWeaponTurn = 0; AutoplayWalked = 0.f; AutoplayWalkFrom = FVector::ZeroVector;
 	bAutoplayHunting = false; AutoplayHuntNext = 0.f; AutoplayPreyBlocked.Reset();
+	bAutoplayKiting = bAutoplayStealthFlee = false; AutoplayStealthNext = AutoplayKiteEnd = AutoplayKiteNext = 0.f;
 	AutoplayR.Initialize((int32)HashCombine((uint32)SessionSeed, 0xA070u));
 	if (PlayerCombat) { PlayerCombat->SetRunMode(true); PlayerCombat->ShowMessage(AutoplaySeconds > 0.f ? FString::Printf(TEXT("Autoplay for %.0f s: any key takes over"), AutoplaySeconds) : FString(TEXT("Autoplay: any key takes over"))); }
 	UE_LOG(LogRDMistward5, Log, TEXT("RDAUTOPLAY begun: %s, %.0f s%s"), *CurrentHero.ToString(), AutoplaySeconds, bAutoplayQuit ? TEXT(", the game quits after") : TEXT(""));
@@ -605,15 +607,19 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 	{
 		const float Hp = Pc->GetHealth() / FMath::Max(Pc->GetMaxHealth(), 1.f);
 		const bool bLowMana = Pc->GetMaxMana() > 0.f && Pc->GetMana() < Pc->GetMaxMana() * 0.25f && AutoplayFoe.IsValid();
-		if (Hp < 0.45f || bLowMana)
+		// (mistward6: the Rogue's energy too low for stealth in a fight: a speed potion fills it)
+		const bool bLowDex = Pc->GetStealthCost() > 0.f && Pc->GetDexEnergy() < Pc->GetStealthCost() && AutoplayFoe.IsValid();
+		if (Hp < 0.45f || bLowMana || bLowDex)
 		{
-			const ERDItemKind Want = Hp < 0.45f ? ERDItemKind::Healing : ERDItemKind::Mana;
+			const ERDItemKind Want = Hp < 0.45f ? ERDItemKind::Healing : bLowMana ? ERDItemKind::Mana : ERDItemKind::Speed;
 			int32 Best = -1; float BestAmt = -1.f;
 			for (int32 I = 0; I < Items.Num(); ++I)
 				if ((Items[I].Kind == Want || (Want == ERDItemKind::Healing && Items[I].Kind == ERDItemKind::Food && Pc->GetRegenPerSecond() <= 0.f)) && Pc->GetItemCount(Items[I].Name) > 0 && Items[I].Amount > BestAmt)
 				{ Best = I; BestAmt = Items[I].Amount; }
-			if (Best >= 0 && Pc->UseItem(Items[Best].Name)) { AutoplayStats.FindOrAdd(TEXT("used"))++; AutoplayNextAct = Now + 0.6f; }
-			AutoplayUseNext = Now + 3.f;          // (a potion's or food's effect shows before the next: food heals over time)
+			// (a potion's or food's effect shows before the next: food heals over time; nothing to use, a short wait: no speed
+			// potion for her energy must not keep a healing one back for 3 s (the PR review's find))
+			if (Best >= 0 && Pc->UseItem(Items[Best].Name)) { AutoplayStats.FindOrAdd(TEXT("used"))++; AutoplayNextAct = Now + 0.6f; AutoplayUseNext = Now + 3.f; }
+			else AutoplayUseNext = Now + 0.5f;
 		}
 	}
 	// ---- the one to fight: the nearest she can see within 18 m, or one coming at her
@@ -633,7 +639,9 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			if (D > 1800.f || FMath::Abs(Ml.Z - L.Z) > 300.f) continue;
 			Q.ClearIgnoredSourceObjects(); Q.AddIgnoredActor(Her); Q.AddIgnoredActor(M);
 			const bool bSeen = !W->LineTraceTestByObjectType(L + FVector(0, 0, 50.f), Ml + FVector(0, 0, 30.f), O, Q);
-			if (!bSeen && !(M->IsAggro() && D < 900.f)) continue;
+			// (mistward6: the one she fights is kept out of sight too, within 15 m: one that lost her while she was hidden wandered
+			// off round a corner, and she went to the chests with it alive)
+			if (!bSeen && !(M->IsAggro() && D < 900.f) && !(M == Foe && D < 1500.f)) continue;
 			const float Score = D * (M == Foe ? 0.6f : 1.f) * (bSeen ? 1.f : 1.6f);
 			if (Score < BestD) { BestD = Score; Best = M; }
 		}
@@ -649,36 +657,93 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		const FString Name = Foe->Title.IsEmpty() ? Foe->MonsterName.ToString() : Foe->Title;
 		AutoplayDoing = FString::Printf(TEXT("fight %s"), *Name);
 		const TArray<FRD5Arm> Arms = RD5Arms(this);
+		// (mistward6: of her weapons (not her spells) only the best near and the best far by damage a second: she took the
+		// Warrior's dagger in turn with the sword she had found)
+		int32 BestNear = -1, BestFar = -1; float BestNearD = -1.f, BestFarD = -1.f;
+		for (const FRD5Arm& A : Arms)
+		{
+			const FRDWeaponDef& Wd = Weapons[A.Index];
+			if (A.bSummon || (Wd.bSpell && !Wd.BoltMesh) || Wd.Attacks.Num() == 0) continue;
+			float Len = 0.f; for (const UAnimSequenceBase* Cl : Wd.Attacks) Len += Cl ? Cl->GetPlayLength() : 1.f;
+			const float Dps = Pc->GetDamageOf(A.Index) * FMath::Max(Wd.PlayRate, 0.1f) / FMath::Max(Len / Wd.Attacks.Num(), 0.2f);
+			if (Wd.bSpell) { if (Dps > BestFarD) { BestFarD = Dps; BestFar = A.Index; } }
+			else if (Dps > BestNearD) { BestNearD = Dps; BestNear = A.Index; }
+		}
+		auto Lesser = [&](const FRD5Arm& A) { const FRDWeaponDef& Wd = Weapons[A.Index]; return !A.bSummon && (!Wd.bSpell || Wd.BoltMesh) && A.Index != BestNear && A.Index != BestFar; };
+		// (how far she stands off: from the arms she will use (a long weapon she never uses held her where only it reached:
+		// the PR review's find))
 		float BestRange = 0.f;
 		for (const FRD5Arm& A : Arms)
-			if (!A.bSummon && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->GetCooldownLeft(A.Index) <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
-		if (BestRange <= 0.f) for (const FRD5Arm& A : Arms) if (!A.bSummon && Weapons[A.Index].ManaCost <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
+			if (!A.bSummon && !Lesser(A) && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->GetCooldownLeft(A.Index) <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
+		if (BestRange <= 0.f) for (const FRD5Arm& A : Arms) if (!A.bSummon && !Lesser(A) && Weapons[A.Index].ManaCost <= 0.f) BestRange = FMath::Max(BestRange, A.Range);
+		// (mistward6: stealth, to come at it unseen and strike first, or to get away when hurt (and drink))
+		const float SCost = Pc->GetStealthCost();
+		const float HpF = Pc->GetHealth() / FMath::Max(Pc->GetMaxHealth(), 1.f);
+		if (SCost > 0.f && !Pc->IsStealthed() && !Pc->IsAttacking() && Now >= AutoplayStealthNext && Pc->GetDexEnergy() >= SCost
+			&& ((Gap > 300.f && Gap < 1500.f && HpF >= 0.35f) || (HpF < 0.35f && Gap < 500.f)))
+		{
+			if (Pc->StartStealth()) { AutoplayStats.FindOrAdd(HpF < 0.35f ? TEXT("stealth away") : TEXT("stealth"))++; bAutoplayStealthFlee = HpF < 0.35f; }
+			AutoplayStealthNext = Now + 3.f;
+		}
+		const bool bHid = Pc->IsStealthed();
+		if (!bHid) bAutoplayStealthFlee = false;
+		// (the ambush: with the weapon that hits hardest (the Rogue's crossbow, from afar: with her daggers she walked up to a
+		// boss and fell to it))
+		int32 AmbushArm = -1; float AmbushD = 0.f, AmbushRange = 0.f;
+		if (bHid)
+			for (const FRD5Arm& A : Arms)
+				if (!A.bSummon && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->GetDamageOf(A.Index) > AmbushD) { AmbushD = Pc->GetDamageOf(A.Index); AmbushArm = A.Index; AmbushRange = A.Range; }
+		if (bHid && !bAutoplayStealthFlee && AmbushArm >= 0) BestRange = AmbushRange;
+		// (mistward6: one who fights from afar steps back from a monster close in (2.5 s at most, then a while before again))
+		const bool bFar = BestRange > 500.f && !bHid;
+		if (bFar && !bAutoplayKiting && Gap < 200.f && Now >= AutoplayKiteNext) { bAutoplayKiting = true; AutoplayKiteEnd = Now + 2.5f; AutoplayStats.FindOrAdd(TEXT("kites"))++; }
+		if (bAutoplayKiting && (Gap > 520.f || Now >= AutoplayKiteEnd || !bFar)) { bAutoplayKiting = false; AutoplayKiteNext = Now + 2.f; }
+		const bool bAway = bAutoplayKiting || bAutoplayStealthFlee;
 		// (attacks: summons while she leads fewer than she may, then the weapons and spells in turn, each in its reach)
-		if (Now >= AutoplayNextAct && !Pc->IsAttacking())
+		if (Now >= AutoplayNextAct && !Pc->IsAttacking() && !bAway)
 		{
 			Her->SetActorRotation(FRotator(0, D.Rotation().Yaw, 0));
 			bool bDid = false;
 			for (const FRD5Arm& A : Arms)
-				if (A.bSummon && CountSummoned(A.Spell) < A.Count && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->StartAttackWith(A.Index))
+				if (!bHid && A.bSummon && CountSummoned(A.Spell) < A.Count && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->StartAttackWith(A.Index))
 				{ bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; break; }
 			for (int32 K = 0; K < Arms.Num() && !bDid; ++K)
 			{
 				const FRD5Arm& A = Arms[(K + AutoplayWeaponTurn) % Arms.Num()];
 				if (A.bSummon || Gap > A.Range) continue;
+				// (hidden: the ambush's weapon only, whether or not it is the best by damage a second; else the best near and far)
+				if (bHid && AmbushArm >= 0) { if (A.Index != AmbushArm) continue; }
+				else if (Lesser(A)) continue;
 				if (Pc->GetMana() < Weapons[A.Index].ManaCost) continue;
 				if (Pc->StartAttackWith(A.Index)) { bDid = true; AutoplayWeaponTurn = (K + AutoplayWeaponTurn + 1) % FMath::Max(Arms.Num(), 1); }
 			}
-			if (bDid) { AutoplayStats.FindOrAdd(TEXT("attacks"))++; AutoplayNextAct = Now + 0.15f; }
+			if (bDid) { AutoplayStats.FindOrAdd(TEXT("attacks"))++; AutoplayNextAct = Now + 0.15f; if (bHid) AutoplayStats.FindOrAdd(TEXT("ambush tries"))++; }
 			else AutoplayNextAct = Now + 0.2f;
 		}
 		// (her own abilities now and then: a roll away from a blow, a dash at one a few metres off)
 		if (Foe->IsAttacking() && Gap < 160.f && AutoplayR.FRand() < 0.02f && Pc->StartRoll(FVector::CrossProduct(D.GetSafeNormal(), FVector::UpVector) * (AutoplayR.FRand() < 0.5f ? 1.f : -1.f)))
 			AutoplayStats.FindOrAdd(TEXT("rolls"))++;
 		else if (Gap > 300.f && Gap < 650.f && AutoplayR.FRand() < 0.01f && Pc->StartDash()) AutoplayStats.FindOrAdd(TEXT("dashes"))++;
-		// (closer while out of her reach; she stands and faces it in reach)
+		// (closer while out of her reach; she stands and faces it in reach; away: to a clear point behind her or to a side)
 		const float Want = FMath::Max(FMath::Min(BestRange * 0.7f, 900.f), 60.f);
 		Look = D.GetSafeNormal();
-		if (Gap > Want && !Pc->IsAttacking())
+		if (bAway && !Pc->IsAttacking())
+		{
+			AutoplayDoing = bAutoplayStealthFlee ? FString(TEXT("slip away unseen")) : FString::Printf(TEXT("keep away from %s"), *Name);
+			if (AutoplayPath.Num() == 0 || FVector::Dist2D(AutoplayPath.Last(), L) < 120.f)
+			{
+				AutoplayPath.Reset();
+				FCollisionQueryParams Qa(SCENE_QUERY_STAT(RDAutoAway), false, Her);
+				const FVector Back = -D.GetSafeNormal();
+				for (const float Turn : { 0.f, 40.f, -40.f, 80.f, -80.f, 120.f, -120.f })
+				{
+					const FVector Dir = Back.RotateAngleAxis(Turn, FVector::UpVector);
+					const FVector To = L + Dir * 350.f;
+					if (!W->SweepTestByChannel(L, To, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(35.f), Qa)) { AutoplayPath.Add(To); break; }
+				}
+			}
+		}
+		else if (Gap > Want && !Pc->IsAttacking())
 		{
 			if (AutoplayPath.Num() == 0 || AutoplayThink <= 0.05f)
 			{

@@ -289,7 +289,8 @@ void ARDHUD::DrawCombat(float Sc)
 	}
 	// ---- status panel (bottom right): hit points (and mana), the weapons with their damage, kills
 	{
-		const bool bMana = Cb->GetMaxMana() > 0.f;
+		const bool bDex = Cb->GetMaxMana() <= 0.f && Cb->GetMaxDexEnergy() > 0.f;          // (mistward6: the Rogue's energy in the mana bar's place)
+		const bool bMana = Cb->GetMaxMana() > 0.f || bDex;
 		// (level 4's painted bars are framed: taller rows; its board reaches beyond the panel, so the panel sits further in)
 		const bool bArtBars = UI.Has(TEXT("bar_health"));
 		const float Bh = 44.f * Sc;                       // (a painted bar's height)
@@ -376,8 +377,36 @@ void ARDHUD::DrawCombat(float Sc)
 		UI.TextSize(Hp, Tw, Th, Small, Sc * 1.2f, ERDType::Label);
 		if (bArtBars) UI.Text(Hp, FLinearColor(0.f, 0.f, 0.f, 0.8f), (H0.X + H1.X - Tw) * 0.5f + 1.5f * Sc, (H0.Y + H1.Y - Th) * 0.5f + 1.5f * Sc, Small, Sc * 1.2f, ERDType::Label);
 		UI.Text(Hp, FLinearColor::White, (H0.X + H1.X - Tw) * 0.5f, (H0.Y + H1.Y - Th) * 0.5f, Small, Sc * 1.2f, ERDType::Label);
+		// (mistward6: the Rogue's dexterity energy: amber in the mana bar's frame, lit while she is in stealth; it flashes when a
+		// stealth was refused for want of it)
+		if (bDex)
+		{
+			const float Df = Cb->GetDexEnergy() / FMath::Max(Cb->GetMaxDexEnergy(), 1.f);
+			FVector2D M0(A.X + Pd, A.Y + 70.f * Sc), M1(B.X - Pd, A.Y + 92.f * Sc);
+			const float Flash = FMath::Clamp(1.f - (Now - Cb->NoManaTime) / 0.6f, 0.f, 1.f);
+			const bool bHid = Cb->IsStealthed();
+			const FLinearColor Fill = bHid ? FLinearColor(0.55f, 0.35f, 0.95f, 0.95f) : FLinearColor(0.95f, 0.66f, 0.16f, 0.95f);
+			if (bArtBars && UI.Has(TEXT("bar_mana")))
+			{
+				ArtBar(TEXT("bar_mana"), TEXT("fill_mana"), A.Y + 30.f * Sc + Bh + 2.f * Sc, 0.f, FLinearColor::White,
+				       FLinearColor(1.f, 1.f - 0.7f * Flash, 1.f - 0.75f * Flash), M0, M1);
+				Box(M0, FVector2D(M0.X + (M1.X - M0.X) * Df, M1.Y), Fill);
+			}
+			else
+			{
+				Box(M0, M1, FLinearColor(0.12f + 0.3f * Flash, 0.08f, 0.03f, 0.95f));
+				Box(M0 + FVector2D(2.f), FVector2D(M0.X + 2.f + (M1.X - M0.X - 4.f) * Df, M1.Y - 2.f), Fill);
+				Frame(M0, M1, Flash > 0.f ? FLinearColor(1.f, 0.3f, 0.25f) : FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 1.5f * Sc);
+			}
+			if (bArtBars && Flash > 0.f) Frame(M0, M1, FLinearColor(1.f, 0.3f, 0.25f, Flash), 2.f * Sc);
+			const FString DexT = bHid ? FString::Printf(TEXT("STEALTH  %.0f s"), FMath::CeilToFloat(Cb->GetStealthLeft()))
+			                        : FString::Printf(TEXT("DEXTERITY  %.0f / %.0f"), FMath::FloorToFloat(Cb->GetDexEnergy()), Cb->GetMaxDexEnergy());
+			UI.TextSize(DexT, Tw, Th, Small, Sc * 1.05f, ERDType::Label);
+			if (bArtBars) UI.Text(DexT, FLinearColor(0.f, 0.f, 0.f, 0.8f), (M0.X + M1.X - Tw) * 0.5f + 1.5f * Sc, (M0.Y + M1.Y - Th) * 0.5f + 1.5f * Sc, Small, Sc * 1.05f, ERDType::Label);
+			UI.Text(DexT, FLinearColor::White, (M0.X + M1.X - Tw) * 0.5f, (M0.Y + M1.Y - Th) * 0.5f, Small, Sc * 1.05f, ERDType::Label);
+		}
 		// mana (blue; it flashes when a cast was refused for want of it)
-		if (bMana)
+		if (bMana && !bDex)
 		{
 			const float Mf = Cb->GetMana() / FMath::Max(Cb->GetMaxMana(), 1.f);
 			FVector2D M0(A.X + Pd, A.Y + 70.f * Sc), M1(B.X - Pd, A.Y + 92.f * Sc);

@@ -1,0 +1,53 @@
+{
+ "_note": "mistward_castle's balance of 2026-11-01 (docs/improvements6.txt; 880 applies it, 868's balance step plays each kit). weapon_tier_power: a found weapon's damage (8 + 3 x its damage rating) times this by the first tier it is found in. chi: a chi attack's damage = base x (mana / base_mana) ^ power. heroes: hp her hit points; per tier open past the first: health_per_tier more hit points, spell_power_per_tier more for her spells and chi, own_weapon_power_per_tier more for her own weapons (not found ones: the Warrior's dagger grows not, by design); mana_regen_share: mana back a second as a share of her pool (0: the hero's own ManaPerSecond); weapons: her own weapons' damage by name; stealth: the Rogue's dexterity energy. kits: what a hero typically carries arriving at a tier (tier 1: her start), for the balance trials; army: the Summoner arrives with that many of her best summoning called (her summons stay with her until they fall).",
+ "weapon_tier_power": [1.0, 1.3, 1.65, 2.05, 2.5],
+ "chi": {"base": 23, "base_mana": 7, "power": 0.75},
+ "heroes": {
+  "Warrior": {"hp": 140, "health_per_tier": 0.18, "spell_power_per_tier": 0.0, "own_weapon_power_per_tier": 0.0, "mana_regen_share": 0.0},
+  "Mage": {"hp": 70, "health_per_tier": 0.15, "spell_power_per_tier": 0.12, "own_weapon_power_per_tier": 0.0, "mana_regen_share": 0.025},
+  "Warlock": {"hp": 100, "health_per_tier": 0.25, "spell_power_per_tier": 0.2, "own_weapon_power_per_tier": 0.3, "mana_regen_share": 0.025},
+  "Rogue": {"hp": 100, "health_per_tier": 0.2, "spell_power_per_tier": 0.0, "own_weapon_power_per_tier": 0.08, "mana_regen_share": 0.0,
+            "weapons": {"Daggers": 13, "Crossbow": 26},
+            "stealth": {"energy": 100, "per_second": 1.5, "cost": 40, "seconds": 8, "ambush": 0.75},
+            "card": "Stealth (Q / LB): unseen by monsters and traps", "keys": ["Q|stealth (dexterity energy)"], "pad": ["LB|stealth"]},
+  "MartialArtist": {"hp": 140, "health_per_tier": 0.2, "spell_power_per_tier": 0.12, "own_weapon_power_per_tier": 0.12, "mana_regen_share": 0.02},
+  "Summoner": {"hp": 85, "health_per_tier": 0.25, "spell_power_per_tier": 0.15, "own_weapon_power_per_tier": 0.0, "mana_regen_share": 0.04}
+ },
+ "kits": {
+  "Warrior": {
+   "2": {"weapon": "Longsword", "armour": "Desert Hero’s Armour", "shield": "Village Shield (green)", "rings": ["HP Potency Ring 2"]},
+   "3": {"weapon": "Templar Sword", "armour": "Crocodile Warrior’s Armour", "shield": "Heraldic Shield", "rings": ["HP Potency Ring 4"], "slash": "Ember Slash"},
+   "4": {"weapon": "Wakizashi", "armour": "Bear Warrior’s Armour", "shield": "Heater Shield", "rings": ["HP Potency Ring 6"], "slash": "Blood Slash"},
+   "5": {"weapon": "Ursag's Horn Blade", "armour": "Dark Knight’s Armour", "rings": ["HP Potency Ring 8"], "slash": "Crystal Slash"}},
+  "Mage": {
+   "2": {"rings": ["Magic Potency Ring 2"], "tomes": ["Frost Shard", "Ash Ward"]},
+   "3": {"rings": ["Magic Potency Ring 4"], "tomes": ["Frost Shard", "Ash Ward", "Bone Spear", "Chain Lightning", "Iron Skin"]},
+   "4": {"rings": ["Magic Potency Ring 6"], "tomes": ["Frost Shard", "Ash Ward", "Bone Spear", "Chain Lightning", "Iron Skin", "Fireball", "Bone Armor"]},
+   "5": {"rings": ["Magic Potency Ring 8"], "tomes": ["Frost Shard", "Ash Ward", "Bone Spear", "Chain Lightning", "Iron Skin", "Fireball", "Bone Armor", "Soul Rend"]}},
+  "Warlock": {
+   "2": {"armour": "Desert Hero’s Armour", "rings": ["HP Potency Ring 2"], "tomes": ["Frost Shard"]},
+   "3": {"armour": "Crocodile Warrior’s Armour", "rings": ["HP Potency Ring 4"], "tomes": ["Frost Shard", "Bone Spear", "Chain Lightning"]},
+   "4": {"armour": "Executioner’s Armour", "rings": ["HP Potency Ring 6"], "tomes": ["Frost Shard", "Bone Spear", "Chain Lightning", "Fireball"], "slash": "Blood Slash"},
+   "5": {"armour": "Dardan’s Armour", "rings": ["HP Potency Ring 8"], "tomes": ["Frost Shard", "Bone Spear", "Chain Lightning", "Fireball", "Soul Rend"], "slash": "Crystal Slash"}},
+  "Rogue": {
+   "2": {"armour": "Desert Hero’s Armour", "rings": ["Dexterity Ring 2"]},
+   "3": {"armour": "Orc Bruiser’s Armour", "rings": ["Dexterity Ring 4"], "slash": "Ember Slash"},
+   "4": {"armour": "Orc Bruiser’s Armour", "rings": ["Dexterity Ring 6"], "weapon": "Crossbow", "slash": "Blood Slash"},
+   "5": {"armour": "Desert Hero’s Armour", "rings": ["Dexterity Ring 8"], "weapon": "Dwarf Crossbow", "slash": "Crystal Slash"}},
+  "MartialArtist": {
+   "2": {"armour": "Desert Hero’s Armour", "rings": ["HP Potency Ring 2", "Dexterity Ring 2"]},
+   "3": {"armour": "Desert Hero’s Armour", "rings": ["HP Potency Ring 4", "Dexterity Ring 4"]},
+   "4": {"armour": "Orc Bruiser’s Armour", "rings": ["HP Potency Ring 6", "Dexterity Ring 6"]},
+   "5": {"armour": "Orc Bruiser’s Armour", "rings": ["HP Potency Ring 8", "Dexterity Ring 8"]}},
+  "Summoner": {
+   "1": {"army": 2},
+   "2": {"rings": ["Magic Potency Ring 2"], "army": 2},
+   "3": {"rings": ["Magic Potency Ring 4"], "army": 2},
+   "4": {"rings": ["Magic Potency Ring 6"], "army": 2},
+   "5": {"rings": ["Magic Potency Ring 8"], "army": 2}}
+ },
+ "potions": {"1": ["Medium Healing Potion", "Medium Mana Potion", "Medium Speed Potion"], "2": ["Uncommon Healing Potion", "Uncommon Mana Potion", "Uncommon Speed Potion"],
+             "3": ["Rare Healing Potion", "Rare Mana Potion", "Rare Speed Potion"], "4": ["Very Rare Healing Potion", "Very Rare Mana Potion", "Very Rare Speed Potion"],
+             "5": ["Legendary Healing Potion", "Legendary Mana Potion", "Legendary Speed Potion"]},
+ "trial": {"pack": 3, "seconds": 75, "boss_seconds": 90, "bosses": 2, "spawn_m": 9}
+}

@@ -803,6 +803,33 @@ public:
 	/** the highest a vault rises over its springing (cm) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") float CeilingMaxRise = 900.f;
 
+	// ---- mistward_castle, the list of 2026-11-01 (docs/improvements6.txt; RDMistward6.cpp, pipeline/unreal/880): each a
+	// switch, on the castle only
+	/** the Rogue's stealth (a hero whose DexEnergy is over 0): Q, the gamepad's LB or its quick slot hides her for her
+	 *  StealthSeconds at StealthCost of her dexterity energy (back DexPerSecond); monsters lose her and no trap goes off under
+	 *  her; her first blow or bolt out of it does AmbushBonus more and ends it; a speed potion fills the energy */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward6") bool bStealth = false;
+	/** the heroes grow as the tiers open (the hero's HealthPerTier, SpellPowerPerTier, UnarmedPowerPerTier for each tier open
+	 *  past the first), and her mana comes back as a share of her pool (ManaRegenShare) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward6") bool bTierGrowth = false;
+	/** the highest tier open (1 at the start) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") int32 GetOpenTier() const;
+	/** what the tiers opened give her hero now: her hit points' factor, a spell's and her fists' damage factors */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float TierHealthMul() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float TierSpellMul() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float TierOwnWeaponMul() const;
+	/** a weapon's damage factor from the tiers opened (a spell or chi: TierSpellMul; one of her own: TierOwnWeaponMul; a
+	 *  found one 1: its damage carries its own tier) */
+	float TierPowerOf(const FRDWeaponDef& W) const;
+	/** mana back a second with her pool at MaxMana */
+	float GetManaRegen(float MaxMana) const;
+	/** a tier opened: she grows (her hit points' new top, the message) */
+	void OnTierGrowth(int32 Tier);
+	/** the autoplay pilot steps back from a monster close in while she fights from afar (casters, a crossbow); her next try
+	 *  at stealth */
+	bool bAutoplayKiting = false, bAutoplayStealthFlee = false;
+	float AutoplayStealthNext = 0.f, AutoplayKiteEnd = 0.f, AutoplayKiteNext = 0.f;
+
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;

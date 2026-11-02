@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
+#include "HAL/FileManager.h"
 #include "InputCoreTypes.h"
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
@@ -176,6 +177,41 @@ void ARDHeroSelect::Tick(float Dt)
 				const bool bStarted = K >= 0 && Confirm();
 				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT command line hero %s: %s"), *Want, bStarted ? TEXT("started") : K < 0 ? TEXT("no such hero") : TEXT("not started (no level to open)"));
 				if (bStarted) return;
+			}
+			// (-RDMenuPick=<name>: the menu itself steps to that hero, one hero at a time, and starts her with AUTOPLAY (its
+			// length -RDMenuAutoplay=<seconds>, one of the menu's); -RDMenuGo=<file>: not before that file exists (a recording
+			// that starts on the menu: the recorder makes it once it records). Once a game run.)
+			static bool bRDMenuPickUsed = false;
+			FString Pick;
+			if (!bRDMenuPickUsed && FParse::Value(FCommandLine::Get(), TEXT("RDMenuPick="), Pick))
+			{
+				bRDMenuPickUsed = true;
+				MenuPickTarget = Heroes.IndexOfByPredicate([&Pick](const FRDHeroDef& H) { return H.Name.ToString().Equals(Pick, ESearchCase::IgnoreCase); });
+				FParse::Value(FCommandLine::Get(), TEXT("RDMenuGo="), MenuGoFile);
+				float S = -1.f;
+				// (a length the menu does not offer is added to its choices (the PR review's find: it was dropped, and the menu's own
+				// choice used))
+				if (FParse::Value(FCommandLine::Get(), TEXT("RDMenuAutoplay="), S) && S >= 0.f)
+				{
+					int32 K = AutoplayLengths.IndexOfByPredicate([S](float L) { return FMath::IsNearlyEqual(L, S, 0.5f); });
+					if (K < 0) K = AutoplayLengths.Add(S);
+					AutoplayChoice = K;
+				}
+				MenuPickNext = GetWorld()->GetTimeSeconds() + 2.f; bMenuPickHeld = false;
+				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT menu pick %s: %s"), *Pick, MenuPickTarget >= 0 ? TEXT("stepping to her") : TEXT("no such hero"));
+			}
+		}
+		if (MenuPickTarget >= 0 && GetWorld()->GetTimeSeconds() >= MenuPickNext)
+		{
+			const float Now = GetWorld()->GetTimeSeconds();
+			if (!MenuGoFile.IsEmpty() && !IFileManager::Get().FileExists(*MenuGoFile)) MenuPickNext = Now + 0.25f;
+			else if (Index != MenuPickTarget) { Step(1); MenuPickNext = Now + 1.4f; }
+			else if (!bMenuPickHeld) { bMenuPickHeld = true; MenuPickNext = Now + 2.5f; }
+			else
+			{
+				const int32 T = MenuPickTarget; MenuPickTarget = -1;
+				UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT menu pick: AUTOPLAY for %s, %.0f s"), *Heroes[T].Name.ToString(), AutoplayLengths.IsValidIndex(AutoplayChoice) ? AutoplayLengths[AutoplayChoice] : -1.f);
+				if (ConfirmAutoplay()) return;
 			}
 		}
 		if (bMouseUI) TickPointer(PC);

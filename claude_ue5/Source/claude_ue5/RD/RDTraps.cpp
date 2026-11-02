@@ -294,6 +294,8 @@ void ARDSection::TickTraps(float Dt, APawn* Her, URDCombatComponent* Pc)
 				if (Pc) Pc->ShowMessage(FString::Printf(TEXT("You spot a trap: %s (F to disarm)"), *D.Label));
 				if (Generator->bTrapOutline) OutlineTrap(I);          // (the third list: much more visible once seen)
 			}
+			// (mistward6: in stealth she passes over it and it stays set)
+			if (bNear && Dist < D.Radius && Pc && Pc->IsStealthed()) { Pc->NoteStealthTrap(HashCombine(GetTypeHash(Coord), (uint32)I)); continue; }
 			if (bNear && Dist < D.Radius && Pc && !Pc->IsDead() && !(Generator->DisarmKey == FIntVector(Coord.X, Coord.Y, I))) FireTrap(I);
 			continue;
 		}

@@ -543,7 +543,7 @@ AActor* ARDMonster::PickFoe(URDCombatComponent* Pc, bool& bFoePlayer) const
 		return Best;
 	}
 	// (a monster: her, unless she is veiled; or one of her allies nearer)
-	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsVeiled())
+	if (Pc && Pc->GetOwner() && !Pc->IsDead() && !Pc->IsHidden())          // (mistward6: or in stealth)
 	{
 		Best = Pc->GetOwner(); bFoePlayer = true;
 		BestD = FVector::Dist2D(Best->GetActorLocation(), L);
@@ -708,7 +708,8 @@ bool ARDMonster::TickCombat(float Dt)
 			if (!bMissBlind && Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f)
 			{
 				const float Dmg = Damage * (1.f - GetCurseShare());
-				if (bFoePlayer) { Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
+				// (mistward6: a blow that passes a hidden Rogue by carries no poison, weakness or slowness either)
+				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
 				else if (ARDMonster* Fm = Cast<ARDMonster>(P)) { Fm->ApplyDamageAt(Dmg, this, nullptr); G->AddHitText(Fm->GetActorLocation() + FVector(0, 0, Fm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false); }
 				++HitsLanded;
 			}

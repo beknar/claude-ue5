@@ -296,7 +296,9 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	const FRDWeaponDef& W = Generator->Weapons[Index];
 	// (a melee weapon: no bolt; a ranged one: a spell whose bolt is a mesh, the crossbow; magic has no bonus; level 5: a
 	// dexterity ring adds to the ranged bonus, a monster's weakening takes off)
-	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage());        // (the third list: a shrine's blessing of might)
+	// (mistward6: her spells, chi and fists grow with the tiers opened; her first blow out of stealth an ambush)
+	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage())        // (the third list: a shrine's blessing of might)
+		* Generator->TierPowerOf(W) * AmbushMul(Index);
 }
 
 float URDCombatComponent::GetBonusOf(int32 Index) const
@@ -421,6 +423,8 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	if (W->ManaCost > 0.f && !Generator->bInfiniteMana) Mana = FMath::Max(0.f, Mana - W->ManaCost);      // (martial_arts: never taken)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
+	// (mistward6: an attack out of stealth ends it, and is an ambush)
+	if (IsStealthed()) { bAmbushArmed = true; EndStealth(TEXT("attack")); }
 	SetSlowed(true);
 	return true;
 }
@@ -451,13 +455,16 @@ void URDCombatComponent::Strike()
 		if (bKilled) ++Kills;
 		// (its bonus and its effect on every monster the blow lands on; the hit's mark where it met it)
 		if (Sl) SlashHit(*Sl, Mo, Dmg, Mo->GetActorLocation() - D.GetSafeNormal() * Rad * 0.8f, true);
+		if (bAmbushArmed) AmbushDamage += Dmg;
 	}
+	if (bAny && bAmbushArmed) ++Ambushes;
 	if (bAny) { LastHitTime = GetWorld()->GetTimeSeconds(); WearOut(AttackIndex); }      // (a blow that landed wears the weapon)
 }
 
 void URDCombatComponent::EndAttack()
 {
 	AttackTime = -1.f;
+	bAmbushArmed = false;
 	SetSlowed(false);
 	StopCharge();
 	EndLimbFx();
@@ -468,6 +475,9 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 {
 	if (bDead || Amount <= 0.f) return;
 	if (IsDodging()) { ++DodgedHits; return; }
+	// (mistward6: in stealth nothing finds her: a blow or a shot already on its way passes her by (a shot whose shooter has
+	// died comes with no From: the PR review's find), and so does a trap that was going off before she hid)
+	if (IsStealthed()) { ++Evaded; return; }
 	const float Now = GetWorld()->GetTimeSeconds();
 	AActor* O = GetOwner();
 	// (level 5: her spells take their part first: a sanctum takes it all, a veil lets it miss, a ward takes it, a mirror
@@ -611,6 +621,7 @@ void URDCombatComponent::Fall()
 		}
 	}
 	EndLimbFx(true);          // (the effects on her fists and legs gone with her)
+	EndStealth(TEXT("down"));
 	bDead = true; ++Deaths; DeathTime = Now; bFallDone = false;
 	if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
 	if (AI && W && W->Death)
@@ -636,6 +647,7 @@ void URDCombatComponent::Revive(bool bToStart)
 	SlashAreas.Reset();
 	bDead = false; Health = MaxHealth; Mana = MaxMana; AttackTime = -1.f; StaggerUntil = -100.f; StopCharge(); EndLimbFx(true); EndRoll(); ShowLoadedBolt(true);
 	Effects.Reset(); SetSlowed(false); UpdateWalkSpeed();
+	ResetStealth(true);          // (mistward6: out of stealth, her dexterity energy full)
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
 	if (bToStart && O && Generator)
 	{
@@ -725,15 +737,20 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 			const FRDSpellDef* S = bSpell ? SpellOf(AttackIndex) : nullptr;
 			// (a scroll's spell goes off here: before it, a cast broken off gives the scroll back (TickScrollWeapon))
 			if (Generator && Generator->Weapons.IsValidIndex(AttackIndex) && Generator->Weapons[AttackIndex].bScroll) bScrollCast = true;
-			if (S && S->Kind != ERDSpellKind::Bolt) ReleaseSpell(AttackIndex);
+			// (mistward6: an ambush's factor holds for this release alone, and is used up by it: a blow, a bolt (its damage goes
+			// with it) or a spell that is no bolt (counted here))
+			bAmbushApplying = bAmbushArmed;
+			if (S && S->Kind != ERDSpellKind::Bolt) { ReleaseSpell(AttackIndex); if (bAmbushArmed) ++Ambushes; }
 			else if (bSpell) LaunchBolt();
 			else Strike();
+			bAmbushApplying = false; bAmbushArmed = false;
 		}
 		if (AttackTime >= AttackLen) EndAttack();
 	}
 	// out of a fight the hit points come back (not in random_dungeonmagic_level4: RegenPerSecond 0); mana comes back slowly
 	if (Health < MaxHealth && Generator->RegenPerSecond > 0.f && Now - LastHurtTime > Generator->RegenDelay) Health = FMath::Min(MaxHealth, Health + Generator->RegenPerSecond * Dt);
-	if (Mana < MaxMana) Mana = Generator->bInfiniteMana ? MaxMana : FMath::Min(MaxMana, Mana + Generator->ManaPerSecond * Dt);
+	if (Mana < MaxMana) Mana = Generator->bInfiniteMana ? MaxMana : FMath::Min(MaxMana, Mana + Generator->GetManaRegen(MaxMana) * Dt);
+	TickStealth(Dt, Now);          // (mistward6: the Rogue's stealth runs out, her dexterity energy comes back)
 	TickEffects(Dt);
 }
 
@@ -908,6 +925,8 @@ bool URDCombatComponent::UseItem(FName Name)
 		Effects.Add({ It.Kind, It.Amount, It.Seconds, Name });
 		UpdateWalkSpeed();
 		SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f%% speed for %.0f s"), *Lb, It.Amount * 100.f, It.Seconds));
+		// (mistward6: it fills the Rogue's dexterity energy)
+		if (MaxDexEnergy > 0.f && DexEnergy < MaxDexEnergy) { DexEnergy = MaxDexEnergy; SetMessage(FString::Printf(TEXT("Drank the %s:  +%.0f%% speed for %.0f s, your dexterity energy full"), *Lb, It.Amount * 100.f, It.Seconds)); }
 		break;
 	case ERDItemKind::Food:
 		if (Health >= MaxHealth) { SetMessage(TEXT("Your hit points are full")); return false; }
@@ -1794,7 +1813,7 @@ void URDCombatComponent::TickDevice(const APlayerController* PC)
 		EKeys::Gamepad_LeftTriggerAxis, EKeys::Gamepad_RightTriggerAxis };
 	static const FKey KeyboardKeys[] = {
 		EKeys::W, EKeys::A, EKeys::S, EKeys::D, EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right, EKeys::SpaceBar, EKeys::LeftShift,
-		EKeys::E, EKeys::R, EKeys::F, EKeys::M, EKeys::B, EKeys::One, EKeys::Two, EKeys::Three, EKeys::LeftMouseButton, EKeys::RightMouseButton };
+		EKeys::E, EKeys::R, EKeys::F, EKeys::M, EKeys::B, EKeys::Q, EKeys::One, EKeys::Two, EKeys::Three, EKeys::LeftMouseButton, EKeys::RightMouseButton };
 	for (const FKey& K : PadKeys) if (PC->IsInputKeyDown(K)) { bUsingGamepad = true; return; }
 	for (const FKey& K : PadAxes) if (FMath::Abs(PC->GetInputAnalogKeyState(K)) > 0.3f) { bUsingGamepad = true; return; }
 	for (const FKey& K : KeyboardKeys) if (PC->IsInputKeyDown(K)) { bUsingGamepad = false; return; }
@@ -1824,6 +1843,8 @@ void URDCombatComponent::TickCasterInput(const APlayerController* PC)
 		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) NextWeapon(-1);
 		if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top)) NextWeapon(1);
 		if (PC->WasInputKeyJustPressed(EKeys::B) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) StartRoll(FVector::ZeroVector);
+		// (mistward6: Q or LB, her stealth)
+		if (MaxDexEnergy > 0.f && (PC->WasInputKeyJustPressed(EKeys::Q) || PC->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder))) StartStealth();
 		// (the Martial Artist: V, the right mouse button or RT dashes forward into an attack)
 		if (Generator->DashClip && (PC->WasInputKeyJustPressed(EKeys::V) || PC->WasInputKeyJustPressed(EKeys::RightMouseButton) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightTrigger))) StartDash();
 		// (an ability made ready on the quick bar (the D-pad): the attack button makes it instead of a blow)
@@ -2007,6 +2028,8 @@ void URDCombatComponent::LaunchBolt()
 		SpellComps.Add(C); B.Mesh = C;
 		ShowLoadedBolt(false);
 	}
+	// (mistward6: a bolt shot out of stealth carries the ambush's damage with it (it lands after her attack has ended))
+	if (bAmbushArmed) { B.Dmg = GetDamageOf(AttackIndex); ++Ambushes; AmbushDamage += B.Dmg; bAmbushArmed = false; }
 	Bolts.Add(B);
 	++BoltsCast; LastBoltFrom = B.At;
 	// (the third list: a slash on a bow or a crossbow sweeps out with the shot)
@@ -2150,7 +2173,7 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 		DamageDealt += Amount; ++HitsLanded; bAny = true;
 		if (bKilled) ++Kills;
 	};
-	const float Dmg = GetDamageOf(B.Weapon);       // (with her ranged bonus for a crossbow's bolt)
+	const float Dmg = B.Dmg >= 0.f ? B.Dmg : GetDamageOf(B.Weapon);       // (with her ranged bonus for a crossbow's bolt; an ambush's, its own)
 	if (Direct && !Direct->IsDead())
 	{
 		Hurt(Direct, Dmg, At);

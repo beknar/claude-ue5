@@ -1,0 +1,3094 @@
+{
+ "tag": "b",
+ "plan": [
+  "balance"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "balance",
+   "ok": true,
+   "trials": {
+    "Warrior|1": {
+     "kit": {},
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 11.6,
+      "hp_left": 0.89,
+      "low": 0.89,
+      "max_hp": 140,
+      "dealt": 186,
+      "taken": 15,
+      "kills": 3,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 9.1,
+       "hp_left": 0.94,
+       "low": 0.94,
+       "max_hp": 140,
+       "dealt": 186,
+       "taken": 8,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 9.2,
+       "hp_left": 0.94,
+       "low": 0.94,
+       "max_hp": 140,
+       "dealt": 186,
+       "taken": 8,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 9.1,
+      "hp_left": 0.94,
+      "low": 0.94,
+      "max_hp": 140,
+      "dealt": 186,
+      "taken": 8,
+      "kills": 1,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warrior|2": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 2",
+        true
+       ]
+      ],
+      "armour": [
+       "Desert Hero’s Armour",
+       true
+      ],
+      "shield": [
+       "Village Shield (green)",
+       true
+      ],
+      "weapon": [
+       "Longsword",
+       1
+      ]
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 14.1,
+      "hp_left": 0.6,
+      "low": 0.46,
+      "max_hp": 198,
+      "dealt": 377,
+      "taken": 159,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 14.6,
+       "hp_left": 0.55,
+       "low": 0.55,
+       "max_hp": 198,
+       "dealt": 377,
+       "taken": 90,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 14.6,
+       "hp_left": 0.55,
+       "low": 0.55,
+       "max_hp": 198,
+       "dealt": 377,
+       "taken": 90,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 14.6,
+      "hp_left": 0.55,
+      "low": 0.55,
+      "max_hp": 198,
+      "dealt": 377,
+      "taken": 90,
+      "kills": 1,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warrior|3": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 4",
+        true
+       ]
+      ],
+      "armour": [
+       "Crocodile Warrior’s Armour",
+       true
+      ],
+      "shield": [
+       "Heraldic Shield",
+       true
+      ],
+      "weapon": [
+       "Templar Sword",
+       1
+      ],
+      "slash": [
+       "Ember Slash",
+       "Templar Sword",
+       true
+      ]
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 8.6,
+      "hp_left": 0.74,
+      "low": 0.74,
+      "max_hp": 267,
+      "dealt": 481,
+      "taken": 68,
+      "kills": 3,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.0,
+       "hp_left": 0.49,
+       "low": 0.34,
+       "max_hp": 267,
+       "dealt": 581,
+       "taken": 296,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.0,
+       "hp_left": 0.49,
+       "low": 0.34,
+       "max_hp": 267,
+       "dealt": 579,
+       "taken": 296,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 11.0,
+      "hp_left": 0.49,
+      "low": 0.34,
+      "max_hp": 267,
+      "dealt": 581,
+      "taken": 296,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warrior|4": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 6",
+        true
+       ]
+      ],
+      "armour": [
+       "Bear Warrior’s Armour",
+       true
+      ],
+      "shield": [
+       "Heater Shield",
+       true
+      ],
+      "weapon": [
+       "Wakizashi",
+       1
+      ],
+      "slash": [
+       "Blood Slash",
+       "Wakizashi",
+       true
+      ]
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 17.6,
+      "hp_left": 1.0,
+      "low": 0.92,
+      "max_hp": 345,
+      "dealt": 770,
+      "taken": 96,
+      "kills": 3,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 21.5,
+       "hp_left": 0.61,
+       "low": 0.46,
+       "max_hp": 345,
+       "dealt": 878,
+       "taken": 592,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 21.4,
+       "hp_left": 0.93,
+       "low": 0.48,
+       "max_hp": 345,
+       "dealt": 892,
+       "taken": 461,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 21.5,
+      "hp_left": 0.61,
+      "low": 0.46,
+      "max_hp": 345,
+      "dealt": 878,
+      "taken": 592,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warrior|5": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 8",
+        true
+       ]
+      ],
+      "armour": [
+       "Dark Knight’s Armour",
+       true
+      ],
+      "weapon": [
+       "Ursag's Horn Blade",
+       1
+      ],
+      "slash": [
+       "Crystal Slash",
+       "Ursag's Horn Blade",
+       true
+      ]
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 24.0,
+      "hp_left": 0.72,
+      "low": 0.45,
+      "max_hp": 433,
+      "dealt": 1211,
+      "taken": 609,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 24.6,
+       "hp_left": 0.46,
+       "low": 0.46,
+       "max_hp": 433,
+       "dealt": 1253,
+       "taken": 233,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 24.6,
+       "hp_left": 0.46,
+       "low": 0.46,
+       "max_hp": 433,
+       "dealt": 1253,
+       "taken": 233,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 24.6,
+      "hp_left": 0.46,
+      "low": 0.46,
+      "max_hp": 433,
+      "dealt": 1253,
+      "taken": 233,
+      "kills": 1,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Mage|1": {
+     "kit": {},
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 4.5,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 70,
+      "dealt": 189,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.7,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 70,
+       "dealt": 216,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.7,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 70,
+       "dealt": 216,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 4.7,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 70,
+      "dealt": 216,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Mage|2": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 2",
+        true
+       ]
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Ash Ward",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 8.1,
+      "hp_left": 0.94,
+      "low": 0.87,
+      "max_hp": 81,
+      "dealt": 361,
+      "taken": 10,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.6,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 81,
+       "dealt": 361,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.6,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 81,
+       "dealt": 361,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 7.6,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 81,
+      "dealt": 361,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Mage|3": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 4",
+        true
+       ]
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Ash Ward",
+        true
+       ],
+       [
+        "Bone Spear",
+        true
+       ],
+       [
+        "Chain Lightning",
+        true
+       ],
+       [
+        "Iron Skin",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 11.8,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 91,
+      "dealt": 471,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 10.2,
+       "hp_left": 1.0,
+       "low": 0.71,
+       "max_hp": 91,
+       "dealt": 580,
+       "taken": 52,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 1,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 10.2,
+       "hp_left": 1.0,
+       "low": 0.72,
+       "max_hp": 91,
+       "dealt": 579,
+       "taken": 52,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 1,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 10.2,
+      "hp_left": 1.0,
+      "low": 0.71,
+      "max_hp": 91,
+      "dealt": 580,
+      "taken": 52,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Mage|4": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 6",
+        true
+       ]
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Ash Ward",
+        true
+       ],
+       [
+        "Bone Spear",
+        true
+       ],
+       [
+        "Chain Lightning",
+        true
+       ],
+       [
+        "Iron Skin",
+        true
+       ],
+       [
+        "Fireball",
+        true
+       ],
+       [
+        "Bone Armor",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 8.7,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 102,
+      "dealt": 870,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.1,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 102,
+       "dealt": 879,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.2,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 102,
+       "dealt": 879,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 11.1,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 102,
+      "dealt": 879,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Mage|5": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 8",
+        true
+       ]
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Ash Ward",
+        true
+       ],
+       [
+        "Bone Spear",
+        true
+       ],
+       [
+        "Chain Lightning",
+        true
+       ],
+       [
+        "Iron Skin",
+        true
+       ],
+       [
+        "Fireball",
+        true
+       ],
+       [
+        "Bone Armor",
+        true
+       ],
+       [
+        "Soul Rend",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 18.6,
+      "hp_left": 0.7,
+      "low": 0.58,
+      "max_hp": 112,
+      "dealt": 1308,
+      "taken": 49,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 3,
+      "summons": 0
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 112,
+       "dealt": 1237,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.5,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 112,
+       "dealt": 1237,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 13.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 112,
+      "dealt": 1237,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warlock|1": {
+     "kit": {},
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 6.8,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 100,
+      "dealt": 175,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 6.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 100,
+       "dealt": 200,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 6.5,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 100,
+       "dealt": 200,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 6.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 100,
+      "dealt": 200,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warlock|2": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 2",
+        true
+       ]
+      ],
+      "armour": [
+       "Desert Hero’s Armour",
+       true
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 16.6,
+      "hp_left": 0.64,
+      "low": 0.64,
+      "max_hp": 150,
+      "dealt": 387,
+      "taken": 55,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.5,
+       "hp_left": 0.86,
+       "low": 0.86,
+       "max_hp": 150,
+       "dealt": 386,
+       "taken": 21,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.5,
+       "hp_left": 0.86,
+       "low": 0.86,
+       "max_hp": 150,
+       "dealt": 386,
+       "taken": 21,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 11.5,
+      "hp_left": 0.86,
+      "low": 0.86,
+      "max_hp": 150,
+      "dealt": 386,
+      "taken": 21,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warlock|3": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 4",
+        true
+       ]
+      ],
+      "armour": [
+       "Crocodile Warrior’s Armour",
+       true
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Bone Spear",
+        true
+       ],
+       [
+        "Chain Lightning",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 9.1,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 210,
+      "dealt": 498,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 0
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.4,
+       "hp_left": 0.65,
+       "low": 0.26,
+       "max_hp": 210,
+       "dealt": 586,
+       "taken": 200,
+       "kills": 1,
+       "left": [],
+       "used": 3,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.4,
+       "hp_left": 0.65,
+       "low": 0.26,
+       "max_hp": 210,
+       "dealt": 586,
+       "taken": 200,
+       "kills": 1,
+       "left": [],
+       "used": 3,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 11.4,
+      "hp_left": 0.65,
+      "low": 0.26,
+      "max_hp": 210,
+      "dealt": 586,
+      "taken": 200,
+      "kills": 1,
+      "left": [],
+      "used": 3,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warlock|4": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 6",
+        true
+       ]
+      ],
+      "armour": [
+       "Executioner’s Armour",
+       true
+      ],
+      "slash": [
+       "Blood Slash",
+       "Sword",
+       false
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Bone Spear",
+        true
+       ],
+       [
+        "Chain Lightning",
+        true
+       ],
+       [
+        "Fireball",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 14.2,
+      "hp_left": 0.93,
+      "low": 0.93,
+      "max_hp": 280,
+      "dealt": 806,
+      "taken": 20,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 17.5,
+       "hp_left": 0.88,
+       "low": 0.88,
+       "max_hp": 280,
+       "dealt": 889,
+       "taken": 32,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 1,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 21.3,
+       "hp_left": 0.77,
+       "low": 0.77,
+       "max_hp": 280,
+       "dealt": 878,
+       "taken": 65,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 2,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 17.5,
+      "hp_left": 0.88,
+      "low": 0.88,
+      "max_hp": 280,
+      "dealt": 889,
+      "taken": 32,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Warlock|5": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 8",
+        true
+       ]
+      ],
+      "armour": [
+       "Dardan’s Armour",
+       true
+      ],
+      "slash": [
+       "Crystal Slash",
+       "Sword",
+       false
+      ],
+      "tomes": [
+       [
+        "Frost Shard",
+        true
+       ],
+       [
+        "Bone Spear",
+        true
+       ],
+       [
+        "Chain Lightning",
+        true
+       ],
+       [
+        "Fireball",
+        true
+       ],
+       [
+        "Soul Rend",
+        true
+       ]
+      ]
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 17.6,
+      "hp_left": 0.58,
+      "low": 0.58,
+      "max_hp": 360,
+      "dealt": 1220,
+      "taken": 151,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 3,
+      "summons": 0
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 24.2,
+       "hp_left": 0.77,
+       "low": 0.77,
+       "max_hp": 360,
+       "dealt": 1269,
+       "taken": 83,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 3,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 24.3,
+       "hp_left": 0.77,
+       "low": 0.77,
+       "max_hp": 360,
+       "dealt": 1269,
+       "taken": 83,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 3,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 24.2,
+      "hp_left": 0.77,
+      "low": 0.77,
+      "max_hp": 360,
+      "dealt": 1269,
+      "taken": 83,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 3,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Rogue|1": {
+     "kit": {},
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 6.1,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 100,
+      "dealt": 254,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 2,
+      "kites": 1,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.5,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 100,
+       "dealt": 220,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 2,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.5,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 100,
+       "dealt": 220,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 2,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 4.5,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 100,
+      "dealt": 220,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 2,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Rogue|2": {
+     "kit": {
+      "rings": [
+       [
+        "Dexterity Ring 2",
+        true
+       ]
+      ],
+      "armour": [
+       "Desert Hero’s Armour",
+       true
+      ]
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 7.3,
+      "hp_left": 0.6,
+      "low": 0.6,
+      "max_hp": 120,
+      "dealt": 400,
+      "taken": 48,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 2,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 120,
+       "dealt": 400,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 2,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 120,
+       "dealt": 400,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 2,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 7.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 120,
+      "dealt": 400,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 2,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Rogue|3": {
+     "kit": {
+      "rings": [
+       [
+        "Dexterity Ring 4",
+        true
+       ]
+      ],
+      "armour": [
+       "Orc Bruiser’s Armour",
+       true
+      ],
+      "slash": [
+       "Ember Slash",
+       "Daggers",
+       false
+      ]
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 10.4,
+      "hp_left": 0.77,
+      "low": 0.77,
+      "max_hp": 140,
+      "dealt": 535,
+      "taken": 33,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 3,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 8.2,
+       "hp_left": 1.0,
+       "low": 0.55,
+       "max_hp": 140,
+       "dealt": 577,
+       "taken": 83,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 3,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 8.2,
+       "hp_left": 1.0,
+       "low": 0.55,
+       "max_hp": 140,
+       "dealt": 577,
+       "taken": 83,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 3,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 8.2,
+      "hp_left": 1.0,
+      "low": 0.55,
+      "max_hp": 140,
+      "dealt": 577,
+      "taken": 83,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 3,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Rogue|4": {
+     "kit": {
+      "rings": [
+       [
+        "Dexterity Ring 6",
+        true
+       ]
+      ],
+      "armour": [
+       "Orc Bruiser’s Armour",
+       true
+      ],
+      "weapon": [
+       "Crossbow",
+       1
+      ],
+      "slash": [
+       "Blood Slash",
+       "Crossbow",
+       false
+      ]
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 12.2,
+      "hp_left": 0.7,
+      "low": 0.7,
+      "max_hp": 160,
+      "dealt": 855,
+      "taken": 48,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 4,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 10.0,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 160,
+       "dealt": 939,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 4,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 9.9,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 160,
+       "dealt": 939,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 4,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 10.0,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 160,
+      "dealt": 939,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 4,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Rogue|5": {
+     "kit": {
+      "rings": [
+       [
+        "Dexterity Ring 8",
+        true
+       ]
+      ],
+      "armour": [
+       "Desert Hero’s Armour",
+       true
+      ],
+      "weapon": [
+       "Dwarf Crossbow",
+       2
+      ],
+      "slash": [
+       "Crystal Slash",
+       "Dwarf Crossbow",
+       false
+      ]
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 11.7,
+      "hp_left": 0.63,
+      "low": 0.63,
+      "max_hp": 180,
+      "dealt": 1336,
+      "taken": 66,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 4,
+      "kites": 2,
+      "summons": 0
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 9.8,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 180,
+       "dealt": 1252,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 3,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 9.9,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 180,
+       "dealt": 1252,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 3,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 9.8,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 180,
+      "dealt": 1252,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 3,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "MartialArtist|1": {
+     "kit": {},
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 6.5,
+      "hp_left": 0.96,
+      "low": 0.96,
+      "max_hp": 140,
+      "dealt": 204,
+      "taken": 6,
+      "kills": 3,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.8,
+       "hp_left": 0.94,
+       "low": 0.94,
+       "max_hp": 140,
+       "dealt": 180,
+       "taken": 9,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 5.4,
+       "hp_left": 0.94,
+       "low": 0.94,
+       "max_hp": 140,
+       "dealt": 204,
+       "taken": 9,
+       "kills": 1,
+       "left": [],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 4.8,
+      "hp_left": 0.94,
+      "low": 0.94,
+      "max_hp": 140,
+      "dealt": 180,
+      "taken": 9,
+      "kills": 1,
+      "left": [],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "MartialArtist|2": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 2",
+        true
+       ],
+       [
+        "Dexterity Ring 2",
+        true
+       ]
+      ],
+      "armour": [
+       "Desert Hero’s Armour",
+       true
+      ],
+      "unlocked": 2
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 9.2,
+      "hp_left": 0.88,
+      "low": 0.88,
+      "max_hp": 202,
+      "dealt": 442,
+      "taken": 25,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.1,
+       "hp_left": 0.9,
+       "low": 0.9,
+       "max_hp": 202,
+       "dealt": 383,
+       "taken": 21,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.1,
+       "hp_left": 0.9,
+       "low": 0.9,
+       "max_hp": 202,
+       "dealt": 383,
+       "taken": 21,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 7.1,
+      "hp_left": 0.9,
+      "low": 0.9,
+      "max_hp": 202,
+      "dealt": 383,
+      "taken": 21,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "MartialArtist|3": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 4",
+        true
+       ],
+       [
+        "Dexterity Ring 4",
+        true
+       ]
+      ],
+      "armour": [
+       "Desert Hero’s Armour",
+       true
+      ],
+      "unlocked": 4
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 9.9,
+      "hp_left": 0.89,
+      "low": 0.89,
+      "max_hp": 274,
+      "dealt": 529,
+      "taken": 29,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.6,
+       "hp_left": 0.58,
+       "low": 0.35,
+       "max_hp": 274,
+       "dealt": 603,
+       "taken": 281,
+       "kills": 1,
+       "left": [],
+       "used": 3,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.6,
+       "hp_left": 0.58,
+       "low": 0.54,
+       "max_hp": 274,
+       "dealt": 603,
+       "taken": 281,
+       "kills": 1,
+       "left": [],
+       "used": 3,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 11.6,
+      "hp_left": 0.58,
+      "low": 0.35,
+      "max_hp": 274,
+      "dealt": 603,
+      "taken": 281,
+      "kills": 1,
+      "left": [],
+      "used": 3,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "MartialArtist|4": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 6",
+        true
+       ],
+       [
+        "Dexterity Ring 6",
+        true
+       ]
+      ],
+      "armour": [
+       "Orc Bruiser’s Armour",
+       true
+      ],
+      "unlocked": 6
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 15.9,
+      "hp_left": 0.62,
+      "low": 0.62,
+      "max_hp": 358,
+      "dealt": 826,
+      "taken": 137,
+      "kills": 3,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.2,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 358,
+       "dealt": 955,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 12.7,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 358,
+       "dealt": 924,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 13.2,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 358,
+      "dealt": 955,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "MartialArtist|5": {
+     "kit": {
+      "rings": [
+       [
+        "HP Potency Ring 8",
+        true
+       ],
+       [
+        "Dexterity Ring 8",
+        true
+       ]
+      ],
+      "armour": [
+       "Orc Bruiser’s Armour",
+       true
+      ],
+      "unlocked": 8
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 25.5,
+      "hp_left": 0.56,
+      "low": 0.43,
+      "max_hp": 454,
+      "dealt": 1230,
+      "taken": 455,
+      "kills": 3,
+      "left": [],
+      "used": 3,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 23.8,
+       "hp_left": 0.81,
+       "low": 0.44,
+       "max_hp": 454,
+       "dealt": 1292,
+       "taken": 339,
+       "kills": 1,
+       "left": [],
+       "used": 3,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 41.3,
+       "hp_left": 0.44,
+       "low": 0.44,
+       "max_hp": 454,
+       "dealt": 1271,
+       "taken": 509,
+       "kills": 1,
+       "left": [],
+       "used": 3,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 23.8,
+      "hp_left": 0.81,
+      "low": 0.44,
+      "max_hp": 454,
+      "dealt": 1292,
+      "taken": 339,
+      "kills": 1,
+      "left": [],
+      "used": 3,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Summoner|1": {
+     "kit": {
+      "army": [
+       "Summon Tier 1",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 5.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 85,
+      "dealt": 189,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.6,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 85,
+       "dealt": 170,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 4.7,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 85,
+       "dealt": 170,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 4.6,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 85,
+      "dealt": 170,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Summoner|2": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 2",
+        true
+       ]
+      ],
+      "unlocked": 1,
+      "army": [
+       "Summon Tier 2",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 10.3,
+      "hp_left": 0.77,
+      "low": 0.75,
+      "max_hp": 106,
+      "dealt": 108,
+      "taken": 27,
+      "kills": 0,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 3
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 10.3,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 106,
+       "dealt": 147,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 3
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 10.3,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 106,
+       "dealt": 147,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 3
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 10.3,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 106,
+      "dealt": 147,
+      "taken": 0,
+      "kills": 0,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 3
+     },
+     "boss_wins": 2
+    },
+    "Summoner|3": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 4",
+        true
+       ]
+      ],
+      "unlocked": 2,
+      "army": [
+       "Summon Tier 3",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 14.0,
+      "hp_left": 0.77,
+      "low": 0.77,
+      "max_hp": 128,
+      "dealt": 60,
+      "taken": 29,
+      "kills": 0,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 5
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 11.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 128,
+       "dealt": 170,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 4
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.9,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 128,
+       "dealt": 209,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 1,
+       "summons": 4
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 11.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 128,
+      "dealt": 170,
+      "taken": 0,
+      "kills": 0,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 4
+     },
+     "boss_wins": 2
+    },
+    "Summoner|4": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 6",
+        true
+       ]
+      ],
+      "unlocked": 3,
+      "army": [
+       "Summon Tier 4",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 14.1,
+      "hp_left": 0.98,
+      "low": 0.9,
+      "max_hp": 149,
+      "dealt": 254,
+      "taken": 14,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 4
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 14.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 149,
+       "dealt": 396,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 4
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.9,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 149,
+       "dealt": 392,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 4
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 14.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 149,
+      "dealt": 396,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 4
+     },
+     "boss_wins": 2
+    },
+    "Summoner|5": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 8",
+        true
+       ]
+      ],
+      "unlocked": 4,
+      "army": [
+       "Summon Tier 5",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 23.3,
+      "hp_left": 1.0,
+      "low": 0.71,
+      "max_hp": 170,
+      "dealt": 200,
+      "taken": 115,
+      "kills": 1,
+      "left": [],
+      "used": 3,
+      "stealth": 0,
+      "kites": 3,
+      "summons": 6
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 21.1,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 170,
+       "dealt": 377,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 1,
+       "summons": 5
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 17.9,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 170,
+       "dealt": 395,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "used": 2,
+       "stealth": 0,
+       "kites": 1,
+       "summons": 5
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 21.1,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 377,
+      "taken": 0,
+      "kills": 0,
+      "left": [],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 5
+     },
+     "boss_wins": 2
+    }
+   },
+   "summary": {
+    "Warrior|1": [
+     true,
+     11.6,
+     0.89,
+     true,
+     9.1,
+     0.94
+    ],
+    "Warrior|2": [
+     true,
+     14.1,
+     0.6,
+     true,
+     14.6,
+     0.55
+    ],
+    "Warrior|3": [
+     true,
+     8.6,
+     0.74,
+     true,
+     11.0,
+     0.49
+    ],
+    "Warrior|4": [
+     true,
+     17.6,
+     1.0,
+     true,
+     21.5,
+     0.61
+    ],
+    "Warrior|5": [
+     true,
+     24.0,
+     0.72,
+     true,
+     24.6,
+     0.46
+    ],
+    "Mage|1": [
+     true,
+     4.5,
+     1.0,
+     true,
+     4.7,
+     1.0
+    ],
+    "Mage|2": [
+     true,
+     8.1,
+     0.94,
+     true,
+     7.6,
+     1.0
+    ],
+    "Mage|3": [
+     true,
+     11.8,
+     1.0,
+     true,
+     10.2,
+     1.0
+    ],
+    "Mage|4": [
+     true,
+     8.7,
+     1.0,
+     true,
+     11.1,
+     1.0
+    ],
+    "Mage|5": [
+     true,
+     18.6,
+     0.7,
+     true,
+     13.4,
+     1.0
+    ],
+    "Warlock|1": [
+     true,
+     6.8,
+     1.0,
+     true,
+     6.4,
+     1.0
+    ],
+    "Warlock|2": [
+     true,
+     16.6,
+     0.64,
+     true,
+     11.5,
+     0.86
+    ],
+    "Warlock|3": [
+     true,
+     9.1,
+     1.0,
+     true,
+     11.4,
+     0.65
+    ],
+    "Warlock|4": [
+     true,
+     14.2,
+     0.93,
+     true,
+     17.5,
+     0.88
+    ],
+    "Warlock|5": [
+     true,
+     17.6,
+     0.58,
+     true,
+     24.2,
+     0.77
+    ],
+    "Rogue|1": [
+     true,
+     6.1,
+     1.0,
+     true,
+     4.5,
+     1.0
+    ],
+    "Rogue|2": [
+     true,
+     7.3,
+     0.6,
+     true,
+     7.4,
+     1.0
+    ],
+    "Rogue|3": [
+     true,
+     10.4,
+     0.77,
+     true,
+     8.2,
+     1.0
+    ],
+    "Rogue|4": [
+     true,
+     12.2,
+     0.7,
+     true,
+     10.0,
+     1.0
+    ],
+    "Rogue|5": [
+     true,
+     11.7,
+     0.63,
+     true,
+     9.8,
+     1.0
+    ],
+    "MartialArtist|1": [
+     true,
+     6.5,
+     0.96,
+     true,
+     4.8,
+     0.94
+    ],
+    "MartialArtist|2": [
+     true,
+     9.2,
+     0.88,
+     true,
+     7.1,
+     0.9
+    ],
+    "MartialArtist|3": [
+     true,
+     9.9,
+     0.89,
+     true,
+     11.6,
+     0.58
+    ],
+    "MartialArtist|4": [
+     true,
+     15.9,
+     0.62,
+     true,
+     13.2,
+     1.0
+    ],
+    "MartialArtist|5": [
+     true,
+     25.5,
+     0.56,
+     true,
+     23.8,
+     0.81
+    ],
+    "Summoner|1": [
+     true,
+     5.4,
+     1.0,
+     true,
+     4.6,
+     1.0
+    ],
+    "Summoner|2": [
+     true,
+     10.3,
+     0.77,
+     true,
+     10.3,
+     1.0
+    ],
+    "Summoner|3": [
+     true,
+     14.0,
+     0.77,
+     true,
+     11.4,
+     1.0
+    ],
+    "Summoner|4": [
+     true,
+     14.1,
+     0.98,
+     true,
+     14.4,
+     1.0
+    ],
+    "Summoner|5": [
+     true,
+     23.3,
+     1.0,
+     true,
+     21.1,
+     1.0
+    ]
+   },
+   "boss_wins": {
+    "Warrior": 10,
+    "Mage": 10,
+    "Warlock": 10,
+    "Rogue": 10,
+    "MartialArtist": 10,
+    "Summoner": 10
+   },
+   "spread": {
+    "1": 2.58,
+    "2": 2.27,
+    "3": 1.63,
+    "4": 2.02,
+    "5": 2.18
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "error": null,
+ "windows_shown_again": 2
+}

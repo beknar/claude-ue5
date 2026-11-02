@@ -1,0 +1,4395 @@
+{
+ "heroes": [
+  {
+   "name": "Warrior",
+   "title": "WARRIOR",
+   "hp": 140.0,
+   "mana": 0.0,
+   "regen": 0.0,
+   "melee": 0.3,
+   "ranged": 0.0,
+   "type_bonus": {},
+   "dex_types": [],
+   "wears": [
+    "LIGHT",
+    "MEDIUM",
+    "HEAVY"
+   ],
+   "rings": [
+    "HEALTH"
+   ],
+   "health_per_tier": 0.18000000715255737,
+   "spell_power_per_tier": 0.0,
+   "own_weapon_power_per_tier": 0.0,
+   "mana_regen_share": 0.0,
+   "dex_energy": 0.0,
+   "dex_per_second": 0.0,
+   "stealth_cost": 0.0,
+   "stealth_seconds": 0.0,
+   "ambush": 0.0,
+   "per_boss": 2,
+   "weapons": [
+    {
+     "name": "Dagger",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 1.7552,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    }
+   ],
+   "locked": []
+  },
+  {
+   "name": "Mage",
+   "title": "MAGE",
+   "hp": 70.0,
+   "mana": 100.0,
+   "regen": 2.0,
+   "melee": 0.0,
+   "ranged": 0.0,
+   "type_bonus": {},
+   "dex_types": [],
+   "wears": [],
+   "rings": [
+    "MAGIC"
+   ],
+   "health_per_tier": 0.15000000596046448,
+   "spell_power_per_tier": 0.11999999731779099,
+   "own_weapon_power_per_tier": 0.0,
+   "mana_regen_share": 0.02500000037252903,
+   "dex_energy": 0.0,
+   "dex_per_second": 0.0,
+   "stealth_cost": 0.0,
+   "stealth_seconds": 0.0,
+   "ambush": 0.0,
+   "per_boss": 2,
+   "weapons": [
+    {
+     "name": "Fire",
+     "damage": 25.0,
+     "reach": 1400.0,
+     "rate": 1.15,
+     "clip_s": [
+      0.795,
+      0.878,
+      0.928
+     ],
+     "spell": true,
+     "mana": 8.0,
+     "cooldown": 0.0,
+     "spell_index": 0,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Dark Fire",
+     "damage": 38.0,
+     "reach": 1400.0,
+     "rate": 1.15,
+     "clip_s": [
+      0.795,
+      0.878,
+      0.928
+     ],
+     "spell": true,
+     "mana": 14.0,
+     "cooldown": 0.0,
+     "spell_index": 1,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    }
+   ],
+   "locked": []
+  },
+  {
+   "name": "Warlock",
+   "title": "WARLOCK",
+   "hp": 100.0,
+   "mana": 60.0,
+   "regen": 1.2000000476837158,
+   "melee": 0.0,
+   "ranged": 0.0,
+   "type_bonus": {},
+   "dex_types": [],
+   "wears": [
+    "LIGHT",
+    "MEDIUM"
+   ],
+   "rings": [
+    "MAGIC",
+    "HEALTH"
+   ],
+   "health_per_tier": 0.25,
+   "spell_power_per_tier": 0.20000000298023224,
+   "own_weapon_power_per_tier": 0.30000001192092896,
+   "mana_regen_share": 0.02500000037252903,
+   "dex_energy": 0.0,
+   "dex_per_second": 0.0,
+   "stealth_cost": 0.0,
+   "stealth_seconds": 0.0,
+   "ambush": 0.0,
+   "per_boss": 2,
+   "weapons": [
+    {
+     "name": "Sword",
+     "damage": 22.0,
+     "reach": 170.0,
+     "rate": 1.15,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Fire",
+     "damage": 25.0,
+     "reach": 1400.0,
+     "rate": 1.15,
+     "clip_s": [
+      0.795,
+      0.928
+     ],
+     "spell": true,
+     "mana": 10.0,
+     "cooldown": 0.0,
+     "spell_index": 0,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": true,
+     "rating": 0
+    }
+   ],
+   "locked": []
+  },
+  {
+   "name": "Rogue",
+   "title": "ROGUE",
+   "hp": 100.0,
+   "mana": 0.0,
+   "regen": 0.0,
+   "melee": 0.0,
+   "ranged": 0.3,
+   "type_bonus": {},
+   "dex_types": [],
+   "wears": [
+    "LIGHT"
+   ],
+   "rings": [
+    "DEXTERITY"
+   ],
+   "health_per_tier": 0.20000000298023224,
+   "spell_power_per_tier": 0.0,
+   "own_weapon_power_per_tier": 0.07999999821186066,
+   "mana_regen_share": 0.0,
+   "dex_energy": 100.0,
+   "dex_per_second": 1.5,
+   "stealth_cost": 40.0,
+   "stealth_seconds": 8.0,
+   "ambush": 0.75,
+   "per_boss": 2,
+   "weapons": [
+    {
+     "name": "Daggers",
+     "damage": 13.0,
+     "reach": 150.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Crossbow",
+     "damage": 26.0,
+     "reach": 2600.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    }
+   ],
+   "locked": []
+  },
+  {
+   "name": "MartialArtist",
+   "title": "MARTIAL ARTIST",
+   "hp": 140.0,
+   "mana": 100.0,
+   "regen": 2.0,
+   "melee": 0.0,
+   "ranged": 0.0,
+   "type_bonus": {
+    "short blades": 0.3
+   },
+   "dex_types": [
+    "unarmed",
+    "short blades"
+   ],
+   "wears": [
+    "LIGHT"
+   ],
+   "rings": [
+    "HEALTH",
+    "DEXTERITY"
+   ],
+   "health_per_tier": 0.20000000298023224,
+   "spell_power_per_tier": 0.11999999731779099,
+   "own_weapon_power_per_tier": 0.11999999731779099,
+   "mana_regen_share": 0.019999999552965164,
+   "dex_energy": 0.0,
+   "dex_per_second": 0.0,
+   "stealth_cost": 0.0,
+   "stealth_seconds": 0.0,
+   "ambush": 0.0,
+   "per_boss": 2,
+   "weapons": [
+    {
+     "name": "Fists",
+     "damage": 44.0,
+     "reach": 160.0,
+     "rate": 1.15,
+     "clip_s": [
+      2.208,
+      1.375
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "unarmed",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Straight Punch",
+     "damage": 23.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.62
+     ],
+     "spell": true,
+     "mana": 7.0,
+     "cooldown": 0.0,
+     "spell_index": 30,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Side Kick",
+     "damage": 45.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.8
+     ],
+     "spell": true,
+     "mana": 17.0,
+     "cooldown": 0.0,
+     "spell_index": 31,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    }
+   ],
+   "locked": [
+    {
+     "name": "Smashing Strike",
+     "damage": 63.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.05
+     ],
+     "spell": true,
+     "mana": 27.0,
+     "cooldown": 0.0,
+     "spell_index": 32,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Roundhouse Kick",
+     "damage": 80.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.8
+     ],
+     "spell": true,
+     "mana": 37.0,
+     "cooldown": 0.0,
+     "spell_index": 33,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Chain Punch",
+     "damage": 96.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.2
+     ],
+     "spell": true,
+     "mana": 47.0,
+     "cooldown": 0.0,
+     "spell_index": 34,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Rear Kick",
+     "damage": 111.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 57.0,
+     "cooldown": 0.0,
+     "spell_index": 35,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Piercing Palm",
+     "damage": 125.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.9
+     ],
+     "spell": true,
+     "mana": 67.0,
+     "cooldown": 0.0,
+     "spell_index": 36,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Axe Kick",
+     "damage": 127.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.92
+     ],
+     "spell": true,
+     "mana": 68.0,
+     "cooldown": 0.0,
+     "spell_index": 37,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Meteor Fist",
+     "damage": 140.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.45
+     ],
+     "spell": true,
+     "mana": 78.0,
+     "cooldown": 0.0,
+     "spell_index": 38,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Spinning Kick",
+     "damage": 154.0,
+     "reach": 400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.15
+     ],
+     "spell": true,
+     "mana": 88.0,
+     "cooldown": 0.0,
+     "spell_index": 39,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    }
+   ]
+  },
+  {
+   "name": "Summoner",
+   "title": "SUMMONER",
+   "hp": 85.0,
+   "mana": 50.0,
+   "regen": 1.0,
+   "melee": 0.0,
+   "ranged": 0.0,
+   "type_bonus": {},
+   "dex_types": [],
+   "wears": [],
+   "rings": [
+    "MAGIC"
+   ],
+   "health_per_tier": 0.25,
+   "spell_power_per_tier": 0.15000000596046448,
+   "own_weapon_power_per_tier": 0.0,
+   "mana_regen_share": 0.03999999910593033,
+   "dex_energy": 0.0,
+   "dex_per_second": 0.0,
+   "stealth_cost": 0.0,
+   "stealth_seconds": 0.0,
+   "ambush": 0.0,
+   "per_boss": 1,
+   "weapons": [
+    {
+     "name": "Fire",
+     "damage": 25.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 8.0,
+     "cooldown": 0.0,
+     "spell_index": 0,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Dark Fire",
+     "damage": 38.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 14.0,
+     "cooldown": 0.0,
+     "spell_index": 1,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Summon Tier 1",
+     "damage": 0.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.65
+     ],
+     "spell": true,
+     "mana": 25.0,
+     "cooldown": 0.0,
+     "spell_index": 40,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.5,
+     "alongside": false,
+     "rating": 0
+    }
+   ],
+   "locked": [
+    {
+     "name": "Summon Tier 2",
+     "damage": 0.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.45
+     ],
+     "spell": true,
+     "mana": 25.0,
+     "cooldown": 0.0,
+     "spell_index": 41,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.5,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Summon Tier 3",
+     "damage": 0.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      2.0
+     ],
+     "spell": true,
+     "mana": 25.0,
+     "cooldown": 0.0,
+     "spell_index": 42,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.5,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Summon Tier 4",
+     "damage": 0.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      2.2
+     ],
+     "spell": true,
+     "mana": 25.0,
+     "cooldown": 0.0,
+     "spell_index": 43,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.5,
+     "alongside": false,
+     "rating": 0
+    },
+    {
+     "name": "Summon Tier 5",
+     "damage": 0.0,
+     "reach": 1400.0,
+     "rate": 1.0,
+     "clip_s": [
+      1.95
+     ],
+     "spell": true,
+     "mana": 25.0,
+     "cooldown": 0.0,
+     "spell_index": 44,
+     "type": "",
+     "crossbow": false,
+     "mana_share": 0.5,
+     "alongside": false,
+     "rating": 0
+    }
+   ]
+  }
+ ],
+ "weapons": [
+  {
+   "name": "Viking Shortsword",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Viking Shortsword",
+     "damage": 20.0,
+     "reach": 165.0,
+     "rate": 1.0726,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Warlock": {
+     "name": "Viking Shortsword",
+     "damage": 20.0,
+     "reach": 165.0,
+     "rate": 0.8311,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    }
+   }
+  },
+  {
+   "name": "Sherwood Sword",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Sherwood Sword",
+     "damage": 20.0,
+     "reach": 165.0,
+     "rate": 1.0726,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Warlock": {
+     "name": "Sherwood Sword",
+     "damage": 20.0,
+     "reach": 165.0,
+     "rate": 0.8311,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    }
+   }
+  },
+  {
+   "name": "Orc Cleaver",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Orc Cleaver",
+     "damage": 30.0,
+     "reach": 165.0,
+     "rate": 0.9495,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    },
+    "Warlock": {
+     "name": "Orc Cleaver",
+     "damage": 30.0,
+     "reach": 165.0,
+     "rate": 0.7357,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    }
+   }
+  },
+  {
+   "name": "Toothed Bone Sword",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Toothed Bone Sword",
+     "damage": 34.0,
+     "reach": 165.0,
+     "rate": 0.8518,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    },
+    "Warlock": {
+     "name": "Toothed Bone Sword",
+     "damage": 34.0,
+     "reach": 165.0,
+     "rate": 0.66,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    }
+   }
+  },
+  {
+   "name": "Arming Sword",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Arming Sword",
+     "damage": 26.0,
+     "reach": 175.0,
+     "rate": 0.8518,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    },
+    "Warlock": {
+     "name": "Arming Sword",
+     "damage": 26.0,
+     "reach": 175.0,
+     "rate": 0.66,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    }
+   }
+  },
+  {
+   "name": "Longsword",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Longsword",
+     "damage": 29.0,
+     "reach": 175.0,
+     "rate": 0.7723,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 7
+    },
+    "Warlock": {
+     "name": "Longsword",
+     "damage": 29.0,
+     "reach": 175.0,
+     "rate": 0.5984,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 7
+    }
+   }
+  },
+  {
+   "name": "Viking Sword",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Viking Sword",
+     "damage": 29.0,
+     "reach": 175.0,
+     "rate": 0.7723,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 7
+    },
+    "Warlock": {
+     "name": "Viking Sword",
+     "damage": 29.0,
+     "reach": 175.0,
+     "rate": 0.5984,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 7
+    }
+   }
+  },
+  {
+   "name": "Veteran's Sword",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Veteran's Sword",
+     "damage": 42.0,
+     "reach": 175.0,
+     "rate": 0.7063,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 8
+    },
+    "Warlock": {
+     "name": "Veteran's Sword",
+     "damage": 42.0,
+     "reach": 175.0,
+     "rate": 0.5473,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 8
+    }
+   }
+  },
+  {
+   "name": "Templar Sword",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Templar Sword",
+     "damage": 42.0,
+     "reach": 175.0,
+     "rate": 0.7063,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 8
+    },
+    "Warlock": {
+     "name": "Templar Sword",
+     "damage": 42.0,
+     "reach": 175.0,
+     "rate": 0.5473,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "one handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 8
+    }
+   }
+  },
+  {
+   "name": "Plate Knight's Sword",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Plate Knight's Sword",
+     "damage": 46.0,
+     "reach": 210.0,
+     "rate": 2.0225,
+     "clip_s": [
+      3.0
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 9
+    },
+    "Warlock": {
+     "name": "Plate Knight's Sword",
+     "damage": 46.0,
+     "reach": 210.0,
+     "rate": 0.5043,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 9
+    }
+   }
+  },
+  {
+   "name": "Paladin's Sword",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Paladin's Sword",
+     "damage": 46.0,
+     "reach": 210.0,
+     "rate": 2.0225,
+     "clip_s": [
+      3.0
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 9
+    },
+    "Warlock": {
+     "name": "Paladin's Sword",
+     "damage": 46.0,
+     "reach": 210.0,
+     "rate": 0.5043,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 9
+    }
+   }
+  },
+  {
+   "name": "Dark Knight's Sword",
+   "tiers": [
+    3
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Dark Knight's Sword",
+     "damage": 63.0,
+     "reach": 210.0,
+     "rate": 1.875,
+     "clip_s": [
+      3.0
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 10
+    },
+    "Warlock": {
+     "name": "Dark Knight's Sword",
+     "damage": 63.0,
+     "reach": 210.0,
+     "rate": 0.4675,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 10
+    }
+   }
+  },
+  {
+   "name": "Ursag's Horn Blade",
+   "tiers": [
+    4,
+    5
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Ursag's Horn Blade",
+     "damage": 78.0,
+     "reach": 210.0,
+     "rate": 1.875,
+     "clip_s": [
+      3.0
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 10
+    },
+    "Warlock": {
+     "name": "Ursag's Horn Blade",
+     "damage": 78.0,
+     "reach": 210.0,
+     "rate": 0.4675,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "two handed sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 10
+    }
+   }
+  },
+  {
+   "name": "Eastern Sabre",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Eastern Sabre",
+     "damage": 20.0,
+     "reach": 180.0,
+     "rate": 1.0726,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "curved and eastern sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Warlock": {
+     "name": "Eastern Sabre",
+     "damage": 20.0,
+     "reach": 180.0,
+     "rate": 0.8311,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "curved and eastern sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    }
+   }
+  },
+  {
+   "name": "Katana",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Katana",
+     "damage": 30.0,
+     "reach": 180.0,
+     "rate": 0.9495,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "curved and eastern sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    },
+    "Warlock": {
+     "name": "Katana",
+     "damage": 30.0,
+     "reach": 180.0,
+     "rate": 0.7357,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "curved and eastern sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    }
+   }
+  },
+  {
+   "name": "Wakizashi",
+   "tiers": [
+    3
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Wakizashi",
+     "damage": 43.0,
+     "reach": 180.0,
+     "rate": 0.8518,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "curved and eastern sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    },
+    "Warlock": {
+     "name": "Wakizashi",
+     "damage": 43.0,
+     "reach": 180.0,
+     "rate": 0.66,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "curved and eastern sword",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    }
+   }
+  },
+  {
+   "name": "Dagger",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Dagger",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 1.7552,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Warlock": {
+     "name": "Dagger",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 1.36,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Rogue": {
+     "name": "Dagger",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "MartialArtist": {
+     "name": "Dagger",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Summoner": {
+     "name": "Dagger",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    }
+   }
+  },
+  {
+   "name": "Leaf-Blade Knife",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Leaf-Blade Knife",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 1.7552,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Warlock": {
+     "name": "Leaf-Blade Knife",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 1.36,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Rogue": {
+     "name": "Leaf-Blade Knife",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "MartialArtist": {
+     "name": "Leaf-Blade Knife",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Summoner": {
+     "name": "Leaf-Blade Knife",
+     "damage": 11.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    }
+   }
+  },
+  {
+   "name": "Obsidian Knife",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Obsidian Knife",
+     "damage": 14.0,
+     "reach": 150.0,
+     "rate": 1.7552,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Warlock": {
+     "name": "Obsidian Knife",
+     "damage": 14.0,
+     "reach": 150.0,
+     "rate": 1.36,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Rogue": {
+     "name": "Obsidian Knife",
+     "damage": 14.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "MartialArtist": {
+     "name": "Obsidian Knife",
+     "damage": 14.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    },
+    "Summoner": {
+     "name": "Obsidian Knife",
+     "damage": 14.0,
+     "reach": 150.0,
+     "rate": 0.8691,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 1
+    }
+   }
+  },
+  {
+   "name": "Bone Blade",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Bone Blade",
+     "damage": 18.0,
+     "reach": 150.0,
+     "rate": 1.448,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Warlock": {
+     "name": "Bone Blade",
+     "damage": 18.0,
+     "reach": 150.0,
+     "rate": 1.122,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Rogue": {
+     "name": "Bone Blade",
+     "damage": 18.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "MartialArtist": {
+     "name": "Bone Blade",
+     "damage": 18.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Summoner": {
+     "name": "Bone Blade",
+     "damage": 18.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    }
+   }
+  },
+  {
+   "name": "Combat Knife",
+   "tiers": [
+    3
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Combat Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 1.448,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Warlock": {
+     "name": "Combat Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 1.122,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Rogue": {
+     "name": "Combat Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "MartialArtist": {
+     "name": "Combat Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Summoner": {
+     "name": "Combat Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    }
+   }
+  },
+  {
+   "name": "Survival Knife",
+   "tiers": [
+    3
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Survival Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 1.448,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Warlock": {
+     "name": "Survival Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 1.122,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Rogue": {
+     "name": "Survival Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "MartialArtist": {
+     "name": "Survival Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    },
+    "Summoner": {
+     "name": "Survival Knife",
+     "damage": 23.0,
+     "reach": 150.0,
+     "rate": 0.717,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 2
+    }
+   }
+  },
+  {
+   "name": "Kukri",
+   "tiers": [
+    4
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Kukri",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 1.2323,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Warlock": {
+     "name": "Kukri",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.9549,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Rogue": {
+     "name": "Kukri",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "MartialArtist": {
+     "name": "Kukri",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Summoner": {
+     "name": "Kukri",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    }
+   }
+  },
+  {
+   "name": "Sniper's Knife",
+   "tiers": [
+    4
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Sniper's Knife",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 1.2323,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Warlock": {
+     "name": "Sniper's Knife",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.9549,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Rogue": {
+     "name": "Sniper's Knife",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "MartialArtist": {
+     "name": "Sniper's Knife",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Summoner": {
+     "name": "Sniper's Knife",
+     "damage": 35.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    }
+   }
+  },
+  {
+   "name": "Wrist Blade",
+   "tiers": [
+    5
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Wrist Blade",
+     "damage": 42.0,
+     "reach": 150.0,
+     "rate": 1.2323,
+     "clip_s": [
+      1.042,
+      1.008,
+      0.846
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Warlock": {
+     "name": "Wrist Blade",
+     "damage": 42.0,
+     "reach": 150.0,
+     "rate": 0.9549,
+     "clip_s": [
+      0.735,
+      0.805,
+      0.704
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Rogue": {
+     "name": "Wrist Blade",
+     "damage": 42.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "MartialArtist": {
+     "name": "Wrist Blade",
+     "damage": 42.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    },
+    "Summoner": {
+     "name": "Wrist Blade",
+     "damage": 42.0,
+     "reach": 150.0,
+     "rate": 0.6102,
+     "clip_s": [
+      0.451,
+      0.482,
+      0.501
+     ],
+     "spell": false,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "short blades",
+     "crossbow": false,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 3
+    }
+   }
+  },
+  {
+   "name": "Longbow",
+   "tiers": [
+    1
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Longbow",
+     "damage": 20.0,
+     "reach": 3000.0,
+     "rate": 1.0556,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Warlock": {
+     "name": "Longbow",
+     "damage": 20.0,
+     "reach": 3000.0,
+     "rate": 1.0556,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Rogue": {
+     "name": "Longbow",
+     "damage": 20.0,
+     "reach": 3000.0,
+     "rate": 1.0556,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    }
+   }
+  },
+  {
+   "name": "Viking Bow",
+   "tiers": [
+    2
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Viking Bow",
+     "damage": 26.0,
+     "reach": 3000.0,
+     "rate": 1.0556,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Warlock": {
+     "name": "Viking Bow",
+     "damage": 26.0,
+     "reach": 3000.0,
+     "rate": 1.0556,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    },
+    "Rogue": {
+     "name": "Viking Bow",
+     "damage": 26.0,
+     "reach": 3000.0,
+     "rate": 1.0556,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 4
+    }
+   }
+  },
+  {
+   "name": "Crossbow",
+   "tiers": [
+    3
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Crossbow",
+     "damage": 38.0,
+     "reach": 2600.0,
+     "rate": 0.9344,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    },
+    "Warlock": {
+     "name": "Crossbow",
+     "damage": 38.0,
+     "reach": 2600.0,
+     "rate": 0.9344,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    },
+    "Rogue": {
+     "name": "Crossbow",
+     "damage": 38.0,
+     "reach": 2600.0,
+     "rate": 0.9344,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 5
+    }
+   }
+  },
+  {
+   "name": "Dwarf Crossbow",
+   "tiers": [
+    4,
+    5
+   ],
+   "fits": {
+    "Warrior": {
+     "name": "Dwarf Crossbow",
+     "damage": 53.0,
+     "reach": 2800.0,
+     "rate": 0.8382,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    },
+    "Warlock": {
+     "name": "Dwarf Crossbow",
+     "damage": 53.0,
+     "reach": 2800.0,
+     "rate": 0.8382,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    },
+    "Rogue": {
+     "name": "Dwarf Crossbow",
+     "damage": 53.0,
+     "reach": 2800.0,
+     "rate": 0.8382,
+     "clip_s": [
+      0.95
+     ],
+     "spell": true,
+     "mana": 0.0,
+     "cooldown": 0.0,
+     "spell_index": -1,
+     "type": "ranged",
+     "crossbow": true,
+     "mana_share": 0.0,
+     "alongside": false,
+     "rating": 6
+    }
+   }
+  }
+ ],
+ "armour": [
+  {
+   "name": "Plate Armour",
+   "tiers": [
+    4
+   ],
+   "amount": 0.4,
+   "slower": 0.21,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Lady Knight’s Armour",
+   "tiers": [
+    4
+   ],
+   "amount": 0.4,
+   "slower": 0.21,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Paladin’s Armour",
+   "tiers": [
+    4
+   ],
+   "amount": 0.4,
+   "slower": 0.21,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Dark Knight’s Armour",
+   "tiers": [
+    4
+   ],
+   "amount": 0.45,
+   "slower": 0.24,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Broddi’s Dwarf Armour",
+   "tiers": [
+    4
+   ],
+   "amount": 0.45,
+   "slower": 0.24,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Epic Plate (Male)",
+   "tiers": [
+    5
+   ],
+   "amount": 0.5,
+   "slower": 0.27,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Epic Plate (Female)",
+   "tiers": [
+    5
+   ],
+   "amount": 0.5,
+   "slower": 0.27,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Bear Warrior’s Armour",
+   "tiers": [
+    3
+   ],
+   "amount": 0.35,
+   "slower": 0.12,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Elephant Warrior’s Armour",
+   "tiers": [
+    3
+   ],
+   "amount": 0.35,
+   "slower": 0.09,
+   "weight": "HEAVY"
+  },
+  {
+   "name": "Crocodile Warrior’s Armour",
+   "tiers": [
+    2
+   ],
+   "amount": 0.3,
+   "slower": 0.15,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Split Armour",
+   "tiers": [
+    2
+   ],
+   "amount": 0.25,
+   "slower": 0.12,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Desert Hero’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.2,
+   "slower": 0.12,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Tiefling’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.15,
+   "slower": 0.09,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Orme’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.1,
+   "slower": 0.06,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Templar’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.2,
+   "slower": 0.12,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Eastern Knight’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.2,
+   "slower": 0.12,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Demonic Armour",
+   "tiers": [
+    2
+   ],
+   "amount": 0.25,
+   "slower": 0.15,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Bedvar’s Armour",
+   "tiers": [
+    2
+   ],
+   "amount": 0.25,
+   "slower": 0.15,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Executioner’s Armour",
+   "tiers": [
+    3
+   ],
+   "amount": 0.3,
+   "slower": 0.18,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Orc Warrior’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.05,
+   "slower": 0.0,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Orc Veteran’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.1,
+   "slower": 0.03,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Orc Skirmisher’s Armour",
+   "tiers": [
+    1
+   ],
+   "amount": 0.15,
+   "slower": 0.06,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Orc Bruiser’s Armour",
+   "tiers": [
+    2
+   ],
+   "amount": 0.2,
+   "slower": 0.09,
+   "weight": "LIGHT"
+  },
+  {
+   "name": "Orc Raider’s Armour",
+   "tiers": [
+    2
+   ],
+   "amount": 0.25,
+   "slower": 0.12,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Gnur’s Armour",
+   "tiers": [
+    3
+   ],
+   "amount": 0.3,
+   "slower": 0.15,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Dardan’s Armour",
+   "tiers": [
+    4
+   ],
+   "amount": 0.35,
+   "slower": 0.18,
+   "weight": "MEDIUM"
+  },
+  {
+   "name": "Costalmed’s Armour",
+   "tiers": [
+    5
+   ],
+   "amount": 0.4,
+   "slower": 0.21,
+   "weight": "HEAVY"
+  }
+ ],
+ "shields": [
+  {
+   "name": "Broddi's Shield",
+   "tiers": [
+    5
+   ],
+   "amount": 0.4,
+   "slower": 0.24
+  },
+  {
+   "name": "Scutum",
+   "tiers": [
+    5
+   ],
+   "amount": 0.36,
+   "slower": 0.27
+  },
+  {
+   "name": "Crusader Shield",
+   "tiers": [
+    5
+   ],
+   "amount": 0.32,
+   "slower": 0.21
+  },
+  {
+   "name": "War Tower Shield",
+   "tiers": [
+    5
+   ],
+   "amount": 0.32,
+   "slower": 0.24
+  },
+  {
+   "name": "Plate Knight's Shield",
+   "tiers": [
+    4
+   ],
+   "amount": 0.28,
+   "slower": 0.15
+  },
+  {
+   "name": "Lady Knight's Shield",
+   "tiers": [
+    4
+   ],
+   "amount": 0.28,
+   "slower": 0.15
+  },
+  {
+   "name": "Kite Shield",
+   "tiers": [
+    4
+   ],
+   "amount": 0.24,
+   "slower": 0.12
+  },
+  {
+   "name": "Desert Shield",
+   "tiers": [
+    4
+   ],
+   "amount": 0.24,
+   "slower": 0.12
+  },
+  {
+   "name": "Heater Shield",
+   "tiers": [
+    3
+   ],
+   "amount": 0.2,
+   "slower": 0.09
+  },
+  {
+   "name": "Eastern Shield",
+   "tiers": [
+    3
+   ],
+   "amount": 0.2,
+   "slower": 0.09
+  },
+  {
+   "name": "Beast Shield",
+   "tiers": [
+    3
+   ],
+   "amount": 0.16,
+   "slower": 0.06
+  },
+  {
+   "name": "Rider's Shield",
+   "tiers": [
+    3
+   ],
+   "amount": 0.16,
+   "slower": 0.15
+  },
+  {
+   "name": "War Camp Shield",
+   "tiers": [
+    3
+   ],
+   "amount": 0.16,
+   "slower": 0.12
+  },
+  {
+   "name": "Heraldic Shield",
+   "tiers": [
+    2
+   ],
+   "amount": 0.12,
+   "slower": 0.06
+  },
+  {
+   "name": "Dock Shield",
+   "tiers": [
+    2
+   ],
+   "amount": 0.12,
+   "slower": 0.09
+  },
+  {
+   "name": "Viking Shield (iron-bound)",
+   "tiers": [
+    2
+   ],
+   "amount": 0.12,
+   "slower": 0.06
+  },
+  {
+   "name": "Village Shield (blue and white)",
+   "tiers": [
+    2
+   ],
+   "amount": 0.08,
+   "slower": 0.09
+  },
+  {
+   "name": "Village Shield (red)",
+   "tiers": [
+    1
+   ],
+   "amount": 0.08,
+   "slower": 0.09
+  },
+  {
+   "name": "Village Shield (green)",
+   "tiers": [
+    1
+   ],
+   "amount": 0.08,
+   "slower": 0.09
+  },
+  {
+   "name": "Viking Round Shield",
+   "tiers": [
+    1
+   ],
+   "amount": 0.04,
+   "slower": 0.0
+  },
+  {
+   "name": "Painted Viking Shield",
+   "tiers": [
+    1
+   ],
+   "amount": 0.04,
+   "slower": 0.0
+  },
+  {
+   "name": "Viking Shield (green and white)",
+   "tiers": [
+    1
+   ],
+   "amount": 0.04,
+   "slower": 0.0
+  }
+ ],
+ "rings": [
+  {
+   "name": "Magic Potency Ring 1",
+   "tiers": [
+    1
+   ],
+   "amount": 0.1,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 2",
+   "tiers": [
+    1
+   ],
+   "amount": 0.2,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 3",
+   "tiers": [
+    2
+   ],
+   "amount": 0.3,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 4",
+   "tiers": [
+    2
+   ],
+   "amount": 0.4,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 5",
+   "tiers": [
+    3
+   ],
+   "amount": 0.5,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 6",
+   "tiers": [
+    3
+   ],
+   "amount": 0.6,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 7",
+   "tiers": [
+    4
+   ],
+   "amount": 0.7,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 8",
+   "tiers": [
+    4
+   ],
+   "amount": 0.8,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 9",
+   "tiers": [
+    5
+   ],
+   "amount": 0.9,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "Magic Potency Ring 10",
+   "tiers": [
+    5
+   ],
+   "amount": 1.0,
+   "kind": "MAGIC"
+  },
+  {
+   "name": "HP Potency Ring 1",
+   "tiers": [
+    1
+   ],
+   "amount": 0.1,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 2",
+   "tiers": [
+    1
+   ],
+   "amount": 0.2,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 3",
+   "tiers": [
+    2
+   ],
+   "amount": 0.3,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 4",
+   "tiers": [
+    2
+   ],
+   "amount": 0.4,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 5",
+   "tiers": [
+    3
+   ],
+   "amount": 0.5,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 6",
+   "tiers": [
+    3
+   ],
+   "amount": 0.6,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 7",
+   "tiers": [
+    4
+   ],
+   "amount": 0.7,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 8",
+   "tiers": [
+    4
+   ],
+   "amount": 0.8,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 9",
+   "tiers": [
+    5
+   ],
+   "amount": 0.9,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "HP Potency Ring 10",
+   "tiers": [
+    5
+   ],
+   "amount": 1.0,
+   "kind": "HEALTH"
+  },
+  {
+   "name": "Dexterity Ring 1",
+   "tiers": [
+    1
+   ],
+   "amount": 0.1,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 2",
+   "tiers": [
+    1
+   ],
+   "amount": 0.2,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 3",
+   "tiers": [
+    2
+   ],
+   "amount": 0.3,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 4",
+   "tiers": [
+    2
+   ],
+   "amount": 0.4,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 5",
+   "tiers": [
+    3
+   ],
+   "amount": 0.5,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 6",
+   "tiers": [
+    3
+   ],
+   "amount": 0.6,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 7",
+   "tiers": [
+    4
+   ],
+   "amount": 0.7,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 8",
+   "tiers": [
+    4
+   ],
+   "amount": 0.8,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 9",
+   "tiers": [
+    5
+   ],
+   "amount": 0.9,
+   "kind": "DEXTERITY"
+  },
+  {
+   "name": "Dexterity Ring 10",
+   "tiers": [
+    5
+   ],
+   "amount": 1.0,
+   "kind": "DEXTERITY"
+  }
+ ],
+ "spells": [
+  {
+   "name": "Fire Bolt",
+   "kind": "BOLT",
+   "damage": 23.0,
+   "mana": 7.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Dark Fire",
+   "kind": "BOLT",
+   "damage": 34.0,
+   "mana": 12.0,
+   "cooldown": 0.0,
+   "duration": 4.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Ash Ward",
+   "kind": "WARD",
+   "damage": 0.0,
+   "mana": 15.0,
+   "cooldown": 10.0,
+   "duration": 8.0,
+   "radius": 0.0,
+   "count": 3,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Frost Shard",
+   "kind": "BOLT",
+   "damage": 31.0,
+   "mana": 14.0,
+   "cooldown": 0.0,
+   "duration": 2.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Shadow Lash",
+   "kind": "LASH",
+   "damage": 46.0,
+   "mana": 18.0,
+   "cooldown": 2.0,
+   "duration": 0.0,
+   "radius": 150.0,
+   "count": 0,
+   "amount": 600.0,
+   "tier": 2
+  },
+  {
+   "name": "Iron Skin",
+   "kind": "SKIN",
+   "damage": 0.0,
+   "mana": 22.0,
+   "cooldown": 15.0,
+   "duration": 12.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.4,
+   "tier": 2
+  },
+  {
+   "name": "Bone Spear",
+   "kind": "BOLT",
+   "damage": 50.0,
+   "mana": 20.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Dispel Hex",
+   "kind": "DISPEL",
+   "damage": 0.0,
+   "mana": 25.0,
+   "cooldown": 12.0,
+   "duration": 3.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Life Drain",
+   "kind": "DRAIN",
+   "damage": 19.0,
+   "mana": 24.0,
+   "cooldown": 3.0,
+   "duration": 3.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Chain Lightning",
+   "kind": "BOLT",
+   "damage": 68.0,
+   "mana": 30.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 700.0,
+   "count": 4,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Bone Armor",
+   "kind": "WARD",
+   "damage": 0.0,
+   "mana": 35.0,
+   "cooldown": 20.0,
+   "duration": 15.0,
+   "radius": 0.0,
+   "count": 5,
+   "amount": 0.0,
+   "tier": 3
+  },
+  {
+   "name": "Plague Cloud",
+   "kind": "CLOUD",
+   "damage": 13.5,
+   "mana": 38.0,
+   "cooldown": 6.0,
+   "duration": 6.0,
+   "radius": 350.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 3
+  },
+  {
+   "name": "Shadow Veil",
+   "kind": "VEIL",
+   "damage": 0.0,
+   "mana": 40.0,
+   "cooldown": 25.0,
+   "duration": 4.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.75,
+   "tier": 3
+  },
+  {
+   "name": "Curse of Frailty",
+   "kind": "CURSE",
+   "damage": 0.0,
+   "mana": 42.0,
+   "cooldown": 10.0,
+   "duration": 8.0,
+   "radius": 500.0,
+   "count": 0,
+   "amount": 0.35,
+   "tier": 3
+  },
+  {
+   "name": "Fireball",
+   "kind": "BOLT",
+   "damage": 91.0,
+   "mana": 45.0,
+   "cooldown": 4.0,
+   "duration": 0.0,
+   "radius": 350.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 3
+  },
+  {
+   "name": "Raise Dead",
+   "kind": "RAISE",
+   "damage": 0.0,
+   "mana": 55.0,
+   "cooldown": 20.0,
+   "duration": 30.0,
+   "radius": 0.0,
+   "count": 3,
+   "amount": 0.6,
+   "tier": 3
+  },
+  {
+   "name": "Rune of Warding",
+   "kind": "RUNE",
+   "damage": 0.0,
+   "mana": 60.0,
+   "cooldown": 30.0,
+   "duration": 10.0,
+   "radius": 400.0,
+   "count": 0,
+   "amount": 0.5,
+   "tier": 3
+  },
+  {
+   "name": "Blood Nova",
+   "kind": "NOVA",
+   "damage": 64.0,
+   "mana": 28.0,
+   "cooldown": 8.0,
+   "duration": 0.0,
+   "radius": 500.0,
+   "count": 0,
+   "amount": 0.15,
+   "tier": 2
+  },
+  {
+   "name": "Mirror of Retribution",
+   "kind": "MIRROR",
+   "damage": 0.0,
+   "mana": 70.0,
+   "cooldown": 35.0,
+   "duration": 5.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 1.0,
+   "tier": 4
+  },
+  {
+   "name": "Soul Rend",
+   "kind": "BOLT",
+   "damage": 121.0,
+   "mana": 65.0,
+   "cooldown": 6.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Blizzard",
+   "kind": "CLOUD",
+   "damage": 17.600000381469727,
+   "mana": 80.0,
+   "cooldown": 12.0,
+   "duration": 8.0,
+   "radius": 500.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Corpse Explosion",
+   "kind": "CORPSE",
+   "damage": 134.0,
+   "mana": 75.0,
+   "cooldown": 3.0,
+   "duration": 0.0,
+   "radius": 400.0,
+   "count": 4,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Spectral Bulwark",
+   "kind": "WARD",
+   "damage": 0.0,
+   "mana": 100.0,
+   "cooldown": 60.0,
+   "duration": 10.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.6,
+   "tier": 4
+  },
+  {
+   "name": "Hellfire Pillar",
+   "kind": "PILLAR",
+   "damage": 179.0,
+   "mana": 110.0,
+   "cooldown": 15.0,
+   "duration": 6.0,
+   "radius": 350.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Void Rift",
+   "kind": "RIFT",
+   "damage": 47.5,
+   "mana": 120.0,
+   "cooldown": 20.0,
+   "duration": 4.0,
+   "radius": 600.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Undying Pact",
+   "kind": "PACT",
+   "damage": 0.0,
+   "mana": 150.0,
+   "cooldown": 180.0,
+   "duration": 60.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.4,
+   "tier": 5
+  },
+  {
+   "name": "Summon Abyssal Knight",
+   "kind": "KNIGHT",
+   "damage": 0.0,
+   "mana": 160.0,
+   "cooldown": 90.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Meteor Storm",
+   "kind": "METEORS",
+   "damage": 98.0,
+   "mana": 200.0,
+   "cooldown": 45.0,
+   "duration": 5.0,
+   "radius": 600.0,
+   "count": 12,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Null Sanctum",
+   "kind": "SANCTUM",
+   "damage": 0.0,
+   "mana": 220.0,
+   "cooldown": 120.0,
+   "duration": 4.0,
+   "radius": 400.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Apocalypse",
+   "kind": "APOCALYPSE",
+   "damage": 380.0,
+   "mana": 300.0,
+   "cooldown": 300.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Straight Punch",
+   "kind": "BOLT",
+   "damage": 23.0,
+   "mana": 7.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Side Kick",
+   "kind": "BOLT",
+   "damage": 45.0,
+   "mana": 17.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Smashing Strike",
+   "kind": "BOLT",
+   "damage": 63.0,
+   "mana": 27.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Roundhouse Kick",
+   "kind": "BOLT",
+   "damage": 80.0,
+   "mana": 37.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Chain Punch",
+   "kind": "BOLT",
+   "damage": 96.0,
+   "mana": 47.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 3
+  },
+  {
+   "name": "Rear Kick",
+   "kind": "BOLT",
+   "damage": 111.0,
+   "mana": 57.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 3
+  },
+  {
+   "name": "Piercing Palm",
+   "kind": "BOLT",
+   "damage": 125.0,
+   "mana": 67.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Axe Kick",
+   "kind": "BOLT",
+   "damage": 127.0,
+   "mana": 68.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Meteor Fist",
+   "kind": "BOLT",
+   "damage": 140.0,
+   "mana": 78.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Spinning Kick",
+   "kind": "BOLT",
+   "damage": 154.0,
+   "mana": 88.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 0,
+   "amount": 0.0,
+   "tier": 5
+  },
+  {
+   "name": "Summon Tier 1",
+   "kind": "SUMMON",
+   "damage": 0.0,
+   "mana": 25.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 2,
+   "amount": 0.0,
+   "tier": 1
+  },
+  {
+   "name": "Summon Tier 2",
+   "kind": "SUMMON",
+   "damage": 0.0,
+   "mana": 25.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 3,
+   "amount": 0.0,
+   "tier": 2
+  },
+  {
+   "name": "Summon Tier 3",
+   "kind": "SUMMON",
+   "damage": 0.0,
+   "mana": 25.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 4,
+   "amount": 0.0,
+   "tier": 3
+  },
+  {
+   "name": "Summon Tier 4",
+   "kind": "SUMMON",
+   "damage": 0.0,
+   "mana": 25.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 5,
+   "amount": 0.0,
+   "tier": 4
+  },
+  {
+   "name": "Summon Tier 5",
+   "kind": "SUMMON",
+   "damage": 0.0,
+   "mana": 25.0,
+   "cooldown": 0.0,
+   "duration": 0.0,
+   "radius": 0.0,
+   "count": 5,
+   "amount": 0.0,
+   "tier": 5
+  }
+ ],
+ "monsters": [
+  {
+   "name": "Rat",
+   "title": "Plague Rat",
+   "tier": 1,
+   "hf": 0.8,
+   "df": 0.8,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Half_Creature_04",
+   "title": "Crawling Wretch",
+   "tier": 1,
+   "hf": 0.857,
+   "df": 0.857,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Parasite_Slider",
+   "title": "Slithering Leech",
+   "tier": 1,
+   "hf": 0.914,
+   "df": 0.914,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Half_Creature_05",
+   "title": "Legless Ghoul",
+   "tier": 1,
+   "hf": 0.971,
+   "df": 0.971,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Drinker",
+   "title": "Bloated Drunkard",
+   "tier": 1,
+   "hf": 1.029,
+   "df": 1.029,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Medic",
+   "title": "Mad Surgeon",
+   "tier": 1,
+   "hf": 1.086,
+   "df": 1.086,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Chicken",
+   "title": "Fowl Ghoul",
+   "tier": 1,
+   "hf": 1.143,
+   "df": 1.143,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Soldier",
+   "title": "Rotting Soldier",
+   "tier": 1,
+   "hf": 1.2,
+   "df": 1.2,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Sufferer",
+   "title": "Chained Sufferer",
+   "tier": 2,
+   "hf": 0.8,
+   "df": 0.8,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Fat",
+   "title": "Bloated Brute",
+   "tier": 2,
+   "hf": 0.857,
+   "df": 0.857,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Mask",
+   "title": "Masked Butcher",
+   "tier": 2,
+   "hf": 0.914,
+   "df": 0.914,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Monster",
+   "title": "Stitched Horror",
+   "tier": 2,
+   "hf": 0.971,
+   "df": 0.971,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Gunner",
+   "title": "Grave Gunner",
+   "tier": 2,
+   "hf": 1.029,
+   "df": 1.029,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Parasites_Fat",
+   "title": "Pustule Glutton",
+   "tier": 2,
+   "hf": 1.086,
+   "df": 1.086,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Parasit",
+   "title": "Flesh Parasite",
+   "tier": 2,
+   "hf": 1.143,
+   "df": 1.143,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Orc_03",
+   "title": "Orc Raider",
+   "tier": 2,
+   "hf": 1.2,
+   "df": 1.2,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Magur",
+   "title": "Orc Berserker",
+   "tier": 3,
+   "hf": 0.8,
+   "df": 0.8,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Azrak",
+   "title": "Orc Marauder",
+   "tier": 3,
+   "hf": 0.831,
+   "df": 0.831,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Warrior_02_the_leopard",
+   "title": "Leopard Warrior",
+   "tier": 3,
+   "hf": 0.862,
+   "df": 0.862,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Kanit",
+   "title": "Orc Shaman",
+   "tier": 3,
+   "hf": 0.892,
+   "df": 0.892,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Gnur",
+   "title": "Hooded Orc Seer",
+   "tier": 3,
+   "hf": 0.923,
+   "df": 0.923,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Dardan",
+   "title": "Orc Axeman",
+   "tier": 3,
+   "hf": 0.954,
+   "df": 0.954,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Costalmed",
+   "title": "Orc Brute",
+   "tier": 3,
+   "hf": 0.985,
+   "df": 0.985,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Orc_05",
+   "title": "Orc Skirmisher",
+   "tier": 3,
+   "hf": 1.015,
+   "df": 1.015,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Orc_06",
+   "title": "Orc Pillager",
+   "tier": 3,
+   "hf": 1.046,
+   "df": 1.046,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Alien",
+   "title": "Void Stalker",
+   "tier": 3,
+   "hf": 1.077,
+   "df": 1.077,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Devourer",
+   "title": "Devourer Hound",
+   "tier": 3,
+   "hf": 1.108,
+   "df": 1.108,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Insect",
+   "title": "Venom Wasp",
+   "tier": 3,
+   "hf": 1.138,
+   "df": 1.138,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Pangolin",
+   "title": "Quillback",
+   "tier": 3,
+   "hf": 1.169,
+   "df": 1.169,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Tank",
+   "title": "Zombie Tank",
+   "tier": 3,
+   "hf": 1.2,
+   "df": 1.2,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Orc_01",
+   "title": "Orc Warlord",
+   "tier": 4,
+   "hf": 0.8,
+   "df": 0.8,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Orc_02",
+   "title": "Orc Executioner",
+   "tier": 4,
+   "hf": 0.822,
+   "df": 0.822,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Ursag",
+   "title": "Orc Ironhide",
+   "tier": 4,
+   "hf": 0.844,
+   "df": 0.844,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Orc_04",
+   "title": "Orc Bloodguard",
+   "tier": 4,
+   "hf": 0.867,
+   "df": 0.867,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Bear_Warrior",
+   "title": "Bear Warrior",
+   "tier": 4,
+   "hf": 0.889,
+   "df": 0.889,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Bull_Warrior",
+   "title": "Bull Warrior",
+   "tier": 4,
+   "hf": 0.911,
+   "df": 0.911,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Crocodile_Warrior",
+   "title": "Crocodile Warrior",
+   "tier": 4,
+   "hf": 0.933,
+   "df": 0.933,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Elephant_Warrior",
+   "title": "Elephant Warrior",
+   "tier": 4,
+   "hf": 0.956,
+   "df": 0.956,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Alien_Warrior_05",
+   "title": "Alien Defender",
+   "tier": 4,
+   "hf": 0.978,
+   "df": 0.978,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Exterminator",
+   "title": "Hellfire Exterminator",
+   "tier": 4,
+   "hf": 1.0,
+   "df": 1.0,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Shell",
+   "title": "Armoured Crawler",
+   "tier": 4,
+   "hf": 1.022,
+   "df": 1.022,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Bug",
+   "title": "Carrion Beetle",
+   "tier": 4,
+   "hf": 1.044,
+   "df": 1.044,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Horned",
+   "title": "Horned Mutant",
+   "tier": 4,
+   "hf": 1.067,
+   "df": 1.067,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Mutant",
+   "title": "Hulking Mutant",
+   "tier": 4,
+   "hf": 1.089,
+   "df": 1.089,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Ripper_dog",
+   "title": "Ripper Hound",
+   "tier": 4,
+   "hf": 1.111,
+   "df": 1.111,
+   "interval": 1.6,
+   "shoots": false
+  },
+  {
+   "name": "Daemon",
+   "title": "Pit Daemon",
+   "tier": 4,
+   "hf": 1.133,
+   "df": 1.133,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Troll",
+   "title": "Cave Troll",
+   "tier": 4,
+   "hf": 1.156,
+   "df": 1.156,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Parasite_Spider",
+   "title": "Brood Spider",
+   "tier": 4,
+   "hf": 1.178,
+   "df": 1.178,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Fantasy_Animal_raptor_mount",
+   "title": "War Raptor",
+   "tier": 4,
+   "hf": 1.2,
+   "df": 1.2,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Alfa",
+   "title": "Scythe Alpha",
+   "tier": 5,
+   "hf": 0.8,
+   "df": 0.8,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Spider",
+   "title": "Giant Spider",
+   "tier": 5,
+   "hf": 0.88,
+   "df": 0.88,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Rock",
+   "title": "Stone Golem",
+   "tier": 5,
+   "hf": 0.96,
+   "df": 0.96,
+   "interval": 1.9,
+   "shoots": true
+  },
+  {
+   "name": "Titan",
+   "title": "Mountain Titan",
+   "tier": 5,
+   "hf": 1.04,
+   "df": 1.04,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Hunter",
+   "title": "Daemon Hunter",
+   "tier": 5,
+   "hf": 1.12,
+   "df": 1.12,
+   "interval": 1.6,
+   "shoots": true
+  },
+  {
+   "name": "Nasty",
+   "title": "Broodmother",
+   "tier": 5,
+   "hf": 1.2,
+   "df": 1.2,
+   "interval": 1.6,
+   "shoots": true
+  }
+ ],
+ "tier_health": [
+  0.5,
+  1.0,
+  1.6,
+  2.4,
+  3.4
+ ],
+ "tier_damage": [
+  0.45,
+  1.0,
+  1.35,
+  1.75,
+  2.2
+ ],
+ "tier_speed": [
+  1.0,
+  1.05,
+  1.1,
+  1.15,
+  1.2
+ ],
+ "tier_attack_interval": [
+  1.15,
+  1.0,
+  0.92,
+  0.85,
+  0.78
+ ],
+ "tier_ability": [
+  0.0,
+  0.0,
+  1.0,
+  1.4,
+  1.8
+ ],
+ "boss_health": 3.0,
+ "boss_damage": 1.6,
+ "monster_reference_health": 100.0,
+ "monster_reference_blow": 25.0,
+ "block_share": 0.3,
+ "chase_speed_scale": 1.6,
+ "weapon_tier_power": [
+  1.0,
+  1.3,
+  1.65,
+  2.05,
+  2.5
+ ],
+ "chi": {
+  "base": 23,
+  "base_mana": 7,
+  "power": 0.75
+ }
+}
