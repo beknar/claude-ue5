@@ -24,6 +24,7 @@
 #include "InputCoreTypes.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Misc/Paths.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDTownGame, Log, All);
 
@@ -616,6 +617,161 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 	if (bTown && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
 		EnterCastle();
+}
+
+// ================================================================================================ the showcase tour
+void ARDDungeonGenerator::StartTownTour(float CastleAutoplaySeconds, const FString& GoFile)
+{
+	if (!bTown) return;
+	bTourOn = true; bTourCmdRead = true; TourPhase = 0; TourT = 0.f; TourCastleSeconds = FMath::Max(0.f, CastleAutoplaySeconds); TourGo = GoFile;
+	TourPath.Reset(); TourStuckT = TourCheckT = 0.f; TourRunMeters = 100.f;
+	UE_LOG(LogRDTownGame, Log, TEXT("RDTOUR begun: castle autoplay %.0f s%s"), TourCastleSeconds, GoFile.IsEmpty() ? TEXT("") : *FString::Printf(TEXT(", waiting for %s"), *GoFile));
+}
+
+FString ARDDungeonGenerator::GetTownTourState() const
+{
+	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
+	const float D = S && P && !S->MistgateAt.IsZero() ? FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) / 100.f : -1.f;
+	return FString::Printf(TEXT("%d|%.1f|%d|%.1f"), bTourOn ? TourPhase : -1, TourT, TourPath.Num(), D);
+}
+
+void ARDDungeonGenerator::TickTownTour(float RealDt)
+{
+	// (the command line, once a game: -RDTownTour=<castle autoplay seconds> [-RDTourGo=<file>])
+	if (!bTourCmdRead)
+	{
+		URDGameInstance* GI = URDGameInstance::Of(this);
+		if (!GI) { bTourCmdRead = true; return; }
+		if (GI->bTourRead) { bTourCmdRead = true; return; }
+		GI->bTourRead = true; bTourCmdRead = true;
+		float Secs = 0.f; FString Go;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("RDTownTour="), Secs)) return;
+		FParse::Value(FCommandLine::Get(), TEXT("RDTourGo="), Go);
+		StartTownTour(Secs, Go);
+		FParse::Value(FCommandLine::Get(), TEXT("RDTourRun="), TourRunMeters);
+		return;
+	}
+	if (!bTourOn || bTownTraveling) return;
+	ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	ACharacter* Her = PC ? Cast<ACharacter>(PC->GetPawn()) : nullptr;
+	if (!S || !Her || !PlayerCombat || !bTownPlaced) return;
+	TourT += FMath::Min(RealDt, 0.1f);
+	const int32 Elder = FindTownsfolk(ERDTownRole::Elder);
+	ARDTownsfolk* E = Elder >= 0 ? TownPeople[Elder].Get() : nullptr;
+	auto Face = [&](const FVector& To, float Pitch)
+	{
+		const FVector D = (To - Her->GetActorLocation()).GetSafeNormal2D();
+		if (D.IsNearlyZero()) return;
+		Her->SetActorRotation(FRotator(0, D.Rotation().Yaw, 0));
+		PC->SetControlRotation(FRotator(Pitch, D.Rotation().Yaw, 0));
+	};
+	switch (TourPhase)
+	{
+	case 0:
+		// (before the elder, a step and a half from him, facing him; he turns to her)
+		if (E)
+		{
+			const FVector At = E->GetActorLocation() + E->GetActorForwardVector() * 150.f;
+			Her->SetActorLocation(FVector(At.X, At.Y, Her->GetActorLocation().Z), false, nullptr, ETeleportType::TeleportPhysics);
+			Her->GetCharacterMovement()->StopMovementImmediately();
+			Face(E->GetActorLocation(), -8.f);
+		}
+		TourPhase = 1; TourT = 0.f;
+		break;
+	case 1:
+		// (waiting for the recording to begin)
+		if (!TourGo.IsEmpty() && !FPaths::FileExists(TourGo)) { TourT = 0.f; break; }
+		TourPhase = 2; TourT = 0.f;
+		UE_LOG(LogRDTownGame, Log, TEXT("RDTOUR go"));
+		break;
+	case 2:
+		if (E) E->FaceToward(Her->GetActorLocation(), 12.f);
+		if (TourT > 1.5f)
+		{
+			// (his panel, as F would open it; no pointer on the screen)
+			if (E && OpenTownPanel(TEXT("talk"), Elder)) PC->SetShowMouseCursor(false);
+			TourPhase = 3; TourT = 0.f;
+		}
+		break;
+	case 3:
+		if (TourT > 1.8f && TourT - FMath::Min(RealDt, 0.1f) <= 1.8f) ActivateTownEntry(0);          // (a question asked: his answer)
+		if (TourT > 5.5f)
+		{
+			CloseTownPanel(); PC->SetShowMouseCursor(false);
+			TourPhase = 4; TourT = 0.f;
+		}
+		break;
+	case 4:
+		if (TourT > 0.6f && !bMapOpen)
+		{
+			SetMapOpen(true);
+			// (the way: over the ground to the castle's door, through its rooms to the Mistgate)
+			TourPath = S->FindPathWorld(Her->GetActorLocation(), S->MistgateAt + S->MistgateNormal * 120.f);
+		}
+		// (while the map covers the view: up the way to TourRunMeters before its end (the whole way from the square is about
+		// 210 m, 80 s at her run), facing along it)
+		if (TourT > 2.5f && TourPath.Num() > 2 && TourRunMeters > 0.f)
+		{
+			float Left = 0.f; int32 K = TourPath.Num() - 1;
+			while (K > 0 && Left < TourRunMeters * 100.f) { Left += FVector::Dist2D(TourPath[K], TourPath[K - 1]); --K; }
+			if (K > 0)
+			{
+				const FVector At = TourPath[K];
+				Her->SetActorLocation(FVector(At.X, At.Y, Her->GetActorLocation().Z), false, nullptr, ETeleportType::TeleportPhysics);
+				Her->GetCharacterMovement()->StopMovementImmediately();
+				Face(TourPath[K + 1], -10.f);
+				TourPath.RemoveAt(0, K);
+				UE_LOG(LogRDTownGame, Log, TEXT("RDTOUR up the way to %.0f m before the Mistgate (%.0f, %.0f)"), Left / 100.f, At.X, At.Y);
+			}
+			TourRunMeters = 0.f;
+		}
+		if (TourT > 4.6f)
+		{
+			SetMapOpen(false);
+			if (TourPath.Num() > 0) TourPath.RemoveAt(0);
+			PlayerCombat->SetRunMode(true);
+			if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->TourCastleSeconds = TourCastleSeconds;
+			TourCheckAt = Her->GetActorLocation(); TourCheckT = 0.f;
+			TourPhase = 5; TourT = 0.f;
+			UE_LOG(LogRDTownGame, Log, TEXT("RDTOUR the run: %d path points, %.0f m to the Mistgate"), TourPath.Num(), FVector::Dist2D(Her->GetActorLocation(), S->MistgateAt) / 100.f);
+		}
+		break;
+	case 5:
+	{
+		const FVector L = Her->GetActorLocation();
+		while (TourPath.Num() > 0 && FVector::Dist2D(L, TourPath[0]) < 90.f) TourPath.RemoveAt(0);
+		const FVector Goal = TourPath.Num() > 0 ? TourPath[0] : S->MistgateAt;
+		FVector D = Goal - L; D.Z = 0.f; D = D.GetSafeNormal();
+		// (a closed door ahead: opened as the townsfolk open theirs)
+		const FIntPoint Cur = S->WorldToLocal(L), Ahead = S->WorldToLocal(L + D * 200.f);
+		if (Ahead != Cur && FMath::Abs(Ahead.X - Cur.X) + FMath::Abs(Ahead.Y - Cur.Y) == 1)
+		{
+			const int32 Dr = S->DoorBetween(Cur, Ahead);
+			if (Dr >= 0 && !S->IsDoorOpenIndex(Dr) && !S->IsTargetOpen(true, Dr) && S->BoardedDoorBld(Dr) < 0) S->ToggleDoor(Dr, L, false);
+		}
+		Her->AddMovementInput(D, 1.f);
+		// (the view follows her way, eased)
+		const FRotator Cr = PC->GetControlRotation();
+		PC->SetControlRotation(FRotator(-10.f, FMath::RInterpTo(FRotator(0, Cr.Yaw, 0), FRotator(0, D.Rotation().Yaw, 0), FMath::Min(RealDt, 0.1f), 2.5f).Yaw, 0.f));
+		// (stuck 2 s: the way found again from where she stands)
+		TourCheckT += FMath::Min(RealDt, 0.1f);
+		if (TourCheckT > 2.f)
+		{
+			if (FVector::Dist2D(L, TourCheckAt) < 80.f)
+			{
+				TourPath = S->FindPathWorld(L, S->MistgateAt + S->MistgateNormal * 120.f);
+				if (TourPath.Num() > 0) TourPath.RemoveAt(0);
+				Her->Jump();
+				UE_LOG(LogRDTownGame, Log, TEXT("RDTOUR stuck at (%.0f, %.0f): the way again, %d points"), L.X, L.Y, TourPath.Num());
+			}
+			TourCheckAt = L; TourCheckT = 0.f;
+		}
+		break;
+	}
+	default: break;
+	}
 }
 
 // ================================================================================================ F in the town

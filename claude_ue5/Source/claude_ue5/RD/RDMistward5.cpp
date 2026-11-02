@@ -13,6 +13,7 @@
 #include "RD/RDMonster.h"
 #include "RD/RDSection.h"
 #include "RD/RDMistward.h"
+#include "RD/RDGameInstance.h"
 #include "Animation/AnimationAsset.h"
 #include "Animation/AnimSequenceBase.h"
 #include "Components/CapsuleComponent.h"
@@ -476,6 +477,11 @@ void ARDDungeonGenerator::ReadAutoplayOption()
 	{
 		const FString V = UGameplayStatics::ParseOption(GM->OptionsString, TEXT("Autoplay"));
 		if (!V.IsEmpty()) Secs = FCString::Atof(*V);
+	}
+	// (Brokenspire's showcase tour came through the Mistgate: its seconds, once; the game quits after, no key takes over)
+	if (URDGameInstance* GI = URDGameInstance::Of(this); Secs < 0.f && GI && GI->TourCastleSeconds > 0.f)
+	{
+		Secs = GI->TourCastleSeconds; GI->TourCastleSeconds = 0.f; bQuit = true; bAutoplayIgnorePlayer = true;
 	}
 	static bool bCommandDone = false;
 	float C = 0.f;

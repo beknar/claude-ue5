@@ -35,6 +35,11 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **The PIE test travels**: `OpenLevel` in play-in-editor keeps the game instance; the test's tick waits through the moment with no world (`travel_until`) and finds the new generator.
 - **PowerShell 5.1 reads a UTF-8 file without a BOM as ANSI**: the map's "·" came out "Â·" when the test's JSON was printed (`Get-Content -Raw` without `-Encoding UTF8`); the game's text was right.
 
+## The reel (Game Bar, 2026-11-02)
+
+- **The packaged game has no pilot of the town**: autoplay is the castle's (asked in the town, it opens the castle). The tour (`StartTownTour`, `-RDTownTour`) runs on the real clock before the panel's pause returns from the generator's tick (the elder's panel pauses the game). The whole way from the square to the Mistgate is about 210 m, 80 s at her run: while the papyrus map covers the view she is put 100 m before it on the way (`-RDTourRun`). Rehearse it in play (`StartTownTour` from Python; `GetTownTourState`) before packaging: the rehearsal's times held in the recording (the Mistgate at about 45 s with the load).
+- **Game Bar recorded the game this time** (its file named after `claude_ue5`), at 2560 x 1440 and about 26 frames a second though the window was 3840 x 2160, with the game's sound (-28 dB mean): the recorder's checks still apply (a clip of another app is deleted unseen). The output keeps Game Bar's variable frame rate; ffmpeg's null muxer warns of non-monotonic timestamps in the first pass, harmless.
+
 ## The map's pictures
 
 - `rdm4_ui_gen.py` creates its board on the InvokeAI server when the board does not exist, and the server answered 500 to that: the batch went to the existing board "claude-ue5 level4 UI".

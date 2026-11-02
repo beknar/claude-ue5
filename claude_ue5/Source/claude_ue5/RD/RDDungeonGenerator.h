@@ -876,6 +876,12 @@ public:
 	/** through the Mistgate (the town's) / back to the town (the castle's); a test's dry run only says where it would go */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCastle();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool ReturnToTown();
+	/** the showcase tour (a reel, a recording; -RDTownTour=<castle autoplay seconds> [-RDTourGo=<file>: it waits for the file]):
+	 *  before the elder, his panel (a question asked), the papyrus map, a run over the town's ground to the castle and into
+	 *  the Mistgate; in the castle autoplay for the seconds (the game quits after) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void StartTownTour(float CastleAutoplaySeconds, const FString& GoFile = TEXT(""));
+	/** "<phase>|<seconds in the phase's clock>|<path points left>|<to the Mistgate, m>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetTownTourState() const;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTravelDryRun = false;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FString LastTravel;
 	/** tests and the reels: the town built again from Seed (0: a new one), the townspeople and guards with it, her in the square */
@@ -952,6 +958,16 @@ public:
 	int32 TownTab = 0, TownCursor = 0, TownGuardsPlanned = 0;
 	bool bTownTraveling = false, bTownPlaced = false;
 	uint64 TownPanelClosedFrame = 0;
+	// (the showcase tour)
+	void TickTownTour(float RealDt);
+	bool bTourOn = false, bTourCmdRead = false;
+	int32 TourPhase = 0;
+	float TourT = 0.f, TourCastleSeconds = 0.f, TourStuckT = 0.f, TourCheckT = 0.f;
+	/** how far before the Mistgate the run starts (m; the map hides the move: -RDTourRun=<m>, 0 the whole way) */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TourRunMeters = 100.f;
+	FString TourGo;
+	TArray<FVector> TourPath;
+	FVector TourCheckAt = FVector::ZeroVector;
 	void SpawnTownPeople();
 	void SpawnTownGuards();
 	/** the services */
