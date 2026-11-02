@@ -41,21 +41,30 @@ void ARDDungeonGenerator::BeginDayNight()
 	for (TActorIterator<AExponentialHeightFog> It(W); It; ++It) { DayFog = It->GetComponent(); break; }
 	for (TActorIterator<APostProcessVolume> It(W); It; ++It) if (It->bUnbound) { DayPost = *It; break; }
 	if (!DaySun) { UE_LOG(LogRDTownDay, Warning, TEXT("RDDAY no atmosphere sun in the level: no day and night")); return; }
-	// (what the level was saved with is the day's light)
-	DaySunLux = DaySun->Intensity; DaySunColor = DaySun->GetLightColor();
-	DaySkyLight = DaySky ? DaySky->Intensity : 1.f;
-	DayFogLight = DayFog ? DayFog->FogInscatteringLuminance : FLinearColor(0.4f, 0.45f, 0.5f);
-	DayBias = DayPost ? DayPost->Settings.AutoExposureBias : 0.f;
-	// the moon: a second atmosphere light, dim and cold, without shadows
-	DayMoon = NewObject<UDirectionalLightComponent>(this, TEXT("RDMoon"));
-	DayMoon->SetupAttachment(RootComponent);
-	DayMoon->SetMobility(EComponentMobility::Movable);
-	DayMoon->SetAtmosphereSunLight(true);
-	DayMoon->SetAtmosphereSunLightIndex(1);
-	DayMoon->SetCastShadows(false);
-	DayMoon->SetLightColor(FLinearColor(0.55f, 0.66f, 1.f));
-	DayMoon->SetIntensity(0.f);
-	DayMoon->RegisterComponent();
+	// (what the level was saved with is the day's light: read once a play, before the clock has changed anything (the PR
+	// review's find: begun again, the night's dimmed sun would have become the day's))
+	if (!bDayBaseRead)
+	{
+		DaySunLux = DaySun->Intensity; DaySunColor = DaySun->GetLightColor();
+		DaySkyLight = DaySky ? DaySky->Intensity : 1.f;
+		DayFogLight = DayFog ? DayFog->FogInscatteringLuminance : FLinearColor(0.4f, 0.45f, 0.5f);
+		DayBias = DayPost ? DayPost->Settings.AutoExposureBias : 0.f;
+		bDayBaseRead = true;
+	}
+	// the moon: a second atmosphere light, dim and cold, without shadows (one: a moon made before is kept)
+	if (!IsValid(DayMoonKept))
+	{
+		DayMoonKept = NewObject<UDirectionalLightComponent>(this, MakeUniqueObjectName(this, UDirectionalLightComponent::StaticClass(), TEXT("RDMoon")));
+		DayMoonKept->SetupAttachment(RootComponent);
+		DayMoonKept->SetMobility(EComponentMobility::Movable);
+		DayMoonKept->SetAtmosphereSunLight(true);
+		DayMoonKept->SetAtmosphereSunLightIndex(1);
+		DayMoonKept->SetCastShadows(false);
+		DayMoonKept->SetLightColor(FLinearColor(0.55f, 0.66f, 1.f));
+		DayMoonKept->SetIntensity(0.f);
+		DayMoonKept->RegisterComponent();
+	}
+	DayMoon = DayMoonKept;
 	// the hour: the game's (back from the castle), else -RDTownHour=<h> (a reel), else the morning
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	float H = TownStartHour;
@@ -73,6 +82,11 @@ void ARDDungeonGenerator::TickDayNight(float Dt)
 	TownHour += Dt * 24.f / DayLengthSeconds;
 	if (TownHour >= 24.f) { TownHour -= 24.f; ++TownDay; }
 	if (URDGameInstance* GI = URDGameInstance::Of(this)) { GI->TownHour = TownHour; GI->TownDay = TownDay; }
+	// (the lights four times a second: a quarter second is 1/7200 of the day, and every change sends the lights, the sky
+	// light and the fog to the render thread again (the PR review's find: they were set every frame))
+	DayApplyT += Dt;
+	if (DayApplyT < 0.25f) return;
+	DayApplyT = 0.f;
 	ApplyDayNight();
 }
 

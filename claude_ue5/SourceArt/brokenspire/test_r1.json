@@ -1,0 +1,265 @@
+{
+ "tag": "r1",
+ "plan": [
+  "castlewalls",
+  "daynight",
+  "map"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "castlewalls",
+   "ok": true,
+   "towers": 4,
+   "stair_towers": 1,
+   "walk_z": 661.0,
+   "blind_arches": 166,
+   "blind_arches_outside": 0,
+   "arched_door_pieces": 0,
+   "pieces": {
+    "SM_Castle_Stone_Wall_01a": 1488,
+    "SM_Castle_Stone_Wall_02h": 353,
+    "SM_Castle_Stone_Wall_02f": 117,
+    "SM_Castle_Stone_Wall_02g": 7,
+    "SM_Castle_Stone_Wall_02d": 8,
+    "SM_Castle_Stone_Parapet_01a": 887,
+    "SM_Castle_Tower_Wall_02": 64,
+    "SM_Tower_Roof_02a": 16,
+    "SM_Stone_Stairs_01a": 9
+   },
+   "through_the_walk": {},
+   "walk_traces": {
+    "n": 81,
+    "miss": 0,
+    "min": 653.8,
+    "max": 653.8
+   },
+   "climb": {
+    "points": 61,
+    "reached": 61,
+    "seconds": 11.6,
+    "z_max": 747.1,
+    "end": [
+     1132,
+     18784,
+     740
+    ],
+    "on_walk": true,
+    "track": [
+     [
+      2153,
+      17653,
+      86
+     ],
+     [
+      2215,
+      17888,
+      170
+     ],
+     [
+      2175,
+      17766,
+      416
+     ],
+     [
+      2178,
+      17731,
+      692
+     ],
+     [
+      1830,
+      18211,
+      740
+     ],
+     [
+      1253,
+      18685,
+      740
+     ]
+    ]
+   }
+  },
+  {
+   "step": "daynight",
+   "ok": true,
+   "on": true,
+   "day_length": 1800.0,
+   "clock": {
+    "from": 8.308,
+    "to": 8.575,
+    "game_s": 20.03,
+    "hours": 0.267,
+    "day_s": 1800.3
+   },
+   "kept_by_game": true,
+   "pictures": {
+    "noon": {
+     "day": 1,
+     "hour": 12.067,
+     "sun_elev": 61.99,
+     "daylight": 1.0,
+     "sun_lux": 7.5,
+     "moon_lux": 0.0,
+     "sky": 1.6,
+     "bias": 0.6,
+     "sun_world": {
+      "elev": 61.99,
+      "lux": 7.5,
+      "n": 1
+     },
+     "moon_world": {
+      "elev": -10.0,
+      "lux": 0.0,
+      "n": 1
+     },
+     "luma": 112.23,
+     "clock": "12:04"
+    },
+    "dusk": {
+     "day": 1,
+     "hour": 18.567,
+     "sun_elev": -9.17,
+     "daylight": 0.0,
+     "sun_lux": 0.0,
+     "moon_lux": 0.963,
+     "sky": 0.128,
+     "bias": -0.6,
+     "sun_world": {
+      "elev": -9.12,
+      "lux": 0.0,
+      "n": 1
+     },
+     "moon_world": {
+      "elev": 6.84,
+      "lux": 0.963,
+      "n": 1
+     },
+     "luma": 18.57,
+     "clock": "18:34"
+    },
+    "night": {
+     "day": 1,
+     "hour": 0.067,
+     "sun_elev": -61.99,
+     "daylight": 0.0,
+     "sun_lux": 0.0,
+     "moon_lux": 1.0,
+     "sky": 0.128,
+     "bias": -0.6,
+     "sun_world": {
+      "elev": -10.0,
+      "lux": 0.0,
+      "n": 1
+     },
+     "moon_world": {
+      "elev": 46.49,
+      "lux": 1.0,
+      "n": 1
+     },
+     "luma": 21.59,
+     "clock": "00:04"
+    }
+   }
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "labels": [
+    "mapc_temple|TEMPLE · blessings",
+    "mapc_tavern|TAVERN",
+    "mapc_smithy|SMITHY · repairs, the anvil",
+    "mapc_store|TRADER · buy and sell",
+    "mapc_healer|HEALER · healing",
+    "mapc_storehouse|STOREHOUSE · your storage",
+    "mapc_barracks|BARRACKS",
+    "mapc_chapel|CHAPEL",
+    "mapc_witch|WITCH'S HUT",
+    "mapc_castle|MISTWARD CASTLE · into the dungeon",
+    "mapc_circle|TELEPORT CIRCLE",
+    "mapc_mill|MILL",
+    "mapc_gate|GATE · barred",
+    "mapc_well|WELL",
+    "mapc_board|QUEST BOARD · bounties",
+    "mapc_graveyard|GRAVEYARD",
+    "mapc_still|STILL",
+    "mapc_market|MARKET",
+    "square|TOWN SQUARE"
+   ],
+   "missing": [],
+   "art": [
+    "mapc_barracks",
+    "mapc_board",
+    "mapc_castle",
+    "mapc_chapel",
+    "mapc_circle",
+    "mapc_gate",
+    "mapc_graveyard",
+    "mapc_healer",
+    "mapc_market",
+    "mapc_mill",
+    "mapc_smithy",
+    "mapc_still",
+    "mapc_store",
+    "mapc_storehouse",
+    "mapc_tavern",
+    "mapc_temple",
+    "mapc_well",
+    "mapc_witch",
+    "square"
+   ],
+   "art_drawn": [
+    "mapc_parchment",
+    "mapc_grass",
+    "mapc_dirt",
+    "mapc_cobble",
+    "mapc_wallstone",
+    "mapc_bush",
+    "mapc_tree3",
+    "mapc_tree1",
+    "mapc_tree2",
+    "mapc_tower",
+    "mapc_home2",
+    "mapc_burned",
+    "mapc_home1",
+    "mapc_boarded",
+    "mapc_graveyard",
+    "mapc_chapel",
+    "mapc_witch",
+    "mapc_home3",
+    "mapc_store",
+    "mapc_tent",
+    "mapc_smithy",
+    "mapc_tavern",
+    "mapc_board",
+    "mapc_still",
+    "mapc_gate",
+    "mapc_market",
+    "mapc_well",
+    "mapc_healer",
+    "mapc_storehouse",
+    "mapc_castle",
+    "mapc_circle",
+    "mapc_barracks",
+    "mapc_temple",
+    "mapc_mill",
+    "mapc_compass"
+   ],
+   "colour": true,
+   "colour_art_in_level": true,
+   "colour_missing": []
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_r1_castle_walk.png",
+  "bs_r1_castle_front.png",
+  "bs_r1_castle_stair_tower.png",
+  "bs_r1_day_noon.png",
+  "bs_r1_day_dusk.png",
+  "bs_r1_day_night.png",
+  "bs_r1_minimap.png",
+  "bs_r1_papyrus_map.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

@@ -62,6 +62,44 @@ static FString RDTLabelOf(uint8 Kind)
 	}
 }
 
+/** a townsperson's quest mark from the quest lines: "?" one is ready to turn in to them, "!" they offer one, "" none */
+static FString RDTQuestMark(const TArray<FString>& QuestLines, const FString& RoleName)
+{
+	FString Mark;
+	for (const FString& Q : QuestLines)
+	{
+		TArray<FString> P_; Q.ParseIntoArray(P_, TEXT("|"), false);
+		if (P_.Num() < 4 || P_[1] != RoleName) continue;
+		if (P_[3] == TEXT("ready")) return TEXT("?");
+		if (P_[3] == TEXT("offered")) Mark = TEXT("!");
+	}
+	return Mark;
+}
+
+void ARDHUD::PlaceTownMapLabels(const TArray<FRDTMapLabel>& Pending, TArray<FBox2D>& Taken, float Sc, const FLinearColor& Halo)
+{
+	// (each label where it covers no picture taken and no label before it: under its picture, over it, beside it, or further
+	// down; the trades round the square stood so close that theirs covered each other)
+	UFont* Small = GEngine->GetSmallFont();
+	for (const FRDTMapLabel& Lb : Pending)
+	{
+		float Tw, Th; UI.TextSize(Lb.Text, Tw, Th, Small, Sc * Lb.K, Lb.Type);
+		const FVector2D Half(Tw * 0.5f + 3.f * Sc, Th * 0.5f + 1.f * Sc);
+		const float Below = Lb.Size * 0.92f + Th * 0.5f, Side = Lb.Size + Tw * 0.5f + 4.f * Sc;
+		const FVector2D Tries[] = { { 0.f, Below }, { 0.f, -Below }, { Side, 0.f }, { -Side, 0.f }, { 0.f, Below + Th * 1.1f }, { 0.f, -Below - Th * 1.1f },
+		                            { Side, Th * 1.1f }, { -Side, Th * 1.1f }, { 0.f, Below + Th * 2.2f }, { 0.f, -Below - Th * 2.2f } };
+		FVector2D C = Lb.P + Tries[0];
+		for (const FVector2D& O : Tries)
+		{
+			const FBox2D Bx(Lb.P + O - Half, Lb.P + O + Half);
+			if (!Taken.ContainsByPredicate([&](const FBox2D& Tb) { return Tb.Intersect(Bx); })) { C = Lb.P + O; break; }
+		}
+		Taken.Add(FBox2D(C - Half, C + Half));
+		Box(C - Half, C + Half, Halo);
+		UI.Text(Lb.Text, Lb.Color, C.X - Tw * 0.5f, C.Y - Th * 0.5f, Small, Sc * Lb.K, Lb.Type);
+	}
+}
+
 TArray<FString> ARDHUD::WrapText(const FString& S, float W, UFont* F, float K) const
 {
 	TArray<FString> Out;
@@ -197,14 +235,7 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 	{
 		if (!IsValid(T)) continue;
 		const FString RoleName = StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)T->TownRole);
-		FString Mark;
-		for (const FString& Q : Ql)
-		{
-			TArray<FString> P_; Q.ParseIntoArray(P_, TEXT("|"), false);
-			if (P_.Num() < 4 || P_[1] != RoleName) continue;
-			if (P_[3] == TEXT("ready")) { Mark = TEXT("?"); break; }
-			if (P_[3] == TEXT("offered") && Mark.IsEmpty()) Mark = TEXT("!");
-		}
+		const FString Mark = RDTQuestMark(Ql, RoleName);
 		const FVector2D P = ToS(FVector2D(T->GetActorLocation()));
 		if (FVector2D::Distance(P, C) > R * 0.9f) continue;
 		if (Mark.IsEmpty()) { SoftDot(P, 3.2f * Sc, FLinearColor(0.55f, 0.85f, 1.f, 0.85f)); continue; }
@@ -271,8 +302,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 	}
 	// (the labels are placed after every picture, each where it overlaps no picture and no label placed before it: under its
 	// picture, over it, beside it, or further down; the trades round the square stood so close that theirs covered each other)
-	struct FMapLabel { FString Text; FVector2D P; float Size; FLinearColor Color; ERDType Type; float K; };
-	TArray<FMapLabel> Pending;
+	TArray<FRDTMapLabel> Pending;
 	TArray<FBox2D> Taken;
 	auto Icon = [&](FName Name, const FVector& W, float Size, const FString& Label, const FLinearColor& Tint = FLinearColor::White)
 	{
@@ -324,37 +354,15 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 		if (!IsValid(T)) continue;
 		const FString RoleName = StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)T->TownRole);
 		if (RoleName != TEXT("Elder") && RoleName != TEXT("Scholar") && RoleName != TEXT("Captain")) continue;
-		FString Mark = TEXT("·");
-		for (const FString& Q : Ql)
-		{
-			TArray<FString> P_; Q.ParseIntoArray(P_, TEXT("|"), false);
-			if (P_.Num() < 4 || P_[1] != RoleName) continue;
-			if (P_[3] == TEXT("ready")) { Mark = TEXT("?"); break; }
-			if (P_[3] == TEXT("offered")) Mark = TEXT("!");
-		}
+		FString Mark = RDTQuestMark(Ql, RoleName);
+		if (Mark.IsEmpty()) Mark = TEXT("·");
 		const FVector2D P = ToM(FVector2D(T->GetActorLocation()));
 		SoftDot(P, 10.f * Sc, FLinearColor(0.75f, 0.1f, 0.05f, 0.5f));
 		float Tw, Th; UI.TextSize(Mark, Tw, Th, Medium, Sc * 0.9f, ERDType::Title);
 		UI.Text(Mark, FLinearColor(1.f, 0.9f, 0.6f, 1.f), P.X - Tw * 0.5f, P.Y - Th * 0.5f, Medium, Sc * 0.9f, ERDType::Title);
 		Pending.Add({ T->Title, P, 9.f * Sc, FLinearColor(0.5f, 0.08f, 0.04f, 1.f), ERDType::Text, 0.85f });
 	}
-	for (const FMapLabel& Lb : Pending)
-	{
-		float Tw, Th; UI.TextSize(Lb.Text, Tw, Th, Small, Sc * Lb.K, Lb.Type);
-		const FVector2D Half(Tw * 0.5f + 3.f * Sc, Th * 0.5f + 1.f * Sc);
-		const float Below = Lb.Size * 0.92f + Th * 0.5f, Side = Lb.Size + Tw * 0.5f + 4.f * Sc;
-		const FVector2D Tries[] = { { 0.f, Below }, { 0.f, -Below }, { Side, 0.f }, { -Side, 0.f }, { 0.f, Below + Th * 1.1f }, { 0.f, -Below - Th * 1.1f },
-		                            { Side, Th * 1.1f }, { -Side, Th * 1.1f }, { 0.f, Below + Th * 2.2f }, { 0.f, -Below - Th * 2.2f } };
-		FVector2D C = Lb.P + Tries[0];
-		for (const FVector2D& O : Tries)
-		{
-			const FBox2D Bx(Lb.P + O - Half, Lb.P + O + Half);
-			if (!Taken.ContainsByPredicate([&](const FBox2D& Tb) { return Tb.Intersect(Bx); })) { C = Lb.P + O; break; }
-		}
-		Taken.Add(FBox2D(C - Half, C + Half));
-		Box(C - Half, C + Half, FLinearColor(0.93f, 0.86f, 0.70f, 0.55f));
-		UI.Text(Lb.Text, Lb.Color, C.X - Tw * 0.5f, C.Y - Th * 0.5f, Small, Sc * Lb.K, Lb.Type);
-	}
+	PlaceTownMapLabels(Pending, Taken, Sc, FLinearColor(0.93f, 0.86f, 0.70f, 0.55f));
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(FVector2D(S->MistgateAt.X, S->MistgateAt.Y)), 7.f * Sc);
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
@@ -437,13 +445,14 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		const FVector2D Ls[4][2] = { { W0, FVector2D(W0.X + Ln, W1.Y) }, { FVector2D(W1.X - Ln, W0.Y), W1 }, { W0, FVector2D(W1.X, W0.Y + Ln) }, { FVector2D(W0.X, W1.Y - Ln), W1 } };
 		for (const auto& Lr : Ls) TownTiled(TEXT("mapc_dirt"), ToM(Lr[0]), ToM(Lr[1]), Lr[0], Lr[1], Rep * 0.5f, FLinearColor(1.f, 1.f, 1.f, 0.55f));
 	}
-	// the roads: a dark verge under every road first, then the earth (the side streets) or the cobbles (the main road, the
-	// forecourt, the cross road and the square), so that crossings stay clean
+	// the roads: a dark verge under every road first, then the cobbles, so that crossings stay clean (every street, the square
+	// and the stair turret's path are cobbled in the town (TownGround); the lane by the wall is earth, drawn above. Until the
+	// PR review the side streets were drawn as earth)
 	TArray<TPair<FVector2D, FVector2D>> Roads; TArray<bool> Cobbled;
 	for (int32 I = 0; I < S->TownRoads.Num(); ++I)
 	{
 		FVector2D W0, W1; TileW(S->TownRoads[I], W0, W1);
-		Roads.Add({ W0, W1 }); Cobbled.Add(I < 3);
+		Roads.Add({ W0, W1 }); Cobbled.Add(true);
 	}
 	{
 		FVector2D W0, W1; TileW(S->TownSquare, W0, W1);
@@ -498,8 +507,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// what stands on the map, drawn from the top of the sheet down (the nearer covers the farther, as in the painting)
 	struct FMapPic { FName Name; FVector2D A, B; bool bFlip; bool bShadow; };
 	TArray<FMapPic> Pics;
-	struct FMapLabel { FString Text; FVector2D P; float Size; FLinearColor Color; ERDType Type; float K; };
-	TArray<FMapLabel> Pending;
+	TArray<FRDTMapLabel> Pending;
 	TArray<FBox2D> Taken;
 	auto Pic = [&](FName Name, const FVector2D& Ctr, float HalfW, float HalfH, bool bFlip, bool bShadow)
 	{
@@ -605,14 +613,8 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		if (!IsValid(T)) continue;
 		const FString RoleName = StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)T->TownRole);
 		if (RoleName != TEXT("Elder") && RoleName != TEXT("Scholar") && RoleName != TEXT("Captain")) continue;
-		FString Mark = TEXT("·");
-		for (const FString& Q : Ql)
-		{
-			TArray<FString> P_; Q.ParseIntoArray(P_, TEXT("|"), false);
-			if (P_.Num() < 4 || P_[1] != RoleName) continue;
-			if (P_[3] == TEXT("ready")) { Mark = TEXT("?"); break; }
-			if (P_[3] == TEXT("offered")) Mark = TEXT("!");
-		}
+		FString Mark = RDTQuestMark(Ql, RoleName);
+		if (Mark.IsEmpty()) Mark = TEXT("·");
 		const FVector2D P = ToM(FVector2D(T->GetActorLocation()));
 		SoftDot(P, 11.f * Sc, FLinearColor(0.55f, 0.06f, 0.03f, 0.75f));
 		float Tw, Th; UI.TextSize(Mark, Tw, Th, Medium, Sc * 0.9f, ERDType::Title);
@@ -620,23 +622,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		Pending.Add({ T->Title, P, 9.f * Sc, FLinearColor(0.5f, 0.06f, 0.03f, 1.f), ERDType::Text, 0.85f });
 	}
 	// the labels: each where it covers no picture of a trade and no label before it, on a halo of the parchment's colour
-	for (const FMapLabel& Lb : Pending)
-	{
-		float Tw, Th; UI.TextSize(Lb.Text, Tw, Th, Small, Sc * Lb.K, Lb.Type);
-		const FVector2D Half(Tw * 0.5f + 3.f * Sc, Th * 0.5f + 1.f * Sc);
-		const float Below = Lb.Size * 0.92f + Th * 0.5f, Side = Lb.Size + Tw * 0.5f + 4.f * Sc;
-		const FVector2D Tries[] = { { 0.f, Below }, { 0.f, -Below }, { Side, 0.f }, { -Side, 0.f }, { 0.f, Below + Th * 1.1f }, { 0.f, -Below - Th * 1.1f },
-		                            { Side, Th * 1.1f }, { -Side, Th * 1.1f }, { 0.f, Below + Th * 2.2f }, { 0.f, -Below - Th * 2.2f } };
-		FVector2D C = Lb.P + Tries[0];
-		for (const FVector2D& O : Tries)
-		{
-			const FBox2D Bx(Lb.P + O - Half, Lb.P + O + Half);
-			if (!Taken.ContainsByPredicate([&](const FBox2D& Tb) { return Tb.Intersect(Bx); })) { C = Lb.P + O; break; }
-		}
-		Taken.Add(FBox2D(C - Half, C + Half));
-		Box(C - Half, C + Half, FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
-		UI.Text(Lb.Text, Lb.Color, C.X - Tw * 0.5f, C.Y - Th * 0.5f, Small, Sc * Lb.K, Lb.Type);
-	}
+	PlaceTownMapLabels(Pending, Taken, Sc, FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(W2(S->MistgateAt)), 7.f * Sc);
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
@@ -687,14 +673,7 @@ void ARDHUD::DrawTownNames(float Sc)
 		const float D = FVector::Dist(Head, Me->GetActorLocation());
 		if (D > 1400.f || FVector::DotProduct(Head - Cam, Fw) < 50.f) continue;
 		const FString RoleName = StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)T->TownRole);
-		FString Mark;
-		for (const FString& Q : Ql)
-		{
-			TArray<FString> P_; Q.ParseIntoArray(P_, TEXT("|"), false);
-			if (P_.Num() < 4 || P_[1] != RoleName) continue;
-			if (P_[3] == TEXT("ready")) { Mark = TEXT("?"); break; }
-			if (P_[3] == TEXT("offered") && Mark.IsEmpty()) Mark = TEXT("!");
-		}
+		const FString Mark = RDTQuestMark(Ql, RoleName);
 		const FVector Sp = Project(Head);
 		const float A = FMath::Clamp((1400.f - D) / 400.f, 0.f, 1.f);
 		const float K = Sc * FMath::Lerp(0.85f, 1.1f, FMath::Clamp((900.f - D) / 700.f, 0.f, 1.f));

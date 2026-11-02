@@ -964,7 +964,9 @@ public:
 	UPROPERTY(Transient) TObjectPtr<class USkyLightComponent> DaySky;
 	UPROPERTY(Transient) TObjectPtr<class UExponentialHeightFogComponent> DayFog;
 	UPROPERTY(Transient) TObjectPtr<class APostProcessVolume> DayPost;
-	float DaySunLux = 7.5f, DaySkyLight = 1.f, DayBias = 0.f;
+	float DaySunLux = 7.5f, DaySkyLight = 1.f, DayBias = 0.f, DayApplyT = 0.f;
+	bool bDayBaseRead = false;
+	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DayMoonKept;
 	FLinearColor DaySunColor = FLinearColor::White, DayFogLight = FLinearColor::White;
 
 	// ---- Brokenspire's runtime (RDTownGame.cpp)

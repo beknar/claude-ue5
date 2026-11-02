@@ -789,10 +789,23 @@ def step_castlewalls():
 # ------------------------------------------------------------------------------------------------ day and night (2026-11-02)
 def day_state():
     p = str(G["gen"].get_day_night_state()).split("|")
-    return {"day": int(p[0]), "hour": float(p[1]), "sun_elev": float(p[2]), "daylight": float(p[3]), "sun_lux": float(p[4]), "moon_lux": float(p[5]), "sky": float(p[6]), "bias": float(p[7])}
+    st = {"day": int(p[0]), "hour": float(p[1]), "sun_elev": float(p[2]), "daylight": float(p[3]), "sun_lux": float(p[4]), "moon_lux": float(p[5]), "sky": float(p[6]), "bias": float(p[7])}
+    # (the lights themselves, read from the world: the level's atmosphere suns, where they shine from and how bright; the PR
+    # review's find: the elevation above is the clock's formula, not the sun)
+    lights = []
+    for a in GS.get_all_actors_of_class(G["w"], unreal.DirectionalLight):
+        lc = a.light_component
+        if lc.get_editor_property("atmosphere_sun_light"):
+            lights.append(("sun", -lc.get_world_rotation().pitch, lc.get_editor_property("intensity")))
+    for lc in G["gen"].get_components_by_class(unreal.DirectionalLightComponent):
+        lights.append(("moon", -lc.get_world_rotation().pitch, lc.get_editor_property("intensity")))
+    sun = [l for l in lights if l[0] == "sun"]; moon = [l for l in lights if l[0] == "moon"]
+    st["sun_world"] = {"elev": round(sun[0][1], 2), "lux": round(sun[0][2], 3), "n": len(sun)} if sun else None
+    st["moon_world"] = {"elev": round(moon[0][1], 2), "lux": round(moon[0][2], 3), "n": len(moon)} if moon else None
+    return st
 def step_daynight():
     """the town's day: 24 hours in DayLengthSeconds (1800) of play, measured on the clock over 20 s of play; the sun high at
-    noon, setting at 18, down at midnight with the moon up; pictures from the square at noon, at 18:30 and at midnight (the
+    noon, setting at 18, down at midnight with the moon up (read from the lights in the world: their rotation and intensity); pictures from the square at noon, at 18:30 and at midnight (the
     noon one brighter than the night one), the game instance keeping the hour; back to the hour it was"""
     g = G["gen"]; res = {}; quiet(True)
     res["on"] = g.get_editor_property("day_night"); res["day_length"] = g.get_editor_property("day_length_seconds")
@@ -816,9 +829,14 @@ def step_daynight():
     res["pictures"] = pics
     g.set_town_hour(h_was); quiet(False)
     n, d_, ni = pics["noon"], pics["dusk"], pics["night"]
+    def el(p, k): return (p.get(k) or {}).get("elev", -999)
+    def lx(p, k): return (p.get(k) or {}).get("lux", -1)
+    # (the sun is clamped 10 degrees under the horizon at night; the moon rises opposite)
     ok = (res["on"] and abs(res["clock"]["day_s"] - res["day_length"]) < res["day_length"] * 0.05 and res["kept_by_game"]
-          and n["sun_elev"] > 55 and n["daylight"] > 0.99 and n["sun_lux"] > 1.0
-          and -10 < d_["sun_elev"] < 0 and ni["sun_elev"] < -40 and ni["sun_lux"] < 0.01 and ni["moon_lux"] > 0.1 and ni["daylight"] < 0.01
+          and all((p.get("sun_world") or {}).get("n") == 1 and (p.get("moon_world") or {}).get("n") == 1 for p in (n, d_, ni))
+          and el(n, "sun_world") > 55 and lx(n, "sun_world") > 1.0 and n["daylight"] > 0.99
+          and -10.5 < el(d_, "sun_world") < 0 and lx(d_, "sun_world") < 0.01
+          and el(ni, "sun_world") < -9 and lx(ni, "sun_world") < 0.01 and el(ni, "moon_world") > 30 and lx(ni, "moon_world") > 0.1 and ni["daylight"] < 0.01
           and n["luma"] is not None and ni["luma"] is not None and n["luma"] > ni["luma"] * 1.8)
     step_result("daynight", ok, **res)
 

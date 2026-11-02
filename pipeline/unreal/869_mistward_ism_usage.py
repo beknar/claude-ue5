@@ -32,6 +32,18 @@ gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDunge
 meshes |= {p.mesh for p in gen.get_editor_property("pieces").values() if p.mesh}
 for m in meshes:
     for b in bases_of(m): want(b, "used_with_instanced_static_meshes")
+# (a piece drawn in a material of its own (FRDPiece::Material: the burned houses' MI_Wood_Burnt, through HismsMat) needs it
+# on that material's base too (the PR review's find: only the meshes' own were checked)
+overrides = 0
+for m_ in ("/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/brokenspire"):
+    open_map(m_)
+    g_ = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    for p in g_.get_editor_property("pieces").values():
+        mat = p.get_editor_property("material")
+        if p.mesh and mat:
+            overrides += 1
+            for b in bases_of(p.mesh, [mat]): want(b, "used_with_instanced_static_meshes")
+print("ISMUSAGE pieces in materials of their own:", overrides)
 # the menu: its placed meshes; Nanite ones need the Nanite usage
 open_map(MENU)
 nmenu = 0

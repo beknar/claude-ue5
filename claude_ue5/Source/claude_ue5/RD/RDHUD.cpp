@@ -470,7 +470,9 @@ void ARDHUD::DrawCombat(float Sc)
 			const FLinearColor Tc = bOn ? FLinearColor::White : FLinearColor(0.72f, 0.70f, 0.66f);
 			// (its key: the one that draws it, or casts it when it is cast alongside; on the gamepad the button it is used with)
 			FString Key = Wp.bAlongside ? FString(TEXT("RMB / E")) : I < 3 ? FString::Printf(TEXT("%d"), I + 1) : FString(TEXT("wheel"));
-			if (bPad) Key = Wp.bAlongside ? FString(TEXT("LB")) : (Wp.bSpell && Cb->GetAlongsideSpell() < 0) ? FString(TEXT("LB / RB")) : FString(TEXT("RB"));
+			// (a hero who blocks holds LB for it: her spells are RB alone (the PR review's find))
+			const bool bLbBlocks = Gen->HeroBlocks();
+			if (bPad) Key = (Wp.bAlongside && !bLbBlocks) ? FString(TEXT("LB")) : (Wp.bSpell && Cb->GetAlongsideSpell() < 0 && !bLbBlocks) ? FString(TEXT("LB / RB")) : FString(TEXT("RB"));
 			if (bPad && Gen->bRogueControls) Key = bOn ? FString(TEXT("RB")) : FString(TEXT("Y"));      // (the rogue: Y draws it, RB uses it)
 			UI.Text(Key, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc, ERDType::Title);
 			const FString N = Wp.Name.ToString().ToUpper();

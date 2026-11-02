@@ -256,7 +256,8 @@ public:
 	float CastleWalkZ = 0.f;
 	/** the trees, bushes and grass of the town as placed (x, y, kind: 1-3 a tree, 4 a bush): the papyrus map draws them */
 	TArray<FVector> TownGreens;
-	/** the castle's towers and stair (tests): "tower|<x>|<y>|<stair 0/1>", "stairdoor|<x>|<y>|<z>", "walkdoor|<x>|<y>|<z>", "walk|<z>" */
+	/** the castle's towers and stair (tests; world): "tower|<x>|<y>|<stair 0/1>", "stairdoor|<x>|<y>|<z>", "walkdoor|<x>|<y>|<z>",
+	 *  "stairmid|<x>|<y>|<z>", "spiral|<start angle in the castle's frame>|<quarter turns>", "walk|<z>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetCastleShapeLines() const;
 	/** the containers' building (-1 none) and where each townsperson stands or walks (role, the point, the building, wander
 	 *  radius cm) */

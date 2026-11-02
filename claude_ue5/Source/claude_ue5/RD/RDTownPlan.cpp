@@ -1244,11 +1244,27 @@ void ARDSection::CastleOuterFace(const FVector& Edge, const FVector& OutW, float
 	const FRDPiece* Rf = Generator->Piece(TEXT("Town.CastleRoof"));
 	const float Sw = T * 0.5f + 15.f;
 	if (Rf) AddPiece(TEXT("Town.CastleRoof"), FTransform(FRotator(0, Yaw, 0), Edge + OutW * (Sw * 0.5f) + FVector(0, 0, H + 40.f), FVector(Sw / FMath::Max((float)Rf->Size.X, 50.f), 1.f, 1.f)));
-	// the battlements on the outer face (not where a tower stands)
-	for (const FVector& C : CastleTowers) if (FVector::Dist2D(Edge, C) < RDTCTowerR) return;
+	// the battlements on the outer face, up to where a tower's ring crosses them: a segment the ring crosses is shortened to
+	// its part outside the ring and 20 cm in (the PR review's find: a test of the segment's middle never caught one, and every
+	// corner's ran 40 cm into its tower)
 	const FRDPiece* Pp = Generator->Piece(TEXT("Town.Parapet"));
 	const float Pt = Pp ? FMath::Max((float)Pp->Size.X, 40.f) : 110.f, Pl = Pp ? FMath::Max((float)Pp->Size.Y, 100.f) : 313.f;
-	AddPiece(TEXT("Town.Parapet"), FTransform(Ro, Edge + OutW * (T * 0.5f + Th - Pt * 0.5f) + FVector(0, 0, Z1), FVector(1.f, M / Pl, 1.f)), true);
+	const FVector Pc = Edge + OutW * (T * 0.5f + Th - Pt * 0.5f);
+	const FVector Along(-OutW.Y, OutW.X, 0.f);
+	float T0 = -M * 0.5f, T1 = M * 0.5f;
+	for (const FVector& C : CastleTowers)
+	{
+		// (where the segment's line Pc + Along t enters and leaves the ring's circle)
+		const FVector2D D(Pc.X - C.X, Pc.Y - C.Y), Al(Along.X, Along.Y);
+		const float B_ = FVector2D::DotProduct(D, Al), Cq = D.SizeSquared() - RDTCTowerR * RDTCTowerR, Disc = B_ * B_ - Cq;
+		if (Disc <= 0.f) continue;
+		const float Ta = -B_ - FMath::Sqrt(Disc), Tb = -B_ + FMath::Sqrt(Disc);
+		if (Tb <= T0 || Ta >= T1) continue;
+		// (keep the longer part outside, reaching 20 cm into the ring)
+		if (Ta - T0 >= T1 - Tb) T1 = FMath::Min(T1, Ta + 20.f); else T0 = FMath::Max(T0, Tb - 20.f);
+	}
+	if (T1 - T0 < 30.f) return;
+	AddPiece(TEXT("Town.Parapet"), FTransform(Ro, Pc + Along * ((T0 + T1) * 0.5f) + FVector(0, 0, Z1), FVector(1.f, (T1 - T0) / Pl, 1.f)), true);
 }
 
 void ARDSection::CastleTowersBuild(const FTownBld& B)
@@ -1331,8 +1347,10 @@ TArray<FString> ARDSection::GetCastleShapeLines() const
 	if (CastleStairTower >= 0)
 	{
 		Out.Add(FString::Printf(TEXT("stairdoor|%.0f|%.0f|%.0f"), CastleStairDoor.X, CastleStairDoor.Y, GetActorLocation().Z));
-		Out.Add(FString::Printf(TEXT("walkdoor|%.0f|%.0f|%.0f"), CastleWalkDoor.X, CastleWalkDoor.Y, GetActorLocation().Z + CastleWalkDoor.Z));
-		Out.Add(FString::Printf(TEXT("stairmid|%.0f|%.0f|%.0f"), CastleTowers[CastleStairTower].X, CastleTowers[CastleStairTower].Y, (float)RDTCSpiralStart));
+		// (world heights: the towers' middles are TileWorld's (the section's z), the walk door's its own plus the walk's top)
+		Out.Add(FString::Printf(TEXT("walkdoor|%.0f|%.0f|%.0f"), CastleWalkDoor.X, CastleWalkDoor.Y, CastleWalkDoor.Z));
+		Out.Add(FString::Printf(TEXT("stairmid|%.0f|%.0f|%.0f"), CastleTowers[CastleStairTower].X, CastleTowers[CastleStairTower].Y, CastleTowers[CastleStairTower].Z));
+		Out.Add(FString::Printf(TEXT("spiral|%.0f|%d"), (float)RDTCSpiralStart, RDTCSpiralQuarters));
 	}
 	Out.Add(FString::Printf(TEXT("walk|%.0f"), CastleWalkZ));
 	return Out;

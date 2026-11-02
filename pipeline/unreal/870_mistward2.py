@@ -204,9 +204,10 @@ for MAP in MAPS:
             keys.insert(min(len(keys), 4), "RMB (hold)|block with the shield")
             # (LB blocks, LT switches walk / run as for everyone: the user's of 2026-11-02 (885). Until then LT blocked and L3
             # ran, and a rerun of this filter dropped her run line altogether)
-            pad = [k for k in pad if not k.startswith(("LB (hold)|", "LT|"))]
+            # (the same rule as 885's warrior_pad, word for word: LT fourth, LB held after it)
+            pad = [k for k in pad if not k.startswith(("LT (hold)|", "L3|", "LT|", "LB (hold)|"))]
             pad.insert(min(len(pad), 3), "LT|switch walk / run")
-            pad.insert(min(len(pad), 5), "LB (hold)|block with the shield")
+            pad.insert(min(len(pad), 4), "LB (hold)|block with the shield")
         h.controls_keys = keys; h.controls_pad = pad
     gen.set_editor_property("heroes", heroes)
     ss = dict(gen.get_editor_property("start_shield")); ss[unreal.Name("Warrior")] = worst_s.name
