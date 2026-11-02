@@ -177,7 +177,14 @@ void ARDMonster::PickTrip()
 	Path.Reset();
 	if (!Section) return;
 	const FIntPoint From = WalkableTileAt(GetActorLocation());
-	const FIntPoint To = Section->RandomRoomTile(R, Section->RoomAtLocal(From));
+	FIntPoint To = Section->RandomRoomTile(R, Section->RoomAtLocal(From));
+	// (Brokenspire: a room's guard walks about its own room only)
+	if (HomeRoom >= 0)
+	{
+		const TArray<FVector> Free = Section->GetRoomFreeTiles(HomeRoom);
+		if (Free.Num() == 0) { WaitTime = R.FRandRange(2.f, 4.f); return; }
+		To = Section->WorldToLocal(Free[R.RandRange(0, Free.Num() - 1)]);
+	}
 	TArray<FIntPoint> Tiles;
 	if (!Section->FindPath(From, To, Tiles) || Tiles.Num() < 2) { WaitTime = R.FRandRange(1.f, 3.f); return; }
 	SetPathFromTiles(Tiles);
@@ -725,6 +732,12 @@ bool ARDMonster::TickCombat(float Dt)
 	}
 	ChaseTimer -= Dt;
 	const bool bSameSection = !FoeMo || FoeMo->Section == Section;
+	// (Brokenspire: a room's guard takes no foe outside its room; one it was after walks out, and it goes back about the room)
+	if (HomeRoom >= 0 && !bAlly && Section->RoomAt(Pl) != HomeRoom)
+	{
+		if (bAggro) { bAggro = false; Path.Reset(); WaitTime = 0.5f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr; }
+		return false;
+	}
 	if (!bAggro && !bAlly)
 	{
 		// it notices its foe when it is near and there is a way to it that is not much longer than the straight line

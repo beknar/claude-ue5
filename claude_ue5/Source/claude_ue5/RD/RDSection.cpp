@@ -490,6 +490,27 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 		return true;
 	}
 	if (!P->Mesh) return true;
+	// (Brokenspire: a piece in a material of its own (a burned house's timbers) has its own instanced component, by name)
+	if (P->Material)
+	{
+		const FName Key = PcName(Name);
+		PendingMat.FindOrAdd(Key).Add(W);
+		if (!HismsMat.Contains(Key))
+		{
+			const bool bColM = P->bCollision && !bForceNoCollision;
+			UInstancedStaticMeshComponent* H = NewObject<UInstancedStaticMeshComponent>(this, NAME_None, RF_Transactional);
+			H->SetStaticMesh(P->Mesh);
+			for (int32 Sl = 0; Sl < P->Mesh->GetStaticMaterials().Num(); ++Sl) H->SetMaterial(Sl, P->Material);
+			H->SetMobility(EComponentMobility::Static);
+			H->SetupAttachment(RootComponent);
+			H->SetCollisionProfileName(bColM ? TEXT("BlockAll") : TEXT("NoCollision"));
+			H->RegisterComponent();
+			AddInstanceComponent(H);
+			HismsMat.Add(Key, H);
+		}
+		++NumInstances;
+		return true;
+	}
 	const bool bCol = (P->bCollision && !bForceNoCollision) || P->bHidden;
 	(P->bHidden ? PendingHidden : bCol ? Pending : PendingNoCol).FindOrAdd(P->Mesh).Add(W);
 	TMap<UStaticMesh*, UInstancedStaticMeshComponent*>& Map = P->bHidden ? HismsHidden : bCol ? Hisms : HismsNoCol;
@@ -520,7 +541,8 @@ void ARDSection::FlushInstances()
 	for (auto& KV : Pending) if (UInstancedStaticMeshComponent** H = Hisms.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
 	for (auto& KV : PendingNoCol) if (UInstancedStaticMeshComponent** H = HismsNoCol.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
 	for (auto& KV : PendingHidden) if (UInstancedStaticMeshComponent** H = HismsHidden.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
-	Pending.Reset(); PendingNoCol.Reset(); PendingHidden.Reset();
+	for (auto& KV : PendingMat) if (UInstancedStaticMeshComponent** H = HismsMat.Find(KV.Key)) (*H)->AddInstances(KV.Value, false, true);
+	Pending.Reset(); PendingNoCol.Reset(); PendingHidden.Reset(); PendingMat.Reset();
 }
 
 UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColor& Color, float Candelas, float Radius, bool bShadows, float Flicker)
@@ -1062,6 +1084,8 @@ void ARDSection::LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex)
 	case ERDRoomKind::Forge: TorchCd = 70.f; Spacing = 1200.f; break;
 	default: TorchCd = 70.f; Spacing = 900.f; break;
 	}
+	// (Brokenspire: two hundred buildings of small rooms: their wall torches half as many, a little brighter)
+	if (Generator->bTown) { Spacing *= 2.f; TorchCd *= 1.3f; }
 	if (TorchCd > 0.f)
 		for (int32 Side = 0; Side < 4; ++Side)
 			for (const FVector& W : WallSlots(Rm, Side, Spacing, 40.f, 140.f))
@@ -1842,6 +1866,23 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	GenR.Initialize(Seed);
+	// (Brokenspire: the start section is the town)
+	if (Generator->bTown && Generator->IsStartSection(Coord))
+	{
+		Theme = NAME_None; ThemeNames.Reset(); ThemeNamesOf = Theme;
+		PlanTown(GenR);
+		ShellPrepare(GenR);
+		ShellX = 0;
+		for (int32 BI = 0; BI < TownBlds.Num(); ++BI) TownShellBuilding(BI);     // (the styles first: the doors' pieces are the style's)
+		TownDoors();
+		ShellX = TownBlds.Num();        // (the shells are built; the outdoors follow, a step a frame)
+		NextCorr = 0;
+		UWorld* W0 = GetWorld();
+		if (W0 && W0->IsGameWorld()) RegisterMap();
+		ShellMs = (FPlatformTime::Seconds() - GenStart) * 1000.0;
+		bBuilding = true;
+		return;
+	}
 	Plan(GenR);
 	ShellPrepare(GenR);
 	ShellX = 0;
@@ -1857,6 +1898,23 @@ bool ARDSection::ContinueGenerate(double Budget)
 	if (!bBuilding) return true;
 	const double T0 = FPlatformTime::Seconds();
 	++GenTicks;
+	// (Brokenspire: the town's outdoors a step at a time, then its buildings furnished, then its play part)
+	if (Generator->bTown && Generator->IsStartSection(Coord))
+	{
+		while (FPlatformTime::Seconds() - T0 < Budget && NextCorr < TownOutdoorSteps) TownOutdoors(GenR, NextCorr++);
+		if (NextCorr < TownOutdoorSteps) { FlushInstances(); return false; }
+		while (FPlatformTime::Seconds() - T0 < Budget && NextRoom < TownBlds.Num()) TownFurnish(GenR, NextRoom++);
+		FurnishMs += (FPlatformTime::Seconds() - T0) * 1000.0;
+		if (NextRoom < TownBlds.Num()) return false;
+		FlushInstances();
+		bBuilding = false;
+		UWorld* W = GetWorld();
+		if (W && W->IsGameWorld()) { CollectFlicker(); RegisterMap(); }
+		GenerateMs = ShellMs + FurnishMs;
+		UE_LOG(LogRandomDungeon, Log, TEXT("RDSECTION town seed %d: %d buildings, %d rooms, %d doors, %d containers, %d instances, %d lights, %.0f ms over %d frames%s"),
+			Seed, TownBlds.Num(), Rooms.Num(), Doors.Num(), Containers.Num(), NumInstances, NumLights, GenerateMs, GenTicks, bEditorBuilt ? TEXT(" [editor]") : TEXT(""));
+		return true;
+	}
 	// the shell first (floors, ceilings, walls), a few tile columns per frame, each frame's instances added at once
 	if (ShellX <= N)
 	{
@@ -1954,6 +2012,24 @@ void ARDSection::ActivateForPlay()
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	const int32 Inst = NumInstances, Lights = NumLights;
 	FRandomStream R(Seed);
+	// (Brokenspire: the town's plan again from its seed; its doors, containers and map data rebuilt as the editor's build made
+	// them: the same draws in the same order)
+	if (Generator->bTown && Generator->IsStartSection(Coord))
+	{
+		Theme = NAME_None; ThemeNames.Reset(); ThemeNamesOf = Theme;
+		PlanTown(R);
+		ShellPrepare(R);
+		for (int32 BI = 0; BI < TownBlds.Num(); ++BI) TownShellBuilding(BI);
+		TownDoors();
+		for (int32 K = 0; K < TownOutdoorSteps; ++K) TownOutdoors(R, K);
+		for (int32 BI = 0; BI < TownBlds.Num(); ++BI) TownFurnish(R, BI);
+		NumInstances = Inst; NumLights = Lights;
+		bBuildStatic = true;
+		RegisterMap();
+		CollectFlicker();
+		UE_LOG(LogRandomDungeon, Log, TEXT("RDSECTION town activated for play: %d buildings, %d doors, %d containers"), TownBlds.Num(), Doors.Num(), Containers.Num());
+		return;
+	}
 	Plan(R);
 	BuildShell(R);
 	AddDoors();

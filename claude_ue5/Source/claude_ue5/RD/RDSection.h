@@ -219,6 +219,49 @@ public:
 	/** free tiles of a room in the order of their distance from its middle (the arena's spawns) */
 	TArray<FVector> GetRoomFreeTilesNear(int32 Index, const FVector& From) const;
 
+	// ---- Brokenspire (the generator's bTown; RDTownPlan.cpp): the start section is the town. Its tiles: the walkable ground
+	// is one hallway (Corrs[0], owner 1000), each building's rooms are rooms; the town wall's ring and what stands outside it
+	// are void. Buildings are House Forge's modules (the village's pieces, "Town.<style>_<part>"), the castle the dungeon's
+	// Castle theme turned out and in; doors are single leaves on the building's doorway.
+	/** a building of the town: its kind (RDTownKinds), its rectangle (local tiles, max exclusive), its door (side 0 -X, 1 +X,
+	 *  2 -Y, 3 +Y; the tile inside it), its state (0 lived in, 1 burned, 2 boarded), style, its rooms */
+	struct FTownBld
+	{
+		uint8 Kind = 0; FIntPoint Min = FIntPoint::ZeroValue, Max = FIntPoint::ZeroValue;
+		int32 DoorSide = 0; FIntPoint DoorTile = FIntPoint::ZeroValue; uint8 State = 0; uint8 Style = 0; int32 Storeys = 2;
+		TArray<int32> Rooms; int32 Door = -1; bool bBoarded = false; uint32 Seed = 0; FString Label;
+	};
+	TArray<FTownBld> TownBlds;
+	/** what stands outside: its kind (RDTownSpots), where, its yaw (and the building it belongs to, -1) */
+	struct FTownSpot { uint8 Kind = 0; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; };
+	TArray<FTownSpot> TownSpots;
+	/** the streets and the square (local tile rectangles, max exclusive), what is cobbled */
+	TArray<FIntRect> TownRoads;
+	FIntRect TownSquare;
+	/** inside the town wall (local tiles, max exclusive) */
+	FIntRect TownInner;
+	/** a tile's ground: 0 void (outside the wall, a tower), 1 ground, 2 a room (Type) */
+	uint8 TownTileType(FIntPoint Local) const { return In(Local) && Type.Num() == N * N ? Type[Idx(Local)] : 0; }
+	int32 GetTownTiles() const { return N; }
+	/** the gate (its tiles' middle, world; the way out) and the Mistgate (the castle hall's back wall: walking into it opens
+	 *  Mistward Castle); the castle hall's room */
+	FVector TownGate = FVector::ZeroVector, TownGateOut = FVector::ZeroVector, MistgateAt = FVector::ZeroVector, MistgateNormal = FVector::ZeroVector;
+	int32 CastleHallRoom = -1, CastleBld = -1;
+	/** the containers' building (-1 none) and where each townsperson stands or walks (role, the point, the building, wander
+	 *  radius cm) */
+	struct FTownPost { ERDTownRole Role = ERDTownRole::Townsfolk; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; float Wander = 0.f; int32 Index = 0; };
+	TArray<FTownPost> TownPosts;
+	/** the building a world point is in (-1: outdoors) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 TownBuildingAt(FVector Location) const;
+	/** the building's kind name ("smithy", "home"...) */
+	static FString TownKindName(uint8 Kind);
+	/** a boarded house's boards are pried loose (F at its door): its door opens from then on */
+	bool PryBoards(int32 Bld);
+	/** the door of a boarded house that is still boarded (-1: none) */
+	int32 BoardedDoorBld(int32 Door) const;
+	/** a door's index on the edge between two tiles (the town's walk test) */
+	TArray<FVector> GetTownDoorPoints() const;
+
 	// ---- interaction (doors, containers)
 	/** nearest door / container within MaxDistance: returns distance (or 1e9) */
 	float FindNearestInteractive(const FVector& From, float MaxDistance, bool& bDoor, int32& Index) const;
@@ -324,6 +367,28 @@ private:
 		bool bLooted = false;                    // containers: opened once (what it held was found)
 	};
 	struct FFlicker { UPointLightComponent* Light; float Base; float Phase; float Amount; };
+	// ---- Brokenspire (RDTownPlan.cpp)
+	void PlanTown(FRandomStream& R);
+	/** the town's static part, a building / the outdoors at a time (static build): NextRoom counts buildings, NextCorr the
+	 *  outdoor steps */
+	void TownShellBuilding(int32 BI);
+	void TownOutdoors(FRandomStream& R, int32 Step);
+	static constexpr int32 TownOutdoorSteps = 6;
+	void TownFurnish(FRandomStream& R, int32 BI);
+	void TownDoors();
+	void TownGround();
+	/** a single door leaf on a building's doorway (the kit's door piece, its hinge) */
+	void AddTownDoor(int32 BI, FIntPoint RoomTile, FIntPoint OutTile, FName Piece, int32 Room);
+	/** the pieces of a building's style ("Town.<Style>_<Part>") */
+	FName TownPiece(const FTownBld& B, const TCHAR* Part) const;
+	/** House Forge's kit at a building's frame: a point in it (x along its door's outward way, y across), its yaw */
+	FVector TownBldPoint(const FTownBld& B, float X, float Y, float Z) const;
+	float TownBldYaw(const FTownBld& B) const;
+	/** boarded houses' planks (their components, hidden when pried loose) */
+	TMap<int32, TArray<TWeakObjectPtr<UStaticMeshComponent>>> TownBoards;
+	/** pieces drawn in a material of their own (the burned houses): one instanced component per piece name */
+	TMap<FName, UInstancedStaticMeshComponent*> HismsMat;
+	TMap<FName, TArray<FTransform>> PendingMat;
 
 	// plan (pure function of Coord + Seed)
 	int32 N = 84;

@@ -90,7 +90,7 @@ The user's list of 2026-10-30 (docs/improvements3.txt; 875-877):
            third refused), her soldiers fighting, daggers in both hands and never enchanted, no armour, magic rings only, no
            tome, the torch; a tier boss: Summon Tier 2 (the Gunner); kept through a death, gone at a restart
 The user's list of 2026-10-31 (878):
-  options  Escape: the main page (Resume, Options, Choose another hero, Quit); Options: the volumes, the controls hint off
+  options  Escape: the main page (Resume, Options, Return to Brokenspire, Choose another hero (a new game), Quit); Options: the volumes, the controls hint off
            (the HUD draws no panel) and on, a display mode and a resolution applied (saved in the editor), Escape back, closed
   allyspace six of the Summoner's allies called apart; following her and waiting round her they keep apart (sampled; the
            switch off first: they gather into each other); the summons panel's rows and hit points; their marks on both maps
@@ -2804,7 +2804,7 @@ def step_summoner():
 
 # ================================================================================================ the list of 2026-10-31 (878)
 def step_options():
-    """Escape (sent as the keyboard sends it) opens the menu's main page: Resume, Options, Choose another hero, Quit; Options
+    """Escape (sent as the keyboard sends it) opens the menu's main page: Resume, Options, Return to Brokenspire (the town, since 2026-11-02), Choose another hero (a new game), Quit; Options
     (S, Enter) opens its page: the four volumes, the controls hint, a resolution, a display mode, Apply, Back. D on the
     controls hint turns the upper left panel off (the HUD draws none; kept in the user settings), again on; a volume
     steps; the display mode and the resolution change, Apply saves them (in the editor: in the editor's own user settings,
@@ -2859,7 +2859,7 @@ def step_options():
     GUS2.set_screen_resolution(kept[0]); GUS2.set_fullscreen_mode(kept[1]); GUS2.save_settings()
     g.set_user_volume(1, kept[2]); g.set_controls_hint_shown(kept[3])
     o = res["open"]; op = res["options"]
-    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Options", "button|Choose another hero", "button|Quit"]
+    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Options", "button|Return to Brokenspire", "button|Choose another hero (a new game)", "button|Quit"]
           and op["page"] == 1 and op["action"] == "options" and [l.split("|")[0] for l in op["lines"]] == ["volume"] * 4 + ["choice"] * 3 + ["button"] * 2
           and res["controls_off"]["shown"] is False and res["controls_off"]["line"].endswith("|Off") and abs(res["volume"]["before"] - res["volume"]["after"] - 0.1) < 0.011
           and res["display"]["mode"] == 2 and res["display"]["to"] != res["display"]["from"] and res["applied"]["said"].startswith("saved") and res["applied"]["saved"] == want

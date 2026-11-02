@@ -556,6 +556,11 @@ public:
 	/** a shrine's blessing on her: its name, until when, and what it gives (her blows' share more, blows on her a share less;
 	 *  swiftness goes in as a speed effect) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") void Bless(const FString& Name, float Damage, float Armour, float Speed, float Seconds);
+	/** Brokenspire: seconds left of her blessing (0: none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") float GetBlessLeft() const;
+	/** Brokenspire: a found weapon (one of the item table's, by its index among her weapons) out of her hands for good (sold,
+	 *  put in her storage): what was left of it (its slash stays with her); false: not a found weapon */
+	bool RemoveFoundWeapon(int32 Index, float& WearLeft);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") FString GetBlessing() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetBlessDamage() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") float GetBlessArmour() const;

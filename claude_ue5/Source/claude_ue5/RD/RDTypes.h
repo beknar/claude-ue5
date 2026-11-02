@@ -35,6 +35,8 @@ struct FRDPiece
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector Hinge2 = FVector::ZeroVector;
 	/** prefab: an actor blueprint spawned instead of an instanced mesh (Mesh may stay empty); Adjust applies */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TSubclassOf<AActor> ActorClass;
+	/** Brokenspire: the mesh drawn in this material instead of its own (a burned house's timbers: House Forge's burnt wood) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UMaterialInterface> Material = nullptr;
 };
 
 /** random_dungeonmagic_level5: what a monster's blow does to her besides its damage */
@@ -873,6 +875,72 @@ struct FRDMapRect
 		const int32 W = Max.X - Min.X, I = (T.Y - Min.Y) * W + (T.X - Min.X);
 		return Mask.IsValidIndex(I) && Mask[I] != 0;
 	}
+};
+
+/** Brokenspire (docs/brokenspire.txt): who someone of the town is. The first three have functionality (quests, what is
+ *  happening); the keepers stand at the buildings whose services she uses (the services are the buildings' own: the anvil,
+ *  the counter, the altar); the rest live there. */
+UENUM(BlueprintType)
+enum class ERDTownRole : uint8
+{
+	Elder, Scholar, Captain,
+	Smith, Trader, Healer, Priest, Keeper, Innkeeper,
+	Drunk, Witch, Child, Refugee, Idiot, Preacher, Mourner, Guard, Militia, Soldier, Townsfolk
+};
+
+/** Brokenspire: a townsperson (the NPC packs: a whole-body mesh and its idle and in-place walk clips, as the prisoners) and
+ *  what they say. pipeline/unreal/882 fills the town's from SourceArt/brokenspire/town.json. */
+USTRUCT(BlueprintType)
+struct FRDTownsfolkDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDTownRole Role = ERDTownRole::Townsfolk;
+	/** their name and what they are ("Aldric Venn", "the elder of Brokenspire") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Calling;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<USkeletalMesh>> Parts;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Idle = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Walk = nullptr;
+	/** mesh relative to its feet (z), turned so that it faces +X (yaw), its scale */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshZ = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = -90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkSpeed = 110.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkClipSpeed = 150.f;
+	/** how many of this one the town has (refugees, children, guards) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Count = 1;
+	/** what F at them gets: one of these at random (their bark) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Lines;
+	/** what can be asked of them: "<question>|<answer>" (the scholar's what is happening, the elder's why he needs her) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Topics;
+};
+
+/** Brokenspire: a quest. Its Goal is a counter the game keeps across the levels (URDGameInstance::Counters): "talk:<role>",
+ *  "guards" (the Mistward Hall's guards killed), "enter" (Mistward Castle entered), "kills" (monsters killed in the castle),
+ *  "kind:<monster>", "boss" (a tier's boss slain), "prisoners" (freed from the cells), "tier" (the highest castle tier open:
+ *  counted whole, not from when it was taken), "wild:<what>" (the wilderness, which is not there yet: offered as coming
+ *  later). */
+USTRUCT(BlueprintType)
+struct FRDQuestDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Id;
+	/** who gives it and takes it back: "Elder", "Scholar", "Captain", "Board" (the quest board) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Giver;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	/** what the giver says offering it, and turning it in */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Offer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Done;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Goal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Count = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Gold = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName RewardItem;
+	/** offered once this one is turned in (none: at once) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName After;
+	/** the tracker's line ("Kill the guards of the Mistward Hall") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Hint;
 };
 
 /** map data of one section: kept for the whole session (also after the section is unloaded) */

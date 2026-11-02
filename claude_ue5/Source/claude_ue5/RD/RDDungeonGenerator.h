@@ -830,6 +830,140 @@ public:
 	bool bAutoplayKiting = false, bAutoplayStealthFlee = false;
 	float AutoplayStealthNext = 0.f, AutoplayKiteEnd = 0.f, AutoplayKiteNext = 0.f;
 
+	// ---- Brokenspire (docs/brokenspire.txt; RD/RDTown*.cpp, pipeline/unreal/881-884): the starting town and the castle's
+	// side of it. Each a switch: bTown on the town's map (its start section is the town: ARDSection::PlanTown), bTownLink on
+	// Mistward Castle (and the town): gold, her things and the purse kept between the two (URDGameInstance), the quests'
+	// counters, the way back to the town. Off on every other level.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTown = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTownLink = false;
+	/** the town's name (the minimap's title, the map's plaque) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString TownName = TEXT("Brokenspire");
+	/** where the Mistgate leads (the town's) and the way back (the castle's): maps opened with ?Hero= */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString CastleLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString TownLevel;
+	/** the town's people and its quests (pipeline/unreal/882 from SourceArt/brokenspire/town.json) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDTownsfolkDef> Townsfolk;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDQuestDef> Quests;
+	/** the ground's material (the village's: grass, trodden earth, cobbles, lush grass by vertex colour) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TObjectPtr<UMaterialInterface> TownGroundMaterial = nullptr;
+	/** a new game's town from a seed of its own (off: the saved one, StartSeed's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTownNewSeed = true;
+	/** the Mistward Hall's guards: how many (a random number between), of tier 1 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownGuardsMin = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownGuardsMax = 10;
+	/** gold: a kill gives Min..Max times its tier, a boss BossGold times its tier more; a container holds gold one time in
+	 *  ContainerGoldChance, Min..Max times its tier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FVector2D KillGold = FVector2D(1.f, 4.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float BossGold = 40.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float ContainerGoldChance = 0.45f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FVector2D ContainerGold = FVector2D(3.f, 12.f);
+	/** what the trader pays for a thing, a share of what it costs */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float SellShare = 0.35f;
+	/** the price of an item (its kind's base by the first tier it is found in) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 PriceOf(FName Item) const;
+	/** her purse (the game's: kept between the levels) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetGold() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void AddGold(int32 Amount, const FString& Why = FString());
+	/** the highest castle tier she has opened this game (the trader's stock and the services' prices follow it) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetGameTier() const;
+	/** her things into the game instance (before another level opens) and back (when her combat component is made) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void SaveCarry();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool RestoreCarry();
+	/** through the Mistgate (the town's) / back to the town (the castle's); a test's dry run only says where it would go */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCastle();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool ReturnToTown();
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTravelDryRun = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FString LastTravel;
+	/** tests and the reels: the town built again from Seed (0: a new one), the townspeople and guards with it, her in the square */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void RebuildTown(int32 Seed);
+	/** the town (tests): "<index>|<kind>|<label>|<state 0 lived, 1 burned, 2 boarded>|<x>|<y>|<door x>|<door y>|<rooms>|<boarded now>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownBuildingLines() const;
+	/** what stands outdoors and the services: "<kind>|<x>|<y>|<z>|<building>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownSpotLines() const;
+	/** the townspeople: "<index>|<role>|<name>|<title>|<x>|<y>|<z>|<walks>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownsfolkLines() const;
+	/** a named place of the town (world): "square", "gate", "mistgate", "castle door", "circle", "board", a spot or a building
+	 *  kind ("smithy", "stash"...); false: none */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool GetTownPlace(const FString& What, FVector& At) const;
+	/** the Mistward Hall's guards alive now */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<ARDMonster*> GetTownGuards() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetTownGuardsPlanned() const { return TownGuardsPlanned; }
+	/** the quests: "<id>|<giver>|<title>|<state: offered, taken, ready, done, later>|<progress>|<count>|<hint>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetQuestLines() const;
+	/** a quest's progress now (its counter less where it stood when taken; "tier": the highest whole) */
+	int32 QuestProgress(const FRDQuestDef& Q) const;
+	/** the town's panel (it pauses the game): "talk" (someone of the town: ask, quests), "store" (buy, sell), "smith" (repairs,
+	 *  the anvil), "healer", "temple", "stash" (her storage), "circle" (the teleport circle), "board" (the quest board) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool OpenTownPanel(FName Kind, int32 Who = -1);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void CloseTownPanel();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsTownPanelOpen() const { return !TownPanel.IsNone(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FName GetTownPanel() const { return TownPanel; }
+	/** the panel's lines: "<action>|<label>|<tag>|<1 can be done>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownPanelLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetTownPanelText() const { return TownBody; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetTownNote() const { return TownNote; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetTownCursor() const { return TownCursor; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetTownTab() const { return TownTab; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void MoveTownCursor(int32 Step);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void SetTownTab(int32 Tab);
+	/** does the line under the cursor (or Line): false when it cannot be done (its note says why) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool ActivateTownEntry(int32 Line = -1);
+	/** the nearest townsperson of a role (tests; -1 none) and F at them */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 FindTownsfolk(ERDTownRole InRole) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") class ARDTownsfolk* GetTownsfolk(int32 Index) const { return TownPeople.IsValidIndex(Index) ? TownPeople[Index].Get() : nullptr; }
+	/** what she heard last from someone of the town (who|line) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FString LastBark;
+	/** the town panel's rows as the HUD drew them (the mouse reads them) */
+	TArray<FBox2D> TownRowBoxes;
+	TArray<FBox2D> TownTabBoxes;
+	/** her talk's partner (the townsperson's index) */
+	int32 TownWho = -1;
+	struct FTownLine { FString Label, Tag, Detail; FName Act; FString Arg; bool bOn = true; };
+	TArray<FTownLine> TownLines;
+	FString TownTitle, TownSub, TownBody, TownNote;
+	float TownNoteTime = -100.f;
+
+	// ---- Brokenspire's runtime (RDTownGame.cpp)
+	void BeginTownPlay();
+	void AfterTownBuilt();
+	void TickTown(float Dt, APlayerController* PC);
+	void TickTownPanel(APlayerController* PC);
+	void BuildTownLines();
+	/** F in the town: someone near, a service, the gate, a boarded door (""; nothing of the town's) */
+	FString TownInteract(const FVector& From);
+	FString TownDescribe(const FVector& From) const;
+	/** the castle's way back to the town (an arch in the great hall): F there */
+	FVector CastleWayBack = FVector::ZeroVector;
+	UPROPERTY(Transient) TObjectPtr<AActor> CastleWayBackActor;
+	/** a monster killed, a container opened, a prisoner freed, a tier opened: the purse and the quests' counters */
+	void TownOnKill(ARDMonster* Monster, bool bBossKill);
+	void TownOnContainer(ARDSection* Section, int32 Key, const FVector& At);
+	void TownCount(const FString& Key, int32 Amount = 1);
+	void TownCountMax(const FString& Key, int32 Value);
+	UPROPERTY(Transient) TArray<TObjectPtr<class ARDTownsfolk>> TownPeople;
+	UPROPERTY(Transient) TArray<TObjectPtr<ARDMonster>> TownGuards;
+	UPROPERTY(Transient) TObjectPtr<AActor> MistgateFx;
+	UPROPERTY(Transient) TObjectPtr<AActor> CircleFx;
+	FName TownPanel;
+	int32 TownTab = 0, TownCursor = 0, TownGuardsPlanned = 0;
+	bool bTownTraveling = false, bTownPlaced = false;
+	uint64 TownPanelClosedFrame = 0;
+	void SpawnTownPeople();
+	void SpawnTownGuards();
+	/** the services */
+	bool TownBuy(FName Item);
+	bool TownSell(const FString& Ref);
+	bool TownHeal();
+	bool TownRepair(const FString& Ref);
+	int32 RepairCost(const FString& Ref) const;
+	bool TownBless();
+	bool TownDeposit(const FString& Ref);
+	bool TownWithdraw(int32 Index);
+	bool TownQuestAction(FName Act, FName Id);
+	void SetTownNote(const FString& Text);
+	/** what the trader has for sale now (the open tier's potions, food, repair items, scrolls) */
+	TArray<FName> TownStock() const;
+
 	/** random_dungeonmagic_level4: the painted interface (panels, bar frames and fills, slots, icons...; pipeline/unreal/830).
 	 *  The HUD draws a piece where it has one and its plain boxes where it has not (the other dungeon levels have none). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Interface") TMap<FName, FRDUIArt> UIArt;

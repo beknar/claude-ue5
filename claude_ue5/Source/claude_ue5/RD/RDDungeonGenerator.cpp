@@ -129,6 +129,8 @@ TArray<FIntPoint> ARDDungeonGenerator::GetSectionCoords() const { TArray<FIntPoi
 
 FVector ARDDungeonGenerator::GetStartRoomCenter() const
 {
+	// (Brokenspire: the town square; she comes back to life there)
+	if (bTown) { FVector Sq; if (GetTownPlace(TEXT("square"), Sq)) return Sq; }
 	// the great hall is the start section's centre block (3, 3): its lanes cross at the origin tile
 	if (ARDSection* S = GetSection(FIntPoint::ZeroValue))
 	{
@@ -221,7 +223,7 @@ bool ARDDungeonGenerator::GenerateSectionNow(FIntPoint S)
 
 void ARDDungeonGenerator::Enqueue(FIntPoint S)
 {
-	if (bOneRoom && !IsStartSection(S)) return;          // (martial_arts: the one room, nothing beyond it)
+	if ((bOneRoom || bTown) && !IsStartSection(S)) return;          // (martial_arts: the one room, nothing beyond it; Brokenspire: the town alone)
 	if (!IsSectionGenerated(S) && !Queue.Contains(S) && IsSectionAllowed(S)) Queue.Add(S);
 }
 
@@ -798,6 +800,8 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 	// (level 5: the four volumes and its three buttons on one page; mistward4: a main page and an Options page)
 	static const FName Vol[4] = { TEXT("vol0"), TEXT("vol1"), TEXT("vol2"), TEXT("vol3") };
 	if (!bOptionsMenu) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("resume"), TEXT("hero"), TEXT("quit") };
+	// (Brokenspire: the castle's way back to the town)
+	if (MenuPage == 0 && bTownLink && !bTown && !TownLevel.IsEmpty()) return { TEXT("resume"), TEXT("options"), TEXT("town"), TEXT("hero"), TEXT("quit") };
 	if (MenuPage == 0) return { TEXT("resume"), TEXT("options"), TEXT("hero"), TEXT("quit") };
 	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
 }
@@ -819,7 +823,8 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 		if (V >= 0) Out.Add(FString::Printf(TEXT("volume|%s|%.2f"), VolLabel[V], UserVolumes[V]));
 		else if (Id == TEXT("resume")) Out.Add(TEXT("button|Resume"));
 		else if (Id == TEXT("options")) Out.Add(TEXT("button|Options"));
-		else if (Id == TEXT("hero")) Out.Add(TEXT("button|Choose another hero"));
+		else if (Id == TEXT("hero")) Out.Add(bTown || bTownLink ? FString(TEXT("button|Choose another hero (a new game)")) : FString(TEXT("button|Choose another hero")));
+		else if (Id == TEXT("town")) Out.Add(FString::Printf(TEXT("button|Return to %s"), *TownName));
 		else if (Id == TEXT("quit")) Out.Add(TEXT("button|Quit"));
 		else if (Id == TEXT("controls")) Out.Add(FString::Printf(TEXT("choice|Controls hint|%s"), bControlsShown ? TEXT("On") : TEXT("Off")));
 		else if (Id == TEXT("res"))
@@ -893,6 +898,14 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); MenuPage = 0; MenuCursor = 1; return true; }
 	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
 	if (Id == TEXT("controls") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
+	if (Id == TEXT("town"))
+	{
+		LastMenuAction = TEXT("town");
+		if (bMenuDryRun) return true;
+		if (PlayerCombat && PlayerCombat->IsDead()) return false;
+		SetMenuOpen(false);
+		return ReturnToTown();
+	}
 	if (Id == TEXT("hero"))
 	{
 		LastMenuAction = TEXT("hero");
@@ -996,10 +1009,13 @@ void ARDDungeonGenerator::OnContainerOpened(ARDSection* Section, int32 Index, co
 {
 	if (!Section || !PlayerCombat) return;
 	const TArray<FName> List = LootListOf(Section->Coord, Index);
+	// (Brokenspire: gold in it, and the game remembers it was opened)
+	const int32 GoldBefore = GetGold();
+	if (bTown || bTownLink) TownOnContainer(Section, Index, At);
 	if (List.Num() == 0)
 	{
 		// (level 5: one container in three holds anything; one that held nothing says so)
-		if (ContainerLootChance < 1.f) { PlayerCombat->ShowMessage(TEXT("Empty: nothing inside")); ++ContainersEmpty; }
+		if (ContainerLootChance < 1.f && GetGold() == GoldBefore) { PlayerCombat->ShowMessage(TEXT("Empty: nothing inside")); ++ContainersEmpty; }
 		return;
 	}
 	for (int32 K = 0; K < List.Num(); ++K) PlayerCombat->AddItem(List[K], LootCountIn(List, Section->Coord, Index, K));
@@ -1021,6 +1037,13 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 {
 	++MonstersKilled;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
+	// (Brokenspire: its gold, the quests' counters)
+	if (bTown || bTownLink)
+	{
+		bool bBossOf = false;
+		for (const FEncounter& E : Encounters) if (E.bBoss && !E.bThrone && E.Live.Num() > 0 && E.Live[0].Get() == Monster) bBossOf = true;
+		TownOnKill(Monster, bBossOf);
+	}
 	// (mistward: one of a boss's band or a ring's guards stays dead)
 	bool bBossKill = false;
 	for (FEncounter& E : Encounters)
@@ -1161,6 +1184,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 			}
 	// (mistward: her dropped things, a teleporter pad, a trap she has seen (the Rogue disarms it) come before the rest)
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
+	// (Brokenspire: someone of the town, a service, the gate, a boarded door; the castle's way back)
+	if (bTown || bTownLink) { const FString Tw = TownInteract(From); if (!Tw.IsEmpty()) return Tw; }
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = UseSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = UsePadNear(From); if (!Pd.IsEmpty()) return Pd; }
@@ -1177,7 +1202,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	{
 		// (mistward: a locked cell: a prisoner is let out; a monster's is locked from within, and opens when she is near)
 		const int32 C = Best->CellOfDoor(BestI);
-		if (Best->Cells.IsValidIndex(C) && Best->Cells[C].Occupant == 1) { Best->OpenCell(BestI); return TEXT("prisoner"); }
+		if (Best->Cells.IsValidIndex(C) && Best->Cells[C].Occupant == 1) { Best->OpenCell(BestI); if (bTownLink) TownCount(TEXT("prisoners")); return TEXT("prisoner"); }
 		if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The cell is locked from within"));
 		return TEXT("cell locked");
 	}
@@ -1263,6 +1288,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 			if (Lp->bHarvest) return FString::Printf(TEXT("harvest the parts (%d)"), Lp->GetNumThings());
 			return Lp->GetNumThings() == 1 ? FString::Printf(TEXT("take the %s"), *Lp->Things[0].ToString().ToLower()) : FString::Printf(TEXT("take up what lies here (%d)"), Lp->GetNumThings());
 		}
+	if (bTown || bTownLink) { const FString Tw = TownDescribe(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
@@ -1353,8 +1379,11 @@ void ARDDungeonGenerator::BeginPlay()
 	SlashR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x51A5u));
 	MapData.Reset();
 	for (auto It = Sections.CreateIterator(); It; ++It) if (!It->Value) It.RemoveCurrent();
+	// (Brokenspire: the game's town (its seed), what was looted and opened in it or in the castle)
+	if (bTown || bTownLink) { BeginTownPlay(); if (bOpeningMenu) return; }
 	if (Sections.Num() == 0) SpawnSection(FIntPoint::ZeroValue, false);
 	else for (auto& KV : Sections) KV.Value->ActivateForPlay();
+	if (bTown || bTownLink) AfterTownBuilt();
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDGEN play: %d start sections, session seed %d, %d monsters"), Sections.Num(), SessionSeed, GetNumMonsters());
 }
 
@@ -1377,6 +1406,13 @@ void ARDDungeonGenerator::Tick(float Dt)
 		}
 	// (it ticks while the game is paused: then only her inventory or the Escape menu, which paused it, is worked)
 	const bool bPaused = GetWorld()->IsPaused();
+	// (Brokenspire: the town's panel takes the keys while it is open, Escape too)
+	if (IsTownPanelOpen())
+	{
+		if (!PlayerCombat || PlayerCombat->IsDead()) CloseTownPanel();
+		else if (APlayerController* TPC = UGameplayStatics::GetPlayerController(this, 0)) TickTownPanel(TPC);
+		return;
+	}
 	if (APlayerController* MPC = UGameplayStatics::GetPlayerController(this, 0)) TickMenu(MPC);
 	if (bMenuOpen) return;
 	if (Heroes.Num() > 0 && PlayerCombat)
@@ -1400,6 +1436,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 				if (bMouseUI) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
 				// (mistward: the shield her hero starts with, on her arm)
 				if (const FName* Sh = StartShield.Find(CurrentHero); Sh && FindItem(*Sh) >= 0) { PlayerCombat->AddItem(*Sh, 1); PlayerCombat->WearShield(*Sh); }
+				// (Brokenspire: what she carried from the other level, in place of what her hero starts with)
+				if (bTown || bTownLink) RestoreCarry();
 			}
 			// (a face that moves: the level's expression channels on her pawn)
 			if (FaceChannels.Num() > 0 && !P->FindComponentByClass<URDFaceComponent>())
@@ -1446,7 +1484,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 			}
 		}
 		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P
-			&& !(PlayerCombat && (PlayerCombat->IsCraftingOpen() || PlayerCombat->CraftClosedFrame == GFrameCounter))) InteractNearest(P->GetActorLocation());
+			&& !(PlayerCombat && (PlayerCombat->IsCraftingOpen() || PlayerCombat->CraftClosedFrame == GFrameCounter)) && TownPanelClosedFrame != GFrameCounter) InteractNearest(P->GetActorLocation());
+		if (bTown || bTownLink) TickTown(Dt, PC);
 		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) SetMapOpen(!bMapOpen);
 		// the big map scrolls under the arrow keys (the D-pad), C (the right stick pressed) brings it back over her
 		UpdateMapScrollInput(PC);
@@ -1461,7 +1500,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 		}
 	}
 	// (mistward: the census of the sets she has not reached, the traps, the cells; G picks the first tier pad's destination)
-	if (TierOpenShare < 1.f && MaxTier > 0)
+	if (TierOpenShare < 1.f && MaxTier > 0 && !bTown)
 	{
 		// (the open tiers' sets are counted ahead, a few a frame, so that the next tier opens the moment it should)
 		// (looked for twice a second: once all are counted the tallies say nothing new)

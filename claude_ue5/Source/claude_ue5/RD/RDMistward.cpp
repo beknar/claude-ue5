@@ -369,12 +369,13 @@ void ARDDungeonGenerator::TickCensus()
 
 void ARDDungeonGenerator::CheckTierOpenings()
 {
-	if (MaxTier <= 0 || TierOpenShare >= 1.f) return;
+	if (MaxTier <= 0 || TierOpenShare >= 1.f || bTown) return;          // (Brokenspire: the town has no tiers of its own)
 	for (int32 T = 2; T <= MaxTier; ++T)
 	{
 		if (TiersOpened.Contains(T)) continue;
 		if (!IsTierOpen(T)) break;
 		TiersOpened.Add(T);
+		if (bTownLink) TownCountMax(TEXT("tier"), T);          // (Brokenspire: the quests that ask for a tier)
 		TierNotice = FString::Printf(TEXT("TIER %d IS OPEN"), T);
 		TierNoticeTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 		RefreshSeals();
