@@ -1,0 +1,47 @@
+{
+ "tag": "t4c",
+ "plan": [
+  "satellite"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "satellite",
+   "ok": true,
+   "state": {
+    "step": 3,
+    "px": 4096,
+    "middle": [
+     0.0,
+     0.0
+    ],
+    "half_m": 264.0,
+    "capture_ms": 2.0,
+    "captures": 1
+   },
+   "luma": {
+    "all": 79.98,
+    "middle": 76.42,
+    "north": 79.5,
+    "south": 81.36,
+    "west": 78.54
+   },
+   "drawn_satellite": true,
+   "painted_drawn": [],
+   "labels_missing": [],
+   "seals": [
+    "seal|Elder",
+    "seal|Captain",
+    "seal|Scholar",
+    "seal|Board"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_t4c_map_satellite1.png",
+  "bs_t4c_map_satellite3.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

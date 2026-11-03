@@ -16,6 +16,7 @@
 #include "Engine/Canvas.h"
 #include "CanvasItem.h"
 #include "RenderUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "GameFramework/PlayerController.h"
@@ -263,7 +264,7 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 {
 	// (the painted map in colour, the Fairhill reference's look (the user's of 2026-11-02), when its pictures are there)
-	if (UI.Has(TEXT("mapc_grass")) && UI.Has(TEXT("mapc_parchment"))) { DrawTownMapColour(Sc, L, Yaw); return; }
+	if (Gen->HasTownSatellite() || (UI.Has(TEXT("mapc_grass")) && UI.Has(TEXT("mapc_parchment")))) { DrawTownMapColour(Sc, L, Yaw); return; }
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
 	const ARDSection* S = Gen->GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
@@ -445,7 +446,16 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// the sheet: an old scroll, its edges frayed and unravelling (the user's of 2026-11-02: "the edges of the town overhead map
 	// should be frayed and unraveling, like an ancient scroll": mapc_scroll, made from the parchment by bs_scroll.py); else the
 	// parchment with a dark rule and a gold one inside it
-	if (UI.Has(TEXT("mapc_scroll"))) UI.Fit(TEXT("mapc_scroll"), A - FVector2D(Ms * 0.03f), B + FVector2D(Ms * 0.03f));
+	// (since 2026-11-03 (the user's: "a semi-realistic top down representation of the terrain features, much like what you would
+	// see from a satellite or google earth, with labels on important or functional buildings and quest markers on NPCs"): the
+	// town's own picture from above (the generator's TownSatellitePicture, RDTownSat.cpp) on a dark sheet with a gold rule, under
+	// the labels and the seals; the painted map until it is taken)
+	const bool bSat = Gen->HasTownSatellite();
+	if (bSat)
+	{
+		Box(A - FVector2D(Ms * 0.03f), B + FVector2D(Ms * 0.03f), FLinearColor(0.035f, 0.035f, 0.04f, 0.97f));
+	}
+	else if (UI.Has(TEXT("mapc_scroll"))) UI.Fit(TEXT("mapc_scroll"), A - FVector2D(Ms * 0.03f), B + FVector2D(Ms * 0.03f));
 	else
 	{
 		if (!UI.Fit(TEXT("mapc_parchment"), A, B)) Box(A, B, FLinearColor(0.86f, 0.77f, 0.58f, 1.f));
@@ -478,6 +488,20 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	FVector2D Bc = FVector2D::ZeroVector;
 	for (const FVector2D& P : Ol) Bc += P;
 	Bc /= Ol.Num();
+	if (bSat)
+	{
+		// the picture: its square of the world (its middle, its half width) where the map puts that square; the picture's up
+		// is the world's +X, its right +Y, as the map's
+		const FVector2D Sc0 = Gen->TownSatCenter; const float Hs = Gen->TownSatHalf;
+		const FVector2D Tl = ToM(FVector2D(Sc0.X + Hs, Sc0.Y - Hs)), Br = ToM(FVector2D(Sc0.X - Hs, Sc0.Y + Hs));
+		DrawTexture(Gen->TownSatellitePicture, Tl.X, Tl.Y, Br.X - Tl.X, Br.Y - Tl.Y, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, BLEND_Opaque);
+		// (a little brighter: the picture added again at a share; a tint over 1 is clamped)
+		const float Bt = FMath::Clamp(Gen->TownSatelliteBrighten, 0.f, 1.f);
+		if (Bt > 0.f) DrawTexture(Gen->TownSatellitePicture, Tl.X, Tl.Y, Br.X - Tl.X, Br.Y - Tl.Y, 0.f, 0.f, 1.f, 1.f, FLinearColor(Bt, Bt, Bt, 1.f), BLEND_Additive);
+		if (UI.Drawn) UI.Drawn->AddUnique(TEXT("town_satellite"));
+	}
+	else
+	{
 	// the grass: the walled ground, feathered into the parchment round it (one picture over the whole town: repeated, its
 	// mirrored seams showed as bands); a fan of triangles from the middle, the outline grown for the feather
 	{
@@ -586,19 +610,23 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 			}
 		}
 	}
+	}
 	// what stands on the map, drawn from the top of the sheet down (the nearer covers the farther, as in the painting)
 	struct FMapPic { FName Name; FVector2D A, B; bool bFlip; bool bShadow; };
 	TArray<FMapPic> Pics;
 	TArray<FRDTMapLabel> Pending;
 	TArray<FBox2D> Taken;
+	// (on the picture from above the buildings are themselves: no painted pictures over them; the labels light on a dark halo)
+	const FLinearColor Ink = bSat ? FLinearColor(0.99f, 0.95f, 0.84f, 1.f) : FLinearColor(0.18f, 0.10f, 0.04f, 1.f);
 	auto Pic = [&](FName Name, const FVector2D& Ctr, float HalfW, float HalfH, bool bFlip, bool bShadow)
 	{
+		if (bSat) return;
 		Pics.Add({ Name, Ctr - FVector2D(HalfW, HalfH), Ctr + FVector2D(HalfW, HalfH), bFlip, bShadow });
 	};
 	auto Label = [&](const FString& Text, const FVector2D& P, float Size, const FString& Key)
 	{
 		if (Text.IsEmpty()) return;
-		Pending.Add({ Text, P, Size, FLinearColor(0.18f, 0.10f, 0.04f, 1.f), ERDType::Label, 0.92f });
+		Pending.Add({ Text, P, Size, Ink, ERDType::Label, 0.92f });
 		TownLabels.Add(FString::Printf(TEXT("%s|%s"), *Key, *Text));
 	};
 	// (the buildings: each its picture on its footprint, a little larger (a roof's eaves); homes by their style)
@@ -680,10 +708,11 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	{
 		FVector Sq; Gen->GetTownPlace(TEXT("square"), Sq);
 		const FVector2D P = ToM(W2(Sq));
-		Pending.Insert({ TEXT("TOWN SQUARE"), P, 4.f * Sc, FLinearColor(0.18f, 0.10f, 0.04f, 0.95f), ERDType::Title, 0.95f }, 0);
+		Pending.Insert({ TEXT("TOWN SQUARE"), P, 4.f * Sc, bSat ? Ink : FLinearColor(0.18f, 0.10f, 0.04f, 0.95f), ERDType::Title, 0.95f }, 0);
 		TownLabels.Add(TEXT("square|TOWN SQUARE"));
 	}
-	// (the watch's patrol, written once on the lane)
+	// (the watch's patrol, written once on the lane; not on the picture from above, which draws no patrol)
+	if (!bSat)
 	{
 		const FVector2D P = ToM(Ol[Ol.Num() / 3] + (Bc - Ol[Ol.Num() / 3]).GetSafeNormal() * TS * 1.5f);
 		Pending.Add({ TEXT("Watch patrol"), P, 2.f * Sc, FLinearColor(0.45f, 0.28f, 0.04f, 1.f), ERDType::Text, 0.9f });
@@ -715,13 +744,13 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		const FVector2D P = ToM(FVector2D(T->GetActorLocation()));
 		Seal(P, RDTQuestMark(Ql, RoleName));
 		TownLabels.Add(FString::Printf(TEXT("seal|%s"), *RoleName));
-		if (Zm >= 2.5f) Pending.Add({ T->Title, P, 13.f * Sc, FLinearColor(0.5f, 0.06f, 0.03f, 1.f), ERDType::Text, 0.85f });
+		if (Zm >= 2.5f) Pending.Add({ T->Title, P, 13.f * Sc, bSat ? FLinearColor(1.f, 0.84f, 0.62f, 1.f) : FLinearColor(0.5f, 0.06f, 0.03f, 1.f), ERDType::Text, 0.85f });
 	}
 	if (Givers.Contains(TEXT("Board")))
 		for (const ARDSection::FTownSpot& Sp : S->TownSpots)
 			if (Sp.Kind == TS_Board) { Seal(ToM(W2(Sp.At)) + FVector2D(0.f, -16.f * Sc), RDTQuestMark(Ql, TEXT("Board"))); TownLabels.Add(TEXT("seal|Board")); break; }
 	// the labels: each where it covers no picture of a trade and no label before it, on a halo of the parchment's colour
-	PlaceTownMapLabels(Pending, Taken, Sc, FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
+	PlaceTownMapLabels(Pending, Taken, Sc, bSat ? FLinearColor(0.02f, 0.02f, 0.025f, 0.62f) : FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(W2(S->MistgateAt)), 7.f * Sc);
 	{
 		const FVector2D P = ToM(FVector2D(L.X, L.Y));
@@ -733,13 +762,21 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// map's edge again (mapc_scroll_edge, bs_scroll.py); the canvas has no clip of its own)
 	if (bZoomed)
 	{
-		const FVector2D Sa = A - FVector2D(Ms * 0.03f), Sb = B + FVector2D(Ms * 0.03f);
+		// (the picture from above stops at its gold frame; the scroll's torn edge stands a little out from the sheet)
+		const FVector2D Sa = bSat ? A : A - FVector2D(Ms * 0.03f), Sb = bSat ? B : B + FVector2D(Ms * 0.03f);
 		const FLinearColor Dk(0.015f, 0.012f, 0.01f, 1.f);
 		Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Sa.Y + 2.f), Dk);
 		Box(FVector2D(0, Sb.Y - 2.f), FVector2D(Canvas->ClipX, Canvas->ClipY), Dk);
 		Box(FVector2D(0, Sa.Y), FVector2D(Sa.X + 2.f, Sb.Y), Dk);
 		Box(FVector2D(Sb.X - 2.f, Sa.Y), FVector2D(Canvas->ClipX, Sb.Y), Dk);
-		if (!UI.Fit(TEXT("mapc_scroll_edge"), Sa, Sb)) Frame(A, B, FLinearColor(0.30f, 0.20f, 0.10f, 0.95f), 6.f * Sc);
+		if (bSat || !UI.Fit(TEXT("mapc_scroll_edge"), Sa, Sb)) Frame(A, B, FLinearColor(0.30f, 0.20f, 0.10f, 0.95f), 6.f * Sc);
+	}
+	// (the picture from above framed in gold, as the dungeon's maps; a dark band under the title and over the key)
+	if (bSat)
+	{
+		Frame(A, B, FLinearColor(0.85f, 0.66f, 0.28f, 0.95f), 2.f * Sc);
+		Box(FVector2D(A.X, A.Y), FVector2D(B.X, A.Y + Ms * 0.075f), FLinearColor(0.02f, 0.02f, 0.025f, 0.72f));
+		Box(FVector2D(A.X, B.Y - Ms * 0.07f), FVector2D(B.X, B.Y), FLinearColor(0.02f, 0.02f, 0.025f, 0.72f));
 	}
 	// the title in gold over a dark shadow, a gold rule under it; the compass rose; the key
 	const FString Title = Gen->TownName.ToUpper();
@@ -757,7 +794,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		if (!UI.Fit(TEXT("mapc_compass"), Cc - FVector2D(Cr), Cc + FVector2D(Cr)))
 			DrawLine(Cc.X, Cc.Y + Cr, Cc.X, Cc.Y - Cr, FLinearColor(0.25f, 0.13f, 0.05f, 1.f), 2.f * Sc);
 		float Nw, Nh; UI.TextSize(TEXT("N"), Nw, Nh, Medium, Sc * 1.2f, ERDType::Title);
-		UI.Text(TEXT("N"), FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cc.X - Nw * 0.5f, Cc.Y - Cr - Nh - 2.f * Sc, Medium, Sc * 1.2f, ERDType::Title);
+		UI.Text(TEXT("N"), bSat ? Ink : FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cc.X - Nw * 0.5f, Cc.Y - Cr - Nh - 2.f * Sc, Medium, Sc * 1.2f, ERDType::Title);
 	}
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 	const FString Clock = Gen->bDayNight ? FString::Printf(TEXT("      day %d · %s"), Gen->GetTownDay(), *Gen->GetTownClock()) : FString();
@@ -765,9 +802,9 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	const FString Key2 = bPad ? FString::Printf(TEXT("right stick zoom (%.1fx)      D-pad move      R3 back to the whole town"), Zm)
 	                          : FString::Printf(TEXT("wheel or + / -  zoom (%.1fx)      drag or arrow keys  move      C  the whole town"), Zm);
 	UI.TextSize(Key, Tw, Th, Small, Sc);
-	UI.Text(Key, FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.055f, Small, Sc);
+	UI.Text(Key, bSat ? Ink : FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.055f, Small, Sc);
 	UI.TextSize(Key2, Tw, Th, Small, Sc);
-	UI.Text(Key2, FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.055f + Th * 1.15f, Small, Sc);
+	UI.Text(Key2, bSat ? Ink : FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.055f + Th * 1.15f, Small, Sc);
 	MapView = Mid;
 	TownMapZoomDrawn = Zm;
 }
