@@ -591,6 +591,8 @@ void URDCombatComponent::TickFallDamage()
 	LastFallDamage = Amount; ++FallsHurt;
 	const float Now = GetWorld()->GetTimeSeconds();
 	Health = FMath::Max(0.f, Health - Amount);
+	// (a pact cheats death once, a fall's as a blow's (the PR review's find))
+	if (Health <= 0.f && Now < PactUntil) { Health = FMath::Max(1.f, MaxHealth * PactShare); PactUntil = Now; ++PactSaves; SetAura(ERDSpellKind::Pact, nullptr, false); SetMessage(TEXT("Your pact holds: you rise again")); }
 	DamageTaken += Amount; LastHurtTime = Now;
 	if (AActor* O = GetOwner())
 	{
@@ -715,6 +717,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (bHeldOn && Now >= HeldUntil) { bHeldOn = false; UpdateWalkSpeed(); }       // (mistward: the snare lets go)
 	// (the third list: a block ends with the shield gone from her hand, a swing begun or a fall, scripted or not (one rule))
 	if (bBlocking && (bDead || !IsShieldInHand() || AttackTime >= 0.f)) SetBlocking(false);
+	TickBlockLayer();
 	if (bDead)
 	{
 		bInAir = false;

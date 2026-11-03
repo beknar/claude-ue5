@@ -67,7 +67,9 @@ void ARDHeroSelect::BeginPlay()
 		float Overall = 1.f, Music = 1.f;
 		if (GConfig) { GConfig->GetFloat(TEXT("RandomDungeon.Volume"), TEXT("Overall"), Overall, GGameUserSettingsIni); GConfig->GetFloat(TEXT("RandomDungeon.Volume"), TEXT("Music"), Music, GGameUserSettingsIni); }
 		const float Vol = MenuMusicVolume * FMath::Clamp(Overall, 0.f, 1.f) * FMath::Clamp(Music, 0.f, 1.f);
-		MenuMusicComp = UGameplayStatics::CreateSound2D(this, MenuMusic, 1.f, 1.f, 0.f, nullptr, true, false);
+		// (it ends with the menu's level: persisting across the travel, it played on in the town and the castle over their own
+		// music (the PR review's find))
+		MenuMusicComp = UGameplayStatics::CreateSound2D(this, MenuMusic, 1.f, 1.f, 0.f, nullptr, false, true);
 		if (MenuMusicComp) { MenuMusicComp->bIsUISound = true; MenuMusicComp->FadeIn(2.f, Vol); }
 		UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT music %s at %.2f"), *MenuMusic->GetName(), Vol);
 	}

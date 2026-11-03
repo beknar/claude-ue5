@@ -419,9 +419,11 @@ bool URDCombatComponent::HasBlockLayer()
 	return AI->GetClass()->FindPropertyByName(TEXT("BlockAlpha")) != nullptr;
 }
 
-void URDCombatComponent::TickBlocking(const APlayerController* PC)
+void URDCombatComponent::TickBlockLayer()
 {
-	// (the block layer eased to its weight, 0.15 s up, 0.2 s down; written into her AnimBP's BlockAlpha)
+	// (the block layer eased to its weight, 0.15 s up, 0.2 s down; written into her AnimBP's BlockAlpha. Every tick, dead or
+	// alive, scripted or not: eased only with her input, a block ended by her death or under autoplay left the shield's pose
+	// over her upper body (the PR review's find))
 	if (BlockLayerNow != BlockLayerTarget)
 	{
 		const float Dt = GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f;
@@ -434,6 +436,10 @@ void URDCombatComponent::TickBlocking(const APlayerController* PC)
 			else if (FFloatProperty* Fp = CastField<FFloatProperty>(P)) Fp->SetPropertyValue_InContainer(AI, BlockLayerNow);
 		}
 	}
+}
+
+void URDCombatComponent::TickBlocking(const APlayerController* PC)
+{
 	if (!Generator || !Generator->HeroBlocks()) { if (bBlocking) SetBlocking(false); return; }
 	// (the right mouse button or LB held; LT is her run switch, as every hero's: the user's of 2026-11-02)
 	const bool bDown = PC && (PC->IsInputKeyDown(EKeys::RightMouseButton) || PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder));

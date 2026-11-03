@@ -869,6 +869,7 @@ public:
 	TArray<TWeakObjectPtr<class ARDTownsfolk>> TownWorkBy;
 	UPROPERTY(Transient) TArray<TObjectPtr<class ARDTownAnimal>> TownAnimalActors;
 	UPROPERTY(Transient) TArray<TObjectPtr<USceneComponent>> TownSpitTurners;
+	UPROPERTY(Transient) TArray<TObjectPtr<USceneComponent>> TownSpitParts;
 	TArray<int32> TownSpitCrank;
 	bool ClaimTownWork(int32 Work, class ARDTownsfolk* T);
 	void ReleaseTownWork(int32 Work, const class ARDTownsfolk* T);

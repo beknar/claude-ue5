@@ -160,11 +160,15 @@ bool ARDTownsfolk::TickWork(float Now, float Dt)
 		if (Now >= WorkUntil) { EndWork(); NextJob(Now); }
 		return true;
 	case 1:
-		// (its way was blocked: on to the next place of its round (tried again, the same place held the innkeeper for good))
+		// (its way was blocked: the same place tried again up to three times (another townsperson or an animal passing), then
+		// on to the next place of its round (tried again for ever, one place held the innkeeper for good))
 		if (Path.Num() == 0 && Now >= NextTrip)
 		{
+			const int32 Fails = GoFails;
 			EndWork();
+			if (Fails < 3) JobI = (JobI - 1 + Jobs.Num()) % Jobs.Num();
 			NextJob(Now);
+			if (Fails < 3) GoFails = Fails;
 		}
 		return true;
 	case 4:
@@ -309,8 +313,11 @@ void ARDDungeonGenerator::SpawnTownAnimals()
 
 void ARDDungeonGenerator::SpawnTownSpits()
 {
-	for (USceneComponent* C : TownSpitTurners) if (IsValid(C)) C->DestroyComponent(true);
-	TownSpitTurners.Reset(); TownSpitCrank.Reset();
+	// (the rods and meat with their pivots: destroyed with the children promoted, they stayed at the old town's spits (the PR
+	// review's find))
+	for (USceneComponent* C : TownSpitParts) if (IsValid(C)) C->DestroyComponent();
+	for (USceneComponent* C : TownSpitTurners) if (IsValid(C)) C->DestroyComponent();
+	TownSpitTurners.Reset(); TownSpitParts.Reset(); TownSpitCrank.Reset();
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
 	for (int32 I = 0; I < S->TownSpits.Num(); ++I)
@@ -332,6 +339,7 @@ void ARDDungeonGenerator::SpawnTownSpits()
 			// (the engine's cylinder: 100 cm along its Z round its middle, 100 across)
 			Rd->SetRelativeTransform(FTransform(FRotator(90.f, 0.f, 0.f), FVector::ZeroVector, FVector(0.045f, 0.045f, 2.1f)));
 			Rd->RegisterComponent();
+			TownSpitParts.Add(Rd);
 		}
 		if (TownSpitMeat)
 			for (int32 K = -1; K <= 1; K += 2)
@@ -343,6 +351,7 @@ void ARDDungeonGenerator::SpawnTownSpits()
 				const FBox Bx = TownSpitMeat->GetBoundingBox();
 				Mt->SetRelativeTransform(FTransform(FRotator(0.f, 90.f, 0.f), FVector(K * 28.f, 0.f, 0.f) - FRotator(0.f, 90.f, 0.f).RotateVector(Bx.GetCenter())));
 				Mt->RegisterComponent();
+				TownSpitParts.Add(Mt);
 			}
 		TownSpitTurners.Add(Pv);
 		int32 Crank = -1;
@@ -432,9 +441,12 @@ void ARDDungeonGenerator::SpawnTownLife()
 			break;
 		case ERDTownRole::Innkeeper:
 		{
+			// (the bar, then each table and back to the bar: the bar's place is in the round between the tables again (Nearest
+			// leaves out what the round has, so it came once: the PR review's find))
 			const int32 B = T->GetHomeBuilding();
-			Add(Nearest(P, [B](const ARDSection::FTownWork& W) { return W.Bld == B && W.Group == TW_Bar && W.Kind == TEXT("CarryIdle"); }, J, 1e9f));
-			for (int32 I = 0; I < Wk.Num(); ++I) if (Wk[I].Bld == B && Wk[I].Group == TW_Serve) { Add(I); Add(Nearest(P, [B](const ARDSection::FTownWork& W) { return W.Bld == B && W.Group == TW_Bar && W.Kind == TEXT("CarryIdle"); }, J, 1e9f)); }
+			const int32 Bar = Nearest(P, [B](const ARDSection::FTownWork& W) { return W.Bld == B && W.Group == TW_Bar && W.Kind == TEXT("CarryIdle"); }, J, 1e9f);
+			Add(Bar);
+			for (int32 I = 0; I < Wk.Num(); ++I) if (Wk[I].Bld == B && Wk[I].Group == TW_Serve) { Add(I); if (Bar >= 0) J.Add(Bar); }
 			Add(Nearest(P, [B](const ARDSection::FTownWork& W) { return W.Bld == B && W.Group == TW_Bar && W.Kind == TEXT("Talk"); }, J, 1e9f));
 			break;
 		}

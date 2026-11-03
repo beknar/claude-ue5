@@ -15,6 +15,7 @@
 #include "RD/RDGameInstance.h"
 #include "Engine/Canvas.h"
 #include "CanvasItem.h"
+#include "RenderUtils.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "GameFramework/PlayerController.h"
@@ -405,7 +406,16 @@ bool ARDHUD::TownTiled(FName Name, const FVector2D& A, const FVector2D& B, const
 void ARDHUD::TownTris(FName Name, const TArray<FVector2D>& Screen, const TArray<FVector2D>& World, const TArray<int32>& Ix, float Repeat, const FLinearColor& Tint)
 {
 	const FRDUIArt* Art = UI.Find(Name);
-	if (!Art || !Art->Texture || !Canvas || Screen.Num() != World.Num()) return;
+	if (!Canvas || Screen.Num() != World.Num()) return;
+	// (its picture missing (883 not run): a plain colour of its kind, as the old map's boxes were (the PR review's find))
+	const bool bPlain = !Art || !Art->Texture;
+	FLinearColor C = Tint;
+	if (bPlain)
+	{
+		const FString N = Name.ToString();
+		const FLinearColor Base = N.Contains(TEXT("wall")) ? FLinearColor(0.42f, 0.41f, 0.39f) : N.Contains(TEXT("grass")) ? FLinearColor(0.36f, 0.5f, 0.24f) : N.Contains(TEXT("cobble")) ? FLinearColor(0.55f, 0.52f, 0.47f) : FLinearColor(0.62f, 0.5f, 0.33f);
+		C = FLinearColor(Base.R * Tint.R, Base.G * Tint.G, Base.B * Tint.B, Tint.A);
+	}
 	// (a painted texture over triangles, its picture anchored to the world as TownTiled's: u with the world's Y, v against X)
 	TArray<FCanvasUVTri> Tris;
 	auto Uv = [&](const FVector2D& W) { return FVector2D(W.Y / Repeat, -W.X / Repeat); };
@@ -414,13 +424,13 @@ void ARDHUD::TownTris(FName Name, const TArray<FVector2D>& Screen, const TArray<
 		FCanvasUVTri Tr;
 		Tr.V0_Pos = Screen[Ix[I]]; Tr.V1_Pos = Screen[Ix[I + 1]]; Tr.V2_Pos = Screen[Ix[I + 2]];
 		Tr.V0_UV = Uv(World[Ix[I]]); Tr.V1_UV = Uv(World[Ix[I + 1]]); Tr.V2_UV = Uv(World[Ix[I + 2]]);
-		Tr.V0_Color = Tint; Tr.V1_Color = Tint; Tr.V2_Color = Tint;
+		Tr.V0_Color = C; Tr.V1_Color = C; Tr.V2_Color = C;
 		Tris.Add(Tr);
 	}
-	FCanvasTriangleItem Item(Tris, Art->Texture->GetResource());
+	FCanvasTriangleItem Item(Tris, bPlain ? GWhiteTexture : Art->Texture->GetResource());
 	Item.BlendMode = SE_BLEND_Translucent;
 	Canvas->DrawItem(Item);
-	if (UI.Drawn) UI.Drawn->AddUnique(Name);
+	if (UI.Drawn && !bPlain) UI.Drawn->AddUnique(Name);
 }
 
 void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
