@@ -1253,6 +1253,39 @@ public:
 	 *  arrow keys and the D-pad move it (as fast on the screen at every zoom); C or R3 shows the whole town again */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon") float MapZoom = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MapZoomMax = 6.f;
+	// ---- Brokenspire's map from above (RDTownSat.cpp; the user's of 2026-11-03: "a semi-realistic top down representation of
+	// the terrain features, much like what you would see from a satellite"): one picture of the town straight down, taken a
+	// few seconds after it is in place, lit at TownSatelliteHour, a fixed exposure (EV bias)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTownSatellite = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownSatelliteSize = 4096;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownSatelliteDelay = 4.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownSatelliteHour = 12.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownSatelliteExposure = 0.f;
+	/** the sun's shadows in the picture (an orthographic capture's shadow maps can cover nothing: everything in shadow) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTownSatelliteShadows = false;
+	/** the picture's colours: 0 lit (the final colour), 1 the materials' own colours (base colour, unlit), 2 the lit picture
+	 *  with the base colour mixed in by TownSatelliteMix; Lumen's light kept or not */
+	// (1 since the first pictures (2026-11-03): lit, the town's dark shingle and slate roofs came out near black beside the
+	// bright grass at every exposure; the materials' own colours read as a noon satellite picture does, and need no light)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownSatelliteSource = 1;
+	/** how much brighter the map draws the picture (an added pass: the canvas clamps a tint at 1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownSatelliteBrighten = 0.25f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTownSatelliteLumen = true;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TObjectPtr<class UTextureRenderTarget2D> TownSatellitePicture;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TObjectPtr<class USceneCaptureComponent2D> TownSatCap;
+	/** the picture's middle (world XY) and half its width (cm) */
+	FVector2D TownSatCenter = FVector2D::ZeroVector;
+	float TownSatHalf = 0.f;
+	int32 TownSatStep = 0, TownSatCaptures = 0;
+	bool bTownSatLit = false;
+	float TownSatWait = 0.f, TownSatHourWas = 0.f;
+	double TownSatMs = 0.0;
+	TArray<TPair<TWeakObjectPtr<class UInstancedStaticMeshComponent>, FIntPoint>> TownSatCulls;
+	void TickTownSatellite(float Dt);
+	/** the picture taken again (tests, a reel): from the next frame on */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void RecaptureTownSatellite() { TownSatStep = 0; TownSatWait = TownSatelliteDelay; }
+	/** "<step: 3 done>|<size px>|<middle x>|<middle y>|<half width cm>|<capture ms>|<captures>" (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetTownSatelliteState() const;
 	/** the town map's input, a frame (TickTown's part; tests call it with keys sent) */
 	void TickTownMapInput(APlayerController* PC, float Dt);
 	/** the town map's screen pixels per cm of the town at zoom 1 (the HUD sets it as it draws) and screen pixels a unit of

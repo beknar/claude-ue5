@@ -42,7 +42,7 @@ OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\brokenspire"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,mapzoom,life,falls,dagger,circle,castle,tour,trip"
+DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,mapzoom,satellite,life,falls,dagger,circle,castle,tour,trip"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 
@@ -474,7 +474,7 @@ def step_tour():
         st = str(G["gen"].get_town_tour_state()).split("|")
         ph = int(st[0]); seen.setdefault(ph, round(time.time() - t0, 1))
         if ph == 3 and G["gen"].is_town_panel_open(): panel = str(G["gen"].get_town_panel()); body = str(G["gen"].get_town_panel_text())
-        if ph == 4 and not mapped: mapped = any(str(a) in ("map_papyrus", "mapc_parchment", "mapc_scroll") for a in G["pc"].get_hud().get_art_drawn())
+        if ph == 4 and not mapped: mapped = any(str(a) in ("map_papyrus", "mapc_parchment", "mapc_scroll", "town_satellite") for a in G["pc"].get_hud().get_art_drawn())
         if ph == 5 and run_m is None: run_m = float(st[3])
         if ph == -1: res["ended"] = st[4]; break
     G["travel_until"] = time.time() + 60
@@ -569,8 +569,55 @@ def step_map():
     res["colour"] = bool(colour); res["colour_art_in_level"] = has_colour
     # (the sheet: the frayed scroll since the second list of 2026-11-02, made from the parchment)
     want = ("mapc_scroll", "mapc_grass", "mapc_cobble", "mapc_dirt", "mapc_wallstone", "mapc_compass", "mapc_castle", "mapc_tree1", "mapc_tower")
-    res["colour_missing"] = [a for a in want if a not in colour] if has_colour else []
+    # (since 2026-11-03 the map is the town's own picture from above once it is taken (RDTownSat.cpp): then the painted
+    # pictures are not drawn, the labels are; the painted map until then)
+    res["satellite"] = "town_satellite" in drawn_open
+    res["colour_missing"] = [a for a in want if a not in colour] if has_colour and not res["satellite"] else []
     step_result("map", not res["missing"] and not res["colour_missing"], **res)
+
+def step_satellite():
+    """the map from above (the user's of 2026-11-03: "a semi-realistic top down representation of the terrain features, much
+    like what you would see from a satellite or google earth, with labels on important or functional buildings and quest
+    markers on NPCs that have them"): the picture taken (4096 px square over the town), not black or washed out and not flat
+    (its parts differ), no townsperson in it; M draws it with every trade's label and a seal for every quest giver; the
+    picture again after the town is rebuilt; pictures of the map at 1x and 3x and the raw picture"""
+    g = G["gen"]; res = {}; quiet(True)
+    t0 = time.time()
+    while time.time() - t0 < 40 and not str(g.get_town_satellite_state()).startswith("3|"): yield
+    st = str(g.get_town_satellite_state()).split("|")
+    res["state"] = {"step": int(st[0]), "px": int(st[1]), "middle": [float(st[2]), float(st[3])], "half_m": round(float(st[4]) / 100, 1), "capture_ms": float(st[5]), "captures": int(st[6])}
+    rt = g.get_editor_property("town_satellite_picture")
+    raw = f"bs_{TAG}_satellite_raw.png"
+    lum = {}
+    if rt:
+        p = os.path.join(SHOTS, raw)
+        if os.path.exists(p): os.remove(p)
+        unreal.RenderingLibrary.export_render_target(G["w"], rt, SHOTS, raw)
+        yield from rwait(1.5)
+        if os.path.exists(p):
+            for nm, bx in (("all", (0.0, 0.0, 1.0, 1.0)), ("middle", (0.4, 0.4, 0.6, 0.6)), ("north", (0.3, 0.05, 0.7, 0.25)), ("south", (0.3, 0.75, 0.7, 0.95)), ("west", (0.05, 0.3, 0.25, 0.7))):
+                lum[nm] = png_luma(p, bx)
+    res["luma"] = lum
+    # (the map: its labels and seals over the picture)
+    put(place("square"), yaw=0.0); yield from wait(0.5)
+    yield from press("M"); yield from wait(0.8)
+    hud = G["pc"].get_hud()
+    drawn = [str(a) for a in hud.get_art_drawn()]; labels = [str(l) for l in hud.get_town_labels()]
+    res["drawn_satellite"] = "town_satellite" in drawn; res["painted_drawn"] = [a for a in drawn if a.startswith("mapc_") and a not in ("mapc_compass",)][:6]
+    names = [l.split("|")[1] for l in labels if "|" in l]
+    need = ("SMITHY", "TRADER", "HEALER", "TEMPLE", "STOREHOUSE", "MISTWARD CASTLE", "GATE", "TELEPORT CIRCLE", "QUEST BOARD", "TAVERN", "CHAPEL", "GRAVEYARD", "BARRACKS", "MILL", "WELL", "MARKET", "TOWN SQUARE")
+    res["labels_missing"] = [n for n in need if not any(x.startswith(n) for x in names)]
+    res["seals"] = [l for l in labels if l.startswith("seal|")]
+    shot("map_satellite1"); yield from rwait(1.5)
+    for _ in range(5): yield from press("MouseScrollUp", 0.05)
+    yield from wait(0.5); shot("map_satellite3"); yield from rwait(1.5)
+    yield from press("M"); yield from wait(0.3)
+    quiet(False)
+    givers = sorted(set(str(q.giver) for q in g.get_editor_property("quests")))
+    vals = [v for v in lum.values() if v is not None]
+    ok = (res["state"]["step"] == 3 and res["state"]["px"] == 4096 and len(vals) == 5 and 35 < lum["all"] < 200 and max(vals) - min(vals) > 3.0
+          and res["drawn_satellite"] and not res["painted_drawn"] and not res["labels_missing"] and all(f"seal|{gv}" in res["seals"] for gv in givers))
+    step_result("satellite", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ the townspeople
 def step_folk():
@@ -1358,7 +1405,7 @@ def step_dagger():
     ok = bool(h_) and -11.0 <= h_[1] <= -8.5 and abs(h_[0] - 0.7) < 2.0
     step_result("dagger", ok, **res)
 
-STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger})
+STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:
