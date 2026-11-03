@@ -446,8 +446,14 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	const float TS = Gen->TileSize;
 	const FVector In0 = S->LocalToWorld(S->TownInner.Min) - FVector(TS * 0.5f, TS * 0.5f, 0), In1 = S->LocalToWorld(S->TownInner.Max - FIntPoint(1, 1)) + FVector(TS * 0.5f, TS * 0.5f, 0);
 	const float Span = FMath::Max(In1.X - In0.X, In1.Y - In0.Y);
-	const float Pad = Ms * 0.1f, K = (Ms - Pad * 2.f) / Span;
-	const FVector2D Mid((In0.X + In1.X) * 0.5f, (In0.Y + In1.Y) * 0.5f), Cm = (A + B) * 0.5f + FVector2D(0.f, Ms * 0.02f);
+	// (the third list of 2026-11-02: "you should be able to zoom the overhead map in and out and then move it around": the
+	// generator's MapZoom (1 the whole town) and MapPan (world cm from the town's middle) move the view over the sheet)
+	const float Zm = FMath::Clamp(Gen->MapZoom, 1.f, 8.f);
+	const float Pad = Ms * 0.1f, K = (Ms - Pad * 2.f) / Span * Zm;
+	const FVector2D Mid0((In0.X + In1.X) * 0.5f, (In0.Y + In1.Y) * 0.5f), Cm = (A + B) * 0.5f + FVector2D(0.f, Ms * 0.02f);
+	const FVector2D Mid = Mid0 + Gen->MapPan;
+	TownMapSpan = Span; Gen->TownMapPxPerCm = K;
+	const bool bZoomed = Zm > 1.01f || !Gen->MapPan.IsNearlyZero(1.f);
 	auto ToM = [&](const FVector2D& W) { return Cm + FVector2D(W.Y - Mid.Y, -(W.X - Mid.X)) * K; };
 	auto W2 = [](const FVector& V) { return FVector2D(V.X, V.Y); };
 	// (a tile rectangle's world corners)
@@ -532,6 +538,28 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 			TArray<FVector2D> Sq; for (const FVector2D& Q : Wq) Sq.Add(ToM(Q));
 			TownTris(TEXT("mapc_wallstone"), Sq, Wq, { 0, 1, 2, 0, 2, 3 }, Rep * 0.15f, Pass == 0 ? FLinearColor(0.16f, 0.15f, 0.14f, 0.9f) : FLinearColor::White);
 		}
+	// the gardens (dark soil, rows of green) and the pens (trodden earth in a fence) by the homes (the third list)
+	auto RectW = [&](const FVector& C, const FVector2D& H, float Yw)
+	{
+		const FVector2D Ax(FMath::Cos(FMath::DegreesToRadians(Yw)), FMath::Sin(FMath::DegreesToRadians(Yw))), Ay(-Ax.Y, Ax.X), C2(C.X, C.Y);
+		return TArray<FVector2D>{ C2 - Ax * H.X - Ay * H.Y, C2 + Ax * H.X - Ay * H.Y, C2 + Ax * H.X + Ay * H.Y, C2 - Ax * H.X + Ay * H.Y };
+	};
+	for (const ARDSection::FTownGarden& Gd : S->TownGardens)
+	{
+		const TArray<FVector2D> Wq = RectW(Gd.At, Gd.Half, Gd.Yaw);
+		TArray<FVector2D> Sq; for (const FVector2D& Q : Wq) Sq.Add(ToM(Q));
+		TownTris(TEXT("mapc_dirt"), Sq, Wq, { 0, 1, 2, 0, 2, 3 }, Rep * 0.3f, FLinearColor(0.42f, 0.28f, 0.14f, 1.f));
+		const FVector2D Ax = (Wq[1] - Wq[0]) / 6.f, Ay = (Wq[3] - Wq[0]);
+		for (int32 Rw = 0; Rw < 3; ++Rw) for (int32 Cl = 0; Cl < 6; ++Cl)
+			SoftDot(ToM(Wq[0] + Ax * (Cl + 0.5f) + Ay * ((Rw + 0.5f) / 3.f)), FMath::Max(1.5f, 45.f * K), FLinearColor(0.22f, 0.45f, 0.12f, 0.95f));
+	}
+	for (const ARDSection::FTownPen& Pn : S->TownPens)
+	{
+		const TArray<FVector2D> Wq = RectW(Pn.At, Pn.Half, Pn.Yaw);
+		TArray<FVector2D> Sq; for (const FVector2D& Q : Wq) Sq.Add(ToM(Q));
+		TownTris(TEXT("mapc_dirt"), Sq, Wq, { 0, 1, 2, 0, 2, 3 }, Rep * 0.5f, FLinearColor(0.85f, 0.72f, 0.52f, 1.f));
+		for (int32 I = 0; I < 4; ++I) DrawLine(Sq[I].X, Sq[I].Y, Sq[(I + 1) % 4].X, Sq[(I + 1) % 4].Y, FLinearColor(0.35f, 0.22f, 0.1f, 1.f), FMath::Max(1.f, 1.4f * Sc));
+	}
 	// the watch's patrol: a gold dashed line along the lane (the militia walk it), a tile in from the wall
 	{
 		const float Dash = 7.f * Sc, Gap = 6.f * Sc;
@@ -650,21 +678,38 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		const FVector2D P = ToM(Ol[Ol.Num() / 3] + (Bc - Ol[Ol.Num() / 3]).GetSafeNormal() * TS * 1.5f);
 		Pending.Add({ TEXT("Watch patrol"), P, 2.f * Sc, FLinearColor(0.45f, 0.28f, 0.04f, 1.f), ERDType::Text, 0.9f });
 	}
-	// the people with quests for her (a seal with their mark), the Mistgate, her
+	// the people who give quests (the third list of 2026-11-02: "it is not necessary to have all the quest giver names on the
+	// overhead map, but there should be some kind of symbol for where they are"): every giver of the town's quests marked by a
+	// wax seal in a gold ring, with "!" when one is offered to her, "?" when one is ready to turn in, else a quill's dot; their
+	// names only when the map is zoomed in 2.5 times or more. The quest board's seal is on the board.
 	const TArray<FString> Ql = Gen->GetQuestLines();
+	TSet<FString> Givers;
+	for (const FRDQuestDef& Q : Gen->Quests) Givers.Add(Q.Giver.ToString());
+	TownQuestSeals = 0;
+	auto Seal = [&](const FVector2D& P, const FString& Mark0)
+	{
+		const FString Mark = Mark0.IsEmpty() ? FString(TEXT("·")) : Mark0;
+		SoftDot(P + FVector2D(1.5f, 2.f) * Sc, 14.f * Sc, FLinearColor(0.05f, 0.03f, 0.01f, 0.45f));
+		SoftDot(P, 13.f * Sc, FLinearColor(0.95f, 0.72f, 0.25f, 1.f));
+		SoftDot(P, 10.f * Sc, FLinearColor(0.58f, 0.07f, 0.04f, 1.f));
+		float Tw, Th; UI.TextSize(Mark, Tw, Th, Medium, Sc * 0.95f, ERDType::Title);
+		UI.Text(Mark, FLinearColor(1.f, 0.9f, 0.55f, 1.f), P.X - Tw * 0.5f, P.Y - Th * 0.5f, Medium, Sc * 0.95f, ERDType::Title);
+		Taken.Add(FBox2D(P - FVector2D(14.f * Sc), P + FVector2D(14.f * Sc)));
+		++TownQuestSeals;
+	};
 	for (const ARDTownsfolk* T : Gen->TownPeople)
 	{
 		if (!IsValid(T)) continue;
 		const FString RoleName = StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)T->TownRole);
-		if (RoleName != TEXT("Elder") && RoleName != TEXT("Scholar") && RoleName != TEXT("Captain")) continue;
-		FString Mark = RDTQuestMark(Ql, RoleName);
-		if (Mark.IsEmpty()) Mark = TEXT("·");
+		if (!Givers.Contains(RoleName)) continue;
 		const FVector2D P = ToM(FVector2D(T->GetActorLocation()));
-		SoftDot(P, 11.f * Sc, FLinearColor(0.55f, 0.06f, 0.03f, 0.75f));
-		float Tw, Th; UI.TextSize(Mark, Tw, Th, Medium, Sc * 0.9f, ERDType::Title);
-		UI.Text(Mark, FLinearColor(1.f, 0.88f, 0.5f, 1.f), P.X - Tw * 0.5f, P.Y - Th * 0.5f, Medium, Sc * 0.9f, ERDType::Title);
-		Pending.Add({ T->Title, P, 9.f * Sc, FLinearColor(0.5f, 0.06f, 0.03f, 1.f), ERDType::Text, 0.85f });
+		Seal(P, RDTQuestMark(Ql, RoleName));
+		TownLabels.Add(FString::Printf(TEXT("seal|%s"), *RoleName));
+		if (Zm >= 2.5f) Pending.Add({ T->Title, P, 13.f * Sc, FLinearColor(0.5f, 0.06f, 0.03f, 1.f), ERDType::Text, 0.85f });
 	}
+	if (Givers.Contains(TEXT("Board")))
+		for (const ARDSection::FTownSpot& Sp : S->TownSpots)
+			if (Sp.Kind == TS_Board) { Seal(ToM(W2(Sp.At)) + FVector2D(0.f, -16.f * Sc), RDTQuestMark(Ql, TEXT("Board"))); TownLabels.Add(TEXT("seal|Board")); break; }
 	// the labels: each where it covers no picture of a trade and no label before it, on a halo of the parchment's colour
 	PlaceTownMapLabels(Pending, Taken, Sc, FLinearColor(0.95f, 0.89f, 0.74f, 0.62f));
 	if (!S->MistgateAt.IsZero()) MistMark(10, ToM(W2(S->MistgateAt)), 7.f * Sc);
@@ -673,6 +718,18 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		SoftDot(P, 16.f * Sc, FLinearColor(0.8f, 0.05f, 0.03f, 0.4f));
 		DrawPlayerArrow(P, Yaw - 90.f, 11.f * Sc);
 		MapArrow = P; bMapArrow = true;
+	}
+	// (zoomed or moved, the map spills past the sheet: dark outside it, and the scroll's torn edge and rolls drawn over the
+	// map's edge again (mapc_scroll_edge, bs_scroll.py); the canvas has no clip of its own)
+	if (bZoomed)
+	{
+		const FVector2D Sa = A - FVector2D(Ms * 0.03f), Sb = B + FVector2D(Ms * 0.03f);
+		const FLinearColor Dk(0.015f, 0.012f, 0.01f, 1.f);
+		Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Sa.Y + 2.f), Dk);
+		Box(FVector2D(0, Sb.Y - 2.f), FVector2D(Canvas->ClipX, Canvas->ClipY), Dk);
+		Box(FVector2D(0, Sa.Y), FVector2D(Sa.X + 2.f, Sb.Y), Dk);
+		Box(FVector2D(Sb.X - 2.f, Sa.Y), FVector2D(Canvas->ClipX, Sb.Y), Dk);
+		if (!UI.Fit(TEXT("mapc_scroll_edge"), Sa, Sb)) Frame(A, B, FLinearColor(0.30f, 0.20f, 0.10f, 0.95f), 6.f * Sc);
 	}
 	// the title in gold over a dark shadow, a gold rule under it; the compass rose; the key
 	const FString Title = Gen->TownName.ToUpper();
@@ -694,10 +751,15 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	}
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 	const FString Clock = Gen->bDayNight ? FString::Printf(TEXT("      day %d · %s"), Gen->GetTownDay(), *Gen->GetTownClock()) : FString();
-	const FString Key = FString::Printf(TEXT("%s close the map      !  a quest for you      ?  a quest to turn in%s"), bPad ? TEXT("Back") : TEXT("M"), *Clock);
+	const FString Key = FString::Printf(TEXT("%s close the map      seal  a quest giver:  !  a quest for you   ?  to turn in%s"), bPad ? TEXT("Back") : TEXT("M"), *Clock);
+	const FString Key2 = bPad ? FString::Printf(TEXT("right stick zoom (%.1fx)      D-pad move      R3 back to the whole town"), Zm)
+	                          : FString::Printf(TEXT("wheel or + / -  zoom (%.1fx)      drag or arrow keys  move      C  the whole town"), Zm);
 	UI.TextSize(Key, Tw, Th, Small, Sc);
-	UI.Text(Key, FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.04f, Small, Sc);
+	UI.Text(Key, FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.055f, Small, Sc);
+	UI.TextSize(Key2, Tw, Th, Small, Sc);
+	UI.Text(Key2, FLinearColor(0.2f, 0.11f, 0.03f, 1.f), Cm.X - Tw * 0.5f, B.Y - Ms * 0.055f + Th * 1.15f, Small, Sc);
 	MapView = Mid;
+	TownMapZoomDrawn = Zm;
 }
 
 // ------------------------------------------------------------------------------------------------ names over the townspeople

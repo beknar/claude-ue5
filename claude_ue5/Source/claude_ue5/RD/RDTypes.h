@@ -37,6 +37,9 @@ struct FRDPiece
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TSubclassOf<AActor> ActorClass;
 	/** Brokenspire: the mesh drawn in this material instead of its own (a burned house's timbers: House Forge's burnt wood) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UMaterialInterface> Material = nullptr;
+	/** Brokenspire (the third list, 2026-11-02): small things in their thousands (the short grass, the garden's plants) fade
+	 *  out from this distance on (cm; 0: always drawn) and cast no shadow */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float CullDistance = 0.f;
 };
 
 /** random_dungeonmagic_level5: what a monster's blow does to her besides its damage */
@@ -915,6 +918,42 @@ struct FRDTownsfolkDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Lines;
 	/** what can be asked of them: "<question>|<answer>" (the scholar's what is happening, the elder's why he needs her) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Topics;
+	/** the town's work (the third list, 2026-11-02): a clip for each kind of work it does ("Stir", "Crank", "Tend",
+	 *  "Scatter", "SitDrink", "SitTalk", "CarryWalk", "CarryIdle", "Talk", "Hammer", "Forge"); a kind it has no clip for it
+	 *  does not take up. 886 fills them. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, TObjectPtr<UAnimationAsset>> WorkClips;
+};
+
+/** Brokenspire: a thing a townsperson holds at work (the third list, 2026-11-02: a ladle, a tray, a mug, a bowl, a hammer):
+ *  its mesh, the bone it goes on and where on it (the bone's frame) */
+USTRUCT(BlueprintType)
+struct FRDTownProp
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Bone = TEXT("hand_r");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform Grip;
+};
+
+/** Brokenspire: a farm animal for the pens (pipeline/blender_numpy/farm_animals.py makes them; 886 imports them): its
+ *  mesh, its idle, grazing and in-place walk clips, the walk's ground speed and how many go in a pen */
+USTRUCT(BlueprintType)
+struct FRDTownAnimalDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Idle = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Graze = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Walk = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkSpeed = 40.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
+	/** the mesh turned so that it faces +X */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = 0.f;
+	/** its body's half length and half width (the pen keeps it inside by them) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D HalfSize = FVector2D(50.f, 25.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 PenMin = 2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 PenMax = 4;
 };
 
 /** Brokenspire: a quest. Its Goal is a counter the game keeps across the levels (URDGameInstance::Counters): "talk:<role>",

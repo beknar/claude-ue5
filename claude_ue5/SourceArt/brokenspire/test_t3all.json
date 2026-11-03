@@ -1,0 +1,1988 @@
+{
+ "tag": "t3all",
+ "plan": [
+  "town",
+  "doors",
+  "talk",
+  "services",
+  "guards",
+  "folk",
+  "gate",
+  "map",
+  "pictures",
+  "castlewalls",
+  "daynight",
+  "shape",
+  "watch",
+  "lights",
+  "signs",
+  "burned",
+  "windows",
+  "walkers",
+  "mapzoom",
+  "life",
+  "falls",
+  "dagger",
+  "circle",
+  "castle",
+  "tour",
+  "trip"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "town",
+   "ok": true,
+   "seed0": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 124,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 68,
+     "burned": 23,
+     "boarded": 33
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 22,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     5700,
+     -1650
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      82,
+      -81
+     ],
+     "tavern": [
+      134,
+      4
+     ],
+     "smithy": [
+      20,
+      -39
+     ],
+     "store": [
+      76,
+      33
+     ],
+     "healer": [
+      34,
+      51
+     ],
+     "storehouse": [
+      39,
+      -52
+     ],
+     "barracks": [
+      93,
+      138
+     ],
+     "chapel": [
+      -130,
+      -69
+     ],
+     "witch's hut": [
+      -222,
+      -105
+     ],
+     "castle": [
+      -206,
+      -16
+     ]
+    },
+    "gate_at": [
+     213,
+     -16
+    ]
+   },
+   "roles": {
+    "Elder": 1,
+    "Preacher": 1,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Refugee": 4,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Soldier": 3,
+    "Witch": 1,
+    "Townsfolk": 61
+   },
+   "roles_missing": [],
+   "seed1111": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 118,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 72,
+     "burned": 21,
+     "boarded": 25
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 21,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -6000,
+     1650
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -39,
+      69
+     ],
+     "tavern": [
+      -80,
+      72
+     ],
+     "smithy": [
+      -117,
+      -9
+     ],
+     "store": [
+      -124,
+      34
+     ],
+     "healer": [
+      -92,
+      33
+     ],
+     "storehouse": [
+      -105,
+      -48
+     ],
+     "barracks": [
+      14,
+      33
+     ],
+     "chapel": [
+      87,
+      -140
+     ],
+     "witch's hut": [
+      222,
+      -36
+     ],
+     "castle": [
+      206,
+      16
+     ]
+    },
+    "gate_at": [
+     -207,
+     16
+    ]
+   },
+   "seed2222": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 122,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 71,
+     "burned": 22,
+     "boarded": 29
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 24,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -1650,
+     -7200
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -42,
+      -34
+     ],
+     "tavern": [
+      10,
+      -36
+     ],
+     "smithy": [
+      32,
+      -102
+     ],
+     "store": [
+      -58,
+      -88
+     ],
+     "healer": [
+      36,
+      -26
+     ],
+     "storehouse": [
+      -57,
+      -124
+     ],
+     "barracks": [
+      -120,
+      -50
+     ],
+     "chapel": [
+      -162,
+      -16
+     ],
+     "witch's hut": [
+      99,
+      189
+     ],
+     "castle": [
+      -16,
+      206
+     ]
+    },
+    "gate_at": [
+     -16,
+     -204
+    ]
+   },
+   "seed3333": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 111,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 55,
+     "burned": 24,
+     "boarded": 32
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 21,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -750,
+     -6900
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -39,
+      -34
+     ],
+     "tavern": [
+      27,
+      -86
+     ],
+     "smithy": [
+      8,
+      -27
+     ],
+     "store": [
+      51,
+      -50
+     ],
+     "healer": [
+      -24,
+      -123
+     ],
+     "storehouse": [
+      21,
+      -106
+     ],
+     "barracks": [
+      62,
+      -130
+     ],
+     "chapel": [
+      -58,
+      126
+     ],
+     "witch's hut": [
+      90,
+      222
+     ],
+     "castle": [
+      -8,
+      206
+     ]
+    },
+    "gate_at": [
+     -8,
+     -204
+    ]
+   },
+   "layouts_differ": true,
+   "back_to_seed": true
+  },
+  {
+   "step": "doors",
+   "ok": true,
+   "prompt": "open door",
+   "door_open": 1.0,
+   "walked_in": true,
+   "container": {
+    "kind": "wardrobe",
+    "looted": true,
+    "gold_found": 0,
+    "lines": 0
+   },
+   "boarded_prompt": "pry the boards loose",
+   "after_pry": false,
+   "boarded_door_open": 1.0,
+   "castle_door_open": 1.0
+  },
+  {
+   "step": "talk",
+   "ok": true,
+   "prompt": "talk to Aldric Venn",
+   "panel": "talk",
+   "lines": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: Word from the Spire|15 g|1",
+    "bye|Farewell||1"
+   ],
+   "asked_changed_text": true,
+   "accepted": true,
+   "quest": {
+    "state": "taken",
+    "progress": 0,
+    "count": 1
+   },
+   "scholar_panel": "talk",
+   "scholar_lines": [
+    "ask|What is the Mistward?||1",
+    "ask|Who broke the spire?||1",
+    "ask|What should I look for down there?||1",
+    "accept|Quest: The Third Seal|150 g|1",
+    "bye|Farewell||1"
+   ],
+   "quest_ready": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1
+   },
+   "turnin": true,
+   "gold": 15,
+   "quest_done": {
+    "state": "done",
+    "progress": 1,
+    "count": 1
+   },
+   "next_offered": true,
+   "lines_after": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: The Mistward Hall|60 g|1",
+    "bye|Farewell||1"
+   ],
+   "captain_later": [
+    "Wolves on the Mill Road",
+    "The Lost Patrol"
+   ],
+   "later_refused": true
+  },
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -15,
+    "hp": 1.0
+   },
+   "weapon": "Dagger",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|LATER|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ]
+  },
+  {
+   "step": "guards",
+   "ok": true,
+   "planned": 8,
+   "alive": 8,
+   "tiers": [
+    1
+   ],
+   "kinds": [
+    "Chicken",
+    "Drinker",
+    "Medic",
+    "Parasite_Slider",
+    "Rat",
+    "Soldier"
+   ],
+   "home_room": 134,
+   "home_kind": "Great hall",
+   "aggro_in_hall": 6,
+   "rooms_after": [
+    134,
+    134,
+    134,
+    134,
+    134,
+    134,
+    134,
+    134
+   ],
+   "all_in_hall": true,
+   "aggro_after": 0,
+   "gold": 8,
+   "counted": 3,
+   "dead_kept": 3,
+   "alive_after_rebuild": 8
+  },
+  {
+   "step": "folk",
+   "ok": true,
+   "fps": {
+    "mean": 30.8,
+    "min": 11.2
+   },
+   "walked": {
+    "Little Wren": 4,
+    "Tobin": 3,
+    "Pip": 2,
+    "Simple Tam": 5,
+    "a militiaman": 3,
+    "a militiawoman": 3
+   },
+   "militia": [
+    {
+     "at": [
+      6778,
+      85
+     ],
+     "paths": [
+      4,
+      4,
+      9,
+      4
+     ]
+    },
+    {
+     "at": [
+      13589,
+      16350
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      -10326,
+      14760
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      -10955,
+      -14511
+     ],
+     "paths": [
+      4,
+      4,
+      12,
+      4
+     ]
+    },
+    {
+     "at": [
+      9750,
+      -15411
+     ],
+     "paths": [
+      17,
+      11,
+      4,
+      18
+     ]
+    }
+   ],
+   "bark": "Old Pell|The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
+   "names": [
+    "Aldric Venn|!",
+    "Little Wren|",
+    "Tobin|"
+   ]
+  },
+  {
+   "step": "gate",
+   "ok": true,
+   "prompt": "the gate (barred)",
+   "message": "The gate is barred: the wilderness beyond is not safe yet (it opens in a later chapter)",
+   "past_gate_cm": -70.1
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "labels": [
+    "mapc_temple|TEMPLE · blessings",
+    "mapc_tavern|TAVERN",
+    "mapc_smithy|SMITHY · repairs, the anvil",
+    "mapc_store|TRADER · buy and sell",
+    "mapc_healer|HEALER · healing",
+    "mapc_storehouse|STOREHOUSE · your storage",
+    "mapc_barracks|BARRACKS",
+    "mapc_chapel|CHAPEL",
+    "mapc_witch|WITCH'S HUT",
+    "mapc_castle|MISTWARD CASTLE · into the dungeon",
+    "mapc_circle|TELEPORT CIRCLE",
+    "mapc_mill|MILL",
+    "mapc_gate|GATE · barred",
+    "mapc_well|WELL",
+    "mapc_board|QUEST BOARD · bounties",
+    "mapc_graveyard|GRAVEYARD",
+    "mapc_still|STILL",
+    "mapc_market|MARKET",
+    "square|TOWN SQUARE",
+    "seal|Elder",
+    "seal|Captain",
+    "seal|Scholar",
+    "seal|Board"
+   ],
+   "missing": [],
+   "art": [
+    "mapc_barracks",
+    "mapc_board",
+    "mapc_castle",
+    "mapc_chapel",
+    "mapc_circle",
+    "mapc_gate",
+    "mapc_graveyard",
+    "mapc_healer",
+    "mapc_market",
+    "mapc_mill",
+    "mapc_smithy",
+    "mapc_still",
+    "mapc_store",
+    "mapc_storehouse",
+    "mapc_tavern",
+    "mapc_temple",
+    "mapc_well",
+    "mapc_witch",
+    "seal",
+    "square"
+   ],
+   "art_drawn": [
+    "mapc_scroll",
+    "mapc_grass",
+    "mapc_dirt",
+    "mapc_cobble",
+    "mapc_wallstone",
+    "mapc_bush",
+    "mapc_tree3",
+    "mapc_tree1",
+    "mapc_tree2",
+    "mapc_tower",
+    "mapc_gate",
+    "mapc_tent",
+    "mapc_burned",
+    "mapc_home1",
+    "mapc_boarded",
+    "mapc_home2",
+    "mapc_still",
+    "mapc_tavern",
+    "mapc_home3",
+    "mapc_barracks",
+    "mapc_store",
+    "mapc_temple",
+    "mapc_circle",
+    "mapc_well",
+    "mapc_board",
+    "mapc_market",
+    "mapc_storehouse",
+    "mapc_healer",
+    "mapc_smithy",
+    "mapc_mill",
+    "mapc_chapel",
+    "mapc_graveyard",
+    "mapc_witch",
+    "mapc_castle",
+    "mapc_compass"
+   ],
+   "colour": true,
+   "colour_art_in_level": true,
+   "colour_missing": []
+  },
+  {
+   "step": "pictures",
+   "ok": true,
+   "shots": [
+    "bs_t3all_names.png",
+    "bs_t3all_gate.png",
+    "bs_t3all_minimap.png",
+    "bs_t3all_papyrus_map.png",
+    "bs_t3all_square.png",
+    "bs_t3all_inside_smithy.png",
+    "bs_t3all_outside_smithy.png",
+    "bs_t3all_inside_tavern.png",
+    "bs_t3all_outside_tavern.png",
+    "bs_t3all_inside_home.png",
+    "bs_t3all_outside_home.png",
+    "bs_t3all_inside_temple.png",
+    "bs_t3all_outside_temple.png",
+    "bs_t3all_inside_store.png",
+    "bs_t3all_outside_store.png",
+    "bs_t3all_castle.png",
+    "bs_t3all_mistward_hall.png",
+    "bs_t3all_castle_stair.png",
+    "bs_t3all_castle_tower_inside.png",
+    "bs_t3all_castle_tower_door.png",
+    "bs_t3all_castle_stairwell.png",
+    "bs_t3all_castle_front.png",
+    "bs_t3all_day_noon.png",
+    "bs_t3all_day_dusk.png",
+    "bs_t3all_day_night.png",
+    "bs_t3all_watch_top.png",
+    "bs_t3all_watch_door.png",
+    "bs_t3all_sign_store.png",
+    "bs_t3all_board_0.png",
+    "bs_t3all_board_1.png",
+    "bs_t3all_board_2.png",
+    "bs_t3all_board_3.png",
+    "bs_t3all_burned.png",
+    "bs_t3all_map_zoom1.png",
+    "bs_t3all_map_zoom3.png",
+    "bs_t3all_life_stir.png",
+    "bs_t3all_life_crank.png",
+    "bs_t3all_life_tend.png",
+    "bs_t3all_life_scatter.png",
+    "bs_t3all_life_sitdrink.png",
+    "bs_t3all_life_sittalk.png",
+    "bs_t3all_life_talk.png",
+    "bs_t3all_life_pen.png",
+    "bs_t3all_life_garden.png",
+    "bs_t3all_dagger_side.png",
+    "bs_t3all_dagger_front.png"
+   ]
+  },
+  {
+   "step": "castlewalls",
+   "ok": true,
+   "towers": 4,
+   "stair_towers": 1,
+   "walk_z": 661.0,
+   "blind_arches": 166,
+   "blind_arches_outside": 0,
+   "arched_door_pieces": 0,
+   "watchtower_doors": 22,
+   "pieces": {
+    "SM_Castle_Stone_Wall_01a": 1319,
+    "SM_Castle_Stone_Wall_02h": 273,
+    "SM_Castle_Stone_Wall_02f": 98,
+    "SM_Castle_Stone_Wall_02g": 10,
+    "SM_Castle_Stone_Wall_02d": 8,
+    "SM_Castle_Stone_Parapet_01a": 651,
+    "SM_Castle_Tower_Wall_02": 64,
+    "SM_Tower_Roof_02a": 16,
+    "SM_Stone_Stairs_01a": 264
+   },
+   "through_the_walk": {},
+   "walk_traces": {
+    "n": 81,
+    "miss": 0,
+    "min": 0.0,
+    "max": 653.8
+   },
+   "climb": {
+    "reached": 21,
+    "of": 21,
+    "z_max": 747.1,
+    "seconds": 4.6,
+    "end": [
+     -17782,
+     1718,
+     740
+    ],
+    "end_from_tower_m": 0.26,
+    "walk_z": 661.0,
+    "in_tower": true,
+    "stair_well_tiles": 2,
+    "stair_room": 135
+   },
+   "outside_nearest_cm": [
+    344,
+    344,
+    344,
+    344,
+    344,
+    344,
+    344,
+    344,
+    344,
+    344,
+    344,
+    344
+   ]
+  },
+  {
+   "step": "daynight",
+   "ok": true,
+   "on": true,
+   "day_length": 3600.0,
+   "clock": {
+    "from": 9.355,
+    "to": 9.488,
+    "game_s": 20.01,
+    "hours": 0.133,
+    "day_s": 3610.7
+   },
+   "kept_by_game": true,
+   "pictures": {
+    "noon": {
+     "day": 1,
+     "hour": 12.033,
+     "sun_elev": 62.0,
+     "daylight": 1.0,
+     "sun_lux": 7.5,
+     "moon_lux": 0.0,
+     "sky": 1.6,
+     "bias": 0.6,
+     "sun_world": {
+      "elev": 62.0,
+      "lux": 7.5,
+      "n": 1
+     },
+     "moon_world": {
+      "elev": -10.0,
+      "lux": 0.0,
+      "n": 1
+     },
+     "luma": 115.68,
+     "clock": "12:02"
+    },
+    "dusk": {
+     "day": 1,
+     "hour": 18.533,
+     "sun_elev": -8.63,
+     "daylight": 0.0,
+     "sun_lux": 0.0,
+     "moon_lux": 0.936,
+     "sky": 0.128,
+     "bias": -0.6,
+     "sun_world": {
+      "elev": -8.6,
+      "lux": 0.0,
+      "n": 1
+     },
+     "moon_world": {
+      "elev": 6.45,
+      "lux": 0.936,
+      "n": 1
+     },
+     "luma": 18.15,
+     "clock": "18:32"
+    },
+    "night": {
+     "day": 1,
+     "hour": 0.033,
+     "sun_elev": -62.0,
+     "daylight": 0.0,
+     "sun_lux": 0.0,
+     "moon_lux": 1.0,
+     "sky": 0.128,
+     "bias": -0.6,
+     "sun_world": {
+      "elev": -10.0,
+      "lux": 0.0,
+      "n": 1
+     },
+     "moon_world": {
+      "elev": 46.5,
+      "lux": 1.0,
+      "n": 1
+     },
+     "luma": 23.77,
+     "clock": "00:02"
+    }
+   }
+  },
+  {
+   "step": "shape",
+   "ok": false,
+   "corners": 20,
+   "radius_m": [
+    179.3,
+    262.8
+   ],
+   "radius_spread": 0.396,
+   "wall_pieces": 1592,
+   "wall_on_outline": 828,
+   "edge_points": 415,
+   "wall_gaps": [],
+   "n_gaps": 0,
+   "towers_at_corners": 20,
+   "paths": 67,
+   "roads_tiles": [
+    969,
+    1694,
+    923
+   ],
+   "path_ends": [
+    [
+     5550,
+     -16950,
+     7909,
+     -17664
+    ],
+    [
+     5550,
+     18150,
+     3069,
+     18690
+    ],
+    [
+     -750,
+     -1650,
+     1028,
+     181
+    ],
+    [
+     5550,
+     -9150,
+     7679,
+     -10622
+    ],
+    [
+     5550,
+     10350,
+     7611,
+     11986
+    ],
+    [
+     5550,
+     6450,
+     7755,
+     4869
+    ],
+    [
+     10950,
+     -1650,
+     10267,
+     -4292
+    ],
+    [
+     5550,
+     2550,
+     2928,
+     3376
+    ]
+   ],
+   "path_wander_m": [
+    1.4,
+    1.6,
+    0.7,
+    1.7,
+    0.6,
+    1.2,
+    1.4,
+    2.8,
+    2.8,
+    2.1,
+    1.6,
+    0.3,
+    1.7,
+    1.1,
+    1.6,
+    0.9,
+    4.1,
+    1.4,
+    3.8,
+    1.7,
+    1.2,
+    1.3,
+    1.8,
+    1.5,
+    3.8,
+    1.2,
+    3.0,
+    2.7,
+    2.6,
+    3.5,
+    3.7,
+    0.5,
+    2.4,
+    1.4,
+    2.1,
+    4.6,
+    3.0,
+    2.1,
+    8.2,
+    0.2,
+    2.1,
+    1.3,
+    1.4,
+    3.0,
+    2.5,
+    3.9,
+    2.8,
+    4.4,
+    4.9,
+    5.4,
+    2.8,
+    8.8,
+    2.5,
+    2.7,
+    2.6,
+    1.7,
+    3.4,
+    1.7,
+    3.4,
+    1.2,
+    1.2,
+    5.8,
+    7.5,
+    9.3,
+    1.5,
+    6.0,
+    5.3
+   ],
+   "headings": {
+    "on_axis": 0.252,
+    "length_m": 2574.0
+   },
+   "wander_median_m": 2.1,
+   "homes": 124
+  },
+  {
+   "step": "watch",
+   "ok": true,
+   "watchtowers": 22,
+   "climb": {
+    "reached": 76,
+    "of": 76,
+    "z_max": 1006.6,
+    "seconds": 7.7
+   },
+   "end_z": 999.8,
+   "onto_the_floor": {
+    "reached": 2,
+    "of": 2,
+    "z_max": 999.8,
+    "seconds": 0.2,
+    "z_after": 999.8
+   },
+   "floor_traces": [
+    913.6,
+    913.6,
+    913.6,
+    913.6,
+    913.6,
+    913.6,
+    913.6
+   ],
+   "stairwell_traces": [
+    824.6,
+    786.3,
+    747.8
+   ]
+  },
+  {
+   "step": "lights",
+   "ok": true,
+   "noon": {
+    "buildings": 100,
+    "lit": 8,
+    "keepers_lit": [
+     "barracks",
+     "healer",
+     "smithy",
+     "store",
+     "storehouse",
+     "tavern",
+     "temple"
+    ],
+    "homes_lit": 1,
+    "trades": [
+     {
+      "bld": 0,
+      "kind": "temple",
+      "lit": 1,
+      "lights": 17,
+      "awake": 1,
+      "asleep": 0,
+      "on": 17
+     },
+     {
+      "bld": 1,
+      "kind": "tavern",
+      "lit": 1,
+      "lights": 12,
+      "awake": 12,
+      "asleep": 0,
+      "on": 12
+     },
+     {
+      "bld": 2,
+      "kind": "smithy",
+      "lit": 1,
+      "lights": 4,
+      "awake": 1,
+      "asleep": 0,
+      "on": 4
+     },
+     {
+      "bld": 3,
+      "kind": "store",
+      "lit": 1,
+      "lights": 2,
+      "awake": 1,
+      "asleep": 0,
+      "on": 2
+     },
+     {
+      "bld": 4,
+      "kind": "healer",
+      "lit": 1,
+      "lights": 4,
+      "awake": 1,
+      "asleep": 0,
+      "on": 4
+     },
+     {
+      "bld": 5,
+      "kind": "storehouse",
+      "lit": 1,
+      "lights": 2,
+      "awake": 1,
+      "asleep": 0,
+      "on": 2
+     },
+     {
+      "bld": 6,
+      "kind": "barracks",
+      "lit": 1,
+      "lights": 6,
+      "awake": 3,
+      "asleep": 0,
+      "on": 6
+     },
+     {
+      "bld": 7,
+      "kind": "chapel",
+      "lit": 0,
+      "lights": 17,
+      "awake": 0,
+      "asleep": 0,
+      "on": 0
+     },
+     {
+      "bld": 8,
+      "kind": "witch's hut",
+      "lit": 0,
+      "lights": 11,
+      "awake": 0,
+      "asleep": 0,
+      "on": 0
+     }
+    ],
+    "asleep_dark": 0,
+    "bad": []
+   },
+   "evening": {
+    "buildings": 100,
+    "lit": 17,
+    "keepers_lit": [
+     "barracks",
+     "healer",
+     "smithy",
+     "store",
+     "storehouse",
+     "tavern",
+     "temple"
+    ],
+    "homes_lit": 10,
+    "trades": [
+     {
+      "bld": 0,
+      "kind": "temple",
+      "lit": 1,
+      "lights": 17,
+      "awake": 1,
+      "asleep": 0,
+      "on": 17
+     },
+     {
+      "bld": 1,
+      "kind": "tavern",
+      "lit": 1,
+      "lights": 12,
+      "awake": 12,
+      "asleep": 0,
+      "on": 12
+     },
+     {
+      "bld": 2,
+      "kind": "smithy",
+      "lit": 1,
+      "lights": 4,
+      "awake": 1,
+      "asleep": 0,
+      "on": 4
+     },
+     {
+      "bld": 3,
+      "kind": "store",
+      "lit": 1,
+      "lights": 2,
+      "awake": 1,
+      "asleep": 0,
+      "on": 2
+     },
+     {
+      "bld": 4,
+      "kind": "healer",
+      "lit": 1,
+      "lights": 4,
+      "awake": 1,
+      "asleep": 0,
+      "on": 4
+     },
+     {
+      "bld": 5,
+      "kind": "storehouse",
+      "lit": 1,
+      "lights": 2,
+      "awake": 1,
+      "asleep": 0,
+      "on": 2
+     },
+     {
+      "bld": 6,
+      "kind": "barracks",
+      "lit": 1,
+      "lights": 6,
+      "awake": 3,
+      "asleep": 0,
+      "on": 6
+     },
+     {
+      "bld": 7,
+      "kind": "chapel",
+      "lit": 0,
+      "lights": 17,
+      "awake": 0,
+      "asleep": 0,
+      "on": 0
+     },
+     {
+      "bld": 8,
+      "kind": "witch's hut",
+      "lit": 0,
+      "lights": 11,
+      "awake": 0,
+      "asleep": 0,
+      "on": 0
+     }
+    ],
+    "asleep_dark": 0,
+    "bad": []
+   },
+   "night": {
+    "buildings": 100,
+    "lit": 0,
+    "keepers_lit": [],
+    "homes_lit": 0,
+    "trades": [
+     {
+      "bld": 0,
+      "kind": "temple",
+      "lit": 0,
+      "lights": 17,
+      "awake": 0,
+      "asleep": 1,
+      "on": 0
+     },
+     {
+      "bld": 1,
+      "kind": "tavern",
+      "lit": 0,
+      "lights": 12,
+      "awake": 0,
+      "asleep": 12,
+      "on": 0
+     },
+     {
+      "bld": 2,
+      "kind": "smithy",
+      "lit": 0,
+      "lights": 4,
+      "awake": 0,
+      "asleep": 1,
+      "on": 0
+     },
+     {
+      "bld": 3,
+      "kind": "store",
+      "lit": 0,
+      "lights": 2,
+      "awake": 0,
+      "asleep": 1,
+      "on": 0
+     },
+     {
+      "bld": 4,
+      "kind": "healer",
+      "lit": 0,
+      "lights": 4,
+      "awake": 0,
+      "asleep": 1,
+      "on": 0
+     },
+     {
+      "bld": 5,
+      "kind": "storehouse",
+      "lit": 0,
+      "lights": 2,
+      "awake": 0,
+      "asleep": 1,
+      "on": 0
+     },
+     {
+      "bld": 6,
+      "kind": "barracks",
+      "lit": 0,
+      "lights": 6,
+      "awake": 0,
+      "asleep": 3,
+      "on": 0
+     },
+     {
+      "bld": 7,
+      "kind": "chapel",
+      "lit": 0,
+      "lights": 17,
+      "awake": 0,
+      "asleep": 0,
+      "on": 0
+     },
+     {
+      "bld": 8,
+      "kind": "witch's hut",
+      "lit": 0,
+      "lights": 11,
+      "awake": 0,
+      "asleep": 0,
+      "on": 0
+     }
+    ],
+    "asleep_dark": 17,
+    "bad": []
+   }
+  },
+  {
+   "step": "signs",
+   "ok": true,
+   "signs": 18,
+   "trades": 9,
+   "words": [
+    "BARRACKS",
+    "CHAPEL",
+    "GENERAL GOODS",
+    "HEALER",
+    "HEDGE WITCH",
+    "SMITHY",
+    "STORE HOUSE",
+    "TAVERN",
+    "TEMPLE"
+   ],
+   "notices": 8
+  },
+  {
+   "step": "burned",
+   "ok": true,
+   "burned": 23,
+   "walls": 485,
+   "upper": 162,
+   "floating": [],
+   "n_floating": 0,
+   "roof_pieces": 0
+  },
+  {
+   "step": "windows",
+   "ok": true,
+   "windows_sampled": 293,
+   "stopped": 40,
+   "through": []
+  },
+  {
+   "step": "walkers",
+   "ok": true,
+   "walkers": {
+    "Little Wren #1": {
+     "samples": 66,
+     "turning_frames_left_out": 0,
+     "foot_slow_cm_s": 24.8,
+     "body_cm_s": 149.4,
+     "rate": 1.0,
+     "parts": 1,
+     "meshes": [
+      "SK_UE5_NPC_Kid_04_Full_01"
+     ]
+    },
+    "Simple Tam #2": {
+     "samples": 120,
+     "turning_frames_left_out": 17,
+     "foot_slow_cm_s": 31.3,
+     "body_cm_s": 184.9,
+     "rate": 0.8,
+     "parts": 2,
+     "meshes": [
+      "SKM_NPC_Character_04_Full_02",
+      "SKM_NPC_Character_04_Head"
+     ]
+    },
+    "a townswoman #3": {
+     "samples": 93,
+     "turning_frames_left_out": 19,
+     "foot_slow_cm_s": 0.2,
+     "body_cm_s": 129.8,
+     "rate": 1.0,
+     "parts": 1,
+     "meshes": [
+      "SK_UE5_NPC_Beggar_03_Full_01"
+     ]
+    },
+    "a townsman #4": {
+     "samples": 120,
+     "turning_frames_left_out": 4,
+     "foot_slow_cm_s": 38.4,
+     "body_cm_s": 186.5,
+     "rate": 0.8,
+     "parts": 1,
+     "meshes": [
+      "SKM_NPC_Character_02_Full_01"
+     ]
+    },
+    "a townswoman #5": {
+     "samples": 14,
+     "turning_frames_left_out": 0,
+     "foot_slow_cm_s": 162.5,
+     "body_cm_s": 176.4,
+     "rate": 1.0,
+     "parts": 1,
+     "meshes": [
+      "SK_UE5_NPC_Kid_05_Full_01"
+     ]
+    }
+   },
+   "full02": {
+    "Simple Tam": [
+     "SKM_NPC_Character_04_Full_02",
+     "SKM_NPC_Character_04_Head"
+    ],
+    "Father Odran": [
+     "SKM_NPC_Character_05_Full_02",
+     "SKM_NPC_Character_05_Head",
+     "SKM_NPC_Character_05_Hair"
+    ],
+    "Gorric": [
+     "SKM_NPC_Character_01_Full_02",
+     "SKM_NPC_Character_01_Head",
+     "SKM_NPC_Character_01_Hair",
+     "SKM_NPC_Character_01_Beard"
+    ],
+    "Old Pell": [
+     "SK_NPC_Character_02_Full_02",
+     "SK_NPC_Character_02_Head",
+     "SK_NPC_Character_02_Hair",
+     "SK_NPC_Character_02_Mustache"
+    ]
+   }
+  },
+  {
+   "step": "mapzoom",
+   "ok": true,
+   "opened": {
+    "zoom": 1.0,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     0
+    ]
+   },
+   "wheel_x3": {
+    "zoom": 1.953,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     0
+    ]
+   },
+   "moved": {
+    "zoom": 1.953,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     8774
+    ]
+   },
+   "zoom3": {
+    "zoom": 3.052,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     8774
+    ]
+   },
+   "seal_labels": [
+    "seal|Elder",
+    "seal|Captain",
+    "seal|Scholar",
+    "seal|Board"
+   ],
+   "centred": {
+    "zoom": 1.0,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     0
+    ]
+   },
+   "map_open_after": false,
+   "givers": [
+    "Board",
+    "Captain",
+    "Elder",
+    "Scholar"
+   ]
+  },
+  {
+   "step": "life",
+   "ok": true,
+   "gardens": 18,
+   "plants": 1084,
+   "pens": 12,
+   "greens": {
+    "grass": 20569,
+    "bushes": 976
+   },
+   "places_of_work": {
+    "Scatter": 12,
+    "Tend": 18,
+    "Crank": 7,
+    "Stir": 9,
+    "Talk": 12,
+    "SitDrink": 6,
+    "SitTalk": 6,
+    "CarryIdle": 7,
+    "Hammer": 1,
+    "Forge": 1
+   },
+   "with_rounds": 73,
+   "fewest_kinds_in_a_round": 3,
+   "rounds_under_3": [],
+   "distinct_timers": 73,
+   "samples": 118,
+   "worked_samples": {
+    "bar:Talk": 42,
+    "camp:Stir": 93,
+    "chat:Talk": 200,
+    "garden:Tend": 842,
+    "pen:Scatter": 428,
+    "pot:Stir": 413,
+    "seat:SitDrink": 427,
+    "seat:SitTalk": 406,
+    "serve:CarryIdle": 50,
+    "smithy:Forge": 32,
+    "smithy:Hammer": 31,
+    "smithy:Talk": 36,
+    "spit:Crank": 219
+   },
+   "spits_turned": 6,
+   "spits": 7,
+   "clips_seen": [
+    "AS_NPC_Beggars_Pack_WalkLocked",
+    "AS_NPC_Characters_Pack_WalkLocked",
+    "AS_NPC_Kids_Pack_WalkLocked",
+    "AS_NPC_King_And_Queen_WalkLocked",
+    "AS_Town_CarryIdle",
+    "AS_Town_Crank",
+    "AS_Town_Scatter",
+    "AS_Town_SitDrink",
+    "AS_Town_SitTalk",
+    "AS_Town_Stir",
+    "AS_Town_Talk",
+    "AS_Town_Tend",
+    "Anim_Drunk_Idle_01",
+    "Anim_Forge_A_Sword_Hit",
+    "Anim_Forge_A_Sword_Idle",
+    "Anim_Idle_Without_Weapon",
+    "Anim_Walk_Without_Weapon",
+    "MM_Idle"
+   ],
+   "folk_three_kinds_done": "46 of 73",
+   "jobs_done_total": 1208,
+   "tavern_staff": [
+    {
+     "role": "Innkeeper",
+     "state": "going",
+     "kind": "CarryIdle",
+     "done": 0,
+     "kinds": [],
+     "jobs": [
+      "CarryIdle@bar",
+      "CarryIdle@serve",
+      "CarryIdle@serve",
+      "CarryIdle@serve",
+      "CarryIdle@serve",
+      "CarryIdle@serve",
+      "CarryIdle@serve",
+      "Talk@bar"
+     ]
+    },
+    {
+     "role": "Townsfolk",
+     "state": "working",
+     "kind": "CarryIdle",
+     "done": 17,
+     "kinds": [
+      "CarryIdle@5",
+      "CarryIdle@8",
+      "Talk@8"
+     ],
+     "jobs": [
+      "CarryIdle@serve",
+      "CarryIdle@bar",
+      "CarryIdle@serve",
+      "CarryIdle@bar",
+      "CarryIdle@serve",
+      "CarryIdle@bar",
+      "CarryIdle@serve",
+      "CarryIdle@bar",
+      "CarryIdle@serve",
+      "CarryIdle@bar",
+      "CarryIdle@serve",
+      "CarryIdle@bar",
+      "Talk@bar"
+     ]
+    }
+   ],
+   "animals": {
+    "Chicken": 19,
+    "Pig": 6,
+    "Goat": 8,
+    "Cow": 4,
+    "Rabbit": 16
+   },
+   "animal_samples_outside_pen": 0,
+   "animals_changed": 53,
+   "pictures": [
+    "Stir",
+    "Crank",
+    "Tend",
+    "Scatter",
+    "SitDrink",
+    "SitTalk",
+    "Talk",
+    "pen",
+    "garden"
+   ]
+  },
+  {
+   "step": "falls",
+   "ok": true,
+   "safe_cm": 450.0,
+   "lethal_cm": 1500.0,
+   "on": true,
+   "from_300": {
+    "before": 85.0,
+    "after": 85.0,
+    "fall": "0|313.9|0.00",
+    "dead": false
+   },
+   "from_900": {
+    "before": 85.0,
+    "after": 47.5,
+    "fall": "1|913.8|37.55",
+    "dead": false
+   },
+   "from_2000": {
+    "before": 85.0,
+    "after": 0.0,
+    "fall": "2|2013.8|85.00",
+    "dead": true
+   },
+   "expected_from_900": 37.1
+  },
+  {
+   "step": "dagger",
+   "ok": true,
+   "weapons": [
+    "Dagger"
+   ],
+   "handle_middle_in_hand_cm": [
+    0.17,
+    -9.44,
+    -3.47
+   ],
+   "guard_in_hand_cm": [
+    -4.97,
+    -9.43,
+    -5.41
+   ],
+   "pommel_in_hand_cm": [
+    5.32,
+    -9.45,
+    -1.53
+   ]
+  },
+  {
+   "step": "circle",
+   "ok": true,
+   "before": {
+    "line": [
+     "castle",
+     "Mistward Castle",
+     "SEALED",
+     "0"
+    ],
+    "guards": 8,
+    "entered": 0
+   },
+   "after": {
+    "line": [
+     "castle",
+     "Mistward Castle",
+     "TRAVEL",
+     "1"
+    ],
+    "guards": 0
+   },
+   "travel": {
+    "activated": true,
+    "last": "castle"
+   }
+  },
+  {
+   "step": "castle",
+   "ok": true,
+   "weapon": "Viking Shortsword",
+   "armour": "Plate Armour",
+   "before_gold": 1240,
+   "before_armour": "Plate Armour",
+   "castle_level": "mistward_castle",
+   "castle_gold": 1240,
+   "castle_armour": "Plate Armour",
+   "castle_lines_same": true,
+   "entered": 1,
+   "menu": [
+    "button|Resume",
+    "button|Options",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "menu_line": "button|Return to Brokenspire",
+   "back_level": "brokenspire",
+   "at_castle_door_m": 1.5,
+   "back_gold": 1240,
+   "back_armour": "Plate Armour",
+   "back_lines_same": true,
+   "same_town": true
+  },
+  {
+   "step": "tour",
+   "ok": true,
+   "phases_at_s": {
+    "1": 0.0,
+    "2": 0.1,
+    "3": 1.7,
+    "6": 7.2,
+    "4": 11.2,
+    "5": 15.9
+   },
+   "map_drawn": true,
+   "panel": "talk",
+   "answer": "Three moons ago the spire on the castle hill cracked in two in a single night. S",
+   "run_from_m": 103.5,
+   "castle": "mistward_castle",
+   "reached_s": 58.4,
+   "autoplay_left": 297.0,
+   "back": "brokenspire",
+   "quests_same": true,
+   "life_lines": [
+    "the town's life: 1 places being worked",
+    "life 0: SitDrink at (13663, 450)",
+    "life 0: SitDrink at (13663, 450)"
+   ]
+  },
+  {
+   "step": "trip",
+   "ok": true,
+   "castle": "mistward_castle",
+   "opened": 1,
+   "piles_at_death": 1,
+   "pile_things": [
+    "Iron Ingot",
+    "Medium Healing Potion",
+    "Medium Healing Potion",
+    "Plate Armour",
+    "Small Healing Potion",
+    "Viking Shortsword"
+   ],
+   "revived": true,
+   "town": "brokenspire",
+   "kept_in_game": [
+    {
+     "level": "castle",
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ]
+    }
+   ],
+   "castle_again": "mistward_castle",
+   "tier2_open": true,
+   "piles_again": [
+    {
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ],
+     "from_hall_middle_m": 3.9
+    }
+   ],
+   "left_in_game": 0,
+   "boss_before_seen": [],
+   "boss_after_seen": [
+    "boss|7650|3750|123|Orc_03|1|2|TIER 2 BOSS: ORC RAIDER|360"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "bs_t3all_names.png",
+  "bs_t3all_gate.png",
+  "bs_t3all_minimap.png",
+  "bs_t3all_papyrus_map.png",
+  "bs_t3all_square.png",
+  "bs_t3all_inside_smithy.png",
+  "bs_t3all_outside_smithy.png",
+  "bs_t3all_inside_tavern.png",
+  "bs_t3all_outside_tavern.png",
+  "bs_t3all_inside_home.png",
+  "bs_t3all_outside_home.png",
+  "bs_t3all_inside_temple.png",
+  "bs_t3all_outside_temple.png",
+  "bs_t3all_inside_store.png",
+  "bs_t3all_outside_store.png",
+  "bs_t3all_castle.png",
+  "bs_t3all_mistward_hall.png",
+  "bs_t3all_castle_stair.png",
+  "bs_t3all_castle_tower_inside.png",
+  "bs_t3all_castle_tower_door.png",
+  "bs_t3all_castle_stairwell.png",
+  "bs_t3all_castle_front.png",
+  "bs_t3all_day_noon.png",
+  "bs_t3all_day_dusk.png",
+  "bs_t3all_day_night.png",
+  "bs_t3all_watch_top.png",
+  "bs_t3all_watch_door.png",
+  "bs_t3all_sign_store.png",
+  "bs_t3all_board_0.png",
+  "bs_t3all_board_1.png",
+  "bs_t3all_board_2.png",
+  "bs_t3all_board_3.png",
+  "bs_t3all_burned.png",
+  "bs_t3all_map_zoom1.png",
+  "bs_t3all_map_zoom3.png",
+  "bs_t3all_life_stir.png",
+  "bs_t3all_life_crank.png",
+  "bs_t3all_life_tend.png",
+  "bs_t3all_life_scatter.png",
+  "bs_t3all_life_sitdrink.png",
+  "bs_t3all_life_sittalk.png",
+  "bs_t3all_life_talk.png",
+  "bs_t3all_life_pen.png",
+  "bs_t3all_life_garden.png",
+  "bs_t3all_dagger_side.png",
+  "bs_t3all_dagger_front.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

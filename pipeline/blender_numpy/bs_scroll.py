@@ -99,3 +99,11 @@ out = os.path.join(D, "mapc_scroll.png")
 img.save(out)
 a = np.asarray(img)[..., 3]
 print(f"bs_scroll: {out} {N}x{N}, opaque {np.mean(a > 128):.3f}, edge columns transparent: left {np.mean(a[:, 2] < 20):.2f} right {np.mean(a[:, -3] < 20):.2f}")
+# the edge alone (the third list of 2026-11-02: the map zooms): the same sheet with its middle cut away, feathered over 1.5 % of
+# the sheet from 9 % in, so that a map drawn over the sheet and spilling past it is framed again by the torn edge and the rolls
+inner = np.clip((np.minimum(dx - m * 2.0, dy - roll * 1.4) - N * 0.0) / (N * 0.015), 0.0, 1.0)
+ring = np.asarray(img).astype(np.float32)
+ring[..., 3] = ring[..., 3] * (1.0 - inner)
+out2 = os.path.join(D, "mapc_scroll_edge.png")
+Image.fromarray(ring.astype(np.uint8), "RGBA").save(out2)
+print(f"bs_scroll: {out2}, opaque {np.mean(ring[..., 3] > 128):.3f}, middle transparent {np.mean(ring[N // 3:2 * N // 3, N // 3:2 * N // 3, 3] < 5):.2f}")

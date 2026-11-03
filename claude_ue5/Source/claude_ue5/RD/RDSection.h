@@ -275,6 +275,28 @@ public:
 	float CastleWalkZ = 0.f;
 	/** the trees, bushes and grass of the town as placed (x, y, kind: 1-3 a tree, 4 a bush): the papyrus map draws them */
 	TArray<FVector> TownGreens;
+	/** the town's work (the third list, 2026-11-02: "the town should look more lively"): a place where a townsperson does a
+	 *  kind of work, its clip's name ("Stir" at a cooking pot, "Crank" at a spit, "Tend" in a garden, "Scatter" at a pen,
+	 *  "SitDrink" / "SitTalk" on a tavern's seat, "CarryIdle" serving at a tavern's table, "Talk" at the well, the bar or a
+	 *  camp, "Hammer" / "Forge" in the smithy), where its feet go (world) and which way it faces; its group (RDTownWorkGroup:
+	 *  the kinds of place a round of work is made of), its building (-1 outdoors) and the thing it holds (a prop's name) */
+	struct FTownWork { FName Kind; FVector At = FVector::ZeroVector; float Yaw = 0.f; uint8 Group = 0; int32 Bld = -1; FName Prop; int32 Thing = -1; };
+	TArray<FTownWork> TownWorks;
+	/** the pens (world: middle, half size along and across its yaw) and the animal kind in each (the generator's TownAnimals) */
+	struct FTownPen { FVector At = FVector::ZeroVector; FVector2D Half = FVector2D(300.f, 300.f); float Yaw = 0.f; int32 Animal = 0; };
+	TArray<FTownPen> TownPens;
+	/** the gardens (world: middle, half size, yaw) and how many plants grow in each */
+	struct FTownGarden { FVector At = FVector::ZeroVector; FVector2D Half = FVector2D(300.f, 150.f); float Yaw = 0.f; int32 Plants = 0; };
+	TArray<FTownGarden> TownGardens;
+	/** the spits (world: the rod's middle, its yaw): the generator turns their meat in play while someone turns the crank */
+	TArray<FVector4> TownSpits;
+	/** the short grass's clumps and the small bushes placed (tests) */
+	int32 TownGrassClumps = 0, TownSmallBushes = 0;
+	/** the castle's stair inside (the third list: "there should be a way down from the battlements to the floor of the
+	 *  castle"): its foot and its top (world), and the tiles left open over it (no ceiling, no roof: the stairwell) */
+	FVector CastleStairFoot = FVector::ZeroVector, CastleStairTop = FVector::ZeroVector;
+	TArray<FIntPoint> CastleStairwell;
+	int32 CastleStairRoom = -1;
 	/** the castle's towers and stair (tests; world): "tower|<x>|<y>|<stair 0/1>", "stairdoor|<x>|<y>|<z>", "walkdoor|<x>|<y>|<z>",
 	 *  "stairmid|<x>|<y>|<z>", "spiral|<start angle in the castle's frame>|<quarter turns>", "walk|<z>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetCastleShapeLines() const;
@@ -412,8 +434,15 @@ private:
 	float CastleWalkTop() const;
 	void CastleOuterFace(const FVector& Edge, const FVector& OutW, float Yaw, float T, float Z0, float Z1, const FIntPoint& Tl, int32 Side, bool bOverDoor);
 	void CastleTowersBuild(const FTownBld& B);
+	/** the castle's stair from its wing up to the wall walk, its stairwell's balustrade on the walk (the third list) */
+	void CastleStairPlan();
+	void CastleStairBuild();
 	void TownOutdoors(FRandomStream& R, int32 Step);
-	static constexpr int32 TownOutdoorSteps = 6;
+	/** the town's life (the third list): gardens, pens, cooking fires with a pot or a spit, by the homes; the places of work */
+	void TownLife(FRandomStream& R);
+	/** the short grass and the small bushes on the free ground */
+	void TownGrass(FRandomStream& R);
+	static constexpr int32 TownOutdoorSteps = 8;
 	void TownFurnish(FRandomStream& R, int32 BI);
 	void TownDoors();
 	void TownGround();

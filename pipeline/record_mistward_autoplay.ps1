@@ -21,7 +21,7 @@
 # -RDTownTour=<seconds> -RDTourGo=<file> -RDTourRun=<-TourRun m>: in the town, once the recording has begun (the file), she
 # stands before the elder, his panel opens and a question is asked, the papyrus map opens (while it covers the view she is put
 # -TourRun m before the Mistgate on the way), she runs to the castle and through the Mistgate; in the castle autoplay plays her.
-# -TownHour h: the town's day begins at that hour (-RDTownHour; a day is half an hour of play: a reel from 17.4 shows the sun go down).
+# -TownHour h: the town's day begins at that hour (-RDTownHour; a day is an hour of play since 2026-11-02's third list (half an hour before): a reel from 17.4 shows the sun go down).
 # -TourCastle <s>: the castle's autoplay after the tour (else the recording's seconds less the town's 40: the game quits a
 # little after the recording ends). -Title <name>: the video's name instead of the hero's.
 # Args: [-Heroes MartialArtist,Summoner,...] [-Seconds 300] [-Res 3840x2160] [-Game <claude_ue5.exe>] [-Py <python with imageio_ffmpeg>]

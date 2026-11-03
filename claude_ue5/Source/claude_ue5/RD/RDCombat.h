@@ -609,7 +609,16 @@ private:
 public:
 	/** the block layer's weight now (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") float GetBlockLayer() const { return BlockLayerNow; }
+	/** her falls (the third list of 2026-11-02, Generator->bFallDamage; tests): "<falls that hurt>|<the last drop, cm>|<its damage>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") FString GetFallState() const
+	{
+		return FString::Printf(TEXT("%d|%.1f|%.2f"), FallsHurt, LastFallDrop, LastFallDamage);
+	}
 private:
+	bool bInAir = false;
+	float AirTopZ = 0.f, LastFallDrop = 0.f, LastFallDamage = 0.f;
+	int32 FallsHurt = 0;
+	void TickFallDamage();
 	FName SlashWith;
 	int32 SlashCursor = 0;
 	float HasteUntil = -100.f, HasteShare = 0.f, SlashEvadeUntil = -100.f, SlashEvadeShare = 0.f, SlashShieldReadyAt = -100.f;

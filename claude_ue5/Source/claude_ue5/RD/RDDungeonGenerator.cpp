@@ -989,6 +989,10 @@ void ARDDungeonGenerator::UpdateMapScrollInput(APlayerController* PC)
 		MapScrollAction->bConsumeInput = true;
 		MapScrollContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapScroll"));
 		for (const FKey& K : { EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right }) MapScrollContext->MapKey(MapScrollAction, K);
+		// (Brokenspire's map zooms and is dragged: the mouse, its wheel and the right stick are the map's while it is open, or
+		// the camera turned behind it)
+		if (bTown) for (const FKey& K : { EKeys::Mouse2D, EKeys::MouseX, EKeys::MouseY, EKeys::MouseWheelAxis, EKeys::Gamepad_Right2D, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY })
+			MapScrollContext->MapKey(MapScrollAction, K);
 	}
 	if (bWant) EI->AddMappingContext(MapScrollContext, 1000);
 	else EI->RemoveMappingContext(MapScrollContext);
@@ -1497,7 +1501,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) SetMapOpen(!bMapOpen);
 		// the big map scrolls under the arrow keys (the D-pad), C (the right stick pressed) brings it back over her
 		UpdateMapScrollInput(PC);
-		if (bMapOpen && bTacticalMaps)
+		if (bMapOpen && bTacticalMaps && bTown) TickTownMapInput(PC, Dt);
+		else if (bMapOpen && bTacticalMaps)
 		{
 			auto Down = [&](const FKey& K) { return PC->IsInputKeyDown(K) ? 1.f : 0.f; };
 			const float N = Down(EKeys::Up) + Down(EKeys::Gamepad_DPad_Up) - Down(EKeys::Down) - Down(EKeys::Gamepad_DPad_Down);

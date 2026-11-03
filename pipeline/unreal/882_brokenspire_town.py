@@ -204,6 +204,36 @@ piece("Sign", DK + "Props/SM_TavernSign_01", front="+x", mode="raw", collision=F
 piece("Planks", SH + "SM_Wooden_Planks_B", front="+x", scale=0.6, collision=False)
 beam = find("/Game/CastleofEternalMist/Meshes", "beam", "dmg")
 if beam: piece("CharredBeam", beam, front="+x", collision=False, material=BURNT)
+# ---------------------------------------------------------------- the town's life (the user's third list of 2026-11-02)
+# (sizes measured: the plantation fence 318 x 18 x 128 cm, lowered to 77; the Viking wood fence 105 long and high; the trough
+# 150 x 45 x 40; the furniture kit's hay pile 236 x 167 x 148, made 0.6; the tripod 107 x 104 x 159 over a 58 cm cauldron;
+# Hive Sherwood's campfire 101 x 61 (the square's Firepit is a 1.16 m fire stand); a fence post 173 tall, cut to 95 for the
+# spit's ends; the crops: wild carrot 80 x 100 (0.55), wheat 145 x 151 (0.45), pumpkin 30 (1.3), sunflower 161 tall, a
+# flower clump 110 x 65 (0.5), a ground plant 180 x 29 (0.3); the short grass Hive Sherwood's wild grass, 140 x 56, 150 x 24,
+# 135 x 18; the small bushes the lake village's 2.7 m bushes made 0.4 and the windmill's 1.2 m one)
+GRASS_CULL = 4500.0
+p = piece("GardenFence", VC + "SM_PlantationFence/Meshes/FBX/SM_PlantationFence", front="+y", scale=(1, 1, 0.6))
+for n, m, sc, cull in (("Crop1", "/Game/Medieval_Castle/Scanned_Foliage/Foliage/WildCarot/Meshes/SM_WildCarrot_M_01", 0.55, 6000.0),
+                       ("Crop2", "/Game/Medieval_Lake_Village/Meshs/Foliage/SM_WheatGrass01", 0.45, 6000.0),
+                       ("Crop3", "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/Fruit/SM_Pumpkin", 1.3, 6000.0),
+                       ("Crop4", "/Game/BoneTemple/Meshes/SM_Sunflower01_Var01", 1.0, 8000.0),
+                       ("Crop5", "/Game/Old_Windmill/Meshes/Flower/SM_flower_clump_01", 0.5, 6000.0),
+                       ("Crop6", "/Game/Old_Windmill/Meshes/Vegetation/SM_plant_ground", 0.3, 6000.0),
+                       ("GrassShort1", SH + "SM_WildGrass_S_01", 0.8, GRASS_CULL), ("GrassShort2", SH + "SM_WildGrass_S_02", 1.0, GRASS_CULL),
+                       ("GrassShort3", SH + "SM_WildGrass_S_03", 1.0, GRASS_CULL), ("GrassShort4", SH + "SM_WildGrass_S_02", 0.8, GRASS_CULL),
+                       ("BushSmall1", "/Game/Medieval_Lake_Village/Meshs/SM_Bush01", 0.4, 9000.0), ("BushSmall2", "/Game/Medieval_Lake_Village/Meshs/SM_Bush02", 0.38, 9000.0),
+                       ("BushSmall3", "/Game/Medieval_Lake_Village/Meshs/SM_Bush03", 0.42, 9000.0), ("BushSmall4", "/Game/Old_Windmill/Meshes/Vegetation/SM_bush", 1.0, 9000.0),
+                       ("Flowers1", "/Game/Flower_meadows/meshes/Grass/SM_flower_01", 0.9, 5000.0), ("Flowers2", "/Game/Old_Windmill/Meshes/Flower/SM_flower_clump_02", 0.45, 5000.0)):
+    p = piece(n, m, front="+x", mode="raw", scale=sc, collision=False)
+    if p: p.cull_distance = cull
+piece("PenFence", VK + "ModularBuildings/ModularSet/SM_WoodFence_01a", front="+y")
+piece("Trough", "/Game/Castle/Furniture/Kit/SM_Kit_Trough", front="+x")
+piece("HayPile", "/Game/Castle/Furniture/Kit/SM_Kit_HayPile", front="+x", scale=0.6)
+piece("Tripod", "/Game/Castle/Furniture/Kit/SM_Kit_Tripod", front="+x", collision=False)
+piece("Pot", "/Game/Castle/Furniture/Kit/SM_Kit_Cauldron", front="+x")
+piece("Firewood", "/Game/Castle/Furniture/Kit/SM_Kit_Firewood", front="+x")
+piece("Campfire", SH + "SM_campfire", front="+x", collision=False)
+piece("SpitPost", "/Game/ModularWoodenBuildings/StaticMeshes/WoodenShacks/Fence/SM_FencePost_01", front="+x", scale=(1, 1, 0.55))
 # ---------------------------------------------------------------- the castle's Mistgate arch, the storehouse's chest
 w = ues.get_editor_world()
 if not w.get_path_name().startswith(MAP + "."): les.load_level(MAP)

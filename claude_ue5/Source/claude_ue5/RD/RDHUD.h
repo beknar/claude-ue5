@@ -59,6 +59,11 @@ public:
 
 	/** tests (Brokenspire): what the papyrus map named the last time it was drawn ("<icon>|<label>"), and the icons it drew */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownLabels() const { return TownLabels; }
+	/** the town map as last drawn (tests): "<zoom>|<the town's span, cm>|<quest givers' seals>|<view x>|<view y>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetTownMapState() const
+	{
+		return FString::Printf(TEXT("%.3f|%.0f|%d|%.0f|%.0f"), TownMapZoomDrawn, TownMapSpan, TownQuestSeals, MapView.X, MapView.Y);
+	}
 	/** tests (Brokenspire): the townspeople whose names were drawn over them last frame, with their quest marks ("<title>|<mark>") */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownNamesDrawn() const { return TownNamesDrawn; }
 
@@ -89,6 +94,8 @@ private:
 	/** a word-wrapped paragraph (lines of at most W pixels) */
 	TArray<FString> WrapText(const FString& S, float W, class UFont* F, float K) const;
 	TArray<FString> TownLabels, TownNamesDrawn;
+	float TownMapSpan = 0.f, TownMapZoomDrawn = 1.f;
+	int32 TownQuestSeals = 0;
 	bool bControlsDrawn = false;
 	TArray<FString> SummonRows;
 	/** mistward4: her summoned allies by kind, in the lower left, its foot level with the status panel's (whose board's top

@@ -565,6 +565,43 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	}
 }
 
+void URDCombatComponent::TickFallDamage()
+{
+	// (the third list of 2026-11-02: "there should be damage taken when falling from a great height"): from the highest point
+	// of a fall to where she lands; nothing up to FallSafeHeight, then a share of her hit points growing to all of them at
+	// FallLethalHeight. A fall is no blow: no dodge, stealth, ward or shield takes it (armour neither)
+	const ACharacter* Ch = Cast<ACharacter>(GetOwner());
+	const UCharacterMovementComponent* Cm = Ch ? Ch->GetCharacterMovement() : nullptr;
+	if (!Cm) return;
+	const float Z = Ch->GetActorLocation().Z;
+	if (Cm->IsFalling())
+	{
+		if (!bInAir) { bInAir = true; AirTopZ = Z; }
+		AirTopZ = FMath::Max(AirTopZ, Z);
+		return;
+	}
+	if (!bInAir) return;
+	bInAir = false;
+	const float Drop = AirTopZ - Z;
+	LastFallDrop = Drop;
+	const float Safe = Generator->FallSafeHeight, Lethal = FMath::Max(Generator->FallLethalHeight, Safe + 100.f);
+	if (Drop <= Safe) return;
+	const float Amount = MaxHealth * FMath::Clamp((Drop - Safe) / (Lethal - Safe), 0.f, 1.f);
+	if (Amount < 0.5f) return;
+	LastFallDamage = Amount; ++FallsHurt;
+	const float Now = GetWorld()->GetTimeSeconds();
+	Health = FMath::Max(0.f, Health - Amount);
+	DamageTaken += Amount; LastHurtTime = Now;
+	if (AActor* O = GetOwner())
+	{
+		Generator->AddHitText(O->GetActorLocation() + FVector(0, 0, 90.f), Amount, true);
+		Generator->PlaySoundAt(Health <= 0.f ? TEXT("Player.Death") : TEXT("Player.Hurt"), O->GetActorLocation());
+	}
+	SetMessage(FString::Printf(TEXT("A hard fall of %.1f m: %.0f damage"), Drop / 100.f, Amount));
+	UE_LOG(LogTemp, Log, TEXT("RDFALL a fall of %.0f cm: %.1f damage, %.0f left"), Drop, Amount, Health);
+	if (Health <= 0.f) Fall();
+}
+
 void URDCombatComponent::Fall()
 {
 	const float Now = GetWorld()->GetTimeSeconds();
@@ -680,13 +717,17 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	if (bBlocking && (bDead || !IsShieldInHand() || AttackTime >= 0.f)) SetBlocking(false);
 	if (bDead)
 	{
+		bInAir = false;
 		if (Now - DeathTime > Generator->RespawnSeconds) Revive(true);
 		return;
 	}
+	if (Generator->bFallDamage) TickFallDamage();
 	if (Generator->bCasterControls)
 		if (const APawn* P = Cast<APawn>(GetOwner()))
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController())) TickDevice(PC);
-	if (!bScriptedOnly && (!Generator->bMapOpen || Generator->bTacticalMaps))        // (the tactical map is an overlay: she fights on under it)
+	// (the tactical map is an overlay: she fights on under it; Brokenspire's map is zoomed and dragged with the mouse, its
+	// wheel and the right stick since the third list of 2026-11-02: her own keys wait while it is open)
+	if (!bScriptedOnly && (!Generator->bMapOpen || (Generator->bTacticalMaps && !Generator->bTown)))
 		if (const APawn* P = Cast<APawn>(GetOwner()))
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController()))
 			{
