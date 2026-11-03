@@ -62,6 +62,13 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
   - **A piece's own material needs the usage too** (869).
   - **A rule kept in two scripts must say the same:** 870 and 885 both write the Warrior's list.
   - **One helper for what several drawings share:** the quest mark, the labels' placement.
+- **The second list (2026-11-02, later)**:
+  - **Read a clip's motion before trusting its name.** The NPC packs' `MM_Walk_InPlace` moves no foot forward or back (0.0 cm; only a 9 cm lift). Every walker marched on the spot, and the half-speed rate (0.51) the speed match gave made it worse. The forward walk with its root locked steps properly. Measure a walk by the planted foot's speed in the world against the body's.
+  - **Measure what each channel shows, not what it is called.** The ground material's channel the code called "lush" is Hive Sherwood's tan ground: the outside of the wall read as bare earth. It is the earth roads' layer now.
+  - **A pack's name for a part can mislead.** The quest board's "notes" mesh is its plank face. Turning the board to show it made its frame's slats and the planks interleave. The papers are a notice of our own (`bs_notice.py`) on planes.
+  - **A pack's `_Full_02` bodies can come without a head:** the NPC Characters pack's carry their heads and hair as separate meshes (`Separate/`). Look at every body in a lineup (base colour, batches of 8: 32 at once hung the GPU).
+  - **The irregular wall:** a star-shaped outline round the middle, its corners' radii from the plan's stream, the gate on a straight stretch inserted across the main road, the castle's side pushed out to the square. A tile is ground only inside it. A straight road is cut where its middle line leaves the outline less the lane. The graveyard and the mill are moved in from their corners until they fit.
+  - **Lit buildings:** a building's lights are the lights and flames inside its rectangle, 60 cm in from the edges. They burn while someone awake stands in it, checked once a second. The store and the storehouse had no torch at all: every lived-in building gets one by its door.
 - **The reel's hour**: at 17:24 (`-TownHour 17.4`) the low sun left the castle's front in shadow for the whole run (the second reel's first take); the afternoon (15:30) lights it. Look at a take's contact sheet before deleting the one before it: the dark take was deleted before its retake, and the retakes then failed.
 - **Game Bar records whatever app the user is in**: with the user at the machine, two takes of three recorded their browser and Discord (deleted unseen) and the third stopped after 6.6 s. Record when the user leaves the machine alone, or ask.
 

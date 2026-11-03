@@ -42,7 +42,7 @@ OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\brokenspire"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castle,tour,trip"
+DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,circle,castle,tour,trip"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 
@@ -474,7 +474,7 @@ def step_tour():
         st = str(G["gen"].get_town_tour_state()).split("|")
         ph = int(st[0]); seen.setdefault(ph, round(time.time() - t0, 1))
         if ph == 3 and G["gen"].is_town_panel_open(): panel = str(G["gen"].get_town_panel()); body = str(G["gen"].get_town_panel_text())
-        if ph == 4 and not mapped: mapped = any(str(a) in ("map_papyrus", "mapc_parchment") for a in G["pc"].get_hud().get_art_drawn())
+        if ph == 4 and not mapped: mapped = any(str(a) in ("map_papyrus", "mapc_parchment", "mapc_scroll") for a in G["pc"].get_hud().get_art_drawn())
         if ph == 5 and run_m is None: run_m = float(st[3])
         if ph == -1: res["ended"] = st[4]; break
     G["travel_until"] = time.time() + 60
@@ -565,7 +565,8 @@ def step_map():
     colour = [a for a in res["art_drawn"] if a.startswith("mapc_")]
     has_colour = any(str(k).startswith("mapc_grass") for k in g.get_editor_property("ui_art").keys())
     res["colour"] = bool(colour); res["colour_art_in_level"] = has_colour
-    want = ("mapc_parchment", "mapc_grass", "mapc_cobble", "mapc_dirt", "mapc_wallstone", "mapc_compass", "mapc_castle", "mapc_tree1", "mapc_tower")
+    # (the sheet: the frayed scroll since the second list of 2026-11-02, made from the parchment)
+    want = ("mapc_scroll", "mapc_grass", "mapc_cobble", "mapc_dirt", "mapc_wallstone", "mapc_compass", "mapc_castle", "mapc_tree1", "mapc_tower")
     res["colour_missing"] = [a for a in want if a not in colour] if has_colour else []
     step_result("map", not res["missing"] and not res["colour_missing"], **res)
 
@@ -716,7 +717,11 @@ def step_castlewalls():
     arch = ism_instances("SM_ArchWall_Blind")
     res["blind_arches"] = len(arch)
     res["blind_arches_outside"] = sum(1 for a in arch if a.x < x0 - 60 or a.x > x1 + 60 or a.y < y0 - 60 or a.y > y1 + 60)
-    res["arched_door_pieces"] = len(ism_instances("SM_Castle_Stone_Wall_02a_NN"))
+    # (the arched doorway piece in the town wall's segments: none; the watchtowers' doors from the town (the second list of
+    # 2026-11-02) are that piece on purpose and are left out)
+    wdoors = [w_["door"] for w_ in shape_lines()["watch"]]
+    res["arched_door_pieces"] = sum(1 for p in ism_instances("SM_Castle_Stone_Wall_02a_NN") if not any(dist2(p, q) < 250 for q in wdoors))
+    res["watchtower_doors"] = len(wdoors)
     forge = {n: len(ism_instances(n)) for n in ("SM_Castle_Stone_Wall_01a", "SM_Castle_Stone_Wall_02h", "SM_Castle_Stone_Wall_02f", "SM_Castle_Stone_Wall_02g", "SM_Castle_Stone_Wall_02d",
                                                 "SM_Castle_Stone_Parapet_01a", "SM_Castle_Tower_Wall_02", "SM_Tower_Roof_02a", "SM_Stone_Stairs_01a")}
     res["pieces"] = forge
@@ -840,9 +845,257 @@ def step_daynight():
           and n["luma"] is not None and ni["luma"] is not None and n["luma"] > ni["luma"] * 1.8)
     step_result("daynight", ok, **res)
 
+# ------------------------------------------------------------------------------------------------ the second list of 2026-11-02
+def shape_lines():
+    d = {"border": [], "paths": [], "watch": []}
+    for l in section().get_town_shape_lines():
+        p = str(l).split("|")
+        if p[0] == "border": d["border"].append(V(float(p[1]), float(p[2]), 0))
+        elif p[0] == "path": d["paths"].append({"n": int(p[1]), "hw": float(p[2]), "a": V(float(p[3]), float(p[4]), 0), "b": V(float(p[5]), float(p[6]), 0)})
+        elif p[0] == "roads": d["roads"] = [int(p[1]), int(p[2]), int(p[3])]
+        elif p[0] == "watch": d["watch"].append({"c": V(float(p[1]), float(p[2]), float(p[6])), "door": V(float(p[3]), float(p[4]), 0), "sa": float(p[5])})
+    return d
+def seg_dist(p, a, b):
+    ab = V(b.x - a.x, b.y - a.y, 0); t = max(0.0, min(1.0, ((p.x - a.x) * ab.x + (p.y - a.y) * ab.y) / max(ab.x * ab.x + ab.y * ab.y, 1e-6)))
+    return math.hypot(p.x - (a.x + ab.x * t), p.y - (a.y + ab.y * t))
+def step_shape():
+    """the town's outline (the user's: "irregularly shaped with the town walls following the shape of the town"): twelve corners
+    or more at radii that differ; the wall's pieces on its edges (every 3 m of every edge, the gate's gap and the towers' insides
+    left out, has a wall piece within 2.5 m; no wall piece more than 2 m from the outline); a tower at every corner; the earth
+    roads winding (each wanders 6 m or more off the line from its one end to the other); the cobbled roads straight"""
+    res = {}; d = shape_lines(); Bd = d["border"]
+    cx = sum(p.x for p in Bd) / len(Bd); cy = sum(p.y for p in Bd) / len(Bd)
+    rr = [math.hypot(p.x - cx, p.y - cy) for p in Bd]
+    res["corners"] = len(Bd); res["radius_m"] = [round(min(rr) / 100, 1), round(max(rr) / 100, 1)]; res["radius_spread"] = round((max(rr) - min(rr)) / (sum(rr) / len(rr)), 3)
+    walls = ism_instances("SM_Castle_Stone_Wall_01a") + ism_instances("SM_Castle_Stone_Wall_02h")
+    def edge_d(p): return min(seg_dist(p, Bd[i - 1], Bd[i]) for i in range(len(Bd)))
+    towers = [s_["at"] for s_ in spots() if s_["kind"] == "tower"]
+    gate = place("gate")
+    on_line = [w for w in walls if edge_d(w) < 200 and min(dist2(w, t) for t in towers) > 380]
+    res["wall_pieces"] = len(walls); res["wall_on_outline"] = len(on_line)
+    gaps = []; n = 0
+    for i in range(len(Bd)):
+        a, b = Bd[i - 1], Bd[i]; L_ = dist2(a, b)
+        for k in range(int(L_ // 300)):
+            p = V(a.x + (b.x - a.x) * (k + 0.5) * 300 / L_, a.y + (b.y - a.y) * (k + 0.5) * 300 / L_, 0)
+            if dist2(p, gate) < 450 or min(dist2(p, t) for t in towers) < 420: continue
+            n += 1
+            if not any(dist2(p, w) < 250 for w in walls): gaps.append([round(p.x), round(p.y)])
+    res["edge_points"] = n; res["wall_gaps"] = gaps[:10]; res["n_gaps"] = len(gaps)
+    res["towers_at_corners"] = sum(1 for p in Bd if min(dist2(p, t) for t in towers) < 50)
+    # (the earth roads: how far each one's middle wanders off the straight line between its ends)
+    res["paths"] = len(d["paths"]); res["roads_tiles"] = d.get("roads")
+    res["path_ends"] = [[round(p["a"].x), round(p["a"].y), round(p["b"].x), round(p["b"].y)] for p in d["paths"]][:8]
+    res["path_wander_m"] = [round(w_, 1) for w_ in section().get_town_path_wander()]
+    ok = (res["corners"] >= 12 and res["radius_spread"] > 0.12 and res["n_gaps"] == 0 and res["wall_on_outline"] > 100 and res["towers_at_corners"] == res["corners"]
+          and res["paths"] >= 4 and all(w_ >= 6.0 for w_ in res["path_wander_m"]) and res["roads_tiles"][0] > 300 and res["roads_tiles"][1] > 300)
+    step_result("shape", ok, **res)
+    yield
+
+def climb(pts, limit=90.0):
+    """she walks by her own movement input to each point in turn (2D); stops when one is not reached in 8 s"""
+    i = 0; t0 = now(); last_i, last_t = 0, now(); zmax = -1e9
+    while i < len(pts) and now() - t0 < limit:
+        p = G["pawn"].get_actor_location(); zmax = max(zmax, p.z)
+        while i < len(pts) and math.hypot(pts[i].x - p.x, pts[i].y - p.y) < 45.0: i += 1
+        if i >= len(pts): break
+        if i != last_i: last_i, last_t = i, now()
+        if now() - last_t > 8.0: break
+        dv = V(pts[i].x - p.x, pts[i].y - p.y, 0); n_ = math.hypot(dv.x, dv.y) or 1.0
+        G["pawn"].add_movement_input(V(dv.x / n_, dv.y / n_, 0), 1.0, False); yield
+    return {"reached": i, "of": len(pts), "z_max": round(zmax, 1), "seconds": round(now() - t0, 1)}
+def step_watch():
+    """a watchtower (the user's: "there's no way to get into the watchtowers from the inside of town"): she walks in at its
+    door from the town, up its spiral stair and onto the landing under its roof, by her own movement; pictures"""
+    quiet(True); res = {}; d = shape_lines()
+    sq = place("square")
+    W_ = sorted(d["watch"], key=lambda w: dist2(w["c"], sq))
+    res["watchtowers"] = len(W_)
+    w = W_[len(W_) // 2]; C = w["c"]; Dp = w["door"]; Sa = w["sa"]
+    def at(ang, r): a = math.radians(ang); return V(C.x + r * math.cos(a), C.y + r * math.sin(a), 0)
+    out = V(Dp.x - C.x, Dp.y - C.y, 0); n_ = math.hypot(out.x, out.y); out = V(out.x / n_, out.y / n_, 0)
+    a_door = math.degrees(math.atan2(Dp.y - C.y, Dp.x - C.x))
+    pts = [V(Dp.x + out.x * 60, Dp.y + out.y * 60, 0), V(Dp.x - out.x * 80, Dp.y - out.y * 80, 0)] + [at(Sa - k * 15, 120) for k in range(0, 73)] + [at(Sa - 45, 135)]
+    put(V(Dp.x + out.x * 250, Dp.y + out.y * 250, 0), yaw=math.degrees(math.atan2(-out.y, -out.x))); yield from wait(0.6)
+    r_ = yield from climb(pts)
+    yield from wait(0.8)
+    p = G["pawn"].get_actor_location(); res["climb"] = r_; res["end_z"] = round(p.z - C.z, 1)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=a_door + 180)); yield from wait(0.5); shot("watch_top"); yield from rwait(1.5)
+    put(V(Dp.x + out.x * 700, Dp.y + out.y * 700, 0), yaw=math.degrees(math.atan2(-out.y, -out.x))); yield from wait(1.0); shot("watch_door"); yield from rwait(1.5)
+    quiet(False)
+    step_result("watch", res["watchtowers"] >= 12 and r_["reached"] == r_["of"] and res["end_z"] > 850, **res)
+
+def light_state():
+    return [dict(zip(("bld", "kind", "lit", "lights", "awake", "asleep", "on"), [int(x) if x.lstrip("-").isdigit() else x for x in str(l).split("|")])) for l in G["gen"].get_town_light_lines()]
+def step_lights():
+    """the lit buildings (the user's: "when a building has someone in it, it should have a torch lit, unless the NPC is
+    sleeping"): at noon a keeper's shop lit and a home with nobody in it dark; at 20 o'clock homes with their residents in them
+    lit; at 23 the keepers and residents asleep and their buildings dark; every building lit exactly when someone awake is in
+    it, its torches' lights shown or hidden with it; the hour put back"""
+    g = G["gen"]; res = {}; h0 = g.get_town_hour(); quiet(True)
+    def check(nm, wait_s):
+        yield from wait(wait_s)
+        st = light_state()
+        bad = [s_ for s_ in st if (s_["lit"] == 1) != (s_["awake"] > 0) or (s_["on"] > 0) != (s_["lit"] == 1)]
+        res[nm] = {"buildings": len(st), "lit": sum(s_["lit"] for s_ in st), "keepers_lit": sorted({s_["kind"] for s_ in st if s_["lit"] and s_["kind"] != "home"}),
+                   "homes_lit": sum(1 for s_ in st if s_["lit"] and s_["kind"] == "home"), "trades": [s_ for s_ in st if s_["kind"] != "home"], "asleep_dark": sum(1 for s_ in st if s_["asleep"] > 0 and not s_["lit"]), "bad": bad[:5]}
+    g.set_town_hour(12.0); yield from check("noon", 3.0)
+    g.set_town_hour(20.0); yield from check("evening", 45.0)
+    g.set_town_hour(23.0); yield from check("night", 4.0)
+    g.set_town_hour(h0); quiet(False)
+    n, e, ni = res["noon"], res["evening"], res["night"]
+    ok = (not n["bad"] and not e["bad"] and not ni["bad"] and len(n["keepers_lit"]) >= 3 and e["homes_lit"] > n["homes_lit"]
+          and ni["lit"] < n["lit"] and ni["asleep_dark"] >= 3)
+    step_result("lights", ok, **res)
+
+def step_signs():
+    """the trades' signs say what they are (the user's: "a general goods store should say something like 'general goods'"),
+    on both faces of each sign; the quest board's notices (four on each face); pictures"""
+    res = {}; S = section()
+    texts = []
+    for c in S.get_components_by_class(unreal.TextRenderComponent):
+        if c.component_has_tag("TownSign"): texts.append(str(c.get_editor_property("text")))
+    trades = [b for b in blds() if b["kind"] not in ("home", "castle")]
+    res["signs"] = len(texts); res["trades"] = len(trades); res["words"] = sorted(set(t.replace("\n", " ") for t in texts))
+    bd = place("board")
+    notes = [p for p in ism_instances("Plane") if bd and dist2(p, bd) < 200]
+    res["notices"] = len(notes)
+    st = next(b for b in blds() if b["kind"] == "store")
+    f = door_front(st, 420.0); put(f, yaw=math.degrees(math.atan2(st["door"].y - f.y, st["door"].x - f.x)))
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(st["door"].y - f.y, st["door"].x - f.x)))); yield from wait(1.0); shot("sign_store"); yield from rwait(1.5)
+    if bd:
+        for k, o in enumerate((V(-330, 0, 0), V(330, 0, 0), V(0, -330, 0), V(0, 330, 0))):
+            pp = V(bd.x + o.x, bd.y + o.y, 0); put(pp, yaw=math.degrees(math.atan2(bd.y - pp.y, bd.x - pp.x))); yield from wait(0.6); shot(f"board_{k}"); yield from rwait(1.2)
+    ok = res["signs"] == 2 * res["trades"] and "GENERAL GOODS" in res["words"] and res["notices"] == 8
+    step_result("signs", ok, **res)
+
+def step_circle():
+    """the teleport circle (the user's: "even after killing all of the enemies in the castle, player was not able to use the
+    teleport circle to get to the Mistward Castle dungeon"): Mistward Castle on its list, shut while the Mistward Hall's guards
+    stand (and she has not been through the Mistgate), open once they are dead; chosen, it opens Mistward Castle (a dry run)"""
+    g = G["gen"]; res = {}
+    assert "brokenspire" in G["w"].get_name(), "the circle step plays in the town: put it before the steps that end in the castle"
+    def castle_line():
+        g.open_town_panel("circle", -1); yield from rwait(0.3)
+        ln = [p for p in panel() if p[0] == "castle"]; i = next((k for k, p in enumerate(panel()) if p[0] == "castle"), -1)
+        return (ln[0] if ln else None), i
+    ln, i = yield from castle_line()
+    res["before"] = {"line": ln, "guards": len(list(g.get_town_guards())), "entered": G["gi"].get_counter("enter")}
+    g.close_town_panel(); yield from rwait(0.3)
+    for m in list(g.get_town_guards()): m.apply_damage(1e7, None)
+    yield from wait(1.5)
+    ln2, i2 = yield from castle_line()
+    res["after"] = {"line": ln2, "guards": len(list(g.get_town_guards()))}
+    g.set_editor_property("travel_dry_run", True)
+    ok_act = g.activate_town_entry(i2) if i2 >= 0 else False
+    yield from rwait(0.5)
+    res["travel"] = {"activated": ok_act, "last": str(g.get_editor_property("last_travel"))}
+    g.set_editor_property("travel_dry_run", False)
+    try: g.close_town_panel()
+    except Exception: pass
+    b_on = res["before"]["line"] and res["before"]["line"][3] == "1"
+    ok = (res["before"]["line"] is not None and (not b_on or res["before"]["entered"] > 0) and res["after"]["line"] and res["after"]["line"][3] == "1"
+          and ok_act and "castle" in res["travel"]["last"])
+    step_result("circle", ok, **res)
+
+def step_burned():
+    """the burned houses are physically whole (the user's: "roof tiles that aren't supported by anything and ... walls that are
+    supported by nothing at all"): no roof piece on any burned house; every upper storey's wall piece stands on a wall piece of
+    the storey under it"""
+    res = {}; S = section()
+    burnt = [b for b in blds() if b["kind"] == "home" and b["state"] == 1]
+    res["burned"] = len(burnt)
+    walls, roofs = [], []
+    for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m = c.get_editor_property("static_mesh")
+        if not m or c.get_num_materials() == 0: continue
+        mt = c.get_material(0)
+        if not mt or "Burnt" not in mt.get_name(): continue
+        nm = m.get_name()
+        for k in range(c.get_instance_count()):
+            t = c.get_instance_transform(k, True)
+            if isinstance(t, tuple): t = t[-1]
+            if "Roof" in nm: roofs.append(nm)
+            elif "Wall" in nm or "Doorway" in nm: walls.append(t.translation)
+    up = [p for p in walls if p.z > 150]; low = [p for p in walls if p.z <= 150]
+    floating = [[round(p.x), round(p.y), round(p.z)] for p in up if not any(dist2(p, q) < 30 and q.z < p.z - 150 for q in low)]
+    res["walls"] = len(walls); res["upper"] = len(up); res["floating"] = floating[:8]; res["n_floating"] = len(floating); res["roof_pieces"] = len(roofs)
+    if burnt:
+        b = burnt[0]; f = door_front(b, 1200.0); put(f, yaw=math.degrees(math.atan2(b["c"].y - f.y, b["c"].x - f.x)))
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=math.degrees(math.atan2(b["c"].y - f.y, b["c"].x - f.x)))); yield from wait(1.0); shot("burned"); yield from rwait(1.5)
+    step_result("burned", res["burned"] > 0 and res["upper"] > 0 and res["n_floating"] == 0 and res["roof_pieces"] == 0, **res)
+
+def step_windows():
+    """the windows' ledges are solid (the user's: "some of the windows have ledges that the player can walk through"): at a
+    sample of house windows a capsule swept into the window from in front of it at a ledge's height is stopped within the
+    ledge's depth"""
+    res = {}; S = section(); w = G["w"]
+    wins = []
+    for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m = c.get_editor_property("static_mesh")
+        if not m or "WallWindow" not in m.get_name() or c.get_collision_enabled() != unreal.CollisionEnabled.NO_COLLISION and False: continue
+        for k in range(0, c.get_instance_count(), 7):
+            t = c.get_instance_transform(k, True)
+            if isinstance(t, tuple): t = t[-1]
+            wins.append((m.get_name(), t))
+    res["windows_sampled"] = len(wins)
+    stopped = 0; through = []
+    for nm, t in wins[:40]:
+        # (the piece's middle: its origin is at one end of its 3 m (180-degree Adjust, -150 cm along its Y)): try both faces
+        rot_ = t.rotation.rotator(); fwd = rot_.get_forward_vector(); rgt = rot_.get_right_vector()
+        mid_ = t.translation - rgt * 150.0
+        hit_both = True
+        for sgn in (1, -1):
+            a = mid_ + fwd * (90.0 * sgn) + V(0, 0, 105.0); b = mid_ + V(0, 0, 105.0)
+            h = unreal.SystemLibrary.capsule_trace_single(w, a, b, 20.0, 20.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            h = h.to_tuple() if h else None
+            if not (h and h[0]): hit_both = False
+        if hit_both: stopped += 1
+        else: through.append([nm, round(mid_.x), round(mid_.y), round(mid_.z)])
+    res["stopped"] = stopped; res["through"] = through[:6]
+    step_result("windows", res["windows_sampled"] > 10 and not through, **res)
+    yield
+
+def step_walkers():
+    """the townsfolk walk on their feet (the user's: "the children NPCs' legs do not move when they walk ... all townsfolk NPCs
+    should have a walking animation"): for each child, the fool and a resident, followed from 4 m while it walks, its planted
+    foot nearly still in the world (the slowest fifth of its foot's speeds under a third of its body's) and its clip's rate
+    near 1; and the bodies that came without a head (the NPC pack's _Full_02) wear their pack's head"""
+    res = {"walkers": {}}; quiet(True)
+    for title in ("Little Wren", "Tobin", "Pip", "Simple Tam", "a townsman"):
+        f = next((x for x in unreal.GameplayStatics.get_all_actors_of_class(G["w"], unreal.RDTownsfolk) if x.title == title), None)
+        if not f: continue
+        b = f.get_components_by_class(unreal.SkeletalMeshComponent)[0]
+        fs, bs = [], []; t0 = now(); last = None; lastb = None; lasty = None; turned = 0
+        while now() - t0 < 12.0 and len(fs) < 120:
+            L_ = f.get_actor_location(); G["pawn"].set_actor_location(V(L_.x - 400, L_.y, L_.z + 30), False, True)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=0))
+            ft = b.get_socket_location("foot_l")
+            dt = GS.get_world_delta_seconds(G["w"]) or 0.016
+            yw = f.get_actor_rotation().yaw
+            straight = lasty is None or abs((yw - lasty + 180.0) % 360.0 - 180.0) < 1.0
+            if f.is_walking() and last is not None and dt > 0:
+                if straight: fs.append((ft - last).length() / dt); bs.append((L_ - lastb).length() / dt)
+                else: turned += 1
+            last, lastb, lasty = ft, L_, yw
+            yield
+        fs2 = sorted(fs); bmean = sum(bs) / len(bs) if bs else 0
+        res["walkers"][title] = {"samples": len(fs), "turning_frames_left_out": turned, "foot_slow_cm_s": round(fs2[len(fs2) // 5], 1) if fs2 else None, "body_cm_s": round(bmean, 1), "rate": round(b.get_play_rate(), 2),
+                                 "parts": len(f.get_components_by_class(unreal.SkeletalMeshComponent)), "meshes": [c.get_editor_property("skeletal_mesh_asset").get_name() for c in f.get_components_by_class(unreal.SkeletalMeshComponent) if c.get_editor_property("skeletal_mesh_asset")]}
+    heads = {}
+    for f in unreal.GameplayStatics.get_all_actors_of_class(G["w"], unreal.RDTownsfolk):
+        ms = [c.get_editor_property("skeletal_mesh_asset").get_name() for c in f.get_components_by_class(unreal.SkeletalMeshComponent) if c.get_editor_property("skeletal_mesh_asset")]
+        if any("_Full_02" in m and "NPC_Character" in m for m in ms): heads[f.title] = ms
+    res["full02"] = heads
+    quiet(False)
+    ws = [v for v in res["walkers"].values() if v["samples"] >= 20]
+    ok = len(ws) >= 3 and all(v["foot_slow_cm_s"] < v["body_cm_s"] / 3 and 0.75 < v["rate"] < 1.25 for v in ws) and heads and all(any("_Head" in m for m in ms) for ms in heads.values())
+    step_result("walkers", ok, **res)
+
 STEPS = {"town": step_town, "doors": step_doors, "talk": step_talk, "services": step_services, "guards": step_guards, "castle": step_castle,
          "map": step_map, "folk": step_folk, "gate": step_gate, "pictures": step_pictures, "tour": step_tour, "trip": step_trip,
-         "castlewalls": step_castlewalls, "daynight": step_daynight}
+         "castlewalls": step_castlewalls, "daynight": step_daynight, "shape": step_shape, "watch": step_watch, "lights": step_lights,
+         "signs": step_signs, "circle": step_circle, "burned": step_burned, "windows": step_windows, "walkers": step_walkers}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

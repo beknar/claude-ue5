@@ -969,6 +969,18 @@ public:
 	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DayMoonKept;
 	FLinearColor DaySunColor = FLinearColor::White, DayFogLight = FLinearColor::White;
 
+	// ---- the town's lit buildings (the user's of 2026-11-02: "when a building has someone in it, it should have a torch lit,
+	// unless the NPC is sleeping"): each building's torches and their flames burn while someone awake is inside it (the
+	// castle's always); checked once a second
+	void TickTownLights(float Dt);
+	/** "<building>|<kind>|<lit 0/1>|<lights>|<awake inside>|<asleep inside>" for every building with lights */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownLightLines() const;
+	TMap<int32, TArray<TWeakObjectPtr<USceneComponent>>> TownBldLights;
+	TMap<int32, bool> TownBldLit;
+	TMap<int32, FIntPoint> TownBldPeople;                 // (awake, asleep inside: as last counted)
+	TWeakObjectPtr<ARDSection> TownLightsFor;
+	float TownLightsT = 0.f;
+
 	// ---- Brokenspire's runtime (RDTownGame.cpp)
 	void BeginTownPlay();
 	void AfterTownBuilt();

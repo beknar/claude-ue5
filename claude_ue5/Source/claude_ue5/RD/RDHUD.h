@@ -76,6 +76,8 @@ private:
 	/** a painted texture laid over a screen box, its picture anchored to the world (W0..W1 in cm, Repeat cm a picture) so
 	 *  that boxes side by side join */
 	bool TownTiled(FName Name, const FVector2D& A, const FVector2D& B, const FVector2D& W0, const FVector2D& W1, float Repeat, const FLinearColor& Tint);
+	/** a painted texture over triangles (screen points, their world points for the picture, indices in threes) */
+	void TownTris(FName Name, const TArray<FVector2D>& Screen, const TArray<FVector2D>& World, const TArray<int32>& Ix, float Repeat, const FLinearColor& Tint);
 	void DrawTownPanel(float Sc);
 	void DrawTownTracker(float Sc);
 	void DrawTownNames(float Sc);

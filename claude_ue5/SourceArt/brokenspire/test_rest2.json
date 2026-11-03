@@ -1,0 +1,146 @@
+{
+ "tag": "rest2",
+ "plan": [
+  "walkers",
+  "circle",
+  "tour"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "walkers",
+   "ok": true,
+   "walkers": {
+    "Little Wren": {
+     "samples": 120,
+     "turning_frames_left_out": 18,
+     "foot_slow_cm_s": 22.1,
+     "body_cm_s": 149.2,
+     "rate": 0.8,
+     "parts": 1,
+     "meshes": [
+      "SK_UE5_NPC_Kid_04_Full_01"
+     ]
+    },
+    "Tobin": {
+     "samples": 120,
+     "turning_frames_left_out": 22,
+     "foot_slow_cm_s": 25.4,
+     "body_cm_s": 149.2,
+     "rate": 0.8,
+     "parts": 1,
+     "meshes": [
+      "SK_UE5_NPC_Kid_02_Full_01"
+     ]
+    },
+    "Pip": {
+     "samples": 120,
+     "turning_frames_left_out": 9,
+     "foot_slow_cm_s": 32.1,
+     "body_cm_s": 151.6,
+     "rate": 0.8,
+     "parts": 1,
+     "meshes": [
+      "SK_UE5_NPC_Kid_03_Full_01"
+     ]
+    },
+    "Simple Tam": {
+     "samples": 120,
+     "turning_frames_left_out": 0,
+     "foot_slow_cm_s": 39.2,
+     "body_cm_s": 186.5,
+     "rate": 0.8,
+     "parts": 2,
+     "meshes": [
+      "SKM_NPC_Character_04_Full_02",
+      "SKM_NPC_Character_04_Head"
+     ]
+    },
+    "a townsman": {
+     "samples": 22,
+     "turning_frames_left_out": 22,
+     "foot_slow_cm_s": 29.5,
+     "body_cm_s": 181.0,
+     "rate": 1.0,
+     "parts": 1,
+     "meshes": [
+      "SKM_NPC_Character_01_Full_01"
+     ]
+    }
+   },
+   "full02": {
+    "Simple Tam": [
+     "SKM_NPC_Character_04_Full_02",
+     "SKM_NPC_Character_04_Head"
+    ],
+    "Father Odran": [
+     "SKM_NPC_Character_05_Full_02",
+     "SKM_NPC_Character_05_Head",
+     "SKM_NPC_Character_05_Hair"
+    ],
+    "Gorric": [
+     "SKM_NPC_Character_01_Full_02",
+     "SKM_NPC_Character_01_Head",
+     "SKM_NPC_Character_01_Hair",
+     "SKM_NPC_Character_01_Beard"
+    ],
+    "Old Pell": [
+     "SK_NPC_Character_02_Full_02",
+     "SK_NPC_Character_02_Head",
+     "SK_NPC_Character_02_Hair",
+     "SK_NPC_Character_02_Mustache"
+    ]
+   }
+  },
+  {
+   "step": "circle",
+   "ok": true,
+   "before": {
+    "line": [
+     "castle",
+     "Mistward Castle",
+     "SEALED",
+     "0"
+    ],
+    "guards": 10,
+    "entered": 0
+   },
+   "after": {
+    "line": [
+     "castle",
+     "Mistward Castle",
+     "TRAVEL",
+     "1"
+    ],
+    "guards": 0
+   },
+   "travel": {
+    "activated": true,
+    "last": "castle"
+   }
+  },
+  {
+   "step": "tour",
+   "ok": true,
+   "phases_at_s": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 1.6,
+    "4": 7.1,
+    "5": 11.7
+   },
+   "map_drawn": true,
+   "panel": "talk",
+   "answer": "Three moons ago the spire on the castle hill cracked in two in a single night. S",
+   "run_from_m": 103.5,
+   "castle": "mistward_castle",
+   "reached_s": 45.1,
+   "autoplay_left": 297.0,
+   "back": "brokenspire",
+   "quests_same": true
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

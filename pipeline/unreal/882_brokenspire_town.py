@@ -115,6 +115,9 @@ WS = CK + "Walls_Stone/"
 piece("CityWall", WS + "SM_Castle_Stone_Wall_01a_NN", front="+y")
 piece("CityWallSlit", WS + "SM_Castle_Stone_Wall_02h_NN", front="+y")
 piece("CityWallWin", WS + "SM_Castle_Stone_Wall_02f_NN", front="+y")
+# (the watchtowers' door from the town (2026-11-02): 02a's arched doorway, 112 cm wide and 240 high in its middle; drawn without
+# its own collision, which closes the doorway's foot: RDTownPlan.cpp puts boxes beside and over the opening)
+piece("CityWallDoor", WS + "SM_Castle_Stone_Wall_02a_NN", front="+y", collision=False)
 piece("Parapet", WS + "SM_Castle_Stone_Parapet_01a_NN", front="+y", collision=False)
 # the castle's outside (RDTownPlan.cpp's CastleOuterFace / CastleTowersBuild; the user's of 2026-11-02: medieval walls with
 # windows, arrow slits, towers and a way up to the battlements instead of the dungeon's blind arches)
@@ -139,8 +142,33 @@ piece("CastleRoof", CK + "Walls_Stone/SM_Stone_Floor_01a_NN", front="+x", scale=
 # ---------------------------------------------------------------- the square, the circle, the graveyard, the yards
 piece("Well", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Stone", front="+x", mode="raw", size=(180, 180, 280))
 piece("WellTop", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Wood", front="+x", mode="raw", collision=False)
+# (SM_WantedBoard is the board's plank face, not papers: the pack's board has none. Turned +y with the frame's own Adjust its
+# planks and the frame's slats interleaved; as it was, -y and raw, the board looks whole)
 piece("Board", VC + "SM_WantedBoard/Meshes/FBX/SM_WantedBoard_Wood", front="-y")
 piece("BoardNotes", VC + "SM_WantedBoard/Meshes/FBX/SM_WantedBoard", front="-y", mode="raw", collision=False)
+# (the board's papers themselves: that "notes" mesh is the board's plank face, with nothing on it. A bounty notice, drawn by
+# blender_numpy/bs_notice.py and imported by 883 (T_BS_mapc_notice), on a plane stood up facing +X, 32 x 42 cm, in a
+# two-sided material made here; RDTownPlan.cpp pins a notice for each bounty)
+NT = unreal.load_asset("/Game/RandomDungeon/UI/Brokenspire/T_BS_mapc_notice")
+if NT:
+    MP = "/Game/RandomDungeon/Materials/M_BS_Notice"
+    mat_n = unreal.load_asset(MP)
+    if not mat_n:
+        mat_n = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_BS_Notice", "/Game/RandomDungeon/Materials", unreal.Material, unreal.MaterialFactoryNew())
+        MEL = unreal.MaterialEditingLibrary
+        ts = MEL.create_material_expression(mat_n, unreal.MaterialExpressionTextureSample, -400, 0); ts.texture = NT
+        MEL.connect_material_property(ts, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
+        rc = MEL.create_material_expression(mat_n, unreal.MaterialExpressionConstant, -400, 250); rc.r = 0.85
+        MEL.connect_material_property(rc, "", unreal.MaterialProperty.MP_ROUGHNESS)
+        mat_n.set_editor_property("two_sided", True); mat_n.set_editor_property("used_with_instanced_static_meshes", True)
+        MEL.recompile_material(mat_n); eal.save_loaded_asset(mat_n, False)
+    pl = load("/Engine/BasicShapes/Plane")
+    if pl:
+        p = unreal.RDPiece(); p.mesh = pl; p.collision = False; p.material = mat_n
+        # (the plane lies in XY facing +Z: pitched -90 it faces +X, its X the notice's height)
+        p.adjust = unreal.Transform(V(0, 0, 0), unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0), V(0.42, 0.32, 1.0)); p.size = V(1, 32, 42)
+        P["Town.Notice"] = p
+else: print("  TOWN no notice texture yet (bs_notice.py, then 883, then 882 again)")
 for i in (1, 2, 3):
     piece(f"Stall{i}", DK + "Props/Market/SM_Market_Stand_01", front="-y", mode="raw", actor=eal.load_blueprint_class(f"/Game/Hivemind/Medieval_Docks/Blueprints/BP_MarketStand_0{i}"))
 piece("Lamp", WC + "SM_FireBasket/Meshes/FBX/SM_FireBasket", front="+x")
@@ -207,6 +235,15 @@ def pack_clips(pack, ue4):
             n = unreal.AnimationLibrary.get_num_frames(fwd)
             d = unreal.AnimationLibrary.get_bone_pose_for_frame(fwd, "root", n - 1, False).translation - unreal.AnimationLibrary.get_bone_pose_for_frame(fwd, "root", 0, False).translation
             if d.length() > 50: speed = d.length() / fwd.get_play_length()
+            # (the walk: the pack's forward walk with its root held in place, so its feet step back under her as she moves; the
+            # pack's MM_Walk_InPlace moves no foot forward or back at all (measured: 0.0 cm, 9 cm up): the townsfolk marched on
+            # the spot while they slid (the user's of 2026-11-02: "the children NPCs' legs do not move when they walk"))
+            dst = f"/Game/RandomDungeon/Anims/Town/AS_{pack}_WalkLocked"
+            if not eal.does_asset_exist(dst): eal.duplicate_asset(fwd.get_path_name().split(".")[0], dst)
+            wl = unreal.load_asset(dst)
+            if wl:
+                wl.set_editor_property("force_root_lock", True); wl.set_editor_property("enable_root_motion", False)
+                eal.save_loaded_asset(wl, False); walk = wl
         clips[key] = (idle, walk, speed)
     return clips[key]
 # (the drunk's clips are on Drunk_Man_Animations' mannequin: the NPC pack's UE4 skeleton takes them as compatible)
@@ -228,7 +265,17 @@ for t in D["townsfolk"]:
     if t.get("walk"): walk = unreal.load_asset(t["walk"])
     if not (mesh and idle):
         print("  MISSING townsperson", t["name"], t["mesh"], "mesh" if not mesh else "idle"); continue
+    # (the NPC pack's _Full_02 bodies come without a head (the user's of 2026-11-02: Simple Tam, the innkeeper, the priest and
+    # the drunk had none): its Separate folder's head, hair, beard and moustache go on as parts, following the body)
+    parts = []
+    mn = mesh.get_name()
+    if "NPC_Characters_Pack" in mesh.get_path_name() and "_Full_02" in mn:
+        base = mesh.get_path_name().rsplit("/Full/", 1)[0] + "/Separate/" + mn.split("_Full_02")[0]
+        for part in ("_Head", "_Hair", "_Beard", "_Mustache"):
+            if eal.does_asset_exist(base + part): parts.append(unreal.load_asset(base + part))
+        print("  TOWN parts for", t["name"], mn, [p.get_name() for p in parts])
     d = unreal.RDTownsfolkDef()
+    d.set_editor_property("parts", parts)
     for k, v in (("name", t["name"]), ("role", roles[t["role"]]), ("title", t["title"]), ("calling", t.get("calling", "")), ("mesh", mesh), ("idle", idle), ("walk", walk),
                  ("walk_clip_speed", speed if not t.get("walk") else 120.0), ("walk_speed", 95.0 if t["role"] in ("Drunk", "Refugee", "Mourner") else 120.0),
                  ("scale", float(t.get("scale", 1.0))), ("mesh_yaw", -90.0), ("mesh_z", 0.0), ("count", int(t.get("count", 1))), ("lines", t.get("lines", [])), ("topics", t.get("topics", []))):

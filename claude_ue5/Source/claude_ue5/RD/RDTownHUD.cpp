@@ -14,6 +14,7 @@
 #include "RD/RDTown.h"
 #include "RD/RDGameInstance.h"
 #include "Engine/Canvas.h"
+#include "CanvasItem.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "GameFramework/PlayerController.h"
@@ -401,6 +402,27 @@ bool ARDHUD::TownTiled(FName Name, const FVector2D& A, const FVector2D& B, const
 	return true;
 }
 
+void ARDHUD::TownTris(FName Name, const TArray<FVector2D>& Screen, const TArray<FVector2D>& World, const TArray<int32>& Ix, float Repeat, const FLinearColor& Tint)
+{
+	const FRDUIArt* Art = UI.Find(Name);
+	if (!Art || !Art->Texture || !Canvas || Screen.Num() != World.Num()) return;
+	// (a painted texture over triangles, its picture anchored to the world as TownTiled's: u with the world's Y, v against X)
+	TArray<FCanvasUVTri> Tris;
+	auto Uv = [&](const FVector2D& W) { return FVector2D(W.Y / Repeat, -W.X / Repeat); };
+	for (int32 I = 0; I + 2 < Ix.Num(); I += 3)
+	{
+		FCanvasUVTri Tr;
+		Tr.V0_Pos = Screen[Ix[I]]; Tr.V1_Pos = Screen[Ix[I + 1]]; Tr.V2_Pos = Screen[Ix[I + 2]];
+		Tr.V0_UV = Uv(World[Ix[I]]); Tr.V1_UV = Uv(World[Ix[I + 1]]); Tr.V2_UV = Uv(World[Ix[I + 2]]);
+		Tr.V0_Color = Tint; Tr.V1_Color = Tint; Tr.V2_Color = Tint;
+		Tris.Add(Tr);
+	}
+	FCanvasTriangleItem Item(Tris, Art->Texture->GetResource());
+	Item.BlendMode = SE_BLEND_Translucent;
+	Canvas->DrawItem(Item);
+	if (UI.Drawn) UI.Drawn->AddUnique(Name);
+}
+
 void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 {
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
@@ -410,10 +432,16 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.6f));
 	const float Ms = FMath::Min(Canvas->ClipY * 0.92f, Canvas->ClipX * 0.64f);
 	const FVector2D A((Canvas->ClipX - Ms) * 0.5f, (Canvas->ClipY - Ms) * 0.5f), B = A + FVector2D(Ms);
-	// the sheet: parchment, a dark rule and a gold one inside it
-	if (!UI.Fit(TEXT("mapc_parchment"), A, B)) Box(A, B, FLinearColor(0.86f, 0.77f, 0.58f, 1.f));
-	Frame(A, B, FLinearColor(0.30f, 0.20f, 0.10f, 0.95f), 3.f * Sc);
-	Frame(A + FVector2D(7.f * Sc), B - FVector2D(7.f * Sc), FLinearColor(0.78f, 0.6f, 0.26f, 0.9f), 1.5f * Sc);
+	// the sheet: an old scroll, its edges frayed and unravelling (the user's of 2026-11-02: "the edges of the town overhead map
+	// should be frayed and unraveling, like an ancient scroll": mapc_scroll, made from the parchment by bs_scroll.py); else the
+	// parchment with a dark rule and a gold one inside it
+	if (UI.Has(TEXT("mapc_scroll"))) UI.Fit(TEXT("mapc_scroll"), A - FVector2D(Ms * 0.03f), B + FVector2D(Ms * 0.03f));
+	else
+	{
+		if (!UI.Fit(TEXT("mapc_parchment"), A, B)) Box(A, B, FLinearColor(0.86f, 0.77f, 0.58f, 1.f));
+		Frame(A, B, FLinearColor(0.30f, 0.20f, 0.10f, 0.95f), 3.f * Sc);
+		Frame(A + FVector2D(7.f * Sc), B - FVector2D(7.f * Sc), FLinearColor(0.78f, 0.6f, 0.26f, 0.9f), 1.5f * Sc);
+	}
 	// the town (north up: world +X up, +Y right), the wall a little inside the sheet's margin
 	const float TS = Gen->TileSize;
 	const FVector In0 = S->LocalToWorld(S->TownInner.Min) - FVector(TS * 0.5f, TS * 0.5f, 0), In1 = S->LocalToWorld(S->TownInner.Max - FIntPoint(1, 1)) + FVector(TS * 0.5f, TS * 0.5f, 0);
@@ -428,23 +456,47 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		W0 = W2(S->LocalToWorld(R.Min) - FVector(TS * 0.5f, TS * 0.5f, 0)); W1 = W2(S->LocalToWorld(R.Max - FIntPoint(1, 1)) + FVector(TS * 0.5f, TS * 0.5f, 0));
 	};
 	const float Rep = 6000.f;                      // (a texture's picture covers 60 m of the town)
+	// the wall's outline (since 2026-11-02 irregular; its corners in order round the town) and its middle
+	TArray<FVector2D> Ol = S->TownBorder;
+	if (Ol.Num() < 3) { const FVector2D W0 = W2(In0), W1 = W2(In1); Ol = { W0, FVector2D(W1.X, W0.Y), W1, FVector2D(W0.X, W1.Y) }; }
+	FVector2D Bc = FVector2D::ZeroVector;
+	for (const FVector2D& P : Ol) Bc += P;
+	Bc /= Ol.Num();
 	// the grass: the walled ground, feathered into the parchment round it (one picture over the whole town: repeated, its
-	// mirrored seams showed as bands)
+	// mirrored seams showed as bands); a fan of triangles from the middle, the outline grown for the feather
 	{
-		const FVector2D W0 = W2(In0), W1 = W2(In1);
 		const float GRep = Span * 1.05f;
-		for (int32 F = 8; F >= 1; --F)
+		auto Fan = [&](float Grow, const FLinearColor& Tint)
 		{
-			const float Grow = F * 380.f;
-			const FVector2D G0 = W0 - FVector2D(Grow), G1 = W1 + FVector2D(Grow);
-			TownTiled(TEXT("mapc_grass"), ToM(G0), ToM(G1), G0, G1, GRep, FLinearColor(1.f, 1.f, 1.f, 0.11f));
-		}
-		TownTiled(TEXT("mapc_grass"), ToM(W0), ToM(W1), W0, W1, GRep, FLinearColor::White);
-		// the lane inside the wall: trodden earth
-		const float Ln = TS * 2.f;
-		const FVector2D Ls[4][2] = { { W0, FVector2D(W0.X + Ln, W1.Y) }, { FVector2D(W1.X - Ln, W0.Y), W1 }, { W0, FVector2D(W1.X, W0.Y + Ln) }, { FVector2D(W0.X, W1.Y - Ln), W1 } };
-		for (const auto& Lr : Ls) TownTiled(TEXT("mapc_dirt"), ToM(Lr[0]), ToM(Lr[1]), Lr[0], Lr[1], Rep * 0.5f, FLinearColor(1.f, 1.f, 1.f, 0.55f));
+			TArray<FVector2D> Wp, Sp; TArray<int32> Ix;
+			Wp.Add(Bc); Sp.Add(ToM(Bc));
+			for (const FVector2D& P : Ol) { const FVector2D Q = P + (P - Bc).GetSafeNormal() * Grow; Wp.Add(Q); Sp.Add(ToM(Q)); }
+			for (int32 I = 1; I <= Ol.Num(); ++I) Ix.Append({ 0, I, I % Ol.Num() + 1 });
+			TownTris(TEXT("mapc_grass"), Sp, Wp, Ix, GRep, Tint);
+		};
+		for (int32 F = 8; F >= 1; --F) Fan(F * 380.f, FLinearColor(1.f, 1.f, 1.f, 0.11f));
+		Fan(0.f, FLinearColor::White);
+		// the lane inside the wall: trodden earth, two tiles along every edge
+		TArray<FVector2D> Inner;
+		for (const FVector2D& P : Ol) Inner.Add(P + (Bc - P).GetSafeNormal() * TS * 2.f);
+		for (int32 I = 0, J = Ol.Num() - 1; I < Ol.Num(); J = I++)
+			TownTris(TEXT("mapc_dirt"), { ToM(Ol[J]), ToM(Ol[I]), ToM(Inner[I]), ToM(Inner[J]) }, { Ol[J], Ol[I], Inner[I], Inner[J] }, { 0, 1, 2, 0, 2, 3 }, Rep * 0.5f, FLinearColor(1.f, 1.f, 1.f, 0.6f));
 	}
+	// the winding earth roads: a dark verge, then the earth, each a strip along its middle
+	for (int32 Pass = 0; Pass < 2; ++Pass)
+		for (const ARDSection::FTownPath& Pth : S->TownPaths)
+			for (int32 I = 1; I < Pth.Pts.Num(); ++I)
+			{
+				const FVector2D Pa = Pth.Pts[I - 1], Pb = Pth.Pts[I];
+				const FVector2D Dn = (Pb - Pa).GetSafeNormal(), Nn(-Dn.Y, Dn.X);
+				const float Hw = Pth.HalfWidth * (Pass == 0 ? 1.25f : 1.f);
+				// (each piece a little longer than its step: the bends stay closed)
+				const FVector2D A0 = Pa - Dn * Hw * 0.35f, B0 = Pb + Dn * Hw * 0.35f;
+				const TArray<FVector2D> Wq = { A0 + Nn * Hw, B0 + Nn * Hw, B0 - Nn * Hw, A0 - Nn * Hw };
+				TArray<FVector2D> Sq; for (const FVector2D& Q : Wq) Sq.Add(ToM(Q));
+				if (Pass == 0) TownTris(TEXT("mapc_dirt"), Sq, Wq, { 0, 1, 2, 0, 2, 3 }, Rep * 0.5f, FLinearColor(0.35f, 0.25f, 0.12f, 0.5f));
+				else TownTris(TEXT("mapc_dirt"), Sq, Wq, { 0, 1, 2, 0, 2, 3 }, Rep * 0.5f, FLinearColor(0.95f, 0.82f, 0.62f, 1.f));
+			}
 	// the roads: a dark verge under every road first, then the cobbles, so that crossings stay clean (every street, the square
 	// and the stair turret's path are cobbled in the town (TownGround); the lane by the wall is earth, drawn above. Until the
 	// PR review the side streets were drawn as earth)
@@ -470,30 +522,22 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 			const FVector2D P = ToM(Roads[I].Key), Q = ToM(Roads[I].Value);
 			Box(FVector2D(FMath::Min(P.X, Q.X), FMath::Min(P.Y, Q.Y)), FVector2D(FMath::Max(P.X, Q.X), FMath::Max(P.Y, Q.Y)), FLinearColor(0.72f, 0.58f, 0.38f, 1.f));
 		}
-	// the wall: grey stone on its line round the town, a dark edge each side
-	{
-		const FVector2D W0 = W2(In0), W1 = W2(In1);
-		const float Wt = 260.f;
-		const FVector2D Ws[4][2] = { { W0 - FVector2D(Wt), FVector2D(W0.X + Wt, W1.Y + Wt) }, { FVector2D(W1.X - Wt, W0.Y - Wt), W1 + FVector2D(Wt) },
-		                             { W0 - FVector2D(Wt), FVector2D(W1.X + Wt, W0.Y + Wt) }, { FVector2D(W0.X - Wt, W1.Y - Wt), W1 + FVector2D(Wt) } };
-		for (const auto& Wr : Ws)
+	// the wall: grey stone along its outline's edges, a dark edge each side
+	for (int32 Pass = 0; Pass < 2; ++Pass)
+		for (int32 I = 0, J = Ol.Num() - 1; I < Ol.Num(); J = I++)
 		{
-			const FVector2D P = ToM(Wr[0]), Q = ToM(Wr[1]);
-			const FVector2D Pa(FMath::Min(P.X, Q.X), FMath::Min(P.Y, Q.Y)), Qa(FMath::Max(P.X, Q.X), FMath::Max(P.Y, Q.Y));
-			Box(Pa - FVector2D(1.2f * Sc), Qa + FVector2D(1.2f * Sc), FLinearColor(0.16f, 0.15f, 0.14f, 0.9f));
-			if (!TownTiled(TEXT("mapc_wallstone"), Pa, Qa, Wr[0], Wr[1], Rep * 0.15f, FLinearColor::White)) Box(Pa, Qa, FLinearColor(0.55f, 0.53f, 0.5f, 1.f));
+			const FVector2D Dn = (Ol[I] - Ol[J]).GetSafeNormal(), Nn(-Dn.Y, Dn.X);
+			const float Wt = Pass == 0 ? 330.f : 260.f;
+			const TArray<FVector2D> Wq = { Ol[J] - Dn * Wt + Nn * Wt, Ol[I] + Dn * Wt + Nn * Wt, Ol[I] + Dn * Wt - Nn * Wt, Ol[J] - Dn * Wt - Nn * Wt };
+			TArray<FVector2D> Sq; for (const FVector2D& Q : Wq) Sq.Add(ToM(Q));
+			TownTris(TEXT("mapc_wallstone"), Sq, Wq, { 0, 1, 2, 0, 2, 3 }, Rep * 0.15f, Pass == 0 ? FLinearColor(0.16f, 0.15f, 0.14f, 0.9f) : FLinearColor::White);
 		}
-	}
-	// the watch's patrol: a gold dashed line along the lane (the militia walk it)
+	// the watch's patrol: a gold dashed line along the lane (the militia walk it), a tile in from the wall
 	{
-		const float In_ = TS;
-		const FVector2D C0 = ToM(W2(In0) + FVector2D(In_)), C1 = ToM(W2(In1) - FVector2D(In_));
-		const FVector2D P0(FMath::Min(C0.X, C1.X), FMath::Min(C0.Y, C1.Y)), P1(FMath::Max(C0.X, C1.X), FMath::Max(C0.Y, C1.Y));
-		const FVector2D Cs[5] = { P0, FVector2D(P1.X, P0.Y), P1, FVector2D(P0.X, P1.Y), P0 };
 		const float Dash = 7.f * Sc, Gap = 6.f * Sc;
-		for (int32 E = 0; E < 4; ++E)
+		for (int32 I = 0, J = Ol.Num() - 1; I < Ol.Num(); J = I++)
 		{
-			const FVector2D Da = Cs[E], Db = Cs[E + 1];
+			const FVector2D Da = ToM(Ol[J] + (Bc - Ol[J]).GetSafeNormal() * TS), Db = ToM(Ol[I] + (Bc - Ol[I]).GetSafeNormal() * TS);
 			const float Len = FVector2D::Distance(Da, Db);
 			const FVector2D Dir = (Db - Da) / FMath::Max(Len, 1.f);
 			for (float T = 0.f; T < Len; T += Dash + Gap)
@@ -603,7 +647,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	}
 	// (the watch's patrol, written once on the lane)
 	{
-		const FVector2D P = ToM(FVector2D(In1.X - TS, (In0.Y + In1.Y) * 0.5f + Span * 0.22f));
+		const FVector2D P = ToM(Ol[Ol.Num() / 3] + (Bc - Ol[Ol.Num() / 3]).GetSafeNormal() * TS * 1.5f);
 		Pending.Add({ TEXT("Watch patrol"), P, 2.f * Sc, FLinearColor(0.45f, 0.28f, 0.04f, 1.f), ERDType::Text, 0.9f });
 	}
 	// the people with quests for her (a seal with their mark), the Mistgate, her

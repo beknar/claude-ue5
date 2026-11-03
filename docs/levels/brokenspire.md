@@ -14,8 +14,9 @@ The town is the generator's start section (`bTown`): one section of 168 x 168 ti
 
 The rules, in the town's own frame (from the gate to the castle):
 
-- **The wall:** a ring of the Castle Forge pack's stone walls round 160 x 160 tiles, two walls high with a parapet; square towers at its corners, along it and on each side of the gate.
-- **The gate:** in one of the four sides (the seed's choice). It is shut and barred (F: "the wilderness beyond is not safe yet"); the road runs on outside it.
+- **The wall:** since the second list of 2026-11-02 it follows an irregular outline (the user's: "the town borders should also be irregularly shaped with the town walls following the shape of the town"): about twenty corners round the town's middle at radii the seed draws (170 to 260 m from it in the saved town), out to the square's edge behind the castle. The Castle Forge pack's stone walls run along each edge, two walls high with a parapet, each edge's pieces stretched to fill it. A square tower stands at every corner, and one more halfway along a long edge. Until then it was a ring round 160 x 160 tiles.
+- **The watchtowers** are walked into from the town: an arched door in the face toward the town, a spiral stair of twelve quarter turns inside, a landing at the top under the tower's roof, which stands on four posts over the parapet.
+- **The gate:** on a straight stretch of the outline across the main road, a tower each side, in one of the four ways (the seed's choice). It is shut and barred (F: "the wilderness beyond is not safe yet"); the road runs on outside it.
 - **Mistward Castle:** against the far wall, at the end of the cobbled main road, behind a forecourt. Four rooms: an entry hall, the **Mistward Hall** behind it (11 by 12 tiles, its back wall the **Mistgate**) and two wings (an armory and a library). Inside, its walls are the dungeon's own Castle theme. Outside (since 2026-11-02; until then the dungeon's blind arches, inside and out) it is a medieval castle of Castle Forge's stone:
   - two storeys of wall up to a **wall walk**: arrow slits in about one segment of three below; above, small windows, now and then a tall one, a slit or plain stone (by a hash of the place, not the plan's stream);
   - crenellated **battlements** round the walk, which is the whole roof and is walked on;
@@ -23,14 +24,21 @@ The rules, in the town's own frame (from the gate to the castle):
   - a **stair turret**: the front tower on one side has a door at its foot (a cobbled path leads to it from the forecourt) and a spiral stair inside. The stair has nine quarter turns and climbs 6.6 m to a door onto the wall walk.
 - **The town wall** is plain stone with an arrow slit in one upper segment of three. Its square towers have slits and small windows. Until 2026-11-02 every segment was Castle Forge's `Wall_02a`, which has an arched doorway through it: a row of arches.
 - **The square:** on the main road, about a third of the way in, crossed by a cobbled road from wall to wall. In it: the well, the quest board, four market stalls, four fire baskets. Beside it, the **teleport circle** (a ring of standing stones round the castle's teleporter glow).
-- **Streets:** side streets parallel to the main road and across it, and a trodden lane inside the wall.
+- **Streets** (since the second list of 2026-11-02: "cobblestone streets should be straight and the dirt roads should be meandering, curved and wandering"):
+  - the main road from the gate to the castle, the cross road through the square, the square, the forecourt and the stair turret's path: straight and cobbled;
+  - the side streets along the main road and across it: winding earth roads, each wandering 13 to 18 m off its straight line in two waves;
+  - a trodden lane two tiles wide all along the inside of the wall.
+- **The ground** is drawn a vertex a metre. The earth is the ground material's tan layer, so it stands out from the grass, worn darker in patches. Every road's edge is ragged by noise, and the roads' surfaces rise and sink a few cm (earth up to 5, cobbles 2.5), shaded by normals from the heights. The bumps are seen only: everyone walks on the flat floor.
 - **The trades:** the temple, the tavern, the smithy, the trader's store, the healer's house and the storehouse take the plots nearest the square; then the barracks nearest the gate, the chapel nearest the graveyard (in a corner of the town away from the gate) and the witch's hut farthest from the square.
-- **Homes:** every plot left along the streets, each door toward its street. Each is lived in (about 55 %), burned (about 20 %: walls with holes, no roof, charred beams and rubble) or boarded up (about 25 %: planks over its windows and its door until she pries them loose with F).
+- **Homes:** every plot left along the streets, each door toward its street. Each is lived in (about 55 %), burned or boarded up (about 25 %: planks over its windows and its door until she pries them loose with F).
+- **Burned houses** are about 20 %. Each has charred beams and rubble inside and no roof at all. Each wall segment stands one storey, two or none, and an upper storey only on the one below (since the second list of 2026-11-02, after the user saw roof pieces and walls standing on nothing).
+- **Windows:** a hidden box covers every window piece's whole bounds; the pieces' own collision missed their sills, and she could walk through the ledges.
+- **Signs:** each trade's hanging sign says what it is on both faces of its board: GENERAL GOODS, SMITHY, HEALER, TEMPLE, STOREHOUSE, TAVERN, CHAPEL, BARRACKS, HEDGE WITCH.
 - **Outdoors:** the mill (Old Windmill's) and the still (a copper pot and kegs beside the tavern), the graveyard (gravestones in rows inside an iron fence with a gate), the refugees' tents by the gate, the barracks' training dummies, carts, hay, sacks and logs by the homes, trees, bushes and grass.
 
 Every building is walked into through a working door. Its inside is furnished by the dungeon's own furnishing for a room of its kind (the smithy a forge with its anvil, the temple and the chapel pews and an altar, the barracks and the healer's house beds and chests, the store and the storehouse shelves, barrels and crates, the tavern a kitchen with tables and stools, the homes a kitchen or a room of chests), lit by torches, with containers that open with F. The houses are House Forge's timber, stone and thatch modules, two storeys of walls high under a gabled roof.
 
-Built for the seed `-1138391333` (the saved one): 179 buildings (182 rooms), 186 doors, 789 containers, about 30 000 instanced meshes, 611 lights, in about 0.7 s.
+Built for the seed `-1138391333` (the saved one) before the irregular wall: 179 buildings (182 rooms), 186 doors, 789 containers, about 30 000 instanced meshes, 611 lights, in about 0.7 s. With the irregular wall (the second list of 2026-11-02) the saved build is 23 206 instanced meshes and 475 lights; the town inside the outline is smaller (about 87 buildings with lights in the tests).
 
 ## Day and night
 
@@ -42,6 +50,8 @@ A full day passes in half an hour of play in the town (the user's of 2026-11-02;
 - **The clock** stands still under a panel's pause and while she is in the castle, which is indoors. The game keeps the hour between the two (`URDGameInstance::TownHour`, `TownDay`).
 - **On screen:** the minimap shows "day 1 · 14:30" under it, and the map's key shows it too.
 - **For a reel or a test:** `-RDTownHour=<h>` starts a new game at another hour; `SetTownHour` sets the hour in play.
+- **The townspeople's day** (the second list): the residents go into their homes at 19 o'clock and come out at half past six. Everyone inside a building sleeps from 22 to 6.
+- **The lit buildings:** a building's torches and their flames burn while someone awake is inside it ("unless the NPC is sleeping"). Every building someone can be in has a torch inside its door. The castle is always lit. Measured (`884 lights`, test_n3): at noon 15 buildings lit (the keepers' trades and the homes whose residents had wandered in), at 20 o'clock 26; at 23 o'clock the sleepers' buildings dark (20 of them in an earlier run).
 
 ## The castle's hall and the way into the dungeon
 
@@ -73,12 +83,18 @@ Each building's service is at its counter, basin, altar, chest or anvil, and its
 | Smithy | mend each found weapon, set of armour and shield, or all at once; use the anvil (the crafting panel: repair items, break-downs) | 30 % of the thing's price for its whole durability, by what is missing |
 | Temple | a blessing: 10 % more damage, 10 % less of each blow, for ten minutes (it goes into the castle with her); an offering for the refugees | 20 gold times her highest tier's factor; 5 gold |
 | Storehouse | put a thing in her storage, take it back | free |
-| Teleport circle | the circles she has found: Brokenspire's (here); the others lie in the wilderness, which is for later | |
-| Quest board | three bounties at a time | |
+| Teleport circle | the circles she has found: Brokenspire's (here); **Mistward Castle** (into its great hall) once the Mistward Hall's guards are all dead or she has walked through the Mistgate once (the second list of 2026-11-02; until then it had no way there); the others lie in the wilderness, which is for later | |
+| Quest board | three bounties at a time; its notices pinned on both faces (a bounty drawn by `bs_notice.py`: the board pack has no papers) | |
 
 ## The people
 
-The elder, the scholar and the captain have functionality: questions (why the town needs her, what the evil is, the wilderness) and quests. The keepers open their buildings' services. Everyone else says a line of their own and turns to her. Those who wander (the children, the town's fool, the militia on the lane, the refugees, the preacher, the residents) walk the town's tiles and open the doors on their way. A name hangs over each person near her, with a gold **!** over one who has a quest for her and **?** over one who is waiting for one she has done.
+The elder, the scholar and the captain have functionality: questions (why the town needs her, what the evil is, the wilderness) and quests. The keepers open their buildings' services. Everyone else says a line of their own and turns to her. Those who wander (the children, the town's fool, the militia on the lane, the refugees, the preacher, the residents) walk the town's tiles and open the doors on their way.
+
+Their walk (the second list of 2026-11-02: "the children NPCs' legs do not move when they walk"):
+- **The clip:** each pack's forward walk (`MM_Walk_Fwd`) with its root held in place (`AS_<pack>_WalkLocked`). The packs' `MM_Walk_InPlace` moves no foot forward or back at all (measured: 0.0 cm), so they had marched on the spot while they slid.
+- **The speed:** each walker moves as far as its feet do, at its body's size (a child at 0.8 strides 0.8 as far). Measured following them: the planted foot moves 29 to 45 cm/s while the body moves 148 to 185.
+
+The NPC Characters pack's `_Full_02` bodies come without a head (Simple Tam, Gorric, Father Odran, Old Pell had none). They wear the pack's separate head, hair, beard and moustache as parts. A name hangs over each person near her, with a gold **!** over one who has a quest for her and **?** over one who is waiting for one she has done.
 
 <!-- bs:people -->
 | Who | Role | Where | What she gets from them | Model |
@@ -146,7 +162,8 @@ A quest's goal is a counter the game keeps across the levels; its progress is wh
 
 - **The minimap** (top right) is the dungeon's: dark tiles fading to a feathered rim, the ground, the streets lighter, the buildings' floors with their walls lit and their doors, the trades' pictures in their middles, the circle and the board, the Mistgate, the Hall's guards (red), the people (blue dots, the gold ! and ?), her arrow. Under it: the building she is in.
 - **The big map** (M, the gamepad's Back), since 2026-11-02, is a painted village map in full colour, in the look of the user's reference picture (`ai models/fairhill village.jpg`; `SourceArt/brokenspire/map_art_colour.json`, `ARDHUD::DrawTownMapColour`):
-  - a parchment sheet with a gold title and a compass rose;
+  - an ancient scroll (the second list: "frayed and unraveling"; `bs_scroll.py` makes it from the painted parchment): torn edges, loose threads, worn holes, darkened rims, rolled ends; a gold title and a compass rose;
+  - the wall along the town's irregular outline, the lane inside it, the winding earth roads as strips along their middles;
   - painted grass inside the wall, fading into the parchment;
   - cobbled roads (the main road, the forecourt, the cross road and the square) and earth streets, the trodden lane inside the wall;
   - the grey stone wall with its towers and gate, the watch's patrol drawn along the lane as a gold dashed line;
@@ -158,7 +175,7 @@ A quest's goal is a counter the game keeps across the levels; its progress is wh
 
 ## The test
 
-`pipeline\unreal\884_brokenspire_test.ps1 <plan> <tag>` (plan `all`: every step); `SourceArt/brokenspire/test_<tag>.json`. `test_ball4.json`: all ten ok on a town of a new seed after the PR review's fixes, and `test_trip1.json` the trip step ok (the pile laid again 3.9 m from the great hall's middle, tier 2's boss set again once a room was seen); the castle's `test_m8s.json` (basics, tiers, death, start gear, options) ok after them (every PIE play is a new game, so every run plays another town; the town step plays four seeds more). The frame rate in the square, in the editor's play window at 2440 x 1616: 30 a second (24 at the least). The castle's own test after the town (`868 all`, `test_m7all.json`): 38 of 39, the Escape menu's main page now has Return to Brokenspire (the step's list updated: `test_m7o.json`); `test_m7s.json`: basics, death, start gear, options, harvest, cells and stealth after the last changes, all ok.
+`pipeline\unreal\884_brokenspire_test.ps1 <plan> <tag>` (plan `all`: every step); `SourceArt/brokenspire/test_<tag>.json`. The records of the second list of 2026-11-02 (the irregular wall, the earth roads, the watchtowers, the lit buildings, the signs and notices, the burned houses, the windows, the walkers, the circle): `test_ball5.json` (town, doors, talk, services, guards, folk, gate, map, pictures, daynight, shape, watch ok; castlewalls failed there on its own old rule, which counted the watchtowers' doors as the town wall's arches), `test_rest1.json` (castlewalls, lights, signs, burned, windows, castle, trip ok) and `test_rest2.json` (walkers, circle, tour ok, after the tests' own fixes: a turning walker's foot left out, the circle played in the town, the tour's map is the scroll); the castle's `test_m11.json` (basics, block with her legs walking under the shield) and `test_m13menu.json` (the menu, its music playing; START and AUTOPLAY open Brokenspire since the town). Each PIE play is a new game, so each run plays another town. The frame rate in the square, in the editor's play window at 2440 x 1616: 30 a second (24 at the least). The castle's own test after the town (`868 all`, `test_m7all.json`): 38 of 39, the Escape menu's main page now has Return to Brokenspire (the step's list updated: `test_m7o.json`); `test_m7s.json`: basics, death, start gear, options, harvest, cells and stealth after the last changes, all ok.
 
 | Step | What it measures |
 |---|---|
@@ -175,14 +192,23 @@ A quest's goal is a counter the game keeps across the levels; its progress is wh
 | `tour` | the showcase tour (`StartTownTour`): every phase, the elder's panel with a question's answer and no quest taken, the papyrus map drawn, the run from about 100 m before the Mistgate, Mistward Castle with autoplay going; back to the town by the Escape menu |
 | `trip` | in the castle tier 2 opened without its boss, and she falls there; back in the town the game keeps her pile; in the castle again the pile lies by the arch, and tier 2's boss is set once a room of tier 1 is seen |
 | `castlewalls` | no blind arch outside the castle's inner walls and no arched doorway piece in the town wall; Castle Forge's walls, slits, windows, battlements and four round towers; nothing stands up through the wall walk (the hall's columns did); the walk under 81 traces over the roof; she walks in at the stair turret's door, up the spiral stair and out onto the wall walk by her own movement; pictures |
-| `daynight` | the clock over 20 s of play (a day 1800 s); the sun at noon (62 degrees), at 18:30 (below the horizon) and at midnight (the moon up, the sun's light 0); pictures from the square at each: noon brighter than night; the game keeps the hour |
+| `daynight` | the clock over 20 s of play (a day 1800 s); the sun at noon (62 degrees), at 18:30 (below the horizon) and at midnight (the moon up, the sun's light 0), read from the lights in the world; pictures from the castle's wall walk at each: noon brighter than night; the game keeps the hour |
+| `shape` | the outline: 12 corners or more at radii that differ; a wall piece within 2.5 m of every 3 m of every edge (no gaps, the gate and towers aside); a tower at every corner; the earth roads each wander 6 m or more off their straight line; cobbles and earth both laid |
+| `watch` | she walks in at a watchtower's door from the town, up its spiral stair and onto the landing under its roof, by her own movement |
+| `lights` | at noon, 20 and 23 o'clock: every building lit exactly when someone awake is in it, its torches shown or hidden with it; the keepers' trades lit by day, more homes at evening, the sleepers' buildings dark at night |
+| `signs` | every trade's sign has its words on both faces (GENERAL GOODS among them); the quest board's eight notices; pictures |
+| `burned` | no roof piece on a burned house; every upper storey's wall stands on one below |
+| `windows` | at 40 house windows a capsule swept in at a ledge's height from either side is stopped |
+| `walkers` | the children, the fool and a resident followed while they walk: the planted foot nearly still, the clip's rate near 1; the `_Full_02` bodies wear their heads |
+| `circle` | Mistward Castle on the circle's list, sealed while the Hall's guards stand, open once they are dead; chosen, it opens the castle (a dry run) |
 
 ## Rebuild notes
 
 1. `881_brokenspire_level.py`: the first run saves `mistward_castle` as `brokenspire`; restart the editor and run it again (the town's switches and outdoor light, the castle's link, the menu's target).
 2. `882_brokenspire_town.py`: the town's pieces, people and quests, and its start section built. The town is a copy of the castle as it was after `880`: a later stage that writes the castle's heroes, items or pieces must be run on `brokenspire` too (then `882` again).
 3. `blender_numpy/rdm4_ui_gen.py SourceArt/brokenspire/map_art.json <dir>`, `rdm4_ui_cut.py ... <dir> --export <out>`, then `883_brokenspire_map_art.py <out>`; the colour map the same way from `map_art_colour.json` (36 pictures; its elements may carry their own `style`, `export` size and `crop`).
-3b. `885_brokenspire_list.py` (the Warrior's gamepad list on the castle, the town and level 5; the town's day and night), then `882` again (the castle's outside, the town wall's pieces, the town built) and `869` (the materials' usages, the town's pieces too) before packaging.
+3a. The second list's pictures: `blender_numpy/bs_scroll.py <export>` (the scroll) and `bs_notice.py <export>` (the bounty notice), into the colour set's export folder before `883`; the menu's music: `blender_numpy/rdc_sound_prep.py SourceArt/mistward/menu_sounds.json SourceArt/mistward/audio_menu` (ignored) before `885`.
+3b. `885_brokenspire_list.py` (the Warrior's gamepad list on the castle, the town and level 5; the town's day and night; the Warrior's block layer in her AnimBP; the hero menu's music), then `882` again (the castle's outside, the town wall's pieces, the town built) and `869` (the materials' usages, the town's pieces too) before packaging.
 4. `blender_numpy/bs_tables_doc.py`: this document's tables from `town.json`.
 5. `884_brokenspire_test.ps1 all <tag>`; the castle's own test (`868_mistward_test.ps1 all`) after anything shared.
 6. `package_mistward.ps1 -Test`: the menu, the town and the castle (`-RDTownGo=castle` walks her through the Mistgate) in the packaged game. On 2026-11-02 (Shipping, 13.2 GB): the menu, the town (peak 3.1 GB), the castle reached through the Mistgate (`castle|mistward_castle|Warrior`) and the display setting all ok, no crash reports. A playable build of its own: `package_mistward.ps1 -Out builds\brokenspire -Test` (`builds\brokenspire\Windows\claude_ue5.exe`, 13.2 GB; the hero menu, whose START opens Brokenspire): the same four runs ok. Built again on 2026-11-02 after `885` (the Warrior's LB block, the castle's walls and towers, day and night, the colour map) and `869` run on the town too (15 of its props' materials lacked the instanced-mesh usage, so the earlier package drew the well, the board, the carts, the fire baskets, the dummies, the graves, the fence, the tents and the fire pit in the default material): the four runs ok, peak 3.1 GB, no crash reports.

@@ -58,6 +58,12 @@ public:
 	FString NextLine();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsWalking() const { return Path.Num() > 0; }
 	USkeletalMeshComponent* GetBody() const { return Body; }
+	/** its building (the town's day, 2026-11-02): a keeper works in it, a resident goes in at evening (19 o'clock) and out in
+	 *  the morning (half past six); asleep from 22 to 6 when it is inside a building (its torches then burn out) */
+	void SetHome(int32 Bld, const FVector& Inside, bool bResident) { HomeBld = Bld; HomeIn = Inside; bResident_ = bResident; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsSleeping() const { return bSleeping; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetHomeBuilding() const { return HomeBld; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsResident() const { return bResident_; }
 protected:
 	virtual void Tick(float Dt) override;
 private:
@@ -74,4 +80,9 @@ private:
 	int32 LinesSaid = 0, NoPathTrips = 0;
 	bool bWalkClip = false;
 	void SetClip(bool bWalk);
+	int32 HomeBld = -1;
+	FVector HomeIn = FVector::ZeroVector;
+	bool bResident_ = false, bWentHome = false, bSleeping = false;
+	/** the town's hour's part of its day: in or out, asleep or awake; true while it walks to where its hour wants it */
+	bool TickDay(float Now);
 };

@@ -601,6 +601,15 @@ private:
 	bool bBlocking = false, bBlockKeyDown = false;
 	/** the block's held pose (a paused montage: stopping the slot did not blend it out; it is resumed, then stopped) */
 	TWeakObjectPtr<class UAnimMontage> BlockMontage;
+	/** her AnimBP's upper-body block layer (885's: a layered blend from spine_01 up over her locomotion, weighted by its float
+	 *  BlockAlpha): the shield raised while her legs walk (the user's of 2026-11-02); 0 to 1, eased; -1: her AnimBP has none */
+	float BlockLayerNow = 0.f, BlockLayerTarget = 0.f;
+	int32 BlockLayerKnown = -1;
+	bool HasBlockLayer();
+public:
+	/** the block layer's weight now (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") float GetBlockLayer() const { return BlockLayerNow; }
+private:
 	FName SlashWith;
 	int32 SlashCursor = 0;
 	float HasteUntil = -100.f, HasteShare = 0.f, SlashEvadeUntil = -100.f, SlashEvadeShare = 0.f, SlashShieldReadyAt = -100.f;

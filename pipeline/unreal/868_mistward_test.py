@@ -1231,6 +1231,8 @@ def step_menu():
         why = why or str(s.slate_mouse_button(mid(b), key("LeftMouseButton"), False)); yield from rwait(0.4)
         return why
     res = {"mouse_ui": s.mouse_ui, "cursor_shown": G["pc"].show_mouse_cursor, "buttons": sorted(buttons()), "refused": []}
+    # (its own music (the user's of 2026-11-02): playing, and not one of the dungeon's tracks (the generator's Music sets name them))
+    res["music"] = {"playing": s.is_menu_music_playing(), "name": str(s.get_menu_music_name())}
     seq = []
     for nm in ("Hero_2", "Next", "Prev", "Hero_0"):
         why = yield from click(nm)
@@ -1294,14 +1296,16 @@ def step_menu():
         res["cursor_after"] = G["pc"].show_mouse_cursor if G.get("pc") else None
     G.pop("travel_until", None)
     ok = (res["mouse_ui"] and res["cursor_shown"] and not res["refused"] and [x[1] for x in seq] == [2, 3, 2, 0] and all(x[3] for x in seq)
-          and res["opened_before"] == "" and res["opened_by_name_again"].endswith("mistward_castle?Hero=Warrior")
-          and (res.get("world_after") or "").endswith("mistward_castle") and res.get("hero_after") == "Rogue" and res.get("cursor_after") is False)
+          # (START opens the town since 2026-11-02 (881's target: Brokenspire, the castle's hub); the castle before it)
+          and res["opened_before"] == "" and (res["opened_by_name_again"].endswith("mistward_castle?Hero=Warrior") or res["opened_by_name_again"].endswith("brokenspire?Hero=Warrior"))
+          and ((res.get("world_after") or "").endswith("mistward_castle") or (res.get("world_after") or "").endswith("brokenspire")) and res.get("hero_after") == "Rogue" and res.get("cursor_after") is False)
     q = res["quit"]
     ok = ok and q["button"] and q.get("click", {}).get("asked") == 1 and not q["click"]["why"] and q["escape_twice"]["armed_after_one"] and q["escape_twice"]["asked"] == 1 \
         and q["escape_lapsed"]["asked"] == 0 and q["escape_lapsed"]["armed_again"]
     au = res["autoplay"]
     ok = ok and len(au["buttons"]) == 3 and au.get("labels") == ["AUTOPLAY  5 MIN", "AUTOPLAY  10 MIN", "AUTOPLAY  30 MIN", "AUTOPLAY  10 MIN"] \
-        and au.get("opened", "").endswith("mistward_castle?Hero=Warrior?Autoplay=600")
+        and (au.get("opened", "").endswith("mistward_castle?Hero=Warrior?Autoplay=600") or au.get("opened", "").endswith("brokenspire?Hero=Warrior?Autoplay=600"))
+    ok = ok and res["music"]["playing"] and res["music"]["name"] == "SW_Music_Menu"
     step_result("menu", ok, **res)
 
 # ================================================================================================ the third list (docs/improvements2.txt)
@@ -1648,6 +1652,17 @@ def step_block():
     if c.is_run_mode() != run0: g.slate_key(key("Gamepad_LeftTrigger"), True); yield from rwait(0.3); g.slate_key(key("Gamepad_LeftTrigger"), False); yield from rwait(0.3)
     res["pad_list"] = [str(k) for h in g.get_editor_property("heroes") if str(h.name) == "Warrior" for k in h.controls_pad]
     res["speed"] = {"normal": round(s0, 1), "blocking": round(s1, 1), "ratio": round(s1 / max(s0, 1), 3)}
+    # (blocking while she walks: her legs walk under the raised shield (the user's of 2026-11-02; the block layer over her
+    # locomotion): her feet's swing relative to her, and her shield hand still up, over 2 s of walking with LB held)
+    yield from wait(0.3)
+    g.slate_key(key("Gamepad_LeftShoulder"), True); yield from rwait(0.4)
+    feet = []; hands = []; t0 = now(); p0 = G["pawn"].get_actor_location()
+    while now() - t0 < 2.0:
+        G["pawn"].add_movement_input(G["pawn"].get_actor_forward_vector(), 1.0, False)
+        feet.append(G["pawn"].get_actor_transform().inverse_transform_location(body.get_socket_location("foot_l")).x); hands.append(hand()[1]); yield
+    g.slate_key(key("Gamepad_LeftShoulder"), False); yield from rwait(0.3)
+    res["walk_block"] = {"blocking": c.is_blocking(), "layer": round(c.get_block_layer(), 2), "foot_swing_cm": round(max(feet) - min(feet), 1) if feet else 0,
+                         "moved_cm": round((G["pawn"].get_actor_location() - p0).length(), 1), "hand_z_min": round(min(hands), 1) if hands else None}
     # (blocking when play restarts: the held pose let go (the PR review's find: the flag was cleared, the paused clip stayed))
     c.set_blocking(True); yield from wait(0.5)
     g.restart_play(0); yield from wait(1.2); refresh(); c = cb(); body = G["pawn"].get_editor_property("mesh")
@@ -1664,6 +1679,7 @@ def step_block():
           and res["hand_block"][1] > res["hand_rest"][1] + 15 and res["after_release"]["hand"][1] < res["hand_block"][1] - 10
           and res["lb_blocking"] and not res["lt_blocking"] and res["lt_run_switched"] and not res["mage_blocking"]
           and "LT|switch walk / run" in res["pad_list"] and "LB (hold)|block with the shield" in res["pad_list"]
+          and res["walk_block"]["foot_swing_cm"] > 20 and res["walk_block"]["moved_cm"] > 100 and (res["walk_block"]["hand_z_min"] or 0) > res["hand_rest"][1] + 10
           and not res["after_restart"]["blocking"] and res["after_restart"]["hand"][1] < res["hand_block"][1] - 10)
     step_result("block", ok, **res)
 

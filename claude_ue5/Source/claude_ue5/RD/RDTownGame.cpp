@@ -14,6 +14,8 @@
 #include "RD/RDMistward.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/PointLightComponent.h"
+#include "NiagaraComponent.h"
 #include "Animation/AnimSequenceBase.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -75,7 +77,11 @@ void ARDTownsfolk::Init(ARDDungeonGenerator* InGenerator, ARDSection* InSection,
 		C->SetLeaderPoseComponent(Body);
 	}
 	IdleAnim = D.Idle; WalkAnim = D.Walk;
-	Speed = D.WalkSpeed; ClipSpeed = FMath::Max(D.WalkClipSpeed, 10.f);
+	// (the walk clip's ground speed at this body's size: a child at 0.8 strides 0.8 as far. The clip plays at least 0.8 of its
+	// speed and the body moves exactly as far as its feet do: at the role's 120 cm/s every walker's clip ran at half speed
+	// (0.51) and its feet slid, and the children's legs looked still (the user's of 2026-11-02))
+	ClipSpeed = FMath::Max(D.WalkClipSpeed, 10.f) * FMath::Max(D.Scale, 0.3f);
+	Speed = FMath::Clamp(D.WalkSpeed, ClipSpeed * 0.8f, ClipSpeed * 1.2f);
 	bWalkClip = true; SetClip(false);
 	Body->SetPosition(R.FRandRange(0.f, 2.f));
 	NextTrip = R.FRandRange(2.f, 9.f);
@@ -87,7 +93,7 @@ void ARDTownsfolk::SetClip(bool bWalk)
 	bWalkClip = bWalk;
 	UAnimationAsset* A = bWalk && WalkAnim ? WalkAnim.Get() : IdleAnim.Get();
 	if (A) Body->PlayAnimation(A, true);
-	Body->SetPlayRate(bWalk && WalkAnim ? FMath::Clamp(Speed / ClipSpeed, 0.5f, 1.8f) : 1.f);
+	Body->SetPlayRate(bWalk && WalkAnim ? Speed / ClipSpeed : 1.f);
 }
 
 void ARDTownsfolk::FaceToward(const FVector& P, float Seconds)
@@ -118,6 +124,9 @@ void ARDTownsfolk::Tick(float Dt)
 	};
 	// (she spoke to it: it turns to her and stands)
 	if (Now < FaceUntil) { Turn(FaceAt - L, 240.f); SetClip(false); return; }
+	// (its day: home at evening, asleep at night; asleep, it stands where it is)
+	TickDay(Now);
+	if (bSleeping && Path.Num() == 0) { SetClip(false); return; }
 	if (Path.Num() > 0)
 	{
 		FVector D = Path[0] - L; D.Z = 0.f;
@@ -138,7 +147,8 @@ void ARDTownsfolk::Tick(float Dt)
 		SetClip(true);
 		return;
 	}
-	// standing: back to its own way of facing; now and then a walk within its round
+	// standing: back to its own way of facing; now and then a walk within its round (not while it is home for the evening)
+	if (bWentHome) return;
 	if (Wander <= 0.f || !Section)
 	{
 		if (FVector::Dist2D(L, Post) < 60.f) Turn(FRotator(0, HomeYaw, 0).Vector(), 90.f);
@@ -165,6 +175,33 @@ void ARDTownsfolk::Tick(float Dt)
 	P.RemoveAt(0);
 	for (FVector& Q : P) Q.Z = L.Z;
 	Path = P; ++Walks;
+}
+
+bool ARDTownsfolk::TickDay(float Now)
+{
+	bSleeping = false;
+	if (!Gen || !Gen->bDayNight || HomeBld < 0 || !Section) return false;
+	const float H = Gen->GetTownHour();
+	const bool bNight = H >= 22.f || H < 6.f;
+	const FVector L = GetActorLocation();
+	if (bResident_)
+	{
+		// (a resident: home from 19 o'clock to half past six; the way there or back once, when its hour turns)
+		const bool bWant = H >= 19.f || H < 6.5f;
+		if (bWant != bWentHome)
+		{
+			bWentHome = bWant;
+			TArray<FVector> P = Section->FindPathWorld(L, bWant ? HomeIn : Post);
+			if (P.Num() >= 2) { P.RemoveAt(0); for (FVector& Q : P) Q.Z = L.Z; Path = P; ++Walks; }
+			else if (bWant) SetActorLocation(FVector(HomeIn.X, HomeIn.Y, L.Z));       // (no way found: it is home all the same)
+			NextTrip = Now + R.FRandRange(5.f, 12.f);
+		}
+		bSleeping = bNight && bWentHome && Path.Num() == 0 && Section->TownBuildingAt(L) == HomeBld;
+		return Path.Num() > 0;
+	}
+	// (a keeper, a soldier, the innkeeper: asleep at night where they work)
+	bSleeping = bNight && Section->TownBuildingAt(L) == HomeBld;
+	return false;
 }
 
 // ================================================================================================ her combat component
@@ -517,6 +554,14 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		ARDTownsfolk* T = GetWorld()->SpawnActor<ARDTownsfolk>(ARDTownsfolk::StaticClass(), FTransform(FRotator(0, Po.Yaw, 0), At + FVector(0, 0, 92.f)), Sp);
 		if (!T) continue;
 		T->Init(this, S, D, At + FVector(0, 0, 92.f), Po.Yaw, Po.Wander, HashCombine((uint32)StartSeed, (uint32)K * 7919u));
+		// (its building: a keeper's where it works (its post inside); a resident's home, a step inside its door)
+		if (S->TownBlds.IsValidIndex(Po.Bld))
+		{
+			const ARDSection::FTownBld& Hb = S->TownBlds[Po.Bld];
+			const bool bResident = Po.Role == ERDTownRole::Townsfolk;
+			const FVector Out = FVector(RDTGDir4[Hb.DoorSide].X, RDTGDir4[Hb.DoorSide].Y, 0.f);
+			T->SetHome(Po.Bld, bResident ? S->LocalToWorld(Hb.DoorTile) - Out * 230.f + FVector(0, 0, 92.f) : At + FVector(0, 0, 92.f), bResident);
+		}
 		TownPeople.Add(T);
 	}
 	UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN %d townspeople at %d posts"), TownPeople.Num(), S->TownPosts.Num());
@@ -572,7 +617,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) TickDayNight(Dt);
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -610,6 +655,78 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 	if (bTown && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
 		EnterCastle();
+}
+
+// ================================================================================================ the lit buildings
+void ARDDungeonGenerator::TickTownLights(float Dt)
+{
+	ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (!S || S->TownBlds.Num() == 0) return;
+	TownLightsT -= Dt;
+	if (TownLightsFor.Get() == S && TownLightsT > 0.f) return;
+	TownLightsT = 1.f;
+	if (TownLightsFor.Get() != S)
+	{
+		// (each light and flame inside a building's rectangle, 60 cm in from its edges' outsides: its torches' (a torch's light
+		// stands 25 cm off the wall, its flame on the sconce); the castle's and what stands outdoors are left alone)
+		TownBldLights.Reset(); TownBldLit.Reset(); TownBldPeople.Reset();
+		TownLightsFor = S;
+		const float M = TileSize;
+		TInlineComponentArray<USceneComponent*> Cs(S);
+		for (USceneComponent* C : Cs)
+		{
+			if (!C || !(C->IsA<UPointLightComponent>() || C->IsA<UNiagaraComponent>())) continue;
+			const FVector L = C->GetComponentLocation();
+			for (int32 BI = 0; BI < S->TownBlds.Num(); ++BI)
+			{
+				if (BI == S->CastleBld) continue;
+				const ARDSection::FTownBld& B = S->TownBlds[BI];
+				const FVector A = S->LocalToWorld(B.Min) - FVector(M * 0.5f - 60.f, M * 0.5f - 60.f, 0), Bm = S->LocalToWorld(B.Max - FIntPoint(1, 1)) + FVector(M * 0.5f - 60.f, M * 0.5f - 60.f, 0);
+				if (L.X >= A.X && L.X <= Bm.X && L.Y >= A.Y && L.Y <= Bm.Y) { TownBldLights.FindOrAdd(BI).Add(C); break; }
+			}
+		}
+	}
+	TMap<int32, FIntPoint> People;
+	for (const ARDTownsfolk* T : TownPeople)
+	{
+		if (!IsValid(T)) continue;
+		const int32 BI = S->TownBuildingAt(T->GetActorLocation());
+		if (BI < 0) continue;
+		FIntPoint& Pp = People.FindOrAdd(BI);
+		if (T->IsSleeping()) ++Pp.Y; else ++Pp.X;
+	}
+	TownBldPeople = People;
+	for (auto& KV : TownBldLights)
+	{
+		const FIntPoint* Pp = People.Find(KV.Key);
+		const bool bLit = !bDayNight || (Pp && Pp->X > 0);
+		if (const bool* Was = TownBldLit.Find(KV.Key); Was && *Was == bLit) continue;
+		TownBldLit.Add(KV.Key, bLit);
+		for (const TWeakObjectPtr<USceneComponent>& W : KV.Value)
+		{
+			USceneComponent* C = W.Get();
+			if (!C) continue;
+			C->SetVisibility(bLit);
+			if (UNiagaraComponent* Nc = Cast<UNiagaraComponent>(C)) { if (bLit) Nc->Activate(true); else Nc->DeactivateImmediate(); }
+		}
+	}
+}
+
+TArray<FString> ARDDungeonGenerator::GetTownLightLines() const
+{
+	TArray<FString> Out;
+	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+	if (!S) return Out;
+	for (const auto& KV : TownBldLights)
+	{
+		const bool* Lit = TownBldLit.Find(KV.Key);
+		const FIntPoint* Pp = TownBldPeople.Find(KV.Key);
+		int32 On = 0;
+		for (const TWeakObjectPtr<USceneComponent>& W : KV.Value) if (W.IsValid() && W->IsVisible()) ++On;
+		Out.Add(FString::Printf(TEXT("%d|%s|%d|%d|%d|%d|%d"), KV.Key, *RDTownKindName(S->TownBlds.IsValidIndex(KV.Key) ? S->TownBlds[KV.Key].Kind : 0), Lit && *Lit ? 1 : 0,
+			KV.Value.Num(), Pp ? Pp->X : 0, Pp ? Pp->Y : 0, On));
+	}
+	return Out;
 }
 
 // ================================================================================================ the showcase tour
@@ -1277,6 +1394,13 @@ void ARDDungeonGenerator::BuildTownLines()
 		if (TownBody.IsEmpty()) TownBody = TEXT("The runes wake under your hand. Any circle you find beyond the walls will answer this one, and this one will take you there.");
 		if (GI) for (const FName& C : GI->CirclesFound) Add(C == FName(TEXT("Brokenspire")) ? FName(TEXT("here")) : FName(TEXT("travel")), C.ToString(), C == FName(TEXT("Brokenspire")) ? TEXT("YOU ARE HERE") : TEXT("TRAVEL"),
 			C == FName(TEXT("Brokenspire")) ? TEXT("This circle") : TEXT("Step through"), C != FName(TEXT("Brokenspire")), C.ToString());
+		// (Mistward Castle: once the Mistward Hall's guards are all dead, or she has walked through the Mistgate once, the circle
+		// takes her there (the user's of 2026-11-02: she had cleared the hall and the circle had no way to the dungeon))
+		const bool bHallClear = TownGuardsPlanned > 0 && GetTownGuards().Num() == 0;
+		const bool bBeenIn = GI && GI->GetCounter(TEXT("enter")) > 0;
+		Add(TEXT("castle"), TEXT("Mistward Castle"), bHallClear || bBeenIn ? TEXT("TRAVEL") : TEXT("SEALED"),
+			bHallClear || bBeenIn ? TEXT("The runes answer the Mistgate: step through into the castle's great hall.") : TEXT("The Mistward Hall's guards still hold the Mistgate: clear the hall, or walk through it once."),
+			bHallClear || bBeenIn, TEXT("castle"));
 		Add(TEXT("none"), TEXT("No other circle found yet"), TEXT("LATER"), TEXT("They lie in the wilderness beyond the gate, which is not open yet."), false);
 		Add(TEXT("bye"), TEXT("Step away"), FString(), FString());
 	}
@@ -1300,6 +1424,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("heal")) bOk = TownHeal();
 	else if (E.Act == TEXT("repair")) bOk = TownRepair(E.Arg);
 	else if (E.Act == TEXT("anvil")) { CloseTownPanel(); if (PlayerCombat) PlayerCombat->SetCraftingOpen(true); return true; }
+	else if (E.Act == TEXT("castle")) { CloseTownPanel(); TownCount(TEXT("circle_castle")); return EnterCastle(); }
 	else if (E.Act == TEXT("bless")) bOk = TownBless();
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);

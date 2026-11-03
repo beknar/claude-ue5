@@ -235,8 +235,27 @@ public:
 	/** what stands outside: its kind (RDTownSpots), where, its yaw (and the building it belongs to, -1) */
 	struct FTownSpot { uint8 Kind = 0; FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; };
 	TArray<FTownSpot> TownSpots;
-	/** the streets and the square (local tile rectangles, max exclusive), what is cobbled */
+	/** the straight cobbled roads, the forecourt and the stair turret's path (local tile rectangles, max exclusive) */
 	TArray<FIntRect> TownRoads;
+	/** the winding earth roads (since 2026-11-02): their middles (world XY) and half their width (cm) */
+	struct FTownPath { TArray<FVector2D> Pts; float HalfWidth = 300.f; };
+	TArray<FTownPath> TownPaths;
+	/** the wall's outline (world XY, in order round the town; since 2026-11-02 it is irregular) */
+	TArray<FVector2D> TownBorder;
+	/** the watchtowers' doors from the town (x, y: the door's middle; z: the spiral's start angle, world yaw) and their middles */
+	TArray<FVector> TownTowerDoors, TownTowerMids;
+	/** a tile's road: 0 none, 1 cobbles, 2 an earth road, 3 the lane inside the wall */
+	TArray<uint8> TownRoadMask;
+	bool InsideTownBorder(const FVector2D& World) const;
+	float TownBorderDist(const FVector2D& World) const;
+	/** a trade's sign's words, painted on both faces of its board (SignT: the sign piece's transform) */
+	void AddSignText(const FTransform& SignT, const FString& Text);
+	/** a hidden box over a piece's whole mesh bounds as placed (a window's sill its own collision leaves out) */
+	void AddMeshBoundsCollider(FName Piece, const FTransform& T);
+	/** each earth road's wander (tests): the farthest its middle goes from the straight line between its ends, m */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<float> GetTownPathWander() const;
+	/** the town's outline and earth roads for tests: "border|x|y" a corner, "path|<n points>|<half width>", "roads|<cobble tiles>|<earth tiles>|<lane tiles>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownShapeLines() const;
 	FIntRect TownSquare;
 	/** inside the town wall (local tiles, max exclusive) */
 	FIntRect TownInner;
