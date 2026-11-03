@@ -1270,6 +1270,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownSatelliteSource = 1;
 	/** how much brighter the map draws the picture (an added pass: the canvas clamps a tint at 1) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownSatelliteBrighten = 0.25f;
+	/** Lumen's light in the lit picture (never for the base colour: it has no light; a first frame has no Lumen history) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bTownSatelliteLumen = true;
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TObjectPtr<class UTextureRenderTarget2D> TownSatellitePicture;
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TObjectPtr<class USceneCaptureComponent2D> TownSatCap;
@@ -1281,10 +1282,15 @@ public:
 	float TownSatWait = 0.f, TownSatHourWas = 0.f;
 	double TownSatMs = 0.0;
 	TArray<TPair<TWeakObjectPtr<class UInstancedStaticMeshComponent>, FIntPoint>> TownSatCulls;
+	int32 TownSatHidden = 0;
 	void TickTownSatellite(float Dt);
+	/** the hour and the plants' fading held for a capture under way put back (a capture begun again or a town rebuilt) */
+	void ReleaseTownSatHold();
+	/** the map draws the picture: one taken of this town and finished (the painted map while a new one is taken) */
+	bool HasTownSatellite() const { return TownSatellitePicture && TownSatCaptures > 0 && TownSatStep >= 3; }
 	/** the picture taken again (tests, a reel): from the next frame on */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void RecaptureTownSatellite() { TownSatStep = 0; TownSatWait = TownSatelliteDelay; }
-	/** "<step: 3 done>|<size px>|<middle x>|<middle y>|<half width cm>|<capture ms>|<captures>" (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void RecaptureTownSatellite() { ReleaseTownSatHold(); TownSatStep = 0; TownSatWait = TownSatelliteDelay; }
+	/** "<step: 3 done>|<size px>|<middle x>|<middle y>|<half width cm>|<capture ms>|<captures>|<components hidden>|<mips>|<camera z>|<culls held>" (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetTownSatelliteState() const;
 	/** the town map's input, a frame (TickTown's part; tests call it with keys sent) */
 	void TickTownMapInput(APlayerController* PC, float Dt);

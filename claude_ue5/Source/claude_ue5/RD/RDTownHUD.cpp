@@ -264,7 +264,7 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 {
 	// (the painted map in colour, the Fairhill reference's look (the user's of 2026-11-02), when its pictures are there)
-	if ((Gen->TownSatellitePicture && Gen->TownSatCaptures > 0) || (UI.Has(TEXT("mapc_grass")) && UI.Has(TEXT("mapc_parchment")))) { DrawTownMapColour(Sc, L, Yaw); return; }
+	if (Gen->HasTownSatellite() || (UI.Has(TEXT("mapc_grass")) && UI.Has(TEXT("mapc_parchment")))) { DrawTownMapColour(Sc, L, Yaw); return; }
 	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
 	const ARDSection* S = Gen->GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
@@ -450,7 +450,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// see from a satellite or google earth, with labels on important or functional buildings and quest markers on NPCs"): the
 	// town's own picture from above (the generator's TownSatellitePicture, RDTownSat.cpp) on a dark sheet with a gold rule, under
 	// the labels and the seals; the painted map until it is taken)
-	const bool bSat = Gen->TownSatellitePicture && Gen->TownSatCaptures > 0;
+	const bool bSat = Gen->HasTownSatellite();
 	if (bSat)
 	{
 		Box(A - FVector2D(Ms * 0.03f), B + FVector2D(Ms * 0.03f), FLinearColor(0.035f, 0.035f, 0.04f, 0.97f));

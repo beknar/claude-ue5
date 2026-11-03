@@ -578,26 +578,32 @@ def step_map():
 def step_satellite():
     """the map from above (the user's of 2026-11-03: "a semi-realistic top down representation of the terrain features, much
     like what you would see from a satellite or google earth, with labels on important or functional buildings and quest
-    markers on NPCs that have them"): the picture taken (4096 px square over the town), not black or washed out and not flat
-    (its parts differ), no townsperson in it; M draws it with every trade's label and a seal for every quest giver; the
-    picture again after the town is rebuilt; pictures of the map at 1x and 3x and the raw picture"""
+    markers on NPCs that have them"): the picture taken (4096 px square over the town, with mips), not black or washed out,
+    with structure (its neighbouring pixels' differences: roofs, streets and their edges, where a flat picture has none);
+    the people, animals, guards and her on the capture's hidden list; M draws it with every trade's label and a seal for every
+    quest giver; taken again: the old picture not drawn meanwhile, begun again halfway and the plants' fading still put back;
+    pictures of the map at 1x and 3x and the raw picture"""
     g = G["gen"]; res = {}; quiet(True)
+    def sat():
+        st = str(g.get_town_satellite_state()).split("|")
+        return {"step": int(st[0]), "px": int(st[1]), "middle": [float(st[2]), float(st[3])], "half_m": round(float(st[4]) / 100, 1), "capture_ms": float(st[5]),
+                "captures": int(st[6]), "hidden": int(st[7]), "mips": int(st[8]), "camera_z": float(st[9]), "culls_held": int(st[10])}
     t0 = time.time()
-    while time.time() - t0 < 40 and not str(g.get_town_satellite_state()).startswith("3|"): yield
-    st = str(g.get_town_satellite_state()).split("|")
-    res["state"] = {"step": int(st[0]), "px": int(st[1]), "middle": [float(st[2]), float(st[3])], "half_m": round(float(st[4]) / 100, 1), "capture_ms": float(st[5]), "captures": int(st[6])}
+    while time.time() - t0 < 40 and sat()["step"] != 3: yield
+    res["state"] = sat()
+    res["folk"] = len(folk())
     rt = g.get_editor_property("town_satellite_picture")
     raw = f"bs_{TAG}_satellite_raw.png"
-    lum = {}
+    lum = {}; edge = {}
     if rt:
         p = os.path.join(SHOTS, raw)
         if os.path.exists(p): os.remove(p)
         unreal.RenderingLibrary.export_render_target(G["w"], rt, SHOTS, raw)
         yield from rwait(1.5)
         if os.path.exists(p):
-            for nm, bx in (("all", (0.0, 0.0, 1.0, 1.0)), ("middle", (0.4, 0.4, 0.6, 0.6)), ("north", (0.3, 0.05, 0.7, 0.25)), ("south", (0.3, 0.75, 0.7, 0.95)), ("west", (0.05, 0.3, 0.25, 0.7))):
-                lum[nm] = png_luma(p, bx)
-    res["luma"] = lum
+            m = png_measure(p, {"all": (0.0, 0.0, 1.0, 1.0), "middle": (0.4, 0.4, 0.6, 0.6), "north": (0.3, 0.05, 0.7, 0.25), "south": (0.3, 0.75, 0.7, 0.95), "west": (0.05, 0.3, 0.25, 0.7)})
+            lum = {k: v[0] for k, v in m.items()}; edge = {k: v[1] for k, v in m.items()}
+    res["luma"] = lum; res["edges"] = edge
     # (the map: its labels and seals over the picture)
     put(place("square"), yaw=0.0); yield from wait(0.5)
     yield from press("M"); yield from wait(0.8)
@@ -612,12 +618,37 @@ def step_satellite():
     for _ in range(5): yield from press("MouseScrollUp", 0.05)
     yield from wait(0.5); shot("map_satellite3"); yield from rwait(1.5)
     yield from press("M"); yield from wait(0.3)
+    # (taken again: held at its first step (the switch off), the map is the painted one, not the old picture)
+    def fading():
+        return sum(1 for c in section().get_components_by_class(unreal.InstancedStaticMeshComponent) if c.get_editor_property("instance_end_cull_distance") > 0)
+    res["fading_before"] = fading()
+    c0 = sat()["captures"]
+    g.set_editor_property("town_satellite", False); g.recapture_town_satellite(); yield from wait(0.3)
+    yield from press("M"); yield from wait(0.5)
+    drawn2 = [str(a) for a in G["pc"].get_hud().get_art_drawn()]
+    res["retaking_drawn_satellite"] = "town_satellite" in drawn2
+    yield from press("M"); yield from wait(0.3)
+    g.set_editor_property("town_satellite", True)
+    # (begun again while the plants' fading is held off (step 1 or 2), then finished)
+    res["restarted_at_step"] = None; t0 = time.time()
+    while time.time() - t0 < 10:
+        s = sat()["step"]
+        if s in (1, 2): res["restarted_at_step"] = s; g.recapture_town_satellite(); break
+        yield
+    t0 = time.time()
+    while time.time() - t0 < 15 and not (sat()["step"] == 3 and sat()["captures"] > c0): yield
+    res["again"] = sat(); res["fading_after"] = fading()
     quiet(False)
     givers = sorted(set(str(q.giver) for q in g.get_editor_property("quests")))
     vals = [v for v in lum.values() if v is not None]
-    ok = (res["state"]["step"] == 3 and res["state"]["px"] == 4096 and len(vals) == 5 and 35 < lum["all"] < 200 and max(vals) - min(vals) > 3.0
-          and res["drawn_satellite"] and not res["painted_drawn"] and not res["labels_missing"] and all(f"seal|{gv}" in res["seals"] for gv in givers))
+    st = res["state"]
+    ok = (st["step"] == 3 and st["px"] == 4096 and st["mips"] == 1 and len(vals) == 5 and 35 < lum["all"] < 200 and edge.get("middle", 0) > SAT_EDGES and edge.get("all", 0) > SAT_EDGES
+          and st["hidden"] >= res["folk"] > 0
+          and res["drawn_satellite"] and not res["painted_drawn"] and not res["labels_missing"] and all(f"seal|{gv}" in res["seals"] for gv in givers)
+          and not res["retaking_drawn_satellite"] and res["restarted_at_step"] in (1, 2) and res["again"]["step"] == 3 and res["again"]["captures"] > c0
+          and res["again"]["culls_held"] == 0 and res["fading_before"] > 0 and res["fading_after"] == res["fading_before"])
     step_result("satellite", ok, **res)
+SAT_EDGES = 4.0      # (the mean brightness step between neighbouring pixels a picture of the town has at least; a flat one 0)
 
 # ------------------------------------------------------------------------------------------------ the townspeople
 def step_folk():
@@ -722,6 +753,43 @@ def png_luma(path, box=(0.0, 0.0, 1.0, 1.0)):
                 i = x * bpp; tot += 0.2126 * line[i] + 0.7152 * line[i + 1] + 0.0722 * line[i + 2]; n += 1
         prev = line
     return round(tot / max(n, 1), 2)
+def png_measure(path, boxes):
+    """for each named box (shares of the picture) of a PNG: (its mean brightness 0-255, the mean brightness step between
+    pixels two apart along a row: 0 for a flat picture), from one read of the file (every other pixel of every other row)"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos < len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    px = {k: (int(b[0] * w), int(b[1] * h), int(b[2] * w), int(b[3] * h)) for k, b in boxes.items()}
+    acc = {k: [0.0, 0, 0.0, 0] for k in boxes}
+    prev = bytearray(stride)
+    for y in range(h):
+        f = raw[y * (stride + 1)]; line = bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        if f == 1:
+            for i in range(bpp, stride): line[i] = (line[i] + line[i - bpp]) & 255
+        elif f == 2:
+            for i in range(stride): line[i] = (line[i] + prev[i]) & 255
+        elif f == 3:
+            for i in range(stride): line[i] = (line[i] + (((line[i - bpp] if i >= bpp else 0) + prev[i]) >> 1)) & 255
+        elif f == 4:
+            for i in range(stride):
+                a = line[i - bpp] if i >= bpp else 0; b = prev[i]; c_ = prev[i - bpp] if i >= bpp else 0
+                p = a + b - c_; pa, pb, pc = abs(p - a), abs(p - b), abs(p - c_)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c_)) & 255
+        if y % 2 == 0:
+            for k, (x0, y0, x1, y1) in px.items():
+                if not (y0 <= y < y1): continue
+                a_ = acc[k]; last = None
+                for x in range(x0, x1, 2):
+                    i = x * bpp; l = 0.2126 * line[i] + 0.7152 * line[i + 1] + 0.0722 * line[i + 2]
+                    a_[0] += l; a_[1] += 1
+                    if last is not None: a_[2] += abs(l - last); a_[3] += 1
+                    last = l
+        prev = line
+    return {k: (round(a[0] / max(a[1], 1), 2), round(a[2] / max(a[3], 1), 2)) for k, a in acc.items()}
 def shot_luma(name, box=(0.0, 0.0, 1.0, 0.85)):
     """a small picture of the game now and its brightness (none: the picture did not come)"""
     p = os.path.join(SHOTS, f"bs_{TAG}_{name}.png")

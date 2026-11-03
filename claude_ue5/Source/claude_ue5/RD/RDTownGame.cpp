@@ -655,7 +655,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 	if (URDGameInstance* GI = URDGameInstance::Of(this)) { GI->TownSeed = Seed != 0 ? Seed : (int32)(FDateTime::Now().GetTicks() % 2000000000) + 1; GI->TownLooted.Reset(); GI->GuardsDead.Reset(); StartSeed = GI->TownSeed; }
 	else if (Seed != 0) StartSeed = Seed;
 	SpawnSection(FIntPoint::ZeroValue, false);
-	TownSatStep = 0; TownSatWait = 0.f;          // (the new town's picture from above)
+	ReleaseTownSatHold(); TownSatStep = 0; TownSatWait = 0.f;          // (the new town's picture from above; the old one not drawn meanwhile)
 	AfterTownBuilt();
 	UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN rebuilt from seed %d"), StartSeed);
 }
