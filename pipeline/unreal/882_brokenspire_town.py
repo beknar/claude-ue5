@@ -115,6 +115,9 @@ WS = CK + "Walls_Stone/"
 piece("CityWall", WS + "SM_Castle_Stone_Wall_01a_NN", front="+y")
 piece("CityWallSlit", WS + "SM_Castle_Stone_Wall_02h_NN", front="+y")
 piece("CityWallWin", WS + "SM_Castle_Stone_Wall_02f_NN", front="+y")
+# (the watchtowers' door from the town (2026-11-02): 02a's arched doorway, 112 cm wide and 240 high in its middle; drawn without
+# its own collision, which closes the doorway's foot: RDTownPlan.cpp puts boxes beside and over the opening)
+piece("CityWallDoor", WS + "SM_Castle_Stone_Wall_02a_NN", front="+y", collision=False)
 piece("Parapet", WS + "SM_Castle_Stone_Parapet_01a_NN", front="+y", collision=False)
 # the castle's outside (RDTownPlan.cpp's CastleOuterFace / CastleTowersBuild; the user's of 2026-11-02: medieval walls with
 # windows, arrow slits, towers and a way up to the battlements instead of the dungeon's blind arches)
@@ -139,8 +142,33 @@ piece("CastleRoof", CK + "Walls_Stone/SM_Stone_Floor_01a_NN", front="+x", scale=
 # ---------------------------------------------------------------- the square, the circle, the graveyard, the yards
 piece("Well", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Stone", front="+x", mode="raw", size=(180, 180, 280))
 piece("WellTop", VC + "SM_OldWell/Meshes/FBX/SM_OldWell_SM_OldWell_Wood", front="+x", mode="raw", collision=False)
+# (SM_WantedBoard is the board's plank face, not papers: the pack's board has none. Turned +y with the frame's own Adjust its
+# planks and the frame's slats interleaved; as it was, -y and raw, the board looks whole)
 piece("Board", VC + "SM_WantedBoard/Meshes/FBX/SM_WantedBoard_Wood", front="-y")
 piece("BoardNotes", VC + "SM_WantedBoard/Meshes/FBX/SM_WantedBoard", front="-y", mode="raw", collision=False)
+# (the board's papers themselves: that "notes" mesh is the board's plank face, with nothing on it. A bounty notice, drawn by
+# blender_numpy/bs_notice.py and imported by 883 (T_BS_mapc_notice), on a plane stood up facing +X, 32 x 42 cm, in a
+# two-sided material made here; RDTownPlan.cpp pins a notice for each bounty)
+NT = unreal.load_asset("/Game/RandomDungeon/UI/Brokenspire/T_BS_mapc_notice")
+if NT:
+    MP = "/Game/RandomDungeon/Materials/M_BS_Notice"
+    mat_n = unreal.load_asset(MP)
+    if not mat_n:
+        mat_n = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_BS_Notice", "/Game/RandomDungeon/Materials", unreal.Material, unreal.MaterialFactoryNew())
+        MEL = unreal.MaterialEditingLibrary
+        ts = MEL.create_material_expression(mat_n, unreal.MaterialExpressionTextureSample, -400, 0); ts.texture = NT
+        MEL.connect_material_property(ts, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
+        rc = MEL.create_material_expression(mat_n, unreal.MaterialExpressionConstant, -400, 250); rc.r = 0.85
+        MEL.connect_material_property(rc, "", unreal.MaterialProperty.MP_ROUGHNESS)
+        mat_n.set_editor_property("two_sided", True); mat_n.set_editor_property("used_with_instanced_static_meshes", True)
+        MEL.recompile_material(mat_n); eal.save_loaded_asset(mat_n, False)
+    pl = load("/Engine/BasicShapes/Plane")
+    if pl:
+        p = unreal.RDPiece(); p.mesh = pl; p.collision = False; p.material = mat_n
+        # (the plane lies in XY facing +Z: pitched -90 it faces +X, its X the notice's height)
+        p.adjust = unreal.Transform(V(0, 0, 0), unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0), V(0.42, 0.32, 1.0)); p.size = V(1, 32, 42)
+        P["Town.Notice"] = p
+else: print("  TOWN no notice texture yet (bs_notice.py, then 883, then 882 again)")
 for i in (1, 2, 3):
     piece(f"Stall{i}", DK + "Props/Market/SM_Market_Stand_01", front="-y", mode="raw", actor=eal.load_blueprint_class(f"/Game/Hivemind/Medieval_Docks/Blueprints/BP_MarketStand_0{i}"))
 piece("Lamp", WC + "SM_FireBasket/Meshes/FBX/SM_FireBasket", front="+x")
@@ -176,6 +204,36 @@ piece("Sign", DK + "Props/SM_TavernSign_01", front="+x", mode="raw", collision=F
 piece("Planks", SH + "SM_Wooden_Planks_B", front="+x", scale=0.6, collision=False)
 beam = find("/Game/CastleofEternalMist/Meshes", "beam", "dmg")
 if beam: piece("CharredBeam", beam, front="+x", collision=False, material=BURNT)
+# ---------------------------------------------------------------- the town's life (the user's third list of 2026-11-02)
+# (sizes measured: the plantation fence 318 x 18 x 128 cm, lowered to 77; the Viking wood fence 105 long and high; the trough
+# 150 x 45 x 40; the furniture kit's hay pile 236 x 167 x 148, made 0.6; the tripod 107 x 104 x 159 over a 58 cm cauldron;
+# Hive Sherwood's campfire 101 x 61 (the square's Firepit is a 1.16 m fire stand); a fence post 173 tall, cut to 95 for the
+# spit's ends; the crops: wild carrot 80 x 100 (0.55), wheat 145 x 151 (0.45), pumpkin 30 (1.3), sunflower 161 tall, a
+# flower clump 110 x 65 (0.5), a ground plant 180 x 29 (0.3); the short grass Hive Sherwood's wild grass, 140 x 56, 150 x 24,
+# 135 x 18; the small bushes the lake village's 2.7 m bushes made 0.4 and the windmill's 1.2 m one)
+GRASS_CULL = 4500.0
+p = piece("GardenFence", VC + "SM_PlantationFence/Meshes/FBX/SM_PlantationFence", front="+y", scale=(1, 1, 0.6))
+for n, m, sc, cull in (("Crop1", "/Game/Medieval_Castle/Scanned_Foliage/Foliage/WildCarot/Meshes/SM_WildCarrot_M_01", 0.55, 6000.0),
+                       ("Crop2", "/Game/Medieval_Lake_Village/Meshs/Foliage/SM_WheatGrass01", 0.45, 6000.0),
+                       ("Crop3", "/Game/Hivemind/Medieval_Docks/Static_Meshes/Props/Fruit/SM_Pumpkin", 1.3, 6000.0),
+                       ("Crop4", "/Game/BoneTemple/Meshes/SM_Sunflower01_Var01", 1.0, 8000.0),
+                       ("Crop5", "/Game/Old_Windmill/Meshes/Flower/SM_flower_clump_01", 0.5, 6000.0),
+                       ("Crop6", "/Game/Old_Windmill/Meshes/Vegetation/SM_plant_ground", 0.3, 6000.0),
+                       ("GrassShort1", SH + "SM_WildGrass_S_01", 0.8, GRASS_CULL), ("GrassShort2", SH + "SM_WildGrass_S_02", 1.0, GRASS_CULL),
+                       ("GrassShort3", SH + "SM_WildGrass_S_03", 1.0, GRASS_CULL), ("GrassShort4", SH + "SM_WildGrass_S_02", 0.8, GRASS_CULL),
+                       ("BushSmall1", "/Game/Medieval_Lake_Village/Meshs/SM_Bush01", 0.4, 9000.0), ("BushSmall2", "/Game/Medieval_Lake_Village/Meshs/SM_Bush02", 0.38, 9000.0),
+                       ("BushSmall3", "/Game/Medieval_Lake_Village/Meshs/SM_Bush03", 0.42, 9000.0), ("BushSmall4", "/Game/Old_Windmill/Meshes/Vegetation/SM_bush", 1.0, 9000.0),
+                       ("Flowers1", "/Game/Flower_meadows/meshes/Grass/SM_flower_01", 0.9, 5000.0), ("Flowers2", "/Game/Old_Windmill/Meshes/Flower/SM_flower_clump_02", 0.45, 5000.0)):
+    p = piece(n, m, front="+x", mode="raw", scale=sc, collision=False)
+    if p: p.cull_distance = cull
+piece("PenFence", VK + "ModularBuildings/ModularSet/SM_WoodFence_01a", front="+y")
+piece("Trough", "/Game/Castle/Furniture/Kit/SM_Kit_Trough", front="+x")
+piece("HayPile", "/Game/Castle/Furniture/Kit/SM_Kit_HayPile", front="+x", scale=0.6)
+piece("Tripod", "/Game/Castle/Furniture/Kit/SM_Kit_Tripod", front="+x", collision=False)
+piece("Pot", "/Game/Castle/Furniture/Kit/SM_Kit_Cauldron", front="+x")
+piece("Firewood", "/Game/Castle/Furniture/Kit/SM_Kit_Firewood", front="+x")
+piece("Campfire", SH + "SM_campfire", front="+x", collision=False)
+piece("SpitPost", "/Game/ModularWoodenBuildings/StaticMeshes/WoodenShacks/Fence/SM_FencePost_01", front="+x", scale=(1, 1, 0.55))
 # ---------------------------------------------------------------- the castle's Mistgate arch, the storehouse's chest
 w = ues.get_editor_world()
 if not w.get_path_name().startswith(MAP + "."): les.load_level(MAP)
@@ -207,6 +265,15 @@ def pack_clips(pack, ue4):
             n = unreal.AnimationLibrary.get_num_frames(fwd)
             d = unreal.AnimationLibrary.get_bone_pose_for_frame(fwd, "root", n - 1, False).translation - unreal.AnimationLibrary.get_bone_pose_for_frame(fwd, "root", 0, False).translation
             if d.length() > 50: speed = d.length() / fwd.get_play_length()
+            # (the walk: the pack's forward walk with its root held in place, so its feet step back under her as she moves; the
+            # pack's MM_Walk_InPlace moves no foot forward or back at all (measured: 0.0 cm, 9 cm up): the townsfolk marched on
+            # the spot while they slid (the user's of 2026-11-02: "the children NPCs' legs do not move when they walk"))
+            dst = f"/Game/RandomDungeon/Anims/Town/AS_{pack}_WalkLocked"
+            if not eal.does_asset_exist(dst): eal.duplicate_asset(fwd.get_path_name().split(".")[0], dst)
+            wl = unreal.load_asset(dst)
+            if wl:
+                wl.set_editor_property("force_root_lock", True); wl.set_editor_property("enable_root_motion", False)
+                eal.save_loaded_asset(wl, False); walk = wl
         clips[key] = (idle, walk, speed)
     return clips[key]
 # (the drunk's clips are on Drunk_Man_Animations' mannequin: the NPC pack's UE4 skeleton takes them as compatible)
@@ -228,7 +295,17 @@ for t in D["townsfolk"]:
     if t.get("walk"): walk = unreal.load_asset(t["walk"])
     if not (mesh and idle):
         print("  MISSING townsperson", t["name"], t["mesh"], "mesh" if not mesh else "idle"); continue
+    # (the NPC pack's _Full_02 bodies come without a head (the user's of 2026-11-02: Simple Tam, the innkeeper, the priest and
+    # the drunk had none): its Separate folder's head, hair, beard and moustache go on as parts, following the body)
+    parts = []
+    mn = mesh.get_name()
+    if "NPC_Characters_Pack" in mesh.get_path_name() and "_Full_02" in mn:
+        base = mesh.get_path_name().rsplit("/Full/", 1)[0] + "/Separate/" + mn.split("_Full_02")[0]
+        for part in ("_Head", "_Hair", "_Beard", "_Mustache"):
+            if eal.does_asset_exist(base + part): parts.append(unreal.load_asset(base + part))
+        print("  TOWN parts for", t["name"], mn, [p.get_name() for p in parts])
     d = unreal.RDTownsfolkDef()
+    d.set_editor_property("parts", parts)
     for k, v in (("name", t["name"]), ("role", roles[t["role"]]), ("title", t["title"]), ("calling", t.get("calling", "")), ("mesh", mesh), ("idle", idle), ("walk", walk),
                  ("walk_clip_speed", speed if not t.get("walk") else 120.0), ("walk_speed", 95.0 if t["role"] in ("Drunk", "Refugee", "Mourner") else 120.0),
                  ("scale", float(t.get("scale", 1.0))), ("mesh_yaw", -90.0), ("mesh_z", 0.0), ("count", int(t.get("count", 1))), ("lines", t.get("lines", [])), ("topics", t.get("topics", []))):

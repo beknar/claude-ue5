@@ -59,6 +59,11 @@ public:
 
 	/** tests (Brokenspire): what the papyrus map named the last time it was drawn ("<icon>|<label>"), and the icons it drew */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownLabels() const { return TownLabels; }
+	/** the town map as last drawn (tests): "<zoom>|<the town's span, cm>|<quest givers' seals>|<view x>|<view y>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetTownMapState() const
+	{
+		return FString::Printf(TEXT("%.3f|%.0f|%d|%.0f|%.0f"), TownMapZoomDrawn, TownMapSpan, TownQuestSeals, MapView.X, MapView.Y);
+	}
 	/** tests (Brokenspire): the townspeople whose names were drawn over them last frame, with their quest marks ("<title>|<mark>") */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FString> GetTownNamesDrawn() const { return TownNamesDrawn; }
 
@@ -76,6 +81,8 @@ private:
 	/** a painted texture laid over a screen box, its picture anchored to the world (W0..W1 in cm, Repeat cm a picture) so
 	 *  that boxes side by side join */
 	bool TownTiled(FName Name, const FVector2D& A, const FVector2D& B, const FVector2D& W0, const FVector2D& W1, float Repeat, const FLinearColor& Tint);
+	/** a painted texture over triangles (screen points, their world points for the picture, indices in threes) */
+	void TownTris(FName Name, const TArray<FVector2D>& Screen, const TArray<FVector2D>& World, const TArray<int32>& Ix, float Repeat, const FLinearColor& Tint);
 	void DrawTownPanel(float Sc);
 	void DrawTownTracker(float Sc);
 	void DrawTownNames(float Sc);
@@ -87,6 +94,8 @@ private:
 	/** a word-wrapped paragraph (lines of at most W pixels) */
 	TArray<FString> WrapText(const FString& S, float W, class UFont* F, float K) const;
 	TArray<FString> TownLabels, TownNamesDrawn;
+	float TownMapSpan = 0.f, TownMapZoomDrawn = 1.f;
+	int32 TownQuestSeals = 0;
 	bool bControlsDrawn = false;
 	TArray<FString> SummonRows;
 	/** mistward4: her summoned allies by kind, in the lower left, its foot level with the status panel's (whose board's top

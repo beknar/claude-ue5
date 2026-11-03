@@ -1,5 +1,5 @@
 {
- "tag": "m9b",
+ "tag": "m11",
  "plan": [
   "basics",
   "block"
@@ -12,12 +12,12 @@
    "title": "Mistward Castle",
    "max_tier": 5,
    "show_fps": true,
-   "fps": 37.1,
+   "fps": 36.9,
    "fps_box": [
-    68,
+    69,
     59,
-    319,
-    111
+    312,
+    113
    ],
    "recipes": [
     "Leather Strips",
@@ -67,7 +67,7 @@
    "refused": [],
    "hand_rest": [
     6.1,
-    8.3
+    8.2
    ],
    "plain": {
     "lost": 30.4,
@@ -76,8 +76,8 @@
    },
    "blocking": true,
    "hand_block": [
-    21.4,
-    39.9
+    15.3,
+    35.4
    ],
    "blocked": {
     "lost": 18.4,
@@ -90,8 +90,8 @@
     "blocking": false,
     "speed": 311.0,
     "hand": [
-     6.2,
-     8.5
+     3.8,
+     8.1
     ]
    },
    "lb_blocking": true,
@@ -114,22 +114,29 @@
     "blocking": 155.5,
     "ratio": 0.5
    },
+   "walk_block": {
+    "blocking": false,
+    "layer": 0.0,
+    "foot_swing_cm": 41.1,
+    "moved_cm": 316.6,
+    "hand_z_min": 42.5
+   },
    "after_restart": {
     "blocking": false,
     "hand": [
-     4.9,
-     8.4
+     2.0,
+     7.9
     ]
    },
    "mage_blocking": false
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "",
  "shots": [
-  "mw_m9b_hud_fps.png",
-  "mw_m9b_block_on.png",
-  "mw_m9b_block_off.png"
+  "mw_m11_hud_fps.png",
+  "mw_m11_block_on.png",
+  "mw_m11_block_off.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 0
 }

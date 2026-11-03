@@ -52,6 +52,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") FString GameTitle = TEXT("RANDOM DUNGEON");
 	/** degrees a second */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float TurnRate = 28.f;
+	/** the menu's own music (the user's of 2026-11-02: thematic, not the dungeon's), looped flat at its volume times the saved
+	 *  overall and music volumes (GameUserSettings' [RandomDungeon.Volume], the Escape menu's sliders); faded in */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") TObjectPtr<class USoundBase> MenuMusic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float MenuMusicVolume = 0.8f;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heroes") bool IsMenuMusicPlaying() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Heroes") FString GetMenuMusicName() const;
 	/** the turntable's yaw when a hero is first shown (her face to the camera) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") float FrontYaw = 0.f;
 
@@ -132,6 +138,7 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
+	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> MenuMusicComp;
 	int32 Index = 0;
 	float Yaw = 0.f, Turned = 0.f, StickRepeat = 0.f;
 	bool bViewSet = false;

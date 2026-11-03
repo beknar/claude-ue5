@@ -533,6 +533,8 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 		H->SetCollisionProfileName(bCol ? TEXT("BlockAll") : TEXT("NoCollision"));
 		if (P->bHidden) { H->SetVisibility(false); H->SetHiddenInGame(true); H->SetCastShadow(false); }
 		if (!bCol) H->SetCanEverAffectNavigation(false);
+		// (Brokenspire's short grass and the gardens' plants, in their thousands: faded out with distance, no shadows)
+		if (P->CullDistance > 0.f) { H->SetCullDistances(FMath::RoundToInt(P->CullDistance * 0.8f), FMath::RoundToInt(P->CullDistance)); H->SetCastShadow(false); }
 		H->RegisterComponent();
 		AddInstanceComponent(H);
 		Map.Add(P->Mesh, H);

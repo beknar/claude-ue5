@@ -381,7 +381,14 @@ void URDCombatComponent::SetBlocking(bool bOn)
 	USkeletalMeshComponent* M = Body();
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
 	const TObjectPtr<UAnimSequenceBase>* Clip = Generator->BlockClip.Find(Generator->CurrentHero);
-	if (AI && Clip && *Clip)
+	// (her AnimBP's block layer when it has one: the shield raised over her own walk; the whole-body held clip stopped her legs
+	// (the user's of 2026-11-02: "when the warrior blocks ... and moves, her legs should still be moving"))
+	if (HasBlockLayer())
+	{
+		BlockLayerTarget = bOn ? 1.f : 0.f;
+		if (UAnimMontage* Mo = BlockMontage.Get(); Mo && AI) { AI->Montage_Resume(Mo); AI->Montage_Stop(0.18f, Mo); BlockMontage = nullptr; }
+	}
+	else if (AI && Clip && *Clip)
 	{
 		if (bOn)
 		{
@@ -402,6 +409,33 @@ void URDCombatComponent::SetBlocking(bool bOn)
 		}
 	}
 	if (bOn) PlayUiSound(TEXT("Player.Draw"), TEXT("Player.Inventory"));
+}
+
+bool URDCombatComponent::HasBlockLayer()
+{
+	USkeletalMeshComponent* M = Body();
+	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;
+	if (!AI) return false;
+	return AI->GetClass()->FindPropertyByName(TEXT("BlockAlpha")) != nullptr;
+}
+
+void URDCombatComponent::TickBlockLayer()
+{
+	// (the block layer eased to its weight, 0.15 s up, 0.2 s down; written into her AnimBP's BlockAlpha. Every tick, dead or
+	// alive, scripted or not: eased only with her input, a block ended by her death or under autoplay left the shield's pose
+	// over her upper body (the PR review's find))
+	if (BlockLayerNow != BlockLayerTarget)
+	{
+		const float Dt = GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f;
+		BlockLayerNow = FMath::FInterpConstantTo(BlockLayerNow, BlockLayerTarget, Dt, BlockLayerTarget > BlockLayerNow ? 6.7f : 5.f);
+		USkeletalMeshComponent* M = Body();
+		if (UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr)
+		{
+			FProperty* P = AI->GetClass()->FindPropertyByName(TEXT("BlockAlpha"));
+			if (FDoubleProperty* Dp = CastField<FDoubleProperty>(P)) Dp->SetPropertyValue_InContainer(AI, BlockLayerNow);
+			else if (FFloatProperty* Fp = CastField<FFloatProperty>(P)) Fp->SetPropertyValue_InContainer(AI, BlockLayerNow);
+		}
+	}
 }
 
 void URDCombatComponent::TickBlocking(const APlayerController* PC)

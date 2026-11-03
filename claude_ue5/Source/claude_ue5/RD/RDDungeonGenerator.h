@@ -847,6 +847,41 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString TownLevel;
 	/** the town's people and its quests (pipeline/unreal/882 from SourceArt/brokenspire/town.json) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDTownsfolkDef> Townsfolk;
+	// ---- the town's life (the third list, 2026-11-02; RDTownLife.cpp; 886 fills these)
+	/** the pens' animals, their kinds in turn pen by pen */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDTownAnimalDef> TownAnimals;
+	/** what the townsfolk hold at their work, by name ("Ladle", "Tray", "Mug", "Bowl", "Hammer") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TMap<FName, FRDTownProp> TownProps;
+	/** how far a worker's feet stand from the thing worked, by the work's clip name (the clips' own numbers, 886) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TMap<FName, float> TownWorkReach;
+	/** a cooking pot's base over its fire, a spit's rod over the ground (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownPotHeight = 12.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownSpitHeight = 75.f;
+	/** the spit's rod and its meat (play: turned while its crank is turned) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TObjectPtr<UStaticMesh> TownSpitRod = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TObjectPtr<UStaticMesh> TownSpitMeat = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TObjectPtr<class UMaterialInterface> TownSpitRodMaterial = nullptr;
+	/** a round of work's time at each place (s; each townsperson draws its own range from these) and the customers a tavern
+	 *  gets for its seats */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FVector2D TownWorkSeconds = FVector2D(14.f, 40.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownPatronShare = 0.7f;
+	/** whose a place of work is now (claimed while it is gone to and worked), the town's animals and spits (play) */
+	TArray<TWeakObjectPtr<class ARDTownsfolk>> TownWorkBy;
+	UPROPERTY(Transient) TArray<TObjectPtr<class ARDTownAnimal>> TownAnimalActors;
+	UPROPERTY(Transient) TArray<TObjectPtr<USceneComponent>> TownSpitTurners;
+	UPROPERTY(Transient) TArray<TObjectPtr<USceneComponent>> TownSpitParts;
+	TArray<int32> TownSpitCrank;
+	bool ClaimTownWork(int32 Work, class ARDTownsfolk* T);
+	void ReleaseTownWork(int32 Work, const class ARDTownsfolk* T);
+	bool IsTownWorkFree(int32 Work, const class ARDTownsfolk* T) const;
+	void SpawnTownAnimals();
+	void SpawnTownSpits();
+	/** who does what (after SpawnTownPeople): the rounds of work, the tavern's customers and server, the animals, the spits */
+	void SpawnTownLife();
+	void TickTownLife(float Dt);
+	/** the town's life for tests: "work|<i>|<kind>|<group>|<x>|<y>|<by>" each place, "folk|<i>|<role>|<state>|<work>|<kinds done>|<jobs>|<min s>|<max s>",
+	 *  "animal|<i>|<kind>|<x>|<y>|<pen>|<state>", "spit|<i>|<turns>|<worked>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownLifeLines() const;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDQuestDef> Quests;
 	/** the ground's material (the village's: grass, trodden earth, cobbles, lush grass by vertex colour) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TObjectPtr<UMaterialInterface> TownGroundMaterial = nullptr;
@@ -937,7 +972,13 @@ public:
 	// town; the sun (the level's atmosphere sun) and a moon made in play cross the sky, the sky light, the fog's light and the
 	// exposure follow the daylight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bDayNight = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float DayLengthSeconds = 1800.f;
+	/** damage from a fall (the third list of 2026-11-02; 886 sets it on Brokenspire and the castle): none up to FallSafeHeight
+	 *  (cm, the top of the fall to where she lands), then a share of her hit points, all of them at FallLethalHeight */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bFallDamage = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float FallSafeHeight = 450.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float FallLethalHeight = 1500.f;
+	// (an hour since the third list of 2026-11-02: "the day/night cycle should last one hour, not half an hour"; 886 sets it)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float DayLengthSeconds = 3600.f;
 	/** a new game's first hour in the town (-RDTownHour=<h> another, for a reel) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownStartHour = 8.f;
 	/** the sun's height at noon (degrees) */
@@ -968,6 +1009,18 @@ public:
 	bool bDayBaseRead = false;
 	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DayMoonKept;
 	FLinearColor DaySunColor = FLinearColor::White, DayFogLight = FLinearColor::White;
+
+	// ---- the town's lit buildings (the user's of 2026-11-02: "when a building has someone in it, it should have a torch lit,
+	// unless the NPC is sleeping"): each building's torches and their flames burn while someone awake is inside it (the
+	// castle's always); checked once a second
+	void TickTownLights(float Dt);
+	/** "<building>|<kind>|<lit 0/1>|<lights>|<awake inside>|<asleep inside>" for every building with lights */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownLightLines() const;
+	TMap<int32, TArray<TWeakObjectPtr<USceneComponent>>> TownBldLights;
+	TMap<int32, bool> TownBldLit;
+	TMap<int32, FIntPoint> TownBldPeople;                 // (awake, asleep inside: as last counted)
+	TWeakObjectPtr<ARDSection> TownLightsFor;
+	float TownLightsT = 0.f;
 
 	// ---- Brokenspire's runtime (RDTownGame.cpp)
 	void BeginTownPlay();
@@ -1000,6 +1053,9 @@ public:
 	bool bTourOn = false, bTourCmdRead = false, bTourJumped = false;
 	int32 TourPhase = 0, TourStuckN = 0;
 	float TourT = 0.f, TourCastleSeconds = 0.f, TourCheckT = 0.f, TourDodgeUntil = -1.f, TourDodgeSign = 1.f;
+	/** the tour's look at the town's life (the third list): the places being worked it shows, in turn */
+	TArray<int32> TourLife;
+	int32 TourLifeI = -1;
 	/** how far before the Mistgate the run starts (m; the map hides the move: -RDTourRun=<m>, 0 the whole way) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TourRunMeters = 100.f;
 	/** a run longer than this (s) goes through the Mistgate at once (said in the log and the tour's state) */
@@ -1191,7 +1247,18 @@ public:
 	/** how fast it scrolls (cm of the dungeon a second) and how far from her it may go */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MapPanSpeed = 4000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MapPanMax = 40000.f;
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void CenterMap() { MapPan = FVector2D::ZeroVector; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void CenterMap() { MapPan = FVector2D::ZeroVector; MapZoom = 1.f; }
+	/** Brokenspire's map (the third list, 2026-11-02: zoomed and moved): 1 the whole town, up to MapZoomMax; MapPan is then
+	 *  the view's middle from the town's. The wheel, + and - and the right stick zoom; a drag with the left mouse button, the
+	 *  arrow keys and the D-pad move it (as fast on the screen at every zoom); C or R3 shows the whole town again */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon") float MapZoom = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float MapZoomMax = 6.f;
+	/** the town map's input, a frame (TickTown's part; tests call it with keys sent) */
+	void TickTownMapInput(APlayerController* PC, float Dt);
+	/** the town map's screen pixels per cm of the town at zoom 1 (the HUD sets it as it draws) and screen pixels a unit of
+	 *  the mouse's delta */
+	float TownMapPxPerCm = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float TownMapDragPx = 1.f;
 
 	/** (editor) clear everything and build the start section with StartSeed; saved with the level */
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "RandomDungeon") void BuildStartSection();
@@ -1215,7 +1282,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString DescribeNearest(FVector From, float MaxDistance = 260.f) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumMonsters() const;
 	/** what M does (scripts / tests) */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetMapOpen(bool bOpen) { if (bOpen && !bMapOpen) MapPan = FVector2D::ZeroVector; bMapOpen = bOpen; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetMapOpen(bool bOpen) { if (bOpen && !bMapOpen) { MapPan = FVector2D::ZeroVector; MapZoom = 1.f; } bMapOpen = bOpen; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<ARDMonster*> GetMonsters() const;
 	/** discovered rooms / all rooms (generated) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void GetDiscoveryStats(int32& DiscoveredRooms, int32& GeneratedRooms) const;

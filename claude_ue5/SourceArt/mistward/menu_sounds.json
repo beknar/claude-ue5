@@ -1,0 +1,10 @@
+{
+  "comment": "the hero menu's music (mistward_castle_select; the user's of 2026-11-02: thematic, not the dungeon's). Its pack and composer are not the dungeon's music's (that is Epic Fantasy / Dark Fantasy Ambience, Ultimate SFX and Music Bundle): VHCMusic's Fantasy RPG Complete OST, its menu loop (90.5 s; the end-to-start seam measured seamless). Converted by pipeline/blender_numpy/rdc_sound_prep.py into SourceArt/mistward/audio_menu/ (ignored), imported by pipeline/unreal/885_brokenspire_list.py music",
+  "root": "I:/game assets",
+  "packs": {
+    "vhcost": "fanatical bundle packs/RPG Game Builder Assets Kit/Fantasy RPG Complete OST/Fantasy RPG Complete OST- VHCMusic"
+  },
+  "sets": {
+    "Music.Menu": {"from": [["vhcost", "01 Menu/WAV 16-44/Main Track/MENU-LOOP\\.wav$"]], "loop": true, "stereo": true, "level": -21, "volume": 0.8, "flat": true}
+  }
+}

@@ -1,0 +1,1137 @@
+{
+ "fps": 30,
+ "skeleton_root": "root",
+ "frames_note": "frame count = length x 30 + 1; the last frame equals the first",
+ "axes": "her: (her right, forward, up) cm from the root; ue: UE component space (she faces +Y, her right is -X)",
+ "idle_source": {
+  "frames": 229,
+  "joint_rebuild_err_cm": 0.0001,
+  "root_travel_cm": 0.0,
+  "root_turn_rad_max": 0.0
+ },
+ "wrist_limits_deg": {
+  "flex": [
+   -50.0,
+   60.0
+  ],
+  "deviation": [
+   -30.0,
+   15.0
+  ],
+  "twist": [
+   -80.0,
+   80.0
+  ],
+  "twist_counted_from": {
+   "l": {
+    "deg_from_palm_in": 36.9,
+    "palm_her": [
+     0.67,
+     -0.09,
+     -0.73
+    ]
+   },
+   "r": {
+    "deg_from_palm_in": -36.7,
+    "palm_her": [
+     -0.67,
+     -0.09,
+     -0.73
+    ]
+   }
+  }
+ },
+ "clips": {
+  "Stir": {
+   "frames": 73,
+   "length_s": 2.4,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 2.5,
+   "largest_step_deg": 10.73,
+   "largest_step_frame": 23,
+   "arm_loop_last_step_deg": 2.5,
+   "arm_largest_step_deg": 10.73,
+   "arm_largest_step_frame": 23,
+   "loop_last_step_bone": "ik_hand_l",
+   "largest_step_bone": "hand_r",
+   "wrist_over_max_deg": 3.5,
+   "arm_in_body_min_cm": -3.03,
+   "arm_in_body_frames": 26,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "arm_in_legs_min_cm": 99.0,
+   "arm_in_legs_frames": 0,
+   "arm_in_body_worst": [
+    44,
+    33,
+    [
+     "lowerarm_r",
+     -2.9,
+     [
+      10.0,
+      13.8,
+      119.1
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 22,
+    "l": [
+     -45.0,
+     9.3,
+     -75.9
+    ],
+    "r": [
+     -29.5,
+     18.5,
+     57.8
+    ]
+   },
+   "grip_middle_off_circle_cm_max": 1.5,
+   "hands_apart_cm": [
+    13.17,
+    16.0
+   ],
+   "left_fist_off_the_shaft_cm_max": 0.91,
+   "ladle_grip_r_root": {
+    "her": [
+     10.0,
+     38.72,
+     104.3
+    ],
+    "ue": [
+     -10.0,
+     38.72,
+     104.3
+    ]
+   },
+   "ladle_axis_root": {
+    "her": [
+     0.0,
+     0.4104,
+     -0.9119
+    ],
+    "ue": [
+     0.0,
+     0.41,
+     -0.91
+    ]
+   },
+   "ladle_tip_from_grip_cm": 68.8,
+   "hands_apart_along_ladle_cm": 16.0,
+   "handle_diameter_cm": 3.4,
+   "hands_circle": {
+    "centre_her": [
+     0.0,
+     42.0,
+     97.0
+    ],
+    "centre_ue": [
+     0.0,
+     42.0,
+     97.0
+    ],
+    "radius_cm": 10.0,
+    "turns": 1
+   },
+   "pot_middle_root": {
+    "her": [
+     0.0,
+     66.93,
+     41.59
+    ],
+    "ue": [
+     0.0,
+     66.93,
+     41.59
+    ],
+    "note": "the ladle's tip circles it at the hands' radius"
+   },
+   "socket_ladle_hand_r": {
+    "bone": "hand_r",
+    "location_ue": [
+     -5.91,
+     1.62,
+     0.42
+    ],
+    "x_axis_ue": [
+     -0.5235,
+     -0.8306,
+     0.1899
+    ],
+    "z_axis_ue": [
+     -0.4493,
+     0.0797,
+     -0.8898
+    ]
+   }
+  },
+  "Crank": {
+   "frames": 61,
+   "length_s": 2.0,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 3.68,
+   "largest_step_deg": 21.03,
+   "largest_step_frame": 45,
+   "arm_loop_last_step_deg": 3.68,
+   "arm_largest_step_deg": 21.03,
+   "arm_largest_step_frame": 45,
+   "loop_last_step_bone": "lowerarm_r",
+   "largest_step_bone": "hand_r",
+   "wrist_over_max_deg": 2.6,
+   "arm_in_body_min_cm": -1.14,
+   "arm_in_body_frames": 12,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "arm_in_legs_min_cm": -1.49,
+   "arm_in_legs_frames": 61,
+   "arm_in_body_worst": [
+    27,
+    4,
+    [
+     "lowerarm_r",
+     -1.1,
+     [
+      13.8,
+      14.3,
+      102.7
+     ]
+    ]
+   ],
+   "arm_in_legs_worst": [
+    44,
+    7,
+    [
+     "lowerarm_twist_01_l",
+     -1.5,
+     [
+      -9.5,
+      27.5,
+      65.2
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 28,
+    "l": [
+     -19.0,
+     -9.8,
+     15.7
+    ],
+    "r": [
+     17.1,
+     -32.6,
+     77.4
+    ]
+   },
+   "fist_hole_circle_measured": {
+    "centre_her": [
+     17.22,
+     39.98,
+     80.04
+    ],
+    "radius_cm": [
+     13.3,
+     14.23
+    ],
+    "forward_spread_cm": 0.34
+   },
+   "grip_off_circle_cm_max": 0.78,
+   "left_palm_to_thigh_skin_cm": [
+    3.16,
+    3.37
+   ],
+   "crank_circle_root": {
+    "centre_her": [
+     17.0,
+     40.0,
+     80.0
+    ],
+    "centre_ue": [
+     -17.0,
+     40.0,
+     80.0
+    ],
+    "radius_cm": 14.0,
+    "plane_normal_her": [
+     0,
+     1,
+     0
+    ],
+    "plane_normal_ue": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "turns": 1,
+    "direction": "her right, up, her left, down (seen from behind her)",
+    "handle_along": "her facing (UE +Y)",
+    "phase_0": "at her right of the centre"
+   },
+   "fist_hole_cm": 4.8,
+   "fist_roll_deg": [
+    15.0,
+    70.0
+   ],
+   "left_palm_lifted_off_knee_cm": 3.2
+  },
+  "Tend": {
+   "frames": 97,
+   "length_s": 3.2,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 14.97,
+   "largest_step_deg": 20.68,
+   "largest_step_frame": 30,
+   "arm_loop_last_step_deg": 14.97,
+   "arm_largest_step_deg": 20.68,
+   "arm_largest_step_frame": 30,
+   "loop_last_step_bone": "hand_l",
+   "largest_step_bone": "hand_l",
+   "wrist_over_max_deg": 5.6,
+   "arm_in_body_min_cm": -2.5,
+   "arm_in_body_frames": 17,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "arm_in_legs_min_cm": -4.36,
+   "arm_in_legs_frames": 71,
+   "arm_in_body_worst": [
+    14,
+    5,
+    [
+     "lowerarm_twist_01_l",
+     -2.2,
+     [
+      -18.2,
+      29.0,
+      53.1
+     ]
+    ]
+   ],
+   "arm_in_legs_worst": [
+    56,
+    277,
+    [
+     "middle_03_r",
+     -3.0,
+     [
+      30.4,
+      25.1,
+      43.7
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 37,
+    "l": [
+     10.7,
+     -15.9,
+     81.4
+    ],
+    "r": [
+     21.9,
+     -35.6,
+     0.4
+    ]
+   },
+   "hand_touch_root": {
+    "her": [
+     4.58,
+     33.73,
+     0.87
+    ],
+    "ue": [
+     -4.58,
+     33.73,
+     0.87
+    ],
+    "frame": 17,
+    "time_s": 0.57
+   },
+   "touch_frames": [
+    16,
+    17,
+    18
+   ],
+   "lowest_point": {
+    "z_cm": -0.76,
+    "bone": "foot_r",
+    "her": [
+     15.71,
+     3.96,
+     -0.76
+    ],
+    "frame": 65
+   },
+   "lowest_of_the_body_above_the_feet_cm": {
+    "z_cm": 9.8,
+    "bone": "calf_r"
+   },
+   "soles_z_cm": {
+    "l": [
+     -0.42,
+     -0.42
+    ],
+    "r": [
+     -0.76,
+     -0.76
+    ]
+   },
+   "pelvis_height_cm": 41.0,
+   "torso_in_thighs_cm_min": -10.5,
+   "torso_in_thighs_frames": 97,
+   "pose": "a deep squat, the feet flat (one knee down could not reach the soil: see the comment in make_tend)",
+   "touch_wrist_height_cm": 19.89,
+   "left_palm_lifted_off_thigh_cm": 2.9
+  },
+  "Scatter": {
+   "frames": 79,
+   "length_s": 2.6,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 3.42,
+   "largest_step_deg": 18.54,
+   "largest_step_frame": 37,
+   "arm_loop_last_step_deg": 3.42,
+   "arm_largest_step_deg": 18.54,
+   "arm_largest_step_frame": 37,
+   "loop_last_step_bone": "lowerarm_r",
+   "largest_step_bone": "lowerarm_l",
+   "wrist_over_max_deg": 10.5,
+   "arm_in_body_min_cm": -1.97,
+   "arm_in_body_frames": 30,
+   "hands_cross_frames": 2,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "arm_in_legs_min_cm": 99.0,
+   "arm_in_legs_frames": 0,
+   "arm_in_body_worst": [
+    28,
+    9,
+    [
+     "lowerarm_r",
+     -2.0,
+     [
+      4.0,
+      17.8,
+      127.4
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 67,
+    "l": [
+     70.5,
+     10.2,
+     -79.1
+    ],
+    "r": [
+     36.0,
+     -31.7,
+     -25.4
+    ]
+   },
+   "bowl_moves_cm": 0.0,
+   "bowl_tilt_deg_max": 8.6,
+   "palm_tipped_deg": [
+    35.0,
+    35.0
+   ],
+   "bowl_point_root": {
+    "her": [
+     3.0,
+     42.0,
+     100.0
+    ],
+    "ue": [
+     -3.0,
+     42.0,
+     100.0
+    ],
+    "bowl_up_her": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "palm_normal_her": [
+     0.574,
+     0.0,
+     0.819
+    ]
+   },
+   "socket_bowl_hand_l": {
+    "bone": "hand_l",
+    "location_ue": [
+     5.72,
+     0.26,
+     -0.15
+    ],
+    "x_axis_ue": [
+     -0.204,
+     0.1131,
+     -0.9724
+    ],
+    "z_axis_ue": [
+     -0.4752,
+     -0.8799,
+     -0.0026
+    ]
+   },
+   "release": {
+    "time_s": 1.467,
+    "frame": 44,
+    "hand_root_her": [
+     29.9,
+     59.58,
+     123.92
+    ],
+    "hand_velocity_her_cm_s": [
+     120.0,
+     -8.0,
+     19.0
+    ],
+    "throw_way_her": [
+     0.985,
+     -0.069,
+     0.159
+    ]
+   }
+  },
+  "SitDrink": {
+   "frames": 181,
+   "length_s": 6.0,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 0.26,
+   "largest_step_deg": 12.39,
+   "largest_step_frame": 94,
+   "arm_loop_last_step_deg": 0.26,
+   "arm_largest_step_deg": 12.39,
+   "arm_largest_step_frame": 94,
+   "loop_last_step_bone": "lowerarm_l",
+   "largest_step_bone": "hand_r",
+   "wrist_over_max_deg": 5.7,
+   "arm_in_body_min_cm": -5.46,
+   "arm_in_body_frames": 21,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "arm_in_legs_min_cm": 99.0,
+   "arm_in_legs_frames": 0,
+   "arm_in_body_worst": [
+    94,
+    12,
+    [
+     "lowerarm_r",
+     -1.3,
+     [
+      11.7,
+      15.1,
+      91.6
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 58,
+    "l": [
+     -32.3,
+     -22.3,
+     62.4
+    ],
+    "r": [
+     -18.9,
+     -35.7,
+     20.9
+    ]
+   },
+   "forearm_skin_lowest_z_cm_at_rest": [
+    74.33,
+    74.96
+   ],
+   "forearm_points_on_table_at_rest_min": 11,
+   "table_edge_forward_cm": 26.0,
+   "arms_below_table_top_over_it_cm_max": 1.08,
+   "belly_front_at_table_height_cm": 17.7,
+   "thigh_top_z_cm_max": 67.9,
+   "bench_front_edge_at_most_forward_cm": 9.6,
+   "seat_point_root": {
+    "her": [
+     5.75,
+     2.71,
+     44.95
+    ],
+    "ue": [
+     -5.75,
+     2.71,
+     44.95
+    ],
+    "z_range_cm": [
+     44.95,
+     44.95
+    ],
+    "note": "the buttocks' lowest skin: the bench top under it"
+   },
+   "rim_to_mouth_cm_at_sip": [
+    1.0,
+    1.0
+   ],
+   "mug_tilt_deg_at_sip": 56.2,
+   "mug_bottom_z_cm_at_rest": [
+    75.0,
+    75.0
+   ],
+   "fingertip_points_inside_mug_max": 0,
+   "seat_z_cm": 45.0,
+   "table_top_z_cm": 75.0,
+   "pelvis_height_cm": 58.3,
+   "socket_mug_hand_r": {
+    "bone": "hand_r",
+    "location_ue": [
+     -6.18,
+     4.27,
+     0.79
+    ],
+    "x_axis_ue": [
+     -0.9893,
+     0.137,
+     0.051
+    ],
+    "z_axis_ue": [
+     0.0321,
+     -0.1369,
+     0.9901
+    ]
+   },
+   "mug": {
+    "radius_cm": 4.3,
+    "height_cm": 11.0,
+    "centre_root_her": [
+     12.0,
+     50.7,
+     80.5
+    ],
+    "note": "socket origin: the mug's middle; z its axis"
+   },
+   "sip": {
+    "up_s": [
+     1.6,
+     2.2
+    ],
+    "at_mouth_s": [
+     2.2,
+     2.9
+    ],
+    "down_s": [
+     2.9,
+     3.5
+    ]
+   }
+  },
+  "SitTalk": {
+   "frames": 151,
+   "length_s": 5.0,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 0.09,
+   "largest_step_deg": 15.52,
+   "largest_step_frame": 125,
+   "arm_loop_last_step_deg": 0.09,
+   "arm_largest_step_deg": 15.52,
+   "arm_largest_step_frame": 125,
+   "loop_last_step_bone": "lowerarm_l",
+   "largest_step_bone": "ik_hand_l",
+   "wrist_over_max_deg": 4.4,
+   "arm_in_body_min_cm": -2.77,
+   "arm_in_body_frames": 34,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "arm_in_legs_min_cm": 99.0,
+   "arm_in_legs_frames": 0,
+   "arm_in_body_worst": [
+    28,
+    36,
+    [
+     "lowerarm_r",
+     -2.3,
+     [
+      16.3,
+      9.3,
+      86.9
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 89,
+    "l": [
+     -46.6,
+     -15.3,
+     -51.1
+    ],
+    "r": [
+     -18.4,
+     19.4,
+     -6.9
+    ]
+   },
+   "forearm_skin_lowest_z_cm_at_rest": [
+    74.97,
+    75.41
+   ],
+   "forearm_points_on_table_at_rest_min": 7,
+   "table_edge_forward_cm": 28.7,
+   "arms_below_table_top_over_it_cm_max": 3.15,
+   "belly_front_at_table_height_cm": 17.6,
+   "thigh_top_z_cm_max": 67.9,
+   "bench_front_edge_at_most_forward_cm": 9.6,
+   "seat_point_root": {
+    "her": [
+     5.75,
+     2.71,
+     44.95
+    ],
+    "ue": [
+     -5.75,
+     2.71,
+     44.95
+    ],
+    "z_range_cm": [
+     44.95,
+     44.95
+    ],
+    "note": "the buttocks' lowest skin: the bench top under it"
+   },
+   "seat_z_cm": 45.0,
+   "table_top_z_cm": 75.0,
+   "pelvis_height_cm": 58.3
+  },
+  "CarryWalk": {
+   "frames": 84,
+   "length_s": 2.7667,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 0.0,
+   "largest_step_deg": 25.52,
+   "largest_step_frame": 50,
+   "arm_loop_last_step_deg": 0.0,
+   "arm_largest_step_deg": 18.5,
+   "arm_largest_step_frame": 13,
+   "loop_last_step_bone": "pelvis",
+   "largest_step_bone": "lowerarm_r",
+   "wrist_over_max_deg": 18.9,
+   "arm_in_body_min_cm": -3.38,
+   "arm_in_body_frames": 84,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 66.89,
+    "foot_r": 55.9,
+    "ball_l": 81.52,
+    "ball_r": 74.43
+   },
+   "arm_in_legs_min_cm": 99.0,
+   "arm_in_legs_frames": 0,
+   "arm_in_body_worst": [
+    21,
+    27,
+    [
+     "lowerarm_r",
+     -3.0,
+     [
+      10.8,
+      7.9,
+      114.6
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 15,
+    "l": [
+     -8.2,
+     15.4,
+     -82.2
+    ],
+    "r": [
+     -17.7,
+     33.9,
+     86.0
+    ]
+   },
+   "tray_moves_her_cm": {
+    "right": [
+     -0.38,
+     0.44
+    ],
+    "forward": [
+     34.55,
+     35.0
+    ],
+    "up": [
+     104.77,
+     107.39
+    ]
+   },
+   "tray_tilt_deg_max": 0.0,
+   "left_palm_to_tray_bottom_cm": [
+    -6.44,
+    -5.87
+   ],
+   "left_palm_sideways_from_its_place_cm_max": 0.07,
+   "hands_skin_above_tray_bottom_cm": [
+    -0.27,
+    0.05
+   ],
+   "tray_point_root": {
+    "her": [
+     0.28,
+     35.0,
+     106.44
+    ],
+    "ue": [
+     -0.28,
+     35.0,
+     106.44
+    ],
+    "normal_her": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "normal_ue": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "the tray's bottom centre, between the palms"
+   },
+   "socket_tray_hand_r": {
+    "bone": "hand_r",
+    "location_ue": [
+     -9.41,
+     12.96,
+     -3.74
+    ],
+    "x_axis_ue": [
+     -0.917,
+     -0.1471,
+     0.3707
+    ],
+    "z_axis_ue": [
+     0.1701,
+     0.6965,
+     0.6971
+    ]
+   },
+   "tray_above_palms_cm": 5.87,
+   "hands_axis_out": -0.5,
+   "palms_tipped_in_deg": 40.0,
+   "palms_apart_cm": 26.0,
+   "source": {
+    "frames": 84,
+    "joint_rebuild_err_cm": 0.0001,
+    "root_travel_cm": 65600.0,
+    "root_turn_rad_max": 0.0
+   },
+   "in_place": "the walk's root motion left out (the root at the origin): as MM_Walk_Fwd played with the root locked",
+   "body_vs_walk_deg_max": 0.0,
+   "body_vs_walk_cm_max": 0.00022,
+   "frames_vs_walk": [
+    84,
+    84
+   ]
+  },
+  "CarryIdle": {
+   "frames": 91,
+   "length_s": 3.0,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 0.33,
+   "largest_step_deg": 7.97,
+   "largest_step_frame": 22,
+   "arm_loop_last_step_deg": 0.33,
+   "arm_largest_step_deg": 7.97,
+   "arm_largest_step_frame": 22,
+   "loop_last_step_bone": "upperarm_l",
+   "largest_step_bone": "hand_r",
+   "wrist_over_max_deg": 11.9,
+   "arm_in_body_min_cm": -4.28,
+   "arm_in_body_frames": 91,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.07,
+    "foot_r": 0.07,
+    "ball_l": 0.08,
+    "ball_r": 0.07
+   },
+   "arm_in_legs_min_cm": 99.0,
+   "arm_in_legs_frames": 0,
+   "arm_in_body_worst": [
+    64,
+    42,
+    [
+     "lowerarm_r",
+     -3.6,
+     [
+      9.8,
+      10.3,
+      118.6
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 72,
+    "l": [
+     -12.2,
+     13.9,
+     -81.4
+    ],
+    "r": [
+     -10.4,
+     26.9,
+     84.4
+    ]
+   },
+   "tray_moves_her_cm": {
+    "right": [
+     -0.07,
+     0.08
+    ],
+    "forward": [
+     35.0,
+     35.0
+    ],
+    "up": [
+     105.88,
+     105.96
+    ]
+   },
+   "tray_tilt_deg_max": 0.0,
+   "left_palm_to_tray_bottom_cm": [
+    -5.91,
+    -5.91
+   ],
+   "left_palm_sideways_from_its_place_cm_max": 0.0,
+   "hands_skin_above_tray_bottom_cm": [
+    -0.01,
+    0.0
+   ],
+   "tray_point_root": {
+    "her": [
+     -0.05,
+     35.0,
+     105.91
+    ],
+    "ue": [
+     0.05,
+     35.0,
+     105.91
+    ],
+    "normal_her": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "normal_ue": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "the tray's bottom centre, between the palms"
+   },
+   "socket_tray_hand_r": {
+    "bone": "hand_r",
+    "location_ue": [
+     -9.4,
+     12.99,
+     -3.71
+    ],
+    "x_axis_ue": [
+     -0.917,
+     -0.1471,
+     0.3707
+    ],
+    "z_axis_ue": [
+     0.1701,
+     0.6965,
+     0.6971
+    ]
+   },
+   "tray_above_palms_cm": 5.91,
+   "hands_axis_out": -0.5,
+   "palms_tipped_in_deg": 40.0,
+   "palms_apart_cm": 26.0,
+   "idle_window": {
+    "idle_start_frame": 190,
+    "idle_cycle_frames": 228,
+    "ends_differed_deg": 1.61
+   }
+  },
+  "Talk": {
+   "frames": 151,
+   "length_s": 5.0,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 0.37,
+   "largest_step_deg": 11.24,
+   "largest_step_frame": 85,
+   "arm_loop_last_step_deg": 0.37,
+   "arm_largest_step_deg": 11.24,
+   "arm_largest_step_frame": 85,
+   "loop_last_step_bone": "ik_hand_l",
+   "largest_step_bone": "ik_hand_l",
+   "wrist_over_max_deg": 1.7,
+   "arm_in_body_min_cm": -1.64,
+   "arm_in_body_frames": 32,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.12,
+    "foot_r": 0.12,
+    "ball_l": 0.12,
+    "ball_r": 0.11
+   },
+   "arm_in_legs_min_cm": -3.09,
+   "arm_in_legs_frames": 70,
+   "arm_in_body_worst": [
+    38,
+    19,
+    [
+     "lowerarm_r",
+     -1.6,
+     [
+      16.4,
+      2.4,
+      116.7
+     ]
+    ]
+   ],
+   "arm_in_legs_worst": [
+    10,
+    185,
+    [
+     "ring_03_r",
+     -3.1,
+     [
+      18.0,
+      -2.3,
+      75.6
+     ]
+    ]
+   ],
+   "wrist_worst": {
+    "frame": 102,
+    "l": [
+     -51.7,
+     5.8,
+     -60.1
+    ],
+    "r": [
+     5.3,
+     -11.4,
+     34.4
+    ]
+   },
+   "idle_window": {
+    "idle_start_frame": 81,
+    "idle_cycle_frames": 228,
+    "ends_differed_deg": 1.78
+   }
+  }
+ },
+ "fbx": "SK_Manny_Town_Work_Clips.fbx",
+ "fbx_check": {
+  "objects": [
+   "root"
+  ],
+  "armature": "root",
+  "units_x": 1.0,
+  "rest_joint_err_cm": 0.0003,
+  "rest_turn_err_deg": 0.1047,
+  "takes": {
+   "root|root|CarryIdle": [
+    1.0,
+    91.0
+   ],
+   "root|root|CarryWalk": [
+    1.0,
+    84.0
+   ],
+   "root|root|Crank": [
+    1.0,
+    61.0
+   ],
+   "root|root|Scatter": [
+    1.0,
+    79.0
+   ],
+   "root|root|SitDrink": [
+    1.0,
+    181.0
+   ],
+   "root|root|SitTalk": [
+    1.0,
+    151.0
+   ],
+   "root|root|Stir": [
+    1.0,
+    73.0
+   ],
+   "root|root|Talk": [
+    1.0,
+    151.0
+   ],
+   "root|root|Tend": [
+    1.0,
+    97.0
+   ]
+  },
+  "frame_joint_err_cm": {
+   "Stir@0": 0.0,
+   "Stir@24": 0.0,
+   "Stir@72": 0.0,
+   "Crank@0": 0.0,
+   "Crank@20": 0.0,
+   "Crank@60": 0.0,
+   "Tend@0": 0.0,
+   "Tend@32": 0.0,
+   "Tend@96": 0.0,
+   "Scatter@0": 0.0,
+   "Scatter@26": 0.0,
+   "Scatter@78": 0.0,
+   "SitDrink@0": 0.0,
+   "SitDrink@60": 0.0,
+   "SitDrink@180": 0.0,
+   "SitTalk@0": 0.0,
+   "SitTalk@50": 0.0,
+   "SitTalk@150": 0.0,
+   "CarryWalk@0": 0.0,
+   "CarryWalk@28": 0.0,
+   "CarryWalk@83": 0.0,
+   "CarryIdle@0": 0.0,
+   "CarryIdle@30": 0.0,
+   "CarryIdle@90": 0.0,
+   "Talk@0": 0.0,
+   "Talk@50": 0.0,
+   "Talk@150": 0.0
+  },
+  "manny_vs_made_rest_cm": 0.0
+ }
+}

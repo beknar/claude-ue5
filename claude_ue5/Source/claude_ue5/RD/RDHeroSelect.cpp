@@ -17,6 +17,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Misc/ConfigCacheIni.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundBase.h"
 
 /** a hero's name as the menu shows it: her title ("MARTIAL ARTIST"), else her name */
 static FString RDHSShown(const FRDHeroDef& H) { return (H.Title.IsEmpty() ? H.Name.ToString() : H.Title).ToUpper(); }
@@ -58,8 +61,23 @@ void ARDHeroSelect::BeginPlay()
 	}
 	Index = -1;
 	Show(Start);
+	// the menu's music: flat, looped, at the saved volumes (overall and music), faded in over two seconds
+	if (MenuMusic)
+	{
+		float Overall = 1.f, Music = 1.f;
+		if (GConfig) { GConfig->GetFloat(TEXT("RandomDungeon.Volume"), TEXT("Overall"), Overall, GGameUserSettingsIni); GConfig->GetFloat(TEXT("RandomDungeon.Volume"), TEXT("Music"), Music, GGameUserSettingsIni); }
+		const float Vol = MenuMusicVolume * FMath::Clamp(Overall, 0.f, 1.f) * FMath::Clamp(Music, 0.f, 1.f);
+		// (it ends with the menu's level: persisting across the travel, it played on in the town and the castle over their own
+		// music (the PR review's find))
+		MenuMusicComp = UGameplayStatics::CreateSound2D(this, MenuMusic, 1.f, 1.f, 0.f, nullptr, false, true);
+		if (MenuMusicComp) { MenuMusicComp->bIsUISound = true; MenuMusicComp->FadeIn(2.f, Vol); }
+		UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT music %s at %.2f"), *MenuMusic->GetName(), Vol);
+	}
 	UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT %d heroes, showing %s"), Heroes.Num(), *GetHeroName().ToString());
 }
+
+bool ARDHeroSelect::IsMenuMusicPlaying() const { return MenuMusicComp && MenuMusicComp->IsPlaying(); }
+FString ARDHeroSelect::GetMenuMusicName() const { return MenuMusicComp && MenuMusicComp->Sound ? MenuMusicComp->Sound->GetName() : FString(); }
 
 void ARDHeroSelect::SetFigureShown(AActor* Figure, bool bShown)
 {
