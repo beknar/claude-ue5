@@ -314,7 +314,9 @@ void ARDFinalDoor::Tick(float Dt)
 	// (in the opening: within its width, at its face (its depth is the arch's), not above it)
 	const FVector L = GetActorTransform().InverseTransformPosition(Her->GetActorLocation());
 	const float Depth = Frame->Bounds.BoxExtent.Size2D() > 0.f ? FMath::Min(Frame->Bounds.BoxExtent.X, Frame->Bounds.BoxExtent.Y) : 60.f;
-	if (FMath::Abs(L.X) < OpenWidth * 0.5f && L.Y < Depth + 90.f && L.Y > -Depth - 60.f && L.Z < OpenHeight + 100.f)
+	const bool bInOpening = FMath::Abs(L.X) < OpenWidth * 0.5f && L.Y < Depth + 90.f && L.Y > -Depth - 60.f && L.Z < OpenHeight + 100.f;
+	if (!bArmed) { bArmed = OpenAlpha >= 1.f && !bInOpening; return; }
+	if (bInOpening)
 	{
 		bTravelled = true;
 		UE_LOG(LogRDAurorim, Log, TEXT("RDFINAL she walks through the door to Brokenspire"));
@@ -348,7 +350,8 @@ void ARDDungeonGenerator::CheckFinalBoss()
 	auto Enough = [this](int32 D, int32 A) { return D >= FMath::CeilToInt(A * FMath::Min(TierOpenShare, 1.f) - 1e-3f); };
 	if (!(Enough(Done.X, All.X) && Enough(Done.Y, All.Y) && Enough(Done.Z, All.Z))) return;
 	UE_LOG(LogRDAurorim, Log, TEXT("RDFINAL tier %d at its share: %d/%d rooms, %d/%d killed, %d/%d looted"), MaxTier, Done.X, All.X, Done.Y, All.Y, Done.Z, All.Z);
-	PlaceFinalBoss();
+	// (no room for him yet (none explored big enough, or only hers): tried again in 10 s, not every second)
+	if (!PlaceFinalBoss()) FinalRestoreTry = 10.f;
 }
 
 ARDMonster* ARDDungeonGenerator::GetFinalBoss() const
@@ -375,25 +378,44 @@ bool ARDDungeonGenerator::PlaceFinalBoss()
 	if (Free.Num() == 0) return false;
 	Free.Sort([&E](const FVector& A, const FVector& B) { return FVector::DistSquared(A, E.At) < FVector::DistSquared(B, E.At); });
 	E.Kinds.Add(Boss); E.Spots.Add(Free[0]);
-	// (his band round him: every other free tile out from him while there are enough, then every one, then doubled up)
-	const int32 Step = Free.Num() > 2 * Band + 1 ? 2 : 1;
-	for (int32 I = 0; I < Band; ++I) { E.Kinds.Add(Kinds[R.RandRange(0, Kinds.Num() - 1)]); E.Spots.Add(Free[FMath::Min(Free.Num() - 1, 1 + I * Step)] + FVector(0, 0, I >= Free.Num() - 1 ? 40.f * I : 0.f)); }
+	// (his band round him: every other free tile out from him while there are enough, then every one; with more of them than
+	// tiles, round the tiles again, each round set off from the tile's middle a different way (never stacked, never on him))
+	const int32 Others = Free.Num() - 1;
+	const int32 Step = Others > 2 * Band ? 2 : 1;
+	for (int32 I = 0; I < Band; ++I)
+	{
+		E.Kinds.Add(Kinds[R.RandRange(0, Kinds.Num() - 1)]);
+		const int32 K = I * Step;
+		const int32 Turn = Others > 0 ? K / Others : I + 1;
+		const FVector Base = Others > 0 ? Free[1 + K % Others] : Free[0];
+		const float A = Turn * 2.1f;
+		E.Spots.Add(Base + (Turn > 0 ? FVector(FMath::Cos(A), FMath::Sin(A), 0.f) * TileSize * 0.35f : FVector::ZeroVector));
+	}
 	E.Dead.Init(false, E.Kinds.Num());
 	const FString Name = Monsters[Boss].Title.IsEmpty() ? Monsters[Boss].Name.ToString() : Monsters[Boss].Title;
 	E.Label = FString::Printf(TEXT("FINAL BOSS: %s"), *Name.ToUpper());
-	// (the door: against a wall of the room, the farthest from its middle, looking in)
+	// (the door: against a wall of the room, the farthest from its middle, looking in. A wall: nothing to walk on behind the
+	// tile and no door there (a hallway or a doorway behind it is the room's way out, which the sealed arch would block))
 	const FVector C = S->GetRoomCenter(Room);
 	float BestD = -1.f; FVector DoorAt = FVector::ZeroVector, Out = FVector::ZeroVector;
 	static const FVector Dirs[4] = { FVector(1, 0, 0), FVector(-1, 0, 0), FVector(0, 1, 0), FVector(0, -1, 0) };
-	for (const FVector& T : Free)
-		for (const FVector& Dd : Dirs)
-		{
-			if (S->RoomAt(T + Dd * TileSize) == Room) continue;
-			if (FVector::DotProduct((T - C) * FVector(1, 1, 0), Dd) < 0.f) continue;
-			if (FVector::DistSquared(T, E.Spots[0]) < FMath::Square(TileSize * 1.5f)) continue;     // (not on him)
-			const float Dc = FVector::Dist2D(T, C);
-			if (Dc > BestD) { BestD = Dc; DoorAt = T + Dd * (TileSize * 0.5f - 30.f); Out = -Dd; }
-		}
+	auto FindWall = [&](bool bOffHim)
+	{
+		for (const FVector& T : Free)
+			for (const FVector& Dd : Dirs)
+			{
+				const FVector Nb = T + Dd * TileSize;
+				if (S->RoomAt(Nb) == Room) continue;
+				const FIntPoint Tl = S->WorldToLocal(T), Nl = S->WorldToLocal(Nb);
+				if (S->IsWalkable(Nl) || S->DoorBetween(Tl, Nl) >= 0) continue;
+				if (FVector::DotProduct((T - C) * FVector(1, 1, 0), Dd) < 0.f) continue;
+				if (bOffHim && FVector::DistSquared(T, E.Spots[0]) < FMath::Square(TileSize * 1.5f)) continue;     // (not on him)
+				const float Dc = FVector::Dist2D(T, C);
+				if (Dc > BestD) { BestD = Dc; DoorAt = T + Dd * (TileSize * 0.5f - 30.f); Out = -Dd; }
+			}
+	};
+	FindWall(true);
+	if (BestD < 0.f) FindWall(false);       // (a small room: beside him rather than none)
 	Encounters.Add(E);
 	RespawnEncounters(S);
 	if (BestD >= 0.f)
@@ -448,9 +470,12 @@ void ARDDungeonGenerator::OnFinalBossKilled(ARDMonster* Boss)
 	AddGold(FinalBossGold, TEXT("the final boss"));
 	FinalReward = FString::Printf(TEXT("%s|%d"), *Item.ToString(), FinalBossGold);
 	const FString Name = Boss && !Boss->Title.IsEmpty() ? Boss->Title : FinalBossKind.ToString();
-	TierNotice = TEXT("MISTWARD CASTLE IS CONQUERED  -  THE DOOR TO BROKENSPIRE IS OPEN"); TierNoticeTime = GetWorld()->GetTimeSeconds();
-	if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Victory: %s falls. %d gold%s. The door to Brokenspire is open."), *FinalBossKind.ToString(), FinalBossGold,
-		Item.IsNone() ? TEXT("") : *FString::Printf(TEXT(", and %s lies where he fell"), *Item.ToString())));
+	// (the lights he had called and not yet fallen go out with him)
+	for (FSkyBeam& B : SkyBeams) if (UFXSystemComponent* M = B.Mark.Get()) { M->DeactivateImmediate(); M->DestroyComponent(); }
+	SkyBeams.Reset();
+	TierNotice = FinalDoor ? TEXT("MISTWARD CASTLE IS CONQUERED  -  THE DOOR TO BROKENSPIRE IS OPEN") : TEXT("MISTWARD CASTLE IS CONQUERED"); TierNoticeTime = GetWorld()->GetTimeSeconds();
+	if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Victory: %s falls. %d gold%s.%s"), *Name, FinalBossGold,
+		Item.IsNone() ? TEXT("") : *FString::Printf(TEXT(", and %s lies where he fell"), *Item.ToString()), FinalDoor ? TEXT(" The door to Brokenspire is open.") : TEXT("")));
 	if (FinalDoor) FinalDoor->Open();
 	UE_LOG(LogRDAurorim, Log, TEXT("RDFINAL %s slain: %s, %d gold; the door %s"), *Name, *Item.ToString(), FinalBossGold, FinalDoor ? TEXT("opens") : TEXT("(none)"));
 }
@@ -517,7 +542,7 @@ void ARDDungeonGenerator::TickFinal(float Dt)
 	FinalRestoreTry -= Dt;
 	if (FinalRestoreTry > 0.f) return;
 	FinalRestoreTry = 1.f;
-	if (bFinalRestorePending && !bFinalBossPlaced && !bFinalBossSlain) { if (PlaceFinalBoss()) bFinalRestorePending = false; return; }
+	if (bFinalRestorePending && !bFinalBossPlaced && !bFinalBossSlain) { if (PlaceFinalBoss()) bFinalRestorePending = false; else FinalRestoreTry = 10.f; return; }
 	CheckFinalBoss();
 }
 

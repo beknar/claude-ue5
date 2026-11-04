@@ -1098,9 +1098,10 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			if (E.Live[I].Get() == Monster)
 			{
 				E.Dead[I] = true;
-				if (E.bBoss && I == 0)
+				if (E.bBoss && I == 0) bBossKill = true;
+				// (the final boss is no tier's boss: OnFinalBossKilled gives his notice and reward, no slash or chi attack here)
+				if (E.bBoss && I == 0 && !E.bFinal)
 				{
-					bBossKill = true;
 					TierNotice = E.bThrone ? FString(TEXT("THE USURPER IS SLAIN")) : FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds();
 					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)

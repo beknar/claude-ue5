@@ -205,7 +205,8 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
   - In plate with a shield the Warrior moves 1.7 to 2.6 m/s and a swing slows her to 12 %: his light's 2.3 m round with 0.9 s warning is hard to leave. Autoplay starts no swing while he calls it, steps out of the mark and not back toward its middle before it falls (she went back to the guard she fought in it: all lights fell on her); she still takes most of them (2 of 6 left in a rehearsal).
   - `CombatBranch` names what a monster's fight did each tick; the test counts it in each watch window. A frozen monster said why at once ("swing", "hold", "stun").
   - A test step that ends in Brokenspire must read the castle generator's properties before the door: after it the generator is gone ("ObjectInstance is null").
-- **The final boss is not a tier's boss for the game's counters**: `bossdone:<tier>` is left alone at his death (it would keep tier 5's own boss from being set again); his own are `finalboss` and `finalboss:placed`.
+- **The final boss is not a tier's boss for the game's counters**: `bossdone:<tier>` is left alone at his death (it would keep tier 5's own boss from being set again); his own are `finalboss` and `finalboss:placed`. Nor for the rewards: his encounter has `bBoss` (for the spawning's scale), so every `bBoss` branch must ask `bFinal` too (`OnMonsterKilled` gave him a second tier-5 slash and a chi attack until PR #17's review).
+- **A wall is not "outside the room":** `RoomAt(neighbour) != Room` is also true of a hallway or a doorway, and the sealed arch could stand in the room's way out. The door's spot wants nothing walkable behind the tile and no door edge (`IsWalkable`, `DoorBetween`).
 
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 

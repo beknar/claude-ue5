@@ -698,7 +698,13 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		for (ARDMonster* M : GetMonsters())
 		{
 			if (!IsValid(M) || M->IsDead() || M->bCaged || M->IsAlly() || M->IsCorpse() || !Allowed(M)) continue;
-			if (FinalBossHolds(M)) { const float Dh = FVector::Dist(M->GetActorLocation(), L); if (Dh < HeldD) { HeldD = Dh; Held = M; } continue; }
+			if (FinalBossHolds(M))
+			{
+				// (on her floor only: he holds back with a sight line to her, so no sight test here)
+				const float Dh = FVector::Dist(M->GetActorLocation(), L);
+				if (FMath::Abs(M->GetActorLocation().Z - L.Z) <= 300.f && Dh < HeldD) { HeldD = Dh; Held = M; }
+				continue;
+			}
 			const FVector Ml = M->GetActorLocation();
 			const float D = FVector::Dist(Ml, L);
 			if (D > (bOnly ? 4000.f : 1800.f) || FMath::Abs(Ml.Z - L.Z) > 300.f) continue;

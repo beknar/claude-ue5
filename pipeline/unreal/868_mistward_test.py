@@ -3630,9 +3630,25 @@ def step_finalboss():
     def pair(lo, hi, skip=0):
         ps = pairs(lo, hi)
         return ps[min(skip, len(ps) - 1)] if ps else None
-    def meet(dmin, dmax, share=1.0, skip=0):
+    def pair_wide(lo, hi, skip=0):
+        # (his room too small for the distance (a run's dungeon is its own: one barracks was under 15 m across): him in his room,
+        # her on a tile of the section's other rooms on his floor with the same sight line; the farthest first, traced lazily)
+        sec_ = g.get_section(I2(*st["section"])); far = []
+        for r_ in range(200):
+            if r_ == st["room"]: continue
+            ts_ = list(sec_.get_room_free_tiles(r_))
+            if not ts_ and r_ > 80: break
+            far += ts_
+        cand = sorted(((a, b, dist2(a, b)) for a in room_tiles for b in far if lo <= dist2(a, b) <= hi and abs(a.z - b.z) < 100), key=lambda x: -x[2])
+        found = []
+        for a, b, d_ in cand:
+            if clear(a, b):
+                found.append((a, b, d_))
+                if len(found) > skip: break
+        return found[min(skip, len(found) - 1)] if found else None
+    def meet(dmin, dmax, share=1.0, skip=0, wide=False):
         # (share: she stands that share of the way from him to the tile found: the tiles are 3 m apart, nearer than that for blows)
-        p_ = pair(dmin, dmax, skip)
+        p_ = pair(dmin, dmax, skip) or (pair_wide(dmin, dmax, skip) if wide else None)
         if not p_: return None
         a, b, d_ = p_
         b = V(a.x + (b.x - a.x) * share, a.y + (b.y - a.y) * share, b.z); d_ = d_ * share
@@ -3692,7 +3708,7 @@ def step_finalboss():
         # the lance from afar (up to three places tried: a sight line the game's own trace refuses is not his to throw along)
         res["long_tries"] = []; res["long"] = {}
         for k_ in range(3):
-            dist_ = meet(1500, 3000, 1.0, k_ * 4)
+            dist_ = meet(1500, 3000, 1.0, k_ * 4, wide=True)
             if not dist_: break
             refill(); s0 = boss.shots_fired; on0 = stat("shot_stats", "on_her"); lance = []; last = {}
             def look_lance():

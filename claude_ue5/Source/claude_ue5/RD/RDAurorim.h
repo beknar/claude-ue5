@@ -42,5 +42,8 @@ public:
 	UFUNCTION(BlueprintCallable) FVector GetApproach(float Out = 150.f) const;
 	virtual void Tick(float Dt) override;
 private:
-	float GateDrop = 0.f, GateZ0 = 0.f;
+	float GateZ0 = 0.f;
+	/** she has stood clear of the opening since it opened all the way: only then does walking into it take her (one fighting
+	 *  him with her back to it is not sent off the moment he falls, before she takes his reward) */
+	bool bArmed = false;
 };
