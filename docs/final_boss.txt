@@ -1,0 +1,20 @@
+The user's spec of 2026-11-03 for mistward_castle's final boss (pasted, verbatim), with the answers to the questions asked.
+
+the final boss for Tier 5 is the Aurorim Final Boss, who then drops loot, grants the reward for finishing Tier 5 and opens
+the teleporter back to Brokenspire
+There should be a door that leads back to Brokenspire
+    model is exported as Aurorim Low.glb
+    long ranged attack - throw a lance or a sword
+    medium ranged attack - particle effect that looks like divine light streaming from above to hit the player
+    melee attack - particle effect that looks like wind wrapped around the boss' fists as he punches the player
+    moves: levitates, add animation to the wings so that the wings move when it flies
+    scaled as a boss for Tier 5 with 6-10 escorts
+
+Answers (2026-11-03):
+- When he appears: at tier 5's 50 % (the other bosses' rule: half of tier 5's rooms explored, monsters killed and chests looted),
+  in a tier-5 room she has explored, with 6 to 10 tier-5 escorts.
+- The reward for finishing tier 5: a large gold sum, a guaranteed best-tier item in his drop, and a "Mistward Castle conquered"
+  victory notice; the game goes on.
+- The way back: a door in his room, sealed while he lives, opening at his death; walking through it takes her to Brokenspire
+  (before the castle's door). The door is the teleporter.
+- `ai models/Aurorim Low.glb`: committed like the other ai models/*.glb (the user's Tripo models, CC BY 4.0).

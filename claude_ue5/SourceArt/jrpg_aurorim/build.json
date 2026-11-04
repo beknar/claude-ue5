@@ -1,0 +1,89 @@
+{
+ "clips": {
+  "Idle": 48,
+  "Fly": 29,
+  "Throw": 34,
+  "Cast": 38,
+  "Death": 48,
+  "Box_01": 54,
+  "Box_02": 68,
+  "Box_03": 62,
+  "Hit_to_body_01": 32
+ },
+ "fps": 24,
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_aurorim\\T_Aurorim_Color.png"
+ },
+ "height_cm": 190.0,
+ "wing_tip_cm": 226.3,
+ "throw_release": 0.54,
+ "cast_release": 0.59,
+ "hit_times": {
+  "Box_01": 0.458,
+  "Box_02": 2.083,
+  "Box_03": 0.625
+ },
+ "wings": {
+  "wing_vertices": {
+   "ul": 2203,
+   "ur": 2418,
+   "dl": 3186,
+   "dr": 2944
+  },
+  "chains": {
+   "ul": {
+    "n": 2203,
+    "root": [
+     5.4,
+     13.7,
+     153.4
+    ],
+    "tip": [
+     64.0,
+     18.4,
+     226.0
+    ]
+   },
+   "ur": {
+    "n": 2418,
+    "root": [
+     -4.0,
+     12.6,
+     152.5
+    ],
+    "tip": [
+     -64.1,
+     18.4,
+     226.0
+    ]
+   },
+   "dl": {
+    "n": 3186,
+    "root": [
+     3.4,
+     11.9,
+     142.8
+    ],
+    "tip": [
+     63.9,
+     17.5,
+     73.0
+    ]
+   },
+   "dr": {
+    "n": 2944,
+    "root": [
+     -4.8,
+     15.2,
+     144.7
+    ],
+    "tip": [
+     -63.9,
+     16.9,
+     72.8
+    ]
+   }
+  }
+ },
+ "scale": 226.3887203296985
+}

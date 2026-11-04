@@ -114,6 +114,9 @@ public:
 	FVector LoadAt = FVector::ZeroVector;
 	float LoadYaw = 0.f;
 	bool bLoadPending = false;
+	/** the final boss's showcase (a reel: -RDFinalShow [-RDShowGo=<file>] [-RDShowDone=<file>], RDAurorim.cpp): read once a game */
+	bool bFinalShowRead = false, bFinalShow = false, bFinalShowEntered = false;
+	FString FinalShowGo, FinalShowDone, FinalShowReady;
 	/** -RDTownGo has been read (once a game instance) */
 	bool bTownGoRead = false;
 	/** the showcase tour: the castle's autoplay seconds when it comes through the Mistgate (0: none) */

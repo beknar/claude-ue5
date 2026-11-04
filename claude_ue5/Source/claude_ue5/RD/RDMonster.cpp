@@ -94,6 +94,7 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 			MaxChaseScale = SpeedScale;
 		}
 		SetupRanged(Def);          // (mistward5: its shot, its wait scaled as its blows' interval)
+		SetupBoss(Def);            // (the final boss: levitating, the beam from above, the lance, wind round its fists)
 	}
 	// (level 5: parts made on its skeleton follow its body; a weapon in its hand)
 	for (USkeletalMesh* PartMesh : Def.Parts)
@@ -277,6 +278,14 @@ bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bo
 	}
 	if (Health <= 0.f) { Die(); return true; }
 	if (!bFlinch) return false;
+	// (the final boss's poise: one flinch in FinalBossPoise seconds; her blows every second kept a rehearsal's boss flinching,
+	// his punches lost in their wind-up and him rooted, 8 blows landed in 30 s)
+	if (bFinalBoss && G && G->FinalBossPoise > 0.f)
+	{
+		const float Now = GetWorld()->GetTimeSeconds();
+		if (Now - LastFlinchTime < G->FinalBossPoise) { ++FlinchesShrugged; return false; }
+		LastFlinchTime = Now;
+	}
 	// a flinch: the blow it was winding up is lost
 	AttackTime = -1.f; AttackCooldown = FMath::Max(AttackCooldown, 0.45f);
 	Stun = 0.3f;
@@ -293,6 +302,7 @@ void ARDMonster::Die()
 	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);       // (the body is no obstacle)
 	GetMesh()->SetPlayRate(1.f);
+	EndFistFx();
 	if (DeathAnim) GetMesh()->PlayAnimation(DeathAnim, false);
 	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
 	// (level 5: the dead stay; one of her allies falls and is gone, its death long counted)
@@ -326,6 +336,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, InTier, 1.f);
 	}
 	if (Def) SetupRanged(*Def);    // (mistward5: the shot's wait follows the interval just set)
+	if (Def) SetupBoss(*Def);      // (the final boss: its beam's wait too)
 	if (ScaleMul != 1.f)
 	{
 		// (bigger: its capsule and its mesh, its feet kept on the floor; its reach grows with it)
@@ -336,6 +347,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 		const FVector Rel = M->GetRelativeLocation();
 		M->SetRelativeLocation(FVector(Rel.X, Rel.Y, Rel.Z * ScaleMul));
 		M->SetRelativeScale3D(M->GetRelativeScale3D() * ScaleMul);
+		BaseMeshZ *= ScaleMul; HoverHeight *= ScaleMul; HoverBob *= ScaleMul;     // (the final boss: it floats as high for its size)
 		AddActorWorldOffset(FVector(0, 0, H0 * (ScaleMul - 1.f) + 2.f));
 		Reach *= ScaleMul;
 	}
@@ -674,8 +686,11 @@ bool ARDMonster::TickCombat(float Dt)
 	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
 	RangedWaitLeft = FMath::Max(0.f, RangedWaitLeft - Dt);
+	BeamWaitLeft = FMath::Max(0.f, BeamWaitLeft - Dt);
+	CombatBranch = TEXT("none");
 	if (Stun > 0.f)
 	{
+		CombatBranch = TEXT("stun");
 		Stun -= Dt;
 		if (Stun <= 0.f) { bStunHeld = false; bWalkingAnim = true; GetMesh()->SetPlayRate(1.f); SetWalkingAnim(false); }
 		return true;
@@ -703,6 +718,7 @@ bool ARDMonster::TickCombat(float Dt)
 	const float Gap = Dist - GetCapsuleComponent()->GetScaledCapsuleRadius() - FoeRad;       // (between the two capsules)
 	if (AttackTime >= 0.f)
 	{
+		CombatBranch = TEXT("swing");
 		AttackTime += Dt;
 		Face(D, Dt);
 		if (!bHitDone && AttackTime >= AttackHit && bRangedSwing)
@@ -710,6 +726,12 @@ bool ARDMonster::TickCombat(float Dt)
 			// (mistward5: its shot leaves its hand; the generator flies it)
 			bHitDone = true;
 			ReleaseShot(P);
+		}
+		else if (!bHitDone && AttackTime >= AttackHit && bBeamSwing)
+		{
+			// (the final boss: the mark where its foe stands, the light from above after)
+			bHitDone = true;
+			ReleaseBeam(P);
 		}
 		else if (!bHitDone && AttackTime >= AttackHit)
 		{
@@ -733,7 +755,9 @@ bool ARDMonster::TickCombat(float Dt)
 		{
 			// (a shot: its own longer wait; its blows may follow at once when its foe closes in)
 			if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
+			else if (bBeamSwing) { BeamWaitLeft = BeamWait; bBeamSwing = false; }
 			else AttackCooldown = AttackInterval;
+			EndFistFx();
 			AttackTime = -1.f; bWalkingAnim = true; SetWalkingAnim(false);
 		}
 		return true;
@@ -743,14 +767,19 @@ bool ARDMonster::TickCombat(float Dt)
 	// (Brokenspire: a room's guard takes no foe outside its room; one it was after walks out, and it goes back about the room)
 	if (HomeRoom >= 0 && !bAlly && Section->RoomAt(Pl) != HomeRoom)
 	{
+		CombatBranch = TEXT("home");
 		if (bAggro) { bAggro = false; Path.Reset(); WaitTime = 0.5f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr; }
 		return false;
 	}
 	if (!bAggro && !bAlly)
 	{
+		CombatBranch = TEXT("unseen");
 		// it notices its foe when it is near and there is a way to it that is not much longer than the straight line
 		// (open ground: seen from farther than in a hall; a test's quiet (0) holds there too)
-		const float Aggro = bOpenGround && G->AggroDistance > 0.f ? FMath::Max(G->AggroDistance, G->WildAggroDistance) : G->AggroDistance;
+		float Aggro = bOpenGround && G->AggroDistance > 0.f ? FMath::Max(G->AggroDistance, G->WildAggroDistance) : G->AggroDistance;
+		// (the final boss: his band fighting her, he joins them from as far as she would be lost from (a rehearsal's band fought
+		// her for 20 s while he wandered 77 m off, unaware of her))
+		if (bFinalBoss && G->AggroDistance > 0.f && G->bFinalBandFighting) Aggro = FMath::Max(Aggro, FMath::Max(G->LoseDistance * 0.9f, 4000.f));
 		if (Dist > Aggro || Dz > (bOpenGround ? 700.f : 300.f) || ChaseTimer > 0.f) return false;
 		// (open ground: one past its leash walks home first and notices her again within 0.8 of it: it took her and dropped
 		// her again each tick at the leash's edge, standing there and never striking back)
@@ -765,14 +794,17 @@ bool ARDMonster::TickCombat(float Dt)
 	}
 	bAggro = true;
 	CurrentFoe = P;
-	const float Lose = bOpenGround && G->LoseDistance > 1.f ? FMath::Max(G->LoseDistance, G->WildAggroDistance * 1.8f) : G->LoseDistance;
+	float Lose = bOpenGround && G->LoseDistance > 1.f ? FMath::Max(G->LoseDistance, G->WildAggroDistance * 1.8f) : G->LoseDistance;
+	if (bFinalBoss && G->bFinalBandFighting) Lose = FMath::Max(Lose, 4500.f);
 	if (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash))
 	{
+		CombatBranch = TEXT("lost");
 		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;
 		return bAlly ? FollowPlayer(Dt, Pc) : false;
 	}
 	if (Gap <= Reach * 0.7f)
 	{
+		CombatBranch = TEXT("reach");
 		Face(D, Dt);
 		if (AttackCooldown <= 0.f && AttackAnims.Num() > 0 && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.6f)
 		{
@@ -780,10 +812,14 @@ bool ARDMonster::TickCombat(float Dt)
 			GetMesh()->PlayAnimation(AttackAnims[K], false);
 			AttackLen = RDClipLength(AttackAnims[K]); AttackHit = FMath::Clamp(HitTimes[K], 0.05f, AttackLen); AttackTime = 0.f; bHitDone = false;
 			bRangedSwing = false;         // (a shot cut short by a flinch or a stun must not make this blow a shot)
+			bBeamSwing = false;
+			if (FistFx.Num() > 0 && FistBones.Num() > 0) StartFistFx();      // (the final boss: wind round its fists)
 			++AttacksMade;
 			G->PlaySoundAt(SndAttack, L);
 			VoiceTimer = FMath::Max(VoiceTimer, 2.f);
 		}
+		// (the final boss: round her between his blows)
+		else if (bFinalBoss && !bAlly && AttackCooldown > 0.2f) CircleStep(D, Gap, Dt);
 		else if (const FVector Push = AllySpacingPush(); Push.Size() > 0.15f)
 		{
 			// (mistward4: her ally in another one at the foe: a step aside, round the foe, still facing it)
@@ -794,7 +830,17 @@ bool ARDMonster::TickCombat(float Dt)
 		return true;
 	}
 	// (mistward5: out of reach of its blows, in its range, with a sight line: it stands and shoots)
-	if (bShoots && G->bMonsterRanged && CellExit.IsZero() && TryShoot(P, D, Dist, Dz, Gap, Dt)) return true;
+	// (the final boss: at middle range the light from above; farther, its lance)
+	// (the final boss struck while his band is up: he comes in to his fists, no lance or light on the way (a test's, struck at
+	// 9 m, threw and called and never came))
+	const bool bProvoked = bFinalBoss && !bAlly && G->FinalBandNear > G->FinalBossCloseBand && GetWorld()->GetTimeSeconds() - LastHurtTime < G->FinalBossStruckHold;
+	if (!bProvoked && bSkyBeam && CellExit.IsZero() && TrySkyBeam(P, D, Dist, Dz, Gap, Dt)) { CombatBranch = TEXT("beam"); return true; }
+	if (!bProvoked && bShoots && G->bMonsterRanged && CellExit.IsZero() && TryShoot(P, D, Dist, Dz, Gap, Dt)) { CombatBranch = TEXT("shoot"); return true; }
+	// (the final boss: back from her, circling, while his band fights her)
+	if (bFinalBoss && !bAlly && bFoePlayer && CellExit.IsZero() && TickFinalHold(P, D, Dist, Dz, Dt)) { CombatBranch = TEXT("hold"); return true; }
+	// (the final boss just out of his blows' reach between them (she stands off a little): round her, closing in, not pressing
+	// on her shield (a rehearsal's stood 2 m off her, still, between his few blows))
+	if (bFinalBoss && !bAlly && Gap <= Reach * 1.4f && AttackCooldown > 0.2f) { CombatBranch = TEXT("circle"); CircleStep(D, Gap, Dt); return true; }
 	// (mistward: just out of its cell: through its door first, then at her)
 	// (the middle of a cell's front is where its bars meet its door: straight from the cell's middle to the exit it walked
 	// into the bars and stuck there; it goes to the door's gap first)
@@ -806,6 +852,7 @@ bool ARDMonster::TickCombat(float Dt)
 		else { Path.Reset(); if (!CellDoorway.IsZero()) Path.Add(CellDoorway); Path.Add(CellExit); Path.Add(Pl); ChaseTimer = 0.35f; }
 	}
 	// the chase: over the tile grid to its foe's tile, then straight at it (across a section's border: straight)
+	CombatBranch = TEXT("chase");
 	if (ChaseTimer <= 0.f || Path.Num() == 0)
 	{
 		ChaseTimer = 0.35f;
@@ -817,13 +864,14 @@ bool ARDMonster::TickCombat(float Dt)
 		else if (!bSameSection && Dist < 900.f) Path.Add(Pl);
 		if (Path.Num() == 0)
 		{
+			CombatBranch = TEXT("nopath");
 			bAggro = false; WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;
 			return bAlly ? FollowPlayer(Dt, Pc) : false;
 		}
 	}
 	GetCharacterMovement()->MaxWalkSpeed = FMath::Min(WalkSpeed * G->ChaseSpeedScale, G->MaxChaseSpeed * MaxChaseScale) * SpeedMul();
 	const FVector Dir2 = FVector(Path[0].X - L.X, Path[0].Y - L.Y, 0);
-	if (WaitForDoor(L, Dir2)) return true;
+	if (WaitForDoor(L, Dir2)) { CombatBranch = TEXT("door"); return true; }
 	if (Dir2.Size() < 70.f && Path.Num() > 1) { Path.RemoveAt(0); return true; }
 	FVector Side = FVector::ZeroVector;
 	if (StuckTime > 0.5f) { const FVector Fw = Dir2.GetSafeNormal(); Side = FVector(-Fw.Y, Fw.X, 0) * (((int32)(StuckTime / 0.8f)) % 2 ? 1.f : -1.f); }
@@ -857,7 +905,12 @@ void ARDMonster::Tick(float Dt)
 		}
 	}
 	TickSounds(Dt);
-	if (bCombat && TickCombat(Dt)) return;
+	TickHover(Dt);             // (the final boss: it floats)
+	bCircling = false;
+	const bool bFought = bCombat && TickCombat(Dt);
+	// (the final boss stepping round her keeps facing her: not turned to where it moves)
+	if (bFinalBoss) GetCharacterMovement()->bOrientRotationToMovement = !bCircling;
+	if (bFought) return;
 	if (WaitTime > 0.f)
 	{
 		WaitTime -= Dt;

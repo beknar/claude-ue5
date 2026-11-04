@@ -20,6 +20,8 @@
 
 class ARDSection;
 class UMaterialInstanceDynamic;
+class UFXSystemComponent;
+class UStaticMesh;
 
 /** a clip's length (s; 1 for none or not a sequence) */
 float RDClipLength(const UAnimationAsset* A);
@@ -147,6 +149,31 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetShotWaitLeft() const { return RangedWaitLeft; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsShooting() const { return AttackTime >= 0.f && bRangedSwing; }
 
+	// ---- mistward_castle's final boss (RDAurorim.cpp): levitating, a beam of light from above, wind round its fists
+	/** the mesh's height over where it would stand (cm, its bob in), its beams called down, its fists' effects made, and the
+	 *  effects round its fists now (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetHoverNow() const { return HoverNow; }
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 BeamsCast = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 FistFxMade = 0;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<FString> GetFistFxLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool CanCallBeam() const { return bSkyBeam; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetBeamWaitLeft() const { return BeamWaitLeft; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsCallingBeam() const { return AttackTime >= 0.f && bBeamSwing; }
+	/** the final boss of its castle (the generator's FinalBossKind, set by it) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") bool bFinalBoss = false;
+	/** made the final boss: its lance's and light's waits times WaitScale (the generator's FinalBossWaitScale) */
+	void MakeFinalBoss(float WaitScale);
+	/** his tactics (the generator's FinalBossHold...): seconds he held back circling her while his band fought, seconds he
+	 *  stepped round her between his blows (tests, the showcase's done file) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float HoldSeconds = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float CircleSeconds = 0.f;
+	/** what its fight did this tick (swing, reach, circle, beam, shoot, hold, chase, door, nopath, unseen, lost, home, stun, none):
+	 *  tests read it when a monster stands still */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") FName CombatBranch;
+	/** the final boss's poise: blows that would have made him flinch and did not (the generator's FinalBossPoise) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") int32 FlinchesShrugged = 0;
+	float LastFlinchTime = -100.f;
+
 	// ---- wounds
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetNumWounds() const { return Wounds.Num(); }
 	/** where a wound is now (world), and its size (cm) */
@@ -201,6 +228,40 @@ private:
 	/** a shot begun at its foe (P), out of reach of its blows and in its range with a sight line: true when it stands to shoot */
 	bool TryShoot(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt);
 	void ReleaseShot(AActor* P);
+	// the final boss (FRDMonsterDef's Hover*, RangedMesh*, Beam*, Fist*)
+	float HoverHeight = 0.f, HoverBob = 0.f, HoverPeriod = 1.6f, HoverNow = 0.f, HoverTime = 0.f, BaseMeshZ = 0.f;
+	UPROPERTY(Transient) TObjectPtr<UStaticMesh> RangedMesh;
+	float RangedMeshScale = 1.f; FRotator RangedMeshRot = FRotator::ZeroRotator;
+	bool bSkyBeam = false, bBeamSwing = false;
+	float BeamMin = 400.f, BeamMax = 1400.f, BeamShare = 0.9f, BeamRadius = 220.f, BeamDelay = 0.9f, BeamWait = 6.f, BeamWaitLeft = 0.f, BeamRelease = 0.6f;
+	float BeamFxScale = 1.f, BeamMarkScale = 1.f;
+	bool bBeamFxUser = false, bBeamMarkUser = false, bBeamHitUser = false;
+	TArray<bool> FistFxUser;
+	UPROPERTY(Transient) TObjectPtr<UAnimationAsset> BeamClip;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemAsset> BeamFx;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemAsset> BeamMarkFx;
+	UPROPERTY(Transient) TObjectPtr<UFXSystemAsset> BeamHitFx;
+	UPROPERTY(Transient) TArray<TObjectPtr<UFXSystemAsset>> FistFx;
+	TArray<float> FistFxScale; TArray<FName> FistBones;
+	TArray<TWeakObjectPtr<UFXSystemComponent>> FistFxLive;
+	void SetupBoss(const FRDMonsterDef& Def);
+	/** the mesh raised over its capsule and bobbing (down on the floor once dead) */
+	void TickHover(float Dt);
+	/** a beam begun at its foe (P), in its range: true when it stands to call it down */
+	bool TrySkyBeam(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt);
+	void ReleaseBeam(AActor* P);
+	void StartFistFx();
+	void EndFistFx();
+	/** the final boss holding back from its foe (P) while its band fights: circling at the generator's FinalBossHold, out of
+	 *  its reach; true when it did (false: the chase brings it in) */
+	bool TickFinalHold(AActor* P, const FVector& D, float Dist, float Dz, float Dt);
+	/** a step round its foe between its blows (in reach) */
+	void CircleStep(const FVector& D, float Gap, float Dt);
+	/** the way round that is clear of walls and furniture (Dir's side flipped when not); false: neither is */
+	bool CircleClear(FVector& Dir, const FVector& Fw, float In);
+	/** the way round (1, -1), when it turns next, and this tick it steps sideways (its turn then not to where it moves) */
+	float CircleSign = 1.f, CircleFlip = 0.f;
+	bool bCircling = false;
 	struct FBurn { float PerSecond = 0.f; float Left = 0.f; float Drain = 0.f; };
 	TArray<FBurn> Burns;
 	TWeakObjectPtr<AActor> CurrentFoe;

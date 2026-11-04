@@ -1083,8 +1083,8 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			if (E.bBoss && !E.bThrone && E.Live.Num() > 0 && E.Live[0].Get() == Monster)
 			{
 				bBossOf = true;
-				// (the tier's boss is dead for the game: coming back into the castle does not set it again)
-				if (bTownLink) TownCountMax(FString::Printf(TEXT("bossdone:%d"), E.Tier), 1);
+				// (the tier's boss is dead for the game: coming back into the castle does not set it again; the final boss has its own)
+				if (bTownLink && !E.bFinal) TownCountMax(FString::Printf(TEXT("bossdone:%d"), E.Tier), 1);
 			}
 		TownOnKill(Monster, bBossOf);
 	}
@@ -1098,9 +1098,10 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			if (E.Live[I].Get() == Monster)
 			{
 				E.Dead[I] = true;
-				if (E.bBoss && I == 0)
+				if (E.bBoss && I == 0) bBossKill = true;
+				// (the final boss is no tier's boss: OnFinalBossKilled gives his notice and reward, no slash or chi attack here)
+				if (E.bBoss && I == 0 && !E.bFinal)
 				{
-					bBossKill = true;
 					TierNotice = E.bThrone ? FString(TEXT("THE USURPER IS SLAIN")) : FString::Printf(TEXT("THE BOSS OF TIER %d IS SLAIN"), E.Tier); TierNoticeTime = GetWorld()->GetTimeSeconds();
 					if (E.bThrone) RoomUses.FindOrAdd(TEXT("usurper"))++;
 					// (the third list: a slash of its tier for her weapons, when her hero takes slashes)
@@ -1120,6 +1121,8 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 						}
 				}
 			}
+	// (the final boss: its loot, the gold, the castle conquered, the door to Brokenspire open)
+	if (Monster && Monster->bFinalBoss) OnFinalBossKilled(Monster);
 	// (the list of 2026-10-30: its parts float over it until she takes them; a boss's or a usurper's are more)
 	if (bHarvest && Monster) HarvestKill(Monster, bBossKill);
 	// (the tiers: it stays dead, also when its section is generated again)
@@ -1159,6 +1162,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	for (ARDMonster* A : Allies) if (A) A->Destroy();
 	Allies.Reset();
 	ResetMistward5();          // (mistward5: no shot of before in the air, no audience, autoplay ended)
+	ResetFinal();              // (the final boss: not placed, its door and its lights from above gone)
 	// (mistward: what the rules set waiting, her dropped things, the pads, the cells, the traps start again)
 	for (const FEncounter& E : Encounters) for (const TWeakObjectPtr<ARDMonster>& M : E.Live) if (M.IsValid()) M->Destroy();
 	// (and every other monster that is none of a set's planned ones (a boss's band, a guard, one a teleport trap brought, a
@@ -1573,6 +1577,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bSpecialRooms) TickArena(Dt);          // (the third list: an arena begun, its waves)
 	if (bArenaLock || bArenaCrowd) TickArenaHold(Dt);      // (mistward5: no way out; the audience)
 	if (bMonsterRanged) TickMonsterShots(Dt);              // (mistward5: the monsters' shots in the air)
+	if (bFinalBossOn) TickFinal(Dt);                       // (the final boss: the last tier's share, the light from above)
+	if (bTown || bFinalBossOn) TickFinalShow(Dt);          // (the final boss's showcase: -RDFinalShow)
 	if (!bAutoplayOptionRead) ReadAutoplayOption();        // (mistward5: ?Autoplay= / -Autoplay=)
 	if (bAutoplay) TickAutoplay(Dt);
 	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)

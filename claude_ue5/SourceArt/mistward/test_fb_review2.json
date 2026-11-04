@@ -1,0 +1,256 @@
+{
+ "tag": "fb_review2",
+ "plan": [
+  "finalboss"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "finalboss",
+   "ok": true,
+   "share_rule": 0.5,
+   "at_start": {
+    "placed": 0,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     0,
+     0
+    ],
+    "room": -1,
+    "band": 0,
+    "boss_alive": 0,
+    "boss_hp": 0.0,
+    "reward": "",
+    "share": "0/325|0/97|0/620|0"
+   },
+   "set": [
+    4,
+    0,
+    5,
+    true
+   ],
+   "share_before": "1/1300|0/391|0/2702|1",
+   "placed_before": 0,
+   "share_at_place": "38/1300|11/391|71/2702|1",
+   "placed": {
+    "placed": 1,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     4,
+     0
+    ],
+    "room": 16,
+    "band": 8,
+    "boss_alive": 1,
+    "boss_hp": 1836.0,
+    "reward": "",
+    "share": "38/1300|11/391|71/2702|1"
+   },
+   "notice_placed": "TIER 5 HALF CLEARED  -  AURORIM WAITS IN THE ARMORY (SEE YOUR MAP)",
+   "boss": {
+    "kind": "Aurorim",
+    "title": "FINAL BOSS  Aurorim",
+    "final": true,
+    "max_hp": 1836,
+    "damage": 132.0
+   },
+   "band": {
+    "n": 8,
+    "max_hp": 408,
+    "kinds": [
+     "Alfa",
+     "Hunter",
+     "Nasty",
+     "Rock",
+     "Titan"
+    ],
+    "all_tier5": true
+   },
+   "hp_ratio": 4.5,
+   "hp_ratio_want": 4.37,
+   "hover": {
+    "bottom": [
+     33.1,
+     53.0
+    ],
+    "now": [
+     37.9,
+     52.1
+    ]
+   },
+   "wing_motion_cm": 108.0,
+   "door_sealed": {
+    "open": 0,
+    "alpha": 0.0,
+    "travelled": 0,
+    "at": [
+     96150.0,
+     -2730.0,
+     0.0
+    ],
+    "facing": [
+     -0.0,
+     -1.0
+    ],
+    "width": 124.0,
+    "height": 258.0,
+    "gate_z": -1.0,
+    "gate_blocks": 1,
+    "glow": 0,
+    "glow_particles": 0
+   },
+   "door_in_room": true,
+   "tactics": {
+    "distance": 671,
+    "band_near": 8,
+    "hold_m": [
+     9.0,
+     13.0
+    ],
+    "branches": {
+     "unseen": 1,
+     "beam": 2,
+     "swing": 105,
+     "hold": 41,
+     "shoot": 1
+    },
+    "round_deg": 49,
+    "held_s": 2.7,
+    "blows_landed": 0,
+    "tail_m": [
+     9.0,
+     9.1
+    ],
+    "moved_m": 8.3,
+    "struck_nearest_m": 3.0,
+    "struck_branches": {
+     "hold": 1,
+     "stun": 12,
+     "chase": 43
+    }
+   },
+   "band_near_after": 0,
+   "long_tries": [
+    {
+     "distance": 2163,
+     "branches": {
+      "swing": 19,
+      "chase": 51
+     },
+     "aggro": true,
+     "shot_wait": 0.2,
+     "shots": 1,
+     "on_her": 1,
+     "hp_lost": 95.0,
+     "lance_frames": 21,
+     "lance_point_first": 1.0,
+     "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
+    }
+   ],
+   "long": {
+    "distance": 2163,
+    "branches": {
+     "swing": 19,
+     "chase": 51
+    },
+    "aggro": true,
+    "shot_wait": 0.2,
+    "shots": 1,
+    "on_her": 1,
+    "hp_lost": 95.0,
+    "lance_frames": 21,
+    "lance_point_first": 1.0,
+    "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
+   },
+   "middle": {
+    "distance": 949,
+    "branches": {
+     "chase": 1,
+     "beam": 4,
+     "swing": 33,
+     "shoot": 1
+    },
+    "beams": 1,
+    "mark_frames": 14,
+    "fell": 1,
+    "on_her": 1,
+    "hp_lost": 126.7
+   },
+   "melee": {
+    "distance": 180,
+    "fist_fx": 8,
+    "lines": [
+     "NS_Shield_Wind_01|LeftHand|0.0|13",
+     "NS_Projectile_Wind01|LeftHand|0.0|20",
+     "NS_Shield_Wind_01|RightHand|0.0|13",
+     "NS_Projectile_Wind01|RightHand|0.0|19"
+    ],
+    "hits": 1,
+    "hp_lost": 126.7,
+    "circle_s": 0.9
+   },
+   "killed": {
+    "placed": 1,
+    "slain": 1,
+    "door_open": 1,
+    "section": [
+     4,
+     0
+    ],
+    "room": 16,
+    "band": 0,
+    "boss_alive": 0,
+    "boss_hp": 0.0,
+    "reward": "Ursag's Horn Blade|2500",
+    "share": "38/1300|11/391|71/2702|1"
+   },
+   "gold": 2716,
+   "notice_killed": "MISTWARD CASTLE IS CONQUERED  -  THE DOOR TO BROKENSPIRE IS OPEN",
+   "reward": "Ursag's Horn Blade|2500",
+   "reward_tier5": true,
+   "pile": [
+    "Brilliant Essence",
+    "Dim Essence",
+    "Glue",
+    "Radiant Essence",
+    "Troll Heart",
+    "Ursag's Horn Blade",
+    "Venom Sac"
+   ],
+   "door_open": {
+    "open": 1,
+    "alpha": 1.0,
+    "travelled": 0,
+    "at": [
+     96150.0,
+     -2730.0,
+     0.0
+    ],
+    "facing": [
+     -0.0,
+     -1.0
+    ],
+    "width": 124.0,
+    "height": 258.0,
+    "gate_z": -289.0,
+    "gate_blocks": 0,
+    "glow": 1,
+    "glow_particles": 131
+   },
+   "door_glow": true,
+   "world_after": "brokenspire",
+   "counter": 1
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_fb_review2_finalboss_door_sealed.png",
+  "mw_fb_review2_finalboss_beam_mark.png",
+  "mw_fb_review2_finalboss_beam_light.png",
+  "mw_fb_review2_finalboss_door_open.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
