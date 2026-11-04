@@ -116,6 +116,11 @@ public:
 	/** Brokenspire: the room of its section it keeps to (-1: none). It wanders only there, and takes no foe outside it: she
 	 *  fights it in the room or walks out (the Mistward Hall's guards) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 HomeRoom = -1;
+	/** the wilderness (RDWildPlaces.cpp): no tile grid out here; it wanders round HomeAt, notices her by distance and
+	 *  height alone, chases her straight, and gives up beyond WildLeash of its home */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bOpenGround = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FVector HomeAt = FVector::ZeroVector;
+	float WildLeash = 6000.f;
 	/** Brokenspire: the guard of the Mistward Hall it is (the game remembers which she killed) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 GuardIndex = -1;
 	/** locked in a prison cell: it waits there, unseen by the fight, until the cell is opened */

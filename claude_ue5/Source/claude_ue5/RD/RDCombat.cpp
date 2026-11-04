@@ -690,7 +690,9 @@ void URDCombatComponent::Revive(bool bToStart)
 	if (USkeletalMeshComponent* M = Body()) if (UAnimInstance* AI = M->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDCombatSlot);
 	if (bToStart && O && Generator)
 	{
-		O->SetActorLocation(Generator->GetStartRoomCenter() + FVector(0, 0, 100.f), false, nullptr, ETeleportType::TeleportPhysics);
+		// (the wilderness: the square of the nearest town she has found, loaded now if it is not)
+		const FVector At = Generator->bWild ? Generator->WildRespawnAt() : Generator->GetStartRoomCenter();
+		O->SetActorLocation(At + FVector(0, 0, 100.f), false, nullptr, ETeleportType::TeleportPhysics);
 		if (ACharacter* C = Cast<ACharacter>(O)) C->GetCharacterMovement()->StopMovementImmediately();
 	}
 }

@@ -1,0 +1,79 @@
+{
+ "tag": "tbsat",
+ "plan": [
+  "satellite"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "satellite",
+   "ok": true,
+   "state": {
+    "step": 3,
+    "px": 4096,
+    "middle": [
+     0.0,
+     0.0
+    ],
+    "half_m": 264.0,
+    "capture_ms": 1.0,
+    "captures": 1,
+    "hidden": 272,
+    "mips": 1,
+    "camera_z": 5000.0,
+    "culls_held": 0
+   },
+   "folk": 91,
+   "raw_complete": true,
+   "luma": {
+    "all": 86.59,
+    "middle": 77.05,
+    "north": 82.06,
+    "south": 82.25,
+    "west": 82.93
+   },
+   "edges": {
+    "all": 9.55,
+    "middle": 9.56,
+    "north": 9.47,
+    "south": 9.46,
+    "west": 9.4
+   },
+   "drawn_satellite": true,
+   "painted_drawn": [],
+   "labels_missing": [],
+   "seals": [
+    "seal|Elder",
+    "seal|Captain",
+    "seal|Scholar",
+    "seal|Board"
+   ],
+   "fading_before": 15,
+   "retaking_drawn_satellite": false,
+   "restarted_at_step": 1,
+   "again": {
+    "step": 3,
+    "px": 4096,
+    "middle": [
+     0.0,
+     0.0
+    ],
+    "half_m": 264.0,
+    "capture_ms": 1.0,
+    "captures": 2,
+    "hidden": 276,
+    "mips": 1,
+    "camera_z": 5000.0,
+    "culls_held": 0
+   },
+   "fading_after": 15
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_tbsat_map_satellite1.png",
+  "bs_tbsat_map_satellite3.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

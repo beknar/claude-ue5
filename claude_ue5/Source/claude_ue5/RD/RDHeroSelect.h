@@ -90,6 +90,12 @@ public:
 	 *  Escape (or the gamepad's B) asks first and quits when pressed again within 3 s */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bQuitButton = false;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool QuitGame();
+	/** a game saved to disk (RDSave.cpp): CONTINUE under QUIT (or C, the pad's X) loads the newest, the autosave or the saved
+	 *  game; which and what it says, read every 2 s */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") FString ContinueSlot;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Heroes") FString ContinueInfo;
+	float ContinueReadAt = -100.f;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Heroes") bool ContinueGame();
 	/** mistward5 (the list of 2026-10-31b): AUTOPLAY over START opens the castle with the hero shown played by the game
 	 *  (?Autoplay=<seconds>); the arrows beside it (or [ and ]) choose how long; P starts it */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Heroes") bool bAutoplayButton = false;

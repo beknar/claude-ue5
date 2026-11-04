@@ -1,4 +1,5 @@
 #include "RD/RDDungeonGenerator.h"
+#include "RD/RDSave.h"
 #include "RD/RDSection.h"
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
@@ -96,7 +97,8 @@ AActor* ARDDungeonGenerator::GetTrackedActor() const
 
 FIntPoint ARDDungeonGenerator::WorldToTile(FVector L) const
 {
-	return FIntPoint(FMath::FloorToInt(L.X / TileSize), FMath::FloorToInt(L.Y / TileSize));
+	// (the grid's origin is the loaded town's middle in the wilderness: 0 everywhere else)
+	return FIntPoint(FMath::FloorToInt((L.X - GridOrigin.X) / TileSize), FMath::FloorToInt((L.Y - GridOrigin.Y) / TileSize));
 }
 
 FIntPoint ARDDungeonGenerator::SectionMinTile(FIntPoint S) const
@@ -114,7 +116,7 @@ FIntPoint ARDDungeonGenerator::WorldToSection(FVector L) const
 
 FVector ARDDungeonGenerator::TileCenter(FIntPoint T) const
 {
-	return FVector((T.X + 0.5f) * TileSize, (T.Y + 0.5f) * TileSize, 0.f);
+	return FVector(GridOrigin.X + (T.X + 0.5f) * TileSize, GridOrigin.Y + (T.Y + 0.5f) * TileSize, 0.f);
 }
 
 int32 ARDDungeonGenerator::SectionSeed(FIntPoint S) const
@@ -134,7 +136,7 @@ FVector ARDDungeonGenerator::GetStartRoomCenter() const
 	// the great hall is the start section's centre block (3, 3): its lanes cross at the origin tile
 	if (ARDSection* S = GetSection(FIntPoint::ZeroValue))
 	{
-		const int32 R = S->RoomAt(FVector(TileSize * 0.5f, TileSize * 0.5f, 0));
+		const int32 R = S->RoomAt(FVector(GridOrigin.X + TileSize * 0.5f, GridOrigin.Y + TileSize * 0.5f, 0));
 		if (R >= 0) return S->GetRoomCenter(R);
 	}
 	return FVector(0, 0, 0);
@@ -145,7 +147,7 @@ ARDSection* ARDDungeonGenerator::SpawnSection(FIntPoint S, bool bEditorBuild, bo
 	UWorld* W = GetWorld();
 	FActorSpawnParameters P; P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	const FIntPoint T0 = SectionMinTile(S);
-	ARDSection* Sec = W->SpawnActor<ARDSection>(ARDSection::StaticClass(), FTransform(FVector(T0.X * TileSize, T0.Y * TileSize, 0.f)), P);
+	ARDSection* Sec = W->SpawnActor<ARDSection>(ARDSection::StaticClass(), FTransform(FVector(GridOrigin.X + T0.X * TileSize, GridOrigin.Y + T0.Y * TileSize, 0.f)), P);
 	if (!Sec) return nullptr;
 #if WITH_EDITOR
 	if (bEditorBuild) { Sec->SetActorLabel(FString::Printf(TEXT("RD_Section_%d_%d"), S.X, S.Y)); Sec->SetFolderPath(TEXT("RandomDungeon/Sections")); }
@@ -801,8 +803,11 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 	static const FName Vol[4] = { TEXT("vol0"), TEXT("vol1"), TEXT("vol2"), TEXT("vol3") };
 	if (!bOptionsMenu) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("resume"), TEXT("hero"), TEXT("quit") };
 	// (Brokenspire: the castle's way back to the town)
-	if (MenuPage == 0 && bTownLink && !bTown && !TownLevel.IsEmpty()) return { TEXT("resume"), TEXT("options"), TEXT("town"), TEXT("hero"), TEXT("quit") };
+	if (MenuPage == 0 && bTownLink && !bTown && !TownLevel.IsEmpty()) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("town"), TEXT("hero"), TEXT("quit") };
+	// (Brokenspire and the wilderness: the game saved and loaded (the user's choice of 2026-11-03))
+	if (MenuPage == 0 && bTown) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("hero"), TEXT("quit") };
 	if (MenuPage == 0) return { TEXT("resume"), TEXT("options"), TEXT("hero"), TEXT("quit") };
+	if (MenuPage == 2) return { TEXT("loadauto"), TEXT("loadsave"), TEXT("back") };
 	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
 }
 
@@ -823,6 +828,15 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 		if (V >= 0) Out.Add(FString::Printf(TEXT("volume|%s|%.2f"), VolLabel[V], UserVolumes[V]));
 		else if (Id == TEXT("resume")) Out.Add(TEXT("button|Resume"));
 		else if (Id == TEXT("options")) Out.Add(TEXT("button|Options"));
+		else if (Id == TEXT("save")) Out.Add(TEXT("button|Save the game"));
+		else if (Id == TEXT("load")) Out.Add(TEXT("button|Load a game"));
+		else if (Id == TEXT("loadauto") || Id == TEXT("loadsave"))
+		{
+			const FString Info = GetSaveInfo(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save"));
+			TArray<FString> P; Info.ParseIntoArray(P, TEXT("|"), false);
+			const TCHAR* What = Id == TEXT("loadauto") ? TEXT("Autosave") : TEXT("Saved game");
+			Out.Add(P.Num() >= 4 ? FString::Printf(TEXT("button|%s: %s, %s (%s)"), What, *P[2], *P[0], *P[3]) : FString::Printf(TEXT("button|%s: none"), What));
+		}
 		else if (Id == TEXT("hero")) Out.Add(bTown || bTownLink ? FString(TEXT("button|Choose another hero (a new game)")) : FString(TEXT("button|Choose another hero")));
 		else if (Id == TEXT("town")) Out.Add(FString::Printf(TEXT("button|Return to %s"), *TownName));
 		else if (Id == TEXT("quit")) Out.Add(TEXT("button|Quit"));
@@ -895,7 +909,16 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (RDMenuVolumeOf(Id) >= 0) return false;
 	if (Id == TEXT("resume")) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
 	if (Id == TEXT("options")) { LastMenuAction = TEXT("options"); OpenOptionsPage(); return true; }
-	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); MenuPage = 0; MenuCursor = 1; return true; }
+	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); MenuCursor = MenuPage == 2 ? 2 : 1; MenuPage = 0; return true; }
+	if (Id == TEXT("save"))
+	{
+		LastMenuAction = TEXT("save");
+		const bool bOk = bMenuDryRun || SaveGameNow(TEXT("save"), TEXT("menu"));
+		if (PlayerCombat) PlayerCombat->ShowMessage(bOk ? TEXT("The game is saved") : TEXT("The game could not be saved"));
+		return bOk;
+	}
+	if (Id == TEXT("load")) { LastMenuAction = TEXT("load"); MenuPage = 2; MenuCursor = 0; return true; }
+	if (Id == TEXT("loadauto") || Id == TEXT("loadsave")) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save")); }
 	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
 	if (Id == TEXT("controls") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
 	if (Id == TEXT("town"))
@@ -919,6 +942,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	LastMenuAction = TEXT("quit");
 	if (bMenuDryRun) return true;
 	SetMenuOpen(false);
+	WildAutosave(TEXT("quit"));
 	// (in the editor this ends play and leaves the editor as it was; a game quits)
 	UKismetSystemLibrary::QuitGame(this, UGameplayStatics::GetPlayerController(this, 0), EQuitPreference::Quit, false);
 	return true;
@@ -929,7 +953,7 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (!bEscapeMenu || !PC) return;
 	if (PlayerCombat && PlayerCombat->IsScriptedOnly()) return;
 	// (mistward4: Escape on the Options page goes back to the main page; on the main page it closes the menu)
-	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage == 1) { MenuPage = 0; MenuCursor = 1; } else SetMenuOpen(!bMenuOpen); return; }
+	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage > 0) { MenuCursor = MenuPage == 2 ? 2 : 1; MenuPage = 0; } else SetMenuOpen(!bMenuOpen); return; }
 	if (!bMenuOpen) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
@@ -1170,6 +1194,8 @@ TArray<ARDMonster*> ARDDungeonGenerator::GetMonsters() const
 {
 	TArray<ARDMonster*> Out;
 	for (const auto& KV : Sections) if (KV.Value) for (ARDMonster* M : KV.Value->SpawnedMonsters) if (M) Out.Add(M);
+	// (the wilderness's: its own section, not on the grid)
+	if (WildSection) for (ARDMonster* M : WildSection->SpawnedMonsters) if (IsValid(M)) Out.Add(M);
 	return Out;
 }
 
@@ -1400,6 +1426,7 @@ void ARDDungeonGenerator::BeginPlay()
 void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	++GenTicks;
 	if (bOpeningMenu) return;
 	// (mistward: the frame rate, smoothed over about a second of frames, from the real time between frames)
 	if (bShowFps)
@@ -1467,7 +1494,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (ACharacter* Ch = Cast<ACharacter>(P); Ch && FallResetDepth > 0.f)
 		{
 			const FVector L = Ch->GetActorLocation();
-			const float Floor = GetActorLocation().Z;
+			// (the wilderness: the ground under her, not the level's floor)
+			const float Floor = bWild && IsWildReady() ? WildGroundZ(L) : GetActorLocation().Z;
 			if (L.Z < Floor - FallResetDepth)
 			{
 				const FVector To = bHasSafeSpot ? LastSafeSpot : GetStartRoomCenter() + FVector(0, 0, 100.f);
@@ -1496,12 +1524,15 @@ void ARDDungeonGenerator::Tick(float Dt)
 			}
 		}
 		if ((PC->WasInputKeyJustPressed(EKeys::F) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) && P
-			&& !(PlayerCombat && (PlayerCombat->IsCraftingOpen() || PlayerCombat->CraftClosedFrame == GFrameCounter)) && TownPanelClosedFrame != GFrameCounter) InteractNearest(P->GetActorLocation());
+			&& !(PlayerCombat && (PlayerCombat->IsCraftingOpen() || PlayerCombat->CraftClosedFrame == GFrameCounter)) && TownPanelClosedFrame != GFrameCounter
+			&& !(bMapOpen && IsWildMapShown())) InteractNearest(P->GetActorLocation());
 		if (bTown || bTownLink) TickTown(Dt, PC);
+		if (bWild) TickWild(Dt, PC);
 		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) SetMapOpen(!bMapOpen);
 		// the big map scrolls under the arrow keys (the D-pad), C (the right stick pressed) brings it back over her
 		UpdateMapScrollInput(PC);
-		if (bMapOpen && bTacticalMaps && bTown) TickTownMapInput(PC, Dt);
+		if (bMapOpen && bTacticalMaps && IsWildMapShown()) TickWildMapInput(PC, Dt);
+		else if (bMapOpen && bTacticalMaps && bTown) TickTownMapInput(PC, Dt);
 		else if (bMapOpen && bTacticalMaps)
 		{
 			auto Down = [&](const FKey& K) { return PC->IsInputKeyDown(K) ? 1.f : 0.f; };
@@ -1577,7 +1608,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 				const FIntPoint C = Here + FIntPoint(Dx, Dy);
 				if (IsSectionGenerated(C)) continue;
 				const FIntPoint T0 = SectionMinTile(C);
-				const float X0 = T0.X * TileSize, Y0 = T0.Y * TileSize;
+				const float X0 = GridOrigin.X + T0.X * TileSize, Y0 = GridOrigin.Y + T0.Y * TileSize;
 				const float Ex = FMath::Max3(X0 - (float)L.X, 0.f, (float)L.X - (X0 + SS));
 				const float Ey = FMath::Max3(Y0 - (float)L.Y, 0.f, (float)L.Y - (Y0 + SS));
 				if (FMath::Sqrt(Ex * Ex + Ey * Ey) < SafetyDistance) Enqueue(C);

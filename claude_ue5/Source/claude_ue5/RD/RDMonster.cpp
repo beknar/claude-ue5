@@ -176,6 +176,14 @@ void ARDMonster::PickTrip()
 {
 	Path.Reset();
 	if (!Section) return;
+	// (the wilderness: a point round its home, straight there)
+	if (bOpenGround)
+	{
+		const float A = R.FRandRange(0.f, 2.f * PI), D = R.FRandRange(300.f, 1500.f);
+		Path.Add(HomeAt + FVector(FMath::Cos(A) * D, FMath::Sin(A) * D, 0.f));
+		Goal = Path.Last(); StuckTime = 0.f;
+		return;
+	}
 	const FIntPoint From = WalkableTileAt(GetActorLocation());
 	FIntPoint To = Section->RandomRoomTile(R, Section->RoomAtLocal(From));
 	// (Brokenspire: a room's guard walks about its own room only)
@@ -741,18 +749,21 @@ bool ARDMonster::TickCombat(float Dt)
 	if (!bAggro && !bAlly)
 	{
 		// it notices its foe when it is near and there is a way to it that is not much longer than the straight line
-		if (Dist > G->AggroDistance || Dz > 300.f || ChaseTimer > 0.f) return false;
+		// (open ground: seen from farther than in a hall; a test's quiet (0) holds there too)
+		const float Aggro = bOpenGround && G->AggroDistance > 0.f ? FMath::Max(G->AggroDistance, G->WildAggroDistance) : G->AggroDistance;
+		if (Dist > Aggro || Dz > (bOpenGround ? 700.f : 300.f) || ChaseTimer > 0.f) return false;
 		ChaseTimer = 0.4f;
 		TArray<FIntPoint> Tiles;
 		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
-		if (bSameSection && From != To && (!Section->FindPath(From, To, Tiles) || Tiles.Num() * G->TileSize > Dist * 2.f + 1200.f)) return false;
+		if (!bOpenGround && bSameSection && From != To && (!Section->FindPath(From, To, Tiles) || Tiles.Num() * G->TileSize > Dist * 2.f + 1200.f)) return false;
 		if (!bSameSection && Dist > G->AggroDistance * 0.6f) return false;
 		bAggro = true; Path.Reset(); WaitTime = 0.f; ChaseTimer = 0.f; StuckTime = 0.f;
 		Roar();
 	}
 	bAggro = true;
 	CurrentFoe = P;
-	if (Dist > G->LoseDistance || Dz > 400.f)
+	const float Lose = bOpenGround && G->LoseDistance > 1.f ? FMath::Max(G->LoseDistance, G->WildAggroDistance * 1.8f) : G->LoseDistance;
+	if (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash))
 	{
 		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;
 		return bAlly ? FollowPlayer(Dt, Pc) : false;
@@ -798,7 +809,7 @@ bool ARDMonster::TickCombat(float Dt)
 		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
 		TArray<FIntPoint> Tiles;
 		Path.Reset();
-		if (From == To || FMath::Abs(From.X - To.X) + FMath::Abs(From.Y - To.Y) == 1) Path.Add(Pl);
+		if (bOpenGround || From == To || FMath::Abs(From.X - To.X) + FMath::Abs(From.Y - To.Y) == 1) Path.Add(Pl);
 		else if (bSameSection && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) { SetPathFromTiles(Tiles); if (Path.Num() > 0) Path.Last() = Pl; }
 		else if (!bSameSection && Dist < 900.f) Path.Add(Pl);
 		if (Path.Num() == 0)

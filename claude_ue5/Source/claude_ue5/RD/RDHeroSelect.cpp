@@ -1,3 +1,4 @@
+#include "RD/RDSave.h"
 #include "RD/RDHeroSelect.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDUIArt.h"
@@ -160,11 +161,25 @@ bool ARDHeroSelect::QuitGame()
 	return true;
 }
 
+bool ARDHeroSelect::ContinueGame()
+{
+	if (ContinueSlot.IsEmpty()) return false;
+	UE_LOG(LogRDHeroSelect, Log, TEXT("RDSELECT continue from %s: %s"), *ContinueSlot, *ContinueInfo);
+	return URDSaveGame::LoadAndOpen(this, ContinueSlot);
+}
+
 void ARDHeroSelect::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	if (bQuitButton && GetWorld()->GetRealTimeSeconds() - ContinueReadAt > 2.f)
+	{
+		ContinueReadAt = GetWorld()->GetRealTimeSeconds();
+		ContinueSlot = URDSaveGame::Latest();
+		ContinueInfo = ContinueSlot.IsEmpty() ? FString() : URDSaveGame::Info(ContinueSlot);
+	}
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{
+		if (!ContinueSlot.IsEmpty() && (PC->WasInputKeyJustPressed(EKeys::C) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Left))) { ContinueGame(); return; }
 		if (!bViewSet && Camera)
 		{
 			PC->SetViewTarget(Camera);
@@ -293,6 +308,7 @@ void ARDHeroSelect::TickPointer(APlayerController* PC)
 	else if (B == TEXT("Next")) Step(1);
 	else if (B == TEXT("Start")) Confirm();
 	else if (B == TEXT("Quit")) QuitGame();
+	else if (B == TEXT("Continue")) ContinueGame();
 	else if (B == TEXT("Auto")) ConfirmAutoplay();
 	else if (B == TEXT("AutoLess")) StepAutoplayLength(-1);
 	else if (B == TEXT("AutoMore")) StepAutoplayLength(1);
@@ -331,6 +347,7 @@ void ARDHeroSelectHUD::NotifyHitBoxClick(FName BoxName)
 	else if (B == TEXT("Next")) Sel->Step(1);
 	else if (B == TEXT("Start")) Sel->Confirm();
 	else if (B == TEXT("Quit")) Sel->QuitGame();
+	else if (B == TEXT("Continue")) Sel->ContinueGame();
 	else if (B == TEXT("Auto")) Sel->ConfirmAutoplay();
 	else if (B == TEXT("AutoLess")) Sel->StepAutoplayLength(-1);
 	else if (B == TEXT("AutoMore")) Sel->StepAutoplayLength(1);
@@ -624,6 +641,21 @@ void ARDHeroSelectHUD::DrawHUD()
 			const FString Ask = bPad ? TEXT("press B again to quit") : TEXT("press Escape again to quit");
 			UI.TextSize(Ask, Tw, Th, Small, Sc * 1.1f);
 			UI.Text(Ask, FLinearColor(1.f, 0.75f, 0.65f), P1.X - Tw, P1.Y + 10.f * Sc, Small, Sc * 1.1f);
+		}
+		// (a saved game: CONTINUE under it, what the save holds beside)
+		if (!Sel->ContinueSlot.IsEmpty())
+		{
+			const FString Cn = TEXT("CONTINUE");
+			UI.TextSize(Cn, Tw, Th, Medium, Sc * 1.05f, ERDType::Title);
+			const FVector2D C1(P1.X, P1.Y + 46.f * Sc + Th + 24.f * Sc + Wide * 0.5f), C0(C1.X - Tw - 50.f * Sc - Wide, P1.Y + 46.f * Sc);
+			if (UI.Has(TEXT("button"))) UI.Nine(TEXT("button"), C0, C1, HeightPx(TEXT("button"), C1.Y - C0.Y), FLinearColor(0.75f, 0.9f, 0.75f));
+			else { Rect(C0, C1, FLinearColor(0.04f, 0.06f, 0.045f, 0.88f)); Frame(C0, C1, RDHSLine, 2.f * Sc); }
+			UI.Text(Cn, RDHSInk, (C0.X + C1.X - Tw) * 0.5f, (C0.Y + C1.Y - Th) * 0.5f, Medium, Sc * 1.05f, ERDType::Title);
+			Button(C0, C1, TEXT("Continue"));
+			TArray<FString> Ip; Sel->ContinueInfo.ParseIntoArray(Ip, TEXT("|"), false);
+			const FString Line = Ip.Num() >= 4 ? FString::Printf(TEXT("%s  ·  %s  ·  %s"), *Ip[3], *Ip[2], *Ip[0]) : Sel->ContinueInfo;
+			UI.TextSize(Line, Tw, Th, Small, Sc * 1.0f);
+			UI.Text(Line, RDHSInk, C1.X - Tw, C1.Y + 8.f * Sc, Small, Sc * 1.0f);
 		}
 	}
 	// the keys

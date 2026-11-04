@@ -15,7 +15,8 @@ Steps (plan, comma separated):
   services  with gold given: the trader sells a potion (gold down, the potion carried) and buys it back (gold up); the
             healer heals her (hit points full, gold down); the smith mends a found weapon worn down (full, gold down) and his
             anvil opens the crafting panel; the temple's blessing (on her, gold down); the storage keeps a thing and gives it
-            back; the circle knows Brokenspire's alone and says the others are for later; the quest board posts three bounties
+            back; the circle knows Brokenspire's alone and says the others are for later (with the wilderness: found in
+            its towns); the quest board posts three bounties
   guards    the Mistward Hall: 5 to 10 guards of tier 1, kept to the hall: after her in the hall, she walks out and they stay
             in it; killed, they give gold, count for the elder's quest and stay dead when the town is played again
   castle    her things to the castle and back: with gold, a found weapon, a potion and a set of armour worn she walks into the
@@ -31,7 +32,8 @@ Steps (plan, comma separated):
             square's; pictures of the map and of the minimap
   folk      the townspeople: those who wander walked within 40 s; F at one without a quest: a line of theirs (their bark);
             the names over the people near her, the elder's "!" while he has a quest for her
-  gate      F at the gate: barred (the wilderness is for later); she cannot walk out of it
+  gate      with the wilderness (since 2026-11-03): no "barred", she walks out through it; without it, F at the gate:
+            barred, she cannot walk out of it
   pictures  the square, a street, a home's inside, the smithy, the tavern, the castle's hall with its guards and the Mistgate
 Writes SourceArt/brokenspire/test_<tag>.json and logs "BSTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
@@ -332,10 +334,14 @@ def step_services():
     res["board"] = [p[1] for p in panel() if p[0] == "accept"]
     g.close_town_panel(); yield from rwait(0.2)
     quiet(False)
+    # (the other circles: "for later" without the wilderness; with it (since 2026-11-03) "find a town", or the towns found)
+    res["wild"] = bool(g.get_editor_property("wild"))
+    others = [l for l in res["circle"] if l.split("|")[0] not in ("here", "castle", "bye")]
+    res["circle_others_ok"] = bool(others) and (all("FIND" in l or not l.startswith("none|") for l in others) if res["wild"] else any("LATER" in l for l in others))
     ok = res["buy"]["ok"] and res["buy"]["gold"] < 0 and res["buy"]["count"] == 1 and res["sell"]["ok"] and res["sell"]["gold"] > 0 and res["sell"]["count"] == 0 \
         and res["heal"]["ok"] and res["heal"]["hp"] >= 0.999 and res["heal"]["gold"] < 0 and res["repair"]["ok"] and res["repair"]["wear"] and res["repair"]["wear"] >= 0.999 and res["repair"]["gold"] < 0 \
         and res["anvil_opens_crafting"] and res["bless"]["ok"] and res["bless"]["blessing"] and res["bless"]["gold"] < 0 and res["deposit"]["ok"] and res["deposit"]["carried"] == -1 \
-        and res["withdraw"]["ok"] and res["withdraw"]["carried"] == 0 and any("YOU ARE HERE" in l for l in res["circle"]) and any("LATER" in l for l in res["circle"]) and len(res["board"]) == 3
+        and res["withdraw"]["ok"] and res["withdraw"]["carried"] == 0 and any("YOU ARE HERE" in l for l in res["circle"]) and res["circle_others_ok"] and len(res["board"]) == 3
     step_result("services", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ the Mistward Hall's guards
@@ -599,8 +605,20 @@ def step_satellite():
         p = os.path.join(SHOTS, raw)
         if os.path.exists(p): os.remove(p)
         unreal.RenderingLibrary.export_render_target(G["w"], rt, SHOTS, raw)
-        yield from rwait(1.5)
-        if os.path.exists(p):
+        # (a 4096 px picture is written over a while: read it once it holds its IEND chunk and its size holds still (the file
+        # is padded with zeros after IEND, so IEND is not at its end))
+        t1 = time.time(); whole = False; last_n = -1
+        while time.time() - t1 < 20.0 and not whole:
+            yield from rwait(0.5)
+            try:
+                n = os.path.getsize(p)
+                if n == last_n and n > 0:
+                    with open(p, "rb") as fh:
+                        fh.seek(max(0, n - 4 * 1024 * 1024)); whole = b"IEND" in fh.read()
+                last_n = n
+            except OSError: pass
+        res["raw_complete"] = whole
+        if whole:
             m = png_measure(p, {"all": (0.0, 0.0, 1.0, 1.0), "middle": (0.4, 0.4, 0.6, 0.6), "north": (0.3, 0.05, 0.7, 0.25), "south": (0.3, 0.75, 0.7, 0.95), "west": (0.05, 0.3, 0.25, 0.7)})
             lum = {k: v[0] for k, v in m.items()}; edge = {k: v[1] for k, v in m.items()}
     res["luma"] = lum; res["edges"] = edge
@@ -694,7 +712,9 @@ def step_gate():
     p = G["pawn"].get_actor_location()
     res["past_gate_cm"] = round((gate.x - p.x) * -d.x + (gate.y - p.y) * -d.y, 1) * -1
     shot("gate"); yield from rwait(1.2)
-    ok = "gate" in res["prompt"] and "barred" in res["message"] and res["past_gate_cm"] < 0
+    # (since 2026-11-03 the wilderness is beyond the gate: open, she walks out (888's gate step); barred without it)
+    res["wild"] = bool(g.get_editor_property("wild"))
+    ok = ("barred" not in res["prompt"] and res["past_gate_cm"] > 600) if res["wild"] else ("gate" in res["prompt"] and "barred" in res["message"] and res["past_gate_cm"] < 0)
     step_result("gate", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ pictures
@@ -728,10 +748,13 @@ def png_luma(path, box=(0.0, 0.0, 1.0, 1.0)):
     """the mean brightness (0-255, Rec. 709) of a part of a PNG, read with zlib (868's: the editor's Python has no image library)"""
     import zlib, struct
     data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
-    while pos < len(data):
+    # (the engine's export pads a file with zeros after IEND (1.6 MB for the town's picture): read up to IEND; the padding's
+    # length once left a piece under a chunk's 8-byte head, and the read failed)
+    while pos + 8 <= len(data):
         ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
         if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
         elif typ == b"IDAT": idat += body
+        elif typ == b"IEND": break
     bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
     prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
     tot = 0.0; n = 0
@@ -758,10 +781,13 @@ def png_measure(path, boxes):
     pixels two apart along a row: 0 for a flat picture), from one read of the file (every other pixel of every other row)"""
     import zlib, struct
     data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
-    while pos < len(data):
+    # (the engine's export pads a file with zeros after IEND (1.6 MB for the town's picture): read up to IEND; the padding's
+    # length once left a piece under a chunk's 8-byte head, and the read failed)
+    while pos + 8 <= len(data):
         ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
         if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
         elif typ == b"IDAT": idat += body
+        elif typ == b"IEND": break
     bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
     px = {k: (int(b[0] * w), int(b[1] * h), int(b[2] * w), int(b[3] * h)) for k, b in boxes.items()}
     acc = {k: [0.0, 0, 0.0, 0] for k in boxes}

@@ -1,0 +1,173 @@
+{
+ "tag": "b6",
+ "plan": [
+  "places",
+  "travel",
+  "save"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "places",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "camp",
+     "name": "Wolf Camp",
+     "found": true,
+     "props": 7,
+     "monsters": 0
+    },
+    {
+     "kind": "ruins",
+     "name": "Ruins of Windstead",
+     "found": true,
+     "props": 5,
+     "monsters": 0
+    },
+    {
+     "kind": "ritual",
+     "name": "Oak Circle",
+     "found": true,
+     "props": 9,
+     "monsters": 0
+    },
+    {
+     "kind": "house",
+     "name": "Wynne's Farmstead",
+     "found": true,
+     "props": 4,
+     "monsters": 0
+    },
+    {
+     "kind": "village",
+     "name": "Briarmere",
+     "found": true,
+     "props": 12,
+     "monsters": 0
+    },
+    {
+     "kind": "cave",
+     "name": "Elm Cave",
+     "found": true,
+     "props": 5,
+     "monsters": 0
+    },
+    {
+     "kind": "lair",
+     "name": "Boar Lair",
+     "found": true,
+     "props": 18,
+     "monsters": 3,
+     "monster_m": [
+      19.0,
+      10.0
+     ],
+     "aggro": true
+    },
+    {
+     "kind": "spawn",
+     "name": "Oak Hollow",
+     "found": true,
+     "props": 7,
+     "monsters": 3,
+     "monster_m": [
+      14.7,
+      5.7
+     ],
+     "aggro": true
+    }
+   ],
+   "census": {
+    "camp": 9,
+    "cave": 10,
+    "house": 11,
+    "lair": 13,
+    "ritual": 8,
+    "ruins": 13,
+    "spawn": 6,
+    "village": 10
+   }
+  },
+  {
+   "step": "travel",
+   "ok": true,
+   "hover": 344611.0,
+   "hover_name": "Oak Hollow",
+   "after": {
+    "cx": 5329.0,
+    "cy": -12156.0,
+    "mpp": 20.0,
+    "level": 6.0,
+    "tiles": 180.0,
+    "asked": 0.0,
+    "tile_ms": 170.3,
+    "hover": 344611.0,
+    "hover_name": "Oak Hollow",
+    "made": 180.0,
+    "refusal": "",
+    "last_travel": "Oak Hollow"
+   },
+   "from_place_m": 28.4,
+   "town_travel": true,
+   "town_after": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 193.0,
+    "build_s": 1.4,
+    "loaded": 1.0,
+    "dropped": 2.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "combat": true,
+   "refused": true,
+   "refusal": "You cannot travel while enemies are near"
+  },
+  {
+   "step": "save",
+   "ok": true,
+   "gold_before": 0,
+   "found_before": 9,
+   "revealed_before": 1335,
+   "saved": true,
+   "info": "2026-11-03 18:02|brokenspire|the wilds: farms, 3 km from Brokenspire|Summoner|test",
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "load": true,
+   "back_m": 0.0,
+   "gold_after": 0,
+   "found_after": 9,
+   "revealed_after": 1335,
+   "save_state": {
+    "written": 1,
+    "slot": "autosave",
+    "why": "map",
+    "arrived": 1
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_b6_place_camp.png",
+  "wd_b6_place_ruins.png",
+  "wd_b6_place_ritual.png",
+  "wd_b6_place_house.png",
+  "wd_b6_place_village.png",
+  "wd_b6_place_cave.png",
+  "wd_b6_place_lair.png",
+  "wd_b6_place_spawn.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

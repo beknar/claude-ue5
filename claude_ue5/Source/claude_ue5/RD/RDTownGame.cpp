@@ -63,6 +63,8 @@ void ARDTownsfolk::Init(ARDDungeonGenerator* InGenerator, ARDSection* InSection,
 	if (!Gen || !Gen->Townsfolk.IsValidIndex(Def)) return;
 	const FRDTownsfolkDef& D = Gen->Townsfolk[Def];
 	TownRole = D.Role; Title = D.Title; Calling = D.Calling;
+	// (a small town of the wilderness: its own people, its name in their titles)
+	if (!Gen->bTownHome) { Title.ReplaceInline(TEXT("Brokenspire"), *Gen->TownName); Calling.ReplaceInline(TEXT("Brokenspire"), *Gen->TownName); }
 	Body->SetSkeletalMeshAsset(D.Mesh);
 	Body->SetRelativeLocationAndRotation(FVector(0, 0, -HalfHeight + D.MeshZ), FRotator(0, D.MeshYaw, 0));
 	Body->SetRelativeScale3D(FVector(D.Scale));
@@ -427,6 +429,7 @@ bool ARDDungeonGenerator::EnterCastle()
 	if (!bTown || CastleLevel.IsEmpty() || bTownTraveling) return false;
 	LastTravel = TEXT("castle");
 	if (bTravelDryRun) return true;
+	WildAutosave(TEXT("castle"));
 	SaveCarry();
 	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->Arrive = TEXT("castle");
 	bTownTraveling = true;
@@ -529,7 +532,8 @@ void ARDDungeonGenerator::AfterTownBuilt()
 			FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			if (MistgateFx) MistgateFx->Destroy();
 			if (CircleFx) CircleFx->Destroy();
-			if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(S->MistgateAt + S->MistgateNormal * 160.f), Sp)) { T->Init(this, 0, false); MistgateFx = T; }
+			// (the Mistgate is Brokenspire's: the wilderness's small towns' keeps have none)
+			if (bTownHome) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(S->MistgateAt + S->MistgateNormal * 160.f), Sp)) { T->Init(this, 0, false); MistgateFx = T; }
 			for (const ARDSection::FTownSpot& Ts : S->TownSpots)
 				if (Ts.Kind == TS_Circle) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(Ts.At + FVector(0, 0, 3.f)), Sp)) { T->Init(this, 0, false); CircleFx = T; }
 		}
@@ -566,7 +570,13 @@ void ARDDungeonGenerator::SpawnTownPeople()
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
 	TMap<ERDTownRole, TArray<int32>> ByRole;
-	for (int32 I = 0; I < Townsfolk.Num(); ++I) if (Townsfolk[I].Mesh) for (int32 K = 0; K < FMath::Max(1, Townsfolk[I].Count); ++K) ByRole.FindOrAdd(Townsfolk[I].Role).Add(I);
+	for (int32 I = 0; I < Townsfolk.Num(); ++I)
+	{
+		// (a small town of the wilderness has no elder, scholar or captain: Brokenspire's quests are Brokenspire's)
+		const ERDTownRole Ro = Townsfolk[I].Role;
+		if (!bTownHome && (Ro == ERDTownRole::Elder || Ro == ERDTownRole::Scholar || Ro == ERDTownRole::Captain)) continue;
+		if (Townsfolk[I].Mesh) for (int32 K = 0; K < FMath::Max(1, Townsfolk[I].Count); ++K) ByRole.FindOrAdd(Townsfolk[I].Role).Add(I);
+	}
 	TMap<ERDTownRole, int32> Used;
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	for (int32 K = 0; K < S->TownPosts.Num(); ++K)
@@ -617,7 +627,7 @@ void ARDDungeonGenerator::SpawnTownGuards()
 	for (ARDMonster* M : TownGuards) if (IsValid(M)) M->Destroy();
 	TownGuards.Reset();
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
-	if (!S || S->CastleHallRoom < 0 || Monsters.Num() == 0) return;
+	if (!S || S->CastleHallRoom < 0 || Monsters.Num() == 0 || !bTownHome) return;
 	// (5 to 10 of tier 1, the number and kinds from the town's seed; the ones she killed this game stay dead)
 	FRandomStream R((int32)HashCombine((uint32)StartSeed, 0x6A4Du));
 	TownGuardsPlanned = R.RandRange(FMath::Min(TownGuardsMin, TownGuardsMax), FMath::Max(TownGuardsMin, TownGuardsMax));
@@ -673,6 +683,12 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 		URDGameInstance* GI = URDGameInstance::Of(this);
 		FVector At = GetStartRoomCenter() + FVector(0, 0, 100.f);
 		float Yaw = P->GetActorRotation().Yaw;
+		// (a game loaded: where she was; in the wilderness TickWildLoad puts her there once the world is made)
+		if (GI && GI->Arrive == TEXT("save"))
+		{
+			if (bWild) { GI->Arrive.Reset(); bTownPlaced = true; return; }
+			At = GI->LoadAt + FVector(0, 0, 20.f); Yaw = GI->LoadYaw; GI->bLoadPending = false;
+		}
 		if (GI && GI->Arrive == TEXT("castle") && S->TownBlds.IsValidIndex(S->CastleBld))
 		{
 			const ARDSection::FTownBld& C = S->TownBlds[S->CastleBld];
@@ -698,7 +714,7 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			if (FParse::Value(FCommandLine::Get(), TEXT("RDTownGo="), Go) && Go == TEXT("castle")) { EnterCastle(); return; }
 		}
 	// the Mistgate: walked into, Mistward Castle opens
-	if (bTown && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
+	if (bTown && bTownHome && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
 		EnterCastle();
 }
@@ -1080,7 +1096,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 		case TS_Smith: if (D < 230.f) return TEXT("the smith's work"); break;
 		case TS_Circle: if (D < 620.f) return TEXT("touch the teleport circle"); break;
 		case TS_Board: if (D < 260.f) return TEXT("read the quest board"); break;
-		case TS_Gate: if (D < 520.f) return TEXT("the gate (barred)"); break;
+		case TS_Gate: if (D < 520.f && !bWild) return TEXT("the gate (barred)"); break;
 		default: break;
 		}
 	}
@@ -1132,7 +1148,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		case TS_Circle: if (D < 620.f) Panel = TEXT("circle"); break;
 		case TS_Board: if (D < 260.f) Panel = TEXT("board"); break;
 		case TS_Gate:
-			if (D < 520.f)
+			if (D < 520.f && !bWild)
 			{
 				if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The gate is barred: the wilderness beyond is not safe yet (it opens in a later chapter)"));
 				return TEXT("gate");
@@ -1252,7 +1268,7 @@ bool ARDDungeonGenerator::TownQuestAction(FName Act, FName Id)
 	if (Act == TEXT("accept"))
 	{
 		if (St && St->State > 0) return false;
-		if (Q->Goal.StartsWith(TEXT("wild:"))) { SetTownNote(TEXT("The wilderness beyond the gate is not open yet: this waits for a later chapter")); return false; }
+		if (Q->Goal.StartsWith(TEXT("wild:"))) { SetTownNote(bWild ? TEXT("This bounty's hunt is not posted yet: it waits for a later chapter") : TEXT("The wilderness beyond the gate is not open yet: this waits for a later chapter")); return false; }
 		FRDQuestState N; N.Id = Id; N.State = 1; N.Base = Q->Goal == TEXT("tier") || Q->Goal == TEXT("guards") ? 0 : GI->GetCounter(Q->Goal);
 		if (St) *St = N; else GI->Quests.Add(N);
 		TownBody = Q->Offer;
@@ -1400,7 +1416,7 @@ void ARDDungeonGenerator::BuildTownLines()
 			// (the board posts three bounties at a time)
 			if (Giver == TEXT("Board") && St == TEXT("offered") && ++Shown > 3) continue;
 			const FString Arg = Q.Id.ToString();
-			if (St == TEXT("later")) Add(TEXT("later"), Q.Title, TEXT("LATER"), Q.Offer + TEXT("\n\n(The wilderness beyond the gate is not open yet: this quest waits for a later chapter.)"), false, Arg);
+			if (St == TEXT("later")) Add(TEXT("later"), Q.Title, TEXT("LATER"), Q.Offer + (bWild ? TEXT("\n\n(This quest's hunt waits for a later chapter.)") : TEXT("\n\n(The wilderness beyond the gate is not open yet: this quest waits for a later chapter.)")), false, Arg);
 			else if (St == TEXT("offered")) Add(TEXT("accept"), FString::Printf(TEXT("Quest: %s"), *Q.Title), Q.Gold > 0 ? FString::Printf(TEXT("%d g"), Q.Gold) : TEXT("NEW"), Q.Offer, true, Arg);
 			else if (St == TEXT("ready")) Add(TEXT("turnin"), FString::Printf(TEXT("Done: %s"), *Q.Title), TEXT("REWARD"), Q.Done, true, Arg);
 			else Add(TEXT("status"), Q.Title, FString::Printf(TEXT("%d / %d"), FMath::Min(P, Q.Count), Q.Count), Q.Hint, true, Arg);
@@ -1422,7 +1438,9 @@ void ARDDungeonGenerator::BuildTownLines()
 	{
 		TownTitle = TEXT("The quest board"); TownSub = TEXT("bounties posted by the townsfolk and the watch");
 		if (TownBody.IsEmpty()) TownBody = TEXT("Notes pinned over notes, some fresh, some faded. A few still ask for help, and one promises coin.");
-		QuestLinesOf(TEXT("Board"));
+		// (Brokenspire's bounties are Brokenspire's: a small town's board has only old notices)
+		if (bTownHome) QuestLinesOf(TEXT("Board"));
+		else Add(TEXT("none"), TEXT("Only faded notices"), FString(), TEXT("Lost cats, a cart for sale, a wedding long past. Nothing asks for your sword here."), false);
 		Add(TEXT("bye"), TEXT("Step away"), FString(), FString());
 	}
 	else if (TownPanel == TEXT("store"))
@@ -1510,8 +1528,10 @@ void ARDDungeonGenerator::BuildTownLines()
 	{
 		TownTitle = TEXT("The teleport circle"); TownSub = TEXT("the stones know the circles you have found");
 		if (TownBody.IsEmpty()) TownBody = TEXT("The runes wake under your hand. Any circle you find beyond the walls will answer this one, and this one will take you there.");
-		if (GI) for (const FName& C : GI->CirclesFound) Add(C == FName(TEXT("Brokenspire")) ? FName(TEXT("here")) : FName(TEXT("travel")), C.ToString(), C == FName(TEXT("Brokenspire")) ? TEXT("YOU ARE HERE") : TEXT("TRAVEL"),
-			C == FName(TEXT("Brokenspire")) ? TEXT("This circle") : TEXT("Step through"), C != FName(TEXT("Brokenspire")), C.ToString());
+		// (the wilderness: each town she has found has its circle; this one is the town she is in)
+		const FName Here_(*TownName);
+		if (GI) for (const FName& C : GI->CirclesFound) Add(C == Here_ ? FName(TEXT("here")) : FName(TEXT("travel")), C.ToString(), C == Here_ ? TEXT("YOU ARE HERE") : TEXT("TRAVEL"),
+			C == Here_ ? TEXT("This circle") : TEXT("Step through"), C != Here_, C.ToString());
 		// (Mistward Castle: once the Mistward Hall's guards are all dead, or she has walked through the Mistgate once, the circle
 		// takes her there (the user's of 2026-11-02: she had cleared the hall and the circle had no way to the dungeon))
 		const bool bHallClear = TownGuardsPlanned > 0 && GetTownGuards().Num() == 0;
@@ -1519,7 +1539,8 @@ void ARDDungeonGenerator::BuildTownLines()
 		Add(TEXT("castle"), TEXT("Mistward Castle"), bHallClear || bBeenIn ? TEXT("TRAVEL") : TEXT("SEALED"),
 			bHallClear || bBeenIn ? TEXT("The runes answer the Mistgate: step through into the castle's great hall.") : TEXT("The Mistward Hall's guards still hold the Mistgate: clear the hall, or walk through it once."),
 			bHallClear || bBeenIn, TEXT("castle"));
-		Add(TEXT("none"), TEXT("No other circle found yet"), TEXT("LATER"), TEXT("They lie in the wilderness beyond the gate, which is not open yet."), false);
+		if (!bWild) Add(TEXT("none"), TEXT("No other circle found yet"), TEXT("LATER"), TEXT("They lie in the wilderness beyond the gate, which is not open yet."), false);
+		else if (!GI || GI->CirclesFound.Num() < 2) Add(TEXT("none"), TEXT("No other circle found yet"), TEXT("FIND"), TEXT("Every town of the wilds has one: find a town, and its circle answers this one."), false);
 		Add(TEXT("bye"), TEXT("Step away"), FString(), FString());
 	}
 	TownCursor = FMath::Clamp(TownCursor, 0, FMath::Max(0, TownLines.Num() - 1));
@@ -1543,6 +1564,14 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	else if (E.Act == TEXT("repair")) bOk = TownRepair(E.Arg);
 	else if (E.Act == TEXT("anvil")) { CloseTownPanel(); if (PlayerCombat) PlayerCombat->SetCraftingOpen(true); return true; }
 	else if (E.Act == TEXT("castle")) { CloseTownPanel(); TownCount(TEXT("circle_castle")); return EnterCastle(); }
+	else if (E.Act == TEXT("travel") && bWild && IsWildReady())
+	{
+		// (a town's circle to another town's: fast travel, as from the map)
+		const int32 Ti = Wild->Towns.IndexOfByPredicate([&E](const FRDWildTown& T) { return T.Name == E.Arg; });
+		if (Ti < 0) return false;
+		CloseTownPanel(); TownCount(TEXT("circle_travel"));
+		return WildFastTravel(1000000 + Ti);
+	}
 	else if (E.Act == TEXT("bless")) bOk = TownBless();
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);
