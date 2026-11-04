@@ -18,6 +18,8 @@ paths:
   - "claude_ue5/Source/claude_ue5/RD/RDCeilings.cpp"
   - "pipeline/blender_numpy/crowd_*.py"
   - "claude_ue5/SourceArt/mistward_crowd/**"
+  - "claude_ue5/Source/claude_ue5/RD/RDAurorim*"
+  - "pipeline/blender_numpy/aurorim_build.py"
 ---
 
 # mistward_castle (`863`-`868`; the user's list of 2026-10-26, `docs/improvements.txt`)
@@ -179,6 +181,22 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A bolt's damage is read when it lands**, after the attack that shot it ended: an ambush's damage goes into the bolt (`FBolt::Dmg`), which the weapons' burst now honours too.
 - **The PR review's finds (2026-11-01)**: hidden means nothing reaches her: a shot whose shooter has died has no `From` (the evade had been for monsters only), and a blow that passes her by carries no poison, weakness or slowness. Stealth is refused in a swing (its blow landed and kept her hidden, the next blow an ambush). The ambush's factor holds only while its own release goes off (`bAmbushApplying`) and is used up there: an area scroll read out of stealth was struck up on every monster and stayed armed, and an earlier bolt bursting in that window got it too. The pilot's stand-off and the ambush's weapon come from the arms it will use (a long weapon it never swings held her out of reach; the ambush's weapon could be filtered out as not the best by damage a second, and she stood hidden doing nothing). No speed potion for her energy kept a healing one back for 3 s (the use gate waits only after something was used). Whole hit points only with the growth (rounding on level 5 changed its numbers). A menu autoplay length the menu does not offer is added to its choices.
 - **The menu pilot for recordings**: `-RDMenuPick=<hero> -RDMenuGo=<file> -RDMenuAutoplay=<s>` (and `-AutoplayLocked`, now for the menu's autoplay too): the menu steps to her and starts AUTOPLAY once the file exists (`record_mistward_autoplay.ps1 -FromMenu` makes it when Game Bar records).
+
+## The final boss (`889`, `RD/RDAurorim.cpp`, `blender_numpy/aurorim_build.py`; the user's spec of 2026-11-03, `docs/final_boss.txt`)
+
+- **Wings Tripo skinned to the arms**: Aurorim's four wings had their weights on his arms and shoulders (they would have bent with every punch). His mesh is 3030 islands, so the wings are found island by island: its middle more than 3 cm behind the body's, most of its weight on an arm, a shoulder or the upper spine, not on the spine's own line (the hair); side and row from its middle. Each wing gets a chain of three bones (root: its points nearest the spine; tip: its farthest), and its vertices only those (the root's fifth half on Spine2).
+- **Measure the bones before blaming a preview**: the wings were missing from the front views and present in Fly: the camera stood exactly at its default clip end (1000 units) from the body, and everything behind the body was cut. The wing tips' bones (60 cm out at rest, in the clip) said the rig was right.
+- **A floating boss plants no feet**: his own boxing clips stand in a stance; his legs are swapped for the hover pose's (relative to his hips, so they follow the punch's hips).
+- **The levitating is the game's, not the clips'**: the mesh is raised over the capsule and bobs (`TickHover`); the death clip lies him on the floor from the mesh's own origin, and the hover eases to 0 when he dies. `868`'s `heights` expects a levitating kind at its hover height, give or take its bob.
+- **`r.TextureStreaming 0` ran the editor out of memory** (screening the effects in the scratch level, 2026-11-03: this machine's commit limit is 48 GB, about 20 GB of it taken by other programs). Screen with streaming on.
+- **Python's `NiagaraComponent` has no `deactivate_immediate`** (`deactivate` then `destroy_component`). Two `HighResShot`s 0.6 s apart: the first was lost (one in flight at a time); 0.85 s apart both came.
+- **A set four sets out from her is dropped as soon as it is made**: the test holds her in the air over its middle while it is built, then sets her down in it (as 815's `mw4_land`). `TeleportToTier` refused without a ring.
+- **One set's share differs by kind**: one cleared tier-5 set was 2.9 % of the tier's rooms and kills but 1.7 % of its chests; with the test's share at 2 % he was rightly not placed. The test scales the share to 1 % (and still checks nothing was placed before the clear).
+- **A tier-5 boss ends a starting hero in three blows** (106 a blow, her 241): the attack windows refill her below 60 % and add up what he took; one of them killed her and the door could not take her (a dead hero is never walked through).
+- **The free tiles are 3 m apart**: no pair is within his reach; the test stands her part of the way to the next tile.
+- **Trace as the game traces**: a pair cleared by a visibility trace at a fixed height was refused by his throw's own sight line (world static and dynamic objects, from his chest); the test traces the same way and tries up to three places.
+- **The door's face is its +Y** (Crownfall's arch, Castle of Eternal Mist's grating: their fronts along their Y): it stands against the wall with its +Y into the room; she walks into it when she is within its opening's width in front of it.
+- **The final boss is not a tier's boss for the game's counters**: `bossdone:<tier>` is left alone at his death (it would keep tier 5's own boss from being set again); his own are `finalboss` and `finalboss:placed`.
 
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 

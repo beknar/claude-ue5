@@ -94,6 +94,7 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 			MaxChaseScale = SpeedScale;
 		}
 		SetupRanged(Def);          // (mistward5: its shot, its wait scaled as its blows' interval)
+		SetupBoss(Def);            // (the final boss: levitating, the beam from above, the lance, wind round its fists)
 	}
 	// (level 5: parts made on its skeleton follow its body; a weapon in its hand)
 	for (USkeletalMesh* PartMesh : Def.Parts)
@@ -293,6 +294,7 @@ void ARDMonster::Die()
 	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);       // (the body is no obstacle)
 	GetMesh()->SetPlayRate(1.f);
+	EndFistFx();
 	if (DeathAnim) GetMesh()->PlayAnimation(DeathAnim, false);
 	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
 	// (level 5: the dead stay; one of her allies falls and is gone, its death long counted)
@@ -326,6 +328,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, InTier, 1.f);
 	}
 	if (Def) SetupRanged(*Def);    // (mistward5: the shot's wait follows the interval just set)
+	if (Def) SetupBoss(*Def);      // (the final boss: its beam's wait too)
 	if (ScaleMul != 1.f)
 	{
 		// (bigger: its capsule and its mesh, its feet kept on the floor; its reach grows with it)
@@ -336,6 +339,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 		const FVector Rel = M->GetRelativeLocation();
 		M->SetRelativeLocation(FVector(Rel.X, Rel.Y, Rel.Z * ScaleMul));
 		M->SetRelativeScale3D(M->GetRelativeScale3D() * ScaleMul);
+		BaseMeshZ *= ScaleMul; HoverHeight *= ScaleMul; HoverBob *= ScaleMul;     // (the final boss: it floats as high for its size)
 		AddActorWorldOffset(FVector(0, 0, H0 * (ScaleMul - 1.f) + 2.f));
 		Reach *= ScaleMul;
 	}
@@ -674,6 +678,7 @@ bool ARDMonster::TickCombat(float Dt)
 	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
 	RangedWaitLeft = FMath::Max(0.f, RangedWaitLeft - Dt);
+	BeamWaitLeft = FMath::Max(0.f, BeamWaitLeft - Dt);
 	if (Stun > 0.f)
 	{
 		Stun -= Dt;
@@ -711,6 +716,12 @@ bool ARDMonster::TickCombat(float Dt)
 			bHitDone = true;
 			ReleaseShot(P);
 		}
+		else if (!bHitDone && AttackTime >= AttackHit && bBeamSwing)
+		{
+			// (the final boss: the mark where its foe stands, the light from above after)
+			bHitDone = true;
+			ReleaseBeam(P);
+		}
 		else if (!bHitDone && AttackTime >= AttackHit)
 		{
 			bHitDone = true;
@@ -733,7 +744,9 @@ bool ARDMonster::TickCombat(float Dt)
 		{
 			// (a shot: its own longer wait; its blows may follow at once when its foe closes in)
 			if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
+			else if (bBeamSwing) { BeamWaitLeft = BeamWait; bBeamSwing = false; }
 			else AttackCooldown = AttackInterval;
+			EndFistFx();
 			AttackTime = -1.f; bWalkingAnim = true; SetWalkingAnim(false);
 		}
 		return true;
@@ -780,6 +793,8 @@ bool ARDMonster::TickCombat(float Dt)
 			GetMesh()->PlayAnimation(AttackAnims[K], false);
 			AttackLen = RDClipLength(AttackAnims[K]); AttackHit = FMath::Clamp(HitTimes[K], 0.05f, AttackLen); AttackTime = 0.f; bHitDone = false;
 			bRangedSwing = false;         // (a shot cut short by a flinch or a stun must not make this blow a shot)
+			bBeamSwing = false;
+			if (FistFx.Num() > 0 && FistBones.Num() > 0) StartFistFx();      // (the final boss: wind round its fists)
 			++AttacksMade;
 			G->PlaySoundAt(SndAttack, L);
 			VoiceTimer = FMath::Max(VoiceTimer, 2.f);
@@ -794,6 +809,8 @@ bool ARDMonster::TickCombat(float Dt)
 		return true;
 	}
 	// (mistward5: out of reach of its blows, in its range, with a sight line: it stands and shoots)
+	// (the final boss: at middle range the light from above; farther, its lance)
+	if (bSkyBeam && CellExit.IsZero() && TrySkyBeam(P, D, Dist, Dz, Gap, Dt)) return true;
 	if (bShoots && G->bMonsterRanged && CellExit.IsZero() && TryShoot(P, D, Dist, Dz, Gap, Dt)) return true;
 	// (mistward: just out of its cell: through its door first, then at her)
 	// (the middle of a cell's front is where its bars meet its door: straight from the cell's middle to the exit it walked
@@ -857,6 +874,7 @@ void ARDMonster::Tick(float Dt)
 		}
 	}
 	TickSounds(Dt);
+	TickHover(Dt);             // (the final boss: it floats)
 	if (bCombat && TickCombat(Dt)) return;
 	if (WaitTime > 0.f)
 	{

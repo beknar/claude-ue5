@@ -535,6 +535,8 @@ def step_open():
 def step_heights():
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     kinds = [str(m.name) for m in g.get_editor_property("monsters")]
+    # (a kind that levitates (the final boss) floats its hover height over the floor, give or take its bob)
+    hover = {str(m.name): (m.hover_height, m.hover_bob) for m in g.get_editor_property("monsters") if m.hover_height > 0}
     ctr = g.get_start_room_center(); out = {}; errs = []
     for b in range(0, len(kinds), 8):
         made = []
@@ -555,10 +557,13 @@ def step_heights():
             try: m.set_actor_hidden_in_game(True); m.set_actor_location(V(0, 0, -50000), False, True); m.set_actor_tick_enabled(False)
             except Exception: pass
         yield
-    bad = {k: v for k, v in out.items() if not -5.0 <= v[0] <= 5.0}
+    def off(k, v):
+        if k in hover: return not hover[k][0] - hover[k][1] - 12.0 <= v[0] <= hover[k][0] + hover[k][1] + 12.0
+        return not -5.0 <= v[0] <= 5.0
+    bad = {k: v for k, v in out.items() if off(k, v)}
     quiet(False)
     step_result("heights", not bad and not errs and len(out) == len(kinds), kinds=len(kinds), measured=len(out), off=bad, errors=errs,
-                half_creature_05=out.get("Half_Creature_05"), all=out)
+                half_creature_05=out.get("Half_Creature_05"), levitating={k: {"hover": hover[k], "bottom": out.get(k)} for k in hover}, all=out)
 
 # ------------------------------------------------------------------------------------------------ the tiers: 50 %, the boss, the guarded ring
 def enc():
@@ -632,7 +637,7 @@ def step_tiers():
     res["open_short"] = any(s_["open"] and s_["share"] < SHARE for s_ in steps_)
     res["opened_at_share"] = opened[0]["share"] if opened else None
     res["last_shut_share"] = shut[-1]["share"] if shut else None
-    res["tally1_enough"] = tally(1); res["open_enough"] = g.is_tier_open(2); res["notice"] = str(g.tier_notice)
+    res["tally1_enough"] = tally(1); res["open_enough"] = g.is_tier_open(2); res["notice"] = str(g.get_editor_property("tier_notice"))
     yield from wait(0.5)
     ok2 = check_opening(2, res)
     res["marks_minimap"] = yield from map_marks(False)
@@ -643,11 +648,11 @@ def step_tiers():
     for S in [s for s in [I2(x, y) for x in range(-1, 2) for y in range(-1, 2)] if not (s.x == 0 and s.y == 0)]:
         g.generate_section_now(S); yield from built(S)
         g.debug_clear_section(S, 0, g.get_start_room_center()); yield from wait(0.2)
-        n_ = str(g.tier_notice)
+        n_ = str(g.get_editor_property("tier_notice"))
         if not notices or notices[-1] != n_: notices.append(n_)
     res["notices_tier2"] = notices
     yield from wait(1.0)
-    res["tally2"] = tally(2); res["open3"] = g.is_tier_open(3); res["notice3"] = str(g.tier_notice); res["tiers_opened"] = list(g.tiers_opened)
+    res["tally2"] = tally(2); res["open3"] = g.is_tier_open(3); res["notice3"] = str(g.get_editor_property("tier_notice")); res["tiers_opened"] = list(g.tiers_opened)
     ok3 = check_opening(3, res)
     res["seconds"] = round(time.time() - t0, 1)
     quiet(False)
@@ -1932,7 +1937,7 @@ def step_rooms():
             t["alive"] = len(ms)
             for m in ms: m.apply_damage(1e7, None)
             yield from wait(0.8)
-            t["slain_notice"] = str(g.tier_notice); t["usurper_uses"] = md(g.room_uses).get("usurper", 0)
+            t["slain_notice"] = str(g.get_editor_property("tier_notice")); t["usurper_uses"] = md(g.room_uses).get("usurper", 0)
             t["slashes_given"] = [str(x) for x in g.slashes_given][given0:]
             t["slash_in_pack"] = [str(x) for x in c.get_all_inventory_lines() if str(x).startswith("slash|")]
         res["throne"] = t
@@ -3037,10 +3042,13 @@ def step_ranged():
     blow instead of shooting; behind a wall, no shot"""
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     defs = list(g.get_editor_property("monsters"))
-    sh = [d for d in defs if d.get_editor_property("shoots")]
-    res = {"shooters": len(sh), "kinds": len(defs), "defs_bad": []}
-    for d in sh:
-        prob = [n for n, bad in (("projectile", not d.get_editor_property("ranged_fx")), ("hit", not d.get_editor_property("ranged_hit_fx")),
+    # (the final boss is no kind of monsters5.json's: his own step (finalboss) measures his lance; his shot's projectile may be a
+    # mesh (the lance) instead of an effect)
+    fb = str(g.get_editor_property("final_boss_kind"))
+    sh = [d for d in defs if d.get_editor_property("shoots") and str(d.get_editor_property("name")) != fb]
+    res = {"shooters": len(sh), "kinds": len(defs), "defs_bad": [], "final_boss_shoots": any(d.get_editor_property("shoots") for d in defs if str(d.get_editor_property("name")) == fb)}
+    for d in [d for d in defs if d.get_editor_property("shoots")]:
+        prob = [n for n, bad in (("projectile", not d.get_editor_property("ranged_fx") and not d.get_editor_property("ranged_mesh")), ("hit", not d.get_editor_property("ranged_hit_fx")),
                                  ("clip", not d.get_editor_property("ranged_clip")), ("share", not 0.0 < d.get_editor_property("ranged_damage") < 1.0),
                                  ("wait", d.get_editor_property("ranged_cooldown") <= d.get_editor_property("attack_interval")),
                                  ("range", d.get_editor_property("ranged_range") <= d.get_editor_property("reach") * 1.5),
@@ -3073,7 +3081,7 @@ def step_ranged():
         yield from wait(1.5)
         st1 = md(g.shot_stats)
         t["fired"] = m.shots_fired; t["on_her"] = st1.get("on_her", 0) - st0.get("on_her", 0)
-        t["hp_lost"] = round(hp0 - c.get_health(), 1); t["last_on_her"] = str(g.last_shot_on_her)
+        t["hp_lost"] = round(hp0 - c.get_health(), 1); t["last_on_her"] = str(g.get_editor_property("last_shot_on_her"))
         t["gaps"] = [round(b - a, 2) for a, b in zip(t["times"], t["times"][1:])]
         # (close in: blows, not shots)
         quiet(True); yield from wait(0.2)
@@ -3097,7 +3105,10 @@ def step_names():
     (bNameOnlyBars); an arena wave's monsters keep their own names; the summons' lines name the new names"""
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     defs = list(g.get_editor_property("monsters"))
-    wrong = [[str(d.get_editor_property("name")), str(d.get_editor_property("title"))] for d in defs if M5["names"].get(str(d.get_editor_property("name"))) != str(d.get_editor_property("title"))]
+    # (the final boss (889) is no kind of monsters5.json's: his title is his own name)
+    fb = str(g.get_editor_property("final_boss_kind"))
+    wrong = [[str(d.get_editor_property("name")), str(d.get_editor_property("title"))] for d in defs
+             if (M5["names"].get(str(d.get_editor_property("name"))) if str(d.get_editor_property("name")) != fb else fb) != str(d.get_editor_property("title"))]
     ctr = g.get_start_room_center(); kill_all_near(ctr, 20000)
     put(ctr, 0.0); yield from wait(0.4)
     spawned = []
@@ -3521,7 +3532,218 @@ def step_balance():
     ok = packs_ok and boss_ok and all(s is not None and s <= 3.0 for s in spread.values())
     step_result("balance", ok, **res)
 
-STEPS = {"stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+# ================================================================================================ the final boss (the user's spec of 2026-11-03; 889, RDAurorim.cpp)
+def fb_state():
+    p = str(G["gen"].get_final_boss_state()).split("|")
+    # (the reward holds a "|" itself: the share is the last four fields)
+    return {"placed": int(p[0]), "slain": int(p[1]), "door_open": int(p[2]), "section": [int(p[3]), int(p[4])], "room": int(p[5]), "band": int(p[6]),
+            "boss_alive": int(p[7]), "boss_hp": float(p[8]), "reward": "|".join(p[9:-4]), "share": "|".join(p[-4:])}
+def door_state(d):
+    p = str(d.get_door_state()).split("|")
+    return {"open": int(p[0]), "alpha": float(p[1]), "travelled": int(p[2]), "at": [float(p[3]), float(p[4]), float(p[5])], "facing": [float(p[6]), float(p[7])],
+            "width": float(p[8]), "height": float(p[9]), "gate_z": float(p[10]), "gate_blocks": int(p[11]), "glow": int(p[12]), "glow_particles": int(p[13])}
+def step_finalboss():
+    """the final boss: tier 5 at the tiers' share (scaled to 1 % for the test: one set of the last tier cleared reaches it (its chests 1.7 to 4 %), and
+    nothing is placed before) sets Aurorim in a room of it she has explored with 6 to 10 of its monsters, scaled as the tier's boss
+    (3 times a tier-5 kind's hit points or more), levitating (his lowest point 30 to 70 cm over the floor) with his wings beating
+    (a wing tip's bone moving 15 cm or more); the door beside him, sealed (its grating there and blocking); his three attacks by
+    distance, each measured on her: the lance from afar (a shot with the spear flying point first), the light from above at
+    middle range (its mark, then the light falling on her), his punches with wind round his fists (effects on his hand bones);
+    killed: his loot (a tier-5 thing her hero uses), 2500 gold, the castle conquered, the door open (the grating down, no longer
+    blocking, its light); she walks into it: Brokenspire, the game's counter kept. Plays last (it ends in Brokenspire)."""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    share0 = g.get_editor_property("tier_open_share"); res["share_rule"] = share0
+    g.debug_open_tiers(5, False); yield from wait(0.5)
+    res["at_start"] = fb_state()
+    g.set_editor_property("tier_open_share", 0.01)
+    try:
+        # (her over the last tier's set first, held in the air while it is built (as 815's mw4_land): a set four sets out from her
+        # is dropped as soon as it is made)
+        S = I2(4, 0); span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+        cm_ = G["pawn"].get_editor_property("character_movement"); cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+        G["pawn"].set_actor_location(V(S.x * span, S.y * span, 400.0), False, True); yield from wait(0.3)
+        g.generate_section_now(S); yield from built(S)
+        sec = g.get_section(S); res["set"] = [S.x, S.y, g.tier_of(S), bool(sec)]
+        put(sec.get_room_center(0)); cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(1.0)
+        # (every set of the last tier counted (the census) before the share is read)
+        t0 = time.time()
+        while time.time() - t0 < 60 and not str(g.get_tier_share_line(5)).endswith("|1"): yield from wait(0.5)
+        yield from wait(1.5)
+        res["share_before"] = str(g.get_tier_share_line(5)); res["placed_before"] = fb_state()["placed"]
+        put(sec.get_room_center(0)); yield from wait(0.5)
+        g.debug_clear_section(S, 0, sec.get_room_center(0))
+        t0 = time.time()
+        while time.time() - t0 < 20 and not fb_state()["placed"]: yield from wait(0.3)
+        res["share_at_place"] = str(g.get_tier_share_line(5))
+    finally:
+        g.set_editor_property("tier_open_share", share0)
+    st = fb_state(); res["placed"] = st; res["notice_placed"] = str(g.get_editor_property("tier_notice"))
+    boss = g.get_final_boss()
+    if not boss:
+        quiet(False); step_result("finalboss", False, **res); return
+    yield from wait(1.5)
+    bl = boss.get_actor_location()
+    band = [m for m in g.get_monsters() if alive(m) and m != boss and m.spawn_index < 0 and dist2(m.get_actor_location(), bl) < 3000]
+    kinds5 = {str(m.name) for m in g.get_editor_property("monsters") if m.tier == 5}
+    res["boss"] = {"kind": str(boss.monster_name), "title": str(boss.title), "final": bool(boss.final_boss), "max_hp": round(boss.get_max_health()), "damage": round(boss.get_damage(), 1)}
+    res["band"] = {"n": len(band), "max_hp": round(max((m.get_max_health() for m in band), default=0)), "kinds": sorted({str(m.monster_name) for m in band}),
+                   "all_tier5": all(str(m.monster_name) in kinds5 for m in band)}
+    res["hp_ratio"] = round(boss.get_max_health() / max(res["band"]["max_hp"], 1.0), 2)
+    # (levitating, the wings beating: his lowest drawn point over the floor, a wing tip's bone over two seconds)
+    bottoms, hov, wing = [], [], []
+    for _ in range(24):
+        bottoms.append(boss.get_drawn_bottom(0.01, True)); hov.append(boss.get_hover_now())
+        wing.append(boss.mesh.get_socket_location("wing_ul_3") - boss.get_actor_location())
+        yield from wait(0.1)
+    res["hover"] = {"bottom": [round(min(bottoms), 1), round(max(bottoms), 1)], "now": [round(min(hov), 1), round(max(hov), 1)]}
+    res["wing_motion_cm"] = round(max(dist3(a, b) for a in wing for b in wing), 1)
+    door = g.get_final_door()
+    res["door_sealed"] = door_state(door) if door else None
+    if door:
+        dl = door.get_actor_location(); ds_ = g.get_section(I2(*st["section"]))
+        rv = door.get_actor_right_vector()
+        res["door_in_room"] = ds_.room_at(V(dl.x + rv.x * 60, dl.y + rv.y * 60, dl.z)) == st["room"]
+        put(door.get_approach(260.0), yaw=math.degrees(math.atan2(-door.get_actor_right_vector().y, -door.get_actor_right_vector().x)), z=dl.z); yield from wait(0.6)
+        shot("finalboss_door_sealed", "1280x720"); yield from rwait(1.2)
+    # (his band away, so that his own attacks are measured; then she meets him at each distance)
+    for m in band: m.apply_damage(1e9, G["pawn"])
+    yield from wait(1.0)
+    room_tiles = list(g.get_section(I2(*st["section"])).get_room_free_tiles(st["room"]))
+    w = G["w"]
+    hh = boss.capsule_component.get_scaled_capsule_half_height()
+    OBJ = [unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY1, unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY2]      # (world static, world dynamic: as his shot's sight line)
+    def clear(a, b):
+        # (from his chest to hers, as TryShoot traces: walls, doors and furniture stop it, pawns do not)
+        h = unreal.SystemLibrary.line_trace_single_for_objects(w, V(a.x, a.y, a.z + hh + 5 + hh * 0.45), V(b.x, b.y, b.z + 120), OBJ, False, [boss, G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        tt = h.to_tuple() if h else None
+        return not (tt and tt[0])
+    def pairs(lo, hi):
+        out = []
+        for a in room_tiles:
+            for b in room_tiles:
+                d_ = dist2(a, b)
+                if lo <= d_ <= hi and clear(a, b): out.append((a, b, d_))
+        out.sort(key=lambda x: -x[2])
+        return out
+    def pair(lo, hi, skip=0):
+        ps = pairs(lo, hi)
+        return ps[min(skip, len(ps) - 1)] if ps else None
+    def meet(dmin, dmax, share=1.0, skip=0):
+        # (share: she stands that share of the way from him to the tile found: the tiles are 3 m apart, nearer than that for blows)
+        p_ = pair(dmin, dmax, skip)
+        if not p_: return None
+        a, b, d_ = p_
+        b = V(a.x + (b.x - a.x) * share, a.y + (b.y - a.y) * share, b.z); d_ = d_ * share
+        boss.set_actor_location(V(a.x, a.y, a.z + boss.capsule_component.get_scaled_capsule_half_height() + 5), False, True)
+        put(b, yaw=math.degrees(math.atan2(a.y - b.y, a.x - b.x)))
+        return round(d_)
+    def refill(): c.set_health(c.get_max_health())
+    def stat(name, k): return dict(g.get_editor_property(name)).get(k, 0)
+    aggro = (g.get_editor_property("aggro_distance"), g.get_editor_property("lose_distance"))
+    quiet(False)
+    g.set_editor_property("aggro_distance", 3500.0); g.set_editor_property("lose_distance", 5000.0)
+    try:
+        # (each attack watched in one window: she is kept alive (a tier-5 boss's blows end a starting hero in three), what he took
+        # off her added up before each refill)
+        def watch(sec, until, each=None):
+            lost = 0.0; prev = c.get_health(); t0 = now()
+            while now() - t0 < sec:
+                hpn = c.get_health()
+                if hpn < prev: lost += prev - hpn
+                if hpn < c.get_max_health() * 0.6: refill(); hpn = c.get_health()
+                prev = hpn
+                if each: each()
+                if until(): break
+                yield
+            return round(lost, 1)
+        # the lance from afar (up to three places tried: a sight line the game's own trace refuses is not his to throw along)
+        res["long_tries"] = []; res["long"] = {}
+        for k_ in range(3):
+            dist_ = meet(1500, 3000, 1.0, k_ * 4)
+            if not dist_: break
+            refill(); s0 = boss.shots_fired; on0 = stat("shot_stats", "on_her"); lance = []; last = {}
+            def look_lance():
+                for a_ in GS.get_all_actors_of_class(w, unreal.StaticMeshActor):
+                    sm = a_.static_mesh_component.static_mesh
+                    if sm and sm.get_name() == "SM_Knight_04_Spear":
+                        p_ = a_.get_actor_location(); kk = a_.get_name()
+                        if kk in last and dist3(p_, last[kk]) > 5:
+                            mv = p_ - last[kk]; mv = mv * (1.0 / max(mv.length(), 1e-3)); up = a_.get_actor_up_vector()
+                            lance.append(round(up.x * mv.x + up.y * mv.y + up.z * mv.z, 2))
+                        last[kk] = p_
+            lost = yield from watch(8, lambda: boss.shots_fired > s0, look_lance)
+            if boss.shots_fired > s0: lost += (yield from watch(2.5, lambda: False, look_lance))
+            tr = {"distance": dist_, "shots": boss.shots_fired - s0, "on_her": stat("shot_stats", "on_her") - on0, "hp_lost": lost, "lance_frames": len(lance),
+                  "lance_point_first": round(sum(lance) / len(lance), 2) if lance else None, "last_on_her": str(g.get_editor_property("last_shot_on_her"))}
+            res["long_tries"].append(tr)
+            if tr["shots"] > 0: res["long"] = tr; break
+        # the light from above at middle range
+        res["middle"] = {"distance": meet(600, 1000)}
+        if res["middle"]["distance"]:
+            refill(); b0 = boss.beams_cast; f0 = stat("sky_beam_stats", "fell"); h0 = stat("sky_beam_stats", "on_her"); marks = [0]; taken = [False]
+            def look_mark():
+                if g.get_sky_beam_lines():
+                    marks[0] += 1
+                    if not taken[0]: shot("finalboss_beam_mark", "1280x720"); taken[0] = True
+            lost = yield from watch(14, lambda: stat("sky_beam_stats", "fell") > f0, look_mark)
+            yield from wait(0.3); shot("finalboss_beam_light", "1280x720"); yield from wait(1.0)
+            res["middle"].update({"beams": boss.beams_cast - b0, "mark_frames": marks[0], "fell": stat("sky_beam_stats", "fell") - f0, "on_her": stat("sky_beam_stats", "on_her") - h0, "hp_lost": lost})
+        # his punches with wind round his fists
+        res["melee"] = {"distance": meet(250, 400, 0.6)}
+        if res["melee"]["distance"]:
+            refill(); m0 = boss.fist_fx_made; hl0 = boss.hits_landed; fx = [[]]
+            def look_fist():
+                ln = [str(x) for x in boss.get_fist_fx_lines()]
+                if ln: fx[0] = ln
+            lost = yield from watch(10, lambda: boss.hits_landed > hl0, look_fist)
+            res["melee"].update({"fist_fx": boss.fist_fx_made - m0, "lines": fx[0], "hits": boss.hits_landed - hl0, "hp_lost": lost})
+    finally:
+        g.set_editor_property("aggro_distance", aggro[0]); g.set_editor_property("lose_distance", aggro[1]); quiet(True)
+    # killed: his loot, the gold, the castle conquered, the door open
+    refill(); gold0 = g.get_gold(); bl = boss.get_actor_location()
+    boss.apply_damage(1e9, G["pawn"]); yield from wait(1.0)
+    st2 = fb_state(); res["killed"] = st2; res["gold"] = g.get_gold() - gold0; res["notice_killed"] = str(g.get_editor_property("tier_notice")); res["reward"] = str(g.get_editor_property("final_reward"))
+    item = str(g.get_editor_property("final_reward")).split("|")[0]
+    it = next((i for i in g.get_editor_property("items") if str(i.name) == item), None)
+    res["reward_tier5"] = bool(it and 5 in list(it.tiers))
+    res["pile"] = sorted({str(x) for p in GS.get_all_actors_of_class(G["w"], unreal.RDLootPile) if dist2(p.get_actor_location(), bl) < 500 for x in p.things})
+    yield from wait(2.5)
+    if door:
+        res["door_open"] = door_state(door); res["door_glow"] = res["door_open"]["glow"] == 1
+        put(door.get_approach(260.0), yaw=math.degrees(math.atan2(-door.get_actor_right_vector().y, -door.get_actor_right_vector().x)), z=door.get_actor_location().z); yield from wait(0.8)
+        shot("finalboss_door_open", "1280x720"); yield from rwait(1.2)
+        # she walks into it: Brokenspire
+        G["travel_until"] = time.time() + 45
+        put(door.get_approach(170.0), yaw=math.degrees(math.atan2(-door.get_actor_right_vector().y, -door.get_actor_right_vector().x)), z=door.get_actor_location().z)
+        try: c.simulate_key(key("W"), True)
+        except Exception: pass
+        t0 = time.time()
+        while time.time() - t0 < 40:
+            yield from rwait(0.5)
+            gw = UES.get_game_world()
+            if gw and gw.get_name().endswith("brokenspire") and refresh() and G.get("gen") and G.get("pawn"): break
+        yield from rwait(2.0); refresh()
+        try: G["gen"].get_player_combat().simulate_key(key("W"), False)
+        except Exception: pass
+        res["world_after"] = G["w"].get_name() if G.get("w") else None
+        gi = GS.get_game_instance(G["w"]) if G.get("w") else None
+        res["counter"] = gi.get_counter("finalboss") if gi else None
+        G.pop("travel_until", None)
+    L_, M_, Me = res.get("long", {}), res.get("middle", {}), res.get("melee", {})
+    sb = res.get("door_sealed") or {}; do = res.get("door_open") or {}
+    ok = (not res["at_start"]["placed"] and not res["placed_before"] and st["placed"] and res["boss"]["kind"] == "Aurorim" and res["boss"]["final"]
+          and 6 <= res["band"]["n"] <= 10 and res["band"]["all_tier5"] and res["hp_ratio"] >= 2.9
+          and 30.0 <= res["hover"]["bottom"][0] and res["hover"]["bottom"][1] <= 75.0 and res["wing_motion_cm"] >= 15.0
+          and sb.get("open") == 0 and sb.get("gate_blocks") == 1 and res.get("door_in_room")
+          and L_.get("shots", 0) >= 1 and L_.get("on_her", 0) >= 1 and L_.get("lance_frames", 0) >= 3 and (L_.get("lance_point_first") or 0) > 0.9
+          and M_.get("beams", 0) >= 1 and M_.get("mark_frames", 0) > 0 and M_.get("fell", 0) >= 1 and M_.get("on_her", 0) >= 1 and M_.get("hp_lost", 0) > 0
+          and Me.get("fist_fx", 0) >= 4 and Me.get("hits", 0) >= 1 and all(float(l.split("|")[2]) < 12.0 for l in Me.get("lines", [])) and Me.get("lines")
+          and res["killed"]["slain"] and res["gold"] >= 2500 and res["reward_tier5"] and res["reward"].split("|")[0] in res["pile"] and "CONQUERED" in res["notice_killed"]
+          and do.get("open") == 1 and do.get("alpha", 0) >= 1.0 and do.get("gate_blocks") == 0 and res.get("door_glow")
+          and (res.get("world_after") or "").endswith("brokenspire") and res.get("counter") == 1)
+    step_result("finalboss", ok, **res)
+
+STEPS = {"finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

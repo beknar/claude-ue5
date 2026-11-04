@@ -747,6 +747,8 @@ public:
 		TWeakObjectPtr<ARDMonster> From; bool bAlly = false; FVector At = FVector::ZeroVector, Vel = FVector::ZeroVector;
 		float Damage = 0.f, Life = 0.f; TWeakObjectPtr<UFXSystemComponent> Fx; TObjectPtr<UFXSystemAsset> HitFx = nullptr; float FxScale = 1.f;
 		FName Kind; FString Theme;
+		/** the final boss's lance: a mesh flying along the shot's way (its rotation from the way's, then MeshRot) */
+		TWeakObjectPtr<AActor> Mesh; FQuat MeshRot = FQuat::Identity; FVector MeshPivot = FVector::ZeroVector;
 	};
 	TArray<FMonsterShot> MonsterShots;
 	/** effects ending (a shot's trail fades, then goes) */
@@ -817,6 +819,59 @@ public:
 	/** the heroes grow as the tiers open (the hero's HealthPerTier, SpellPowerPerTier, UnarmedPowerPerTier for each tier open
 	 *  past the first), and her mana comes back as a share of her pool (ManaRegenShare) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward6") bool bTierGrowth = false;
+
+	// ---- the final boss (the user's spec of 2026-11-03; RDAurorim.cpp, pipeline/unreal/889): when the last tier reaches the
+	// tiers' share (TierOpenShare of its rooms explored, monsters killed, chests looted), FinalBossKind waits in a room of it she
+	// has explored with FinalBossMinions of its kinds, scaled as the tier's boss; beside it a door to Brokenspire, sealed while it
+	// lives. Its death: its loot (the best of the last tier's things she can use), FinalBossGold, the victory, the door open
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") bool bFinalBossOn = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") FName FinalBossKind = NAME_None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") FIntPoint FinalBossMinions = FIntPoint(6, 10);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") int32 FinalBossGold = 2500;
+	/** its size against its kind's (its health and blows are the tier's boss's: BossHealth, BossDamage) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossScale = 1.f;
+	/** the door: an arch (FinalDoorFrame), a grating in it while sealed (FinalDoorGate, sinking into the floor when it opens),
+	 *  a light in it once open (FinalDoorFx); scaled to stand FinalDoorHeight tall */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") TObjectPtr<UStaticMesh> FinalDoorFrame = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") TObjectPtr<UStaticMesh> FinalDoorGate = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") TObjectPtr<UFXSystemAsset> FinalDoorFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalDoorHeight = 380.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalDoorFxScale = 0.5f;
+	/** placed, slain (for the game: a counter), the door open, the reward given ("<item>|<gold>") */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Final") bool bFinalBossPlaced = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Final") bool bFinalBossSlain = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Final") FString FinalReward;
+	UPROPERTY(Transient) TObjectPtr<class ARDFinalDoor> FinalDoor = nullptr;
+	/** "<placed>|<slain>|<door open>|<section x>|<section y>|<room>|<band>|<boss alive>|<boss hp>|<reward>|<share done/all>" (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") FString GetFinalBossState() const;
+	/** the last tier's share now: "<rooms done>/<all>|<killed>/<all>|<looted>/<all>|<complete>" (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") FString GetTierShareLine(int32 Tier) const;
+	/** the final boss's monster (none: not placed, or gone) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Final") ARDMonster* GetFinalBoss() const;
+	/** the door's actor (none before the boss is placed) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Final") class ARDFinalDoor* GetFinalDoor() const { return FinalDoor; }
+	/** the light from above in the air: "<x>|<y>|<z>|<seconds left>|<radius>|<damage>", and those that fell, struck her (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") TArray<FString> GetSkyBeamLines() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Final") TMap<FString, int32> SkyBeamStats;
+	void CheckFinalBoss();
+	bool PlaceFinalBoss();
+	void OnFinalBossKilled(ARDMonster* Boss);
+	void TickFinal(float Dt);
+	void ResetFinal();
+	/** the best of the last tier's things her hero can use: a weapon she wields, else armour she wears, else a ring */
+	FName PickFinalReward() const;
+	/** a beam called down: a mark at At now, the light BeamDelay seconds after */
+	void QueueSkyBeam(ARDMonster* From, const FVector& At, float Delay, float Radius, float Damage, UFXSystemAsset* Fx, UFXSystemAsset* MarkFx, UFXSystemAsset* HitFx, float FxScale, float MarkScale, bool bFxUser, bool bMarkUser, bool bHitUser);
+	struct FSkyBeam
+	{
+		TWeakObjectPtr<ARDMonster> From; FVector At = FVector::ZeroVector; float Left = 0.f, Radius = 200.f, Damage = 0.f, FxScale = 1.f; bool bFxUser = false, bHitUser = false;
+		TObjectPtr<UFXSystemAsset> Fx = nullptr; TObjectPtr<UFXSystemAsset> HitFx = nullptr; TWeakObjectPtr<UFXSystemComponent> Mark;
+	};
+	TArray<FSkyBeam> SkyBeams;
+	/** the final boss set again on the way back into the castle (placed, not slain, before she left): once a room of the tier
+	 *  is seen */
+	bool bFinalRestorePending = false;
+	float FinalRestoreTry = 0.f;
 	/** the highest tier open (1 at the start) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") int32 GetOpenTier() const;
 	/** what the tiers opened give her hero now: her hit points' factor, a spell's and her fists' damage factors */
@@ -1351,6 +1406,8 @@ public:
 		FName Ring = NAME_None; FIntVector RingKey = FIntVector(0, 0, -1); FString Label;
 		/** the third list: a throne room's usurper (its room, not a tier's opening) */
 		bool bThrone = false;
+		/** the castle's final boss (RDAurorim.cpp): tier 5 at its share, the door to Brokenspire beside it */
+		bool bFinal = false;
 	};
 	TArray<FEncounter> Encounters;
 	/** a set of rooms is generated (again): the encounters in it come back (the living ones) */

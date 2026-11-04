@@ -36,6 +36,7 @@ From tier 1 to tier 5 a monster's hit points grow 6.8 times and its damage 4.9 t
 
 - **Opening a tier:** a tier opens when the tier before has half of its rooms explored, half of its monsters killed and half of its chests and trunks looted.
 - **The boss:** each opening puts the new tier's strongest kind in a room of the tier before that she has explored. It is 1.35 times bigger, has 3 times the hit points, hits 1.6 times as hard and has 3 to 6 monsters of the new tier round it.
+- **The final boss:** once tier 5 itself reaches the share, Aurorim waits in a room of it, scaled as tier 5's boss (its strongest kind's factors, 3 times the hit points, 1.6 times the blows) with 6 to 10 escorts; his lance (13 to 32 m, 0.75 of a blow), his light from above (3.5 to 13 m, a full blow, 230 cm round) and his punches. Not yet in the trials: he is not among the bosses each hero fought there.
 - **The guarded ring:** if she has found neither magic potency ring of the tier before, one is put in a container there, guarded by 4 monsters of the new tier.
 
 ### The heroes: how each grows

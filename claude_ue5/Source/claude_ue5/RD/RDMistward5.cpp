@@ -20,6 +20,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -80,7 +82,7 @@ bool ARDMonster::TryShoot(AActor* P, const FVector& D, float Dist, float Dz, flo
 	Face(D, Dt);
 	if (FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) < 0.9f) { SetWalkingAnim(false); return true; }      // (turning to aim)
 	GetMesh()->PlayAnimation(RangedClip, false);
-	AttackLen = RDClipLength(RangedClip); AttackHit = AttackLen * RangedRelease; AttackTime = 0.f; bHitDone = false; bRangedSwing = true;
+	AttackLen = RDClipLength(RangedClip); AttackHit = AttackLen * RangedRelease; AttackTime = 0.f; bHitDone = false; bRangedSwing = true; bBeamSwing = false;
 	ShotAim = To;
 	if (ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr) G->PlaySoundAt(SndAttack, GetActorLocation());
 	VoiceTimer = FMath::Max(VoiceTimer, 2.f);
@@ -104,6 +106,21 @@ void ARDMonster::ReleaseShot(AActor* P)
 	}
 	if (RangedMuzzleFx) RDMSpawnFx(this, RangedMuzzleFx, From, (Aim - From).Rotation(), RangedFxScale, nullptr, true, true);
 	G->FireMonsterShot(this, From, Aim, RangedSpeed, GetShotDamage(), RangedRange * 1.3f, RangedFx, RangedHitFx, RangedFxScale, RangedTheme);
+	// (the final boss: its shot is a lance that flies, laid along the way (RangedMeshRot), its middle on the shot's point)
+	if (RangedMesh && G->MonsterShots.Num() > 0)
+	{
+		ARDDungeonGenerator::FMonsterShot& S = G->MonsterShots.Last();
+		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		if (AStaticMeshActor* A = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), FTransform(From), Sp))
+		{
+			UStaticMeshComponent* C = A->GetStaticMeshComponent();
+			C->SetMobility(EComponentMobility::Movable); C->SetStaticMesh(RangedMesh); C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			C->SetCastShadow(true); A->SetActorScale3D(FVector(RangedMeshScale));
+			S.Mesh = A; S.MeshRot = FQuat(RangedMeshRot); S.MeshPivot = RangedMesh->GetBoundingBox().GetCenter() * RangedMeshScale;
+			const FQuat Q = S.Vel.Rotation().Quaternion() * S.MeshRot;
+			A->SetActorLocationAndRotation(S.At - Q.RotateVector(S.MeshPivot), Q);
+		}
+	}
 	++ShotsFired; ++AttacksMade;
 }
 
@@ -122,7 +139,7 @@ void ARDDungeonGenerator::FireMonsterShot(ARDMonster* From, const FVector& Muzzl
 
 void ARDDungeonGenerator::ResetMistward5()
 {
-	for (FMonsterShot& S : MonsterShots) if (UFXSystemComponent* F = S.Fx.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); }
+	for (FMonsterShot& S : MonsterShots) { if (UFXSystemComponent* F = S.Fx.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); } if (AActor* Mh = S.Mesh.Get()) Mh->Destroy(); }
 	for (auto& E : ShotFxEnding) if (UFXSystemComponent* F = E.Key.Get()) { F->DeactivateImmediate(); F->DestroyComponent(); }
 	MonsterShots.Reset(); ShotFxEnding.Reset(); ShotStats.Reset(); LastShotOnHer.Reset();
 	for (ARDSpectator* A : Crowd) if (IsValid(A)) A->Destroy();
@@ -208,7 +225,10 @@ void ARDDungeonGenerator::TickMonsterShots(float Dt)
 		if (Ended.IsEmpty() && S.Life <= 0.f) { Ended = TEXT("faded"); ShotStats.FindOrAdd(TEXT("faded"))++; }
 		S.At = B;
 		if (UFXSystemComponent* F = S.Fx.Get()) F->SetWorldLocationAndRotation(B, S.Vel.Rotation());
+		if (AActor* Mh = S.Mesh.Get()) { const FQuat Mq = S.Vel.Rotation().Quaternion() * S.MeshRot; Mh->SetActorLocationAndRotation(B - Mq.RotateVector(S.MeshPivot), Mq); }
 		if (Ended.IsEmpty()) continue;
+		// (the lance: stuck where it struck a moment, then gone)
+		if (AActor* Mh = S.Mesh.Get()) Mh->SetLifeSpan(Ended == TEXT("wall") ? 1.5f : 0.15f);
 		if (S.HitFx && Ended != TEXT("faded")) RDMSpawnFx(this, S.HitFx, EndAt == B ? B : (B + EndAt) * 0.5f, (-S.Vel).Rotation(), S.FxScale, nullptr, true, true);
 		if (Ended != TEXT("faded")) PlaySoundAt(TEXT("Monster.ShotHit"), B);
 		if (UFXSystemComponent* F = S.Fx.Get()) { F->Deactivate(); ShotFxEnding.Add(TPair<TWeakObjectPtr<UFXSystemComponent>, float>(S.Fx, 0.4f)); }

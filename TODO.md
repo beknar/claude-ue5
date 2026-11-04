@@ -2,7 +2,7 @@
 
 [README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md)
 
-What is still to be tested and done, and the known limits. Written 2026-11-03, while the wilderness (the user's spec of 2026-11-03, [docs/wilderness.txt](docs/wilderness.txt)) was being finished on the `wilderness` branch. Remove an item when a test shows it working or the work lands; add one when a limit is found.
+What is still to be tested and done, and the known limits. Written 2026-11-03 for the wilderness and the castle's final boss (the user's spec of 2026-11-03, [docs/wilderness.txt](docs/wilderness.txt)), merged that day in PR #16. Remove an item when a test shows it working or the work lands; add one when a limit is found.
 
 ## To test
 
@@ -18,14 +18,23 @@ Built and compiled, but no test has run it yet:
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
 - [ ] **The packaged game with the wilderness:** a Shipping build of `brokenspire` has not been made since the wilderness was added (worker threads, transient map textures and the save all behave differently packaged); then a walk out of the gate, a journey and a save and load in it, and its memory over a long walk.
 
+## The final boss (Aurorim, 2026-11-03)
+
+Built and tested (`868`'s `finalboss`); still to test or do:
+
+- [ ] **Coming back to an unslain final boss:** placed and not slain when she leaves the castle, he is set again once she sees a room of tier 5 on her way back (`bFinalRestorePending`); no test has left and come back.
+- [ ] **The real share:** the test scales tier 5's share to 1 % (one set); a game reaches 50 % over about 16 of tier 5's 32 sets. Nobody has played that far.
+- [ ] **His fight against each hero:** the balance trials have not fought him (tier 5's boss in them is its strongest kind); a starting Warrior dies in three of his blows. Trial him with the tier-5 kits ([docs/hero-balance.md](docs/hero-balance.md)).
+- [ ] **A room with no wall free for the door:** the door goes against a wall of his room away from him; a room with none (never seen yet) leaves no door (the log says so). The castle's arch and its Escape menu still take her back.
+- [ ] **The map:** the door has no mark of its own (his mark is the boss's).
+- [ ] **The packaged game:** not built with him yet.
+
 ## To do
 
 - [ ] **A chunk's making stutters:** the 5 ms budget a frame cannot split one chunk's work on the game thread (its mesh, collision setup, plants), measured at 45 to 72 ms: one long frame each time a chunk is made, every few seconds while she runs. Split it over frames (the ground first, then the plants).
 - [ ] **Memory over a long walk:** back at the start after a 6 km walk out and back the editor held 470 to 670 MB more than when it began (the test allows 700); eight long journeys held flat. Measure hours of walking, and in the packaged game.
-- [ ] Commit to the `wilderness` branch, open the PR, review it, fix what the review finds, merge if it is mergeable (the spec's last request).
 - [ ] Give the captain's two wilderness quests ("Wolves on the Mill Road", "The Lost Patrol") now that the gate is open: they still say they wait for it.
 - [ ] Balance the heroes continent-wide: the first attempt covers Mistward Castle's five tiers only ([docs/hero-balance.md](docs/hero-balance.md#continent-wide-balancing-considerations)). The wilderness's tiers go by the distance from Brokenspire while her growth counts the castle's tiers she has opened; trials at each distance band, the wilderness's loot and the travel times are still to be done.
-- [ ] Leave the editor usable at the end: `brokenspire` open, play stopped, started without `-deterministicaudio`.
 
 ## Limits
 

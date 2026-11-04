@@ -120,6 +120,46 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedRelease = 0.5f;
 	/** what the shot is ("a thrown axe": the HUD's line when it lands) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString RangedTheme;
+	// ---- mistward_castle's final boss (the user's spec of 2026-11-03: Aurorim; RDAurorim.cpp, pipeline/unreal/889)
+	/** it levitates: its mesh raised this far over its capsule (cm), bobbing HoverBob up and down every HoverPeriod seconds;
+	 *  down on the floor when it dies */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HoverHeight = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HoverBob = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HoverPeriod = 1.6f;
+	/** its shot is a thing that flies (a thrown lance): this mesh along the shot's way, turned by RangedMeshRot from the way's
+	 *  rotation (the lance's point is its +Z: pitch -90 lays it along the way) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> RangedMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RangedMeshScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FRotator RangedMeshRot = FRotator::ZeroRotator;
+	/** a beam of light from above at its foe from BeamMin to BeamMax (cm): its BeamClip, at BeamRelease of it a mark where its
+	 *  foe stands, and BeamDelay seconds after the light falls there: BeamDamage of its blow's damage within BeamRadius; then it
+	 *  waits BeamCooldown seconds (scaled as its blows' interval with its tier) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bSkyBeam = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamMin = 400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamMax = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamDamage = 0.9f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamRadius = 220.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamDelay = 0.9f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamCooldown = 6.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> BeamClip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamRelease = 0.6f;
+	/** the light falling (from above), the mark on the floor before it, the burst where it lands */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BeamFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BeamMarkFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UFXSystemAsset> BeamHitFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamFxScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BeamMarkScale = 1.f;
+	/** each effect's scale goes into its User.Scale (the Stylized Shields packs) rather than its component's (a system that
+	 *  honours both is scaled twice) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bBeamFxUserScale = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bBeamMarkUserScale = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bBeamHitUserScale = false;
+	/** effects round its fists while it strikes with them (wind): each FistFx[i] at FistFxScale[i] on every bone of FistBones,
+	 *  from the blow's start to its end */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UFXSystemAsset>> FistFx;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> FistFxScale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<bool> FistFxUserScale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> FistBones;
 };
 
 /** Sounds for one occasion ("Player.Hurt", "Env.DoorOpen", "Monster.Troll.Roar"...): one of them is played each time,

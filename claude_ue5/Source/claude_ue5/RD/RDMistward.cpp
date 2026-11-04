@@ -535,9 +535,12 @@ void ARDDungeonGenerator::RespawnEncounters(ARDSection* S)
 		{
 			if (E.Dead[I] || (E.Live[I].IsValid() && !E.Live[I]->IsDead())) continue;
 			const bool bBoss = E.bBoss && I == 0;
-			ARDMonster* M = SpawnMonsterKind(E.Kinds[I], E.Spots[I], E.Tier, bBoss ? BossHealth : 1.f, bBoss ? BossDamage : 1.f, bBoss ? BossScale : 1.f,
-				bBoss ? FString::Printf(TEXT("BOSS  %s"), *(Monsters[E.Kinds[I]].Title.IsEmpty() ? Monsters[E.Kinds[I]].Name.ToString() : Monsters[E.Kinds[I]].Title)) : FString());
-			if (M) { M->bBoss = bBoss; E.Live[I] = M; }
+			// (the final boss: scaled as the tier's boss in its health and blows, its size its own)
+			const bool bFinalOne = bBoss && E.bFinal;
+			const FString Nm = Monsters[E.Kinds[I]].Title.IsEmpty() ? Monsters[E.Kinds[I]].Name.ToString() : Monsters[E.Kinds[I]].Title;
+			ARDMonster* M = SpawnMonsterKind(E.Kinds[I], E.Spots[I], E.Tier, bBoss ? BossHealth : 1.f, bBoss ? BossDamage : 1.f, bFinalOne ? FinalBossScale : (bBoss ? BossScale : 1.f),
+				bFinalOne ? FString::Printf(TEXT("FINAL BOSS  %s"), *Nm) : (bBoss ? FString::Printf(TEXT("BOSS  %s"), *Nm) : FString()));
+			if (M) { M->bBoss = bBoss; M->bFinalBoss = bFinalOne; E.Live[I] = M; }
 		}
 	}
 }

@@ -512,6 +512,13 @@ void ARDDungeonGenerator::BeginTownPlay()
 			if (bBossEncounters && GI->GetCounter(FString::Printf(TEXT("bossdone:%d"), T)) == 0) RestoredBossTiers.AddUnique(T);
 			if (bRingGuards) RestoredRingTiers.AddUnique(T);
 		}
+		// (the final boss: slain for the game; placed and not slain before she left, set again once a room of the last tier is
+		// seen (its share counted again from nothing would have kept him away))
+		if (bFinalBossOn)
+		{
+			bFinalBossSlain = GI->GetCounter(TEXT("finalboss")) > 0;
+			bFinalRestorePending = !bFinalBossSlain && GI->GetCounter(TEXT("finalboss:placed")) > 0;
+		}
 		GI->Count(TEXT("enter"));
 	}
 }

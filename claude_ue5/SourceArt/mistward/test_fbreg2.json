@@ -1,0 +1,208 @@
+{
+ "tag": "fbreg2",
+ "plan": [
+  "names",
+  "ranged"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "names",
+   "ok": true,
+   "wrong_titles": [],
+   "spawned": [
+    [
+     "Rat",
+     "Plague Rat"
+    ],
+    [
+     "Orc_03",
+     "Orc Raider"
+    ],
+    [
+     "Warrior_02_the_leopard",
+     "Leopard Warrior"
+    ],
+    [
+     "Spider",
+     "Giant Spider"
+    ]
+   ],
+   "name_only": true,
+   "summon_lines": [
+    "calls Rotting Soldier (a tier 1 monster) to fight at her side until it falls; 2 at most",
+    "calls Grave Gunner (a tier 2 monster) to fight at her side until it falls; 3 at most",
+    "calls Orc Skirmisher (a tier 3 monster) to fight at her side until it falls; 4 at most",
+    "calls Alien Defender (a tier 4 monster) to fight at her side until it falls; 5 at most",
+    "calls Giant Spider (a tier 5 monster) to fight at her side until it falls; 5 at most"
+   ],
+   "stale_lines": []
+  },
+  {
+   "step": "ranged",
+   "ok": true,
+   "shooters": 28,
+   "kinds": 56,
+   "defs_bad": [],
+   "final_boss_shoots": true,
+   "trials": [
+    {
+     "kind": "Soldier",
+     "title": "Rotting Soldier",
+     "dist": 976,
+     "blow": 14.0,
+     "shot": 5.6,
+     "wait": 5.52,
+     "interval": 1.84,
+     "flight": [
+      [
+       916,
+       0,
+       146,
+       1900
+      ],
+      [
+       110,
+       0,
+       111,
+       1900
+      ],
+      [
+       849,
+       0,
+       135,
+       1900
+      ],
+      [
+       739,
+       0,
+       131,
+       1900
+      ],
+      [
+       627,
+       0,
+       127,
+       1900
+      ],
+      [
+       511,
+       0,
+       123,
+       1900
+      ],
+      [
+       401,
+       0,
+       120,
+       1900
+      ],
+      [
+       284,
+       0,
+       116,
+       1900
+      ],
+      [
+       177,
+       0,
+       112,
+       1900
+      ]
+     ],
+     "times": [
+      1.79,
+      9.36
+     ],
+     "fired": 2,
+     "on_her": 2,
+     "hp_lost": 10.8,
+     "last_on_her": "Soldier|5.6|14.0|a rifle shot",
+     "gaps": [
+      7.57
+     ],
+     "close": {
+      "shots": 0,
+      "blows": 2
+     }
+    },
+    {
+     "kind": "Medic",
+     "title": "Mad Surgeon",
+     "dist": 600,
+     "blow": 12.0,
+     "shot": 6.6,
+     "wait": 4.05,
+     "interval": 1.84,
+     "flight": [
+      [
+       505,
+       0,
+       132,
+       1400
+      ],
+      [
+       494,
+       0,
+       132,
+       1400
+      ],
+      [
+       410,
+       0,
+       127,
+       1400
+      ],
+      [
+       324,
+       0,
+       123,
+       1400
+      ],
+      [
+       239,
+       0,
+       118,
+       1400
+      ],
+      [
+       158,
+       0,
+       114,
+       1400
+      ],
+      [
+       69,
+       0,
+       109,
+       1400
+      ]
+     ],
+     "times": [
+      1.88,
+      8.29
+     ],
+     "fired": 3,
+     "on_her": 3,
+     "hp_lost": 19.0,
+     "last_on_her": "Medic|6.6|12.0|a syringe dart",
+     "gaps": [
+      6.41
+     ],
+     "close": {
+      "shots": 0,
+      "blows": 2
+     }
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_fbreg2_names_bars.png",
+  "mw_fbreg2_ranged_Soldier.png",
+  "mw_fbreg2_ranged_Medic.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
