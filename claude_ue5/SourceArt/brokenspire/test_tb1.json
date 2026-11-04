@@ -1,0 +1,674 @@
+{
+ "tag": "tb1",
+ "plan": [
+  "town",
+  "doors",
+  "talk",
+  "services",
+  "guards",
+  "folk",
+  "gate"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "town",
+   "ok": true,
+   "seed0": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 123,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 75,
+     "burned": 23,
+     "boarded": 25
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 20,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -6000,
+     -450
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -22,
+      18
+     ],
+     "tavern": [
+      -38,
+      -45
+     ],
+     "smithy": [
+      -117,
+      15
+     ],
+     "store": [
+      -27,
+      -22
+     ],
+     "healer": [
+      -99,
+      -24
+     ],
+     "storehouse": [
+      -93,
+      12
+     ],
+     "barracks": [
+      -116,
+      54
+     ],
+     "chapel": [
+      104,
+      -126
+     ],
+     "witch's hut": [
+      225,
+      45
+     ],
+     "castle": [
+      206,
+      -4
+     ]
+    },
+    "gate_at": [
+     -210,
+     -4
+    ]
+   },
+   "roles": {
+    "Elder": 1,
+    "Preacher": 1,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Refugee": 4,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Soldier": 3,
+    "Witch": 1,
+    "Townsfolk": 66
+   },
+   "roles_missing": [],
+   "seed1111": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 118,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 72,
+     "burned": 21,
+     "boarded": 25
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 21,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -6000,
+     1650
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -39,
+      69
+     ],
+     "tavern": [
+      -80,
+      72
+     ],
+     "smithy": [
+      -117,
+      -9
+     ],
+     "store": [
+      -124,
+      34
+     ],
+     "healer": [
+      -92,
+      33
+     ],
+     "storehouse": [
+      -105,
+      -48
+     ],
+     "barracks": [
+      14,
+      33
+     ],
+     "chapel": [
+      87,
+      -140
+     ],
+     "witch's hut": [
+      222,
+      -36
+     ],
+     "castle": [
+      206,
+      16
+     ]
+    },
+    "gate_at": [
+     -207,
+     16
+    ]
+   },
+   "seed2222": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 122,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 71,
+     "burned": 22,
+     "boarded": 29
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 24,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -1650,
+     -7200
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -42,
+      -34
+     ],
+     "tavern": [
+      10,
+      -36
+     ],
+     "smithy": [
+      32,
+      -102
+     ],
+     "store": [
+      -58,
+      -88
+     ],
+     "healer": [
+      36,
+      -26
+     ],
+     "storehouse": [
+      -57,
+      -124
+     ],
+     "barracks": [
+      -120,
+      -50
+     ],
+     "chapel": [
+      -162,
+      -16
+     ],
+     "witch's hut": [
+      99,
+      189
+     ],
+     "castle": [
+      -16,
+      206
+     ]
+    },
+    "gate_at": [
+     -16,
+     -204
+    ]
+   },
+   "seed3333": {
+    "kinds": {
+     "temple": 1,
+     "tavern": 1,
+     "smithy": 1,
+     "store": 1,
+     "healer": 1,
+     "storehouse": 1,
+     "barracks": 1,
+     "chapel": 1,
+     "witch's hut": 1,
+     "home": 111,
+     "castle": 1
+    },
+    "homes": {
+     "lived": 55,
+     "burned": 24,
+     "boarded": 32
+    },
+    "spots": {
+     "circle": 1,
+     "mill": 1,
+     "tower": 21,
+     "gate": 1,
+     "well": 1,
+     "board": 1,
+     "stall": 4,
+     "lamp": 4,
+     "grave": 16,
+     "graveyard": 1,
+     "tent": 3,
+     "still": 1,
+     "altar": 1,
+     "bar": 1,
+     "smith": 1,
+     "counter": 1,
+     "basin": 1,
+     "stash": 1
+    },
+    "square": [
+     -750,
+     -6900
+    ],
+    "unreached": [],
+    "castle_rooms": 4,
+    "mistgate": true,
+    "trades_at": {
+     "temple": [
+      -39,
+      -34
+     ],
+     "tavern": [
+      27,
+      -86
+     ],
+     "smithy": [
+      8,
+      -27
+     ],
+     "store": [
+      51,
+      -50
+     ],
+     "healer": [
+      -24,
+      -123
+     ],
+     "storehouse": [
+      21,
+      -106
+     ],
+     "barracks": [
+      62,
+      -130
+     ],
+     "chapel": [
+      -58,
+      126
+     ],
+     "witch's hut": [
+      90,
+      222
+     ],
+     "castle": [
+      -8,
+      206
+     ]
+    },
+    "gate_at": [
+     -8,
+     -204
+    ]
+   },
+   "layouts_differ": true,
+   "back_to_seed": true
+  },
+  {
+   "step": "doors",
+   "ok": true,
+   "prompt": "open door",
+   "door_open": 1.0,
+   "walked_in": true,
+   "container": {
+    "kind": "barrel",
+    "looted": true,
+    "gold_found": 9,
+    "lines": 0
+   },
+   "boarded_prompt": "pry the boards loose",
+   "after_pry": false,
+   "boarded_door_open": 1.0,
+   "castle_door_open": 1.0
+  },
+  {
+   "step": "talk",
+   "ok": true,
+   "prompt": "talk to Aldric Venn",
+   "panel": "talk",
+   "lines": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: Word from the Spire|15 g|1",
+    "bye|Farewell||1"
+   ],
+   "asked_changed_text": true,
+   "accepted": true,
+   "quest": {
+    "state": "taken",
+    "progress": 0,
+    "count": 1
+   },
+   "scholar_panel": "talk",
+   "scholar_lines": [
+    "ask|What is the Mistward?||1",
+    "ask|Who broke the spire?||1",
+    "ask|What should I look for down there?||1",
+    "accept|Quest: The Third Seal|150 g|1",
+    "bye|Farewell||1"
+   ],
+   "quest_ready": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1
+   },
+   "turnin": true,
+   "gold": 15,
+   "quest_done": {
+    "state": "done",
+    "progress": 1,
+    "count": 1
+   },
+   "next_offered": true,
+   "lines_after": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: The Mistward Hall|60 g|1",
+    "bye|Farewell||1"
+   ],
+   "captain_later": [
+    "Wolves on the Mill Road",
+    "The Lost Patrol"
+   ],
+   "later_refused": true
+  },
+  {
+   "step": "services",
+   "ok": false,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -15,
+    "hp": 1.0
+   },
+   "weapon": "Dagger",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ]
+  },
+  {
+   "step": "guards",
+   "ok": true,
+   "planned": 7,
+   "alive": 7,
+   "tiers": [
+    1
+   ],
+   "kinds": [
+    "Drinker",
+    "Medic",
+    "Parasite_Slider",
+    "Rat",
+    "Soldier"
+   ],
+   "home_room": 133,
+   "home_kind": "Great hall",
+   "aggro_in_hall": 2,
+   "rooms_after": [
+    133,
+    133,
+    133,
+    133,
+    133,
+    133,
+    133
+   ],
+   "all_in_hall": true,
+   "aggro_after": 0,
+   "gold": 8,
+   "counted": 3,
+   "dead_kept": 3,
+   "alive_after_rebuild": 7
+  },
+  {
+   "step": "folk",
+   "ok": true,
+   "fps": {
+    "mean": 23.0,
+    "min": 5.7
+   },
+   "walked": {
+    "Little Wren": 1,
+    "Tobin": 3,
+    "Pip": 5,
+    "Simple Tam": 7,
+    "a militiaman": 6,
+    "a militiawoman": 1
+   },
+   "militia": [
+    {
+     "at": [
+      -8250,
+      1967
+     ],
+     "paths": [
+      4,
+      10,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      -16737,
+      -6150
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      7354,
+      -17518
+     ],
+     "paths": [
+      4,
+      4,
+      18,
+      5
+     ]
+    },
+    {
+     "at": [
+      22079,
+      10418
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      12
+     ]
+    },
+    {
+     "at": [
+      -7350,
+      14644
+     ],
+     "paths": [
+      4,
+      14,
+      4,
+      4
+     ]
+    }
+   ],
+   "bark": "Old Pell|The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
+   "names": [
+    "Aldric Venn|!",
+    "Little Wren|",
+    "Pip|"
+   ]
+  },
+  {
+   "step": "gate",
+   "ok": true,
+   "prompt": "",
+   "message": "Old Pell:  \"The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.\"",
+   "past_gate_cm": 1147.3,
+   "wild": true
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_tb1_names.png",
+  "bs_tb1_gate.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

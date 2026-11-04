@@ -24,6 +24,7 @@
 #include "GameFramework/Actor.h"
 #include "RDTypes.h"
 #include "RDFace.h"
+#include "RDWild.h"
 #include "RDDungeonGenerator.generated.h"
 
 class ARDSection;
@@ -1321,7 +1322,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") FString DescribeNearest(FVector From, float MaxDistance = 260.f) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") int32 GetNumMonsters() const;
 	/** what M does (scripts / tests) */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetMapOpen(bool bOpen) { if (bOpen && !bMapOpen) { MapPan = FVector2D::ZeroVector; MapZoom = 1.f; } bMapOpen = bOpen; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetMapOpen(bool bOpen) { if (bOpen && !bMapOpen) { MapPan = FVector2D::ZeroVector; MapZoom = 1.f; if (IsWildMapShown()) OpenWildMap(); } bMapOpen = bOpen; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") TArray<ARDMonster*> GetMonsters() const;
 	/** discovered rooms / all rooms (generated) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void GetDiscoveryStats(int32& DiscoveredRooms, int32& GeneratedRooms) const;
@@ -1401,6 +1402,8 @@ private:
 	int32 MenuPage = 0;
 	bool bControlsShown = true;
 	TArray<FName> MenuItems() const;
+	/** from the Options or Load page back to the main page, the cursor on the line that opened it */
+	void BackToMainMenu();
 	void LoadOptions();
 	void OpenOptionsPage();
 	int32 MenuCursor = 0;
@@ -1440,4 +1443,205 @@ private:
 	void StartReveal(ARDSection* Section);
 	void Enqueue(FIntPoint S);
 	void UpdateDiscovery(const FVector& L);
+
+public:
+	// ---- the wilderness (RDWild*.cpp; the user's spec of 2026-11-03, docs/wilderness.txt): a continent of 300 x 300 km made
+	// from one seed as she comes to it, in chunks round her (a 2 km square of them at most), the towns loaded as she nears
+	// them and dropped 2 km off, its map revealed where she has been
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") bool bWild = false;
+	/** the user's terrain templates (887 from SourceArt/wilderness/biomes.json) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TArray<FRDWildBiome> WildBiomes;
+	/** the world's seed for tests (0: the game's own, new for each new game, kept in the save) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") int32 WildSeedFixed = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildChunkM = 250.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildStepM = 2.f;
+	/** half the active square: a chunk is made when its middle is within this of her on both axes (the spec's 2 km square) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildActiveM = 1000.f;
+	/** and dropped when its middle is farther than this on an axis */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildDropM = 1125.f;
+	/** the chunks within this of her have their grass and their trees' collision */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildNearM = 140.f;
+	/** a town is loaded when she comes within this of its middle, dropped when farther than WildTownDropM (the spec's 2 km) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildTownLoadM = 1600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildTownDropM = 2000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") int32 WildMaxInFlight = 8;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildBuildBudgetMs = 5.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UMaterialInterface> WildGroundMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UMaterialInterface> WildWaterMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UMaterialInterface> WildSeaMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UMaterialInterface> WildSpringMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UMaterialInterface> WildLavaMaterial = nullptr;
+	/** the places' props by name ("house1", "tent2", "stone3", "bones1", ...: RDWildPlaces.cpp takes them by prefix) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TMap<FName, TObjectPtr<UStaticMesh>> WildPieces;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UNiagaraSystem> WildSteamFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TObjectPtr<UNiagaraSystem> WildFireFx = nullptr;
+	/** she reveals the map this far round her; finds a place this near it (a town within its section) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildRevealM = 300.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildDiscoverM = 90.f;
+	/** the wilderness's monsters notice her this far (cm; the halls' AggroDistance is 10 m) and give up at 1.8 times it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildAggroDistance = 2500.f;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Wild") TMap<FIntPoint, TObjectPtr<ARDWildChunk>> WildChunks;
+	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> Wild;
+	TSharedPtr<struct FRDWStream, ESPMode::ThreadSafe> WildStream;
+	TMap<FIntPoint, TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe>> WildKept;     // (a built chunk's near plants and places)
+	TSet<FIntPoint> WildInFlight;
+	int32 WildTicket = 0, WildBuilt = 0, WildDropped = 0, WildMaxActive = 0, WildTicks = 0, GenTicks = 0;
+	double WildComputeMs = 0.0, WildBuildMsMax = 0.0, WildBuildMsLast = 0.0;
+	float WildLookTimer = 0.f;
+	/** the map's fog: 50 m cells revealed, in blocks of 32 x 32 (a bit each) */
+	TMap<FIntPoint, TArray<uint64>> WildRevealed;
+	int32 WildRevealedCells = 0;
+	int32 WildRevealVersion = 0;
+	/** the places she has found (their ids) */
+	TSet<int32> WildFound;
+	FString WildLastFound;
+	void StartWild();
+	void TickWild(float Dt, APlayerController* PC);
+	void BuildWildChunk(const TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe>& D);
+	void SetWildNear(ARDWildChunk* C, bool bNear);
+	void RevealWild(const FVector2D& AtM, float RadiusM);
+	bool IsWildRevealed(double Xm, double Ym) const;
+	/** the ground's z (cm) under a world point in the wilderness (the town's 0 inside a loaded town) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") float WildGroundZ(FVector At) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool IsWildReady() const;
+	/** "ready|seed|init s|chunks|in flight|built|dropped|max active|compute ms avg|build ms max|revealed cells|found|towns" (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildState() const;
+	/** one line per chunk: "x|y|instances|triangles|near|collision" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildChunkLines() const;
+	/** what the world has at a point (world cm): "h m|z cm|biome|biome2|w1|water kind|water m|rock|snow|sand|road|field|canopy|lava|tier" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildSampleAt(FVector At) const;
+	/** "name|kind|x m|y m|h m|style" per town */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildTownLines() const;
+	/** per biome "name|cells|nearest site x m|y m|distance km" (the templates' census) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildBiomeLines() const;
+	/** rivers, lakes and roads: "river|points|length km|width m", "lake|x|y|r|level", "road|from|to|length km" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildFeatureLines() const;
+	/** the places of the 4 km cells round a world point (cm), within RadiusM: "id|kind|name|x m|y m|h m|tier|found" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildPlacesNear(FVector At, float RadiusM) const;
+	/** a picture of the world from above (colours and relief), metres, to a PNG (tests, the docs) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool WildDebugMap(const FString& Path, int32 Px, float X0m, float Y0m, float X1m, float Y1m, bool bFog = false);
+	/** her put at a world point (metres) on the ground there, the chunks round it made first (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool WildPutHer(float Xm, float Ym);
+	/** the process's memory in use, MB (tests: what the chunks and towns cost and give back) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") float GetMemoryMB(bool bCommitted = false) const { const FPlatformMemoryStats St = FPlatformMemory::GetStats(); return (float)((bCommitted ? St.UsedVirtual : St.UsedPhysical) / (1024.0 * 1024.0)); }
+	/** the memory of dropped chunks and towns given back to the system: a collection asked for, then the allocator trimmed
+	 *  (the allocator kept what was freed: the editor's committed memory grew 12 GB over a test and the machine ran out) */
+	void WildAskTrim() { bWildTrimPending = true; WildTrimAt = -1.0; }
+	bool bWildTrimPending = false;
+	double WildTrimAt = -1.0, WildLastTrim = 0.0;
+	int32 WildDroppedAtTrim = 0, WildTrims = 0;
+	/** a point of the map revealed (metres) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool WildRevealedAt(float Xm, float Ym) const { return IsWildRevealed(Xm, Ym); }
+	/** every chunk dropped (tests: the memory back) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void WildDropAll();
+	/** a piece's scale (WildPieces' meshes by their asset name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TMap<FName, float> WildPieceScale;
+	/** a small town's section, tiles (Brokenspire's is its SectionTiles) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") int32 WildSmallTownTiles = 120;
+	/** the tile grid's origin: the loaded town's middle (cm; z 0). Every town is section (0, 0) of it */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") FVector GridOrigin = FVector::ZeroVector;
+	/** the wilderness's monsters' section (no tiles: they live on open ground) */
+	UPROPERTY(Transient) TObjectPtr<ARDSection> WildSection;
+	/** the loaded town is Brokenspire (its castle and Mistgate, its quests and guards) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") bool bTownHome = true;
+	int32 HomeSectionTiles = 168, HomeTownSeed = 0;
+	FString HomeTownName;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 WildTownIdx = -1;
+	bool bTownLoading = false, bInTownWalls = true;
+	double TownLoadStart = 0.0;
+	float TownLoadSeconds = 0.f, LoadedTownDistM = 0.f;
+	int32 WildTownsLoaded = 0, WildTownsDropped = 0, WildMonstersSpawned = 0;
+	TSet<FIntPoint> WildStale;
+	uint32 WildGameSeed() const;
+	void AskWildChunk(FIntPoint C);
+	void WildTownHole(struct FRDWChunkData& D) const;
+	void TickWildPlaces(const FVector2D& AtM);
+	void TickWildTowns(const FVector2D& AtM);
+	void SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildPlace>& Places);
+	void WildPiecesOf(const FString& Prefix, TArray<UStaticMesh*>& Out) const;
+	ARDSection* EnsureWildSection();
+	void SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace& P);
+	bool IsInLoadedTown(const FVector& At) const;
+	/** inside the loaded town's wall (its maps are the town's) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool IsInTownWalls(const FVector& At) const;
+	void DropWildChunksNear(const FVector2D& AtM, double HalfM);
+	void SaveTownState();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void UnloadWildTown();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void LoadWildTown(int32 Ti, bool bNow);
+	void FinishWildTownLoad();
+	/** "town index|name|loading|section|her distance m|build s|loaded|dropped|in its walls|origin x|origin y|home" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildTownState() const;
+	/** the map shown is the wilderness's (she is outside a town's walls) */
+	bool IsWildMapShown() const { return bWild && !bInTownWalls; }
+	// ---- the wilderness's map (RDWildMap.cpp, RDWildHUD.cpp)
+	UPROPERTY(Transient) TMap<FIntVector, TObjectPtr<UTexture2D>> WildMapTex;
+	TMap<FIntVector, double> WildMapUsed;
+	TSet<FIntVector> WildMapPending;
+	TMap<FIntVector, TArray<FColor>> WildMapCpu;
+	TSharedPtr<struct FRDWMapStream, ESPMode::ThreadSafe> WildMapStream;
+	UPROPERTY(Transient) TObjectPtr<UTexture2D> WildFogTex;
+	UPROPERTY(Transient) TObjectPtr<UTexture2D> WildMiniTex;
+	/** the map's view: its middle (world metres) and metres a screen pixel */
+	FVector2D WildMapCenter = FVector2D::ZeroVector;
+	double WildMapMpp = 25.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildMapOpenMpp = 5.f;
+	double WildMapMinMpp = 0.9, WildMapMaxMpp = 380.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") int32 WildMapMaxTiles = 360;
+	int32 WildMapMaxLevel = 10, WildMapMaxInFlight = 16, WildMiniLevel = 9;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildMiniRadiusM = 280.f;
+	FVector4 WildFogFor = FVector4(0, 0, 0, 0);
+	int32 WildFogVersion = -1;
+	double WildFogMpp = 0.0;
+	/** how often the fog picture was made (the test: not once a frame while the map is dragged) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 WildFogBuilds = 0;
+	double WildMiniTime = 0.0;
+	FVector2D WildMiniFor = FVector2D::ZeroVector;
+	/** the found place under the map's middle (its id, -1 none) */
+	int32 WildMapHover = -1;
+	FString WildMapHoverName, WildTravelRefusal, WildLastTravel;
+	bool bWildDrag = false;
+	FVector2D WildDragFrom = FVector2D::ZeroVector;
+	int32 WildMapTilesMade = 0, WildTravels = 0;
+	float WildMapWarmTimer = 0.f;
+	bool bWildMadeLogged = false;
+	double WildMapTileMs = 0.0;
+	/** cells revealed in each 1.6 km block (the map's fog at its coarse zooms) */
+	TMap<FIntPoint, int32> WildRevealCount;
+	int32 WildMapLevelFor(double Mpp) const;
+	double WildMapTileSpan(int32 L) const;
+	UTexture2D* WildMapTile(int32 L, int32 I, int32 J, bool bAsk);
+	void TickWildMap(float Dt);
+	float WildRevealedShare(double Xm, double Ym, double Radius) const;
+	/** the fog over the map: a picture over twice the view, and the part of it the view shows (UV0 to UV1) */
+	UTexture2D* WildFog(const FVector2D& Mid, double Mpp, const FVector2D& SizePx, FVector2D& OutUV0, FVector2D& OutUV1);
+	UTexture2D* WildMini(const FVector2D& At);
+	void WildKnownPlaces(TArray<FRDWildPlace>& Out) const;
+	/** a monster is after her near (fast travel is refused) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool IsWildCombat() const;
+	void OpenWildMap();
+	void TickWildMapInput(APlayerController* PC, float Dt);
+	/** to a place she has found (its id), not while a monster is after her (the reason in WildTravelRefusal) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool WildFastTravel(int32 PlaceId);
+	/** "middle x|middle y|m a pixel|level|tiles|tiles asked|tile ms|hovered id|hovered name|tiles made|refusal|last travel" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildMapState() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void SetWildMapView(float Xm, float Ym, float Mpp);
+	void WildAutosave(const FString& Why);
+	// ---- the game saved to disk (RDSave.cpp)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") bool bAutosave = true;
+	float LastSaveTime = -1000.f;
+	double LastSaveRealTime = 0.0;
+	mutable TMap<FString, TPair<double, FString>> SaveInfoCache;
+	int32 LastSaveReveal = -1, SavesWritten = 0, LoadsArrived = 0;
+	FString LastSaveSlot, LastSaveWhy;
+	/** the game written to a slot ("autosave", "save") */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool SaveGameNow(const FString& Slot, const FString& Why);
+	/** the game read from a slot and its level opened */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool LoadGameFrom(const FString& Slot);
+	/** "<date>|<level>|<place>|<hero>|<why>" or "" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetSaveInfo(const FString& Slot) const;
+	/** "<saves written>|<last slot>|<last why>|<loads arrived>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetSaveState() const { return FString::Printf(TEXT("%d|%s|%s|%d"), SavesWritten, *LastSaveSlot, *LastSaveWhy, LoadsArrived); }
+	void TickWildLoad();
+	/** where she comes back to life in the wilderness: the square of the nearest town she has found (loaded now) */
+	FVector WildRespawnAt();
 };

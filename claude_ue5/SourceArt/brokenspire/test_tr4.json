@@ -1,0 +1,202 @@
+{
+ "tag": "tr4",
+ "plan": [
+  "falls",
+  "dagger",
+  "circle",
+  "castle",
+  "tour",
+  "trip"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "falls",
+   "ok": true,
+   "safe_cm": 450.0,
+   "lethal_cm": 1500.0,
+   "on": true,
+   "from_300": {
+    "before": 85.0,
+    "after": 85.0,
+    "fall": "0|313.9|0.00",
+    "dead": false
+   },
+   "from_900": {
+    "before": 85.0,
+    "after": 47.5,
+    "fall": "1|913.8|37.55",
+    "dead": false
+   },
+   "from_2000": {
+    "before": 85.0,
+    "after": 0.0,
+    "fall": "2|2013.8|85.00",
+    "dead": true
+   },
+   "expected_from_900": 37.1
+  },
+  {
+   "step": "dagger",
+   "ok": true,
+   "weapons": [
+    "Dagger"
+   ],
+   "handle_middle_in_hand_cm": [
+    0.17,
+    -9.44,
+    -3.47
+   ],
+   "guard_in_hand_cm": [
+    -4.97,
+    -9.43,
+    -5.41
+   ],
+   "pommel_in_hand_cm": [
+    5.32,
+    -9.45,
+    -1.53
+   ]
+  },
+  {
+   "step": "circle",
+   "ok": true,
+   "before": {
+    "line": [
+     "castle",
+     "Mistward Castle",
+     "SEALED",
+     "0"
+    ],
+    "guards": 7,
+    "entered": 0
+   },
+   "after": {
+    "line": [
+     "castle",
+     "Mistward Castle",
+     "TRAVEL",
+     "1"
+    ],
+    "guards": 0
+   },
+   "travel": {
+    "activated": true,
+    "last": "castle"
+   }
+  },
+  {
+   "step": "castle",
+   "ok": true,
+   "weapon": "Viking Shortsword",
+   "armour": "Plate Armour",
+   "before_gold": 266,
+   "before_armour": "Plate Armour",
+   "castle_level": "mistward_castle",
+   "castle_gold": 266,
+   "castle_armour": "Plate Armour",
+   "castle_lines_same": true,
+   "entered": 1,
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "menu_line": "button|Return to Brokenspire",
+   "back_level": "brokenspire",
+   "at_castle_door_m": 1.5,
+   "back_gold": 266,
+   "back_armour": "Plate Armour",
+   "back_lines_same": true,
+   "same_town": true
+  },
+  {
+   "step": "tour",
+   "ok": true,
+   "phases_at_s": {
+    "1": 0.1,
+    "2": 0.2,
+    "3": 4.2,
+    "6": 10.0,
+    "4": 22.6,
+    "5": 32.8
+   },
+   "map_drawn": true,
+   "panel": "talk",
+   "answer": "Three moons ago the spire on the castle hill cracked in two in a single night. S",
+   "run_from_m": 103.5,
+   "castle": "mistward_castle",
+   "reached_s": 78.2,
+   "autoplay_left": 297.0,
+   "back": "brokenspire",
+   "quests_same": true,
+   "life_lines": [
+    "the town's life: 2 places being worked",
+    "life 0: Stir at (-2020, 18383)",
+    "life 0: Stir at (-2020, 18383)",
+    "life 1: Tend at (2400, 18086)"
+   ]
+  },
+  {
+   "step": "trip",
+   "ok": true,
+   "castle": "mistward_castle",
+   "opened": 1,
+   "piles_at_death": 1,
+   "pile_things": [
+    "Iron Ingot",
+    "Medium Healing Potion",
+    "Medium Healing Potion",
+    "Plate Armour",
+    "Small Healing Potion",
+    "Viking Shortsword"
+   ],
+   "revived": true,
+   "town": "brokenspire",
+   "kept_in_game": [
+    {
+     "level": "castle",
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ]
+    }
+   ],
+   "castle_again": "mistward_castle",
+   "tier2_open": true,
+   "piles_again": [
+    {
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ],
+     "from_hall_middle_m": 3.9
+    }
+   ],
+   "left_in_game": 0,
+   "boss_before_seen": [],
+   "boss_after_seen": [
+    "boss|-3939|-3450|123|Orc_03|1|2|TIER 2 BOSS: ORC RAIDER|360"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_tr4_dagger_side.png",
+  "bs_tr4_dagger_front.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

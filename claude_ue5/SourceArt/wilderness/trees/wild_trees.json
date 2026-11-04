@@ -1,0 +1,56 @@
+{
+ "Aspen": {
+  "bark": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\T_Wild_AspenBark.png",
+  "leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\T_Wild_AspenLeaves.png",
+  "trees": {
+   "A": {
+    "height_m": 17.19,
+    "triangles": 1000,
+    "cards": 112,
+    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\SM_Wild_Aspen_A.fbx"
+   },
+   "B": {
+    "height_m": 16.07,
+    "triangles": 1098,
+    "cards": 136,
+    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\SM_Wild_Aspen_B.fbx"
+   }
+  }
+ },
+ "Birch": {
+  "bark": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\T_Wild_BirchBark.png",
+  "leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\T_Wild_BirchLeaves.png",
+  "trees": {
+   "A": {
+    "height_m": 15.19,
+    "triangles": 1244,
+    "cards": 184,
+    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\SM_Wild_Birch_A.fbx"
+   },
+   "B": {
+    "height_m": 14.07,
+    "triangles": 1350,
+    "cards": 212,
+    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\SM_Wild_Birch_B.fbx"
+   }
+  }
+ },
+ "Acacia": {
+  "bark": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\T_Wild_AcaciaBark.png",
+  "leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\T_Wild_AcaciaLeaves.png",
+  "trees": {
+   "A": {
+    "height_m": 8.38,
+    "triangles": 460,
+    "cards": 46,
+    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\SM_Wild_Acacia_A.fbx"
+   },
+   "B": {
+    "height_m": 7.82,
+    "triangles": 360,
+    "cards": 32,
+    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\trees\\SM_Wild_Acacia_B.fbx"
+   }
+  }
+ }
+}

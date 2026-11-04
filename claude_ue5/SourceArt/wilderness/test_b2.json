@@ -1,0 +1,441 @@
+{
+ "tag": "b2",
+ "plan": [
+  "look=plains+pine_forests+temperate_autumn_forests+marshes+wetlands+mountains_and_peaks+volcanoes"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "look",
+   "ok": true,
+   "visits": {
+    "plains": {
+     "found": true,
+     "at": [
+      1392,
+      -15924
+     ],
+     "sample": {
+      "h": 57.65,
+      "z": -1320.0,
+      "biome": "plains",
+      "biome2": "plains",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 1.0
+     },
+     "chunks": 64,
+     "instances": 256,
+     "trees": 256,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 81,
+      "dropped": 17,
+      "max_active": 64,
+      "compute_ms": 35.5,
+      "build_ms_max": 48.6,
+      "revealed": 222,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 151,
+      "gen_ticks": 151,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 25.3,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Tree06"
+     ],
+     "tree_kinds": [
+      "SM_Tree06"
+     ],
+     "far_ok": true
+    },
+    "pine forests": {
+     "found": true,
+     "at": [
+      62479,
+      -33839
+     ],
+     "sample": {
+      "h": 228.89,
+      "z": 15804.0,
+      "biome": "pine forests",
+      "biome2": "pine forests",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.72,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 64,
+     "instances": 33886,
+     "trees": 31273,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 145,
+      "dropped": 81,
+      "max_active": 64,
+      "compute_ms": 97.1,
+      "build_ms_max": 48.6,
+      "revealed": 333,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 239,
+      "gen_ticks": 239,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 30.2,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Pine_Big_1_",
+      "SM_Pine_Big_2_",
+      "SM_Pine_Big_3_",
+      "SM_Pine_Medium_1_",
+      "SM_Bush_Pine",
+      "SM_Pine_Fallen"
+     ],
+     "tree_kinds": [
+      "SM_Pine_Big_1_",
+      "SM_Pine_Big_2_",
+      "SM_Pine_Big_3_",
+      "SM_Pine_Medium_1_"
+     ],
+     "far_ok": true
+    },
+    "temperate autumn forests": {
+     "found": true,
+     "at": [
+      26654,
+      -77277
+     ],
+     "sample": {
+      "h": 154.34,
+      "z": 8349.0,
+      "biome": "temperate autumn forests",
+      "biome2": "temperate autumn forests",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.71,
+      "lava": 0.0,
+      "tier": 4.0
+     },
+     "chunks": 58,
+     "instances": 25620,
+     "trees": 25099,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 209,
+      "dropped": 145,
+      "max_active": 64,
+      "compute_ms": 55.5,
+      "build_ms_max": 48.6,
+      "revealed": 445,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 308,
+      "gen_ticks": 308,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 10.9,
+     "pawn": true,
+     "far_kinds": [
+      "SM_AutumnTree01",
+      "SM_AutumnTree02",
+      "SM_AutumnTree03",
+      "SM_AutumnTree04",
+      "SM_EuropeanBeech_Log_01"
+     ],
+     "tree_kinds": [
+      "SM_AutumnTree01",
+      "SM_AutumnTree02",
+      "SM_AutumnTree03",
+      "SM_AutumnTree04"
+     ],
+     "far_ok": true
+    },
+    "marshes": {
+     "found": true,
+     "at": [
+      49156,
+      25994
+     ],
+     "sample": {
+      "h": 12.73,
+      "z": -5811.0,
+      "biome": "marshes",
+      "biome2": "marshes",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 64,
+     "instances": 813,
+     "trees": 813,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 273,
+      "dropped": 209,
+      "max_active": 64,
+      "compute_ms": 85.0,
+      "build_ms_max": 48.6,
+      "revealed": 561,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 399,
+      "gen_ticks": 399,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 35.4,
+     "pawn": true,
+     "far_kinds": [
+      "SM_EuropeanBeech_Dead_M_01"
+     ],
+     "tree_kinds": [
+      "SM_EuropeanBeech_Dead_M_01"
+     ],
+     "far_ok": true
+    },
+    "wetlands": {
+     "found": true,
+     "at": [
+      41777,
+      36806
+     ],
+     "sample": {
+      "h": 14.55,
+      "z": -5630.0,
+      "biome": "wetlands",
+      "biome2": "wetlands",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 37,
+     "instances": 1042,
+     "trees": 1042,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 337,
+      "dropped": 273,
+      "max_active": 64,
+      "compute_ms": 44.9,
+      "build_ms_max": 48.6,
+      "revealed": 673,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 452,
+      "gen_ticks": 452,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 10.3,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Tree07"
+     ],
+     "tree_kinds": [
+      "SM_Tree07"
+     ],
+     "far_ok": true
+    },
+    "mountains and peaks": {
+     "found": true,
+     "at": [
+      -30756,
+      -35557
+     ],
+     "sample": {
+      "h": 1958.3,
+      "z": 188745.0,
+      "biome": "mountains and peaks",
+      "biome2": "mountains and peaks",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.6,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 2.0
+     },
+     "chunks": 62,
+     "instances": 4537,
+     "trees": 693,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 401,
+      "dropped": 337,
+      "max_active": 64,
+      "compute_ms": 36.3,
+      "build_ms_max": 48.6,
+      "revealed": 789,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 517,
+      "gen_ticks": 517,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 14.1,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Boulder_03",
+      "SM_RockCluster_01",
+      "SM_Pine_Medium_1_Snow"
+     ],
+     "tree_kinds": [
+      "SM_Pine_Medium_1_Snow"
+     ],
+     "far_ok": true
+    },
+    "volcanoes": {
+     "found": true,
+     "at": [
+      24247,
+      6486
+     ],
+     "sample": {
+      "h": 1649.21,
+      "z": 157836.0,
+      "biome": "volcanoes",
+      "biome2": "volcanoes",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.5,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 2.0
+     },
+     "chunks": 42,
+     "instances": 4564,
+     "trees": 323,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 465,
+      "dropped": 401,
+      "max_active": 64,
+      "compute_ms": 42.7,
+      "build_ms_max": 48.6,
+      "revealed": 905,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 573,
+      "gen_ticks": 573,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 17.8,
+     "pawn": true,
+     "far_kinds": [
+      "SM_LavaRock01",
+      "SM_LavaRock03",
+      "SM_RockFormation01",
+      "SM_Tree02"
+     ],
+     "tree_kinds": [
+      "SM_Tree02"
+     ],
+     "far_ok": true
+    }
+   },
+   "basecolor_shot": "plains"
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_b2_look_plains.png",
+  "wd_b2_look_plains_basecolor.png",
+  "wd_b2_look_pine_forests.png",
+  "wd_b2_look_temperate_autumn_forests.png",
+  "wd_b2_look_marshes.png",
+  "wd_b2_look_wetlands.png",
+  "wd_b2_look_mountains_and_peaks.png",
+  "wd_b2_look_volcanoes.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

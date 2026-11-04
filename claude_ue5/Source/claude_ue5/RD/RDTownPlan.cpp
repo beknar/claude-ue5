@@ -1192,13 +1192,17 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				AddPiece(TEXT("Town.Parapet"), FTransform(FRotator(0, InYaw, 0), P + FVector(0, 0, 2 * Wh), Sc), true);
 			}
 		}
-		// the gate: its frame across the gap, two leaves shut, a beam barring them, a blocker (the wilderness is for later)
+		// the gate: its frame across the gap, two leaves shut, a beam barring them, a blocker; open (frame only) when the
+		// wilderness is beyond it (the user's spec of 2026-11-03)
 		const float GYaw = TownGateOut.Rotation().Yaw;
 		// (its pieces run across the gap along their +Y, their faces outward)
 		AddPieceAt(TEXT("Town.Gate"), TownGate, GYaw, 1.f, true);
-		AddPieceAt(TEXT("Town.GateLeaves"), TownGate - TownGateOut * 20.f, GYaw, 1.f, true);
-		AddPieceAt(TEXT("Town.GateBar"), TownGate - TownGateOut * 45.f + FVector(0, 0, 150.f), GYaw, 1.f, true);
-		if (bBuildStatic)
+		if (!Generator->bWild)
+		{
+			AddPieceAt(TEXT("Town.GateLeaves"), TownGate - TownGateOut * 20.f, GYaw, 1.f, true);
+			AddPieceAt(TEXT("Town.GateBar"), TownGate - TownGateOut * 45.f + FVector(0, 0, 150.f), GYaw, 1.f, true);
+		}
+		if (bBuildStatic && !Generator->bWild)
 		{
 			UBoxComponent* Bx = NewObject<UBoxComponent>(this, NAME_None, RF_Transactional);
 			Bx->SetupAttachment(RootComponent);

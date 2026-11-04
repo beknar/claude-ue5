@@ -1,0 +1,434 @@
+{
+ "tag": "b4",
+ "plan": [
+  "look=boreal_pine_forest+temperate_aspen+volcanic_tundra+geothermal_caldera+glacial+taigas+rocky_coastal"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "look",
+   "ok": true,
+   "visits": {
+    "boreal pine forest": {
+     "found": true,
+     "at": [
+      105169,
+      -46969
+     ],
+     "sample": {
+      "h": 243.82,
+      "z": 17298.0,
+      "biome": "boreal pine forest",
+      "biome2": "boreal pine forest",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.8,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 64,
+     "instances": 38065,
+     "trees": 34051,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 89,
+      "dropped": 25,
+      "max_active": 64,
+      "compute_ms": 43.0,
+      "build_ms_max": 45.4,
+      "revealed": 228,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 158,
+      "gen_ticks": 158,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 23.0,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Pine_Big_2_",
+      "SM_Pine_Medium_2_",
+      "SM_Pine_Big_1_Snow",
+      "SM_Wild_Birch_A",
+      "SM_Bush_Pine",
+      "SM_Pine_Fallen_1"
+     ],
+     "tree_kinds": [
+      "SM_Pine_Big_2_",
+      "SM_Pine_Medium_2_",
+      "SM_Pine_Big_1_Snow",
+      "SM_Wild_Birch_A"
+     ],
+     "far_ok": true
+    },
+    "temperate aspen": {
+     "found": true,
+     "at": [
+      62442,
+      -20562
+     ],
+     "sample": {
+      "h": 152.19,
+      "z": 8134.0,
+      "biome": "temperate aspen",
+      "biome2": "plains",
+      "w1": 0.95,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.6,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 64,
+     "instances": 17484,
+     "trees": 17484,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 153,
+      "dropped": 89,
+      "max_active": 64,
+      "compute_ms": 58.8,
+      "build_ms_max": 45.4,
+      "revealed": 343,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 261,
+      "gen_ticks": 261,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 27.7,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Wild_Aspen_A",
+      "SM_Wild_Aspen_B"
+     ],
+     "tree_kinds": [
+      "SM_Wild_Aspen_A",
+      "SM_Wild_Aspen_B"
+     ],
+     "far_ok": true
+    },
+    "volcanic tundra": {
+     "found": true,
+     "at": [
+      122983,
+      -1577
+     ],
+     "sample": {
+      "h": 313.62,
+      "z": 24277.0,
+      "biome": "volcanic tundra",
+      "biome2": "volcanic tundra",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.35,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 64,
+     "instances": 3712,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 217,
+      "dropped": 153,
+      "max_active": 64,
+      "compute_ms": 46.9,
+      "build_ms_max": 45.4,
+      "revealed": 456,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 351,
+      "gen_ticks": 351,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 24.9,
+     "pawn": true,
+     "far_kinds": [
+      "SM_LavaRock05",
+      "SM_Snow_Pile_02"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    },
+    "geothermal caldera": {
+     "found": true,
+     "at": [
+      55686,
+      -87651
+     ],
+     "sample": {
+      "h": 381.26,
+      "z": 31041.0,
+      "biome": "geothermal caldera",
+      "biome2": "geothermal caldera",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.25,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 64,
+     "instances": 1598,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 281,
+      "dropped": 217,
+      "max_active": 64,
+      "compute_ms": 49.0,
+      "build_ms_max": 45.4,
+      "revealed": 572,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 440,
+      "gen_ticks": 440,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 14.4,
+     "pawn": true,
+     "far_kinds": [
+      "SM_LavaRock07"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    },
+    "glacial": {
+     "found": true,
+     "at": [
+      113544,
+      -62136
+     ],
+     "sample": {
+      "h": 1428.28,
+      "z": 135744.0,
+      "biome": "glacial",
+      "biome2": "glacial",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.1,
+      "snow": 1.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 57,
+     "instances": 1596,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 345,
+      "dropped": 281,
+      "max_active": 64,
+      "compute_ms": 44.4,
+      "build_ms_max": 72.3,
+      "revealed": 686,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 507,
+      "gen_ticks": 507,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 15.6,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Glaciar_01",
+      "SM_Ice_Formation_01",
+      "SM_Boulder_03",
+      "SM_Snow_Pile_03"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    },
+    "taigas": {
+     "found": true,
+     "at": [
+      135204,
+      41593
+     ],
+     "sample": {
+      "h": 179.86,
+      "z": 10902.0,
+      "biome": "taigas",
+      "biome2": "taigas",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.25,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.53,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 64,
+     "instances": 22180,
+     "trees": 22180,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 409,
+      "dropped": 345,
+      "max_active": 64,
+      "compute_ms": 34.4,
+      "build_ms_max": 72.3,
+      "revealed": 801,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 579,
+      "gen_ticks": 579,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 14.4,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Pine_Big_2_Snow",
+      "SM_Pine_Medium_2_Snow",
+      "SM_Pine_Big_3_",
+      "SM_Wild_Birch_B"
+     ],
+     "tree_kinds": [
+      "SM_Pine_Big_2_Snow",
+      "SM_Pine_Medium_2_Snow",
+      "SM_Pine_Big_3_",
+      "SM_Wild_Birch_B"
+     ],
+     "far_ok": true
+    },
+    "rocky coastal": {
+     "found": true,
+     "at": [
+      -45718,
+      -26193
+     ],
+     "sample": {
+      "h": 93.7,
+      "z": 2285.0,
+      "biome": "rocky coastal",
+      "biome2": "rocky coastal",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.5,
+      "snow": 0.0,
+      "sand": 0.05,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 64,
+     "instances": 2553,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 473,
+      "dropped": 409,
+      "max_active": 64,
+      "compute_ms": 47.4,
+      "build_ms_max": 72.3,
+      "revealed": 912,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 684,
+      "gen_ticks": 684,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 39.8,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Cliff_01",
+      "SM_Boulder_04"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    }
+   },
+   "basecolor_shot": "boreal pine forest"
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_b4_look_boreal_pine_forest.png",
+  "wd_b4_look_boreal_pine_forest_basecolor.png",
+  "wd_b4_look_temperate_aspen.png",
+  "wd_b4_look_volcanic_tundra.png",
+  "wd_b4_look_geothermal_caldera.png",
+  "wd_b4_look_glacial.png",
+  "wd_b4_look_taigas.png",
+  "wd_b4_look_rocky_coastal.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

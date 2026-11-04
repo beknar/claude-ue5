@@ -1,0 +1,35 @@
+The user's spec of 2026-11-03 (pasted as written), then their answers to the questions asked before building it.
+
+the wilderness
+the map of the wilderness has a papyrus or scroll look at the edges, but the geographical features are a
+3d stylized canvas, with the biomes and terrain represented by their realistic top down look.  points of
+interested are represented by stylized symbols, like villages, towns, major cities, camps, lone houses in
+the wilderness, spawn points, ruins, ancient ritual sites, caves, monster lairs, etc.  the wilderness map
+will have a fog of war that disappears when the player walks into that area.  the places and terrain that the
+player encounters will be procedurally generated as he encounters them and revealed on the overhead map.
+once the player reveals the terrain on the map by encountering them, that procedurally generated terrain
+becomes a permanent part of the map, to be saved in the player's save file.  in order to save memory, once
+the player gets far enough from a part of the map, that part of the map should de-spawn and its memory
+deallocated.  the player should only be able to have an active amount of terrain in a 2km x 2km area of
+the world.  for example, if the player moves 2km away from Brokenspire, Brokenspire is deallocated from
+memory and only the 2km x 2km block the player is in is active.  this only applies to the wilderness, not
+the town the player is in or any of the dungeons.
+terrain procedural generation templates: grasslands, meadows, farms, roads, savannahs, hills, mountains,
+tundras, plains, pine forests, temperate autumn forests, marshes, wetlands, mountains and peaks, volcanoes,
+coastal regions, arctic regions, canyons, mesas, canyon networks, cold teppes, highland moorland, boreal pine forest,
+lakes, rivers, ponds, temperate aspen, volcanic tundra, geothermal caldera, glacial, taigas, rocky coastal
+there should be transition between biomes and areas.
+refer to this picture for an example of aesthetics for the overhead wilderness map "E:\code\claude-ue5\ai models\overhead-map-example.png"
+once a player discovers a point of interest, the player will be able to fast travel from one point to another.
+Brokenspire is located on the mid-southern of the continent.  For now, there should be a marker for Vel Morrath located
+to the east of Brokenspire, close to but not on the coast.  The marker for Ashenreach should be in the middle of
+the continent, north of Brokenspire.  Graymourne should be on the mid northern coast.
+when the hero enters a town, the overhead map and the mini map switch to the local town.
+when all of the above are done, commit to a PR, review the changes, fix any errors, merge if it is mergeable.
+
+Answers (2026-11-03):
+- The continent: 300 x 300 km (built as written otherwise).
+- Vel Morrath, Ashenreach and Graymourne: a marker and a small generated walled town at each (Brokenspire's generator,
+  another seed); entering it switches the maps to that town.
+- The save file: autosave in one slot, and Save / Load entries in the Escape menu.
+- Fast travel: from the map, to any discovered place, not while in combat.

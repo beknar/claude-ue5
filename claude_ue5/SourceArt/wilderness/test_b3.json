@@ -1,0 +1,419 @@
+{
+ "tag": "b3",
+ "plan": [
+  "look=coastal_regions+arctic_regions+canyons+mesas+canyon_networks+cold_steppes+highland_moorland"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "look",
+   "ok": true,
+   "visits": {
+    "coastal regions": {
+     "found": true,
+     "at": [
+      -61519,
+      -2512
+     ],
+     "sample": {
+      "h": 2.7,
+      "z": -6815.0,
+      "biome": "coastal regions",
+      "biome2": "coastal regions",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 0.0,
+      "sand": 0.53,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 64,
+     "instances": 1280,
+     "trees": 256,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 99,
+      "dropped": 35,
+      "max_active": 64,
+      "compute_ms": 38.3,
+      "build_ms_max": 36.7,
+      "revealed": 228,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 198,
+      "gen_ticks": 198,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 20.5,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Small_Rock_B",
+      "SM_Tree09"
+     ],
+     "tree_kinds": [
+      "SM_Tree09"
+     ],
+     "far_ok": true
+    },
+    "arctic regions": {
+     "found": true,
+     "at": [
+      167972,
+      38005
+     ],
+     "sample": {
+      "h": 51.43,
+      "z": -1941.0,
+      "biome": "arctic regions",
+      "biome2": "arctic regions",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.0,
+      "snow": 1.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 64,
+     "instances": 2176,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 163,
+      "dropped": 99,
+      "max_active": 64,
+      "compute_ms": 56.3,
+      "build_ms_max": 42.3,
+      "revealed": 341,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 306,
+      "gen_ticks": 306,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 41.4,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Snow_Pile",
+      "SM_Ice_01",
+      "SM_Boulder_04"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    },
+    "canyons": {
+     "found": true,
+     "at": [
+      -16020,
+      -17308
+     ],
+     "sample": {
+      "h": 436.75,
+      "z": 36591.0,
+      "biome": "canyons",
+      "biome2": "canyons",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.5,
+      "snow": 0.0,
+      "sand": 0.2,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 1.0
+     },
+     "chunks": 64,
+     "instances": 1085,
+     "trees": 64,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 227,
+      "dropped": 163,
+      "max_active": 64,
+      "compute_ms": 44.0,
+      "build_ms_max": 44.2,
+      "revealed": 453,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 435,
+      "gen_ticks": 435,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 46.7,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Large_Rock_C",
+      "SM_TreeDead05"
+     ],
+     "tree_kinds": [
+      "SM_TreeDead05"
+     ],
+     "far_ok": true
+    },
+    "mesas": {
+     "found": true,
+     "at": [
+      -32822,
+      9106
+     ],
+     "sample": {
+      "h": 294.89,
+      "z": 22404.0,
+      "biome": "mesas",
+      "biome2": "mesas",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.45,
+      "snow": 0.0,
+      "sand": 0.25,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 2.0
+     },
+     "chunks": 64,
+     "instances": 1086,
+     "trees": 64,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 291,
+      "dropped": 227,
+      "max_active": 64,
+      "compute_ms": 34.8,
+      "build_ms_max": 44.2,
+      "revealed": 566,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 524,
+      "gen_ticks": 524,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 16.9,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Small_Rock_B",
+      "SM_TreeDead06"
+     ],
+     "tree_kinds": [
+      "SM_TreeDead06"
+     ],
+     "far_ok": true
+    },
+    "canyon networks": {
+     "found": true,
+     "at": [
+      -25765,
+      -5627
+     ],
+     "sample": {
+      "h": 324.32,
+      "z": 25347.0,
+      "biome": "canyon networks",
+      "biome2": "canyon networks",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.5,
+      "snow": 0.0,
+      "sand": 0.2,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 2.0
+     },
+     "chunks": 64,
+     "instances": 915,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 355,
+      "dropped": 291,
+      "max_active": 64,
+      "compute_ms": 49.0,
+      "build_ms_max": 44.2,
+      "revealed": 678,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 672,
+      "gen_ticks": 672,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 47.8,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Large_Rock_C"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    },
+    "cold steppes": {
+     "found": true,
+     "at": [
+      79545,
+      69533
+     ],
+     "sample": {
+      "h": 318.51,
+      "z": 24766.0,
+      "biome": "cold steppes",
+      "biome2": "cold steppes",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.05,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 5.0
+     },
+     "chunks": 64,
+     "instances": 576,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 419,
+      "dropped": 355,
+      "max_active": 64,
+      "compute_ms": 36.4,
+      "build_ms_max": 44.2,
+      "revealed": 790,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 766,
+      "gen_ticks": 766,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 22.0,
+     "pawn": true,
+     "far_kinds": [
+      "SM_Boulder_02"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    },
+    "highland moorland": {
+     "found": true,
+     "at": [
+      53179,
+      38407
+     ],
+     "sample": {
+      "h": 411.61,
+      "z": 34076.0,
+      "biome": "highland moorland",
+      "biome2": "highland moorland",
+      "w1": 1.0,
+      "water": 0.0,
+      "water_m": 0.0,
+      "rock": 0.1,
+      "snow": 0.0,
+      "sand": 0.0,
+      "road": 0.0,
+      "field": 0.0,
+      "canopy": 0.0,
+      "lava": 0.0,
+      "tier": 3.0
+     },
+     "chunks": 64,
+     "instances": 15422,
+     "trees": 0,
+     "state": {
+      "ready": 1,
+      "seed": 20261103,
+      "init_s": 0.1,
+      "chunks": 64,
+      "in_flight": 0,
+      "built": 483,
+      "dropped": 419,
+      "max_active": 64,
+      "compute_ms": 39.0,
+      "build_ms_max": 44.2,
+      "revealed": 902,
+      "found": 1,
+      "towns": 4,
+      "wild_ticks": 854,
+      "gen_ticks": 854,
+      "paused": 0,
+      "menu": 0,
+      "panel": 0
+     },
+     "fps": 28.0,
+     "pawn": true,
+     "far_kinds": [
+      "SM_HeatherBush_01",
+      "SM_Boulder_01"
+     ],
+     "tree_kinds": [],
+     "far_ok": true
+    }
+   },
+   "basecolor_shot": "coastal regions"
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_b3_look_coastal_regions.png",
+  "wd_b3_look_coastal_regions_basecolor.png",
+  "wd_b3_look_arctic_regions.png",
+  "wd_b3_look_canyons.png",
+  "wd_b3_look_mesas.png",
+  "wd_b3_look_canyon_networks.png",
+  "wd_b3_look_cold_steppes.png",
+  "wd_b3_look_highland_moorland.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

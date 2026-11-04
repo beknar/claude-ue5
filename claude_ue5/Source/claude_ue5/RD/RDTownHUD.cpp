@@ -338,7 +338,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 		case TS_Graveyard: Icon(TEXT("mapicon_graveyard"), Sp.At, 24.f * Sc, TEXT("GRAVEYARD")); break;
 		case TS_Mill: Icon(TEXT("mapicon_mill"), Sp.At, 24.f * Sc, TEXT("MILL")); break;
 		case TS_Still: Icon(TEXT("mapicon_still"), Sp.At, 14.f * Sc, TEXT("STILL")); break;
-		case TS_Gate: Icon(TEXT("mapicon_gate"), Sp.At, 26.f * Sc, TEXT("GATE · barred")); break;
+		case TS_Gate: Icon(TEXT("mapicon_gate"), Sp.At, 26.f * Sc, Gen->bWild ? TEXT("GATE · the wilds") : TEXT("GATE · barred")); break;
 		case TS_Stall: Stalls += FVector2D(Sp.At.X, Sp.At.Y); ++NStalls; break;
 		default: break;
 		}
@@ -666,7 +666,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		switch (Sp.Kind)
 		{
 		case TS_Tower: One(TEXT("mapc_tower"), 420.f, nullptr); break;
-		case TS_Gate: One(TEXT("mapc_gate"), 650.f, TEXT("GATE · barred")); break;
+		case TS_Gate: One(TEXT("mapc_gate"), 650.f, Gen->bWild ? TEXT("GATE · the wilds") : TEXT("GATE · barred")); break;
 		case TS_Well: One(TEXT("mapc_well"), 330.f, TEXT("WELL")); break;
 		case TS_Board: One(TEXT("mapc_board"), 330.f, TEXT("QUEST BOARD · bounties")); break;
 		case TS_Circle: One(TEXT("mapc_circle"), 760.f, TEXT("TELEPORT CIRCLE")); break;

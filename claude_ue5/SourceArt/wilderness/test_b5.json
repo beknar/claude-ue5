@@ -1,0 +1,293 @@
+{
+ "tag": "b5",
+ "plan": [
+  "stream",
+  "towns",
+  "gate",
+  "map"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stream",
+   "ok": true,
+   "mem_start": 21100.0,
+   "mem_far": 21694.0,
+   "mem_back": 21766.0,
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21112
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21256
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21419
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21636
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21694
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21694
+    },
+    {
+     "y": 7100.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 21681
+    },
+    {
+     "y": 5600.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 21663
+    },
+    {
+     "y": 4100.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 21703
+    },
+    {
+     "y": 2600.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 21766
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 48.1,
+   "build_ms_max": 53.4
+  },
+  {
+   "step": "towns",
+   "ok": true,
+   "at_start": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 69.0,
+    "build_s": 3.4,
+    "loaded": 1.0,
+    "dropped": 1.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_start": 96,
+   "far": {
+    "idx": -1.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 0.0,
+    "dist_m": 2300.0,
+    "build_s": 3.4,
+    "loaded": 1.0,
+    "dropped": 2.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_far": 0,
+   "mem_far": 20646.0,
+   "back": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1200.0,
+    "build_s": 3.5,
+    "loaded": 2.0,
+    "dropped": 2.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_back": 96,
+   "vm_near": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1300.0,
+    "build_s": 1.9,
+    "loaded": 3.0,
+    "dropped": 3.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 11470000.0,
+    "home": 0.0
+   },
+   "minimap_outside": true,
+   "vm_in": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 17.0,
+    "build_s": 1.9,
+    "loaded": 3.0,
+    "dropped": 3.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 11470000.0,
+    "home": 0.0
+   },
+   "minimap_inside_wild": false,
+   "vm_folk": 55,
+   "vm_roles": [
+    "Child",
+    "Drunk",
+    "Guard",
+    "Healer",
+    "Idiot",
+    "Innkeeper",
+    "Keeper",
+    "Militia",
+    "Mourner",
+    "Preacher",
+    "Priest",
+    "Refugee",
+    "Smith",
+    "Soldier",
+    "Townsfolk",
+    "Trader",
+    "Witch"
+   ],
+   "vm_titles_brokenspire": [],
+   "vm_titles_own": [],
+   "vm_square": [
+    -750,
+    11468500
+   ]
+  },
+  {
+   "step": "gate",
+   "ok": true,
+   "prompt": "",
+   "past_gate_m": 14.3,
+   "in_walls_after": 0.0
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "minimap_drawn": true,
+   "open": {
+    "cx": 900.0,
+    "cy": -700.0,
+    "mpp": 5.0,
+    "level": 8.0,
+    "tiles": 154.0,
+    "asked": 0.0,
+    "tile_ms": 266.2,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 154.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "drawn": [
+    "wmap_town",
+    "mapc_scroll_edge",
+    "mapc_compass",
+    "wild_map"
+   ],
+   "map_region": {
+    "cx": 2000.0,
+    "cy": 0.0,
+    "mpp": 60.0,
+    "level": 4.0,
+    "tiles": 188.0,
+    "asked": 10.0,
+    "tile_ms": 207.9,
+    "hover": 1000000.0,
+    "hover_name": "Brokenspire",
+    "made": 188.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_region_drawn": [
+    "wmap_select",
+    "wmap_town"
+   ],
+   "map_country": {
+    "cx": 40000.0,
+    "cy": 20000.0,
+    "mpp": 160.0,
+    "level": 3.0,
+    "tiles": 240.0,
+    "asked": 10.0,
+    "tile_ms": 172.0,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 240.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_country_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "map_continent": {
+    "cx": 70000.0,
+    "cy": 0.0,
+    "mpp": 330.0,
+    "level": 2.0,
+    "tiles": 250.0,
+    "asked": 0.0,
+    "tile_ms": 164.4,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 250.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_continent_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "revealed_here": true,
+   "revealed_far": false
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_b5_gate_out.png",
+  "wd_b5_minimap.png",
+  "wd_b5_map_near.png",
+  "wd_b5_map_region.png",
+  "wd_b5_map_country.png",
+  "wd_b5_map_continent.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

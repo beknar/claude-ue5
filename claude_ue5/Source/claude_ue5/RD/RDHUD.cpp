@@ -700,10 +700,10 @@ void ARDHUD::DrawHUD()
 	const bool bBigMap = Gen->bMapOpen && !bTac;
 	// (Brokenspire: the townspeople's names under everything else; the town's maps in place of the dungeon's)
 	if (Gen->bTown && !Gen->bMapOpen) DrawTownNames(Sc);
-	if (bTac && Gen->bMapOpen) { if (Gen->bTown) DrawTownMap(Sc, L, Yaw); else DrawTacticalMap(Sc, L, Yaw); }
+	if (bTac && Gen->bMapOpen) { if (Gen->IsWildMapShown()) DrawWildMap(Sc, L, Yaw); else if (Gen->bTown) DrawTownMap(Sc, L, Yaw); else DrawTacticalMap(Sc, L, Yaw); }
 	if (Gen->bCombat && !bBigMap && !(Gen->bTown && Gen->bMapOpen)) DrawCombat(Sc);
 	if (Gen->bCombat && !bBigMap && Gen->Spells.Num() > 0 && !(Gen->bTown && Gen->bMapOpen)) DrawHotbar(Sc);
-	if (bTac && !Gen->bMapOpen) { if (Gen->bTown) DrawTownMinimap(Sc, L, Yaw); else DrawTacticalMinimap(Sc, L, Yaw); }
+	if (bTac && !Gen->bMapOpen) { if (Gen->IsWildMapShown()) DrawWildMinimap(Sc, L, Yaw); else if (Gen->bTown) DrawTownMinimap(Sc, L, Yaw); else DrawTacticalMinimap(Sc, L, Yaw); }
 	if ((Gen->bTown || Gen->bTownLink) && !Gen->bMapOpen && !Gen->IsTownPanelOpen()) DrawTownTracker(Sc);
 
 	// ---- minimap (top right), north (+X) up: screen right = world +Y, screen up = world +X

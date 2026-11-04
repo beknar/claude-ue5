@@ -18,5 +18,9 @@ void URDGameInstance::NewGame(FName Hero)
 	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
 	Arrive.Reset();
 	TownHour = -1.f; TownDay = 1;
+	// (a new continent each game: the seed from the clock)
+	WildSeed = (int32)(FDateTime::Now().GetTicks() % 1999999999) + 1;
+	WildRevealKeys.Reset(); WildRevealBits.Reset(); WildFound.Reset(); WildKilled.Reset(); TownStore.Reset();
+	CurrentTown = TEXT("Brokenspire");
 	UE_LOG(LogTemp, Log, TEXT("RDGAME new game %d for %s"), GamesStarted, *Hero.ToString());
 }

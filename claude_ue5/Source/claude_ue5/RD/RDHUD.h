@@ -71,6 +71,10 @@ private:
 	// ---- Brokenspire (RDTownHUD.cpp): the town's minimap and its papyrus map, the town's panel, the townspeople's names,
 	// her purse and quests
 	void DrawTownMinimap(float Sc, const FVector& L, float Yaw);
+	// the wilderness's maps (RDWildHUD.cpp)
+	void DrawWildMap(float Sc, const FVector& L, float Yaw);
+	void DrawWildMinimap(float Sc, const FVector& L, float Yaw);
+	int32 WildMapTilesDrawn = 0, WildMapStandIns = 0;
 	void DrawTownMap(float Sc, const FVector& L, float Yaw);
 	/** the painted map in colour (RDTownHUD.cpp: the Fairhill reference's look; "mapc_*" pictures) */
 	void DrawTownMapColour(float Sc, const FVector& L, float Yaw);
