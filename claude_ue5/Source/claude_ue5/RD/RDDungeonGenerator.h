@@ -789,6 +789,9 @@ public:
 	bool bAutoplayHunting = false;
 	/** monsters she found no way to (caged behind a wall, in a closed vault...): not hunted again this run */
 	TSet<TWeakObjectPtr<ARDMonster>> AutoplayPreyBlocked;
+	/** while any of these lives, autoplay fights only them, sees them across 40 m and takes no chest (the final boss's showcase:
+	 *  him and his band; the first recording hunted another set's monsters for 80 s) */
+	TArray<TWeakObjectPtr<ARDMonster>> AutoplayOnly;
 	TArray<FVector> AutoplayPath;
 	TWeakObjectPtr<ARDMonster> AutoplayFoe;
 	TSet<FIntVector> AutoplayRoomsSeen;
@@ -828,8 +831,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") FName FinalBossKind = NAME_None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") FIntPoint FinalBossMinions = FIntPoint(6, 10);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") int32 FinalBossGold = 2500;
-	/** its size against its kind's (its health and blows are the tier's boss's: BossHealth, BossDamage) */
+	/** its size against its kind's (its health and blows are the tier's boss's: BossHealth, BossDamage, times FinalBossHealth,
+	 *  FinalBossDamage) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossScale = 1.f;
+	/** the dungeon boss above a tier's (the user's of 2026-11-04: "a little more challenging"): its hit points and blows over a
+	 *  tier's boss's, and its lance's and light's waits (shorter under 1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossHealth = 1.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossDamage = 1.25f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossWaitScale = 0.75f;
+	/** his tactics: while more than FinalBossCloseBand of his band are within 25 m of him, he keeps FinalBossHold (cm, nearest
+	 *  and farthest) from her, circling her, with his lance and his light (his band fights her); struck within FinalBossStruckHold
+	 *  seconds, or his band down, he comes in to his fists, and steps round her between his blows */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") FVector2D FinalBossHold = FVector2D(900.f, 1300.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") int32 FinalBossCloseBand = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossStruckHold = 4.f;
+	/** his poise: a blow makes him flinch (his punch lost, a moment's stun) at most once in this many seconds (0: every blow) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossPoise = 3.f;
+	/** his band alive within 25 m of him now (TickFinal) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Final") int32 GetFinalBandNear() const { return FinalBandNear; }
+	/** he holds back now: his band near enough and he not struck lately (his tactics; autoplay leaves him for his band then) */
+	bool FinalBossHolds(const ARDMonster* Boss) const;
+	int32 FinalBandNear = 0;
+	/** any of his band after her now (he notices her from farther then) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Final") bool bFinalBandFighting = false;
 	/** the door: an arch (FinalDoorFrame), a grating in it while sealed (FinalDoorGate, sinking into the floor when it opens),
 	 *  a light in it once open (FinalDoorFx); scaled to stand FinalDoorHeight tall */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") TObjectPtr<UStaticMesh> FinalDoorFrame = nullptr;
@@ -872,6 +896,26 @@ public:
 	 *  is seen */
 	bool bFinalRestorePending = false;
 	float FinalRestoreTry = 0.f;
+	// ---- the final boss's showcase (a reel of the fight: RDAurorim.cpp). In the town: into the castle. In the castle: every tier
+	// open (her growth), the best of everything her hero can use on her (armour, weapon, shield, a ring of each kind, the slash
+	// table's last slash on the weapon, healing potions), a set of the last tier, him and his band there; once the go file is
+	// there (the recording begun), autoplay fights; a while after his death (or hers) the done file is written
+	/** begins it here (tests, a rehearsal in the editor: Go and Done as the command line's) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") void StartFinalShow(const FString& Go, const FString& Done);
+	/** "<phase>|<seconds in it>|<fight seconds>|<her hp>|<her max>|<boss hp>|<band alive>|<result>|<kit>" (tests, the recorder) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") FString GetFinalShowState() const;
+	void TickFinalShow(float RealDt);
+	bool bFinalShowOn = false, bFinalShowCmdRead = false;
+	int32 FinalShowPhase = 0;
+	float FinalShowT = 0.f, FinalShowFightT = 0.f, FinalShowCheck = 0.f, FinalShowAggro = 0.f, FinalShowLose = 0.f;
+	FIntPoint FinalShowSet = FIntPoint::ZeroValue;
+	/** the showcase's room for him (the set's largest: room for his lance before his light and his fists); -1 none */
+	int32 FinalShowRoom = -1;
+	FString FinalShowGo, FinalShowDone, FinalShowReady, FinalShowResult, FinalShowKit, FinalShowGoLine;
+	/** the fight's order and moves for the done file: her first blow on him (fight seconds, -1 none) and his band alive then,
+	 *  the band's last death, her lowest hit points */
+	float FinalShowFirstHitT = -1.f, FinalShowBandDoneT = -1.f, FinalShowMinHp = 0.f, FinalShowHoldS = 0.f, FinalShowBossCircleS = 0.f, FinalShowBossMaxHp = 0.f;
+	int32 FinalShowBandAtHit = -1;
 	/** the highest tier open (1 at the start) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") int32 GetOpenTier() const;
 	/** what the tiers opened give her hero now: her hit points' factor, a spell's and her fists' damage factors */
@@ -889,6 +933,10 @@ public:
 	 *  at stealth */
 	bool bAutoplayKiting = false, bAutoplayStealthFlee = false;
 	float AutoplayStealthNext = 0.f, AutoplayKiteEnd = 0.f, AutoplayKiteNext = 0.f;
+	/** the final boss's fight (2026-11-04): she steps round him between her blows (the way round, when it turns), and out of
+	 *  his light's mark before it falls */
+	float AutoplayCircleSign = 1.f, AutoplayCircleFlip = 0.f, AutoplayCircleSeconds = 0.f;
+	bool bAutoplayWasAttacking = false, bAutoplayDodging = false;
 
 	// ---- Brokenspire (docs/brokenspire.txt; RD/RDTown*.cpp, pipeline/unreal/881-884): the starting town and the castle's
 	// side of it. Each a switch: bTown on the town's map (its start section is the town: ARDSection::PlanTown), bTownLink on

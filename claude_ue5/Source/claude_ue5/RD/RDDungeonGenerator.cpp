@@ -1577,6 +1577,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bArenaLock || bArenaCrowd) TickArenaHold(Dt);      // (mistward5: no way out; the audience)
 	if (bMonsterRanged) TickMonsterShots(Dt);              // (mistward5: the monsters' shots in the air)
 	if (bFinalBossOn) TickFinal(Dt);                       // (the final boss: the last tier's share, the light from above)
+	if (bTown || bFinalBossOn) TickFinalShow(Dt);          // (the final boss's showcase: -RDFinalShow)
 	if (!bAutoplayOptionRead) ReadAutoplayOption();        // (mistward5: ?Autoplay= / -Autoplay=)
 	if (bAutoplay) TickAutoplay(Dt);
 	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)

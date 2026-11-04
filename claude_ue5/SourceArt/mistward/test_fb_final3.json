@@ -1,5 +1,5 @@
 {
- "tag": "fb7",
+ "tag": "fb_final3",
  "plan": [
   "finalboss"
  ],
@@ -30,9 +30,9 @@
     5,
     true
    ],
-   "share_before": "2/1301|0/394|0/2643|1",
+   "share_before": "2/1325|0/397|0/2827|1",
    "placed_before": 0,
-   "share_at_place": "41/1301|12/394|77/2643|1",
+   "share_at_place": "44/1325|13/397|164/2827|1",
    "placed": {
     "placed": 1,
     "slain": 0,
@@ -41,26 +41,27 @@
      4,
      0
     ],
-    "room": 9,
-    "band": 6,
+    "room": 24,
+    "band": 8,
     "boss_alive": 1,
-    "boss_hp": 1224.0,
+    "boss_hp": 1836.0,
     "reward": "",
-    "share": "41/1301|12/394|77/2643|1"
+    "share": "44/1325|13/397|164/2827|1"
    },
-   "notice_placed": "TIER 5 HALF CLEARED  -  AURORIM WAITS IN THE ARMORY (SEE YOUR MAP)",
+   "notice_placed": "TIER 5 HALF CLEARED  -  AURORIM WAITS IN THE BARRACKS (SEE YOUR MAP)",
    "boss": {
     "kind": "Aurorim",
     "title": "FINAL BOSS  Aurorim",
     "final": true,
-    "max_hp": 1224,
-    "damage": 106.0
+    "max_hp": 1836,
+    "damage": 132.0
    },
    "band": {
-    "n": 6,
+    "n": 9,
     "max_hp": 408,
     "kinds": [
      "Alfa",
+     "Hunter",
      "Nasty",
      "Rock",
      "Spider",
@@ -68,29 +69,30 @@
     ],
     "all_tier5": true
    },
-   "hp_ratio": 3.0,
+   "hp_ratio": 4.5,
+   "hp_ratio_want": 4.37,
    "hover": {
     "bottom": [
      31.9,
-     52.8
+     52.4
     ],
     "now": [
-     38.0,
+     37.9,
      52.1
     ]
    },
-   "wing_motion_cm": 70.2,
+   "wing_motion_cm": 89.2,
    "door_sealed": {
     "open": 0,
     "alpha": 0.0,
     "travelled": 0,
     "at": [
-     96330.0,
-     -8550.0,
+     101970.0,
+     -150.0,
      0.0
     ],
     "facing": [
-     1.0,
+     -1.0,
      -0.0
     ],
     "width": 124.0,
@@ -101,45 +103,94 @@
     "glow_particles": 0
    },
    "door_in_room": true,
+   "tactics": {
+    "distance": 671,
+    "band_near": 8,
+    "hold_m": [
+     9.0,
+     13.0
+    ],
+    "branches": {
+     "unseen": 1,
+     "beam": 2,
+     "swing": 98,
+     "hold": 26,
+     "shoot": 2
+    },
+    "round_deg": 36,
+    "held_s": 2.1,
+    "blows_landed": 0,
+    "tail_m": [
+     9.1,
+     9.1
+    ],
+    "moved_m": 5.7,
+    "struck_nearest_m": 3.0,
+    "struck_branches": {
+     "swing": 1,
+     "stun": 11,
+     "chase": 67
+    }
+   },
+   "band_near_after": 0,
    "long_tries": [
     {
-     "distance": 2683,
+     "distance": 2419,
+     "branches": {
+      "swing": 18,
+      "chase": 46
+     },
+     "aggro": true,
+     "shot_wait": 0.2,
      "shots": 1,
      "on_her": 1,
-     "hp_lost": 76.3,
-     "lance_frames": 26,
+     "hp_lost": 95.0,
+     "lance_frames": 22,
      "lance_point_first": 1.0,
-     "last_on_her": "Aurorim|79.5|106.0|a thrown lance"
+     "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
     }
    ],
    "long": {
-    "distance": 2683,
+    "distance": 2419,
+    "branches": {
+     "swing": 18,
+     "chase": 46
+    },
+    "aggro": true,
+    "shot_wait": 0.2,
     "shots": 1,
     "on_her": 1,
-    "hp_lost": 76.3,
-    "lance_frames": 26,
+    "hp_lost": 95.0,
+    "lance_frames": 22,
     "lance_point_first": 1.0,
-    "last_on_her": "Aurorim|79.5|106.0|a thrown lance"
+    "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
    },
    "middle": {
     "distance": 949,
+    "branches": {
+     "chase": 1,
+     "beam": 1,
+     "swing": 35,
+     "shoot": 1
+    },
     "beams": 1,
     "mark_frames": 13,
     "fell": 1,
     "on_her": 1,
-    "hp_lost": 101.8
+    "hp_lost": 126.7
    },
    "melee": {
     "distance": 180,
-    "fist_fx": 4,
+    "fist_fx": 8,
     "lines": [
-     "NS_Shield_Wind_01|LeftHand|0.0|11",
-     "NS_Projectile_Wind01|LeftHand|0.0|21",
-     "NS_Shield_Wind_01|RightHand|0.0|9",
-     "NS_Projectile_Wind01|RightHand|0.0|22"
+     "NS_Shield_Wind_01|LeftHand|0.0|14",
+     "NS_Projectile_Wind01|LeftHand|0.0|19",
+     "NS_Shield_Wind_01|RightHand|0.0|15",
+     "NS_Projectile_Wind01|RightHand|0.0|20"
     ],
-    "hits": 1,
-    "hp_lost": 101.8
+    "hits": 2,
+    "hp_lost": 253.4,
+    "circle_s": 0.9
    },
    "killed": {
     "placed": 1,
@@ -149,20 +200,20 @@
      4,
      0
     ],
-    "room": 9,
+    "room": 24,
     "band": 0,
     "boss_alive": 0,
     "boss_hp": 0.0,
     "reward": "Ursag's Horn Blade|2500",
-    "share": "41/1301|12/394|77/2643|1"
+    "share": "44/1325|13/397|164/2827|1"
    },
-   "gold": 2705,
+   "gold": 2709,
    "notice_killed": "MISTWARD CASTLE IS CONQUERED  -  THE DOOR TO BROKENSPIRE IS OPEN",
    "reward": "Ursag's Horn Blade|2500",
    "reward_tier5": true,
    "pile": [
-    "Bright Essence",
-    "Cured Leather Strip",
+    "Dim Essence",
+    "Light Leather",
     "Radiant Essence",
     "Troll Heart",
     "Ursag's Horn Blade",
@@ -173,12 +224,12 @@
     "alpha": 1.0,
     "travelled": 0,
     "at": [
-     96330.0,
-     -8550.0,
+     101970.0,
+     -150.0,
      0.0
     ],
     "facing": [
-     1.0,
+     -1.0,
      -0.0
     ],
     "width": 124.0,
@@ -186,7 +237,7 @@
     "gate_z": -289.0,
     "gate_blocks": 0,
     "glow": 1,
-    "glow_particles": 129
+    "glow_particles": 138
    },
    "door_glow": true,
    "world_after": "brokenspire",
@@ -195,10 +246,10 @@
  ],
  "windows_hidden": "",
  "shots": [
-  "mw_fb7_finalboss_door_sealed.png",
-  "mw_fb7_finalboss_beam_mark.png",
-  "mw_fb7_finalboss_beam_light.png",
-  "mw_fb7_finalboss_door_open.png"
+  "mw_fb_final3_finalboss_door_sealed.png",
+  "mw_fb_final3_finalboss_beam_mark.png",
+  "mw_fb_final3_finalboss_beam_light.png",
+  "mw_fb_final3_finalboss_door_open.png"
  ],
  "error": null,
  "windows_shown_again": 0

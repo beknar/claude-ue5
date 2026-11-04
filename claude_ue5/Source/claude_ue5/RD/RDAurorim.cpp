@@ -20,11 +20,16 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Misc/Parse.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDAurorim, Log, All);
 
@@ -131,6 +136,86 @@ void ARDMonster::EndFistFx()
 	for (const TWeakObjectPtr<UFXSystemComponent>& W : FistFxLive)
 		if (UFXSystemComponent* C = W.Get()) { C->DeactivateImmediate(); C->DestroyComponent(); }
 	FistFxLive.Reset();
+}
+
+// ------------------------------------------------------------------------------------------------ his tactics (2026-11-04)
+void ARDMonster::MakeFinalBoss(float WaitScale)
+{
+	bFinalBoss = true;
+	const float S = FMath::Clamp(WaitScale, 0.2f, 2.f);
+	RangedWait *= S; BeamWait *= S;
+}
+
+bool ARDMonster::CircleClear(FVector& Dir, const FVector& Fw, float In)
+{
+	// (a sphere a little under his capsule's width, low enough to meet the furniture, 1.6 m along the way)
+	const FVector L = GetActorLocation() - FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.4f);
+	const float Rad = GetCapsuleComponent()->GetScaledCapsuleRadius() * 0.8f;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDAuCircle), false, this);
+	auto Way = [&](float Sign, float I) { return (FVector(-Fw.Y, Fw.X, 0.f) * Sign + Fw * I).GetSafeNormal2D(); };
+	// (the way wanted either way round; then straight round her (along a wall at his back), then round and a little in)
+	const TPair<float, float> Tries[] = { { CircleSign, In }, { -CircleSign, In }, { CircleSign, 0.f }, { -CircleSign, 0.f }, { CircleSign, 0.6f }, { -CircleSign, 0.6f } };
+	for (const TPair<float, float>& T : Tries)
+	{
+		const float Sign = T.Key;
+		const FVector W = Way(Sign, T.Value);
+		if (!GetWorld()->SweepTestByChannel(L, L + W * 160.f, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(Rad), Q))
+		{
+			if (Sign != CircleSign) { CircleSign = Sign; CircleFlip = 4.f; }
+			Dir = W;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ARDMonster::TickFinalHold(AActor* P, const FVector& D, float Dist, float Dz, float Dt)
+{
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	if (!G || !P || Dz > 300.f || !G->FinalBossHolds(this)) return false;
+	const float Near = G->FinalBossHold.X, Far = FMath::Max(G->FinalBossHold.Y, Near + 100.f);
+	if (Dist > Far) return false;             // (farther: the chase brings him in to his lance's and light's range)
+	const FVector L = GetActorLocation();
+	// (her out of his sight (round a corner, behind a pillar): the chase brings him where he sees her)
+	FCollisionQueryParams Qs(SCENE_QUERY_STAT(RDAuHoldSight), false, this); Qs.AddIgnoredActor(P);
+	FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic);
+	if (GetWorld()->LineTraceTestByObjectType(L + FVector(0, 0, 60.f), P->GetActorLocation() + FVector(0, 0, 60.f), O, Qs)) return false;
+	Face(D, Dt);
+	const FVector Fw = D.GetSafeNormal();
+	// (round her, turning now and then; out when she is nearer than his range's near end, in a little past its middle)
+	CircleFlip -= Dt;
+	if (CircleFlip <= 0.f) { CircleSign = -CircleSign; CircleFlip = 4.f; }
+	const float In = Dist < Near ? -FMath::Clamp((Near - Dist) / 300.f, 0.4f, 1.5f) : (Dist > (Near + Far) * 0.5f ? 0.3f : 0.f);
+	FVector Dir;
+	if (!CircleClear(Dir, Fw, In))
+	{
+		// (walled in both ways round: straight back from her if that is clear, else he stands)
+		Dir = Dist < Near ? -Fw : FVector::ZeroVector;
+	}
+	// (stuck on something the sweep missed (one of his band): the other way round)
+	StuckTime = GetVelocity().Size2D() < 40.f ? StuckTime + Dt : 0.f;
+	if (StuckTime > 0.7f) { StuckTime = 0.f; CircleSign = -CircleSign; CircleFlip = 4.f; }
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul();
+	if (!Dir.IsZero()) AddMovementInput(Dir, 0.85f);
+	bCircling = true; HoldSeconds += Dt;
+	const float Speed = GetVelocity().Size2D();
+	SetWalkingAnim(Speed > 25.f);
+	if (bWalkingAnim) GetMesh()->SetPlayRate(FMath::Clamp(Speed / ClipSpeed, 0.4f, 1.6f));
+	return true;
+}
+
+void ARDMonster::CircleStep(const FVector& D, float Gap, float Dt)
+{
+	Face(D, Dt);
+	CircleFlip -= Dt;
+	if (CircleFlip <= 0.f) { CircleSign = -CircleSign; CircleFlip = 3.f; }
+	// (round her at his reach: a little in as the step round carries him out, a little out when he is on her)
+	const float In = Gap > Reach * 0.45f ? 0.35f : (Gap < Reach * 0.15f ? -0.3f : 0.f);
+	FVector Dir;
+	if (!CircleClear(Dir, D.GetSafeNormal(), In)) { SetWalkingAnim(false); return; }
+	AddMovementInput(Dir, 0.45f);
+	bCircling = true; CircleSeconds += Dt;
+	SetWalkingAnim(GetVelocity().Size2D() > 25.f);
 }
 
 TArray<FString> ARDMonster::GetFistFxLines() const
@@ -278,7 +363,9 @@ bool ARDDungeonGenerator::PlaceFinalBoss()
 	const int32 Boss = Monsters.IndexOfByPredicate([this](const FRDMonsterDef& D) { return D.Name == FinalBossKind; });
 	if (Boss < 0 || !Monsters[Boss].Mesh) { UE_LOG(LogRDAurorim, Warning, TEXT("RDFINAL no monster %s"), *FinalBossKind.ToString()); return false; }
 	ARDSection* S = nullptr; int32 Room = -1;
-	if (!PickExploredRoom(FMath::Max(MaxTier, 1), 7, S, Room)) { UE_LOG(LogRDAurorim, Warning, TEXT("RDFINAL no explored room of tier %d to set him in"), MaxTier); return false; }
+	// (the showcase: the room it chose)
+	if (bFinalShowOn && FinalShowRoom >= 0) { S = GetSection(FinalShowSet); Room = FinalShowRoom; }
+	if ((!S || Room < 0) && !PickExploredRoom(FMath::Max(MaxTier, 1), 7, S, Room)) { UE_LOG(LogRDAurorim, Warning, TEXT("RDFINAL no explored room of tier %d to set him in"), MaxTier); return false; }
 	FEncounter E; E.Tier = FMath::Max(MaxTier, 1); E.bBoss = true; E.bFinal = true; E.Section = S->Coord; E.Room = Room; E.At = S->GetRoomCenter(Room);
 	TArray<int32> Kinds; MonsterKindsFor(FIntPoint(FMath::Max(MaxTier - 1, 0), 0), Kinds);
 	Kinds.Remove(Boss);
@@ -376,8 +463,27 @@ void ARDDungeonGenerator::QueueSkyBeam(ARDMonster* From, const FVector& At, floa
 	SkyBeamStats.FindOrAdd(TEXT("called"))++;
 }
 
+bool ARDDungeonGenerator::FinalBossHolds(const ARDMonster* Boss) const
+{
+	if (!Boss || !Boss->bFinalBoss || Boss->IsDead() || FinalBossHold.Y <= 0.f || FinalBandNear <= FinalBossCloseBand) return false;
+	// (struck lately: he fights back)
+	return GetWorld()->GetTimeSeconds() - Boss->LastHurtTime >= FinalBossStruckHold;
+}
+
 void ARDDungeonGenerator::TickFinal(float Dt)
 {
+	// (his band near him: his tactics hold him back while they fight)
+	// (and any of them after her: he joins the fight from farther)
+	FinalBandNear = 0; bFinalBandFighting = false;
+	for (const FEncounter& E : Encounters)
+		if (E.bFinal && E.Live.Num() > 0)
+			if (const ARDMonster* B = E.Live[0].Get(); B && !B->IsDead())
+				for (int32 I = 1; I < E.Live.Num(); ++I)
+					if (const ARDMonster* M = E.Live[I].Get(); M && !M->IsDead())
+					{
+						if (FVector::Dist2D(M->GetActorLocation(), B->GetActorLocation()) < 2500.f) ++FinalBandNear;
+						if (M->IsAggro() && !M->IsAlly()) bFinalBandFighting = true;
+					}
 	// the light from above: the mark's moment over, it falls
 	if (SkyBeams.Num() > 0)
 	{
@@ -446,4 +552,286 @@ TArray<FString> ARDDungeonGenerator::GetSkyBeamLines() const
 	TArray<FString> Out;
 	for (const FSkyBeam& B : SkyBeams) Out.Add(FString::Printf(TEXT("%.0f|%.0f|%.0f|%.2f|%.0f|%.1f"), B.At.X, B.At.Y, B.At.Z, B.Left, B.Radius, B.Damage));
 	return Out;
+}
+
+// ================================================================================================ the showcase (a reel of the fight)
+void ARDDungeonGenerator::StartFinalShow(const FString& Go, const FString& Done)
+{
+	bFinalShowOn = true; bFinalShowCmdRead = true; FinalShowPhase = 0; FinalShowT = FinalShowFightT = FinalShowCheck = 0.f;
+	FinalShowGo = Go; FinalShowDone = Done; FinalShowResult.Reset(); FinalShowKit.Reset(); FinalShowGoLine.Reset();
+	UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW begun (%s)%s%s"), bTown ? TEXT("the town: into the castle") : TEXT("the castle"),
+		Go.IsEmpty() ? TEXT("") : *FString::Printf(TEXT(", waits for %s"), *Go), Done.IsEmpty() ? TEXT("") : *FString::Printf(TEXT(", writes %s"), *Done));
+}
+
+FString ARDDungeonGenerator::GetFinalShowState() const
+{
+	const ARDMonster* Boss = GetFinalBoss();
+	const FEncounter* E = Encounters.FindByPredicate([](const FEncounter& X) { return X.bFinal; });
+	int32 Band = 0;
+	if (E) for (int32 I = 1; I < E->Live.Num(); ++I) if (const ARDMonster* M = E->Live[I].Get(); M && !M->IsDead()) ++Band;
+	return FString::Printf(TEXT("%d|%.1f|%.1f|%.0f|%.0f|%.0f|%d|%s|%s"), bFinalShowOn ? FinalShowPhase : -1, FinalShowT, FinalShowFightT,
+		PlayerCombat ? PlayerCombat->GetHealth() : 0.f, PlayerCombat ? PlayerCombat->GetMaxHealth() : 0.f, Boss && !Boss->IsDead() ? Boss->GetHealth() : 0.f, Band, *FinalShowResult, *FinalShowKit);
+}
+
+void ARDDungeonGenerator::TickFinalShow(float RealDt)
+{
+	// (the command line, once a game: -RDFinalShow [-RDShowGo=<file>] [-RDShowDone=<file>])
+	URDGameInstance* GI = URDGameInstance::Of(this);
+	if (!bFinalShowCmdRead)
+	{
+		bFinalShowCmdRead = true;
+		if (GI && !GI->bFinalShowRead)
+		{
+			GI->bFinalShowRead = true;
+			GI->bFinalShow = FParse::Param(FCommandLine::Get(), TEXT("RDFinalShow"));
+			FParse::Value(FCommandLine::Get(), TEXT("RDShowGo="), GI->FinalShowGo);
+			FParse::Value(FCommandLine::Get(), TEXT("RDShowDone="), GI->FinalShowDone);
+			FParse::Value(FCommandLine::Get(), TEXT("RDShowReady="), GI->FinalShowReady);
+		}
+		// (in the castle after the town: the show goes on there)
+		if (GI && GI->bFinalShow && !bTown && bFinalBossOn) { StartFinalShow(GI->FinalShowGo, GI->FinalShowDone); FinalShowReady = GI->FinalShowReady; }
+	}
+	// the town: into the castle, once she stands in it
+	if (bTown)
+	{
+		if (GI && GI->bFinalShow && !GI->bFinalShowEntered && bTownPlaced && PlayerCombat && !bTownTraveling)
+		{
+			GI->bFinalShowEntered = true;
+			UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW the town: into the castle"));
+			EnterCastle();
+		}
+		return;
+	}
+	if (!bFinalShowOn) return;
+	const float Dt = FMath::Min(RealDt, 0.1f);
+	FinalShowT += Dt;
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	ACharacter* Her = PC ? Cast<ACharacter>(PC->GetPawn()) : nullptr;
+	URDCombatComponent* Pc = PlayerCombat;
+	if (!Her || !Pc) return;
+	auto Done = [this](const FString& Why)
+	{
+		FinalShowResult = Why; FinalShowPhase = 9;
+		StopAutoplay(TEXT("the showcase's end"));
+		if (FinalShowAggro > 0.f) { AggroDistance = FinalShowAggro; LoseDistance = FinalShowLose; }
+		// (with the go's measures, the fight's order and moves, and its length: a Shipping game writes no log)
+		const FString Moves = FString::Printf(TEXT("his band's last fell at %.1f s; her first blow on him at %.1f s, %d of his band alive then; he held back circling %.1f s, ")
+			TEXT("stepped round her %.1f s; she stepped round him %.1f s, left %d light marks, %d of %d lights fell on her; her lowest %.0f of %.0f hp; his %.0f hp ")
+			TEXT("(a tier's boss's x%.2f), blows x%.2f, waits x%.2f"),
+			FinalShowBandDoneT, FinalShowFirstHitT, FinalShowBandAtHit, FinalShowHoldS, FinalShowBossCircleS, AutoplayCircleSeconds,
+			AutoplayStats.FindRef(TEXT("light marks left")), SkyBeamStats.FindRef(TEXT("on_her")), SkyBeamStats.FindRef(TEXT("fell")),
+			FinalShowMinHp, PlayerCombat ? PlayerCombat->GetMaxHealth() : 0.f, FinalShowBossMaxHp, FinalBossHealth, FinalBossDamage, FinalBossWaitScale);
+		if (!FinalShowDone.IsEmpty()) FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s | %s | %s | the fight %.1f s"), *Why, *FinalShowGoLine, *Moves, FinalShowFightT), *FinalShowDone);
+		UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW moves: %s"), *Moves);
+		UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW done: %s (the fight %.1f s)"), *Why, FinalShowFightT);
+	};
+	auto Face = [&](const FVector& To)
+	{
+		const FVector D = (To - Her->GetActorLocation()).GetSafeNormal2D();
+		if (D.IsNearlyZero()) return;
+		Her->SetActorRotation(FRotator(0, D.Rotation().Yaw, 0));
+		PC->SetControlRotation(FRotator(-12.f, D.Rotation().Yaw, 0));
+	};
+	switch (FinalShowPhase)
+	{
+	case 0:
+	{
+		// (the start set built and a moment given: her things are restored a few frames after her combat component is made)
+		const ARDSection* S0 = GetSection(FIntPoint::ZeroValue);
+		if (!S0 || S0->IsBuilding() || FinalShowT < 2.f) return;
+		// the kit: every tier open (her growth), the best of everything she can use
+		DebugOpenTiers(MaxTier, false);
+		TArray<FString> Kit;
+		FName Arm = NAME_None, Wpn = NAME_None, Shd = NAME_None, Heal = NAME_None; float Av = -1.f, Wv = -1.f, Sv = -1.f, Hv = -1.f;
+		TMap<uint8, TPair<FName, float>> Rings;
+		for (const FRDItemDef& It : Items)
+		{
+			// (the heroes are women: of two sets rated alike, the one made for a woman: Epic Plate (Female) over (Male))
+			if (It.Kind == ERDItemKind::Armour && ArmourRefusal(It, It.Name.ToString()).IsEmpty()
+				&& (It.DamageRating > Av || (It.DamageRating == Av && It.Name.ToString().Contains(TEXT("Female"))))) { Av = It.DamageRating; Arm = It.Name; }
+			else if (It.Kind == ERDItemKind::Weapon) { for (const FRDWeaponFit& F : It.WeaponFits) if (F.Hero == CurrentHero && F.Weapon.Damage > Wv) { Wv = F.Weapon.Damage; Wpn = It.Name; } }
+			else if (It.Kind == ERDItemKind::Shield && It.Amount > Sv) { Sv = It.Amount; Shd = It.Name; }
+			else if (It.Kind == ERDItemKind::Healing && It.Amount > Hv) { Hv = It.Amount; Heal = It.Name; }
+			else if (It.Kind == ERDItemKind::Ring) { TPair<FName, float>& B = Rings.FindOrAdd((uint8)It.RingKind, TPair<FName, float>(NAME_None, -1.f)); if (It.Amount > B.Value) B = TPair<FName, float>(It.Name, It.Amount); }
+		}
+		if (!Arm.IsNone()) { Pc->AddItem(Arm, 1); if (Pc->WearArmour(Arm)) Kit.Add(Arm.ToString()); }
+		if (!Shd.IsNone()) { Pc->AddItem(Shd, 1); if (Pc->WearShield(Shd)) Kit.Add(Shd.ToString()); }
+		for (const auto& Kv : Rings) if (!Kv.Value.Key.IsNone()) { Pc->AddItem(Kv.Value.Key, 1); if (Pc->WearRing(Kv.Value.Key)) Kit.Add(Kv.Value.Key.ToString()); }
+		if (!Heal.IsNone()) { Pc->AddItem(Heal, 6); Kit.Add(FString::Printf(TEXT("6 %s"), *Heal.ToString())); }
+		if (!Wpn.IsNone())
+		{
+			Pc->AddItem(Wpn, 1);
+			const int32 Wi = Weapons.IndexOfByPredicate([Wpn](const FRDWeaponDef& W) { return W.Item == Wpn; });
+			if (Wi >= 0)
+			{
+				Pc->SelectWeapon(Wi); Kit.Add(Wpn.ToString());
+				// (the slash table's last slash on it)
+				if (Slashes.Num() > 0)
+				{
+					const FName Sl = Slashes.Last().Name;
+					Pc->AddItem(Sl, 1);
+					if (Pc->ApplySlash(Sl, Wi)) Kit.Add(Sl.ToString());
+				}
+			}
+		}
+		Pc->SetHealth(Pc->GetMaxHealth());
+		FinalShowKit = FString::Join(Kit, TEXT(", "));
+		UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW kit: %s; %.0f hit points"), *FinalShowKit, Pc->GetMaxHealth());
+		// into a set of the last tier: held in the air over it while it is built (a set that far from her is dropped at once)
+		FinalShowSet = FIntPoint(FMath::Max(MaxTier - 1, 1), 0);
+		const float Span = SectionTiles * TileSize;
+		Her->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		Her->SetActorLocation(FVector(FinalShowSet.X * Span, FinalShowSet.Y * Span, 400.f), false, nullptr, ETeleportType::TeleportPhysics);
+		GenerateSectionNow(FinalShowSet);
+		// (nobody comes at her before the recording begins)
+		FinalShowAggro = AggroDistance; FinalShowLose = LoseDistance; AggroDistance = 0.f; LoseDistance = 1.f;
+		FinalShowPhase = 1; FinalShowT = 0.f;
+		return;
+	}
+	case 1:
+	{
+		ARDSection* S = GetSection(FinalShowSet);
+		if (!S || S->IsBuilding()) { if (FinalShowT > 60.f) Done(TEXT("the set was not built")); return; }
+		Her->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		const FVector C = S->GetRoomCenter(0);
+		Her->SetActorLocation(C + FVector(0, 0, 120.f), false, nullptr, ETeleportType::TeleportPhysics);
+		// (the set's own monsters gone and its rooms seen: him and his band only; then him, at once)
+		DebugClearSection(FinalShowSet, 0, C);
+		// (his room: the set's largest by its free floor (she is put in it a moment later; nobody fights before the go))
+		{
+			int32 BestN = -1; FinalShowRoom = -1;
+			for (int32 Ri = 0; Ri < S->GetNumRooms(); ++Ri)
+			{
+				const int32 N = S->GetRoomFreeTiles(Ri).Num();
+				if (N > BestN) { BestN = N; FinalShowRoom = Ri; }
+			}
+			UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW his room: %d (%d free tiles)"), FinalShowRoom, BestN);
+		}
+		if (!PlaceFinalBoss()) { Done(TEXT("he could not be placed")); return; }
+		FinalShowPhase = 2; FinalShowT = 0.f;
+		return;
+	}
+	case 2:
+	{
+		// (her about 20 m from him in his room (his lance first, then his light as she closes, then his fists), on a tile with the
+		// camera's room behind her (a bed behind her filled the first shot), facing him)
+		ARDMonster* Boss = GetFinalBoss();
+		const FEncounter* E = Encounters.FindByPredicate([](const FEncounter& X) { return X.bFinal; });
+		ARDSection* S = E ? GetSection(E->Section) : nullptr;
+		if (!Boss || !S || FinalShowT < 1.f) { if (FinalShowT > 10.f) Done(TEXT("no boss")); return; }
+		const FVector B = Boss->GetActorLocation();
+		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDShowCam), false, Her); Q.AddIgnoredActor(Boss);
+		FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
+		FVector Best = FVector::ZeroVector; float BestScore = -MAX_flt;
+		for (const FVector& T : S->GetRoomFreeTiles(E->Room))
+		{
+			const float D = FVector::Dist2D(T, B);
+			float Score = -FMath::Abs(D - 2000.f);
+			const FVector Back = (T - B).GetSafeNormal2D();
+			if (GetWorld()->LineTraceTestByObjectType(T + FVector(0, 0, 180.f), T + Back * 400.f + FVector(0, 0, 230.f), O, Q)) Score -= 5000.f;      // (the camera's room)
+			if (GetWorld()->LineTraceTestByObjectType(T + FVector(0, 0, 150.f), B + FVector(0, 0, 150.f), O, Q)) Score -= 3000.f;                    // (him in sight)
+			if (Score > BestScore) { BestScore = Score; Best = T; }
+		}
+		if (!Best.IsZero()) Her->SetActorLocation(Best + FVector(0, 0, 120.f), false, nullptr, ETeleportType::TeleportPhysics);
+		Face(B);
+		// (him and his band kept in his room until the go: the recorder's wait (three Game Bar presses, 40 s) let them wander off
+		// down the hallways, and autoplay hunted them one by one for three minutes)
+		for (const TWeakObjectPtr<ARDMonster>& M : E->Live) if (M.IsValid()) M->HomeRoom = E->Room;
+		Pc->SetHealth(Pc->GetMaxHealth());
+		FinalShowPhase = 3; FinalShowT = 0.f;
+		// (ready: the recorder may begin, then writes the go file)
+		if (!FinalShowReady.IsEmpty()) FFileHelper::SaveStringToFile(TEXT("ready"), *FinalShowReady);
+		UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW she stands %.0f m from him"), FVector::Dist2D(Her->GetActorLocation(), B) / 100.f);
+		return;
+	}
+	case 3:
+	{
+		// (waiting for the recording to begin: the go file, four times a second; facing him)
+		if (ARDMonster* Boss = GetFinalBoss()) Face(Boss->GetActorLocation());
+		if (!FinalShowGo.IsEmpty())
+		{
+			FinalShowCheck += Dt;
+			if (FinalShowCheck < 0.25f) return;
+			FinalShowCheck = 0.f;
+			if (!FPaths::FileExists(FinalShowGo)) return;
+		}
+		// (he and his band come at her from the start: she stands farther from him than the castle's noticing distance (in a
+		// rehearsal he stood 32 s while his band fought her); the castle's own back at the end)
+		AggroDistance = FMath::Max(FinalShowAggro, 2600.f); LoseDistance = FMath::Max(FinalShowLose, 4000.f);
+		StartAutoplay(900.f, false);
+		bAutoplayIgnorePlayer = true;          // (no key takes over: Game Bar's hotkey reaches the game)
+		// (him and his band only: the first recording's autoplay hunted another set's monsters for 80 s before it reached him)
+		AutoplayOnly.Reset();
+		if (const FEncounter* E = Encounters.FindByPredicate([](const FEncounter& X) { return X.bFinal; }))
+		{
+			float Far = 0.f; int32 Out = 0;
+			ARDSection* Es = GetSection(E->Section);
+			for (const TWeakObjectPtr<ARDMonster>& M : E->Live)
+				if (M.IsValid())
+				{
+					M->HomeRoom = -1; if (!M->IsDead()) AutoplayOnly.Add(M);
+					Far = FMath::Max(Far, FVector::Dist2D(M->GetActorLocation(), Her->GetActorLocation()));
+					if (Es && Es->RoomAt(M->GetActorLocation()) != E->Room) ++Out;
+				}
+			const ARDMonster* Bo = GetFinalBoss();
+			FinalShowGoLine = FString::Printf(TEXT("at the go: him %.0f m from her, the farthest of them %.0f m, %d of %d out of his room, her in it: %s; %s"),
+				Bo ? FVector::Dist2D(Bo->GetActorLocation(), Her->GetActorLocation()) / 100.f : -1.f, Far / 100.f, Out, E->Live.Num(),
+				Es && Es->RoomAt(Her->GetActorLocation()) == E->Room ? TEXT("yes") : TEXT("no"), *FinalShowKit);
+		}
+		UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW autoplay fights only his %d"), AutoplayOnly.Num());
+		FinalShowPhase = 4; FinalShowT = 0.f; FinalShowFightT = 0.f;
+		FinalShowFirstHitT = FinalShowBandDoneT = -1.f; FinalShowBandAtHit = -1; FinalShowMinHp = Pc->GetHealth();
+		FinalShowHoldS = FinalShowBossCircleS = 0.f; FinalShowBossMaxHp = GetFinalBoss() ? GetFinalBoss()->GetMaxHealth() : 0.f;
+		SkyBeamStats.Reset();
+		UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW go: the fight (his %.0f hit points, his band %d near him)"), FinalShowBossMaxHp, FinalBandNear);
+		return;
+	}
+	case 4:
+		FinalShowFightT += Dt;
+		FinalShowMinHp = FMath::Min(FinalShowMinHp, Pc->GetHealth());
+		// (the fight's order: her first blow on him and his band then, the band's last death; his moves)
+		if (const FEncounter* E = Encounters.FindByPredicate([](const FEncounter& X) { return X.bFinal; }))
+		{
+			int32 Band = 0;
+			for (int32 I = 1; I < E->Live.Num(); ++I) if (const ARDMonster* M = E->Live[I].Get(); M && !M->IsDead()) ++Band;
+			if (Band == 0 && FinalShowBandDoneT < 0.f) FinalShowBandDoneT = FinalShowFightT;
+			if (const ARDMonster* Bo = E->Live.Num() > 0 ? E->Live[0].Get() : nullptr)
+			{
+				if (FinalShowFirstHitT < 0.f && Bo->GetHealth() < Bo->GetMaxHealth() - 0.5f)
+				{
+					FinalShowFirstHitT = FinalShowFightT; FinalShowBandAtHit = Band;
+					UE_LOG(LogRDAurorim, Log, TEXT("RDSHOW her first blow on him at %.1f s, %d of his band alive"), FinalShowFightT, Band);
+				}
+				FinalShowHoldS = Bo->HoldSeconds; FinalShowBossCircleS = Bo->CircleSeconds;
+			}
+		}
+		if (Pc->IsDead()) { FinalShowPhase = 5; FinalShowT = 0.f; FinalShowResult = TEXT("she fell"); return; }
+		// (the combat goes on after his death while any of his band is after her: over once none has been for 3 s, or 40 s after
+		// him at most (a rehearsal's autoplay went looting chests for a minute and a half with idle monsters left about the set))
+		if (bFinalBossSlain)
+		{
+			if (FinalShowResult.IsEmpty()) { FinalShowResult = TEXT("he is slain"); FinalShowT = 0.f; FinalShowCheck = 0.f; }
+			bool bFight = false;
+			for (const ARDMonster* M : GetMonsters())
+				if (M && !M->IsDead() && !M->IsAlly() && M->IsAggro() && FVector::Dist2D(M->GetActorLocation(), Her->GetActorLocation()) < 2500.f) { bFight = true; break; }
+			FinalShowCheck = bFight ? 0.f : FinalShowCheck + Dt;
+			if (FinalShowCheck < 3.f && FinalShowT < 40.f) return;
+			const FEncounter* E = Encounters.FindByPredicate([](const FEncounter& X) { return X.bFinal; });
+			int32 Band = 0;
+			if (E) for (int32 I = 1; I < E->Live.Num(); ++I) if (const ARDMonster* M = E->Live[I].Get(); M && !M->IsDead()) ++Band;
+			FinalShowPhase = 5; FinalShowT = 0.f; FinalShowResult = Band > 0 ? FString::Printf(TEXT("he is slain (%d of his band left, none after her)"), Band) : FString(TEXT("he is slain, and his band"));
+			StopAutoplay(TEXT("the fight is over"));
+			return;
+		}
+		if (FinalShowFightT > 900.f) Done(TEXT("the fight went on 15 minutes"));
+		return;
+	case 5:
+		// (his loot, the notice, the door's grating going down: then the end)
+		// (she turns to the door, its grating down and its light up)
+		if (FinalShowResult.StartsWith(TEXT("he is slain")) && FinalShowT < 0.5f && FinalDoor) Face(FinalDoor->GetActorLocation());
+		if (FinalShowT > 7.f) Done(FinalShowResult);
+		return;
+	default:
+		return;
+	}
 }

@@ -3544,8 +3544,10 @@ def door_state(d):
             "width": float(p[8]), "height": float(p[9]), "gate_z": float(p[10]), "gate_blocks": int(p[11]), "glow": int(p[12]), "glow_particles": int(p[13])}
 def step_finalboss():
     """the final boss: tier 5 at the tiers' share (scaled to 1 % for the test: one set of the last tier cleared reaches it (its chests 1.7 to 4 %), and
-    nothing is placed before) sets Aurorim in a room of it she has explored with 6 to 10 of its monsters, scaled as the tier's boss
-    (3 times a tier-5 kind's hit points or more), levitating (his lowest point 30 to 70 cm over the floor) with his wings beating
+    nothing is placed before) sets Aurorim in a room of it she has explored with 6 to 10 of its monsters, above the tier's boss
+    (BossHealth x FinalBossHealth, 4.5 times a tier-5 kind's hit points or more); his tactics: his band alive, he keeps 9 to 13 m
+    from her circling her and lands no blow, struck he comes in (within 3 m), his band dead he no longer holds back, and between
+    his blows he steps round her; levitating (his lowest point 30 to 70 cm over the floor) with his wings beating
     (a wing tip's bone moving 15 cm or more); the door beside him, sealed (its grating there and blocking); his three attacks by
     distance, each measured on her: the lance from afar (a shot with the spear flying point first), the light from above at
     middle range (its mark, then the light falling on her), his punches with wind round his fists (effects on his hand bones);
@@ -3589,6 +3591,9 @@ def step_finalboss():
     res["band"] = {"n": len(band), "max_hp": round(max((m.get_max_health() for m in band), default=0)), "kinds": sorted({str(m.monster_name) for m in band}),
                    "all_tier5": all(str(m.monster_name) in kinds5 for m in band)}
     res["hp_ratio"] = round(boss.get_max_health() / max(res["band"]["max_hp"], 1.0), 2)
+    # (above a tier's boss: BossHealth x FinalBossHealth over the strongest of his band (his kind's factor is the tier's strongest);
+    # read here: the step ends in Brokenspire, the castle's generator gone)
+    res["hp_ratio_want"] = round(g.get_editor_property("boss_health") * g.get_editor_property("final_boss_health") * 0.97, 2)
     # (levitating, the wings beating: his lowest drawn point over the floor, a wing tip's bone over two seconds)
     bottoms, hov, wing = [], [], []
     for _ in range(24):
@@ -3605,9 +3610,6 @@ def step_finalboss():
         res["door_in_room"] = ds_.room_at(V(dl.x + rv.x * 60, dl.y + rv.y * 60, dl.z)) == st["room"]
         put(door.get_approach(260.0), yaw=math.degrees(math.atan2(-door.get_actor_right_vector().y, -door.get_actor_right_vector().x)), z=dl.z); yield from wait(0.6)
         shot("finalboss_door_sealed", "1280x720"); yield from rwait(1.2)
-    # (his band away, so that his own attacks are measured; then she meets him at each distance)
-    for m in band: m.apply_damage(1e9, G["pawn"])
-    yield from wait(1.0)
     room_tiles = list(g.get_section(I2(*st["section"])).get_room_free_tiles(st["room"]))
     w = G["w"]
     hh = boss.capsule_component.get_scaled_capsule_half_height()
@@ -3645,9 +3647,12 @@ def step_finalboss():
     try:
         # (each attack watched in one window: she is kept alive (a tier-5 boss's blows end a starting hero in three), what he took
         # off her added up before each refill)
+        BR = {}
         def watch(sec, until, each=None):
-            lost = 0.0; prev = c.get_health(); t0 = now()
+            # (and what his fight did each frame (his CombatBranch), counted into BR: a standing boss says why)
+            lost = 0.0; prev = c.get_health(); t0 = now(); BR.clear()
             while now() - t0 < sec:
+                kb = str(boss.combat_branch); BR[kb] = BR.get(kb, 0) + 1
                 hpn = c.get_health()
                 if hpn < prev: lost += prev - hpn
                 if hpn < c.get_max_health() * 0.6: refill(); hpn = c.get_health()
@@ -3656,6 +3661,34 @@ def step_finalboss():
                 if until(): break
                 yield
             return round(lost, 1)
+        # his tactics (the user's of 2026-11-04): his band alive, he keeps his range from her (FinalBossHold, 9 to 13 m), circling
+        # her, and does not come in to his fists; struck, he comes at her
+        hold = g.get_editor_property("final_boss_hold")
+        tac = {"distance": meet(400, 700), "band_near": g.get_final_band_near(), "hold_m": [round(hold.x / 100, 1), round(hold.y / 100, 1)]}
+        if tac["distance"]:
+            refill(); h0 = boss.hold_seconds; hl0 = boss.hits_landed; ds = []; ps = []
+            def look_tac():
+                ds.append(dist2(boss.get_actor_location(), G["pawn"].get_actor_location())); ps.append(boss.get_actor_location())
+            yield from watch(8, lambda: False, look_tac)
+            tail = ds[len(ds) // 2:] or [0.0]
+            tac["branches"] = dict(BR)
+            # (the way round her he went: degrees about her, frame to frame)
+            hl = G["pawn"].get_actor_location(); sw_ = 0.0
+            for i in range(1, len(ps)):
+                a0 = math.atan2(ps[i - 1].y - hl.y, ps[i - 1].x - hl.x); a1 = math.atan2(ps[i].y - hl.y, ps[i].x - hl.x)
+                sw_ += abs((a1 - a0 + math.pi) % (2 * math.pi) - math.pi)
+            tac["round_deg"] = round(math.degrees(sw_))
+            tac.update({"held_s": round(boss.hold_seconds - h0, 1), "blows_landed": boss.hits_landed - hl0,
+                        "tail_m": [round(min(tail) / 100, 1), round(max(tail) / 100, 1)],
+                        "moved_m": round(sum(dist2(ps[i], ps[i - 1]) for i in range(1, len(ps))) / 100, 1)})
+            boss.apply_damage(1.0, G["pawn"]); ds2 = []
+            yield from watch(6, lambda: bool(ds2) and ds2[-1] < 300, lambda: ds2.append(dist2(boss.get_actor_location(), G["pawn"].get_actor_location())))
+            tac["struck_nearest_m"] = round(min(ds2) / 100, 1) if ds2 else None; tac["struck_branches"] = dict(BR)
+        res["tactics"] = tac
+        # (his band away, so that his own attacks are measured; then she meets him at each distance)
+        for m in band: m.apply_damage(1e9, G["pawn"])
+        yield from wait(1.0)
+        res["band_near_after"] = g.get_final_band_near()
         # the lance from afar (up to three places tried: a sight line the game's own trace refuses is not his to throw along)
         res["long_tries"] = []; res["long"] = {}
         for k_ in range(3):
@@ -3673,11 +3706,14 @@ def step_finalboss():
                         last[kk] = p_
             lost = yield from watch(8, lambda: boss.shots_fired > s0, look_lance)
             if boss.shots_fired > s0: lost += (yield from watch(2.5, lambda: False, look_lance))
-            tr = {"distance": dist_, "shots": boss.shots_fired - s0, "on_her": stat("shot_stats", "on_her") - on0, "hp_lost": lost, "lance_frames": len(lance),
+            tr = {"distance": dist_, "branches": dict(BR), "aggro": bool(boss.is_aggro()), "shot_wait": round(boss.get_shot_wait_left(), 1), "shots": boss.shots_fired - s0, "on_her": stat("shot_stats", "on_her") - on0, "hp_lost": lost, "lance_frames": len(lance),
                   "lance_point_first": round(sum(lance) / len(lance), 2) if lance else None, "last_on_her": str(g.get_editor_property("last_shot_on_her"))}
             res["long_tries"].append(tr)
             if tr["shots"] > 0: res["long"] = tr; break
         # the light from above at middle range
+        # (a light called before still in the air would fall in this window and end it: it falls first)
+        t_ = now()
+        while g.get_sky_beam_lines() and now() - t_ < 4.0: yield
         res["middle"] = {"distance": meet(600, 1000)}
         if res["middle"]["distance"]:
             refill(); b0 = boss.beams_cast; f0 = stat("sky_beam_stats", "fell"); h0 = stat("sky_beam_stats", "on_her"); marks = [0]; taken = [False]
@@ -3687,7 +3723,7 @@ def step_finalboss():
                     if not taken[0]: shot("finalboss_beam_mark", "1280x720"); taken[0] = True
             lost = yield from watch(14, lambda: stat("sky_beam_stats", "fell") > f0, look_mark)
             yield from wait(0.3); shot("finalboss_beam_light", "1280x720"); yield from wait(1.0)
-            res["middle"].update({"beams": boss.beams_cast - b0, "mark_frames": marks[0], "fell": stat("sky_beam_stats", "fell") - f0, "on_her": stat("sky_beam_stats", "on_her") - h0, "hp_lost": lost})
+            res["middle"].update({"branches": dict(BR), "beams": boss.beams_cast - b0, "mark_frames": marks[0], "fell": stat("sky_beam_stats", "fell") - f0, "on_her": stat("sky_beam_stats", "on_her") - h0, "hp_lost": lost})
         # his punches with wind round his fists
         res["melee"] = {"distance": meet(250, 400, 0.6)}
         if res["melee"]["distance"]:
@@ -3696,7 +3732,10 @@ def step_finalboss():
                 ln = [str(x) for x in boss.get_fist_fx_lines()]
                 if ln: fx[0] = ln
             lost = yield from watch(10, lambda: boss.hits_landed > hl0, look_fist)
-            res["melee"].update({"fist_fx": boss.fist_fx_made - m0, "lines": fx[0], "hits": boss.hits_landed - hl0, "hp_lost": lost})
+            # (between his blows he steps round her)
+            c0 = boss.circle_seconds
+            lost += (yield from watch(4, lambda: False))
+            res["melee"].update({"fist_fx": boss.fist_fx_made - m0, "lines": fx[0], "hits": boss.hits_landed - hl0, "hp_lost": lost, "circle_s": round(boss.circle_seconds - c0, 1)})
     finally:
         g.set_editor_property("aggro_distance", aggro[0]); g.set_editor_property("lose_distance", aggro[1]); quiet(True)
     # killed: his loot, the gold, the castle conquered, the door open
@@ -3730,9 +3769,11 @@ def step_finalboss():
         res["counter"] = gi.get_counter("finalboss") if gi else None
         G.pop("travel_until", None)
     L_, M_, Me = res.get("long", {}), res.get("middle", {}), res.get("melee", {})
-    sb = res.get("door_sealed") or {}; do = res.get("door_open") or {}
-    ok = (not res["at_start"]["placed"] and not res["placed_before"] and st["placed"] and res["boss"]["kind"] == "Aurorim" and res["boss"]["final"]
-          and 6 <= res["band"]["n"] <= 10 and res["band"]["all_tier5"] and res["hp_ratio"] >= 2.9
+    sb = res.get("door_sealed") or {}; do = res.get("door_open") or {}; Tc = res.get("tactics", {})
+    ok =(not res["at_start"]["placed"] and not res["placed_before"] and st["placed"] and res["boss"]["kind"] == "Aurorim" and res["boss"]["final"]
+          and 6 <= res["band"]["n"] <= 10 and res["band"]["all_tier5"] and res["hp_ratio"] >= res["hp_ratio_want"]
+          and Tc.get("held_s", 0) >= 1.5 and Tc.get("blows_landed", 1) == 0 and Tc.get("tail_m", [0])[0] >= (Tc.get("distance") or 0) / 100 - 0.5 and Tc.get("moved_m", 0) >= 3.0 and Tc.get("round_deg", 0) >= 25
+          and (Tc.get("struck_nearest_m") or 99) <= Tc.get("tail_m", [0])[0] - 3.0 and res.get("band_near_after") == 0 and Me.get("circle_s", 0) > 0.3
           and 30.0 <= res["hover"]["bottom"][0] and res["hover"]["bottom"][1] <= 75.0 and res["wing_motion_cm"] >= 15.0
           and sb.get("open") == 0 and sb.get("gate_blocks") == 1 and res.get("door_in_room")
           and L_.get("shots", 0) >= 1 and L_.get("on_her", 0) >= 1 and L_.get("lance_frames", 0) >= 3 and (L_.get("lance_point_first") or 0) > 0.9

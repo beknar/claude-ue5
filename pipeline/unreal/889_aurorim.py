@@ -6,9 +6,11 @@ blender_numpy/aurorim_build.py's SourceArt/jrpg_aurorim), and after anything tha
 His monster (FRDMonsterDef "Aurorim"; tier 6: never one of a tier's own, only the final boss):
   - his clips: Idle (hovering), Fly (his walk), Box_01 / Box_03 / Box_02 (punches: hit times from build.json), Hit_to_body_01,
     Death; Throw (the lance), Cast (the light from above)
-  - his hit points and blows: the last tier's strongest kind's factors (the tier's boss's BossHealth, BossDamage on top, as
-    PlaceFinalBoss spawns him); his voice: the Titan's
-  - long range (13 to 32 m): a thrown lance (Knights_Pack's Knight_04 spear flying, point first), a gust where it leaves him
+  - his hit points and blows: the last tier's strongest kind's factors (the tier's boss's BossHealth, BossDamage on top, and the
+    final boss's FinalBossHealth 1.5, FinalBossDamage 1.25 over those, as RespawnEncounters spawns him); his voice: the Titan's
+  - his tactics (2026-11-04): while his band is near him he keeps 9 to 13 m from her, circling, with his lance and light
+    (FinalBossWaitScale 0.75: a quarter sooner); struck, or his band dead, he comes in, and steps round her between his blows
+  - long range (9 to 32 m; from 9 to 13 m while his light cools down): a thrown lance (Knights_Pack's Knight_04 spear flying, point first), a gust where it leaves him
     and a lightning burst where it lands
   - middle range (3.5 to 13 m): a beam of light from above: Loot Drops' blue ring where she stands, 0.9 s later MysticDungeon's
     light rays and the holy shield's burst there (230 cm round)
@@ -65,7 +67,7 @@ d.reach = 150.0; d.attack_interval = 1.5
 if titan: d.sound_set = titan.sound_set; d.step_length = titan.step_length
 d.tier = 6
 # long range: the lance
-d.shoots = True; d.ranged_range = 3200.0; d.ranged_min = 1300.0; d.ranged_damage = 0.75; d.ranged_cooldown = 3.5; d.ranged_speed = 2400.0
+d.shoots = True; d.ranged_range = 3200.0; d.ranged_min = 900.0; d.ranged_damage = 0.75; d.ranged_cooldown = 3.5; d.ranged_speed = 2400.0
 d.ranged_clip = need(A + "Throw"); d.ranged_release = float(info["throw_release"])
 d.ranged_fx = None; d.ranged_muzzle_fx = need(FX["gust"]); d.ranged_hit_fx = need(FX["bolt"]); d.ranged_fx_scale = 0.7
 d.ranged_theme = "a thrown lance"
@@ -98,6 +100,16 @@ gen.set_editor_property("final_boss_kind", "Aurorim")
 gen.set_editor_property("final_boss_minions", unreal.IntPoint(6, 10))
 gen.set_editor_property("final_boss_gold", 2500)
 gen.set_editor_property("final_boss_scale", 1.0)
+# (the dungeon boss above a tier's (the user's of 2026-11-04): x1.5 hit points, x1.25 blows over BossHealth / BossDamage, his
+# lance and light a quarter sooner; his tactics: 9 to 13 m from her, circling, while any of his band is near him, until struck)
+gen.set_editor_property("final_boss_health", 1.5)
+gen.set_editor_property("final_boss_damage", 1.25)
+gen.set_editor_property("final_boss_wait_scale", 0.75)
+gen.set_editor_property("final_boss_hold", unreal.Vector2D(900.0, 1300.0))
+gen.set_editor_property("final_boss_close_band", 0)
+gen.set_editor_property("final_boss_struck_hold", 4.0)
+# (his poise: one flinch in 3 s; her blows every second kept him flinching, his punches lost in their wind-up)
+gen.set_editor_property("final_boss_poise", 3.0)
 gen.set_editor_property("final_door_frame", need(DOOR_FRAME))
 gen.set_editor_property("final_door_gate", need(DOOR_GATE))
 gen.set_editor_property("final_door_fx", need(FX["ray"]))

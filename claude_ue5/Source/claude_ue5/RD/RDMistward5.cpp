@@ -523,6 +523,7 @@ void ARDDungeonGenerator::StartAutoplay(float Seconds, bool bQuitAtEnd)
 	AutoplayStats.Reset(); AutoplayWeaponTurn = 0; AutoplayWalked = 0.f; AutoplayWalkFrom = FVector::ZeroVector;
 	bAutoplayHunting = false; AutoplayHuntNext = 0.f; AutoplayPreyBlocked.Reset();
 	bAutoplayKiting = bAutoplayStealthFlee = false; AutoplayStealthNext = AutoplayKiteEnd = AutoplayKiteNext = 0.f;
+	AutoplayCircleSign = 1.f; AutoplayCircleFlip = 2.5f; AutoplayCircleSeconds = 0.f; bAutoplayWasAttacking = bAutoplayDodging = false;
 	AutoplayR.Initialize((int32)HashCombine((uint32)SessionSeed, 0xA070u));
 	if (PlayerCombat) { PlayerCombat->SetRunMode(true); PlayerCombat->ShowMessage(AutoplaySeconds > 0.f ? FString::Printf(TEXT("Autoplay for %.0f s: any key takes over"), AutoplaySeconds) : FString(TEXT("Autoplay: any key takes over"))); }
 	UE_LOG(LogRDMistward5, Log, TEXT("RDAUTOPLAY begun: %s, %.0f s%s"), *CurrentHero.ToString(), AutoplaySeconds, bAutoplayQuit ? TEXT(", the game quits after") : TEXT(""));
@@ -532,7 +533,7 @@ void ARDDungeonGenerator::StopAutoplay(const FString& Why)
 {
 	if (!bAutoplay) return;
 	bAutoplay = false; AutoplayDoing.Reset();
-	AutoplayPath.Reset(); AutoplayFoe = nullptr;
+	AutoplayPath.Reset(); AutoplayFoe = nullptr; AutoplayOnly.Reset();
 	UE_LOG(LogRDMistward5, Log, TEXT("RDAUTOPLAY ended (%s) after %.0f s: %d kills, %d attacks, %d things used, %d opened, %d rooms"), *Why,
 		GetWorld()->GetTimeSeconds() - AutoplayStart, PlayerCombat ? PlayerCombat->Kills : 0, AutoplayStats.FindRef(TEXT("attacks")), AutoplayStats.FindRef(TEXT("used")),
 		AutoplayStats.FindRef(TEXT("opened")), AutoplayRoomsSeen.Num());
@@ -648,33 +649,78 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			else AutoplayUseNext = Now + 0.5f;
 		}
 	}
+	// ---- the final boss's light: its mark round her, out of it before it falls (a roll if her hero has one); the way out a
+	// sphere's sweep finds clear (the mark's middle away from her, turned up to 120 degrees)
+	FVector Dodge = FVector::ZeroVector;
+	for (const FSkyBeam& B : SkyBeams)
+	{
+		const FVector Off = (L - B.At) * FVector(1, 1, 0);
+		if (B.Left <= 0.f || Off.Size() > B.Radius + 80.f || FMath::Abs(L.Z - B.At.Z) > 300.f) continue;
+		Dodge += Off.Size() > 10.f ? Off.GetSafeNormal() : FVector::CrossProduct(Her->GetActorForwardVector(), FVector::UpVector);
+	}
+	if (!Dodge.IsZero())
+	{
+		FCollisionQueryParams Qd(SCENE_QUERY_STAT(RDAutoDodge), false, Her);
+		const FVector Out = Dodge.GetSafeNormal2D();
+		Dodge = FVector::ZeroVector;
+		for (const float Turn : { 0.f, 45.f, -45.f, 90.f, -90.f, 120.f, -120.f })
+		{
+			const FVector Dir = Out.RotateAngleAxis(Turn, FVector::UpVector);
+			if (!W->SweepTestByChannel(L, L + Dir * 300.f, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(35.f), Qd)) { Dodge = Dir; break; }
+		}
+		if (!bAutoplayDodging && !Dodge.IsZero())
+		{
+			AutoplayStats.FindOrAdd(TEXT("light marks left"))++;
+			if (!Pc->IsAttacking() && Pc->StartRoll(Dodge)) AutoplayStats.FindOrAdd(TEXT("rolls"))++;
+		}
+		bAutoplayDodging = !Dodge.IsZero();
+	}
+	else bAutoplayDodging = false;
+	// (his light called (his cast's wind-up): no new swing of hers, so that she is free to move when its mark falls (a swing slows
+	// her to a crawl: a rehearsal's Warrior in plate began to step out of all five marks and all five fell on her))
+	const ARDMonster* FinalNow = bFinalBossOn ? GetFinalBoss() : nullptr;
+	const bool bLightComing = FinalNow && !FinalNow->IsDead() && FinalNow->IsCallingBeam() && FVector::Dist2D(FinalNow->GetActorLocation(), L) < 1600.f;
 	// ---- the one to fight: the nearest she can see within 18 m, or one coming at her
 	ARDMonster* Foe = AutoplayFoe.Get();
-	if (Foe && (Foe->IsDead() || Foe->bCaged || Foe->IsAlly() || FVector::Dist(Foe->GetActorLocation(), L) > 2600.f)) Foe = nullptr;
+	// (only these while any of them lives: the showcase's boss and band)
+	AutoplayOnly.RemoveAll([](const TWeakObjectPtr<ARDMonster>& M) { return !M.IsValid() || M->IsDead(); });
+	const bool bOnly = AutoplayOnly.Num() > 0;
+	auto Allowed = [this, bOnly](const ARDMonster* M) { return !bOnly || AutoplayOnly.Contains(TWeakObjectPtr<ARDMonster>(const_cast<ARDMonster*>(M))); };
+	if (Foe && (Foe->IsDead() || Foe->bCaged || Foe->IsAlly() || !Allowed(Foe) || FVector::Dist(Foe->GetActorLocation(), L) > (bOnly ? 4000.f : 2600.f))) Foe = nullptr;
 	if (AutoplayThink <= 0.f)
 	{
 		AutoplayThink = 0.25f;
 		FCollisionObjectQueryParams O; O.AddObjectTypesToQuery(ECC_WorldStatic); O.AddObjectTypesToQuery(ECC_WorldDynamic);
 		FCollisionQueryParams Q(SCENE_QUERY_STAT(RDAutoSight), false, Her);
 		ARDMonster* Best = nullptr; float BestD = 1e9f;
+		// (the final boss holding back while his band fights her: his band first, him only when none of them is in her reach)
+		ARDMonster* Held = nullptr; float HeldD = 1e9f;
 		for (ARDMonster* M : GetMonsters())
 		{
-			if (!IsValid(M) || M->IsDead() || M->bCaged || M->IsAlly() || M->IsCorpse()) continue;
+			if (!IsValid(M) || M->IsDead() || M->bCaged || M->IsAlly() || M->IsCorpse() || !Allowed(M)) continue;
+			if (FinalBossHolds(M)) { const float Dh = FVector::Dist(M->GetActorLocation(), L); if (Dh < HeldD) { HeldD = Dh; Held = M; } continue; }
 			const FVector Ml = M->GetActorLocation();
 			const float D = FVector::Dist(Ml, L);
-			if (D > 1800.f || FMath::Abs(Ml.Z - L.Z) > 300.f) continue;
+			if (D > (bOnly ? 4000.f : 1800.f) || FMath::Abs(Ml.Z - L.Z) > 300.f) continue;
 			Q.ClearIgnoredSourceObjects(); Q.AddIgnoredActor(Her); Q.AddIgnoredActor(M);
 			const bool bSeen = !W->LineTraceTestByObjectType(L + FVector(0, 0, 50.f), Ml + FVector(0, 0, 30.f), O, Q);
 			// (mistward6: the one she fights is kept out of sight too, within 15 m: one that lost her while she was hidden wandered
 			// off round a corner, and she went to the chests with it alive)
-			if (!bSeen && !(M->IsAggro() && D < 900.f) && !(M == Foe && D < 1500.f)) continue;
+			if (!bSeen && !bOnly && !(M->IsAggro() && D < 900.f) && !(M == Foe && D < 1500.f)) continue;
 			const float Score = D * (M == Foe ? 0.6f : 1.f) * (bSeen ? 1.f : 1.6f);
 			if (Score < BestD) { BestD = Score; Best = M; }
 		}
+		if (!Best && Held && HeldD < (bOnly ? 4000.f : 1800.f)) Best = Held;
 		if (Best != Foe) { Foe = Best; AutoplayPath.Reset(); }
 	}
 	AutoplayThink -= Dt;
 	AutoplayFoe = Foe;
+	// (against the final boss a moment after each of her swings: she steps round him then)
+	{
+		const bool bAtt = Pc->IsAttacking();
+		if (bAutoplayWasAttacking && !bAtt && Foe && Foe->bFinalBoss) AutoplayNextAct = FMath::Max(AutoplayNextAct, Now + 0.55f);
+		bAutoplayWasAttacking = bAtt;
+	}
 	if (Foe)
 	{
 		const FVector Fl = Foe->GetActorLocation();
@@ -726,7 +772,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		if (bAutoplayKiting && (Gap > 520.f || Now >= AutoplayKiteEnd || !bFar)) { bAutoplayKiting = false; AutoplayKiteNext = Now + 2.f; }
 		const bool bAway = bAutoplayKiting || bAutoplayStealthFlee;
 		// (attacks: summons while she leads fewer than she may, then the weapons and spells in turn, each in its reach)
-		if (Now >= AutoplayNextAct && !Pc->IsAttacking() && !bAway)
+		if (Now >= AutoplayNextAct && !Pc->IsAttacking() && !bAway && Dodge.IsZero() && !bLightComing)
 		{
 			Her->SetActorRotation(FRotator(0, D.Rotation().Yaw, 0));
 			bool bDid = false;
@@ -778,6 +824,25 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 				else AutoplayPath.Last() = Fl;
 			}
 		}
+		else if (Foe->bFinalBoss && !Pc->IsAttacking() && Now < AutoplayNextAct)
+		{
+			// (the final boss in her reach, between her swings: a step round him, the way round turning now and then or at a wall)
+			AutoplayPath.Reset();
+			AutoplayCircleFlip -= Dt;
+			if (AutoplayCircleFlip <= 0.f) { AutoplayCircleSign = -AutoplayCircleSign; AutoplayCircleFlip = 2.5f; }
+			const FVector Fw = D.GetSafeNormal(), Rt(-Fw.Y, Fw.X, 0.f);
+			const float In = Gap > 120.f ? 0.3f : -0.1f;
+			FCollisionQueryParams Qc(SCENE_QUERY_STAT(RDAutoCircle), false, Her); Qc.AddIgnoredActor(Foe);
+			for (const float Sign : { AutoplayCircleSign, -AutoplayCircleSign })
+			{
+				const FVector Way = (Rt * Sign + Fw * In).GetSafeNormal2D();
+				if (W->SweepTestByChannel(L, L + Way * 200.f, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(35.f), Qc)) continue;
+				if (Sign != AutoplayCircleSign) { AutoplayCircleSign = Sign; AutoplayCircleFlip = 2.5f; }
+				Move = Way; AutoplayCircleSeconds += Dt; AutoplayStats.FindOrAdd(TEXT("circle s")) = FMath::RoundToInt(AutoplayCircleSeconds);
+				AutoplayDoing = FString::Printf(TEXT("round %s"), *Name);
+				break;
+			}
+		}
 		else { AutoplayPath.Reset(); Her->SetActorRotation(FMath::RInterpConstantTo(Her->GetActorRotation(), FRotator(0, D.Rotation().Yaw, 0), Dt, 540.f)); }
 	}
 	else
@@ -793,7 +858,8 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			if (bUse) { const FString Did = InteractNearest(L, 230.f); AutoplayStats.FindOrAdd(TEXT("opened"))++; AutoplayDoing = What; AutoplayNextAct = Now + 1.2f; UE_LOG(LogRDMistward5, Log, TEXT("RDAUTOPLAY %s -> %s"), *What, *Did); }
 			// (armour she found and does not wear: put on, if her hero wears it)
 			for (const FRDItemDef& It : Items)
-				if (It.Kind == ERDItemKind::Armour && Pc->GetItemCount(It.Name) > 0 && !AutoplayStats.Contains(FString(TEXT("tried ")) + It.Name.ToString()))
+				// (never the set she wears: WearArmour on it takes it off; the showcase's plate came off at autoplay's first second)
+				if (It.Kind == ERDItemKind::Armour && Pc->GetItemCount(It.Name) > 0 && Pc->GetWornArmour() != It.Name && !AutoplayStats.Contains(FString(TEXT("tried ")) + It.Name.ToString()))
 				{
 					AutoplayStats.Add(FString(TEXT("tried ")) + It.Name.ToString(), Pc->WearArmour(It.Name) ? 1 : 0);
 					break;
@@ -814,7 +880,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 			}
 			AutoplayGoal = FVector::ZeroVector; AutoplayPath.Reset(); bAutoplayHunting = false; AutoplayGoalKind = 0; AutoplayPrey = nullptr;
 			float BestD = 1500.f; int32 BestKey = 0;
-			for (int32 I = 0; I < S->GetNumContainers(); ++I)
+			for (int32 I = 0; I < (bOnly ? 0 : S->GetNumContainers()); ++I)
 			{
 				if (S->IsContainerLooted(I) || S->IsTargetOpen(false, I)) continue;
 				const FString K = S->GetContainerKind(I);
@@ -839,7 +905,7 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 				TArray<ARDMonster*> Cands;
 				for (ARDMonster* M : GetMonsters())
 					if (IsValid(M) && !M->IsDead() && !M->bCaged && !M->IsAlly() && !M->IsCorpse() && FMath::Abs(M->GetActorLocation().Z - L.Z) < 300.f
-						&& !AutoplayPreyBlocked.Contains(M)) Cands.Add(M);
+						&& !AutoplayPreyBlocked.Contains(M) && Allowed(M)) Cands.Add(M);
 				Cands.Sort([&L](const ARDMonster& A, const ARDMonster& B) { return FVector::DistSquared2D(A.GetActorLocation(), L) < FVector::DistSquared2D(B.GetActorLocation(), L); });
 				for (int32 K = 0; K < Cands.Num() && K < 6; ++K)
 				{
@@ -925,6 +991,20 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		Move = (To - L).GetSafeNormal2D();
 		if (!Foe) Look = Move;
 	}
+	// (out of his light's mark first, whatever else she was doing; and not back into it before it falls: no step toward a mark's
+	// middle near her (a rehearsal's Warrior stepped out of all four, went back to the guard she fought in them, and all four fell
+	// on her))
+	if (!Dodge.IsZero()) { Move = Dodge; AutoplayDoing = TEXT("out of the light's mark"); }
+	else if (!Move.IsZero())
+		for (const FSkyBeam& B : SkyBeams)
+		{
+			const FVector Off = (L - B.At) * FVector(1, 1, 0);
+			if (B.Left <= 0.f || Off.Size() > B.Radius + 260.f || Off.Size() < 1.f) continue;
+			const FVector In = -Off.GetSafeNormal();
+			const float Toward = FVector::DotProduct(Move, In);
+			if (Toward > 0.f) { Move = Move - In * Toward; AutoplayDoing = TEXT("waits for the light to fall"); }
+		}
+	if (!Move.IsZero() && Move.Size() < 0.2f) Move = FVector::ZeroVector;
 	// ---- stuck: a step aside, then the goal is given up
 	if (!Move.IsZero())
 	{
