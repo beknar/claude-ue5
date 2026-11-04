@@ -13,6 +13,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformTime.h"
+#include "HAL/FileManager.h"
+#include "Misc/Paths.h"
 #include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDSave, Log, All);
@@ -77,7 +79,7 @@ bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why)
 	Sv->SavedAt = FDateTime::Now();
 	Sv->Level = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
 	Sv->Hero = CurrentHero; Sv->At = Her->GetActorLocation(); Sv->Yaw = Her->GetActorRotation().Yaw;
-	Sv->Why = Why; Sv->Place = Place;
+	Sv->Why = Why; Sv->Place = Place; Sv->bInTown = bTown;
 	RDSerializeGame(GI, Sv->Game, false);
 	// (the game goes on as it was)
 	GI->HerPiles = Piles; GI->TownLooted = Looted; GI->GuardsDead = Guards; GI->TownStore = Store; GI->CurrentTown = Current;
@@ -100,8 +102,16 @@ void ARDDungeonGenerator::WildAutosave(const FString& Why)
 bool ARDDungeonGenerator::LoadGameFrom(const FString& Slot)
 {
 	if (bMenuDryRun) { LastMenuAction = TEXT("load ") + Slot; return UGameplayStatics::DoesSaveGameExist(Slot, 0); }
+	// (a slot with no save, or one that cannot be read: said, and the menu stays open)
+	if (URDSaveGame::Info(Slot).IsEmpty())
+	{
+		if (PlayerCombat) PlayerCombat->ShowMessage(Slot == TEXT("autosave") ? TEXT("There is no autosave to load") : TEXT("There is no saved game to load"));
+		return false;
+	}
 	SetMenuOpen(false);
-	return URDSaveGame::LoadAndOpen(this, Slot);
+	if (URDSaveGame::LoadAndOpen(this, Slot)) return true;
+	if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The game could not be loaded"));
+	return false;
 }
 
 FString ARDDungeonGenerator::GetSaveInfo(const FString& Slot) const
@@ -125,12 +135,15 @@ void ARDDungeonGenerator::TickWildLoad()
 	const FVector At = GI->LoadAt;
 	double Dt; const int32 Ti = Wild->NearestTown(At.X / 100.0, At.Y / 100.0, Dt);
 	const double Half = (Ti == 0 ? HomeSectionTiles : WildSmallTownTiles) * TileSize / 200.0;
-	if (Ti > 0 && Dt < Half + 50.0)
+	// (in its square, not a circle round its middle: a save in a town's corner was put out in the wilds, the town built
+	// round her after)
+	const bool bInSquare = Ti >= 0 && FMath::Max(FMath::Abs(At.X / 100.0 - Wild->Towns[Ti].Site.X), FMath::Abs(At.Y / 100.0 - Wild->Towns[Ti].Site.Y)) < Half + 50.0;
+	if (Ti > 0 && bInSquare)
 	{
 		WildDropAll(); LoadWildTown(Ti, true);
 		Her->SetActorLocation(FVector(At.X, At.Y, 120.0), false, nullptr, ETeleportType::TeleportPhysics);
 	}
-	else if (Ti != 0 || Dt > Half + 50.0) WildPutHer(At.X / 100.0, At.Y / 100.0);
+	else if (Ti != 0 || !bInSquare) WildPutHer(At.X / 100.0, At.Y / 100.0);
 	else Her->SetActorLocation(FVector(At.X, At.Y, 120.0), false, nullptr, ETeleportType::TeleportPhysics);
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) PC->SetControlRotation(FRotator(-10.f, GI->LoadYaw, 0.f));
 	Her->SetActorRotation(FRotator(0.f, GI->LoadYaw, 0.f));
@@ -147,26 +160,51 @@ bool URDSaveGame::LoadAndOpen(UObject* Ctx, const FString& Slot)
 	if (!GI || !Sv || Sv->Game.Num() == 0 || Sv->Level.IsEmpty()) return false;
 	RDSerializeGame(GI, Sv->Game, true);
 	GI->GameHero = Sv->Hero; GI->GamesStarted = FMath::Max(GI->GamesStarted, 1);
-	GI->Arrive = TEXT("save"); GI->LoadAt = Sv->At; GI->LoadYaw = Sv->Yaw; GI->bLoadPending = true;
+	// (put back where she was only in a town's level: the castle reads none of it, and a flag left set there moved her to
+	// the castle's coordinates out in the wilds once she came back)
+	GI->Arrive = Sv->bInTown ? TEXT("save") : FString(); GI->LoadAt = Sv->At; GI->LoadYaw = Sv->Yaw; GI->bLoadPending = Sv->bInTown;
 	UE_LOG(LogRDSave, Log, TEXT("RDSAVE loading %s: %s as %s (%s)"), *Slot, *Sv->Level, *Sv->Hero.ToString(), *Sv->Place);
 	UGameplayStatics::OpenLevel(Ctx, FName(*Sv->Level), true, FString::Printf(TEXT("Hero=%s"), *Sv->Hero.ToString()));
 	return true;
 }
 
+bool URDSaveGame::ReadHead(const FString& Slot, FString& OutInfo, FDateTime& OutSavedAt)
+{
+	// (the hero menu asks every 2 s: each ask loaded and deserialized both slots, which grow with the map revealed; a slot is
+	// read again only when its file's timestamp changes)
+	struct FHead { FDateTime Stamp; FString Info; FDateTime SavedAt; bool bOk = false; };
+	static TMap<FString, FHead> Cache;
+	const FString Path = FPaths::ProjectSavedDir() / TEXT("SaveGames") / (Slot + TEXT(".sav"));
+	const FDateTime Stamp = IFileManager::Get().GetTimeStamp(*Path);
+	if (Stamp == FDateTime::MinValue()) { Cache.Remove(Slot); return false; }
+	FHead& H = Cache.FindOrAdd(Slot);
+	if (H.Stamp != Stamp)
+	{
+		H = FHead(); H.Stamp = Stamp;
+		if (const URDSaveGame* Sv = Cast<URDSaveGame>(UGameplayStatics::LoadGameFromSlot(Slot, 0)); Sv && Sv->Game.Num() > 0 && !Sv->Level.IsEmpty())
+		{
+			FString Lv = Sv->Level; int32 Sl; if (Lv.FindLastChar(TEXT('/'), Sl)) Lv = Lv.Mid(Sl + 1);
+			H.Info = FString::Printf(TEXT("%s|%s|%s|%s|%s"), *Sv->SavedAt.ToString(TEXT("%Y-%m-%d %H:%M")), *Lv, *Sv->Place, *Sv->Hero.ToString(), *Sv->Why);
+			H.SavedAt = Sv->SavedAt; H.bOk = true;
+		}
+	}
+	OutInfo = H.Info; OutSavedAt = H.SavedAt;
+	return H.bOk;
+}
+
 FString URDSaveGame::Info(const FString& Slot)
 {
-	if (!UGameplayStatics::DoesSaveGameExist(Slot, 0)) return FString();
-	const URDSaveGame* Sv = Cast<URDSaveGame>(UGameplayStatics::LoadGameFromSlot(Slot, 0));
-	if (!Sv) return FString();
-	FString Lv = Sv->Level; int32 Sl; if (Lv.FindLastChar(TEXT('/'), Sl)) Lv = Lv.Mid(Sl + 1);
-	return FString::Printf(TEXT("%s|%s|%s|%s|%s"), *Sv->SavedAt.ToString(TEXT("%Y-%m-%d %H:%M")), *Lv, *Sv->Place, *Sv->Hero.ToString(), *Sv->Why);
+	FString I; FDateTime T;
+	return ReadHead(Slot, I, T) ? I : FString();
 }
 
 FString URDSaveGame::Latest()
 {
 	FString Best; FDateTime Bt = FDateTime::MinValue();
 	for (const TCHAR* S : { TEXT("save"), TEXT("autosave") })
-		if (UGameplayStatics::DoesSaveGameExist(S, 0))
-			if (const URDSaveGame* Sv = Cast<URDSaveGame>(UGameplayStatics::LoadGameFromSlot(S, 0)); Sv && Sv->SavedAt > Bt) { Bt = Sv->SavedAt; Best = S; }
+	{
+		FString I; FDateTime T;
+		if (ReadHead(S, I, T) && T > Bt) { Bt = T; Best = S; }
+	}
 	return Best;
 }

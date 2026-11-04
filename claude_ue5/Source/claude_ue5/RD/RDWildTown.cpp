@@ -184,7 +184,7 @@ FVector ARDDungeonGenerator::WildRespawnAt()
 	int32 Best = 0; double Bd = 1e18;
 	for (int32 Ti = 0; Ti < Wild->Towns.Num(); ++Ti)
 	{
-		if (Ti > 0 && !WildFound.Contains(1000000 + Ti)) continue;
+		if (Ti > 0 && !WildFound.Contains(FRDWildWorld::TownIdBase + Ti)) continue;
 		const double D = FVector2D::Distance(At, Wild->Towns[Ti].Site);
 		if (D < Bd) { Bd = D; Best = Ti; }
 	}

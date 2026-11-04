@@ -20,6 +20,10 @@ class CLAUDE_UE5_API ARDHeroGameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
+	/** her pawn is always made, moved off what overlaps it where it can: Brokenspire is planned from a new seed every game,
+	 *  and a building or animal on the level's player start left her with no pawn at all (the engine's default does not
+	 *  spawn into a collision); the town puts her in its square once she is there */
+	virtual APawn* SpawnDefaultPawnAtTransform_Implementation(AController* NewPlayer, const FTransform& SpawnTransform) override;
 };
 
 /** the menu's game mode: no pawn (the view is the studio's camera), the menu's HUD */

@@ -92,7 +92,10 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		if (R.Box.Max.X > X0 && R.Box.Min.X < X1 && R.Box.Max.Y > Y0 && R.Box.Min.Y < Y1)
 			Lines(R.P, FLinearColor(0.42f, 0.33f, 0.22f, 0.9f), FMath::Clamp((float)(5.0 / Mpp), 1.3f, 3.f) * Sc);
 	// the fog
-	if (UTexture2D* F = Gen->WildFog(Cw, Mpp, Sz)) DrawTexture(F, A.X, A.Y, Sz.X, Sz.Y, 0, 0, 1, 1, FLinearColor::White, BLEND_Translucent);
+	{
+		FVector2D U0, U1;
+		if (UTexture2D* F = Gen->WildFog(Cw, Mpp, Sz, U0, U1)) DrawTexture(F, A.X, A.Y, Sz.X, Sz.Y, U0.X, U0.Y, U1.X - U0.X, U1.Y - U0.Y, FLinearColor::White, BLEND_Translucent);
+	}
 	// the places she knows: the towns (always) and those she found; the one under the view's middle chosen for travel
 	TArray<FRDWildPlace> Ps; Gen->WildKnownPlaces(Ps);
 	int32 Pick = -1; float PickD = 34.f * Sc; FString PickName; double PickKm = 0;

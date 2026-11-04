@@ -2841,7 +2841,10 @@ def step_options():
     res = {"controls_before": hud.get_controls_drawn()}
     why = yield from slate_hold("Escape", 0.08); yield from rwait(0.3)
     res["open"] = {"why": why, "open": g.is_menu_open(), "page": g.get_menu_page(), "lines": [str(l) for l in g.get_menu_lines()]}
-    yield from slate_hold("S", 0.08); yield from slate_hold("Enter", 0.08); yield from rwait(0.3)
+    # (the cursor to Options by its line: since the save (2026-11-03) Save and Load stand between Resume and Options)
+    oi = next((i for i, l in enumerate(res["open"]["lines"]) if l == "button|Options"), 1)
+    for _ in range(oi - g.get_menu_cursor()): yield from slate_hold("S", 0.08)
+    yield from slate_hold("Enter", 0.08); yield from rwait(0.3)
     L = [str(l) for l in g.get_menu_lines()]
     res["options"] = {"page": g.get_menu_page(), "lines": L, "action": str(g.last_menu_action)}
     shot("options_page"); yield from rwait(0.8)
@@ -2875,7 +2878,7 @@ def step_options():
     GUS2 = unreal.GameUserSettings.get_game_user_settings(); sr = GUS2.get_screen_resolution()
     res["applied"] = {"said": str(g.last_applied), "saved": (sr.x, sr.y), "mode": str(GUS2.get_fullscreen_mode())}
     yield from slate_hold("Escape", 0.08); yield from rwait(0.2)
-    res["escape_back"] = {"open": g.is_menu_open(), "page": g.get_menu_page()}
+    res["escape_back"] = {"open": g.is_menu_open(), "page": g.get_menu_page(), "cursor": g.get_menu_cursor(), "options_at": oi}
     yield from slate_hold("Escape", 0.08); yield from rwait(0.4)
     res["escape_closed"] = {"open": g.is_menu_open(), "paused": GS.is_game_paused(G["w"])}
     res["controls_drawn_off"] = hud.get_controls_drawn()
@@ -2884,11 +2887,11 @@ def step_options():
     GUS2.set_screen_resolution(kept[0]); GUS2.set_fullscreen_mode(kept[1]); GUS2.save_settings()
     g.set_user_volume(1, kept[2]); g.set_controls_hint_shown(kept[3])
     o = res["open"]; op = res["options"]
-    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Options", "button|Return to Brokenspire", "button|Choose another hero (a new game)", "button|Quit"]
+    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Save the game", "button|Load a game", "button|Options", "button|Return to Brokenspire", "button|Choose another hero (a new game)", "button|Quit"]
           and op["page"] == 1 and op["action"] == "options" and [l.split("|")[0] for l in op["lines"]] == ["volume"] * 4 + ["choice"] * 3 + ["button"] * 2
           and res["controls_off"]["shown"] is False and res["controls_off"]["line"].endswith("|Off") and abs(res["volume"]["before"] - res["volume"]["after"] - 0.1) < 0.011
           and res["display"]["mode"] == 2 and res["display"]["to"] != res["display"]["from"] and res["applied"]["said"].startswith("saved") and res["applied"]["saved"] == want
-          and res["escape_back"]["open"] and res["escape_back"]["page"] == 0 and not res["escape_closed"]["open"] and not res["escape_closed"]["paused"]
+          and res["escape_back"]["open"] and res["escape_back"]["page"] == 0 and res["escape_back"]["cursor"] == oi and not res["escape_closed"]["open"] and not res["escape_closed"]["paused"]
           and res["controls_drawn_off"] is False and res["controls_drawn_on"] is True)
     step_result("options", ok, **res)
 

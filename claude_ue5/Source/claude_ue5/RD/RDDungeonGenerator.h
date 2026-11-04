@@ -1402,6 +1402,8 @@ private:
 	int32 MenuPage = 0;
 	bool bControlsShown = true;
 	TArray<FName> MenuItems() const;
+	/** from the Options or Load page back to the main page, the cursor on the line that opened it */
+	void BackToMainMenu();
 	void LoadOptions();
 	void OpenOptionsPage();
 	int32 MenuCursor = 0;
@@ -1589,6 +1591,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildMiniRadiusM = 280.f;
 	FVector4 WildFogFor = FVector4(0, 0, 0, 0);
 	int32 WildFogVersion = -1;
+	double WildFogMpp = 0.0;
+	/** how often the fog picture was made (the test: not once a frame while the map is dragged) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 WildFogBuilds = 0;
 	double WildMiniTime = 0.0;
 	FVector2D WildMiniFor = FVector2D::ZeroVector;
 	/** the found place under the map's middle (its id, -1 none) */
@@ -1607,7 +1612,8 @@ public:
 	UTexture2D* WildMapTile(int32 L, int32 I, int32 J, bool bAsk);
 	void TickWildMap(float Dt);
 	float WildRevealedShare(double Xm, double Ym, double Radius) const;
-	UTexture2D* WildFog(const FVector2D& Mid, double Mpp, const FVector2D& SizePx);
+	/** the fog over the map: a picture over twice the view, and the part of it the view shows (UV0 to UV1) */
+	UTexture2D* WildFog(const FVector2D& Mid, double Mpp, const FVector2D& SizePx, FVector2D& OutUV0, FVector2D& OutUV1);
 	UTexture2D* WildMini(const FVector2D& At);
 	void WildKnownPlaces(TArray<FRDWildPlace>& Out) const;
 	/** a monster is after her near (fast travel is refused) */

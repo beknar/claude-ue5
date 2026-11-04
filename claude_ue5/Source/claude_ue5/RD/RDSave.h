@@ -24,13 +24,18 @@ public:
 	UPROPERTY() FString Why;
 	/** where, in words ("Brokenspire", "the wilds: temperate aspen near Ashenreach") */
 	UPROPERTY() FString Place;
+	/** made in a town (Brokenspire's level): she is put back at At when it loads. A castle's save puts her at the castle's
+	 *  own start (nothing in the castle reads At: the flag left set once put her at the castle's coordinates in the wilds) */
+	UPROPERTY() bool bInTown = false;
 	/** the game instance's SaveGame properties, serialized */
 	UPROPERTY() TArray<uint8> Game;
 
 	/** the game instance filled from the slot and the level opened (she is put where she was when it has loaded) */
 	static bool LoadAndOpen(UObject* Ctx, const FString& Slot);
-	/** "<date>|<level>|<place>|<hero>|<why>" of a slot, or "" */
+	/** "<date>|<level>|<place>|<hero>|<why>" of a slot, or "" (read again only when the slot's file changes) */
 	static FString Info(const FString& Slot);
-	/** the slot with the newest save, or "" */
+	/** the slot with the newest save, or "" (from the same cached reads) */
 	static FString Latest();
+	/** a slot's info and time, read from the file once per change of its timestamp */
+	static bool ReadHead(const FString& Slot, FString& OutInfo, FDateTime& OutSavedAt);
 };

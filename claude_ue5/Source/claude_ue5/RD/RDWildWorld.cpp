@@ -957,7 +957,7 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 		const FRDWildTown& T = Towns[Ti];
 		if (T.Site.X >= X0 && T.Site.X < X0 + PlaceCellM && T.Site.Y >= Y0 && T.Site.Y < Y0 + PlaceCellM)
 		{
-			FRDWildPlace P; P.Id = 1000000 + Ti; P.Kind = T.Kind == TEXT("city") ? TEXT("city") : TEXT("town"); P.Name = T.Name; P.At = T.Site; P.H = T.H; P.Town = Ti; P.Tier = 1;
+			FRDWildPlace P; P.Id = TownIdBase + Ti; P.Kind = T.Kind == TEXT("city") ? TEXT("city") : TEXT("town"); P.Name = T.Name; P.At = T.Site; P.H = T.H; P.Town = Ti; P.Tier = 1;
 			Out.Add(P);
 		}
 	}
@@ -995,7 +995,7 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 {
 	TArray<FRDWildPlace> Ps;
-	if (Id >= 1000000) { const int32 Ti = Id - 1000000; if (!Towns.IsValidIndex(Ti)) return false; PlacesIn(PlaceCellOf(Towns[Ti].Site.X, Towns[Ti].Site.Y), Ps); }
+	if (Id >= TownIdBase) { const int32 Ti = Id - TownIdBase; if (!Towns.IsValidIndex(Ti)) return false; PlacesIn(PlaceCellOf(Towns[Ti].Site.X, Towns[Ti].Site.Y), Ps); }
 	else PlacesIn(FIntPoint((Id >> 14) & 0x3FF, (Id >> 4) & 0x3FF), Ps);
 	for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
 	return false;

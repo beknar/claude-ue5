@@ -203,6 +203,9 @@ public:
 	int32 TierAt(double X, double Y) const;
 	/** a name for a place */
 	FString NameFor(const FString& Kind, uint32 H) const;
+	/** a town's place id is TownIdBase + its index: far above any other place's ((cell x << 14) | (cell y << 4) | k, under
+	 *  2^24; the 1000000 it was first collided with the places of the northern cells, x 62 and on) */
+	static constexpr int32 TownIdBase = 1 << 30;
 
 	// ---- the noise (public for the map and the chunks)
 	static float Perlin(double X, double Y, uint32 S);

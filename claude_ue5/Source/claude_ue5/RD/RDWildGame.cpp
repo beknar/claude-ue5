@@ -70,7 +70,7 @@ void ARDDungeonGenerator::StartWild()
 		}
 		for (const int32 Id : GI->WildFound) WildFound.Add(Id);
 	}
-	if (WildFound.Num() == 0) WildFound.Add(1000000);      // (Brokenspire: known from the start)
+	if (WildFound.Num() == 0) WildFound.Add(FRDWildWorld::TownIdBase);      // (Brokenspire: known from the start)
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
 	const TArray<FRDWildBiome> Biomes = WildBiomes;
 	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed]() { W->Init(Seed, Biomes); });

@@ -39,6 +39,17 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **The town code assumes section (0, 0) at the world's origin**: a town elsewhere moves the grid (`GridOrigin`: `WorldToTile`, `TileCenter`, `SpawnSection`); everything else goes through the section's own location.
 - **The wilderness's monsters have no tile grid** (`ARDMonster::bOpenGround`): they live in a section of no tiles (`WildSection`, not in `Sections`) that `GetMonsters` adds.
 
+## PR #16's review (2026-11-03)
+
+- **Two id ranges must not meet**: a place's id packs its cell (`x << 14`), and the 75 cells across reach 1,228,800: the towns' ids started at 1,000,000, so the northern places were taken for towns (no travel there, not on the map) and one cell's were exactly towns 0 to 7. The towns' are `FRDWildWorld::TownIdBase` (2^30) now; the world step checks the northern ids.
+- **A load's flags must be read where the save was made**: a castle save set the town's "put her back" flag, which nothing in the castle reads; back in the wilds it moved her to the castle's coordinates. The save says whether it was made in a town (`bInTown`).
+- **A level that always comes back as Brokenspire must leave Brokenspire's state in the game instance**: the castle from another town's circle carried that town's looted chests and dead guards back as Brokenspire's (`EnterCastle` swaps them as the save does).
+- **A leash that drops the foe must also stop the notice**: past its leash a monster took her and dropped her each tick, frozen at the edge. It walks home and notices her again within 0.8 of the leash.
+- **Made again from the seed means made again in full**: a lair's monsters came back every time its chunk was made again (gold, counters). Kills are kept (`WildKilled`: place id x 16 + n, saved), their draws still made so the others keep their places.
+- **A cache keyed by the view is rebuilt as the view moves**: the fog was made for the view's middle and scale, so every frame of a drag made it again (65k texels of noise). It covers twice the view and is kept while the view stays in it.
+- **A menu's cursor by index breaks when lines are added**: Back from Options put the cursor on 1, now Save the game (Enter then overwrote her save). `BackToMainMenu` finds the line that opened the page; the castle's test finds Options by its line.
+- The hero menu read both saves every 2 s (`Latest` and `Info`): each slot's head is read once per change of its file's time. A load of an empty or unreadable slot says so and keeps the menu open. A town's square, not a circle round its middle, says whether a save was made in it.
+
 ## The test (`888`)
 
 - Steps that move her far leave the town unloaded: a step that needs a town loads it first.

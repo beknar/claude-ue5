@@ -192,13 +192,28 @@ float ARDDungeonGenerator::WildRevealedShare(double Xm, double Ym, double Radius
 	return C ? FMath::Clamp(*C / 200.f, 0.f, 1.f) : 0.f;
 }
 
-UTexture2D* ARDDungeonGenerator::WildFog(const FVector2D& Mid, double Mpp, const FVector2D& SizePx)
+UTexture2D* ARDDungeonGenerator::WildFog(const FVector2D& Mid, double Mpp, const FVector2D& SizePx, FVector2D& OutUV0, FVector2D& OutUV1)
 {
-	const int32 Fw = 256, Fh = FMath::Clamp(FMath::RoundToInt(256.0 * SizePx.Y / FMath::Max(SizePx.X, 1.0)), 32, 256);
-	const FVector4 For(Mid.X, Mid.Y, Mpp, SizePx.X);
-	if (WildFogTex && WildFogTex->GetSizeY() == Fh && WildFogVersion == WildRevealVersion && (For - WildFogFor).SizeSquared() < 1e-6) return WildFogTex;
+	// (the view's half extents in metres: X north (the rows, up), Y east (the columns))
+	const double Vhx = SizePx.Y * Mpp * 0.5, Vhy = SizePx.X * Mpp * 0.5;
+	auto UVs = [&]()
+	{
+		const double Bx = WildFogFor.X, By = WildFogFor.Y, Bhx = WildFogFor.Z, Bhy = WildFogFor.W;
+		OutUV0 = FVector2D((Mid.Y - Vhy - (By - Bhy)) / (2.0 * Bhy), ((Bx + Bhx) - (Mid.X + Vhx)) / (2.0 * Bhx));
+		OutUV1 = FVector2D((Mid.Y + Vhy - (By - Bhy)) / (2.0 * Bhy), ((Bx + Bhx) - (Mid.X - Vhx)) / (2.0 * Bhx));
+	};
+	// (made over twice the view each way and kept while the view stays inside it at about its scale: made for the view's
+	// own middle and scale, it was made again in every frame the map was dragged or zoomed: 65k texels of noise each)
+	if (WildFogTex && WildFogVersion == WildRevealVersion && WildFogMpp > 0.0 && Mpp / WildFogMpp > 0.75 && Mpp / WildFogMpp < 1.5
+		&& Mid.X - Vhx >= WildFogFor.X - WildFogFor.Z && Mid.X + Vhx <= WildFogFor.X + WildFogFor.Z
+		&& Mid.Y - Vhy >= WildFogFor.Y - WildFogFor.W && Mid.Y + Vhy <= WildFogFor.Y + WildFogFor.W)
+	{
+		UVs(); return WildFogTex;
+	}
+	const int32 Fw = 384, Fh = FMath::Clamp(FMath::RoundToInt(384.0 * SizePx.Y / FMath::Max(SizePx.X, 1.0)), 48, 384);
+	const double Bhx = Vhx * 2.0, Bhy = Vhy * 2.0;
 	TArray<FColor> Px; Px.SetNumUninitialized(Fw * Fh);
-	const double Tx = SizePx.X * Mpp / Fw, Ty = SizePx.Y * Mpp / Fh;     // (a texel in metres)
+	const double Tx = 2.0 * Bhy / Fw, Ty = 2.0 * Bhx / Fh;     // (a texel in metres)
 	for (int32 R = 0; R < Fh; ++R)
 		for (int32 C = 0; C < Fw; ++C)
 		{
@@ -213,9 +228,10 @@ UTexture2D* ARDDungeonGenerator::WildFog(const FVector2D& Mid, double Mpp, const
 			FColor Fc = Col.ToFColor(true); Fc.A = (uint8)FMath::Clamp(A * 238.f, 0.f, 255.f);
 			Px[R * Fw + C] = Fc;
 		}
-	if (!WildFogTex || WildFogTex->GetSizeY() != Fh) WildFogTex = RDWTexture(Fw, Fh, Px, this);
+	if (!WildFogTex || WildFogTex->GetSizeX() != Fw || WildFogTex->GetSizeY() != Fh) WildFogTex = RDWTexture(Fw, Fh, Px, this);
 	else RDWUpdateTexture(WildFogTex, Px);
-	WildFogFor = For; WildFogVersion = WildRevealVersion;
+	WildFogFor = FVector4(Mid.X, Mid.Y, Bhx, Bhy); WildFogMpp = Mpp; WildFogVersion = WildRevealVersion; ++WildFogBuilds;
+	UVs();
 	return WildFogTex;
 }
 
@@ -265,12 +281,12 @@ void ARDDungeonGenerator::WildKnownPlaces(TArray<FRDWildPlace>& Out) const
 	for (int32 Ti = 0; Ti < Wild->Towns.Num(); ++Ti)
 	{
 		const FRDWildTown& T = Wild->Towns[Ti];
-		FRDWildPlace P; P.Id = 1000000 + Ti; P.Kind = T.Kind == TEXT("city") ? TEXT("city") : TEXT("town"); P.Name = T.Name; P.At = T.Site; P.H = T.H; P.Town = Ti;
+		FRDWildPlace P; P.Id = FRDWildWorld::TownIdBase + Ti; P.Kind = T.Kind == TEXT("city") ? TEXT("city") : TEXT("town"); P.Name = T.Name; P.At = T.Site; P.H = T.H; P.Town = Ti;
 		Out.Add(P);
 	}
 	for (const int32 Id : WildFound)
 	{
-		if (Id >= 1000000) continue;
+		if (Id >= FRDWildWorld::TownIdBase) continue;
 		FRDWildPlace P;
 		if (Wild->FindPlace(Id, P)) Out.Add(P);
 	}

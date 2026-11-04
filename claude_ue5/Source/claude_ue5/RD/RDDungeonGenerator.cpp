@@ -1,5 +1,6 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDSave.h"
+#include "RD/RDGameInstance.h"
 #include "RD/RDSection.h"
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
@@ -797,6 +798,15 @@ void ARDDungeonGenerator::ApplyUserVolumes()
 	}
 }
 
+void ARDDungeonGenerator::BackToMainMenu()
+{
+	// (the cursor back on the line that opened the page: with Save and Load on the main page, "1" was Save, and Back then
+	// Enter overwrote her saved game)
+	const FName From = MenuPage == 2 ? FName(TEXT("load")) : FName(TEXT("options"));
+	MenuPage = 0;
+	MenuCursor = FMath::Max(0, MenuItems().IndexOfByKey(From));
+}
+
 TArray<FName> ARDDungeonGenerator::MenuItems() const
 {
 	// (level 5: the four volumes and its three buttons on one page; mistward4: a main page and an Options page)
@@ -909,7 +919,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (RDMenuVolumeOf(Id) >= 0) return false;
 	if (Id == TEXT("resume")) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
 	if (Id == TEXT("options")) { LastMenuAction = TEXT("options"); OpenOptionsPage(); return true; }
-	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); MenuCursor = MenuPage == 2 ? 2 : 1; MenuPage = 0; return true; }
+	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
 	if (Id == TEXT("save"))
 	{
 		LastMenuAction = TEXT("save");
@@ -953,7 +963,7 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (!bEscapeMenu || !PC) return;
 	if (PlayerCombat && PlayerCombat->IsScriptedOnly()) return;
 	// (mistward4: Escape on the Options page goes back to the main page; on the main page it closes the menu)
-	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage > 0) { MenuCursor = MenuPage == 2 ? 2 : 1; MenuPage = 0; } else SetMenuOpen(!bMenuOpen); return; }
+	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage > 0) BackToMainMenu(); else SetMenuOpen(!bMenuOpen); return; }
 	if (!bMenuOpen) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
@@ -961,7 +971,7 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left })) StepMenuValue(-1);
 	if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right })) StepMenuValue(1);
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom })) { ActivateMenuLine(); return; }
-	if (Pressed({ EKeys::Gamepad_FaceButton_Right })) { if (MenuPage == 1) { MenuPage = 0; MenuCursor = 1; } else SetMenuOpen(false); return; }
+	if (Pressed({ EKeys::Gamepad_FaceButton_Right })) { if (MenuPage > 0) BackToMainMenu(); else SetMenuOpen(false); return; }
 	// the mouse: a line under it is chosen; a click on a button presses it, on a slider's track (or dragging along it)
 	// sets the volume where it is
 	float Mx = 0.f, My = 0.f;
@@ -1078,6 +1088,9 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			}
 		TownOnKill(Monster, bBossOf);
 	}
+	// (the wilderness: one killed stays dead when its chunk is made again)
+	if (Monster && Monster->WildKey >= 0)
+		if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Monster->WildKey);
 	// (mistward: one of a boss's band or a ring's guards stays dead)
 	bool bBossKill = false;
 	for (FEncounter& E : Encounters)

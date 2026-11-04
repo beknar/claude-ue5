@@ -752,6 +752,9 @@ bool ARDMonster::TickCombat(float Dt)
 		// (open ground: seen from farther than in a hall; a test's quiet (0) holds there too)
 		const float Aggro = bOpenGround && G->AggroDistance > 0.f ? FMath::Max(G->AggroDistance, G->WildAggroDistance) : G->AggroDistance;
 		if (Dist > Aggro || Dz > (bOpenGround ? 700.f : 300.f) || ChaseTimer > 0.f) return false;
+		// (open ground: one past its leash walks home first and notices her again within 0.8 of it: it took her and dropped
+		// her again each tick at the leash's edge, standing there and never striking back)
+		if (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash * 0.8f) return false;
 		ChaseTimer = 0.4f;
 		TArray<FIntPoint> Tiles;
 		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);

@@ -431,7 +431,20 @@ bool ARDDungeonGenerator::EnterCastle()
 	if (bTravelDryRun) return true;
 	WildAutosave(TEXT("castle"));
 	SaveCarry();
-	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->Arrive = TEXT("castle");
+	if (URDGameInstance* GI = URDGameInstance::Of(this))
+	{
+		GI->Arrive = TEXT("castle");
+		// (from another town's circle: its state into the store, Brokenspire's back into the fields the level reads when she
+		// comes back (it always comes back as Brokenspire): else Brokenspire took that town's looted chests and guards, and
+		// wrote them over its own in the store at its next unload)
+		if (bWild && !bTownHome && GetSection(FIntPoint::ZeroValue))
+		{
+			SaveTownState();
+			const FRDTownSave* B = GI->TownStore.Find(HomeTownName);
+			GI->TownLooted = B ? B->Looted : TArray<int32>(); GI->GuardsDead = B ? B->GuardsDead : TArray<int32>();
+			GI->CurrentTown = HomeTownName;
+		}
+	}
 	bTownTraveling = true;
 	UE_LOG(LogRDTownGame, Log, TEXT("RDTRAVEL into %s as %s"), *CastleLevel, *CurrentHero.ToString());
 	UGameplayStatics::OpenLevel(this, FName(*CastleLevel), true, FString::Printf(TEXT("Hero=%s"), *CurrentHero.ToString()));
@@ -1570,7 +1583,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 		const int32 Ti = Wild->Towns.IndexOfByPredicate([&E](const FRDWildTown& T) { return T.Name == E.Arg; });
 		if (Ti < 0) return false;
 		CloseTownPanel(); TownCount(TEXT("circle_travel"));
-		return WildFastTravel(1000000 + Ti);
+		return WildFastTravel(FRDWildWorld::TownIdBase + Ti);
 	}
 	else if (E.Act == TEXT("bless")) bOk = TownBless();
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }

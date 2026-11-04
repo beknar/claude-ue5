@@ -37,6 +37,18 @@ UClass* ARDHeroGameMode::GetDefaultPawnClassForController_Implementation(AContro
 	return Super::GetDefaultPawnClassForController_Implementation(InController);
 }
 
+APawn* ARDHeroGameMode::SpawnDefaultPawnAtTransform_Implementation(AController* NewPlayer, const FTransform& SpawnTransform)
+{
+	FActorSpawnParameters Sp;
+	Sp.Instigator = GetInstigator();
+	Sp.ObjectFlags |= RF_Transient;
+	Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	UClass* PawnClass = GetDefaultPawnClassForController(NewPlayer);
+	APawn* P = PawnClass ? GetWorld()->SpawnActor<APawn>(PawnClass, SpawnTransform, Sp) : nullptr;
+	if (!P) UE_LOG(LogRDHeroSelect, Warning, TEXT("RDHERO no pawn spawned (%s)"), PawnClass ? *PawnClass->GetName() : TEXT("no class"));
+	return P;
+}
+
 ARDHeroSelectGameMode::ARDHeroSelectGameMode()
 {
 	DefaultPawnClass = nullptr;

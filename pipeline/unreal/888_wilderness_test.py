@@ -11,6 +11,7 @@ import unreal, sys, json, math, os, time
 __keep__ = True
 TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
 V = unreal.Vector; GS = unreal.GameplayStatics
+TOWN_ID = 1 << 30   # (a town's place id: FRDWildWorld::TownIdBase + its index)
 OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\wilderness"
 SHOTS = r"E:\code\claude-ue5\claude_ue5\Saved\Screenshots\WindowsEditor"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
@@ -144,7 +145,18 @@ def step_world():
         t0 = time.time(); ok = g.wild_debug_map(p, px, box[0], box[1], box[2], box[3], False)
         res[f"map_{nm}"] = {"ok": ok, "s": round(time.time() - t0, 1)}
         yield
-    ok = st.get("ready") == 1 and all(chk.values()) and len(chk) == 6 and not res["missing_templates"] and res["rivers"] >= 8 and res["lakes"] >= 5 and len(res["roads"]) >= 4
+    # (the places' ids: a place's id once reached the towns' range in the northern cells (x 62 and on), and those places were
+    # taken for towns: no fast travel there, not on the map; one cell's were exactly towns 0 to 7)
+    ids = {}
+    for cx, cy in ((190000, -40000), (200000, 30000), (60000, 0), (-20000, 20000)):
+        for l in g.get_wild_places_near(V(cx * 100.0, cy * 100.0, 0), 12000.0):
+            p = str(l).split("|"); ids.setdefault(int(p[0]), set()).add((p[1], p[2]))
+    res["place_ids"] = {"count": len(ids), "north": sum(1 for i, v in ids.items() if any(k not in ("town", "city") for k, _ in v) and i >= 62 << 14),
+                        "town_range_not_towns": sorted(i for i, v in ids.items() if i >= TOWN_ID and any(k not in ("town", "city") for k, _ in v))[:5],
+                        "shared": sorted(i for i, v in ids.items() if len(v) > 1)[:5]}
+    pid = res["place_ids"]
+    ok = st.get("ready") == 1 and all(chk.values()) and len(chk) == 6 and not res["missing_templates"] and res["rivers"] >= 8 and res["lakes"] >= 5 and len(res["roads"]) >= 4 \
+        and pid["count"] > 20 and pid["north"] > 0 and not pid["town_range_not_towns"] and not pid["shared"]
     step_result("world", ok, **res)
 
 
@@ -353,11 +365,19 @@ def step_map():
         yield from rwait(1.0)
         res[nm] = map_state(); res[nm + "_drawn"] = [a for a in drawn() if a.startswith("wmap_")]
         shot(nm, "1600x900"); yield from rwait(1.5)
+    # (the fog's picture while the map is dragged: 40 frames, a few metres each, at the region's scale, and a little zoom; it was
+    # made again in every one of them)
+    g.set_wild_map_view(2000.0, 0.0, 60.0); yield from rwait(0.5)
+    b0 = g.get_editor_property("wild_fog_builds")
+    for k in range(40):
+        g.set_wild_map_view(2000.0 + k * 40.0, k * 25.0, 60.0 * (1.0 + 0.004 * k)); yield
+    res["fog_drag"] = {"frames": 40, "builds": g.get_editor_property("wild_fog_builds") - b0}
     g.set_map_open(False); yield from rwait(0.5)
     res["revealed_here"] = g.wild_revealed_at(900.0, -700.0); res["revealed_far"] = g.wild_revealed_at(150000.0, 100000.0)
     quiet(False)
     ok = (res["minimap_drawn"] and res["open"]["tiles"] > 0 and res["revealed_here"] and not res["revealed_far"]
-          and res["map_continent"]["level"] <= 2 and res["open"]["level"] >= 8 and any(a in res["map_continent_drawn"] for a in ("wmap_town", "wmap_city")))
+          and res["map_continent"]["level"] <= 2 and res["open"]["level"] >= 8 and any(a in res["map_continent_drawn"] for a in ("wmap_town", "wmap_city"))
+          and res["fog_drag"]["builds"] <= 3)
     step_result("map", ok, **res)
 
 
@@ -404,9 +424,22 @@ def step_places():
         res["visits"].append(v)
         if v["found"]: found.append(p)
     G["found_places"] = found
+    # (a monster killed stays dead when its chunk is made again: one of the spawn point's killed, the chunks dropped and made
+    # again round it; the lair (the travel step's) is left alone. They were made again in full, gold and counters and all)
+    sp = [p for p in want if p["kind"] == "spawn"]
+    if sp:
+        p = sp[0]
+        def at_place():
+            return [m for m in g.get_monsters() if m and not m.is_dead() and dist2(m.get_actor_location(), V(p["x"] * 100.0, p["y"] * 100.0, 0)) < 2500.0]
+        g.wild_drop_all(); g.wild_put_her(p["x"] - 45.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(0.8)
+        n0 = len(at_place())
+        if n0: at_place()[0].apply_damage(1e7, G["pawn"]); yield from rwait(1.0)
+        g.wild_drop_all(); g.wild_put_her(p["x"] - 45.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(0.8)
+        res["killed_stays"] = {"place": p["name"], "before": n0, "after": len(at_place())}
     quiet(False)
     chase = [v for v in res["visits"] if "monster_m" in v]
-    ok = len(want) >= 6 and all(v["found"] for v in res["visits"]) and all(v["props"] > 0 for v in res["visits"]) and (not chase or all(v["monster_m"][1] < v["monster_m"][0] for v in chase))
+    ok = len(want) >= 6 and all(v["found"] for v in res["visits"]) and all(v["props"] > 0 for v in res["visits"]) and (not chase or all(v["monster_m"][1] < v["monster_m"][0] for v in chase)) \
+        and (not sp or (res["killed_stays"]["before"] >= 2 and res["killed_stays"]["after"] == res["killed_stays"]["before"] - 1))
     step_result("places", ok, **res)
 def dist2(a, b): return math.hypot(a.x - b.x, a.y - b.y)
 
@@ -429,7 +462,7 @@ def step_travel():
     p = G["pawn"].get_actor_location()
     res["after"] = map_state(); res["from_place_m"] = round(math.hypot(p.x / 100.0 - tgt["x"], p.y / 100.0 - tgt["y"]), 1)
     # a town (Vel Morrath, found in the towns step; else Brokenspire)
-    ti = 1000003 if G.get("vm_found") else 1000000
+    ti = TOWN_ID + 3 if G.get("vm_found") else TOWN_ID
     ok_t = g.wild_fast_travel(ti); yield from rwait(3.0)
     res["town_travel"] = ok_t; res["town_after"] = town_state()
     # refused in a fight: at a lair with its monsters after her
@@ -439,7 +472,7 @@ def step_travel():
         g.wild_put_her(l["x"] - 12.0, l["y"]); yield from wait_chunks(30, 50)
         quiet(False); yield from wait(3.0)
         res["combat"] = g.is_wild_combat()
-        res["refused"] = not g.wild_fast_travel(1000000); res["refusal"] = map_state()["refusal"]
+        res["refused"] = not g.wild_fast_travel(TOWN_ID); res["refusal"] = map_state()["refusal"]
         quiet(True); cb().set_health(cb().get_max_health())
     quiet(False)
     ok = (res["hover"] == tgt["id"] and res["after"]["last_travel"] == tgt["name"] and res["from_place_m"] < 80 and res["town_travel"] and res["town_after"]["section"] == 1

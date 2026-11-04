@@ -105,6 +105,9 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Wild") TArray<FIntPoint> WildRevealKeys;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Wild") TArray<int64> WildRevealBits;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Wild") TArray<int32> WildFound;
+	/** the wilderness's monsters killed, by place and their number in its group (place id * 16 + n): a cleared lair stays
+	 *  cleared when its chunk is made again (it was made again in full, gold and counters and all) */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Wild") TArray<int64> WildKilled;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Wild") FString CurrentTown;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Wild") TMap<FString, FRDTownSave> TownStore;
 	/** a game loaded from disk (RDSave.cpp): where she was, put back once the level has loaded */

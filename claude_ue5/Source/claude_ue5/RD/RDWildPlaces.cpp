@@ -7,6 +7,7 @@
 #include "RD/RDWild.h"
 #include "RD/RDMonster.h"
 #include "RD/RDSection.h"
+#include "RD/RDGameInstance.h"
 #include "Components/StaticMeshComponent.h"
 #include "ProceduralMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -139,6 +140,9 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Mesh && Monsters[K].Tier == T) Kinds.Add(K);
 	if (Kinds.Num() == 0) for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Mesh) Kinds.Add(K);
 	if (Kinds.Num() == 0) return;
+	// (destroyed ones out of the list: the chunks' monsters go with their chunks, and GetMonsters walks it)
+	Ws->SpawnedMonsters.RemoveAll([](const TObjectPtr<ARDMonster>& M) { return !IsValid(M); });
+	URDGameInstance* GI = URDGameInstance::Of(this);
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 91, Wild->Seed));
 	const bool bLair = P.Kind == TEXT("lair");
 	const int32 Kind = Kinds[R.RandRange(0, Kinds.Num() - 1)];
@@ -146,14 +150,17 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	const FRDMonsterDef& Def = Monsters[Kind];
 	for (int32 I = 0; I < N; ++I)
 	{
-		const float A = R.FRandRange(0.f, 2.f * PI), D = R.FRandRange(300.f, 900.f);
+		const float A = R.FRandRange(0.f, 2.f * PI), D = R.FRandRange(300.f, 900.f), Yaw = R.FRandRange(0.f, 360.f);
+		// (one killed stays dead: its draws are made first, so the others keep their places)
+		const int64 Key = (int64)P.Id * 16 + I;
+		if (GI && GI->WildKilled.Contains(Key)) continue;
 		FVector At(P.At.X * 100.0 + FMath::Cos(A) * D, P.At.Y * 100.0 + FMath::Sin(A) * D, 0.0);
 		At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, R.FRandRange(0.f, 360.f), 0), At), Sp);
+		ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), At), Sp);
 		if (!M) continue;
 		M->SpawnIndex = -1;
-		M->bOpenGround = true; M->HomeAt = At;
+		M->bOpenGround = true; M->HomeAt = At; M->WildKey = Key;
 		M->Setup(Ws, Def, (int32)FRDWildWorld::Hash(P.Id, 100 + I, Wild->Seed));
 		M->Empower(P.Tier, bLair ? 1.35f : 1.f, bLair ? 1.2f : 1.f, 1.f, bLair ? FString::Printf(TEXT("%s"), *P.Name) : FString());
 		Ws->SpawnedMonsters.Add(M);
