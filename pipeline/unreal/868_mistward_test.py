@@ -3452,24 +3452,39 @@ def bal_fight(c, hero, t, monsters, secs, after_start=None):
     g = G["gen"]
     st0 = md(g.autoplay_stats); d0, k0, tk0 = prop(c, "damage_dealt"), c.kills, prop(c, "damage_taken")
     hp0 = c.get_health(); low = hp0
+    # (her maximum as she begins: read after a fall it is her bare one, the kit's ring dropped with her things (433 / 241))
+    mx0 = max(c.get_max_health(), 1)
     g.set_editor_property("autoplay_ignore_player", True); g.start_autoplay(secs + 5, False); t0 = now()
-    if after_start: after_start()
+    only_n = after_start() if after_start else None
+    # (what autoplay and each foe are doing, every 2 s for the first 30 s: the trace says why a fight never began)
+    trace, tn = [], 0.0
     while now() - t0 < secs:
         yield from wait(0.1)
+        if now() - t0 >= tn and tn <= 30.0:
+            tn += 2.0; me = G["pawn"].get_actor_location()
+            trace.append([round(now() - t0, 1), str(g.get_editor_property("autoplay_doing")), [round(me.x), round(me.y), round(me.z)],
+                          [[round(dist2(m.get_actor_location(), me) / 100, 1), round(m.get_actor_location().z - me.z), bool(m.is_aggro()), str(m.combat_branch)] for m in monsters if alive(m)]])
         low = min(low, c.get_health())
         if c.is_dead() or not any(alive(m) for m in monsters): break
     secs_ = round(now() - t0, 1); dead = c.is_dead()
     st = md(g.autoplay_stats); g.stop_autoplay("test")
     left = [round(hp(m)) for m in monsters if alive(m)]
-    return {"won": not dead and not left, "down": dead, "secs": secs_, "hp_left": round(c.get_health() / max(c.get_max_health(), 1), 2), "low": round(low / max(c.get_max_health(), 1), 2),
-            "max_hp": round(c.get_max_health()), "dealt": round(prop(c, "damage_dealt") - d0), "taken": round(prop(c, "damage_taken") - tk0), "kills": c.kills - k0,
-            "left": left, "used": st.get("used", 0), "stealth": st.get("stealth", 0), "kites": st.get("kites", 0), "summons": st.get("summons", 0)}
+    return {"won": not dead and not left, "down": dead, "secs": secs_, "hp_left": round(c.get_health() / mx0, 2), "low": round(low / mx0, 2),
+            "max_hp": round(mx0), "dealt": round(prop(c, "damage_dealt") - d0), "taken": round(prop(c, "damage_taken") - tk0), "kills": c.kills - k0,
+            "left": left, "autoplay_only": only_n, "trace": trace, "used": st.get("used", 0), "stealth": st.get("stealth", 0), "kites": st.get("kites", 0), "summons": st.get("summons", 0)}
 
-def bal_final(hero, secs):
+def bal_final(hero, secs, mode="both", seed=0, provoke=False):
     """one fight with the dungeon's boss as a game sets him: tiers 1 to 5 open, a set of tier 5 built and its own monsters gone,
     Aurorim and his band in its largest room (DebugPlaceFinalBoss: his encounter, his tactics, his door), her with her tier-5
-    kit on the tile of his room nearest 12 m from him, then autoplay against him and his band only (as the showcase's go)"""
+    kit on the tile of his room nearest 12 m from him, then autoplay against him and his band only (as the showcase's go).
+    mode "boss": his band taken away once placed (him alone: with none of them near he comes in at once, as when his band is
+    dead); "band": he is taken away (his band alone, as placed round him). Taken away = destroyed, not killed: a kill would
+    drop harvests by him, and his own would conquer the castle and open the door to Brokenspire.
+    seed (not 0): the session seed, so that the three modes meet the same room and band (his band's number and kinds, and the
+    set's rooms, come from it: one play session's gave 7 in a room of 83 tiles, another's 10 in one of 96)"""
     c = yield from restart(hero); g = G["gen"]; quiet(True)
+    if seed:
+        g.restart_play(seed); yield from wait(0.8); refresh(); c = cb(); g = G["gen"]; quiet(True)
     g.debug_open_tiers(5, False); yield from wait(0.5)
     S = I2(4, 0); span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
     cm_ = G["pawn"].get_editor_property("character_movement"); cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
@@ -3481,24 +3496,53 @@ def bal_final(hero, secs):
     g.debug_clear_section(S, 0, sec.get_room_center(0)); yield from wait(0.5)
     rooms = [(r_, list(sec.get_room_free_tiles(r_))) for r_ in range(200)]
     room, tiles = max(rooms, key=lambda x: len(x[1]))
+    # (her kit before he is placed: while it was given (the Summoner's summons 2.6 s each) he and his band wandered off, the
+    # monsters quiet; alone he was 220 m off by the fight's end and never met her (seed 13422's Warrior and Summoner))
+    got = yield from kit(c, hero, 5)
     if not g.debug_place_final_boss(S, room): return {"placed": False, "why": "not placed", "room": room}
     yield from wait(1.0)
     boss = g.get_final_boss(); bl = boss.get_actor_location()
     band = [m for m in g.get_monsters() if alive(m) and m != boss and m.spawn_index < 0 and dist2(m.get_actor_location(), bl) < 3000]
+    nband = len(band); bmax, bdmg = round(boss.get_max_health()), round(boss.get_damage(), 1)
+    bandinfo = {"max_hp": round(max((m.get_max_health() for m in band), default=0)), "hp_sum": round(sum(m.get_max_health() for m in band)),
+                "damage_max": round(max((m.get_damage() for m in band), default=0), 1), "kinds": sorted(str(m.monster_name) for m in band)}
+    if mode == "boss":
+        for m in band: m.destroy_actor()
+        band = []
+    elif mode == "band":
+        boss.destroy_actor(); boss = None
+    yield from wait(0.5)
     at = min(tiles, key=lambda p: abs(dist2(p, bl) - 1200.0))
     put(at, yaw=math.degrees(math.atan2(bl.y - at.y, bl.x - at.x))); yield from wait(0.5)
-    got = yield from kit(c, hero, 5)
-    sb0, sh0 = md(g.sky_beam_stats), md(g.shot_stats); bc0, sf0 = boss.beams_cast, boss.shots_fired
+    c.set_health(c.get_max_health()); c.set_mana(c.get_max_mana()); c.set_dex_energy(c.get_max_dex_energy())
+    sb0, sh0 = md(g.sky_beam_stats), md(g.shot_stats); bc0, sf0 = (boss.beams_cast, boss.shots_fired) if boss else (0, 0)
     quiet(False); yield from wait(0.2)
-    r = yield from bal_fight(c, hero, 5, [boss] + band, secs, after_start=lambda: g.debug_autoplay_only_final())
+    foes = ([boss] if boss else []) + band
+    # (how far each has gone from him as the fight begins: his band stands round him as placed)
+    drift = [round(dist2(m.get_actor_location(), bl) / 100, 1) for m in foes if alive(m)]
+    # (provoke: every one of them has noticed her as the fight begins (0.01 of a blow from her, which sets what a blow sets). Alone,
+    # 12 m off in his room, he had not: he notices from 40 m only once his band is after her, and wandered off from the Warrior
+    # walking after him in plate (2.5 m/s) for the whole fight; his band's that never noticed her wandered 60 to 300 m off.
+    # The run's "provoke=1"; without it they notice her themselves, as in the trials of 2026-11-04)
+    if provoke:
+        for m in foes:
+            if alive(m): m.apply_damage(0.01, G["pawn"])
+    r = yield from bal_fight(c, hero, 5, foes, secs, after_start=lambda: g.debug_autoplay_only_final())
     sb, sh = md(g.sky_beam_stats), md(g.shot_stats)
-    r.update({"placed": True, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": len(band), "kit": got,
-              "boss_max_hp": round(boss.get_max_health()) if unreal.SystemLibrary.is_valid(boss) else None,
-              "boss_damage": round(boss.get_damage(), 1) if unreal.SystemLibrary.is_valid(boss) else None,
-              "boss_hp_left": round(hp(boss)), "boss_slain": not alive(boss), "band_left": sum(1 for m in band if alive(m)),
-              "lights": [boss.beams_cast - bc0 if unreal.SystemLibrary.is_valid(boss) else None, sb.get("fell", 0) - sb0.get("fell", 0), sb.get("on_her", 0) - sb0.get("on_her", 0)],
-              "lances": [boss.shots_fired - sf0 if unreal.SystemLibrary.is_valid(boss) else None, sh.get("on_her", 0) - sh0.get("on_her", 0)]})
-    quiet(True); drop([boss] + band); yield from wait(0.3)
+    bv = boss is not None and unreal.SystemLibrary.is_valid(boss)
+    # (who was left standing at the end, and why: where each is from her, from where it was placed, what its fight was doing)
+    me = G["pawn"].get_actor_location()
+    r["survivors"] = [{"kind": str(m.monster_name), "hp": round(hp(m)), "of": round(m.get_max_health()), "m_from_her": round(dist2(m.get_actor_location(), me) / 100, 1),
+                       "dz": round(m.get_actor_location().z - me.z), "m_from_him": round(dist2(m.get_actor_location(), bl) / 100, 1), "aggro": bool(m.is_aggro()),
+                       "branch": str(m.combat_branch), "home": m.home_room}
+                      for m in foes if alive(m)]
+    r.update({"placed": True, "mode": mode, "provoked": provoke, "session_seed": g.get_editor_property("session_seed"), "m_from_him_at_go": drift, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": nband if mode != "boss" else 0,
+              "band_placed": nband, "band_info": bandinfo, "kit": got, "boss_max_hp": bmax, "boss_damage": bdmg,
+              "boss_hp_left": round(hp(boss)) if mode != "band" else None, "boss_slain": (not alive(boss)) if mode != "band" else None,
+              "band_left": sum(1 for m in band if alive(m)),
+              "lights": [boss.beams_cast - bc0 if bv else None, sb.get("fell", 0) - sb0.get("fell", 0), sb.get("on_her", 0) - sb0.get("on_her", 0)],
+              "lances": [boss.shots_fired - sf0 if bv else None, sh.get("on_her", 0) - sh0.get("on_her", 0)]})
+    quiet(True); drop(foes); yield from wait(0.3)
     return r
 
 def step_balance():
@@ -3518,6 +3562,11 @@ def step_balance():
     tiers = [] if opt.get("tiers") == "none" else [int(x) for x in (opt.get("tiers") or "1+2+3+4+5").split("+")]
     # (the dungeon's boss's fights for each hero, after her tiers: "finals=0" leaves them out, "tiers=none;finals=2" runs them alone)
     nf = int(opt.get("finals", TR.get("finals", 2) if 5 in tiers else 0)); res["finals"] = {}
+    # (which fights: "both" (him and his band, the default), "boss" (him alone), "band" (his band alone): "final_modes=boss+band";
+    # the first's record is "finals", the others' "finals_boss" / "finals_band")
+    modes = (opt.get("final_modes") or "both").split("+")
+    fkey = {"both": "finals", "boss": "finals_boss", "band": "finals_band"}
+    for md_ in modes: res.setdefault(fkey[md_], {})
     for hero in only:
         for t in tiers:
             c = yield from restart(hero); g = G["gen"]; quiet(True)
@@ -3558,12 +3607,14 @@ def step_balance():
             res["trials"][f"{hero}|{t}"] = r
             unreal.log(f"MWBAL {hero} t{t} pack {json.dumps(r['pack'])} boss {json.dumps(r.get('boss'))}")
         # (the dungeon's boss, Aurorim and his band, as the game sets him: finals times with her tier-5 kit)
-        for k in range(nf):
-            fr = yield from bal_final(hero, float(opt.get("final_s", 240)))
-            res["finals"].setdefault(hero, []).append(fr)
-            unreal.log(f"MWBAL {hero} final {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'boss_hp_left', 'band_left', 'lights', 'lances', 'used')})}")
+        for md_ in modes:
+            for k in range(nf):
+                fr = yield from bal_final(hero, float(opt.get("final_s", 240)), md_, int(opt.get("final_seed", 0)), opt.get("provoke", "0") == "1")
+                res[fkey[md_]].setdefault(hero, []).append(fr)
+                unreal.log(f"MWBAL {hero} final {md_} {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'taken', 'dealt', 'boss_hp_left', 'band_left', 'lights', 'lances', 'used')})}")
     quiet(False)
-    res["final_wins"] = {h: sum(1 for x in v if x.get("won")) for h, v in res["finals"].items()}
+    for md_ in modes:
+        res[fkey[md_].replace("finals", "final_wins")] = {h: sum(1 for x in v if x.get("won")) for h, v in res[fkey[md_]].items()}
     tr = res["trials"]
     res["summary"] = {k: [v["pack"]["won"], v["pack"]["secs"], v["pack"]["hp_left"], (v.get("boss") or {}).get("won"), (v.get("boss") or {}).get("secs"), (v.get("boss") or {}).get("hp_left")] for k, v in tr.items()}
     packs_ok = all(v["pack"]["won"] for v in tr.values())
