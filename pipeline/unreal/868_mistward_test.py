@@ -3447,12 +3447,13 @@ def kit(c, hero, t):
     c.set_health(c.get_max_health()); c.set_mana(c.get_max_mana()); c.set_dex_energy(c.get_max_dex_energy())
     return got
 
-def bal_fight(c, hero, t, monsters, secs):
+def bal_fight(c, hero, t, monsters, secs, after_start=None):
     """autoplay against these monsters until all are down, she is down or secs pass: what it took"""
     g = G["gen"]
     st0 = md(g.autoplay_stats); d0, k0, tk0 = prop(c, "damage_dealt"), c.kills, prop(c, "damage_taken")
     hp0 = c.get_health(); low = hp0
     g.set_editor_property("autoplay_ignore_player", True); g.start_autoplay(secs + 5, False); t0 = now()
+    if after_start: after_start()
     while now() - t0 < secs:
         yield from wait(0.1)
         low = min(low, c.get_health())
@@ -3464,6 +3465,42 @@ def bal_fight(c, hero, t, monsters, secs):
             "max_hp": round(c.get_max_health()), "dealt": round(prop(c, "damage_dealt") - d0), "taken": round(prop(c, "damage_taken") - tk0), "kills": c.kills - k0,
             "left": left, "used": st.get("used", 0), "stealth": st.get("stealth", 0), "kites": st.get("kites", 0), "summons": st.get("summons", 0)}
 
+def bal_final(hero, secs):
+    """one fight with the dungeon's boss as a game sets him: tiers 1 to 5 open, a set of tier 5 built and its own monsters gone,
+    Aurorim and his band in its largest room (DebugPlaceFinalBoss: his encounter, his tactics, his door), her with her tier-5
+    kit on the tile of his room nearest 12 m from him, then autoplay against him and his band only (as the showcase's go)"""
+    c = yield from restart(hero); g = G["gen"]; quiet(True)
+    g.debug_open_tiers(5, False); yield from wait(0.5)
+    S = I2(4, 0); span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+    cm_ = G["pawn"].get_editor_property("character_movement"); cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+    G["pawn"].set_actor_location(V(S.x * span, S.y * span, 400.0), False, True); yield from wait(0.3)
+    g.generate_section_now(S); yield from built(S)
+    sec = g.get_section(S)
+    if not sec: return {"placed": False, "why": "no set"}
+    put(sec.get_room_center(0)); cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(1.0)
+    g.debug_clear_section(S, 0, sec.get_room_center(0)); yield from wait(0.5)
+    rooms = [(r_, list(sec.get_room_free_tiles(r_))) for r_ in range(200)]
+    room, tiles = max(rooms, key=lambda x: len(x[1]))
+    if not g.debug_place_final_boss(S, room): return {"placed": False, "why": "not placed", "room": room}
+    yield from wait(1.0)
+    boss = g.get_final_boss(); bl = boss.get_actor_location()
+    band = [m for m in g.get_monsters() if alive(m) and m != boss and m.spawn_index < 0 and dist2(m.get_actor_location(), bl) < 3000]
+    at = min(tiles, key=lambda p: abs(dist2(p, bl) - 1200.0))
+    put(at, yaw=math.degrees(math.atan2(bl.y - at.y, bl.x - at.x))); yield from wait(0.5)
+    got = yield from kit(c, hero, 5)
+    sb0, sh0 = md(g.sky_beam_stats), md(g.shot_stats); bc0, sf0 = boss.beams_cast, boss.shots_fired
+    quiet(False); yield from wait(0.2)
+    r = yield from bal_fight(c, hero, 5, [boss] + band, secs, after_start=lambda: g.debug_autoplay_only_final())
+    sb, sh = md(g.sky_beam_stats), md(g.shot_stats)
+    r.update({"placed": True, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": len(band), "kit": got,
+              "boss_max_hp": round(boss.get_max_health()) if unreal.SystemLibrary.is_valid(boss) else None,
+              "boss_damage": round(boss.get_damage(), 1) if unreal.SystemLibrary.is_valid(boss) else None,
+              "boss_hp_left": round(hp(boss)), "boss_slain": not alive(boss), "band_left": sum(1 for m in band if alive(m)),
+              "lights": [boss.beams_cast - bc0 if unreal.SystemLibrary.is_valid(boss) else None, sb.get("fell", 0) - sb0.get("fell", 0), sb.get("on_her", 0) - sb0.get("on_her", 0)],
+              "lances": [boss.shots_fired - sf0 if unreal.SystemLibrary.is_valid(boss) else None, sh.get("on_her", 0) - sh0.get("on_her", 0)]})
+    quiet(True); drop([boss] + band); yield from wait(0.3)
+    return r
+
 def step_balance():
     """the heroes against each other tier by tier (balance6.json): each hero at each tier, with the tiers up to it open and the
     kit she typically carries arriving there (her start at tier 1), under autoplay, fights a pack of three of the tier's kinds
@@ -3471,13 +3508,16 @@ def step_balance():
     measured for each: won or down, the seconds, her hit points left and her lowest, the damage dealt and taken, potions drunk,
     stealths, steps back, summons; the boss fought twice, each time from the start with her kit (one fight's outcome swings).
     Every hero must win every pack and lose at most two of her ten boss fights; at each tier the slowest pack win within 3 x
-    the quickest"""
+    the quickest. Then, with tier 5 in the run, the dungeon's boss (bal_final: Aurorim and his band as the game sets him)
+    fought twice by each hero with her tier-5 kit: measured and recorded (final_wins), not part of the rule"""
     TR = BAL["trial"]; res = {"trials": {}}
     heroes = [str(h.name) for h in G["gen"].get_editor_property("heroes")]
     # (the run's third argument may narrow it: "heroes=Mage+Rogue;tiers=4+5")
     opt = dict(kv.split("=", 1) for kv in (sys.argv[3] if len(sys.argv) > 3 else "").split(";") if "=" in kv)
     only = [h for h in heroes if h in (opt.get("heroes") or "+".join(heroes)).split("+")]
-    tiers = [int(x) for x in (opt.get("tiers") or "1+2+3+4+5").split("+")]
+    tiers = [] if opt.get("tiers") == "none" else [int(x) for x in (opt.get("tiers") or "1+2+3+4+5").split("+")]
+    # (the dungeon's boss's fights for each hero, after her tiers: "finals=0" leaves them out, "tiers=none;finals=2" runs them alone)
+    nf = int(opt.get("finals", TR.get("finals", 2) if 5 in tiers else 0)); res["finals"] = {}
     for hero in only:
         for t in tiers:
             c = yield from restart(hero); g = G["gen"]; quiet(True)
@@ -3517,7 +3557,13 @@ def step_balance():
             if r.get("bosses"): r["boss_wins"] = sum(1 for x in r["bosses"] if x["won"])
             res["trials"][f"{hero}|{t}"] = r
             unreal.log(f"MWBAL {hero} t{t} pack {json.dumps(r['pack'])} boss {json.dumps(r.get('boss'))}")
+        # (the dungeon's boss, Aurorim and his band, as the game sets him: finals times with her tier-5 kit)
+        for k in range(nf):
+            fr = yield from bal_final(hero, float(opt.get("final_s", 240)))
+            res["finals"].setdefault(hero, []).append(fr)
+            unreal.log(f"MWBAL {hero} final {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'boss_hp_left', 'band_left', 'lights', 'lances', 'used')})}")
     quiet(False)
+    res["final_wins"] = {h: sum(1 for x in v if x.get("won")) for h, v in res["finals"].items()}
     tr = res["trials"]
     res["summary"] = {k: [v["pack"]["won"], v["pack"]["secs"], v["pack"]["hp_left"], (v.get("boss") or {}).get("won"), (v.get("boss") or {}).get("secs"), (v.get("boss") or {}).get("hp_left")] for k, v in tr.items()}
     packs_ok = all(v["pack"]["won"] for v in tr.values())

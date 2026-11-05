@@ -849,6 +849,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossPoise = 3.f;
 	/** his band alive within 25 m of him now (TickFinal) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Final") int32 GetFinalBandNear() const { return FinalBandNear; }
+	/** the balance trials (868 balance): Aurorim and his band set in room Room of set Set as the game sets him (his encounter,
+	 *  his tactics, his door), whatever the tiers' share; false if he is placed already or could not be */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") bool DebugPlaceFinalBoss(FIntPoint Set, int32 Room);
+	/** autoplay fights only him and his band (as the showcase's go: seen across 40 m, no chests); how many of them live */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") int32 DebugAutoplayOnlyFinal();
 	/** he holds back now: his band near enough and he not struck lately (his tactics; autoplay leaves him for his band then) */
 	bool FinalBossHolds(const ARDMonster* Boss) const;
 	int32 FinalBandNear = 0;

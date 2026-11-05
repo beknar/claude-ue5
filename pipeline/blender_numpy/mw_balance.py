@@ -114,6 +114,20 @@ if os.path.exists(tp):
             rows.append("| %s | three of the tier | %s |" % (TITLE[h["name"]], " | ".join(cell(v.get("pack")) for v in tr_)))
             rows.append("|  | its boss | %s |" % " | ".join(bosses(v) for v in tr_))
         tables["trials"] = rows
+    # ---- the dungeon's boss: Aurorim and his band as the game sets him, each hero with her tier-5 kit
+    if st and st.get("finals"):
+        nf = max(len(v) for v in st["finals"].values())
+        rows = ["| Hero | " + " | ".join("Fight %d" % (k + 1) for k in range(nf)) + " |", "|---|" + "---|" * nf]
+        def fcell(r):
+            if not r.get("placed"): return "not placed"
+            hd = "won, %s s, %s %% left" % (f0(r["secs"]), f0(r["hp_left"] * 100)) if r["won"] else ("down after %s s" % f0(r["secs"]) if r["down"] else "not done in %s s" % f0(r["secs"]))
+            boss = "Aurorim slain" if r.get("boss_slain") else "Aurorim %s of %s hit points left" % (r["boss_hp_left"], r["boss_max_hp"])
+            lt = r.get("lights") or [0, 0, 0]
+            return "%s: %s, %d of his band of %d left; %d of his %d lights on her" % (hd, boss, r["band_left"], r["band"], lt[2], lt[1])
+        for h in ST["heroes"]:
+            fs = st["finals"].get(h["name"])
+            if fs: rows.append("| %s | %s |" % (TITLE[h["name"]], " | ".join(fcell(r) for r in fs)))
+        tables["finals"] = rows
 p = os.path.join(ROOT, "docs", "levels", "mistward_castle.md"); s = open(p, encoding="utf-8").read()
 for key, rows in tables.items():
     a, b = "<!-- mw6:%s -->" % key, "<!-- /mw6:%s -->" % key
