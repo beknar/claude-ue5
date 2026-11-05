@@ -124,10 +124,29 @@ Measured 2026-11-04 (`868 balance`'s finals): Aurorim as the game sets him, in a
 | Martial Artist | 0 of 2 | 22 / 22 s | 1836 / 1836 | 6 / 7 | 2 of 5 / 0 of 5 |
 | Summoner | 0 of 2 | 74 / 54 s | 16 / 785 | 9 / 9 | 0 of 6 / 0 of 5 |
 
-- **No hero wins.** The heroes who stand in the blows (the Warrior, the Warlock, the Martial Artist) take 4 to 5 times their hit points within half a minute, with 1 to 4 of his band killed and him untouched.
+- **No hero wins.** The heroes who stand in the blows (the Warrior, the Warlock, the Martial Artist) take 2 to 3 times their hit points within half a minute, with 1 to 4 of his band killed and him untouched. (This table's first version said 4 to 5 times: the record read her hit points after her fall, when the kit's ring had dropped with her things: 241 is the Warrior's bare tier-5 number, 433 with the kit's HP Potency Ring 8. The test reads them as she begins now.)
 - **The ones who keep away do best:** the Rogue's stealth reached him and killed him both times, and his band then killed her; the Summoner's summons brought him to 16 hit points once. The Mage stepped out of all 8 of his lights and fell to the shots of him and his band.
-- **What decides it is not measured yet:** his band of 10 at once is more than three of the trials' packs of 3 at once (a pack of 3 took 22 to 38 % of a hero's hit points at tier 5 in the same run), with his lights and lances on top. Trials of his band without him, and of him alone, would say which carries the fight.
-- **The showcase's Warrior won** (2026-11-04's reel): with the best of everything she can use (482 hit points against the kit's 241) and six of the best healing potion, she left 160 of 482 at her lowest.
+- **The showcase's Warrior won** (2026-11-04's reel): with the best of everything she can use (482 hit points against the kit's 433) and six of the best healing potion, she left 160 of 482 at her lowest.
+
+### Him or his band (2026-11-05)
+
+Which of them makes the fight unwinnable: `868 balance` with `final_modes=both+boss+band` fights each hero against him and his band, him alone (his band taken away once placed) and his band alone (him taken away), twice each, in the same set, room and band (a fixed session seed: the band's number, its kinds and the set's rooms come from it). Two seeds: 13422 (a band of 8: 3 Hunters, 2 Rocks, 2 Spiders, an Alfa; 2665 hit points in all, in a room of 77 free tiles) and 13425 (a band of 10, the most the roll gives: 4 Hunters, 4 Nasties, a Spider, an Alfa; 3727 hit points, a room of 91). Everyone has noticed her as the fight begins (`provoke=1`), as when she walks into his room. Records: `SourceArt/mistward/test_bk.json` (13422) and `test_bl.json` (13425).
+
+| Hero | Him and his band of 8 | Him alone | His band of 8 alone | Him and his band of 10 | Him alone | His band of 10 alone |
+|---|---|---|---|---|---|---|
+| Warrior | 0 of 2 | 2 of 2 | 2 of 2 | 0 of 2 | 2 of 2 | 2 of 2 |
+| Mage | 0 of 2 | 2 of 2 | 2 of 2 | 0 of 2 | 2 of 2 | 1 of 2 |
+| Warlock | 0 of 2 | 2 of 2 | 2 of 2 | 0 of 2 | 2 of 2 | 2 of 2 |
+| Rogue | 0 of 2 | 2 of 2 | 1 of 2 | 0 of 2 | 2 of 2 | 0 of 2 |
+| Martial Artist | 0 of 2 | 2 of 2 | 2 of 2 | 0 of 2 | 1 of 2 (the other: him at 39) | 0 of 2 |
+| Summoner | 0 of 2 | 1 of 2 (the other: him at 292) | 0 of 2 | 0 of 2 | 0 of 1 (him at 658; the other fight never met: below) | 0 of 2 |
+| **All** | **0 of 12** | **11 of 12** | **9 of 12** | **0 of 12** | **9 of 11** | **5 of 12** |
+
+- **Together they are unwinnable; neither is alone.** Him alone: 20 of 23 fights won, every hero at least once (27 to 73 s; the Warrior with half her hit points left at her lowest). His band of 8 alone: 9 of 12 won. Together: 0 of 24, and he kept 918 to 1836 of his 1836 hit points in all of them: she falls (in 5 to 38 s) still fighting his band.
+- **The band is the larger part, and its size decides how large:** a band of 8 alone is beaten by five of the six heroes; a band of 10 alone by three (the Warrior, the Warlock, and the Mage once), while the Rogue, the Martial Artist and the Summoner fall to it every time. Him alone is beaten by every hero but the Summoner (1 of 3), who is the weakest against both halves.
+- **What he adds on top of a band of 8** (which alone is beatable) is his 1836 hit points behind it and his lance and light from 9 to 13 m while it fights; the trials do not separate those two.
+- **Not measured:** why the Warrior's and the Mage's damage a second halves with him there (13425: the Warrior 68 to 72 a second against 158 with his band alone; the Mage 101 to 116 against 157 to 215); the other four deal no less with him there.
+- **A trial that never met:** one Summoner fight with him alone (13425) ended at 180 s with him 93 m off, unseen, though provoked: she had kept away behind her summons and he lost her. Before the provoking (a run on 13422 without it) he never noticed the Warrior or the Summoner: alone in his room 12 m from her he notices her only from the castle's noticing distance (from 40 m only once his band is after her), and he wandered off from the Warrior walking after him in plate (2.5 m/s) for the whole fight.
 
 ### How it got here
 
