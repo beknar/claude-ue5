@@ -3566,7 +3566,12 @@ def step_balance():
     # the first's record is "finals", the others' "finals_boss" / "finals_band")
     modes = (opt.get("final_modes") or "both").split("+")
     fkey = {"both": "finals", "boss": "finals_boss", "band": "finals_band"}
+    bad = [m_ for m_ in modes if m_ not in fkey]
+    if bad: raise ValueError(f"final_modes: no such fight {bad} (both, boss, band)")
     for md_ in modes: res.setdefault(fkey[md_], {})
+    # (a fixed final_seed is the finals' only: the session's own is put back after each hero's finals, or the next hero's tier
+    # trials ran on it)
+    seed0 = G["gen"].get_editor_property("session_seed")
     for hero in only:
         for t in tiers:
             c = yield from restart(hero); g = G["gen"]; quiet(True)
@@ -3612,6 +3617,8 @@ def step_balance():
                 fr = yield from bal_final(hero, float(opt.get("final_s", 240)), md_, int(opt.get("final_seed", 0)), opt.get("provoke", "0") == "1")
                 res[fkey[md_]].setdefault(hero, []).append(fr)
                 unreal.log(f"MWBAL {hero} final {md_} {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'taken', 'dealt', 'boss_hp_left', 'band_left', 'lights', 'lances', 'used')})}")
+        if nf and int(opt.get("final_seed", 0)) and seed0:
+            G["gen"].restart_play(seed0); yield from wait(0.8); refresh()
     quiet(False)
     for md_ in modes:
         res[fkey[md_].replace("finals", "final_wins")] = {h: sum(1 for x in v if x.get("won")) for h, v in res[fkey[md_]].items()}
