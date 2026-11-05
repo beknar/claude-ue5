@@ -12,6 +12,8 @@
 #include "RD/RDTown.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "Engine/SkeletalMesh.h"
 #include "Animation/AnimSequenceBase.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -208,6 +210,15 @@ ARDTownAnimal::ARDTownAnimal()
 	Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	Body->bEnableUpdateRateOptimizations = true;
+	// (it blocks pawns: her and the townsfolk; the camera passes)
+	Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("Collider"));
+	Collider->SetupAttachment(Root);
+	Collider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Collider->SetCollisionObjectType(ECC_WorldDynamic);
+	Collider->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Collider->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	Collider->SetCanEverAffectNavigation(false);
+	Collider->SetHiddenInGame(true);
 }
 
 void ARDTownAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, int32 InPen, const FVector& InPenAt, const FVector2D& InPenHalf, uint32 InSeed)
@@ -220,6 +231,15 @@ void ARDTownAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, int32 In
 	Body->SetRelativeRotation(FRotator(0, D.MeshYaw, 0));
 	Body->SetRelativeScale3D(FVector(D.Scale));
 	Speed = FMath::Max(D.WalkSpeed, 5.f);
+	// (the list of 2026-11-04: "player can walk through the farm animals, such as the cows": a box over its body that stops
+	// pawns, as long and wide as its half size and as high as its mesh)
+	{
+		const FBoxSphereBounds Bb = D.Mesh ? D.Mesh->GetBounds() : FBoxSphereBounds(FVector(0, 0, 40), FVector(40), 60.f);
+		const float Hh = FMath::Max((float)(Bb.Origin.Z + Bb.BoxExtent.Z) * D.Scale, 20.f) * 0.5f;
+		Collider->SetBoxExtent(FVector(FMath::Max(D.HalfSize.X, 12.f), FMath::Max(D.HalfSize.Y, 10.f), Hh));
+		Collider->SetRelativeLocation(FVector(0, 0, Hh));
+		Collider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
 	SetState(R.RandRange(0, 1), GetWorld()->GetTimeSeconds());
 	if (const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(Body->AnimationData.AnimToPlay)) Body->SetPosition(R.FRandRange(0.f, S->GetPlayLength()));
 }

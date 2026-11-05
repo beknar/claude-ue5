@@ -38,7 +38,7 @@ namespace
 	}
 }
 
-bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why)
+bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why, const FString& Name)
 {
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
@@ -79,7 +79,7 @@ bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why)
 	Sv->SavedAt = FDateTime::Now();
 	Sv->Level = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
 	Sv->Hero = CurrentHero; Sv->At = Her->GetActorLocation(); Sv->Yaw = Her->GetActorRotation().Yaw;
-	Sv->Why = Why; Sv->Place = Place; Sv->bInTown = bTown;
+	Sv->Why = Why; Sv->Place = Place; Sv->bInTown = bTown; Sv->Name = Name;
 	RDSerializeGame(GI, Sv->Game, false);
 	// (the game goes on as it was)
 	GI->HerPiles = Piles; GI->TownLooted = Looted; GI->GuardsDead = Guards; GI->TownStore = Store; GI->CurrentTown = Current;
@@ -184,7 +184,7 @@ bool URDSaveGame::ReadHead(const FString& Slot, FString& OutInfo, FDateTime& Out
 		if (const URDSaveGame* Sv = Cast<URDSaveGame>(UGameplayStatics::LoadGameFromSlot(Slot, 0)); Sv && Sv->Game.Num() > 0 && !Sv->Level.IsEmpty())
 		{
 			FString Lv = Sv->Level; int32 Sl; if (Lv.FindLastChar(TEXT('/'), Sl)) Lv = Lv.Mid(Sl + 1);
-			H.Info = FString::Printf(TEXT("%s|%s|%s|%s|%s"), *Sv->SavedAt.ToString(TEXT("%Y-%m-%d %H:%M")), *Lv, *Sv->Place, *Sv->Hero.ToString(), *Sv->Why);
+			H.Info = FString::Printf(TEXT("%s|%s|%s|%s|%s|%s"), *Sv->SavedAt.ToString(TEXT("%Y-%m-%d %H:%M")), *Lv, *Sv->Place, *Sv->Hero.ToString(), *Sv->Why, *Sv->Name.Replace(TEXT("|"), TEXT(" ")));
 			H.SavedAt = Sv->SavedAt; H.bOk = true;
 		}
 	}
@@ -200,11 +200,50 @@ FString URDSaveGame::Info(const FString& Slot)
 
 FString URDSaveGame::Latest()
 {
-	FString Best; FDateTime Bt = FDateTime::MinValue();
-	for (const TCHAR* S : { TEXT("save"), TEXT("autosave") })
+	const TArray<FString> All = AllSlots();
+	return All.Num() > 0 ? All[0] : FString();
+}
+
+TArray<FString> URDSaveGame::AllSlots()
+{
+	// (the autosave, the old "save" and every named "save_<name>" in the save folder, newest first)
+	TArray<FString> Files;
+	IFileManager::Get().FindFiles(Files, *(FPaths::ProjectSavedDir() / TEXT("SaveGames") / TEXT("*.sav")), true, false);
+	TArray<TPair<FDateTime, FString>> Got;
+	for (const FString& F : Files)
 	{
+		const FString Slot = FPaths::GetBaseFilename(F);
+		if (Slot != TEXT("autosave") && Slot != TEXT("save") && !Slot.StartsWith(TEXT("save_"))) continue;
 		FString I; FDateTime T;
-		if (ReadHead(S, I, T) && T > Bt) { Bt = T; Best = S; }
+		if (ReadHead(Slot, I, T)) Got.Add({ T, Slot });
 	}
-	return Best;
+	Got.Sort([](const TPair<FDateTime, FString>& A, const TPair<FDateTime, FString>& B) { return A.Key > B.Key; });
+	TArray<FString> Out;
+	for (const auto& G : Got) Out.Add(G.Value);
+	return Out;
+}
+
+FString ARDDungeonGenerator::SlotForName(const FString& Name)
+{
+	FString S;
+	for (const TCHAR C : Name.ToLower()) { if (FChar::IsAlnum(C)) S.AppendChar(C); else if ((C == TEXT(' ') || C == TEXT('-') || C == TEXT('_')) && !S.EndsWith(TEXT("_"))) S.AppendChar(TEXT('_')); }
+	S.RemoveFromEnd(TEXT("_"));
+	return S.IsEmpty() ? FString(TEXT("save")) : FString(TEXT("save_")) + S.Left(40);
+}
+
+TArray<FString> ARDDungeonGenerator::GetSaveSlots() const
+{
+	// (read again a second after the last read, or after a save)
+	const double Now = FPlatformTime::Seconds();
+	if (Now - SaveSlotsAt < 1.0 && SaveSlotsAt > LastSaveRealTime) return SaveSlotsCache;
+	SaveSlotsAt = Now;
+	SaveSlotsCache.Reset();
+	for (const FString& Slot : URDSaveGame::AllSlots())
+	{
+		TArray<FString> P; URDSaveGame::Info(Slot).ParseIntoArray(P, TEXT("|"), false);
+		if (P.Num() < 4) continue;
+		const FString Nm = P.Num() >= 6 && !P[5].IsEmpty() ? P[5] : (Slot == TEXT("autosave") ? FString(TEXT("Autosave")) : FString(TEXT("Saved game")));
+		SaveSlotsCache.Add(FString::Printf(TEXT("%s|%s|%s|%s|%s"), *Slot, *Nm, *P[0], *P[2], *P[3]));
+	}
+	return SaveSlotsCache;
 }

@@ -123,6 +123,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	TownInner = FIntRect(Ground.Min, Ground.Max);
 	TownBorder.Reset(); TownPaths.Reset(); TownRoadMask.Init(0, N * N); TownTowerDoors.Reset(); TownTowerMids.Reset();
 	TownWorks.Reset(); TownPens.Reset(); TownGardens.Reset(); TownSpits.Reset(); TownGrassClumps = 0; TownSmallBushes = 0;
+	TownOvens.Reset(); TownFoods.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
 	CastleStairwell.Reset(); CastleStairRoom = -1; CastleStairFoot = CastleStairTop = FVector::ZeroVector;
 	// (a frame grid of what each tile is taken by: 0 free, 1 road, 2 square, 3 building or its margin, 4 kept clear, 9 outside)
 	TArray<uint8> Use; Use.Init(0, S * S);
@@ -909,7 +910,9 @@ void ARDSection::TownShellBuilding(int32 BI)
 	// building in Brokenspire has a purpose, there should be a sign outside the door saying what the building is")
 	if (B.Kind != TK_Home)
 	{
-		const FTransform Sg = WallT(FVector2D(Hx + 25.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 250.f);
+		// (its bracket against the wall's face: 25 cm off the wall's line it hung in the air (the list of 2026-11-04: "the signs
+		// outside buildings look like they're floating"))
+		const FTransform Sg = WallT(FVector2D(Hx + 9.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 262.f);
 		AddPiece(TEXT("Town.Sign"), Sg, true);
 		AddSignText(Sg, RDTSignText(B.Kind));
 	}
@@ -1124,10 +1127,23 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 				}
 				FTownWork Sv; Sv.Kind = TEXT("CarryIdle"); Sv.At = Q - In_ * (RServe ? *RServe : 85.f); Sv.Yaw = In_.Rotation().Yaw; Sv.Group = TW_Serve; Sv.Bld = BI; Sv.Prop = TEXT("Tray");
 				TownWorks.Add(Sv);
+				// (the list of 2026-11-04: "inside the inns, it is often too dark where the customers are sitting": a candle on
+				// every table, its light over the table, food set out on some (taken with F); no draws from the plan's stream)
+				const FRDPiece* Tp = Generator->Piece(TEXT("TableSmall"));
+				const float Tz = Tp ? (float)Tp->Size.Z : 76.f;
+				AddPieceAt(TEXT("Candles"), Q + Ac * 30.f + FVector(0, 0, Tz), 25.f * Tables, 1.f, true);
+				AddEffect(TEXT("CandleFire"), Q + Ac * 30.f + FVector(0, 0, Tz + 18.f), 1.f);
+				AddLight(Q + FVector(0, 0, Tz + 95.f), FLinearColor(1.f, 0.64f, 0.34f), 95.f, 720.f, false, 0.12f);
+				{
+					FRandomStream Rf((int32)HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(Q.X), FMath::RoundToInt(Q.Y))), 0x7AB1u));
+					if (Rf.FRand() < 0.65f) TownFoodOn(Rf, Q - Ac * 22.f + FVector(0, 0, Tz), Ac.Rotation().Yaw);
+				}
 				++Tables;
 			}
 			FurnRoom = -1;
 		}
+		// (lamps hung over the seating, a side each: the room's torches by the walls left its middle dark)
+		for (int32 K = -1; K <= 1; K += 2) AddLight(Ctr + Ac * (K * 380.f) + FVector(0, 0, 255.f), FLinearColor(1.f, 0.6f, 0.3f), 170.f, 1000.f, false, 0.08f);
 		// (the bar's front: the server takes a tray there; customers stand and talk)
 		for (const FTownSpot& Sp : TownSpots)
 			if (Sp.Kind == TS_Bar && Sp.Bld == BI)
@@ -1173,30 +1189,59 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			FVector2D Nin(-Dir.Y, Dir.X);
 			if (FVector2D::DotProduct(Mid2 - (A + B) * 0.5f, Nin) < 0.f) Nin = -Nin;
 			const float InYaw = FMath::RadiansToDegrees(FMath::Atan2(Nin.Y, Nin.X));
-			const int32 Np = FMath::Max(1, FMath::RoundToInt(Le / Wl));
-			const float Seg = Le / Np;
-			for (int32 K = 0; K < Np; ++K)
+			// (the user's list of 2026-11-04: "there are gaps on either side of" the portcullis: the gate's edge was laid in 3 m
+			// pieces and every one whose middle was within 1.6 m of the gate left out, a 6 m hole for a 4 m portcullis. The edge
+			// with the gate is laid in two runs, each stretched to meet the portcullis's sides)
+			const float GHalf = 202.f;
+			TArray<FVector2D, TInlineAllocator<2>> Runs;
 			{
-				const FVector2D P2 = A + Dir * (Seg * (K + 0.5f));
-				const FVector P(P2.X, P2.Y, Z0);
-				if (FVector::Dist2D(P, TownGate) < 160.f) continue;            // (the gate's gap: its frame stands there)
-				bool bInTower = false;
-				for (const FTownSpot& Sp : TownSpots) if (Sp.Kind == TS_Tower && FVector::Dist2D(Sp.At, P) < 300.f + Seg * 0.5f - 40.f) { bInTower = true; break; }
-				if (bInTower) continue;                                           // (the tower's own faces close it)
-				// (a wall piece runs along its +Y, its face toward +X: the parapet's the same; plain stone below, an arrow slit in
-				// one upper segment of three, by a hash of the place: until 2026-11-02 every piece was one with an arched doorway)
-				const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(P.X), FMath::RoundToInt(P.Y))), 0x5117u);
-				const FVector Sc(1.f, (Seg + 12.f) / Wl, 1.f);
-				AddPiece(TEXT("Town.CityWall"), FTransform(FRotator(0, InYaw, 0), P, Sc));
-				AddPiece(Hh % 3 == 0 && Generator->Piece(TEXT("Town.CityWallSlit")) ? FName(TEXT("Town.CityWallSlit")) : FName(TEXT("Town.CityWall")), FTransform(FRotator(0, InYaw, 0), P + FVector(0, 0, Wh), Sc));
-				AddPiece(TEXT("Town.Parapet"), FTransform(FRotator(0, InYaw, 0), P + FVector(0, 0, 2 * Wh), Sc), true);
+				double Tg = 0.0;
+				const double Dg = FMath::PointDistToSegment(FVector(TownGate.X, TownGate.Y, 0), FVector(A, 0.f), FVector(B, 0.f));
+				Tg = FVector2D::DotProduct(FVector2D(TownGate.X, TownGate.Y) - A, Dir);
+				if (Dg < 120.0 && Tg > GHalf && Tg < Le - GHalf) { Runs.Add(FVector2D(0.f, (float)Tg - GHalf)); Runs.Add(FVector2D((float)Tg + GHalf, Le)); }
+				else Runs.Add(FVector2D(0.f, Le));
+			}
+			for (const FVector2D& Run : Runs)
+			{
+				const float RunL = Run.Y - Run.X;
+				if (RunL < 20.f) continue;
+				const int32 Np = FMath::Max(1, FMath::RoundToInt(RunL / Wl));
+				const float Seg = RunL / Np;
+				for (int32 K = 0; K < Np; ++K)
+				{
+					const FVector2D P2 = A + Dir * (Run.X + Seg * (K + 0.5f));
+					const FVector P(P2.X, P2.Y, Z0);
+					bool bInTower = false;
+					for (const FTownSpot& Sp : TownSpots) if (Sp.Kind == TS_Tower && FVector::Dist2D(Sp.At, P) < 300.f + Seg * 0.5f - 40.f) { bInTower = true; break; }
+					if (bInTower) continue;                                           // (the tower's own faces close it)
+					// (a wall piece runs along its +Y, its face toward +X: the parapet's the same; plain stone below, an arrow slit in
+					// one upper segment of three, by a hash of the place: until 2026-11-02 every piece was one with an arched doorway)
+					const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(P.X), FMath::RoundToInt(P.Y))), 0x5117u);
+					const FVector Sc(1.f, (Seg + 12.f) / Wl, 1.f);
+					AddPiece(TEXT("Town.CityWall"), FTransform(FRotator(0, InYaw, 0), P, Sc));
+					AddPiece(Hh % 3 == 0 && Generator->Piece(TEXT("Town.CityWallSlit")) ? FName(TEXT("Town.CityWallSlit")) : FName(TEXT("Town.CityWall")), FTransform(FRotator(0, InYaw, 0), P + FVector(0, 0, Wh), Sc));
+					AddPiece(TEXT("Town.Parapet"), FTransform(FRotator(0, InYaw, 0), P + FVector(0, 0, 2 * Wh), Sc), true);
+				}
+			}
+			// (over the portcullis: the wall's upper part and its parapet across the gate, the portcullis rising into it)
+			if (Runs.Num() == 2 && Generator->bWild)
+			{
+				const FVector2D Pg2 = A + Dir * ((Runs[0].Y + Runs[1].X) * 0.5f);
+				const FVector Pg3(Pg2.X, Pg2.Y, Z0);
+				const float Lz = 530.f, Hz = FMath::Max(2.f * Wh - Lz, 20.f);
+				const FVector Sc(1.f, (2.f * GHalf + 14.f) / Wl, Hz / FMath::Max(Wh + 4.f, 1.f));
+				AddPiece(TEXT("Town.CityWall"), FTransform(FRotator(0, InYaw, 0), Pg3 + FVector(0, 0, Lz), Sc));
+				AddPiece(TEXT("Town.Parapet"), FTransform(FRotator(0, InYaw, 0), Pg3 + FVector(0, 0, 2 * Wh), FVector(1.f, (2.f * GHalf + 14.f) / Wl, 1.f)), true);
 			}
 		}
 		// the gate: its frame across the gap, two leaves shut, a beam barring them, a blocker; open (frame only) when the
 		// wilderness is beyond it (the user's spec of 2026-11-03)
 		const float GYaw = TownGateOut.Rotation().Yaw;
-		// (its pieces run across the gap along their +Y, their faces outward)
-		AddPieceAt(TEXT("Town.Gate"), TownGate, GYaw, 1.f, true);
+		// (its pieces run across the gap along their +Y, their faces outward; with the wilderness beyond it (the list of
+		// 2026-11-04: "the portcullis ... can be walked through ... there should be a way to open the portcullis like a lever")
+		// the portcullis is a door that lifts, with a lever on each side of the gate)
+		if (Generator->bWild) TownGateWorks();
+		else AddPieceAt(TEXT("Town.Gate"), TownGate, GYaw, 1.f, true);
 		if (!Generator->bWild)
 		{
 			AddPieceAt(TEXT("Town.GateLeaves"), TownGate - TownGateOut * 20.f, GYaw, 1.f, true);
@@ -1359,7 +1404,18 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				AddPieceAt(TEXT("Town.CircleFloor"), Sp.At, 0.f, 1.f, true);
 				break;
 			case TS_Still: AddPieceAt(TEXT("Town.StillPot"), Sp.At, Sp.Yaw); AddPieceAt(TEXT("Town.Keg"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(0, 150.f, 0)), Sp.Yaw); AddPieceAt(TEXT("Town.Keg"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(0, -150.f, 0)), Sp.Yaw + 30.f); break;
-			case TS_Mill: AddPieceAt(TEXT("Town.Mill"), Sp.At, Sp.Yaw); break;
+			case TS_Mill:
+				// (the list of 2026-11-04: "the windmill is embedded in the ground while the arms of the windmill turns, hitting
+				// into the ground": the pack's BP_windmill is its sails, shaft and millstones only, its root at the hub (the stones
+				// 14 m under it); it stood on the ground with no mill round it. Now the pack's mill house, the sails where the
+				// pack's own level puts them on it: (23, 318, 1526) in the house's frame, turned half round)
+				if (Generator->Piece(TEXT("Town.MillHouse")))
+				{
+					AddPieceAt(TEXT("Town.MillHouse"), Sp.At, Sp.Yaw);
+					AddPieceAt(TEXT("Town.Mill"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(23.f, 318.f, 1526.f)), Sp.Yaw + 180.f);
+				}
+				else AddPieceAt(TEXT("Town.Mill"), Sp.At, Sp.Yaw);
+				break;
 			case TS_Tent: AddPieceAt(TEXT("Town.Tent"), Sp.At, Sp.Yaw); AddPieceAt(TEXT("Town.Firepit"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(330.f, 0, 0)), 0.f); break;
 			default: break;
 			}
@@ -1440,6 +1496,9 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 		break;
 	case 5:
 	{
+		// (the list of 2026-11-04: the open ground rises and falls; what is placed from here on stands on it)
+		TownLiftPlan();
+		bTownLiftOn = true;
 		// ---- trees and bushes on the free ground away from the roads (never on a road, a doorway's front or the square)
 		TArray<uint8> Road; Road.Init(0, N * N);
 		for (const FIntRect& Rr : TownRoads) for (int32 X = Rr.Min.X; X < Rr.Max.X; ++X) for (int32 Y = Rr.Min.Y; Y < Rr.Max.Y; ++Y) if (In(FIntPoint(X, Y))) Road[Idx(FIntPoint(X, Y))] = 1;
@@ -1478,15 +1537,21 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			else if (Ns == TEXT("Town.Bush")) TownGreens.Add(FVector(P.X, P.Y, 4.f));
 			if (bInside && Nm.ToString().Contains(TEXT("Tree"))) Blocked[Idx(T)] = 1;
 		}
+		bTownLiftOn = false;
 		break;
 	}
 	case 6:
 		// ---- the short grass and the small bushes (the third list: "short grass in more places where there aren't any roads,
 		// more small bushes")
+		if (TownLiftW.Num() == 0) TownLiftPlan();
+		bTownLiftOn = true;
 		TownGrass(R);
+		bTownLiftOn = false;
 		break;
 	case 7:
 		// ---- the ground itself
+		if (TownLiftW.Num() == 0) TownLiftPlan();
+		bTownLiftOn = false;
 		TownGround();
 		break;
 	default: break;
@@ -1551,7 +1616,7 @@ void ARDSection::TownLife(FRandomStream& R)
 	};
 	// (a fence along a world rectangle's edges (axis aligned), with a gap of GapW in the middle of edge GapSide (-1 none): 0 -X, 1
 	// +X, 2 -Y, 3 +Y)
-	auto FenceRect = [&](const FVector& C, const FVector2D& H, FName Piece, int32 GapSide, float GapW)
+	auto FenceRect = [&](const FVector& C, const FVector2D& H, FName Piece, int32 GapSide, float GapW, bool bGate)
 	{
 		const FRDPiece* Fp = Generator->Piece(Piece);
 		if (!Fp) return;
@@ -1567,12 +1632,20 @@ void ARDSection::TownLife(FRandomStream& R)
 			const int32 Nseg = FMath::Max(1, FMath::RoundToInt(Len / Fl));
 			const float Sl = Len / Nseg;
 			const float FYaw = FMath::RadiansToDegrees(FMath::Atan2(D.Y, D.X)) - 90.f;
+			float Gu0 = 1e9f, Gu1 = -1e9f;
 			for (int32 J = 0; J < Nseg; ++J)
 			{
 				const float U = (J + 0.5f) * Sl;
-				if (SideOf[K] == GapSide && FMath::Abs(U - Len * 0.5f) < GapW * 0.5f + Sl * 0.25f) continue;
+				if (SideOf[K] == GapSide && FMath::Abs(U - Len * 0.5f) < GapW * 0.5f + Sl * 0.25f) { Gu0 = FMath::Min(Gu0, U - Sl * 0.5f); Gu1 = FMath::Max(Gu1, U + Sl * 0.5f); continue; }
 				const FVector2D Q = P0 + D * U;
 				AddPiece(Piece, FTransform(FRotator(0, FYaw, 0), FVector(Q.X, Q.Y, C.Z), FVector(1.f, Sl / Fl * 1.02f, 1.f)));
+			}
+			// (the list of 2026-11-04: "there should be a door for the animal pens that can be opened and closed": the gap's
+			// fence segment on a hinge at its end)
+			if (bGate && Gu1 > Gu0)
+			{
+				const FVector2D Hg = P0 + D * Gu0;
+				TownPenGate(FVector(Hg.X, Hg.Y, C.Z), FYaw, Gu1 - Gu0);
 			}
 		}
 	};
@@ -1614,7 +1687,7 @@ void ARDSection::TownLife(FRandomStream& R)
 				{
 					FVector C; FVector2D Hf; RectWorld(T0, Ow, Oh, C, Hf);
 					const FVector2D Bed = Hf - FVector2D(25.f, 25.f);
-					FenceRect(C, Bed, TEXT("Town.GardenFence"), Ws, 150.f);
+					FenceRect(C, Bed, TEXT("Town.GardenFence"), Ws, 150.f, false);
 					const FVector In_ = -SideDir(Ws), Al(In_.Y, -In_.X, 0.f);
 					const float Depth = (Ws < 2 ? Bed.X : Bed.Y) * 2.f, Width = (Ws < 2 ? Bed.Y : Bed.X) * 2.f;
 					const FVector Edge = C - In_ * (Depth * 0.5f);
@@ -1633,6 +1706,9 @@ void ARDSection::TownLife(FRandomStream& R)
 						}
 					}
 					FTownGarden Gd; Gd.At = C; Gd.Half = Bed; Gd.Yaw = 0.f; Gd.Plants = Plants;
+					// (what grows in it: harvested with F (the list of 2026-11-04: "gardens can be lootable with ingredients"))
+					for (const int32 Kc : { K1, K2, K3 }) Gd.Crops.AddUnique((uint8)Kc);
+					if (Depth > 300.f) Gd.Crops.AddUnique(3);
 					TownGardens.Add(Gd);
 					BlockRect(T0, Ow, Oh);
 					// (kneeling on the path just inside the way in, the first row before her)
@@ -1655,7 +1731,7 @@ void ARDSection::TownLife(FRandomStream& R)
 				{
 					FVector C; FVector2D Hf; RectWorld(T0, Ow, Oh, C, Hf);
 					const FVector2D In2 = Hf - FVector2D(30.f, 30.f);
-					FenceRect(C, In2, TEXT("Town.PenFence"), -1, 0.f);
+					FenceRect(C, In2, TEXT("Town.PenFence"), Ws, 100.f, true);
 					const FVector Out = SideDir(Ws), Al(Out.Y, -Out.X, 0.f);
 					const float Half = Ws < 2 ? In2.X : In2.Y, HalfW = Ws < 2 ? In2.Y : In2.X;
 					AddPieceAt(TEXT("Town.Trough"), C + Out * (Half - 60.f) + Al * (HalfW * 0.35f), Out.Rotation().Yaw + 90.f);
@@ -1844,6 +1920,7 @@ void ARDSection::TownGround()
 	// the roads' surfaces raised and sunk a few cm (seen only: everyone walks on the flat floor), their normals from the heights
 	UMaterialInterface* Mat = Generator->TownGroundMaterial;
 	const float M = Generator->TileSize;
+	const float TownCobbleHalfWidth = Generator->TownCobbleHalfWidth;
 	const int32 Sub = 3;                          // vertices a tile
 	const int32 Nv = N * Sub + 1;
 	const float St = M / Sub;
@@ -1851,6 +1928,7 @@ void ARDSection::TownGround()
 	const uint32 Sd = (uint32)Seed;
 	TArray<FVector> V; TArray<int32> Tri; TArray<FVector> Nrm; TArray<FVector2D> UV; TArray<FLinearColor> Col; TArray<FProcMeshTangent> Tan;
 	V.SetNumUninitialized(Nv * Nv); Col.SetNumUninitialized(Nv * Nv); UV.SetNumUninitialized(Nv * Nv); Nrm.SetNumUninitialized(Nv * Nv);
+	TArray<uint8> Sunk; Sunk.Init(0, Nv * Nv);
 	// (the earth roads' segments, local cm, in buckets by tile; the road on out of the gate among them)
 	struct FSeg { FVector2D A, B; float Hw; };
 	TArray<FSeg> Segs;
@@ -1873,9 +1951,23 @@ void ARDSection::TownGround()
 		const int32 Y0 = FMath::Max(0, FMath::FloorToInt((FMath::Min(S_.A.Y, S_.B.Y) - Rr) / M)), Y1 = FMath::Min(N - 1, FMath::FloorToInt((FMath::Max(S_.A.Y, S_.B.Y) + Rr) / M));
 		for (int32 X = X0; X <= X1; ++X) for (int32 Y = Y0; Y <= Y1; ++Y) Bk[Idx(FIntPoint(X, Y))].Add(Si);
 	}
-	// (the cobbled rectangles, local cm)
-	TArray<FBox2D> Cob;
-	for (const FIntRect& Rr : TownRoads) Cob.Add(FBox2D(FVector2D(Rr.Min.X * M, Rr.Min.Y * M), FVector2D(Rr.Max.X * M, Rr.Max.Y * M)));
+	// (the cobbled rectangles, local cm. The list of 2026-11-04: "the cobblestone streets should be at most 3 people wide": a
+	// street (a road three tiles across or less: the main road, the cross road) is cobbled in a strip 2.6 m wide down its middle,
+	// the rest of its tiles trodden earth; the square and the castle's forecourt are paved whole)
+	TArray<FBox2D> Cob, StreetEarth;
+	for (const FIntRect& Rr : TownRoads)
+	{
+		const FBox2D Bx(FVector2D(Rr.Min.X * M, Rr.Min.Y * M), FVector2D(Rr.Max.X * M, Rr.Max.Y * M));
+		const FVector2D Sz = Bx.GetSize();
+		if (FMath::Min(Sz.X, Sz.Y) <= 3.f * M + 1.f)
+		{
+			const FVector2D Ct = Bx.GetCenter();
+			const FVector2D Hf = Sz.X >= Sz.Y ? FVector2D(Sz.X * 0.5f, TownCobbleHalfWidth) : FVector2D(TownCobbleHalfWidth, Sz.Y * 0.5f);
+			Cob.Add(FBox2D(Ct - Hf, Ct + Hf));
+			StreetEarth.Add(Bx);
+		}
+		else Cob.Add(Bx);
+	}
 	Cob.Add(FBox2D(FVector2D(TownSquare.Min.X * M, TownSquare.Min.Y * M), FVector2D(TownSquare.Max.X * M, TownSquare.Max.Y * M)));
 	// (the doors' aprons: the tile out of each door and the one past it)
 	TArray<FVector2D> Aprons;
@@ -1919,6 +2011,13 @@ void ARDSection::TownGround()
 			// the lane inside the wall: two tiles' earth
 			if (bInTown && TownBorder.Num() >= 3) Dd = FMath::Min(Dd, TownBorderDist(Wp) - 2.f * M);
 			for (const FVector2D& Ap : Aprons) if (FMath::Abs(Ap.X - P.X) < 250.f && FMath::Abs(Ap.Y - P.Y) < 250.f) Dd = FMath::Min(Dd, FVector2D::Distance(Ap, P) - 170.f);
+			// (a street's tiles beside its cobbled strip: trodden earth)
+			for (const FBox2D& Bx : StreetEarth)
+			{
+				const float Dx = FMath::Max(Bx.Min.X - P.X, P.X - Bx.Max.X), Dy = FMath::Max(Bx.Min.Y - P.Y, P.Y - Bx.Max.Y);
+				if (Dx > 200.f || Dy > 200.f) continue;
+				Dd = FMath::Min(Dd, (Dx > 0.f || Dy > 0.f) ? FMath::Sqrt(FMath::Square(FMath::Max(Dx, 0.f)) + FMath::Square(FMath::Max(Dy, 0.f))) : FMath::Max(Dx, Dy));
+			}
 			const float Earth = FMath::Clamp(0.5f - (Dd + Rag) / 60.f, 0.f, 1.f);
 			// the cobbles: inside a rectangle, its edges ragged a little less
 			float Dc = 1e9f;
@@ -1949,10 +2048,13 @@ void ARDSection::TownGround()
 			Col[I * Nv + J] = C;
 			// the height: bumps and ruts in the earth (up to +-5 cm), worn stones in the cobbles (+-2.5 cm)
 			float Z = UnderFloor(P) ? -40.f : 0.f;
+			Sunk[I * Nv + J] = Z < 0.f ? 1 : 0;
 			if (Z == 0.f)
 			{
 				Z += C.R * ((RDTFbm(P.X / 70.f, P.Y / 70.f, Sd + 9u) - 0.5f) * 10.f - 1.5f);
 				Z += C.G * (RDTNoise(P.X / 28.f, P.Y / 28.f, Sd + 13u) - 0.5f) * 5.f;
+				// (the open ground's rise and fall: 0 where anything stands or is walked to)
+				Z += TownLiftAt(Wp);
 			}
 			V[I * Nv + J] = FVector(P.X, P.Y, Z);
 			UV[I * Nv + J] = FVector2D(P.X / 400.f, P.Y / 400.f);
@@ -1963,8 +2065,9 @@ void ARDSection::TownGround()
 		{
 			const float Zx0 = V[FMath::Max(I - 1, 0) * Nv + J].Z, Zx1 = V[FMath::Min(I + 1, Nv - 1) * Nv + J].Z;
 			const float Zy0 = V[I * Nv + FMath::Max(J - 1, 0)].Z, Zy1 = V[I * Nv + FMath::Min(J + 1, Nv - 1)].Z;
-			// (the sunk floors' steep sides are left flat-lit)
-			if (FMath::Abs(Zx1 - Zx0) > 20.f || FMath::Abs(Zy1 - Zy0) > 20.f) { Nrm[I * Nv + J] = FVector::UpVector; continue; }
+			// (the sunk floors' steep sides are left flat-lit; the open ground's slopes shade)
+			const bool bEdge = Sunk[FMath::Max(I - 1, 0) * Nv + J] != Sunk[FMath::Min(I + 1, Nv - 1) * Nv + J] || Sunk[I * Nv + FMath::Max(J - 1, 0)] != Sunk[I * Nv + FMath::Min(J + 1, Nv - 1)];
+			if (bEdge) { Nrm[I * Nv + J] = FVector::UpVector; continue; }
 			Nrm[I * Nv + J] = FVector(-(Zx1 - Zx0) / (2.f * St), -(Zy1 - Zy0) / (2.f * St), 1.f).GetSafeNormal();
 		}
 	Tri.Reserve((Nv - 1) * (Nv - 1) * 6);
@@ -1983,14 +2086,45 @@ void ARDSection::TownGround()
 	AddInstanceComponent(G);
 	G->CreateMeshSection_LinearColor(0, V, Tri, Nrm, UV, Col, Tan, false);
 	if (Mat) G->SetMaterial(0, Mat);
-	// (the ground is seen only: everyone walks on a flat invisible floor at its level, as in the village; under the buildings
-	// the drawn ground is sunk, and their own floors stand on this one)
+	// (the drawn ground is seen only: under the buildings it is sunk, and their own floors stand on the walked ground. Until
+	// 2026-11-04 everyone walked on a flat invisible floor at its level, as in the village; since the list of that day the
+	// open ground rises and falls, and the walked ground is a mesh of its own following it, a vertex every 1.5 m, without the
+	// cobbles' and ruts' few cm: TownLiftAt is smooth over metres)
 	G->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	{
+		const int32 SubW = 2, NvW = N * SubW + 1;
+		const float StW = M / SubW;
+		TArray<FVector> Vw; Vw.SetNumUninitialized(NvW * NvW);
+		for (int32 I = 0; I < NvW; ++I)
+			for (int32 J = 0; J < NvW; ++J)
+			{
+				const FVector2D P(I * StW, J * StW);
+				Vw[I * NvW + J] = FVector(P.X, P.Y, TownLiftAt(P + O2));
+			}
+		TArray<int32> Tw; Tw.Reserve((NvW - 1) * (NvW - 1) * 6);
+		for (int32 I = 0; I < NvW - 1; ++I)
+			for (int32 J = 0; J < NvW - 1; ++J)
+			{
+				const int32 A = I * NvW + J, B = (I + 1) * NvW + J, C = (I + 1) * NvW + J + 1, D = I * NvW + J + 1;
+				Tw.Append({ A, C, B, A, D, C });
+			}
+		UProceduralMeshComponent* Wk = NewObject<UProceduralMeshComponent>(this, TEXT("TownWalk"), RF_Transactional);
+		Wk->SetupAttachment(RootComponent);
+		Wk->SetMobility(EComponentMobility::Static);
+		Wk->bUseComplexAsSimpleCollision = true;
+		Wk->bUseAsyncCooking = false;
+		Wk->RegisterComponent();
+		AddInstanceComponent(Wk);
+		Wk->CreateMeshSection_LinearColor(0, Vw, Tw, TArray<FVector>(), TArray<FVector2D>(), TArray<FLinearColor>(), TArray<FProcMeshTangent>(), true);
+		Wk->SetCollisionProfileName(TEXT("BlockAll"));
+		Wk->SetVisibility(false); Wk->SetHiddenInGame(true); Wk->SetCastShadow(false);
+	}
+	// (a floor far under it all, to catch a fall)
 	UBoxComponent* Fl = NewObject<UBoxComponent>(this, TEXT("TownFloor"), RF_Transactional);
 	Fl->SetupAttachment(RootComponent);
 	Fl->SetMobility(EComponentMobility::Static);
 	Fl->SetBoxExtent(FVector(N * M * 0.5f, N * M * 0.5f, 20.f));
-	Fl->SetRelativeLocation(FVector(N * M * 0.5f, N * M * 0.5f, -20.f));
+	Fl->SetRelativeLocation(FVector(N * M * 0.5f, N * M * 0.5f, -620.f));
 	Fl->SetCollisionProfileName(TEXT("BlockAll"));
 	Fl->SetHiddenInGame(true);
 	Fl->RegisterComponent();
@@ -2317,6 +2451,18 @@ TArray<FString> ARDSection::GetTownShapeLines() const
 void ARDSection::AddSignText(const FTransform& SignT, const FString& Text)
 {
 	if (!bBuildStatic || Text.IsEmpty()) return;
+	// (the list of 2026-11-04: "they often fall outside of the sign's boundaries. the font should also be an appropriate medieval
+	// one": the board measured (x 58.5 to 122.3, z -114.7 to -64.3, its faces 3.1 cm out of its middle), each trade's words
+	// painted in Almendra by bs_signs.py to fit 58 x 42 cm on a plane against each face (890's "Town.SignFace_<WORDS>"))
+	FString Key;
+	for (const TCHAR Ch : Text) if (FChar::IsAlnum(Ch)) Key.AppendChar(Ch);
+	const FName Face(*FString::Printf(TEXT("Town.SignFace_%s"), *Key));
+	if (Generator->Piece(Face))
+	{
+		for (int32 Side = -1; Side <= 1; Side += 2)
+			AddPiece(Face, FTransform(FRotator(0, Side > 0 ? 0.f : 180.f, 0), FVector(90.4f, Side * 3.35f, -89.5f)) * SignT, true);
+		return;
+	}
 	// (the tavern sign's board hangs under its bracket: about x 30-146, z -115 to -20 in the piece's frame, 6 cm thick along y;
 	// the letters on each face, gold paint on the dark wood)
 	for (int32 Side = -1; Side <= 1; Side += 2)

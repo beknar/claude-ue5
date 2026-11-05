@@ -192,7 +192,7 @@ void ARDDungeonGenerator::BuildWildChunk(const TSharedPtr<FRDWChunkData, ESPMode
 	if (!C) return;
 	C->Coord = D->Coord;
 	C->Ground->bUseAsyncCooking = !D->bSyncCollision;
-	C->Ground->CreateMeshSection_LinearColor(0, D->V, D->T, D->N, D->UV0, D->UV1, D->UV2, TArray<FVector2D>(), D->C, D->Tan, true);
+	C->Ground->CreateMeshSection_LinearColor(0, D->V, D->T, D->N, D->UV0, D->UV1, D->UV2, D->UV3, D->C, D->Tan, true);
 	if (WildGroundMaterial) C->Ground->SetMaterial(0, WildGroundMaterial);
 	C->Triangles = D->T.Num() / 3;
 	UMaterialInterface* Wm[4] = { WildWaterMaterial, WildSeaMaterial ? WildSeaMaterial.Get() : WildWaterMaterial.Get(), WildSpringMaterial ? WildSpringMaterial.Get() : WildWaterMaterial.Get(), WildLavaMaterial };
@@ -233,6 +233,7 @@ void ARDDungeonGenerator::BuildWildChunk(const TSharedPtr<FRDWChunkData, ESPMode
 			H->SetCastShadow(F.Kind != TEXT("grass") && F.Kind != TEXT("flower") && F.Kind != TEXT("reed"));
 			H->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			if (F.bCollision) H->ComponentTags.Add(TEXT("rdw_col"));
+			for (int32 Sl = 0; Sl < F.Materials.Num(); ++Sl) if (F.Materials[Sl]) H->SetMaterial(Sl, F.Materials[Sl]);
 			H->RegisterComponent();
 			C->Foliage.Add(H);
 		}
@@ -301,6 +302,7 @@ void ARDDungeonGenerator::SetWildNear(ARDWildChunk* C, bool bNear)
 			H->SetCullDistances(FMath::RoundToInt(F.CullDistance * 0.8f), FMath::RoundToInt(F.CullDistance));
 			H->SetCastShadow(false);
 			H->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			for (int32 Sl = 0; Sl < F.Materials.Num(); ++Sl) if (F.Materials[Sl]) H->SetMaterial(Sl, F.Materials[Sl]);
 			H->RegisterComponent();
 			C->NearFoliage.Add(H);
 		}

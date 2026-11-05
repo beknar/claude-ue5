@@ -282,6 +282,10 @@ public:
 	// for the inventory; W / S choose a recipe, Enter makes it, F, I, Tab, Backspace or B close it.
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetCraftingOpen(bool bOpen);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsCraftingOpen() const { return bCraftOpen; }
+	/** the list of 2026-11-04: where the panel is opened: none an anvil, "Oven" a town kitchen's oven (its recipes only) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetCraftStation(FName Station) { CraftStation = Station; CraftCursor = 0; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") FName GetCraftStation() const { return CraftStation; }
+	FName CraftStation;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetCraftCursor() const { return CraftCursor; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveCraftCursor(int32 Step);
 	/** the recipes: "recipe|<item>|<1 she can make it>|<part label>:<have>:<need>;..." */

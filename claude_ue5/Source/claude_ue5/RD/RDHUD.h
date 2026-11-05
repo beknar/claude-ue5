@@ -35,6 +35,9 @@ public:
 	virtual void DrawHUD() override;
 	/** tests: the painted pieces (the generator's UIArt) drawn in the last frame */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") TArray<FName> GetArtDrawn() const { return ArtDrawn; }
+	/** the wilderness's minimap: the region's line it drew under it (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetBiomeLabelDrawn() const { return BiomeLabelDrawn; }
+	FString BiomeLabelDrawn;
 	/** mistward: where the frame rate was drawn last frame (canvas pixels, min and max; zero: not drawn) (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FVector4 GetFpsBox() const { return FVector4(FpsBox.Min.X, FpsBox.Min.Y, FpsBox.Max.X, FpsBox.Max.Y); }
 	FBox2D FpsBox = FBox2D(FVector2D::ZeroVector, FVector2D::ZeroVector);

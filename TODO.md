@@ -9,7 +9,7 @@ What is still to be tested and done, and the known limits. Written 2026-11-03 fo
 Built and compiled, but no test has run it yet:
 
 - [ ] **The hero menu's CONTINUE** (C or the pad's X): it loads the newest of the two saves. Test: a save written, the menu opened, CONTINUE, and she arrives where the save says.
-- [ ] **The Escape menu's Load page loading a game:** the test checked the page's lines (which save, where, when); the load itself was tested through the code, not through the page's choice.
+- [ ] **The Escape menu's Load page loading a game:** the test checked the page's lines (which save, where, when; since the list of 2026-11-04 every named save among them); the load itself was tested through the code, not through the page's choice.
 - [ ] **A load into another town:** she saved in Vel Morrath (or Ashenreach, or Graymourne), and the load builds that town first and puts her in it.
 - [ ] **The autosaves on Quit and before the Mistgate** (`quit`, `castle`): the other autosaves (a place found, a town entered, before and after a journey) have run in the tests.
 - [ ] **Coming back to life in the nearest found town** after a death in the wilds (`WildRespawnAt`): the nearest found town, not the nearest town, and it is loaded at once.
@@ -17,6 +17,15 @@ Built and compiled, but no test has run it yet:
 - [ ] **Ashenreach and Graymourne visited:** built as she nears them, their people their own, the maps switching in their walls (only Vel Morrath has been visited in a test).
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
 - [ ] **The packaged game with the wilderness:** a Shipping build of `brokenspire` has not been made since the wilderness was added (worker threads, transient map textures and the save all behave differently packaged); then a walk out of the gate, a journey and a save and load in it, and its memory over a long walk.
+
+## The list of 2026-11-04 ([docs/improvements7.txt](docs/improvements7.txt))
+
+Built and tested (`884 list7`, `signs`, `gate`; `888 sky7`, `life7`, `ground7`, `music7`, `save`); still to test:
+
+- [ ] **The weather over a long session:** the tests set each weather; the game's own changes every 4 to 9 minutes (the next one's time is checked) have not been watched for an hour.
+- [ ] **The music's change after 5 to 10 minutes:** tested by asking for the next track at once and reading when the one after is due; no test has waited the minutes.
+- [ ] **A named save loaded from the Load page,** and two saves of the same name (the second overwrites the first).
+- [ ] **The town's rise and fall in the other towns** (Vel Morrath, Ashenreach, Graymourne): the code is the same; only Brokenspire was measured.
 
 ## The final boss (Aurorim, 2026-11-03)
 
@@ -42,7 +51,9 @@ What the wilderness does not do yet:
 
 - **Caves have no inside:** a cave is its mouth among rocks.
 - **Villages, camps and lone houses are empty:** their houses, tents and props stand, but nobody lives in them, and their houses are single pack pieces with no working doors, furniture or containers.
-- **Monsters live only at spawn points and lairs:** the open land between places has no creatures, wandering monsters or animals.
+- **Monsters live only at spawn points and lairs:** between places there are only the animals that flee (deer, wolves, squirrels, hares: since the list of 2026-11-04), which never fight; no wandering monsters.
+- **Birds and insects are effects round her** (Niagara flocks and swarms), not creatures: nothing hunts them and they do not land.
+- **The weather has no lightning, puddles or wet ground:** the rain and snow are falling drops round the camera, the storm a darker sky, more rain and stronger wind.
 - **No swimming:** she wades rivers and lakes on a floor under the water; an invisible wall keeps her out of the sea. The lava does no harm.
 - **Long walks:** the towns are 85 to 157 km apart, hours on foot; fast travel takes her to a town once she has found it.
 - **The small towns are simpler than Brokenspire:** no elder, scholar or captain, no quests of their own (their boards hold only old notices), a keep with no Mistgate.

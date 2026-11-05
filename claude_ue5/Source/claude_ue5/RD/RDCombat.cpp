@@ -1259,6 +1259,8 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 	{
 		// (mistward, the list of 2026-10-30: a recipe of a tier not yet open, or a scroll her hero does not read, is not offered)
 		if (!Generator->RecipeRefusal(Rc).IsEmpty()) continue;
+		// (the list of 2026-11-04: an oven bakes, an anvil makes the rest)
+		if (Rc.Station != CraftStation) continue;
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		TMap<FName, int32> Take;          // (the recipe as it is, not looked up again by name: the PR review's find, every frame)
@@ -1266,6 +1268,7 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 	}
 	if (Generator->bAlphabeticalCrafting) Out.Sort(ByName);
 	const int32 NumRecipes = Out.Num();
+	if (!CraftStation.IsNone()) return Out;          // (an oven breaks nothing down)
 	// (mistward: armour (bArmourStacks) and shields she carries break down too: "breakdown|<name>|g<name>|<1 worn>|...")
 	for (const FName& N : CarriedOrder)
 	{
@@ -1413,7 +1416,7 @@ bool URDCombatComponent::Craft(FName Item)
 	for (const TPair<FName, int32>& T : Take) RemoveCarried(T.Key, T.Value);
 	AddItem(Item, 1);
 	++ItemsCrafted;
-	SetMessage(FString::Printf(TEXT("You make %s at the anvil"), *One));
+	SetMessage(FString::Printf(TEXT("You %s %s at the %s"), Rc.Station == TEXT("Oven") ? TEXT("bake") : TEXT("make"), *One, Rc.Station == TEXT("Oven") ? TEXT("oven") : TEXT("anvil")));
 	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
 	UE_LOG(LogTemp, Log, TEXT("RDCRAFT %s made (%d crafted)"), *Item.ToString(), ItemsCrafted);
 	return true;

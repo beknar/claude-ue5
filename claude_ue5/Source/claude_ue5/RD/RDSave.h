@@ -22,6 +22,8 @@ public:
 	UPROPERTY() FVector At = FVector::ZeroVector;
 	UPROPERTY() float Yaw = 0.f;
 	UPROPERTY() FString Why;
+	/** the name she gave it (the list of 2026-11-04; "" an autosave or an older save) */
+	UPROPERTY() FString Name;
 	/** where, in words ("Brokenspire", "the wilds: temperate aspen near Ashenreach") */
 	UPROPERTY() FString Place;
 	/** made in a town (Brokenspire's level): she is put back at At when it loads. A castle's save puts her at the castle's
@@ -32,8 +34,10 @@ public:
 
 	/** the game instance filled from the slot and the level opened (she is put where she was when it has loaded) */
 	static bool LoadAndOpen(UObject* Ctx, const FString& Slot);
-	/** "<date>|<level>|<place>|<hero>|<why>" of a slot, or "" (read again only when the slot's file changes) */
+	/** "<date>|<level>|<place>|<hero>|<why>|<name>" of a slot, or "" (read again only when the slot's file changes) */
 	static FString Info(const FString& Slot);
+	/** the slots on disk ("autosave", "save", "save_<name>"...), newest first */
+	static TArray<FString> AllSlots();
 	/** the slot with the newest save, or "" (from the same cached reads) */
 	static FString Latest();
 	/** a slot's info and time, read from the file once per change of its timestamp */

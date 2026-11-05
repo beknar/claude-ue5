@@ -10,6 +10,8 @@ paths:
   - "claude_ue5/Source/claude_ue5/RD/RDTownDay*"
   - "pipeline/blender_numpy/bs_*.py"
   - "claude_ue5/SourceArt/brokenspire/**"
+  - "claude_ue5/Source/claude_ue5/RD/RDShow7*"
+  - "pipeline/unreal/890_*"
 ---
 
 # Brokenspire (`881`-`884`, `RD/RDTown*.cpp`, `docs/brokenspire.txt`, `docs/levels/brokenspire.md`)
@@ -88,3 +90,14 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 
 - `rdm4_ui_gen.py` creates its board on the InvokeAI server when the board does not exist, and the server answered 500 to that: the batch went to the existing board "claude-ue5 level4 UI".
 - `rdm4_ui_cut.py` sizes its export by kind (`SIZES`): the map's pictures are of kind `icon` (their style is the map's ink-and-wash, named under `icon` in `map_art.json`), the papyrus a `texture`.
+
+## The list of 2026-11-04 (`890`, `RD/RDTown7.cpp`, `RD/RDShow7.cpp`, `docs/improvements7.txt`)
+
+- **New interactive things keep off the plan's streams**: the levers, pen gates, food and garden crops are made with `AddPivot` / `AddMesh` from hash-seeded streams, so the saved build's containers stay where they were.
+- **The ground's rise and fall is drawn, grown on and walked on**: `TownLiftAt` lifts the pieces of the open ground (`AddPiece` while `bTownLiftOn`), the drawn ground and an invisible walking mesh (`TownWalk`, 1.5 m); `TownFloor` sinks to -620 cm as a net. Anything within a tile of a building, road, door, place of work, garden, pen or the gate stays at 0 (measured: 0 under every building).
+- **A probe put high over the town falls**: a picture taken 22 m up over the square dropped her on landing and fall damage killed her. Put her on the ground (`TownLiftAt`) and lift the camera instead.
+- **Every play is a new town**: a pilot finds what it shows by what the town has (the face planes of the signs, the gates' doors, the gardens, a road crossing a ring round the gate), never by coordinates; rehearse it in several towns (eight rehearsals, eight towns: each found a different failure).
+- **A sign's own transform misled the pilot twice** (in front of a wall, behind a corner): aim at what is seen, the face planes (`MI_BS_Sign_*`, the engine's plane: its face is its local +Z), and check the camera's line from the face is clear.
+- **F takes the nearest thing**: at a pen a townsperson standing nearer took F ("bark") instead of the gate; a pilot opens a door by its index (`PushDoor`).
+- **Margins measured, not guessed**: walking at a pig from 1.7 m she stops 0.58 to 0.66 m from its middle; the shut portcullis stops her 0.40 to 0.57 m before the gate's line. The first limits (0.6 m, 0.4 m) failed in one town each with her blocked.
+- **`HighResShot` in play includes the HUD** (the captions, the minimap): a rehearsal's pictures show what the reel will.

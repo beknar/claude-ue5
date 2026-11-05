@@ -116,6 +116,8 @@ private:
 	FVector FaceAt = FVector::ZeroVector;
 	int32 LinesSaid = 0, NoPathTrips = 0;
 	bool bWalkClip = false;
+	/** its height over the ground where the ground is level (the list of 2026-11-04: the open ground rises and falls) */
+	float FloorZ0 = -1e9f;
 	void SetClip(bool bWalk);
 	int32 HomeBld = -1;
 	FVector HomeIn = FVector::ZeroVector;
@@ -145,6 +147,7 @@ protected:
 private:
 	UPROPERTY() TObjectPtr<USceneComponent> Root;
 	UPROPERTY() TObjectPtr<USkeletalMeshComponent> Body;
+	UPROPERTY() TObjectPtr<class UBoxComponent> Collider;
 	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Gen;
 	FRandomStream R;
 	FVector PenAt = FVector::ZeroVector, To = FVector::ZeroVector;

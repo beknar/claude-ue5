@@ -326,6 +326,15 @@ def step_gate():
     if not gate or not sq: step_result("gate", False, error="no gate or square"); return
     d = V(sq.x - gate.x, sq.y - gate.y, 0); n = math.hypot(d.x, d.y); d = V(d.x / n, d.y / n, 0)
     inside = V(gate.x + d.x * 350, gate.y + d.y * 350, 0)
+    # (the list of 2026-11-04: the portcullis is raised with a lever by the gate first)
+    S = g.get_section(unreal.IntPoint(0, 0))
+    if S and not S.is_portcullis_up():
+        lv = [str(l).split("|") for l in S.get_town_improve_lines() if str(l).startswith("lever|")]
+        if lv:
+            q = min(lv, key=lambda q: math.hypot(float(q[2]) - inside.x, float(q[3]) - inside.y))
+            put(V(float(q[2]) + d.x * 110, float(q[3]) + d.y * 110, 0)); yield from wait(0.4)
+            res["lever"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(11.0)
+        res["raised"] = S.is_portcullis_up()
     put(inside, yaw=math.degrees(math.atan2(-d.y, -d.x))); yield from wait(0.5)
     res["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 600.0))
     t0 = time.time()
@@ -494,7 +503,22 @@ def step_save():
     # the menu's lines: Save, Load, its page of two
     g.set_menu_open(True); yield from rwait(0.3)
     res["menu"] = [str(l) for l in g.get_menu_lines()]
+    # (the list of 2026-11-04: "there is no way to name your own save": the Save page, a name typed with the keys, Enter)
+    save_i = next(i for i, l in enumerate(res["menu"]) if "Save the game" in l)
+    g.activate_menu_line(save_i); yield from rwait(0.3)
+    res["save_page"] = [str(l) for l in g.get_menu_lines()]
+    g.set_save_name_text("Test Sav")
+    for k in ("E", "SpaceBar", "Seven"): yield from press(k)
+    res["typed"] = str(g.get_save_name_text())
+    yield from press("Enter"); yield from rwait(0.5)
+    res["slots"] = [str(s) for s in g.get_save_slots()]
+    g.set_menu_open(False); yield from rwait(0.2); g.set_menu_open(True); yield from rwait(0.2)
+    load_i = next(i for i, l in enumerate([str(x) for x in g.get_menu_lines()]) if "Load a game" in l)
+    g.activate_menu_line(load_i); yield from rwait(0.3)
+    res["load_page"] = [str(l) for l in g.get_menu_lines()]
     g.set_menu_open(False)
+    res["named_ok"] = res["typed"] == "Test Save 7" and any(s.startswith("save_test_save_7|Test Save 7|") for s in res["slots"]) and any("Test Save 7" in l for l in res["load_page"]) \
+        and any(l.startswith("text|Name|") for l in res["save_page"])
     # something changed after the save, then the save loaded
     g.add_gold(250, "test"); g.wild_put_her(-1000.0, 1000.0); yield from rwait(1.0)
     G["travel_until"] = time.time() + 60
@@ -511,9 +535,259 @@ def step_save():
     res["found_after"] = state()["found"]; res["revealed_after"] = state()["revealed"]; res["save_state"] = save_state()
     G["travel_until"] = 0
     quiet(False)
-    ok = (res["saved"] and res["info"] and any("Save the game" in l for l in res["menu"]) and any("Load a game" in l for l in res["menu"]) and res["load"]
+    ok = (res["saved"] and res["info"] and any("Save the game" in l for l in res["menu"]) and any("Load a game" in l for l in res["menu"]) and res["load"] and res["named_ok"]
           and res["back_m"] < 10 and res["gold_after"] == res["gold_before"] and res["found_after"] >= res["found_before"] and res["revealed_after"] >= res["revealed_before"] * 0.95)
     step_result("save", ok, **res)
+
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-04
+SHOT_DIR = SHOTS
+def png_stats(path, box):
+    """mean and standard deviation of the luma (0-255) of a part of a PNG (zlib only: the editor's Python has no image library)"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos + 8 <= len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+        elif typ == b"IEND": break
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
+    vals = []; i = 0
+    for y in range(h):
+        f = raw[i]; line = bytearray(raw[i + 1:i + 1 + stride]); i += 1 + stride
+        for x in range(stride):
+            a = line[x - bpp] if x >= bpp else 0; b = prev[x]; c = prev[x - bpp] if x >= bpp else 0
+            if f == 1: line[x] = (line[x] + a) & 255
+            elif f == 2: line[x] = (line[x] + b) & 255
+            elif f == 3: line[x] = (line[x] + (a + b) // 2) & 255
+            elif f == 4:
+                p_ = a + b - c; pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c)
+                line[x] = (line[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        prev = line
+        if y0 <= y < y1 and y % 4 == 0:
+            for x in range(x0, x1, 4):
+                o = x * bpp; vals.append(0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2])
+    m = sum(vals) / max(len(vals), 1)
+    return m, (sum((v - m) ** 2 for v in vals) / max(len(vals), 1)) ** 0.5
+def sky_state():
+    p = str(G["gen"].get_sky_state()).split("|")
+    k = ["weather", "cover", "rain", "wind", "fog", "snowing", "changes", "next_s", "clouds", "stars", "moon", "fog_cutoff_m", "rain_on", "snow_on", "wind_fx"]
+    return {a: (b if a == "weather" else float(b)) for a, b in zip(k, p)}
+def step_sky7():
+    """the sky (the list's "clouds of different sizes and types, ... the sun if it's daytime, the moon if it's night time, stars
+    if it's night if there's no cloud cover"; "when it's night time, there is no moonlight or starlight"; "no wind of weather
+    effects"): the fog no longer over the sky; the noon sky not one grey (pictures measured); the clouds' cover changes the
+    light; at night with a clear sky the stars and the moon, the moonlit ground not black; rain falling round her, snow in the
+    cold; a new weather in its 4 to 9 minutes"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    g.wild_put_her(9000.0, -4000.0); yield from wait_chunks(35, 50); yield from rwait(1.0)
+    st = sky_state(); res["begin"] = st
+    def pic(name, pitch, yaw=30.0, box=(0.0, 0.0, 1.0, 0.45)):
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=yaw)); shot(name, "960x540")
+        return os.path.join(SHOT_DIR, f"wd_{TAG}_{name}.png"), box
+    g.set_town_hour(12.0); g.set_weather(1, True); yield from rwait(3.0)
+    p_noon = pic("sky7_noon", 30.0); yield from rwait(1.5)
+    sun_fair = float(str(g.get_day_night_state()).split("|")[4])
+    g.set_weather(3, True); yield from rwait(2.0)
+    sun_over = float(str(g.get_day_night_state()).split("|")[4]); p_over = pic("sky7_overcast", 30.0); yield from rwait(1.5)
+    g.set_town_hour(0.5); g.set_weather(0, True); yield from rwait(3.0)
+    night = sky_state(); p_night = pic("sky7_night", 40.0); yield from rwait(1.5)
+    p_ground = pic("sky7_night_ground", -10.0, box=(0.0, 0.6, 1.0, 0.95)); yield from rwait(1.5)
+    g.set_town_hour(11.0); g.set_weather(4, True); yield from rwait(3.0)
+    rain = sky_state(); p_rain = pic("sky7_rain", 0.0, box=(0.0, 0.1, 1.0, 0.6)); yield from rwait(1.5)
+    g.set_weather(0, True); yield from rwait(2.0); p_dry = pic("sky7_dry", 0.0, box=(0.0, 0.1, 1.0, 0.6)); yield from rwait(1.5)
+    # (snow: in a cold biome the rain is snow)
+    bl = {}
+    for l in g.get_wild_biome_lines():
+        q = str(l).split("|"); bl[q[0]] = (float(q[2]), float(q[3]))
+    if "arctic regions" in bl:
+        g.wild_put_her(*bl["arctic regions"]); yield from wait_chunks(35, 50); yield from rwait(1.0)
+        g.set_weather(4, True); yield from rwait(2.5)
+        res["snow"] = sky_state(); pic("sky7_snow", 0.0); yield from rwait(1.5)
+    g.set_weather(1, True); g.set_town_hour(10.0)
+    yield from rwait(1.0)
+    S = {}
+    for nm, (pth, box) in (("noon", p_noon), ("overcast", p_over), ("night", p_night), ("night_ground", p_ground), ("rain", p_rain), ("dry", p_dry)):
+        if os.path.exists(pth): S[nm] = [round(x, 1) for x in png_stats(pth, box)]
+    res["pictures"] = S; res["sun_lux"] = {"fair": sun_fair, "overcast": sun_over}; res["night"] = night; res["rain"] = rain
+    quiet(False)
+    ok = (st["clouds"] == 1 and st["fog_cutoff_m"] >= 1000 and 240 <= st["next_s"] + 0.0 <= 560 and sun_over < sun_fair * 0.5
+          and night["stars"] > 0.5 and night["moon"] > 0.5 and rain["rain_on"] == 1
+          and S.get("noon", [0, 0])[1] > 6.0 and S.get("night_ground", [0])[0] > 6.0 and res.get("snow", {}).get("snow_on", 0) == 1)
+    step_result("sky7", ok, **res)
+
+def life_lines():
+    out = {"animal": [], "swarm": [], "counts": None}
+    for l in G["gen"].get_wild_life_lines():
+        p = str(l).split("|")
+        if p[0] == "animal": out["animal"].append({"kind": p[1], "at": V(float(p[2]), float(p[3]), float(p[4])), "state": int(p[5]), "flee": float(p[6]), "fled": int(p[7])})
+        elif p[0] == "swarm": out["swarm"].append({"name": p[1], "layer": int(p[5])})
+        elif p[0] == "counts": out["counts"] = [int(x) for x in p[1:]]
+    return out
+def step_life7():
+    """the animals and insects of each biome (the list's: "those animals should flee from the player if the player gets too close
+    (1-3 meters)"): round her in three biomes some animals of the kinds that live there and insects or birds; an animal comes
+    within its own flee distance of her (1 to 3 m) and runs: off at its run, metres away"""
+    g = G["gen"]; res = {"visits": {}}; quiet(True)
+    yield from wait_ready(90)
+    bl = {}
+    for l in g.get_wild_biome_lines():
+        q = str(l).split("|"); bl[q[0]] = (float(q[2]), float(q[3]))
+    g.set_town_hour(11.0); g.set_weather(1, True)
+    for name in ("meadows", "taigas", "grasslands"):
+        if name not in bl: continue
+        g.wild_put_her(*bl[name]); yield from wait_chunks(35, 50)
+        t0 = time.time()
+        while time.time() - t0 < 25:
+            yield
+            L = life_lines()
+            if len(L["animal"]) >= 3 and len(L["swarm"]) >= 2: break
+        L = life_lines()
+        res["visits"][name] = {"animals": sorted(set(a["kind"] for a in L["animal"])), "n": len(L["animal"]), "swarms": sorted(set(s["name"] for s in L["swarm"]))}
+        shot(f"life7_{name.replace(' ', '_')}", "960x540"); yield from rwait(1.2)
+    # (an animal she walks up to)
+    p = G["pawn"].get_actor_location(); fwd = G["pawn"].get_actor_forward_vector()
+    a = g.spawn_wild_animal_at("Deer", V(p.x + fwd.x * 700, p.y + fwd.y * 700, 0))
+    yield from rwait(1.0)
+    fl = {}
+    if a:
+        fd = a.get_flee_distance(); ap = a.get_actor_location()
+        put(V(ap.x - fwd.x * (fd + 120), ap.y - fwd.y * (fd + 120), ap.z), z=ap.z); yield from rwait(1.0)
+        s_far = a.get_state()
+        put(V(ap.x - fwd.x * (fd - 30), ap.y - fwd.y * (fd - 30), ap.z), z=ap.z); yield from rwait(2.0)
+        fl = {"flee_cm": round(fd, 1), "state_far": s_far, "state_near": a.get_state(), "fled": a.get_times_fled(), "ran_m": round(dist2(a.get_actor_location(), ap) / 100.0, 1)}
+        shot("life7_flee", "960x540"); yield from rwait(1.0)
+    res["flee"] = fl
+    g.set_town_hour(0.5); yield from rwait(8.0); res["night_swarms"] = sorted(set(s["name"] for s in life_lines()["swarm"])); g.set_town_hour(11.0)
+    quiet(False)
+    vs = [v for v in res["visits"].values()]
+    ok = (len(vs) >= 2 and all(v["n"] >= 1 for v in vs) and sum(len(v["swarms"]) > 0 for v in vs) >= 2 and fl.get("state_far") != 3 and fl.get("fled", 0) >= 1
+          and 100 <= fl.get("flee_cm", 0) <= 300 and fl.get("ran_m", 0) > 3 and any("Fireflies" in n or "Flies" in n for n in res["night_swarms"]))
+    step_result("life7", ok, **res)
+
+def step_ground7():
+    """the land (the list's: "all of the ground terrain in the wilderness is uniformly flat. there should be natural hills, dips,
+    ridges, berms"; "the transition between terrain types is too abrupt and looks like a straight line"; "the different terrain
+    types are in regular squares and grids on the map"; "the road ... is not visible in the wilderness"; "the biome's name
+    should also be visible under the mini map"): over 300 m in six regions the ground rises and falls at short and long scales;
+    the blend between two regions takes kilometres; a farm's fields along a line are of many lengths (a grid's are two); the
+    road wide enough to be seen; the region's name under the minimap"""
+    g = G["gen"]; res = {"relief": {}}; quiet(True)
+    yield from wait_ready(90)
+    bl = {}
+    for l in g.get_wild_biome_lines():
+        q = str(l).split("|"); bl[q[0]] = (float(q[2]), float(q[3]))
+    # (a region's nearest cell to Brokenspire can be a town's own, whose ground is levelled to 1.15 km on purpose: the line
+    # is moved out until it is 1.4 km from every town and still in the region)
+    tl = [(t["x"], t["y"]) for t in towns().values()]
+    def clear_of_towns(x, y):
+        return all(math.hypot(x - a, y - b) > 1400.0 and math.hypot(x + 300.0 - a, y - b) > 1400.0 for a, b in tl)
+    res["lines"] = {}
+    for name in ("grasslands", "plains", "farms", "meadows", "temperate aspen", "tundras"):
+        if name not in bl: continue
+        x, y = bl[name]
+        if not clear_of_towns(x, y):
+            a, b = min(tl, key=lambda t: math.hypot(x - t[0], y - t[1]))
+            dx, dy = x - a, y - b; n = math.hypot(dx, dy) or 1.0
+            found = None
+            for ang in range(0, 360, 30):
+                ca, sa = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+                ux, uy = (dx / n) * ca - (dy / n) * sa, (dx / n) * sa + (dy / n) * ca
+                for r in range(1500, 4001, 250):
+                    px, py = a + ux * r, b + uy * r
+                    if clear_of_towns(px, py) and sample(px, py)["biome"] == name and sample(px + 300.0, py)["biome"] == name:
+                        found = (px, py); break
+                if found: break
+            if not found: continue
+            x, y = found
+        res["lines"][name] = [round(x), round(y)]
+        hs = [sample(x + k * 5.0, y)["h"] for k in range(61)]
+        dif = [abs(hs[k + 1] - hs[k]) for k in range(60)]
+        # (short scale: what is left after a 60 m running mean)
+        mean = [sum(hs[max(0, k - 6):k + 7]) / len(hs[max(0, k - 6):k + 7]) for k in range(61)]
+        res["relief"][name] = {"range_m": round(max(hs) - min(hs), 2), "short_m": round(max(abs(h - m) for h, m in zip(hs, mean)), 2), "max_step_5m": round(max(dif), 2)}
+        yield
+    # (the blend: the first region's weight along 8 km from a region's middle outward)
+    if "farms" in bl:
+        x, y = bl["farms"]
+        w = [sample(x + k * 250.0, y) for k in range(33)]
+        res["blend"] = [(round(s["w1"], 2), s["biome"]) for s in w[::2]]
+        ch = [k for k in range(32) if w[k]["biome"] != w[k + 1]["biome"]]
+        mixed = [s for s in w if s["w1"] < 0.85]
+        res["blend_mixed_km"] = round(len(mixed) * 0.25, 2)
+    # (the fields along a 2 km line: their lengths)
+    fx, fy = bl.get("farms", (0.0, 0.0))
+    runs, cur = [], 0
+    for k in range(400):
+        f = sample(fx + k * 5.0, fy + 300.0)["field"] > 0.5
+        if f: cur += 5
+        elif cur: runs.append(cur); cur = 0
+    import statistics
+    res["fields"] = {"n": len(runs), "mean_m": round(statistics.mean(runs), 1) if runs else 0, "cv": round(statistics.pstdev(runs) / statistics.mean(runs), 2) if len(runs) > 2 else 0}
+    # (the road outside Brokenspire's gate: across it, where it is a road; the town loaded for its gate)
+    if town_state()["name"] != "Brokenspire" or town_state()["section"] != 1:
+        g.wild_put_her(600.0, 600.0); g.load_wild_town(0, True); yield from rwait(1.0)
+    # (the roads leave the gate and wind off toward the next town: on rings round the gate, where a road crosses, its width
+    # across it (the narrowest of 18 ways through the crossing's middle))
+    gate = place("gate")
+    if gate:
+        gx, gy = gate.x / 100.0, gate.y / 100.0
+        best, cross = 0.0, []
+        for rad in (400.0, 650.0):
+            steps = int(2 * math.pi * rad / 1.0)
+            on = [sample(gx + rad * math.cos(2 * math.pi * k / steps), gy + rad * math.sin(2 * math.pi * k / steps))["road"] > 0.5 for k in range(steps)]
+            k = 0
+            while k < steps:
+                if on[k] and not on[k - 1]:
+                    e = k
+                    while on[e % steps] and e - k < steps: e += 1
+                    m = (k + e - 1) / 2.0; a = 2 * math.pi * m / steps
+                    cx, cy = gx + rad * math.cos(a), gy + rad * math.sin(a)
+                    wid = 1e9
+                    for j in range(18):
+                        t = math.pi * j / 18; ux, uy = math.cos(t), math.sin(t)
+                        cnt = 1
+                        for sgn in (1, -1):
+                            q = 1
+                            while q < 60 and sample(cx + sgn * ux * q * 0.25, cy + sgn * uy * q * 0.25)["road"] > 0.5: q += 1; cnt += 1
+                        wid = min(wid, cnt * 0.25)
+                    cross.append([rad, round(cx), round(cy), wid]); best = max(best, wid)
+                    k = e
+                else:
+                    k += 1
+            yield
+        res["road_m"] = best; res["road_crossings"] = cross
+    # (the region's name under the minimap)
+    g.wild_put_her(*bl.get("meadows", (9000.0, -4000.0))); yield from wait_chunks(35, 50); yield from rwait(1.5)
+    res["minimap_label"] = str(G["pc"].get_hud().get_biome_label_drawn())
+    shot("ground7_minimap", "1280x720"); yield from rwait(1.2)
+    quiet(False)
+    rl = list(res["relief"].values())
+    ok = (len(rl) >= 5 and sum(1 for r in rl if r["range_m"] > 4.0 and r["short_m"] > 0.6) >= 4 and all(r["max_step_5m"] < 4.0 for r in rl)
+          and res.get("blend_mixed_km", 0) >= 1.0 and res["fields"]["n"] >= 6 and res["fields"]["cv"] > 0.3 and res.get("road_m", 0) >= 4.0
+          and "MEADOWS" in res["minimap_label"])
+    step_result("ground7", ok, **res)
+
+def step_music7():
+    """the music (the list's: "after 5-10 minutes, the music should change to another appropriate song for the scene"): the
+    wilds' set out there, the town's in its walls; when its time comes a new track of the scene's set"""
+    g = G["gen"]; res = {}
+    yield from wait_ready(90)
+    g.set_town_hour(11.0)
+    g.wild_put_her(9000.0, -4000.0); yield from wait_chunks(30, 40); yield from rwait(6.0)
+    s1 = str(g.get_music_scene()).split("|"); t1 = str(g.get_music_track())
+    g.rotate_music_now(); yield from rwait(7.0)
+    s2 = str(g.get_music_scene()).split("|"); t2 = str(g.get_music_track())
+    res["wild"] = {"scene": s1[0], "track": t1, "rotations": int(s1[1]), "next_in_s": float(s1[2]) - now()}
+    res["rotated"] = {"scene": s2[0], "track": t2, "rotations": int(s2[1]), "next_in_s": float(s2[2]) - now()}
+    g.wild_put_her(600.0, 600.0); g.load_wild_town(0, True); yield from rwait(2.0)
+    sq = place("square")
+    if sq: put(sq); yield from rwait(6.0)
+    res["town"] = str(g.get_music_scene()).split("|")[0]
+    ok = (res["wild"]["scene"].startswith("Music.Wild") and res["rotated"]["rotations"] == res["wild"]["rotations"] + 1 and t2 != t1 and t2
+          and 290 <= res["rotated"]["next_in_s"] <= 610 and res["town"].startswith("Music.Town"))
+    step_result("music7", ok, **res)
 
 def step_memprobe():
     """(a probe: memory after teleports far apart, each building its chunks anew; a memreport at the end)"""
@@ -530,7 +804,8 @@ def step_memprobe():
     quiet(False)
     step_result("memprobe", True, **res)
 
-STEPS = {"world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe}
+STEPS = {"world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+         "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

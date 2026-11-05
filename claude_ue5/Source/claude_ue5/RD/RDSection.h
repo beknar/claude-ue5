@@ -286,8 +286,41 @@ public:
 	struct FTownPen { FVector At = FVector::ZeroVector; FVector2D Half = FVector2D(300.f, 300.f); float Yaw = 0.f; int32 Animal = 0; };
 	TArray<FTownPen> TownPens;
 	/** the gardens (world: middle, half size, yaw) and how many plants grow in each */
-	struct FTownGarden { FVector At = FVector::ZeroVector; FVector2D Half = FVector2D(300.f, 150.f); float Yaw = 0.f; int32 Plants = 0; };
+	struct FTownGarden { FVector At = FVector::ZeroVector; FVector2D Half = FVector2D(300.f, 150.f); float Yaw = 0.f; int32 Plants = 0; TArray<uint8> Crops; };
 	TArray<FTownGarden> TownGardens;
+	// ---- the user's list of 2026-11-04 (docs/improvements7.txt; RDTownPlan.cpp, RDTown7.cpp)
+	/** the bread ovens of the town's kitchens (world): F at one bakes the oven's recipes */
+	TArray<FVector> TownOvens;
+	/** food set out on a table (bread, cheese, apples): F takes it (its items), its meshes go */
+	struct FTownFood { FVector At = FVector::ZeroVector; TArray<FName> Items; TArray<TWeakObjectPtr<UStaticMeshComponent>> Comps; bool bTaken = false; };
+	TArray<FTownFood> TownFoods;
+	/** the gate's portcullis (a door that lifts) and the levers that raise it, the pens' gates (all indices into the doors) */
+	int32 TownPortcullis = -1;
+	TArray<int32> TownLevers, TownPenGates;
+	/** the ground's rise and fall (the list's "terrain above and below the ground level"): a weight per tile (0 flat where
+	 *  anything stands or is walked to, 1 open ground), the height there is TownLiftAt */
+	TArray<float> TownLiftW;
+	bool bTownLiftOn = false;
+	/** the ground's height (cm, from the section's z) at a world point: 0 where buildings, roads, gardens, pens and the
+	 *  square are, rising and falling up to TownLiftAmp over open ground */
+	float TownLiftAt(const FVector2D& World) const;
+	/** tests: the ground's height at a point (cm over the section) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") float GetTownLiftAt(FVector Location) const { return TownLiftAt(FVector2D(Location)); }
+	/** tests: "gate|<door>|<open target>|<alpha>|<x>|<y>|<z>", "lever|<door>|<x>|<y>|<z>", "pengate|<door>|<open>|<x>|<y>|<z>",
+	 *  "oven|<x>|<y>|<z>", "food|<i>|<taken>|<x>|<y>|<z>|<items, comma>", "garden|<i>|<crops, comma>|<x>|<y>", "lift|<max cm>|<min cm>|<under buildings max |cm|>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownImproveLines() const;
+	/** what F reaches of the list's things at From: "food", "oven", "garden", "lever", or "" (index set) */
+	FString FindTownThing(const FVector& From, float Reach, int32& OutIndex) const;
+	/** the food of a table taken (its meshes hidden) */
+	bool TakeTownFood(int32 Index);
+	/** a door's index for the town's levers and gates (tests): the door at the lever pushed as F does */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool PullTownLever(int32 Lever, FVector Opener);
+	/** the portcullis up (or on its way up) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsPortcullisUp() const { return Doors.IsValidIndex(TownPortcullis) && Doors[TownPortcullis].Target > 0.5f; }
+	/** tests: the drawn ground's layers at a point (R trodden floor, G cobbles, A earth; -1 none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FLinearColor GetTownGroundColorAt(FVector Location) const;
+	/** a door's kind ("door", "gate" (a pen's), "lever", "portcullis") */
+	FString GetDoorKind(int32 Index) const { return Doors.IsValidIndex(Index) ? Doors[Index].Kind : FString(); }
 	/** the spits (world: the rod's middle, its yaw): the generator turns their meat in play while someone turns the crank */
 	TArray<FVector4> TownSpits;
 	/** the short grass's clumps and the small bushes placed (tests) */
@@ -421,6 +454,13 @@ private:
 		FIntPoint TileA = FIntPoint(-1), TileB = FIntPoint(-1);
 		int32 Partner = -1;                      // double door / wardrobe partner
 		bool bLooted = false;                    // containers: opened once (what it held was found)
+		/** improvements7: a part that slides up instead of turning (the town gate's portcullis): LiftZ cm at open, from where
+		 *  its pivot was closed */
+		bool bLift = false;
+		float LiftZ = 0.f;
+		FVector ClosedLoc = FVector::ZeroVector;
+		/** improvements7: a lever's mover: pulling it moves this other door (the portcullis) the same way */
+		int32 Link = -1;
 	};
 	struct FFlicker { UPointLightComponent* Light; float Base; float Phase; float Amount; };
 	// ---- Brokenspire (RDTownPlan.cpp)
@@ -446,6 +486,15 @@ private:
 	void TownFurnish(FRandomStream& R, int32 BI);
 	void TownDoors();
 	void TownGround();
+	/** the list of 2026-11-04 (RDTown7.cpp): the ground's lift field from what stands where (after the town's life, before the
+	 *  trees and the grass, which then stand on it) */
+	void TownLiftPlan();
+	/** the gate's portcullis as a door that lifts, a lever each side of it (interactive build) */
+	void TownGateWorks();
+	/** food set out on a table's top at Top (bread, cheese, apples: the kit's), taken with F */
+	void TownFoodOn(FRandomStream& R, const FVector& Top, float Yaw);
+	/** a swinging gate in a pen's fence: a fence segment hinged at its end (interactive build) */
+	void TownPenGate(const FVector& HingeW, float Yaw, float Len);
 	/** a single door leaf on a building's doorway (the kit's door piece, its hinge) */
 	void AddTownDoor(int32 BI, FIntPoint RoomTile, FIntPoint OutTile, FName Piece, int32 Room);
 	/** the pieces of a building's style ("Town.<Style>_<Part>") */

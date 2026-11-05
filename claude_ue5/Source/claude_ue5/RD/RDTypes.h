@@ -812,6 +812,8 @@ struct FRDRecipe
 	/** mistward_castle (docs/improvements3.txt, the generator's bRecipeTiers): the anvil offers it once this tier is open (0:
 	 *  always) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 0;
+	/** the list of 2026-11-04: where it is made: none an anvil, "Oven" a town kitchen's bread oven (the gardens' ingredients) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Station;
 };
 
 /** random_dungeonmagic_level4: one of the characters to choose from (the menu level's ARDHeroSelect shows them; the
@@ -994,6 +996,59 @@ struct FRDTownAnimalDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector2D HalfSize = FVector2D(50.f, 25.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 PenMin = 2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 PenMax = 4;
+};
+
+/** the wilderness's animals (the user's list of 2026-11-04: "more animals and insects that are appropriate for that biome.
+ *  those animals should flee from the player if the player gets too close (1-3 meters)"): a kind's mesh and clips (Wildlands'
+ *  deer, wolf and squirrel; the farm's rabbit), the biomes it lives in and how many a square kilometre, its speeds, and how
+ *  near she comes before it runs (a distance of its own for each, between FleeMin and FleeMax). 890 fills them. */
+USTRUCT(BlueprintType)
+struct FRDWildFauna
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> Mesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Idle = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Eat = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Walk = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimationAsset> Run = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshYaw = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MeshZ = 0.f;
+	/** cm/s, and its clips' ground speed at Scale 1 (the clip plays at speed / clip speed) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkSpeed = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RunSpeed = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkClipSpeed = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RunClipSpeed = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FleeMin = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float FleeMax = 300.f;
+	/** the biomes' names it lives in, and how many a km² there */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PerKm2 = 20.f;
+	/** its body's half length (it keeps that far from what blocks it) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HalfLength = 60.f;
+};
+
+/** the wilderness's insects and the sky's birds (the list of 2026-11-04): a Niagara system of the packs' (butterflies,
+ *  fireflies, flies; flocks of birds), the biomes it is in ("*": any; "town": Brokenspire's walls), by day, by night or both,
+ *  how high over the ground (birds: tens of metres) and its scale */
+USTRUCT(BlueprintType)
+struct FRDWildSwarm
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UNiagaraSystem> System = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bDay = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bNight = false;
+	/** 0 insects near the ground round her, 1 birds in the sky */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Layer = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Height = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Scale = 1.f;
+	/** how many at once round her where it lives */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Count = 3;
+	/** not near the coast (0), or only near it (1: within 3 km of the sea), or anywhere (2) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Coast = 2;
 };
 
 /** Brokenspire: a quest. Its Goal is a counter the game keeps across the levels (URDGameInstance::Counters): "talk:<role>",

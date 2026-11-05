@@ -763,7 +763,7 @@ int32 ARDDungeonGenerator::SoundCategory(FName Key)
 {
 	const FString K = Key.ToString();
 	if (K.StartsWith(TEXT("Music."))) return 3;
-	if (K.StartsWith(TEXT("Env.")) || K.StartsWith(TEXT("Atmos."))) return 2;
+	if (K.StartsWith(TEXT("Env.")) || K.StartsWith(TEXT("Atmos.")) || K.StartsWith(TEXT("Weather."))) return 2;
 	return 1;
 }
 
@@ -802,7 +802,7 @@ void ARDDungeonGenerator::BackToMainMenu()
 {
 	// (the cursor back on the line that opened the page: with Save and Load on the main page, "1" was Save, and Back then
 	// Enter overwrote her saved game)
-	const FName From = MenuPage == 2 ? FName(TEXT("load")) : FName(TEXT("options"));
+	const FName From = MenuPage == 2 ? FName(TEXT("load")) : MenuPage == 3 ? FName(TEXT("save")) : FName(TEXT("options"));
 	MenuPage = 0;
 	MenuCursor = FMath::Max(0, MenuItems().IndexOfByKey(From));
 }
@@ -817,7 +817,21 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 	// (Brokenspire and the wilderness: the game saved and loaded (the user's choice of 2026-11-03))
 	if (MenuPage == 0 && bTown) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("hero"), TEXT("quit") };
 	if (MenuPage == 0) return { TEXT("resume"), TEXT("options"), TEXT("hero"), TEXT("quit") };
-	if (MenuPage == 2) return { TEXT("loadauto"), TEXT("loadsave"), TEXT("back") };
+	// (the list of 2026-11-04: the saves on disk by their names, newest first (the autosave among them); the Save page's name)
+	if (MenuPage == 2)
+	{
+		TArray<FName> L;
+		for (const FString& S : GetSaveSlots())
+		{
+			FString Slot, Rest; S.Split(TEXT("|"), &Slot, &Rest);
+			L.Add(Slot == TEXT("autosave") ? FName(TEXT("loadauto")) : FName(*(TEXT("load:") + Slot)));
+			if (L.Num() >= 8) break;
+		}
+		if (!L.Contains(FName(TEXT("loadauto")))) L.Insert(FName(TEXT("loadauto")), 0);
+		L.Add(TEXT("back"));
+		return L;
+	}
+	if (MenuPage == 3) return { TEXT("savename"), TEXT("savedo"), TEXT("back") };
 	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
 }
 
@@ -840,12 +854,19 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 		else if (Id == TEXT("options")) Out.Add(TEXT("button|Options"));
 		else if (Id == TEXT("save")) Out.Add(TEXT("button|Save the game"));
 		else if (Id == TEXT("load")) Out.Add(TEXT("button|Load a game"));
-		else if (Id == TEXT("loadauto") || Id == TEXT("loadsave"))
+		else if (Id == TEXT("loadauto") || Id == TEXT("loadsave") || Id.ToString().StartsWith(TEXT("load:")))
 		{
-			const FString Info = GetSaveInfo(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save"));
+			const FString Slot = Id == TEXT("loadauto") ? FString(TEXT("autosave")) : Id == TEXT("loadsave") ? FString(TEXT("save")) : Id.ToString().RightChop(5);
+			const FString Info = GetSaveInfo(Slot);
 			TArray<FString> P; Info.ParseIntoArray(P, TEXT("|"), false);
-			const TCHAR* What = Id == TEXT("loadauto") ? TEXT("Autosave") : TEXT("Saved game");
-			Out.Add(P.Num() >= 4 ? FString::Printf(TEXT("button|%s: %s, %s (%s)"), What, *P[2], *P[0], *P[3]) : FString::Printf(TEXT("button|%s: none"), What));
+			const FString What = Id == TEXT("loadauto") ? FString(TEXT("Autosave")) : (P.Num() >= 6 && !P[5].IsEmpty() ? P[5] : FString(TEXT("Saved game")));
+			Out.Add(P.Num() >= 4 ? FString::Printf(TEXT("button|%s: %s, %s (%s)"), *What, *P[2], *P[0], *P[3]) : FString::Printf(TEXT("button|%s: none"), *What));
+		}
+		else if (Id == TEXT("savename")) Out.Add(FString::Printf(TEXT("text|Name|%s"), *SaveNameText.Replace(TEXT("|"), TEXT(" "))));
+		else if (Id == TEXT("savedo"))
+		{
+			const bool bOver = URDSaveGame::Info(SlotForName(SaveNameText)).Len() > 0;
+			Out.Add(bOver ? FString(TEXT("button|Save (over the save of that name)")) : FString(TEXT("button|Save")));
 		}
 		else if (Id == TEXT("hero")) Out.Add(bTown || bTownLink ? FString(TEXT("button|Choose another hero (a new game)")) : FString(TEXT("button|Choose another hero")));
 		else if (Id == TEXT("town")) Out.Add(FString::Printf(TEXT("button|Return to %s"), *TownName));
@@ -922,13 +943,32 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
 	if (Id == TEXT("save"))
 	{
+		// (the list of 2026-11-04: a page to name it on, the place and the day offered as its name)
 		LastMenuAction = TEXT("save");
-		const bool bOk = bMenuDryRun || SaveGameNow(TEXT("save"), TEXT("menu"));
-		if (PlayerCombat) PlayerCombat->ShowMessage(bOk ? TEXT("The game is saved") : TEXT("The game could not be saved"));
+		MenuPage = 3; MenuCursor = 0;
+		if (SaveNameText.IsEmpty())
+		{
+			const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
+			const bool bWilds = bWild && Her && IsWildReady() && !IsInTownWalls(Her->GetActorLocation());
+			SaveNameText = FString::Printf(TEXT("%s day %d"), bWilds ? TEXT("The wilds") : (bTown ? *TownName : TEXT("Mistward Castle")), TownDay);
+		}
+		return true;
+	}
+	if (Id == TEXT("savename")) { LastMenuAction = TEXT("savename"); MenuCursor = 1; return true; }
+	if (Id == TEXT("savedo"))
+	{
+		LastMenuAction = TEXT("savedo");
+		const FString Nm = SaveNameText.TrimStartAndEnd();
+		if (Nm.IsEmpty()) { if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("Give the save a name first")); return false; }
+		const FString Slot = SlotForName(Nm);
+		const bool bOk = bMenuDryRun || SaveGameNow(Slot, TEXT("menu"), Nm);
+		if (PlayerCombat) PlayerCombat->ShowMessage(bOk ? FString::Printf(TEXT("The game is saved as \"%s\""), *Nm) : FString(TEXT("The game could not be saved")));
+		if (bOk) BackToMainMenu();
 		return bOk;
 	}
-	if (Id == TEXT("load")) { LastMenuAction = TEXT("load"); MenuPage = 2; MenuCursor = 0; return true; }
+	if (Id == TEXT("load")) { LastMenuAction = TEXT("load"); MenuPage = 2; MenuCursor = 0; SaveSlotsAt = -10.0; return true; }
 	if (Id == TEXT("loadauto") || Id == TEXT("loadsave")) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save")); }
+	if (Id.ToString().StartsWith(TEXT("load:"))) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id.ToString().RightChop(5)); }
 	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
 	if (Id == TEXT("controls") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
 	if (Id == TEXT("town"))
@@ -958,6 +998,28 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	return true;
 }
 
+void ARDDungeonGenerator::TickSaveNameKeys(APlayerController* PC)
+{
+	// (the keys as typed: letters (shift for capitals, the first a capital), digits, space, - and ', Backspace; 40 at most)
+	if (!PC) return;
+	static const FKey Letters[26] = { EKeys::A, EKeys::B, EKeys::C, EKeys::D, EKeys::E, EKeys::F, EKeys::G, EKeys::H, EKeys::I, EKeys::J, EKeys::K, EKeys::L, EKeys::M,
+		EKeys::N, EKeys::O, EKeys::P, EKeys::Q, EKeys::R, EKeys::S, EKeys::T, EKeys::U, EKeys::V, EKeys::W, EKeys::X, EKeys::Y, EKeys::Z };
+	static const FKey Digits[10] = { EKeys::Zero, EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
+	const bool bShift = PC->IsInputKeyDown(EKeys::LeftShift) || PC->IsInputKeyDown(EKeys::RightShift);
+	for (int32 K = 0; K < 26; ++K)
+		if (PC->WasInputKeyJustPressed(Letters[K]) && SaveNameText.Len() < 40)
+		{
+			const bool bCap = bShift || SaveNameText.IsEmpty() || SaveNameText.EndsWith(TEXT(" "));
+			SaveNameText.AppendChar((TCHAR)((bCap ? 'A' : 'a') + K));
+		}
+	for (int32 K = 0; K < 10; ++K) if (PC->WasInputKeyJustPressed(Digits[K]) && SaveNameText.Len() < 40) SaveNameText.AppendChar((TCHAR)('0' + K));
+	if (PC->WasInputKeyJustPressed(EKeys::SpaceBar) && SaveNameText.Len() < 40 && !SaveNameText.EndsWith(TEXT(" "))) SaveNameText.AppendChar(TEXT(' '));
+	if (PC->WasInputKeyJustPressed(EKeys::Hyphen) && SaveNameText.Len() < 40) SaveNameText.AppendChar(TEXT('-'));
+	if (PC->WasInputKeyJustPressed(EKeys::Apostrophe) && SaveNameText.Len() < 40) SaveNameText.AppendChar(TEXT('\''));
+	if (PC->WasInputKeyJustPressed(EKeys::BackSpace) && SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1);
+	if (PC->WasInputKeyJustPressed(EKeys::Delete)) SaveNameText.Reset();
+}
+
 void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 {
 	if (!bEscapeMenu || !PC) return;
@@ -966,11 +1028,28 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage > 0) BackToMainMenu(); else SetMenuOpen(!bMenuOpen); return; }
 	if (!bMenuOpen) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
+	// (the Save page: the letters type its name; the arrows choose; Enter saves)
+	if (MenuPage == 3)
+	{
+		TickSaveNameKeys(PC);
+		if (Pressed({ EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
+		if (Pressed({ EKeys::Down, EKeys::Gamepad_DPad_Down })) MoveMenuCursor(1);
+		if (Pressed({ EKeys::Enter, EKeys::Gamepad_FaceButton_Bottom }))
+		{
+			const TArray<FName> It3 = MenuItems();
+			if (It3.IsValidIndex(MenuCursor) && It3[MenuCursor] == TEXT("back")) BackToMainMenu();
+			else ActivateMenuLine(It3.IndexOfByKey(FName(TEXT("savedo"))));
+			return;
+		}
+	}
+	else
+	{
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
 	if (Pressed({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down })) MoveMenuCursor(1);
 	if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left })) StepMenuValue(-1);
 	if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right })) StepMenuValue(1);
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom })) { ActivateMenuLine(); return; }
+	}
 	if (Pressed({ EKeys::Gamepad_FaceButton_Right })) { if (MenuPage > 0) BackToMainMenu(); else SetMenuOpen(false); return; }
 	// the mouse: a line under it is chosen; a click on a button presses it, on a slider's track (or dragging along it)
 	// sets the volume where it is
@@ -1247,6 +1326,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	FVector Anvil;
 	if (PlayerCombat && Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil))
 	{
+		PlayerCombat->SetCraftStation(NAME_None);
 		PlayerCombat->SetCraftingOpen(true);
 		return TEXT("anvil");
 	}
@@ -1349,7 +1429,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
 	if (!Best) return FString();
 	if (bBestDoor && Best->IsDoorCell(BestI)) { const FString Cl = Best->DescribeCell(BestI); if (!Cl.IsEmpty()) return Cl; }
-	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : TEXT("door")) : Best->GetContainerKind(BestI);
+	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : Best->GetDoorKind(BestI) == TEXT("gate") ? TEXT("gate") : TEXT("door")) : Best->GetContainerKind(BestI);
 	What.ReplaceInline(TEXT("2"), TEXT(""));
 	return FString::Printf(TEXT("%s %s"), Best->IsTargetOpen(bBestDoor, BestI) ? TEXT("close") : TEXT("open"), *What);
 }
@@ -1462,6 +1542,8 @@ void ARDDungeonGenerator::Tick(float Dt)
 	const bool bPaused = GetWorld()->IsPaused();
 	// (Brokenspire's showcase tour: on the real clock, also while its panel pauses the game)
 	if (bTown && (bTourOn || !bTourCmdRead)) TickTownTour((float)FApp::GetDeltaTime());
+	// (the list of 2026-11-04's showcase pilot: on the real clock, also under the menu and the oven's panel)
+	if (bTown && bWild) TickShow7((float)FApp::GetDeltaTime(), UGameplayStatics::GetPlayerController(this, 0));
 	// (Brokenspire: the town's panel takes the keys while it is open, Escape too)
 	if (IsTownPanelOpen())
 	{
@@ -1811,11 +1893,28 @@ void ARDDungeonGenerator::StopMusic()
 	for (UAudioComponent* A : MusicComps) if (A) A->Stop();
 	for (int32 I = 0; I < 4; ++I) { MusicPos[I] = 0.f; MusicIndex[I] = 0; }
 	bMusicOn = bCombatMusic = false; LastFightTime = -100.f; MusicShifts = 0;
+	MusicSceneKey = NAME_None; MusicRotateAt = -1.f; MusicPendingAt = -1.f;
+}
+
+FName ARDDungeonGenerator::MusicSceneFor() const
+{
+	// (the town's walls by day and by night, the wilds by day and by night; the castle and the other levels: Music.Explore)
+	static const FName Explore(TEXT("Music.Explore"));
+	if (!bTown) return Explore;
+	const APawn* P = UGameplayStatics::GetPlayerPawn(this, 0);
+	const bool bNight = DayLight < 0.3f;
+	const bool bWilds = bWild && P && IsWildReady() && !IsInTownWalls(P->GetActorLocation());
+	FName K(bWilds ? (bNight ? TEXT("Music.WildNight") : TEXT("Music.Wild")) : (bNight ? TEXT("Music.TownNight") : TEXT("Music.Town")));
+	if (!Sounds.Contains(K)) K = FName(bWilds ? TEXT("Music.Wild") : TEXT("Music.Town"));
+	return Sounds.Contains(K) ? K : Explore;
 }
 
 void ARDDungeonGenerator::StartMusicLayer(int32 Layer, float FadeSeconds, bool bFromStart)
 {
-	const FRDSoundSet* Set = Sounds.Find(RDMusicKeys[Layer]);
+	// (the wandering music: the scene's set (the list of 2026-11-04: the town's by day and by night, the wilds'), else the
+	// level's Music.Explore)
+	const FName Key = (Layer == 0 && !MusicSceneKey.IsNone() && Sounds.Contains(MusicSceneKey)) ? MusicSceneKey : RDMusicKeys[Layer];
+	const FRDSoundSet* Set = Sounds.Find(Key);
 	if (!Set || Set->Sounds.Num() == 0) return;
 	USoundBase* Snd = Set->Sounds[MusicIndex[Layer] % Set->Sounds.Num()];
 	if (!Snd) return;
@@ -1849,9 +1948,37 @@ void ARDDungeonGenerator::TickMusic(float Dt)
 		if (!bAny || !PlayerCombat) return;
 		bMusicOn = true; bCombatMusic = false;
 		MusicIndex[0] = MusicIndex[1] = FMath::Abs(SessionSeed % 1000);
+		MusicSceneKey = MusicSceneFor(); MusicRotateAt = -1.f; MusicPendingAt = -1.f;
 		StartMusicLayer(0, 1.5f, true); StartMusicLayer(2, 1.5f, true);
 	}
 	const float Now = GetWorld()->GetTimeSeconds();
+	// (the list of 2026-11-04: "the music should change every so often. after 5-10 minutes, the music should change to another
+	// appropriate song for the scene the player is in": a time of its own for each track, from the session's seed; and at
+	// once when the scene changes (out of the town's walls, the night falling). The track fades out and the next fades in)
+	if (MusicRotateAt < 0.f)
+	{
+		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x3A51u, (uint32)MusicRotations * 2654435761u);
+		MusicRotateAt = Now + FMath::Lerp(MusicRotateSeconds.X, MusicRotateSeconds.Y, (H % 1000u) / 999.f);
+	}
+	if (MusicPendingAt > 0.f && Now >= MusicPendingAt)
+	{
+		MusicPendingAt = -1.f;
+		if (!bCombatMusic) StartMusicLayer(0, 3.f, true);
+	}
+	else if (MusicPendingAt < 0.f && !bCombatMusic)
+	{
+		const FName Scene = MusicSceneFor();
+		if (Scene != MusicSceneKey || Now >= MusicRotateAt)
+		{
+			const bool bScene = Scene != MusicSceneKey;
+			MusicSceneKey = Scene; ++MusicIndex[0]; ++MusicRotations;
+			if (MusicComps.IsValidIndex(0) && MusicComps[0]) MusicComps[0]->FadeOut(3.f, 0.f);
+			MusicPendingAt = Now + 3.1f;
+			const uint32 H = HashCombine((uint32)SessionSeed ^ 0x3A51u, (uint32)MusicRotations * 2654435761u);
+			MusicRotateAt = Now + 3.1f + FMath::Lerp(MusicRotateSeconds.X, MusicRotateSeconds.Y, (H % 1000u) / 999.f);
+			UE_LOG(LogRandomDungeonGen, Log, TEXT("RDMUSIC %s: the next track of %s (%d)"), bScene ? TEXT("a new scene") : TEXT("its time"), *Scene.ToString(), MusicRotations);
+		}
+	}
 	// a fight is on: blows fell a moment ago, or a monster near her is after her
 	bool bFight = false;
 	if (PlayerCombat && PlayerCombat->GetOwner() && !PlayerCombat->IsDead())

@@ -19,7 +19,8 @@ struct FRDWChunkData
 	// the ground (positions relative to the chunk's corner, cm)
 	TArray<FVector> V, N;
 	TArray<int32> T;
-	TArray<FVector2D> UV0, UV1, UV2;
+	/** UV1 (rock, snow), UV2 (sand, mud), UV3 (the road, its ruts' noise): the ground material's layers */
+	TArray<FVector2D> UV0, UV1, UV2, UV3;
 	TArray<FLinearColor> C;
 	TArray<float> Slope;
 	TArray<FProcMeshTangent> Tan;

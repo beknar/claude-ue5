@@ -1632,10 +1632,13 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		// the recipes listed are those the anvil offers her now)
 		TArray<FString> Uses;
 		const bool bHv = Gen && Gen->bHarvest;
+		bool bOven = false;
 		if (Gen)
 			for (const FRDRecipe& Rc : Gen->Recipes)
-				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) Uses.Add(Rc.Item.ToString().ToLower());
-		FString S = bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
+				if (Rc.Parts.ContainsByPredicate([&It](const FRDRecipePart& Pt) { return Pt.AnyOf.Contains(It.Name); }) && Gen->RecipeRefusal(Rc).IsEmpty()) { Uses.Add(Rc.Item.ToString().ToLower()); bOven |= Rc.Station == TEXT("Oven"); }
+		// (the list of 2026-11-04: a garden's crops are baked at a kitchen's oven)
+		FString S = bOven ? TEXT("An ingredient from a garden: a kitchen's bread oven bakes food from it (F at an oven).")
+		          : bHv ? TEXT("A crafting material: an anvil makes potions, scrolls and repair items from it (F at an anvil; anvils are on the maps).")
 		                : TEXT("A crafting material: an anvil makes repair items from it (F at an anvil; anvils are on the maps).");
 		if (Uses.Num() > 8) { const int32 More = Uses.Num() - 8; Uses.SetNum(8); Uses.Add(FString::Printf(TEXT("%d more"), More)); }
 		if (Uses.Num() > 0) S += TEXT("  It goes into: ") + FString::Join(Uses, TEXT(", ")) + TEXT(".");
@@ -2280,9 +2283,10 @@ void ARDHUD::DrawCrafting(float Sc)
 	}
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
 	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;
-	UI.Text(TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	const bool bOven = Cb->GetCraftStation() == TEXT("Oven");
+	UI.Text(bOven ? TEXT("THE OVEN") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
-	const FString Sub = TEXT("make repair items  ·  break down the weapons you found");
+	const FString Sub = bOven ? TEXT("bake food from the gardens' ingredients") : TEXT("make repair items  ·  break down the weapons you found");
 	UI.TextSize(Sub, Tw, Th, Small, Sc * 1.05f);
 	UI.Text(Sub, Gold, B.X - Pd - Tin - Tw, A.Y + 22.f * Sc, Small, Sc * 1.05f);
 	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 46.f * Sc, Small, Sc * 0.95f); }
@@ -2583,7 +2587,7 @@ void ARDHUD::DrawMenu(float Sc)
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 	}
 	float Tw, Th;
-	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : TEXT("PAUSED");
+	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : TEXT("PAUSED");
 	UI.TextSize(Head, Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
 	UI.Text(Head, RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
 	Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset();
@@ -2620,6 +2624,18 @@ void ARDHUD::DrawMenu(float Sc)
 			UI.TextSize(Pc, Tw, Th, Small, Sc * 1.15f, ERDType::Label);
 			UI.Text(Pc, bOn ? Gold : Dim, R1.X - 14.f * Sc - Tw, R0.Y + 13.f * Sc, Small, Sc * 1.15f, ERDType::Label);
 		}
+		else if (P[0] == TEXT("text") && P.Num() >= 2)
+		{
+			// (the list of 2026-11-04: "there is no way to name your own save": the name typed, a caret after it)
+			Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
+			UI.Text(P[1], bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 14.f * Sc, R0.Y + 12.f * Sc, Small, Sc * 1.2f);
+			const FVector2D F0(R0.X + 220.f * Sc, R0.Y + 5.f * Sc), F1(R1.X - 12.f * Sc, R1.Y - 5.f * Sc);
+			Box(F0, F1, FLinearColor(0.04f, 0.04f, 0.05f, 0.95f));
+			Frame(F0, F1, bOn ? Gold : FLinearColor(0.6f, 0.55f, 0.42f, 0.9f), 1.f * Sc);
+			const FString V = P.Num() >= 3 ? P[2] : FString();
+			const bool bCaret = bOn && FMath::Fmod((float)FPlatformTime::Seconds(), 1.f) < 0.55f;
+			UI.Text(V + (bCaret ? TEXT("|") : TEXT("")), bOn ? FLinearColor::White : Dim, F0.X + 10.f * Sc, R0.Y + 12.f * Sc, Small, Sc * 1.2f);
+		}
 		else if (P[0] == TEXT("choice") && P.Num() >= 3)
 		{
 			// (mistward4: a choice: its label, and its value between arrows (A D or a click change it))
@@ -2639,6 +2655,7 @@ void ARDHUD::DrawMenu(float Sc)
 		Y += Rh;
 	}
 	const FString Keys = !Gen->bOptionsMenu ? FString(TEXT("W S  choose      A D  volume      Enter  press      mouse  click or drag      Esc  back to the game"))
+	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Enter  save      Esc  back"))
 	                   : Gen->GetMenuPage() == 1 ? FString(TEXT("W S  choose      A D  change      Enter  press      mouse  click or drag      Esc  back"))
 	                                             : FString(TEXT("W S  choose      Enter  press      mouse  click      Esc  back to the game"));
 	UI.TextSize(Keys, Tw, Th, Small, Sc);

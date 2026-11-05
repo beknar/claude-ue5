@@ -1,0 +1,303 @@
+// Brokenspire's and the wilderness's sky and weather (the user's list of 2026-11-04, docs/improvements7.txt: "the sky is
+// uniformly grey. there should be clouds of different sizes and types, ... the sun if it's daytime, the moon if it's night
+// time, stars if it's night if there's no cloud cover"; "when it's night time, there is no moonlight or starlight"; "there is
+// no wind of weather effects"). The generator's bSky7 (890 sets it and the assets):
+//   - the height fog no longer covers the sky (its cutoff distance: the level's fog drew every sky pixel at 94 % grey); the
+//     sun's disc is the sky atmosphere's own, seen once the fog is off it
+//   - clouds: a volumetric cloud layer (the engine's simple cloud material; its coverage and its storm look from the weather)
+//   - the stars: a dome far off round her camera, their brightness the night's and the clear sky's; the moon: a disc in the
+//     moon light's direction, as bright as the night and the clouds let it be; the moonlight and the night's sky light raised
+//     (890's MoonLux, NightSkyShare, NightExposureBias)
+//   - the weather (clear, fair, cloudy, overcast, rain, storm, snow, fog), a new one every 4 to 9 minutes from a stream of its
+//     own (the session's seed: never the play's): the clouds' cover, the sun's and sky light's dimming, the fog's thickening,
+//     rain or snow (cold places snow) round her camera, wind (blowing leaves, the grass's sway: WindCollection's Strength),
+//     the rain's and the wind's sounds
+#include "RD/RDDungeonGenerator.h"
+#include "RD/RDWild.h"
+#include "RD/RDSection.h"
+#include "RD/RDCombat.h"
+#include "Components/VolumetricCloudComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/DirectionalLightComponent.h"
+#include "Components/SkyLightComponent.h"
+#include "Components/ExponentialHeightFogComponent.h"
+#include "Components/AudioComponent.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/World.h"
+#include "Sound/SoundBase.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogRDSky, Log, All);
+
+namespace
+{
+	float RDSkySmooth(float A, float B, float X) { const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return T * T * (3.f - 2.f * T); }
+	// (per weather: the clouds' cover, rain, wind, fog)
+	struct FRDWeatherLook { float Cover, Rain, Wind, Fog; };
+	const FRDWeatherLook RDWeatherLooks[8] = {
+		{ 0.04f, 0.f, 0.12f, 0.f },     // clear
+		{ 0.32f, 0.f, 0.25f, 0.f },     // fair
+		{ 0.62f, 0.f, 0.40f, 0.05f },   // cloudy
+		{ 0.90f, 0.f, 0.45f, 0.20f },   // overcast
+		{ 0.96f, 0.7f, 0.55f, 0.35f },  // rain
+		{ 1.00f, 1.f, 1.00f, 0.45f },   // storm
+		{ 0.94f, 0.8f, 0.45f, 0.45f },  // snow
+		{ 0.70f, 0.f, 0.04f, 1.00f } }; // fog
+}
+
+FString ARDDungeonGenerator::WeatherName(int32 K)
+{
+	static const TCHAR* N[] = { TEXT("clear"), TEXT("fair"), TEXT("cloudy"), TEXT("overcast"), TEXT("rain"), TEXT("storm"), TEXT("snow"), TEXT("fog") };
+	return K >= 0 && K < 8 ? FString(N[K]) : FString(TEXT("?"));
+}
+
+void ARDDungeonGenerator::BeginSky7()
+{
+	if (!bSky7 || !bTown) return;
+	UWorld* W = GetWorld();
+	if (!W) return;
+	if (DayFog)
+	{
+		DayFogDensity = DayFog->FogDensity;
+		DayFog->SetFogCutoffDistance(FogSkyCutoff);
+	}
+	DaySkyLightBase = DaySky ? DaySky->Intensity : 1.f;
+	// (the clouds: a layer from 1.6 to 5.6 km over the ground)
+	if (SkyCloudMaterial && !IsValid(SkyClouds))
+	{
+		SkyClouds = NewObject<UVolumetricCloudComponent>(this, TEXT("RDSkyClouds"));
+		SkyClouds->SetupAttachment(RootComponent);
+		SkyClouds->RegisterComponent();
+		SkyCloudMID = UMaterialInstanceDynamic::Create(SkyCloudMaterial, this);
+		SkyClouds->SetMaterial(SkyCloudMID);
+		SkyClouds->SetLayerBottomAltitude(1.6f);
+		SkyClouds->SetLayerHeight(4.f);
+	}
+	auto Dome = [&](UStaticMesh* Mesh, UMaterialInterface* Mat, const TCHAR* Name, TObjectPtr<UStaticMeshComponent>& Out, TObjectPtr<UMaterialInstanceDynamic>& Mid)
+	{
+		if (!Mesh || !Mat || IsValid(Out)) return;
+		Out = NewObject<UStaticMeshComponent>(this, Name);
+		Out->SetupAttachment(RootComponent);
+		Out->SetMobility(EComponentMobility::Movable);
+		Out->SetStaticMesh(Mesh);
+		Out->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Out->SetCastShadow(false);
+		Out->bAffectDistanceFieldLighting = false;
+		Out->SetVisibleInRayTracing(false);
+		Out->SetUsingAbsoluteLocation(true); Out->SetUsingAbsoluteRotation(true); Out->SetUsingAbsoluteScale(true);
+		Out->BoundsScale = 10.f;
+		Out->RegisterComponent();
+		Mid = UMaterialInstanceDynamic::Create(Mat, this);
+		Out->SetMaterial(0, Mid);
+	};
+	Dome(SkyDomeMesh, SkyStarsMaterial, TEXT("RDSkyStars"), SkyStars, SkyStarsMID);
+	if (SkyStars && SkyDomeMesh) { const float Sr = FMath::Max(SkyDomeMesh->GetBounds().SphereRadius, 1.f); SkyStars->SetWorldScale3D(FVector(4.0e6f / Sr)); }
+	Dome(SkyDomeMesh, SkyHighCloudMaterial, TEXT("RDSkyHigh"), SkyHigh, SkyHighMID);
+	if (SkyHigh && SkyDomeMesh) { const float Sr = FMath::Max(SkyDomeMesh->GetBounds().SphereRadius, 1.f); SkyHigh->SetWorldScale3D(FVector(3.6e6f / Sr)); }
+	Dome(SkyQuadMesh, SkyMoonMaterial, TEXT("RDSkyMoon"), SkyMoon, SkyMoonMID);
+	// (the weather of the start: fair; the next in a while)
+	if (WeatherUntil <= 0.f)
+	{
+		Weather = 1; WeatherChanges = 0;
+		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x5EA7u, 17u);
+		WeatherUntil = W->GetTimeSeconds() + FMath::Lerp(WeatherSeconds.X, WeatherSeconds.Y, (H % 1000u) / 999.f);
+		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
+		SkyCover = SkyCoverWant = Lk.Cover; SkyRain = SkyRainWant = Lk.Rain; SkyWind = SkyWindWant = Lk.Wind; SkyFog = SkyFogWant = Lk.Fog;
+	}
+	ApplySky7();
+	UE_LOG(LogRDSky, Log, TEXT("RDSKY begun: clouds %d, stars %d, moon %d, fog off the sky beyond %.0f m, weather %s"), SkyClouds ? 1 : 0, SkyStars ? 1 : 0, SkyMoon ? 1 : 0, FogSkyCutoff / 100.f, *WeatherName(Weather));
+}
+
+void ARDDungeonGenerator::SetWeather(int32 Kind, bool bAtOnce)
+{
+	Weather = FMath::Clamp(Kind, 0, 7);
+	const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
+	SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog;
+	if (bAtOnce) { SkyCover = SkyCoverWant; SkyRain = SkyRainWant; SkyWind = SkyWindWant; SkyFog = SkyFogWant; }
+	if (const UWorld* W = GetWorld()) WeatherUntil = W->GetTimeSeconds() + WeatherSeconds.Y;
+	++WeatherChanges;
+	ApplySky7();
+	UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather: %s%s"), *WeatherName(Weather), bAtOnce ? TEXT(" (at once)") : TEXT(""));
+}
+
+void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
+{
+	if (!bSky7 || !bTown || Dt <= 0.f) return;
+	UWorld* W = GetWorld();
+	if (!W || W->IsPaused()) return;
+	if (!DaySun) return;
+	const float Now = W->GetTimeSeconds();
+	SkyTime += Dt;
+	// ---- where she is: cold (snow for rain), dry (less rain)
+	const APawn* Her = PC ? PC->GetPawn() : nullptr;
+	const FVector L = Her ? Her->GetActorLocation() : FVector::ZeroVector;
+	bool bDry = false;
+	bSkyCold = false;
+	if (bWild && IsWildReady() && Her)
+	{
+		FRDWSample S; Wild->Sample(L.X / 100.0, L.Y / 100.0, S, false);
+		float T = 0.5f, M = 0.5f; Wild->Climate(L.X / 100.0, L.Y / 100.0, T, M);
+		bSkyCold = S.Snow > 0.3f || T < 0.18f;
+		bDry = M < 0.25f;
+	}
+	// ---- the next weather, when its time comes
+	if (Now >= WeatherUntil)
+	{
+		++WeatherChanges;
+		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)WeatherChanges * 2654435761u);
+		const float Wt[8] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, 0.6f };
+		float Sum = 0.f; for (const float X : Wt) Sum += X;
+		float Pick = ((H >> 4) % 10000u) / 10000.f * Sum;
+		int32 K = 0;
+		for (; K < 7; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
+		if (K == Weather) K = (K + 1) % 8 == 6 ? 7 : (K + 1) % 8;
+		if (bSkyCold && (K == 4 || K == 5)) K = 6;
+		Weather = K;
+		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
+		SkyCoverWant = Lk.Cover; SkyRainWant = Lk.Rain; SkyWindWant = Lk.Wind; SkyFogWant = Lk.Fog;
+		WeatherUntil = Now + FMath::Lerp(WeatherSeconds.X, WeatherSeconds.Y, (H % 1000u) / 999.f);
+		UE_LOG(LogRDSky, Log, TEXT("RDSKY the weather turns %s (for %.0f s)%s"), *WeatherName(Weather), WeatherUntil - Now, bSkyCold ? TEXT(", cold") : TEXT(""));
+	}
+	// ---- easing toward it: the clouds over a minute and a half, the rain in twenty seconds
+	SkyCover = FMath::FInterpConstantTo(SkyCover, SkyCoverWant, Dt, 1.f / 90.f);
+	SkyRain = FMath::FInterpConstantTo(SkyRain, SkyRainWant, Dt, 1.f / 20.f);
+	SkyWind = FMath::FInterpConstantTo(SkyWind, SkyWindWant, Dt, 1.f / 30.f);
+	SkyFog = FMath::FInterpConstantTo(SkyFog, SkyFogWant, Dt, 1.f / 60.f);
+	bSkySnowing = bSkyCold || Weather == 6;
+	// ---- what follows her camera every frame: the dome, the moon, the rain or snow
+	FVector Cam = L; FRotator CamR = FRotator::ZeroRotator;
+	if (PC && PC->PlayerCameraManager) { Cam = PC->PlayerCameraManager->GetCameraLocation(); CamR = PC->PlayerCameraManager->GetCameraRotation(); }
+	if (SkyStars) SkyStars->SetWorldLocationAndRotation(Cam, FRotator(0.f, SkyTime * 0.15f, 0.f));
+	if (SkyHigh) SkyHigh->SetWorldLocationAndRotation(Cam, FRotator(0.f, SkyTime * 0.6f, 0.f));
+	if (SkyMoon && DayMoon)
+	{
+		const FVector Md = -DayMoon->GetForwardVector();
+		const float D = 3.5e6f;
+		// (a 100 cm plane facing +Z, turned to face her: 2.4 degrees of sky across, a little larger than the real moon)
+		const float Size = 2.f * D * FMath::Tan(FMath::DegreesToRadians(1.2f));
+		SkyMoon->SetWorldLocationAndRotation(Cam + Md * D, FRotationMatrix::MakeFromZ(-Md).Rotator());
+		SkyMoon->SetWorldScale3D(FVector(Size / 100.f));
+	}
+	// rain or snow round the camera, the wind's leaves round her
+	auto Fx = [&](TObjectPtr<UNiagaraComponent>& C, UNiagaraSystem* Sys, bool bOn, const FVector& At)
+	{
+		if (!Sys) return;
+		if (bOn && !IsValid(C)) C = UNiagaraFunctionLibrary::SpawnSystemAtLocation(W, Sys, At, FRotator::ZeroRotator, FVector(1.f), false, true, ENCPoolMethod::None);
+		if (!IsValid(C)) return;
+		C->SetWorldLocation(At);
+		if (!bOn && C->IsActive()) C->Deactivate();
+		else if (bOn && !C->IsActive()) C->Activate(true);
+	};
+	const bool bInside = bTown && GetSection(FIntPoint::ZeroValue) && GetSection(FIntPoint::ZeroValue)->TownBuildingAt(L) >= 0;
+	// (the drops of our own: made once, 3000 streaks or 2500 flakes in a 36 x 36 x 18 m field; the field kept round the camera,
+	// the material moving them down through it)
+	auto Drops = [&](TObjectPtr<UHierarchicalInstancedStaticMeshComponent>& H, TObjectPtr<UMaterialInstanceDynamic>& Mid, UMaterialInterface* Mat, int32 Count, const FVector& Scale, uint32 Sd, float Amount)
+	{
+		if (!DropMesh || !Mat) return;
+		if (!IsValid(H))
+		{
+			H = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+			H->SetStaticMesh(DropMesh);
+			H->SetMobility(EComponentMobility::Movable);
+			H->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			H->SetCastShadow(false);
+			H->SetUsingAbsoluteLocation(true); H->SetUsingAbsoluteRotation(true);
+			H->SetupAttachment(RootComponent);
+			H->RegisterComponent();
+			Mid = UMaterialInstanceDynamic::Create(Mat, this);
+			H->SetMaterial(0, Mid);
+			FRandomStream Rd((int32)Sd);
+			TArray<FTransform> Xs; Xs.Reserve(Count);
+			for (int32 K = 0; K < Count; ++K)
+				Xs.Add(FTransform(FRotator(90.f, Rd.FRandRange(0.f, 360.f), 0.f), FVector(Rd.FRandRange(-1800.f, 1800.f), Rd.FRandRange(-1800.f, 1800.f), Rd.FRandRange(0.f, 1800.f)), Scale));
+			H->AddInstances(Xs, false, false, false);
+			// (the field is far larger than its instances' boxes once they move: never culled away)
+			H->BoundsScale = 20.f;
+			H->SetVisibility(false);
+		}
+		const bool bOn = Amount > 0.03f && !bInside;
+		H->SetVisibility(bOn);
+		if (!bOn) return;
+		H->SetWorldLocation(FVector(Cam.X, Cam.Y, Cam.Z - 600.f));
+		Mid->SetScalarParameterValue(TEXT("Amount"), FMath::Clamp(Amount, 0.f, 1.f));
+		Mid->SetVectorParameterValue(TEXT("Origin"), FLinearColor(Cam.X, Cam.Y, Cam.Z - 600.f, 0.f));
+		Mid->SetScalarParameterValue(TEXT("Wind"), FMath::Clamp(SkyWind, 0.f, 1.2f));
+		Mid->SetScalarParameterValue(TEXT("Bright"), FMath::Lerp(0.07f, 1.f, DayLight));
+	};
+	Drops(RainDrops, RainDropMID, RainDropMaterial, 3000, FVector(0.016f, 0.6f, 1.f), 0xA11Bu, bSkySnowing ? 0.f : SkyRain);
+	Drops(SnowDrops, SnowDropMID, SnowDropMaterial, 2500, FVector(0.05f, 0.05f, 1.f), 0x5E0Au, bSkySnowing ? SkyRain : 0.f);
+	Fx(WeatherRain, RainFx, SkyRain > 0.3f && !bSkySnowing && !bInside, Cam + FVector(0, 0, 400.f));
+	Fx(WeatherSnow, SnowFx, SkyRain > 0.3f && bSkySnowing && !bInside, Cam + FVector(0, 0, 400.f));
+	Fx(WeatherWind, WindFx, SkyWind > 0.42f && !bSkySnowing && !bInside, L + FVector(0, 0, 150.f));
+	SkyApplyT += Dt;
+	if (SkyApplyT >= 0.25f) { SkyApplyT = 0.f; ApplySky7(); }
+}
+
+void ARDDungeonGenerator::ApplySky7()
+{
+	if (!bSky7) return;
+	const float Night = 1.f - DayLight;
+	// (gusts on the wind)
+	const float Gust = 0.75f + 0.25f * FMath::PerlinNoise1D(SkyTime * 0.11f) + 0.15f * FMath::PerlinNoise1D(SkyTime * 0.47f + 3.f);
+	const float Wind = FMath::Clamp(SkyWind * Gust, 0.f, 1.2f);
+	if (SkyCloudMID)
+	{
+		SkyCloudMID->SetScalarParameterValue(TEXT("Cloud_GlobalCoverage"), FMath::Lerp(SkyCoverRange.X, SkyCoverRange.Y, SkyCover));
+		SkyCloudMID->SetScalarParameterValue(TEXT("StormClouds"), RDSkySmooth(0.85f, 1.f, SkyCover) * FMath::Clamp(SkyRain, 0.f, 1.f));
+	}
+	if (SkyStarsMID)
+	{
+		// (after the dusk: none while the sky still glows)
+		const float Clear = FMath::Pow(FMath::Clamp(1.f - SkyCover, 0.f, 1.f), 1.6f) * (1.f - SkyFog);
+		SkyStarsMID->SetScalarParameterValue(TEXT("Bright"), (1.f - RDSkySmooth(0.02f, 0.3f, DayLight)) * Clear);
+	}
+	if (SkyHighMID) SkyHighMID->SetScalarParameterValue(TEXT("Bright"), FMath::Lerp(0.05f, 1.f, DayLight) * FMath::Lerp(0.35f, 1.f, SkyCover));
+	if (SkyMoonMID && DayMoon)
+	{
+		const float Up = RDSkySmooth(-0.03f, 0.05f, -DayMoon->GetForwardVector().Z);
+		SkyMoonMID->SetScalarParameterValue(TEXT("Bright"), Up * FMath::Lerp(0.25f, 1.f, Night) * FMath::Lerp(1.f, 0.12f, RDSkySmooth(0.5f, 0.95f, SkyCover)));
+	}
+	// (fog and rain thicken the haze; the clouds' dimming of the sun, the moon and the sky light is ApplyDayNight's)
+	if (DayFog) DayFog->SetFogDensity(DayFogDensity * (1.f + 3.5f * SkyFog + 0.6f * SkyRain));
+	if (WindCollection) UKismetMaterialLibrary::SetScalarParameterValue(this, WindCollection, TEXT("Strength"), Wind);
+	// (the rain's and the wind's sounds: loops, not placed)
+	auto Loop = [&](TObjectPtr<UAudioComponent>& A, const TCHAR* Key, float Vol)
+	{
+		const FRDSoundSet* Set = Sounds.Find(FName(Key));
+		if (!Set || Set->Sounds.Num() == 0 || !Set->Sounds[0]) return;
+		if (!IsValid(A))
+		{
+			A = NewObject<UAudioComponent>(this);
+			A->bAutoActivate = false; A->bAutoDestroy = false; A->bAllowSpatialization = false; A->bIsUISound = false;
+			A->SetupAttachment(RootComponent); A->RegisterComponent();
+			A->SetSound(Set->Sounds[0]);
+		}
+		const float V = Vol * Set->Volume * UserVolumeOf(FName(Key));
+		if (V > 0.01f) { if (!A->IsPlaying()) A->Play(FMath::FRand() * 5.f); A->SetVolumeMultiplier(V); }
+		else if (A->IsPlaying()) A->Stop();
+	};
+	Loop(WeatherRainSound, TEXT("Weather.Rain"), bSkySnowing ? 0.f : FMath::Clamp(SkyRain, 0.f, 1.f));
+	Loop(WeatherWindSound, TEXT("Weather.Wind"), FMath::Clamp(0.08f + Wind * 0.8f, 0.f, 1.f) * (bWild ? 1.f : 0.5f));
+}
+
+FString ARDDungeonGenerator::GetSkyState() const
+{
+	// "<weather>|<cover>|<rain>|<wind>|<fog>|<snowing>|<changes>|<seconds to the next>|<clouds>|<stars bright>|<moon bright>|<fog cutoff m>"
+	float Sb = -1.f, Mb = -1.f;
+	if (SkyStarsMID) SkyStarsMID->GetScalarParameterValue(FName(TEXT("Bright")), Sb);
+	if (SkyMoonMID) SkyMoonMID->GetScalarParameterValue(FName(TEXT("Bright")), Mb);
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	return FString::Printf(TEXT("%s|%.2f|%.2f|%.2f|%.2f|%d|%d|%.0f|%d|%.3f|%.3f|%.0f|%d|%d|%d"), *WeatherName(Weather), SkyCover, SkyRain, SkyWind, SkyFog, bSkySnowing ? 1 : 0, WeatherChanges,
+		WeatherUntil - Now, SkyClouds ? 1 : 0, Sb, Mb, DayFog ? DayFog->FogCutoffDistance / 100.f : -1.f,
+		(IsValid(WeatherRain) && WeatherRain->IsActive()) || (IsValid(RainDrops) && RainDrops->IsVisible()) ? 1 : 0,
+		(IsValid(WeatherSnow) && WeatherSnow->IsActive()) || (IsValid(SnowDrops) && SnowDrops->IsVisible()) ? 1 : 0, IsValid(WeatherWind) && WeatherWind->IsActive() ? 1 : 0);
+}

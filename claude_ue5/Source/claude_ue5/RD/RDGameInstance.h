@@ -98,6 +98,14 @@ public:
 	 *  kept while she is in the castle (the castle is indoors: its clock stands still there) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownHour = -1.f;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownDay = 1;
+	/** the list of 2026-11-04: the gardens she harvested (town seed and garden packed, "<seed>:<garden>") and the day of it; the
+	 *  tables' food she took ("<seed>:<table>") */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TMap<FString, int32> GardensHarvested;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FString> FoodTaken;
+	/** the portcullis raised (it stays as she left it) */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bPortcullisUp = false;
+	/** the showcase's command line read (once a game) */
+	bool bShow7Read = false;
 	// ---- the wilderness (RDWild*.cpp): the world's seed, the map she revealed (50 m cells in blocks of 32 x 32: a block's
 	// key and its 16 words), the places she found, the town she is in or nearest (whose state TownLooted and GuardsDead hold)
 	// and the others' state

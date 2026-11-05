@@ -1,0 +1,242 @@
+{
+ "tag": "i7f",
+ "plan": [
+  "sky7",
+  "life7",
+  "music7",
+  "save"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sky7",
+   "ok": true,
+   "begin": {
+    "weather": "fair",
+    "cover": 0.32,
+    "rain": 0.0,
+    "wind": 0.25,
+    "fog": 0.0,
+    "snowing": 0.0,
+    "changes": 0.0,
+    "next_s": 420.0,
+    "clouds": 1.0,
+    "stars": 0.0,
+    "moon": 0.0,
+    "fog_cutoff_m": 6000.0,
+    "rain_on": 0.0,
+    "snow_on": 0.0,
+    "wind_fx": 0.0
+   },
+   "snow": {
+    "weather": "rain",
+    "cover": 0.96,
+    "rain": 0.7,
+    "wind": 0.55,
+    "fog": 0.35,
+    "snowing": 1.0,
+    "changes": 6.0,
+    "next_s": 537.0,
+    "clouds": 1.0,
+    "stars": 0.0,
+    "moon": 0.0,
+    "fog_cutoff_m": 6000.0,
+    "rain_on": 0.0,
+    "snow_on": 1.0,
+    "wind_fx": 0.0
+   },
+   "pictures": {
+    "noon": [
+     117.2,
+     61.4
+    ],
+    "overcast": [
+     118.0,
+     66.0
+    ],
+    "night": [
+     43.8,
+     32.6
+    ],
+    "night_ground": [
+     48.7,
+     25.6
+    ],
+    "rain": [
+     80.0,
+     53.1
+    ],
+    "dry": [
+     111.3,
+     58.4
+    ]
+   },
+   "sun_lux": {
+    "fair": 6.95,
+    "overcast": 3.13
+   },
+   "night": {
+    "weather": "clear",
+    "cover": 0.04,
+    "rain": 0.0,
+    "wind": 0.12,
+    "fog": 0.0,
+    "snowing": 0.0,
+    "changes": 3.0,
+    "next_s": 537.0,
+    "clouds": 1.0,
+    "stars": 0.937,
+    "moon": 1.0,
+    "fog_cutoff_m": 6000.0,
+    "rain_on": 0.0,
+    "snow_on": 0.0,
+    "wind_fx": 0.0
+   },
+   "rain": {
+    "weather": "rain",
+    "cover": 0.96,
+    "rain": 0.7,
+    "wind": 0.55,
+    "fog": 0.35,
+    "snowing": 0.0,
+    "changes": 4.0,
+    "next_s": 538.0,
+    "clouds": 1.0,
+    "stars": 0.0,
+    "moon": 0.0,
+    "fog_cutoff_m": 6000.0,
+    "rain_on": 1.0,
+    "snow_on": 0.0,
+    "wind_fx": 0.0
+   }
+  },
+  {
+   "step": "life7",
+   "ok": true,
+   "visits": {
+    "meadows": {
+     "animals": [
+      "Hare",
+      "Squirrel"
+     ],
+     "n": 3,
+     "swarms": [
+      "Butterflies"
+     ]
+    },
+    "taigas": {
+     "animals": [
+      "Deer",
+      "Squirrel",
+      "Wolf"
+     ],
+     "n": 6,
+     "swarms": [
+      "Bird flock"
+     ]
+    },
+    "grasslands": {
+     "animals": [
+      "Deer",
+      "Hare"
+     ],
+     "n": 3,
+     "swarms": [
+      "Butterflies"
+     ]
+    }
+   },
+   "flee": {
+    "flee_cm": 133.5,
+    "state_far": 0,
+    "state_near": 3,
+    "fled": 1,
+    "ran_m": 15.0
+   },
+   "night_swarms": [
+    "Fireflies"
+   ]
+  },
+  {
+   "step": "music7",
+   "ok": true,
+   "wild": {
+    "scene": "Music.Wild",
+    "track": "SW_Music_Wild_02",
+    "rotations": 5,
+    "next_in_s": 471.2112638913095
+   },
+   "rotated": {
+    "scene": "Music.Wild",
+    "track": "SW_Music_Wild_03",
+    "rotations": 6,
+    "next_in_s": 365.2112638913095
+   },
+   "town": "Music.Town"
+  },
+  {
+   "step": "save",
+   "ok": true,
+   "gold_before": 0,
+   "found_before": 1,
+   "revealed_before": 900,
+   "saved": true,
+   "info": "2026-11-05 02:14|brokenspire|the wilds: farms, 3 km from Brokenspire|Summoner|test|",
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "save_page": [
+    "text|Name|The wilds day 1",
+    "button|Save",
+    "button|Back"
+   ],
+   "typed": "Test Save 7",
+   "slots": [
+    "save_test_save_7|Test Save 7|2026-11-05 02:14|the wilds: farms, 3 km from Brokenspire|Summoner",
+    "save|Saved game|2026-11-05 02:14|the wilds: farms, 3 km from Brokenspire|Summoner",
+    "autosave|Autosave|2026-11-05 02:14|Brokenspire|Summoner",
+    "save_meadows_at_dawn|Meadows at dawn|2026-11-05 02:05|the wilds: meadows, 17 km from Brokenspire|Summoner"
+   ],
+   "load_page": [
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-05 02:14 (Summoner)",
+    "button|Saved game: the wilds: farms, 3 km from Brokenspire, 2026-11-05 02:14 (Summoner)",
+    "button|Autosave: Brokenspire, 2026-11-05 02:14 (Summoner)",
+    "button|Meadows at dawn: the wilds: meadows, 17 km from Brokenspire, 2026-11-05 02:05 (Summoner)",
+    "button|Back"
+   ],
+   "named_ok": true,
+   "load": true,
+   "back_m": 0.0,
+   "gold_after": 0,
+   "found_after": 1,
+   "revealed_after": 900,
+   "save_state": {
+    "written": 1,
+    "slot": "autosave",
+    "why": "map",
+    "arrived": 1
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_i7f_sky7_noon.png",
+  "wd_i7f_sky7_overcast.png",
+  "wd_i7f_sky7_night.png",
+  "wd_i7f_sky7_night_ground.png",
+  "wd_i7f_sky7_rain.png",
+  "wd_i7f_sky7_dry.png",
+  "wd_i7f_sky7_snow.png",
+  "wd_i7f_life7_meadows.png",
+  "wd_i7f_life7_taigas.png",
+  "wd_i7f_life7_grasslands.png",
+  "wd_i7f_life7_flee.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

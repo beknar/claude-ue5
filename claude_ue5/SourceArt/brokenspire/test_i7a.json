@@ -1,0 +1,64 @@
+{
+ "tag": "i7a",
+ "plan": [
+  "list7",
+  "signs",
+  "gate"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "list7",
+   "ok": false,
+   "error": "'StaticMeshComponent' object has no attribute 'bounds'",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 1690, in run\n    yield from STEPS[s]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 1609, in step_list7\n    lo = min(c.bounds.origin.z - c.bounds.box_extent.z for c in mills[0].get_components_by_class(unreal.StaticMeshComponent))\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 1609, in <genexpr>\n    lo = min(c.bounds.origin.z - c.bounds.box_extent.z for c in mills[0].get_components_by_class(unreal.StaticMeshComponent))\n             ^^^^^^^^\nAttributeError: 'StaticMeshComponent' object has no attribute 'bounds'\n"
+  },
+  {
+   "step": "signs",
+   "ok": true,
+   "signs": 9,
+   "faces": 18,
+   "trades": 9,
+   "words": [
+    "BARRACKS",
+    "CHAPEL",
+    "GENERALGOODS",
+    "HEALER",
+    "HEDGEWITCH",
+    "SMITHY",
+    "STOREHOUSE",
+    "TAVERN",
+    "TEMPLE"
+   ],
+   "face_off_board_cm": 0.05,
+   "notices": 8
+  },
+  {
+   "step": "gate",
+   "ok": true,
+   "wild": true,
+   "gate_before": [
+    "gate|143|0|0.00|-450|-21300|0"
+   ],
+   "shut_past_gate_cm": -56.5,
+   "lever_prompt": "pull the lever (raise the portcullis)",
+   "up": true,
+   "prompt": "",
+   "message": "The portcullis rises",
+   "past_gate_cm": 870.3
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_i7a_list7_lift.png",
+  "bs_i7a_sign_tavern.png",
+  "bs_i7a_sign_tavern.png",
+  "bs_i7a_board_0.png",
+  "bs_i7a_board_1.png",
+  "bs_i7a_board_2.png",
+  "bs_i7a_board_3.png",
+  "bs_i7a_gate.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

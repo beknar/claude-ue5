@@ -128,6 +128,14 @@ void ARDTownsfolk::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	const float Now = GetWorld()->GetTimeSeconds();
+	// (the list of 2026-11-04: on the open ground's rise and fall, at its own height over it)
+	if (Section && Section->TownLiftW.Num() > 0)
+	{
+		const FVector P = GetActorLocation();
+		const float Lz = Section->TownLiftAt(FVector2D(P));
+		if (FloorZ0 < -1e8f) FloorZ0 = P.Z - Lz;
+		if (FMath::Abs(P.Z - (FloorZ0 + Lz)) > 0.5f) SetActorLocation(FVector(P.X, P.Y, FloorZ0 + Lz));
+	}
 	const FVector L = GetActorLocation();
 	auto Turn = [&](const FVector& Dir, float Rate)
 	{
@@ -693,7 +701,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); }
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1102,6 +1110,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	// (a door or a container nearer than them: that is what F does)
 	if (Who >= 0) if (const ARDSection* S0 = GetSection(FIntPoint::ZeroValue)) { bool bD0 = false; int32 I0 = -1; if (Best > 160.f || S0->FindNearestInteractive(From, Best, bD0, I0) < Best - 30.f) Who = -1; }
 	if (Who >= 0) return FString::Printf(TEXT("talk to %s"), *TownPeople[Who]->Title);
+	if (const FString Th = TownThingDescribe(From); !Th.IsEmpty()) return Th;
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return FString();
 	for (const ARDSection::FTownSpot& Sp : S->TownSpots)
@@ -1152,6 +1161,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		if (!Service.IsNone()) { OpenTownPanel(Service, Who); TownBody = Line; }
 		return TEXT("bark");
 	}
+	if (const FString Th = TownThingInteract(From); !Th.IsEmpty()) return Th;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return FString();
 	for (const ARDSection::FTownSpot& Sp : S->TownSpots)

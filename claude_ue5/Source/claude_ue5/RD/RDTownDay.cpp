@@ -73,6 +73,7 @@ void ARDDungeonGenerator::BeginDayNight()
 	if (GI && GI->TownHour >= 0.f) { H = GI->TownHour; TownDay = GI->TownDay; }
 	TownHour = FMath::Fmod(H, 24.f);
 	ApplyDayNight();
+	BeginSky7();
 	UE_LOG(LogRDTownDay, Log, TEXT("RDDAY begun: day %d at %s (a day lasts %.0f s), sun %.1f lux, sky %.2f, exposure bias %.2f"), TownDay, *GetTownClock(), DayLengthSeconds, DaySunLux, DaySkyLight, DayBias);
 }
 
@@ -97,8 +98,10 @@ void ARDDungeonGenerator::ApplyDayNight()
 	// (daylight: 0 at night (the sun 6 degrees under the horizon), 1 once it is 12 over it; the sun warmer near the horizon)
 	DayLight = RDTDSmooth(-6.f, 12.f, Elev);
 	const float SunUp = RDTDSmooth(-3.f, 4.f, Elev);
+	// (the list of 2026-11-04: the weather's clouds dim the sun, the moon and the sky light)
+	const float Cv = bSky7 ? SkyCover : 0.f;
 	DaySun->SetWorldRotation(RDTDLightFrom(FMath::Max(Elev, -10.f), Azim));
-	DaySun->SetIntensity(DaySunLux * SunUp * FMath::Lerp(0.55f, 1.f, RDTDSmooth(0.f, 25.f, Elev)));
+	DaySun->SetIntensity(DaySunLux * SunUp * FMath::Lerp(0.55f, 1.f, RDTDSmooth(0.f, 25.f, Elev)) * FMath::Lerp(1.f, 0.28f, Cv * Cv));
 	const FLinearColor Low(1.f, 0.55f, 0.28f), High(1.f, 0.96f, 0.9f);
 	DaySun->SetLightColor(FMath::Lerp(Low, High, RDTDSmooth(2.f, 30.f, Elev)) * DaySunColor);
 	DaySun->SetCastShadows(SunUp > 0.01f);
@@ -106,9 +109,9 @@ void ARDDungeonGenerator::ApplyDayNight()
 	{
 		const float Me = -Elev * 0.75f;      // (the moon opposite, not as high)
 		DayMoon->SetWorldRotation(RDTDLightFrom(FMath::Max(Me, -10.f), Azim + 180.f));
-		DayMoon->SetIntensity(MoonLux * RDTDSmooth(-2.f, 8.f, Me));
+		DayMoon->SetIntensity(MoonLux * RDTDSmooth(-2.f, 8.f, Me) * FMath::Lerp(1.f, 0.35f, Cv * Cv));
 	}
-	if (DaySky) DaySky->SetIntensity(DaySkyLight * FMath::Lerp(NightSkyShare, 1.f, DayLight));
+	if (DaySky) DaySky->SetIntensity(DaySkyLight * FMath::Lerp(NightSkyShare, 1.f, DayLight) * FMath::Lerp(1.f, 0.7f, Cv));
 	if (DayFog) DayFog->SetFogInscatteringColor(DayFogLight * FMath::Lerp(0.12f, 1.f, DayLight));
 	if (DayPost)
 	{
