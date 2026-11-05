@@ -57,7 +57,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 				const double X = X0 + (I - 1) * St, Y = Y0 + (J - 1) * St;
 				const double Ex = D.TownHalfM - FMath::Abs(X - D.TownAt.X), Ey = D.TownHalfM - FMath::Abs(Y - D.TownAt.Y);
 				const double In = FMath::Min(Ex, Ey);
-				if (In >= 0.0) Zc = FMath::Lerp(0.f, -60.f, RDWCSmooth(0.f, 3.f, (float)In));
+				// (3 m under: the town's own ground has hollows since the list of 2026-11-04 (1.4 m at most))
+				if (In >= 0.0) Zc = FMath::Lerp(0.f, -300.f, RDWCSmooth(0.f, 3.f, (float)In));
 			}
 			Z[I * Nb + J] = Zc;
 		}
@@ -65,7 +66,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 	auto Sat = [&](int32 I, int32 J) -> const FRDWSample& { return S[(I + 1) * Nb + (J + 1)]; };
 	// ---- the ground's mesh
 	D.V.SetNumUninitialized(Nv * Nv); D.N.SetNumUninitialized(Nv * Nv); D.C.SetNumUninitialized(Nv * Nv);
-	D.UV0.SetNumUninitialized(Nv * Nv); D.UV1.SetNumUninitialized(Nv * Nv); D.UV2.SetNumUninitialized(Nv * Nv);
+	D.UV0.SetNumUninitialized(Nv * Nv); D.UV1.SetNumUninitialized(Nv * Nv); D.UV2.SetNumUninitialized(Nv * Nv); D.UV3.SetNumUninitialized(Nv * Nv);
 	D.Slope.SetNumUninitialized(Nv * Nv); D.Tan.SetNumUninitialized(Nv * Nv);
 	const double U0 = (X0 - W.Xs) / 4.0, V0 = (Y0 - W.Yw) / 4.0;      // (the detail textures: one repeat every 4 m, from the continent's corner)
 	for (int32 I = 0; I < Nv; ++I)
@@ -92,7 +93,11 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			D.C[K] = C;
 			D.UV0[K] = FVector2D(U0 + I * St / 4.0, V0 + J * St / 4.0);
 			D.UV1[K] = FVector2D(Rk, Sn);
-			D.UV2[K] = FVector2D(Q.Sand, FMath::Max(Q.Mud, Q.Road * 0.8f));
+			// (the list of 2026-11-04: "the road outside brokenspire is visible on the map, but it is indistinguishable and not
+			// visible in the wilderness": it was 80 % of the mud layer, 3 m wide, on a 2 m grid. It has a layer of its own now: a
+			// trodden earth road, darker in its wheel ruts)
+			D.UV2[K] = FVector2D(Q.Sand, Q.Mud);
+			D.UV3[K] = FVector2D(Q.Road, 0.f);
 		}
 	D.T.Reserve((Nv - 1) * (Nv - 1) * 6);
 	for (int32 I = 0; I + 1 < Nv; ++I)

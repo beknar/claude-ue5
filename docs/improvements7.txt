@@ -1,0 +1,39 @@
+improvements with the current game
+player can walk through the farm animals, such as the cows.
+the signs outside buildings look like they're floating and they often fall outside of the sign's boundaries.  the font
+should also be an appropriate medieval one for the town of brokenspire and vell Morath.
+inside the inns, it is often too dark where the customers are sitting.
+the windmill is embedded in the ground while the arms of the windmill turns, hitting into the ground.
+there should be a door for the animal pens that can be opened and closed.
+the cobblestone streets should be at most 3 people wide.
+the ground is uniformly flat throughout all of brokenspire.  there should be some terrain that is above the 
+ground level and some that's below ground level.  the houses and buildings should be on flat land, but unoccupied
+terrain could rise and lower.
+gardens can be lootable with ingredients that can be made into food at an oven.
+if a table has food items on it, it should be lootable.
+the portcullis at Brokenspire can be walked through and there are gaps on either side of it.  there should be a collider
+that prevents someone from walking through it.  there should be a way to open the portcullis like a lever or other 
+mechanism.
+the sky is uniformly grey.  there should be clouds of different sizes and types, birds of different sizes and
+types, the sun if it's daytime, the moon if it's night time, stars if it's night if there's no cloud cover
+the transition between terrain types is too abrupt and looks like a straight line from above.  it should be a more
+natural transition and it should be smooth.  the biome's name should also be visible under the mini map once the player
+is in the wilderness.
+all of the ground terrain in the wilderness is uniformly flat.  there should be natural hills, dips, ridges, berms, just like a real
+wilderness.  
+the wilderness should also have a lot more foliage than what it has now, which includes lots more bushes, grass that's 
+blowing in the wind, trees of various sizes depending on what biome they're in
+the road outside brokenspire is visible on the map, but it is indistinguishable and not visible in the wilderness
+the different terrain types are in regular squares and grids on the map.  it should not be that regular or mechanical, 
+it should look more natural and ragged and uneven, and the different biome type should gradually flow into each other instead
+of abruptly changing and looking like a straight line on the map
+when it's night time, there is no moonlight or starlight
+the music should change every so often.  after 5-10 minutes, the music should change to another appropriate song for the 
+scene the player is in
+there should be more animals and insects that are appropriate for that biome.  those animals should flee from the player if 
+the player gets too close (1-3 meters).
+there is no wind of weather effects
+there is no way to name your own save
+when all of the above are done, commit to a PR, review the changes, fix any errors, merge if it is mergeable.
+create a gamebar reel showing off the new changes above.  the reel can be of any length up to 5 minutes.  put
+the gamebar reel in E:\code\claude-ue5\renders\gamebar renders.  

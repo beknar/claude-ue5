@@ -488,6 +488,26 @@ void ARDDungeonGenerator::QueueSkyBeam(ARDMonster* From, const FVector& At, floa
 	SkyBeamStats.FindOrAdd(TEXT("called"))++;
 }
 
+bool ARDDungeonGenerator::DebugPlaceFinalBoss(FIntPoint Set, int32 Room)
+{
+	if (bFinalBossPlaced || !GetSection(Set)) return false;
+	// (PlaceFinalBoss takes the showcase's room when the showcase is on: set for this call only)
+	const bool bWas = bFinalShowOn; const FIntPoint S0 = FinalShowSet; const int32 R0 = FinalShowRoom;
+	bFinalShowOn = true; FinalShowSet = Set; FinalShowRoom = Room;
+	const bool bOk = PlaceFinalBoss();
+	bFinalShowOn = bWas; FinalShowSet = S0; FinalShowRoom = R0;
+	return bOk;
+}
+
+int32 ARDDungeonGenerator::DebugAutoplayOnlyFinal()
+{
+	AutoplayOnly.Reset();
+	if (const FEncounter* E = Encounters.FindByPredicate([](const FEncounter& X) { return X.bFinal; }))
+		for (const TWeakObjectPtr<ARDMonster>& M : E->Live)
+			if (M.IsValid() && !M->IsDead()) AutoplayOnly.Add(M);
+	return AutoplayOnly.Num();
+}
+
 bool ARDDungeonGenerator::FinalBossHolds(const ARDMonster* Boss) const
 {
 	if (!Boss || !Boss->bFinalBoss || Boss->IsDead() || FinalBossHold.Y <= 0.f || FinalBandNear <= FinalBossCloseBand) return false;

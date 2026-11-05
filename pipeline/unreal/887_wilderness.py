@@ -96,15 +96,21 @@ def materials():
     uv0b = b.n(unreal.MaterialExpressionMultiply, -1350); b.c(uv0, "", uv0b, "A"); uv0b.set_editor_property("const_b", 0.5)
     uv1 = b.n(unreal.MaterialExpressionTextureCoordinate, -1500, coordinate_index=1)
     uv2 = b.n(unreal.MaterialExpressionTextureCoordinate, -1500, coordinate_index=2)
-    rock = b.mask(uv1, "", r=True); snow = b.mask(uv1, "", g=True); sand = b.mask(uv2, "", r=True); mud = b.mask(uv2, "", g=True)
+    # (the road's own layer since the list of 2026-11-04: "the road outside brokenspire is ... not visible in the wilderness":
+    # it was 80 % of the mud. UV3's U, the lake village's soil road)
+    uv3 = b.n(unreal.MaterialExpressionTextureCoordinate, -1500, coordinate_index=3)
+    rock = b.mask(uv1, "", r=True); snow = b.mask(uv1, "", g=True); sand = b.mask(uv2, "", r=True); mud = b.mask(uv2, "", g=True); road = b.mask(uv3, "", r=True)
+    ML = "/Game/Medieval_Lake_Village/Textures/"
     L = {"grass": (S + "T_Grass_BC", S + "T_Grass_N", uv0), "rock": (S + "T_RockyCliff_A_basecolor", S + "T_RockyCliff_A_normal", uv0b),
          "sand": (S + "T_Sand_basecolor", S + "T_Sand_normal", uv0), "mud": (S + "T_Mud_BC", S + "T_Mud_N", uv0),
+         "road": (ML + "T_SoilRoad_BC", ML + "T_SoilRoad_N", uv0),
          "snow": ("/Game/AlienPlanet/Textures/Snow/T_Snow_B", "/Game/AlienPlanet/Textures/Snow/T_Snow_N", uv0)}
     T = {k: (b.tex(bc, u), b.tex(nm, u)) for k, (bc, nm, u) in L.items()}
     def chain(i):
         e = b.lerp(T["grass"][i], T["rock"][i], rock)
         e = b.lerp(e, T["sand"][i], sand)
         e = b.lerp(e, T["mud"][i], mud)
+        e = b.lerp(e, T["road"][i], road)
         return b.lerp(e, T["snow"][i], snow)
     det = chain(0)
     # (the texture gives its detail as brightness against its own average (its coarsest mip); the hue is the world's own, from
@@ -114,7 +120,7 @@ def materials():
         s = b.tex(bc, u); s.set_editor_property("mip_value_mode", unreal.TextureMipValueMode.TMVM_MIP_LEVEL); s.set_editor_property("const_mip_value", 12)
         avg[k] = s
     def chain_avg():
-        e = b.lerp(avg["grass"], avg["rock"], rock); e = b.lerp(e, avg["sand"], sand); e = b.lerp(e, avg["mud"], mud); return b.lerp(e, avg["snow"], snow)
+        e = b.lerp(avg["grass"], avg["rock"], rock); e = b.lerp(e, avg["sand"], sand); e = b.lerp(e, avg["mud"], mud); e = b.lerp(e, avg["road"], road); return b.lerp(e, avg["snow"], snow)
     da = chain_avg()
     lum = b.n(unreal.MaterialExpressionDotProduct, -200); b.c(det, "", lum, "A"); b.c(b.const3((0.30, 0.59, 0.11)), "", lum, "B")
     lua = b.n(unreal.MaterialExpressionDotProduct, -200); b.c(da, "", lua, "A"); b.c(b.const3((0.30, 0.59, 0.11)), "", lua, "B")
@@ -263,7 +269,13 @@ def data():
     w, g = gen()
     J = json.load(open(JSON, encoding="utf-8"))
     out = []; missing = []
+    # (the list of 2026-11-04: more of each kind, sizes that vary more, bushes and ferns added by groups of biomes)
+    L7 = J.get("list7", {}); DENS = L7.get("density", {}); SCALE = L7.get("scale", {})
+    EXTRA = {}
+    for names, entry in L7.get("extra", []):
+        for n in names: EXTRA.setdefault(n, []).append(entry)
     for b in J["biomes"]:
+        b = dict(b); b["foliage"] = list(b.get("foliage", [])) + EXTRA.get(b["name"], [])
         B = unreal.RDWildBiome()
         B.set_editor_property("name", b["name"]); B.set_editor_property("shape", SHAPES[b["shape"]])
         B.set_editor_property("base", float(b["base"])); B.set_editor_property("amp", float(b["amp"]))
@@ -278,8 +290,9 @@ def data():
             if not m or not isinstance(m, unreal.StaticMesh): missing.append(f"{b['name']}: {path}"); continue
             sc = hm * 100.0 / mesh_height(m)
             F = unreal.RDWildFoliage()
-            F.set_editor_property("mesh", m); F.set_editor_property("kind", kind); F.set_editor_property("density", float(dens))
-            F.set_editor_property("scale_min", sc * 0.8); F.set_editor_property("scale_max", sc * 1.2)
+            F.set_editor_property("mesh", m); F.set_editor_property("kind", kind); F.set_editor_property("density", float(dens) * float(DENS.get(kind, 1.0)))
+            lo, hi = SCALE.get(kind, [0.8, 1.2])
+            F.set_editor_property("scale_min", sc * lo); F.set_editor_property("scale_max", sc * hi)
             s = 30.0
             if "s" in flags:
                 i = flags.index("s"); s = float("".join(ch for ch in flags[i + 1:] if ch.isdigit()) or 30)

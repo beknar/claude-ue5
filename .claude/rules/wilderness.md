@@ -6,6 +6,8 @@ paths:
   - "pipeline/unreal/888_*"
   - "pipeline/blender_numpy/wild_*.py"
   - "claude_ue5/SourceArt/wilderness/**"
+  - "claude_ue5/Source/claude_ue5/RD/RDSky*"
+  - "pipeline/unreal/890_*"
 ---
 
 # The wilderness (`887`, `888`, `RD/RDWild*.cpp`, `RD/RDSave.cpp`, `docs/wilderness.txt`, `docs/levels/wilderness.md`)
@@ -56,3 +58,12 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - A step whose pawn is gone keeps "passing" on what it no longer measures: the look step checks her pawn and the chunks round her at every visit.
 - **The whole test in one play session ran the machine short of memory** (the editor's committed memory 32 to 34 GB; two background runs were killed). Trimming after drops held eight long teleports flat at about 30.3 GB, but the 28 template visits still ran out: run the test in batches with the editor restarted between them (`world`; `look=<seven templates>` four times; `stream,towns,gate,map`; `places,travel,save`). Don't restart a run that was killed for memory without asking.
 - What is built but not yet tested, and the known limits, are in `TODO.md`: keep it current when a step is added or a limit removed.
+
+## The list of 2026-11-04 (`890`, `RD/RDSky.cpp`, `RD/RDWildLife.cpp`, `docs/improvements7.txt`)
+
+- **The fog covered the sky**: the height fog's own colour hid the clouds and stars at every hour; `FogSkyCutoff` (6 km) leaves the sky to the sky.
+- **Screen a pack's effect before using it by name**: Wildlands' wind effect drew huge green blobs and the rain effect showed nothing: the rain and snow are our own drops (instanced planes round the camera with `M_RD_Drops`). The first stars (a fine tiling) read as snow: they are tiled coarser and come out only after dusk.
+- **A filter written as "the same" drops one side**: the swarms' town check was `bInTown != Biomes.Contains("town")`, so out in the wilds every swarm that also lives in towns (the fireflies) was dropped and the night had none. In a town only the town's swarms; outside, all.
+- **The towns' level ground reaches 1.15 km**: a relief measured on a region's nearest cell to Brokenspire measured the town's flattening; the test's lines are moved 1.4 km clear of every town.
+- **The roads doubled back**: the path finder starts from the 1 km grid's node nearest the gate (the town's middle), so a road left the gate and ran back along the wall; from the gate none was seen ahead. Each road now runs 600 m straight out of its town before joining the grid. Measure a road where it leaves (rings round the gate), not along the line from the square through the gate.
+- **A pilot moved far drops the town**: 17 km out the home section is gone (`GetSection(0, 0)` is null), and a pilot that required it stopped without a word. Read what the town gives before moving her.

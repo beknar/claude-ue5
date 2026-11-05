@@ -217,9 +217,14 @@ void FRDWildWorld::AssignBiomes()
 
 int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* Site) const
 {
-	// the regions' borders wander (a warped Voronoi); weights fall off over ~2 km past the nearest site's distance
-	const double Wx = X + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 61u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 63u) * 900.0;
-	const double Wy = Y + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 62u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 64u) * 900.0;
+	// the regions' borders wander (a warped Voronoi); weights fall off over ~2 km past the nearest site's distance. Since the
+	// list of 2026-11-04 ("the transition between terrain types is too abrupt and looks like a straight line from above ... it
+	// should look more natural and ragged and uneven") the warp has two finer scales too (700 m, 180 m) and the fall-off is
+	// wider: a border wanders at every scale and the regions flow into each other over 3 to 6 km
+	const double Wx = X + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 61u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 63u) * 900.0
+	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 65u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 67u) * 70.0;
+	const double Wy = Y + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 62u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 64u) * 900.0
+	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 66u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 68u) * 70.0;
 	const int32 I0 = FMath::FloorToInt((Wx - Xs) / CellM), J0 = FMath::FloorToInt((Wy - Yw) / CellM);
 	int32 Ci[9]; double Cd[9]; int32 N = 0; double Dmin = 1e18;
 	for (int32 Di = -1; Di <= 1; ++Di)
@@ -231,7 +236,7 @@ int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* S
 			if (bDup) continue;
 			Ci[N] = K; Cd[N] = FVector2D::Distance(FVector2D(Wx, Wy), CellSite[K]); Dmin = FMath::Min(Dmin, Cd[N]); ++N;
 		}
-	constexpr double Tau = 1700.0;
+	constexpr double Tau = 2400.0;
 	int32 M = 0; float Sum = 0.f;
 	float Tw[9];
 	for (int32 Q = 0; Q < N; ++Q) Tw[Q] = (float)FMath::Exp(-(Cd[Q] - Dmin) / Tau);
@@ -378,7 +383,18 @@ float FRDWildWorld::LandRelief(double X, double Y, bool bDetail, const int32* Bi
 	const float R1 = (Ridged(X, Y, 1.0 / 3800.0, bDetail ? 4 : 3, Seed + 131u) - 0.32f) * 46.f;
 	const float R2 = Fbm(X, Y, 1.0 / 1300.0, bDetail ? 3 : 2, Seed + 132u) * 13.f;
 	const float R3 = (Ridged(X, Y, 1.0 / 9500.0, 3, Seed + 133u) - 0.3f) * 55.f;
-	return K * (R1 + R2 + R3);
+	// (the list of 2026-11-04: "all of the ground terrain in the wilderness is uniformly flat. there should be natural hills,
+	// dips, ridges, berms": the regions' shapes and the relief above vary over kilometres, and walked over a few hundred
+	// metres the land was level. Hills and hollows of 150 to 500 m, ridges and berms of 60 to 250 m, swells of 25 m; the
+	// flattest (marsh, beach) keep a little of it, a farm's fields most of it)
+	// (measured by 888's ground7: the first try (7.5 m at 420 m, 4.2 at 240, 0.55 at 26) left a plain's 300 m within 2 m and
+	// its swells under half a metre; the second (11 m, 6 m, K2 1 - 0.45 Flat) a plain's 300 m within 1.8 m, a farm's 3.7)
+	const float K2 = 1.f - 0.3f * FMath::Clamp(Flat, 0.f, 1.f);
+	const float L1 = Fbm(X, Y, 1.0 / 420.0, 3, Seed + 134u) * 20.f;
+	const float L2 = (Ridged(X, Y, 1.0 / 240.0, 2, Seed + 135u) - 0.35f) * 8.5f;
+	const float L4 = (Ridged(X, Y, 1.0 / 95.0, 2, Seed + 137u) - 0.4f) * 2.2f;
+	const float L3 = bDetail ? Fbm(X, Y, 1.0 / 30.0, 2, Seed + 136u) * 1.1f : 0.f;
+	return K * (R1 + R2 + R3) + K2 * (L1 + L2 + L3 + L4);
 }
 
 // ------------------------------------------------------------------------------------------------ rivers, lakes, roads, towns
@@ -443,20 +459,26 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		const FRoad& R = Roads[Di];
 		const float Z = FMath::Lerp(R.Z[Ds], R.Z[Ds + 1], (float)Dt);
 		const float D = (float)Dd;
-		const float Wt = 1.f - RDWSmooth(2.6f, 10.f, D);
+		// (the road a cart and a half wide, its edges ragged: 2.3 to 3 m from its middle (it was 1.5 to 2.9, under the 2 m
+		// mesh's spacing); its bed levelled out to 12 m)
+		const float Wt = 1.f - RDWSmooth(3.2f, 12.f, D);
 		H = FMath::Lerp(H, Z, Wt);
-		Road = 1.f - RDWSmooth(1.5f + 0.6f * Perlin(X / 9.0, Y / 9.0, Seed + 71u), 2.9f, D);
+		Road = 1.f - RDWSmooth(2.3f + 0.7f * Perlin(X / 9.0, Y / 9.0, Seed + 71u), 3.9f, D);
 		if (Road > 0.4f && Kind == 3) { Water = -1e9f; Kind = 0; }           // a ford: the road crosses dry
 	}
 	// the towns: their ground flat (their whole section and a margin), their region round them eased into it
 	for (const FRDWildTown& T : Towns)
 	{
+		// (since the list of 2026-11-04 eased in over 400 to 1150 m, not 480 to 1700: the land before the gate was flat for
+		// more than a kilometre)
 		const double D = FVector2D::Distance(P, T.Site);
-		if (D > 1700.0) continue;
-		float F = 1.f - RDWSmooth(480.f, 1700.f, (float)D);
-		if (H < 2.f && D > 480.0) F *= 1.f - RDWSmooth(480.f, 560.f, (float)D);
+		if (D > 1150.0) continue;
+		float F = 1.f - RDWSmooth(400.f, 1150.f, (float)D);
+		if (H < 2.f && D > 400.0) F *= 1.f - RDWSmooth(400.f, 470.f, (float)D);
 		H = FMath::Lerp(H, T.H, F);
-		if (D < 480.0) { Water = -1e9f; Kind = 0; Road = 0.f; }
+		// (the road runs on up to the town's own ground, which draws it from the gate: its section is 360 to 504 m across)
+		if (D < 400.0) { Water = -1e9f; Kind = 0; }
+		if (D < 170.0) Road = 0.f;
 	}
 	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; }
 	return H;
@@ -534,21 +556,41 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	if (Kind == 0 && H < 0.f && C < 0.02f) { Water = 0.f; Kind = 1; }
 	// farms: fields of crops in parcels (rows), between the roads
 	float Field = 0.f;
-	if (Farm > 0.35f && Fs.Road < 0.1f)
+	if (Farm > 0.2f && Fs.Road < 0.1f)
 	{
-		const double U = X * 0.94 + Y * 0.34, V = -X * 0.34 + Y * 0.94;
-		const int32 Pu = FMath::FloorToInt(U / 140.0), Pv = FMath::FloorToInt(V / 95.0);
-		const float Pr = Rand01(Pu, Pv, Seed + 85u);
-		const float Fu = (float)(U / 140.0 - Pu), Fv = (float)(V / 95.0 - Pv);
-		const float Edge = FMath::Min(FMath::Min(Fu, 1.f - Fu) * 140.f, FMath::Min(Fv, 1.f - Fv) * 95.f);
-		if (Pr < 0.82f && Edge > 2.5f)
+		// (the list of 2026-11-04: "the different terrain types are in regular squares and grids on the map. it should not be
+		// that regular or mechanical": the fields were one grid of 140 x 95 m parcels turned 20 degrees. Now each field is the
+		// land nearest a point of a jittered grid (70 to 160 m across), the land warped so the fields' edges bend, each field
+		// its own crop and its rows its own way, grass strips (hedgerows) along the edges; toward the farms' edge the fields
+		// thin out, each at a farm weight of its own, not along one line)
+		const double Wx = X + Fbm(X, Y, 1.0 / 300.0, 2, Seed + 88u) * 26.0, Wy = Y + Fbm(X, Y, 1.0 / 300.0, 2, Seed + 89u) * 26.0;
+		constexpr double Cs = 112.0;
+		const int32 Ci = FMath::FloorToInt(Wx / Cs), Cj = FMath::FloorToInt(Wy / Cs);
+		double D1 = 1e18, D2 = 1e18; int32 Fbi = Ci, Fbj = Cj;
+		for (int32 Di = -1; Di <= 1; ++Di)
+			for (int32 Dj = -1; Dj <= 1; ++Dj)
+			{
+				const int32 Pi = Ci + Di, Pj = Cj + Dj;
+				const double Px = (Pi + 0.12 + 0.76 * Rand01(Pi, Pj, Seed + 90u)) * Cs, Py = (Pj + 0.12 + 0.76 * Rand01(Pi, Pj, Seed + 93u)) * Cs;
+				const double Dd = FMath::Square(Wx - Px) + FMath::Square(Wy - Py);
+				if (Dd < D1) { D2 = D1; D1 = Dd; Fbi = Pi; Fbj = Pj; }
+				else if (Dd < D2) D2 = Dd;
+			}
+		const float Edge = (float)(FMath::Sqrt(D2) - FMath::Sqrt(D1)) * 0.5f;
+		const float Pr = Rand01(Fbi, Fbj, Seed + 85u);
+		const float Need = 0.22f + 0.55f * Rand01(Fbi, Fbj, Seed + 91u);
+		if (Pr < 0.86f && Farm > Need && Edge > 2.2f)
 		{
 			// (seen from far, a pixel spans fields: their own colours fade into the region's)
-			Field = RDWSmooth(0.35f, 0.6f, Farm) * (1.f - RDWSmooth(25.f, 110.f, PixelM));
-			static const FLinearColor Crops[5] = { FLinearColor(0.48f, 0.40f, 0.16f), FLinearColor(0.20f, 0.30f, 0.09f), FLinearColor(0.27f, 0.18f, 0.10f), FLinearColor(0.42f, 0.38f, 0.18f), FLinearColor(0.30f, 0.34f, 0.12f) };
-			FLinearColor Cc = Crops[(int32)(Pr * 97.f) % 5];
+			Field = RDWSmooth(Need, Need + 0.12f, Farm) * (1.f - RDWSmooth(25.f, 110.f, PixelM));
+			static const FLinearColor Crops[6] = { FLinearColor(0.48f, 0.40f, 0.16f), FLinearColor(0.20f, 0.30f, 0.09f), FLinearColor(0.27f, 0.18f, 0.10f), FLinearColor(0.42f, 0.38f, 0.18f), FLinearColor(0.30f, 0.34f, 0.12f), FLinearColor(0.36f, 0.31f, 0.13f) };
+			FLinearColor Cc = Crops[(int32)(Pr * 97.f) % 6];
+			const float Ang = Rand01(Fbi, Fbj, Seed + 92u) * PI;
+			const double U = X * FMath::Cos(Ang) + Y * FMath::Sin(Ang);
 			const float Row = 0.5f + 0.5f * FMath::Sin((float)(U / 1.6));
 			Cc *= 0.88f + 0.12f * Row;
+			// (a field's own shade varies a little across it)
+			Cc *= 0.93f + 0.14f * (0.5f + 0.5f * Fbm(X, Y, 1.0 / 60.0, 2, Seed + 94u));
 			Col = FMath::Lerp(Col, Cc, Field);
 		}
 	}
@@ -804,11 +846,16 @@ void FRDWildWorld::MakeRoads()
 	};
 	auto MakeRoad = [&](FVector2D Pa, FVector2D Pb, int32 Ta, int32 Tb)
 	{
+		// (each end runs straight out of its town for 600 m first: from the 1 km grid's node nearest the gate (the town's own
+		// middle) the road doubled back along the wall, and from the gate no road was seen ahead (the list of 2026-11-04's
+		// showcase, measured on a ring round the gate))
+		const FVector2D Da = (Pa - Towns[Ta].Site).GetSafeNormal(), Db = (Pb - Towns[Tb].Site).GetSafeNormal();
+		const FVector2D Qa = Pa + Da * 600.0, Qb = Pb + Db * 600.0;
 		TArray<FIntPoint> Path;
-		if (!AStar(Node(Pa), Node(Pb), Path)) return;
-		TArray<FVector2D> P; P.Add(Pa);
+		if (!AStar(Node(Qa + Da * 400.0), Node(Qb + Db * 400.0), Path)) return;
+		TArray<FVector2D> P; P.Add(Pa); P.Add(Pa + Da * 250.0); P.Add(Qa);
 		for (int32 I = 1; I + 1 < Path.Num(); ++I) P.Add(FVector2D(Xs + Path[I].X * G, Yw + Path[I].Y * G));
-		P.Add(Pb);
+		P.Add(Qb); P.Add(Pb + Db * 250.0); P.Add(Pb);
 		for (int32 Pass = 0; Pass < 3; ++Pass)
 		{
 			TArray<FVector2D> Q; Q.Add(P[0]);

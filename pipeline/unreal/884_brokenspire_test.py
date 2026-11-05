@@ -44,7 +44,7 @@ OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\brokenspire"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
 assert G["w"] is not None, "PIE is not running"
-DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,mapzoom,satellite,life,falls,dagger,circle,castle,tour,trip"
+DEFAULT = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,mapzoom,satellite,life,list7,falls,dagger,circle,castle,tour,trip"
 PLAN = [s.strip() for s in (sys.argv[1] if len(sys.argv) > 1 else DEFAULT).split(",") if s.strip()]
 R = {"tag": TAG, "plan": PLAN, "level": G["w"].get_path_name().split(".")[-1], "steps": []}
 
@@ -702,9 +702,30 @@ def step_gate():
     gate = place("gate"); sq = place("square")
     d = V(sq.x - gate.x, sq.y - gate.y, 0); n = math.hypot(d.x, d.y); d = V(d.x / n, d.y / n, 0)
     inside = V(gate.x + d.x * 350, gate.y + d.y * 350, 0)
-    put(inside, yaw=math.degrees(math.atan2(-d.y, -d.x))); yield from wait(0.4)
+    res["wild"] = bool(g.get_editor_property("wild"))
+    if res["wild"]:
+        # (the list of 2026-11-04: the portcullis stops her until a lever raises it; it stays as she leaves it)
+        lv = [l for l in [str(x) for x in section().get_town_improve_lines()] if l.startswith(("lever|", "gate|"))]
+        res["gate_before"] = [l for l in lv if l.startswith("gate|")]
+        if section().is_portcullis_up():
+            L1 = [l.split("|") for l in lv if l.startswith("lever|")][0]; put(V(float(L1[2]) + d.x * 100, float(L1[3]) + d.y * 100, 0)); yield from wait(0.3)
+            g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(11.0)
+        put(inside, yaw=math.degrees(math.atan2(-d.y, -d.x))); yield from wait(0.4)
+        t0 = time.time()
+        while time.time() - t0 < 3.0:
+            G["pawn"].add_movement_input(V(-d.x, -d.y, 0), 1.0, False); yield
+        p = G["pawn"].get_actor_location(); res["shut_past_gate_cm"] = round(-((gate.x - p.x) * -d.x + (gate.y - p.y) * -d.y), 1)
+        L1 = [l.split("|") for l in lv if l.startswith("lever|")]
+        lever = min(L1, key=lambda q: dist2(V(float(q[1 + 1]), float(q[2 + 1]), 0), inside)) if L1 else None
+        if lever:
+            lp = V(float(lever[2]), float(lever[3]), 0)
+            put(V(lp.x + d.x * 110, lp.y + d.y * 110, 0)); yield from wait(0.3)
+            res["lever_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(11.0)
+            res["up"] = section().is_portcullis_up()
+        put(inside, yaw=math.degrees(math.atan2(-d.y, -d.x))); yield from wait(0.4)
     res["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
-    g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.2)
+    if not res["wild"]: g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.2)
     res["message"] = str(cb().get_editor_property("message"))
     t0 = time.time()
     while time.time() - t0 < 4.0:
@@ -712,9 +733,10 @@ def step_gate():
     p = G["pawn"].get_actor_location()
     res["past_gate_cm"] = round((gate.x - p.x) * -d.x + (gate.y - p.y) * -d.y, 1) * -1
     shot("gate"); yield from rwait(1.2)
-    # (since 2026-11-03 the wilderness is beyond the gate: open, she walks out (888's gate step); barred without it)
-    res["wild"] = bool(g.get_editor_property("wild"))
-    ok = ("barred" not in res["prompt"] and res["past_gate_cm"] > 600) if res["wild"] else ("gate" in res["prompt"] and "barred" in res["message"] and res["past_gate_cm"] < 0)
+    # (since 2026-11-03 the wilderness is beyond the gate: she walks out (888's gate step) once its portcullis is up; barred without it.
+    # Shut, she is stopped before the gate's line (0.40 m short in one town, 0.57 m in another: where her capsule meets its bars))
+    ok = ("barred" not in res["prompt"] and res.get("shut_past_gate_cm", 0) < -15 and "raise the portcullis" in res.get("lever_prompt", "") and res.get("up") and res["past_gate_cm"] > 600) if res["wild"] \
+        else ("gate" in res["prompt"] and "barred" in res["message"] and res["past_gate_cm"] < 0)
     step_result("gate", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ pictures
@@ -1142,22 +1164,40 @@ def step_lights():
 def step_signs():
     """the trades' signs say what they are (the user's: "a general goods store should say something like 'general goods'"),
     on both faces of each sign; the quest board's notices (four on each face); pictures"""
+    # (since the list of 2026-11-04 the words are painted in Almendra on a plane against each face of the board (Town.SignFace_<WORDS>,
+    # MI_BS_Sign_<WORDS>), not the engine's text: each face within its board (90.4 cm out along the bracket, 89.5 down, 3.35 off
+    # its middle: 127.3 cm from the sign's origin))
     res = {}; S = section()
-    texts = []
-    for c in S.get_components_by_class(unreal.TextRenderComponent):
-        if c.component_has_tag("TownSign"): texts.append(str(c.get_editor_property("text")))
+    signs_at = []
+    for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m = c.get_editor_property("static_mesh")
+        if m and "TavernSign" in m.get_name():
+            for i in range(c.get_instance_count()):
+                t = c.get_instance_transform(i, True); t = t[-1] if isinstance(t, tuple) else t; signs_at.append(t)
+    faces = []
+    for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        mt = c.get_material(0)
+        if not mt or not mt.get_name().startswith("MI_BS_Sign_"): continue
+        for i in range(c.get_instance_count()):
+            t = c.get_instance_transform(i, True); t = t[-1] if isinstance(t, tuple) else t
+            faces.append((mt.get_name()[11:], t))
+    off = [min((abs((f.translation - s.translation).length() - 127.3) for s in signs_at), default=1e9) for _, f in faces]
     trades = [b for b in blds() if b["kind"] not in ("home", "castle")]
-    res["signs"] = len(texts); res["trades"] = len(trades); res["words"] = sorted(set(t.replace("\n", " ") for t in texts))
+    res["signs"] = len(signs_at); res["faces"] = len(faces); res["trades"] = len(trades); res["words"] = sorted(set(w for w, _ in faces))
+    res["face_off_board_cm"] = round(max(off, default=0.0), 2)
     bd = place("board")
     notes = [p for p in ism_instances("Plane") if bd and dist2(p, bd) < 200]
     res["notices"] = len(notes)
-    st = next(b for b in blds() if b["kind"] == "store")
-    f = door_front(st, 420.0); put(f, yaw=math.degrees(math.atan2(st["door"].y - f.y, st["door"].x - f.x)))
-    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(st["door"].y - f.y, st["door"].x - f.x)))); yield from wait(1.0); shot("sign_store"); yield from rwait(1.5)
+    # (a sign seen from along the street: 3.5 m off its board's face, at its height)
+    for k, (w, f) in enumerate([x for x in faces if x[0] in ("GENERALGOODS", "TAVERN")][:2]):
+        nrm = f.rotation.rotator().get_up_vector() if hasattr(f.rotation.rotator(), "get_up_vector") else unreal.MathLibrary.get_up_vector(f.rotation.rotator())
+        p = f.translation; cam = V(p.x + nrm.x * 330, p.y + nrm.y * 330, 0)
+        yaw = math.degrees(math.atan2(p.y - cam.y, p.x - cam.x))
+        put(cam, yaw=yaw, z=0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=14, yaw=yaw)); yield from wait(1.0); shot(f"sign_{w.lower()}"); yield from rwait(1.5)
     if bd:
         for k, o in enumerate((V(-330, 0, 0), V(330, 0, 0), V(0, -330, 0), V(0, 330, 0))):
             pp = V(bd.x + o.x, bd.y + o.y, 0); put(pp, yaw=math.degrees(math.atan2(bd.y - pp.y, bd.x - pp.x))); yield from wait(0.6); shot(f"board_{k}"); yield from rwait(1.2)
-    ok = res["signs"] == 2 * res["trades"] and "GENERAL GOODS" in res["words"] and res["notices"] == 8
+    ok = res["signs"] == res["trades"] and res["faces"] == 2 * res["trades"] and "GENERALGOODS" in res["words"] and res["face_off_board_cm"] < 2.0 and res["notices"] == 8
     step_result("signs", ok, **res)
 
 def step_circle():
@@ -1499,7 +1539,157 @@ def step_dagger():
     ok = bool(h_) and -11.0 <= h_[1] <= -8.5 and abs(h_[0] - 0.7) < 2.0
     step_result("dagger", ok, **res)
 
-STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite})
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-04
+def improve():
+    d = {}
+    for l in section().get_town_improve_lines():
+        p = str(l).split("|"); d.setdefault(p[0], []).append(p[1:])
+    return d
+def sweep_to(frm, to):
+    """she is put at frm and moved to `to` with a sweep (as a body that walks): how far she got (cm)"""
+    G["pawn"].set_actor_location(V(frm.x, frm.y, frm.z), False, True)
+    G["pawn"].set_actor_location(V(to.x, to.y, frm.z), True, False)
+    p = G["pawn"].get_actor_location()
+    return dist2(p, frm)
+def step_list7():
+    """the user's list of 2026-11-04 in the town (docs/improvements7.txt): the farm animals stop her; a street's cobbles at
+    most three people wide; the open ground rises and falls (flat under every building), the walked ground following it; the
+    mill's sails clear of the ground on its house; the tavern's seats lit; a pen's gate opens and shuts; a garden harvested
+    for its crops (once a day); a table's food taken; the oven bakes bread of the garden's wheat"""
+    g = G["gen"]; S = section(); res = {}; quiet(True)
+    g.set_town_hour(11.0); yield from wait(0.5)
+    # ---- an animal stops her: put inside its pen, 1.6 m off it, and moved through where it stands
+    L = life(); an = None
+    for a in L["animal"]:
+        if a["kind"].lower().startswith(("cow", "pig", "goat")): an = a; break
+    an = an or (L["animal"][0] if L["animal"] else None)
+    if an:
+        # (the same sweep with the animal moved away first: the pen's fence alone stops her there)
+        A = min(GS.get_all_actors_of_class(G["w"], unreal.RDTownAnimal), key=lambda a: dist2(a.get_actor_location(), an["at"]))
+        at = A.get_actor_location(); A.set_actor_tick_enabled(False)
+        free = got = 0.0
+        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            frm = V(at.x + dx * 170, at.y + dy * 170, at.z + 100); to = V(at.x, at.y, at.z + 100)
+            A.set_actor_location(V(at.x, at.y, at.z - 5000), False, True); free = sweep_to(frm, to)
+            A.set_actor_location(at, False, True); yield from wait(0.1); got = sweep_to(frm, to)
+            if free > 150: break
+        A.set_actor_tick_enabled(True)
+        res["animal"] = {"kind": an["kind"], "without_cm": round(free, 1), "with_cm": round(got, 1)}
+        # (stopped short of its middle by at least her capsule and some of its body: a pig met side on stopped her 58 cm off,
+        # end on 66 (two towns); walked through, she reaches its middle as she does without it)
+        res["animal"]["stopped"] = free > 150 and got < free - 40
+    # ---- the cobbles: across the main road's middle, a sample every 20 cm of the drawn ground's cobble weight
+    gate = place("gate"); sq = place("square")
+    d = V(sq.x - gate.x, sq.y - gate.y, 0); n = math.hypot(d.x, d.y); d = V(d.x / n, d.y / n, 0); ac = V(-d.y, d.x, 0)
+    mid = V(gate.x + d.x * (n * 0.45), gate.y + d.y * (n * 0.45), 0)
+    cob = [S.get_town_ground_color_at(V(mid.x + ac.x * k * 20, mid.y + ac.y * k * 20, 0)).g for k in range(-30, 31)]
+    run_, best = 0, 0
+    for c in cob: run_ = run_ + 1 if c > 0.5 else 0; best = max(best, run_)
+    res["cobbles_m"] = round(best * 0.2, 1); res["cobbles_profile"] = [round(c, 2) for c in cob[::3]]
+    # ---- the ground's rise and fall
+    im = improve()
+    lift = [float(x) for x in im.get("lift", [["0", "0", "9"]])[0]]
+    res["lift"] = {"max_cm": lift[0], "min_cm": lift[1], "under_buildings_cm": lift[2]}
+    L0 = S.get_actor_location(); best = None
+    for i in range(4, 164, 3):
+        for j in range(4, 164, 3):
+            P = V(L0.x + (i + 0.5) * 300, L0.y + (j + 0.5) * 300, 0); h = S.get_town_lift_at(P)
+            if best is None or h > best[2]: best = (P.x, P.y, h)
+        if i % 30 == 4: yield
+    # (the walked ground there: a trace straight down)
+    hit = unreal.SystemLibrary.line_trace_single(G["w"], V(best[0], best[1], 1500), V(best[0], best[1], -800), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+    hz = None
+    if hit:
+        h = hit.to_tuple() if hasattr(hit, "to_tuple") else hit
+        try: hz = round(h[4].z, 1)
+        except Exception: hz = None
+    res["lift"]["highest"] = [round(best[0]), round(best[1]), round(best[2], 1)]; res["lift"]["walked_z"] = hz
+    put(V(best[0] - 1400, best[1], 0), yaw=0.0, z=best[2] + 60); yield from wait(1.5); shot("list7_lift"); yield from rwait(1.2)
+    # ---- the mill: its sails' lowest point and the millstones over the ground, its house there
+    mills = [a for a in GS.get_all_actors_of_class(G["w"], unreal.Actor) if "windmill" in a.get_class().get_name().lower()]
+    houses = [a for a in GS.get_all_actors_of_class(G["w"], unreal.Actor) if "PLA_Mill" in a.get_class().get_name()]
+    if mills:
+        def low(c):
+            b0, b1 = c.get_local_bounds(); t = c.get_world_transform()
+            return min(t.transform_location(V(x, y, z)).z for x in (b0.x, b1.x) for y in (b0.y, b1.y) for z in (b0.z, b1.z))
+        rot = [c for c in mills[0].get_components_by_class(unreal.StaticMeshComponent) if c.static_mesh and "rotor" in c.static_mesh.get_name()]
+        lo = min(low(c) for c in rot) if rot else -1.0
+        res["mill_base_cm"] = round(min(low(c) for c in mills[0].get_components_by_class(unreal.StaticMeshComponent)), 1)
+        res["mill"] = {"lowest_cm": round(lo, 1), "house": len(houses) > 0, "house_m": round(dist2(houses[0].get_actor_location(), mills[0].get_actor_location()) / 100.0, 1) if houses else None}
+        ml = place("mill"); put(V(ml.x + 2800, ml.y, 0), yaw=180.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=180.0)); yield from wait(1.5); shot("list7_mill"); yield from rwait(1.2)
+    # ---- the tavern's seats lit: lights within 2.5 m of every seat, a picture at night
+    seats = [w for w in L["work"] if w["kind"] in ("SitDrink", "SitTalk")]
+    lights = [c.get_world_location() for c in S.get_components_by_class(unreal.PointLightComponent)]
+    lit = [min((dist2(s["at"], l) for l in lights), default=1e9) for s in seats]
+    res["tavern"] = {"seats": len(seats), "seats_lit": sum(1 for x in lit if x < 250), "nearest_light_m": round(max(lit, default=0) / 100.0, 2)}
+    tv = next(b for b in blds() if b["kind"] == "tavern")
+    g.set_town_hour(20.5); yield from wait(1.0)
+    put(V(tv["c"].x, tv["c"].y, 0), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=0.0)); yield from wait(1.2); shot("list7_tavern", "1280x720"); yield from rwait(1.5)
+    res["tavern"]["luma"] = round(png_luma(os.path.join(SHOTS, f"bs_{TAG}_list7_tavern.png"), (0.2, 0.45, 0.8, 0.95)), 1) if os.path.exists(os.path.join(SHOTS, f"bs_{TAG}_list7_tavern.png")) else None
+    g.set_town_hour(11.0)
+    # ---- a pen's gate: F at it opens it, again shuts it
+    pg = im.get("pengate", [])
+    res["pens"] = {"gates": len(pg)}
+    if pg:
+        q = pg[0]; c = V(float(q[2]), float(q[3]), 0)
+        put(V(c.x + 120, c.y, 0)); yield from wait(0.3)
+        res["pens"]["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(1.5)
+        o1 = [x for x in improve()["pengate"] if x[0] == q[0]][0][1]
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(1.5)
+        o2 = [x for x in improve()["pengate"] if x[0] == q[0]][0][1]
+        res["pens"]["opened"] = o1 == "1"; res["pens"]["shut"] = o2 == "0"
+    # ---- a garden harvested, not again the same day
+    cnt = lambda n: cb().get_item_count(n)
+    crops = ("Wild Carrot", "Wheat", "Pumpkin", "Sunflower Seeds", "Herbs")
+    gd = im.get("garden", [])
+    if gd:
+        q = gd[0]; at = V(float(q[2]), float(q[3]), 0)
+        before = {c: cnt(c) for c in crops}
+        put(V(at.x, at.y, 0)); yield from wait(0.3)
+        res["garden_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+        got = {c: cnt(c) - before[c] for c in crops if cnt(c) != before[c]}
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+        res["garden"] = {"crops": q[1], "got": got, "again": str(cb().get_editor_property("message")), "ripe_after": g.is_garden_ripe(int(q[0]))}
+    # ---- a table's food taken
+    fd = [x for x in im.get("food", []) if x[1] == "0"]
+    res["food"] = {"tables": len(im.get("food", []))}
+    if fd:
+        q = fd[0]; at = V(float(q[2]), float(q[3]), float(q[4]))
+        items = q[5].split(","); before = {i: cnt(i) for i in set(items)}
+        put(V(at.x + 90, at.y, 0)); yield from wait(0.3)
+        res["food"]["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+        res["food"]["got"] = {i: cnt(i) - before[i] for i in set(items)}
+        res["food"]["taken"] = [x for x in improve()["food"] if x[0] == q[0]][0][1] == "1"
+    # ---- the oven: 2 wheat bake a bread
+    ov = im.get("oven", [])
+    res["oven"] = {"ovens": len(ov)}
+    if ov:
+        q = ov[0]; at = V(float(q[0]), float(q[1]), 0)
+        cb().add_item("Wheat", 2); w0, b0 = cnt("Wheat"), cnt("Bread")
+        for dx, dy in ((200, 0), (-200, 0), (0, 200), (0, -200)):
+            put(V(at.x + dx, at.y + dy, 0)); yield from wait(0.2)
+            if "oven" in str(g.describe_nearest(G["pawn"].get_actor_location())): break
+        res["oven"]["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
+        res["oven"]["station"] = str(cb().get_craft_station()); res["oven"]["open"] = cb().is_crafting_open()
+        res["oven"]["lines"] = [str(l).split("|")[1] for l in cb().get_craft_lines()][:8]
+        res["oven"]["baked"] = cb().craft("Bread")
+        res["oven"]["bread"] = cnt("Bread") - b0; res["oven"]["wheat_used"] = w0 - cnt("Wheat")
+        cb().set_crafting_open(False); cb().set_craft_station("None")
+    quiet(False)
+    ok = (res.get("animal", {}).get("stopped", False) and 0.8 <= res["cobbles_m"] <= 3.0 and lift[0] >= 60 and lift[1] <= -40 and lift[2] < 1.0
+          and hz is not None and abs(hz - best[2]) < 15 and res.get("mill", {}).get("lowest_cm", -1) > 150 and res.get("mill", {}).get("house")
+          and res["tavern"]["seats"] > 0 and res["tavern"]["seats_lit"] == res["tavern"]["seats"]
+          and res["pens"].get("opened") and res["pens"].get("shut") and "gate" in res["pens"].get("prompt", "")
+          and res.get("garden", {}).get("got") and "harvested" in res.get("garden", {}).get("again", "") and not res.get("garden", {}).get("ripe_after", True)
+          and res["food"].get("taken") and sum(res["food"].get("got", {}).values()) >= 1
+          and res["oven"].get("station") == "Oven" and res["oven"].get("baked") and res["oven"].get("bread") == 1 and res["oven"].get("wheat_used") == 2)
+    step_result("list7", ok, **res)
+
+STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

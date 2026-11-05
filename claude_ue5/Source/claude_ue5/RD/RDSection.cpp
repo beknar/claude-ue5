@@ -473,8 +473,26 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	}
 	// (level 5: where the anvils stand, in play also for the saved start section, whose furniture is not built again)
 	if (Generator && Name == Generator->AnvilPiece) AnvilPoints.Add(T.GetLocation());
-	if (!bBuildStatic) return true;
+	// (improvements7, the town: its kitchens' ovens bake; what stands on the open ground (the trees, the grass) stands on its
+	// rise and fall; a prep table has food on it to take (in play too: the food is interactive))
+	if (Generator && Generator->bTown)
+	{
+		if (Name == TEXT("BreadOven")) TownOvens.Add(T.GetLocation());
+		if (Name == TEXT("PrepTable") && FurnRoom >= 0)
+		{
+			const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(T.GetLocation().X), FMath::RoundToInt(T.GetLocation().Y))), 0xF00Du);
+			FRandomStream Rf((int32)Hh);
+			// (the kit's prep table's top is at 80 cm; the town's is the bare one, its food set on it here)
+			TownFoodOn(Rf, T.TransformPosition(FVector(0, 0, 80.5f)), T.Rotator().Yaw);
+		}
+	}
 	FTransform W = P->Adjust * T;
+	if (bTownLiftOn && Generator && Generator->bTown)
+	{
+		const float Lz = TownLiftAt(FVector2D(T.GetLocation()));
+		if (Lz != 0.f) W.AddToTranslation(FVector(0, 0, Lz));
+	}
+	if (!bBuildStatic) return true;
 	// (Brokenspire: a piece taller than the room it stands in (the dungeon's columns, 9.6 m) ends under its ceiling: the town
 	// castle's roof is a walked wall walk since 2026-11-02, and the columns stood through it)
 	if (Generator && Generator->bTown && FurnRoom >= 0 && P->Size.Z > Generator->RoomHeight + 20.f && T.GetLocation().Z - GetActorLocation().Z < 30.f && P->Mesh)
@@ -2213,6 +2231,8 @@ float ARDSection::FindNearestInteractive(const FVector& From, float MaxDistance,
 	Index = -1; float Best = MaxDistance; bDoor = false;
 	for (int32 I = 0; I < Doors.Num(); ++I)
 	{
+		// (the portcullis is moved by its levers, not by F at it)
+		if (Doors[I].bLift) continue;
 		const FVector D = Doors[I].Center - From;
 		const float H = FVector2D(D.X, D.Y).Size();
 		if (H < Best && FMath::Abs(D.Z) < 200.f) { Best = H; Index = I; bDoor = true; }
@@ -2233,7 +2253,8 @@ void ARDSection::ToggleDoor(int32 I, const FVector& Opener, bool bByMonster)
 	if (!Doors.IsValidIndex(I)) return;
 	auto Set = [&](FMover& M, float Target)
 	{
-		if (Target > 0.5f && M.Target < 0.5f)
+		// (a portcullis lifts and a lever throws one way: no side to swing away from)
+		if (Target > 0.5f && M.Target < 0.5f && !M.bLift && M.Kind != TEXT("lever"))
 		{
 			// swing away from whoever opens it: +yaw swings a +Y leaf toward -X (against the leaf normal)
 			const FVector D = Opener - M.Center;
@@ -2242,6 +2263,19 @@ void ARDSection::ToggleDoor(int32 I, const FVector& Opener, bool bByMonster)
 		}
 		M.Target = Target; M.bByMonster = bByMonster && Target > 0.5f; M.MonsterCloseTimer = 0.f;
 	};
+	// (improvements7: a lever moves what it is linked to (the portcullis) and every other lever of it with it)
+	if (Doors[I].Kind == TEXT("lever") && Doors.IsValidIndex(Doors[I].Link))
+	{
+		const int32 Lk = Doors[I].Link;
+		const float Tg = Doors[Lk].Target > 0.5f ? 0.f : 1.f;
+		Doors[Lk].Target = Tg;
+		for (FMover& Lv : Doors) if (Lv.Kind == TEXT("lever") && Lv.Link == Lk) Lv.Target = Tg;
+		// (the game keeps the portcullis as she left it, however the lever was pulled: the PR review's find, F's door path
+		// raised it without saying so)
+		if (Lk == TownPortcullis) RecordPortcullis(Tg > 0.5f);
+		if (Generator) { Generator->PlaySoundAt(TEXT("Env.CellOpen"), Doors[I].Center); Generator->PlaySoundAt(Tg > 0.5f ? TEXT("Env.DoorOpen") : TEXT("Env.DoorClose"), Doors[Lk].Center); }
+		return;
+	}
 	FMover& M = Doors[I];
 	const float Target = M.Target > 0.5f ? 0.f : 1.f;
 	// (the third list: a vault she has no key for, an arena while it is fought: its doors do not open, for her or a monster)
@@ -2579,9 +2613,11 @@ void ARDSection::Tick(float Dt)
 	auto Animate = [Dt](FMover& M)
 	{
 		if (M.Alpha == M.Target) return;
-		M.Alpha = FMath::FInterpConstantTo(M.Alpha, M.Target, Dt, M.bDoor ? 1.4f : 1.8f);
+		// (a portcullis rises slowly, a lever is thrown quickly)
+		M.Alpha = FMath::FInterpConstantTo(M.Alpha, M.Target, Dt, M.bLift ? 0.32f : M.Kind == TEXT("lever") ? 3.f : M.bDoor ? 1.4f : 1.8f);
 		const float E = M.Alpha * M.Alpha * (3.f - 2.f * M.Alpha);
-		M.Pivot->SetRelativeRotation(M.Closed * FQuat(M.Axis, FMath::DegreesToRadians(M.OpenAngle * E)));
+		if (M.bLift) M.Pivot->SetRelativeLocation(M.ClosedLoc + FVector(0, 0, M.LiftZ * E));
+		else M.Pivot->SetRelativeRotation(M.Closed * FQuat(M.Axis, FMath::DegreesToRadians(M.OpenAngle * E)));
 		// moving / open leaves and lids never push anyone (a wardrobe door swinging into her would wedge her)
 		const bool bShut = M.Alpha < 0.02f;
 		for (UStaticMeshComponent* C : M.Parts)

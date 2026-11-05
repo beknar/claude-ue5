@@ -1,5 +1,5 @@
 {
- "tag": "b",
+ "tag": "b_final",
  "plan": [
   "balance"
  ],
@@ -19,7 +19,7 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 11.6,
+      "secs": 11.3,
       "hp_left": 0.89,
       "low": 0.89,
       "max_hp": 140,
@@ -38,7 +38,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 9.1,
+       "secs": 9.0,
        "hp_left": 0.94,
        "low": 0.94,
        "max_hp": 140,
@@ -54,7 +54,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 9.2,
+       "secs": 9.0,
        "hp_left": 0.94,
        "low": 0.94,
        "max_hp": 140,
@@ -71,7 +71,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 9.1,
+      "secs": 9.0,
       "hp_left": 0.94,
       "low": 0.94,
       "max_hp": 140,
@@ -115,12 +115,12 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 14.1,
-      "hp_left": 0.6,
-      "low": 0.46,
+      "secs": 14.3,
+      "hp_left": 0.7,
+      "low": 0.39,
       "max_hp": 198,
       "dealt": 377,
-      "taken": 159,
+      "taken": 139,
       "kills": 3,
       "left": [],
       "used": 1,
@@ -134,7 +134,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 14.6,
+       "secs": 14.2,
        "hp_left": 0.55,
        "low": 0.55,
        "max_hp": 198,
@@ -150,12 +150,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 14.6,
-       "hp_left": 0.55,
-       "low": 0.55,
+       "secs": 14.1,
+       "hp_left": 0.72,
+       "low": 0.72,
        "max_hp": 198,
        "dealt": 377,
-       "taken": 90,
+       "taken": 55,
        "kills": 1,
        "left": [],
        "used": 0,
@@ -167,7 +167,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 14.6,
+      "secs": 14.2,
       "hp_left": 0.55,
       "low": 0.55,
       "max_hp": 198,
@@ -216,12 +216,12 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 8.6,
-      "hp_left": 0.74,
-      "low": 0.74,
+      "secs": 9.8,
+      "hp_left": 0.53,
+      "low": 0.53,
       "max_hp": 267,
-      "dealt": 481,
-      "taken": 68,
+      "dealt": 511,
+      "taken": 126,
       "kills": 3,
       "left": [],
       "used": 0,
@@ -235,12 +235,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.0,
-       "hp_left": 0.49,
+       "secs": 11.3,
+       "hp_left": 0.79,
        "low": 0.34,
        "max_hp": 267,
-       "dealt": 581,
-       "taken": 296,
+       "dealt": 582,
+       "taken": 216,
        "kills": 1,
        "left": [],
        "used": 1,
@@ -253,9 +253,9 @@
        "down": false,
        "secs": 11.0,
        "hp_left": 0.49,
-       "low": 0.34,
+       "low": 0.49,
        "max_hp": 267,
-       "dealt": 579,
+       "dealt": 581,
        "taken": 296,
        "kills": 1,
        "left": [],
@@ -268,12 +268,12 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 11.0,
-      "hp_left": 0.49,
+      "secs": 11.3,
+      "hp_left": 0.79,
       "low": 0.34,
       "max_hp": 267,
-      "dealt": 581,
-      "taken": 296,
+      "dealt": 582,
+      "taken": 216,
       "kills": 1,
       "left": [],
       "used": 1,
@@ -317,12 +317,12 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 17.6,
+      "secs": 17.1,
       "hp_left": 1.0,
-      "low": 0.92,
+      "low": 0.87,
       "max_hp": 345,
-      "dealt": 770,
-      "taken": 96,
+      "dealt": 758,
+      "taken": 121,
       "kills": 3,
       "left": [],
       "used": 0,
@@ -337,8 +337,8 @@
        "won": true,
        "down": false,
        "secs": 21.5,
-       "hp_left": 0.61,
-       "low": 0.46,
+       "hp_left": 0.68,
+       "low": 0.48,
        "max_hp": 345,
        "dealt": 878,
        "taken": 592,
@@ -353,11 +353,11 @@
        "won": true,
        "down": false,
        "secs": 21.4,
-       "hp_left": 0.93,
-       "low": 0.48,
+       "hp_left": 0.52,
+       "low": 0.39,
        "max_hp": 345,
-       "dealt": 892,
-       "taken": 461,
+       "dealt": 878,
+       "taken": 636,
        "kills": 1,
        "left": [],
        "used": 1,
@@ -370,8 +370,8 @@
       "won": true,
       "down": false,
       "secs": 21.5,
-      "hp_left": 0.61,
-      "low": 0.46,
+      "hp_left": 0.68,
+      "low": 0.48,
       "max_hp": 345,
       "dealt": 878,
       "taken": 592,
@@ -414,15 +414,15 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 24.0,
-      "hp_left": 0.72,
-      "low": 0.45,
+      "secs": 16.5,
+      "hp_left": 0.77,
+      "low": 0.41,
       "max_hp": 433,
       "dealt": 1211,
-      "taken": 609,
+      "taken": 355,
       "kills": 3,
       "left": [],
-      "used": 2,
+      "used": 1,
       "stealth": 0,
       "kites": 0,
       "summons": 0
@@ -433,15 +433,15 @@
       {
        "won": true,
        "down": false,
-       "secs": 24.6,
-       "hp_left": 0.46,
-       "low": 0.46,
+       "secs": 24.1,
+       "hp_left": 0.87,
+       "low": 0.54,
        "max_hp": 433,
-       "dealt": 1253,
-       "taken": 233,
+       "dealt": 1263,
+       "taken": 315,
        "kills": 1,
        "left": [],
-       "used": 0,
+       "used": 1,
        "stealth": 0,
        "kites": 0,
        "summons": 0
@@ -449,15 +449,15 @@
       {
        "won": true,
        "down": false,
-       "secs": 24.6,
-       "hp_left": 0.46,
-       "low": 0.46,
+       "secs": 24.0,
+       "hp_left": 0.87,
+       "low": 0.54,
        "max_hp": 433,
-       "dealt": 1253,
-       "taken": 233,
+       "dealt": 1263,
+       "taken": 315,
        "kills": 1,
        "left": [],
-       "used": 0,
+       "used": 1,
        "stealth": 0,
        "kites": 0,
        "summons": 0
@@ -466,15 +466,15 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 24.6,
-      "hp_left": 0.46,
-      "low": 0.46,
+      "secs": 24.1,
+      "hp_left": 0.87,
+      "low": 0.54,
       "max_hp": 433,
-      "dealt": 1253,
-      "taken": 233,
+      "dealt": 1263,
+      "taken": 315,
       "kills": 1,
       "left": [],
-      "used": 0,
+      "used": 1,
       "stealth": 0,
       "kites": 0,
       "summons": 0
@@ -585,7 +585,7 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 8.1,
+      "secs": 8.2,
       "hp_left": 0.94,
       "low": 0.87,
       "max_hp": 81,
@@ -604,11 +604,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 7.6,
+       "secs": 7.5,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 81,
-       "dealt": 361,
+       "dealt": 362,
        "taken": 0,
        "kills": 1,
        "left": [],
@@ -620,11 +620,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 7.6,
+       "secs": 7.5,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 81,
-       "dealt": 361,
+       "dealt": 362,
        "taken": 0,
        "kills": 1,
        "left": [],
@@ -637,11 +637,11 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 7.6,
+      "secs": 7.5,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 81,
-      "dealt": 361,
+      "dealt": 362,
       "taken": 0,
       "kills": 1,
       "left": [],
@@ -691,17 +691,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 11.8,
+      "secs": 17.7,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 91,
-      "dealt": 471,
+      "dealt": 554,
       "taken": 0,
       "kills": 3,
       "left": [],
       "used": 1,
       "stealth": 0,
-      "kites": 2,
+      "kites": 4,
       "summons": 0
      },
      "boss_kind": "Tank",
@@ -710,50 +710,50 @@
       {
        "won": true,
        "down": false,
-       "secs": 10.2,
-       "hp_left": 1.0,
+       "secs": 9.9,
+       "hp_left": 0.83,
        "low": 0.71,
        "max_hp": 91,
-       "dealt": 580,
-       "taken": 52,
+       "dealt": 607,
+       "taken": 68,
        "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 1,
+       "kites": 0,
        "summons": 0
       },
       {
        "won": true,
        "down": false,
-       "secs": 10.2,
-       "hp_left": 1.0,
-       "low": 0.72,
+       "secs": 10.0,
+       "hp_left": 0.83,
+       "low": 0.71,
        "max_hp": 91,
-       "dealt": 579,
-       "taken": 52,
+       "dealt": 607,
+       "taken": 68,
        "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 1,
+       "kites": 0,
        "summons": 0
       }
      ],
      "boss": {
       "won": true,
       "down": false,
-      "secs": 10.2,
-      "hp_left": 1.0,
+      "secs": 9.9,
+      "hp_left": 0.83,
       "low": 0.71,
       "max_hp": 91,
-      "dealt": 580,
-      "taken": 52,
+      "dealt": 607,
+      "taken": 68,
       "kills": 1,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 1,
+      "kites": 0,
       "summons": 0
      },
      "boss_wins": 2
@@ -805,7 +805,7 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 8.7,
+      "secs": 8.8,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 102,
@@ -824,7 +824,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.1,
+       "secs": 11.2,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 102,
@@ -840,7 +840,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.2,
+       "secs": 11.1,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 102,
@@ -857,7 +857,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 11.1,
+      "secs": 11.2,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 102,
@@ -923,11 +923,11 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 18.6,
-      "hp_left": 0.7,
-      "low": 0.58,
+      "secs": 18.4,
+      "hp_left": 0.66,
+      "low": 0.57,
       "max_hp": 112,
-      "dealt": 1308,
+      "dealt": 1334,
       "taken": 49,
       "kills": 3,
       "left": [],
@@ -958,7 +958,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 13.5,
+       "secs": 13.4,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 112,
@@ -1035,7 +1035,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 6.5,
+       "secs": 6.4,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 100,
@@ -1094,17 +1094,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 16.6,
-      "hp_left": 0.64,
-      "low": 0.64,
+      "secs": 11.4,
+      "hp_left": 0.7,
+      "low": 0.7,
       "max_hp": 150,
-      "dealt": 387,
-      "taken": 55,
+      "dealt": 386,
+      "taken": 46,
       "kills": 3,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 2,
+      "kites": 1,
       "summons": 0
      },
      "boss_kind": "Orc_03",
@@ -1113,7 +1113,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.5,
+       "secs": 11.2,
        "hp_left": 0.86,
        "low": 0.86,
        "max_hp": 150,
@@ -1129,7 +1129,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.5,
+       "secs": 11.3,
        "hp_left": 0.86,
        "low": 0.86,
        "max_hp": 150,
@@ -1146,7 +1146,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 11.5,
+      "secs": 11.2,
       "hp_left": 0.86,
       "low": 0.86,
       "max_hp": 150,
@@ -1196,17 +1196,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 9.1,
+      "secs": 10.2,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 210,
-      "dealt": 498,
+      "dealt": 480,
       "taken": 0,
       "kills": 3,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 1,
+      "kites": 2,
       "summons": 0
      },
      "boss_kind": "Tank",
@@ -1215,12 +1215,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.4,
-       "hp_left": 0.65,
-       "low": 0.26,
+       "secs": 11.1,
+       "hp_left": 0.34,
+       "low": 0.34,
        "max_hp": 210,
        "dealt": 586,
-       "taken": 200,
+       "taken": 264,
        "kills": 1,
        "left": [],
        "used": 3,
@@ -1231,12 +1231,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.4,
-       "hp_left": 0.65,
-       "low": 0.26,
+       "secs": 11.1,
+       "hp_left": 0.34,
+       "low": 0.34,
        "max_hp": 210,
        "dealt": 586,
-       "taken": 200,
+       "taken": 264,
        "kills": 1,
        "left": [],
        "used": 3,
@@ -1248,12 +1248,12 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 11.4,
-      "hp_left": 0.65,
-      "low": 0.26,
+      "secs": 11.1,
+      "hp_left": 0.34,
+      "low": 0.34,
       "max_hp": 210,
       "dealt": 586,
-      "taken": 200,
+      "taken": 264,
       "kills": 1,
       "left": [],
       "used": 3,
@@ -1307,7 +1307,7 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 14.2,
+      "secs": 14.3,
       "hp_left": 0.93,
       "low": 0.93,
       "max_hp": 280,
@@ -1326,7 +1326,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 17.5,
+       "secs": 17.7,
        "hp_left": 0.88,
        "low": 0.88,
        "max_hp": 280,
@@ -1342,24 +1342,24 @@
       {
        "won": true,
        "down": false,
-       "secs": 21.3,
+       "secs": 18.5,
        "hp_left": 0.77,
        "low": 0.77,
        "max_hp": 280,
-       "dealt": 878,
+       "dealt": 880,
        "taken": 65,
        "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 2,
+       "kites": 1,
        "summons": 0
       }
      ],
      "boss": {
       "won": true,
       "down": false,
-      "secs": 17.5,
+      "secs": 17.7,
       "hp_left": 0.88,
       "low": 0.88,
       "max_hp": 280,
@@ -1422,17 +1422,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 17.6,
-      "hp_left": 0.58,
-      "low": 0.58,
+      "secs": 16.5,
+      "hp_left": 0.62,
+      "low": 0.62,
       "max_hp": 360,
-      "dealt": 1220,
-      "taken": 151,
+      "dealt": 1229,
+      "taken": 136,
       "kills": 3,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 3,
+      "kites": 2,
       "summons": 0
      },
      "boss_kind": "Nasty",
@@ -1441,50 +1441,50 @@
       {
        "won": true,
        "down": false,
-       "secs": 24.2,
-       "hp_left": 0.77,
-       "low": 0.77,
+       "secs": 23.4,
+       "hp_left": 0.85,
+       "low": 0.85,
        "max_hp": 360,
        "dealt": 1269,
-       "taken": 83,
+       "taken": 55,
        "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 3,
+       "kites": 2,
        "summons": 0
       },
       {
        "won": true,
        "down": false,
-       "secs": 24.3,
-       "hp_left": 0.77,
-       "low": 0.77,
+       "secs": 23.5,
+       "hp_left": 0.85,
+       "low": 0.85,
        "max_hp": 360,
        "dealt": 1269,
-       "taken": 83,
+       "taken": 55,
        "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 3,
+       "kites": 2,
        "summons": 0
       }
      ],
      "boss": {
       "won": true,
       "down": false,
-      "secs": 24.2,
-      "hp_left": 0.77,
-      "low": 0.77,
+      "secs": 23.4,
+      "hp_left": 0.85,
+      "low": 0.85,
       "max_hp": 360,
       "dealt": 1269,
-      "taken": 83,
+      "taken": 55,
       "kills": 1,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 3,
+      "kites": 2,
       "summons": 0
      },
      "boss_wins": 2
@@ -1534,7 +1534,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 4.5,
+       "secs": 4.4,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 100,
@@ -1588,11 +1588,11 @@
       "won": true,
       "down": false,
       "secs": 7.3,
-      "hp_left": 0.6,
-      "low": 0.6,
+      "hp_left": 0.68,
+      "low": 0.68,
       "max_hp": 120,
       "dealt": 400,
-      "taken": 48,
+      "taken": 38,
       "kills": 3,
       "left": [],
       "used": 1,
@@ -1606,7 +1606,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 7.4,
+       "secs": 7.3,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 120,
@@ -1639,7 +1639,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 7.4,
+      "secs": 7.3,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 120,
@@ -1680,17 +1680,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 10.4,
-      "hp_left": 0.77,
-      "low": 0.77,
+      "secs": 12.4,
+      "hp_left": 0.76,
+      "low": 0.76,
       "max_hp": 140,
-      "dealt": 535,
-      "taken": 33,
+      "dealt": 522,
+      "taken": 34,
       "kills": 3,
       "left": [],
       "used": 1,
-      "stealth": 3,
-      "kites": 2,
+      "stealth": 2,
+      "kites": 3,
       "summons": 0
      },
      "boss_kind": "Tank",
@@ -1715,12 +1715,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 8.2,
-       "hp_left": 1.0,
+       "secs": 8.4,
+       "hp_left": 0.85,
        "low": 0.55,
        "max_hp": 140,
        "dealt": 577,
-       "taken": 83,
+       "taken": 104,
        "kills": 1,
        "left": [],
        "used": 2,
@@ -1777,16 +1777,16 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 12.2,
-      "hp_left": 0.7,
-      "low": 0.7,
+      "secs": 13.9,
+      "hp_left": 0.68,
+      "low": 0.68,
       "max_hp": 160,
-      "dealt": 855,
-      "taken": 48,
+      "dealt": 806,
+      "taken": 51,
       "kills": 3,
       "left": [],
-      "used": 2,
-      "stealth": 4,
+      "used": 1,
+      "stealth": 2,
       "kites": 2,
       "summons": 0
      },
@@ -1796,7 +1796,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 10.0,
+       "secs": 9.9,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 160,
@@ -1829,7 +1829,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 10.0,
+      "secs": 9.9,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 160,
@@ -1874,17 +1874,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 11.7,
-      "hp_left": 0.63,
-      "low": 0.63,
+      "secs": 10.7,
+      "hp_left": 0.78,
+      "low": 0.78,
       "max_hp": 180,
       "dealt": 1336,
-      "taken": 66,
+      "taken": 39,
       "kills": 3,
       "left": [],
       "used": 2,
       "stealth": 4,
-      "kites": 2,
+      "kites": 1,
       "summons": 0
      },
      "boss_kind": "Nasty",
@@ -1909,7 +1909,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 9.9,
+       "secs": 9.8,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 180,
@@ -1951,7 +1951,7 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 6.5,
+      "secs": 6.4,
       "hp_left": 0.96,
       "low": 0.96,
       "max_hp": 140,
@@ -1970,12 +1970,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 4.8,
-       "hp_left": 0.94,
-       "low": 0.94,
+       "secs": 5.2,
+       "hp_left": 1.0,
+       "low": 1.0,
        "max_hp": 140,
-       "dealt": 180,
-       "taken": 9,
+       "dealt": 204,
+       "taken": 0,
        "kills": 1,
        "left": [],
        "used": 0,
@@ -1986,12 +1986,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 5.4,
-       "hp_left": 0.94,
-       "low": 0.94,
+       "secs": 5.3,
+       "hp_left": 1.0,
+       "low": 1.0,
        "max_hp": 140,
        "dealt": 204,
-       "taken": 9,
+       "taken": 0,
        "kills": 1,
        "left": [],
        "used": 0,
@@ -2003,12 +2003,12 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 4.8,
-      "hp_left": 0.94,
-      "low": 0.94,
+      "secs": 5.2,
+      "hp_left": 1.0,
+      "low": 1.0,
       "max_hp": 140,
-      "dealt": 180,
-      "taken": 9,
+      "dealt": 204,
+      "taken": 0,
       "kills": 1,
       "left": [],
       "used": 0,
@@ -2044,12 +2044,12 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 9.2,
-      "hp_left": 0.88,
-      "low": 0.88,
+      "secs": 10.9,
+      "hp_left": 0.89,
+      "low": 0.89,
       "max_hp": 202,
-      "dealt": 442,
-      "taken": 25,
+      "dealt": 461,
+      "taken": 22,
       "kills": 3,
       "left": [],
       "used": 2,
@@ -2063,12 +2063,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 7.1,
-       "hp_left": 0.9,
-       "low": 0.9,
+       "secs": 6.7,
+       "hp_left": 1.0,
+       "low": 1.0,
        "max_hp": 202,
        "dealt": 383,
-       "taken": 21,
+       "taken": 0,
        "kills": 1,
        "left": [],
        "used": 1,
@@ -2079,12 +2079,12 @@
       {
        "won": true,
        "down": false,
-       "secs": 7.1,
-       "hp_left": 0.9,
-       "low": 0.9,
+       "secs": 6.7,
+       "hp_left": 1.0,
+       "low": 1.0,
        "max_hp": 202,
        "dealt": 383,
-       "taken": 21,
+       "taken": 0,
        "kills": 1,
        "left": [],
        "used": 1,
@@ -2096,12 +2096,12 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 7.1,
-      "hp_left": 0.9,
-      "low": 0.9,
+      "secs": 6.7,
+      "hp_left": 1.0,
+      "low": 1.0,
       "max_hp": 202,
       "dealt": 383,
-      "taken": 21,
+      "taken": 0,
       "kills": 1,
       "left": [],
       "used": 1,
@@ -2137,15 +2137,15 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 9.9,
-      "hp_left": 0.89,
-      "low": 0.89,
+      "secs": 10.6,
+      "hp_left": 0.81,
+      "low": 0.81,
       "max_hp": 274,
-      "dealt": 529,
-      "taken": 29,
+      "dealt": 551,
+      "taken": 51,
       "kills": 3,
       "left": [],
-      "used": 1,
+      "used": 2,
       "stealth": 0,
       "kites": 0,
       "summons": 0
@@ -2156,11 +2156,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.6,
+       "secs": 11.7,
        "hp_left": 0.58,
        "low": 0.35,
        "max_hp": 274,
-       "dealt": 603,
+       "dealt": 626,
        "taken": 281,
        "kills": 1,
        "left": [],
@@ -2172,11 +2172,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.6,
+       "secs": 11.8,
        "hp_left": 0.58,
-       "low": 0.54,
+       "low": 0.35,
        "max_hp": 274,
-       "dealt": 603,
+       "dealt": 626,
        "taken": 281,
        "kills": 1,
        "left": [],
@@ -2189,11 +2189,11 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 11.6,
+      "secs": 11.7,
       "hp_left": 0.58,
       "low": 0.35,
       "max_hp": 274,
-      "dealt": 603,
+      "dealt": 626,
       "taken": 281,
       "kills": 1,
       "left": [],
@@ -2230,12 +2230,12 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 15.9,
-      "hp_left": 0.62,
-      "low": 0.62,
+      "secs": 11.5,
+      "hp_left": 0.78,
+      "low": 0.78,
       "max_hp": 358,
-      "dealt": 826,
-      "taken": 137,
+      "dealt": 773,
+      "taken": 80,
       "kills": 3,
       "left": [],
       "used": 2,
@@ -2249,11 +2249,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 13.2,
+       "secs": 12.5,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 358,
-       "dealt": 955,
+       "dealt": 924,
        "taken": 0,
        "kills": 1,
        "left": [],
@@ -2266,11 +2266,11 @@
        "won": true,
        "down": false,
        "secs": 12.7,
-       "hp_left": 1.0,
-       "low": 1.0,
+       "hp_left": 0.9,
+       "low": 0.9,
        "max_hp": 358,
        "dealt": 924,
-       "taken": 0,
+       "taken": 37,
        "kills": 1,
        "left": [],
        "used": 2,
@@ -2282,11 +2282,11 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 13.2,
+      "secs": 12.5,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 358,
-      "dealt": 955,
+      "dealt": 924,
       "taken": 0,
       "kills": 1,
       "left": [],
@@ -2323,15 +2323,15 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 25.5,
-      "hp_left": 0.56,
-      "low": 0.43,
+      "secs": 17.6,
+      "hp_left": 0.72,
+      "low": 0.72,
       "max_hp": 454,
-      "dealt": 1230,
-      "taken": 455,
+      "dealt": 1239,
+      "taken": 129,
       "kills": 3,
       "left": [],
-      "used": 3,
+      "used": 2,
       "stealth": 0,
       "kites": 0,
       "summons": 0
@@ -2342,15 +2342,15 @@
       {
        "won": true,
        "down": false,
-       "secs": 23.8,
+       "secs": 31.3,
        "hp_left": 0.81,
-       "low": 0.44,
+       "low": 0.36,
        "max_hp": 454,
-       "dealt": 1292,
-       "taken": 339,
+       "dealt": 1276,
+       "taken": 661,
        "kills": 1,
        "left": [],
-       "used": 3,
+       "used": 4,
        "stealth": 0,
        "kites": 0,
        "summons": 0
@@ -2358,15 +2358,15 @@
       {
        "won": true,
        "down": false,
-       "secs": 41.3,
-       "hp_left": 0.44,
-       "low": 0.44,
+       "secs": 35.1,
+       "hp_left": 0.63,
+       "low": 0.36,
        "max_hp": 454,
-       "dealt": 1271,
-       "taken": 509,
+       "dealt": 1276,
+       "taken": 712,
        "kills": 1,
        "left": [],
-       "used": 3,
+       "used": 4,
        "stealth": 0,
        "kites": 0,
        "summons": 0
@@ -2375,15 +2375,15 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 23.8,
+      "secs": 31.3,
       "hp_left": 0.81,
-      "low": 0.44,
+      "low": 0.36,
       "max_hp": 454,
-      "dealt": 1292,
-      "taken": 339,
+      "dealt": 1276,
+      "taken": 661,
       "kills": 1,
       "left": [],
-      "used": 3,
+      "used": 4,
       "stealth": 0,
       "kites": 0,
       "summons": 0
@@ -2424,7 +2424,7 @@
       {
        "won": true,
        "down": false,
-       "secs": 4.6,
+       "secs": 4.7,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 85,
@@ -2457,7 +2457,7 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 4.6,
+      "secs": 4.7,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 85,
@@ -2494,17 +2494,17 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 10.3,
-      "hp_left": 0.77,
+      "secs": 10.9,
+      "hp_left": 0.79,
       "low": 0.75,
       "max_hp": 106,
-      "dealt": 108,
+      "dealt": 115,
       "taken": 27,
       "kills": 0,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 1,
+      "kites": 2,
       "summons": 3
      },
      "boss_kind": "Orc_03",
@@ -2513,11 +2513,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 10.3,
+       "secs": 9.4,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 106,
-       "dealt": 147,
+       "dealt": 143,
        "taken": 0,
        "kills": 0,
        "left": [],
@@ -2529,11 +2529,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 10.3,
+       "secs": 9.5,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 106,
-       "dealt": 147,
+       "dealt": 143,
        "taken": 0,
        "kills": 0,
        "left": [],
@@ -2546,11 +2546,11 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 10.3,
+      "secs": 9.4,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 106,
-      "dealt": 147,
+      "dealt": 143,
       "taken": 0,
       "kills": 0,
       "left": [],
@@ -2583,18 +2583,18 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 14.0,
-      "hp_left": 0.77,
+      "secs": 12.1,
+      "hp_left": 0.79,
       "low": 0.77,
       "max_hp": 128,
-      "dealt": 60,
+      "dealt": 109,
       "taken": 29,
       "kills": 0,
       "left": [],
       "used": 2,
       "stealth": 0,
       "kites": 2,
-      "summons": 5
+      "summons": 4
      },
      "boss_kind": "Tank",
      "boss_hp": 576,
@@ -2602,29 +2602,29 @@
       {
        "won": true,
        "down": false,
-       "secs": 11.4,
+       "secs": 15.2,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 128,
-       "dealt": 170,
+       "dealt": 242,
        "taken": 0,
-       "kills": 0,
+       "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 0,
+       "kites": 1,
        "summons": 4
       },
       {
        "won": true,
        "down": false,
-       "secs": 13.9,
+       "secs": 15.9,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 128,
-       "dealt": 209,
+       "dealt": 242,
        "taken": 0,
-       "kills": 1,
+       "kills": 0,
        "left": [],
        "used": 2,
        "stealth": 0,
@@ -2635,17 +2635,17 @@
      "boss": {
       "won": true,
       "down": false,
-      "secs": 11.4,
+      "secs": 15.2,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 128,
-      "dealt": 170,
+      "dealt": 242,
       "taken": 0,
-      "kills": 0,
+      "kills": 1,
       "left": [],
       "used": 2,
       "stealth": 0,
-      "kites": 0,
+      "kites": 1,
       "summons": 4
      },
      "boss_wins": 2
@@ -2672,13 +2672,13 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 14.1,
+      "secs": 14.3,
       "hp_left": 0.98,
       "low": 0.9,
       "max_hp": 149,
-      "dealt": 254,
+      "dealt": 309,
       "taken": 14,
-      "kills": 1,
+      "kills": 2,
       "left": [],
       "used": 2,
       "stealth": 0,
@@ -2695,7 +2695,7 @@
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 149,
-       "dealt": 396,
+       "dealt": 397,
        "taken": 0,
        "kills": 1,
        "left": [],
@@ -2707,11 +2707,11 @@
       {
        "won": true,
        "down": false,
-       "secs": 13.9,
+       "secs": 14.4,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 149,
-       "dealt": 392,
+       "dealt": 396,
        "taken": 0,
        "kills": 1,
        "left": [],
@@ -2728,7 +2728,7 @@
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 149,
-      "dealt": 396,
+      "dealt": 397,
       "taken": 0,
       "kills": 1,
       "left": [],
@@ -2761,18 +2761,18 @@
      "pack": {
       "won": true,
       "down": false,
-      "secs": 23.3,
-      "hp_left": 1.0,
+      "secs": 25.3,
+      "hp_left": 0.77,
       "low": 0.71,
       "max_hp": 170,
-      "dealt": 200,
-      "taken": 115,
+      "dealt": 505,
+      "taken": 152,
       "kills": 1,
       "left": [],
       "used": 3,
       "stealth": 0,
       "kites": 3,
-      "summons": 6
+      "summons": 5
      },
      "boss_kind": "Nasty",
      "boss_hp": 1224,
@@ -2780,13 +2780,13 @@
       {
        "won": true,
        "down": false,
-       "secs": 21.1,
+       "secs": 19.4,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 170,
        "dealt": 377,
        "taken": 0,
-       "kills": 0,
+       "kills": 1,
        "left": [],
        "used": 2,
        "stealth": 0,
@@ -2796,30 +2796,30 @@
       {
        "won": true,
        "down": false,
-       "secs": 17.9,
+       "secs": 20.2,
        "hp_left": 1.0,
        "low": 1.0,
        "max_hp": 170,
-       "dealt": 395,
+       "dealt": 346,
        "taken": 0,
        "kills": 0,
        "left": [],
        "used": 2,
        "stealth": 0,
-       "kites": 1,
+       "kites": 2,
        "summons": 5
       }
      ],
      "boss": {
       "won": true,
       "down": false,
-      "secs": 21.1,
+      "secs": 19.4,
       "hp_left": 1.0,
       "low": 1.0,
       "max_hp": 170,
       "dealt": 377,
       "taken": 0,
-      "kills": 0,
+      "kills": 1,
       "left": [],
       "used": 2,
       "stealth": 0,
@@ -2829,46 +2829,912 @@
      "boss_wins": 2
     }
    },
+   "finals": {
+    "Warrior": [
+     {
+      "won": false,
+      "down": true,
+      "secs": 21.1,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 241,
+      "dealt": 1907,
+      "taken": 1054,
+      "kills": 3,
+      "left": [
+       1836,
+       354,
+       128,
+       186,
+       326,
+       408,
+       158,
+       128
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "HP Potency Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Dark Knight’s Armour",
+        true
+       ],
+       "weapon": [
+        "Ursag's Horn Blade",
+        1
+       ],
+       "slash": [
+        "Crystal Slash",
+        "Ursag's Horn Blade",
+        true
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 7,
+      "lights": [
+       5,
+       5,
+       4
+      ],
+      "lances": [
+       4,
+       16
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 16.2,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 241,
+      "dealt": 1675,
+      "taken": 977,
+      "kills": 1,
+      "left": [
+       1836,
+       354,
+       128,
+       186,
+       158,
+       131,
+       73,
+       408,
+       242,
+       213
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "HP Potency Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Dark Knight’s Armour",
+        true
+       ],
+       "weapon": [
+        "Ursag's Horn Blade",
+        1
+       ],
+       "slash": [
+        "Crystal Slash",
+        "Ursag's Horn Blade",
+        true
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 9,
+      "lights": [
+       4,
+       4,
+       3
+      ],
+      "lances": [
+       3,
+       14
+      ]
+     }
+    ],
+    "Mage": [
+     {
+      "won": false,
+      "down": true,
+      "secs": 24.1,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 112,
+      "dealt": 2341,
+      "taken": 327,
+      "kills": 4,
+      "left": [
+       1774,
+       354,
+       75,
+       99,
+       326,
+       408,
+       381
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "tomes": [
+        [
+         "Frost Shard",
+         true
+        ],
+        [
+         "Ash Ward",
+         true
+        ],
+        [
+         "Bone Spear",
+         true
+        ],
+        [
+         "Chain Lightning",
+         true
+        ],
+        [
+         "Iron Skin",
+         true
+        ],
+        [
+         "Fireball",
+         true
+        ],
+        [
+         "Bone Armor",
+         true
+        ],
+        [
+         "Soul Rend",
+         true
+        ]
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1774,
+      "boss_slain": false,
+      "band_left": 6,
+      "lights": [
+       5,
+       5,
+       0
+      ],
+      "lances": [
+       5,
+       21
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 12.6,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 112,
+      "dealt": 247,
+      "taken": 323,
+      "kills": 0,
+      "left": [
+       1836,
+       354,
+       381,
+       354,
+       326,
+       299,
+       280,
+       408,
+       326,
+       207,
+       381
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "tomes": [
+        [
+         "Frost Shard",
+         true
+        ],
+        [
+         "Ash Ward",
+         true
+        ],
+        [
+         "Bone Spear",
+         true
+        ],
+        [
+         "Chain Lightning",
+         true
+        ],
+        [
+         "Iron Skin",
+         true
+        ],
+        [
+         "Fireball",
+         true
+        ],
+        [
+         "Bone Armor",
+         true
+        ],
+        [
+         "Soul Rend",
+         true
+        ]
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 10,
+      "lights": [
+       3,
+       3,
+       0
+      ],
+      "lances": [
+       3,
+       10
+      ]
+     }
+    ],
+    "Warlock": [
+     {
+      "won": false,
+      "down": true,
+      "secs": 28.4,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 200,
+      "dealt": 1427,
+      "taken": 917,
+      "kills": 1,
+      "left": [
+       1836,
+       354,
+       223,
+       163,
+       326,
+       132,
+       87,
+       408,
+       67,
+       381
+      ],
+      "used": 4,
+      "stealth": 0,
+      "kites": 5,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "HP Potency Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Dardan’s Armour",
+        true
+       ],
+       "slash": [
+        "Crystal Slash",
+        "Sword",
+        false
+       ],
+       "tomes": [
+        [
+         "Frost Shard",
+         true
+        ],
+        [
+         "Bone Spear",
+         true
+        ],
+        [
+         "Chain Lightning",
+         true
+        ],
+        [
+         "Fireball",
+         true
+        ],
+        [
+         "Soul Rend",
+         true
+        ]
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 9,
+      "lights": [
+       6,
+       6,
+       1
+      ],
+      "lances": [
+       6,
+       23
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 25.7,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 200,
+      "dealt": 1377,
+      "taken": 888,
+      "kills": 1,
+      "left": [
+       1836,
+       354,
+       203,
+       59,
+       326,
+       132,
+       116,
+       408,
+       228,
+       381
+      ],
+      "used": 4,
+      "stealth": 0,
+      "kites": 5,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "HP Potency Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Dardan’s Armour",
+        true
+       ],
+       "slash": [
+        "Crystal Slash",
+        "Sword",
+        false
+       ],
+       "tomes": [
+        [
+         "Frost Shard",
+         true
+        ],
+        [
+         "Bone Spear",
+         true
+        ],
+        [
+         "Chain Lightning",
+         true
+        ],
+        [
+         "Fireball",
+         true
+        ],
+        [
+         "Soul Rend",
+         true
+        ]
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 9,
+      "lights": [
+       6,
+       6,
+       3
+      ],
+      "lances": [
+       5,
+       24
+      ]
+     }
+    ],
+    "Rogue": [
+     {
+      "won": false,
+      "down": true,
+      "secs": 56.4,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 180,
+      "dealt": 2699,
+      "taken": 491,
+      "kills": 3,
+      "left": [
+       354,
+       381,
+       354,
+       326,
+       326,
+       408,
+       326,
+       381
+      ],
+      "used": 4,
+      "stealth": 7,
+      "kites": 3,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "Dexterity Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Desert Hero’s Armour",
+        true
+       ],
+       "weapon": [
+        "Dwarf Crossbow",
+        2
+       ],
+       "slash": [
+        "Crystal Slash",
+        "Dwarf Crossbow",
+        false
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 8,
+      "lights": [
+       7,
+       7,
+       0
+      ],
+      "lances": [
+       5,
+       10
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 90.1,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 180,
+      "dealt": 3478,
+      "taken": 453,
+      "kills": 4,
+      "left": [
+       354,
+       354,
+       326,
+       326,
+       408,
+       326,
+       381
+      ],
+      "used": 4,
+      "stealth": 8,
+      "kites": 4,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "Dexterity Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Desert Hero’s Armour",
+        true
+       ],
+       "weapon": [
+        "Dwarf Crossbow",
+        2
+       ],
+       "slash": [
+        "Crystal Slash",
+        "Dwarf Crossbow",
+        false
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 7,
+      "lights": [
+       8,
+       8,
+       0
+      ],
+      "lances": [
+       2,
+       9
+      ]
+     }
+    ],
+    "MartialArtist": [
+     {
+      "won": false,
+      "down": true,
+      "secs": 22.3,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 252,
+      "dealt": 2081,
+      "taken": 1066,
+      "kills": 4,
+      "left": [
+       1836,
+       354,
+       240,
+       28,
+       326,
+       408,
+       381
+      ],
+      "used": 4,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "HP Potency Ring 8",
+         true
+        ],
+        [
+         "Dexterity Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Orc Bruiser’s Armour",
+        true
+       ],
+       "unlocked": 8
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 6,
+      "lights": [
+       5,
+       5,
+       2
+      ],
+      "lances": [
+       5,
+       16
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 22.3,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 252,
+      "dealt": 2203,
+      "taken": 1074,
+      "kills": 3,
+      "left": [
+       1836,
+       129,
+       242,
+       159,
+       185,
+       247,
+       408,
+       99
+      ],
+      "used": 4,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "HP Potency Ring 8",
+         true
+        ],
+        [
+         "Dexterity Ring 8",
+         true
+        ]
+       ],
+       "armour": [
+        "Orc Bruiser’s Armour",
+        true
+       ],
+       "unlocked": 8
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 1836,
+      "boss_slain": false,
+      "band_left": 7,
+      "lights": [
+       5,
+       5,
+       0
+      ],
+      "lances": [
+       4,
+       26
+      ]
+     }
+    ],
+    "Summoner": [
+     {
+      "won": false,
+      "down": true,
+      "secs": 73.7,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 170,
+      "dealt": 1447,
+      "taken": 495,
+      "kills": 0,
+      "left": [
+       16,
+       354,
+       381,
+       354,
+       326,
+       299,
+       408,
+       326,
+       408,
+       381
+      ],
+      "used": 4,
+      "stealth": 0,
+      "kites": 8,
+      "summons": 5,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 16,
+      "boss_slain": false,
+      "band_left": 9,
+      "lights": [
+       6,
+       6,
+       0
+      ],
+      "lances": [
+       4,
+       1
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 54.3,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 170,
+      "dealt": 1154,
+      "taken": 495,
+      "kills": 0,
+      "left": [
+       785,
+       354,
+       381,
+       354,
+       326,
+       299,
+       408,
+       326,
+       408,
+       381
+      ],
+      "used": 4,
+      "stealth": 0,
+      "kites": 5,
+      "summons": 5,
+      "placed": true,
+      "room": 43,
+      "room_tiles": 79,
+      "start_m": 12.0,
+      "band": 10,
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 785,
+      "boss_slain": false,
+      "band_left": 9,
+      "lights": [
+       5,
+       5,
+       0
+      ],
+      "lances": [
+       4,
+       1
+      ]
+     }
+    ]
+   },
+   "final_wins": {
+    "Warrior": 0,
+    "Mage": 0,
+    "Warlock": 0,
+    "Rogue": 0,
+    "MartialArtist": 0,
+    "Summoner": 0
+   },
    "summary": {
     "Warrior|1": [
      true,
-     11.6,
+     11.3,
      0.89,
      true,
-     9.1,
+     9.0,
      0.94
     ],
     "Warrior|2": [
      true,
-     14.1,
-     0.6,
+     14.3,
+     0.7,
      true,
-     14.6,
+     14.2,
      0.55
     ],
     "Warrior|3": [
      true,
-     8.6,
-     0.74,
+     9.8,
+     0.53,
      true,
-     11.0,
-     0.49
+     11.3,
+     0.79
     ],
     "Warrior|4": [
      true,
-     17.6,
+     17.1,
      1.0,
      true,
      21.5,
-     0.61
+     0.68
     ],
     "Warrior|5": [
      true,
-     24.0,
-     0.72,
+     16.5,
+     0.77,
      true,
-     24.6,
-     0.46
+     24.1,
+     0.87
     ],
     "Mage|1": [
      true,
@@ -2880,32 +3746,32 @@
     ],
     "Mage|2": [
      true,
-     8.1,
+     8.2,
      0.94,
      true,
-     7.6,
+     7.5,
      1.0
     ],
     "Mage|3": [
      true,
-     11.8,
+     17.7,
      1.0,
      true,
-     10.2,
-     1.0
+     9.9,
+     0.83
     ],
     "Mage|4": [
      true,
-     8.7,
+     8.8,
      1.0,
      true,
-     11.1,
+     11.2,
      1.0
     ],
     "Mage|5": [
      true,
-     18.6,
-     0.7,
+     18.4,
+     0.66,
      true,
      13.4,
      1.0
@@ -2920,35 +3786,35 @@
     ],
     "Warlock|2": [
      true,
-     16.6,
-     0.64,
+     11.4,
+     0.7,
      true,
-     11.5,
+     11.2,
      0.86
     ],
     "Warlock|3": [
      true,
-     9.1,
+     10.2,
      1.0,
      true,
-     11.4,
-     0.65
+     11.1,
+     0.34
     ],
     "Warlock|4": [
      true,
-     14.2,
+     14.3,
      0.93,
      true,
-     17.5,
+     17.7,
      0.88
     ],
     "Warlock|5": [
      true,
-     17.6,
-     0.58,
+     16.5,
+     0.62,
      true,
-     24.2,
-     0.77
+     23.4,
+     0.85
     ],
     "Rogue|1": [
      true,
@@ -2961,73 +3827,73 @@
     "Rogue|2": [
      true,
      7.3,
-     0.6,
+     0.68,
      true,
-     7.4,
+     7.3,
      1.0
     ],
     "Rogue|3": [
      true,
-     10.4,
-     0.77,
+     12.4,
+     0.76,
      true,
      8.2,
      1.0
     ],
     "Rogue|4": [
      true,
-     12.2,
-     0.7,
+     13.9,
+     0.68,
      true,
-     10.0,
+     9.9,
      1.0
     ],
     "Rogue|5": [
      true,
-     11.7,
-     0.63,
+     10.7,
+     0.78,
      true,
      9.8,
      1.0
     ],
     "MartialArtist|1": [
      true,
-     6.5,
+     6.4,
      0.96,
      true,
-     4.8,
-     0.94
+     5.2,
+     1.0
     ],
     "MartialArtist|2": [
      true,
-     9.2,
-     0.88,
+     10.9,
+     0.89,
      true,
-     7.1,
-     0.9
+     6.7,
+     1.0
     ],
     "MartialArtist|3": [
      true,
-     9.9,
-     0.89,
+     10.6,
+     0.81,
      true,
-     11.6,
+     11.7,
      0.58
     ],
     "MartialArtist|4": [
      true,
-     15.9,
-     0.62,
+     11.5,
+     0.78,
      true,
-     13.2,
+     12.5,
      1.0
     ],
     "MartialArtist|5": [
      true,
-     25.5,
-     0.56,
+     17.6,
+     0.72,
      true,
-     23.8,
+     31.3,
      0.81
     ],
     "Summoner|1": [
@@ -3035,28 +3901,28 @@
      5.4,
      1.0,
      true,
-     4.6,
+     4.7,
      1.0
     ],
     "Summoner|2": [
      true,
-     10.3,
-     0.77,
+     10.9,
+     0.79,
      true,
-     10.3,
+     9.4,
      1.0
     ],
     "Summoner|3": [
      true,
-     14.0,
-     0.77,
+     12.1,
+     0.79,
      true,
-     11.4,
+     15.2,
      1.0
     ],
     "Summoner|4": [
      true,
-     14.1,
+     14.3,
      0.98,
      true,
      14.4,
@@ -3064,10 +3930,10 @@
     ],
     "Summoner|5": [
      true,
-     23.3,
-     1.0,
+     25.3,
+     0.77,
      true,
-     21.1,
+     19.4,
      1.0
     ]
    },
@@ -3080,15 +3946,15 @@
     "Summoner": 10
    },
    "spread": {
-    "1": 2.58,
-    "2": 2.27,
-    "3": 1.63,
-    "4": 2.02,
-    "5": 2.18
+    "1": 2.51,
+    "2": 1.96,
+    "3": 1.81,
+    "4": 1.94,
+    "5": 2.36
    }
   }
  ],
- "windows_hidden": "Message Log, Content Browser",
+ "windows_hidden": "",
  "error": null,
- "windows_shown_again": 2
+ "windows_shown_again": 0
 }

@@ -1,0 +1,26 @@
+{
+  "comment": "the user's list of 2026-11-04 (docs/improvements7.txt): 'the music should change every so often. after 5-10 minutes, the music should change to another appropriate song for the scene the player is in'; and the weather's sounds ('there is no wind of weather effects'). The town's music by day and by night and the wilderness's by day and by night, each a set of loops the generator turns to in turn (MusicRotateSeconds, 5 to 10 minutes; at once when the scene changes); rain and wind as loops under the weather. GDM's RPG Music Kit (its town, village and exploration themes; not the dungeon's packs) and The Sound Guild's ambience loops. Converted by pipeline/blender_numpy/rdc_sound_prep.py into SourceArt/brokenspire/audio7/ (ignored), imported by pipeline/unreal/890_improvements7.py music",
+  "root": "I:/game assets",
+  "packs": {
+    "rpg": "humble bundle - 2d game creation mega bundle/gdm-rpg-music-kit/RPG Music Kit V2.0/Music Files",
+    "amb": "complete rpg creator bundle/ambience sounds pack/The_Sound_Guild_Ambience_Sounds/WAV - 44100 Hz - 16 Bit"
+  },
+  "sets": {
+    "Music.Town": {"from": [["rpg", "Adventure/Medieval Band - LOOP - Medieval Town Theme - Live\\.wav$"], ["rpg", "Tranquil/Orchestral - LOOP - Calm Village Theme - Main Version - Live\\.wav$"],
+                            ["rpg", "Tranquil/Acoustic Band - LOOP - Chill Town Theme - Main Version - Live\\.wav$"], ["rpg", "Atmosphere/Tranquil - LOOP - Forest Town - Main Version - Live\\.wav$"],
+                            ["rpg", "Mysterious/Orchestral - LOOP - Mystical Town Theme - Main Version - Live\\.wav$"]],
+                   "loop": true, "stereo": true, "level": -22, "volume": 0.75, "flat": true},
+    "Music.TownNight": {"from": [["rpg", "Tranquil/Orchestral - LOOP - Calm Village Theme Night - Main Version - Live\\.wav$"], ["rpg", "Tranquil/Solo Piano - LOOP - Sleepy Village\\.wav$"],
+                                 ["rpg", "Atmosphere/Tranquil - LOOP - Misty Village - Main Version - Live\\.wav$"], ["rpg", "Atmosphere/Dark - LOOP - Fog of Night\\.wav$"]],
+                        "loop": true, "stereo": true, "level": -23, "volume": 0.7, "flat": true},
+    "Music.Wild": {"from": [["rpg", "Adventure/Orchestral - LOOP - The Land Before Us - Main Version\\.wav$"], ["rpg", "Adventure/Orchestral - LOOP - First Light - Live\\.wav$"],
+                            ["rpg", "Atmosphere/Tranquil - LOOP - Spring Rays - Main Version - Live\\.wav$"], ["rpg", "Tranquil/Ambient Flute - LOOP - Wild Breath - Ambient Version - Live\\.wav$"],
+                            ["rpg", "Atmosphere/Somber - LOOP - Barren Wilds - Main Version - Live\\.wav$"], ["rpg", "Atmosphere/Tranquil - LOOP - Desert Winds - Main Version - Live\\.wav$"]],
+                   "loop": true, "stereo": true, "level": -22, "volume": 0.75, "flat": true},
+    "Music.WildNight": {"from": [["rpg", "Atmosphere/Somber - LOOP - Lone Wolf - Main Version - Live\\.wav$"], ["rpg", "Mysterious/Ambient - LOOP - Ancient Crystals - Live\\.wav$"],
+                                 ["rpg", "Mysterious/Orchestral - LOOP - Suspended Moment - Live\\.wav$"], ["rpg", "Atmosphere/Dark - LOOP - Forbidden Lakes - Main Version - Live\\.wav$"]],
+                        "loop": true, "stereo": true, "level": -23, "volume": 0.7, "flat": true},
+    "Weather.Rain": {"from": [["amb", "Ambience_Rain_Intense_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -24, "volume": 0.8, "flat": true},
+    "Weather.Wind": {"from": [["amb", "Ambience_Wind_Low_Loop\\.wav$"]], "loop": true, "stereo": true, "level": -26, "volume": 0.7, "flat": true}
+  }
+}

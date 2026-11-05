@@ -849,6 +849,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Final") float FinalBossPoise = 3.f;
 	/** his band alive within 25 m of him now (TickFinal) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Final") int32 GetFinalBandNear() const { return FinalBandNear; }
+	/** the balance trials (868 balance): Aurorim and his band set in room Room of set Set as the game sets him (his encounter,
+	 *  his tactics, his door), whatever the tiers' share; false if he is placed already or could not be */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") bool DebugPlaceFinalBoss(FIntPoint Set, int32 Room);
+	/** autoplay fights only him and his band (as the showcase's go: seen across 40 m, no chests); how many of them live */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Final") int32 DebugAutoplayOnlyFinal();
 	/** he holds back now: his band near enough and he not struck lately (his tactics; autoplay leaves him for his band then) */
 	bool FinalBossHolds(const ARDMonster* Boss) const;
 	int32 FinalBandNear = 0;
@@ -1114,6 +1119,118 @@ public:
 	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DayMoonKept;
 	FLinearColor DaySunColor = FLinearColor::White, DayFogLight = FLinearColor::White;
 
+	// ---- the user's list of 2026-11-04 (docs/improvements7.txt; RDTown7.cpp, RDSky.cpp, RDWildLife.cpp; 890 sets them)
+	/** the town: a street's cobbles half as wide as this (cm: "at most 3 people wide"), the open ground's rise and fall (cm), how
+	 *  far the portcullis lifts (cm), what a garden's crops give (by the crop's kind: Town.Crop1..6), the reach of F at a
+	 *  garden, an oven, a table's food */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire7") float TownCobbleHalfWidth = 130.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire7") float TownLiftAmp = 140.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire7") float TownPortcullisLift = 275.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire7") TArray<FName> TownCropItems;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire7") float TownThingReach = 230.f;
+	/** a garden harvested grows again after this many of the town's days */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire7") int32 GardenRegrowDays = 1;
+	/** the sky: clouds (a volumetric cloud material of the engine's, its coverage from the weather), the stars (a dome), the
+	 *  moon (a disc far off), the height fog kept off the sky beyond this distance (cm: it had covered the whole sky in grey) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") bool bSky7 = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SkyCloudMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SkyHighCloudMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SkyStarsMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SkyMoonMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UStaticMesh> SkyDomeMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UStaticMesh> SkyQuadMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FogSkyCutoff = 600000.f;
+	/** the cloud material's Cloud_GlobalCoverage at a clear sky and at an overcast one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FVector2D SkyCoverRange = FVector2D(0.1f, 1.f);
+	/** weather: rain and snow round her camera, wind (blowing leaves, the grass's sway through WindCollection's "Strength"),
+	 *  how long a weather lasts (s) */
+	/** the rain and snow of our own (the packs' rain did not show): a field of thin planes round her camera, falling in their
+	 *  material (890's M_RD_Drops: the drops move by its world position offset, wrapped in the field's height) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UStaticMesh> DropMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> RainDropMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SnowDropMaterial = nullptr;
+	UPROPERTY(Transient) TObjectPtr<class UHierarchicalInstancedStaticMeshComponent> RainDrops;
+	UPROPERTY(Transient) TObjectPtr<class UHierarchicalInstancedStaticMeshComponent> SnowDrops;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> RainDropMID;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> SnowDropMID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UNiagaraSystem> RainFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UNiagaraSystem> SnowFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UNiagaraSystem> WindFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<class UMaterialParameterCollection> WindCollection = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FVector2D WeatherSeconds = FVector2D(240.f, 540.f);
+	/** the birds in the sky and the insects round her (the list's "birds of different sizes and types", "animals and insects
+	 *  that are appropriate for that biome") and the wild animals that flee */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TArray<FRDWildSwarm> WildSwarms;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TArray<FRDWildFauna> WildFauna;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") int32 WildAnimalsMax = 10;
+	/** music: a new track after a while of its own (s; the list's "after 5-10 minutes, the music should change to another
+	 *  appropriate song for the scene"); the scene's set: Music.Town, Music.TownNight, Music.Wild, Music.WildNight (else
+	 *  Music.Explore) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") FVector2D MusicRotateSeconds = FVector2D(300.f, 600.f);
+	// the sky and weather's state (RDSky.cpp)
+	void BeginSky7();
+	void TickSky7(float Dt, APlayerController* PC);
+	void ApplySky7();
+	UPROPERTY(Transient) TObjectPtr<class UVolumetricCloudComponent> SkyClouds;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> SkyCloudMID;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> SkyHigh;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> SkyHighMID;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> SkyStars;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> SkyStarsMID;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> SkyMoon;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> SkyMoonMID;
+	UPROPERTY(Transient) TObjectPtr<class UNiagaraComponent> WeatherRain;
+	UPROPERTY(Transient) TObjectPtr<class UNiagaraComponent> WeatherSnow;
+	UPROPERTY(Transient) TObjectPtr<class UNiagaraComponent> WeatherWind;
+	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> WeatherRainSound;
+	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> WeatherWindSound;
+	/** 0 clear, 1 fair, 2 cloudy, 3 overcast, 4 rain, 5 storm, 6 snow, 7 fog */
+	int32 Weather = 1, WeatherChanges = 0;
+	float WeatherUntil = 0.f, SkyCover = 0.25f, SkyCoverWant = 0.25f, SkyRain = 0.f, SkyRainWant = 0.f, SkyWind = 0.2f, SkyWindWant = 0.2f, SkyFog = 0.f, SkyFogWant = 0.f, SkyApplyT = 0.f, SkyTime = 0.f;
+	bool bSkyCold = false, bSkySnowing = false;
+	float DayFogDensity = 0.02f, DaySkyLightBase = 1.f;
+	/** the weather now (tests, reels) and a weather set (tests): see Weather */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
+	static FString WeatherName(int32 Kind);
+	// the showcase pilot of the list of 2026-11-04 (RDShow7.cpp): -RDShow7 in the game, StartShow7 in play (a rehearsal; Go
+	// empty: at once)
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Show7") void StartShow7(const FString& Go, const FString& Done);
+	/** "<on>|<beat>|<time in it>|<log>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Show7") FString GetShow7State() const;
+	void TickShow7(float RealDt, APlayerController* PC);
+	FString Show7Go, Show7Done, Show7Ready;
+	TArray<FString> Show7Log;
+	int32 Show7Beat = -1, Show7Step = 0;
+	float Show7T = 0.f, Show7Aggro = 0.f, Show7Yaw = 0.f;
+	bool bShow7On = false, bShow7Going = false;
+	FVector Show7A = FVector::ZeroVector, Show7B = FVector::ZeroVector;
+	/** the showcase's save's slot, and a save of that name the player had (put back at the end) */
+	FString Show7SaveSlot;
+	UPROPERTY(Transient) TObjectPtr<class USaveGame> Show7KeptSave;
+	// the swarms and birds round her, the wild animals (RDWildLife.cpp)
+	void TickWildLife(float Dt, const FVector& Her);
+	struct FRDSwarmInst { int32 Def = -1; TWeakObjectPtr<class UNiagaraComponent> C; FVector At = FVector::ZeroVector; };
+	TArray<FRDSwarmInst> SwarmInsts;
+	UPROPERTY(Transient) TArray<TObjectPtr<class ARDWildAnimal>> WildAnimals;
+	float WildLifeT = 0.f;
+	int32 AnimalsSpawned = 0, AnimalsFled = 0, SwarmsSpawned = 0;
+	/** "animal|<kind>|<x>|<y>|<z>|<state>|<flee cm>|<fled times>", "swarm|<name>|<x>|<y>|<z>|<layer>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") TArray<FString> GetWildLifeLines() const;
+	/** tests: an animal of a kind put at a point (it stands there) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") class ARDWildAnimal* SpawnWildAnimalAt(FName Kind, FVector At);
+	/** the town's list (RDTown7.cpp): a garden harvested, the oven's crafting, a table's food taken */
+	bool TownHarvestGarden(ARDSection* S, int32 Garden);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire7") bool IsGardenRipe(int32 Garden) const;
+	/** music's scene (RDDungeonGenerator.cpp): the set the wandering music plays now, when it changes next */
+	FName MusicSceneKey;
+	float MusicRotateAt = -1.f, MusicPendingAt = -1.f;
+	int32 MusicRotations = 0;
+	FName MusicSceneFor() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sound") FString GetMusicScene() const { return FString::Printf(TEXT("%s|%d|%.0f"), *MusicSceneKey.ToString(), MusicRotations, MusicRotateAt); }
+	/** tests: the next track at once (as its time would) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sound") void RotateMusicNow() { MusicRotateAt = 0.f; }
+
 	// ---- the town's lit buildings (the user's of 2026-11-02: "when a building has someone in it, it should have a torch lit,
 	// unless the NPC is sleeping"): each building's torches and their flames burn while someone awake is inside it (the
 	// castle's always); checked once a second
@@ -1135,6 +1252,9 @@ public:
 	/** F in the town: someone near, a service, the gate, a boarded door (""; nothing of the town's) */
 	FString TownInteract(const FVector& From);
 	FString TownDescribe(const FVector& From) const;
+	/** the list of 2026-11-04's things of the town (RDTown7.cpp): a table's food, a garden, an oven, the gate's levers */
+	FString TownThingInteract(const FVector& From);
+	FString TownThingDescribe(const FVector& From) const;
 	/** the castle's way back to the town (an arch in the great hall): F there */
 	FVector CastleWayBack = FVector::ZeroVector;
 	UPROPERTY(Transient) TObjectPtr<AActor> CastleWayBackActor;
@@ -1738,8 +1858,19 @@ public:
 	mutable TMap<FString, TPair<double, FString>> SaveInfoCache;
 	int32 LastSaveReveal = -1, SavesWritten = 0, LoadsArrived = 0;
 	FString LastSaveSlot, LastSaveWhy;
-	/** the game written to a slot ("autosave", "save") */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool SaveGameNow(const FString& Slot, const FString& Why);
+	/** the game written to a slot ("autosave", "save", a named one "save_<name>"), the name she gave it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool SaveGameNow(const FString& Slot, const FString& Why, const FString& Name = TEXT(""));
+	/** the list of 2026-11-04 ("there is no way to name your own save"): the Escape menu's Save page, the name typed there; the
+	 *  saves on disk, newest first ("<slot>|<name>|<date>|<place>|<hero>") */
+	FString SaveNameText;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void SetSaveNameText(const FString& Text) { SaveNameText = Text.Left(40); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") FString GetSaveNameText() const { return SaveNameText; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") TArray<FString> GetSaveSlots() const;
+	/** a name's slot ("save_" and its letters and digits) */
+	static FString SlotForName(const FString& Name);
+	void TickSaveNameKeys(APlayerController* PC);
+	mutable TArray<FString> SaveSlotsCache;
+	mutable double SaveSlotsAt = -10.0;
 	/** the game read from a slot and its level opened */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool LoadGameFrom(const FString& Slot);
 	/** "<date>|<level>|<place>|<hero>|<why>" or "" */

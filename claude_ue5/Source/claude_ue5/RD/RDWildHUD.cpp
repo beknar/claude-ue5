@@ -196,13 +196,18 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 	if (Ra) UI.Fit(TEXT("minimap_ring"), C - FVector2D(Ring), C + FVector2D(Ring));
 	const FLinearColor Ink(0.75f, 0.77f, 0.8f, 0.85f);
 	UI.Text(TEXT("N"), Ink, C.X - 4.f * Sc, C.Y - R * 0.98f, Small, Sc, ERDType::Title);
-	// its title: the region she is in; under it the hour and the key
+	// under it (the list of 2026-11-04: "the biome's name should also be visible under the mini map once the player is in the
+	// wilderness"; it was over it, at the screen's top edge): the region she is in and the weather, then the nearest town, the
+	// hour and the key
 	FRDWSample S; Gen->Wild->Sample(Here.X, Here.Y, S, false);
+	const float Y0 = C.Y + (Ra ? Ring + 4.f * Sc : R * 0.96f);
+	float Th0 = 0.f;
 	{
-		const FString Title = Gen->Wild->BiomeName(S.Biome).ToUpper();
-		float Tw0, Th0; UI.TextSize(Title, Tw0, Th0, Small, Sc * 1.0f, ERDType::Title);
-		UI.Text(Title, FLinearColor(0.f, 0.f, 0.f, 0.8f), C.X - Tw0 * 0.5f + 1.5f * Sc, C.Y - Ring - Th0 - 2.f * Sc + 1.5f * Sc, Small, Sc, ERDType::Title);
-		UI.Text(Title, FLinearColor(1.f, 0.84f, 0.5f, 1.f), C.X - Tw0 * 0.5f, C.Y - Ring - Th0 - 2.f * Sc, Small, Sc, ERDType::Title);
+		const FString Title = Gen->bSky7 ? FString::Printf(TEXT("%s  ·  %s"), *Gen->Wild->BiomeName(S.Biome).ToUpper(), *ARDDungeonGenerator::WeatherName(Gen->Weather)) : Gen->Wild->BiomeName(S.Biome).ToUpper();
+		float Tw0; UI.TextSize(Title, Tw0, Th0, Small, Sc * 1.15f, ERDType::Title);
+		UI.Text(Title, FLinearColor(0.f, 0.f, 0.f, 0.8f), C.X - Tw0 * 0.5f + 1.5f * Sc, Y0 + 1.5f * Sc, Small, Sc * 1.15f, ERDType::Title);
+		UI.Text(Title, FLinearColor(1.f, 0.84f, 0.5f, 1.f), C.X - Tw0 * 0.5f, Y0, Small, Sc * 1.15f, ERDType::Title);
+		BiomeLabelDrawn = Title;
 	}
 	const bool bPad = Gen->bCasterControls && Gen->GetPlayerCombat() && Gen->GetPlayerCombat()->IsUsingGamepad();
 	double Dt; const int32 Ti = Gen->Wild->NearestTown(Here.X, Here.Y, Dt);
@@ -210,6 +215,6 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 	const FString Clock = Gen->bDayNight ? FString::Printf(TEXT("    day %d · %s"), Gen->GetTownDay(), *Gen->GetTownClock()) : FString();
 	const FString Under = FString::Printf(TEXT("%s%s    %s  map"), *Near, *Clock, bPad ? TEXT("Back") : TEXT("M"));
 	float Tw, Th; UI.TextSize(Under, Tw, Th, Small, Sc);
-	UI.Text(Under, Ink, C.X - Tw * 0.5f, C.Y + (Ra ? Ring + 4.f * Sc : R * 0.96f), Small, Sc);
+	UI.Text(Under, Ink, C.X - Tw * 0.5f, Y0 + Th0 + 3.f * Sc, Small, Sc);
 	if (UI.Drawn) UI.Drawn->AddUnique(TEXT("wild_minimap"));
 }

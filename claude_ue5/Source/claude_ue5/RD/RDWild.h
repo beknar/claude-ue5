@@ -47,6 +47,8 @@ struct FRDWildFoliage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Clump = 0.f;
 	/** grows only near water (reeds, lily pads: < 0 on the water itself) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float NearWater = 0.f;
+	/** the list of 2026-11-04: its materials instead of its mesh's (by slot; the grass's and bushes' that sway in the wind) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UMaterialInterface>> Materials;
 };
 
 /** one of the user's terrain templates (docs/wilderness.txt), as data: 887 writes the table from biomes.json */
@@ -226,6 +228,37 @@ private:
 	void HashSegments();
 	float Feature(double X, double Y, float H, FRDWSample* S) const;   // rivers, lakes, ponds, roads, towns on H
 	int32 Biome(const TCHAR* Name) const { const int32* I = BiomeIndex.Find(Name); return I ? *I : 0; }
+};
+
+/** a wild animal (the user's list of 2026-11-04; RDWildLife.cpp): the generator's WildFauna kind on its clips, no controller.
+ *  It stands, grazes and walks about where it was put; when she comes within its own flee distance (1-3 m) it runs off
+ *  away from her for a while, then calms and grazes again. It keeps to the ground (the world's height) and to dry land. */
+UCLASS()
+class CLAUDE_UE5_API ARDWildAnimal : public AActor
+{
+	GENERATED_BODY()
+public:
+	ARDWildAnimal();
+	void Init(ARDDungeonGenerator* InGenerator, int32 InDef, uint32 InSeed);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 Def = -1;
+	/** 0 standing, 1 grazing, 2 walking, 3 fleeing */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") int32 GetState() const { return State; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") float GetFleeDistance() const { return FleeR; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") int32 GetTimesFled() const { return Fled; }
+	FVector Home = FVector::ZeroVector;
+protected:
+	virtual void Tick(float Dt) override;
+private:
+	UPROPERTY() TObjectPtr<USceneComponent> Root;
+	UPROPERTY() TObjectPtr<class USkeletalMeshComponent> Body;
+	UPROPERTY(Transient) TObjectPtr<ARDDungeonGenerator> Gen;
+	FRandomStream R;
+	int32 State = 0, Fled = 0;
+	float Until = 0.f, FleeR = 200.f;
+	FVector To = FVector::ZeroVector;
+	UAnimationAsset* CurAnim = nullptr;
+	void SetState(int32 S, float Now, const FVector& Away = FVector::ZeroVector);
+	void Play(UAnimationAsset* A, float Rate);
 };
 
 /** one chunk of the wilderness: its ground (a procedural mesh with collision), its water, its plants and rocks, its places'

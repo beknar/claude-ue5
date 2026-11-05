@@ -8,7 +8,7 @@ How the six heroes are balanced against each other and against what they fight. 
 
 The user's list of 2026-11-01 (`docs/improvements6.txt`) asked for the six heroes to be balanced against each other tier by tier, each playing differently (not the same hero six times). It was built by `880_mistward6.py` (C++ `RD/RDMistward6.cpp`, the generator's `bTierGrowth`; the numbers in `SourceArt/mistward/balance6.json`) and measured by `868_mistward_test.ps1 balance` (the trials) and `868 growth` (each hero's numbers with tiers 2 to 5 open).
 
-The tables below are a snapshot of 2026-11-01 (the record `SourceArt/mistward/test_b.json`). The castle's document keeps the live tables, written from the game's data by `pipeline/blender_numpy/mw_balance.py`: [mistward_castle: the list of 2026-11-01](levels/mistward_castle.md#mistward_castle-the-castle).
+The tables below are a snapshot of 2026-11-01. The record `SourceArt/mistward/test_b.json` now holds the run of 2026-11-04, whose tier trials agree with it (every hero won every pack and all ten boss fights again) and which added the dungeon's boss. The castle's document keeps the live tables, written from the game's data by `pipeline/blender_numpy/mw_balance.py`: [mistward_castle: the list of 2026-11-01](levels/mistward_castle.md#mistward_castle-the-castle).
 
 ### What it fixed
 
@@ -36,7 +36,7 @@ From tier 1 to tier 5 a monster's hit points grow 6.8 times and its damage 4.9 t
 
 - **Opening a tier:** a tier opens when the tier before has half of its rooms explored, half of its monsters killed and half of its chests and trunks looted.
 - **The boss:** each opening puts the new tier's strongest kind in a room of the tier before that she has explored. It is 1.35 times bigger, has 3 times the hit points, hits 1.6 times as hard and has 3 to 6 monsters of the new tier round it.
-- **The final boss:** once tier 5 itself reaches the share, Aurorim waits in a room of it, scaled above tier 5's boss as the dungeon's boss (its strongest kind's factors, then 1.5 times a tier boss's hit points and 1.25 times its blows: 4.5 times the hit points and 2 times the blows) with 6 to 10 escorts; his lance (9 to 32 m, 0.75 of a blow), his light from above (3.5 to 13 m, a full blow, 230 cm round), both recharging a quarter faster, and his punches; he flinches at most once every 3 s. Not yet in the trials: he is not among the bosses each hero fought there.
+- **The final boss:** once tier 5 itself reaches the share, Aurorim waits in a room of it, scaled above tier 5's boss as the dungeon's boss (its strongest kind's factors, then 1.5 times a tier boss's hit points and 1.25 times its blows: 4.5 times the hit points and 2 times the blows) with 6 to 10 escorts; his lance (9 to 32 m, 0.75 of a blow), his light from above (3.5 to 13 m, a full blow, 230 cm round), both recharging a quarter faster, and his punches; he flinches at most once every 3 s. In the trials of 2026-11-04 no hero beat him: see [The dungeon's boss](#the-dungeons-boss).
 - **The guarded ring:** if she has found neither magic potency ring of the tier before, one is put in a container there, guarded by 4 monsters of the new tier.
 
 ### The heroes: how each grows
@@ -110,6 +110,24 @@ Each hero at each tier is played by autoplay:
   - the Warlock sits between.
 - **The hardest fight** is tier 3's boss, the Zombie Tank (a cannon and a slowing blow): it once left the Warlock with less than 1 %.
 - **Monsters outgrow the heroes' hit points:** a monster's damage grows about 5 times from tier 1 to tier 5, the heroes' hit points 1.6 to 2 times. A tier-5 blow (55) is half the Mage's hit points before armour. Keeping her distance, armour and the summons carry the difference.
+
+### The dungeon's boss
+
+Measured 2026-11-04 (`868 balance`'s finals): Aurorim as the game sets him, in a tier-5 room of 79 free tiles with his band of 10 (the most the roll gives; the same in all twelve fights), each hero 12 m from him with her tier-5 kit and two of each tier-5 potion, fought twice by each hero under autoplay. The fight by fight table is in [the castle's document](levels/mistward_castle.md#mistward_castle-the-castle).
+
+| Hero | Won | Fell after | Aurorim's hit points left (of 1836) | His band left (of 10) | His lights on her |
+|---|---|---|---|---|---|
+| Warrior | 0 of 2 | 21 / 16 s | 1836 / 1836 | 7 / 9 | 4 of 5 / 3 of 4 |
+| Mage | 0 of 2 | 24 / 13 s | 1774 / 1836 | 6 / 10 | 0 of 5 / 0 of 3 |
+| Warlock | 0 of 2 | 28 / 26 s | 1836 / 1836 | 9 / 9 | 1 of 6 / 3 of 6 |
+| Rogue | 0 of 2 | 56 / 90 s | slain / slain | 8 / 7 | 0 of 7 / 0 of 8 |
+| Martial Artist | 0 of 2 | 22 / 22 s | 1836 / 1836 | 6 / 7 | 2 of 5 / 0 of 5 |
+| Summoner | 0 of 2 | 74 / 54 s | 16 / 785 | 9 / 9 | 0 of 6 / 0 of 5 |
+
+- **No hero wins.** The heroes who stand in the blows (the Warrior, the Warlock, the Martial Artist) take 4 to 5 times their hit points within half a minute, with 1 to 4 of his band killed and him untouched.
+- **The ones who keep away do best:** the Rogue's stealth reached him and killed him both times, and his band then killed her; the Summoner's summons brought him to 16 hit points once. The Mage stepped out of all 8 of his lights and fell to the shots of him and his band.
+- **What decides it is not measured yet:** his band of 10 at once is more than three of the trials' packs of 3 at once (a pack of 3 took 22 to 38 % of a hero's hit points at tier 5 in the same run), with his lights and lances on top. Trials of his band without him, and of him alone, would say which carries the fight.
+- **The showcase's Warrior won** (2026-11-04's reel): with the best of everything she can use (482 hit points against the kit's 241) and six of the best healing potion, she left 160 of 482 at her lowest.
 
 ### How it got here
 

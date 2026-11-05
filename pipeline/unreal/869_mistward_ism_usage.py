@@ -44,6 +44,26 @@ for m_ in ("/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps
             overrides += 1
             for b in bases_of(p.mesh, [mat]): want(b, "used_with_instanced_static_meshes")
 print("ISMUSAGE pieces in materials of their own:", overrides)
+# (the wilderness on brokenspire: its plants and rocks are instanced too, the list of 2026-11-04's swaying grass and bushes in
+# materials of their own (FRDWildFoliage::Materials), and the weather's rain and snow drops (instanced planes))
+open_map("/Game/RandomDungeon/Maps/brokenspire")
+g_ = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+nwild = 0
+for bm in g_.get_editor_property("wild_biomes"):
+    for f in bm.get_editor_property("foliage"):
+        fm = f.get_editor_property("mesh")
+        if not fm: continue
+        nwild += 1
+        for b in bases_of(fm): want(b, "used_with_instanced_static_meshes")
+        own = [m for m in f.get_editor_property("materials") if m]
+        if own:
+            for b in bases_of(fm, own): want(b, "used_with_instanced_static_meshes")
+dm = g_.get_editor_property("drop_mesh")
+for k in ("rain_drop_material", "snow_drop_material"):
+    dmat = g_.get_editor_property(k)
+    if dm and dmat:
+        for b in bases_of(dm, [dmat]): want(b, "used_with_instanced_static_meshes")
+print("ISMUSAGE the wilderness's plants:", nwild)
 # the menu: its placed meshes; Nanite ones need the Nanite usage
 open_map(MENU)
 nmenu = 0

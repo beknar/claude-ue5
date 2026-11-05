@@ -1,0 +1,134 @@
+{
+ "tag": "i7g",
+ "plan": [
+  "life7",
+  "music7",
+  "save"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "life7",
+   "ok": true,
+   "visits": {
+    "meadows": {
+     "animals": [
+      "Deer",
+      "Squirrel"
+     ],
+     "n": 3,
+     "swarms": [
+      "Butterflies"
+     ]
+    },
+    "taigas": {
+     "animals": [
+      "Deer",
+      "Squirrel",
+      "Wolf"
+     ],
+     "n": 6,
+     "swarms": [
+      "Bird flock"
+     ]
+    },
+    "grasslands": {
+     "animals": [
+      "Deer",
+      "Hare"
+     ],
+     "n": 3,
+     "swarms": [
+      "Butterflies"
+     ]
+    }
+   },
+   "flee": {
+    "flee_cm": 240.7,
+    "state_far": 0,
+    "state_near": 3,
+    "fled": 1,
+    "ran_m": 15.8
+   },
+   "night_swarms": [
+    "Fireflies"
+   ]
+  },
+  {
+   "step": "music7",
+   "ok": true,
+   "wild": {
+    "scene": "Music.Wild",
+    "track": "SW_Music_Wild_02",
+    "rotations": 3,
+    "next_in_s": 316.38613706827164
+   },
+   "rotated": {
+    "scene": "Music.Wild",
+    "track": "SW_Music_Wild_03",
+    "rotations": 4,
+    "next_in_s": 327.38613706827164
+   },
+   "town": "Music.Town"
+  },
+  {
+   "step": "save",
+   "ok": true,
+   "gold_before": 0,
+   "found_before": 1,
+   "revealed_before": 789,
+   "saved": true,
+   "info": "2026-11-05 02:41|brokenspire|the wilds: farms, 3 km from Brokenspire|Summoner|test|",
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "save_page": [
+    "text|Name|The wilds day 1",
+    "button|Save",
+    "button|Back"
+   ],
+   "typed": "Test Save 7",
+   "slots": [
+    "save_test_save_7_788cca|Test Save 7|2026-11-05 02:41|the wilds: farms, 3 km from Brokenspire|Summoner",
+    "save|Saved game|2026-11-05 02:41|the wilds: farms, 3 km from Brokenspire|Summoner",
+    "autosave|Autosave|2026-11-05 02:41|Brokenspire|Summoner",
+    "save_meadows_at_dawn|Meadows at dawn|2026-11-05 02:21|the wilds: meadows, 17 km from Brokenspire|Summoner",
+    "save_test_save_7|Test Save 7|2026-11-05 02:14|the wilds: farms, 3 km from Brokenspire|Summoner"
+   ],
+   "load_page": [
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-05 02:41 (Summoner)",
+    "button|Saved game: the wilds: farms, 3 km from Brokenspire, 2026-11-05 02:41 (Summoner)",
+    "button|Autosave: Brokenspire, 2026-11-05 02:41 (Summoner)",
+    "button|Meadows at dawn: the wilds: meadows, 17 km from Brokenspire, 2026-11-05 02:21 (Summoner)",
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-05 02:14 (Summoner)",
+    "button|Back"
+   ],
+   "named_ok": true,
+   "load": true,
+   "back_m": 0.0,
+   "gold_after": 0,
+   "found_after": 1,
+   "revealed_after": 789,
+   "save_state": {
+    "written": 1,
+    "slot": "autosave",
+    "why": "map",
+    "arrived": 1
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_i7g_life7_meadows.png",
+  "wd_i7g_life7_taigas.png",
+  "wd_i7g_life7_grasslands.png",
+  "wd_i7g_life7_flee.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

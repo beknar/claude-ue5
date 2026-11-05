@@ -1,0 +1,885 @@
+{
+ "tag": "i7c",
+ "plan": [
+  "basics",
+  "recipes",
+  "harvest",
+  "gearbreak",
+  "options",
+  "death"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "basics",
+   "ok": true,
+   "title": "Mistward Castle",
+   "max_tier": 5,
+   "show_fps": true,
+   "fps": 16.3,
+   "fps_box": [
+    73,
+    63,
+    333,
+    120
+   ],
+   "recipes": [
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "recipes_sorted": true,
+   "breakdowns": [
+    "Beast Shield",
+    "Dock Shield",
+    "Eastern Shield",
+    "Kite Shield",
+    "Painted Viking Shield"
+   ],
+   "breakdowns_sorted": true,
+   "plate_knight_tiers": [
+    2
+   ],
+   "themes": {
+    "1": "None",
+    "2": "Castle",
+    "3": "Dwarf",
+    "4": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ],
+    "5": [
+     "Castle",
+     "Dwarf",
+     "None"
+    ]
+   }
+  },
+  {
+   "step": "recipes",
+   "ok": true,
+   "highest": 1,
+   "offered_t1": [
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "small": {
+    "made": true,
+    "count": 1,
+    "faint_left": 2,
+    "ichor_left": 2
+   },
+   "large_t1": {
+    "made": false,
+    "message": "The large healing potion is of tier 2: the anvil makes it once tier 2 is open"
+   },
+   "highest_after": 2,
+   "offered_t2": [
+    "Large Healing Potion",
+    "Large Mana Potion",
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Uncommon Healing Potion",
+    "Uncommon Mana Potion",
+    "Whetstone"
+   ],
+   "large_t2": {
+    "made": true,
+    "count": 1
+   },
+   "scrolls": {
+    "Warrior": 0,
+    "MartialArtist": 0,
+    "Mage": 11,
+    "Warlock": 8,
+    "Summoner": 11
+   },
+   "mage_scrolls": [
+    "Scroll of Ash Ward",
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Dispel Hex",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Iron Skin",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "warlock_scrolls": [
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "fire_scroll": {
+    "made": true,
+    "count": 1,
+    "faint_left": 0,
+    "venom_left": 0
+   },
+   "wood_glue": {
+    "Slickstone": 5,
+    "Patch Kit": 10,
+    "Repair Kit": 15,
+    "Torch": 1
+   },
+   "slickstone": {
+    "made": true,
+    "wood_glue_left": 1
+   },
+   "great": {
+    "Null Sanctum": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "troll heart",
+      3
+     ]
+    ],
+    "Apocalypse": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ],
+    "Meteor Storm": [
+     [
+      "radiant essence",
+      4
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ]
+   },
+   "fires": {
+    "Env.Torch": [
+     0.044,
+     0.044
+    ],
+    "Env.Brazier": [
+     0.052,
+     0.052
+    ],
+    "Env.Hearth": [
+     0.068,
+     0.068
+    ]
+   }
+  },
+  {
+   "step": "harvest",
+   "ok": true,
+   "kills": [
+    {
+     "kind": "Rat",
+     "family": "Spider",
+     "tier": 1,
+     "piles": 1,
+     "things": [
+      "Faint Essence",
+      "Venom Sac"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 15,
+     "picture_cm": 100.8,
+     "tint": [
+      0.55,
+      1.0,
+      0.55
+     ]
+    },
+    {
+     "kind": "Half_Creature_04",
+     "family": "Spider",
+     "tier": 1,
+     "piles": 1,
+     "things": [
+      "Faint Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 17,
+     "picture_cm": 100.6,
+     "tint": [
+      0.55,
+      1.0,
+      0.55
+     ]
+    },
+    {
+     "kind": "Parasite_Slider",
+     "family": "Spider",
+     "tier": 1,
+     "piles": 1,
+     "things": [
+      "Faint Essence",
+      "Light Leather"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.8,
+     "tint": [
+      0.55,
+      1.0,
+      0.55
+     ]
+    },
+    {
+     "kind": "Sufferer",
+     "family": "Horned",
+     "tier": 2,
+     "piles": 1,
+     "things": [
+      "Dim Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 16,
+     "picture_cm": 100.7,
+     "tint": [
+      0.45,
+      0.7,
+      1.0
+     ]
+    },
+    {
+     "kind": "Fat",
+     "family": "Troll",
+     "tier": 2,
+     "piles": 1,
+     "things": [
+      "Faint Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 17,
+     "picture_cm": 100.6,
+     "tint": [
+      0.45,
+      0.7,
+      1.0
+     ]
+    },
+    {
+     "kind": "Mask",
+     "family": "Mutant",
+     "tier": 2,
+     "piles": 1,
+     "things": [
+      "Dim Essence",
+      "Mutant Ichor",
+      "Oils"
+     ],
+     "harvest": true,
+     "pictures": 3,
+     "particles": 16,
+     "picture_cm": 94.6,
+     "tint": [
+      0.45,
+      0.7,
+      1.0
+     ]
+    },
+    {
+     "kind": "Magur",
+     "family": "Horned",
+     "tier": 3,
+     "piles": 1,
+     "things": [
+      "Bright Essence",
+      "Glue",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 3,
+     "particles": 17,
+     "picture_cm": 94.5,
+     "tint": [
+      0.8,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "kind": "Azrak",
+     "family": "Horned",
+     "tier": 3,
+     "piles": 1,
+     "things": [
+      "Dim Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.8,
+     "tint": [
+      0.8,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "kind": "Warrior_02_the_leopard",
+     "family": "Horned",
+     "tier": 3,
+     "piles": 1,
+     "things": [
+      "Bright Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.7,
+     "tint": [
+      0.8,
+      0.5,
+      1.0
+     ]
+    },
+    {
+     "kind": "Orc_01",
+     "family": "Horned",
+     "tier": 4,
+     "piles": 1,
+     "things": [
+      "Bright Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 16,
+     "picture_cm": 100.8,
+     "tint": [
+      1.0,
+      0.62,
+      0.22
+     ]
+    },
+    {
+     "kind": "Orc_02",
+     "family": "Horned",
+     "tier": 4,
+     "piles": 1,
+     "things": [
+      "Brilliant Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 16,
+     "picture_cm": 100.7,
+     "tint": [
+      1.0,
+      0.62,
+      0.22
+     ]
+    },
+    {
+     "kind": "Ursag",
+     "family": "Horned",
+     "tier": 4,
+     "piles": 1,
+     "things": [
+      "Dim Essence",
+      "Horn Shard"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 17,
+     "picture_cm": 100.7,
+     "tint": [
+      1.0,
+      0.62,
+      0.22
+     ]
+    },
+    {
+     "kind": "Alfa",
+     "family": "Daemon",
+     "tier": 5,
+     "piles": 1,
+     "things": [
+      "Oils",
+      "Radiant Essence"
+     ],
+     "harvest": true,
+     "pictures": 2,
+     "particles": 17,
+     "picture_cm": 100.9,
+     "tint": [
+      1.0,
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "kind": "Spider",
+     "family": "Spider",
+     "tier": 5,
+     "piles": 1,
+     "things": [
+      "Bright Essence",
+      "Oils",
+      "Venom Sac"
+     ],
+     "harvest": true,
+     "pictures": 3,
+     "particles": 16,
+     "picture_cm": 94.0,
+     "tint": [
+      1.0,
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "kind": "Rock",
+     "family": "Troll",
+     "tier": 5,
+     "piles": 1,
+     "things": [
+      "Faint Essence"
+     ],
+     "harvest": true,
+     "pictures": 1,
+     "particles": 17,
+     "picture_cm": 100.8,
+     "tint": [
+      1.0,
+      0.28,
+      0.28
+     ]
+    }
+   ],
+   "bad": [],
+   "big": [
+    [
+     "Faint Essence",
+     "Faint Essence",
+     "Faint Essence",
+     "Venom Sac",
+     "Mutant Ichor"
+    ],
+    [
+     "Dim Essence",
+     "Faint Essence",
+     "Dim Essence",
+     "Horn Shard",
+     "Mutant Ichor"
+    ],
+    [
+     "Dim Essence",
+     "Bright Essence",
+     "Bright Essence",
+     "Horn Shard",
+     "Mutant Ichor"
+    ],
+    [
+     "Dim Essence",
+     "Brilliant Essence",
+     "Dim Essence",
+     "Horn Shard",
+     "Daemon Ash"
+    ],
+    [
+     "Brilliant Essence",
+     "Bright Essence",
+     "Radiant Essence",
+     "Daemon Ash",
+     "Venom Sac"
+    ]
+   ],
+   "reload": {
+    "before": 1,
+    "reloaded": true,
+    "after": 1,
+    "describe": "harvest the parts (2)",
+    "f": "loot",
+    "message": "You harvest:  1 faint essence, 1 wood glue",
+    "got": {
+     "Wood Glue": 1,
+     "Faint Essence": 1
+    },
+    "want": {
+     "Wood Glue": 1,
+     "Faint Essence": 1
+    },
+    "gone": true
+   },
+   "enough": {
+    "1": {
+     "monsters": 14,
+     "have": {
+      "Coarse Hide": 1,
+      "Cured Leather Strip": 1,
+      "Faint Essence": 17,
+      "Glue": 2,
+      "Light Leather": 1,
+      "Mutant Ichor": 3,
+      "Oils": 2,
+      "Venom Sac": 5
+     },
+     "short": []
+    },
+    "2": {
+     "monsters": 100,
+     "have": {
+      "Coarse Hide": 4,
+      "Cured Leather Strip": 13,
+      "Dim Essence": 49,
+      "Epoxy": 6,
+      "Faint Essence": 71,
+      "Glue": 10,
+      "Horn Shard": 13,
+      "Light Leather": 7,
+      "Mutant Ichor": 24,
+      "Oils": 5,
+      "Troll Heart": 14,
+      "Venom Sac": 5,
+      "Wood Glue": 5
+     },
+     "short": []
+    },
+    "3": {
+     "monsters": 201,
+     "have": {
+      "Bright Essence": 112,
+      "Coarse Hide": 13,
+      "Cured Leather Strip": 29,
+      "Dim Essence": 88,
+      "Epoxy": 13,
+      "Faint Essence": 124,
+      "Glue": 25,
+      "Horn Shard": 84,
+      "Hound Fang": 9,
+      "Light Leather": 27,
+      "Mutant Ichor": 32,
+      "Oils": 17,
+      "Troll Heart": 18,
+      "Venom Sac": 20,
+      "Wood Glue": 15
+     },
+     "short": []
+    },
+    "4": {
+     "monsters": 299,
+     "have": {
+      "Bright Essence": 158,
+      "Brilliant Essence": 164,
+      "Coarse Hide": 34,
+      "Cured Leather Strip": 44,
+      "Daemon Ash": 23,
+      "Dim Essence": 142,
+      "Epoxy": 36,
+      "Faint Essence": 162,
+      "Glue": 40,
+      "Horn Shard": 161,
+      "Hound Fang": 22,
+      "Light Leather": 37,
+      "Mutant Ichor": 52,
+      "Oils": 33,
+      "Troll Heart": 25,
+      "Venom Sac": 41,
+      "Wood Glue": 35
+     },
+     "short": []
+    },
+    "5": {
+     "monsters": 403,
+     "have": {
+      "Bright Essence": 215,
+      "Brilliant Essence": 218,
+      "Coarse Hide": 60,
+      "Cured Leather Strip": 67,
+      "Daemon Ash": 123,
+      "Dim Essence": 200,
+      "Epoxy": 63,
+      "Faint Essence": 212,
+      "Glue": 65,
+      "Horn Shard": 161,
+      "Hound Fang": 22,
+      "Light Leather": 59,
+      "Mutant Ichor": 52,
+      "Oils": 59,
+      "Radiant Essence": 187,
+      "Troll Heart": 85,
+      "Venom Sac": 77,
+      "Wood Glue": 58
+     },
+     "short": []
+    }
+   }
+  },
+  {
+   "step": "gearbreak",
+   "ok": true,
+   "listed": [
+    "HP Potency Ring 3",
+    "Painted Viking Shield",
+    "Torch"
+   ],
+   "ring": {
+    "ok": true,
+    "left": 1
+   },
+   "worn": true,
+   "ring_worn": {
+    "ok": false,
+    "message": "You wear the hp potency ring 3: take it off first",
+    "left": 1
+   },
+   "torch_lit": {
+    "held": true,
+    "ok": false,
+    "message": "The torch burns in your hand: put it out first"
+   },
+   "torch": {
+    "held": false,
+    "ok": true,
+    "left": 0
+   },
+   "got": {
+    "Copper Ingot": 2,
+    "Bronze Ingot": 2,
+    "Faint Essence": 2,
+    "Wood Log": 1,
+    "Straw Rope": 1,
+    "Oils": 1
+   }
+  },
+  {
+   "step": "options",
+   "ok": true,
+   "controls_before": true,
+   "open": {
+    "why": "",
+    "open": true,
+    "page": 0,
+    "lines": [
+     "button|Resume",
+     "button|Save the game",
+     "button|Load a game",
+     "button|Options",
+     "button|Return to Brokenspire",
+     "button|Choose another hero (a new game)",
+     "button|Quit"
+    ]
+   },
+   "options": {
+    "page": 1,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|1.00",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|On",
+     "choice|Resolution|the screen's own (windowed fullscreen)",
+     "choice|Display mode|Windowed fullscreen",
+     "button|Apply display settings",
+     "button|Back"
+    ],
+    "action": "options"
+   },
+   "controls_off": {
+    "shown": false,
+    "line": "choice|Controls hint|Off"
+   },
+   "volume": {
+    "before": 1.0,
+    "after": 0.9
+   },
+   "display": {
+    "choices": [
+     "1280x720",
+     "1600x900",
+     "1920x1080",
+     "2560x1440",
+     "3840x2160"
+    ],
+    "from": [
+     1920,
+     1080
+    ],
+    "to": [
+     2560,
+     1440
+    ],
+    "mode": 2,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|0.90",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|Off",
+     "choice|Resolution|2560 x 1440",
+     "choice|Display mode|Windowed",
+     "button|Apply display settings",
+     "button|Back"
+    ]
+   },
+   "applied": {
+    "said": "saved 2560x1440 mode 2 in the editor's user settings (the editor's play window keeps its size)",
+    "saved": [
+     2560,
+     1440
+    ],
+    "mode": "<WindowMode.WINDOWED: 2>"
+   },
+   "escape_back": {
+    "open": true,
+    "page": 0,
+    "cursor": 3,
+    "options_at": 3
+   },
+   "escape_closed": {
+    "open": false,
+    "paused": false
+   },
+   "controls_drawn_off": false,
+   "controls_drawn_on": true
+  },
+  {
+   "step": "death",
+   "ok": true,
+   "gave": [
+    "Kite Shield",
+    "Small Healing Potion",
+    "Iron Ingot",
+    "Plate Armour",
+    "Viking Shortsword",
+    "Copper Ingot",
+    "Bronze Ingot",
+    "Steel Ingot",
+    "Hardwood",
+    "Timber",
+    "Wood Log",
+    "Coarse Hide",
+    "Light Leather",
+    "Cured Leather Strip",
+    "Epoxy"
+   ],
+   "lines_before": 2,
+   "start_shield": "Painted Viking Shield",
+   "keep_start_gear": true,
+   "dead": true,
+   "piles": 1,
+   "pile": {
+    "things": [
+     "Viking Shortsword",
+     "Kite Shield",
+     "Small Healing Potion",
+     "Iron Ingot",
+     "Plate Armour",
+     "Copper Ingot",
+     "Bronze Ingot",
+     "Steel Ingot",
+     "Hardwood",
+     "Timber",
+     "Wood Log",
+     "Coarse Hide",
+     "Light Leather",
+     "Cured Leather Strip",
+     "Epoxy"
+    ],
+    "pictures": 15,
+    "particles": 18,
+    "from_her_m": 0.0
+   },
+   "carried_after": {
+    "Kite Shield": 0,
+    "Small Healing Potion": 0,
+    "Iron Ingot": 0,
+    "Plate Armour": 0,
+    "Viking Shortsword": 0,
+    "Copper Ingot": 0,
+    "Bronze Ingot": 0,
+    "Steel Ingot": 0,
+    "Hardwood": 0,
+    "Timber": 0,
+    "Wood Log": 0,
+    "Coarse Hide": 0,
+    "Light Leather": 0,
+    "Cured Leather Strip": 0,
+    "Epoxy": 0
+   },
+   "start_shield_after": 1,
+   "marks": [
+    9,
+    10
+   ],
+   "revived": true,
+   "where_after_m": 6.7,
+   "describe": "take up your things (15)",
+   "f": "loot",
+   "carried_back": {
+    "Kite Shield": 1,
+    "Small Healing Potion": 1,
+    "Iron Ingot": 1,
+    "Plate Armour": 1,
+    "Viking Shortsword": 1,
+    "Copper Ingot": 1,
+    "Bronze Ingot": 1,
+    "Steel Ingot": 1,
+    "Hardwood": 1,
+    "Timber": 1,
+    "Wood Log": 1,
+    "Coarse Hide": 1,
+    "Light Leather": 1,
+    "Cured Leather Strip": 1,
+    "Epoxy": 1,
+    "Painted Viking Shield": 1
+   },
+   "shield_worn_again": "Kite Shield",
+   "piles_after": 0
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_i7c_hud_fps.png",
+  "mw_i7c_harvest_piles.png",
+  "mw_i7c_options_page.png",
+  "mw_i7c_death_pile.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
