@@ -517,7 +517,7 @@ def step_save():
     g.activate_menu_line(load_i); yield from rwait(0.3)
     res["load_page"] = [str(l) for l in g.get_menu_lines()]
     g.set_menu_open(False)
-    res["named_ok"] = res["typed"] == "Test Save 7" and any(s.startswith("save_test_save_7|Test Save 7|") for s in res["slots"]) and any("Test Save 7" in l for l in res["load_page"]) \
+    res["named_ok"] = res["typed"] == "Test Save 7" and any(s.startswith("save_test_save_7_") and "|Test Save 7|" in s for s in res["slots"]) and any("Test Save 7" in l for l in res["load_page"]) \
         and any(l.startswith("text|Name|") for l in res["save_page"])
     # something changed after the save, then the save loaded
     g.add_gold(250, "test"); g.wild_put_her(-1000.0, 1000.0); yield from rwait(1.0)

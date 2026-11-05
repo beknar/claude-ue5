@@ -22,6 +22,9 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDWildLife, Log, All);
 
+/** in a town's walls only the swarms and birds of the town or of everywhere (both the spawning and the keeping) */
+static bool RDWLInTownOk(const FRDWildSwarm& Sw) { return Sw.Biomes.Contains(TEXT("town")) || Sw.Biomes.Contains(TEXT("*")); }
+
 // ------------------------------------------------------------------------------------------------ an animal
 ARDWildAnimal::ARDWildAnimal()
 {
@@ -192,7 +195,7 @@ void ARDDungeonGenerator::TickWildLife(float Dt, const FVector& Her)
 		{
 			const FRDWildSwarm& Sw = WildSwarms[Si.Def];
 			const float Far = Sw.Layer == 1 ? 40000.f : 8000.f;
-			bKeep = FVector::Dist2D(Si.At, Her) < Far && (bDay ? Sw.bDay : Sw.bNight) && (Sw.Layer == 1 || !bInTown || Sw.Biomes.Contains(TEXT("town")) || Sw.Biomes.Contains(TEXT("*")));
+			bKeep = FVector::Dist2D(Si.At, Her) < Far && (bDay ? Sw.bDay : Sw.bNight) && (!bInTown || RDWLInTownOk(Sw));
 			// (no birds in rain, snow or fog)
 			if (Sw.Layer == 1 && bSky7 && (SkyRain > 0.3f || SkyFog > 0.6f)) bKeep = false;
 		}
@@ -206,12 +209,8 @@ void ARDDungeonGenerator::TickWildLife(float Dt, const FVector& Her)
 		int32 Have = 0; for (const FRDSwarmInst& Si : SwarmInsts) if (Si.Def == K) ++Have;
 		if (Have >= Sw.Count) continue;
 		const bool bBird = Sw.Layer == 1;
-		// (in the town's walls only the town's insects; its birds or any)
-		if (!Sw.Biomes.Contains(TEXT("*")))
-		{
-			if (!bBird && bInTown && !Sw.Biomes.Contains(TEXT("town"))) continue;
-			if (bBird && bInTown && !Sw.Biomes.Contains(TEXT("town"))) continue;
-		}
+		// (in the town's walls only the town's swarms and birds, or those of everywhere: the same rule keeps them above)
+		if (bInTown && !RDWLInTownOk(Sw)) continue;
 		const float Ang = Rr.FRandRange(0.f, 2.f * PI), Dd = bBird ? Rr.FRandRange(6000.f, 22000.f) : Rr.FRandRange(1200.f, 4500.f);
 		FVector P = Her + FVector(FMath::Cos(Ang), FMath::Sin(Ang), 0.f) * Dd;
 		float Zg = 0.f;

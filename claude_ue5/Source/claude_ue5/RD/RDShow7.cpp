@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/SaveGame.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
@@ -55,9 +56,11 @@ namespace
 
 void ARDDungeonGenerator::StartShow7(const FString& Go, const FString& Done)
 {
+	// (nothing comes at her while it runs; started again while it runs, the noticing distance kept is the first one: the PR
+	// review's find, a second start kept 0 and put it back at the end)
+	if (!bShow7On) Show7Aggro = AggroDistance;
+	AggroDistance = 0.f;
 	Show7Go = Go; Show7Done = Done; Show7Beat = -1; Show7T = 0.f; bShow7On = true; bShow7Going = Go.IsEmpty(); Show7Log.Reset();
-	// (nothing comes at her while it runs)
-	Show7Aggro = AggroDistance; AggroDistance = 0.f;
 	UE_LOG(LogRDShow7, Log, TEXT("RDSHOW7 armed (go %s)"), Go.IsEmpty() ? TEXT("at once") : *Go);
 }
 
@@ -117,6 +120,12 @@ void ARDDungeonGenerator::TickShow7(float RealDt, APlayerController* PC)
 		{
 			bShow7On = false; AggroDistance = Show7Aggro;
 			SetMenuOpen(false); SetMapOpen(false);
+			if (!Show7SaveSlot.IsEmpty())
+			{
+				if (Show7KeptSave) UGameplayStatics::SaveGameToSlot(Show7KeptSave, Show7SaveSlot, 0);
+				else UGameplayStatics::DeleteGameInSlot(Show7SaveSlot, 0);
+				Show7KeptSave = nullptr; Show7SaveSlot.Reset(); LastSaveRealTime = FPlatformTime::Seconds();
+			}
 			if (!Show7Done.IsEmpty()) FFileHelper::SaveStringToFile(FString::Join(Show7Log, TEXT(" | ")), *Show7Done);
 			UE_LOG(LogRDShow7, Log, TEXT("RDSHOW7 done: %s"), *FString::Join(Show7Log, TEXT(" | ")));
 			return;
@@ -382,7 +391,14 @@ void ARDDungeonGenerator::TickShow7(float RealDt, APlayerController* PC)
 		{
 			const int32 Want = FMath::Clamp(FMath::FloorToInt((Show7T - 2.f) * 6.f), 0, FCString::Strlen(Name));
 			SaveNameText = FString(Name).Left(Want);
-			if (Want >= FCString::Strlen(Name) && Show7T > 6.f) { Show7Step = 2; const int32 I = MenuItems().IndexOfByKey(FName(TEXT("savedo"))); Show7Log.Add(ActivateMenuLine(I) ? TEXT("saved") : TEXT("not saved")); }
+			if (Want >= FCString::Strlen(Name) && Show7T > 6.f)
+			{
+				// (the showcase's save is the showcase's: a save of that name the player had is kept and put back, and the
+				// showcase's deleted at the end (the PR review's find: every rehearsal left one, which Continue could load))
+				Show7Step = 2; Show7SaveSlot = SlotForName(Name);
+				Show7KeptSave = UGameplayStatics::DoesSaveGameExist(Show7SaveSlot, 0) ? UGameplayStatics::LoadGameFromSlot(Show7SaveSlot, 0) : nullptr;
+				const int32 I = MenuItems().IndexOfByKey(FName(TEXT("savedo"))); Show7Log.Add(ActivateMenuLine(I) ? TEXT("saved") : TEXT("not saved"));
+			}
 		}
 		if (Show7Step == 2 && Show7T > 8.f) { Show7Step = 3; const int32 I = MenuItems().IndexOfByKey(FName(TEXT("load"))); ActivateMenuLine(I); }
 		break;

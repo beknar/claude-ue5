@@ -210,7 +210,8 @@ ARDTownAnimal::ARDTownAnimal()
 	Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	Body->bEnableUpdateRateOptimizations = true;
-	// (it blocks pawns: her and the townsfolk; the camera passes)
+	// (it blocks pawns: her and the monsters; the camera passes. The townsfolk (WorldDynamic capsules) pass through it on
+	// purpose: their rounds feed and tend the pens, walking a tile path among the animals, and a block there would jam them)
 	Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("Collider"));
 	Collider->SetupAttachment(Root);
 	Collider->SetCollisionEnabled(ECollisionEnabled::NoCollision);

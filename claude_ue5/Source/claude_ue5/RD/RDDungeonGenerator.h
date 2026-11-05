@@ -1205,6 +1205,9 @@ public:
 	float Show7T = 0.f, Show7Aggro = 0.f, Show7Yaw = 0.f;
 	bool bShow7On = false, bShow7Going = false;
 	FVector Show7A = FVector::ZeroVector, Show7B = FVector::ZeroVector;
+	/** the showcase's save's slot, and a save of that name the player had (put back at the end) */
+	FString Show7SaveSlot;
+	UPROPERTY(Transient) TObjectPtr<class USaveGame> Show7KeptSave;
 	// the swarms and birds round her, the wild animals (RDWildLife.cpp)
 	void TickWildLife(float Dt, const FVector& Her);
 	struct FRDSwarmInst { int32 Def = -1; TWeakObjectPtr<class UNiagaraComponent> C; FVector At = FVector::ZeroVector; };

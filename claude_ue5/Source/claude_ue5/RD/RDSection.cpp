@@ -2270,6 +2270,9 @@ void ARDSection::ToggleDoor(int32 I, const FVector& Opener, bool bByMonster)
 		const float Tg = Doors[Lk].Target > 0.5f ? 0.f : 1.f;
 		Doors[Lk].Target = Tg;
 		for (FMover& Lv : Doors) if (Lv.Kind == TEXT("lever") && Lv.Link == Lk) Lv.Target = Tg;
+		// (the game keeps the portcullis as she left it, however the lever was pulled: the PR review's find, F's door path
+		// raised it without saying so)
+		if (Lk == TownPortcullis) RecordPortcullis(Tg > 0.5f);
 		if (Generator) { Generator->PlaySoundAt(TEXT("Env.CellOpen"), Doors[I].Center); Generator->PlaySoundAt(Tg > 0.5f ? TEXT("Env.DoorOpen") : TEXT("Env.DoorClose"), Doors[Lk].Center); }
 		return;
 	}

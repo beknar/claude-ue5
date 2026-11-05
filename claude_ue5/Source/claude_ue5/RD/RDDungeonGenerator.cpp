@@ -1429,6 +1429,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
 	if (!Best) return FString();
 	if (bBestDoor && Best->IsDoorCell(BestI)) { const FString Cl = Best->DescribeCell(BestI); if (!Cl.IsEmpty()) return Cl; }
+	// (a lever reached by the doors' longer reach: named as a lever, not "open door" (the PR review's find))
+	if (bBestDoor && Best->GetDoorKind(BestI) == TEXT("lever")) return Best->IsPortcullisUp() ? TEXT("pull the lever (lower the portcullis)") : TEXT("pull the lever (raise the portcullis)");
 	FString What = bBestDoor ? (Best->IsDoorCell(BestI) ? TEXT("cell door") : Best->GetDoorKind(BestI) == TEXT("gate") ? TEXT("gate") : TEXT("door")) : Best->GetContainerKind(BestI);
 	What.ReplaceInline(TEXT("2"), TEXT(""));
 	return FString::Printf(TEXT("%s %s"), Best->IsTargetOpen(bBestDoor, BestI) ? TEXT("close") : TEXT("open"), *What);
@@ -1960,12 +1962,15 @@ void ARDDungeonGenerator::TickMusic(float Dt)
 		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x3A51u, (uint32)MusicRotations * 2654435761u);
 		MusicRotateAt = Now + FMath::Lerp(MusicRotateSeconds.X, MusicRotateSeconds.Y, (H % 1000u) / 999.f);
 	}
+	// (Brokenspire, its wilds and the castle only (the PR review's find: every dungeon level's music rotated too); a fight begun
+	// in the fade-out leaves the new track to start from its beginning when the fight is over, not at the old one's place)
+	const bool bRotate = bTown || bTownLink;
 	if (MusicPendingAt > 0.f && Now >= MusicPendingAt)
 	{
-		MusicPendingAt = -1.f;
+		MusicPendingAt = -1.f; MusicPos[0] = 0.f;
 		if (!bCombatMusic) StartMusicLayer(0, 3.f, true);
 	}
-	else if (MusicPendingAt < 0.f && !bCombatMusic)
+	else if (bRotate && MusicPendingAt < 0.f && !bCombatMusic)
 	{
 		const FName Scene = MusicSceneFor();
 		if (Scene != MusicSceneKey || Now >= MusicRotateAt)

@@ -1,8 +1,10 @@
 {
- "tag": "i7d",
+ "tag": "i7e",
  "plan": [
   "gate",
-  "list7"
+  "list7",
+  "doors",
+  "services"
  ],
  "level": "brokenspire",
  "steps": [
@@ -11,14 +13,14 @@
    "ok": true,
    "wild": true,
    "gate_before": [
-    "gate|130|0|0.00|750|20700|0"
+    "gate|137|0|0.00|-750|-20100|0"
    ],
    "shut_past_gate_cm": -39.5,
    "lever_prompt": "pull the lever (raise the portcullis)",
    "up": true,
    "prompt": "",
    "message": "The portcullis rises",
-   "past_gate_cm": 1108.5
+   "past_gate_cm": 909.8
   },
   {
    "step": "list7",
@@ -26,7 +28,7 @@
    "animal": {
     "kind": "Pig",
     "without_cm": 170.0,
-    "with_cm": 114.4,
+    "with_cm": 92.9,
     "stopped": true
    },
    "cobbles_m": 2.0,
@@ -38,8 +40,8 @@
     0.0,
     0.0,
     0.0,
-    0.06,
-    0.06,
+    0.0,
+    0.0,
     1.0,
     1.0,
     1.0,
@@ -58,15 +60,15 @@
     "min_cm": -140.0,
     "under_buildings_cm": 0.0,
     "highest": [
+     11250,
      -22950,
-     -14850,
      140.0
     ],
     "walked_z": 140.0
    },
    "mill_base_cm": 128.1,
    "mill": {
-    "lowest_cm": 663.3,
+    "lowest_cm": 610.9,
     "house": true,
     "house_m": 3.2
    },
@@ -74,7 +76,7 @@
     "seats": 12,
     "seats_lit": 12,
     "nearest_light_m": 0.67,
-    "luma": 93.3
+    "luma": 92.6
    },
    "pens": {
     "gates": 12,
@@ -84,9 +86,9 @@
    },
    "garden_prompt": "harvest the garden",
    "garden": {
-    "crops": "0,4,3",
+    "crops": "0,5,3",
     "got": {
-     "Wild Carrot": 3,
+     "Wild Carrot": 2,
      "Sunflower Seeds": 2,
      "Herbs": 3
     },
@@ -94,16 +96,15 @@
     "ripe_after": false
    },
    "food": {
-    "tables": 43,
-    "prompt": "take the food (bread, fruit)",
+    "tables": 34,
+    "prompt": "take the food (bread)",
     "got": {
-     "Fruit": 2,
      "Bread": 1
     },
     "taken": true
    },
    "oven": {
-    "ovens": 36,
+    "ovens": 31,
     "prompt": "bake at the oven",
     "station": "Oven",
     "open": true,
@@ -119,14 +120,88 @@
     "bread": 1,
     "wheat_used": 2
    }
+  },
+  {
+   "step": "doors",
+   "ok": true,
+   "prompt": "open door",
+   "door_open": 1.0,
+   "walked_in": true,
+   "container": {
+    "kind": "barrel",
+    "looted": true,
+    "gold_found": 0,
+    "lines": 0
+   },
+   "boarded_prompt": "pry the boards loose",
+   "after_pry": false,
+   "boarded_door_open": 1.0,
+   "castle_door_open": 1.0
+  },
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -15,
+    "hp": 1.0
+   },
+   "weapon": "Dagger",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ],
+   "wild": true,
+   "circle_others_ok": true
   }
  ],
  "windows_hidden": "",
  "shots": [
-  "bs_i7d_gate.png",
-  "bs_i7d_list7_lift.png",
-  "bs_i7d_list7_mill.png",
-  "bs_i7d_list7_tavern.png"
+  "bs_i7e_gate.png",
+  "bs_i7e_list7_lift.png",
+  "bs_i7e_list7_mill.png",
+  "bs_i7e_list7_tavern.png"
  ],
  "error": null,
  "windows_shown_again": 0

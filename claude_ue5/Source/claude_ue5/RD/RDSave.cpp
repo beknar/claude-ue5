@@ -228,7 +228,11 @@ FString ARDDungeonGenerator::SlotForName(const FString& Name)
 	FString S;
 	for (const TCHAR C : Name.ToLower()) { if (FChar::IsAlnum(C)) S.AppendChar(C); else if ((C == TEXT(' ') || C == TEXT('-') || C == TEXT('_')) && !S.EndsWith(TEXT("_"))) S.AppendChar(TEXT('_')); }
 	S.RemoveFromEnd(TEXT("_"));
-	return S.IsEmpty() ? FString(TEXT("save")) : FString(TEXT("save_")) + S.Left(40);
+	// (and the name's own hash: names that differ only in case or punctuation ("Brokenspire day 3", "brokenspire-day-3") are
+	// two saves, and a name of punctuation alone never takes the old "save" slot (the PR review's find); the same name, the
+	// same slot)
+	const uint32 H = FCrc::StrCrc32(*Name.TrimStartAndEnd());
+	return FString(TEXT("save_")) + (S.IsEmpty() ? FString() : S.Left(40) + TEXT("_")) + FString::Printf(TEXT("%06x"), H & 0xFFFFFFu);
 }
 
 TArray<FString> ARDDungeonGenerator::GetSaveSlots() const

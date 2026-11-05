@@ -311,6 +311,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownImproveLines() const;
 	/** what F reaches of the list's things at From: "food", "oven", "garden", "lever", or "" (index set) */
 	FString FindTownThing(const FVector& From, float Reach, int32& OutIndex) const;
+	/** the portcullis's state kept by the game (Brokenspire's own: it stays as she left it) */
+	void RecordPortcullis(bool bUp);
 	/** the food of a table taken (its meshes hidden) */
 	bool TakeTownFood(int32 Index);
 	/** a door's index for the town's levers and gates (tests): the door at the lever pushed as F does */

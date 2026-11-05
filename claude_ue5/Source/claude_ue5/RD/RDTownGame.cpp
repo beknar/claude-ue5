@@ -133,7 +133,9 @@ void ARDTownsfolk::Tick(float Dt)
 	{
 		const FVector P = GetActorLocation();
 		const float Lz = Section->TownLiftAt(FVector2D(P));
-		if (FloorZ0 < -1e8f) FloorZ0 = P.Z - Lz;
+		// (spawned on the flat floor's height, the lift not in it: the PR review's find, taken off it a townsperson posted on a
+		// rise walked sunk by it everywhere, one in a hollow floating)
+		if (FloorZ0 < -1e8f) FloorZ0 = P.Z;
 		if (FMath::Abs(P.Z - (FloorZ0 + Lz)) > 0.5f) SetActorLocation(FVector(P.X, P.Y, FloorZ0 + Lz));
 	}
 	const FVector L = GetActorLocation();

@@ -183,9 +183,13 @@ void ARDSection::TownPenGate(const FVector& HingeW, float Yaw, float Len)
 bool ARDSection::PullTownLever(int32 Lever, FVector Opener)
 {
 	if (!TownLevers.IsValidIndex(Lever)) return false;
-	ToggleDoor(TownLevers[Lever], Opener);
-	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && Generator && Generator->bTownHome && Doors.IsValidIndex(TownPortcullis)) GI->bPortcullisUp = Doors[TownPortcullis].Target > 0.5f;
+	ToggleDoor(TownLevers[Lever], Opener);          // (it records the portcullis: RecordPortcullis)
 	return true;
+}
+
+void ARDSection::RecordPortcullis(bool bUp)
+{
+	if (URDGameInstance* GI = URDGameInstance::Of(this); GI && Generator && Generator->bTownHome) GI->bPortcullisUp = bUp;
 }
 
 // ------------------------------------------------------------------------------------------------ food, gardens, ovens
@@ -254,6 +258,14 @@ FString ARDSection::FindTownThing(const FVector& From, float Reach, int32& OutIn
 		const float Dx = FMath::Max(FMath::Abs(From.X - G.At.X) - G.Half.X, 0.f), Dy = FMath::Max(FMath::Abs(From.Y - G.At.Y) - G.Half.Y, 0.f);
 		const float D = FMath::Sqrt(Dx * Dx + Dy * Dy) + 30.f;
 		if (D < Best && Dx < 110.f && Dy < 110.f) { Best = D; Kind = TEXT("garden"); OutIndex = I; }
+	}
+	// (a door or a container nearer than it is what F does, as with the townsfolk (the PR review's find: an oven or a garden
+	// took F from a cupboard or a chest beside it for good); a lever is a door itself)
+	if (!Kind.IsEmpty())
+	{
+		bool bD = false; int32 Di = -1;
+		const float Dd = FindNearestInteractive(From, Best, bD, Di);
+		if (Dd < Best && !(bD && TownLevers.Contains(Di))) { OutIndex = -1; return FString(); }
 	}
 	return Kind;
 }
