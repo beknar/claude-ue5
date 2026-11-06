@@ -404,6 +404,10 @@ def cast_at(m, gap=900.0, label="cast"):
     wn = str(d.name); snd = [f"Player.{k}.{wn}" for k in ("Charge", "Cast", "Hit")]
     hp0 = m.get_health(); n0 = (c.bolts_cast, c.bolts_on_monsters, c.bolts_elsewhere); snd0 = {k: gen.get_sound_count(k) for k in snd}
     bolt_mesh = d.bolt_mesh; flying = 0; loaded_before = None; loaded_gone = None; muzzle_gap = None
+    # (bolts of an earlier shot still stuck in a wall (BoltStickSeconds) are loose bolt meshes too: the keys step's shot left one,
+    # and this shot counted two in flight (2026-11-06). Only those that were not there before it are counted)
+    def loose_bolts(): return [q for q in p.get_components_by_class(unreal.StaticMeshComponent) if bolt_mesh is not None and q.static_mesh == bolt_mesh and q.is_visible() and q.get_attach_parent() is None]
+    stuck_before = {q.get_name() for q in loose_bolts()}
     rel = lambda: ML.inverse_transform_location(p.get_actor_transform(), p.mesh.get_socket_location(hb))
     if ROGUE: c.select_weapon(spell_index()); yield from wait(0.5); loaded_before = bool(c.get_loaded_bolt_mesh().is_visible())
     a0 = rel(); started = cast(c); target = c.get_last_target(); t0 = now()
@@ -413,7 +417,7 @@ def cast_at(m, gap=900.0, label="cast"):
         if c.is_charging(): charge = max(charge, c.get_spell_particles(hand, 120.0)[0])
         bs = c.get_bolts()
         if bs and bolt_mesh is not None:
-            fl = [q for q in p.get_components_by_class(unreal.StaticMeshComponent) if q.static_mesh == bolt_mesh and q.is_visible() and q.get_attach_parent() is None]
+            fl = [q for q in loose_bolts() if q.get_name() not in stuck_before]
             flying = max(flying, len(fl))
             if loaded_gone is None: loaded_gone = not c.get_loaded_bolt_mesh().is_visible()
             if muzzle_gap is None: muzzle_gap = round((c.last_bolt_from - mesh_point(c.get_weapon_mesh(), *list(d.bolt_muzzle.to_tuple()))).length(), 1)
@@ -433,7 +437,7 @@ def cast_at(m, gap=900.0, label="cast"):
          "it_lost": round(hp0 - m.get_health(), 1) if alive(m) else round(hp0, 1), "damage": d.damage, "burst_particles": burst_particles, "burst_at": v3(burst_at),
          "sounds": {k: gen.get_sound_count(k) - snd0[k] for k in snd0}}
     if ROGUE:
-        e.update({"bolt_meshes_flying": flying, "loaded_bolt_before": loaded_before, "loaded_bolt_gone_at_the_shot": loaded_gone, "bolt_left_from_the_muzzle_cm": muzzle_gap,
+        e.update({"bolt_meshes_flying": flying, "bolts_stuck_before": len(stuck_before), "loaded_bolt_before": loaded_before, "loaded_bolt_gone_at_the_shot": loaded_gone, "bolt_left_from_the_muzzle_cm": muzzle_gap,
                   "loaded_bolt_back_after": bool(c.get_loaded_bolt_mesh().is_visible()), "bolt_left_from_hand_cm": round((c.last_bolt_from - p.mesh.get_socket_location("hand_r")).length())})
     rogue_ok = not ROGUE or (flying == 1 and loaded_before and loaded_gone and muzzle_gap is not None and muzzle_gap < 3.0 and e["loaded_bolt_back_after"] and e["bolt_left_from_hand_cm"] > 30)
     e["ok"] = bool(started and target == m and mont and moved > 25 and (charge > 0 or d.charge_effect is None) and launched_at is not None and abs(speed - d.bolt_speed) < 0.1 * d.bolt_speed and near_bolt > 0 and rogue_ok

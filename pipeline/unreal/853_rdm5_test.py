@@ -176,6 +176,16 @@ def shot(name):
     unreal.SystemLibrary.execute_console_command(G["w"], f"HighResShot 1920x1080 filename=rdm5_{TAG}_{name}")
     R.setdefault("shots", []).append(f"rdm5_{TAG}_{name}.png")
 def lines(c): return [str(l) for l in c.get_inventory_lines()]
+# (870 put the inventory in five tabs on level 5 too (bInventoryTabs, 2026-10-27): get_inventory_lines is the open tab's only,
+# and the loot, wear and repair steps found no armour or repair line. What she carries is read from every tab; a cursor is
+# moved in the tab that shows the line)
+def all_lines(c): return [str(l) for l in c.get_all_inventory_lines()]
+def tab_with(c, prefix):
+    for _ in range(5):
+        ls = lines(c)
+        if any(l.startswith(prefix) for l in ls): return ls
+        c.set_inventory_tab(c.get_inventory_tab() + 1)
+    return lines(c)
 def cursor_to(c, i):
     while c.get_inventory_cursor() < i: yield from press("S")
     while c.get_inventory_cursor() > i: yield from press("W")
@@ -230,8 +240,11 @@ def step_loot():
     s0 = g.get_section(S0); n = s0.get_num_containers(); hall = list(g.get_start_room_containers())
     lists = {i: [str(x) for x in g.loot_list_of(S0, i)] for i in range(n)}
     in_hall = [x for i in hall for x in lists[i] if x in SETS]
-    # (armour anywhere else in the start section: tier-1 sets only)
-    elsewhere = [(i, x) for i in range(n) if i not in hall for x in lists[i] if x in SETS and 1 not in SET_TIERS[x]]
+    # (armour anywhere else in the start section: tier-1 sets only, but in a vault: since 870's special rooms (2026-10-27) a
+    # vault's chests hold things of the tier above, by design)
+    vault = {i for i in range(n) if s0.room_at(s0.get_container_location(i)) >= 0 and "vault" in str(s0.get_room_kind(s0.room_at(s0.get_container_location(i)))).lower()}
+    elsewhere = [(i, x) for i in range(n) if i not in hall and i not in vault for x in lists[i] if x in SETS and 1 not in SET_TIERS[x]]
+    in_vaults = [(i, x) for i in sorted(vault) for x in lists[i] if x in SETS]
     lens_start = sorted({len(v) for v in lists.values()})
     # many more containers: the counts 1..6 about a sixth each, never armour
     N = 6000; cnt = {}; arm_more = 0
@@ -280,10 +293,14 @@ def step_loot():
         if x in SETS: want[x] = 1                     # (a set found again mends hers: it is carried once)
     # (a tome teaches her its spell when she finds it: it is not carried)
     for x in [x for x in want if x.startswith("Tome of ") and c.knows_spell(x[8:])]: del want[x]
-    ls = lines(c)
+    ls = all_lines(c)
     have = {l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.split("|")[0] in ("item", "repair", "component", "tome")}
     have.update({l.split("|")[1]: 1 for l in ls if l.startswith("armour|")})
     have.update({l.split("|")[1]: int(l.split("|")[3]) for l in ls if l.startswith("ring|")})
+    # (the castle's lists brought shields and vault keys into level 5's loot: "shield|<name>|<in hand>|<left>|<full>|<count>",
+    # "key|<name>|<count>")
+    have.update({l.split("|")[1]: int(l.split("|")[5]) for l in ls if l.startswith("shield|")})
+    have.update({l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("key|")})
     # (855's weapons: the Summoner cannot wield them, so she carries them as items: "carried|<name>|<count>")
     have.update({l.split("|")[1]: int(l.split("|")[2]) for l in ls if l.startswith("carried|")})
     # opened again: nothing more
@@ -297,15 +314,18 @@ def step_loot():
         if s1 and not s1.is_building(): break
         yield
     s1 = g.get_section(unreal.IntPoint(1, 0)); n1 = s1.get_num_containers() if s1 else 0
-    gen_armour = sum(1 for i in range(n1) for x in g.loot_list_of(unreal.IntPoint(1, 0), i) if str(x) in SETS and 2 not in SET_TIERS[str(x)])
+    # (its vaults' chests hold the tier above, by design: left out, as in the start set)
+    vault1 = {i for i in range(n1) if s1.room_at(s1.get_container_location(i)) >= 0 and "vault" in str(s1.get_room_kind(s1.room_at(s1.get_container_location(i)))).lower()} if s1 else set()
+    gen_armour = sum(1 for i in range(n1) if i not in vault1 for x in g.loot_list_of(unreal.IntPoint(1, 0), i) if str(x) in SETS and 2 not in SET_TIERS[str(x)])
     counts_ok = fpress is not None and all(1 <= k <= 3 for k in fpress["counts"])
     ok = (len(hall) > 0 and set(START_ARMOUR) <= set(in_hall) and not elsewhere and counts_ok and lens_start[-1] <= 6
           and min(cnt) >= 0 and max(cnt) <= 6 and len([k for k in cnt if k > 0]) == 6 and worst < 4.5 and arm_more == 0
           and fpress is not None and fpress["found"] == len(fpress["list"]) and fpress["found_list"] == fpress["list"]
           and not bad and have == want and again == 0 and n1 > 0 and gen_armour == 0)
-    step_result("loot", ok, containers=n, great_hall=hall, hall_lists={str(i): lists[i] for i in hall}, armour_elsewhere=elsewhere,
+    step_result("loot", ok, containers=n, great_hall=hall, hall_lists={str(i): lists[i] for i in hall}, armour_elsewhere=elsewhere, armour_in_vaults=in_vaults,
                 start_counts=lens_start, more=N, counts={str(k): cnt[k] for k in sorted(cnt)}, worst_sd=round(worst, 2), armour_in_more=arm_more,
                 by_f=fpress, wrong=bad[:5], wrong_count=len(bad), items_kinds=len(want), carried_matches=have == want, opened_again_gave=again,
+                carried_diff={k: [want.get(k), have.get(k)] for k in sorted(set(want) | set(have)) if want.get(k) != have.get(k)},
                 generated_containers=n1, generated_armour=gen_armour)
 
 # ------------------------------------------------------------------------------------------------ wearing
@@ -318,14 +338,14 @@ def step_wear():
     out = []
     yield from press("I")
     for t in SETS:
-        ls = lines(c); i = next(k for k, l in enumerate(ls) if l.startswith("armour|" + t + "|"))
+        ls = tab_with(c, "armour|" + t + "|"); i = next(k for k, l in enumerate(ls) if l.startswith("armour|" + t + "|"))
         yield from cursor_to(c, i); ch0 = c.armour_changes
         yield from press("Enter")
         ms = list(c.get_armour_meshes())
         e = {"set": t, "cursor": c.get_inventory_cursor(), "worn": str(c.get_worn_armour()), "armour": round(c.get_armour(), 3), "want": amount.get(t),
              "meshes": [m.skeletal_mesh_asset.get_name() if m.skeletal_mesh_asset else None for m in ms],
              "follows_her": all(m.leader_pose_component == body and m.get_attach_parent() == body for m in ms), "message": str(c.message),
-             "line": next(l for l in lines(c) if l.startswith("armour|" + t + "|"))}
+             "line": next(l for l in all_lines(c) if l.startswith("armour|" + t + "|"))}
         e["ok"] = (e["cursor"] == i and e["worn"] == t and abs(e["armour"] - (amount.get(t) or -1)) < 1e-4 and e["meshes"] == [want_mesh[t]]
                    and e["follows_her"] and e["line"].split("|")[2] == "1" and c.armour_changes == ch0 + 1)
         out.append(e)
@@ -835,7 +855,7 @@ def step_armourtable():
     c.set_armour_wear(t, 1.0); c.set_health(c.get_max_health()); c.apply_damage(10.0, None); yield from wait(0.2)
     took_last = c.last_blow_taken; at0 = {"wear": c.get_armour_wear(t), "share": round(c.get_armour(), 4), "message": str(c.message)}
     c.apply_damage(10.0, None); yield from wait(0.2)
-    took_worn = c.last_blow_taken; line = next(l for l in lines(c) if l.startswith("armour|" + t + "|"))
+    took_worn = c.last_blow_taken; line = next(l for l in all_lines(c) if l.startswith("armour|" + t + "|"))
     dur = {"full": full, "before": w0, "after_3": w3, "share_full": round(share_full, 4), "blow_at_1_left": round(took_last, 3), "at_0": at0,
            "blow_worn_out": round(took_worn, 3), "line": line}
     dur_ok = (full == 600 and w0 == 600 and w3 == 597 and abs(share_full - 0.5) < 1e-4 and abs(took_last - 5.0) < 0.01 and at0["wear"] == 0
@@ -852,7 +872,7 @@ def step_repair():
     wpn = "Viking Shortsword"; c.add_item(wpn, 1)
     wl_ = list(g.get_editor_property("weapons")); wi = next(i for i in range(len(wl_)) if str(wl_[i].name) == wpn); wfull = c.get_weapon_durability(wi); c.set_weapon_wear(wi, 10.0)
     c.add_item("Patch Kit", 2); c.add_item("Leather Strips", 1)
-    yield from press("I"); ls = lines(c)
+    yield from press("I"); ls = tab_with(c, "repair|Patch Kit|")
     yield from cursor_to(c, next(i for i, l in enumerate(ls) if l.startswith("repair|Patch Kit|")))
     yield from press("Enter")
     picking = c.is_picking_repair(); rl = [str(x) for x in c.get_repair_lines()]
@@ -866,7 +886,7 @@ def step_repair():
     wl = next(i for i, l in enumerate(rl2) if l.startswith("weapon|%d|" % wi)); yield from rcursor(wl); yield from press("Enter")
     wp = {"wear": c.get_weapon_wear(wi), "full": wfull, "kits": c.get_item_count("Patch Kit"), "picking_after_last_kit": c.is_picking_repair(), "message": str(c.message)}
     # leather strips on the whole (mended) weapon: refused, kept
-    ls = lines(c); yield from cursor_to(c, next(i for i, l in enumerate(ls) if l.startswith("repair|Leather Strips|")))
+    ls = tab_with(c, "repair|Leather Strips|"); yield from cursor_to(c, next(i for i, l in enumerate(ls) if l.startswith("repair|Leather Strips|")))
     c.set_weapon_wear(wi, wfull); c.set_armour_wear(t, c.get_armour_durability(t))
     yield from press("Enter"); rl3 = [str(x) for x in c.get_repair_lines()]
     yield from rcursor(0); yield from press("Enter")

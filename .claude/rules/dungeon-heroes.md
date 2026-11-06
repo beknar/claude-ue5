@@ -98,6 +98,7 @@ paths:
   - A `HighResShot` is taken a frame later: press nothing in the frame it is asked for (the menu's Warrior shot showed the Rogue).
   - Long renders and test runs go in detached processes (a closed terminal or a memory squeeze stopped them twice).
 - **Inside a mesh:** the side of the nearest face is not an inside test for an open mesh: points 11 to 19 cm above the torso's open neck counted as inside it and refused every hilt over her head. Inside only where the mesh is round the point (rays both ways along two of three axes).
+- **A stage on the castle that is on level 5 too changes level 5's test** (2026-11-06: `853`'s loot, wear and repair had failed since `870`, unnoticed for ten days): the inventory's tabs hide every line but the open tab's from `get_inventory_lines` (read `get_all_inventory_lines`; open the tab before moving the cursor: `tab_with`), the loot holds shields and vault keys, and a vault's chests hold the tier above. Run level 5's test after a castle stage that sets level 5's switches.
 - **855 then 858:** 855 rewrites the weapon items and clears the types 858 gives them (the anvil's break-down then had nothing to go by): run 858 after it.
 - `event()`'s first argument is `kind`: an event field named `kind` (a container's kind) failed the whole run; it is `ckind`.
 
