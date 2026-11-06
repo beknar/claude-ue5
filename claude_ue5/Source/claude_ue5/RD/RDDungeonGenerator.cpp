@@ -1559,6 +1559,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) PlayerCombat->TickInventory(PC);
 	if (bPaused) return;
 	TickAllies(Dt);
+	TickCarrySummons();
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{

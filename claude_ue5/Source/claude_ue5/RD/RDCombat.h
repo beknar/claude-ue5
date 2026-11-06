@@ -45,6 +45,7 @@ class UFXSystemComponent;
 class UFXSystemAsset;
 class UPointLightComponent;
 class APlayerController;
+struct FRDCarry;
 
 UCLASS(ClassGroup = (RandomDungeon))
 class CLAUDE_UE5_API URDCombatComponent : public UActorComponent
@@ -54,6 +55,17 @@ class CLAUDE_UE5_API URDCombatComponent : public UActorComponent
 public:
 	URDCombatComponent();
 	void Init(ARDDungeonGenerator* InGenerator);
+
+	/** Brokenspire: the rest of her state as she leaves a level, beside her things (the generator's SaveCarry): her statistics,
+	 *  what is on her and for how long (potions, food, spells, poison, weakness, slowness, stealth), her cooldowns, her
+	 *  dexterity energy, the quick bar, the torch lit, her starting shield's wear, her summons; RestoreState puts it back
+	 *  once her things are hers again (RDCarry.cpp) */
+	void GatherState(FRDCarry& C) const;
+	void RestoreState(const FRDCarry& C);
+	/** her state as lines, for the tests and the log: "hp|<hp>|<max>", "mana|..", "dex|..", "stat|<name>|<value>",
+	 *  "timed|<name>|<left>|<strength>", "effect|<item>|<kind>|<amount>|<left>", "cooldown|<name>|<left>", "quick|<slot>|<entry>",
+	 *  "quickoff|<entry>", "torch|<item>", "startshield|<wear>", "summon|<spell>|<share>" (GatherState's, as it reads it now) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") TArray<FString> GetStateLines() const;
 
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 Kills = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 AttacksMade = 0;

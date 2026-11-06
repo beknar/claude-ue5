@@ -81,6 +81,8 @@ public:
 	/** new hit points' top and blow, its share of hit points kept, and with another tier its speed, blows' pace and ability as
 	 *  that tier's (a summon grown as a tier opens); false if nothing changed */
 	bool SetStrength(int32 InTier, float InMaxHealth, float InDamage);
+	/** its hit points as a share of its top (a summon brought from the other level as hurt as it was) */
+	void SetHealthShare(float Share) { if (!bDead) Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * FMath::Clamp(Share, 0.f, 1.f))); }
 	/** mistward4 (bAllySpacing): the way and strength (0 none; about 1 standing in another) her ally steps to keep clear of
 	 *  her other allies and of her (RDMistward4.cpp) */
 	FVector AllySpacingPush() const;

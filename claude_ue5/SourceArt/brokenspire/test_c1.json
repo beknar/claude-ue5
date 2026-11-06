@@ -1,0 +1,800 @@
+{
+ "tag": "c1",
+ "plan": [
+  "carry"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "carry",
+   "ok": true,
+   "Summoner": {
+    "set_town": {
+     "found_wear": 28.600000381469727,
+     "ring": true,
+     "torch": true,
+     "used": [
+      [
+       "Small Speed Potion",
+       true
+      ],
+      [
+       "Bread",
+       true
+      ]
+     ],
+     "killed": true,
+     "quick": true
+    },
+    "town_lines": [
+     "effect|Small Speed Potion|2|0.100|18.10",
+     "hp|53.00|85.00",
+     "mana|31.10|66.00",
+     "quick|0|Fire",
+     "quick|2|Summon Tier 1",
+     "quick|3|Dagger",
+     "quick|6|Dark Fire",
+     "stat|AbilitiesUsed|0.00",
+     "stat|AmbushDamage|0.00",
+     "stat|Ambushes|0.00",
+     "stat|ArmourChanges|0.00",
+     "stat|ArmourWornOut|0.00",
+     "stat|AttacksMade|3.00",
+     "stat|BlockedHits|0.00",
+     "stat|BoltsCast|3.00",
+     "stat|BoltsElsewhere|1.00",
+     "stat|BoltsOnMonsters|2.00",
+     "stat|CastsRefused|0.00",
+     "stat|CooldownRefusals|0.00",
+     "stat|DamageDealt|50.00",
+     "stat|DamageTaken|0.00",
+     "stat|Dashes|0.00",
+     "stat|Deaths|0.00",
+     "stat|DodgedHits|0.00",
+     "stat|Evaded|0.00",
+     "stat|FallsHurt|0.00",
+     "stat|GearBrokenDown|0.00",
+     "stat|HarvestsTaken|0.00",
+     "stat|HitsLanded|2.00",
+     "stat|HitsTaken|0.00",
+     "stat|ItemsCrafted|0.00",
+     "stat|ItemsRepaired|0.00",
+     "stat|ItemsUsed|2.00",
+     "stat|Kills|1.00",
+     "stat|PactSaves|0.00",
+     "stat|Reflected|0.00",
+     "stat|Rolls|0.00",
+     "stat|ScrollsRead|0.00",
+     "stat|ShieldBlocks|0.00",
+     "stat|ShieldsBroken|0.00",
+     "stat|SlashBonusDealt|0.00",
+     "stat|Spell:Fire Bolt|2.00",
+     "stat|Spell:Summon Tier 1|2.00",
+     "stat|SpellsLearned|0.00",
+     "stat|StealthRefusals|0.00",
+     "stat|StealthTrapsPassed|0.00",
+     "stat|StealthUses|0.00",
+     "stat|StepsTaken|0.00",
+     "stat|Summoned|2.00",
+     "stat|SummonsRefused|0.00",
+     "stat|WardBlocks|0.00",
+     "stat|WeaponsBrokenDown|0.00",
+     "stat|WeaponsBroken|0.00",
+     "stat|WeaponsTaken|1.00",
+     "stat|ZoneBlocks|0.00",
+     "summon|Summon Tier 1|0.600",
+     "summon|Summon Tier 1|1.000",
+     "timed|Poison|10.58|1.600",
+     "timed|Weak|11.58|0.500",
+     "torch|Torch"
+    ],
+    "to_castle": {
+     "level": "mistward_castle",
+     "left": 60,
+     "arrived": 60,
+     "left_vs_arrived": [],
+     "test_vs_left": [],
+     "kinds": [
+      "effect",
+      "hp",
+      "mana",
+      "quick",
+      "stat",
+      "summon",
+      "timed",
+      "torch"
+     ],
+     "summons": [
+      [
+       "Summon Tier 1",
+       0.6
+      ],
+      [
+       "Summon Tier 1",
+       1.0
+      ]
+     ],
+     "summons_before": [
+      [
+       "Summon Tier 1",
+       0.6
+      ],
+      [
+       "Summon Tier 1",
+       1.0
+      ]
+     ],
+     "kills": [
+      1,
+      1
+     ],
+     "inventory_same": true,
+     "quick_same": true,
+     "torch": [
+      true,
+      true
+     ],
+     "buffs": [
+      "POISON 1.6/s",
+      "WEAKENED -50%"
+     ],
+     "armour": [
+      "None",
+      "None"
+     ],
+     "gold": [
+      122,
+      122
+     ],
+     "ok": true
+    },
+    "set_castle": {
+     "used": [
+      [
+       "Small Speed Potion",
+       true
+      ],
+      [
+       "Bread",
+       true
+      ]
+     ],
+     "killed": true
+    },
+    "castle_lines": [
+     "effect|Bread|3|0.010|3.75",
+     "effect|Small Speed Potion|2|0.100|23.43",
+     "effect|Small Speed Potion|2|0.100|8.29",
+     "hp|53.26|85.00",
+     "mana|30.81|66.00",
+     "quick|0|Fire",
+     "quick|2|Summon Tier 1",
+     "quick|3|Dagger",
+     "quick|6|Dark Fire",
+     "stat|AbilitiesUsed|0.00",
+     "stat|AmbushDamage|0.00",
+     "stat|Ambushes|0.00",
+     "stat|ArmourChanges|0.00",
+     "stat|ArmourWornOut|0.00",
+     "stat|AttacksMade|4.00",
+     "stat|BlockedHits|0.00",
+     "stat|BoltsCast|8.00",
+     "stat|BoltsElsewhere|2.00",
+     "stat|BoltsOnMonsters|6.00",
+     "stat|CastsRefused|0.00",
+     "stat|CooldownRefusals|0.00",
+     "stat|DamageDealt|100.00",
+     "stat|DamageTaken|14.54",
+     "stat|Dashes|0.00",
+     "stat|Deaths|0.00",
+     "stat|DodgedHits|0.00",
+     "stat|Evaded|0.00",
+     "stat|FallsHurt|0.00",
+     "stat|GearBrokenDown|0.00",
+     "stat|HarvestsTaken|0.00",
+     "stat|HitsLanded|6.00",
+     "stat|HitsTaken|0.00",
+     "stat|ItemsCrafted|0.00",
+     "stat|ItemsRepaired|0.00",
+     "stat|ItemsUsed|4.00",
+     "stat|Kills|2.00",
+     "stat|PactSaves|0.00",
+     "stat|Reflected|0.00",
+     "stat|Rolls|0.00",
+     "stat|ScrollsRead|0.00",
+     "stat|ShieldBlocks|0.00",
+     "stat|ShieldsBroken|0.00",
+     "stat|SlashBonusDealt|0.00",
+     "stat|Spell:Fire Bolt|6.00",
+     "stat|Spell:Summon Tier 1|2.00",
+     "stat|SpellsLearned|0.00",
+     "stat|StealthRefusals|0.00",
+     "stat|StealthTrapsPassed|0.00",
+     "stat|StealthUses|0.00",
+     "stat|StepsTaken|0.00",
+     "stat|Summoned|2.00",
+     "stat|SummonsRefused|0.00",
+     "stat|WardBlocks|0.00",
+     "stat|WeaponsBrokenDown|0.00",
+     "stat|WeaponsBroken|0.00",
+     "stat|WeaponsTaken|1.00",
+     "stat|ZoneBlocks|0.00",
+     "summon|Summon Tier 1|0.600",
+     "summon|Summon Tier 1|1.000",
+     "timed|Poison|0.77|1.600",
+     "timed|Slow|6.19|0.600",
+     "timed|Weak|1.77|0.500",
+     "torch|Torch"
+    ],
+    "to_town": {
+     "level": "brokenspire",
+     "left": 63,
+     "arrived": 63,
+     "left_vs_arrived": [],
+     "test_vs_left": [],
+     "kinds": [
+      "effect",
+      "hp",
+      "mana",
+      "quick",
+      "stat",
+      "summon",
+      "timed",
+      "torch"
+     ],
+     "summons": [
+      [
+       "Summon Tier 1",
+       0.6
+      ],
+      [
+       "Summon Tier 1",
+       1.0
+      ]
+     ],
+     "summons_before": [
+      [
+       "Summon Tier 1",
+       0.6
+      ],
+      [
+       "Summon Tier 1",
+       1.0
+      ]
+     ],
+     "kills": [
+      2,
+      2
+     ],
+     "inventory_same": true,
+     "quick_same": true,
+     "torch": [
+      true,
+      true
+     ],
+     "buffs": [
+      "SLOWED -60%"
+     ],
+     "armour": [
+      "None",
+      "None"
+     ],
+     "gold": [
+      125,
+      125
+     ],
+     "ok": true
+    },
+    "missing_kinds": [],
+    "has_kinds": true,
+    "timed_to_castle": [
+     "Poison",
+     "Weak"
+    ]
+   },
+   "Warrior": {
+    "set_town": {
+     "found_wear": 47.29999923706055,
+     "slash": [
+      "Ember Slash",
+      true
+     ],
+     "start_shield": [
+      "Painted Viking Shield",
+      100.0
+     ],
+     "armour": "Plate Armour",
+     "used": [
+      [
+       "Small Speed Potion",
+       true
+      ],
+      [
+       "Bread",
+       true
+      ]
+     ],
+     "killed": true,
+     "quick": true
+    },
+    "town_lines": [
+     "effect|Bread|3|0.010|6.32",
+     "effect|Small Speed Potion|2|0.100|25.93",
+     "hp|87.47|140.00",
+     "mana|0.00|0.00",
+     "quick|0|Dagger",
+     "quick|6|Arming Sword",
+     "slash|0|Ember Slash",
+     "startshield|100.00",
+     "stat|AbilitiesUsed|0.00",
+     "stat|AmbushDamage|0.00",
+     "stat|Ambushes|0.00",
+     "stat|ArmourChanges|1.00",
+     "stat|ArmourWornOut|0.00",
+     "stat|AttacksMade|1.00",
+     "stat|BlockedHits|0.00",
+     "stat|BoltsCast|0.00",
+     "stat|BoltsElsewhere|0.00",
+     "stat|BoltsOnMonsters|0.00",
+     "stat|CastsRefused|0.00",
+     "stat|CooldownRefusals|0.00",
+     "stat|DamageDealt|0.00",
+     "stat|DamageTaken|0.00",
+     "stat|Dashes|0.00",
+     "stat|Deaths|0.00",
+     "stat|DodgedHits|0.00",
+     "stat|Evaded|0.00",
+     "stat|FallsHurt|0.00",
+     "stat|GearBrokenDown|0.00",
+     "stat|HarvestsTaken|0.00",
+     "stat|HitsLanded|0.00",
+     "stat|HitsTaken|0.00",
+     "stat|ItemsCrafted|0.00",
+     "stat|ItemsRepaired|0.00",
+     "stat|ItemsUsed|2.00",
+     "stat|Kills|0.00",
+     "stat|PactSaves|0.00",
+     "stat|Reflected|0.00",
+     "stat|Rolls|0.00",
+     "stat|ScrollsRead|0.00",
+     "stat|ShieldBlocks|0.00",
+     "stat|ShieldsBroken|0.00",
+     "stat|SlashBonusDealt|0.00",
+     "stat|SpellsLearned|0.00",
+     "stat|StealthRefusals|0.00",
+     "stat|StealthTrapsPassed|0.00",
+     "stat|StealthUses|0.00",
+     "stat|StepsTaken|0.00",
+     "stat|Summoned|0.00",
+     "stat|SummonsRefused|0.00",
+     "stat|WardBlocks|0.00",
+     "stat|WeaponsBrokenDown|0.00",
+     "stat|WeaponsBroken|0.00",
+     "stat|WeaponsTaken|1.00",
+     "stat|ZoneBlocks|0.00",
+     "timed|Poison|10.66|1.600",
+     "timed|Weak|11.66|0.500"
+    ],
+    "to_castle": {
+     "level": "mistward_castle",
+     "left": 56,
+     "arrived": 56,
+     "left_vs_arrived": [],
+     "test_vs_left": [],
+     "kinds": [
+      "effect",
+      "hp",
+      "mana",
+      "quick",
+      "slash",
+      "startshield",
+      "stat",
+      "timed"
+     ],
+     "summons": [],
+     "summons_before": [],
+     "kills": [
+      0,
+      0
+     ],
+     "inventory_same": true,
+     "quick_same": true,
+     "torch": [
+      false,
+      false
+     ],
+     "buffs": [
+      "POISON 1.6/s",
+      "WEAKENED -50%"
+     ],
+     "armour": [
+      "Plate Armour",
+      "Plate Armour"
+     ],
+     "gold": [
+      247,
+      247
+     ],
+     "ok": true
+    },
+    "set_castle": {
+     "used": [
+      [
+       "Small Speed Potion",
+       true
+      ],
+      [
+       "Bread",
+       true
+      ]
+     ],
+     "killed": true
+    },
+    "castle_lines": [
+     "effect|Bread|3|0.010|6.63",
+     "effect|Small Speed Potion|2|0.100|19.09",
+     "effect|Small Speed Potion|2|0.100|26.30",
+     "hp|85.39|140.00",
+     "mana|0.00|0.00",
+     "quick|0|Dagger",
+     "quick|6|Arming Sword",
+     "slash|0|Ember Slash",
+     "startshield|100.00",
+     "stat|AbilitiesUsed|0.00",
+     "stat|AmbushDamage|0.00",
+     "stat|Ambushes|0.00",
+     "stat|ArmourChanges|1.00",
+     "stat|ArmourWornOut|0.00",
+     "stat|AttacksMade|2.00",
+     "stat|BlockedHits|0.00",
+     "stat|BoltsCast|0.00",
+     "stat|BoltsElsewhere|0.00",
+     "stat|BoltsOnMonsters|0.00",
+     "stat|CastsRefused|0.00",
+     "stat|CooldownRefusals|0.00",
+     "stat|DamageDealt|0.00",
+     "stat|DamageTaken|10.56",
+     "stat|Dashes|0.00",
+     "stat|Deaths|0.00",
+     "stat|DodgedHits|0.00",
+     "stat|Evaded|0.00",
+     "stat|FallsHurt|0.00",
+     "stat|GearBrokenDown|0.00",
+     "stat|HarvestsTaken|0.00",
+     "stat|HitsLanded|0.00",
+     "stat|HitsTaken|0.00",
+     "stat|ItemsCrafted|0.00",
+     "stat|ItemsRepaired|0.00",
+     "stat|ItemsUsed|4.00",
+     "stat|Kills|0.00",
+     "stat|PactSaves|0.00",
+     "stat|Reflected|0.00",
+     "stat|Rolls|0.00",
+     "stat|ScrollsRead|0.00",
+     "stat|ShieldBlocks|0.00",
+     "stat|ShieldsBroken|0.00",
+     "stat|SlashBonusDealt|0.00",
+     "stat|SpellsLearned|0.00",
+     "stat|StealthRefusals|0.00",
+     "stat|StealthTrapsPassed|0.00",
+     "stat|StealthUses|0.00",
+     "stat|StepsTaken|0.00",
+     "stat|Summoned|0.00",
+     "stat|SummonsRefused|0.00",
+     "stat|WardBlocks|0.00",
+     "stat|WeaponsBrokenDown|0.00",
+     "stat|WeaponsBroken|0.00",
+     "stat|WeaponsTaken|1.00",
+     "stat|ZoneBlocks|0.00",
+     "timed|Poison|3.83|1.600",
+     "timed|Slow|6.18|0.600",
+     "timed|Weak|4.83|0.500"
+    ],
+    "to_town": {
+     "level": "brokenspire",
+     "left": 58,
+     "arrived": 58,
+     "left_vs_arrived": [],
+     "test_vs_left": [],
+     "kinds": [
+      "effect",
+      "hp",
+      "mana",
+      "quick",
+      "slash",
+      "startshield",
+      "stat",
+      "timed"
+     ],
+     "summons": [],
+     "summons_before": [],
+     "kills": [
+      0,
+      0
+     ],
+     "inventory_same": true,
+     "quick_same": true,
+     "torch": [
+      false,
+      false
+     ],
+     "buffs": [
+      "POISON 1.6/s",
+      "WEAKENED -50%",
+      "SLOWED -60%"
+     ],
+     "armour": [
+      "Plate Armour",
+      "Plate Armour"
+     ],
+     "gold": [
+      250,
+      250
+     ],
+     "ok": true
+    },
+    "missing_kinds": [],
+    "has_kinds": true,
+    "timed_to_castle": [
+     "Poison",
+     "Weak"
+    ]
+   },
+   "Rogue": {
+    "set_town": {
+     "found_wear": 28.600000381469727,
+     "torch": true,
+     "used": [
+      [
+       "Small Speed Potion",
+       true
+      ],
+      [
+       "Bread",
+       true
+      ]
+     ],
+     "killed": true,
+     "quick": true,
+     "stealth_was_on": false,
+     "stealth": true
+    },
+    "town_lines": [
+     "dex|50.00|100.00",
+     "effect|Bread|3|0.010|6.34",
+     "effect|Small Speed Potion|2|0.100|26.00",
+     "hp|62.53|100.00",
+     "mana|0.00|0.00",
+     "quick|0|Daggers",
+     "quick|2|Dagger",
+     "quick|6|Crossbow",
+     "stat|AbilitiesUsed|0.00",
+     "stat|AmbushDamage|0.00",
+     "stat|Ambushes|0.00",
+     "stat|ArmourChanges|0.00",
+     "stat|ArmourWornOut|0.00",
+     "stat|AttacksMade|1.00",
+     "stat|BlockedHits|0.00",
+     "stat|BoltsCast|0.00",
+     "stat|BoltsElsewhere|0.00",
+     "stat|BoltsOnMonsters|0.00",
+     "stat|CastsRefused|0.00",
+     "stat|CooldownRefusals|0.00",
+     "stat|DamageDealt|0.00",
+     "stat|DamageTaken|0.00",
+     "stat|Dashes|0.00",
+     "stat|Deaths|0.00",
+     "stat|DodgedHits|0.00",
+     "stat|Evaded|0.00",
+     "stat|FallsHurt|0.00",
+     "stat|GearBrokenDown|0.00",
+     "stat|HarvestsTaken|0.00",
+     "stat|HitsLanded|0.00",
+     "stat|HitsTaken|0.00",
+     "stat|ItemsCrafted|0.00",
+     "stat|ItemsRepaired|0.00",
+     "stat|ItemsUsed|2.00",
+     "stat|Kills|0.00",
+     "stat|PactSaves|0.00",
+     "stat|Reflected|0.00",
+     "stat|Rolls|0.00",
+     "stat|ScrollsRead|0.00",
+     "stat|ShieldBlocks|0.00",
+     "stat|ShieldsBroken|0.00",
+     "stat|SlashBonusDealt|0.00",
+     "stat|SpellsLearned|0.00",
+     "stat|StealthRefusals|0.00",
+     "stat|StealthTrapsPassed|0.00",
+     "stat|StealthUses|1.00",
+     "stat|StepsTaken|0.00",
+     "stat|Summoned|0.00",
+     "stat|SummonsRefused|0.00",
+     "stat|WardBlocks|0.00",
+     "stat|WeaponsBrokenDown|0.00",
+     "stat|WeaponsBroken|0.00",
+     "stat|WeaponsTaken|1.00",
+     "stat|ZoneBlocks|0.00",
+     "timed|Poison|10.47|1.600",
+     "timed|Stealth|7.47|0.000",
+     "timed|Weak|11.47|0.500",
+     "torch|Torch"
+    ],
+    "to_castle": {
+     "level": "mistward_castle",
+     "left": 58,
+     "arrived": 58,
+     "left_vs_arrived": [],
+     "test_vs_left": [],
+     "kinds": [
+      "dex",
+      "effect",
+      "hp",
+      "mana",
+      "quick",
+      "stat",
+      "timed",
+      "torch"
+     ],
+     "summons": [],
+     "summons_before": [],
+     "kills": [
+      0,
+      0
+     ],
+     "inventory_same": true,
+     "quick_same": true,
+     "torch": [
+      true,
+      true
+     ],
+     "buffs": [
+      "STEALTH",
+      "POISON 1.6/s",
+      "WEAKENED -50%"
+     ],
+     "armour": [
+      "None",
+      "None"
+     ],
+     "gold": [
+      372,
+      372
+     ],
+     "ok": true
+    },
+    "set_castle": {
+     "used": [
+      [
+       "Small Speed Potion",
+       true
+      ],
+      [
+       "Bread",
+       true
+      ]
+     ],
+     "killed": true,
+     "stealth_was_on": false,
+     "stealth": true
+    },
+    "castle_lines": [
+     "dex|50.00|100.00",
+     "effect|Bread|3|0.010|6.65",
+     "effect|Small Speed Potion|2|0.100|18.91",
+     "effect|Small Speed Potion|2|0.100|26.28",
+     "hp|62.32|100.00",
+     "mana|0.00|0.00",
+     "quick|0|Daggers",
+     "quick|2|Dagger",
+     "quick|6|Crossbow",
+     "stat|AbilitiesUsed|0.00",
+     "stat|AmbushDamage|0.00",
+     "stat|Ambushes|0.00",
+     "stat|ArmourChanges|0.00",
+     "stat|ArmourWornOut|0.00",
+     "stat|AttacksMade|2.00",
+     "stat|BlockedHits|0.00",
+     "stat|BoltsCast|0.00",
+     "stat|BoltsElsewhere|0.00",
+     "stat|BoltsOnMonsters|0.00",
+     "stat|CastsRefused|0.00",
+     "stat|CooldownRefusals|0.00",
+     "stat|DamageDealt|0.00",
+     "stat|DamageTaken|10.43",
+     "stat|Dashes|0.00",
+     "stat|Deaths|0.00",
+     "stat|DodgedHits|0.00",
+     "stat|Evaded|0.00",
+     "stat|FallsHurt|0.00",
+     "stat|GearBrokenDown|0.00",
+     "stat|HarvestsTaken|0.00",
+     "stat|HitsLanded|0.00",
+     "stat|HitsTaken|0.00",
+     "stat|ItemsCrafted|0.00",
+     "stat|ItemsRepaired|0.00",
+     "stat|ItemsUsed|4.00",
+     "stat|Kills|0.00",
+     "stat|PactSaves|0.00",
+     "stat|Reflected|0.00",
+     "stat|Rolls|0.00",
+     "stat|ScrollsRead|0.00",
+     "stat|ShieldBlocks|0.00",
+     "stat|ShieldsBroken|0.00",
+     "stat|SlashBonusDealt|0.00",
+     "stat|SpellsLearned|0.00",
+     "stat|StealthRefusals|0.00",
+     "stat|StealthTrapsPassed|0.00",
+     "stat|StealthUses|2.00",
+     "stat|StepsTaken|0.00",
+     "stat|Summoned|0.00",
+     "stat|SummonsRefused|0.00",
+     "stat|WardBlocks|0.00",
+     "stat|WeaponsBrokenDown|0.00",
+     "stat|WeaponsBroken|0.00",
+     "stat|WeaponsTaken|1.00",
+     "stat|ZoneBlocks|0.00",
+     "timed|Poison|3.56|1.600",
+     "timed|Slow|6.18|0.600",
+     "timed|Stealth|7.68|0.000",
+     "timed|Weak|4.56|0.500",
+     "torch|Torch"
+    ],
+    "to_town": {
+     "level": "brokenspire",
+     "left": 60,
+     "arrived": 60,
+     "left_vs_arrived": [],
+     "test_vs_left": [],
+     "kinds": [
+      "dex",
+      "effect",
+      "hp",
+      "mana",
+      "quick",
+      "stat",
+      "timed",
+      "torch"
+     ],
+     "summons": [],
+     "summons_before": [],
+     "kills": [
+      0,
+      0
+     ],
+     "inventory_same": true,
+     "quick_same": true,
+     "torch": [
+      true,
+      true
+     ],
+     "buffs": [
+      "STEALTH",
+      "POISON 1.6/s",
+      "WEAKENED -50%",
+      "SLOWED -60%"
+     ],
+     "armour": [
+      "None",
+      "None"
+     ],
+     "gold": [
+      373,
+      373
+     ],
+     "ok": true
+    },
+    "missing_kinds": [],
+    "has_kinds": true,
+    "timed_to_castle": [
+     "Poison",
+     "Stealth",
+     "Weak"
+    ],
+    "stealth_carried": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

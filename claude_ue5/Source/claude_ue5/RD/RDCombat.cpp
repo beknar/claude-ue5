@@ -122,6 +122,9 @@ void URDCombatComponent::Init(ARDDungeonGenerator* InGenerator)
 	SelectWeapon(0);
 	// (level 5: the spells' own stream: a veil's misses; never the play's)
 	SpellR.Initialize(Generator ? (int32)HashCombine((uint32)Generator->SessionSeed, 0x5E11u) : 7);
+	// (her tops as her hero, the tiers and her rings make them, from the start (found 2026-11-06: a Rogue started in
+	// Brokenspire had no dexterity energy, 0 of 0, until a ring or a restart set her tops; full, as she begins)
+	UpdateMaxima();
 }
 
 // ------------------------------------------------------------------------------------------------ found weapons (level 5)

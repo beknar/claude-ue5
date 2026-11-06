@@ -1030,6 +1030,18 @@ public:
 	/** her things into the game instance (before another level opens) and back (when her combat component is made) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") void SaveCarry();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool RestoreCarry();
+	/** her state as she came into this level (her combat component's GetStateLines just after RestoreCarry; empty: nothing
+	 *  carried), to set against what she left the other level with (the game instance's CarryLeftLines) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetCarryArrivedLines() const { return CarryArrivedLines; }
+	/** the summons she brought that are not at her side yet (called once she stands in the level) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetCarrySummonsWaiting() const { return CarrySummons.Num(); }
+	// (her state carried (RDCarry.cpp): the lines as she came in; her summons waiting to be called to her side, from when, until
+	// when: set by her combat component's RestoreState)
+	TArray<FString> CarryArrivedLines;
+	TArray<FName> CarrySummons;
+	TArray<float> CarrySummonShares;
+	float CarrySummonFrom = -1.f, CarrySummonUntil = -1.f;
+	void TickCarrySummons();
 	/** through the Mistgate (the town's) / back to the town (the castle's); a test's dry run only says where it would go */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCastle();
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool ReturnToTown();

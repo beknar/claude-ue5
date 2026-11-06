@@ -1,0 +1,92 @@
+{
+ "tag": "c2",
+ "plan": [
+  "castle",
+  "trip"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "castle",
+   "ok": true,
+   "weapon": "Viking Shortsword",
+   "armour": "Plate Armour",
+   "before_gold": 250,
+   "before_armour": "Plate Armour",
+   "castle_level": "mistward_castle",
+   "castle_gold": 250,
+   "castle_armour": "Plate Armour",
+   "castle_lines_same": true,
+   "entered": 1,
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "menu_line": "button|Return to Brokenspire",
+   "back_level": "brokenspire",
+   "at_castle_door_m": 1.5,
+   "back_gold": 250,
+   "back_armour": "Plate Armour",
+   "back_lines_same": true,
+   "same_town": true
+  },
+  {
+   "step": "trip",
+   "ok": true,
+   "castle": "mistward_castle",
+   "opened": 1,
+   "piles_at_death": 1,
+   "pile_things": [
+    "Iron Ingot",
+    "Medium Healing Potion",
+    "Medium Healing Potion",
+    "Plate Armour",
+    "Small Healing Potion",
+    "Viking Shortsword"
+   ],
+   "revived": true,
+   "town": "brokenspire",
+   "kept_in_game": [
+    {
+     "level": "castle",
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ]
+    }
+   ],
+   "castle_again": "mistward_castle",
+   "tier2_open": true,
+   "piles_again": [
+    {
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ],
+     "from_hall_middle_m": 3.9
+    }
+   ],
+   "left_in_game": 0,
+   "boss_before_seen": [],
+   "boss_after_seen": [
+    "boss|-3450|6738|123|Orc_03|1|2|TIER 2 BOSS: ORC RAIDER|360"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}
