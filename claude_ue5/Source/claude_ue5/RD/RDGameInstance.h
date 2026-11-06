@@ -33,6 +33,37 @@ struct FRDCarry
 	UPROPERTY(SaveGame, BlueprintReadOnly) float BlessArmour = 0.f;
 	/** the weapon in her hands (its name) */
 	UPROPERTY(SaveGame, BlueprintReadOnly) FName Drawn;
+	// ---- the rest of her state (the user's of 2026-11-06: "they should bring with them their current state ... this includes
+	// statistics and all inventory items"; URDCombatComponent::GatherState / RestoreState, RDCarry.cpp)
+	/** her statistics: the combat component's counters by name; each spell's casts; each slash's procs */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, float> Stats;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, int32> SpellCasts;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FString, int32> SlashProcs;
+	/** what is on her, for how long: a timed state's seconds left ("<Name>Left") and its strength ("<Name>") */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, float> Timed;
+	/** the potions and food working on her: each one's item, kind, amount and seconds left */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> EffectItems;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<uint8> EffectKinds;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> EffectAmounts;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> EffectLeft;
+	/** her weapons' and spells' cooldowns: the seconds left, by name */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, float> Cooldowns;
+	/** the Rogue's dexterity energy (-1: none) */
+	UPROPERTY(SaveGame, BlueprintReadOnly) float DexEnergy = -1.f;
+	/** the quick bar: its slots, the entries taken off it, the first slot shown */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> QuickSlots;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> QuickOff;
+	UPROPERTY(SaveGame, BlueprintReadOnly) int32 QuickFirst = 0;
+	/** the torch lit in her hand (its item; none: not lit) */
+	UPROPERTY(SaveGame, BlueprintReadOnly) FName TorchHeld;
+	/** the slashes on her found weapons, each with its weapon's item: Things carries a slash as a thing of its own beside the
+	 *  weapon (as it drops at a death), so it goes back on a weapon of that item (by name: a weapon the level cannot give back
+	 *  must not move the others' slashes) */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SlashWeapons;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SlashNames;
+	/** her summons standing: each one's summoning (its spell) and its share of hit points */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> Summons;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> SummonShares;
 };
 
 /** a town of the wilderness she is not in: its seed, the containers she opened there, its guards she killed */
@@ -69,6 +100,9 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") int32 GamesStarted = 0;
 
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FRDCarry Carry;
+	/** her state as she left the last level (her combat component's GetStateLines as SaveCarry took it: the tests set it
+	 *  against the next level's GetCarryArrivedLines) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FString> CarryLeftLines;
 	/** her purse */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 Gold = 0;
 	/** the town of this game (0: not made yet: the town picks one) */

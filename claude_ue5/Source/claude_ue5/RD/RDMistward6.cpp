@@ -12,8 +12,8 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward6, Log, All);
 
-// (her stealth's look: the Shadow Veil's aura, kept apart from the veil's own (whose end would take it off))
-static const ERDSpellKind RD6StealthAura = (ERDSpellKind)200;
+// (her stealth's look: the Shadow Veil's aura, kept apart from the veil's own (whose end would take it off): RDCombat.h's key)
+static const ERDSpellKind RD6StealthAura = RDStealthAuraKind;
 
 // ================================================================================================ the tiers' growth
 int32 ARDDungeonGenerator::GetOpenTier() const

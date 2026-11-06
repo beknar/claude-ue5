@@ -3,7 +3,7 @@
 # line, stops PIE, sets rd.HeroMenu back to 1 and leaves the editor on brokenspire with play stopped.
 # Args: plan tag [maxSeconds]   e.g.  .\884_brokenspire_test.ps1 "town,doors,talk" b1     (plan "all": every step, 884's order)
 param([string]$plan, [string]$tag, [int]$maxs = 1800)
-if ($plan -eq "all") { $plan = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,mapzoom,satellite,life,list7,falls,dagger,circle,castle,tour,trip" }
+if ($plan -eq "all") { $plan = "town,doors,talk,services,guards,folk,gate,map,pictures,castlewalls,daynight,shape,watch,lights,signs,burned,windows,walkers,mapzoom,satellite,life,list7,falls,dagger,circle,castle,tour,trip,carry" }
 $L = "brokenspire"
 $py = $env:UE_PY; if (-not $py) { $py = "python" }
 $ex = Join-Path $PSScriptRoot "..\blender_numpy\ue_exec.py"

@@ -386,6 +386,9 @@ void ARDDungeonGenerator::SaveCarry()
 	C.Health = PlayerCombat->GetHealth(); C.Mana = PlayerCombat->GetMana();
 	C.Blessing = PlayerCombat->GetBlessing(); C.BlessLeft = PlayerCombat->GetBlessLeft(); C.BlessDamage = PlayerCombat->GetBlessDamage(); C.BlessArmour = PlayerCombat->GetBlessArmour();
 	if (Weapons.IsValidIndex(PlayerCombat->GetWeaponIndex())) C.Drawn = Weapons[PlayerCombat->GetWeaponIndex()].Name;
+	// (the rest of her as she is (the user's of 2026-11-06): statistics, what is on her and for how long, cooldowns, energy, the
+	// quick bar, the torch lit, her starting shield's wear, her summons: RDCarry.cpp)
+	PlayerCombat->GatherState(C);
 	GI->Carry = C;
 	// (the game is hers: a hero switched in play (tests) would otherwise start a new game in the next level, her things lost)
 	GI->GameHero = CurrentHero;
@@ -429,6 +432,11 @@ bool ARDDungeonGenerator::RestoreCarry()
 	if (C.Mana >= 0.f) PlayerCombat->SetMana(C.Mana);
 	if (!C.Blessing.IsEmpty() && C.BlessLeft > 1.f) PlayerCombat->Bless(C.Blessing, C.BlessDamage, C.BlessArmour, 0.f, C.BlessLeft);
 	if (!C.Drawn.IsNone()) { const int32 Dw = Weapons.IndexOfByPredicate([&](const FRDWeaponDef& W) { return W.Name == C.Drawn; }); if (Dw >= 0 && !Weapons[Dw].bAlongside) PlayerCombat->SelectWeapon(Dw); }
+	// (the rest of her as she left the other level: RDCarry.cpp; her summons come to her side once she stands here)
+	PlayerCombat->RestoreState(C);
+#if !UE_BUILD_SHIPPING
+	CarryArrivedLines = PlayerCombat->GetStateLines();          // (for the tests; her summons waiting to come to her side among them)
+#endif
 	PlayerCombat->ShowMessage(bTown ? FString::Printf(TEXT("%s"), *TownName) : FString(TEXT("Mistward Castle")));
 	UE_LOG(LogRDTownGame, Log, TEXT("RDCARRY restored %s: %d things, %d weapons, armour %s, %.0f hp"), *CurrentHero.ToString(), C.Things.Num(), Weapons.Num(), *PlayerCombat->GetWornArmour().ToString(), PlayerCombat->GetHealth());
 	return true;
@@ -443,6 +451,11 @@ bool ARDDungeonGenerator::EnterCastle()
 	SaveCarry();
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
+		// (her state as she leaves, for the tests: set on the travel only (the town's autosave as she came in wrote it too); a
+		// shipped game makes no lines)
+#if !UE_BUILD_SHIPPING
+		if (PlayerCombat) GI->CarryLeftLines = PlayerCombat->GetStateLines();
+#endif
 		GI->Arrive = TEXT("castle");
 		// (from another town's circle: its state into the store, Brokenspire's back into the fields the level reads when she
 		// comes back (it always comes back as Brokenspire): else Brokenspire took that town's looted chests and guards, and
@@ -468,7 +481,13 @@ bool ARDDungeonGenerator::ReturnToTown()
 	LastTravel = TEXT("town");
 	if (bTravelDryRun) return true;
 	SaveCarry();
-	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->Arrive = TEXT("castle");
+	if (URDGameInstance* GI = URDGameInstance::Of(this))
+	{
+		GI->Arrive = TEXT("castle");
+#if !UE_BUILD_SHIPPING
+		if (PlayerCombat) GI->CarryLeftLines = PlayerCombat->GetStateLines();
+#endif
+	}
 	bTownTraveling = true;
 	UE_LOG(LogRDTownGame, Log, TEXT("RDTRAVEL back to %s as %s"), *TownLevel, *CurrentHero.ToString());
 	UGameplayStatics::OpenLevel(this, FName(*TownLevel), true, FString::Printf(TEXT("Hero=%s"), *CurrentHero.ToString()));
