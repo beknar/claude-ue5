@@ -30,8 +30,8 @@ Steps (plan, comma separated):
             hall, and tier 2's boss is set again once a room of tier 1 is seen
   carry     her whole state into the castle and back (the user's of 2026-11-06), for the Summoner, the Warrior and the Rogue:
             her statistics, what is on her with its seconds left, potions and food, cooldowns, energy, the quick bar, the torch,
-            the slash on her sword, her starting shield's wear, her summons, hit points and mana, her things, gold and armour
-            the same as she left the other level, each way (step_carry)
+            the slash on her sword, her summons, hit points and mana, her things, gold and armour, the Rogue's stealth the same
+            as she left the other level, each way (step_carry)
   map      M opens the papyrus map: the trades' pictures and what they do written under them, the castle's, the gate's, the
             square's; pictures of the map and of the minimap
   folk      the townspeople: those who wander walked within 40 s; F at one without a quest: a line of theirs (their bark);
@@ -1738,7 +1738,7 @@ def as_hero(hero):
 def set_up(hero, leg):
     """her state made different from a fresh start, the way play makes it: found things, worn and used; potions and food working
     on her; poison and weakness (slowness on the way back); spells on her; her own counters run up; the quick bar rearranged; a
-    torch lit; for the Summoner two summons, one hurt; for the Warrior a slash on her found sword and her starting shield worn;
+    torch lit; for the Summoner two summons, one hurt; for the Warrior a slash on her found sword and plate on;
     for the Rogue her energy spent and stealth on. Returns what was done."""
     g = G["gen"]; c = cb(); did = {}
     quiet(True)
@@ -1754,11 +1754,9 @@ def set_up(hero, leg):
         if wi >= 0: c.set_weapon_wear(wi, round(c.get_weapon_durability(wi) * 0.55, 1)); did["found_wear"] = c.get_weapon_wear(wi)
         take("Medium Healing Potion", 2); take(item_of(unreal.RDItemKind.COMPONENT), 3)
         if hero == "Warrior":
-            # (a slash on her found sword; her starting shield worn down; a set of armour on)
+            # (a slash on her found sword; a set of armour on)
             sl = next((str(s.name) for s in g.get_editor_property("slashes")), None)
             if sl and wi >= 0: take(sl); yield from wait(0.2); did["slash"] = [sl, c.apply_slash(sl, wi)]
-            sh = next((str(v) for k, v in g.get_editor_property("start_shield").items() if str(k) == hero), "None")
-            if sh != "None" and c.get_item_count(sh) == 1: c.set_armour_wear(sh, round(c.get_armour_durability(sh) * 0.4, 1)); did["start_shield"] = [sh, c.get_armour_wear(sh)]
             for it in g.get_editor_property("items"):
                 if it.kind != unreal.RDItemKind.ARMOUR: continue
                 take(str(it.name)); yield from wait(0.1)
@@ -1827,23 +1825,25 @@ def leg_check(before, label):
     r["buffs"] = [str(b).split("|")[0] for b in c.get_buff_lines()]
     r["armour"] = [before["armour"], str(c.get_worn_armour())]
     r["gold"] = [before["gold"], g.get_gold()]
+    r["stealthed"] = [before["stealthed"], c.is_stealthed()]
     r["ok"] = (not r["left_vs_arrived"] and not r["test_vs_left"] and r["arrived"] > 20 and r["summons"] == r["summons_before"]
                and r["kills"][0] == r["kills"][1] and r["inventory_same"] and r["quick_same"] and r["torch"][0] == r["torch"][1]
-               and r["armour"][0] == r["armour"][1] and r["gold"][0] == r["gold"][1])
+               and r["armour"][0] == r["armour"][1] and r["gold"][0] == r["gold"][1] and r["stealthed"][0] == r["stealthed"][1])
     unreal.log(f"BSTEST carry {label}: {json.dumps(r, default=str)[:1800]}")
     return r
 def snapshot():
     g = G["gen"]; c = cb()
     return {"lines": state_lines(), "summons": summons_now(), "kills": c.kills, "inventory": sorted(str(l) for l in c.get_all_inventory_lines()),
-            "quick": [str(x) for x in c.get_quick_slots()], "torch": c.is_torch_held(), "armour": str(c.get_worn_armour()), "gold": g.get_gold()}
+            "quick": [str(x) for x in c.get_quick_slots()], "torch": c.is_torch_held(), "armour": str(c.get_worn_armour()), "gold": g.get_gold(),
+            "stealthed": c.is_stealthed()}
 def step_carry():
     """the user's of 2026-11-06: into the castle and back to Brokenspire she brings her whole state, statistics and every thing
     she carries. For the Summoner, the Warrior and the Rogue, each in turn: her state made different in the town (set_up), into
     the castle through the Mistgate, then changed again there and back to the town through the Escape menu; each way the state
     she left with and the state she came in with are the same line for line (hit points, mana, energy, every counter, every timed
     state with its seconds left, potions and food on her, cooldowns, the quick bar, the torch, the slash on her sword, her
-    starting shield's wear, her summons), and in the new level her things, gold, armour, quick bar, torch, kills and summons are
-    as they were"""
+    summons), and in the new level her things, gold, armour, quick bar, torch, kills, summons and the Rogue's stealth are as they
+    were"""
     res = {}
     for hero in ("Summoner", "Warrior", "Rogue"):
         # (each hero from the town)
@@ -1863,12 +1863,15 @@ def step_carry():
         yield from travel("brokenspire", via_menu)
         h["to_town"] = yield from leg_check(before, f"{hero} to the town")
         quiet(False)
-    want = {"Summoner": ("summon", "effect", "timed", "torch", "stat", "quick"), "Warrior": ("slash", "startshield", "effect", "timed", "stat"), "Rogue": ("dex", "effect", "timed", "stat")}
+    want = {"Summoner": ("summon", "effect", "timed", "torch", "stat", "spell", "quick"), "Warrior": ("slash", "effect", "timed", "stat"), "Rogue": ("dex", "effect", "timed", "stat")}
     for hero, kinds in want.items():
         h = res[hero]; h["missing_kinds"] = [k for k in kinds if k not in h["to_castle"]["kinds"]]; h["has_kinds"] = not h["missing_kinds"]
         h["timed_to_castle"] = sorted(l.split("|")[1] for l in h["town_lines"] if l.startswith("timed|"))
-    res["Rogue"]["stealth_carried"] = any(l.startswith("timed|Stealth|") for l in res["Rogue"]["castle_lines"] + res["Rogue"]["town_lines"])
-    ok =all(res[h]["to_castle"]["ok"] and res[h]["to_town"]["ok"] and res[h]["has_kinds"] for h in res) \
+    # (the Rogue's stealth itself crossed both ways: on as she left (its line among those she left with) and on as she came in)
+    ro = res["Rogue"]
+    ro["stealth_carried"] = [any(l.startswith("timed|Stealth|") for l in ro[k]) for k in ("town_lines", "castle_lines")] \
+        + [ro["to_castle"]["stealthed"] == [True, True], ro["to_town"]["stealthed"] == [True, True]]
+    ok = all(res[h]["to_castle"]["ok"] and res[h]["to_town"]["ok"] and res[h]["has_kinds"] for h in res) and all(ro["stealth_carried"]) \
         and len(res["Summoner"]["to_castle"]["summons"]) == 2 and res["Summoner"]["to_castle"]["kills"][0] >= 1
     step_result("carry", ok, **res)
 

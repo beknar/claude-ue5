@@ -471,6 +471,8 @@ bool ARDDungeonGenerator::SwitchHero(FName Name)
 	APawn* Old = PC->GetPawn();
 	const FTransform T = Old ? Old->GetActorTransform() : FTransform(GetStartRoomCenter() + FVector(0, 0, 100.f));
 	if (PlayerCombat) PlayerCombat->SetInventoryOpen(false);
+	// (the summons another hero brought from the other level are hers, not the new hero's (the PR review's find))
+	CarrySummons.Reset(); CarrySummonShares.Reset();
 	ApplyHero(Name);
 	PlayerCombat = nullptr;         // (Tick gives the new pawn its own)
 	if (Old) { PC->UnPossess(); Old->Destroy(); }
@@ -1240,6 +1242,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Progress.Reset(); TierNotice.Reset(); TierNoticeTime = -100.f;     // (the tiers start again: only tier 1 open)
 	for (ARDMonster* A : Allies) if (A) A->Destroy();
 	Allies.Reset();
+	CarrySummons.Reset(); CarrySummonShares.Reset();          // (no summons brought from the other level called after a restart)
 	ResetMistward5();          // (mistward5: no shot of before in the air, no audience, autoplay ended)
 	ResetFinal();              // (the final boss: not placed, its door and its lights from above gone)
 	// (mistward: what the rules set waiting, her dropped things, the pads, the cells, the traps start again)

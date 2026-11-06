@@ -2,12 +2,13 @@
 // their current state. when the heroes leave to go to Brokenspire, they should also bring with them their current state. this
 // includes statistics and all inventory items"). The generator's SaveCarry / RestoreCarry (RDTownGame.cpp) keep her things,
 // what she wears, her spells, hit points, mana and blessing; this keeps the rest of her as it was:
-//   statistics       the combat component's counters (kills, blows, damage dealt and taken, potions used, ...), each spell's casts
+//   statistics       the combat component's counters (kills, blows, damage dealt and taken, potions used, ...), each spell's
+//                    casts, each slash's procs
 //   on her           potions' and food's effects, her spells on her (ward, iron skin, veil, mirror, pact, hex ward) with their
 //                    looks, stealth, a slash's haste, evasion and deflection, the crystal shield, poison, weakness,
 //                    slowness, a snare: each with the seconds it had left
-//   ready            her weapons' and spells' cooldowns (the seconds left), the Rogue's dexterity energy
-//   at hand          the quick bar as she set it, the torch lit, what is left of her starting shield (not among her things)
+//   ready            her weapons' and spells' cooldowns, her roll's and dash's (the seconds left), the Rogue's dexterity energy
+//   at hand          the slash on each found weapon, the quick bar as she set it, the torch lit
 //   her summons      each standing summon, called to her side again in the next level as hurt as it was
 // A level's clock starts again from 0: every time on her is kept as the seconds left, not as a moment.
 #include "RD/RDCombat.h"
@@ -19,23 +20,21 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDCarry, Log, All);
 
-// (her stealth's look: RDMistward6.cpp's RD6StealthAura, the same key)
-static const ERDSpellKind RDCarryStealthAura = (ERDSpellKind)200;
-
 // (her statistics: whole counts and amounts)
 #define RDCARRY_COUNTS(X) X(Kills) X(AttacksMade) X(HitsLanded) X(HitsTaken) X(Deaths) X(StepsTaken) X(BoltsCast) X(BoltsOnMonsters) \
 	X(BoltsElsewhere) X(Rolls) X(DodgedHits) X(Dashes) X(AbilitiesUsed) X(CastsRefused) X(ItemsUsed) X(ArmourChanges) X(ArmourWornOut) \
 	X(ItemsRepaired) X(ItemsCrafted) X(WeaponsBroken) X(WeaponsTaken) X(SpellsLearned) X(WardBlocks) X(Reflected) X(PactSaves) X(Evaded) \
 	X(ZoneBlocks) X(CooldownRefusals) X(StealthUses) X(StealthRefusals) X(Ambushes) X(StealthTrapsPassed) X(WeaponsBrokenDown) \
-	X(ShieldBlocks) X(ShieldsBroken) X(GearBrokenDown) X(HarvestsTaken) X(ScrollsRead) X(SummonsRefused) X(Summoned) X(BlockedHits) X(FallsHurt)
+	X(ShieldBlocks) X(ShieldsBroken) X(GearBrokenDown) X(HarvestsTaken) X(ScrollsRead) X(SummonsRefused) X(Summoned) X(BlockedHits) X(FallsHurt) \
+	X(MouseUses) X(LimbFxMade)
 #define RDCARRY_AMOUNTS(X) X(DamageDealt) X(DamageTaken) X(AmbushDamage) X(SlashBonusDealt)
 
 void URDCombatComponent::GatherState(FRDCarry& C) const
 {
-	C.Stats.Reset(); C.Timed.Reset(); C.Cooldowns.Reset();
+	C.Stats.Reset(); C.SpellCasts.Reset(); C.SlashProcs.Reset(); C.Timed.Reset(); C.Cooldowns.Reset();
 	C.EffectItems.Reset(); C.EffectKinds.Reset(); C.EffectAmounts.Reset(); C.EffectLeft.Reset();
-	C.QuickSlots.Reset(); C.QuickOff.Reset(); C.Summons.Reset(); C.SummonShares.Reset(); C.FoundSlashes.Reset();
-	C.DexEnergy = -1.f; C.TorchHeld = NAME_None; C.StartShieldWear = -1.f; C.QuickFirst = 0;
+	C.QuickSlots.Reset(); C.QuickOff.Reset(); C.Summons.Reset(); C.SummonShares.Reset(); C.SlashWeapons.Reset(); C.SlashNames.Reset();
+	C.DexEnergy = -1.f; C.TorchHeld = NAME_None; C.QuickFirst = 0;
 	const UWorld* W = GetWorld();
 	if (!W || !Generator) return;
 	const float Now = W->GetTimeSeconds();
@@ -44,7 +43,8 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 	RDCARRY_COUNTS(RDCARRY_PUT)
 	RDCARRY_AMOUNTS(RDCARRY_PUT)
 #undef RDCARRY_PUT
-	for (const TPair<FName, int32>& S : SpellsReleased) C.Stats.Add(FName(*(TEXT("Spell:") + S.Key.ToString())), (float)S.Value);
+	C.SpellCasts = SpellsReleased;
+	C.SlashProcs = SlashProcs;
 	// ---- what is on her: the seconds left and its strength
 	auto Put = [&](const TCHAR* N, float Until, float Amount)
 	{
@@ -67,6 +67,7 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 	Put(TEXT("Evasion"), SlashEvadeUntil, SlashEvadeShare);
 	Put(TEXT("Deflect"), DeflectUntil, DeflectShare);
 	Put(TEXT("CrystalReady"), SlashShieldReadyAt, 0.f);
+	Put(TEXT("Roll"), RollReadyAt, 0.f);                 // (her roll's and dash's cooldown)
 	if (bSlashShieldUp) C.Timed.Add(TEXT("CrystalUp"), 1.f);
 	if (bHeldOn) Put(TEXT("Held"), HeldUntil, 0.f);
 	// ---- potions and food working on her
@@ -77,13 +78,11 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 	// ---- ready: cooldowns, the Rogue's energy
 	for (const TPair<FName, float>& R : ReadyAt) if (R.Value > Now) C.Cooldowns.Add(R.Key, R.Value - Now);
 	if (MaxDexEnergy > 0.f) C.DexEnergy = DexEnergy;
-	// ---- at hand: the slashes on her found weapons, the quick bar, the torch, her starting shield
-	for (const FRDWeaponDef& Wd : Generator->Weapons) if (!Wd.Item.IsNone()) C.FoundSlashes.Add(Wd.Slash);
+	// ---- at hand: the slashes on her found weapons (with the weapon's item), the quick bar, the torch
+	for (const FRDWeaponDef& Wd : Generator->Weapons)
+		if (!Wd.Item.IsNone() && !Wd.Slash.IsNone()) { C.SlashWeapons.Add(Wd.Item); C.SlashNames.Add(Wd.Slash); }
 	C.QuickSlots = QuickSlots; C.QuickOff = QuickOff.Array(); C.QuickFirst = QuickFirst;
 	if (bTorchHeld && !TorchItem.IsNone()) C.TorchHeld = TorchItem;
-	// (the shield her hero starts with stays out of her things (bKeepStartGear): its wear, when she carries just that one)
-	if (Generator->bKeepStartGear)
-		if (const FName Keep = StartShieldOf(); !Keep.IsNone() && GetItemCount(Keep) == 1) C.StartShieldWear = GetArmourWear(Keep);
 	// ---- her summons standing
 	for (const ARDMonster* A : Generator->Allies)
 		if (IsValid(A) && !A->IsDead() && !A->SummonSpell.IsNone())
@@ -109,9 +108,8 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 	RDCARRY_AMOUNTS(RDCARRY_GETAMOUNT)
 #undef RDCARRY_GETCOUNT
 #undef RDCARRY_GETAMOUNT
-	SpellsReleased.Reset();
-	for (const TPair<FName, float>& S : C.Stats)
-		if (S.Key.ToString().StartsWith(TEXT("Spell:"))) SpellsReleased.Add(FName(*S.Key.ToString().Mid(6)), FMath::RoundToInt(S.Value));
+	SpellsReleased = C.SpellCasts;
+	SlashProcs = C.SlashProcs;
 	// ---- what is on her, with the seconds it had left (and the look of a spell on her)
 	auto Get = [&](const TCHAR* N, float& Until, float& Amount) -> bool
 	{
@@ -143,7 +141,9 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 	if (MaxDexEnergy > 0.f && Get(TEXT("Stealth"), StealthUntil, Armed))
 	{
 		bAmbushArmed = Armed > 0.5f; StealthEndReason.Reset();
-		SetAura(RDCarryStealthAura, SpellOfKind(ERDSpellKind::Veil), true);
+		// (its look as StartStealth gives it: the table's first Shadow Veil, under the stealth's own key)
+		const int32 Vi = Generator->Spells.IndexOfByPredicate([](const FRDSpellDef& S) { return S.Kind == ERDSpellKind::Veil; });
+		if (Vi >= 0) SetAura(RDStealthAuraKind, &Generator->Spells[Vi], true);
 	}
 	Get(TEXT("Poison"), PoisonUntil, PoisonDps);
 	Get(TEXT("Weak"), WeakUntil, WeakShare);
@@ -152,6 +152,7 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 	Get(TEXT("Evasion"), SlashEvadeUntil, SlashEvadeShare);
 	Get(TEXT("Deflect"), DeflectUntil, DeflectShare);
 	Get(TEXT("CrystalReady"), SlashShieldReadyAt, Dummy);
+	Get(TEXT("Roll"), RollReadyAt, Dummy);
 	bSlashShieldUp = C.Timed.Contains(TEXT("CrystalUp"));
 	if (Get(TEXT("Held"), HeldUntil, Dummy)) bHeldOn = true;
 	// ---- potions and food working on her
@@ -161,17 +162,15 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 	// ---- ready: cooldowns, the Rogue's energy
 	for (const TPair<FName, float>& R : C.Cooldowns) ReadyAt.Add(R.Key, Now + R.Value);
 	if (C.DexEnergy >= 0.f && MaxDexEnergy > 0.f) DexEnergy = FMath::Clamp(C.DexEnergy, 0.f, MaxDexEnergy);
-	// ---- at hand: each slash back on the found weapon it was on (TakeBack laid it in her pack beside it), then the quick bar
-	// as she set it (FillQuickSlots keeps what is set and fills only what is empty)
+	// ---- at hand: each slash back on a found weapon of the item it was on (TakeBack laid it in her pack beside it; a weapon
+	// this level could not give back leaves its slash in her pack and moves no other), then the quick bar as she set it
+	// (FillQuickSlots keeps what is set and fills only what is empty)
+	for (int32 I = 0; I < C.SlashWeapons.Num() && I < C.SlashNames.Num(); ++I)
 	{
-		int32 K = 0;
+		const FName Sl = C.SlashNames[I];
+		if (Sl.IsNone() || GetItemCount(Sl) <= 0) continue;
 		for (FRDWeaponDef& Wd : Generator->Weapons)
-		{
-			if (Wd.Item.IsNone()) continue;
-			const FName Sl = C.FoundSlashes.IsValidIndex(K) ? C.FoundSlashes[K] : NAME_None; ++K;
-			if (Sl.IsNone() || !Wd.Slash.IsNone() || GetItemCount(Sl) <= 0) continue;
-			Wd.Slash = Sl; RemoveCarried(Sl, 1);
-		}
+			if (Wd.Item == C.SlashWeapons[I] && Wd.Slash.IsNone()) { Wd.Slash = Sl; RemoveCarried(Sl, 1); break; }
 	}
 	if (C.QuickSlots.Num() > 0)
 	{
@@ -180,14 +179,12 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 		QuickFirst = FMath::Clamp(C.QuickFirst, 0, FMath::Max(0, QuickSlots.Num() - 1));
 	}
 	if (!C.TorchHeld.IsNone() && GetItemCount(C.TorchHeld) > 0) { TorchItem = C.TorchHeld; HoldTorch(true); }
-	if (C.StartShieldWear >= 0.f && Generator->bKeepStartGear)
-		if (const FName Keep = StartShieldOf(); !Keep.IsNone() && GetItemCount(Keep) == 1) ArmourWear.Add(Keep, C.StartShieldWear);
 	UpdateWalkSpeed();
 	// ---- her summons: called to her side once she stands in this level (the generator's TickCarrySummons)
 	Generator->CarrySummons = C.Summons; Generator->CarrySummonShares = C.SummonShares;
 	Generator->CarrySummonFrom = Now + 0.5f; Generator->CarrySummonUntil = Now + 20.f;
-	UE_LOG(LogRDCarry, Log, TEXT("RDCARRY state back: %d statistics (%d kills), %d timed, %d effects, %d cooldowns, %d quick slots, torch %s, %d summons to call"),
-		C.Stats.Num(), Kills, C.Timed.Num() / 2, Effects.Num(), C.Cooldowns.Num(), C.QuickSlots.Num(), *C.TorchHeld.ToString(), C.Summons.Num());
+	UE_LOG(LogRDCarry, Log, TEXT("RDCARRY state back: %d statistics (%d kills), %d timed, %d effects, %d cooldowns, %d quick slots, torch %s, %d slashes, %d summons to call"),
+		C.Stats.Num(), Kills, C.Timed.Num() / 2, Effects.Num(), C.Cooldowns.Num(), C.QuickSlots.Num(), *C.TorchHeld.ToString(), C.SlashNames.Num(), C.Summons.Num());
 }
 
 TArray<FString> URDCombatComponent::GetStateLines() const
@@ -199,6 +196,8 @@ TArray<FString> URDCombatComponent::GetStateLines() const
 	Out.Add(FString::Printf(TEXT("mana|%.2f|%.2f"), Mana, MaxMana));
 	if (C.DexEnergy >= 0.f) Out.Add(FString::Printf(TEXT("dex|%.2f|%.2f"), C.DexEnergy, MaxDexEnergy));
 	for (const TPair<FName, float>& S : C.Stats) Out.Add(FString::Printf(TEXT("stat|%s|%.2f"), *S.Key.ToString(), S.Value));
+	for (const TPair<FName, int32>& S : C.SpellCasts) Out.Add(FString::Printf(TEXT("spell|%s|%d"), *S.Key.ToString(), S.Value));
+	for (const TPair<FString, int32>& S : C.SlashProcs) Out.Add(FString::Printf(TEXT("proc|%s|%d"), *S.Key, S.Value));
 	for (const TPair<FName, float>& T : C.Timed)
 	{
 		const FString K = T.Key.ToString();
@@ -215,8 +214,7 @@ TArray<FString> URDCombatComponent::GetStateLines() const
 	for (int32 I = 0; I < C.QuickSlots.Num(); ++I) if (!C.QuickSlots[I].IsNone()) Out.Add(FString::Printf(TEXT("quick|%d|%s"), I, *C.QuickSlots[I].ToString()));
 	for (const FName& Q : C.QuickOff) Out.Add(FString::Printf(TEXT("quickoff|%s"), *Q.ToString()));
 	if (!C.TorchHeld.IsNone()) Out.Add(FString::Printf(TEXT("torch|%s"), *C.TorchHeld.ToString()));
-	if (C.StartShieldWear >= 0.f) Out.Add(FString::Printf(TEXT("startshield|%.2f"), C.StartShieldWear));
-	for (int32 I = 0; I < C.FoundSlashes.Num(); ++I) if (!C.FoundSlashes[I].IsNone()) Out.Add(FString::Printf(TEXT("slash|%d|%s"), I, *C.FoundSlashes[I].ToString()));
+	for (int32 I = 0; I < C.SlashNames.Num(); ++I) Out.Add(FString::Printf(TEXT("slash|%s|%s"), *C.SlashWeapons[I].ToString(), *C.SlashNames[I].ToString()));
 	for (int32 I = 0; I < C.Summons.Num(); ++I) Out.Add(FString::Printf(TEXT("summon|%s|%.3f"), *C.Summons[I].ToString(), C.SummonShares[I]));
 	Out.Sort();
 	return Out;
@@ -228,8 +226,11 @@ void ARDDungeonGenerator::TickCarrySummons()
 	if (CarrySummons.Num() == 0 || !GetWorld()) return;
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (Now < CarrySummonFrom) return;
-	// (in the town: once she stands where she comes in (before the castle's door), not where the level's start put her)
-	if (bTown && !bTownPlaced) return;
+	// (in the town: once she stands where she comes in (before the castle's door), not where the level's start put her; a game
+	// loaded in the wilds: once TickWildLoad has put her where the save was made (the PR review's find: bTownPlaced is set at
+	// once there, and they came in Brokenspire's square, kilometres from her))
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	if ((bTown && !bTownPlaced) || (GI && GI->bLoadPending)) { CarrySummonUntil = FMath::Max(CarrySummonUntil, Now + 20.f); return; }
 	APawn* P = PlayerCombat ? Cast<APawn>(PlayerCombat->GetOwner()) : nullptr;
 	if (!P || PlayerCombat->IsDead()) return;
 	const FVector L = P->GetActorLocation(), Fw = P->GetActorForwardVector();

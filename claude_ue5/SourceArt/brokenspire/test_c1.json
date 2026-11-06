@@ -1,7 +1,9 @@
 {
  "tag": "c1",
  "plan": [
-  "carry"
+  "carry",
+  "castle",
+  "trip"
  ],
  "level": "brokenspire",
  "steps": [
@@ -27,13 +29,15 @@
      "quick": true
     },
     "town_lines": [
-     "effect|Small Speed Potion|2|0.100|18.10",
+     "effect|Small Speed Potion|2|0.100|17.97",
      "hp|53.00|85.00",
-     "mana|31.10|66.00",
+     "mana|30.87|66.00",
      "quick|0|Fire",
      "quick|2|Summon Tier 1",
      "quick|3|Dagger",
      "quick|6|Dark Fire",
+     "spell|Fire Bolt|2",
+     "spell|Summon Tier 1|2",
      "stat|AbilitiesUsed|0.00",
      "stat|AmbushDamage|0.00",
      "stat|Ambushes|0.00",
@@ -61,6 +65,8 @@
      "stat|ItemsRepaired|0.00",
      "stat|ItemsUsed|2.00",
      "stat|Kills|1.00",
+     "stat|LimbFxMade|0.00",
+     "stat|MouseUses|0.00",
      "stat|PactSaves|0.00",
      "stat|Reflected|0.00",
      "stat|Rolls|0.00",
@@ -68,8 +74,6 @@
      "stat|ShieldBlocks|0.00",
      "stat|ShieldsBroken|0.00",
      "stat|SlashBonusDealt|0.00",
-     "stat|Spell:Fire Bolt|2.00",
-     "stat|Spell:Summon Tier 1|2.00",
      "stat|SpellsLearned|0.00",
      "stat|StealthRefusals|0.00",
      "stat|StealthTrapsPassed|0.00",
@@ -84,14 +88,14 @@
      "stat|ZoneBlocks|0.00",
      "summon|Summon Tier 1|0.600",
      "summon|Summon Tier 1|1.000",
-     "timed|Poison|10.58|1.600",
-     "timed|Weak|11.58|0.500",
+     "timed|Poison|10.67|1.600",
+     "timed|Weak|11.67|0.500",
      "torch|Torch"
     ],
     "to_castle": {
      "level": "mistward_castle",
-     "left": 60,
-     "arrived": 60,
+     "left": 62,
+     "arrived": 62,
      "left_vs_arrived": [],
      "test_vs_left": [],
      "kinds": [
@@ -99,6 +103,7 @@
       "hp",
       "mana",
       "quick",
+      "spell",
       "stat",
       "summon",
       "timed",
@@ -143,8 +148,12 @@
       "None"
      ],
      "gold": [
-      122,
-      122
+      123,
+      123
+     ],
+     "stealthed": [
+      false,
+      false
      ],
      "ok": true
     },
@@ -162,15 +171,17 @@
      "killed": true
     },
     "castle_lines": [
-     "effect|Bread|3|0.010|3.75",
-     "effect|Small Speed Potion|2|0.100|23.43",
-     "effect|Small Speed Potion|2|0.100|8.29",
-     "hp|53.26|85.00",
-     "mana|30.81|66.00",
+     "effect|Bread|3|0.010|3.69",
+     "effect|Small Speed Potion|2|0.100|23.35",
+     "effect|Small Speed Potion|2|0.100|7.97",
+     "hp|53.30|85.00",
+     "mana|30.92|66.00",
      "quick|0|Fire",
      "quick|2|Summon Tier 1",
      "quick|3|Dagger",
      "quick|6|Dark Fire",
+     "spell|Fire Bolt|6",
+     "spell|Summon Tier 1|2",
      "stat|AbilitiesUsed|0.00",
      "stat|AmbushDamage|0.00",
      "stat|Ambushes|0.00",
@@ -184,7 +195,7 @@
      "stat|CastsRefused|0.00",
      "stat|CooldownRefusals|0.00",
      "stat|DamageDealt|100.00",
-     "stat|DamageTaken|14.54",
+     "stat|DamageTaken|14.87",
      "stat|Dashes|0.00",
      "stat|Deaths|0.00",
      "stat|DodgedHits|0.00",
@@ -198,6 +209,8 @@
      "stat|ItemsRepaired|0.00",
      "stat|ItemsUsed|4.00",
      "stat|Kills|2.00",
+     "stat|LimbFxMade|0.00",
+     "stat|MouseUses|0.00",
      "stat|PactSaves|0.00",
      "stat|Reflected|0.00",
      "stat|Rolls|0.00",
@@ -205,8 +218,6 @@
      "stat|ShieldBlocks|0.00",
      "stat|ShieldsBroken|0.00",
      "stat|SlashBonusDealt|0.00",
-     "stat|Spell:Fire Bolt|6.00",
-     "stat|Spell:Summon Tier 1|2.00",
      "stat|SpellsLearned|0.00",
      "stat|StealthRefusals|0.00",
      "stat|StealthTrapsPassed|0.00",
@@ -221,15 +232,15 @@
      "stat|ZoneBlocks|0.00",
      "summon|Summon Tier 1|0.600",
      "summon|Summon Tier 1|1.000",
-     "timed|Poison|0.77|1.600",
-     "timed|Slow|6.19|0.600",
-     "timed|Weak|1.77|0.500",
+     "timed|Poison|0.73|1.600",
+     "timed|Slow|6.15|0.600",
+     "timed|Weak|1.73|0.500",
      "torch|Torch"
     ],
     "to_town": {
      "level": "brokenspire",
-     "left": 63,
-     "arrived": 63,
+     "left": 65,
+     "arrived": 65,
      "left_vs_arrived": [],
      "test_vs_left": [],
      "kinds": [
@@ -237,6 +248,7 @@
       "hp",
       "mana",
       "quick",
+      "spell",
       "stat",
       "summon",
       "timed",
@@ -280,8 +292,12 @@
       "None"
      ],
      "gold": [
-      125,
-      125
+      124,
+      124
+     ],
+     "stealthed": [
+      false,
+      false
      ],
      "ok": true
     },
@@ -299,10 +315,6 @@
       "Ember Slash",
       true
      ],
-     "start_shield": [
-      "Painted Viking Shield",
-      100.0
-     ],
      "armour": "Plate Armour",
      "used": [
       [
@@ -318,14 +330,13 @@
      "quick": true
     },
     "town_lines": [
-     "effect|Bread|3|0.010|6.32",
-     "effect|Small Speed Potion|2|0.100|25.93",
-     "hp|87.47|140.00",
+     "effect|Bread|3|0.010|6.05",
+     "effect|Small Speed Potion|2|0.100|25.55",
+     "hp|87.53|140.00",
      "mana|0.00|0.00",
      "quick|0|Dagger",
      "quick|6|Arming Sword",
-     "slash|0|Ember Slash",
-     "startshield|100.00",
+     "slash|Arming Sword|Ember Slash",
      "stat|AbilitiesUsed|0.00",
      "stat|AmbushDamage|0.00",
      "stat|Ambushes|0.00",
@@ -353,6 +364,8 @@
      "stat|ItemsRepaired|0.00",
      "stat|ItemsUsed|2.00",
      "stat|Kills|0.00",
+     "stat|LimbFxMade|0.00",
+     "stat|MouseUses|0.00",
      "stat|PactSaves|0.00",
      "stat|Reflected|0.00",
      "stat|Rolls|0.00",
@@ -372,13 +385,13 @@
      "stat|WeaponsBroken|0.00",
      "stat|WeaponsTaken|1.00",
      "stat|ZoneBlocks|0.00",
-     "timed|Poison|10.66|1.600",
-     "timed|Weak|11.66|0.500"
+     "timed|Poison|10.62|1.600",
+     "timed|Weak|11.62|0.500"
     ],
     "to_castle": {
      "level": "mistward_castle",
-     "left": 56,
-     "arrived": 56,
+     "left": 57,
+     "arrived": 57,
      "left_vs_arrived": [],
      "test_vs_left": [],
      "kinds": [
@@ -387,7 +400,6 @@
       "mana",
       "quick",
       "slash",
-      "startshield",
       "stat",
       "timed"
      ],
@@ -415,6 +427,10 @@
       247,
       247
      ],
+     "stealthed": [
+      false,
+      false
+     ],
      "ok": true
     },
     "set_castle": {
@@ -431,15 +447,14 @@
      "killed": true
     },
     "castle_lines": [
-     "effect|Bread|3|0.010|6.63",
-     "effect|Small Speed Potion|2|0.100|19.09",
-     "effect|Small Speed Potion|2|0.100|26.30",
-     "hp|85.39|140.00",
+     "effect|Bread|3|0.010|6.69",
+     "effect|Small Speed Potion|2|0.100|18.80",
+     "effect|Small Speed Potion|2|0.100|26.36",
+     "hp|85.43|140.00",
      "mana|0.00|0.00",
      "quick|0|Dagger",
      "quick|6|Arming Sword",
-     "slash|0|Ember Slash",
-     "startshield|100.00",
+     "slash|Arming Sword|Ember Slash",
      "stat|AbilitiesUsed|0.00",
      "stat|AmbushDamage|0.00",
      "stat|Ambushes|0.00",
@@ -453,7 +468,7 @@
      "stat|CastsRefused|0.00",
      "stat|CooldownRefusals|0.00",
      "stat|DamageDealt|0.00",
-     "stat|DamageTaken|10.56",
+     "stat|DamageTaken|10.30",
      "stat|Dashes|0.00",
      "stat|Deaths|0.00",
      "stat|DodgedHits|0.00",
@@ -467,6 +482,8 @@
      "stat|ItemsRepaired|0.00",
      "stat|ItemsUsed|4.00",
      "stat|Kills|0.00",
+     "stat|LimbFxMade|0.00",
+     "stat|MouseUses|0.00",
      "stat|PactSaves|0.00",
      "stat|Reflected|0.00",
      "stat|Rolls|0.00",
@@ -486,14 +503,14 @@
      "stat|WeaponsBroken|0.00",
      "stat|WeaponsTaken|1.00",
      "stat|ZoneBlocks|0.00",
-     "timed|Poison|3.83|1.600",
-     "timed|Slow|6.18|0.600",
-     "timed|Weak|4.83|0.500"
+     "timed|Poison|3.87|1.600",
+     "timed|Slow|6.16|0.600",
+     "timed|Weak|4.87|0.500"
     ],
     "to_town": {
      "level": "brokenspire",
-     "left": 58,
-     "arrived": 58,
+     "left": 59,
+     "arrived": 59,
      "left_vs_arrived": [],
      "test_vs_left": [],
      "kinds": [
@@ -502,7 +519,6 @@
       "mana",
       "quick",
       "slash",
-      "startshield",
       "stat",
       "timed"
      ],
@@ -528,8 +544,12 @@
       "Plate Armour"
      ],
      "gold": [
-      250,
-      250
+      249,
+      249
+     ],
+     "stealthed": [
+      false,
+      false
      ],
      "ok": true
     },
@@ -561,9 +581,9 @@
     },
     "town_lines": [
      "dex|50.00|100.00",
-     "effect|Bread|3|0.010|6.34",
-     "effect|Small Speed Potion|2|0.100|26.00",
-     "hp|62.53|100.00",
+     "effect|Bread|3|0.010|6.25",
+     "effect|Small Speed Potion|2|0.100|25.95",
+     "hp|62.38|100.00",
      "mana|0.00|0.00",
      "quick|0|Daggers",
      "quick|2|Dagger",
@@ -595,6 +615,8 @@
      "stat|ItemsRepaired|0.00",
      "stat|ItemsUsed|2.00",
      "stat|Kills|0.00",
+     "stat|LimbFxMade|0.00",
+     "stat|MouseUses|0.00",
      "stat|PactSaves|0.00",
      "stat|Reflected|0.00",
      "stat|Rolls|0.00",
@@ -614,15 +636,15 @@
      "stat|WeaponsBroken|0.00",
      "stat|WeaponsTaken|1.00",
      "stat|ZoneBlocks|0.00",
-     "timed|Poison|10.47|1.600",
-     "timed|Stealth|7.47|0.000",
-     "timed|Weak|11.47|0.500",
+     "timed|Poison|10.62|1.600",
+     "timed|Stealth|7.62|0.000",
+     "timed|Weak|11.62|0.500",
      "torch|Torch"
     ],
     "to_castle": {
      "level": "mistward_castle",
-     "left": 58,
-     "arrived": 58,
+     "left": 60,
+     "arrived": 60,
      "left_vs_arrived": [],
      "test_vs_left": [],
      "kinds": [
@@ -660,6 +682,10 @@
       372,
       372
      ],
+     "stealthed": [
+      true,
+      true
+     ],
      "ok": true
     },
     "set_castle": {
@@ -679,10 +705,10 @@
     },
     "castle_lines": [
      "dex|50.00|100.00",
-     "effect|Bread|3|0.010|6.65",
-     "effect|Small Speed Potion|2|0.100|18.91",
-     "effect|Small Speed Potion|2|0.100|26.28",
-     "hp|62.32|100.00",
+     "effect|Bread|3|0.010|6.69",
+     "effect|Small Speed Potion|2|0.100|18.81",
+     "effect|Small Speed Potion|2|0.100|26.39",
+     "hp|60.32|100.00",
      "mana|0.00|0.00",
      "quick|0|Daggers",
      "quick|2|Dagger",
@@ -700,7 +726,7 @@
      "stat|CastsRefused|0.00",
      "stat|CooldownRefusals|0.00",
      "stat|DamageDealt|0.00",
-     "stat|DamageTaken|10.43",
+     "stat|DamageTaken|11.07",
      "stat|Dashes|0.00",
      "stat|Deaths|0.00",
      "stat|DodgedHits|0.00",
@@ -714,6 +740,8 @@
      "stat|ItemsRepaired|0.00",
      "stat|ItemsUsed|4.00",
      "stat|Kills|0.00",
+     "stat|LimbFxMade|0.00",
+     "stat|MouseUses|0.00",
      "stat|PactSaves|0.00",
      "stat|Reflected|0.00",
      "stat|Rolls|0.00",
@@ -733,16 +761,16 @@
      "stat|WeaponsBroken|0.00",
      "stat|WeaponsTaken|1.00",
      "stat|ZoneBlocks|0.00",
-     "timed|Poison|3.56|1.600",
+     "timed|Poison|3.58|1.600",
      "timed|Slow|6.18|0.600",
      "timed|Stealth|7.68|0.000",
-     "timed|Weak|4.56|0.500",
+     "timed|Weak|4.58|0.500",
      "torch|Torch"
     ],
     "to_town": {
      "level": "brokenspire",
-     "left": 60,
-     "arrived": 60,
+     "left": 62,
+     "arrived": 62,
      "left_vs_arrived": [],
      "test_vs_left": [],
      "kinds": [
@@ -778,8 +806,12 @@
       "None"
      ],
      "gold": [
-      373,
-      373
+      375,
+      375
+     ],
+     "stealthed": [
+      true,
+      true
      ],
      "ok": true
     },
@@ -790,8 +822,92 @@
      "Stealth",
      "Weak"
     ],
-    "stealth_carried": true
+    "stealth_carried": [
+     true,
+     true,
+     true,
+     true
+    ]
    }
+  },
+  {
+   "step": "castle",
+   "ok": true,
+   "weapon": "Viking Shortsword",
+   "armour": "Plate Armour",
+   "before_gold": 625,
+   "before_armour": "Plate Armour",
+   "castle_level": "mistward_castle",
+   "castle_gold": 625,
+   "castle_armour": "Plate Armour",
+   "castle_lines_same": true,
+   "entered": 4,
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "menu_line": "button|Return to Brokenspire",
+   "back_level": "brokenspire",
+   "at_castle_door_m": 1.5,
+   "back_gold": 625,
+   "back_armour": "Plate Armour",
+   "back_lines_same": true,
+   "same_town": true
+  },
+  {
+   "step": "trip",
+   "ok": true,
+   "castle": "mistward_castle",
+   "opened": 1,
+   "piles_at_death": 1,
+   "pile_things": [
+    "Iron Ingot",
+    "Medium Healing Potion",
+    "Medium Healing Potion",
+    "Plate Armour",
+    "Small Healing Potion",
+    "Viking Shortsword"
+   ],
+   "revived": true,
+   "town": "brokenspire",
+   "kept_in_game": [
+    {
+     "level": "castle",
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ]
+    }
+   ],
+   "castle_again": "mistward_castle",
+   "tier2_open": true,
+   "piles_again": [
+    {
+     "things": [
+      "Iron Ingot",
+      "Medium Healing Potion",
+      "Medium Healing Potion",
+      "Plate Armour",
+      "Small Healing Potion",
+      "Viking Shortsword"
+     ],
+     "from_hall_middle_m": 3.9
+    }
+   ],
+   "left_in_game": 0,
+   "boss_before_seen": [],
+   "boss_after_seen": [
+    "boss|7050|7350|124|Orc_03|1|2|TIER 2 BOSS: ORC RAIDER|360"
+   ]
   }
  ],
  "windows_hidden": "",

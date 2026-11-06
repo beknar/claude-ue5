@@ -35,8 +35,10 @@ struct FRDCarry
 	UPROPERTY(SaveGame, BlueprintReadOnly) FName Drawn;
 	// ---- the rest of her state (the user's of 2026-11-06: "they should bring with them their current state ... this includes
 	// statistics and all inventory items"; URDCombatComponent::GatherState / RestoreState, RDCarry.cpp)
-	/** her statistics: the combat component's counters by name ("Spell:<name>": each spell's casts) */
+	/** her statistics: the combat component's counters by name; each spell's casts; each slash's procs */
 	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, float> Stats;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, int32> SpellCasts;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FString, int32> SlashProcs;
 	/** what is on her, for how long: a timed state's seconds left ("<Name>Left") and its strength ("<Name>") */
 	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, float> Timed;
 	/** the potions and food working on her: each one's item, kind, amount and seconds left */
@@ -54,11 +56,11 @@ struct FRDCarry
 	UPROPERTY(SaveGame, BlueprintReadOnly) int32 QuickFirst = 0;
 	/** the torch lit in her hand (its item; none: not lit) */
 	UPROPERTY(SaveGame, BlueprintReadOnly) FName TorchHeld;
-	/** what is left of the shield her hero starts with (bKeepStartGear: it is not among Things; -1: unknown) */
-	UPROPERTY(SaveGame, BlueprintReadOnly) float StartShieldWear = -1.f;
-	/** the slash on each found weapon, in the order of her found weapons (none: no slash): Things carries it as a thing of its
-	 *  own beside the weapon (as it drops at a death), so it goes back on the weapon it was on */
-	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> FoundSlashes;
+	/** the slashes on her found weapons, each with its weapon's item: Things carries a slash as a thing of its own beside the
+	 *  weapon (as it drops at a death), so it goes back on a weapon of that item (by name: a weapon the level cannot give back
+	 *  must not move the others' slashes) */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SlashWeapons;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> SlashNames;
 	/** her summons standing: each one's summoning (its spell) and its share of hit points */
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> Summons;
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> SummonShares;
