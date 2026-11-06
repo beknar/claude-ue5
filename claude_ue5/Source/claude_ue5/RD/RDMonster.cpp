@@ -417,6 +417,31 @@ void ARDMonster::Freeze()
 	SetActorTickEnabled(false);
 }
 
+bool ARDMonster::SetStrength(int32 InTier, float InMaxHealth, float InDamage)
+{
+	if (bDead) return false;
+	const float NewH = FMath::Max(1.f, InMaxHealth), NewD = FMath::Max(1.f, InDamage);
+	const bool bTierChanges = InTier > 0 && InTier != Tier;
+	if (!bTierChanges && FMath::IsNearlyEqual(NewH, MaxHealth) && FMath::IsNearlyEqual(NewD, Damage)) return false;
+	const float Share = MaxHealth > 0.f ? Health / MaxHealth : 1.f;
+	MaxHealth = NewH; Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * Share)); Damage = NewD;
+	// (its speed, blows' pace and ability as a monster of the new tier, as Empower sets them: a summon called after the tier
+	// opened has them, so one called before must too (the PR review's find))
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	if (bTierChanges && G && G->MaxTier > 0)
+	{
+		Tier = InTier;
+		const FRDMonsterDef* Def = G->Monsters.FindByPredicate([this](const FRDMonsterDef& D) { return D.Name == MonsterName; });
+		const float Sp = ARDDungeonGenerator::TierValue(G->TierSpeed, InTier, 1.f);
+		WalkSpeed = (Def ? Def->WalkSpeed : WalkSpeed / FMath::Max(SpeedScale, 0.01f)) * Sp; SpeedScale = Sp; MaxChaseScale = Sp;
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		if (Def) AttackInterval = Def->AttackInterval * ARDDungeonGenerator::TierValue(G->TierAttackInterval, InTier, 1.f);
+		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, InTier, 1.f);
+		if (Def && bShoots) RangedWait = Def->RangedCooldown * (Def->AttackInterval > 0.f ? AttackInterval / Def->AttackInterval : 1.f);
+	}
+	return true;
+}
+
 void ARDMonster::BecomeAlly(float Seconds, float InHealth, float InDamage)
 {
 	const bool bRise = bDead;

@@ -885,6 +885,10 @@ struct FRDHeroDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpellPowerPerTier = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float OwnWeaponPowerPerTier = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaRegenShare = 0.f;
+	/** (the Summoner's balance of 2026-11-05, the generator's bTierGrowth): for each tier open past the first, the share more
+	 *  mana; her summons grow with the tiers opened (the generator's SummonTierStrength) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float ManaPerTier = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bSummonsGrow = false;
 };
 
 UENUM(BlueprintType)

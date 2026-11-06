@@ -2744,9 +2744,10 @@ def step_gearbreak():
     step_result("gearbreak", ok, **res)
 
 def step_summoner():
-    """the Summoner (876): Summoner4's pawn, 85 hit points, 50 mana (half the Mage's), her weapons Fire, Dark Fire and Summon
-    Tier 1 with the Mage's damage and effects; a fire bolt at a monster (its damage); Summon Tier 1: 25 mana (half her pool), a
-    Soldier at her side as strong as a tier-1 one, a second, a third refused with no mana taken; her soldiers fight a monster
+    """the Summoner (876): Summoner4's pawn, 85 hit points, 50 mana (half the Mage's; balance6.json's 60 on the castle since
+    880's balance of 2026-11-05), her weapons Fire, Dark Fire and Summon Tier 1 with the Mage's damage and effects; a fire bolt at
+    a monster (its damage); Summon Tier 1: half her pool, a Soldier at her side as strong as a tier-1 one (her summons growing:
+    the reference's tier-1 hit points x the first summon factor), a second, a third refused with no mana taken; her soldiers fight a monster
     near her; a dagger found: in her hands, a slash refused (never enchanted); armour refused, an HP ring refused, a magic ring
     worn; a tome not learned; the torch held; a tier's boss slain: Summon Tier 2 (the Gunner, 3 at most) is hers, its cast another
     clip; kept through a death, gone at a restart; a picture of her and her soldiers"""
@@ -2772,6 +2773,13 @@ def step_summoner():
     ref = g.spawn_monster_named("Soldier", ahead(-600), 1, 1.0, 1.0, 1.0); yield from wait(0.3)
     res["tier1_soldier"] = {"hp": round(ref.get_max_health(), 1), "damage": round(ref.get_damage(), 1)} if ref else None
     drop([ref]); yield from wait(0.5)
+    # (her summons as balance6.json sets them on the castle (880, 2026-11-05), read while she is the hero: growing with the
+    # tiers, at tier 1 a Soldier has the reference's tier-1 hit points times the first summon factor (40), not a tier-1
+    # Soldier's 60)
+    if g.summons_grow():
+        k1 = list(g.get_editor_property("summon_tier_strength"))[0]
+        res["want_ally_hp"] = round(g.get_editor_property("monster_reference_health") * list(g.get_editor_property("tier_health"))[0] * k1)
+    else: res["want_ally_hp"] = (res["tier1_soldier"] or {}).get("hp", -1)
     # (they fight: the dummy before her loses hit points to them)
     # (allies look for foes within the monsters' aggro distance, which quiet() takes away: given back for this)
     quiet(False); h1 = hp(m); yield from wait(6.0); res["allies_fight"] = round(h1 - hp(m), 1); quiet(True)
@@ -2820,12 +2828,13 @@ def step_summoner():
     res["after_restart"] = W()
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     sm = res["summon"]; t1 = res.get("tier1_soldier") or {}
-    ok = (res["pawn"].startswith("BP_SU4_SummonerCharacter") and res["hp"] == 85 and res["mana"] == 50 and res["weapons"] == ["Fire", "Dark Fire", "Summon Tier 1"]
+    sb = BAL["heroes"]["Summoner"]; mana0 = float(sb.get("mana", 50))
+    ok =(res["pawn"].startswith("BP_SU4_SummonerCharacter") and res["hp"] == 85 and res["mana"] == mana0 and res["weapons"] == ["Fire", "Dark Fire", "Summon Tier 1"]
           and all(res["same_as_mage"]) and len(res["clips"]) == 6 and res["fire"]["started"] and abs(res["fire"]["lost"] - mage.weapons[0].damage) < 0.6
-          and sm[0]["started"] and sm[0]["mana"] == 25 and sm[0]["count"] == 1 and sm[1]["count"] == 2 and not sm[2]["started"] and sm[2]["mana"] == 0 and sm[2]["count"] == 2
-          and "already" in sm[2]["message"] and len(res["allies"]) == 2 and all(a["kind"] == "Soldier" and abs(a["hp"] - t1.get("hp", -1)) < 1 for a in res["allies"])
+          and sm[0]["started"] and sm[0]["mana"] == round(mana0 * 0.5) and sm[0]["count"] == 1 and sm[1]["count"] == 2 and not sm[2]["started"] and sm[2]["mana"] == 0 and sm[2]["count"] == 2
+          and "already" in sm[2]["message"] and len(res["allies"]) == 2 and all(a["kind"] == "Soldier" and abs(a["hp"] - res["want_ally_hp"]) < 1 for a in res["allies"])
           and res["allies_fight"] > 0 and res["dagger"]["both_hands"] and (not sl or not res["slash"]["begun"]) and res["armour_worn"] == "None"
-          and not res["hp_ring"] and res["magic_ring"] and res["mana_ringed"] > 50 and res["summon_mana_ringed"] == round(res["mana_ringed"] * 0.5)
+          and not res["hp_ring"] and res["magic_ring"] and res["mana_ringed"] > mana0 and res["summon_mana_ringed"] == round(res["mana_ringed"] * 0.5)
           and not res["tome"]["knows"] and res["tome"]["carried"] == 1 and res["torch"]
           and res["after_restart"] == ["Fire", "Dark Fire", "Summon Tier 1"])
     if g.get_editor_property("boss_encounters"):
@@ -3388,10 +3397,29 @@ def step_growth():
         ws = list(g.get_editor_property("weapons"))
         kinds = ["spell" if (w.get_editor_property("spell") and not w.bolt_mesh) else ("own" if str(w.item) == "None" else "found") for w in ws]
         d1 = [c.get_damage_of(i) for i in range(len(ws))]; h1 = c.get_max_health(); t1 = g.get_open_tier()
+        # (the Summoner: two Soldiers called at tier 1 grow with her as the tiers open, to tier 5's numbers times the first summon
+        # factor and tier 5's pace (SetStrength), and the message counts them; her pool grows by mana_per_tier)
+        sol = []
+        if g.summons_grow() and "Summon Tier 1" in [str(w.name) for w in ws]:
+            si = [str(w.name) for w in ws].index("Summon Tier 1")
+            for _ in range(2): c.set_mana(c.get_max_mana()); c.start_attack_with(si); yield from wait(2.6)
+            sol = [a for a in g.get_allies() if alive(a) and str(a.summon_spell) == "Summon Tier 1"]
+        s1 = [[a.tier, round(a.get_max_health()), round(a.get_damage()), round(a.get_walk_speed()), round(a.get_attack_interval(), 3)] for a in sol]
+        m1 = c.get_max_mana()
         g.debug_open_tiers(5, False); yield from wait(0.3)
         d5 = [c.get_damage_of(i) for i in range(len(ws))]; h5 = c.get_max_health(); t5 = g.get_open_tier(); says = str(c.message)
         r = {"tier": [t1, t5], "hp": [h1, h5], "want_hp": round(hb["hp"] * (1 + hb["health_per_tier"] * 4)), "says": says,
              "weapons": [[str(w.name), k, round(a, 1), round(b, 1)] for w, k, a, b in zip(ws, kinds, d1, d5)]}
+        if hb.get("mana_per_tier"): r["mana"] = [m1, c.get_max_mana(), round(m1 * (1 + hb["mana_per_tier"] * 4))]
+        if sol:
+            k1 = list(g.get_editor_property("summon_tier_strength"))[0]
+            r["summons"] = {"at_tier_1": s1, "at_tier_5": [[a.tier, round(a.get_max_health()), round(a.get_damage()), round(a.get_walk_speed()), round(a.get_attack_interval(), 3)] for a in sol if alive(a)],
+                            "want": [5, round(g.get_editor_property("monster_reference_health") * list(g.get_editor_property("tier_health"))[4] * k1),
+                                     round(g.get_editor_property("monster_reference_blow") * list(g.get_editor_property("tier_damage"))[4] * k1)]}
+            # (a Soldier of tier 5 as the game makes one: its pace to compare with the grown ones')
+            ref = g.spawn_monster_named("Soldier", G["pawn"].get_actor_location() + V(-600, 0, 0), 5, 1.0, 1.0, 1.0); yield from wait(0.3)
+            r["summons"]["tier5_soldier_pace"] = [round(ref.get_walk_speed()), round(ref.get_attack_interval(), 3)] if ref else None
+            drop([ref]); yield from wait(0.3)
         want = {"spell": 1 + hb["spell_power_per_tier"] * 4, "own": 1 + hb["own_weapon_power_per_tier"] * 4}
         r["factors_ok"] = all(a <= 0 or abs(b / a - want[k]) < 0.01 for (_, k, a, b) in zip(ws, kinds, d1, d5))
         # (a found weapon: no growth of hers)
@@ -3410,7 +3438,12 @@ def step_growth():
     ok = (len(hs) == 6 and all(a == b for a, b in res["found"].values())
           and all(h["tier"] == [1, 5] and h["hp"][1] == h["want_hp"] and h["factors_ok"] and h["after_restart"] == [1, h["hp"][0]]
                   and (not h.get("regen") or h["regen"][1] is None or abs(h["regen"][0] - h["regen"][1]) < 0.1) for h in hs.values())
-          and hs["Warlock"]["found_weapon"][0] == hs["Warlock"]["found_weapon"][1] and "grow stronger" in hs["Mage"]["says"])
+          and hs["Warlock"]["found_weapon"][0] == hs["Warlock"]["found_weapon"][1] and "grow stronger" in hs["Mage"]["says"]
+          and all(h["mana"][1] == h["mana"][2] for h in hs.values() if h.get("mana")))
+    su = hs.get("Summoner", {}).get("summons")
+    if su:
+        ok = ok and len(su["at_tier_5"]) == 2 and all(s[:3] == su["want"] and s[3:] == su["tier5_soldier_pace"] for s in su["at_tier_5"]) \
+             and "your 2 summons" in hs["Summoner"]["says"]
     step_result("growth", ok, **res)
 
 def kit(c, hero, t):
@@ -3473,7 +3506,7 @@ def bal_fight(c, hero, t, monsters, secs, after_start=None):
             "max_hp": round(mx0), "dealt": round(prop(c, "damage_dealt") - d0), "taken": round(prop(c, "damage_taken") - tk0), "kills": c.kills - k0,
             "left": left, "autoplay_only": only_n, "trace": trace, "used": st.get("used", 0), "stealth": st.get("stealth", 0), "kites": st.get("kites", 0), "summons": st.get("summons", 0)}
 
-def bal_final(hero, secs, mode="both", seed=0, provoke=False):
+def bal_final(hero, secs, mode="both", seed=0, provoke=False, band_n=0):
     """one fight with the dungeon's boss as a game sets him: tiers 1 to 5 open, a set of tier 5 built and its own monsters gone,
     Aurorim and his band in its largest room (DebugPlaceFinalBoss: his encounter, his tactics, his door), her with her tier-5
     kit on the tile of his room nearest 12 m from him, then autoplay against him and his band only (as the showcase's go).
@@ -3481,7 +3514,10 @@ def bal_final(hero, secs, mode="both", seed=0, provoke=False):
     dead); "band": he is taken away (his band alone, as placed round him). Taken away = destroyed, not killed: a kill would
     drop harvests by him, and his own would conquer the castle and open the door to Brokenspire.
     seed (not 0): the session seed, so that the three modes meet the same room and band (his band's number and kinds, and the
-    set's rooms, come from it: one play session's gave 7 in a room of 83 tiles, another's 10 in one of 96)"""
+    set's rooms, come from it: one play session's gave 7 in a room of 83 tiles, another's 10 in one of 96)
+    band_n (not 0): his band's number set to it (FinalBossMinions n to n, put back after): the game places it as it would
+    place any band. The number is one draw of the seed's stream and each member's kind the next, so on one seed a band of 3
+    is the first 3 of a band of 6"""
     c = yield from restart(hero); g = G["gen"]; quiet(True)
     if seed:
         g.restart_play(seed); yield from wait(0.8); refresh(); c = cb(); g = G["gen"]; quiet(True)
@@ -3499,7 +3535,13 @@ def bal_final(hero, secs, mode="both", seed=0, provoke=False):
     # (her kit before he is placed: while it was given (the Summoner's summons 2.6 s each) he and his band wandered off, the
     # monsters quiet; alone he was 220 m off by the fight's end and never met her (seed 13422's Warrior and Summoner))
     got = yield from kit(c, hero, 5)
-    if not g.debug_place_final_boss(S, room): return {"placed": False, "why": "not placed", "room": room}
+    mm0 = g.get_editor_property("final_boss_minions")
+    if band_n: g.set_editor_property("final_boss_minions", unreal.IntPoint(band_n, band_n))
+    try: placed = g.debug_place_final_boss(S, room)
+    finally:
+        # (put back whatever the placing did: left at (n, n), every later trial and the game's own placing had a band of n)
+        if band_n: g.set_editor_property("final_boss_minions", mm0)
+    if not placed: return {"placed": False, "why": "not placed", "room": room}
     yield from wait(1.0)
     boss = g.get_final_boss(); bl = boss.get_actor_location()
     band = [m for m in g.get_monsters() if alive(m) and m != boss and m.spawn_index < 0 and dist2(m.get_actor_location(), bl) < 3000]
@@ -3536,7 +3578,7 @@ def bal_final(hero, secs, mode="both", seed=0, provoke=False):
                        "dz": round(m.get_actor_location().z - me.z), "m_from_him": round(dist2(m.get_actor_location(), bl) / 100, 1), "aggro": bool(m.is_aggro()),
                        "branch": str(m.combat_branch), "home": m.home_room}
                       for m in foes if alive(m)]
-    r.update({"placed": True, "mode": mode, "provoked": provoke, "session_seed": g.get_editor_property("session_seed"), "m_from_him_at_go": drift, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": nband if mode != "boss" else 0,
+    r.update({"placed": True, "mode": mode, "provoked": provoke, "band_n": band_n,"session_seed": g.get_editor_property("session_seed"), "m_from_him_at_go": drift, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": nband if mode != "boss" else 0,
               "band_placed": nband, "band_info": bandinfo, "kit": got, "boss_max_hp": bmax, "boss_damage": bdmg,
               "boss_hp_left": round(hp(boss)) if mode != "band" else None, "boss_slain": (not alive(boss)) if mode != "band" else None,
               "band_left": sum(1 for m in band if alive(m)),
@@ -3568,7 +3610,16 @@ def step_balance():
     fkey = {"both": "finals", "boss": "finals_boss", "band": "finals_band"}
     bad = [m_ for m_ in modes if m_ not in fkey]
     if bad: raise ValueError(f"final_modes: no such fight {bad} (both, boss, band)")
-    for md_ in modes: res.setdefault(fkey[md_], {})
+    # (his band's number, each in turn: "band_sizes=3+4+5+6"; each size's record is the mode's key with "_n<size>" after it,
+    # "finals_n3"; none: the game's own (FinalBossMinions))
+    sizes = [int(x) for x in (opt.get("band_sizes") or "0").split("+")]
+    if any(n_ < 0 for n_ in sizes): raise ValueError(f"band_sizes: {sizes} (0 or more each)")
+    def fk(md_, n_): return fkey[md_] + (f"_n{n_}" if n_ else "")
+    # (him alone has no band: his fights are the same whatever its size, fought once under the mode's own key (the PR review's
+    # find: they were fought again for every size))
+    def sizes_of(md_): return [0] if md_ == "boss" else sizes
+    for md_ in modes:
+        for n_ in sizes_of(md_): res.setdefault(fk(md_, n_), {})
     # (a fixed final_seed is the finals' only: the session's own is put back after each hero's finals, or the next hero's tier
     # trials ran on it)
     seed0 = G["gen"].get_editor_property("session_seed")
@@ -3613,15 +3664,17 @@ def step_balance():
             unreal.log(f"MWBAL {hero} t{t} pack {json.dumps(r['pack'])} boss {json.dumps(r.get('boss'))}")
         # (the dungeon's boss, Aurorim and his band, as the game sets him: finals times with her tier-5 kit)
         for md_ in modes:
-            for k in range(nf):
-                fr = yield from bal_final(hero, float(opt.get("final_s", 240)), md_, int(opt.get("final_seed", 0)), opt.get("provoke", "0") == "1")
-                res[fkey[md_]].setdefault(hero, []).append(fr)
-                unreal.log(f"MWBAL {hero} final {md_} {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'taken', 'dealt', 'boss_hp_left', 'band_left', 'lights', 'lances', 'used')})}")
+            for n_ in sizes_of(md_):
+                for k in range(nf):
+                    fr = yield from bal_final(hero, float(opt.get("final_s", 240)), md_, int(opt.get("final_seed", 0)), opt.get("provoke", "0") == "1", n_)
+                    res[fk(md_, n_)].setdefault(hero, []).append(fr)
+                    unreal.log(f"MWBAL {hero} final {md_} n{n_} {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'taken', 'dealt', 'boss_hp_left', 'band', 'band_left', 'lights', 'lances', 'used')})}")
         if nf and int(opt.get("final_seed", 0)) and seed0:
             G["gen"].restart_play(seed0); yield from wait(0.8); refresh()
     quiet(False)
     for md_ in modes:
-        res[fkey[md_].replace("finals", "final_wins")] = {h: sum(1 for x in v if x.get("won")) for h, v in res[fkey[md_]].items()}
+        for n_ in sizes_of(md_):
+            res[fk(md_, n_).replace("finals", "final_wins")] = {h: sum(1 for x in v if x.get("won")) for h, v in res[fk(md_, n_)].items()}
     tr = res["trials"]
     res["summary"] = {k: [v["pack"]["won"], v["pack"]["secs"], v["pack"]["hp_left"], (v.get("boss") or {}).get("won"), (v.get("boss") or {}).get("secs"), (v.get("boss") or {}).get("hp_left")] for k, v in tr.items()}
     packs_ok = all(v["pack"]["won"] for v in tr.values())

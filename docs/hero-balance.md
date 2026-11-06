@@ -36,7 +36,7 @@ From tier 1 to tier 5 a monster's hit points grow 6.8 times and its damage 4.9 t
 
 - **Opening a tier:** a tier opens when the tier before has half of its rooms explored, half of its monsters killed and half of its chests and trunks looted.
 - **The boss:** each opening puts the new tier's strongest kind in a room of the tier before that she has explored. It is 1.35 times bigger, has 3 times the hit points, hits 1.6 times as hard and has 3 to 6 monsters of the new tier round it.
-- **The final boss:** once tier 5 itself reaches the share, Aurorim waits in a room of it, scaled above tier 5's boss as the dungeon's boss (its strongest kind's factors, then 1.5 times a tier boss's hit points and 1.25 times its blows: 4.5 times the hit points and 2 times the blows) with 6 to 10 escorts; his lance (9 to 32 m, 0.75 of a blow), his light from above (3.5 to 13 m, a full blow, 230 cm round), both recharging a quarter faster, and his punches; he flinches at most once every 3 s. In the trials of 2026-11-04 no hero beat him: see [The dungeon's boss](#the-dungeons-boss).
+- **The final boss:** once tier 5 itself reaches the share, Aurorim waits in a room of it, scaled above tier 5's boss as the dungeon's boss (its strongest kind's factors, then 1.5 times a tier boss's hit points and 1.25 times its blows: 4.5 times the hit points and 2 times the blows) with 6 to 10 escorts; his lance (9 to 32 m, 0.75 of a blow), his light from above (3.5 to 13 m, a full blow, 230 cm round), both recharging a quarter faster, and his punches; he flinches at most once every 3 s. In the trials of 2026-11-04 no hero beat him: see [The dungeon's boss](#the-dungeons-boss). The encounter is kept as it is (the user's decision of 2026-11-06): see [Kept as it is](#kept-as-it-is-2026-11-06).
 - **The guarded ring:** if she has found neither magic potency ring of the tier before, one is put in a container there, guarded by 4 monsters of the new tier.
 
 ### The heroes: how each grows
@@ -48,7 +48,7 @@ From tier 1 to tier 5 a monster's hit points grow 6.8 times and its damage 4.9 t
 | Warlock | 100 / 125 / 150 / 175 / 200 | 60 (1.5: 2.5 % of her pool) | +25 % hit points, +20 % spell damage, +30 % to her own weapons | By her pact blade and fire; found medium armour, rings of both kinds. |
 | Rogue | 100 / 120 / 140 / 160 / 180 | none | +20 % hit points, +8 % to her own weapons | By stealth, rings and crossbows: 8 s unseen by monsters and traps for 40 of 100 dexterity energy, her first blow out of it +75 %; Dexterity rings on her bolts; found crossbows' tiers. +30 % ranged. |
 | Martial Artist | 140 / 168 / 196 / 224 / 252 | 100 (2: 2 % of her pool) | +20 % hit points, +12 % chi, +12 % to her fists | By her body: chi attacks' damage follows their mana (23 x (mana / 7) ^ 0.75); HP and Dexterity rings worn together. +30 % short blades. |
-| Summoner | 85 / 106 / 128 / 149 / 170 | 50 (2: 4 % of her pool) | +25 % hit points, +15 % spell damage | By her summons: each tier's boss gives the next, stronger kind; they stay with her until they fall. A summon takes half her pool. |
+| Summoner | 85 / 106 / 128 / 149 / 170 | 60 / 66 / 72 / 78 / 84 (2.4 to 3.4: 4 % of her pool) | +25 % hit points, +15 % spell damage, +10 % mana; her summons grow (since 2026-11-05) | By her summons: each tier's boss gives the next, stronger kind; they stay with her until they fall. A summon takes half her pool. Each summon takes the open tier's monster numbers times 0.8 / 0.85 / 0.9 / 0.95 / 1.0 by its summoning's tier (a tier-5 Spider: 340 hit points, 55 a blow), and she leads at most 2 / 3 / 4 / 5 / 3 of each summoning. |
 
 ### Her own weapons and spells
 
@@ -82,7 +82,7 @@ Each hero at each tier is played by autoplay:
 - **How autoplay plays her:**
   - the Rogue hides to strike first, or to get away when hurt;
   - the Mage, the Summoner and the Rogue with her crossbow step back from what comes close;
-  - the Summoner calls her summons first;
+  - the Summoner calls her summons first, only her best summoning (since 2026-11-05: before, she called them in list order and led tier-1 Soldiers);
   - every hero uses only her best near and best far weapon.
 
 | Hero | Fight | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Tier 5 |
@@ -99,6 +99,8 @@ Each hero at each tier is played by autoplay:
 |  | its boss | won 2 of 2 (4.8 / 5.4 s, 94 / 94 % left) | won 2 of 2 (7.1 / 7.1 s, 90 / 90 % left) | won 2 of 2 (11.6 / 11.6 s, 58 / 58 % left) | won 2 of 2 (13.2 / 12.7 s, 100 / 100 % left) | won 2 of 2 (24 / 41 s, 81 / 44 % left) |
 | Summoner | three of the tier | won, 5.4 s, 100 % left | won, 10.3 s, 77 % left | won, 14 s, 77 % left | won, 14.1 s, 98 % left | won, 23 s, 100 % left |
 |  | its boss | won 2 of 2 (4.6 / 4.7 s, 100 / 100 % left) | won 2 of 2 (10.3 / 10.3 s, 100 / 100 % left) | won 2 of 2 (11.4 / 13.9 s, 100 / 100 % left) | won 2 of 2 (14.4 / 13.9 s, 100 / 100 % left) | won 2 of 2 (21 / 17.9 s, 100 / 100 % left) |
+
+The Summoner's row is from before her changes of 2026-11-05. As she is now (`test_ca.json`) she wins every pack in 5.4 to 15.7 s with 78 to 100 % left and every boss in 5.0 to 13.1 s with nothing lost: see [The Summoner brought up, then back](#the-summoner-brought-up-then-back-2026-11-05).
 
 ### What the trials say
 
@@ -147,6 +149,46 @@ Which of them makes the fight unwinnable: `868 balance` with `final_modes=both+b
 - **What he adds on top of a band of 8** (which alone is beatable) is his 1836 hit points behind it and his lance and light from 9 to 13 m while it fights; the trials do not separate those two.
 - **Not measured:** why the Warrior's and the Mage's damage a second halves with him there (13425: the Warrior 68 to 72 a second against 158 with his band alone; the Mage 101 to 116 against 157 to 215); the other four deal no less with him there.
 - **A trial that never met:** one Summoner fight with him alone (13425) ended at 180 s with him 93 m off, unseen, though provoked: she had kept away behind her summons and he lost her. Before the provoking (a run on 13422 without it) he never noticed the Warrior or the Summoner: alone in his room 12 m from her he notices her only from the castle's noticing distance (from 40 m only once his band is after her), and he wandered off from the Warrior walking after him in plate (2.5 m/s) for the whole fight.
+
+### The Summoner brought up, then back (2026-11-05)
+
+Against Aurorim with a band of 1 or 2 (`band_sizes=1+2`, both seeds) she won 0 of 8 while the others won 22 of 40. Her log showed why: autoplay called her summonings in list order, so she kept calling tier-1 Soldiers (60 hit points, 14 a blow: 41 of them in those fights) and had half her pool left for nothing else, and against Aurorim alone she dealt 13 a second, the others 29 to 68. Three changes (C++ `RDMistward5.cpp`, `RDMistward6.cpp`, `RDMistward3.cpp`; numbers in `balance6.json`, set by `880`):
+
+- **Autoplay** calls only her best summoning, until she leads as many as it allows.
+- **Her summons grow with the tiers she has opened**: a summon takes the open tier's monster numbers (hit points and damage of the reference monster at that tier) times `summon_tier_strength` by the summoning's own tier; summons she already leads grow when a tier opens.
+- **Her mana** is the Warlock's 60 and grows with each tier opened past the first (`mana_per_tier`).
+
+Each run below is her own trials only: the tier trials (a pack and the boss, tiers 1 to 5) on seed 13422, and Aurorim with his full band, him alone and his band alone, and with bands of 1 to 3, twice each on both seeds. The other heroes' numbers are the runs above and the band-size runs (`test_bo.json` to `test_br.json`).
+
+| Her numbers | Him and his full band (8 / 10) | Him alone | His band alone | Him with a band of 1 to 3 | Tier trials | Records |
+|---|---|---|---|---|---|---|
+| Before (summons not growing, the first summoning called) | 0 of 4 | 1 of 3 | 0 of 4 | 0 of 12 | the table above | `test_bk`, `bl`, `bo` to `br` |
+| Summons x 1.2 to 1.4, 5 Spiders, mana +20 % a tier | 4 of 4 (24 to 34 s) | 4 of 4 | 4 of 4 | 12 of 12 | all won | `test_bs` to `bv` |
+| Summons x 0.8 to 1.0, 3 Spiders, mana +20 % a tier | 2 of 4 | 4 of 4 | 4 of 4 | 12 of 12 | all won | `test_bw` to `bz` |
+| Summons x 0.8 to 1.0, 3 Spiders, mana +10 % a tier (2026-11-06) | 0 of 4 | 4 of 4 | 4 of 4 | 12 of 12 | all won | `test_ca` to `cd` |
+| The other five heroes, for comparison | 0 of 20 | 19 of 20 | 14 of 20 | 25 of 60 (band of 1: 14 of 20; 2: 8 of 20; 3: 3 of 20) | | |
+
+- **At 1.2 to 1.4 she overshot.** A tier-5 Spider was 476 hit points and 77 a blow, and five of them (2380 hit points) outweighed Aurorim's 1836 and took every blow aimed at her. She beat him with his full band in every fight, which no other hero has done once, and ended every tier boss at full health.
+- **At 0.8 to 1.0 with 3 Spiders** (`test_bw` to `bz`), the log shows a tier-5 Spider at 340 hit points and 55 a blow, never more than 3 at once, and her tier-1 Soldiers at 40 and 9 (they were 60 and 14).
+  - Him and his full band: on 13422 (8) she won in 54.5 s at 47 % at her lowest, and fell at 43.1 s with him at 50 hit points and one of his band left. On 13425 (10) she fell at 37.8 s with him at 578, and won in 43.2 s at 53 % at her lowest.
+  - Him alone: won all four in 35 to 37 s. His band alone: won all four in 21 to 29 s, 47 % at her lowest. Bands of 1 to 3: 12 of 12 in 27 to 44 s, 64 % at her lowest.
+  - The tier trials: every pack won in 5.4 to 16.2 s with 78 to 100 % left, every boss in 5.0 to 13.6 s with nothing lost.
+- **Still the strongest hero.** With her summons cut back, her own spells did 3459 to 4266 damage in the fights with his full band (about 80 a second): the mana growth (a pool of 108 at tier 5) had become the larger part of her lead.
+- **Mana +10 % a tier** (`test_ca` to `cd`; a pool of 84 at tier 5 as `880` sets it; the run's log does not print her pool at tier 5):
+  - Him and his full band: 0 of 4, like every other hero. She fell in 35 to 43 s with him at 671 to 806 of 1836 and 3 of 8 or 5 to 6 of 10 of his band left; her own spells did 2681 to 3386 (they did 3459 to 4266 at +20 %).
+  - Him alone: won all four in 32 to 37 s. His band alone: won all four in 21 to 29 s, 47 % at her lowest. Bands of 1 to 3: 12 of 12 in 23 to 48 s, 43 % at her lowest (a band of 3 on 13422).
+  - The tier trials: every pack won in 5.4 to 15.7 s with 78 to 100 % left, every boss in 5.0 to 13.1 s with nothing lost.
+  - She is level with the others where nobody wins (his full band) and still ahead where some do: bands of 1 to 3, 12 of 12 against the others' 25 of 60; his band alone, 4 of 4 against 14 of 20; she ends every tier boss at full health.
+
+### Kept as it is (2026-11-06)
+
+The user's decision after the run above: the Summoner stays as she is now, and the dungeon's boss encounter stays as it is now.
+
+- **The Summoner:** the numbers of the last row above (`balance6.json`: summons x 0.8 to 1.0 by the summoning's tier, 3 Spiders at most, mana 60 and +10 % a tier; autoplay calling her best summoning), on the castle and in Brokenspire alike (`880` sets both, or her pool carried to the town was cut to its 50). She remains the strongest of the six in these trials, except against Aurorim with his full band, where no hero wins.
+- **PR #20's review** (after these runs): a summon grown as a tier opens now also takes that tier's speed, pace and ability (before, only its hit points and blow), and her pool is rounded to whole mana when it grows. Measured by `868 growth` (`test_ce.json`): her two Soldiers called at tier 1 (40 hit points, 9 a blow, 102 cm/s, a blow every 1.84 s) grow to 272, 44, 122 cm/s and 1.25 s with tier 5 open, a tier-5 Soldier's pace; her pool goes from 60 to 84. Her trials were not run again after it: their tiers are opened before her summons are called, so those summons were already spawned at the open tier with its pace; the fixes change her trials at most by the rounding of her pool.
+- **The dungeon's boss:** Aurorim with his band of 6 to 10 as the game rolls it (`FinalBossMinions`), his numbers as `889` sets them. Under autoplay with the trial kits no hero as she is now beats him with his full band (0 of 24: the other five's 20 and the Summoner's last 4; only her overstrong settings of 2026-11-05 did); him alone, his band alone and smaller bands are beaten. A smaller band (3 to 6, then 1 to 2) was measured, not adopted: a band of 3 won 3 of 20 for the other five heroes, a band of 1 won 14 of 20.
+- **Not measured:** a player's play against him (the trials are autoplay's), and a hero with better loot than the trial kit (the showcase's Warrior, with 482 hit points and six of the best healing potion, won).
+- The heroes table above still shows her numbers from before these changes.
 
 ### How it got here
 
@@ -270,7 +312,7 @@ The alternatives:
 | Warlock | her pact blade's growth, fire | hit points, medium armour | life drain for sustain; curses that weaken by a share |
 | Rogue | crossbow tiers, Dexterity rings, the +75 % ambush | stealth, dodging | stealth energy and length growing per tier; a dodge chance in armour's place |
 | Martial Artist | fists and chi growth, chi attacks unlocked by bosses | hit points, dodging | her 8 locked chi attacks spread over the 20 tiers, not 5; her chi pool growing |
-| Summoner | her summons | her summons take the blows | summons that take the open tier's monster numbers times a factor, so they keep up by themselves; a new summon kind every 3 or 4 tiers (5 kinds today) |
+| Summoner | her summons | her summons take the blows | her summons already take the open tier's monster numbers times a factor (since 2026-11-05), so they keep up by themselves; a new summon kind every 3 or 4 tiers (5 kinds today) |
 
 **Her growth:** still by the tiers opened, counting the highest tier she has opened in any dungeon, so a tier opened in one city counts everywhere.
 

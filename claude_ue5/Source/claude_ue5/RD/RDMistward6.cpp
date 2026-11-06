@@ -41,6 +41,33 @@ float ARDDungeonGenerator::TierOwnWeaponMul() const
 	return H ? 1.f + H->OwnWeaponPowerPerTier * (GetOpenTier() - 1) : 1.f;
 }
 
+float ARDDungeonGenerator::TierManaMul() const
+{
+	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
+	return H ? 1.f + H->ManaPerTier * (GetOpenTier() - 1) : 1.f;
+}
+
+bool ARDDungeonGenerator::SummonsGrow() const
+{
+	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
+	return H && H->bSummonsGrow;
+}
+
+void ARDDungeonGenerator::SummonStrength(FName Spell, float& OutHealth, float& OutDamage, int32& OutTier) const
+{
+	// (the Summoner's balance of 2026-11-05: her summons were monsters of their kind's own tier, so a tier-1 summoning stayed at
+	// 60 hit points and 14 a blow at tier 5, and the first two died to one blow of the final boss each)
+	const FRDSpellDef* S = Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; });
+	const int32 St = FMath::Clamp(S ? S->Tier : 1, 1, 5);
+	const int32 T = FMath::Max(GetOpenTier(), St);
+	OutTier = T;
+	const float K = SummonTierStrength.IsValidIndex(St - 1) ? SummonTierStrength[St - 1] : 1.f;
+	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
+	const float Blow = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
+	OutHealth = FMath::Max(1.f, FMath::RoundToFloat(Ref * TierValue(TierHealth, T, 1.f) * K));
+	OutDamage = FMath::Max(1.f, FMath::RoundToFloat(Blow * TierValue(TierDamage, T, 1.f) * K));
+}
+
 float ARDDungeonGenerator::TierPowerOf(const FRDWeaponDef& W) const
 {
 	if (!bTierGrowth) return 1.f;
@@ -60,16 +87,28 @@ float ARDDungeonGenerator::GetManaRegen(float Max) const
 void ARDDungeonGenerator::OnTierGrowth(int32 Tier)
 {
 	if (!bTierGrowth || !PlayerCombat) return;
-	const float OldH = PlayerCombat->GetMaxHealth();
+	const float OldH = PlayerCombat->GetMaxHealth(), OldM = PlayerCombat->GetMaxMana();
 	PlayerCombat->RefreshMaxima();
 	const FRDHeroDef* H = FindHero(CurrentHero);
 	TArray<FString> What;
 	if (PlayerCombat->GetMaxHealth() > OldH + 0.5f) What.Add(FString::Printf(TEXT("%.0f hit points"), PlayerCombat->GetMaxHealth()));
+	if (PlayerCombat->GetMaxMana() > OldM + 0.5f) What.Add(FString::Printf(TEXT("%.0f mana"), PlayerCombat->GetMaxMana()));
+	// (her summons standing grow with her, each keeping its share of hit points; one of a summoning above the open tier is at
+	// its summoning's tier already and does not change, nor is it counted (the PR review's find))
+	int32 Grown = 0;
+	if (SummonsGrow())
+		for (ARDMonster* A : Allies)
+			if (IsValid(A) && !A->IsDead() && !A->SummonSpell.IsNone())
+			{
+				float Hp = 0.f, Dm = 0.f; int32 St = 0; SummonStrength(A->SummonSpell, Hp, Dm, St);
+				if (A->SetStrength(St, Hp, Dm)) ++Grown;
+			}
+	if (Grown > 0) What.Add(Grown == 1 ? FString(TEXT("your summon")) : FString::Printf(TEXT("your %d summons"), Grown));
 	if (H && H->SpellPowerPerTier > 0.f) What.Add(FString::Printf(TEXT("%s +%.0f%%"), H->Name == TEXT("MartialArtist") ? TEXT("chi") : TEXT("spells"), (TierSpellMul() - 1.f) * 100.f));
 	if (H && H->OwnWeaponPowerPerTier > 0.f) What.Add(FString::Printf(TEXT("%s +%.0f%%"), H->Name == TEXT("MartialArtist") ? TEXT("fists") : TEXT("your own weapons"), (TierOwnWeaponMul() - 1.f) * 100.f));
 	if (What.Num() > 0) PlayerCombat->ShowMessage(FString::Printf(TEXT("Tier %d opens: you grow stronger (%s)"), Tier, *FString::Join(What, TEXT(", "))));
-	UE_LOG(LogRDMistward6, Log, TEXT("RDGROW tier %d: %s %.0f hit points (x%.2f), spells x%.2f, own weapons x%.2f"), Tier, *CurrentHero.ToString(),
-		PlayerCombat->GetMaxHealth(), TierHealthMul(), TierSpellMul(), TierOwnWeaponMul());
+	UE_LOG(LogRDMistward6, Log, TEXT("RDGROW tier %d: %s %.0f hit points (x%.2f), %.0f mana (x%.2f), spells x%.2f, own weapons x%.2f, %d summons grown"), Tier, *CurrentHero.ToString(),
+		PlayerCombat->GetMaxHealth(), TierHealthMul(), PlayerCombat->GetMaxMana(), TierManaMul(), TierSpellMul(), TierOwnWeaponMul(), Grown);
 }
 
 // ================================================================================================ the Rogue's stealth

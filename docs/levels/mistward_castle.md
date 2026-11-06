@@ -246,14 +246,14 @@ Her clips are made for her in Blender (`summoner4_clips.py`): Walk, Run and the 
   The numbers below are written from the game's own data (`880` writes `SourceArt/mistward/balance_state.json`, `pipeline/blender_numpy/mw_balance.py` the tables). Measured (`868` `growth`): every hero's hit points, spells, chi and own weapons with tiers 2 to 5 open by her shares, the found weapons by their tiers (and no growth of hers on them), mana back as her pool's share, a restart back to tier 1.
 
 <!-- mw6:heroes -->
-| Hero | Hit points with tiers 1 / 2 / 3 / 4 / 5 open | Mana (back a second) | Each tier opened past the first | Abilities |
+| Hero | Hit points with tiers 1 / 2 / 3 / 4 / 5 open | Mana (with tiers 1 to 5 open, if it grows; back a second) | Each tier opened past the first | Abilities |
 |---|---|---|---|---|
 | Warrior | 140 / 165 / 190 / 216 / 241 | none | +18 % hit points (her own dagger stays the worst weapon: she grows by what she finds) | +30 % melee |
 | Mage | 70 / 81 / 91 / 102 / 112 | 100 (2.5: 2.5 % of her pool) | +15 % hit points, +12 % spell damage | - |
 | Warlock | 100 / 125 / 150 / 175 / 200 | 60 (1.5: 2.5 % of her pool) | +25 % hit points, +20 % spell damage, +30 % damage of her own weapons | - |
 | Rogue | 100 / 120 / 140 / 160 / 180 | none | +20 % hit points, +8 % damage of her own weapons | stealth: 40 of 100 dexterity energy (back 1.5 a second; a speed potion fills it), 8 s unseen by monsters and traps, her first blow out of it +75 %; +30 % ranged |
 | Martial Artist | 140 / 168 / 196 / 224 / 252 | 100 (2: 2 % of her pool) | +20 % hit points, +12 % chi, +12 % damage of her own fists | +30 % short blades |
-| Summoner | 85 / 106 / 128 / 149 / 170 | 50 (2: 4 % of her pool) | +25 % hit points, +15 % spell damage | - |
+| Summoner | 85 / 106 / 128 / 149 / 170 | 60 / 66 / 72 / 78 / 84 (2.4: 4 % of her pool) | +25 % hit points, +10 % mana, her summons grow: the open tier's hit points and blows x 0.8 / 0.85 / 0.9 / 0.95 / 1 by the summoning's tier 1 to 5, +15 % spell damage | - |
 <!-- /mw6:heroes -->
 
 Her own weapons and spells, tier by tier (her melee, ranged and type bonuses in, no ring):
@@ -389,6 +389,8 @@ No hero won. The Warrior, the Warlock and the Martial Artist fell in 16 to 28 s 
 | 13425 (10: 3727 hit points) | 0 of 12 | 9 of 11 | 5 of 12 |
 
 Neither is unwinnable alone; together they are, and he kept 918 to 1836 of his hit points in every one of the 24 (she falls in 5 to 38 s fighting his band). His band is the larger part: a band of 10 alone beats the Rogue, the Martial Artist and the Summoner every time. Each hero's fights are in [hero-balance.md](../hero-balance.md#him-or-his-band-2026-11-05).
+
+**Smaller bands and the Summoner** (2026-11-05 and 06, `868 balance`'s `band_sizes=1+2+3`: his band's number set for the trial, its kinds the seed's first ones). The five heroes other than the Summoner won 14 of 20 with a band of 1, 8 of 20 with 2, 3 of 20 with 3 and none with 4 to 6; the Summoner won none of them (autoplay called her tier-1 Soldiers). Her summons now grow with the tiers she has opened (the generator's `SummonTierStrength`: the open tier's monster numbers x 0.8 to 1.0 by the summoning's tier), autoplay calls her best summoning, she leads 3 Spiders at most, and her mana is 60 and +10 % a tier (`balance6.json`, `880`). As she is now she wins every tier trial, Aurorim alone, his band alone and bands of 1 to 3, and loses to him with his full band like everyone. The user kept her and the encounter as they are (2026-11-06): [hero-balance.md](../hero-balance.md#kept-as-it-is-2026-11-06).
 
 What the trials say (`test_b.json`: the run of 2026-11-04, whose tier trials agree with the third run of 2026-11-01, after two runs that moved the numbers above): every hero wins every pack and both fights with every tier's boss; at each tier the slowest pack win is within 2.6 times the quickest. The heroes win their own ways: the Warrior and the Martial Artist stand in the blows (they lose the most hit points, and have the most); the Mage and the Summoner hardly get hit (she keeps her distance, her summons take the blows) but have the fewest hit points when something does reach them; the Rogue kills quickest (a found Dwarf Crossbow, a Dexterity ring and ambushes: 10 s for tier 5's boss against the Warrior's 24) but has light armour only; the Warlock sits between. The hardest fight is tier 3's boss, the Zombie Tank (the tier's strongest kind, a cannon and a slowing blow): it left the Warlock with less than 1 % once. In the first run (the first numbers: the Mage's spells +20 % a tier, less hit point growth for the heroes in light armour, the ambush +150 %; the Summoner with no summons called, the pilot not yet keeping after a monster that lost the Rogue) four of six heroes fell to it, the Summoner fell to tier 5's pack and the Rogue to tier 5's boss, and the Mage lost under 10 % anywhere; the second run made the Rogue the strongest by far (a tier-5 boss in 7.6 s, nothing lost).
 
