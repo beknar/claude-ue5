@@ -94,7 +94,7 @@ void ARDDungeonGenerator::WildAutosave(const FString& Why)
 	if (!bAutosave) return;
 	// (a moment between two: finding places one after another writes once; a journey's two are kept)
 	const float Now = GetWorld()->GetTimeSeconds();
-	const bool bForce = Why.Contains(TEXT("travel")) || Why == TEXT("quit") || Why == TEXT("castle");
+	const bool bForce = Why.Contains(TEXT("travel")) || Why == TEXT("quit") || Why == TEXT("castle") || Why == TEXT("catacombs");
 	if (!bForce && SavesWritten > 0 && Now - LastSaveTime < 8.f) return;
 	SaveGameNow(TEXT("autosave"), Why);
 }

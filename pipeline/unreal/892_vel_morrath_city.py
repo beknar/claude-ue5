@@ -151,6 +151,8 @@ def pack_clips(pack):
             wl = unreal.load_asset(dst)
             if wl:
                 wl.set_editor_property("force_root_lock", True); wl.set_editor_property("enable_root_motion", False)
+                # (saved, as 882 saves it: unsaved, a pack only the city uses left its walkers without a walk after a restart)
+                eal.save_loaded_asset(wl, False)
                 walk = wl
         clips[pack] = (idle, walk, speed)
     return clips[pack]

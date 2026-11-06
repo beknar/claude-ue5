@@ -1,0 +1,132 @@
+{
+ "tag": "r4",
+ "plan": [
+  "talk",
+  "mapzoom"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "talk",
+   "ok": true,
+   "prompt": "talk to Aldric Venn",
+   "panel": "talk",
+   "lines": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: Word from the Spire|15 g|1",
+    "bye|Farewell||1"
+   ],
+   "asked_changed_text": true,
+   "accepted": true,
+   "quest": {
+    "state": "taken",
+    "progress": 0,
+    "count": 1
+   },
+   "scholar_panel": "talk",
+   "scholar_lines": [
+    "ask|What is the Mistward?||1",
+    "ask|Who broke the spire?||1",
+    "ask|What should I look for down there?||1",
+    "accept|Quest: The Third Seal|150 g|1",
+    "bye|Farewell||1"
+   ],
+   "quest_ready": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1
+   },
+   "turnin": true,
+   "gold": 15,
+   "quest_done": {
+    "state": "done",
+    "progress": 1,
+    "count": 1
+   },
+   "next_offered": true,
+   "lines_after": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: The Mistward Hall|60 g|1",
+    "bye|Farewell||1"
+   ],
+   "captain_later": [
+    "Wolves on the Mill Road",
+    "The Lost Patrol"
+   ],
+   "later_refused": true
+  },
+  {
+   "step": "mapzoom",
+   "ok": true,
+   "opened": {
+    "zoom": 1.0,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     0
+    ]
+   },
+   "wheel_x3": {
+    "zoom": 1.953,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     0
+    ]
+   },
+   "moved": {
+    "zoom": 1.953,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     8988
+    ]
+   },
+   "zoom3": {
+    "zoom": 3.052,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     8988
+    ]
+   },
+   "seal_labels": [
+    "seal|Elder",
+    "seal|Captain",
+    "seal|Scholar",
+    "seal|Board"
+   ],
+   "centred": {
+    "zoom": 1.0,
+    "span": 48000.0,
+    "seals": 4,
+    "view": [
+     0,
+     0
+    ]
+   },
+   "map_open_after": false,
+   "givers": [
+    "Board",
+    "Captain",
+    "Elder",
+    "Scholar"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_r4_map_zoom1.png",
+  "bs_r4_map_zoom3.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

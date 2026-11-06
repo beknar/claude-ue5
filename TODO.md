@@ -35,6 +35,7 @@ Built and tested (`884 holy`, `descend`; `868 catacombs -lv vel_morrath`; `888 w
 - [ ] **Tiers 4 and 5 below:** the floors and stairs were measured for tiers 1 to 3 (0, -4.5, -9 m); 4 and 5 follow the same rule and have not been visited.
 - [ ] **Monsters on the stairs:** monsters path over the tiles in two dimensions; one chasing her up or down a stair has not been watched.
 - [ ] **A save in the catacombs loaded:** the save names the level and the place ("The Catacombs of Vel Morrath"); a load of it has not been run.
+- [ ] **The plaza on the map:** its statues, fountain and shrines are not drawn; the cathedral and monastery borrow the temple's and chapel's pictures.
 - [ ] **The catacombs' own looks:** tier 1 is the dungeon's stone and tier 3 and 4 are the castle's themes; only tier 2 (the crypt stone) is new. Bone-lined ossuary walls, niches and sarcophagi of their own are still to come.
 - [ ] **The houses' stone:** in the morning light (08:00) the city reads blue-grey; it has not been pictured at noon.
 - [ ] **The packaged game:** not built with the city or the catacombs (`vel_morrath` must be named to the cook).

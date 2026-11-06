@@ -3992,6 +3992,22 @@ def step_catacombs():
         tr = [floor_z(p.x + 20, p.y + 20, top=-D * (g.tier_of(sc) - 1) + 150.0) for p in tl_[:6]]
         floors[f"{sc.x},{sc.y}"] = {"tier": g.tier_of(sc), "actor_z": round(S.get_actor_location().z, 1), "want": -D * (g.tier_of(sc) - 1), "room_floor": tr}
     res["floors"] = floors
+    # (what the sets hold stands on their floors (PR #23's review: the rooms' furniture, wall containers and lights were built
+    # from the room's box at z 0, 4.5 m a tier over a deeper set's floor)): tier 3's set (2, 0), not cleared, and tier 2's
+    # (1, 0): every container between its floor and 2.6 m up, every light under the highest ceiling, every monster standing
+    placed = {}
+    for sc in (I2(1, 0), S3):
+        S = g.get_section(sc); base = S.get_actor_location().z
+        cz = [S.get_container_location(i).z - base for i in range(S.get_num_containers())]
+        lz = [l.get_world_location().z - base for l in list(S.get_components_by_class(unreal.PointLightComponent)) + list(S.get_components_by_class(unreal.SpotLightComponent))]
+        mz = [m.get_actor_location().z - base for m in g.get_monsters() if alive(m) and g.world_to_section(m.get_actor_location()) == sc]
+        bad_c = [round(z) for z in cz if not -30 <= z <= 260]; bad_l = [round(z) for z in lz if not -30 <= z <= 1600]; bad_m = [round(z) for z in mz if not -10 <= z <= 300]
+        placed[f"{sc.x},{sc.y}"] = {"containers": len(cz), "lights": len(lz), "monsters": len(mz), "containers_off": bad_c[:10], "lights_off": bad_l[:10], "monsters_off": bad_m[:10],
+                                    "container_z": [round(min(cz)), round(max(cz))] if cz else None, "light_z": [round(min(lz)), round(max(lz))] if lz else None}
+    res["placed"] = placed
+    placed_ok = all(p["containers"] > 0 and p["lights"] > 0 and not p["containers_off"] and not p["lights_off"] and not p["monsters_off"] for p in placed.values()) and placed["2,0"]["monsters"] > 0
+    S3s = g.get_section(S3)
+    put(S3s.get_room_center(0), 0.0); yield from wait(1.0); shot("catacombs_tier3_room"); yield from rwait(1.0)
     floors_ok = all(f and abs(f["actor_z"] - f["want"]) < 1 and f["room_floor"] and all(z is not None and abs(z - f["want"]) < 40 for z in f["room_floor"]) for f in floors.values())
     # (the stairs: the west hallways of (1, 0), up to the start set; the east ones of (2, 0), up to (1, 0); (1, 1) has none
     # (its west and south neighbours are of its tier))
@@ -4045,8 +4061,8 @@ def step_catacombs():
     res["walks"] = walks; res["fall_resets"] = g.get_editor_property("fall_resets") - resets0
     walks_ok = len(walks) == 2 and all(w_["reached"] and w_["air_s"] < 1.0 for w_ in walks) and walks[0]["end_section"] == [0, 0] and walks[1]["end_section"] == [1, 0] and res["fall_resets"] == 0
     quiet(False)
-    ok = (res["tier_floors"] and res["key"] == "vel_morrath" and not res["final_boss_on"] and res["open2"] and res["open3"] and floors_ok and stairs_ok and walks_ok)
-    step_result("catacombs", ok, floors_ok=floors_ok, stairs_ok=stairs_ok, walks_ok=walks_ok, **res)
+    ok = (res["tier_floors"] and res["key"] == "vel_morrath" and not res["final_boss_on"] and res["open2"] and res["open3"] and floors_ok and stairs_ok and walks_ok and placed_ok)
+    step_result("catacombs", ok, floors_ok=floors_ok, stairs_ok=stairs_ok, walks_ok=walks_ok, placed_ok=placed_ok, **res)
 
 STEPS = {"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

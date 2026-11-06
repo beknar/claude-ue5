@@ -416,6 +416,10 @@ private:
 	 *  tiles' floor over the set's (the tile's middle) and the side of the tile it rises toward (255: no stair) */
 	TArray<float> StairZ;
 	TArray<uint8> StairSide;
+	/** the stair's length in tiles and its rise over one tile, as the plan laid it (the ramp, the safety net and the tile
+	 *  heights all read these) */
+	int32 StairLen = 4;
+	float StairRise = 0.f;
 	bool IsStairTile(FIntPoint T) const { return In(T) && StairSide.IsValidIndex(Idx(T)) && StairSide[Idx(T)] != 255; }
 	/** mistward: the room's shape cut out of its rectangle (tiles outside it void), the ceiling heights of the shapes that rise */
 	void ShapeRoom(FRandomStream& R, int32 RI);

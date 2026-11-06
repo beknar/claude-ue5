@@ -42,6 +42,8 @@ static FName RDTIconOf(uint8 Kind, uint8 State)
 	case TK_Chapel: return TEXT("mapicon_chapel");
 	case TK_Barracks: return TEXT("mapicon_barracks");
 	case TK_Witch: return TEXT("mapicon_witch");
+	case TK_Cathedral: return TEXT("mapicon_temple");          // (Vel Morrath's: the temple's and the chapel's pictures)
+	case TK_Monastery: return TEXT("mapicon_chapel");
 	default: return State == 1 ? FName(TEXT("mapicon_burned")) : State == 2 ? FName(TEXT("mapicon_boarded")) : FName(TEXT("mapicon_home"));
 	}
 }
@@ -61,6 +63,8 @@ static FString RDTLabelOf(uint8 Kind)
 	case TK_Chapel: return TEXT("CHAPEL");
 	case TK_Barracks: return TEXT("BARRACKS");
 	case TK_Witch: return TEXT("WITCH'S HUT");
+	case TK_Cathedral: return TEXT("CATHEDRAL · the stair down");
+	case TK_Monastery: return TEXT("MONASTERY");
 	default: return FString();
 	}
 }
@@ -233,7 +237,7 @@ void ARDHUD::DrawTownMinimap(float Sc, const FVector& L, float Yaw)
 		if (FVector2D::Distance(P, C) > R * 0.94f) continue;
 		SoftDot(P, 9.f * Sc, FLinearColor(1.f, 0.16f, 0.1f, 0.35f)); SoftDot(P, 4.6f * Sc, FLinearColor(1.f, 0.16f, 0.1f, 1.f));
 	}
-	const TArray<FString> Ql = Gen->GetQuestLines();
+	const TArray<FString> Ql = Gen->GetQuestLinesHere();
 	for (const ARDTownsfolk* T : Gen->TownPeople)
 	{
 		if (!IsValid(T)) continue;
@@ -351,7 +355,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 		TownLabels.Add(TEXT("square|TOWN SQUARE"));
 	}
 	// the people with quests for her, the Mistgate, her
-	const TArray<FString> Ql = Gen->GetQuestLines();
+	const TArray<FString> Ql = Gen->GetQuestLinesHere();
 	for (const ARDTownsfolk* T : Gen->TownPeople)
 	{
 		if (!IsValid(T)) continue;
@@ -648,6 +652,8 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		case TK_Chapel: Nm = TEXT("mapc_chapel"); break;
 		case TK_Barracks: Nm = TEXT("mapc_barracks"); break;
 		case TK_Witch: Nm = TEXT("mapc_witch"); break;
+		case TK_Cathedral: Nm = TEXT("mapc_temple"); break;
+		case TK_Monastery: Nm = TEXT("mapc_chapel"); break;
 		default: Nm = Bd.State == 1 ? FName(TEXT("mapc_burned")) : Bd.State == 2 ? FName(TEXT("mapc_boarded")) : Bd.Style == 1 ? FName(TEXT("mapc_home3")) : Bd.Style == 2 ? FName(TEXT("mapc_home1")) : FName(TEXT("mapc_home2")); break;
 		}
 		const float Grow = Bd.Kind == TK_Castle ? 1.12f : Bd.Kind == TK_Home ? 1.3f : 1.22f;
@@ -721,9 +727,9 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	// overhead map, but there should be some kind of symbol for where they are"): every giver of the town's quests marked by a
 	// wax seal in a gold ring, with "!" when one is offered to her, "?" when one is ready to turn in, else a quill's dot; their
 	// names only when the map is zoomed in 2.5 times or more. The quest board's seal is on the board.
-	const TArray<FString> Ql = Gen->GetQuestLines();
+	const TArray<FString> Ql = Gen->GetQuestLinesHere();
 	TSet<FString> Givers;
-	for (const FRDQuestDef& Q : Gen->Quests) Givers.Add(Q.Giver.ToString());
+	for (const FRDQuestDef& Q : Gen->Quests) if (Gen->IsQuestHere(Q)) Givers.Add(Q.Giver.ToString());          // (this town's givers only)
 	TownQuestSeals = 0;
 	auto Seal = [&](const FVector2D& P, const FString& Mark0)
 	{
@@ -818,7 +824,7 @@ void ARDHUD::DrawTownNames(float Sc)
 	if (!PC || !PC->PlayerCameraManager || !Me) return;
 	UFont* Small = GEngine->GetSmallFont();
 	const FVector Cam = PC->PlayerCameraManager->GetCameraLocation(), Fw = PC->PlayerCameraManager->GetCameraRotation().Vector();
-	const TArray<FString> Ql = Gen->GetQuestLines();
+	const TArray<FString> Ql = Gen->GetQuestLinesHere();
 	for (const ARDTownsfolk* T : Gen->TownPeople)
 	{
 		if (!IsValid(T)) continue;

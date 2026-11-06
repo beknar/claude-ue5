@@ -1,5 +1,5 @@
 {
- "tag": "d1",
+ "tag": "d2",
  "plan": [
   "descend"
  ],
@@ -64,8 +64,8 @@
      "Plate Armour"
     ],
     "gold": [
-     123,
-     123
+     122,
+     122
     ],
     "stealthed": [
      false,
@@ -89,6 +89,7 @@
      7503250
     ]
    },
+   "enter_counter": 1,
    "set_catacombs": {
     "used": [
      [
@@ -137,8 +138,8 @@
      "Plate Armour"
     ],
     "gold": [
-     126,
-     126
+     125,
+     125
     ],
     "stealthed": [
      false,

@@ -1,8 +1,7 @@
 {
- "tag": "h3",
+ "tag": "h4",
  "plan": [
-  "holy",
-  "descend"
+  "holy"
  ],
  "level": "brokenspire",
  "steps": [
@@ -14,14 +13,14 @@
     75.0
    ],
    "north_east": true,
-   "fps_brokenspire_square": 15.4,
+   "fps_brokenspire_square": 4.3,
    "state": [
     "3",
     "Vel Morrath",
     "0",
     "1",
     "0",
-    "4.7",
+    "5.7",
     "1",
     "1",
     "1",
@@ -194,166 +193,17 @@
    },
    "stair_from_cathedral_m": 40,
    "fps": {
-    "plaza": 5.2,
-    "nave": 20.4
+    "plaza": 11.5,
+    "nave": 28.1
    },
    "stair_travel": "catacombs"
-  },
-  {
-   "step": "descend",
-   "ok": true,
-   "set_town": {
-    "found_wear": 47.29999923706055,
-    "slash": [
-     "Ember Slash",
-     true
-    ],
-    "armour": "Plate Armour",
-    "used": [
-     [
-      "Small Speed Potion",
-      true
-     ],
-     [
-      "Bread",
-      true
-     ]
-    ],
-    "killed": true,
-    "quick": true
-   },
-   "down": {
-    "level": "vel_morrath",
-    "left": 57,
-    "arrived": 57,
-    "left_vs_arrived": [],
-    "test_vs_left": [],
-    "kinds": [
-     "effect",
-     "hp",
-     "mana",
-     "quick",
-     "slash",
-     "stat",
-     "timed"
-    ],
-    "summons": [],
-    "summons_before": [],
-    "kills": [
-     0,
-     0
-    ],
-    "inventory_same": true,
-    "quick_same": true,
-    "torch": [
-     false,
-     false
-    ],
-    "buffs": [
-     "POISON 1.6/s",
-     "WEAKENED -50%"
-    ],
-    "armour": [
-     "Plate Armour",
-     "Plate Armour"
-    ],
-    "gold": [
-     123,
-     123
-    ],
-    "stealthed": [
-     false,
-     false
-    ],
-    "ok": true
-   },
-   "catacombs": {
-    "key": "vel_morrath",
-    "title": "The Catacombs of Vel Morrath",
-    "tier_floors": true,
-    "section": [
-     0,
-     0
-    ],
-    "z": 85.8,
-    "return_line": "button|Return to Vel Morrath",
-    "return_town": "Vel Morrath",
-    "return_at": [
-     5499250,
-     7503250
-    ]
-   },
-   "enter_counter": 1,
-   "set_catacombs": {
-    "used": [
-     [
-      "Small Speed Potion",
-      true
-     ],
-     [
-      "Bread",
-      true
-     ]
-    ],
-    "killed": true
-   },
-   "up": {
-    "level": "brokenspire",
-    "left": 59,
-    "arrived": 59,
-    "left_vs_arrived": [],
-    "test_vs_left": [],
-    "kinds": [
-     "effect",
-     "hp",
-     "mana",
-     "quick",
-     "slash",
-     "stat",
-     "timed"
-    ],
-    "summons": [],
-    "summons_before": [],
-    "kills": [
-     0,
-     0
-    ],
-    "inventory_same": true,
-    "quick_same": true,
-    "torch": [
-     false,
-     false
-    ],
-    "buffs": [
-     "SLOWED -60%"
-    ],
-    "armour": [
-     "Plate Armour",
-     "Plate Armour"
-    ],
-    "gold": [
-     125,
-     125
-    ],
-    "stealthed": [
-     false,
-     false
-    ],
-    "ok": true
-   },
-   "back": {
-    "town": "Vel Morrath",
-    "from_return_at_m": 0.0,
-    "from_cathedral_door_m": 2.5,
-    "on_ground": true
-   }
   }
  ],
  "windows_hidden": "",
  "shots": [
-  "bs_h3_vm_cathedral_front.png",
-  "bs_h3_vm_plaza.png",
-  "bs_h3_vm_nave.png"
+  "bs_h4_vm_cathedral_front.png",
+  "bs_h4_vm_plaza.png",
+  "bs_h4_vm_nave.png"
  ],
  "error": null,
  "windows_shown_again": 0

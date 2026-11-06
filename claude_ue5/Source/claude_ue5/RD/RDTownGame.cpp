@@ -453,7 +453,15 @@ bool ARDDungeonGenerator::EnterCastle()
 	if (!bTown || CastleLevel.IsEmpty() || bTownTraveling) return false;
 	LastTravel = TEXT("castle");
 	if (bTravelDryRun) return true;
-	WildAutosave(TEXT("castle"));
+	TravelToDungeon(CastleLevel, TEXT("castle"));
+	return true;
+}
+
+void ARDDungeonGenerator::TravelToDungeon(const FString& Level, const FString& Why)
+{
+	// (the town's side of every trip down into a dungeon: Mistward Castle by the Mistgate, Vel Morrath's catacombs by the stair
+	// beneath its altar)
+	WildAutosave(Why);
 	SaveCarry();
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
@@ -462,10 +470,10 @@ bool ARDDungeonGenerator::EnterCastle()
 #if !UE_BUILD_SHIPPING
 		if (PlayerCombat) GI->CarryLeftLines = PlayerCombat->GetStateLines();
 #endif
-		GI->Arrive = TEXT("castle");
-		// (from another town's circle: its state into the store, Brokenspire's back into the fields the level reads when she
-		// comes back (it always comes back as Brokenspire): else Brokenspire took that town's looted chests and guards, and
-		// wrote them over its own in the store at its next unload)
+		GI->Arrive = Why;
+		// (from another town (its circle, or Vel Morrath's stair): its state into the store, Brokenspire's back into the fields
+		// the level reads when she comes back (it always comes back as Brokenspire): else Brokenspire took that town's looted
+		// chests and guards, and wrote them over its own in the store at its next unload)
 		if (bWild && !bTownHome && GetSection(FIntPoint::ZeroValue))
 		{
 			SaveTownState();
@@ -475,9 +483,8 @@ bool ARDDungeonGenerator::EnterCastle()
 		}
 	}
 	bTownTraveling = true;
-	UE_LOG(LogRDTownGame, Log, TEXT("RDTRAVEL into %s as %s"), *CastleLevel, *CurrentHero.ToString());
-	UGameplayStatics::OpenLevel(this, FName(*CastleLevel), true, FString::Printf(TEXT("Hero=%s"), *CurrentHero.ToString()));
-	return true;
+	UE_LOG(LogRDTownGame, Log, TEXT("RDTRAVEL into %s (%s) from %s as %s"), *Level, *Why, *TownName, *CurrentHero.ToString());
+	UGameplayStatics::OpenLevel(this, FName(*Level), true, FString::Printf(TEXT("Hero=%s"), *CurrentHero.ToString()));
 }
 
 bool ARDDungeonGenerator::ReturnToTown()
@@ -1315,9 +1322,10 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 	// quest was taken count, or the quest could ask for more than are left)
 	// (both read from the state itself, not a counter beside it (the PR review's finds): the tier from the tiers open, so a
 	// tier opened by any way counts; the guards from the ones dead in this town, so a town built again starts over)
-	if (Q.Goal == TEXT("tier")) return FMath::Max(GI->GetCounter(Q.Goal), GetGameTier());
-	// (a dungeon's own tier ("vel_morrath:tier", the catacombs' deepest floor opened): whole, as the castle's)
-	if (Q.Goal.EndsWith(TEXT(":tier"))) return FMath::Max(GI->GetCounter(Q.Goal), 1);
+	// (Mistward Castle's own tiers: the catacombs' do not count for Brokenspire's quests (PR #23's review))
+	if (Q.Goal == TEXT("tier")) return FMath::Max(GI->GetCounter(Q.Goal), DungeonTierReached(FString()));
+	// (a dungeon's own tier ("vel_morrath:tier", the catacombs' deepest floor opened): whole, as the castle's, from its tiers)
+	if (Q.Goal.EndsWith(TEXT(":tier"))) return FMath::Max(GI->GetCounter(Q.Goal), DungeonTierReached(Q.Goal.LeftChop(5)));
 	if (Q.Goal == TEXT("guards")) return GI->GuardsDead.Num();
 	const FRDQuestState* St = GI->FindQuest(Q.Id);
 	const int32 Base = St ? St->Base : 0;
@@ -1339,6 +1347,26 @@ TArray<FString> ARDDungeonGenerator::GetQuestLines() const
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	for (const FRDQuestDef& Q : Quests)
 	{
+		const int32 P = QuestProgress(Q);
+		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
+	}
+	return Out;
+}
+
+bool ARDDungeonGenerator::IsQuestHere(const FRDQuestDef& Q) const
+{
+	return Q.Town == (bTownHome ? FString() : TownName);
+}
+
+TArray<FString> ARDDungeonGenerator::GetQuestLinesHere() const
+{
+	// (the quests of the town she is in: a giver's mark is keyed by role, and Vel Morrath's archbishop is an Elder as
+	// Brokenspire's elder is (PR #23's review: each showed the other's "!" and "?"))
+	TArray<FString> Out;
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	for (const FRDQuestDef& Q : Quests)
+	{
+		if (!IsQuestHere(Q)) continue;
 		const int32 P = QuestProgress(Q);
 		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
 	}

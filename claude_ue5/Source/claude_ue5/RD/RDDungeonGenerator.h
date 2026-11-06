@@ -981,9 +981,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString CatacombsLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString DungeonKey;
 	/** a counter of this dungeon's ("bossdone:2", "tier", "prisoners"): Mistward Castle's as they were, another's under its key */
-	FString DungeonCounterName(const FString& N) const { return DungeonKey.IsEmpty() ? N : DungeonKey + TEXT(":") + N; }
+	FString DungeonCounterName(const FString& N) const;
 	/** the town the way out leads to, as the player reads it (the catacombs': the town she came down from) */
 	FString WayBackName() const;
+	/** a quest of the town she is in (Brokenspire's have no town set); the quest lines of those only, for the givers' marks */
+	bool IsQuestHere(const FRDQuestDef& Q) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetQuestLinesHere() const;
+	/** the deepest tier open in one dungeon (empty key: Mistward Castle), from the state itself */
+	int32 DungeonTierReached(const FString& Key) const;
+	/** the town's side of a trip down into a dungeon (the autosave, her state carried, the town's state put away, the level
+	 *  opened); Why is the autosave's reason and the game instance's Arrive */
+	void TravelToDungeon(const FString& Level, const FString& Why);
 	/** the cathedral's stair down: walked into, the catacombs open (a test's dry run only says so) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCatacombs();
 	/** the town's people and its quests (pipeline/unreal/882 from SourceArt/brokenspire/town.json) */

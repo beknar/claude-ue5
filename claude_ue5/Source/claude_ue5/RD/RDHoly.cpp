@@ -193,8 +193,27 @@ void ARDSection::CathedralShell(int32 BI)
 FString ARDDungeonGenerator::WayBackName() const
 {
 	if (!DungeonKey.IsEmpty())
-		if (const URDGameInstance* GI = Cast<URDGameInstance>(UGameplayStatics::GetGameInstance(this)); GI && !GI->ReturnTown.IsEmpty()) return GI->ReturnTown;
+		if (const URDGameInstance* GI = URDGameInstance::Of(this); GI && !GI->ReturnTown.IsEmpty()) return GI->ReturnTown;
 	return TownName;
+}
+
+FString ARDDungeonGenerator::DungeonCounterName(const FString& N) const
+{
+	return URDGameInstance::DungeonCounter(DungeonKey, N);          // (one key format, the game instance's)
+}
+
+int32 ARDDungeonGenerator::DungeonTierReached(const FString& Key) const
+{
+	// (the deepest tier open in one dungeon: Mistward Castle's (empty key) or another's; this level's own as well when it is
+	// that dungeon)
+	int32 T = 1;
+	if (!bTown && DungeonKey == Key) for (const int32 O : TiersOpened) T = FMath::Max(T, O);
+	if (const URDGameInstance* GI = URDGameInstance::Of(this))
+	{
+		if (Key.IsEmpty()) { for (const int32 O : GI->CastleTiers) T = FMath::Max(T, O); }
+		else if (const FRDDungeonSave* D = GI->Dungeons.Find(Key)) { for (const int32 O : D->Tiers) T = FMath::Max(T, O); }
+	}
+	return FMath::Clamp(T, 1, 5);
 }
 
 bool ARDDungeonGenerator::EnterCatacombs()
@@ -203,13 +222,8 @@ bool ARDDungeonGenerator::EnterCatacombs()
 	if (!bTown || TownPlan != 1 || CatacombsLevel.IsEmpty() || bTownTraveling || !S) return false;
 	LastTravel = TEXT("catacombs");
 	if (bTravelDryRun) return true;
-	WildAutosave(TEXT("catacombs"));
-	SaveCarry();
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
-#if !UE_BUILD_SHIPPING
-		if (PlayerCombat) GI->CarryLeftLines = PlayerCombat->GetStateLines();
-#endif
 		// (where she comes back: 7 m before the cathedral's door, facing out over the plaza; the plan comes from the town's seed
 		// alone, so the place is the same when the town is built again)
 		if (S->TownBlds.IsValidIndex(S->CastleBld))
@@ -220,19 +234,7 @@ bool ARDDungeonGenerator::EnterCatacombs()
 			GI->ReturnYaw = Out.Rotation().Yaw;
 		}
 		GI->ReturnTown = TownName;
-		// (the level always comes back as Brokenspire (as EnterCastle from another town's circle): this town's state into the
-		// store, Brokenspire's back into the fields the level reads)
-		if (bWild && !bTownHome)
-		{
-			SaveTownState();
-			const FRDTownSave* Bs = GI->TownStore.Find(HomeTownName);
-			GI->TownLooted = Bs ? Bs->Looted : TArray<int32>(); GI->GuardsDead = Bs ? Bs->GuardsDead : TArray<int32>();
-			GI->CurrentTown = HomeTownName;
-		}
-		GI->Arrive = TEXT("catacombs");
 	}
-	bTownTraveling = true;
-	UE_LOG(LogRDHoly, Log, TEXT("RDTRAVEL down into %s from %s as %s"), *CatacombsLevel, *TownName, *CurrentHero.ToString());
-	UGameplayStatics::OpenLevel(this, FName(*CatacombsLevel), true, FString::Printf(TEXT("Hero=%s"), *CurrentHero.ToString()));
+	TravelToDungeon(CatacombsLevel, TEXT("catacombs"));
 	return true;
 }

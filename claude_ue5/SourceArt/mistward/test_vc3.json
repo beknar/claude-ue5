@@ -1,5 +1,5 @@
 {
- "tag": "vc2",
+ "tag": "vc3",
  "plan": [
   "catacombs"
  ],
@@ -11,6 +11,7 @@
    "floors_ok": true,
    "stairs_ok": true,
    "walks_ok": true,
+   "placed_ok": true,
    "tier_floors": true,
    "depth": 450.0,
    "stair_tiles": 4,
@@ -38,8 +39,8 @@
      "actor_z": -450.0,
      "want": -450.0,
      "room_floor": [
-      -445.0,
       -450.1,
+      -445.0,
       -445.0,
       -445.0,
       -445.0,
@@ -51,12 +52,12 @@
      "actor_z": -450.0,
      "want": -450.0,
      "room_floor": [
+      -450.1,
       -445.0,
       -445.0,
       -445.0,
       -445.0,
-      -445.0,
-      -450.1
+      -445.0
      ]
     },
     "-1,0": {
@@ -77,12 +78,46 @@
      "actor_z": -900.0,
      "want": -900.0,
      "room_floor": [
+      -907.9,
       -901.8,
       -901.8,
       -901.8,
       -901.8,
-      -908.5,
       -901.8
+     ]
+    }
+   },
+   "placed": {
+    "1,0": {
+     "containers": 378,
+     "lights": 451,
+     "monsters": 3,
+     "containers_off": [],
+     "lights_off": [],
+     "monsters_off": [],
+     "container_z": [
+      21,
+      119
+     ],
+     "light_z": [
+      45,
+      577
+     ]
+    },
+    "2,0": {
+     "containers": 219,
+     "lights": 446,
+     "monsters": 15,
+     "containers_off": [],
+     "lights_off": [],
+     "monsters_off": [],
+     "container_z": [
+      21,
+      119
+     ],
+     "light_z": [
+      45,
+      480
      ]
     }
    },
@@ -123,15 +158,15 @@
       },
       {
        "i": 4,
-       "floor": -445.0,
+       "floor": -450.1,
        "want": -450.0,
-       "headroom": 590.0
+       "headroom": 1194.0
       },
       {
        "i": 5,
        "floor": -445.0,
        "want": -450.0,
-       "headroom": 590.0
+       "headroom": 1359.3
       }
      ],
      "beyond": -6.4,
@@ -175,13 +210,13 @@
        "i": 4,
        "floor": -445.0,
        "want": -450.0,
-       "headroom": 590.0
+       "headroom": 790.0
       },
       {
        "i": 5,
        "floor": -445.0,
        "want": -450.0,
-       "headroom": 590.0
+       "headroom": 790.0
       }
      ],
      "beyond": -6.4,
@@ -223,15 +258,15 @@
       },
       {
        "i": 4,
-       "floor": -450.1,
+       "floor": -445.0,
        "want": -450.0,
-       "headroom": 395.1
+       "headroom": 590.0
       },
       {
        "i": 5,
        "floor": -445.0,
        "want": -450.0,
-       "headroom": 390.0
+       "headroom": 590.0
       }
      ],
      "beyond": -6.4,
@@ -261,9 +296,9 @@
       },
       {
        "i": 2,
-       "floor": -740.3,
+       "floor": -733.1,
        "want": -731.2,
-       "headroom": 410.9
+       "headroom": 403.7
       },
       {
        "i": 3,
@@ -273,15 +308,15 @@
       },
       {
        "i": 4,
-       "floor": -901.8,
+       "floor": -908.5,
        "want": -900.0,
-       "headroom": 701.8
+       "headroom": 410.3
       },
       {
        "i": 5,
        "floor": -901.8,
        "want": -900.0,
-       "headroom": 701.8
+       "headroom": 403.6
       }
      ],
      "beyond": -445.0,
@@ -323,18 +358,18 @@
       },
       {
        "i": 4,
-       "floor": -901.8,
+       "floor": -907.9,
        "want": -900.0,
-       "headroom": 403.6
+       "headroom": 1207.9
       },
       {
        "i": 5,
-       "floor": -901.8,
+       "floor": -908.5,
        "want": -900.0,
-       "headroom": 901.8
+       "headroom": 1208.5
       }
      ],
-     "beyond": -445.0,
+     "beyond": -450.1,
      "beyond_want": -450.0
     },
     {
@@ -349,9 +384,9 @@
      "tiles": [
       {
        "i": 0,
-       "floor": -508.1,
+       "floor": -515.3,
        "want": -506.2,
-       "headroom": 403.7
+       "headroom": 410.9
       },
       {
        "i": 1,
@@ -375,13 +410,13 @@
        "i": 4,
        "floor": -901.8,
        "want": -900.0,
-       "headroom": 1320.0
+       "headroom": 1010.2
       },
       {
        "i": 5,
        "floor": -901.8,
        "want": -900.0,
-       "headroom": 1562.7
+       "headroom": 1051.7
       }
      ],
      "beyond": -445.0,
@@ -395,7 +430,7 @@
      "reached": true,
      "from_x": 14100,
      "to_x": 12300,
-     "end_x": 12276,
+     "end_x": 12285,
      "end_y": -7050,
      "end_section": [
       0,
@@ -404,25 +439,25 @@
      "end_z": 78.3,
      "floor_there": 417.0,
      "air_s": 0.0,
-     "z_min": -360.3,
-     "z_max": 92.2
+     "z_min": -370.5,
+     "z_max": 92.1
     },
     {
      "leg": "down",
-     "seconds": 5.3,
+     "seconds": 5.2,
      "reached": true,
      "from_x": 12300,
      "to_x": 14100,
-     "end_x": 14119,
+     "end_x": 14109,
      "end_y": -7050,
      "end_section": [
       1,
       0
      ],
      "end_z": -360.3,
-     "floor_there": 250.1,
-     "air_s": 0.0,
-     "z_min": -360.3,
+     "floor_there": -445.0,
+     "air_s": 0.13,
+     "z_min": -367.6,
      "z_max": 91.6
     }
    ],
@@ -431,8 +466,9 @@
  ],
  "windows_hidden": "",
  "shots": [
-  "mw_vc2_catacombs_stair_top.png",
-  "mw_vc2_catacombs_stair.png"
+  "mw_vc3_catacombs_tier3_room.png",
+  "mw_vc3_catacombs_stair_top.png",
+  "mw_vc3_catacombs_stair.png"
  ],
  "error": null,
  "windows_shown_again": 0
