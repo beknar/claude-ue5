@@ -1,0 +1,258 @@
+{
+ "tag": "rgm3",
+ "plan": [
+  "setup",
+  "keys",
+  "cast",
+  "nothing",
+  "far",
+  "kill:3",
+  "tier"
+ ],
+ "level": "random_dungeonmagic_level3",
+ "steps": [
+  {
+   "step": "setup",
+   "ok": true,
+   "pawn": "BP_RDM3_RogueCharacter_C",
+   "mesh": "SK_JRPG_Rogue",
+   "in_her_right_hand": "SM_Dagger",
+   "hit_points": 100.0,
+   "weapons": [
+    "Daggers",
+    "Crossbow"
+   ],
+   "spell": false,
+   "from_start_room_cm": 0,
+   "title": "ROGUE",
+   "caster_controls": true,
+   "keys": [
+    "W A S D|move",
+    "Mouse|look / turn the camera",
+    "Space|jump",
+    "R|switch walk / run",
+    "Shift (held)|run",
+    "B|roll / dodge",
+    "1 / 2, wheel|daggers / crossbow",
+    "Left mouse|strike or shoot",
+    "F|open door or container",
+    "M|map"
+   ],
+   "pad": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "B|roll / dodge",
+    "Y|switch weapon",
+    "RB|strike or shoot",
+    "X|open door or container",
+    "Back|map"
+   ]
+  },
+  {
+   "step": "keys",
+   "ok": true,
+   "context_active": false,
+   "move_keys": [
+    "A",
+    "D",
+    "Down",
+    "Gamepad_Left2D",
+    "Left",
+    "Right",
+    "S",
+    "Up",
+    "W"
+   ],
+   "run_keys": [
+    "Gamepad_LeftThumbstick",
+    "LeftShift"
+   ],
+   "actions_on_E_and_left_mouse": [
+    "IA_Hook",
+    "IA_Jab",
+    "IA_TurnRight"
+   ],
+   "her_handlers": [
+    "Jump",
+    "Look",
+    "MouseLook",
+    "Move",
+    "Sprint"
+   ],
+   "clash": [],
+   "walk_cm_s": 116.7,
+   "her_walk": 116.67,
+   "run_cm_s": 376.5,
+   "her_run": 376.53,
+   "speeds": {
+    "walk": 116.7,
+    "run": 376.5,
+    "A": 116.7,
+    "S": 116.7,
+    "D": 116.7
+   },
+   "headings_deg": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "wanted_headings": {
+    "walk": 0,
+    "run": 0,
+    "A": -90,
+    "S": 180,
+    "D": 90
+   },
+   "attacks_by_key": {
+    "LeftMouseButton daggers": {
+     "attacks": 1,
+     "bolts": 0
+    },
+    "RightMouseButton": {
+     "attacks": 0,
+     "bolts": 0
+    },
+    "E": {
+     "attacks": 0,
+     "bolts": 0
+    },
+    "LeftMouseButton crossbow": {
+     "attacks": 1,
+     "bolts": 1
+    }
+   }
+  },
+  {
+   "step": "cast",
+   "ok": true,
+   "monster": "Ripper_dog",
+   "gap_cm": 900,
+   "hand": "hand_r",
+   "started": true,
+   "target_is_it": true,
+   "montage": true,
+   "hand_moved_cm": 31,
+   "charge_particles": 0,
+   "bolt_left_at_s": 0.41,
+   "bolt_speed_cm_s": 4500,
+   "spell_speed": 4500.0,
+   "particles_round_the_bolt": 500,
+   "on_monster": 1,
+   "elsewhere": 0,
+   "flown_cm": 608,
+   "it_lost": 34.0,
+   "damage": 34.0,
+   "burst_particles": 15,
+   "burst_at": [
+    -3248,
+    3538,
+    113
+   ],
+   "sounds": {
+    "Player.Charge.Crossbow": 1,
+    "Player.Cast.Crossbow": 1,
+    "Player.Hit.Crossbow": 1
+   },
+   "bolt_meshes_flying": 1,
+   "bolts_stuck_before": 1,
+   "loaded_bolt_before": true,
+   "loaded_bolt_gone_at_the_shot": true,
+   "bolt_left_from_the_muzzle_cm": 0.0,
+   "loaded_bolt_back_after": true,
+   "bolt_left_from_hand_cm": 88
+  },
+  {
+   "step": "nothing",
+   "ok": true,
+   "stuck_in_the_wall": 1,
+   "target": null,
+   "turned_deg": 0.0,
+   "off_her_heading_deg": 0.3,
+   "flown_cm": 1189,
+   "reach": 2600.0,
+   "damage_dealt": 0.0
+  },
+  {
+   "step": "far",
+   "ok": true,
+   "monster": "Horned",
+   "distance_cm": 2943,
+   "reach": 2600.0,
+   "target": null
+  },
+  {
+   "step": "kill",
+   "ok": true,
+   "fights": [
+    {
+     "monster": "Horned",
+     "hit_points": 59.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 2.0,
+     "ok": true
+    },
+    {
+     "monster": "Mutant",
+     "hit_points": 49.0,
+     "casts": 3,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 2,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 3.0,
+     "ok": true
+    },
+    {
+     "monster": "Daemon",
+     "hit_points": 54.0,
+     "casts": 2,
+     "bolts_on_it": 2,
+     "bolts_needed": 2,
+     "killed": true,
+     "kills_counted": 1,
+     "each_bolt_took_the_damage": true,
+     "she_lost": 0,
+     "seconds": 2.0,
+     "ok": true
+    }
+   ],
+   "monsters_killed": 5
+  },
+  {
+   "step": "tier",
+   "ok": true,
+   "section": [
+    1,
+    0
+   ],
+   "monsters": 12,
+   "average_hit_points": 101.1,
+   "hers": 100.0,
+   "average_damage": 24.5,
+   "spell_damage": 24.5
+  }
+ ],
+ "error": null,
+ "rolls": 0,
+ "dodged": 0,
+ "kills": 5,
+ "casts": 12,
+ "bolts": 11,
+ "bolts_on_monsters": 8,
+ "bolts_elsewhere": 3,
+ "deaths": 0,
+ "damage_dealt": 272.0,
+ "damage_taken": 0.0
+}
