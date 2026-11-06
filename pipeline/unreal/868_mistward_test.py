@@ -3957,7 +3957,114 @@ def step_finalboss():
           and (res.get("world_after") or "").endswith("brokenspire") and res.get("counter") == 1)
     step_result("finalboss", ok, **res)
 
-STEPS = {"finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+# ------------------------------------------------------------------------------------------------ vel_morrath's catacombs (891)
+def floor_z(x, y, top=600.0, bottom=-3000.0):
+    h_ = unreal.SystemLibrary.line_trace_single(G["w"], V(x, y, top), V(x, y, bottom), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+    t_ = h_.to_tuple() if h_ else None
+    return round(t_[4].z, 1) if t_ and t_[0] else None
+def ceil_z(x, y, z0):
+    h_ = unreal.SystemLibrary.line_trace_single(G["w"], V(x, y, z0 + 60), V(x, y, z0 + 2000), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+    t_ = h_.to_tuple() if h_ else None
+    return round(t_[4].z, 1) if t_ and t_[0] else None
+def step_catacombs():
+    """the catacombs (vel_morrath, the generator's bTierFloors): each tier's sets a floor TierFloorDepth below the tier before's;
+    the hallways out of a set toward a shallower one climb over StairTiles to its floor (traced tile by tile, its ceiling
+    over it), and she walks up a stair into the shallower set and back down (on the ground all the way, never caught by the
+    safety net)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    D = g.get_editor_property("tier_floor_depth"); L = g.get_editor_property("stair_tiles"); TS = g.get_editor_property("tile_size")
+    res = {"tier_floors": g.get_editor_property("tier_floors"), "depth": D, "stair_tiles": L, "key": str(g.get_editor_property("dungeon_key")),
+           "title": str(g.get_editor_property("dungeon_title")), "final_boss_on": g.get_editor_property("final_boss_on")}
+    S0 = I2(0, 0)
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    res["open2"] = g.is_tier_open(2)
+    for S in [I2(x, y) for x in range(-1, 2) for y in range(-1, 2) if not (x == 0 and y == 0)]:
+        g.generate_section_now(S); yield from built(S)
+        g.debug_clear_section(S, 0, g.get_start_room_center()); yield from wait(0.2)
+    res["open3"] = g.is_tier_open(3)
+    S3 = I2(2, 0); g.generate_section_now(S3); yield from built(S3)
+    # (each set's floor: the actor's height and a trace at its first room's tiles)
+    floors = {}
+    for sc in [S0, I2(1, 0), I2(1, 1), I2(-1, 0), S3]:
+        S = g.get_section(sc)
+        if not S: floors[f"{sc.x},{sc.y}"] = None; continue
+        r_ = S.get_room_tiles(0); tl_ = r_[0] if isinstance(r_, tuple) else r_
+        tr = [floor_z(p.x + 20, p.y + 20, top=-D * (g.tier_of(sc) - 1) + 150.0) for p in tl_[:6]]
+        floors[f"{sc.x},{sc.y}"] = {"tier": g.tier_of(sc), "actor_z": round(S.get_actor_location().z, 1), "want": -D * (g.tier_of(sc) - 1), "room_floor": tr}
+    res["floors"] = floors
+    # (what the sets hold stands on their floors (PR #23's review: the rooms' furniture, wall containers and lights were built
+    # from the room's box at z 0, 4.5 m a tier over a deeper set's floor)): tier 3's set (2, 0), not cleared, and tier 2's
+    # (1, 0): every container between its floor and 2.6 m up, every light under the highest ceiling, every monster standing
+    placed = {}
+    for sc in (I2(1, 0), S3):
+        S = g.get_section(sc); base = S.get_actor_location().z
+        cz = [S.get_container_location(i).z - base for i in range(S.get_num_containers())]
+        lz = [l.get_world_location().z - base for l in list(S.get_components_by_class(unreal.PointLightComponent)) + list(S.get_components_by_class(unreal.SpotLightComponent))]
+        mz = [m.get_actor_location().z - base for m in g.get_monsters() if alive(m) and g.world_to_section(m.get_actor_location()) == sc]
+        bad_c = [round(z) for z in cz if not -30 <= z <= 260]; bad_l = [round(z) for z in lz if not -30 <= z <= 1600]; bad_m = [round(z) for z in mz if not -10 <= z <= 300]
+        placed[f"{sc.x},{sc.y}"] = {"containers": len(cz), "lights": len(lz), "monsters": len(mz), "containers_off": bad_c[:10], "lights_off": bad_l[:10], "monsters_off": bad_m[:10],
+                                    "container_z": [round(min(cz)), round(max(cz))] if cz else None, "light_z": [round(min(lz)), round(max(lz))] if lz else None}
+    res["placed"] = placed
+    placed_ok = all(p["containers"] > 0 and p["lights"] > 0 and not p["containers_off"] and not p["lights_off"] and not p["monsters_off"] for p in placed.values()) and placed["2,0"]["monsters"] > 0
+    S3s = g.get_section(S3)
+    put(S3s.get_room_center(0), 0.0); yield from wait(1.0); shot("catacombs_tier3_room"); yield from rwait(1.0)
+    floors_ok = all(f and abs(f["actor_z"] - f["want"]) < 1 and f["room_floor"] and all(z is not None and abs(z - f["want"]) < 40 for z in f["room_floor"]) for f in floors.values())
+    # (the stairs: the west hallways of (1, 0), up to the start set; the east ones of (2, 0), up to (1, 0); (1, 1) has none
+    # (its west and south neighbours are of its tier))
+    stairs = []
+    for sc, way in ((I2(1, 0), -1), (S3, -1)):
+        S = g.get_section(sc); smin = S.get_section_min(); base = S.get_actor_location().z
+        for pp in S.get_portal_points():
+            if abs(pp.x - (smin.x + TS * 0.5)) > 5: continue          # (the west border's hallway ends)
+            tiles = []
+            for i in range(L + 2):
+                x = pp.x + i * TS; want = base + (D * (1 - (i + 0.5) / L) if i < L else 0.0)
+                # (from just over where the floor should be: from higher up the trace stops on a deeper set's ceiling)
+                fz = floor_z(x, pp.y, top=want + 150.0); cz = ceil_z(x, pp.y, fz if fz is not None else want)
+                tiles.append({"i": i, "floor": fz, "want": round(want, 1), "headroom": round(cz - fz, 1) if (cz is not None and fz is not None) else None})
+            beyond = floor_z(pp.x - TS, pp.y, top=base + D + 150.0)
+            stairs.append({"section": [sc.x, sc.y], "at": [round(pp.x), round(pp.y)], "tiles": tiles, "beyond": beyond, "beyond_want": base + D})
+    res["stairs"] = stairs
+    stairs_ok = bool(stairs) and all(all(t["floor"] is not None and abs(t["floor"] - t["want"]) < 45 and (t["headroom"] or 0) > 220 for t in s["tiles"])
+                                     and s["beyond"] is not None and abs(s["beyond"] - s["beyond_want"]) < 40 for s in stairs)
+    # (she walks it: from the flat hallway below the first stair of (1, 0), west up into the start set, then back down)
+    walks = []
+    resets0 = g.get_editor_property("fall_resets")
+    if stairs:
+        s = stairs[0]; pp = V(s["at"][0], s["at"][1], 0)
+        S1 = g.get_section(I2(1, 0)); base = S1.get_actor_location().z
+        # (the doors on the way opened: the hallway's room door stood shut between her and the stair)
+        for sc_ in (I2(1, 0), S0):
+            Sd = g.get_section(sc_)
+            for di in range(Sd.get_num_doors()):
+                dl = Sd.get_door_location(di)
+                if abs(dl.y - pp.y) < TS and abs(dl.x - pp.x) < (L + 3) * TS and not Sd.is_target_open(True, di): Sd.push_door(di, dl + V(0, 50, 0))
+        yield from wait(1.5)
+        for leg, (frm, to_x, yaw) in enumerate(((V(pp.x + (L + 0.5) * TS, pp.y, base), pp.x - 1.5 * TS, 180.0), (V(pp.x - 1.5 * TS, pp.y, base + D), pp.x + (L + 0.5) * TS, 0.0))):
+            put(frm, yaw); yield from wait(0.6)
+            t0 = now(); air = 0.0; zs = []; prev = now()
+            while now() - t0 < 30.0:
+                p_ = G["pawn"].get_actor_location(); zs.append(round(p_.z, 1))
+                if (yaw == 180.0 and p_.x <= to_x) or (yaw == 0.0 and p_.x >= to_x): break
+                G["pawn"].add_movement_input(V(-1 if yaw == 180.0 else 1, 0, 0), 1.0, False)
+                if not G["pawn"].get_editor_property("character_movement").is_moving_on_ground(): air += now() - prev
+                prev = now(); yield
+            p_ = G["pawn"].get_actor_location(); sec_ = g.world_to_section(p_)
+            walks.append({"leg": "up" if leg == 0 else "down", "seconds": round(now() - t0, 1), "reached": (p_.x <= to_x) if yaw == 180.0 else (p_.x >= to_x),
+                          "from_x": round(frm.x), "to_x": round(to_x), "end_x": round(p_.x), "end_y": round(p_.y),
+                          "end_section": [sec_.x, sec_.y], "end_z": round(p_.z, 1), "floor_there": floor_z(p_.x, p_.y), "air_s": round(air, 2),
+                          "z_min": min(zs) if zs else None, "z_max": max(zs) if zs else None})
+            if leg == 0: shot("catacombs_stair_top")
+            yield from rwait(0.6)
+        # (a picture up the stair from its foot)
+        put(V(pp.x + (L + 1.5) * TS, pp.y, base), 180.0); yield from wait(0.8); shot("catacombs_stair"); yield from rwait(1.0)
+    res["walks"] = walks; res["fall_resets"] = g.get_editor_property("fall_resets") - resets0
+    walks_ok = len(walks) == 2 and all(w_["reached"] and w_["air_s"] < 1.0 for w_ in walks) and walks[0]["end_section"] == [0, 0] and walks[1]["end_section"] == [1, 0] and res["fall_resets"] == 0
+    quiet(False)
+    ok = (res["tier_floors"] and res["key"] == "vel_morrath" and not res["final_boss_on"] and res["open2"] and res["open3"] and floors_ok and stairs_ok and walks_ok and placed_ok)
+    step_result("catacombs", ok, floors_ok=floors_ok, stairs_ok=stairs_ok, walks_ok=walks_ok, placed_ok=placed_ok, **res)
+
+STEPS = {"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

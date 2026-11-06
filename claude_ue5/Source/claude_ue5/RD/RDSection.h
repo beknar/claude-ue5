@@ -374,6 +374,10 @@ public:
 	bool FindPath(FIntPoint From, FIntPoint To, TArray<FIntPoint>& Out) const;
 	FIntPoint RandomRoomTile(FRandomStream& R, int32 NotRoom = -1) const;
 	int32 RoomAtLocal(FIntPoint Local) const;
+	/** the catacombs: a local tile's floor over the set's (a stair's rise there; 0 off the stairs) */
+	float StairRiseAt(FIntPoint Local) const { return IsStairTile(Local) ? StairZ[Idx(Local)] : 0.f; }
+	/** the floor's height in the world under a point of the set (its own floor, or the stair's ramp there) */
+	float FloorZAt(const FVector& P) const;
 
 	// ---- map
 	FRDSectionMap BuildMapData() const;
@@ -408,6 +412,15 @@ private:
 	/** mistward: a room tile's ceiling height (0: the room's or hallway's own) */
 	TArray<float> CeilH;
 	float CeilAt(FIntPoint T) const;
+	/** the catacombs (the generator's bTierFloors, 2026-11-06): a hallway's stair up to the shallower set beyond the border, its
+	 *  tiles' floor over the set's (the tile's middle) and the side of the tile it rises toward (255: no stair) */
+	TArray<float> StairZ;
+	TArray<uint8> StairSide;
+	/** the stair's length in tiles and its rise over one tile, as the plan laid it (the ramp, the safety net and the tile
+	 *  heights all read these) */
+	int32 StairLen = 4;
+	float StairRise = 0.f;
+	bool IsStairTile(FIntPoint T) const { return In(T) && StairSide.IsValidIndex(Idx(T)) && StairSide[Idx(T)] != 255; }
 	/** mistward: the room's shape cut out of its rectangle (tiles outside it void), the ceiling heights of the shapes that rise */
 	void ShapeRoom(FRandomStream& R, int32 RI);
 	/** mistward: a piece of the set's theme ("<Theme>.<Name>") or else the plain one, and the name that resolves to */
@@ -479,6 +492,11 @@ private:
 	/** the castle's stair from its wing up to the wall walk, its stairwell's balustrade on the walk (the third list) */
 	void CastleStairPlan();
 	void CastleStairBuild();
+	/** Vel Morrath's holy city (RDHoly.cpp, 2026-11-06): the cathedral's shell (its rooms' walls of their heights, the outer
+	 *  stone and its tall windows, the vaults, the gabled roofs, the bell towers and their spires, the arch of the stair down);
+	 *  a gabled roof of a style's pieces over a rectangle of tiles */
+	void CathedralShell(int32 BI);
+	void HolyGable(const FIntRect& Rc, float Top, const TCHAR* Style);
 	void TownOutdoors(FRandomStream& R, int32 Step);
 	/** the town's life (the third list): gardens, pens, cooking fires with a pot or a spit, by the homes; the places of work */
 	void TownLife(FRandomStream& R);

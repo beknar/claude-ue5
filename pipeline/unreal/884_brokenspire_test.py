@@ -1875,7 +1875,166 @@ def step_carry():
         and len(res["Summoner"]["to_castle"]["summons"]) == 2 and res["Summoner"]["to_castle"]["kills"][0] >= 1
     step_result("carry", ok, **res)
 
-STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry})
+# ------------------------------------------------------------------------------------------------ Vel Morrath, the holy city
+def vm_town():
+    for i, l in enumerate(G["gen"].get_wild_town_lines()):
+        p = str(l).split("|")
+        if p[0] == "Vel Morrath": return i, float(p[2]), float(p[3])
+    return -1, 0.0, 0.0
+def to_vel_morrath():
+    """out into the wilderness to Vel Morrath's middle; until it is built round her"""
+    g = G["gen"]; ti, x, y = vm_town()
+    g.wild_put_her(x, y)
+    t0 = time.time()
+    while time.time() - t0 < 120:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Vel Morrath" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    return ti, x, y
+def step_holy():
+    """Vel Morrath (the user's spec of 2026-11-06, docs/vel_morrath.txt): north-east of Brokenspire and inland; built as she
+    comes, the holy city's plan: the cathedral at its middle (its seven rooms: narthex, nave, choir, aisles, bell towers), the
+    plaza before it with its fountain, shrines and statues, the monastery, three chapels or more, a temple, the trades, eighty
+    homes or more (few burned or boarded); every building's rooms, doors and containers; its people its own (the archbishop, the
+    archivist, the templar commander, monks, pilgrims, beggars, templars) and Brokenspire's elder, scholar and captain not among
+    them; the archbishop's panel with his first quest; the stair down at the choir's far wall (a dry run: walked into, it
+    would open the catacombs); pictures of the plaza and cathedral, the nave, a street"""
+    g = G["gen"]; res = {}
+    ti, x, y = vm_town()
+    res["site_km"] = [round(x / 1000, 1), round(y / 1000, 1)]; res["north_east"] = x > 20000 and y > 20000
+    # (Brokenspire's square for comparison: frames over real seconds)
+    sq0 = place("square")
+    if sq0:
+        put(sq0); yield from rwait(1.5); n_ = 0; t_ = time.time()
+        while time.time() - t_ < 4.0: n_ += 1; yield
+        res["fps_brokenspire_square"] = round(n_ / (time.time() - t_), 1)
+    ti, x, y = yield from to_vel_morrath()
+    st = str(g.get_wild_town_state()).split("|"); res["state"] = st
+    res["plan"] = g.get_editor_property("town_plan")
+    S = section(); B = blds()
+    kinds = {}
+    for b in B: kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
+    res["kinds"] = kinds
+    homes = [b for b in B if b["kind"] == "home"]
+    res["homes"] = {"all": len(homes), "burned": sum(1 for b in homes if b["state"] == 1), "boarded": sum(1 for b in homes if b["state"] == 2)}
+    cat = next((b for b in B if b["kind"] == "cathedral"), None)
+    res["cathedral"] = {"label": cat["label"], "rooms": cat["rooms"], "from_middle_m": round(math.hypot(cat["c"].x / 100 - x, cat["c"].y / 100 - y))} if cat else None
+    sq = place("square"); res["plaza_to_cathedral_m"] = round(dist2(sq, cat["c"]) / 100) if cat and sq else None
+    sk = {}
+    for p in spots(): sk[p["kind"]] = sk.get(p["kind"], 0) + 1
+    res["spots"] = sk
+    # (inside: every building's rooms, doors, containers)
+    n_cont = S.get_num_containers()
+    conts = [S.get_container_location(i) for i in range(n_cont)]
+    doors = [S.get_door_location(i) for i in range(S.get_num_doors())]
+    per = {}
+    for b in B:
+        if b["state"] == 1: continue                   # (a burned house: its walls fallen, no door)
+        k = b["kind"]; e = per.setdefault(k, {"n": 0, "with_rooms": 0, "with_door": 0, "containers": 0})
+        e["n"] += 1; e["with_rooms"] += 1 if b["rooms"] > 0 else 0
+        e["with_door"] += 1 if any(dist2(d, b["door"]) < 250 for d in doors) else 0
+        e["containers"] += sum(1 for c in conts if S.town_building_at(c) == b["i"])
+    res["inside"] = per; res["containers"] = n_cont; res["doors"] = len(doors)
+    # (its people)
+    F = folk(); roles = {}
+    for f in F: roles[f["role"]] = roles.get(f["role"], 0) + 1
+    res["roles"] = roles; res["titles"] = sorted({f["title"] for f in F if f["role"] in ("Elder", "Scholar", "Captain", "Priest", "Smith", "Trader", "Healer", "Keeper", "Innkeeper")})
+    # (the archbishop: his panel, his first quest)
+    quiet(True)
+    ab = talk_to("Elder"); yield from wait(0.4)
+    said = str(g.interact_nearest(G["pawn"].get_actor_location())) if ab else None; yield from rwait(0.5)
+    res["archbishop"] = {"found": ab is not None, "said": said, "panel": [p[1] for p in panel()][:8]}
+    g.close_town_panel(); yield from wait(0.3)
+    # (the stair down: its place, a dry run)
+    mg = place("mistgate"); res["stair_from_cathedral_m"] = round(dist2(mg, cat["c"]) / 100) if mg and cat else None
+    door = place("castle door")
+    if door:
+        put(door, yaw=math.degrees(math.atan2(cat["c"].y - door.y, cat["c"].x - door.x)) if cat else None); yield from wait(1.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(cat["c"].y - door.y, cat["c"].x - door.x)))); yield from wait(0.6)
+        shot("vm_cathedral_front"); yield from rwait(1.0)
+    def fps_here(sec=4.0):
+        # (frames counted over real seconds, no picture being taken; after a settle: just after the city was built the plaza
+        # read 5 a second, settled 24)
+        yield from rwait(5.0); n = 0; t0 = time.time()
+        while time.time() - t0 < sec: n += 1; yield
+        return round(n / (time.time() - t0), 1)
+    res["fps"] = {}
+    if sq:
+        put(sq); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=math.degrees(math.atan2(cat["c"].y - sq.y, cat["c"].x - sq.x)) if cat else 0)); yield from wait(0.8)
+        res["fps"]["plaza"] = yield from fps_here()
+        shot("vm_plaza"); yield from rwait(1.0)
+    if mg and cat:
+        yaw = math.degrees(math.atan2(mg.y - cat["c"].y, mg.x - cat["c"].x))
+        put(V(cat["c"].x, cat["c"].y, 0), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=5, yaw=yaw)); yield from wait(0.8)
+        res["fps"]["nave"] = yield from fps_here()
+        shot("vm_nave"); yield from rwait(1.0)
+        g.set_editor_property("travel_dry_run", True)
+        put(V(mg.x - (mg.x - cat["c"].x) * 0.02, mg.y - (mg.y - cat["c"].y) * 0.02, 0)); yield from wait(1.5)
+        res["stair_travel"] = str(g.get_editor_property("last_travel"))
+        # (off the stair before the dry run ends: standing on it, the next tick went down for real)
+        put(V(cat["c"].x, cat["c"].y, 0)); yield from wait(0.5)
+        g.set_editor_property("travel_dry_run", False)
+    quiet(False)
+    k = kinds
+    ok = (res["north_east"] and res["plan"] == 1 and cat is not None and res["cathedral"]["rooms"] == 7 and res["cathedral"]["from_middle_m"] < 120
+          and k.get("monastery", 0) == 1 and k.get("chapel", 0) >= 3 and k.get("temple", 0) == 1 and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks"))
+          and k.get("witch's hut", 0) == 0 and res["homes"]["all"] >= 80 and res["homes"]["burned"] + res["homes"]["boarded"] < res["homes"]["all"] * 0.2
+          and sk.get("fountain", 0) == 1 and sk.get("shrine", 0) >= 4 and sk.get("statue", 0) >= 4
+          and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
+          and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Monk", "Pilgrim", "Beggar", "Templar", "Preacher"))
+          and "Archbishop Severin Aurel" in res["titles"] and "Aldric Venn" not in res["titles"]
+          and any("Stair Beneath" in str(p) for p in res["archbishop"]["panel"]) and res.get("stair_travel") == "catacombs")
+    step_result("holy", ok, **res)
+
+def step_descend():
+    """the stair beneath Vel Morrath's altar, both ways: from the cathedral's choir down into the catacombs (the level
+    vel_morrath, 891) with her whole state, its name and its way back; then back up by the Escape menu's "Return to Vel
+    Morrath": the city built round her again and she stands before the cathedral's door (the game instance's ReturnAt), her
+    state as she left the catacombs"""
+    res = {}
+    if "brokenspire" not in G["w"].get_path_name(): yield from travel("brokenspire", via_menu)
+    yield from as_hero("Warrior")
+    yield from to_vel_morrath()
+    g = G["gen"]
+    res["set_town"] = yield from set_up("Warrior", "town")
+    before = snapshot()
+    mg = place("mistgate")
+    yield from travel("vel_morrath", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]; c = cb()
+    res["down"] = yield from leg_check(before, "Warrior down the stair")
+    p = G["pawn"].get_actor_location()
+    lines = [str(l) for l in g.get_menu_lines()]
+    res["catacombs"] = {"key": str(g.get_editor_property("dungeon_key")), "title": str(g.get_editor_property("dungeon_title")), "tier_floors": g.get_editor_property("tier_floors"),
+                        "section": [g.world_to_section(p).x, g.world_to_section(p).y], "z": round(p.z, 1), "return_line": next((l for l in lines if "Return to" in l), None),
+                        "return_town": str(G["gi"].get_editor_property("return_town")), "return_at": [round(v) for v in (G["gi"].get_editor_property("return_at").x, G["gi"].get_editor_property("return_at").y)]}
+    try: res["enter_counter"] = G["gi"].get_counter("vel_morrath:enter")
+    except Exception as e: res["enter_counter"] = str(e)
+    res["set_catacombs"] = yield from set_up("Warrior", "castle")
+    before = snapshot()
+    quiet(False)
+    yield from travel("brokenspire", via_menu)
+    g = G["gen"]
+    # (the game instance's load: once the world is made the city is built round her, at the cathedral's door)
+    t0 = time.time(); st = []
+    while time.time() - t0 < 150:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Vel Morrath" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    res["up"] = yield from leg_check(before, "Warrior up the stair")
+    p = G["pawn"].get_actor_location(); ra = G["gi"].get_editor_property("return_at")
+    door = place("castle door")
+    res["back"] = {"town": st[1] if len(st) > 1 else None, "from_return_at_m": round(dist2(p, ra) / 100, 2), "from_cathedral_door_m": round(dist2(p, door) / 100, 1) if door else None,
+                   "on_ground": G["pawn"].get_editor_property("character_movement").is_moving_on_ground()}
+    cc = res["catacombs"]
+    ok = (res["down"]["ok"] and res["up"]["ok"] and res["down"]["level"] == "vel_morrath" and cc["key"] == "vel_morrath" and cc["tier_floors"] and cc["section"] == [0, 0]
+          and abs(cc["z"]) < 200 and cc["return_line"] and "Vel Morrath" in cc["return_line"] and cc["return_town"] == "Vel Morrath"
+          and res["back"]["town"] == "Vel Morrath" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_cathedral_door_m"] or 99) < 12)
+    step_result("descend", ok, **res)
+
+STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
+              "holy": step_holy, "descend": step_descend})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

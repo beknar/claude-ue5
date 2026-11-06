@@ -117,7 +117,19 @@ FIntPoint ARDDungeonGenerator::WorldToSection(FVector L) const
 
 FVector ARDDungeonGenerator::TileCenter(FIntPoint T) const
 {
-	return FVector(GridOrigin.X + (T.X + 0.5f) * TileSize, GridOrigin.Y + (T.Y + 0.5f) * TileSize, 0.f);
+	float Z = 0.f;
+	if (bTierFloors)
+	{
+		const int32 H = SectionTiles / 2;
+		const FIntPoint S(FMath::FloorToInt((float)(T.X + H) / SectionTiles), FMath::FloorToInt((float)(T.Y + H) / SectionTiles));
+		Z = SectionFloorZ(S);
+		// (a stair's tile: its own height on the ramp)
+		if (const ARDSection* Sec = GetSection(S))
+		{
+			Z += Sec->StairRiseAt(T - SectionMinTile(S));
+		}
+	}
+	return FVector(GridOrigin.X + (T.X + 0.5f) * TileSize, GridOrigin.Y + (T.Y + 0.5f) * TileSize, Z);
 }
 
 int32 ARDDungeonGenerator::SectionSeed(FIntPoint S) const
@@ -148,7 +160,7 @@ ARDSection* ARDDungeonGenerator::SpawnSection(FIntPoint S, bool bEditorBuild, bo
 	UWorld* W = GetWorld();
 	FActorSpawnParameters P; P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	const FIntPoint T0 = SectionMinTile(S);
-	ARDSection* Sec = W->SpawnActor<ARDSection>(ARDSection::StaticClass(), FTransform(FVector(GridOrigin.X + T0.X * TileSize, GridOrigin.Y + T0.Y * TileSize, 0.f)), P);
+	ARDSection* Sec = W->SpawnActor<ARDSection>(ARDSection::StaticClass(), FTransform(FVector(GridOrigin.X + T0.X * TileSize, GridOrigin.Y + T0.Y * TileSize, SectionFloorZ(S))), P);
 	if (!Sec) return nullptr;
 #if WITH_EDITOR
 	if (bEditorBuild) { Sec->SetActorLabel(FString::Printf(TEXT("RD_Section_%d_%d"), S.X, S.Y)); Sec->SetFolderPath(TEXT("RandomDungeon/Sections")); }
@@ -871,7 +883,7 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 			Out.Add(bOver ? FString(TEXT("button|Save (over the save of that name)")) : FString(TEXT("button|Save")));
 		}
 		else if (Id == TEXT("hero")) Out.Add(bTown || bTownLink ? FString(TEXT("button|Choose another hero (a new game)")) : FString(TEXT("button|Choose another hero")));
-		else if (Id == TEXT("town")) Out.Add(FString::Printf(TEXT("button|Return to %s"), *TownName));
+		else if (Id == TEXT("town")) Out.Add(FString::Printf(TEXT("button|Return to %s"), *WayBackName()));
 		else if (Id == TEXT("quit")) Out.Add(TEXT("button|Quit"));
 		else if (Id == TEXT("controls")) Out.Add(FString::Printf(TEXT("choice|Controls hint|%s"), bControlsShown ? TEXT("On") : TEXT("Off")));
 		else if (Id == TEXT("res"))
@@ -952,7 +964,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 		{
 			const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 			const bool bWilds = bWild && Her && IsWildReady() && !IsInTownWalls(Her->GetActorLocation());
-			SaveNameText = FString::Printf(TEXT("%s day %d"), bWilds ? TEXT("The wilds") : (bTown ? *TownName : TEXT("Mistward Castle")), TownDay);
+			SaveNameText = FString::Printf(TEXT("%s day %d"), bWilds ? TEXT("The wilds") : (bTown ? *TownName : !DungeonTitle.IsEmpty() ? *DungeonTitle : TEXT("Mistward Castle")), TownDay);
 		}
 		return true;
 	}
@@ -1165,7 +1177,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			{
 				bBossOf = true;
 				// (the tier's boss is dead for the game: coming back into the castle does not set it again; the final boss has its own)
-				if (bTownLink && !E.bFinal) TownCountMax(FString::Printf(TEXT("bossdone:%d"), E.Tier), 1);
+				if (bTownLink && !E.bFinal) TownCountMax(DungeonCounterName(FString::Printf(TEXT("bossdone:%d"), E.Tier)), 1);
 			}
 		TownOnKill(Monster, bBossOf);
 	}
@@ -1338,7 +1350,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	{
 		// (mistward: a locked cell: a prisoner is let out; a monster's is locked from within, and opens when she is near)
 		const int32 C = Best->CellOfDoor(BestI);
-		if (Best->Cells.IsValidIndex(C) && Best->Cells[C].Occupant == 1) { Best->OpenCell(BestI); if (bTownLink) TownCount(TEXT("prisoners")); return TEXT("prisoner"); }
+		if (Best->Cells.IsValidIndex(C) && Best->Cells[C].Occupant == 1) { Best->OpenCell(BestI); if (bTownLink) TownCount(DungeonCounterName(TEXT("prisoners"))); return TEXT("prisoner"); }
 		if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("The cell is locked from within"));
 		return TEXT("cell locked");
 	}
@@ -1600,7 +1612,14 @@ void ARDDungeonGenerator::Tick(float Dt)
 		{
 			const FVector L = Ch->GetActorLocation();
 			// (the wilderness: the ground under her, not the level's floor)
-			const float Floor = bWild && IsWildReady() ? WildGroundZ(L) : GetActorLocation().Z;
+			float Floor = bWild && IsWildReady() ? WildGroundZ(L) : GetActorLocation().Z;
+			// (the catacombs: the floor of the set she is in, or the ramp's height on a stair)
+			if (bTierFloors)
+			{
+				const FIntPoint Sn = WorldToSection(L);
+				const ARDSection* Sec = GetSection(Sn);
+				Floor = Sec ? Sec->FloorZAt(L) : SectionFloorZ(Sn);
+			}
 			if (L.Z < Floor - FallResetDepth)
 			{
 				const FVector To = bHasSafeSpot ? LastSafeSpot : GetStartRoomCenter() + FVector(0, 0, 100.f);

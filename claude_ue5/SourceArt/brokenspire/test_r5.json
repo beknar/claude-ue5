@@ -1,0 +1,41 @@
+{
+ "tag": "r5",
+ "plan": [
+  "castle"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "castle",
+   "ok": true,
+   "weapon": "Viking Shortsword",
+   "armour": "Plate Armour",
+   "before_gold": 250,
+   "before_armour": "Plate Armour",
+   "castle_level": "mistward_castle",
+   "castle_gold": 250,
+   "castle_armour": "Plate Armour",
+   "castle_lines_same": true,
+   "entered": 1,
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "menu_line": "button|Return to Brokenspire",
+   "back_level": "brokenspire",
+   "at_castle_door_m": 1.5,
+   "back_gold": 250,
+   "back_armour": "Plate Armour",
+   "back_lines_same": true,
+   "same_town": true
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

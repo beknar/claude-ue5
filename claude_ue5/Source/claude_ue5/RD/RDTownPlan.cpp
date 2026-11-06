@@ -48,6 +48,7 @@ static FString RDTSignText(uint8 Kind)
 	case TK_Chapel: return TEXT("CHAPEL");
 	case TK_Barracks: return TEXT("BARRACKS");
 	case TK_Witch: return TEXT("HEDGE\nWITCH");
+	case TK_Monastery: return TEXT("MONASTERY");
 	default: return FString();
 	}
 }
@@ -116,6 +117,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 	CastleHallRoom = -1; CastleBld = -1; CastleTowers.Reset(); CastleStairTower = -1;
 	FRDTFrame F; F.O = FMath::Max(4, (N - 160) / 2); F.S = N - 2 * F.O; F.G = R.RandRange(0, 3);
 	const int32 S = F.S;
+	// (Vel Morrath's holy city (the user's of 2026-11-06, the generator's TownPlan 1): the cathedral at the town's middle with
+	// its plaza before it, over the catacombs; every rule of it behind bHoly, so Brokenspire's plan and draws stay as they were)
+	const bool bHoly = Generator->TownPlan == 1;
 	// ---- the ground inside the wall: one hallway (its rectangle the town's bounds; only the tiles inside the wall's outline
 	// are ground, below)
 	FCorr Ground; Ground.Min = FIntPoint(F.O, F.O); Ground.Max = FIntPoint(F.O + S, F.O + S); Ground.bHoriz = true; Ground.Theme = 0;
@@ -139,10 +143,14 @@ void ARDSection::PlanTown(FRandomStream& R)
 	};
 	// ---- the main road, the castle, the square, the cross roads
 	const int32 Vc = S / 2 - 1 + R.RandRange(-6, 6);
-	const int32 CD = 17, CW = 21;
-	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners)
-	const int32 Cu0 = S - 3 - CD, Cv0 = Vc - CW / 2;
-	const int32 Us = 50 + R.RandRange(-4, 4);           // (the square's near edge)
+	// (the holy city's cathedral: 27 tiles deep (81 m: the narthex, the nave, the choir), 19 wide (the nave and its aisles))
+	const int32 CD = bHoly ? 27 : 17, CW = bHoly ? 19 : 21;
+	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners; the cathedral a
+	// little past the town's middle, the plaza before it)
+	const int32 Cu0 = bHoly ? S / 2 - CD / 2 + 4 : S - 3 - CD, Cv0 = Vc - CW / 2;
+	const int32 Us = bHoly ? Cu0 - 19 : 50 + R.RandRange(-4, 4);           // (the square's near edge)
+	// (the castle's (or the cathedral's) ground with a margin: the castle reaches the far wall, the cathedral has ground behind)
+	auto InCastleZone = [&](float U, float V, float Mg) { return U >= Cu0 - Mg && (!bHoly || U <= Cu0 + CD + Mg) && V >= Cv0 - Mg && V <= Cv0 + CW + Mg; };
 	const int32 SqU0 = Us, SqU1 = Us + 14, SqV0 = Vc - 7, SqV1 = Vc + 8;
 	// ---- the wall's outline (the user's of 2026-11-02: "the town borders should also be irregularly shaped with the town walls
 	// following the shape of the town"): about twenty corners round the town's middle at radii from the plan's stream; a
@@ -175,7 +183,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 			if (FMath::Abs(FMath::FindDeltaAngleRadians(Th, PI)) < 0.32f) continue;      // (the gate's stretch)
 			const FVector2D D(FMath::Cos(Th), FMath::Sin(Th));
 			float Rr = Rb * (0.84f + 0.08f * FMath::Sin(2.f * Th + Ph1) + 0.06f * FMath::Sin(3.f * Th + Ph2) + R.FRandRange(-0.035f, 0.035f));
-			if (Th > CaMin - Step && Th < CaMax + Step) Rr = 1e9f;                             // (behind the castle: the square's edge)
+			if (!bHoly && Th > CaMin - Step && Th < CaMax + Step) Rr = 1e9f;                             // (behind the castle: the square's edge)
 			Vs.Add({ Th, Cc + D * FMath::Min(Rr, RMax(D)) });
 		}
 		// (the gate's stretch: across the main road, 4 tiles each side of it (its two towers), as far out as the corners beside it)
@@ -237,7 +245,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		for (const FVector2D& Q : Fp)
 		{
 			const float U = Q.X, V = Q.Y;
-			const bool bCastle = U >= Cu0 - 3 && V >= Cv0 - 3 && V <= Cv0 + CW + 3;
+			const bool bCastle = InCastleZone(U, V, 3.f);
 			if (!InsidePg(U, V) || BorderDistPg(U, V) < 1.5f || bCastle) { if (Path.Pts.Num() >= 6) TownPaths.Add(Path); Path.Pts.Reset(); continue; }
 			const FVector2D Lf = F.LocalF(U, V);
 			Path.Pts.Add(FVector2D(GetActorLocation().X + Lf.X * Generator->TileSize, GetActorLocation().Y + Lf.Y * Generator->TileSize));
@@ -273,7 +281,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 			float Want = FMath::Atan2(To.Y, To.X) + (Am * FMath::Sin(Sd / W1 + Ph1) + 0.45f * FMath::Sin(Sd / W2 + Ph2)) * FMath::Clamp((D - 3.f) / 14.f, 0.f, 1.f);
 			const FVector2D Ahead = P + FVector2D(FMath::Cos(Hd), FMath::Sin(Hd)) * 3.f;
 			// (the castle's ground and the lane ahead: turn toward the town's middle)
-			const bool bCastle = Ahead.X >= Cu0 - 5 && Ahead.Y >= Cv0 - 5 && Ahead.Y <= Cv0 + CW + 5;
+			const bool bCastle = InCastleZone(Ahead.X, Ahead.Y, 5.f);
 			if (bCastle || !InsidePg(Ahead.X, Ahead.Y) || BorderDistPg(Ahead.X, Ahead.Y) < 4.f)
 				Want = FMath::Atan2(S * 0.5f - P.Y, S * 0.45f - P.X);
 			const float Turn = D < 4.f ? 0.5f : 0.12f;
@@ -292,6 +300,14 @@ void ARDSection::PlanTown(FRandomStream& R)
 	TownSquare = F.Rect(SqU0, SqV0, SqU1, SqV1);
 	const int32 Xu = Us + 6;
 	RoadIn(Xu, 0, Xu + 3, S, false);
+	// (the holy city: the main road on past the cathedral's flank to a second cross road behind its choir, the processional way
+	// round it)
+	if (bHoly)
+	{
+		RoadIn(Cu0 + CD + 4, 0, Cu0 + CD + 7, S, false);
+		Road(Cu0 - 6, Cv0 - 4, Cu0 + CD + 4, Cv0 - 2);
+		Road(Cu0 - 6, Cv0 + CW + 2, Cu0 + CD + 4, Cv0 + CW + 4);
+	}
 	for (const FIntRect& Rr : TownRoads) for (int32 X = Rr.Min.X; X < Rr.Max.X; ++X) for (int32 Y = Rr.Min.Y; Y < Rr.Max.Y; ++Y) if (In(FIntPoint(X, Y))) TownRoadMask[Idx(FIntPoint(X, Y))] = 1;
 	for (int32 X = TownSquare.Min.X; X < TownSquare.Max.X; ++X) for (int32 Y = TownSquare.Min.Y; Y < TownSquare.Max.Y; ++Y) if (In(FIntPoint(X, Y))) TownRoadMask[Idx(FIntPoint(X, Y))] = 1;
 	// ---- the earth roads (the third list of 2026-11-02: no grid): places scattered over the town (at least 15 tiles apart,
@@ -308,7 +324,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		{
 			const FVector2D Q(R.FRandRange(5.f, S - 5.f), R.FRandRange(5.f, S - 5.f));
 			if (!InsidePg(Q.X, Q.Y) || BorderDistPg(Q.X, Q.Y) < 7.f) continue;
-			if (Q.X >= Cu0 - 10 && Q.Y >= Cv0 - 8 && Q.Y <= Cv0 + CW + 8) continue;
+			if (Q.X >= Cu0 - 10 && (!bHoly || Q.X <= Cu0 + CD + 8) && Q.Y >= Cv0 - 8 && Q.Y <= Cv0 + CW + 8) continue;
 			if (Q.X > SqU0 - 4 && Q.X < SqU1 + 4 && Q.Y > SqV0 - 4 && Q.Y < SqV1 + 4) continue;
 			bool bNear = false;
 			for (int32 K = 0; K < Nodes.Num() && !bNear; ++K) bNear = FVector2D::Distance(Nodes[K], Q) < (K < NAnchor ? 8.f : 12.f);
@@ -347,7 +363,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		UE_LOG(LogRDTown, Log, TEXT("RDTOWN earth roads: %d places (%d on the cobbles), %d ways (%d loops), %d strips"), Nodes.Num(), NAnchor, Edges.Num(), Edges.Num() - NTree, TownPaths.Num());
 	}
 	// the castle and the square's ground are taken; the gate's mouth kept clear
-	Mark(Cu0 - 2, Cv0 - 2, S, Cv0 + CW + 2, 3);
+	Mark(Cu0 - 2, Cv0 - 2, bHoly ? Cu0 + CD + 2 : S, Cv0 + CW + 2, 3);
 	Mark(GateU, Vc - 4, GateU + 6, Vc + 5, 4);
 	// (a rectangle wholly inside the outline, 2.5 tiles from the wall, on free ground)
 	auto FitsIn = [&](int32 U0, int32 V0, int32 U1, int32 V1)
@@ -383,10 +399,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// (the graveyard: a corner of the town away from the gate; its chapel takes the plot beside it)
 	const bool bGraveLow = R.RandBool();
 	// (in the corner wanted, moved in until it lies inside the wall's outline on free ground)
-	int32 GyU0 = S - 4 - 14 - CD - 6, GyV0 = bGraveLow ? 3 : S - 3 - 11;
-	PlaceRect(GyU0, GyV0, 12, 11);
-	Mark(GyU0, GyV0, GyU0 + 12, GyV0 + 11, 4);
-	const FIntRect Gy = F.Rect(GyU0 + 1, GyV0 + 1, GyU0 + 11, GyV0 + 10);
+	// (the holy city's: a larger one behind the cathedral's choir, its chapel beside it)
+	const int32 GyW = bHoly ? 16 : 12, GyH = bHoly ? 14 : 11;
+	int32 GyU0 = bHoly ? Cu0 + CD + 9 : S - 4 - 14 - CD - 6, GyV0 = bHoly ? (bGraveLow ? Vc - 18 : Vc + 3) : bGraveLow ? 3 : S - 3 - 11;
+	PlaceRect(GyU0, GyV0, GyW, GyH);
+	Mark(GyU0, GyV0, GyU0 + GyW, GyV0 + GyH, 4);
+	const FIntRect Gy = F.Rect(GyU0 + 1, GyV0 + 1, GyU0 + GyW - 1, GyV0 + GyH - 1);
 	// (the mill in the other corner by the castle side, on open ground)
 	int32 MlU0 = S - 4 - 14 - CD - 4, MlV0 = bGraveLow ? S - 3 - 7 : 3;
 	PlaceRect(MlU0, MlV0, 7, 7);
@@ -467,7 +485,15 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// the barracks by the gate, the chapel by the graveyard, the witch's hut far from everyone
 	if (Place(TK_Barracks, 9, 11, 6, 7, Near(GateMid + FVector2D(14.f, 0.f)), 900, P)) Commit(TK_Barracks, P, 0, 2);
 	if (Place(TK_Chapel, 6, 7, 5, 6, Near(FVector2D(GyU0 + 6.f, GyV0 + 5.5f)), 900, P)) Commit(TK_Chapel, P, 0, 2);
-	if (Place(TK_Witch, 4, 4, 4, 4, [&](const FVector2D& Q) { return -(float)FVector2D::Distance(Q, SqMid); }, 900, P)) Commit(TK_Witch, P, 0, 1);
+	if (bHoly)
+	{
+		// (the holy city: the monastery by the cathedral's flank, two more chapels on the plaza's sides; no hedge witch)
+		const FVector2D Flank((float)(Cu0 + CD / 2), (float)(Cv0 + CW + 9));
+		if (Place(TK_Monastery, 12, 14, 8, 10, Near(Flank), 900, P)) Commit(TK_Monastery, P, 0, 2);
+		for (int32 K = 0; K < 2; ++K)
+			if (Place(TK_Chapel, 6, 7, 5, 6, Near(FVector2D(SqMid.X, SqMid.Y + (K ? 14.f : -14.f))), 900, P)) Commit(TK_Chapel, P, 0, 2);
+	}
+	else if (Place(TK_Witch, 4, 4, 4, 4, [&](const FVector2D& Q) { return -(float)FVector2D::Distance(Q, SqMid); }, 900, P)) Commit(TK_Witch, P, 0, 1);
 	// the homes: as many as fit; their state by chance (the user's: burned down, boarded up, or lived in)
 	// (400 tries a home: a try is a rectangle anywhere in the town, and few land beside a winding road; at 80 the town had 94
 	// homes once the earth roads wandered (the third list), 170 on the old grid)
@@ -475,11 +501,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 	{
 		if (!Place(TK_Home, 4, 6, 4, 5, [&](const FVector2D& Q) { return R.FRand(); }, 400, P)) continue;
 		const float U = R.FRand();
-		Commit(TK_Home, P, U < 0.2f ? 1 : U < 0.42f ? 2 : 0, 2);
+		// (the holy city is kept: few homes burned or boarded)
+		Commit(TK_Home, P, bHoly ? (U < 0.04f ? 1 : U < 0.10f ? 2 : 0) : (U < 0.2f ? 1 : U < 0.42f ? 2 : 0), 2);
 	}
-	// ---- the castle (its own frame: front toward -u, the main road's middle Vc)
+	// ---- the castle (its own frame: front toward -u, the main road's middle Vc); the holy city's cathedral
 	{
-		FTownBld B; B.Kind = TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
+		FTownBld B; B.Kind = bHoly ? TK_Cathedral : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
 		const FIntRect Rc = F.Rect(Cu0, Cv0, Cu0 + CD, Cv0 + CW);
 		B.Min = Rc.Min; B.Max = Rc.Max;
 		B.DoorSide = F.Side(-1, 0); B.DoorTile = F.Tile(Cu0, Vc);
@@ -527,6 +554,42 @@ void ARDSection::PlanTown(FRandomStream& R)
 			B.Label = TEXT("Mistward Castle");
 			continue;
 		}
+		if (B.Kind == TK_Cathedral)
+		{
+			// the holy city's cathedral (RDHoly.cpp builds it): the narthex at its front between the two bell towers' bases, the
+			// nave, the choir behind it whose far wall holds the stair down into the catacombs, an aisle down each side
+			const int32 Ew = 11, Ed = 4, Cd = 6;
+			const int32 W0 = Vc - Ew / 2;
+			const int32 RE = AddRoomRect(BI, F.Rect(Cu0, W0, Cu0 + Ed, W0 + Ew), ERDRoomKind::Shrine, F.Tile(Cu0 + 2, Vc));
+			const int32 RN = AddRoomRect(BI, F.Rect(Cu0 + Ed, W0, Cu0 + CD - Cd, W0 + Ew), ERDRoomKind::Chapel, F.Tile(Cu0 + Ed + (CD - Cd - Ed) / 2, Vc));
+			const int32 RC = AddRoomRect(BI, F.Rect(Cu0 + CD - Cd, W0, Cu0 + CD, W0 + Ew), ERDRoomKind::Crypt, F.Tile(Cu0 + CD - Cd / 2, Vc));
+			const int32 RL = AddRoomRect(BI, F.Rect(Cu0 + Ed, Cv0, Cu0 + CD, W0), ERDRoomKind::Library, F.Tile(Cu0 + Ed + (CD - Ed) / 2, (Cv0 + W0) / 2));
+			const int32 RR = AddRoomRect(BI, F.Rect(Cu0 + Ed, W0 + Ew, Cu0 + CD, Cv0 + CW), ERDRoomKind::Treasury, F.Tile(Cu0 + Ed + (CD - Ed) / 2, (W0 + Ew + Cv0 + CW) / 2));
+			const int32 TL = AddRoomRect(BI, F.Rect(Cu0, Cv0, Cu0 + Ed, W0), ERDRoomKind::Storeroom, F.Tile(Cu0 + 2, (Cv0 + W0) / 2));
+			const int32 TR = AddRoomRect(BI, F.Rect(Cu0, W0 + Ew, Cu0 + Ed, Cv0 + CW), ERDRoomKind::Storeroom, F.Tile(Cu0 + 2, (W0 + Ew + Cv0 + CW) / 2));
+			CastleHallRoom = RC;
+			const int32 Front = F.Side(-1, 0), Back = F.Side(1, 0), Left = F.Side(0, -1), Right = F.Side(0, 1);
+			Rooms[RE].bDoorSide[Front] = true;
+			AddEdge(B.DoorTile, Out);
+			AddEdge(F.Tile(Cu0 + Ed - 1, Vc), F.Tile(Cu0 + Ed, Vc)); Rooms[RE].bDoorSide[Back] = true; Rooms[RN].bDoorSide[Front] = true;
+			AddEdge(F.Tile(Cu0 + CD - Cd - 1, Vc), F.Tile(Cu0 + CD - Cd, Vc)); Rooms[RN].bDoorSide[Back] = true; Rooms[RC].bDoorSide[Front] = true;
+			// (the aisles from the nave, two doors each; the bell towers from the narthex)
+			for (const int32 Ua : { Cu0 + Ed + 3, Cu0 + CD - Cd - 3 })
+			{
+				AddEdge(F.Tile(Ua, W0), F.Tile(Ua, W0 - 1)); AddEdge(F.Tile(Ua, W0 + Ew - 1), F.Tile(Ua, W0 + Ew));
+			}
+			Rooms[RN].bDoorSide[Left] = Rooms[RN].bDoorSide[Right] = true; Rooms[RL].bDoorSide[Right] = true; Rooms[RR].bDoorSide[Left] = true;
+			AddEdge(F.Tile(Cu0 + 2, W0), F.Tile(Cu0 + 2, W0 - 1)); AddEdge(F.Tile(Cu0 + 2, W0 + Ew - 1), F.Tile(Cu0 + 2, W0 + Ew));
+			Rooms[RE].bDoorSide[Left] = Rooms[RE].bDoorSide[Right] = true; Rooms[TL].bDoorSide[Right] = true; Rooms[TR].bDoorSide[Left] = true;
+			// (the choir's far wall: the stair down into the catacombs (the Mistgate's part: walked into, it opens them))
+			Rooms[RC].bDoorSide[Back] = true;
+			const FVector Far = TileWorld(F.Tile(Cu0 + CD - 1, Vc));
+			const FVector Fw = FVector(RDTDir4[Back].X, RDTDir4[Back].Y, 0.f);
+			MistgateAt = Far + Fw * (Generator->TileSize * 0.5f);
+			MistgateNormal = -Fw;
+			B.Label = FString::Printf(TEXT("The Cathedral of %s"), *Generator->TownName);
+			continue;
+		}
 		ERDRoomKind K = ERDRoomKind::Kitchen;
 		switch (B.Kind)
 		{
@@ -549,8 +612,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 		B.bBoarded = B.State == 2;
 		B.Label = RDTownKindName(B.Kind);
 	}
-	// ---- the castle's round towers, its stair turret and the path to it (no draws: the plan's stream is untouched)
-	CastleTowersPlan();
+	// ---- the castle's round towers, its stair turret and the path to it (no draws: the plan's stream is untouched); the
+	// cathedral's bell towers are its own (RDHoly.cpp)
+	if (!bHoly) CastleTowersPlan();
 	// ---- the wall's towers (2 x 2 tiles astride the wall at its corners, beside the gate and every 15 tiles or so): void
 	// (since 2026-11-02 at the corners of the wall's outline, the gate's stretch's two among them; a long straight stretch gets
 	// one more half way)
@@ -578,7 +642,19 @@ void ARDSection::PlanTown(FRandomStream& R)
 		const FIntRect Sq = TownSquare;
 		const FVector Mid = (TileWorld(Sq.Min) + TileWorld(Sq.Max - FIntPoint(1, 1))) * 0.5f;
 		const FVector Ua = FVector(RDTDir4[F.Side(1, 0)].X, RDTDir4[F.Side(1, 0)].Y, 0.f), Va = FVector(RDTDir4[F.Side(0, 1)].X, RDTDir4[F.Side(0, 1)].Y, 0.f);
-		FTownSpot W; W.Kind = TS_Well; W.At = Mid + Va * 600.f; TownSpots.Add(W);
+		// (the holy city's plaza: a fountain where the well would be, a wayside shrine in each of its corners, a statue on each side)
+		FTownSpot W; W.Kind = bHoly ? TS_Fountain : TS_Well; W.At = Mid + Va * 600.f; TownSpots.Add(W);
+		if (bHoly)
+		{
+			for (const FVector& C : { Mid + Ua * 1900.f + Va * 1900.f, Mid + Ua * 1900.f - Va * 1900.f, Mid - Ua * 1900.f + Va * 1900.f, Mid - Ua * 1900.f - Va * 1900.f })
+			{
+				FTownSpot Sh; Sh.Kind = TS_Shrine; Sh.At = C; Sh.Yaw = (Mid - C).Rotation().Yaw; TownSpots.Add(Sh);
+			}
+			for (const float Sd : { -1.f, 1.f })
+			{
+				FTownSpot St; St.Kind = TS_Statue; St.At = Mid + Va * Sd * 2050.f; St.Yaw = (-Va * Sd).Rotation().Yaw; TownSpots.Add(St);
+			}
+		}
 		FTownSpot Bd; Bd.Kind = TS_Board; Bd.At = Mid - Va * 700.f + Ua * 450.f; Bd.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(Bd);
 		for (int32 K = 0; K < 4; ++K)
 		{
@@ -593,7 +669,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 			FTownSpot L; L.Kind = TS_Lamp; L.At = C; TownSpots.Add(L);
 		}
 		// the elder by the board, the preacher, children and the town's idiot about the square
-		FTownPost Pe; Pe.Role = ERDTownRole::Elder; Pe.At = Bd.At + Ua * -220.f + Va * 160.f; Pe.Yaw = Bd.Yaw + 180.f; TownPosts.Add(Pe);
+		// (the holy city's elder is its archbishop, before the cathedral's door: below)
+		FTownPost Pe; Pe.Role = ERDTownRole::Elder; Pe.At = Bd.At + Ua * -220.f + Va * 160.f; Pe.Yaw = Bd.Yaw + 180.f; if (!bHoly) TownPosts.Add(Pe);
 		FTownPost Pp; Pp.Role = ERDTownRole::Preacher; Pp.At = Mid - Ua * 900.f + Va * 200.f; Pp.Yaw = Ua.Rotation().Yaw; Pp.Wander = 250.f; TownPosts.Add(Pp);
 		for (int32 K = 0; K < 3; ++K) { FTownPost Pc_; Pc_.Role = ERDTownRole::Child; Pc_.At = Mid + Va * (K - 1) * 500.f + Ua * 300.f; Pc_.Wander = 1800.f; Pc_.Index = K; TownPosts.Add(Pc_); }
 		FTownPost Pi; Pi.Role = ERDTownRole::Idiot; Pi.At = Mid - Ua * 2500.f; Pi.Wander = 3500.f; TownPosts.Add(Pi);
@@ -633,15 +710,31 @@ void ARDSection::PlanTown(FRandomStream& R)
 		}
 		for (int32 K = 0; K < 4; ++K)
 		{
-			FTownPost Rf; Rf.Role = ERDTownRole::Refugee; Rf.Index = K; Rf.Wander = 300.f;
+			// (the holy city: pilgrims come in at the gate where Brokenspire's refugees camp)
+			FTownPost Rf; Rf.Role = bHoly ? ERDTownRole::Pilgrim : ERDTownRole::Refugee; Rf.Index = K; Rf.Wander = bHoly ? 2500.f : 300.f;
 			Rf.At = GateIn + Ua * 500.f + Va * ((K % 2 ? 1.f : -1.f) * (650.f + 120.f * K)); Rf.Yaw = R.FRandRange(0, 360);
 			TownPosts.Add(Rf);
 		}
-		// (a camp of the refugees: tents by the wall near the gate)
+		// (a camp of the refugees: tents by the wall near the gate; the holy city's pilgrims' tents the same)
 		for (int32 K = 0; K < 3; ++K)
 		{
 			FTownSpot T; T.Kind = TS_Tent; T.At = GateIn + Ua * (900.f + 350.f * K) + Va * (K % 2 ? 1300.f : -1300.f); T.Yaw = Va.Rotation().Yaw + (K % 2 ? 180.f : 0.f);
 			TownSpots.Add(T);
+		}
+		if (bHoly)
+		{
+			// the holy city's people before the cathedral: the archbishop (its elder: talk, quests) and the templars at its door,
+			// beggars on its steps, pilgrims about the plaza, a second preacher; statues flanking its door
+			const FVector Pz = (TileWorld(TownSquare.Min) + TileWorld(TownSquare.Max - FIntPoint(1, 1))) * 0.5f;
+			FTownPost Ab; Ab.Role = ERDTownRole::Elder; Ab.At = CDoor - Ua * 350.f - Va * 420.f; Ab.Yaw = (-Ua).Rotation().Yaw; TownPosts.Add(Ab);
+			for (int32 K = 0; K < 2; ++K) { FTownPost Tp; Tp.Role = ERDTownRole::Templar; Tp.At = CDoor - Ua * 150.f + Va * (K ? 650.f : -650.f); Tp.Yaw = (-Ua).Rotation().Yaw; Tp.Index = K; TownPosts.Add(Tp); }
+			for (int32 K = 0; K < 3; ++K) { FTownPost Bg; Bg.Role = ERDTownRole::Beggar; Bg.At = CDoor - Ua * 900.f + Va * ((K - 1) * 800.f + 300.f); Bg.Yaw = Ua.Rotation().Yaw; Bg.Wander = 150.f; Bg.Index = K; TownPosts.Add(Bg); }
+			for (int32 K = 0; K < 6; ++K) { FTownPost Pl; Pl.Role = ERDTownRole::Pilgrim; Pl.At = Pz + Va * ((K % 3 - 1) * 900.f) + Ua * ((K / 3) * 900.f - 450.f); Pl.Wander = 2200.f; Pl.Index = 4 + K; TownPosts.Add(Pl); }
+			FTownPost Pp2; Pp2.Role = ERDTownRole::Preacher; Pp2.At = Pz + Ua * 600.f - Va * 1300.f; Pp2.Yaw = Va.Rotation().Yaw; Pp2.Wander = 250.f; TownPosts.Add(Pp2);
+			for (const float Sd : { -1.f, 1.f })
+			{
+				FTownSpot St; St.Kind = TS_Statue; St.At = CDoor - Ua * 100.f + Va * Sd * 1050.f; St.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(St);
+			}
 		}
 		for (int32 BI = 0; BI < TownBlds.Num(); ++BI)
 		{
@@ -669,6 +762,17 @@ void ARDSection::PlanTown(FRandomStream& R)
 			// (outside, beside the door, not before it: F at the door must reach the door)
 			case TK_Witch: Post(ERDTownRole::Witch, TileWorld(B.DoorTile) - In_ * 260.f + FVector(In_.Y, -In_.X, 0) * 230.f); break;
 			case TK_Home: if (B.State == 0 && FRandomStream((int32)(B.Seed ^ 0x51u)).FRand() < 0.6f) Post(ERDTownRole::Townsfolk, TileWorld(B.DoorTile) - In_ * 260.f + FVector(In_.Y, -In_.X, 0) * 230.f, 350.f, BI); break;
+			// (the holy city: monks in the monastery and walking out from it; a preacher in the cathedral's nave, a monk at prayer)
+			case TK_Monastery: Post(ERDTownRole::Monk, Inside, 0.f, 0); Post(ERDTownRole::Monk, Ctr, 600.f, 1); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 2); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 3); break;
+			case TK_Cathedral:
+				if (B.Rooms.Num() > 1)
+				{
+					const FRoom& Nv = Rooms[B.Rooms[1]];
+					const FVector Nc = (TileWorld(Nv.Min) + TileWorld(Nv.Max - FIntPoint(1, 1))) * 0.5f;
+					// (the preacher at the nave's far end facing the door (the posts face out), a monk among the pews)
+					Post(ERDTownRole::Preacher, Nc + In_ * 900.f, 0.f, 9); Post(ERDTownRole::Monk, Nc - In_ * 300.f, 400.f, 4);
+				}
+				break;
 			default: break;
 			}
 		}
@@ -689,6 +793,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 // ------------------------------------------------------------------------------------------------ the building's frame
 FName ARDSection::TownPiece(const FTownBld& B, const TCHAR* Part) const
 {
+	// (the holy city's white stone: "Holy.<part>", 892's pieces (882 rewrites the "Town." ones))
+	if (B.Style == 4) return FName(*FString::Printf(TEXT("Holy.%s"), Part));
 	static const TCHAR* Styles[] = { TEXT("Timber"), TEXT("Stone"), TEXT("Thatch"), TEXT("Burnt") };
 	return FName(*FString::Printf(TEXT("Town.%s_%s"), Styles[FMath::Min<int32>(B.Style, 3)], Part));
 }
@@ -790,6 +896,10 @@ void ARDSection::TownShellBuilding(int32 BI)
 		AddPieceAt(TEXT("Town.MistArch"), MistgateAt - MistgateNormal * 30.f, MistgateNormal.Rotation().Yaw, 1.f, true);
 		return;
 	}
+	if (B.Kind == TK_Cathedral) { CathedralShell(BI); return; }
+	// (the holy city: its houses of white stone (Town.Holy_*), a burned one's timbers as anywhere)
+	if (Generator->TownPlan == 1) B.Style = B.State == 1 ? 3 : 4;
+	else
 	B.Style = B.State == 1 ? 3 : (B.Kind == TK_Temple || B.Kind == TK_Smithy || B.Kind == TK_Barracks || B.Kind == TK_Chapel) ? 1
 	        : B.Kind == TK_Witch ? 2 : (R.FRand() < 0.3f ? 2 : R.FRand() < 0.85f ? 0 : 1);
 	const int32 Nx = B.DoorSide < 2 ? B.Max.X - B.Min.X : B.Max.Y - B.Min.Y;      // (depth along the door's way)
@@ -1155,6 +1265,43 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 		break;
 	}
 	case TK_Witch: FurnRoom = RI; AddPieceAt(TEXT("Cauldron"), Ctr, 0.f); FurnRoom = -1; break;
+	case TK_Cathedral:
+	{
+		// (the holy city's cathedral, after its rooms' own furnishing: pews down the nave either side of its aisle, facing the
+		// choir; the high altar in the choir before the stair down, candles on it. Each piece where it fits)
+		if (B.Rooms.Num() < 3) break;
+		const int32 RN = B.Rooms[1];
+		const FRoom& Nv = Rooms[RN];
+		const FVector L0 = TileWorld(Nv.Lane);
+		float A0 = MAX_flt, A1 = -MAX_flt;
+		for (const FIntPoint& Cn : { Nv.Min, Nv.Max - FIntPoint(1, 1) }) { const float A = FVector::DotProduct(TileWorld(Cn) - L0, In_); A0 = FMath::Min(A0, A); A1 = FMath::Max(A1, A); }
+		const float PewYaw = In_.Rotation().Yaw;
+		int32 Pews = 0;
+		FurnRoom = RN;
+		for (float A = A0 + 300.f; A <= A1 - 300.f; A += 230.f)
+			for (const float Sd : { -1.f, 1.f })
+			{
+				const FVector P = L0 + In_ * A + Along * Sd * 450.f;
+				if (AddPieceAt(TEXT("Cathedral.Pew"), P, PewYaw)) { MarkBlocked(P, PewYaw, FVector2D(110.f, 480.f), true); ++Pews; }
+			}
+		FurnRoom = -1;
+		if (!MistgateAt.IsZero())
+		{
+			const FVector Altar = MistgateAt + MistgateNormal * 780.f;
+			FurnRoom = B.Rooms[2];
+			if (AddPieceAt(TEXT("Cathedral.Altar"), Altar, (-MistgateNormal).Rotation().Yaw))
+			{
+				MarkBlocked(Altar, MistgateNormal.Rotation().Yaw, FVector2D(200.f, 360.f), true);
+				const FRDPiece* Ap = Generator->Piece(TEXT("Cathedral.Altar"));
+				const float Az = Ap ? (float)Ap->Size.Z : 110.f;
+				for (int32 K = -1; K <= 1; K += 2) AddEffect(TEXT("CandleFire"), Altar + FVector(MistgateNormal.Y, -MistgateNormal.X, 0.f) * (K * 110.f) + FVector(0, 0, Az + 10.f), 1.f);
+				AddLight(Altar + FVector(0, 0, Az + 120.f), FLinearColor(1.f, 0.7f, 0.42f), 180.f, 900.f, false, 0.10f);
+			}
+			FurnRoom = -1;
+		}
+		UE_LOG(LogRDTown, Log, TEXT("RDHOLY the cathedral furnished: %d pews"), Pews);
+		break;
+	}
 	default: break;
 	}
 }
@@ -1417,11 +1564,26 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				else AddPieceAt(TEXT("Town.Mill"), Sp.At, Sp.Yaw);
 				break;
 			case TS_Tent: AddPieceAt(TEXT("Town.Tent"), Sp.At, Sp.Yaw); AddPieceAt(TEXT("Town.Firepit"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(330.f, 0, 0)), 0.f); break;
+			// (the holy city's: a statue on its plinth, the plaza's fountain, a wayside shrine with its candles)
+			case TS_Statue:
+			{
+				// (on its plinth, standing on the plinth's top)
+				const FRDPiece* Pl = Generator->Piece(TEXT("Holy.StatuePlinth"));
+				AddPieceAt(TEXT("Holy.StatuePlinth"), Sp.At, Sp.Yaw);
+				AddPieceAt(FName(*FString::Printf(TEXT("Holy.Statue%d"), 1 + R.RandRange(0, 2))), Sp.At + FVector(0, 0, Pl ? (float)Pl->Size.Z - 2.f : 120.f), Sp.Yaw);
+				break;
+			}
+			case TS_Fountain: AddPieceAt(TEXT("Holy.Fountain"), Sp.At, Sp.Yaw); break;
+			case TS_Shrine:
+				AddPieceAt(TEXT("Holy.Shrine"), Sp.At, Sp.Yaw);
+				AddEffect(TEXT("CandleFire"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(40.f, 0, 120.f)), 1.f);
+				break;
 			default: break;
 			}
 			// (what stands outdoors blocks the tiles under it for whoever walks the paths)
-			if (Sp.Kind == TS_Well || Sp.Kind == TS_Board || Sp.Kind == TS_Stall || Sp.Kind == TS_Still || Sp.Kind == TS_Tent)
+			if (Sp.Kind == TS_Well || Sp.Kind == TS_Board || Sp.Kind == TS_Stall || Sp.Kind == TS_Still || Sp.Kind == TS_Tent || Sp.Kind == TS_Statue || Sp.Kind == TS_Shrine)
 				MarkBlocked(Sp.At, Sp.Yaw, FVector2D(260.f, 260.f), true);
+			if (Sp.Kind == TS_Fountain) MarkBlocked(Sp.At, 0.f, FVector2D(600.f, 600.f), true);
 			if (Sp.Kind == TS_Mill) MarkBlocked(Sp.At, 0.f, FVector2D(900.f, 900.f), true);
 		}
 		break;

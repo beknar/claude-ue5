@@ -322,6 +322,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName SealPiece = TEXT("CellFrame");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName EndPiece = TEXT("Wall_Corr");
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierOf(FIntPoint Section) const { return FMath::Max(FMath::Abs(Section.X), FMath::Abs(Section.Y)) + 1; }
+	/** Vel Morrath's catacombs (the user's of 2026-11-06: "each tier is a floor below the last, reached by stairs down from the
+	 *  floor above"): every tier's sets of rooms TierFloorDepth lower than the tier before's, and each hallway across the border
+	 *  from a shallower tier a stair up to it over its StairTiles nearest the border (the set's edge rooms kept that far in) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Catacombs") bool bTierFloors = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Catacombs") float TierFloorDepth = 450.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Catacombs") int32 StairTiles = 4;
+	/** a set of rooms' floor height (0, or its tier's depth with bTierFloors) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Catacombs") float SectionFloorZ(FIntPoint Section) const { return bTierFloors ? -TierFloorDepth * (TierOf(Section) - 1) : 0.f; }
 	/** sections in a tier: 1, 8, 16, 24... */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierSize(int32 Tier) const { return Tier <= 1 ? 1 : 8 * (Tier - 1); }
 	/** its sections may be generated (tier 1 always; another once the tier before it is cleared; none past MaxTier) */
@@ -967,6 +975,25 @@ public:
 	/** where the Mistgate leads (the town's) and the way back (the castle's): maps opened with ?Hero= */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString CastleLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString TownLevel;
+	/** Vel Morrath (2026-11-06): the catacombs' level the holy city's cathedral opens (the town's); this dungeon level's key (a
+	 *  dungeon's: empty for Mistward Castle, "vel_morrath" for the catacombs: its tiers, counters and her piles kept apart; its
+	 *  name for the player is DungeonTitle) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString CatacombsLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString DungeonKey;
+	/** a counter of this dungeon's ("bossdone:2", "tier", "prisoners"): Mistward Castle's as they were, another's under its key */
+	FString DungeonCounterName(const FString& N) const;
+	/** the town the way out leads to, as the player reads it (the catacombs': the town she came down from) */
+	FString WayBackName() const;
+	/** a quest of the town she is in (Brokenspire's have no town set); the quest lines of those only, for the givers' marks */
+	bool IsQuestHere(const FRDQuestDef& Q) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetQuestLinesHere() const;
+	/** the deepest tier open in one dungeon (empty key: Mistward Castle), from the state itself */
+	int32 DungeonTierReached(const FString& Key) const;
+	/** the town's side of a trip down into a dungeon (the autosave, her state carried, the town's state put away, the level
+	 *  opened); Why is the autosave's reason and the game instance's Arrive */
+	void TravelToDungeon(const FString& Level, const FString& Why);
+	/** the cathedral's stair down: walked into, the catacombs open (a test's dry run only says so) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCatacombs();
 	/** the town's people and its quests (pipeline/unreal/882 from SourceArt/brokenspire/town.json) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDTownsfolkDef> Townsfolk;
 	// ---- the town's life (the third list, 2026-11-02; RDTownLife.cpp; 886 fills these)
@@ -1797,6 +1824,8 @@ public:
 	int32 HomeSectionTiles = 168, HomeTownSeed = 0;
 	FString HomeTownName;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 WildTownIdx = -1;
+	/** the town section's plan (FRDWildTown::Plan): 0 Brokenspire's, 1 the holy city (Vel Morrath: RDHoly.cpp) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 TownPlan = 0;
 	bool bTownLoading = false, bInTownWalls = true;
 	double TownLoadStart = 0.0;
 	float TownLoadSeconds = 0.f, LoadedTownDistM = 0.f;

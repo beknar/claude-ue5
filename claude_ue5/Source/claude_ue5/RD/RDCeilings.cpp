@@ -158,7 +158,10 @@ void ARDSection::ShellVaults()
 {
 	if (!Generator || !bBuildStatic) return;
 	const float S = Generator->TileSize, RH = Generator->RoomHeight;
-	const FVector Org = GetActorLocation();
+	// (the vaults' heights are the set's own (over its floor): the mesh stands at the set's place, its points less the set's X and
+	// Y only (Vel Morrath's catacombs, 2026-11-06: a set of rooms below z 0 had its vaults at the heights over z 0))
+	const FVector Org(GetActorLocation().X, GetActorLocation().Y, 0.f);
+	const FVector OrgW = GetActorLocation();
 	const FRDPiece* CeilP = Pc(TEXT("Ceil_Room"));
 	UMaterialInterface* CeilMat = CeilP && CeilP->Mesh ? CeilP->Mesh->GetMaterial(0) : nullptr;
 	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
@@ -183,7 +186,7 @@ void ARDSection::ShellVaults()
 		M->bUseAsyncCooking = false;
 		M->RegisterComponent();
 		AddInstanceComponent(M);
-		M->SetWorldLocation(Org);
+		M->SetWorldLocation(OrgW);
 		int32 Sec = 0;
 		if (Rm.Ceil == 2)
 		{

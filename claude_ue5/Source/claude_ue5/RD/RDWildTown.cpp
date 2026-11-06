@@ -119,7 +119,9 @@ void ARDDungeonGenerator::LoadWildTown(int32 Ti, bool bNow)
 	}
 	bTownHome = T.Style == 0;
 	TownName = T.Name;
-	SectionTiles = bTownHome ? HomeSectionTiles : WildSmallTownTiles;
+	// (each town its own size and plan: Vel Morrath a holy city of the home town's size, the user's of 2026-11-06)
+	SectionTiles = bTownHome ? HomeSectionTiles : T.Tiles > 0 ? T.Tiles : WildSmallTownTiles;
+	TownPlan = bTownHome ? 0 : T.Plan;
 	StartSeed = bTownHome ? HomeTownSeed : T.Seed;
 	GridOrigin = FVector(T.Site.X * 100.0, T.Site.Y * 100.0, 0.0);
 	LootedContainers.Reset();

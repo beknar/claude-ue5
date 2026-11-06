@@ -624,15 +624,19 @@ void FRDWildWorld::PlaceTowns()
 	const double Mx = (Xs + Xn) * 0.5;
 	FRDWildTown A; A.Name = TEXT("Ashenreach"); A.Site = FVector2D(Mx, 0.0); A.Seed = (int32)(Hash(1, 0, Seed) & 0x3FFFFFFF); A.Kind = TEXT("city");
 	FRDWildTown G; G.Name = TEXT("Graymourne"); G.Seed = (int32)(Hash(2, 0, Seed) & 0x3FFFFFFF); G.Kind = TEXT("coast");
-	FRDWildTown V; V.Name = TEXT("Vel Morrath"); V.Seed = (int32)(Hash(3, 0, Seed) & 0x3FFFFFFF); V.Kind = TEXT("town");
+	FRDWildTown V; V.Name = TEXT("Vel Morrath"); V.Seed = (int32)(Hash(3, 0, Seed) & 0x3FFFFFFF); V.Kind = TEXT("city");
+	// (the holy city (the user's of 2026-11-06): Brokenspire's size, the cathedral at its middle over the catacombs)
+	V.Tiles = 168; V.Plan = 1;
 	// (the coasts are found where the land measure falls below 0, walking out from inland)
 	auto Walk = [this](FVector2D From, FVector2D Dir) { FVector2D P = From; for (int32 I = 0; I < 3000; ++I) { if (Continent(P.X, P.Y) < 0.f) return P; P += Dir * 100.0; } return P; };
 	const FVector2D NorthCoast = Walk(FVector2D(Mx + 60000.0, 0.0), FVector2D(1, 0));
 	G.Site = NorthCoast - FVector2D(650.0, 0.0);
 	for (int32 I = 0; I < 40 && Continent(G.Site.X, G.Site.Y) < 0.0005f; ++I) G.Site.X -= 100.0;     // (on land, a few hundred metres from the sea)
-	const FVector2D EastCoast = Walk(FVector2D(0.0, 40000.0), FVector2D(0, 1));
-	V.Site = EastCoast - FVector2D(0.0, 9000.0);
-	for (int32 I = 0; I < 60 && Continent(V.Site.X, V.Site.Y) < 0.04f; ++I) V.Site.Y -= 400.0;
+	// (Vel Morrath, the user's of 2026-11-06: "to the east, but not on the coast. north east of Brokenspire": 55 km north, and
+	// east toward the coast but 35 km or more inside it (until then 9 km inside it, due east))
+	const FVector2D NeCoast = Walk(FVector2D(55000.0, 30000.0), FVector2D(0, 1));
+	V.Site = FVector2D(55000.0, FMath::Min(75000.0, NeCoast.Y - 35000.0));
+	for (int32 I = 0; I < 60 && Continent(V.Site.X, V.Site.Y) < 0.08f; ++I) V.Site.Y -= 500.0;
 	Towns.Add(A); Towns.Add(G); Towns.Add(V);
 }
 

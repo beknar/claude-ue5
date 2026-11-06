@@ -146,7 +146,7 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
   - **Render one hero per editor session**: the editor's memory grew about 4 GB a run (24 to 28 GB committed), and one session for all six ran the machine out of memory in the second run. The driver restarts the editor with `-deterministicaudio` before each.
   - **Take a harvest where it fell, at once**: the Warrior's harvest beat came after her second fight, which had chased that monster 17 m off: within 10 m it found no pile (the render showed none taken), and walked back from 17 m it cost the run four kills. She takes it right after her first kill (1 m).
   - **The overlay's pictures by weapon name**: a spell learned from a tome in the run is not among her card's weapons; it falls back to `spell_<name>` (the Mage's quick bar showed "FS" and "CL").
-- **`868 all`'s ward trap**: its throw's peak speed is sampled once a frame; one full run read 418 cm/s for a throw that measures 537 to 595 (the same 1.6 m): rerun `tiers,traps` before chasing it. `traps` alone fails: it needs `tiers` before it in the plan.
+- **`868 all`'s ward trap**: its throw's peak speed is sampled once a frame; one full run read 418 cm/s for a throw that measures 537 to 595 (the same 1.6 m): rerun `tiers,traps` before chasing it. `traps` alone fails: it needs `tiers` before it in the plan. The chain's blows are sampled the same way: one run (2026-11-06, `test_r2.json`) read its four blows as one drop at 2.47 s (it wants two or more), the rerun three (`test_r3.json`).
 
 ## The list of 2026-10-31 (`878`, `RD/RDMistward4.cpp`, `docs/improvements4.txt`)
 

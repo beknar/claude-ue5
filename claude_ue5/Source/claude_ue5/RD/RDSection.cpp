@@ -49,7 +49,21 @@ FVector ARDSection::TileWorld(FIntPoint T, float Z) const
 {
 	const float S = Generator->TileSize;
 	const FVector L = GetActorLocation();
-	return FVector(L.X + (T.X + 0.5f) * S, L.Y + (T.Y + 0.5f) * S, Z);
+	// (Z over the set's own floor: every set stands at z 0 but the catacombs' (bTierFloors, 2026-11-06), a floor down a tier)
+	return FVector(L.X + (T.X + 0.5f) * S, L.Y + (T.Y + 0.5f) * S, L.Z + Z);
+}
+
+float ARDSection::FloorZAt(const FVector& P) const
+{
+	const float Base = GetActorLocation().Z;
+	const FIntPoint T = WorldToLocal(P);
+	if (!IsStairTile(T) || !Generator) return Base;
+	const int32 Sd = StairSide[Idx(T)];
+	const float S = Generator->TileSize;
+	const float Rise = StairRise;
+	const FVector Off = P - TileWorld(T);
+	const float Along = FMath::Clamp((float)(Off.X * Dir4[Sd].X + Off.Y * Dir4[Sd].Y), -S * 0.5f, S * 0.5f);
+	return Base + StairZ[Idx(T)] + Rise * Along / S;
 }
 
 FIntPoint ARDSection::WorldToLocal(const FVector& W) const
@@ -97,6 +111,13 @@ void ARDSection::Plan(FRandomStream& R)
 	for (FPickup& Pk : Pickups) if (Pk.Mesh.IsValid()) Pk.Mesh->DestroyComponent();
 	Pickups.Reset();
 	Type.Init(0, N * N); Owner.Init(-1, N * N); Blocked.Init(0, N * N); CeilH.Init(0.f, N * N);
+	StairZ.Reset(); StairSide.Reset();
+	// (the catacombs: the sides whose neighbour set is a tier shallower; their hallways climb to it)
+	bool StairSides[4] = { false, false, false, false };
+	const int32 StairL = FMath::Clamp(Generator->StairTiles, 2, Generator->BlockTiles / 2 - 1);
+	StairLen = StairL; StairRise = Generator->TierFloorDepth / StairL;
+	if (Generator->bTierFloors)
+		for (int32 Sd = 0; Sd < 4; ++Sd) StairSides[Sd] = Generator->TierOf(Coord + Dir4[Sd]) < Generator->TierOf(Coord);
 	const bool bStart = Generator->IsStartSection(Coord);
 	// (martial_arts: the great hall alone, OneRoomTiles a side round the middle block's lane: no doors, no hallways, no portals)
 	if (Generator->bOneRoom && bStart)
@@ -161,8 +182,14 @@ void ARDSection::Plan(FRandomStream& R)
 						else if (U < 0.42f) { W = H = Long; }
 					}
 				}
-				const int32 X0 = R.RandRange(FMath::Max(1, B / 2 + 1 - W), FMath::Min(B / 2, B - 1 - W));
-				const int32 Y0 = R.RandRange(FMath::Max(1, B / 2 + 1 - H), FMath::Min(B / 2, B - 1 - H));
+				int32 X0 = R.RandRange(FMath::Max(1, B / 2 + 1 - W), FMath::Min(B / 2, B - 1 - W));
+				int32 Y0 = R.RandRange(FMath::Max(1, B / 2 + 1 - H), FMath::Min(B / 2, B - 1 - H));
+				// (the catacombs: a portal block's room on a side whose hallway is a stair keeps StairTiles of hallway clear before
+				// the border; after the draws, so every other room is where it was)
+				if (StairSides[0] && Bx == 0 && ARDDungeonGenerator::IsPortalBlock(By)) { X0 = FMath::Max(X0, StairL); W = FMath::Max(3, FMath::Min(W, B - 1 - X0)); }
+				if (StairSides[1] && Bx == NB - 1 && ARDDungeonGenerator::IsPortalBlock(By)) { X0 = FMath::Min(X0, B - StairL - 3); W = FMath::Max(3, FMath::Min(W, B - StairL - X0)); }
+				if (StairSides[2] && By == 0 && ARDDungeonGenerator::IsPortalBlock(Bx)) { Y0 = FMath::Max(Y0, StairL); H = FMath::Max(3, FMath::Min(H, B - 1 - Y0)); }
+				if (StairSides[3] && By == NB - 1 && ARDDungeonGenerator::IsPortalBlock(Bx)) { Y0 = FMath::Min(Y0, B - StairL - 3); H = FMath::Max(3, FMath::Min(H, B - StairL - Y0)); }
 				Rm.Min = FIntPoint(Bx * B + X0, By * B + Y0); Rm.Max = Rm.Min + FIntPoint(W, H);
 			}
 			const int32 RI = Rooms.Add(Rm);
@@ -222,6 +249,25 @@ void ARDSection::Plan(FRandomStream& R)
 		AddCorr(FIntPoint(E.Max.X, E.Lane.Y), FIntPoint(N - 1, E.Lane.Y), true); E.bDoorSide[1] = true; Portals.Add(FIntPoint(N - 1, E.Lane.Y));
 		AddCorr(FIntPoint(S.Lane.X, 0), FIntPoint(S.Lane.X, S.Min.Y - 1), false); S.bDoorSide[2] = true; Portals.Add(FIntPoint(S.Lane.X, 0));
 		AddCorr(FIntPoint(Nn.Lane.X, Nn.Max.Y), FIntPoint(Nn.Lane.X, N - 1), false); Nn.bDoorSide[3] = true; Portals.Add(FIntPoint(Nn.Lane.X, N - 1));
+	}
+	// (the catacombs: each portal's hallway on a stair side climbs over its StairL tiles nearest the border to the floor beyond:
+	// a tile's rise is the ramp's height at its middle)
+	if (Generator->bTierFloors)
+	{
+		StairZ.Init(0.f, N * N); StairSide.Init(255, N * N);
+		const float Depth = Generator->TierFloorDepth;
+		for (const FIntPoint& Pt : Portals)
+		{
+			const int32 Sd = Pt.X == 0 ? 0 : Pt.X == N - 1 ? 1 : Pt.Y == 0 ? 2 : 3;
+			if (!StairSides[Sd]) continue;
+			for (int32 I = 0; I < StairL; ++I)
+			{
+				const FIntPoint T = Pt - Dir4[Sd] * I;
+				if (!In(T) || Type[Idx(T)] != 2) break;
+				StairZ[Idx(T)] = Depth - StairRise * (I + 0.5f);
+				StairSide[Idx(T)] = (uint8)Sd;
+			}
+		}
 	}
 	// doorways: every room (not junction) <-> hallway edge, in a fixed order (door index = mover index)
 	int32 DI = 0;
@@ -459,7 +505,7 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	if (!P) return true;              // (false only for the castle's refusals below: callers go on as they did before)
 	// (mistward: furniture stands on its room's floor (a shaped room has no floor outside its shape), never on another piece
 	// and never where a container is opened; what hangs on a wall or from the ceiling is not on the floor)
-	if (FurnRoom >= 0 && T.GetLocation().Z < 30.f && Rooms.IsValidIndex(FurnRoom))
+	if (FurnRoom >= 0 && T.GetLocation().Z - GetActorLocation().Z < 30.f && Rooms.IsValidIndex(FurnRoom))
 	{
 		FVector Fc; FVector2D Sz; float Front;
 		FootOf(P, T, Fc, Sz, Front);
@@ -962,10 +1008,30 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 			// floor (occasional damaged / variant tiles), ceiling
 			FName F = bRoom ? RoomFloor[O] : FName(TEXT("Floor_Corr"));
 			if (R.FRand() < 0.12f && Pc(FName(*(F.ToString() + TEXT("_Alt"))))) F = FName(*(F.ToString() + TEXT("_Alt")));
-			AddPieceAt(F, C, 90.f * R.RandRange(0, 3));
+			const float FloorYaw = 90.f * R.RandRange(0, 3);
 			// (mistward5: a vaulted room's ceiling is its vault (ShellVaults); the turn is drawn all the same)
 			const float CeilYaw = 90.f * R.RandRange(0, 3);
-			if (!(bRoom && Rooms[O].Ceil >= 3)) AddPieceAt(bLow ? TEXT("Ceil_Corr") : TEXT("Ceil_Room"), C + FVector(0, 0, Hgt), CeilYaw);
+			// (the catacombs: a stair's tile, its floor and ceiling one ramp rising toward the border, its side walls from the
+			// ramp's low edge to its high edge's ceiling; the same draws as a flat tile)
+			const bool bStair = IsStairTile(T);
+			float StairLo = 0.f, StairHi = 0.f;
+			if (bStair)
+			{
+				const int32 Sd = StairSide[Idx(T)];
+				const float Rise = StairRise;          // (the plan's: one source for the ramp, its tiles' heights and the safety net)
+				const float Ang = FMath::RadiansToDegrees(FMath::Atan2(Rise, S));
+				const float Up = 1.f / FMath::Cos(FMath::DegreesToRadians(Ang));
+				const float YawB = FMath::RadiansToDegrees(FMath::Atan2((float)Dir4[Sd].Y, (float)Dir4[Sd].X));
+				const float Zs = StairZ[Idx(T)];
+				StairLo = Zs - Rise * 0.5f; StairHi = Zs + Rise * 0.5f;
+				AddPiece(F, FTransform(FRotator(Ang, YawB, 0.f), C + FVector(0, 0, Zs), FVector(Up, 1.f, 1.f)));
+				AddPiece(TEXT("Ceil_Corr"), FTransform(FRotator(Ang, YawB, 0.f), C + FVector(0, 0, Zs + Hgt), FVector(Up, 1.f, 1.f)));
+			}
+			else
+			{
+				AddPieceAt(F, C, FloorYaw);
+				if (!(bRoom && Rooms[O].Ceil >= 3)) AddPieceAt(bLow ? TEXT("Ceil_Corr") : TEXT("Ceil_Room"), C + FVector(0, 0, Hgt), CeilYaw);
+			}
 			// walls
 			for (int32 Side = 0; Side < 4; ++Side)
 			{
@@ -987,7 +1053,8 @@ void ARDSection::ShellColumn(FRandomStream& R, int32 X)
 				if (bWall)
 				{
 					const FName WN = bRoom ? RoomWall[O] : FName(TEXT("Wall_Corr"));
-					Stack(WN, Edge, Yaw, 0.f, Hgt, T, Side);
+					if (bStair) Stack(WN, Edge + FVector(0, 0, StairLo - 20.f), Yaw, 0.f, StairHi - StairLo + 20.f + Hgt, T, Side);
+					else Stack(WN, Edge, Yaw, 0.f, Hgt, T, Side);
 				}
 				else if (bDoorway)
 				{
@@ -1007,7 +1074,7 @@ void ARDSection::ShellCorners()
 	{
 		if (Rm.Kind == ERDRoomKind::Junction || Rm.Shape != 0) continue;       // (mistward: a shaped room's corners are elsewhere)
 		const FVector A = TileWorld(Rm.Min) - FVector(S * 0.5f, S * 0.5f, 0), Bv = TileWorld(Rm.Max - FIntPoint(1, 1)) + FVector(S * 0.5f, S * 0.5f, 0);
-		const FVector Cn[4] = { FVector(A.X, A.Y, 0), FVector(Bv.X, A.Y, 0), FVector(Bv.X, Bv.Y, 0), FVector(A.X, Bv.Y, 0) };
+		const FVector Cn[4] = { FVector(A.X, A.Y, A.Z), FVector(Bv.X, A.Y, A.Z), FVector(Bv.X, Bv.Y, A.Z), FVector(A.X, Bv.Y, A.Z) };
 		for (int32 I = 0; I < 4; ++I)
 		{
 			const FVector In_ = ((A + Bv) * 0.5f - Cn[I]).GetSafeNormal2D();
@@ -1058,7 +1125,7 @@ TArray<FVector> ARDSection::WallSlots(const FRoom& Rm, int32 Side, float Spacing
 	{
 		const float A = Cnt > 1 ? A0 + Step * I : (A0 + A1) * 0.5f;
 		if (FMath::Abs(A - Lane) < S * 0.5f + Clear) continue;
-		const FVector W = bAlongY ? FVector(Wl, A, 0) : FVector(A, Wl, 0);
+		const FVector W = bAlongY ? FVector(Wl, A, GetActorLocation().Z) : FVector(A, Wl, GetActorLocation().Z);          // (on the set's floor: the catacombs' are below z 0)
 		if (bShaped)
 		{
 			const FVector Inward = FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(S * 0.5f, 0, 0));
@@ -1091,7 +1158,7 @@ void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FN
 void ARDSection::LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex)
 {
 	const FBox2D B = RoomBox(Rm);
-	const FVector Ctr(B.GetCenter(), 0);
+	const FVector Ctr(B.GetCenter(), GetActorLocation().Z);          // (on the set's floor)
 	const FVector2D Sz = B.GetSize();
 	const float Big = FMath::Max(Sz.X, Sz.Y);
 	// wall torches: per kind brightness and spacing (cd); 0 = none
@@ -1172,7 +1239,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	const FRoom& Rm = Rooms[RI];
 	const float S = Generator->TileSize, RH = Generator->RoomHeight;
 	const FBox2D B = RoomBox(Rm);
-	const FVector Ctr(B.GetCenter(), 0);
+	const FVector Ctr(B.GetCenter(), GetActorLocation().Z);          // (on the set's floor)
 	const FVector Lc = TileWorld(Rm.Lane);
 	const FVector2D Sz = B.GetSize();
 	// quadrant centres (between the lanes and the walls)
@@ -1183,7 +1250,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		{
 			const float X0 = Qx == 0 ? B.Min.X : Lc.X + S * 0.5f, X1 = Qx == 0 ? Lc.X - S * 0.5f : B.Max.X;
 			const float Y0 = Qy == 0 ? B.Min.Y : Lc.Y + S * 0.5f, Y1 = Qy == 0 ? Lc.Y - S * 0.5f : B.Max.Y;
-			if (X1 - X0 >= 280.f && Y1 - Y0 >= 280.f) { Quads.Add(FVector((X0 + X1) * 0.5f, (Y0 + Y1) * 0.5f, 0)); QuadBoxes.Add(FBox2D(FVector2D(X0, Y0), FVector2D(X1, Y1))); }
+			if (X1 - X0 >= 280.f && Y1 - Y0 >= 280.f) { Quads.Add(FVector((X0 + X1) * 0.5f, (Y0 + Y1) * 0.5f, GetActorLocation().Z)); QuadBoxes.Add(FBox2D(FVector2D(X0, Y0), FVector2D(X1, Y1))); }
 		}
 	auto QuadSize = [&](const FVector& Q) { return FVector2D(FMath::Min(Q.X - B.Min.X, B.Max.X - Q.X) * 2.f - (FMath::Abs(Q.X - Lc.X) < 1 ? 0 : 0), FMath::Min(Q.Y - B.Min.Y, B.Max.Y - Q.Y) * 2.f); };
 	// (mistward: the footprints placed in this room, so that nothing is set on anything else)
@@ -1264,7 +1331,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			Hang(TEXT("Chandelier"), Q, 0.f);
 			AddLight(Q + FVector(0, 0, RH - 230.f), FLinearColor(1.f, 0.66f, 0.36f), 260.f, 2200.f, true, 0.06f);
 		}
-		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, 0), FVector(B.Max.X - 150, B.Min.Y + 150, 0), FVector(B.Min.X + 150, B.Max.Y - 150, 0), FVector(B.Max.X - 150, B.Max.Y - 150, 0) })
+		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Min.X + 150, B.Max.Y - 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Max.Y - 150, GetActorLocation().Z) })
 		{
 			Center(TEXT("Brazier"), Cn, 0.f);
 			const FRDPiece* Bz = this->Pc(TEXT("Brazier"));
@@ -1429,7 +1496,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			for (float A = 0.f; A <= (bRowsX ? In_.GetSize().Y : In_.GetSize().X) + 1.f; A += 240.f)        // rows 2.4 m apart
 				for (float U = 0.f; U <= (bRowsX ? In_.GetSize().X : In_.GetSize().Y) + 1.f; U += 110.f)
 				{
-					const FVector P = bRowsX ? FVector(In_.Min.X + U, In_.Min.Y + A, 0) : FVector(In_.Min.X + A, In_.Min.Y + U, 0);
+					const FVector P = bRowsX ? FVector(In_.Min.X + U, In_.Min.Y + A, GetActorLocation().Z) : FVector(In_.Min.X + A, In_.Min.Y + U, GetActorLocation().Z);
 					if (R.FRand() < 0.2f || !LaneFree(Rm, P, 60.f)) continue;
 					const int32 Pk = R.RandRange(0, 3);
 					const FName Nm = Pk == 0 ? TEXT("Barrel") : Pk == 1 ? TEXT("Barrel2") : Pk == 2 ? TEXT("Crate") : TEXT("Crate2");
@@ -1491,7 +1558,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			const float Yaw = InwardYaw(HearthSide);
 			const FRotator Rt(0, Yaw, 0);
 			const FBox2D Bx = B;
-			FVector Wall = HearthSide == 0 ? FVector(Bx.Min.X, Lc.Y, 0) : HearthSide == 1 ? FVector(Bx.Max.X, Lc.Y, 0) : HearthSide == 2 ? FVector(Lc.X, Bx.Min.Y, 0) : FVector(Lc.X, Bx.Max.Y, 0);
+			FVector Wall = HearthSide == 0 ? FVector(Bx.Min.X, Lc.Y, GetActorLocation().Z) : HearthSide == 1 ? FVector(Bx.Max.X, Lc.Y, GetActorLocation().Z) : HearthSide == 2 ? FVector(Lc.X, Bx.Min.Y, GetActorLocation().Z) : FVector(Lc.X, Bx.Max.Y, GetActorLocation().Z);
 			if (bHearthOnDoor) Wall += (HearthSide < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f;      // every wall has a door: off the doorway lane
 			const FRDPiece* Fp = this->Pc(TEXT("Fireplace"));
 			if (Fp)
@@ -1536,7 +1603,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		if (AltarSide < 0) AltarSide = 1;
 		const float Yaw = InwardYaw(AltarSide);
 		const FRotator Rt(0, Yaw, 0);
-		const FVector Wall = (AltarSide == 0 ? FVector(B.Min.X, Lc.Y, 0) : AltarSide == 1 ? FVector(B.Max.X, Lc.Y, 0) : AltarSide == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0))
+		const FVector Wall = (AltarSide == 0 ? FVector(B.Min.X, Lc.Y, GetActorLocation().Z) : AltarSide == 1 ? FVector(B.Max.X, Lc.Y, GetActorLocation().Z) : AltarSide == 2 ? FVector(Lc.X, B.Min.Y, GetActorLocation().Z) : FVector(Lc.X, B.Max.Y, GetActorLocation().Z))
 			+ (bAltarOnDoor ? (AltarSide < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
 		const FVector Altar = Wall + Rt.RotateVector(FVector(160.f, 0, 0));
 		Center(TEXT("Altar"), Altar, Yaw, true, true);
@@ -1631,7 +1698,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		if (Sd0 < 0) Sd0 = 0;
 		const float Yaw = InwardYaw(Sd0);
 		const FRotator Rt(0, Yaw, 0);
-		const FVector Wall = (Sd0 == 0 ? FVector(B.Min.X, Lc.Y, 0) : Sd0 == 1 ? FVector(B.Max.X, Lc.Y, 0) : Sd0 == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0))
+		const FVector Wall = (Sd0 == 0 ? FVector(B.Min.X, Lc.Y, GetActorLocation().Z) : Sd0 == 1 ? FVector(B.Max.X, Lc.Y, GetActorLocation().Z) : Sd0 == 2 ? FVector(Lc.X, B.Min.Y, GetActorLocation().Z) : FVector(Lc.X, B.Max.Y, GetActorLocation().Z))
 			+ (bForgeOnDoor ? (Sd0 < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
 		const FRDPiece* Fg = this->Pc(TEXT("Forge"));
 		if (Fg)
@@ -1676,7 +1743,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			AddLight(Q + FVector(0, 0, FMath::Min((Mp ? Mp->Size.Z : 120.f) + 120.f, RH - 60.f)), Glow, 90.f, 900.f, false, 0.05f);
 			break;
 		}
-		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, 0), FVector(B.Max.X - 150, B.Max.Y - 150, 0) })
+		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Max.Y - 150, GetActorLocation().Z) })
 			if (LaneFree(Rm, Cn, 60.f)) Candles(Cn, 20.f);
 		for (int32 Side = 0; Side < 4; ++Side)
 			for (const FVector& W : WallSlots(Rm, Side, 600.f, 120.f, 300.f))
@@ -1686,7 +1753,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	case ERDRoomKind::Arena:
 	{
 		// (the floor kept clear for the fight: braziers in the corners, weapons and shields on the walls, banners)
-		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, 0), FVector(B.Max.X - 150, B.Min.Y + 150, 0), FVector(B.Min.X + 150, B.Max.Y - 150, 0), FVector(B.Max.X - 150, B.Max.Y - 150, 0) })
+		for (const FVector& Cn : { FVector(B.Min.X + 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Min.Y + 150, GetActorLocation().Z), FVector(B.Min.X + 150, B.Max.Y - 150, GetActorLocation().Z), FVector(B.Max.X - 150, B.Max.Y - 150, GetActorLocation().Z) })
 		{
 			if (!Center(TEXT("Brazier"), Cn, 0.f)) continue;
 			const FRDPiece* Bz = this->Pc(TEXT("Brazier"));
@@ -1716,7 +1783,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		int32 DoorSide = 0;
 		for (int32 Side = 0; Side < 4; ++Side) if (Rm.bDoorSide[Side]) { DoorSide = Side; break; }
 		const int32 Far = DoorSide ^ 1;
-		const FVector Wall = Far == 0 ? FVector(B.Min.X, Lc.Y, 0) : Far == 1 ? FVector(B.Max.X, Lc.Y, 0) : Far == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0);
+		const FVector Wall = Far == 0 ? FVector(B.Min.X, Lc.Y, GetActorLocation().Z) : Far == 1 ? FVector(B.Max.X, Lc.Y, GetActorLocation().Z) : Far == 2 ? FVector(Lc.X, B.Min.Y, GetActorLocation().Z) : FVector(Lc.X, B.Max.Y, GetActorLocation().Z);
 		const float Yaw = InwardYaw(Far);
 		// (beside the far wall's lane, out of its doorway)
 		const FVector Side2 = (Far < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * (S * 1.f);
@@ -1754,7 +1821,7 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		if (Far < 0) Far = 1;
 		const float Yaw = InwardYaw(Far);
 		const FRotator Rt(0, Yaw, 0);
-		const FVector Wall = (Far == 0 ? FVector(B.Min.X, Lc.Y, 0) : Far == 1 ? FVector(B.Max.X, Lc.Y, 0) : Far == 2 ? FVector(Lc.X, B.Min.Y, 0) : FVector(Lc.X, B.Max.Y, 0))
+		const FVector Wall = (Far == 0 ? FVector(B.Min.X, Lc.Y, GetActorLocation().Z) : Far == 1 ? FVector(B.Max.X, Lc.Y, GetActorLocation().Z) : Far == 2 ? FVector(Lc.X, B.Min.Y, GetActorLocation().Z) : FVector(Lc.X, B.Max.Y, GetActorLocation().Z))
 			+ (bOnDoor ? (Far < 2 ? FVector(0, 1, 0) : FVector(1, 0, 0)) * 450.f : FVector::ZeroVector);
 		const FVector Dais = Wall + Rt.RotateVector(FVector(220.f, 0, 0));
 		const FRDPiece* D = this->Pc(TEXT("Dais"));
@@ -1805,7 +1872,8 @@ void ARDSection::DecorateCorridor(FRandomStream& R, int32 CI)
 		const int32 Side = C.bHoriz ? ((K / 3) % 2 ? 2 : 3) : ((K / 3) % 2 ? 0 : 1);
 		const FIntPoint Nb = T + Dir4[Side];
 		if (In(Nb) && Type[Idx(Nb)] != 0) continue;
-		const FVector Wall = TileWorld(T) + FVector(Dir4[Side].X, Dir4[Side].Y, 0) * (S * 0.5f);
+		// (the catacombs: on a stair, at the ramp's height there)
+		const FVector Wall = TileWorld(T) + FVector(Dir4[Side].X, Dir4[Side].Y, 0) * (S * 0.5f) + FVector(0, 0, StairRiseAt(T));
 		if (C.Theme == 2)
 		{
 			const FVector P = Wall + FRotator(0, InwardYaw(Side), 0).RotateVector(FVector(40, 0, 0));
@@ -1821,6 +1889,8 @@ void ARDSection::DecorateCorridor(FRandomStream& R, int32 CI)
 	{
 		const FIntPoint T = C.bHoriz ? FIntPoint(C.Min.X + K, C.Min.Y) : FIntPoint(C.Min.X, C.Min.Y + K);
 		if (!In(T) || Type[Idx(T)] != 2) continue;
+		// (the catacombs: nothing on a stair's ramp)
+		if (IsStairTile(T)) continue;
 		const float U = R.FRand();
 		const int32 Side = C.bHoriz ? (R.RandBool() ? 2 : 3) : (R.RandBool() ? 0 : 1);
 		const FIntPoint Nb = T + Dir4[Side];
@@ -2005,7 +2075,7 @@ bool ARDSection::Census(ARDDungeonGenerator* InGenerator, FIntPoint InCoord, int
 	S->Generator = InGenerator; S->Coord = InCoord; S->Seed = InSeed; S->bEditorBuilt = false;
 	S->bCensus = true; S->bBuildStatic = false; S->bBuildInteractive = false; S->CensusChests = 0;
 	const FIntPoint T0 = InGenerator->SectionMinTile(InCoord);
-	if (USceneComponent* Rt = S->GetRootComponent()) Rt->SetRelativeLocation(FVector(T0.X * InGenerator->TileSize, T0.Y * InGenerator->TileSize, 0.f));
+	if (USceneComponent* Rt = S->GetRootComponent()) Rt->SetRelativeLocation(FVector(T0.X * InGenerator->TileSize, T0.Y * InGenerator->TileSize, InGenerator->SectionFloorZ(InCoord)));
 	S->Theme = InGenerator->ThemeOf(InCoord);
 	FRandomStream R(InSeed);
 	S->Plan(R);
@@ -2340,7 +2410,7 @@ FVector ARDSection::GetRoomCenter(int32 I) const
 {
 	if (!Rooms.IsValidIndex(I)) return FVector::ZeroVector;
 	const FBox2D B = RoomBox(Rooms[I]);
-	return FVector(B.GetCenter(), 0.f);
+	return FVector(B.GetCenter(), GetActorLocation().Z);         // (on the set's floor: the catacombs' are below z 0)
 }
 void ARDSection::GetRoomBounds(int32 I, FVector2D& Min, FVector2D& Max) const
 {
@@ -2373,6 +2443,8 @@ FIntPoint ARDSection::PortalNeighbour(int32 Portal, FVector& Border, FVector& Ou
 	Outward = FVector(D.X, D.Y, 0.f);
 	const float TS = Generator ? Generator->TileSize : 300.f;
 	Border = TileWorld(P) + Outward * (TS * 0.5f);
+	// (the catacombs: a stair's top is at the floor beyond)
+	if (IsStairTile(P)) Border.Z = FloorZAt(Border - Outward * 1.f);
 	return Coord + D;
 }
 
