@@ -66,6 +66,16 @@ struct FRDCarry
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> SummonShares;
 };
 
+/** a dungeon level other than Mistward Castle (Vel Morrath's catacombs, 2026-11-06): the tiers she opened there and the
+ *  containers of its first set of rooms she opened (the castle's are the game instance's CastleTiers / CastleStartLooted) */
+USTRUCT(BlueprintType)
+struct FRDDungeonSave
+{
+	GENERATED_BODY()
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<int32> Tiers;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<int32> StartLooted;
+};
+
 /** a town of the wilderness she is not in: its seed, the containers she opened there, its guards she killed */
 USTRUCT(BlueprintType)
 struct FRDTownSave
@@ -120,6 +130,19 @@ public:
 	/** the castle's tiers she has opened (they stay open), the start set's containers she opened there */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<int32> CastleTiers;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<int32> CastleStartLooted;
+	/** the other dungeon levels' (the generator's DungeonKey: "vel_morrath" the catacombs under Vel Morrath's cathedral) */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TMap<FString, FRDDungeonSave> Dungeons;
+	/** a dungeon's tiers and first set's opened containers by its key (empty: Mistward Castle's own fields) */
+	TArray<int32>& TiersOf(const FString& Key) { return Key.IsEmpty() ? CastleTiers : Dungeons.FindOrAdd(Key).Tiers; }
+	TArray<int32>& StartLootedOf(const FString& Key) { return Key.IsEmpty() ? CastleStartLooted : Dungeons.FindOrAdd(Key).StartLooted; }
+	/** a counter of a dungeon's ("bossdone:2", "enter"...): Mistward Castle's as they were, another's under its key
+	 *  ("vel_morrath:bossdone:2") */
+	static FString DungeonCounter(const FString& Key, const FString& Name) { return Key.IsEmpty() ? Name : Key + TEXT(":") + Name; }
+	/** where she comes back to the wilderness from a dungeon entered from a town of it that is not Brokenspire (the cathedral of
+	 *  Vel Morrath: before its door), facing which way; the town */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FVector ReturnAt = FVector::ZeroVector;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float ReturnYaw = 0.f;
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString ReturnTown;
 	/** where she comes into the town: "" the town square (a new game), "castle" the castle's door (back from the castle),
 	 *  "portal" before the Mistgate (tests) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString Arrive;

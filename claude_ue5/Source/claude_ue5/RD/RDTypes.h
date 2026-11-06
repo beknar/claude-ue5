@@ -934,7 +934,9 @@ enum class ERDTownRole : uint8
 {
 	Elder, Scholar, Captain,
 	Smith, Trader, Healer, Priest, Keeper, Innkeeper,
-	Drunk, Witch, Child, Refugee, Idiot, Preacher, Mourner, Guard, Militia, Soldier, Townsfolk
+	Drunk, Witch, Child, Refugee, Idiot, Preacher, Mourner, Guard, Militia, Soldier, Townsfolk,
+	// (Vel Morrath's holy city, 2026-11-06: its monks and nuns, pilgrims, beggars at the cathedral's steps, templars)
+	Monk, Pilgrim, Beggar, Templar
 };
 
 /** Brokenspire: a townsperson (the NPC packs: a whole-body mesh and its idle and in-place walk clips, as the prisoners) and
@@ -945,6 +947,9 @@ struct FRDTownsfolkDef
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDTownRole Role = ERDTownRole::Townsfolk;
+	/** the town they live in (empty: Brokenspire, and the small towns' common folk); a town with people of its own for a role
+	 *  (Vel Morrath, 2026-11-06) has those in that role, the shared ones in the others */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Town;
 	/** their name and what they are ("Aldric Venn", "the elder of Brokenspire") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Calling;
@@ -1067,6 +1072,8 @@ struct FRDQuestDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Id;
 	/** who gives it and takes it back: "Elder", "Scholar", "Captain", "Board" (the quest board) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Giver;
+	/** the town whose giver it is (empty: Brokenspire; Vel Morrath's archbishop's, 2026-11-06) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Town;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
 	/** what the giver says offering it, and turning it in */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Offer;

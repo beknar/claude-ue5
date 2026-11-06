@@ -375,7 +375,7 @@ void ARDDungeonGenerator::CheckTierOpenings()
 		if (TiersOpened.Contains(T)) continue;
 		if (!IsTierOpen(T)) break;
 		TiersOpened.Add(T);
-		if (bTownLink) TownCountMax(TEXT("tier"), T);          // (Brokenspire: the quests that ask for a tier)
+		if (bTownLink) TownCountMax(DungeonCounterName(TEXT("tier")), T);          // (Brokenspire: the quests that ask for a tier; the catacombs' under their key)
 		TierNotice = FString::Printf(TEXT("TIER %d IS OPEN"), T);
 		TierNoticeTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 		RefreshSeals();

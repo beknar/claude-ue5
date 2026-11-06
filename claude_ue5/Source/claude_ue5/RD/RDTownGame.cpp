@@ -312,7 +312,12 @@ int32 ARDDungeonGenerator::GetGameTier() const
 {
 	int32 T = 1;
 	for (const int32 O : TiersOpened) T = FMath::Max(T, O);
-	if (const URDGameInstance* GI = URDGameInstance::Of(this)) for (const int32 O : GI->CastleTiers) T = FMath::Max(T, O);
+	if (const URDGameInstance* GI = URDGameInstance::Of(this))
+	{
+		for (const int32 O : GI->CastleTiers) T = FMath::Max(T, O);
+		// (the catacombs' tiers count too: the highest she has opened in any dungeon (2026-11-06))
+		for (const TPair<FString, FRDDungeonSave>& D : GI->Dungeons) for (const int32 O : D.Value.Tiers) T = FMath::Max(T, O);
+	}
 	return FMath::Clamp(T, 1, 5);
 }
 
@@ -395,13 +400,14 @@ void ARDDungeonGenerator::SaveCarry()
 	// (what the level keeps for the game: the castle's tiers and its first set's looted containers, the town's looted ones)
 	if (!bTown)
 	{
-		for (const int32 T : TiersOpened) GI->CastleTiers.AddUnique(T);
-		for (const FIntVector& K : LootedContainers) if (K.X == 0 && K.Y == 0) GI->CastleStartLooted.AddUnique(K.Z);
+		// (each dungeon its own: Mistward Castle's fields, the catacombs' under their key (2026-11-06))
+		for (const int32 T : TiersOpened) GI->TiersOf(DungeonKey).AddUnique(T);
+		for (const FIntVector& K : LootedContainers) if (K.X == 0 && K.Y == 0) GI->StartLootedOf(DungeonKey).AddUnique(K.Z);
 	}
 	else for (const FIntVector& K : LootedContainers) if (K.X == 0 && K.Y == 0) GI->TownLooted.AddUnique(K.Z);
 	// (her things where she fell go with the game, laid again when she comes back to this level (the PR review's find: they
 	// went with the level))
-	const FName Here(bTown ? TEXT("town") : TEXT("castle"));
+	const FName Here(bTown ? TEXT("town") : DungeonKey.IsEmpty() ? TEXT("castle") : *DungeonKey);
 	for (const ARDLootPile* Lp : LootPiles)
 		if (IsValid(Lp) && Lp->bHers && Lp->Things.Num() > 0)
 		{
@@ -437,7 +443,7 @@ bool ARDDungeonGenerator::RestoreCarry()
 #if !UE_BUILD_SHIPPING
 	CarryArrivedLines = PlayerCombat->GetStateLines();          // (for the tests; her summons waiting to come to her side among them)
 #endif
-	PlayerCombat->ShowMessage(bTown ? FString::Printf(TEXT("%s"), *TownName) : FString(TEXT("Mistward Castle")));
+	PlayerCombat->ShowMessage(bTown ? FString::Printf(TEXT("%s"), *TownName) : !DungeonTitle.IsEmpty() ? DungeonTitle : FString(TEXT("Mistward Castle")));
 	UE_LOG(LogRDTownGame, Log, TEXT("RDCARRY restored %s: %d things, %d weapons, armour %s, %.0f hp"), *CurrentHero.ToString(), C.Things.Num(), Weapons.Num(), *PlayerCombat->GetWornArmour().ToString(), PlayerCombat->GetHealth());
 	return true;
 }
@@ -484,6 +490,12 @@ bool ARDDungeonGenerator::ReturnToTown()
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
 		GI->Arrive = TEXT("castle");
+		// (from the catacombs (2026-11-06): back before the cathedral of the town she went down from, out in the wilderness: put
+		// there as a loaded game is (TickWildLoad builds the town round her))
+		if (!DungeonKey.IsEmpty() && !GI->ReturnAt.IsZero())
+		{
+			GI->Arrive = TEXT("save"); GI->LoadAt = GI->ReturnAt; GI->LoadYaw = GI->ReturnYaw; GI->bLoadPending = true;
+		}
 #if !UE_BUILD_SHIPPING
 		if (PlayerCombat) GI->CarryLeftLines = PlayerCombat->GetStateLines();
 #endif
@@ -529,16 +541,18 @@ void ARDDungeonGenerator::BeginTownPlay()
 	}
 	else if (bTownLink && GI)
 	{
-		// (Mistward Castle: the tiers she opened stay open, the first set's opened containers stay opened)
-		for (const int32 T : GI->CastleTiers) TiersOpened.AddUnique(T);
-		for (const int32 K : GI->CastleStartLooted) LootedContainers.Add(FIntVector(0, 0, K));
+		// (Mistward Castle: the tiers she opened stay open, the first set's opened containers stay opened; the catacombs the same,
+		// their own (their DungeonKey))
+		const TArray<int32> Tiers = GI->TiersOf(DungeonKey);
+		for (const int32 T : Tiers) TiersOpened.AddUnique(T);
+		for (const int32 K : GI->StartLootedOf(DungeonKey)) LootedContainers.Add(FIntVector(0, 0, K));
 		// (a tier open from an earlier visit: its boss, if she has not killed it, and its guarded ring (PlaceRingGuard skips a
 		// ring she has) are set again once she has seen a room of the tier before (the PR review's find: CheckTierOpenings
 		// passes an open tier by, so they were never set again))
-		for (const int32 T : GI->CastleTiers)
+		for (const int32 T : Tiers)
 		{
 			if (T < 2) continue;
-			if (bBossEncounters && GI->GetCounter(FString::Printf(TEXT("bossdone:%d"), T)) == 0) RestoredBossTiers.AddUnique(T);
+			if (bBossEncounters && GI->GetCounter(URDGameInstance::DungeonCounter(DungeonKey, FString::Printf(TEXT("bossdone:%d"), T))) == 0) RestoredBossTiers.AddUnique(T);
 			if (bRingGuards) RestoredRingTiers.AddUnique(T);
 		}
 		// (the final boss: slain for the game; placed and not slain before she left, set again once a room of the last tier is
@@ -548,7 +562,7 @@ void ARDDungeonGenerator::BeginTownPlay()
 			bFinalBossSlain = GI->GetCounter(TEXT("finalboss")) > 0;
 			bFinalRestorePending = !bFinalBossSlain && GI->GetCounter(TEXT("finalboss:placed")) > 0;
 		}
-		GI->Count(TEXT("enter"));
+		GI->Count(URDGameInstance::DungeonCounter(DungeonKey, TEXT("enter")));
 	}
 }
 
@@ -560,7 +574,7 @@ void ARDDungeonGenerator::AfterTownBuilt()
 	{
 		URDGameInstance* GI = URDGameInstance::Of(this);
 		if (!GI || At.IsZero()) return;
-		const FName Here(bTown ? TEXT("town") : TEXT("castle"));
+		const FName Here(bTown ? TEXT("town") : DungeonKey.IsEmpty() ? TEXT("castle") : *DungeonKey);
 		int32 N = 0;
 		for (int32 I = GI->HerPiles.Num() - 1; I >= 0; --I)
 		{
@@ -582,7 +596,8 @@ void ARDDungeonGenerator::AfterTownBuilt()
 			if (MistgateFx) MistgateFx->Destroy();
 			if (CircleFx) CircleFx->Destroy();
 			// (the Mistgate is Brokenspire's: the wilderness's small towns' keeps have none)
-			if (bTownHome) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(S->MistgateAt + S->MistgateNormal * 160.f), Sp)) { T->Init(this, 0, false); MistgateFx = T; }
+			// (and the holy city's stair down into the catacombs, 2026-11-06)
+			if (bTownHome || TownPlan == 1) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(S->MistgateAt + S->MistgateNormal * 160.f), Sp)) { T->Init(this, 0, false); MistgateFx = T; }
 			for (const ARDSection::FTownSpot& Ts : S->TownSpots)
 				if (Ts.Kind == TS_Circle) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(Ts.At + FVector(0, 0, 3.f)), Sp)) { T->Init(this, 0, false); CircleFx = T; }
 		}
@@ -619,12 +634,20 @@ void ARDDungeonGenerator::SpawnTownPeople()
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
 	TMap<ERDTownRole, TArray<int32>> ByRole;
+	// (a town with people of its own for a role (Vel Morrath, 2026-11-06: its archbishop, monks, templars...) has those in that
+	// role; the shared ones (no town) fill the others)
+	const FString Here = bTownHome ? FString() : TownName;
+	TSet<ERDTownRole> OwnRoles;
+	if (!Here.IsEmpty()) for (const FRDTownsfolkDef& Df : Townsfolk) if (Df.Town == Here && Df.Mesh) OwnRoles.Add(Df.Role);
 	for (int32 I = 0; I < Townsfolk.Num(); ++I)
 	{
-		// (a small town of the wilderness has no elder, scholar or captain: Brokenspire's quests are Brokenspire's)
 		const ERDTownRole Ro = Townsfolk[I].Role;
-		if (!bTownHome && (Ro == ERDTownRole::Elder || Ro == ERDTownRole::Scholar || Ro == ERDTownRole::Captain)) continue;
-		if (Townsfolk[I].Mesh) for (int32 K = 0; K < FMath::Max(1, Townsfolk[I].Count); ++K) ByRole.FindOrAdd(Townsfolk[I].Role).Add(I);
+		const FRDTownsfolkDef& Df = Townsfolk[I];
+		if (!Df.Town.IsEmpty() && Df.Town != Here) continue;              // (another town's)
+		if (Df.Town.IsEmpty() && OwnRoles.Contains(Ro)) continue;          // (this town has its own in this role)
+		// (a small town of the wilderness has no elder, scholar or captain of its own: Brokenspire's quests are Brokenspire's)
+		if (!bTownHome && Df.Town.IsEmpty() && (Ro == ERDTownRole::Elder || Ro == ERDTownRole::Scholar || Ro == ERDTownRole::Captain)) continue;
+		if (Df.Mesh) for (int32 K = 0; K < FMath::Max(1, Df.Count); ++K) ByRole.FindOrAdd(Ro).Add(I);
 	}
 	TMap<ERDTownRole, int32> Used;
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -766,6 +789,10 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 	if (bTown && bTownHome && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
 		EnterCastle();
+	// the holy city's stair down (the cathedral's choir, 2026-11-06): walked into, the catacombs open
+	else if (bTown && TownPlan == 1 && S && !S->IsBuilding() && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
+		&& !(PlayerCombat && PlayerCombat->IsDead()))
+		EnterCatacombs();
 }
 
 // ================================================================================================ the town map's zoom and drag
@@ -1120,7 +1147,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 {
 	if (!bTown)
 	{
-		if (bTownLink && !CastleWayBack.IsZero() && FVector::Dist2D(From, CastleWayBack) < 260.f && FMath::Abs(From.Z - CastleWayBack.Z) < 250.f) return FString::Printf(TEXT("return to %s"), *TownName);
+		if (bTownLink && !CastleWayBack.IsZero() && FVector::Dist2D(From, CastleWayBack) < 260.f && FMath::Abs(From.Z - CastleWayBack.Z) < 250.f) return FString::Printf(TEXT("return to %s"), *WayBackName());
 		return FString();
 	}
 	if (IsTownPanelOpen()) return FString();
@@ -1257,6 +1284,12 @@ void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 	TownCount(TEXT("kills"));
 	TownCount(FString::Printf(TEXT("kind:%s"), *M->MonsterName.ToString()));
 	if (bBossKill || M->bBoss) TownCount(TEXT("boss"));
+	// (another dungeon's kills under its key too: Vel Morrath's quests count the catacombs' (2026-11-06))
+	if (!DungeonKey.IsEmpty())
+	{
+		TownCount(DungeonCounterName(TEXT("kills")));
+		if (bBossKill || M->bBoss) TownCount(DungeonCounterName(TEXT("boss")));
+	}
 }
 
 void ARDDungeonGenerator::TownOnContainer(ARDSection* Section, int32 Key, const FVector& At)
@@ -1283,6 +1316,8 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 	// (both read from the state itself, not a counter beside it (the PR review's finds): the tier from the tiers open, so a
 	// tier opened by any way counts; the guards from the ones dead in this town, so a town built again starts over)
 	if (Q.Goal == TEXT("tier")) return FMath::Max(GI->GetCounter(Q.Goal), GetGameTier());
+	// (a dungeon's own tier ("vel_morrath:tier", the catacombs' deepest floor opened): whole, as the castle's)
+	if (Q.Goal.EndsWith(TEXT(":tier"))) return FMath::Max(GI->GetCounter(Q.Goal), 1);
 	if (Q.Goal == TEXT("guards")) return GI->GuardsDead.Num();
 	const FRDQuestState* St = GI->FindQuest(Q.Id);
 	const int32 Base = St ? St->Base : 0;
@@ -1453,12 +1488,14 @@ void ARDDungeonGenerator::BuildTownLines()
 	const FRDTownsfolkDef* Def = Who && Townsfolk.IsValidIndex(Who->Def) ? &Townsfolk[Who->Def] : nullptr;
 	TownTitle = Who ? Who->Title : FString(); TownSub = Who ? Who->Calling : FString();
 	const int32 T = GetGameTier();
+	// (each town its own quests (Vel Morrath's archbishop's, 2026-11-06): a giver offers those of the town it stands in)
+	const FString HereQ = bTownHome ? FString() : TownName;
 	auto QuestLinesOf = [&](const FName Giver)
 	{
 		int32 Shown = 0;
 		for (const FRDQuestDef& Q : Quests)
 		{
-			if (Q.Giver != Giver) continue;
+			if (Q.Giver != Giver || Q.Town != HereQ) continue;
 			const int32 P = QuestProgress(Q);
 			const FString St = RDQuestStateOf(GI, Q, P);
 			const FRDQuestState* Before = Q.After.IsNone() ? nullptr : (GI ? GI->FindQuest(Q.After) : nullptr);
@@ -1490,7 +1527,7 @@ void ARDDungeonGenerator::BuildTownLines()
 		TownTitle = TEXT("The quest board"); TownSub = TEXT("bounties posted by the townsfolk and the watch");
 		if (TownBody.IsEmpty()) TownBody = TEXT("Notes pinned over notes, some fresh, some faded. A few still ask for help, and one promises coin.");
 		// (Brokenspire's bounties are Brokenspire's: a small town's board has only old notices)
-		if (bTownHome) QuestLinesOf(TEXT("Board"));
+		if (bTownHome || Quests.ContainsByPredicate([&](const FRDQuestDef& Q) { return Q.Giver == TEXT("Board") && Q.Town == HereQ; })) QuestLinesOf(TEXT("Board"));
 		else Add(TEXT("none"), TEXT("Only faded notices"), FString(), TEXT("Lost cats, a cart for sale, a wedding long past. Nothing asks for your sword here."), false);
 		Add(TEXT("bye"), TEXT("Step away"), FString(), FString());
 	}

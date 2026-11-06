@@ -1,0 +1,360 @@
+{
+ "tag": "h3",
+ "plan": [
+  "holy",
+  "descend"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "holy",
+   "ok": true,
+   "site_km": [
+    55.0,
+    75.0
+   ],
+   "north_east": true,
+   "fps_brokenspire_square": 15.4,
+   "state": [
+    "3",
+    "Vel Morrath",
+    "0",
+    "1",
+    "0",
+    "4.7",
+    "1",
+    "1",
+    "1",
+    "5500000",
+    "7500000",
+    "0"
+   ],
+   "plan": 1,
+   "kinds": {
+    "temple": 1,
+    "tavern": 1,
+    "smithy": 1,
+    "store": 1,
+    "healer": 1,
+    "storehouse": 1,
+    "barracks": 1,
+    "chapel": 3,
+    "monastery": 1,
+    "home": 92,
+    "cathedral": 1
+   },
+   "homes": {
+    "all": 92,
+    "burned": 4,
+    "boarded": 3
+   },
+   "cathedral": {
+    "label": "The Cathedral of Vel Morrath",
+    "rooms": 7,
+    "from_middle_m": 15
+   },
+   "plaza_to_cathedral_m": 76,
+   "spots": {
+    "circle": 1,
+    "mill": 1,
+    "tower": 20,
+    "gate": 1,
+    "fountain": 1,
+    "shrine": 4,
+    "statue": 4,
+    "board": 1,
+    "stall": 4,
+    "lamp": 4,
+    "grave": 30,
+    "graveyard": 1,
+    "tent": 3,
+    "still": 1,
+    "altar": 1,
+    "bar": 1,
+    "smith": 1,
+    "counter": 1,
+    "basin": 1,
+    "stash": 1
+   },
+   "inside": {
+    "temple": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "tavern": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "smithy": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "store": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 18
+    },
+    "healer": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 6
+    },
+    "storehouse": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 12
+    },
+    "barracks": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 13
+    },
+    "chapel": {
+     "n": 3,
+     "with_rooms": 3,
+     "with_door": 3,
+     "containers": 0
+    },
+    "monastery": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 20
+    },
+    "home": {
+     "n": 88,
+     "with_rooms": 88,
+     "with_door": 88,
+     "containers": 239
+    },
+    "cathedral": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 55
+    }
+   },
+   "containers": 371,
+   "doors": 136,
+   "roles": {
+    "Preacher": 3,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Pilgrim": 10,
+    "Elder": 1,
+    "Templar": 2,
+    "Beggar": 3,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Soldier": 3,
+    "Monk": 5,
+    "Townsfolk": 78
+   },
+   "titles": [
+    "Ansel the Chandler",
+    "Archbishop Severin Aurel",
+    "Archivist Mott",
+    "Commander Ysolde Vane",
+    "Garrick Tull",
+    "Matron Gilda",
+    "Mother Ilsabet",
+    "Sister Brenna",
+    "Wardkeeper Holt"
+   ],
+   "archbishop": {
+    "found": true,
+    "said": "talk",
+    "panel": [
+     "What lies beneath the cathedral?",
+     "Why do you need me?",
+     "How do I get down?",
+     "Quest: The Stair Beneath the Altar",
+     "Farewell"
+    ]
+   },
+   "stair_from_cathedral_m": 40,
+   "fps": {
+    "plaza": 5.2,
+    "nave": 20.4
+   },
+   "stair_travel": "catacombs"
+  },
+  {
+   "step": "descend",
+   "ok": true,
+   "set_town": {
+    "found_wear": 47.29999923706055,
+    "slash": [
+     "Ember Slash",
+     true
+    ],
+    "armour": "Plate Armour",
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true,
+    "quick": true
+   },
+   "down": {
+    "level": "vel_morrath",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "POISON 1.6/s",
+     "WEAKENED -50%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     123,
+     123
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "catacombs": {
+    "key": "vel_morrath",
+    "title": "The Catacombs of Vel Morrath",
+    "tier_floors": true,
+    "section": [
+     0,
+     0
+    ],
+    "z": 85.8,
+    "return_line": "button|Return to Vel Morrath",
+    "return_town": "Vel Morrath",
+    "return_at": [
+     5499250,
+     7503250
+    ]
+   },
+   "enter_counter": 1,
+   "set_catacombs": {
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true
+   },
+   "up": {
+    "level": "brokenspire",
+    "left": 59,
+    "arrived": 59,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "SLOWED -60%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     125,
+     125
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "back": {
+    "town": "Vel Morrath",
+    "from_return_at_m": 0.0,
+    "from_cathedral_door_m": 2.5,
+    "on_ground": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_h3_vm_cathedral_front.png",
+  "bs_h3_vm_plaza.png",
+  "bs_h3_vm_nave.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

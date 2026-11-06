@@ -318,6 +318,9 @@ for q in D["quests"]:
                  ("gold", int(q.get("gold", 0))), ("reward_item", q.get("reward", "None")), ("after", q.get("after", "None")), ("hint", q.get("hint", ""))):
         x.set_editor_property(k, v)
     quests.append(x)
+# (another town's people and quests (Vel Morrath's: 892, 2026-11-06) are that town's script's: kept as they are)
+defs += [d for d in g.get_editor_property("townsfolk") if str(d.get_editor_property("town"))]
+quests += [q for q in g.get_editor_property("quests") if str(q.get_editor_property("town"))]
 g.set_editor_property("townsfolk", defs); g.set_editor_property("quests", quests)
 print("TOWN", len(defs), "townsfolk of", len(D["townsfolk"]), "|", len(quests), "quests")
 if "nobuild" not in ARGS:

@@ -1,6 +1,6 @@
 # TODO
 
-[README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md)
+[README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md) · [Vel Morrath](docs/levels/vel_morrath.md)
 
 What is still to be tested and done, and the known limits. Written 2026-11-03 for the wilderness and the castle's final boss (the user's spec of 2026-11-03, [docs/wilderness.txt](docs/wilderness.txt)), merged that day in PR #16. Remove an item when a test shows it working or the work lands; add one when a limit is found.
 
@@ -26,6 +26,18 @@ Built and tested (`884 list7`, `signs`, `gate`; `888 sky7`, `life7`, `ground7`, 
 - [ ] **The music's change after 5 to 10 minutes:** tested by asking for the next track at once and reading when the one after is due; no test has waited the minutes.
 - [ ] **A named save loaded from the Load page,** and two saves of the same name (the second overwrites the first).
 - [ ] **The town's rise and fall in the other towns** (Vel Morrath, Ashenreach, Graymourne): the code is the same; only Brokenspire was measured.
+
+## Vel Morrath and its catacombs (2026-11-06, [docs/levels/vel_morrath.md](docs/levels/vel_morrath.md))
+
+Built and tested (`884 holy`, `descend`; `868 catacombs -lv vel_morrath`; `888 world`, `towns`); still to test or do:
+
+- [ ] **Its quests taken and turned in:** the archbishop's first quest is offered and its counter (`vel_morrath:enter`) reached 1 on the way down; none has been taken and turned in, and the tier, kill and boss counters below (`vel_morrath:tier`, `:kills`, `:boss`) have not been read after a fight.
+- [ ] **Tiers 4 and 5 below:** the floors and stairs were measured for tiers 1 to 3 (0, -4.5, -9 m); 4 and 5 follow the same rule and have not been visited.
+- [ ] **Monsters on the stairs:** monsters path over the tiles in two dimensions; one chasing her up or down a stair has not been watched.
+- [ ] **A save in the catacombs loaded:** the save names the level and the place ("The Catacombs of Vel Morrath"); a load of it has not been run.
+- [ ] **The catacombs' own looks:** tier 1 is the dungeon's stone and tier 3 and 4 are the castle's themes; only tier 2 (the crypt stone) is new. Bone-lined ossuary walls, niches and sarcophagi of their own are still to come.
+- [ ] **The houses' stone:** in the morning light (08:00) the city reads blue-grey; it has not been pictured at noon.
+- [ ] **The packaged game:** not built with the city or the catacombs (`vel_morrath` must be named to the cook).
 
 ## The final boss (Aurorim, 2026-11-03)
 

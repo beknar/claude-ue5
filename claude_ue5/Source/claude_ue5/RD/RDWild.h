@@ -94,6 +94,11 @@ struct FRDWildTown
 	UPROPERTY(BlueprintReadOnly) int32 Style = 1;
 	/** the place's symbol: "town" or "city" */
 	UPROPERTY(BlueprintReadOnly) FString Kind = TEXT("town");
+	/** its size in tiles (0: the generator's small town, WildSmallTownTiles) */
+	UPROPERTY(BlueprintReadOnly) int32 Tiles = 0;
+	/** its plan (the generator's TownPlan): 0 Brokenspire's (the gate, the square, a castle at the far wall), 1 a holy city
+	 *  (Vel Morrath, the user's of 2026-11-06: the cathedral at its middle over the catacombs) */
+	UPROPERTY(BlueprintReadOnly) int32 Plan = 0;
 };
 
 /** a point of interest: its kind, place, name; its id is its cell's and kind's */

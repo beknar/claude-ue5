@@ -1,8 +1,9 @@
 """The wilderness's test (the user's spec of 2026-11-03, docs/wilderness.txt; C++ RD/RDWild*.cpp), in play on brokenspire.
 Steps:
   world   the world made (its seed, how long); the towns where the spec puts them: Brokenspire mid-south, Ashenreach in the
-          continent's middle north of it, Graymourne on the north coast mid-way across, Vel Morrath east of Brokenspire near
-          its coast but not on it (the coast measured by walking out until the sea); every template of the spec in the
+          continent's middle north of it, Graymourne on the north coast mid-way across, Vel Morrath north-east of Brokenspire
+          and inland (the user's of 2026-11-06: "to the east, but not on the coast"; no sea within 20 km east of it, walked
+          out); every template of the spec in the
           biome regions; rivers, lakes, roads between the towns; pictures of the continent and of 40 km round Brokenspire
   look    each template visited (her put on the nearest of its regions, the chunks round her made): a picture of her view,
           what the world has under her (its biome, height, snow, sand, water), the plants and rocks of the chunks there
@@ -126,8 +127,9 @@ def step_world():
     if vm and b:
         res["velmorrath_sea_east_m"] = sea_along(vm["x"], vm["y"], 0, 1, 30000, 250.0)
         s = sample(vm["x"], vm["y"])
-        chk["velmorrath_east"] = vm["y"] - b["y"] > 60000 and abs(vm["x"] - b["x"]) < 25000
-        chk["velmorrath_near_coast_not_on_it"] = res["velmorrath_sea_east_m"] is not None and 2000 < res["velmorrath_sea_east_m"] < 20000 and int(s["water"]) == 0
+        # (since 2026-11-06 the holy city: north-east of Brokenspire, inland)
+        chk["velmorrath_north_east"] = vm["y"] - b["y"] > 40000 and vm["x"] - b["x"] > 30000
+        chk["velmorrath_inland"] = (res["velmorrath_sea_east_m"] is None or res["velmorrath_sea_east_m"] > 20000) and int(s["water"]) == 0
     res["checks"] = chk
     # the templates' census
     bl = {}
@@ -308,10 +310,16 @@ def step_towns():
     res["vm_titles_brokenspire"] = [f["title"] for f in F if "Brokenspire" in f["title"]][:5]
     res["vm_titles_own"] = [f["title"] for f in F if "Vel Morrath" in f["title"]][:5]
     res["vm_square"] = [round(sq2.x), round(sq2.y)] if sq2 else None
+    BS_NOTABLES = {t_["title"] for t_ in json.load(open(os.path.join(os.path.dirname(OUT), "brokenspire", "town.json"), encoding="utf-8"))["townsfolk"]
+                   if t_.get("role") in ("Elder", "Scholar", "Captain")}
+    res["vm_notables"] = sorted({f["title"] for f in F if f["role"] in ("Elder", "Scholar", "Captain")})
     quiet(False)
     ok = (res["at_start"]["section"] == 1 and res["far"]["section"] == 0 and res["folk_far"] == 0 and res["back"]["section"] == 1 and res["folk_back"] > 0
           and res["vm_near"]["name"] == "Vel Morrath" and res["vm_in"]["in_walls"] == 1 and res["minimap_outside"] and not res["minimap_inside_wild"]
-          and res["vm_folk"] > 0 and not any(r in res["vm_roles"] for r in ("Elder", "Scholar", "Captain")) and not res["vm_titles_brokenspire"])
+          and res["vm_folk"] > 0 and not res["vm_titles_brokenspire"]
+          # (Vel Morrath, a city since 2026-11-06, has an archbishop, an archivist and a commander of its own: none of them
+          # Brokenspire's elder, scholar or captain)
+          and not any(f["title"] in BS_NOTABLES for f in F) and "Elder" in res["vm_roles"])
     G["vm_found"] = True
     step_result("towns", ok, **res)
 

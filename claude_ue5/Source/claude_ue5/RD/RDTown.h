@@ -15,11 +15,13 @@ class USkeletalMeshComponent;
 class UCapsuleComponent;
 
 /** the town's buildings */
-enum ERDTownKind : uint8 { TK_Castle, TK_Smithy, TK_Store, TK_Healer, TK_Temple, TK_Storehouse, TK_Tavern, TK_Home, TK_Chapel, TK_Barracks, TK_Witch, TK_Count };
+/** (Vel Morrath's holy city, 2026-11-06 (RDHoly.cpp): the cathedral at its middle over the catacombs, the monastery) */
+enum ERDTownKind : uint8 { TK_Castle, TK_Smithy, TK_Store, TK_Healer, TK_Temple, TK_Storehouse, TK_Tavern, TK_Home, TK_Chapel, TK_Barracks, TK_Witch,
+	TK_Cathedral, TK_Monastery, TK_Count };
 /** what stands outdoors, and the services inside the buildings (the counter, the basin, the altar, the stash, the smith's
- *  place by his anvil, the tavern's bar) */
+ *  place by his anvil, the tavern's bar); the holy city's statues, fountain and wayside shrines */
 enum ERDTownSpot : uint8 { TS_Well, TS_Board, TS_Circle, TS_Stall, TS_Still, TS_Mill, TS_Grave, TS_Graveyard, TS_Tower, TS_Gate, TS_Lamp, TS_Tent,
-	TS_Counter, TS_Basin, TS_Altar, TS_Stash, TS_Smith, TS_Bar };
+	TS_Counter, TS_Basin, TS_Altar, TS_Stash, TS_Smith, TS_Bar, TS_Statue, TS_Fountain, TS_Shrine };
 
 /** the kinds of place a townsperson's round of work is made of (the third list, 2026-11-02): a cooking pot, a spit, a garden,
  *  a pen, a tavern's seat, serving at a tavern's table, chatting (the well, the square), the smithy, the bar, a camp's fire */
@@ -28,15 +30,16 @@ enum ERDTownWorkGroup : uint8 { TW_Pot, TW_Spit, TW_Garden, TW_Pen, TW_Seat, TW_
 inline FString RDTownKindName(uint8 Kind)
 {
 	static const TCHAR* Names[] = { TEXT("castle"), TEXT("smithy"), TEXT("store"), TEXT("healer"), TEXT("temple"), TEXT("storehouse"), TEXT("tavern"),
-	                                TEXT("home"), TEXT("chapel"), TEXT("barracks"), TEXT("witch's hut") };
+	                                TEXT("home"), TEXT("chapel"), TEXT("barracks"), TEXT("witch's hut"), TEXT("cathedral"), TEXT("monastery") };
 	return Kind < TK_Count ? FString(Names[Kind]) : FString(TEXT("?"));
 }
 
 inline FString RDTownSpotName(uint8 Kind)
 {
 	static const TCHAR* Names[] = { TEXT("well"), TEXT("board"), TEXT("circle"), TEXT("stall"), TEXT("still"), TEXT("mill"), TEXT("grave"), TEXT("graveyard"),
-	                                TEXT("tower"), TEXT("gate"), TEXT("lamp"), TEXT("tent"), TEXT("counter"), TEXT("basin"), TEXT("altar"), TEXT("stash"), TEXT("smith"), TEXT("bar") };
-	return Kind <= TS_Bar ? FString(Names[Kind]) : FString(TEXT("?"));
+	                                TEXT("tower"), TEXT("gate"), TEXT("lamp"), TEXT("tent"), TEXT("counter"), TEXT("basin"), TEXT("altar"), TEXT("stash"), TEXT("smith"), TEXT("bar"),
+	                                TEXT("statue"), TEXT("fountain"), TEXT("shrine") };
+	return Kind <= TS_Shrine ? FString(Names[Kind]) : FString(TEXT("?"));
 }
 
 UCLASS()

@@ -94,6 +94,7 @@ void ARDSection::PlaceTraps()
 		if (Len < 5 || U >= Generator->TrapHallShare) continue;
 		const FIntPoint T = C.bHoriz ? FIntPoint(C.Min.X + Len / 2, C.Min.Y) : FIntPoint(C.Min.X, C.Min.Y + Len / 2);
 		if (!In(T) || Type[Idx(T)] != 2) continue;
+		if (IsStairTile(T)) continue;                 // (the catacombs' stairs between floors: no trap on a slope)
 		FTrapInst Ti; Ti.Def = PickKind(K, true, false); Ti.At = TileWorld(T); Ti.bHall = true; Ti.Yaw = C.bHoriz ? 0.f : 90.f;
 		if (Ti.Def < 0) continue;
 		TrapList.Add(Ti);
@@ -133,7 +134,7 @@ void ARDSection::PlaceTraps()
 int32 ARDSection::AddTrapAt(int32 Def, const FVector& At, uint8 State)
 {
 	if (!Generator || !Generator->Traps.IsValidIndex(Def)) return -1;
-	FTrapInst Ti; Ti.Def = Def; Ti.At = FVector(At.X, At.Y, 0.f); Ti.Room = RoomAt(At); Ti.State = State;
+	FTrapInst Ti; Ti.Def = Def; Ti.At = FVector(At.X, At.Y, GetActorLocation().Z); Ti.Room = RoomAt(At); Ti.State = State;   // (on the set's floor: the catacombs' are below z 0)
 	const int32 I = TrapList.Add(Ti);
 	BuildTrapVisual(I);
 	return I;

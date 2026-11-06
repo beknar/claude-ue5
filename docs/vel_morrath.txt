@@ -1,0 +1,12 @@
+Vel Morrath (the user's spec of 2026-11-06)
+
+build out Vel Morrath with this theme: cathedral city built over catacombs that go deeper than anyone has mapped.  the dungeon is underground.
+        city is located to the east, but not on the coast.  north east of Brokenspire.
+build out the dungeon with the entrance from the central cathedral.  this should look like a holy city.  this should be a new level called Vel Morrath.  the buildings should all have internals, working doors, containers, etc.  this should also have functional and non-functional NPCs, like Brokenshire.
+
+Answers (2026-11-06):
+- The city: Vel Morrath stays one of the wilderness's towns on the brokenspire level, rebuilt in place as a full-size holy
+  city (Brokenspire-sized, the cathedral at its centre, its own trades and people), moved north-east of Brokenspire and
+  inland, streamed in the wilds as before. The catacombs under the cathedral are the new level "vel_morrath".
+- The catacombs: floors going down. Each tier is a floor below the last, reached by stairs down from the floor above: tier 1
+  under the cathedral, tier 5 the deepest, built and balanced like Mistward Castle's tiers.

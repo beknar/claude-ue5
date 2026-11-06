@@ -216,7 +216,7 @@ The first attempt balanced the castle's five tiers only. The wilderness round Br
 ### Where it starts
 
 - **The monsters:** 55 usable kinds of the monster gallery's 107 ([docs/monsters.md](monsters.md)): 8 in tier 1, 8 in tier 2, 14 in tier 3, 19 in tier 4 and only 6 in tier 5. All are dungeon creatures (orcs, zombies, aliens, insects): there is almost no wildlife. The other 52 lack clips that walk, attack, flinch and die.
-- **The wilderness's tiers go by distance from Brokenspire:** tier 1 within 25 km, one more tier every 25 km, tier 5 from 100 km on (`FRDWildWorld::TierAt`). Ashenreach (70 km) stands in tier 3; Vel Morrath (115 km) and Graymourne (197 km) in tier 5.
+- **The wilderness's tiers go by distance from Brokenspire:** tier 1 within 25 km, one more tier every 25 km, tier 5 from 100 km on (`FRDWildWorld::TierAt`). Ashenreach (70 km) stands in tier 3; Vel Morrath (93 km since 2026-11-06, north-east; 115 km due east before) in tier 4; Graymourne (197 km) in tier 5.
 - **The land in each band**, estimated from a simplified shape of the continent (a rounded square, not the world model's own coast):
 
   | Tier | Share of the land |

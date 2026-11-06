@@ -52,7 +52,7 @@ bool ARDDungeonGenerator::SaveGameNow(const FString& Slot, const FString& Why, c
 	const TMap<FString, FRDTownSave> Store = GI->TownStore;
 	const FString Current = GI->CurrentTown;
 	SaveCarry();
-	FString Place = bTown ? TownName : FString(TEXT("Mistward Castle"));
+	FString Place = bTown ? TownName : !DungeonTitle.IsEmpty() ? DungeonTitle : FString(TEXT("Mistward Castle"));
 	if (bTown && bWild && IsWildReady())
 	{
 		GI->WildRevealKeys.Reset(); GI->WildRevealBits.Reset();
@@ -134,7 +134,8 @@ void ARDDungeonGenerator::TickWildLoad()
 	if (!Her) return;
 	const FVector At = GI->LoadAt;
 	double Dt; const int32 Ti = Wild->NearestTown(At.X / 100.0, At.Y / 100.0, Dt);
-	const double Half = (Ti == 0 ? HomeSectionTiles : WildSmallTownTiles) * TileSize / 200.0;
+	// (each town its own size: Vel Morrath is the home town's, the others small)
+	const double Half = (Ti == 0 ? HomeSectionTiles : Ti > 0 && Wild->Towns[Ti].Tiles > 0 ? Wild->Towns[Ti].Tiles : WildSmallTownTiles) * TileSize / 200.0;
 	// (in its square, not a circle round its middle: a save in a town's corner was put out in the wilds, the town built
 	// round her after)
 	const bool bInSquare = Ti >= 0 && FMath::Max(FMath::Abs(At.X / 100.0 - Wild->Towns[Ti].Site.X), FMath::Abs(At.Y / 100.0 - Wild->Towns[Ti].Site.Y)) < Half + 50.0;

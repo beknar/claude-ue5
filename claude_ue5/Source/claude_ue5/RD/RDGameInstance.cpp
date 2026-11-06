@@ -16,6 +16,7 @@ void URDGameInstance::NewGame(FName Hero)
 	Quests.Reset(); Counters.Reset();
 	CirclesFound = { FName(TEXT("Brokenspire")) };
 	TownLooted.Reset(); CastleTiers.Reset(); CastleStartLooted.Reset(); GuardsDead.Reset(); HerPiles.Reset();
+	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset();
 	Arrive.Reset();
 	TownHour = -1.f; TownDay = 1;
 	GardensHarvested.Reset(); FoodTaken.Reset(); bPortcullisUp = false;
