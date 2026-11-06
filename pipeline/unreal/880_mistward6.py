@@ -3,7 +3,8 @@ other tier by tier (SourceArt/mistward/balance6.json; C++ RD/RDMistward6.cpp). O
 - the generator's switches bStealth and bTierGrowth on
 - each hero's numbers: hit points; for each tier open past the first, the share more hit points, spell / chi damage and damage
   of her own weapons (her fists, her starting blades and crossbow; a found weapon carries its own tier instead); mana back a
-  second as a share of her pool
+  second as a share of her pool; the Summoner (2026-11-05): her pool (60, the Warlock's), more mana per tier, her summons
+  growing with the tiers (the generator's SummonTierStrength), how many of a summoning she leads (summon_counts: 3 Spiders)
 - the Rogue: her dexterity energy, a stealth's cost and length, the ambush (balance6.json's numbers: 100, 1.5 a second back,
   40 a stealth, 8 s, +75 %), her daggers and crossbow (13 and 26: the ambush and her rings are her growth), her card's line
   and the controls panel's
@@ -30,6 +31,7 @@ w = ues.get_editor_world()
 if w.get_name() != "mistward_castle": les.load_level(MAP); w = ues.get_editor_world()
 g = gen_of(w)
 g.set_editor_property("stealth", True); g.set_editor_property("tier_growth", True)
+g.set_editor_property("summon_tier_strength", [float(x) for x in B["summon_tier_strength"]])
 
 # ---- found weapons: their damage by their tier
 items = list(g.get_editor_property("items")); nw = 0
@@ -53,6 +55,12 @@ for s in spells:
     if nm in CHI:
         d = float(round(C["base"] * (s.get_editor_property("mana") / C["base_mana"]) ** C["power"]))
         s.set_editor_property("damage", d); chi[nm] = d
+# ---- the Summoner's summonings: how many of each she leads (balance6.json's summon_counts; the rest as 876 set them)
+SC = B["heroes"]["Summoner"].get("summon_counts", {}); counts = {}
+for s in spells:
+    nm = str(s.get_editor_property("name"))
+    if nm in SC: s.set_editor_property("count", int(SC[nm])); counts[nm] = int(SC[nm])
+assert sorted(counts) == sorted(SC), ("summonings not found", SC, counts)
 g.set_editor_property("spells", spells)
 assert len(chi) == 10, ("chi spells found", sorted(chi))
 
@@ -64,6 +72,9 @@ for h in heroes:
     h.set_editor_property("max_health", float(hb["hp"]))
     h.set_editor_property("health_per_tier", hb["health_per_tier"]); h.set_editor_property("spell_power_per_tier", hb["spell_power_per_tier"])
     h.set_editor_property("own_weapon_power_per_tier", hb["own_weapon_power_per_tier"]); h.set_editor_property("mana_regen_share", hb["mana_regen_share"])
+    # (the Summoner's balance of 2026-11-05: her pool, its growth per tier, her summons growing with the tiers)
+    if "mana" in hb: h.set_editor_property("max_mana", float(hb["mana"]))
+    h.set_editor_property("mana_per_tier", float(hb.get("mana_per_tier", 0.0))); h.set_editor_property("summons_grow", bool(hb.get("summons_grow", False)))
     st = hb.get("stealth", {})
     h.set_editor_property("dex_energy", float(st.get("energy", 0))); h.set_editor_property("dex_per_second", float(st.get("per_second", 0)))
     h.set_editor_property("stealth_cost", float(st.get("cost", 0))); h.set_editor_property("stealth_seconds", float(st.get("seconds", 0)))
@@ -104,7 +115,7 @@ for h in heroes:
                          "ranged": round(h.ranged_bonus, 3), "type_bonus": {str(k): round(v, 3) for k, v in h.type_bonus.items()}, "dex_types": [str(x) for x in h.dexterity_types],
                          "wears": [str(x).split(".")[-1].split(":")[0] for x in h.wears], "rings": [str(x).split(".")[-1].split(":")[0] for x in h.ring_kinds],
                          "health_per_tier": h.health_per_tier, "spell_power_per_tier": h.spell_power_per_tier, "own_weapon_power_per_tier": h.own_weapon_power_per_tier,
-                         "mana_regen_share": h.mana_regen_share, "dex_energy": h.dex_energy, "dex_per_second": h.dex_per_second, "stealth_cost": h.stealth_cost,
+                         "mana_regen_share": h.mana_regen_share, "mana_per_tier": round(h.mana_per_tier, 3), "summons_grow": h.summons_grow, "dex_energy": h.dex_energy, "dex_per_second": h.dex_per_second, "stealth_cost": h.stealth_cost,
                          "stealth_seconds": h.stealth_seconds, "ambush": h.ambush_bonus, "per_boss": h.unlock_per_boss,
                          "weapons": [wdef(x) for x in h.weapons], "locked": [wdef(x) for x in h.locked_weapons]})
 for it in items:
@@ -121,11 +132,11 @@ for m in g.get_editor_property("monsters"):
                            "interval": round(m.attack_interval, 3), "shoots": m.shoots})
 for k in ("tier_health", "tier_damage", "tier_speed", "tier_attack_interval", "tier_ability"): S_[k] = [round(x, 3) for x in g.get_editor_property(k)]
 for k in ("boss_health", "boss_damage", "monster_reference_health", "monster_reference_blow", "block_share", "chase_speed_scale"): S_[k] = round(g.get_editor_property(k), 3)
-S_["weapon_tier_power"] = WP; S_["chi"] = C
+S_["weapon_tier_power"] = WP; S_["chi"] = C; S_["summon_tier_strength"] = [round(x, 3) for x in g.get_editor_property("summon_tier_strength")]
 json.dump(S_, open(os.path.join(SA, "mistward", "balance_state.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 HTXT = [h.export_text() for h in heroes]
 les.save_current_level()
-print("RD880 castle:", nw, "weapon fits,", len(chi), "chi", chi, "| heroes", json.dumps(done)[:1500])
+print("RD880 castle:", nw, "weapon fits,", len(chi), "chi", chi, "| summonings", counts, "| heroes", json.dumps(done)[:1500])
 
 # ---- the menu's cards: the heroes as the castle has them
 les.load_level(MENU); w = ues.get_editor_world()

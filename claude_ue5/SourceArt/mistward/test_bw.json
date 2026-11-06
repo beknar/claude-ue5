@@ -1,0 +1,6689 @@
+{
+ "tag": "bw",
+ "plan": [
+  "balance"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "balance",
+   "ok": true,
+   "trials": {
+    "Summoner|1": {
+     "kit": {
+      "army": [
+       "Summon Tier 1",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Soldier",
+      "Half_Creature_04",
+      "Parasite_Slider"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 5.4,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 85,
+      "dealt": 189,
+      "taken": 0,
+      "kills": 3,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Rotting Soldier",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Crawling Wretch",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.4,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Slithering Leech",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          3.2,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_kind": "Soldier",
+     "boss_hp": 180,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 5.0,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 85,
+       "dealt": 175,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Rotting Soldier",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.1,
+         "fight Rotting Soldier",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.5,
+           36,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         4.0,
+         "fight Rotting Soldier",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.5,
+           36,
+           true,
+           "stun"
+          ]
+         ]
+        ]
+       ],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 5.0,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 85,
+       "dealt": 176,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Rotting Soldier",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.0,
+         "fight Rotting Soldier",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.5,
+           36,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         4.1,
+         "fight Rotting Soldier",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.4,
+           36,
+           true,
+           "stun"
+          ]
+         ]
+        ]
+       ],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 0
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 5.0,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 85,
+      "dealt": 175,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Rotting Soldier",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          36,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Rotting Soldier",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.5,
+          36,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight Rotting Soldier",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.5,
+          36,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 0
+     },
+     "boss_wins": 2
+    },
+    "Summoner|2": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 2",
+        true
+       ]
+      ],
+      "unlocked": 1,
+      "army": [
+       "Summon Tier 2",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Parasites_Fat",
+      "Gunner",
+      "Orc_03"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 9.5,
+      "hp_left": 0.78,
+      "low": 0.75,
+      "max_hp": 106,
+      "dealt": 253,
+      "taken": 27,
+      "kills": 3,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Pustule Glutton",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Pustule Glutton",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.1,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          8.0,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight Grave Gunner",
+        [
+         -2,
+         2,
+         87
+        ],
+        [
+         [
+          4.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "hunt Orc Raider",
+        [
+         -2,
+         2,
+         87
+        ],
+        [
+         [
+          3.3,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Orc Raider",
+        [
+         198,
+         520,
+         87
+        ],
+        [
+         [
+          6.6,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 1
+     },
+     "boss_kind": "Orc_03",
+     "boss_hp": 360,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.5,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 106,
+       "dealt": 259,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.1,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.8,
+           36,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         4.1,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.8,
+           36,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         6.0,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.8,
+           36,
+           true,
+           "reach"
+          ]
+         ]
+        ]
+       ],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 1
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 7.6,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 106,
+       "dealt": 260,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.1,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.8,
+           36,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         4.0,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.8,
+           36,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         6.0,
+         "fight Orc Raider",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.8,
+           36,
+           true,
+           "swing"
+          ]
+         ]
+        ]
+       ],
+       "used": 1,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 1
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 7.5,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 106,
+      "dealt": 259,
+      "taken": 0,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Orc Raider",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          36,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Orc Raider",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.8,
+          36,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Orc Raider",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.8,
+          36,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Orc Raider",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.8,
+          36,
+          true,
+          "reach"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 1
+     },
+     "boss_wins": 2
+    },
+    "Summoner|3": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 4",
+        true
+       ]
+      ],
+      "unlocked": 2,
+      "army": [
+       "Summon Tier 3",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Kanit",
+      "Orc_06",
+      "Warrior_02_the_leopard"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 12.2,
+      "hp_left": 0.84,
+      "low": 0.77,
+      "max_hp": 128,
+      "dealt": 244,
+      "taken": 29,
+      "kills": 3,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Orc Shaman",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Orc Pillager",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.8,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          4.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          4.8,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "keep away from Leopard Warrior",
+        [
+         0,
+         1,
+         87
+        ],
+        [
+         [
+          8.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          2.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          1.4,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Orc Pillager",
+        [
+         304,
+         253,
+         87
+        ],
+        [
+         [
+          6.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          5.2,
+          5,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Orc Shaman",
+        [
+         304,
+         253,
+         87
+        ],
+        [
+         [
+          3.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.2,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "keep away from Orc Shaman",
+        [
+         30,
+         376,
+         87
+        ],
+        [
+         [
+          4.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.1,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Orc Shaman",
+        [
+         -165,
+         477,
+         87
+        ],
+        [
+         [
+          6.6,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 2
+     },
+     "boss_kind": "Tank",
+     "boss_hp": 576,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.6,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 128,
+       "dealt": 305,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           6.5,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         4.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.3,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         6.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.3,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         8.0,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.3,
+           37,
+           true,
+           "reach"
+          ]
+         ]
+        ],
+        [
+         10.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.3,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         12.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.3,
+           37,
+           true,
+           "reach"
+          ]
+         ]
+        ]
+       ],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 4
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.2,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 128,
+       "dealt": 315,
+       "taken": 0,
+       "kills": 0,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.0,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           6.5,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         4.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.4,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         6.0,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.4,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         8.0,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.4,
+           37,
+           true,
+           "reach"
+          ]
+         ]
+        ],
+        [
+         10.1,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.4,
+           37,
+           true,
+           "reach"
+          ]
+         ]
+        ],
+        [
+         12.0,
+         "fight Zombie Tank",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           5.4,
+           37,
+           true,
+           "reach"
+          ]
+         ]
+        ]
+       ],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 4
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 13.6,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 128,
+      "dealt": 305,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          36,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          6.5,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          5.3,
+          37,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          5.3,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          5.3,
+          37,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          5.3,
+          37,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Zombie Tank",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          5.3,
+          37,
+          true,
+          "reach"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 4
+     },
+     "boss_wins": 2
+    },
+    "Summoner|4": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 6",
+        true
+       ]
+      ],
+      "unlocked": 3,
+      "army": [
+       "Summon Tier 4",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Horned",
+      "Orc_02",
+      "Ripper_dog"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 14.3,
+      "hp_left": 1.0,
+      "low": 0.57,
+      "max_hp": 149,
+      "dealt": 176,
+      "taken": 99,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Horned Mutant",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Horned Mutant",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          7.6,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.4,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight Ripper Hound",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          5.9,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          1.4,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Orc Executioner",
+        [
+         261,
+         373,
+         86
+        ],
+        [
+         [
+          5.0,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          2.8,
+          7,
+          true,
+          "chase"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "keep away from Orc Executioner",
+        [
+         268,
+         373,
+         86
+        ],
+        [
+         [
+          1.3,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight Orc Executioner",
+        [
+         791,
+         447,
+         87
+        ],
+        [
+         [
+          6.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          10.2,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Ripper Hound",
+        [
+         791,
+         447,
+         87
+        ],
+        [
+         [
+          10.2,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.0,
+        "fight Ripper Hound",
+        [
+         791,
+         447,
+         87
+        ],
+        [
+         [
+          10.2,
+          5,
+          true,
+          "reach"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 3
+     },
+     "boss_kind": "Fantasy_Animal_raptor_mount",
+     "boss_hp": 864,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.3,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 149,
+       "dealt": 372,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         4.0,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         6.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         8.0,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         10.0,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         12.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ]
+       ],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 3
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.4,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 149,
+       "dealt": 372,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.0,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         4.0,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ],
+        [
+         6.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         8.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         10.1,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         12.0,
+         "fight War Raptor",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           8.0,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ]
+       ],
+       "used": 2,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 3
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 13.3,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 149,
+      "dealt": 372,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          36,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.0,
+          37,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.0,
+          37,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.0,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.0,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.0,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight War Raptor",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.0,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 3
+     },
+     "boss_wins": 2
+    },
+    "Summoner|5": {
+     "kit": {
+      "rings": [
+       [
+        "Magic Potency Ring 8",
+        true
+       ]
+      ],
+      "unlocked": 4,
+      "army": [
+       "Summon Tier 5",
+       2
+      ]
+     },
+     "pack_kinds": [
+      "Titan",
+      "Nasty",
+      "Titan"
+     ],
+     "pack": {
+      "won": true,
+      "down": false,
+      "secs": 16.2,
+      "hp_left": 0.89,
+      "low": 0.71,
+      "max_hp": 170,
+      "dealt": 738,
+      "taken": 49,
+      "kills": 3,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Mountain Titan",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Mountain Titan",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.5,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          6.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          8.2,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.5,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          3.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          8.5,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          3.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          1.4,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "keep away from Broodmother",
+        [
+         212,
+         308,
+         87
+        ],
+        [
+         [
+          7.0,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          3.6,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Broodmother",
+        [
+         518,
+         311,
+         86
+        ],
+        [
+         [
+          4.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.6,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          7.2,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight Mountain Titan",
+        [
+         518,
+         311,
+         86
+        ],
+        [
+         [
+          4.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.2,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.0,
+        "fight Mountain Titan",
+        [
+         518,
+         311,
+         86
+        ],
+        [
+         [
+          7.2,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight Mountain Titan",
+        [
+         518,
+         311,
+         86
+        ],
+        [
+         [
+          7.2,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 0,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 1
+     },
+     "boss_kind": "Nasty",
+     "boss_hp": 1224,
+     "bosses": [
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.2,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 170,
+       "dealt": 701,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.9,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         4.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.9,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         6.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         8.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         10.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         12.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ]
+       ],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 1
+      },
+      {
+       "won": true,
+       "down": false,
+       "secs": 13.1,
+       "hp_left": 1.0,
+       "low": 1.0,
+       "max_hp": 170,
+       "dealt": 700,
+       "taken": 0,
+       "kills": 1,
+       "left": [],
+       "autoplay_only": null,
+       "trace": [
+        [
+         0.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           9.0,
+           36,
+           true,
+           "chase"
+          ]
+         ]
+        ],
+        [
+         2.0,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.9,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         4.0,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.9,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         6.0,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         8.0,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         10.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "stun"
+          ]
+         ]
+        ],
+        [
+         12.1,
+         "fight Broodmother",
+         [
+          0,
+          0,
+          87
+         ],
+         [
+          [
+           7.6,
+           37,
+           true,
+           "swing"
+          ]
+         ]
+        ]
+       ],
+       "used": 0,
+       "stealth": 0,
+       "kites": 0,
+       "summons": 1
+      }
+     ],
+     "boss": {
+      "won": true,
+      "down": false,
+      "secs": 13.2,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 701,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": null,
+      "trace": [
+       [
+        0.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          9.0,
+          36,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.9,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.9,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.6,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.6,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.6,
+          37,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Broodmother",
+        [
+         0,
+         0,
+         87
+        ],
+        [
+         [
+          7.6,
+          37,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 0,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 1
+     },
+     "boss_wins": 2
+    }
+   },
+   "finals": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 54.5,
+      "hp_left": 0.71,
+      "low": 0.47,
+      "max_hp": 170,
+      "dealt": 3779,
+      "taken": 163,
+      "kills": 9,
+      "left": [],
+      "autoplay_only": 9,
+      "trace": [
+       [
+        0.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.0,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          15.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          8.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          10.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          8.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          10.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.6,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          10.6,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          8.6,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          7.8,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          10.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          5.6,
+          4,
+          true,
+          "reach"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.0,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.1,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          8.9,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          5.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.0,
+          4,
+          true,
+          "reach"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.2,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          6.0,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          6,
+          false,
+          "none"
+         ],
+         [
+          5.2,
+          3,
+          false,
+          "none"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "shoot"
+         ],
+         [
+          5.2,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.0,
+          4,
+          false,
+          "none"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.9,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.9,
+          2,
+          true,
+          "swing"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.0,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.8,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          5.7,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          5.1,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.9,
+          2,
+          true,
+          "swing"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.5,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.8,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          4.6,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.8,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.3,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          4,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        22.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.8,
+          12,
+          true,
+          "chase"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.6,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.1,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        24.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.1,
+          11,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.6,
+          6,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        26.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.7,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          4.1,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          4.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        28.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.0,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          5.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.4,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          4.1,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          4.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        30.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          4.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.3,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          3.7,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 4,
+      "summons": 5,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.0,
+       3.0,
+       3.0,
+       4.2,
+       4.3,
+       6.0,
+       6.0,
+       6.7,
+       5.7
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 8,
+      "band_placed": 8,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 2665,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Rock",
+        "Rock",
+        "Spider",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       1,
+       1,
+       0
+      ],
+      "lances": [
+       0,
+       7
+      ]
+     },
+     {
+      "won": false,
+      "down": true,
+      "secs": 43.1,
+      "hp_left": 0.0,
+      "low": 0.0,
+      "max_hp": 170,
+      "dealt": 3459,
+      "taken": 293,
+      "kills": 5,
+      "left": [
+       50,
+       109
+      ],
+      "autoplay_only": 9,
+      "trace": [
+       [
+        0.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.1,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          15.7,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          12.1,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          9.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          10.4,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          8.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          7.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          6.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          6.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          5.0,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          6.5,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          6.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.9,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          5.0,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          6.5,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          5.7,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.7,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.7,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.3,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          5.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.9,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          5.7,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          5.3,
+          12,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.2,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.2,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        22.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112879,
+         10800,
+         83
+        ],
+        [
+         [
+          2.8,
+          15,
+          true,
+          "swing"
+         ],
+         [
+          5.3,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          9,
+          true,
+          "swing"
+         ],
+         [
+          6.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          7,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        24.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112838,
+         10749,
+         84
+        ],
+        [
+         [
+          2.9,
+          14,
+          true,
+          "reach"
+         ],
+         [
+          5.0,
+          7,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          8,
+          true,
+          "chase"
+         ],
+         [
+          3.7,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.2,
+          6,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        26.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112942,
+         10319,
+         86
+        ],
+        [
+         [
+          6.6,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          7.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          8.2,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.7,
+          3,
+          true,
+          "reach"
+         ],
+         [
+          9.1,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          8.5,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        28.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112724,
+         10289,
+         80
+        ],
+        [
+         [
+          6.1,
+          18,
+          true,
+          "reach"
+         ],
+         [
+          7.4,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.5,
+          11,
+          true,
+          "chase"
+         ],
+         [
+          5.8,
+          9,
+          true,
+          "swing"
+         ],
+         [
+          8.1,
+          10,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        30.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112658,
+         10303,
+         80
+        ],
+        [
+         [
+          5.9,
+          18,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.1,
+          11,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          9,
+          true,
+          "swing"
+         ],
+         [
+          7.8,
+          10,
+          true,
+          "swing"
+         ],
+         [
+          7.4,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 5,
+      "survivors": [
+       {
+        "kind": "Aurorim",
+        "hp": 50,
+        "of": 1836,
+        "m_from_her": 2.0,
+        "dz": 12,
+        "m_from_him": 15.0,
+        "aggro": false,
+        "branch": "none",
+        "home": -1
+       },
+       {
+        "kind": "Rock",
+        "hp": 109,
+        "of": 326,
+        "m_from_her": 8.9,
+        "dz": 11,
+        "m_from_him": 8.1,
+        "aggro": false,
+        "branch": "none",
+        "home": -1
+       }
+      ],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.1,
+       3.0,
+       3.0,
+       4.2,
+       4.4,
+       6.0,
+       6.0,
+       6.7,
+       5.7
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 8,
+      "band_placed": 8,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 2665,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Rock",
+        "Rock",
+        "Spider",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 50,
+      "boss_slain": false,
+      "band_left": 1,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       7
+      ]
+     }
+    ]
+   },
+   "finals_boss": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 35.1,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 872,
+      "taken": 132,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": 1,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.3,
+          12,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "out of the light's mark",
+        [
+         112955,
+         10979,
+         86
+        ],
+        [
+         [
+          12.3,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112711,
+         11239,
+         85
+        ],
+        [
+         [
+          10.0,
+          12,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112670,
+         10960,
+         86
+        ],
+        [
+         [
+          7.2,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112609,
+         10810,
+         84
+        ],
+        [
+         [
+          5.4,
+          8,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112325,
+         10664,
+         86
+        ],
+        [
+         [
+          4.1,
+          11,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112296,
+         10728,
+         85
+        ],
+        [
+         [
+          3.5,
+          11,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112491,
+         10844,
+         83
+        ],
+        [
+         [
+          3.0,
+          13,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112837,
+         10703,
+         84
+        ],
+        [
+         [
+          6.5,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        18.0,
+        "out of the light's mark",
+        [
+         112863,
+         10833,
+         84
+        ],
+        [
+         [
+          6.2,
+          13,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112899,
+         11012,
+         85
+        ],
+        [
+         [
+          5.1,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        22.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112791,
+         11218,
+         84
+        ],
+        [
+         [
+          4.6,
+          14,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        24.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112818,
+         11035,
+         84
+        ],
+        [
+         [
+          4.4,
+          14,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        26.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112751,
+         10806,
+         84
+        ],
+        [
+         [
+          3.9,
+          14,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        28.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112416,
+         10635,
+         86
+        ],
+        [
+         [
+          3.2,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        30.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112377,
+         10635,
+         86
+        ],
+        [
+         [
+          3.1,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 5,
+      "survivors": [],
+      "placed": true,
+      "mode": "boss",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.2
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 0,
+      "band_placed": 8,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 2665,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Rock",
+        "Rock",
+        "Spider",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       3,
+       3,
+       1
+      ],
+      "lances": [
+       1,
+       0
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 36.6,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 772,
+      "taken": 132,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": 1,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.3,
+          12,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "out of the light's mark",
+        [
+         112946,
+         10980,
+         86
+        ],
+        [
+         [
+          12.3,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112648,
+         11237,
+         85
+        ],
+        [
+         [
+          9.3,
+          12,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112604,
+         10919,
+         86
+        ],
+        [
+         [
+          6.3,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112545,
+         10792,
+         83
+        ],
+        [
+         [
+          4.3,
+          13,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112226,
+         10756,
+         84
+        ],
+        [
+         [
+          3.2,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112263,
+         10793,
+         83
+        ],
+        [
+         [
+          3.0,
+          13,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112368,
+         10815,
+         85
+        ],
+        [
+         [
+          2.8,
+          11,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112482,
+         10445,
+         84
+        ],
+        [
+         [
+          6.6,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112659,
+         10579,
+         86
+        ],
+        [
+         [
+          6.2,
+          10,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112782,
+         10775,
+         83
+        ],
+        [
+         [
+          5.7,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        22.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112733,
+         10843,
+         84
+        ],
+        [
+         [
+          4.9,
+          11,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        24.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112653,
+         10768,
+         85
+        ],
+        [
+         [
+          4.7,
+          11,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        26.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112431,
+         10687,
+         86
+        ],
+        [
+         [
+          4.3,
+          10,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        28.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112206,
+         10728,
+         84
+        ],
+        [
+         [
+          3.8,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        30.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112045,
+         10902,
+         80
+        ],
+        [
+         [
+          3.3,
+          16,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 6,
+      "survivors": [],
+      "placed": true,
+      "mode": "boss",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.2
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 0,
+      "band_placed": 8,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 2665,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Rock",
+        "Rock",
+        "Spider",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       2,
+       2,
+       1
+      ],
+      "lances": [
+       1,
+       0
+      ]
+     }
+    ]
+   },
+   "finals_band": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 21.3,
+      "hp_left": 0.6,
+      "low": 0.47,
+      "max_hp": 170,
+      "dealt": 1956,
+      "taken": 90,
+      "kills": 5,
+      "left": [],
+      "autoplay_only": 8,
+      "trace": [
+       [
+        0.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          15.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.7,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          8.9,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          12.1,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          9.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          6.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          8.3,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          10.5,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          8.3,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          7.8,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          7.7,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Stone Golem",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          6.7,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "reach"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          6.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.5,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          6.7,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "reach"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.4,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          6.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "reach"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight Scythe Alpha",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "fight Stone Golem",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 1,
+      "survivors": [],
+      "placed": true,
+      "mode": "band",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       3.0,
+       3.0,
+       4.2,
+       4.4,
+       6.0,
+       6.0,
+       6.7,
+       5.6
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 8,
+      "band_placed": 8,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 2665,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Rock",
+        "Rock",
+        "Spider",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": null,
+      "boss_slain": null,
+      "band_left": 0,
+      "lights": [
+       null,
+       0,
+       0
+      ],
+      "lances": [
+       null,
+       4
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 20.7,
+      "hp_left": 0.75,
+      "low": 0.47,
+      "max_hp": 170,
+      "dealt": 1896,
+      "taken": 90,
+      "kills": 5,
+      "left": [],
+      "autoplay_only": 8,
+      "trace": [
+       [
+        0.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          15.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.3,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          8.8,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          14.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          12.0,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          9.5,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          7.4,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          8.3,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          8.3,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          8.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.2,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          8.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          7.2,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.8,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          7.9,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          5.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "hunt Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.2,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.8,
+          3,
+          true,
+          "reach"
+         ],
+         [
+          7.9,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.2,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.8,
+          3,
+          true,
+          "reach"
+         ],
+         [
+          7.9,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          6.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        14.0,
+        "fight Daemon Hunter",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.2,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.8,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          7.9,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight Stone Golem",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "reach"
+         ],
+         [
+          7.8,
+          3,
+          true,
+          "reach"
+         ],
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight Stone Golem",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "fight Stone Golem",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.7,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          7.6,
+          6,
+          true,
+          "reach"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 1,
+      "survivors": [],
+      "placed": true,
+      "mode": "band",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       3.0,
+       3.0,
+       4.2,
+       4.3,
+       6.0,
+       6.0,
+       6.7,
+       5.6
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 8,
+      "band_placed": 8,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 2665,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Rock",
+        "Rock",
+        "Spider",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": null,
+      "boss_slain": null,
+      "band_left": 0,
+      "lights": [
+       null,
+       0,
+       0
+      ],
+      "lances": [
+       null,
+       4
+      ]
+     }
+    ]
+   },
+   "final_wins": {
+    "Summoner": 1
+   },
+   "final_wins_boss": {
+    "Summoner": 2
+   },
+   "final_wins_band": {
+    "Summoner": 2
+   },
+   "summary": {
+    "Summoner|1": [
+     true,
+     5.4,
+     1.0,
+     true,
+     5.0,
+     1.0
+    ],
+    "Summoner|2": [
+     true,
+     9.5,
+     0.78,
+     true,
+     7.5,
+     1.0
+    ],
+    "Summoner|3": [
+     true,
+     12.2,
+     0.84,
+     true,
+     13.6,
+     1.0
+    ],
+    "Summoner|4": [
+     true,
+     14.3,
+     1.0,
+     true,
+     13.3,
+     1.0
+    ],
+    "Summoner|5": [
+     true,
+     16.2,
+     0.89,
+     true,
+     13.2,
+     1.0
+    ]
+   },
+   "boss_wins": {
+    "Summoner": 10
+   },
+   "spread": {
+    "1": 1.0,
+    "2": 1.0,
+    "3": 1.0,
+    "4": 1.0,
+    "5": 1.0
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

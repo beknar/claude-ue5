@@ -417,6 +417,13 @@ void ARDMonster::Freeze()
 	SetActorTickEnabled(false);
 }
 
+void ARDMonster::SetStrength(float InMaxHealth, float InDamage)
+{
+	if (bDead) return;
+	const float Share = MaxHealth > 0.f ? Health / MaxHealth : 1.f;
+	MaxHealth = FMath::Max(1.f, InMaxHealth); Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * Share)); Damage = FMath::Max(1.f, InDamage);
+}
+
 void ARDMonster::BecomeAlly(float Seconds, float InHealth, float InDamage)
 {
 	const bool bRise = bDead;

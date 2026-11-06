@@ -3473,7 +3473,7 @@ def bal_fight(c, hero, t, monsters, secs, after_start=None):
             "max_hp": round(mx0), "dealt": round(prop(c, "damage_dealt") - d0), "taken": round(prop(c, "damage_taken") - tk0), "kills": c.kills - k0,
             "left": left, "autoplay_only": only_n, "trace": trace, "used": st.get("used", 0), "stealth": st.get("stealth", 0), "kites": st.get("kites", 0), "summons": st.get("summons", 0)}
 
-def bal_final(hero, secs, mode="both", seed=0, provoke=False):
+def bal_final(hero, secs, mode="both", seed=0, provoke=False, band_n=0):
     """one fight with the dungeon's boss as a game sets him: tiers 1 to 5 open, a set of tier 5 built and its own monsters gone,
     Aurorim and his band in its largest room (DebugPlaceFinalBoss: his encounter, his tactics, his door), her with her tier-5
     kit on the tile of his room nearest 12 m from him, then autoplay against him and his band only (as the showcase's go).
@@ -3481,7 +3481,10 @@ def bal_final(hero, secs, mode="both", seed=0, provoke=False):
     dead); "band": he is taken away (his band alone, as placed round him). Taken away = destroyed, not killed: a kill would
     drop harvests by him, and his own would conquer the castle and open the door to Brokenspire.
     seed (not 0): the session seed, so that the three modes meet the same room and band (his band's number and kinds, and the
-    set's rooms, come from it: one play session's gave 7 in a room of 83 tiles, another's 10 in one of 96)"""
+    set's rooms, come from it: one play session's gave 7 in a room of 83 tiles, another's 10 in one of 96)
+    band_n (not 0): his band's number set to it (FinalBossMinions n to n, put back after): the game places it as it would
+    place any band. The number is one draw of the seed's stream and each member's kind the next, so on one seed a band of 3
+    is the first 3 of a band of 6"""
     c = yield from restart(hero); g = G["gen"]; quiet(True)
     if seed:
         g.restart_play(seed); yield from wait(0.8); refresh(); c = cb(); g = G["gen"]; quiet(True)
@@ -3499,7 +3502,11 @@ def bal_final(hero, secs, mode="both", seed=0, provoke=False):
     # (her kit before he is placed: while it was given (the Summoner's summons 2.6 s each) he and his band wandered off, the
     # monsters quiet; alone he was 220 m off by the fight's end and never met her (seed 13422's Warrior and Summoner))
     got = yield from kit(c, hero, 5)
-    if not g.debug_place_final_boss(S, room): return {"placed": False, "why": "not placed", "room": room}
+    mm0 = g.get_editor_property("final_boss_minions")
+    if band_n: g.set_editor_property("final_boss_minions", unreal.IntPoint(band_n, band_n))
+    placed = g.debug_place_final_boss(S, room)
+    if band_n: g.set_editor_property("final_boss_minions", mm0)
+    if not placed: return {"placed": False, "why": "not placed", "room": room}
     yield from wait(1.0)
     boss = g.get_final_boss(); bl = boss.get_actor_location()
     band = [m for m in g.get_monsters() if alive(m) and m != boss and m.spawn_index < 0 and dist2(m.get_actor_location(), bl) < 3000]
@@ -3536,7 +3543,7 @@ def bal_final(hero, secs, mode="both", seed=0, provoke=False):
                        "dz": round(m.get_actor_location().z - me.z), "m_from_him": round(dist2(m.get_actor_location(), bl) / 100, 1), "aggro": bool(m.is_aggro()),
                        "branch": str(m.combat_branch), "home": m.home_room}
                       for m in foes if alive(m)]
-    r.update({"placed": True, "mode": mode, "provoked": provoke, "session_seed": g.get_editor_property("session_seed"), "m_from_him_at_go": drift, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": nband if mode != "boss" else 0,
+    r.update({"placed": True, "mode": mode, "provoked": provoke, "band_n": band_n,"session_seed": g.get_editor_property("session_seed"), "m_from_him_at_go": drift, "room": room, "room_tiles": len(tiles), "start_m": round(dist2(at, bl) / 100, 1), "band": nband if mode != "boss" else 0,
               "band_placed": nband, "band_info": bandinfo, "kit": got, "boss_max_hp": bmax, "boss_damage": bdmg,
               "boss_hp_left": round(hp(boss)) if mode != "band" else None, "boss_slain": (not alive(boss)) if mode != "band" else None,
               "band_left": sum(1 for m in band if alive(m)),
@@ -3568,7 +3575,13 @@ def step_balance():
     fkey = {"both": "finals", "boss": "finals_boss", "band": "finals_band"}
     bad = [m_ for m_ in modes if m_ not in fkey]
     if bad: raise ValueError(f"final_modes: no such fight {bad} (both, boss, band)")
-    for md_ in modes: res.setdefault(fkey[md_], {})
+    # (his band's number, each in turn: "band_sizes=3+4+5+6"; each size's record is the mode's key with "_n<size>" after it,
+    # "finals_n3"; none: the game's own (FinalBossMinions))
+    sizes = [int(x) for x in (opt.get("band_sizes") or "0").split("+")]
+    if any(n_ < 0 for n_ in sizes): raise ValueError(f"band_sizes: {sizes} (0 or more each)")
+    def fk(md_, n_): return fkey[md_] + (f"_n{n_}" if n_ else "")
+    for md_ in modes:
+        for n_ in sizes: res.setdefault(fk(md_, n_), {})
     # (a fixed final_seed is the finals' only: the session's own is put back after each hero's finals, or the next hero's tier
     # trials ran on it)
     seed0 = G["gen"].get_editor_property("session_seed")
@@ -3613,15 +3626,17 @@ def step_balance():
             unreal.log(f"MWBAL {hero} t{t} pack {json.dumps(r['pack'])} boss {json.dumps(r.get('boss'))}")
         # (the dungeon's boss, Aurorim and his band, as the game sets him: finals times with her tier-5 kit)
         for md_ in modes:
-            for k in range(nf):
-                fr = yield from bal_final(hero, float(opt.get("final_s", 240)), md_, int(opt.get("final_seed", 0)), opt.get("provoke", "0") == "1")
-                res[fkey[md_]].setdefault(hero, []).append(fr)
-                unreal.log(f"MWBAL {hero} final {md_} {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'taken', 'dealt', 'boss_hp_left', 'band_left', 'lights', 'lances', 'used')})}")
+            for n_ in sizes:
+                for k in range(nf):
+                    fr = yield from bal_final(hero, float(opt.get("final_s", 240)), md_, int(opt.get("final_seed", 0)), opt.get("provoke", "0") == "1", n_)
+                    res[fk(md_, n_)].setdefault(hero, []).append(fr)
+                    unreal.log(f"MWBAL {hero} final {md_} n{n_} {k + 1}: {json.dumps({x: fr.get(x) for x in ('won', 'down', 'secs', 'hp_left', 'low', 'taken', 'dealt', 'boss_hp_left', 'band', 'band_left', 'lights', 'lances', 'used')})}")
         if nf and int(opt.get("final_seed", 0)) and seed0:
             G["gen"].restart_play(seed0); yield from wait(0.8); refresh()
     quiet(False)
     for md_ in modes:
-        res[fkey[md_].replace("finals", "final_wins")] = {h: sum(1 for x in v if x.get("won")) for h, v in res[fkey[md_]].items()}
+        for n_ in sizes:
+            res[fk(md_, n_).replace("finals", "final_wins")] = {h: sum(1 for x in v if x.get("won")) for h, v in res[fk(md_, n_)].items()}
     tr = res["trials"]
     res["summary"] = {k: [v["pack"]["won"], v["pack"]["secs"], v["pack"]["hp_left"], (v.get("boss") or {}).get("won"), (v.get("boss") or {}).get("secs"), (v.get("boss") or {}).get("hp_left")] for k, v in tr.items()}
     packs_ok = all(v["pack"]["won"] for v in tr.values())

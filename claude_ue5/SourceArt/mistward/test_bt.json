@@ -1,0 +1,3812 @@
+{
+ "tag": "bt",
+ "plan": [
+  "balance"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "balance",
+   "ok": true,
+   "trials": {},
+   "finals": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 33.9,
+      "hp_left": 1.0,
+      "low": 0.28,
+      "max_hp": 170,
+      "dealt": 2823,
+      "taken": 122,
+      "kills": 4,
+      "left": [],
+      "autoplay_only": 11,
+      "trace": [
+       [
+        0.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.0,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          15.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          14.7,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.8,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          16.2,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          18.2,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          7.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.2,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          9.8,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          11.6,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          14.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.2,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          12.1,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          13.1,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.0,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          6.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.5,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          4.7,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          9.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          7.8,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.7,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          13.2,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          3.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          3.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          4.0,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          4.9,
+          5,
+          true,
+          "shoot"
+         ],
+         [
+          4.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.6,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          4.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.1,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          3.9,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.7,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          4.9,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          4.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.0,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Scythe Alpha",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          3.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          4.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          3.9,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          3,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110586,
+         3549,
+         86
+        ],
+        [
+         [
+          3.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          3.5,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          2.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          3.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          3,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "keep away from Broodmother",
+        [
+         110445,
+         3650,
+         83
+        ],
+        [
+         [
+          5.3,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          5.1,
+          2,
+          true,
+          "swing"
+         ],
+         [
+          4.6,
+          7,
+          true,
+          "stun"
+         ],
+         [
+          5.9,
+          2,
+          true,
+          "reach"
+         ],
+         [
+          5.6,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight Broodmother",
+        [
+         110292,
+         3553,
+         85
+        ],
+        [
+         [
+          6.5,
+          7,
+          true,
+          "stun"
+         ],
+         [
+          7.2,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          6.5,
+          1,
+          true,
+          "stun"
+         ],
+         [
+          7.0,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         110347,
+         3656,
+         85
+        ],
+        [
+         [
+          6.3,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          6.1,
+          1,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        22.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110589,
+         3886,
+         84
+        ],
+        [
+         [
+          5.5,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          4.9,
+          2,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        24.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110806,
+         3944,
+         85
+        ],
+        [
+         [
+          5.0,
+          7,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        26.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110690,
+         3817,
+         83
+        ],
+        [
+         [
+          4.3,
+          9,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        28.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110582,
+         3474,
+         86
+        ],
+        [
+         [
+          3.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        30.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110699,
+         3266,
+         82
+        ],
+        [
+         [
+          3.2,
+          10,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 2,
+      "summons": 3,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13425,
+      "m_from_him_at_go": [
+       0.0,
+       3.0,
+       4.2,
+       4.3,
+       8.4,
+       6.7,
+       7.6,
+       6.7,
+       6.0,
+       9.0,
+       6.7
+      ],
+      "room": 34,
+      "room_tiles": 91,
+      "start_m": 12.0,
+      "band": 10,
+      "band_placed": 10,
+      "band_info": {
+       "max_hp": 408,
+       "hp_sum": 3727,
+       "damage_max": 66.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       5
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 31.6,
+      "hp_left": 1.0,
+      "low": 0.28,
+      "max_hp": 170,
+      "dealt": 2843,
+      "taken": 122,
+      "kills": 5,
+      "left": [],
+      "autoplay_only": 11,
+      "trace": [
+       [
+        0.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.0,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          15.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.6,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          16.2,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          18.2,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          8.1,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          9.6,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          11.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          12.1,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          13.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.0,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          6.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.8,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          9.2,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          7.6,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          5.0,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          13.2,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          3.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.8,
+          2,
+          true,
+          "stun"
+         ],
+         [
+          3.8,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          4.2,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          5.1,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          4.7,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.3,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          6.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.4,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          3.9,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          4.6,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          3.8,
+          3,
+          true,
+          "reach"
+         ],
+         [
+          4.2,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          5.1,
+          3,
+          true,
+          "shoot"
+         ],
+         [
+          4.7,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.3,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.9,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110646,
+         3645,
+         84
+        ],
+        [
+         [
+          3.5,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          3.3,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          3.2,
+          2,
+          true,
+          "stun"
+         ],
+         [
+          3.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          2.8,
+          7,
+          true,
+          "stun"
+         ],
+         [
+          2.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.1,
+          2,
+          true,
+          "swing"
+         ],
+         [
+          4.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "keep away from Scythe Alpha",
+        [
+         110353,
+         3578,
+         84
+        ],
+        [
+         [
+          6.0,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          6.3,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.0,
+          2,
+          true,
+          "swing"
+         ],
+         [
+          6.4,
+          7,
+          true,
+          "chase"
+         ],
+         [
+          5.7,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          6.4,
+          2,
+          true,
+          "reach"
+         ],
+         [
+          6.8,
+          7,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight Scythe Alpha",
+        [
+         110274,
+         3551,
+         85
+        ],
+        [
+         [
+          6.7,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.6,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          6.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          7.5,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight Broodmother",
+        [
+         110274,
+         3551,
+         85
+        ],
+        [
+         [
+          6.7,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "reach"
+         ],
+         [
+          7.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.1,
+          1,
+          true,
+          "reach"
+         ],
+         [
+          7.5,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight Broodmother",
+        [
+         110274,
+         3551,
+         85
+        ],
+        [
+         [
+          6.7,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          7.0,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "stun"
+         ],
+         [
+          7.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          1,
+          true,
+          "stun"
+         ],
+         [
+          7.4,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        22.1,
+        "fight Broodmother",
+        [
+         110274,
+         3551,
+         85
+        ],
+        [
+         [
+          6.7,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          7.0,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          7.1,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.1,
+          1,
+          true,
+          "stun"
+         ],
+         [
+          7.5,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        24.1,
+        "fight Broodmother",
+        [
+         110274,
+         3551,
+         85
+        ],
+        [
+         [
+          6.0,
+          7,
+          true,
+          "stun"
+         ],
+         [
+          7.0,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "stun"
+         ],
+         [
+          7.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        26.1,
+        "fight Broodmother",
+        [
+         110274,
+         3551,
+         85
+        ],
+        [
+         [
+          6.0,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "stun"
+         ],
+         [
+          6.8,
+          1,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        28.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110291,
+         3584,
+         84
+        ],
+        [
+         [
+          5.6,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          6.7,
+          2,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        30.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110548,
+         3840,
+         85
+        ],
+        [
+         [
+          4.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.6,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 5,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13425,
+      "m_from_him_at_go": [
+       0.0,
+       3.0,
+       4.2,
+       4.3,
+       8.3,
+       6.7,
+       7.5,
+       6.7,
+       6.0,
+       9.0,
+       6.7
+      ],
+      "room": 34,
+      "room_tiles": 91,
+      "start_m": 12.0,
+      "band": 10,
+      "band_placed": 10,
+      "band_info": {
+       "max_hp": 408,
+       "hp_sum": 3727,
+       "damage_max": 66.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       5
+      ]
+     }
+    ]
+   },
+   "finals_boss": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 24.3,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 315,
+      "taken": 132,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": 1,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.0,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "out of the light's mark",
+        [
+         110544,
+         3430,
+         86
+        ],
+        [
+         [
+          12.1,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110281,
+         3285,
+         84
+        ],
+        [
+         [
+          14.1,
+          8,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110329,
+         3592,
+         84
+        ],
+        [
+         [
+          9.2,
+          14,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110362,
+         3663,
+         85
+        ],
+        [
+         [
+          6.4,
+          7,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110522,
+         3829,
+         86
+        ],
+        [
+         [
+          5.8,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110730,
+         3923,
+         83
+        ],
+        [
+         [
+          5.3,
+          9,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110949,
+         3928,
+         85
+        ],
+        [
+         [
+          4.9,
+          7,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110787,
+         3847,
+         85
+        ],
+        [
+         [
+          4.4,
+          7,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110616,
+         3597,
+         83
+        ],
+        [
+         [
+          3.8,
+          8,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110604,
+         3453,
+         86
+        ],
+        [
+         [
+          3.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        22.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110754,
+         3219,
+         80
+        ],
+        [
+         [
+          3.0,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        24.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110745,
+         3283,
+         80
+        ],
+        [
+         [
+          2.7,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 6,
+      "survivors": [],
+      "placed": true,
+      "mode": "boss",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13425,
+      "m_from_him_at_go": [
+       0.0
+      ],
+      "room": 34,
+      "room_tiles": 91,
+      "start_m": 12.0,
+      "band": 0,
+      "band_placed": 10,
+      "band_info": {
+       "max_hp": 408,
+       "hp_sum": 3727,
+       "damage_max": 66.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       2,
+       2,
+       1
+      ],
+      "lances": [
+       1,
+       0
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 22.7,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 315,
+      "taken": 132,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": 1,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.0,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "out of the light's mark",
+        [
+         110539,
+         3413,
+         86
+        ],
+        [
+         [
+          12.1,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110278,
+         3225,
+         86
+        ],
+        [
+         [
+          14.4,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         110325,
+         3510,
+         85
+        ],
+        [
+         [
+          9.1,
+          13,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110366,
+         3613,
+         84
+        ],
+        [
+         [
+          6.4,
+          9,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110514,
+         3795,
+         86
+        ],
+        [
+         [
+          5.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110720,
+         3904,
+         83
+        ],
+        [
+         [
+          5.1,
+          9,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110955,
+         3914,
+         84
+        ],
+        [
+         [
+          4.6,
+          8,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110773,
+         3823,
+         86
+        ],
+        [
+         [
+          4.2,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         110642,
+         3590,
+         84
+        ],
+        [
+         [
+          3.4,
+          8,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110667,
+         3400,
+         85
+        ],
+        [
+         [
+          3.1,
+          7,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        22.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         110557,
+         2997,
+         83
+        ],
+        [
+         [
+          6.4,
+          9,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 5,
+      "survivors": [],
+      "placed": true,
+      "mode": "boss",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13425,
+      "m_from_him_at_go": [
+       0.0
+      ],
+      "room": 34,
+      "room_tiles": 91,
+      "start_m": 12.0,
+      "band": 0,
+      "band_placed": 10,
+      "band_info": {
+       "max_hp": 408,
+       "hp_sum": 3727,
+       "damage_max": 66.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       2,
+       2,
+       1
+      ],
+      "lances": [
+       1,
+       0
+      ]
+     }
+    ]
+   },
+   "finals_band": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 20.2,
+      "hp_left": 1.0,
+      "low": 0.28,
+      "max_hp": 170,
+      "dealt": 1900,
+      "taken": 122,
+      "kills": 7,
+      "left": [],
+      "autoplay_only": 10,
+      "trace": [
+       [
+        0.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          15.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.7,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          16.2,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          18.2,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          9.7,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          11.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          14.6,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.1,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          12.0,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          13.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          14.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          6.6,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          8.0,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.6,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          13.5,
+          4,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          4.0,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          3.8,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          5.4,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          4.7,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.7,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.6,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          4.0,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          4.7,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.3,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.0,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.7,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.8,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Giant Spider",
+        [
+         110554,
+         3451,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.6,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.2,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.6,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          4.2,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.5,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "fight Giant Spider",
+        [
+         110554,
+         3451,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.2,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.5,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight Broodmother",
+        [
+         110554,
+         3451,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.4,
+          5,
+          true,
+          "reach"
+         ],
+         [
+          4.5,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        18.0,
+        "fight Broodmother",
+        [
+         110554,
+         3451,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.4,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.5,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight Daemon Hunter",
+        [
+         110554,
+         3451,
+         86
+        ],
+        [
+         [
+          4.5,
+          0,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 3,
+      "survivors": [],
+      "placed": true,
+      "mode": "band",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13425,
+      "m_from_him_at_go": [
+       3.0,
+       4.2,
+       4.2,
+       8.2,
+       6.7,
+       7.5,
+       6.7,
+       6.0,
+       9.0,
+       6.7
+      ],
+      "room": 34,
+      "room_tiles": 91,
+      "start_m": 12.0,
+      "band": 10,
+      "band_placed": 10,
+      "band_info": {
+       "max_hp": 408,
+       "hp_sum": 3727,
+       "damage_max": 66.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": null,
+      "boss_slain": null,
+      "band_left": 0,
+      "lights": [
+       null,
+       0,
+       0
+      ],
+      "lances": [
+       null,
+       5
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 20.9,
+      "hp_left": 1.0,
+      "low": 0.28,
+      "max_hp": 170,
+      "dealt": 1931,
+      "taken": 122,
+      "kills": 6,
+      "left": [],
+      "autoplay_only": 10,
+      "trace": [
+       [
+        0.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          15.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          14.7,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          10.8,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          9.9,
+          4,
+          true,
+          "stun"
+         ],
+         [
+          16.2,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          18.2,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          15.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          14.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          9.9,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          14.8,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          13.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          14.8,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          12.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          11.7,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          14.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          9.3,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          5.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          12.1,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          13.0,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "reach"
+         ],
+         [
+          14.8,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          6.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.8,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.9,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.5,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          8.0,
+          4,
+          true,
+          "chase"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.3,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          9.6,
+          3,
+          true,
+          "chase"
+         ],
+         [
+          3.0,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          13.4,
+          4,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.6,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          3.8,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          4.1,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          4.7,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.4,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          4.4,
+          3,
+          true,
+          "stun"
+         ],
+         [
+          6.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          6.3,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.6,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.4,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          3.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          3,
+          true,
+          "reach"
+         ],
+         [
+          6.7,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          5.1,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight Broodmother",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.6,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          4.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          5,
+          true,
+          "chase"
+         ],
+         [
+          4.3,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          5.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          4.9,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.0,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.6,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.3,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.8,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          3,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        18.0,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          5,
+          true,
+          "reach"
+         ],
+         [
+          4.7,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight Daemon Hunter",
+        [
+         110550,
+         3450,
+         86
+        ],
+        [
+         [
+          4.7,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 3,
+      "stealth": 0,
+      "kites": 0,
+      "summons": 3,
+      "survivors": [],
+      "placed": true,
+      "mode": "band",
+      "provoked": true,
+      "band_n": 0,
+      "session_seed": 13425,
+      "m_from_him_at_go": [
+       3.0,
+       4.2,
+       4.3,
+       8.4,
+       6.7,
+       7.6,
+       6.7,
+       6.0,
+       9.0,
+       6.7
+      ],
+      "room": 34,
+      "room_tiles": 91,
+      "start_m": 12.0,
+      "band": 10,
+      "band_placed": 10,
+      "band_info": {
+       "max_hp": 408,
+       "hp_sum": 3727,
+       "damage_max": 66.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Hunter",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Nasty",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": null,
+      "boss_slain": null,
+      "band_left": 0,
+      "lights": [
+       null,
+       0,
+       0
+      ],
+      "lances": [
+       null,
+       5
+      ]
+     }
+    ]
+   },
+   "final_wins": {
+    "Summoner": 2
+   },
+   "final_wins_boss": {
+    "Summoner": 2
+   },
+   "final_wins_band": {
+    "Summoner": 2
+   },
+   "summary": {},
+   "boss_wins": {
+    "Summoner": 0
+   },
+   "spread": {}
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

@@ -187,7 +187,8 @@ void URDCombatComponent::UpdateMaxima()
 	// (whole hit points with the growth only: the other levels keep theirs as they were (the PR review's find))
 	const float RawH = Generator->PlayerMaxHealth * (1.f + GetRingBonus(ERDRingKind::Health)) * Generator->TierHealthMul();
 	MaxHealth = FMath::Max(1.f, Generator->bTierGrowth ? FMath::RoundToFloat(RawH) : RawH);
-	MaxMana = FMath::Max(Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic)), GetTomeMana());
+	// (the Summoner's balance of 2026-11-05: her mana grows with the tiers opened too (her hero's ManaPerTier))
+	MaxMana = FMath::Max(Generator->PlayerMaxMana * (1.f + GetRingBonus(ERDRingKind::Magic)) * Generator->TierManaMul(), GetTomeMana());
 	// (a ring put on adds its part to what she has; one taken off takes no more than it gave)
 	if (MaxHealth > OldH) Health += MaxHealth - OldH;
 	if (MaxMana > OldM) Mana += MaxMana - OldM;

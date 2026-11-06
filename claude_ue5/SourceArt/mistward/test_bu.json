@@ -1,0 +1,2218 @@
+{
+ "tag": "bu",
+ "plan": [
+  "balance"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "balance",
+   "ok": true,
+   "trials": {},
+   "finals": {},
+   "finals_n1": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 16.9,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 489,
+      "taken": 0,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": 2,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.4,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112950,
+         10949,
+         86
+        ],
+        [
+         [
+          8.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112862,
+         10741,
+         84
+        ],
+        [
+         [
+          4.6,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          10.2,
+          1,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112687,
+         10608,
+         86
+        ],
+        [
+         [
+          4.1,
+          11,
+          true,
+          "reach"
+         ],
+         [
+          8.6,
+          0,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112473,
+         10553,
+         84
+        ],
+        [
+         [
+          3.3,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          8,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112269,
+         10643,
+         86
+        ],
+        [
+         [
+          2.9,
+          11,
+          true,
+          "stun"
+         ],
+         [
+          3.6,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         111997,
+         10378,
+         86
+        ],
+        [
+         [
+          6.7,
+          11,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112218,
+         10306,
+         84
+        ],
+        [
+         [
+          6.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          7.0,
+          7,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112578,
+         10371,
+         80
+        ],
+        [
+         [
+          5.1,
+          17,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 3,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 1,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.3,
+       3.0
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 1,
+      "band_placed": 1,
+      "band_info": {
+       "max_hp": 272,
+       "hp_sum": 272,
+       "damage_max": 44.0,
+       "kinds": [
+        "Alfa"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       0
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 19.0,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 420,
+      "taken": 0,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": 2,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.4,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112949,
+         10946,
+         86
+        ],
+        [
+         [
+          8.3,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112864,
+         10743,
+         84
+        ],
+        [
+         [
+          4.6,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          10.2,
+          1,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112691,
+         10609,
+         85
+        ],
+        [
+         [
+          4.1,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          8.6,
+          0,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112474,
+         10551,
+         84
+        ],
+        [
+         [
+          3.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.3,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112268,
+         10221,
+         84
+        ],
+        [
+         [
+          6.5,
+          11,
+          true,
+          "swing"
+         ],
+         [
+          8.7,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112194,
+         10281,
+         83
+        ],
+        [
+         [
+          6.1,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          8.3,
+          7,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112428,
+         10278,
+         85
+        ],
+        [
+         [
+          5.6,
+          11,
+          true,
+          "stun"
+         ],
+         [
+          8.0,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112755,
+         10480,
+         80
+        ],
+        [
+         [
+          4.5,
+          16,
+          true,
+          "swing"
+         ],
+         [
+          6.9,
+          10,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        18.0,
+        "fight Scythe Alpha",
+        [
+         112844,
+         10722,
+         84
+        ],
+        [
+         [
+          5.6,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 3,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 1,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.3,
+       3.0
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 1,
+      "band_placed": 1,
+      "band_info": {
+       "max_hp": 272,
+       "hp_sum": 272,
+       "damage_max": 44.0,
+       "kinds": [
+        "Alfa"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       0
+      ]
+     }
+    ]
+   },
+   "finals_n2": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 20.3,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 521,
+      "taken": 0,
+      "kills": 2,
+      "left": [],
+      "autoplay_only": 3,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.3,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112949,
+         10948,
+         86
+        ],
+        [
+         [
+          8.4,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.2,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112860,
+         10738,
+         84
+        ],
+        [
+         [
+          4.6,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          10.1,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          11.1,
+          1,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112680,
+         10606,
+         85
+        ],
+        [
+         [
+          4.1,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          8.6,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          5,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112451,
+         10592,
+         84
+        ],
+        [
+         [
+          3.1,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          4.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          2.4,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112271,
+         10733,
+         86
+        ],
+        [
+         [
+          2.8,
+          10,
+          true,
+          "swing"
+         ],
+         [
+          3.8,
+          5,
+          true,
+          "stun"
+         ],
+         [
+          2.0,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         111959,
+         10488,
+         83
+        ],
+        [
+         [
+          6.7,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          7.7,
+          8,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          7,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112173,
+         10400,
+         85
+        ],
+        [
+         [
+          5.9,
+          11,
+          true,
+          "reach"
+         ],
+         [
+          7.3,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112517,
+         10386,
+         80
+        ],
+        [
+         [
+          5.2,
+          16,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          10,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112714,
+         10493,
+         81
+        ],
+        [
+         [
+          4.7,
+          15,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112761,
+         10582,
+         84
+        ],
+        [
+         [
+          3.7,
+          11,
+          true,
+          "reach"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 4,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 2,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.2,
+       3.0,
+       3.0
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 2,
+      "band_placed": 2,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 653,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       0
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 20.3,
+      "hp_left": 1.0,
+      "low": 1.0,
+      "max_hp": 170,
+      "dealt": 519,
+      "taken": 0,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": 3,
+      "trace": [
+       [
+        0.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.3,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112949,
+         10948,
+         86
+        ],
+        [
+         [
+          8.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.2,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112864,
+         10745,
+         84
+        ],
+        [
+         [
+          4.7,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          10.1,
+          1,
+          true,
+          "swing"
+         ],
+         [
+          11.2,
+          1,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112682,
+         10604,
+         86
+        ],
+        [
+         [
+          4.1,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          8.5,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          4.0,
+          6,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112467,
+         10578,
+         84
+        ],
+        [
+         [
+          3.4,
+          13,
+          true,
+          "stun"
+         ],
+         [
+          4.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          2.7,
+          6,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112270,
+         10689,
+         86
+        ],
+        [
+         [
+          3.0,
+          11,
+          true,
+          "swing"
+         ],
+         [
+          4.2,
+          5,
+          true,
+          "swing"
+         ],
+         [
+          2.2,
+          5,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112107,
+         10360,
+         86
+        ],
+        [
+         [
+          6.6,
+          11,
+          true,
+          "swing"
+         ],
+         [
+          7.9,
+          4,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112326,
+         10324,
+         86
+        ],
+        [
+         [
+          6.1,
+          11,
+          true,
+          "swing"
+         ],
+         [
+          7.5,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112624,
+         10411,
+         80
+        ],
+        [
+         [
+          5.3,
+          17,
+          true,
+          "swing"
+         ],
+         [
+          6.8,
+          10,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        18.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112792,
+         10609,
+         84
+        ],
+        [
+         [
+          4.6,
+          13,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112755,
+         10587,
+         84
+        ],
+        [
+         [
+          4.5,
+          12,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 4,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 2,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.2,
+       3.0,
+       3.0
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 2,
+      "band_placed": 2,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 653,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       0
+      ]
+     }
+    ]
+   },
+   "finals_n3": {
+    "Summoner": [
+     {
+      "won": true,
+      "down": false,
+      "secs": 23.4,
+      "hp_left": 1.0,
+      "low": 0.85,
+      "max_hp": 170,
+      "dealt": 603,
+      "taken": 25,
+      "kills": 0,
+      "left": [],
+      "autoplay_only": 4,
+      "trace": [
+       [
+        0.1,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.0,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.1,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          7.9,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112949,
+         10949,
+         86
+        ],
+        [
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          8.3,
+          0,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112828,
+         10758,
+         84
+        ],
+        [
+         [
+          5.0,
+          14,
+          true,
+          "swing"
+         ],
+         [
+          8.7,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          8,
+          true,
+          "chase"
+         ],
+         [
+          5.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112641,
+         10639,
+         86
+        ],
+        [
+         [
+          4.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.0,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          5.4,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112326,
+         10676,
+         85
+        ],
+        [
+         [
+          3.3,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.3,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          2.7,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.5,
+          4,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        12.1,
+        "keep away from FINAL BOSS  Aurorim",
+        [
+         112233,
+         10661,
+         85
+        ],
+        [
+         [
+          3.8,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          5.7,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          3.2,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          4.9,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112045,
+         10453,
+         85
+        ],
+        [
+         [
+          6.6,
+          13,
+          true,
+          "swing"
+         ],
+         [
+          8.4,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          7,
+          true,
+          "swing"
+         ],
+         [
+          7.6,
+          5,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112268,
+         10395,
+         85
+        ],
+        [
+         [
+          6.1,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          8.2,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          5.6,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          7.4,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        18.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112570,
+         10453,
+         80
+        ],
+        [
+         [
+          5.3,
+          18,
+          true,
+          "stun"
+         ],
+         [
+          5.3,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.9,
+          10,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        20.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112758,
+         10628,
+         86
+        ],
+        [
+         [
+          4.6,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.1,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        22.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112699,
+         10596,
+         86
+        ],
+        [
+         [
+          4.3,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          6.0,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ]
+      ],
+      "used": 2,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 5,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 3,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.0,
+       3.0,
+       3.0,
+       4.2
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 3,
+      "band_placed": 3,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 952,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       1
+      ]
+     },
+     {
+      "won": true,
+      "down": false,
+      "secs": 20.7,
+      "hp_left": 1.0,
+      "low": 0.85,
+      "max_hp": 170,
+      "dealt": 747,
+      "taken": 25,
+      "kills": 1,
+      "left": [],
+      "autoplay_only": 4,
+      "trace": [
+       [
+        0.1,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          12.1,
+          12,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "stun"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        2.0,
+        "fight Giant Spider",
+        [
+         112950,
+         10950,
+         86
+        ],
+        [
+         [
+          8.2,
+          6,
+          true,
+          "chase"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.4,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          9.5,
+          0,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        4.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112948,
+         10945,
+         86
+        ],
+        [
+         [
+          5.6,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          10.3,
+          0,
+          true,
+          "swing"
+         ],
+         [
+          12.3,
+          0,
+          true,
+          "chase"
+         ],
+         [
+          8.2,
+          0,
+          true,
+          "chase"
+         ]
+        ]
+       ],
+       [
+        6.1,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112825,
+         10753,
+         83
+        ],
+        [
+         [
+          5.1,
+          14,
+          true,
+          "swing"
+         ],
+         [
+          8.8,
+          2,
+          true,
+          "chase"
+         ],
+         [
+          5.5,
+          8,
+          true,
+          "chase"
+         ],
+         [
+          5.6,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        8.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112632,
+         10634,
+         85
+        ],
+        [
+         [
+          4.2,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          6.1,
+          6,
+          true,
+          "reach"
+         ],
+         [
+          4.0,
+          6,
+          true,
+          "stun"
+         ],
+         [
+          5.4,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        10.0,
+        "round FINAL BOSS  Aurorim",
+        [
+         112307,
+         10674,
+         86
+        ],
+        [
+         [
+          3.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.4,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          2.8,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.6,
+          4,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        12.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112359,
+         10717,
+         86
+        ],
+        [
+         [
+          3.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          4.9,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          2.3,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          4.1,
+          4,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        14.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112520,
+         10410,
+         80
+        ],
+        [
+         [
+          6.0,
+          18,
+          true,
+          "reach"
+         ],
+         [
+          8.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.5,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          7.2,
+          10,
+          true,
+          "swing"
+         ]
+        ]
+       ],
+       [
+        16.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112722,
+         10465,
+         80
+        ],
+        [
+         [
+          6.1,
+          18,
+          true,
+          "swing"
+         ],
+         [
+          8.0,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          5.9,
+          12,
+          true,
+          "swing"
+         ],
+         [
+          7.3,
+          10,
+          true,
+          "reach"
+         ]
+        ]
+       ],
+       [
+        18.0,
+        "fight FINAL BOSS  Aurorim",
+        [
+         112861,
+         10643,
+         85
+        ],
+        [
+         [
+          5.6,
+          12,
+          true,
+          "reach"
+         ],
+         [
+          7.1,
+          6,
+          true,
+          "swing"
+         ],
+         [
+          6.6,
+          4,
+          true,
+          "stun"
+         ]
+        ]
+       ],
+       [
+        20.1,
+        "round FINAL BOSS  Aurorim",
+        [
+         112797,
+         10694,
+         83
+        ],
+        [
+         [
+          4.7,
+          14,
+          true,
+          "swing"
+         ],
+         [
+          5.8,
+          6,
+          true,
+          "swing"
+         ]
+        ]
+       ]
+      ],
+      "used": 1,
+      "stealth": 0,
+      "kites": 1,
+      "summons": 3,
+      "survivors": [],
+      "placed": true,
+      "mode": "both",
+      "provoked": true,
+      "band_n": 3,
+      "session_seed": 13422,
+      "m_from_him_at_go": [
+       0.1,
+       3.0,
+       3.0,
+       4.2
+      ],
+      "room": 48,
+      "room_tiles": 77,
+      "start_m": 12.0,
+      "band": 3,
+      "band_placed": 3,
+      "band_info": {
+       "max_hp": 381,
+       "hp_sum": 952,
+       "damage_max": 62.0,
+       "kinds": [
+        "Alfa",
+        "Hunter",
+        "Spider"
+       ]
+      },
+      "kit": {
+       "rings": [
+        [
+         "Magic Potency Ring 8",
+         true
+        ]
+       ],
+       "unlocked": 4,
+       "army": [
+        "Summon Tier 5",
+        2
+       ]
+      },
+      "boss_max_hp": 1836,
+      "boss_damage": 132.0,
+      "boss_hp_left": 0,
+      "boss_slain": true,
+      "band_left": 0,
+      "lights": [
+       0,
+       0,
+       0
+      ],
+      "lances": [
+       0,
+       1
+      ]
+     }
+    ]
+   },
+   "final_wins_n1": {
+    "Summoner": 2
+   },
+   "final_wins_n2": {
+    "Summoner": 2
+   },
+   "final_wins_n3": {
+    "Summoner": 2
+   },
+   "summary": {},
+   "boss_wins": {
+    "Summoner": 0
+   },
+   "spread": {}
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

@@ -38,11 +38,16 @@ def f0(x): return ("%.0f" % x) if abs(x - round(x)) < 0.05 or x >= 20 else ("%.1
 
 tables = {}
 # ---- the heroes
-rows = ["| Hero | Hit points with tiers 1 / 2 / 3 / 4 / 5 open | Mana (back a second) | Each tier opened past the first | Abilities |", "|---|---|---|---|---|"]
+rows = ["| Hero | Hit points with tiers 1 / 2 / 3 / 4 / 5 open | Mana (with tiers 1 to 5 open, if it grows; back a second) | Each tier opened past the first | Abilities |", "|---|---|---|---|---|"]
 for h in ST["heroes"]:
     hp = " / ".join(f0(round(h["hp"] * (1 + h["health_per_tier"] * (t - 1)))) for t in range(1, 6))
-    mana = "none" if h["mana"] <= 0 else ("%s (%s: %s %% of her pool)" % (f0(h["mana"]), f0(h["mana"] * h["mana_regen_share"]), f0(h["mana_regen_share"] * 100)) if h["mana_regen_share"] > 0 else "%s (%s)" % (f0(h["mana"]), f0(h["regen"])))
+    mt = h.get("mana_per_tier", 0.0)
+    pool = f0(h["mana"]) if mt <= 0 else " / ".join(f0(round(h["mana"] * (1 + mt * (t - 1)))) for t in range(1, 6))
+    mana = "none" if h["mana"] <= 0 else ("%s (%s: %s %% of her pool)" % (pool, f0(h["mana"] * h["mana_regen_share"]), f0(h["mana_regen_share"] * 100)) if h["mana_regen_share"] > 0 else "%s (%s)" % (pool, f0(h["regen"])))
     g = ["+%s %% hit points" % f0(h["health_per_tier"] * 100)]
+    if mt > 0: g.append("+%s %% mana" % f0(mt * 100))
+    if h.get("summons_grow"): g.append("her summons grow: the open tier's hit points and blows x %s by the summoning's tier 1 to 5"
+                                      % " / ".join("%g" % round(x, 3) for x in ST.get("summon_tier_strength", [])))
     if h["spell_power_per_tier"] > 0: g.append("+%s %% %s" % (f0(h["spell_power_per_tier"] * 100), "chi" if h["name"] == "MartialArtist" else "spell damage"))
     if h["own_weapon_power_per_tier"] > 0: g.append("+%s %% damage of her own %s" % (f0(h["own_weapon_power_per_tier"] * 100), "fists" if h["name"] == "MartialArtist" else "weapons"))
     if h["name"] == "Warrior": g[-1] += " (her own dagger stays the worst weapon: she grows by what she finds)"

@@ -555,7 +555,7 @@ static TArray<FVector> RD5PathTo(const ARDSection* S, const FVector& From, const
 }
 
 /** her weapons the pilot may use: index, how far it reaches (cm between capsules), whether it is a summon (and its spell) */
-struct FRD5Arm { int32 Index; float Range; bool bSummon; bool bSpell; FName Spell; int32 Count; };
+struct FRD5Arm { int32 Index; float Range; bool bSummon; bool bSpell; FName Spell; int32 Count; int32 SummonTier = 0; };
 
 static TArray<FRD5Arm> RD5Arms(const ARDDungeonGenerator* G)
 {
@@ -572,7 +572,7 @@ static TArray<FRD5Arm> RD5Arms(const ARDDungeonGenerator* G)
 			{
 				const FRDSpellDef& S = G->Spells[W.SpellIndex];
 				A.Spell = S.Name;
-				if (S.Kind == ERDSpellKind::Summon) { A.bSummon = true; A.Count = FMath::Max(S.Count, 1); A.Range = 1e6f; }
+				if (S.Kind == ERDSpellKind::Summon) { A.bSummon = true; A.Count = FMath::Max(S.Count, 1); A.Range = 1e6f; A.SummonTier = S.Tier; }
 				else if (S.Kind != ERDSpellKind::Bolt && S.Kind != ERDSpellKind::Rend && S.Kind != ERDSpellKind::Lash && S.Kind != ERDSpellKind::Drain)
 					A.Range = FMath::Min(FMath::Max(S.Reach, 600.f), 1400.f);
 				if (S.Kind == ERDSpellKind::Lash) A.Range = FMath::Max(S.Reach, 250.f);
@@ -782,9 +782,14 @@ void ARDDungeonGenerator::TickAutoplay(float Dt)
 		{
 			Her->SetActorRotation(FRotator(0, D.Rotation().Yaw, 0));
 			bool bDid = false;
-			for (const FRD5Arm& A : Arms)
-				if (!bHid && A.bSummon && CountSummoned(A.Spell) < A.Count && Pc->GetMana() >= Weapons[A.Index].ManaCost && Pc->StartAttackWith(A.Index))
-				{ bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; break; }
+			// (her best summoning only, the highest tier she knows: the first in her list was tier 1's, and against the final boss
+			// she called 41 soldiers of 60 hit points (one blow of his each) with all her mana, a summon taking half her pool
+			// whatever its tier (the trials of 2026-11-05))
+			const FRD5Arm* BestSummon = nullptr;
+			for (const FRD5Arm& A : Arms) if (A.bSummon && (!BestSummon || A.SummonTier > BestSummon->SummonTier)) BestSummon = &A;
+			if (BestSummon && !bHid && CountSummoned(BestSummon->Spell) < BestSummon->Count && Pc->GetMana() >= Weapons[BestSummon->Index].ManaCost
+				&& Pc->StartAttackWith(BestSummon->Index))
+			{ bDid = true; AutoplayStats.FindOrAdd(TEXT("summons"))++; }
 			for (int32 K = 0; K < Arms.Num() && !bDid; ++K)
 			{
 				const FRD5Arm& A = Arms[(K + AutoplayWeaponTurn) % Arms.Num()];
