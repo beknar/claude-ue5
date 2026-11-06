@@ -53,13 +53,14 @@ bool ARDDungeonGenerator::SummonsGrow() const
 	return H && H->bSummonsGrow;
 }
 
-void ARDDungeonGenerator::SummonStrength(FName Spell, float& OutHealth, float& OutDamage) const
+void ARDDungeonGenerator::SummonStrength(FName Spell, float& OutHealth, float& OutDamage, int32& OutTier) const
 {
 	// (the Summoner's balance of 2026-11-05: her summons were monsters of their kind's own tier, so a tier-1 summoning stayed at
 	// 60 hit points and 14 a blow at tier 5, and the first two died to one blow of the final boss each)
 	const FRDSpellDef* S = Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; });
 	const int32 St = FMath::Clamp(S ? S->Tier : 1, 1, 5);
 	const int32 T = FMath::Max(GetOpenTier(), St);
+	OutTier = T;
 	const float K = SummonTierStrength.IsValidIndex(St - 1) ? SummonTierStrength[St - 1] : 1.f;
 	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
 	const float Blow = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
@@ -92,21 +93,22 @@ void ARDDungeonGenerator::OnTierGrowth(int32 Tier)
 	TArray<FString> What;
 	if (PlayerCombat->GetMaxHealth() > OldH + 0.5f) What.Add(FString::Printf(TEXT("%.0f hit points"), PlayerCombat->GetMaxHealth()));
 	if (PlayerCombat->GetMaxMana() > OldM + 0.5f) What.Add(FString::Printf(TEXT("%.0f mana"), PlayerCombat->GetMaxMana()));
-	// (her summons standing grow with her, each keeping its share of hit points)
+	// (her summons standing grow with her, each keeping its share of hit points; one of a summoning above the open tier is at
+	// its summoning's tier already and does not change, nor is it counted (the PR review's find))
 	int32 Grown = 0;
 	if (SummonsGrow())
 		for (ARDMonster* A : Allies)
 			if (IsValid(A) && !A->IsDead() && !A->SummonSpell.IsNone())
 			{
-				float Hp = 0.f, Dm = 0.f; SummonStrength(A->SummonSpell, Hp, Dm);
-				A->SetStrength(Hp, Dm); ++Grown;
+				float Hp = 0.f, Dm = 0.f; int32 St = 0; SummonStrength(A->SummonSpell, Hp, Dm, St);
+				if (A->SetStrength(St, Hp, Dm)) ++Grown;
 			}
 	if (Grown > 0) What.Add(Grown == 1 ? FString(TEXT("your summon")) : FString::Printf(TEXT("your %d summons"), Grown));
 	if (H && H->SpellPowerPerTier > 0.f) What.Add(FString::Printf(TEXT("%s +%.0f%%"), H->Name == TEXT("MartialArtist") ? TEXT("chi") : TEXT("spells"), (TierSpellMul() - 1.f) * 100.f));
 	if (H && H->OwnWeaponPowerPerTier > 0.f) What.Add(FString::Printf(TEXT("%s +%.0f%%"), H->Name == TEXT("MartialArtist") ? TEXT("fists") : TEXT("your own weapons"), (TierOwnWeaponMul() - 1.f) * 100.f));
 	if (What.Num() > 0) PlayerCombat->ShowMessage(FString::Printf(TEXT("Tier %d opens: you grow stronger (%s)"), Tier, *FString::Join(What, TEXT(", "))));
-	UE_LOG(LogRDMistward6, Log, TEXT("RDGROW tier %d: %s %.0f hit points (x%.2f), spells x%.2f, own weapons x%.2f"), Tier, *CurrentHero.ToString(),
-		PlayerCombat->GetMaxHealth(), TierHealthMul(), TierSpellMul(), TierOwnWeaponMul());
+	UE_LOG(LogRDMistward6, Log, TEXT("RDGROW tier %d: %s %.0f hit points (x%.2f), %.0f mana (x%.2f), spells x%.2f, own weapons x%.2f, %d summons grown"), Tier, *CurrentHero.ToString(),
+		PlayerCombat->GetMaxHealth(), TierHealthMul(), PlayerCombat->GetMaxMana(), TierManaMul(), TierSpellMul(), TierOwnWeaponMul(), Grown);
 }
 
 // ================================================================================================ the Rogue's stealth

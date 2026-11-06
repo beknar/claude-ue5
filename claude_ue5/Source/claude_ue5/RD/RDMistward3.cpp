@@ -217,18 +217,19 @@ ARDMonster* ARDDungeonGenerator::SummonKindAlly(FName Kind, FVector At, FName Sp
 {
 	const int32 K = Monsters.IndexOfByPredicate([Kind](const FRDMonsterDef& D) { return D.Name == Kind && D.Mesh; });
 	if (K < 0) { UE_LOG(LogRDMistward3, Warning, TEXT("RDSUMMON no monster kind %s"), *Kind.ToString()); return nullptr; }
-	// (the Summoner's balance of 2026-11-05, SummonsGrow: its speed and blows' pace of the open tier, its hit points and blow
-	// by its summoning's tier at the open tier (SummonStrength))
+	// (the Summoner's balance of 2026-11-05, SummonsGrow: one tier for everything, the open tier or its summoning's if higher
+	// (SummonStrength): its speed, blows' pace and ability as that tier's monsters, its hit points and blow that tier's times its
+	// summoning's factor (the PR review's find: its pace had followed its kind's tier, its strength the summoning's))
 	const bool bGrow = SummonsGrow();
 	int32 T = FMath::Clamp(Monsters[K].Tier > 0 ? Monsters[K].Tier : 1, 1, 5);
-	if (bGrow) T = FMath::Max(T, GetOpenTier());
+	float Hp = 0.f, Dm = 0.f;
+	if (bGrow) SummonStrength(Spell, Hp, Dm, T);
 	const FString Title = Monsters[K].Title.IsEmpty() ? Kind.ToString() : Monsters[K].Title;
 	ARDMonster* M = SpawnMonsterKind(K, At, T, 1.f, 1.f, 1.f, Title);
 	if (!M) return nullptr;
 	// (hers: out of its set's monsters (her blows and spells pass it by), among her allies until it falls)
 	if (M->Section) M->Section->SpawnedMonsters.Remove(M);
-	float Hp = M->GetMaxHealth(), Dm = M->GetDamage();
-	if (bGrow) SummonStrength(Spell, Hp, Dm);
+	if (!bGrow) { Hp = M->GetMaxHealth(); Dm = M->GetDamage(); }
 	M->BecomeAlly(0.f, Hp, Dm);
 	M->SummonSpell = Spell;
 	Allies.Add(M);

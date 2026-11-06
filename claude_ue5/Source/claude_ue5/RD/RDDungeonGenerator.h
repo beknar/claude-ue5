@@ -824,8 +824,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward6") bool bTierGrowth = false;
 	/** a growing summon's strength (her hero's bSummonsGrow): a monster of the open tier's hit points and blows, times this by
 	 *  the tier of the summoning (1 to 5; none: 1), whatever its kind: a higher summoning stays the stronger (raised to the open
-	 *  tier by its kind's own factor, a tier-1 Soldier outdid a tier-5 Spider). 880 sets 1.2 to 1.4: tier 1's at tier 1 keeps
-	 *  the Soldier's 60 hit points and 14 a blow */
+	 *  tier by its kind's own factor, a tier-1 Soldier outdid a tier-5 Spider). The factors must not fall from tier 1 to 5, or a
+	 *  low summoning grown to the open tier outdoes a high one. 880 sets balance6.json's 0.8 to 1.0 (2026-11-06; at 1.2 to 1.4
+	 *  she beat everything): a tier-1 Soldier at tier 1 has 40 hit points and 9 a blow, a tier-5 Spider 340 and 55 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward6") TArray<float> SummonTierStrength;
 
 	// ---- the final boss (the user's spec of 2026-11-03; RDAurorim.cpp, pipeline/unreal/889): when the last tier reaches the
@@ -936,8 +937,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") float TierManaMul() const;
 	/** her hero's summons grow with the tiers opened (bTierGrowth and the hero's bSummonsGrow) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward6") bool SummonsGrow() const;
-	/** a growing summon's hit points and blow for its summoning now (SummonTierStrength at the open tier) */
-	void SummonStrength(FName Spell, float& OutHealth, float& OutDamage) const;
+	/** a growing summon's hit points and blow for its summoning now (SummonTierStrength at the open tier), and the tier it is
+	 *  then (the open tier, or its summoning's if higher: its speed, pace and ability are that tier's) */
+	void SummonStrength(FName Spell, float& OutHealth, float& OutDamage, int32& OutTier) const;
 	/** a weapon's damage factor from the tiers opened (a spell or chi: TierSpellMul; one of her own: TierOwnWeaponMul; a
 	 *  found one 1: its damage carries its own tier) */
 	float TierPowerOf(const FRDWeaponDef& W) const;
