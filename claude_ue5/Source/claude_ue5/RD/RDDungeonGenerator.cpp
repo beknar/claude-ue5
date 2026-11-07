@@ -1183,7 +1183,10 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	}
 	// (the wilderness: one killed stays dead when its chunk is made again)
 	if (Monster && Monster->WildKey >= 0)
+	{
 		if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Monster->WildKey);
+		WildQuestOnKill(Monster);
+	}
 	// (mistward: one of a boss's band or a ring's guards stays dead)
 	bool bBossKill = false;
 	for (FEncounter& E : Encounters)

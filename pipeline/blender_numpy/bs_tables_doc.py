@@ -24,14 +24,14 @@ for t in D["townsfolk"]:
                 f"{' and ' + str(len(t.get('topics', []))) + ' questions' if t.get('topics') else ''} | {pack(t)} |")
 people = "\n".join(rows)
 GOAL = {"talk": "speak with", "guards": "the Mistward Hall's guards killed", "enter": "Mistward Castle entered", "kills": "monsters killed in the castle",
-        "kind": "of that kind killed in the castle", "tier": "the castle's tier opened", "boss": "tier bosses slain", "prisoners": "prisoners freed", "wild": "the wilderness (later)"}
+        "kind": "of that kind killed in the castle", "tier": "the castle's tier opened", "boss": "tier bosses slain", "prisoners": "prisoners freed", "wild": "the wilderness"}
 rows = ["| Quest | Given by | After | Asks | Reward |", "|---|---|---|---|---|"]
 titles = {q["id"]: q["title"] for q in D["quests"]}
 for q in D["quests"]:
     g = q["goal"]; k = g.split(":")[0]
     asks = q.get("hint", "")
     rew = ", ".join(x for x in (f"{q.get('gold', 0)} gold" if q.get("gold") else "", q.get("reward", "")) if x)
-    rows.append(f"| {q['title']} | {q['giver']} | {titles.get(q.get('after', ''), '')} | {asks} (`{g}` x {q.get('count', 1)}) | {rew}{' (when the gate opens)' if k == 'wild' else ''} |")
+    rows.append(f"| {q['title']} | {q['giver']} | {titles.get(q.get('after', ''), '')} | {asks} (`{g}` x {q.get('count', 1)}) | {rew} |")
 quests = "\n".join(rows)
 t = open(DOC, encoding="utf-8").read()
 for tag, body in (("people", people), ("quests", quests)):

@@ -1,4 +1,4 @@
-"""mistward_castle, brokenspire and vel_morrath for a packaged game: every material their generators' pieces are drawn with gets the InstancedStaticMeshes
+"""mistward_castle, brokenspire, vel_morrath, war_engine and sewers for a packaged game: every material their generators' pieces are drawn with gets the InstancedStaticMeshes
 usage. The sections draw every piece through instanced meshes (ARDSection's HISMs). The editor adds a missing usage flag
 while it plays, so play in the editor looked right; a packaged game has no shaders for it and draws the default material
 (the packaged game's log: "Material ... missing usage flag InstancedStaticMeshes! Default Material will be used in game";
@@ -79,6 +79,16 @@ for k in ("rain_drop_material", "snow_drop_material"):
     if dm and dmat: use(dm, [dmat])
 # (Vel Morrath's catacombs (2026-11-06, 891): the copy of the castle with its crypt pieces in a table of its own)
 pieces_of(VEL)
+# (The War Engine and the sewers (2026-11-07, 895 / 897): copies of the castle with the Foundry's and the damp Sewer's pieces
+# and props; a monster drawn in a material of its own (FRDMonsterDef::Material: the iron golem's rusted iron, a static pack's
+# material) needs the skeletal-mesh usage)
+nskel = 0
+for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers"):
+    g_ = pieces_of(m_)
+    for d in g_.get_editor_property("monsters"):
+        mm = d.get_editor_property("material")
+        if mm and mm.get_base_material():
+            nskel += 1; note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
 # the menu: its placed meshes; Nanite ones need the Nanite usage
 open_map(MENU)
 for a in eas.get_all_level_actors():
@@ -90,7 +100,7 @@ for a in eas.get_all_level_actors():
 # the castle last: the script ends on it
 g_ = pieces_of(MAP)
 del g_
-print("ISMUSAGE pieces in materials of their own:", overrides, "| the wilderness's plants:", nwild)
+print("ISMUSAGE pieces in materials of their own:", overrides, "| the wilderness's plants:", nwild, "| monsters in materials of their own:", nskel)
 # (the editor sets a usage it needs while it draws, in memory only: the menu's two read true here while the files on disk,
 # and so the package, did not have them. Such a material is saved too.)
 # (they did not show as dirty either: the menu's Nanite materials are saved every run, the castle's when one is dirty)

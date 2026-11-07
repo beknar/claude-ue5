@@ -49,6 +49,9 @@ static FString RDTSignText(uint8 Kind)
 	case TK_Barracks: return TEXT("BARRACKS");
 	case TK_Witch: return TEXT("HEDGE\nWITCH");
 	case TK_Monastery: return TEXT("MONASTERY");
+	case TK_Workshop: return TEXT("WORKSHOP");
+	case TK_Warehouse: return TEXT("WARE\nHOUSE");
+	case TK_SluiceHouse: return TEXT("SLUICE\nHOUSE");
 	default: return FString();
 	}
 }
@@ -120,6 +123,16 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// (Vel Morrath's holy city (the user's of 2026-11-06, the generator's TownPlan 1): the cathedral at the town's middle with
 	// its plaza before it, over the catacombs; every rule of it behind bHoly, so Brokenspire's plan and draws stay as they were)
 	const bool bHoly = Generator->TownPlan == 1;
+	// (Ashenreach's forge city (the user's of 2026-11-07, docs/ashenreach.txt; TownPlan 2, RDForge.cpp): the besieged foundry at
+	// the town's middle where the cathedral stands in the holy city, its square before it, the guild's workshops; bMid the rules
+	// the two share: a landmark at the town's middle over a dungeon of its own)
+	const bool bForge = Generator->TownPlan == 2;
+	// (Graymourne's port (the user's of 2026-11-07, docs/graymourne.txt; TownPlan 3, RDPort.cpp): the sluice house over the sewers
+	// at the town's middle, an inner harbour along its sea wall (the frame's far side, turned to the north: the coast), its quay,
+	// piers, moored ships, warehouses, the drowned dead)
+	const bool bPort = Generator->TownPlan == 3;
+	const bool bMid = bHoly || bForge || bPort;
+	if (bPort) F.G = 0;
 	// ---- the ground inside the wall: one hallway (its rectangle the town's bounds; only the tiles inside the wall's outline
 	// are ground, below)
 	FCorr Ground; Ground.Min = FIntPoint(F.O, F.O); Ground.Max = FIntPoint(F.O + S, F.O + S); Ground.bHoriz = true; Ground.Theme = 0;
@@ -144,13 +157,19 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// ---- the main road, the castle, the square, the cross roads
 	const int32 Vc = S / 2 - 1 + R.RandRange(-6, 6);
 	// (the holy city's cathedral: 27 tiles deep (81 m: the narthex, the nave, the choir), 19 wide (the nave and its aisles))
-	const int32 CD = bHoly ? 27 : 17, CW = bHoly ? 19 : 21;
-	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners; the cathedral a
-	// little past the town's middle, the plaza before it)
-	const int32 Cu0 = bHoly ? S / 2 - CD / 2 + 4 : S - 3 - CD, Cv0 = Vc - CW / 2;
-	const int32 Us = bHoly ? Cu0 - 19 : 50 + R.RandRange(-4, 4);           // (the square's near edge)
+	// (the foundry: 25 deep (75 m: its gatehouse, the casting hall, the furnace hall), 21 wide (the halls and a workshop wing
+	// down each side))
+	// (the port's sluice house: a stone hall of 9 x 9 tiles over the sewers' mouth)
+	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : 21;
+	// (the port's harbour in the frame: from 26 tiles before the far wall to it, 24 tiles in from each side; its quay the 4 rows
+	// before it)
+	const int32 Hu0 = S - 26, Hv0 = 24, Hv1 = S - 24;
+	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners; the cathedral (or
+	// the foundry) a little past the town's middle, the plaza before it)
+	const int32 Cu0 = bMid ? S / 2 - CD / 2 + 4 : S - 3 - CD, Cv0 = Vc - CW / 2;
+	const int32 Us = bMid ? Cu0 - 19 : 50 + R.RandRange(-4, 4);           // (the square's near edge)
 	// (the castle's (or the cathedral's) ground with a margin: the castle reaches the far wall, the cathedral has ground behind)
-	auto InCastleZone = [&](float U, float V, float Mg) { return U >= Cu0 - Mg && (!bHoly || U <= Cu0 + CD + Mg) && V >= Cv0 - Mg && V <= Cv0 + CW + Mg; };
+	auto InCastleZone = [&](float U, float V, float Mg) { return U >= Cu0 - Mg && (!bMid || U <= Cu0 + CD + Mg) && V >= Cv0 - Mg && V <= Cv0 + CW + Mg; };
 	const int32 SqU0 = Us, SqU1 = Us + 14, SqV0 = Vc - 7, SqV1 = Vc + 8;
 	// ---- the wall's outline (the user's of 2026-11-02: "the town borders should also be irregularly shaped with the town walls
 	// following the shape of the town"): about twenty corners round the town's middle at radii from the plan's stream; a
@@ -183,7 +202,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 			if (FMath::Abs(FMath::FindDeltaAngleRadians(Th, PI)) < 0.32f) continue;      // (the gate's stretch)
 			const FVector2D D(FMath::Cos(Th), FMath::Sin(Th));
 			float Rr = Rb * (0.84f + 0.08f * FMath::Sin(2.f * Th + Ph1) + 0.06f * FMath::Sin(3.f * Th + Ph2) + R.FRandRange(-0.035f, 0.035f));
-			if (!bHoly && Th > CaMin - Step && Th < CaMax + Step) Rr = 1e9f;                             // (behind the castle: the square's edge)
+			if (!bMid && Th > CaMin - Step && Th < CaMax + Step) Rr = 1e9f;                             // (behind the castle: the square's edge)
+			if (bPort && FMath::Abs(Th) < 1.15f) Rr = 1e9f;                                             // (the port's sea wall: straight, at the far edge)
 			Vs.Add({ Th, Cc + D * FMath::Min(Rr, RMax(D)) });
 		}
 		// (the gate's stretch: across the main road, 4 tiles each side of it (its two towers), as far out as the corners beside it)
@@ -224,6 +244,26 @@ void ARDSection::PlanTown(FRandomStream& R)
 			Type[Idx(T)] = 2; Owner[Idx(T)] = 1000;
 			if (BorderDistPg(U + 0.5f, V + 0.5f) < 2.f) { Use[U * S + V] = 1; TownRoadMask[Idx(T)] = 3; }
 		}
+	// (the port's harbour: no ground (nothing is built or walked there but on its piers); five piers 2 tiles wide out from the
+	// quay, 16 tiles into the water)
+	TownHarbour = FIntRect(); TownPiers.Reset();
+	if (bPort)
+	{
+		for (int32 U = Hu0; U < S; ++U)
+			for (int32 V = Hv0; V < Hv1; ++V)
+			{
+				const FIntPoint T = F.Tile(U, V);
+				Use[U * S + V] = 9; Type[Idx(T)] = 0; Owner[Idx(T)] = -1; TownRoadMask[Idx(T)] = 0;
+			}
+		TownHarbour = F.Rect(Hu0, Hv0, S, Hv1);
+		for (int32 K = 0; K < 5; ++K)
+		{
+			const int32 Pv = Hv0 + 10 + K * ((Hv1 - Hv0 - 22) / 4);
+			for (int32 U = Hu0; U < Hu0 + 16; ++U)
+				for (int32 V = Pv; V < Pv + 2; ++V) { const FIntPoint T = F.Tile(U, V); Use[U * S + V] = 4; Type[Idx(T)] = 2; Owner[Idx(T)] = 1000; }
+			TownPiers.Add(F.Rect(Hu0, Pv, Hu0 + 16, Pv + 2));
+		}
+	}
 	// a straight cobbled road, cut to the outline's inside less the lane (along U when bAlongU, its long side)
 	auto RoadIn = [&](int32 U0, int32 V0, int32 U1, int32 V1, bool bAlongU)
 	{
@@ -301,12 +341,18 @@ void ARDSection::PlanTown(FRandomStream& R)
 	const int32 Xu = Us + 6;
 	RoadIn(Xu, 0, Xu + 3, S, false);
 	// (the holy city: the main road on past the cathedral's flank to a second cross road behind its choir, the processional way
-	// round it)
-	if (bHoly)
+	// round it; the forge city's the same round its foundry)
+	if (bMid)
 	{
 		RoadIn(Cu0 + CD + 4, 0, Cu0 + CD + 7, S, false);
 		Road(Cu0 - 6, Cv0 - 4, Cu0 + CD + 4, Cv0 - 2);
 		Road(Cu0 - 6, Cv0 + CW + 2, Cu0 + CD + 4, Cv0 + CW + 4);
+	}
+	// (the port: the quay along the harbour's edge, the main road on from the cross road behind the sluice house down to it)
+	if (bPort)
+	{
+		Road(Hu0 - 4, Hv0, Hu0, Hv1);
+		Road(Cu0 + CD + 7, Vc - 1, Hu0 - 4, Vc + 2);
 	}
 	for (const FIntRect& Rr : TownRoads) for (int32 X = Rr.Min.X; X < Rr.Max.X; ++X) for (int32 Y = Rr.Min.Y; Y < Rr.Max.Y; ++Y) if (In(FIntPoint(X, Y))) TownRoadMask[Idx(FIntPoint(X, Y))] = 1;
 	for (int32 X = TownSquare.Min.X; X < TownSquare.Max.X; ++X) for (int32 Y = TownSquare.Min.Y; Y < TownSquare.Max.Y; ++Y) if (In(FIntPoint(X, Y))) TownRoadMask[Idx(FIntPoint(X, Y))] = 1;
@@ -324,8 +370,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 		{
 			const FVector2D Q(R.FRandRange(5.f, S - 5.f), R.FRandRange(5.f, S - 5.f));
 			if (!InsidePg(Q.X, Q.Y) || BorderDistPg(Q.X, Q.Y) < 7.f) continue;
-			if (Q.X >= Cu0 - 10 && (!bHoly || Q.X <= Cu0 + CD + 8) && Q.Y >= Cv0 - 8 && Q.Y <= Cv0 + CW + 8) continue;
+			if (Q.X >= Cu0 - 10 && (!bMid || Q.X <= Cu0 + CD + 8) && Q.Y >= Cv0 - 8 && Q.Y <= Cv0 + CW + 8) continue;
 			if (Q.X > SqU0 - 4 && Q.X < SqU1 + 4 && Q.Y > SqV0 - 4 && Q.Y < SqV1 + 4) continue;
+			if (bPort && Q.X > Hu0 - 8) continue;                                          // (not on the quay or in the harbour)
 			bool bNear = false;
 			for (int32 K = 0; K < Nodes.Num() && !bNear; ++K) bNear = FVector2D::Distance(Nodes[K], Q) < (K < NAnchor ? 8.f : 12.f);
 			if (!bNear) Nodes.Add(Q);
@@ -363,7 +410,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		UE_LOG(LogRDTown, Log, TEXT("RDTOWN earth roads: %d places (%d on the cobbles), %d ways (%d loops), %d strips"), Nodes.Num(), NAnchor, Edges.Num(), Edges.Num() - NTree, TownPaths.Num());
 	}
 	// the castle and the square's ground are taken; the gate's mouth kept clear
-	Mark(Cu0 - 2, Cv0 - 2, bHoly ? Cu0 + CD + 2 : S, Cv0 + CW + 2, 3);
+	Mark(Cu0 - 2, Cv0 - 2, bMid ? Cu0 + CD + 2 : S, Cv0 + CW + 2, 3);
 	Mark(GateU, Vc - 4, GateU + 6, Vc + 5, 4);
 	// (a rectangle wholly inside the outline, 2.5 tiles from the wall, on free ground)
 	auto FitsIn = [&](int32 U0, int32 V0, int32 U1, int32 V1)
@@ -401,7 +448,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// (in the corner wanted, moved in until it lies inside the wall's outline on free ground)
 	// (the holy city's: a larger one behind the cathedral's choir, its chapel beside it)
 	const int32 GyW = bHoly ? 16 : 12, GyH = bHoly ? 14 : 11;
-	int32 GyU0 = bHoly ? Cu0 + CD + 9 : S - 4 - 14 - CD - 6, GyV0 = bHoly ? (bGraveLow ? Vc - 18 : Vc + 3) : bGraveLow ? 3 : S - 3 - 11;
+	// (the forge city's behind its foundry the same, of the town's size)
+	int32 GyU0 = bMid ? Cu0 + CD + 9 : S - 4 - 14 - CD - 6, GyV0 = bMid ? (bGraveLow ? Vc - 18 : Vc + 3) : bGraveLow ? 3 : S - 3 - 11;
 	PlaceRect(GyU0, GyV0, GyW, GyH);
 	Mark(GyU0, GyV0, GyU0 + GyW, GyV0 + GyH, 4);
 	const FIntRect Gy = F.Rect(GyU0 + 1, GyV0 + 1, GyU0 + GyW - 1, GyV0 + GyH - 1);
@@ -493,6 +541,22 @@ void ARDSection::PlanTown(FRandomStream& R)
 		for (int32 K = 0; K < 2; ++K)
 			if (Place(TK_Chapel, 6, 7, 5, 6, Near(FVector2D(SqMid.X, SqMid.Y + (K ? 14.f : -14.f))), 900, P)) Commit(TK_Chapel, P, 0, 2);
 	}
+	else if (bForge)
+	{
+		// (the forge city: the guild's workshops (an armourer's, a weaponsmith's, a gearwright's, a smelter) down the main road
+		// and round the square, its trade; no hedge witch)
+		for (int32 K = 0; K < 4; ++K)
+		{
+			const FVector2D Want = K < 2 ? FVector2D(GateU + 18.f + 12.f * K, Vc + (K ? 9.f : -9.f)) : FVector2D(SqMid.X, SqMid.Y + (K == 2 ? 15.f : -15.f));
+			if (Place(TK_Workshop, 7, 9, 6, 7, Near(Want), 900, P)) Commit(TK_Workshop, P, 0, 2);
+		}
+	}
+	else if (bPort)
+	{
+		// (the port: warehouses along the quay, their doors to it; no hedge witch)
+		for (int32 K = 0; K < 4; ++K)
+			if (Place(TK_Warehouse, 8, 10, 6, 7, Near(FVector2D(Hu0 - 9.f, Hv0 + 14.f + K * ((Hv1 - Hv0 - 28) / 3.f))), 900, P)) Commit(TK_Warehouse, P, 0, 2);
+	}
 	else if (Place(TK_Witch, 4, 4, 4, 4, [&](const FVector2D& Q) { return -(float)FVector2D::Distance(Q, SqMid); }, 900, P)) Commit(TK_Witch, P, 0, 1);
 	// the homes: as many as fit; their state by chance (the user's: burned down, boarded up, or lived in)
 	// (400 tries a home: a try is a rectangle anywhere in the town, and few land beside a winding road; at 80 the town had 94
@@ -501,12 +565,13 @@ void ARDSection::PlanTown(FRandomStream& R)
 	{
 		if (!Place(TK_Home, 4, 6, 4, 5, [&](const FVector2D& Q) { return R.FRand(); }, 400, P)) continue;
 		const float U = R.FRand();
-		// (the holy city is kept: few homes burned or boarded)
-		Commit(TK_Home, P, bHoly ? (U < 0.04f ? 1 : U < 0.10f ? 2 : 0) : (U < 0.2f ? 1 : U < 0.42f ? 2 : 0), 2);
+		// (the holy city is kept: few homes burned or boarded; the forge city fewer than Brokenspire, the siege is the foundry's)
+		// (the port: many shut up, few burned: the tide's dead empty the houses)
+		Commit(TK_Home, P, bHoly ? (U < 0.04f ? 1 : U < 0.10f ? 2 : 0) : bForge ? (U < 0.08f ? 1 : U < 0.18f ? 2 : 0) : bPort ? (U < 0.05f ? 1 : U < 0.25f ? 2 : 0) : (U < 0.2f ? 1 : U < 0.42f ? 2 : 0), 2);
 	}
 	// ---- the castle (its own frame: front toward -u, the main road's middle Vc); the holy city's cathedral
 	{
-		FTownBld B; B.Kind = bHoly ? TK_Cathedral : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
+		FTownBld B; B.Kind = bHoly ? TK_Cathedral : bForge ? TK_Foundry : bPort ? TK_SluiceHouse : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
 		const FIntRect Rc = F.Rect(Cu0, Cv0, Cu0 + CD, Cv0 + CW);
 		B.Min = Rc.Min; B.Max = Rc.Max;
 		B.DoorSide = F.Side(-1, 0); B.DoorTile = F.Tile(Cu0, Vc);
@@ -590,6 +655,60 @@ void ARDSection::PlanTown(FRandomStream& R)
 			B.Label = FString::Printf(TEXT("The Cathedral of %s"), *Generator->TownName);
 			continue;
 		}
+		if (B.Kind == TK_Foundry)
+		{
+			// the forge city's foundry (RDForge.cpp builds it): the gatehouse at its front between the two chimney stacks' bases
+			// (barricaded: the siege), the casting hall, the furnace hall behind it whose far wall holds the gate down into The War
+			// Engine, a workshop wing down each side (the armoury's racks, the stores of ore and gear)
+			const int32 Ew = 11, Ed = 4, Cd = 7;
+			const int32 W0 = Vc - Ew / 2;
+			const int32 RE = AddRoomRect(BI, F.Rect(Cu0, W0, Cu0 + Ed, W0 + Ew), ERDRoomKind::GuardRoom, F.Tile(Cu0 + 2, Vc));
+			const int32 RN = AddRoomRect(BI, F.Rect(Cu0 + Ed, W0, Cu0 + CD - Cd, W0 + Ew), ERDRoomKind::Forge, F.Tile(Cu0 + Ed + (CD - Cd - Ed) / 2, Vc));
+			const int32 RC = AddRoomRect(BI, F.Rect(Cu0 + CD - Cd, W0, Cu0 + CD, W0 + Ew), ERDRoomKind::Forge, F.Tile(Cu0 + CD - Cd / 2, Vc));
+			const int32 RL = AddRoomRect(BI, F.Rect(Cu0 + Ed, Cv0, Cu0 + CD, W0), ERDRoomKind::Armory, F.Tile(Cu0 + Ed + (CD - Ed) / 2, (Cv0 + W0) / 2));
+			const int32 RR = AddRoomRect(BI, F.Rect(Cu0 + Ed, W0 + Ew, Cu0 + CD, Cv0 + CW), ERDRoomKind::Storeroom, F.Tile(Cu0 + Ed + (CD - Ed) / 2, (W0 + Ew + Cv0 + CW) / 2));
+			const int32 TL = AddRoomRect(BI, F.Rect(Cu0, Cv0, Cu0 + Ed, W0), ERDRoomKind::Storeroom, F.Tile(Cu0 + 2, (Cv0 + W0) / 2));
+			const int32 TR = AddRoomRect(BI, F.Rect(Cu0, W0 + Ew, Cu0 + Ed, Cv0 + CW), ERDRoomKind::Storeroom, F.Tile(Cu0 + 2, (W0 + Ew + Cv0 + CW) / 2));
+			CastleHallRoom = RC;
+			const int32 Front = F.Side(-1, 0), Back = F.Side(1, 0), Left = F.Side(0, -1), Right = F.Side(0, 1);
+			Rooms[RE].bDoorSide[Front] = true;
+			AddEdge(B.DoorTile, Out);
+			AddEdge(F.Tile(Cu0 + Ed - 1, Vc), F.Tile(Cu0 + Ed, Vc)); Rooms[RE].bDoorSide[Back] = true; Rooms[RN].bDoorSide[Front] = true;
+			AddEdge(F.Tile(Cu0 + CD - Cd - 1, Vc), F.Tile(Cu0 + CD - Cd, Vc)); Rooms[RN].bDoorSide[Back] = true; Rooms[RC].bDoorSide[Front] = true;
+			// (the wings from the casting hall, two doors each; the stacks' bases from the gatehouse)
+			for (const int32 Ua : { Cu0 + Ed + 3, Cu0 + CD - Cd - 3 })
+			{
+				AddEdge(F.Tile(Ua, W0), F.Tile(Ua, W0 - 1)); AddEdge(F.Tile(Ua, W0 + Ew - 1), F.Tile(Ua, W0 + Ew));
+			}
+			Rooms[RN].bDoorSide[Left] = Rooms[RN].bDoorSide[Right] = true; Rooms[RL].bDoorSide[Right] = true; Rooms[RR].bDoorSide[Left] = true;
+			AddEdge(F.Tile(Cu0 + 2, W0), F.Tile(Cu0 + 2, W0 - 1)); AddEdge(F.Tile(Cu0 + 2, W0 + Ew - 1), F.Tile(Cu0 + 2, W0 + Ew));
+			Rooms[RE].bDoorSide[Left] = Rooms[RE].bDoorSide[Right] = true; Rooms[TL].bDoorSide[Right] = true; Rooms[TR].bDoorSide[Left] = true;
+			// (the furnace hall's far wall: the iron gate down into The War Engine (the Mistgate's part: walked into, it opens it))
+			Rooms[RC].bDoorSide[Back] = true;
+			const FVector Far = TileWorld(F.Tile(Cu0 + CD - 1, Vc));
+			const FVector Fw = FVector(RDTDir4[Back].X, RDTDir4[Back].Y, 0.f);
+			MistgateAt = Far + Fw * (Generator->TileSize * 0.5f);
+			MistgateNormal = -Fw;
+			B.Label = FString::Printf(TEXT("The Great Foundry of %s"), *Generator->TownName);
+			continue;
+		}
+		if (B.Kind == TK_SluiceHouse)
+		{
+			// the port's sluice house (RDPort.cpp furnishes it): one stone hall, the grated way down into the sewers at its far
+			// wall (the Mistgate's part: walked into, it opens them)
+			const int32 RI = AddRoomRect(BI, F.Rect(Cu0, Cv0, Cu0 + CD, Cv0 + CW), ERDRoomKind::Crypt, F.Tile(Cu0 + CD / 2, Vc));
+			Rooms[RI].bDoorSide[B.DoorSide] = true;
+			AddEdge(B.DoorTile, Out);
+			const int32 Back = F.Side(1, 0);
+			Rooms[RI].bDoorSide[Back] = true;
+			const FVector Far = TileWorld(F.Tile(Cu0 + CD - 1, Vc));
+			const FVector Fw = FVector(RDTDir4[Back].X, RDTDir4[Back].Y, 0.f);
+			MistgateAt = Far + Fw * (Generator->TileSize * 0.5f);
+			MistgateNormal = -Fw;
+			CastleHallRoom = RI;
+			B.Label = TEXT("The Sluice House");
+			continue;
+		}
 		ERDRoomKind K = ERDRoomKind::Kitchen;
 		switch (B.Kind)
 		{
@@ -601,6 +720,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 		case TK_Tavern: K = ERDRoomKind::Kitchen; break;
 		case TK_Barracks: K = ERDRoomKind::Barracks; break;
 		case TK_Witch: K = ERDRoomKind::Library; break;
+		case TK_Workshop: K = ERDRoomKind::Forge; break;
+		case TK_Warehouse: K = ERDRoomKind::Storeroom; break;
 		default: K = B.State == 2 ? ERDRoomKind::Storeroom : B.State == 1 ? ERDRoomKind::Crypt : (FRandomStream((int32)B.Seed).RandBool() ? ERDRoomKind::Kitchen : ERDRoomKind::GuardRoom); break;
 		}
 		// (the lane runs through the door)
@@ -614,7 +735,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	}
 	// ---- the castle's round towers, its stair turret and the path to it (no draws: the plan's stream is untouched); the
 	// cathedral's bell towers are its own (RDHoly.cpp)
-	if (!bHoly) CastleTowersPlan();
+	if (!bMid) CastleTowersPlan();
 	// ---- the wall's towers (2 x 2 tiles astride the wall at its corners, beside the gate and every 15 tiles or so): void
 	// (since 2026-11-02 at the corners of the wall's outline, the gate's stretch's two among them; a long straight stretch gets
 	// one more half way)
@@ -655,6 +776,21 @@ void ARDSection::PlanTown(FRandomStream& R)
 				FTownSpot St; St.Kind = TS_Statue; St.At = Mid + Va * Sd * 2050.f; St.Yaw = (-Va * Sd).Rotation().Yaw; TownSpots.Add(St);
 			}
 		}
+		if (bForge)
+		{
+			// (the forge city's square: the guild's great anvil across from the well, an open forge in each of its corners, its
+			// smoke and sparks; ore carts on their rails along the main road toward the foundry; a crane beside the foundry's door)
+			FTownSpot An; An.Kind = TS_Anvil; An.At = Mid - Va * 600.f; An.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(An);
+			for (const FVector& C : { Mid + Ua * 1900.f + Va * 1900.f, Mid + Ua * 1900.f - Va * 1900.f, Mid - Ua * 1900.f + Va * 1900.f, Mid - Ua * 1900.f - Va * 1900.f })
+			{
+				FTownSpot Fg; Fg.Kind = TS_Forge; Fg.At = C; Fg.Yaw = (Mid - C).Rotation().Yaw; TownSpots.Add(Fg);
+			}
+			for (int32 K = 0; K < 3; ++K)
+			{
+				// (on the forecourt's sides, clear of the main road's three tiles and of the foundry's front at 12 tiles)
+				FTownSpot Ct; Ct.Kind = TS_Cart; Ct.At = Mid + Ua * (1900.f + 550.f * K) + Va * 780.f * (K % 2 ? 1.f : -1.f); Ct.Yaw = Ua.Rotation().Yaw; TownSpots.Add(Ct);
+			}
+		}
 		FTownSpot Bd; Bd.Kind = TS_Board; Bd.At = Mid - Va * 700.f + Ua * 450.f; Bd.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(Bd);
 		for (int32 K = 0; K < 4; ++K)
 		{
@@ -670,7 +806,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		}
 		// the elder by the board, the preacher, children and the town's idiot about the square
 		// (the holy city's elder is its archbishop, before the cathedral's door: below)
-		FTownPost Pe; Pe.Role = ERDTownRole::Elder; Pe.At = Bd.At + Ua * -220.f + Va * 160.f; Pe.Yaw = Bd.Yaw + 180.f; if (!bHoly) TownPosts.Add(Pe);
+		FTownPost Pe; Pe.Role = ERDTownRole::Elder; Pe.At = Bd.At + Ua * -220.f + Va * 160.f; Pe.Yaw = Bd.Yaw + 180.f; if (!bMid) TownPosts.Add(Pe);
 		FTownPost Pp; Pp.Role = ERDTownRole::Preacher; Pp.At = Mid - Ua * 900.f + Va * 200.f; Pp.Yaw = Ua.Rotation().Yaw; Pp.Wander = 250.f; TownPosts.Add(Pp);
 		for (int32 K = 0; K < 3; ++K) { FTownPost Pc_; Pc_.Role = ERDTownRole::Child; Pc_.At = Mid + Va * (K - 1) * 500.f + Ua * 300.f; Pc_.Wander = 1800.f; Pc_.Index = K; TownPosts.Add(Pc_); }
 		FTownPost Pi; Pi.Role = ERDTownRole::Idiot; Pi.At = Mid - Ua * 2500.f; Pi.Wander = 3500.f; TownPosts.Add(Pi);
@@ -736,6 +872,64 @@ void ARDSection::PlanTown(FRandomStream& R)
 				FTownSpot St; St.Kind = TS_Statue; St.At = CDoor - Ua * 100.f + Va * Sd * 1050.f; St.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(St);
 			}
 		}
+		if (bForge)
+		{
+			// the forge city's siege of its own foundry (its machines woke: The War Engine): a barricade across the forecourt facing
+			// the foundry's door, a gap in its middle for the way in; the guild's soldiers behind it, braziers at its ends; the
+			// guildmaster (its elder: talk, quests) by the barricade; the workers at the square's open forges
+			const float Bar = 900.f;
+			for (int32 K = -2; K <= 2; ++K)
+			{
+				if (K == 0) continue;
+				FTownSpot Bk; Bk.Kind = TS_Barricade; Bk.At = CDoor - Ua * Bar + Va * (K * 330.f + (K > 0 ? 80.f : -80.f)); Bk.Yaw = Ua.Rotation().Yaw; TownSpots.Add(Bk);
+			}
+			for (const float Sd : { -1.f, 1.f }) { FTownSpot L; L.Kind = TS_Lamp; L.At = CDoor - Ua * (Bar + 120.f) + Va * Sd * 1050.f; TownSpots.Add(L); }
+			for (int32 K = 0; K < 4; ++K) { FTownPost Sd_; Sd_.Role = ERDTownRole::Soldier; Sd_.At = CDoor - Ua * (Bar + 260.f) + Va * ((K - 1.5f) * 420.f); Sd_.Yaw = Ua.Rotation().Yaw; Sd_.Index = 3 + K; TownPosts.Add(Sd_); }
+			FTownPost Gm; Gm.Role = ERDTownRole::Elder; Gm.At = CDoor - Ua * (Bar + 380.f) - Va * 1350.f; Gm.Yaw = (-Va).Rotation().Yaw + 90.f; TownPosts.Add(Gm);
+			int32 Wk = 0;
+			for (const FTownSpot& Sp : TownSpots)
+				if (Sp.Kind == TS_Forge) { FTownPost W; W.Role = ERDTownRole::Worker; W.At = Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(160.f, 120.f, 0)); W.Yaw = Sp.Yaw + 180.f; W.Index = Wk++; TownPosts.Add(W); }
+		}
+		if (bPort)
+		{
+			// the port's harbour (RDPort.cpp builds it): each pier (its deck, posts, the blockers along its sides), a ship moored
+			// down one side of it and a rowboat by the other, two wrecks in the harbour's corners; on the quay the drowned dead the
+			// tide brought in, gibbets, the fishers' racks, nets and crates; the harbourmaster (its elder: talk, quests) on the quay
+			// by the road down, sailors on the piers, fishers at the racks, mourners by the dead
+			const float Mt = Generator->TileSize;
+			auto Wp = [&](float U, float V) { const FVector2D L = F.LocalF(U, V); return FVector(GetActorLocation().X + L.X * Mt, GetActorLocation().Y + L.Y * Mt, GetActorLocation().Z); };
+			const float AlongU = Ua.Rotation().Yaw;
+			FRandomStream RP((int32)(R.GetInitialSeed() ^ 0x5EA9u));
+			int32 Sl = 0;
+			for (int32 K = 0; K < TownPiers.Num(); ++K)
+			{
+				const int32 Pv = Hv0 + 10 + K * ((Hv1 - Hv0 - 22) / 4);
+				FTownSpot Pr; Pr.Kind = TS_Pier; Pr.At = Wp(Hu0, Pv + 1.f); Pr.Yaw = AlongU; Pr.Bld = K; TownSpots.Add(Pr);
+				const bool bLeft = (K % 2) == 0;
+				FTownSpot Sh; Sh.Kind = TS_Ship; Sh.At = Wp(Hu0 + 8.f + RP.FRandRange(-1.5f, 1.5f), bLeft ? Pv - 2.6f : Pv + 4.6f); Sh.Yaw = AlongU + (RP.RandBool() ? 0.f : 180.f); TownSpots.Add(Sh);
+				FTownSpot Bt; Bt.Kind = TS_Boat; Bt.At = Wp(Hu0 + 3.f + RP.FRandRange(0.f, 6.f), bLeft ? Pv + 3.3f : Pv - 1.3f); Bt.Yaw = AlongU + RP.FRandRange(-25.f, 25.f); TownSpots.Add(Bt);
+				for (int32 J = 0; J < 2; ++J) { FTownPost Sa; Sa.Role = ERDTownRole::Sailor; Sa.At = Wp(Hu0 + 4.f + J * 8.f, Pv + 1.f); Sa.Yaw = AlongU + (J ? 0.f : 180.f); Sa.Wander = 400.f; Sa.Index = Sl++; TownPosts.Add(Sa); }
+			}
+			for (const float Vw : { Hv0 + 3.f, Hv1 - 3.f }) { FTownSpot Wr; Wr.Kind = TS_Wreck; Wr.At = Wp(S - 6.f, Vw); Wr.Yaw = AlongU + RP.FRandRange(60.f, 120.f); TownSpots.Add(Wr); }
+			// (on the quay: the drowned dead in twos and threes at the water's edge, the mourners by them; gibbets with their
+			// cages; the fishers' racks with nets and crates between the piers' roots)
+			int32 Mo = 0;
+			for (int32 K = 0; K < 6; ++K)
+			{
+				const float Vb = Hv0 + 6.f + K * ((Hv1 - Hv0 - 12) / 5.f) + RP.FRandRange(-2.f, 2.f);
+				for (int32 J = 0; J < 1 + RP.RandRange(1, 2); ++J) { FTownSpot Bd_; Bd_.Kind = TS_Body; Bd_.At = Wp(Hu0 - 1.2f + RP.FRandRange(-0.4f, 0.3f), Vb + J * 1.1f); Bd_.Yaw = RP.FRandRange(0.f, 360.f); TownSpots.Add(Bd_); }
+				if (K % 2 == 0) { FTownPost Mn; Mn.Role = ERDTownRole::Mourner; Mn.At = Wp(Hu0 - 2.6f, Vb + 0.5f); Mn.Yaw = AlongU; Mn.Index = 1 + Mo++; TownPosts.Add(Mn); }
+			}
+			for (int32 K = 0; K < 3; ++K) { FTownSpot Gb; Gb.Kind = TS_Gibbet; Gb.At = Wp(Hu0 - 3.5f, Hv0 + 20.f + K * ((Hv1 - Hv0 - 40) / 2.f)); Gb.Yaw = AlongU; TownSpots.Add(Gb); }
+			int32 Fi = 0;
+			for (int32 K = 0; K < 4; ++K)
+			{
+				const int32 Pv = Hv0 + 10 + K * ((Hv1 - Hv0 - 22) / 4) + 11;
+				FTownSpot Dp_; Dp_.Kind = TS_DockProps; Dp_.At = Wp(Hu0 - 2.f, Pv); Dp_.Yaw = AlongU + 180.f; TownSpots.Add(Dp_);
+				FTownPost Fs; Fs.Role = ERDTownRole::Fisher; Fs.At = Wp(Hu0 - 2.f, Pv + 2.2f); Fs.Yaw = AlongU; Fs.Wander = 300.f; Fs.Index = Fi++; TownPosts.Add(Fs);
+			}
+			FTownPost Hm; Hm.Role = ERDTownRole::Elder; Hm.At = Wp(Hu0 - 3.f, Vc - 3.f); Hm.Yaw = AlongU; TownPosts.Add(Hm);
+		}
 		for (int32 BI = 0; BI < TownBlds.Num(); ++BI)
 		{
 			const FTownBld& B = TownBlds[BI];
@@ -763,6 +957,10 @@ void ARDSection::PlanTown(FRandomStream& R)
 			case TK_Witch: Post(ERDTownRole::Witch, TileWorld(B.DoorTile) - In_ * 260.f + FVector(In_.Y, -In_.X, 0) * 230.f); break;
 			case TK_Home: if (B.State == 0 && FRandomStream((int32)(B.Seed ^ 0x51u)).FRand() < 0.6f) Post(ERDTownRole::Townsfolk, TileWorld(B.DoorTile) - In_ * 260.f + FVector(In_.Y, -In_.X, 0) * 230.f, 350.f, BI); break;
 			// (the holy city: monks in the monastery and walking out from it; a preacher in the cathedral's nave, a monk at prayer)
+			// (the forge city's workshops: a worker at the anvil inside, another walking out to the square's forges)
+			case TK_Workshop: Post(ERDTownRole::Worker, Ctr, 250.f, 10 + BI); Post(ERDTownRole::Worker, TileWorld(B.DoorTile) - In_ * 300.f, 3000.f, 30 + BI); break;
+			// (the port's warehouses: a dockhand inside among the crates, another on the quay outside)
+			case TK_Warehouse: Post(ERDTownRole::Dockhand, Ctr, 300.f, 10 + BI); Post(ERDTownRole::Dockhand, TileWorld(B.DoorTile) - In_ * 300.f, 2500.f, 30 + BI); break;
 			case TK_Monastery: Post(ERDTownRole::Monk, Inside, 0.f, 0); Post(ERDTownRole::Monk, Ctr, 600.f, 1); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 2); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 3); break;
 			case TK_Cathedral:
 				if (B.Rooms.Num() > 1)
@@ -795,6 +993,8 @@ FName ARDSection::TownPiece(const FTownBld& B, const TCHAR* Part) const
 {
 	// (the holy city's white stone: "Holy.<part>", 892's pieces (882 rewrites the "Town." ones))
 	if (B.Style == 4) return FName(*FString::Printf(TEXT("Holy.%s"), Part));
+	// (the forge city's soot-dark stone: "Forge.<part>", 894's pieces)
+	if (B.Style == 5) return FName(*FString::Printf(TEXT("Forge.%s"), Part));
 	static const TCHAR* Styles[] = { TEXT("Timber"), TEXT("Stone"), TEXT("Thatch"), TEXT("Burnt") };
 	return FName(*FString::Printf(TEXT("Town.%s_%s"), Styles[FMath::Min<int32>(B.Style, 3)], Part));
 }
@@ -897,10 +1097,13 @@ void ARDSection::TownShellBuilding(int32 BI)
 		return;
 	}
 	if (B.Kind == TK_Cathedral) { CathedralShell(BI); return; }
-	// (the holy city: its houses of white stone (Town.Holy_*), a burned one's timbers as anywhere)
+	if (B.Kind == TK_Foundry) { FoundryShell(BI); return; }
+	// (the holy city: its houses of white stone (Town.Holy_*), a burned one's timbers as anywhere; the forge city's of soot-dark
+	// stone (Forge.*, 2026-11-07))
 	if (Generator->TownPlan == 1) B.Style = B.State == 1 ? 3 : 4;
+	else if (Generator->TownPlan == 2) B.Style = B.State == 1 ? 3 : 5;
 	else
-	B.Style = B.State == 1 ? 3 : (B.Kind == TK_Temple || B.Kind == TK_Smithy || B.Kind == TK_Barracks || B.Kind == TK_Chapel) ? 1
+	B.Style = B.State == 1 ? 3 : (B.Kind == TK_Temple || B.Kind == TK_Smithy || B.Kind == TK_Barracks || B.Kind == TK_Chapel || B.Kind == TK_SluiceHouse) ? 1
 	        : B.Kind == TK_Witch ? 2 : (R.FRand() < 0.3f ? 2 : R.FRand() < 0.85f ? 0 : 1);
 	const int32 Nx = B.DoorSide < 2 ? B.Max.X - B.Min.X : B.Max.Y - B.Min.Y;      // (depth along the door's way)
 	const int32 Ny = B.DoorSide < 2 ? B.Max.Y - B.Min.Y : B.Max.X - B.Min.X;      // (width across)
@@ -1172,9 +1375,10 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 	case TK_Healer: Service(TS_Basin, TEXT("Fountain"), Back, FaceDoor); break;
 	case TK_Temple: Service(TS_Altar, NAME_None, Back, FaceDoor); break;
 	case TK_Storehouse: Service(TS_Stash, TEXT("Town.StashChest"), Back, FaceDoor); break;
-	case TK_Smithy:
+	case TK_Smithy: case TK_Workshop:
 	{
-		Service(TS_Smith, NAME_None, TileWorld(B.DoorTile) + In_ * 450.f, FaceDoor);
+		// (the forge city's workshops (2026-11-07): the smithy's round for their workers, no service)
+		if (B.Kind == TK_Smithy) Service(TS_Smith, NAME_None, TileWorld(B.DoorTile) + In_ * 450.f, FaceDoor);
 		// (the smith's round (the third list): hammering at his anvil, at the forge's fire, and by his door for her)
 		const FBox2D Rb(FVector2D(TileWorld(Rm.Min)) - FVector2D(150.f), FVector2D(TileWorld(Rm.Max - FIntPoint(1, 1))) + FVector2D(150.f));
 		auto Inside = [&](const FVector& P) { return Rb.IsInside(FVector2D(P)); };
@@ -1202,7 +1406,7 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 				bForge = true; break;
 			}
 		if (!bForge) Wk(TEXT("Forge"), Ctr + Along * 250.f, (-Along).Rotation().Yaw, nullptr);
-		Wk(TEXT("Talk"), TileWorld(B.DoorTile) + In_ * 450.f, FaceDoor, nullptr);
+		if (B.Kind == TK_Smithy) Wk(TEXT("Talk"), TileWorld(B.DoorTile) + In_ * 450.f, FaceDoor, nullptr);
 		break;
 	}
 	case TK_Tavern:
@@ -1265,6 +1469,8 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 		break;
 	}
 	case TK_Witch: FurnRoom = RI; AddPieceAt(TEXT("Cauldron"), Ctr, 0.f); FurnRoom = -1; break;
+	// (the port's sluice house: the sewer's mouth at its far wall (RDPort.cpp))
+	case TK_SluiceHouse: SewerGateBuild(BI); break;
 	case TK_Cathedral:
 	{
 		// (the holy city's cathedral, after its rooms' own furnishing: pews down the nave either side of its aisle, facing the
@@ -1519,6 +1725,8 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 	}
 	case 1:
 	{
+		// ---- the port's harbour: its water, its quay's wall, the blockers along its edges (RDPort.cpp)
+		HarbourBuild();
 		// ---- the square: the well, the quest board, the stalls, the lamps; the teleport circle's stones
 		for (const FTownSpot& Sp : TownSpots)
 		{
@@ -1578,11 +1786,23 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 				AddPieceAt(TEXT("Holy.Shrine"), Sp.At, Sp.Yaw);
 				AddEffect(TEXT("CandleFire"), Sp.At + FRotator(0, Sp.Yaw, 0).RotateVector(FVector(40.f, 0, 120.f)), 1.f);
 				break;
+			// (the forge city's (2026-11-07, RDForge.cpp): the guild's great anvil on its plinth, an open forge with its anvil, fire,
+			// sparks and smoke and the work at it, an ore cart on its rails, a stretch of the barricade)
+			case TS_Anvil: ForgeAnvilBuild(Sp); break;
+			case TS_Forge: OpenForgeBuild(Sp); break;
+			case TS_Cart: OreCartBuild(Sp); break;
+			case TS_Barricade: BarricadeBuild(Sp); break;
+			// (the port's harbour (2026-11-07, RDPort.cpp): piers, ships, boats, wrecks, the drowned dead, gibbets, dock props)
+			case TS_Pier: case TS_Ship: case TS_Boat: case TS_Wreck: case TS_Body: case TS_Gibbet: case TS_DockProps: PortSpotBuild(Sp); break;
 			default: break;
 			}
+			if (Sp.Kind == TS_Gibbet || Sp.Kind == TS_DockProps) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(260.f, Sp.Kind == TS_DockProps ? 900.f : 260.f), true);
 			// (what stands outdoors blocks the tiles under it for whoever walks the paths)
-			if (Sp.Kind == TS_Well || Sp.Kind == TS_Board || Sp.Kind == TS_Stall || Sp.Kind == TS_Still || Sp.Kind == TS_Tent || Sp.Kind == TS_Statue || Sp.Kind == TS_Shrine)
+			if (Sp.Kind == TS_Well || Sp.Kind == TS_Board || Sp.Kind == TS_Stall || Sp.Kind == TS_Still || Sp.Kind == TS_Tent || Sp.Kind == TS_Statue || Sp.Kind == TS_Shrine
+				|| Sp.Kind == TS_Anvil || Sp.Kind == TS_Forge)
 				MarkBlocked(Sp.At, Sp.Yaw, FVector2D(260.f, 260.f), true);
+			if (Sp.Kind == TS_Cart) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(320.f, 160.f), true);
+			if (Sp.Kind == TS_Barricade) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(140.f, 330.f), true);
 			if (Sp.Kind == TS_Fountain) MarkBlocked(Sp.At, 0.f, FVector2D(600.f, 600.f), true);
 			if (Sp.Kind == TS_Mill) MarkBlocked(Sp.At, 0.f, FVector2D(900.f, 900.f), true);
 		}
@@ -1675,6 +1895,7 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			const FVector Tw = TileWorld(T);
 			const bool bOutside = In(T) && Type[Idx(T)] == 0 && !InsideTownBorder(FVector2D(Tw.X, Tw.Y)) && TownBorderDist(FVector2D(Tw.X, Tw.Y)) > 2.5f * M;
 			if (!bInside && !bOutside) continue;
+			if (TownHarbour.Area() > 0 && TownHarbour.Contains(T)) continue;
 			if (bInside)
 			{
 				bool bOk = !Road[Idx(T)] && !Blocked[Idx(T)];
@@ -2017,6 +2238,8 @@ void ARDSection::TownGrass(FRandomStream& R)
 		{
 			const FIntPoint T(X, Y);
 			if (Type[Idx(T)] != 2 || Road[Idx(T)] || Blocked[Idx(T)] || DoorFront.Contains(T)) continue;
+			// (the port's harbour grows nothing: its piers are decks over the water; 884 gm1's picture had grass on them)
+			if (TownHarbour.Area() > 0 && TownHarbour.Contains(T)) continue;
 			// (a road's edge tile keeps its grass back from the road)
 			bool bByRoad = false;
 			for (int32 D = 0; D < 4 && !bByRoad; ++D) { const FIntPoint Q = T + RDTDir4[D]; bByRoad = In(Q) && Road[Idx(Q)]; }
@@ -2210,6 +2433,9 @@ void ARDSection::TownGround()
 			Col[I * Nv + J] = C;
 			// the height: bumps and ruts in the earth (up to +-5 cm), worn stones in the cobbles (+-2.5 cm)
 			float Z = UnderFloor(P) ? -40.f : 0.f;
+			// (the port's harbour: its bed 2.6 m under the quay, under the harbour's own water (RDPort.cpp), the piers' tiles too:
+			// they are decks on pilings; at the ground's height the grass showed between the planks)
+			if (TownHarbour.Area() > 0 && TownHarbour.Contains(T)) Z = -260.f;
 			Sunk[I * Nv + J] = Z < 0.f ? 1 : 0;
 			if (Z == 0.f)
 			{
@@ -2261,7 +2487,9 @@ void ARDSection::TownGround()
 			for (int32 J = 0; J < NvW; ++J)
 			{
 				const FVector2D P(I * StW, J * StW);
-				Vw[I * NvW + J] = FVector(P.X, P.Y, TownLiftAt(P + O2));
+				const FIntPoint Tw_(FMath::Clamp(FMath::FloorToInt(P.X / M), 0, N - 1), FMath::Clamp(FMath::FloorToInt(P.Y / M), 0, N - 1));
+				// (the harbour's water walked 1.7 m down behind its blockers; a pier's deck flat at the quay's height)
+				Vw[I * NvW + J] = FVector(P.X, P.Y, InHarbourWater(Tw_) ? -170.f : (TownHarbour.Area() > 0 && TownHarbour.Contains(Tw_)) ? 0.f : TownLiftAt(P + O2));
 			}
 		TArray<int32> Tw; Tw.Reserve((NvW - 1) * (NvW - 1) * 6);
 		for (int32 I = 0; I < NvW - 1; ++I)

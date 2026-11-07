@@ -290,6 +290,9 @@ void ARDDungeonGenerator::WildKnownPlaces(TArray<FRDWildPlace>& Out) const
 		FRDWildPlace P;
 		if (Wild->FindPlace(Id, P)) Out.Add(P);
 	}
+	// (a quest's place while its quest is taken: the captain said where; not found, so no travel there)
+	for (const FRDWildPlace& Q : Wild->QuestPlaces)
+		if (!WildFound.Contains(Q.Id) && IsWildQuestShown(Q.Id)) Out.Add(Q);
 }
 
 bool ARDDungeonGenerator::IsWildCombat() const

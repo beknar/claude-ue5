@@ -1,0 +1,16 @@
+Graymourne (the user's spec of 2026-11-07, pasted as written), then their answers to the questions asked before building it.
+
+Graymourne - theme a fog bound port where the tide brings in more bodies than ships.  this is a sea port on the northern
+        coast.  there are lots of docks and ships parked on them.  the dungeon is located in the sewers.  take a
+        sewer entrance to get there.
+
+Answers (2026-11-07):
+- The ships: no whole sailing ship is in the project: Viking longships (the Medieval Castle pack) and rowboats moored at
+  the piers, the wrecked age-of-sail hull pieces as derelict hulks and wrecks on the shore.
+- The sea and sewer monsters: the project's own (drowned sailors and their captain, the Crocodile Warrior, the crab-like
+  Shell, the Parasite Slider, the Drinker, the Devourer, the giant spider as a boss); no download.
+- The order: after the chunk stutter and Ashenreach (docs/ashenreach.txt).
+- As for Vel Morrath (docs/vel_morrath.txt), unless said otherwise: the city rebuilt in place at full size on the
+  brokenspire level (its own trades, people and quests, every building with rooms, working doors and containers), the
+  sewers a new level (a copy of Mistward Castle with its own themes, key and way back), going down floor by floor like
+  the catacombs, entered by a sewer entrance in the city.

@@ -1,0 +1,115 @@
+{
+ "tag": "s7",
+ "plan": [
+  "gate",
+  "map"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "gate",
+   "ok": true,
+   "lever": "lever",
+   "raised": true,
+   "prompt": "pull the lever (lower the portcullis)",
+   "past_gate_m": 15.0,
+   "in_walls_after": 0.0
+  },
+  {
+   "step": "map",
+   "ok": true,
+   "minimap_drawn": true,
+   "open": {
+    "cx": 900.0,
+    "cy": -700.0,
+    "mpp": 5.0,
+    "level": 8.0,
+    "tiles": 88.0,
+    "asked": 0.0,
+    "tile_ms": 202.9,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 88.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "drawn": [
+    "wmap_town",
+    "mapc_scroll_edge",
+    "mapc_compass",
+    "wild_map"
+   ],
+   "map_region": {
+    "cx": 2000.0,
+    "cy": 0.0,
+    "mpp": 60.0,
+    "level": 4.0,
+    "tiles": 108.0,
+    "asked": 16.0,
+    "tile_ms": 326.3,
+    "hover": 1073741824.0,
+    "hover_name": "Brokenspire",
+    "made": 108.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_region_drawn": [
+    "wmap_select",
+    "wmap_town"
+   ],
+   "map_country": {
+    "cx": 40000.0,
+    "cy": 20000.0,
+    "mpp": 160.0,
+    "level": 3.0,
+    "tiles": 169.0,
+    "asked": 16.0,
+    "tile_ms": 253.3,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 169.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_country_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "map_continent": {
+    "cx": 70000.0,
+    "cy": 0.0,
+    "mpp": 330.0,
+    "level": 2.0,
+    "tiles": 192.0,
+    "asked": 0.0,
+    "tile_ms": 216.6,
+    "hover": -1.0,
+    "hover_name": "",
+    "made": 192.0,
+    "refusal": "",
+    "last_travel": ""
+   },
+   "map_continent_drawn": [
+    "wmap_town",
+    "wmap_city"
+   ],
+   "fog_drag": {
+    "frames": 40,
+    "builds": 0
+   },
+   "revealed_here": true,
+   "revealed_far": false
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_s7_gate_out.png",
+  "wd_s7_minimap.png",
+  "wd_s7_map_near.png",
+  "wd_s7_map_region.png",
+  "wd_s7_map_country.png",
+  "wd_s7_map_continent.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

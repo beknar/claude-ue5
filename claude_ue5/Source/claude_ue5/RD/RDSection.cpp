@@ -1855,6 +1855,13 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			const FVector P(R.FRandRange(B.Min.X + 80, B.Max.X - 80), R.FRandRange(B.Min.Y + 80, B.Max.Y - 80), 0);
 			if (LaneFree(Rm, P, 40.f)) AddPieceAt(TEXT("Debris"), P, R.FRandRange(0, 360), 1.f, true);
 		}
+	// (a dungeon's own props by the walls, after the room's furniture where they still fit (2026-11-07: The War Engine's gears,
+	// chains and carts; the generator's ThemeProps): from a stream of the room's own, so the plan's draws stay as they were)
+	if (Generator->ThemeProps.Num() > 0 && Rm.Kind != ERDRoomKind::Junction)
+	{
+		FRandomStream Rp((int32)HashCombine((uint32)Seed ^ 0x7E3Au, (uint32)RI));
+		FurnishWalls(Rp, Rm, Generator->ThemeProps, Generator->ThemePropSpacing, Generator->ThemePropChance, false);
+	}
 	LightRoom(R, Rm, RI);
 }
 

@@ -98,6 +98,8 @@ struct FRDMonsterDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform WeaponGrip;
 	/** the gallery's name (the HUD's bar shows it) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	/** its look instead of its mesh's own (every slot; none: the mesh's): The War Engine's iron golem (2026-11-07) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<class UMaterialInterface> Material = nullptr;
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): a shot
 	// from afar in its kind's theme (half the kinds), weaker than its blow and with a longer wait
 	/** it shoots: from RangedMin out to RangedRange (cm), with a sight line; RangedDamage of its blow's damage; then waits
@@ -936,7 +938,11 @@ enum class ERDTownRole : uint8
 	Smith, Trader, Healer, Priest, Keeper, Innkeeper,
 	Drunk, Witch, Child, Refugee, Idiot, Preacher, Mourner, Guard, Militia, Soldier, Townsfolk,
 	// (Vel Morrath's holy city, 2026-11-06: its monks and nuns, pilgrims, beggars at the cathedral's steps, templars)
-	Monk, Pilgrim, Beggar, Templar
+	Monk, Pilgrim, Beggar, Templar,
+	// (Ashenreach's forge city, 2026-11-07: the guild's workers at the open forges and in the workshops)
+	Worker,
+	// (Graymourne's port, 2026-11-07: sailors on the piers, dockhands on the quay and in the warehouses, fishers at the racks)
+	Sailor, Dockhand, Fisher
 };
 
 /** Brokenspire: a townsperson (the NPC packs: a whole-body mesh and its idle and in-place walk clips, as the prisoners) and
@@ -1063,8 +1069,8 @@ struct FRDWildSwarm
 /** Brokenspire: a quest. Its Goal is a counter the game keeps across the levels (URDGameInstance::Counters): "talk:<role>",
  *  "guards" (the Mistward Hall's guards killed), "enter" (Mistward Castle entered), "kills" (monsters killed in the castle),
  *  "kind:<monster>", "boss" (a tier's boss slain), "prisoners" (freed from the cells), "tier" (the highest castle tier open:
- *  counted whole, not from when it was taken), "wild:<what>" (the wilderness, which is not there yet: offered as coming
- *  later). */
+ *  counted whole, not from when it was taken), "wild:<what>" (the wilderness's: "wolves" the Mill Road Den's pack killed,
+ *  "patrol" the lost patrol found at the old watchtower; read from the world, whole: RDWildQuest.cpp). */
 USTRUCT(BlueprintType)
 struct FRDQuestDef
 {

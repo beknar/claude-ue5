@@ -116,7 +116,8 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		const float Ic = (bTown ? 19.f : 13.f) * Sc;
 		if (P.Id == Pick) UI.Fit(TEXT("wmap_select"), S - FVector2D(Ic * 1.9f), S + FVector2D(Ic * 1.9f), FLinearColor(1.f, 1.f, 1.f, 0.95f));
 		if (!UI.Fit(RDWSymbolOf(P.Kind), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 1.f, 1.f, bFound ? 1.f : 0.55f))) SoftDot(S, 6.f * Sc, FLinearColor(0.95f, 0.9f, 0.78f, 1.f));
-		if (bTown || Mpp < 18.0 || P.Id == Pick)
+		// (a taken quest's place is named at every zoom: it is where she is sent)
+		if (bTown || Mpp < 18.0 || P.Id == Pick || Gen->IsWildQuestShown(P.Id))
 		{
 			const FString Nm = bTown ? P.Name.ToUpper() : P.Name;
 			const float Ts = Sc * (bTown ? 1.15f : 0.9f);

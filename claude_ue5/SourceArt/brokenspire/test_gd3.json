@@ -1,0 +1,238 @@
+{
+ "tag": "gd3",
+ "plan": [
+  "descendsewer"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "descendsewer",
+   "ok": true,
+   "set_town": {
+    "found_wear": 47.29999923706055,
+    "slash": [
+     "Ember Slash",
+     true
+    ],
+    "armour": "Plate Armour",
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true,
+    "quick": true
+   },
+   "down": {
+    "level": "sewers",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "POISON 1.6/s",
+     "WEAKENED -50%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     123,
+     123
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "sewers": {
+    "key": "sewers",
+    "title": "The Sewers of Graymourne",
+    "tier_floors": true,
+    "section": [
+     0,
+     0
+    ],
+    "z": 85,
+    "return_line": "button|Return to Graymourne",
+    "return_town": "Graymourne",
+    "drowned_kinds": [
+     "Abyssal_Shellclaw",
+     "Drowned_Captain",
+     "Drowned_Deckhand",
+     "Drowned_Diver",
+     "Drowned_Sailor",
+     "Finned_Lurker",
+     "Gaping_Deepman",
+     "Hammerhead_Brute",
+     "Shellclaw",
+     "Spearsnout",
+     "Tide_Captain"
+    ],
+    "monsters_now": {
+     "Drowned_Sailor": 6,
+     "Drowned_Deckhand": 5,
+     "Soldier": 3,
+     "Chicken": 2,
+     "Parasite_Slider": 1,
+     "Medic": 1,
+     "Rat": 1
+    },
+    "drowned_now": 11,
+    "themes": [
+     "Sewer",
+     "Sewer",
+     "Castle",
+     "Sewer",
+     "Mixed"
+    ]
+   },
+   "enter_counter": 1,
+   "drowned_clips": {
+    "Abyssal_Shellclaw": {
+     "bones_moved_cm": 60.04,
+     "moving": true
+    },
+    "Drowned_Captain": {
+     "bones_moved_cm": 8.44,
+     "moving": true
+    },
+    "Drowned_Deckhand": {
+     "bones_moved_cm": 7.57,
+     "moving": true
+    },
+    "Drowned_Diver": {
+     "bones_moved_cm": 5.06,
+     "moving": true
+    },
+    "Drowned_Sailor": {
+     "bones_moved_cm": 40.91,
+     "moving": true
+    },
+    "Finned_Lurker": {
+     "bones_moved_cm": 5.88,
+     "moving": true
+    },
+    "Gaping_Deepman": {
+     "bones_moved_cm": 32.76,
+     "moving": true
+    },
+    "Hammerhead_Brute": {
+     "bones_moved_cm": 7.19,
+     "moving": true
+    },
+    "Shellclaw": {
+     "bones_moved_cm": 25.54,
+     "moving": true
+    },
+    "Spearsnout": {
+     "bones_moved_cm": 5.02,
+     "moving": true
+    },
+    "Tide_Captain": {
+     "bones_moved_cm": 136.21,
+     "moving": true
+    }
+   },
+   "drowned_spawned": 11,
+   "set_sewers": {
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true
+   },
+   "up": {
+    "level": "brokenspire",
+    "left": 58,
+    "arrived": 58,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "SLOWED -60%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     126,
+     126
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "back": {
+    "town": "Graymourne",
+    "from_return_at_m": 0.0,
+    "from_sluice_door_m": 2.5,
+    "on_ground": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "bs_gd3_gm_sewers_start.png",
+  "bs_gd3_gm_drowned.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

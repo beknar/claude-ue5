@@ -1,6 +1,6 @@
 # TODO
 
-[README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md) · [Vel Morrath](docs/levels/vel_morrath.md)
+[README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md) · [Vel Morrath](docs/levels/vel_morrath.md) · [Ashenreach](docs/levels/ashenreach.md) · [Graymourne](docs/levels/graymourne.md)
 
 What is still to be tested and done, and the known limits. Written 2026-11-03 for the wilderness and the castle's final boss (the user's spec of 2026-11-03, [docs/wilderness.txt](docs/wilderness.txt)), merged that day in PR #16. Remove an item when a test shows it working or the work lands; add one when a limit is found.
 
@@ -14,7 +14,7 @@ Built and compiled, but no test has run it yet:
 - [ ] **The autosaves on Quit and before the Mistgate** (`quit`, `castle`): the other autosaves (a place found, a town entered, before and after a journey) have run in the tests.
 - [ ] **Coming back to life in the nearest found town** after a death in the wilds (`WildRespawnAt`): the nearest found town, not the nearest town, and it is loaded at once.
 - [ ] **The teleport circle's journey to another town** (Brokenspire's circle to Vel Morrath's and back, and refused in a fight).
-- [ ] **Ashenreach and Graymourne visited:** built as she nears them, their people their own, the maps switching in their walls (only Vel Morrath has been visited in a test).
+- [ ] **The maps switching in Ashenreach's and Graymourne's walls:** both are built round her and their people are their own in tests (`884 forge`, `port`), but no test has walked in through their gates, nor read the town's map there.
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
 - [ ] **The packaged game in the wilderness:** the package of 2026-11-06 (`builds\vel_morrath`) runs the town, puts her out in Vel Morrath and builds the city round her; a walk out of the gate, a journey, a save and load, and its memory over a long walk have not been run in it (worker threads, transient map textures and the save all behave differently packaged).
 
@@ -40,6 +40,38 @@ Built and tested (`884 holy`, `descend`; `868 catacombs -lv vel_morrath`; `888 w
 - [ ] **The houses' stone:** in the morning light (08:00) the city reads blue-grey; it has not been pictured at noon.
 - [ ] **The packaged game's city and catacombs played:** the package of 2026-11-06 goes down into the catacombs and out to the city and runs in each (no crash, no missing material in the Development package's log); the stair down from the cathedral, the deeper tiers and the way back have not been played in it.
 
+## Ashenreach and The War Engine (2026-11-07, [docs/levels/ashenreach.md](docs/levels/ashenreach.md))
+
+Built and tested (`884 forge`, `descendwar`); still to test or do:
+
+- [ ] **The War Engine past its first hall:** tiers 2 to 5 (the brick, the dwarven halls, the mixed) and the props by their walls have not been visited; nor a governor (a tier's boss) fought.
+- [ ] **Its quests taken and turned in**, the counters `war_engine:tier`, `:kills`, `:boss` read after a fight.
+- [ ] **The machines fought:** each kind spawned and its clips measured playing; none fought. The borrowed warrior swings are a weapon's swings done empty-handed; the iron golem's rusted metal reads very dark.
+- [ ] **The square's frame rate settled:** 5 to 7 just after the city was built round her; the casting hall 22 to 24.
+- [ ] **Embers in the burned plain's air:** the swarms table has none for it.
+- [ ] **The packaged game played:** the Shipping package of 2026-11-07 (`builds\graymourne`) goes down into `war_engine` (`-RDTownGo=dungeon:ashenreach`) and out to the city (`town:ashenreach`) and runs in each, no crash; `869` set the instanced-mesh usage on the city's new pieces (the barricade, the ore carts) and the skeletal-mesh usage on the iron golem's rusted iron. The Development package from the same cook (`builds\graymourne_dev`) logged no "missing usage flag" in the city or the first hall (the deeper tiers' pieces are checked only by `869`'s tables); no picture taken in it, and the gate, the deeper tiers and the way back have not been played in it.
+
+## Graymourne and its sewers (2026-11-07, [docs/levels/graymourne.md](docs/levels/graymourne.md))
+
+Built and tested (`884 port`, `descendsewer`; `888 world`, `towns`); still to test or do:
+
+- [ ] **The harbour opens to no sea:** every town's ground stands 12 m or more over the sea, so the harbour is a basin inside the town wall; the sea 700 m north is not seen from the quay. A harbour mouth through the sea wall, and the coast below the town (cliffs, a stair down to a sea quay), are still to come.
+- [ ] **The wrecks pictured:** placed by the sea wall (2 in the test), not yet in a picture.
+- [ ] **The sewers past their first hall:** tiers 2 to 5 (the damp brick, the cistern's vaults, the mixed), their ramps down and the drowned things by the walls have not been visited; nor a warden (a tier's boss) fought. The start hall keeps the castle's great-hall furniture (throne, carpet, banners) and its warm torchlight.
+- [ ] **Its quests taken and turned in**, the counters `sewers:tier`, `:kills`, `:boss` read after a fight.
+- [ ] **The drowned fought:** each kind spawned and its clips measured playing; none fought. The fish-men's borrowed warrior swings are a weapon's swings done empty-handed.
+- [ ] **The fog indoors:** the port's fog fills the houses and the Sluice House as it fills the streets.
+- [ ] **The city's frame rate settled:** 2 to 16 just after the city was built round her.
+- [ ] **The packaged game played:** the Shipping package of 2026-11-07 (`builds\graymourne`) goes down into `sewers` (`-RDTownGo=dungeon:graymourne`) and out to the port (`town:graymourne`) and runs in each, no crash; `869` set the instanced-mesh usage on the harbour's nets, wrecks, fish racks, boats and piers and the sewers' mud and drowned props (16 base materials). The Development package from the same cook (`builds\graymourne_dev`) logged no "missing usage flag" in the port or the first hall (the deeper tiers' pieces are checked only by `869`'s tables); no picture taken in it, and the sewer gate, the deeper tiers and the way back have not been played in it.
+
+## The captain's wilderness quests (2026-11-07)
+
+Built and tested (`888 quests`: their places, taken, the den's pack, the patrol found, turned in; `884 talk`: offered); still to test:
+
+- [ ] **Played by hand:** the test kills the pack with a blow of 1e7 and puts her before the watchtower's door; nobody has walked out from the gate, followed the map to them and fought the four ripper dogs (tier 1, the den's size).
+- [ ] **Saved and loaded with a quest taken:** the kills (`WildKilled`) and the find (`wild:patrol`) are saved with the game; a load in the middle of either has not been run.
+- [ ] **Their places in other games:** they follow the roads, which leave by Brokenspire's gate (a new town each game); in the three test games the den was 1.82 to 1.84 km out beside the Ashenreach road (45 m from it) and the tower 2.98 to 2.99 km out off the Vel Morrath road, both on dry farmland. A game whose roads leave over ground too steep or wet for them falls back to fixed points (2 km north, 3.1 km north-east), never seen.
+
 ## The final boss (Aurorim, 2026-11-03)
 
 Built and tested (`868`'s `finalboss`); still to test or do:
@@ -53,9 +85,8 @@ Built and tested (`868`'s `finalboss`); still to test or do:
 
 ## To do
 
-- [ ] **A chunk's making stutters:** the 5 ms budget a frame cannot split one chunk's work on the game thread (its mesh, collision setup, plants), measured at 45 to 72 ms: one long frame each time a chunk is made, every few seconds while she runs. Split it over frames (the ground first, then the plants).
+- [ ] **New ground costs the drawing a frame:** a chunk is made in steps since 2026-11-07 (`888 build7`: the game thread's making at most 9.3 ms of a frame, its longest step 6 ms, against 14.7 ms for a whole chunk in one go; the 45 to 72 ms written here before were chunks she is put on, cooked at once). The frames with making are still 12 to 16 ms longer than those without, and stat unit's threads put that in the drawing: the render thread 40 to 62 ms against 29 to 33, the GPU 33 to 59 against 28 to 31 (the editor's view at 2440 x 1616 on the RTX 3060, flying 100 m/s over new ground). What of a new chunk costs the GPU (its shadows, the plants' first frames, the ground's upload) is not measured yet; measure it in the packaged game too.
 - [ ] **Memory over a long walk:** back at the start after a 6 km walk out and back the editor held 470 to 670 MB more than when it began (the test allows 700); eight long journeys held flat. Measure hours of walking, and in the packaged game.
-- [ ] Give the captain's two wilderness quests ("Wolves on the Mill Road", "The Lost Patrol") now that the gate is open: they still say they wait for it.
 - [ ] Balance the heroes continent-wide: the first attempt covers Mistward Castle's five tiers only ([docs/hero-balance.md](docs/hero-balance.md#continent-wide-balancing-considerations)). The wilderness's tiers go by the distance from Brokenspire while her growth counts the castle's tiers she has opened; trials at each distance band, the wilderness's loot and the travel times are still to be done.
 
 ## Limits

@@ -604,7 +604,7 @@ void ARDDungeonGenerator::AfterTownBuilt()
 			if (CircleFx) CircleFx->Destroy();
 			// (the Mistgate is Brokenspire's: the wilderness's small towns' keeps have none)
 			// (and the holy city's stair down into the catacombs, 2026-11-06)
-			if (bTownHome || TownPlan == 1) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(S->MistgateAt + S->MistgateNormal * 160.f), Sp)) { T->Init(this, 0, false); MistgateFx = T; }
+			if (bTownHome || HasTownDungeon()) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(S->MistgateAt + S->MistgateNormal * 160.f), Sp)) { T->Init(this, 0, false); MistgateFx = T; }
 			for (const ARDSection::FTownSpot& Ts : S->TownSpots)
 				if (Ts.Kind == TS_Circle) if (ARDTeleporter* T = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(Ts.At + FVector(0, 0, 3.f)), Sp)) { T->Init(this, 0, false); CircleFx = T; }
 		}
@@ -800,6 +800,16 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 				if (DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw)) return;
 				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=catacombs refused: %s"), CatacombsLevel.IsEmpty() ? TEXT("no catacombs level") : TEXT("already travelling"));
 			}
+			// (-RDTownGo=dungeon:<town>: down into that town's own dungeon from where she stands (2026-11-07: "dungeon:ashenreach",
+			// "dungeon:graymourne"); she comes back where she stood)
+			else if (Go.StartsWith(TEXT("dungeon:")))
+			{
+				const FString Want = Go.Mid(8);
+				FString Level;
+				for (const auto& Kv : TownDungeons) if (Kv.Key.Replace(TEXT(" "), TEXT("")).ToLower() == Want.Replace(TEXT(" "), TEXT("")).ToLower()) Level = Kv.Value;
+				if (!Level.IsEmpty() && DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw, Level)) return;
+				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s refused: %s"), *Go, Level.IsEmpty() ? TEXT("no such town's dungeon") : TEXT("already travelling"));
+			}
 			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
 			// city: once the wilds are ready, by the map's fast travel; her mark written once it is built round her)
 			else if (Go.StartsWith(TEXT("town:")) && bWild) GI->TownGoTown = Go.Mid(5);
@@ -826,8 +836,9 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 	if (bTown && bTownHome && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
 		EnterCastle();
-	// the holy city's stair down (the cathedral's choir, 2026-11-06): walked into, the catacombs open
-	else if (bTown && TownPlan == 1 && S && !S->IsBuilding() && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
+	// a city's way into its dungeon (the cathedral's stair, 2026-11-06; the foundry's gate, the sewer's mouth, 2026-11-07):
+	// walked into, its level opens
+	else if (HasTownDungeon() && S && !S->IsBuilding() && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f
 		&& !(PlayerCombat && PlayerCombat->IsDead()))
 		EnterCatacombs();
 }
@@ -1357,14 +1368,17 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 	// (a dungeon's own tier ("vel_morrath:tier", the catacombs' deepest floor opened): whole, as the castle's, from its tiers)
 	if (Q.Goal.EndsWith(TEXT(":tier"))) return FMath::Max(GI->GetCounter(Q.Goal), DungeonTierReached(Q.Goal.LeftChop(5)));
 	if (Q.Goal == TEXT("guards")) return GI->GuardsDead.Num();
+	// (the wilderness's (2026-11-07): read from the world, whole: the den's pack dead, the patrol found)
+	if (Q.Goal.StartsWith(TEXT("wild:"))) return WildQuestProgress(Q.Goal);
 	const FRDQuestState* St = GI->FindQuest(Q.Id);
 	const int32 Base = St ? St->Base : 0;
 	return FMath::Max(0, GI->GetCounter(Q.Goal) - Base);
 }
 
-static FString RDQuestStateOf(const URDGameInstance* GI, const FRDQuestDef& Q, int32 Progress)
+static FString RDQuestStateOf(const URDGameInstance* GI, const FRDQuestDef& Q, int32 Progress, bool bWildOpen)
 {
-	if (Q.Goal.StartsWith(TEXT("wild:"))) return TEXT("later");
+	// (the wilderness's quests wait on a level without it; since 2026-11-07 Brokenspire's gate opens on it)
+	if (!bWildOpen && Q.Goal.StartsWith(TEXT("wild:"))) return TEXT("later");
 	const FRDQuestState* St = GI ? GI->FindQuest(Q.Id) : nullptr;
 	if (!St || St->State == 0) return TEXT("offered");
 	if (St->State == 2) return TEXT("done");
@@ -1378,7 +1392,7 @@ TArray<FString> ARDDungeonGenerator::GetQuestLines() const
 	for (const FRDQuestDef& Q : Quests)
 	{
 		const int32 P = QuestProgress(Q);
-		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
+		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
 	}
 	return Out;
 }
@@ -1398,7 +1412,7 @@ TArray<FString> ARDDungeonGenerator::GetQuestLinesHere() const
 	{
 		if (!IsQuestHere(Q)) continue;
 		const int32 P = QuestProgress(Q);
-		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
+		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
 	}
 	return Out;
 }
@@ -1412,8 +1426,9 @@ bool ARDDungeonGenerator::TownQuestAction(FName Act, FName Id)
 	if (Act == TEXT("accept"))
 	{
 		if (St && St->State > 0) return false;
-		if (Q->Goal.StartsWith(TEXT("wild:"))) { SetTownNote(bWild ? TEXT("This bounty's hunt is not posted yet: it waits for a later chapter") : TEXT("The wilderness beyond the gate is not open yet: this waits for a later chapter")); return false; }
-		FRDQuestState N; N.Id = Id; N.State = 1; N.Base = Q->Goal == TEXT("tier") || Q->Goal == TEXT("guards") ? 0 : GI->GetCounter(Q->Goal);
+		// (the wilderness's need the wilderness: Brokenspire's level with its gate open)
+		if (Q->Goal.StartsWith(TEXT("wild:")) && (!bWild || !IsWildReady())) { SetTownNote(TEXT("The wilderness beyond the gate is not open yet")); return false; }
+		FRDQuestState N; N.Id = Id; N.State = 1; N.Base = Q->Goal == TEXT("tier") || Q->Goal == TEXT("guards") || Q->Goal.StartsWith(TEXT("wild:")) ? 0 : GI->GetCounter(Q->Goal);
 		if (St) *St = N; else GI->Quests.Add(N);
 		TownBody = Q->Offer;
 		SetTownNote(FString::Printf(TEXT("Quest taken: %s"), *Q->Title));
@@ -1555,14 +1570,14 @@ void ARDDungeonGenerator::BuildTownLines()
 		{
 			if (Q.Giver != Giver || Q.Town != HereQ) continue;
 			const int32 P = QuestProgress(Q);
-			const FString St = RDQuestStateOf(GI, Q, P);
+			const FString St = RDQuestStateOf(GI, Q, P, bWild);
 			const FRDQuestState* Before = Q.After.IsNone() ? nullptr : (GI ? GI->FindQuest(Q.After) : nullptr);
 			const bool bOpen = Q.After.IsNone() || (Before && Before->State == 2);
 			if (!bOpen || St == TEXT("done")) continue;
 			// (the board posts three bounties at a time)
 			if (Giver == TEXT("Board") && St == TEXT("offered") && ++Shown > 3) continue;
 			const FString Arg = Q.Id.ToString();
-			if (St == TEXT("later")) Add(TEXT("later"), Q.Title, TEXT("LATER"), Q.Offer + (bWild ? TEXT("\n\n(This quest's hunt waits for a later chapter.)") : TEXT("\n\n(The wilderness beyond the gate is not open yet: this quest waits for a later chapter.)")), false, Arg);
+			if (St == TEXT("later")) Add(TEXT("later"), Q.Title, TEXT("LATER"), Q.Offer + TEXT("\n\n(The wilderness beyond the gate is not open yet: this quest waits for it.)"), false, Arg);
 			else if (St == TEXT("offered")) Add(TEXT("accept"), FString::Printf(TEXT("Quest: %s"), *Q.Title), Q.Gold > 0 ? FString::Printf(TEXT("%d g"), Q.Gold) : TEXT("NEW"), Q.Offer, true, Arg);
 			else if (St == TEXT("ready")) Add(TEXT("turnin"), FString::Printf(TEXT("Done: %s"), *Q.Title), TEXT("REWARD"), Q.Done, true, Arg);
 			else Add(TEXT("status"), Q.Title, FString::Printf(TEXT("%d / %d"), FMath::Min(P, Q.Count), Q.Count), Q.Hint, true, Arg);

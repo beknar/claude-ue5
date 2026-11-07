@@ -11,7 +11,7 @@ Steps (plan, comma separated):
             a boarded house's door refused until its boards are pried loose (F), then it opens; the castle's doors
   talk      F at the elder: his panel (questions, his first quest); a question asked (its answer shown); the quest taken; the
             scholar spoken to (F): the quest ready; turned in at the elder (+15 gold, done), the next one offered; the
-            captain's wilderness quests offered as later and refused
+            captain's wilderness quests offered (since 2026-11-07; until then as later, refused)
   services  with gold given: the trader sells a potion (gold down, the potion carried) and buys it back (gold up); the
             healer heals her (hit points full, gold down); the smith mends a found weapon worn down (full, gold down) and his
             anvil opens the crafting panel; the temple's blessing (on her, gold down); the storage keeps a thing and gives it
@@ -270,17 +270,16 @@ def step_talk():
     res["quest_done"] = quest("elder_word"); res["next_offered"] = line_of("accept", "Mistward Hall") >= 0
     res["lines_after"] = ["|".join(p) for p in panel()]
     g.close_town_panel(); yield from rwait(0.3)
-    # (the captain's wilderness quests: offered as later, refused)
+    # (the captain's wilderness quests: offered since the gate opened (2026-11-07; until then "later" and refused); taken and
+    # played in 888's quests step)
     talk_to("Captain"); yield from wait(0.3)
     g.interact_nearest(G["pawn"].get_actor_location()); yield from rwait(0.3)
-    later = [p for p in panel() if p[0] == "later"]
-    res["captain_later"] = [p[1] for p in later]
-    li = line_of("later")
-    res["later_refused"] = li >= 0 and not g.activate_town_entry(li)
+    res["captain_later"] = [p[1] for p in panel() if p[0] == "later"]
+    res["captain_wild_offered"] = [p[1] for p in panel() if p[0] == "accept" and ("Mill Road" in p[1] or "Lost Patrol" in p[1])]
     g.close_town_panel(); yield from rwait(0.3)
     quiet(False)
     ok = res["panel"] == "talk" and res["asked_changed_text"] and res["accepted"] and res["quest_ready"]["state"] == "ready" and res["turnin"] and res["gold"] == 15 \
-        and res["quest_done"]["state"] == "done" and res["next_offered"] and len(res["captain_later"]) == 2 and res["later_refused"]
+        and res["quest_done"]["state"] == "done" and res["next_offered"] and len(res["captain_later"]) == 0 and len(res["captain_wild_offered"]) == 2
     step_result("talk", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ the services
@@ -2033,8 +2032,443 @@ def step_descend():
           and res["back"]["town"] == "Vel Morrath" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_cathedral_door_m"] or 99) < 12)
     step_result("descend", ok, **res)
 
+# ------------------------------------------------------------------------------------------------ Ashenreach, the forge city
+def town_of(name):
+    for i, l in enumerate(G["gen"].get_wild_town_lines()):
+        p = str(l).split("|")
+        if p[0] == name: return i, float(p[2]), float(p[3])
+    return -1, 0.0, 0.0
+def to_town(name):
+    """out into the wilderness to a town's middle; until it is built round her"""
+    g = G["gen"]; ti, x, y = town_of(name)
+    g.wild_put_her(x, y)
+    t0 = time.time()
+    while time.time() - t0 < 120:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == name and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    return ti, x, y
+def step_forge():
+    """Ashenreach (the user's spec of 2026-11-07, docs/ashenreach.txt): in the continent's middle north of Brokenspire, at the
+    edge of its burned plain (the region north of it: the "burned plain" template); built as she comes, the forge city's plan:
+    the Great Foundry at its middle (its seven rooms: the gatehouse, the casting hall, the furnace hall, the two workshop wings,
+    the two chimney stacks), the square before it with the guild's great anvil and four open forges, ore carts on their rails,
+    the barricade across the forecourt; four workshops, the trades, eighty homes or more of soot-dark stone (the "Forge." pieces);
+    every building's rooms, doors and containers; its people its own (the guildmaster, the artificer, the siege captain, forge
+    hands, soldiers) and Brokenspire's elder, scholar and captain not among them; the guildmaster's panel with his first quest;
+    the forge hands' work at the open forges; the iron gate at the furnace hall's far wall (a dry run: walked into, it would
+    open The War Engine); pictures of the foundry's front over the barricade, the square, the casting hall and the furnace
+    hall"""
+    g = G["gen"]; res = {}
+    ti, x, y = town_of("Ashenreach")
+    res["site_km"] = [round(x / 1000, 1), round(y / 1000, 1)]; res["north_middle"] = x > 40000 and abs(y) < 15000
+    s_n = str(g.get_wild_sample_at(V((x + 6000.0) * 100.0, y * 100.0, 0))).split("|"); s_s = str(g.get_wild_sample_at(V((x - 9000.0) * 100.0, y * 100.0, 0))).split("|")
+    res["biome_6km_north"] = s_n[2] if len(s_n) > 2 else None; res["biome_9km_south"] = s_s[2] if len(s_s) > 2 else None
+    ti, x, y = yield from to_town("Ashenreach")
+    st = str(g.get_wild_town_state()).split("|"); res["state"] = st
+    res["plan"] = g.get_editor_property("town_plan")
+    res["dungeon_level"] = str(g.current_dungeon_level())
+    S = section(); B = blds()
+    kinds = {}
+    for b in B: kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
+    res["kinds"] = kinds
+    homes = [b for b in B if b["kind"] == "home"]
+    res["homes"] = {"all": len(homes), "burned": sum(1 for b in homes if b["state"] == 1), "boarded": sum(1 for b in homes if b["state"] == 2)}
+    fd = next((b for b in B if b["kind"] == "foundry"), None)
+    res["foundry"] = {"label": fd["label"], "rooms": fd["rooms"], "from_middle_m": round(math.hypot(fd["c"].x / 100 - x, fd["c"].y / 100 - y))} if fd else None
+    sq = place("square"); res["square_to_foundry_m"] = round(dist2(sq, fd["c"]) / 100) if fd and sq else None
+    sk = {}
+    for p in spots(): sk[p["kind"]] = sk.get(p["kind"], 0) + 1
+    res["spots"] = sk
+    n_cont = S.get_num_containers()
+    conts = [S.get_container_location(i) for i in range(n_cont)]
+    doors = [S.get_door_location(i) for i in range(S.get_num_doors())]
+    per = {}
+    for b in B:
+        if b["state"] == 1: continue
+        k = b["kind"]; e = per.setdefault(k, {"n": 0, "with_rooms": 0, "with_door": 0, "containers": 0})
+        e["n"] += 1; e["with_rooms"] += 1 if b["rooms"] > 0 else 0
+        e["with_door"] += 1 if any(dist2(d, b["door"]) < 250 for d in doors) else 0
+        e["containers"] += sum(1 for c in conts if S.town_building_at(c) == b["i"])
+    res["inside"] = per; res["containers"] = n_cont; res["doors"] = len(doors)
+    # (the forge city's pieces in the section: soot-dark houses, the foundry's brick, the square's things)
+    res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_ST_BrickWall_05", "SM_ST_MainHall_BrickWall_06", "SM_ChimneyTop", "SM_Kit_Forge", "SM_Forge", "sm_Anvil_01a",
+                                                              "SM_Ind_Min_Cart_Metal_Old_02", "SM_Ind_Min_Rail_Tracks_Wood_Modular_01_A", "SM_Camp_Barricade_Var3_SM_Barricade_Var3", "SM_PR_Chandelier_A")}
+    F = folk(); roles = {}
+    for f in F: roles[f["role"]] = roles.get(f["role"], 0) + 1
+    res["roles"] = roles; res["titles"] = sorted({f["title"] for f in F if f["role"] in ("Elder", "Scholar", "Captain", "Priest", "Smith", "Trader", "Healer", "Keeper", "Innkeeper")})
+    quiet(True)
+    gm = talk_to("Elder"); yield from wait(0.4)
+    said = str(g.interact_nearest(G["pawn"].get_actor_location())) if gm else None; yield from rwait(0.5)
+    res["guildmaster"] = {"found": gm is not None, "said": said, "panel": [p[1] for p in panel()][:8]}
+    g.close_town_panel(); yield from wait(0.3)
+    # (the forge hands at work: their rounds hold the open forges' places)
+    try:
+        ws = [str(g.get_townsfolk(f["i"]).get_work_state()) for f in F if f["role"] == "Worker"]
+        res["workers"] = len(ws); res["worker_states"] = ws[:6]
+    except Exception as e: res["workers_error"] = str(e)
+    mg = place("mistgate"); res["gate_from_foundry_m"] = round(dist2(mg, fd["c"]) / 100) if mg and fd else None
+    door = place("castle door")
+    def fps_here(sec=4.0):
+        yield from rwait(5.0); n = 0; t0 = time.time()
+        while time.time() - t0 < sec: n += 1; yield
+        return round(n / (time.time() - t0), 1)
+    res["fps"] = {}
+    if door and fd:
+        yaw = math.degrees(math.atan2(fd["c"].y - door.y, fd["c"].x - door.x))
+        bk = V(door.x - math.cos(math.radians(yaw)) * 1500.0, door.y - math.sin(math.radians(yaw)) * 1500.0, 0)
+        put(bk, yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=10, yaw=yaw)); yield from wait(1.0)
+        shot("ar_foundry_front"); yield from rwait(1.2)
+    if sq:
+        put(sq); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=math.degrees(math.atan2(fd["c"].y - sq.y, fd["c"].x - sq.x)) + 60.0 if fd else 0)); yield from wait(0.8)
+        res["fps"]["square"] = yield from fps_here()
+        shot("ar_square"); yield from rwait(1.2)
+    if mg and fd:
+        yaw = math.degrees(math.atan2(mg.y - fd["c"].y, mg.x - fd["c"].x))
+        put(V(fd["c"].x, fd["c"].y, 0), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=5, yaw=yaw)); yield from wait(0.8)
+        res["fps"]["casting_hall"] = yield from fps_here()
+        shot("ar_casting_hall"); yield from rwait(1.2)
+        # (across the hall at one long wall: its forge line, beside her in the picture along the hall)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=yaw + 90.0)); G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw + 90.0), True); yield from wait(1.0)
+        shot("ar_casting_side"); yield from rwait(1.2)
+        put(V(mg.x - (mg.x - fd["c"].x) * 0.35, mg.y - (mg.y - fd["c"].y) * 0.35, 0), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=3, yaw=yaw)); yield from wait(0.8)
+        shot("ar_furnace_hall"); yield from rwait(1.2)
+        g.set_editor_property("travel_dry_run", True)
+        put(V(mg.x - (mg.x - fd["c"].x) * 0.02, mg.y - (mg.y - fd["c"].y) * 0.02, 0)); yield from wait(1.5)
+        res["gate_travel"] = str(g.get_editor_property("last_travel"))
+        put(V(fd["c"].x, fd["c"].y, 0)); yield from wait(0.5)
+        g.set_editor_property("travel_dry_run", False)
+    quiet(False)
+    k = kinds
+    ok = (res["north_middle"] and res["plan"] == 2 and fd is not None and res["foundry"]["rooms"] == 7 and res["foundry"]["from_middle_m"] < 120
+          and "war_engine" in res["dungeon_level"] and res["biome_6km_north"] == "burned plain"
+          and k.get("workshop", 0) >= 3 and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple"))
+          and k.get("witch's hut", 0) == 0 and k.get("cathedral", 0) == 0 and res["homes"]["all"] >= 80
+          and sk.get("anvil", 0) == 1 and sk.get("forge", 0) == 4 and sk.get("cart", 0) == 3 and sk.get("barricade", 0) == 4
+          and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
+          and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Worker", "Soldier", "Refugee"))
+          and "Guildmaster Torvald Brask" in res["titles"] and "Aldric Venn" not in res["titles"]
+          and any("Iron Gate" in str(p) for p in res["guildmaster"]["panel"]) and res.get("gate_travel") == "catacombs")
+    step_result("forge", ok, **res)
+
+def step_descendwar():
+    """the iron gate of Ashenreach's Great Foundry, both ways: down into The War Engine (the level war_engine, 895) with her
+    whole state, its name, its machines and its way back; then back up by the Escape menu's "Return to Ashenreach": the city
+    built round her again and she stands before the foundry's door (the game instance's ReturnAt)"""
+    res = {}
+    if "brokenspire" not in G["w"].get_path_name(): yield from travel("brokenspire", via_menu)
+    yield from as_hero("Warrior")
+    yield from to_town("Ashenreach")
+    g = G["gen"]
+    res["set_town"] = yield from set_up("Warrior", "town")
+    before = snapshot()
+    mg = place("mistgate")
+    yield from travel("war_engine", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]
+    res["down"] = yield from leg_check(before, "Warrior through the iron gate")
+    p = G["pawn"].get_actor_location()
+    lines = [str(l) for l in g.get_menu_lines()]
+    machines = {str(m.get_editor_property("name")) for m in g.get_editor_property("monsters") if int(m.get_editor_property("weight") * 10) >= 30}
+    near = {}
+    for m in g.get_monsters():
+        if m and not m.is_dead(): n = str(m.get_editor_property("monster_name")); near[n] = near.get(n, 0) + 1
+    res["engine"] = {"key": str(g.get_editor_property("dungeon_key")), "title": str(g.get_editor_property("dungeon_title")), "tier_floors": g.get_editor_property("tier_floors"),
+                     "section": [g.world_to_section(p).x, g.world_to_section(p).y], "return_line": next((l for l in lines if "Return to" in l), None),
+                     "return_town": str(G["gi"].get_editor_property("return_town")), "machine_kinds": sorted(machines), "monsters_now": near,
+                     "machines_now": sum(v for k_, v in near.items() if k_ in machines), "theme_props": [str(t) for t in g.get_editor_property("theme_props")]}
+    try: res["enter_counter"] = G["gi"].get_counter("war_engine:enter")
+    except Exception as e: res["enter_counter"] = str(e)
+    shot("ar_war_engine_start"); yield from rwait(1.2)
+    # (every machine kind: one of each spawned in a row across the great hall, its clips playing (a kind with borrowed clips
+    # stood in its rig's pose if its skeleton could not play them); a picture of the row, her body hidden)
+    quiet(True)
+    hc = g.get_start_room_center(); kinds_ = sorted(machines)
+    ms = []
+    for j, k_ in enumerate(kinds_):
+        m = g.spawn_monster_named(k_, V(hc.x + 900.0, hc.y + (j - (len(kinds_) - 1) / 2.0) * 320.0, hc.z + 120.0), 1, 1.0, 0.0, 1.0)
+        if m: ms.append(m)
+    yield from wait(1.5)
+    # (each machine's clip plays: its bones move against its actor over half a second (Python reaches no single node instance;
+    # a clip its skeleton cannot play leaves the mesh in its rig's pose, still))
+    def pose(m):
+        c = m.get_component_by_class(unreal.SkeletalMeshComponent); a = m.get_actor_location(); out = []
+        for i in range(0, min(c.get_num_bones(), 60), 3):
+            p = c.get_socket_location(c.get_bone_name(i)); out.append((p.x - a.x, p.y - a.y, p.z - a.z))
+        return out
+    p0 = {}
+    for m in ms:
+        try: p0[m] = pose(m)
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    yield from wait(0.5)
+    res["machine_clips"] = {}
+    for m, a in p0.items():
+        try:
+            b = pose(m); mv = max(math.dist(x, y) for x, y in zip(a, b)) if a and b else 0.0
+            res["machine_clips"][str(m.get_editor_property("monster_name"))] = [{"clip": True, "bones_moved_cm": round(mv, 2), "moving": mv > 0.3}]
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    res["machines_spawned"] = len(ms)
+    if ms:
+        # (her body hidden for the picture (868's way), 5 m behind the hall's middle looking at the row)
+        put(V(hc.x - 500.0, hc.y, hc.z), yaw=0.0)
+        G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3, yaw=0.0)); yield from wait(1.0)
+        shot("ar_machines"); yield from rwait(1.2)
+        G["pawn"].set_actor_hidden_in_game(False)
+        for m in ms:
+            try: m.destroy_actor()
+            except Exception: pass
+    quiet(False)
+    res["set_engine"] = yield from set_up("Warrior", "castle")
+    before = snapshot()
+    quiet(False)
+    yield from travel("brokenspire", via_menu)
+    g = G["gen"]
+    t0 = time.time(); st = []
+    while time.time() - t0 < 150:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Ashenreach" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    res["up"] = yield from leg_check(before, "Warrior back out of the iron gate")
+    p = G["pawn"].get_actor_location(); ra = G["gi"].get_editor_property("return_at")
+    door = place("castle door")
+    res["back"] = {"town": st[1] if len(st) > 1 else None, "from_return_at_m": round(dist2(p, ra) / 100, 2), "from_foundry_door_m": round(dist2(p, door) / 100, 1) if door else None,
+                   "on_ground": G["pawn"].get_editor_property("character_movement").is_moving_on_ground()}
+    e = res["engine"]
+    ok = (res["down"]["ok"] and res["up"]["ok"] and res["down"]["level"] == "war_engine" and e["key"] == "war_engine" and not e["tier_floors"] and e["section"] == [0, 0]
+          and e["return_line"] and "Ashenreach" in e["return_line"] and e["return_town"] == "Ashenreach" and len(e["machine_kinds"]) >= 10 and e["machines_now"] >= 1
+          and res.get("machines_spawned", 0) >= 10 and len(res.get("machine_clips", {})) >= 10 and all(c["clip"] and c["moving"] for v in res["machine_clips"].values() for c in v)
+          and res["enter_counter"] == 1 and res["back"]["town"] == "Ashenreach" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_foundry_door_m"] or 99) < 12)
+    step_result("descendwar", ok, **res)
+
+# ------------------------------------------------------------------------------------------------ Graymourne, the port
+def step_port():
+    """Graymourne (the user's spec of 2026-11-07, docs/graymourne.txt): on the northern coast, the sea within 1.5 km north of
+    its middle; built as she comes, the port's plan: the sluice house at its middle (its sewer gate at the far wall), the inner
+    harbour along the sea wall (its water, the quay's stone face, the blockers at the water's edge), five piers with a ship and a
+    boat at each, two wrecks, the drowned dead laid on the quay with their mourners, three gibbets, the fishers' racks, nets and
+    cages; warehouses on the quay, the trades, the homes (every building's rooms, doors, containers); its people its own (the
+    harbourmaster, the coroner, the watch-captain, sailors, dockhands, fishers) and Brokenspire's elder not among them; the
+    harbourmaster's panel with her first quest; a pier walked on (its deck under her feet) and the water's edge holding her
+    (pushed sideways off the pier for 2.5 s she stays on it); the port's fog thick in the town (PortFog); the gate's dry run
+    (walked into, it would open the sewers); pictures of the harbour from the quay, the quay from a pier's end, the dead on the
+    quay and the sewer gate"""
+    g = G["gen"]; res = {}
+    ti, x, y = town_of("Graymourne")
+    res["site_km"] = [round(x / 1000, 1), round(y / 1000, 1)]
+    sea = None
+    for d in range(0, 3001, 100):
+        p_ = str(g.get_wild_sample_at(V((x + d) * 100.0, y * 100.0, 0))).split("|")
+        if len(p_) > 5 and int(float(p_[5])) == 1: sea = d; break
+    res["sea_north_m"] = sea
+    ti, x, y = yield from to_town("Graymourne")
+    st = str(g.get_wild_town_state()).split("|"); res["state"] = st
+    res["plan"] = g.get_editor_property("town_plan")
+    res["dungeon_level"] = str(g.current_dungeon_level())
+    S = section(); B = blds()
+    kinds = {}
+    for b in B: kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
+    res["kinds"] = kinds
+    homes = [b for b in B if b["kind"] == "home"]
+    res["homes"] = {"all": len(homes), "burned": sum(1 for b in homes if b["state"] == 1), "boarded": sum(1 for b in homes if b["state"] == 2)}
+    sh = next((b for b in B if b["kind"] == "sluice house"), None)
+    res["sluice_house"] = {"label": sh["label"], "rooms": sh["rooms"], "from_middle_m": round(math.hypot(sh["c"].x / 100 - x, sh["c"].y / 100 - y))} if sh else None
+    SP = spots(); sk = {}
+    for p_ in SP: sk[p_["kind"]] = sk.get(p_["kind"], 0) + 1
+    res["spots"] = sk
+    n_cont = S.get_num_containers()
+    conts = [S.get_container_location(i) for i in range(n_cont)]
+    doors = [S.get_door_location(i) for i in range(S.get_num_doors())]
+    per = {}
+    for b in B:
+        if b["state"] == 1: continue
+        k = b["kind"]; e = per.setdefault(k, {"n": 0, "with_rooms": 0, "with_door": 0, "containers": 0})
+        e["n"] += 1; e["with_rooms"] += 1 if b["rooms"] > 0 else 0
+        e["with_door"] += 1 if any(dist2(d, b["door"]) < 250 for d in doors) else 0
+        e["containers"] += sum(1 for c in conts if S.town_building_at(c) == b["i"])
+    res["inside"] = per; res["containers"] = n_cont; res["doors"] = len(doors)
+    res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_Gangway_01", "SM_Pier_Pilings_01a", "SM_Mooring_post_NN_01h", "SM_VikingBoat_01a", "SM_SmallBoat", "SM_BrokenShip",
+                                                              "SM_Dead_Pirate_01c", "SM_Dead_Pirate_01d", "SM_Gibbet_A", "SM_FishRack_SM_FishRack_Wood", "SM_FishRack_SM_FishRack_Fish",
+                                                              "SM_BigFishNet", "SM_Crab_Cages_01a", "SM_Sewer_Tube_Gate_01a")}
+    res["harbour_water"] = [c.get_name() for c in S.get_components_by_class(unreal.ProceduralMeshComponent) if "Harbour" in c.get_name()]
+    F = folk(); roles = {}
+    for f in F: roles[f["role"]] = roles.get(f["role"], 0) + 1
+    res["roles"] = roles; res["titles"] = sorted({f["title"] for f in F if f["role"] in ("Elder", "Scholar", "Captain", "Priest", "Smith", "Trader", "Healer", "Keeper", "Innkeeper")})
+    quiet(True)
+    hm = talk_to("Elder"); yield from wait(0.4)
+    said = str(g.interact_nearest(G["pawn"].get_actor_location())) if hm else None; yield from rwait(0.5)
+    res["harbourmaster"] = {"found": hm is not None, "said": said, "panel": [p[1] for p in panel()][:8]}
+    g.close_town_panel(); yield from wait(0.3)
+    # (the fog eases in over some seconds as the town comes (gm3 read it at 0.88): wait until it has settled)
+    t0 = time.time()
+    while time.time() - t0 < 30 and float(g.get_editor_property("port_fog")) < 0.995: yield
+    res["port_fog"] = round(float(g.get_editor_property("port_fog")), 2); res["port_fog_wait_s"] = round(time.time() - t0, 1)
+    # (the fog itself, as the world has it: its start drawn in from the wilds' 250 m, its density raised)
+    fogs = [c for a in unreal.GameplayStatics.get_all_actors_of_class(G["w"], unreal.ExponentialHeightFog) for c in a.get_components_by_class(unreal.ExponentialHeightFogComponent)]
+    res["fog"] = [{"start_m": round(c.get_editor_property("start_distance") / 100, 1), "density": round(c.get_editor_property("fog_density"), 4)} for c in fogs]
+    # (a pier: its way out from the ship moored beside it (the longer axis of ship - pier), her feet on its deck; pushed across it
+    # for 2.5 s, the water's edge holds her)
+    piers = [p_ for p_ in SP if p_["kind"] == "pier"]; ships = [p_ for p_ in SP if p_["kind"] == "ship"]
+    res["pier_walk"] = None
+    if piers and ships:
+        pr = piers[0]; s0 = min(ships, key=lambda s_: dist2(s_["at"], pr["at"]))
+        dx, dy = s0["at"].x - pr["at"].x, s0["at"].y - pr["at"].y
+        out = V(1.0 if dx > 0 else -1.0, 0, 0) if abs(dx) > abs(dy) else V(0, 1.0 if dy > 0 else -1.0, 0)
+        side = V(-out.y, out.x, 0)
+        mid = V(pr["at"].x + out.x * 2400.0, pr["at"].y + out.y * 2400.0, 0)
+        yaw_out = math.degrees(math.atan2(out.y, out.x))
+        # (the harbour from the quay: 6 m back from the first pier's foot, looking out along it)
+        put(V(pr["at"].x - out.x * 600.0, pr["at"].y - out.y * 600.0, 0), yaw=yaw_out); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=yaw_out)); yield from wait(1.5)
+        shot("gm_harbour"); yield from rwait(1.2)
+        put(mid, yaw=yaw_out); yield from wait(1.2)
+        z0 = G["pawn"].get_actor_location().z; zmin = z0; t0 = time.time()
+        for sgn in (1.0, -1.0):
+            t0 = time.time()
+            while time.time() - t0 < 2.5:
+                G["pawn"].add_movement_input(V(side.x * sgn, side.y * sgn, 0), 1.0); yield
+                zmin = min(zmin, G["pawn"].get_actor_location().z)
+            p1 = G["pawn"].get_actor_location()
+            res.setdefault("pier_push", []).append({"side": sgn, "off_middle_m": round(abs((p1.x - mid.x) * side.x + (p1.y - mid.y) * side.y) / 100, 2), "z": round(p1.z)})
+            put(mid, yaw=yaw_out); yield from wait(0.8)
+        res["pier_walk"] = {"z_on_deck": round(z0), "z_min_pushed": round(zmin), "on_ground": G["pawn"].get_editor_property("character_movement").is_moving_on_ground()}
+        # (nothing grows on a pier: every instance on the first pier's deck that is not the port's own (884 gm1's picture had
+        # grass and flowers on them))
+        own = ("Gangway", "Pier_Pilings", "Mooring", "VikingBoat", "SmallBoat", "Collider", "Cube", "Castle_Stone_Wall")
+        on = {}
+        for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+            m_ = c.get_editor_property("static_mesh")
+            if not m_ or any(o in m_.get_name() for o in own): continue
+            for i in range(c.get_instance_count()):
+                t = c.get_instance_transform(i, True)
+                if isinstance(t, tuple): t = t[-1]
+                q = t.translation; a_ = (q.x - pr["at"].x) * out.x + (q.y - pr["at"].y) * out.y; c_ = (q.x - pr["at"].x) * side.x + (q.y - pr["at"].y) * side.y
+                if 150.0 < a_ < 4650.0 and abs(c_ - 0.0) < 420.0 and q.z > -60.0: on[m_.get_name()] = on.get(m_.get_name(), 0) + 1
+        res["on_pier"] = on
+        # (the quay from the pier's end, looking back)
+        end = V(pr["at"].x + out.x * 4500.0, pr["at"].y + out.y * 4500.0, 0)
+        put(end, yaw=yaw_out + 180.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw_out + 180.0)); yield from wait(1.5)
+        shot("gm_quay"); yield from rwait(1.2)
+    bodies = [p_ for p_ in SP if p_["kind"] == "body"]; gib = [p_ for p_ in SP if p_["kind"] == "gibbet"]
+    if bodies and gib:
+        b0 = bodies[len(bodies) // 2]; gg = min(gib, key=lambda q: dist2(q["at"], b0["at"]))
+        yaw = math.degrees(math.atan2(gg["at"].y - b0["at"].y, gg["at"].x - b0["at"].x))
+        put(V(b0["at"].x - math.cos(math.radians(yaw)) * 700.0, b0["at"].y - math.sin(math.radians(yaw)) * 700.0, 0), yaw=yaw)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=yaw)); yield from wait(1.2)
+        shot("gm_dead"); yield from rwait(1.2)
+    mg = place("mistgate"); res["gate_from_sluice_m"] = round(dist2(mg, sh["c"]) / 100) if mg and sh else None
+    if mg and sh:
+        yaw = math.degrees(math.atan2(mg.y - sh["c"].y, mg.x - sh["c"].x))
+        put(V(mg.x - (mg.x - sh["c"].x) * 0.7, mg.y - (mg.y - sh["c"].y) * 0.7, 0), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=yaw)); yield from wait(1.2)
+        shot("gm_sewer_gate"); yield from rwait(1.2)
+        g.set_editor_property("travel_dry_run", True)
+        put(V(mg.x - (mg.x - sh["c"].x) * 0.02, mg.y - (mg.y - sh["c"].y) * 0.02, 0)); yield from wait(1.5)
+        res["gate_travel"] = str(g.get_editor_property("last_travel"))
+        put(V(sh["c"].x, sh["c"].y, 0)); yield from wait(0.5)
+        g.set_editor_property("travel_dry_run", False)
+    quiet(False)
+    k = kinds; pc_ = res["piece_counts"]; pw = res.get("pier_walk") or {}
+    ok = (res["sea_north_m"] is not None and res["sea_north_m"] < 1500 and res["plan"] == 3 and sh is not None and res["sluice_house"]["from_middle_m"] < 120
+          and "sewers" in res["dungeon_level"] and res["harbour_water"]
+          and sk.get("pier", 0) == 5 and sk.get("ship", 0) == 5 and sk.get("boat", 0) == 5 and sk.get("wreck", 0) == 2 and sk.get("gibbet", 0) == 3 and sk.get("body", 0) >= 8 and sk.get("dock props", 0) >= 3
+          and pc_["SM_Gangway_01"] >= 5 * 14 and pc_["SM_VikingBoat_01a"] == 5 and pc_["SM_SmallBoat"] == 5 and pc_["SM_BrokenShip"] == 2 and pc_["SM_Sewer_Tube_Gate_01a"] == 1
+          and k.get("warehouse", 0) >= 3 and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple"))
+          and k.get("cathedral", 0) == 0 and k.get("foundry", 0) == 0 and res["homes"]["all"] >= 40
+          and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
+          and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Sailor", "Dockhand", "Fisher", "Mourner"))
+          and "Harbourmaster Edda Strand" in res["titles"] and "Aldric Venn" not in res["titles"]
+          and any("Old Grate" in str(p) for p in res["harbourmaster"]["panel"]) and res["port_fog"] > 0.8 and res["fog"] and all(f["start_m"] < 20 and f["density"] > 0.1 for f in res["fog"])
+          and pw and abs(pw["z_on_deck"] - 90) < 40 and pw["z_min_pushed"] > pw["z_on_deck"] - 30 and not res.get("on_pier")
+          and res.get("gate_travel") == "catacombs")
+    step_result("port", ok, **res)
+
+def step_descendsewer():
+    """the sewer gate of Graymourne's sluice house, both ways: down into the sewers (the level sewers, 897: its floors going
+    down, its name, its drowned and its way back) with her whole state; the drowned, one of each kind spawned in a row, their
+    clips playing; then back up by the Escape menu's "Return to Graymourne": the city built round her again and she stands
+    before the sluice house's door (the game instance's ReturnAt)"""
+    res = {}
+    if "brokenspire" not in G["w"].get_path_name(): yield from travel("brokenspire", via_menu)
+    yield from as_hero("Warrior")
+    yield from to_town("Graymourne")
+    g = G["gen"]
+    res["set_town"] = yield from set_up("Warrior", "town")
+    before = snapshot()
+    mg = place("mistgate")
+    yield from travel("sewers", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]
+    res["down"] = yield from leg_check(before, "Warrior through the sewer gate")
+    p = G["pawn"].get_actor_location()
+    lines = [str(l) for l in g.get_menu_lines()]
+    drowned = {str(m.get_editor_property("name")) for m in g.get_editor_property("monsters") if int(m.get_editor_property("weight") * 10) >= 30}
+    near = {}
+    for m in g.get_monsters():
+        if m and not m.is_dead(): n = str(m.get_editor_property("monster_name")); near[n] = near.get(n, 0) + 1
+    res["sewers"] = {"key": str(g.get_editor_property("dungeon_key")), "title": str(g.get_editor_property("dungeon_title")), "tier_floors": g.get_editor_property("tier_floors"),
+                     "section": [g.world_to_section(p).x, g.world_to_section(p).y], "z": round(p.z), "return_line": next((l for l in lines if "Return to" in l), None),
+                     "return_town": str(G["gi"].get_editor_property("return_town")), "drowned_kinds": sorted(drowned), "monsters_now": near,
+                     "drowned_now": sum(v for k_, v in near.items() if k_ in drowned), "themes": [str(t) for t in g.get_editor_property("tier_themes")]}
+    try: res["enter_counter"] = G["gi"].get_counter("sewers:enter")
+    except Exception as e: res["enter_counter"] = str(e)
+    shot("gm_sewers_start"); yield from rwait(1.2)
+    quiet(True)
+    hc = g.get_start_room_center(); kinds_ = sorted(drowned)
+    ms = []
+    for j, k_ in enumerate(kinds_):
+        m = g.spawn_monster_named(k_, V(hc.x + 900.0, hc.y + (j - (len(kinds_) - 1) / 2.0) * 320.0, hc.z + 120.0), 1, 1.0, 0.0, 1.0)
+        if m: ms.append(m)
+    yield from wait(1.5)
+    def pose(m):
+        c = m.get_component_by_class(unreal.SkeletalMeshComponent); a = m.get_actor_location(); out = []
+        for i in range(0, min(c.get_num_bones(), 60), 3):
+            p_ = c.get_socket_location(c.get_bone_name(i)); out.append((p_.x - a.x, p_.y - a.y, p_.z - a.z))
+        return out
+    p0 = {}
+    for m in ms:
+        try: p0[m] = pose(m)
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    yield from wait(0.5)
+    res["drowned_clips"] = {}
+    for m, a in p0.items():
+        try:
+            b = pose(m); mv = max(math.dist(x_, y_) for x_, y_ in zip(a, b)) if a and b else 0.0
+            res["drowned_clips"][str(m.get_editor_property("monster_name"))] = {"bones_moved_cm": round(mv, 2), "moving": mv > 0.3}
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    res["drowned_spawned"] = len(ms)
+    if ms:
+        put(V(hc.x - 500.0, hc.y, hc.z), yaw=0.0)
+        G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3, yaw=0.0)); yield from wait(1.0)
+        shot("gm_drowned"); yield from rwait(1.2)
+        G["pawn"].set_actor_hidden_in_game(False)
+        for m in ms:
+            try: m.destroy_actor()
+            except Exception: pass
+    quiet(False)
+    res["set_sewers"] = yield from set_up("Warrior", "castle")
+    before = snapshot()
+    yield from travel("brokenspire", via_menu)
+    g = G["gen"]
+    t0 = time.time(); st = []
+    while time.time() - t0 < 150:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Graymourne" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    res["up"] = yield from leg_check(before, "Warrior back out of the sewer gate")
+    p = G["pawn"].get_actor_location(); ra = G["gi"].get_editor_property("return_at")
+    door = place("castle door")
+    res["back"] = {"town": st[1] if len(st) > 1 else None, "from_return_at_m": round(dist2(p, ra) / 100, 2), "from_sluice_door_m": round(dist2(p, door) / 100, 1) if door else None,
+                   "on_ground": G["pawn"].get_editor_property("character_movement").is_moving_on_ground()}
+    e = res["sewers"]
+    ok = (res["down"]["ok"] and res["up"]["ok"] and res["down"]["level"] == "sewers" and e["key"] == "sewers" and e["tier_floors"] and e["section"] == [0, 0]
+          and e["return_line"] and "Graymourne" in e["return_line"] and e["return_town"] == "Graymourne" and len(e["drowned_kinds"]) >= 10 and e["drowned_now"] >= 1
+          and res.get("drowned_spawned", 0) >= 10 and len(res.get("drowned_clips", {})) >= 10 and all(c["moving"] for c in res["drowned_clips"].values())
+          and res["enter_counter"] == 1 and res["back"]["town"] == "Graymourne" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_sluice_door_m"] or 99) < 12)
+    step_result("descendsewer", ok, **res)
+
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
-              "holy": step_holy, "descend": step_descend})
+              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

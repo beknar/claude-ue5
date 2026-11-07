@@ -460,6 +460,14 @@ void ARDDungeonGenerator::SpawnTownLife()
 		case ERDTownRole::Smith:
 			for (int32 I = 0; I < Wk.Num(); ++I) if (Wk[I].Group == TW_Smithy && Wk[I].Bld == T->GetHomeBuilding()) Add(I);
 			break;
+		case ERDTownRole::Worker:
+			// (the forge city's (2026-11-07): its workshop's anvil and fire, the nearest open forge on the square, a chat)
+			for (int32 I = 0; I < Wk.Num(); ++I) if (Wk[I].Group == TW_Smithy && Wk[I].Bld == T->GetHomeBuilding() && T->GetHomeBuilding() >= 0) Add(I);
+			Add(Nearest(P, [](const ARDSection::FTownWork& W) { return W.Group == TW_Smithy && W.Bld < 0; }, J, 12000.f));
+			{ TArray<int32> J2 = J; Add(Nearest(P, [](const ARDSection::FTownWork& W) { return W.Group == TW_Smithy && W.Bld < 0; }, J2, 12000.f)); }
+			Add(Nearest(P, Group(TW_Chat), J, 9000.f));
+			J.Add(-1);
+			break;
 		case ERDTownRole::Innkeeper:
 		{
 			// (the bar, then each table and back to the bar: the bar's place is in the round between the tables again (Nearest

@@ -497,6 +497,22 @@ private:
 	 *  a gabled roof of a style's pieces over a rectangle of tiles */
 	void CathedralShell(int32 BI);
 	void HolyGable(const FIntRect& Rc, float Top, const TCHAR* Style);
+	/** Ashenreach's forge city (2026-11-07, RDForge.cpp): the besieged foundry's shell, and what stands on its square: the
+	 *  guild's great anvil, an open forge (its fire, sparks, smoke and the work at it), an ore cart on its rails, a stretch of
+	 *  the barricade before the foundry */
+	/** Graymourne's port (2026-11-07, RDPort.cpp): its inner harbour (local tiles; empty: none) and its piers, the harbour's
+	 *  water and the blockers along the quay and the piers, the things on the harbour's spots, the sewer gate in the sluice house */
+	FIntRect TownHarbour;
+	TArray<FIntRect> TownPiers;
+	void HarbourBuild();
+	void PortSpotBuild(const FTownSpot& Sp);
+	void SewerGateBuild(int32 BI);
+	bool InHarbourWater(const FIntPoint& T) const;
+	void FoundryShell(int32 BI);
+	void ForgeAnvilBuild(const FTownSpot& Sp);
+	void OpenForgeBuild(const FTownSpot& Sp, bool bWork = true);
+	void OreCartBuild(const FTownSpot& Sp);
+	void BarricadeBuild(const FTownSpot& Sp);
 	void TownOutdoors(FRandomStream& R, int32 Step);
 	/** the town's life (the third list): gardens, pens, cooking fires with a pot or a spit, by the homes; the places of work */
 	void TownLife(FRandomStream& R);

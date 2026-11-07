@@ -27,8 +27,10 @@ void ARDSection::HolyGable(const FIntRect& Rc, float Top, const TCHAR* Style)
 {
 	// (as a house's roof (TownShellBuilding): its ridge along the rectangle's longer side, each tile's piece sloping down and
 	// out from it a tile's height a tile, a trim along the eaves, the gables' triangles at the two ends)
-	// (Style "Holy": the city's white stone, "Holy.<part>"; another: the town's "Town.<style>_<part>")
-	auto Pn = [Style](const TCHAR* Part) { return FCString::Strcmp(Style, TEXT("Holy")) == 0 ? FName(*FString::Printf(TEXT("Holy.%s"), Part)) : FName(*FString::Printf(TEXT("Town.%s_%s"), Style, Part)); };
+	// (Style "Holy": the city's white stone, "Holy.<part>"; "Forge": the forge city's soot-dark stone, "Forge.<part>" (2026-11-07);
+	// another: the town's "Town.<style>_<part>")
+	const bool bOwn = FCString::Strcmp(Style, TEXT("Holy")) == 0 || FCString::Strcmp(Style, TEXT("Forge")) == 0;
+	auto Pn = [Style, bOwn](const TCHAR* Part) { return bOwn ? FName(*FString::Printf(TEXT("%s.%s"), Style, Part)) : FName(*FString::Printf(TEXT("Town.%s_%s"), Style, Part)); };
 	const float M = Generator->TileSize;
 	const int32 Nx = Rc.Max.X - Rc.Min.X, Ny = Rc.Max.Y - Rc.Min.Y;
 	if (Nx <= 0 || Ny <= 0) return;
@@ -216,10 +218,17 @@ int32 ARDDungeonGenerator::DungeonTierReached(const FString& Key) const
 	return FMath::Clamp(T, 1, 5);
 }
 
+FString ARDDungeonGenerator::CurrentDungeonLevel() const
+{
+	if (bTownHome) return FString();
+	if (const FString* L = TownDungeons.Find(TownName)) return *L;
+	return TownPlan == 1 ? CatacombsLevel : FString();
+}
+
 bool ARDDungeonGenerator::EnterCatacombs()
 {
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
-	if (!bTown || TownPlan != 1 || !S) return false;
+	if (!HasTownDungeon() || !S) return false;
 	// (where she comes back: 7 m before the cathedral's door, facing out over the plaza; the plan comes from the town's seed
 	// alone, so the place is the same when the town is built again)
 	FVector At = FVector::ZeroVector; float Yaw = 0.f;
@@ -233,9 +242,11 @@ bool ARDDungeonGenerator::EnterCatacombs()
 	return DescendToCatacombs(At, Yaw);
 }
 
-bool ARDDungeonGenerator::DescendToCatacombs(const FVector& At, float Yaw)
+bool ARDDungeonGenerator::DescendToCatacombs(const FVector& At, float Yaw, const FString& InLevel)
 {
-	if (!bTown || CatacombsLevel.IsEmpty() || bTownTraveling) return false;
+	// (the level asked for, else the town's own; from Brokenspire (-RDTownGo=catacombs) Vel Morrath's catacombs as before)
+	const FString Level = !InLevel.IsEmpty() ? InLevel : HasTownDungeon() ? CurrentDungeonLevel() : CatacombsLevel;
+	if (!bTown || Level.IsEmpty() || bTownTraveling) return false;
 	LastTravel = TEXT("catacombs");
 	if (bTravelDryRun) return true;
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
@@ -243,6 +254,6 @@ bool ARDDungeonGenerator::DescendToCatacombs(const FVector& At, float Yaw)
 		if (!At.IsZero()) { GI->ReturnAt = At; GI->ReturnYaw = Yaw; }
 		GI->ReturnTown = TownName;
 	}
-	TravelToDungeon(CatacombsLevel, TEXT("catacombs"));
+	TravelToDungeon(Level, TEXT("catacombs"));
 	return true;
 }

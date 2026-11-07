@@ -1,0 +1,17 @@
+Ashenreach (the user's spec of 2026-11-07, pasted as written), then their answers to the questions asked before building it.
+
+build out these two cities as described:
+
+Ashenreach - theme: a forge city on the edge of a burned plain, ruled by a forge-guild.  this is a city whose job is to
+        build weapons, armor and gear.  lots of industrial theming.  the dungeon is located in a besieged factory.
+        city is located in the middle of the continent, north of Brokenspire.
+        the dungeon: The War Engine - industrial themed build, lots of mechanical monsters, half-mechanical monsters
+
+Answers (2026-11-07):
+- The War Engine's monsters: what is in the project (none of the game's 56 monsters is mechanical): the Stone Golem as
+  iron / forge golems, the Dystopia blade-armed Mech as elites and boss, the scrap robot and the cyborg and mutant
+  figures on borrowed clips, with the existing monsters.
+- The order: the wilderness's chunk stutter finished first, then Ashenreach, then Graymourne (docs/graymourne.txt).
+- As for Vel Morrath (docs/vel_morrath.txt), unless said otherwise: the city rebuilt in place at full size on the
+  brokenspire level (its own trades, people and quests, every building with rooms, working doors and containers), the
+  dungeon a new level (a copy of Mistward Castle with its own themes, key and way back), entered from the factory.

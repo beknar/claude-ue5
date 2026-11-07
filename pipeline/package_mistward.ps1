@@ -4,7 +4,8 @@
 #     castle (mistward_castle) and what they refer to, stages it into .pak / IoStore containers and archives it to
 #     <repo>\builds\mistward_castle\Windows
 #   - every map is named to the cook: the menu opens the town, the town the castle and (from Vel Morrath's cathedral) the
-#     catacombs (vel_morrath), and the castle's Escape menu the menu, all by name (a string, which the cooker does not follow)
+#     catacombs (vel_morrath), Ashenreach's foundry The War Engine (war_engine), Graymourne's sewer gate the sewers (sewers),
+#     and the castle's Escape menu the menu, all by name (a string, which the cooker does not follow)
 #   - the Visual C++ and Universal C runtime DLLs are copied next to the executable (app-local prerequisites) instead of
 #     the redistributable installer, so nothing has to be installed on the PC that plays it
 #   - for the cook and the stage only, the project's default map is the hero menu (a packaged game starts on its default
@@ -23,7 +24,7 @@ $KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/Kitchen
 $repo = Split-Path -Parent $PSScriptRoot
 $ue = "E:\Program Files\Epic Games\UE_5.8"
 $proj = "$repo\claude_ue5\claude_ue5.uproject"
-$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath"
+$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath", "/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers"
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" }
 # (a relative -Out is the caller's folder: handed on as it is, UnrealAutomationTool archived it under the engine's own folder)
 elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
@@ -106,6 +107,12 @@ public static class RDWin {
               @{ name = "castle"; args = @("-RDStartHero=Warrior", "-RDTownGo=castle", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "mistward_castle" },
               @{ name = "catacombs"; args = @("-RDStartHero=Warrior", "-RDTownGo=catacombs", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "vel_morrath" },
               @{ name = "city"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:velmorrath", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Vel Morrath|Warrior*" },
+              # (2026-11-07: Ashenreach's War Engine and Graymourne's sewers, down from the town by -RDTownGo=dungeon:<town>
+              #  (DescendToCatacombs with that town's level), and out to both cities)
+              @{ name = "war_engine"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:ashenreach", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "war_engine" },
+              @{ name = "sewers"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:graymourne", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "sewers" },
+              @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
+              @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true })
     try {
     foreach ($run in $runs) {

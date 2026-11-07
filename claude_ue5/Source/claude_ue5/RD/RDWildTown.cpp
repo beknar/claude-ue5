@@ -56,8 +56,17 @@ void ARDDungeonGenerator::DropWildChunksNear(const FVector2D& AtM, double HalfM)
 		if (It->Value) It->Value->Destroy();
 		WildKept.Remove(It->Key); It.RemoveCurrent(); ++WildDropped;
 	}
-	// (those being computed come back with or without the hole as it was asked: dropped when they arrive)
+	// (those being computed come back with or without the hole as it was asked: dropped when they arrive; those being made
+	// over frames were computed so too: dropped, asked again)
 	for (const FIntPoint& C : WildInFlight) WildStale.Add(C);
+	WildBuilding.RemoveAll([&](const FWildBuild& B)
+	{
+		if (!B.D.IsValid()) return true;
+		const double X0 = B.D->Coord.X * Cm, Y0 = B.D->Coord.Y * Cm;
+		if (X0 > AtM.X + HalfM + 5.0 || X0 + Cm < AtM.X - HalfM - 5.0 || Y0 > AtM.Y + HalfM + 5.0 || Y0 + Cm < AtM.Y - HalfM - 5.0) return false;
+		if (TObjectPtr<ARDWildChunk>* Old = WildChunks.Find(B.D->Coord)) { if (*Old) (*Old)->Destroy(); WildChunks.Remove(B.D->Coord); WildKept.Remove(B.D->Coord); ++WildDropped; }
+		return true;
+	});
 }
 
 void ARDDungeonGenerator::SaveTownState()
