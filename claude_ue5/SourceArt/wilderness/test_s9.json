@@ -1,0 +1,406 @@
+{
+ "tag": "s9",
+ "plan": [
+  "world",
+  "towns"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "world",
+   "ok": true,
+   "state": {
+    "ready": 1,
+    "seed": 20261103,
+    "init_s": 0.12,
+    "chunks": 13,
+    "in_flight": 20,
+    "built": 12,
+    "dropped": 0,
+    "max_active": 13,
+    "compute_ms": 85.1,
+    "build_ms_max": 12.7,
+    "revealed": 114,
+    "found": 1,
+    "towns": 4,
+    "wild_ticks": 24,
+    "gen_ticks": 24,
+    "paused": 0,
+    "menu": 0,
+    "panel": 0
+   },
+   "towns": {
+    "Brokenspire": {
+     "kind": "town",
+     "x": 0.0,
+     "y": 0.0,
+     "h": 77.0,
+     "style": 0
+    },
+    "Ashenreach": {
+     "kind": "city",
+     "x": 70000.0,
+     "y": 0.0,
+     "h": 77.0,
+     "style": 1
+    },
+    "Graymourne": {
+     "kind": "coast",
+     "x": 197400.0,
+     "y": 0.0,
+     "h": 77.0,
+     "style": 1
+    },
+    "Vel Morrath": {
+     "kind": "city",
+     "x": 55000.0,
+     "y": 75000.0,
+     "h": 77.0,
+     "style": 1
+    }
+   },
+   "graymourne_sea_north_m": 700.0,
+   "velmorrath_sea_east_m": null,
+   "checks": {
+    "brokenspire_mid_south": true,
+    "ashenreach_middle": true,
+    "ashenreach_north_of_brokenspire": true,
+    "graymourne_north_coast": true,
+    "velmorrath_north_east": true,
+    "velmorrath_inland": true
+   },
+   "biomes": {
+    "grasslands": {
+     "cells": 7,
+     "x": 8946.0,
+     "y": -772.0,
+     "km": 9.0
+    },
+    "meadows": {
+     "cells": 11,
+     "x": 12786.0,
+     "y": 11844.0,
+     "km": 17.4
+    },
+    "farms": {
+     "cells": 2,
+     "x": 1500.0,
+     "y": -1200.0,
+     "km": 1.9
+    },
+    "savannahs": {
+     "cells": 13,
+     "x": -13506.0,
+     "y": -34642.0,
+     "km": 37.2
+    },
+    "hills": {
+     "cells": 47,
+     "x": -19383.0,
+     "y": 10596.0,
+     "km": 22.1
+    },
+    "mountains": {
+     "cells": 22,
+     "x": 20594.0,
+     "y": 618.0,
+     "km": 20.6
+    },
+    "tundras": {
+     "cells": 12,
+     "x": 118681.0,
+     "y": -20325.0,
+     "km": 120.4
+    },
+    "plains": {
+     "cells": 29,
+     "x": 1392.0,
+     "y": -15924.0,
+     "km": 16.0
+    },
+    "pine forests": {
+     "cells": 14,
+     "x": 62479.0,
+     "y": -33839.0,
+     "km": 71.1
+    },
+    "temperate autumn forests": {
+     "cells": 4,
+     "x": 26654.0,
+     "y": -77277.0,
+     "km": 81.7
+    },
+    "marshes": {
+     "cells": 1,
+     "x": 49156.0,
+     "y": 25994.0,
+     "km": 55.6
+    },
+    "wetlands": {
+     "cells": 1,
+     "x": 41377.0,
+     "y": 36806.0,
+     "km": 55.4
+    },
+    "mountains and peaks": {
+     "cells": 10,
+     "x": -30356.0,
+     "y": -35557.0,
+     "km": 46.8
+    },
+    "volcanoes": {
+     "cells": 1,
+     "x": 24447.0,
+     "y": 6140.0,
+     "km": 25.2
+    },
+    "coastal regions": {
+     "cells": 28,
+     "x": -61519.0,
+     "y": -2512.0,
+     "km": 61.6
+    },
+    "arctic regions": {
+     "cells": 1,
+     "x": 167972.0,
+     "y": 38005.0,
+     "km": 172.2
+    },
+    "canyons": {
+     "cells": 1,
+     "x": -16020.0,
+     "y": -17308.0,
+     "km": 23.6
+    },
+    "mesas": {
+     "cells": 1,
+     "x": -32822.0,
+     "y": 9106.0,
+     "km": 34.1
+    },
+    "canyon networks": {
+     "cells": 2,
+     "x": -26111.0,
+     "y": -5827.0,
+     "km": 26.8
+    },
+    "cold steppes": {
+     "cells": 10,
+     "x": 79545.0,
+     "y": 69533.0,
+     "km": 105.7
+    },
+    "highland moorland": {
+     "cells": 20,
+     "x": 53179.0,
+     "y": 38407.0,
+     "km": 65.6
+    },
+    "boreal pine forest": {
+     "cells": 7,
+     "x": 105169.0,
+     "y": -46969.0,
+     "km": 115.2
+    },
+    "temperate aspen": {
+     "cells": 14,
+     "x": 62442.0,
+     "y": -20562.0,
+     "km": 65.7
+    },
+    "volcanic tundra": {
+     "cells": 7,
+     "x": 122983.0,
+     "y": -1577.0,
+     "km": 123.0
+    },
+    "burned plain": {
+     "cells": 2,
+     "x": 75000.0,
+     "y": 0.0,
+     "km": 75.0
+    },
+    "geothermal caldera": {
+     "cells": 5,
+     "x": 55686.0,
+     "y": -87651.0,
+     "km": 103.8
+    },
+    "glacial": {
+     "cells": 18,
+     "x": 113544.0,
+     "y": -62136.0,
+     "km": 129.4
+    },
+    "taigas": {
+     "cells": 4,
+     "x": 135204.0,
+     "y": 41593.0,
+     "km": 141.5
+    },
+    "rocky coastal": {
+     "cells": 235,
+     "x": -45718.0,
+     "y": -26193.0,
+     "km": 52.7
+    }
+   },
+   "missing_templates": [],
+   "rivers": 23,
+   "lakes": 78,
+   "roads": [
+    "road|Brokenspire|Ashenreach|84.6|-2|272",
+    "road|Ashenreach|Graymourne|160.8|70300|0",
+    "road|Brokenspire|Vel Morrath|136.3|-2|272",
+    "road|Ashenreach|Vel Morrath|89.6|69941|294"
+   ],
+   "river_lengths_km": [
+    28.2,
+    25.8,
+    21.2,
+    17.3,
+    17.1,
+    16.5,
+    14.8,
+    14.7
+   ],
+   "map_continent": {
+    "ok": true,
+    "s": 1.1
+   },
+   "map_around": {
+    "ok": true,
+    "s": 0.7
+   },
+   "map_near": {
+    "ok": true,
+    "s": 0.6
+   },
+   "place_ids": {
+    "count": 34,
+    "north": 11,
+    "town_range_not_towns": [],
+    "shared": []
+   }
+  },
+  {
+   "step": "towns",
+   "ok": true,
+   "at_start": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 66.0,
+    "build_s": 0.0,
+    "loaded": 0.0,
+    "dropped": 0.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_start": 85,
+   "far": {
+    "idx": -1.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 0.0,
+    "dist_m": 2300.0,
+    "build_s": 0.0,
+    "loaded": 0.0,
+    "dropped": 1.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_far": 0,
+   "mem_far": 22511.0,
+   "back": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1200.0,
+    "build_s": 11.7,
+    "loaded": 1.0,
+    "dropped": 1.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_back": 85,
+   "vm_near": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1300.0,
+    "build_s": 7.2,
+    "loaded": 2.0,
+    "dropped": 2.0,
+    "in_walls": 0.0,
+    "ox": 5500000.0,
+    "oy": 7500000.0,
+    "home": 0.0
+   },
+   "minimap_outside": true,
+   "vm_in": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 63.0,
+    "build_s": 7.2,
+    "loaded": 2.0,
+    "dropped": 2.0,
+    "in_walls": 1.0,
+    "ox": 5500000.0,
+    "oy": 7500000.0,
+    "home": 0.0
+   },
+   "minimap_inside_wild": false,
+   "vm_folk": 127,
+   "vm_roles": [
+    "Beggar",
+    "Captain",
+    "Child",
+    "Drunk",
+    "Elder",
+    "Guard",
+    "Healer",
+    "Idiot",
+    "Innkeeper",
+    "Keeper",
+    "Militia",
+    "Monk",
+    "Mourner",
+    "Pilgrim",
+    "Preacher",
+    "Priest",
+    "Scholar",
+    "Smith",
+    "Soldier",
+    "Templar",
+    "Townsfolk",
+    "Trader"
+   ],
+   "vm_titles_brokenspire": [],
+   "vm_titles_own": [],
+   "vm_square": [
+    5499250,
+    7506300
+   ],
+   "vm_notables": [
+    "Archbishop Severin Aurel",
+    "Archivist Mott",
+    "Commander Ysolde Vane"
+   ]
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "error": null,
+ "windows_shown_again": 1
+}

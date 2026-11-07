@@ -1,0 +1,888 @@
+{
+ "tag": "s5",
+ "plan": [
+  "build7",
+  "stream"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "build7",
+   "ok": true,
+   "modes": {
+    "whole": {
+     "streamed": 103,
+     "step_ms_max": 7.4,
+     "frame_build_ms_max": 15.3,
+     "chunk_ms_max": 14.7,
+     "building": 0,
+     "parts": {
+      "ground": 7.1,
+      "collision": 7.4,
+      "water": 0.5,
+      "wade": 1.8,
+      "plants": 1.0,
+      "places": 0.1
+     },
+     "trims": 1,
+     "long_frames": [
+      {
+       "ms": 90.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 59.2,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 51.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 63.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 61.6,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 76.7,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 125.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 66.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 55.7,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 59.3,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 61.7,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 54.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 53.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 57.6,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 57.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 53.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 60.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.4,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 77.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 54.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.6,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 71.0,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 52.6,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 59.6,
+       "why": [
+        "dropped"
+       ]
+      }
+     ],
+     "long_without_making": 33,
+     "lag0": {
+      "making_frames": 89,
+      "mean_ms": 35.3,
+      "others_mean_ms": 28.6,
+      "excess_ms": 6.7,
+      "p90_ms": 52.6,
+      "others_p90_ms": 43.4,
+      "threads_making": {
+       "game": 30.2,
+       "render": 26.5,
+       "rhi": 8.2,
+       "gpu": 28.8
+      },
+      "threads_others": {
+       "game": 12.5,
+       "render": 29.0,
+       "rhi": 7.7,
+       "gpu": 27.0
+      }
+     },
+     "lag1": {
+      "making_frames": 89,
+      "mean_ms": 33.4,
+      "others_mean_ms": 28.8,
+      "excess_ms": 4.6,
+      "p90_ms": 47.1,
+      "others_p90_ms": 43.7,
+      "threads_making": {
+       "game": 28.8,
+       "render": 25.8,
+       "rhi": 8.3,
+       "gpu": 28.9
+      },
+      "threads_others": {
+       "game": 12.7,
+       "render": 29.1,
+       "rhi": 7.7,
+       "gpu": 27.0
+      }
+     },
+     "long_threads": [
+      {
+       "ms": 90.1,
+       "game": 25.5,
+       "render": 28.5,
+       "rhi": 8.1,
+       "gpu": 36.0
+      },
+      {
+       "ms": 59.2,
+       "game": 40.6,
+       "render": 45.1,
+       "rhi": 14.4,
+       "gpu": 40.9
+      },
+      {
+       "ms": 51.2,
+       "game": 24.8,
+       "render": 45.3,
+       "rhi": 9.3,
+       "gpu": 41.3
+      },
+      {
+       "ms": 63.8,
+       "game": 14.7,
+       "render": 36.5,
+       "rhi": 8.9,
+       "gpu": 34.6
+      },
+      {
+       "ms": 61.6,
+       "game": 30.7,
+       "render": 42.4,
+       "rhi": 11.4,
+       "gpu": 41.4
+      },
+      {
+       "ms": 76.7,
+       "game": 39.4,
+       "render": 27.8,
+       "rhi": 11.1,
+       "gpu": 38.1
+      },
+      {
+       "ms": 125.0,
+       "game": 16.7,
+       "render": 62.1,
+       "rhi": 617.4,
+       "gpu": 58.1
+      },
+      {
+       "ms": 66.1,
+       "game": 19.8,
+       "render": 50.9,
+       "rhi": 9.4,
+       "gpu": 54.6
+      },
+      {
+       "ms": 51.5,
+       "game": 18.3,
+       "render": 56.7,
+       "rhi": 10.1,
+       "gpu": 51.4
+      },
+      {
+       "ms": 55.7,
+       "game": 17.6,
+       "render": 59.4,
+       "rhi": 17.0,
+       "gpu": 53.0
+      },
+      {
+       "ms": 59.3,
+       "game": 19.1,
+       "render": 57.0,
+       "rhi": 8.4,
+       "gpu": 60.2
+      },
+      {
+       "ms": 61.7,
+       "game": 22.4,
+       "render": 55.8,
+       "rhi": 11.2,
+       "gpu": 49.6
+      },
+      {
+       "ms": 54.0,
+       "game": 17.8,
+       "render": 53.7,
+       "rhi": 9.8,
+       "gpu": 46.8
+      },
+      {
+       "ms": 53.8,
+       "game": 16.0,
+       "render": 49.3,
+       "rhi": 9.1,
+       "gpu": 48.7
+      },
+      {
+       "ms": 57.6,
+       "game": 15.9,
+       "render": 47.5,
+       "rhi": 8.4,
+       "gpu": 45.5
+      },
+      {
+       "ms": 57.0,
+       "game": 13.5,
+       "render": 49.5,
+       "rhi": 7.9,
+       "gpu": 46.6
+      },
+      {
+       "ms": 51.1,
+       "game": 12.7,
+       "render": 47.3,
+       "rhi": 9.6,
+       "gpu": 47.5
+      },
+      {
+       "ms": 51.0,
+       "game": 17.2,
+       "render": 44.6,
+       "rhi": 7.8,
+       "gpu": 44.2
+      },
+      {
+       "ms": 51.2,
+       "game": 11.5,
+       "render": 44.6,
+       "rhi": 8.2,
+       "gpu": 45.0
+      },
+      {
+       "ms": 53.5,
+       "game": 10.0,
+       "render": 45.4,
+       "rhi": 6.6,
+       "gpu": 42.1
+      }
+     ],
+     "excess_ms": 6.7,
+     "frames": 886,
+     "frame_ms_p50": 25.5,
+     "frame_ms_p99": 77.8,
+     "frame_ms_max": 125.0,
+     "frames_over_50ms": 42,
+     "frames_over_100ms": 3,
+     "chunks": 79,
+     "making_after": 0
+    },
+    "steps": {
+     "streamed": 103,
+     "step_ms_max": 6.0,
+     "frame_build_ms_max": 9.3,
+     "chunk_ms_max": 10.6,
+     "building": 0,
+     "parts": {
+      "ground": 6.0,
+      "collision": 4.1,
+      "water": 0.5,
+      "wade": 0.7,
+      "plants": 1.2,
+      "places": 0.2
+     },
+     "trims": 2,
+     "long_frames": [
+      {
+       "ms": 125.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 80.6,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 54.4,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 75.3,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 104.7,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 61.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 56.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.1,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 59.7,
+       "why": [
+        "making"
+       ]
+      },
+      {
+       "ms": 52.5,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 52.3,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 53.2,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 54.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.7,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 54.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 54.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 53.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 59.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 59.7,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.6,
+       "why": [
+        "nothing of the chunks"
+       ]
+      }
+     ],
+     "long_without_making": 53,
+     "lag0": {
+      "making_frames": 92,
+      "mean_ms": 36.5,
+      "others_mean_ms": 30.7,
+      "excess_ms": 5.8,
+      "p90_ms": 55.8,
+      "others_p90_ms": 48.8,
+      "threads_making": {
+       "game": 26.5,
+       "render": 29.9,
+       "rhi": 8.4,
+       "gpu": 30.9
+      },
+      "threads_others": {
+       "game": 12.8,
+       "render": 31.2,
+       "rhi": 7.1,
+       "gpu": 29.0
+      }
+     },
+     "lag1": {
+      "making_frames": 92,
+      "mean_ms": 34.1,
+      "others_mean_ms": 31.0,
+      "excess_ms": 3.1,
+      "p90_ms": 53.2,
+      "others_p90_ms": 48.9,
+      "threads_making": {
+       "game": 25.1,
+       "render": 29.4,
+       "rhi": 8.4,
+       "gpu": 31.0
+      },
+      "threads_others": {
+       "game": 13.0,
+       "render": 31.3,
+       "rhi": 7.1,
+       "gpu": 29.0
+      }
+     },
+     "long_threads": [
+      {
+       "ms": 125.0,
+       "game": 16.0,
+       "render": 41.0,
+       "rhi": 6.5,
+       "gpu": 32.4
+      },
+      {
+       "ms": 80.6,
+       "game": 14.0,
+       "render": 50.3,
+       "rhi": 7.4,
+       "gpu": 50.1
+      },
+      {
+       "ms": 52.1,
+       "game": 15.4,
+       "render": 50.8,
+       "rhi": 8.4,
+       "gpu": 48.5
+      },
+      {
+       "ms": 54.4,
+       "game": 19.7,
+       "render": 51.0,
+       "rhi": 8.6,
+       "gpu": 48.3
+      },
+      {
+       "ms": 52.5,
+       "game": 16.5,
+       "render": 78.6,
+       "rhi": 8.1,
+       "gpu": 57.1
+      },
+      {
+       "ms": 75.3,
+       "game": 14.6,
+       "render": 45.7,
+       "rhi": 9.0,
+       "gpu": 50.0
+      },
+      {
+       "ms": 104.7,
+       "game": 18.8,
+       "render": 49.4,
+       "rhi": 7.5,
+       "gpu": 45.6
+      },
+      {
+       "ms": 61.9,
+       "game": 18.1,
+       "render": 49.4,
+       "rhi": 9.6,
+       "gpu": 52.3
+      },
+      {
+       "ms": 56.5,
+       "game": 17.4,
+       "render": 51.3,
+       "rhi": 7.0,
+       "gpu": 47.9
+      },
+      {
+       "ms": 51.1,
+       "game": 22.3,
+       "render": 45.0,
+       "rhi": 8.4,
+       "gpu": 42.9
+      },
+      {
+       "ms": 59.7,
+       "game": 26.0,
+       "render": 57.6,
+       "rhi": 8.4,
+       "gpu": 55.8
+      },
+      {
+       "ms": 52.5,
+       "game": 26.1,
+       "render": 51.1,
+       "rhi": 7.0,
+       "gpu": 51.5
+      },
+      {
+       "ms": 52.3,
+       "game": 25.2,
+       "render": 52.8,
+       "rhi": 8.1,
+       "gpu": 51.8
+      },
+      {
+       "ms": 53.2,
+       "game": 27.8,
+       "render": 56.6,
+       "rhi": 6.8,
+       "gpu": 52.3
+      },
+      {
+       "ms": 54.9,
+       "game": 16.8,
+       "render": 53.7,
+       "rhi": 8.5,
+       "gpu": 54.0
+      },
+      {
+       "ms": 52.0,
+       "game": 12.7,
+       "render": 47.5,
+       "rhi": 7.9,
+       "gpu": 48.0
+      },
+      {
+       "ms": 50.7,
+       "game": 14.9,
+       "render": 49.0,
+       "rhi": 7.1,
+       "gpu": 46.2
+      },
+      {
+       "ms": 50.1,
+       "game": 13.3,
+       "render": 49.9,
+       "rhi": 6.8,
+       "gpu": 48.4
+      },
+      {
+       "ms": 51.5,
+       "game": 11.9,
+       "render": 47.9,
+       "rhi": 7.6,
+       "gpu": 48.7
+      },
+      {
+       "ms": 50.2,
+       "game": 14.4,
+       "render": 48.3,
+       "rhi": 6.1,
+       "gpu": 47.6
+      }
+     ],
+     "excess_ms": 5.8,
+     "frames": 819,
+     "frame_ms_p50": 25.6,
+     "frame_ms_p99": 88.5,
+     "frame_ms_max": 125.0,
+     "frames_over_50ms": 72,
+     "frames_over_100ms": 7,
+     "chunks": 79,
+     "making_after": 0
+    }
+   },
+   "budget_ms": 5.0,
+   "compared_chunks": 79,
+   "differ": []
+  },
+  {
+   "step": "stream",
+   "ok": false,
+   "mem_start": 20759.0,
+   "mem_far": 22415.0,
+   "mem_back": 22397.0,
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 20759
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21674
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21995
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22220
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22415
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22416
+    },
+    {
+     "y": 7100.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 22365
+    },
+    {
+     "y": 5600.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 22363
+    },
+    {
+     "y": 4100.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 22337
+    },
+    {
+     "y": 2600.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 22525
+    }
+   ],
+   "dropped": 418,
+   "built": 425,
+   "active_km2_max": 4.5,
+   "compute_ms": 59.8,
+   "build_ms_max": 53.8
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

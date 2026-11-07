@@ -68,6 +68,7 @@ void ARDDungeonGenerator::BeginSky7()
 	if (DayFog)
 	{
 		DayFogDensity = DayFog->FogDensity;
+		DayFogStart = DayFog->StartDistance;
 		DayFog->SetFogCutoffDistance(FogSkyCutoff);
 	}
 	DaySkyLightBase = DaySky ? DaySky->Intensity : 1.f;
@@ -267,7 +268,20 @@ void ARDDungeonGenerator::ApplySky7()
 		SkyMoonMID->SetScalarParameterValue(TEXT("Bright"), Up * FMath::Lerp(0.25f, 1.f, Night) * FMath::Lerp(1.f, 0.12f, RDSkySmooth(0.5f, 0.95f, SkyCover)));
 	}
 	// (fog and rain thicken the haze; the clouds' dimming of the sun, the moon and the sky light is ApplyDayNight's)
-	if (DayFog) DayFog->SetFogDensity(DayFogDensity * (1.f + 3.5f * SkyFog + 0.6f * SkyRain));
+	// (Graymourne, "a fog bound port" (the user's of 2026-11-07): its own fog round it, eased in from 1.6 km off and whole within
+	// 700 m of its middle, a step a call)
+	{
+		const bool bPortNear = bWild && WildTownIdx >= 0 && TownPlan == 3;
+		const float Want = bPortNear ? 1.f - FMath::Clamp((LoadedTownDistM - 700.f) / 900.f, 0.f, 1.f) : 0.f;
+		PortFog = FMath::FInterpConstantTo(PortFog, Want, 1.f, 0.04f);
+	}
+	if (DayFog)
+	{
+		DayFog->SetFogDensity(DayFogDensity * (1.f + 3.5f * SkyFog + 0.6f * SkyRain + PortFogBoost * PortFog));
+		// (the port's fog reaches the town itself: the wilds' fog starts 250 m out, so at density x 9 the whole town stayed clear
+		// (884 gm1's pictures: the wall 80 m off sharp))
+		DayFog->SetStartDistance(FMath::Lerp(DayFogStart, FMath::Min(PortFogStart, DayFogStart), PortFog));
+	}
 	if (WindCollection) UKismetMaterialLibrary::SetScalarParameterValue(this, WindCollection, TEXT("Strength"), Wind);
 	// (the rain's and the wind's sounds: loops, not placed)
 	auto Loop = [&](TObjectPtr<UAudioComponent>& A, const TCHAR* Key, float Vol)

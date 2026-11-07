@@ -1,0 +1,272 @@
+{
+ "tag": "ad4",
+ "plan": [
+  "descendwar"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "descendwar",
+   "ok": true,
+   "set_town": {
+    "found_wear": 47.29999923706055,
+    "slash": [
+     "Ember Slash",
+     true
+    ],
+    "armour": "Plate Armour",
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true,
+    "quick": true
+   },
+   "down": {
+    "level": "war_engine",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "POISON 1.6/s",
+     "WEAKENED -50%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     121,
+     121
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "engine": {
+    "key": "war_engine",
+    "title": "The War Engine",
+    "tier_floors": false,
+    "section": [
+     0,
+     0
+    ],
+    "return_line": "button|Return to Ashenreach",
+    "return_town": "Ashenreach",
+    "machine_kinds": [
+     "Cyber_Convict",
+     "Cyber_Soldier",
+     "Engine_Mech",
+     "Flayed_Mechanic",
+     "Iron_Colossus",
+     "Iron_Golem",
+     "Mutant_Trooper",
+     "Rusted_Robot",
+     "Scrap_Hound",
+     "Scrap_Mutant",
+     "War_Mech"
+    ],
+    "monsters_now": {
+     "Scrap_Hound": 6,
+     "Flayed_Mechanic": 5,
+     "Soldier": 3,
+     "Chicken": 2,
+     "Parasite_Slider": 1,
+     "Medic": 1,
+     "Rat": 1
+    },
+    "machines_now": 11,
+    "theme_props": [
+     "Engine.Gear",
+     "Engine.Chain",
+     "Engine.Cart",
+     "Engine.Anvil",
+     "Engine.Kiln",
+     "Engine.Barrel",
+     "Engine.Chain"
+    ]
+   },
+   "enter_counter": 1,
+   "machine_clips": {
+    "Cyber_Convict": [
+     {
+      "clip": true,
+      "bones_moved_cm": 17.63,
+      "moving": true
+     }
+    ],
+    "Cyber_Soldier": [
+     {
+      "clip": true,
+      "bones_moved_cm": 55.4,
+      "moving": true
+     }
+    ],
+    "Engine_Mech": [
+     {
+      "clip": true,
+      "bones_moved_cm": 20.98,
+      "moving": true
+     }
+    ],
+    "Flayed_Mechanic": [
+     {
+      "clip": true,
+      "bones_moved_cm": 5.86,
+      "moving": true
+     }
+    ],
+    "Iron_Colossus": [
+     {
+      "clip": true,
+      "bones_moved_cm": 14.39,
+      "moving": true
+     }
+    ],
+    "Iron_Golem": [
+     {
+      "clip": true,
+      "bones_moved_cm": 10.27,
+      "moving": true
+     }
+    ],
+    "Mutant_Trooper": [
+     {
+      "clip": true,
+      "bones_moved_cm": 4.18,
+      "moving": true
+     }
+    ],
+    "Rusted_Robot": [
+     {
+      "clip": true,
+      "bones_moved_cm": 1.86,
+      "moving": true
+     }
+    ],
+    "Scrap_Hound": [
+     {
+      "clip": true,
+      "bones_moved_cm": 6.47,
+      "moving": true
+     }
+    ],
+    "Scrap_Mutant": [
+     {
+      "clip": true,
+      "bones_moved_cm": 2.09,
+      "moving": true
+     }
+    ],
+    "War_Mech": [
+     {
+      "clip": true,
+      "bones_moved_cm": 2.02,
+      "moving": true
+     }
+    ]
+   },
+   "machines_spawned": 11,
+   "set_engine": {
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true
+   },
+   "up": {
+    "level": "brokenspire",
+    "left": 58,
+    "arrived": 58,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "SLOWED -60%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     125,
+     125
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "back": {
+    "town": "Ashenreach",
+    "from_return_at_m": 0.0,
+    "from_foundry_door_m": 2.5,
+    "on_ground": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_ad4_ar_war_engine_start.png",
+  "bs_ad4_ar_machines.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

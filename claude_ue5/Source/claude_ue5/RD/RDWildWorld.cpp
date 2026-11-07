@@ -167,6 +167,14 @@ void FRDWildWorld::AssignBiomes()
 		else CellBiome[K] = (T.Name.Len() % 2) ? B(TEXT("farms")) : B(TEXT("meadows"));
 		// (the cell's site on the town: its region is round it)
 		CellSite[K] = T.Site + FVector2D(1500, -1200);
+		// (a town at the edge of a region the spec names (Ashenreach's burned plain, 2026-11-07): the region's middle 5 km north
+		// of it, the cell north of it the same; only when the table has that template (Biome() would give the first silently))
+		if (!T.Biome.IsEmpty() && BiomeIndex.Contains(T.Biome))
+		{
+			CellBiome[K] = BiomeIndex[T.Biome];
+			CellSite[K] = T.Site + FVector2D(5000.0, 0.0);
+			if (I + 1 < CellsX) { CellBiome[(I + 1) * CellsY + J] = BiomeIndex[T.Biome]; CellSite[(I + 1) * CellsY + J] = T.Site + FVector2D(16000.0, 2000.0); }
+		}
 		// (Brokenspire's neighbours: open lowlands, never mountains next door)
 		if (T.Style == 0)
 			for (int32 Di = -1; Di <= 1; ++Di)
@@ -627,10 +635,16 @@ void FRDWildWorld::PlaceTowns()
 	FRDWildTown V; V.Name = TEXT("Vel Morrath"); V.Seed = (int32)(Hash(3, 0, Seed) & 0x3FFFFFFF); V.Kind = TEXT("city");
 	// (the holy city (the user's of 2026-11-06): Brokenspire's size, the cathedral at its middle over the catacombs)
 	V.Tiles = 168; V.Plan = 1;
+	// (the forge city (the user's of 2026-11-07, docs/ashenreach.txt): Brokenspire's size, the besieged foundry at its middle over
+	// The War Engine, at the edge of a burned plain)
+	A.Tiles = 168; A.Plan = 2; A.Biome = TEXT("burned plain");
 	// (the coasts are found where the land measure falls below 0, walking out from inland)
 	auto Walk = [this](FVector2D From, FVector2D Dir) { FVector2D P = From; for (int32 I = 0; I < 3000; ++I) { if (Continent(P.X, P.Y) < 0.f) return P; P += Dir * 100.0; } return P; };
 	const FVector2D NorthCoast = Walk(FVector2D(Mx + 60000.0, 0.0), FVector2D(1, 0));
-	G.Site = NorthCoast - FVector2D(650.0, 0.0);
+	// (the port (the user's of 2026-11-07, docs/graymourne.txt): Brokenspire's size, its harbour along its northern wall, so it
+	// stands nearer the coast: its sea wall about 150 m from it (until then a small town 650 m inland))
+	G.Tiles = 168; G.Plan = 3;
+	G.Site = NorthCoast - FVector2D(400.0, 0.0);
 	for (int32 I = 0; I < 40 && Continent(G.Site.X, G.Site.Y) < 0.0005f; ++I) G.Site.X -= 100.0;     // (on land, a few hundred metres from the sea)
 	// (Vel Morrath, the user's of 2026-11-06: "to the east, but not on the coast. north east of Brokenspire": 55 km north, and
 	// east toward the coast but 35 km or more inside it (until then 9 km inside it, due east))
@@ -963,8 +977,88 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	MakeRoads();
 	HashSegments();
 	BaseH = Towns[0].H;
+	MakeQuestPlaces();
 	bReady = true;
 	InitSeconds = FPlatformTime::Seconds() - T0;
+}
+
+// ------------------------------------------------------------------------------------------------ the quests' places
+void FRDWildWorld::MakeQuestPlaces()
+{
+	// Brokenspire's captain's two quests (town.json): "Wolves on the Mill Road" (something killing the sheep along the mill
+	// road beyond the wall: a den of ripper dogs beside the road to Ashenreach, 1.8 km or more out (as the crow flies: the road
+	// leaves by the gate, whichever way that faces)) and "The Lost Patrol" (five
+	// of the watch who went to the old watchtower: a ruined tower on a rise beside the road to Vel Morrath, 3 km or more out).
+	// Each on dry ground that is flat enough round it; past the towns' level ground (1.15 km) and the roads' first 600 m.
+	QuestPlaces.Reset();
+	if (Towns.Num() == 0) return;
+	const FVector2D Home = Towns[0].Site;
+	auto RoadTo = [this](int32 To) -> const FRoad* { for (const FRoad& R : Roads) if (R.From == 0 && R.To == To && R.P.Num() > 2) return &R; return nullptr; };
+	auto Flat = [this](const FVector2D& At, double Rm, float MaxDh)
+	{
+		const float H0 = Height(At.X, At.Y);
+		for (int32 A = 0; A < 8; ++A)
+		{
+			const double Ang = A * PI / 4.0;
+			const FVector2D Q = At + FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * Rm;
+			FRDWSample S; Sample(Q.X, Q.Y, S, false);
+			if (S.WaterKind != 0 || FMath::Abs(S.H - H0) > MaxDh) return false;
+		}
+		FRDWSample S; Sample(At.X, At.Y, S, false);
+		return S.WaterKind == 0 && S.H > 2.f && S.Road < 0.05f;
+	};
+	// a point beside a road from Brokenspire, from MinM out (as the crow flies), Off metres to a side; bHigh: the higher side
+	auto Beside = [&](const FRoad* R, double MinM, double MaxM, const double* Offs, int32 NOff, double FlatR, float MaxDh, bool bHigh, FVector2D& Out, float& OutYaw)
+	{
+		if (!R) return false;
+		for (int32 I = 1; I + 1 < R->P.Num(); ++I)
+		{
+			const double D = FVector2D::Distance(R->P[I], Home);
+			if (D < MinM) continue;
+			if (D > MaxM) break;
+			const FVector2D Dir = (R->P[I + 1] - R->P[I - 1]).GetSafeNormal(), Side(-Dir.Y, Dir.X);
+			float BestH = -1e9f; bool bAny = false;
+			for (int32 K = 0; K < NOff; ++K)
+			{
+				const FVector2D Q = R->P[I] + Side * Offs[K];
+				if (!Flat(Q, FlatR, MaxDh)) continue;
+				const float H = Height(Q.X, Q.Y);
+				if (!bAny || (bHigh && H > BestH)) { BestH = H; Out = Q; bAny = true; if (!bHigh) break; }
+			}
+			if (bAny && (!bHigh || BestH > Height(R->P[I].X, R->P[I].Y) + 3.f || D > MaxM - 300.0))
+			{
+				const FVector2D Back = R->P[I] - Out;
+				OutYaw = FMath::RadiansToDegrees(FMath::Atan2(Back.Y, Back.X));      // (facing the road)
+				return true;
+			}
+		}
+		return false;
+	};
+	auto Add = [&](const TCHAR* Quest, const TCHAR* Kind, const TCHAR* Name, const FVector2D& At, float Yaw)
+	{
+		FRDWildPlace P; P.Id = QuestIdBase + QuestPlaces.Num(); P.Kind = Kind; P.Name = Name; P.Quest = Quest;
+		P.At = At; P.H = Height(At.X, At.Y); P.Tier = 1; P.Biome = BiomeAt(At.X, At.Y); P.Yaw = Yaw;
+		QuestPlaces.Add(P);
+	};
+	FVector2D At; float Yaw = 0.f;
+	{
+		static const double Offs[] = { 45.0, -45.0, 70.0, -70.0 };
+		if (!Beside(RoadTo(1), 1800.0, 4500.0, Offs, 4, 12.0, 2.5f, false, At, Yaw)) { At = Home + FVector2D(2000.0, 0.0); Yaw = 180.f; }
+		Add(TEXT("wolves"), TEXT("lair"), TEXT("The Mill Road Den"), At, Yaw);
+	}
+	{
+		static const double Offs[] = { 180.0, -180.0, 240.0, -240.0, 120.0, -120.0 };
+		if (!Beside(RoadTo(3), 3000.0, 6000.0, Offs, 6, 9.0, 2.f, true, At, Yaw)) { At = Home + FVector2D(1900.0, 2500.0); Yaw = 225.f; }
+		Add(TEXT("patrol"), TEXT("ruins"), TEXT("The Old Watchtower"), At, Yaw);
+	}
+}
+
+const FRDWildPlace* FRDWildWorld::QuestPlaceFor(const FString& Goal) const
+{
+	if (!Goal.StartsWith(TEXT("wild:"))) return nullptr;
+	const FString Q = Goal.Mid(5);
+	for (const FRDWildPlace& P : QuestPlaces) if (P.Quest == Q) return &P;
+	return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------ towns and places
@@ -1012,12 +1106,16 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 			Out.Add(P);
 		}
 	}
+	for (const FRDWildPlace& Q : QuestPlaces)
+		if (Q.At.X >= X0 && Q.At.X < X0 + PlaceCellM && Q.At.Y >= Y0 && Q.At.Y < Y0 + PlaceCellM) Out.Add(Q);
 	if (X0 < Xs || X0 + PlaceCellM > Xn || Y0 < Yw || Y0 + PlaceCellM > Ye) return;
 	const float R = Rand01(Cell.X, Cell.Y, Seed + 121u);
 	if (R > 0.48f) return;
 	const FVector2D At(X0 + (0.2 + 0.6 * Rand01(Cell.X, Cell.Y, Seed + 122u)) * PlaceCellM, Y0 + (0.2 + 0.6 * Rand01(Cell.X, Cell.Y, Seed + 123u)) * PlaceCellM);
 	double Dt; NearestTown(At.X, At.Y, Dt);
 	if (Dt < 2600.0) return;
+	// (none on top of a quest's place)
+	for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, At) < 600.0) return;
 	FRDWSample S; Sample(At.X, At.Y, S, false);
 	if (S.WaterKind != 0 || S.H < 2.f || S.Road > 0.1f) return;
 	const FString Bn = Biomes[S.Biome].Name;
@@ -1046,6 +1144,11 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 {
 	TArray<FRDWildPlace> Ps;
+	if (Id >= QuestIdBase && Id < TownIdBase)
+	{
+		if (!QuestPlaces.IsValidIndex(Id - QuestIdBase)) return false;
+		Out = QuestPlaces[Id - QuestIdBase]; return true;
+	}
 	if (Id >= TownIdBase) { const int32 Ti = Id - TownIdBase; if (!Towns.IsValidIndex(Ti)) return false; PlacesIn(PlaceCellOf(Towns[Ti].Site.X, Towns[Ti].Site.Y), Ps); }
 	else PlacesIn(FIntPoint((Id >> 14) & 0x3FF, (Id >> 4) & 0x3FF), Ps);
 	for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }

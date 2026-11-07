@@ -23,6 +23,8 @@
 #include "ImageUtils.h"
 #include "Misc/FileHelper.h"
 #include "HAL/PlatformTime.h"
+#include "RenderTimer.h"
+#include "DynamicRHI.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDWild, Log, All);
 
@@ -101,6 +103,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 		}
 	}
 	// ---- the missing ones asked for, nearest first
+	auto Making = [this](const FIntPoint& C) { for (const FWildBuild& B : WildBuilding) if (B.D.IsValid() && B.D->Coord == C) return true; return false; };
 	TTuple<double, FIntPoint> Want[256]; int32 Nw = 0;
 	const int32 I0 = FMath::FloorToInt((Xm - WildActiveM) / Cm), I1 = FMath::FloorToInt((Xm + WildActiveM) / Cm);
 	const int32 J0 = FMath::FloorToInt((Ym - WildActiveM) / Cm), J1 = FMath::FloorToInt((Ym + WildActiveM) / Cm);
@@ -110,13 +113,16 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 			const double Cx = (I + 0.5) * Cm, Cy = (J + 0.5) * Cm;
 			if (FMath::Abs(Cx - Xm) > WildActiveM || FMath::Abs(Cy - Ym) > WildActiveM) continue;
 			const FIntPoint C(I, J);
-			if (WildChunks.Contains(C) || WildInFlight.Contains(C) || Nw >= 256) continue;
+			if (WildChunks.Contains(C) || WildInFlight.Contains(C) || Nw >= 256 || Making(C)) continue;
 			Want[Nw++] = MakeTuple(FMath::Square(Cx - Xm) + FMath::Square(Cy - Ym), C);
 		}
 	Algo::Sort(TArrayView<TTuple<double, FIntPoint>>(Want, Nw), [](const auto& A, const auto& B) { return A.template Get<0>() < B.template Get<0>(); });
 	for (int32 K = 0; K < Nw && WildInFlight.Num() < WildMaxInFlight; ++K) AskWildChunk(Want[K].Get<1>());
-	// ---- the computed ones made, within the frame's budget
+	// ---- the computed ones made, within the frame's budget: in steps (2026-11-07: a chunk made in one go took 45 to 72 ms of
+	// a frame), the ones begun first, nearest first; at least one step a frame
 	const double T0 = FPlatformTime::Seconds();
+	auto Spent = [T0]() { return (FPlatformTime::Seconds() - T0) * 1000.0; };
+	int32 Steps = 0;
 	TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D;
 	while (WildStream->Done.Dequeue(D))
 	{
@@ -124,15 +130,41 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 		if (WildStale.Remove(D->Coord) > 0) continue;          // (asked before a town came or went: asked again)
 		WildComputeMs = WildComputeMs <= 0.0 ? D->Ms : FMath::Lerp(WildComputeMs, D->Ms, 0.1);
 		const double Cx = (D->Coord.X + 0.5) * Cm, Cy = (D->Coord.Y + 0.5) * Cm;
-		if (WildChunks.Contains(D->Coord) || FMath::Abs(Cx - Xm) > WildDropM || FMath::Abs(Cy - Ym) > WildDropM) continue;
-		BuildWildChunk(D);
-		if ((FPlatformTime::Seconds() - T0) * 1000.0 > WildBuildBudgetMs) break;
+		if (WildChunks.Contains(D->Coord) || Making(D->Coord) || FMath::Abs(Cx - Xm) > WildDropM || FMath::Abs(Cy - Ym) > WildDropM) continue;
+		// (the old way, kept for the test's comparison: each chunk in one go, as many as the budget lets begin)
+		if (!bWildBuildSteps && (Steps == 0 || Spent() <= WildBuildBudgetMs)) { BuildWildChunk(D, true); ++Steps; continue; }
+		FWildBuild B; B.D = D; WildBuilding.Add(MoveTemp(B));
 	}
+	if (WildBuilding.Num() > 0 && (Steps == 0 || Spent() <= WildBuildBudgetMs))
+	{
+		// (those begun first; of the rest the nearest)
+		WildBuilding.StableSort([Xm, Ym, Cm](const FWildBuild& A, const FWildBuild& B)
+		{
+			if ((A.Step > 0) != (B.Step > 0)) return A.Step > 0;
+			auto D2 = [&](const FWildBuild& W) { return FMath::Square((W.D->Coord.X + 0.5) * Cm - Xm) + FMath::Square((W.D->Coord.Y + 0.5) * Cm - Ym); };
+			return D2(A) < D2(B);
+		});
+		while (WildBuilding.Num() > 0)
+		{
+			if (Steps > 0 && Spent() > WildBuildBudgetMs) break;
+			FWildBuild& B = WildBuilding[0];
+			const double Cx = (B.D->Coord.X + 0.5) * Cm, Cy = (B.D->Coord.Y + 0.5) * Cm;
+			// (dropped while being made, or gone far before it began)
+			if ((B.Step > 0 && !B.C.IsValid()) || (B.Step == 0 && (WildChunks.Contains(B.D->Coord) || FMath::Abs(Cx - Xm) > WildDropM || FMath::Abs(Cy - Ym) > WildDropM)))
+			{
+				WildBuilding.RemoveAt(0); continue;
+			}
+			if (!bWildBuildSteps) { const TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> Bd = B.D; WildBuilding.RemoveAt(0); BuildWildChunk(Bd, true); }
+			else if (StepWildBuild(B)) WildBuilding.RemoveAt(0);
+			++Steps;
+		}
+	}
+	if (Steps > 0) { WildFrameBuildMsMax = FMath::Max(WildFrameBuildMsMax, Spent()); ++WildMakeFrames; }
 	WildMaxActive = FMath::Max(WildMaxActive, WildChunks.Num());
 	// ---- the chunks round her: grass, the trees' collision
 	for (auto& Kv : WildChunks)
 	{
-		ARDWildChunk* C = Kv.Value; if (!C) continue;
+		ARDWildChunk* C = Kv.Value; if (!C || C->bMaking) continue;
 		const double X0 = Kv.Key.X * Cm, Y0 = Kv.Key.Y * Cm;
 		const double Ex = FMath::Max3(X0 - Xm, 0.0, Xm - (X0 + Cm)), Ey = FMath::Max3(Y0 - Ym, 0.0, Ym - (Y0 + Cm));
 		SetWildNear(C, FMath::Sqrt(Ex * Ex + Ey * Ey) < WildNearM);
@@ -144,6 +176,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 		WildLookTimer = 0.25f;
 		RevealWild(FVector2D(Xm, Ym), WildRevealM);
 		TickWildPlaces(FVector2D(Xm, Ym));
+		TickWildQuests(FVector2D(Xm, Ym));
 	}
 	TickWildTowns(FVector2D(Xm, Ym));
 	TickWildMap(Dt);
@@ -182,85 +215,172 @@ void ARDDungeonGenerator::AskWildChunk(FIntPoint C)
 	Async(EAsyncExecution::ThreadPool, [W, St, D]() { RDWildComputeChunk(*W, *D); St->Done.Enqueue(D); });
 }
 
-void ARDDungeonGenerator::BuildWildChunk(const TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe>& D)
+void ARDDungeonGenerator::BuildWildChunk(const TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe>& D, bool /*bStreamed*/)
 {
+	FWildBuild B; B.D = D;
+	while (!StepWildBuild(B)) if (B.Step > 0 && !B.C.IsValid()) return;
+}
+
+bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
+{
+	// one part of a chunk's making a call: 0 the actor and its ground as it is seen, 1 the ground's collision (a hidden mesh
+	// of its own, cooked on a worker unless she is put on it: the two together were 11 ms of a frame, s2), 2 the water, 3 the
+	// wading floor, 4 the plants and rocks (up to RDWInstStep instances of one table entry a call; those round her only, the
+	// grass and flowers, wait for SetWildNear), 5 the places and the steam
+	constexpr int32 RDWInstStep = 2500;
 	const double T0 = FPlatformTime::Seconds();
-	UWorld* Wd = GetWorld();
-	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	const FVector O(D->Coord.X * WildChunkM * 100.0, D->Coord.Y * WildChunkM * 100.0, 0.0);
-	ARDWildChunk* C = Wd->SpawnActor<ARDWildChunk>(ARDWildChunk::StaticClass(), FTransform(O), Sp);
-	if (!C) return;
-	C->Coord = D->Coord;
-	C->Ground->bUseAsyncCooking = !D->bSyncCollision;
-	C->Ground->CreateMeshSection_LinearColor(0, D->V, D->T, D->N, D->UV0, D->UV1, D->UV2, D->UV3, D->C, D->Tan, true);
-	if (WildGroundMaterial) C->Ground->SetMaterial(0, WildGroundMaterial);
-	C->Triangles = D->T.Num() / 3;
-	UMaterialInterface* Wm[4] = { WildWaterMaterial, WildSeaMaterial ? WildSeaMaterial.Get() : WildWaterMaterial.Get(), WildSpringMaterial ? WildSpringMaterial.Get() : WildWaterMaterial.Get(), WildLavaMaterial };
-	for (int32 S = 0; S < 4; ++S)
+	FRDWChunkData* D = B.D.Get();
+	const TCHAR* Part = TEXT("ground");
+	bool bDone = false;
+	if (B.Step == 0)
 	{
-		const FRDWChunkData::FWater& Wt = D->Water[S];
-		if (Wt.V.Num() == 0) continue;
-		TArray<FVector> Up; Up.Init(FVector::UpVector, Wt.V.Num());
-		C->WaterMesh->CreateMeshSection_LinearColor(S, Wt.V, Wt.T, Up, Wt.UV, TArray<FVector2D>(), TArray<FVector2D>(), TArray<FVector2D>(), Wt.C, TArray<FProcMeshTangent>(), false);
-		if (Wm[S]) C->WaterMesh->SetMaterial(S, Wm[S]);
+		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		const FVector O(D->Coord.X * WildChunkM * 100.0, D->Coord.Y * WildChunkM * 100.0, 0.0);
+		ARDWildChunk* C = GetWorld()->SpawnActor<ARDWildChunk>(ARDWildChunk::StaticClass(), FTransform(O), Sp);
+		if (!C) return true;
+		C->Coord = D->Coord; C->bMaking = true;
+		C->Ground->CreateMeshSection_LinearColor(0, D->V, D->T, D->N, D->UV0, D->UV1, D->UV2, D->UV3, D->C, D->Tan, false);
+		if (WildGroundMaterial) C->Ground->SetMaterial(0, WildGroundMaterial);
+		C->Triangles = D->T.Num() / 3;
+		// (what only the drawn ground needed goes now; the positions and triangles wait for its collision)
+		D->N.Empty(); D->Tan.Empty(); D->UV0.Empty(); D->UV1.Empty(); D->UV2.Empty(); D->UV3.Empty(); D->C.Empty(); D->Slope.Empty();
+		B.C = C; B.Step = 1;
+		WildChunks.Add(D->Coord, C);
 	}
-	if (D->Block.Num() > 0)
+	else if (!B.C.IsValid()) return true;
+	else if (B.Step == 1)
 	{
-		UProceduralMeshComponent* B = NewObject<UProceduralMeshComponent>(C, TEXT("Wade"));
-		B->SetupAttachment(C->Ground);
-		B->bUseAsyncCooking = !D->bSyncCollision;
-		B->SetHiddenInGame(true); B->SetVisibility(false);
-		B->RegisterComponent();
-		B->CreateMeshSection(0, D->Block, D->BlockT, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-		B->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		B->SetCollisionResponseToAllChannels(ECR_Ignore);
-		B->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		Part = TEXT("collision");
+		ARDWildChunk* C = B.C.Get();
+		// (she, the monsters, the camera and the traces stand on it as on the ground before: BlockAll, hidden, not in the scene)
+		UProceduralMeshComponent* G = NewObject<UProceduralMeshComponent>(C, TEXT("GroundCollision"));
+		G->SetupAttachment(C->Ground);
+		G->bUseAsyncCooking = !D->bSyncCollision;
+		G->SetCollisionProfileName(TEXT("BlockAll"));
+		G->SetHiddenInGame(true); G->SetVisibility(false); G->SetCastShadow(false);
+		G->RegisterComponent();
+		G->CreateMeshSection(0, D->V, D->T, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+		D->V.Empty(); D->T.Empty();
+		B.Step = 2;
 	}
-	// the plants and rocks (those of the chunks round her only, the grass and flowers, wait for SetWildNear)
-	TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> ByMesh;
-	for (const FRDWChunkData::FInst& In : D->Inst)
+	else if (B.Step == 2)
 	{
-		if (In.bNear || !Wild->Biomes.IsValidIndex(In.Biome) || !WildBiomes.IsValidIndex(In.Biome)) continue;
-		const FRDWildFoliage& F = WildBiomes[In.Biome].Foliage[In.Foliage];
-		if (!F.Mesh) continue;
-		UHierarchicalInstancedStaticMeshComponent*& H = ByMesh.FindOrAdd(F.Mesh);
-		if (!H)
+		Part = TEXT("water");
+		ARDWildChunk* C = B.C.Get();
+		UMaterialInterface* Wm[4] = { WildWaterMaterial, WildSeaMaterial ? WildSeaMaterial.Get() : WildWaterMaterial.Get(), WildSpringMaterial ? WildSpringMaterial.Get() : WildWaterMaterial.Get(), WildLavaMaterial };
+		for (int32 S = 0; S < 4; ++S)
 		{
-			H = NewObject<UHierarchicalInstancedStaticMeshComponent>(C);
-			H->SetStaticMesh(F.Mesh);
-			H->SetupAttachment(C->Ground);
-			H->SetCullDistances(FMath::RoundToInt(F.CullDistance * 0.85f), FMath::RoundToInt(F.CullDistance));
-			H->SetCastShadow(F.Kind != TEXT("grass") && F.Kind != TEXT("flower") && F.Kind != TEXT("reed"));
-			H->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			if (F.bCollision) H->ComponentTags.Add(TEXT("rdw_col"));
-			for (int32 Sl = 0; Sl < F.Materials.Num(); ++Sl) if (F.Materials[Sl]) H->SetMaterial(Sl, F.Materials[Sl]);
-			H->RegisterComponent();
-			C->Foliage.Add(H);
+			FRDWChunkData::FWater& Wt = D->Water[S];
+			if (Wt.V.Num() == 0) continue;
+			TArray<FVector> Up; Up.Init(FVector::UpVector, Wt.V.Num());
+			C->WaterMesh->CreateMeshSection_LinearColor(S, Wt.V, Wt.T, Up, Wt.UV, TArray<FVector2D>(), TArray<FVector2D>(), TArray<FVector2D>(), Wt.C, TArray<FProcMeshTangent>(), false);
+			if (Wm[S]) C->WaterMesh->SetMaterial(S, Wm[S]);
+			Wt.V.Empty(); Wt.T.Empty(); Wt.UV.Empty(); Wt.C.Empty();
 		}
-		H->AddInstances(In.X, false, false, false);
-		C->Instances += In.X.Num();
-		if (F.Kind == TEXT("tree")) C->Trees += In.X.Num();
+		B.Step = 3;
 	}
-	// (what the chunk keeps: its near plants and its places; the mesh's arrays go)
-	D->V.Empty(); D->N.Empty(); D->T.Empty(); D->Tan.Empty(); D->UV0.Empty(); D->UV1.Empty(); D->UV2.Empty(); D->C.Empty(); D->Slope.Empty();
-	for (FRDWChunkData::FWater& Wt : D->Water) { Wt.V.Empty(); Wt.T.Empty(); Wt.UV.Empty(); Wt.C.Empty(); }
-	D->Block.Empty(); D->BlockT.Empty();
-	D->Inst.RemoveAll([](const FRDWChunkData::FInst& In) { return !In.bNear; });
-	WildKept.Add(D->Coord, D);
-	WildChunks.Add(D->Coord, C);
-	SpawnWildPlaces(C, D->Places);
-	if (WildSteamFx)
-		for (const FRDWildWorld::FLake& Pd : Wild->Ponds)
+	else if (B.Step == 3)
+	{
+		Part = TEXT("wade");
+		ARDWildChunk* C = B.C.Get();
+		if (D->Block.Num() > 0)
 		{
-			if (Pd.Kind != 6) continue;
-			const double X0 = D->Coord.X * WildChunkM, Y0 = D->Coord.Y * WildChunkM;
-			if (Pd.C.X < X0 || Pd.C.X >= X0 + WildChunkM || Pd.C.Y < Y0 || Pd.C.Y >= Y0 + WildChunkM) continue;
-			UNiagaraFunctionLibrary::SpawnSystemAttached(WildSteamFx, C->Ground, NAME_None, FVector(Pd.C.X * 100.0, Pd.C.Y * 100.0, Wild->ToZ(Pd.Level) + 20.f) - C->GetActorLocation(),
-				FRotator::ZeroRotator, FVector(2.5f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None);
+			UProceduralMeshComponent* W = NewObject<UProceduralMeshComponent>(C, TEXT("Wade"));
+			W->SetupAttachment(C->Ground);
+			W->bUseAsyncCooking = !D->bSyncCollision;
+			W->SetHiddenInGame(true); W->SetVisibility(false);
+			W->RegisterComponent();
+			W->CreateMeshSection(0, D->Block, D->BlockT, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+			W->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			W->SetCollisionResponseToAllChannels(ECR_Ignore);
+			W->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 		}
-	++WildBuilt;
-	WildBuildMsLast = (FPlatformTime::Seconds() - T0) * 1000.0;
-	WildBuildMsMax = FMath::Max(WildBuildMsMax, WildBuildMsLast);
+		D->Block.Empty(); D->BlockT.Empty();
+		B.Step = 4; B.Inst = 0;
+	}
+	else if (B.Step == 4)
+	{
+		Part = TEXT("plants");
+		ARDWildChunk* C = B.C.Get();
+		// (the next table entry with instances to add; a big one in parts)
+		while (B.Inst < D->Inst.Num())
+		{
+			FRDWChunkData::FInst& In = D->Inst[B.Inst];
+			if (In.bNear || In.X.Num() == 0 || !Wild->Biomes.IsValidIndex(In.Biome) || !WildBiomes.IsValidIndex(In.Biome) || !WildBiomes[In.Biome].Foliage.IsValidIndex(In.Foliage) || !WildBiomes[In.Biome].Foliage[In.Foliage].Mesh) { ++B.Inst; continue; }
+			const FRDWildFoliage& F = WildBiomes[In.Biome].Foliage[In.Foliage];
+			UHierarchicalInstancedStaticMeshComponent*& H = B.ByMesh.FindOrAdd(F.Mesh);
+			if (!H)
+			{
+				H = NewObject<UHierarchicalInstancedStaticMeshComponent>(C);
+				H->SetStaticMesh(F.Mesh);
+				H->SetupAttachment(C->Ground);
+				H->SetCullDistances(FMath::RoundToInt(F.CullDistance * 0.85f), FMath::RoundToInt(F.CullDistance));
+				H->SetCastShadow(F.Kind != TEXT("grass") && F.Kind != TEXT("flower") && F.Kind != TEXT("reed"));
+				H->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				if (F.bCollision) H->ComponentTags.Add(TEXT("rdw_col"));
+				for (int32 Sl = 0; Sl < F.Materials.Num(); ++Sl) if (F.Materials[Sl]) H->SetMaterial(Sl, F.Materials[Sl]);
+				H->RegisterComponent();
+				C->Foliage.Add(H);
+			}
+			const int32 N = FMath::Min(In.X.Num(), RDWInstStep);
+			if (N == In.X.Num()) H->AddInstances(In.X, false, false, false);
+			else H->AddInstances(TArray<FTransform>(In.X.GetData(), N), false, false, false);
+			C->Instances += N;
+			if (F.Kind == TEXT("tree")) C->Trees += N;
+			In.X.RemoveAt(0, N, EAllowShrinking::No);
+			if (In.X.Num() == 0) ++B.Inst;
+			break;
+		}
+		if (B.Inst >= D->Inst.Num()) B.Step = 5;
+	}
+	else
+	{
+		Part = TEXT("places");
+		ARDWildChunk* C = B.C.Get();
+		// (what the chunk keeps: its near plants and its places)
+		D->Inst.RemoveAll([](const FRDWChunkData::FInst& In) { return !In.bNear; });
+		WildKept.Add(D->Coord, B.D);
+		SpawnWildPlaces(C, D->Places);
+		if (WildSteamFx)
+			for (const FRDWildWorld::FLake& Pd : Wild->Ponds)
+			{
+				if (Pd.Kind != 6) continue;
+				const double X0 = D->Coord.X * WildChunkM, Y0 = D->Coord.Y * WildChunkM;
+				if (Pd.C.X < X0 || Pd.C.X >= X0 + WildChunkM || Pd.C.Y < Y0 || Pd.C.Y >= Y0 + WildChunkM) continue;
+				UNiagaraFunctionLibrary::SpawnSystemAttached(WildSteamFx, C->Ground, NAME_None, FVector(Pd.C.X * 100.0, Pd.C.Y * 100.0, Wild->ToZ(Pd.Level) + 20.f) - C->GetActorLocation(),
+					FRotator::ZeroRotator, FVector(2.5f), EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::None);
+			}
+		C->bMaking = false;
+		++WildBuilt;
+		bDone = true;
+	}
+	// (the measures: streamed chunks only; one she is put on is made at once, its collision cooked on the game thread)
+	const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
+	B.Ms += Ms;
+	if (!D->bSyncCollision)
+	{
+		double& Pm = WildPartMsMax.FindOrAdd(Part); Pm = FMath::Max(Pm, Ms);
+		WildStepMsMax = FMath::Max(WildStepMsMax, Ms);
+	}
+	if (bDone)
+	{
+		WildBuildMsLast = B.Ms;
+		WildBuildMsMax = FMath::Max(WildBuildMsMax, B.Ms);
+		if (!D->bSyncCollision) { WildChunkMsMax = FMath::Max(WildChunkMsMax, B.Ms); ++WildStreamBuilt; }
+	}
+	return bDone;
+}
+
+FString ARDDungeonGenerator::GetWildBuildStats(bool bReset)
+{
+	FString Parts;
+	for (const auto& Kv : WildPartMsMax) Parts += FString::Printf(TEXT("%s%s=%.1f"), Parts.IsEmpty() ? TEXT("") : TEXT(","), *Kv.Key, Kv.Value);
+	// (and the last frame's threads, as stat unit has them: game, render, RHI, GPU ms: which one a long frame waited on)
+	const FString Out = FString::Printf(TEXT("%d|%.1f|%.1f|%.1f|%d|%s|%d|%d|%d|%d|%.1f|%.1f|%.1f|%.1f"), WildStreamBuilt, WildStepMsMax, WildFrameBuildMsMax, WildChunkMsMax, WildBuilding.Num(), *Parts, WildMakeFrames, WildTrims, WildDropped,
+		!bWildTrimPending ? 0 : WildTrimAt < 0.0 ? 1 : 2, FPlatformTime::ToMilliseconds(GGameThreadTime), FPlatformTime::ToMilliseconds(GRenderThreadTime), FPlatformTime::ToMilliseconds(GRHIThreadTime),
+		FPlatformTime::ToMilliseconds(RHIGetGPUFrameCycles(0)));
+	if (bReset) { WildStreamBuilt = 0; WildStepMsMax = WildFrameBuildMsMax = WildChunkMsMax = 0.0; WildPartMsMax.Reset(); }
+	return Out;
 }
 
 void ARDDungeonGenerator::SetWildNear(ARDWildChunk* C, bool bNear)
@@ -352,7 +472,8 @@ float ARDDungeonGenerator::WildGroundZ(FVector At) const
 FString ARDDungeonGenerator::GetWildState() const
 {
 	if (!Wild.IsValid()) return TEXT("0");
-	return FString::Printf(TEXT("%d|%u|%.2f|%d|%d|%d|%d|%d|%.1f|%.1f|%d|%d|%d|%d|%d|%d|%d|%d"), IsWildReady() ? 1 : 0, Wild->Seed, Wild->InitSeconds, WildChunks.Num(), WildInFlight.Num(),
+	// (in flight: computed or still being made: a chunk being made over frames has not all its plants or places yet)
+	return FString::Printf(TEXT("%d|%u|%.2f|%d|%d|%d|%d|%d|%.1f|%.1f|%d|%d|%d|%d|%d|%d|%d|%d"), IsWildReady() ? 1 : 0, Wild->Seed, Wild->InitSeconds, WildChunks.Num(), WildInFlight.Num() + WildBuilding.Num(),
 		WildBuilt, WildDropped, WildMaxActive, WildComputeMs, WildBuildMsMax, WildRevealedCells, WildFound.Num(), Wild->Towns.Num(), WildTicks, GenTicks,
 		GetWorld()->IsPaused() ? 1 : 0, bMenuOpen ? 1 : 0, IsTownPanelOpen() ? 1 : 0);
 }
@@ -362,7 +483,7 @@ TArray<FString> ARDDungeonGenerator::GetWildChunkLines() const
 	TArray<FString> Out;
 	for (const auto& Kv : WildChunks)
 		if (const ARDWildChunk* C = Kv.Value)
-			Out.Add(FString::Printf(TEXT("%d|%d|%d|%d|%d|%d|%d|%d|%d|%d"), Kv.Key.X, Kv.Key.Y, C->Instances, C->Triangles, C->bNear ? 1 : 0, C->bCollisionOn ? 1 : 0, C->Props.Num(), C->PlaceProps.Num(), C->NearFoliage.Num(), C->Trees));
+			Out.Add(FString::Printf(TEXT("%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d"), Kv.Key.X, Kv.Key.Y, C->Instances, C->Triangles, C->bNear ? 1 : 0, C->bCollisionOn ? 1 : 0, C->Props.Num(), C->PlaceProps.Num(), C->NearFoliage.Num(), C->Trees, C->bMaking ? 1 : 0));
 	return Out;
 }
 
@@ -497,6 +618,13 @@ bool ARDDungeonGenerator::WildPutHer(float Xm, float Ym)
 		for (int32 J = Jc - 1; J <= Jc + 1; ++J)
 		{
 			const FIntPoint C(I, J);
+			// (one still being made over frames: its collision may not be cooked yet; made again now)
+			const int32 Mk = WildBuilding.IndexOfByPredicate([&C](const FWildBuild& B) { return B.D.IsValid() && B.D->Coord == C; });
+			if (Mk != INDEX_NONE)
+			{
+				WildBuilding.RemoveAt(Mk);
+				if (TObjectPtr<ARDWildChunk>* Old = WildChunks.Find(C)) { if (*Old) (*Old)->Destroy(); WildChunks.Remove(C); WildKept.Remove(C); }
+			}
 			if (WildChunks.Contains(C)) continue;
 			TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D = MakeShared<FRDWChunkData, ESPMode::ThreadSafe>();
 			D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->bSyncCollision = true;
@@ -516,6 +644,6 @@ void ARDDungeonGenerator::WildDropAll()
 	WildAskTrim();
 	for (auto& Kv : WildChunks) if (Kv.Value) Kv.Value->Destroy();
 	WildDropped += WildChunks.Num();
-	WildChunks.Reset(); WildKept.Reset();
+	WildChunks.Reset(); WildKept.Reset(); WildBuilding.Reset();
 }
 

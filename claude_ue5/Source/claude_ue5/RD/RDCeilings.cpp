@@ -163,13 +163,15 @@ void ARDSection::ShellVaults()
 	const FVector Org(GetActorLocation().X, GetActorLocation().Y, 0.f);
 	const FVector OrgW = GetActorLocation();
 	const FRDPiece* CeilP = Pc(TEXT("Ceil_Room"));
-	UMaterialInterface* CeilMat = CeilP && CeilP->Mesh ? CeilP->Mesh->GetMaterial(0) : nullptr;
+	// (a piece's own material first, as its instances wear it: the sewers' damp concrete left the vaults in the pack's pale
+	// one (884 gd2's picture))
+	UMaterialInterface* CeilMat = CeilP && CeilP->Material ? CeilP->Material.Get() : CeilP && CeilP->Mesh ? CeilP->Mesh->GetMaterial(0) : nullptr;
 	for (int32 RI = 0; RI < Rooms.Num(); ++RI)
 	{
 		const FRoom& Rm = Rooms[RI];
 		if (Rm.Ceil < 2) continue;
 		const FRDPiece* WallP = ShellWall.IsValidIndex(RI) ? Pc(ShellWall[RI]) : nullptr;
-		UMaterialInterface* WallMat = WallP && WallP->Mesh ? WallP->Mesh->GetMaterial(0) : CeilMat;
+		UMaterialInterface* WallMat = WallP && WallP->Material ? WallP->Material.Get() : WallP && WallP->Mesh ? WallP->Mesh->GetMaterial(0) : CeilMat;
 		UMaterialInterface* RibMat = Generator->CeilingRibMaterial ? Generator->CeilingRibMaterial.Get() : WallMat;
 		UMaterialInterface* BeamMat = Generator->CeilingBeamMaterial ? Generator->CeilingBeamMaterial.Get() : RibMat;
 		// (the room's box, 2 cm out past its walls' line: the walls stand in front of the vault's rim and its band)

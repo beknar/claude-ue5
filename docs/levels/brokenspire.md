@@ -185,8 +185,8 @@ A quest's goal is a counter the game keeps across the levels; its progress is wh
 | Thin the Horde | Captain |  | Kill 15 monsters in Mistward Castle (`kills` x 15) | 80 gold, Whetstone |
 | Cells Under the Keep | Captain |  | Free two prisoners from the castle's cells (`prisoners` x 2) | 100 gold, Medium Healing Potion |
 | The First Warden | Captain | Thin the Horde | Slay a tier's boss in Mistward Castle (`boss` x 1) | 150 gold, HP Potency Ring 1 |
-| Wolves on the Mill Road | Captain |  | The wilderness: when the gate opens (`wild:wolves` x 1) | 120 gold (when the gate opens) |
-| The Lost Patrol | Captain |  | The wilderness: when the gate opens (`wild:patrol` x 1) | 200 gold (when the gate opens) |
+| Wolves on the Mill Road | Captain |  | Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map) (`wild:wolves` x 1) | 120 gold |
+| The Lost Patrol | Captain |  | Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map) (`wild:patrol` x 1) | 200 gold |
 | Rats in the Cellars | Board |  | Kill six rats in Mistward Castle (`kind:Rat` x 6) | 30 gold |
 | The Drinkers | Board |  | Kill four Drinkers in Mistward Castle (`kind:Drinker` x 4) | 35 gold |
 | Dead Soldiers Walking | Board |  | Kill four dead soldiers in Mistward Castle (`kind:Soldier` x 4) | 40 gold |

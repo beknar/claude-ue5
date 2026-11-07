@@ -1,0 +1,205 @@
+{
+ "tag": "s6",
+ "plan": [
+  "stream",
+  "towns"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stream",
+   "ok": true,
+   "mem_start": 22661.0,
+   "mem_far": 21940.0,
+   "mem_back": 22470.0,
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22665
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22981
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 20718
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21277
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21940
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21940
+    },
+    {
+     "y": 7100.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 21913
+    },
+    {
+     "y": 5600.0,
+     "chunks": 71,
+     "near": 4,
+     "mem": 22415
+    },
+    {
+     "y": 4100.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 22493
+    },
+    {
+     "y": 2600.0,
+     "chunks": 72,
+     "near": 4,
+     "mem": 22470
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 63.7,
+   "build_ms_max": 64.8
+  },
+  {
+   "step": "towns",
+   "ok": true,
+   "at_start": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 66.0,
+    "build_s": 4.2,
+    "loaded": 1.0,
+    "dropped": 1.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_start": 92,
+   "far": {
+    "idx": -1.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 0.0,
+    "dist_m": 2300.0,
+    "build_s": 4.2,
+    "loaded": 1.0,
+    "dropped": 2.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_far": 0,
+   "mem_far": 23644.0,
+   "back": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1200.0,
+    "build_s": 6.6,
+    "loaded": 2.0,
+    "dropped": 2.0,
+    "in_walls": 0.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "folk_back": 92,
+   "vm_near": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 1300.0,
+    "build_s": 7.1,
+    "loaded": 3.0,
+    "dropped": 3.0,
+    "in_walls": 0.0,
+    "ox": 5500000.0,
+    "oy": 7500000.0,
+    "home": 0.0
+   },
+   "minimap_outside": true,
+   "vm_in": {
+    "idx": 3.0,
+    "name": "Vel Morrath",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 63.0,
+    "build_s": 7.1,
+    "loaded": 3.0,
+    "dropped": 3.0,
+    "in_walls": 1.0,
+    "ox": 5500000.0,
+    "oy": 7500000.0,
+    "home": 0.0
+   },
+   "minimap_inside_wild": false,
+   "vm_folk": 127,
+   "vm_roles": [
+    "Beggar",
+    "Captain",
+    "Child",
+    "Drunk",
+    "Elder",
+    "Guard",
+    "Healer",
+    "Idiot",
+    "Innkeeper",
+    "Keeper",
+    "Militia",
+    "Monk",
+    "Mourner",
+    "Pilgrim",
+    "Preacher",
+    "Priest",
+    "Scholar",
+    "Smith",
+    "Soldier",
+    "Templar",
+    "Townsfolk",
+    "Trader"
+   ],
+   "vm_titles_brokenspire": [],
+   "vm_titles_own": [],
+   "vm_square": [
+    5499250,
+    7506300
+   ],
+   "vm_notables": [
+    "Archbishop Severin Aurel",
+    "Archivist Mott",
+    "Commander Ysolde Vane"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

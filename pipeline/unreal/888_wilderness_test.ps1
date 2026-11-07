@@ -14,7 +14,10 @@ function Restore {
     & $py $ex -c ($cvar -f 1) 2>$null | Out-Null
     & $py $ex -c "import unreal; print('windows shown again', unreal.RDDungeonGenerator.slate_restore_any_view())" 2>$null | Out-Null
 }
+# (CLAUDE.md: the old objects collected before new work in the editor and after a level is closed: obj gc)
+$gc = "import unreal; unreal.SystemLibrary.execute_console_command(None, 'obj gc'); print('obj gc')"
 & $py $ex -c $open 2>$null | Out-Null
+& $py $ex -c $gc 2>$null | Out-Null
 & $py $ex -c ($cvar -f 0) 2>$null | Out-Null
 $pat = "WILDTEST done \| $tag \|"
 $n0 = (Select-String -Path $log -Pattern $pat | Measure-Object).Count
@@ -47,4 +50,5 @@ Start-Sleep 3; & $py $ex -c $stop 2>$null | Out-Null; Start-Sleep 6
 Restore
 # (the castle step ends play in the castle: the editor is left on the town)
 & $py $ex -c $open 2>$null | Out-Null
+& $py $ex -c $gc 2>$null | Out-Null
 if ($line) { $line.Substring($line.IndexOf("WILDTEST")) } else { "no result after $maxs s"; (Select-String -Path $log -Pattern "WILDTEST " | Select-Object -Last 5).Line }

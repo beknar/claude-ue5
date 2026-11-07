@@ -39,6 +39,7 @@ class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UPostProcessComponent;
 class UNiagaraSystem;
+class UHierarchicalInstancedStaticMeshComponent;
 
 UCLASS()
 class CLAUDE_UE5_API ARDDungeonGenerator : public AActor
@@ -981,6 +982,16 @@ public:
 	 *  dungeon's: empty for Mistward Castle, "vel_morrath" for the catacombs: its tiers, counters and her piles kept apart; its
 	 *  name for the player is DungeonTitle) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString CatacombsLevel;
+	/** a dungeon's own props set by its rooms' walls after their furniture (2026-11-07: The War Engine's gears, chains, ore
+	 *  carts; piece names in Pieces), every ThemePropSpacing cm of wall with ThemePropChance; none: none */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FName> ThemeProps;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float ThemePropSpacing = 450.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float ThemePropChance = 0.35f;
+	/** each wilderness town's own dungeon level by the town's name (2026-11-07: Ashenreach's War Engine, Graymourne's sewers;
+	 *  each city's script sets its own); Vel Morrath's is CatacombsLevel when it is not here */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TMap<FString, FString> TownDungeons;
+	/** the town she is in's dungeon level (empty: none; Brokenspire's is the castle, through the Mistgate) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString CurrentDungeonLevel() const;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString DungeonKey;
 	/** a counter of this dungeon's ("bossdone:2", "tier", "prisoners"): Mistward Castle's as they were, another's under its key */
 	FString DungeonCounterName(const FString& N) const;
@@ -994,11 +1005,14 @@ public:
 	/** the town's side of a trip down into a dungeon (the autosave, her state carried, the town's state put away, the level
 	 *  opened); Why is the autosave's reason and the game instance's Arrive */
 	void TravelToDungeon(const FString& Level, const FString& Why);
-	/** the cathedral's stair down: walked into, the catacombs open (a test's dry run only says so) */
+	/** a city's way into its dungeon (Vel Morrath's cathedral stair, Ashenreach's foundry gate, Graymourne's sewer entrance):
+	 *  walked into, its level opens (a test's dry run only says so) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCatacombs();
-	/** the way down into the catacombs, she coming back at ReturnAt facing ReturnYaw (the cathedral's door; -RDTownGo=catacombs:
-	 *  where she stands); a test's dry run only says so */
-	bool DescendToCatacombs(const FVector& ReturnAt, float ReturnYaw);
+	/** the town she is in has a dungeon of its own (not Brokenspire, whose castle is the Mistgate's) */
+	bool HasTownDungeon() const { return bTown && !bTownHome && !CurrentDungeonLevel().IsEmpty(); }
+	/** the way down into a dungeon (Level, or the town's own when empty), she coming back at ReturnAt facing ReturnYaw (the
+	 *  landmark's door; -RDTownGo: where she stands); a test's dry run only says so */
+	bool DescendToCatacombs(const FVector& ReturnAt, float ReturnYaw, const FString& Level = FString());
 	/** the town's people and its quests (pipeline/unreal/882 from SourceArt/brokenspire/town.json) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDTownsfolkDef> Townsfolk;
 	// ---- the town's life (the third list, 2026-11-02; RDTownLife.cpp; 886 fills these)
@@ -1245,7 +1259,12 @@ public:
 	int32 Weather = 1, WeatherChanges = 0;
 	float WeatherUntil = 0.f, SkyCover = 0.25f, SkyCoverWant = 0.25f, SkyRain = 0.f, SkyRainWant = 0.f, SkyWind = 0.2f, SkyWindWant = 0.2f, SkyFog = 0.f, SkyFogWant = 0.f, SkyApplyT = 0.f, SkyTime = 0.f;
 	bool bSkyCold = false, bSkySnowing = false;
-	float DayFogDensity = 0.02f, DaySkyLightBase = 1.f;
+	float DayFogDensity = 0.02f, DayFogStart = 0.f, DaySkyLightBase = 1.f;
+	/** Graymourne's fog (2026-11-07): 0 away from it, 1 within 700 m of its middle; the day's fog density is raised by
+	 *  PortFogBoost times it, and its start (the wilds' 250 m, which left the whole town clear) drawn in to PortFogStart (cm) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") float PortFog = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float PortFogBoost = 8.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float PortFogStart = 500.f;
 	/** the weather now (tests, reels) and a weather set (tests): see Weather */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
@@ -1779,7 +1798,34 @@ public:
 	FString WildLastFound;
 	void StartWild();
 	void TickWild(float Dt, APlayerController* PC);
-	void BuildWildChunk(const TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe>& D);
+	/** a chunk made from its computed data all at once (she is put on it; or streamed, with bWildBuildSteps off: bStreamed
+	 *  counts it in the making's measures) */
+	void BuildWildChunk(const TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe>& D, bool bStreamed = false);
+	/** the chunks being made over frames (2026-11-07: one chunk's making took 45 to 72 ms in a frame): each step is one
+	 *  part (the ground with its collision, the water, the wading floor, one plant mesh's instances, the places), as many
+	 *  as fit the frame's WildBuildBudgetMs */
+	struct FWildBuild
+	{
+		TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe> D;
+		TWeakObjectPtr<ARDWildChunk> C;
+		int32 Step = 0, Inst = 0;
+		double Ms = 0.0;
+		TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> ByMesh;
+	};
+	TArray<FWildBuild> WildBuilding;
+	/** one step of a chunk's making; true when it is whole */
+	bool StepWildBuild(FWildBuild& B);
+	/** chunks made in steps (true), or each in one go (the old way, for the test's comparison) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") bool bWildBuildSteps = true;
+	/** the making's measures on the game thread (streamed chunks only; a chunk she is put on is made at once): the longest
+	 *  step, the longest frame's share of making, the whole of a chunk (its steps summed), per part's longest ms */
+	double WildStepMsMax = 0.0, WildFrameBuildMsMax = 0.0, WildChunkMsMax = 0.0;
+	TMap<FString, double> WildPartMsMax;
+	int32 WildStreamBuilt = 0, WildMakeFrames = 0;
+	/** "streamed|step max ms|frame max ms|chunk max ms|building now|part=ms,...|frames with making|trims|dropped|trim stage"
+	 *  |game ms|render ms|RHI ms|GPU ms (tests: the counts since play began, the trim's stage (0 none, 1 its collection
+	 *  asked, 2 waiting to trim) and the last frame's threads (stat unit's) tell a long frame's cause); bReset clears the maxima */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildBuildStats(bool bReset = false);
 	void SetWildNear(ARDWildChunk* C, bool bNear);
 	void RevealWild(const FVector2D& AtM, float RadiusM);
 	bool IsWildRevealed(double Xm, double Ym) const;
@@ -1845,6 +1891,20 @@ public:
 	void WildPiecesOf(const FString& Prefix, TArray<UStaticMesh*>& Out) const;
 	ARDSection* EnsureWildSection();
 	void SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace& P);
+	// ---- the captain's two wilderness quests (2026-11-07, RDWildQuest.cpp): "wild:wolves" (the Mill Road Den's pack killed,
+	// every one: read from the kills kept, WildKilled), "wild:patrol" (the lost patrol's remains found at the old watchtower)
+	/** how many monsters a quest's place has (its kills' keys are its id x 16 + 0..N-1) */
+	int32 WildQuestMonsters(const FRDWildPlace& P) const { return P.Quest == TEXT("wolves") ? 4 : 3; }
+	/** where the patrol's remains lie (metres): before the watchtower's doorway, toward the road */
+	FVector2D WildQuestRemainsAt(const FRDWildPlace& P) const;
+	/** a wild quest's state from the world: 1 done (the pack dead, the remains found), else 0 */
+	int32 WildQuestProgress(const FString& Goal) const;
+	void WildQuestOnKill(const class ARDMonster* M);
+	void TickWildQuests(const FVector2D& AtM);
+	/** a quest's place is on the map while its quest is taken and not turned in (named, not found: no travel there) */
+	bool IsWildQuestShown(int32 PlaceId) const;
+	/** "goal|place id|name|x m|y m|kind|monsters|killed|progress|remains x m|remains y m|yaw|on the map" per wild quest (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> GetWildQuestLines() const;
 	bool IsInLoadedTown(const FVector& At) const;
 	/** inside the loaded town's wall (its maps are the town's) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool IsInTownWalls(const FVector& At) const;

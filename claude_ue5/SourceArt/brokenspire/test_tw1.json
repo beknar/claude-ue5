@@ -1,0 +1,65 @@
+{
+ "tag": "tw1",
+ "plan": [
+  "talk"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "talk",
+   "ok": true,
+   "prompt": "talk to Aldric Venn",
+   "panel": "talk",
+   "lines": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: Word from the Spire|15 g|1",
+    "bye|Farewell||1"
+   ],
+   "asked_changed_text": true,
+   "accepted": true,
+   "quest": {
+    "state": "taken",
+    "progress": 0,
+    "count": 1
+   },
+   "scholar_panel": "talk",
+   "scholar_lines": [
+    "ask|What is the Mistward?||1",
+    "ask|Who broke the spire?||1",
+    "ask|What should I look for down there?||1",
+    "accept|Quest: The Third Seal|150 g|1",
+    "bye|Farewell||1"
+   ],
+   "quest_ready": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1
+   },
+   "turnin": true,
+   "gold": 15,
+   "quest_done": {
+    "state": "done",
+    "progress": 1,
+    "count": 1
+   },
+   "next_offered": true,
+   "lines_after": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: The Mistward Hall|60 g|1",
+    "bye|Farewell||1"
+   ],
+   "captain_later": [],
+   "captain_wild_offered": [
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

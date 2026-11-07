@@ -99,6 +99,9 @@ struct FRDWildTown
 	/** its plan (the generator's TownPlan): 0 Brokenspire's (the gate, the square, a castle at the far wall), 1 a holy city
 	 *  (Vel Morrath, the user's of 2026-11-06: the cathedral at its middle over the catacombs) */
 	UPROPERTY(BlueprintReadOnly) int32 Plan = 0;
+	/** the region it stands at the edge of, when the spec names one (Ashenreach's "burned plain", 2026-11-07): that biome over
+	 *  its cell, the region's middle 5 km north of the town, and over the cell north of it; empty: the region by its kind */
+	UPROPERTY(BlueprintReadOnly) FString Biome;
 };
 
 /** a point of interest: its kind, place, name; its id is its cell's and kind's */
@@ -118,6 +121,9 @@ struct FRDWildPlace
 	UPROPERTY(BlueprintReadOnly) int32 Town = -1;
 	/** its yaw (degrees): the props face the way to her approach */
 	UPROPERTY(BlueprintReadOnly) float Yaw = 0.f;
+	/** a quest's place (the captain's of Brokenspire, 2026-11-07): "wolves" (the den on the mill road), "patrol" (the old
+	 *  watchtower); empty for the others */
+	UPROPERTY(BlueprintReadOnly) FString Quest;
 };
 
 /** the shapes of ground a biome can have */
@@ -213,6 +219,12 @@ public:
 	/** a town's place id is TownIdBase + its index: far above any other place's ((cell x << 14) | (cell y << 4) | k, under
 	 *  2^24; the 1000000 it was first collided with the places of the northern cells, x 62 and on) */
 	static constexpr int32 TownIdBase = 1 << 30;
+	/** the quests' places (Brokenspire's captain: the wolves' den, the old watchtower): QuestIdBase + their index, between
+	 *  the places' ids (under 2^24) and the towns' */
+	static constexpr int32 QuestIdBase = 1 << 29;
+	TArray<FRDWildPlace> QuestPlaces;
+	/** a quest goal's place ("wild:wolves" -> the den), or null */
+	const FRDWildPlace* QuestPlaceFor(const FString& Goal) const;
 
 	// ---- the noise (public for the map and the chunks)
 	static float Perlin(double X, double Y, uint32 S);
@@ -230,6 +242,7 @@ private:
 	void MakeRivers();
 	void MakeLakes();
 	void MakeRoads();
+	void MakeQuestPlaces();
 	void HashSegments();
 	float Feature(double X, double Y, float H, FRDWSample* S) const;   // rivers, lakes, ponds, roads, towns on H
 	int32 Biome(const TCHAR* Name) const { const int32* I = BiomeIndex.Find(Name); return I ? *I : 0; }
@@ -291,5 +304,7 @@ public:
 	UPROPERTY(BlueprintReadOnly) int32 Triangles = 0;
 	UPROPERTY(BlueprintReadOnly) bool bNear = false;
 	UPROPERTY(BlueprintReadOnly) bool bCollisionOn = false;
+	/** still being made over frames (the generator's WildBuilding): its near plants wait */
+	UPROPERTY(BlueprintReadOnly) bool bMaking = false;
 	virtual void Destroyed() override;
 };

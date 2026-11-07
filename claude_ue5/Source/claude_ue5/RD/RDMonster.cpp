@@ -55,6 +55,8 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 	M->SetSkeletalMesh(Def.Mesh);
 	M->SetRelativeLocationAndRotation(FVector(0, 0, Def.MeshZ), FRotator(0, Def.MeshYaw, 0));
 	M->SetRelativeScale3D(FVector(Def.Scale));
+	// (a kind's own look over its mesh's (2026-11-07: The War Engine's iron golem, the Stone Golem in iron))
+	if (Def.Material) for (int32 Sl = 0; Sl < M->GetNumMaterials(); ++Sl) M->SetMaterial(Sl, Def.Material);
 	IdleAnim = Def.Idle; WalkAnim = Def.Walk;
 	WalkSpeed = Def.WalkSpeed; ClipSpeed = FMath::Max(Def.WalkClipSpeed, 10.f);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;

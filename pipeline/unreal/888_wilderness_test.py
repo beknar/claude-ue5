@@ -7,6 +7,10 @@ Steps:
           biome regions; rivers, lakes, roads between the towns; pictures of the continent and of 40 km round Brokenspire
   look    each template visited (her put on the nearest of its regions, the chunks round her made): a picture of her view,
           what the world has under her (its biome, height, snow, sand, water), the plants and rocks of the chunks there
+  build7  (2026-11-07) the chunks made in steps against in one go, the same flight twice: the game thread's making a frame,
+          the frames' times, every chunk the same both ways
+  quests  (2026-11-07) the captain's two wilderness quests: their places, taken, played (the den's pack, the patrol's
+          remains), turned in
 Writes SourceArt/wilderness/test_<tag>.json and logs "WILDTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -227,7 +231,8 @@ def step_look():
 def chunks():
     out = []
     for l in G["gen"].get_wild_chunk_lines():
-        p = str(l).split("|"); out.append({"x": int(p[0]), "y": int(p[1]), "inst": int(p[2]), "tris": int(p[3]), "near": int(p[4]), "col": int(p[5]), "monsters": int(p[6]), "props": int(p[7]), "near_hism": int(p[8])})
+        p = str(l).split("|"); out.append({"x": int(p[0]), "y": int(p[1]), "inst": int(p[2]), "tris": int(p[3]), "near": int(p[4]), "col": int(p[5]), "monsters": int(p[6]), "props": int(p[7]), "near_hism": int(p[8]),
+                                           "trees": int(p[9]) if len(p) > 9 else 0, "making": int(p[10]) if len(p) > 10 else 0})
     return out
 def gc_mem():
     unreal.SystemLibrary.collect_garbage()
@@ -812,8 +817,220 @@ def step_memprobe():
     quiet(False)
     step_result("memprobe", True, **res)
 
+# ------------------------------------------------------------------------------------------------ the chunks made in steps
+def build_stats(reset=False):
+    p = str(G["gen"].get_wild_build_stats(reset)).split("|")
+    parts = {}
+    for kv in (p[5].split(",") if len(p) > 5 and p[5] else []):
+        k, _, v = kv.partition("="); parts[k] = float(v)
+    return {"streamed": int(p[0]), "step_ms_max": float(p[1]), "frame_build_ms_max": float(p[2]), "chunk_ms_max": float(p[3]), "building": int(p[4]), "parts": parts,
+            "trims": int(p[7]) if len(p) > 7 else None}
+def step_build7():
+    """(2026-11-07, TODO's "a chunk's making stutters": one chunk made in a frame took 45 to 72 ms.) The same flight over new
+    ground twice from the same start, the chunks made in one go each (the old way) and in steps: what making took of each
+    frame on the game thread, the longest step and part, the frames' own times (the test's tick), and every chunk made the
+    same both ways (instances, triangles, trees, props, its grass round her)"""
+    g = G["gen"]; res = {"modes": {}}; quiet(True)
+    yield from wait_ready(90)
+    sx, sy = 3200.0, -9000.0
+    res["budget_ms"] = g.get_editor_property("wild_build_budget_ms")
+    made = {}
+    for mode in (False, True):
+        name = "steps" if mode else "whole"
+        g.set_editor_property("wild_build_steps", mode)
+        g.wild_drop_all(); g.wild_put_her(sx, sy); yield from wait_chunks(40, 56); yield from rwait(1.5)
+        build_stats(True)
+        fly(True); G["rec"] = []
+        for k in range(97):      # (2.4 km north-east at 100 m/s: 25 m every 0.25 s)
+            hover_at(sx + k * 10.0, sy + k * 23.0); yield from rwait(0.25)
+        t0 = time.time()
+        while time.time() - t0 < 30 and state()["in_flight"] > 0: yield
+        rec = G.pop("rec"); yield from rwait(0.5)
+        dts = sorted(d * 1000.0 for d, _ in rec)
+        # (each long frame against what the counters say happened between the tick before and this one: a chunk finished, a
+        # step of making, chunks dropped, the memory's collection asked or trimmed)
+        rows = []
+        for d, s in rec:
+            p = s.split("|")
+            th = tuple(float(x) for x in p[10:14]) if len(p) >= 14 else (0.0, 0.0, 0.0, 0.0)
+            rows.append((d * 1000.0, int(p[0]), int(p[6]), int(p[7]), int(p[8]), int(p[9])) + th)
+        long_ = []
+        for i in range(1, len(rows)):
+            if rows[i][0] <= 50.0: continue
+            a, b = rows[i - 1], rows[i]
+            why = [w for w, k in (("chunk done", 1), ("making", 2), ("trim", 3), ("dropped", 4)) if b[k] != a[k]]
+            if b[5] != a[5]: why.append(f"trim stage {a[5]}->{b[5]}")
+            long_.append({"ms": round(b[0], 1), "why": why or ["nothing of the chunks"]})
+        st = build_stats(); cs = chunks(); fly(False)
+        st["long_frames"] = long_[:30]
+        st["long_without_making"] = sum(1 for x in long_ if "making" not in x["why"])
+        # (s2: most long frames came with no chunk work at all (the editor's own, the new ground drawn); what making costs a
+        # frame is the frames with making against those without. A frame's work shows in the tick after it or the one after
+        # that (the test's tick is Slate's, the frame's drawing comes after it): both lags)
+        # (and each thread's time in those frames, stat unit's: the game thread, the render thread, the RHI, the GPU)
+        def mean(v): return round(sum(v) / len(v), 1) if v else None
+        for lag in (0, 1):
+            mk, no = [], []
+            for i in range(1 + lag, len(rows)):
+                (mk if rows[i - lag][2] != rows[i - lag - 1][2] else no).append(rows[i])
+            if mk and no:
+                a = sorted(r[0] for r in mk); b = sorted(r[0] for r in no)
+                st[f"lag{lag}"] = {"making_frames": len(mk), "mean_ms": mean(a), "others_mean_ms": mean(b), "excess_ms": round(mean(a) - mean(b), 1),
+                                   "p90_ms": round(a[int(len(a) * 0.9)], 1), "others_p90_ms": round(b[int(len(b) * 0.9)], 1),
+                                   "threads_making": {k: mean([r[6 + j] for r in mk]) for j, k in enumerate(("game", "render", "rhi", "gpu"))},
+                                   "threads_others": {k: mean([r[6 + j] for r in no]) for j, k in enumerate(("game", "render", "rhi", "gpu"))}}
+        st["long_threads"] = [dict(zip(("ms", "game", "render", "rhi", "gpu"), (round(r[0], 1),) + tuple(round(x, 1) for x in r[6:10]))) for r in rows if r[0] > 50.0][:20]
+        st["excess_ms"] = max(st.get(f"lag{l}", {}).get("excess_ms", 0.0) for l in (0, 1))
+        made[name] = {f"{c['x']},{c['y']}": (c["inst"], c["tris"], c["trees"], c["props"], c["monsters"], c["near_hism"]) for c in cs}
+        st["frames"] = len(dts); st["frame_ms_p50"] = round(dts[len(dts) // 2], 1) if dts else None
+        st["frame_ms_p99"] = round(dts[min(len(dts) - 1, int(len(dts) * 0.99))], 1) if dts else None
+        st["frame_ms_max"] = round(dts[-1], 1) if dts else None
+        st["frames_over_50ms"] = sum(1 for d in dts if d > 50.0); st["frames_over_100ms"] = sum(1 for d in dts if d > 100.0)
+        st["chunks"] = len(cs); st["making_after"] = sum(1 for c in cs if c.get("making"))
+        res["modes"][name] = st
+    g.set_editor_property("wild_build_steps", True)
+    both = sorted(set(made["whole"]) & set(made["steps"]))
+    res["compared_chunks"] = len(both)
+    res["differ"] = [{"at": k, "whole": made["whole"][k], "steps": made["steps"][k]} for k in both if made["whole"][k] != made["steps"][k]][:8]
+    quiet(False)
+    W, S = res["modes"]["whole"], res["modes"]["steps"]
+    # (s1-s4: a streamed chunk's making measured 12 to 16 ms at most in one go, not the 45 to 72 of the look step's records,
+    # which were chunks she is put on (cooked at once). The frames with making were 12 to 16 ms longer than those without both
+    # ways: stat unit's threads (s4) put it in the drawing (the render thread 40-62 ms against 29-33, the GPU 33-59 against
+    # 28-31: the new ground drawn), not in the game thread's making. Judged on what the steps change, the game thread: the
+    # longest step and the most making in a frame against a whole chunk's; the frames' and threads' times are recorded)
+    ok = (W["streamed"] >= 40 and S["streamed"] >= 40 and res["compared_chunks"] >= 40 and not res["differ"] and S["making_after"] == 0
+          and S["step_ms_max"] <= 0.6 * W["chunk_ms_max"] and S["frame_build_ms_max"] <= 0.75 * W["chunk_ms_max"])
+    step_result("build7", ok, **res)
+
+
+# ------------------------------------------------------------------------------------------------ the captain's quests
+def wq():
+    out = {}
+    for l in G["gen"].get_wild_quest_lines():
+        p = str(l).split("|")
+        out[p[0]] = {"id": int(p[1]), "name": p[2], "x": float(p[3]), "y": float(p[4]), "kind": p[5], "n": int(p[6]), "killed": int(p[7]), "progress": int(p[8]),
+                     "rx": float(p[9]), "ry": float(p[10]), "yaw": float(p[11]), "shown": int(p[12])}
+    return out
+def quest_of(qid):
+    for l in G["gen"].get_quest_lines():
+        p = str(l).split("|")
+        if p[0] == qid: return {"state": p[3], "progress": int(p[4]), "count": int(p[5]), "hint": p[6]}
+    return None
+def panel(): return [str(l).split("|") for l in G["gen"].get_town_panel_lines()]
+def line_of(act, has=""):
+    for i, p in enumerate(panel()):
+        if p[0] == act and has in p[1]: return i
+    return -1
+def at_captain():
+    """her before Brokenspire's captain, his panel opened by F (884's talk_to)"""
+    g = G["gen"]
+    for f in folk():
+        if f["role"] != "Captain": continue
+        at = g.get_townsfolk(f["i"]).get_actor_location()
+        for dx, dy, yaw in ((110, 0, 180.0), (-110, 0, 0.0), (0, 110, -90.0), (0, -110, 90.0)):
+            put(V(at.x + dx, at.y + dy, 0), yaw=yaw)
+            if f["title"] in str(g.describe_nearest(G["pawn"].get_actor_location())): break
+        g.interact_nearest(G["pawn"].get_actor_location())
+        return str(g.get_town_panel()) == "talk"
+    return False
+def road_within(x, y, max_m=150.0):
+    """metres from (x, y) to the nearest road (a sample with road > 0.3), rings of 5 m"""
+    for r in range(0, int(max_m) + 1, 5):
+        for k in range(24 if r else 1):
+            a = k * math.pi / 12.0
+            if sample(x + math.cos(a) * r, y + math.sin(a) * r)["road"] > 0.3: return r
+    return None
+def monsters_near(x, y, r_m):
+    return [m for m in G["gen"].get_monsters() if m and not m.is_dead() and dist2(m.get_actor_location(), V(x * 100.0, y * 100.0, 0)) < r_m * 100.0]
+def to_brokenspire():
+    g = G["gen"]
+    g.wild_fast_travel(TOWN_ID); yield from rwait(2.0)
+    t0 = time.time()
+    while time.time() - t0 < 40 and not any(f["role"] == "Captain" for f in folk()): yield
+    yield from rwait(1.0)
+def step_quests():
+    """(2026-11-07) the captain's "Wolves on the Mill Road" and "The Lost Patrol": their places (beside the roads north and to Vel
+    Morrath, on dry ground, past the town's level ground), taken at the captain (on the map, named, not found: no travel
+    there), the den's four killed (three, the chunks made again: the three stay dead, the fourth killed: done), the patrol
+    found at the watchtower's door (not from 10 m), both turned in for their gold; pictures of the den and the tower"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    Q = wq(); res["places"] = Q
+    den, tw = Q.get("wild:wolves"), Q.get("wild:patrol")
+    assert den and tw, "no quest places"
+    for k, p in (("den", den), ("tower", tw)):
+        s = sample(p["x"], p["y"])
+        res[k] = {"from_brokenspire_km": round(math.hypot(p["x"], p["y"]) / 1000.0, 2), "water": s["water"], "h": round(s["h"], 1), "biome": s["biome"], "road_m": road_within(p["x"], p["y"])}
+    # taken at the captain
+    yield from to_brokenspire()
+    res["captain_panel"] = at_captain(); yield from rwait(0.3)
+    res["offered"] = [p[1] for p in panel() if p[0] == "accept"]
+    res["accept_wolves"] = g.activate_town_entry(line_of("accept", "Mill Road")); yield from rwait(0.2)
+    res["accept_patrol"] = g.activate_town_entry(line_of("accept", "Lost Patrol")); yield from rwait(0.2)
+    g.close_town_panel(); yield from rwait(0.3)
+    res["taken"] = {q: quest_of(q) for q in ("captain_wolves", "captain_patrol")}
+    Q = wq(); res["on_map"] = {k: v["shown"] for k, v in Q.items()}
+    res["travel_refused"] = not g.wild_fast_travel(den["id"]); res["refusal"] = map_state()["refusal"]
+    # the den: its pack of four
+    fw = (math.cos(math.radians(den["yaw"])), math.sin(math.radians(den["yaw"])))
+    g.wild_put_her(den["x"] + fw[0] * 30.0, den["y"] + fw[1] * 30.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=den["yaw"] + 180.0)); yield from rwait(0.6)
+    shot("quest_den", "1280x720"); yield from rwait(1.2)
+    pack = monsters_near(den["x"], den["y"], 15.0)
+    res["den_pack"] = {"alive": len(pack), "kinds": sorted(set(str(m.get_editor_property("monster_name")) for m in pack))}
+    for m in pack[:3]: m.apply_damage(1e7, G["pawn"])
+    yield from rwait(1.0)
+    res["after_three"] = {"progress": wq()["wild:wolves"]["progress"], "killed": wq()["wild:wolves"]["killed"], "quest": quest_of("captain_wolves")}
+    g.wild_drop_all(); g.wild_put_her(den["x"] + fw[0] * 30.0, den["y"] + fw[1] * 30.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    left = monsters_near(den["x"], den["y"], 15.0); res["again_alive"] = len(left)
+    for m in left: m.apply_damage(1e7, G["pawn"])
+    yield from rwait(1.0)
+    res["after_all"] = {"progress": wq()["wild:wolves"]["progress"], "killed": wq()["wild:wolves"]["killed"], "quest": quest_of("captain_wolves")}
+    # the watchtower: the remains before its doorway
+    fw = (math.cos(math.radians(tw["yaw"])), math.sin(math.radians(tw["yaw"])))
+    g.wild_put_her(tw["rx"] + fw[0] * 30.0, tw["ry"] + fw[1] * 30.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=tw["yaw"] + 180.0)); yield from rwait(0.6)
+    shot("quest_tower", "1280x720"); yield from rwait(1.2)
+    res["tower_guards"] = len(monsters_near(tw["x"], tw["y"], 15.0))
+    cm = g.get_editor_property("wild_chunk_m")
+    mine = [c for c in chunks() if c["x"] == math.floor(tw["x"] / cm) and c["y"] == math.floor(tw["y"] / cm)]
+    res["tower_props"] = mine[0]["props"] if mine else -1
+    for m in monsters_near(tw["x"], tw["y"], 15.0): m.apply_damage(1e7, G["pawn"])
+    yield from rwait(0.5)
+    def stand(d):
+        z = sample(tw["rx"] + fw[0] * d, tw["ry"] + fw[1] * d)["z"]
+        G["pawn"].set_actor_location(V((tw["rx"] + fw[0] * d) * 100.0, (tw["ry"] + fw[1] * d) * 100.0, z + 110.0), False, True)
+    stand(10.0); yield from rwait(1.0)
+    res["patrol_at_10m"] = wq()["wild:patrol"]["progress"]
+    stand(2.5); yield from rwait(1.0)
+    res["patrol_at_2_5m"] = wq()["wild:patrol"]["progress"]; res["patrol_quest"] = quest_of("captain_patrol")
+    # turned in
+    yield from to_brokenspire()
+    g0 = g.get_gold()
+    res["captain_again"] = at_captain(); yield from rwait(0.3)
+    res["turnin_lines"] = [p[1] for p in panel() if p[0] == "turnin"]
+    for _ in range(2):
+        i = line_of("turnin")
+        if i >= 0: g.activate_town_entry(i); yield from rwait(0.2)
+    g.close_town_panel(); yield from rwait(0.3)
+    res["gold"] = g.get_gold() - g0
+    res["done"] = {q: quest_of(q)["state"] for q in ("captain_wolves", "captain_patrol")}
+    res["on_map_after"] = {k: v["shown"] for k, v in wq().items()}
+    quiet(False)
+    ok = (1.7 <= res["den"]["from_brokenspire_km"] <= 4.6 and res["den"]["water"] == 0 and res["den"]["road_m"] is not None and 30 <= res["den"]["road_m"] <= 90
+          and 2.9 <= res["tower"]["from_brokenspire_km"] <= 6.2 and res["tower"]["water"] == 0
+          and res["captain_panel"] and res["accept_wolves"] and res["accept_patrol"] and all(v and v["state"] == "taken" for v in res["taken"].values())
+          and all(v == 1 for v in res["on_map"].values()) and res["travel_refused"]
+          and res["den_pack"]["alive"] == 4 and res["after_three"]["progress"] == 0 and res["after_three"]["killed"] == 3
+          and res["again_alive"] == 1 and res["after_all"]["progress"] == 1 and res["after_all"]["quest"]["state"] == "ready"
+          and res["tower_guards"] == 3 and res["tower_props"] > 10 and res["patrol_at_10m"] == 0 and res["patrol_at_2_5m"] == 1 and res["patrol_quest"]["state"] == "ready"
+          and res["gold"] == 320 and all(v == "done" for v in res["done"].values()) and all(v == 0 for v in res["on_map_after"].values()))
+    step_result("quests", ok, **res)
+
+
 STEPS = {"world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
-         "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7}
+         "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:
@@ -844,6 +1061,7 @@ def tick(dt):
         if UES.get_game_world() is None:
             if G.get("travel_until", 0) > time.time(): return
             finish("PIE ended"); return
+        if "rec" in G: G["rec"].append((dt, str(G["gen"].get_wild_build_stats(False))))
         next(G["gen_"])
     except StopIteration: finish()
     except Exception as e:

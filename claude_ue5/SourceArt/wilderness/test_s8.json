@@ -1,0 +1,196 @@
+{
+ "tag": "s8",
+ "plan": [
+  "places",
+  "travel",
+  "save"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "places",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "camp",
+     "name": "Wolf Camp",
+     "found": true,
+     "props": 7,
+     "monsters": 0
+    },
+    {
+     "kind": "ruins",
+     "name": "The Old Watchtower",
+     "found": true,
+     "props": 18,
+     "monsters": 3
+    },
+    {
+     "kind": "ritual",
+     "name": "Oak Circle",
+     "found": true,
+     "props": 9,
+     "monsters": 0
+    },
+    {
+     "kind": "house",
+     "name": "Wynne's Farmstead",
+     "found": true,
+     "props": 4,
+     "monsters": 0
+    },
+    {
+     "kind": "village",
+     "name": "Briarmere",
+     "found": true,
+     "props": 12,
+     "monsters": 0
+    },
+    {
+     "kind": "cave",
+     "name": "Elm Cave",
+     "found": true,
+     "props": 5,
+     "monsters": 0
+    },
+    {
+     "kind": "lair",
+     "name": "The Mill Road Den",
+     "found": true,
+     "props": 19,
+     "monsters": 4,
+     "monster_m": [
+      19.8,
+      10.0
+     ],
+     "aggro": true
+    },
+    {
+     "kind": "spawn",
+     "name": "Oak Hollow",
+     "found": true,
+     "props": 7,
+     "monsters": 3,
+     "monster_m": [
+      14.7,
+      5.7
+     ],
+     "aggro": true
+    }
+   ],
+   "census": {
+    "camp": 9,
+    "cave": 10,
+    "house": 11,
+    "lair": 14,
+    "ritual": 8,
+    "ruins": 14,
+    "spawn": 6,
+    "village": 10
+   },
+   "killed_stays": {
+    "place": "Oak Hollow",
+    "before": 3,
+    "after": 2
+   }
+  },
+  {
+   "step": "travel",
+   "ok": true,
+   "hover": 344611.0,
+   "hover_name": "Oak Hollow",
+   "after": {
+    "cx": 5329.0,
+    "cy": -12156.0,
+    "mpp": 20.0,
+    "level": 6.0,
+    "tiles": 168.0,
+    "asked": 0.0,
+    "tile_ms": 216.7,
+    "hover": 344611.0,
+    "hover_name": "Oak Hollow",
+    "made": 168.0,
+    "refusal": "",
+    "last_travel": "Oak Hollow"
+   },
+   "from_place_m": 28.4,
+   "town_travel": true,
+   "town_after": {
+    "idx": 0.0,
+    "name": "Brokenspire",
+    "loading": 0.0,
+    "section": 1.0,
+    "dist_m": 199.0,
+    "build_s": 2.0,
+    "loaded": 1.0,
+    "dropped": 2.0,
+    "in_walls": 1.0,
+    "ox": 0.0,
+    "oy": 0.0,
+    "home": 1.0
+   },
+   "combat": true,
+   "refused": true,
+   "refusal": "You cannot travel while enemies are near"
+  },
+  {
+   "step": "save",
+   "ok": true,
+   "gold_before": 2,
+   "found_before": 9,
+   "revealed_before": 1247,
+   "saved": true,
+   "info": "2026-11-07 09:39|brokenspire|the wilds: farms, 3 km from Brokenspire|Summoner|test|",
+   "menu": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "save_page": [
+    "text|Name|The wilds day 1",
+    "button|Save",
+    "button|Back"
+   ],
+   "typed": "Test Save 7",
+   "slots": [
+    "save_test_save_7_788cca|Test Save 7|2026-11-07 09:39|the wilds: farms, 3 km from Brokenspire|Summoner",
+    "save|Saved game|2026-11-07 09:39|the wilds: farms, 3 km from Brokenspire|Summoner",
+    "autosave|Autosave|2026-11-07 09:39|Brokenspire|Summoner"
+   ],
+   "load_page": [
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|Saved game: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|Autosave: Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|Back"
+   ],
+   "named_ok": true,
+   "load": true,
+   "back_m": 0.0,
+   "gold_after": 2,
+   "found_after": 9,
+   "revealed_after": 1247,
+   "save_state": {
+    "written": 1,
+    "slot": "autosave",
+    "why": "map",
+    "arrived": 1
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_s8_place_camp.png",
+  "wd_s8_place_ruins.png",
+  "wd_s8_place_ritual.png",
+  "wd_s8_place_house.png",
+  "wd_s8_place_village.png",
+  "wd_s8_place_cave.png",
+  "wd_s8_place_lair.png",
+  "wd_s8_place_spawn.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
