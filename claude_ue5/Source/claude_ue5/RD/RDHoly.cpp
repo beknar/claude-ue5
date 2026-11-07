@@ -219,20 +219,28 @@ int32 ARDDungeonGenerator::DungeonTierReached(const FString& Key) const
 bool ARDDungeonGenerator::EnterCatacombs()
 {
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
-	if (!bTown || TownPlan != 1 || CatacombsLevel.IsEmpty() || bTownTraveling || !S) return false;
+	if (!bTown || TownPlan != 1 || !S) return false;
+	// (where she comes back: 7 m before the cathedral's door, facing out over the plaza; the plan comes from the town's seed
+	// alone, so the place is the same when the town is built again)
+	FVector At = FVector::ZeroVector; float Yaw = 0.f;
+	if (S->TownBlds.IsValidIndex(S->CastleBld))
+	{
+		const ARDSection::FTownBld& C = S->TownBlds[S->CastleBld];
+		const FVector Out(RDHolyDir4[C.DoorSide].X, RDHolyDir4[C.DoorSide].Y, 0.f);
+		At = S->LocalToWorld(C.DoorTile) + Out * 700.f + FVector(0, 0, 100.f);
+		Yaw = Out.Rotation().Yaw;
+	}
+	return DescendToCatacombs(At, Yaw);
+}
+
+bool ARDDungeonGenerator::DescendToCatacombs(const FVector& At, float Yaw)
+{
+	if (!bTown || CatacombsLevel.IsEmpty() || bTownTraveling) return false;
 	LastTravel = TEXT("catacombs");
 	if (bTravelDryRun) return true;
 	if (URDGameInstance* GI = URDGameInstance::Of(this))
 	{
-		// (where she comes back: 7 m before the cathedral's door, facing out over the plaza; the plan comes from the town's seed
-		// alone, so the place is the same when the town is built again)
-		if (S->TownBlds.IsValidIndex(S->CastleBld))
-		{
-			const ARDSection::FTownBld& C = S->TownBlds[S->CastleBld];
-			const FVector Out(RDHolyDir4[C.DoorSide].X, RDHolyDir4[C.DoorSide].Y, 0.f);
-			GI->ReturnAt = S->LocalToWorld(C.DoorTile) + Out * 700.f + FVector(0, 0, 100.f);
-			GI->ReturnYaw = Out.Rotation().Yaw;
-		}
+		if (!At.IsZero()) { GI->ReturnAt = At; GI->ReturnYaw = Yaw; }
 		GI->ReturnTown = TownName;
 	}
 	TravelToDungeon(CatacombsLevel, TEXT("catacombs"));

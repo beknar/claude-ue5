@@ -396,6 +396,23 @@ bool ARDDungeonGenerator::WildFastTravel(int32 PlaceId)
 	return true;
 }
 
+bool ARDDungeonGenerator::WildTravelToTown(const FString& Key)
+{
+	// (the packaged game's test of a wilderness town: found, then the map's own fast travel: loaded, she just inside its gate)
+	WildTravelRefusal.Reset();
+	if (!IsWildReady()) { WildTravelRefusal = TEXT("not ready"); return false; }
+	const FString Want = Key.Replace(TEXT(" "), TEXT("")).ToLower();
+	for (int32 Ti = 0; Ti < Wild->Towns.Num(); ++Ti)
+		if (Wild->Towns[Ti].Name.Replace(TEXT(" "), TEXT("")).ToLower() == Want)
+		{
+			const int32 Id = FRDWildWorld::TownIdBase + Ti;
+			WildFound.Add(Id);
+			return WildFastTravel(Id);
+		}
+	WildTravelRefusal = FString::Printf(TEXT("no town named %s"), *Key);
+	return false;
+}
+
 FString ARDDungeonGenerator::GetWildMapState() const
 {
 	return FString::Printf(TEXT("%.0f|%.0f|%.2f|%d|%d|%d|%.1f|%d|%s|%d|%s|%s"), WildMapCenter.X, WildMapCenter.Y, WildMapMpp, WildMapLevelFor(WildMapMpp), WildMapTex.Num(), WildMapPending.Num(),

@@ -92,16 +92,18 @@ bool ARDDungeonGenerator::ApplyDisplaySettings()
 	return true;
 }
 
+void ARDDungeonGenerator::WriteTestMark(const FString& Kind, const FString& Where) const
+{
+	FString Mark;
+	if (FParse::Value(FCommandLine::Get(), TEXT("RDMarkFile="), Mark))
+		FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s|%s|%s"), *Kind, *Where, *CurrentHero.ToString()), *Mark);
+}
+
 void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
 {
 	// (-RDMarkFile=<path>: the castle writes where it is and as whom, so a test of a packaged game knows it got here: a
 	// Shipping game writes no log, and a run that stayed on the menu had passed as the castle's)
-	FString Mark;
-	if (FParse::Value(FCommandLine::Get(), TEXT("RDMarkFile="), Mark))
-	{
-		const FString Body = FString::Printf(TEXT("castle|%s|%s"), *GetWorld()->GetMapName(), *CurrentHero.ToString());
-		FFileHelper::SaveStringToFile(Body, *Mark);
-	}
+	WriteTestMark(TEXT("castle"), GetWorld()->GetMapName());
 	FString S;
 	if (!FParse::Value(FCommandLine::Get(), TEXT("RDApplyDisplay="), S)) return;
 	TArray<FString> P; S.ParseIntoArray(P, TEXT("x"));

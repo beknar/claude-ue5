@@ -700,6 +700,8 @@ public:
 	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply); and -RDMarkFile=<path>:
 	 *  "castle|<map>|<hero>" written there (a packaged game's test knows it reached the castle) */
 	void ApplyDisplayFromCommandLine();
+	/** -RDMarkFile=<path>: where a packaged game's test reads where the game got ("castle|<map>|<hero>", "town|<name>|<hero>") */
+	void WriteTestMark(const FString& Kind, const FString& Where) const;
 
 	// ---- mistward_castle, the list of 2026-10-31b (docs/improvements5.txt; RDMistward5.cpp, pipeline/unreal/879): each a
 	// switch, off on the other levels
@@ -994,6 +996,9 @@ public:
 	void TravelToDungeon(const FString& Level, const FString& Why);
 	/** the cathedral's stair down: walked into, the catacombs open (a test's dry run only says so) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Brokenspire") bool EnterCatacombs();
+	/** the way down into the catacombs, she coming back at ReturnAt facing ReturnYaw (the cathedral's door; -RDTownGo=catacombs:
+	 *  where she stands); a test's dry run only says so */
+	bool DescendToCatacombs(const FVector& ReturnAt, float ReturnYaw);
 	/** the town's people and its quests (pipeline/unreal/882 from SourceArt/brokenspire/town.json) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TArray<FRDTownsfolkDef> Townsfolk;
 	// ---- the town's life (the third list, 2026-11-02; RDTownLife.cpp; 886 fills these)
@@ -1901,6 +1906,9 @@ public:
 	void TickWildMapInput(APlayerController* PC, float Dt);
 	/** to a place she has found (its id), not while a monster is after her (the reason in WildTravelRefusal) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool WildFastTravel(int32 PlaceId);
+	/** -RDTownGo=town:<name>: the wilderness town of that name (case and spaces ignored) found and travelled to as the map's
+	 *  fast travel does (the reason in WildTravelRefusal) */
+	bool WildTravelToTown(const FString& Key);
 	/** "middle x|middle y|m a pixel|level|tiles|tiles asked|tile ms|hovered id|hovered name|tiles made|refusal|last travel" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildMapState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void SetWildMapView(float Xm, float Ym, float Mpp);
