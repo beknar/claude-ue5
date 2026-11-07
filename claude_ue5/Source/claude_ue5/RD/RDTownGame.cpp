@@ -25,6 +25,7 @@
 #include "Engine/World.h"
 #include "InputCoreTypes.h"
 #include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 
@@ -791,6 +792,42 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			GI->bTownGoRead = true;
 			FString Go;
 			if (FParse::Value(FCommandLine::Get(), TEXT("RDTownGo="), Go) && Go == TEXT("castle")) { EnterCastle(); return; }
+			// (-RDTownGo=catacombs: down into Vel Morrath's catacombs from the town she starts in (the packaged game's test of the
+			// catacombs: the city is a long walk away); she comes back to this town's square)
+			if (Go == TEXT("catacombs") && !CatacombsLevel.IsEmpty() && !bTownTraveling)
+			{
+				GI->ReturnAt = P->GetActorLocation(); GI->ReturnYaw = P->GetActorRotation().Yaw; GI->ReturnTown = TownName;
+				TravelToDungeon(CatacombsLevel, TEXT("catacombs")); return;
+			}
+			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
+			// city; her mark is written once it is built round her)
+			if (Go.StartsWith(TEXT("town:"))) GI->TownGoTown = Go.Mid(5).Replace(TEXT(" "), TEXT("")).ToLower();
+		}
+	if (bTown && bTownPlaced)
+		if (URDGameInstance* GI = URDGameInstance::Of(this))
+		{
+			if (!GI->TownGoTown.IsEmpty() && IsWildReady())
+			{
+				for (const FString& L : GetWildTownLines())
+				{
+					TArray<FString> F; L.ParseIntoArray(F, TEXT("|"), false);
+					if (F.Num() > 3 && F[0].Replace(TEXT(" "), TEXT("")).ToLower() == GI->TownGoTown && WildPutHer(FCString::Atof(*F[2]), FCString::Atof(*F[3])))
+					{
+						UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN -RDTownGo: out to %s"), *F[0]);
+						GI->TownGoMark = GI->TownGoTown; break;
+					}
+				}
+				GI->TownGoTown.Reset();
+			}
+			ARDSection* Here = GetSection(FIntPoint::ZeroValue);
+			if (!GI->TownGoMark.IsEmpty() && TownName.Replace(TEXT(" "), TEXT("")).ToLower() == GI->TownGoMark && Here && !Here->IsBuilding() && !bTownLoading)
+			{
+				FString Mark;
+				if (FParse::Value(FCommandLine::Get(), TEXT("RDMarkFile="), Mark))
+					FFileHelper::SaveStringToFile(FString::Printf(TEXT("town|%s|%s"), *TownName, *CurrentHero.ToString()), *Mark);
+				UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN -RDTownGo: %s built round her"), *TownName);
+				GI->TownGoMark.Reset();
+			}
 		}
 	// the Mistgate: walked into, Mistward Castle opens
 	if (bTown && bTownHome && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f

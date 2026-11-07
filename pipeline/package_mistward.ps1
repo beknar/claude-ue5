@@ -3,8 +3,8 @@
 #   - builds the game target (Shipping) against the installed engine, cooks the hero menu (mistward_castle_select) and the
 #     castle (mistward_castle) and what they refer to, stages it into .pak / IoStore containers and archives it to
 #     <repo>\builds\mistward_castle\Windows
-#   - both maps are named to the cook: the menu opens the castle, and the castle's Escape menu the menu, by name (a string,
-#     which the cooker does not follow)
+#   - every map is named to the cook: the menu opens the town, the town the castle and (from Vel Morrath's cathedral) the
+#     catacombs (vel_morrath), and the castle's Escape menu the menu, all by name (a string, which the cooker does not follow)
 #   - the Visual C++ and Universal C runtime DLLs are copied next to the executable (app-local prerequisites) instead of
 #     the redistributable installer, so nothing has to be installed on the PC that plays it
 #   - for the cook and the stage only, the project's default map is the hero menu (a packaged game starts on its default
@@ -23,7 +23,7 @@ $KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/Kitchen
 $repo = Split-Path -Parent $PSScriptRoot
 $ue = "E:\Program Files\Epic Games\UE_5.8"
 $proj = "$repo\claude_ue5\claude_ue5.uproject"
-$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle"
+$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath"
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" }
 # (a relative -Out is the caller's folder: handed on as it is, UnrealAutomationTool archived it under the engine's own folder)
 elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
@@ -99,9 +99,13 @@ public static class RDWin {
     #  setting asked as the Escape menu's Apply sets it (-RDApplyDisplay: 1600 x 900, windowed), its window measured)
     # (into the castle through the menu, -RDStartHero: a Shipping game drops a map named on its command line (the engine's
     #  GameInstance: "In shipping don't allow a map override"), and its "castle" run had stayed on the menu since 2026-10-27)
-    # (Brokenspire, 2026-11-02: the menu opens the town; -RDTownGo=castle walks her on through the Mistgate into the castle)
+    # (Brokenspire, 2026-11-02: the menu opens the town; -RDTownGo=castle walks her on through the Mistgate into the castle;
+    #  -RDTownGo=catacombs (2026-11-06) takes her down into Vel Morrath's catacombs from the town, -RDTownGo=town:velmorrath
+    #  out to the holy city, its mark written once the city is built round her)
     $runs = @(@{ name = "menu"; args = @(); secs = 90 }, @{ name = "town"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark"); secs = 60; castle = $true; map = "brokenspire" },
               @{ name = "castle"; args = @("-RDStartHero=Warrior", "-RDTownGo=castle", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "mistward_castle" },
+              @{ name = "catacombs"; args = @("-RDStartHero=Warrior", "-RDTownGo=catacombs", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "vel_morrath" },
+              @{ name = "city"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:velmorrath", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Vel Morrath|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true })
     try {
     foreach ($run in $runs) {
@@ -129,14 +133,16 @@ public static class RDWin {
             #  unaware of it (the engine's default), Windows stretched a 1600 x 900 window to 3200 x 1800 on a 200 % screen)
             $dpi = [RDWin]::GetDpiForWindow($p.MainWindowHandle)
         }
-        if ($run.name -eq "castle" -or $run.name -eq "town") { "memory every 5 s (MB): $($mem -join ' ')" }
+        if ($run.name -ne "menu" -and -not $run.window) { "memory every 5 s (MB): $($mem -join ' ')" }
         foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
         Start-Sleep 2
         $after = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
         $ok = $alive -and $after -eq $before
         # (where the run got to: the castle's mark, "castle|<map>|<hero>")
         $where = if (Test-Path $mark) { (Get-Content $mark -Raw).Trim() } else { "no mark (not the castle)" }
-        if ($run.castle) { $ok = $ok -and $where -like "castle|$(if ($run.map) { $run.map } else { '*' })|Warrior*" }
+        # (the city's run: the town writes its mark once the wilderness town is built round her, "town|<name>|<hero>")
+        $pat = if ($run.want) { $run.want } else { "castle|$(if ($run.map) { $run.map } else { '*' })|Warrior*" }
+        if ($run.castle) { $ok = $ok -and $where -like $pat }
         if ($run.window) {
             # (the window's inside the size asked, its scaling the screen's (the game handles it; unaware it read 96 on a
             #  200 % screen), and this run's settings say so: Apply as the menu's)

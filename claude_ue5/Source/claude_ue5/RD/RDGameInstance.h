@@ -184,6 +184,9 @@ public:
 	FString FinalShowGo, FinalShowDone, FinalShowReady;
 	/** -RDTownGo has been read (once a game instance) */
 	bool bTownGoRead = false;
+	/** -RDTownGo=town:<name>: the wilderness town she is put in once the wilds are ready (its name lower case, no spaces), and
+	 *  the one whose building round her is still to be marked (-RDMarkFile) */
+	FString TownGoTown, TownGoMark;
 	/** the showcase tour: the castle's autoplay seconds when it comes through the Mistgate (0: none) */
 	float TourCastleSeconds = 0.f;
 	bool bTourRead = false;

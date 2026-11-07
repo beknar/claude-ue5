@@ -16,7 +16,7 @@ Built and compiled, but no test has run it yet:
 - [ ] **The teleport circle's journey to another town** (Brokenspire's circle to Vel Morrath's and back, and refused in a fight).
 - [ ] **Ashenreach and Graymourne visited:** built as she nears them, their people their own, the maps switching in their walls (only Vel Morrath has been visited in a test).
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
-- [ ] **The packaged game with the wilderness:** a Shipping build of `brokenspire` has not been made since the wilderness was added (worker threads, transient map textures and the save all behave differently packaged); then a walk out of the gate, a journey and a save and load in it, and its memory over a long walk.
+- [ ] **The packaged game in the wilderness:** the package of 2026-11-06 (`builds\vel_morrath`) runs the town, puts her out in Vel Morrath and builds the city round her; a walk out of the gate, a journey, a save and load, and its memory over a long walk have not been run in it (worker threads, transient map textures and the save all behave differently packaged).
 
 ## The list of 2026-11-04 ([docs/improvements7.txt](docs/improvements7.txt))
 
@@ -38,7 +38,7 @@ Built and tested (`884 holy`, `descend`; `868 catacombs -lv vel_morrath`; `888 w
 - [ ] **The plaza on the map:** its statues, fountain and shrines are not drawn; the cathedral and monastery borrow the temple's and chapel's pictures.
 - [ ] **The catacombs' own looks:** tier 1 is the dungeon's stone and tier 3 and 4 are the castle's themes; only tier 2 (the crypt stone) is new. Bone-lined ossuary walls, niches and sarcophagi of their own are still to come.
 - [ ] **The houses' stone:** in the morning light (08:00) the city reads blue-grey; it has not been pictured at noon.
-- [ ] **The packaged game:** not built with the city or the catacombs (`vel_morrath` must be named to the cook).
+- [ ] **The packaged game's city and catacombs played:** the package of 2026-11-06 goes down into the catacombs and out to the city and runs in each (no crash, no missing material in the Development package's log); the stair down from the cathedral, the deeper tiers and the way back have not been played in it.
 
 ## The final boss (Aurorim, 2026-11-03)
 
@@ -49,7 +49,7 @@ Built and tested (`868`'s `finalboss`); still to test or do:
 - [ ] **His fight against each hero:** the balance trials have not fought him (tier 5's boss in them is its strongest kind); a starting Warrior dies in three of his blows. Trial him with the tier-5 kits ([docs/hero-balance.md](docs/hero-balance.md)).
 - [ ] **A room with no wall free for the door:** the door goes against a wall of his room away from him; a room with none (never seen yet) leaves no door (the log says so). The castle's arch and its Escape menu still take her back.
 - [ ] **The map:** the door has no mark of its own (his mark is the boss's).
-- [ ] **The packaged game:** not built with him yet.
+- [ ] **Him in the packaged game:** the package of 2026-11-06 cooks him (his mesh, skeleton, material, texture and 9 clips are in the cook's list), but no run of it has reached tier 5 or met him.
 
 ## To do
 
