@@ -1,5 +1,5 @@
 {
- "tag": "h4",
+ "tag": "h5",
  "plan": [
   "holy"
  ],
@@ -13,14 +13,14 @@
     75.0
    ],
    "north_east": true,
-   "fps_brokenspire_square": 4.3,
+   "fps_brokenspire_square": 4.1,
    "state": [
     "3",
     "Vel Morrath",
     "0",
     "1",
     "0",
-    "5.7",
+    "6.3",
     "1",
     "1",
     "1",
@@ -193,17 +193,17 @@
    },
    "stair_from_cathedral_m": 40,
    "fps": {
-    "plaza": 11.5,
-    "nave": 28.1
+    "plaza": 10.9,
+    "nave": 11.2
    },
    "stair_travel": "catacombs"
   }
  ],
  "windows_hidden": "",
  "shots": [
-  "bs_h4_vm_cathedral_front.png",
-  "bs_h4_vm_plaza.png",
-  "bs_h4_vm_nave.png"
+  "bs_h5_vm_cathedral_front.png",
+  "bs_h5_vm_plaza.png",
+  "bs_h5_vm_nave.png"
  ],
  "error": null,
  "windows_shown_again": 0

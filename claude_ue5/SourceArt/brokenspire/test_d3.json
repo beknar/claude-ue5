@@ -1,5 +1,5 @@
 {
- "tag": "d2",
+ "tag": "d3",
  "plan": [
   "descend"
  ],
@@ -64,8 +64,8 @@
      "Plate Armour"
     ],
     "gold": [
-     122,
-     122
+     123,
+     123
     ],
     "stealthed": [
      false,
