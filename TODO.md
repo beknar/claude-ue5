@@ -64,6 +64,19 @@ Built and tested (`884 port`, `descendsewer`; `888 world`, `towns`); still to te
 - [ ] **The city's frame rate settled:** 2 to 16 just after the city was built round her.
 - [ ] **The packaged game played:** the Shipping package of 2026-11-07 (`builds\graymourne`) goes down into `sewers` (`-RDTownGo=dungeon:graymourne`) and out to the port (`town:graymourne`) and runs in each, no crash; `869` set the instanced-mesh usage on the harbour's nets, wrecks, fish racks, boats and piers and the sewers' mud and drowned props (16 base materials). The Development package from the same cook (`builds\graymourne_dev`) logged no "missing usage flag" in the port or the first hall (the deeper tiers' pieces are checked only by `869`'s tables); no picture taken in it, and the sewer gate, the deeper tiers and the way back have not been played in it.
 
+## PR #25's review (2026-11-07, not yet checked in play)
+
+The review's finds, merged with the PR and still to be checked and fixed:
+
+- [ ] **The harbour's edges lean** (`RDTownPlan.cpp`'s walk mesh, about line 2492): a vertex on a tile's edge takes the tile on its +X / +Y side, so the drop from deck to water may fall inside the walked area on the quay's side, a pier's +Y side and its far end (a slope of about 48 degrees in the last 1.5 m) and outside it on the -Y side; the drawn bed the same. The pier push (2.55 m off the middle) would not see it: push her toward each edge and its end.
+- [ ] **The quest places' fallback is unchecked** (`RDWildWorld.cpp` `MakeQuestPlaces`, about line 1046): the fixed points (2 km +X; 1.9 / 2.5 km) get no water, slope or road check: a den or the tower could stand in a lake or on a slope.
+- [ ] **`-RDTownGo=catacombs` in a city with a dungeon of its own** opens that town's (`DescendToCatacombs`, `RDHoly.cpp` line 248), and its refusal still says "no catacombs level". The tests start in Brokenspire, which has none.
+- [ ] **The wild quests offered before the wilds are ready** (`RDTownGame.cpp` about line 1430): the state reads `bWild`, the accept `IsWildReady()`: in the first seconds the board offers one and then refuses it.
+- [ ] **The foundry's gate and furnaces at `MistgateAt` unguarded** (`RDForge.cpp` about line 284): the sewer gate checks `IsZero`; the foundry would build at the section's corner if its plan never set it.
+- [ ] **The den's wolves by name** (`RDWildPlaces.cpp` about line 208): the first monster named "Ripper"; with none, a random kind titled "Mill Road Wolf", unlogged.
+- [ ] **A big foliage entry shifted step by step** (`RDWildGame.cpp` about line 330): `RemoveAt(0, N)` moves the rest of the array each step (O(n²)); keep an index instead.
+- [ ] **A dead loop** in `RDForge.cpp`'s `DoorRow` (about line 172: `Dl <= 0`) and its comment about the rows either side.
+
 ## The captain's wilderness quests (2026-11-07)
 
 Built and tested (`888 quests`: their places, taken, the den's pack, the patrol found, turned in; `884 talk`: offered); still to test:
