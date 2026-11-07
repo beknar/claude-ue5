@@ -26,7 +26,7 @@ pipeline/
   blender_numpy/         Blender scripts (-b -P), numpy/scipy tools, ue_exec.py, encode_video.py, rl_reel_overlay.py, rd_reel_overlay.py, iv_reel_overlay.py, ss_reel_overlay.py, rdc_reel_overlay.py, rdc_sound_prep.py, rdc_sound_check.py, unity_extract.py, monster_doc.py, hero_doc.py, enemy_doc.py, vehicle_doc.py, object_doc.py, anim_text.py
   build_cpp.ps1          builds the C++ module (editor closed)
   package_starship.ps1   packages starship_level as a standalone Windows game
-  package_mistward.ps1   packages mistward_castle (its hero menu first) as a standalone Windows game
+  package_mistward.ps1   packages the hero menu, Brokenspire and its wilderness, mistward_castle and Vel Morrath's catacombs as a standalone Windows game
 asset_survey/            survey of the local Fab library: UE5 usability, animation compatibility; the other asset directories (asset_dirs.json)
 docs/                    spec.md and design.md (random_dungeonmagic_level5's specification and design); monsters.md, heroes.md, humanoid_enemies.md, vehicles.md, objects.md (the galleries); assets.md (attribution, the asset libraries); levels.md (every level and who can play it); dungeon_types.md, outdoors.md, magic.md, emotional-content.md (what the libraries hold for future work); capabilities.md, controls.md, pipeline.md, reels.md and levels/ (the parts of this README: what the project can do, the controls, the stages, the reels and stills, each level's description and rebuild notes); images/: the level documents' stills and the galleries' pictures
 local-packs.md           rig/animation summary of the local Fab packs

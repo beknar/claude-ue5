@@ -790,7 +790,37 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 		{
 			GI->bTownGoRead = true;
 			FString Go;
-			if (FParse::Value(FCommandLine::Get(), TEXT("RDTownGo="), Go) && Go == TEXT("castle")) { EnterCastle(); return; }
+			FParse::Value(FCommandLine::Get(), TEXT("RDTownGo="), Go);
+			if (Go.IsEmpty()) {}
+			else if (Go == TEXT("castle")) { EnterCastle(); return; }
+			// (-RDTownGo=catacombs: the way down from the town she starts in (the packaged game's test of the catacombs: the city
+			// is a long walk away); she comes back where she stood)
+			else if (Go == TEXT("catacombs"))
+			{
+				if (DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw)) return;
+				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=catacombs refused: %s"), CatacombsLevel.IsEmpty() ? TEXT("no catacombs level") : TEXT("already travelling"));
+			}
+			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
+			// city: once the wilds are ready, by the map's fast travel; her mark written once it is built round her)
+			else if (Go.StartsWith(TEXT("town:")) && bWild) GI->TownGoTown = Go.Mid(5);
+			else UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s: not a way this level has"), *Go);
+		}
+	if (bTown && bTownPlaced)
+		if (URDGameInstance* GI = URDGameInstance::Of(this); GI && !(GI->TownGoTown.IsEmpty() && GI->TownGoMark.IsEmpty()))
+		{
+			if (!GI->TownGoTown.IsEmpty() && IsWildReady())
+			{
+				if (WildTravelToTown(GI->TownGoTown)) { GI->TownGoMark = GI->TownGoTown.Replace(TEXT(" "), TEXT("")).ToLower(); UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN -RDTownGo: out to %s"), *GI->TownGoTown); }
+				else UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=town:%s refused: %s"), *GI->TownGoTown, *WildTravelRefusal);
+				GI->TownGoTown.Reset();
+			}
+			const ARDSection* Here = GI->TownGoMark.IsEmpty() ? nullptr : GetSection(FIntPoint::ZeroValue);
+			if (Here && !Here->IsBuilding() && !bTownLoading && TownName.Replace(TEXT(" "), TEXT("")).ToLower() == GI->TownGoMark)
+			{
+				WriteTestMark(TEXT("town"), TownName);
+				UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN -RDTownGo: %s built round her"), *TownName);
+				GI->TownGoMark.Reset();
+			}
 		}
 	// the Mistgate: walked into, Mistward Castle opens
 	if (bTown && bTownHome && S && !bTownTraveling && !S->MistgateAt.IsZero() && FVector::Dist2D(P->GetActorLocation(), S->MistgateAt) < 170.f

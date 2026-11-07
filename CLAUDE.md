@@ -66,6 +66,7 @@ Each area's lessons are in a rules file that loads when a file of that area is r
 ## Working rules
 
 - **Commit and push only when the user asks.** Finished work stays uncommitted until then, and the report says so.
+- **Collect garbage before new work in the editor:** run `obj gc` in the editor's console before starting anything new in it (loading another level, a new script, a play session) and after closing a level, so the old level's objects are cleared. It is the engine's `OBJ GC` (`UEngine::HandleObjCommand`: also `obj garbage`); `collectgarbage` is no console command (the editor takes it silently and does nothing: measured 2026-11-06, only `obj gc` compacted the object tables). From the shell: `python pipeline\blender_numpy\ue_exec.py -c "import unreal; unreal.SystemLibrary.execute_console_command(None, 'obj gc')"`.
 - **Leave the editor usable:** on a playable level (not a `*_Cine` copy), play stopped, started without `-deterministicaudio` (that switch is for a render with sound only; relaunch without it afterwards).
 - **Scratch stays out of the repository:** probes, intermediate renders and test recordings go to the session's scratch directory.
 
