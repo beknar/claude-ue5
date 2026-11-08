@@ -1,0 +1,807 @@
+{
+ "tag": "s11",
+ "plan": [
+  "build7",
+  "quests"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "build7",
+   "ok": true,
+   "modes": {
+    "whole": {
+     "streamed": 103,
+     "step_ms_max": 10.6,
+     "frame_build_ms_max": 21.1,
+     "chunk_ms_max": 21.1,
+     "building": 0,
+     "parts": {
+      "ground": 9.1,
+      "collision": 10.6,
+      "water": 0.4,
+      "wade": 0.8,
+      "plants": 0.8,
+      "places": 0.5
+     },
+     "trims": 1,
+     "long_frames": [
+      {
+       "ms": 50.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 59.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 55.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.6,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 60.3,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.3,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.3,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 66.7,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 62.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 54.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 52.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 58.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 53.4,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 102.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 67.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 64.6,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 58.6,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 61.0,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 55.2,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 56.6,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 62.6,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 70.0,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 51.0,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 62.1,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 65.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 51.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      }
+     ],
+     "long_without_making": 63,
+     "lag0": {
+      "making_frames": 93,
+      "mean_ms": 42.5,
+      "others_mean_ms": 28.5,
+      "excess_ms": 14.0,
+      "p90_ms": 70.0,
+      "others_p90_ms": 47.1,
+      "threads_making": {
+       "game": 34.0,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 33.2
+      },
+      "threads_others": {
+       "game": 14.9,
+       "render": 0.0,
+       "rhi": 1.4,
+       "gpu": 26.7
+      }
+     },
+     "lag1": {
+      "making_frames": 93,
+      "mean_ms": 40.7,
+      "others_mean_ms": 28.6,
+      "excess_ms": 12.1,
+      "p90_ms": 63.9,
+      "others_p90_ms": 48.2,
+      "threads_making": {
+       "game": 32.4,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 33.1
+      },
+      "threads_others": {
+       "game": 15.0,
+       "render": 0.0,
+       "rhi": 1.4,
+       "gpu": 26.6
+      }
+     },
+     "long_threads": [
+      {
+       "ms": 50.8,
+       "game": 19.7,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 58.1
+      },
+      {
+       "ms": 59.9,
+       "game": 17.2,
+       "render": 0.0,
+       "rhi": 0.9,
+       "gpu": 47.4
+      },
+      {
+       "ms": 50.8,
+       "game": 17.1,
+       "render": 0.0,
+       "rhi": 0.9,
+       "gpu": 45.5
+      },
+      {
+       "ms": 55.5,
+       "game": 19.9,
+       "render": 0.0,
+       "rhi": 1.0,
+       "gpu": 46.9
+      },
+      {
+       "ms": 51.6,
+       "game": 19.3,
+       "render": 0.0,
+       "rhi": 0.9,
+       "gpu": 45.7
+      },
+      {
+       "ms": 51.1,
+       "game": 17.0,
+       "render": 0.0,
+       "rhi": 1.0,
+       "gpu": 49.9
+      },
+      {
+       "ms": 51.2,
+       "game": 16.8,
+       "render": 0.0,
+       "rhi": 0.4,
+       "gpu": 56.3
+      },
+      {
+       "ms": 60.3,
+       "game": 21.5,
+       "render": 0.0,
+       "rhi": 0.8,
+       "gpu": 46.6
+      },
+      {
+       "ms": 50.3,
+       "game": 21.4,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 46.7
+      },
+      {
+       "ms": 51.3,
+       "game": 13.6,
+       "render": 0.0,
+       "rhi": 0.8,
+       "gpu": 47.9
+      },
+      {
+       "ms": 52.2,
+       "game": 20.3,
+       "render": 0.0,
+       "rhi": 0.8,
+       "gpu": 47.0
+      },
+      {
+       "ms": 66.7,
+       "game": 19.3,
+       "render": 0.0,
+       "rhi": 1.1,
+       "gpu": 52.0
+      },
+      {
+       "ms": 62.9,
+       "game": 21.8,
+       "render": 0.0,
+       "rhi": 0.8,
+       "gpu": 51.1
+      },
+      {
+       "ms": 54.8,
+       "game": 19.3,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 47.2
+      },
+      {
+       "ms": 52.9,
+       "game": 20.4,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 45.9
+      },
+      {
+       "ms": 58.9,
+       "game": 19.8,
+       "render": 0.0,
+       "rhi": 0.9,
+       "gpu": 53.0
+      },
+      {
+       "ms": 53.4,
+       "game": 60.9,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 49.3
+      },
+      {
+       "ms": 102.0,
+       "game": 36.9,
+       "render": 0.0,
+       "rhi": 1.0,
+       "gpu": 60.6
+      },
+      {
+       "ms": 67.5,
+       "game": 25.1,
+       "render": 0.0,
+       "rhi": 0.7,
+       "gpu": 54.4
+      },
+      {
+       "ms": 64.6,
+       "game": 28.9,
+       "render": 0.0,
+       "rhi": 0.3,
+       "gpu": 48.2
+      }
+     ],
+     "excess_ms": 14.0,
+     "frames": 865,
+     "frame_ms_p50": 26.0,
+     "frame_ms_p99": 90.7,
+     "frame_ms_max": 125.0,
+     "frames_over_50ms": 86,
+     "frames_over_100ms": 5,
+     "chunks": 79,
+     "making_after": 0
+    },
+    "steps": {
+     "streamed": 103,
+     "step_ms_max": 7.4,
+     "frame_build_ms_max": 9.3,
+     "chunk_ms_max": 14.7,
+     "building": 0,
+     "parts": {
+      "ground": 7.4,
+      "collision": 6.7,
+      "water": 0.9,
+      "wade": 1.3,
+      "plants": 2.2,
+      "places": 0.2
+     },
+     "trims": 2,
+     "long_frames": [
+      {
+       "ms": 66.4,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 50.4,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 58.9,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 68.5,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 64.2,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 84.9,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 86.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 125.0,
+       "why": [
+        "making"
+       ]
+      },
+      {
+       "ms": 123.7,
+       "why": [
+        "making"
+       ]
+      },
+      {
+       "ms": 74.0,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 60.4,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 62.5,
+       "why": [
+        "chunk done",
+        "making"
+       ]
+      },
+      {
+       "ms": 107.1,
+       "why": [
+        "nothing of the chunks"
+       ]
+      },
+      {
+       "ms": 71.8,
+       "why": [
+        "nothing of the chunks"
+       ]
+      }
+     ],
+     "long_without_making": 9,
+     "lag0": {
+      "making_frames": 110,
+      "mean_ms": 33.4,
+      "others_mean_ms": 25.3,
+      "excess_ms": 8.1,
+      "p90_ms": 38.8,
+      "others_p90_ms": 30.5,
+      "threads_making": {
+       "game": 31.0,
+       "render": 0.0,
+       "rhi": 0.6,
+       "gpu": 25.2
+      },
+      "threads_others": {
+       "game": 14.8,
+       "render": 0.0,
+       "rhi": 1.6,
+       "gpu": 23.8
+      }
+     },
+     "lag1": {
+      "making_frames": 110,
+      "mean_ms": 31.6,
+      "others_mean_ms": 25.6,
+      "excess_ms": 6.0,
+      "p90_ms": 38.4,
+      "others_p90_ms": 30.5,
+      "threads_making": {
+       "game": 29.8,
+       "render": 0.0,
+       "rhi": 0.6,
+       "gpu": 25.3
+      },
+      "threads_others": {
+       "game": 15.0,
+       "render": 0.0,
+       "rhi": 1.6,
+       "gpu": 23.8
+      }
+     },
+     "long_threads": [
+      {
+       "ms": 66.4,
+       "game": 22.3,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 23.7
+      },
+      {
+       "ms": 50.4,
+       "game": 37.8,
+       "render": 0.0,
+       "rhi": 0.3,
+       "gpu": 23.8
+      },
+      {
+       "ms": 58.9,
+       "game": 30.1,
+       "render": 0.0,
+       "rhi": 0.1,
+       "gpu": 23.4
+      },
+      {
+       "ms": 68.5,
+       "game": 26.4,
+       "render": 0.0,
+       "rhi": 0.6,
+       "gpu": 23.0
+      },
+      {
+       "ms": 64.2,
+       "game": 18.6,
+       "render": 0.0,
+       "rhi": 1.5,
+       "gpu": 24.3
+      },
+      {
+       "ms": 84.9,
+       "game": 22.8,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 24.6
+      },
+      {
+       "ms": 86.1,
+       "game": 22.2,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 22.3
+      },
+      {
+       "ms": 125.0,
+       "game": 34.1,
+       "render": 0.0,
+       "rhi": 0.3,
+       "gpu": 23.2
+      },
+      {
+       "ms": 123.7,
+       "game": 38.7,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 23.4
+      },
+      {
+       "ms": 74.0,
+       "game": 26.0,
+       "render": 0.0,
+       "rhi": 0.3,
+       "gpu": 24.1
+      },
+      {
+       "ms": 60.4,
+       "game": 21.0,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 29.8
+      },
+      {
+       "ms": 62.5,
+       "game": 31.0,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 25.8
+      },
+      {
+       "ms": 107.1,
+       "game": 23.7,
+       "render": 0.0,
+       "rhi": 0.2,
+       "gpu": 23.5
+      },
+      {
+       "ms": 71.8,
+       "game": 22.6,
+       "render": 0.0,
+       "rhi": 0.3,
+       "gpu": 25.5
+      }
+     ],
+     "excess_ms": 8.1,
+     "frames": 967,
+     "frame_ms_p50": 25.4,
+     "frame_ms_p99": 64.2,
+     "frame_ms_max": 125.0,
+     "frames_over_50ms": 14,
+     "frames_over_100ms": 3,
+     "chunks": 79,
+     "making_after": 0
+    }
+   },
+   "budget_ms": 5.0,
+   "compared_chunks": 79,
+   "differ": []
+  },
+  {
+   "step": "quests",
+   "ok": true,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 1063.9,
+     "y": -1492.6,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 1063.9,
+     "ry": -1492.6,
+     "yaw": -179.2,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": -2429.3,
+     "y": 1772.7,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": -2434.1,
+     "ry": 1767.6,
+     "yaw": -133.4,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.83,
+    "water": 0.0,
+    "h": 68.4,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 3.01,
+    "water": 0.0,
+    "h": 81.5,
+    "biome": "farms",
+    "road_m": null
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": true,
+   "refusal": "You have not found The Mill Road Den yet",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 18,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_s11_quest_den.png",
+  "wd_s11_quest_tower.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

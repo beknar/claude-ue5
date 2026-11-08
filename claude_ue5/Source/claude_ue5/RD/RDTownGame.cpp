@@ -1380,8 +1380,10 @@ static FString RDQuestStateOf(const URDGameInstance* GI, const FRDQuestDef& Q, i
 {
 	// (the wilderness's quests wait on a level without it, and until it is ready (as the accept does: PR #25's review, offered
 	// before it was, a quest was then refused); since 2026-11-07 Brokenspire's gate opens on it)
-	if (!bWildOpen && Q.Goal.StartsWith(TEXT("wild:"))) return TEXT("later");
+	// (only a quest not taken yet waits: one taken, ready or done keeps its state while the wilds start again after a trip
+	// (PR #26's review))
 	const FRDQuestState* St = GI ? GI->FindQuest(Q.Id) : nullptr;
+	if ((!St || St->State == 0) && !bWildOpen && Q.Goal.StartsWith(TEXT("wild:"))) return TEXT("later");
 	if (!St || St->State == 0) return TEXT("offered");
 	if (St->State == 2) return TEXT("done");
 	return Progress >= Q.Count ? TEXT("ready") : TEXT("taken");

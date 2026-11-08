@@ -2294,8 +2294,9 @@ float ARDSection::TownBorderDist(const FVector2D& W) const
 	return Dm;
 }
 
-// (the tiles a ground vertex touches: one inside a tile, two on its edge, four at a corner; a vertex on an edge read the tile on
-// its +X / +Y side alone, so the harbour's drop to the water fell inside the walked quay on two of its four ways (PR #25's review))
+// (the tiles a walked-ground vertex touches: one inside a tile, two on its edge, four at a corner; a vertex on an edge read the
+// tile on its +X / +Y side alone, so the harbour's drop to the water fell inside the walked quay on two of its four ways (PR #25's
+// review). The drawn ground's harbour is a rectangle and needs no tiles; UnderFloor has its own sampling for the buildings)
 static void RDTPTouching(const FVector2D& P, float M, int32 N, TArray<FIntPoint, TInlineAllocator<4>>& Out)
 {
 	Out.Reset();
@@ -2450,12 +2451,28 @@ void ARDSection::TownGround()
 			float Z = UnderFloor(P) ? -40.f : 0.f;
 			// (the port's harbour: its bed 2.6 m under the quay, under the harbour's own water (RDPort.cpp), the piers' tiles too:
 			// they are decks on pilings; at the ground's height the grass showed between the planks)
+			// (sunk strictly inside the harbour's rectangle, so the vertices on its edge stay at the quay's height as the walked ground
+			// does. The drop is drawn behind the quay's stone face, under the wall: a vertex on the edge stands 10 cm back into the
+			// land and the sunk vertex a step from it 5 cm back. Left on the grid the bed made a 1 m ramp out of the water in front
+			// of the face and under the piers' roots (PR #26's review); dropped 5 cm in front of the line it hid the face's stone
+			// behind a stretched cliff of the ground's own (884 gm8's edge pictures))
+			FVector2D Pv = P;
 			if (TownHarbour.Area() > 0)
 			{
-				RDTPTouching(P, M, N, Tt);
-				bool bAll = true;
-				for (const FIntPoint& Q : Tt) bAll &= TownHarbour.Contains(Q);
-				if (bAll) Z = -260.f;
+				const float Hx0 = TownHarbour.Min.X * M, Hx1 = TownHarbour.Max.X * M, Hy0 = TownHarbour.Min.Y * M, Hy1 = TownHarbour.Max.Y * M;
+				const bool bSpanX = P.X > Hx0 - 0.5f && P.X < Hx1 + 0.5f, bSpanY = P.Y > Hy0 - 0.5f && P.Y < Hy1 + 0.5f;
+				if (P.X > Hx0 + 0.5f && P.X < Hx1 - 0.5f && P.Y > Hy0 + 0.5f && P.Y < Hy1 - 0.5f)
+				{
+					Z = -260.f;
+					if (P.X - St < Hx0 + 0.5f) Pv.X = Hx0 - 5.f; else if (P.X + St > Hx1 - 0.5f) Pv.X = Hx1 + 5.f;
+					if (P.Y - St < Hy0 + 0.5f) Pv.Y = Hy0 - 5.f; else if (P.Y + St > Hy1 - 0.5f) Pv.Y = Hy1 + 5.f;
+				}
+				else if (bSpanX && bSpanY)
+				{
+					// (on the rectangle's edge: back into the land)
+					if (FMath::Abs(P.X - Hx0) < 0.5f) Pv.X = Hx0 - 10.f; else if (FMath::Abs(P.X - Hx1) < 0.5f) Pv.X = Hx1 + 10.f;
+					if (FMath::Abs(P.Y - Hy0) < 0.5f) Pv.Y = Hy0 - 10.f; else if (FMath::Abs(P.Y - Hy1) < 0.5f) Pv.Y = Hy1 + 10.f;
+				}
 			}
 			Sunk[I * Nv + J] = Z < 0.f ? 1 : 0;
 			if (Z == 0.f)
@@ -2465,8 +2482,8 @@ void ARDSection::TownGround()
 				// (the open ground's rise and fall: 0 where anything stands or is walked to)
 				Z += TownLiftAt(Wp);
 			}
-			V[I * Nv + J] = FVector(P.X, P.Y, Z);
-			UV[I * Nv + J] = FVector2D(P.X / 400.f, P.Y / 400.f);
+			V[I * Nv + J] = FVector(Pv.X, Pv.Y, Z);
+			UV[I * Nv + J] = FVector2D(Pv.X / 400.f, Pv.Y / 400.f);
 		}
 	// (normals from the heights: the bumps shade)
 	for (int32 I = 0; I < Nv; ++I)
@@ -2512,7 +2529,8 @@ void ARDSection::TownGround()
 				// tile's edge is water only if every tile it touches is: the drop to the water then falls behind the blocker on every
 				// way (taking the tile on its +X / +Y side, the quay's last 1.5 m fell 1.4 m on two ways: 884 gm6, PR #25's review))
 				float Zw = TownLiftAt(P + O2);
-				if (TownHarbour.Area() > 0)
+				// (only a vertex on the harbour's rectangle or in it can touch one of its tiles)
+				if (TownHarbour.Area() > 0 && P.X > TownHarbour.Min.X * M - 0.5f && P.X < TownHarbour.Max.X * M + 0.5f && P.Y > TownHarbour.Min.Y * M - 0.5f && P.Y < TownHarbour.Max.Y * M + 0.5f)
 				{
 					RDTPTouching(P, M, N, Tt);
 					bool bWater = true, bPier = false;

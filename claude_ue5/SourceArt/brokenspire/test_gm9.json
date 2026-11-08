@@ -1,5 +1,5 @@
 {
- "tag": "gm7",
+ "tag": "gm9",
  "plan": [
   "port"
  ],
@@ -19,7 +19,7 @@
     "0",
     "1",
     "0",
-    "17.3",
+    "11.6",
     "1",
     "1",
     "1",
@@ -283,10 +283,13 @@
  ],
  "windows_hidden": "",
  "shots": [
-  "bs_gm7_gm_harbour.png",
-  "bs_gm7_gm_quay.png",
-  "bs_gm7_gm_dead.png",
-  "bs_gm7_gm_sewer_gate.png"
+  "bs_gm9_gm_harbour.png",
+  "bs_gm9_gm_quay.png",
+  "bs_gm9_gm_edge_px.png",
+  "bs_gm9_gm_edge_py.png",
+  "bs_gm9_gm_edge_my.png",
+  "bs_gm9_gm_dead.png",
+  "bs_gm9_gm_sewer_gate.png"
  ],
  "error": null,
  "windows_shown_again": 0

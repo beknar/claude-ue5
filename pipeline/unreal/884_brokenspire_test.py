@@ -2382,7 +2382,8 @@ def step_port():
         dip = min(z_ for r in prof[land] for z_ in r if z_ is not None)
         e = ways.setdefault(key, {"edges": 0, "land_dip_cm": 0.0, "dipped": 0})
         e["edges"] += 1; e["land_dip_cm"] = round(min(e["land_dip_cm"], dip), 1); e["dipped"] += 1 if dip < -30.0 else 0
-        if key not in pushes and all(abs(gz(q.x + nm.x * land * d, q.y + nm.y * land * d) or -999.0) < 60.0 for d in (200, 300)):
+        # (a trace's 0.0 is ground, not a miss (PR #26's review: `or` took the level quay's 0.0 for none and skipped it))
+        if key not in pushes and all((lambda z_: z_ is not None and abs(z_) < 60.0)(gz(q.x + nm.x * land * d, q.y + nm.y * land * d)) for d in (200, 300)):
             pushes[key] = (q, wd, land, nm)
     res["harbour_edges"] = ways
     for key, (q, wd, land, nm) in sorted(pushes.items()):
@@ -2394,6 +2395,9 @@ def step_port():
             zmin = min(zmin, G["pawn"].get_actor_location().z)
         p1 = G["pawn"].get_actor_location()
         res.setdefault("edge_push", {})[key] = {"from_line_m": round(((p1.x - q.x) * wd.x + (p1.y - q.y) * wd.y) / 100, 2), "z0": round(z0), "z": round(p1.z), "z_min": round(zmin)}
+        # (the quay's face and the bed below it, looked down at from where she stopped: the drawn ground must drop at the face)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-40, yaw=math.degrees(math.atan2(wd.y, wd.x)))); yield from wait(1.0)
+        shot("gm_edge_" + key.replace("+", "p").replace("-", "m")); yield from rwait(1.2)
     bodies = [p_ for p_ in SP if p_["kind"] == "body"]; gib = [p_ for p_ in SP if p_["kind"] == "gibbet"]
     if bodies and gib:
         b0 = bodies[len(bodies) // 2]; gg = min(gib, key=lambda q: dist2(q["at"], b0["at"]))
@@ -2425,7 +2429,7 @@ def step_port():
           and any("Old Grate" in str(p) for p in res["harbourmaster"]["panel"]) and res["port_fog"] > 0.8 and res["fog"] and all(f["start_m"] < 20 and f["density"] > 0.1 for f in res["fog"])
           and pw and abs(pw["z_on_deck"] - 90) < 40 and pw["z_min_pushed"] > pw["z_on_deck"] - 30 and not res.get("on_pier")
           and len(res["harbour_edges"]) >= 3 and all(e["dipped"] == 0 for e in res["harbour_edges"].values())
-          and res.get("edge_push") and all(e["from_line_m"] < 0 and e["z_min"] > e["z0"] - 30 for e in res["edge_push"].values())
+          and set(res.get("edge_push") or {}) == set(res["harbour_edges"]) and all(e["from_line_m"] < 0 and e["z_min"] > e["z0"] - 30 for e in res["edge_push"].values())
           and res.get("gate_travel") == "catacombs")
     step_result("port", ok, **res)
 
