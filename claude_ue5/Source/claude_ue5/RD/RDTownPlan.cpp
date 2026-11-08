@@ -2325,6 +2325,13 @@ void ARDSection::TownGround()
 	const int32 Sub = 3;                          // vertices a tile
 	const int32 Nv = N * Sub + 1;
 	const float St = M / Sub;
+	// (the port's harbour in cm, one definition for the drawn and the walked ground: on or in its rectangle (Tol 0.5) or strictly
+	// inside it (Tol -0.5); and whether the tile beyond its edge is the quay (the town's walked ground: HarbourBuild stands the
+	// stone face there) or not (outside the section or the town's ground: no face, so no drop drawn behind one: PR #26's review))
+	const bool bHarb = TownHarbour.Area() > 0;
+	const float Hx0 = TownHarbour.Min.X * M, Hx1 = TownHarbour.Max.X * M, Hy0 = TownHarbour.Min.Y * M, Hy1 = TownHarbour.Max.Y * M;
+	auto OnHarbour = [&](const FVector2D& Q, float Tol) { return bHarb && Q.X > Hx0 - Tol && Q.X < Hx1 + Tol && Q.Y > Hy0 - Tol && Q.Y < Hy1 + Tol; };
+	auto QuayAt = [&](int32 X, int32 Y) { const FIntPoint Q(X, Y); return In(Q) && Type[Idx(Q)] != 0 && !TownHarbour.Contains(Q); };
 	const FVector2D O2(GetActorLocation().X, GetActorLocation().Y);
 	const uint32 Sd = (uint32)Seed;
 	TArray<FVector> V; TArray<int32> Tri; TArray<FVector> Nrm; TArray<FVector2D> UV; TArray<FLinearColor> Col; TArray<FProcMeshTangent> Tan;
@@ -2455,23 +2462,27 @@ void ARDSection::TownGround()
 			// does. The drop is drawn behind the quay's stone face, under the wall: a vertex on the edge stands 10 cm back into the
 			// land and the sunk vertex a step from it 5 cm back. Left on the grid the bed made a 1 m ramp out of the water in front
 			// of the face and under the piers' roots (PR #26's review); dropped 5 cm in front of the line it hid the face's stone
-			// behind a stretched cliff of the ground's own (884 gm8's edge pictures))
+			// behind a stretched cliff of the ground's own (884 gm8's edge pictures). Only where the quay is beyond the edge: where
+			// it is not (the section's border, ground outside the town) the bed runs on to the edge, as it did)
 			FVector2D Pv = P;
-			if (TownHarbour.Area() > 0)
+			if (OnHarbour(P, 0.5f))
 			{
-				const float Hx0 = TownHarbour.Min.X * M, Hx1 = TownHarbour.Max.X * M, Hy0 = TownHarbour.Min.Y * M, Hy1 = TownHarbour.Max.Y * M;
-				const bool bSpanX = P.X > Hx0 - 0.5f && P.X < Hx1 + 0.5f, bSpanY = P.Y > Hy0 - 0.5f && P.Y < Hy1 + 0.5f;
-				if (P.X > Hx0 + 0.5f && P.X < Hx1 - 0.5f && P.Y > Hy0 + 0.5f && P.Y < Hy1 - 0.5f)
+				const int32 Tx = FMath::Clamp(FMath::FloorToInt(P.X / M), TownHarbour.Min.X, TownHarbour.Max.X - 1), Ty = FMath::Clamp(FMath::FloorToInt(P.Y / M), TownHarbour.Min.Y, TownHarbour.Max.Y - 1);
+				const bool bQx0 = QuayAt(TownHarbour.Min.X - 1, Ty), bQx1 = QuayAt(TownHarbour.Max.X, Ty), bQy0 = QuayAt(Tx, TownHarbour.Min.Y - 1), bQy1 = QuayAt(Tx, TownHarbour.Max.Y);
+				if (OnHarbour(P, -0.5f))
 				{
 					Z = -260.f;
-					if (P.X - St < Hx0 + 0.5f) Pv.X = Hx0 - 5.f; else if (P.X + St > Hx1 - 0.5f) Pv.X = Hx1 + 5.f;
-					if (P.Y - St < Hy0 + 0.5f) Pv.Y = Hy0 - 5.f; else if (P.Y + St > Hy1 - 0.5f) Pv.Y = Hy1 + 5.f;
+					if (bQx0 && P.X - St < Hx0 + 0.5f) Pv.X = Hx0 - 5.f; else if (bQx1 && P.X + St > Hx1 - 0.5f) Pv.X = Hx1 + 5.f;
+					if (bQy0 && P.Y - St < Hy0 + 0.5f) Pv.Y = Hy0 - 5.f; else if (bQy1 && P.Y + St > Hy1 - 0.5f) Pv.Y = Hy1 + 5.f;
 				}
-				else if (bSpanX && bSpanY)
+				else
 				{
-					// (on the rectangle's edge: back into the land)
-					if (FMath::Abs(P.X - Hx0) < 0.5f) Pv.X = Hx0 - 10.f; else if (FMath::Abs(P.X - Hx1) < 0.5f) Pv.X = Hx1 + 10.f;
-					if (FMath::Abs(P.Y - Hy0) < 0.5f) Pv.Y = Hy0 - 10.f; else if (FMath::Abs(P.Y - Hy1) < 0.5f) Pv.Y = Hy1 + 10.f;
+					// (on the rectangle's edge: back into the quay where there is one; elsewhere the bed's)
+					const bool bEx0 = FMath::Abs(P.X - Hx0) < 0.5f && bQx0, bEx1 = FMath::Abs(P.X - Hx1) < 0.5f && bQx1;
+					const bool bEy0 = FMath::Abs(P.Y - Hy0) < 0.5f && bQy0, bEy1 = FMath::Abs(P.Y - Hy1) < 0.5f && bQy1;
+					if (!(bEx0 || bEx1 || bEy0 || bEy1)) Z = -260.f;
+					if (bEx0) Pv.X = Hx0 - 10.f; else if (bEx1) Pv.X = Hx1 + 10.f;
+					if (bEy0) Pv.Y = Hy0 - 10.f; else if (bEy1) Pv.Y = Hy1 + 10.f;
 				}
 			}
 			Sunk[I * Nv + J] = Z < 0.f ? 1 : 0;
@@ -2530,7 +2541,7 @@ void ARDSection::TownGround()
 				// way (taking the tile on its +X / +Y side, the quay's last 1.5 m fell 1.4 m on two ways: 884 gm6, PR #25's review))
 				float Zw = TownLiftAt(P + O2);
 				// (only a vertex on the harbour's rectangle or in it can touch one of its tiles)
-				if (TownHarbour.Area() > 0 && P.X > TownHarbour.Min.X * M - 0.5f && P.X < TownHarbour.Max.X * M + 0.5f && P.Y > TownHarbour.Min.Y * M - 0.5f && P.Y < TownHarbour.Max.Y * M + 0.5f)
+				if (OnHarbour(P, 0.5f))
 				{
 					RDTPTouching(P, M, N, Tt);
 					bool bWater = true, bPier = false;

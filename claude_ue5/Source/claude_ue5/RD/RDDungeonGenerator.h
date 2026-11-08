@@ -1950,6 +1950,8 @@ public:
 	int32 WildMapTilesMade = 0, WildTravels = 0;
 	float WildMapWarmTimer = 0.f;
 	bool bWildMadeLogged = false;
+	/** the den's pack fell back to the place's own kind: said once a play (RDWildPlaces.cpp) */
+	bool bWildWolvesWarned = false;
 	double WildMapTileMs = 0.0;
 	/** cells revealed in each 1.6 km block (the map's fog at its coarse zooms) */
 	TMap<FIntPoint, int32> WildRevealCount;

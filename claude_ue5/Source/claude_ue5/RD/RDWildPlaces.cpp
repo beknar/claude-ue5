@@ -207,7 +207,8 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		{
 			// (by name: the ripper dogs, else any wolf, hound or dog; with none the place's own kind, said in the log (PR #25's
 			// review: a level without them would have sent another kind silently). Case kept: "Werewolf" or "Hellhound" is not
-			// a pack (PR #26's review); the warning once a session, not at every making of the den's chunk)
+			// a pack (PR #26's review); the warning once a play (the generator's, not a static: one outlives play sessions), not at
+			// every making of the den's chunk)
 			int32 Found = -1;
 			for (const TCHAR* Want : { TEXT("Ripper"), TEXT("Wolf"), TEXT("Hound"), TEXT("Dog") })
 			{
@@ -215,9 +216,8 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 					if (Monsters[K].Mesh && Monsters[K].Name.ToString().Contains(Want, ESearchCase::CaseSensitive)) Found = K;
 				if (Found >= 0) break;
 			}
-			static bool bRDWolvesWarned = false;
 			if (Found >= 0) Kind = Found;
-			else if (!bRDWolvesWarned) { bRDWolvesWarned = true; UE_LOG(LogRDWildPlace, Warning, TEXT("RDWILD %s: no ripper dog, wolf, hound or dog among the monsters: its pack is %s"), *P.Name, *Monsters[Kind].Name.ToString()); }
+			else if (!bWildWolvesWarned) { bWildWolvesWarned = true; UE_LOG(LogRDWildPlace, Warning, TEXT("RDWILD %s: no ripper dog, wolf, hound or dog among the monsters: its pack is %s"), *P.Name, *Monsters[Kind].Name.ToString()); }
 		}
 	}
 	const FRDMonsterDef& Def = Monsters[Kind];
