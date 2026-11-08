@@ -1,5 +1,5 @@
 {
- "tag": "ar4",
+ "tag": "ar5",
  "plan": [
   "forge"
  ],
@@ -21,7 +21,7 @@
     "0",
     "1",
     "0",
-    "4.2",
+    "8.1",
     "1",
     "1",
     "1",
@@ -216,20 +216,20 @@
    ],
    "gate_from_foundry_m": 38,
    "fps": {
-    "square": 9.6,
-    "casting_hall": 29.6
+    "square": 6.9,
+    "casting_hall": 7.0
    },
    "gate_travel": "catacombs"
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "",
  "shots": [
-  "bs_ar4_ar_foundry_front.png",
-  "bs_ar4_ar_square.png",
-  "bs_ar4_ar_casting_hall.png",
-  "bs_ar4_ar_casting_side.png",
-  "bs_ar4_ar_furnace_hall.png"
+  "bs_ar5_ar_foundry_front.png",
+  "bs_ar5_ar_square.png",
+  "bs_ar5_ar_casting_hall.png",
+  "bs_ar5_ar_casting_side.png",
+  "bs_ar5_ar_furnace_hall.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 0
 }

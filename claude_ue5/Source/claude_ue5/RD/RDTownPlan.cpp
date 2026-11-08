@@ -2294,8 +2294,23 @@ float ARDSection::TownBorderDist(const FVector2D& W) const
 	return Dm;
 }
 
+// (the tiles a ground vertex touches: one inside a tile, two on its edge, four at a corner; a vertex on an edge read the tile on
+// its +X / +Y side alone, so the harbour's drop to the water fell inside the walked quay on two of its four ways (PR #25's review))
+static void RDTPTouching(const FVector2D& P, float M, int32 N, TArray<FIntPoint, TInlineAllocator<4>>& Out)
+{
+	Out.Reset();
+	const int32 Xr = FMath::RoundToInt(P.X / M), Yr = FMath::RoundToInt(P.Y / M);
+	const bool bEx = FMath::Abs(P.X - Xr * M) < 0.5f, bEy = FMath::Abs(P.Y - Yr * M) < 0.5f;
+	const int32 X0 = bEx ? Xr - 1 : FMath::FloorToInt(P.X / M), X1 = bEx ? Xr : X0;
+	const int32 Y0 = bEy ? Yr - 1 : FMath::FloorToInt(P.Y / M), Y1 = bEy ? Yr : Y0;
+	for (int32 X = X0; X <= X1; ++X)
+		for (int32 Y = Y0; Y <= Y1; ++Y)
+			Out.AddUnique(FIntPoint(FMath::Clamp(X, 0, N - 1), FMath::Clamp(Y, 0, N - 1)));
+}
+
 void ARDSection::TownGround()
 {
+	TArray<FIntPoint, TInlineAllocator<4>> Tt;
 	if (!bBuildStatic) return;
 	// one procedural mesh over the whole section: grass, cobbles on the straight roads and the square, earth on the winding
 	// streets, the lane and round the doors (the village's ground material by vertex colour: R a dark trodden floor, G cobbles,
@@ -2435,7 +2450,13 @@ void ARDSection::TownGround()
 			float Z = UnderFloor(P) ? -40.f : 0.f;
 			// (the port's harbour: its bed 2.6 m under the quay, under the harbour's own water (RDPort.cpp), the piers' tiles too:
 			// they are decks on pilings; at the ground's height the grass showed between the planks)
-			if (TownHarbour.Area() > 0 && TownHarbour.Contains(T)) Z = -260.f;
+			if (TownHarbour.Area() > 0)
+			{
+				RDTPTouching(P, M, N, Tt);
+				bool bAll = true;
+				for (const FIntPoint& Q : Tt) bAll &= TownHarbour.Contains(Q);
+				if (bAll) Z = -260.f;
+			}
 			Sunk[I * Nv + J] = Z < 0.f ? 1 : 0;
 			if (Z == 0.f)
 			{
@@ -2487,9 +2508,18 @@ void ARDSection::TownGround()
 			for (int32 J = 0; J < NvW; ++J)
 			{
 				const FVector2D P(I * StW, J * StW);
-				const FIntPoint Tw_(FMath::Clamp(FMath::FloorToInt(P.X / M), 0, N - 1), FMath::Clamp(FMath::FloorToInt(P.Y / M), 0, N - 1));
-				// (the harbour's water walked 1.7 m down behind its blockers; a pier's deck flat at the quay's height)
-				Vw[I * NvW + J] = FVector(P.X, P.Y, InHarbourWater(Tw_) ? -170.f : (TownHarbour.Area() > 0 && TownHarbour.Contains(Tw_)) ? 0.f : TownLiftAt(P + O2));
+				// (the harbour's water walked 1.7 m down behind its blockers; a pier's deck flat at the quay's height. A vertex on a
+				// tile's edge is water only if every tile it touches is: the drop to the water then falls behind the blocker on every
+				// way (taking the tile on its +X / +Y side, the quay's last 1.5 m fell 1.4 m on two ways: 884 gm6, PR #25's review))
+				float Zw = TownLiftAt(P + O2);
+				if (TownHarbour.Area() > 0)
+				{
+					RDTPTouching(P, M, N, Tt);
+					bool bWater = true, bPier = false;
+					for (const FIntPoint& Q : Tt) { bWater &= InHarbourWater(Q); bPier |= TownHarbour.Contains(Q) && !InHarbourWater(Q); }
+					if (bWater) Zw = -170.f; else if (bPier) Zw = 0.f;
+				}
+				Vw[I * NvW + J] = FVector(P.X, P.Y, Zw);
 			}
 		TArray<int32> Tw; Tw.Reserve((NvW - 1) * (NvW - 1) * 6);
 		for (int32 I = 0; I < NvW - 1; ++I)

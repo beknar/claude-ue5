@@ -296,7 +296,7 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 			W->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 		}
 		D->Block.Empty(); D->BlockT.Empty();
-		B.Step = 4; B.Inst = 0;
+		B.Step = 4; B.Inst = 0; B.InstAt = 0;
 	}
 	else if (B.Step == 4)
 	{
@@ -306,7 +306,7 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 		while (B.Inst < D->Inst.Num())
 		{
 			FRDWChunkData::FInst& In = D->Inst[B.Inst];
-			if (In.bNear || In.X.Num() == 0 || !Wild->Biomes.IsValidIndex(In.Biome) || !WildBiomes.IsValidIndex(In.Biome) || !WildBiomes[In.Biome].Foliage.IsValidIndex(In.Foliage) || !WildBiomes[In.Biome].Foliage[In.Foliage].Mesh) { ++B.Inst; continue; }
+			if (In.bNear || In.X.Num() == 0 || !Wild->Biomes.IsValidIndex(In.Biome) || !WildBiomes.IsValidIndex(In.Biome) || !WildBiomes[In.Biome].Foliage.IsValidIndex(In.Foliage) || !WildBiomes[In.Biome].Foliage[In.Foliage].Mesh) { ++B.Inst; B.InstAt = 0; continue; }
 			const FRDWildFoliage& F = WildBiomes[In.Biome].Foliage[In.Foliage];
 			UHierarchicalInstancedStaticMeshComponent*& H = B.ByMesh.FindOrAdd(F.Mesh);
 			if (!H)
@@ -322,13 +322,15 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 				H->RegisterComponent();
 				C->Foliage.Add(H);
 			}
-			const int32 N = FMath::Min(In.X.Num(), RDWInstStep);
-			if (N == In.X.Num()) H->AddInstances(In.X, false, false, false);
-			else H->AddInstances(TArray<FTransform>(In.X.GetData(), N), false, false, false);
+			// (a part of RDWInstStep from where the last stopped (B.InstAt): the rest is not moved down each part (PR #25's review:
+			// RemoveAt(0, N) shifted a big entry's every remaining instance at each step))
+			const int32 N = FMath::Min(In.X.Num() - B.InstAt, RDWInstStep);
+			if (B.InstAt == 0 && N == In.X.Num()) H->AddInstances(In.X, false, false, false);
+			else H->AddInstances(TArray<FTransform>(In.X.GetData() + B.InstAt, N), false, false, false);
 			C->Instances += N;
 			if (F.Kind == TEXT("tree")) C->Trees += N;
-			In.X.RemoveAt(0, N, EAllowShrinking::No);
-			if (In.X.Num() == 0) ++B.Inst;
+			B.InstAt += N;
+			if (B.InstAt >= In.X.Num()) { In.X.Empty(); ++B.Inst; B.InstAt = 0; }
 			break;
 		}
 		if (B.Inst >= D->Inst.Num()) B.Step = 5;

@@ -1809,6 +1809,8 @@ public:
 		TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe> D;
 		TWeakObjectPtr<ARDWildChunk> C;
 		int32 Step = 0, Inst = 0;
+		/** how many of the plant entry Inst's instances are added (a big entry goes in parts) */
+		int32 InstAt = 0;
 		double Ms = 0.0;
 		TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> ByMesh;
 	};

@@ -1,5 +1,5 @@
 {
- "tag": "gm5",
+ "tag": "gm7",
  "plan": [
   "port"
  ],
@@ -19,7 +19,7 @@
     "0",
     "1",
     "0",
-    "9.1",
+    "17.3",
     "1",
     "1",
     "1",
@@ -240,17 +240,54 @@
     }
    ],
    "on_pier": {},
+   "harbour_edges": {
+    "+x": {
+     "edges": 41,
+     "land_dip_cm": -0.0,
+     "dipped": 0
+    },
+    "+y": {
+     "edges": 58,
+     "land_dip_cm": -13.9,
+     "dipped": 0
+    },
+    "-y": {
+     "edges": 32,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    }
+   },
+   "edge_push": {
+    "+x": {
+     "from_line_m": -0.45,
+     "z0": 86,
+     "z": 86,
+     "z_min": 86
+    },
+    "+y": {
+     "from_line_m": -0.45,
+     "z0": 86,
+     "z": 86,
+     "z_min": 86
+    },
+    "-y": {
+     "from_line_m": -0.45,
+     "z0": 92,
+     "z": 92,
+     "z_min": 92
+    }
+   },
    "gate_from_sluice_m": 14,
    "gate_travel": "catacombs"
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "",
  "shots": [
-  "bs_gm5_gm_harbour.png",
-  "bs_gm5_gm_quay.png",
-  "bs_gm5_gm_dead.png",
-  "bs_gm5_gm_sewer_gate.png"
+  "bs_gm7_gm_harbour.png",
+  "bs_gm7_gm_quay.png",
+  "bs_gm7_gm_dead.png",
+  "bs_gm7_gm_sewer_gate.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 0
 }
