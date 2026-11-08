@@ -5,6 +5,8 @@
 #include "HAL/PlatformTime.h"
 #include "Async/ParallelFor.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogRDWildWorld, Log, All);
+
 namespace
 {
 	// 16 gradient directions
@@ -1040,15 +1042,40 @@ void FRDWildWorld::MakeQuestPlaces()
 		P.At = At; P.H = Height(At.X, At.Y); P.Tier = 1; P.Biome = BiomeAt(At.X, At.Y); P.Yaw = Yaw;
 		QuestPlaces.Add(P);
 	};
+	// (a road with no place beside it: a fixed point, held to the same ground (flat, dry, off the road: PR #25's review, the fixed
+	// points had no check and could stand in a lake or on a slope), the nearest that is within 1.5 km of it and past MinD (the quest's own 1.8 / 3 km) from
+	// Brokenspire (bHigh: the highest such, as the tower's rise beside its road); with none, the point as it is, logged. Facing
+	// Brokenspire, the way she comes (PR #26's review: a fixed yaw faced anywhere once the point had moved)
+	auto Fallback = [&](const TCHAR* Name, const FVector2D& P0, double MinD, double FlatR, float MaxDh, bool bHigh, FVector2D& Out, float& OutYaw)
+	{
+		Out = P0;
+		// (the point itself only if it is as far out as the quest asks (PR #26's review: the search's minimum was under it); the
+		// tower the highest within 600 m of the first good ground found, not anywhere in the 1.5 km)
+		bool bFound = FVector2D::Distance(P0, Home) >= MinD && Flat(P0, FlatR, MaxDh);
+		float BestH = bFound ? Height(P0.X, P0.Y) : -1e9f;
+		double FirstR = bFound ? 0.0 : -1.0;
+		for (double Rr = 100.0; Rr <= 1500.0 && (!bFound || (bHigh && Rr <= FirstR + 600.0)); Rr += 100.0)
+			for (int32 A = 0; A < 16; ++A)
+			{
+				const double Ang = A * PI / 8.0;
+				const FVector2D Q = P0 + FVector2D(FMath::Cos(Ang), FMath::Sin(Ang)) * Rr;
+				if (FVector2D::Distance(Q, Home) < MinD || !Flat(Q, FlatR, MaxDh)) continue;
+				const float H = Height(Q.X, Q.Y);
+				if (!bFound || (bHigh && H > BestH)) { Out = Q; BestH = H; if (!bFound) FirstR = Rr; bFound = true; if (!bHigh) break; }
+			}
+		if (!bFound) UE_LOG(LogRDWildWorld, Warning, TEXT("RDWILD %s: no road beside, and no flat dry ground within 1.5 km of its fixed point (%.0f, %.0f): left there"), Name, P0.X, P0.Y);
+		const FVector2D Back = Home - Out;
+		OutYaw = FMath::RadiansToDegrees(FMath::Atan2(Back.Y, Back.X));
+	};
 	FVector2D At; float Yaw = 0.f;
 	{
 		static const double Offs[] = { 45.0, -45.0, 70.0, -70.0 };
-		if (!Beside(RoadTo(1), 1800.0, 4500.0, Offs, 4, 12.0, 2.5f, false, At, Yaw)) { At = Home + FVector2D(2000.0, 0.0); Yaw = 180.f; }
+		if (!Beside(RoadTo(1), 1800.0, 4500.0, Offs, 4, 12.0, 2.5f, false, At, Yaw)) Fallback(TEXT("The Mill Road Den"), Home + FVector2D(2000.0, 0.0), 1800.0, 12.0, 2.5f, false, At, Yaw);
 		Add(TEXT("wolves"), TEXT("lair"), TEXT("The Mill Road Den"), At, Yaw);
 	}
 	{
 		static const double Offs[] = { 180.0, -180.0, 240.0, -240.0, 120.0, -120.0 };
-		if (!Beside(RoadTo(3), 3000.0, 6000.0, Offs, 6, 9.0, 2.f, true, At, Yaw)) { At = Home + FVector2D(1900.0, 2500.0); Yaw = 225.f; }
+		if (!Beside(RoadTo(3), 3000.0, 6000.0, Offs, 6, 9.0, 2.f, true, At, Yaw)) Fallback(TEXT("The Old Watchtower"), Home + FVector2D(1900.0, 2500.0), 3000.0, 9.0, 2.f, true, At, Yaw);
 		Add(TEXT("patrol"), TEXT("ruins"), TEXT("The Old Watchtower"), At, Yaw);
 	}
 }

@@ -794,11 +794,12 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 			if (Go.IsEmpty()) {}
 			else if (Go == TEXT("castle")) { EnterCastle(); return; }
 			// (-RDTownGo=catacombs: the way down from the town she starts in (the packaged game's test of the catacombs: the city
-			// is a long walk away); she comes back where she stood)
+			// is a long walk away); she comes back where she stood. Vel Morrath's catacombs by name: with no level given the way down
+			// takes the town's own dungeon, so in Ashenreach or Graymourne it opened theirs (PR #25's review))
 			else if (Go == TEXT("catacombs"))
 			{
-				if (DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw)) return;
-				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=catacombs refused: %s"), CatacombsLevel.IsEmpty() ? TEXT("no catacombs level") : TEXT("already travelling"));
+				if (!CatacombsLevel.IsEmpty() && DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw, CatacombsLevel)) return;
+				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=catacombs refused: %s"), CatacombsLevel.IsEmpty() ? TEXT("no catacombs level") : bTownTraveling ? TEXT("already travelling") : TEXT("the way down refused it"));
 			}
 			// (-RDTownGo=dungeon:<town>: down into that town's own dungeon from where she stands (2026-11-07: "dungeon:ashenreach",
 			// "dungeon:graymourne"); she comes back where she stood)
@@ -808,7 +809,7 @@ void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 				FString Level;
 				for (const auto& Kv : TownDungeons) if (Kv.Key.Replace(TEXT(" "), TEXT("")).ToLower() == Want.Replace(TEXT(" "), TEXT("")).ToLower()) Level = Kv.Value;
 				if (!Level.IsEmpty() && DescendToCatacombs(P->GetActorLocation(), P->GetActorRotation().Yaw, Level)) return;
-				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s refused: %s"), *Go, Level.IsEmpty() ? TEXT("no such town's dungeon") : TEXT("already travelling"));
+				UE_LOG(LogRDTownGame, Warning, TEXT("RDTOWN -RDTownGo=%s refused: %s"), *Go, Level.IsEmpty() ? TEXT("no such town's dungeon") : bTownTraveling ? TEXT("already travelling") : TEXT("the way down refused it"));
 			}
 			// (-RDTownGo=town:<name>: out to a wilderness town (Vel Morrath: "town:velmorrath"), the packaged game's test of the
 			// city: once the wilds are ready, by the map's fast travel; her mark written once it is built round her)
@@ -1377,9 +1378,12 @@ int32 ARDDungeonGenerator::QuestProgress(const FRDQuestDef& Q) const
 
 static FString RDQuestStateOf(const URDGameInstance* GI, const FRDQuestDef& Q, int32 Progress, bool bWildOpen)
 {
-	// (the wilderness's quests wait on a level without it; since 2026-11-07 Brokenspire's gate opens on it)
-	if (!bWildOpen && Q.Goal.StartsWith(TEXT("wild:"))) return TEXT("later");
+	// (the wilderness's quests wait on a level without it, and until it is ready (as the accept does: PR #25's review, offered
+	// before it was, a quest was then refused); since 2026-11-07 Brokenspire's gate opens on it)
+	// (only a quest not taken yet waits: one taken, ready or done keeps its state while the wilds start again after a trip
+	// (PR #26's review))
 	const FRDQuestState* St = GI ? GI->FindQuest(Q.Id) : nullptr;
+	if ((!St || St->State == 0) && !bWildOpen && Q.Goal.StartsWith(TEXT("wild:"))) return TEXT("later");
 	if (!St || St->State == 0) return TEXT("offered");
 	if (St->State == 2) return TEXT("done");
 	return Progress >= Q.Count ? TEXT("ready") : TEXT("taken");
@@ -1392,7 +1396,7 @@ TArray<FString> ARDDungeonGenerator::GetQuestLines() const
 	for (const FRDQuestDef& Q : Quests)
 	{
 		const int32 P = QuestProgress(Q);
-		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
+		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild && IsWildReady()), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
 	}
 	return Out;
 }
@@ -1412,7 +1416,7 @@ TArray<FString> ARDDungeonGenerator::GetQuestLinesHere() const
 	{
 		if (!IsQuestHere(Q)) continue;
 		const int32 P = QuestProgress(Q);
-		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
+		Out.Add(FString::Printf(TEXT("%s|%s|%s|%s|%d|%d|%s"), *Q.Id.ToString(), *Q.Giver.ToString(), *Q.Title, *RDQuestStateOf(GI, Q, P, bWild && IsWildReady()), FMath::Min(P, Q.Count), Q.Count, *Q.Hint));
 	}
 	return Out;
 }
@@ -1570,7 +1574,7 @@ void ARDDungeonGenerator::BuildTownLines()
 		{
 			if (Q.Giver != Giver || Q.Town != HereQ) continue;
 			const int32 P = QuestProgress(Q);
-			const FString St = RDQuestStateOf(GI, Q, P, bWild);
+			const FString St = RDQuestStateOf(GI, Q, P, bWild && IsWildReady());
 			const FRDQuestState* Before = Q.After.IsNone() ? nullptr : (GI ? GI->FindQuest(Q.After) : nullptr);
 			const bool bOpen = Q.After.IsNone() || (Before && Before->State == 2);
 			if (!bOpen || St == TEXT("done")) continue;

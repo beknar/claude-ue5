@@ -1809,6 +1809,8 @@ public:
 		TSharedPtr<struct FRDWChunkData, ESPMode::ThreadSafe> D;
 		TWeakObjectPtr<ARDWildChunk> C;
 		int32 Step = 0, Inst = 0;
+		/** how many of the plant entry Inst's instances are added (a big entry goes in parts) */
+		int32 InstAt = 0;
 		double Ms = 0.0;
 		TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> ByMesh;
 	};
@@ -1948,6 +1950,8 @@ public:
 	int32 WildMapTilesMade = 0, WildTravels = 0;
 	float WildMapWarmTimer = 0.f;
 	bool bWildMadeLogged = false;
+	/** the den's pack fell back to the place's own kind: said once a play (RDWildPlaces.cpp) */
+	bool bWildWolvesWarned = false;
 	double WildMapTileMs = 0.0;
 	/** cells revealed in each 1.6 km block (the map's fog at its coarse zooms) */
 	TMap<FIntPoint, int32> WildRevealCount;

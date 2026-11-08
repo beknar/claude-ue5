@@ -165,16 +165,15 @@ void ARDSection::FoundryShell(int32 BI)
 		const int32 L0 = bAlongX ? Hl.Min.X : Hl.Min.Y, L1 = bAlongX ? Hl.Max.X : Hl.Max.Y;
 		const int32 W0 = bAlongX ? Hl.Min.Y : Hl.Min.X, W1 = bAlongX ? Hl.Max.Y : Hl.Max.X;
 		auto At = [&](int32 L, int32 W) { return TileWorld(bAlongX ? FIntPoint(L, W) : FIntPoint(W, L)); };
-		// (the tiles of a side door: a door edge out of the hall on that row; every other row a forge (ar2: every third row with
-		// the rows either side of a door kept left four forges, the hall still bare))
+		// (a row with a side door: a door edge out of the hall at either end of row L; every other row without one gets a forge
+		// (ar2: every third row, with the rows either side of a door kept free too, left four forges and the hall still bare))
 		auto DoorRow = [&](int32 L)
 		{
-			for (int32 Dl = 0; Dl <= 0; ++Dl)
-				for (const int32 W : { W0, W1 - 1 })
-				{
-					const FIntPoint T = bAlongX ? FIntPoint(L + Dl, W) : FIntPoint(W, L + Dl);
-					for (int32 Side = 0; Side < 4; ++Side) if (DoorEdges.Contains(EdgeKey(T, T + RDForgeDir4[Side]))) return true;
-				}
+			for (const int32 W : { W0, W1 - 1 })
+			{
+				const FIntPoint T = bAlongX ? FIntPoint(L, W) : FIntPoint(W, L);
+				for (int32 Side = 0; Side < 4; ++Side) if (DoorEdges.Contains(EdgeKey(T, T + RDForgeDir4[Side]))) return true;
+			}
 			return false;
 		};
 		FurnRoom = B.Rooms[1];

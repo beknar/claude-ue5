@@ -2349,6 +2349,67 @@ def step_port():
         end = V(pr["at"].x + out.x * 4500.0, pr["at"].y + out.y * 4500.0, 0)
         put(end, yaw=yaw_out + 180.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw_out + 180.0)); yield from wait(1.5)
         shot("gm_quay"); yield from rwait(1.2)
+        # (and out from it to the harbour's far side, where no quay stands (PR #26's review: the bed's edge there))
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=yaw_out)); yield from wait(1.2)
+        shot("gm_mouth"); yield from rwait(1.2)
+    # (every edge where walked ground meets the harbour's water (PR #25's review: a walk-mesh vertex on a tile's edge takes the
+    # tile on its +X / +Y side, so the drop to the water could fall inside the walked side on two of the four ways): the ground
+    # traced across each blocker 30 to 150 cm either side, at three points along it; its land side must stay level; and pushed at
+    # the water from 3 m inland for 2.5 s on each way, she must stop at the blocker on level ground)
+    def gzd(x_, y_):
+        """the ground's height at (x, y) and whether a pier's deck is what was hit"""
+        h = unreal.SystemLibrary.line_trace_single(G["w"], V(x_, y_, 400), V(x_, y_, -500), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        h = h.to_tuple() if h else None
+        if not (h and h[0]): return None, False
+        comp = next((x_ for x_ in h if isinstance(x_, unreal.PrimitiveComponent)), None)
+        sm_ = comp.get_editor_property("static_mesh") if isinstance(comp, unreal.StaticMeshComponent) else None
+        return h[4].z, bool(sm_ and "Gangway" in sm_.get_name())
+    def gz(x_, y_): return gzd(x_, y_)[0]
+    # (every blocker of the harbour (PR #26's review: those within 90 m of the first pier only left the far side untraced):
+    # within 250 m of any pier and with water on one side; an edge whose land side is a pier's deck is the deck's (its own
+    # collision holds her there: counted apart, not pushed), the others the quay's)
+    edges = []
+    for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m_ = c.get_editor_property("static_mesh")
+        if not m_ or m_.get_name() != "Cube": continue
+        for i in range(c.get_instance_count()):
+            t = c.get_instance_transform(i, True)
+            if isinstance(t, tuple): t = t[-1]
+            q, sc = t.translation, t.scale3d
+            if abs(sc.y - 0.3) > 0.03 or abs(sc.z - 2.1) > 0.1 or not piers or min(dist2(q, p_["at"]) for p_ in piers) > 25000.0: continue
+            yw = math.radians(t.rotation.rotator().yaw)
+            edges.append((q, V(math.cos(yw), math.sin(yw), 0), V(-math.sin(yw), math.cos(yw), 0), sc.x * 100.0))
+    ways = {}; decks = {}; pushes = {}
+    for q, al, nm, ln in edges:
+        prof = {}; deck = {}
+        for s_ in (1.0, -1.0):
+            rows = [[gzd(q.x + al.x * ln * f + nm.x * s_ * d, q.y + al.y * ln * f + nm.y * s_ * d) for d in (30, 60, 90, 120, 150)] for f in (-0.35, 0.0, 0.35)]
+            prof[s_] = [[z_ for z_, _ in r] for r in rows]; deck[s_] = any(dk for r in rows for _, dk in r)
+        far = {s_: sorted(r[-1] for r in prof[s_] if r[-1] is not None) for s_ in prof}
+        med = {s_: (far[s_][len(far[s_]) // 2] if far[s_] else None) for s_ in prof}
+        land = next((s_ for s_ in (1.0, -1.0) if med[s_] is not None and med[s_] > -60.0), None)
+        if land is None or med[-land] is None or med[-land] > -60.0: continue      # (no water on the other side: not the harbour's edge)
+        wd = V(-nm.x * land, -nm.y * land, 0)
+        key = ("+x" if wd.x > 0 else "-x") if abs(wd.x) > abs(wd.y) else ("+y" if wd.y > 0 else "-y")
+        dip = min(z_ for r in prof[land] for z_ in r if z_ is not None)
+        e = (decks if deck[land] else ways).setdefault(key, {"edges": 0, "land_dip_cm": 0.0, "dipped": 0})
+        e["edges"] += 1; e["land_dip_cm"] = round(min(e["land_dip_cm"], dip), 1); e["dipped"] += 1 if dip < -30.0 else 0
+        # (a trace's 0.0 is ground, not a miss (PR #26's review: `or` took the level quay's 0.0 for none and skipped it))
+        if not deck[land] and key not in pushes and all((lambda z_: z_ is not None and abs(z_) < 60.0)(gz(q.x + nm.x * land * d, q.y + nm.y * land * d)) for d in (200, 300)):
+            pushes[key] = (q, wd, land, nm)
+    res["harbour_edges"] = ways; res["deck_edges"] = decks
+    for key, (q, wd, land, nm) in sorted(pushes.items()):
+        st_ = V(q.x - wd.x * 300.0, q.y - wd.y * 300.0, 0)
+        put(st_, yaw=math.degrees(math.atan2(wd.y, wd.x))); yield from wait(1.0)
+        z0 = G["pawn"].get_actor_location().z; zmin = z0; t0 = time.time()
+        while time.time() - t0 < 2.5:
+            G["pawn"].add_movement_input(wd, 1.0); yield
+            zmin = min(zmin, G["pawn"].get_actor_location().z)
+        p1 = G["pawn"].get_actor_location()
+        res.setdefault("edge_push", {})[key] = {"from_line_m": round(((p1.x - q.x) * wd.x + (p1.y - q.y) * wd.y) / 100, 2), "z0": round(z0), "z": round(p1.z), "z_min": round(zmin)}
+        # (the quay's face and the bed below it, looked down at from where she stopped: the drawn ground must drop at the face)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-40, yaw=math.degrees(math.atan2(wd.y, wd.x)))); yield from wait(1.0)
+        shot("gm_edge_" + key.replace("+", "p").replace("-", "m")); yield from rwait(1.2)
     bodies = [p_ for p_ in SP if p_["kind"] == "body"]; gib = [p_ for p_ in SP if p_["kind"] == "gibbet"]
     if bodies and gib:
         b0 = bodies[len(bodies) // 2]; gg = min(gib, key=lambda q: dist2(q["at"], b0["at"]))
@@ -2379,6 +2440,8 @@ def step_port():
           and "Harbourmaster Edda Strand" in res["titles"] and "Aldric Venn" not in res["titles"]
           and any("Old Grate" in str(p) for p in res["harbourmaster"]["panel"]) and res["port_fog"] > 0.8 and res["fog"] and all(f["start_m"] < 20 and f["density"] > 0.1 for f in res["fog"])
           and pw and abs(pw["z_on_deck"] - 90) < 40 and pw["z_min_pushed"] > pw["z_on_deck"] - 30 and not res.get("on_pier")
+          and len(res["harbour_edges"]) >= 3 and all(e["dipped"] == 0 for e in list(res["harbour_edges"].values()) + list(res["deck_edges"].values()))
+          and set(res.get("edge_push") or {}) == set(res["harbour_edges"]) and all(e["from_line_m"] < 0 and e["z_min"] > e["z0"] - 30 for e in res["edge_push"].values())
           and res.get("gate_travel") == "catacombs")
     step_result("port", ok, **res)
 

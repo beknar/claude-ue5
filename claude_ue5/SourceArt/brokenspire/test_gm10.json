@@ -1,5 +1,5 @@
 {
- "tag": "gm5",
+ "tag": "gm10",
  "plan": [
   "port"
  ],
@@ -240,17 +240,75 @@
     }
    ],
    "on_pier": {},
+   "harbour_edges": {
+    "+x": {
+     "edges": 102,
+     "land_dip_cm": -0.0,
+     "dipped": 0
+    },
+    "+y": {
+     "edges": 25,
+     "land_dip_cm": -13.9,
+     "dipped": 0
+    },
+    "-y": {
+     "edges": 25,
+     "land_dip_cm": -5.2,
+     "dipped": 0
+    }
+   },
+   "deck_edges": {
+    "-y": {
+     "edges": 80,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    },
+    "+y": {
+     "edges": 80,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    },
+    "+x": {
+     "edges": 10,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    }
+   },
+   "edge_push": {
+    "+x": {
+     "from_line_m": -0.45,
+     "z0": 86,
+     "z": 86,
+     "z_min": 86
+    },
+    "+y": {
+     "from_line_m": -0.45,
+     "z0": 86,
+     "z": 86,
+     "z_min": 86
+    },
+    "-y": {
+     "from_line_m": -0.45,
+     "z0": 84,
+     "z": 86,
+     "z_min": 84
+    }
+   },
    "gate_from_sluice_m": 14,
    "gate_travel": "catacombs"
   }
  ],
- "windows_hidden": "Message Log",
+ "windows_hidden": "",
  "shots": [
-  "bs_gm5_gm_harbour.png",
-  "bs_gm5_gm_quay.png",
-  "bs_gm5_gm_dead.png",
-  "bs_gm5_gm_sewer_gate.png"
+  "bs_gm10_gm_harbour.png",
+  "bs_gm10_gm_quay.png",
+  "bs_gm10_gm_mouth.png",
+  "bs_gm10_gm_edge_px.png",
+  "bs_gm10_gm_edge_py.png",
+  "bs_gm10_gm_edge_my.png",
+  "bs_gm10_gm_dead.png",
+  "bs_gm10_gm_sewer_gate.png"
  ],
  "error": null,
- "windows_shown_again": 1
+ "windows_shown_again": 0
 }

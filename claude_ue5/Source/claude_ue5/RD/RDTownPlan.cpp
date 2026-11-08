@@ -2294,8 +2294,24 @@ float ARDSection::TownBorderDist(const FVector2D& W) const
 	return Dm;
 }
 
+// (the tiles a walked-ground vertex touches: one inside a tile, two on its edge, four at a corner; a vertex on an edge read the
+// tile on its +X / +Y side alone, so the harbour's drop to the water fell inside the walked quay on two of its four ways (PR #25's
+// review). The drawn ground's harbour is a rectangle and needs no tiles; UnderFloor has its own sampling for the buildings)
+static void RDTPTouching(const FVector2D& P, float M, int32 N, TArray<FIntPoint, TInlineAllocator<4>>& Out)
+{
+	Out.Reset();
+	const int32 Xr = FMath::RoundToInt(P.X / M), Yr = FMath::RoundToInt(P.Y / M);
+	const bool bEx = FMath::Abs(P.X - Xr * M) < 0.5f, bEy = FMath::Abs(P.Y - Yr * M) < 0.5f;
+	const int32 X0 = bEx ? Xr - 1 : FMath::FloorToInt(P.X / M), X1 = bEx ? Xr : X0;
+	const int32 Y0 = bEy ? Yr - 1 : FMath::FloorToInt(P.Y / M), Y1 = bEy ? Yr : Y0;
+	for (int32 X = X0; X <= X1; ++X)
+		for (int32 Y = Y0; Y <= Y1; ++Y)
+			Out.AddUnique(FIntPoint(FMath::Clamp(X, 0, N - 1), FMath::Clamp(Y, 0, N - 1)));
+}
+
 void ARDSection::TownGround()
 {
+	TArray<FIntPoint, TInlineAllocator<4>> Tt;
 	if (!bBuildStatic) return;
 	// one procedural mesh over the whole section: grass, cobbles on the straight roads and the square, earth on the winding
 	// streets, the lane and round the doors (the village's ground material by vertex colour: R a dark trodden floor, G cobbles,
@@ -2309,6 +2325,13 @@ void ARDSection::TownGround()
 	const int32 Sub = 3;                          // vertices a tile
 	const int32 Nv = N * Sub + 1;
 	const float St = M / Sub;
+	// (the port's harbour in cm, one definition for the drawn and the walked ground: on or in its rectangle (Tol 0.5) or strictly
+	// inside it (Tol -0.5); and whether the tile beyond its edge is the quay (the town's walked ground: HarbourBuild stands the
+	// stone face there) or not (outside the section or the town's ground: no face, so no drop drawn behind one: PR #26's review))
+	const bool bHarb = TownHarbour.Area() > 0;
+	const float Hx0 = TownHarbour.Min.X * M, Hx1 = TownHarbour.Max.X * M, Hy0 = TownHarbour.Min.Y * M, Hy1 = TownHarbour.Max.Y * M;
+	auto OnHarbour = [&](const FVector2D& Q, float Tol) { return bHarb && Q.X > Hx0 - Tol && Q.X < Hx1 + Tol && Q.Y > Hy0 - Tol && Q.Y < Hy1 + Tol; };
+	auto QuayAt = [&](int32 X, int32 Y) { const FIntPoint Q(X, Y); return In(Q) && Type[Idx(Q)] != 0 && !TownHarbour.Contains(Q); };
 	const FVector2D O2(GetActorLocation().X, GetActorLocation().Y);
 	const uint32 Sd = (uint32)Seed;
 	TArray<FVector> V; TArray<int32> Tri; TArray<FVector> Nrm; TArray<FVector2D> UV; TArray<FLinearColor> Col; TArray<FProcMeshTangent> Tan;
@@ -2435,7 +2458,33 @@ void ARDSection::TownGround()
 			float Z = UnderFloor(P) ? -40.f : 0.f;
 			// (the port's harbour: its bed 2.6 m under the quay, under the harbour's own water (RDPort.cpp), the piers' tiles too:
 			// they are decks on pilings; at the ground's height the grass showed between the planks)
-			if (TownHarbour.Area() > 0 && TownHarbour.Contains(T)) Z = -260.f;
+			// (sunk strictly inside the harbour's rectangle, so the vertices on its edge stay at the quay's height as the walked ground
+			// does. The drop is drawn behind the quay's stone face, under the wall: a vertex on the edge stands 10 cm back into the
+			// land and the sunk vertex a step from it 5 cm back. Left on the grid the bed made a 1 m ramp out of the water in front
+			// of the face and under the piers' roots (PR #26's review); dropped 5 cm in front of the line it hid the face's stone
+			// behind a stretched cliff of the ground's own (884 gm8's edge pictures). Only where the quay is beyond the edge: where
+			// it is not (the section's border, ground outside the town) the bed runs on to the edge, as it did)
+			FVector2D Pv = P;
+			if (OnHarbour(P, 0.5f))
+			{
+				const int32 Tx = FMath::Clamp(FMath::FloorToInt(P.X / M), TownHarbour.Min.X, TownHarbour.Max.X - 1), Ty = FMath::Clamp(FMath::FloorToInt(P.Y / M), TownHarbour.Min.Y, TownHarbour.Max.Y - 1);
+				const bool bQx0 = QuayAt(TownHarbour.Min.X - 1, Ty), bQx1 = QuayAt(TownHarbour.Max.X, Ty), bQy0 = QuayAt(Tx, TownHarbour.Min.Y - 1), bQy1 = QuayAt(Tx, TownHarbour.Max.Y);
+				if (OnHarbour(P, -0.5f))
+				{
+					Z = -260.f;
+					if (bQx0 && P.X - St < Hx0 + 0.5f) Pv.X = Hx0 - 5.f; else if (bQx1 && P.X + St > Hx1 - 0.5f) Pv.X = Hx1 + 5.f;
+					if (bQy0 && P.Y - St < Hy0 + 0.5f) Pv.Y = Hy0 - 5.f; else if (bQy1 && P.Y + St > Hy1 - 0.5f) Pv.Y = Hy1 + 5.f;
+				}
+				else
+				{
+					// (on the rectangle's edge: back into the quay where there is one; elsewhere the bed's)
+					const bool bEx0 = FMath::Abs(P.X - Hx0) < 0.5f && bQx0, bEx1 = FMath::Abs(P.X - Hx1) < 0.5f && bQx1;
+					const bool bEy0 = FMath::Abs(P.Y - Hy0) < 0.5f && bQy0, bEy1 = FMath::Abs(P.Y - Hy1) < 0.5f && bQy1;
+					if (!(bEx0 || bEx1 || bEy0 || bEy1)) Z = -260.f;
+					if (bEx0) Pv.X = Hx0 - 10.f; else if (bEx1) Pv.X = Hx1 + 10.f;
+					if (bEy0) Pv.Y = Hy0 - 10.f; else if (bEy1) Pv.Y = Hy1 + 10.f;
+				}
+			}
 			Sunk[I * Nv + J] = Z < 0.f ? 1 : 0;
 			if (Z == 0.f)
 			{
@@ -2444,8 +2493,8 @@ void ARDSection::TownGround()
 				// (the open ground's rise and fall: 0 where anything stands or is walked to)
 				Z += TownLiftAt(Wp);
 			}
-			V[I * Nv + J] = FVector(P.X, P.Y, Z);
-			UV[I * Nv + J] = FVector2D(P.X / 400.f, P.Y / 400.f);
+			V[I * Nv + J] = FVector(Pv.X, Pv.Y, Z);
+			UV[I * Nv + J] = FVector2D(Pv.X / 400.f, Pv.Y / 400.f);
 		}
 	// (normals from the heights: the bumps shade)
 	for (int32 I = 0; I < Nv; ++I)
@@ -2487,9 +2536,19 @@ void ARDSection::TownGround()
 			for (int32 J = 0; J < NvW; ++J)
 			{
 				const FVector2D P(I * StW, J * StW);
-				const FIntPoint Tw_(FMath::Clamp(FMath::FloorToInt(P.X / M), 0, N - 1), FMath::Clamp(FMath::FloorToInt(P.Y / M), 0, N - 1));
-				// (the harbour's water walked 1.7 m down behind its blockers; a pier's deck flat at the quay's height)
-				Vw[I * NvW + J] = FVector(P.X, P.Y, InHarbourWater(Tw_) ? -170.f : (TownHarbour.Area() > 0 && TownHarbour.Contains(Tw_)) ? 0.f : TownLiftAt(P + O2));
+				// (the harbour's water walked 1.7 m down behind its blockers; a pier's deck flat at the quay's height. A vertex on a
+				// tile's edge is water only if every tile it touches is: the drop to the water then falls behind the blocker on every
+				// way (taking the tile on its +X / +Y side, the quay's last 1.5 m fell 1.4 m on two ways: 884 gm6, PR #25's review))
+				float Zw = TownLiftAt(P + O2);
+				// (only a vertex on the harbour's rectangle or in it can touch one of its tiles)
+				if (OnHarbour(P, 0.5f))
+				{
+					RDTPTouching(P, M, N, Tt);
+					bool bWater = true, bPier = false;
+					for (const FIntPoint& Q : Tt) { bWater &= InHarbourWater(Q); bPier |= TownHarbour.Contains(Q) && !InHarbourWater(Q); }
+					if (bWater) Zw = -170.f; else if (bPier) Zw = 0.f;
+				}
+				Vw[I * NvW + J] = FVector(P.X, P.Y, Zw);
 			}
 		TArray<int32> Tw; Tw.Reserve((NvW - 1) * (NvW - 1) * 6);
 		for (int32 I = 0; I < NvW - 1; ++I)

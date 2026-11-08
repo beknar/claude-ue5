@@ -64,18 +64,23 @@ Built and tested (`884 port`, `descendsewer`; `888 world`, `towns`); still to te
 - [ ] **The city's frame rate settled:** 2 to 16 just after the city was built round her.
 - [ ] **The packaged game played:** the Shipping package of 2026-11-07 (`builds\graymourne`) goes down into `sewers` (`-RDTownGo=dungeon:graymourne`) and out to the port (`town:graymourne`) and runs in each, no crash; `869` set the instanced-mesh usage on the harbour's nets, wrecks, fish racks, boats and piers and the sewers' mud and drowned props (16 base materials). The Development package from the same cook (`builds\graymourne_dev`) logged no "missing usage flag" in the port or the first hall (the deeper tiers' pieces are checked only by `869`'s tables); no picture taken in it, and the sewer gate, the deeper tiers and the way back have not been played in it.
 
-## PR #25's review (2026-11-07, not yet checked in play)
+## PR #25's review (2026-11-07; checked and fixed 2026-11-08)
 
-The review's finds, merged with the PR and still to be checked and fixed:
+The review's finds, each checked (in play where it could be measured, else in the code) and fixed:
 
-- [ ] **The harbour's edges lean** (`RDTownPlan.cpp`'s walk mesh, about line 2492): a vertex on a tile's edge takes the tile on its +X / +Y side, so the drop from deck to water may fall inside the walked area on the quay's side, a pier's +Y side and its far end (a slope of about 48 degrees in the last 1.5 m) and outside it on the -Y side; the drawn bed the same. The pier push (2.55 m off the middle) would not see it: push her toward each edge and its end.
-- [ ] **The quest places' fallback is unchecked** (`RDWildWorld.cpp` `MakeQuestPlaces`, about line 1046): the fixed points (2 km +X; 1.9 / 2.5 km) get no water, slope or road check: a den or the tower could stand in a lake or on a slope.
-- [ ] **`-RDTownGo=catacombs` in a city with a dungeon of its own** opens that town's (`DescendToCatacombs`, `RDHoly.cpp` line 248), and its refusal still says "no catacombs level". The tests start in Brokenspire, which has none.
-- [ ] **The wild quests offered before the wilds are ready** (`RDTownGame.cpp` about line 1430): the state reads `bWild`, the accept `IsWildReady()`: in the first seconds the board offers one and then refuses it.
-- [ ] **The foundry's gate and furnaces at `MistgateAt` unguarded** (`RDForge.cpp` about line 284): the sewer gate checks `IsZero`; the foundry would build at the section's corner if its plan never set it.
-- [ ] **The den's wolves by name** (`RDWildPlaces.cpp` about line 208): the first monster named "Ripper"; with none, a random kind titled "Mill Road Wolf", unlogged.
-- [ ] **A big foliage entry shifted step by step** (`RDWildGame.cpp` about line 330): `RemoveAt(0, N)` moves the rest of the array each step (O(n²)); keep an index instead.
-- [ ] **A dead loop** in `RDForge.cpp`'s `DoorRow` (about line 172: `Dl <= 0`) and its comment about the rows either side.
+- [x] **The harbour's edges leaned: confirmed in play, fixed** (`884 port`: test_gm6 failed on it, test_gm10 passes). A walk-mesh vertex on a tile's edge took the tile on its +X / +Y side, so where the water lay +X or +Y of the land the walked ground fell up to 1.39 m within 1.5 m of the blocker and she slid 1.06 m down beside it (the piers' decks hid it there). A walked vertex on an edge is water now only if every tile it touches is (`RDTPTouching`): every blocker of the harbour level on its land side (152 quay edges, 170 pier-deck edges, none lower than 14 cm), she stops 0.45 m before the line on level ground on every way the quay has. The drawn bed drops behind the quay's stone face where a quay stands beyond the edge, and runs on to the edge elsewhere (PR #26's reviews: left on the grid it made a 1 m ramp in front of the face; dropped in front of the line it covered the face; lifted on every side it would have stood as a grass bank at the harbour's far side): the stone shows on every way in the edge pictures (`gm_edge_*`), the town wall straight out of the water on the far side (`gm_mouth`).
+- [x] **The quest places' fallback, fixed**: a fixed point is held to the same flat, dry, off-road ground as far out as the quest asks (1.8 / 3 km): the den the nearest within 1.5 km, the tower the highest within 600 m of the first good ground; facing Brokenspire; else left there and logged. Not seen in a game yet (the test's games all find a place beside the road: `888 quests` test_s12).
+- [x] **The wild quests offered before the wilds are ready, fixed**: a quest not yet taken waits for `IsWildReady()` as the accept does (a window of 0.13 to 0.54 s before); one taken, ready or done keeps its state meanwhile (PR #26's review).
+- [x] **`-RDTownGo=catacombs` names Vel Morrath's catacombs** (it took the town's own dungeon when started in a city with one); its refusal and `dungeon:<town>`'s say why. Not run in a package since (the packaged test starts in Brokenspire, which has none, and goes the same way).
+- [x] **The foundry's gate at `MistgateAt` unguarded: cannot happen**: the foundry's plan (`RDTownPlan.cpp` 688-691) always sets `MistgateAt` and `FoundryShell` runs only for a foundry (1100). Left as it is.
+- [x] **The den's wolves by name**: the ripper dogs, else a wolf, hound or dog (case kept: not a werewolf or hellhound), else the place's own kind with a warning once a play (the generator's flag) (`888 quests` test_s12: four ripper dogs, no warning).
+- [x] **A big plant entry is added in parts from where the last stopped** (`FWildBuild::InstAt`), not moved down each part. `888 build7`: the longest step 5.5 and 7.4 ms, at most 8.6 and 9.3 ms a frame in two runs after it (6.0 / 9.3 before, test_s5): the runs' own spread; the change not measurable apart.
+- [x] **The dead loop** in `RDForge.cpp`'s `DoorRow` is a plain check of the row, its comment true (`884 forge` test_ar5: the same 19 forges and every piece count as ar4).
+
+PR #26's second review, left open (small):
+
+- [ ] **A quest panel opened before the wilds are ready keeps its LATER line** until it is opened again (`BuildTownLines` runs on a panel action or an opening): a window of 0.13 to 0.54 s at the start, a little longer after a trip down.
+- [ ] **The den's pack by a word in the name**: with no ripper dog, a kind named "Dogman" or "WolfRider" would do (the first in the table, not the weakest), with no warning.
 
 ## The captain's wilderness quests (2026-11-07)
 
