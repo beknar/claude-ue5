@@ -11,6 +11,8 @@ Steps:
           the frames' times, every chunk the same both ways
   quests  (2026-11-07) the captain's two wilderness quests: their places, taken, played (the den's pack, the patrol's
           remains), turned in
+  secondary9 (2026-11-09, 911) a wild place's Hallowed Stone taken and not laid again, the lairs' monsters' Seraph Feathers,
+          the Martial Artist's Water Walk over a lake
   wild25  (2026-11-09, 910) lairs and spawn points of six tiers along the roads, Brokenspire to Heaven: each monster of its
           place's tier and of a kind whose wild band holds it, the kinds changing along the way
 Writes SourceArt/wilderness/test_<tag>.json and logs "WILDTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
@@ -509,6 +511,104 @@ def step_wild25():
     ok = (len(res["visits"]) >= 5 and len(vs) >= 5 and all(not v["out_of_band"] and v["tiers"] == [v["tier"]] for v in vs)
           and max(v["tier"] for v in vs) >= 20 and len({tuple(v["kinds"]) for v in vs}) >= 4)
     step_result("wild25", ok, **res)
+
+
+def step_secondary9():
+    """the sixth phase's materials and the water walk in the wilds (911, RD/RDSecondary.cpp): a ruin's, ritual site's or cave's
+    Hallowed Stone lies at it, F takes it, and it is not laid again when its chunk is made again; the wilds' monsters drop Seraph
+    Feathers (the lairs' monsters killed: their feathers counted against the kills); the Martial Artist walks on a lake: put on
+    its shore facing it, Water Walk made, she runs over the water at its face (never under it) for its length, then is off it"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    stone = str(g.get_editor_property("hallowed_stone_item")); feather = str(g.get_editor_property("seraph_feather_item"))
+    def piles_near(x, y, r_m, thing):
+        out = []
+        for p in g.get_editor_property("loot_piles"):
+            if not p or not unreal.SystemLibrary.is_valid(p): continue
+            l = p.get_actor_location()
+            if math.hypot(l.x / 100.0 - x, l.y / 100.0 - y) < r_m and thing in [str(t) for t in p.things]: out.append(p)
+        return out
+    # ---- a Hallowed Stone
+    near = [p for p in places_near(0, 0, 25000) if p["kind"] in ("ruins", "ritual", "cave")]
+    st = {"places": len(near)}
+    if near:
+        p = min(near, key=lambda q: math.hypot(q["x"], q["y"]))
+        g.wild_drop_all(); g.wild_put_her(p["x"] - 6.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        ps = piles_near(p["x"], p["y"], 15.0, stone); st["place"] = p["name"]; st["piles"] = len(ps)
+        if ps:
+            at = ps[0].get_actor_location()
+            G["pawn"].set_actor_location(V(at.x - 90.0, at.y, at.z + 100.0), False, True); yield from rwait(0.6)
+            n0 = cb().get_item_count(stone)
+            yield from press("F"); yield from rwait(0.6)
+            st["taken"] = cb().get_item_count(stone) - n0
+            g.wild_drop_all(); g.wild_put_her(p["x"] - 6.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+            st["laid_again"] = len(piles_near(p["x"], p["y"], 15.0, stone))
+    res["stone"] = st
+    # ---- Seraph Feathers from the lairs' monsters
+    fe = {"kills": 0, "feathers": 0, "lairs": []}
+    lairs = sorted([p for p in places_near(0, 0, 25000) if p["kind"] in ("lair", "spawn")], key=lambda q: math.hypot(q["x"], q["y"]))
+    for p in lairs[:3]:
+        g.wild_drop_all(); g.wild_put_her(p["x"] - 45.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        at = V(p["x"] * 100.0, p["y"] * 100.0, 0)
+        ms = [m for m in g.get_monsters() if m and not m.is_dead() and not m.is_ally() and dist2(m.get_actor_location(), at) < 4000.0]
+        f0 = len(piles_near(p["x"], p["y"], 45.0, feather))
+        for m in ms: m.apply_damage(1e7, G["pawn"])
+        yield from rwait(1.0)
+        got = len(piles_near(p["x"], p["y"], 45.0, feather)) - f0
+        fe["kills"] += len(ms); fe["feathers"] += got; fe["lairs"].append({"name": p["name"], "kills": len(ms), "feathers": got})
+        cb().set_health(cb().get_max_health())
+        if fe["feathers"] >= 2: break
+    res["feathers"] = fe
+    # ---- the water walk: the Martial Artist on the nearest lake's shore
+    ww = {}
+    lakes = []
+    for f in g.get_wild_feature_lines():
+        q = str(f).split("|")
+        if q[0] == "lake": lakes.append((float(q[1]), float(q[2]), float(q[3])))
+    T = towns(); keep = [(t["x"], t["y"]) for t in T.values()]
+    lakes = [k for k in lakes if all(math.hypot(k[0] - x, k[1] - y) > 2500 for x, y in keep)]
+    lakes.sort(key=lambda k: math.hypot(k[0], k[1]))
+    if lakes:
+        lx, ly, lr = lakes[0]; ww["lake"] = [round(lx), round(ly), round(lr)]
+        # (out from its middle until dry land, ten rays: the first shore with water 12 m on toward the middle)
+        shore = None
+        for k in range(10):
+            a = k * math.pi / 5.0; dx, dy = math.cos(a), math.sin(a)
+            for d in range(int(lr * 0.4), int(lr * 1.6), 5):
+                s_ = sample(lx + dx * d, ly + dy * d)
+                if int(s_["water"]) == 0 and s_["lava"] < 0.5:
+                    inner = sample(lx + dx * (d - 14), ly + dy * (d - 14))
+                    if int(inner["water"]) != 0 and inner["water_m"] > inner["h"] + 0.5: shore = (lx + dx * (d + 2), ly + dy * (d + 2), -dx, -dy)
+                    break
+            if shore: break
+        ww["shore"] = [round(shore[0]), round(shore[1])] if shore else None
+        if shore:
+            if str(g.get_editor_property("current_hero")) != "MartialArtist": g.switch_hero("MartialArtist"); yield from rwait(1.0); refresh(); g = G["gen"]
+            t0 = time.time()
+            while cb() is None and time.time() - t0 < 10: yield; refresh()
+            g.wild_drop_all(); g.wild_put_her(shore[0], shore[1]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+            yaw = math.degrees(math.atan2(shore[3], shore[2]))
+            G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=yaw))
+            c = cb(); c.set_secondary_rank("WaterWalk", 1, "None"); yield from rwait(0.3)
+            ww["used"] = c.use_secondary("WaterWalk"); ww["says"] = str(c.message)
+            zs = []; p0 = G["pawn"].get_actor_location(); hh = G["pawn"].capsule_component.get_scaled_capsule_half_height()
+            t0 = time.time()
+            while time.time() - t0 < 6.0:
+                G["pawn"].add_movement_input(V(shore[2], shore[3], 0), 1.0, False)
+                l = G["pawn"].get_actor_location(); s_ = sample(l.x / 100.0, l.y / 100.0)
+                if c.is_secondary_on("WaterWalk") and int(s_["water"]) != 0 and s_["water_m"] > s_["h"] + 0.3: zs.append(round((l.z - hh) - (s_["z"] + (s_["water_m"] - s_["h"]) * 100.0), 1))          # (her feet over the water's face)
+                yield
+            ww.update({"walked_cm": round(c.last_move_length), "moved_cm": round(dist2(G["pawn"].get_actor_location(), p0)), "over_water_samples": len(zs),
+                       "feet_over_water_cm": [min(zs), max(zs)] if zs else None, "on_after": c.is_secondary_on("WaterWalk")})
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=yaw + 180)); yield from rwait(0.3)
+    res["water"] = ww
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from rwait(1.0); refresh()
+    quiet(False)
+    ok_s = st.get("piles", 0) >= 1 and st.get("taken") == 1 and st.get("laid_again") == 0
+    ok_f = fe["kills"] >= 3 and fe["feathers"] >= 1
+    ok_w = bool(ww.get("used")) and ww.get("walked_cm", 0) >= 800 and ww.get("over_water_samples", 0) > 20 and ww["feet_over_water_cm"] and ww["feet_over_water_cm"][0] > -25 and not ww.get("on_after")
+    step_result("secondary9", ok_s and ok_f and ok_w, stone_ok=ok_s, feathers_ok=ok_f, water_ok=ok_w, **res)
 
 
 # ------------------------------------------------------------------------------------------------ fast travel
@@ -1529,7 +1629,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

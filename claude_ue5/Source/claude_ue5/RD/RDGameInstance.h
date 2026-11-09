@@ -64,6 +64,9 @@ struct FRDCarry
 	/** her summons standing: each one's summoning (its spell) and its share of hit points */
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<FName> Summons;
 	UPROPERTY(SaveGame, BlueprintReadOnly) TArray<float> SummonShares;
+	/** the list of 2026-11-08b's sixth phase: her secondary abilities' ranks and the spells her boosts raise */
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, int32> SecondaryRanks;
+	UPROPERTY(SaveGame, BlueprintReadOnly) TMap<FName, FName> BoostSpells;
 };
 
 /** a dungeon level other than Mistward Castle (Vel Morrath's catacombs, 2026-11-06): the tiers she opened there and the

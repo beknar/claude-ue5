@@ -5,6 +5,7 @@
 #include "RD/RDMonster.h"
 #include "RD/RDCombat.h"
 #include "RD/RDInputSim.h"
+#include "RD/RDGameInstance.h"
 #include "UObject/UObjectIterator.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -599,6 +600,8 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	if (!Best || !Pc) return false;
 	if (Best->bHarvest) Pc->TakeHarvest(Best->Things);
 	else Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
+	// (the sixth phase: a wild place's stone taken for good)
+	if (Best->WildKey >= 0) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Best->WildKey);
 	LootPiles.Remove(Best);
 	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
 	Best->Destroy();

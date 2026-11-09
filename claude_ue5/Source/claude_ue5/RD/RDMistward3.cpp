@@ -241,6 +241,7 @@ ARDMonster* ARDDungeonGenerator::SummonKindAlly(FName Kind, FVector At, FName Sp
 	if (!bGrow) { Hp = M->GetMaxHealth(); Dm = M->GetDamage(); }
 	M->BecomeAlly(0.f, Hp, Dm);
 	M->SummonSpell = Spell;
+	M->AllyPace = SecondaryMul(TEXT("Frenzy"));          // (the sixth phase: her frenzy)
 	Allies.Add(M);
 	UE_LOG(LogRDMistward3, Log, TEXT("RDSUMMON %s for %s: tier %d, %.0f hit points, %.0f damage (%d of them)"), *Kind.ToString(), *Spell.ToString(), T, M->GetMaxHealth(), M->GetDamage(), CountSummoned(Spell));
 	return M;

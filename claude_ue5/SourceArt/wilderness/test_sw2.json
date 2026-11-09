@@ -1,0 +1,63 @@
+{
+ "tag": "sw2",
+ "plan": [
+  "secondary9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "secondary9",
+   "ok": true,
+   "stone_ok": true,
+   "feathers_ok": true,
+   "water_ok": true,
+   "stone": {
+    "places": 17,
+    "place": "The Old Watchtower",
+    "piles": 1,
+    "taken": 1,
+    "laid_again": 0
+   },
+   "feathers": {
+    "kills": 7,
+    "feathers": 3,
+    "lairs": [
+     {
+      "name": "The Mill Road Den",
+      "kills": 4,
+      "feathers": 0
+     },
+     {
+      "name": "Boar Lair",
+      "kills": 3,
+      "feathers": 3
+     }
+    ]
+   },
+   "water": {
+    "lake": [
+     15453,
+     1577,
+     821
+    ],
+    "shore": [
+     16203,
+     1577
+    ],
+    "used": true,
+    "says": "Water Walk",
+    "walked_cm": 1003,
+    "moved_cm": 2206,
+    "over_water_samples": 151,
+    "feet_over_water_cm": [
+     1.1,
+     2.1
+    ],
+    "on_after": false
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "windows_shown_again": 3
+}

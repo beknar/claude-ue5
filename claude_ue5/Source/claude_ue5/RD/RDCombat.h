@@ -621,6 +621,90 @@ public:
 	TArray<FSlashArea> SlashAreas;
 	void TickSlashAreas(float Dt);
 
+	// ================================================================ the secondary abilities (RDSecondary.cpp; the list of
+	// 2026-11-08b's sixth phase: earned with Angel Tokens, a token a rank, six ranks; the generator's Secondaries)
+	/** her rank in a secondary ability (0: not learned) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") int32 GetSecondaryRank(FName Ability) const;
+	/** sets a rank (tests; the token's way is RankUpSecondary) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") bool SetSecondaryRank(FName Ability, int32 Rank, FName Spell);
+	/** an Angel Token spent on an ability of her hero: a rank more (its first rank of a spell boost takes the spell she chose) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") bool RankUpSecondary(FName Ability, FName Spell);
+	/** her hero's abilities: "<name>|<title>|<kind>|<rank>|<max>|<what it does now>|<at the next rank>|<its spell>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") TArray<FString> GetSecondaryLines() const;
+	/** the spell a spell boost raises (none: not chosen) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") FName GetBoostSpell(FName Ability) const;
+	/** an active ability made, a toggle turned on or off (refused with the reason said) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") bool UseSecondary(FName Ability);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") float GetSecondaryCooldownLeft(FName Ability) const;
+	/** its time on her still running (a shield, a mode), or a toggle on */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") bool IsSecondaryOn(FName Ability) const;
+	/** what the last one did (tests): "<name>|<what it reached>|<a number of it>" */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") FString LastSecondary;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") int32 SecondaryUses = 0;
+	/** what the shields and modes took (tests): blows parried, peeled, turned to mana, taken by mana; mana gained, mana spent;
+	 *  the mana blade's blows; soul harvests */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") int32 ParriedBlows = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") int32 PeeledLayers = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") float RechargedMana = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") float ShieldManaSpent = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") int32 ManaBladeBlows = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") int32 SoulHarvests = 0;
+	/** the leap's, the flash step's, the misty step's and the water walk's length (cm), as made */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") float LastMoveLength = 0.f;
+	/** choosing what an Angel Token raises (the inventory's list; a spell boost then asks for its spell) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") bool BeginRankUp(FName Item);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") void CancelRankUp();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") bool IsPickingRank() const { return !RankWith.IsNone(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") FName GetRankItem() const { return RankWith; }
+	/** the list: "rank|<name>|<title>|<rank>|<max>|<at the next rank>" or, choosing a boost's spell, "spell|<name>|<boosted by>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") TArray<FString> GetRankLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") int32 GetRankCursor() const { return RankCursor; }
+	/** the ability whose spell she is choosing (none: choosing the ability) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Secondary") FName GetRankSpellFor() const { return RankSpellFor; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") void MoveRankCursor(int32 Step);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") bool RankEntry(int32 Line = -1);
+	/** her ranks as a map (her carry) */
+	const TMap<FName, int32>& GetSecondaryRanks() const { return SecondaryRanks; }
+	const TMap<FName, FName>& GetBoostSpells() const { return BoostSpells; }
+	void SetSecondaryState(const TMap<FName, int32>& Ranks, const TMap<FName, FName>& Spells) { SecondaryRanks = Ranks; BoostSpells = Spells; }
+	/** a secondary ability's number at her rank (Values, Values2, Seconds, Cooldowns: 0 when not learned) */
+	float SecondaryValue(FName Ability, int32 Which) const;
+	/** what the shields and modes leave of a blow (ApplyDamage; 0: it is all taken) */
+	float AbsorbBySecondary(float Amount, AActor* From);
+	/** the spell boosts on a spell weapon (GetDamageOf) */
+	float SpellBoostMul(const FRDWeaponDef& W) const;
+	/** the mana blade on a blow of her weapon: the damage it adds (bSpend: the mana taken) */
+	float ManaBladeBonus(bool bSpend);
+	void TickSecondary(float Dt);
+
+private:
+	TMap<FName, int32> SecondaryRanks;
+	TMap<FName, FName> BoostSpells;
+	FName RankWith, RankSpellFor;
+	int32 RankCursor = 0;
+	float RechargeUntil = -100.f, AblationUntil = -100.f, ManaShieldUntil = -100.f, CurseShieldUntil = -100.f, BlindShieldUntil = -100.f,
+		BleedShieldUntil = -100.f, ParryUntil = -100.f, IronSkinUntil = -100.f, ShieldAuraTick = 0.f;
+	int32 AblationLayers = 0;
+	bool bManaBlade = false;
+	/** a monster pulled to her or pushed away, tick by tick (swept: walls stop it) */
+	struct FForcedMove { TWeakObjectPtr<ARDMonster> M; FVector To = FVector::ZeroVector; float Speed = 0.f, Until = 0.f; };
+	TArray<FForcedMove> ForcedMoves;
+	/** the mana swarm's lights still to go (one each 0.07 s) */
+	TWeakObjectPtr<ARDMonster> SwarmTarget;
+	int32 SwarmLeft = 0, SwarmSpell = -1;
+	float SwarmDmg = 0.f, SwarmNextAt = 0.f;
+	/** the flash step: pawns passed through until it ends; the water walk: its distance left, where it was last */
+	float FlashUntil = -100.f;
+	float WaterLeft = 0.f, WaterUntil = -100.f;
+	FVector WaterLast = FVector::ZeroVector;
+	bool bWaterWalking = false, bWaterReached = false;
+	const FRDSecondaryDef* SecDef(FName Ability) const;
+	ARDMonster* SecTargetAhead(float Reach, float CosMin) const;
+	TArray<ARDMonster*> SecTargetsAround(float Reach, float CosMin) const;
+	/** a floor point near To (traced down; her capsule clear there): false when none */
+	bool SecFloorAt(const FVector& To, float HalfHeight, float Radius, FVector& Out) const;
+public:
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:

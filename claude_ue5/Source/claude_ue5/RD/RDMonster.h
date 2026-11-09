@@ -83,6 +83,12 @@ public:
 	bool SetStrength(int32 InTier, float InMaxHealth, float InDamage);
 	/** its hit points as a share of its top (a summon brought from the other level as hurt as it was) */
 	void SetHealthShare(float Share) { if (!bDead) Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * FMath::Clamp(Share, 0.f, 1.f))); }
+	/** the list of 2026-11-08b's sixth phase: an ally healed (the Summoner's healing, her soul harvest); its pace of blows (her
+	 *  frenzy: its wait between blows divided by it) and a boost on its blows until a time (her soul harvest) */
+	void HealBy(float Amount) { if (!bDead && Amount > 0.f) Health = FMath::Min(MaxHealth, Health + Amount); }
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float AllyPace = 1.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float AllyBoost = 1.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float AllyBoostUntil = -100.f;
 	/** mistward4 (bAllySpacing): the way and strength (0 none; about 1 standing in another) her ally steps to keep clear of
 	 *  her other allies and of her (RDMistward4.cpp) */
 	FVector AllySpacingPush() const;

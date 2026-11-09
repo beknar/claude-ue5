@@ -319,7 +319,7 @@ float URDCombatComponent::GetDamageOf(int32 Index) const
 	// dexterity ring adds to the ranged bonus, a monster's weakening takes off)
 	// (mistward6: her spells, chi and fists grow with the tiers opened; her first blow out of stealth an ambush)
 	return W.Damage * (1.f + GetBonusOf(Index)) * WeakMul() * (1.f + GetBlessDamage())        // (the third list: a shrine's blessing of might)
-		* Generator->TierPowerOf(W) * AmbushMul(Index);
+		* Generator->TierPowerOf(W) * AmbushMul(Index) * SpellBoostMul(W);          // (the sixth phase: the Mage's spell boosts)
 }
 
 float URDCombatComponent::GetBonusOf(int32 Index) const
@@ -460,6 +460,7 @@ void URDCombatComponent::Strike()
 	bool bAny = false;
 	const FRDSlashDef* Sl = SlashOf(AttackIndex);          // (the third list: the slash on the weapon)
 	const FName HitSound = HitSoundOf(*W);
+	const float Mb = ManaBladeBonus(false);          // (the sixth phase: the Warlock's mana blade, its mana taken once if the blow lands)
 	for (ARDMonster* Mo : Generator->GetMonsters())
 	{
 		if (!Mo || Mo->IsDead()) continue;
@@ -470,7 +471,7 @@ void URDCombatComponent::Strike()
 		// (a big monster right against her is in the arc whatever the angle to its middle)
 		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
 		Generator->PlaySoundAt(HitSound, Mo->GetActorLocation());
-		const float Dmg = GetDamageOf(AttackIndex);         // (with her melee bonus)
+		const float Dmg = GetDamageOf(AttackIndex) + Mb;         // (with her melee bonus)
 		const bool bKilled = Mo->ApplyDamage(Dmg, O);
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false);
 		DamageDealt += Dmg; ++HitsLanded; bAny = true;
@@ -480,6 +481,7 @@ void URDCombatComponent::Strike()
 		if (bAmbushArmed) AmbushDamage += Dmg;
 	}
 	if (bAny && bAmbushArmed) ++Ambushes;
+	if (bAny && Mb > 0.f) ManaBladeBonus(true);
 	if (bAny) { LastHitTime = GetWorld()->GetTimeSeconds(); WearOut(AttackIndex); }      // (a blow that landed wears the weapon)
 	// (the list of 2026-11-07: the barracks' training dummies in the blow's reach and arc rock away from her, with the weapon's
 	// hit sound and the blow's number; they wear nothing and count as no hit on a foe)
@@ -507,6 +509,9 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	// (mistward6: in stealth nothing finds her: a blow or a shot already on its way passes her by (a shot whose shooter has
 	// died comes with no From: the PR review's find), and so does a trap that was going off before she hid)
 	if (IsStealthed()) { ++Evaded; return; }
+	// (the sixth phase's shields and modes: a parry, an ablation's layer, a recharge, her mana, iron skin)
+	Amount = AbsorbBySecondary(Amount, From);
+	if (Amount <= 0.f) return;
 	const float Now = GetWorld()->GetTimeSeconds();
 	AActor* O = GetOwner();
 	// (level 5: her spells take their part first: a sanctum takes it all, a veil lets it miss, a ward takes it, a mirror
@@ -748,6 +753,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickScrollWeapon();          // (mistward: a scroll's weapon gone once its cast and bolts are done)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
 	if (SlashAreas.Num() > 0) TickSlashAreas(Dt);
+	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
 	if (Generator->bQuickSlots && (Generator->Weapons.Num() != LastWeaponCount || WeaponSig() != LastWeaponSig)) FillQuickSlots();
 	if (bHeldOn && Now >= HeldUntil) { bHeldOn = false; UpdateWalkSpeed(); }       // (mistward: the snare lets go)
 	// (the third list: a block ends with the shield gone from her hand, a swing begun or a fall, scripted or not (one rule))
@@ -897,6 +903,11 @@ void URDCombatComponent::ClearItems()
 	HarvestsTaken = ScrollsRead = Summoned = SummonsRefused = 0; ScrollItemRead = NAME_None; bScrollCast = false;       // (the list of 2026-10-30's counters, as the others)
 	UpdateLeftHand();
 	RepairWith = NAME_None; RepairCursor = 0;
+	// (the sixth phase: her abilities' ranks and what is on her (a new game; RestoreCarry gives them back after))
+	SecondaryRanks.Reset(); BoostSpells.Reset(); RankWith = RankSpellFor = NAME_None; RankCursor = 0; bManaBlade = false;
+	RechargeUntil = AblationUntil = ManaShieldUntil = CurseShieldUntil = BlindShieldUntil = BleedShieldUntil = ParryUntil = IronSkinUntil = -100.f;
+	AblationLayers = 0; ForcedMoves.Reset(); SwarmLeft = 0;
+	ParriedBlows = PeeledLayers = ManaBladeBlows = SoulHarvests = SecondaryUses = 0; RechargedMana = ShieldManaSpent = 0.f;
 	if (bCraftOpen) SetCraftingOpen(false);
 	CraftCursor = 0;
 	InventoryCursor = 0;
@@ -974,7 +985,8 @@ bool URDCombatComponent::UseItem(FName Name)
 		                               : FString::Printf(TEXT("The %s is a crafting material: an anvil makes repair items from it (F at an anvil)"), *Lb));
 		return false;
 	}
-	if (It.Kind == ERDItemKind::Scroll) return ReadScroll(Name);          // (mistward: cast once, no mana)
+	if (It.Kind == ERDItemKind::Scroll) return ReadScroll(Name);
+	if (It.Kind == ERDItemKind::Token) return BeginRankUp(Name);          // (the sixth phase: an Angel Token)          // (mistward: cast once, no mana)
 	if (It.Kind == ERDItemKind::Weapon)
 	{
 		// (one she carries is not made for her hero: had it been, it would be among her weapons)
@@ -1067,6 +1079,10 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 	// (the quick bar's abilities, after the weapons: "ability|<name>|<its slot, -1: off the bar>")
 	if (Generator && Generator->bQuickSlots)
 		for (const FName& A : GetAbilities()) Out.Add(FString::Printf(TEXT("ability|%s|%d"), *A.ToString().Mid(1), QuickSlots.IndexOfByKey(A)));
+	// (the sixth phase: her passive secondary abilities learned, "passive|<name>|<rank>")
+	if (Generator)
+		for (const FRDSecondaryDef& Sd : Generator->Secondaries)
+			if (Sd.Kind == ERDSecondaryKind::Passive && Sd.Hero == Generator->CurrentHero && GetSecondaryRank(Sd.Name) > 0) Out.Add(FString::Printf(TEXT("passive|%s|%d"), *Sd.Name.ToString(), GetSecondaryRank(Sd.Name)));
 	auto KindOf = [this](FName N) { const int32 Ix = Generator ? Generator->FindItem(N) : -1; return Ix >= 0 ? Generator->Items[Ix].Kind : ERDItemKind::Healing; };
 	auto Usable = [](ERDItemKind K) { return K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed || K == ERDItemKind::Food; };
 	for (const FName& N : CarriedOrder) if (Usable(KindOf(N))) Out.Add(FString::Printf(TEXT("item|%s|%d"), *N.ToString(), GetItemCount(N)));
@@ -1112,6 +1128,7 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 	// (the third list: slashes she carries, a vault's key, the worn set's helmet shown or hidden)
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Slash) Out.Add(FString::Printf(TEXT("slash|%s|%d"), *N.ToString(), GetItemCount(N)));
 	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Key) Out.Add(FString::Printf(TEXT("key|%s|%d"), *N.ToString(), GetItemCount(N)));
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Token) Out.Add(FString::Printf(TEXT("token|%s|%d"), *N.ToString(), GetItemCount(N)));
 	if (Generator && Generator->bHelmetToggle && HasHelmet()) Out.Add(FString::Printf(TEXT("helmet|%d|%s"), bHelmetHidden ? 1 : 0, *WornArmour.ToString()));
 	return Out;
 }
@@ -1659,7 +1676,7 @@ bool URDCombatComponent::UseInventoryEntry()
 		return true;
 	}
 	if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("armour") || P[0] == TEXT("carried") || P[0] == TEXT("repair") || P[0] == TEXT("component")
-		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport") || P[0] == TEXT("scroll")))
+		|| P[0] == TEXT("ring") || P[0] == TEXT("tome") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("teleport") || P[0] == TEXT("scroll") || P[0] == TEXT("token")))
 	{
 		const bool bOk = UseItem(FName(*P[1]));
 		InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
@@ -1784,6 +1801,16 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 		Steer([this](int32 S) { MoveRepairCursor(S); });
 		if (bMouse) TickPointerList(PC, RepairCursor, [this](int32 I) { RepairCursor = I; }, [this]() { RepairEntry(); });
 		if (bUse) RepairEntry();
+		return;
+	}
+	// (the sixth phase: choosing what an Angel Token raises (and a boost's spell); Backspace or B back)
+	if (IsPickingRank())
+	{
+		if (bToggle) { RankWith = NAME_None; RankSpellFor = NAME_None; SetInventoryOpen(false); return; }
+		if (Pressed({ EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right })) { CancelRankUp(); return; }
+		Steer([this](int32 S) { MoveRankCursor(S); });
+		if (bMouse) TickPointerList(PC, RankCursor, [this](int32 I) { RankCursor = I; }, [this]() { RankEntry(); });
+		if (bUse) RankEntry();
 		return;
 	}
 	// (the third list: choosing the weapon a slash goes on; Backspace or B back to the inventory)

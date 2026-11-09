@@ -470,6 +470,15 @@ bool ARDDungeonGenerator::IsWildRevealed(double Xm, double Ym) const
 	return ((*Bits)[Bi >> 6] >> (Bi & 63)) & 1ull;
 }
 
+bool ARDDungeonGenerator::WildWaterZAt(FVector At, float& OutZ) const
+{
+	if (!IsWildReady() || IsInLoadedTown(At)) return false;
+	FRDWSample S; Wild->Sample(At.X / 100.0, At.Y / 100.0, S, true);
+	if (!S.WaterKind || S.Lava > 0.5f || S.Water <= S.H + 0.15f) return false;
+	OutZ = Wild->ToZ(S.Water);
+	return true;
+}
+
 float ARDDungeonGenerator::WildGroundZ(FVector At) const
 {
 	if (!IsWildReady()) return 0.f;
