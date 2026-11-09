@@ -504,6 +504,7 @@ void URDCombatComponent::EndAttack()
 
 void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 {
+	bLastBlowAbsorbed = false;
 	if (bDead || Amount <= 0.f) return;
 	if (IsDodging()) { ++DodgedHits; return; }
 	// (mistward6: in stealth nothing finds her: a blow or a shot already on its way passes her by (a shot whose shooter has
@@ -511,7 +512,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	if (IsStealthed()) { ++Evaded; return; }
 	// (the sixth phase's shields and modes: a parry, an ablation's layer, a recharge, her mana, iron skin)
 	Amount = AbsorbBySecondary(Amount, From);
-	if (Amount <= 0.f) return;
+	if (Amount <= 0.f) { bLastBlowAbsorbed = true; return; }          // (PR #35's review: taken whole: no poison or slowness with it)
 	const float Now = GetWorld()->GetTimeSeconds();
 	AActor* O = GetOwner();
 	// (level 5: her spells take their part first: a sanctum takes it all, a veil lets it miss, a ward takes it, a mirror
@@ -1634,7 +1635,7 @@ void URDCombatComponent::SetInventoryOpen(bool bOpen)
 	if (bOpen == bInventoryOpen || (bOpen && bDead)) return;
 	if (bOpen && bCraftOpen) SetCraftingOpen(false);
 	KeyRepeatDir = 0;
-	if (!bOpen) { CancelRepair(); CancelSlash(); }
+	if (!bOpen) { CancelRepair(); CancelSlash(); if (!RankWith.IsNone()) ResetListView(); RankWith = RankSpellFor = NAME_None; RankCursor = 0; }          // (PR #35's review: the token's list too)
 	if (bOpen) SetBlocking(false);           // (the third list: no block while she looks in her pack)
 	bInventoryOpen = bOpen;
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1)); }

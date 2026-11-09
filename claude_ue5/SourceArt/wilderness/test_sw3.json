@@ -1,0 +1,189 @@
+{
+ "tag": "sw3",
+ "plan": [
+  "secondary9",
+  "quests"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "secondary9",
+   "ok": true,
+   "stone_ok": true,
+   "feathers_ok": true,
+   "water_ok": true,
+   "stone": {
+    "places": 17,
+    "place": "The Old Watchtower",
+    "piles": 1,
+    "taken": 1,
+    "laid_again": 0
+   },
+   "feathers": {
+    "kills": 4,
+    "feathers": 2,
+    "lairs": [
+     {
+      "name": "The Mill Road Den",
+      "kills": 4,
+      "feathers": 2
+     }
+    ]
+   },
+   "water": {
+    "lake": [
+     15453,
+     1577,
+     821
+    ],
+    "shore": [
+     16203,
+     1577
+    ],
+    "used": true,
+    "says": "Water Walk",
+    "walked_cm": 1001,
+    "moved_cm": 2200,
+    "over_water_samples": 151,
+    "feet_over_water_cm": [
+     1.1,
+     2.1
+    ],
+    "on_after": false
+   }
+  },
+  {
+   "step": "quests",
+   "ok": false,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 49.8,
+     "y": -1821.1,
+     "kind": "lair",
+     "n": 4,
+     "killed": 4,
+     "progress": 1,
+     "rx": 49.8,
+     "ry": -1821.1,
+     "yaw": -179.7,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": -2489.9,
+     "y": 1649.3,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 1,
+     "rx": -2495.0,
+     "ry": 1644.5,
+     "yaw": -136.6,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.82,
+    "water": 0.0,
+    "h": 58.0,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 2.99,
+    "water": 0.0,
+    "h": 75.9,
+    "biome": "farms",
+    "road_m": 120
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": false,
+   "refusal": "",
+   "den_pack": {
+    "alive": 0,
+    "kinds": []
+   },
+   "after_three": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 0,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 18,
+   "patrol_at_10m": 1,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_sw3_quest_den.png",
+  "wd_sw3_quest_tower.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

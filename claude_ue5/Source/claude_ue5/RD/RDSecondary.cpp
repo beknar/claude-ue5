@@ -260,6 +260,7 @@ TArray<ARDMonster*> URDCombatComponent::SecTargetsAround(float Reach, float CosM
 	AActor* O = GetOwner();
 	if (!O || !Generator) return Out;
 	const FVector L = O->GetActorLocation(), Fw = O->GetActorForwardVector() * FVector(1, 1, 0);
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDSecAround), false, O);
 	for (ARDMonster* Mo : Generator->GetMonsters())
 	{
 		if (!IsValid(Mo) || Mo->IsDead() || Mo->IsAlly()) continue;
@@ -267,6 +268,9 @@ TArray<ARDMonster*> URDCombatComponent::SecTargetsAround(float Reach, float CosM
 		const float Dist = D.Size() - Mo->GetCapsuleComponent()->GetScaledCapsuleRadius();
 		if (Dist > Reach || FMath::Abs(Mo->GetActorLocation().Z - L.Z) > 300.f) continue;
 		if (CosMin > -1.f && Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw.GetSafeNormal()) < CosMin) continue;
+		// (PR #35's review: not through a wall)
+		FHitResult H; Q.ClearIgnoredSourceObjects(); Q.AddIgnoredActor(O); Q.AddIgnoredActor(Mo);
+		if (GetWorld()->LineTraceSingleByChannel(H, L + FVector(0, 0, 50.f), Mo->GetActorLocation() + FVector(0, 0, 30.f), ECC_Visibility, Q) && !Cast<ARDMonster>(H.GetActor())) continue;
 		Out.Add(Mo);
 	}
 	return Out;
@@ -398,6 +402,7 @@ bool URDCombatComponent::UseSecondary(FName Ability)
 		else
 		{
 			SwarmTarget = Mo; SwarmLeft = N; SwarmDmg = Dmg; SwarmNextAt = Now; SwarmSpell = Generator->FindSpell(D->LookSpell);
+			Mana -= N * V;          // (PR #35's review: its lights are her mana's, spent)
 			Reached = N; Number = Dmg;
 		}
 	}
@@ -429,12 +434,15 @@ bool URDCombatComponent::UseSecondary(FName Ability)
 			const float H2 = Mo ? Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : Hh, R2 = Mo ? Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() : Rad;
 			TArray<ARDMonster*> Foes = SecTargetsAround(4000.f, -2.f);
 			FVector Best = FVector::ZeroVector; float BestScore = -1.f, BestLen = 0.f;
-			for (float F = 1.f; F >= 0.39f && BestScore < 0.f; F -= 0.2f)
+			for (float F = 1.f; F >= 0.19f && BestScore < 0.f; F -= 0.2f)
 				for (int32 K = 0; K < 16; ++K)
 				{
 					const float A = K * PI / 8.f;
 					FVector Spot;
 					if (!SecFloorAt(From + FVector(FMath::Cos(A), FMath::Sin(A), 0.f) * V * 100.f * F, H2, R2, Spot)) continue;
+					// (PR #35's review: in sight of where it starts: never through a wall into a vault, a cell or past the arena's bars)
+					FHitResult Sh; FCollisionQueryParams Sq(SCENE_QUERY_STAT(RDSecMisty), false, C); Sq.AddIgnoredActor(Who);
+					if (W->LineTraceSingleByChannel(Sh, From + FVector(0, 0, 40.f), Spot + FVector(0, 0, 40.f), ECC_Visibility, Sq) && !Cast<ARDMonster>(Sh.GetActor())) continue;
 					float Score = 0.f;
 					if (Mo) Score = FVector::Dist2D(Spot, L);
 					else { Score = 1e9f; for (ARDMonster* Fo : Foes) Score = FMath::Min(Score, (float)FVector::Dist2D(Spot, Fo->GetActorLocation())); }
@@ -492,6 +500,7 @@ bool URDCombatComponent::UseSecondary(FName Ability)
 		if (Len < 150.f) NoTarget(TEXT("a wall is in the way"));
 		else
 		{
+			FlashPawnWas = C->GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
 			C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 			const float Dur = FMath::Clamp(Len / 4000.f, 0.15f, 0.6f);
 			TSharedPtr<FRootMotionSource_ConstantForce> F = MakeShared<FRootMotionSource_ConstantForce>();
@@ -622,7 +631,7 @@ void URDCombatComponent::TickSecondary(float Dt)
 		}
 	}
 	// (the flash step over: her capsule stops pawns again)
-	if (FlashUntil > 0.f && Now > FlashUntil) { C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block); FlashUntil = -100.f; }
+	if (FlashUntil > 0.f && Now > FlashUntil) { C->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, FlashPawnWas); FlashUntil = -100.f; }
 	// (the water walk: held on the water's face as she goes, its length counted over water; off it, or its length gone, she walks
 	// (or falls in))
 	if (bWaterWalking)
@@ -632,7 +641,7 @@ void URDCombatComponent::TickSecondary(float Dt)
 		float Wz = 0.f;
 		const bool bOver = Generator->WildWaterZAt(L, Wz);
 		// (on the shore still: she walks; on the water: held on its face)
-		if (bOver && !bWaterReached) { bWaterReached = true; CM->SetMovementMode(MOVE_Flying); }
+		if (bOver && !bWaterReached) { bWaterReached = true; FlySpeedWas = CM->MaxFlySpeed; CM->SetMovementMode(MOVE_Flying); }
 		if (bOver)
 		{
 			const float Hh = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
@@ -646,6 +655,7 @@ void URDCombatComponent::TickSecondary(float Dt)
 		{
 			bWaterWalking = false;
 			if (CM->MovementMode == MOVE_Flying) CM->SetMovementMode(MOVE_Falling);
+			if (FlySpeedWas >= 0.f) { CM->MaxFlySpeed = FlySpeedWas; FlySpeedWas = -1.f; }
 		}
 	}
 }
@@ -693,9 +703,18 @@ void ARDDungeonGenerator::SecondaryOnKill(ARDMonster* Monster)
 void ARDDungeonGenerator::LayHallowedStone(ARDWildChunk* C, const FRDWildPlace& P)
 {
 	if (!C || HallowedStoneItem.IsNone() || FindItem(HallowedStoneItem) < 0 || !HallowedKinds.Contains(P.Kind)) return;
-	const int64 Key = (int64)P.Id * 16 + 15;          // (a place's kills are its id x 16 + 0..4: 15 is its stone)
+	// (PR #35's review: a range of its own: a place's kills are its id x 16 + 0..15, and a quest counts them all)
+	const int64 Key = -((int64)P.Id + 2);          // (-1 is a pile's "none")
 	if (const URDGameInstance* GI = URDGameInstance::Of(this); GI && GI->WildKilled.Contains(Key)) return;
+	// (a chunk made again lays it again: the piles of the chunks gone are out of the list first, and it is no harvest)
+	LootPiles.RemoveAll([](const TObjectPtr<ARDLootPile>& Lp) { return !IsValid(Lp); });
 	FVector At(P.At.X * 100.0 + 250.0, P.At.Y * 100.0, 0.0);
 	At.Z = WildGroundZ(At) + 40.f;
-	if (ARDLootPile* Lp = DropHarvest(At, { HallowedStoneItem }, 1)) { Lp->WildKey = Key; C->Props.Add(Lp); }
+	TArray<float> Wr; Wr.Init(-1.f, 1);
+	if (ARDLootPile* Lp = DropLoot(At, { HallowedStoneItem }, Wr))
+	{
+		Lp->bHers = false; Lp->bHarvest = true; Lp->Tier = 1; Lp->WildKey = Key;
+		if (HarvestTints.Num() > 0) Lp->SetTint(HarvestTints[0]);
+		C->Props.Add(Lp);
+	}
 }

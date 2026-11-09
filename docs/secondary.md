@@ -83,12 +83,13 @@ The table's numbers run from rank 1 to rank 6, as the list gives them. Where the
 | Iron Skin | active | for 8 s every blow that reaches her is 10 to 60% weaker | 20 |
 
 How each one works in the game:
-- **Blocking a blow:** the shields and modes take a blow before her ward, armour and shield do. The order is parry, then ablation, then recharge, then mana shield, then iron skin.
+- **Blocking a blow:** the shields and modes take a blow before her ward, armour and shield do. The order is parry, then ablation, then recharge, then mana shield, then iron skin. A blow taken whole brings no poison, weakness or slowness with it.
+- **Through walls:** the abilities that reach all around her (the bash, the push, the Warlock's shields) take only monsters she can see.
 - **Grapple:** it slows the monster to a stop, so it still turns and strikes. Trip stuns it: no move and no blow.
 - **The push and the pull:** both move the monster tick by tick and are swept, so walls stop them.
 - **The mana swarm:** its lights are Fire Bolt's bolts aimed at the target, one every 0.07 s. Each light does a third of her first spell's blow, so it grows with her.
-- **Misty Step:** it picks, out of 16 ways and distances down to two fifths of its length, the floor farthest from her foes.
-- **Misty Transfer:** it picks the floor farthest from her.
+- **Misty Step:** it picks, out of 16 ways and distances down to a fifth of its length, the floor farthest from her foes, in sight of where she stood. It never goes through a wall into a vault, a cell or past the arena's bars (PR #35's review).
+- **Misty Transfer:** it picks the floor farthest from her, in sight of where the monster stood, so a hall gives less than its length.
 - **The leap (Wall Run):** it lands on the farthest floor along her way within its length, up to half its length higher, with the arc clear. It is a launch, so she flies it.
 - **Flash Steps:** it ignores pawns for its length, so only the walls stop it.
 - **Water Walk:** only in the wilds. From the shore she runs onto the water within 8 m before her, and is held on its face for its length; off it, she falls in.
@@ -100,7 +101,7 @@ How each one works in the game:
 
 ## The tests
 
-`868 secondary` runs on Mistward Castle (`test_sc2.json`):
+`868 secondary` runs on Mistward Castle (`test_sc4.json` after PR #35's review):
 - **The token:** 3 feathers and a stone made a token at the anvil. Used, its list showed the Warrior's six, and Shield Bash became rank 1 and went on the quick bar; the token was used up.
 - **Warrior:**
   - Shield Bash stunned two monsters in front of her, still at 4.7 s and over at 5.7 s, and a second use was refused.
@@ -110,7 +111,7 @@ How each one works in the game:
   - Sweeping Push pushed two monsters away as far as the room let them.
   - Pulling Attack pulled one from 15 m to under 3 m.
 - **Mage:**
-  - Mana Swarm sent five lights for her 100 mana; the monster lost 51, the five lights' worth.
+  - Mana Swarm sent five lights for her 100 mana, all of it spent; the monster lost 51, the five lights' worth.
   - Spell Boost made Fire Bolt 30 against 25.
   - The ablation's two layers took two blows and struck their maker for 40; the third blow hurt her.
   - The recharge turned a blow of 30 into 30 mana.
@@ -118,7 +119,7 @@ How each one works in the game:
 - **Warlock:**
   - The mana shield took a blow of 20 from her mana.
   - The curse (25 %), blinding (100 %) and bleeding (11 in 2 s) shields worked on a monster within 2 m.
-  - Misty Transfer sent a monster 40 m.
+  - Misty Transfer sent a monster 16 m, as far as the great hall's sight lines let it.
   - The mana blade added 12 to a blow (22 to 34) for its 6 mana. The 3.5 mana read was less: her mana came back over the 2 s.
 - **Summoner:** a Soldier called before the passives grew to 1.2 times its hit points and blow and 1.2 times its pace. Summon Healing healed 10 % of its hit points, and a kill near her healed it and boosted its blows 1.2 times for 10 s.
 - **Martial Artist:**
@@ -127,8 +128,8 @@ How each one works in the game:
   - The parry took a blow from in front, staggered its maker and refused a second use.
   - Iron Skin made a blow 10 % weaker.
 
-`888 secondary9` runs on Brokenspire (`-Light`, `test_sw2.json`):
-- **The stone:** a Hallowed Stone at the Old Watchtower; F took it, and it was not laid again when its chunk was made again.
+`888 secondary9` runs on Brokenspire (`-Light`, `test_sw3.json`):
+- **The stone:** a Hallowed Stone at the Old Watchtower; F took it, and it was not laid again when its chunk was made again. The captain's patrol quest there still counted no kill (the stone's key is out of the places' kill range: PR #35's review). `quests` passes on its own (`test_sq1.json`); in one session after `secondary9` it fails, because that step killed the den's pack.
 - **The feathers:** the Mill Road Den's four monsters dropped two Seraph Feathers.
 - **Water Walk:** from a lake's shore the Martial Artist ran 10 m over the water, her feet 1 to 2 cm over its face the whole way.
 

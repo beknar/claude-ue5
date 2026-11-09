@@ -1,0 +1,144 @@
+{
+ "tag": "sq1",
+ "plan": [
+  "quests"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "quests",
+   "ok": true,
+   "places": {
+    "wild:wolves": {
+     "id": 536870912,
+     "name": "The Mill Road Den",
+     "x": 1839.6,
+     "y": 137.8,
+     "kind": "lair",
+     "n": 4,
+     "killed": 0,
+     "progress": 0,
+     "rx": 1839.6,
+     "ry": 137.8,
+     "yaw": -149.7,
+     "shown": 0
+    },
+    "wild:patrol": {
+     "id": 536870913,
+     "name": "The Old Watchtower",
+     "x": -2393.7,
+     "y": 1732.7,
+     "kind": "ruins",
+     "n": 3,
+     "killed": 0,
+     "progress": 0,
+     "rx": -2398.7,
+     "ry": 1727.7,
+     "yaw": -135.4,
+     "shown": 0
+    }
+   },
+   "den": {
+    "from_brokenspire_km": 1.84,
+    "water": 0.0,
+    "h": 74.5,
+    "biome": "farms",
+    "road_m": 45
+   },
+   "tower": {
+    "from_brokenspire_km": 2.96,
+    "water": 0.0,
+    "h": 76.2,
+    "biome": "farms",
+    "road_m": null
+   },
+   "captain_panel": true,
+   "offered": [
+    "Quest: Thin the Horde",
+    "Quest: Cells Under the Keep",
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ],
+   "accept_wolves": true,
+   "accept_patrol": true,
+   "taken": {
+    "captain_wolves": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    },
+    "captain_patrol": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+    }
+   },
+   "on_map": {
+    "wild:wolves": 1,
+    "wild:patrol": 1
+   },
+   "travel_refused": true,
+   "refusal": "You have not found The Mill Road Den yet",
+   "den_pack": {
+    "alive": 4,
+    "kinds": [
+     "Ripper_dog"
+    ]
+   },
+   "after_three": {
+    "progress": 0,
+    "killed": 3,
+    "quest": {
+     "state": "taken",
+     "progress": 0,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "again_alive": 1,
+   "after_all": {
+    "progress": 1,
+    "killed": 4,
+    "quest": {
+     "state": "ready",
+     "progress": 1,
+     "count": 1,
+     "hint": "Kill the pack at the Mill Road Den, beside the road to Ashenreach (on your map)"
+    }
+   },
+   "tower_guards": 3,
+   "tower_props": 18,
+   "patrol_at_10m": 0,
+   "patrol_at_2_5m": 1,
+   "patrol_quest": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1,
+    "hint": "Find the lost patrol at the Old Watchtower, off the road to Vel Morrath (on your map)"
+   },
+   "captain_again": true,
+   "turnin_lines": [
+    "Done: Wolves on the Mill Road",
+    "Done: The Lost Patrol"
+   ],
+   "gold": 320,
+   "done": {
+    "captain_wolves": "done",
+    "captain_patrol": "done"
+   },
+   "on_map_after": {
+    "wild:wolves": 0,
+    "wild:patrol": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_sq1_quest_den.png",
+  "wd_sq1_quest_tower.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

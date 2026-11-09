@@ -601,7 +601,7 @@ bool ARDDungeonGenerator::TakeLootNear(const FVector& From, float Reach)
 	if (Best->bHarvest) Pc->TakeHarvest(Best->Things);
 	else Pc->TakeBack(Best->Things, Best->Wear, Best->bHers, Best->WornShield);
 	// (the sixth phase: a wild place's stone taken for good)
-	if (Best->WildKey >= 0) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Best->WildKey);
+	if (Best->WildKey != -1) if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->WildKilled.AddUnique(Best->WildKey);
 	LootPiles.Remove(Best);
 	PlaySoundAt(TEXT("Player.Loot"), Best->GetActorLocation());
 	Best->Destroy();

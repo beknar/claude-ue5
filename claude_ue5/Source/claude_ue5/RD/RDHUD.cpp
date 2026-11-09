@@ -2137,7 +2137,7 @@ void ARDHUD::DrawInventory(float Sc)
 			const int32 Rk = FCString::Atoi(*Sel[3]);
 			for (const FString& Ln : Cb->GetSecondaryLines())
 				if (Ln.StartsWith(Sel[1] + TEXT("|")) && Rk > 0) { TArray<FString> Q; Ln.ParseIntoArray(Q, TEXT("|"), false); if (Q.Num() >= 6) Para(FString::Printf(TEXT("Now (rank %d):  %s"), Rk, *Q[5]), RDInk, Sc * 1.05f); }
-			Para(Rk >= 6 ? FString(TEXT("At its last rank")) : FString::Printf(TEXT("Rank %d:  %s"), Rk + 1, *Sel[5]), FLinearColor(0.6f, 0.95f, 0.6f), Sc * 1.1f);
+			Para(Rk >= FCString::Atoi(*Sel[4]) ? FString(TEXT("At its last rank")) : FString::Printf(TEXT("Rank %d:  %s"), Rk + 1, *Sel[5]), FLinearColor(0.6f, 0.95f, 0.6f), Sc * 1.1f);
 		}
 		else Picture(NAME_None, Sel[1]);
 		Ry += 6.f * Sc;

@@ -776,7 +776,7 @@ bool ARDMonster::TickCombat(float Dt)
 				// (the sixth phase: the Summoner's soul harvest on her summons' blows a while)
 				if (bAlly && GetWorld()->GetTimeSeconds() < AllyBoostUntil) Dmg *= AllyBoost;
 				// (mistward6: a blow that passes a hidden Rogue by carries no poison, weakness or slowness either)
-				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
+				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden && !Pc->bLastBlowAbsorbed) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
 				else if (ARDMonster* Fm = Cast<ARDMonster>(P)) { Fm->ApplyDamageAt(Dmg, this, nullptr); G->AddHitText(Fm->GetActorLocation() + FVector(0, 0, Fm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false); }
 				++HitsLanded;
 			}

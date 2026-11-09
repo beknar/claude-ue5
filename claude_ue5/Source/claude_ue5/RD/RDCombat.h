@@ -651,6 +651,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") int32 SoulHarvests = 0;
 	/** the leap's, the flash step's, the misty step's and the water walk's length (cm), as made */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Secondary") float LastMoveLength = 0.f;
+	/** the last blow on her was taken whole by a shield or mode of hers (its maker's poison, weakness or slowness stays off) */
+	bool bLastBlowAbsorbed = false;
 	/** choosing what an Angel Token raises (the inventory's list; a spell boost then asks for its spell) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") bool BeginRankUp(FName Item);
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Secondary") void CancelRankUp();
@@ -694,7 +696,8 @@ private:
 	int32 SwarmLeft = 0, SwarmSpell = -1;
 	float SwarmDmg = 0.f, SwarmNextAt = 0.f;
 	/** the flash step: pawns passed through until it ends; the water walk: its distance left, where it was last */
-	float FlashUntil = -100.f;
+	float FlashUntil = -100.f, FlySpeedWas = -1.f;
+	TEnumAsByte<ECollisionResponse> FlashPawnWas = ECR_Block;
 	float WaterLeft = 0.f, WaterUntil = -100.f;
 	FVector WaterLast = FVector::ZeroVector;
 	bool bWaterWalking = false, bWaterReached = false;

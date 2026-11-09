@@ -4310,7 +4310,7 @@ def step_secondary():
     for nm in ("ManaSwarm", "RechargeShield", "AblationShield", "MistyStep"): c.set_secondary_rank(nm, 1 if nm != "AblationShield" else 2, "None")
     c.set_secondary_rank("SpellBoost1", 1, "Fire Bolt")
     m = spawn_dummy(ahead(600)); yield from wait(0.5); h0 = hp(m); c.set_mana(100.0)
-    mg["swarm"] = use(c, "ManaSwarm"); yield from wait(3.0); mg["swarm"]["lost"] = round(h0 - hp(m), 1)
+    mg["swarm"] = use(c, "ManaSwarm"); mg["swarm"]["mana_after"] = round(c.get_mana(), 1); yield from wait(3.0); mg["swarm"]["lost"] = round(h0 - hp(m), 1)
     fi = next(i for i, wd in enumerate(g.get_editor_property("weapons")) if wd.get_editor_property("spell") and not wd.bolt_mesh)
     mg["boost"] = {"fire": round(c.get_damage_of(fi), 2)}
     c.set_secondary_rank("SpellBoost1", 0, "None"); mg["boost"]["plain"] = round(c.get_damage_of(fi), 2); c.set_secondary_rank("SpellBoost1", 1, "Fire Bolt")
@@ -4398,14 +4398,14 @@ def step_secondary():
         and w["push"]["ok"] and all(x["away"] and x["moved_cm"] >= min(1800, x["free_cm"] - 250) * 0.8 for x in w["push"]["monsters"])
         and w["pull"]["ok"] and w["pull"]["from_cm"] > 800 and w["pull"]["to_cm"] < 300)
     sw_ = mg["swarm"]; nsw = lastn(sw_); dsw = float(sw_["last"].split("|")[2]) if sw_["ok"] else 0
-    ok_m = (sw_["ok"] and nsw == 5 and sw_["lost"] >= nsw * dsw * 0.9
+    ok_m = (sw_["ok"] and nsw == 5 and sw_["lost"] >= nsw * dsw * 0.9 and sw_["mana_after"] < 1.0
         and abs(mg["boost"]["fire"] / max(mg["boost"]["plain"], 0.01) - 1.2) < 0.01
         and mg["recharge"]["ok"] and mg["recharge"]["hp_lost"] == 0 and abs(mg["recharge"]["mana"] - 30) < 0.5
         and mg["ablation"]["ok"] and mg["ablation"]["hp_lost_two"] == 0 and mg["ablation"]["monster_lost"] >= 39.5 and mg["ablation"]["hp_lost_third"] > 0
         and mg["step"]["ok"] and 300 <= mg["step"]["moved_cm"] <= 1050 and mg["step"]["foe_after_cm"] > mg["step"]["foe_before_cm"] + 200)
     ok_wl = (wl["mana_shield"]["ok"] and wl["mana_shield"]["hp_lost"] == 0 and abs(wl["mana_shield"]["mana_taken"] - 20) < 0.5
         and all(wl[k]["ok"] for k in ("curse", "blind", "bleed")) and wl["auras"]["curse"] >= 0.25 and wl["auras"]["blind"] == 1.0 and wl["auras"]["bled"] > 0
-        and wl["transfer"]["ok"] and wl["transfer"]["moved_cm"] >= 2000
+        and wl["transfer"]["ok"] and wl["transfer"]["moved_cm"] >= 1000          # (in sight of where it stood (PR #35's review): the great hall gives 16 m of its 40)
         and wl["blade"]["ok"] and wl["blade"]["blows"] >= 1 and abs((wl["blade"]["lost_blade"] - wl["blade"]["lost_plain"]) - 12.0 * wl["blade"]["blows"]) < 1.0)
     gr = su.get("grown", {}); bs = gr.get("base") or {}
     ok_s = (bool(bs) and abs(gr["hp"] / bs["hp"] - 1.2) < 0.02 and abs(gr["damage"] / bs["damage"] - 1.2) < 0.03 and abs(gr["pace"] - 1.2) < 0.001
