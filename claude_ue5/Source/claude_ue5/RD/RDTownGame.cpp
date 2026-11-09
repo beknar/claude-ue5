@@ -316,18 +316,17 @@ void ARDDungeonGenerator::AddGold(int32 Amount, const FString& Why)
 
 int32 ARDDungeonGenerator::GetGameTier() const
 {
-	int32 T = 1;
-	for (const int32 O : TiersOpened) T = FMath::Max(T, O);
-	if (const URDGameInstance* GI = URDGameInstance::Of(this))
-	{
-		for (const int32 O : GI->CastleTiers) T = FMath::Max(T, O);
-		// (the catacombs' tiers count too: the highest she has opened in any dungeon (2026-11-06))
-		for (const TPair<FString, FRDDungeonSave>& D : GI->Dungeons) for (const int32 O : D.Value.Tiers) T = FMath::Max(T, O);
-	}
-	return FMath::Clamp(T, 1, 5);
+	// (the rebalance to tier 25: the game's tier, the deepest opened in any dungeon of the chain in the game's tiers (Vel
+	// Morrath's first is 6); until then 1-5 by the dungeons' own tiers)
+	return FMath::Clamp(GameGlobalTier(), 1, 25);
 }
 
-static float RDTierPrice(int32 Tier) { static const float K[5] = { 1.f, 2.f, 3.5f, 5.5f, 8.f }; return K[FMath::Clamp(Tier, 1, 5) - 1]; }
+static float RDTierPrice(int32 Tier)
+{
+	// (1 to 8 over the first five tiers as before; past them about 18 % a tier: about 190 at tier 25)
+	static const float K[5] = { 1.f, 2.f, 3.5f, 5.5f, 8.f };
+	return Tier <= 5 ? K[FMath::Clamp(Tier, 1, 5) - 1] : 8.f * FMath::Pow(1.17f, (float)(FMath::Min(Tier, 25) - 5));
+}
 
 int32 ARDDungeonGenerator::PriceOf(FName Item) const
 {

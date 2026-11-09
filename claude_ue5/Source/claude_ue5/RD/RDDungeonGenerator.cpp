@@ -430,14 +430,14 @@ float ARDDungeonGenerator::GetMonsterHealth(FIntPoint Section) const
 {
 	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
 	// (level 5: by the tier of its rooms)
-	if (MaxTier > 0 && TierHealth.Num() > 0) return Ref * TierValue(TierHealth, TierOf(Section), 1.f);
+	if (MaxTier > 0 && TierHealth.Num() > 0) return Ref * TierValueAt(TierHealth, TierOf(Section), 1.f);
 	return Ref * (IsStartSection(Section) ? StartMonsterHealth : RuntimeMonsterHealth);
 }
 
 float ARDDungeonGenerator::GetMonsterDamage(FIntPoint Section) const
 {
 	const float Ref = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
-	if (MaxTier > 0 && TierDamage.Num() > 0) return Ref * TierValue(TierDamage, TierOf(Section), 1.f);
+	if (MaxTier > 0 && TierDamage.Num() > 0) return Ref * TierValueAt(TierDamage, TierOf(Section), 1.f);
 	return Ref * (IsStartSection(Section) ? StartMonsterDamage : RuntimeMonsterDamage);
 }
 
@@ -551,7 +551,8 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 	if (!bStartLoot || Items.Num() == 0 || (!IsStartSection(Section) && !bLootAllSections)) return Out;
 	const int32 Max = FMath::Max(MaxItemsPerContainer, 1);
 	// (level 5: an item may be found only in some tiers of rooms; level 4's items have no tiers: everywhere)
-	const int32 Tier = TierOf(Section);
+	// (the rebalance to tier 25: an item's tiers are the game's: this level's tier through GlobalTier)
+	const int32 Tier = GlobalTier(TierOf(Section));
 	auto InTier = [Tier](const FRDItemDef& It) { return It.Tiers.Num() == 0 || It.Tiers.Contains(Tier); };
 	// what is put in the start room's containers: one to each in turn
 	if (StartRoomItems.Num() > 0 && IsStartSection(Section))
@@ -619,6 +620,14 @@ int32 ARDDungeonGenerator::FindSpell(FName Name) const
 FName ARDDungeonGenerator::TomeSpellOf(FIntPoint Section, int32 Index, int32 Pick) const
 {
 	const int32 Tier = TierOf(Section);
+	// (the rebalance to tier 25: "mage spells need to be limited to 1 gained per tier": a tome found in a tier of a dungeon is
+	// the spell of that tier's place (Slot: the dungeons' tiers in the chain's order); with no spell placed, as before)
+	if (Spells.ContainsByPredicate([](const FRDSpellDef& S) { return S.Slot > 0; }))
+	{
+		const int32 Want = FMath::Max(ChainIndexHere(), 0) * 5 + Tier;
+		const FRDSpellDef* Sp = Spells.FindByPredicate([Want](const FRDSpellDef& S) { return S.Slot == Want; });
+		return Sp ? Sp->Name : NAME_None;
+	}
 	float Sum = 0.f;
 	for (const FRDSpellDef& S : Spells) if (S.Tier == Tier) Sum += FMath::Max(S.DropChance, 0.f);
 	if (Sum <= 0.f) return NAME_None;
@@ -757,7 +766,7 @@ ARDMonster* ARDDungeonGenerator::SummonAlly(FName Kind, FVector At, float Streng
 	const int32 T = FMath::Max(MaxTier, 1);
 	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
 	const float Blow = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
-	M->BecomeAlly(0.f, FMath::RoundToFloat(Ref * TierValue(TierHealth, T, 1.f) * Strength), FMath::RoundToFloat(Blow * TierValue(TierDamage, T, 1.f) * Strength));
+	M->BecomeAlly(0.f, FMath::RoundToFloat(Ref * TierValueAt(TierHealth, T, 1.f) * Strength), FMath::RoundToFloat(Blow * TierValueAt(TierDamage, T, 1.f) * Strength));
 	M->SetChampion(true);
 	Allies.Add(M);
 	return M;
@@ -1269,7 +1278,12 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 				if (E.bBoss && I == 0) bBossKill = true;
 				// (a dungeon with no final boss: its last tier's boss is the dungeon's, and drops the next dungeon's key and map (the
 				// list of 2026-11-08b))
-				if (E.bBoss && I == 0 && !E.bFinal && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !bFinalBossOn && Monster) DropNextDungeonKey(Monster->GetActorLocation());
+				if (E.bBoss && I == 0 && !E.bFinal && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !bFinalBossOn && Monster)
+			{
+				DropNextDungeonKey(Monster->GetActorLocation());
+				// (the rebalance to tier 25: this dungeon's ability for the Summoner, the Rogue and the Martial Artist is hers now)
+				bLaterBossDown = true; GrantLaterWeapons(true);
+			}
 				// (the final boss is no tier's boss: OnFinalBossKilled gives his notice and reward, no slash or chi attack here)
 				if (E.bBoss && I == 0 && !E.bFinal)
 				{

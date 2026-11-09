@@ -89,10 +89,10 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 		Tier = G->TierOf(Section->Coord); Ability = Def.Ability; Title = Def.Title;
 		if (G->MaxTier > 0)
 		{
-			SpeedScale = ARDDungeonGenerator::TierValue(G->TierSpeed, Tier, 1.f);
+			SpeedScale = G->TierValueAt(G->TierSpeed, Tier, 1.f);
 			WalkSpeed *= SpeedScale; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-			AttackInterval *= ARDDungeonGenerator::TierValue(G->TierAttackInterval, Tier, 1.f);
-			AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, Tier, 1.f);
+			AttackInterval *= G->TierValueAt(G->TierAttackInterval, Tier, 1.f);
+			AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : G->TierValueAt(G->TierAbility, Tier, 1.f);
 			MaxChaseScale = SpeedScale;
 		}
 		SetupRanged(Def);          // (mistward5: its shot, its wait scaled as its blows' interval)
@@ -326,16 +326,16 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 	// (the means of the kinds of that tier: a set of rooms of it)
 	const FIntPoint TierSection(FMath::Max(InTier - 1, 0), 0);
 	G->MeanMonsterFactors(MeanH, MeanD, TierSection);
-	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(RefH * ARDDungeonGenerator::TierValue(G->TierHealth, InTier, 1.f) * Hf / MeanH * HealthMul));
-	Damage = FMath::Max(1.f, FMath::RoundToFloat(RefD * ARDDungeonGenerator::TierValue(G->TierDamage, InTier, 1.f) * Df / MeanD * DamageMul));
+	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(RefH * G->TierValueAt(G->TierHealth, InTier, 1.f) * Hf / MeanH * HealthMul));
+	Damage = FMath::Max(1.f, FMath::RoundToFloat(RefD * G->TierValueAt(G->TierDamage, InTier, 1.f) * Df / MeanD * DamageMul));
 	Tier = InTier;
 	if (G->MaxTier > 0)
 	{
-		const float Sp = ARDDungeonGenerator::TierValue(G->TierSpeed, InTier, 1.f);
+		const float Sp = G->TierValueAt(G->TierSpeed, InTier, 1.f);
 		WalkSpeed = (Def ? Def->WalkSpeed : WalkSpeed) * Sp; SpeedScale = Sp; MaxChaseScale = Sp;
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-		AttackInterval = (Def ? Def->AttackInterval : AttackInterval) * ARDDungeonGenerator::TierValue(G->TierAttackInterval, InTier, 1.f);
-		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : ARDDungeonGenerator::TierValue(G->TierAbility, InTier, 1.f);
+		AttackInterval = (Def ? Def->AttackInterval : AttackInterval) * G->TierValueAt(G->TierAttackInterval, InTier, 1.f);
+		AbilityPower = Ability == ERDMonsterAbility::None ? 0.f : G->TierValueAt(G->TierAbility, InTier, 1.f);
 	}
 	if (Def) SetupRanged(*Def);    // (mistward5: the shot's wait follows the interval just set)
 	if (Def) SetupBoss(*Def);      // (the final boss: its beam's wait too)

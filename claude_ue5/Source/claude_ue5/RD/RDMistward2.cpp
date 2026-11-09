@@ -850,7 +850,7 @@ FName ARDDungeonGenerator::PickupItemFor(FIntPoint Section, int32 Index) const
 	TArray<FName> Wpn, Shd;
 	for (const FRDItemDef& It : Items)
 	{
-		if ((It.Kind != ERDItemKind::Weapon && It.Kind != ERDItemKind::Shield) || (It.Tiers.Num() > 0 && !It.Tiers.Contains(Tier)) || !PickupMeshOf(It.Name)) continue;
+		if ((It.Kind != ERDItemKind::Weapon && It.Kind != ERDItemKind::Shield) || (It.Tiers.Num() > 0 && !It.Tiers.Contains(GlobalTier(Tier))) || !PickupMeshOf(It.Name)) continue;
 		(It.Kind == ERDItemKind::Weapon ? Wpn : Shd).Add(It.Name);
 	}
 	const uint32 H = HashCombine(HashCombine((uint32)SessionSeed ^ 0x9C4Bu, GetTypeHash(Section)), GetTypeHash(Index * 131 + 7));
@@ -908,7 +908,7 @@ static TArray<FName> RDM2TierItems(const ARDDungeonGenerator* G, int32 Tier, uin
 {
 	TArray<FName> Pool;
 	for (const FRDItemDef& It : G->Items)
-		if (It.Weight > 0.f && (It.Tiers.Num() == 0 || It.Tiers.Contains(Tier)) && It.Kind != ERDItemKind::Slash && It.Kind != ERDItemKind::Key && It.Kind != ERDItemKind::Teleport
+		if (It.Weight > 0.f && (It.Tiers.Num() == 0 || It.Tiers.Contains(G->GlobalTier(Tier))) && It.Kind != ERDItemKind::Slash && It.Kind != ERDItemKind::Key && It.Kind != ERDItemKind::Teleport
 			&& It.Kind != ERDItemKind::Component && It.Kind != ERDItemKind::Tome) Pool.Add(It.Name);
 	// (distinct things: a draw that repeats one is drawn again (a gauntlet's chest held two of its three once))
 	TArray<FName> Out;

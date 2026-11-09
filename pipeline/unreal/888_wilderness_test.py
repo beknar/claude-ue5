@@ -11,6 +11,8 @@ Steps:
           the frames' times, every chunk the same both ways
   quests  (2026-11-07) the captain's two wilderness quests: their places, taken, played (the den's pack, the patrol's
           remains), turned in
+  wild25  (2026-11-09, 910) lairs and spawn points of six tiers along the roads, Brokenspire to Heaven: each monster of its
+          place's tier and of a kind whose wild band holds it, the kinds changing along the way
 Writes SourceArt/wilderness/test_<tag>.json and logs "WILDTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -472,6 +474,41 @@ def step_places():
         and (not sp or (res["killed_stays"]["before"] >= 2 and res["killed_stays"]["after"] == res["killed_stays"]["before"] - 1))
     step_result("places", ok, **res)
 def dist2(a, b): return math.hypot(a.x - b.x, a.y - b.y)
+def step_wild25():
+    """the rebalance to tier 25 (910): the monsters met in the wilds by the tiers of the roads, Brokenspire to Heaven: lairs and
+    spawn points of six tiers (round 2, 7, 12, 17, 22, 25) visited; every monster there is of its place's tier and of a kind
+    whose wild band holds it (the castle's kinds in 1-10, the War Engine's 11-15, the drowned 16-20, the casters 21-25, the
+    defenders 23-25), and the kinds change along the way"""
+    g = G["gen"]; res = {"visits": []}; quiet(True)
+    yield from wait_ready(90)
+    band = {str(d.name): (d.wild_tier_min, d.wild_tier_max) for d in g.get_editor_property("monsters")}
+    res["bands"] = {k: v for k, v in band.items() if v[1] > 0 and v[0] < 99}
+    T = towns(); cand = []
+    for tn in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+        t = T.get(tn)
+        if not t: continue
+        for p in places_near(t["x"], t["y"], 25000):
+            if p["kind"] in ("lair", "spawn") and all(q["id"] != p["id"] for q in cand): cand.append(p)
+    res["tiers_found"] = sorted({p["tier"] for p in cand})
+    picks = []
+    for want in (2, 7, 12, 17, 22, 25):
+        c = sorted(cand, key=lambda p: (abs(p["tier"] - want), p["id"]))
+        if c and c[0] not in picks: picks.append(c[0])
+    for p in picks:
+        g.wild_drop_all(); g.wild_put_her(p["x"] - 45.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        at = V(p["x"] * 100.0, p["y"] * 100.0, 0)
+        ms = [m for m in g.get_monsters() if m and not m.is_dead() and not m.is_ally() and dist2(m.get_actor_location(), at) < 4000.0]
+        kinds = sorted({str(m.monster_name) for m in ms})
+        v = {"name": p["name"], "kind": p["kind"], "tier": p["tier"], "monsters": len(ms), "kinds": kinds, "tiers": sorted({m.tier for m in ms}),
+             "out_of_band": [k for k in kinds if not (band.get(k, (0, 0))[0] <= p["tier"] <= band.get(k, (0, 0))[1])],
+             "hp": round(sum(m.get_max_health() for m in ms) / max(len(ms), 1))}
+        res["visits"].append(v)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    vs = [v for v in res["visits"] if v["monsters"] > 0]
+    ok = (len(res["visits"]) >= 5 and len(vs) >= 5 and all(not v["out_of_band"] and v["tiers"] == [v["tier"]] for v in vs)
+          and max(v["tier"] for v in vs) >= 20 and len({tuple(v["kinds"]) for v in vs}) >= 4)
+    step_result("wild25", ok, **res)
 
 
 # ------------------------------------------------------------------------------------------------ fast travel
@@ -1492,7 +1529,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

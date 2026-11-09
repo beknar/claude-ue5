@@ -49,6 +49,8 @@ const TArray<ARDDungeonGenerator::FRDChainLink>& ARDDungeonGenerator::Chain() co
 		FRDChainLink L;
 		L.Key = P[0]; L.Level = P[1]; L.Short = RDKShort(P[1]); L.Town = P[2]; L.Title = P[3];
 		L.KeyItem = P[4].IsEmpty() ? NAME_None : FName(*P[4]); L.MapItem = P[5].IsEmpty() ? NAME_None : FName(*P[5]);
+		// (the rebalance to tier 25: the dungeon's tiers in the game's, "|base|cap" after its map (905 from chain.json))
+		if (P.Num() >= 8) { L.TierBase = FCString::Atoi(*P[6]); L.TierCap = FCString::Atoi(*P[7]); }
 		ChainCache.Add(L);
 	}
 	return ChainCache;

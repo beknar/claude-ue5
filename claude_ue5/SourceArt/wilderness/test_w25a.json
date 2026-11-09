@@ -1,0 +1,472 @@
+{
+ "tag": "w25a",
+ "plan": [
+  "wild25"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "wild25",
+   "ok": true,
+   "visits": [
+    {
+     "name": "Spider Lair",
+     "kind": "lair",
+     "tier": 2,
+     "monsters": 5,
+     "kinds": [
+      "Half_Creature_04"
+     ],
+     "tiers": [
+      2
+     ],
+     "out_of_band": [],
+     "hp": 116
+    },
+    {
+     "name": "Harpy Lair",
+     "kind": "lair",
+     "tier": 6,
+     "monsters": 5,
+     "kinds": [
+      "Costalmed"
+     ],
+     "tiers": [
+      6
+     ],
+     "out_of_band": [],
+     "hp": 506
+    },
+    {
+     "name": "Hawk Hollow",
+     "kind": "spawn",
+     "tier": 11,
+     "monsters": 3,
+     "kinds": [
+      "Scrap_Hound"
+     ],
+     "tiers": [
+      11
+     ],
+     "out_of_band": [],
+     "hp": 671
+    },
+    {
+     "name": "Troll Lair",
+     "kind": "lair",
+     "tier": 16,
+     "monsters": 4,
+     "kinds": [
+      "Drowned_Sailor"
+     ],
+     "tiers": [
+      16
+     ],
+     "out_of_band": [],
+     "hp": 1597
+    },
+    {
+     "name": "Frost Hollow",
+     "kind": "spawn",
+     "tier": 22,
+     "monsters": 2,
+     "kinds": [
+      "Skeleton_Witch"
+     ],
+     "tiers": [
+      22
+     ],
+     "out_of_band": [],
+     "hp": 2334
+    },
+    {
+     "name": "Bear Lair",
+     "kind": "lair",
+     "tier": 25,
+     "monsters": 4,
+     "kinds": [
+      "Kratos_Tank"
+     ],
+     "tiers": [
+      25
+     ],
+     "out_of_band": [],
+     "hp": 5313
+    }
+   ],
+   "bands": {
+    "Rat": [
+     1,
+     2
+    ],
+    "Half_Creature_04": [
+     1,
+     2
+    ],
+    "Parasite_Slider": [
+     1,
+     2
+    ],
+    "Half_Creature_05": [
+     1,
+     2
+    ],
+    "Drinker": [
+     1,
+     2
+    ],
+    "Medic": [
+     1,
+     2
+    ],
+    "Chicken": [
+     1,
+     2
+    ],
+    "Soldier": [
+     1,
+     2
+    ],
+    "Sufferer": [
+     3,
+     4
+    ],
+    "Fat": [
+     3,
+     4
+    ],
+    "Mask": [
+     3,
+     4
+    ],
+    "Monster": [
+     3,
+     4
+    ],
+    "Gunner": [
+     3,
+     4
+    ],
+    "Parasites_Fat": [
+     3,
+     4
+    ],
+    "Parasit": [
+     3,
+     4
+    ],
+    "Orc_03": [
+     3,
+     4
+    ],
+    "Magur": [
+     5,
+     6
+    ],
+    "Azrak": [
+     5,
+     6
+    ],
+    "Warrior_02_the_leopard": [
+     5,
+     6
+    ],
+    "Kanit": [
+     5,
+     6
+    ],
+    "Gnur": [
+     5,
+     6
+    ],
+    "Dardan": [
+     5,
+     6
+    ],
+    "Costalmed": [
+     5,
+     6
+    ],
+    "Orc_05": [
+     5,
+     6
+    ],
+    "Orc_06": [
+     5,
+     6
+    ],
+    "Alien": [
+     5,
+     6
+    ],
+    "Devourer": [
+     5,
+     6
+    ],
+    "Insect": [
+     5,
+     6
+    ],
+    "Pangolin": [
+     5,
+     6
+    ],
+    "Tank": [
+     5,
+     6
+    ],
+    "Orc_01": [
+     7,
+     8
+    ],
+    "Orc_02": [
+     7,
+     8
+    ],
+    "Ursag": [
+     7,
+     8
+    ],
+    "Orc_04": [
+     7,
+     8
+    ],
+    "Bear_Warrior": [
+     7,
+     8
+    ],
+    "Bull_Warrior": [
+     7,
+     8
+    ],
+    "Crocodile_Warrior": [
+     7,
+     8
+    ],
+    "Elephant_Warrior": [
+     7,
+     8
+    ],
+    "Alien_Warrior_05": [
+     7,
+     8
+    ],
+    "Exterminator": [
+     7,
+     8
+    ],
+    "Shell": [
+     7,
+     8
+    ],
+    "Bug": [
+     7,
+     8
+    ],
+    "Horned": [
+     7,
+     8
+    ],
+    "Mutant": [
+     7,
+     8
+    ],
+    "Ripper_dog": [
+     7,
+     8
+    ],
+    "Daemon": [
+     7,
+     8
+    ],
+    "Troll": [
+     7,
+     8
+    ],
+    "Parasite_Spider": [
+     7,
+     8
+    ],
+    "Fantasy_Animal_raptor_mount": [
+     7,
+     8
+    ],
+    "Alfa": [
+     9,
+     10
+    ],
+    "Spider": [
+     9,
+     10
+    ],
+    "Rock": [
+     9,
+     10
+    ],
+    "Titan": [
+     9,
+     10
+    ],
+    "Hunter": [
+     9,
+     10
+    ],
+    "Nasty": [
+     9,
+     10
+    ],
+    "Scrap_Hound": [
+     11,
+     11
+    ],
+    "Flayed_Mechanic": [
+     11,
+     11
+    ],
+    "Scrap_Mutant": [
+     12,
+     12
+    ],
+    "Rusted_Robot": [
+     12,
+     12
+    ],
+    "Cyber_Convict": [
+     12,
+     12
+    ],
+    "Iron_Golem": [
+     13,
+     13
+    ],
+    "Cyber_Soldier": [
+     13,
+     13
+    ],
+    "Mutant_Trooper": [
+     13,
+     13
+    ],
+    "War_Mech": [
+     14,
+     14
+    ],
+    "Iron_Colossus": [
+     15,
+     15
+    ],
+    "Engine_Mech": [
+     15,
+     15
+    ],
+    "Drowned_Sailor": [
+     16,
+     16
+    ],
+    "Drowned_Deckhand": [
+     16,
+     16
+    ],
+    "Drowned_Diver": [
+     17,
+     17
+    ],
+    "Finned_Lurker": [
+     17,
+     17
+    ],
+    "Drowned_Captain": [
+     18,
+     18
+    ],
+    "Gaping_Deepman": [
+     18,
+     18
+    ],
+    "Hammerhead_Brute": [
+     18,
+     18
+    ],
+    "Spearsnout": [
+     19,
+     19
+    ],
+    "Shellclaw": [
+     19,
+     19
+    ],
+    "Tide_Captain": [
+     20,
+     20
+    ],
+    "Abyssal_Shellclaw": [
+     20,
+     20
+    ],
+    "Skeleton_Mage": [
+     21,
+     21
+    ],
+    "Skeleton_Witch": [
+     22,
+     22
+    ],
+    "Spire_Witch": [
+     23,
+     23
+    ],
+    "Skeleton_Archmage": [
+     24,
+     24
+    ],
+    "Spire_Witch_Elder": [
+     25,
+     25
+    ],
+    "Kratos_Trooper": [
+     23,
+     25
+    ],
+    "Kratos_Guard": [
+     23,
+     25
+    ],
+    "Kratos_Operative": [
+     23,
+     25
+    ],
+    "Kratos_Commander": [
+     23,
+     25
+    ],
+    "Kratos_Tank": [
+     23,
+     25
+    ]
+   },
+   "tiers_found": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    9,
+    10,
+    11,
+    14,
+    15,
+    16,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "windows_shown_again": 3
+}

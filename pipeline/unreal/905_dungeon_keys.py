@@ -1,6 +1,7 @@
 """The user's list of 2026-11-08b (docs/improvements9.txt), its third phase: the dungeons' keys in order. On every map of the
 packaged game (brokenspire, mistward_castle, vel_morrath, war_engine, sewers) the generator's DungeonChain (from
-SourceArt/dungeons/chain.json: "<dungeon key>|<level>|<town>|<title>|<key item>|<map item>") and each dungeon's key and map as
+SourceArt/dungeons/chain.json: "<dungeon key>|<level>|<town>|<title>|<key item>|<map item>|<tier base>|<tier cap>", the tiers'
+base and cap from SourceArt/balance/tier25.json's maps: the rebalance to tier 25, 910) and each dungeon's key and map as
 items of kind Key (weight 0: never in a container; the vault key's picture if it has one, none yet for a map). C++ (RD/RDKeys.cpp): the way
 into a town's dungeon refused without its key, the dungeon's boss dropping the next key and map, the map revealing the road, the
 keys kept at a death; the wilderness's tiers along the chain of towns (FRDWildWorld::TierAt). Run with play stopped, C++ first.
@@ -9,6 +10,7 @@ import unreal, os, json, gc
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 CHAIN = os.path.join(REPO, "claude_ue5", "SourceArt", "dungeons", "chain.json")
+TIERS = os.path.join(REPO, "claude_ue5", "SourceArt", "balance", "tier25.json")
 MAPS = "/Game/RandomDungeon/Maps/"
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
@@ -23,7 +25,8 @@ def open_map(m):
 
 def main():
     J = json.load(open(CHAIN, encoding="utf-8"))
-    lines = [f'{c["key"]}|{c["level"]}|{c["town"]}|{c["title"]}|{c["key_item"]}|{c["map_item"]}' for c in J["chain"]]
+    T = json.load(open(TIERS, encoding="utf-8"))["maps"]
+    lines = [f'{c["key"]}|{c["level"]}|{c["town"]}|{c["title"]}|{c["key_item"]}|{c["map_item"]}|{T[c["level"]][0]}|{T[c["level"]][1]}' for c in J["chain"]]
     for m in GAME_MAPS:
         if not eal.does_asset_exist(MAPS + m): REPORT.append(f"no map {m}"); continue
         g = open_map(MAPS + m)

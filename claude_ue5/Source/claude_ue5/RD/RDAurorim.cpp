@@ -440,7 +440,8 @@ bool ARDDungeonGenerator::PlaceFinalBoss()
 FName ARDDungeonGenerator::PickFinalReward() const
 {
 	const int32 T = FMath::Max(MaxTier, 1);
-	auto OfTier = [T](const FRDItemDef& It) { return It.Tiers.Contains(T); };
+	const int32 Tg = GlobalTier(T);
+	auto OfTier = [Tg](const FRDItemDef& It) { return It.Tiers.Contains(Tg); };
 	// a weapon she wields (her best blow), else armour she wears (its best rating), else the best ring of her kind
 	FName Best = NAME_None; float BestV = -1.f;
 	for (const FRDItemDef& It : Items)
