@@ -20,9 +20,9 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-07 ([docs/improvements8.txt](docs/improvements8.txt))
 
-Built and tested (`884 planks`, `dummies`, `storage`, `block8`; `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`, `perf8`; `868 block`); still to test or do:
+Built and tested (`884 planks`, `storage`, `block8` (`test_b8b`; `test_b8`'s block8 failed on the turn, 56 degrees of 60); `dummies` still to pass: its last record, `test_b8`, failed with the Mage's bolt at the dummy counting 0 hits, and the rerun is pending; `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`, `perf8` (its record was not kept: run it again for the numbers); `868 block`); still to test or do:
 
-- [ ] **The packaged game with this list:** not packaged yet. `869` must run first (the crops' materials, the corn and potato plants', need the instanced-mesh usage; Bone Temple's and PureNature's too).
+- [ ] **The packaged game with this list:** packaged on 2026-11-08 (Shipping, `builds\mistward_castle`; every run of its `-Test` ok, the console reading `rd.WildRunSpeed` back), but no run went out to the farms, and whether `869` ran before it is not recorded: the crops' materials (the corn and potato plants', Bone Temple's and PureNature's) need the instanced-mesh usage. A Development package's log ("missing usage flag") would show it.
 - [ ] **Hunting a fleeing animal:** struck once, a deer runs at 8.5 m/s and the Summoner's next bolts fell short of it; the test holds the animals before her. Whether a hunt reads well in play (bolts' reach against a fleeing deer, a sword against a hare at 4.2 m/s) is not measured.
 - [ ] **An animal's return at the level's own wait** (120 s): measured with the wait at 45 s (another deer 45.5 s after the kill).
 - [ ] **Walking into the farms:** running at 5x across them, 26 frames of 286 were over 100 ms (the grassland 11 of 225); the near chunks' crops (about 24,000 a chunk) are added in one go when a chunk comes near. At 1x not measured.
@@ -134,7 +134,7 @@ What the wilderness does not do yet:
 - **The weather has no lightning, puddles or wet ground:** the rain and snow are falling drops round the camera, the storm a darker sky, more rain and stronger wind.
 - **No swimming:** she wades rivers and lakes on a floor under the water; an invisible wall keeps her out of the sea. The lava does no harm.
 - **Long walks:** the towns are 85 to 157 km apart, hours on foot; fast travel takes her to a town once she has found it.
-- **The small towns are simpler than Brokenspire:** no elder, scholar or captain, no quests of their own (their boards hold only old notices), a keep with no Mistgate.
+- **One way into Mistward Castle:** only Brokenspire's Mistgate leads to it (and to its final boss); the three other cities (Vel Morrath, Ashenreach, Graymourne: cities of Brokenspire's size with their own people and quests since 2026-11-06/07) each lead to their own dungeon.
 - **The light:** in the default morning (08:00) the land looks pale from a distance. The base colour buffer shows the ground's colours right; it is the low sun and the sky light.
 - **The frame rate:** 10 to 48 frames a second (23 on average) in the editor's play window out there.
 - **Memory in the editor:** one long play session that visited all 28 templates ran the machine short of memory (32 to 34 GB committed); the tests run in batches with the editor restarted between them. A walk with eight long journeys held flat at about 30.3 GB.

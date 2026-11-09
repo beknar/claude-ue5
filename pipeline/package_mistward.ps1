@@ -1,4 +1,4 @@
-# Package mistward_castle (and Brokenspire, its town, which the hero menu opens) as a standalone Windows game: one directory with claude_ue5.exe that runs on a PC without
+# Package the current game (the hero menu, Brokenspire with its wilderness and cities, mistward_castle, and the cities' dungeons vel_morrath, war_engine and sewers) as a standalone Windows game: one directory with claude_ue5.exe that runs on a PC without
 # Unreal, Visual Studio or any runtime installed. Close the editor first (package_starship.ps1's way):
 #   - builds the game target (Shipping) against the installed engine, cooks the hero menu (mistward_castle_select) and the
 #     castle (mistward_castle) and what they refer to, stages it into .pak / IoStore containers and archives it to
