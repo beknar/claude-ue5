@@ -1,5 +1,5 @@
 {
- "tag": "f9c",
+ "tag": "f9f",
  "plan": [
   "farms9"
  ],
@@ -23,7 +23,14 @@
     24.0
    ],
    "croft_plot_m2_median": 1200,
-   "cross_walked_rise_fall_m": 1.654,
+   "walked_follows_ridge": {
+    "corr": 1.0,
+    "slope": 1.0,
+    "walked_less_bare_m": [
+     0.0,
+     0.313
+    ]
+   },
    "cross": {
     "at": [
      -2000.0,
@@ -38,7 +45,7 @@
      0.313
     ]
    },
-   "farmsteads_within_3_5km": 35,
+   "farmsteads_within_3_5km": 23,
    "farm": {
     "name": "Odric's Croft",
     "at": [
@@ -125,7 +132,7 @@
     },
     {
      "in_pen": true,
-     "above_ground_cm": 0.0,
+     "above_ground_cm": -1.0,
      "state": 2
     },
     {
@@ -163,17 +170,17 @@
    "bark": "farmwife of Odric's Croft|Mind the gate, they'll be out and in the beans before you can whistle.",
    "bark_new": true,
    "bodies_ok": true,
-   "fence_pieces": 84,
+   "fence_pieces": 63,
    "fences_in_open_fields": []
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "bs_f9c_farms9_talk.png",
-  "bs_f9c_farms9_farmstead.png",
-  "bs_f9c_farms9_farmstead2.png",
-  "bs_f9c_farms9_paddock.png",
-  "bs_f9c_farms9_strips.png"
+  "bs_f9f_farms9_talk.png",
+  "bs_f9f_farms9_farmstead.png",
+  "bs_f9f_farms9_farmstead2.png",
+  "bs_f9f_farms9_paddock.png",
+  "bs_f9f_farms9_strips.png"
  ],
  "error": null,
  "windows_shown_again": 1

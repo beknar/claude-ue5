@@ -1207,7 +1207,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	}
 	if (IsTownPanelOpen()) return FString();
 	// (a farmstead's family out in the wilds (the list of 2026-11-08b))
-	if (bWild) if (const ARDTownsfolk* Wf = NearestWildFolk(From)) return FString::Printf(TEXT("talk to the %s"), *Wf->Title);
+	if (const ARDTownsfolk* Wf = WildFolkForF(From)) return FString::Printf(TEXT("talk to the %s"), *Wf->Title);
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
@@ -1248,7 +1248,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	}
 	if (TownPanelClosedFrame == GFrameCounter) return TEXT("closed");
 	// (a farmstead's family: they turn to her and say a line of their own)
-	if (bWild) if (ARDTownsfolk* Wf = NearestWildFolk(From))
+	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
 		Wf->FaceToward(From, 8.f);
 		TownCount(TEXT("talk:farm"));

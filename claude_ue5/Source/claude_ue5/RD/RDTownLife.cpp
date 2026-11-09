@@ -280,12 +280,21 @@ void ARDTownAnimal::Tick(float Dt)
 		{
 			FVector Nl = L + GetActorForwardVector() * FMath::Min(Speed * Dt, D.Size());
 			// (on the wild ground: at its height where it steps (the paddock's ground rises and falls a little))
-			if (bWildGround) Nl.Z = Gen->WildGroundZ(Nl);
+			if (bWildGround && GroundN > 1) Nl.Z = GroundZAt(Nl);
 			SetActorLocation(Nl, false);
 		}
 		return;
 	}
 	if (Now >= Until) SetState(R.FRand() < 0.45f ? 2 : State == 1 ? 0 : 1, Now);
+}
+
+float ARDTownAnimal::GroundZAt(const FVector& P) const
+{
+	if (GroundN < 2 || GroundGrid.Num() != GroundN * GroundN) return P.Z;
+	const float Fx = FMath::Clamp((float)(P.X - GroundO.X) / GroundStep, 0.f, GroundN - 1.001f), Fy = FMath::Clamp((float)(P.Y - GroundO.Y) / GroundStep, 0.f, GroundN - 1.001f);
+	const int32 I = (int32)Fx, J = (int32)Fy; const float A = Fx - I, B = Fy - J;
+	auto G = [&](int32 X, int32 Y) { return GroundGrid[X * GroundN + Y]; };
+	return FMath::Lerp(FMath::Lerp(G(I, J), G(I + 1, J), A), FMath::Lerp(G(I, J + 1), G(I + 1, J + 1), A), B);
 }
 
 // ================================================================================================ the generator's side

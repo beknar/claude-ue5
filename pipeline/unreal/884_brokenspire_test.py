@@ -2935,7 +2935,7 @@ def step_farms9():
         for i in range(-160, 161):
             d = i * 0.25; px, py = x + ax * d, y + ay * d
             p = str(g.get_wild_farm_at(px, py)).split("|")
-            rows.append((d, int(p[0]), int(p[8]), float(p[9]), float(p[10]), float(p[11]), p[2]))
+            rows.append((d, int(p[0]), int(p[8]), float(p[9]), float(p[10]), float(p[11]), p[2], float(p[12])))
         same = [r for r in rows if r[1] == 1 and r[6] == rows[160][6]]
         strips = sorted({r[2] for r in same})
         furrow_runs = 0; prev = False
@@ -2944,13 +2944,16 @@ def step_farms9():
             if f and not prev: furrow_runs += 1
             prev = f
         ridge = [r[4] for r in same]; hs = [r[5] for r in same]
-        # (the walked height against a line through it: the ridges' rise and fall in what she walks on)
-        n = len(hs)
+        # (the ridges in what she walks on (Height), not the land's lie (PR #30's review: a fit to a line passed on the relief
+        # alone): the walked height less the same ground with no farm on it, against the ridge the layout gives: how closely it
+        # follows (correlation), by how much (slope: 1 if the ridge is all of it) and its rise and fall)
+        diff = [r[5] - r[7] for r in same]
+        n = len(diff)
         if n > 10:
-            xs = list(range(n)); mx = sum(xs) / n; my = sum(hs) / n
-            b = sum((a - mx) * (h - my) for a, h in zip(xs, hs)) / max(1e-9, sum((a - mx) ** 2 for a in xs))
-            dev = [h - (my + b * (a - mx)) for a, h in zip(xs, hs)]
-            res["cross_walked_rise_fall_m"] = round(max(dev) - min(dev), 3)
+            mh, mr = sum(diff) / n, sum(ridge) / n
+            cov = sum((a - mh) * (b - mr) for a, b in zip(diff, ridge)); vh = sum((a - mh) ** 2 for a in diff); vr = sum((b - mr) ** 2 for b in ridge)
+            res["walked_follows_ridge"] = {"corr": round(cov / max(1e-12, math.sqrt(vh * vr)), 3), "slope": round(cov / max(1e-12, vr), 3),
+                                           "walked_less_bare_m": [round(min(diff), 3), round(max(diff), 3)]}
         res["cross"] = {"at": [x, y], "strip_w": sw, "samples": len(same), "strips": len(strips), "furrows": furrow_runs,
                         "ridge_min_max_m": [round(min(ridge), 3), round(max(ridge), 3)] if ridge else None}
     yield
@@ -3036,7 +3039,8 @@ def step_farms9():
     ok = (res["open_fields"] >= 5 and not res["open_fields_with_more_than_one_crop"] and res["crops_in_open_fields"] >= 8
           and res["strip_w_m"] and res["strip_w_m"][0] >= 15 and res["strip_w_m"][1] <= 24 and 0 < res["croft_plot_m2_median"] < 4000
           and cr.get("strips", 0) >= 3 and cr.get("furrows", 0) >= cr.get("strips", 0) - 1 and cr.get("ridge_min_max_m") and cr["ridge_min_max_m"][1] - cr["ridge_min_max_m"][0] >= 0.25
-          and res.get("cross_walked_rise_fall_m", 0) >= 0.25 and res["farmsteads_within_3_5km"] >= 3 and ok_farm and res["fence_pieces"] > 0 and not res["fences_in_open_fields"])
+          and res.get("walked_follows_ridge", {}).get("corr", 0) >= 0.98 and 0.9 <= res.get("walked_follows_ridge", {}).get("slope", 0) <= 1.1
+          and res["walked_follows_ridge"]["walked_less_bare_m"][1] - res["walked_follows_ridge"]["walked_less_bare_m"][0] >= 0.25 and res["farmsteads_within_3_5km"] >= 3 and ok_farm and res["fence_pieces"] > 0 and not res["fences_in_open_fields"])
     step_result("farms9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,

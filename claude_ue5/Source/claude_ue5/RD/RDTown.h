@@ -161,6 +161,13 @@ public:
 	 *  the paddock is turned PenYaw degrees (its half sizes along and across that way) */
 	bool bWildGround = false;
 	float PenYaw = 0.f;
+	/** the ground's height (cm) over the pen, read once when the farm is made (GroundN x GroundN points GroundStep apart from
+	 *  GroundO): read as it walks (PR #30's review: the world's whole height every frame for every animal) */
+	TArray<float> GroundGrid;
+	FVector2D GroundO = FVector2D::ZeroVector;
+	float GroundStep = 100.f;
+	int32 GroundN = 0;
+	float GroundZAt(const FVector& P) const;
 protected:
 	virtual void Tick(float Dt) override;
 private:

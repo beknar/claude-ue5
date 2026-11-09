@@ -302,14 +302,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		for (const FRDWildPlace& P : Ps) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm && P.Town < 0) D.Places.Add(P);
 		// (the list of 2026-11-08b: "on the farm terrain, there should also be farm houses, barns, fenced in animals, and farm
 		// families": a farmstead in each croft field's yard, laid as a place is)
-		if (!D.bTownHole) W.FarmsteadsIn(X0, Y0, X0 + Cm, Y0 + Cm, D.Places);
-		else
-		{
-			TArray<FRDWildPlace> Fs;
-			W.FarmsteadsIn(X0, Y0, X0 + Cm, Y0 + Cm, Fs);
-			for (const FRDWildPlace& P : Fs)
-				if (FMath::Abs(P.At.X - D.TownAt.X) > D.TownHalfM + 60.0 || FMath::Abs(P.At.Y - D.TownAt.Y) > D.TownHalfM + 60.0) D.Places.Add(P);
-		}
+		// (none by a town: FarmAt makes a croft field within 450 m of one pasture)
+		W.FarmsteadsIn(X0, Y0, X0 + Cm, Y0 + Cm, D.Places);
 	}
 	D.Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 }

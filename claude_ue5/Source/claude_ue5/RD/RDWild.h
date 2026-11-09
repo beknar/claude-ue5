@@ -267,6 +267,8 @@ public:
 	float BaseHeight(double X, double Y) const;
 	/** the ground as she walks it (metres above the sea) */
 	float Height(double X, double Y) const;
+	/** the same ground with no farm on it (no ridge-and-furrow: tests) */
+	float BareHeight(double X, double Y) const;
 	/** everything at a point (the chunk's vertices, the map's pixels); bDetail: the fine noise too */
 	void Sample(double X, double Y, FRDWSample& Out, bool bDetail = true, float PixelM = 0.f) const;
 	/** the game's z (cm) of a height in metres, and back */
@@ -307,7 +309,7 @@ public:
 private:
 	float ShapeHeight(int32 B, double X, double Y, const FVector2D& Site, bool bDetail) const;
 	float LandRelief(double X, double Y, bool bDetail, const int32* Bi, const float* W, int32 N) const;
-	float LandHeight(double X, double Y, bool bDetail, int32* OutB = nullptr, int32* OutB2 = nullptr, float* OutW = nullptr, float* OutC = nullptr) const;
+	float LandHeight(double X, double Y, bool bDetail, int32* OutB = nullptr, int32* OutB2 = nullptr, float* OutW = nullptr, float* OutC = nullptr, float* OutFarm = nullptr) const;
 	void AssignBiomes();
 	void PlaceTowns();
 	void MakeRivers();

@@ -9,6 +9,7 @@
 #include "RD/RDWild.h"
 #include "RD/RDTown.h"
 #include "RD/RDCombat.h"
+#include "RD/RDSection.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "ProceduralMeshComponent.h"
@@ -134,6 +135,12 @@ void ARDDungeonGenerator::SpawnWildFarm(ARDWildChunk* C, const FRDWildPlace& P)
 		const FVector2D Half(Hu * 100.f - 40.f, Hv * 100.f - 40.f);
 		const FVector2D H = (Half - FVector2D(D.HalfSize.X, D.HalfSize.X)).ComponentMax(FVector2D(5.f, 5.f));
 		Rec.PenAt = PenAt; Rec.PenHalf = Half; Rec.PenYaw = P.Yaw;
+		// (the ground's height over the pen, once: the animals read it as they walk (PR #30's review))
+		const float Rg = FMath::Sqrt(FMath::Square(Hu) + FMath::Square(Hv)) * 100.f + 100.f;
+		constexpr int32 Gn = 6;
+		TArray<float> Grid; Grid.SetNumUninitialized(Gn * Gn);
+		const FVector2D G0(PenAt.X - Rg, PenAt.Y - Rg); const float Gs = 2.f * Rg / (Gn - 1);
+		for (int32 I = 0; I < Gn; ++I) for (int32 J = 0; J < Gn; ++J) Grid[I * Gn + J] = WildGroundZ(FVector(G0.X + I * Gs, G0.Y + J * Gs, 0.0));
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		for (int32 K = 0; K < N; ++K)
 		{
@@ -142,6 +149,7 @@ void ARDDungeonGenerator::SpawnWildFarm(ARDWildChunk* C, const FRDWildPlace& P)
 			ARDTownAnimal* A = GetWorld()->SpawnActor<ARDTownAnimal>(ARDTownAnimal::StaticClass(), FTransform(FRotator(0, R.FRandRange(0.f, 360.f), 0), At), Sp);
 			if (!A) continue;
 			A->bWildGround = true; A->PenYaw = P.Yaw;
+			A->GroundGrid = Grid; A->GroundO = G0; A->GroundStep = Gs; A->GroundN = Gn;
 			A->Init(this, Kd, -1, PenAt, Half, HashCombine((uint32)P.Id, Salt + (uint32)K * 2654435761u));
 			C->Props.Add(A);
 			Rec.Animals.Add(A);
@@ -241,6 +249,28 @@ void ARDDungeonGenerator::SpawnWildFarm(ARDWildChunk* C, const FRDWildPlace& P)
 	WildFarms.Add(MoveTemp(Rec));
 }
 
+void ARDDungeonGenerator::TickWildFarms()
+{
+	while (WildFarmQueue.Num() > 0)
+	{
+		const TPair<TWeakObjectPtr<ARDWildChunk>, FRDWildPlace> Q = WildFarmQueue[0];
+		WildFarmQueue.RemoveAt(0);
+		if (ARDWildChunk* C = Q.Key.Get(); IsValid(C)) { SpawnWildFarm(C, Q.Value); return; }    // (a chunk dropped before its turn: the next)
+	}
+}
+
+ARDTownsfolk* ARDDungeonGenerator::WildFolkForF(const FVector& From) const
+{
+	// (as the town's people: within 2 m, and a door or a container of a loaded town nearer than them takes F (PR #30's review:
+	// the farm folk took F before Brokenspire's rule))
+	if (!bWild) return nullptr;
+	ARDTownsfolk* T = NearestWildFolk(From, 200.f);
+	if (!T) return nullptr;
+	const float D = FVector::Dist2D(T->GetActorLocation(), From);
+	if (const ARDSection* S0 = GetSection(FIntPoint::ZeroValue)) { bool bD0 = false; int32 I0 = -1; if (S0->FindNearestInteractive(From, D, bD0, I0) < D - 30.f) return nullptr; }
+	return T;
+}
+
 ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Reach) const
 {
 	ARDTownsfolk* Best = nullptr; float Bd = Reach;
@@ -294,8 +324,8 @@ FString ARDDungeonGenerator::GetWildFarmAt(float Xm, float Ym) const
 {
 	if (!IsWildReady()) return FString();
 	FRDWFarm Fm; Wild->FarmAt(Xm, Ym, Wild->FarmWeight(Xm, Ym), Fm);
-	return FString::Printf(TEXT("%d|%d,%d|%d,%d|%d|%.3f|%.4f|%.2f|%.2f|%d|%.3f|%.3f|%.3f"), (int32)Fm.Kind, Fm.Great.X, Fm.Great.Y, Fm.Plot.X, Fm.Plot.Y, Fm.Crop, Fm.Field, Fm.Ang,
-		Fm.StripW, Fm.StripOff, Fm.Strip, Fm.Furrow, Fm.Ridge, Wild->Height(Xm, Ym));
+	return FString::Printf(TEXT("%d|%d,%d|%d,%d|%d|%.3f|%.4f|%.2f|%.2f|%d|%.3f|%.3f|%.3f|%.3f"), (int32)Fm.Kind, Fm.Great.X, Fm.Great.Y, Fm.Plot.X, Fm.Plot.Y, Fm.Crop, Fm.Field, Fm.Ang,
+		Fm.StripW, Fm.StripOff, Fm.Strip, Fm.Furrow, Fm.Ridge, Wild->Height(Xm, Ym), Wild->BareHeight(Xm, Ym));
 }
 
 TArray<FString> ARDDungeonGenerator::FindWildFarmsteads(float Xm, float Ym, float Rm) const
