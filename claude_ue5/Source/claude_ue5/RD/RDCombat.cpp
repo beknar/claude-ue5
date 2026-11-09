@@ -1757,7 +1757,12 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 	// (the third list's tabs take E (and Q) in the inventory: there it is no longer "use"; the anvil keeps it)
 	const bool bTabsE = Generator && Generator->bInventoryTabs && !bCraftOpen;
 	const bool bUse = Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom }) || (!bTabsE && Pressed({ EKeys::E })) || (!bMouse && Pressed({ EKeys::LeftMouseButton }));
-	const bool bToggle = Pressed({ EKeys::I, EKeys::Tab, EKeys::Gamepad_Special_Right });
+	// (the gamepad's Start: with a list open its press closes it, as before; with none open a short press (let go within half a
+	// second) opens the inventory and a long one the Escape menu: the generator's TickMenu tells them apart (the list of
+	// 2026-11-08b: "the esc menu is inaccessible from the gamepad"))
+	const bool bStart = (bInventoryOpen || bCraftOpen || !Generator || !Generator->bEscapeMenu) ? Pressed({ EKeys::Gamepad_Special_Right }) : bStartTapped;
+	bStartTapped = false;
+	const bool bToggle = Pressed({ EKeys::I, EKeys::Tab }) || bStart;
 	// (level 5: the anvil's crafting panel, opened by the generator's F)
 	if (bCraftOpen)
 	{

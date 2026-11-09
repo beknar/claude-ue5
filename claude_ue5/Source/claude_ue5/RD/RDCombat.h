@@ -240,6 +240,9 @@ public:
 	/** the open inventory pauses the game (off for the demo reel: the Movie Render Queue renders a world that goes on) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Combat") bool bInventoryPausesGame = true;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") bool IsInventoryOpen() const { return bInventoryOpen; }
+	/** the list of 2026-11-08b: the gamepad's Start let go within half a second with nothing open (the generator's TickMenu
+	 *  reads Start: held longer it opens the Escape menu); the inventory takes it as its toggle, once */
+	bool bStartTapped = false;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") int32 GetInventoryCursor() const { return InventoryCursor; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void MoveInventoryCursor(int32 Step);
 	/** wields the weapon / uses the item under the cursor */

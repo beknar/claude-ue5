@@ -16,8 +16,19 @@
 #include "EngineUtils.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "HAL/IConsoleManager.h"
+#include "GameFramework/WorldSettings.h"
+#include "RD/RDCombat.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDTownDay, Log, All);
+
+// (the list of 2026-11-08b, docs/improvements9.txt: "need a command to speed up time in the console". Two: the day's clock
+// alone (the sun, the moon, the hour the townsfolk keep), and the whole game (everything moves faster, the clock too). Both
+// typed at the console, the editor's or a Shipping game's own (RDConsole.cpp))
+static TAutoConsoleVariable<float> CVarRDTimeSpeed(TEXT("rd.TimeSpeed"), 1.f,
+	TEXT("How much faster the day's clock runs (the hour, the sun and the moon): 1 as made (a day an hour), up to 240 (a day in 15 s)."));
+static TAutoConsoleVariable<float> CVarRDGameSpeed(TEXT("rd.GameSpeed"), 1.f,
+	TEXT("How fast the whole game runs (the world's time dilation): 1 as made, 0.1 to 10."));
 
 namespace
 {
@@ -77,10 +88,24 @@ void ARDDungeonGenerator::BeginDayNight()
 	UE_LOG(LogRDTownDay, Log, TEXT("RDDAY begun: day %d at %s (a day lasts %.0f s), sun %.1f lux, sky %.2f, exposure bias %.2f"), TownDay, *GetTownClock(), DayLengthSeconds, DaySunLux, DaySkyLight, DayBias);
 }
 
+void ARDDungeonGenerator::TickGameSpeed()
+{
+	// (rd.GameSpeed: set on the world when it is typed (a change), so a test's own time dilation is left alone otherwise; a
+	// new level starts at 1 and takes it again)
+	const float Want = FMath::Clamp(CVarRDGameSpeed.GetValueOnGameThread(), 0.1f, 10.f);
+	UWorld* W = GetWorld();
+	if (!W || !W->GetWorldSettings()) return;
+	if (Want == GameSpeedApplied) return;
+	W->GetWorldSettings()->SetTimeDilation(Want);
+	UE_LOG(LogRDTownDay, Log, TEXT("RDTIME the game's speed %.2fx (was %.2fx)"), Want, GameSpeedApplied);
+	if (PlayerCombat && (Want != 1.f || GameSpeedApplied != 1.f)) PlayerCombat->ShowMessage(FString::Printf(TEXT("Game speed: %.2gx"), Want));
+	GameSpeedApplied = Want;
+}
+
 void ARDDungeonGenerator::TickDayNight(float Dt)
 {
 	if (!DaySun || DayLengthSeconds <= 0.f || Dt <= 0.f || GetWorld()->IsPaused()) return;
-	TownHour += Dt * 24.f / DayLengthSeconds;
+	TownHour += Dt * FMath::Clamp(CVarRDTimeSpeed.GetValueOnGameThread(), 0.f, 240.f) * 24.f / DayLengthSeconds;
 	if (TownHour >= 24.f) { TownHour -= 24.f; ++TownDay; }
 	if (URDGameInstance* GI = URDGameInstance::Of(this)) { GI->TownHour = TownHour; GI->TownDay = TownDay; }
 	// (the lights four times a second: a quarter second is 1/7200 of the day, and every change sends the lights, the sky

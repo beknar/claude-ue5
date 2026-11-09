@@ -1,4 +1,6 @@
 #include "RD/RDDungeonGenerator.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Application/IInputProcessor.h"
 #include "RD/RDSave.h"
 #include "RD/RDGameInstance.h"
 #include "RD/RDSection.h"
@@ -47,6 +49,8 @@ static TAutoConsoleVariable<int32> CVarRDHeroMenu(TEXT("rd.HeroMenu"), 1,
 	TEXT("1: a dungeon level with heroes and a MenuLevel, played without ?Hero=, opens its menu first. 0: it plays its DefaultHero (scripted tests, reel renders)."));
 
 static const int32 RDSoundSeed = 90417;
+// (the list of 2026-11-08b: the gamepad's Start held this long with nothing open opens the Escape menu)
+static constexpr double RDStartHoldSeconds = 0.5;
 static const FName RDFireKeys[3] = { TEXT("Env.Torch"), TEXT("Env.Brazier"), TEXT("Env.Hearth") };
 static const FName RDMusicKeys[4] = { TEXT("Music.Explore"), TEXT("Music.Combat"), TEXT("Atmos.Explore"), TEXT("Atmos.Combat") };
 
@@ -897,9 +901,47 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 	return Out;
 }
 
+/** the gamepad's Start as the device sends it (see StartKeys) */
+class FRDStartKeys : public IInputProcessor
+{
+public:
+	TWeakObjectPtr<ARDDungeonGenerator> Owner;
+	virtual void Tick(const float, FSlateApplication&, TSharedRef<ICursor>) override {}
+	virtual bool HandleKeyDownEvent(FSlateApplication&, const FKeyEvent& E) override
+	{
+		if (E.GetKey() == EKeys::Gamepad_Special_Right && !E.IsRepeat())
+			if (ARDDungeonGenerator* G = Owner.Get()) { G->bRawStartDown = true; G->bRawStartSeen = true; G->RawStartDownAt = FPlatformTime::Seconds(); }
+		return false;
+	}
+	virtual bool HandleKeyUpEvent(FSlateApplication&, const FKeyEvent& E) override
+	{
+		if (E.GetKey() == EKeys::Gamepad_Special_Right) if (ARDDungeonGenerator* G = Owner.Get()) G->bRawStartDown = false;
+		return false;
+	}
+	virtual const TCHAR* GetDebugName() const override { return TEXT("RDStartKeys"); }
+};
+
+void ARDDungeonGenerator::ResetStartHold()
+{
+	StartHeldSince = -1.0;
+	RawStartHandledAt = RawStartDownAt;
+	if (PlayerCombat) PlayerCombat->bStartTapped = false;
+}
+
+void ARDDungeonGenerator::EndPlay(const EEndPlayReason::Type Reason)
+{
+	if (StartKeys.IsValid() && FSlateApplication::IsInitialized()) FSlateApplication::Get().UnregisterInputPreProcessor(StartKeys);
+	StartKeys.Reset();
+	// (the clouds' render-target mode as it was before this level's sky set it: RDSky.cpp)
+	if (VrtModeWas >= 0)
+		if (IConsoleVariable* V = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"))) { V->Set(VrtModeWas, ECVF_SetByCode); VrtModeWas = -1; }
+	Super::EndPlay(Reason);
+}
+
 void ARDDungeonGenerator::SetMenuOpen(bool bOpen)
 {
 	if (bOpen == bMenuOpen || !bEscapeMenu) return;
+	ResetStartHold();
 	bMenuOpen = bOpen; bMenuDragging = false;
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	if (bOpen)
@@ -1030,7 +1072,14 @@ void ARDDungeonGenerator::TickSaveNameKeys(APlayerController* PC)
 	if (PC->WasInputKeyJustPressed(EKeys::SpaceBar) && SaveNameText.Len() < 40 && !SaveNameText.EndsWith(TEXT(" "))) SaveNameText.AppendChar(TEXT(' '));
 	if (PC->WasInputKeyJustPressed(EKeys::Hyphen) && SaveNameText.Len() < 40) SaveNameText.AppendChar(TEXT('-'));
 	if (PC->WasInputKeyJustPressed(EKeys::Apostrophe) && SaveNameText.Len() < 40) SaveNameText.AppendChar(TEXT('\''));
-	if (PC->WasInputKeyJustPressed(EKeys::BackSpace) && SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1);
+	// (the list of 2026-11-08b: "holding down the backspace key should backspace multiple times": held, it goes on after a
+	// moment (0.4 s), a letter every 50 ms, until it is let go or the name is empty; real time, the menu pauses the game)
+	{
+		const double Now = FPlatformTime::Seconds();
+		if (PC->WasInputKeyJustPressed(EKeys::BackSpace)) { if (SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1); SaveBackAt = Now + 0.4; }
+		else if (PC->IsInputKeyDown(EKeys::BackSpace) && SaveBackAt > 0.0 && Now >= SaveBackAt) { if (SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1); SaveBackAt = Now + 0.05; }
+		else if (!PC->IsInputKeyDown(EKeys::BackSpace)) SaveBackAt = 0.0;
+	}
 	if (PC->WasInputKeyJustPressed(EKeys::Delete)) SaveNameText.Reset();
 }
 
@@ -1040,6 +1089,29 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (PlayerCombat && PlayerCombat->IsScriptedOnly()) return;
 	// (mistward4: Escape on the Options page goes back to the main page; on the main page it closes the menu)
 	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage > 0) BackToMainMenu(); else SetMenuOpen(!bMenuOpen); return; }
+	// (the list of 2026-11-08b: "the esc menu is inaccessible from the gamepad". Start opens the inventory; held half a second
+	// with nothing open it opens this menu instead (the inventory takes a shorter press when it is let go: bStartTapped). With
+	// the menu open, Start closes it (or goes back a page), as B does. Start's press and release come from the device itself
+	// (StartKeys) once it has sent one; a flush of the controller's keys does not end a hold)
+	{
+		const FKey St = EKeys::Gamepad_Special_Right;
+		const double Now = FPlatformTime::Seconds();
+		const bool bListOpen = PlayerCombat && (PlayerCombat->IsInventoryOpen() || PlayerCombat->IsCraftingOpen());
+		bool bPressed = false, bDown = false;
+		if (RawStartDownAt > RawStartHandledAt) { bPressed = true; RawStartHandledAt = RawStartDownAt; }
+		if (bRawStartSeen) bDown = bRawStartDown;
+		else { bPressed = PC->WasInputKeyJustPressed(St); bDown = PC->IsInputKeyDown(St); }
+		if (bPressed)
+		{
+			if (bMenuOpen) { ResetStartHold(); if (MenuPage > 0) BackToMainMenu(); else SetMenuOpen(false); return; }
+			StartHeldSince = bListOpen ? -1.0 : Now;
+		}
+		if (StartHeldSince >= 0.0)
+		{
+			if (!bDown) { if (PlayerCombat) PlayerCombat->bStartTapped = true; StartHeldSince = -1.0; }
+			else if (Now - StartHeldSince >= RDStartHoldSeconds) { SetMenuOpen(true); ResetStartHold(); ++MenuOpensByStart; return; }
+		}
+	}
 	if (!bMenuOpen) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	// (the Save page: the letters type its name; the arrows choose; Enter saves)
@@ -1474,6 +1546,12 @@ void ARDDungeonGenerator::UpdateDiscovery(const FVector& L)
 void ARDDungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	// (the list of 2026-11-08b: the gamepad's Start as the device sends it, for the Escape menu's hold)
+	if (bEscapeMenu && !StartKeys.IsValid() && FSlateApplication::IsInitialized())
+	{
+		TSharedRef<FRDStartKeys> K = MakeShared<FRDStartKeys>(); K->Owner = this;
+		StartKeys = K; FSlateApplication::Get().RegisterInputPreProcessor(K);
+	}
 	SessionSeed = FixedSessionSeed != 0 ? FixedSessionSeed : (int32)(FDateTime::Now().GetTicks() & 0x7fffffff);
 	if (bRevealEffect && RevealPostMaterial)
 	{
@@ -1689,6 +1767,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bMonsterRanged) TickMonsterShots(Dt);              // (mistward5: the monsters' shots in the air)
 	if (bFinalBossOn) TickFinal(Dt);                       // (the final boss: the last tier's share, the light from above)
 	if (bTown || bFinalBossOn) TickFinalShow(Dt);          // (the final boss's showcase: -RDFinalShow)
+	TickGameSpeed();                                       // (the list of 2026-11-08b: rd.GameSpeed)
 	if (!bAutoplayOptionRead) ReadAutoplayOption();        // (mistward5: ?Autoplay= / -Autoplay=)
 	if (bAutoplay) TickAutoplay(Dt);
 	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)

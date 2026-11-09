@@ -4,6 +4,7 @@
 #include "RD/RDWild.h"
 #include "HAL/PlatformTime.h"
 #include "Async/ParallelFor.h"
+#include "Algo/BinarySearch.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDWildWorld, Log, All);
 
@@ -399,6 +400,12 @@ float FRDWildWorld::LandHeight(double X, double Y, bool bDetail, int32* OutB, in
 
 float FRDWildWorld::BaseHeight(double X, double Y) const { return LandHeight(X, Y, true); }
 
+FString FRDWildWorld::CropName(const FRDWSample& S, float MinField) const
+{
+	const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
+	return Fb && Fb->Crops.IsValidIndex(S.FieldCrop) && S.Field > MinField ? Fb->Crops[S.FieldCrop].Name : FString();
+}
+
 float FRDWildWorld::LandRelief(double X, double Y, bool bDetail, const int32* Bi, const float* W, int32 N) const
 {
 	// low ridges and hollows over every region but the flattest (marshes, beaches, the farms' fields), scaled by how rugged
@@ -638,7 +645,16 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 			FLinearColor Cc(0.30f, 0.30f, 0.12f);
 			if (Fb && Fb->Crops.Num() > 0)
 			{
-				O.FieldCrop = (int32)(Pr * 97.f) % Fb->Crops.Num();
+				// (the list of 2026-11-08b: "apply the list of most common crops ... in this order: wheat, barley, oats, rye, peas,
+				// beans, flax, hemp, corn, potatoes, cabbages, pumpkins, sunflowers": each field's crop drawn by the crops'
+				// weights (biomes.json's "weight", the commonest first), from a hash of its own; the weights' running sums are made
+				// once at Init (CropCum), not on every sample)
+				O.FieldCrop = 0;
+				if (CropCum.Num() == Fb->Crops.Num() && CropCum.Last() > 0.f)
+				{
+					const float Pick = Rand01(Fbi, Fbj, Seed + 141u) * CropCum.Last();
+					O.FieldCrop = FMath::Min(Algo::UpperBound(CropCum, Pick), CropCum.Num() - 1);
+				}
 				const FRDWildCrop& Cr = Fb->Crops[O.FieldCrop];
 				Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f));
 			}
@@ -1004,6 +1020,14 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
 	if (Biomes.Num() == 0) { FRDWildBiome B; B.Name = TEXT("grasslands"); Biomes.Add(B); BiomeIndex.Add(B.Name, 0); }
 	{ const int32* Fi = BiomeIndex.Find(TEXT("farms")); FarmsBiome = Fi ? *Fi : -1; }
+	// (the farms' crops' weights as running sums, for each field's draw; the ground's rows hold at most RDWMaxCrops crops)
+	CropCum.Reset();
+	if (Biomes.IsValidIndex(FarmsBiome))
+	{
+		float S = 0.f;
+		for (const FRDWildCrop& C : Biomes[FarmsBiome].Crops) { S += FMath::Max(C.Weight, 0.f); CropCum.Add(S); }
+		if (CropCum.Num() > FRDWildWorld::MaxCrops) UE_LOG(LogRDWildWorld, Error, TEXT("RDWILD %d crops in the farms: the ground's rows hold %d (the chunk's UV0 v is the crop / %d)"), CropCum.Num(), FRDWildWorld::MaxCrops, FRDWildWorld::MaxCrops);
+	}
 	Rivers.Reset(); Lakes.Reset(); Roads.Reset(); SegHash.Reset(); LakeHash.Reset();
 	PlaceTowns();
 	AssignBiomes();

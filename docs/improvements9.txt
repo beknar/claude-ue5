@@ -1,0 +1,185 @@
+in the storage, in the take one back menu item, multiple of the same items need to stack
+in the storage, in the store a thing menu, when the button is held down to store something, 
+it should continue to store something until the button is let go
+the warrior should have no default shield
+the esc menu is inaccessible from the gamepad
+when saving the game in the ESC menu, holding down the backspace key should backspace multiple times
+in town, when looking up at the sky, there is a blue outline against any object, including buildings,
+players, and NPCs,  as if there were a border between the building and the sky, whenever there is any blue sky
+the grey disc still appears in the sky whenever there is any blue sky at all, and there is no grey disc when there
+is no blue sky
+when there is no blue sky, there is a grey shimmering border around objects on the ground when viewed against the grey sky
+on the farm terrain, there should also be farm houses, barns, fenced in animals, and farm families to go with 
+the farms
+for the kinds of plants raised in the farms, apply the list of most common crops raised to what is actually
+found in the wilderness in this order: wheat, barley, oats, rye, peas, beans, flax, hemp, corn, potatoes, cabbages,
+pumpkins, sunflowers
+have an indicator for what kind of crops there are at the farm terrain
+need a command to speed up time in the console
+
+the defeat of the dungeon boss at Mistward Castle drops not just a reward, it drops a key and a map to vell morrath, that will
+be the key to opening its dungeon.  this key will not open any of the other dungeons.  the dungeons are opened in order, with
+Heaven being the last.  Each town's dungeon drops a key to the next one.  
+
+build these cities
+	Kethrys Spire - theme: a mage-city clustered around a black tower that hasn't opened its gates in a century.
+		the lights in the upper windows still move.  the town around the black tower is mystically themed, with
+		lots of magical effects, laboratories, libraries, study rooms, meditation chambers, stone houses, etc. this
+		is not a poor village.
+	Heaven - theme: this is a modern city that is surrounded by a shimmering shield.  it is characterized by modern
+		skyscrapers, office buildings, modern shops, modern streets, modern vehicles navigating the streets.
+		the dungeon is a mechanized fortress with modern and sci-fi defenders armed with firearms.  the outside
+		and entrance of the dungeon is a foreboding research facility called 'Kratos Aurorim Research, LLC'.
+
+
+mage spells need to be limited to 1 gained per tier, then the rest need to be redistributed in the rest of the 5
+if there are not enough mage spells, there needs to be more made up, assigned damage and balanced all the way to Heaven
+additional summoner, rogue, and martial artist abilities need to be created after the mistward castle dungeon is defeated so that they can be earned in the other dungeons.
+the armor and weapons need to be redistributed across the rest of the 5 dungeons and then rebalanced - or more 
+armor and weapons need to be made up and added on to the other 5 dungeons, or both need to be done
+rebalance and redistribute all monsters so that they're spread out from brokenspire to Heaven.  the dungeon bosses
+will be created later.  
+
+new class secondary abilities:
+Warrior Secondary abilities - earned in the wilderness by gathering materials and making Angel Tokens
+shield bash - stun 1 or more enemies in range for 5s / 6s / 7s / 8s / 9s / 10s
+grapple - make enemy immobile for 5s / 6s / 7s / 8s / 9s / 10s
+trip - make enemy prone for 5s / 6s / 7s / 8s / 9s / 10s
+blinding strike - blind enemy for 5s / 6s / 7s / 8s / 9s / 10s
+sweeping push - push 1 or more enemies in range away for 20m / 21m / 22m / 23m / 24m / 25m
+pulling attack - pulls 1 enemy into melee range from 40m away / 41m / 42m / 43m / 44m / 45m
+
+Mage Secondary abilities - earned in the wilderness by gathering materials and making Angel Tokens
+mana swarm - damages one target with seeking points of light that has a ratio dependent on how much mana she has left
+	1 missile per 20 points / 18 / 16 / 14 / 12 / 10
+	cooldown: 15s / 13s / 11s / 9s / 7s / 6s
+mana recharge shield - makes a shield that converts damage to mana points
+	lasts for: 5s / 10s / 15s / 20s / 25s / 30s
+	cooldown: 15s / 13s / 11s / 9s / 7s / 6s
+ablation shield - every time shield is hit, it does damage and one layer is peeled away
+	lasts for: 5s / 10s / 15s / 20s / 25s / 30s
+	layers: 1 / 2 / 3 / 4 / 5 / 6
+misty step - teleports in a safe direction from your current place
+	distance: 10m / 15m / 20m / 25m / 30m / 35m
+	cooldown:  15s / 13s / 11s / 9s / 7s / 6s
+spell boost 1 - pick 1 spell to apply this to permanently
+	boost rate: 1.2x / 1.3x / 1.4x / 1.5x / 1.6x / 1.7x
+spell boost 2 - pick 2nd spell to apply this to permanently
+	boost rate: 1.2x / 1.3x / 1.4x / 1.5x / 1.6x / 1.7x
+
+Warlock Secondary abilities - earned in the wilderness by gathering materials and making Angel Tokens
+mana shield - absorbs damage while draining mana
+curse shield - curses enemies in a 2m radius with a debuff
+blinding shield - blinds enemies in a 2m radius
+	lasts for: 5s / 10s / 15s / 20s / 25s / 30s
+	cooldown: 15s / 13s / 11s / 9s / 7s / 6s
+misty transfer - sends 1 creature somewhere else in the area
+	distance: 40m / 50m / 60m / 70m / 80m / 90m
+	cooldown: 15s / 13s / 11s / 9s / 7s / 6s
+bleeding shield - causes damage over time in a 2m radiums
+	lasts for: 5s / 10s / 15s / 20s / 25s / 30s
+	cooldown: 15s / 13s / 11s / 9s / 7s / 6s
+mana blade - transfers mana from the mana pool as damage done by her weapon
+
+Summoner Secondary abilities - earned in the wilderness by gathering materials and making Angel Tokens
+minion health - summons have more HP 
+	boost rate: 1.2x / 1.3x / 1.4x / 1.5x / 1.6x / 1.7x
+minion damage - summons do more damage
+	boost rate: 1.2x / 1.3x / 1.4x / 1.5x / 1.6x / 1.7x
+summon healing - summons are healed
+	healing rate: 10% of full / 20% / 30% / 40% / 50% / 60%
+frenzy - minion attack rate increases
+	boost rate: 1.2x / 1.3x / 1.4x / 1.5x / 1.6x / 1.7x
+soul harvest - dying enemies heal and minions damage
+	healing rate per dead enemy: 10% of full / 20% / 30% / 40% / 50% / 60%
+	boost rate per dead enemy: 1.2x / 1.3x / 1.4x / 1.5x / 1.6x / 1.7x
+
+
+Martial Artist Secondary abilities - earned in the wilderness by gathering materials and making Angel Tokens
+wall run / jump - scale walls and cross gaps without climbing gear
+	distance: 10m / 20m / 30m / 40m / 50m / 60m
+flash steps - short dash that passes through enemies
+	distance: 10m / 20m / 30m / 40m / 50m / 60m
+water walk - briefly run across water
+	distance: 10m / 20m / 30m / 40m / 50m / 60m
+parry / deflect mode: perfectly timed blocks that stagger the attacker
+	lasts for: 5s / 10s / 15s / 20s / 25s / 30s
+	cooldown: 15s / 13s / 11s / 9s / 7s / 6s
+iron skin - damage reduction for brief amounts of time
+	boosts: -10% damage / -20% / -30% / -40% / -50% / -60%
+
+make the farms in the wilderness look more like medieval farms, with different sizes of farms, from the croft to the strip.
+have the layout of the farm look like the differently sized farms.
+How it looked:
+- No hedges or fences between strips: the open fields were unfenced, and strips were divided only by furrows or boundary stones.
+- One crop per field: rotation was decided for each whole field, so every strip in a field grew the same crop that year. A view across a village showed a few very large single-crop areas cut into thin stripes.
+- Ridge-and-furrow: ploughing left each strip as a raised ridge, still visible in English pastures today.
+between brokenspire and vell morrath, there should be monster encounters starting at Tier 1 to Tier 5 the closer
+one gets to vell morrath, the more challenging the encounters are
+from vell morrath to ashenreach, the encounters should be from Tier 5 - Tier 10, then from Ashenreach to Graymourne, the
+encounters should be from Tier 10 Tier 15, then from Graymourne to Kethrys Spire, the encounters should be from Tier 15 - Tier 20,
+and from Kethrys Spire to Heaven, the encounters should be from Tier 20 - Tier 25
+what difference are there between meadows and grasslands?
+make a rideable horse for a player to buy and ride with increased speed across the wilderness
+in order to retain engagement, the player should be able to interact or encounter something every 40 seconds when
+roaming the wilderness.  the terrain generation algorithm should take this into account.  some of the 
+points of interest in the wilderness:
+Minor settlements -- 
+	Villages, hamlets, and farmsteads
+	Roadside inns and taverns (often quest hubs)
+	Mining, logging, or fishing camps
+	Monasteries, shrines with caretakers, hermit huts
+	Trading posts and caravan stops
+Dungeons and delvable sites
+	Caves, crypts, barrows, and catacombs
+	Ruined keeps, forts, and towers
+	Abandoned mines
+	Ancient or pre-collapse ruins (a lost civilization’s architecture)
+	Wizard towers, cult temples, sunken or flooded structures
+Hostile camps and lairs
+	Bandit camps, highwayman ambush points, toll gangs
+	Monster nests and dens (spiders, wolves, trolls)
+	Enemy faction outposts or war camps
+	Necromancer or cultist ritual sites
+	A boss creature’s territory (a dragon’s perch, a giant’s camp)
+Dynamic and roaming encounters
+	Travelers, pilgrims, merchants, and caravans on the road
+	Patrols, bounty hunters, assassins sent after the player
+	Fights aready in progress (two factions, monster vs. guards)
+	NPCs in distress: ambushed wagons, injured travelers, kidnappings
+	World events: a dragon attack, a meteor strike, a storm, a rift opening
+Landmarks and lore sites
+	Standing stones, obelisks, altars that grant buffs or powers
+	Statues, monuments, and ancient battlefields
+	Scenic overlooks and climbable peaks
+	Grave sites, memorials, shipwrecks
+	Weird anomalies: a floating rock, a dead zone, a tree that never loses its leaves
+Environmental storytelling vignettes
+	A camp with skeletons and a journal explaining what happened
+	An abandoned wagon with a trail of blood leading away
+	A collapsed bridge with the builder’s notes nearby
+	A body clutching a treasure map
+Resources and crafting
+	Ore veins, herbs, rare plants, fishing spots
+	Hunting grounds and legendary beasts
+	Crafting stations out in the wild (a smithy at a mine)
+Secrets, puzzles, and loot	
+	Hidden chests, buried treasure, treasure-map destinations
+	Lever, rune, or pressure-plate puzzles guarding a vault
+	Collectibles (books, lore fragments, trophies)
+	Optional mini-bosses guarding unique gear
+Travel infrastructure
+	Wayshrines or fast-travel points
+	Bridges, ferries, mountain passes, gatehouses
+	Signposts, milestones, and crossroads (often encounter spawn points)
+	Stables and mounts
+Faction and quest hooks
+	Guild or order recruitment sites
+	Quest-givers living outside cities (a witch in the swamp, a disgraced knight)
+	Notice boards in villages listing local bounties
+design notes for distribution of points of interest and events found along the way:
+	Mix types along a route. Variety beats density; the fifth identical bandit camp feels like filler.
+	Layer by visibility. Big landmarks are seen from afar and pull players in, mid-size POIs are found along the way, and small vignettes reward people who wander off the road.
+	Tie them to the region. A swampy area should produce bog witches, drowned ruins, and leech-infested camps, not generic content, so the space between cities still tells you where you are.
+	Let some be dynamic. Roaming encounters on roads make familiar routes feel different on repeat trips.
+

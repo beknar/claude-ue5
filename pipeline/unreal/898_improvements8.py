@@ -37,46 +37,12 @@ def open_map(m):
 
 # ================================================================================================ the crops
 def crops():
-    src = os.path.join(SA, "wilderness", "crops")
-    if not os.path.isdir(src): REPORT.append(f"crops: none in {src} (run blender_numpy/wild_crops.py)"); return
-    if not eal.does_directory_exist(CROPS): eal.make_directory(CROPS)
-    tasks = []
-    for f in sorted(os.listdir(src)):
-        if not (f.endswith(".png") or f.endswith(".fbx")): continue
-        tk = unreal.AssetImportTask(); tk.set_editor_property("filename", os.path.join(src, f)); tk.set_editor_property("destination_path", CROPS)
-        tk.set_editor_property("replace_existing", True); tk.set_editor_property("automated", True); tk.set_editor_property("save", True)
-        if f.endswith(".fbx"):
-            o = unreal.FbxImportUI(); o.import_mesh = True; o.import_materials = False; o.import_textures = False; o.import_as_skeletal = False
-            # (no collision: she walks through a field, as through the grass)
-            o.static_mesh_import_data.combine_meshes = True; o.static_mesh_import_data.auto_generate_collision = False; o.static_mesh_import_data.generate_lightmap_u_vs = False
-            tk.set_editor_property("options", o)
-        tasks.append(tk)
-    at.import_asset_tasks(tasks)
-    bark, leaves = unreal.load_asset(f"{WILD}/M_RD_WildBark"), unreal.load_asset(f"{WILD}/M_RD_WildLeaves")
-    if not bark or not leaves: REPORT.append("crops: no M_RD_WildBark / M_RD_WildLeaves (run 887 trees)"); return
-    n = 0
-    for kind, stalk_t in (("Corn", "CornStalk"), ("Potato", "PotatoStem")):
-        mis = []
-        for part, parent, tex in (("Bark", bark, stalk_t), ("Leaves", leaves, f"{kind}Leaves")):
-            nm = f"MI_RD_Wild{kind}{part}"; pth = f"{CROPS}/{nm}"
-            if not eal.does_asset_exist(pth): at.create_asset(nm, CROPS, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
-            mi = unreal.load_asset(pth); MEL.set_material_instance_parent(mi, parent)
-            tx = unreal.load_asset(f"{CROPS}/T_Wild_{tex}")
-            if tx: MEL.set_material_instance_texture_parameter_value(mi, "Tex", tx)
-            else: REPORT.append(f"crops: no T_Wild_{tex}")
-            eal.save_loaded_asset(mi, only_if_is_dirty=False); mis.append(mi)
-        for v in ("A", "B"):
-            m = unreal.load_asset(f"{CROPS}/SM_Wild_{kind}_{v}")
-            if not m: REPORT.append(f"crops: SM_Wild_{kind}_{v} not imported"); continue
-            sm = list(m.get_editor_property("static_materials"))
-            for i, s in enumerate(sm):
-                s.set_editor_property("material_interface", mis[1] if "Leaves" in str(s.get_editor_property("material_slot_name")) else mis[0]); sm[i] = s
-            m.set_editor_property("static_materials", sm)
-            # (no collision at all on a crop: a field is walked through)
-            try: unreal.EditorStaticMeshLibrary.remove_collisions(m)
-            except Exception: pass
-            eal.save_loaded_asset(m, only_if_is_dirty=False); n += 1
-    REPORT.append(f"crops: {n} meshes imported with their materials")
+    """the crops' import is 899's since the list of 2026-11-08b (every kind wild_crops.json names, not corn and potatoes alone:
+    two copies of it had drifted apart; PR #29's review): run from there"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("rd899", os.path.join(os.path.dirname(os.path.abspath(__file__)), "899_improvements9.py"))
+    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    m.crops(); REPORT.extend(m.REPORT)
 
 
 # ================================================================================================ the animals

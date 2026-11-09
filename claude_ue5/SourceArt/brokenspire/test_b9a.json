@@ -1,0 +1,172 @@
+{
+ "tag": "b9a",
+ "plan": [
+  "noshield9",
+  "storage9",
+  "start9",
+  "backspace9",
+  "time9",
+  "sky9",
+  "crops9",
+  "storage",
+  "block8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "noshield9",
+   "ok": true,
+   "start_shield_map": {},
+   "worn": "None",
+   "shield_meshes_on_her": [],
+   "blocks_without": false,
+   "given": "Broddi's Shield",
+   "blocks_with": true
+  },
+  {
+   "step": "storage9",
+   "ok": true,
+   "deposit_line": 0,
+   "held_stored": 5,
+   "carried_after": 0,
+   "other_after": 0,
+   "repeats": 4,
+   "withdraw_lines": [
+    "Small Healing Potion  x 5"
+   ],
+   "one_press_took": 1,
+   "held_0_75s_took": 4,
+   "withdraw_lines_after": []
+  },
+  {
+   "step": "start9",
+   "ok": false,
+   "tap_inventory": true,
+   "tap_menu": false,
+   "tap_again_shut": true,
+   "hold_menu": false,
+   "hold_inventory": true,
+   "opens_by_start": 0,
+   "start_closes": true,
+   "hold_again": true,
+   "b_closes": true
+  },
+  {
+   "step": "backspace9",
+   "ok": true,
+   "save_line": 1,
+   "one_press": 1,
+   "held_1_2s": 13,
+   "left_after_long_hold": ""
+  },
+  {
+   "step": "time9",
+   "ok": true,
+   "hours_5s_at_1": 0.033,
+   "hours_5s_at_60": 1.967,
+   "dilation_at_2": 2.0,
+   "game_s_in_2s": 4.05,
+   "dilation_after": 1.0
+  },
+  {
+   "step": "sky9",
+   "ok": true,
+   "vrt_mode": 1
+  },
+  {
+   "step": "crops9",
+   "ok": true,
+   "samples_by_crop": {
+    "wheat": 2681,
+    "barley": 2610,
+    "oats": 2162,
+    "rye": 1659,
+    "peas": 1173,
+    "beans": 988,
+    "flax": 834,
+    "hemp": 751,
+    "corn": 577,
+    "potatoes": 391,
+    "cabbages": 338,
+    "pumpkins": 332,
+    "sunflowers": 136
+   },
+   "top4": [
+    "wheat",
+    "barley",
+    "oats",
+    "rye"
+   ],
+   "visits": {
+    "barley": {
+     "at": [
+      -3000.0,
+      -1120.0
+     ],
+     "label": "barley",
+     "plants": 148154
+    },
+    "oats": {
+     "at": [
+      -3000.0,
+      -3000.0
+     ],
+     "label": "oats",
+     "plants": 21600
+    },
+    "flax": {
+     "at": [
+      -3000.0,
+      -2920.0
+     ],
+     "label": "flax",
+     "plants": 33224
+    },
+    "hemp": {
+     "at": [
+      -3000.0,
+      -680.0
+     ],
+     "label": "hemp",
+     "plants": 17381
+    }
+   }
+  },
+  {
+   "step": "storage",
+   "ok": true,
+   "rows": null,
+   "open": true,
+   "one_press": 1,
+   "held_down_1_5s": 15,
+   "held_up_0_9s": 8
+  },
+  {
+   "step": "block8",
+   "ok": false,
+   "error": "'NoneType' object has no attribute 'x'",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 2882, in run\n    yield from STEPS[s]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\884_brokenspire_test.py\", line 2643, in step_block8\n    sq = place(\"square\"); put(V(sq.x + 600, sq.y + 600, 0), yaw=0.0); yield from wait(1.0)\n                                ^^^^\nAttributeError: 'NoneType' object has no attribute 'x'\n"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_b9a_noshield9.png",
+  "bs_b9a_storage9.png",
+  "bs_b9a_start9_menu.png",
+  "bs_b9a_sky9_fair_0.png",
+  "bs_b9a_sky9_fair_90.png",
+  "bs_b9a_sky9_fair_180.png",
+  "bs_b9a_sky9_fair_270.png",
+  "bs_b9a_sky9_overcast_0.png",
+  "bs_b9a_sky9_overcast_90.png",
+  "bs_b9a_sky9_overcast_180.png",
+  "bs_b9a_sky9_overcast_270.png",
+  "bs_b9a_crops9_barley.png",
+  "bs_b9a_crops9_oats.png",
+  "bs_b9a_crops9_flax.png",
+  "bs_b9a_crops9_hemp.png",
+  "bs_b9a_storage_held.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

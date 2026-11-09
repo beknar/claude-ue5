@@ -38,6 +38,9 @@ public:
 	/** the wilderness's minimap: the region's line it drew under it (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetBiomeLabelDrawn() const { return BiomeLabelDrawn; }
 	FString BiomeLabelDrawn;
+	/** the list of 2026-11-08b: the crop named under the minimap (its field's), "" outside a field (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FString GetCropLabelDrawn() const { return CropLabelDrawn; }
+	FString CropLabelDrawn;
 	/** mistward: where the frame rate was drawn last frame (canvas pixels, min and max; zero: not drawn) (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Interface") FVector4 GetFpsBox() const { return FVector4(FpsBox.Min.X, FpsBox.Min.Y, FpsBox.Max.X, FpsBox.Max.Y); }
 	FBox2D FpsBox = FBox2D(FVector2D::ZeroVector, FVector2D::ZeroVector);

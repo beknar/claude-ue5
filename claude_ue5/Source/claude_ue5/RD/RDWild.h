@@ -67,6 +67,8 @@ struct FRDWildCrop
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Leaf = FLinearColor(0.16f, 0.27f, 0.07f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Cover = 0.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RowM = 1.f;
+	/** how often a field grows it, against the others' (the list of 2026-11-08b: the commonest medieval crops first) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
 };
 
 /** one of the user's terrain templates (docs/wilderness.txt), as data: 887 writes the table from biomes.json */
@@ -186,6 +188,12 @@ public:
 	TArray<FRDWildBiome> Biomes;     // the table (names, shapes, colours; meshes are read on the game thread only)
 	TMap<FString, int32> BiomeIndex;
 	int32 FarmsBiome = -1;           // the farms' (its fields' crops), -1 none
+	TArray<float> CropCum;           // the farms' crops' weights as running sums (Init)
+	/** the most crops the ground's rows can tell apart: the chunk packs a field's crop in UV0's v as (crop + 0.5) / MaxCrops and
+	 *  887's ground material reads floor(v x MaxCrops) (887 and Init check the farms' table against it) */
+	static constexpr int32 MaxCrops = 16;
+	/** a sample's field's crop's name ("" outside a field, or at a field's edge under MinField of its weight) */
+	FString CropName(const FRDWSample& S, float MinField = 0.f) const;
 	TArray<FRDWildTown> Towns;
 	float BaseH = 0.f;               // Brokenspire's ground (the game's z 0)
 	/** where a town's roads leave it (world metres, just outside its section), when its gate is known before Init */
