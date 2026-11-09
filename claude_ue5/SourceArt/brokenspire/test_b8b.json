@@ -1,0 +1,55 @@
+{
+ "tag": "b8b",
+ "plan": [
+  "block8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "block8",
+   "ok": true,
+   "block_move_speed": 90.0,
+   "blocking": true,
+   "ahead": {
+    "along_cm": 177,
+    "aside_cm": 0,
+    "turned_deg": 0.0,
+    "speed_cm_s": 88,
+    "filter": [
+     1.0,
+     0.0,
+     1.0
+    ]
+   },
+   "right": {
+    "along_cm": 0,
+    "aside_cm": 0,
+    "turned_deg": -101.9,
+    "speed_cm_s": 0,
+    "filter": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "back": {
+    "along_cm": -148,
+    "aside_cm": 0,
+    "turned_deg": 0.0,
+    "speed_cm_s": 74,
+    "filter": [
+     -1.0,
+     0.0,
+     -0.8
+    ]
+   },
+   "after_cm_s": 366
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "bs_b8b_block8.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

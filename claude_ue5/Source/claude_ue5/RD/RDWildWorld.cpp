@@ -14,6 +14,10 @@ namespace
 	static const float RDWGY[16] = { 0.f, 0.3827f, 0.7071f, 0.9239f, 1.f, 0.9239f, 0.7071f, 0.3827f, 0.f, -0.3827f, -0.7071f, -0.9239f, -1.f, -0.9239f, -0.7071f, -0.3827f };
 	FORCEINLINE float RDWFade(float T) { return T * T * T * (T * (T * 6.f - 15.f) + 10.f); }
 	FORCEINLINE float RDWSmooth(float A, float B, float X) { const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return T * T * (3.f - 2.f * T); }
+	// how far out a lake's and a pond's banks reach (metres past the water's edge): they ease the ground down to them
+	constexpr double RDWLakeBankM = 400.0, RDWPondBankM = 150.0;
+	// how far out a road's bank can reach (metres from its middle) where its bed is over or under the ground
+	constexpr double RDWRoadBankM = 60.0;
 	FORCEINLINE double RDWSegDist(const FVector2D& P, const FVector2D& A, const FVector2D& B, double& T)
 	{
 		const FVector2D Ab = B - A; const double L2 = Ab.SizeSquared();
@@ -235,29 +239,46 @@ int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* S
 	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 65u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 67u) * 70.0;
 	const double Wy = Y + Fbm(X, Y, 1.0 / 13000.0, 4, Seed + 62u) * 6500.0 + Fbm(X, Y, 1.0 / 2600.0, 2, Seed + 64u) * 900.0
 	                    + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 66u) * 320.0 + Fbm(X, Y, 1.0 / 180.0, 2, Seed + 68u) * 70.0;
-	const int32 I0 = FMath::FloorToInt((Wx - Xs) / CellM), J0 = FMath::FloorToInt((Wy - Yw) / CellM);
-	int32 Ci[9]; double Cd[9]; int32 N = 0; double Dmin = 1e18;
-	for (int32 Di = -1; Di <= 1; ++Di)
-		for (int32 Dj = -1; Dj <= 1; ++Dj)
+	// (the user's of 2026-11-08: "a wall of earth that is a sheer drop that can't be climbed" 12 km from Brokenspire. The four
+	// heaviest regions were kept at their whole weight and the rest dropped, and so were weights under 0.03: where a mountain
+	// region took the fourth place from a farm's, or rose past 0.03, it came in at 2 to 9 % at once, and at its 650 to 3200 m
+	// the ground stepped 26 to 125 m between two samples (RDWildProbe on the user's seed: walls 22 and 32 km long round the
+	// town). Each region now counts by how much it is over the cut (the fifth heaviest's weight, at least 0.03), so a region
+	// comes in from nothing as it gains its place. The 5 x 5 cells round the point: a town's region can have its site moved
+	// 16 km, more than a cell, off its own cell, and a cell left out must weigh under the cut)
+	const int32 Ic = FMath::Clamp(FMath::FloorToInt((Wx - Xs) / CellM), 0, CellsX - 1), Jc = FMath::Clamp(FMath::FloorToInt((Wy - Yw) / CellM), 0, CellsY - 1);
+	constexpr int32 RDWBlendRad = 2, RDWBlendMax = (2 * RDWBlendRad + 1) * (2 * RDWBlendRad + 1);
+	int32 Ci[RDWBlendMax]; double Cd[RDWBlendMax]; int32 N = 0; double Dmin = 1e18;
+	for (int32 Di = -RDWBlendRad; Di <= RDWBlendRad; ++Di)
+		for (int32 Dj = -RDWBlendRad; Dj <= RDWBlendRad; ++Dj)
 		{
-			const int32 I = FMath::Clamp(I0 + Di, 0, CellsX - 1), J = FMath::Clamp(J0 + Dj, 0, CellsY - 1);
+			const int32 I = Ic + Di, J = Jc + Dj;
+			if (I < 0 || J < 0 || I >= CellsX || J >= CellsY) continue;
 			const int32 K = I * CellsY + J;
-			bool bDup = false; for (int32 Q = 0; Q < N; ++Q) if (Ci[Q] == K) bDup = true;
-			if (bDup) continue;
 			Ci[N] = K; Cd[N] = FVector2D::Distance(FVector2D(Wx, Wy), CellSite[K]); Dmin = FMath::Min(Dmin, Cd[N]); ++N;
 		}
 	constexpr double Tau = 2400.0;
-	int32 M = 0; float Sum = 0.f;
-	float Tw[9];
+	float Tw[RDWBlendMax];
 	for (int32 Q = 0; Q < N; ++Q) Tw[Q] = (float)FMath::Exp(-(Cd[Q] - Dmin) / Tau);
-	// the four heaviest
-	for (int32 Pick = 0; Pick < 4; ++Pick)
+	// the five heaviest, in order (a picked one marked -1)
+	int32 Top[5]; float TopW[5]; int32 Nt = 0;
+	for (int32 Pick = 0; Pick < 5; ++Pick)
 	{
-		int32 Bq = -1; float Bw = 0.03f;
+		int32 Bq = -1; float Bw = -0.5f;
 		for (int32 Q = 0; Q < N; ++Q) if (Tw[Q] > Bw) { Bw = Tw[Q]; Bq = Q; }
 		if (Bq < 0) break;
-		Idx[M] = CellBiome[Ci[Bq]]; W[M] = Bw; Site[M] = CellSite[Ci[Bq]]; Sum += Bw; ++M; Tw[Bq] = 0.f;
+		Top[Nt] = Bq; TopW[Nt] = Bw; ++Nt; Tw[Bq] = -1.f;
 	}
+	const float Cut = FMath::Max(0.03f, Nt > 4 ? TopW[4] : 0.f);
+	int32 M = 0; float Sum = 0.f;
+	for (int32 P = 0; P < FMath::Min(Nt, 4); ++P)
+	{
+		const float Wq = TopW[P] - Cut;
+		if (Wq <= 0.f) break;
+		Idx[M] = CellBiome[Ci[Top[P]]]; W[M] = Wq; Site[M] = CellSite[Ci[Top[P]]]; Sum += Wq; ++M;
+	}
+	// (five regions at one distance: the nearest alone)
+	if (M == 0 && Nt > 0) { Idx[0] = CellBiome[Ci[Top[0]]]; W[0] = 1.f; Site[0] = CellSite[Ci[Top[0]]]; Sum = 1.f; M = 1; }
 	for (int32 Q = 0; Q < M; ++Q) W[Q] /= Sum;
 	return M;
 }
@@ -420,9 +441,16 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		const double D = FVector2D::Distance(P, L.C);
 		const float Ang = FMath::Atan2((float)(Y - L.C.Y), (float)(X - L.C.X));
 		const float Rr = L.R * (0.78f + 0.36f * (0.5f + 0.5f * Perlin(FMath::Cos(Ang) * 1.7 + L.Shape % 97, FMath::Sin(Ang) * 1.7, L.Shape)));
-		if (D > Rr + 120.0) continue;
+		if (D > Rr + RDWLakeBankM) continue;
 		if (D < Rr) { H = FMath::Min(H, L.Level - L.Depth * (1.f - FMath::Square((float)D / Rr)) - 0.4f); }
-		else H = FMath::Min(H, L.Level - 0.4f + (float)(D - Rr) * 0.22f);
+		else
+		{
+			// (the bank: 12 degrees up from the water, whole for 30 m, let go of by RDWLakeBankM. The user's of 2026-11-08 (a
+			// sheer wall out in the wilds): held whole to 120 m and dropped there, a lake among hills or mountains stood in a
+			// pit with walls of 20 to 160 m round it)
+			const float Hb = L.Level - 0.4f + (float)(D - Rr) * 0.22f;
+			if (H > Hb) H = FMath::Lerp(H, Hb, 1.f - RDWSmooth(Rr + 30.f, Rr + (float)RDWLakeBankM, (float)D));
+		}
 		if (D < Rr + 30.0 && H < L.Level) { Water = L.Level; Kind = L.Kind; }
 	}
 	// ponds and hot springs (made at Init, hashed as the lakes)
@@ -432,9 +460,14 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		{
 			const double D = FVector2D::Distance(P, L.C);
 			const float Rr = L.R * (0.8f + 0.3f * (0.5f + 0.5f * Perlin(X / 37.0, Y / 37.0, L.Shape)));
-			if (D > Rr + 40.0) continue;
+			if (D > Rr + RDWPondBankM) continue;
 			if (D < Rr) H = FMath::Min(H, L.Level - L.Depth * (1.f - FMath::Square((float)D / Rr)) - 0.25f);
-			else H = FMath::Min(H, L.Level - 0.25f + (float)(D - Rr) * 0.3f);
+			else
+			{
+				// (as a lake's bank: whole for 6 m, let go of by RDWPondBankM; it was dropped at 40 m)
+				const float Hb = L.Level - 0.25f + (float)(D - Rr) * 0.3f;
+				if (H > Hb) H = FMath::Lerp(H, Hb, 1.f - RDWSmooth(Rr + 6.f, Rr + (float)RDWPondBankM, (float)D));
+			}
 			if (D < Rr + 6.0 && H < L.Level) { Water = L.Level; Kind = L.Kind; }
 		}
 	}
@@ -470,8 +503,10 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		const float Z = FMath::Lerp(R.Z[Ds], R.Z[Ds + 1], (float)Dt);
 		const float D = (float)Dd;
 		// (the road a cart and a half wide, its edges ragged: 2.3 to 3 m from its middle (it was 1.5 to 2.9, under the 2 m
-		// mesh's spacing); its bed levelled out to 12 m)
-		const float Wt = 1.f - RDWSmooth(3.2f, 12.f, D);
+		// mesh's spacing); its bed levelled out to 12 m. Over a dip or through a rise its bank widens with the height it makes
+		// up, 2.5 m a metre, to RDWRoadBankM: eased in over 9 m whatever the height, a bed 10 m over the ground stood on a bank
+		// of 60 degrees (the user's of 2026-11-08, found by RDWildProbe))
+		const float Wt = 1.f - RDWSmooth(3.2f, FMath::Min(12.f + 2.5f * FMath::Abs(Z - H), (float)RDWRoadBankM), D);
 		H = FMath::Lerp(H, Z, Wt);
 		Road = 1.f - RDWSmooth(2.3f + 0.7f * Perlin(X / 9.0, Y / 9.0, Seed + 71u), 3.9f, D);
 		if (Road > 0.4f && Kind == 3) { Water = -1e9f; Kind = 0; }           // a ford: the road crosses dry
@@ -566,6 +601,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	if (Kind == 0 && H < 0.f && C < 0.02f) { Water = 0.f; Kind = 1; }
 	// farms: fields of crops in parcels (rows), between the roads
 	float Field = 0.f;
+	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f;
 	if (Farm > 0.2f && Fs.Road < 0.1f)
 	{
 		// (the list of 2026-11-04: "the different terrain types are in regular squares and grids on the map. it should not be
@@ -592,16 +628,25 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 		if (Pr < 0.86f && Farm > Need && Edge > 2.2f)
 		{
 			// (seen from far, a pixel spans fields: their own colours fade into the region's)
-			Field = RDWSmooth(Need, Need + 0.12f, Farm) * (1.f - RDWSmooth(25.f, 110.f, PixelM));
-			static const FLinearColor Crops[6] = { FLinearColor(0.48f, 0.40f, 0.16f), FLinearColor(0.20f, 0.30f, 0.09f), FLinearColor(0.27f, 0.18f, 0.10f), FLinearColor(0.42f, 0.38f, 0.18f), FLinearColor(0.30f, 0.34f, 0.12f), FLinearColor(0.36f, 0.31f, 0.13f) };
-			FLinearColor Cc = Crops[(int32)(Pr * 97.f) % 6];
-			const float Ang = Rand01(Fbi, Fbj, Seed + 92u) * PI;
-			const double U = X * FMath::Cos(Ang) + Y * FMath::Sin(Ang);
-			const float Row = 0.5f + 0.5f * FMath::Sin((float)(U / 1.6));
-			Cc *= 0.88f + 0.12f * Row;
+			// (the list of 2026-11-07: "the different colors of the farm terrain look like abrupt banding ... instead of smoothly
+			// and gradually blending": a field's colour came in whole within one 2 m quad of its hedgerow, six crops of very
+			// different colours side by side, and 10 m stripes for its rows on the 2 m grid. Now a field eases in over 2.2 to 8 m
+			// from its edge, its colour is its crop's (soil with its leaves over a share of it) drawn half way toward the
+			// region's own ground, and its rows are the ground material's (at every pixel, faded out where they would shimmer))
+			Field = RDWSmooth(Need, Need + 0.12f, Farm) * RDWSmooth(2.2f, 8.f, Edge) * (1.f - RDWSmooth(25.f, 110.f, PixelM));
+			const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
+			FLinearColor Cc(0.30f, 0.30f, 0.12f);
+			if (Fb && Fb->Crops.Num() > 0)
+			{
+				O.FieldCrop = (int32)(Pr * 97.f) % Fb->Crops.Num();
+				const FRDWildCrop& Cr = Fb->Crops[O.FieldCrop];
+				Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f));
+			}
+			O.FieldCell = FIntPoint(Fbi, Fbj);
+			O.FieldAng = Rand01(Fbi, Fbj, Seed + 92u) * PI;
 			// (a field's own shade varies a little across it)
-			Cc *= 0.93f + 0.14f * (0.5f + 0.5f * Fbm(X, Y, 1.0 / 60.0, 2, Seed + 94u));
-			Col = FMath::Lerp(Col, Cc, Field);
+			Cc *= 0.94f + 0.12f * (0.5f + 0.5f * Fbm(X, Y, 1.0 / 60.0, 2, Seed + 94u));
+			Col = FMath::Lerp(Col, FMath::Lerp(Col, Cc, 0.75f), Field);
 		}
 	}
 	// the ground's colour: rock, snow, sand, mud, lava, roads mixed over the biomes' own
@@ -909,7 +954,10 @@ void FRDWildWorld::MakeRoads()
 			float S = 0.f; int32 C = 0;
 			for (int32 K = FMath::Max(0, I - 8); K <= FMath::Min(R.P.Num() - 1, I + 8); ++K) { S += Raw[K]; ++C; }
 			R.Z[I] = FMath::Max(S / C, 1.2f);
-			for (const FRDWildTown& T : Towns) { const double D = FVector2D::Distance(R.P[I], T.Site); if (D < 1700.0) R.Z[I] = FMath::Lerp(R.Z[I], T.H, 1.f - RDWSmooth(480.f, 1700.f, (float)D)); }
+			// (eased to a town's height as its ground is (Feature: 400 to 1150 m); left at the old 480 to 1700 m when the ground's
+			// was shortened, the road ran up to 12 m over or under the ground between 1.15 and 1.7 km from every town: the
+			// user's of 2026-11-08, found by RDWildProbe)
+			for (const FRDWildTown& T : Towns) { const double D = FVector2D::Distance(R.P[I], T.Site); if (D < 1150.0) R.Z[I] = FMath::Lerp(R.Z[I], T.H, 1.f - RDWSmooth(400.f, 1150.f, (float)D)); }
 		}
 		R.Box = FBox2D(R.P);
 		Roads.Add(MoveTemp(R));
@@ -939,10 +987,10 @@ void FRDWildWorld::HashSegments()
 	for (int32 R = 0; R < Rivers.Num(); ++R)
 		for (int32 S = 0; S + 1 < Rivers[R].P.Num(); ++S) Add(Rivers[R].P[S], Rivers[R].P[S + 1], Rivers[R].W[S] * 2.0 + 70.0, ((uint32)R << 16) | (uint32)S);
 	for (int32 R = 0; R < Roads.Num(); ++R)
-		for (int32 S = 0; S + 1 < Roads[R].P.Num(); ++S) Add(Roads[R].P[S], Roads[R].P[S + 1], 14.0, 0x80000000u | ((uint32)R << 16) | (uint32)S);
+		for (int32 S = 0; S + 1 < Roads[R].P.Num(); ++S) Add(Roads[R].P[S], Roads[R].P[S + 1], RDWRoadBankM + 2.0, 0x80000000u | ((uint32)R << 16) | (uint32)S);
 	for (int32 L = 0; L < Lakes.Num(); ++L)
 	{
-		const FLake& K = Lakes[L]; const double Pad = K.R * 1.2 + 130.0;
+		const FLake& K = Lakes[L]; const double Pad = K.R * 1.2 + RDWLakeBankM + 10.0;
 		for (int32 I = FMath::FloorToInt((K.C.X - Pad) / HashM); I <= FMath::FloorToInt((K.C.X + Pad) / HashM); ++I)
 			for (int32 J = FMath::FloorToInt((K.C.Y - Pad) / HashM); J <= FMath::FloorToInt((K.C.Y + Pad) / HashM); ++J) LakeHash.Add(FIntPoint(I, J), L);
 	}
@@ -955,6 +1003,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	BiomeIndex.Reset();
 	for (int32 I = 0; I < Biomes.Num(); ++I) BiomeIndex.Add(Biomes[I].Name, I);
 	if (Biomes.Num() == 0) { FRDWildBiome B; B.Name = TEXT("grasslands"); Biomes.Add(B); BiomeIndex.Add(B.Name, 0); }
+	{ const int32* Fi = BiomeIndex.Find(TEXT("farms")); FarmsBiome = Fi ? *Fi : -1; }
 	Rivers.Reset(); Lakes.Reset(); Roads.Reset(); SegHash.Reset(); LakeHash.Reset();
 	PlaceTowns();
 	AssignBiomes();
@@ -971,7 +1020,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 		for (int32 J = 0; J * PlaceCellM < Ye - Yw; ++J) PondsIn(FIntPoint(I, J), Ponds);
 	for (int32 K = 0; K < Ponds.Num(); ++K)
 	{
-		const FLake& P = Ponds[K]; const double Pad = P.R * 1.3 + 50.0;
+		const FLake& P = Ponds[K]; const double Pad = P.R * 1.3 + RDWPondBankM + 10.0;
 		for (int32 I = FMath::FloorToInt((P.C.X - Pad) / HashM); I <= FMath::FloorToInt((P.C.X + Pad) / HashM); ++I)
 			for (int32 J = FMath::FloorToInt((P.C.Y - Pad) / HashM); J <= FMath::FloorToInt((P.C.Y + Pad) / HashM); ++J) PondHash.Add(FIntPoint(I, J), K);
 	}

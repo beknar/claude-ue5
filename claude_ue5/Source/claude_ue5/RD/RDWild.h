@@ -49,6 +49,24 @@ struct FRDWildFoliage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float NearWater = 0.f;
 	/** the list of 2026-11-04: its materials instead of its mesh's (by slot; the grass's and bushes' that sway in the wind) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<TObjectPtr<UMaterialInterface>> Materials;
+	/** the list of 2026-11-07: a field crop (its biome's Crops index): planted in its field's rows, StepM apart along them
+	 *  (Density then weighs it against the crop's other kinds); -1 scattered as before */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Crop = -1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StepM = 0.8f;
+};
+
+/** the list of 2026-11-07 ("the farm terrain should have regular lines of crops, like corn, cabbages, potatoes, pumpkins"): a
+ *  field's crop, its rows RowM apart; seen from afar its ground is Soil with Leaf over Cover of it, and the ground material
+ *  draws its rows (ToRows: the field's way and crop in the ground mesh's UV0, its weight in UV3's V) */
+USTRUCT(BlueprintType)
+struct FRDWildCrop
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Soil = FLinearColor(0.20f, 0.14f, 0.08f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Leaf = FLinearColor(0.16f, 0.27f, 0.07f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Cover = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RowM = 1.f;
 };
 
 /** one of the user's terrain templates (docs/wilderness.txt), as data: 887 writes the table from biomes.json */
@@ -77,6 +95,8 @@ struct FRDWildBiome
 	/** the ground's layers for the terrain material (0-1 each): rock, snow, sand, mud; the rest is grass or soil */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FVector4 Layers = FVector4(0, 0, 0, 0);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWildFoliage> Foliage;
+	/** its fields' crops (the farms'; none elsewhere) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWildCrop> Crops;
 };
 
 /** a town of the continent (Brokenspire and the three the spec places) */
@@ -146,6 +166,10 @@ struct FRDWSample
 	int32 Biome2 = 0;           // the second (for the transitions)
 	float W1 = 1.f;             // the first's weight (0.5-1)
 	float SlopeHint = 0.f;      // set by callers that know the slope
+	// (the list of 2026-11-07: the field it is in, when Field > 0: its cell, its crop (the farms biome's Crops), its rows' way)
+	FIntPoint FieldCell = FIntPoint(MIN_int32, MIN_int32);
+	int32 FieldCrop = -1;
+	float FieldAng = 0.f;
 };
 
 /** the world's model (see the file's head) */
@@ -161,6 +185,7 @@ public:
 	bool bReady = false;
 	TArray<FRDWildBiome> Biomes;     // the table (names, shapes, colours; meshes are read on the game thread only)
 	TMap<FString, int32> BiomeIndex;
+	int32 FarmsBiome = -1;           // the farms' (its fields' crops), -1 none
 	TArray<FRDWildTown> Towns;
 	float BaseH = 0.f;               // Brokenspire's ground (the game's z 0)
 	/** where a town's roads leave it (world metres, just outside its section), when its gate is known before Init */
@@ -264,6 +289,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") float GetFleeDistance() const { return FleeR; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") int32 GetTimesFled() const { return Fled; }
 	FVector Home = FVector::ZeroVector;
+	// ---- the list of 2026-11-07: "player should be able to kill the animals wandering in the wilderness and get appropriate
+	// crafting materials from them": her blows and bolts hurt it (its kind's Health), struck it runs off; at 0 it falls on its
+	// side where it stood and its things lie by it (its kind's Drops, taken with F as a harvest); the body goes after a while
+	/** a blow or bolt of Dmg from From: true when it kills */
+	bool TakeHit(float Dmg, const FVector& From);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") bool IsDead() const { return bDead; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") float GetHealth() const { return Health; }
+	/** its body's middle (world) and how far round it a blow or a bolt meets it */
+	FVector BodyCenter() const;
+	float BodyRadius() const;
+	float Health = 1.f, DeadAt = -1.f, FallYaw = 0.f;
+	bool bDead = false;
 protected:
 	virtual void Tick(float Dt) override;
 private:

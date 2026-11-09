@@ -297,6 +297,24 @@ public:
 	/** the gate's portcullis (a door that lifts) and the levers that raise it, the pens' gates (all indices into the doors) */
 	int32 TownPortcullis = -1;
 	TArray<int32> TownLevers, TownPenGates;
+	// ---- the list of 2026-11-07 (docs/improvements8.txt; RDTown8.cpp)
+	/** the barracks' training dummies and targets: a mesh of their own on a pivot at their foot (play only, never instanced), rocked
+	 *  away from a blow or a bolt that meets them (a swing that dies away) */
+	struct FTownDummy
+	{
+		TWeakObjectPtr<USceneComponent> Pivot; TWeakObjectPtr<UStaticMeshComponent> Mesh;
+		FVector At = FVector::ZeroVector; FQuat Rest = FQuat::Identity; FName Kind;
+		float Radius = 40.f, Height = 180.f;
+		FVector Axis = FVector(0, 1, 0); float HitAt = -100.f, Amp = 0.f; int32 Hits = 0;
+	};
+	TArray<FTownDummy> TownDummies;
+	void AddTownDummy(FName Kind, const struct FRDPiece* P, const FTransform& T, float Lift);
+	/** rocks dummy I away from From (Strength 1 a full blow) */
+	void HitTownDummy(int32 I, const FVector& From, float Strength);
+	void TickTownDummies(float Now);
+	/** the dummy whose mesh is C (a bolt's trace hit it), -1 none */
+	int32 TownDummyOf(const UPrimitiveComponent* C) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownDummyLines() const;
 	/** the ground's rise and fall (the list's "terrain above and below the ground level"): a weight per tile (0 flat where
 	 *  anything stands or is walked to, 1 open ground), the height there is TownLiftAt */
 	TArray<float> TownLiftW;

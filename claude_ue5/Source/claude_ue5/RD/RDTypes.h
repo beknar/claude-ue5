@@ -1042,6 +1042,15 @@ struct FRDWildFauna
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float PerKm2 = 20.f;
 	/** its body's half length (it keeps that far from what blocks it) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HalfLength = 60.f;
+	/** the list of 2026-11-07: its hit points; its body's middle over its feet (cm) and its reach for blows and bolts (cm);
+	 *  what it gives when killed, each "Item|min|max|chance" (an item of the generator's Items) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Health = 30.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BodyZ = 60.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BodyRadius = 45.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Drops;
+	/** its cry when struck and when it dies (sound sets; none: silent) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName HurtSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName DeathSound;
 };
 
 /** the wilderness's insects and the sky's birds (the list of 2026-11-04): a Niagara system of the packs' (butterflies,

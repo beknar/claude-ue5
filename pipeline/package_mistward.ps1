@@ -12,7 +12,7 @@
 #     map) and the default game mode the C++ hero game mode (each map sets its own; the project's default, Fig4's Blueprint,
 #     would pull its level's content into the cook). DefaultEngine.ini is put back afterwards, whatever happens.
 # The package holds cooked content of the Fab packs: it stays out of the repository (builds/ is ignored).
-#   - the cook fails on any error logged, and the asset registry logs 13 at every start: Kitchen_Asset_Kit textures that are
+#   - the cook fails on any error logged, and the asset registry logs 15 at every start: Kitchen_Asset_Kit textures (and two of Favelas's sequences) that are
 #     zeros from their first byte (not packages; no map here uses them). The cook runs with -IgnoreCookErrors and the
 #     script fails it itself on any other error in the cook's summary (KNOWN_BAD below). The whole output is kept in
 #     <Out>\package.log.
@@ -20,7 +20,8 @@
 #   without a window, and check that it keeps running and leaves no crash report) [-TestOnly] (only that) [-SkipCook]
 #   (stage and archive the last cook's output: after a cook that finished but was failed for its errors)
 param([string]$Config = "Shipping", [string]$Out = "", [switch]$Test, [switch]$TestOnly, [switch]$SkipCook)
-$KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/Kitchen_Asset_Kit/'
+# (2026-11-08: two of the Favelas pack's level sequences are zeros as well; no map here uses them)
+$KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/(Kitchen_Asset_Kit/|Favelas/Sequencers/(LS_)?OverViewLevelSequence\.uasset)'
 $repo = Split-Path -Parent $PSScriptRoot
 $ue = "E:\Program Files\Epic Games\UE_5.8"
 $proj = "$repo\claude_ue5\claude_ue5.uproject"
@@ -96,6 +97,7 @@ public static class RDWin {
 '@
     # (the castle writes a mark when it begins (-RDMarkFile): a run that stayed on the menu had passed as the castle's)
     $mark = Join-Path $env:TEMP "rd_package_mark.txt"
+    $ctest = Join-Path $env:TEMP "rd_package_console.txt"
     # (the runs: the menu and the castle offscreen for 90 s each; then the castle in a window of its own with a display
     #  setting asked as the Escape menu's Apply sets it (-RDApplyDisplay: 1600 x 900, windowed), its window measured)
     # (into the castle through the menu, -RDStartHero: a Shipping game drops a map named on its command line (the engine's
@@ -113,20 +115,24 @@ public static class RDWin {
               @{ name = "sewers"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:graymourne", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "sewers" },
               @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
               @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
-              @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true })
+              @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true },
+              # (2026-11-08: the game's own console (RD/RDConsole.cpp), in a window of its own (the keys go to its focused line):
+              #  its self-test types into it through Slate and writes what it measured, and its picture beside it)
+              @{ name = "console"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDConsoleTest=$ctest", "-windowed", "-ResX=1280", "-ResY=720"); secs = 75; shown = $true; console = $true; castle = $true; map = "brokenspire" })
     try {
     foreach ($run in $runs) {
         $before = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count
         if (Test-Path $mark) { Remove-Item $mark -Force }
         # (the display run's "saved" must come from this run: the settings files are taken away first (put back at the end))
         if ($run.window) { foreach ($g in $gus) { if (Test-Path $g) { Remove-Item $g -Force } } }
+        if ($run.console) { foreach ($f in @($ctest, [IO.Path]::ChangeExtension($ctest, "png"))) { if (Test-Path $f) { Remove-Item $f -Force } } }
         $client = $null; $dpi = 0; $want = "1600x900"
         # (claude_ue5.exe is a launcher: the game is the exe under claude_ue5\Binaries\Win64, which it starts and waits for:
         #  claude_ue5-Win64-Shipping.exe, but in a Development package claude_ue5.exe too: found by its folder, not its name
         #  (by the Shipping name the Development games were never found, nor stopped))
         $bin = (Join-Path $Out "Windows\claude_ue5\Binaries\Win64").ToLower()
         $t0 = Get-Date
-        $extra = if ($run.window) { @("-nosound") } else { @("-RenderOffScreen", "-ResX=1280", "-ResY=720", "-nosound") }
+        $extra = if ($run.window -or $run.shown) { @("-nosound") } else { @("-RenderOffScreen", "-ResX=1280", "-ResY=720", "-nosound") }
         $l = Start-Process -FilePath $exe -ArgumentList ($run.args + $extra) -PassThru
         $p = $null
         for ($s = 0; $s -lt 30 -and -not $p; $s++) { Start-Sleep 1; $p = Get-Process "claude_ue5*" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith($bin) -and $_.StartTime -ge $t0.AddSeconds(-1) } | Select-Object -First 1 }
@@ -150,6 +156,14 @@ public static class RDWin {
         # (the city's run: the town writes its mark once the wilderness town is built round her, "town|<name>|<hero>")
         $pat = if ($run.want) { $run.want } else { "castle|$(if ($run.map) { $run.map } else { '*' })|Warrior*" }
         if ($run.castle) { $ok = $ok -and $where -like $pat }
+        if ($run.console) {
+            # (its self-test's lines: "check|<name>|ok/FAILED|<measured>", the last "result|ok")
+            $lines = if (Test-Path $ctest) { @(Get-Content $ctest -Encoding UTF8) } else { @() }
+            $lines | Where-Object { $_ -like "check|*" -or $_ -like "note|*" } | ForEach-Object { "    $_" }
+            $png = [IO.Path]::ChangeExtension($ctest, "png")
+            "    picture: $(if (Test-Path $png) { $png } else { 'none' })"
+            $ok = $ok -and $lines.Count -gt 0 -and $lines[-1] -eq "result|ok"
+        }
         if ($run.window) {
             # (the window's inside the size asked, its scaling the screen's (the game handles it; unaware it read 96 on a
             #  200 % screen), and this run's settings say so: Apply as the menu's)

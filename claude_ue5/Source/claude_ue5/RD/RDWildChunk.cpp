@@ -91,13 +91,15 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			if (Sn < Q.Snow && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Q.Snow - Sn) * 0.7f);
 			C.A = Q.Lava;
 			D.C[K] = C;
-			D.UV0[K] = FVector2D(U0 + I * St / 4.0, V0 + J * St / 4.0);
+			// (UV0, which the ground material no longer reads for its detail (the world position does): the list of 2026-11-07's
+			// field rows, their way (0-1 of half a turn) and their crop (/ 8); UV3's V their weight)
+			D.UV0[K] = FVector2D(Q.FieldAng / PI, Q.FieldCrop >= 0 ? (Q.FieldCrop + 0.5) / 8.0 : 0.0);
 			D.UV1[K] = FVector2D(Rk, Sn);
 			// (the list of 2026-11-04: "the road outside brokenspire is visible on the map, but it is indistinguishable and not
 			// visible in the wilderness": it was 80 % of the mud layer, 3 m wide, on a 2 m grid. It has a layer of its own now: a
 			// trodden earth road, darker in its wheel ruts)
 			D.UV2[K] = FVector2D(Q.Sand, Q.Mud);
-			D.UV3[K] = FVector2D(Q.Road, 0.f);
+			D.UV3[K] = FVector2D(Q.Road, Q.FieldCrop >= 0 ? Q.Field * (1.f - Q.Road) : 0.f);
 		}
 	D.T.Reserve((Nv - 1) * (Nv - 1) * 6);
 	for (int32 I = 0; I + 1 < Nv; ++I)
@@ -167,7 +169,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		for (int32 Fi = 0; Fi < B.Foliage.Num(); ++Fi)
 		{
 			const FRDWildFoliage& F = B.Foliage[Fi];
-			if (F.Density <= 0.f) continue;
+			if (F.Density <= 0.f || F.Crop >= 0) continue;          // (a field crop goes in its rows: below)
 			const double Sp = 100.0 / FMath::Sqrt(F.Density);
 			const int32 Ng = FMath::Max(1, FMath::FloorToInt(Cm / Sp));
 			FRDWChunkData::FInst Ins; Ins.Biome = Bi; Ins.Foliage = Fi; Ins.bNear = F.bNearOnly;
@@ -208,6 +210,78 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 				}
 			if (Ins.X.Num() > 0) D.Inst.Add(MoveTemp(Ins));
 		}
+	}
+	// ---- the list of 2026-11-07: "the farm terrain should have regular lines of crops, like corn, cabbages, potatoes,
+	// pumpkins": each field in the chunk planted in rows along its own way, RowM apart, a plant every StepM along a row (the
+	// crop's kinds mixed by their Density), on the world's grid of rows so that a field goes on across the chunks' edges; a
+	// plant where the field is whole (Field 0.5 or more: its hedgerow left bare), off roads, water and steep ground
+	if (W.Biomes.IsValidIndex(W.FarmsBiome) && W.Biomes[W.FarmsBiome].Crops.Num() > 0)
+	{
+		const int32 Bi = W.FarmsBiome;
+		const FRDWildBiome& B = W.Biomes[Bi];
+		struct FFieldIn { int32 Crop = -1; float Ang = 0.f; FBox2D Box = FBox2D(ForceInit); };
+		TMap<FIntPoint, FFieldIn> Fields;
+		for (int32 I = 0; I < Nv; ++I)
+			for (int32 J = 0; J < Nv; ++J)
+			{
+				const FRDWSample& Q = Sat(I, J);
+				if (Q.FieldCrop < 0 || Q.Field < 0.3f) continue;
+				FFieldIn& Fd = Fields.FindOrAdd(Q.FieldCell);
+				Fd.Crop = Q.FieldCrop; Fd.Ang = Q.FieldAng; Fd.Box += FVector2D(I * St, J * St);
+			}
+		TMap<int32, FRDWChunkData::FInst> ByKind;
+		for (const auto& Kv : Fields)
+		{
+			const FFieldIn& Fd = Kv.Value;
+			if (!B.Crops.IsValidIndex(Fd.Crop)) continue;
+			TArray<int32> Kinds; float Wsum = 0.f;
+			for (int32 Fi = 0; Fi < B.Foliage.Num(); ++Fi) if (B.Foliage[Fi].Crop == Fd.Crop && B.Foliage[Fi].Density > 0.f) { Kinds.Add(Fi); Wsum += B.Foliage[Fi].Density; }
+			if (Kinds.Num() == 0) continue;
+			const float RowM = FMath::Max(0.3f, B.Crops[Fd.Crop].RowM);
+			float StepM = 1e9f; for (const int32 Fi : Kinds) StepM = FMath::Min(StepM, FMath::Max(0.25f, B.Foliage[Fi].StepM));
+			const FVector2D Dir(FMath::Cos(Fd.Ang), FMath::Sin(Fd.Ang)), Acr(-Dir.Y, Dir.X);
+			// (the field's part in the chunk, 2 m out, in its rows' frame (world metres: the grid of rows is the world's))
+			const FBox2D Bx(Fd.Box.Min - FVector2D(St), Fd.Box.Max + FVector2D(St));
+			float Umin = 1e30f, Umax = -1e30f, Vmin = 1e30f, Vmax = -1e30f;
+			for (int32 Cc = 0; Cc < 4; ++Cc)
+			{
+				const FVector2D P(X0 + ((Cc & 1) ? Bx.Max.X : Bx.Min.X), Y0 + ((Cc & 2) ? Bx.Max.Y : Bx.Min.Y));
+				const float U = (float)FVector2D::DotProduct(P, Dir), V = (float)FVector2D::DotProduct(P, Acr);
+				Umin = FMath::Min(Umin, U); Umax = FMath::Max(Umax, U); Vmin = FMath::Min(Vmin, V); Vmax = FMath::Max(Vmax, V);
+			}
+			const uint32 Hs = HashCombine(GetTypeHash(Kv.Key), 0xC809u);
+			for (int32 Rn = FMath::FloorToInt(Vmin / RowM); Rn <= FMath::CeilToInt(Vmax / RowM); ++Rn)
+				for (int32 Sn = FMath::FloorToInt(Umin / StepM); Sn <= FMath::CeilToInt(Umax / StepM); ++Sn)
+				{
+					// (a row's plants a little off their marks; now and then one missing)
+					const float J1 = FRDWildWorld::Rand01(Rn, Sn, Hs + 1u), J2 = FRDWildWorld::Rand01(Rn, Sn, Hs + 2u), J3 = FRDWildWorld::Rand01(Rn, Sn, Hs + 3u);
+					if (J3 < 0.04f) continue;
+					const double U = (Sn + 0.5 + (J1 - 0.5) * 0.3) * StepM, V = (Rn + 0.5 + (J2 - 0.5) * 0.12) * RowM;
+					const double Wx = Dir.X * U + Acr.X * V, Wy = Dir.Y * U + Acr.Y * V;
+					const double Lx = Wx - X0, Ly = Wy - Y0;
+					if (Lx < 0.0 || Ly < 0.0 || Lx >= Cm || Ly >= Cm) continue;
+					int32 I, J; Nearest(Lx, Ly, I, J);
+					const FRDWSample& Q = Sat(I, J);
+					if (Q.FieldCell != Kv.Key || Q.Field < 0.5f || Q.Road > 0.1f || Q.WaterKind) continue;
+					if (D.Slope[I * Nv + J] > 22.f) continue;
+					if (D.bTownHole && FMath::Abs(Wx - D.TownAt.X) < D.TownHalfM + 6.0 && FMath::Abs(Wy - D.TownAt.Y) < D.TownHalfM + 6.0) continue;
+					// (its kind: the crop's kinds by their Density; one kind a step, the same each time it is made)
+					float Pick = FRDWildWorld::Rand01(Rn, Sn, Hs + 4u) * Wsum; int32 Fi = Kinds.Last();
+					for (const int32 Ki : Kinds) { if (Pick < B.Foliage[Ki].Density) { Fi = Ki; break; } Pick -= B.Foliage[Ki].Density; }
+					const FRDWildFoliage& F = B.Foliage[Fi];
+					// (a kind planted sparser than the crop's finest step leaves its other steps empty)
+					if (F.StepM > StepM * 1.01f && FRDWildWorld::Rand01(Rn, Sn, Hs + 5u) > StepM / F.StepM) continue;
+					const int32 I0 = FMath::Clamp(FMath::FloorToInt(Lx / St), 0, Nv - 2), J0 = FMath::Clamp(FMath::FloorToInt(Ly / St), 0, Nv - 2);
+					const float Fx = (float)(Lx / St - I0), Fy = (float)(Ly / St - J0);
+					const float Zc = FMath::Lerp(FMath::Lerp(Zat(I0, J0), Zat(I0 + 1, J0), Fx), FMath::Lerp(Zat(I0, J0 + 1), Zat(I0 + 1, J0 + 1), Fx), Fy);
+					const float Sc = FMath::Lerp(F.ScaleMin, F.ScaleMax, FRDWildWorld::Rand01(Rn, Sn, Hs + 6u));
+					const float Yaw = FRDWildWorld::Rand01(Rn, Sn, Hs + 7u) * 360.f;
+					FRDWChunkData::FInst& Ins = ByKind.FindOrAdd(Fi);
+					Ins.Biome = Bi; Ins.Foliage = Fi; Ins.bNear = F.bNearOnly;
+					Ins.X.Add(FTransform(FQuat(FVector::UpVector, FMath::DegreesToRadians(Yaw)), FVector(Lx * 100.0, Ly * 100.0, Zc - F.Sink * Sc), FVector(Sc)));
+				}
+		}
+		for (auto& Kv : ByKind) if (Kv.Value.X.Num() > 0) D.Inst.Add(MoveTemp(Kv.Value));
 	}
 	// ---- the places whose middle is in it
 	{

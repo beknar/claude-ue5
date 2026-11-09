@@ -1,0 +1,20 @@
+new improvements from the graymourne build:
+the windowsills that have boards jutting out from the bottom of the window do not have a collision layer, the
+player can walk right through those boards
+the training dummies near the barracks should react when hit by a melee or ranged weapon
+when viewing your personal storage, the player cannot scroll down the list by holding down the d-pad up or down
+when blocking with the shield, the warrior should only be able to walk forward slowly or walk backwards slowly
+when it rains, the rain does not look like raindrops, instead they look like white rods falling down
+the sky when looking straight up looks like a giant circle of white that is not continuous with the rest of
+the sky closer to the horizon.  the sky should be continuous.
+the farm terrain should have regular lines of crops, like corn, cabbages, potatoes, pumpkins, etc.  it should
+not be barren or have only grass.
+player should be able to kill the animals wandering in the wilderness and get appropriate crafting materials
+from them.  animals should respawn after they've been killed at regular intervals
+the different colors of the farm terrain look like abrupt banding of different colors instead of smoothly and
+gradually blending into each other
+when stepping off from a higher level of terrain, the character looks like she is walking or running on
+air instead of dropping into the lower level of terrain.
+implement a console command that allows the character to choose how fast to run in the wilderness in order
+to make testing of the wilderness faster.  choose from 1x / 5x / 10x /15x / 20x / 30x / 40x
+at many points in the wilderness, the character is not on the ground and appears to be running in the air

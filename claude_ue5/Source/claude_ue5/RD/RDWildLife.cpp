@@ -50,7 +50,41 @@ void ARDWildAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, uint32 I
 	Body->SetRelativeScale3D(FVector(F.Scale));
 	FleeR = R.FRandRange(F.FleeMin, FMath::Max(F.FleeMax, F.FleeMin));
 	Home = GetActorLocation();
+	Health = FMath::Max(F.Health, 1.f);
 	SetState(R.RandRange(0, 1), GetWorld()->GetTimeSeconds());
+}
+
+FVector ARDWildAnimal::BodyCenter() const
+{
+	const float Bz = Gen && Gen->WildFauna.IsValidIndex(Def) ? Gen->WildFauna[Def].BodyZ : 50.f;
+	return GetActorLocation() + FVector(0, 0, bDead ? Bz * 0.4f : Bz);
+}
+
+float ARDWildAnimal::BodyRadius() const
+{
+	return Gen && Gen->WildFauna.IsValidIndex(Def) ? FMath::Max(Gen->WildFauna[Def].BodyRadius, 10.f) : 40.f;
+}
+
+bool ARDWildAnimal::TakeHit(float Dmg, const FVector& From)
+{
+	if (bDead || !Gen || !Gen->WildFauna.IsValidIndex(Def) || !GetWorld()) return false;
+	const FRDWildFauna& F = Gen->WildFauna[Def];
+	const float Now = GetWorld()->GetTimeSeconds();
+	Health -= FMath::Max(Dmg, 0.f);
+	if (Health > 0.f)
+	{
+		// (struck and alive: off it runs, away from her)
+		if (!F.HurtSound.IsNone()) Gen->PlaySoundAt(F.HurtSound, BodyCenter());
+		SetState(3, Now, GetActorLocation() - From);
+		return false;
+	}
+	// (killed: its pose held, it falls on its side over half a second (Tick), its things by it)
+	bDead = true; DeadAt = Now; Health = 0.f;
+	FallYaw = R.RandBool() ? 90.f : -90.f;
+	Body->bPauseAnims = true;
+	if (!F.DeathSound.IsNone()) Gen->PlaySoundAt(F.DeathSound, BodyCenter());
+	Gen->OnWildAnimalKilled(this);
+	return true;
 }
 
 void ARDWildAnimal::Play(UAnimationAsset* A, float Rate)
@@ -96,6 +130,16 @@ void ARDWildAnimal::Tick(float Dt)
 	UWorld* W = GetWorld();
 	const float Now = W->GetTimeSeconds();
 	FVector L = GetActorLocation();
+	// ---- dead: falling over onto its side, then lying there (the generator takes the body away in time)
+	if (bDead)
+	{
+		const float T = FMath::Clamp((Now - DeadAt) / 0.5f, 0.f, 1.f);
+		const float E = T * T * (3.f - 2.f * T);
+		Body->SetRelativeRotation(FRotator(0.f, F.MeshYaw, 0.f).Quaternion() * FQuat(FVector(1, 0, 0), FMath::DegreesToRadians(FallYaw * E)));
+		// (lying, its middle comes down to about a third of its height)
+		Body->SetRelativeLocation(FVector(0, 0, F.MeshZ + F.BodyZ * 0.25f * E));
+		return;
+	}
 	// ---- she comes too near: off it runs (once running, it keeps on)
 	if (const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0); Her && State != 3)
 	{
@@ -142,6 +186,68 @@ ARDWildAnimal* ARDDungeonGenerator::SpawnWildAnimalAt(FName Kind, FVector At)
 	return A;
 }
 
+void ARDDungeonGenerator::OnWildAnimalKilled(ARDWildAnimal* A)
+{
+	if (!A || !WildFauna.IsValidIndex(A->Def) || !GetWorld()) return;
+	const FRDWildFauna& F = WildFauna[A->Def];
+	const float Now = GetWorld()->GetTimeSeconds();
+	++AnimalsKilled;
+	AnimalRespawns.Add(TPair<int32, float>(A->Def, Now + WildAnimalRespawnSeconds));
+	// (its things: each "Item|min|max|chance", drawn from a hash of the session and the kill (no stream of the play's))
+	TArray<FName> Got;
+	const uint32 H0 = HashCombine((uint32)SessionSeed ^ 0xA41Du, (uint32)AnimalsKilled * 2654435761u);
+	for (int32 K = 0; K < F.Drops.Num(); ++K)
+	{
+		TArray<FString> P; F.Drops[K].ParseIntoArray(P, TEXT("|"), false);
+		if (P.Num() < 1 || P[0].IsEmpty() || FindItem(FName(*P[0])) < 0) continue;
+		const int32 Lo = P.Num() > 1 ? FCString::Atoi(*P[1]) : 1, Hi = P.Num() > 2 ? FCString::Atoi(*P[2]) : Lo;
+		const float Ch = P.Num() > 3 ? FCString::Atof(*P[3]) : 1.f;
+		const float U = (HashCombine(H0, (uint32)K * 7919u + 1u) % 100003u) / 100003.f;
+		if (U >= Ch) continue;
+		const int32 N = Lo + (int32)(HashCombine(H0, (uint32)K * 104729u + 2u) % (uint32)FMath::Max(Hi - Lo + 1, 1));
+		for (int32 I = 0; I < N; ++I) Got.Add(FName(*P[0]));
+	}
+	LastAnimalDrops = Got;
+	if (Got.Num() > 0) DropHarvest(A->GetActorLocation() + FVector(0, 0, 10.f), Got, 1);
+	UE_LOG(LogRDWildLife, Log, TEXT("RDWILDLIFE %s killed: %s"), *F.Name.ToString(), Got.Num() ? *FString::JoinBy(Got, TEXT(", "), [](const FName& N) { return N.ToString(); }) : TEXT("nothing"));
+}
+
+int32 ARDDungeonGenerator::HitWildAnimalsInArc(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Dmg, FName Sound)
+{
+	int32 N = 0;
+	for (ARDWildAnimal* A : WildAnimals)
+	{
+		if (!IsValid(A) || A->IsDead()) continue;
+		const FVector C = A->BodyCenter();
+		const FVector D = (C - L) * FVector(1, 1, 0);
+		const float Dist = D.Size() - A->BodyRadius();
+		if (Dist > Reach || FMath::Abs(C.Z - L.Z) > 220.f) continue;
+		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
+		if (!Sound.IsNone()) PlaySoundAt(Sound, C);
+		AddHitText(C + FVector(0, 0, 40.f), Dmg, false);
+		A->TakeHit(Dmg, L);
+		++N;
+	}
+	return N;
+}
+
+ARDWildAnimal* ARDDungeonGenerator::WildAnimalOnSegment(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const
+{
+	ARDWildAnimal* Best = nullptr; OutT = 2.f;
+	const FVector Ab = B - A;
+	const float L2 = Ab.SizeSquared();
+	for (ARDWildAnimal* An : WildAnimals)
+	{
+		if (!IsValid(An) || An->IsDead()) continue;
+		const FVector C = An->BodyCenter();
+		const float T = L2 > 1e-4f ? FMath::Clamp(FVector::DotProduct(C - A, Ab) / L2, 0.f, 1.f) : 0.f;
+		const FVector P = A + Ab * T;
+		if (FVector::Dist(P, C) > An->BodyRadius() + Pad || T >= OutT) continue;
+		OutT = T; Best = An; OutAt = P;
+	}
+	return Best;
+}
+
 void ARDDungeonGenerator::TickWildLife(float Dt, const FVector& Her)
 {
 	WildLifeT -= Dt;
@@ -154,13 +260,20 @@ void ARDDungeonGenerator::TickWildLife(float Dt, const FVector& Her)
 	const bool bDay = DayLight > 0.35f;
 	FRandomStream Rr((int32)HashCombine((uint32)SessionSeed ^ 0x11FEu, (uint32)FMath::RoundToInt(W->GetTimeSeconds() * 2.f)));
 	// ---- the animals: the far ones go, new ones come
+	const float NowT = W->GetTimeSeconds();
 	for (int32 I = WildAnimals.Num() - 1; I >= 0; --I)
 	{
 		ARDWildAnimal* A = WildAnimals[I];
 		if (!IsValid(A)) { WildAnimals.RemoveAt(I); continue; }
-		if (!bReady || FVector::Dist2D(A->GetActorLocation(), Her) > 23000.f) { A->Destroy(); WildAnimals.RemoveAt(I); }
+		// (the list of 2026-11-07: a killed animal's body lies a while, then goes)
+		const bool bGone = A->IsDead() && NowT - A->DeadAt > WildCorpseSeconds;
+		if (!bReady || bGone || FVector::Dist2D(A->GetActorLocation(), Her) > 23000.f) { A->Destroy(); WildAnimals.RemoveAt(I); }
 	}
-	if (bReady && !bInTown && WildAnimals.Num() < WildAnimalsMax && WildFauna.Num() > 0)
+	// (a killed kind's place waits WildAnimalRespawnSeconds: then another of the kind may come, as the others do)
+	AnimalRespawns.RemoveAll([NowT](const TPair<int32, float>& P) { return P.Value <= NowT; });
+	// (the living only: a body lying there held its place against the cap as long as it lay (888 animals8: no deer came back))
+	int32 Living = 0; for (const ARDWildAnimal* A : WildAnimals) if (IsValid(A) && !A->IsDead()) ++Living;
+	if (bReady && !bInTown && Living + AnimalRespawns.Num() < WildAnimalsMax && WildFauna.Num() > 0)
 	{
 		// (a try a half second: a point 60 to 150 m off, its biome's kinds weighed by how many live there a km²)
 		const float Ang = Rr.FRandRange(0.f, 2.f * PI), Dd = Rr.FRandRange(6000.f, 15000.f);
@@ -172,7 +285,8 @@ void ARDDungeonGenerator::TickWildLife(float Dt, const FVector& Her)
 		{
 			const FRDWildFauna& F = WildFauna[K];
 			if (!F.Mesh || !(F.Biomes.Contains(Bn) || F.Biomes.Contains(TEXT("*")))) continue;
-			int32 Have = 0; for (const ARDWildAnimal* A : WildAnimals) if (IsValid(A) && A->Def == K) ++Have;
+			int32 Have = 0; for (const ARDWildAnimal* A : WildAnimals) if (IsValid(A) && !A->IsDead() && A->Def == K) ++Have;
+			for (const TPair<int32, float>& Rp : AnimalRespawns) if (Rp.Key == K) ++Have;
 			// (as many as live in the 0.07 km² round her, one at least)
 			if (Have >= FMath::Max(1, FMath::RoundToInt(F.PerKm2 * 0.07f))) continue;
 			Ks.Add(K); Ws.Add(F.PerKm2); Sum += F.PerKm2;
@@ -246,11 +360,15 @@ TArray<FString> ARDDungeonGenerator::GetWildLifeLines() const
 		if (IsValid(A))
 		{
 			const FVector L = A->GetActorLocation();
-			Out.Add(FString::Printf(TEXT("animal|%s|%.0f|%.0f|%.0f|%d|%.0f|%d"), WildFauna.IsValidIndex(A->Def) ? *WildFauna[A->Def].Name.ToString() : TEXT("?"), L.X, L.Y, L.Z, A->GetState(), A->GetFleeDistance(), A->GetTimesFled()));
+			Out.Add(FString::Printf(TEXT("animal|%s|%.0f|%.0f|%.0f|%d|%.0f|%d|%.1f|%d"), WildFauna.IsValidIndex(A->Def) ? *WildFauna[A->Def].Name.ToString() : TEXT("?"), L.X, L.Y, L.Z, A->GetState(), A->GetFleeDistance(), A->GetTimesFled(), A->GetHealth(), A->IsDead() ? 1 : 0));
 		}
 	for (const FRDSwarmInst& Si : SwarmInsts)
 		if (WildSwarms.IsValidIndex(Si.Def) && Si.C.IsValid())
 			Out.Add(FString::Printf(TEXT("swarm|%s|%.0f|%.0f|%.0f|%d|%d"), *WildSwarms[Si.Def].Name.ToString(), Si.At.X, Si.At.Y, Si.At.Z, WildSwarms[Si.Def].Layer, Si.C->IsActive() ? 1 : 0));
-	Out.Add(FString::Printf(TEXT("counts|%d|%d|%d"), AnimalsSpawned, AnimalsFled, SwarmsSpawned));
+	Out.Add(FString::Printf(TEXT("counts|%d|%d|%d|%d|%d"), AnimalsSpawned, AnimalsFled, SwarmsSpawned, AnimalsKilled, AnimalRespawns.Num()));
+	// (the list of 2026-11-07: each killed kind's place kept empty, and the game seconds left)
+	if (const UWorld* W = GetWorld())
+		for (const TPair<int32, float>& Rp : AnimalRespawns)
+			Out.Add(FString::Printf(TEXT("respawn|%s|%.1f"), WildFauna.IsValidIndex(Rp.Key) ? *WildFauna[Rp.Key].Name.ToString() : TEXT("?"), Rp.Value - W->GetTimeSeconds()));
 	return Out;
 }

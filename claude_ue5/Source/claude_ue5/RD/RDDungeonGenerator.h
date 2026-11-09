@@ -554,6 +554,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TArray<FName> BlockHeroes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockShare = 0.3f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockSlow = 0.5f;
+	/** the list of 2026-11-07 (docs/improvements8.txt): over 0, while she blocks she walks only ahead or back, at this speed
+	 *  (cm/s) whether she walks or runs (BlockSlow then unused), back at BlockBackShare of it; the stick's side turns her at
+	 *  BlockTurnRate (deg/s). 0: the third list's block (BlockSlow off her speed, any way) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockMoveSpeed = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockBackShare = 0.8f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockTurnRate = 120.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") float BlockWear = 5.f;
 	/** a clip and the moment of it held while she blocks (her shield raised; none: no pose) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward2") TMap<FName, TObjectPtr<UAnimSequenceBase>> BlockClip;
@@ -1141,6 +1147,16 @@ public:
 	/** the town panel's rows as the HUD drew them (the mouse reads them) */
 	TArray<FBox2D> TownRowBoxes;
 	TArray<FBox2D> TownTabBoxes;
+	/** the town panel's cursor held down (W / S, the D-pad, the left stick): its way and when it steps next (real time) */
+	int32 TownRepeatDir = 0;
+	double TownRepeatAt = 0.0;
+	/** the list of 2026-11-07 (RDTown8.cpp): her blow meets the barracks' dummies in its reach and arc (they rock; the sound and
+	 *  the blow's number over them); a bolt's trace that hit one's mesh. TownDummyHits counts them (tests) */
+	int32 HitTownDummiesInArc(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Strength, FName Sound, float Dmg);
+	bool HitTownDummyByComponent(const class UPrimitiveComponent* C, const FVector& From, float Strength, FName Sound, float Dmg);
+	/** every town section's dummies (kind|x|y|z|hits|lean deg|radius|height) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") TArray<FString> GetTownDummyLines() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") int32 TownDummyHits = 0;
 	/** her talk's partner (the townsperson's index) */
 	int32 TownWho = -1;
 	struct FTownLine { FString Label, Tag, Detail; FName Act; FString Arg; bool bOn = true; };
@@ -1210,7 +1226,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SkyMoonMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UStaticMesh> SkyDomeMesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UStaticMesh> SkyQuadMesh = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FogSkyCutoff = 600000.f;
+	/** what is farther than this (cm) gets no height fog: the sky itself (the fog's colour hid it, 2026-11-04). The list of
+	 *  2026-11-07: at 6 km the clouds overhead (1.6 km up) were fogged and those past 6 km, below 15 degrees, were not: "a
+	 *  giant circle of white ... not continuous with the rest of the sky". 1000 km: every cloud and the land fogged by their
+	 *  distance, the sky's own pixels (at no distance) left clear */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FogSkyCutoff = 1.0e8f;
 	/** the cloud material's Cloud_GlobalCoverage at a clear sky and at an overcast one */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FVector2D SkyCoverRange = FVector2D(0.1f, 1.f);
 	/** weather: rain and snow round her camera, wind (blowing leaves, the grass's sway through WindCollection's "Strength"),
@@ -1218,6 +1238,8 @@ public:
 	/** the rain and snow of our own (the packs' rain did not show): a field of thin planes round her camera, falling in their
 	 *  material (890's M_RD_Drops: the drops move by its world position offset, wrapped in the field's height) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UStaticMesh> DropMesh = nullptr;
+	/** the list of 2026-11-07: a rain streak's length and width as the drop plane's scale (100 cm a unit) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FVector2D RainStreak = FVector2D(0.26f, 0.009f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> RainDropMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> SnowDropMaterial = nullptr;
 	UPROPERTY(Transient) TObjectPtr<class UHierarchicalInstancedStaticMeshComponent> RainDrops;
@@ -1295,6 +1317,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") TArray<FString> GetWildLifeLines() const;
 	/** tests: an animal of a kind put at a point (it stands there) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") class ARDWildAnimal* SpawnWildAnimalAt(FName Kind, FVector At);
+	/** the list of 2026-11-07 (RDWildLife.cpp): an animal killed (its things dropped as a harvest, its kind's place kept empty
+	 *  WildAnimalRespawnSeconds before another comes, the body gone after WildCorpseSeconds); her blow's animals in its reach
+	 *  and arc; the first animal on a bolt's way this frame (its share of the way, where it met it) */
+	void OnWildAnimalKilled(class ARDWildAnimal* A);
+	int32 HitWildAnimalsInArc(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Dmg, FName Sound);
+	class ARDWildAnimal* WildAnimalOnSegment(const FVector& A, const FVector& B, float Pad, float& OutT, FVector& OutAt) const;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildAnimalRespawnSeconds = 120.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildCorpseSeconds = 90.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 AnimalsKilled = 0;
+	/** a killed kind's place empty until then (its WildFauna index, the game time it may come again) */
+	TArray<TPair<int32, float>> AnimalRespawns;
+	/** what the last killed animal gave (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") TArray<FName> LastAnimalDrops;
 	/** the town's list (RDTown7.cpp): a garden harvested, the oven's crafting, a table's food taken */
 	bool TownHarvestGarden(ARDSection* S, int32 Garden);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire7") bool IsGardenRipe(int32 Garden) const;
@@ -1833,6 +1868,17 @@ public:
 	bool IsWildRevealed(double Xm, double Ym) const;
 	/** the ground's z (cm) under a world point in the wilderness (the town's 0 inside a loaded town) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") float WildGroundZ(FVector At) const;
+	/** the list of 2026-11-07 (RDWild8.cpp): her run speed in the wilderness for testing (rd.WildRunSpeed, -RDWildRunSpeed=):
+	 *  one of 1, 5, 10, 15, 20, 30, 40 (the nearest); what is applied now (1 in a town's walls); how often she was held on the
+	 *  world's height where the ground was not made yet */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void SetWildRunSpeed(float Factor);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") float GetWildRunSpeed() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") float GetWildRunApplied() const { return WildRunApplied; }
+	static float WildRunSpeedChoice(float Asked);
+	void TickWildRunSpeed(APawn* P);
+	float WildRunApplied = 1.f, WildRunBaseAccel = 1200.f, WildRunBaseBrake = 1000.f, WildRunLogged = 1.f;
+	bool bWildRunCmdRead = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 WildRunHeld = 0;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool IsWildReady() const;
 	/** "ready|seed|init s|chunks|in flight|built|dropped|max active|compute ms avg|build ms max|revealed cells|found|towns" (tests) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildState() const;

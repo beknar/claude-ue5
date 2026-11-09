@@ -88,6 +88,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 	TickWildLoad();
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
+	TickWildRunSpeed(P);          // (the list of 2026-11-07: rd.WildRunSpeed)
 	const FVector L = P->GetActorLocation();
 	const double Xm = L.X / 100.0, Ym = L.Y / 100.0, Cm = WildChunkM;
 	// (every two minutes the map has grown: an autosave)
@@ -208,6 +209,8 @@ void ARDDungeonGenerator::AskWildChunk(FIntPoint C)
 {
 	TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D = MakeShared<FRDWChunkData, ESPMode::ThreadSafe>();
 	D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->Ticket = ++WildTicket;
+	// (the list of 2026-11-07: run fast (rd.WildRunSpeed over 1) she outruns a worker's cooking: the ground's collision at once)
+	D->bSyncCollision = WildRunApplied > 1.f;
 	WildTownHole(*D);
 	WildInFlight.Add(C);
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
