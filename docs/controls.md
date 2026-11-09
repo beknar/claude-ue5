@@ -25,7 +25,8 @@ The game is the packaged one (`pipeline/package_mistward.ps1`): the hero menu, B
 | Quick bar | 1 to 0 use the first ten slots (an ability goes off at once) | D-pad left / right: the next or previous filled slot (an ability is made ready, the attack button makes it) |
 | Next weapon or spell | the mouse wheel | Y |
 | Act on what is near (below) | F | X |
-| Inventory | I or Tab | Start |
+| Inventory | I or Tab | Start (a short press) |
+| The Escape menu | Escape | Start held half a second |
 | Map | M | Back (View) |
 | Hide or show the helmet | H | |
 | Escape menu | Escape | none (once it is open, the D-pad, A and B work in it) |
@@ -67,7 +68,7 @@ F (X) at an anvil opens the crafting panel; at a bread oven the same panel opens
 
 ## The town's panels
 
-A service, a keeper or a quest giver opens a panel, which pauses the game. W / S, the arrows or the wheel (the D-pad, the left stick) choose; held, they go on after 0.35 s, a row every 80 ms. Enter, Space, E or a click (A) does it. A / D, the left and right arrows or a click on a tab (LB / RB, the D-pad left / right) change the list's tab (the store's, the storage's). Escape, F, Tab or Backspace (B) close it.
+A service, a keeper or a quest giver opens a panel, which pauses the game. W / S, the arrows or the wheel (the D-pad, the left stick) choose; held, they go on after 0.35 s, a row every 80 ms. Enter, Space, E or a click (A) does it. A / D, the left and right arrows or a click on a tab (LB / RB, the D-pad left / right) change the list's tab (the store's, the storage's). Escape, F, Tab or Backspace (B) close it. In the storage, Enter, Space, E or the left mouse button (A) held stores (or takes back) the same thing again after 0.4 s, every 0.15 s, until it is let go or none is left; the things she stored lie on one line a kind ("x 5").
 
 ## The maps (M; Back)
 
@@ -75,13 +76,13 @@ A service, a keeper or a quest giver opens a panel, which pauses the game. W / S
 - **In a town:** the town from above. The wheel or + / - (the right stick) zoom it up to six times; a drag with the left mouse button or the arrows (the D-pad) move it; C (R3) shows the whole town again. While it is open the mouse, its wheel and the right stick are the map's.
 - **In the wilderness:** the map of the world (in a town's walls the town's own), opened 4 km across round her. The wheel or + / - (the right stick) zoom it; a drag with the left mouse button or the arrows (the D-pad, the left stick) move it; C (R3) brings it back over her; F or Enter (A) travels to the found place under the cross (not while a monster is after her).
 
-## The Escape menu (Escape)
+## The Escape menu (Escape; Start held)
 
-No gamepad button opens it. W / S or the arrows (the D-pad up / down) choose a line, A / D or the left and right arrows (the D-pad left / right) change a setting, Enter or Space (A) presses a button. The mouse: the line under the pointer is chosen, a click presses it, a click or a drag on a volume's track sets it. Escape (B) goes back to the main page from another page, and on the main page closes the menu.
+The gamepad's Start held half a second (with no list open) opens it, since the list of 2026-11-08b; a shorter press of Start still opens the inventory, when it is let go. Start or B closes it (or goes back a page). W / S or the arrows (the D-pad up / down) choose a line, A / D or the left and right arrows (the D-pad left / right) change a setting, Enter or Space (A) presses a button. The mouse: the line under the pointer is chosen, a click presses it, a click or a drag on a volume's track sets it. Escape (B) goes back to the main page from another page, and on the main page closes the menu.
 
 - **The main page:** Resume, Save the game, Load a game, Options, Choose another hero (a new game), Quit; in a dungeon also Return to its town, after Options.
 - **Options:** Overall volume, Action sounds, Environment sounds, Music; Controls hint (on or off); Resolution; Display mode (fullscreen, windowed fullscreen, windowed); Apply display settings; Back.
-- **Save the game:** the keys type its name (letters, digits, spaces, hyphens and apostrophes, 40 at most; each word's first letter a capital), Backspace takes off a letter and Delete the whole name; Up / Down (the D-pad) choose; Enter (A) saves, over the save of that name if there is one.
+- **Save the game:** the keys type its name (letters, digits, spaces, hyphens and apostrophes, 40 at most; each word's first letter a capital), Backspace takes off a letter (held, it goes on after 0.4 s, a letter every 50 ms) and Delete the whole name; Up / Down (the D-pad) choose; Enter (A) saves, over the save of that name if there is one.
 - **Load a game:** the autosave and the named saves, newest first, each with where and when; Enter or a click (A) loads one.
 
 In the editor Shift+Escape stops play.
@@ -91,6 +92,8 @@ In the editor Shift+Escape stops play.
 The console key (`, or the input settings' `ConsoleKeys`) opens it and shuts it, Escape shuts it; no gamepad button opens it. Enter runs the line; Up / Down bring back the lines typed before; Tab completes a command's name; PageUp / PageDown scroll; `help` (or `?`) lists the game's own commands (`rd.*`) with their values; `clear` (or `cls`) empties it. A command's name alone shows its value, a name and a value sets it. While it is open nothing typed or clicked reaches the game. In the editor and a Development game the engine's own console has the key (`rd.GameConsole 1` or `-RDConsole` puts this one on it).
 
 - `rd.WildRunSpeed <x>`: her running speed in the wilderness outside the towns' walls, for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest). `-RDWildRunSpeed=<x>` on the command line sets it too.
+- `rd.TimeSpeed <x>`: the day's clock x times faster (1 to 240; 60: an hour of the day a minute), since the list of 2026-11-08b.
+- `rd.GameSpeed <x>`: the whole game x times faster (0.1 to 10: the world's time dilation; the clock with it).
 
 ## The earlier levels
 

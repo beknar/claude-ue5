@@ -965,7 +965,13 @@ void ARDHUD::DrawTownPanel(float Sc)
 			if (Ln.Act == TEXT("buy")) Item = FName(*Ln.Arg);
 			else if (Ln.Arg.StartsWith(TEXT("i:"))) Item = FName(*Ln.Arg.Mid(2));
 			else if (Ln.Arg.StartsWith(TEXT("w:"))) { const int32 Wi = FCString::Atoi(*Ln.Arg.Mid(2)); if (Gen->Weapons.IsValidIndex(Wi)) Item = Gen->Weapons[Wi].Item; }
-			else if (Ln.Act == TEXT("withdraw")) Item = FName(*Ln.Label);
+			else if (Ln.Act == TEXT("withdraw"))
+			{
+				// (a stacked line's label carries its count: the thing is the stored one its line takes back)
+				const URDGameInstance* Gi = URDGameInstance::Of(Gen);
+				const int32 Si = FCString::Atoi(*Ln.Arg);
+				Item = Gi && Gi->StashThings.IsValidIndex(Si) ? Gi->StashThings[Si] : FName(*Ln.Label);
+			}
 			const FName Ic = ItemIcon(Item);
 			if (UI.Has(Ic)) { Ix = Rh; UI.Fit(Ic, FVector2D(R0.X + 6.f * Sc, R0.Y - 2.f * Sc), FVector2D(R0.X + 2.f * Sc + Rh, R1.Y + 2.f * Sc)); }
 		}

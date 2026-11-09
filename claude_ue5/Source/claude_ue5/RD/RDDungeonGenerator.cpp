@@ -47,6 +47,8 @@ static TAutoConsoleVariable<int32> CVarRDHeroMenu(TEXT("rd.HeroMenu"), 1,
 	TEXT("1: a dungeon level with heroes and a MenuLevel, played without ?Hero=, opens its menu first. 0: it plays its DefaultHero (scripted tests, reel renders)."));
 
 static const int32 RDSoundSeed = 90417;
+// (the list of 2026-11-08b: the gamepad's Start held this long with nothing open opens the Escape menu)
+static constexpr double RDStartHoldSeconds = 0.5;
 static const FName RDFireKeys[3] = { TEXT("Env.Torch"), TEXT("Env.Brazier"), TEXT("Env.Hearth") };
 static const FName RDMusicKeys[4] = { TEXT("Music.Explore"), TEXT("Music.Combat"), TEXT("Atmos.Explore"), TEXT("Atmos.Combat") };
 
@@ -1030,7 +1032,14 @@ void ARDDungeonGenerator::TickSaveNameKeys(APlayerController* PC)
 	if (PC->WasInputKeyJustPressed(EKeys::SpaceBar) && SaveNameText.Len() < 40 && !SaveNameText.EndsWith(TEXT(" "))) SaveNameText.AppendChar(TEXT(' '));
 	if (PC->WasInputKeyJustPressed(EKeys::Hyphen) && SaveNameText.Len() < 40) SaveNameText.AppendChar(TEXT('-'));
 	if (PC->WasInputKeyJustPressed(EKeys::Apostrophe) && SaveNameText.Len() < 40) SaveNameText.AppendChar(TEXT('\''));
-	if (PC->WasInputKeyJustPressed(EKeys::BackSpace) && SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1);
+	// (the list of 2026-11-08b: "holding down the backspace key should backspace multiple times": held, it goes on after a
+	// moment (0.4 s), a letter every 50 ms, until it is let go or the name is empty; real time, the menu pauses the game)
+	{
+		const double Now = FPlatformTime::Seconds();
+		if (PC->WasInputKeyJustPressed(EKeys::BackSpace)) { if (SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1); SaveBackAt = Now + 0.4; }
+		else if (PC->IsInputKeyDown(EKeys::BackSpace) && SaveBackAt > 0.0 && Now >= SaveBackAt) { if (SaveNameText.Len() > 0) SaveNameText.LeftChopInline(1); SaveBackAt = Now + 0.05; }
+		else if (!PC->IsInputKeyDown(EKeys::BackSpace)) SaveBackAt = 0.0;
+	}
 	if (PC->WasInputKeyJustPressed(EKeys::Delete)) SaveNameText.Reset();
 }
 
@@ -1040,6 +1049,24 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 	if (PlayerCombat && PlayerCombat->IsScriptedOnly()) return;
 	// (mistward4: Escape on the Options page goes back to the main page; on the main page it closes the menu)
 	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { if (bMenuOpen && MenuPage > 0) BackToMainMenu(); else SetMenuOpen(!bMenuOpen); return; }
+	// (the list of 2026-11-08b: "the esc menu is inaccessible from the gamepad". Start opens the inventory; held half a second
+	// with nothing open it opens this menu instead (the inventory takes a shorter press when it is let go: bStartTapped). With
+	// the menu open, Start closes it (or goes back a page), as B does)
+	{
+		const FKey St = EKeys::Gamepad_Special_Right;
+		const double Now = FPlatformTime::Seconds();
+		const bool bListOpen = PlayerCombat && (PlayerCombat->IsInventoryOpen() || PlayerCombat->IsCraftingOpen());
+		if (PC->WasInputKeyJustPressed(St))
+		{
+			if (bMenuOpen) { StartHeldSince = -1.0; if (MenuPage > 0) BackToMainMenu(); else SetMenuOpen(false); return; }
+			StartHeldSince = bListOpen ? -1.0 : Now;
+		}
+		if (StartHeldSince >= 0.0)
+		{
+			if (!PC->IsInputKeyDown(St)) { if (PlayerCombat) PlayerCombat->bStartTapped = true; StartHeldSince = -1.0; }
+			else if (Now - StartHeldSince >= RDStartHoldSeconds) { StartHeldSince = -1.0; SetMenuOpen(true); ++MenuOpensByStart; return; }
+		}
+	}
 	if (!bMenuOpen) return;
 	auto Pressed = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->WasInputKeyJustPressed(K)) return true; return false; };
 	// (the Save page: the letters type its name; the arrows choose; Enter saves)
@@ -1689,6 +1716,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bMonsterRanged) TickMonsterShots(Dt);              // (mistward5: the monsters' shots in the air)
 	if (bFinalBossOn) TickFinal(Dt);                       // (the final boss: the last tier's share, the light from above)
 	if (bTown || bFinalBossOn) TickFinalShow(Dt);          // (the final boss's showcase: -RDFinalShow)
+	TickGameSpeed();                                       // (the list of 2026-11-08b: rd.GameSpeed)
 	if (!bAutoplayOptionRead) ReadAutoplayOption();        // (mistward5: ?Autoplay= / -Autoplay=)
 	if (bAutoplay) TickAutoplay(Dt);
 	if (bOneRoom) TickOneRoom(Dt);             // (martial_arts: the room's monsters)

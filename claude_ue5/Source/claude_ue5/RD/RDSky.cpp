@@ -17,6 +17,7 @@
 #include "RD/RDSection.h"
 #include "RD/RDCombat.h"
 #include "Components/VolumetricCloudComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SkyLightComponent.h"
@@ -83,6 +84,15 @@ void ARDDungeonGenerator::BeginSky7()
 		SkyClouds->SetLayerBottomAltitude(1.6f);
 		SkyClouds->SetLayerHeight(4.f);
 	}
+	// (the list of 2026-11-08b: "when looking up at the sky, there is a blue outline against any object ... whenever there is
+	// any blue sky"; "when there is no blue sky, there is a grey shimmering border around objects on the ground". The clouds
+	// were traced at a quarter of the view's size and put back at half (the volumetric render target's mode 0): along every
+	// edge against the sky they bled a fringe of the sky's colour 2 to 4 pixels wide (pictures of 2026-11-08b, roofs at noon,
+	// fair and overcast). Mode 1 (traced at half size, upsampled) draws none and still lets the clouds meet the mountains;
+	// mode 2 also drew none but cannot meet opaque ground, and the wilds' peaks reach into the layer)
+	if (SkyClouds)
+		if (IConsoleVariable* V = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode")))
+			V->Set(1, ECVF_SetByCode);
 	auto Dome = [&](UStaticMesh* Mesh, UMaterialInterface* Mat, const TCHAR* Name, TObjectPtr<UStaticMeshComponent>& Out, TObjectPtr<UMaterialInstanceDynamic>& Mid)
 	{
 		if (!Mesh || !Mat || IsValid(Out)) return;

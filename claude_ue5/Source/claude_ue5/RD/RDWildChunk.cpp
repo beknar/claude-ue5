@@ -93,7 +93,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			D.C[K] = C;
 			// (UV0, which the ground material no longer reads for its detail (the world position does): the list of 2026-11-07's
 			// field rows, their way (0-1 of half a turn) and their crop (/ 8); UV3's V their weight)
-			D.UV0[K] = FVector2D(Q.FieldAng / PI, Q.FieldCrop >= 0 ? (Q.FieldCrop + 0.5) / 8.0 : 0.0);
+			// (the crop / 16: thirteen crops since the list of 2026-11-08b (887's ground material reads floor(v x 16)))
+			D.UV0[K] = FVector2D(Q.FieldAng / PI, Q.FieldCrop >= 0 ? (Q.FieldCrop + 0.5) / 16.0 : 0.0);
 			D.UV1[K] = FVector2D(Rk, Sn);
 			// (the list of 2026-11-04: "the road outside brokenspire is visible on the map, but it is indistinguishable and not
 			// visible in the wilderness": it was 80 % of the mud layer, 3 m wide, on a 2 m grid. It has a layer of its own now: a

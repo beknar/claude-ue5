@@ -18,6 +18,23 @@ Built and compiled, but no test has run it yet:
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
 - [ ] **The packaged game in the wilderness:** the package of 2026-11-06 (`builds\vel_morrath`) runs the town, puts her out in Vel Morrath and builds the city round her; a walk out of the gate, a journey, a save and load, and its memory over a long walk have not been run in it (worker threads, transient map textures and the save all behave differently packaged).
 
+## The list of 2026-11-08b ([docs/improvements9.txt](docs/improvements9.txt))
+
+Done in phases, a PR each ([Brokenspire](docs/levels/brokenspire.md#the-list-of-2026-11-08b-first-part), [the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-08b-first-part)). The first, the quick fixes, is built and tested (`884 storage9,start9,backspace9,time9,noshield9,sky9,crops9` with `-Light`; `868 startgear,shields,death,block`). Still to do:
+
+- [ ] **Phase 2, the medieval farms:** crofts to strips, unfenced strips divided by furrows, one crop a field, ridge-and-furrow; farmhouses, barns, fenced animals and farm families.
+- [ ] **Phase 3, the dungeons' keys in order and the wilderness's tiers:** the castle's boss drops a key and a map to Vel Morrath's dungeon, each town's dungeon the next one's, Heaven's last; the roads' encounters from tier 1 near Brokenspire to 25 near Heaven (the user's bands; each dungeon the band of the road leaving its city: Mistward 1-5, Vel Morrath 5-10, Ashenreach 10-15, Graymourne 15-20, Kethrys Spire 20-25, Heaven 25).
+- [ ] **Phase 4, Kethrys Spire and Heaven** with their dungeons (Heaven's: a mechanised fortress behind "Kratos Aurorim Research, LLC").
+- [ ] **Phase 5, the rebalance to tier 25:** a Mage spell a tier and more made up, the Summoner's, Rogue's and Martial Artist's abilities after Mistward, armour and weapons over the five other dungeons, the monsters spread from Brokenspire to Heaven (the dungeons' bosses later).
+- [ ] **Phase 6, the secondary abilities** earned with Angel Tokens made from the wilderness's materials (six a hero, six ranks).
+- [ ] **Phase 7, the wilderness's places every ~40 s** (the list's kinds, mixed, by visibility and region, some on the roads).
+- [ ] **Phase 8, the ridable horse** (built in Blender, bought, faster across the wilds).
+- [ ] **The grey disc in the sky** ("still appears whenever there is any blue sky"): not seen in pictures straight up and at 60 degrees, clear and fair, at 9, 12 and 16 o'clock, with the high clouds' dome shown and hidden; where and when the user saw it is to be asked. The clouds' new mode (half-size tracing) may have taken it with the edges' fringe.
+- [ ] **The clouds' new mode's cost:** the frame time of `r.VolumetricRenderTarget.Mode 1` against 0 not measured (two readings of one setting in the editor varied twice over).
+- [ ] **Start held just after closing the inventory:** within about 0.3 s it once read as a short press (the inventory opened); a player's pause is longer (`test_b9b.json`: twice ok with a 0.8 s pause).
+- [ ] **The new crops in the packaged game and from afar:** not packaged yet (`869` first: the new crops' materials need the instanced-mesh usage); the peas read as a low mat in rows, the flax shows thin bundles at the rows' ends, and the hemp alone looks like a sapling (the Blender previews).
+- [ ] **`888` with the thirteen crops:** `fields8` and `perf8` not run since (the crops' kinds and their plants' count changed).
+
 ## The list of 2026-11-07 ([docs/improvements8.txt](docs/improvements8.txt))
 
 Built and tested (`884 planks`, `storage`, `block8` (`test_b8b`; `test_b8`'s block8 failed on the turn, 56 degrees of 60); `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`; `868 block`); still to test or do:

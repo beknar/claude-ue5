@@ -499,8 +499,11 @@ FString ARDDungeonGenerator::GetWildSampleAt(FVector At) const
 {
 	if (!IsWildReady()) return FString();
 	FRDWSample S; Wild->Sample(At.X / 100.0, At.Y / 100.0, S, true);
-	return FString::Printf(TEXT("%.2f|%.0f|%s|%s|%.2f|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%d"), S.H, Wild->ToZ(S.H), *Wild->BiomeName(S.Biome), *Wild->BiomeName(S.Biome2), S.W1, S.WaterKind,
-		S.WaterKind ? S.Water : 0.f, S.Rock, S.Snow, S.Sand, S.Road, S.Field, S.Canopy, S.Lava, Wild->TierAt(At.X / 100.0, At.Y / 100.0));
+	// (the list of 2026-11-08b: and the field's crop, "" outside a field)
+	const FRDWildBiome* Fb = Wild->Biomes.IsValidIndex(Wild->FarmsBiome) ? &Wild->Biomes[Wild->FarmsBiome] : nullptr;
+	const FString Crop = Fb && Fb->Crops.IsValidIndex(S.FieldCrop) ? Fb->Crops[S.FieldCrop].Name : FString();
+	return FString::Printf(TEXT("%.2f|%.0f|%s|%s|%.2f|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%d|%s"), S.H, Wild->ToZ(S.H), *Wild->BiomeName(S.Biome), *Wild->BiomeName(S.Biome2), S.W1, S.WaterKind,
+		S.WaterKind ? S.Water : 0.f, S.Rock, S.Snow, S.Sand, S.Road, S.Field, S.Canopy, S.Lava, Wild->TierAt(At.X / 100.0, At.Y / 100.0), *Crop);
 }
 
 TArray<FString> ARDDungeonGenerator::GetWildTownLines() const

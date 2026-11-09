@@ -67,6 +67,8 @@ struct FRDWildCrop
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Leaf = FLinearColor(0.16f, 0.27f, 0.07f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Cover = 0.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RowM = 1.f;
+	/** how often a field grows it, against the others' (the list of 2026-11-08b: the commonest medieval crops first) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
 };
 
 /** one of the user's terrain templates (docs/wilderness.txt), as data: 887 writes the table from biomes.json */

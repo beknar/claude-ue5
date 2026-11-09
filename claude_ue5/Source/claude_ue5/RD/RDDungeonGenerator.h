@@ -1150,6 +1150,15 @@ public:
 	/** the town panel's cursor held down (W / S, the D-pad, the left stick): its way and when it steps next (real time) */
 	int32 TownRepeatDir = 0;
 	double TownRepeatAt = 0.0;
+	/** the list of 2026-11-08b: the storage's use held down stores (or takes back) the same thing again: what (its act and the
+	 *  thing's name, empty when nothing is held) and when next (real time) */
+	FName TownHoldAct;
+	FString TownHoldThing;
+	double TownHoldAt = 0.0;
+	/** the thing a storage line stores or takes back ("" for a found weapon, which does not stack) */
+	FString TownLineThing(int32 Line) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetTownHoldUses() const { return TownHoldUses; }
+	int32 TownHoldUses = 0;
 	/** the list of 2026-11-07 (RDTown8.cpp): her blow meets the barracks' dummies in its reach and arc (they rock; the sound and
 	 *  the blow's number over them); a bolt's trace that hit one's mesh. TownDummyHits counts them (tests) */
 	int32 HitTownDummiesInArc(const FVector& L, const FVector& Fw, float Reach, float MinCos, float Strength, FName Sound, float Dmg);
@@ -1195,6 +1204,9 @@ public:
 	int32 TownDay = 1;
 	void BeginDayNight();
 	void TickDayNight(float Dt);
+	/** the list of 2026-11-08b: rd.GameSpeed put on the world when it changes (every level); what was put last */
+	void TickGameSpeed();
+	float GameSpeedApplied = 1.f;
 	void ApplyDayNight();
 	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DaySun;
 	UPROPERTY(Transient) TObjectPtr<class UDirectionalLightComponent> DayMoon;
@@ -1534,6 +1546,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Menu") bool bMenuPausesGame = true;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void SetMenuOpen(bool bOpen);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") bool IsMenuOpen() const { return bMenuOpen; }
+	/** the list of 2026-11-08b: since when the gamepad's Start has been held with nothing open (-1: not), and how often its hold
+	 *  opened the menu (tests) */
+	double StartHeldSince = -1.0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Menu") int32 MenuOpensByStart = 0;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") int32 GetMenuCursor() const { return MenuCursor; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void MoveMenuCursor(int32 Step);
 	/** a slider under the cursor one step (Step: -1 / 1) */
@@ -2037,6 +2053,8 @@ public:
 	/** the list of 2026-11-04 ("there is no way to name your own save"): the Escape menu's Save page, the name typed there; the
 	 *  saves on disk, newest first ("<slot>|<name>|<date>|<place>|<hero>") */
 	FString SaveNameText;
+	/** Backspace held on the Save page: when it takes the next letter (real time; 0 when not held) */
+	double SaveBackAt = 0.0;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void SetSaveNameText(const FString& Text) { SaveNameText = Text.Left(40); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") FString GetSaveNameText() const { return SaveNameText; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") TArray<FString> GetSaveSlots() const;

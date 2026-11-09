@@ -267,7 +267,10 @@ def step_shields():
     c.add_item("Kite Shield", 1); res["mage"] = {"wore": c.wear_shield("Kite Shield"), "says": str(c.message)}
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     s, sp, b, k = res["start"], res["speed"], res["blow"], res["kite"]
-    ok = (s["worn"] == ss and s["in_hand"] and s["want_share"] is not None and abs(s["share"] - s["want_share"]) < 1e-3
+    # (the list of 2026-11-08b: the castle's Warrior starts with no shield (899 noshield); level 5 keeps its own)
+    start_ok = (s["worn"] == ss and s["in_hand"] and s["want_share"] is not None and abs(s["share"] - s["want_share"]) < 1e-3) if ss != "None" else \
+               (s["worn"] == "None" and not s["in_hand"] and s["share"] == 0)
+    ok = (start_ok
           and not sp["taken_off_in_hand"] and sp["back_on"] == "Heater Shield" and abs(sp["measured_share"] - sp["want_share"]) < 0.01
           and abs(b["lost"] - b["want_lost"]) < 0.6 and b["shield_lost"] > 0
           and k["count"] == 2 and k["spares"] == 1 and k["worn"] == "Kite Shield" and abs(k["share"] - k["want_share"]) < 1e-3
@@ -1214,11 +1217,14 @@ def step_death():
     pl = res.get("pile", {})
     # (all of her found equipment drops (the list's words); the shield she started with drops too unless it is hers for good
     # (bKeepStartGear, the third list); her hero's own weapons are not items)
-    want = sorted(give + ([] if keep else [ss]))
+    # (since the list of 2026-11-08b the castle's Warrior starts with no shield (ss "None"): nothing of hers stays but her Dagger)
+    has_ss = ss != "None"
+    want = sorted(give + ([] if keep or not has_ss else [ss]))
+    back = {k_: v for k_, v in res.get("carried_back", {"x": 0}).items() if has_ss or k_ != ss}
     ok = (res["dead"] and res["piles"] == 1 and sorted(pl.get("things", [])) == want and pl.get("pictures", 0) >= len(want) and len(want) > 12
           and pl.get("particles", 0) > 0 and pl.get("from_her_m", 9) < 1.5 and all(v == 0 for v in res["carried_after"].values())
-          and res["start_shield_after"] == (1 if keep else 0)
-          and 9 in res["marks"] and res["revived"] and res.get("f") == "loot" and all(v == 1 for v in res.get("carried_back", {"x": 0}).values())
+          and (res["start_shield_after"] == (1 if keep else 0) if has_ss else True)
+          and 9 in res["marks"] and res["revived"] and res.get("f") == "loot" and all(v == 1 for v in back.values())
           and res.get("shield_worn_again") == "Kite Shield" and res.get("piles_after") == 0)
     step_result("death", ok, **res)
 
@@ -1727,6 +1733,17 @@ def step_startgear():
                 and res["after_fall"]["shield"] == ss and res["after_fall"]["count"] == 1 and res["after_fall"]["weapons"] == ["Dagger"]
                 and res.get("f") == "loot" and res.get("back", {}).get("shield") == "Kite Shield" and res.get("back", {}).get("start") == 1) if res["drop_on_death"] else
                (res["pile"] is None and res["after_fall"]["count"] == 1 and "Dagger" in res["after_fall"]["weapons"]))
+    # (the list of 2026-11-08b: the castle's Warrior starts with no shield (ss "None"): none worn, no shield drawn on her, and
+    # after a fall with a found shield worn she has none; level 5 keeps the worst shield, hers for good)
+    if ss == "None":
+        res["shield_meshes_on_her"] = [cm.static_mesh.get_name() for cm in G["pawn"].get_components_by_class(unreal.StaticMeshComponent)
+                                       if cm.static_mesh and "shield" in cm.static_mesh.get_name().lower() and cm.is_visible() and str(c.get_worn_shield()) == "None"]
+        fall_ok = ((res["pile"] is not None and "Kite Shield" in res["pile"] and "Arming Sword" in res["pile"] and res["after_fall"]["shield"] == "None"
+                    and res["after_fall"]["weapons"] == ["Dagger"] and res.get("f") == "loot" and res.get("back", {}).get("shield") == "Kite Shield") if res["drop_on_death"] else
+                   (res["pile"] is None and "Dagger" in res["after_fall"]["weapons"]))
+        ok = (len(res["weapons"]) == 1 and res["weapons"][0][0] == "Dagger" and res["weapons"][0][1] == "None" and res["weapons"][0][2] == 0
+              and res["worn_shield"] == "None" and res["worn_armour"] == "None" and fall_ok)
+        step_result("startgear", ok, **res); return
     ok = (len(res["weapons"]) == 1 and res["weapons"][0][0] == "Dagger" and res["weapons"][0][1] == "None" and res["weapons"][0][2] == 0
           and res["worn_shield"] == ss == res["worst_shield"] and res["worn_armour"] == "None" and res["shield_wear"][0] == res["shield_wear"][1] and fall_ok)
     step_result("startgear", ok, **res)

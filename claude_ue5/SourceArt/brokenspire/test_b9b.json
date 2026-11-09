@@ -1,0 +1,86 @@
+{
+ "tag": "b9b",
+ "plan": [
+  "start9",
+  "start9",
+  "block8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "start9",
+   "ok": true,
+   "tap_inventory": true,
+   "tap_menu": false,
+   "tap_again_shut": true,
+   "hold_menu": true,
+   "hold_inventory": false,
+   "opens_by_start": 1,
+   "start_closes": true,
+   "hold_again": true,
+   "b_closes": true
+  },
+  {
+   "step": "start9",
+   "ok": true,
+   "tap_inventory": true,
+   "tap_menu": false,
+   "tap_again_shut": true,
+   "hold_menu": true,
+   "hold_inventory": false,
+   "opens_by_start": 1,
+   "start_closes": true,
+   "hold_again": true,
+   "b_closes": true
+  },
+  {
+   "step": "block8",
+   "ok": true,
+   "shield_given": "Broddi's Shield",
+   "block_move_speed": 90.0,
+   "blocking": true,
+   "ahead": {
+    "along_cm": 182,
+    "aside_cm": 0,
+    "turned_deg": 0.0,
+    "speed_cm_s": 91,
+    "filter": [
+     1.0,
+     0.0,
+     1.0
+    ]
+   },
+   "right": {
+    "along_cm": 0,
+    "aside_cm": 0,
+    "turned_deg": 240.1,
+    "speed_cm_s": 0,
+    "filter": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "back": {
+    "along_cm": -144,
+    "aside_cm": 0,
+    "turned_deg": 0.0,
+    "speed_cm_s": 72,
+    "filter": [
+     -1.0,
+     0.0,
+     -0.8
+    ]
+   },
+   "after_cm_s": 253
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_b9b_start9_menu.png",
+  "bs_b9b_start9_menu.png",
+  "bs_b9b_block8.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

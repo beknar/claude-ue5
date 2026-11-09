@@ -638,7 +638,16 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 			FLinearColor Cc(0.30f, 0.30f, 0.12f);
 			if (Fb && Fb->Crops.Num() > 0)
 			{
-				O.FieldCrop = (int32)(Pr * 97.f) % Fb->Crops.Num();
+				// (the list of 2026-11-08b: "apply the list of most common crops ... in this order: wheat, barley, oats, rye, peas,
+				// beans, flax, hemp, corn, potatoes, cabbages, pumpkins, sunflowers": each field's crop drawn by the crops'
+				// weights (biomes.json's "weight", the commonest first), from a hash of its own)
+				float Tot = 0.f; for (const FRDWildCrop& Cw : Fb->Crops) Tot += FMath::Max(Cw.Weight, 0.f);
+				O.FieldCrop = 0;
+				if (Tot > 0.f)
+				{
+					float Pick = Rand01(Fbi, Fbj, Seed + 141u) * Tot;
+					for (int32 Q = 0; Q < Fb->Crops.Num(); ++Q) { Pick -= FMath::Max(Fb->Crops[Q].Weight, 0.f); if (Pick < 0.f) { O.FieldCrop = Q; break; } O.FieldCrop = Q; }
+				}
 				const FRDWildCrop& Cr = Fb->Crops[O.FieldCrop];
 				Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f));
 			}

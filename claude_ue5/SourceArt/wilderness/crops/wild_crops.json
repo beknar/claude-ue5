@@ -3,11 +3,57 @@
   "corn_stalk": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_CornStalk.png",
   "corn_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_CornLeaves.png",
   "potato_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PotatoStem.png",
-  "potato_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PotatoLeaves.png"
+  "potato_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PotatoLeaves.png",
+  "oats_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_OatsStem.png",
+  "oats_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_OatsLeaves.png",
+  "rye_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_RyeStem.png",
+  "rye_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_RyeLeaves.png",
+  "peas_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PeasStem.png",
+  "peas_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PeasLeaves.png",
+  "beans_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_BeansStem.png",
+  "beans_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_BeansLeaves.png",
+  "flax_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_FlaxStem.png",
+  "flax_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_FlaxLeaves.png",
+  "hemp_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_HempStem.png",
+  "hemp_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_HempLeaves.png"
+ },
+ "kind_textures": {
+  "Corn": [
+   "T_Wild_CornStalk",
+   "T_Wild_CornLeaves"
+  ],
+  "Potato": [
+   "T_Wild_PotatoStem",
+   "T_Wild_PotatoLeaves"
+  ],
+  "Oats": [
+   "T_Wild_OatsStem",
+   "T_Wild_OatsLeaves"
+  ],
+  "Rye": [
+   "T_Wild_RyeStem",
+   "T_Wild_RyeLeaves"
+  ],
+  "Peas": [
+   "T_Wild_PeasStem",
+   "T_Wild_PeasLeaves"
+  ],
+  "Beans": [
+   "T_Wild_BeansStem",
+   "T_Wild_BeansLeaves"
+  ],
+  "Flax": [
+   "T_Wild_FlaxStem",
+   "T_Wild_FlaxLeaves"
+  ],
+  "Hemp": [
+   "T_Wild_HempStem",
+   "T_Wild_HempLeaves"
+  ]
  },
  "slots": {
-  "Bark": "opaque (stalk, roots, husks, stems)",
-  "Leaves": "masked, two-sided (leaves, tassel, silk, leaf and flower cards)"
+  "Bark": "opaque (stalks, stems, vines, roots, husks, pods)",
+  "Leaves": "masked, two-sided (leaves, leaflets, tassel, silk, heads, spray, flower and pod cards)"
  },
  "meshes": {
   "SM_Wild_Corn_A": {
@@ -45,6 +91,110 @@
    "stems": 8,
    "flower_clusters": 5,
    "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Potato_B.fbx"
+  },
+  "SM_Wild_Oats_A": {
+   "height_m": 0.977,
+   "width_m": 0.691,
+   "foot_z_m": -0.011,
+   "triangles": 468,
+   "stems": 6,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Oats_A.fbx"
+  },
+  "SM_Wild_Oats_B": {
+   "height_m": 0.941,
+   "width_m": 0.786,
+   "foot_z_m": -0.011,
+   "triangles": 468,
+   "stems": 6,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Oats_B.fbx"
+  },
+  "SM_Wild_Rye_A": {
+   "height_m": 1.549,
+   "width_m": 0.496,
+   "foot_z_m": -0.01,
+   "triangles": 344,
+   "stems": 4,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Rye_A.fbx"
+  },
+  "SM_Wild_Rye_B": {
+   "height_m": 1.475,
+   "width_m": 0.71,
+   "foot_z_m": -0.01,
+   "triangles": 602,
+   "stems": 7,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Rye_B.fbx"
+  },
+  "SM_Wild_Peas_A": {
+   "height_m": 0.549,
+   "width_m": 1.116,
+   "foot_z_m": -0.027,
+   "triangles": 360,
+   "vines": 7,
+   "pods": 4,
+   "flower_clusters": 4,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Peas_A.fbx"
+  },
+  "SM_Wild_Peas_B": {
+   "height_m": 0.61,
+   "width_m": 1.084,
+   "foot_z_m": -0.026,
+   "triangles": 412,
+   "vines": 8,
+   "pods": 6,
+   "flower_clusters": 4,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Peas_B.fbx"
+  },
+  "SM_Wild_Beans_A": {
+   "height_m": 1.032,
+   "width_m": 0.35,
+   "foot_z_m": -0.011,
+   "triangles": 462,
+   "stems": 3,
+   "pods": 3,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Beans_A.fbx"
+  },
+  "SM_Wild_Beans_B": {
+   "height_m": 0.909,
+   "width_m": 0.354,
+   "foot_z_m": -0.011,
+   "triangles": 614,
+   "stems": 4,
+   "pods": 5,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Beans_B.fbx"
+  },
+  "SM_Wild_Flax_A": {
+   "height_m": 0.81,
+   "width_m": 0.307,
+   "foot_z_m": -0.01,
+   "triangles": 234,
+   "stems": 12,
+   "flowers": 5,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Flax_A.fbx"
+  },
+  "SM_Wild_Flax_B": {
+   "height_m": 0.836,
+   "width_m": 0.307,
+   "foot_z_m": -0.01,
+   "triangles": 254,
+   "stems": 13,
+   "flowers": 6,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Flax_B.fbx"
+  },
+  "SM_Wild_Hemp_A": {
+   "height_m": 1.936,
+   "width_m": 0.573,
+   "foot_z_m": -0.0,
+   "triangles": 564,
+   "leaves": 18,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Hemp_A.fbx"
+  },
+  "SM_Wild_Hemp_B": {
+   "height_m": 2.107,
+   "width_m": 0.599,
+   "foot_z_m": -0.0,
+   "triangles": 608,
+   "leaves": 20,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Hemp_B.fbx"
   }
  }
 }

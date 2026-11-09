@@ -137,7 +137,7 @@ def materials():
     tint = b.mask(vc, "", r=True, g=True, b=True)
     base = b.mul(tint, dl, x=150)
     # (the list of 2026-11-07: a farm field's rows at every pixel. The chunk gives each vertex its field's way (UV0's U, of half a
-    # turn) and crop (UV0's V x 8) and the field's weight (UV3's V); a row's leaves over a share of it (the crop's cover), the
+    # turn) and crop (UV0's V x 16 since the list of 2026-11-08b's thirteen crops; x 8 before) and the field's weight (UV3's V); a row's leaves over a share of it (the crop's cover), the
     # soil between, both against the field's average colour that the vertex colour already holds; faded out where a row comes
     # under about three pixels (fwidth) so that far fields do not shimmer. The crops' colours and spacing from biomes.json)
     farms = next((x for x in json.load(open(JSON, encoding="utf-8"))["biomes"] if x["name"] == "farms"), {})
@@ -145,7 +145,7 @@ def materials():
     cases = "".join(f"{'else ' if i else ''}if (k == {i}) {{ rowm = {float(c.get('row', 1.0)):.3f}; cover = {float(c.get('cover', 0.5)):.3f}; soil = float3({lin(c['soil'])}); leaf = float3({lin(c['leaf'])}); }}\n"
                     for i, c in enumerate(farms.get("crops", [])))
     rows = b.n(unreal.MaterialExpressionCustom, -100)
-    rows.set_editor_property("code", "float wt = saturate(Wt);\nif (wt <= 0.001) return float3(1, 1, 1);\nint k = (int)floor(F.y * 8.0);\n"
+    rows.set_editor_property("code", "float wt = saturate(Wt);\nif (wt <= 0.001) return float3(1, 1, 1);\nint k = (int)floor(F.y * 16.0);\n"
                              "float rowm = 1.0; float cover = 0.5; float3 soil = float3(0.1, 0.07, 0.04); float3 leaf = float3(0.07, 0.13, 0.03);\n" + cases +
                              "float ang = F.x * 3.14159265;\nfloat2 acr = float2(-sin(ang), cos(ang));\nfloat ph = dot(P.xy * 0.01, acr) / rowm;\n"
                              "float fw = max(fwidth(ph), 1e-5);\nfloat d = abs(frac(ph) - 0.5) * 2.0;\nfloat s = max(0.12, fw * 1.5);\n"
@@ -313,6 +313,8 @@ def data():
             C = unreal.RDWildCrop()
             C.set_editor_property("name", c["name"]); C.set_editor_property("soil", srgb(c["soil"])); C.set_editor_property("leaf", srgb(c["leaf"]))
             C.set_editor_property("cover", float(c.get("cover", 0.5))); C.set_editor_property("row_m", float(c.get("row", 1.0)))
+            # (the list of 2026-11-08b: how often a field grows it, the commonest medieval crops first)
+            C.set_editor_property("weight", float(c.get("weight", 1.0)))
             crops.append(C)
         B.set_editor_property("crops", crops)
         fol = []

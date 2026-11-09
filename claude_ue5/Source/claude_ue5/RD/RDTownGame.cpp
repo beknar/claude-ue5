@@ -1686,8 +1686,28 @@ void ARDDungeonGenerator::BuildTownLines()
 		TownTitle = TEXT("Your storage"); TownSub = TEXT("the storehouse keeps what you leave here, as long as the game lasts");
 		if (TownTab == 0) { if (PlayerCombat) RDTownThingLines(this, PlayerCombat, TownLines, TEXT("deposit"), false); }
 		else if (GI)
+		{
+			// (the list of 2026-11-08b, docs/improvements9.txt: "in the take one back menu item, multiple of the same items need to
+			// stack": one line a kind with how many, as the carried list has; a thing that wears (a weapon, a set of armour) stacks
+			// only with its like at the same wear. The line takes back the last of them: the others keep their places)
+			TArray<FString> Keys; TArray<int32> LastAt, Count;
 			for (int32 I = 0; I < GI->StashThings.Num(); ++I)
-				Add(TEXT("withdraw"), GI->StashThings[I].ToString(), GI->StashWear.IsValidIndex(I) && GI->StashWear[I] >= 0.f ? FString::Printf(TEXT("%.0f"), GI->StashWear[I]) : FString(), TEXT("In your storage"), true, FString::FromInt(I));
+			{
+				const float Wr = GI->StashWear.IsValidIndex(I) ? GI->StashWear[I] : -1.f;
+				const FString K = GI->StashThings[I].ToString() + (Wr >= 0.f ? FString::Printf(TEXT("|%.0f"), Wr) : FString());
+				const int32 At = Keys.Find(K);
+				if (At == INDEX_NONE) { Keys.Add(K); LastAt.Add(I); Count.Add(1); }
+				else { LastAt[At] = I; ++Count[At]; }
+			}
+			for (int32 Q = 0; Q < Keys.Num(); ++Q)
+			{
+				const int32 I = LastAt[Q];
+				const float Wr = GI->StashWear.IsValidIndex(I) ? GI->StashWear[I] : -1.f;
+				const FString Nm = GI->StashThings[I].ToString();
+				Add(TEXT("withdraw"), Count[Q] > 1 ? FString::Printf(TEXT("%s  x %d"), *Nm, Count[Q]) : Nm, Wr >= 0.f ? FString::Printf(TEXT("%.0f"), Wr) : FString(),
+					Count[Q] > 1 ? FString::Printf(TEXT("In your storage: %d"), Count[Q]) : TEXT("In your storage"), true, FString::FromInt(I));
+			}
+		}
 		if (TownLines.Num() == 0) Add(TEXT("none"), TownTab == 0 ? TEXT("You carry nothing to store") : TEXT("Your storage is empty"), FString(), FString(), false);
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
@@ -1914,6 +1934,19 @@ bool ARDDungeonGenerator::TownWithdraw(int32 Index)
 	return true;
 }
 
+FString ARDDungeonGenerator::TownLineThing(int32 Line) const
+{
+	if (!TownLines.IsValidIndex(Line)) return FString();
+	const FTownLine& L = TownLines[Line];
+	if (L.Act == TEXT("deposit")) return L.Arg.StartsWith(TEXT("i:")) ? L.Arg : FString();
+	if (L.Act != TEXT("withdraw")) return FString();
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	const int32 I = FCString::Atoi(*L.Arg);
+	if (!GI || !GI->StashThings.IsValidIndex(I)) return FString();
+	const float Wr = GI->StashWear.IsValidIndex(I) ? GI->StashWear[I] : -1.f;
+	return GI->StashThings[I].ToString() + (Wr >= 0.f ? FString::Printf(TEXT("|%.0f"), Wr) : FString());
+}
+
 // ================================================================================================ the panel's keys and pointer
 void ARDDungeonGenerator::TickTownPanel(APlayerController* PC)
 {
@@ -1939,7 +1972,30 @@ void ARDDungeonGenerator::TickTownPanel(APlayerController* PC)
 	}
 	if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftShoulder })) SetTownTab(0);
 	if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_RightShoulder })) SetTownTab(1);
-	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::Gamepad_FaceButton_Bottom })) { ActivateTownEntry(); return; }
+	// (the list of 2026-11-08b: "in the storage, in the store a thing menu, when the button is held down to store something, it
+	// should continue to store something until the button is let go": held after a moment (0.4 s), the same thing is stored
+	// again every 0.15 s while she has it (taking back the same), then it stops; a found weapon is one thing and stops at once)
+	auto UseHeld = [PC]() { for (const FKey& K : { EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::Gamepad_FaceButton_Bottom, EKeys::LeftMouseButton }) if (PC->IsInputKeyDown(K)) return true; return false; };
+	auto Use = [this](int32 Line)
+	{
+		const int32 L = Line >= 0 ? Line : TownCursor;
+		const bool bStore = TownPanel == TEXT("stash") && TownLines.IsValidIndex(L) && (TownLines[L].Act == TEXT("deposit") || TownLines[L].Act == TEXT("withdraw"));
+		TownHoldAct = bStore ? TownLines[L].Act : NAME_None; TownHoldThing = bStore ? TownLineThing(L) : FString();
+		TownHoldAt = FPlatformTime::Seconds() + 0.4;
+		ActivateTownEntry(Line);
+	};
+	if (!TownHoldThing.IsEmpty())
+	{
+		if (!UseHeld()) { TownHoldThing.Reset(); TownHoldAct = NAME_None; }
+		else if (FPlatformTime::Seconds() >= TownHoldAt)
+		{
+			int32 Again = INDEX_NONE;
+			for (int32 I = 0; I < TownLines.Num() && Again == INDEX_NONE; ++I) if (TownLines[I].Act == TownHoldAct && TownLineThing(I) == TownHoldThing) Again = I;
+			if (Again == INDEX_NONE) { TownHoldThing.Reset(); TownHoldAct = NAME_None; }
+			else { TownCursor = Again; ActivateTownEntry(Again); ++TownHoldUses; TownHoldAt = FPlatformTime::Seconds() + 0.15; }
+		}
+	}
+	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::Gamepad_FaceButton_Bottom })) { Use(-1); return; }
 	if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) MoveTownCursor(-1);
 	if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown)) MoveTownCursor(1);
 	float Mx = 0.f, My = 0.f;
@@ -1952,7 +2008,7 @@ void ARDDungeonGenerator::TickTownPanel(APlayerController* PC)
 	{
 		if (!TownRowBoxes[I].IsInside(M)) continue;
 		if (Dx != 0.f || Dy != 0.f || bClick) TownCursor = I;
-		if (bClick) { ActivateTownEntry(I); return; }
+		if (bClick) { Use(I); return; }
 	}
 }
 

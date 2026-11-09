@@ -40,6 +40,9 @@ Steps (plan, comma separated):
             barred, she cannot walk out of it
   pictures  the square, a street, a home's inside, the smithy, the tavern, the castle's hall with its guards and the Mistgate
   console   the game's own console (RD/RDConsole.cpp, a Shipping game's; here rd.GameConsole 1): its self-test (step_console)
+  storage9, start9, backspace9, time9, noshield9, sky9, crops9   the list of 2026-11-08b (docs/improvements9.txt, 899): the
+            storage's stacks and held store, the gamepad's Escape menu, Backspace held, rd.TimeSpeed / rd.GameSpeed, the
+            Warrior's start with no shield, the sky's edges' pictures, the farms' thirteen crops and the crop under the minimap
 Writes SourceArt/brokenspire/test_<tag>.json and logs "BSTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -2637,8 +2640,15 @@ def step_block8():
     g = G["gen"]; res = {}; quiet(True)
     if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from wait(1.0); refresh()
     c = cb(); p = G["pawn"]
-    sq = place("square"); put(V(sq.x + 600, sq.y + 600, 0), yaw=0.0); yield from wait(1.0)
+    sq = place("square") or p.get_actor_location()          # (a town planned without the place: where she stands)
+    put(V(sq.x + 600, sq.y + 600, 0), yaw=0.0); yield from wait(1.0)
     c.set_run_mode(True)
+    # (since the list of 2026-11-08b she starts with no shield: one given for the block, taken back after)
+    given = None
+    if str(c.get_worn_shield()) in ("None", ""):
+        given = next((str(i.name) for i in g.get_editor_property("items") if "shield" in str(i.kind).lower()), None)
+        if given: c.add_item(given, 1); c.wear_shield(given); yield from wait(0.3)
+    res["shield_given"] = given
     res["block_move_speed"] = g.get_editor_property("block_move_speed")
     c.simulate_key(key("Gamepad_LeftShoulder"), True); yield from wait(0.5)
     res["blocking"] = c.is_blocking() if hasattr(c, "is_blocking") else None
@@ -2663,6 +2673,7 @@ def step_block8():
     while time.time() - t0 < 1.5: p.add_movement_input(p.get_actor_forward_vector(), 1.0); yield
     res["after_cm_s"] = round((p.get_actor_location() - a).length() / 1.5)
     c.set_run_mode(False); quiet(False)
+    if given: c.wear_shield(given); c.remove_item(given, 1)
     bs = res["block_move_speed"]
     ok = (bs > 0 and 0.7 * bs * 2 <= res["ahead"]["along_cm"] <= 1.1 * bs * 2 and abs(res["ahead"]["aside_cm"]) < 25
           and abs(res["right"]["aside_cm"]) < 25 and abs(res["right"]["along_cm"]) < 25 and abs(res["right"]["turned_deg"]) > 60
@@ -2694,9 +2705,177 @@ def step_console():
     res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
     ok = bool(checks) and txt.strip().endswith("result|ok")
     step_result("console", ok, **res)
+# ================================================================================================ the list of 2026-11-08b (899)
+def stash_count(name): return sum(1 for s in G["gi"].get_editor_property("stash_things") if str(s) == name)
+def step_storage9():
+    """the storage (the list of 2026-11-08b): "in the take one back menu item, multiple of the same items need to stack" and "in
+    the store a thing menu, when the button is held down to store something, it should continue to store something until the
+    button is let go": five potions stored with Enter held 2 s (the first at the press, the rest every 0.15 s after 0.4 s; it
+    stops when she has none, the next thing not stored); the take-back tab one line "x 5" for them; Enter held there 0.7 s
+    takes back 2 or 3, one press one"""
+    g = G["gen"]; c = cb(); res = {}; quiet(True)
+    pot = "Small Healing Potion"; other = "Large Healing Potion"
+    for nm, n in ((pot, 5), (other, 2)): c.add_item(nm, n)
+    p0, o0, s0 = c.get_item_count(pot), c.get_item_count(other), stash_count(pot)
+    g.open_town_panel("stash", -1); yield from rwait(0.4); g.set_town_tab(0); yield from rwait(0.3)
+    i = line_of("deposit", pot); res["deposit_line"] = i
+    if i >= 0:
+        for _ in range(abs(g.get_town_cursor() - i)): yield from press("Gamepad_DPad_Down" if g.get_town_cursor() < i else "Gamepad_DPad_Up", 0.08)
+    u0 = g.get_town_hold_uses()
+    yield from press("Enter", 2.0)
+    res["held_stored"] = stash_count(pot) - s0; res["carried_after"] = c.get_item_count(pot); res["other_after"] = c.get_item_count(other) - o0
+    res["repeats"] = g.get_town_hold_uses() - u0
+    g.set_town_tab(1); yield from rwait(0.3)
+    ws = [p for p in panel() if p[0] == "withdraw" and pot in p[1]]
+    res["withdraw_lines"] = [p[1] for p in ws]
+    i = line_of("withdraw", pot)
+    if i >= 0:
+        for _ in range(abs(g.get_town_cursor() - i)): yield from press("Gamepad_DPad_Down" if g.get_town_cursor() < i else "Gamepad_DPad_Up", 0.08)
+    n1 = c.get_item_count(pot); yield from press("Enter", 0.12); res["one_press_took"] = c.get_item_count(pot) - n1
+    n2 = c.get_item_count(pot); yield from press("Enter", 0.75); res["held_0_75s_took"] = c.get_item_count(pot) - n2
+    res["withdraw_lines_after"] = [p[1] for p in panel() if p[0] == "withdraw" and pot in p[1]]
+    shot("storage9", "1280x720"); yield from rwait(1.5)
+    g.close_town_panel(); quiet(False)
+    ok = (res["held_stored"] == p0 and res["carried_after"] == 0 and res["other_after"] == 0 and len(ws) == 1 and f"x {p0}" in ws[0][1]
+          and res["one_press_took"] == 1 and 2 <= res["held_0_75s_took"] <= 4)
+    step_result("storage9", ok, **res)
+def step_start9():
+    """the gamepad's Escape menu (the list of 2026-11-08b: "the esc menu is inaccessible from the gamepad"): Start pressed
+    briefly opens the inventory (and closes it); held 0.8 s it opens the Escape menu instead (the inventory shut); Start
+    again closes the menu; B too"""
+    g = G["gen"]; c = cb(); res = {}
+    g.set_menu_open(False); c.set_inventory_open(False); yield from rwait(0.4)
+    yield from press("Gamepad_Special_Right", 0.15); yield from rwait(0.3)
+    res["tap_inventory"] = c.is_inventory_open(); res["tap_menu"] = g.is_menu_open()
+    yield from press("Gamepad_Special_Right", 0.15); yield from rwait(0.3); res["tap_again_shut"] = not c.is_inventory_open()
+    yield from rwait(0.8)          # (a moment after the inventory shuts, as a player's hand would take)
+    m0 = g.get_editor_property("menu_opens_by_start")
+    yield from press("Gamepad_Special_Right", 0.8); yield from rwait(0.3)
+    res["hold_menu"] = g.is_menu_open(); res["hold_inventory"] = c.is_inventory_open(); res["opens_by_start"] = g.get_editor_property("menu_opens_by_start") - m0
+    shot("start9_menu", "1280x720"); yield from rwait(1.5)
+    yield from press("Gamepad_Special_Right", 0.12); yield from rwait(0.3); res["start_closes"] = not g.is_menu_open()
+    yield from press("Gamepad_Special_Right", 0.8); yield from rwait(0.3); res["hold_again"] = g.is_menu_open()
+    yield from press("Gamepad_FaceButton_Right", 0.12); yield from rwait(0.3); res["b_closes"] = not g.is_menu_open()
+    g.set_menu_open(False); c.set_inventory_open(False)
+    ok = (res["tap_inventory"] and not res["tap_menu"] and res["tap_again_shut"] and res["hold_menu"] and not res["hold_inventory"]
+          and res["opens_by_start"] == 1 and res["start_closes"] and res["hold_again"] and res["b_closes"])
+    step_result("start9", ok, **res)
+def step_backspace9():
+    """the Save page's name (the list of 2026-11-08b: "holding down the backspace key should backspace multiple times"): one
+    press takes one letter; held 1.2 s it takes on (a letter every 50 ms after 0.4 s), not past the empty name"""
+    g = G["gen"]; res = {}
+    g.set_menu_open(True); yield from rwait(0.3)
+    i = next((k for k, l in enumerate([str(x) for x in g.get_menu_lines()]) if "Save the game" in l), -1); res["save_line"] = i
+    g.activate_menu_line(i); yield from rwait(0.4)
+    g.set_save_name_text("Abcdefghijklmnopqrstuvwxyz"); n0 = len(str(g.get_save_name_text()))
+    yield from press("BackSpace", 0.1); res["one_press"] = n0 - len(str(g.get_save_name_text()))
+    n1 = len(str(g.get_save_name_text())); yield from press("BackSpace", 1.2); res["held_1_2s"] = n1 - len(str(g.get_save_name_text()))
+    yield from press("BackSpace", 3.0); res["left_after_long_hold"] = str(g.get_save_name_text())
+    g.set_save_name_text(""); g.set_menu_open(False); yield from rwait(0.3)
+    ok = res["save_line"] >= 0 and res["one_press"] == 1 and 10 <= res["held_1_2s"] <= 20 and res["left_after_long_hold"] == ""
+    step_result("backspace9", ok, **res)
+def step_time9():
+    """the console's time (the list of 2026-11-08b: "need a command to speed up time in the console"): rd.TimeSpeed 60 runs the
+    day's clock 60 times (2 hours of the day in 5 s, against 2 minutes at 1); rd.GameSpeed 2 doubles the game's own time (the
+    world's time dilation); both back to 1"""
+    g = G["gen"]; w = G["w"]; res = {}
+    def cmd(c_): unreal.SystemLibrary.execute_console_command(w, c_)
+    def hours(): h, m = str(g.get_town_clock()).split(":"); return int(h) + int(m) / 60.0
+    cmd("rd.TimeSpeed 1"); yield from rwait(0.3)
+    h0 = hours(); yield from rwait(5.0); res["hours_5s_at_1"] = round((hours() - h0) % 24, 3)
+    cmd("rd.TimeSpeed 60"); yield from rwait(0.2)
+    h0 = hours(); yield from rwait(5.0); res["hours_5s_at_60"] = round((hours() - h0) % 24, 3)
+    cmd("rd.TimeSpeed 1")
+    cmd("rd.GameSpeed 2"); yield from rwait(0.5)
+    res["dilation_at_2"] = round(GS.get_global_time_dilation(w), 3)
+    t0 = time.time(); g0 = now(); yield from rwait(2.0); res["game_s_in_2s"] = round(now() - g0, 2)
+    cmd("rd.GameSpeed 1"); yield from rwait(0.5); res["dilation_after"] = round(GS.get_global_time_dilation(w), 3)
+    ok = (res["hours_5s_at_1"] < 0.2 and 1.4 <= res["hours_5s_at_60"] <= 2.6 and res["dilation_at_2"] == 2.0 and 3.4 <= res["game_s_in_2s"] <= 4.6
+          and res["dilation_after"] == 1.0)
+    step_result("time9", ok, **res)
+def step_noshield9():
+    """the Warrior's start (the list of 2026-11-08b: "the warrior should have no default shield"): she wears none, carries
+    none, no shield is drawn on her (a mesh named a shield on her), and her block (LB held) does not come up; a shield
+    given and worn: she blocks"""
+    g = G["gen"]; res = {}
+    if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from wait(1.0); refresh()
+    c = cb(); p = G["pawn"]
+    res["start_shield_map"] = {str(k): str(v) for k, v in g.get_editor_property("start_shield").items()}
+    res["worn"] = str(c.get_worn_shield())
+    res["shield_meshes_on_her"] = [cm.get_name() + ":" + cm.static_mesh.get_name() for cm in p.get_components_by_class(unreal.StaticMeshComponent)
+                                   if cm.static_mesh and "shield" in cm.static_mesh.get_name().lower() and cm.is_visible()]
+    c.simulate_key(key("Gamepad_LeftShoulder"), True); yield from wait(0.4); res["blocks_without"] = c.is_blocking(); c.simulate_key(key("Gamepad_LeftShoulder"), False)
+    sh = next((str(i.name) for i in g.get_editor_property("items") if str(i.kind) in ("ERDItemKind.SHIELD", "ERDItemKind.Shield") or "shield" in str(i.kind).lower()), None)
+    res["given"] = sh
+    if sh:
+        c.add_item(sh, 1); c.wear_shield(sh); yield from wait(0.4)
+        c.simulate_key(key("Gamepad_LeftShoulder"), True); yield from wait(0.4); res["blocks_with"] = c.is_blocking(); c.simulate_key(key("Gamepad_LeftShoulder"), False)
+        c.wear_shield(sh); c.remove_item(sh, 1)          # (the same shield again takes it off)
+    shot("noshield9", "1280x720"); yield from rwait(1.5)
+    ok = (not res["start_shield_map"].get("Warrior") and res["worn"] in ("None", "") and not res["shield_meshes_on_her"]
+          and not res["blocks_without"] and bool(res.get("blocks_with")))
+    step_result("noshield9", ok, **res)
+def step_sky9():
+    """the sky's edges (the list of 2026-11-08b: a blue outline round everything against a blue sky, a grey shimmering border
+    against a grey one): the clouds traced at half the view's size (r.VolumetricRenderTarget.Mode 1, set with the clouds);
+    pictures looking up at the town's roofs at noon, fair and overcast, four ways (measured offline: the fringe's pixels)"""
+    g = G["gen"]; res = {}
+    res["vrt_mode"] = unreal.SystemLibrary.get_console_variable_int_value("r.VolumetricRenderTarget.Mode")
+    for wname, wk in (("fair", 1), ("overcast", 3)):
+        g.set_town_hour(12.0); g.set_weather(wk, True); yield from rwait(6.0)
+        for yaw in (0, 90, 180, 270):
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=22, yaw=float(yaw))); yield from rwait(1.2)
+            shot(f"sky9_{wname}_{yaw}", "1280x720"); yield from rwait(1.5)
+    g.set_weather(1, True)
+    step_result("sky9", res["vrt_mode"] == 1, **res)
+def step_crops9():
+    """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
+    indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every
+    crop grows somewhere and the grains lead (wheat, barley, oats, rye the four commonest); put in a field, the minimap's
+    title names its crop, and the chunks round her hold the crop's own plants"""
+    g = G["gen"]; res = {}; quiet(True)
+    t0 = time.time()
+    while time.time() - t0 < 60 and not g.is_wild_ready(): yield
+    cnt = {}; first = {}
+    for ix in range(-75, 76, 1):
+        for iy in range(-75, 76, 1):
+            x, y = ix * 40.0, iy * 40.0
+            if abs(x) < 1300 and abs(y) < 1300: continue          # (the town's own ground)
+            p = str(g.get_wild_sample_at(V(x * 100.0, y * 100.0, 0))).split("|")
+            if len(p) > 15 and p[15]:
+                cnt[p[15]] = cnt.get(p[15], 0) + 1
+                if p[15] not in first and float(p[11]) > 0.6: first[p[15]] = (x, y)
+        if ix % 10 == 0: yield
+    res["samples_by_crop"] = dict(sorted(cnt.items(), key=lambda kv: -kv[1]))
+    top4 = list(res["samples_by_crop"].keys())[:4]
+    res["top4"] = top4
+    # (in a field: the commonest's and a rare one's, the title and the plants round her)
+    res["visits"] = {}
+    for crop in [k for k in ("barley", "oats", "flax", "hemp") if k in first]:
+        x, y = first[crop]; g.wild_put_her(x, y); yield from wait(4.0)
+        t1 = time.time()
+        while time.time() - t1 < 25 and int(str(g.get_wild_state()).split("|")[4] or 0) > 0: yield
+        yield from wait(1.0)
+        hud = G["pc"].get_hud()
+        label = str(hud.get_crop_label_drawn()) if hud else ""
+        here = G["pawn"].get_actor_location()
+        n = 0
+        for comp in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+            for h in comp.get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent):
+                m = h.static_mesh
+                if m and (crop.capitalize() in m.get_name() or (crop == "barley" and "Barley" in m.get_name())): n += h.get_instance_count()
+        res["visits"][crop] = {"at": [x, y], "label": label, "plants": n}
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-18, yaw=40.0)); yield from rwait(0.6)
+        shot(f"crops9_{crop}", "1280x720"); yield from rwait(1.5)
+    quiet(False)
+    grains = {"wheat", "barley", "oats", "rye"}
+    ok = (len(cnt) >= 12 and set(top4) == grains and res["visits"] and all(v["label"] == k and v["plants"] > 200 for k, v in res["visits"].items()))
+    step_result("crops9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
-              "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console})
+              "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
+              "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
+              "sky9": step_sky9, "crops9": step_crops9})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:
