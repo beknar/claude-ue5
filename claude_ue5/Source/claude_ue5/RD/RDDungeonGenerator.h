@@ -2153,6 +2153,9 @@ public:
 	FVector MountMeshWas = FVector::ZeroVector, BoomOffsetWas = FVector::ZeroVector;
 	float BoomArmWas = 0.f;
 	FName RiderClipNow;
+	float JumpWas = 0.f, StableLookIn = 0.f;
+	UPROPERTY(Transient) TObjectPtr<class UAnimMontage> RiderMontage;
+	FVector HorseSpotBeside(const APawn* Her) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") bool HasHorse() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") bool IsMounted() const { return bMounted; }
 	/** the stable's price now (HorseDef.Price x the tier's price) */

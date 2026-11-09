@@ -1041,7 +1041,19 @@ void ARDSection::PlanTown(FRandomStream& R)
 		for (int32 K = 0; K < 2; ++K) { FTownPost G; G.Role = ERDTownRole::Guard; G.At = GateIn + Va * (K ? 380.f : -380.f); G.Yaw = TownGateOut.Rotation().Yaw + 180.f; G.Index = K; TownPosts.Add(G); }
 		// (the eighth phase: the stable beside the gate, inside the wall, its horse facing out, 6 m past the guard so F at the
 		// stable is not taken by him (at 7 m from the gate the first test's prompt was "talk to a guard"); no stream drawn)
-		{ FTownSpot St; St.Kind = TS_Stable; St.At = GateIn + Va * 1000.f; St.Yaw = TownGateOut.Rotation().Yaw; TownSpots.Add(St); }
+		// (PR #37's review: on a free tile inside the wall, tried along it both ways from 10 m: a building, a tower or the harbour
+		// can stand there)
+		{
+			for (const float K : { 1000.f, -1000.f, 800.f, -800.f, 1300.f, -1300.f, 600.f, -600.f })
+			{
+				const FVector Sp = GateIn + Va * K;
+				FIntPoint Bt(-1, -1); float Bd = 1e9f;
+				for (int32 X = 0; X < N; ++X) for (int32 Y = 0; Y < N; ++Y) { const float Dd = FVector::Dist2D(TileWorld(FIntPoint(X, Y)), Sp); if (Dd < Bd) { Bd = Dd; Bt = FIntPoint(X, Y); } }
+				if (!In(Bt) || Type[Idx(Bt)] != 2 || Blocked[Idx(Bt)] || !InsideTownBorder(FVector2D(Sp.X, Sp.Y)) || TownBorderDist(FVector2D(Sp.X, Sp.Y)) < 1.2f * Generator->TileSize) continue;
+				FTownSpot St; St.Kind = TS_Stable; St.At = Sp; St.Yaw = TownGateOut.Rotation().Yaw; TownSpots.Add(St);
+				break;
+			}
+		}
 		const FTownBld& C = TownBlds[CastleBld];
 		const FVector CDoor = TileWorld(C.DoorTile) + FVector(RDTDir4[C.DoorSide].X, RDTDir4[C.DoorSide].Y, 0.f) * 330.f;
 		for (int32 K = 0; K < 2; ++K) { FTownPost G; G.Role = ERDTownRole::Guard; G.At = CDoor + Va * (K ? 300.f : -300.f); G.Yaw = (-Ua).Rotation().Yaw; G.Index = 2 + K; TownPosts.Add(G); }

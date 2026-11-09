@@ -77,18 +77,28 @@ ARDHorse* ARDDungeonGenerator::SpawnHorseAt(const FVector& At, float Yaw, bool b
 	return H;
 }
 
+FVector ARDDungeonGenerator::HorseSpotBeside(const APawn* Her) const
+{
+	// (beside her on the ground under that point: her right, else her left, else behind her; the ground traced)
+	const float Hh = Her->GetSimpleCollisionHalfHeight();
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(RDHorseSpot), false, Her);
+	if (Horse) Q.AddIgnoredActor(Horse);
+	for (const FVector Off : { Her->GetActorRightVector() * 220.f, Her->GetActorRightVector() * -220.f, Her->GetActorForwardVector() * -260.f })
+	{
+		const FVector P = Her->GetActorLocation() + Off;
+		FHitResult Hit;
+		// (a clear line from her to it, at her chest: not through a wall)
+		if (GetWorld()->LineTraceSingleByChannel(Hit, Her->GetActorLocation(), P, ECC_Visibility, Q)) continue;
+		if (GetWorld()->LineTraceSingleByChannel(Hit, P + FVector(0, 0, 200.f), P - FVector(0, 0, 600.f), ECC_Visibility, Q)) return Hit.ImpactPoint;
+	}
+	return Her->GetActorLocation() - FVector(0, 0, Hh);
+}
+
 bool ARDDungeonGenerator::CallHorse()
 {
 	APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!Her || !HasHorse() || bMounted) return false;
-	// (beside her, on the ground under that point)
-	const FVector Side = Her->GetActorRightVector() * 220.f;
-	FVector At = Her->GetActorLocation() + Side;
-	FHitResult Hit;
-	const float Hh = Her->GetSimpleCollisionHalfHeight();
-	if (GetWorld()->LineTraceSingleByChannel(Hit, At + FVector(0, 0, 200.f), At - FVector(0, 0, 600.f), ECC_Visibility, FCollisionQueryParams(SCENE_QUERY_STAT(RDHorseCall), false, Her)))
-		At = Hit.ImpactPoint;
-	else At.Z -= Hh;
+	const FVector At = HorseSpotBeside(Her);
 	if (!Horse) Horse = SpawnHorseAt(At, Her->GetActorRotation().Yaw, true);
 	else { Horse->SetActorLocationAndRotation(At, FRotator(0.f, Her->GetActorRotation().Yaw, 0.f)); Horse->PlayFor(0.f); }
 	return Horse != nullptr;
@@ -101,10 +111,12 @@ bool ARDDungeonGenerator::BuyHorse()
 	if (GI->bHorseOwned) { SetTownNote(TEXT("You have a horse already: the stable calls it for you")); return CallHorse(); }
 	const int32 Cost = HorsePriceNow();
 	if (GetGold() < Cost) { SetTownNote(TEXT("You have too little gold")); return false; }
-	AddGold(-Cost, TEXT("the stable"));
+	// (PR #37's review: the horse made before her gold is taken: no horse, no sale)
+	if (!HorseDef.Mesh) { SetTownNote(TEXT("The stable has no horse today")); return false; }
 	GI->bHorseOwned = true;
+	if (!CallHorse()) { GI->bHorseOwned = false; SetTownNote(TEXT("The stable has no horse today")); return false; }
+	AddGold(-Cost, TEXT("the stable"));
 	if (StableHorse) { StableHorse->Destroy(); StableHorse = nullptr; }
-	CallHorse();
 	TownCount(TEXT("horse"));
 	SetTownNote(FString::Printf(TEXT("The horse is yours for %d gold: F beside it to ride"), Cost));
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE bought for %d gold"), Cost);
@@ -115,7 +127,12 @@ bool ARDDungeonGenerator::MountHorse()
 {
 	ACharacter* C = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	if (!C || !Horse || bMounted || !PlayerCombat || PlayerCombat->IsDead()) return false;
+	if (PlayerCombat->IsBusyForMount()) { PlayerCombat->ShowMessage(TEXT("Not in the middle of a move")); return false; }
 	bMounted = true;
+	// (no jump from the saddle: it lifted the horse; the generator's tick after her movement's, so the horse is put under where
+	// she is this frame, not where she was (it trailed her by 26 cm at a gallop: PR #37's review))
+	JumpWas = C->GetCharacterMovement()->JumpZVelocity; C->GetCharacterMovement()->JumpZVelocity = 0.f;
+	PrimaryActorTick.AddPrerequisite(C->GetCharacterMovement(), C->GetCharacterMovement()->PrimaryComponentTick);
 	MountMeshWas = C->GetMesh()->GetRelativeLocation();
 	if (USpringArmComponent* B = C->FindComponentByClass<USpringArmComponent>()) { BoomArmWas = B->TargetArmLength; BoomOffsetWas = B->TargetOffset; B->TargetArmLength += 140.f; B->TargetOffset.Z += 110.f; }
 	PlayerCombat->MountFactor = FMath::Max(HorseDef.SpeedMul, 1.f); PlayerCombat->RefreshWalkSpeed();
@@ -134,10 +151,14 @@ bool ARDDungeonGenerator::DismountHorse()
 	if (C)
 	{
 		C->GetMesh()->SetRelativeLocation(MountMeshWas);
-		if (UAnimInstance* AI = C->GetMesh()->GetAnimInstance()) AI->StopSlotAnimation(0.2f, RDHorseSlot);
+		// (her rider clip off, but not a death's: it plays on the same slot (PR #37's review: she stood up dead))
+		const bool bDeadNow = PlayerCombat && PlayerCombat->IsDead();
+		if (UAnimInstance* AI = C->GetMesh()->GetAnimInstance(); AI && !bDeadNow) AI->StopSlotAnimation(0.2f, RDHorseSlot);
 		if (USpringArmComponent* B = C->FindComponentByClass<USpringArmComponent>()) { B->TargetArmLength = BoomArmWas; B->TargetOffset = BoomOffsetWas; }
-		// (the horse left standing beside her)
-		if (Horse) { Horse->SetActorLocation(Horse->GetActorLocation() + C->GetActorRightVector() * 200.f); Horse->PlayFor(0.f); }
+		C->GetCharacterMovement()->JumpZVelocity = JumpWas;
+		PrimaryActorTick.RemovePrerequisite(C->GetCharacterMovement(), C->GetCharacterMovement()->PrimaryComponentTick);
+		// (the horse left standing beside her, on the ground (PR #37's review: moved without a trace it floated on a slope))
+		if (Horse) { Horse->SetActorLocation(HorseSpotBeside(C)); Horse->PlayFor(0.f); }
 	}
 	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); }
 	RiderClipNow = NAME_None;
@@ -152,12 +173,17 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	// (hers comes to her on this level; she rides only while alive)
 	if (HasHorse() && !Horse && !bMounted && PlayerCombat && (bWild ? IsWildReady() : true)) CallHorse();
 	if (bMounted && (!Horse || !PlayerCombat || PlayerCombat->IsDead())) { DismountHorse(); return; }
+	if (bMounted && PlayerCombat->IsBusyForMount()) PlayerCombat->SetBlocking(false);          // (a block begun before: off)
 	// (the stable's horse: by the town's stable while she has none)
-	if (!HasHorse())
+	StableLookIn -= Dt;
+	if (!HasHorse() && StableLookIn <= 0.f)
 	{
+		// (once a second, not each frame (PR #37's review); gone when the town that had it is gone)
+		StableLookIn = 1.f;
 		const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 		const ARDSection::FTownSpot* St = S ? S->TownSpots.FindByPredicate([](const ARDSection::FTownSpot& Sp) { return Sp.Kind == TS_Stable; }) : nullptr;
-		if (St && (!StableHorse || FVector::Dist2D(StableHorse->GetActorLocation(), St->At) > 300.f))
+		if (!St) { if (StableHorse) { StableHorse->Destroy(); StableHorse = nullptr; } }
+		else if (!StableHorse || FVector::Dist2D(StableHorse->GetActorLocation(), St->At) > 300.f)
 		{
 			if (StableHorse) StableHorse->Destroy();
 			StableHorse = SpawnHorseAt(St->At, St->Yaw, false);
@@ -182,11 +208,14 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	if (UAnimInstance* AI = M->GetAnimInstance(); AI && Clip)
 	{
 		const FName Want(*Horse->ClipNow.ToString());
+		// (at the horse's pace: her bounce in step with its stride (PR #37's review))
+		const float Rate = FMath::Clamp(Horse->RateNow, 0.5f, 3.f);
 		if (Want != RiderClipNow || !AI->IsSlotActive(RDHorseSlot))
 		{
-			AI->PlaySlotAnimationAsDynamicMontage(Clip, RDHorseSlot, 0.25f, 0.25f, 1.f, 10000);
+			RiderMontage = AI->PlaySlotAnimationAsDynamicMontage(Clip, RDHorseSlot, 0.25f, 0.25f, Rate, 10000);
 			RiderClipNow = Want;
 		}
+		else if (RiderMontage) AI->Montage_SetPlayRate(RiderMontage, Rate);
 	}
 }
 

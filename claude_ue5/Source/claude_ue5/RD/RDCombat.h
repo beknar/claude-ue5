@@ -234,6 +234,8 @@ public:
 	float WildRunFactor = 1.f;
 	/** the eighth phase: on her horse, this many times as fast */
 	float MountFactor = 1.f;
+	/** a swing, a roll or a block under way (no mounting in one: PR #37's review) */
+	bool IsBusyForMount() const { return AttackTime >= 0.f || IsDodging() || bBlocking; }
 	void RefreshWalkSpeed() { UpdateWalkSpeed(); }
 	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
 	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A

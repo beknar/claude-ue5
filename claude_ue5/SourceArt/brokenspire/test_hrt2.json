@@ -1,5 +1,5 @@
 {
- "tag": "hrt",
+ "tag": "hrt2",
  "plan": [
   "services",
   "keys9",
@@ -164,7 +164,7 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_hrt_storage9.png"
+  "bs_hrt2_storage9.png"
  ],
  "error": null,
  "windows_shown_again": 3

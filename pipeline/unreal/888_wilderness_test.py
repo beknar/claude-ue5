@@ -773,13 +773,22 @@ def step_horse9():
     res["after_dismount"] = hs()
     p0 = G["pawn"].get_actor_location(); yield from run_her((1.0, 0.3), 3.0); p1 = G["pawn"].get_actor_location()
     res["speed_m_s"]["after"] = round(math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 3.0, 2)
+    # (PR #37's review: a death in the saddle gets her off and keeps her death clip (it was stopped with the rider's: she stood up))
+    g.call_horse(); yield from rwait(0.5); g.mount_horse(); yield from rwait(0.8)
+    c_ = cb(); c_.apply_damage(c_.get_health() * 10.0 + 500.0, None); yield from wait(1.2)
+    ai = G["pawn"].mesh.get_anim_instance()
+    res["death"] = {"dead": c_.is_dead(), "mounted": hs()["mounted"], "montage": bool(ai and ai.is_any_montage_playing())}
+    t0 = time.time()
+    while cb().is_dead() and time.time() - t0 < 20: yield
+    yield from rwait(1.0)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     quiet(False)
     b = res["before"]; a = res["after_buy"]; mt = res["mounted"]; rd = res["riding"] or {}; sp = res["speed_m_s"]
     ok = (b["stable_horse"] == 1 and b["owned"] == 0 and "horse" in res["prompt"] and res["bought"] and res["gold_taken"] == res["price"] > 0
           and a["owned"] == 1 and a["spawned"] == 1 and res["gi_owned"]
-          and mt["mounted"] == 1 and abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 25) and mt["rider"] not in ("", "None") and res["attack_refused"]
-          and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < 0.4)
+          and mt["mounted"] == 1 and abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 15) and mt["rider"] not in ("", "None") and res["attack_refused"]
+          and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < 0.4
+          and res["death"]["dead"] and res["death"]["mounted"] == 0 and res["death"]["montage"])
     step_result("horse9", ok, **res)
 
 
