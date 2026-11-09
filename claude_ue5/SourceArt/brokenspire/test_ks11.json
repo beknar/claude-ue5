@@ -1,5 +1,5 @@
 {
- "tag": "ks7",
+ "tag": "ks11",
  "plan": [
   "spire"
  ],
@@ -22,7 +22,7 @@
     "0",
     "1",
     "0",
-    "7.5",
+    "7.7",
     "1",
     "1",
     "1",
@@ -140,7 +140,7 @@
      "n": 2,
      "with_rooms": 2,
      "with_door": 2,
-     "containers": 4
+     "containers": 7
     },
     "study": {
      "n": 2,
@@ -167,8 +167,22 @@
      "containers": 9
     }
    },
-   "containers": 332,
+   "containers": 335,
    "doors": 127,
+   "labs": [
+    {
+     "cauldron": 1,
+     "potions": 4
+    },
+    {
+     "cauldron": 1,
+     "potions": 4
+    }
+   ],
+   "chambers": [
+    4,
+    4
+   ],
    "piece_counts": {
     "SM_TowerRound_Window_8m_A": 3,
     "SM_TowerRound_Border_Top_A": 1,
@@ -182,8 +196,8 @@
    },
    "window_lights": {
     "n": 4,
-    "moved_cm_min": 532.2,
-    "moved_cm_max": 541.6,
+    "moved_cm_min": 480.9,
+    "moved_cm_max": 489.5,
     "lowest_m": 36.2
    },
    "roles": {
@@ -238,18 +252,18 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "bs_ks7_ks_tower_front.png",
-  "bs_ks7_ks_tower_front_night.png",
-  "bs_ks7_ks_tower_front_night2.png",
-  "bs_ks7_ks_square.png",
-  "bs_ks7_ks_tower_afar.png",
-  "bs_ks7_ks_tower_night.png",
-  "bs_ks7_ks_tower_night2.png",
-  "bs_ks7_ks_library.png",
-  "bs_ks7_ks_laboratory.png",
-  "bs_ks7_ks_study.png",
-  "bs_ks7_ks_meditation.png",
-  "bs_ks7_ks_gate.png"
+  "bs_ks11_ks_tower_front.png",
+  "bs_ks11_ks_tower_front_night.png",
+  "bs_ks11_ks_tower_front_night2.png",
+  "bs_ks11_ks_square.png",
+  "bs_ks11_ks_tower_afar.png",
+  "bs_ks11_ks_tower_night.png",
+  "bs_ks11_ks_tower_night2.png",
+  "bs_ks11_ks_library.png",
+  "bs_ks11_ks_laboratory.png",
+  "bs_ks11_ks_study.png",
+  "bs_ks11_ks_meditation.png",
+  "bs_ks11_ks_gate.png"
  ],
  "error": null,
  "windows_shown_again": 2

@@ -871,12 +871,12 @@ def castle_shape():
         elif p[0] == "stair": d["stair"] = {"foot": V(float(p[1]), float(p[2]), float(p[3])), "top": V(float(p[4]), float(p[5]), float(p[6])), "well": int(p[7]), "room": int(p[8])}
         elif p[0] == "walk": d["walk"] = float(p[1])
     return d
-def ism_instances(mesh_has):
-    """the section's instances of meshes whose name has mesh_has (world places)"""
+def ism_instances(mesh_has, path_has=None):
+    """the section's instances of meshes whose name has mesh_has (and whose path has path_has) (world places)"""
     out = []
     for c in section().get_components_by_class(unreal.InstancedStaticMeshComponent):
         m = c.get_editor_property("static_mesh")
-        if not m or mesh_has not in m.get_name(): continue
+        if not m or mesh_has not in m.get_name() or (path_has and path_has not in m.get_path_name()): continue
         for i in range(c.get_instance_count()):
             t = c.get_instance_transform(i, True)
             if isinstance(t, tuple): t = t[-1]
@@ -2291,6 +2291,12 @@ def step_spire():
         e["with_door"] += 1 if any(dist2(d, b["door"]) < 250 for d in doors) else 0
         e["containers"] += sum(1 for c in conts if S.town_building_at(c) == b["i"])
     res["inside"] = per; res["containers"] = n_cont; res["doors"] = len(doors)
+    # (PR #32's review: each laboratory's own cauldron and potions and each meditation chamber's own rune stones, inside its
+    # rectangle; a count over the town passed on the kitchens' prep tables and the still's cauldron)
+    def in_bld(pts, bi): return sum(1 for q in pts if S.town_building_at(q) == bi)
+    caul = ism_instances("SM_Cauldron", "CauldronFX"); pots = ism_instances("SM_S_Potion"); stones = ism_instances("SM_Rune_01a")
+    res["labs"] = [{"cauldron": in_bld(caul, b["i"]), "potions": in_bld(pots, b["i"])} for b in B if b["kind"] == "laboratory" and b["state"] == 0]
+    res["chambers"] = [in_bld(stones, b["i"]) for b in B if b["kind"] == "meditation chamber" and b["state"] == 0]
     res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_TowerRound_Window_8m_A", "SM_TowerRound_Border_Top_A", "SM_TowerRound_Cap_4m_A", "SM_IceCrystal01", "SM_StatuePlinth",
                                                               "SM_Cauldron", "SM_Kit_PrepTable", "SM_S_Potion", "SM_Rune_01a")}
     # (the upper storeys' lights that move: each read twice, 2 s apart; how far each went round, how high the lowest stands)
@@ -2360,8 +2366,9 @@ def step_spire():
           and res["window_lights"]["n"] >= 2 and res["window_lights"]["moved_cm_min"] > 50 and res["window_lights"]["lowest_m"] > res["tower"]["top_m"] * 0.4
           and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple")) and k.get("witch's hut", 0) == 0
           and res["homes"]["all"] >= 80 and res["homes"]["burned"] + res["homes"]["boarded"] < res["homes"]["all"] * 0.1
-          and sk.get("rune", 0) >= 2 and sk.get("crystal", 0) >= 8 and pc["SM_TowerRound_Window_8m_A"] >= 2 and pc["SM_TowerRound_Cap_4m_A"] >= 1
-          and pc["SM_IceCrystal01"] >= 8 and pc["SM_Cauldron"] >= 2 and pc["SM_Kit_PrepTable"] >= 2 and pc["SM_Rune_01a"] >= 6 + 4 * k.get("meditation chamber", 0)
+          and sk.get("rune", 0) >= 2 and sk.get("crystal", 0) >= 6 and pc["SM_TowerRound_Window_8m_A"] >= 2 and pc["SM_TowerRound_Cap_4m_A"] >= 1
+          and pc["SM_IceCrystal01"] >= 6 and pc["SM_Rune_01a"] >= 12
+          and len(res["labs"]) >= 2 and all(l["cauldron"] == 1 and l["potions"] >= 2 for l in res["labs"]) and len(res["chambers"]) >= 1 and all(n >= 2 for n in res["chambers"])
           and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
           and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Monk", "Worker", "Pilgrim", "Soldier"))
           and "Archmage Velis Kethran" in res["titles"] and "Aldric Venn" not in res["titles"]

@@ -18,6 +18,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDTown.h"
 #include "Engine/World.h"
+#include "Misc/ScopeExit.h"
 #include "Components/PointLightComponent.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "NiagaraComponent.h"
@@ -194,6 +195,7 @@ void ARDSection::MageSpotBuild(const FTownSpot& Sp)
 		{
 			const FVector D = FRotator(0, Sp.Yaw + 60.f * K, 0).RotateVector(FVector(1, 0, 0));
 			AddPieceAt(TEXT("Mage.RuneStone"), Sp.At + D * 330.f, Sp.Yaw + 60.f * K + 180.f, 0.5f);
+			MarkBlocked(Sp.At + D * 330.f, 0.f, FVector2D(90.f, 90.f), true);     // (PR #32's review: the townsfolk walked into them)
 		}
 		AddLight(Sp.At + FVector(0, 0, 120.f), FLinearColor(0.4f, 0.55f, 1.f), 200.f, 900.f, false, 0.2f);
 		return;
@@ -212,25 +214,44 @@ void ARDSection::MageLabBuild(int32 BI)
 	// (a laboratory: a cauldron bubbling on the far side from the door, a table of potions beside it, both off the door's lane;
 	// a stream of their own, so the plan's draws and the furniture's stay where they were)
 	const FTownBld& B = TownBlds[BI];
-	if (B.State != 0) return;
+	if (B.State != 0 || B.Rooms.Num() == 0) return;
 	FRandomStream R((int32)(B.Seed ^ 0xA1C4E3u));
+	// (after the room's own furnishing, among its footprints: a piece that would stand in another is refused (FurnRoom), so each
+	// is tried at a few places; PR #32's review: built before it, the kitchen's barrels and crates were set into them)
+	FurnRoom = B.Rooms[0];
+	ON_SCOPE_EXIT { FurnRoom = -1; };
 	const float M = Generator->TileSize;
 	const int32 Nx = B.DoorSide < 2 ? B.Max.X - B.Min.X : B.Max.Y - B.Min.Y;
 	const int32 Ny = B.DoorSide < 2 ? B.Max.Y - B.Min.Y : B.Max.X - B.Min.X;
 	const float Hx = Nx * M * 0.5f, Hy = Ny * M * 0.5f;
 	const float Yaw0 = TownBldYaw(B);
 	const float Sd = R.RandBool() ? 1.f : -1.f;
-	const FVector Cauldron = TownBldPoint(B, -Hx + 220.f, Sd * (Hy - 230.f), 0.f);
-	const FVector Table = TownBldPoint(B, -Hx * 0.2f, -Sd * (Hy - 160.f), 0.f);
-	AddPieceAt(TEXT("Mage.Cauldron"), Cauldron, Yaw0 + R.FRandRange(0.f, 360.f));
-	const FRDPiece* Cp = Generator->Piece(TEXT("Mage.Cauldron"));
-	AddEffect(TEXT("CauldronFx"), Cauldron + FVector(0, 0, Cp ? (float)Cp->Size.Z * 0.85f : 80.f), 1.f);
-	AddLight(Cauldron + FVector(0, 0, 150.f), FLinearColor(0.35f, 1.f, 0.55f), 140.f, 700.f, false, 0.3f);
-	MarkBlocked(Cauldron, Yaw0, FVector2D(260.f, 260.f), true);
-	AddPieceAt(TEXT("Mage.LabTable"), Table, Yaw0 + 90.f);
+	const float CYaw = Yaw0 + R.FRandRange(0.f, 360.f);
+	FVector Cauldron = FVector::ZeroVector; bool bCauldron = false;
+	for (const FVector2D& Q : { FVector2D(-Hx + 220.f, Sd * (Hy - 230.f)), FVector2D(-Hx + 220.f, -Sd * (Hy - 230.f)), FVector2D(-Hx * 0.2f, Sd * (Hy - 230.f)),
+	                            FVector2D(-Hx * 0.2f, -Sd * (Hy - 230.f)), FVector2D(Hx * 0.3f, Sd * (Hy - 230.f)), FVector2D(Hx * 0.3f, -Sd * (Hy - 230.f)) })
+	{
+		Cauldron = TownBldPoint(B, Q.X, Q.Y, 0.f);
+		if (AddPieceAt(TEXT("Mage.Cauldron"), Cauldron, CYaw)) { bCauldron = true; break; }
+	}
+	if (bCauldron)
+	{
+		const FRDPiece* Cp = Generator->Piece(TEXT("Mage.Cauldron"));
+		AddEffect(TEXT("CauldronFx"), Cauldron + FVector(0, 0, Cp ? (float)Cp->Size.Z * 0.85f : 80.f), 1.f);
+		AddLight(Cauldron + FVector(0, 0, 150.f), FLinearColor(0.35f, 1.f, 0.55f), 140.f, 700.f, false, 0.3f);
+		MarkBlocked(Cauldron, Yaw0, FVector2D(260.f, 260.f), true);
+	}
 	const FRDPiece* Tp = Generator->Piece(TEXT("Mage.LabTable"));
 	const float Tz = Tp ? (float)Tp->Size.Z : 90.f;
-	for (int32 K = 0; K < 4; ++K)
-		AddPieceAt(TEXT("Mage.Potion"), Table + FRotator(0, Yaw0 + 90.f, 0).RotateVector(FVector(R.FRandRange(-60.f, 60.f), R.FRandRange(-20.f, 20.f), Tz)), R.FRandRange(0.f, 360.f), 1.f, true);
-	MarkBlocked(Table, Yaw0 + 90.f, FVector2D(Tp ? (float)Tp->Size.X + 40.f : 220.f, Tp ? (float)Tp->Size.Y + 40.f : 120.f), true);
+	for (const FVector2D& Q : { FVector2D(-Hx * 0.2f, -Sd * (Hy - 160.f)), FVector2D(-Hx * 0.2f, Sd * (Hy - 160.f)), FVector2D(Hx * 0.3f, -Sd * (Hy - 160.f)),
+	                            FVector2D(Hx * 0.3f, Sd * (Hy - 160.f)), FVector2D(-Hx + 200.f, -Sd * (Hy - 160.f)), FVector2D(-Hx + 200.f, Sd * (Hy - 160.f)) })
+	{
+		const FVector Table = TownBldPoint(B, Q.X, Q.Y, 0.f);
+		if (!AddPieceAt(TEXT("Mage.LabTable"), Table, Yaw0 + 90.f)) continue;
+		for (int32 K = 0; K < 4; ++K)
+			AddPieceAt(TEXT("Mage.Potion"), Table + FRotator(0, Yaw0 + 90.f, 0).RotateVector(FVector(R.FRandRange(-60.f, 60.f), R.FRandRange(-20.f, 20.f), Tz)), R.FRandRange(0.f, 360.f), 1.f, true);
+		MarkBlocked(Table, Yaw0 + 90.f, FVector2D(Tp ? (float)Tp->Size.X + 40.f : 220.f, Tp ? (float)Tp->Size.Y + 40.f : 120.f), true);
+		break;
+	}
+	if (!bCauldron) UE_LOG(LogRDMage, Warning, TEXT("RDMAGE no room for a laboratory's cauldron (building %d)"), BI);
 }

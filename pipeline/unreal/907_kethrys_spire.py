@@ -116,6 +116,8 @@ else:
         mi = unreal.load_asset(path); MEL.set_material_instance_parent(mi, unreal.load_asset(parent))
         MEL.set_material_instance_scalar_parameter_value(mi, "Albedo Multiply (S)", mul)
         MEL.set_material_instance_scalar_parameter_value(mi, "Albedo Desaturate", desat)
+        # (read back: the setter returns False when the value is already there, so its result says nothing)
+        print("KSD dark", name, "read back", [(str(p.parameter_info.name), round(p.parameter_value, 3)) for p in mi.get_editor_property("scalar_parameter_values")])
         MEL.update_material_instance(mi); eal.save_loaded_asset(mi, False)
         return mi
     MI = "/Game/MysticDungeon/Material/Instances/"
@@ -132,7 +134,14 @@ else:
     f1 = piece(MD + "Floor/SM_Floor_Stone_Square_Tiles_A", mode="floor", fit=(300, 300))
     f2 = piece(MD + "Floor/SM_floor_tiles_A", mode="floor", fit=(300, 300))
     fm = piece(MD + "Floor/SM_floor_Ring_Mosaic_A", mode="floor", fit=(300, 300))
+    # (every floor darkened, each from its own stone: PR #32's review found the _Alt floors and the ring mosaic in the cream)
+    def own_dark(name, mesh_path):
+        mi = unreal.load_asset(mesh_path).get_material(0)
+        print("KSD floor", name, "from", mi.get_path_name())
+        return dark(name, mi.get_path_name(), 0.42, 0.4)
     f1.material = FLOORM
+    f2.material = own_dark("MI_Arcane_FloorAlt", MD + "Floor/SM_floor_tiles_A")
+    fm.material = own_dark("MI_Arcane_Mosaic", MD + "Floor/SM_floor_Ring_Mosaic_A")
     for n in ("Floor_Stone", "Floor_Brick", "Floor_Brick2", "Floor_Random", "Floor_Tiles", "Floor_Wood", "Floor_Corr"):
         P["Arcane." + n] = f1; P["Arcane." + n + "_Alt"] = f2
     P["Arcane.Floor_Tiles_Alt"] = fm

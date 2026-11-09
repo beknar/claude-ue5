@@ -170,7 +170,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// down each side))
 	// (the port's sluice house: a stone hall of 9 x 9 tiles over the sewers' mouth)
 	// (the black tower: its gatehouse 4 deep, its hall 13 deep and 15 wide under the round tower)
-	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : bMage ? 17 : 17, CW = bHoly ? 19 : bPort ? 9 : bMage ? 15 : 21;
+	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : bMage ? 15 : 21;
 	// (the port's harbour in the frame: from 26 tiles before the far wall to it, 24 tiles in from each side; its quay the 4 rows
 	// before it)
 	const int32 Hu0 = S - 26, Hv0 = 24, Hv1 = S - 24;
@@ -772,7 +772,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		case TK_Library: K = ERDRoomKind::Library; break;
 		case TK_Laboratory: K = ERDRoomKind::Kitchen; break;
 		// (a study: the library's desks, chairs, books and candles; a meditation chamber: a library's room whose furniture is its
-		// rune circle and candles instead (Furnish, RDMage.cpp's MageMeditationFurnish))
+		// rune circle and candles instead (ARDSection::Furnish's Library case))
 		case TK_Study: case TK_Meditation: K = ERDRoomKind::Library; break;
 		default: K = B.State == 2 ? ERDRoomKind::Storeroom : B.State == 1 ? ERDRoomKind::Crypt : (FRandomStream((int32)B.Seed).RandBool() ? ERDRoomKind::Kitchen : ERDRoomKind::GuardRoom); break;
 		}
@@ -847,15 +847,31 @@ void ARDSection::PlanTown(FRandomStream& R)
 		{
 			// (the mage city's square: a rune circle across from the well, a crystal pylon at each of its corners and down the main
 			// road toward the gate, every 12 tiles a pair either side)
-			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = Mid - Va * 600.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
+			// (PR #32's review: at -Va 600 its ring stood 1.2 m before the quest board's face: across the square from it now)
+			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = Mid - Ua * 700.f - Va * 700.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
 			for (const FVector& C : { Mid + Ua * 1900.f + Va * 1900.f, Mid + Ua * 1900.f - Va * 1900.f, Mid - Ua * 1900.f + Va * 1900.f, Mid - Ua * 1900.f - Va * 1900.f })
 			{
 				FTownSpot Cr; Cr.Kind = TS_Crystal; Cr.At = C; Cr.Yaw = (Mid - C).Rotation().Yaw; TownSpots.Add(Cr);
 			}
+			// (PR #32's review: a pylon beside the main road could stand in a home or before its door: only on the ground, a tile
+			// and more from every building's way out and from the other spots)
+			auto PylonFits = [&](const FVector& At)
+			{
+				const FIntPoint T = WorldToLocal(At);
+				if (!In(T) || Owner[Idx(T)] != 1000 || Type[Idx(T)] != 2) return false;
+				for (const FTownBld& Tb : TownBlds)
+				{
+					const FIntPoint O = Tb.DoorTile + FIntPoint(RDTDir4[Tb.DoorSide].X, RDTDir4[Tb.DoorSide].Y);
+					if (FMath::Max(FMath::Abs(O.X - T.X), FMath::Abs(O.Y - T.Y)) <= 1) return false;
+				}
+				for (const FTownSpot& Sp : TownSpots) if (FVector::Dist2D(Sp.At, At) < 400.f) return false;
+				return true;
+			};
 			for (int32 K = 1; K <= 3; ++K)
 				for (const float Sd : { -1.f, 1.f })
 				{
-					FTownSpot Cr; Cr.Kind = TS_Crystal; Cr.At = Mid - Ua * (2600.f + 1200.f * K) + Va * Sd * 600.f; Cr.Yaw = Ua.Rotation().Yaw; TownSpots.Add(Cr);
+					FTownSpot Cr; Cr.Kind = TS_Crystal; Cr.At = Mid - Ua * (2600.f + 1200.f * K) + Va * Sd * 600.f; Cr.Yaw = Ua.Rotation().Yaw;
+					if (PylonFits(Cr.At)) TownSpots.Add(Cr);
 				}
 		}
 		FTownSpot Bd; Bd.Kind = TS_Board; Bd.At = Mid - Va * 700.f + Ua * 450.f; Bd.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(Bd);
@@ -947,7 +963,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 			FTownPost Am; Am.Role = ERDTownRole::Elder; Am.At = CDoor - Ua * 450.f - Va * 520.f; Am.Yaw = (-Ua).Rotation().Yaw; TownPosts.Add(Am);
 			for (int32 K = 0; K < 2; ++K) { FTownPost Wd; Wd.Role = ERDTownRole::Soldier; Wd.At = CDoor - Ua * 150.f + Va * (K ? 520.f : -520.f); Wd.Yaw = (-Ua).Rotation().Yaw; Wd.Index = 3 + K; TownPosts.Add(Wd); }
 			for (int32 K = 0; K < 5; ++K) { FTownPost Ap; Ap.Role = ERDTownRole::Pilgrim; Ap.At = Pz + Va * ((K % 3 - 1) * 900.f) + Ua * ((K / 3) * 900.f - 450.f); Ap.Wander = 2200.f; Ap.Index = 4 + K; TownPosts.Add(Ap); }
-			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = CDoor - Ua * 900.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
+			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = CDoor - Ua * 1300.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
 		}
 		if (bForge)
 		{
@@ -1108,8 +1124,6 @@ int32 ARDSection::TownBuildingAt(FVector L) const
 void ARDSection::TownShellBuilding(int32 BI)
 {
 	FTownBld& B = TownBlds[BI];
-	// (the mage city's laboratories: their cauldrons and tables first, from a stream of their own (RDMage.cpp))
-	if (B.Kind == TK_Laboratory) MageLabBuild(BI);
 	FRandomStream R((int32)(B.Seed ^ 0x13579bdfu));
 	const float M = Generator->TileSize, WH = 300.f;
 	// the style: stone for the temple, the smithy and the barracks; timber or thatch for the rest; a burned house's timbers
@@ -1564,6 +1578,9 @@ void ARDSection::TownFurnish(FRandomStream& R, int32 BI)
 		break;
 	}
 	case TK_Witch: FurnRoom = RI; AddPieceAt(TEXT("Cauldron"), Ctr, 0.f); FurnRoom = -1; break;
+	// (the mage city's laboratory: its cauldron and table of potions where they fit among the kitchen's furniture (RDMage.cpp);
+	// PR #32's review: built before the furnishing, the kitchen's barrels and crates went into them)
+	case TK_Laboratory: MageLabBuild(BI); break;
 	// (the port's sluice house: the sewer's mouth at its far wall (RDPort.cpp))
 	case TK_SluiceHouse: SewerGateBuild(BI); break;
 	case TK_Cathedral:

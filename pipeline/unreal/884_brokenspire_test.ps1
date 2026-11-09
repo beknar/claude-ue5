@@ -37,7 +37,7 @@ for ($k = 0; $k -lt 60 -and -not $up; $k++) {
     elseif ($Light -and -not $travelled -and "$o" -match "UEDPIE_0_rl_scratch\.") { & $py $ex -c $travel 2>$null | Out-Null; $travelled = $true }
     elseif ($k % 6 -eq 5 -and "$o" -notmatch "UEDPIE") { & $py $ex -c $begin 2>$null | Out-Null }
 }
-if (-not $up) { & $py $ex -c $stop 2>$null | Out-Null; Restore; "PIE did not start on ${L}: $o"; exit 1 }
+if (-not $up) { & $py $ex -c $stop 2>$null | Out-Null; Restore; & $py $ex -c $open 2>$null | Out-Null; "PIE did not start on ${L}: $o"; exit 1 }
 # (the wilds made before the test: a level just opened by travel is still building)
 for ($k = 0; $k -lt 24; $k++) {
     $o = & $py $ex -c "import unreal; w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world(); g = unreal.GameplayStatics.get_all_actors_of_class(w, unreal.RDDungeonGenerator) if w else []; print('READY', bool(g) and (g[0].is_wild_ready() or not g[0].get_editor_property('wild')))" 2>$null
@@ -46,7 +46,7 @@ for ($k = 0; $k -lt 24; $k++) {
 }
 Start-Sleep 8
 $o = & $py $ex (Join-Path $PSScriptRoot "884_brokenspire_test.py") $plan $tag 2>$null
-if (-not ("$o" -match "brokenspire test armed")) { & $py $ex -c $stop | Out-Null; Restore; "arm failed: $o"; exit 1 }
+if (-not ("$o" -match "brokenspire test armed")) { & $py $ex -c $stop | Out-Null; Restore; & $py $ex -c $open 2>$null | Out-Null; "arm failed: $o"; exit 1 }
 $t = 0; $line = $null
 while ($t -lt $maxs) {
     Start-Sleep 10; $t += 10
