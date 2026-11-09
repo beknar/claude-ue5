@@ -52,6 +52,10 @@ static FString RDTSignText(uint8 Kind)
 	case TK_Workshop: return TEXT("WORKSHOP");
 	case TK_Warehouse: return TEXT("WARE\nHOUSE");
 	case TK_SluiceHouse: return TEXT("SLUICE\nHOUSE");
+	case TK_Library: return TEXT("LIBRARY");
+	case TK_Laboratory: return TEXT("LABORA-\nTORY");
+	case TK_Study: return TEXT("STUDY");
+	case TK_Meditation: return TEXT("MEDITA-\nTION");
 	default: return FString();
 	}
 }
@@ -131,7 +135,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// at the town's middle, an inner harbour along its sea wall (the frame's far side, turned to the north: the coast), its quay,
 	// piers, moored ships, warehouses, the drowned dead)
 	const bool bPort = Generator->TownPlan == 3;
-	const bool bMid = bHoly || bForge || bPort;
+	// (Kethrys Spire's mage city (the list of 2026-11-08b, docs/improvements9.txt: "a mage-city clustered around a black tower
+	// that hasn't opened its gates in a century ... magical effects, laboratories, libraries, stone houses, not poor"; TownPlan 4,
+	// RDMage.cpp): the black tower at the town's middle over its dungeon, the libraries and laboratories round the square, rune
+	// circles and crystal pylons, the wardens at the tower's sealed gate)
+	const bool bMage = Generator->TownPlan == 4;
+	const bool bMid = bHoly || bForge || bPort || bMage;
 	if (bPort) F.G = 0;
 	// ---- the ground inside the wall: one hallway (its rectangle the town's bounds; only the tiles inside the wall's outline
 	// are ground, below)
@@ -160,7 +169,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// (the foundry: 25 deep (75 m: its gatehouse, the casting hall, the furnace hall), 21 wide (the halls and a workshop wing
 	// down each side))
 	// (the port's sluice house: a stone hall of 9 x 9 tiles over the sewers' mouth)
-	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : 21;
+	// (the black tower: its gatehouse 4 deep, its hall 13 deep and 15 wide under the round tower)
+	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : bMage ? 17 : 17, CW = bHoly ? 19 : bPort ? 9 : bMage ? 15 : 21;
 	// (the port's harbour in the frame: from 26 tiles before the far wall to it, 24 tiles in from each side; its quay the 4 rows
 	// before it)
 	const int32 Hu0 = S - 26, Hv0 = 24, Hv1 = S - 24;
@@ -557,6 +567,20 @@ void ARDSection::PlanTown(FRandomStream& R)
 		for (int32 K = 0; K < 4; ++K)
 			if (Place(TK_Warehouse, 8, 10, 6, 7, Near(FVector2D(Hu0 - 9.f, Hv0 + 14.f + K * ((Hv1 - Hv0 - 28) / 3.f))), 900, P)) Commit(TK_Warehouse, P, 0, 2);
 	}
+	else if (bMage)
+	{
+		// (the mage city: two libraries, two laboratories, two study rooms and two meditation chambers round the square and down
+		// the main road (the spec: "laboratories, libraries, study rooms, meditation chambers"); no hedge witch)
+		static const uint8 RDMageKinds[4] = { TK_Library, TK_Laboratory, TK_Study, TK_Meditation };
+		for (int32 K = 0; K < 8; ++K)
+		{
+			const FVector2D Want = K < 2 ? FVector2D(SqMid.X, SqMid.Y + (K ? 15.f : -15.f)) : K < 4 ? FVector2D(GateU + 18.f + 12.f * (K - 2), Vc + (K % 2 ? 9.f : -9.f))
+			                     : K < 6 ? FVector2D(SqMid.X - 12.f, SqMid.Y + (K % 2 ? 13.f : -13.f)) : FVector2D(GateU + 42.f + 10.f * (K - 6), Vc + (K % 2 ? 10.f : -10.f));
+			const uint8 Kd = RDMageKinds[K % 4];
+			const bool bSmall = Kd == TK_Study || Kd == TK_Meditation;
+			if (Place(Kd, bSmall ? 5 : 7, bSmall ? 6 : 9, bSmall ? 5 : 6, bSmall ? 6 : 7, Near(Want), 900, P)) Commit(Kd, P, 0, 2);
+		}
+	}
 	else if (Place(TK_Witch, 4, 4, 4, 4, [&](const FVector2D& Q) { return -(float)FVector2D::Distance(Q, SqMid); }, 900, P)) Commit(TK_Witch, P, 0, 1);
 	// the homes: as many as fit; their state by chance (the user's: burned down, boarded up, or lived in)
 	// (400 tries a home: a try is a rectangle anywhere in the town, and few land beside a winding road; at 80 the town had 94
@@ -567,11 +591,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 		const float U = R.FRand();
 		// (the holy city is kept: few homes burned or boarded; the forge city fewer than Brokenspire, the siege is the foundry's)
 		// (the port: many shut up, few burned: the tide's dead empty the houses)
-		Commit(TK_Home, P, bHoly ? (U < 0.04f ? 1 : U < 0.10f ? 2 : 0) : bForge ? (U < 0.08f ? 1 : U < 0.18f ? 2 : 0) : bPort ? (U < 0.05f ? 1 : U < 0.25f ? 2 : 0) : (U < 0.2f ? 1 : U < 0.42f ? 2 : 0), 2);
+		// (the mage city is well kept: "not poor")
+		Commit(TK_Home, P, bMage ? (U < 0.02f ? 1 : U < 0.05f ? 2 : 0) : bHoly ? (U < 0.04f ? 1 : U < 0.10f ? 2 : 0) : bForge ? (U < 0.08f ? 1 : U < 0.18f ? 2 : 0) : bPort ? (U < 0.05f ? 1 : U < 0.25f ? 2 : 0) : (U < 0.2f ? 1 : U < 0.42f ? 2 : 0), 2);
 	}
 	// ---- the castle (its own frame: front toward -u, the main road's middle Vc); the holy city's cathedral
 	{
-		FTownBld B; B.Kind = bHoly ? TK_Cathedral : bForge ? TK_Foundry : bPort ? TK_SluiceHouse : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
+		FTownBld B; B.Kind = bHoly ? TK_Cathedral : bForge ? TK_Foundry : bPort ? TK_SluiceHouse : bMage ? TK_Spire : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
 		const FIntRect Rc = F.Rect(Cu0, Cv0, Cu0 + CD, Cv0 + CW);
 		B.Min = Rc.Min; B.Max = Rc.Max;
 		B.DoorSide = F.Side(-1, 0); B.DoorTile = F.Tile(Cu0, Vc);
@@ -692,6 +717,28 @@ void ARDSection::PlanTown(FRandomStream& R)
 			B.Label = FString::Printf(TEXT("The Great Foundry of %s"), *Generator->TownName);
 			continue;
 		}
+		if (B.Kind == TK_Spire)
+		{
+			// the black tower (RDMage.cpp builds it): its gatehouse at the front, then the tower's hall under the round tower, whose
+			// far wall holds the gate sealed for a century (the Mistgate's part: walked into with the Spire Key, it opens the tower's
+			// dungeon)
+			const int32 Ew = 7, Ed = 4;
+			const int32 W0 = Vc - Ew / 2;
+			const int32 RE = AddRoomRect(BI, F.Rect(Cu0, W0, Cu0 + Ed, W0 + Ew), ERDRoomKind::GuardRoom, F.Tile(Cu0 + 2, Vc));
+			const int32 RH = AddRoomRect(BI, F.Rect(Cu0 + Ed, Cv0, Cu0 + CD, Cv0 + CW), ERDRoomKind::Library, F.Tile(Cu0 + Ed + (CD - Ed) / 2, Vc));
+			const int32 Front = F.Side(-1, 0), Back = F.Side(1, 0);
+			Rooms[RE].bDoorSide[Front] = true;
+			AddEdge(B.DoorTile, Out);
+			AddEdge(F.Tile(Cu0 + Ed - 1, Vc), F.Tile(Cu0 + Ed, Vc)); Rooms[RE].bDoorSide[Back] = true; Rooms[RH].bDoorSide[Front] = true;
+			Rooms[RH].bDoorSide[Back] = true;
+			const FVector Far = TileWorld(F.Tile(Cu0 + CD - 1, Vc));
+			const FVector Fw = FVector(RDTDir4[Back].X, RDTDir4[Back].Y, 0.f);
+			MistgateAt = Far + Fw * (Generator->TileSize * 0.5f);
+			MistgateNormal = -Fw;
+			CastleHallRoom = RH;
+			B.Label = FString::Printf(TEXT("The Black Tower of %s"), *Generator->TownName);
+			continue;
+		}
 		if (B.Kind == TK_SluiceHouse)
 		{
 			// the port's sluice house (RDPort.cpp furnishes it): one stone hall, the grated way down into the sewers at its far
@@ -722,6 +769,11 @@ void ARDSection::PlanTown(FRandomStream& R)
 		case TK_Witch: K = ERDRoomKind::Library; break;
 		case TK_Workshop: K = ERDRoomKind::Forge; break;
 		case TK_Warehouse: K = ERDRoomKind::Storeroom; break;
+		case TK_Library: K = ERDRoomKind::Library; break;
+		case TK_Laboratory: K = ERDRoomKind::Kitchen; break;
+		// (a study: the library's desks, chairs, books and candles; a meditation chamber: a library's room whose furniture is its
+		// rune circle and candles instead (Furnish, RDMage.cpp's MageMeditationFurnish))
+		case TK_Study: case TK_Meditation: K = ERDRoomKind::Library; break;
 		default: K = B.State == 2 ? ERDRoomKind::Storeroom : B.State == 1 ? ERDRoomKind::Crypt : (FRandomStream((int32)B.Seed).RandBool() ? ERDRoomKind::Kitchen : ERDRoomKind::GuardRoom); break;
 		}
 		// (the lane runs through the door)
@@ -790,6 +842,21 @@ void ARDSection::PlanTown(FRandomStream& R)
 				// (on the forecourt's sides, clear of the main road's three tiles and of the foundry's front at 12 tiles)
 				FTownSpot Ct; Ct.Kind = TS_Cart; Ct.At = Mid + Ua * (1900.f + 550.f * K) + Va * 780.f * (K % 2 ? 1.f : -1.f); Ct.Yaw = Ua.Rotation().Yaw; TownSpots.Add(Ct);
 			}
+		}
+		if (bMage)
+		{
+			// (the mage city's square: a rune circle across from the well, a crystal pylon at each of its corners and down the main
+			// road toward the gate, every 12 tiles a pair either side)
+			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = Mid - Va * 600.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
+			for (const FVector& C : { Mid + Ua * 1900.f + Va * 1900.f, Mid + Ua * 1900.f - Va * 1900.f, Mid - Ua * 1900.f + Va * 1900.f, Mid - Ua * 1900.f - Va * 1900.f })
+			{
+				FTownSpot Cr; Cr.Kind = TS_Crystal; Cr.At = C; Cr.Yaw = (Mid - C).Rotation().Yaw; TownSpots.Add(Cr);
+			}
+			for (int32 K = 1; K <= 3; ++K)
+				for (const float Sd : { -1.f, 1.f })
+				{
+					FTownSpot Cr; Cr.Kind = TS_Crystal; Cr.At = Mid - Ua * (2600.f + 1200.f * K) + Va * Sd * 600.f; Cr.Yaw = Ua.Rotation().Yaw; TownSpots.Add(Cr);
+				}
 		}
 		FTownSpot Bd; Bd.Kind = TS_Board; Bd.At = Mid - Va * 700.f + Ua * 450.f; Bd.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(Bd);
 		for (int32 K = 0; K < 4; ++K)
@@ -871,6 +938,16 @@ void ARDSection::PlanTown(FRandomStream& R)
 			{
 				FTownSpot St; St.Kind = TS_Statue; St.At = CDoor - Ua * 100.f + Va * Sd * 1050.f; St.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(St);
 			}
+		}
+		if (bMage)
+		{
+			// the mage city's people before the black tower: the archmage (its elder: talk, quests) before its door, the Spire's
+			// wardens at the door, apprentices about the square, a rune circle before the tower's door
+			const FVector Pz = (TileWorld(TownSquare.Min) + TileWorld(TownSquare.Max - FIntPoint(1, 1))) * 0.5f;
+			FTownPost Am; Am.Role = ERDTownRole::Elder; Am.At = CDoor - Ua * 450.f - Va * 520.f; Am.Yaw = (-Ua).Rotation().Yaw; TownPosts.Add(Am);
+			for (int32 K = 0; K < 2; ++K) { FTownPost Wd; Wd.Role = ERDTownRole::Soldier; Wd.At = CDoor - Ua * 150.f + Va * (K ? 520.f : -520.f); Wd.Yaw = (-Ua).Rotation().Yaw; Wd.Index = 3 + K; TownPosts.Add(Wd); }
+			for (int32 K = 0; K < 5; ++K) { FTownPost Ap; Ap.Role = ERDTownRole::Pilgrim; Ap.At = Pz + Va * ((K % 3 - 1) * 900.f) + Ua * ((K / 3) * 900.f - 450.f); Ap.Wander = 2200.f; Ap.Index = 4 + K; TownPosts.Add(Ap); }
+			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = CDoor - Ua * 900.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
 		}
 		if (bForge)
 		{
@@ -961,6 +1038,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 			case TK_Workshop: Post(ERDTownRole::Worker, Ctr, 250.f, 10 + BI); Post(ERDTownRole::Worker, TileWorld(B.DoorTile) - In_ * 300.f, 3000.f, 30 + BI); break;
 			// (the port's warehouses: a dockhand inside among the crates, another on the quay outside)
 			case TK_Warehouse: Post(ERDTownRole::Dockhand, Ctr, 300.f, 10 + BI); Post(ERDTownRole::Dockhand, TileWorld(B.DoorTile) - In_ * 300.f, 2500.f, 30 + BI); break;
+			// (the mage city: scribes among a library's shelves (the town's own monks), alchemists at a laboratory's tables (its workers))
+			case TK_Library: Post(ERDTownRole::Monk, Ctr, 300.f, 10 + BI); Post(ERDTownRole::Monk, Inside, 0.f, 30 + BI); break;
+			case TK_Laboratory: Post(ERDTownRole::Worker, Ctr, 250.f, 10 + BI); Post(ERDTownRole::Worker, TileWorld(B.DoorTile) - In_ * 300.f, 2500.f, 30 + BI); break;
+			// (an apprentice at a study's desks; two at a meditation chamber's circle, still)
+			case TK_Study: Post(ERDTownRole::Pilgrim, Ctr, 150.f, 10 + BI); break;
+			case TK_Meditation: Post(ERDTownRole::Pilgrim, Ctr + FVector(In_.Y, -In_.X, 0) * 230.f, 0.f, 10 + BI); Post(ERDTownRole::Pilgrim, Ctr - FVector(In_.Y, -In_.X, 0) * 230.f, 0.f, 30 + BI); break;
 			case TK_Monastery: Post(ERDTownRole::Monk, Inside, 0.f, 0); Post(ERDTownRole::Monk, Ctr, 600.f, 1); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 2); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 3); break;
 			case TK_Cathedral:
 				if (B.Rooms.Num() > 1)
@@ -995,6 +1078,7 @@ FName ARDSection::TownPiece(const FTownBld& B, const TCHAR* Part) const
 	if (B.Style == 4) return FName(*FString::Printf(TEXT("Holy.%s"), Part));
 	// (the forge city's soot-dark stone: "Forge.<part>", 894's pieces)
 	if (B.Style == 5) return FName(*FString::Printf(TEXT("Forge.%s"), Part));
+	if (B.Style == 6) return FName(*FString::Printf(TEXT("Mage.%s"), Part));
 	static const TCHAR* Styles[] = { TEXT("Timber"), TEXT("Stone"), TEXT("Thatch"), TEXT("Burnt") };
 	return FName(*FString::Printf(TEXT("Town.%s_%s"), Styles[FMath::Min<int32>(B.Style, 3)], Part));
 }
@@ -1024,6 +1108,8 @@ int32 ARDSection::TownBuildingAt(FVector L) const
 void ARDSection::TownShellBuilding(int32 BI)
 {
 	FTownBld& B = TownBlds[BI];
+	// (the mage city's laboratories: their cauldrons and tables first, from a stream of their own (RDMage.cpp))
+	if (B.Kind == TK_Laboratory) MageLabBuild(BI);
 	FRandomStream R((int32)(B.Seed ^ 0x13579bdfu));
 	const float M = Generator->TileSize, WH = 300.f;
 	// the style: stone for the temple, the smithy and the barracks; timber or thatch for the rest; a burned house's timbers
@@ -1098,10 +1184,13 @@ void ARDSection::TownShellBuilding(int32 BI)
 	}
 	if (B.Kind == TK_Cathedral) { CathedralShell(BI); return; }
 	if (B.Kind == TK_Foundry) { FoundryShell(BI); return; }
+	if (B.Kind == TK_Spire) { SpireShell(BI); return; }
 	// (the holy city: its houses of white stone (Town.Holy_*), a burned one's timbers as anywhere; the forge city's of soot-dark
 	// stone (Forge.*, 2026-11-07))
 	if (Generator->TownPlan == 1) B.Style = B.State == 1 ? 3 : 4;
 	else if (Generator->TownPlan == 2) B.Style = B.State == 1 ? 3 : 5;
+	// (the mage city's houses of well-kept grey-blue stone: "Mage.<part>", 906's pieces)
+	else if (Generator->TownPlan == 4) B.Style = B.State == 1 ? 3 : 6;
 	else
 	B.Style = B.State == 1 ? 3 : (B.Kind == TK_Temple || B.Kind == TK_Smithy || B.Kind == TK_Barracks || B.Kind == TK_Chapel || B.Kind == TK_SluiceHouse) ? 1
 	        : B.Kind == TK_Witch ? 2 : (R.FRand() < 0.3f ? 2 : R.FRand() < 0.85f ? 0 : 1);
@@ -1800,6 +1889,8 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			case TS_Barricade: BarricadeBuild(Sp); break;
 			// (the port's harbour (2026-11-07, RDPort.cpp): piers, ships, boats, wrecks, the drowned dead, gibbets, dock props)
 			case TS_Pier: case TS_Ship: case TS_Boat: case TS_Wreck: case TS_Body: case TS_Gibbet: case TS_DockProps: PortSpotBuild(Sp); break;
+			// (the mage city's (RDMage.cpp): a rune circle, a crystal pylon)
+			case TS_Rune: case TS_Crystal: MageSpotBuild(Sp); break;
 			default: break;
 			}
 			if (Sp.Kind == TS_Gibbet || Sp.Kind == TS_DockProps) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(260.f, Sp.Kind == TS_DockProps ? 900.f : 260.f), true);
@@ -1810,6 +1901,7 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			if (Sp.Kind == TS_Cart) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(320.f, 160.f), true);
 			if (Sp.Kind == TS_Barricade) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(140.f, 330.f), true);
 			if (Sp.Kind == TS_Fountain) MarkBlocked(Sp.At, 0.f, FVector2D(600.f, 600.f), true);
+			if (Sp.Kind == TS_Crystal) MarkBlocked(Sp.At, 0.f, FVector2D(200.f, 200.f), true);
 			if (Sp.Kind == TS_Mill) MarkBlocked(Sp.At, 0.f, FVector2D(900.f, 900.f), true);
 		}
 		break;

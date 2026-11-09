@@ -869,6 +869,16 @@ void FRDWildWorld::PlaceTowns()
 	V.Site = FVector2D(55000.0, FMath::Min(75000.0, NeCoast.Y - 35000.0));
 	for (int32 I = 0; I < 60 && Continent(V.Site.X, V.Site.Y) < 0.08f; ++I) V.Site.Y -= 500.0;
 	Towns.Add(A); Towns.Add(G); Towns.Add(V);
+	// (Kethrys Spire, the mage city round its black tower (the list of 2026-11-08b): the road's next town after Graymourne, tiers
+	// 15 to 20: north-west, about 80 km from Graymourne and well inland; walked in from the coast until the land is solid)
+	FRDWildTown K; K.Name = TEXT("Kethrys Spire"); K.Seed = (int32)(Hash(4, 0, Seed) & 0x3FFFFFFF); K.Kind = TEXT("city");
+	K.Tiles = 168; K.Plan = 4;
+	K.Site = FVector2D(G.Site.X - 45000.0, -70000.0);
+	{
+		const FVector2D Inland = (FVector2D(Mx, -20000.0) - K.Site).GetSafeNormal();
+		for (int32 I = 0; I < 80 && Continent(K.Site.X, K.Site.Y) < 0.08f; ++I) K.Site += Inland * 1000.0;
+	}
+	Towns.Add(K);
 }
 
 void FRDWildWorld::MakeRivers()
@@ -1143,6 +1153,7 @@ void FRDWildWorld::MakeRoads()
 	MakeRoad(Out(1, 2), Out(2, 1), 1, 2);       // Ashenreach - Graymourne
 	MakeRoad(Out(0, 3), Out(3, 0), 0, 3);       // Brokenspire - Vel Morrath
 	MakeRoad(Out(1, 3), Out(3, 1), 1, 3);       // Ashenreach - Vel Morrath
+	if (Towns.Num() > 4) MakeRoad(Out(2, 4), Out(4, 2), 2, 4);       // Graymourne - Kethrys Spire (the list of 2026-11-08b)
 }
 
 void FRDWildWorld::HashSegments()

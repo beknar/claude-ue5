@@ -1,0 +1,256 @@
+{
+ "tag": "ks7",
+ "plan": [
+  "spire"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "spire",
+   "ok": true,
+   "site_km": [
+    152.4,
+    -70.0
+   ],
+   "from_graymourne_km": 83.2,
+   "north_west": true,
+   "tier_here": 20,
+   "tier_half_way_from_graymourne": 18,
+   "state": [
+    "4",
+    "Kethrys Spire",
+    "0",
+    "1",
+    "0",
+    "7.5",
+    "1",
+    "1",
+    "1",
+    "15240000",
+    "-7000000",
+    "0"
+   ],
+   "plan": 4,
+   "dungeon_level": "/Game/RandomDungeon/Maps/kethrys_spire",
+   "kinds": {
+    "temple": 1,
+    "tavern": 1,
+    "smithy": 1,
+    "store": 1,
+    "healer": 1,
+    "storehouse": 1,
+    "barracks": 1,
+    "chapel": 1,
+    "library": 2,
+    "laboratory": 2,
+    "study": 2,
+    "meditation chamber": 2,
+    "home": 92,
+    "black tower": 1
+   },
+   "homes": {
+    "all": 92,
+    "burned": 1,
+    "boarded": 1
+   },
+   "tower": {
+    "label": "The Black Tower of Kethrys Spire",
+    "rooms": 2,
+    "from_middle_m": 14,
+    "top_m": 69.1
+   },
+   "spots": {
+    "circle": 1,
+    "mill": 1,
+    "tower": 20,
+    "gate": 1,
+    "well": 1,
+    "rune": 2,
+    "crystal": 10,
+    "board": 1,
+    "stall": 4,
+    "lamp": 4,
+    "grave": 16,
+    "graveyard": 1,
+    "tent": 3,
+    "still": 1,
+    "altar": 1,
+    "bar": 1,
+    "smith": 1,
+    "counter": 1,
+    "basin": 1,
+    "stash": 1
+   },
+   "inside": {
+    "temple": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "tavern": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "smithy": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 3
+    },
+    "store": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 18
+    },
+    "healer": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 5
+    },
+    "storehouse": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 19
+    },
+    "barracks": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 16
+    },
+    "chapel": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "library": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 0
+    },
+    "laboratory": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 4
+    },
+    "study": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 0
+    },
+    "meditation chamber": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 0
+    },
+    "home": {
+     "n": 91,
+     "with_rooms": 91,
+     "with_door": 91,
+     "containers": 254
+    },
+    "black tower": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 9
+    }
+   },
+   "containers": 332,
+   "doors": 127,
+   "piece_counts": {
+    "SM_TowerRound_Window_8m_A": 3,
+    "SM_TowerRound_Border_Top_A": 1,
+    "SM_TowerRound_Cap_4m_A": 1,
+    "SM_IceCrystal01": 10,
+    "SM_StatuePlinth": 10,
+    "SM_Cauldron": 3,
+    "SM_Kit_PrepTable": 44,
+    "SM_S_Potion": 8,
+    "SM_Rune_01a": 20
+   },
+   "window_lights": {
+    "n": 4,
+    "moved_cm_min": 532.2,
+    "moved_cm_max": 541.6,
+    "lowest_m": 36.2
+   },
+   "roles": {
+    "Preacher": 1,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Refugee": 4,
+    "Elder": 1,
+    "Soldier": 5,
+    "Pilgrim": 11,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Monk": 4,
+    "Worker": 4,
+    "Townsfolk": 71
+   },
+   "titles": [
+    "Archivist Mirel Ondra",
+    "Archmage Velis Kethran",
+    "Bess Lanterne",
+    "Hollen the Runesmith",
+    "Mother Selwyn",
+    "Oswin the Ledger",
+    "Quillon Vey",
+    "Sister Amarah",
+    "Warden-Captain Iska Thorne"
+   ],
+   "archmage": {
+    "found": true,
+    "said": "talk",
+    "panel": [
+     "What is the Black Tower?",
+     "Why do you need me?",
+     "Quest: The Gate of a Hundred Years",
+     "Farewell"
+    ]
+   },
+   "gate_from_tower_m": 26,
+   "gate_without_key": "locked",
+   "gate_with_keys": "catacombs"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_ks7_ks_tower_front.png",
+  "bs_ks7_ks_tower_front_night.png",
+  "bs_ks7_ks_tower_front_night2.png",
+  "bs_ks7_ks_square.png",
+  "bs_ks7_ks_tower_afar.png",
+  "bs_ks7_ks_tower_night.png",
+  "bs_ks7_ks_tower_night2.png",
+  "bs_ks7_ks_library.png",
+  "bs_ks7_ks_laboratory.png",
+  "bs_ks7_ks_study.png",
+  "bs_ks7_ks_meditation.png",
+  "bs_ks7_ks_gate.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

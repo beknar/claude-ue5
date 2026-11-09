@@ -22,6 +22,7 @@
 #include "HAL/PlatformTime.h"
 #include "Misc/ScopeExit.h"
 #include "RD/RDMistward.h"
+#include "RD/RDTown.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeon, Log, All);
 
@@ -637,7 +638,9 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 	L->SetWorldLocation(Loc);
 	L->SetIntensityUnits(ELightUnits::Candelas);
 	L->SetIntensity(Candelas);
-	L->SetLightColor(Color);
+	// (a dungeon's own light (the list of 2026-11-08b: the Black Tower's cold violet): every light of its sets drawn toward the
+	// level's tint; 0 on every other level)
+	L->SetLightColor(Generator && !Generator->bTown && Generator->DungeonLightTintShare > 0.f ? FMath::Lerp(Color, Generator->DungeonLightTint, FMath::Clamp(Generator->DungeonLightTintShare, 0.f, 1.f)) : Color);
 	L->SetAttenuationRadius(Radius);
 	L->SetSourceRadius(6.f);
 	L->SetCastShadows(bShadows);
@@ -1587,6 +1590,27 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	}
 	case ERDRoomKind::Library:
 	{
+		// (Kethrys Spire's meditation chambers (the list of 2026-11-08b): a rune circle glowing on the floor in the room's middle,
+		// small rune stones round it, a ring of candles, a candle stand in each quarter; no shelves or desks)
+		bool bMeditation = false;
+		if (Generator->bTown && Generator->TownPlan == 4)
+			for (const FTownBld& Tb : TownBlds) if (Tb.Kind == TK_Meditation && Tb.Rooms.Contains(RI)) { bMeditation = true; break; }
+		if (bMeditation)
+		{
+			const FVector Mc((B.Min.X + B.Max.X) * 0.5f, (B.Min.Y + B.Max.Y) * 0.5f, GetActorLocation().Z);
+			AddEffect(TEXT("MageRune"), Mc + FVector(0, 0, 6.f), 1.2f);
+			AddLight(Mc + FVector(0, 0, 140.f), FLinearColor(0.5f, 0.45f, 1.f), 90.f, 900.f, false, 0.15f);
+			for (int32 K = 0; K < 4; ++K)
+				AddPieceAt(TEXT("Mage.RuneStone"), Mc + FRotator(0, 45.f + 90.f * K, 0).RotateVector(FVector(190.f, 0, 0)), 45.f + 90.f * K + 180.f, 0.35f);
+			MarkBlocked(Mc, 0.f, FVector2D(300.f, 300.f), false);
+			for (int32 K = 0; K < 8; ++K)
+			{
+				const FVector P = Mc + FRotator(0, 22.5f + 45.f * K, 0).RotateVector(FVector(250.f, 0, 0));
+				if (LaneFree(Rm, P, 40.f)) Candles(P, 6.f);
+			}
+			for (const FVector& Q : Quads) { const FVector P = (Q + Mc) * 0.5f + (Q - Mc).GetSafeNormal2D() * 120.f; if (LaneFree(Rm, P, 60.f)) Center(TEXT("CandleStand"), P, 0.f); }
+			break;
+		}
 		FurnishWalls(R, Rm, { TEXT("Bookshelf"), TEXT("Bookshelf"), TEXT("Bookshelf2") }, 240.f, 0.9f);
 		for (const FVector& Q : Quads)
 		{

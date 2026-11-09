@@ -27,7 +27,7 @@ $KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/(Kitche
 $repo = Split-Path -Parent $PSScriptRoot
 $ue = "E:\Program Files\Epic Games\UE_5.8"
 $proj = "$repo\claude_ue5\claude_ue5.uproject"
-$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath", "/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers"
+$maps = "/Game/RandomDungeon/Maps/mistward_castle_select", "/Game/RandomDungeon/Maps/brokenspire", "/Game/RandomDungeon/Maps/mistward_castle", "/Game/RandomDungeon/Maps/vel_morrath", "/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers", "/Game/RandomDungeon/Maps/kethrys_spire"
 if (-not $Out) { $Out = "$repo\builds\mistward_castle" }
 # (a relative -Out is the caller's folder: handed on as it is, UnrealAutomationTool archived it under the engine's own folder)
 elseif (-not [IO.Path]::IsPathRooted($Out)) { $Out = Join-Path (Get-Location).Path $Out }
@@ -116,6 +116,7 @@ public static class RDWin {
               #  (DescendToCatacombs with that town's level), and out to both cities)
               @{ name = "war_engine"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:ashenreach", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "war_engine" },
               @{ name = "sewers"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:graymourne", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "sewers" },
+    @{ name = "kethrys_spire"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:kethrysspire", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "kethrys_spire" },
               @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
               @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true },

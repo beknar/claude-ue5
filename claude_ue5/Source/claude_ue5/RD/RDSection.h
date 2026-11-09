@@ -265,6 +265,8 @@ public:
 	/** the gate (its tiles' middle, world; the way out) and the Mistgate (the castle hall's back wall: walking into it opens
 	 *  Mistward Castle); the castle hall's room */
 	FVector TownGate = FVector::ZeroVector, TownGateOut = FVector::ZeroVector, MistgateAt = FVector::ZeroVector, MistgateNormal = FVector::ZeroVector;
+	/** Kethrys Spire's black tower: the top of its round tower (cm over the town's ground; 0 none) (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Town") float TowerTopZ = 0.f;
 	int32 CastleHallRoom = -1, CastleBld = -1;
 	/** the castle's round corner towers (the user's of 2026-11-02: medieval walls, not the dungeon's arches): their middles
 	 *  (world, z 0), which of them holds the stair up to the wall walk (-1 none), its ground door and its door onto the walk */
@@ -527,6 +529,11 @@ private:
 	void SewerGateBuild(int32 BI);
 	bool InHarbourWater(const FIntPoint& T) const;
 	void FoundryShell(int32 BI);
+	/** Kethrys Spire's mage city (the list of 2026-11-08b, RDMage.cpp): the black tower (its gatehouse and hall, the round tower
+	 *  over the hall, its cap, the sealed gate), a rune circle or a crystal pylon outdoors, a laboratory's cauldrons and tables */
+	void SpireShell(int32 BI);
+	void MageSpotBuild(const FTownSpot& Sp);
+	void MageLabBuild(int32 BI);
 	void ForgeAnvilBuild(const FTownSpot& Sp);
 	void OpenForgeBuild(const FTownSpot& Sp, bool bWork = true);
 	void OreCartBuild(const FTownSpot& Sp);

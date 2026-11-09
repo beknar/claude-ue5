@@ -2246,6 +2246,208 @@ def step_descendwar():
           and res["enter_counter"] == 1 and res["back"]["town"] == "Ashenreach" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_foundry_door_m"] or 99) < 12)
     step_result("descendwar", ok, **res)
 
+# ------------------------------------------------------------------------------------------------ Kethrys Spire, the mage city
+def step_spire():
+    """Kethrys Spire (the list of 2026-11-08b's fourth phase: "a mage-city clustered around a black tower that hasn't opened its
+    gates in a century. there are magical effects, laboratories, libraries, stone houses. this city is not poor"): north-west
+    of Graymourne, the road's tier 20 there; built as she comes, the mage plan: the black tower at its middle (its gatehouse and
+    hall, the round tower over the hall 50 m and more high with its crown and cap), the square with its rune circle and crystal
+    pylons, more pylons down the main road, libraries and laboratories (each laboratory its cauldron and table of potions), study rooms and
+    meditation chambers (each chamber its rune circle: four small rune stones), the upper storeys' lights moving (lights tagged
+    SpireWindow, read 2 s apart, in the tower's upper half), the trades, eighty homes or more of grey-blue stone, few burned or boarded; every building's rooms, doors and containers; its
+    people its own (the archmage, the archivist, the warden-captain, scribes, alchemists, apprentices, wardens) and Brokenspire's
+    elder not among them; the archmage's panel with his first quest; the sealed gate at the hall's far wall refused without the
+    Spire Key and opened with it (dry runs); pictures of the tower from the square and from afar (by day and at 23:00), the
+    square, a library, a laboratory, a study, a meditation chamber, the gate"""
+    g = G["gen"]; res = {}
+    ti, x, y = town_of("Kethrys Spire")
+    tg, gx, gy = town_of("Graymourne")
+    res["site_km"] = [round(x / 1000, 1), round(y / 1000, 1)]; res["from_graymourne_km"] = round(math.hypot(x - gx, y - gy) / 1000, 1)
+    res["north_west"] = x > 80000 and y < -30000
+    res["tier_here"] = g.get_wild_tier_at(x, y); res["tier_half_way_from_graymourne"] = g.get_wild_tier_at((x + gx) / 2, (y + gy) / 2)
+    ti, x, y = yield from to_town("Kethrys Spire")
+    st = str(g.get_wild_town_state()).split("|"); res["state"] = st
+    res["plan"] = g.get_editor_property("town_plan")
+    res["dungeon_level"] = str(g.current_dungeon_level())
+    S = section(); B = blds()
+    kinds = {}
+    for b in B: kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
+    res["kinds"] = kinds
+    homes = [b for b in B if b["kind"] == "home"]
+    res["homes"] = {"all": len(homes), "burned": sum(1 for b in homes if b["state"] == 1), "boarded": sum(1 for b in homes if b["state"] == 2)}
+    tw = next((b for b in B if b["kind"] == "black tower"), None)
+    res["tower"] = {"label": tw["label"], "rooms": tw["rooms"], "from_middle_m": round(math.hypot(tw["c"].x / 100 - x, tw["c"].y / 100 - y)), "top_m": round(S.get_editor_property("tower_top_z") / 100, 1)} if tw else None
+    sk = {}
+    for p in spots(): sk[p["kind"]] = sk.get(p["kind"], 0) + 1
+    res["spots"] = sk
+    n_cont = S.get_num_containers()
+    conts = [S.get_container_location(i) for i in range(n_cont)]
+    doors = [S.get_door_location(i) for i in range(S.get_num_doors())]
+    per = {}
+    for b in B:
+        if b["state"] == 1: continue
+        k = b["kind"]; e = per.setdefault(k, {"n": 0, "with_rooms": 0, "with_door": 0, "containers": 0})
+        e["n"] += 1; e["with_rooms"] += 1 if b["rooms"] > 0 else 0
+        e["with_door"] += 1 if any(dist2(d, b["door"]) < 250 for d in doors) else 0
+        e["containers"] += sum(1 for c in conts if S.town_building_at(c) == b["i"])
+    res["inside"] = per; res["containers"] = n_cont; res["doors"] = len(doors)
+    res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_TowerRound_Window_8m_A", "SM_TowerRound_Border_Top_A", "SM_TowerRound_Cap_4m_A", "SM_IceCrystal01", "SM_StatuePlinth",
+                                                              "SM_Cauldron", "SM_Kit_PrepTable", "SM_S_Potion", "SM_Rune_01a")}
+    # (the upper storeys' lights that move: each read twice, 2 s apart; how far each went round, how high the lowest stands)
+    def wlights(): return [c.get_world_location() for c in S.get_components_by_tag(unreal.PointLightComponent, "SpireWindow")]
+    w0 = wlights(); yield from wait(2.0); w1 = wlights()
+    res["window_lights"] = {"n": len(w0), "moved_cm_min": round(min((dist2(a, b) for a, b in zip(w0, w1)), default=0.0), 1),
+                            "moved_cm_max": round(max((dist2(a, b) for a, b in zip(w0, w1)), default=0.0), 1),
+                            "lowest_m": round(min((a.z for a in w0), default=0.0) / 100, 1)}
+    F = folk(); roles = {}
+    for f in F: roles[f["role"]] = roles.get(f["role"], 0) + 1
+    res["roles"] = roles; res["titles"] = sorted({f["title"] for f in F if f["role"] in ("Elder", "Scholar", "Captain", "Priest", "Smith", "Trader", "Healer", "Keeper", "Innkeeper")})
+    quiet(True)
+    am = talk_to("Elder"); yield from wait(0.4)
+    said = str(g.interact_nearest(G["pawn"].get_actor_location())) if am else None; yield from rwait(0.5)
+    res["archmage"] = {"found": am is not None, "said": said, "panel": [p[1] for p in panel()][:8]}
+    g.close_town_panel(); yield from wait(0.3)
+    mg = place("mistgate"); door = place("castle door"); sq = place("square")
+    res["gate_from_tower_m"] = round(dist2(mg, tw["c"]) / 100) if mg and tw else None
+    if door and tw:
+        yaw = math.degrees(math.atan2(tw["c"].y - door.y, tw["c"].x - door.x))
+        bk = V(door.x - math.cos(math.radians(yaw)) * 2200.0, door.y - math.sin(math.radians(yaw)) * 2200.0, 0)
+        put(bk, yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=22, yaw=yaw)); yield from wait(1.2)
+        shot("ks_tower_front"); yield from rwait(1.2)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=40, yaw=yaw)); h_was = g.get_town_hour(); g.set_town_hour(23.0); yield from wait(5.0)
+        shot("ks_tower_front_night"); yield from rwait(1.5); shot("ks_tower_front_night2"); yield from rwait(1.2)
+        g.set_town_hour(h_was); yield from wait(1.0)
+    if sq:
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=6, yaw=math.degrees(math.atan2(tw["c"].y - sq.y, tw["c"].x - sq.x)) + 70.0 if tw else 0)); put(sq); yield from wait(1.0)
+        shot("ks_square"); yield from rwait(1.2)
+    # (the tower from out beyond the wall, on the main road: above the roofs)
+    gate = place("gate")
+    if gate and tw:
+        yaw = math.degrees(math.atan2(tw["c"].y - gate.y, tw["c"].x - gate.x))
+        out = V(gate.x - math.cos(math.radians(yaw)) * 4000.0, gate.y - math.sin(math.radians(yaw)) * 4000.0, 0)
+        g.wild_put_her(out.x / 100.0, out.y / 100.0); yield from wait(3.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=14, yaw=yaw)); G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); yield from wait(1.5)
+        shot("ks_tower_afar"); yield from rwait(1.2)
+        # (at night the upper windows' moving light shows: two pictures 1.5 s apart)
+        h_was = g.get_town_hour(); g.set_town_hour(23.0); yield from wait(5.0)
+        shot("ks_tower_night"); yield from rwait(1.5); shot("ks_tower_night2"); yield from rwait(1.2)
+        g.set_town_hour(h_was); yield from wait(1.0)
+    # (a library and a laboratory inside, from their door)
+    for kd in ("library", "laboratory", "study", "meditation chamber"):
+        b = next((b for b in B if b["kind"] == kd and b["state"] == 0), None)
+        if b:
+            yaw = math.degrees(math.atan2(b["c"].y - b["door"].y, b["c"].x - b["door"].x))
+            put(V(b["door"].x + math.cos(math.radians(yaw)) * 150.0, b["door"].y + math.sin(math.radians(yaw)) * 150.0, 0), yaw=yaw)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yaw)); yield from wait(1.0)
+            shot(f"ks_{kd.split()[0]}"); yield from rwait(1.2)
+    # (the sealed gate: refused without the Spire Key, open with it (dry runs))
+    if mg and tw:
+        yaw = math.degrees(math.atan2(mg.y - tw["c"].y, mg.x - tw["c"].x))
+        put(V(mg.x - (mg.x - tw["c"].x) * 0.45, mg.y - (mg.y - tw["c"].y) * 0.45, 0), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=yaw)); yield from wait(1.0)
+        shot("ks_gate"); yield from rwait(1.2)
+        for keys, tag in ((False, "gate_without_key"), (True, "gate_with_keys")):
+            g.debug_all_dungeon_keys(keys); g.set_editor_property("travel_dry_run", True)
+            put(V(mg.x - (mg.x - tw["c"].x) * 0.02, mg.y - (mg.y - tw["c"].y) * 0.02, 0)); yield from wait(1.5)
+            res[tag] = str(g.get_editor_property("last_travel"))
+            put(V(tw["c"].x, tw["c"].y, 0)); yield from wait(0.5)
+            g.set_editor_property("travel_dry_run", False)
+        g.debug_all_dungeon_keys(True)
+    quiet(False)
+    k = kinds; pc = res["piece_counts"]
+    ok = (res["north_west"] and 60 <= res["from_graymourne_km"] <= 120 and res["tier_here"] == 20 and 16 <= res["tier_half_way_from_graymourne"] <= 19
+          and res["plan"] == 4 and tw is not None and res["tower"]["rooms"] == 2 and res["tower"]["from_middle_m"] < 120 and res["tower"]["top_m"] >= 50
+          and "kethrys_spire" in res["dungeon_level"] and k.get("library", 0) >= 2 and k.get("laboratory", 0) >= 2 and k.get("study", 0) >= 1 and k.get("meditation chamber", 0) >= 1
+          and res["window_lights"]["n"] >= 2 and res["window_lights"]["moved_cm_min"] > 50 and res["window_lights"]["lowest_m"] > res["tower"]["top_m"] * 0.4
+          and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple")) and k.get("witch's hut", 0) == 0
+          and res["homes"]["all"] >= 80 and res["homes"]["burned"] + res["homes"]["boarded"] < res["homes"]["all"] * 0.1
+          and sk.get("rune", 0) >= 2 and sk.get("crystal", 0) >= 8 and pc["SM_TowerRound_Window_8m_A"] >= 2 and pc["SM_TowerRound_Cap_4m_A"] >= 1
+          and pc["SM_IceCrystal01"] >= 8 and pc["SM_Cauldron"] >= 2 and pc["SM_Kit_PrepTable"] >= 2 and pc["SM_Rune_01a"] >= 6 + 4 * k.get("meditation chamber", 0)
+          and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
+          and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Monk", "Worker", "Pilgrim", "Soldier"))
+          and "Archmage Velis Kethran" in res["titles"] and "Aldric Venn" not in res["titles"]
+          and any("Hundred Years" in str(p) for p in res["archmage"]["panel"]) and res.get("gate_without_key") == "locked" and res.get("gate_with_keys") == "catacombs")
+    step_result("spire", ok, **res)
+
+def step_descendspire():
+    """the black tower's gate, both ways: down into its dungeon (the level kethrys_spire, 907: its arcane halls, its casters
+    that shoot, its way back) with her whole state; every caster kind spawned in a row, its clips playing; then back up by
+    the Escape menu's "Return to Kethrys Spire": the city built round her again and she stands before the tower's door"""
+    res = {}
+    if "brokenspire" not in G["w"].get_path_name(): yield from travel("brokenspire", via_menu)
+    yield from as_hero("Warrior")
+    yield from to_town("Kethrys Spire")
+    g = G["gen"]; g.debug_all_dungeon_keys(True)
+    res["set_town"] = yield from set_up("Warrior", "town")
+    before = snapshot()
+    mg = place("mistgate")
+    yield from travel("kethrys_spire", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]
+    res["down"] = yield from leg_check(before, "Warrior through the tower's gate")
+    p = G["pawn"].get_actor_location()
+    lines = [str(l) for l in g.get_menu_lines()]
+    casters = {str(m.get_editor_property("name")): bool(m.get_editor_property("shoots")) for m in g.get_editor_property("monsters") if int(m.get_editor_property("weight") * 10) >= 30}
+    res["tower"] = {"key": str(g.get_editor_property("dungeon_key")), "title": str(g.get_editor_property("dungeon_title")), "themes": [str(t) for t in g.get_editor_property("tier_themes")],
+                    "section": [g.world_to_section(p).x, g.world_to_section(p).y], "return_line": next((l for l in lines if "Return to" in l), None),
+                    "return_town": str(G["gi"].get_editor_property("return_town")), "caster_kinds": casters}
+    try: res["enter_counter"] = G["gi"].get_counter("kethrys:enter")
+    except Exception as e: res["enter_counter"] = str(e)
+    shot("ks_tower_dungeon_start"); yield from rwait(1.2)
+    quiet(True)
+    hc = g.get_start_room_center(); kinds_ = sorted(casters)
+    ms = []
+    for j, k_ in enumerate(kinds_):
+        m = g.spawn_monster_named(k_, V(hc.x + 900.0, hc.y + (j - (len(kinds_) - 1) / 2.0) * 320.0, hc.z + 120.0), 1, 1.0, 0.0, 1.0)
+        if m: ms.append(m)
+    yield from wait(1.5)
+    def pose(m):
+        c = m.get_component_by_class(unreal.SkeletalMeshComponent); a = m.get_actor_location(); out = []
+        for i in range(0, min(c.get_num_bones(), 60), 3):
+            q = c.get_socket_location(c.get_bone_name(i)); out.append((q.x - a.x, q.y - a.y, q.z - a.z))
+        return out
+    p0 = {}
+    for m in ms:
+        try: p0[m] = pose(m)
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    yield from wait(0.5)
+    res["caster_clips"] = {}
+    for m, a in p0.items():
+        try:
+            b = pose(m); mv = max(math.dist(x_, y_) for x_, y_ in zip(a, b)) if a and b else 0.0
+            res["caster_clips"][str(m.get_editor_property("monster_name"))] = {"bones_moved_cm": round(mv, 2), "moving": mv > 0.3,
+                                                                                "parts": len([c for c in m.get_components_by_class(unreal.SkeletalMeshComponent)]) - 1}
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    res["casters_spawned"] = len(ms)
+    if ms:
+        put(V(hc.x - 500.0, hc.y, hc.z), yaw=0.0)
+        G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3, yaw=0.0)); yield from wait(1.0)
+        shot("ks_casters"); yield from rwait(1.2)
+        G["pawn"].set_actor_hidden_in_game(False)
+        for m in ms:
+            try: m.destroy_actor()
+            except Exception: pass
+    quiet(False)
+    res["set_tower"] = yield from set_up("Warrior", "castle")
+    before = snapshot()
+    yield from travel("brokenspire", via_menu)
+    g = G["gen"]
+    t0 = time.time(); st = []
+    while time.time() - t0 < 150:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Kethrys Spire" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    res["up"] = yield from leg_check(before, "Warrior back out of the tower's gate")
+    p = G["pawn"].get_actor_location(); ra = G["gi"].get_editor_property("return_at")
+    door = place("castle door")
+    res["back"] = {"town": st[1] if len(st) > 1 else None, "from_return_at_m": round(dist2(p, ra) / 100, 2), "from_tower_door_m": round(dist2(p, door) / 100, 1) if door else None}
+    e = res["tower"]
+    ok = (res["down"]["ok"] and res["up"]["ok"] and res["down"]["level"] == "kethrys_spire" and e["key"] == "kethrys" and e["section"] == [0, 0]
+          and e["return_line"] and "Kethrys Spire" in e["return_line"] and e["return_town"] == "Kethrys Spire" and len(e["caster_kinds"]) >= 5 and all(e["caster_kinds"].values())
+          and res.get("casters_spawned", 0) >= 5 and all(c["moving"] for c in res["caster_clips"].values())
+          and res["enter_counter"] == 1 and res["back"]["town"] == "Kethrys Spire" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_tower_door_m"] or 99) < 15)
+    step_result("descendspire", ok, **res)
+
 # ------------------------------------------------------------------------------------------------ Graymourne, the port
 def step_port():
     """Graymourne (the user's spec of 2026-11-07, docs/graymourne.txt): on the northern coast, the sea within 1.5 km north of
@@ -3156,7 +3358,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9})
+              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)
