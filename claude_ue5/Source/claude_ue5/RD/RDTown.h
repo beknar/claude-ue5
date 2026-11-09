@@ -48,7 +48,7 @@ inline FString RDTownKindName(uint8 Kind)
 	                                TEXT("home"), TEXT("chapel"), TEXT("barracks"), TEXT("witch's hut"), TEXT("cathedral"), TEXT("monastery"), TEXT("foundry"), TEXT("workshop"),
 	                                TEXT("sluice house"), TEXT("warehouse"), TEXT("black tower"), TEXT("library"), TEXT("laboratory"),
 	                                TEXT("study"), TEXT("meditation chamber"),
-	                                TEXT("research facility"), TEXT("tower"), TEXT("office block"), TEXT("shop") };
+	                                TEXT("research facility"), TEXT("skyscraper"), TEXT("office block"), TEXT("shop") };
 	return Kind < TK_Count ? FString(Names[Kind]) : FString(TEXT("?"));
 }
 

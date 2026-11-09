@@ -1,5 +1,5 @@
 {
- "tag": "hv8",
+ "tag": "hv11",
  "plan": [
   "spire",
   "holy"
@@ -23,7 +23,7 @@
     "0",
     "1",
     "0",
-    "13.5",
+    "8.1",
     "1",
     "1",
     "1",
@@ -184,6 +184,7 @@
     4,
     4
    ],
+   "static_gate": 0,
    "piece_counts": {
     "SM_TowerRound_Window_8m_A": 3,
     "SM_TowerRound_Border_Top_A": 1,
@@ -197,8 +198,8 @@
    },
    "window_lights": {
     "n": 4,
-    "moved_cm_min": 558.7,
-    "moved_cm_max": 568.6,
+    "moved_cm_min": 561.6,
+    "moved_cm_max": 571.5,
     "lowest_m": 36.2
    },
    "roles": {
@@ -258,14 +259,14 @@
     75.0
    ],
    "north_east": true,
-   "fps_brokenspire_square": 29.3,
+   "fps_brokenspire_square": 28.3,
    "state": [
     "3",
     "Vel Morrath",
     "0",
     "1",
     "0",
-    "4.8",
+    "4.9",
     "2",
     "2",
     "1",
@@ -438,29 +439,29 @@
    },
    "stair_from_cathedral_m": 40,
    "fps": {
-    "plaza": 33.2,
-    "nave": 35.9
+    "plaza": 35.8,
+    "nave": 36.7
    },
    "stair_travel": "catacombs"
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_hv8_ks_tower_front.png",
-  "bs_hv8_ks_tower_front_night.png",
-  "bs_hv8_ks_tower_front_night2.png",
-  "bs_hv8_ks_square.png",
-  "bs_hv8_ks_tower_afar.png",
-  "bs_hv8_ks_tower_night.png",
-  "bs_hv8_ks_tower_night2.png",
-  "bs_hv8_ks_library.png",
-  "bs_hv8_ks_laboratory.png",
-  "bs_hv8_ks_study.png",
-  "bs_hv8_ks_meditation.png",
-  "bs_hv8_ks_gate.png",
-  "bs_hv8_vm_cathedral_front.png",
-  "bs_hv8_vm_plaza.png",
-  "bs_hv8_vm_nave.png"
+  "bs_hv11_ks_tower_front.png",
+  "bs_hv11_ks_tower_front_night.png",
+  "bs_hv11_ks_tower_front_night2.png",
+  "bs_hv11_ks_square.png",
+  "bs_hv11_ks_tower_afar.png",
+  "bs_hv11_ks_tower_night.png",
+  "bs_hv11_ks_tower_night2.png",
+  "bs_hv11_ks_library.png",
+  "bs_hv11_ks_laboratory.png",
+  "bs_hv11_ks_study.png",
+  "bs_hv11_ks_meditation.png",
+  "bs_hv11_ks_gate.png",
+  "bs_hv11_vm_cathedral_front.png",
+  "bs_hv11_vm_plaza.png",
+  "bs_hv11_vm_nave.png"
  ],
  "error": null,
  "windows_shown_again": 3

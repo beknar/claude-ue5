@@ -94,7 +94,7 @@ Built and tested (`884 heaven`, `descendheaven`; `888 world`, `towns`, all with 
 - [ ] **The defenders fought:** each kind spawned and its clips measured playing, a trooper's rounds measured reaching her; none fought hand to hand, the tank (a tank's idle for its walk and death) not seen moving or dying.
 - [ ] **The towers' upper floors and the office blocks' upper storeys** are seen from outside only (no floors or stairs inside); no window is lit at night.
 - [ ] **The cars' wheels do not turn** (each car one merged mesh); they turn back at a street's end by changing lanes at once; they do not stop at crossings or for townsfolk, only for her and each other.
-- [ ] **The trades keep the town's signs and furnishing** (SMITHY, TAVERN, a hearth in a kitchen); the refugees about the gate wear the town's clothes; the square's lamps are fire baskets.
+- [ ] **The trades keep the town's signs and furnishing** (SMITHY, TAVERN, a hearth in a kitchen); the refugees about the gate wear the town's clothes; the square's lamps are fire baskets; the traffic lights show no changing light.
 - [ ] **Its quests taken and turned in**, the counters `heaven:tier`, `:kills`, `:boss` read after a fight.
 - [ ] **The city's frame rate settled:** 13 to 26 a second just after the city was built round her (a play window of 1280 x 720).
 - [ ] **The packaged game:** `869` and `package_mistward.ps1` name `heaven_fortress` and its run down from the city (`-RDTownGo=dungeon:heaven`); not packaged yet. The merged meshes and the materials made by `908` need the instanced-mesh usage (`M_HV_Surface` has it).

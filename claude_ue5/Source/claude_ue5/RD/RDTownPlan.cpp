@@ -406,12 +406,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 	{
 		TArray<FVector2D> Nodes; int32 NAnchor = 0;
 		if (!bModern)
+		{
 		for (int32 U = GateU + 8; U < Cu0 - 9; U += 13) Nodes.Add(FVector2D(U + 0.5f, Vc + 0.5f));
 		for (int32 V = 6; V < S - 6; V += 13) if (InsidePg(Xu + 1.5f, V + 0.5f) && BorderDistPg(Xu + 1.5f, V + 0.5f) > 6.f && (V < SqV0 - 3 || V > SqV1 + 3)) Nodes.Add(FVector2D(Xu + 1.5f, V + 0.5f));
-		if (bModern) Nodes.Reset();
 		NAnchor = Nodes.Num();
 		// (about fifty places: with thirty, 12 tiles or more apart, the homes found frontage for 94, against 170 on the old grid)
-		for (int32 T = 0; T < (bModern ? 0 : 2400) && Nodes.Num() < NAnchor + 52; ++T)
+		for (int32 T = 0; T < 2400 && Nodes.Num() < NAnchor + 52; ++T)
 		{
 			const FVector2D Q(R.FRandRange(5.f, S - 5.f), R.FRandRange(5.f, S - 5.f));
 			if (!InsidePg(Q.X, Q.Y) || BorderDistPg(Q.X, Q.Y) < 7.f) continue;
@@ -453,6 +453,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		}
 		for (int32 E = 0; E < Edges.Num(); ++E) PaintPath(Wander(Nodes[Edges[E].Key], Nodes[Edges[E].Value]), E < NTree ? 1.05f : 0.8f);
 		UE_LOG(LogRDTown, Log, TEXT("RDTOWN earth roads: %d places (%d on the cobbles), %d ways (%d loops), %d strips"), Nodes.Num(), NAnchor, Edges.Num(), Edges.Num() - NTree, TownPaths.Num());
+		}          // (Heaven: no earth roads, its grid of streets instead)
 	}
 	// the castle and the square's ground are taken; the gate's mouth kept clear
 	Mark(Cu0 - 2, Cv0 - 2, bMid ? Cu0 + CD + 2 : S, Cv0 + CW + 2, 3);
@@ -500,10 +501,10 @@ void ARDSection::PlanTown(FRandomStream& R)
 	const FIntRect Gy = F.Rect(GyU0 + 1, GyV0 + 1, GyU0 + GyW - 1, GyV0 + GyH - 1);
 	// (the mill in the other corner by the castle side, on open ground)
 	int32 MlU0 = S - 4 - 14 - CD - 4, MlV0 = bGraveLow ? S - 3 - 7 : 3;
-	if (!bModern) PlaceRect(MlU0, MlV0, 7, 7);
-	if (!bModern) Mark(MlU0, MlV0, MlU0 + 7, MlV0 + 7, 4);
-	if (!bModern)
+	if (!bModern)          // (Heaven: no mill)
 	{
+	PlaceRect(MlU0, MlV0, 7, 7);
+	Mark(MlU0, MlV0, MlU0 + 7, MlV0 + 7, 4);
 		const FIntRect M = F.Rect(MlU0, MlV0, MlU0 + 7, MlV0 + 7);
 		FTownSpot Sp; Sp.Kind = TS_Mill; Sp.At = TileWorld(FIntPoint((M.Min.X + M.Max.X) / 2, (M.Min.Y + M.Max.Y) / 2)); Sp.Yaw = 90.f * R.RandRange(0, 3);
 		TownSpots.Add(Sp);
@@ -964,6 +965,23 @@ void ARDSection::PlanTown(FRandomStream& R)
 				for (const FTownSpot& Sp : TownSpots) if (FVector::Dist2D(Sp.At, TileWorld(T)) < 500.f) return false;
 				return true;
 			};
+			// (a traffic light at a corner of every crossing of two streets)
+			for (int32 Ia = 0; Ia < TownRoads.Num(); ++Ia)
+				for (int32 Ib = Ia + 1; Ib < TownRoads.Num(); ++Ib)
+				{
+					const FIntRect& Ra = TownRoads[Ia]; const FIntRect& Rb = TownRoads[Ib];
+					if ((Ra.Width() >= Ra.Height()) == (Rb.Width() >= Rb.Height())) continue;
+					const FIntPoint X0(FMath::Max(Ra.Min.X, Rb.Min.X), FMath::Max(Ra.Min.Y, Rb.Min.Y)), X1(FMath::Min(Ra.Max.X, Rb.Max.X), FMath::Min(Ra.Max.Y, Rb.Max.Y));
+					if (X1.X <= X0.X || X1.Y <= X0.Y) continue;
+					for (const FIntPoint& Cn : { FIntPoint(X0.X - 1, X0.Y - 1), FIntPoint(X1.X, X1.Y), FIntPoint(X0.X - 1, X1.Y), FIntPoint(X1.X, X0.Y - 1) })
+						if (OpenGround(Cn))
+						{
+							const FVector Mid2 = (TileWorld(X0) + TileWorld(X1 - FIntPoint(1, 1))) * 0.5f;
+							FTownSpot Tl; Tl.Kind = TS_TrafficLight; Tl.At = TileWorld(Cn); Tl.Yaw = (Mid2 - Tl.At).Rotation().Yaw;
+							TownSpots.Add(Tl);
+							break;
+						}
+				}
 			for (const FIntRect& Rr : TownRoads)
 			{
 				const bool bAlongX = Rr.Width() >= Rr.Height();
@@ -1407,19 +1425,9 @@ void ARDSection::TownShellBuilding(int32 BI)
 				AddPiece(TownPiece(B, TEXT("Pillar")), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, Cx * Hx, Cy * Hy, 2.f + St * WH)));
 	// ---- the roof: a gable along the building's longer side (none for a burned house: charred beams and a few rafters)
 	const float Top = 2.f + B.Storeys * WH;
-	// (Heaven: a flat roof with a parapet; a tower's floors over its lobby (RDHeaven.cpp))
-	if (B.Style >= 7)
-	{
-		ModernRoof(BI, Top);
-		if (!bBurnt && !bBoarded) AddTorch(TownBldPoint(B, Hx - 24.f, (DoorK + 0.5f) * M - Hy - 115.f, 235.f), Yaw0 + 180.f, 110.f);
-		if (B.Kind != TK_Home)
-		{
-			const FTransform Sg = WallT(FVector2D(Hx + 9.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 262.f);
-			AddPiece(TEXT("Town.Sign"), Sg, true);
-			AddSignText(Sg, RDTSignText(B.Kind));
-		}
-		return;
-	}
+	// (Heaven: a flat roof with a parapet, a tower's floors over its lobby (RDHeaven.cpp), instead of the gable)
+	const bool bFlatRoof = B.Style >= 7;
+	if (bFlatRoof) ModernRoof(BI, Top);
 	const bool bRidgeY = Ny >= Nx;
 	const FVector2D A = bRidgeY ? FVector2D(0, 1) : FVector2D(1, 0), C = bRidgeY ? FVector2D(1, 0) : FVector2D(0, 1);
 	const int32 NAlong = bRidgeY ? Ny : Nx, Span = bRidgeY ? Nx : Ny;
@@ -1429,7 +1437,7 @@ void ARDSection::TownShellBuilding(int32 BI)
 		{
 			// (a burned house has no roof left: the pieces that stayed hung over nothing (the user's of 2026-11-02); its charred
 			// beams lie inside)
-			if (bBurnt) continue;
+			if (bBurnt || bFlatRoof) continue;
 			const bool bLow = Ac < Span / 2;
 			const int32 Level = bLow ? Ac : Span - 1 - Ac;
 			const FVector2D Out = C * (bLow ? -1.f : 1.f);
@@ -1444,7 +1452,7 @@ void ARDSection::TownShellBuilding(int32 BI)
 			if (Al == NAlong - 1) AddPiece(TownPiece(B, Dy > 0.f ? TEXT("RoofEndL") : TEXT("RoofEndR")), T);
 			if (Al == 0) AddPiece(TownPiece(B, Dy > 0.f ? TEXT("RoofEndR") : TEXT("RoofEndL")), T);
 		}
-	if (!bBurnt)
+	if (!bBurnt && !bFlatRoof)
 		for (int32 End = 0; End < 2; ++End)
 		{
 			const FVector2D Out = A * (End == 0 ? -1.f : 1.f);
@@ -1461,7 +1469,10 @@ void ARDSection::TownShellBuilding(int32 BI)
 		}
 	// (a torch inside beside the door of every building someone can be in: the store and the storehouse had none of the
 	// dungeon furnishing's, and their keepers stood in the dark; the town's lights burn while someone awake is inside)
-	if (!bBurnt && !bBoarded)
+	// (Heaven's buildings: a white ceiling light, not a burning sconce)
+	if (!bBurnt && !bBoarded && bFlatRoof)
+		AddLight(TownBldPoint(B, Hx - 160.f, (DoorK + 0.5f) * M - Hy, 270.f), FLinearColor(0.95f, 0.97f, 1.f), 120.f, 1000.f, false, 0.f);
+	else if (!bBurnt && !bBoarded)
 		AddTorch(TownBldPoint(B, Hx - 24.f, (DoorK + 0.5f) * M - Hy - 115.f, 235.f), Yaw0 + 180.f, 110.f);
 	// a burned house: rubble and charred beams inside
 	if (bBurnt)
@@ -1845,8 +1856,10 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 		// 2026-11-04: "the portcullis ... can be walked through ... there should be a way to open the portcullis like a lever")
 		// the portcullis is a door that lifts, with a lever on each side of the gate)
 		if (Generator->bWild) TownGateWorks();
-		if (Generator->TownPlan == 5 && bBuildInteractive) HeavenWorks();          // (Heaven: its shield, its traffic)
 		else AddPieceAt(TEXT("Town.Gate"), TownGate, GYaw, 1.f, true);
+		// (Heaven: its shield, its traffic; PR #33's review: put between the gate's if and its else, it gave every other wild
+		// town a shut gate's mesh standing in its open gateway)
+		if (Generator->TownPlan == 5 && bBuildInteractive) HeavenWorks();
 		if (!Generator->bWild)
 		{
 			AddPieceAt(TEXT("Town.GateLeaves"), TownGate - TownGateOut * 20.f, GYaw, 1.f, true);

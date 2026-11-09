@@ -2301,6 +2301,8 @@ def step_spire():
     caul = ism_instances("SM_Cauldron", "CauldronFX"); pots = ism_instances("SM_S_Potion"); stones = ism_instances("SM_Rune_01a")
     res["labs"] = [{"cauldron": in_bld(caul, b["i"]), "potions": in_bld(pots, b["i"])} for b in B if b["kind"] == "laboratory" and b["state"] == 0]
     res["chambers"] = [in_bld(stones, b["i"]) for b in B if b["kind"] == "meditation chamber" and b["state"] == 0]
+    # (no shut gate's mesh standing in the open gateway of a town in the wilds: PR #33's review found one in every wild town)
+    res["static_gate"] = len(ism_instances("SM_Main_Gate_03a"))
     res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_TowerRound_Window_8m_A", "SM_TowerRound_Border_Top_A", "SM_TowerRound_Cap_4m_A", "SM_IceCrystal01", "SM_StatuePlinth",
                                                               "SM_Cauldron", "SM_Kit_PrepTable", "SM_S_Potion", "SM_Rune_01a")}
     # (the upper storeys' lights that move: each read twice, 2 s apart; how far each went round, how high the lowest stands)
@@ -2364,7 +2366,7 @@ def step_spire():
         g.debug_all_dungeon_keys(True)
     quiet(False)
     k = kinds; pc = res["piece_counts"]
-    ok = (res["north_west"] and 60 <= res["from_graymourne_km"] <= 120 and res["tier_here"] == 20 and 16 <= res["tier_half_way_from_graymourne"] <= 19
+    ok = (res["north_west"] and res["static_gate"] == 0 and 60 <= res["from_graymourne_km"] <= 120 and res["tier_here"] == 20 and 16 <= res["tier_half_way_from_graymourne"] <= 19
           and res["plan"] == 4 and tw is not None and res["tower"]["rooms"] == 2 and res["tower"]["from_middle_m"] < 120 and res["tower"]["top_m"] >= 50
           and "kethrys_spire" in res["dungeon_level"] and k.get("library", 0) >= 2 and k.get("laboratory", 0) >= 2 and k.get("study", 0) >= 1 and k.get("meditation chamber", 0) >= 1
           and res["window_lights"]["n"] >= 2 and res["window_lights"]["moved_cm_min"] > 50 and res["window_lights"]["lowest_m"] > res["tower"]["top_m"] * 0.4
@@ -2391,7 +2393,8 @@ def step_heaven():
     leaves it; its people its own (the director, the scientist, the security chief, office workers, clerks, guards) and
     Brokenspire's elder not among them; the director's panel with the first quest; the security door at the hall's far wall
     refused without the Kratos Keycard and opened with it (dry runs); pictures of the facility's front, a street with its cars, the
-    skyline from beyond the wall under the shield, a tower's lobby, a shop, the security door"""
+    skyline from beyond the wall under the shield, a skyscraper's lobby, a shop, the security door; traffic lights at the
+    streets' crossings; no car on the square or at the facility's door"""
     g = G["gen"]; res = {}
     ti, x, y = town_of("Heaven")
     tk, kx, ky = town_of("Kethrys Spire")
@@ -2427,6 +2430,7 @@ def step_heaven():
     res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_HV_Road", "SM_HV_Paving", "SM_HV_Wall", "SM_HV_Window", "SM_HV_GlassWall", "SM_HV_Roof", "SM_Module03_Tower01_MiddleFloors01",
                                                               "SM_HV_LabWall", "SM_HV_Block", "SM_HV_CityWall", "SM_MM00284_Exterior_Light_Streetlight", "SM_Stone_Wall", "SM_Castle_Stone_Wall_01a",
                                                               "SM_Tower_Roof_01d", "SM_MM00406_Office_Desk", "SM_Prop_Table_A")}
+    res["static_gate"] = len(ism_instances("SM_Main_Gate_03a"))
     # (no grass: the town's short grass clumps)
     res["grass"] = len(ism_instances("Grass"))
     signs = S.get_components_by_tag(unreal.TextRenderComponent, "HeavenSign")
@@ -2445,6 +2449,11 @@ def step_heaven():
     p1 = [c.get_world_location() for c in c0]
     moved = [dist2(a, b) for a, b in zip(p0, p1)]
     res["cars"] = {"n": len(c0), "moving": sum(1 for m in moved if m > 300), "moved_m_median": round(sorted(moved)[len(moved) // 2] / 100, 1) if moved else 0}
+    # (PR #33's review: no car on the square or at the facility's door: the main road and the cross road through the square
+    # carry none)
+    sqp = place("square"); fdoor = place("castle door")
+    res["cars_on_square"] = sum(1 for q in p0 + p1 if sqp and dist2(q, sqp) < 2200.0)
+    res["cars_at_facility"] = sum(1 for q in p0 + p1 if fdoor and dist2(q, fdoor) < 1500.0)
     # (a car waits for her: she stands 6 m ahead of a moving one in its lane; it must not come within 3 m of her in 2.5 s; then she
     # steps off the street and it goes on)
     if c0:
@@ -2487,7 +2496,7 @@ def step_heaven():
         h_was = g.get_town_hour(); g.set_town_hour(22.0); yield from wait(5.0)
         shot("hv_skyline_night"); yield from rwait(1.2)
         g.set_town_hour(h_was); yield from wait(1.0)
-    for kd in ("tower", "shop", "office block"):
+    for kd in ("skyscraper", "shop", "office block"):
         b = next((b for b in B if b["kind"] == kd and b["state"] == 0), None)
         if b:
             yaw = math.degrees(math.atan2(b["c"].y - b["door"].y, b["c"].x - b["door"].x))
@@ -2507,16 +2516,16 @@ def step_heaven():
         g.debug_all_dungeon_keys(True)
     quiet(False)
     k = kinds; pc = res["piece_counts"]; cw = res.get("car_waits", {})
-    ok = (res["tier_here"] == 25 and 22 <= res["tier_half_way_from_kethrys"] <= 24 and 40 <= res["from_kethrys_km"] <= 110
+    ok = (res["tier_here"] == 25 and res["static_gate"] == 0 and 22 <= res["tier_half_way_from_kethrys"] <= 24 and 40 <= res["from_kethrys_km"] <= 110
           and res["plan"] == 5 and rf is not None and res["facility"]["rooms"] == 2 and res["facility"]["from_middle_m"] < 120
-          and "heaven_fortress" in res["dungeon_level"] and k.get("tower", 0) >= 4 and k.get("office block", 0) >= 5 and k.get("shop", 0) >= 5
+          and "heaven_fortress" in res["dungeon_level"] and k.get("skyscraper", 0) >= 4 and k.get("office block", 0) >= 5 and k.get("shop", 0) >= 5
           and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple")) and k.get("witch's hut", 0) == 0
           and res["homes"]["all"] >= 30 and res["homes"]["burned"] + res["homes"]["boarded"] == 0 and res["tallest_m"] >= 50
           and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
           and pc["SM_HV_Road"] > 500 and pc["SM_HV_Paving"] > 1000 and pc["SM_HV_Window"] > 100 and pc["SM_Module03_Tower01_MiddleFloors01"] >= 16
           and pc["SM_HV_CityWall"] > 50 and pc["SM_Stone_Wall"] == 0 and pc["SM_Castle_Stone_Wall_01a"] == 0 and pc["SM_Tower_Roof_01d"] == 0 and res["grass"] == 0
           and sk.get("street light", 0) >= 40 and res["sign"] == ["KRATOS AURORIM RESEARCH, LLC"] and res["dome_parts"] == 1 and res.get("dome_past_buildings_m", 0) > 10 and len(res["styles"]) == 3
-          and res["cars"]["n"] >= 10 and res["cars"]["moving"] >= res["cars"]["n"] * 0.6 and cw.get("gap_m", 0) >= 3.0 and cw.get("moved_after_m", 0) > 3.0
+          and res["cars"]["n"] >= 10 and res["cars"]["moving"] >= res["cars"]["n"] * 0.6 and res["cars_on_square"] == 0 and res["cars_at_facility"] == 0 and sk.get("traffic light", 0) >= 4 and cw.get("gap_m", 0) >= 3.0 and cw.get("moved_after_m", 0) > 3.0
           and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Worker", "Soldier"))
           and "Director Cassia Vael" in res["titles"] and "Aldric Venn" not in res["titles"]
           and any("Past the Lobby" in str(p) for p in res["director"]["panel"]) and res.get("gate_without_key") == "locked" and res.get("gate_with_keys") == "catacombs")

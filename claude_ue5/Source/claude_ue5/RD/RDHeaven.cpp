@@ -30,7 +30,6 @@ static const FName RDHeavenDomeTag(TEXT("HeavenDome"));
 void ARDSection::ResearchShell(int32 BI)
 {
 	FTownBld& B = TownBlds[BI];
-	FRandomStream R((int32)(B.Seed ^ 0x52E5A1u));
 	const float M = Generator->TileSize;
 	const FName Wall(TEXT("Lab.Wall")), Floor(TEXT("Lab.Floor")), Ceil(TEXT("Lab.Ceil")), Roof(TEXT("Lab.Roof")), Doorway(TEXT("Lab.Doorway"));
 	const FRDPiece* Wp = Generator->Piece(Wall);
@@ -62,8 +61,7 @@ void ARDSection::ResearchShell(int32 BI)
 					const FIntPoint Nb = Tl + RDHeavenDir4[Side];
 					const int32 On = In(Nb) ? Owner[Idx(Nb)] : -1;
 					if (On == RI) continue;
-					const int32 Kn = B.Rooms.IndexOfByKey(On);
-					const bool bOut = Kn == INDEX_NONE;
+					const bool bOut = B.Rooms.IndexOfByKey(On) == INDEX_NONE;
 					const bool bDoor = DoorEdges.Contains(EdgeKey(Tl, Nb));
 					const FVector Edge = C + FVector(RDHeavenDir4[Side].X, RDHeavenDir4[Side].Y, 0) * (M * 0.5f);
 					const float Yaw = InwardYaw(Side);
@@ -207,7 +205,8 @@ void ARDSection::HeavenSpotBuild(const FTownSpot& Sp)
 		return;
 	}
 	if (Sp.Kind == TS_TrafficLight) { AddPieceAt(TEXT("Heaven.TrafficLight"), Sp.At, Sp.Yaw); MarkBlocked(Sp.At, 0.f, FVector2D(60.f, 60.f), true); return; }
-	static const TCHAR* Props[4] = { TEXT("Heaven.Bench"), TEXT("Heaven.BusStop"), TEXT("Heaven.Hydrant"), TEXT("Heaven.Bin") };
+	// (the street's bench is its own piece: "Heaven.Bench" is the rooms' (the town's furnishing asks for "Bench"))
+	static const TCHAR* Props[4] = { TEXT("Heaven.StreetBench"), TEXT("Heaven.BusStop"), TEXT("Heaven.Hydrant"), TEXT("Heaven.Bin") };
 	const FName Nm(Props[FMath::Clamp(Sp.Bld, 0, 3)]);
 	// (a bench and a bus stop face the street: along it)
 	AddPieceAt(Nm, Sp.At, Sp.Yaw + (Sp.Bld <= 1 ? 90.f : 0.f));
@@ -247,11 +246,18 @@ void ARDSection::HeavenWorks()
 	for (int32 K = 1; K <= 6; ++K) if (const FRDPiece* P = Generator->Piece(FName(*FString::Printf(TEXT("Heaven.Car_%d"), K)))) if (P->Mesh) Kinds.Add(P);
 	if (Kinds.Num() == 0) return;
 	int32 Made = 0;
-	for (const FIntRect& Rr : TownRoads)
+	// (not on the main road or the cross road through the square: PR #33's review: cars drove across the paved square and turned
+	// back among the director and the guards at the facility's door)
+	FIntRect Keep = TownSquare;
+	if (TownBlds.IsValidIndex(CastleBld)) Keep.Union(FIntRect(TownBlds[CastleBld].Min, TownBlds[CastleBld].Max));
+	Keep.InflateRect(3);
+	for (int32 Ri = 0; Ri < TownRoads.Num(); ++Ri)
 	{
+		const FIntRect& Rr = TownRoads[Ri];
 		const bool bAlongX = Rr.Width() >= Rr.Height();
 		const int32 Len = bAlongX ? Rr.Width() : Rr.Height(), Wd = bAlongX ? Rr.Height() : Rr.Width();
 		if (Len < 14 || Wd < 3) continue;
+		if (Rr.Intersect(Keep)) continue;
 		// (the street's middle line, from end to end, a tile in from each end)
 		const FVector A = bAlongX ? (TileWorld(FIntPoint(Rr.Min.X + 1, Rr.Min.Y)) + TileWorld(FIntPoint(Rr.Min.X + 1, Rr.Max.Y - 1))) * 0.5f
 		                          : (TileWorld(FIntPoint(Rr.Min.X, Rr.Min.Y + 1)) + TileWorld(FIntPoint(Rr.Max.X - 1, Rr.Min.Y + 1))) * 0.5f;
@@ -274,7 +280,7 @@ void ARDSection::HeavenWorks()
 				}
 				Pv->ComponentTags.Add(RDHeavenCarTag);
 				FRDHeavenCar Cr;
-				Cr.C = Pv; Cr.L0 = A; Cr.L1 = Bv; Cr.bFwd = Lane == 0;
+				Cr.C = Pv; Cr.L0 = A; Cr.L1 = Bv; Cr.bFwd = Lane == 0; Cr.Street = Ri;
 				Cr.S = (K + 0.5f + ((Hh >> 8) % 100u) / 400.f) / Per * L;
 				Cr.Speed = 800.f + (float)((Hh >> 12) % 400u);
 				HeavenCars.Add(Cr);
@@ -289,6 +295,15 @@ void ARDSection::TickHeavenCars(float Dt, const FVector& Her)
 {
 	// each car drives its lane (the right of its way); at the street's end it turns back into the other lane. It waits while she
 	// or another car stands within 9 m ahead of it in its lane, so it never drives into her
+	// (PR #33's review: still while she is far beyond the shield (they stand where they were); each car checks only its own
+	// street's cars)
+	if (HeavenDomeRadius > 0.f && Dt > 0.f)
+	{
+		FVector2D Mid(0, 0);
+		for (const FVector2D& P : TownBorder) Mid += P;
+		Mid /= FMath::Max(1, TownBorder.Num());
+		if (FVector2D::Distance(Mid, FVector2D(Her.X, Her.Y)) > HeavenDomeRadius + 30000.f) return;
+	}
 	for (int32 I = 0; I < HeavenCars.Num(); ++I)
 	{
 		FRDHeavenCar& Cr = HeavenCars[I];
@@ -308,13 +323,21 @@ void ARDSection::TickHeavenCars(float Dt, const FVector& Her)
 		{
 			if (J == I) continue;
 			const FRDHeavenCar& O = HeavenCars[J];
-			if (O.bFwd != Cr.bFwd || O.L0 != Cr.L0) continue;
+			if (O.Street != Cr.Street || O.bFwd != Cr.bFwd) continue;
 			const float Gap = O.S - Cr.S;
 			if (Gap > 0.f && Gap < 900.f) bWait = true;
 		}
-		if (!bWait) Cr.S += Cr.Speed * Dt;
-		Cr.Waited = bWait ? Cr.Waited + Dt : 0.f;
-		if (Cr.S > L) { Cr.S -= L; Cr.bFwd = !Cr.bFwd; }
+		if (!bWait) Cr.S = FMath::Min(Cr.S + Cr.Speed * Dt, L);
+		// (at the street's end it turns into the other lane, only once that lane's start is clear of her and of its cars (PR #33's
+		// review: it jumped 4.4 m across onto whatever stood there))
+		if (Cr.S >= L)
+		{
+			const FVector To = (Cr.bFwd ? Cr.L1 : Cr.L0) - Right * Cr.Lane;
+			bool bClear = FVector::Dist2D(To, Her) > 600.f || FMath::Abs(To.Z - Her.Z) > 400.f;
+			for (int32 J = 0; J < HeavenCars.Num() && bClear; ++J)
+				if (J != I && HeavenCars[J].Street == Cr.Street && HeavenCars[J].bFwd != Cr.bFwd && HeavenCars[J].S < 900.f) bClear = false;
+			if (bClear) { Cr.S = 0.f; Cr.bFwd = !Cr.bFwd; }
+		}
 		const FVector W2 = (Cr.bFwd ? Cr.L1 - Cr.L0 : Cr.L0 - Cr.L1).GetSafeNormal2D();
 		const FVector R2(-W2.Y, W2.X, 0.f);
 		const FVector P = (Cr.bFwd ? Cr.L0 : Cr.L1) + W2 * Cr.S + R2 * Cr.Lane;          // (UE's +Y is the right of +X: right-hand traffic)

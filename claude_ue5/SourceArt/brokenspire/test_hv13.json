@@ -1,227 +1,10 @@
 {
- "tag": "hv9",
+ "tag": "hv13",
  "plan": [
-  "forge",
   "port"
  ],
  "level": "brokenspire",
  "steps": [
-  {
-   "step": "forge",
-   "ok": true,
-   "site_km": [
-    70.0,
-    0.0
-   ],
-   "north_middle": true,
-   "biome_6km_north": "burned plain",
-   "biome_9km_south": "plains",
-   "state": [
-    "1",
-    "Ashenreach",
-    "0",
-    "1",
-    "0",
-    "6.1",
-    "1",
-    "1",
-    "1",
-    "7000000",
-    "0",
-    "0"
-   ],
-   "plan": 2,
-   "dungeon_level": "/Game/RandomDungeon/Maps/war_engine",
-   "kinds": {
-    "temple": 1,
-    "tavern": 1,
-    "smithy": 1,
-    "store": 1,
-    "healer": 1,
-    "storehouse": 1,
-    "barracks": 1,
-    "chapel": 1,
-    "workshop": 4,
-    "home": 87,
-    "foundry": 1
-   },
-   "homes": {
-    "all": 87,
-    "burned": 4,
-    "boarded": 8
-   },
-   "foundry": {
-    "label": "The Great Foundry of Ashenreach",
-    "rooms": 7,
-    "from_middle_m": 21
-   },
-   "square_to_foundry_m": 74,
-   "spots": {
-    "circle": 1,
-    "mill": 1,
-    "tower": 20,
-    "gate": 1,
-    "well": 1,
-    "anvil": 1,
-    "forge": 4,
-    "cart": 3,
-    "board": 1,
-    "stall": 4,
-    "lamp": 6,
-    "grave": 16,
-    "graveyard": 1,
-    "tent": 3,
-    "barricade": 4,
-    "still": 1,
-    "altar": 1,
-    "bar": 1,
-    "smith": 1,
-    "counter": 1,
-    "basin": 1,
-    "stash": 1
-   },
-   "inside": {
-    "temple": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 0
-    },
-    "tavern": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 4
-    },
-    "smithy": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 4
-    },
-    "store": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 22
-    },
-    "healer": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 3
-    },
-    "storehouse": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 25
-    },
-    "barracks": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 11
-    },
-    "chapel": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 0
-    },
-    "workshop": {
-     "n": 4,
-     "with_rooms": 4,
-     "with_door": 4,
-     "containers": 17
-    },
-    "home": {
-     "n": 83,
-     "with_rooms": 83,
-     "with_door": 83,
-     "containers": 279
-    },
-    "foundry": {
-     "n": 1,
-     "with_rooms": 1,
-     "with_door": 1,
-     "containers": 131
-    }
-   },
-   "containers": 496,
-   "doors": 132,
-   "piece_counts": {
-    "SM_ST_BrickWall_05": 1197,
-    "SM_ST_MainHall_BrickWall_06": 603,
-    "SM_ChimneyTop": 2,
-    "SM_Kit_Forge": 19,
-    "SM_Forge": 2,
-    "sm_Anvil_01a": 13,
-    "SM_Ind_Min_Cart_Metal_Old_02": 5,
-    "SM_Ind_Min_Rail_Tracks_Wood_Modular_01_A": 23,
-    "SM_Camp_Barricade_Var3_SM_Barricade_Var3": 4,
-    "SM_PR_Chandelier_A": 5
-   },
-   "roles": {
-    "Preacher": 1,
-    "Child": 3,
-    "Idiot": 1,
-    "Mourner": 1,
-    "Guard": 4,
-    "Captain": 1,
-    "Militia": 4,
-    "Refugee": 4,
-    "Soldier": 7,
-    "Elder": 1,
-    "Worker": 12,
-    "Priest": 1,
-    "Innkeeper": 1,
-    "Drunk": 1,
-    "Scholar": 1,
-    "Smith": 1,
-    "Trader": 1,
-    "Healer": 1,
-    "Keeper": 1,
-    "Townsfolk": 67
-   },
-   "titles": [
-    "Bram the Weigher",
-    "Captain Marek Dunholt",
-    "Corvin Slagg",
-    "Dagny Coalbrook",
-    "Guildmaster Torvald Brask",
-    "Hilde Ironhand",
-    "Master Artificer Odile Fenn",
-    "Mother Ashwyn",
-    "Sister Calla"
-   ],
-   "guildmaster": {
-    "found": true,
-    "said": "talk",
-    "panel": [
-     "What happened to the foundry?",
-     "What is in there now?",
-     "How do I get in?",
-     "Quest: Through the Iron Gate",
-     "Farewell"
-    ]
-   },
-   "workers": 12,
-   "worker_states": [
-    "going|0|Hammer|0.0|0||1,0,58,-1|23.2|44.4",
-    "none|-1|None|0.0|0||2,3,57,-1|18.4|43.9",
-    "going|5|Forge|0.0|0||5,4,56,-1|19.4|43.0",
-    "none|-1|None|0.0|0||7,6,55,-1|17.9|45.9",
-    "none|-1|None|0.0|0||87,88,3,2,-1|20.2|32.4",
-    "going|87|Hammer|0.0|0||87,88,3,2,-1|16.4|40.3"
-   ],
-   "gate_from_foundry_m": 38,
-   "fps": {
-    "square": 22.7,
-    "casting_hall": 22.7
-   },
-   "gate_travel": "catacombs"
-  },
   {
    "step": "port",
    "ok": true,
@@ -236,9 +19,9 @@
     "0",
     "1",
     "0",
-    "5.7",
-    "2",
-    "2",
+    "7.1",
+    "1",
+    "1",
     "1",
     "19740000",
     "0",
@@ -432,7 +215,7 @@
     ]
    },
    "port_fog": 1.0,
-   "port_fog_wait_s": 2.3,
+   "port_fog_wait_s": 0.8,
    "fog": [
     {
      "start_m": 5.0,
@@ -517,19 +300,14 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_hv9_ar_foundry_front.png",
-  "bs_hv9_ar_square.png",
-  "bs_hv9_ar_casting_hall.png",
-  "bs_hv9_ar_casting_side.png",
-  "bs_hv9_ar_furnace_hall.png",
-  "bs_hv9_gm_harbour.png",
-  "bs_hv9_gm_quay.png",
-  "bs_hv9_gm_mouth.png",
-  "bs_hv9_gm_edge_px.png",
-  "bs_hv9_gm_edge_py.png",
-  "bs_hv9_gm_edge_my.png",
-  "bs_hv9_gm_dead.png",
-  "bs_hv9_gm_sewer_gate.png"
+  "bs_hv13_gm_harbour.png",
+  "bs_hv13_gm_quay.png",
+  "bs_hv13_gm_mouth.png",
+  "bs_hv13_gm_edge_px.png",
+  "bs_hv13_gm_edge_py.png",
+  "bs_hv13_gm_edge_my.png",
+  "bs_hv13_gm_dead.png",
+  "bs_hv13_gm_sewer_gate.png"
  ],
  "error": null,
  "windows_shown_again": 3

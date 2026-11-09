@@ -14,7 +14,7 @@ mistward_castle (its heroes, balance, loot, traps, special rooms and bosses; its
   its shot clip, a tracer for its round, a muzzle flash, a bullet's impact); clips on another skeleton made playable on the
   mesh's (compatible skeletons, saved)
 - no final boss (Aurorim is Mistward Castle's), no menu (it is entered from the facility with her hero)
-Run 908 first (its materials). Run as `909 saveas` (it saves the copy and quits the editor: a copied map is opened only after a
+Its materials and the merge of boxes are heaven_kit.py's (908's too). Run as `909 saveas` (it saves the copy and quits the editor: a copied map is opened only after a
 restart), then, the editor started again, `909` (it sets the copy up, builds its start section and saves it). Then 905 (the
 chain's items on it). Args: [saveas] [rebuild]"""
 import sys, os, json, math, unreal
@@ -29,6 +29,9 @@ FACE = 25.0
 ABIL = {"None": unreal.RDMonsterAbility.NONE, "Poison": unreal.RDMonsterAbility.POISON, "Weaken": unreal.RDMonsterAbility.WEAKEN, "Slow": unreal.RDMonsterAbility.SLOW}
 HV = "/Game/RandomDungeon/Heaven"; HVM = HV + "/Meshes"
 REBUILD = "rebuild" in sys.argv[1:]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import importlib, heaven_kit as hk
+importlib.reload(hk)
 
 
 def corners(b): return [V(x, y, z) for x in (b.min.x, b.max.x) for y in (b.min.y, b.max.y) for z in (b.min.z, b.max.z)]
@@ -94,30 +97,9 @@ def blow_time(anim):
 
 
 def boxes(name, parts, MAT):
-    """908's: a mesh merged from boxes (x0, x1, y0, y1, z0, z1, material key), its pivot the world's origin, saved"""
-    path = f"{HVM}/{name}"
-    if eal.does_asset_exist(path) and not REBUILD: return unreal.load_asset(path)
-    if eal.does_asset_exist(path): eal.delete_asset(path)
-    cube = unreal.load_asset("/Engine/BasicShapes/Cube")
-    acts = []
-    for (x0, x1, y0, y1, z0, z1, mk) in parts:
-        a = eas.spawn_actor_from_object(cube, V((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2))
-        a.set_actor_scale3d(V(max(x1 - x0, 0.2) / 100.0, max(y1 - y0, 0.2) / 100.0, max(z1 - z0, 0.2) / 100.0))
-        a.static_mesh_component.set_material(0, MAT[mk])
-        acts.append(a)
-    o = unreal.MergeStaticMeshActorsOptions()
-    o.set_editor_property("base_package_name", f"{HVM}/{name[3:]}"); o.set_editor_property("destroy_source_actors", True); o.set_editor_property("spawn_merged_actor", False)
-    ms = o.get_editor_property("mesh_merging_settings")
-    ms.set_editor_property("pivot_type", unreal.MeshMergePivotType.WORLD_ORIGIN); ms.set_editor_property("merge_physics_data", True)
-    ms.set_editor_property("merge_materials", False); ms.set_editor_property("generate_light_map_uv", False)
-    o.set_editor_property("mesh_merging_settings", ms)
-    unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).merge_static_mesh_actors(acts, o)
-    for a in acts:
-        try: a.destroy_actor()
-        except Exception: pass
-    m = unreal.load_asset(path)
-    assert m, path
-    eal.save_loaded_asset(m, False)
+    """the kit's (heaven_kit.py, 908's too)"""
+    m = hk.boxes(name, parts, MAT, REBUILD)
+    assert m, name
     return m
 
 
@@ -131,21 +113,8 @@ else:
     if not ues.get_editor_world().get_path_name().startswith(DST + "."): les.load_level(DST)
     w = ues.get_editor_world(); assert w.get_path_name().startswith(DST + "."), w.get_path_name()
     gen = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
-    MEL = unreal.MaterialEditingLibrary; AT = unreal.AssetToolsHelpers.get_asset_tools()
-    SURF = unreal.load_asset(HV + "/M_HV_Surface"); assert SURF, "run 908 first (M_HV_Surface)"
-    def mi(name, rgb, metal=0.0, rough=0.6, glow=0.0):
-        path = HV + "/" + name
-        if not eal.does_asset_exist(path): AT.create_asset(name, HV, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
-        m = unreal.load_asset(path); MEL.set_material_instance_parent(m, SURF)
-        MEL.set_material_instance_vector_parameter_value(m, "Color", unreal.LinearColor(rgb[0], rgb[1], rgb[2], 1.0))
-        MEL.set_material_instance_scalar_parameter_value(m, "Metallic", metal); MEL.set_material_instance_scalar_parameter_value(m, "Roughness", rough)
-        MEL.set_material_instance_scalar_parameter_value(m, "Glow", glow)
-        MEL.update_material_instance(m); eal.save_loaded_asset(m, False)
-        return m
-    MAT = {"steel": mi("MI_HV_Steel", (0.13, 0.14, 0.16), 0.85, 0.32), "dark": mi("MI_HV_DarkConcrete", (0.16, 0.17, 0.19), 0.0, 0.8),
-           "concrete": mi("MI_HV_Concrete", (0.5, 0.5, 0.48), 0.0, 0.85), "panel": mi("MI_HV_LightPanel", (0.9, 0.95, 1.0), 0.0, 0.5, 6.0),
-           "cyan": mi("MI_HV_CyanStrip", (0.2, 0.85, 1.0), 0.0, 0.4, 8.0), "hazard": mi("MI_HV_Hazard", (0.75, 0.55, 0.05), 0.2, 0.5),
-           "red": mi("MI_HV_RedLight", (1.0, 0.06, 0.04), 0.0, 0.5, 12.0), "plate": mi("MI_HV_FloorPlate", (0.22, 0.23, 0.25), 0.7, 0.45)}
+    # (Heaven's materials, one table for 908 and 909: heaven_kit.py's)
+    MAT = hk.materials()
     # ------------------------------------------------------------ the fortress's halls (built with their room face +X, then 907's
     # normalisation: a wall's face at FACE, a floor's top at 0, a ceiling turned over)
     H = 151.0

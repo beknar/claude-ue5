@@ -275,7 +275,8 @@ public:
 	{
 		TWeakObjectPtr<USceneComponent> C;
 		FVector L0 = FVector::ZeroVector, L1 = FVector::ZeroVector;      // (the street's middle line, its ends)
-		float Lane = 220.f, S = 0.f, Speed = 900.f, Waited = 0.f;
+		float Lane = 220.f, S = 0.f, Speed = 900.f;
+		int32 Street = 0;          // (its street: a car checks only the cars of its street ahead of it)
 		bool bFwd = true;
 	};
 	TArray<FRDHeavenCar> HeavenCars;
