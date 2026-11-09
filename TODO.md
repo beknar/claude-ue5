@@ -20,7 +20,10 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-07 ([docs/improvements8.txt](docs/improvements8.txt))
 
-Built and tested (`884 planks`, `storage`, `block8` (`test_b8b`; `test_b8`'s block8 failed on the turn, 56 degrees of 60); `dummies` still to pass: its last record, `test_b8`, failed with the Mage's bolt at the dummy counting 0 hits, and the rerun is pending; `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`, `perf8` (its record was not kept: run it again for the numbers); `868 block`); still to test or do:
+Built and tested (`884 planks`, `storage`, `block8` (`test_b8b`; `test_b8`'s block8 failed on the turn, 56 degrees of 60); `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`; `868 block`); still to test or do:
+
+- [ ] **`884 dummies` to pass:** its only kept record, `test_b8`, failed: the Mage's bolt at the dummy counted 0 hits (the sword and the bolt at the target counted). Run it again.
+- [ ] **`888 perf8` to run again:** its record was not kept, so the farms' frame rates quoted for it (37 to 39 a second, 39 to 42 with the crops hidden) have no record behind them.
 
 - [ ] **The packaged game with this list:** packaged on 2026-11-08 (Shipping, `builds\mistward_castle`; every run of its `-Test` ok, the console reading `rd.WildRunSpeed` back), but no run went out to the farms, and whether `869` ran before it is not recorded: the crops' materials (the corn and potato plants', Bone Temple's and PureNature's) need the instanced-mesh usage. A Development package's log ("missing usage flag") would show it.
 - [ ] **Hunting a fleeing animal:** struck once, a deer runs at 8.5 m/s and the Summoner's next bolts fell short of it; the test holds the animals before her. Whether a hunt reads well in play (bolts' reach against a fleeing deer, a sword against a hare at 4.2 m/s) is not measured.
