@@ -564,8 +564,9 @@ TArray<FString> ARDDungeonGenerator::GetWildPlacesNear(FVector At, float RadiusM
 	const FIntPoint C0 = Wild->PlaceCellOf(X - RadiusM, Y - RadiusM), C1 = Wild->PlaceCellOf(X + RadiusM, Y + RadiusM);
 	TArray<FRDWildPlace> Ps;
 	for (int32 I = C0.X; I <= C1.X; ++I) for (int32 J = C0.Y; J <= C1.Y; ++J) Wild->PlacesIn(FIntPoint(I, J), Ps);
-	// (the seventh phase: the small points of interest too, for a search of 3 km or less: a 160 m grid)
-	if (RadiusM <= 3000.f)
+	// (the seventh phase: the small points of interest too, for a search of 1.5 km or less (a 120 m grid: each cell's making
+	// samples the world; PR #36's review))
+	if (RadiusM <= 1500.f)
 	{
 		const FIntPoint Q0 = Wild->PoiCellOf(X - RadiusM, Y - RadiusM), Q1 = Wild->PoiCellOf(X + RadiusM, Y + RadiusM);
 		for (int32 I = Q0.X; I <= Q1.X; ++I) for (int32 J = Q0.Y; J <= Q1.Y; ++J) Wild->PoisIn(FIntPoint(I, J), Ps);

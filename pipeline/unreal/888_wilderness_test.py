@@ -644,6 +644,11 @@ def step_poi7():
         p = str(l).split("|"); bl[p[0]] = (float(p[2]), float(p[3]))
     for bn in ("marshes", "pine forests", "mountains", "savannahs", "tundras", "volcanoes"):
         if bn in bl: lines[bn] = along(bl[bn][0] - 1000, bl[bn][1], 1.0, 0.0, 2000.0)
+    # (PR #36's review: the cells north of 165.8 km and east of 95.8 km had none (11 bits a cell): a line from each town there)
+    for tn, t in T.items():
+        if t["x"] > 165000 or t["y"] > 95000:
+            d_ = math.hypot(b["x"] - t["x"], b["y"] - t["y"]) or 1.0; dx, dy = (b["x"] - t["x"]) / d_, (b["y"] - t["y"]) / d_
+            lines["from_" + tn.lower().replace(" ", "_")] = along(t["x"] + dx * 1500, t["y"] + dy * 1500, dx, dy, 2000.0)
     allsec = sorted(s for v in lines.values() for s in v["secs"])
     kinds = sorted({k for v in lines.values() for k in v["kinds"]})
     for v in lines.values(): v.pop("secs")

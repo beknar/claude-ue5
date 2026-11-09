@@ -713,8 +713,7 @@ void ARDDungeonGenerator::LayHallowedStone(ARDWildChunk* C, const FRDWildPlace& 
 	TArray<float> Wr; Wr.Init(-1.f, 1);
 	if (ARDLootPile* Lp = DropLoot(At, { HallowedStoneItem }, Wr))
 	{
-		Lp->bHers = false; Lp->bHarvest = true; Lp->Tier = 1; Lp->WildKey = Key;
-		if (HarvestTints.Num() > 0) Lp->SetTint(HarvestTints[0]);
+		Lp->bHers = false; Lp->bHarvest = false; Lp->WildKey = Key;          // ("take the hallowed stone")
 		C->Props.Add(Lp);
 	}
 }

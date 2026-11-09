@@ -1,5 +1,5 @@
 {
- "tag": "pi4",
+ "tag": "pi6",
  "plan": [
   "poi7"
  ],
@@ -200,10 +200,24 @@
       "p50_s": 27.4,
       "p90_s": 52.9,
       "max_s": 244.0
+     },
+     "from_graymourne": {
+      "n": 17,
+      "kinds": [
+       "abandoned_camp",
+       "drowned_ruin",
+       "grave",
+       "great_ruin",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 30.3,
+      "p90_s": 50.0,
+      "max_s": 113.7
      }
     },
-    "p50_s": 31.4,
-    "p90_s": 72.3,
+    "p50_s": 31.1,
+    "p90_s": 69.3,
     "max_s": 422.6,
     "kinds": [
      "abandoned_camp",
@@ -227,53 +241,54 @@
     ]
    },
    "run": {
-    "seconds": 150.0,
-    "events": 28,
+    "seconds": 149.7,
+    "events": 30,
     "met": 2,
     "near": [
      "animal",
-     "pile",
-     "roamer"
+     "monster"
     ],
-    "max_gap_s": 27.3,
+    "max_gap_s": 26.2,
     "gaps": [
-     8.5,
-     3.0,
-     3.1,
-     3.0,
-     3.0,
-     3.1,
-     27.3,
-     7.1,
-     3.0,
-     3.0,
+     18.5,
+     5.1,
      3.1,
      3.0,
      3.0,
      3.1,
      3.0,
      3.0,
-     3.0,
+     3.1,
+     7.0,
      3.1,
      3.0,
      3.0,
      3.0,
-     27.3,
-     7.1,
+     3.1,
+     3.0,
+     3.1,
+     26.2,
+     5.1,
      3.0,
      3.0,
      3.1,
      3.0,
+     3.1,
      3.0,
-     3.1
+     3.0,
+     13.2,
+     3.0,
+     3.1,
+     3.0,
+     1.7
     ],
     "state": [
      "state",
-     "197",
+     "195",
      "0",
      "2",
-     "0",
-     "155.0"
+     "2",
+     "157.2"
     ],
     "moved_m": 529
    },
@@ -282,13 +297,19 @@
      "kind": "abandoned_camp",
      "things": [
       "Bread",
-      "Straw Rope"
+      "Bread"
      ],
      "gained": {
-      "Straw Rope": 1,
-      "Bread": 1
+      "Bread": 2
      },
      "laid_again": 0
+    },
+    "milestone": {
+     "kind": "milestone",
+     "prompt": "read the milestone",
+     "says": "The milestone reads:  Brokenspire 1.0 km south;  Ashenreach 69.0 km north",
+     "blessing": "",
+     "hp_share": 1.0
     },
     "lore": {
      "kind": "grave",

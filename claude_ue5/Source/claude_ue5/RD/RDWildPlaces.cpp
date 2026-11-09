@@ -25,6 +25,56 @@ void ARDDungeonGenerator::WildPiecesOf(const FString& Prefix, TArray<UStaticMesh
 	Out.Sort([](const UStaticMesh& A, const UStaticMesh& B) { return A.GetName() < B.GetName(); });
 }
 
+UStaticMeshComponent* ARDDungeonGenerator::LayWildPiece(ARDWildChunk* C, const FString& Prefix, const FVector2D& At, float Yaw, float Scale, float Sink, bool bCollide, bool bFar, FRandomStream& R)
+{
+	TArray<UStaticMesh*> Ms; WildPiecesOf(Prefix, Ms);
+	if (!C || Ms.Num() == 0) return nullptr;
+	UStaticMesh* M = Ms[R.RandRange(0, Ms.Num() - 1)];
+	const float* Ks = WildPieceScale.Find(FName(*M->GetName()));
+	const float Sc = Scale * (Ks ? *Ks : 1.f);
+	const float Z = WildGroundZ(FVector(At.X * 100.0, At.Y * 100.0, 0.0));
+	UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
+	Sm->SetStaticMesh(M);
+	Sm->SetupAttachment(C->Ground);
+	Sm->SetRelativeLocation(FVector(At.X * 100.0, At.Y * 100.0, Z - Sink * Sc) - C->GetActorLocation());
+	Sm->SetRelativeRotation(FRotator(0.f, Yaw, 0.f));
+	Sm->SetRelativeScale3D(FVector(Sc));
+	if (!bCollide) Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (bFar) { Sm->SetCachedMaxDrawDistance(0.f); Sm->bNeverDistanceCull = true; }          // (a landmark: seen from the chunks' whole reach)
+	Sm->RegisterComponent();
+	C->PlaceProps.Add(Sm);
+	return Sm;
+}
+
+TArray<FName> ARDDungeonGenerator::RollWildThings(const TArray<FString>& Things, FRandomStream& R) const
+{
+	// ("Item|min|max|chance"; an item the level lacks is left out)
+	TArray<FName> Got;
+	for (const FString& T : Things)
+	{
+		TArray<FString> F; T.ParseIntoArray(F, TEXT("|"), false);
+		if (F.Num() < 1 || FindItem(FName(*F[0])) < 0) continue;
+		const int32 Lo = F.Num() > 1 ? FCString::Atoi(*F[1]) : 1, Hi = F.Num() > 2 ? FCString::Atoi(*F[2]) : Lo;
+		if (R.FRand() > (F.Num() > 3 ? FCString::Atof(*F[3]) : 1.f)) continue;
+		for (int32 I = 0, N = R.RandRange(Lo, FMath::Max(Lo, Hi)); I < N; ++I) Got.Add(FName(*F[0]));
+	}
+	return Got;
+}
+
+void ARDDungeonGenerator::WildKindsForTier(int32 Tier, TArray<int32>& Kinds) const
+{
+	// (kinds of its tier (or the nearest tier below that has any; the rebalance to tier 25: a kind with wild tiers meets her in
+	// them), else any kind with a mesh)
+	Kinds.Reset();
+	for (int32 T = Tier; T >= 1 && Kinds.Num() == 0; --T)
+		for (int32 K = 0; K < Monsters.Num(); ++K)
+		{
+			const FRDMonsterDef& D = Monsters[K];
+			if (D.Mesh && (D.WildTierMax > 0 ? (T >= D.WildTierMin && T <= D.WildTierMax) : D.Tier == T)) Kinds.Add(K);
+		}
+	if (Kinds.Num() == 0) for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Mesh) Kinds.Add(K);
+}
+
 void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildPlace>& Places)
 {
 	if (!C || !IsWildReady()) return;
@@ -40,22 +90,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		// one prop: a piece of the kind (by prefix), at a point (world metres), turned, sunk, scaled
 		auto Put = [&](const FString& Prefix, const FVector2D& At, float Yaw, float Scale = 1.f, float Sink = 10.f, bool bCollide = true) -> UStaticMeshComponent*
 		{
-			TArray<UStaticMesh*> Ms; WildPiecesOf(Prefix, Ms);
-			if (Ms.Num() == 0) return nullptr;
-			UStaticMesh* M = Ms[R.RandRange(0, Ms.Num() - 1)];
-			const float* Ks = WildPieceScale.Find(FName(*M->GetName()));
-			const float Sc = Scale * (Ks ? *Ks : 1.f);
-			const float Z = WildGroundZ(FVector(At.X * 100.0, At.Y * 100.0, 0.0));
-			UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
-			Sm->SetStaticMesh(M);
-			Sm->SetupAttachment(C->Ground);
-			Sm->SetRelativeLocation(FVector(At.X * 100.0, At.Y * 100.0, Z - Sink * Sc) - O);
-			Sm->SetRelativeRotation(FRotator(0.f, Yaw, 0.f));
-			Sm->SetRelativeScale3D(FVector(Sc));
-			if (!bCollide) Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Sm->RegisterComponent();
-			C->PlaceProps.Add(Sm);
-			++Laid;
+			UStaticMeshComponent* Sm = LayWildPiece(C, Prefix, At, Yaw, Scale, Sink, bCollide, false, R);
+			if (Sm) ++Laid;
 			return Sm;
 		};
 		auto Ring = [&](int32 N, float Rr, float Jit, TFunctionRef<void(const FVector2D&, float)> Each)
@@ -190,17 +226,8 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	if (!bCombat || Monsters.Num() == 0) return;
 	ARDSection* Ws = EnsureWildSection();
 	if (!Ws) return;
-	// kinds of its tier (or the nearest tier below that has any)
-	TArray<int32> Kinds;
-	// (the rebalance to tier 25: a kind with wild tiers meets her in them (the dungeons' kinds spread along the roads), another in
-	// its own tier)
-	for (int32 T = P.Tier; T >= 1 && Kinds.Num() == 0; --T)
-		for (int32 K = 0; K < Monsters.Num(); ++K)
-		{
-			const FRDMonsterDef& D = Monsters[K];
-			if (D.Mesh && (D.WildTierMax > 0 ? (T >= D.WildTierMin && T <= D.WildTierMax) : D.Tier == T)) Kinds.Add(K);
-		}
-	if (Kinds.Num() == 0) for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Mesh) Kinds.Add(K);
+	// kinds of its tier (WildKindsForTier: the director's too)
+	TArray<int32> Kinds; WildKindsForTier(P.Tier, Kinds);
 	if (Kinds.Num() == 0) return;
 	// (destroyed ones out of the list: the chunks' monsters go with their chunks, and GetMonsters walks it)
 	Ws->SpawnedMonsters.RemoveAll([](const TObjectPtr<ARDMonster>& M) { return !IsValid(M); });

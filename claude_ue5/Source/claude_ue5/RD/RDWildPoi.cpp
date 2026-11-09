@@ -1,11 +1,11 @@
 // The wilderness's small points of interest and its encounter director (the user's list of 2026-11-08b, docs/improvements9.txt,
 // its seventh phase: "in order to retain engagement, the player should be able to interact or encounter something every 40
 // seconds when roaming the wilderness. the terrain generation algorithm should take this into account"; SourceArt/wilderness/
-// poi.json, 912). FRDWildWorld::PoisIn puts one in most cells of a 160 m grid, of the kinds of the region (a kind's biomes),
+// poi.json, 912). FRDWildWorld::PoisIn puts one in most cells of a 120 m grid, of the kinds of the region (a kind's biomes),
 // beside the roads or off them, landmarks in one cell in nine; here each is laid with its chunk (its pieces, what it holds, its
 // guards) and F uses it (a pile taken, a blessing, a rest, a story, a milestone's ways to the towns). The director meets her on
-// her way with an encounter (an ambush, a lost satchel) whenever 25 s go by with nothing near her: no fight, no point of
-// interest, pile or animal within reach of her eye.
+// her way with an encounter (an ambush, a lost satchel) whenever 25 s go by with nothing to do near her: no fight, no
+// point of interest still to use, pile, monster or animal within 45 m.
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDWild.h"
 #include "RD/RDMonster.h"
@@ -48,27 +48,7 @@ void ARDDungeonGenerator::SpawnWildPoi(ARDWildChunk* C, const FRDWildPlace& P)
 	if (!C || !WildPoiKinds.IsValidIndex(P.Poi)) return;
 	const FRDWildPoiKind& K = WildPoiKinds[P.Poi];
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 78, Wild->Seed));
-	const FVector O = C->GetActorLocation();
-	auto Put = [&](const FString& Prefix, const FVector2D& At, float Yaw, float Scale, float Sink, bool bCollide)
-	{
-		TArray<UStaticMesh*> Ms; WildPiecesOf(Prefix, Ms);
-		if (Ms.Num() == 0) return;
-		UStaticMesh* M = Ms[R.RandRange(0, Ms.Num() - 1)];
-		const float* Ks = WildPieceScale.Find(FName(*M->GetName()));
-		const float Sc = Scale * (Ks ? *Ks : 1.f);
-		const float Z = WildGroundZ(FVector(At.X * 100.0, At.Y * 100.0, 0.0));
-		UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
-		Sm->SetStaticMesh(M);
-		Sm->SetupAttachment(C->Ground);
-		Sm->SetRelativeLocation(FVector(At.X * 100.0, At.Y * 100.0, Z - Sink * Sc) - O);
-		Sm->SetRelativeRotation(FRotator(0.f, Yaw, 0.f));
-		Sm->SetRelativeScale3D(FVector(Sc));
-		if (!bCollide) Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		// (a landmark is seen from the chunks' whole reach)
-		if (K.Layer >= 2) { Sm->SetCachedMaxDrawDistance(0.f); Sm->bNeverDistanceCull = true; }
-		Sm->RegisterComponent();
-		C->PlaceProps.Add(Sm);
-	};
+	auto Put = [&](const FString& Prefix, const FVector2D& At, float Yaw, float Scale, float Sink, bool bCollide) { LayWildPiece(C, Prefix, At, Yaw, Scale, Sink, bCollide, K.Layer >= 2, R); };
 	// ("prefix|count|ring radius m|scale|sink|collide"; radius 0: at its point, a little apart)
 	for (const FString& Ln : K.Props)
 	{
@@ -91,16 +71,7 @@ void ARDDungeonGenerator::SpawnWildPoi(ARDWildChunk* C, const FRDWildPlace& P)
 	const bool bUsed = IsWildPoiUsed(P.Id);
 	if (!bUsed && (K.Use == TEXT("loot") || K.Use == TEXT("resource") || K.Use == TEXT("guarded")))
 	{
-		TArray<FName> Got;
-		for (const FString& T : K.Things)
-		{
-			TArray<FString> F; T.ParseIntoArray(F, TEXT("|"), false);
-			if (F.Num() < 1 || FindItem(FName(*F[0])) < 0) continue;
-			const int32 Lo = F.Num() > 1 ? FCString::Atoi(*F[1]) : 1, Hi = F.Num() > 2 ? FCString::Atoi(*F[2]) : Lo;
-			const float Ch = F.Num() > 3 ? FCString::Atof(*F[3]) : 1.f;
-			if (R.FRand() > Ch) continue;
-			for (int32 I = 0, N = R.RandRange(Lo, FMath::Max(Lo, Hi)); I < N; ++I) Got.Add(FName(*F[0]));
-		}
+		const TArray<FName> Got = RollWildThings(K.Things, R);
 		if (Got.Num() > 0)
 		{
 			FVector At(P.At.X * 100.0 + 120.0, P.At.Y * 100.0, 0.0);
@@ -109,8 +80,8 @@ void ARDDungeonGenerator::SpawnWildPoi(ARDWildChunk* C, const FRDWildPlace& P)
 			LootPiles.RemoveAll([](const TObjectPtr<ARDLootPile>& Lp) { return !IsValid(Lp); });
 			if (ARDLootPile* Lp = DropLoot(At, Got, Wr))
 			{
-				Lp->bHers = false; Lp->bHarvest = true; Lp->Tier = 1; Lp->WildKey = RDPoiUsedKey(P.Id);
-				if (HarvestTints.Num() > 0) Lp->SetTint(HarvestTints[0]);
+				// (no harvest: "take the bread", not "harvest the parts" (PR #36's review))
+				Lp->bHers = false; Lp->bHarvest = false; Lp->WildKey = RDPoiUsedKey(P.Id);
 				C->Props.Add(Lp);
 			}
 		}
@@ -131,9 +102,9 @@ const ARDDungeonGenerator::FRDWildPoiLive* ARDDungeonGenerator::WildPoiNear(cons
 	const FRDWildPoiLive* Best = nullptr; float BestD = Reach;
 	for (const FRDWildPoiLive& L : WildPoiLive)
 	{
-		if (!L.Chunk.IsValid() || !WildPoiKinds.IsValidIndex(L.Kind) || !RDPoiUsable(WildPoiKinds[L.Kind].Use) || IsWildPoiUsed(L.Id)) continue;
 		const float D = FVector::Dist2D(L.At, From);
-		if (D < BestD) { BestD = D; Best = &L; }
+		if (D >= BestD || !L.Chunk.IsValid() || !WildPoiKinds.IsValidIndex(L.Kind) || !RDPoiUsable(WildPoiKinds[L.Kind].Use) || IsWildPoiUsed(L.Id)) continue;
+		BestD = D; Best = &L;
 	}
 	return Best;
 }
@@ -200,17 +171,24 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 		if (!M) { WildRoamers.RemoveAt(I); continue; }
 		if (FVector::Dist2D(M->GetActorLocation(), Her) > 25000.f) { M->Destroy(); WildRoamers.RemoveAt(I); }
 	}
+	for (int32 I = WildRoamPiles.Num() - 1; I >= 0; --I)
+	{
+		ARDLootPile* Lp = WildRoamPiles[I].Get();
+		if (!Lp) { WildRoamPiles.RemoveAt(I); continue; }
+		if (FVector::Dist2D(Lp->GetActorLocation(), Her) > 25000.f) { LootPiles.Remove(Lp); Lp->Destroy(); WildRoamPiles.RemoveAt(I); }
+	}
 	WildEncounterTick -= Dt;
 	if (WildEncounterTick > 0.f) return;
 	WildEncounterTick = 1.f;
 	if (WildLastEngaged < 0.f || IsInTownWalls(Her) || PlayerCombat->IsDead()) { WildLastEngaged = Now; return; }
-	// (something near her: a fight, a point of interest not used, a pile, an animal within 45 m)
+	// (something to do near her (PR #36's review: not a spot already emptied or cleared): a fight, a point of interest still to
+	// use, a pile, a live monster, an animal within 45 m)
 	FString Near;
 	if (IsWildCombat()) Near = TEXT("fight");
-	if (Near.IsEmpty())
-		for (const FRDWildPoiLive& L : WildPoiLive)
-			if (L.Chunk.IsValid() && FVector::Dist2D(L.At, Her) < WildEngageM && !IsWildPoiUsed(L.Id)) { Near = WildPoiKinds.IsValidIndex(L.Kind) ? WildPoiKinds[L.Kind].Name.ToString() : TEXT("poi"); break; }
+	if (Near.IsEmpty()) if (const FRDWildPoiLive* L = WildPoiNear(Her, WildEngageM)) Near = WildPoiKinds[L->Kind].Name.ToString();
 	if (Near.IsEmpty()) for (const ARDLootPile* Lp : LootPiles) if (IsValid(Lp) && FVector::Dist2D(Lp->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("pile"); break; }
+	if (Near.IsEmpty() && WildSection)
+		for (const ARDMonster* M : WildSection->SpawnedMonsters) if (IsValid(M) && !M->IsDead() && !M->IsAlly() && FVector::Dist2D(M->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("monster"); break; }
 	if (Near.IsEmpty()) for (const ARDWildAnimal* An : WildAnimals) if (IsValid(An) && !An->IsDead() && FVector::Dist2D(An->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("animal"); break; }
 	if (Near.IsEmpty()) for (const TWeakObjectPtr<ARDMonster>& M : WildRoamers) if (M.IsValid() && !M->IsDead() && FVector::Dist2D(M->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("roamer"); break; }
 	if (!Near.IsEmpty())
@@ -259,13 +237,7 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	if (K.Monsters > 0 && Monsters.Num() > 0)
 	{
 		ARDSection* Ws_ = EnsureWildSection();
-		TArray<int32> Kinds;
-		for (int32 T = Tier; T >= 1 && Kinds.Num() == 0; --T)
-			for (int32 Ki = 0; Ki < Monsters.Num(); ++Ki)
-			{
-				const FRDMonsterDef& D = Monsters[Ki];
-				if (D.Mesh && (D.WildTierMax > 0 ? (T >= D.WildTierMin && T <= D.WildTierMax) : D.Tier == T)) Kinds.Add(Ki);
-			}
+		TArray<int32> Kinds; WildKindsForTier(Tier, Kinds);
 		if (Ws_ && Kinds.Num() > 0)
 		{
 			const FRDMonsterDef& Def = Monsters[Kinds[Rs.RandRange(0, Kinds.Num() - 1)]];
@@ -287,20 +259,12 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	}
 	else
 	{
-		TArray<FName> Got;
-		for (const FString& T : K.Things)
-		{
-			TArray<FString> F; T.ParseIntoArray(F, TEXT("|"), false);
-			if (F.Num() < 1 || FindItem(FName(*F[0])) < 0) continue;
-			const int32 Lo = F.Num() > 1 ? FCString::Atoi(*F[1]) : 1, Hi = F.Num() > 2 ? FCString::Atoi(*F[2]) : Lo;
-			if (Rs.FRand() > (F.Num() > 3 ? FCString::Atof(*F[3]) : 1.f)) continue;
-			for (int32 I = 0, N = Rs.RandRange(Lo, FMath::Max(Lo, Hi)); I < N; ++I) Got.Add(FName(*F[0]));
-		}
+		const TArray<FName> Got = RollWildThings(K.Things, Rs);
 		if (Got.Num() > 0)
 		{
 			TArray<float> Wr; Wr.Init(-1.f, Got.Num());
 			LootPiles.RemoveAll([](const TObjectPtr<ARDLootPile>& Lp) { return !IsValid(Lp); });
-			if (ARDLootPile* Lp = DropLoot(FVector(At.X, At.Y, WildGroundZ(FVector(At.X, At.Y, 0.f)) + 40.f), Got, Wr)) { Lp->bHers = false; Lp->bHarvest = true; Lp->Tier = 1; ++Made; }
+			if (ARDLootPile* Lp = DropLoot(FVector(At.X, At.Y, WildGroundZ(FVector(At.X, At.Y, 0.f)) + 40.f), Got, Wr)) { Lp->bHers = false; Lp->bHarvest = false; WildRoamPiles.Add(Lp); ++Made; }
 		}
 	}
 	if (Made == 0) return;

@@ -305,8 +305,8 @@ public:
 	 *  the places' ids (under 2^24) and the towns' */
 	static constexpr int32 QuestIdBase = 1 << 29;
 	/** the seventh phase's small points of interest (PoisIn): a 120 m grid, one in most of its cells, of the kinds of the
-	 *  region (PoiKinds, set after Init from the generator's WildPoiKinds); their ids PoiIdBase + (cell x << 11 | cell y), in the
-	 *  free range under the farms' 2^28 */
+	 *  region (PoiKinds, set after Init from the generator's WildPoiKinds); their ids PoiIdBase + (cell x << 12 | cell y) (the
+	 *  continent is 2500 cells across), in the free range under the farms' 2^28 */
 	static constexpr int32 PoiIdBase = 1 << 24;
 	static constexpr double PoiCellM = 120.0;
 	TArray<FRDWildPoiKind> PoiKinds;

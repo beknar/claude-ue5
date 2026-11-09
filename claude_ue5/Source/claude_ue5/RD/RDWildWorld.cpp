@@ -1446,13 +1446,6 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 {
 	TArray<FRDWildPlace> Ps;
-	// (the seventh phase's small points of interest: their cell in the id)
-	if (Id >= PoiIdBase && Id < PoiIdBase + (1 << 22))
-	{
-		PoisIn(FIntPoint(((Id - PoiIdBase) >> 11) & 0x7FF, (Id - PoiIdBase) & 0x7FF), Ps);
-		for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
-		return false;
-	}
 	if (Id >= QuestIdBase && Id < TownIdBase)
 	{
 		if (!QuestPlaces.IsValidIndex(Id - QuestIdBase)) return false;
@@ -1467,7 +1460,7 @@ bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 // ================================================================================================ the seventh phase's points of interest
 void FRDWildWorld::PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 {
-	if (PoiKinds.Num() == 0 || Cell.X < 0 || Cell.Y < 0 || Cell.X > 0x7FF || Cell.Y > 0x7FF) return;
+	if (PoiKinds.Num() == 0 || Cell.X < 0 || Cell.Y < 0 || Cell.X > 0xFFF || Cell.Y > 0xFFF) return;
 	const double X0 = Xs + Cell.X * PoiCellM, Y0 = Yw + Cell.Y * PoiCellM;
 	if (X0 < Xs || X0 + PoiCellM > Xn || Y0 < Yw || Y0 + PoiCellM > Ye) return;
 	if (Rand01(Cell.X, Cell.Y, Seed + 911u) > PoiFill) return;
@@ -1508,9 +1501,14 @@ void FRDWildWorld::PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 		bOk = true;
 	}
 	if (!bOk) return;
-	// (a place's 4 km cell: none within 90 m of its place)
+	// (none within 90 m of a place: its 4 km cell's and, near a cell's edge, the next's (PR #36's review))
 	{
-		TArray<FRDWildPlace> Ps; PlacesIn(PlaceCellOf(At.X, At.Y), Ps);
+		const FIntPoint Pc = PlaceCellOf(At.X, At.Y);
+		const double Cx0 = Xs + Pc.X * PlaceCellM, Cy0 = Yw + Pc.Y * PlaceCellM;
+		const int32 Dx0 = At.X - Cx0 < 90.0 ? -1 : 0, Dx1 = Cx0 + PlaceCellM - At.X < 90.0 ? 1 : 0;
+		const int32 Dy0 = At.Y - Cy0 < 90.0 ? -1 : 0, Dy1 = Cy0 + PlaceCellM - At.Y < 90.0 ? 1 : 0;
+		TArray<FRDWildPlace> Ps;
+		for (int32 I = Dx0; I <= Dx1; ++I) for (int32 J = Dy0; J <= Dy1; ++J) PlacesIn(Pc + FIntPoint(I, J), Ps);
 		for (const FRDWildPlace& P : Ps) if (FVector2D::Distance(P.At, At) < 90.0) return;
 	}
 	// (the kinds of the region, beside the road or off it; landmarks in one cell in nine)
@@ -1531,7 +1529,7 @@ void FRDWildWorld::PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 	while (Ki > 0 && Wt[Ki] <= 0.f) --Ki;
 	if (Wt[Ki] <= 0.f) return;
 	FRDWildPlace P;
-	P.Id = PoiIdBase + ((Cell.X & 0x7FF) << 11) + (Cell.Y & 0x7FF);
+	P.Id = PoiIdBase + ((Cell.X & 0xFFF) << 12) + (Cell.Y & 0xFFF);          // (12 bits a cell: 2500 cells across)
 	P.Kind = PoiKinds[Ki].Name.ToString(); P.Name = PoiKinds[Ki].Title; P.At = At; P.H = S.H; P.Biome = S.Biome; P.Poi = Ki;
 	P.Tier = TierAt(At.X, At.Y); P.Yaw = Rand01(Cell.X, Cell.Y, Seed + 916u) * 360.f;
 	Out.Add(P);
