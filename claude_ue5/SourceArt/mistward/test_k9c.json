@@ -1,0 +1,256 @@
+{
+ "tag": "k9c",
+ "plan": [
+  "finalboss"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "finalboss",
+   "ok": true,
+   "share_rule": 0.5,
+   "at_start": {
+    "placed": 0,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     0,
+     0
+    ],
+    "room": -1,
+    "band": 0,
+    "boss_alive": 0,
+    "boss_hp": 0.0,
+    "reward": "",
+    "share": "0/0|0/0|0/0|0"
+   },
+   "set": [
+    4,
+    0,
+    5,
+    true
+   ],
+   "share_before": "1/1341|0/406|0/2903|1",
+   "placed_before": 0,
+   "share_at_place": "42/1341|13/406|110/2903|1",
+   "placed": {
+    "placed": 1,
+    "slain": 0,
+    "door_open": 0,
+    "section": [
+     4,
+     0
+    ],
+    "room": 11,
+    "band": 7,
+    "boss_alive": 1,
+    "boss_hp": 1836.0,
+    "reward": "",
+    "share": "42/1341|13/406|110/2903|1"
+   },
+   "notice_placed": "TIER 5 HALF CLEARED  -  AURORIM WAITS IN THE CHAPEL (SEE YOUR MAP)",
+   "boss": {
+    "kind": "Aurorim",
+    "title": "FINAL BOSS  Aurorim",
+    "final": true,
+    "max_hp": 1836,
+    "damage": 132.0
+   },
+   "band": {
+    "n": 7,
+    "max_hp": 408,
+    "kinds": [
+     "Alfa",
+     "Hunter",
+     "Nasty",
+     "Spider",
+     "Titan"
+    ],
+    "all_tier5": true
+   },
+   "hp_ratio": 4.5,
+   "hp_ratio_want": 4.37,
+   "hover": {
+    "bottom": [
+     33.2,
+     52.9
+    ],
+    "now": [
+     38.0,
+     52.0
+    ]
+   },
+   "wing_motion_cm": 127.6,
+   "door_sealed": {
+    "open": 0,
+    "alpha": 0.0,
+    "travelled": 0,
+    "at": [
+     102930.0,
+     -6450.0,
+     0.0
+    ],
+    "facing": [
+     1.0,
+     -0.0
+    ],
+    "width": 124.0,
+    "height": 258.0,
+    "gate_z": -1.0,
+    "gate_blocks": 1,
+    "glow": 0,
+    "glow_particles": 0
+   },
+   "door_in_room": true,
+   "tactics": {
+    "distance": 671,
+    "band_near": 7,
+    "hold_m": [
+     9.0,
+     13.0
+    ],
+    "branches": {
+     "unseen": 1,
+     "beam": 2,
+     "swing": 144,
+     "hold": 94,
+     "shoot": 1
+    },
+    "round_deg": 52,
+    "held_s": 3.3,
+    "blows_landed": 0,
+    "tail_m": [
+     8.7,
+     9.0
+    ],
+    "moved_m": 7.6,
+    "struck_nearest_m": 2.9,
+    "struck_branches": {
+     "shoot": 1,
+     "stun": 17,
+     "chase": 69
+    }
+   },
+   "band_near_after": 0,
+   "long_tries": [
+    {
+     "distance": 3000,
+     "branches": {
+      "swing": 22,
+      "chase": 60
+     },
+     "aggro": true,
+     "shot_wait": 0.2,
+     "shots": 1,
+     "on_her": 1,
+     "hp_lost": 99.0,
+     "lance_frames": 36,
+     "lance_point_first": 1.0,
+     "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
+    }
+   ],
+   "long": {
+    "distance": 3000,
+    "branches": {
+     "swing": 22,
+     "chase": 60
+    },
+    "aggro": true,
+    "shot_wait": 0.2,
+    "shots": 1,
+    "on_her": 1,
+    "hp_lost": 99.0,
+    "lance_frames": 36,
+    "lance_point_first": 1.0,
+    "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
+   },
+   "middle": {
+    "distance": 949,
+    "branches": {
+     "chase": 1,
+     "beam": 5,
+     "swing": 44,
+     "shoot": 1
+    },
+    "beams": 1,
+    "mark_frames": 15,
+    "fell": 1,
+    "on_her": 1,
+    "hp_lost": 132.0
+   },
+   "melee": {
+    "distance": 180,
+    "fist_fx": 8,
+    "lines": [
+     "NS_Shield_Wind_01|LeftHand|0.0|15",
+     "NS_Projectile_Wind01|LeftHand|0.0|20",
+     "NS_Shield_Wind_01|RightHand|0.0|14",
+     "NS_Projectile_Wind01|RightHand|0.0|22"
+    ],
+    "hits": 2,
+    "hp_lost": 264.0,
+    "circle_s": 1.0
+   },
+   "killed": {
+    "placed": 1,
+    "slain": 1,
+    "door_open": 1,
+    "section": [
+     4,
+     0
+    ],
+    "room": 11,
+    "band": 0,
+    "boss_alive": 0,
+    "boss_hp": 0.0,
+    "reward": "Ursag's Horn Blade|2500",
+    "share": "42/1341|13/406|110/2903|1"
+   },
+   "gold": 2709,
+   "notice_killed": "MISTWARD CASTLE IS CONQUERED  -  THE DOOR TO BROKENSPIRE IS OPEN",
+   "reward": "Ursag's Horn Blade|2500",
+   "reward_tier5": true,
+   "pile": [
+    "Catacomb Key",
+    "Daemon Ash",
+    "Map to Vel Morrath",
+    "Radiant Essence",
+    "Troll Heart",
+    "Ursag's Horn Blade"
+   ],
+   "key_dropped": "vel_morrath",
+   "door_open": {
+    "open": 1,
+    "alpha": 1.0,
+    "travelled": 0,
+    "at": [
+     102930.0,
+     -6450.0,
+     0.0
+    ],
+    "facing": [
+     1.0,
+     -0.0
+    ],
+    "width": 124.0,
+    "height": 258.0,
+    "gate_z": -289.0,
+    "gate_blocks": 0,
+    "glow": 1,
+    "glow_particles": 134
+   },
+   "door_glow": true,
+   "world_after": "brokenspire",
+   "counter": 1
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_k9c_finalboss_door_sealed.png",
+  "mw_k9c_finalboss_beam_mark.png",
+  "mw_k9c_finalboss_beam_light.png",
+  "mw_k9c_finalboss_door_open.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

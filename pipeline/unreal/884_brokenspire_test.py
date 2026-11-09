@@ -3042,13 +3042,117 @@ def step_farms9():
           and res.get("walked_follows_ridge", {}).get("corr", 0) >= 0.98 and 0.9 <= res.get("walked_follows_ridge", {}).get("slope", 0) <= 1.1
           and res["walked_follows_ridge"]["walked_less_bare_m"][1] - res["walked_follows_ridge"]["walked_less_bare_m"][0] >= 0.25 and res["farmsteads_within_3_5km"] >= 3 and ok_farm and res["fence_pieces"] > 0 and not res["fences_in_open_fields"])
     step_result("farms9", ok, **res)
+def step_keys9():
+    """the dungeons' keys in order and the wilderness's tiers (the list of 2026-11-08b's third phase):
+      chain   the generator's chain from Mistward Castle to Heaven; with no key held only the castle open
+      tiers   the tier at each town of the chain (Brokenspire 1, Vel Morrath 5, Ashenreach 10, Graymourne 15) and half way along
+              each leg (3, 8, 12 or 13), behind Brokenspire 1
+      map     the map to Vel Morrath taken: the land round the city revealed on her map, once
+      locked  out at Vel Morrath, the cathedral's stair walked into (a dry run): refused for want of its key, said why
+      drop    this level's boss's drop (Mistward's: the next is Vel Morrath's): the Catacomb Key and the map in a pile that is not
+              hers; taken with F; the stair then opens (the dry run goes down); a second drop gives nothing (once a game)
+      death   she falls: the key and the map stay with her, the rest drops"""
+    g = G["gen"]; res = {}; quiet(True)
+    g.debug_all_dungeon_keys(False); yield from wait(1.2)
+    c = cb()
+    for it in ("Catacomb Key", "Map to Vel Morrath"):
+        n = c.get_item_count(it)
+        if n: c.remove_item(it, n)
+    lines = [str(s).split("|") for s in g.get_dungeon_key_lines()]
+    res["chain"] = [l[1] or "castle" for l in lines]
+    res["open_at_start"] = {(l[1] or "castle"): l[5] == "1" for l in lines}
+    res["had_at_start"] = {(l[1] or "castle"): l[6] for l in lines}
+    # ---- the tiers along the chain
+    towns = {}
+    for l in g.get_wild_town_lines():
+        p = str(l).split("|"); towns[p[0]] = (float(p[2]), float(p[3]))
+    def tier(a): return g.get_wild_tier_at(a[0], a[1])
+    def mid(a, b): return ((towns[a][0] + towns[b][0]) / 2, (towns[a][1] + towns[b][1]) / 2)
+    res["tiers"] = {t: tier(towns[t]) for t in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne") if t in towns}
+    res["tiers_mid"] = {f"{a}-{b}": tier(mid(a, b)) for a, b in (("Brokenspire", "Vel Morrath"), ("Vel Morrath", "Ashenreach"), ("Ashenreach", "Graymourne")) if a in towns and b in towns}
+    bs = towns.get("Brokenspire", (0, 0)); vm = towns.get("Vel Morrath", (1, 1))
+    away = (bs[0] - (vm[0] - bs[0]) * 0.1, bs[1] - (vm[1] - bs[1]) * 0.1)
+    res["tier_behind_brokenspire"] = tier(away)
+    # ---- the map to Vel Morrath
+    res["vm_revealed_before"] = bool(g.wild_revealed_at(vm[0] + 800, vm[1]))
+    c.add_item("Map to Vel Morrath", 1); yield from wait(2.5)
+    res["vm_revealed_after_map"] = bool(g.wild_revealed_at(vm[0] + 800, vm[1]))
+    l2 = {(l[1] or "castle"): l for l in [str(s).split("|") for s in g.get_dungeon_key_lines()]}
+    res["map_had_shown"] = [l2["vel_morrath"][7], l2["vel_morrath"][8]] if "vel_morrath" in l2 else None
+    c.remove_item("Map to Vel Morrath", 1)            # (the boss's drop below gives her one)
+    # ---- locked at the stair
+    ti, x, y = yield from to_vel_morrath()
+    mg = place("mistgate"); cat = next((b for b in blds() if b["kind"] == "cathedral"), None)
+    def stair_try():
+        g.set_editor_property("travel_dry_run", True)
+        put(V(mg.x - (mg.x - cat["c"].x) * 0.02, mg.y - (mg.y - cat["c"].y) * 0.02, 0)); yield from wait(1.5)
+        r = str(g.get_editor_property("last_travel"))
+        put(V(cat["c"].x, cat["c"].y, 0)); yield from wait(0.5)
+        g.set_editor_property("travel_dry_run", False)
+        return r
+    if mg and cat:
+        res["stair_without_key"] = yield from stair_try()
+        res["locked_level"] = str(g.get_editor_property("dungeon_locked_level"))
+        res["said"] = str(g.dungeon_locked_line("vel_morrath"))
+    # ---- the drop, taken with F
+    here = G["pawn"].get_actor_location(); fw = G["pawn"].get_actor_forward_vector()
+    n0 = len([p for p in g.loot_piles if p])
+    g.debug_drop_next_dungeon_key(V(here.x + fw.x * 150, here.y + fw.y * 150, here.z)); yield from wait(0.5)
+    piles = [p for p in g.loot_piles if p]
+    res["dropped"] = str(g.get_editor_property("dungeon_key_dropped")); res["piles_new"] = len(piles) - n0
+    newp = piles[-1] if len(piles) > n0 else None
+    res["pile_hers"] = bool(newp.get_editor_property("hers")) if newp else None
+    res["pile_things"] = [str(t) for t in newp.get_editor_property("things")] if newp else []
+    if newp:
+        pl = newp.get_actor_location(); G["pawn"].set_actor_location(V(pl.x - 80, pl.y, pl.z + 100), False, True); yield from wait(0.6)
+        res["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from wait(1.5)
+    res["carried"] = {it: c.get_item_count(it) for it in ("Catacomb Key", "Map to Vel Morrath")}
+    l3 = {(l[1] or "castle"): l for l in [str(s).split("|") for s in g.get_dungeon_key_lines()]}
+    res["open_after"] = {k: v[5] == "1" for k, v in l3.items()}
+    if mg and cat: res["stair_with_key"] = yield from stair_try()
+    n1 = len([p for p in g.loot_piles if p])
+    g.debug_drop_next_dungeon_key(V(here.x, here.y, here.z)); yield from wait(0.5)
+    res["second_drop_piles"] = len([p for p in g.loot_piles if p]) - n1
+    # ---- a death: the key and the map stay
+    t0 = time.time()
+    while time.time() - t0 < 6:
+        if c.is_dead(): break
+        c.apply_damage(c.get_health() / max(1.0 - c.get_shield_share(), 0.1) + 5.0, None); yield from wait(0.3)
+    res["fell"] = c.is_dead()
+    t0 = time.time()
+    while c.is_dead() and time.time() - t0 < 25: yield
+    yield from wait(1.0); refresh(); c = cb()
+    res["carried_after_death"] = {it: c.get_item_count(it) for it in ("Catacomb Key", "Map to Vel Morrath")}
+    her = [p for p in g.loot_piles if p and p.get_editor_property("hers")]
+    res["death_pile_has_key"] = any("Catacomb Key" in [str(t) for t in p.get_editor_property("things")] for p in her)
+    # (her things back, the keys put away, every way open again for the other steps)
+    for p in her:
+        pl = p.get_actor_location(); G["pawn"].set_actor_location(V(pl.x - 80, pl.y, pl.z + 100), False, True); yield from wait(0.5)
+        g.interact_nearest(G["pawn"].get_actor_location()); yield from wait(0.8)
+    for it in ("Catacomb Key", "Map to Vel Morrath"):
+        n = c.get_item_count(it)
+        if n: c.remove_item(it, n)
+    g.debug_all_dungeon_keys(True); quiet(False)
+    t = res["tiers"]; tm = res["tiers_mid"]
+    ok = (res["chain"][:4] == ["castle", "vel_morrath", "war_engine", "sewers"] and res["open_at_start"].get("castle") and not res["open_at_start"].get("vel_morrath")
+          and not res["open_at_start"].get("war_engine") and t.get("Brokenspire") == 1 and t.get("Vel Morrath") == 5 and t.get("Ashenreach") == 10 and t.get("Graymourne") == 15
+          and tm.get("Brokenspire-Vel Morrath") == 3 and tm.get("Vel Morrath-Ashenreach") in (7, 8) and tm.get("Ashenreach-Graymourne") in (12, 13) and res["tier_behind_brokenspire"] == 1
+          and not res["vm_revealed_before"] and res["vm_revealed_after_map"] and res.get("stair_without_key") == "locked" and "vel_morrath" in res.get("locked_level", "")
+          and res["dropped"] == "vel_morrath" and res["piles_new"] == 1 and res["pile_hers"] is False and sorted(res["pile_things"]) == ["Catacomb Key", "Map to Vel Morrath"]
+          and res["carried"] == {"Catacomb Key": 1, "Map to Vel Morrath": 1} and res["open_after"].get("vel_morrath") and not res["open_after"].get("war_engine")
+          and res.get("stair_with_key") == "catacombs" and res["second_drop_piles"] == 0 and res["fell"]
+          and res["carried_after_death"] == {"Catacomb Key": 1, "Map to Vel Morrath": 1} and not res["death_pile_has_key"])
+    step_result("keys9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9})
+              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
+    # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)
+    if o: o.debug_all_dungeon_keys(True)
     for s in PLAN:
         try:
             refresh()

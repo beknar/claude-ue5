@@ -184,6 +184,8 @@ public:
 	FString FinalShowGo, FinalShowDone, FinalShowReady;
 	/** -RDTownGo has been read (once a game instance) */
 	bool bTownGoRead = false;
+	/** -RDAllKeys (every dungeon's way open: the packaged game's runs) has been read (once a game instance) */
+	bool bAllKeysRead = false;
 	/** -RDTownGo=town:<name>: the wilderness town she travels to once the wilds are ready (as given), and the one whose
 	 *  building round her is still to be marked (-RDMarkFile; lower case, no spaces) */
 	FString TownGoTown, TownGoMark;

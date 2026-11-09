@@ -1325,8 +1325,30 @@ int32 FRDWildWorld::NearestTown(double X, double Y, double& Dist) const
 
 int32 FRDWildWorld::TierAt(double X, double Y) const
 {
-	const double D = FVector2D(X, Y).Size();
-	return FMath::Clamp(1 + (int32)(D / 25000.0), 1, 5);
+	// (the list of 2026-11-08b: "between brokenspire and vell morrath, there should be monster encounters starting at Tier 1 to
+	// Tier 5 the closer one gets to vell morrath ... from vell morrath to ashenreach ... Tier 5 - Tier 10, then from Ashenreach to
+	// Graymourne ... Tier 10 Tier 15, then from Graymourne to Kethrys Spire ... Tier 15 - Tier 20, and from Kethrys Spire to
+	// Heaven ... Tier 20 - Tier 25": the chain of towns and their tiers (TierChain, "<town>|<tier>"), a point's tier read along the
+	// leg of the chain nearest it, from the tier of the town it leaves to the next one's. Until the list it was 1 to 5 by the
+	// distance from Brokenspire, 25 km a tier)
+	TArray<FVector2D> At; TArray<float> Ti;
+	static const TCHAR* RDWTierDefault[] = { TEXT("Brokenspire|1"), TEXT("Vel Morrath|5"), TEXT("Ashenreach|10"), TEXT("Graymourne|15"), TEXT("Kethrys Spire|20"), TEXT("Heaven|25") };
+	const int32 N = TierChain.Num() > 0 ? TierChain.Num() : UE_ARRAY_COUNT(RDWTierDefault);
+	for (int32 K = 0; K < N; ++K)
+	{
+		FString Name, Tn;
+		if (!(TierChain.Num() > 0 ? TierChain[K] : FString(RDWTierDefault[K])).Split(TEXT("|"), &Name, &Tn)) continue;
+		for (const FRDWildTown& T : Towns) if (T.Name == Name) { At.Add(T.Site); Ti.Add(FCString::Atof(*Tn)); break; }
+	}
+	if (At.Num() < 2) return FMath::Clamp(1 + (int32)(FVector2D(X, Y).Size() / 25000.0), 1, 5);
+	const FVector2D P(X, Y);
+	double Best = 1e30; float Tier = Ti[0];
+	for (int32 K = 0; K + 1 < At.Num(); ++K)
+	{
+		double T; const double D = RDWSegDist(P, At[K], At[K + 1], T);
+		if (D < Best) { Best = D; Tier = FMath::Lerp(Ti[K], Ti[K + 1], (float)T); }
+	}
+	return FMath::Clamp(FMath::RoundToInt(Tier), 1, 99);
 }
 
 FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const

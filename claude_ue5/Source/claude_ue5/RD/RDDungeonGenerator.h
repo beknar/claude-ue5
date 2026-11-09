@@ -996,6 +996,39 @@ public:
 	/** each wilderness town's own dungeon level by the town's name (2026-11-07: Ashenreach's War Engine, Graymourne's sewers;
 	 *  each city's script sets its own); Vel Morrath's is CatacombsLevel when it is not here */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TMap<FString, FString> TownDungeons;
+	// ---- the dungeons' keys in order (the list of 2026-11-08b's third phase, RDKeys.cpp): "<dungeon key>|<level>|<town>|<title>|
+	// <key item>|<map item>" from Mistward Castle (its key empty, no key or map) to Heaven; each dungeon's boss drops the next's key
+	// and map, and the way into a town's dungeon is refused without its key. 905 writes it on every map (SourceArt/dungeons/chain.json)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Keys") TArray<FString> DungeonChain;
+	struct FRDChainLink { FString Key, Level, Town, Title; FName KeyItem, MapItem; };
+	bool ChainLink(int32 I, FRDChainLink& Out) const;
+	int32 ChainIndexOfLevel(const FString& Level) const;
+	int32 ChainIndexOfKey(const FString& Key) const;
+	/** she may go down into a level: Mistward Castle and a level not in the chain always; another with its key held or once held */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Keys") bool HasDungeonKey(const FString& Level) const;
+	/** what she is told at a locked way down ("" when it is not locked) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Keys") FString DungeonLockedLine(const FString& Level) const;
+	/** a dungeon's key or map (kept at her death) */
+	bool IsDungeonChainItem(FName Item) const;
+	/** this dungeon's boss fell at At: the next dungeon's key and map lie there (once a game) */
+	void DropNextDungeonKey(const FVector& At);
+	/** once a second: a key or map she carries kept in the counters; out in the wilds a map's road revealed */
+	void TickDungeonKeys();
+	float DungeonKeysNextTick = 0.f, DungeonLockedSaidAt = -100.f;
+	/** the road from one town to another and the land round the second revealed on her map; the cells revealed */
+	int32 RevealRoute(const FString& From, const FString& To);
+	/** the key dropped here this play ("" none; tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Keys") FString DungeonKeyDropped;
+	/** the last way down refused for want of its key (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Keys") FString DungeonLockedLevel;
+	/** every way open (tests and the packaged game's runs: -RDAllKeys) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Keys") void DebugAllDungeonKeys(bool bOn);
+	/** "<index>|<key>|<level>|<town>|<key item>|<open 0/1>|<key had>|<map had>|<map shown>" (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Keys") TArray<FString> GetDungeonKeyLines() const;
+	/** this level's boss fell at At (cm): the next dungeon's key and map dropped as the boss's death drops them (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Keys") void DebugDropNextDungeonKey(FVector At) { DropNextDungeonKey(At); }
+	/** the wilderness's tier at a point (metres; 0 with no wilds) (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Keys") int32 GetWildTierAt(float Xm, float Ym) const;
 	/** the town she is in's dungeon level (empty: none; Brokenspire's is the castle, through the Mistgate) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString CurrentDungeonLevel() const;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FString DungeonKey;

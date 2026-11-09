@@ -109,12 +109,13 @@ public static class RDWin {
     #  out to the holy city, its mark written once the city is built round her)
     $runs = @(@{ name = "menu"; args = @(); secs = 90 }, @{ name = "town"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark"); secs = 60; castle = $true; map = "brokenspire" },
               @{ name = "castle"; args = @("-RDStartHero=Warrior", "-RDTownGo=castle", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "mistward_castle" },
-              @{ name = "catacombs"; args = @("-RDStartHero=Warrior", "-RDTownGo=catacombs", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "vel_morrath" },
+              @{ name = "catacombs"; args = @("-RDStartHero=Warrior", "-RDTownGo=catacombs", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "vel_morrath" },
               @{ name = "city"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:velmorrath", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Vel Morrath|Warrior*" },
-              # (2026-11-07: Ashenreach's War Engine and Graymourne's sewers, down from the town by -RDTownGo=dungeon:<town>
+              # (2026-11-08b: the dungeons open in order, each with its key (RD/RDKeys.cpp): the runs that go down take -RDAllKeys)
+# (2026-11-07: Ashenreach's War Engine and Graymourne's sewers, down from the town by -RDTownGo=dungeon:<town>
               #  (DescendToCatacombs with that town's level), and out to both cities)
-              @{ name = "war_engine"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:ashenreach", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "war_engine" },
-              @{ name = "sewers"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:graymourne", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "sewers" },
+              @{ name = "war_engine"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:ashenreach", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "war_engine" },
+              @{ name = "sewers"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:graymourne", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "sewers" },
               @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
               @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true },

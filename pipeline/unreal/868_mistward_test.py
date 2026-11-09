@@ -3943,6 +3943,8 @@ def step_finalboss():
     it = next((i for i in g.get_editor_property("items") if str(i.name) == item), None)
     res["reward_tier5"] = bool(it and 5 in list(it.tiers))
     res["pile"] = sorted({str(x) for p in GS.get_all_actors_of_class(G["w"], unreal.RDLootPile) if dist2(p.get_actor_location(), bl) < 500 for x in p.things})
+    # (the list of 2026-11-08b: the dungeon boss drops the next dungeon's key and a map to its town (Vel Morrath's))
+    res["key_dropped"] = str(g.get_editor_property("dungeon_key_dropped"))
     yield from wait(2.5)
     if door:
         res["door_open"] = door_state(door); res["door_glow"] = res["door_open"]["glow"] == 1
@@ -3977,6 +3979,7 @@ def step_finalboss():
           and M_.get("beams", 0) >= 1 and M_.get("mark_frames", 0) > 0 and M_.get("fell", 0) >= 1 and M_.get("on_her", 0) >= 1 and M_.get("hp_lost", 0) > 0
           and Me.get("fist_fx", 0) >= 4 and Me.get("hits", 0) >= 1 and all(float(l.split("|")[2]) < 12.0 for l in Me.get("lines", [])) and Me.get("lines")
           and res["killed"]["slain"] and res["gold"] >= 2500 and res["reward_tier5"] and res["reward"].split("|")[0] in res["pile"] and "CONQUERED" in res["notice_killed"]
+          and res["key_dropped"] == "vel_morrath" and "Catacomb Key" in res["pile"] and "Map to Vel Morrath" in res["pile"]
           and do.get("open") == 1 and do.get("alpha", 0) >= 1.0 and do.get("gate_blocks") == 0 and res.get("door_glow")
           and (res.get("world_after") or "").endswith("brokenspire") and res.get("counter") == 1)
     step_result("finalboss", ok, **res)
