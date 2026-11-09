@@ -569,7 +569,87 @@ def rabbit():
     return S
 
 
-ANIMALS = {"chicken": chicken, "rabbit": rabbit, "goat": goat, "pig": pig, "cow": cow}
+def horse():
+    """the ridable horse (the user's list of 2026-11-08b, its eighth phase: "make a rideable horse for a player to buy and ride
+    with increased speed across the wilderness"; built here as the farm animals are, the user's choice): a riding horse about
+    155 cm at the withers, a long neck carried up, a mane and a long tail of hair, a saddle on its back and a `saddle` bone the
+    rider sits on (her root on it: the Animals pack's rider clips put her pelvis there); clips Idle, Graze, Walk and Run (a
+    gallop: the hind feet, then the fore, a short stance)"""
+    S = Spec("Horse", res=1.8, body_tris=5200, sole_band=1.2, hoof_h=9.0, rigid=(9.0, 10.0))
+    S.bone("root", None, (0, 0, 0), (0, 0, 30))
+    S.bone("pelvis", "root", (-60, 0, 140), (-8, 0, 144))
+    S.bone("spine_01", "pelvis", (-8, 0, 144), (36, 0, 148))
+    S.bone("spine_02", "spine_01", (36, 0, 148), (52, 0, 146))
+    S.bone("neck_01", "spine_02", (44, 0, 132), (74, 0, 160))
+    S.bone("neck_02", "neck_01", (74, 0, 160), (96, 0, 186))
+    S.bone("head", "neck_02", (96, 0, 186), (140, 0, 150))
+    S.bone("jaw", "head", (104, 0, 168), (132, 0, 148))
+    for sd, y in SIDES: S.bone(f"ear_{sd}", "head", (99, 6 * y, 196), (102, 9.5 * y, 214))
+    S.bone("tail_01", "pelvis", (-82, 0, 147), (-90, 0, 130))
+    S.bone("tail_02", "tail_01", (-90, 0, 130), (-94, 0, 104))
+    S.bone("tail_03", "tail_02", (-94, 0, 104), (-94, 0, 72))
+    S.bone("saddle", "spine_01", (-4, 0, 156), (-4, 0, 168))          # (the rider's seat: no skin on it)
+    # the body: barrel, chest, withers, rump, belly; the neck and its crest; the long head
+    S.ell((-10, 0, 122), (60, 29, 30), "spine_01")
+    S.ell((38, 0, 120), (26, 26, 31), "spine_02")
+    S.ball((40, 0, 144), 14, "spine_02")
+    S.ell((-58, 0, 128), (25, 26, 24), "pelvis")
+    S.ell((-10, 0, 108), (46, 26, 19), "spine_01")
+    S.cap((50, 0, 134), (76, 0, 162), 17, "neck_01")
+    S.cap((76, 0, 162), (94, 0, 184), 13, "neck_02")
+    S.ell((98, 0, 188), (10, 10, 11), "head")
+    S.cap((100, 0, 180), (121, 0, 166), 10, "head")
+    S.cap((121, 0, 166), (136, 0, 153), 8.5, "head")
+    S.ball((139, 0, 150), 8.5, "head", "muzzle")
+    S.cap((104, 0, 171), (128, 0, 153), 7, "jaw")
+    for sd, y in SIDES:
+        S.ell((-56, 15 * y, 116), (20, 12, 28), f"thigh_{sd}")
+        # (the joints bent: a near-straight leg left the IK no sweep, 16 cm a half stride (the first build))
+        Pf = S.leg("front", sd, 16 * y, [(44, 136), (22, 102), (34, 56), (42, 16), (44, 0)], "spine_02", quad_names(True), 1)
+        Pr = S.leg("rear", sd, 17 * y, [(-58, 140), (-44, 100), (-72, 58), (-64, 15), (-62, 0)], "pelvis", quad_names(False), -1)
+        hooved_leg_blobs(S, Pf, True, 14, 7.6, 4.8, 6.2, sd)
+        hooved_leg_blobs(S, Pr, False, 0, 8.2, 4.8, 6.2, sd)
+
+    def parts(S):
+        for sd, y in SIDES:
+            S.loft("ear", [(99, 6 * y, 196), (100, 8 * y, 203), (101, 9 * y, 209), (102, 9.5 * y, 214)], [3.0, 3.4, 2.2, 0],
+                   [1.5, 1.2, 0.9, 0], (1, 0, 0.2), f"ear_{sd}", "coat")
+            S.sphere("eye", S.snap((108, 9 * y, 182), (0.2, y, 0.3), 0.8), 2.2, "head", "eye", axis=Vector((0.2, y, 0.3)), n=8, m=5)
+            S.sphere("nostril", S.snap((142, 4 * y, 150), (1, 0.3 * y, 0), 0.3), 1.8, "head", "nostril", axis=X, flat=0.5, n=8, m=4)
+        # the mane along the crest, standing up; the tail's hair, spreading
+        mp = [(95, 0, 200), (86, 0, 192), (76, 0, 182), (65, 0, 171), (54, 0, 161), (44, 0, 155)]
+        S.loft("mane", mp, [3.5, 4.0, 4.2, 4.2, 3.6, 0], [9, 13, 14, 14, 11, 0], Z, S.chain_w(mp, ["head", "neck_02", "neck_01", "spine_02"]), "mane")
+        tp = [(-82, 0, 147), (-88, 0, 138), (-92, 0, 124), (-94, 0, 108), (-95, 0, 92), (-95, 0, 78), (-94, 0, 70)]
+        tr = [4.0, 5.0, 6.0, 7.0, 7.5, 6.0, 0]
+        S.loft("tail", tp, tr, tr, X, S.chain_w(tp, ["tail_01", "tail_02", "tail_03"]), "mane")
+        # the saddle: a leather seat on the back, its blanket under it
+        S.sphere("saddle", (-3, 0, 153), 24, "spine_01", "saddle", axis=Z, flat=0.22, n=14, m=6)
+        S.sphere("blanket", (-3, 0, 150), 29, "spine_01", "blanket", axis=Z, flat=0.12, n=14, m=6)
+    S.parts_fn = parts
+    S.variants = {"A": {"coat": "#6B3A1E", "mane": "#17110E", "muzzle": "#3A2A24", "nostril": "#2A1A16", "hoof": "#2A2420", "eye": "#0C0A0A",
+                        "saddle": "#4A2814", "blanket": "#7A1E1A"},
+                  "B": {"coat": "#B9B5AE", "mane": "#EAE6DF", "muzzle": "#8A8580", "nostril": "#3A3230", "hoof": "#4A4440", "eye": "#0C0A0A",
+                        "saddle": "#3A2414", "blanket": "#1E3A6A"}}
+
+    def pattern(v, c):                                          # a bay's black points: the legs below the knees
+        if v == "A":
+            tg, P = c["tags"], c["centers"]
+            tg[(tg == "coat") & (P[:, 2] < 48)] = "mane"
+    S.pattern = pattern
+    S.anim = dict(neck=[("neck_01", 0.35), ("neck_02", 0.35), ("head", 0.3)], look=28, look_pitch=-4, breaths=2, breath_z=0.6,
+                  breath_pitch=0.4, ears=["ear_l", "ear_r"], ear_flick=25, tail=["tail_01", "tail_02", "tail_03"], tail_swish=12,
+                  graze=None,                                     # (its long neck curled under its chest: the horse has no graze)
+                  walk=dict(T=1.1, v=150, bob=2.0, nod=4, roll=1.2, tail=6,
+                            phase={"rear_l": 0.0, "front_l": 0.25, "rear_r": 0.5, "front_r": 0.75},
+                            gait={"front": dict(duty=0.62, height=13, tilt=34, fold=45), "rear": dict(duty=0.62, height=13, tilt=34, fold=40)}),
+                  run=dict(T=0.6, v=900, bob=2, nod=7, roll=0.8, tail=14,
+                           phase={"rear_l": 0.0, "rear_r": 0.1, "front_r": 0.45, "front_l": 0.55},
+                           # (a swing of 28 cm and a fold of 95 overreached the legs by 17 cm and crushed their faces: lower)
+                           gait={"front": dict(duty=0.38, height=17, tilt=50, fold=60), "rear": dict(duty=0.38, height=15, tilt=45, fold=55)}))
+    return S
+
+
+ANIMALS = {"chicken": chicken, "rabbit": rabbit, "goat": goat, "pig": pig, "cow": cow, "horse": horse}
 
 
 # ---------------------------------------------------------------- the mesh
@@ -909,8 +989,8 @@ def walk_targets(rig, W, t):
     return feet, stance, since
 
 
-def walk_pose(rig, A, t):
-    W = A["walk"]; T = W["T"]; P = empty_pose()
+def walk_pose(rig, A, t, key="walk"):
+    W = A[key]; T = W["T"]; P = empty_pose()
     P["feet"] = walk_targets(rig, W, t)[0]
     w2 = 2 * math.pi * 2 * t / T
     if W.get("hop"):                                           # the rabbit: up as the hind feet push off, the back flexing
@@ -940,10 +1020,10 @@ def walk_pose(rig, A, t):
     return P
 
 
-def plan_stride(rig, A):
+def plan_stride(rig, A, key="walk"):
     """the longest stance sweep each leg reaches without its IK clamping (with the body up by the bob), and the walk
-    speed that comes from it: the wanted speed or less"""
-    W = A["walk"]; T = W["T"]; vmax = W["v"]; lim = {}
+    speed that comes from it: the wanted speed or less (key: "run" for the horse's gallop)"""
+    W = A[key]; T = W["T"]; vmax = W["v"]; lim = {}
     for lg in rig.S.legs:
         G = W["gait"][lg["kind"]]; E0 = rig.t0[lg["bones"][3]].copy()
 
@@ -969,22 +1049,30 @@ def plan_stride(rig, A):
 
 def make_clips(rig, S):
     A = S.anim; rig.stretch = {}
-    g0, mz = graze_g(rig, A, A["graze_z"])
+    g0, mz = graze_g(rig, A, A["graze_z"]) if A.get("graze") else (0.0, 0.0)
     lim = plan_stride(rig, A)
+    lim_run = plan_stride(rig, A, "run") if "run" in A else None
     clips, info = {}, {}
-    for name, L, fn in (("Idle", IDLE_LEN, lambda t: idle_pose(rig, A, t)), ("Graze", GRAZE_LEN, lambda t: graze_pose(rig, A, t, g0)),
-                        ("Walk", A["walk"]["T"], lambda t: walk_pose(rig, A, t))):
+    todo = [("Idle", IDLE_LEN, lambda t: idle_pose(rig, A, t))]
+    if A.get("graze"): todo.append(("Graze", GRAZE_LEN, lambda t: graze_pose(rig, A, t, g0)))
+    todo.append(("Walk", A["walk"]["T"], lambda t: walk_pose(rig, A, t)))
+    if "run" in A: todo.append(("Run", A["run"]["T"], lambda t: walk_pose(rig, A, t, "run")))          # (the horse's gallop)
+    for name, L, fn in todo:
         n = int(round(L * FPS)); rig.stretch = {}
         frames = [rig.basis(rig.solve(fn(i / FPS))) for i in range(n)]
         frames.append(frames[0])                                # the last key is the first: a seamless loop
         clips[name] = frames
         info[name] = dict(length_s=L, frames=n + 1, ik_overreach_cm={k: round(v, 3) for k, v in rig.stretch.items()})
-    info["Graze"]["neck_down_deg"] = round(g0, 2); info["Graze"]["head_below_horizontal_deg"] = A["graze"]["head_deg"]
-    info["Graze"]["mouth_z_solved"] = round(mz, 2)
+    if "Graze" in info:
+        info["Graze"]["neck_down_deg"] = round(g0, 2); info["Graze"]["head_below_horizontal_deg"] = A["graze"]["head_deg"]
+        info["Graze"]["mouth_z_solved"] = round(mz, 2)
     info["Walk"]["designed_speed_cm_s"] = round(A["walk"]["v_eff"], 1)
     info["Walk"]["wanted_speed_cm_s"] = A["walk"]["v"]
     info["Walk"]["stance_sweep_cm"] = {k: round(v, 1) for k, v in A["walk"]["stride"].items()}
     info["Walk"]["half_sweep_limit_cm"] = lim
+    if lim_run is not None:
+        info["Run"]["designed_speed_cm_s"] = round(A["run"]["v_eff"], 1); info["Run"]["wanted_speed_cm_s"] = A["run"]["v"]
+        info["Run"]["stance_sweep_cm"] = {k: round(v, 1) for k, v in A["run"]["stride"].items()}; info["Run"]["half_sweep_limit_cm"] = lim_run
     return clips, info
 
 
@@ -1033,7 +1121,7 @@ def measure(S, rig, arm, ob, G, clips):
                 R["mouth_lowest_z"] = round(min(r["_mouth"] for r in rows), 2)
                 R["mouth_highest_z"] = round(max(r["_mouth"] for r in rows), 2)
         else:
-            Wk = S.anim["walk"]; speeds = []
+            Wk = S.anim["run" if name == "Run" else "walk"]; speeds = []
             for k in soles:
                 ts = [i / FPS for i in range(len(rows) - 1)]
                 wt = [walk_targets(rig, Wk, t) for t in ts]
@@ -1161,7 +1249,9 @@ def previews(S, arm, obs, G, clips, cam, sc, others):
     go("qback", "Idle", 0, "A", 150, 18)
     go("B", "Idle", 0, vs[1], 40, 18); go("other", "Idle", 0, vs[-1], -40, 18)
     go("idle_l", "Idle", int(1.2 * FPS), "A", 40, 18); go("idle_r", "Idle", int(3.5 * FPS), "A", 40, 18)
-    go("graze0", "Graze", 0, "A", 0, 6); go("graze", "Graze", int(1.4 * FPS), "A", 40, 18)
+    if "Graze" in clips: go("graze0", "Graze", 0, "A", 0, 6); go("graze", "Graze", int(1.4 * FPS), "A", 40, 18)
+    else:                                                       # (the horse: its gallop, at a third and two thirds of its stride)
+        nr = len(clips["Run"]) - 1; go("run0", "Run", nr // 3, "A", 0, 4); go("run1", "Run", 2 * nr // 3, "A", 0, 4)
     n = len(clips["Walk"]) - 1
     go("walk0", "Walk", 0, "A", 0, 4); go("walk1", "Walk", n // 4, "A", 0, 4); go("walk2", "Walk", n // 2, "A", 0, 4)
     go("walk3", "Walk", 3 * n // 4, "A", 40, 18)
@@ -1311,6 +1401,7 @@ def main():
                "clips": {k: {**cinfo[k], **meas[k]} for k in clips}}
         rec["walk_speed_cm_s"] = meas["Walk"]["walk_speed_cm_s"]
         rec["walk_cycle_s"] = S.anim["walk"]["T"]; rec["walk_stride_cm"] = round(rec["walk_speed_cm_s"] * S.anim["walk"]["T"], 1)
+        if "Run" in meas: rec["run_speed_cm_s"] = meas["Run"]["walk_speed_cm_s"]; rec["run_cycle_s"] = S.anim["run"]["T"]
         log(S.name, json.dumps({k: rec[k] for k in ("size_cm", "triangles", "rest_pose_rebuilt_err_cm", "weights", "walk_speed_cm_s")}))
         for k in clips: log(S.name, k, json.dumps(rec["clips"][k]))
         if len(G["T"]) >= TRI_BUDGET: log(S.name, "OVER THE TRIANGLE BUDGET", len(G["T"]))

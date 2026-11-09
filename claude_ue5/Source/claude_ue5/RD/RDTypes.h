@@ -651,6 +651,39 @@ enum class ERDItemKind : uint8
 	Token
 };
 
+/** the list of 2026-11-08b's eighth phase (913): the ridable horse: its meshes (her bay, the stable's grey), its clips (made in
+ *  farm_animals.py: Idle, Walk, Run a gallop), the speeds its soles keep in the walk and the gallop (the clips play at her speed
+ *  over them), the speed from which it gallops, its saddle bone (the rider's root), what it costs (x the tier's price), how much
+ *  faster she goes on it */
+USTRUCT(BlueprintType)
+struct FRDHorseDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> Mesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<USkeletalMesh> MeshB;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Idle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Walk;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Run;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkClipSpeed = 87.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RunClipSpeed = 260.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GallopFrom = 420.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SaddleBone = TEXT("saddle");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Price = 60.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpeedMul = 2.2f;
+	/** her root this far over the saddle bone (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RiderLift = 0.f;
+};
+
+/** a hero's rider clips (the Animals pack's camel rider's, retargeted to her by 913) */
+USTRUCT(BlueprintType)
+struct FRDRiderClips
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Idle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Walk;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Run;
+};
+
 /** the list of 2026-11-08b's seventh phase (SourceArt/wilderness/poi.json, 912): a kind of the wilderness's small points of interest
  *  ("the player should be able to interact or encounter something every 40 seconds when roaming the wilderness"): where it
  *  stands (its regions' biomes by name, "*" any; beside a road or off it; Layer 0 a small vignette, 1 mid-size, 2 a landmark

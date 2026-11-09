@@ -232,6 +232,8 @@ public:
 	void ShowMessage(const FString& Text) { SetMessage(Text); }
 	/** the list of 2026-11-07: her top speed times this in the wilderness (rd.WildRunSpeed; the generator sets it) */
 	float WildRunFactor = 1.f;
+	/** the eighth phase: on her horse, this many times as fast */
+	float MountFactor = 1.f;
 	void RefreshWalkSpeed() { UpdateWalkSpeed(); }
 	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
 	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A

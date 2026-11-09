@@ -2143,6 +2143,28 @@ public:
 	/** what met her (tests): "<time>|near|<what>|", "<time>|met|<kind>|<x>|<y>", "<time>|used|<kind>|<what it said>", and last
 	 *  "state|<laid>|<used>|<encounters asked>|<roamers>|<last engaged>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") TArray<FString> GetWildEncounterLines() const;
+	// ---- the eighth phase: the ridable horse (RDHorse.cpp; 913)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Horse") FRDHorseDef HorseDef;
+	/** each hero's rider clips, by her name */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Horse") TMap<FName, FRDRiderClips> RiderClips;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Horse") TObjectPtr<class ARDHorse> Horse;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Horse") TObjectPtr<class ARDHorse> StableHorse;
+	bool bMounted = false;
+	FVector MountMeshWas = FVector::ZeroVector, BoomOffsetWas = FVector::ZeroVector;
+	float BoomArmWas = 0.f;
+	FName RiderClipNow;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") bool HasHorse() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") bool IsMounted() const { return bMounted; }
+	/** the stable's price now (HorseDef.Price x the tier's price) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") int32 HorsePriceNow() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool BuyHorse();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool CallHorse();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool MountHorse();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Horse") bool DismountHorse();
+	/** tests: "<owned>|<spawned>|<mounted>|<x>|<y>|<z>|<its clip>|<its rate>|<her speed>|<saddle z>|<her pelvis z>|<her rider clip>|<the stable's horse>|<her pelvis from the saddle, flat (cm)>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") FString GetHorseState() const;
+	class ARDHorse* SpawnHorseAt(const FVector& At, float Yaw, bool bHers);
+	void TickHorse(float Dt);
 	// ---- the captain's two wilderness quests (2026-11-07, RDWildQuest.cpp): "wild:wolves" (the Mill Road Den's pack killed,
 	// every one: read from the kills kept, WildKilled), "wild:patrol" (the lost patrol's remains found at the old watchtower)
 	/** how many monsters a quest's place has (its kills' keys are its id x 16 + 0..N-1) */

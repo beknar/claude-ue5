@@ -36,7 +36,9 @@ enum ERDTownSpot : uint8 { TS_Well, TS_Board, TS_Circle, TS_Stall, TS_Still, TS_
 	TS_Rune, TS_Crystal,
 	/** Heaven: a street light, a traffic light at a crossing, a street's furniture (a bench, a bus stop, a hydrant, a bin: by
 	 *  the spot's Bld, a variant) */
-	TS_StreetLight, TS_TrafficLight, TS_StreetProp };
+	TS_StreetLight, TS_TrafficLight, TS_StreetProp,
+	/** the eighth phase: the stable by the gate (a horse to buy, hers called) */
+	TS_Stable };
 
 /** the kinds of place a townsperson's round of work is made of (the third list, 2026-11-02): a cooking pot, a spit, a garden,
  *  a pen, a tavern's seat, serving at a tavern's table, chatting (the well, the square), the smithy, the bar, a camp's fire */
@@ -58,8 +60,8 @@ inline FString RDTownSpotName(uint8 Kind)
 	                                TEXT("tower"), TEXT("gate"), TEXT("lamp"), TEXT("tent"), TEXT("counter"), TEXT("basin"), TEXT("altar"), TEXT("stash"), TEXT("smith"), TEXT("bar"),
 	                                TEXT("statue"), TEXT("fountain"), TEXT("shrine"), TEXT("anvil"), TEXT("forge"), TEXT("cart"), TEXT("barricade"),
 	                                TEXT("pier"), TEXT("ship"), TEXT("boat"), TEXT("wreck"), TEXT("body"), TEXT("gibbet"), TEXT("dock props"), TEXT("rune"), TEXT("crystal"),
-	                                TEXT("street light"), TEXT("traffic light"), TEXT("street prop") };
-	return Kind <= TS_StreetProp ? FString(Names[Kind]) : FString(TEXT("?"));
+	                                TEXT("street light"), TEXT("traffic light"), TEXT("street prop"), TEXT("stable") };
+	return Kind <= TS_Stable ? FString(Names[Kind]) : FString(TEXT("?"));
 }
 
 UCLASS()

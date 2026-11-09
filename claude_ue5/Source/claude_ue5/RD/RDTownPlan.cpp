@@ -1039,6 +1039,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 		const FVector Ua = FVector(RDTDir4[F.Side(1, 0)].X, RDTDir4[F.Side(1, 0)].Y, 0.f), Va = FVector(RDTDir4[F.Side(0, 1)].X, RDTDir4[F.Side(0, 1)].Y, 0.f);
 		const FVector GateIn = TownGate - TownGateOut * 450.f;
 		for (int32 K = 0; K < 2; ++K) { FTownPost G; G.Role = ERDTownRole::Guard; G.At = GateIn + Va * (K ? 380.f : -380.f); G.Yaw = TownGateOut.Rotation().Yaw + 180.f; G.Index = K; TownPosts.Add(G); }
+		// (the eighth phase: the stable beside the gate, inside the wall, its horse facing out, 6 m past the guard so F at the
+		// stable is not taken by him (at 7 m from the gate the first test's prompt was "talk to a guard"); no stream drawn)
+		{ FTownSpot St; St.Kind = TS_Stable; St.At = GateIn + Va * 1000.f; St.Yaw = TownGateOut.Rotation().Yaw; TownSpots.Add(St); }
 		const FTownBld& C = TownBlds[CastleBld];
 		const FVector CDoor = TileWorld(C.DoorTile) + FVector(RDTDir4[C.DoorSide].X, RDTDir4[C.DoorSide].Y, 0.f) * 330.f;
 		for (int32 K = 0; K < 2; ++K) { FTownPost G; G.Role = ERDTownRole::Guard; G.At = CDoor + Va * (K ? 300.f : -300.f); G.Yaw = (-Ua).Rotation().Yaw; G.Index = 2 + K; TownPosts.Add(G); }

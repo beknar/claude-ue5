@@ -164,6 +164,8 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FString> FoodTaken;
 	/** the portcullis raised (it stays as she left it) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bPortcullisUp = false;
+	/** the eighth phase: she has bought a horse at a stable */
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bHorseOwned = false;
 	/** the showcase's command line read (once a game) */
 	bool bShow7Read = false;
 	// ---- the wilderness (RDWild*.cpp): the world's seed, the map she revealed (50 m cells in blocks of 32 x 32: a block's

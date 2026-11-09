@@ -1,0 +1,121 @@
+{
+ "tag": "hr3",
+ "plan": [
+  "horse9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    19350,
+    -2650
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 0.0,
+    "mounted": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "clip": "none",
+    "rate": 0.0,
+    "speed": 0.0,
+    "saddle_z": 0.0,
+    "pelvis_z": 95.5,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": -1.0
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 19102.0,
+    "y": -2396.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 156.5,
+    "pelvis_z": 95.5,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 220.5
+   },
+   "gi_owned": true,
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140578.0,
+    "y": -1591987.0,
+    "z": -1911.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1754.7,
+    "pelvis_z": -1740.7,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.1
+   },
+   "attack_refused": true,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 142199.0,
+    "y": -1591500.0,
+    "z": -1960.0,
+    "clip": "run",
+    "rate": 2.99,
+    "speed": 777.0,
+    "saddle_z": -1803.5,
+    "pelvis_z": -1789.1,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 18.2
+   },
+   "speed_m_s": {
+    "foot": 3.45,
+    "mounted": 7.95,
+    "ratio": 2.3,
+    "want": 2.2,
+    "after": 3.39
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 145712.0,
+    "y": -1590238.0,
+    "z": -1939.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1783.1,
+    "pelvis_z": -1845.5,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 200.5
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_hr3_horse_idle.png",
+  "wd_hr3_horse_side.png",
+  "wd_hr3_horse_back.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

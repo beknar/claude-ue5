@@ -122,3 +122,10 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **Add a turn up frame by frame**: read once at the end, 415 degrees came out as 56 (a wrap).
 - **A "clear line" to a thing is a line to that thing**: the dummy test's sight check accepted any hit on the town's section (its walls too) and the Mage's bolt hit something else once.
 - **A castle test after Brokenspire's plays needs a fresh editor** (2026-11-08): after five `884 ... -Light` plays in one editor, `868 finalboss` ran out of video memory at its play's start (D3D12 "Out of video memory", the editor gone, its crash reporter left running). Restarted on `mistward_castle`, the same step passed. Wait for the editor's level to be loaded before a test arms (one armed 40 s after start and failed: "arm failed").
+
+## The horse (2026-11-09, phase 8 of the list of 2026-11-08b: `913`, `RD/RDHorse.cpp`, `farm_animals.py`'s `horse()`)
+
+- **A leg drawn near straight leaves the IK no stride**: the first horse's half stride was 16 cm (its walk 47 cm/s, its gallop none); bent at the joints, 30 cm. Read `half_sweep_limit_cm` before tuning a gait; a swing too high overreaches the legs (`ik_overreach_cm`) and crushes faces (`edge_squash_min`).
+- **A long neck curls under the chest when turned down**: the graze search turned it 158 degrees. The horse has no graze (`graze=None`).
+- **A rider clip carries its mount's seat**: the camel rider's pelvis is 2 m over its root and forward of it. Seat her by her pelvis's place against her mesh each frame (all three axes), not a lift.
+- **A new spot by the gate meets the gate's guards**: at 7 m the stable's F talked to a guard (3.2 m off). Test a spot's prompt from where a player stands, the town's side.

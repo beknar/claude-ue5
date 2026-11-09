@@ -1,0 +1,435 @@
+{
+ "fps": 30,
+ "units": "cm",
+ "faces": "+X",
+ "sheet_panels": [
+  "side (A, Idle's first frame)",
+  "front",
+  "three-quarter",
+  "three-quarter from behind",
+  "B (three-quarter)",
+  "C or B again from the other side",
+  "Idle 1.2 s (looking left)",
+  "Idle 3.5 s (looking right)",
+  "Graze 0 (side)",
+  "Graze 1.4 s (three-quarter; the chicken mid-peck)",
+  "Walk 0 (side)",
+  "Walk 1/4 (side)",
+  "Walk 1/2 (side)",
+  "Walk 3/4 (three-quarter)",
+  "at 5 m, 70-degree view (A)",
+  "at 5 m, 70-degree view (B)"
+ ],
+ "Horse": {
+  "size_cm": {
+   "length_x": 250.3,
+   "width_y": 65.8,
+   "height_z": 214.0,
+   "min": [
+    -102.5,
+    -32.9,
+    0.0
+   ],
+   "max": [
+    147.8,
+    32.9,
+    214.0
+   ],
+   "back_height": 160.7
+  },
+  "triangles": 5976,
+  "vertices": 3010,
+  "body_triangles_before_decimation": 48444,
+  "bones": [
+   "root",
+   "pelvis",
+   "spine_01",
+   "spine_02",
+   "neck_01",
+   "neck_02",
+   "head",
+   "jaw",
+   "ear_l",
+   "ear_r",
+   "tail_01",
+   "tail_02",
+   "tail_03",
+   "saddle",
+   "upperarm_l",
+   "forearm_l",
+   "cannon_front_l",
+   "hoof_front_l",
+   "thigh_l",
+   "shin_l",
+   "cannon_rear_l",
+   "hoof_rear_l",
+   "upperarm_r",
+   "forearm_r",
+   "cannon_front_r",
+   "hoof_front_r",
+   "thigh_r",
+   "shin_r",
+   "cannon_rear_r",
+   "hoof_rear_r"
+  ],
+  "legs": {
+   "front_l": [
+    "upperarm_l",
+    "forearm_l",
+    "cannon_front_l",
+    "hoof_front_l"
+   ],
+   "rear_l": [
+    "thigh_l",
+    "shin_l",
+    "cannon_rear_l",
+    "hoof_rear_l"
+   ],
+   "front_r": [
+    "upperarm_r",
+    "forearm_r",
+    "cannon_front_r",
+    "hoof_front_r"
+   ],
+   "rear_r": [
+    "thigh_r",
+    "shin_r",
+    "cannon_rear_r",
+    "hoof_rear_r"
+   ]
+  },
+  "rest_pose_rebuilt_err_cm": 0.0,
+  "rest_pose_rebuilt_turn_deg": 0.0,
+  "weights": {
+   "sum_min": 1.0,
+   "sum_max": 1.0,
+   "bones_per_vertex_max": 4,
+   "unweighted_vertices": 0,
+   "farthest_from_moving_bone_cm": 81.2,
+   "that_bone": "spine_01"
+  },
+  "variants": {
+   "A": {
+    "coat": "#6B3A1E",
+    "mane": "#17110E",
+    "muzzle": "#3A2A24",
+    "nostril": "#2A1A16",
+    "hoof": "#2A2420",
+    "eye": "#0C0A0A",
+    "saddle": "#4A2814",
+    "blanket": "#7A1E1A"
+   },
+   "B": {
+    "coat": "#B9B5AE",
+    "mane": "#EAE6DF",
+    "muzzle": "#8A8580",
+    "nostril": "#3A3230",
+    "hoof": "#4A4440",
+    "eye": "#0C0A0A",
+    "saddle": "#3A2414",
+    "blanket": "#1E3A6A"
+   }
+  },
+  "clips": {
+   "Idle": {
+    "length_s": 5.0,
+    "frames": 151,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 1.353,
+    "edge_squash_min": 0.636,
+    "edge_stretch_p99_5": 1.128,
+    "loop_seam_cm": 0.0,
+    "feet": {
+     "front_l": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "rear_l": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "rear_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Walk": {
+    "length_s": 1.1,
+    "frames": 34,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 86.9,
+    "wanted_speed_cm_s": 150,
+    "stance_sweep_cm": {
+     "front": 59.3,
+     "rear": 59.3
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 29.63,
+     "rear_l": 33.6,
+     "front_r": 29.63,
+     "rear_r": 33.6
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 3.572,
+    "edge_squash_min": 0.143,
+    "edge_stretch_p99_5": 2.14,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 86.88,
+    "feet": {
+     "front_l": {
+      "stance_frames": 15,
+      "speed_cm_s": 86.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_l": {
+      "stance_frames": 16,
+      "speed_cm_s": 86.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "front_r": {
+      "stance_frames": 16,
+      "speed_cm_s": 86.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_r": {
+      "stance_frames": 16,
+      "speed_cm_s": 86.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     }
+    }
+   },
+   "Run": {
+    "length_s": 0.6,
+    "frames": 19,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 259.9,
+    "wanted_speed_cm_s": 900,
+    "stance_sweep_cm": {
+     "front": 59.3,
+     "rear": 59.3
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 29.63,
+     "rear_l": 33.6,
+     "front_r": 29.63,
+     "rear_r": 33.6
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 4.53,
+    "edge_squash_min": 0.059,
+    "edge_stretch_p99_5": 2.886,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 259.88,
+    "feet": {
+     "front_l": {
+      "stance_frames": 6,
+      "speed_cm_s": 259.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_l": {
+      "stance_frames": 6,
+      "speed_cm_s": 259.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "front_r": {
+      "stance_frames": 5,
+      "speed_cm_s": 259.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_r": {
+      "stance_frames": 5,
+      "speed_cm_s": 259.88,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": -0.0
+     }
+    }
+   }
+  },
+  "walk_speed_cm_s": 86.88,
+  "walk_cycle_s": 1.1,
+  "walk_stride_cm": 95.6,
+  "run_speed_cm_s": 259.88,
+  "run_cycle_s": 0.6,
+  "fbx": {
+   "A": "SK_Farm_Horse.fbx",
+   "B": "SK_Farm_Horse_B.fbx"
+  }
+ },
+ "fbx_check": {
+  "SK_Farm_Horse.fbx": {
+   "objects": [
+    "Armature",
+    "SK_Farm_Horse"
+   ],
+   "bones": 30,
+   "root_bone": "root",
+   "triangles": 5976,
+   "materials": {
+    "M_Farm_Horse_A_coat": [
+     0.147,
+     0.042,
+     0.013
+    ],
+    "M_Farm_Horse_A_mane": [
+     0.009,
+     0.006,
+     0.004
+    ],
+    "M_Farm_Horse_A_muzzle": [
+     0.042,
+     0.023,
+     0.018
+    ],
+    "M_Farm_Horse_A_nostril": [
+     0.023,
+     0.01,
+     0.008
+    ],
+    "M_Farm_Horse_A_hoof": [
+     0.023,
+     0.018,
+     0.014
+    ],
+    "M_Farm_Horse_A_eye": [
+     0.004,
+     0.003,
+     0.003
+    ],
+    "M_Farm_Horse_A_saddle": [
+     0.068,
+     0.021,
+     0.007
+    ],
+    "M_Farm_Horse_A_blanket": [
+     0.195,
+     0.013,
+     0.01
+    ]
+   },
+   "takes": {
+    "Armature|Armature|Idle": [
+     1.0,
+     151.0
+    ],
+    "Armature|Armature|Run": [
+     1.0,
+     19.0
+    ],
+    "Armature|Armature|Walk": [
+     1.0,
+     34.0
+    ]
+   },
+   "size_read_back_cm": [
+    250.3,
+    65.8,
+    214.0
+   ]
+  },
+  "SK_Farm_Horse_B.fbx": {
+   "objects": [
+    "Armature",
+    "SK_Farm_Horse_B"
+   ],
+   "bones": 30,
+   "root_bone": "root",
+   "triangles": 5976,
+   "materials": {
+    "M_Farm_Horse_B_coat": [
+     0.485,
+     0.462,
+     0.423
+    ],
+    "M_Farm_Horse_B_mane": [
+     0.823,
+     0.791,
+     0.738
+    ],
+    "M_Farm_Horse_B_muzzle": [
+     0.254,
+     0.235,
+     0.216
+    ],
+    "M_Farm_Horse_B_nostril": [
+     0.042,
+     0.032,
+     0.03
+    ],
+    "M_Farm_Horse_B_hoof": [
+     0.068,
+     0.058,
+     0.051
+    ],
+    "M_Farm_Horse_B_eye": [
+     0.004,
+     0.003,
+     0.003
+    ],
+    "M_Farm_Horse_B_saddle": [
+     0.042,
+     0.018,
+     0.007
+    ],
+    "M_Farm_Horse_B_blanket": [
+     0.013,
+     0.042,
+     0.144
+    ]
+   },
+   "takes": {},
+   "size_read_back_cm": [
+    250.3,
+    65.8,
+    214.0
+   ]
+  }
+ }
+}

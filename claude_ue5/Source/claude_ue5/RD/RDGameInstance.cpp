@@ -19,7 +19,7 @@ void URDGameInstance::NewGame(FName Hero)
 	Dungeons.Reset(); ReturnAt = FVector::ZeroVector; ReturnYaw = 0.f; ReturnTown.Reset();
 	Arrive.Reset();
 	TownHour = -1.f; TownDay = 1;
-	GardensHarvested.Reset(); FoodTaken.Reset(); bPortcullisUp = false;
+	GardensHarvested.Reset(); FoodTaken.Reset(); bPortcullisUp = false; bHorseOwned = false;
 	// (a new continent each game: the seed from the clock)
 	WildSeed = (int32)(FDateTime::Now().GetTicks() % 1999999999) + 1;
 	WildRevealKeys.Reset(); WildRevealBits.Reset(); WildFound.Reset(); WildKilled.Reset(); TownStore.Reset();
