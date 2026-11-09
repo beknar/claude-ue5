@@ -1,5 +1,5 @@
 {
- "tag": "k9c",
+ "tag": "k9e",
  "plan": [
   "finalboss"
  ],
@@ -30,9 +30,9 @@
     5,
     true
    ],
-   "share_before": "1/1341|0/406|0/2903|1",
+   "share_before": "2/1310|0/393|0/2824|1",
    "placed_before": 0,
-   "share_at_place": "42/1341|13/406|110/2903|1",
+   "share_at_place": "43/1310|13/393|105/2824|1",
    "placed": {
     "placed": 1,
     "slain": 0,
@@ -41,14 +41,14 @@
      4,
      0
     ],
-    "room": 11,
-    "band": 7,
+    "room": 16,
+    "band": 9,
     "boss_alive": 1,
     "boss_hp": 1836.0,
     "reward": "",
-    "share": "42/1341|13/406|110/2903|1"
+    "share": "43/1310|13/393|105/2824|1"
    },
-   "notice_placed": "TIER 5 HALF CLEARED  -  AURORIM WAITS IN THE CHAPEL (SEE YOUR MAP)",
+   "notice_placed": "TIER 5 HALF CLEARED  -  AURORIM WAITS IN THE STOREROOM (SEE YOUR MAP)",
    "boss": {
     "kind": "Aurorim",
     "title": "FINAL BOSS  Aurorim",
@@ -57,13 +57,13 @@
     "damage": 132.0
    },
    "band": {
-    "n": 7,
+    "n": 9,
     "max_hp": 408,
     "kinds": [
      "Alfa",
      "Hunter",
      "Nasty",
-     "Spider",
+     "Rock",
      "Titan"
     ],
     "all_tier5": true
@@ -72,27 +72,27 @@
    "hp_ratio_want": 4.37,
    "hover": {
     "bottom": [
-     33.2,
-     52.9
+     34.2,
+     53.0
     ],
     "now": [
      38.0,
-     52.0
+     52.1
     ]
    },
-   "wing_motion_cm": 127.6,
+   "wing_motion_cm": 125.8,
    "door_sealed": {
     "open": 0,
     "alpha": 0.0,
     "travelled": 0,
     "at": [
-     102930.0,
-     -6450.0,
+     97350.0,
+     -4770.0,
      0.0
     ],
     "facing": [
-     1.0,
-     -0.0
+     0.0,
+     1.0
     ],
     "width": 124.0,
     "height": 258.0,
@@ -104,7 +104,7 @@
    "door_in_room": true,
    "tactics": {
     "distance": 671,
-    "band_near": 7,
+    "band_near": 9,
     "hold_m": [
      9.0,
      13.0
@@ -112,68 +112,68 @@
     "branches": {
      "unseen": 1,
      "beam": 2,
-     "swing": 144,
-     "hold": 94,
-     "shoot": 1
+     "swing": 149,
+     "hold": 53,
+     "shoot": 2
     },
-    "round_deg": 52,
-    "held_s": 3.3,
+    "round_deg": 34,
+    "held_s": 2.4,
     "blows_landed": 0,
     "tail_m": [
-     8.7,
+     9.0,
      9.0
     ],
-    "moved_m": 7.6,
-    "struck_nearest_m": 2.9,
+    "moved_m": 5.4,
+    "struck_nearest_m": 3.0,
     "struck_branches": {
-     "shoot": 1,
-     "stun": 17,
-     "chase": 69
+     "swing": 1,
+     "stun": 14,
+     "chase": 75
     }
    },
    "band_near_after": 0,
    "long_tries": [
     {
-     "distance": 3000,
+     "distance": 2100,
      "branches": {
-      "swing": 22,
-      "chase": 60
+      "swing": 28,
+      "chase": 56,
+      "beam": 1
      },
      "aggro": true,
      "shot_wait": 0.2,
      "shots": 1,
      "on_her": 1,
      "hp_lost": 99.0,
-     "lance_frames": 36,
+     "lance_frames": 25,
      "lance_point_first": 1.0,
      "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
     }
    ],
    "long": {
-    "distance": 3000,
+    "distance": 2100,
     "branches": {
-     "swing": 22,
-     "chase": 60
+     "swing": 28,
+     "chase": 56,
+     "beam": 1
     },
     "aggro": true,
     "shot_wait": 0.2,
     "shots": 1,
     "on_her": 1,
     "hp_lost": 99.0,
-    "lance_frames": 36,
+    "lance_frames": 25,
     "lance_point_first": 1.0,
     "last_on_her": "Aurorim|99.0|132.0|a thrown lance"
    },
    "middle": {
     "distance": 949,
     "branches": {
-     "chase": 1,
-     "beam": 5,
-     "swing": 44,
+     "swing": 39,
      "shoot": 1
     },
     "beams": 1,
-    "mark_frames": 15,
+    "mark_frames": 16,
     "fell": 1,
     "on_her": 1,
     "hp_lost": 132.0
@@ -182,10 +182,10 @@
     "distance": 180,
     "fist_fx": 8,
     "lines": [
-     "NS_Shield_Wind_01|LeftHand|0.0|15",
-     "NS_Projectile_Wind01|LeftHand|0.0|20",
-     "NS_Shield_Wind_01|RightHand|0.0|14",
-     "NS_Projectile_Wind01|RightHand|0.0|22"
+     "NS_Shield_Wind_01|LeftHand|0.0|14",
+     "NS_Projectile_Wind01|LeftHand|0.0|25",
+     "NS_Shield_Wind_01|RightHand|0.0|13",
+     "NS_Projectile_Wind01|RightHand|0.0|25"
     ],
     "hits": 2,
     "hp_lost": 264.0,
@@ -199,20 +199,22 @@
      4,
      0
     ],
-    "room": 11,
+    "room": 16,
     "band": 0,
     "boss_alive": 0,
     "boss_hp": 0.0,
     "reward": "Ursag's Horn Blade|2500",
-    "share": "42/1341|13/406|110/2903|1"
+    "share": "43/1310|13/393|105/2824|1"
    },
-   "gold": 2709,
+   "gold": 2716,
    "notice_killed": "MISTWARD CASTLE IS CONQUERED  -  THE DOOR TO BROKENSPIRE IS OPEN",
    "reward": "Ursag's Horn Blade|2500",
    "reward_tier5": true,
    "pile": [
     "Catacomb Key",
     "Daemon Ash",
+    "Epoxy",
+    "Faint Essence",
     "Map to Vel Morrath",
     "Radiant Essence",
     "Troll Heart",
@@ -224,20 +226,20 @@
     "alpha": 1.0,
     "travelled": 0,
     "at": [
-     102930.0,
-     -6450.0,
+     97350.0,
+     -4770.0,
      0.0
     ],
     "facing": [
-     1.0,
-     -0.0
+     0.0,
+     1.0
     ],
     "width": 124.0,
     "height": 258.0,
     "gate_z": -289.0,
     "gate_blocks": 0,
     "glow": 1,
-    "glow_particles": 134
+    "glow_particles": 133
    },
    "door_glow": true,
    "world_after": "brokenspire",
@@ -246,10 +248,10 @@
  ],
  "windows_hidden": "",
  "shots": [
-  "mw_k9c_finalboss_door_sealed.png",
-  "mw_k9c_finalboss_beam_mark.png",
-  "mw_k9c_finalboss_beam_light.png",
-  "mw_k9c_finalboss_door_open.png"
+  "mw_k9e_finalboss_door_sealed.png",
+  "mw_k9e_finalboss_beam_mark.png",
+  "mw_k9e_finalboss_beam_light.png",
+  "mw_k9e_finalboss_door_open.png"
  ],
  "error": null,
  "windows_shown_again": 0

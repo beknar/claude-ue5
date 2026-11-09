@@ -46,8 +46,13 @@ TArray<FName> ARDDungeonGenerator::HarvestOf(FName Kind, int32 Tier, bool bBig, 
 	// Ichor for its Medium Healing Potion, 868's harvest step), any part of the tier once each has been given)
 	const FRDMonsterDef* Def = Kind.IsNone() ? nullptr : Monsters.FindByPredicate([Kind](const FRDMonsterDef& D) { return D.Name == Kind; });
 	TArray<FName> Fam, OfTier;
+	// (a tier past the parts' table's last (the roads' tiers run to 25 since the list of 2026-11-08b): that last tier's parts, until
+	// the rebalance gives the tiers their own (PR #31's review: a wild monster of tier 10 gave no part))
+	int32 PartTop = 1;
+	for (const FRDHarvestPart& P : HarvestParts) for (const int32 Pt : P.Tiers) PartTop = FMath::Max(PartTop, Pt);
+	const int32 Tp = FMath::Min(T, PartTop);
 	for (const FRDHarvestPart& P : HarvestParts)
-		if (P.Tiers.Num() == 0 || P.Tiers.Contains(T)) { OfTier.Add(P.Part); if (Def && P.Family == Def->SoundSet) Fam.Add(P.Part); }
+		if (P.Tiers.Num() == 0 || P.Tiers.Contains(Tp)) { OfTier.Add(P.Part); if (Def && P.Family == Def->SoundSet) Fam.Add(P.Part); }
 	const int32 NP = bBig ? FMath::Max(BossParts, 0) : (U(20) < HarvestPartChance ? 1 : 0);
 	TArray<FName> Given;
 	for (int32 K = 0; K < NP; ++K)

@@ -1000,8 +1000,11 @@ public:
 	// <key item>|<map item>" from Mistward Castle (its key empty, no key or map) to Heaven; each dungeon's boss drops the next's key
 	// and map, and the way into a town's dungeon is refused without its key. 905 writes it on every map (SourceArt/dungeons/chain.json)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Keys") TArray<FString> DungeonChain;
-	struct FRDChainLink { FString Key, Level, Town, Title; FName KeyItem, MapItem; };
-	bool ChainLink(int32 I, FRDChainLink& Out) const;
+	struct FRDChainLink { FString Key, Level, Short, Town, Title; FName KeyItem, MapItem; };
+	/** the chain parsed (once, again when its text changes) */
+	const TArray<FRDChainLink>& Chain() const;
+	mutable TArray<FRDChainLink> ChainCache;
+	mutable uint32 ChainHash = 0;
 	int32 ChainIndexOfLevel(const FString& Level) const;
 	int32 ChainIndexOfKey(const FString& Key) const;
 	/** she may go down into a level: Mistward Castle and a level not in the chain always; another with its key held or once held */

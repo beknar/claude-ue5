@@ -3133,7 +3133,14 @@ def step_keys9():
     for it in ("Catacomb Key", "Map to Vel Morrath"):
         n = c.get_item_count(it)
         if n: c.remove_item(it, n)
-    g.debug_all_dungeon_keys(True); quiet(False)
+    # (a game saved before the keys (PR #31's review): Vel Morrath's last tier's boss slain gives the War Engine's way; the
+    # every-way switch is not a saved counter)
+    gi = GS.get_game_instance(G["w"]); res["war_engine_before"] = gi.get_counter("dkey:war_engine")
+    gi.count("vel_morrath:bossdone:5", 1); yield from wait(1.6)
+    res["war_engine_after_old_progress"] = gi.get_counter("dkey:war_engine")
+    g.debug_all_dungeon_keys(True); yield from wait(0.2)
+    res["all_keys_counter"] = gi.get_counter("dkey:all")
+    quiet(False)
     t = res["tiers"]; tm = res["tiers_mid"]
     ok = (res["chain"][:4] == ["castle", "vel_morrath", "war_engine", "sewers"] and res["open_at_start"].get("castle") and not res["open_at_start"].get("vel_morrath")
           and not res["open_at_start"].get("war_engine") and t.get("Brokenspire") == 1 and t.get("Vel Morrath") == 5 and t.get("Ashenreach") == 10 and t.get("Graymourne") == 15
@@ -3142,7 +3149,8 @@ def step_keys9():
           and res["dropped"] == "vel_morrath" and res["piles_new"] == 1 and res["pile_hers"] is False and sorted(res["pile_things"]) == ["Catacomb Key", "Map to Vel Morrath"]
           and res["carried"] == {"Catacomb Key": 1, "Map to Vel Morrath": 1} and res["open_after"].get("vel_morrath") and not res["open_after"].get("war_engine")
           and res.get("stair_with_key") == "catacombs" and res["second_drop_piles"] == 0 and res["fell"]
-          and res["carried_after_death"] == {"Catacomb Key": 1, "Map to Vel Morrath": 1} and not res["death_pile_has_key"])
+          and res["carried_after_death"] == {"Catacomb Key": 1, "Map to Vel Morrath": 1} and not res["death_pile_has_key"]
+          and res["war_engine_before"] == 0 and res["war_engine_after_old_progress"] == 1 and res["all_keys_counter"] == 0)
     step_result("keys9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,

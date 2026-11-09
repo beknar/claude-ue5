@@ -5,10 +5,13 @@
 //   - the chain (DungeonChain, 905 from SourceArt/dungeons/chain.json): Mistward Castle, then each town's dungeon in order,
 //     each with its key and its map (items of kind Key, known by name: not sold, not stored, kept at her death)
 //   - the way down into a town's dungeon is refused without its key (DescendToCatacombs; the castle is always open)
-//   - a dungeon's boss (Mistward's final boss; another dungeon's last tier's boss) drops the next dungeon's key and map
-//   - what she has had is kept in the game's counters ("dkey:<dungeon>", "dmap:<town>"): saved, and a key sold or lost would
-//     still open its way
-//   - the map, out in the wilds: the road from the town before to its town and the land round it revealed on her map
+//   - a dungeon's boss (Mistward's final boss; another dungeon's last tier's boss) drops the next dungeon's key and map, once a
+//     game; the way is hers from that moment (the game's counter "dkey:<dungeon>", saved): a pile left behind (a death, the
+//     door taken at once, the level left) does not lock the rest of the chain (PR #31's review)
+//   - a game saved before the keys gets the keys its progress implies: Mistward's final boss slain, a dungeon entered, a
+//     dungeon's last tier's boss slain
+//   - the map, out in the wilds: the road from the town before to its town and the land round it revealed on her map, once the
+//     town is in the world
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDCombat.h"
 #include "RD/RDGameInstance.h"
@@ -32,74 +35,84 @@ namespace
 	}
 }
 
-bool ARDDungeonGenerator::ChainLink(int32 I, FRDChainLink& Out) const
+const TArray<ARDDungeonGenerator::FRDChainLink>& ARDDungeonGenerator::Chain() const
 {
-	if (!DungeonChain.IsValidIndex(I)) return false;
-	TArray<FString> P; DungeonChain[I].ParseIntoArray(P, TEXT("|"), false);
-	if (P.Num() < 6) return false;
-	Out.Key = P[0]; Out.Level = P[1]; Out.Town = P[2]; Out.Title = P[3]; Out.KeyItem = FName(*P[4]); Out.MapItem = FName(*P[5]);
-	if (P[4].IsEmpty()) Out.KeyItem = NAME_None;
-	if (P[5].IsEmpty()) Out.MapItem = NAME_None;
-	return true;
+	// (parsed once, again only if the chain's text changes: PR #31's review, every lookup parsed it)
+	uint32 H = 0;
+	for (const FString& S : DungeonChain) H = HashCombine(H, GetTypeHash(S));
+	if (H == ChainHash && ChainCache.Num() > 0) return ChainCache;
+	ChainCache.Reset(); ChainHash = H;
+	for (const FString& S : DungeonChain)
+	{
+		TArray<FString> P; S.ParseIntoArray(P, TEXT("|"), false);
+		if (P.Num() < 6) continue;
+		FRDChainLink L;
+		L.Key = P[0]; L.Level = P[1]; L.Short = RDKShort(P[1]); L.Town = P[2]; L.Title = P[3];
+		L.KeyItem = P[4].IsEmpty() ? NAME_None : FName(*P[4]); L.MapItem = P[5].IsEmpty() ? NAME_None : FName(*P[5]);
+		ChainCache.Add(L);
+	}
+	return ChainCache;
 }
 
 int32 ARDDungeonGenerator::ChainIndexOfLevel(const FString& Level) const
 {
 	const FString Want = RDKShort(Level);
-	FRDChainLink L;
-	for (int32 I = 0; I < DungeonChain.Num(); ++I) if (ChainLink(I, L) && RDKShort(L.Level) == Want) return I;
-	return -1;
+	return Chain().IndexOfByPredicate([&](const FRDChainLink& L) { return L.Short == Want; });
 }
 
 int32 ARDDungeonGenerator::ChainIndexOfKey(const FString& Key) const
 {
-	FRDChainLink L;
-	for (int32 I = 0; I < DungeonChain.Num(); ++I) if (ChainLink(I, L) && L.Key == Key) return I;
-	return -1;
+	return Chain().IndexOfByPredicate([&](const FRDChainLink& L) { return L.Key == Key; });
 }
 
 bool ARDDungeonGenerator::HasDungeonKey(const FString& Level) const
 {
 	// (the first of the chain (Mistward Castle) and a level not in it need none)
 	const int32 I = ChainIndexOfLevel(Level);
-	FRDChainLink L;
-	if (I <= 0 || !ChainLink(I, L)) return true;
+	if (I <= 0) return true;
+	const FRDChainLink& L = Chain()[I];
 	if (const URDGameInstance* GI = URDGameInstance::Of(this))
-		if (GI->GetCounter(TEXT("dkey:all")) > 0 || GI->GetCounter(TEXT("dkey:") + L.Key) > 0) return true;
-	// (-RDAllKeys: the packaged game's runs go down by -RDTownGo in the town's first ticks, before TickDungeonKeys has read it)
-	if (FParse::Param(FCommandLine::Get(), TEXT("RDAllKeys"))) return true;
+	{
+		// (every way open: tests and the packaged game's runs, never saved (PR #31's review: as a counter it went into the saves))
+		if (GI->bAllDungeonKeys || GI->GetCounter(TEXT("dkey:") + L.Key) > 0) return true;
+		// (-RDAllKeys read before TickDungeonKeys has: the packaged runs go down in the town's first ticks)
+		if (!GI->bAllKeysRead && FParse::Param(FCommandLine::Get(), TEXT("RDAllKeys"))) return true;
+	}
 	return PlayerCombat && !L.KeyItem.IsNone() && PlayerCombat->GetItemCount(L.KeyItem) > 0;
 }
 
 FString ARDDungeonGenerator::DungeonLockedLine(const FString& Level) const
 {
 	const int32 I = ChainIndexOfLevel(Level);
-	FRDChainLink L, Prev;
-	if (I <= 0 || !ChainLink(I, L) || !ChainLink(I - 1, Prev)) return FString();
+	if (I <= 0) return FString();
+	const FRDChainLink& L = Chain()[I];
+	const FRDChainLink& Prev = Chain()[I - 1];
 	return FString::Printf(TEXT("The way into %s is locked. Its key, the %s, is held by the master of %s."), *L.Title, *L.KeyItem.ToString(), *Prev.Title);
 }
 
 bool ARDDungeonGenerator::IsDungeonChainItem(FName Item) const
 {
 	if (Item.IsNone()) return false;
-	FRDChainLink L;
-	for (int32 I = 0; I < DungeonChain.Num(); ++I) if (ChainLink(I, L) && (L.KeyItem == Item || L.MapItem == Item)) return true;
-	return false;
+	return Chain().ContainsByPredicate([&](const FRDChainLink& L) { return L.KeyItem == Item || L.MapItem == Item; });
 }
 
 void ARDDungeonGenerator::DropNextDungeonKey(const FVector& At)
 {
 	// (this dungeon's place in the chain: its key (Mistward Castle's is empty); the next one's key and map lie where its boss fell)
 	const int32 I = ChainIndexOfKey(DungeonKey);
-	FRDChainLink Next;
-	if (I < 0 || !ChainLink(I + 1, Next)) return;
+	if (I < 0 || !Chain().IsValidIndex(I + 1)) return;
+	const FRDChainLink& Next = Chain()[I + 1];
 	URDGameInstance* GI = URDGameInstance::Of(this);
-	if (GI && GI->GetCounter(TEXT("dkey:") + Next.Key) > 0) { UE_LOG(LogRDKeys, Log, TEXT("RDKEY %s's key taken already: none dropped"), *Next.Title); return; }
+	// (once a game: the key given at the first drop (PR #31's review: two of the last tier's bosses killed before a pile was taken
+	// dropped two keys))
+	if (GI && GI->GetCounter(TEXT("dkey:") + Next.Key) > 0) { UE_LOG(LogRDKeys, Log, TEXT("RDKEY %s's key given already: none dropped"), *Next.Title); return; }
 	TArray<FName> Things;
 	for (const FName& N : { Next.KeyItem, Next.MapItem }) if (!N.IsNone() && FindItem(N) >= 0) Things.Add(N);
 	if (Things.Num() == 0) { UE_LOG(LogRDKeys, Warning, TEXT("RDKEY %s's key and map are not items of this level (905)"), *Next.Title); return; }
 	TArray<float> Wear; Wear.Init(-1.f, Things.Num());
 	if (ARDLootPile* P = DropLoot(At + FVector(0, 0, 100.f), Things, Wear)) P->bHers = false;
+	// (the way and the map are hers from now: the pile is what she sees and carries)
+	if (GI) { GI->CountMax(TEXT("dkey:") + Next.Key, 1); GI->CountMax(TEXT("dmap:") + Next.Town, 1); }
 	DungeonKeyDropped = Next.Key;
 	if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s and a map to %s lie where the master of %s fell."), *Next.KeyItem.ToString(), *Next.Town, *(DungeonTitle.IsEmpty() ? FString(TEXT("Mistward Castle")) : DungeonTitle)));
 	UE_LOG(LogRDKeys, Log, TEXT("RDKEY dropped: %s and %s (the way into %s)"), *Next.KeyItem.ToString(), *Next.MapItem.ToString(), *Next.Title);
@@ -113,41 +126,50 @@ void ARDDungeonGenerator::TickDungeonKeys()
 	DungeonKeysNextTick = Now + 1.f;
 	URDGameInstance* GI = URDGameInstance::Of(this);
 	if (!GI) return;
-	// (-RDAllKeys: every way open, read once a game instance (the packaged game's runs go down into each dungeon))
-	if (!GI->bAllKeysRead) { GI->bAllKeysRead = true; if (FParse::Param(FCommandLine::Get(), TEXT("RDAllKeys"))) GI->Counters.Add(TEXT("dkey:all"), 1); }
-	FRDChainLink L;
-	for (int32 I = 1; I < DungeonChain.Num(); ++I)
+	// (-RDAllKeys: every way open, read once a game instance; not saved)
+	if (!GI->bAllKeysRead) { GI->bAllKeysRead = true; if (FParse::Param(FCommandLine::Get(), TEXT("RDAllKeys"))) GI->bAllDungeonKeys = true; }
+	const TArray<FRDChainLink>& C = Chain();
+	auto Give = [&](int32 I, const TCHAR* Why)
 	{
-		if (!ChainLink(I, L)) continue;
-		// (what she has had stays hers in the game's counters)
-		if (!L.KeyItem.IsNone() && PlayerCombat->GetItemCount(L.KeyItem) > 0 && GI->GetCounter(TEXT("dkey:") + L.Key) == 0)
+		if (!C.IsValidIndex(I) || GI->GetCounter(TEXT("dkey:") + C[I].Key) > 0) return;
+		GI->CountMax(TEXT("dkey:") + C[I].Key, 1);
+		UE_LOG(LogRDKeys, Log, TEXT("RDKEY the way into %s is hers: %s"), *C[I].Title, Why);
+	};
+	for (int32 I = 1; I < C.Num(); ++I)
+	{
+		const FRDChainLink& L = C[I];
+		// (what she carries is hers in the game's counters)
+		if (!L.KeyItem.IsNone() && PlayerCombat->GetItemCount(L.KeyItem) > 0) Give(I, TEXT("its key carried"));
+		if (!L.MapItem.IsNone() && PlayerCombat->GetItemCount(L.MapItem) > 0) GI->CountMax(TEXT("dmap:") + L.Town, 1);
+		// (a game saved before the keys (PR #31's review): the way into a dungeon she has been in, and the next one's when this
+		// dungeon's last tier's boss is dead; Mistward's final boss slain gives the first)
+		if (GI->Dungeons.Contains(L.Key)) Give(I, TEXT("she has been there"));
+		if (GI->GetCounter(URDGameInstance::DungeonCounter(L.Key, TEXT("bossdone:5"))) > 0) Give(I + 1, TEXT("the dungeon before it conquered"));
+	}
+	if (GI->GetCounter(TEXT("finalboss")) > 0) Give(1, TEXT("Mistward's master slain"));
+	// (out in the wilds: a map taken shows its road and its town's land, once the town is in the world)
+	if (bWild && IsWildReady())
+		for (int32 I = 1; I < C.Num(); ++I)
 		{
-			GI->CountMax(TEXT("dkey:") + L.Key, 1);
-			UE_LOG(LogRDKeys, Log, TEXT("RDKEY taken: %s (opens %s)"), *L.KeyItem.ToString(), *L.Title);
-		}
-		if (!L.MapItem.IsNone() && PlayerCombat->GetItemCount(L.MapItem) > 0 && GI->GetCounter(TEXT("dmap:") + L.Town) == 0)
-			GI->CountMax(TEXT("dmap:") + L.Town, 1);
-		// (out in the wilds: a map taken shows its road and its town's land, once)
-		if (bWild && IsWildReady() && GI->GetCounter(TEXT("dmap:") + L.Town) > 0 && GI->GetCounter(TEXT("dmapshown:") + L.Town) == 0)
-		{
-			FRDChainLink Prev;
-			const int32 Cells = RevealRoute(ChainLink(I - 1, Prev) ? Prev.Town : FString(TEXT("Brokenspire")), L.Town);
+			const FRDChainLink& L = C[I];
+			if (GI->GetCounter(TEXT("dmap:") + L.Town) == 0 || GI->GetCounter(TEXT("dmapshown:") + L.Town) > 0) continue;
+			const int32 Cells = RevealRoute(C[I - 1].Town.IsEmpty() ? FString(TEXT("Brokenspire")) : C[I - 1].Town, L.Town);
+			if (Cells < 0) continue;                 // (its town not in this world yet: shown when it is (PR #31's review))
 			GI->CountMax(TEXT("dmapshown:") + L.Town, 1);
 			if (Cells > 0) PlayerCombat->ShowMessage(FString::Printf(TEXT("Your map shows the way to %s."), *L.Town));
 		}
-	}
 }
 
 int32 ARDDungeonGenerator::RevealRoute(const FString& From, const FString& To)
 {
-	if (!IsWildReady()) return 0;
+	if (!IsWildReady()) return -1;
 	int32 A = -1, B = -1;
 	for (int32 T = 0; T < Wild->Towns.Num(); ++T)
 	{
 		if (Wild->Towns[T].Name == From) A = T;
 		if (Wild->Towns[T].Name == To) B = T;
 	}
-	if (B < 0) { UE_LOG(LogRDKeys, Log, TEXT("RDKEY no town %s in this world: its map shows nothing yet"), *To); return 0; }
+	if (B < 0) return -1;
 	const int32 C0 = WildRevealedCells;
 	// (the road between them, else the straight way; 700 m either side of it, 2.5 km round the town)
 	TArray<FVector2D> Way;
@@ -167,18 +189,20 @@ int32 ARDDungeonGenerator::RevealRoute(const FString& From, const FString& To)
 
 void ARDDungeonGenerator::DebugAllDungeonKeys(bool bOn)
 {
-	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->Counters.Add(TEXT("dkey:all"), bOn ? 1 : 0);
+	if (URDGameInstance* GI = URDGameInstance::Of(this)) { GI->bAllDungeonKeys = bOn; GI->bAllKeysRead = true; }
 }
 
 TArray<FString> ARDDungeonGenerator::GetDungeonKeyLines() const
 {
 	TArray<FString> Out;
 	const URDGameInstance* GI = URDGameInstance::Of(this);
-	FRDChainLink L;
-	for (int32 I = 0; I < DungeonChain.Num(); ++I)
-		if (ChainLink(I, L))
-			Out.Add(FString::Printf(TEXT("%d|%s|%s|%s|%s|%d|%d|%d|%d"), I, *L.Key, *L.Level, *L.Town, *L.KeyItem.ToString(), HasDungeonKey(L.Level) ? 1 : 0,
-				GI ? GI->GetCounter(TEXT("dkey:") + L.Key) : 0, GI ? GI->GetCounter(TEXT("dmap:") + L.Town) : 0, GI ? GI->GetCounter(TEXT("dmapshown:") + L.Town) : 0));
+	const TArray<FRDChainLink>& C = Chain();
+	for (int32 I = 0; I < C.Num(); ++I)
+	{
+		const FRDChainLink& L = C[I];
+		Out.Add(FString::Printf(TEXT("%d|%s|%s|%s|%s|%d|%d|%d|%d"), I, *L.Key, *L.Level, *L.Town, *L.KeyItem.ToString(), HasDungeonKey(L.Level) ? 1 : 0,
+			GI ? GI->GetCounter(TEXT("dkey:") + L.Key) : 0, GI ? GI->GetCounter(TEXT("dmap:") + L.Town) : 0, GI ? GI->GetCounter(TEXT("dmapshown:") + L.Town) : 0));
+	}
 	return Out;
 }
 

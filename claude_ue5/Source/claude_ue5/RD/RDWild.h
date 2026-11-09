@@ -289,8 +289,10 @@ public:
 	 *  the next one's, on the leg nearest the point (the list of 2026-11-08b: Brokenspire 1, Vel Morrath 5, Ashenreach 10,
 	 *  Graymourne 15, Kethrys Spire 20, Heaven 25; towns not in this world are left out of the chain) */
 	int32 TierAt(double X, double Y) const;
-	/** "<town>|<tier>" in the chain's order (empty: the list's own); set before Init (the generator's WildTierChain) */
-	TArray<FString> TierChain;
+	/** the chain's towns this world has (their sites) and their tiers, in order (Init) */
+	TArray<FVector2D> TierSites;
+	TArray<float> TierValues;
+	void MakeTierChain();
 	/** a name for a place */
 	FString NameFor(const FString& Kind, uint32 H) const;
 	/** a town's place id is TownIdBase + its index: far above any other place's ((cell x << 14) | (cell y << 4) | k, under

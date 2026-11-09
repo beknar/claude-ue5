@@ -60,4 +60,5 @@ if __name__ == "__main__":
         import traceback
         REPORT.append(f"FAILED {e!r}"); traceback.print_exc()
     print("905 " + " | ".join(REPORT))
+    del les, ues, eas, eal
     gc.collect()

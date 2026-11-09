@@ -1,5 +1,5 @@
 {
- "tag": "k9b",
+ "tag": "k9d",
  "plan": [
   "keys9",
   "holy"
@@ -81,7 +81,10 @@
     "Catacomb Key": 1,
     "Map to Vel Morrath": 1
    },
-   "death_pile_has_key": false
+   "death_pile_has_key": false,
+   "war_engine_before": 0,
+   "war_engine_after_old_progress": 1,
+   "all_keys_counter": 0
   },
   {
    "step": "holy",
@@ -91,14 +94,14 @@
     75.0
    ],
    "north_east": true,
-   "fps_brokenspire_square": 32.6,
+   "fps_brokenspire_square": 28.2,
    "state": [
     "3",
     "Vel Morrath",
     "0",
     "1",
     "0",
-    "5.1",
+    "5.2",
     "1",
     "1",
     "1",
@@ -271,17 +274,17 @@
    },
    "stair_from_cathedral_m": 40,
    "fps": {
-    "plaza": 31.6,
-    "nave": 36.6
+    "plaza": 30.4,
+    "nave": 33.7
    },
    "stair_travel": "catacombs"
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "bs_k9b_vm_cathedral_front.png",
-  "bs_k9b_vm_plaza.png",
-  "bs_k9b_vm_nave.png"
+  "bs_k9d_vm_cathedral_front.png",
+  "bs_k9d_vm_plaza.png",
+  "bs_k9d_vm_nave.png"
  ],
  "error": null,
  "windows_shown_again": 1
