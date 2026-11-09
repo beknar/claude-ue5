@@ -538,6 +538,13 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 		const float Lz = TownLiftAt(FVector2D(T.GetLocation()));
 		if (Lz != 0.f) W.AddToTranslation(FVector(0, 0, Lz));
 	}
+	// (the list of 2026-11-07: the barracks' dummies and targets are play's own meshes on pivots, rocked by a blow: never an
+	// instance (a static instance cannot move); made only with the interactive things, so the saved build has none)
+	if (Generator && Generator->bTown && P->Mesh && (Name == TEXT("Town.Dummy") || Name == TEXT("Town.Target")))
+	{
+		if (bBuildInteractive) AddTownDummy(Name, P, T, (float)(W.GetLocation().Z - (P->Adjust * T).GetLocation().Z));
+		return true;
+	}
 	if (!bBuildStatic) return true;
 	// (Brokenspire: a piece taller than the room it stands in (the dungeon's columns, 9.6 m) ends under its ceiling: the town
 	// castle's roof is a walked wall walk since 2026-11-02, and the columns stood through it)
@@ -2660,6 +2667,7 @@ void ARDSection::Tick(float Dt)
 	const float Now = W->GetTimeSeconds();
 	const AActor* Pawn = Generator ? Generator->GetTrackedActor() : UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector PL = Pawn ? Pawn->GetActorLocation() : FVector(1e9);
+	if (TownDummies.Num() > 0) TickTownDummies(Now);          // (the list of 2026-11-07: a struck dummy rocks)
 	// cinematics: doors open by themselves in front of the tracked actor
 	if (Generator && Generator->TrackedActor && Generator->TrackedAutoDoorDistance > 0.f)
 		for (int32 I = 0; I < Doors.Num(); ++I)

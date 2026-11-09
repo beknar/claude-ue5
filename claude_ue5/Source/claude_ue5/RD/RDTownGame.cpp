@@ -1476,6 +1476,8 @@ bool ARDDungeonGenerator::OpenTownPanel(FName Kind, int32 Who)
 	if (PlayerCombat->IsCraftingOpen()) PlayerCombat->SetCraftingOpen(false);
 	const bool bWasOpen = IsTownPanelOpen();
 	TownPanel = Kind; TownWho = Who; TownTab = 0; TownCursor = 0; TownNote.Reset(); TownBody.Reset();
+	// (a key or the stick held as it opens waits to be let go before it steps the cursor: TickTownPanel)
+	if (!bWasOpen) TownRepeatDir = 2;
 	BuildTownLines();
 	if (!bWasOpen)
 	{
@@ -1920,6 +1922,21 @@ void ARDDungeonGenerator::TickTownPanel(APlayerController* PC)
 	if (Pressed({ EKeys::Escape, EKeys::BackSpace, EKeys::F, EKeys::Tab, EKeys::Gamepad_FaceButton_Right })) { CloseTownPanel(); return; }
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveTownCursor(-1);
 	if (Pressed({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down })) MoveTownCursor(1);
+	// (held down, the cursor goes on after a moment, a step every 80 ms, as the inventory's does (the user's of 2026-11-07:
+	// the storage could not be scrolled by holding the D-pad); the left stick the same. Armed only by a press made while the
+	// panel is open, so a key held from before does not run it. Real time: a panel may pause the game)
+	{
+		auto Down = [PC](std::initializer_list<FKey> Keys) { for (const FKey& K : Keys) if (PC->IsInputKeyDown(K)) return true; return false; };
+		const float Sy = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
+		const int32 Dir = (Down({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up }) || Sy > 0.6f) ? -1 : (Down({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down }) || Sy < -0.6f) ? 1 : 0;
+		const bool bJust = Dir < 0 ? Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up }) : Dir > 0 ? Pressed({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down }) : false;
+		const bool bStick = FMath::Abs(Sy) > 0.6f;
+		const double Now = FPlatformTime::Seconds();
+		if (Dir == 0) TownRepeatDir = 0;
+		else if (bJust) { TownRepeatDir = Dir; TownRepeatAt = Now + 0.35; }
+		else if (bStick && TownRepeatDir == 0) { MoveTownCursor(Dir); TownRepeatDir = Dir; TownRepeatAt = Now + 0.4; }
+		else if (Dir == TownRepeatDir && Now >= TownRepeatAt) { MoveTownCursor(Dir); TownRepeatAt = Now + (bStick ? 0.15 : 0.08); }
+	}
 	if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left, EKeys::Gamepad_LeftShoulder })) SetTownTab(0);
 	if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right, EKeys::Gamepad_RightShoulder })) SetTownTab(1);
 	if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::E, EKeys::Gamepad_FaceButton_Bottom })) { ActivateTownEntry(); return; }

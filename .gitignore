@@ -52,9 +52,13 @@ claude_ue5/SourceArt/**/build_err.txt
 claude_ue5/SourceArt/**/cine_rehearsal.json
 
 # --- Fab pack downloads at the repository root (licensed, not redistributable) ---
+/AbandonedVillageEnvironme/
+/CityScooterRigged/
+/MerlinsCaveEnvironmentFa/
 /CitySubwayTunnel/
 /Compact3DServerRoomEnviro/
 /FrozenNorseEnvironment/
+/GothicCathedralEnvironmen/
 /HyperActorHealthSystemv4/
 /HyperAttributeManagerv4/
 /HyperBuildingSystemv4/
@@ -66,12 +70,19 @@ claude_ue5/SourceArt/**/cine_rehearsal.json
 /HyperObjectPoolerv4/
 /IndustrialEnvironmen1900s/
 /LootDropsVol2Niagara/
+/MedievalTavernMedievalTa/
+/MiddleEasternTownGigapack/
+/MinipolySeriesModernIsla/
 /Modern3DCityEnvironmentL/
 /ParkingGarageParkingLot3/
 /PostApocalypticMansionAlb/
 /QuarantineMedicalTent/
 /RealisticKitchenEnvironme/
 /SteampunkZeppelinStation/
+/StylizedEasternProvinceS/
+/StylizedLostCivilization/
+# Windows' folder settings
+desktop.ini
 # the packs' documentation PDFs, put beside the project file by the launcher
 /claude_ue5/*.pdf
 

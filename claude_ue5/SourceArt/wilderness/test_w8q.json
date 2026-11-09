@@ -1,0 +1,100 @@
+{
+ "tag": "w8q",
+ "plan": [
+  "animals8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "animals8",
+   "ok": true,
+   "kills": {
+    "Deer": {
+     "hp0": 40.0,
+     "hp_after_first_blow": 15.0,
+     "blows": 2,
+     "dead": true,
+     "drops": [
+      "Coarse Hide"
+     ],
+     "lying_roll": 90.0,
+     "f_names": "harvest the parts (1)",
+     "taken": {
+      "Coarse Hide": 1
+     }
+    },
+    "Wolf": {
+     "hp0": 55.0,
+     "hp_after_first_blow": 30.0,
+     "blows": 3,
+     "dead": true,
+     "drops": [
+      "Coarse Hide"
+     ],
+     "lying_roll": 90.0,
+     "f_names": "harvest the parts (1)",
+     "taken": {
+      "Coarse Hide": 1
+     }
+    },
+    "Hare": {
+     "hp0": 10.0,
+     "hp_after_first_blow": 0.0,
+     "blows": 1,
+     "dead": true,
+     "drops": [
+      "Light Leather"
+     ],
+     "lying_roll": 90.0,
+     "f_names": "harvest the parts (1)",
+     "taken": {
+      "Light Leather": 1
+     }
+    }
+   },
+   "alive_at_kill": {
+    "Deer": 2,
+    "Wolf": 0,
+    "Hare": 3
+   },
+   "killed": 3,
+   "respawn_wait_s": 45.0,
+   "pending_after_kills": [
+    [
+     "Deer",
+     25
+    ],
+    [
+     "Wolf",
+     34
+    ],
+    [
+     "Hare",
+     41
+    ]
+   ],
+   "places_freed_after_s": 41.2,
+   "wild_deer": {
+    "killed": true,
+    "casts": 2,
+    "deer_after_kill": 1,
+    "waiting": [
+     [
+      "Deer",
+      45
+     ]
+    ],
+    "deer_at_20s": 1,
+    "another_came_after_s": 45.5
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_w8q_animals8_deer_dead.png",
+  "wd_w8q_animals8_wolf_dead.png",
+  "wd_w8q_animals8_hare_dead.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

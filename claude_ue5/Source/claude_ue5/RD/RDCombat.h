@@ -51,6 +51,23 @@ struct FRDCarry;
  *  (whose end would take it off); StartStealth / EndStealth and a stealth carried to another level (RDCarry.cpp) */
 static constexpr ERDSpellKind RDStealthAuraKind = (ERDSpellKind)200;
 
+class URDCombatComponent;
+
+/** the list of 2026-11-07 (docs/improvements8.txt): her move input filtered while she blocks (forward or back only, slowly;
+ *  the stick's side turns her). Ticks after her player controller (whose input adds the move) and before her character
+ *  movement (which uses it up): the combat component itself ticks during physics, after the movement */
+UCLASS(ClassGroup = (RandomDungeon))
+class CLAUDE_UE5_API URDMoveFilterComponent : public UActorComponent
+{
+	GENERATED_BODY()
+public:
+	URDMoveFilterComponent();
+	virtual void TickComponent(float Dt, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	TWeakObjectPtr<URDCombatComponent> Combat;
+	TWeakObjectPtr<class AController> OrderedAfter;
+	bool bMovementOrdered = false;
+};
+
 UCLASS(ClassGroup = (RandomDungeon))
 class CLAUDE_UE5_API URDCombatComponent : public UActorComponent
 {
@@ -213,6 +230,9 @@ public:
 	float MessageTime = -100.f;
 	/** a line the HUD shows for a moment (level 5: a container that held nothing) */
 	void ShowMessage(const FString& Text) { SetMessage(Text); }
+	/** the list of 2026-11-07: her top speed times this in the wilderness (rd.WildRunSpeed; the generator sets it) */
+	float WildRunFactor = 1.f;
+	void RefreshWalkSpeed() { UpdateWalkSpeed(); }
 	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
 	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A
 	 *  wield or use the one under it; I, Tab, Start or B close it. The generator works it every tick, paused or not. */
@@ -339,6 +359,8 @@ public:
 	bool TakeWeapon(FName Item);
 	/** the sound name of a weapon (its SoundKey, else its name) */
 	static FName WeaponSound(const FRDWeaponDef& W) { return W.SoundKey.IsNone() ? W.Name : W.SoundKey; }
+	/** the sound of a weapon's blow landing ("Player.Hit.<its sound>") */
+	static FName HitSoundOf(const FRDWeaponDef& W) { return FName(*(TEXT("Player.Hit.") + WeaponSound(W).ToString())); }
 
 	// ---- random_dungeonmagic_level5: the spell table (the generator's Spells). A spell of her weapons (FRDWeaponDef::SpellIndex)
 	// does at its release what its Kind says; spells have cooldowns; tomes teach new ones (Learns on her hero's card).
@@ -620,6 +642,16 @@ private:
 	int32 AssignSlot = 0;
 	bool bHelmetHidden = false;
 	bool bBlocking = false, bBlockKeyDown = false;
+public:
+	/** the list of 2026-11-07: while she blocks (the generator's BlockMoveSpeed over 0) her move goes along her facing only,
+	 *  forward or back, and the stick's side turns her (URDMoveFilterComponent calls it before her movement ticks) */
+	void FilterBlockMove(float Dt);
+	/** the block's move under way (her movement's own turning put back when it ends) */
+	bool bBlockMoveOn = false, bSavedOrientToMove = true, bSavedDesiredRot = false;
+	/** what the filter did last (tests): her input's way ahead and aside of her, what went on as the move, the turn (deg/s) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") FVector LastBlockMove = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward2") float LastBlockTurn = 0.f;
+private:
 	/** the block's held pose (a paused montage: stopping the slot did not blend it out; it is resumed, then stopped) */
 	TWeakObjectPtr<class UAnimMontage> BlockMontage;
 	/** her AnimBP's upper-body block layer (885's: a layered blend from spine_01 up over her locomotion, weighted by its float
@@ -817,6 +849,9 @@ private:
 		bool bPierce = false, bGoal = false, bWisp = false;
 		FVector Goal = FVector::ZeroVector;
 		TArray<TWeakObjectPtr<ARDMonster>> Done;
+		/** the list of 2026-11-07: with no monster to fly at, the wilderness animal ahead of her it flies at (aimed at its body:
+		 *  a bolt at her hand's height passed over a wolf's back) */
+		TWeakObjectPtr<class ARDWildAnimal> Animal;
 	};
 	void LaunchSpellBolt(int32 Spell, const FVector& From, ARDMonster* Target, float Dmg, int32 ChainLeft, const TArray<TWeakObjectPtr<ARDMonster>>& Done);
 	void LaunchGoalBolt(int32 Spell, const FVector& From, const FVector& To, float Speed, bool bWisp);

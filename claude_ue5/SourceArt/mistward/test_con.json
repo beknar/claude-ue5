@@ -1,0 +1,95 @@
+{
+ "tag": "con",
+ "plan": [
+  "console"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "console",
+   "ok": true,
+   "key": "sent",
+   "checks": {
+    "enabled": {
+     "ok": true,
+     "what": "rd.GameConsole 1 in UEDPIE_0_mistward_castle (editor)"
+    },
+    "opens": {
+     "ok": true,
+     "what": "open 1, the line has the keyboard 1, the line \"\" (the key's ` not typed)"
+    },
+    "runs": {
+     "ok": true,
+     "what": "typed \"rd.WildRunSpeed 10\", Enter: rd.WildRunSpeed 10.0, the line emptied 1, still open with the keyboard 1; printed: \"rd.WildRunSpeed = \"10\"\""
+    },
+    "reads": {
+     "ok": true,
+     "what": "rd.WildRunSpeed printed \"rd.WildRunSpeed = \"10\"      LastSetBy: Console\"; t.MaxFPS printed \"t.MaxFPS = \"0\"      LastSetBy: Scalability\""
+    },
+    "recalls": {
+     "ok": true,
+     "what": "Up \"t.MaxFPS\", Up \"rd.WildRunSpeed\", Down \"t.MaxFPS\""
+    },
+    "completes": {
+     "ok": true,
+     "what": "rd.Wild and Tab: \"rd.WildRunSpeed \""
+    },
+    "unknown": {
+     "ok": true,
+     "what": "printed \"Command not recognized: nosuchcommand\""
+    },
+    "help": {
+     "ok": true,
+     "what": "\"rd.WildRunSpeed = 10    Her running speed in the wilderness (outside the towns' walls), for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest).\" / \"rd.GameConsole = 1    The game's own console, opened with the console key (`): 1 on, 0 off.\""
+    },
+    "picture": {
+     "ok": true,
+     "what": "E:\\code\\claude-ue5\\claude_ue5\\Saved\\Screenshots\\WindowsEditor\\mw_con_console.png"
+    },
+    "game_untouched": {
+     "ok": true,
+     "what": "W held 1.2 s under it: the game saw it down 0, she moved 0 cm"
+    },
+    "escape": {
+     "ok": true,
+     "what": "Escape: open 0, the game's view has the keyboard 1"
+    },
+    "toggles": {
+     "ok": true,
+     "what": "` opened it 1, ` again shut it 1"
+    },
+    "game_back": {
+     "ok": true,
+     "what": "W held 1 s with it shut: the game saw it down 1, she moved 103 cm"
+    }
+   },
+   "lines": [
+    "The game's console. Type a command and Enter; help lists the game's own.",
+    "> rd.WildRunSpeed 10",
+    "rd.WildRunSpeed = \"10\"",
+    "> rd.WildRunSpeed",
+    "HISTORY",
+    "Constructor: 1.000000",
+    "Console: 10.000000",
+    "rd.WildRunSpeed = \"10\"      LastSetBy: Console",
+    "> t.MaxFPS",
+    "HISTORY",
+    "Constructor: 0.000000",
+    "Scalability: 0.000000",
+    "t.MaxFPS = \"0\"      LastSetBy: Scalability",
+    "> nosuchcommand",
+    "Command not recognized: nosuchcommand",
+    "> help",
+    "The game's commands (a name alone shows its value, a name and a value sets it):",
+    "  rd.GameConsole = 1    The game's own console, opened with the console key (`): 1 on, 0 off.",
+    "  rd.HeroMenu = 0    1: a dungeon level with heroes and a MenuLevel, played without ?Hero=, opens its menu first.",
+    "  rd.WildRunSpeed = 10    Her running speed in the wilderness (outside the towns' walls), for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest).",
+    "  help, clear    this list; empty the console",
+    "The engine's console variables are read and set the same way (t.MaxFPS 60)."
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

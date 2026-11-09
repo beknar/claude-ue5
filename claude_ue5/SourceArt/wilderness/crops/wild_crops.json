@@ -1,0 +1,50 @@
+{
+ "textures": {
+  "corn_stalk": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_CornStalk.png",
+  "corn_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_CornLeaves.png",
+  "potato_stem": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PotatoStem.png",
+  "potato_leaves": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\T_Wild_PotatoLeaves.png"
+ },
+ "slots": {
+  "Bark": "opaque (stalk, roots, husks, stems)",
+  "Leaves": "masked, two-sided (leaves, tassel, silk, leaf and flower cards)"
+ },
+ "meshes": {
+  "SM_Wild_Corn_A": {
+   "height_m": 2.229,
+   "width_m": 1.268,
+   "foot_z_m": -0.012,
+   "triangles": 438,
+   "leaves": 8,
+   "ears": 1,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Corn_A.fbx"
+  },
+  "SM_Wild_Corn_B": {
+   "height_m": 2.003,
+   "width_m": 1.455,
+   "foot_z_m": -0.012,
+   "triangles": 544,
+   "leaves": 9,
+   "ears": 2,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Corn_B.fbx"
+  },
+  "SM_Wild_Potato_A": {
+   "height_m": 0.49,
+   "width_m": 0.664,
+   "foot_z_m": -0.017,
+   "triangles": 300,
+   "stems": 6,
+   "flower_clusters": 4,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Potato_A.fbx"
+  },
+  "SM_Wild_Potato_B": {
+   "height_m": 0.487,
+   "width_m": 0.712,
+   "foot_z_m": -0.014,
+   "triangles": 384,
+   "stems": 8,
+   "flower_clusters": 5,
+   "fbx": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\wilderness\\crops\\SM_Wild_Potato_B.fbx"
+  }
+ }
+}

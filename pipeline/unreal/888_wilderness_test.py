@@ -582,6 +582,44 @@ def png_stats(path, box):
                 o = x * bpp; vals.append(0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2])
     m = sum(vals) / max(len(vals), 1)
     return m, (sum((v - m) ** 2 for v in vals) / max(len(vals), 1)) ** 0.5
+def png_grid(path, box, nx, ny):
+    """the mean luma of each of nx x ny cells over a part of a PNG (one decoding)"""
+    import zlib, struct
+    data = open(path, "rb").read(); pos = 8; w = h = 0; ct = 6; idat = b""
+    while pos + 8 <= len(data):
+        ln, typ = struct.unpack(">I4s", data[pos:pos + 8]); body = data[pos + 8:pos + 8 + ln]; pos += 12 + ln
+        if typ == b"IHDR": w, h, bd, ct = struct.unpack(">IIBB", body[:10])
+        elif typ == b"IDAT": idat += body
+        elif typ == b"IEND": break
+    bpp = 4 if ct == 6 else 3; raw = zlib.decompress(idat); stride = w * bpp
+    prev = bytearray(stride); x0, y0, x1, y1 = int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)
+    S = [[0.0] * nx for _ in range(ny)]; N = [[0] * nx for _ in range(ny)]; i = 0
+    for y in range(h):
+        f = raw[i]; line = bytearray(raw[i + 1:i + 1 + stride]); i += 1 + stride
+        for x in range(stride):
+            a = line[x - bpp] if x >= bpp else 0; b = prev[x]; c = prev[x - bpp] if x >= bpp else 0
+            if f == 1: line[x] = (line[x] + a) & 255
+            elif f == 2: line[x] = (line[x] + b) & 255
+            elif f == 3: line[x] = (line[x] + (a + b) // 2) & 255
+            elif f == 4:
+                p_ = a + b - c; pa, pb, pc = abs(p_ - a), abs(p_ - b), abs(p_ - c)
+                line[x] = (line[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        prev = line
+        if y0 <= y < y1 and y % 2 == 0:
+            gy = min(ny - 1, (y - y0) * ny // max(y1 - y0, 1))
+            for x in range(x0, x1, 4):
+                o = x * bpp; gx = min(nx - 1, (x - x0) * nx // max(x1 - x0, 1))
+                S[gy][gx] += 0.2126 * line[o] + 0.7152 * line[o + 1] + 0.0722 * line[o + 2]; N[gy][gx] += 1
+    return [[S[j][k] / max(N[j][k], 1) for k in range(nx)] for j in range(ny)]
+def sky_edge(path):
+    """the sky's sharpest change from one strip to the next down a picture of the horizon (the upper 42 %), taken where three
+    columns in four agree (an arc's edge spans the picture; a tree or a blade of grass does not)"""
+    g_ = png_grid(path, (0.05, 0.0, 0.95, 0.42), 24, 40)
+    best = 0.0
+    for j in range(39):
+        d = sorted(abs(g_[j + 1][k] - g_[j][k]) for k in range(24))
+        best = max(best, d[int(0.75 * 23)])
+    return round(best, 1)
 def sky_state():
     p = str(G["gen"].get_sky_state()).split("|")
     k = ["weather", "cover", "rain", "wind", "fog", "snowing", "changes", "next_s", "clouds", "stars", "moon", "fog_cutoff_m", "rain_on", "snow_on", "wind_fx"]
@@ -1029,8 +1067,426 @@ def step_quests():
     step_result("quests", ok, **res)
 
 
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-07 (docs/improvements8.txt)
+def biome_lines():
+    bl = {}
+    for l in G["gen"].get_wild_biome_lines():
+        q = str(l).split("|"); bl[q[0]] = (float(q[2]), float(q[3]))
+    return bl
+def clear_spot(name, rmin=1500, rmax=5000):
+    """a point of the region 1.4 km or more from every town (a town's ground is level on purpose)"""
+    bl = biome_lines()
+    if name not in bl: return None
+    x, y = bl[name]; tl = [(t["x"], t["y"]) for t in towns().values()]
+    for r in [0] + list(range(rmin, rmax + 1, 500)):
+        for ang in range(0, 360, 45):
+            px, py = x + math.cos(math.radians(ang)) * r, y + math.sin(math.radians(ang)) * r
+            if all(math.hypot(px - a, py - b) > 1400.0 for a, b in tl) and sample(px, py)["biome"] == name and sample(px, py)["water"] == 0:
+                return (px, py)
+    return None
+def run_her(dir_xy, sec, rec=None, every=0.1):
+    """her run along a way (her move input each frame, her run switch on), a record of her feet against the drawn ground"""
+    p = G["pawn"]; cbc = cb(); cbc.set_run_mode(True)
+    d = V(dir_xy[0], dir_xy[1], 0.0); t0 = time.time(); tn = 0.0
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=math.degrees(math.atan2(dir_xy[1], dir_xy[0]))))
+    while time.time() - t0 < sec:
+        p.add_movement_input(d, 1.0)
+        if rec is not None and time.time() - t0 >= tn:
+            tn += every
+            l = p.get_actor_location(); cm = p.get_editor_property("character_movement")
+            hh = p.get_editor_property("capsule_component").get_scaled_capsule_half_height()
+            s = sample(l.x / 100.0, l.y / 100.0)
+            fl = cm.get_editor_property("current_floor"); hr = fl.get_editor_property("hit_result").to_tuple()
+            comp = hr[10]; act = hr[9]
+            rec.append({"t": round(time.time() - t0, 2), "x": round(l.x), "y": round(l.y), "feet": round(l.z - hh, 1), "ground": round(s["z"], 1),
+                        "water": int(s["water"]), "falling": bool(cm.is_falling()), "floor": (comp.get_name() if comp else None), "floor_actor": (act.get_name() if act else None),
+                        "floor_dist": round(fl.get_editor_property("floor_dist"), 1), "speed": round(p.get_velocity().length(), 0)})
+        yield
+def step_rain8():
+    """the rain (the list of 2026-11-07: "the rain does not look like raindrops, instead they look like white rods"): the drops
+    are streaks standing up, about 26 cm by 1 cm, each two crossed planes (one faces the camera from any way), soft and
+    see-through; the field keeps the world's axes; pictures by day and at dusk"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("grasslands") or (9000.0, -4000.0)
+    g.wild_put_her(*sp); yield from wait_chunks(35, 50); yield from rwait(1.0)
+    g.set_town_hour(11.0); g.set_weather(4, True); yield from rwait(4.0)
+    res["sky"] = sky_state()
+    for nm, pitch, hour in (("rain8_day", 0.0, 11.0), ("rain8_up", 25.0, 11.0), ("rain8_dusk", 0.0, 19.3)):
+        g.set_town_hour(hour); yield from rwait(1.5)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=40.0)); yield from rwait(0.5); shot(nm, "1920x1080"); yield from rwait(2.0)
+    # (the drops' own transforms: a streak's height over its width, all facing one way)
+    for c in g.get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent):
+        if c.get_instance_count() > 3000 and c.is_visible():
+            ts = [c.get_instance_transform(i, True) for i in range(0, 50)]
+            # (each drop two crossed upright planes at one place, one facing the world's X and one its Y; the field not turned
+            # with the camera (PR #27's review: turned with it, the rain stood still on the screen as she looked round))
+            fw = [t.rotation.get_axis_z() for t in ts]          # (a plane's face: its local Z)
+            res["drops"] = {"count": c.get_instance_count(), "scale0": [round(v, 4) for v in (ts[0].scale3d.x, ts[0].scale3d.y, ts[0].scale3d.z)],
+                            "up_share": round(sum(1 for t in ts if abs(t.rotation.rotator().pitch) > 80.0) / len(ts), 2),
+                            "pairs_crossed": sum(1 for k in range(0, 50, 2) if (ts[k].translation - ts[k + 1].translation).length() < 0.5
+                                                 and abs(fw[k].x * fw[k + 1].x + fw[k].y * fw[k + 1].y) < 0.05) / 25.0,
+                            "field_yaw": round(c.get_world_rotation().yaw, 1), "camera_yaw": round(G["pc"].get_control_rotation().yaw, 1)}
+    g.set_weather(1, True); g.set_town_hour(11.0); quiet(False)
+    dr = res.get("drops", {})
+    ok = res["sky"]["rain_on"] == 1 and dr.get("up_share", 0) == 1.0 and 0.2 <= dr.get("scale0", [0])[0] <= 0.4 and dr.get("scale0", [0, 1])[1] < 0.02 \
+        and dr.get("pairs_crossed", 0) == 1.0 and abs(dr.get("field_yaw", 999)) < 1.0
+    step_result("rain8", ok, **res)
+def step_sky8():
+    """the sky overhead (the list of 2026-11-07: "the sky when looking straight up looks like a giant circle of white that is not
+    continuous with the rest of the sky"): pictures straight up and half way up, clear, cloudy and overcast; the zenith's
+    picture measured ring by ring out from its middle (a disc's edge is a jump between two rings)"""
+    g = G["gen"]; res = {"rings": {}}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("grasslands") or (9000.0, -4000.0)
+    g.wild_put_her(*sp); yield from wait_chunks(35, 50); yield from rwait(1.0)
+    fogs = GS.get_all_actors_of_class(G["w"], unreal.ExponentialHeightFog)
+    fc = fogs[0].get_component_by_class(unreal.ExponentialHeightFogComponent) if fogs else None
+    res["fog"] = {"cutoff_m": round(fc.get_editor_property("fog_cutoff_distance") / 100.0) if fc else None, "falloff": fc.get_editor_property("fog_height_falloff") if fc else None,
+                  "density": fc.get_editor_property("fog_density") if fc else None}
+    # (probes: "sky8=nocutoff+falloff30" pictures the fog without its cutoff, or falling off with height (falloff30: 0.030), beside the level's own)
+    variants = [("base", None)] + ([(v, v) for v in G.pop("look_only", [])])
+    # (the camera looking up is under her: her body and the HUD hidden for these pictures)
+    G["pawn"].set_actor_hidden_in_game(True)
+    hud = G["pc"].get_hud(); hud.set_editor_property("show_hud", False)
+    for wk, wname in ((1, "fair"), (3, "overcast"), (4, "rain")):
+        g.set_town_hour(12.0); g.set_weather(wk, True); yield from rwait(3.0)
+        for vn, v in variants:
+            undo = None
+            if v == "nocutoff" and fc: undo = ("fog_cutoff_distance", fc.get_editor_property("fog_cutoff_distance")); fc.set_fog_cutoff_distance(0.0)
+            if v and v.startswith("cut") and fc: undo = ("fog_cutoff_distance", fc.get_editor_property("fog_cutoff_distance")); fc.set_fog_cutoff_distance(float(v[3:]) * 100000.0)
+            if v and v.startswith("falloff") and fc: undo = ("fog_height_falloff", fc.get_editor_property("fog_height_falloff")); fc.set_fog_height_falloff(float(v[7:] or "20") / 1000.0)
+            yield from rwait(0.8)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=89.0, yaw=10.0)); yield from rwait(0.6)
+            nm = f"sky8_{wname}_{vn}_up"; shot(nm, "960x960"); yield from rwait(1.8)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=35.0, yaw=10.0)); yield from rwait(0.6)
+            shot(f"sky8_{wname}_{vn}_mid", "1280x720"); yield from rwait(1.8)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=2.0, yaw=10.0)); yield from rwait(0.6)
+            shot(f"sky8_{wname}_{vn}_low", "1280x720"); yield from rwait(1.8)
+            lp = os.path.join(SHOT_DIR, f"wd_{TAG}_sky8_{wname}_{vn}_low.png")
+            if os.path.exists(lp): res.setdefault("edges", {})[f"{wname}_{vn}"] = sky_edge(lp)
+            pth = os.path.join(SHOT_DIR, f"wd_{TAG}_{nm}.png")
+            if os.path.exists(pth):
+                rings = []
+                for k in range(8):
+                    r0, r1 = k / 16.0, (k + 1) / 16.0
+                    vals = [png_stats(pth, (0.5 - r1, 0.5 - r1, 0.5 + r1, 0.5 - r0))[0], png_stats(pth, (0.5 - r1, 0.5 + r0, 0.5 + r1, 0.5 + r1))[0]]
+                    rings.append(round(sum(vals) / 2.0, 1))
+                res["rings"][f"{wname}_{vn}"] = rings
+            if undo and fc: fc.set_editor_property(undo[0], undo[1])
+    G["pawn"].set_actor_hidden_in_game(False); hud.set_editor_property("show_hud", True)
+    g.set_weather(1, True); quiet(False)
+    # (a disc's edge: the biggest jump between two neighbouring rings, against the ring's own level)
+    jumps = {k: round(max(abs(r[i + 1] - r[i]) for i in range(len(r) - 1)), 1) for k, r in res["rings"].items()}
+    res["jumps"] = jumps
+    # (the level's own sky, in each weather: no edge across it; 888 w8i measured 52 in the rain with the 6 km cutoff, 7.4 without)
+    ed = res.get("edges", {})
+    ok = len(jumps) >= 3 and all(v < 12.0 for k, v in jumps.items() if k.endswith("_base")) and len([k for k in ed if k.endswith("_base")]) >= 3 \
+        and all(v < 15.0 for k, v in ed.items() if k.endswith("_base")) and res["fog"]["cutoff_m"] >= 100000
+    step_result("sky8", ok, **res)
+def step_fields8():
+    """the farms (the list of 2026-11-07: "the farm terrain should have regular lines of crops, like corn, cabbages, potatoes,
+    pumpkins ... not barren or have only grass"; "the different colors of the farm terrain look like abrupt banding"): in the
+    farms the chunks round her hold the crops planted in rows (corn, cabbage, potato, pumpkin, sunflower, wheat); along 400 m
+    the ground's colour changes by little from one 2 m step to the next (no hard edges); pictures near, from above and far"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("farms")
+    if not sp: step_result("fields8", False, error="no farms"); quiet(False); return
+    # (a field's middle near there)
+    best = None
+    for dx in range(-400, 401, 40):
+        for dy in range(-400, 401, 40):
+            s = sample(sp[0] + dx, sp[1] + dy)
+            if s["field"] > 0.95 and s["road"] == 0 and (best is None or abs(dx) + abs(dy) < best[2]): best = (sp[0] + dx, sp[1] + dy, abs(dx) + abs(dy))
+    if best: sp = (best[0], best[1])
+    res["at"] = [round(sp[0]), round(sp[1])]
+    g.set_town_hour(11.0); g.set_weather(1, True)
+    g.wild_put_her(*sp); yield from wait_chunks(40, 50); yield from rwait(3.0)
+    # (what the chunks round her hold: instances by mesh)
+    counts = {}
+    for ch in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+        if ch.get_actor_location().distance(G["pawn"].get_actor_location()) > 40000: continue
+        for c in ch.get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent):
+            m = c.get_editor_property("static_mesh")
+            if m: counts[m.get_name()] = counts.get(m.get_name(), 0) + c.get_instance_count()
+    crops = {k: v for k, v in counts.items() if any(t in k for t in ("Wheat", "Corn", "Cabbage", "Potato", "Pumpkin", "Sunflower"))}
+    res["crops"] = crops
+    # (the frame rate looking across the fields, against the open grassland's (the crops are tens of thousands of instances))
+    def fps_for(sec):
+        fs = []; t1 = time.time()
+        while time.time() - t1 < sec:
+            f = g.get_fps()
+            if f > 0: fs.append(f)
+            yield
+        return round(sum(fs) / max(len(fs), 1), 1)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=20.0)); yield from rwait(2.0)
+    res["fps_fields"] = yield from fps_for(5.0)
+    gs = clear_spot("grasslands")
+    if gs:
+        g.wild_put_her(*gs); yield from wait_chunks(40, 50); yield from rwait(2.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=20.0)); yield from rwait(2.0)
+        res["fps_grasslands"] = yield from fps_for(5.0)
+        g.wild_put_her(*sp); yield from wait_chunks(40, 50); yield from rwait(2.0)
+    # (the ground's colour along a line: no step between neighbours as big as a field's change used to be)
+    cols = []
+    for k in range(200):
+        cols.append(str(g.get_wild_sample_at(V((sp[0] + k * 2.0 - 200.0) * 100.0, sp[1] * 100.0, 0))))
+    res["fields_on_line"] = sum(1 for k in range(199) if (float(cols[k].split("|")[11]) > 0.5) != (float(cols[k + 1].split("|")[11]) > 0.5))
+    for nm, pitch, z in (("fields8_near", -20.0, 0.0), ("fields8_low", -35.0, 600.0), ("fields8_far", -8.0, 2500.0)):
+        p = G["pawn"]; l = p.get_actor_location()
+        if z > 0: p.set_actor_location(V(l.x, l.y, l.z + z), False, True); p.get_editor_property("character_movement").set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+        for yaw in (20.0, 200.0):
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=yaw)); yield from rwait(1.2); shot(f"{nm}_{int(yaw)}", "1920x1080"); yield from rwait(2.0)
+        if z > 0: p.get_editor_property("character_movement").set_movement_mode(unreal.MovementMode.MOVE_WALKING); g.wild_put_her(*sp); yield from rwait(2.0)
+    quiet(False)
+    ok = sum(1 for v in crops.values() if v > 0) >= 1 and sum(crops.values()) > 500
+    step_result("fields8", ok, **res)
+def step_perf8():
+    """the crops' cost (the list of 2026-11-07's fields): the frame rate in the open grassland, then in the farms looking across
+    the fields with their crops, then the same view with the crops hidden (one session, the same camera)"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    g.set_town_hour(11.0); g.set_weather(1, True)
+    def fps_for(sec):
+        fs = []; t1 = time.time()
+        while time.time() - t1 < sec:
+            f = g.get_fps()
+            if f > 0: fs.append(f)
+            yield
+        return round(sum(fs) / max(len(fs), 1), 1)
+    def crop_hisms(on, kinds=("Wheat", "Corn", "Cabbage", "Potato", "Pumpkin", "Sunflower")):
+        n = 0
+        for ch in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+            for c in ch.get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent):
+                m = c.get_editor_property("static_mesh")
+                if m and any(t in m.get_name() for t in ("Wheat", "Corn", "Cabbage", "Potato", "Pumpkin", "Sunflower")):
+                    v = on and any(t in m.get_name() for t in kinds); c.set_visibility(v); n += c.get_instance_count() if v else 0
+        return n
+    gs = clear_spot("grasslands")
+    if gs:
+        g.wild_put_her(*gs); yield from wait_chunks(40, 50); yield from rwait(3.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=20.0)); yield from rwait(2.0)
+        res["fps_grasslands"] = yield from fps_for(6.0)
+    fs = clear_spot("farms")
+    g.wild_put_her(*fs); yield from wait_chunks(40, 50); yield from rwait(3.0)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=20.0)); yield from rwait(2.0)
+    res["fps_farms_crops"] = yield from fps_for(6.0)
+    res["crop_instances"] = crop_hisms(False); yield from rwait(1.0)
+    res["fps_farms_no_crops"] = yield from fps_for(6.0)
+    for k_ in ("Wheat", "Corn", "Cabbage", "Potato", "Pumpkin", "Sunflower"):
+        n_ = crop_hisms(True, (k_,)); yield from rwait(1.0)
+        f_ = yield from fps_for(4.0)
+        res[f"fps_only_{k_.lower()}"] = [n_, f_]
+    crop_hisms(True)
+    # (running across them: the frames' times, the farms' chunks made as she comes against the grassland's)
+    def run_frames(sec):
+        p = G["pawn"]; cb().set_run_mode(True); ts = []; t1 = time.time(); last = t1
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0.0))
+        while time.time() - t1 < sec:
+            p.add_movement_input(V(1.0, 0.0, 0.0), 1.0); yield
+            n_ = time.time(); ts.append(n_ - last); last = n_
+        ts = ts[1:]
+        return {"frames": len(ts), "mean_ms": round(1000 * sum(ts) / max(len(ts), 1), 1), "over_50ms": sum(1 for x in ts if x > 0.05), "over_100ms": sum(1 for x in ts if x > 0.1), "max_ms": round(1000 * max(ts or [0]), 0)}
+    for nm, spot in (("farms", fs), ("grasslands", gs)):
+        if not spot: continue
+        g.set_wild_run_speed(5.0)
+        g.wild_put_her(*spot); yield from wait_chunks(40, 50); yield from rwait(2.0)
+        r_ = yield from run_frames(15.0)
+        res[f"run_{nm}_5x"] = r_
+        g.set_wild_run_speed(1.0)
+    quiet(False)
+    step_result("perf8", True, **res)
+def step_ground8():
+    """her feet on the ground (the list of 2026-11-07: "when stepping off from a higher level of terrain, the character looks like
+    she is walking or running on air instead of dropping"; "at many points in the wilderness, the character is not on the
+    ground and appears to be running in the air"): she runs 12 s in each of six regions; every 0.1 s her feet against the
+    drawn ground under her, what she stands on (the floor's component) and whether she falls; pictures where her feet are
+    farthest over the ground"""
+    g = G["gen"]; res = {"runs": {}}; quiet(True)
+    yield from wait_ready(90)
+    g.set_town_hour(11.0); g.set_weather(1, True)
+    worst = []
+    for name in ("grasslands", "hills", "farms", "temperate autumn forests", "marshes", "mountains"):
+        sp = clear_spot(name)
+        if not sp: continue
+        g.wild_put_her(*sp); yield from wait_chunks(40, 50); yield from rwait(1.5)
+        rec = []
+        for ang in (0.0, 120.0, 240.0):
+            yield from run_her((math.cos(math.radians(ang)), math.sin(math.radians(ang))), 4.0, rec)
+        over = [r for r in rec if not r["water"] and r["feet"] - r["ground"] > 20.0]
+        floors = {}
+        for r in over: floors[str(r["floor"])] = floors.get(str(r["floor"]), 0) + 1
+        res["runs"][name] = {"samples": len(rec), "over_20cm": len(over), "max_over": max([r["feet"] - r["ground"] for r in rec if not r["water"]] or [0]),
+                             "falling": sum(1 for r in rec if r["falling"]), "floors_over": floors,
+                             "worst": sorted(over, key=lambda r: r["ground"] - r["feet"])[:4]}
+        for r in sorted(over, key=lambda r: r["ground"] - r["feet"])[:1]: worst.append((name, r))
+        yield
+    # (a picture at each region's worst place: her put there, the camera from her side)
+    for name, r in worst[:4]:
+        G["pawn"].set_actor_location(V(r["x"], r["y"], r["feet"] + 100.0), False, True); yield from rwait(1.5)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=90.0)); yield from rwait(0.8); shot(f"ground8_{name.replace(' ', '_')}", "1280x720"); yield from rwait(1.8)
+    quiet(False)
+    tot = sum(v["samples"] for v in res["runs"].values()); bad = sum(v["over_20cm"] for v in res["runs"].values())
+    res["share_over_20cm"] = round(bad / max(tot, 1), 3)
+    ok = tot > 300 and res["share_over_20cm"] < 0.02
+    step_result("ground8", ok, **res)
+def step_animals8():
+    """the wild animals hunted (the list of 2026-11-07: "player should be able to kill the animals wandering in the wilderness and
+    get appropriate crafting materials from them. animals should respawn after they've been killed at regular intervals"): a
+    deer and a wolf put before her: her blows and bolts hurt them (their hit points fall, struck they run), killed each falls
+    on its side and its things lie by it (a harvest pile of its kind's materials, taken with F); while the kind's wait lasts
+    no other of it comes; the body goes in time"""
+    g = G["gen"]; res = {"kills": {}}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("grasslands") or (9000.0, -4000.0)
+    g.set_town_hour(11.0); g.set_weather(1, True)
+    g.wild_put_her(*sp); yield from wait_chunks(40, 50); yield from rwait(1.5)
+    def life():
+        out = []
+        for l in g.get_wild_life_lines():
+            p = str(l).split("|")
+            if p[0] == "animal": out.append({"kind": p[1], "at": V(float(p[2]), float(p[3]), float(p[4])), "state": int(p[5]), "hp": float(p[8]) if len(p) > 8 else -1, "dead": int(p[9]) if len(p) > 9 else 0})
+        return out
+    k0 = g.get_editor_property("animals_killed")
+    hero0 = str(g.get_editor_property("current_hero"))
+    # (the wait made short for the test: 45 s (the level's own is 120))
+    wait0 = g.get_editor_property("wild_animal_respawn_seconds"); g.set_editor_property("wild_animal_respawn_seconds", 45.0)
+    # (the hero's own weapons: the Summoner's fire bolts at the deer and the wolf, the Warrior's sword at the hare)
+    for kind, hero in (("Deer", hero0), ("Wolf", hero0), ("Hare", "Warrior")):
+        if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from rwait(1.5); refresh()
+        p = G["pawn"]; l = p.get_actor_location(); fw = p.get_actor_forward_vector()
+        a = g.spawn_wild_animal_at(kind, V(l.x + fw.x * 120.0, l.y + fw.y * 120.0, l.z))
+        if not a: res["kills"][kind] = {"error": "not spawned"}; continue
+        hp0 = a.get_health(); blows = 0; t0 = time.time(); hp_after_first = None
+        # (her own attack, again and again; the animal put back before her between blows (it runs off when struck))
+        def hold_before(sec):
+            t1 = time.time()
+            while time.time() - t1 < sec and not a.is_dead():
+                l = p.get_actor_location(); fw = p.get_actor_forward_vector()
+                a.set_actor_location(V(l.x + fw.x * 120.0, l.y + fw.y * 120.0, a.get_actor_location().z), False, True)
+                yield
+        while not a.is_dead() and time.time() - t0 < 25.0:
+            cb().set_mana(cb().get_max_mana())
+            yield from hold_before(0.2)
+            cb().simulate_key(key("LeftMouseButton"), True); yield from hold_before(0.12); cb().simulate_key(key("LeftMouseButton"), False)
+            blows += 1
+            yield from hold_before(1.3)
+            if hp_after_first is None and a.get_health() < hp0: hp_after_first = a.get_health()
+        dead = a.is_dead()
+        drops = [str(x) for x in g.get_editor_property("last_animal_drops")] if dead else []
+        res.setdefault("alive_at_kill", {})[kind] = sum(1 for x in life() if x["kind"] == kind and not x["dead"])
+        yield from rwait(1.0)
+        res["kills"][kind] = {"hp0": hp0, "hp_after_first_blow": hp_after_first, "blows": blows, "dead": dead, "drops": drops,
+                              "lying_roll": round(abs(a.get_component_by_class(unreal.SkeletalMeshComponent).get_world_rotation().roll), 1) if dead else None}
+        if dead:
+            # (on its side, measured by the body's axes: its length still along its facing and level, its back's up turned
+            # sideways; a roll about the mesh's own X tipped a kind turned -90 onto its nose, with the same roll: PR #27's review)
+            bm = a.get_component_by_class(unreal.SkeletalMeshComponent); af = a.get_actor_forward_vector()
+            fv, rv, uv = bm.get_forward_vector(), bm.get_right_vector(), bm.get_up_vector()
+            ln = fv if abs(fv.x * af.x + fv.y * af.y) >= abs(rv.x * af.x + rv.y * af.y) else rv
+            res["kills"][kind]["length_z"] = round(abs(ln.z), 2); res["kills"][kind]["up_z"] = round(abs(uv.z), 2)
+        if dead:
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=p.get_actor_rotation().yaw)); yield from rwait(0.8); shot(f"animals8_{kind.lower()}_dead", "1280x720"); yield from rwait(1.8)
+        # (her things: the harvest by it, taken with F)
+        if dead:
+            bl_ = a.get_actor_location(); ml = p.get_actor_location()
+            p.set_actor_location(V(bl_.x + (ml.x - bl_.x) * 0.3, bl_.y + (ml.y - bl_.y) * 0.3, ml.z), False, True); yield from rwait(0.5)
+        got0 = {d: cb().get_item_count(d) for d in set(drops)}
+        try: res["kills"][kind]["f_names"] = str(g.describe_nearest(p.get_actor_location()))
+        except Exception as e_: res["kills"][kind]["f_names"] = f"? {e_}"
+        yield from press("F", 0.1); yield from rwait(0.8)
+        res["kills"][kind]["taken"] = {d: cb().get_item_count(d) - got0[d] for d in got0}
+    res["killed"] = g.get_editor_property("animals_killed") - k0
+    # (the kinds killed wait: none of them comes again within the wait; each kind's place is held empty and freed on time)
+    res["respawn_wait_s"] = g.get_editor_property("wild_animal_respawn_seconds")
+    def pending():
+        return [(str(l).split("|")[1], float(str(l).split("|")[2])) for l in g.get_wild_life_lines() if str(l).startswith("respawn|")]
+    res["pending_after_kills"] = [[k_, round(s_)] for k_, s_ in pending()]
+    # (the places freed when the wait is over)
+    t_ = time.time(); freed_at = None
+    while time.time() - t_ < 70.0 and freed_at is None:
+        if not pending(): freed_at = round(time.time() - t_, 1)
+        yield from rwait(1.0)
+    res["places_freed_after_s"] = freed_at
+    # (a deer of the wild's own (the test's are extra to its count): killed, no deer comes while its place waits; after it
+    # another comes, as they come round her (60 to 150 m off))
+    if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0); yield from rwait(1.5); refresh()
+    p = G["pawn"]; nat = None; t_ = time.time()
+    while nat is None and time.time() - t_ < 40.0:
+        here = p.get_actor_location()
+        ds_ = sorted([x for x in life() if x["kind"] == "Deer" and not x["dead"]], key=lambda x: (x["at"] - here).length())
+        if ds_: nat = ds_[0]
+        else: yield from rwait(1.0)
+    rw = {}
+    if nat:
+        target = None
+        for a_ in GS.get_all_actors_of_class(G["w"], unreal.RDWildAnimal):
+            if not a_.is_dead() and (a_.get_actor_location() - nat["at"]).length() < 5.0: target = a_
+        if target:
+            al = target.get_actor_location()
+            p.set_actor_location(V(al.x - 800.0, al.y, al.z + 100.0), False, True); p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=0.0), True)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=0.0)); yield from rwait(1.0)
+            n_ = 0
+            # (held before her as the test's own (struck, a deer runs off faster than her bolts' reach): what is measured
+            # here is its place, not the chase)
+            def hold_t(sec):
+                t1 = time.time()
+                while time.time() - t1 < sec and not target.is_dead():
+                    l = p.get_actor_location(); fw = p.get_actor_forward_vector()
+                    target.set_actor_location(V(l.x + fw.x * 300.0, l.y + fw.y * 300.0, target.get_actor_location().z), False, True)
+                    yield
+            while not target.is_dead() and n_ < 10:
+                cb().set_mana(cb().get_max_mana())          # (the kills before spent her mana)
+                yield from hold_t(0.2)
+                cb().simulate_key(key("LeftMouseButton"), True); yield from hold_t(0.12); cb().simulate_key(key("LeftMouseButton"), False)
+                yield from hold_t(1.4); n_ += 1
+            rw["killed"] = target.is_dead(); rw["casts"] = n_
+            deer = lambda: sum(1 for x in life() if x["kind"] == "Deer" and not x["dead"])
+            rw["deer_after_kill"] = deer(); rw["waiting"] = [[k_, round(s_)] for k_, s_ in pending()]
+            yield from rwait(20.0); rw["deer_at_20s"] = deer()
+            t_ = time.time(); came = None
+            while time.time() - t_ < 70.0 and came is None:
+                if deer() > rw["deer_after_kill"]: came = round(20.0 + time.time() - t_, 1)
+                yield from rwait(1.0)
+            rw["another_came_after_s"] = came
+    res["wild_deer"] = rw
+    g.set_editor_property("wild_animal_respawn_seconds", wait0)
+    quiet(False)
+    ok = all(v.get("dead") and v.get("drops") and v.get("hp_after_first_blow") is not None and sum(v.get("taken", {}).values()) == len(v["drops"])
+             and v.get("length_z", 1) < 0.3 and v.get("up_z", 1) < 0.3 for v in res["kills"].values()) \
+        and res["killed"] >= 3 and len(res["pending_after_kills"]) >= 3 and res["places_freed_after_s"] is not None \
+        and rw.get("killed") and rw.get("deer_at_20s", 99) <= rw.get("deer_after_kill", -1) and rw.get("another_came_after_s") is not None and rw["another_came_after_s"] >= 40.0
+    step_result("animals8", ok, **res)
+def step_speed8():
+    """her run speed for testing (the list of 2026-11-07: "a console command that allows the character to choose how fast to run
+    in the wilderness ... 1x / 5x / 10x / 15x / 20x / 30x / 40x"): rd.WildRunSpeed 10 then 40 typed at the console, her run
+    measured over 4 s each, on the ground the whole way (no fall reset); back to 1"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("plains") or clear_spot("grasslands") or (9000.0, -4000.0)
+    g.wild_put_her(*sp); yield from wait_chunks(40, 50); yield from rwait(1.5)
+    fr0 = g.get_editor_property("fall_resets") if hasattr(g, "fall_resets") else None
+    for k in (1, 10, 40):
+        unreal.SystemLibrary.execute_console_command(G["w"], f"rd.WildRunSpeed {k}"); yield from rwait(0.6)
+        a = G["pawn"].get_actor_location(); rec = []
+        yield from run_her((1.0, 0.3), 4.0, rec, every=0.25)
+        b = G["pawn"].get_actor_location()
+        res[f"x{k}"] = {"applied": g.get_wild_run_applied(), "m_per_s": round(math.hypot(b.x - a.x, b.y - a.y) / 100.0 / 4.0, 1),
+                        "max_over_ground": max([r["feet"] - r["ground"] for r in rec] or [0]), "held": g.get_editor_property("wild_run_held")}
+        yield from rwait(1.0)
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.WildRunSpeed 1"); yield from rwait(0.5)
+    res["after"] = g.get_wild_run_applied()
+    quiet(False)
+    b1 = res["x1"]["m_per_s"]
+    ok = res["x10"]["applied"] == 10 and res["x40"]["applied"] == 40 and res["after"] == 1 and b1 > 2.0 \
+        and res["x10"]["m_per_s"] > b1 * 6 and res["x40"]["m_per_s"] > b1 * 20
+    step_result("speed8", ok, **res)
+
+
 STEPS = {"world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
-         "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests}
+         "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
+         "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

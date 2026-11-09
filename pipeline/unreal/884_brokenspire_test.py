@@ -39,6 +39,7 @@ Steps (plan, comma separated):
   gate      with the wilderness (since 2026-11-03): no "barred", she walks out through it; without it, F at the gate:
             barred, she cannot walk out of it
   pictures  the square, a street, a home's inside, the smithy, the tavern, the castle's hall with its guards and the Mistgate
+  console   the game's own console (RD/RDConsole.cpp, a Shipping game's; here rd.GameConsole 1): its self-test (step_console)
 Writes SourceArt/brokenspire/test_<tag>.json and logs "BSTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -2530,8 +2531,172 @@ def step_descendsewer():
           and res["enter_counter"] == 1 and res["back"]["town"] == "Graymourne" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_sluice_door_m"] or 99) < 12)
     step_result("descendsewer", ok, **res)
 
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-07 (docs/improvements8.txt)
+def step_planks():
+    """the boarded windows' boards (the list of 2026-11-07: "the windowsills that have boards jutting out from the bottom of the
+    window do not have a collision layer, the player can walk right through those boards"): at every boarded window's planks a
+    small capsule swept at them from 1 m out on each side is stopped before their middle"""
+    res = {}; S = section(); w = G["w"]
+    planks = []
+    for c in S.get_components_by_class(unreal.InstancedStaticMeshComponent):
+        m = c.get_editor_property("static_mesh")
+        if not m or "Wooden_Planks" not in m.get_name(): continue
+        bb = m.get_bounding_box(); ctr = (bb.min + bb.max) * 0.5
+        for k in range(c.get_instance_count()):
+            t = c.get_instance_transform(k, True)
+            if isinstance(t, tuple): t = t[-1]
+            planks.append(unreal.MathLibrary.transform_location(t, ctr))
+    res["planks"] = len(planks); stopped = 0; through = []
+    for p in planks[:60]:
+        ok_all = True
+        for ang in (0, 90, 180, 270):
+            d = V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0.0)
+            a = p + d * 100.0
+            h = unreal.SystemLibrary.capsule_trace_single(w, a, p, 5.0, 5.0, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            h = h.to_tuple() if h else None
+            if not (h and h[0] and h[2] < 0.97): ok_all = False
+        if ok_all: stopped += 1
+        else: through.append([round(p.x), round(p.y), round(p.z)])
+    res["stopped"] = stopped; res["through"] = through[:6]
+    step_result("planks", res["planks"] > 3 and not through, **res)
+    yield
+def dummies():
+    out = []
+    for l in G["gen"].get_town_dummy_lines():
+        p = str(l).split("|"); out.append({"kind": p[0], "at": V(float(p[1]), float(p[2]), float(p[3])), "hits": int(p[4]), "lean": float(p[5]), "r": float(p[6]), "h": float(p[7])})
+    return out
+def step_dummies():
+    """the barracks' training dummies (the list of 2026-11-07: "the training dummies near the barracks should react when hit by a
+    melee or ranged weapon"): the Warrior's sword and the Mage's bolt each at a dummy and a target: it counts the hit and
+    leans away (degrees, its most within 1.5 s), then stands again; pictures of a dummy struck"""
+    g = G["gen"]; res = {"melee": [], "ranged": []}; quiet(True)
+    ds = dummies(); res["dummies"] = [[d["kind"], round(d["at"].x), round(d["at"].y), round(d["r"]), round(d["h"])] for d in ds]
+    if not ds: step_result("dummies", False, **res); quiet(False); return
+    hero0 = str(g.get_editor_property("current_hero"))
+    def watch(i, sec):
+        best = 0.0; t0 = time.time()
+        while time.time() - t0 < sec:
+            best = max(best, dummies()[i]["lean"]); yield
+        return best
+    for hero, kind in (("Warrior", "melee"), ("Mage", "ranged")):
+        if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from wait(1.0); refresh()
+        for i, d in enumerate(ds[:2]):
+            # (before it, 1.3 m off (a bolt: 6 m), facing it, on the barracks' side away from the door's lane)
+            off = 130.0 + d["r"] if kind == "melee" else 600.0
+            to_door = V(1.0, 0.0, 0.0)
+            ang = 0.0
+            for a_ in range(0, 360, 30):
+                pp = d["at"] + V(math.cos(math.radians(a_)), math.sin(math.radians(a_)), 0) * off
+                h = unreal.SystemLibrary.line_trace_single(G["w"], pp + V(0, 0, 100), d["at"] + V(0, 0, d["h"] * 0.6), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                h = h.to_tuple() if h else None
+                hc = h[10] if h else None; hm = hc.get_editor_property("static_mesh") if hc and isinstance(hc, unreal.StaticMeshComponent) else None
+                if h and h[0] and hm and ("Dummy" in hm.get_name() or "Target" in hm.get_name()): ang = a_; break
+            pp = d["at"] + V(math.cos(math.radians(ang)), math.sin(math.radians(ang)), 0) * off
+            yaw = math.degrees(math.atan2(d["at"].y - pp.y, d["at"].x - pp.x))
+            put(V(pp.x, pp.y, d["at"].z), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4.0 if kind == "melee" else -1.0, yaw=yaw)); yield from wait(1.2)
+            h0 = dummies()[i]["hits"]
+            yield from press("LeftMouseButton", 0.12)
+            lean = yield from watch(i, 1.6)
+            if kind == "melee" and i == 0:
+                shot("dummy_struck"); yield from rwait(1.5)
+            yield from rwait(2.5)
+            after = dummies()[i]
+            res[kind].append({"kind": d["kind"], "hits": after["hits"] - h0, "lean_max": round(lean, 1), "lean_after_4s": round(after["lean"], 2)})
+    if str(g.get_editor_property("current_hero")) != hero0: g.switch_hero(hero0); yield from wait(1.0); refresh()
+    quiet(False)
+    ok = all(r["hits"] >= 1 and r["lean_max"] > 3.0 and r["lean_after_4s"] < 0.5 for r in res["melee"] + res["ranged"]) and len(res["melee"]) >= 1 and len(res["ranged"]) >= 1
+    step_result("dummies", ok, **res)
+def step_storage():
+    """her storage's list held (the list of 2026-11-07: "when viewing your personal storage, the player cannot scroll down the list
+    by holding down the d-pad up or down"): with more things than the panel shows, the D-pad held down 1.5 s moves the cursor
+    on row after row (once at the press, then every 80 ms after 0.35 s), held up brings it back; one press is one row"""
+    g = G["gen"]; c = cb(); res = {}; quiet(True)
+    for it in [i for i in g.get_editor_property("items")][:24]:
+        try: c.add_item(str(it.name), 1)
+        except Exception: pass
+    yield from wait(0.3)
+    g.open_town_panel("stash", -1); yield from rwait(0.3); g.set_town_tab(0); yield from rwait(0.3)
+    n = len(g.get_town_lines()) if hasattr(g, "get_town_lines") else None
+    res["rows"] = n; res["open"] = g.is_town_panel_open()
+    c0 = g.get_town_cursor()
+    yield from press("Gamepad_DPad_Down", 0.12); res["one_press"] = g.get_town_cursor() - c0
+    c1 = g.get_town_cursor()
+    yield from press("Gamepad_DPad_Down", 1.5); res["held_down_1_5s"] = g.get_town_cursor() - c1
+    c2 = g.get_town_cursor()
+    yield from press("Gamepad_DPad_Up", 0.9); res["held_up_0_9s"] = c2 - g.get_town_cursor()
+    shot("storage_held", "1280x720"); yield from rwait(1.5)
+    g.close_town_panel(); yield from rwait(0.3)
+    quiet(False)
+    ok = res["open"] and res["one_press"] == 1 and res["held_down_1_5s"] >= 8 and res["held_up_0_9s"] >= 4
+    step_result("storage", ok, **res)
+def step_block8():
+    """the Warrior's block (the list of 2026-11-07: "when blocking with the shield, the warrior should only be able to walk
+    forward slowly or walk backwards slowly"): her shield up (LB held), her run switch on, the stick pushed ahead, to her right
+    and back for 2 s each: ahead and back she walks along her facing at the block's speed (90 cm/s, back 72) and no faster for
+    running; the stick pushed to the side turns her and does not move her; she faces her way all along (the shield before her)"""
+    g = G["gen"]; res = {}; quiet(True)
+    if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from wait(1.0); refresh()
+    c = cb(); p = G["pawn"]
+    sq = place("square"); put(V(sq.x + 600, sq.y + 600, 0), yaw=0.0); yield from wait(1.0)
+    c.set_run_mode(True)
+    res["block_move_speed"] = g.get_editor_property("block_move_speed")
+    c.simulate_key(key("Gamepad_LeftShoulder"), True); yield from wait(0.5)
+    res["blocking"] = c.is_blocking() if hasattr(c, "is_blocking") else None
+    for nm, way in (("ahead", (1, 0)), ("right", (0, 1)), ("back", (-1, 0))):
+        f = p.get_actor_forward_vector(); r_ = p.get_actor_right_vector(); y0 = p.get_actor_rotation().yaw; a = p.get_actor_location()
+        # (the stick against the camera, as her move comes in: up, right, down)
+        cy = math.radians(G["pc"].get_control_rotation().yaw); cf = V(math.cos(cy), math.sin(cy), 0.0); cr = V(-math.sin(cy), math.cos(cy), 0.0)
+        d = cf * float(way[0]) + cr * float(way[1])
+        # (her turn added up frame by frame: read once at the end, 415 degrees came out as 56)
+        t0 = time.time(); turned = 0.0; yl = y0
+        while time.time() - t0 < 2.0:
+            p.add_movement_input(d, 1.0); yield
+            yn = p.get_actor_rotation().yaw; turned += ((yn - yl) + 180) % 360 - 180; yl = yn
+        b = p.get_actor_location(); dv = b - a
+        res[nm] = {"along_cm": round(dv.dot(f)), "aside_cm": round(dv.dot(r_)), "turned_deg": round(turned, 1),
+                   "speed_cm_s": round(math.hypot(dv.x, dv.y) / 2.0), "filter": [round(x, 2) for x in (c.last_block_move.x, c.last_block_move.y, c.last_block_move.z)]}
+        yield from wait(0.4)
+    shot("block8", "1280x720"); yield from rwait(1.5)
+    c.simulate_key(key("Gamepad_LeftShoulder"), False); yield from wait(0.5)
+    # (the block let go: her run as before)
+    a = p.get_actor_location(); t0 = time.time()
+    while time.time() - t0 < 1.5: p.add_movement_input(p.get_actor_forward_vector(), 1.0); yield
+    res["after_cm_s"] = round((p.get_actor_location() - a).length() / 1.5)
+    c.set_run_mode(False); quiet(False)
+    bs = res["block_move_speed"]
+    ok = (bs > 0 and 0.7 * bs * 2 <= res["ahead"]["along_cm"] <= 1.1 * bs * 2 and abs(res["ahead"]["aside_cm"]) < 25
+          and abs(res["right"]["aside_cm"]) < 25 and abs(res["right"]["along_cm"]) < 25 and abs(res["right"]["turned_deg"]) > 60
+          and -1.1 * bs * 0.8 * 2 <= res["back"]["along_cm"] <= -0.6 * bs * 0.8 * 2 and abs(res["back"]["turned_deg"]) < 5
+          and res["after_cm_s"] > bs * 2)
+    step_result("block8", ok, **res)
+def step_console():
+    """the game's own console (the user's of 2026-11-08: "create a console for the shipping game"; RD/RDConsole.cpp, on in a
+    Shipping game, here put on with rd.GameConsole 1): its self-test, the same one a packaged game runs with -RDConsoleTest
+    (package_mistward.ps1's console run). Through Slate as a keyboard sends it: ` in the game's view opens it with the line
+    focused (the key's ` not typed); "rd.WildRunSpeed 10" typed and Enter sets the run speed; a name alone prints its value
+    (t.MaxFPS too, an engine variable); Up / Down recall, Tab completes rd.Wild, an unknown word says so, help lists the
+    rd. commands; a picture of the view with it open; W held 1.2 s under it reaches nothing; Escape shuts it and gives the
+    view the keyboard; ` opens and ` shuts it; W held after that is the game's again"""
+    g = G["gen"]; res = {}
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.GameConsole 1")
+    con = unreal.RDConsole.get_console(g)
+    out = os.path.join(SHOTS, f"bs_{TAG}_console.txt")
+    con.start_self_test(out)
+    t0 = time.time()
+    while not con.get_self_test_result() and time.time() - t0 < 60: yield
+    txt = str(con.get_self_test_result())
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.GameConsole 0")
+    checks = {}
+    for ln in txt.splitlines():
+        p = ln.split("|", 3)
+        if p[0] == "check": checks[p[1]] = {"ok": p[2] == "ok", "what": p[3] if len(p) > 3 else ""}
+        elif p[0] == "note": res[p[1]] = p[2]
+    res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
+    ok = bool(checks) and txt.strip().endswith("result|ok")
+    step_result("console", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
-              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer})
+              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
+              "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

@@ -18,6 +18,22 @@ Built and compiled, but no test has run it yet:
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
 - [ ] **The packaged game in the wilderness:** the package of 2026-11-06 (`builds\vel_morrath`) runs the town, puts her out in Vel Morrath and builds the city round her; a walk out of the gate, a journey, a save and load, and its memory over a long walk have not been run in it (worker threads, transient map textures and the save all behave differently packaged).
 
+## The list of 2026-11-07 ([docs/improvements8.txt](docs/improvements8.txt))
+
+Built and tested (`884 planks`, `dummies`, `storage`, `block8`; `888 rain8`, `sky8`, `fields8`, `ground8`, `animals8`, `speed8`, `perf8`; `868 block`); still to test or do:
+
+- [ ] **The packaged game with this list:** not packaged yet. `869` must run first (the crops' materials, the corn and potato plants', need the instanced-mesh usage; Bone Temple's and PureNature's too).
+- [ ] **Hunting a fleeing animal:** struck once, a deer runs at 8.5 m/s and the Summoner's next bolts fell short of it; the test holds the animals before her. Whether a hunt reads well in play (bolts' reach against a fleeing deer, a sword against a hare at 4.2 m/s) is not measured.
+- [ ] **An animal's return at the level's own wait** (120 s): measured with the wait at 45 s (another deer 45.5 s after the kill).
+- [ ] **Walking into the farms:** running at 5x across them, 26 frames of 286 were over 100 ms (the grassland 11 of 225); the near chunks' crops (about 24,000 a chunk) are added in one go when a chunk comes near. At 1x not measured.
+- [ ] **The ground's rows far off** read in a picture from above in one wheat field; the other crops' rows fade at a smaller distance (their rows are finer). Not judged across a whole farm region.
+- [ ] **A thin dark line at the horizon** where the land's chunks end (seen in the fields' far picture): from before this list; not looked into.
+- [ ] **The other towns' boards, dummies and panels** (Vel Morrath, Ashenreach, Graymourne): the code is shared; only Brokenspire was measured.
+- [ ] **`rd.WildRunSpeed` in a packaged game:** set at the Shipping game's own console since 2026-11-08 (the package test's console run reads it back as 10); her run in the wilds at that speed has not been measured packaged.
+- [ ] **The wilderness's sheer walls (2026-11-08, [wilderness.md](docs/levels/wilderness.md#the-sheer-walls-2026-11-08)):** the regions' mixing, the lakes' and ponds' banks and the roads' banks changed in `RDWildWorld.cpp`; measured without a game (`RDWildProbe`, `wild_seams.py`: no seams left round Brokenspire on the user's seed). Not yet run in play: `888` (all of it: every height moved a little; `ground7`, `ground8`, `quests`, `places` read the ground) and `884` (the town's way out and its roads), and the user's spot walked over in the game. Play on `brokenspire` ran the GPU out of memory again that day.
+- [ ] **PR #27's review fixes, not yet run in play:** a killed animal rolled about its facing (`888 animals8` now measures the body's axes, `length_z` / `up_z`); the rain's drops two crossed planes in a field that keeps the world's axes (`rain8`: `pairs_crossed`, look at its pictures); `rd.WildRunSpeed` set as the console sets it, applied again to a new pawn, the hold checking the chunk's collision under her (`speed8`, and a hero switch at 10x); the streaming's measures counting chunks streamed while fast (`perf8`). The rain still follows the camera's place (a field round her), as since 2026-11-04.
+- [ ] **The game's console (2026-11-08):** `884 console` not run on Brokenspire in the editor (play there ran the GPU out of memory); passed on the castle (`868 console`) and in the Shipping package in Brokenspire. Only the US layout's ` key was tried; no gamepad opens it; the lines typed are not kept between games.
+
 ## The list of 2026-11-04 ([docs/improvements7.txt](docs/improvements7.txt))
 
 Built and tested (`884 list7`, `signs`, `gate`; `888 sky7`, `life7`, `ground7`, `music7`, `save`); still to test:

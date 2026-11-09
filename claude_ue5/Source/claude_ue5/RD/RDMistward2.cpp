@@ -447,6 +447,81 @@ void URDCombatComponent::TickBlocking(const APlayerController* PC)
 	if (!bScriptedOnly && bDown != bBlocking) SetBlocking(bDown);
 }
 
+// ================================================================================================ the block's walk
+// (the list of 2026-11-07: "when blocking with the shield, the warrior should only be able to walk forward slowly or walk
+// backwards slowly". Her move comes in through her controller's input as a way relative to the camera; while she blocks the
+// stick's up and down walk her along her own facing (at the generator's BlockMoveSpeed whether she walks or runs, back at
+// BlockBackShare of it), and its left and right turn her (BlockTurnRate) instead of moving her. Her movement's own turning
+// toward where she goes is off for the block (going back it would have turned her round, the shield away from the foe))
+URDMoveFilterComponent::URDMoveFilterComponent()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickGroup = TG_PrePhysics;
+}
+
+void URDMoveFilterComponent::TickComponent(float Dt, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(Dt, TickType, ThisTickFunction);
+	ACharacter* C = Cast<ACharacter>(GetOwner());
+	if (!C) return;
+	// (the order, once each: after her controller (its input adds the move this frame), before her movement (it uses it up))
+	if (AController* Ctl = C->GetController(); Ctl && OrderedAfter.Get() != Ctl)
+	{
+		PrimaryComponentTick.AddPrerequisite(Ctl, Ctl->PrimaryActorTick);
+		OrderedAfter = Ctl;
+	}
+	if (!bMovementOrdered)
+		if (UCharacterMovementComponent* CM = C->GetCharacterMovement())
+		{
+			CM->PrimaryComponentTick.AddPrerequisite(this, PrimaryComponentTick);
+			bMovementOrdered = true;
+		}
+	if (URDCombatComponent* Cb = Combat.Get()) Cb->FilterBlockMove(Dt);
+}
+
+void URDCombatComponent::FilterBlockMove(float Dt)
+{
+	ACharacter* C = Cast<ACharacter>(GetOwner());
+	UCharacterMovementComponent* CM = C ? C->GetCharacterMovement() : nullptr;
+	if (!CM) return;
+	const bool bOn = bBlocking && !bDead && Generator && Generator->BlockMoveSpeed > 0.f;
+	if (bOn != bBlockMoveOn)
+	{
+		if (bOn)
+		{
+			bSavedOrientToMove = CM->bOrientRotationToMovement; bSavedDesiredRot = CM->bUseControllerDesiredRotation;
+			CM->bOrientRotationToMovement = false; CM->bUseControllerDesiredRotation = false;
+		}
+		else { CM->bOrientRotationToMovement = bSavedOrientToMove; CM->bUseControllerDesiredRotation = bSavedDesiredRot; }
+		bBlockMoveOn = bOn;
+		LastBlockMove = FVector::ZeroVector; LastBlockTurn = 0.f;
+	}
+	if (!bOn) return;
+	const FVector In = C->ConsumeMovementInputVector();
+	const FVector In2(In.X, In.Y, 0.f);
+	const float Mag = In2.Size();
+	FVector Fwd = C->GetActorForwardVector(); Fwd.Z = 0.f; Fwd = Fwd.GetSafeNormal();
+	LastBlockMove = FVector::ZeroVector; LastBlockTurn = 0.f;
+	if (Mag < 0.02f || Fwd.IsNearlyZero()) return;
+	// (the stick as she pushes it, against the camera's way (her move came in turned by it): up or down walks her along her
+	// own facing, ahead or back; left or right turns her and never moves her (taken against her facing, a push to the side
+	// turned her and then walked her that way, 888's first block8: 1.4 m aside in 2 s))
+	const FVector Cf = FRotator(0.f, C->GetControlRotation().Yaw, 0.f).Vector(), Cr(-Cf.Y, Cf.X, 0.f);
+	const float Ahead = FVector::DotProduct(In2, Cf) / Mag, Aside = FVector::DotProduct(In2, Cr) / Mag;
+	// (aside: a turn toward that side, as fast as the push is to the side)
+	if (FMath::Abs(Aside) > 0.25f)
+	{
+		LastBlockTurn = Generator->BlockTurnRate * FMath::Clamp(Aside, -1.f, 1.f);
+		C->AddActorWorldRotation(FRotator(0.f, LastBlockTurn * Dt, 0.f));
+	}
+	// (ahead or back: her slow block walk, whatever her run switch says; the input's full size, the speed is MaxWalkSpeed's)
+	float Go = 0.f;
+	if (Ahead > 0.45f) Go = 1.f;
+	else if (Ahead < -0.45f) Go = -FMath::Clamp(Generator->BlockBackShare, 0.f, 1.f);
+	if (Go != 0.f) C->AddMovementInput(Fwd, Go);
+	LastBlockMove = FVector(Ahead, Aside, Go);
+}
+
 // ================================================================================================ input of the third list (outside the inventory)
 void URDCombatComponent::TickThirdListInput(const APlayerController* PC)
 {

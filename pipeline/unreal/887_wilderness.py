@@ -8,7 +8,7 @@ brokenspire level (play stopped). Parts (argv, default "materials,data,level"):
              table gives it, from its mesh's bounds; a missing mesh is reported and left out), WildPieces / WildPieceScale (the
              places' props), the fire and steam effects
   symbols    the map's symbols (blender_numpy/wild_symbols.py writes SourceArt/wilderness/symbols/wmap_*.png) into UIArt
-  level      bWild on, the 4 km far-ground plane hidden (the terrain is the ground now), the level saved
+  level      bWild on, the 4 km far-ground plane taken out (the terrain is the ground now; hidden, she still ran on it), the level saved
   trees      the aspen, birch and acacia made in Blender (blender_numpy/wild_trees.py) imported, their bark and leaf materials
   fixmats    FrozenNorseEnvironment's cliff, ice and runestone masters do not compile here ("MatLayerBlend_Simple: arithmetic
              between float3 and float4"): its boulders, cliffs, rock clusters, glaciers and ice get materials of our own made
@@ -136,6 +136,30 @@ def materials():
     vc = b.n(unreal.MaterialExpressionVertexColor, -600)
     tint = b.mask(vc, "", r=True, g=True, b=True)
     base = b.mul(tint, dl, x=150)
+    # (the list of 2026-11-07: a farm field's rows at every pixel. The chunk gives each vertex its field's way (UV0's U, of half a
+    # turn) and crop (UV0's V x 8) and the field's weight (UV3's V); a row's leaves over a share of it (the crop's cover), the
+    # soil between, both against the field's average colour that the vertex colour already holds; faded out where a row comes
+    # under about three pixels (fwidth) so that far fields do not shimmer. The crops' colours and spacing from biomes.json)
+    farms = next((x for x in json.load(open(JSON, encoding="utf-8"))["biomes"] if x["name"] == "farms"), {})
+    lin = lambda c: ", ".join(f"{(v / 255.0) ** 2.2:.4f}" for v in c)
+    cases = "".join(f"{'else ' if i else ''}if (k == {i}) {{ rowm = {float(c.get('row', 1.0)):.3f}; cover = {float(c.get('cover', 0.5)):.3f}; soil = float3({lin(c['soil'])}); leaf = float3({lin(c['leaf'])}); }}\n"
+                    for i, c in enumerate(farms.get("crops", [])))
+    rows = b.n(unreal.MaterialExpressionCustom, -100)
+    rows.set_editor_property("code", "float wt = saturate(Wt);\nif (wt <= 0.001) return float3(1, 1, 1);\nint k = (int)floor(F.y * 8.0);\n"
+                             "float rowm = 1.0; float cover = 0.5; float3 soil = float3(0.1, 0.07, 0.04); float3 leaf = float3(0.07, 0.13, 0.03);\n" + cases +
+                             "float ang = F.x * 3.14159265;\nfloat2 acr = float2(-sin(ang), cos(ang));\nfloat ph = dot(P.xy * 0.01, acr) / rowm;\n"
+                             "float fw = max(fwidth(ph), 1e-5);\nfloat d = abs(frac(ph) - 0.5) * 2.0;\nfloat s = max(0.12, fw * 1.5);\n"
+                             "float band = 1.0 - smoothstep(cover - s, cover + s, d);\nfloat aa = saturate(1.6 - fw * 4.0);\n"
+                             "float3 avg = lerp(soil, leaf, cover);\nfloat3 rc = lerp(soil, leaf, band);\nreturn lerp(float3(1, 1, 1), rc / max(avg, 0.005), wt * aa);")
+    rows.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    ins = []
+    for nm in ("P", "F", "Wt"):
+        ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
+    rows.set_editor_property("inputs", ins)
+    uvf = b.n(unreal.MaterialExpressionTextureCoordinate, -1500, coordinate_index=0)
+    fw_ = b.mask(uv3, "", g=True)
+    b.c(wpos, "", rows, "P"); b.c(uvf, "", rows, "F"); b.c(fw_, "", rows, "Wt")
+    base = b.mul(base, rows, x=200)
     b.out(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
     b.out(chain(1), "", unreal.MaterialProperty.MP_NORMAL)
     rough = b.lerp(b.const(0.92), b.const(0.55), snow, x=150)
@@ -283,9 +307,18 @@ def data():
         B.set_editor_property("snow", float(b.get("snow", 0))); B.set_editor_property("canopy", float(b.get("canopy", 0)))
         B.set_editor_property("ponds", float(b.get("ponds", 0))); B.set_editor_property("steam", float(b.get("steam", 0)))
         Ly = b.get("layers", [0, 0, 0, 0]); B.set_editor_property("layers", unreal.Vector4(*[float(x) for x in Ly]))
+        # (the list of 2026-11-07: a farm's fields' crops (898): their soil and leaves seen from afar, their rows' spacing)
+        crops = []
+        for c in b.get("crops", []):
+            C = unreal.RDWildCrop()
+            C.set_editor_property("name", c["name"]); C.set_editor_property("soil", srgb(c["soil"])); C.set_editor_property("leaf", srgb(c["leaf"]))
+            C.set_editor_property("cover", float(c.get("cover", 0.5))); C.set_editor_property("row_m", float(c.get("row", 1.0)))
+            crops.append(C)
+        B.set_editor_property("crops", crops)
         fol = []
         for f in b.get("foliage", []):
-            path, kind, dens, hm, flags = f
+            path, kind, dens, hm, flags = f[:5]
+            row = f[5] if len(f) > 5 else {}
             m = unreal.load_asset(path)
             if not m or not isinstance(m, unreal.StaticMesh): missing.append(f"{b['name']}: {path}"); continue
             sc = hm * 100.0 / mesh_height(m)
@@ -306,6 +339,10 @@ def data():
             F.set_editor_property("collision", "c" in flags); F.set_editor_property("align", "a" in flags)
             F.set_editor_property("near_only", "n" in flags); F.set_editor_property("clump", 0.8 if "k" in flags else 0.0)
             F.set_editor_property("near_water", -1.0 if "W" in flags else (1.0 if "w" in flags else 0.0))
+            # (a field crop: planted in its field's rows, step m apart along them; per hectare only weighs its kinds)
+            if "crop" in row:
+                F.set_editor_property("crop", int(row["crop"])); F.set_editor_property("step_m", float(row.get("step", 0.8)))
+                F.set_editor_property("density", float(dens))
             fol.append(F)
         B.set_editor_property("foliage", fol)
         out.append(B)
@@ -348,11 +385,13 @@ def level():
         # (the volumetric fog lies over the first tens of metres whatever the start distance: the near ground came out washed white)
         c.set_editor_property("enable_volumetric_fog", False)
         REPORT.append(f"fog {WILD_FOG}")
+    # (881's 4 km far-ground plane at z -6 cm: the terrain is the ground now. Hidden with its collision set off it still stood
+    # in play (the component's collision call did not keep in the saved level): within 2 km of Brokenspire she ran on it 2 m
+    # over the drawn ground wherever the land dips (the list of 2026-11-07, 888 ground8: "running in the air"). Taken out)
     for a in unreal.GameplayStatics.get_all_actors_of_class(w, unreal.StaticMeshActor):
         if a.get_actor_label() == "BS_FarGround":
-            a.set_actor_hidden_in_game(True); a.set_is_temporarily_hidden_in_editor(True)
-            a.static_mesh_component.set_collision_enabled(unreal.CollisionEnabled.NO_COLLISION)
-            REPORT.append("BS_FarGround hidden")
+            unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)
+            REPORT.append("BS_FarGround taken out")
     # (the saved town built again with the gate open: no leaves, bar or blocker)
     g.build_start_section()
     REPORT.append("Brokenspire built again (the gate open)")

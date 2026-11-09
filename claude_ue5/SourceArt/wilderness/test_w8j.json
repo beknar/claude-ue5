@@ -1,0 +1,234 @@
+{
+ "tag": "w8j",
+ "plan": [
+  "rain8",
+  "sky8",
+  "fields8",
+  "ground8",
+  "animals8",
+  "speed8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "rain8",
+   "ok": true,
+   "sky": {
+    "weather": "rain",
+    "cover": 0.96,
+    "rain": 0.7,
+    "wind": 0.55,
+    "fog": 0.35,
+    "snowing": 0.0,
+    "changes": 1.0,
+    "next_s": 536.0,
+    "clouds": 1.0,
+    "stars": 0.0,
+    "moon": 0.0,
+    "fog_cutoff_m": 1000000.0,
+    "rain_on": 1.0,
+    "snow_on": 0.0,
+    "wind_fx": 0.0
+   },
+   "drops": {
+    "count": 4500,
+    "scale0": [
+     0.2483,
+     0.009,
+     1.0
+    ],
+    "up_share": 1.0,
+    "field_yaw": 40.0,
+    "camera_yaw": 40.0
+   }
+  },
+  {
+   "step": "sky8",
+   "ok": true,
+   "rings": {
+    "fair_base": [
+     159.5,
+     157.4,
+     153.4,
+     149.2,
+     143.1,
+     137.1,
+     129.2,
+     121.0
+    ],
+    "overcast_base": [
+     156.8,
+     155.5,
+     152.2,
+     148.2,
+     142.0,
+     135.6,
+     127.1,
+     118.2
+    ],
+    "rain_base": [
+     155.5,
+     154.0,
+     150.6,
+     146.6,
+     140.1,
+     133.8,
+     125.1,
+     116.3
+    ]
+   },
+   "fog": {
+    "cutoff_m": 1000000,
+    "falloff": 0.001500000013038516,
+    "density": 0.019999999552965164
+   },
+   "edges": {
+    "fair_base": 4.4,
+    "overcast_base": 5.4,
+    "rain_base": 6.4
+   },
+   "jumps": {
+    "fair_base": 8.2,
+    "overcast_base": 8.9,
+    "rain_base": 8.8
+   }
+  },
+  {
+   "step": "fields8",
+   "ok": true,
+   "at": [
+    1460,
+    -1200
+   ],
+   "crops": {
+    "SM_Cabbage_1": 14603,
+    "SM_Cabbage_2": 14926,
+    "SM_Cabbage_3": 14713,
+    "SM_Wild_Potato_A": 18856,
+    "SM_Wild_Potato_B": 19096,
+    "SM_Pumpkin03": 2083,
+    "SM_Pumpkin02": 1983,
+    "SM_Pumpkin01": 1966,
+    "SM_Sunflower01_Var01": 14443,
+    "SM_Sunflower01_Var02": 14693,
+    "SM_Sunflower01_Var03": 14482,
+    "SM_WheatGrass01": 20155,
+    "SM_WheatGrass02": 10084,
+    "SM_WheatGrass03": 10086,
+    "SM_Wild_Corn_B": 23584,
+    "SM_Wild_Corn_A": 23498
+   },
+   "fps_fields": 9.5,
+   "fps_grasslands": 30.6,
+   "fields_on_line": 6
+  },
+  {
+   "step": "ground8",
+   "ok": true,
+   "runs": {
+    "grasslands": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 4.0,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "hills": {
+     "samples": 119,
+     "over_20cm": 0,
+     "max_over": 3.5,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "farms": {
+     "samples": 107,
+     "over_20cm": 0,
+     "max_over": 3.0999999999999943,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "temperate autumn forests": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 5.0,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "marshes": {
+     "samples": 109,
+     "over_20cm": 0,
+     "max_over": 3.300000000000182,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    },
+    "mountains": {
+     "samples": 120,
+     "over_20cm": 0,
+     "max_over": 6.19999999999709,
+     "falling": 0,
+     "floors_over": {},
+     "worst": []
+    }
+   },
+   "share_over_20cm": 0.0
+  },
+  {
+   "step": "animals8",
+   "ok": false,
+   "error": "describe_nearest() required argument 'from_' (pos 1) not found",
+   "trace": "Traceback (most recent call last):\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 1426, in run\n    yield from STEPS[name]()\n  File \"E:\\code\\claude-ue5\\pipeline\\unreal\\888_wilderness_test.py\", line 1377, in step_animals8\n    res[\"kills\"][kind][\"f_names\"] = str(g.describe_nearest()) if hasattr(g, \"describe_nearest\") else None\n                                        ^^^^^^^^^^^^^^^^^^^^\nTypeError: describe_nearest() required argument 'from_' (pos 1) not found\n"
+  },
+  {
+   "step": "speed8",
+   "ok": true,
+   "x1": {
+    "applied": 1.0,
+    "m_per_s": 3.5,
+    "max_over_ground": 2.900000000000091,
+    "held": 0
+   },
+   "x10": {
+    "applied": 10.0,
+    "m_per_s": 36.5,
+    "max_over_ground": 3.599999999999909,
+    "held": 0
+   },
+   "x40": {
+    "applied": 40.0,
+    "m_per_s": 145.6,
+    "max_over_ground": 2.699999999999818,
+    "held": 0
+   },
+   "after": 1.0
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "wd_w8j_rain8_day.png",
+  "wd_w8j_rain8_up.png",
+  "wd_w8j_rain8_dusk.png",
+  "wd_w8j_sky8_fair_base_up.png",
+  "wd_w8j_sky8_fair_base_mid.png",
+  "wd_w8j_sky8_fair_base_low.png",
+  "wd_w8j_sky8_overcast_base_up.png",
+  "wd_w8j_sky8_overcast_base_mid.png",
+  "wd_w8j_sky8_overcast_base_low.png",
+  "wd_w8j_sky8_rain_base_up.png",
+  "wd_w8j_sky8_rain_base_mid.png",
+  "wd_w8j_sky8_rain_base_low.png",
+  "wd_w8j_fields8_near_20.png",
+  "wd_w8j_fields8_near_200.png",
+  "wd_w8j_fields8_low_20.png",
+  "wd_w8j_fields8_low_200.png",
+  "wd_w8j_fields8_far_20.png",
+  "wd_w8j_fields8_far_200.png",
+  "wd_w8j_animals8_deer_dead.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

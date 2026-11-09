@@ -140,7 +140,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	TownInner = FIntRect(Ground.Min, Ground.Max);
 	TownBorder.Reset(); TownPaths.Reset(); TownRoadMask.Init(0, N * N); TownTowerDoors.Reset(); TownTowerMids.Reset();
 	TownWorks.Reset(); TownPens.Reset(); TownGardens.Reset(); TownSpits.Reset(); TownGrassClumps = 0; TownSmallBushes = 0;
-	TownOvens.Reset(); TownFoods.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
+	TownOvens.Reset(); TownFoods.Reset(); TownDummies.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
 	CastleStairwell.Reset(); CastleStairRoom = -1; CastleStairFoot = CastleStairTop = FVector::ZeroVector;
 	// (a frame grid of what each tile is taken by: 0 free, 1 road, 2 square, 3 building or its margin, 4 kept clear, 9 outside)
 	TArray<uint8> Use; Use.Init(0, S * S);
@@ -1162,7 +1162,13 @@ void ARDSection::TownShellBuilding(int32 BI)
 				// whole bounds (the user's of 2026-11-02: she walked through the ledges))
 				if (Nm != TownPiece(B, TEXT("Wall")) && !bDoor) AddMeshBoundsCollider(Nm, WallT(P, Sd.Out, Z));
 				// (a boarded house: planks across its lower windows (and the door, AddTownDoor))
-				if (bBoarded && St == 0 && !bDoor && Nm != TownPiece(B, TEXT("Wall"))) AddPiece(TEXT("Town.Planks"), WallT(P + Sd.Out * 14.f, Sd.Out, Z + 120.f), true);
+				// (the planks stand out of the wall past the window's box: a hidden box over their own bounds too (the user's
+				// of 2026-11-07: she walked through the boards under the windows))
+				if (bBoarded && St == 0 && !bDoor && Nm != TownPiece(B, TEXT("Wall")))
+				{
+					AddPiece(TEXT("Town.Planks"), WallT(P + Sd.Out * 14.f, Sd.Out, Z + 120.f), true);
+					AddMeshBoundsCollider(TEXT("Town.Planks"), WallT(P + Sd.Out * 14.f, Sd.Out, Z + 120.f));
+				}
 			}
 		}
 	}

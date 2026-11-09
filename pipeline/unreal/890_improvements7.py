@@ -242,13 +242,28 @@ def sky():
     sky_flags(b.m, False); moonm = b.finish()
     # high thin clouds (another kind than the volumetric layer's heaps): the engine's cloud texture drifting over the dome
     b = MB(f"{SKY}/M_RD_SkyHigh")
+    # (the list of 2026-11-07: "the sky when looking straight up looks like a giant circle"; the sphere's own UVs pinched the
+    # cloud texture into rays at the top (888 sky8's pictures). The clouds are laid flat over the sky instead: their place is
+    # the way to them over its height (a ceiling's), drifting, thinning out toward the horizon where the ceiling's are
+    # stretched)
+    # (laid flat from the view's way instead, the engine's cloud picture (not made to tile) showed its seams as straight lines
+    # running to the horizon: the sphere's UVs are kept and the high clouds thin out toward the top, where they pinched)
     uv = b.n(unreal.MaterialExpressionTextureCoordinate, -1200, u_tiling=2.0, v_tiling=1.0)
     pn = b.n(unreal.MaterialExpressionPanner, -1000, speed_x=0.002, speed_y=0.0005); b.c(uv, "", pn, "Coordinate")
+    cu = b.n(unreal.MaterialExpressionCustom, -1000)
+    cu.set_editor_property("code", "float3 d = normalize(P - C);\nreturn 1.0 - smoothstep(0.55, 0.85, d.z);")
+    cu.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    ins = []
+    for nm in ("P", "C"):
+        ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
+    cu.set_editor_property("inputs", ins)
+    b.c(b.n(unreal.MaterialExpressionWorldPosition, -1300), "", cu, "P"); b.c(b.n(unreal.MaterialExpressionCameraPositionWS, -1300), "", cu, "C")
+    fade = cu
     ct = b.n(unreal.MaterialExpressionTextureSample, -800, texture=clouds_t); b.c(pn, "", ct, "UVs")
     br = b.n(unreal.MaterialExpressionScalarParameter, -900, parameter_name="Bright", default_value=1.0)
     col = b.n(unreal.MaterialExpressionConstant3Vector, -800, constant=unreal.LinearColor(0.9, 0.92, 0.96, 1))
     b.out(b.mul(b.mul(col, br), ct, bp="R"), "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
-    op = b.mul(ct, b.n(unreal.MaterialExpressionConstant, -700, r=0.45), ap="R")
+    op = b.mul(b.mul(ct, b.n(unreal.MaterialExpressionConstant, -700, r=0.45), ap="R"), fade)
     b.out(op, "", unreal.MaterialProperty.MP_OPACITY)
     sky_flags(b.m, False); high = b.finish()
     # the rain and snow of our own: thin planes round her camera, falling by their world position offset (the packs' rain
@@ -273,12 +288,21 @@ def sky():
     br = b.n(unreal.MaterialExpressionScalarParameter, -900, parameter_name="Bright", default_value=1.0)
     col = b.n(unreal.MaterialExpressionVectorParameter, -900, parameter_name="Color", default_value=unreal.LinearColor(0.75, 0.8, 0.9, 1))
     opq = b.n(unreal.MaterialExpressionScalarParameter, -900, parameter_name="Opacity", default_value=0.3)
+    # (the list of 2026-11-07: "the rain does not look like raindrops, instead they look like white rods": flat, hard-edged and
+    # glowing near-white by day. Each drop is now soft: thin toward its ends along its length and across its width (the plane's
+    # UVs, either way round), dimmer and bluer, about as see-through as a drop against the sky; the snow's flakes round)
+    sh = b.n(unreal.MaterialExpressionCustom, -500)
+    sh.set_editor_property("code", "float a = sin(saturate(U.x) * 3.14159265);\nfloat c = sin(saturate(U.y) * 3.14159265);\nreturn pow(a, 1.6) * pow(c, 1.6);")
+    sh.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    ci = unreal.CustomInput(); ci.set_editor_property("input_name", "U"); sh.set_editor_property("inputs", [ci])
+    b.c(b.n(unreal.MaterialExpressionTextureCoordinate, -900, coordinate_index=0), "", sh, "U")
     b.out(b.mul(col, br), "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
-    b.out(b.mul(opq, am), "", unreal.MaterialProperty.MP_OPACITY)
+    b.out(b.mul(b.mul(opq, am), sh), "", unreal.MaterialProperty.MP_OPACITY)
     sky_flags(b.m, False); b.m.set_editor_property("used_with_instanced_static_meshes", True)
     drops = b.finish()
-    rain_mi = mi(f"{SKY}/MI_RD_Rain", drops, scalars={"Speed": 950.0, "Height": 1800.0, "Sway": 0.0, "Opacity": 0.26})
-    snow_mi = mi(f"{SKY}/MI_RD_Snow", drops, scalars={"Speed": 130.0, "Height": 1800.0, "Sway": 28.0, "Opacity": 0.85})
+    rain_mi = mi(f"{SKY}/MI_RD_Rain", drops, scalars={"Speed": 950.0, "Height": 1800.0, "Sway": 0.0, "Opacity": 0.42})
+    MEL.set_material_instance_vector_parameter_value(rain_mi, "Color", unreal.LinearColor(0.42, 0.47, 0.55, 1)); eal.save_loaded_asset(rain_mi, only_if_is_dirty=False)
+    snow_mi = mi(f"{SKY}/MI_RD_Snow", drops, scalars={"Speed": 130.0, "Height": 1800.0, "Sway": 28.0, "Opacity": 1.0})
     MEL.set_material_instance_vector_parameter_value(snow_mi, "Color", unreal.LinearColor(1.3, 1.3, 1.35, 1)); eal.save_loaded_asset(snow_mi, only_if_is_dirty=False)
     cloud_parent = unreal.load_asset("/Engine/EngineSky/VolumetricClouds/m_SimpleVolumetricCloud_Inst")
     clouds = mi(f"{SKY}/MI_RD_Clouds", cloud_parent)

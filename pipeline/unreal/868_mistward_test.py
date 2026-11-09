@@ -114,6 +114,10 @@ The list of 2026-11-01 (docs/improvements6.txt; 880, balance6.json):
            tier, mana back as her pool's share, a restart back to tier 1
   balance  (not in the default plan: about 40 minutes) each hero at each tier with her kit: a pack of three and a boss under
            autoplay (won, seconds, hit points left); a third argument narrows it ("heroes=Mage+Rogue;tiers=4+5")
+The user's of 2026-11-08 (RD/RDConsole.cpp):
+  console  the game's own console (a Shipping game's; here put on with rd.GameConsole 1): its self-test through Slate as a
+           keyboard sends it (` opens it, typed lines run, values read, Up / Down, Tab, help, W under it reaches nothing,
+           Escape and ` shut it, the game's keys back after); the same self-test as 884's and a packaged game's -RDConsoleTest
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -1663,7 +1667,8 @@ def step_block():
     g.slate_key(key("Gamepad_LeftShoulder"), True); yield from rwait(0.4)
     feet = []; hands = []; t0 = now(); p0 = G["pawn"].get_actor_location()
     while now() - t0 < 2.0:
-        G["pawn"].add_movement_input(G["pawn"].get_actor_forward_vector(), 1.0, False)
+        # (the stick pushed up, as her move comes in against the camera: the list of 2026-11-07's block walks her along her facing)
+        cy_ = math.radians(G["pc"].get_control_rotation().yaw); G["pawn"].add_movement_input(V(math.cos(cy_), math.sin(cy_), 0.0), 1.0, False)
         feet.append(G["pawn"].get_actor_transform().inverse_transform_location(body.get_socket_location("foot_l")).x); hands.append(hand()[1]); yield
     g.slate_key(key("Gamepad_LeftShoulder"), False); yield from rwait(0.3)
     res["walk_block"] = {"blocking": c.is_blocking(), "layer": round(c.get_block_layer(), 2), "foot_swing_cm": round(max(feet) - min(feet), 1) if feet else 0,
@@ -1678,7 +1683,9 @@ def step_block():
     g.switch_hero("Warrior"); yield from wait(0.6); refresh(); quiet(False)
     p_, b_ = res["plain"], res["blocked"]
     want_share = min(share + 0.3, 0.95)
-    ok = (not res["refused"] and res["blocking"] and abs(res["speed"]["ratio"] - 0.5) < 0.03 and abs(b_["share"] - want_share) < 0.005 and b_["hits"] == 1
+    # (the list of 2026-11-07: with BlockMoveSpeed she walks at that speed at most, whether she walks or runs; 0: BlockSlow off hers)
+    bm = g.get_editor_property("block_move_speed"); res["block_move_speed"] = bm
+    ok = (not res["refused"] and res["blocking"] and (abs(s1 - min(s0, bm)) < 2.0 if bm > 0 else abs(res["speed"]["ratio"] - 0.5) < 0.03) and abs(b_["share"] - want_share) < 0.005 and b_["hits"] == 1
           and b_["lost"] < p_["lost"] * 0.8 and p_["shield_lost"] > 0 and abs(b_["shield_lost"] / max(p_["shield_lost"], 1e-3) - 5.0 * (want_share / max(share, 1e-3))) < 1.0
           and res["swing_refused"] and not res["after_release"]["blocking"] and res["after_release"]["speed"] > s1 * 1.8
           and res["hand_block"][1] > res["hand_rest"][1] + 15 and res["after_release"]["hand"][1] < res["hand_block"][1] - 10
@@ -4064,7 +4071,24 @@ def step_catacombs():
     ok = (res["tier_floors"] and res["key"] == "vel_morrath" and not res["final_boss_on"] and res["open2"] and res["open3"] and floors_ok and stairs_ok and walks_ok and placed_ok)
     step_result("catacombs", ok, floors_ok=floors_ok, stairs_ok=stairs_ok, walks_ok=walks_ok, placed_ok=placed_ok, **res)
 
-STEPS = {"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+def step_console():
+    """the game's own console: RDConsole's self-test (884's step_console says what it measures)"""
+    g = G["gen"]; res = {}
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.GameConsole 1")
+    con = unreal.RDConsole.get_console(g)
+    con.start_self_test(os.path.join(SHOTS, f"mw_{TAG}_console.txt"))
+    t0 = time.time()
+    while not con.get_self_test_result() and time.time() - t0 < 60: yield
+    txt = str(con.get_self_test_result())
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.GameConsole 0")
+    checks = {}
+    for ln in txt.splitlines():
+        q = ln.split("|", 3)
+        if q[0] == "check": checks[q[1]] = {"ok": q[2] == "ok", "what": q[3] if len(q) > 3 else ""}
+        elif q[0] == "note": res[q[1]] = q[2]
+    res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
+    step_result("console", bool(checks) and txt.strip().endswith("result|ok"), **res)
+STEPS = {"console": step_console, "catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,
