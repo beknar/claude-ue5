@@ -1,0 +1,464 @@
+{
+ "tag": "hv10",
+ "plan": [
+  "heaven",
+  "descendheaven"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "heaven",
+   "ok": true,
+   "site_km": [
+    114.1,
+    -110.9
+   ],
+   "from_kethrys_km": 56.0,
+   "tier_here": 25,
+   "tier_half_way_from_kethrys": 23,
+   "state": [
+    "5",
+    "Heaven",
+    "0",
+    "1",
+    "0",
+    "5.9",
+    "1",
+    "1",
+    "1",
+    "11410614",
+    "-11090579",
+    "0"
+   ],
+   "plan": 5,
+   "dungeon_level": "/Game/RandomDungeon/Maps/heaven_fortress",
+   "kinds": {
+    "temple": 1,
+    "tavern": 1,
+    "smithy": 1,
+    "store": 1,
+    "healer": 1,
+    "storehouse": 1,
+    "barracks": 1,
+    "chapel": 1,
+    "skyscraper": 9,
+    "office block": 12,
+    "shop": 12,
+    "home": 56,
+    "research facility": 1
+   },
+   "homes": {
+    "all": 56,
+    "burned": 0,
+    "boarded": 0
+   },
+   "facility": {
+    "label": "Kratos Aurorim Research, LLC",
+    "rooms": 2,
+    "from_middle_m": 16
+   },
+   "tallest_m": 101.1,
+   "dome_radius_m": 229.8,
+   "spots": {
+    "circle": 1,
+    "tower": 20,
+    "gate": 1,
+    "fountain": 1,
+    "traffic light": 36,
+    "street prop": 87,
+    "street light": 154,
+    "board": 1,
+    "lamp": 4,
+    "grave": 16,
+    "graveyard": 1,
+    "still": 1,
+    "altar": 1,
+    "bar": 1,
+    "smith": 1,
+    "counter": 1,
+    "basin": 1,
+    "stash": 1
+   },
+   "inside": {
+    "temple": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "tavern": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 3
+    },
+    "smithy": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 1
+    },
+    "store": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 20
+    },
+    "healer": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "storehouse": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 24
+    },
+    "barracks": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 9
+    },
+    "chapel": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "skyscraper": {
+     "n": 9,
+     "with_rooms": 9,
+     "with_door": 9,
+     "containers": 0
+    },
+    "office block": {
+     "n": 12,
+     "with_rooms": 12,
+     "with_door": 12,
+     "containers": 0
+    },
+    "shop": {
+     "n": 12,
+     "with_rooms": 12,
+     "with_door": 12,
+     "containers": 101
+    },
+    "home": {
+     "n": 56,
+     "with_rooms": 56,
+     "with_door": 56,
+     "containers": 145
+    },
+    "research facility": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 5
+    }
+   },
+   "containers": 312,
+   "doors": 104,
+   "piece_counts": {
+    "SM_HV_Road": 3787,
+    "SM_HV_Paving": 6591,
+    "SM_HV_Wall": 751,
+    "SM_HV_Window": 375,
+    "SM_HV_GlassWall": 253,
+    "SM_HV_Roof": 2716,
+    "SM_Module03_Tower01_MiddleFloors01": 61,
+    "SM_HV_LabWall": 217,
+    "SM_HV_Block": 1,
+    "SM_HV_CityWall": 1393,
+    "SM_MM00284_Exterior_Light_Streetlight": 154,
+    "SM_Stone_Wall": 0,
+    "SM_Castle_Stone_Wall_01a": 0,
+    "SM_Tower_Roof_01d": 0,
+    "SM_MM00406_Office_Desk": 88,
+    "SM_Prop_Table_A": 2
+   },
+   "static_gate": 0,
+   "grass": 0,
+   "sign": [
+    "KRATOS AURORIM RESEARCH, LLC"
+   ],
+   "dome_parts": 1,
+   "dome_past_buildings_m": 33.5,
+   "styles": [
+    "SM_HV2_Wall",
+    "SM_HV3_Wall",
+    "SM_HV_Wall"
+   ],
+   "cars": {
+    "n": 84,
+    "moving": 84,
+    "moved_m_median": 30.0
+   },
+   "cars_on_square": 0,
+   "cars_at_facility": 0,
+   "car_waits": {
+    "gap_m": 6.0,
+    "moved_m": 0.0,
+    "moved_after_m": 29.85
+   },
+   "roles": {
+    "Preacher": 1,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Refugee": 4,
+    "Elder": 1,
+    "Soldier": 5,
+    "Townsfolk": 49,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Worker": 33
+   },
+   "titles": [
+    "Chaplain Ruth Okonkwo",
+    "Director Cassia Vael",
+    "Dr. Abel Nwosu",
+    "Dr. Imre Solace",
+    "Lydia Marsh",
+    "Morris Haig",
+    "Nina Sato",
+    "Security Chief Dana Roarke",
+    "Teo Brask, armorer"
+   ],
+   "director": {
+    "found": true,
+    "said": "talk",
+    "panel": [
+     "What is Kratos Aurorim?",
+     "What is under the facility?",
+     "Quest: Past the Lobby",
+     "Farewell"
+    ]
+   },
+   "gate_without_key": "locked",
+   "gate_with_keys": "catacombs"
+  },
+  {
+   "step": "descendheaven",
+   "ok": true,
+   "set_town": {
+    "found_wear": 47.29999923706055,
+    "slash": [
+     "Ember Slash",
+     true
+    ],
+    "armour": "Plate Armour",
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true,
+    "quick": true
+   },
+   "down": {
+    "level": "heaven_fortress",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "POISON 1.6/s",
+     "WEAKENED -50%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     123,
+     123
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "fortress": {
+    "key": "heaven",
+    "title": "Kratos Aurorim Research",
+    "themes": [
+     "Facility",
+     "Facility",
+     "Facility",
+     "Facility",
+     "Mixed"
+    ],
+    "section": [
+     0,
+     0
+    ],
+    "return_line": "button|Return to Heaven",
+    "return_town": "Heaven",
+    "defender_kinds": {
+     "Kratos_Trooper": true,
+     "Kratos_Guard": true,
+     "Kratos_Operative": true,
+     "Kratos_Commander": true,
+     "Kratos_Tank": true
+    }
+   },
+   "enter_counter": 1,
+   "defender_clips": {
+    "Kratos_Commander": {
+     "bones_moved_cm": 9.32,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Guard": {
+     "bones_moved_cm": 1.59,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Operative": {
+     "bones_moved_cm": 16.46,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Tank": {
+     "bones_moved_cm": 2.47,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Trooper": {
+     "bones_moved_cm": 48.75,
+     "moving": true,
+     "parts": 0
+    }
+   },
+   "defenders_spawned": 5,
+   "shooting": {
+    "fired": 2,
+    "times": [
+     2.98,
+     10.18
+    ],
+    "on_her": 2,
+    "hp_lost": 10.8,
+    "theme": "Kratos_Trooper",
+    "pictured": true
+   },
+   "set_tower": {
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true
+   },
+   "up": {
+    "level": "brokenspire",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "SLOWED -60%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     125,
+     125
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "back": {
+    "town": "Heaven",
+    "from_return_at_m": 0.0,
+    "from_facility_door_m": 2.5
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_hv10_hv_street.png",
+  "bs_hv10_hv_facility.png",
+  "bs_hv10_hv_skyline.png",
+  "bs_hv10_hv_skyline_night.png",
+  "bs_hv10_hv_skyscraper.png",
+  "bs_hv10_hv_shop.png",
+  "bs_hv10_hv_office.png",
+  "bs_hv10_hv_gate.png",
+  "bs_hv10_hv_fortress_start.png",
+  "bs_hv10_hv_defenders.png",
+  "bs_hv10_hv_shot.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

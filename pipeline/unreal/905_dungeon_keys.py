@@ -10,7 +10,7 @@ import unreal, os, json, gc
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 CHAIN = os.path.join(REPO, "claude_ue5", "SourceArt", "dungeons", "chain.json")
 MAPS = "/Game/RandomDungeon/Maps/"
-GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire")
+GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
 REPORT = []

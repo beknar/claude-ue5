@@ -1,0 +1,314 @@
+{
+ "tag": "hv13",
+ "plan": [
+  "port"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "port",
+   "ok": true,
+   "site_km": [
+    197.4,
+    0.0
+   ],
+   "sea_north_m": 700,
+   "state": [
+    "2",
+    "Graymourne",
+    "0",
+    "1",
+    "0",
+    "7.1",
+    "1",
+    "1",
+    "1",
+    "19740000",
+    "0",
+    "0"
+   ],
+   "plan": 3,
+   "dungeon_level": "/Game/RandomDungeon/Maps/sewers",
+   "kinds": {
+    "temple": 1,
+    "tavern": 1,
+    "smithy": 1,
+    "store": 1,
+    "healer": 1,
+    "storehouse": 1,
+    "barracks": 1,
+    "chapel": 1,
+    "warehouse": 4,
+    "home": 107,
+    "sluice house": 1
+   },
+   "homes": {
+    "all": 107,
+    "burned": 3,
+    "boarded": 31
+   },
+   "sluice_house": {
+    "label": "The Sluice House",
+    "rooms": 1,
+    "from_middle_m": 14
+   },
+   "spots": {
+    "circle": 1,
+    "mill": 1,
+    "tower": 23,
+    "gate": 1,
+    "well": 1,
+    "board": 1,
+    "stall": 4,
+    "lamp": 4,
+    "grave": 16,
+    "graveyard": 1,
+    "tent": 3,
+    "pier": 5,
+    "ship": 5,
+    "boat": 5,
+    "wreck": 2,
+    "body": 14,
+    "gibbet": 3,
+    "dock props": 4,
+    "still": 1,
+    "altar": 1,
+    "bar": 1,
+    "smith": 1,
+    "counter": 1,
+    "basin": 1,
+    "stash": 1
+   },
+   "inside": {
+    "temple": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "tavern": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 5
+    },
+    "smithy": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "store": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 19
+    },
+    "healer": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 6
+    },
+    "storehouse": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 14
+    },
+    "barracks": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 14
+    },
+    "chapel": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "warehouse": {
+     "n": 4,
+     "with_rooms": 4,
+     "with_door": 4,
+     "containers": 131
+    },
+    "home": {
+     "n": 104,
+     "with_rooms": 104,
+     "with_door": 104,
+     "containers": 491
+    },
+    "sluice house": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    }
+   },
+   "containers": 680,
+   "doors": 136,
+   "piece_counts": {
+    "SM_Gangway_01": 80,
+    "SM_Pier_Pilings_01a": 80,
+    "SM_Mooring_post_NN_01h": 10,
+    "SM_VikingBoat_01a": 5,
+    "SM_SmallBoat": 5,
+    "SM_BrokenShip": 2,
+    "SM_Dead_Pirate_01c": 9,
+    "SM_Dead_Pirate_01d": 5,
+    "SM_Gibbet_A": 3,
+    "SM_FishRack_SM_FishRack_Wood": 4,
+    "SM_FishRack_SM_FishRack_Fish": 4,
+    "SM_BigFishNet": 4,
+    "SM_Crab_Cages_01a": 4,
+    "SM_Sewer_Tube_Gate_01a": 1
+   },
+   "harbour_water": [
+    "HarbourWater"
+   ],
+   "roles": {
+    "Preacher": 1,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 4,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Refugee": 4,
+    "Sailor": 10,
+    "Fisher": 4,
+    "Elder": 1,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Soldier": 3,
+    "Dockhand": 8,
+    "Townsfolk": 71
+   },
+   "titles": [
+    "Coroner Thaddeus Pell",
+    "Harbourmaster Edda Strand",
+    "Mags Fennick",
+    "Mother Wren of the Tides",
+    "Old Gull",
+    "Osric Tarr",
+    "Rosamund Brine",
+    "Sister Morwenna",
+    "Watch-Captain Bram Hollow"
+   ],
+   "harbourmaster": {
+    "found": true,
+    "said": "talk",
+    "panel": [
+     "Where do the bodies come from?",
+     "What is under the town?",
+     "How do I get down?",
+     "Quest: Down the Old Grate",
+     "Farewell"
+    ]
+   },
+   "port_fog": 1.0,
+   "port_fog_wait_s": 0.8,
+   "fog": [
+    {
+     "start_m": 5.0,
+     "density": 0.18
+    }
+   ],
+   "pier_walk": {
+    "z_on_deck": 91,
+    "z_min_pushed": 91,
+    "on_ground": true
+   },
+   "pier_push": [
+    {
+     "side": 1.0,
+     "off_middle_m": 2.49,
+     "z": 91
+    },
+    {
+     "side": -1.0,
+     "off_middle_m": 2.49,
+     "z": 91
+    }
+   ],
+   "on_pier": {},
+   "harbour_edges": {
+    "+x": {
+     "edges": 102,
+     "land_dip_cm": -0.0,
+     "dipped": 0
+    },
+    "+y": {
+     "edges": 25,
+     "land_dip_cm": -13.9,
+     "dipped": 0
+    },
+    "-y": {
+     "edges": 25,
+     "land_dip_cm": -5.2,
+     "dipped": 0
+    }
+   },
+   "deck_edges": {
+    "-y": {
+     "edges": 80,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    },
+    "+y": {
+     "edges": 80,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    },
+    "+x": {
+     "edges": 10,
+     "land_dip_cm": 0.0,
+     "dipped": 0
+    }
+   },
+   "edge_push": {
+    "+x": {
+     "from_line_m": -0.51,
+     "z0": 85,
+     "z": 85,
+     "z_min": 85
+    },
+    "+y": {
+     "from_line_m": -0.51,
+     "z0": 85,
+     "z": 85,
+     "z_min": 85
+    },
+    "-y": {
+     "from_line_m": -0.51,
+     "z0": 82,
+     "z": 85,
+     "z_min": 82
+    }
+   },
+   "gate_from_sluice_m": 14,
+   "gate_travel": "catacombs"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_hv13_gm_harbour.png",
+  "bs_hv13_gm_quay.png",
+  "bs_hv13_gm_mouth.png",
+  "bs_hv13_gm_edge_px.png",
+  "bs_hv13_gm_edge_py.png",
+  "bs_hv13_gm_edge_my.png",
+  "bs_hv13_gm_dead.png",
+  "bs_hv13_gm_sewer_gate.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

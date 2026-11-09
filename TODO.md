@@ -1,6 +1,6 @@
 # TODO
 
-[README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md) · [Vel Morrath](docs/levels/vel_morrath.md) · [Ashenreach](docs/levels/ashenreach.md) · [Graymourne](docs/levels/graymourne.md) · [Kethrys Spire](docs/levels/kethrys_spire.md)
+[README](README.md) · [The wilderness](docs/levels/wilderness.md) · [Brokenspire](docs/levels/brokenspire.md) · [Vel Morrath](docs/levels/vel_morrath.md) · [Ashenreach](docs/levels/ashenreach.md) · [Graymourne](docs/levels/graymourne.md) · [Kethrys Spire](docs/levels/kethrys_spire.md) · [Heaven](docs/levels/heaven.md)
 
 What is still to be tested and done, and the known limits. Written 2026-11-03 for the wilderness and the castle's final boss (the user's spec of 2026-11-03, [docs/wilderness.txt](docs/wilderness.txt)), merged that day in PR #16. Remove an item when a test shows it working or the work lands; add one when a limit is found.
 
@@ -24,7 +24,7 @@ Done in phases, a PR each ([Brokenspire](docs/levels/brokenspire.md#the-list-of-
 
 - [ ] **The farms, what is not measured:** five of 29 croft yards in the probe's 5 km have no farmstead (on a slope or a road: their yard stays grass); the farmhouses and barns are whole meshes (not entered); the farm folk do not walk, sleep or go in at night; the furrows between strips are drawn as soil but the 2 m ground grid softens them at a distance; the frame rate in a farmstead's chunk (29 props, 8 or 9 animals, 4 people) not compared with the fields'; the farmsteads' pieces in the packaged game (`869`: the Lake Village's and the castle kit's materials need the instanced-mesh usage? they are placed as single components, not instances) not checked.
 - [ ] **Phase 3, the dungeons' keys, what is not done or measured:** built and tested (`884 keys9`, `868 finalboss`). The dungeons' own tier bands (Vel Morrath 5-10, Ashenreach 10-15, Graymourne 15-20, Kethrys Spire 20-25, Heaven 25) wait for the rebalance (phase 5): each dungeon still runs its tiers 1 to 5, and the roads' monsters past tier 5 fight at tier 5's strength. Vel Morrath's, Ashenreach's and Graymourne's last tier's bosses dropping the next key is measured only through the same drop called in Brokenspire (`keys9`), not by killing them in their dungeons. The keys and maps have no pictures (the inventory shows their names). The packaged game with the keys (its runs that go down take `-RDAllKeys`) not packaged yet.
-- [ ] **Phase 4, Kethrys Spire and Heaven** with their dungeons: Kethrys Spire and its tower's dungeon are built and tested ([its section](#kethrys-spire-and-its-tower-2026-11-08b-docslevelskethrys_spiremd)); Heaven (a modern city in a shimmering shield) and its fortress behind "Kratos Aurorim Research, LLC" are still to come.
+- [ ] **Phase 4, Kethrys Spire and Heaven** with their dungeons: Kethrys Spire and its tower's dungeon are built and tested ([its section](#kethrys-spire-and-its-tower-2026-11-08b-docslevelskethrys_spiremd)); Heaven and its fortress behind "Kratos Aurorim Research, LLC" are built and tested ([its section](#heaven-and-its-fortress-2026-11-09-docslevelsheavenmd)).
 - [ ] **Phase 5, the rebalance to tier 25:** a Mage spell a tier and more made up, the Summoner's, Rogue's and Martial Artist's abilities after Mistward, armour and weapons over the five other dungeons, the monsters spread from Brokenspire to Heaven (the dungeons' bosses later).
 - [ ] **Phase 6, the secondary abilities** earned with Angel Tokens made from the wilderness's materials (six a hero, six ranks).
 - [ ] **Phase 7, the wilderness's places every ~40 s** (the list's kinds, mixed, by visibility and region, some on the roads).
@@ -85,6 +85,19 @@ Built and tested (`884 forge`, `descendwar`); still to test or do:
 - [ ] **The square's frame rate settled:** 5 to 7 just after the city was built round her; the casting hall 22 to 24.
 - [ ] **Embers in the burned plain's air:** the swarms table has none for it.
 - [ ] **The packaged game played:** the Shipping package of 2026-11-07 (`builds\graymourne`) goes down into `war_engine` (`-RDTownGo=dungeon:ashenreach`) and out to the city (`town:ashenreach`) and runs in each, no crash; `869` set the instanced-mesh usage on the city's new pieces (the barricade, the ore carts) and the skeletal-mesh usage on the iron golem's rusted iron. The Development package from the same cook (`builds\graymourne_dev`) logged no "missing usage flag" in the city or the first hall (the deeper tiers' pieces are checked only by `869`'s tables); no picture taken in it, and the gate, the deeper tiers and the way back have not been played in it.
+
+## Heaven and its fortress (2026-11-09, [docs/levels/heaven.md](docs/levels/heaven.md))
+
+Built and tested (`884 heaven`, `descendheaven`; `888 world`, `towns`, all with `-Light`); still to test or do:
+
+- [ ] **The fortress past its first hall:** tiers 2 to 5 (the steel halls, the mixed) and the machines by the walls have not been visited; nor a tier's boss fought. The start hall keeps the castle's great-hall furniture (throne, carpet, banners, columns); its white floors read over-bright.
+- [ ] **The defenders fought:** each kind spawned and its clips measured playing, a trooper's rounds measured reaching her; none fought hand to hand, the tank (a tank's idle for its walk and death) not seen moving or dying.
+- [ ] **The towers' upper floors and the office blocks' upper storeys** are seen from outside only (no floors or stairs inside); no window is lit at night.
+- [ ] **The cars' wheels do not turn** (each car one merged mesh); they turn back at a street's end by changing lanes at once; they do not stop at crossings or for townsfolk, only for her and each other.
+- [ ] **The trades keep the town's signs and furnishing** (SMITHY, TAVERN, a hearth in a kitchen); the refugees about the gate wear the town's clothes; the square's lamps are fire baskets; the traffic lights show no changing light.
+- [ ] **Its quests taken and turned in**, the counters `heaven:tier`, `:kills`, `:boss` read after a fight.
+- [ ] **The city's frame rate settled:** 13 to 26 a second just after the city was built round her (a play window of 1280 x 720).
+- [ ] **The packaged game:** `869` and `package_mistward.ps1` name `heaven_fortress` and its run down from the city (`-RDTownGo=dungeon:heaven`); not packaged yet. The merged meshes and the materials made by `908` need the instanced-mesh usage (`M_HV_Surface` has it).
 
 ## Kethrys Spire and its tower (2026-11-08b, [docs/levels/kethrys_spire.md](docs/levels/kethrys_spire.md))
 

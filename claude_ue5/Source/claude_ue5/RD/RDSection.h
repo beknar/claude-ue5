@@ -267,6 +267,19 @@ public:
 	FVector TownGate = FVector::ZeroVector, TownGateOut = FVector::ZeroVector, MistgateAt = FVector::ZeroVector, MistgateNormal = FVector::ZeroVector;
 	/** Kethrys Spire's black tower: the top of its round tower (cm over the town's ground; 0 none) (tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Town") float TowerTopZ = 0.f;
+	/** Heaven: its tallest tower's top (cm over the town's ground) and its shield's radius (cm; 0 none) (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Town") float HeavenTallestZ = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Town") float HeavenDomeRadius = 0.f;
+	/** Heaven's traffic: a car driving one street's lane, turning back into the other lane at the street's end */
+	struct FRDHeavenCar
+	{
+		TWeakObjectPtr<USceneComponent> C;
+		FVector L0 = FVector::ZeroVector, L1 = FVector::ZeroVector;      // (the street's middle line, its ends)
+		float Lane = 220.f, S = 0.f, Speed = 900.f;
+		int32 Street = 0;          // (its street: a car checks only the cars of its street ahead of it)
+		bool bFwd = true;
+	};
+	TArray<FRDHeavenCar> HeavenCars;
 	int32 CastleHallRoom = -1, CastleBld = -1;
 	/** the castle's round corner towers (the user's of 2026-11-02: medieval walls, not the dungeon's arches): their middles
 	 *  (world, z 0), which of them holds the stair up to the wall walk (-1 none), its ground door and its door onto the walk */
@@ -534,6 +547,14 @@ private:
 	void SpireShell(int32 BI);
 	void MageSpotBuild(const FTownSpot& Sp);
 	void MageLabBuild(int32 BI);
+	/** Heaven's modern city (the list of 2026-11-08b, RDHeaven.cpp): the research facility, a flat roof (a tower's floors over
+	 *  its lobby), the streets' asphalt and paving, a street light or a street's furniture, the shield and the traffic */
+	void ResearchShell(int32 BI);
+	void ModernRoof(int32 BI, float Top);
+	void HeavenStreets();
+	void HeavenSpotBuild(const FTownSpot& Sp);
+	void HeavenWorks();
+	void TickHeavenCars(float Dt, const FVector& Her);
 	void ForgeAnvilBuild(const FTownSpot& Sp);
 	void OpenForgeBuild(const FTownSpot& Sp, bool bWork = true);
 	void OreCartBuild(const FTownSpot& Sp);

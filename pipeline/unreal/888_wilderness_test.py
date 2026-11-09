@@ -117,7 +117,7 @@ def step_world():
     st = state(); res["state"] = st
     T = towns(); res["towns"] = T
     W = CONT["xn"] - CONT["xs"]
-    b = T.get("Brokenspire"); a = T.get("Ashenreach"); gm = T.get("Graymourne"); vm = T.get("Vel Morrath"); ks = T.get("Kethrys Spire")
+    b = T.get("Brokenspire"); a = T.get("Ashenreach"); gm = T.get("Graymourne"); vm = T.get("Vel Morrath"); ks = T.get("Kethrys Spire"); hv = T.get("Heaven")
     chk = {}
     if b:
         chk["brokenspire_mid_south"] = 0.15 < (b["x"] - CONT["xs"]) / W < 0.42 and abs(b["y"]) < 0.15 * W
@@ -138,6 +138,10 @@ def step_world():
         # (the list of 2026-11-08b: Kethrys Spire north-west of Graymourne, inland, 60 to 120 km from it; PR #32's review)
         res["kethrys_from_graymourne_km"] = round(math.hypot(ks["x"] - gm["x"], ks["y"] - gm["y"]) / 1000.0, 1)
         chk["kethrys_north_west_inland"] = ks["x"] < gm["x"] and ks["y"] < gm["y"] - 30000 and 60 <= res["kethrys_from_graymourne_km"] <= 120 and int(sample(ks["x"], ks["y"])["water"]) == 0
+    if hv and ks:
+        # (the list of 2026-11-08b: Heaven past Kethrys Spire, south-west of it, inland, 40 to 110 km from it)
+        res["heaven_from_kethrys_km"] = round(math.hypot(hv["x"] - ks["x"], hv["y"] - ks["y"]) / 1000.0, 1)
+        chk["heaven_past_kethrys_inland"] = hv["x"] < ks["x"] and hv["y"] < ks["y"] and 40 <= res["heaven_from_kethrys_km"] <= 110 and int(sample(hv["x"], hv["y"])["water"]) == 0
     res["checks"] = chk
     # the templates' census
     bl = {}
@@ -165,7 +169,7 @@ def step_world():
                         "town_range_not_towns": sorted(i for i, v in ids.items() if i >= TOWN_ID and any(k not in ("town", "city") for k, _ in v))[:5],
                         "shared": sorted(i for i, v in ids.items() if len(v) > 1)[:5]}
     pid = res["place_ids"]
-    ok = st.get("ready") == 1 and all(chk.values()) and len(chk) == (7 if ks else 6) and not res["missing_templates"] and res["rivers"] >= 8 and res["lakes"] >= 5 and len(res["roads"]) >= (5 if ks else 4) \
+    ok = st.get("ready") == 1 and all(chk.values()) and len(chk) == 6 + (1 if ks else 0) + (1 if hv and ks else 0) and not res["missing_templates"] and res["rivers"] >= 8 and res["lakes"] >= 5 and len(res["roads"]) >= 4 + (1 if ks else 0) + (1 if hv else 0) \
         and pid["count"] > 20 and pid["north"] > 0 and not pid["town_range_not_towns"] and not pid["shared"]
     step_result("world", ok, **res)
 

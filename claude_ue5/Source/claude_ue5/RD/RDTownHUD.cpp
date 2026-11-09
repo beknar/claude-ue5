@@ -53,6 +53,10 @@ static FName RDTIconOf(uint8 Kind, uint8 State)
 	case TK_Laboratory: return TEXT("mapicon_witch");
 	case TK_Study: return TEXT("mapicon_witch");
 	case TK_Meditation: return TEXT("mapicon_witch");
+	case TK_Research: return TEXT("mapicon_castle");            // (Heaven's: the castle's, the barracks' and the store's pictures)
+	case TK_SkyTower: return TEXT("mapicon_barracks");
+	case TK_Office: return TEXT("mapicon_storehouse");
+	case TK_Shop: return TEXT("mapicon_store");
 	default: return State == 1 ? FName(TEXT("mapicon_burned")) : State == 2 ? FName(TEXT("mapicon_boarded")) : FName(TEXT("mapicon_home"));
 	}
 }
@@ -83,6 +87,10 @@ static FString RDTLabelOf(uint8 Kind)
 	case TK_Laboratory: return TEXT("LABORATORY");
 	case TK_Study: return TEXT("STUDY");
 	case TK_Meditation: return TEXT("MEDITATION");
+	case TK_Research: return TEXT("KRATOS AURORIM RESEARCH, LLC · the facility");
+	case TK_SkyTower: return TEXT("TOWER");
+	case TK_Office: return TEXT("OFFICES");
+	case TK_Shop: return TEXT("SHOP");
 	default: return FString();
 	}
 }
@@ -677,6 +685,10 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		case TK_SluiceHouse: case TK_Warehouse: Nm = TEXT("mapc_storehouse"); break;
 		case TK_Spire: Nm = TEXT("mapc_castle"); break;
 		case TK_Library: case TK_Laboratory: case TK_Study: case TK_Meditation: Nm = TEXT("mapc_witch"); break;
+		case TK_Research: Nm = TEXT("mapc_castle"); break;
+		case TK_SkyTower: Nm = TEXT("mapc_barracks"); break;
+		case TK_Office: Nm = TEXT("mapc_storehouse"); break;
+		case TK_Shop: Nm = TEXT("mapc_store"); break;
 		default: Nm = Bd.State == 1 ? FName(TEXT("mapc_burned")) : Bd.State == 2 ? FName(TEXT("mapc_boarded")) : Bd.Style == 1 ? FName(TEXT("mapc_home3")) : Bd.Style == 2 ? FName(TEXT("mapc_home1")) : FName(TEXT("mapc_home2")); break;
 		}
 		const float Grow = Bd.Kind == TK_Castle ? 1.12f : Bd.Kind == TK_Home ? 1.3f : 1.22f;

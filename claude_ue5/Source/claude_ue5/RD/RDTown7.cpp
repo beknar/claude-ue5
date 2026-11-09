@@ -106,6 +106,7 @@ void ARDSection::TownLiftPlan()
 float ARDSection::TownLiftAt(const FVector2D& World) const
 {
 	if (!Generator || TownLiftW.Num() != N * N || N <= 0) return 0.f;
+	if (Generator->TownPlan == 5) return 0.f;          // (Heaven: paved, flat)
 	const float M = Generator->TileSize;
 	const FVector L = GetActorLocation();
 	const float Lx = World.X - L.X, Ly = World.Y - L.Y;

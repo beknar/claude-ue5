@@ -87,6 +87,10 @@ def put(at, yaw=None, z=None):
     if yaw is not None:
         p.set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=yaw))
 def dist2(a, b): return math.hypot(a.x - b.x, a.y - b.y)
+def md(m):
+    """an unreal.Map as a dict with str keys (868's)"""
+    try: return {str(k): v for k, v in m.items()}
+    except Exception: return {}
 def place(what):
     r = G["gen"].get_town_place(what)
     return r if isinstance(r, unreal.Vector) else None
@@ -2297,6 +2301,8 @@ def step_spire():
     caul = ism_instances("SM_Cauldron", "CauldronFX"); pots = ism_instances("SM_S_Potion"); stones = ism_instances("SM_Rune_01a")
     res["labs"] = [{"cauldron": in_bld(caul, b["i"]), "potions": in_bld(pots, b["i"])} for b in B if b["kind"] == "laboratory" and b["state"] == 0]
     res["chambers"] = [in_bld(stones, b["i"]) for b in B if b["kind"] == "meditation chamber" and b["state"] == 0]
+    # (no shut gate's mesh standing in the open gateway of a town in the wilds: PR #33's review found one in every wild town)
+    res["static_gate"] = len(ism_instances("SM_Main_Gate_03a"))
     res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_TowerRound_Window_8m_A", "SM_TowerRound_Border_Top_A", "SM_TowerRound_Cap_4m_A", "SM_IceCrystal01", "SM_StatuePlinth",
                                                               "SM_Cauldron", "SM_Kit_PrepTable", "SM_S_Potion", "SM_Rune_01a")}
     # (the upper storeys' lights that move: each read twice, 2 s apart; how far each went round, how high the lowest stands)
@@ -2360,7 +2366,7 @@ def step_spire():
         g.debug_all_dungeon_keys(True)
     quiet(False)
     k = kinds; pc = res["piece_counts"]
-    ok = (res["north_west"] and 60 <= res["from_graymourne_km"] <= 120 and res["tier_here"] == 20 and 16 <= res["tier_half_way_from_graymourne"] <= 19
+    ok = (res["north_west"] and res["static_gate"] == 0 and 60 <= res["from_graymourne_km"] <= 120 and res["tier_here"] == 20 and 16 <= res["tier_half_way_from_graymourne"] <= 19
           and res["plan"] == 4 and tw is not None and res["tower"]["rooms"] == 2 and res["tower"]["from_middle_m"] < 120 and res["tower"]["top_m"] >= 50
           and "kethrys_spire" in res["dungeon_level"] and k.get("library", 0) >= 2 and k.get("laboratory", 0) >= 2 and k.get("study", 0) >= 1 and k.get("meditation chamber", 0) >= 1
           and res["window_lights"]["n"] >= 2 and res["window_lights"]["moved_cm_min"] > 50 and res["window_lights"]["lowest_m"] > res["tower"]["top_m"] * 0.4
@@ -2374,6 +2380,156 @@ def step_spire():
           and "Archmage Velis Kethran" in res["titles"] and "Aldric Venn" not in res["titles"]
           and any("Hundred Years" in str(p) for p in res["archmage"]["panel"]) and res.get("gate_without_key") == "locked" and res.get("gate_with_keys") == "catacombs")
     step_result("spire", ok, **res)
+
+def step_heaven():
+    """Heaven (the list of 2026-11-08b's fourth phase: "a modern city that is surrounded by a shimmering shield ... modern
+    skyscrapers, office buildings, modern shops, modern streets, modern vehicles navigating the streets ... the outside and
+    entrance of the dungeon is a foreboding research facility called 'Kratos Aurorim Research, LLC'"): south-west of Kethrys
+    Spire, the road's tier 25 there; built as she comes, the modern plan: the research facility at its middle (its two rooms, its
+    name over its door, the dark glass block over its hall), towers (a lobby walked into and floors over it), office blocks,
+    shops, apartments, the trades; every building's rooms, doors and containers; the straight streets in asphalt, the rest paved,
+    no grass; street lights and furniture by the streets; the shield over the whole town (its radius past the outline's farthest
+    corner); cars on the streets, each moving, one that waits while she stands in its lane ahead of it and goes on when she
+    leaves it; its people its own (the director, the scientist, the security chief, office workers, clerks, guards) and
+    Brokenspire's elder not among them; the director's panel with the first quest; the security door at the hall's far wall
+    refused without the Kratos Keycard and opened with it (dry runs); pictures of the facility's front, a street with its cars, the
+    skyline from beyond the wall under the shield, a skyscraper's lobby, a shop, the security door; traffic lights at the
+    streets' crossings; no car on the square or at the facility's door"""
+    g = G["gen"]; res = {}
+    ti, x, y = town_of("Heaven")
+    tk, kx, ky = town_of("Kethrys Spire")
+    res["site_km"] = [round(x / 1000, 1), round(y / 1000, 1)]; res["from_kethrys_km"] = round(math.hypot(x - kx, y - ky) / 1000, 1)
+    res["tier_here"] = g.get_wild_tier_at(x, y); res["tier_half_way_from_kethrys"] = g.get_wild_tier_at((x + kx) / 2, (y + ky) / 2)
+    ti, x, y = yield from to_town("Heaven")
+    st = str(g.get_wild_town_state()).split("|"); res["state"] = st
+    res["plan"] = g.get_editor_property("town_plan")
+    res["dungeon_level"] = str(g.current_dungeon_level())
+    S = section(); B = blds()
+    kinds = {}
+    for b in B: kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
+    res["kinds"] = kinds
+    homes = [b for b in B if b["kind"] == "home"]
+    res["homes"] = {"all": len(homes), "burned": sum(1 for b in homes if b["state"] == 1), "boarded": sum(1 for b in homes if b["state"] == 2)}
+    rf = next((b for b in B if b["kind"] == "research facility"), None)
+    res["facility"] = {"label": rf["label"], "rooms": rf["rooms"], "from_middle_m": round(math.hypot(rf["c"].x / 100 - x, rf["c"].y / 100 - y))} if rf else None
+    res["tallest_m"] = round(S.get_editor_property("heaven_tallest_z") / 100, 1)
+    res["dome_radius_m"] = round(S.get_editor_property("heaven_dome_radius") / 100, 1)
+    sk = {}
+    for p in spots(): sk[p["kind"]] = sk.get(p["kind"], 0) + 1
+    res["spots"] = sk
+    n_cont = S.get_num_containers()
+    conts = [S.get_container_location(i) for i in range(n_cont)]
+    doors = [S.get_door_location(i) for i in range(S.get_num_doors())]
+    per = {}
+    for b in B:
+        k = b["kind"]; e = per.setdefault(k, {"n": 0, "with_rooms": 0, "with_door": 0, "containers": 0})
+        e["n"] += 1; e["with_rooms"] += 1 if b["rooms"] > 0 else 0
+        e["with_door"] += 1 if any(dist2(d, b["door"]) < 250 for d in doors) else 0
+        e["containers"] += sum(1 for c in conts if S.town_building_at(c) == b["i"])
+    res["inside"] = per; res["containers"] = n_cont; res["doors"] = len(doors)
+    res["piece_counts"] = {n: len(ism_instances(n)) for n in ("SM_HV_Road", "SM_HV_Paving", "SM_HV_Wall", "SM_HV_Window", "SM_HV_GlassWall", "SM_HV_Roof", "SM_Module03_Tower01_MiddleFloors01",
+                                                              "SM_HV_LabWall", "SM_HV_Block", "SM_HV_CityWall", "SM_MM00284_Exterior_Light_Streetlight", "SM_Stone_Wall", "SM_Castle_Stone_Wall_01a",
+                                                              "SM_Tower_Roof_01d", "SM_MM00406_Office_Desk", "SM_Prop_Table_A")}
+    res["static_gate"] = len(ism_instances("SM_Main_Gate_03a"))
+    # (no grass: the town's short grass clumps)
+    res["grass"] = len(ism_instances("Grass"))
+    signs = S.get_components_by_tag(unreal.TextRenderComponent, "HeavenSign")
+    res["sign"] = [str(c.get_editor_property("text")) for c in signs]
+    # (the shield: its middle and radius against the outline's farthest corner)
+    dome = S.get_components_by_tag(unreal.StaticMeshComponent, "HeavenDome")
+    res["dome_parts"] = len(dome)
+    if dome:
+        dc = dome[0].get_world_location()
+        res["dome_past_buildings_m"] = round((S.get_editor_property("heaven_dome_radius") - max(dist2(b["c"], dc) for b in B)) / 100, 1)
+    res["styles"] = sorted({str(x) for x in ism_instances("SM_HV_Wall")} and [n for n in ("SM_HV_Wall", "SM_HV2_Wall", "SM_HV3_Wall") if ism_instances(n)])
+    # (the traffic: every car read twice 3 s apart; how far each went)
+    def cars(): return [c for c in S.get_components_by_tag(unreal.StaticMeshComponent, "HeavenCar")]
+    c0 = cars(); p0 = [c.get_world_location() for c in c0]
+    yield from wait(3.0)
+    p1 = [c.get_world_location() for c in c0]
+    moved = [dist2(a, b) for a, b in zip(p0, p1)]
+    res["cars"] = {"n": len(c0), "moving": sum(1 for m in moved if m > 300), "moved_m_median": round(sorted(moved)[len(moved) // 2] / 100, 1) if moved else 0}
+    # (PR #33's review: no car on the square or at the facility's door: the main road and the cross road through the square
+    # carry none)
+    sqp = place("square"); fdoor = place("castle door")
+    res["cars_on_square"] = sum(1 for q in p0 + p1 if sqp and dist2(q, sqp) < 2200.0)
+    res["cars_at_facility"] = sum(1 for q in p0 + p1 if fdoor and dist2(q, fdoor) < 1500.0)
+    # (a car waits for her: she stands 6 m ahead of a moving one in its lane; it must not come within 3 m of her in 2.5 s; then she
+    # steps off the street and it goes on)
+    if c0:
+        k = max(range(len(c0)), key=lambda i: moved[i])
+        c = c0[k]; a = c.get_world_location(); fw = c.get_forward_vector()
+        # (the car mesh's forward is its pivot's: the pivot is turned to its way)
+        piv = c.get_attach_parent(); fw = piv.get_forward_vector() if piv else fw
+        her = V(a.x + fw.x * 600.0, a.y + fw.y * 600.0, 0)
+        quiet(True); put(her, yaw=math.degrees(math.atan2(-fw.y, -fw.x))); yield from wait(2.5)
+        b = c.get_world_location()
+        res["car_waits"] = {"gap_m": round(dist2(b, G["pawn"].get_actor_location()) / 100, 2), "moved_m": round(dist2(a, b) / 100, 2)}
+        put(V(her.x + fw.y * 900.0, her.y - fw.x * 900.0, 0)); yield from wait(2.5)
+        res["car_waits"]["moved_after_m"] = round(dist2(b, c.get_world_location()) / 100, 2)
+        # (a picture of the street from the pavement, the car in it)
+        put(V(b.x + fw.y * 700.0, b.y - fw.x * 700.0, 0), yaw=math.degrees(math.atan2(-fw.x * 0.3 - fw.y, fw.x - fw.y * 0.3)))
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=math.degrees(math.atan2(b.y - G["pawn"].get_actor_location().y, b.x - G["pawn"].get_actor_location().x))))
+        yield from wait(1.5); shot("hv_street"); yield from rwait(1.2)
+    F = folk(); roles = {}
+    for f in F: roles[f["role"]] = roles.get(f["role"], 0) + 1
+    res["roles"] = roles; res["titles"] = sorted({f["title"] for f in F if f["role"] in ("Elder", "Scholar", "Captain", "Priest", "Smith", "Trader", "Healer", "Keeper", "Innkeeper")})
+    quiet(True)
+    am = talk_to("Elder"); yield from wait(0.4)
+    said = str(g.interact_nearest(G["pawn"].get_actor_location())) if am else None; yield from rwait(0.5)
+    res["director"] = {"found": am is not None, "said": said, "panel": [p[1] for p in panel()][:8]}
+    g.close_town_panel(); yield from wait(0.3)
+    mg = place("mistgate"); door = place("castle door")
+    if door and rf:
+        yaw = math.degrees(math.atan2(rf["c"].y - door.y, rf["c"].x - door.x))
+        bk = V(door.x - math.cos(math.radians(yaw)) * 2000.0, door.y - math.sin(math.radians(yaw)) * 2000.0, 0)
+        put(bk, yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=8, yaw=yaw)); yield from wait(1.2)
+        shot("hv_facility"); yield from rwait(1.2)
+    # (the skyline from out beyond the wall, the shield over it)
+    gate = place("gate")
+    if gate and rf:
+        yaw = math.degrees(math.atan2(rf["c"].y - gate.y, rf["c"].x - gate.x))
+        out = V(gate.x - math.cos(math.radians(yaw)) * 9000.0, gate.y - math.sin(math.radians(yaw)) * 9000.0, 0)
+        g.wild_put_her(out.x / 100.0, out.y / 100.0); yield from wait(3.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=12, yaw=yaw)); G["pawn"].set_actor_rotation(unreal.Rotator(roll=0, pitch=0, yaw=yaw), True); yield from wait(1.5)
+        shot("hv_skyline"); yield from rwait(1.2)
+        h_was = g.get_town_hour(); g.set_town_hour(22.0); yield from wait(5.0)
+        shot("hv_skyline_night"); yield from rwait(1.2)
+        g.set_town_hour(h_was); yield from wait(1.0)
+    for kd in ("skyscraper", "shop", "office block"):
+        b = next((b for b in B if b["kind"] == kd and b["state"] == 0), None)
+        if b:
+            yaw = math.degrees(math.atan2(b["c"].y - b["door"].y, b["c"].x - b["door"].x))
+            put(V(b["door"].x + math.cos(math.radians(yaw)) * 150.0, b["door"].y + math.sin(math.radians(yaw)) * 150.0, 0), yaw=yaw)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=yaw)); yield from wait(1.0)
+            shot(f"hv_{kd.split()[0]}"); yield from rwait(1.2)
+    if mg and rf:
+        yaw = math.degrees(math.atan2(mg.y - rf["c"].y, mg.x - rf["c"].x))
+        put(V(mg.x - (mg.x - rf["c"].x) * 0.45, mg.y - (mg.y - rf["c"].y) * 0.45, 0), yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=4, yaw=yaw)); yield from wait(1.0)
+        shot("hv_gate"); yield from rwait(1.2)
+        for keys, tag in ((False, "gate_without_key"), (True, "gate_with_keys")):
+            g.debug_all_dungeon_keys(keys); g.set_editor_property("travel_dry_run", True)
+            put(V(mg.x - (mg.x - rf["c"].x) * 0.02, mg.y - (mg.y - rf["c"].y) * 0.02, 0)); yield from wait(1.5)
+            res[tag] = str(g.get_editor_property("last_travel"))
+            put(V(rf["c"].x, rf["c"].y, 0)); yield from wait(0.5)
+            g.set_editor_property("travel_dry_run", False)
+        g.debug_all_dungeon_keys(True)
+    quiet(False)
+    k = kinds; pc = res["piece_counts"]; cw = res.get("car_waits", {})
+    ok = (res["tier_here"] == 25 and res["static_gate"] == 0 and 22 <= res["tier_half_way_from_kethrys"] <= 24 and 40 <= res["from_kethrys_km"] <= 110
+          and res["plan"] == 5 and rf is not None and res["facility"]["rooms"] == 2 and res["facility"]["from_middle_m"] < 120
+          and "heaven_fortress" in res["dungeon_level"] and k.get("skyscraper", 0) >= 4 and k.get("office block", 0) >= 5 and k.get("shop", 0) >= 5
+          and all(k.get(t, 0) == 1 for t in ("smithy", "store", "healer", "storehouse", "tavern", "barracks", "temple")) and k.get("witch's hut", 0) == 0
+          and res["homes"]["all"] >= 30 and res["homes"]["burned"] + res["homes"]["boarded"] == 0 and res["tallest_m"] >= 50
+          and all(e["with_rooms"] == e["n"] and e["with_door"] == e["n"] for e in per.values()) and n_cont > 100
+          and pc["SM_HV_Road"] > 500 and pc["SM_HV_Paving"] > 1000 and pc["SM_HV_Window"] > 100 and pc["SM_Module03_Tower01_MiddleFloors01"] >= 16
+          and pc["SM_HV_CityWall"] > 50 and pc["SM_Stone_Wall"] == 0 and pc["SM_Castle_Stone_Wall_01a"] == 0 and pc["SM_Tower_Roof_01d"] == 0 and res["grass"] == 0
+          and sk.get("street light", 0) >= 40 and res["sign"] == ["KRATOS AURORIM RESEARCH, LLC"] and res["dome_parts"] == 1 and res.get("dome_past_buildings_m", 0) > 10 and len(res["styles"]) == 3
+          and res["cars"]["n"] >= 10 and res["cars"]["moving"] >= res["cars"]["n"] * 0.6 and res["cars_on_square"] == 0 and res["cars_at_facility"] == 0 and sk.get("traffic light", 0) >= 4 and cw.get("gap_m", 0) >= 3.0 and cw.get("moved_after_m", 0) > 3.0
+          and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Worker", "Soldier"))
+          and "Director Cassia Vael" in res["titles"] and "Aldric Venn" not in res["titles"]
+          and any("Past the Lobby" in str(p) for p in res["director"]["panel"]) and res.get("gate_without_key") == "locked" and res.get("gate_with_keys") == "catacombs")
+    step_result("heaven", ok, **res)
 
 def step_descendspire():
     """the black tower's gate, both ways: down into its dungeon (the level kethrys_spire, 907: its arcane halls, its casters
@@ -2454,6 +2610,118 @@ def step_descendspire():
           and res.get("casters_spawned", 0) >= 5 and all(c["moving"] for c in res["caster_clips"].values())
           and res["enter_counter"] == 1 and res["back"]["town"] == "Kethrys Spire" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_tower_door_m"] or 99) < 15)
     step_result("descendspire", ok, **res)
+
+def step_descendheaven():
+    """the research facility's security door, both ways: down into the fortress (the level heaven_fortress, 909: its steel
+    halls, its defenders armed with firearms, its way back) with her whole state; every defender kind spawned in a row, its
+    clips playing; a trooper's rounds fired at her from 7 m (each shot counted, what reached her, a picture of a round in
+    flight); then back up by the Escape menu's "Return to Heaven": the city built round her again and she stands before the
+    facility's door"""
+    res = {}
+    if "brokenspire" not in G["w"].get_path_name(): yield from travel("brokenspire", via_menu)
+    yield from as_hero("Warrior")
+    yield from to_town("Heaven")
+    g = G["gen"]; g.debug_all_dungeon_keys(True)
+    res["set_town"] = yield from set_up("Warrior", "town")
+    before = snapshot()
+    mg = place("mistgate")
+    yield from travel("heaven_fortress", lambda: put(V(mg.x, mg.y, 0)))
+    g = G["gen"]
+    res["down"] = yield from leg_check(before, "Warrior through the security door")
+    p = G["pawn"].get_actor_location()
+    lines = [str(l) for l in g.get_menu_lines()]
+    defenders = {str(m.get_editor_property("name")): bool(m.get_editor_property("shoots")) for m in g.get_editor_property("monsters") if int(m.get_editor_property("weight") * 10) >= 30}
+    res["fortress"] = {"key": str(g.get_editor_property("dungeon_key")), "title": str(g.get_editor_property("dungeon_title")), "themes": [str(t) for t in g.get_editor_property("tier_themes")],
+                    "section": [g.world_to_section(p).x, g.world_to_section(p).y], "return_line": next((l for l in lines if "Return to" in l), None),
+                    "return_town": str(G["gi"].get_editor_property("return_town")), "defender_kinds": defenders}
+    try: res["enter_counter"] = G["gi"].get_counter("heaven:enter")
+    except Exception as e: res["enter_counter"] = str(e)
+    shot("hv_fortress_start"); yield from rwait(1.2)
+    quiet(True)
+    hc = g.get_start_room_center(); kinds_ = sorted(defenders)
+    ms = []
+    for j, k_ in enumerate(kinds_):
+        m = g.spawn_monster_named(k_, V(hc.x + 900.0, hc.y + (j - (len(kinds_) - 1) / 2.0) * 320.0, hc.z + 120.0), 1, 1.0, 0.0, 1.0)
+        if m: ms.append(m)
+    yield from wait(1.5)
+    def pose(m):
+        c = m.get_component_by_class(unreal.SkeletalMeshComponent); a = m.get_actor_location(); out = []
+        for i in range(0, min(c.get_num_bones(), 60), 3):
+            q = c.get_socket_location(c.get_bone_name(i)); out.append((q.x - a.x, q.y - a.y, q.z - a.z))
+        return out
+    p0 = {}
+    for m in ms:
+        try: p0[m] = pose(m)
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    yield from wait(0.5)
+    res["defender_clips"] = {}
+    for m, a in p0.items():
+        try:
+            b = pose(m); mv = max(math.dist(x_, y_) for x_, y_ in zip(a, b)) if a and b else 0.0
+            res["defender_clips"][str(m.get_editor_property("monster_name"))] = {"bones_moved_cm": round(mv, 2), "moving": mv > 0.3,
+                                                                                "parts": len([c for c in m.get_components_by_class(unreal.SkeletalMeshComponent)]) - 1}
+        except Exception as e: res.setdefault("pose_errors", []).append(str(e))
+    res["defenders_spawned"] = len(ms)
+    if ms:
+        put(V(hc.x - 500.0, hc.y, hc.z), yaw=0.0)
+        G["pawn"].set_actor_hidden_in_game(True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3, yaw=0.0)); yield from wait(1.0)
+        shot("hv_defenders"); yield from rwait(1.2)
+        G["pawn"].set_actor_hidden_in_game(False)
+        for m in ms:
+            try: m.destroy_actor()
+            except Exception: pass
+    # (a trooper's rounds: held where it stands 7 m off on a clear line (its range is 9 m: from 10 m, held, it never shot), aggressive;
+    # its shots counted, what reached her)
+    res["shooting"] = {}
+    hc = g.get_start_room_center()
+    for yaw in (0.0, 90.0, 180.0, 270.0):
+        put(V(hc.x, hc.y, hc.z), yaw=yaw); yield from wait(0.3)
+        her = G["pawn"].get_actor_location()
+        fw = V(math.cos(math.radians(yaw)), math.sin(math.radians(yaw)), 0)
+        hit = unreal.SystemLibrary.line_trace_single(G["w"], her, V(her.x + fw.x * 700.0, her.y + fw.y * 700.0, her.z), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        if hit is None or not hit.to_tuple()[0]: break
+    tr = g.spawn_monster_named("Kratos_Trooper", V(her.x + fw.x * 700.0, her.y + fw.y * 700.0, her.z), 1, 50.0, 1.0, 1.0)
+    if tr:
+        quiet(False)
+        mcs = g.get_editor_property("max_chase_speed"); g.set_editor_property("max_chase_speed", 1.0)
+        g.set_editor_property("aggro_distance", 2500.0); g.set_editor_property("lose_distance", 4000.0)
+        cc = G["pawn"].get_component_by_class(unreal.RDCombatComponent); cc.set_health(cc.get_max_health()); hp0 = cc.get_health()
+        st0 = md(g.shot_stats); t0 = now(); pictured = False; times = []
+        while now() - t0 < 12.0 and tr.shots_fired < 3:
+            yield from wait(0.05)
+            if not pictured and len(list(g.get_shot_lines())) > 0:
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-4, yaw=yaw)); shot("hv_shot"); pictured = True
+            if tr.shots_fired > len(times): times.append(round(now() - t0, 2))
+        yield from wait(1.5)
+        st1 = md(g.shot_stats)
+        res["shooting"] = {"fired": tr.shots_fired, "times": times, "on_her": st1.get("on_her", 0) - st0.get("on_her", 0), "hp_lost": round(hp0 - cc.get_health(), 1),
+                           "theme": str(tr.get_editor_property("monster_name")), "pictured": pictured}
+        g.set_editor_property("max_chase_speed", mcs)
+        try: tr.destroy_actor()
+        except Exception: pass
+        quiet(True)
+    quiet(False)
+    res["set_tower"] = yield from set_up("Warrior", "castle")
+    before = snapshot()
+    yield from travel("brokenspire", via_menu)
+    g = G["gen"]
+    t0 = time.time(); st = []
+    while time.time() - t0 < 150:
+        yield
+        st = str(g.get_wild_town_state()).split("|")
+        if len(st) > 3 and st[1] == "Heaven" and st[2] == "0" and st[3] == "1": break
+    yield from wait(2.0)
+    res["up"] = yield from leg_check(before, "Warrior back out of the security door")
+    p = G["pawn"].get_actor_location(); ra = G["gi"].get_editor_property("return_at")
+    door = place("castle door")
+    res["back"] = {"town": st[1] if len(st) > 1 else None, "from_return_at_m": round(dist2(p, ra) / 100, 2), "from_facility_door_m": round(dist2(p, door) / 100, 1) if door else None}
+    e = res["fortress"]
+    ok = (res["down"]["ok"] and res["up"]["ok"] and res["down"]["level"] == "heaven_fortress" and e["key"] == "heaven" and e["section"] == [0, 0]
+          and e["return_line"] and "Heaven" in e["return_line"] and e["return_town"] == "Heaven" and len(e["defender_kinds"]) >= 5 and all(e["defender_kinds"].values())
+          and res.get("defenders_spawned", 0) >= 5 and all(c["moving"] for c in res["defender_clips"].values())
+          and res["enter_counter"] == 1 and res["shooting"].get("fired", 0) >= 2 and res["shooting"].get("on_her", 0) >= 1 and res["back"]["town"] == "Heaven" and res["back"]["from_return_at_m"] < 3.0 and (res["back"]["from_facility_door_m"] or 99) < 15)
+    step_result("descendheaven", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ Graymourne, the port
 def step_port():
@@ -3365,7 +3633,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire})
+              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)
