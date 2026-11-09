@@ -879,6 +879,16 @@ void FRDWildWorld::PlaceTowns()
 		for (int32 I = 0; I < 80 && Continent(K.Site.X, K.Site.Y) < 0.08f; ++I) K.Site += Inland * 1000.0;
 	}
 	Towns.Add(K);
+	// (Heaven, the modern city in its shield (the list of 2026-11-08b): the chain's last town, tiers 20 to 25: on past Kethrys
+	// Spire to the south-west, about 65 km on and well inland; walked in from the coast as Kethrys Spire)
+	FRDWildTown Hv; Hv.Name = TEXT("Heaven"); Hv.Seed = (int32)(Hash(5, 0, Seed) & 0x3FFFFFFF); Hv.Kind = TEXT("city");
+	Hv.Tiles = 168; Hv.Plan = 5;
+	Hv.Site = FVector2D(K.Site.X - 30000.0, K.Site.Y - 58000.0);
+	{
+		const FVector2D Inland = (FVector2D(Mx, -20000.0) - Hv.Site).GetSafeNormal();
+		for (int32 I = 0; I < 120 && Continent(Hv.Site.X, Hv.Site.Y) < 0.08f; ++I) Hv.Site += Inland * 1000.0;
+	}
+	Towns.Add(Hv);
 }
 
 void FRDWildWorld::MakeRivers()
@@ -1154,6 +1164,7 @@ void FRDWildWorld::MakeRoads()
 	MakeRoad(Out(0, 3), Out(3, 0), 0, 3);       // Brokenspire - Vel Morrath
 	MakeRoad(Out(1, 3), Out(3, 1), 1, 3);       // Ashenreach - Vel Morrath
 	if (Towns.Num() > 4) MakeRoad(Out(2, 4), Out(4, 2), 2, 4);       // Graymourne - Kethrys Spire (the list of 2026-11-08b)
+	if (Towns.Num() > 5) MakeRoad(Out(4, 5), Out(5, 4), 4, 5);       // Kethrys Spire - Heaven
 }
 
 void FRDWildWorld::HashSegments()

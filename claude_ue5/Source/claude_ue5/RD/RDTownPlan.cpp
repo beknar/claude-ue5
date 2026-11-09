@@ -56,6 +56,9 @@ static FString RDTSignText(uint8 Kind)
 	case TK_Laboratory: return TEXT("LABORA-\nTORY");
 	case TK_Study: return TEXT("STUDY");
 	case TK_Meditation: return TEXT("MEDITA-\nTION");
+	case TK_SkyTower: return TEXT("TOWER");
+	case TK_Office: return TEXT("OFFICES");
+	case TK_Shop: return TEXT("SHOP");
 	default: return FString();
 	}
 }
@@ -140,7 +143,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// RDMage.cpp): the black tower at the town's middle over its dungeon, the libraries and laboratories round the square, rune
 	// circles and crystal pylons, the wardens at the tower's sealed gate)
 	const bool bMage = Generator->TownPlan == 4;
-	const bool bMid = bHoly || bForge || bPort || bMage;
+	// (Heaven, the modern city (the list of 2026-11-08b: "a modern city that is surrounded by a shimmering shield ... modern
+	// skyscrapers, office buildings, modern shops, modern streets, modern vehicles navigating the streets ... the outside and
+	// entrance of the dungeon is a foreboding research facility called 'Kratos Aurorim Research, LLC'"; TownPlan 5, RDHeaven.cpp):
+	// the facility at the town's middle over the fortress, a grid of straight streets, towers, office blocks and shops)
+	const bool bModern = Generator->TownPlan == 5;
+	const bool bMid = bHoly || bForge || bPort || bMage || bModern;
 	if (bPort) F.G = 0;
 	// ---- the ground inside the wall: one hallway (its rectangle the town's bounds; only the tiles inside the wall's outline
 	// are ground, below)
@@ -170,7 +178,8 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// down each side))
 	// (the port's sluice house: a stone hall of 9 x 9 tiles over the sewers' mouth)
 	// (the black tower: its gatehouse 4 deep, its hall 13 deep and 15 wide under the round tower)
-	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : bMage ? 15 : 21;
+	// (the research facility: its lobby 4 deep, its laboratory hall behind it, 15 deep in all and 15 wide)
+	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : (bMage || bModern) ? 15 : 21;
 	// (the port's harbour in the frame: from 26 tiles before the far wall to it, 24 tiles in from each side; its quay the 4 rows
 	// before it)
 	const int32 Hu0 = S - 26, Hv0 = 24, Hv1 = S - 24;
@@ -364,19 +373,45 @@ void ARDSection::PlanTown(FRandomStream& R)
 		Road(Hu0 - 4, Hv0, Hu0, Hv1);
 		Road(Cu0 + CD + 7, Vc - 1, Hu0 - 4, Vc + 2);
 	}
+	// (Heaven: a grid of straight streets 3 tiles wide every 19 tiles each way, none through the facility's ground or the square)
+	if (bModern)
+	{
+		auto Clear = [&](int32 U0, int32 V0, int32 U1, int32 V1)
+		{
+			const bool bCastle = U1 > Cu0 - 4 && U0 < Cu0 + CD + 4 && V1 > Cv0 - 4 && V0 < Cv0 + CW + 4;
+			const bool bSq = U1 > SqU0 - 2 && U0 < SqU1 + 2 && V1 > SqV0 - 2 && V0 < SqV1 + 2;
+			return !bCastle && !bSq;
+		};
+		for (int32 K = -6; K <= 6; ++K)
+		{
+			const int32 V = Vc - 1 + 19 * K;
+			if (K == 0 || V < 6 || V > S - 9) continue;
+			if (Clear(0, V, S, V + 3)) RoadIn(0, V, S, V + 3, true);
+			else { RoadIn(0, V, Cu0 - 5, V + 3, true); RoadIn(Cu0 + CD + 5, V, S, V + 3, true); }
+		}
+		for (int32 K = -6; K <= 6; ++K)
+		{
+			const int32 U = Xu + 19 * K;
+			if (K == 0 || U < 6 || U > S - 9) continue;
+			if (Clear(U, 0, U + 3, S)) RoadIn(U, 0, U + 3, S, false);
+			else { RoadIn(U, 0, U + 3, Cv0 - 5, false); RoadIn(U, Cv0 + CW + 5, U + 3, S, false); }
+		}
+	}
 	for (const FIntRect& Rr : TownRoads) for (int32 X = Rr.Min.X; X < Rr.Max.X; ++X) for (int32 Y = Rr.Min.Y; Y < Rr.Max.Y; ++Y) if (In(FIntPoint(X, Y))) TownRoadMask[Idx(FIntPoint(X, Y))] = 1;
 	for (int32 X = TownSquare.Min.X; X < TownSquare.Max.X; ++X) for (int32 Y = TownSquare.Min.Y; Y < TownSquare.Max.Y; ++Y) if (In(FIntPoint(X, Y))) TownRoadMask[Idx(FIntPoint(X, Y))] = 1;
-	// ---- the earth roads (the third list of 2026-11-02: no grid): places scattered over the town (at least 15 tiles apart,
+	// ---- the earth roads (the third list of 2026-11-02: no grid; Heaven has its streets instead): places scattered over the town (at least 15 tiles apart,
 	// clear of the square, the castle and the lane), joined to the cobbled roads and to each other by the shortest tree
 	// (Prim's: the cobbles' points are in it from the start) and a few loops besides; each join a wandering way. The trunk
 	// ways (from the cobbles and the tree) are a road wide; the loops narrower lanes.
 	{
 		TArray<FVector2D> Nodes; int32 NAnchor = 0;
+		if (!bModern)
 		for (int32 U = GateU + 8; U < Cu0 - 9; U += 13) Nodes.Add(FVector2D(U + 0.5f, Vc + 0.5f));
 		for (int32 V = 6; V < S - 6; V += 13) if (InsidePg(Xu + 1.5f, V + 0.5f) && BorderDistPg(Xu + 1.5f, V + 0.5f) > 6.f && (V < SqV0 - 3 || V > SqV1 + 3)) Nodes.Add(FVector2D(Xu + 1.5f, V + 0.5f));
+		if (bModern) Nodes.Reset();
 		NAnchor = Nodes.Num();
 		// (about fifty places: with thirty, 12 tiles or more apart, the homes found frontage for 94, against 170 on the old grid)
-		for (int32 T = 0; T < 2400 && Nodes.Num() < NAnchor + 52; ++T)
+		for (int32 T = 0; T < (bModern ? 0 : 2400) && Nodes.Num() < NAnchor + 52; ++T)
 		{
 			const FVector2D Q(R.FRandRange(5.f, S - 5.f), R.FRandRange(5.f, S - 5.f));
 			if (!InsidePg(Q.X, Q.Y) || BorderDistPg(Q.X, Q.Y) < 7.f) continue;
@@ -465,8 +500,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 	const FIntRect Gy = F.Rect(GyU0 + 1, GyV0 + 1, GyU0 + GyW - 1, GyV0 + GyH - 1);
 	// (the mill in the other corner by the castle side, on open ground)
 	int32 MlU0 = S - 4 - 14 - CD - 4, MlV0 = bGraveLow ? S - 3 - 7 : 3;
-	PlaceRect(MlU0, MlV0, 7, 7);
-	Mark(MlU0, MlV0, MlU0 + 7, MlV0 + 7, 4);
+	if (!bModern) PlaceRect(MlU0, MlV0, 7, 7);
+	if (!bModern) Mark(MlU0, MlV0, MlU0 + 7, MlV0 + 7, 4);
+	if (!bModern)
 	{
 		const FIntRect M = F.Rect(MlU0, MlV0, MlU0 + 7, MlV0 + 7);
 		FTownSpot Sp; Sp.Kind = TS_Mill; Sp.At = TileWorld(FIntPoint((M.Min.X + M.Max.X) / 2, (M.Min.Y + M.Max.Y) / 2)); Sp.Yaw = 90.f * R.RandRange(0, 3);
@@ -581,6 +617,18 @@ void ARDSection::PlanTown(FRandomStream& R)
 			if (Place(Kd, bSmall ? 5 : 7, bSmall ? 6 : 9, bSmall ? 5 : 6, bSmall ? 6 : 7, Near(Want), 900, P)) Commit(Kd, P, 0, 2);
 		}
 	}
+	else if (bModern)
+	{
+		// (Heaven: towers round the middle (a lobby walked into, the tower's floors over it), office blocks of three to five
+		// storeys anywhere, shops round the square; no hedge witch)
+		const FVector2D Mid2(S * 0.5f, Vc + 0.5f);
+		for (int32 K = 0; K < 9; ++K)
+			if (Place(TK_SkyTower, 7, 7, 7, 7, [&](const FVector2D& Q) { return (float)FVector2D::Distance(Q, Mid2) + R.FRandRange(0.f, 30.f); }, 900, P)) Commit(TK_SkyTower, P, 0, 1);
+		for (int32 K = 0; K < 12; ++K)
+			if (Place(TK_Office, 6, 9, 6, 8, [&](const FVector2D& Q) { return R.FRand(); }, 600, P)) Commit(TK_Office, P, 0, 3 + R.RandRange(0, 2));
+		for (int32 K = 0; K < 12; ++K)
+			if (Place(TK_Shop, 4, 6, 4, 5, [&](const FVector2D& Q) { return (float)FVector2D::Distance(Q, SqMid) + R.FRandRange(0.f, 25.f); }, 600, P)) Commit(TK_Shop, P, 0, 1);
+	}
 	else if (Place(TK_Witch, 4, 4, 4, 4, [&](const FVector2D& Q) { return -(float)FVector2D::Distance(Q, SqMid); }, 900, P)) Commit(TK_Witch, P, 0, 1);
 	// the homes: as many as fit; their state by chance (the user's: burned down, boarded up, or lived in)
 	// (400 tries a home: a try is a rectangle anywhere in the town, and few land beside a winding road; at 80 the town had 94
@@ -592,11 +640,12 @@ void ARDSection::PlanTown(FRandomStream& R)
 		// (the holy city is kept: few homes burned or boarded; the forge city fewer than Brokenspire, the siege is the foundry's)
 		// (the port: many shut up, few burned: the tide's dead empty the houses)
 		// (the mage city is well kept: "not poor")
+		if (bModern) { Commit(TK_Home, P, 0, 3); continue; }        // (Heaven: apartments, none burned or boarded)
 		Commit(TK_Home, P, bMage ? (U < 0.02f ? 1 : U < 0.05f ? 2 : 0) : bHoly ? (U < 0.04f ? 1 : U < 0.10f ? 2 : 0) : bForge ? (U < 0.08f ? 1 : U < 0.18f ? 2 : 0) : bPort ? (U < 0.05f ? 1 : U < 0.25f ? 2 : 0) : (U < 0.2f ? 1 : U < 0.42f ? 2 : 0), 2);
 	}
 	// ---- the castle (its own frame: front toward -u, the main road's middle Vc); the holy city's cathedral
 	{
-		FTownBld B; B.Kind = bHoly ? TK_Cathedral : bForge ? TK_Foundry : bPort ? TK_SluiceHouse : bMage ? TK_Spire : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
+		FTownBld B; B.Kind = bHoly ? TK_Cathedral : bForge ? TK_Foundry : bPort ? TK_SluiceHouse : bMage ? TK_Spire : bModern ? TK_Research : TK_Castle; B.Seed = (uint32)R.RandHelper(0x7fffffff); B.Storeys = 2;
 		const FIntRect Rc = F.Rect(Cu0, Cv0, Cu0 + CD, Cv0 + CW);
 		B.Min = Rc.Min; B.Max = Rc.Max;
 		B.DoorSide = F.Side(-1, 0); B.DoorTile = F.Tile(Cu0, Vc);
@@ -739,6 +788,28 @@ void ARDSection::PlanTown(FRandomStream& R)
 			B.Label = FString::Printf(TEXT("The Black Tower of %s"), *Generator->TownName);
 			continue;
 		}
+		if (B.Kind == TK_Research)
+		{
+			// Heaven's research facility (RDHeaven.cpp builds it): its lobby at the front behind the security desk, the laboratory
+			// hall behind it, whose far wall holds the security door down into the fortress (the Mistgate's part: walked into with
+			// the Kratos Keycard, it opens it)
+			const int32 Ew = 9, Ed = 4;
+			const int32 W0 = Vc - Ew / 2;
+			const int32 RE = AddRoomRect(BI, F.Rect(Cu0, W0, Cu0 + Ed, W0 + Ew), ERDRoomKind::GuardRoom, F.Tile(Cu0 + 2, Vc));
+			const int32 RH = AddRoomRect(BI, F.Rect(Cu0 + Ed, Cv0, Cu0 + CD, Cv0 + CW), ERDRoomKind::Library, F.Tile(Cu0 + Ed + (CD - Ed) / 2, Vc));
+			const int32 Front = F.Side(-1, 0), Back = F.Side(1, 0);
+			Rooms[RE].bDoorSide[Front] = true;
+			AddEdge(B.DoorTile, Out);
+			AddEdge(F.Tile(Cu0 + Ed - 1, Vc), F.Tile(Cu0 + Ed, Vc)); Rooms[RE].bDoorSide[Back] = true; Rooms[RH].bDoorSide[Front] = true;
+			Rooms[RH].bDoorSide[Back] = true;
+			const FVector Far = TileWorld(F.Tile(Cu0 + CD - 1, Vc));
+			const FVector Fw = FVector(RDTDir4[Back].X, RDTDir4[Back].Y, 0.f);
+			MistgateAt = Far + Fw * (Generator->TileSize * 0.5f);
+			MistgateNormal = -Fw;
+			CastleHallRoom = RH;
+			B.Label = TEXT("Kratos Aurorim Research, LLC");
+			continue;
+		}
 		if (B.Kind == TK_SluiceHouse)
 		{
 			// the port's sluice house (RDPort.cpp furnishes it): one stone hall, the grated way down into the sewers at its far
@@ -774,6 +845,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 		// (a study: the library's desks, chairs, books and candles; a meditation chamber: a library's room whose furniture is its
 		// rune circle and candles instead (ARDSection::Furnish's Library case))
 		case TK_Study: case TK_Meditation: K = ERDRoomKind::Library; break;
+		// (Heaven: a tower's lobby and an office block's floor desks and chairs (Heaven's own furniture, 908), a shop its shelves)
+		case TK_SkyTower: case TK_Office: K = ERDRoomKind::Library; break;
+		case TK_Shop: K = ERDRoomKind::Storeroom; break;
 		default: K = B.State == 2 ? ERDRoomKind::Storeroom : B.State == 1 ? ERDRoomKind::Crypt : (FRandomStream((int32)B.Seed).RandBool() ? ERDRoomKind::Kitchen : ERDRoomKind::GuardRoom); break;
 		}
 		// (the lane runs through the door)
@@ -816,7 +890,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 		const FVector Mid = (TileWorld(Sq.Min) + TileWorld(Sq.Max - FIntPoint(1, 1))) * 0.5f;
 		const FVector Ua = FVector(RDTDir4[F.Side(1, 0)].X, RDTDir4[F.Side(1, 0)].Y, 0.f), Va = FVector(RDTDir4[F.Side(0, 1)].X, RDTDir4[F.Side(0, 1)].Y, 0.f);
 		// (the holy city's plaza: a fountain where the well would be, a wayside shrine in each of its corners, a statue on each side)
-		FTownSpot W; W.Kind = bHoly ? TS_Fountain : TS_Well; W.At = Mid + Va * 600.f; TownSpots.Add(W);
+		FTownSpot W; W.Kind = (bHoly || bModern) ? TS_Fountain : TS_Well; W.At = Mid + Va * 600.f; TownSpots.Add(W);
 		if (bHoly)
 		{
 			for (const FVector& C : { Mid + Ua * 1900.f + Va * 1900.f, Mid + Ua * 1900.f - Va * 1900.f, Mid - Ua * 1900.f + Va * 1900.f, Mid - Ua * 1900.f - Va * 1900.f })
@@ -874,9 +948,43 @@ void ARDSection::PlanTown(FRandomStream& R)
 					if (PylonFits(Cr.At)) TownSpots.Add(Cr);
 				}
 		}
+		if (bModern)
+		{
+			// (Heaven's streets: a street light every 7 tiles along each side, the side's way out of the street's edge; a bench, a
+			// bus stop, a hydrant or a bin between them by a hash; only on ground clear of every building's way out and of the
+			// other spots)
+			auto OpenGround = [&](const FIntPoint& T)
+			{
+				if (!In(T) || Owner[Idx(T)] != 1000 || Type[Idx(T)] != 2 || TownRoadMask[Idx(T)] != 0) return false;
+				for (const FTownBld& Tb : TownBlds)
+				{
+					const FIntPoint O = Tb.DoorTile + FIntPoint(RDTDir4[Tb.DoorSide].X, RDTDir4[Tb.DoorSide].Y);
+					if (FMath::Max(FMath::Abs(O.X - T.X), FMath::Abs(O.Y - T.Y)) <= 1) return false;
+				}
+				for (const FTownSpot& Sp : TownSpots) if (FVector::Dist2D(Sp.At, TileWorld(T)) < 500.f) return false;
+				return true;
+			};
+			for (const FIntRect& Rr : TownRoads)
+			{
+				const bool bAlongX = Rr.Width() >= Rr.Height();
+				const int32 L0 = bAlongX ? Rr.Min.X : Rr.Min.Y, L1 = bAlongX ? Rr.Max.X : Rr.Max.Y;
+				if (L1 - L0 < 10) continue;
+				for (int32 Sd = 0; Sd < 2; ++Sd)
+					for (int32 A = L0 + 3 + Sd * 3; A < L1 - 2; A += 7)
+					{
+						const FIntPoint T = bAlongX ? FIntPoint(A, Sd ? Rr.Max.Y : Rr.Min.Y - 1) : FIntPoint(Sd ? Rr.Max.X : Rr.Min.X - 1, A);
+						if (!OpenGround(T)) continue;
+						const FVector ToRoad = bAlongX ? FVector(0, Sd ? -1.f : 1.f, 0) : FVector(Sd ? -1.f : 1.f, 0, 0);
+						const uint32 Hh = HashCombine(GetTypeHash(T), 0x4E4Fu);
+						FTownSpot Sl; Sl.Kind = (Hh % 3 == 0) ? TS_StreetProp : TS_StreetLight; Sl.At = TileWorld(T) + ToRoad * 120.f; Sl.Yaw = ToRoad.Rotation().Yaw; Sl.Bld = (int32)(Hh >> 4) % 4;
+						TownSpots.Add(Sl);
+					}
+			}
+		}
 		FTownSpot Bd; Bd.Kind = TS_Board; Bd.At = Mid - Va * 700.f + Ua * 450.f; Bd.Yaw = (-Ua).Rotation().Yaw; TownSpots.Add(Bd);
 		for (int32 K = 0; K < 4; ++K)
 		{
+			if (bModern) continue;          // (Heaven: no market stalls; its shops)
 			FTownSpot St; St.Kind = TS_Stall;
 			const float Sd = K < 2 ? -1.f : 1.f;
 			St.At = Mid + Ua * Sd * 1500.f + Va * ((K % 2) ? 650.f : -650.f);
@@ -935,7 +1043,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 			TownPosts.Add(Rf);
 		}
 		// (a camp of the refugees: tents by the wall near the gate; the holy city's pilgrims' tents the same)
-		for (int32 K = 0; K < 3; ++K)
+		for (int32 K = 0; K < (bModern ? 0 : 3); ++K)
 		{
 			FTownSpot T; T.Kind = TS_Tent; T.At = GateIn + Ua * (900.f + 350.f * K) + Va * (K % 2 ? 1300.f : -1300.f); T.Yaw = Va.Rotation().Yaw + (K % 2 ? 180.f : 0.f);
 			TownSpots.Add(T);
@@ -964,6 +1072,15 @@ void ARDSection::PlanTown(FRandomStream& R)
 			for (int32 K = 0; K < 2; ++K) { FTownPost Wd; Wd.Role = ERDTownRole::Soldier; Wd.At = CDoor - Ua * 150.f + Va * (K ? 520.f : -520.f); Wd.Yaw = (-Ua).Rotation().Yaw; Wd.Index = 3 + K; TownPosts.Add(Wd); }
 			for (int32 K = 0; K < 5; ++K) { FTownPost Ap; Ap.Role = ERDTownRole::Pilgrim; Ap.At = Pz + Va * ((K % 3 - 1) * 900.f) + Ua * ((K / 3) * 900.f - 450.f); Ap.Wander = 2200.f; Ap.Index = 4 + K; TownPosts.Add(Ap); }
 			FTownSpot Rn; Rn.Kind = TS_Rune; Rn.At = CDoor - Ua * 1300.f; Rn.Yaw = 0.f; TownSpots.Add(Rn);
+		}
+		if (bModern)
+		{
+			// Heaven's people before the research facility: the director (its elder: talk, quests) before its door, the facility's
+			// security at the door, citizens about the square
+			const FVector Pz = (TileWorld(TownSquare.Min) + TileWorld(TownSquare.Max - FIntPoint(1, 1))) * 0.5f;
+			FTownPost Am; Am.Role = ERDTownRole::Elder; Am.At = CDoor - Ua * 450.f - Va * 520.f; Am.Yaw = (-Ua).Rotation().Yaw; TownPosts.Add(Am);
+			for (int32 K = 0; K < 2; ++K) { FTownPost Wd; Wd.Role = ERDTownRole::Soldier; Wd.At = CDoor - Ua * 150.f + Va * (K ? 520.f : -520.f); Wd.Yaw = (-Ua).Rotation().Yaw; Wd.Index = 3 + K; TownPosts.Add(Wd); }
+			for (int32 K = 0; K < 6; ++K) { FTownPost Ap; Ap.Role = ERDTownRole::Townsfolk; Ap.At = Pz + Va * ((K % 3 - 1) * 900.f) + Ua * ((K / 3) * 900.f - 450.f); Ap.Wander = 3000.f; Ap.Index = 40 + K; TownPosts.Add(Ap); }
 		}
 		if (bForge)
 		{
@@ -1059,6 +1176,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 			case TK_Laboratory: Post(ERDTownRole::Worker, Ctr, 250.f, 10 + BI); Post(ERDTownRole::Worker, TileWorld(B.DoorTile) - In_ * 300.f, 2500.f, 30 + BI); break;
 			// (an apprentice at a study's desks; two at a meditation chamber's circle, still)
 			case TK_Study: Post(ERDTownRole::Pilgrim, Ctr, 150.f, 10 + BI); break;
+			// (Heaven: office workers at their desks, a clerk in each shop)
+			case TK_SkyTower: case TK_Office: Post(ERDTownRole::Worker, Ctr, 300.f, 10 + BI); break;
+			case TK_Shop: Post(ERDTownRole::Worker, Inside, 0.f, 30 + BI); break;
 			case TK_Meditation: Post(ERDTownRole::Pilgrim, Ctr + FVector(In_.Y, -In_.X, 0) * 230.f, 0.f, 10 + BI); Post(ERDTownRole::Pilgrim, Ctr - FVector(In_.Y, -In_.X, 0) * 230.f, 0.f, 30 + BI); break;
 			case TK_Monastery: Post(ERDTownRole::Monk, Inside, 0.f, 0); Post(ERDTownRole::Monk, Ctr, 600.f, 1); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 2); Post(ERDTownRole::Monk, TileWorld(B.DoorTile) - In_ * 300.f, 3500.f, 3); break;
 			case TK_Cathedral:
@@ -1095,6 +1215,8 @@ FName ARDSection::TownPiece(const FTownBld& B, const TCHAR* Part) const
 	// (the forge city's soot-dark stone: "Forge.<part>", 894's pieces)
 	if (B.Style == 5) return FName(*FString::Printf(TEXT("Forge.%s"), Part));
 	if (B.Style == 6) return FName(*FString::Printf(TEXT("Mage.%s"), Part));
+	if (B.Style == 7) return FName(*FString::Printf(TEXT("Modern.%s"), Part));
+	if (B.Style == 8 || B.Style == 9) return FName(*FString::Printf(TEXT("Modern%d.%s"), B.Style - 6, Part));
 	static const TCHAR* Styles[] = { TEXT("Timber"), TEXT("Stone"), TEXT("Thatch"), TEXT("Burnt") };
 	return FName(*FString::Printf(TEXT("Town.%s_%s"), Styles[FMath::Min<int32>(B.Style, 3)], Part));
 }
@@ -1199,12 +1321,16 @@ void ARDSection::TownShellBuilding(int32 BI)
 	if (B.Kind == TK_Cathedral) { CathedralShell(BI); return; }
 	if (B.Kind == TK_Foundry) { FoundryShell(BI); return; }
 	if (B.Kind == TK_Spire) { SpireShell(BI); return; }
+	if (B.Kind == TK_Research) { ResearchShell(BI); return; }
 	// (the holy city: its houses of white stone (Town.Holy_*), a burned one's timbers as anywhere; the forge city's of soot-dark
 	// stone (Forge.*, 2026-11-07))
 	if (Generator->TownPlan == 1) B.Style = B.State == 1 ? 3 : 4;
 	else if (Generator->TownPlan == 2) B.Style = B.State == 1 ? 3 : 5;
 	// (the mage city's houses of well-kept grey-blue stone: "Mage.<part>", 906's pieces)
 	else if (Generator->TownPlan == 4) B.Style = B.State == 1 ? 3 : 6;
+	// (Heaven's buildings: concrete, glass and steel ("Modern.<part>", 908's), a flat roof; three facings by the building's
+	// seed: pale concrete, dark stone, brick red ("Modern", "Modern2", "Modern3"))
+	else if (Generator->TownPlan == 5) B.Style = 7 + (uint8)(B.Seed % 3u);
 	else
 	B.Style = B.State == 1 ? 3 : (B.Kind == TK_Temple || B.Kind == TK_Smithy || B.Kind == TK_Barracks || B.Kind == TK_Chapel || B.Kind == TK_SluiceHouse) ? 1
 	        : B.Kind == TK_Witch ? 2 : (R.FRand() < 0.3f ? 2 : R.FRand() < 0.85f ? 0 : 1);
@@ -1281,6 +1407,19 @@ void ARDSection::TownShellBuilding(int32 BI)
 				AddPiece(TownPiece(B, TEXT("Pillar")), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, Cx * Hx, Cy * Hy, 2.f + St * WH)));
 	// ---- the roof: a gable along the building's longer side (none for a burned house: charred beams and a few rafters)
 	const float Top = 2.f + B.Storeys * WH;
+	// (Heaven: a flat roof with a parapet; a tower's floors over its lobby (RDHeaven.cpp))
+	if (B.Style >= 7)
+	{
+		ModernRoof(BI, Top);
+		if (!bBurnt && !bBoarded) AddTorch(TownBldPoint(B, Hx - 24.f, (DoorK + 0.5f) * M - Hy - 115.f, 235.f), Yaw0 + 180.f, 110.f);
+		if (B.Kind != TK_Home)
+		{
+			const FTransform Sg = WallT(FVector2D(Hx + 9.f, (DoorK + 0.5f) * M - Hy + 140.f), FVector2D(1, 0), 262.f);
+			AddPiece(TEXT("Town.Sign"), Sg, true);
+			AddSignText(Sg, RDTSignText(B.Kind));
+		}
+		return;
+	}
 	const bool bRidgeY = Ny >= Nx;
 	const FVector2D A = bRidgeY ? FVector2D(0, 1) : FVector2D(1, 0), C = bRidgeY ? FVector2D(1, 0) : FVector2D(0, 1);
 	const int32 NAlong = bRidgeY ? Ny : Nx, Span = bRidgeY ? Nx : Ny;
@@ -1706,6 +1845,7 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 		// 2026-11-04: "the portcullis ... can be walked through ... there should be a way to open the portcullis like a lever")
 		// the portcullis is a door that lifts, with a lever on each side of the gate)
 		if (Generator->bWild) TownGateWorks();
+		if (Generator->TownPlan == 5 && bBuildInteractive) HeavenWorks();          // (Heaven: its shield, its traffic)
 		else AddPieceAt(TEXT("Town.Gate"), TownGate, GYaw, 1.f, true);
 		if (!Generator->bWild)
 		{
@@ -1908,6 +2048,7 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			case TS_Pier: case TS_Ship: case TS_Boat: case TS_Wreck: case TS_Body: case TS_Gibbet: case TS_DockProps: PortSpotBuild(Sp); break;
 			// (the mage city's (RDMage.cpp): a rune circle, a crystal pylon)
 			case TS_Rune: case TS_Crystal: MageSpotBuild(Sp); break;
+		case TS_StreetLight: case TS_TrafficLight: case TS_StreetProp: HeavenSpotBuild(Sp); break;
 			default: break;
 			}
 			if (Sp.Kind == TS_Gibbet || Sp.Kind == TS_DockProps) MarkBlocked(Sp.At, Sp.Yaw, FVector2D(260.f, Sp.Kind == TS_DockProps ? 900.f : 260.f), true);
@@ -2028,6 +2169,8 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 			const FVector P = TileWorld(T) + FVector(R.FRandRange(-90, 90), R.FRandRange(-90, 90), 0);
 			const float U = R.FRand();
 			const FName Nm = U < (bOutside ? 0.5f : 0.22f) ? FName(*FString::Printf(TEXT("Town.Tree%d"), 1 + R.RandRange(0, 2))) : U < 0.6f ? FName(TEXT("Town.Bush")) : FName(TEXT("Town.Grass"));
+			// (Heaven: paved; only its street trees, no bushes or grass in or round it)
+			if (Generator->TownPlan == 5 && !Nm.ToString().Contains(TEXT("Tree"))) continue;
 			AddPieceAt(Nm, P, R.FRandRange(0, 360), R.FRandRange(0.85f, 1.2f), !Nm.ToString().Contains(TEXT("Tree")));
 			// (the papyrus map draws the trees and bushes where they stand)
 			const FString Ns = Nm.ToString();
@@ -2043,7 +2186,8 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 		// more small bushes")
 		if (TownLiftW.Num() == 0) TownLiftPlan();
 		bTownLiftOn = true;
-		TownGrass(R);
+		if (Generator->TownPlan == 5) HeavenStreets();          // (Heaven: asphalt, pavements and paving, no grass)
+		else TownGrass(R);
 		bTownLiftOn = false;
 		break;
 	case 7:
@@ -2168,6 +2312,8 @@ void ARDSection::TownLife(FRandomStream& R)
 	TArray<int32> Order;
 	for (int32 BI = 0; BI < TownBlds.Num(); ++BI) if (TownBlds[BI].Kind == TK_Home && TownBlds[BI].State == 0) Order.Add(BI);
 	for (int32 I = Order.Num() - 1; I > 0; --I) Order.Swap(I, R.RandRange(0, I));
+	// (Heaven's apartments: no vegetable gardens, animal pens or cooking fires (884 heaven found the gardens' wheat in its streets))
+	if (Generator->TownPlan == 5) Order.Reset();
 	static const TCHAR* Crops[] = { TEXT("Town.Crop1"), TEXT("Town.Crop2"), TEXT("Town.Crop3"), TEXT("Town.Crop4"), TEXT("Town.Crop5"), TEXT("Town.Crop6") };
 	for (const int32 BI : Order)
 	{

@@ -1,0 +1,467 @@
+{
+ "tag": "hv8",
+ "plan": [
+  "spire",
+  "holy"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "spire",
+   "ok": true,
+   "site_km": [
+    152.4,
+    -70.0
+   ],
+   "from_graymourne_km": 83.2,
+   "north_west": true,
+   "tier_here": 20,
+   "tier_half_way_from_graymourne": 18,
+   "state": [
+    "4",
+    "Kethrys Spire",
+    "0",
+    "1",
+    "0",
+    "13.5",
+    "1",
+    "1",
+    "1",
+    "15240000",
+    "-7000000",
+    "0"
+   ],
+   "plan": 4,
+   "dungeon_level": "/Game/RandomDungeon/Maps/kethrys_spire",
+   "kinds": {
+    "temple": 1,
+    "tavern": 1,
+    "smithy": 1,
+    "store": 1,
+    "healer": 1,
+    "storehouse": 1,
+    "barracks": 1,
+    "chapel": 1,
+    "library": 2,
+    "laboratory": 2,
+    "study": 2,
+    "meditation chamber": 2,
+    "home": 92,
+    "black tower": 1
+   },
+   "homes": {
+    "all": 92,
+    "burned": 1,
+    "boarded": 1
+   },
+   "tower": {
+    "label": "The Black Tower of Kethrys Spire",
+    "rooms": 2,
+    "from_middle_m": 14,
+    "top_m": 69.1
+   },
+   "spots": {
+    "circle": 1,
+    "mill": 1,
+    "tower": 20,
+    "gate": 1,
+    "well": 1,
+    "rune": 2,
+    "crystal": 10,
+    "board": 1,
+    "stall": 4,
+    "lamp": 4,
+    "grave": 16,
+    "graveyard": 1,
+    "tent": 3,
+    "still": 1,
+    "altar": 1,
+    "bar": 1,
+    "smith": 1,
+    "counter": 1,
+    "basin": 1,
+    "stash": 1
+   },
+   "inside": {
+    "temple": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "tavern": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "smithy": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 3
+    },
+    "store": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 18
+    },
+    "healer": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 5
+    },
+    "storehouse": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 19
+    },
+    "barracks": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 16
+    },
+    "chapel": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "library": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 0
+    },
+    "laboratory": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 7
+    },
+    "study": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 0
+    },
+    "meditation chamber": {
+     "n": 2,
+     "with_rooms": 2,
+     "with_door": 2,
+     "containers": 0
+    },
+    "home": {
+     "n": 91,
+     "with_rooms": 91,
+     "with_door": 91,
+     "containers": 254
+    },
+    "black tower": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 9
+    }
+   },
+   "containers": 335,
+   "doors": 127,
+   "labs": [
+    {
+     "cauldron": 1,
+     "potions": 4
+    },
+    {
+     "cauldron": 1,
+     "potions": 4
+    }
+   ],
+   "chambers": [
+    4,
+    4
+   ],
+   "piece_counts": {
+    "SM_TowerRound_Window_8m_A": 3,
+    "SM_TowerRound_Border_Top_A": 1,
+    "SM_TowerRound_Cap_4m_A": 1,
+    "SM_IceCrystal01": 10,
+    "SM_StatuePlinth": 10,
+    "SM_Cauldron": 3,
+    "SM_Kit_PrepTable": 44,
+    "SM_S_Potion": 8,
+    "SM_Rune_01a": 20
+   },
+   "window_lights": {
+    "n": 4,
+    "moved_cm_min": 558.7,
+    "moved_cm_max": 568.6,
+    "lowest_m": 36.2
+   },
+   "roles": {
+    "Preacher": 1,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Refugee": 4,
+    "Elder": 1,
+    "Soldier": 5,
+    "Pilgrim": 11,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Monk": 4,
+    "Worker": 4,
+    "Townsfolk": 71
+   },
+   "titles": [
+    "Archivist Mirel Ondra",
+    "Archmage Velis Kethran",
+    "Bess Lanterne",
+    "Hollen the Runesmith",
+    "Mother Selwyn",
+    "Oswin the Ledger",
+    "Quillon Vey",
+    "Sister Amarah",
+    "Warden-Captain Iska Thorne"
+   ],
+   "archmage": {
+    "found": true,
+    "said": "talk",
+    "panel": [
+     "What is the Black Tower?",
+     "Why do you need me?",
+     "Quest: The Gate of a Hundred Years",
+     "Farewell"
+    ]
+   },
+   "gate_from_tower_m": 26,
+   "gate_without_key": "locked",
+   "gate_with_keys": "catacombs"
+  },
+  {
+   "step": "holy",
+   "ok": true,
+   "site_km": [
+    55.0,
+    75.0
+   ],
+   "north_east": true,
+   "fps_brokenspire_square": 29.3,
+   "state": [
+    "3",
+    "Vel Morrath",
+    "0",
+    "1",
+    "0",
+    "4.8",
+    "2",
+    "2",
+    "1",
+    "5500000",
+    "7500000",
+    "0"
+   ],
+   "plan": 1,
+   "kinds": {
+    "temple": 1,
+    "tavern": 1,
+    "smithy": 1,
+    "store": 1,
+    "healer": 1,
+    "storehouse": 1,
+    "barracks": 1,
+    "chapel": 3,
+    "monastery": 1,
+    "home": 92,
+    "cathedral": 1
+   },
+   "homes": {
+    "all": 92,
+    "burned": 4,
+    "boarded": 3
+   },
+   "cathedral": {
+    "label": "The Cathedral of Vel Morrath",
+    "rooms": 7,
+    "from_middle_m": 15
+   },
+   "plaza_to_cathedral_m": 76,
+   "spots": {
+    "circle": 1,
+    "mill": 1,
+    "tower": 20,
+    "gate": 1,
+    "fountain": 1,
+    "shrine": 4,
+    "statue": 4,
+    "board": 1,
+    "stall": 4,
+    "lamp": 4,
+    "grave": 30,
+    "graveyard": 1,
+    "tent": 3,
+    "still": 1,
+    "altar": 1,
+    "bar": 1,
+    "smith": 1,
+    "counter": 1,
+    "basin": 1,
+    "stash": 1
+   },
+   "inside": {
+    "temple": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 0
+    },
+    "tavern": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "smithy": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 4
+    },
+    "store": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 18
+    },
+    "healer": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 6
+    },
+    "storehouse": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 12
+    },
+    "barracks": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 13
+    },
+    "chapel": {
+     "n": 3,
+     "with_rooms": 3,
+     "with_door": 3,
+     "containers": 0
+    },
+    "monastery": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 20
+    },
+    "home": {
+     "n": 88,
+     "with_rooms": 88,
+     "with_door": 88,
+     "containers": 239
+    },
+    "cathedral": {
+     "n": 1,
+     "with_rooms": 1,
+     "with_door": 1,
+     "containers": 55
+    }
+   },
+   "containers": 371,
+   "doors": 136,
+   "roles": {
+    "Preacher": 3,
+    "Child": 3,
+    "Idiot": 1,
+    "Mourner": 1,
+    "Guard": 4,
+    "Captain": 1,
+    "Militia": 4,
+    "Pilgrim": 10,
+    "Elder": 1,
+    "Templar": 2,
+    "Beggar": 3,
+    "Priest": 1,
+    "Innkeeper": 1,
+    "Drunk": 1,
+    "Scholar": 1,
+    "Smith": 1,
+    "Trader": 1,
+    "Healer": 1,
+    "Keeper": 1,
+    "Soldier": 3,
+    "Monk": 5,
+    "Townsfolk": 78
+   },
+   "titles": [
+    "Ansel the Chandler",
+    "Archbishop Severin Aurel",
+    "Archivist Mott",
+    "Commander Ysolde Vane",
+    "Garrick Tull",
+    "Matron Gilda",
+    "Mother Ilsabet",
+    "Sister Brenna",
+    "Wardkeeper Holt"
+   ],
+   "archbishop": {
+    "found": true,
+    "said": "talk",
+    "panel": [
+     "What lies beneath the cathedral?",
+     "Why do you need me?",
+     "How do I get down?",
+     "Quest: The Stair Beneath the Altar",
+     "Farewell"
+    ]
+   },
+   "stair_from_cathedral_m": 40,
+   "fps": {
+    "plaza": 33.2,
+    "nave": 35.9
+   },
+   "stair_travel": "catacombs"
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_hv8_ks_tower_front.png",
+  "bs_hv8_ks_tower_front_night.png",
+  "bs_hv8_ks_tower_front_night2.png",
+  "bs_hv8_ks_square.png",
+  "bs_hv8_ks_tower_afar.png",
+  "bs_hv8_ks_tower_night.png",
+  "bs_hv8_ks_tower_night2.png",
+  "bs_hv8_ks_library.png",
+  "bs_hv8_ks_laboratory.png",
+  "bs_hv8_ks_study.png",
+  "bs_hv8_ks_meditation.png",
+  "bs_hv8_ks_gate.png",
+  "bs_hv8_vm_cathedral_front.png",
+  "bs_hv8_vm_plaza.png",
+  "bs_hv8_vm_nave.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

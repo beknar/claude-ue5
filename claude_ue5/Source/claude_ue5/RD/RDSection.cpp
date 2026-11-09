@@ -2019,7 +2019,9 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	// (Brokenspire: the start section is the town)
 	if (Generator->bTown && Generator->IsStartSection(Coord))
 	{
-		Theme = NAME_None; ThemeNames.Reset(); ThemeNamesOf = Theme;
+		// (Heaven (TownPlan 5): every piece the town asks for is Heaven's own where it has one ("Heaven.<name>", 908): the wall,
+		// its towers, the furniture)
+		Theme = Generator->TownPlan == 5 ? FName(TEXT("Heaven")) : NAME_None; ThemeNames.Reset(); ThemeNamesOf = Theme;
 		PlanTown(GenR);
 		ShellPrepare(GenR);
 		ShellX = 0;
@@ -2166,7 +2168,7 @@ void ARDSection::ActivateForPlay()
 	// them: the same draws in the same order)
 	if (Generator->bTown && Generator->IsStartSection(Coord))
 	{
-		Theme = NAME_None; ThemeNames.Reset(); ThemeNamesOf = Theme;
+		Theme = Generator->TownPlan == 5 ? FName(TEXT("Heaven")) : NAME_None; ThemeNames.Reset(); ThemeNamesOf = Theme;
 		PlanTown(R);
 		ShellPrepare(R);
 		for (int32 BI = 0; BI < TownBlds.Num(); ++BI) TownShellBuilding(BI);
@@ -2704,6 +2706,7 @@ void ARDSection::Tick(float Dt)
 	const AActor* Pawn = Generator ? Generator->GetTrackedActor() : UGameplayStatics::GetPlayerPawn(this, 0);
 	const FVector PL = Pawn ? Pawn->GetActorLocation() : FVector(1e9);
 	if (TownDummies.Num() > 0) TickTownDummies(Now);          // (the list of 2026-11-07: a struck dummy rocks)
+	if (HeavenCars.Num() > 0) TickHeavenCars(Dt, PL);          // (Heaven's traffic)
 	// cinematics: doors open by themselves in front of the tracked actor
 	if (Generator && Generator->TrackedActor && Generator->TrackedAutoDoorDistance > 0.f)
 		for (int32 I = 0; I < Doors.Num(); ++I)

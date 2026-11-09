@@ -1,0 +1,28 @@
+{
+ "_doc": "The fortress under Kratos Aurorim Research's facility (the user's list of 2026-11-08b: 'the dungeon is a mechanized fortress with modern and sci-fi defenders armed with firearms'), read by 909: each a kind added to the castle's (whose weights are cut so the defenders' weight is twice theirs in each tier), measured as 907 measures the casters. Each shoots (the castle's monsters that shoot, 879): its shot clip (shot), a tracer for its round, a muzzle flash, a bullet's impact (guns). pack: where its clips are found by name. A kind's clips on another skeleton than its mesh's are made playable (the mesh's skeleton made compatible with the clips', saved).",
+ "monsters": [
+  {"name": "Kratos_Trooper", "title": "Kratos Security Trooper", "tier": 1, "weight": 4, "mesh": "/Game/Soldier/Character/SK_Dystopia_Soldier_02", "pack": "/Game/Soldier",
+   "idle": "AS_Soldier_Idle_01", "walk": "AS_Soldier_02_Walk", "attacks": ["AS_Soldier_Attack_01", "AS_Soldier_Attack_02"], "hit": "AS_Soldier_Get_Hit", "death": "AS_Soldier_Dead_01", "shot": "AS_Soldier_02_Shot",
+   "sound": "Horned", "ability": "None", "ranged": {"range": "medium", "gun": "rifle"}},
+  {"name": "Kratos_Guard", "title": "Facility Guard", "tier": 2, "weight": 4, "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Guard/SK_Guard", "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_01", "walk": "Anim_Defender_Walk", "attacks": ["Anim_Defender_Attack_01", "Anim_Defender_Attack_02"], "hit": "Anim_Defender_Get_Hit", "death": "Anim_Defender_Dead_01", "shot": "Anim_Defender_Shot_01",
+   "sound": "Horned", "ability": "Slow", "ranged": {"range": "medium", "gun": "rifle"}},
+  {"name": "Kratos_Operative", "title": "Kratos Operative", "tier": 3, "weight": 4, "mesh": "/Game/Sci_Fi_Characters_Pack_Vol_2/Mesh/Sci_Fi_Character_09/SK_Sci_Fi_Character_09_Full_01", "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_02", "walk": "Anim_Defender_Walk", "attacks": ["Anim_Defender_Attack_03", "Anim_Defender_Attack_01"], "hit": "Anim_Defender_Get_Hit_02", "death": "Anim_Defender_Dead_02", "shot": "Anim_Defender_Shot_02",
+   "sound": "Horned", "ability": "Weaken", "ranged": {"range": "long", "gun": "rifle"}},
+  {"name": "Kratos_Commander", "title": "Kratos Field Commander", "tier": 4, "weight": 3, "scale": 1.1, "mesh": "/Game/Dystopia_Pack/Dystopian_general/Mesh/Mesh_UE4/Full/SK_UE4_Dystopian_general_Full_01", "pack": "/Game/Sci_Fi_Characters_Pack_Vol_2",
+   "idle": "Anim_Defender_Idle_03", "walk": "Anim_Defender_Walk", "attacks": ["Anim_Defender_Attack_04", "Anim_Defender_Attack_02"], "hit": "Anim_Defender_Get_Hit", "death": "Anim_Defender_Dead_01", "shot": "Anim_Defender_Shot_03",
+   "sound": "Horned", "ability": "Poison", "ranged": {"range": "long", "gun": "rifle"}},
+  {"name": "Kratos_Tank", "title": "Kratos Assault Tank", "tier": 5, "weight": 3, "scale": 0.55, "mesh": "/Game/Dystopia_Pack/Tank/Mesh/Mesh_UE4/Full/SK_Tank_Full", "pack": "/Game/Dystopia_Pack",
+   "idle": "Anim_Tank_Idle", "walk": "Anim_Tank_Idle", "attacks": ["Anim_Tank_Shot_Muzzle"], "hit": "Anim_Tank_Idle", "death": "Anim_Tank_Idle", "shot": "Anim_Tank_Shot_Mashinegun",
+   "sound": "Troll", "ability": "Slow", "ranged": {"range": "long", "gun": "heavy"}}
+ ],
+ "guns": {
+  "rifle": {"projectile": "/Game/SciFi_Impacts/FX/NS_Tracer_Orange", "muzzle": "/Game/MuzzleFlash3D/FX/Modern/NS_MuzzleFlash_4X", "hit": "/Game/Bullet_ImpactFX/FX/NS_Impact_Metal", "theme": "a rifle round"},
+  "heavy": {"projectile": "/Game/SciFi_Impacts/FX/NS_Tracer_Blue", "muzzle": "/Game/MuzzleFlash3D/FX/Futuristic/NS_MuzzleFlash_Blast_Futuristic", "hit": "/Game/SciFi_Impacts/FX/NS_Energy_Impact_1", "theme": "a cannon's round"}
+ },
+ "ranges": {"medium": 900, "long": 1500, "min": 300},
+ "damage": {"medium": 0.5, "long": 0.45},
+ "cooldown": {"medium": 1.6, "long": 2.2},
+ "speed": {"medium": 5000, "long": 6000}
+}

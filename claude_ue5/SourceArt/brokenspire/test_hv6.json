@@ -1,0 +1,212 @@
+{
+ "tag": "hv6",
+ "plan": [
+  "descendheaven"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "descendheaven",
+   "ok": true,
+   "set_town": {
+    "found_wear": 47.29999923706055,
+    "slash": [
+     "Ember Slash",
+     true
+    ],
+    "armour": "Plate Armour",
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true,
+    "quick": true
+   },
+   "down": {
+    "level": "heaven_fortress",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "POISON 1.6/s",
+     "WEAKENED -50%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     124,
+     124
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "fortress": {
+    "key": "heaven",
+    "title": "Kratos Aurorim Research",
+    "themes": [
+     "Facility",
+     "Facility",
+     "Facility",
+     "Facility",
+     "Mixed"
+    ],
+    "section": [
+     0,
+     0
+    ],
+    "return_line": "button|Return to Heaven",
+    "return_town": "Heaven",
+    "defender_kinds": {
+     "Kratos_Trooper": true,
+     "Kratos_Guard": true,
+     "Kratos_Operative": true,
+     "Kratos_Commander": true,
+     "Kratos_Tank": true
+    }
+   },
+   "enter_counter": 1,
+   "defender_clips": {
+    "Kratos_Commander": {
+     "bones_moved_cm": 71.22,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Guard": {
+     "bones_moved_cm": 2.38,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Operative": {
+     "bones_moved_cm": 29.06,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Tank": {
+     "bones_moved_cm": 2.82,
+     "moving": true,
+     "parts": 0
+    },
+    "Kratos_Trooper": {
+     "bones_moved_cm": 10.38,
+     "moving": true,
+     "parts": 0
+    }
+   },
+   "defenders_spawned": 5,
+   "shooting": {
+    "fired": 2,
+    "times": [
+     2.76,
+     9.97
+    ],
+    "on_her": 2,
+    "hp_lost": 12.6,
+    "theme": "Kratos_Trooper",
+    "pictured": true
+   },
+   "set_tower": {
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true
+   },
+   "up": {
+    "level": "brokenspire",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "SLOWED -60%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     126,
+     126
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "back": {
+    "town": "Heaven",
+    "from_return_at_m": 0.0,
+    "from_facility_door_m": 2.5
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_hv6_hv_fortress_start.png",
+  "bs_hv6_hv_defenders.png",
+  "bs_hv6_hv_shot.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}
