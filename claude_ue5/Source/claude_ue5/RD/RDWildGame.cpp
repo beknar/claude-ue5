@@ -263,6 +263,7 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 		G->SetHiddenInGame(true); G->SetVisibility(false); G->SetCastShadow(false);
 		G->RegisterComponent();
 		G->CreateMeshSection(0, D->V, D->T, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+		C->GroundCollision = G;
 		D->V.Empty(); D->T.Empty();
 		B.Step = 2;
 	}
@@ -359,10 +360,12 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 		++WildBuilt;
 		bDone = true;
 	}
-	// (the measures: streamed chunks only; one she is put on is made at once, its collision cooked on the game thread)
+	// (the measures: streamed chunks only; one she is put on is made at once, its collision cooked on the game thread. Those
+	// streamed while she runs fast cook theirs on the game thread too and are counted: PR #27's review, left out by
+	// bSyncCollision they vanished from perf8's 5x run)
 	const double Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 	B.Ms += Ms;
-	if (!D->bSyncCollision)
+	if (!D->bPutOn)
 	{
 		double& Pm = WildPartMsMax.FindOrAdd(Part); Pm = FMath::Max(Pm, Ms);
 		WildStepMsMax = FMath::Max(WildStepMsMax, Ms);
@@ -371,7 +374,7 @@ bool ARDDungeonGenerator::StepWildBuild(FWildBuild& B)
 	{
 		WildBuildMsLast = B.Ms;
 		WildBuildMsMax = FMath::Max(WildBuildMsMax, B.Ms);
-		if (!D->bSyncCollision) { WildChunkMsMax = FMath::Max(WildChunkMsMax, B.Ms); ++WildStreamBuilt; }
+		if (!D->bPutOn) { WildChunkMsMax = FMath::Max(WildChunkMsMax, B.Ms); ++WildStreamBuilt; }
 	}
 	return bDone;
 }
@@ -632,7 +635,7 @@ bool ARDDungeonGenerator::WildPutHer(float Xm, float Ym)
 			}
 			if (WildChunks.Contains(C)) continue;
 			TSharedPtr<FRDWChunkData, ESPMode::ThreadSafe> D = MakeShared<FRDWChunkData, ESPMode::ThreadSafe>();
-			D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->bSyncCollision = true;
+			D->Coord = C; D->ChunkM = WildChunkM; D->StepM = WildStepM; D->bSyncCollision = true; D->bPutOn = true;
 			WildTownHole(*D);
 			RDWildComputeChunk(*Wild, *D);
 			BuildWildChunk(D);

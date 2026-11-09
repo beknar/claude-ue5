@@ -135,7 +135,9 @@ void ARDWildAnimal::Tick(float Dt)
 	{
 		const float T = FMath::Clamp((Now - DeadAt) / 0.5f, 0.f, 1.f);
 		const float E = T * T * (3.f - 2.f * T);
-		Body->SetRelativeRotation(FRotator(0.f, F.MeshYaw, 0.f).Quaternion() * FQuat(FVector(1, 0, 0), FMath::DegreesToRadians(FallYaw * E)));
+		// (rolled about its facing, the actor's X, after the mesh's own yaw: rolled about the mesh's X, a kind turned -90 (its
+		// length along the mesh's Y) tipped onto its nose or tail, PR #27's review)
+		Body->SetRelativeRotation(FQuat(FVector(1, 0, 0), FMath::DegreesToRadians(FallYaw * E)) * FRotator(0.f, F.MeshYaw, 0.f).Quaternion());
 		// (lying, its middle comes down to about a third of its height)
 		Body->SetRelativeLocation(FVector(0, 0, F.MeshZ + F.BodyZ * 0.25f * E));
 		return;

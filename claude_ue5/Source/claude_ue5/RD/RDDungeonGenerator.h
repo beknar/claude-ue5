@@ -1877,6 +1877,8 @@ public:
 	static float WildRunSpeedChoice(float Asked);
 	void TickWildRunSpeed(APawn* P);
 	float WildRunApplied = 1.f, WildRunBaseAccel = 1200.f, WildRunBaseBrake = 1000.f, WildRunLogged = 1.f;
+	/** the movement the run speed was applied to (a new pawn's is applied again from its own base) */
+	TWeakObjectPtr<UObject> WildRunMove;
 	bool bWildRunCmdRead = false;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild") int32 WildRunHeld = 0;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool IsWildReady() const;

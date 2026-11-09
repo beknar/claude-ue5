@@ -37,8 +37,10 @@ struct FRDWChunkData
 	double Ms = 0.0;
 	/** asked for at this generation of the streaming (a chunk dropped and asked again is computed again) */
 	int32 Ticket = 0;
-	/** its collision cooked at once (she is put on it) */
+	/** its collision cooked at once (she is put on it, or she runs faster than a worker's cooking: rd.WildRunSpeed) */
 	bool bSyncCollision = false;
+	/** made at once because she is put on it (left out of the streaming's measures; a fast run's streamed chunks stay in them) */
+	bool bPutOn = false;
 };
 
 /** what the worker threads hand back, and the world's making (shared: the tasks outlive nothing they point at) */

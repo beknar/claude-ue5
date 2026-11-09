@@ -343,5 +343,7 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bCollisionOn = false;
 	/** still being made over frames (the generator's WildBuilding): its near plants wait */
 	UPROPERTY(BlueprintReadOnly) bool bMaking = false;
+	/** the ground's collision (hidden, BlockAll); cooked on a worker unless she was running fast when it was asked */
+	UPROPERTY() TObjectPtr<UProceduralMeshComponent> GroundCollision = nullptr;
 	virtual void Destroyed() override;
 };

@@ -459,6 +459,7 @@ void URDCombatComponent::Strike()
 	const float MinCos = FMath::Cos(FMath::DegreesToRadians(W->Arc * 0.5f));
 	bool bAny = false;
 	const FRDSlashDef* Sl = SlashOf(AttackIndex);          // (the third list: the slash on the weapon)
+	const FName HitSound = HitSoundOf(*W);
 	for (ARDMonster* Mo : Generator->GetMonsters())
 	{
 		if (!Mo || Mo->IsDead()) continue;
@@ -468,7 +469,7 @@ void URDCombatComponent::Strike()
 		if (Dist > W->Reach || FMath::Abs(Mo->GetActorLocation().Z - L.Z) > 260.f) continue;
 		// (a big monster right against her is in the arc whatever the angle to its middle)
 		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
-		Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(*W).ToString())), Mo->GetActorLocation());
+		Generator->PlaySoundAt(HitSound, Mo->GetActorLocation());
 		const float Dmg = GetDamageOf(AttackIndex);         // (with her melee bonus)
 		const bool bKilled = Mo->ApplyDamage(Dmg, O);
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false);
@@ -483,10 +484,10 @@ void URDCombatComponent::Strike()
 	// (the list of 2026-11-07: the barracks' training dummies in the blow's reach and arc rock away from her, with the weapon's
 	// hit sound and the blow's number; they wear nothing and count as no hit on a foe)
 	if (Generator->bTown)
-		Generator->HitTownDummiesInArc(L, Fw, W->Reach, MinCos, 1.f, FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(*W).ToString())), GetDamageOf(AttackIndex));
+		Generator->HitTownDummiesInArc(L, Fw, W->Reach, MinCos, 1.f, HitSound, GetDamageOf(AttackIndex));
 	// (the list of 2026-11-07: the wilderness's animals in its reach and arc are hurt by it)
 	if (Generator->bWild)
-		Generator->HitWildAnimalsInArc(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(*W).ToString())));
+		Generator->HitWildAnimalsInArc(L, Fw, W->Reach, MinCos, GetDamageOf(AttackIndex), HitSound);
 }
 
 void URDCombatComponent::EndAttack()
@@ -2253,7 +2254,7 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	if (W.BurstEffect) SpawnFx(W.BurstEffect, At, B.Vel.Rotation(), W.BurstEffectScale);
 	if (W.BurstFlameEffect)
 		if (UFXSystemComponent* Fl = SpawnFx(W.BurstFlameEffect, At, FRotator::ZeroRotator, W.BurstFlameEffectScale)) TimedFx.Add({ Fl, W.BurstFlameSeconds });
-	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(W).ToString())), At);
+	Generator->PlaySoundAt(HitSoundOf(W), At);
 	// the flames on the bolt die away where they are (a moment, then gone: EndBoltFx); its light flares and fades
 	EndBoltFx(B);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, W.SpellLightIntensity * 3.f }); }
@@ -2341,27 +2342,19 @@ void URDCombatComponent::TickBolts(float Dt)
 			if (UPointLightComponent* L = B.Light.Get()) L->SetWorldLocation(B.At);
 			continue;
 		}
-		// it steers after its monster (as far as it can turn)
+		// it steers after its monster, or (the list of 2026-11-07) with none its animal, as far as it can turn
 		const float Speed = B.Vel.Size();
-		if (ARDMonster* Tg = B.Target.Get())
-			if (!Tg->IsDead())
-			{
-				const FVector Want = (Tg->GetActorLocation() + FVector(0, 0, Tg->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.15f) - B.At).GetSafeNormal();
-				const FVector Cur = B.Vel.GetSafeNormal();
-				const float Ang = FMath::Acos(FMath::Clamp(FVector::DotProduct(Cur, Want), -1.f, 1.f)), MaxAng = FMath::DegreesToRadians(W.BoltTurnRate) * Dt;
-				const FQuat Turn = FQuat::FindBetweenNormals(Cur, Want);
-				B.Vel = (Ang <= MaxAng ? Want : FQuat::Slerp(FQuat::Identity, Turn, MaxAng / FMath::Max(Ang, 1e-4f)).RotateVector(Cur)) * Speed;
-			}
-		// (the list of 2026-11-07: or after its animal, the same way)
-		if (!B.Target.IsValid())
-			if (ARDWildAnimal* An = B.Animal.Get(); An && !An->IsDead())
-			{
-				const FVector Want = (An->BodyCenter() - B.At).GetSafeNormal();
-				const FVector Cur = B.Vel.GetSafeNormal();
-				const float Ang = FMath::Acos(FMath::Clamp(FVector::DotProduct(Cur, Want), -1.f, 1.f)), MaxAng = FMath::DegreesToRadians(W.BoltTurnRate) * Dt;
-				const FQuat Turn = FQuat::FindBetweenNormals(Cur, Want);
-				B.Vel = (Ang <= MaxAng ? Want : FQuat::Slerp(FQuat::Identity, Turn, MaxAng / FMath::Max(Ang, 1e-4f)).RotateVector(Cur)) * Speed;
-			}
+		TOptional<FVector> Aim;
+		if (ARDMonster* Tg = B.Target.Get(); Tg && !Tg->IsDead()) Aim = Tg->GetActorLocation() + FVector(0, 0, Tg->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.15f);
+		else if (!B.Target.IsValid()) if (ARDWildAnimal* An = B.Animal.Get(); An && !An->IsDead()) Aim = An->BodyCenter();
+		if (Aim.IsSet())
+		{
+			const FVector Want = (Aim.GetValue() - B.At).GetSafeNormal();
+			const FVector Cur = B.Vel.GetSafeNormal();
+			const float Ang = FMath::Acos(FMath::Clamp(FVector::DotProduct(Cur, Want), -1.f, 1.f)), MaxAng = FMath::DegreesToRadians(W.BoltTurnRate) * Dt;
+			const FQuat Turn = FQuat::FindBetweenNormals(Cur, Want);
+			B.Vel = (Ang <= MaxAng ? Want : FQuat::Slerp(FQuat::Identity, Turn, MaxAng / FMath::Max(Ang, 1e-4f)).RotateVector(Cur)) * Speed;
+		}
 		const FVector Next = B.At + B.Vel * Dt;
 		// the first monster on the way (the bolt against each capsule's axis), then the first wall
 		ARDMonster* HitMo = nullptr; float HitT = 2.f; FVector HitAt = Next;
@@ -2387,7 +2380,7 @@ void URDCombatComponent::TickBolts(float Dt)
 			if (An && AnT < HitT && (!bWallHit || AnT < H.Time))
 			{
 				const float Dmg = B.Dmg > 0.f ? B.Dmg : GetDamageOf(B.Weapon);
-				Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(W).ToString())), AnAt);
+				Generator->PlaySoundAt(HitSoundOf(W), AnAt);
 				Generator->AddHitText(An->BodyCenter() + FVector(0, 0, 40.f), Dmg, false);
 				An->TakeHit(Dmg, B.At);
 				B.Flown += (AnAt - B.At).Size();
@@ -2401,7 +2394,7 @@ void URDCombatComponent::TickBolts(float Dt)
 			B.Flown += (H.ImpactPoint - B.At).Size();
 			// (the list of 2026-11-07: a bolt into a training dummy rocks it, a bolt mesh stuck in it rocks with it)
 			const bool bDummy = Generator->bTown && Generator->HitTownDummyByComponent(H.GetComponent(), B.At, 0.7f,
-				FName(*FString::Printf(TEXT("Player.Hit.%s"), *WeaponSound(W).ToString())), B.Dmg > 0.f ? B.Dmg : GetDamageOf(B.Weapon));
+				HitSoundOf(W), B.Dmg > 0.f ? B.Dmg : GetDamageOf(B.Weapon));
 			Burst(B, H.ImpactPoint + H.ImpactNormal * 10.f, nullptr);
 			// (a bolt mesh stays stuck in the wall a while, its point a little way in)
 			if (UStaticMeshComponent* C = B.Mesh.Get())

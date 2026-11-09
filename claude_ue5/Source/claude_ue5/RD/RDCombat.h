@@ -359,6 +359,8 @@ public:
 	bool TakeWeapon(FName Item);
 	/** the sound name of a weapon (its SoundKey, else its name) */
 	static FName WeaponSound(const FRDWeaponDef& W) { return W.SoundKey.IsNone() ? W.Name : W.SoundKey; }
+	/** the sound of a weapon's blow landing ("Player.Hit.<its sound>") */
+	static FName HitSoundOf(const FRDWeaponDef& W) { return FName(*(TEXT("Player.Hit.") + WeaponSound(W).ToString())); }
 
 	// ---- random_dungeonmagic_level5: the spell table (the generator's Spells). A spell of her weapons (FRDWeaponDef::SpellIndex)
 	// does at its release what its Kind says; spells have cooldowns; tomes teach new ones (Learns on her hero's card).

@@ -12,7 +12,9 @@ RD/RDWild8.cpp and the rest named there). Run with play stopped. Parts (argv[1],
   sky     the height fog's cutoff past every cloud (FogSkyCutoff 1000 km: at 6 km an edge ran round the zenith)
   town    brokenspire's town built again (build_start_section: the boarded windows' planks' colliders; the barracks' dummies
           are play's own now, so the saved build loses its static ones) and the level saved
-Run after it on brokenspire: 887 materials,data (the farms' crops and the ground's rows), 890 sky (the rain's streaks).
+Run after it on brokenspire: 887 materials,data,level (the farms' crops and the ground's rows; level builds the town again and
+saves it), 890 sky (the rain's streaks), then 898 town (or 887 level last): the saved town must be built again, or it keeps the
+barracks' static dummies under play's own and no colliders on the boarded windows' planks (PR #27's review).
 Args: [parts]   e.g.  ue_exec.py 898_improvements8.py crops,fauna,block,town"""
 import unreal, os, sys, json, gc
 

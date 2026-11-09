@@ -1104,7 +1104,8 @@ def run_her(dir_xy, sec, rec=None, every=0.1):
         yield
 def step_rain8():
     """the rain (the list of 2026-11-07: "the rain does not look like raindrops, instead they look like white rods"): the drops
-    are streaks standing up, about 26 cm by 1 cm, facing the camera, soft and see-through; pictures by day and at dusk"""
+    are streaks standing up, about 26 cm by 1 cm, each two crossed planes (one faces the camera from any way), soft and
+    see-through; the field keeps the world's axes; pictures by day and at dusk"""
     g = G["gen"]; res = {}; quiet(True)
     yield from wait_ready(90)
     sp = clear_spot("grasslands") or (9000.0, -4000.0)
@@ -1118,13 +1119,18 @@ def step_rain8():
     for c in g.get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent):
         if c.get_instance_count() > 3000 and c.is_visible():
             ts = [c.get_instance_transform(i, True) for i in range(0, 50)]
+            # (each drop two crossed upright planes at one place, one facing the world's X and one its Y; the field not turned
+            # with the camera (PR #27's review: turned with it, the rain stood still on the screen as she looked round))
+            fw = [t.rotation.get_axis_z() for t in ts]          # (a plane's face: its local Z)
             res["drops"] = {"count": c.get_instance_count(), "scale0": [round(v, 4) for v in (ts[0].scale3d.x, ts[0].scale3d.y, ts[0].scale3d.z)],
                             "up_share": round(sum(1 for t in ts if abs(t.rotation.rotator().pitch) > 80.0) / len(ts), 2),
+                            "pairs_crossed": sum(1 for k in range(0, 50, 2) if (ts[k].translation - ts[k + 1].translation).length() < 0.5
+                                                 and abs(fw[k].x * fw[k + 1].x + fw[k].y * fw[k + 1].y) < 0.05) / 25.0,
                             "field_yaw": round(c.get_world_rotation().yaw, 1), "camera_yaw": round(G["pc"].get_control_rotation().yaw, 1)}
     g.set_weather(1, True); g.set_town_hour(11.0); quiet(False)
     dr = res.get("drops", {})
     ok = res["sky"]["rain_on"] == 1 and dr.get("up_share", 0) == 1.0 and 0.2 <= dr.get("scale0", [0])[0] <= 0.4 and dr.get("scale0", [0, 1])[1] < 0.02 \
-        and abs(((dr.get("field_yaw", 999) - dr.get("camera_yaw", 0)) + 180) % 360 - 180) < 2.0
+        and dr.get("pairs_crossed", 0) == 1.0 and abs(dr.get("field_yaw", 999)) < 1.0
     step_result("rain8", ok, **res)
 def step_sky8():
     """the sky overhead (the list of 2026-11-07: "the sky when looking straight up looks like a giant circle of white that is not
@@ -1374,6 +1380,13 @@ def step_animals8():
         res["kills"][kind] = {"hp0": hp0, "hp_after_first_blow": hp_after_first, "blows": blows, "dead": dead, "drops": drops,
                               "lying_roll": round(abs(a.get_component_by_class(unreal.SkeletalMeshComponent).get_world_rotation().roll), 1) if dead else None}
         if dead:
+            # (on its side, measured by the body's axes: its length still along its facing and level, its back's up turned
+            # sideways; a roll about the mesh's own X tipped a kind turned -90 onto its nose, with the same roll: PR #27's review)
+            bm = a.get_component_by_class(unreal.SkeletalMeshComponent); af = a.get_actor_forward_vector()
+            fv, rv, uv = bm.get_forward_vector(), bm.get_right_vector(), bm.get_up_vector()
+            ln = fv if abs(fv.x * af.x + fv.y * af.y) >= abs(rv.x * af.x + rv.y * af.y) else rv
+            res["kills"][kind]["length_z"] = round(abs(ln.z), 2); res["kills"][kind]["up_z"] = round(abs(uv.z), 2)
+        if dead:
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=p.get_actor_rotation().yaw)); yield from rwait(0.8); shot(f"animals8_{kind.lower()}_dead", "1280x720"); yield from rwait(1.8)
         # (her things: the harvest by it, taken with F)
         if dead:
@@ -1440,7 +1453,8 @@ def step_animals8():
     res["wild_deer"] = rw
     g.set_editor_property("wild_animal_respawn_seconds", wait0)
     quiet(False)
-    ok = all(v.get("dead") and v.get("drops") and v.get("hp_after_first_blow") is not None and sum(v.get("taken", {}).values()) == len(v["drops"]) for v in res["kills"].values()) \
+    ok = all(v.get("dead") and v.get("drops") and v.get("hp_after_first_blow") is not None and sum(v.get("taken", {}).values()) == len(v["drops"])
+             and v.get("length_z", 1) < 0.3 and v.get("up_z", 1) < 0.3 for v in res["kills"].values()) \
         and res["killed"] >= 3 and len(res["pending_after_kills"]) >= 3 and res["places_freed_after_s"] is not None \
         and rw.get("killed") and rw.get("deer_at_20s", 99) <= rw.get("deer_after_kill", -1) and rw.get("another_came_after_s") is not None and rw["another_came_after_s"] >= 40.0
     step_result("animals8", ok, **res)

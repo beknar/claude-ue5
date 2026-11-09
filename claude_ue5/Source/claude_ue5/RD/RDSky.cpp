@@ -175,8 +175,8 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	SkyFog = FMath::FInterpConstantTo(SkyFog, SkyFogWant, Dt, 1.f / 60.f);
 	bSkySnowing = bSkyCold || Weather == 6;
 	// ---- what follows her camera every frame: the dome, the moon, the rain or snow
-	FVector Cam = L; FRotator CamR = FRotator::ZeroRotator;
-	if (PC && PC->PlayerCameraManager) { Cam = PC->PlayerCameraManager->GetCameraLocation(); CamR = PC->PlayerCameraManager->GetCameraRotation(); }
+	FVector Cam = L;
+	if (PC && PC->PlayerCameraManager) Cam = PC->PlayerCameraManager->GetCameraLocation();
 	if (SkyStars) SkyStars->SetWorldLocationAndRotation(Cam, FRotator(0.f, SkyTime * 0.15f, 0.f));
 	if (SkyHigh) SkyHigh->SetWorldLocationAndRotation(Cam, FRotator(0.f, SkyTime * 0.6f, 0.f));
 	if (SkyMoon && DayMoon)
@@ -199,8 +199,8 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		else if (bOn && !C->IsActive()) C->Activate(true);
 	};
 	const bool bInside = bTown && GetSection(FIntPoint::ZeroValue) && GetSection(FIntPoint::ZeroValue)->TownBuildingAt(L) >= 0;
-	// (the drops of our own: made once, 3000 streaks or 2500 flakes in a 36 x 36 x 18 m field; the field kept round the camera,
-	// the material moving them down through it)
+	// (the drops of our own: made once, 4500 streaks or 2500 flakes (each two crossed planes) in a 36 x 36 x 18 m field; the
+	// field kept round the camera, the material moving them down through it)
 	auto Drops = [&](TObjectPtr<UHierarchicalInstancedStaticMeshComponent>& H, TObjectPtr<UMaterialInstanceDynamic>& Mid, UMaterialInterface* Mat, int32 Count, const FVector& Scale, uint32 Sd, float Amount)
 	{
 		if (!DropMesh || !Mat) return;
@@ -222,8 +222,16 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 			// the engine's plane pitched up with its 60 cm across and its 1.6 cm up (a falling bar), turned any way (some side on).
 			// Now the plane's X (pitched up) is the streak's length and its Y its width, every drop facing the field's +X, and the
 			// field turned each frame to face the camera; the material makes each a soft streak, thin at its ends)
+			// (PR #27's review: turned with the camera's yaw, the drops turned with the view and stood still on the screen as she
+			// looked round. Each drop is now two such planes crossed, one facing the field's +X and one its +Y, so from any way
+			// one faces the camera and the two read as one streak; the field keeps the world's axes)
 			for (int32 K = 0; K < Count; ++K)
-				Xs.Add(FTransform(FRotator(90.f, 0.f, 0.f), FVector(Rd.FRandRange(-1800.f, 1800.f), Rd.FRandRange(-1800.f, 1800.f), Rd.FRandRange(0.f, 1800.f)), Scale * FVector(Rd.FRandRange(0.8f, 1.25f), 1.f, 1.f)));
+			{
+				const FVector At(Rd.FRandRange(-1800.f, 1800.f), Rd.FRandRange(-1800.f, 1800.f), Rd.FRandRange(0.f, 1800.f));
+				const FVector Sc = Scale * FVector(Rd.FRandRange(0.8f, 1.25f), 1.f, 1.f);
+				Xs.Add(FTransform(FRotator(90.f, 0.f, 0.f), At, Sc));
+				Xs.Add(FTransform(FRotator(90.f, 90.f, 0.f), At, Sc));
+			}
 			H->AddInstances(Xs, false, false, false);
 			// (the field is far larger than its instances' boxes once they move: never culled away)
 			H->BoundsScale = 20.f;
@@ -232,7 +240,7 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		const bool bOn = Amount > 0.03f && !bInside;
 		H->SetVisibility(bOn);
 		if (!bOn) return;
-		H->SetWorldLocationAndRotation(FVector(Cam.X, Cam.Y, Cam.Z - 600.f), FRotator(0.f, CamR.Yaw, 0.f));
+		H->SetWorldLocationAndRotation(FVector(Cam.X, Cam.Y, Cam.Z - 600.f), FRotator::ZeroRotator);
 		Mid->SetScalarParameterValue(TEXT("Amount"), FMath::Clamp(Amount, 0.f, 1.f));
 		Mid->SetVectorParameterValue(TEXT("Origin"), FLinearColor(Cam.X, Cam.Y, Cam.Z - 600.f, 0.f));
 		Mid->SetScalarParameterValue(TEXT("Wind"), FMath::Clamp(SkyWind, 0.f, 1.2f));

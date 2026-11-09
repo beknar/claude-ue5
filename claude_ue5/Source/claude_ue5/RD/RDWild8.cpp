@@ -13,6 +13,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "ProceduralMeshComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDWild8, Log, All);
 
@@ -29,7 +30,9 @@ float ARDDungeonGenerator::WildRunSpeedChoice(float Asked)
 
 void ARDDungeonGenerator::SetWildRunSpeed(float Factor)
 {
-	CVarRDWildRunSpeed->Set(WildRunSpeedChoice(Factor), ECVF_SetByCode);
+	// (as typed at the console: set by code it ranks under a console's setting, and once the speed had been typed the
+	// command line's and the tests' calls were refused with only a warning; PR #27's review)
+	CVarRDWildRunSpeed->Set(WildRunSpeedChoice(Factor), ECVF_SetByConsole);
 }
 
 float ARDDungeonGenerator::GetWildRunSpeed() const
@@ -52,10 +55,13 @@ void ARDDungeonGenerator::TickWildRunSpeed(APawn* P)
 	const FVector L = Ch->GetActorLocation();
 	const float Asked = GetWildRunSpeed();
 	const float Want = (IsWildReady() && !IsInTownWalls(L)) ? Asked : 1.f;
-	if (Want != WildRunApplied)
+	// (a new pawn (another hero, a respawn) comes with its own movement at 1x: applied again to it from its own base, never
+	// the last pawn's; PR #27's review)
+	if (WildRunMove.Get() != CM) { WildRunMove = CM; WildRunApplied = 1.f; }
+	if (Want != WildRunApplied || PlayerCombat->WildRunFactor != Want)
 	{
 		// (her acceleration and braking with it: at 1200 cm/s² she would take two minutes to come up to 40 times her run)
-		if (WildRunApplied == 1.f) { WildRunBaseAccel = CM->MaxAcceleration; WildRunBaseBrake = CM->BrakingDecelerationWalking; }
+		if (WildRunApplied == 1.f && Want != 1.f) { WildRunBaseAccel = CM->MaxAcceleration; WildRunBaseBrake = CM->BrakingDecelerationWalking; }
 		CM->MaxAcceleration = WildRunBaseAccel * Want;
 		CM->BrakingDecelerationWalking = WildRunBaseBrake * Want;
 		PlayerCombat->WildRunFactor = Want;
@@ -73,7 +79,14 @@ void ARDDungeonGenerator::TickWildRunSpeed(APawn* P)
 	{
 		const FIntPoint C(FMath::FloorToInt(L.X / 100.0 / WildChunkM), FMath::FloorToInt(L.Y / 100.0 / WildChunkM));
 		const TObjectPtr<ARDWildChunk>* K = WildChunks.Find(C);
-		const bool bGround = K && *K && !(*K)->bMaking;
+		// (made, and its collision there under her: a chunk asked before she sped up cooks its collision on a worker after it
+		// is made; a trace against that component alone says whether it has been cooked yet; PR #27's review)
+		bool bGround = K && *K && !(*K)->bMaking && (*K)->GroundCollision;
+		if (bGround)
+		{
+			FHitResult Hit;
+			bGround = (*K)->GroundCollision->LineTraceComponent(Hit, FVector(L.X, L.Y, L.Z + 5000.f), FVector(L.X, L.Y, L.Z - 20000.f), FCollisionQueryParams(SCENE_QUERY_STAT(RDWildRunGround), false));
+		}
 		if (!bGround)
 		{
 			const float Z = WildGroundZ(L) + Ch->GetSimpleCollisionHalfHeight() + 2.f;
