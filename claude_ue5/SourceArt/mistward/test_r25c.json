@@ -1,0 +1,1682 @@
+{
+ "tag": "r25c",
+ "plan": [
+  "summoner",
+  "growth",
+  "allyspace",
+  "martial",
+  "tiers",
+  "rooms",
+  "pickups",
+  "cells"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "summoner",
+   "ok": true,
+   "pawn": "BP_SU4_SummonerCharacter_C",
+   "hp": 85.0,
+   "mana": 60.0,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ],
+   "same_as_mage": [
+    true,
+    true
+   ],
+   "clips": [
+    "AS_Summoner4_CastBolt",
+    "AS_Summoner4_Summon1",
+    "AS_Summoner4_Summon2",
+    "AS_Summoner4_Summon3",
+    "AS_Summoner4_Summon4",
+    "AS_Summoner4_Summon5"
+   ],
+   "fire": {
+    "started": true,
+    "lost": 25.0
+   },
+   "summon": [
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 1,
+     "message": "Rotting Soldier answers your call  (1 of 2)"
+    },
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 2,
+     "message": "Rotting Soldier answers your call  (2 of 2)"
+    },
+    {
+     "started": false,
+     "mana": 0.0,
+     "count": 2,
+     "message": "You lead 2 of them already (Rotting Soldier): no more answer Summon Tier 1"
+    }
+   ],
+   "allies": [
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    },
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    }
+   ],
+   "tier1_soldier": {
+    "hp": 60.0,
+    "damage": 14.0
+   },
+   "want_ally_hp": 40,
+   "allies_fight": 25.2,
+   "dagger": {
+    "index": 3,
+    "both_hands": true
+   },
+   "slash": {
+    "begun": false,
+    "message": "Only a warrior's weapons take the ember slash"
+   },
+   "armour_worn": "None",
+   "hp_ring": false,
+   "magic_ring": true,
+   "mana_ringed": 66.0,
+   "summon_mana_ringed": 33.0,
+   "tome": {
+    "knows": false,
+    "carried": 1
+   },
+   "torch": true,
+   "boss": {
+    "weapons": [
+     "Summon Tier 2"
+    ],
+    "unlocked": 1
+   },
+   "tier2": {
+    "started": true,
+    "mana": 33.0,
+    "kinds": [
+     "Gunner"
+    ]
+   },
+   "after_death": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Summon Tier 2"
+   ],
+   "after_restart": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ]
+  },
+  {
+   "step": "growth",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      241.0
+     ],
+     "want_hp": 241,
+     "says": "Tier 5 opens: you grow stronger (241 hit points)",
+     "weapons": [
+      [
+       "Dagger",
+       "own",
+       14.3,
+       14.3
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Mage": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      70.0,
+      112.0
+     ],
+     "want_hp": 112,
+     "says": "Tier 5 opens: you grow stronger (112 hit points, spells +48%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       37.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       56.2
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.5,
+      2.5
+     ],
+     "after_restart": [
+      1,
+      70.0
+     ]
+    },
+    "Warlock": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      200.0
+     ],
+     "want_hp": 200,
+     "says": "Tier 5 opens: you grow stronger (200 hit points, spells +80%, your own weapons +120%)",
+     "weapons": [
+      [
+       "Sword",
+       "own",
+       22.0,
+       48.4
+      ],
+      [
+       "Fire",
+       "spell",
+       25.0,
+       45.0
+      ]
+     ],
+     "factors_ok": true,
+     "found_weapon": [
+      78.0,
+      78
+     ],
+     "regen": [
+      1.51,
+      1.5
+     ],
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "Rogue": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      180.0
+     ],
+     "want_hp": 180,
+     "says": "Tier 5 opens: you grow stronger (180 hit points, your own weapons +32%)",
+     "weapons": [
+      [
+       "Daggers",
+       "own",
+       13.0,
+       17.2
+      ],
+      [
+       "Crossbow",
+       "own",
+       33.8,
+       44.6
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "MartialArtist": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      252.0
+     ],
+     "want_hp": 252,
+     "says": "Tier 5 opens: you grow stronger (252 hit points, chi +48%, fists +48%)",
+     "weapons": [
+      [
+       "Fists",
+       "own",
+       44.0,
+       65.1
+      ],
+      [
+       "Straight Punch",
+       "spell",
+       23.0,
+       34.0
+      ],
+      [
+       "Side Kick",
+       "spell",
+       45.0,
+       66.6
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.02,
+      2.0
+     ],
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Summoner": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      85.0,
+      170.0
+     ],
+     "want_hp": 170,
+     "says": "Tier 5 opens: you grow stronger (170 hit points, 84 mana, your 2 summons, spells +60%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       40.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       60.8
+      ],
+      [
+       "Summon Tier 1",
+       "spell",
+       0.0,
+       0.0
+      ]
+     ],
+     "mana": [
+      60.0,
+      84.0,
+      84
+     ],
+     "summons": {
+      "at_tier_1": [
+       [
+        1,
+        40,
+        9,
+        102,
+        1.84
+       ],
+       [
+        1,
+        40,
+        9,
+        102,
+        1.84
+       ]
+      ],
+      "at_tier_5": [
+       [
+        5,
+        272,
+        44,
+        122,
+        1.248
+       ],
+       [
+        5,
+        272,
+        44,
+        122,
+        1.248
+       ]
+      ],
+      "want": [
+       5,
+       272,
+       44
+      ],
+      "tier5_soldier_pace": [
+       122,
+       1.248
+      ]
+     },
+     "factors_ok": true,
+     "regen": [
+      3.36,
+      3.36
+     ],
+     "after_restart": [
+      1,
+      85.0
+     ]
+    }
+   },
+   "found": {
+    "Viking Shortsword": [
+     20.0,
+     20
+    ],
+    "Fine Viking Shortsword": [
+     56.0,
+     56
+    ],
+    "Masterwork Viking Shortsword": [
+     99.0,
+     99
+    ],
+    "Exalted Viking Shortsword": [
+     174.0,
+     174
+    ],
+    "Celestial Viking Shortsword": [
+     307.0,
+     307
+    ],
+    "Sherwood Sword": [
+     20.0,
+     20
+    ],
+    "Fine Sherwood Sword": [
+     56.0,
+     56
+    ],
+    "Masterwork Sherwood Sword": [
+     99.0,
+     99
+    ],
+    "Exalted Sherwood Sword": [
+     174.0,
+     174
+    ],
+    "Celestial Sherwood Sword": [
+     307.0,
+     307
+    ],
+    "Orc Cleaver": [
+     30.0,
+     30
+    ],
+    "Fine Orc Cleaver": [
+     72.0,
+     72
+    ],
+    "Masterwork Orc Cleaver": [
+     127.0,
+     127
+    ],
+    "Exalted Orc Cleaver": [
+     224.0,
+     224
+    ],
+    "Celestial Orc Cleaver": [
+     395.0,
+     395
+    ],
+    "Toothed Bone Sword": [
+     34.0,
+     34
+    ],
+    "Fine Toothed Bone Sword": [
+     82.0,
+     82
+    ],
+    "Masterwork Toothed Bone Sword": [
+     144.0,
+     144
+    ],
+    "Exalted Toothed Bone Sword": [
+     253.0,
+     253
+    ],
+    "Celestial Toothed Bone Sword": [
+     446.0,
+     446
+    ],
+    "Arming Sword": [
+     26.0,
+     26
+    ],
+    "Fine Arming Sword": [
+     73.0,
+     73
+    ],
+    "Masterwork Arming Sword": [
+     128.0,
+     128
+    ],
+    "Exalted Arming Sword": [
+     226.0,
+     226
+    ],
+    "Celestial Arming Sword": [
+     398.0,
+     398
+    ],
+    "Longsword": [
+     29.0,
+     29
+    ],
+    "Fine Longsword": [
+     81.0,
+     81
+    ],
+    "Masterwork Longsword": [
+     143.0,
+     143
+    ],
+    "Exalted Longsword": [
+     252.0,
+     252
+    ],
+    "Celestial Longsword": [
+     444.0,
+     444
+    ],
+    "Viking Sword": [
+     29.0,
+     29
+    ],
+    "Fine Viking Sword": [
+     81.0,
+     81
+    ],
+    "Masterwork Viking Sword": [
+     143.0,
+     143
+    ],
+    "Exalted Viking Sword": [
+     252.0,
+     252
+    ],
+    "Celestial Viking Sword": [
+     444.0,
+     444
+    ],
+    "Veteran's Sword": [
+     42.0,
+     42
+    ],
+    "Fine Veteran's Sword": [
+     100.0,
+     100
+    ],
+    "Masterwork Veteran's Sword": [
+     177.0,
+     177
+    ],
+    "Exalted Veteran's Sword": [
+     312.0,
+     312
+    ],
+    "Celestial Veteran's Sword": [
+     549.0,
+     549
+    ],
+    "Templar Sword": [
+     42.0,
+     42
+    ],
+    "Fine Templar Sword": [
+     100.0,
+     100
+    ],
+    "Masterwork Templar Sword": [
+     177.0,
+     177
+    ],
+    "Exalted Templar Sword": [
+     312.0,
+     312
+    ],
+    "Celestial Templar Sword": [
+     549.0,
+     549
+    ],
+    "Plate Knight's Sword": [
+     46.0,
+     46
+    ],
+    "Fine Plate Knight's Sword": [
+     110.0,
+     110
+    ],
+    "Masterwork Plate Knight's Sword": [
+     193.0,
+     193
+    ],
+    "Exalted Plate Knight's Sword": [
+     341.0,
+     341
+    ],
+    "Celestial Plate Knight's Sword": [
+     601.0,
+     601
+    ],
+    "Paladin's Sword": [
+     46.0,
+     46
+    ],
+    "Fine Paladin's Sword": [
+     110.0,
+     110
+    ],
+    "Masterwork Paladin's Sword": [
+     193.0,
+     193
+    ],
+    "Exalted Paladin's Sword": [
+     341.0,
+     341
+    ],
+    "Celestial Paladin's Sword": [
+     601.0,
+     601
+    ],
+    "Dark Knight's Sword": [
+     63.0,
+     63
+    ],
+    "Fine Dark Knight's Sword": [
+     133.0,
+     133
+    ],
+    "Masterwork Dark Knight's Sword": [
+     235.0,
+     235
+    ],
+    "Exalted Dark Knight's Sword": [
+     415.0,
+     415
+    ],
+    "Celestial Dark Knight's Sword": [
+     731.0,
+     731
+    ],
+    "Ursag's Horn Blade": [
+     78.0,
+     78
+    ],
+    "Fine Ursag's Horn Blade": [
+     149.0,
+     149
+    ],
+    "Masterwork Ursag's Horn Blade": [
+     263.0,
+     263
+    ],
+    "Exalted Ursag's Horn Blade": [
+     464.0,
+     464
+    ],
+    "Celestial Ursag's Horn Blade": [
+     818.0,
+     818
+    ],
+    "Eastern Sabre": [
+     20.0,
+     20
+    ],
+    "Fine Eastern Sabre": [
+     56.0,
+     56
+    ],
+    "Masterwork Eastern Sabre": [
+     99.0,
+     99
+    ],
+    "Exalted Eastern Sabre": [
+     174.0,
+     174
+    ],
+    "Celestial Eastern Sabre": [
+     307.0,
+     307
+    ],
+    "Katana": [
+     30.0,
+     30
+    ],
+    "Fine Katana": [
+     72.0,
+     72
+    ],
+    "Masterwork Katana": [
+     127.0,
+     127
+    ],
+    "Exalted Katana": [
+     224.0,
+     224
+    ],
+    "Celestial Katana": [
+     395.0,
+     395
+    ],
+    "Wakizashi": [
+     43.0,
+     43
+    ],
+    "Fine Wakizashi": [
+     91.0,
+     91
+    ],
+    "Masterwork Wakizashi": [
+     161.0,
+     161
+    ],
+    "Exalted Wakizashi": [
+     284.0,
+     284
+    ],
+    "Celestial Wakizashi": [
+     500.0,
+     500
+    ],
+    "Dagger": [
+     11.0,
+     11
+    ],
+    "Fine Dagger": [
+     31.0,
+     31
+    ],
+    "Masterwork Dagger": [
+     54.0,
+     54
+    ],
+    "Exalted Dagger": [
+     96.0,
+     96
+    ],
+    "Celestial Dagger": [
+     169.0,
+     169
+    ],
+    "Leaf-Blade Knife": [
+     11.0,
+     11
+    ],
+    "Fine Leaf-Blade Knife": [
+     31.0,
+     31
+    ],
+    "Masterwork Leaf-Blade Knife": [
+     54.0,
+     54
+    ],
+    "Exalted Leaf-Blade Knife": [
+     96.0,
+     96
+    ],
+    "Celestial Leaf-Blade Knife": [
+     169.0,
+     169
+    ],
+    "Obsidian Knife": [
+     14.0,
+     14
+    ],
+    "Fine Obsidian Knife": [
+     34.0,
+     34
+    ],
+    "Masterwork Obsidian Knife": [
+     61.0,
+     61
+    ],
+    "Exalted Obsidian Knife": [
+     107.0,
+     107
+    ],
+    "Celestial Obsidian Knife": [
+     189.0,
+     189
+    ],
+    "Bone Blade": [
+     18.0,
+     18
+    ],
+    "Fine Bone Blade": [
+     44.0,
+     44
+    ],
+    "Masterwork Bone Blade": [
+     77.0,
+     77
+    ],
+    "Exalted Bone Blade": [
+     136.0,
+     136
+    ],
+    "Celestial Bone Blade": [
+     240.0,
+     240
+    ],
+    "Combat Knife": [
+     23.0,
+     23
+    ],
+    "Fine Combat Knife": [
+     49.0,
+     49
+    ],
+    "Masterwork Combat Knife": [
+     87.0,
+     87
+    ],
+    "Exalted Combat Knife": [
+     153.0,
+     153
+    ],
+    "Celestial Combat Knife": [
+     269.0,
+     269
+    ],
+    "Survival Knife": [
+     23.0,
+     23
+    ],
+    "Fine Survival Knife": [
+     49.0,
+     49
+    ],
+    "Masterwork Survival Knife": [
+     87.0,
+     87
+    ],
+    "Exalted Survival Knife": [
+     153.0,
+     153
+    ],
+    "Celestial Survival Knife": [
+     269.0,
+     269
+    ],
+    "Kukri": [
+     35.0,
+     35
+    ],
+    "Fine Kukri": [
+     67.0,
+     67
+    ],
+    "Masterwork Kukri": [
+     118.0,
+     118
+    ],
+    "Exalted Kukri": [
+     208.0,
+     208
+    ],
+    "Celestial Kukri": [
+     366.0,
+     366
+    ],
+    "Sniper's Knife": [
+     35.0,
+     35
+    ],
+    "Fine Sniper's Knife": [
+     67.0,
+     67
+    ],
+    "Masterwork Sniper's Knife": [
+     118.0,
+     118
+    ],
+    "Exalted Sniper's Knife": [
+     208.0,
+     208
+    ],
+    "Celestial Sniper's Knife": [
+     366.0,
+     366
+    ],
+    "Wrist Blade": [
+     42.0,
+     42
+    ],
+    "Fine Wrist Blade": [
+     75.0,
+     75
+    ],
+    "Masterwork Wrist Blade": [
+     132.0,
+     132
+    ],
+    "Exalted Wrist Blade": [
+     233.0,
+     233
+    ],
+    "Celestial Wrist Blade": [
+     410.0,
+     410
+    ],
+    "Longbow": [
+     20.0,
+     20
+    ],
+    "Fine Longbow": [
+     56.0,
+     56
+    ],
+    "Masterwork Longbow": [
+     99.0,
+     99
+    ],
+    "Exalted Longbow": [
+     174.0,
+     174
+    ],
+    "Celestial Longbow": [
+     307.0,
+     307
+    ],
+    "Viking Bow": [
+     26.0,
+     26
+    ],
+    "Fine Viking Bow": [
+     63.0,
+     63
+    ],
+    "Masterwork Viking Bow": [
+     111.0,
+     111
+    ],
+    "Exalted Viking Bow": [
+     195.0,
+     195
+    ],
+    "Celestial Viking Bow": [
+     343.0,
+     343
+    ],
+    "Crossbow": [
+     38.0,
+     38
+    ],
+    "Fine Crossbow": [
+     81.0,
+     81
+    ],
+    "Masterwork Crossbow": [
+     142.0,
+     142
+    ],
+    "Exalted Crossbow": [
+     251.0,
+     251
+    ],
+    "Celestial Crossbow": [
+     442.0,
+     442
+    ],
+    "Dwarf Crossbow": [
+     53.0,
+     53
+    ],
+    "Fine Dwarf Crossbow": [
+     102.0,
+     102
+    ],
+    "Masterwork Dwarf Crossbow": [
+     180.0,
+     180
+    ],
+    "Exalted Dwarf Crossbow": [
+     318.0,
+     318
+    ],
+    "Celestial Dwarf Crossbow": [
+     560.0,
+     560
+    ]
+   }
+  },
+  {
+   "step": "allyspace",
+   "ok": true,
+   "called": [
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 1,
+     "least_gap": null
+    },
+    {
+     "spell": "Summon Tier 1",
+     "started": true,
+     "allies": 2,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 3,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 2",
+     "started": true,
+     "allies": 4,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 5,
+     "least_gap": 58.3
+    },
+    {
+     "spell": "Summon Tier 3",
+     "started": true,
+     "allies": 6,
+     "least_gap": 58.3
+    }
+   ],
+   "off": {
+    "moving_least": -75.8,
+    "standing_least": -74.1,
+    "standing_overlap_share": 1.0
+   },
+   "on": {
+    "moving_least": 1.0,
+    "standing_least": 20.0,
+    "standing_overlap_share": 0.0
+   },
+   "far": {
+    "moved_m": 155.9,
+    "near_her": 6,
+    "allies": 6,
+    "least_gap": 58.3,
+    "behind_her": 0
+   },
+   "panel": {
+    "rows": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|85/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "after_hurt": [
+     "Rotting Soldier|2|2|40/40,40/40",
+     "Grave Gunner|2|3|68/85,85/85",
+     "Orc Skirmisher|2|4|144/144,144/144"
+    ],
+    "hurt_hp": [
+     85.0,
+     68.0
+    ]
+   },
+   "marks": {
+    "allies": 6,
+    "minimap": 6,
+    "minimap_matched": 6,
+    "big": 6,
+    "big_matched": 6
+   }
+  },
+  {
+   "step": "martial",
+   "ok": true,
+   "hero": "MartialArtist",
+   "hp": 140.0,
+   "mana": 100.0,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ],
+   "pawn": "BP_MA_MartialArtistCharacter_C",
+   "fists": {
+    "damage": 44.0,
+    "damage_of": 44.0,
+    "bonus": 0.0,
+    "started": true,
+    "lost": 44.0,
+    "hits": 1
+   },
+   "ring_worn": true,
+   "ring": {
+    "amount": 2.200000047683716,
+    "fists": 140.8,
+    "chi": 23.0
+   },
+   "knife": {
+    "index": 3,
+    "damage": 11.0,
+    "damage_of": 38.5,
+    "bonus": 2.5,
+    "both_hands": true,
+    "type": "short blades",
+    "lost": 38.5
+   },
+   "ring_off": {
+    "fists": 44.0,
+    "knife": 14.3
+   },
+   "chi": {
+    "name": "Straight Punch",
+    "started": true,
+    "mana": 7.0,
+    "lost": 23.0,
+    "fx": 36,
+    "released": 0,
+    "bolts": 1,
+    "damage_of": 23.0,
+    "pictured": true,
+    "splash_lost": 11.5
+   },
+   "chi_far": {
+    "name": "Straight Punch",
+    "started": false,
+    "mana": 0.0,
+    "lost": 0.0,
+    "fx": 0,
+    "released": 0,
+    "bolts": 0,
+    "damage_of": 23.0,
+    "pictured": false
+   },
+   "dash": {
+    "started": true,
+    "before_m": 6.0,
+    "after_m": 0.76,
+    "length": 444.0,
+    "at_it": true,
+    "attacked": 1,
+    "lost": 44.0,
+    "dashes": 1
+   },
+   "rolls": 1,
+   "medium_worn": "None",
+   "light_worn": "Desert Hero’s Armour",
+   "armour_share": 0.2,
+   "boss": {
+    "weapons": [
+     "Smashing Strike",
+     "Roundhouse Kick"
+    ],
+    "unlocked": 2
+   },
+   "asked": 2,
+   "after_ask": [
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_death": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_restart": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ]
+  },
+  {
+   "step": "tiers",
+   "ok": true,
+   "ok_tier2": true,
+   "ok_tier3": true,
+   "share": 0.5,
+   "tally1_start": {
+    "ok": true,
+    "done": [
+     1,
+     0,
+     0
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "standing_before": 14,
+   "kills": [
+    {
+     "killed": 0,
+     "of": 14,
+     "share": 0.0,
+     "open": false
+    },
+    {
+     "killed": 1,
+     "of": 14,
+     "share": 0.071,
+     "open": false
+    },
+    {
+     "killed": 2,
+     "of": 14,
+     "share": 0.143,
+     "open": false
+    },
+    {
+     "killed": 3,
+     "of": 14,
+     "share": 0.214,
+     "open": false
+    },
+    {
+     "killed": 4,
+     "of": 14,
+     "share": 0.286,
+     "open": false
+    },
+    {
+     "killed": 5,
+     "of": 14,
+     "share": 0.357,
+     "open": false
+    },
+    {
+     "killed": 6,
+     "of": 14,
+     "share": 0.429,
+     "open": false
+    },
+    {
+     "killed": 7,
+     "of": 14,
+     "share": 0.5,
+     "open": true
+    }
+   ],
+   "open_short": false,
+   "opened_at_share": 0.5,
+   "last_shut_share": 0.429,
+   "tally1_enough": {
+    "ok": true,
+    "done": [
+     46,
+     7,
+     71
+    ],
+    "all": [
+     46,
+     14,
+     71
+    ]
+   },
+   "open_enough": true,
+   "notice": "TIER 2 IS OPEN  -  A BOSS WAITS IN THE GUARD ROOM (SEE YOUR MAP)",
+   "tier2": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       7050.0,
+       450.0,
+       124.0
+      ],
+      "name": "Orc_03",
+      "alive": 1,
+      "tier": 2,
+      "label": "TIER 2 BOSS: ORC RAIDER",
+      "max_health": 360.0
+     }
+    ],
+    "band": 4,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       450.0,
+       4050.0,
+       88.0
+      ],
+      "name": "Magic Potency Ring 1",
+      "key": -1,
+      "tier": 2,
+      "section": [
+       0,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 1,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     97.0,
+     103.0,
+     109.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 1"
+    ],
+    "ring_in_pile": true,
+    "ring_kind_ok": true
+   },
+   "marks_minimap": [
+    7,
+    8,
+    10
+   ],
+   "marks_map": [
+    7,
+    8,
+    10
+   ],
+   "notices_tier2": [
+    "SET CLEARED  -  TIER 2: 1 / 8",
+    "SET CLEARED  -  TIER 2: 2 / 8",
+    "SET CLEARED  -  TIER 2: 3 / 8",
+    "SET CLEARED  -  TIER 2: 4 / 8",
+    "TIER 3 IS OPEN  -  A BOSS WAITS IN THE PRISON CELLS (SEE YOUR MAP)",
+    "SET CLEARED  -  TIER 2: 6 / 8",
+    "SET CLEARED  -  TIER 2: 7 / 8",
+    "TIER 2 CLEARED"
+   ],
+   "tally2": {
+    "ok": true,
+    "done": [
+     326,
+     98,
+     626
+    ],
+    "all": [
+     326,
+     98,
+     626
+    ]
+   },
+   "open3": true,
+   "notice3": "TIER 2 CLEARED",
+   "tiers_opened": [
+    2,
+    3
+   ],
+   "tier3": {
+    "boss": [
+     {
+      "kind": "boss",
+      "at": [
+       -18150.0,
+       -450.0,
+       116.0
+      ],
+      "name": "Tank",
+      "alive": 1,
+      "tier": 3,
+      "label": "TIER 3 BOSS: ZOMBIE TANK",
+      "max_health": 576.0
+     }
+    ],
+    "band": 6,
+    "guards": 4,
+    "ring": [
+     {
+      "kind": "ring",
+      "at": [
+       -14100.0,
+       -10950.0,
+       102.0
+      ],
+      "name": "Magic Potency Ring 3",
+      "key": -1,
+      "tier": 3,
+      "section": [
+       -1,
+       0
+      ]
+     }
+    ],
+    "boss_tier_of_room": 2,
+    "boss_room_is_hers": false,
+    "boss_scale": 1.35,
+    "boss_mesh_scale": 1.35,
+    "band_health": [
+     133.0,
+     148.0,
+     172.0,
+     177.0,
+     182.0
+    ],
+    "ring_first_in_container": [
+     "Magic Potency Ring 3"
+    ],
+    "ring_in_pile": true,
+    "ring_kind_ok": true
+   },
+   "seconds": 8.5
+  },
+  {
+   "step": "rooms",
+   "ok": true,
+   "kinds": {
+    "Trap gauntlet": 6,
+    "Fountain of speed": 4,
+    "Vault": 4,
+    "Arena": 5,
+    "Shrine": 4,
+    "Fountain of mana": 4,
+    "Healing fountain": 3,
+    "Throne room": 2
+   },
+   "refused": [],
+   "shrine": {
+    "describe": "pray at the shrine",
+    "f": "shrine",
+    "blessing": "Blessing of might",
+    "damage_x": 1.25,
+    "armour": 0.0,
+    "speed": 0.0,
+    "again": "shrine used"
+   },
+   "heal": {
+    "f": "fountain",
+    "hp_gain": 0.6,
+    "speed_x": 1.0,
+    "speed_bonus": 0.0,
+    "again": "fountain dry",
+    "particles": 12
+   },
+   "speed": {
+    "f": "fountain",
+    "hp_gain": 0.0,
+    "speed_x": 1.3,
+    "speed_bonus": 0.3,
+    "again": "fountain dry",
+    "particles": 18
+   },
+   "mana": {
+    "f": "fountain",
+    "mana": [
+     0.0,
+     100.0,
+     100.0
+    ],
+    "again": "fountain dry"
+   },
+   "arena": {
+    "doors": 8,
+    "open_before": 8,
+    "began": true,
+    "doors_open_after_begin": 0,
+    "pushed_open": false,
+    "waves": [
+     {
+      "wave": 0,
+      "left": 3
+     },
+     {
+      "wave": 1,
+      "left": 3
+     },
+     {
+      "wave": 2,
+      "left": 3
+     },
+     {
+      "wave": -1,
+      "left": 0
+     }
+    ],
+    "won": 1,
+    "prize": [
+     [
+      "Medium Healing Potion",
+      "Patch Kit",
+      "Viking Shield (green and white)"
+     ]
+    ],
+    "harvest_piles": 10,
+    "opens_after": true
+   },
+   "gauntlet": {
+    "traps": 13,
+    "kinds": [
+     "Cursed",
+     "Darts",
+     "Deadfall",
+     "Glyph",
+     "Pit",
+     "Spring"
+    ],
+    "chests": 1,
+    "chest_loot": [
+     "Viking Round Shield",
+     "Orc Skirmisher’s Armour",
+     "Bread"
+    ]
+   },
+   "vault": {
+    "doors": 4,
+    "locked_f": "vault locked",
+    "open_without_key": false,
+    "key_chests": 1,
+    "key_room": 17,
+    "key_chest_f": "chest",
+    "other_opened": 0,
+    "has_key": 1,
+    "f": "vault",
+    "open_with_key": true,
+    "key_after": 0,
+    "vault_chests": 23,
+    "vault_loot": [
+     "HP Potency Ring 6",
+     "Rare Speed Potion"
+    ],
+    "tier_beyond": [
+     [
+      3
+     ],
+     [
+      3,
+      8,
+      13,
+      18,
+      23
+     ]
+    ]
+   },
+   "throne": {
+    "encounters": 2,
+    "label": "THE USURPER: ORC RAIDER",
+    "alive": 1,
+    "slain_notice": "THE USURPER IS SLAIN  -  THE WAVE SLASH IS YOURS",
+    "usurper_uses": 1,
+    "slashes_given": [
+     "Wave Slash"
+    ],
+    "slash_in_pack": [
+     "slash|Wave Slash|1"
+    ]
+   }
+  },
+  {
+   "step": "pickups",
+   "ok": true,
+   "pickups": 16,
+   "items": [
+    "Arming Sword",
+    "Dagger",
+    "Leaf-Blade Knife",
+    "Longbow",
+    "Longsword",
+    "Sherwood Sword",
+    "Viking Shortsword",
+    "Viking Sword",
+    "Village Shield (red)"
+   ],
+   "drawn": 16,
+   "tier_ok": true,
+   "stand": {
+    "room": 20,
+    "at": [
+     10497,
+     -2926
+    ],
+    "st": [
+     10617,
+     -2926
+    ],
+    "her": [
+     10617,
+     -2926,
+     84
+    ],
+    "her_d": 120
+   },
+   "describe": "take the sherwood sword",
+   "f_refused": "",
+   "took": {
+    "item": "Sherwood Sword",
+    "gained": 1,
+    "taken_flag": "1",
+    "drawn": "0",
+    "taken_total": 1
+   }
+  },
+  {
+   "step": "cells",
+   "ok": true,
+   "cells": 23,
+   "prisoners": 10,
+   "monsters": 5,
+   "empty": 8,
+   "prisoner": {
+    "describe": "unlock the cell: free the prisoner",
+    "f": "prisoner",
+    "freed": 1,
+    "says": "The prisoner thanks you and gives you patch kit",
+    "found": "Patch Kit",
+    "carried_more": 1,
+    "gone": true,
+    "door_open": true
+   },
+   "monster": {
+    "caged_before": true,
+    "lonely": true,
+    "far_d": 460,
+    "opened_far": 0,
+    "near_d": 250,
+    "track": [
+     [
+      135,
+      41
+     ],
+     [
+      216,
+      54
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ],
+     [
+      262,
+      62
+     ]
+    ],
+    "her": [
+     400,
+     73
+    ],
+    "door_alpha": 1.0,
+    "breakouts": 1,
+    "caged_after": false,
+    "came_m": 2.1,
+    "hp_lost": 28.0,
+    "out_of_cell_m": 2.69
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_r25c_summoner_soldiers.png",
+  "mw_r25c_summon_panel.png",
+  "mw_r25c_ally_marks_map.png",
+  "mw_r25c_ma_knife.png",
+  "mw_r25c_ma_chi_straight.png",
+  "mw_r25c_ma_dash.png",
+  "mw_r25c_ma_armour.png",
+  "mw_r25c_map_tier2.png",
+  "mw_r25c_room_shrine.png",
+  "mw_r25c_room_heal.png",
+  "mw_r25c_room_speed.png",
+  "mw_r25c_room_mana.png",
+  "mw_r25c_room_gauntlet.png",
+  "mw_r25c_room_vault.png",
+  "mw_r25c_room_throne.png",
+  "mw_r25c_pickup_before.png",
+  "mw_r25c_pickup_after.png",
+  "mw_r25c_cell_prisoner_before.png",
+  "mw_r25c_cell_prisoner_out.png",
+  "mw_r25c_cell_monster.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

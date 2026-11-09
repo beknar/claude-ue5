@@ -320,6 +320,46 @@ public:
 	// (EndPiece) at the end of the dungeon, both with a blocker as tall as the hallway.
 	/** the last tier (0: no tiers, the dungeon goes on for ever) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 MaxTier = 0;
+	/** (the rebalance to tier 25, the list of 2026-11-08b's fifth phase) this level's tiers in the game's: its tier T is the game's
+	 *  DungeonTierBase + T, at most DungeonTierCap (0: none): Mistward Castle 0 (1-5), Vel Morrath 5, The War Engine 10, the Sewers 15,
+	 *  Kethrys Spire 20 (21-25), Heaven 24 capped at 25. The monsters' strength, the loot's tiers and the hero's growth go by it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 DungeonTierBase = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") int32 DungeonTierCap = 0;
+	/** past the game's tier 5: the hero's hit points and mana grow by TierGrowthHealth a tier, her power (spells, her own weapons,
+	 *  chi, summons) by TierGrowthPower, as the monsters' (TierHealth / TierDamage past 5, 910) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") float TierGrowthHealth = 1.09f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") float TierGrowthPower = 1.12f;
+	/** the game's tier of this level's tier T */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 GlobalTier(int32 Tier) const;
+	/** the deepest game's tier opened in any dungeon of the chain (or this level's): the town's and the wilds' prices and growth */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 GameGlobalTier() const;
+	/** the tier the hero grows by: this level's open tier in the game's tiers, at least the deepest she has opened anywhere */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 GrowthTier() const;
+	/** a container whose loot the rules put first (a guarded ring, a vault's or a gauntlet's things, a vault's key): its index as
+	 *  LootListOf takes it (the tests tell the random draw from it) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool HasForcedLoot(FIntPoint Section, int32 Index) const;
+	/** a tier table's value at this level's tier T (the game's tier: GlobalTier) */
+	float TierValueAt(const TArray<float>& List, int32 Tier, float Def) const { return TierValue(List, GlobalTier(Tier), Def); }
+	/** a growth by tier: 1 + PerTier a tier up to tier 5, times Past5 a tier beyond it */
+	static float GrowthAt(float PerTier, int32 Tier, float Past5) { return (1.f + PerTier * (FMath::Min(Tier, 5) - 1)) * FMath::Pow(Past5, (float)FMath::Max(Tier - 5, 0)); }
+	/** the hero's abilities earned in the later dungeons whose last boss has fallen (FRDHeroDef::LaterWeapons), into her weapons;
+	 *  with Announce a message for each new one. Returns how many were added */
+	int32 GrantLaterWeapons(bool bAnnounce);
+	/** this level's place in the chain of dungeons (0 Mistward Castle; -1 none) */
+	int32 ChainIndexHere() const;
+	/** a level's tier T in the game's tiers by a base and a cap (0: none): GlobalTier's and the chain's (GameGlobalTier) one rule */
+	static int32 MapTier(int32 Tier, int32 Base, int32 Cap) { return Cap > 0 ? FMath::Min(Tier + Base, Cap) : Tier + Base; }
+	/** the level's tier that maps to a game's tier (at least 1): a summon grown to the game's tier is spawned at it */
+	int32 LevelTierOf(int32 GameTier) const { return FMath::Max(1, GameTier - DungeonTierBase); }
+	/** an item found in this level's tier T: no tiers, or the game's tier of T among them (every reader of an item's Tiers) */
+	bool ItemOfTier(const FRDItemDef& It, int32 Tier) const { return It.Tiers.Num() == 0 || It.Tiers.Contains(GlobalTier(Tier)); }
+	/** the kinds the wilds meet at a game's tier (their wild bands): their factors' plain mean (the wilds pick a kind evenly);
+	 *  false when no kind has a band holding it */
+	bool MeanWildFactors(float& Health, float& Damage, int32 Tier) const;
+	/** GameGlobalTier kept for the frame it was read in while the tiers opened here stay as many (it walks the chain and the game
+	 *  instance's dungeons; growth reads it at every blow and every redraw; a tier opening reads it in the same frame) */
+	mutable int32 CachedGameTier = 0, CachedGameTierOpened = -1;
+	mutable uint64 CachedGameTierFrame = MAX_uint64;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName SealPiece = TEXT("CellFrame");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName EndPiece = TEXT("Wall_Corr");
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierOf(FIntPoint Section) const { return FMath::Max(FMath::Abs(Section.X), FMath::Abs(Section.Y)) + 1; }
@@ -1006,7 +1046,7 @@ public:
 	// <key item>|<map item>" from Mistward Castle (its key empty, no key or map) to Heaven; each dungeon's boss drops the next's key
 	// and map, and the way into a town's dungeon is refused without its key. 905 writes it on every map (SourceArt/dungeons/chain.json)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Keys") TArray<FString> DungeonChain;
-	struct FRDChainLink { FString Key, Level, Short, Town, Title; FName KeyItem, MapItem; };
+	struct FRDChainLink { FString Key, Level, Short, Town, Title; FName KeyItem, MapItem; int32 TierBase = 0, TierCap = 0; };
 	/** the chain parsed (once, again when its text changes) */
 	const TArray<FRDChainLink>& Chain() const;
 	mutable TArray<FRDChainLink> ChainCache;

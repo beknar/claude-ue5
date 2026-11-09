@@ -26,25 +26,25 @@ int32 ARDDungeonGenerator::GetOpenTier() const
 float ARDDungeonGenerator::TierHealthMul() const
 {
 	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
-	return H ? 1.f + H->HealthPerTier * (GetOpenTier() - 1) : 1.f;
+	return H ? GrowthAt(H->HealthPerTier, GrowthTier(), TierGrowthHealth) : 1.f;
 }
 
 float ARDDungeonGenerator::TierSpellMul() const
 {
 	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
-	return H ? 1.f + H->SpellPowerPerTier * (GetOpenTier() - 1) : 1.f;
+	return H ? GrowthAt(H->SpellPowerPerTier, GrowthTier(), TierGrowthPower) : 1.f;
 }
 
 float ARDDungeonGenerator::TierOwnWeaponMul() const
 {
 	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
-	return H ? 1.f + H->OwnWeaponPowerPerTier * (GetOpenTier() - 1) : 1.f;
+	return H ? GrowthAt(H->OwnWeaponPowerPerTier, GrowthTier(), TierGrowthPower) : 1.f;
 }
 
 float ARDDungeonGenerator::TierManaMul() const
 {
 	const FRDHeroDef* H = bTierGrowth ? FindHero(CurrentHero) : nullptr;
-	return H ? 1.f + H->ManaPerTier * (GetOpenTier() - 1) : 1.f;
+	return H ? GrowthAt(H->ManaPerTier, GrowthTier(), TierGrowthHealth) : 1.f;
 }
 
 bool ARDDungeonGenerator::SummonsGrow() const
@@ -58,8 +58,10 @@ void ARDDungeonGenerator::SummonStrength(FName Spell, float& OutHealth, float& O
 	// (the Summoner's balance of 2026-11-05: her summons were monsters of their kind's own tier, so a tier-1 summoning stayed at
 	// 60 hit points and 14 a blow at tier 5, and the first two died to one blow of the final boss each)
 	const FRDSpellDef* S = Spells.FindByPredicate([Spell](const FRDSpellDef& D) { return D.Name == Spell; });
-	const int32 St = FMath::Clamp(S ? S->Tier : 1, 1, 5);
-	const int32 T = FMath::Max(GetOpenTier(), St);
+	// (the rebalance to tier 25: a summoning's own tier up to its table's (the later dungeons' summonings 6 on); the summons as
+	// strong as the game's tier she has reached (GrowthTier), not this level's)
+	const int32 St = FMath::Clamp(S ? S->Tier : 1, 1, FMath::Max(SummonTierStrength.Num(), 5));
+	const int32 T = FMath::Max(GrowthTier(), St);
 	OutTier = T;
 	const float K = SummonTierStrength.IsValidIndex(St - 1) ? SummonTierStrength[St - 1] : 1.f;
 	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;

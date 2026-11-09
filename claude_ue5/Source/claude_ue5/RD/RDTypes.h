@@ -87,6 +87,10 @@ struct FRDMonsterDef
 	// ---- random_dungeonmagic_level5: the monster gallery's tiers (docs/monsters.md, pipeline/unreal/859)
 	/** the tier of rooms it lives in (0: any; with the generator's MaxTier a section spawns only the kinds of its tier) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 0;
+	/** (the rebalance to tier 25, the list of 2026-11-08b's fifth phase) the wilderness's tiers it meets her in, Min to Max
+	 *  (0: its Tier): the dungeons' kinds spread along the roads from Brokenspire to Heaven */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 WildTierMin = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 WildTierMax = 0;
 	/** what its blow does to her besides its damage (none, poison: hit points over a few seconds, weaken: her blows and
 	 *  spells do less for a while, slow: she moves slower for a while); the generator's tier scales how strong */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDMonsterAbility Ability = ERDMonsterAbility::None;
@@ -478,6 +482,9 @@ struct FRDSpellDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float DropChance = 0.f;
 	/** the tier of rooms whose tomes may teach it (by its mana) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Tier = 1;
+	/** (the rebalance to tier 25) its tome's place, one spell to each of the dungeons' tiers in the chain's order: 1-5 Mistward
+	 *  Castle's, 6-10 Vel Morrath's ... 26-30 Heaven's (0: no place; then a tome picks by Tier and DropChance as before) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Slot = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Damage = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Reach = 1400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Radius = 0.f;
@@ -870,6 +877,11 @@ struct FRDHeroDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> DashClip = nullptr;
 	/** weapons (her chi attacks) she gains UnlockPerBoss at a time, in their order, each time she slays a tier's boss */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponDef> LockedWeapons;
+	/** (the rebalance to tier 25: "additional summoner, rogue, and martial artist abilities ... after the mistward castle dungeon is
+	 *  defeated so that they can be earned in the other dungeons") one for each later dungeon of the chain in its order (Vel Morrath,
+	 *  The War Engine, the Sewers, Kethrys Spire, Heaven), hers once that dungeon's last tier's boss has fallen (its counter
+	 *  bossdone:5), kept by the game: ARDDungeonGenerator::StartWeaponsOf, GrantLaterWeapons */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FRDWeaponDef> LaterWeapons;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 UnlockPerBoss = 2;
 	/** mistward_castle (docs/improvements3.txt): the types of spell whose scrolls she reads (empty: none) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<ERDSpellType> ScrollTypes;

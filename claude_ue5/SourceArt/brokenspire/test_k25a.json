@@ -1,0 +1,92 @@
+{
+ "tag": "k25a",
+ "plan": [
+  "keys9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "keys9",
+   "ok": true,
+   "chain": [
+    "castle",
+    "vel_morrath",
+    "war_engine",
+    "sewers",
+    "kethrys",
+    "heaven"
+   ],
+   "open_at_start": {
+    "castle": true,
+    "vel_morrath": false,
+    "war_engine": false,
+    "sewers": false,
+    "kethrys": false,
+    "heaven": false
+   },
+   "had_at_start": {
+    "castle": "0",
+    "vel_morrath": "0",
+    "war_engine": "0",
+    "sewers": "0",
+    "kethrys": "0",
+    "heaven": "0"
+   },
+   "tiers": {
+    "Brokenspire": 1,
+    "Vel Morrath": 5,
+    "Ashenreach": 10,
+    "Graymourne": 15
+   },
+   "tiers_mid": {
+    "Brokenspire-Vel Morrath": 3,
+    "Vel Morrath-Ashenreach": 8,
+    "Ashenreach-Graymourne": 13
+   },
+   "tier_behind_brokenspire": 1,
+   "vm_revealed_before": false,
+   "vm_revealed_after_map": true,
+   "map_had_shown": [
+    "1",
+    "1"
+   ],
+   "stair_without_key": "locked",
+   "locked_level": "/Game/RandomDungeon/Maps/vel_morrath",
+   "said": "The way into the Catacombs of Vel Morrath is locked. Its key, the Catacomb Key, is held by the master of Mistward Castle.",
+   "dropped": "vel_morrath",
+   "piles_new": 1,
+   "pile_hers": false,
+   "pile_things": [
+    "Catacomb Key",
+    "Map to Vel Morrath"
+   ],
+   "prompt": "take up what lies here (2)",
+   "carried": {
+    "Catacomb Key": 1,
+    "Map to Vel Morrath": 1
+   },
+   "open_after": {
+    "castle": true,
+    "vel_morrath": true,
+    "war_engine": false,
+    "sewers": false,
+    "kethrys": false,
+    "heaven": false
+   },
+   "stair_with_key": "catacombs",
+   "second_drop_piles": 0,
+   "fell": true,
+   "carried_after_death": {
+    "Catacomb Key": 1,
+    "Map to Vel Morrath": 1
+   },
+   "death_pile_has_key": false,
+   "war_engine_before": 0,
+   "war_engine_after_old_progress": 1,
+   "all_keys_counter": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "windows_shown_again": 3
+}

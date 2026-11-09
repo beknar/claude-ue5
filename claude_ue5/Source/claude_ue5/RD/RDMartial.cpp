@@ -9,6 +9,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDSection.h"
 #include "RD/RDMonster.h"
+#include "RD/RDGameInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
@@ -27,6 +28,14 @@ void ARDDungeonGenerator::StartWeaponsOf(const FRDHeroDef& H, TArray<FRDWeaponDe
 {
 	Out = H.Weapons;
 	if (bUnlockAll) Out.Append(H.LockedWeapons);
+	// (the rebalance to tier 25: the later dungeons' abilities she has earned (or, with bUnlockAll, all of them))
+	const URDGameInstance* GI = URDGameInstance::Of(this);
+	const TArray<FRDChainLink>& C = Chain();
+	for (int32 I = 0; I < H.LaterWeapons.Num(); ++I)
+	{
+		const bool bEarned = bUnlockAll || (C.IsValidIndex(I + 1) && GI && GI->GetCounter(URDGameInstance::DungeonCounter(C[I + 1].Key, TEXT("bossdone:5"))) > 0);
+		if (bEarned && !Out.ContainsByPredicate([&](const FRDWeaponDef& W) { return W.Name == H.LaterWeapons[I].Name; })) Out.Add(H.LaterWeapons[I]);
+	}
 }
 
 int32 ARDDungeonGenerator::UnlockHeroWeapons(int32 Count)

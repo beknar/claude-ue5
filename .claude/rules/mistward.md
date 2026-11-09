@@ -220,6 +220,23 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
   - **PR #20's review (2026-11-06)**: Brokenspire is a Save As copy and keeps its own heroes and spell table: `880` balances it too (her 84 mana carried to the town was clamped to its 50). A growing summon takes one tier for everything (the open tier or its summoning's, higher): spawned at it, and grown with `SetStrength(tier, ...)`, which sets its speed, pace and ability as `Empower` does (grown Soldiers had kept tier 1's pace); only summons whose numbers change are counted in the tier's message. A growing pool is whole (as hit points), and `RDGROW` prints her mana and the summons grown. `868 growth` checks the Summoner's Soldiers grown to tier 5 against a tier-5 Soldier's pace; `868 summoner` reads `summons_grow` before it switches back to the Warrior (read after, it was the Warrior's: false). Him alone is fought once whatever the `band_sizes`; the band's size is put back in a `finally`.
 - **A wall is not "outside the room":** `RoomAt(neighbour) != Room` is also true of a hallway or a doorway, and the sealed arch could stand in the room's way out. The door's spot wants nothing walkable behind the tile and no door edge (`IsWalkable`, `DoorBetween`).
 
+## The rebalance to tier 25 (`910`, `RD/RDTier25.cpp`, `SourceArt/balance/tier25.json`, `docs/tiers.md`; the list of 2026-11-08b's fifth phase)
+
+- **Every tier read goes through `GlobalTier`**: the items' `Tiers` are the game's (1-25), a level's own tier is 1-5. A rule that names its thing by the castle's tier missed it: the guarded ring was "Magic Potency Ring 2(T-1)" by name, and in Vel Morrath it was still the castle's ring (the test's first run). Past the castle it is picked from the items by the game's tier now.
+- **A loot test tells the random draw from what the rules put first**: a vault holds the tier above, the start room its own items, a guarded ring its set's tier. Counted together, 464 "off tier" things hid one real fault. `HasForcedLoot` names the rules' containers.
+- **Hit points and blows are whole**: a ratio between two monsters' numbers is off by up to half a point at each end (54 to 414 read 7.67 for a 7.62 rule). Allow that, not a percentage.
+- **A tier's boss stands in an explored room of the tier before**: `DebugOpenTiers(5, True)` with only the start set explored placed no tier-5 boss. Explore a tier-4 set first (held in the air over it while it is built).
+- **A copy keeps its source's numbers**: the tome items kept the castle's tiers (Tome of Life Drain [2]) while their spells moved. `910` gives each tome its place's tier.
+- **The tier-5 boss gives the Martial Artist her own locked chi attacks too**, as every tier's boss does; the dungeon's new ability comes with them.
+- **PR #34's review (2026-11-09)**:
+  - A rule on one side of a trade needs the other side too: prices went by the game's tier while kills and containers still paid by the level's 1-5, so past the castle the town was out of reach (`RDTierGold`). A whole heal priced per point grew by the price and by her hit points both: priced down by her growth.
+  - A mean over "the kinds of this tier" must be over the kinds actually met there: the wilds' tiers past 10 found no dungeon kinds and the mean fell to 1 (`MeanWildFactors`, by wild band).
+  - A tier passed from one rule to another is one kind of tier: the summons' strength gave the game's tier to `Empower`, which maps a level's (`LevelTierOf`).
+  - A flag beside a saved counter is a second truth that outlives a restart: the later abilities read the game instance's counter only.
+  - A value read at every blow is kept for the frame, keyed also by what changes within it (the tiers opened).
+  - Numbers that the stages filter by: each stage's own range (`910`'s spells 301 on and 311 on).
+- **The castle's stages write the tables `910` builds from**: rerun `910` after any of them (`855`, `857`-`859`, `871`, `872`, `876`, `880`, and the dungeons' `895`, `897`, `907`, `909`).
+
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 
 - **Play in the editor hides missing material usages**: the editor sets a usage a material lacks while it draws (in memory only, and the package did not even show as dirty), so the castle looked right in play while the packaged game drew 7 base materials' pieces (the furniture kit's iron, food, embers and flames; DarkHalls, Gothic Props, HallowedDepths, Medieval Weapons) in the default material, and the menu's two Fig4 studio materials lacked the Nanite usage. `869` sets and saves them; the menu's are saved every run. Look for "missing usage flag" in a Development package's log, never only in the editor's.

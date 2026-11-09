@@ -118,6 +118,11 @@ The user's of 2026-11-08 (RD/RDConsole.cpp):
   console  the game's own console (a Shipping game's; here put on with rd.GameConsole 1): its self-test through Slate as a
            keyboard sends it (` opens it, typed lines run, values read, Up / Down, Tab, help, W under it reaches nothing,
            Escape and ` shut it, the game's keys back after); the same self-test as 884's and a packaged game's -RDConsoleTest
+The rebalance to tier 25 (910; the list of 2026-11-08b's fifth phase):
+  tier25   (on a dungeon past the castle: -lv vel_morrath) its tiers the game's 6-10; its monsters and her as much stronger as the
+           tables say (the same seed with and without the level's base); loot of the game's tier only (quality copies), each
+           tome its tier's one spell; the tier-5 boss: the dungeon's ability for the Martial Artist, the Rogue, the Summoner
+           (Summon Tier 6 calls an Iron Golem)
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -2143,7 +2148,8 @@ def step_tomemana():
     put(g.get_start_room_center(), 0.0); yield from wait(0.3)
     K = unreal.RDItemKind
     tome = {str(i.spell): str(i.name) for i in items_of(K.TOME)}
-    ring = max((i for i in items_of(K.RING) if i.ring_kind == unreal.RDRingKind.MAGIC), key=lambda i: i.amount)
+    # (the castle's best: its tiers 1-5; the quality copies of the later dungeons (910) are stronger)
+    ring = max((i for i in items_of(K.RING) if i.ring_kind == unreal.RDRingKind.MAGIC and max(list(i.tiers) or [1]) <= 5), key=lambda i: i.amount)
     def widx(sp): return next((k for k, d in enumerate(g.get_editor_property("weapons")) if str(d.name) == sp), -1)
     res = {"tomes": {s: tome.get(s) for s in ("Null Sanctum", "Apocalypse")}, "ring": str(ring.name), "tome_mana": c.get_tome_mana()}
     res["base"] = round(c.get_max_mana(), 1)
@@ -3409,7 +3415,9 @@ def step_growth():
     way by her shares; a found weapon her table damage x its tier's power (Ursag's Horn Blade a tier 4: x 2.05) and no growth of
     hers; mana back a second her pool's share (over 2 s); a restart back to tier 1"""
     res = {"heroes": {}, "found": {}}
-    WP = BAL["weapon_tier_power"]
+    WP = list(BAL["weapon_tier_power"])
+    # (the rebalance to tier 25: the quality copies' tiers 6-25, the hero's power growth a tier past 5)
+    WP += [WP[-1] * G["gen"].get_editor_property("tier_growth_power") ** k for k in range(1, 21)]
     for it in items_of(unreal.RDItemKind.WEAPON):
         f = list(it.weapon_fits)
         if not f: continue
@@ -4091,6 +4099,137 @@ def step_catacombs():
     ok = (res["tier_floors"] and res["key"] == "vel_morrath" and not res["final_boss_on"] and res["open2"] and res["open3"] and floors_ok and stairs_ok and walks_ok and placed_ok)
     step_result("catacombs", ok, floors_ok=floors_ok, stairs_ok=stairs_ok, walks_ok=walks_ok, placed_ok=placed_ok, **res)
 
+def step_tier25():
+    """the rebalance to tier 25 (910, SourceArt/balance/tier25.json; the list of 2026-11-08b's fifth phase), on a dungeon past
+    the castle (-lv vel_morrath): its tiers are the game's 6-10 (GlobalTier); the start set's monsters, the same seed spawned with
+    the level's base taken away and put back, are as much stronger as the tier tables say (hit points and blows, monster by
+    monster) and so is she (her hit points by her growth); every container's loot in the start set and in a tier-2 set over 40
+    session seeds holds only things of the game's tier (the castle's tiered gear in its quality copies: Fine in tiers 6-10, none
+    of the others), and each tome is the one spell of its tier's place (Slot = the chain's index x 5 + the tier); the tier-5 boss
+    slain: the Martial Artist earns the dungeon's ability (Crashing Wave), the Rogue and the Summoner theirs (Barbed Bolt, Summon
+    Tier 6), none of the next dungeon's; Summon Tier 6 called: an Iron Golem at her side"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    S0 = I2(0, 0)
+    res = {"key": str(g.get_editor_property("dungeon_key")), "base": g.get_editor_property("dungeon_tier_base"), "cap": g.get_editor_property("dungeon_tier_cap"),
+           "global": [g.global_tier(t) for t in range(1, 6)], "growth_tier": g.growth_tier()}
+    chain = [str(l).split("|") for l in g.get_editor_property("dungeon_chain")]
+    ci = next((i for i, p in enumerate(chain) if p[0] == res["key"]), -1); res["chain_index"] = ci
+    TH = list(g.get_editor_property("tier_health")); TD = list(g.get_editor_property("tier_damage")); res["tables"] = len(TH)
+    # (the start set's monsters with the level's base and without: the same seed, the same monsters)
+    def census():
+        out = {}
+        for m in g.get_monsters():
+            if alive(m) and not m.is_ally() and not m.boss and g.world_to_section(m.get_actor_location()) == S0:
+                out.setdefault(str(m.monster_name), []).append((m.get_max_health(), m.get_damage(), m.tier))
+        return {k: sorted(v) for k, v in out.items()}
+    here = census(); hero_here = c.get_max_health()
+    base, cap = res["base"], res["cap"]
+    g.set_editor_property("dungeon_tier_base", 0); g.set_editor_property("dungeon_tier_cap", 0)
+    g.restart_play(0); yield from wait(1.0); refresh(); g = G["gen"]; c = cb()
+    t1 = census(); hero_t1 = c.get_max_health()
+    g.set_editor_property("dungeon_tier_base", base); g.set_editor_property("dungeon_tier_cap", cap)
+    g.restart_play(0); yield from wait(1.0); refresh(); g = G["gen"]; c = cb()
+    again = census()
+    gt = res["global"][0]
+    want_h = TH[gt - 1] / TH[0]; want_d = TD[gt - 1] / TD[0]
+    ratios = []
+    for k, v in here.items():
+        for (h, d, t), (h1, d1, _t1) in zip(v, t1.get(k, [])):
+            # (hit points and blows are whole: each end rounded by half a point)
+            ratios.append({"kind": k, "tier": t, "h": [round(h, 1), round(h1, 1)], "d": [round(d, 1), round(d1, 1)],
+                           "ok": abs(h - want_h * h1) <= 0.5 + 0.5 * want_h + 0.005 * h and abs(d - want_d * d1) <= 0.5 + 0.5 * want_d + 0.005 * d})
+    res["monsters"] = {"count": sum(len(v) for v in here.values()), "count_t1": sum(len(v) for v in t1.values()), "same_again": here == again,
+                       "want_h": round(want_h, 3), "want_d": round(want_d, 3), "off": [r for r in ratios if not r["ok"]][:8], "ratios": ratios[:6]}
+    res["hero_hp"] = {"here": round(hero_here, 1), "as_tier1": round(hero_t1, 1)}
+    mons_ok = (ratios and res["monsters"]["count"] == res["monsters"]["count_t1"] and res["monsters"]["same_again"]
+               and all(r["ok"] for r in ratios) and hero_here > hero_t1 * 1.05)
+    # (the loot: the start set and a tier-2 set, over 40 session seeds)
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    S2 = I2(1, 0); g.generate_section_now(S2); yield from built(S2)
+    IT = {str(i.name): list(i.tiers) for i in g.get_editor_property("items")}
+    SL = {str(s.name): s.slot for s in g.get_editor_property("spells")}
+    seed0 = g.get_editor_property("session_seed")
+    loot = {}
+    start_room = set(g.get_start_room_containers())
+    for sc in (S0, S2):
+        S = g.get_section(sc); tier = g.tier_of(sc); want_t = g.global_tier(tier)
+        names = []; forced = []
+        for sd in range(1, 41):
+            g.set_session_seed(seed0 + sd * 7919)
+            for i in range(S.get_num_containers()):
+                if sc == S0 and i in start_room: continue          # (the start room's own things: there whatever the tier)
+                l_ = [str(n) for n in g.loot_list_of(sc, i)]
+                (forced if g.has_forced_loot(sc, i) else names).extend(l_)
+        bad = sorted({n for n in names if IT.get(n) and want_t not in IT[n]})
+        # (what the rules put first: a guarded ring of the set's tier, a vault's things of the tier above, a gauntlet's of its own)
+        bad_forced = sorted({n for n in forced if IT.get(n) and want_t not in IT[n] and want_t + 1 not in IT[n]})
+        tomes = sorted({n for n in names if n.startswith("Tome of ")})
+        loot[f"{sc.x},{sc.y}"] = {"tier": tier, "game_tier": want_t, "things": len(names), "off_tier": bad[:10], "forced": sorted(set(forced))[:12], "forced_off": bad_forced[:10],
+                                  "fine": sum(1 for n in names if n.startswith("Fine ")), "plain_tiered": sum(1 for n in names if IT.get(n) and not n.startswith(("Fine ", "Masterwork ", "Exalted ", "Celestial ")) and max(IT[n]) <= 5),
+                                  "other_quality": sum(1 for n in names if n.startswith(("Masterwork ", "Exalted ", "Celestial "))),
+                                  "tomes": {t: SL.get(t[8:]) for t in tomes}, "slot_want": ci * 5 + tier}
+    g.set_session_seed(seed0)
+    res["loot"] = loot
+    loot_ok = all(l["things"] > 0 and not l["off_tier"] and not l["forced_off"] and l["fine"] > 0 and l["other_quality"] == 0 and l["plain_tiered"] == 0
+                  and all(s == l["slot_want"] for s in l["tomes"].values()) for l in loot.values())
+    res["tomes_seen"] = sum(len(l["tomes"]) for l in loot.values())
+    # (the later abilities: the tier-5 boss slain as the Martial Artist)
+    later = {}
+    c = yield from restart("MartialArtist"); g = G["gen"]; quiet(True)
+    W = lambda: [str(w.name) for w in g.get_editor_property("weapons")]
+    w0 = W()
+    g.debug_clear_section(S0, 0, g.get_start_room_center()); yield from wait(0.5)
+    g.debug_open_tiers(4, False); yield from wait(0.5)
+    # (her over a tier-4 set while it is built (a set three out from her is dropped as soon as it is made), then it explored)
+    S4 = I2(3, 0); span = g.get_editor_property("section_tiles") * g.get_editor_property("tile_size")
+    cm_ = G["pawn"].get_editor_property("character_movement"); cm_.set_movement_mode(unreal.MovementMode.MOVE_FLYING)
+    G["pawn"].set_actor_location(V(S4.x * span, S4.y * span, g.section_floor_z(S4) + 400.0), False, True); yield from wait(0.3)
+    g.generate_section_now(S4); yield from built(S4)
+    sec4 = g.get_section(S4)
+    if sec4: put(sec4.get_room_center(0)); cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING); yield from wait(0.5); g.debug_clear_section(S4, 0, sec4.get_room_center(0)); yield from wait(0.5)
+    else: cm_.set_movement_mode(unreal.MovementMode.MOVE_WALKING)
+    g.debug_open_tiers(5, True); yield from wait(1.0)
+    boss = []
+    for _ in range(80):
+        boss = [e for e in (str(l).split("|") for l in g.get_encounter_lines()) if e[0] == "boss" and e[6] == "5" and "USURPER" not in e[7]]
+        if boss: break
+        yield from rwait(0.25)
+    killed = 0; gold0 = g.get_gold()
+    if boss:
+        at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3]))
+        for mo in g.get_monsters():
+            if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 600: mo.apply_damage(1e7, None); killed += 1
+        yield from wait(1.0)
+    # (its gold by the game's tier (PR #34's review: it was the level's 5): a boss's at least BossGold x the tier's gold factor,
+    # 5 x the price factor over 8 past tier 5: tier 10's 17.5)
+    gt5 = g.global_tier(5); price = (8.0 * 1.17 ** (gt5 - 5)) if gt5 > 5 else [1, 2, 3.5, 5.5, 8][gt5 - 1]
+    later["gold"] = {"gained": g.get_gold() - gold0, "game_tier": gt5, "want_min": round(g.get_editor_property("boss_gold") * (5.0 * price / 8.0 if gt5 > 5 else gt5))}
+    later["MartialArtist"] = {"set4": bool(sec4), "boss": boss[0][4] if boss else None, "killed": killed, "new": [n for n in W() if n not in w0], "message": str(cb().message)}
+    for hero in ("Rogue", "Summoner"):
+        c = yield from restart(hero); g = G["gen"]; quiet(True)
+        later[hero] = {"weapons": W()}
+    # (Summon Tier 6 called)
+    if "Summon Tier 6" in W():
+        ctr = g.get_start_room_center(); put(V(ctr.x + 300, ctr.y + 300, ctr.z), 0.0); yield from wait(0.5)
+        si = W().index("Summon Tier 6"); c.set_mana(c.get_max_mana()); m0 = c.get_mana()
+        st = c.start_attack_with(si); taken = round(m0 - c.get_mana(), 1); yield from wait(2.5)
+        al = [a for a in g.get_allies() if str(a.summon_spell) == "Summon Tier 6"]
+        # (its tier the game's she grows by (PR #34's review: spawned at it, Empower mapped it again))
+        later["Summoner"]["summon6"] = {"started": st, "mana": taken, "growth_tier": g.growth_tier(),
+                                        "allies": [{"kind": str(a.monster_name), "hp": round(a.get_max_health()), "damage": round(a.get_damage(), 1), "tier": a.tier} for a in al]}
+        if al: G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=G["pawn"].get_actor_rotation().yaw + 150)); yield from wait(0.4); shot("tier25_golem"); yield from rwait(0.8)
+    res["later"] = later
+    nxt = {"MartialArtist": "Thunder Step", "Rogue": "Incendiary Bolt", "Summoner": "Summon Tier 7"}
+    # (the boss also gives her two of her own locked chi attacks, as every tier's boss does)
+    later_ok = (later["MartialArtist"]["killed"] > 0 and "Crashing Wave" in later["MartialArtist"]["new"]
+                and "Barbed Bolt" in later["Rogue"]["weapons"] and "Summon Tier 6" in later["Summoner"]["weapons"]
+                and all(nxt[h] not in (later[h].get("weapons") or later[h].get("new")) for h in nxt)
+                and any(a["kind"] == "Iron_Golem" and a["tier"] == later["Summoner"]["summon6"]["growth_tier"] for a in later["Summoner"].get("summon6", {}).get("allies", []))
+                and later["gold"]["gained"] >= later["gold"]["want_min"])
+    c = yield from restart("Warrior"); quiet(False)
+    ok = (res["global"] == [base + t for t in range(1, 6)] and res["tables"] >= 25 and ci >= 1 and mons_ok and loot_ok and later_ok)
+    step_result("tier25", ok, mons_ok=mons_ok, loot_ok=loot_ok, later_ok=later_ok, **res)
+
 def step_console():
     """the game's own console: RDConsole's self-test (884's step_console says what it measures)"""
     g = G["gen"]; res = {}
@@ -4108,7 +4247,7 @@ def step_console():
         elif q[0] == "note": res[q[1]] = q[2]
     res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
     step_result("console", bool(checks) and txt.strip().endswith("result|ok"), **res)
-STEPS = {"console": step_console, "catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+STEPS = {"tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

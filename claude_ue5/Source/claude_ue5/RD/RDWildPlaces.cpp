@@ -190,8 +190,14 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	if (!Ws) return;
 	// kinds of its tier (or the nearest tier below that has any)
 	TArray<int32> Kinds;
+	// (the rebalance to tier 25: a kind with wild tiers meets her in them (the dungeons' kinds spread along the roads), another in
+	// its own tier)
 	for (int32 T = P.Tier; T >= 1 && Kinds.Num() == 0; --T)
-		for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Mesh && Monsters[K].Tier == T) Kinds.Add(K);
+		for (int32 K = 0; K < Monsters.Num(); ++K)
+		{
+			const FRDMonsterDef& D = Monsters[K];
+			if (D.Mesh && (D.WildTierMax > 0 ? (T >= D.WildTierMin && T <= D.WildTierMax) : D.Tier == T)) Kinds.Add(K);
+		}
 	if (Kinds.Num() == 0) for (int32 K = 0; K < Monsters.Num(); ++K) if (Monsters[K].Mesh) Kinds.Add(K);
 	if (Kinds.Num() == 0) return;
 	// (destroyed ones out of the list: the chunks' monsters go with their chunks, and GetMonsters walks it)

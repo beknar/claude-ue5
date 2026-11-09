@@ -492,7 +492,17 @@ bool ARDDungeonGenerator::PlaceRingGuard(int32 Tier)
 	const ERDRingKind Kind = ERDRingKind::Magic;
 	const TCHAR* Base = TEXT("Magic Potency Ring");
 	const int32 A = 2 * (Tier - 1) - 1, B = 2 * (Tier - 1);
-	const FName RA(*FString::Printf(TEXT("%s %d"), Base, A)), RB(*FString::Printf(TEXT("%s %d"), Base, B));
+	FName RA(*FString::Printf(TEXT("%s %d"), Base, A)), RB(*FString::Printf(TEXT("%s %d"), Base, B));
+	// (the rebalance to tier 25: past the castle the rings of the tier before in the game's tiers (their quality copies), the
+	// weaker first)
+	if (DungeonTierBase > 0)
+	{
+		const int32 Tg = GlobalTier(Tier - 1);
+		TArray<const FRDItemDef*> Rs;
+		for (const FRDItemDef& It : Items) if (It.Kind == ERDItemKind::Ring && It.RingKind == Kind && It.Tiers.Contains(Tg)) Rs.Add(&It);
+		Rs.Sort([](const FRDItemDef& X, const FRDItemDef& Y) { return X.Amount < Y.Amount; });
+		if (Rs.Num() > 0) { RA = Rs[0]->Name; RB = Rs.Last()->Name; }
+	}
 	const URDCombatComponent* Pc = GetPlayerCombat();
 	if (!Pc || FindItem(RA) < 0) return true;
 	if (Pc->GetItemCount(RA) > 0 || Pc->GetItemCount(RB) > 0 || Pc->GetWornRing(Kind) == RA || Pc->GetWornRing(Kind) == RB) return true;
@@ -786,7 +796,7 @@ bool ARDSection::OpenCell(int32 Door)
 		for (const FName& Rw : Generator->PrisonerRewards)
 		{
 			const int32 Ix = Generator->FindItem(Rw);
-			if (Ix >= 0 && (Generator->Items[Ix].Tiers.Num() == 0 || Generator->Items[Ix].Tiers.Contains(Tier))) Can.Add(Rw);
+			if (Ix >= 0 && Generator->ItemOfTier(Generator->Items[Ix], Tier)) Can.Add(Rw);
 		}
 		if (Can.Num() == 0) Can = Generator->PrisonerRewards;
 		const FName Gift = Can.Num() > 0 ? Can[HashCombine((uint32)Generator->SessionSeed, GetTypeHash(FIntVector(Coord.X, Coord.Y, Ci))) % (uint32)Can.Num()] : NAME_None;
