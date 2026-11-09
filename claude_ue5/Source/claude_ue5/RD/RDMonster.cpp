@@ -772,9 +772,11 @@ bool ARDMonster::TickCombat(float Dt)
 			if (bMissBlind) ++BlindMisses;
 			if (!bMissBlind && Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f)
 			{
-				const float Dmg = Damage * (1.f - GetCurseShare());
+				float Dmg = Damage * (1.f - GetCurseShare());
+				// (the sixth phase: the Summoner's soul harvest on her summons' blows a while)
+				if (bAlly && GetWorld()->GetTimeSeconds() < AllyBoostUntil) Dmg *= AllyBoost;
 				// (mistward6: a blow that passes a hidden Rogue by carries no poison, weakness or slowness either)
-				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
+				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden && !Pc->bLastBlowAbsorbed) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
 				else if (ARDMonster* Fm = Cast<ARDMonster>(P)) { Fm->ApplyDamageAt(Dmg, this, nullptr); G->AddHitText(Fm->GetActorLocation() + FVector(0, 0, Fm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false); }
 				++HitsLanded;
 			}
@@ -784,7 +786,7 @@ bool ARDMonster::TickCombat(float Dt)
 			// (a shot: its own longer wait; its blows may follow at once when its foe closes in)
 			if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
 			else if (bBeamSwing) { BeamWaitLeft = BeamWait; bBeamSwing = false; }
-			else AttackCooldown = AttackInterval;
+			else AttackCooldown = AttackInterval / (bAlly ? FMath::Max(AllyPace, 0.1f) : 1.f);          // (an ally: the Summoner's frenzy)
 			EndFistFx();
 			AttackTime = -1.f; bWalkingAnim = true; SetWalkingAnim(false);
 		}

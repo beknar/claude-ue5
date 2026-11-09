@@ -71,6 +71,7 @@ int32 URDCombatComponent::TabOfLine(const FString& Line)
 	if (Kind == TEXT("armour") || Kind == TEXT("shield") || Kind == TEXT("torch") || Kind == TEXT("helmet")) return 1;
 	if (Kind == TEXT("item")) return 2;
 	if (Kind == TEXT("component") || Kind == TEXT("repair")) return 3;
+	if (Kind == TEXT("passive")) return 0;          // (the sixth phase: her passive abilities with the others)
 	return 4;          // (rings, tomes, teleport rings, slashes, keys)
 }
 
@@ -159,13 +160,18 @@ TArray<FName> URDCombatComponent::GetAbilities() const
 	// controls could never be made))
 	if (Generator->DashClip && Generator->bRogueControls) Out.Add(TEXT("@Dash"));
 	if (MaxDexEnergy > 0.f && Generator->bRogueControls) Out.Add(TEXT("@Stealth"));          // (mistward6: the Rogue's stealth)
+	// (the sixth phase: her secondary abilities learned that are made: actives and toggles)
+	for (const FRDSecondaryDef& D : Generator->Secondaries)
+		if (D.Kind != ERDSecondaryKind::Passive && D.Hero == Generator->CurrentHero && GetSecondaryRank(D.Name) > 0) Out.Add(FName(*(TEXT("@") + D.Name.ToString())));
 	return Out;
 }
 
 bool URDCombatComponent::UseAbility(FName Ability)
 {
 	if (!GetAbilities().Contains(Ability)) return false;
-	const bool bDone = Ability == TEXT("@Dash") ? StartDash() : Ability == TEXT("@Stealth") ? StartStealth() : StartRoll(FVector::ZeroVector);
+	const FName Sec(*Ability.ToString().Mid(1));
+	const bool bDone = Generator && Generator->FindSecondary(Sec) ? UseSecondary(Sec)          // (the sixth phase's)
+		: Ability == TEXT("@Dash") ? StartDash() : Ability == TEXT("@Stealth") ? StartStealth() : StartRoll(FVector::ZeroVector);
 	// (made: no longer ready; refused (still in a move): it stays ready for the next press (the PR review's find))
 	if (bDone) { ++AbilitiesUsed; ReadyAbility = NAME_None; }
 	UpdateQuickFirst();

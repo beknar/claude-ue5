@@ -170,6 +170,7 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		}
 		// (the caldera's hot springs steam: their places are the world's ponds of kind 6, laid by the chunk's water)
 		if (P.Kind == TEXT("spawn") || P.Kind == TEXT("lair") || !P.Quest.IsEmpty()) SpawnWildMonsters(C, P);
+		if (HallowedKinds.Num() > 0) LayHallowedStone(C, P);          // (the sixth phase: the Angel Tokens' stone)
 		UE_LOG(LogRDWildPlace, Verbose, TEXT("RDWILD %s (%s): %d props"), *P.Name, *P.Kind, Laid);
 	}
 }

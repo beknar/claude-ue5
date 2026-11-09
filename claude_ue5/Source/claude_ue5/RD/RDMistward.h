@@ -45,6 +45,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHers = true;
 	/** the shield on her arm when she fell (none: she wore none): it goes back on when she takes the pile up */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FName WornShield;
+	/** the sixth phase: a wild place's Hallowed Stone, its key in the game instance's WildKilled once taken (-1: none) */
+	int64 WildKey = -1;
 	/** mistward_castle (docs/improvements3.txt): parts harvested from a dead monster (its tier: the light's tint) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHarvest = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 Tier = 0;

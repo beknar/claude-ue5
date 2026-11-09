@@ -1,0 +1,251 @@
+{
+ "tag": "sc4",
+ "plan": [
+  "secondary"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "secondary",
+   "ok": true,
+   "token_ok": true,
+   "warrior_ok": true,
+   "mage_ok": true,
+   "warlock_ok": true,
+   "summoner_ok": true,
+   "martial_ok": true,
+   "token": {
+    "made": true,
+    "count": 1,
+    "began": true,
+    "lines": [
+     "rank|ShieldBash|Shield Bash|0|6|stuns every enemy within reach in front of her for 5 s  (every 14 s)",
+     "rank|Grapple|Grapple|0|6|holds the enemy before her where it stands for 5 s (it still strikes)  (every 12 s)",
+     "rank|Trip|Trip|0|6|throws the enemy before her prone for 5 s: it neither moves nor strikes  (every 12 s)",
+     "rank|BlindingStrike|Blinding Strike|0|6|a blow of her weapon that blinds the enemy before her for 5 s (its blows miss)  (every 12 s)",
+     "rank|SweepingPush|Sweeping Push|0|6|pushes every enemy within reach 20 m away from her  (every 16 s)",
+     "rank|PullingAttack|Pulling Attack|0|6|pulls an enemy up to 40 m away before her into her reach  (every 12 s)"
+    ],
+    "entry": true,
+    "rank": 1,
+    "left": 0,
+    "on_bar": true,
+    "picking_after": false
+   },
+   "warrior": {
+    "bash": {
+     "ok": true,
+     "last": "ShieldBash|2|5.00",
+     "says": "Shield Bash",
+     "stunned": [
+      true,
+      true
+     ],
+     "stunned_4_7s": [
+      true,
+      true
+     ],
+     "stunned_5_7s": [
+      false,
+      false
+     ],
+     "again": false
+    },
+    "grapple": {
+     "ok": true,
+     "last": "Grapple|1|5.00",
+     "says": "Grapple",
+     "slow": 1.0,
+     "moved_cm": 0,
+     "stunned": false
+    },
+    "trip": {
+     "ok": true,
+     "last": "Trip|1|5.00",
+     "says": "Trip",
+     "stunned": true
+    },
+    "blind": {
+     "ok": true,
+     "last": "BlindingStrike|1|5.00",
+     "says": "Blinding Strike",
+     "lost": 14.3,
+     "blind": 1.0
+    },
+    "push": {
+     "ok": true,
+     "last": "SweepingPush|2|20.00",
+     "says": "Sweeping Push",
+     "monsters": [
+      {
+       "moved_cm": 1530,
+       "free_cm": 1582,
+       "away": true
+      },
+      {
+       "moved_cm": 1527,
+       "free_cm": 1582,
+       "away": true
+      }
+     ]
+    },
+    "pull": {
+     "from_cm": 1027,
+     "ok": true,
+     "last": "PullingAttack|1|10.27",
+     "says": "Pulling Attack",
+     "to_cm": 186
+    }
+   },
+   "mage": {
+    "swarm": {
+     "ok": true,
+     "last": "ManaSwarm|5|10.20",
+     "says": "Mana Swarm",
+     "mana_after": 0.0,
+     "lost": 51.0
+    },
+    "boost": {
+     "fire": 30.0,
+     "plain": 25.0
+    },
+    "ablation": {
+     "ok": true,
+     "last": "AblationShield|2|10.00",
+     "says": "Ablation Shield",
+     "monster_lost": 40.0,
+     "hp_lost_two": 0.0,
+     "hp_lost_third": 20.0
+    },
+    "recharge": {
+     "ok": true,
+     "last": "RechargeShield|1|5.00",
+     "says": "Mana Recharge Shield",
+     "hp_lost": 0.0,
+     "mana": 30.3
+    },
+    "step": {
+     "ok": true,
+     "last": "MistyStep|1|10.00",
+     "says": "Misty Step",
+     "moved_cm": 1000,
+     "foe_before_cm": 224,
+     "foe_after_cm": 1159
+    }
+   },
+   "warlock": {
+    "mana_shield": {
+     "ok": true,
+     "last": "ManaShield|1|5.00",
+     "says": "Mana Shield",
+     "hp_lost": 0.0,
+     "mana_taken": 19.8
+    },
+    "curse": {
+     "ok": true,
+     "last": "CurseShield|1|5.00",
+     "says": "Curse Shield"
+    },
+    "blind": {
+     "ok": true,
+     "last": "BlindingShield|1|5.00",
+     "says": "Blinding Shield"
+    },
+    "bleed": {
+     "ok": true,
+     "last": "BleedingShield|1|5.00",
+     "says": "Bleeding Shield"
+    },
+    "auras": {
+     "curse": 0.25,
+     "blind": 1.0,
+     "bled": 11.2
+    },
+    "transfer": {
+     "ok": true,
+     "last": "MistyTransfer|1|16.00",
+     "says": "Misty Transfer",
+     "moved_cm": 1600
+    },
+    "blade": {
+     "ok": true,
+     "last": "ManaBlade|1|2.0",
+     "says": "Mana Blade on",
+     "plain": 22.0,
+     "lost_plain": 22.0,
+     "lost_blade": 34.0,
+     "mana_taken": 3.5,
+     "blows": 1
+    }
+   },
+   "summoner": {
+    "grown": {
+     "base": {
+      "hp": 40.0,
+      "damage": 9.0,
+      "pace": 1.0
+     },
+     "hp": 48.0,
+     "damage": 11.0,
+     "pace": 1.2000000476837158
+    },
+    "healing": {
+     "ok": true,
+     "last": "SummonHealing|1|10.00",
+     "says": "Summon Healing",
+     "healed": 4.8,
+     "max": 48.0
+    },
+    "soul": {
+     "harvests": 1,
+     "healed": 4.8,
+     "boost": 1.2,
+     "boost_left": 9.6
+    }
+   },
+   "martial": {
+    "leap": {
+     "ok": true,
+     "last": "WallRun|1|8.50",
+     "says": "Wall Run",
+     "moved_cm": 798,
+     "planned_cm": 850,
+     "room_cm": 1196,
+     "air": false
+    },
+    "flash": {
+     "ok": true,
+     "last": "FlashStep|1|9.56",
+     "says": "Flash Steps",
+     "moved_cm": 1007,
+     "past_it": true,
+     "planned_cm": 956
+    },
+    "water": {
+     "ok": false,
+     "last": "FlashStep|1|9.56",
+     "says": "Water Walk: no water before you"
+    },
+    "parry": {
+     "ok": true,
+     "last": "Parry|1|5.00",
+     "says": "Parry",
+     "hp_lost": 0.0,
+     "parried": 1,
+     "staggered": true,
+     "again": false
+    },
+    "iron": {
+     "ok": true,
+     "last": "IronSkin|1|10.00",
+     "says": "Iron Skin",
+     "plain": 50.0,
+     "skin": 45.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "error": null,
+ "windows_shown_again": 2
+}

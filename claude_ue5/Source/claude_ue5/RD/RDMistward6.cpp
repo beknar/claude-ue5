@@ -66,8 +66,9 @@ void ARDDungeonGenerator::SummonStrength(FName Spell, float& OutHealth, float& O
 	const float K = SummonTierStrength.IsValidIndex(St - 1) ? SummonTierStrength[St - 1] : 1.f;
 	const float Ref = MonsterReferenceHealth > 0.f ? MonsterReferenceHealth : PlayerMaxHealth;
 	const float Blow = MonsterReferenceBlow > 0.f ? MonsterReferenceBlow : GetAverageWeaponDamage();
-	OutHealth = FMath::Max(1.f, FMath::RoundToFloat(Ref * TierValue(TierHealth, T, 1.f) * K));
-	OutDamage = FMath::Max(1.f, FMath::RoundToFloat(Blow * TierValue(TierDamage, T, 1.f) * K));
+	// (the sixth phase: her minions' health and damage (1 when not learned))
+	OutHealth = FMath::Max(1.f, FMath::RoundToFloat(Ref * TierValue(TierHealth, T, 1.f) * K * SecondaryMul(TEXT("MinionHealth"))));
+	OutDamage = FMath::Max(1.f, FMath::RoundToFloat(Blow * TierValue(TierDamage, T, 1.f) * K * SecondaryMul(TEXT("MinionDamage"))));
 }
 
 float ARDDungeonGenerator::TierPowerOf(const FRDWeaponDef& W) const

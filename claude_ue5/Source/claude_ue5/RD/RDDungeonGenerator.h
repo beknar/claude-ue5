@@ -338,6 +338,26 @@ public:
 	/** a container whose loot the rules put first (a guarded ring, a vault's or a gauntlet's things, a vault's key): its index as
 	 *  LootListOf takes it (the tests tell the random draw from it) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") bool HasForcedLoot(FIntPoint Section, int32 Index) const;
+	// ---- the secondary abilities (the list of 2026-11-08b's sixth phase; RDSecondary.cpp; 911 from SourceArt/balance/secondary.json)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") TArray<FRDSecondaryDef> Secondaries;
+	/** the Angel Token (an item of kind Token) and the wilderness's two materials it is made from: the feathers the wilds'
+	 *  monsters drop (that share of the time), the stones at the wild places of those kinds (one each, once a game) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") FName AngelTokenItem;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") FName SeraphFeatherItem;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") float SeraphFeatherChance = 0.45f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") FName HallowedStoneItem;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Secondary") TArray<FString> HallowedKinds;
+	const FRDSecondaryDef* FindSecondary(FName Name) const { return Secondaries.FindByPredicate([Name](const FRDSecondaryDef& D) { return D.Name == Name; }); }
+	/** her rank's number of a secondary ability (1 when not learned: the Summoner's multipliers) */
+	float SecondaryMul(FName Ability, int32 Which = 0) const;
+	/** her summons' strength again (a rank of her minions' health, damage or frenzy raised) */
+	void RefreshSummonsSecondary();
+	/** the soul harvest at a monster's death near her */
+	void SecondaryOnKill(ARDMonster* Monster);
+	/** the wilderness's water at a point: its surface's height (cm); false: no water there */
+	bool WildWaterZAt(FVector At, float& OutZ) const;
+	/** a wild place's Hallowed Stone laid (its kind among HallowedKinds, not taken yet this game) */
+	void LayHallowedStone(class ARDWildChunk* C, const struct FRDWildPlace& P);
 	/** a tier table's value at this level's tier T (the game's tier: GlobalTier) */
 	float TierValueAt(const TArray<float>& List, int32 Tier, float Def) const { return TierValue(List, GlobalTier(Tier), Def); }
 	/** a growth by tier: 1 + PerTier a tier up to tier 5, times Past5 a tier beyond it */

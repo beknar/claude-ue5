@@ -237,6 +237,15 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
   - Numbers that the stages filter by: each stage's own range (`910`'s spells 301 on and 311 on).
 - **The castle's stages write the tables `910` builds from**: rerun `910` after any of them (`855`, `857`-`859`, `871`, `872`, `876`, `880`, and the dungeons' `895`, `897`, `907`, `909`).
 
+## The secondary abilities (`911`, `RD/RDSecondary.cpp`, `SourceArt/balance/secondary.json`, `docs/secondary.md`; the list of 2026-11-08b's sixth phase)
+
+- **A shield or mode still up spoils the next trial**: the recharge shield (5 s) took the ablation's third blow, and the bleeding shield hurt the mana blade's monster. Order a test's trials so each starts with the last one's time over (or wait it out).
+- **A move that starts on land must not test for water under her at once**: the water walk ended in its first tick (she stood on the shore). It finds water within 8 m before her, lets her walk on, and holds her on the water's face from where she reaches it.
+- **Mana read after a few seconds is not what a blow took**: her mana came back over the 2 s (3.5 read for a cost of 6). Count the ability's own blows (`ManaBladeBlows`) and the damage.
+- **PR #35's review (2026-11-09)**: an ability that moves her or a monster far must keep to what it can see (the misty steps went through walls into vaults and cells); one that reaches all around her too (the bash, the push, the shields reached the next room); a list opened from the inventory is cancelled wherever the inventory closes (`SetInventoryOpen`); a blow a shield takes whole brings no monster ability with it (`bLastBlowAbsorbed`); a key kept in the game instance takes a range of its own (the stone's `Id*16+15` was a kill to the patrol quest); a pile laid again with its chunk is no harvest, and the dead piles go out of `LootPiles` first; what a move changes on her is put back as it was (her pawn response, her fly speed).
+- **`888 secondary9` kills the Mill Road Den's pack**: run `quests` in another session.
+- **`quickbar` is martial_arts's step** (it expects her 11 weapons): run it with `-lv martial_arts`, not in a castle batch.
+
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 
 - **Play in the editor hides missing material usages**: the editor sets a usage a material lacks while it draws (in memory only, and the package did not even show as dirty), so the castle looked right in play while the packaged game drew 7 base materials' pieces (the furniture kit's iron, food, embers and flames; DarkHalls, Gothic Props, HallowedDepths, Medieval Weapons) in the default material, and the menu's two Fig4 studio materials lacked the Nanite usage. `869` sets and saves them; the menu's are saved every run. Look for "missing usage flag" in a Development package's log, never only in the editor's.

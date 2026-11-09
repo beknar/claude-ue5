@@ -1,0 +1,1979 @@
+{
+ "tag": "r26a",
+ "plan": [
+  "secondary",
+  "inventory",
+  "tabs",
+  "slots",
+  "quickbar",
+  "death",
+  "martial",
+  "summoner",
+  "growth",
+  "shields",
+  "scrolls",
+  "recipes"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "secondary",
+   "ok": true,
+   "token_ok": true,
+   "warrior_ok": true,
+   "mage_ok": true,
+   "warlock_ok": true,
+   "summoner_ok": true,
+   "martial_ok": true,
+   "token": {
+    "made": true,
+    "count": 1,
+    "began": true,
+    "lines": [
+     "rank|ShieldBash|Shield Bash|0|6|stuns every enemy within reach in front of her for 5 s  (every 14 s)",
+     "rank|Grapple|Grapple|0|6|holds the enemy before her where it stands for 5 s (it still strikes)  (every 12 s)",
+     "rank|Trip|Trip|0|6|throws the enemy before her prone for 5 s: it neither moves nor strikes  (every 12 s)",
+     "rank|BlindingStrike|Blinding Strike|0|6|a blow of her weapon that blinds the enemy before her for 5 s (its blows miss)  (every 12 s)",
+     "rank|SweepingPush|Sweeping Push|0|6|pushes every enemy within reach 20 m away from her  (every 16 s)",
+     "rank|PullingAttack|Pulling Attack|0|6|pulls an enemy up to 40 m away before her into her reach  (every 12 s)"
+    ],
+    "entry": true,
+    "rank": 1,
+    "left": 0,
+    "on_bar": true,
+    "picking_after": false
+   },
+   "warrior": {
+    "bash": {
+     "ok": true,
+     "last": "ShieldBash|2|5.00",
+     "says": "Shield Bash",
+     "stunned": [
+      true,
+      true
+     ],
+     "stunned_4_7s": [
+      true,
+      true
+     ],
+     "stunned_5_7s": [
+      false,
+      false
+     ],
+     "again": false
+    },
+    "grapple": {
+     "ok": true,
+     "last": "Grapple|1|5.00",
+     "says": "Grapple",
+     "slow": 1.0,
+     "moved_cm": 0,
+     "stunned": false
+    },
+    "trip": {
+     "ok": true,
+     "last": "Trip|1|5.00",
+     "says": "Trip",
+     "stunned": true
+    },
+    "blind": {
+     "ok": true,
+     "last": "BlindingStrike|1|5.00",
+     "says": "Blinding Strike",
+     "lost": 14.3,
+     "blind": 1.0
+    },
+    "push": {
+     "ok": true,
+     "last": "SweepingPush|2|20.00",
+     "says": "Sweeping Push",
+     "monsters": [
+      {
+       "moved_cm": 1530,
+       "free_cm": 1582,
+       "away": true
+      },
+      {
+       "moved_cm": 1530,
+       "free_cm": 1582,
+       "away": true
+      }
+     ]
+    },
+    "pull": {
+     "from_cm": 1027,
+     "ok": true,
+     "last": "PullingAttack|1|10.27",
+     "says": "Pulling Attack",
+     "to_cm": 186
+    }
+   },
+   "mage": {
+    "swarm": {
+     "ok": true,
+     "last": "ManaSwarm|5|10.20",
+     "says": "Mana Swarm",
+     "lost": 51.0
+    },
+    "boost": {
+     "fire": 30.0,
+     "plain": 25.0
+    },
+    "ablation": {
+     "ok": true,
+     "last": "AblationShield|2|10.00",
+     "says": "Ablation Shield",
+     "monster_lost": 40.0,
+     "hp_lost_two": 0.0,
+     "hp_lost_third": 20.0
+    },
+    "recharge": {
+     "ok": true,
+     "last": "RechargeShield|1|5.00",
+     "says": "Mana Recharge Shield",
+     "hp_lost": 0.0,
+     "mana": 30.3
+    },
+    "step": {
+     "ok": true,
+     "last": "MistyStep|1|10.00",
+     "says": "Misty Step",
+     "moved_cm": 1000,
+     "foe_before_cm": 224,
+     "foe_after_cm": 1159
+    }
+   },
+   "warlock": {
+    "mana_shield": {
+     "ok": true,
+     "last": "ManaShield|1|5.00",
+     "says": "Mana Shield",
+     "hp_lost": 0.0,
+     "mana_taken": 19.8
+    },
+    "curse": {
+     "ok": true,
+     "last": "CurseShield|1|5.00",
+     "says": "Curse Shield"
+    },
+    "blind": {
+     "ok": true,
+     "last": "BlindingShield|1|5.00",
+     "says": "Blinding Shield"
+    },
+    "bleed": {
+     "ok": true,
+     "last": "BleedingShield|1|5.00",
+     "says": "Bleeding Shield"
+    },
+    "auras": {
+     "curse": 0.25,
+     "blind": 1.0,
+     "bled": 11.2
+    },
+    "transfer": {
+     "ok": true,
+     "last": "MistyTransfer|1|40.00",
+     "says": "Misty Transfer",
+     "moved_cm": 4000
+    },
+    "blade": {
+     "ok": true,
+     "last": "ManaBlade|1|2.0",
+     "says": "Mana Blade on",
+     "plain": 22.0,
+     "lost_plain": 22.0,
+     "lost_blade": 34.0,
+     "mana_taken": 3.5,
+     "blows": 1
+    }
+   },
+   "summoner": {
+    "grown": {
+     "base": {
+      "hp": 40.0,
+      "damage": 9.0,
+      "pace": 1.0
+     },
+     "hp": 48.0,
+     "damage": 11.0,
+     "pace": 1.2000000476837158
+    },
+    "healing": {
+     "ok": true,
+     "last": "SummonHealing|1|10.00",
+     "says": "Summon Healing",
+     "healed": 4.8,
+     "max": 48.0
+    },
+    "soul": {
+     "harvests": 1,
+     "healed": 4.8,
+     "boost": 1.2,
+     "boost_left": 9.6
+    }
+   },
+   "martial": {
+    "leap": {
+     "ok": true,
+     "last": "WallRun|1|8.50",
+     "says": "Wall Run",
+     "moved_cm": 781,
+     "planned_cm": 850,
+     "room_cm": 1196,
+     "air": false
+    },
+    "flash": {
+     "ok": true,
+     "last": "FlashStep|1|9.56",
+     "says": "Flash Steps",
+     "moved_cm": 974,
+     "past_it": true,
+     "planned_cm": 956
+    },
+    "water": {
+     "ok": false,
+     "last": "FlashStep|1|9.56",
+     "says": "Water Walk: no water before you"
+    },
+    "parry": {
+     "ok": true,
+     "last": "Parry|1|5.00",
+     "says": "Parry",
+     "hp_lost": 0.0,
+     "parried": 1,
+     "staggered": true,
+     "again": false
+    },
+    "iron": {
+     "ok": true,
+     "last": "IronSkin|1|10.00",
+     "says": "Iron Skin",
+     "plain": 50.0,
+     "skin": 45.0
+    }
+   }
+  },
+  {
+   "step": "inventory",
+   "ok": true,
+   "lines": 34,
+   "pointer_shown": true,
+   "cursor_shown": true,
+   "refused": [],
+   "hold_s": 13,
+   "hold_w": -8,
+   "hold_dpad_down": 13,
+   "hold_dpad_up": -8,
+   "one_press": 1,
+   "rows_drawn": 21,
+   "mouse": {
+    "row": 1,
+    "item": "Medium Healing Potion",
+    "chosen_by_pointer": true,
+    "used": 1,
+    "mouse_uses": 1,
+    "says": "Drank the medium healing potion:  +28 HP",
+    "first_before": 1,
+    "first_after_wheel_down": 7,
+    "cursor_kept": true,
+    "cursor": [
+     1,
+     1
+    ],
+    "tab_lines": [
+     "item|Small Healing Potion|1",
+     "item|Medium Healing Potion|1",
+     "item|Large Healing Potion|1",
+     "item|Uncommon Healing Potion|1",
+     "item|Wondrous Healing Potion|1",
+     "item|Rare Healing Potion|1",
+     "item|Very Rare Healing Potion|1",
+     "item|Legendary Healing Potion|1",
+     "item|Small Mana Potion|1",
+     "item|Medium Mana Potion|1",
+     "item|Large Mana Potion|1",
+     "item|Uncommon Mana Potion|1"
+    ],
+    "pointer_sent": [
+     964.8,
+     364.0
+    ],
+    "pointer_read": [
+     965.0,
+     364.0
+    ],
+    "first_after_wheel_up": 4,
+    "double_click_drank": 1,
+    "double_click_uses": 1
+   },
+   "pointer_after_close": false,
+   "cursor_after_close": false
+  },
+  {
+   "step": "tabs",
+   "ok": true,
+   "tabs": {
+    "0": {
+     "kinds": [
+      "weapon"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    },
+    "1": {
+     "kinds": [
+      "armour",
+      "shield"
+     ],
+     "lines": 2,
+     "all_its_own": true
+    },
+    "2": {
+     "kinds": [
+      "item"
+     ],
+     "lines": 1,
+     "all_its_own": true
+    },
+    "3": {
+     "kinds": [
+      "component",
+      "repair"
+     ],
+     "lines": 2,
+     "all_its_own": true
+    },
+    "4": {
+     "kinds": [
+      "key",
+      "ring",
+      "slash"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    }
+   },
+   "refused": [],
+   "lines_total": 11,
+   "lines_in_tabs": 11,
+   "key_tabs": [
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "tab_boxes": 5,
+   "clicked_tab": 3,
+   "e_on_potions": {
+    "tab_after": 3,
+    "drunk": 0
+   },
+   "daggers_lines": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|52|52|1|2|"
+   ],
+   "daggers_after_wear": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|20|52|1|1|",
+    "weapon|Dagger|52|52|2|1|"
+   ],
+   "anvil_kite": true,
+   "anvil_says": "You break down the kite shield:  8 iron ingot, 4 steel ingot   (1 left)",
+   "anvil_dagger": true,
+   "anvil_dagger_says": "You break down the dagger:  2 steel ingot, 3 iron ingot, 2 cured leather strip   (1 left)"
+  },
+  {
+   "step": "slots",
+   "ok": true,
+   "slots_filled": [
+    "Dagger",
+    "Arming Sword",
+    "Longbow",
+    "Viking Sword",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "refused": [],
+   "after_5": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "Viking Sword",
+    "Longbow",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "assign_slot": 7,
+   "after_y": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "None",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "after_rmb": [
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "Arming Sword",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "drawn_seq": [
+    "Longbow",
+    "Dagger",
+    "Longbow",
+    "Arming Sword",
+    "Longbow"
+   ]
+  },
+  {
+   "step": "quickbar",
+   "ok": false,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ],
+   "bar": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "abilities": [
+    "@Dodge",
+    "@Dash"
+   ],
+   "refused": [],
+   "dpad": [
+    [
+     "Fists",
+     0,
+     0
+    ],
+    [
+     "Straight Punch",
+     1,
+     0
+    ],
+    [
+     "Side Kick",
+     2,
+     0
+    ],
+    [
+     "Fists",
+     0,
+     0
+    ]
+   ],
+   "ability_lines": [
+    "ability|Dodge|-1",
+    "ability|Dash|-1"
+   ],
+   "after_dash": [
+    "Fists",
+    "Straight Punch",
+    "@Dash",
+    "Side Kick",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "after_off": [
+    "Fists",
+    "None",
+    "@Dash",
+    "Side Kick",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "after_found": [
+    "Fists",
+    "Dagger",
+    "@Dash",
+    "Side Kick",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "dash": {
+    "dashes": 1,
+    "abilities_used": 1
+   },
+   "dodge_put": true,
+   "after_dodge": [
+    "Fists",
+    "Dagger",
+    "@Dash",
+    "Side Kick",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "@Dodge"
+   ],
+   "ready": "@Dodge",
+   "ready_cursor": 10,
+   "ready_first": 1,
+   "roll": {
+    "rolls": 1,
+    "ready_after": "None"
+   }
+  },
+  {
+   "step": "death",
+   "ok": true,
+   "gave": [
+    "Kite Shield",
+    "Small Healing Potion",
+    "Iron Ingot",
+    "Plate Armour",
+    "Viking Shortsword",
+    "Copper Ingot",
+    "Bronze Ingot",
+    "Steel Ingot",
+    "Hardwood",
+    "Timber",
+    "Wood Log",
+    "Coarse Hide",
+    "Light Leather",
+    "Cured Leather Strip",
+    "Epoxy"
+   ],
+   "lines_before": 2,
+   "start_shield": "None",
+   "keep_start_gear": true,
+   "dead": true,
+   "piles": 1,
+   "pile": {
+    "things": [
+     "Viking Shortsword",
+     "Kite Shield",
+     "Small Healing Potion",
+     "Iron Ingot",
+     "Plate Armour",
+     "Copper Ingot",
+     "Bronze Ingot",
+     "Steel Ingot",
+     "Hardwood",
+     "Timber",
+     "Wood Log",
+     "Coarse Hide",
+     "Light Leather",
+     "Cured Leather Strip",
+     "Epoxy"
+    ],
+    "pictures": 15,
+    "particles": 16,
+    "from_her_m": 0.0
+   },
+   "carried_after": {
+    "Kite Shield": 0,
+    "Small Healing Potion": 0,
+    "Iron Ingot": 0,
+    "Plate Armour": 0,
+    "Viking Shortsword": 0,
+    "Copper Ingot": 0,
+    "Bronze Ingot": 0,
+    "Steel Ingot": 0,
+    "Hardwood": 0,
+    "Timber": 0,
+    "Wood Log": 0,
+    "Coarse Hide": 0,
+    "Light Leather": 0,
+    "Cured Leather Strip": 0,
+    "Epoxy": 0
+   },
+   "start_shield_after": 1,
+   "marks": [
+    9,
+    10
+   ],
+   "revived": true,
+   "where_after_m": 6.7,
+   "describe": "take up your things (15)",
+   "f": "loot",
+   "carried_back": {
+    "Kite Shield": 1,
+    "Small Healing Potion": 1,
+    "Iron Ingot": 1,
+    "Plate Armour": 1,
+    "Viking Shortsword": 1,
+    "Copper Ingot": 1,
+    "Bronze Ingot": 1,
+    "Steel Ingot": 1,
+    "Hardwood": 1,
+    "Timber": 1,
+    "Wood Log": 1,
+    "Coarse Hide": 1,
+    "Light Leather": 1,
+    "Cured Leather Strip": 1,
+    "Epoxy": 1,
+    "None": 1
+   },
+   "shield_worn_again": "Kite Shield",
+   "piles_after": 0
+  },
+  {
+   "step": "martial",
+   "ok": true,
+   "hero": "MartialArtist",
+   "hp": 140.0,
+   "mana": 100.0,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ],
+   "pawn": "BP_MA_MartialArtistCharacter_C",
+   "fists": {
+    "damage": 44.0,
+    "damage_of": 44.0,
+    "bonus": 0.0,
+    "started": true,
+    "lost": 44.0,
+    "hits": 1
+   },
+   "ring_worn": true,
+   "ring": {
+    "amount": 2.200000047683716,
+    "fists": 140.8,
+    "chi": 23.0
+   },
+   "knife": {
+    "index": 3,
+    "damage": 11.0,
+    "damage_of": 38.5,
+    "bonus": 2.5,
+    "both_hands": true,
+    "type": "short blades",
+    "lost": 38.5
+   },
+   "ring_off": {
+    "fists": 44.0,
+    "knife": 14.3
+   },
+   "chi": {
+    "name": "Straight Punch",
+    "started": true,
+    "mana": 7.0,
+    "lost": 23.0,
+    "fx": 37,
+    "released": 0,
+    "bolts": 1,
+    "damage_of": 23.0,
+    "pictured": true,
+    "splash_lost": 11.5
+   },
+   "chi_far": {
+    "name": "Straight Punch",
+    "started": false,
+    "mana": 0.0,
+    "lost": 0.0,
+    "fx": 0,
+    "released": 0,
+    "bolts": 0,
+    "damage_of": 23.0,
+    "pictured": false
+   },
+   "dash": {
+    "started": true,
+    "before_m": 6.0,
+    "after_m": 0.76,
+    "length": 444.0,
+    "at_it": true,
+    "attacked": 1,
+    "lost": 44.0,
+    "dashes": 1
+   },
+   "rolls": 1,
+   "medium_worn": "None",
+   "light_worn": "Desert Hero’s Armour",
+   "armour_share": 0.2,
+   "boss": {
+    "weapons": [
+     "Smashing Strike",
+     "Roundhouse Kick"
+    ],
+    "unlocked": 2
+   },
+   "asked": 2,
+   "after_ask": [
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_death": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_restart": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ]
+  },
+  {
+   "step": "summoner",
+   "ok": true,
+   "pawn": "BP_SU4_SummonerCharacter_C",
+   "hp": 85.0,
+   "mana": 60.0,
+   "weapons": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ],
+   "same_as_mage": [
+    true,
+    true
+   ],
+   "clips": [
+    "AS_Summoner4_CastBolt",
+    "AS_Summoner4_Summon1",
+    "AS_Summoner4_Summon2",
+    "AS_Summoner4_Summon3",
+    "AS_Summoner4_Summon4",
+    "AS_Summoner4_Summon5"
+   ],
+   "fire": {
+    "started": true,
+    "lost": 25.0
+   },
+   "summon": [
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 1,
+     "message": "Rotting Soldier answers your call  (1 of 2)"
+    },
+    {
+     "started": true,
+     "mana": 30.0,
+     "count": 2,
+     "message": "Rotting Soldier answers your call  (2 of 2)"
+    },
+    {
+     "started": false,
+     "mana": 0.0,
+     "count": 2,
+     "message": "You lead 2 of them already (Rotting Soldier): no more answer Summon Tier 1"
+    }
+   ],
+   "allies": [
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    },
+    {
+     "kind": "Soldier",
+     "hp": 40.0,
+     "damage": 9.0,
+     "m": 2.3
+    }
+   ],
+   "tier1_soldier": {
+    "hp": 60.0,
+    "damage": 14.0
+   },
+   "want_ally_hp": 40,
+   "allies_fight": 25.2,
+   "dagger": {
+    "index": 3,
+    "both_hands": true
+   },
+   "slash": {
+    "begun": false,
+    "message": "Only a warrior's weapons take the ember slash"
+   },
+   "armour_worn": "None",
+   "hp_ring": false,
+   "magic_ring": true,
+   "mana_ringed": 66.0,
+   "summon_mana_ringed": 33.0,
+   "tome": {
+    "knows": false,
+    "carried": 1
+   },
+   "torch": true,
+   "boss": {
+    "weapons": [
+     "Summon Tier 2"
+    ],
+    "unlocked": 1
+   },
+   "tier2": {
+    "started": true,
+    "mana": 33.0,
+    "kinds": [
+     "Gunner"
+    ]
+   },
+   "after_death": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1",
+    "Summon Tier 2"
+   ],
+   "after_restart": [
+    "Fire",
+    "Dark Fire",
+    "Summon Tier 1"
+   ]
+  },
+  {
+   "step": "growth",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      241.0
+     ],
+     "want_hp": 241,
+     "says": "Tier 5 opens: you grow stronger (241 hit points)",
+     "weapons": [
+      [
+       "Dagger",
+       "own",
+       14.3,
+       14.3
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Mage": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      70.0,
+      112.0
+     ],
+     "want_hp": 112,
+     "says": "Tier 5 opens: you grow stronger (112 hit points, spells +48%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       37.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       56.2
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.51,
+      2.5
+     ],
+     "after_restart": [
+      1,
+      70.0
+     ]
+    },
+    "Warlock": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      200.0
+     ],
+     "want_hp": 200,
+     "says": "Tier 5 opens: you grow stronger (200 hit points, spells +80%, your own weapons +120%)",
+     "weapons": [
+      [
+       "Sword",
+       "own",
+       22.0,
+       48.4
+      ],
+      [
+       "Fire",
+       "spell",
+       25.0,
+       45.0
+      ]
+     ],
+     "factors_ok": true,
+     "found_weapon": [
+      78.0,
+      78
+     ],
+     "regen": [
+      1.5,
+      1.5
+     ],
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "Rogue": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      100.0,
+      180.0
+     ],
+     "want_hp": 180,
+     "says": "Tier 5 opens: you grow stronger (180 hit points, your own weapons +32%)",
+     "weapons": [
+      [
+       "Daggers",
+       "own",
+       13.0,
+       17.2
+      ],
+      [
+       "Crossbow",
+       "own",
+       33.8,
+       44.6
+      ]
+     ],
+     "factors_ok": true,
+     "after_restart": [
+      1,
+      100.0
+     ]
+    },
+    "MartialArtist": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      140.0,
+      252.0
+     ],
+     "want_hp": 252,
+     "says": "Tier 5 opens: you grow stronger (252 hit points, chi +48%, fists +48%)",
+     "weapons": [
+      [
+       "Fists",
+       "own",
+       44.0,
+       65.1
+      ],
+      [
+       "Straight Punch",
+       "spell",
+       23.0,
+       34.0
+      ],
+      [
+       "Side Kick",
+       "spell",
+       45.0,
+       66.6
+      ]
+     ],
+     "factors_ok": true,
+     "regen": [
+      2.0,
+      2.0
+     ],
+     "after_restart": [
+      1,
+      140.0
+     ]
+    },
+    "Summoner": {
+     "tier": [
+      1,
+      5
+     ],
+     "hp": [
+      85.0,
+      170.0
+     ],
+     "want_hp": 170,
+     "says": "Tier 5 opens: you grow stronger (170 hit points, 84 mana, your 2 summons, spells +60%)",
+     "weapons": [
+      [
+       "Fire",
+       "spell",
+       25.0,
+       40.0
+      ],
+      [
+       "Dark Fire",
+       "spell",
+       38.0,
+       60.8
+      ],
+      [
+       "Summon Tier 1",
+       "spell",
+       0.0,
+       0.0
+      ]
+     ],
+     "mana": [
+      60.0,
+      84.0,
+      84
+     ],
+     "summons": {
+      "at_tier_1": [
+       [
+        1,
+        40,
+        9,
+        102,
+        1.84
+       ],
+       [
+        1,
+        40,
+        9,
+        102,
+        1.84
+       ]
+      ],
+      "at_tier_5": [
+       [
+        5,
+        272,
+        44,
+        122,
+        1.248
+       ],
+       [
+        5,
+        272,
+        44,
+        122,
+        1.248
+       ]
+      ],
+      "want": [
+       5,
+       272,
+       44
+      ],
+      "tier5_soldier_pace": [
+       122,
+       1.248
+      ]
+     },
+     "factors_ok": true,
+     "regen": [
+      3.39,
+      3.36
+     ],
+     "after_restart": [
+      1,
+      85.0
+     ]
+    }
+   },
+   "found": {
+    "Viking Shortsword": [
+     20.0,
+     20
+    ],
+    "Fine Viking Shortsword": [
+     56.0,
+     56
+    ],
+    "Masterwork Viking Shortsword": [
+     99.0,
+     99
+    ],
+    "Exalted Viking Shortsword": [
+     174.0,
+     174
+    ],
+    "Celestial Viking Shortsword": [
+     307.0,
+     307
+    ],
+    "Sherwood Sword": [
+     20.0,
+     20
+    ],
+    "Fine Sherwood Sword": [
+     56.0,
+     56
+    ],
+    "Masterwork Sherwood Sword": [
+     99.0,
+     99
+    ],
+    "Exalted Sherwood Sword": [
+     174.0,
+     174
+    ],
+    "Celestial Sherwood Sword": [
+     307.0,
+     307
+    ],
+    "Orc Cleaver": [
+     30.0,
+     30
+    ],
+    "Fine Orc Cleaver": [
+     72.0,
+     72
+    ],
+    "Masterwork Orc Cleaver": [
+     127.0,
+     127
+    ],
+    "Exalted Orc Cleaver": [
+     224.0,
+     224
+    ],
+    "Celestial Orc Cleaver": [
+     395.0,
+     395
+    ],
+    "Toothed Bone Sword": [
+     34.0,
+     34
+    ],
+    "Fine Toothed Bone Sword": [
+     82.0,
+     82
+    ],
+    "Masterwork Toothed Bone Sword": [
+     144.0,
+     144
+    ],
+    "Exalted Toothed Bone Sword": [
+     253.0,
+     253
+    ],
+    "Celestial Toothed Bone Sword": [
+     446.0,
+     446
+    ],
+    "Arming Sword": [
+     26.0,
+     26
+    ],
+    "Fine Arming Sword": [
+     73.0,
+     73
+    ],
+    "Masterwork Arming Sword": [
+     128.0,
+     128
+    ],
+    "Exalted Arming Sword": [
+     226.0,
+     226
+    ],
+    "Celestial Arming Sword": [
+     398.0,
+     398
+    ],
+    "Longsword": [
+     29.0,
+     29
+    ],
+    "Fine Longsword": [
+     81.0,
+     81
+    ],
+    "Masterwork Longsword": [
+     143.0,
+     143
+    ],
+    "Exalted Longsword": [
+     252.0,
+     252
+    ],
+    "Celestial Longsword": [
+     444.0,
+     444
+    ],
+    "Viking Sword": [
+     29.0,
+     29
+    ],
+    "Fine Viking Sword": [
+     81.0,
+     81
+    ],
+    "Masterwork Viking Sword": [
+     143.0,
+     143
+    ],
+    "Exalted Viking Sword": [
+     252.0,
+     252
+    ],
+    "Celestial Viking Sword": [
+     444.0,
+     444
+    ],
+    "Veteran's Sword": [
+     42.0,
+     42
+    ],
+    "Fine Veteran's Sword": [
+     100.0,
+     100
+    ],
+    "Masterwork Veteran's Sword": [
+     177.0,
+     177
+    ],
+    "Exalted Veteran's Sword": [
+     312.0,
+     312
+    ],
+    "Celestial Veteran's Sword": [
+     549.0,
+     549
+    ],
+    "Templar Sword": [
+     42.0,
+     42
+    ],
+    "Fine Templar Sword": [
+     100.0,
+     100
+    ],
+    "Masterwork Templar Sword": [
+     177.0,
+     177
+    ],
+    "Exalted Templar Sword": [
+     312.0,
+     312
+    ],
+    "Celestial Templar Sword": [
+     549.0,
+     549
+    ],
+    "Plate Knight's Sword": [
+     46.0,
+     46
+    ],
+    "Fine Plate Knight's Sword": [
+     110.0,
+     110
+    ],
+    "Masterwork Plate Knight's Sword": [
+     193.0,
+     193
+    ],
+    "Exalted Plate Knight's Sword": [
+     341.0,
+     341
+    ],
+    "Celestial Plate Knight's Sword": [
+     601.0,
+     601
+    ],
+    "Paladin's Sword": [
+     46.0,
+     46
+    ],
+    "Fine Paladin's Sword": [
+     110.0,
+     110
+    ],
+    "Masterwork Paladin's Sword": [
+     193.0,
+     193
+    ],
+    "Exalted Paladin's Sword": [
+     341.0,
+     341
+    ],
+    "Celestial Paladin's Sword": [
+     601.0,
+     601
+    ],
+    "Dark Knight's Sword": [
+     63.0,
+     63
+    ],
+    "Fine Dark Knight's Sword": [
+     133.0,
+     133
+    ],
+    "Masterwork Dark Knight's Sword": [
+     235.0,
+     235
+    ],
+    "Exalted Dark Knight's Sword": [
+     415.0,
+     415
+    ],
+    "Celestial Dark Knight's Sword": [
+     731.0,
+     731
+    ],
+    "Ursag's Horn Blade": [
+     78.0,
+     78
+    ],
+    "Fine Ursag's Horn Blade": [
+     149.0,
+     149
+    ],
+    "Masterwork Ursag's Horn Blade": [
+     263.0,
+     263
+    ],
+    "Exalted Ursag's Horn Blade": [
+     464.0,
+     464
+    ],
+    "Celestial Ursag's Horn Blade": [
+     818.0,
+     818
+    ],
+    "Eastern Sabre": [
+     20.0,
+     20
+    ],
+    "Fine Eastern Sabre": [
+     56.0,
+     56
+    ],
+    "Masterwork Eastern Sabre": [
+     99.0,
+     99
+    ],
+    "Exalted Eastern Sabre": [
+     174.0,
+     174
+    ],
+    "Celestial Eastern Sabre": [
+     307.0,
+     307
+    ],
+    "Katana": [
+     30.0,
+     30
+    ],
+    "Fine Katana": [
+     72.0,
+     72
+    ],
+    "Masterwork Katana": [
+     127.0,
+     127
+    ],
+    "Exalted Katana": [
+     224.0,
+     224
+    ],
+    "Celestial Katana": [
+     395.0,
+     395
+    ],
+    "Wakizashi": [
+     43.0,
+     43
+    ],
+    "Fine Wakizashi": [
+     91.0,
+     91
+    ],
+    "Masterwork Wakizashi": [
+     161.0,
+     161
+    ],
+    "Exalted Wakizashi": [
+     284.0,
+     284
+    ],
+    "Celestial Wakizashi": [
+     500.0,
+     500
+    ],
+    "Dagger": [
+     11.0,
+     11
+    ],
+    "Fine Dagger": [
+     31.0,
+     31
+    ],
+    "Masterwork Dagger": [
+     54.0,
+     54
+    ],
+    "Exalted Dagger": [
+     96.0,
+     96
+    ],
+    "Celestial Dagger": [
+     169.0,
+     169
+    ],
+    "Leaf-Blade Knife": [
+     11.0,
+     11
+    ],
+    "Fine Leaf-Blade Knife": [
+     31.0,
+     31
+    ],
+    "Masterwork Leaf-Blade Knife": [
+     54.0,
+     54
+    ],
+    "Exalted Leaf-Blade Knife": [
+     96.0,
+     96
+    ],
+    "Celestial Leaf-Blade Knife": [
+     169.0,
+     169
+    ],
+    "Obsidian Knife": [
+     14.0,
+     14
+    ],
+    "Fine Obsidian Knife": [
+     34.0,
+     34
+    ],
+    "Masterwork Obsidian Knife": [
+     61.0,
+     61
+    ],
+    "Exalted Obsidian Knife": [
+     107.0,
+     107
+    ],
+    "Celestial Obsidian Knife": [
+     189.0,
+     189
+    ],
+    "Bone Blade": [
+     18.0,
+     18
+    ],
+    "Fine Bone Blade": [
+     44.0,
+     44
+    ],
+    "Masterwork Bone Blade": [
+     77.0,
+     77
+    ],
+    "Exalted Bone Blade": [
+     136.0,
+     136
+    ],
+    "Celestial Bone Blade": [
+     240.0,
+     240
+    ],
+    "Combat Knife": [
+     23.0,
+     23
+    ],
+    "Fine Combat Knife": [
+     49.0,
+     49
+    ],
+    "Masterwork Combat Knife": [
+     87.0,
+     87
+    ],
+    "Exalted Combat Knife": [
+     153.0,
+     153
+    ],
+    "Celestial Combat Knife": [
+     269.0,
+     269
+    ],
+    "Survival Knife": [
+     23.0,
+     23
+    ],
+    "Fine Survival Knife": [
+     49.0,
+     49
+    ],
+    "Masterwork Survival Knife": [
+     87.0,
+     87
+    ],
+    "Exalted Survival Knife": [
+     153.0,
+     153
+    ],
+    "Celestial Survival Knife": [
+     269.0,
+     269
+    ],
+    "Kukri": [
+     35.0,
+     35
+    ],
+    "Fine Kukri": [
+     67.0,
+     67
+    ],
+    "Masterwork Kukri": [
+     118.0,
+     118
+    ],
+    "Exalted Kukri": [
+     208.0,
+     208
+    ],
+    "Celestial Kukri": [
+     366.0,
+     366
+    ],
+    "Sniper's Knife": [
+     35.0,
+     35
+    ],
+    "Fine Sniper's Knife": [
+     67.0,
+     67
+    ],
+    "Masterwork Sniper's Knife": [
+     118.0,
+     118
+    ],
+    "Exalted Sniper's Knife": [
+     208.0,
+     208
+    ],
+    "Celestial Sniper's Knife": [
+     366.0,
+     366
+    ],
+    "Wrist Blade": [
+     42.0,
+     42
+    ],
+    "Fine Wrist Blade": [
+     75.0,
+     75
+    ],
+    "Masterwork Wrist Blade": [
+     132.0,
+     132
+    ],
+    "Exalted Wrist Blade": [
+     233.0,
+     233
+    ],
+    "Celestial Wrist Blade": [
+     410.0,
+     410
+    ],
+    "Longbow": [
+     20.0,
+     20
+    ],
+    "Fine Longbow": [
+     56.0,
+     56
+    ],
+    "Masterwork Longbow": [
+     99.0,
+     99
+    ],
+    "Exalted Longbow": [
+     174.0,
+     174
+    ],
+    "Celestial Longbow": [
+     307.0,
+     307
+    ],
+    "Viking Bow": [
+     26.0,
+     26
+    ],
+    "Fine Viking Bow": [
+     63.0,
+     63
+    ],
+    "Masterwork Viking Bow": [
+     111.0,
+     111
+    ],
+    "Exalted Viking Bow": [
+     195.0,
+     195
+    ],
+    "Celestial Viking Bow": [
+     343.0,
+     343
+    ],
+    "Crossbow": [
+     38.0,
+     38
+    ],
+    "Fine Crossbow": [
+     81.0,
+     81
+    ],
+    "Masterwork Crossbow": [
+     142.0,
+     142
+    ],
+    "Exalted Crossbow": [
+     251.0,
+     251
+    ],
+    "Celestial Crossbow": [
+     442.0,
+     442
+    ],
+    "Dwarf Crossbow": [
+     53.0,
+     53
+    ],
+    "Fine Dwarf Crossbow": [
+     102.0,
+     102
+    ],
+    "Masterwork Dwarf Crossbow": [
+     180.0,
+     180
+    ],
+    "Exalted Dwarf Crossbow": [
+     318.0,
+     318
+    ],
+    "Celestial Dwarf Crossbow": [
+     560.0,
+     560
+    ]
+   }
+  },
+  {
+   "step": "shields",
+   "ok": true,
+   "start": {
+    "worn": "None",
+    "in_hand": false,
+    "share": 0.0,
+    "start_shield": "None",
+    "want_share": null
+   },
+   "speed": {
+    "with": 321.6,
+    "without": 353.4,
+    "taken_off_in_hand": false,
+    "back_on": "Heater Shield",
+    "measured_share": 0.09,
+    "want_share": 0.09
+   },
+   "blow": {
+    "lost": 32.0,
+    "want_lost": 32.0,
+    "shield_lost": 8.0
+   },
+   "kite": {
+    "count": 2,
+    "spares": 1,
+    "worn": "Kite Shield",
+    "share": 0.24,
+    "want_share": 0.24,
+    "broke_down": true,
+    "count_after": 1,
+    "materials": {
+     "Iron Ingot": 8,
+     "Steel Ingot": 4,
+     "Timber": 0
+    },
+    "last_refused": true,
+    "refused_says": "You wear the kite shield: take it off first",
+    "anvil_line": [
+     "breakdown|Kite Shield|gKite Shield|1|Iron Ingot:8;Steel Ingot:4"
+    ]
+   },
+   "mage": {
+    "wore": false,
+    "says": "The mage carries no shield"
+   }
+  },
+  {
+   "step": "scrolls",
+   "ok": true,
+   "fireball_damage": 91.0,
+   "read": {
+    "ok": true,
+    "message": "You read the scroll of fireball:  Fireball, no mana",
+    "scroll_weapon": 2,
+    "mana_taken": 0.0,
+    "cast_s": 0.78,
+    "bar_same": true,
+    "weapons_after": 0,
+    "lost": 91.0,
+    "left_after_two": 1,
+    "scroll_weapon_after": -1,
+    "read": 1
+   },
+   "again": {
+    "ok": false,
+    "message": "Fireball is not ready:  4 s",
+    "left": 1
+   },
+   "learned": {
+    "index": 2,
+    "cooldown_left": 3.0
+   },
+   "warrior": {
+    "ok": false,
+    "message": "The warrior cannot read the scroll of fire bolt (offense)",
+    "kept": 1
+   },
+   "warlock": {
+    "ward": false,
+    "ward_message": "The warlock cannot read the scroll of ash ward (protection)",
+    "frost": true
+   },
+   "summoner": {
+    "ok": true,
+    "message": "You read the scroll of ash ward:  Ash Ward, no mana",
+    "ward_hits": 3,
+    "mana_taken": 0.0
+   },
+   "broken_off": {
+    "ok": true,
+    "left_read": 0,
+    "left_after": 1,
+    "read_after": 0,
+    "message": "The scroll of frost shard was not read through: you keep it",
+    "scroll_weapon": -1
+   }
+  },
+  {
+   "step": "recipes",
+   "ok": true,
+   "highest": 1,
+   "offered_t1": [
+    "Angel Token",
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Whetstone"
+   ],
+   "small": {
+    "made": true,
+    "count": 1,
+    "faint_left": 2,
+    "ichor_left": 2
+   },
+   "large_t1": {
+    "made": false,
+    "message": "The large healing potion is of tier 2: the anvil makes it once tier 2 is open"
+   },
+   "highest_after": 2,
+   "offered_t2": [
+    "Angel Token",
+    "Large Healing Potion",
+    "Large Mana Potion",
+    "Leather Strips",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Torch",
+    "Uncommon Healing Potion",
+    "Uncommon Mana Potion",
+    "Whetstone"
+   ],
+   "large_t2": {
+    "made": true,
+    "count": 1
+   },
+   "scrolls": {
+    "Warrior": 0,
+    "MartialArtist": 0,
+    "Mage": 11,
+    "Warlock": 8,
+    "Summoner": 11
+   },
+   "mage_scrolls": [
+    "Scroll of Ash Ward",
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Dispel Hex",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Iron Skin",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "warlock_scrolls": [
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "fire_scroll": {
+    "made": true,
+    "count": 1,
+    "faint_left": 0,
+    "venom_left": 0
+   },
+   "wood_glue": {
+    "Slickstone": 5,
+    "Patch Kit": 10,
+    "Repair Kit": 15,
+    "Torch": 1
+   },
+   "slickstone": {
+    "made": true,
+    "wood_glue_left": 1
+   },
+   "great": {
+    "Null Sanctum": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "troll heart",
+      3
+     ]
+    ],
+    "Apocalypse": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ],
+    "Meteor Storm": [
+     [
+      "radiant essence",
+      4
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ]
+   },
+   "fires": {
+    "Env.Torch": [
+     0.044,
+     0.044
+    ],
+    "Env.Brazier": [
+     0.052,
+     0.052
+    ],
+    "Env.Hearth": [
+     0.068,
+     0.068
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_r26a_inventory_mouse.png",
+  "mw_r26a_tabs_weapons.png",
+  "mw_r26a_tabs_magic.png",
+  "mw_r26a_tabs_anvil.png",
+  "mw_r26a_slots_inventory.png",
+  "mw_r26a_slots_bar.png",
+  "mw_r26a_qb_inventory.png",
+  "mw_r26a_qb_ready.png",
+  "mw_r26a_death_pile.png",
+  "mw_r26a_ma_knife.png",
+  "mw_r26a_ma_chi_straight.png",
+  "mw_r26a_ma_dash.png",
+  "mw_r26a_ma_armour.png",
+  "mw_r26a_summoner_soldiers.png",
+  "mw_r26a_shield_kite.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

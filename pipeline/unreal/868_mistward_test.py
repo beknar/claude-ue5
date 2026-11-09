@@ -118,6 +118,8 @@ The user's of 2026-11-08 (RD/RDConsole.cpp):
   console  the game's own console (a Shipping game's; here put on with rd.GameConsole 1): its self-test through Slate as a
            keyboard sends it (` opens it, typed lines run, values read, Up / Down, Tab, help, W under it reaches nothing,
            Escape and ` shut it, the game's keys back after); the same self-test as 884's and a packaged game's -RDConsoleTest
+The secondary abilities (911; the list of 2026-11-08b's sixth phase):
+  secondary an Angel Token made and spent (its list), then each hero's abilities made and measured on monsters or on her
 The rebalance to tier 25 (910; the list of 2026-11-08b's fifth phase):
   tier25   (on a dungeon past the castle: -lv vel_morrath) its tiers the game's 6-10; its monsters and her as much stronger as the
            tables say (the same seed with and without the level's base); loot of the game's tier only (quality copies), each
@@ -4230,6 +4232,192 @@ def step_tier25():
     ok = (res["global"] == [base + t for t in range(1, 6)] and res["tables"] >= 25 and ci >= 1 and mons_ok and loot_ok and later_ok)
     step_result("tier25", ok, mons_ok=mons_ok, loot_ok=loot_ok, later_ok=later_ok, **res)
 
+def step_secondary():
+    """the heroes' secondary abilities (911, RD/RDSecondary.cpp; the list of 2026-11-08b's sixth phase), each made in play and
+    measured on monsters or on her: an Angel Token made at the anvil from 3 Seraph Feathers and a Hallowed Stone, used from the
+    inventory's list to learn Shield Bash (rank 1, on the quick bar, the token used up); then each hero's abilities at a rank:
+    the Warrior's stun (two in front), grapple (it stays where it is as she walks off), trip, blinding strike (hurt and blind),
+    sweeping push (pushed away as far as the walls let it) and pulling attack (from 15 m to her); the Mage's swarm (a light for
+    every 20 mana, each its share of her fire bolt), recharge shield (a blow becomes mana), ablation shield (two layers: two blows
+    back on their maker, the third hurts her), misty step (away from her foes) and spell boost (Fire Bolt x 1.2); the Warlock's
+    mana shield, curse, blinding and bleeding shields (on a monster within 2 m), misty transfer (a monster sent away) and mana
+    blade (a blow's damage up by mana); the Summoner's minion health, damage, frenzy (a Soldier against one called before),
+    summon healing and soul harvest; the Martial Artist's leap, flash step through a monster, parry (a blow from in front taken,
+    its maker staggered), iron skin and water walk refused in the castle (no water); each on its cooldown (a second use
+    refused)"""
+    g = G["gen"]; res = {}
+    def setup(hero):
+        c = yield from restart(hero); quiet(True)
+        ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.5)
+        kill_all_near(G["pawn"].get_actor_location(), 4000); yield from wait(0.5)
+        return c
+    def here(): return G["pawn"].get_actor_location()
+    def free_ahead(frm, dirv, maxcm):
+        r = unreal.SystemLibrary.line_trace_single(G["w"], V(frm.x, frm.y, frm.z + 40), V(frm.x + dirv.x * maxcm, frm.y + dirv.y * maxcm, frm.z + 40),
+                                                   unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        if r is None: return maxcm
+        t = r.to_tuple(); return t[3] if t[0] else maxcm
+    def use(c, name):
+        u0 = c.secondary_uses; ok = c.use_secondary(name); return {"ok": ok and c.secondary_uses > u0, "last": str(c.last_secondary), "says": str(c.message)}
+    # ---- the token
+    c = yield from setup("Warrior")
+    tok = str(g.get_editor_property("angel_token_item"))
+    c.add_item(str(g.get_editor_property("seraph_feather_item")), 3); c.add_item(str(g.get_editor_property("hallowed_stone_item")), 1)
+    made = c.craft(tok); yield from wait(0.2)
+    t = {"made": made, "count": c.get_item_count(tok), "began": c.use_item(tok)}
+    rl = [str(l) for l in c.get_rank_lines()]; t["lines"] = rl
+    k = next((i for i, l in enumerate(rl) if l.split("|")[1] == "ShieldBash"), -1)
+    t["entry"] = c.rank_entry(k) if k >= 0 else False
+    t["rank"] = c.get_secondary_rank("ShieldBash"); t["left"] = c.get_item_count(tok); t["on_bar"] = "@ShieldBash" in [str(x) for x in c.get_quick_slots()]
+    t["picking_after"] = c.is_picking_rank()
+    c.set_inventory_open(False); res["token"] = t
+    # ---- the Warrior
+    w = {}
+    ms = [spawn_dummy(ahead(160, -60)), spawn_dummy(ahead(160, 60))]; yield from wait(0.5)
+    w["bash"] = use(c, "ShieldBash"); yield from wait(0.3)
+    w["bash"]["stunned"] = [m.is_stunned() for m in ms]
+    yield from wait(4.4); w["bash"]["stunned_4_7s"] = [m.is_stunned() for m in ms]
+    yield from wait(1.0); w["bash"]["stunned_5_7s"] = [m.is_stunned() for m in ms]
+    w["bash"]["again"] = use(c, "ShieldBash")["ok"]
+    drop(ms); yield from wait(0.3)
+    for nm in ("Grapple", "Trip", "BlindingStrike", "SweepingPush", "PullingAttack"): c.set_secondary_rank(nm, 1, "None")
+    m = spawn_dummy(ahead(170)); yield from wait(0.5); p0 = m.get_actor_location()
+    w["grapple"] = use(c, "Grapple"); quiet(False); yield from wait(0.2)
+    put(V(here().x - 600, here().y, here().z - 100), 0.0); yield from wait(2.5)
+    w["grapple"].update({"slow": round(m.get_slow_share(), 2), "moved_cm": round(dist2(m.get_actor_location(), p0)), "stunned": m.is_stunned()})
+    quiet(True); drop([m]); yield from wait(0.3)
+    ctr = g.get_start_room_center(); put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.4)
+    m = spawn_dummy(ahead(170)); yield from wait(0.5)
+    w["trip"] = use(c, "Trip"); yield from wait(0.3); w["trip"]["stunned"] = m.is_stunned(); drop([m]); yield from wait(0.3)
+    m = spawn_dummy(ahead(170)); yield from wait(0.5); h0 = hp(m)
+    w["blind"] = use(c, "BlindingStrike"); yield from wait(0.3); w["blind"].update({"lost": round(h0 - hp(m), 1), "blind": round(m.get_blind_share(), 2)}); drop([m]); yield from wait(0.3)
+    ms = [spawn_dummy(ahead(200, -150)), spawn_dummy(ahead(200, 150))]; yield from wait(0.5)
+    p0 = [m.get_actor_location() for m in ms]; L = here()
+    w["push"] = use(c, "SweepingPush"); yield from wait(2.0)
+    pu = []
+    for m, p in zip(ms, p0):
+        d = V(p.x - L.x, p.y - L.y, 0); n = math.hypot(d.x, d.y) or 1.0; dv = V(d.x / n, d.y / n, 0)
+        pu.append({"moved_cm": round(dist2(m.get_actor_location(), p)), "free_cm": round(free_ahead(p, dv, 2000)), "away": dist2(m.get_actor_location(), L) > dist2(p, L)})
+    w["push"]["monsters"] = pu; drop(ms); yield from wait(0.3)
+    put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.4)
+    far = min(1500.0, free_ahead(here(), V(1, 0, 0), 2000) - 150)
+    m = spawn_dummy(ahead(far)); yield from wait(0.6)
+    w["pull"] = {"from_cm": round(dist2(m.get_actor_location(), here()))}; w["pull"].update(use(c, "PullingAttack")); yield from wait(1.5)
+    w["pull"]["to_cm"] = round(dist2(m.get_actor_location(), here())); drop([m]); yield from wait(0.3)
+    res["warrior"] = w
+    # ---- the Mage
+    c = yield from setup("Mage"); mg = {}
+    for nm in ("ManaSwarm", "RechargeShield", "AblationShield", "MistyStep"): c.set_secondary_rank(nm, 1 if nm != "AblationShield" else 2, "None")
+    c.set_secondary_rank("SpellBoost1", 1, "Fire Bolt")
+    m = spawn_dummy(ahead(600)); yield from wait(0.5); h0 = hp(m); c.set_mana(100.0)
+    mg["swarm"] = use(c, "ManaSwarm"); mg["swarm"]["mana_after"] = round(c.get_mana(), 1); yield from wait(3.0); mg["swarm"]["lost"] = round(h0 - hp(m), 1)
+    fi = next(i for i, wd in enumerate(g.get_editor_property("weapons")) if wd.get_editor_property("spell") and not wd.bolt_mesh)
+    mg["boost"] = {"fire": round(c.get_damage_of(fi), 2)}
+    c.set_secondary_rank("SpellBoost1", 0, "None"); mg["boost"]["plain"] = round(c.get_damage_of(fi), 2); c.set_secondary_rank("SpellBoost1", 1, "Fire Bolt")
+    drop([m]); yield from wait(0.3)
+    # (the ablation first: a recharge still up would take its third blow)
+    m = spawn_dummy(ahead(150)); yield from wait(0.4); h0 = hp(m); c.set_health(c.get_max_health()); hb = c.get_health()
+    mg["ablation"] = use(c, "AblationShield"); c.apply_damage(20.0, m); c.apply_damage(20.0, m); yield from wait(0.2)
+    mg["ablation"].update({"monster_lost": round(h0 - hp(m), 1), "hp_lost_two": round(hb - c.get_health(), 1)}); c.apply_damage(20.0, m); yield from wait(0.1)
+    mg["ablation"]["hp_lost_third"] = round(hb - c.get_health(), 1); drop([m]); yield from wait(0.3)
+    c.set_mana(0.0); hb = c.get_health(); mg["recharge"] = use(c, "RechargeShield"); c.apply_damage(30.0, None); yield from wait(0.1)
+    mg["recharge"].update({"hp_lost": round(hb - c.get_health(), 1), "mana": round(c.get_mana(), 1)})
+    yield from wait(5.2)          # (the recharge over before her step)
+    ms = [spawn_dummy(ahead(200, -100)), spawn_dummy(ahead(200, 100))]; yield from wait(0.5)
+    def nearest_foe(): return min(dist2(x.get_actor_location(), here()) for x in ms)
+    d0 = nearest_foe(); p0 = here()
+    mg["step"] = use(c, "MistyStep"); yield from wait(0.4); mg["step"].update({"moved_cm": round(dist2(here(), p0)), "foe_before_cm": round(d0), "foe_after_cm": round(nearest_foe())})
+    drop(ms); yield from wait(0.3); res["mage"] = mg
+    # ---- the Warlock
+    c = yield from setup("Warlock"); wl = {}
+    for nm in ("ManaShield", "CurseShield", "BlindingShield", "BleedingShield", "MistyTransfer", "ManaBlade"): c.set_secondary_rank(nm, 1, "None")
+    c.set_mana(c.get_max_mana()); m0 = c.get_mana(); hb = c.get_health()
+    wl["mana_shield"] = use(c, "ManaShield"); c.apply_damage(20.0, None); yield from wait(0.1)
+    wl["mana_shield"].update({"hp_lost": round(hb - c.get_health(), 1), "mana_taken": round(m0 - c.get_mana(), 1)})
+    m = spawn_dummy(ahead(110)); yield from wait(0.5); h0 = hp(m)
+    wl["curse"] = use(c, "CurseShield"); wl["blind"] = use(c, "BlindingShield"); wl["bleed"] = use(c, "BleedingShield"); yield from wait(2.0)
+    wl["auras"] = {"curse": round(m.get_curse_share(), 2), "blind": round(m.get_blind_share(), 2), "bled": round(h0 - hp(m), 1)}
+    drop([m]); yield from wait(0.3)
+    m = spawn_dummy(ahead(250)); yield from wait(0.5); p0 = m.get_actor_location()
+    wl["transfer"] = use(c, "MistyTransfer"); yield from wait(0.4); wl["transfer"]["moved_cm"] = round(dist2(m.get_actor_location(), p0)); drop([m]); yield from wait(0.3)
+    sw = next((i for i, wd in enumerate(g.get_editor_property("weapons")) if not wd.get_editor_property("spell")), 0)
+    c.select_weapon(sw); yield from wait(4.0)          # (the shields over: the bleeding would hurt the blade's dummy)
+    m = spawn_dummy(ahead(120)); yield from wait(0.5)
+    plain = c.get_damage_of(sw); h0 = hp(m); c.start_attack(); yield from wait(2.0); lost_plain = h0 - hp(m)
+    wl["blade"] = use(c, "ManaBlade"); c.set_mana(c.get_max_mana()); m0 = c.get_mana(); h0 = hp(m); b0 = c.mana_blade_blows
+    c.start_attack(); yield from wait(2.0)
+    wl["blade"].update({"plain": round(plain, 1), "lost_plain": round(lost_plain, 1), "lost_blade": round(h0 - hp(m), 1), "mana_taken": round(m0 - c.get_mana(), 1), "blows": c.mana_blade_blows - b0})
+    use(c, "ManaBlade"); drop([m]); yield from wait(0.3); res["warlock"] = wl
+    # ---- the Summoner
+    c = yield from setup("Summoner"); su = {}
+    W_ = lambda: [str(x.name) for x in g.get_editor_property("weapons")]
+    si = W_().index("Summon Tier 1")
+    def call():
+        c.set_mana(c.get_max_mana()); c.start_attack_with(si)
+    call(); yield from wait(2.2)
+    a0 = [a for a in g.get_allies() if str(a.summon_spell) == "Summon Tier 1"]
+    base = {"hp": a0[0].get_max_health(), "damage": a0[0].get_damage(), "pace": a0[0].ally_pace} if a0 else None
+    for nm in ("MinionHealth", "MinionDamage", "Frenzy", "SummonHealing", "SoulHarvest"): c.set_secondary_rank(nm, 1, "None")
+    yield from wait(0.3)
+    a1 = a0[0] if a0 else None
+    su["grown"] = {"base": base, "hp": a1.get_max_health() if a1 else None, "damage": a1.get_damage() if a1 else None, "pace": a1.ally_pace if a1 else None}
+    if a1:
+        a1.apply_damage(a1.get_max_health() * 0.5, None); yield from wait(0.1); h0 = a1.get_health()
+        su["healing"] = use(c, "SummonHealing"); su["healing"].update({"healed": round(a1.get_health() - h0, 1), "max": round(a1.get_max_health(), 1)})
+        a1.apply_damage(a1.get_max_health() * 0.3, None); yield from wait(0.1); h0 = a1.get_health(); s0 = c.soul_harvests
+        m = spawn_dummy(ahead(300)); yield from wait(0.4); m.apply_damage(1e7, None); yield from wait(0.4)
+        su["soul"] = {"harvests": c.soul_harvests - s0, "healed": round(a1.get_health() - h0, 1), "boost": round(a1.ally_boost, 2), "boost_left": round(a1.ally_boost_until - now(), 1)}
+    res["summoner"] = su
+    # ---- the Martial Artist
+    c = yield from setup("MartialArtist"); ma = {}
+    for nm in ("WallRun", "FlashStep", "WaterWalk", "Parry", "IronSkin"): c.set_secondary_rank(nm, 1, "None")
+    p0 = here(); room = free_ahead(p0, V(1, 0, 0), 3000)
+    ma["leap"] = use(c, "WallRun"); yield from wait(2.5); ma["leap"].update({"moved_cm": round(dist2(here(), p0)), "planned_cm": round(c.last_move_length), "room_cm": round(room), "air": not G["pawn"].get_editor_property("character_movement").is_moving_on_ground()})
+    put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.5)
+    m = spawn_dummy(ahead(300)); yield from wait(0.5); p0 = here(); mp = m.get_actor_location()
+    ma["flash"] = use(c, "FlashStep"); yield from wait(1.0)
+    ma["flash"].update({"moved_cm": round(dist2(here(), p0)), "past_it": dist2(here(), p0) > dist2(mp, p0) + 100, "planned_cm": round(c.last_move_length)})
+    drop([m]); yield from wait(0.3)
+    put(V(ctr.x, ctr.y, ctr.z), 0.0); yield from wait(0.5)
+    ma["water"] = use(c, "WaterWalk")
+    m = spawn_dummy(ahead(150)); yield from wait(0.5); hb = c.get_health(); p0_ = c.parried_blows
+    ma["parry"] = use(c, "Parry"); c.apply_damage(30.0, m); yield from wait(0.1)
+    ma["parry"].update({"hp_lost": round(hb - c.get_health(), 1), "parried": c.parried_blows - p0_, "staggered": m.is_stunned(), "again": use(c, "Parry")["ok"]})
+    drop([m]); yield from wait(1.0)
+    c.set_health(c.get_max_health()); hb = c.get_health(); c.apply_damage(50.0, None); yield from wait(0.1); plain = hb - c.get_health()
+    c.set_health(c.get_max_health()); hb = c.get_health()
+    ma["iron"] = use(c, "IronSkin"); c.apply_damage(50.0, None); yield from wait(0.1); ma["iron"].update({"plain": round(plain, 1), "skin": round(hb - c.get_health(), 1)})
+    res["martial"] = ma
+    c = yield from restart("Warrior"); quiet(False)
+    # ---- the verdicts
+    def lastn(u): p = str(u.get("last", "")).split("|"); return int(p[1]) if len(p) > 1 else 0
+    ok_t = t["made"] and t["began"] and t["entry"] and t["rank"] == 1 and t["left"] == 0 and t["on_bar"] and len(t["lines"]) == 6
+    b = w["bash"]; ok_w = (b["ok"] and all(b["stunned"]) and all(b["stunned_4_7s"]) and not any(b["stunned_5_7s"]) and not b["again"]
+        and w["grapple"]["ok"] and w["grapple"]["slow"] == 1.0 and w["grapple"]["moved_cm"] < 40 and not w["grapple"]["stunned"]
+        and w["trip"]["ok"] and w["trip"]["stunned"] and w["blind"]["ok"] and w["blind"]["lost"] > 0 and w["blind"]["blind"] == 1.0
+        and w["push"]["ok"] and all(x["away"] and x["moved_cm"] >= min(1800, x["free_cm"] - 250) * 0.8 for x in w["push"]["monsters"])
+        and w["pull"]["ok"] and w["pull"]["from_cm"] > 800 and w["pull"]["to_cm"] < 300)
+    sw_ = mg["swarm"]; nsw = lastn(sw_); dsw = float(sw_["last"].split("|")[2]) if sw_["ok"] else 0
+    ok_m = (sw_["ok"] and nsw == 5 and sw_["lost"] >= nsw * dsw * 0.9 and sw_["mana_after"] < 1.0
+        and abs(mg["boost"]["fire"] / max(mg["boost"]["plain"], 0.01) - 1.2) < 0.01
+        and mg["recharge"]["ok"] and mg["recharge"]["hp_lost"] == 0 and abs(mg["recharge"]["mana"] - 30) < 0.5
+        and mg["ablation"]["ok"] and mg["ablation"]["hp_lost_two"] == 0 and mg["ablation"]["monster_lost"] >= 39.5 and mg["ablation"]["hp_lost_third"] > 0
+        and mg["step"]["ok"] and 300 <= mg["step"]["moved_cm"] <= 1050 and mg["step"]["foe_after_cm"] > mg["step"]["foe_before_cm"] + 200)
+    ok_wl = (wl["mana_shield"]["ok"] and wl["mana_shield"]["hp_lost"] == 0 and abs(wl["mana_shield"]["mana_taken"] - 20) < 0.5
+        and all(wl[k]["ok"] for k in ("curse", "blind", "bleed")) and wl["auras"]["curse"] >= 0.25 and wl["auras"]["blind"] == 1.0 and wl["auras"]["bled"] > 0
+        and wl["transfer"]["ok"] and wl["transfer"]["moved_cm"] >= 1000          # (in sight of where it stood (PR #35's review): the great hall gives 16 m of its 40)
+        and wl["blade"]["ok"] and wl["blade"]["blows"] >= 1 and abs((wl["blade"]["lost_blade"] - wl["blade"]["lost_plain"]) - 12.0 * wl["blade"]["blows"]) < 1.0)
+    gr = su.get("grown", {}); bs = gr.get("base") or {}
+    ok_s = (bool(bs) and abs(gr["hp"] / bs["hp"] - 1.2) < 0.02 and abs(gr["damage"] / bs["damage"] - 1.2) < 0.03 and abs(gr["pace"] - 1.2) < 0.001
+        and su.get("healing", {}).get("ok") and abs(su["healing"]["healed"] - su["healing"]["max"] * 0.1) < 1.0
+        and su.get("soul", {}).get("harvests") == 1 and su["soul"]["healed"] > 0 and abs(su["soul"]["boost"] - 1.2) < 0.001 and su["soul"]["boost_left"] > 8)
+    ok_ma = (ma["leap"]["ok"] and ma["leap"]["moved_cm"] >= 0.8 * ma["leap"]["planned_cm"] and ma["leap"]["planned_cm"] >= 500
+        and ma["flash"]["ok"] and ma["flash"]["past_it"] and ma["flash"]["moved_cm"] >= 0.8 * ma["flash"]["planned_cm"]
+        and not ma["water"]["ok"] and "water" in ma["water"]["says"].lower()
+        and ma["parry"]["ok"] and ma["parry"]["hp_lost"] == 0 and ma["parry"]["parried"] == 1 and ma["parry"]["staggered"] and not ma["parry"]["again"]
+        and ma["iron"]["ok"] and ma["iron"]["plain"] > 0 and abs(ma["iron"]["skin"] / ma["iron"]["plain"] - 0.9) < 0.03)
+    step_result("secondary", ok_t and ok_w and ok_m and ok_wl and ok_s and ok_ma, token_ok=ok_t, warrior_ok=ok_w, mage_ok=ok_m, warlock_ok=ok_wl, summoner_ok=ok_s, martial_ok=ok_ma, **res)
+
 def step_console():
     """the game's own console: RDConsole's self-test (884's step_console says what it measures)"""
     g = G["gen"]; res = {}
@@ -4247,7 +4435,7 @@ def step_console():
         elif q[0] == "note": res[q[1]] = q[2]
     res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
     step_result("console", bool(checks) and txt.strip().endswith("result|ok"), **res)
-STEPS = {"tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+STEPS = {"secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

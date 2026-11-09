@@ -645,7 +645,48 @@ enum class ERDItemKind : uint8
 	Key,
 	/** mistward_castle (docs/improvements3.txt): a scroll of its Spell: read, the spell is cast once at no mana (sharing the
 	 *  spell's cooldown) and the scroll is used up; only a hero whose card reads scrolls of the spell's type (ScrollTypes) */
-	Scroll
+	Scroll,
+	/** the list of 2026-11-08b's sixth phase: an Angel Token: used, she chooses one of her hero's secondary abilities to raise a
+	 *  rank (the generator's Secondaries) */
+	Token
+};
+
+/** the list of 2026-11-08b's sixth phase: how a secondary ability is used */
+UENUM(BlueprintType)
+enum class ERDSecondaryKind : uint8
+{
+	/** on the quick bar ("@<Name>"), made with its cooldown */
+	Active,
+	/** on the quick bar, on and off */
+	Toggle,
+	/** always on once learned */
+	Passive
+};
+
+/** the list of 2026-11-08b's sixth phase (SourceArt/balance/secondary.json, 911): a hero's secondary ability, earned with Angel
+ *  Tokens (a token a rank, six ranks; the first learns it). Its numbers by rank: Values and Values2 as its Text says ({v},
+ *  {v2}), Seconds it lasts, Cooldowns; RDSecondary.cpp makes each by its Name */
+USTRUCT(BlueprintType)
+struct FRDSecondaryDef
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Hero;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Text;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDSecondaryKind Kind = ERDSecondaryKind::Active;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> Values;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> Values2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> Seconds;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<float> Cooldowns;
+	/** how far it reaches (cm; 0: its own rule) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Reach = 0.f;
+	/** a share of its own (a mana swarm's light: a share of her first spell's damage; the ablation's blow back; a parry's stagger) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Share = 0.f;
+	/** a spell whose look it takes (the mana swarm's lights) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName LookSpell;
+	/** it raises a spell she chooses at its first rank (the Mage's spell boosts) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bChoosesSpell = false;
 };
 
 /** random_dungeonmagic_level5: how heavy a set of armour is; each hero wears only some weights (FRDHeroDef::Wears) */

@@ -1249,6 +1249,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 {
 	++MonstersKilled;
 	UE_LOG(LogRandomDungeonGen, Log, TEXT("RDCOMBAT %s killed (%d)"), Monster ? *Monster->MonsterName.ToString() : TEXT("?"), MonstersKilled);
+	if (Secondaries.Num() > 0) SecondaryOnKill(Monster);          // (the sixth phase: the wilds' feathers, the soul harvest)
 	// (Brokenspire: its gold, the quests' counters)
 	if (bTown || bTownLink)
 	{

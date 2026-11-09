@@ -238,9 +238,11 @@ ARDMonster* ARDDungeonGenerator::SummonKindAlly(FName Kind, FVector At, FName Sp
 	if (bGrow) M->Tier = T;
 	// (hers: out of its set's monsters (her blows and spells pass it by), among her allies until it falls)
 	if (M->Section) M->Section->SpawnedMonsters.Remove(M);
-	if (!bGrow) { Hp = M->GetMaxHealth(); Dm = M->GetDamage(); }
+	// (PR #35's review: her minions' health and damage on summons that do not grow too)
+	if (!bGrow) { Hp = M->GetMaxHealth() * SecondaryMul(TEXT("MinionHealth")); Dm = M->GetDamage() * SecondaryMul(TEXT("MinionDamage")); }
 	M->BecomeAlly(0.f, Hp, Dm);
 	M->SummonSpell = Spell;
+	M->AllyPace = SecondaryMul(TEXT("Frenzy"));          // (the sixth phase: her frenzy)
 	Allies.Add(M);
 	UE_LOG(LogRDMistward3, Log, TEXT("RDSUMMON %s for %s: tier %d, %.0f hit points, %.0f damage (%d of them)"), *Kind.ToString(), *Spell.ToString(), T, M->GetMaxHealth(), M->GetDamage(), CountSummoned(Spell));
 	return M;

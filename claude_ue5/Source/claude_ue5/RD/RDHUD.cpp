@@ -1791,9 +1791,12 @@ void ARDHUD::DrawInventory(float Sc)
 	const bool bRepair = Cb->IsPickingRepair();
 	// (the third list: choosing the weapon a slash goes on; the inventory in tabs)
 	const bool bSlashPick = !bRepair && Cb->IsPickingSlash();
-	const bool bTabs = Gen->bInventoryTabs && !bRepair && !bSlashPick;
-	const TArray<FString> Lines = bRepair ? Cb->GetRepairLines() : bSlashPick ? Cb->GetSlashLines() : Cb->GetInventoryLines();
-	const int32 Cur = bRepair ? Cb->GetRepairCursor() : bSlashPick ? Cb->GetSlashCursor() : Cb->GetInventoryCursor();
+	// (the sixth phase: choosing what an Angel Token raises)
+	const bool bRankPick = !bRepair && !bSlashPick && Cb->IsPickingRank();
+	const bool bTabs = Gen->bInventoryTabs && !bRepair && !bSlashPick && !bRankPick;
+	const TArray<FString> Lines = bRepair ? Cb->GetRepairLines() : bSlashPick ? Cb->GetSlashLines() : bRankPick ? Cb->GetRankLines() : Cb->GetInventoryLines();
+	const int32 Cur = bRepair ? Cb->GetRepairCursor() : bSlashPick ? Cb->GetSlashCursor() : bRankPick ? Cb->GetRankCursor() : Cb->GetInventoryCursor();
+	auto SecTitle = [this](const FString& Name) { const FRDSecondaryDef* D = Gen->FindSecondary(FName(*Name)); return D ? D->Title : Name; };
 	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Line(0.75f, 0.65f, 0.45f, 0.9f), Worn(1.f, 0.45f, 0.35f);
 	// the game stands still under it
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.55f));
@@ -1807,16 +1810,21 @@ void ARDHUD::DrawInventory(float Sc)
 		Secs.Add({ TEXT("weapon"), TEXT("WEAPONS YOU FOUND"), false });
 	}
 	else if (bSlashPick) Secs.Add({ TEXT("weapon"), FString::Printf(TEXT("PUT THE %s ON"), *Cb->GetSlashItem().ToString().ToUpper()), true });
+	else if (bRankPick)
+	{
+		if (Cb->GetRankSpellFor().IsNone()) Secs.Add({ TEXT("rank"), FString::Printf(TEXT("RAISE AN ABILITY WITH THE %s  (%d)"), *Cb->GetRankItem().ToString().ToUpper(), Cb->GetItemCount(Cb->GetRankItem())), true });
+		else Secs.Add({ TEXT("spell"), FString::Printf(TEXT("THE SPELL %s BOOSTS"), *SecTitle(Cb->GetRankSpellFor().ToString()).ToUpper()), true });
+	}
 	else if (bTabs)
 	{
 		// (one tab's sections; its first is shown empty or not)
 		switch (Cb->GetInventoryTab())
 		{
-		case 0: Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true }); Secs.Add({ TEXT("ability"), TEXT("ABILITIES  (ON THE QUICK BAR IF YOU PUT THEM THERE)"), false }); Secs.Add({ TEXT("carried"),FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false }); break;
+		case 0: Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true }); Secs.Add({ TEXT("ability"), TEXT("ABILITIES  (ON THE QUICK BAR IF YOU PUT THEM THERE)"), false }); Secs.Add({ TEXT("passive"), TEXT("ABILITIES ALWAYS ON"), false }); Secs.Add({ TEXT("carried"),FString::Printf(TEXT("WEAPONS THE %s CANNOT WIELD"), *Gen->PlayerTitle.ToUpper()), false }); break;
 		case 1: Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), true }); Secs.Add({ TEXT("helmet"), TEXT("HELMET"), false }); Secs.Add({ TEXT("shield"), TEXT("SHIELDS"), false }); Secs.Add({ TEXT("torch"), TEXT("TORCH"), false }); break;
 		case 2: Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true }); break;
 		case 3: Secs.Add({ TEXT("component"), TEXT("MATERIALS"), true }); Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false }); break;
-		default: Secs.Add({ TEXT("slash"), TEXT("SLASHES"), true }); Secs.Add({ TEXT("scroll"), TEXT("SCROLLS  (CAST ONCE, NO MANA)"), false }); Secs.Add({ TEXT("ring"), TEXT("RINGS"), false }); Secs.Add({ TEXT("key"), TEXT("KEYS"), false });
+		default: Secs.Add({ TEXT("slash"), TEXT("SLASHES"), true }); Secs.Add({ TEXT("scroll"), TEXT("SCROLLS  (CAST ONCE, NO MANA)"), false }); Secs.Add({ TEXT("ring"), TEXT("RINGS"), false }); Secs.Add({ TEXT("key"), TEXT("KEYS"), false }); Secs.Add({ TEXT("token"), TEXT("ANGEL TOKENS  (EACH RAISES AN ABILITY A RANK)"), false });
 			Secs.Add({ TEXT("teleport"), TEXT("TELEPORT RINGS"), false }); Secs.Add({ TEXT("tome"), FString::Printf(TEXT("TOMES THE %s CANNOT LEARN"), *Gen->PlayerTitle.ToUpper()), false }); break;
 		}
 	}
@@ -1824,6 +1832,8 @@ void ARDHUD::DrawInventory(float Sc)
 	{
 		Secs.Add({ TEXT("weapon"), TEXT("WEAPONS AND SPELLS"), true });
 		Secs.Add({ TEXT("ability"), TEXT("ABILITIES"), false });
+		Secs.Add({ TEXT("passive"), TEXT("ABILITIES ALWAYS ON"), false });
+		Secs.Add({ TEXT("token"), TEXT("ANGEL TOKENS"), false });
 		Secs.Add({ TEXT("item"), TEXT("POTIONS AND FOOD"), true });
 		Secs.Add({ TEXT("repair"), TEXT("REPAIR ITEMS"), false });
 		Secs.Add({ TEXT("armour"), TEXT("ARMOUR"), false });
@@ -1981,6 +1991,17 @@ void ARDHUD::DrawInventory(float Sc)
 			Row(I, Nm, Tag, Left >= Full ? Dim : Gold, bArm ? ItemIcon(FName(*Nm)) : WeaponIcon(FCString::Atoi(*P[1])));
 			continue;
 		}
+		if (bRankPick)
+		{
+			// (the sixth phase: "rank|<name>|<title>|<rank>|<max>|<next>", "spell|<name>|<boosted by>")
+			if (Kd == TEXT("rank") && P.Num() >= 5)
+			{
+				const int32 Rk = FCString::Atoi(*P[3]), Mx = FCString::Atoi(*P[4]);
+				Row(I, P[2], Rk >= Mx ? FString::Printf(TEXT("RANK %d  LAST"), Rk) : Rk == 0 ? FString(TEXT("NOT LEARNED")) : FString::Printf(TEXT("RANK %d / %d"), Rk, Mx), Rk >= Mx ? Dim : Rk > 0 ? RDCyan : Gold, FName(*(TEXT("ability_") + P[1].ToLower())));
+			}
+			else if (Kd == TEXT("spell") && P.Num() >= 2) Row(I, P[1], P.Num() >= 3 && !P[2].IsEmpty() && P[2] != TEXT("None") ? FString::Printf(TEXT("BOOSTED BY %s"), *SecTitle(P[2]).ToUpper()) : FString(), P.Num() >= 3 && !P[2].IsEmpty() && P[2] != TEXT("None") ? Dim : Gold, NAME_None);
+			continue;
+		}
 		if (bSlashPick)
 		{
 			// (the third list: "weapon|<index>|<name>|<slash on it>")
@@ -2008,8 +2029,13 @@ void ARDHUD::DrawInventory(float Sc)
 		{
 			// (the quick bar's abilities: "ability|<name>|<slot or -1>")
 			const int32 Qs = FCString::Atoi(*P[2]);
-			Row(I, P[1], Qs >= 0 ? FString::Printf(TEXT("[%s]"), *URDCombatComponent::SlotLabel(Qs)) : FString(TEXT("OFF THE BAR")), Qs >= 0 ? Gold : Dim, FName(*(TEXT("ability_") + P[1].ToLower())));
+			// (the sixth phase's: its title and rank)
+			const int32 Rk = Cb->GetSecondaryRank(FName(*P[1]));
+			FString Tag = Qs >= 0 ? FString::Printf(TEXT("[%s]"), *URDCombatComponent::SlotLabel(Qs)) : FString(TEXT("OFF THE BAR"));
+			if (Rk > 0) Tag = FString::Printf(TEXT("RANK %d   "), Rk) + Tag;
+			Row(I, SecTitle(P[1]), Tag, Qs >= 0 ? Gold : Dim, FName(*(TEXT("ability_") + P[1].ToLower())));
 		}
+		else if (Kd == TEXT("passive") && P.Num() >= 3) Row(I, SecTitle(P[1]), FString::Printf(TEXT("RANK %s"), *P[2]), RDCyan, FName(*(TEXT("ability_") + P[1].ToLower())));
 		else if (Kd == TEXT("helmet") && P.Num() >= 2) Row(I, P.Num() >= 3 ? FString::Printf(TEXT("Helmet of the %s"), *P[2]) : FString(TEXT("Helmet")), P[1] == TEXT("1") ? TEXT("HIDDEN") : TEXT("SHOWN"), P[1] == TEXT("1") ? Dim : RDCyan, NAME_None);
 		else if ((Kd == TEXT("slash") || Kd == TEXT("key")) && P.Num() >= 3) Row(I, P[1], FString::Printf(TEXT("x %s"), *P[2]), Kd == TEXT("slash") ? RDCyan : Gold, ItemIcon(FName(*P[1])));
 		else if (Kd == TEXT("armour") && P.Num() >= 3)
@@ -2102,6 +2128,21 @@ void ARDHUD::DrawInventory(float Sc)
 		Para(FString::Printf(TEXT("%s  mend it      %s  back"), bPad ? TEXT("A") : TEXT("Enter"), bPad ? TEXT("B") : TEXT("Backspace")), Gold, Sc * 1.05f);
 		Para(FString::Printf(TEXT("%d %s left"), Cb->GetItemCount(Cb->GetRepairItem()), *Cb->GetRepairItem().ToString().ToLower()), Dim, Sc);
 	}
+	else if (bRankPick && Sel.Num() >= 2)
+	{
+		// (the sixth phase: what the token's rank would give)
+		if (Sel[0] == TEXT("rank") && Sel.Num() >= 6)
+		{
+			Picture(FName(*(TEXT("ability_") + Sel[1].ToLower())), Sel[2]);
+			const int32 Rk = FCString::Atoi(*Sel[3]);
+			for (const FString& Ln : Cb->GetSecondaryLines())
+				if (Ln.StartsWith(Sel[1] + TEXT("|")) && Rk > 0) { TArray<FString> Q; Ln.ParseIntoArray(Q, TEXT("|"), false); if (Q.Num() >= 6) Para(FString::Printf(TEXT("Now (rank %d):  %s"), Rk, *Q[5]), RDInk, Sc * 1.05f); }
+			Para(Rk >= FCString::Atoi(*Sel[4]) ? FString(TEXT("At its last rank")) : FString::Printf(TEXT("Rank %d:  %s"), Rk + 1, *Sel[5]), FLinearColor(0.6f, 0.95f, 0.6f), Sc * 1.1f);
+		}
+		else Picture(NAME_None, Sel[1]);
+		Ry += 6.f * Sc;
+		Para(FString::Printf(TEXT("%s  raise it      %s  back"), bPad ? TEXT("A") : TEXT("Enter"), bPad ? TEXT("B") : TEXT("Backspace")), Gold, Sc * 1.05f);
+	}
 	else if (bSlashPick && Sel.Num() >= 3)
 	{
 		// (the third list: the weapon chosen, the slash it gets, the one it would give back)
@@ -2123,7 +2164,31 @@ void ARDHUD::DrawInventory(float Sc)
 		const int32 Wi = Sel[0] == TEXT("weapon") && Sel.Num() >= 5 ? FCString::Atoi(*Sel[4]) : Cur;
 		Picture(Sel[0] == TEXT("weapon") ? WeaponIcon(Wi) : Sel[0] == TEXT("helmet") ? NAME_None : Sel[0] == TEXT("ability") ? FName(*(TEXT("ability_") + Sel[1].ToLower())) : ItemIcon(FName(*Sel[1])),
 			Sel[0] == TEXT("helmet") ? FString(TEXT("Helmet")) : Sel[1]);
-		if (Sel[0] == TEXT("ability"))
+		if ((Sel[0] == TEXT("ability") || Sel[0] == TEXT("passive")) && Gen->FindSecondary(FName(*Sel[1])))
+		{
+			// (the sixth phase: what it does at her rank and the next, its use)
+			for (const FString& Ln : Cb->GetSecondaryLines())
+				if (Ln.StartsWith(Sel[1] + TEXT("|")))
+				{
+					TArray<FString> Q; Ln.ParseIntoArray(Q, TEXT("|"), false);
+					if (Q.Num() < 8) continue;
+					Para(FString::Printf(TEXT("%s, rank %s / %s:  %s"), *Q[1], *Q[3], *Q[4], *Q[5]), RDInk, Sc * 1.05f);
+					if (!Q[7].IsEmpty() && Q[7] != TEXT("None")) Para(FString::Printf(TEXT("Its spell: %s"), *Q[7]), RDCyan, Sc);
+					if (!Q[6].IsEmpty()) Para(FString::Printf(TEXT("Next rank:  %s  (an Angel Token)"), *Q[6]), Dim, Sc);
+				}
+			if (Sel[0] == TEXT("ability"))
+			{
+				const int32 Qs = Sel.Num() >= 3 ? FCString::Atoi(*Sel[2]) : -1;
+				Ry += 6.f * Sc;
+				Para(Qs >= 0 ? FString::Printf(TEXT("In quick slot %s: its number makes it; on the D-pad it is made ready and the attack button makes it"), *URDCombatComponent::SlotLabel(Qs)) : FString(TEXT("Off the quick bar: 1-0 puts it on")), Gold, Sc * 1.05f);
+			}
+		}
+		else if (Sel[0] == TEXT("token"))
+		{
+			Para(TEXT("Used: choose one of your hero's secondary abilities; it rises a rank (six ranks; the first learns it)"), RDInk, Sc * 1.05f);
+			Para(TEXT("Made at an anvil from 3 Seraph Feathers (the wilderness's monsters) and a Hallowed Stone (its old shrines)"), Dim, Sc);
+		}
+		else if (Sel[0] == TEXT("ability"))
 		{
 			// (the quick bar's abilities (the user's of 2026-10-29): what it does, its own key, its slot)
 			Para(Sel[1] == TEXT("Dash") ? TEXT("A dash at the monster ahead (up to 5 m, stopping short of it) and a strike with what you hold")
@@ -2492,6 +2557,20 @@ void ARDHUD::DrawHotbar(float Sc)
 			const FLinearColor Tint = bOn ? FLinearColor::White : FLinearColor(0.75f, 0.75f, 0.75f);
 			if (UI.Has(Ic)) UI.Fit(Ic, A + FVector2D(8.f * Sc), B - FVector2D(8.f * Sc), Tint);
 			else { UI.TextSize(Nm.Left(2).ToUpper(), Tw, Th, Small, Sc * 1.4f, ERDType::Title); UI.Text(Nm.Left(2).ToUpper(), Tint, (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.4f, ERDType::Title); }
+			// (the sixth phase's: its cooldown as a weapon's, a green frame while it is on her)
+			const FName SecN(*Nm);
+			if (Gen->FindSecondary(SecN))
+			{
+				const float Cd = Cb->GetSecondaryCooldownLeft(SecN), Full = Cb->SecondaryValue(SecN, 3);
+				if (Cd > 0.f && Full > 0.f)
+				{
+					Box(A, FVector2D(B.X, A.Y + (B.Y - A.Y) * FMath::Clamp(Cd / Full, 0.f, 1.f)), FLinearColor(0.f, 0.f, 0.f, 0.62f));
+					const FString T = FString::Printf(TEXT("%.0f"), FMath::CeilToFloat(Cd));
+					UI.TextSize(T, Tw, Th, Small, Sc * 1.3f, ERDType::Title);
+					UI.Text(T, FLinearColor(1.f, 0.9f, 0.6f), (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.3f, ERDType::Title);
+				}
+				if (Cb->IsSecondaryOn(SecN)) Frame(A + FVector2D(3.f), B - FVector2D(3.f), FLinearColor(0.5f, 1.f, 0.55f, 0.95f), 2.f * Sc);
+			}
 			if (bOn) Frame(A + FVector2D(1.f), B - FVector2D(1.f), FLinearColor(0.55f, 0.85f, 1.f, 0.95f), 2.5f * Sc);
 			UI.Text(URDCombatComponent::SlotLabel(Q), Q < 10 ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
 			continue;

@@ -35,6 +35,7 @@ void URDCombatComponent::GatherState(FRDCarry& C) const
 	C.EffectItems.Reset(); C.EffectKinds.Reset(); C.EffectAmounts.Reset(); C.EffectLeft.Reset();
 	C.QuickSlots.Reset(); C.QuickOff.Reset(); C.Summons.Reset(); C.SummonShares.Reset(); C.SlashWeapons.Reset(); C.SlashNames.Reset();
 	C.DexEnergy = -1.f; C.TorchHeld = NAME_None; C.QuickFirst = 0;
+	C.SecondaryRanks = SecondaryRanks; C.BoostSpells = BoostSpells;          // (the sixth phase)
 	const UWorld* W = GetWorld();
 	if (!W || !Generator) return;
 	const float Now = W->GetTimeSeconds();
@@ -110,6 +111,7 @@ void URDCombatComponent::RestoreState(const FRDCarry& C)
 #undef RDCARRY_GETAMOUNT
 	SpellsReleased = C.SpellCasts;
 	SlashProcs = C.SlashProcs;
+	SecondaryRanks = C.SecondaryRanks; BoostSpells = C.BoostSpells;          // (the sixth phase's abilities, before the quick bar)
 	// ---- what is on her, with the seconds it had left (and the look of a spell on her)
 	auto Get = [&](const TCHAR* N, float& Until, float& Amount) -> bool
 	{

@@ -1,0 +1,187 @@
+{
+ "tag": "r26b",
+ "plan": [
+  "quickbar"
+ ],
+ "level": "martial_arts",
+ "steps": [
+  {
+   "step": "quickbar",
+   "ok": true,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick"
+   ],
+   "bar": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick"
+   ],
+   "abilities": [
+    "@Dodge",
+    "@Dash"
+   ],
+   "refused": [],
+   "dpad": [
+    [
+     "Fists",
+     0,
+     0
+    ],
+    [
+     "Straight Punch",
+     1,
+     0
+    ],
+    [
+     "Side Kick",
+     2,
+     0
+    ],
+    [
+     "Smashing Strike",
+     3,
+     0
+    ],
+    [
+     "Roundhouse Kick",
+     4,
+     0
+    ],
+    [
+     "Chain Punch",
+     5,
+     0
+    ],
+    [
+     "Rear Kick",
+     6,
+     0
+    ],
+    [
+     "Piercing Palm",
+     7,
+     0
+    ],
+    [
+     "Axe Kick",
+     8,
+     0
+    ],
+    [
+     "Meteor Fist",
+     9,
+     0
+    ],
+    [
+     "Spinning Kick",
+     10,
+     1
+    ],
+    [
+     "Fists",
+     0,
+     0
+    ]
+   ],
+   "ability_lines": [
+    "ability|Dodge|-1",
+    "ability|Dash|-1"
+   ],
+   "after_dash": [
+    "Fists",
+    "Straight Punch",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick"
+   ],
+   "after_off": [
+    "Fists",
+    "None",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick"
+   ],
+   "after_found": [
+    "Fists",
+    "Dagger",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick"
+   ],
+   "dash": {
+    "dashes": 1,
+    "abilities_used": 1
+   },
+   "dodge_put": true,
+   "after_dodge": [
+    "Fists",
+    "Dagger",
+    "@Dash",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick",
+    "Piercing Palm",
+    "Axe Kick",
+    "Meteor Fist",
+    "Spinning Kick",
+    "Side Kick",
+    "@Dodge"
+   ],
+   "ready": "@Dodge",
+   "ready_cursor": 12,
+   "ready_first": 3,
+   "roll": {
+    "rolls": 1,
+    "ready_after": "None"
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_r26b_qb_scrolled.png",
+  "mw_r26b_qb_inventory.png",
+  "mw_r26b_qb_ready.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}
