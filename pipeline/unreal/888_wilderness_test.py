@@ -11,6 +11,8 @@ Steps:
           the frames' times, every chunk the same both ways
   quests  (2026-11-07) the captain's two wilderness quests: their places, taken, played (the den's pack, the patrol's
           remains), turned in
+  horse9  (2026-11-09, 913) the stable by Brokenspire's gate, the horse bought, mounted with F, her speed on it against on foot
+          on the plains, the gallop under her, off with F; pictures of her riding
   poi7    (2026-11-09, 912) the points of interest: the seconds between them along 14 lines of the world's model, a 150 s
           run in play (what met her never 40 s apart), each use made with F
   secondary9 (2026-11-09, 911) a wild place's Hallowed Stone taken and not laid again, the lairs' monsters' Seraph Feathers,
@@ -705,6 +707,89 @@ def step_poi7():
             and ("heal" not in uses or uses["heal"]["hp_share"] == 1.0) and ("buff" not in uses or uses["buff"]["blessing"] not in ("", "None"))
             and len(uses) >= 3)
     step_result("poi7", ok_m and ok_r and ok_u, model_ok=ok_m, run_ok=ok_r, uses_ok=bool(ok_u), **res)
+
+
+def step_horse9():
+    """the ridable horse (913, RD/RDHorse.cpp; the list of 2026-11-08b's eighth phase): Brokenspire's stable by the gate with the
+    stable's horse standing at it; bought there (its price in gold taken, hers kept in the game instance) and come to her side;
+    F beside it mounts her (her pelvis on its saddle, her hero's rider clip playing, no blow from the saddle); on the plains she
+    runs HorseDef.SpeedMul times as fast mounted as on foot, the horse galloping under her; F gets her off (her speed back);
+    pictures of her riding from the side and from behind"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    def hs():
+        p = str(g.get_horse_state()).split("|")
+        k = ["owned", "spawned", "mounted", "x", "y", "z", "clip", "rate", "speed", "saddle_z", "pelvis_z", "rider", "stable_horse", "pelvis_off_xy"]
+        return {a: (b if a in ("clip", "rider") else float(b)) for a, b in zip(k, p)}
+    # ---- the stable
+    st = [s for s in spots() if s["kind"] == "stable"]
+    res["stable_spots"] = len(st)
+    if not st: quiet(False); step_result("horse9", False, **res); return
+    at = st[0]["at"]
+    # (on its town side: toward the town's middle, away from the wall and the gate's guards)
+    n_ = math.hypot(at.x, at.y) or 1.0
+    G["pawn"].set_actor_location(V(at.x - at.x / n_ * 250.0, at.y - at.y / n_ * 250.0, at.z + 100.0), False, True); yield from rwait(1.5)
+    res["stable_at"] = [round(at.x), round(at.y)]
+    res["before"] = hs(); res["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 450.0))
+    g.add_gold(5000, "the test"); g0 = g.get_gold(); price = g.horse_price_now()
+    g.open_town_panel("stable", -1); yield from rwait(0.3)
+    lines = [str(l) for l in g.get_town_panel_lines()]
+    k = next((i for i, l in enumerate(lines) if l.startswith("buyhorse|")), -1)
+    res["bought"] = g.activate_town_entry(k) if k >= 0 else False; yield from rwait(1.0)
+    res["gold_taken"] = g0 - g.get_gold(); res["price"] = price; res["after_buy"] = hs()
+    res["gi_owned"] = G["gi"].get_editor_property("horse_owned")
+    try: g.close_town_panel()
+    except Exception: pass
+    # ---- out on the plains: on foot, then mounted
+    xy = clear_spot("plains"); g.wild_put_her(*xy); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    g.call_horse(); yield from rwait(0.8)
+    p0 = G["pawn"].get_actor_location()
+    yield from run_her((1.0, 0.3), 4.0); p1 = G["pawn"].get_actor_location()
+    foot = math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 4.0
+    yield from rwait(0.6)
+    g.call_horse(); yield from rwait(0.5)
+    hp_ = hs(); d_ = math.hypot(hp_["x"] - G["pawn"].get_actor_location().x, hp_["y"] - G["pawn"].get_actor_location().y)
+    res["horse_at_cm"] = round(d_); res["mount_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
+    yield from press("F"); yield from rwait(1.0)
+    m = hs(); res["mounted"] = m; res["attack_refused"] = not cb().start_attack()
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=G["pawn"].get_actor_rotation().yaw + 90)); yield from rwait(0.6); shot("horse_idle", "1280x720"); yield from rwait(1.0)
+    p0 = G["pawn"].get_actor_location()
+    run = []
+    t0 = time.time()
+    for _ in run_her((1.0, 0.3), 4.0):
+        if time.time() - t0 > 2.0 and len(run) < 6: run.append(hs())
+        yield
+    p1 = G["pawn"].get_actor_location()
+    mounted = math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 4.0
+    res["riding"] = run[-1] if run else None
+    # (pictures: from the side as she gallops, then from behind)
+    for nm, yawoff in (("horse_side", 90.0), ("horse_back", 0.0)):
+        t0 = time.time()
+        while time.time() - t0 < 1.2: G["pawn"].add_movement_input(V(1.0, 0.3, 0.0), 1.0); yield
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=math.degrees(math.atan2(0.3, 1.0)) + yawoff))
+        G["pawn"].add_movement_input(V(1.0, 0.3, 0.0), 1.0); shot(nm, "1280x720"); yield from rwait(1.2)
+    res["speed_m_s"] = {"foot": round(foot, 2), "mounted": round(mounted, 2), "ratio": round(mounted / max(foot, 0.01), 2), "want": round(g.get_editor_property("horse_def").speed_mul, 2)}
+    yield from press("F"); yield from rwait(0.8)
+    res["after_dismount"] = hs()
+    p0 = G["pawn"].get_actor_location(); yield from run_her((1.0, 0.3), 3.0); p1 = G["pawn"].get_actor_location()
+    res["speed_m_s"]["after"] = round(math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 3.0, 2)
+    # (PR #37's review: a death in the saddle gets her off and keeps her death clip (it was stopped with the rider's: she stood up))
+    g.call_horse(); yield from rwait(0.5); g.mount_horse(); yield from rwait(0.8)
+    c_ = cb(); c_.apply_damage(c_.get_health() * 10.0 + 500.0, None); yield from wait(1.2)
+    ai = G["pawn"].mesh.get_anim_instance()
+    res["death"] = {"dead": c_.is_dead(), "mounted": hs()["mounted"], "montage": bool(ai and ai.is_any_montage_playing())}
+    t0 = time.time()
+    while cb().is_dead() and time.time() - t0 < 20: yield
+    yield from rwait(1.0)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    b = res["before"]; a = res["after_buy"]; mt = res["mounted"]; rd = res["riding"] or {}; sp = res["speed_m_s"]
+    ok = (b["stable_horse"] == 1 and b["owned"] == 0 and "horse" in res["prompt"] and res["bought"] and res["gold_taken"] == res["price"] > 0
+          and a["owned"] == 1 and a["spawned"] == 1 and res["gi_owned"]
+          and mt["mounted"] == 1 and abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 15) and mt["rider"] not in ("", "None") and res["attack_refused"]
+          and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < 0.4
+          and res["death"]["dead"] and res["death"]["mounted"] == 0 and res["death"]["montage"])
+    step_result("horse9", ok, **res)
 
 
 # ------------------------------------------------------------------------------------------------ fast travel
@@ -1725,7 +1810,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"horse9": step_horse9, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

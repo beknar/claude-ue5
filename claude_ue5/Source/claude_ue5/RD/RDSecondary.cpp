@@ -318,6 +318,7 @@ bool URDCombatComponent::UseSecondary(FName Ability)
 	const FRDSecondaryDef* D = SecDef(Ability);
 	ACharacter* C = Cast<ACharacter>(GetOwner());
 	if (!D || !C || !Generator || bDead || GetSecondaryRank(Ability) <= 0 || D->Hero != Generator->CurrentHero) return false;
+	if (Generator->IsMounted()) { SetMessage(FString::Printf(TEXT("%s: not from the saddle"), *D->Title)); return false; }
 	UWorld* W = GetWorld();
 	const float Now = W->GetTimeSeconds();
 	const float V = SecondaryValue(Ability, 0), V2 = SecondaryValue(Ability, 1), S = SecondaryValue(Ability, 2), Cd = SecondaryValue(Ability, 3);

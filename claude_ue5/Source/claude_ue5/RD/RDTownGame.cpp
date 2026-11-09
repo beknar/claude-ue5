@@ -321,6 +321,9 @@ int32 ARDDungeonGenerator::GetGameTier() const
 	return FMath::Clamp(GameGlobalTier(), 1, 25);
 }
 
+static float RDTierPrice(int32 Tier);
+int32 ARDDungeonGenerator::HorsePriceNow() const { return FMath::RoundToInt(HorseDef.Price * RDTierPrice(GetGameTier())); }
+
 static float RDTierPrice(int32 Tier)
 {
 	// (1 to 8 over the first five tiers as before; past them about 18 % a tier: about 190 at tier 25)
@@ -761,7 +764,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); } }
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); } }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1229,6 +1232,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 		case TS_Counter: if (D < 260.f) return TEXT("trade"); break;
 		case TS_Basin: if (D < 260.f) return TEXT("be healed"); break;
 		case TS_Altar: if (D < 330.f) return TEXT("pray at the altar"); break;
+		case TS_Stable: if (D < 420.f && !bMounted) return HasHorse() ? FString(TEXT("the stable: call your horse")) : FString::Printf(TEXT("the stable: a horse for %d gold"), HorsePriceNow()); break;
 		case TS_Stash: if (D < 240.f) return TEXT("open your storage"); break;
 		case TS_Smith: if (D < 230.f) return TEXT("the smith's work"); break;
 		case TS_Circle: if (D < 620.f) return TEXT("touch the teleport circle"); break;
@@ -1291,6 +1295,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		case TS_Counter: if (D < 260.f) Panel = TEXT("store"); break;
 		case TS_Basin: if (D < 260.f) Panel = TEXT("healer"); break;
 		case TS_Altar: if (D < 330.f) Panel = TEXT("temple"); break;
+		case TS_Stable: if (D < 420.f && !bMounted) Panel = TEXT("stable"); break;
 		case TS_Stash: if (D < 240.f) Panel = TEXT("stash"); break;
 		case TS_Smith: if (D < 230.f) Panel = TEXT("smith"); break;
 		case TS_Circle: if (D < 620.f) Panel = TEXT("circle"); break;
@@ -1705,6 +1710,16 @@ void ARDDungeonGenerator::BuildTownLines()
 		Add(TEXT("donate"), TEXT("Give an offering"), TEXT("5 g"), TEXT("For the refugees' bread"), Gold >= 5);
 		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
 	}
+	else if (TownPanel == TEXT("stable"))
+	{
+		// (the eighth phase: a horse to buy, hers called)
+		TownTitle = TEXT("The stable"); TownSub = FString::Printf(TEXT("you have %d gold"), Gold);
+		if (TownBody.IsEmpty()) TownBody = TEXT("A grey stands in the straw, saddled and patient. The stable boy pats its neck: \"Fast as the wind on the open road.\"");
+		const int32 Cost = HorsePriceNow();
+		if (!HasHorse()) Add(TEXT("buyhorse"), TEXT("Buy the horse"), FString::Printf(TEXT("%d g"), Cost), FString::Printf(TEXT("Yours for good: ridden, you go %.1f times as fast across the wilds (F beside it to ride, F again to get off; no blows from the saddle)"), HorseDef.SpeedMul), Gold >= Cost);
+		else Add(TEXT("callhorse"), TEXT("Call your horse"), FString(), TEXT("It comes to your side"));
+		Add(TEXT("bye"), TEXT("Leave"), FString(), FString());
+	}
 	else if (TownPanel == TEXT("stash"))
 	{
 		TownTitle = TEXT("Your storage"); TownSub = TEXT("the storehouse keeps what you leave here, as long as the game lasts");
@@ -1764,7 +1779,7 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 	const FTownLine E = TownLines[L];
 	bool bOk = false;
 	if (E.Act == TEXT("bye")) { CloseTownPanel(); return true; }
-	if (!E.bOn && E.Act != TEXT("ask")) { SetTownNote(E.Act == TEXT("buy") || E.Act == TEXT("heal") || E.Act == TEXT("bless") || E.Act == TEXT("repair") ? TEXT("You have too little gold") : E.Detail); return false; }
+	if (!E.bOn && E.Act != TEXT("ask")) { SetTownNote(E.Act == TEXT("buy") || E.Act == TEXT("heal") || E.Act == TEXT("bless") || E.Act == TEXT("repair") || E.Act == TEXT("buyhorse") ? TEXT("You have too little gold") : E.Detail); return false; }
 	if (E.Act == TEXT("ask")) { TownBody = E.Detail; TownCount(TEXT("asked")); bOk = true; }
 	else if (E.Act == TEXT("accept") || E.Act == TEXT("turnin")) bOk = TownQuestAction(E.Act, FName(*E.Arg));
 	else if (E.Act == TEXT("status")) { TownBody = E.Detail; bOk = true; }
@@ -1783,6 +1798,8 @@ bool ARDDungeonGenerator::ActivateTownEntry(int32 Line)
 		return WildFastTravel(FRDWildWorld::TownIdBase + Ti);
 	}
 	else if (E.Act == TEXT("bless")) bOk = TownBless();
+	else if (E.Act == TEXT("buyhorse")) { bOk = BuyHorse(); if (bOk) CloseTownPanel(); }
+	else if (E.Act == TEXT("callhorse")) { bOk = CallHorse(); if (bOk) { SetTownNote(TEXT("Your horse comes")); CloseTownPanel(); } }
 	else if (E.Act == TEXT("donate")) { AddGold(-5, TEXT("an offering")); TownCount(TEXT("offerings")); SetTownNote(TEXT("The priest bows his head: \"They will eat tonight.\"")); bOk = true; }
 	else if (E.Act == TEXT("deposit")) bOk = TownDeposit(E.Arg);
 	else if (E.Act == TEXT("withdraw")) bOk = TownWithdraw(FCString::Atoi(*E.Arg));

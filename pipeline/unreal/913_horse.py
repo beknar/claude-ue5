@@ -1,0 +1,131 @@
+"""The ridable horse (the user's list of 2026-11-08b, docs/improvements9.txt, its eighth phase: "make a rideable horse for a player
+to buy and ride with increased speed across the wilderness"; the horse built in Blender as the farm animals are, the user's
+choice). Steps (all by default, or name some):
+  import   the horse (pipeline/blender_numpy/farm_animals.py -- claude_ue5/SourceArt/brokenspire/horse only=horse: SK_Farm_Horse.fbx
+           and its grey, SK_Farm_Horse_B.fbx) into /Game/RandomDungeon/Town/Animals/Horse; its clips at the lengths Blender built
+  rider    the Animals pack's camel rider's clips (Anim_Rider_Idle_01, _Walk, _Run on its UE4 mannequin) retargeted to each hero's
+           rig (an IK rig on the pack's mannequin, a retargeter per hero onto IK_JRPG_<rig>_Auto) into /Game/RandomDungeon/Horse/Anims
+  level    brokenspire's HorseDef (meshes, clips, the soles' speeds from farm_animals.json, price, speed) and RiderClips by hero
+C++ first (RD/RDHorse.cpp). Args: [import] [rider] [level]"""
+import os, sys, json, unreal
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
+eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
+SA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "claude_ue5", "SourceArt", "brokenspire", "horse"))
+STEPS = [a for a in sys.argv[1:] if a in ("import", "rider", "level")] or ["import", "rider", "level"]
+DH = "/Game/RandomDungeon/Town/Animals/Horse"; RIGS = "/Game/RandomDungeon/Horse/Rigs"; ANIMS = "/Game/RandomDungeon/Horse/Anims"
+HERO_RIG = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "MartialArtist": "MartialArtist", "Summoner": "Summoner4"}
+RIDER = {"Idle": "Anim_Rider_Idle_01", "Walk": "Anim_Rider_Walk", "Run": "Anim_Rider_Run"}
+J = json.load(open(os.path.join(SA, "farm_animals.json"), encoding="utf-8"))["Horse"]
+REPORT = []
+
+
+def fbx_task(path, dest, skeleton=None, anims=True):
+    o = unreal.FbxImportUI()
+    o.set_editor_property("import_mesh", True); o.set_editor_property("import_as_skeletal", True)
+    o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_SKELETAL_MESH)
+    if skeleton: o.set_editor_property("skeleton", skeleton)
+    o.set_editor_property("import_animations", anims); o.set_editor_property("import_materials", True); o.set_editor_property("import_textures", False)
+    t = unreal.AssetImportTask(); t.filename = path; t.destination_path = dest
+    t.automated = True; t.replace_existing = True; t.save = True; t.options = o
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
+    return [unreal.load_asset(p) for p in t.imported_object_paths]
+
+
+def horse_assets():
+    assets = [unreal.load_asset(p.split(".")[0]) for p in eal.list_assets(DH, recursive=True)] if eal.does_directory_exist(DH) else []
+    meshes = sorted([a for a in assets if isinstance(a, unreal.SkeletalMesh)], key=lambda a: a.get_name())
+    seqs = {a.get_name().split("_")[-1]: a for a in assets if isinstance(a, unreal.AnimSequence)}
+    return meshes, seqs
+
+
+def make(cls, fac, name, folder):
+    p = f"{folder}/{name}"
+    if eal.does_asset_exist(p): eal.delete_asset(p)
+    return unreal.AssetToolsHelpers.get_asset_tools().create_asset(name, folder, cls, fac)
+
+
+if "import" in STEPS:
+    # (its clips first, then its meshes and skeleton: deleted the other way round the clips lost their skeleton (886's lesson))
+    if eal.does_directory_exist(DH):
+        ps = [p.split(".")[0] for p in eal.list_assets(DH, recursive=True)]
+        order = lambda p: 0 if isinstance(unreal.load_asset(p), unreal.AnimSequence) else 1 if isinstance(unreal.load_asset(p), unreal.SkeletalMesh) else 2
+        for p in sorted(ps, key=order): eal.delete_asset(p)
+    got = fbx_task(os.path.join(SA, "SK_Farm_Horse.fbx"), DH)
+    sk = next((a for a in got if isinstance(a, unreal.SkeletalMesh)), None); assert sk, "the horse did not import"
+    fbx_task(os.path.join(SA, "SK_Farm_Horse_B.fbx"), DH, skeleton=sk.get_editor_property("skeleton"), anims=False)
+    meshes, seqs = horse_assets()
+    # (Interchange takes Blender's 30 fps at its own rate: each clip plays at the length Blender built it to)
+    for k, a in seqs.items():
+        L = float(J["clips"].get(k, {}).get("length_s", a.get_play_length()))
+        if L > 0 and abs(a.get_play_length() - L) > 0.02: a.set_editor_property("rate_scale", a.get_play_length() / L)
+        eal.save_loaded_asset(a, only_if_is_dirty=False)
+    bones = [str(n) for n in unreal.SkeletalMeshLibrary.get_bone_names(sk)] if hasattr(unreal, "SkeletalMeshLibrary") else []
+    REPORT.append(f"import: {[m.get_name() for m in meshes]}, clips {sorted(seqs)}, saddle bone {'saddle' in bones if bones else '?'}")
+
+if "rider" in STEPS:
+    ar = unreal.AssetRegistryHelpers.get_asset_registry()
+    clips = {}
+    for k, n in RIDER.items():
+        a = next((x for x in ar.get_assets_by_path("/Game/Animals_Pack", recursive=True) if str(x.asset_name) == n and str(x.asset_class_path.asset_name) == "AnimSequence"), None)
+        assert a, n; clips[k] = a
+    src_mesh = unreal.load_asset("/Game/Animals_Pack/Demoscene/Mesh/SK_Mannequin"); assert src_mesh, "the Animals pack's mannequin"
+    rig = make(unreal.IKRigDefinition, unreal.IKRigDefinitionFactory(), "IK_Rider_Source", RIGS)
+    c = unreal.IKRigController.get_controller(rig); c.set_skeletal_mesh(src_mesh); c.apply_auto_generated_retarget_definition()
+    try: c.apply_auto_fbik()
+    except Exception: pass
+    eal.save_loaded_asset(rig)
+    for hero, ch in HERO_RIG.items():
+        tgt_mesh = unreal.load_asset(f"/Game/JRPG/Character/SK_JRPG_{ch}"); tgt_rig = unreal.load_asset(f"/Game/JRPG/Rigs/IK_JRPG_{ch}_Auto")
+        if not tgt_mesh or not tgt_rig: REPORT.append(f"rider {hero}: no mesh or rig for {ch}"); continue
+        rtg = make(unreal.IKRetargeter, unreal.IKRetargetFactory(), f"RTG_Rider_To_{ch}", RIGS)
+        rc = unreal.IKRetargeterController.get_controller(rtg)
+        rc.add_default_ops()
+        rc.set_ik_rig(unreal.RetargetSourceOrTarget.SOURCE, rig); rc.set_ik_rig(unreal.RetargetSourceOrTarget.TARGET, tgt_rig)
+        rc.set_preview_mesh(unreal.RetargetSourceOrTarget.SOURCE, src_mesh); rc.set_preview_mesh(unreal.RetargetSourceOrTarget.TARGET, tgt_mesh)
+        rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.SOURCE, rig); rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.TARGET, tgt_rig)
+        rc.auto_map_chains(unreal.AutoMapChainType.FUZZY, True)
+        rm = rc.get_op_controller(rc.get_index_of_op_by_name("Root Motion"))          # (add_default_ops leaves it without bones)
+        rm.set_source_root_bone("root"); rm.set_target_root_bone("root"); rm.set_target_pelvis_bone("pelvis")
+        try: rc.auto_align_all_bones(unreal.RetargetSourceOrTarget.TARGET)
+        except Exception as e: print("RIDER align", e)
+        eal.save_loaded_asset(rtg)
+        out = f"{ANIMS}/{ch}"
+        for n in RIDER.values():
+            if eal.does_asset_exist(f"{out}/{n}_{ch}"): eal.delete_asset(f"{out}/{n}_{ch}")
+        inp = unreal.IKRetargetBatchOperationInputs()
+        inp.set_editor_property("assets_to_retarget", list(clips.values())); inp.set_editor_property("source_mesh", src_mesh); inp.set_editor_property("target_mesh", tgt_mesh)
+        inp.set_editor_property("ik_retarget_asset", rtg); inp.set_editor_property("suffix", "_" + ch); inp.set_editor_property("target_path", out)
+        inp.set_editor_property("include_referenced_assets", False); inp.set_editor_property("overwrite_existing_files", True)
+        unreal.IKRetargetBatchOperation.run_batch_retarget(inp)
+        made = []
+        for n in RIDER.values():
+            a = unreal.load_asset(f"{out}/{n}_{ch}")
+            if not a: continue
+            a.set_editor_property("enable_root_motion", False); a.set_editor_property("force_root_lock", True); eal.save_loaded_asset(a, False); made.append(n)
+        REPORT.append(f"rider {hero} ({ch}): {len(made)} of 3")
+
+if "level" in STEPS:
+    MAP = "/Game/RandomDungeon/Maps/brokenspire"
+    if not ues.get_editor_world().get_path_name().startswith(MAP + "."):
+        les.load_level(MAP); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
+    meshes, seqs = horse_assets()
+    d = unreal.RDHorseDef()
+    d.set_editor_property("mesh", meshes[0]); d.set_editor_property("mesh_b", meshes[1] if len(meshes) > 1 else meshes[0])
+    for k in ("Idle", "Walk", "Run"): d.set_editor_property(k.lower(), seqs.get(k))
+    d.set_editor_property("walk_clip_speed", float(J["walk_speed_cm_s"])); d.set_editor_property("run_clip_speed", float(J.get("run_speed_cm_s", 260.0)))
+    d.set_editor_property("gallop_from", 250.0); d.set_editor_property("saddle_bone", "saddle")
+    d.set_editor_property("price", 60.0); d.set_editor_property("speed_mul", 2.2); d.set_editor_property("rider_lift", 14.0)          # (her pelvis this far over the saddle bone)
+    g.set_editor_property("horse_def", d)
+    rc_map = {}
+    for hero, ch in HERO_RIG.items():
+        r = unreal.RDRiderClips()
+        for k, n in RIDER.items(): r.set_editor_property(k.lower(), unreal.load_asset(f"{ANIMS}/{ch}/{n}_{ch}"))
+        rc_map[hero] = r
+    g.set_editor_property("rider_clips", rc_map)
+    g.modify(); les.save_current_level()
+    REPORT.append(f"level: horse {meshes[0].get_name()}, clips {sorted(seqs)}, walk {J['walk_speed_cm_s']} / run {J.get('run_speed_cm_s')} cm/s, riders {sorted(rc_map)}")
+    del g
+print("HORSE " + " | ".join(REPORT))
+import gc
+gc.collect()

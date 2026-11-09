@@ -1,4 +1,5 @@
 #include "RD/RDDungeonGenerator.h"
+#include "RD/RDHorse.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/IInputProcessor.h"
 #include "RD/RDSave.h"
@@ -1424,6 +1425,8 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 				if (I >= 0 && D < BestD) { BestD = D; Best = S; bBestDoor = bDoor; BestI = I; }
 			}
 	// (mistward: her dropped things, a teleporter pad, a trap she has seen (the Rogue disarms it) come before the rest)
+	// (the eighth phase: F off her horse; beside it, on it)
+	if (bMounted) { DismountHorse(); return TEXT("dismount"); }
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
 	if (bWild) { const FString Wp = WildPoiInteract(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
 	// (Brokenspire: someone of the town, a service, the gate, a boarded door; the castle's way back)
@@ -1440,6 +1443,9 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 		PlayerCombat->SetCraftingOpen(true);
 		return TEXT("anvil");
 	}
+	// (the eighth phase: her horse, after everything else F reaches and only when nearer than the nearest door or container (PR
+	// #37's review: called at the stable or left by a door, it took the stable's and the door's F))
+	if (Horse && FVector::Dist2D(Horse->GetActorLocation(), From) < FMath::Min(320.f, Best ? BestD : 320.f) && MountHorse()) return TEXT("mount");
 	if (!Best) return FString();
 	if (bBestDoor && Best->IsDoorCell(BestI) && !Best->DescribeCell(BestI).IsEmpty())
 	{
@@ -1524,6 +1530,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	// review's find)
 	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
+	if (bMounted) return TEXT("get off your horse");          // (the eighth phase)
 	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
 	if (Lp)
 		{
@@ -1538,6 +1545,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
+	if (Horse && FVector::Dist2D(Horse->GetActorLocation(), From) < FMath::Min(320.f, Best ? BestD : 320.f)) return TEXT("ride your horse");
 	if (!Best) return FString();
 	if (bBestDoor && Best->IsDoorCell(BestI)) { const FString Cl = Best->DescribeCell(BestI); if (!Cl.IsEmpty()) return Cl; }
 	// (a lever reached by the doors' longer reach: named as a lever, not "open door" (the PR review's find))

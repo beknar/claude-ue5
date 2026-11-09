@@ -71,6 +71,7 @@ bool ARDDungeonGenerator::DexterityBoosts(const FString& Type) const
 // ------------------------------------------------------------------------------------------------ the dash
 bool URDCombatComponent::StartDash()
 {
+	if (Generator && Generator->IsMounted()) return false;          // (the eighth phase: none from the saddle)
 	ACharacter* C = Cast<ACharacter>(GetOwner());
 	USkeletalMeshComponent* M = Body();
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;

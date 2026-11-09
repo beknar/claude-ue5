@@ -131,9 +131,10 @@ The user's words: "in order to retain engagement, the player should be able to i
 - **Ids:** they take the free range `2^24 + (cell x << 11 | cell y)`, and `FindPlace` decodes it.
 - **Not places:** they are not found or announced, and not on the map. `GetWildPlacesNear` lists them for a search of 3 km or less.
 
-**The encounter director** (`TickWildEncounters`). Once a second it asks what is near her (within 45 m):
+**The encounter director** (`TickWildEncounters`). Once a second it asks what is near her to do (within 45 m; an emptied or cleared spot does not count):
 - a fight;
-- a point of interest not used;
+- a point of interest still to use;
+- a live monster;
 - a pile;
 - an animal;
 - its own roamers.
@@ -143,13 +144,14 @@ When 25 s pass with none, it meets her 45–70 m ahead on her way with a roaming
 - a prowling pack (3, in the forests and on the cold ground);
 - a lost satchel (a pile).
 
-Its roamers go once she is 250 m off. It is off inside the towns' walls.
+Its roamers and satchels go once she is 250 m off. It is off inside the towns' walls.
 
-**Measured** (`888 poi7 -Light`, `test_pi4.json`):
+**Measured** (`888 poi7 -Light`, `test_pi6.json` after PR #36's review):
 - **The world's spacing:** along 14 lines of the world's model (8 out of Brokenspire, 6 through other regions, 2 km each), the points within 75 m of the way.
   - Half the gaps are under 31.4 s at her run; 90 % are under 72 s.
   - 18 kinds were seen.
   - The longest gaps are in the mountains and a pine forest (7 min), where the slopes and lakes leave few spots.
+- **The far band:** a line out of Graymourne holds 17 points of interest (half its gaps under 30 s). Before PR #36's review, the ids' 11 bits a cell had left the cells north of 165.8 km and east of 95.8 km empty.
 - **In play:** a 150 s run off the roads met something 28 times, two of them the director's. The longest gap was 27.3 s.
 - **Each use:** made with F where it stands:
   - a pile taken, with its things gained, and not laid again;
