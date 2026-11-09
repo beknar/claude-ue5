@@ -172,6 +172,33 @@ struct FRDWSample
 	FIntPoint FieldCell = FIntPoint(MIN_int32, MIN_int32);
 	int32 FieldCrop = -1;
 	float FieldAng = 0.f;
+	// (the list of 2026-11-08b's medieval farms: the great field's kind there (FRDWFarm::Kind; 4 a farmstead's yard), and an
+	// open field's strips: their width across FieldAng's way and where they start (metres), 0 where it has none)
+	uint8 FarmKind = 0;
+	float StripW = 0.f, StripOff = 0.f;
+};
+
+/** the farms' layout at a point (the list of 2026-11-08b: "make the farms in the wilderness look more like medieval farms, with
+ *  different sizes of farms, from the croft to the strip"): the farms are great fields (a warped Voronoi about 420 m across),
+ *  each an open field of unfenced strips (one crop the whole field, its furlongs each their own way, the strips divided by
+ *  furrows and ploughed into ridges), a farmstead's crofts (small plots round its yard, each its own crop or grass) or
+ *  pasture (grass over old ridges) */
+struct FRDWFarm
+{
+	/** 0 none, 1 open field, 2 crofts, 3 pasture, 4 a farmstead's yard */
+	uint8 Kind = 0;
+	FIntPoint Great = FIntPoint::ZeroValue;   // the great field's cell
+	FIntPoint Plot = FIntPoint::ZeroValue;    // the furlong's (open field) or the plot's (crofts)
+	FVector2D Site = FVector2D::ZeroVector;   // the great field's point (a croft field's farmstead stands there)
+	int32 Crop = -1;                          // -1 grass
+	float Field = 0.f;                        // how much the crop's ground it is (0-1: the edges, the headlands and furrows less)
+	float Fade = 0.f;                         // the great field's own fade (the farms' edge, its own edge)
+	float Ang = 0.f;                          // its rows' and strips' way (radians, 0-PI)
+	float StripW = 0.f, StripOff = 0.f;       // the strips' width and start (metres, along the way across)
+	int32 Strip = 0;                          // which strip
+	float Furrow = 0.f;                       // 1 in the furrow between two strips
+	float Ridge = 0.f;                        // metres over the ground (ridge-and-furrow)
+	float Shade = 1.f;                        // the strip's own shade (each strip ploughed and sown by another hand)
 };
 
 /** the world's model (see the file's head) */
@@ -194,6 +221,17 @@ public:
 	static constexpr int32 MaxCrops = 16;
 	/** a sample's field's crop's name ("" outside a field, or at a field's edge under MinField of its weight) */
 	FString CropName(const FRDWSample& S, float MinField = 0.f) const;
+	/** the farms' layout at a point given the farms' weight there (FRDWFarm) */
+	void FarmAt(double X, double Y, float FarmW, FRDWFarm& Out) const;
+	/** the farms biome's weight at a point (Blend's) */
+	float FarmWeight(double X, double Y) const;
+	/** a crop drawn by the crops' weights from a hash (-1 with none) */
+	int32 PickCrop(int32 A, int32 B, uint32 S) const;
+	/** the farmsteads whose middle is in a box (world metres): one at each croft field's point that is dry, off the roads and
+	 *  level; places of kind "farmstead", ids FarmIdBase + (great cell x & 1023) << 10 | (y & 1023) (none on the map) */
+	void FarmsteadsIn(double X0, double Y0, double X1, double Y1, TArray<FRDWildPlace>& Out) const;
+	static constexpr double GreatFieldM = 420.0;
+	static constexpr int32 FarmIdBase = 1 << 28;
 	TArray<FRDWildTown> Towns;
 	float BaseH = 0.f;               // Brokenspire's ground (the game's z 0)
 	/** where a town's roads leave it (world metres, just outside its section), when its gate is known before Init */

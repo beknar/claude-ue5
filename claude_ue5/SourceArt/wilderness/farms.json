@@ -1,0 +1,35 @@
+{
+ "_doc": "The farmsteads' families (the user's list of 2026-11-08b, docs/improvements9.txt: 'farm families to go with the farms'): what each says when she speaks to them (F), by who they are; 'any' is said by every one. {farm} is the farmstead's name. 899 farms writes them into brokenspire's generator (WildFarmLines, '<who>|<line>'), and the paddock's most animals (WildFarmAnimalsMax).",
+ "animals_max": 6,
+ "lines": {
+  "farmer": [
+   "The strips by the lane are mine this year, barley. The headland's for turning the plough, mind your step.",
+   "Ridge and furrow, same as my father ploughed it. The water runs off into the furrows and the crop stays dry.",
+   "One crop to the whole field, that's the rule. The reeve says wheat, it's wheat, from this hedge to the far one.",
+   "Wolves took two of the neighbour's sheep last moon. Keep to the road after dark.",
+   "If you're bound for Brokenspire, tell the miller I'll bring the grain once the rain stops."
+  ],
+  "farmwife": [
+   "Mind the gate, they'll be out and in the beans before you can whistle.",
+   "Hens are laying again. That's the first good news since the frost.",
+   "We keep the little plots by the house for ourselves: cabbages, peas, a few beans. The open field's for the lord's tithe as much as ours.",
+   "You look half starved. There's bread in the house if you've a coin for it.",
+   "Welcome to {farm}. Don't mind the mud."
+  ],
+  "farmhand": [
+   "Up before the cock, down after the sun. Pay's a roof and two meals.",
+   "Barn's full of hay to the rafters. Somebody's going to have to fork it all again come spring.",
+   "I'd rather be swinging a sword like you than a scythe, truth be told.",
+   "The old boundary stones? They say the strips haven't moved in a hundred years."
+  ],
+  "child": [
+   "Are you a knight? Did you kill a dragon?",
+   "I'm minding the well. Nobody's allowed to fall in.",
+   "Ma says not to talk to strangers. But you're not strange, you're just dusty."
+  ],
+  "any": [
+   "Fair weather to you, traveller.",
+   "The harvest won't bring itself in."
+  ]
+ }
+}

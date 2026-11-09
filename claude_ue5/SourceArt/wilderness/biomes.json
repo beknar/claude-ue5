@@ -31,7 +31,7 @@
              {"name": "rye", "soil": [116,94,60], "leaf": [150,160,124], "cover": 0.8, "row": 1.0, "weight": 11},
              {"name": "peas", "soil": [98,76,50], "leaf": [82,118,56], "cover": 0.7, "row": 1.0, "weight": 8},
              {"name": "beans", "soil": [96,74,50], "leaf": [96,118,80], "cover": 0.6, "row": 1.0, "weight": 7},
-             {"name": "flax", "soil": [100,80,54], "leaf": [120,142,170], "cover": 0.6, "row": 0.8, "weight": 6},
+             {"name": "flax", "soil": [100,80,54], "leaf": [106,130,128], "cover": 0.6, "row": 0.8, "weight": 6},
              {"name": "hemp", "soil": [96,74,48], "leaf": [62,100,44], "cover": 0.75, "row": 1.2, "weight": 5},
              {"name": "corn", "soil": [96,72,48], "leaf": [74,104,42], "cover": 0.7, "row": 1.2, "weight": 4},
              {"name": "potatoes", "soil": [100,76,50], "leaf": [64,94,40], "cover": 0.65, "row": 1.0, "weight": 3},
@@ -155,7 +155,14 @@
   "stone": ["/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Rune_01a", "/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Rune_01b"],
   "altar": ["/Game/Relics/VOL2_ForgottenRelics/Meshes/LP/SM_Altar_01a"],
   "cave": ["/Game/Scene_OldMine/Assets/Custom/Ind_Min_Cave/SM_Ind_Min_Cave"],
-  "rock": ["/Game/FrozenNorseEnvironment/Meshes/SM_Boulder_01", "/Game/FrozenNorseEnvironment/Meshes/SM_Boulder_02", "/Game/Hivemind/Medieval_Docks/Static_Meshes/Rock_Kit/Large/SM_Large_Rock_C"]
+  "rock": ["/Game/FrozenNorseEnvironment/Meshes/SM_Boulder_01", "/Game/FrozenNorseEnvironment/Meshes/SM_Boulder_02", "/Game/Hivemind/Medieval_Docks/Static_Meshes/Rock_Kit/Large/SM_Large_Rock_C"],
+  "_farmstead": "the list of 2026-11-08b ('farm houses, barns, fenced in animals, and farm families'): a farmstead's pieces (RDWildFarm.cpp); a mesh shared with another kind keeps one height (the scale is the mesh's)",
+  "farmhouse": ["/Game/Medieval_Lake_Village/Meshs/SM_HouseSet01", "/Game/Medieval_Fantasy_Village/Meshes/Houses/SM_house_02", "/Game/Medieval_Fantasy_Village/Meshes/Houses/SM_house_05"],
+  "barn": ["/Game/Medieval_Lake_Village/Meshs/SM_StorageSet"],
+  "paddock": ["/Game/Medieval_Lake_Village/Meshs/SM_Fence01"],
+  "trough": ["/Game/Castle/Furniture/Kit/SM_Kit_Trough"],
+  "woodpile": ["/Game/Medieval_Lake_Village/Meshs/SM_FireWoodSet02"],
+  "scarecrow": ["/Game/StylizedVillage/Meshes/SM_Scarecrow"]
  },
- "heights": {"house": 9, "tent": 3, "campfire": 0.6, "log": 0.6, "fence": 1.3, "hay": 1.5, "well": 3.5, "cart": 2.2, "totem": 3.2, "bones": 0.4, "skeleton": 2.0, "branch": 0.5, "ruin": 5, "stone": 3.2, "altar": 1.2, "cave": 9, "rock": 3}
+ "heights": {"house": 9, "tent": 3, "campfire": 0.6, "log": 0.6, "fence": 1.3, "hay": 1.5, "well": 0.85, "cart": 2.2, "totem": 3.2, "bones": 0.4, "skeleton": 2.0, "branch": 0.5, "ruin": 5, "stone": 3.2, "altar": 1.2, "cave": 9, "rock": 3, "farmhouse": 9, "barn": 6.1, "paddock": 1.5, "trough": 0.45, "woodpile": 0.66, "scarecrow": 2.0}
 }

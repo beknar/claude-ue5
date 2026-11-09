@@ -192,6 +192,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					if (F.Clump > 0.f) Wb *= RDWCSmooth(-0.1f, 0.35f, FRDWildWorld::Fbm(X0 + Lx, Y0 + Ly, 1.0 / 60.0, 2, Hs + 3u)) * F.Clump + (1.f - F.Clump);
 					if (Q.Road > 0.15f || (Q.Snow > 0.85f && !bTree && F.Kind != TEXT("rock") && F.Kind != TEXT("ice"))) continue;
 					if (bCrop ? Q.Field < 0.5f : (Q.Field > 0.3f && F.Kind != TEXT("rock"))) continue;
+					// (a farmstead's yard: its grass only (its house, barn and paddock stand there))
+					if (Q.FarmKind == 4 && F.Kind != TEXT("grass") && F.Kind != TEXT("flower")) continue;
 					if (F.NearWater < 0.f) { if (!Q.WaterKind || Q.WaterKind == 1) continue; }
 					else if (Q.WaterKind) continue;
 					else if (F.NearWater > 0.f && !Wet[I * Nv + J]) continue;
@@ -264,6 +266,14 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					int32 I, J; Nearest(Lx, Ly, I, J);
 					const FRDWSample& Q = Sat(I, J);
 					if (Q.FieldCell != Kv.Key || Q.Field < 0.5f || Q.Road > 0.1f || Q.WaterKind) continue;
+					// (the list of 2026-11-08b: the strips divided by their furrows: none sown within 0.8 m of a strip's edge, from
+					// the plant's own place (the samples are 2 m apart))
+					if (Q.StripW > 0.f)
+					{
+						const double Vs = Wx * Acr.X + Wy * Acr.Y + Q.StripOff;
+						const double Fs = Vs / Q.StripW - FMath::FloorToDouble(Vs / Q.StripW);
+						if (FMath::Min(Fs, 1.0 - Fs) * Q.StripW < 0.8) continue;
+					}
 					if (D.Slope[I * Nv + J] > 22.f) continue;
 					if (D.bTownHole && FMath::Abs(Wx - D.TownAt.X) < D.TownHalfM + 6.0 && FMath::Abs(Wy - D.TownAt.Y) < D.TownHalfM + 6.0) continue;
 					// (its kind: the crop's kinds by their Density; one kind a step, the same each time it is made)
@@ -290,6 +300,16 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		const FIntPoint C0 = W.PlaceCellOf(X0, Y0), C1 = W.PlaceCellOf(X0 + Cm, Y0 + Cm);
 		for (int32 Ci = C0.X; Ci <= C1.X; ++Ci) for (int32 Cj = C0.Y; Cj <= C1.Y; ++Cj) W.PlacesIn(FIntPoint(Ci, Cj), Ps);
 		for (const FRDWildPlace& P : Ps) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm && P.Town < 0) D.Places.Add(P);
+		// (the list of 2026-11-08b: "on the farm terrain, there should also be farm houses, barns, fenced in animals, and farm
+		// families": a farmstead in each croft field's yard, laid as a place is)
+		if (!D.bTownHole) W.FarmsteadsIn(X0, Y0, X0 + Cm, Y0 + Cm, D.Places);
+		else
+		{
+			TArray<FRDWildPlace> Fs;
+			W.FarmsteadsIn(X0, Y0, X0 + Cm, Y0 + Cm, Fs);
+			for (const FRDWildPlace& P : Fs)
+				if (FMath::Abs(P.At.X - D.TownAt.X) > D.TownHalfM + 60.0 || FMath::Abs(P.At.Y - D.TownAt.Y) > D.TownHalfM + 60.0) D.Places.Add(P);
+		}
 	}
 	D.Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 }

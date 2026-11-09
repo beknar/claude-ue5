@@ -257,7 +257,7 @@ void ARDTownAnimal::SetState(int32 S, float Now)
 	{
 		// (somewhere else in the pen, kept its body's half length from the fence)
 		const FVector2D H = (PenHalf - FVector2D(D.HalfSize.X, D.HalfSize.X)).ComponentMax(FVector2D(5.f, 5.f));
-		To = PenAt + FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f);
+		To = PenAt + FRotator(0.f, PenYaw, 0.f).RotateVector(FVector(R.FRandRange(-H.X, H.X), R.FRandRange(-H.Y, H.Y), 0.f));
 		Until = Now + 20.f;
 	}
 	else Until = Now + (S == 1 ? R.FRandRange(4.f, 11.f) : R.FRandRange(3.f, 8.f));
@@ -277,7 +277,12 @@ void ARDTownAnimal::Tick(float Dt)
 		SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), Want, Dt, 120.f).Yaw, 0.f));
 		// (it walks the way it faces once it has nearly turned)
 		if (FMath::Abs(FMath::FindDeltaAngleDegrees(GetActorRotation().Yaw, Want.Yaw)) < 35.f)
-			SetActorLocation(L + GetActorForwardVector() * FMath::Min(Speed * Dt, D.Size()), false);
+		{
+			FVector Nl = L + GetActorForwardVector() * FMath::Min(Speed * Dt, D.Size());
+			// (on the wild ground: at its height where it steps (the paddock's ground rises and falls a little))
+			if (bWildGround) Nl.Z = Gen->WildGroundZ(Nl);
+			SetActorLocation(Nl, false);
+		}
 		return;
 	}
 	if (Now >= Until) SetState(R.FRand() < 0.45f ? 2 : State == 1 ? 0 : 1, Now);
