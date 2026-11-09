@@ -325,7 +325,8 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 	float MeanH = 1.f, MeanD = 1.f;
 	// (the means of the kinds of that tier: a set of rooms of it)
 	const FIntPoint TierSection(FMath::Max(InTier - 1, 0), 0);
-	G->MeanMonsterFactors(MeanH, MeanD, TierSection);
+	// (PR #34's review: in the wilds the kinds met at its tier (their wild bands): a dungeon tier's past 10 has none)
+	if (!(bOpenGround && G->MeanWildFactors(MeanH, MeanD, InTier))) G->MeanMonsterFactors(MeanH, MeanD, TierSection);
 	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(RefH * G->TierValueAt(G->TierHealth, InTier, 1.f) * Hf / MeanH * HealthMul));
 	Damage = FMath::Max(1.f, FMath::RoundToFloat(RefD * G->TierValueAt(G->TierDamage, InTier, 1.f) * Df / MeanD * DamageMul));
 	Tier = InTier;

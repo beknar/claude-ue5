@@ -230,8 +230,12 @@ ARDMonster* ARDDungeonGenerator::SummonKindAlly(FName Kind, FVector At, FName Sp
 	float Hp = 0.f, Dm = 0.f;
 	if (bGrow) SummonStrength(Spell, Hp, Dm, T);
 	const FString Title = Monsters[K].Title.IsEmpty() ? Kind.ToString() : Monsters[K].Title;
-	ARDMonster* M = SpawnMonsterKind(K, At, T, 1.f, 1.f, 1.f, Title);
+	// (PR #34's review: SummonStrength's tier is the game's; Empower maps a level's tier through GlobalTier, so it is given the
+	// level's tier that maps to it (else Vel Morrath's summons at 12 read tier 17's), and the summon then holds the game's, as
+	// SetStrength reads it when it grows)
+	ARDMonster* M = SpawnMonsterKind(K, At, bGrow ? LevelTierOf(T) : T, 1.f, 1.f, 1.f, Title);
 	if (!M) return nullptr;
+	if (bGrow) M->Tier = T;
 	// (hers: out of its set's monsters (her blows and spells pass it by), among her allies until it falls)
 	if (M->Section) M->Section->SpawnedMonsters.Remove(M);
 	if (!bGrow) { Hp = M->GetMaxHealth(); Dm = M->GetDamage(); }

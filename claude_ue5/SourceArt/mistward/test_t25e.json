@@ -1,5 +1,5 @@
 {
- "tag": "t25d",
+ "tag": "t25e",
  "plan": [
   "tier25"
  ],
@@ -120,7 +120,7 @@
     "0,0": {
      "tier": 1,
      "game_tier": 6,
-     "things": 16100,
+     "things": 16047,
      "off_tier": [],
      "forced": [
       "Bread",
@@ -137,7 +137,7 @@
       "Fine Dexterity Ring 1"
      ],
      "forced_off": [],
-     "fine": 5677,
+     "fine": 5572,
      "plain_tiered": 0,
      "other_quality": 0,
      "tomes": {
@@ -148,24 +148,24 @@
     "1,0": {
      "tier": 2,
      "game_tier": 7,
-     "things": 9338,
+     "things": 9308,
      "off_tier": [],
      "forced": [
       "Bronze Ingot",
       "Coarse Hide",
-      "Copper Ingot",
-      "Cured Leather Strip",
-      "Epoxy",
-      "Fine Bear Warrior’s Armour",
       "Fine Bedvar’s Armour",
       "Fine Bone Blade",
-      "Fine Combat Knife",
       "Fine Crocodile Warrior’s Armour",
-      "Fine Dark Knight's Sword",
-      "Fine Demonic Armour"
+      "Fine Demonic Armour",
+      "Fine Dexterity Ring 4",
+      "Fine Dock Shield",
+      "Fine HP Potency Ring 4",
+      "Fine Katana",
+      "Fine Magic Potency Ring 4",
+      "Fine Obsidian Knife"
      ],
      "forced_off": [],
-     "fine": 3705,
+     "fine": 3645,
      "plain_tiered": 0,
      "other_quality": 0,
      "tomes": {
@@ -176,6 +176,11 @@
    },
    "tomes_seen": 2,
    "later": {
+    "gold": {
+     "gained": 471,
+     "game_tier": 10,
+     "want_min": 438
+    },
     "MartialArtist": {
      "set4": true,
      "boss": "Nasty",
@@ -204,11 +209,13 @@
      "summon6": {
       "started": true,
       "mana": 46.0,
+      "growth_tier": 6,
       "allies": [
        {
         "kind": "Iron_Golem",
         "hp": 396,
-        "damage": 62.0
+        "damage": 62.0,
+        "tier": 6
        }
       ]
      }
@@ -218,7 +225,7 @@
  ],
  "windows_hidden": "Content Browser, Message Log",
  "shots": [
-  "mw_t25d_tier25_golem.png"
+  "mw_t25e_tier25_golem.png"
  ],
  "error": null,
  "windows_shown_again": 2

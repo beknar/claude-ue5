@@ -796,7 +796,7 @@ bool ARDSection::OpenCell(int32 Door)
 		for (const FName& Rw : Generator->PrisonerRewards)
 		{
 			const int32 Ix = Generator->FindItem(Rw);
-			if (Ix >= 0 && (Generator->Items[Ix].Tiers.Num() == 0 || Generator->Items[Ix].Tiers.Contains(Generator->GlobalTier(Tier)))) Can.Add(Rw);
+			if (Ix >= 0 && Generator->ItemOfTier(Generator->Items[Ix], Tier)) Can.Add(Rw);
 		}
 		if (Can.Num() == 0) Can = Generator->PrisonerRewards;
 		const FName Gift = Can.Num() > 0 ? Can[HashCombine((uint32)Generator->SessionSeed, GetTypeHash(FIntVector(Coord.X, Coord.Y, Ci))) % (uint32)Can.Num()] : NAME_None;

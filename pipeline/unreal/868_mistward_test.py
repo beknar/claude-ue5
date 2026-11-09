@@ -4194,12 +4194,16 @@ def step_tier25():
         boss = [e for e in (str(l).split("|") for l in g.get_encounter_lines()) if e[0] == "boss" and e[6] == "5" and "USURPER" not in e[7]]
         if boss: break
         yield from rwait(0.25)
-    killed = 0
+    killed = 0; gold0 = g.get_gold()
     if boss:
         at = V(float(boss[0][1]), float(boss[0][2]), float(boss[0][3]))
         for mo in g.get_monsters():
             if alive(mo) and mo.boss and dist2(mo.get_actor_location(), at) < 600: mo.apply_damage(1e7, None); killed += 1
         yield from wait(1.0)
+    # (its gold by the game's tier (PR #34's review: it was the level's 5): a boss's at least BossGold x the tier's gold factor,
+    # 5 x the price factor over 8 past tier 5: tier 10's 17.5)
+    gt5 = g.global_tier(5); price = (8.0 * 1.17 ** (gt5 - 5)) if gt5 > 5 else [1, 2, 3.5, 5.5, 8][gt5 - 1]
+    later["gold"] = {"gained": g.get_gold() - gold0, "game_tier": gt5, "want_min": round(g.get_editor_property("boss_gold") * (5.0 * price / 8.0 if gt5 > 5 else gt5))}
     later["MartialArtist"] = {"set4": bool(sec4), "boss": boss[0][4] if boss else None, "killed": killed, "new": [n for n in W() if n not in w0], "message": str(cb().message)}
     for hero in ("Rogue", "Summoner"):
         c = yield from restart(hero); g = G["gen"]; quiet(True)
@@ -4210,7 +4214,9 @@ def step_tier25():
         si = W().index("Summon Tier 6"); c.set_mana(c.get_max_mana()); m0 = c.get_mana()
         st = c.start_attack_with(si); taken = round(m0 - c.get_mana(), 1); yield from wait(2.5)
         al = [a for a in g.get_allies() if str(a.summon_spell) == "Summon Tier 6"]
-        later["Summoner"]["summon6"] = {"started": st, "mana": taken, "allies": [{"kind": str(a.monster_name), "hp": round(a.get_max_health()), "damage": round(a.get_damage(), 1)} for a in al]}
+        # (its tier the game's she grows by (PR #34's review: spawned at it, Empower mapped it again))
+        later["Summoner"]["summon6"] = {"started": st, "mana": taken, "growth_tier": g.growth_tier(),
+                                        "allies": [{"kind": str(a.monster_name), "hp": round(a.get_max_health()), "damage": round(a.get_damage(), 1), "tier": a.tier} for a in al]}
         if al: G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=G["pawn"].get_actor_rotation().yaw + 150)); yield from wait(0.4); shot("tier25_golem"); yield from rwait(0.8)
     res["later"] = later
     nxt = {"MartialArtist": "Thunder Step", "Rogue": "Incendiary Bolt", "Summoner": "Summon Tier 7"}
@@ -4218,7 +4224,8 @@ def step_tier25():
     later_ok = (later["MartialArtist"]["killed"] > 0 and "Crashing Wave" in later["MartialArtist"]["new"]
                 and "Barbed Bolt" in later["Rogue"]["weapons"] and "Summon Tier 6" in later["Summoner"]["weapons"]
                 and all(nxt[h] not in (later[h].get("weapons") or later[h].get("new")) for h in nxt)
-                and any(a["kind"] == "Iron_Golem" for a in later["Summoner"].get("summon6", {}).get("allies", [])))
+                and any(a["kind"] == "Iron_Golem" and a["tier"] == later["Summoner"]["summon6"]["growth_tier"] for a in later["Summoner"].get("summon6", {}).get("allies", []))
+                and later["gold"]["gained"] >= later["gold"]["want_min"])
     c = yield from restart("Warrior"); quiet(False)
     ok = (res["global"] == [base + t for t in range(1, 6)] and res["tables"] >= 25 and ci >= 1 and mons_ok and loot_ok and later_ok)
     step_result("tier25", ok, mons_ok=mons_ok, loot_ok=loot_ok, later_ok=later_ok, **res)

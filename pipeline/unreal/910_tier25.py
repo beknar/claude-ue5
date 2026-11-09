@@ -85,10 +85,11 @@ for m in MAPS:
     made = {s["name"] for s in D["new_spells"]} | {e["name"] for e in later["Summoner"]} | {e["name"] for e in later["MartialArtist"]}
     spells = [s for s in g.get_editor_property("spells") if str(s.get_editor_property("name")) not in made]
     by = {str(s.get_editor_property("name")): s for s in spells}
-    num = max(int(s.get_editor_property("number")) for s in spells)
-    for e in D["new_spells"]:
-        s = copy_struct(unreal.RDSpellDef, by[e["from"]]); num += 1
-        s.set_editor_property("name", e["name"]); s.set_editor_property("number", num)
+    # (numbers of their own (PR #34's review: max + 1 met the later summonings' 206-210): the made-up spells 301 on, the later chi
+    # attacks 311 on; the stages take out spells by number (872 101-199, 876 201-205, 875 keeps 1-100))
+    for k_, e in enumerate(D["new_spells"]):
+        s = copy_struct(unreal.RDSpellDef, by[e["from"]])
+        s.set_editor_property("name", e["name"]); s.set_editor_property("number", 301 + k_)
         s.set_editor_property("mana", s.get_editor_property("mana") * e["mana"]); s.set_editor_property("damage", s.get_editor_property("damage") * e["damage"])
         s.set_editor_property("effect", e["effect"]); spells.append(s)
     excl = set(D["starting_spells"]) | set(D["tome_spells_exclude"])
@@ -100,14 +101,14 @@ for m in MAPS:
     r["slots"] = [str(s.get_editor_property("name")) for s in tome]
     # (the later abilities' spells: summonings of the later dungeons' kinds, stronger chi attacks)
     for e in later["Summoner"]:
-        s = copy_struct(unreal.RDSpellDef, by[e["from_spell"]]); num += 1
+        s = copy_struct(unreal.RDSpellDef, by[e["from_spell"]])
         for k, v in (("name", e["name"]), ("number", 200 + e["tier"]), ("tier", e["tier"]), ("summon_kind", e["kind"]), ("count", e["count"]), ("effect", e["effect"]),
                      ("icon", e["icon"]), ("slot", 0)): s.set_editor_property(k, v)
         s.set_editor_property("mana", s.get_editor_property("mana") * (1.0 + 0.12 * (e["tier"] - 5)))
         spells.append(s)
     for k_, e in enumerate(later["MartialArtist"]):
         s = copy_struct(unreal.RDSpellDef, by[e["from_spell"]])
-        num += 1; s.set_editor_property("name", e["name"]); s.set_editor_property("number", num); s.set_editor_property("slot", 0)
+        s.set_editor_property("name", e["name"]); s.set_editor_property("number", 311 + k_); s.set_editor_property("slot", 0)
         s.set_editor_property("damage", s.get_editor_property("damage") * e["damage"]); s.set_editor_property("tier", 5)
         spells.append(s)
     g.set_editor_property("spells", spells)

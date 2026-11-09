@@ -552,8 +552,8 @@ TArray<FName> ARDDungeonGenerator::LootListOf(FIntPoint Section, int32 Index) co
 	const int32 Max = FMath::Max(MaxItemsPerContainer, 1);
 	// (level 5: an item may be found only in some tiers of rooms; level 4's items have no tiers: everywhere)
 	// (the rebalance to tier 25: an item's tiers are the game's: this level's tier through GlobalTier)
-	const int32 Tier = GlobalTier(TierOf(Section));
-	auto InTier = [Tier](const FRDItemDef& It) { return It.Tiers.Num() == 0 || It.Tiers.Contains(Tier); };
+	const int32 Tier = TierOf(Section);
+	auto InTier = [this, Tier](const FRDItemDef& It) { return ItemOfTier(It, Tier); };
 	// what is put in the start room's containers: one to each in turn
 	if (StartRoomItems.Num() > 0 && IsStartSection(Section))
 	{
@@ -1279,11 +1279,12 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 				// (a dungeon with no final boss: its last tier's boss is the dungeon's, and drops the next dungeon's key and map (the
 				// list of 2026-11-08b))
 				if (E.bBoss && I == 0 && !E.bFinal && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !bFinalBossOn && Monster)
-			{
-				DropNextDungeonKey(Monster->GetActorLocation());
-				// (the rebalance to tier 25: this dungeon's ability for the Summoner, the Rogue and the Martial Artist is hers now)
-				bLaterBossDown = true; GrantLaterWeapons(true);
-			}
+				{
+					DropNextDungeonKey(Monster->GetActorLocation());
+					// (the rebalance to tier 25: this dungeon's ability for the Summoner, the Rogue and the Martial Artist is hers now:
+					// its bossdone:5 counter was written above (TownCountMax), which StartWeaponsOf reads)
+					GrantLaterWeapons(true);
+				}
 				// (the final boss is no tier's boss: OnFinalBossKilled gives his notice and reward, no slash or chi attack here)
 				if (E.bBoss && I == 0 && !E.bFinal)
 				{

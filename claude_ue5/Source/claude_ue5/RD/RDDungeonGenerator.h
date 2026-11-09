@@ -347,8 +347,19 @@ public:
 	int32 GrantLaterWeapons(bool bAnnounce);
 	/** this level's place in the chain of dungeons (0 Mistward Castle; -1 none) */
 	int32 ChainIndexHere() const;
-	/** this level's last tier's boss fell in this play (its counter is written later) */
-	bool bLaterBossDown = false;
+	/** a level's tier T in the game's tiers by a base and a cap (0: none): GlobalTier's and the chain's (GameGlobalTier) one rule */
+	static int32 MapTier(int32 Tier, int32 Base, int32 Cap) { return Cap > 0 ? FMath::Min(Tier + Base, Cap) : Tier + Base; }
+	/** the level's tier that maps to a game's tier (at least 1): a summon grown to the game's tier is spawned at it */
+	int32 LevelTierOf(int32 GameTier) const { return FMath::Max(1, GameTier - DungeonTierBase); }
+	/** an item found in this level's tier T: no tiers, or the game's tier of T among them (every reader of an item's Tiers) */
+	bool ItemOfTier(const FRDItemDef& It, int32 Tier) const { return It.Tiers.Num() == 0 || It.Tiers.Contains(GlobalTier(Tier)); }
+	/** the kinds the wilds meet at a game's tier (their wild bands): their factors' plain mean (the wilds pick a kind evenly);
+	 *  false when no kind has a band holding it */
+	bool MeanWildFactors(float& Health, float& Damage, int32 Tier) const;
+	/** GameGlobalTier kept for the frame it was read in while the tiers opened here stay as many (it walks the chain and the game
+	 *  instance's dungeons; growth reads it at every blow and every redraw; a tier opening reads it in the same frame) */
+	mutable int32 CachedGameTier = 0, CachedGameTierOpened = -1;
+	mutable uint64 CachedGameTierFrame = MAX_uint64;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName SealPiece = TEXT("CellFrame");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Tiers") FName EndPiece = TEXT("Wall_Corr");
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Tiers") int32 TierOf(FIntPoint Section) const { return FMath::Max(FMath::Abs(Section.X), FMath::Abs(Section.Y)) + 1; }

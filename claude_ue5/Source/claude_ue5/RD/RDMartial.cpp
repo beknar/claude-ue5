@@ -33,8 +33,7 @@ void ARDDungeonGenerator::StartWeaponsOf(const FRDHeroDef& H, TArray<FRDWeaponDe
 	const TArray<FRDChainLink>& C = Chain();
 	for (int32 I = 0; I < H.LaterWeapons.Num(); ++I)
 	{
-		const bool bEarned = bUnlockAll || (C.IsValidIndex(I + 1) && ((GI && GI->GetCounter(URDGameInstance::DungeonCounter(C[I + 1].Key, TEXT("bossdone:5"))) > 0)
-		                                                              || (bLaterBossDown && ChainIndexHere() == I + 1)));
+		const bool bEarned = bUnlockAll || (C.IsValidIndex(I + 1) && GI && GI->GetCounter(URDGameInstance::DungeonCounter(C[I + 1].Key, TEXT("bossdone:5"))) > 0);
 		if (bEarned && !Out.ContainsByPredicate([&](const FRDWeaponDef& W) { return W.Name == H.LaterWeapons[I].Name; })) Out.Add(H.LaterWeapons[I]);
 	}
 }

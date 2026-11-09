@@ -25,7 +25,9 @@ Each dungeon keeps its own five tiers of sets of rooms. A level's base (`Dungeon
 | the Black Tower of Kethrys Spire | Kethrys Spire | 21-25 | 20 | |
 | Kratos Aurorim Research | Heaven | 25 (its first tier 24 + 1, the rest held at 25) | 24 | 25 |
 
-The game's tier (`GameGlobalTier`) is the deepest one opened in any dungeon of the chain. It sets the town's prices: 1 to 8 over the first five tiers as before, then about 17 % a tier, so 17.5 at tier 10 and 185 at tier 25. It also sets the tier she grows by (`GrowthTier`): at least the deepest she has opened anywhere, so a new dungeon never sets her back to tier 1.
+The game's tier (`GameGlobalTier`) is the deepest one opened in any dungeon of the chain. It sets the town's prices: 1 to 8 over the first five tiers as before, then about 17 % a tier, so 17.5 at tier 10 and 185 at tier 25.
+- **Gold:** a kill and a container pay by the game's tier of where she earned them: x the tier over the first five, then growing as the prices do (5 x the price factor over 8: about 11 at tier 10, 115 at tier 25).
+- **Healer:** prices a point of her hit points and mana down by her growth past tier 5, so a whole heal costs as many kills as before. It also sets the tier she grows by (`GrowthTier`): at least the deepest she has opened anywhere, so a new dungeon never sets her back to tier 1.
 
 ## Strength by tier
 
@@ -90,12 +92,14 @@ The castle's tiered weapons, armour, shields and rings come again in each later 
 
 Each quality has 108 copies. A copy's damage follows `880`'s rule for found weapons: 8 + 3 × its damage rating, times the power of its first tier (`balance6.json` for tiers 1 to 5, then × 1.12 a tier). The Viking Shortsword, for example, does 20 at tier 1; its Fine copy does 56 (tier 6), Masterwork 99, Exalted 174 and Celestial 307. The potions, food and scrolls are found in every dungeon at their rank.
 
-What the rules put in a container stays in the game's tiers too:
+Every reader of an item's tiers goes through one rule (`ItemOfTier`: no tiers, or the game's tier of the level's among them). What the rules put in a container stays in the game's tiers too:
 - **Guarded ring:** past the castle, the ring of the tier before in the game's tiers, the weaker of its two (`PlaceRingGuard`).
 - **Vaults:** the tier above.
 - **Gauntlets:** their own tier.
 - **Prisoners' gifts and armory tables:** their tier.
 - **The final boss's reward:** its tier.
+
+The bosses' slashes and the harvests (essences, parts) stay on each dungeon's own tiers 1 to 5: their tables have five tiers, and the later dungeons give their own tiers' slashes and harvests as Mistward does.
 
 ## The monsters from Brokenspire to Heaven
 
@@ -112,21 +116,23 @@ Every map now carries every dungeon's kinds: 88 kinds, weight 0 except on their 
 
 ## The tests
 
-`868 tier25` runs on Vel Morrath (`-lv vel_morrath`, `test_t25d.json`).
+`868 tier25` runs on Vel Morrath (`-lv vel_morrath`, `test_t25e.json`).
 - **Tiers:** the level's tiers are the game's 6-10.
 - **Monster strength:** the start set's 19 monsters were spawned on the same seed without the level's base and with it. Every one came out 7.62 times the hit points and 5.33 times the blows (whole points, each end within half a point), as the tables say.
 - **Hero strength:** her hit points went from 140 to 262 (tier 6's growth).
-- **Loot:** every container's random draw in the start set and a tier-2 set, over 40 session seeds, held only things of the game's tier. That was 25,438 things, 9,382 of them Fine and none of another quality or a plain tiered piece of the castle's.
+- **Loot:** every container's random draw in the start set and a tier-2 set, over 40 session seeds, held only things of the game's tier. That was 25,355 things, 9,217 of them Fine and none of another quality or a plain tiered piece of the castle's.
 - **Rules' loot:** what the rules put first held only things of the set's tier or the tier above.
 - **Tomes:** each tome was its tier's one spell (Life Drain, Dispel Hex).
 - **Later abilities:** the tier-5 boss slain gave the Martial Artist Crashing Wave, the Rogue Barbed Bolt and the Summoner Summon Tier 6, and none of the next dungeon's.
-- **Summon Tier 6:** cast, it called an Iron Golem (396 hit points, blows of 62).
+- **Later abilities, saved:** the abilities come from the game instance's saved counter (`<dungeon>:bossdone:5`). The Rogue's and the Summoner's were read after a restart as each hero.
+- **Boss gold:** the boss paid 471 gold, at least `BossGold` x the gold factor of game tier 10 (438).
+- **Summon Tier 6:** cast, it called an Iron Golem (396 hit points, blows of 62) holding the game's tier she grows by (6).
 
-`888 wild25` runs on Brokenspire (`-Light`, `test_w25a.json`). It visited lairs and spawn points of tiers 2, 6, 11, 16, 22 and 25 along the roads:
+`888 wild25` runs on Brokenspire (`-Light`, `test_w25b.json`). It visited lairs and spawn points of tiers 2, 6, 11, 16, 22 and 25 along the roads:
 - **What was there:** Half Creatures, Costalmeds, Scrap Hounds, Drowned Sailors, Skeleton Witches and Kratos Tanks, each kind of its place's tier and inside its band.
-- **Strength:** their hit points rose from 116 to 5313.
+- **Strength:** their hit points rose from 116 to 4830, each kind measured against the mean of the kinds met at its tier.
 
-The castle's own steps the rebalance touches still pass on Mistward Castle (`test_r25b.json`, and `tiers`, `martial`, `summoner`, `recipes`, `rooms`, `pickups`, `scrolls` in the batch before it): `growth` and `tomemana` now take the castle's own tiers' gear, not the quality copies. `884 keys9` passes on Brokenspire (`test_k25a.json`).
+The castle's own steps the rebalance touches still pass on Mistward Castle (`test_r25c.json` after PR #34's review: `summoner`, `growth`, `allyspace`, `martial`, `tiers`, `rooms`, `pickups`, `cells`; `test_r25b.json`, and `tiers`, `martial`, `summoner`, `recipes`, `rooms`, `pickups`, `scrolls` in the batch before it): `growth` and `tomemana` now take the castle's own tiers' gear, not the quality copies. `884 keys9` passes on Brokenspire (`test_k25a.json`).
 
 ## Rebuild
 

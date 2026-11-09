@@ -14,8 +14,17 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDTier25, Log, All);
 
 int32 ARDDungeonGenerator::GlobalTier(int32 Tier) const
 {
-	const int32 G = Tier + DungeonTierBase;
-	return DungeonTierCap > 0 ? FMath::Min(G, DungeonTierCap) : G;
+	return MapTier(Tier, DungeonTierBase, DungeonTierCap);
+}
+
+bool ARDDungeonGenerator::MeanWildFactors(float& Health, float& Damage, int32 Tier) const
+{
+	float H = 0.f, D = 0.f; int32 N = 0;
+	for (const FRDMonsterDef& M : Monsters)
+		if (M.Mesh && M.WildTierMax > 0 && Tier >= M.WildTierMin && Tier <= M.WildTierMax) { H += M.HealthFactor; D += M.DamageFactor; ++N; }
+	if (N == 0) return false;
+	Health = H > 0.f ? H / N : 1.f; Damage = D > 0.f ? D / N : 1.f;
+	return true;
 }
 
 int32 ARDDungeonGenerator::ChainIndexHere() const
@@ -26,6 +35,7 @@ int32 ARDDungeonGenerator::ChainIndexHere() const
 
 int32 ARDDungeonGenerator::GameGlobalTier() const
 {
+	if (CachedGameTierFrame == GFrameCounter && CachedGameTierOpened == TiersOpened.Num()) return CachedGameTier;
 	int32 T = 1;
 	if (!bTown) for (const int32 O : TiersOpened) T = FMath::Max(T, GlobalTier(O));
 	if (const URDGameInstance* GI = URDGameInstance::Of(this))
@@ -37,7 +47,7 @@ int32 ARDDungeonGenerator::GameGlobalTier() const
 			const FRDDungeonSave* Ds = L.Key.IsEmpty() ? nullptr : GI->Dungeons.Find(L.Key);
 			const TArray<int32>* Ts = L.Key.IsEmpty() ? &GI->CastleTiers : (Ds ? &Ds->Tiers : nullptr);
 			if (!Ts) continue;
-			for (const int32 O : *Ts) T = FMath::Max(T, L.TierCap > 0 ? FMath::Min(L.TierBase + O, L.TierCap) : L.TierBase + O);
+			for (const int32 O : *Ts) T = FMath::Max(T, MapTier(O, L.TierBase, L.TierCap));
 		}
 		// (no chain (an older level): the dungeons' own tiers, as before)
 		if (C.Num() == 0)
@@ -48,7 +58,8 @@ int32 ARDDungeonGenerator::GameGlobalTier() const
 	}
 	// (the town's own tiers are the castle's)
 	if (bTown) for (const int32 O : TiersOpened) T = FMath::Max(T, O);
-	return FMath::Clamp(T, 1, 99);
+	CachedGameTier = FMath::Clamp(T, 1, 99); CachedGameTierFrame = GFrameCounter; CachedGameTierOpened = TiersOpened.Num();
+	return CachedGameTier;
 }
 
 int32 ARDDungeonGenerator::GrowthTier() const

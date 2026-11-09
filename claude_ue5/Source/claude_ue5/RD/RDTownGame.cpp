@@ -328,6 +328,10 @@ static float RDTierPrice(int32 Tier)
 	return Tier <= 5 ? K[FMath::Clamp(Tier, 1, 5) - 1] : 8.f * FMath::Pow(1.17f, (float)(FMath::Min(Tier, 25) - 5));
 }
 
+// (what a kill or a container pays by the game's tier: x the tier over the first five as before, then growing as the prices do
+// (PR #34's review: gold by the level's own 1-5 against prices to 185 left the town's services out of reach past the castle))
+static float RDTierGold(int32 Tier) { return Tier <= 5 ? (float)FMath::Max(Tier, 1) : 5.f * RDTierPrice(Tier) / 8.f; }
+
 int32 ARDDungeonGenerator::PriceOf(FName Item) const
 {
 	const int32 Ix = FindItem(Item);
@@ -1332,7 +1336,8 @@ void ARDDungeonGenerator::TownCountMax(const FString& Key, int32 Value)
 void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 {
 	if (!M || M->IsAlly()) return;
-	const int32 T = FMath::Max(1, M->Tier);
+	// (the monster's tier in the game's: a dungeon's own through its base, the wilds' already the game's)
+	const float T = RDTierGold(GlobalTier(FMath::Max(1, M->Tier)));
 	// (the roll a hash of the monster, not a stream the play draws from)
 	const uint32 H = HashCombine(GetTypeHash(M->GetUniqueID()), (uint32)SessionSeed ^ 0x601Du);
 	int32 Gold = FMath::RoundToInt(FMath::Lerp(KillGold.X, KillGold.Y, (H % 1000u) / 999.f) * T);
@@ -1361,7 +1366,7 @@ void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 void ARDDungeonGenerator::TownOnContainer(ARDSection* Section, int32 Key, const FVector& At)
 {
 	if (!Section) return;
-	const int32 T = bTown ? 1 : FMath::Max(1, TierOf(Section->Coord));
+	const float T = bTown ? 1.f : RDTierGold(GlobalTier(FMath::Max(1, TierOf(Section->Coord))));
 	const uint32 H = HashCombine(HashCombine((uint32)(bTown ? StartSeed : SessionSeed), GetTypeHash(Section->Coord)), (uint32)Key * 2654435761u ^ 0x60D1u);
 	if ((H % 1000u) / 1000.f < ContainerGoldChance)
 	{
@@ -1832,8 +1837,11 @@ int32 ARDDungeonGenerator::TownHealCost() const
 	const float Miss = FMath::Max(0.f, PlayerCombat->GetMaxHealth() - PlayerCombat->GetHealth());
 	const float ManaMiss = FMath::Max(0.f, PlayerCombat->GetMaxMana() - PlayerCombat->GetMana());
 	const bool bCure = PlayerCombat->IsAfflicted();
-	const float K = RDTierPrice(GetGameTier());
-	const int32 C = FMath::RoundToInt((Miss * 0.25f + ManaMiss * 0.1f + (bCure ? 5.f : 0.f)) * K);
+	// (her hit points and mana grow past tier 5 (TierGrowthHealth a tier): a point is priced down by that, or a whole heal would
+	// cost the price's growth times hers)
+	const int32 Gt = GetGameTier();
+	const float K = RDTierPrice(Gt) / FMath::Pow(FMath::Max(TierGrowthHealth, 1.f), (float)FMath::Max(Gt - 5, 0));
+	const int32 C = FMath::RoundToInt((Miss * 0.25f + ManaMiss * 0.1f) * K + (bCure ? 5.f : 0.f) * RDTierPrice(Gt));
 	return Miss > 0.5f || ManaMiss > 0.5f || bCure ? FMath::Max(2, C) : 0;
 }
 

@@ -228,6 +228,13 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A tier's boss stands in an explored room of the tier before**: `DebugOpenTiers(5, True)` with only the start set explored placed no tier-5 boss. Explore a tier-4 set first (held in the air over it while it is built).
 - **A copy keeps its source's numbers**: the tome items kept the castle's tiers (Tome of Life Drain [2]) while their spells moved. `910` gives each tome its place's tier.
 - **The tier-5 boss gives the Martial Artist her own locked chi attacks too**, as every tier's boss does; the dungeon's new ability comes with them.
+- **PR #34's review (2026-11-09)**:
+  - A rule on one side of a trade needs the other side too: prices went by the game's tier while kills and containers still paid by the level's 1-5, so past the castle the town was out of reach (`RDTierGold`). A whole heal priced per point grew by the price and by her hit points both: priced down by her growth.
+  - A mean over "the kinds of this tier" must be over the kinds actually met there: the wilds' tiers past 10 found no dungeon kinds and the mean fell to 1 (`MeanWildFactors`, by wild band).
+  - A tier passed from one rule to another is one kind of tier: the summons' strength gave the game's tier to `Empower`, which maps a level's (`LevelTierOf`).
+  - A flag beside a saved counter is a second truth that outlives a restart: the later abilities read the game instance's counter only.
+  - A value read at every blow is kept for the frame, keyed also by what changes within it (the tiers opened).
+  - Numbers that the stages filter by: each stage's own range (`910`'s spells 301 on and 311 on).
 - **The castle's stages write the tables `910` builds from**: rerun `910` after any of them (`855`, `857`-`859`, `871`, `872`, `876`, `880`, and the dungeons' `895`, `897`, `907`, `909`).
 
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
