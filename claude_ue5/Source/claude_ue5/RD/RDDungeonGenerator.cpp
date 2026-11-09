@@ -1267,6 +1267,9 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 			{
 				E.Dead[I] = true;
 				if (E.bBoss && I == 0) bBossKill = true;
+				// (a dungeon with no final boss: its last tier's boss is the dungeon's, and drops the next dungeon's key and map (the
+				// list of 2026-11-08b))
+				if (E.bBoss && I == 0 && !E.bFinal && !E.bThrone && MaxTier > 0 && E.Tier == MaxTier && !bFinalBossOn && Monster) DropNextDungeonKey(Monster->GetActorLocation());
 				// (the final boss is no tier's boss: OnFinalBossKilled gives his notice and reward, no slash or chi attack here)
 				if (E.bBoss && I == 0 && !E.bFinal)
 				{
@@ -1656,6 +1659,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 	if (bPaused) return;
 	TickAllies(Dt);
 	TickCarrySummons();
+	TickDungeonKeys();
 	// input: F interacts, M toggles the map
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{

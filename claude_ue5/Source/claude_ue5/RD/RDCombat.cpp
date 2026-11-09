@@ -646,7 +646,7 @@ void URDCombatComponent::Fall()
 	if (Generator && Generator->bDropOnDeath && O)
 	{
 		TArray<FName> Things; TArray<float> ThingWear;
-		GatherDroppable(Things, ThingWear);
+		GatherDroppable(Things, ThingWear, true);
 		// (the lists shut whatever she had: the pointer and the game's input mode with them)
 		if (bInventoryOpen) SetInventoryOpen(false);
 		if (bCraftOpen) SetCraftingOpen(false);
@@ -661,7 +661,11 @@ void URDCombatComponent::Fall()
 			TMap<FName, FName> KeptSlashes;
 			for (const FRDWeaponDef& Wd : Generator->Weapons) if (Wd.Item.IsNone() && !Wd.Slash.IsNone()) KeptSlashes.Add(Wd.Name, Wd.Slash);
 			TakeOffArmour(); WornShield = NAME_None; bTorchHeld = false; TorchItem = NAME_None;
+			// (a dungeon's key and map stay hers (the list of 2026-11-08b): given back after the rest goes)
+			TArray<TPair<FName, int32>> KeptKeys;
+			for (const FName& N : CarriedOrder) if (Generator->IsDungeonChainItem(N) && GetItemCount(N) > 0) KeptKeys.Add({ N, GetItemCount(N) });
 			WornRings.Reset(); Spares.Reset(); Carried.Reset(); CarriedOrder.Reset(); ArmourWear.Reset();
+			for (const TPair<FName, int32>& Kk : KeptKeys) AddItem(Kk.Key, Kk.Value);
 			if (const FRDHeroDef* H = Generator->FindHero(Generator->CurrentHero))
 			{
 				// (her spells learned from tomes stay (a spell weapon of no item that is not on her card); until 2026-10-28 the

@@ -247,6 +247,15 @@ bool ARDDungeonGenerator::DescendToCatacombs(const FVector& At, float Yaw, const
 	// (the level asked for, else the town's own; from Brokenspire (-RDTownGo=catacombs) Vel Morrath's catacombs as before)
 	const FString Level = !InLevel.IsEmpty() ? InLevel : HasTownDungeon() ? CurrentDungeonLevel() : CatacombsLevel;
 	if (!bTown || Level.IsEmpty() || bTownTraveling) return false;
+	// (the list of 2026-11-08b: "the dungeons are opened in order": without its key the way down is refused, said once in a while
+	// (she stands in the way down: this is asked every tick))
+	if (!HasDungeonKey(Level))
+	{
+		DungeonLockedLevel = Level; LastTravel = TEXT("locked");
+		const float Now = GetWorld()->GetTimeSeconds();
+		if (PlayerCombat && Now - DungeonLockedSaidAt > 5.f) { DungeonLockedSaidAt = Now; PlayerCombat->ShowMessage(DungeonLockedLine(Level)); }
+		return false;
+	}
 	LastTravel = TEXT("catacombs");
 	if (bTravelDryRun) return true;
 	if (URDGameInstance* GI = URDGameInstance::Of(this))

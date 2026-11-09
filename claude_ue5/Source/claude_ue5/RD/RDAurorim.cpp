@@ -477,6 +477,8 @@ void ARDDungeonGenerator::OnFinalBossKilled(ARDMonster* Boss)
 	if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Victory: %s falls. %d gold%s.%s"), *Name, FinalBossGold,
 		Item.IsNone() ? TEXT("") : *FString::Printf(TEXT(", and %s lies where he fell"), *Item.ToString()), FinalDoor ? TEXT(" The door to Brokenspire is open.") : TEXT("")));
 	if (FinalDoor) FinalDoor->Open();
+	// (the list of 2026-11-08b: the dungeon boss drops the next dungeon's key and a map to its town (Vel Morrath's, from here))
+	DropNextDungeonKey(At + FVector(120.f, 0.f, 0.f));
 	UE_LOG(LogRDAurorim, Log, TEXT("RDFINAL %s slain: %s, %d gold; the door %s"), *Name, *Item.ToString(), FinalBossGold, FinalDoor ? TEXT("opens") : TEXT("(none)"));
 }
 

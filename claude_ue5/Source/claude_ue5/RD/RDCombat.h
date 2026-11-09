@@ -483,7 +483,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") int32 ShieldsBroken = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Mistward") float LastShieldTook = 0.f;
 	/** everything she found (not the weapons her hero starts with): what drops when she falls; Wear: durability left (-1 none) */
-	void GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut) const;
+	void GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut, bool bDeath = false) const;   // (bDeath: a dungeon's key and map left out: they stay hers)
 	/** her dropped things taken up again */
 	void TakeBack(const TArray<FName>& Things, const TArray<float>& WearIn, bool bHers = true, FName Rewear = NAME_None);
 	/** breaking a set of armour or a shield down at an anvil (a spare first; the one worn only when it is the last) */

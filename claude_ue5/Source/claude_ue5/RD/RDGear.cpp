@@ -173,7 +173,7 @@ void URDCombatComponent::WearDownShield(float Took)
 }
 
 // ------------------------------------------------------------------------------------------------ what she drops, takes back, breaks down
-void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut) const
+void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& WearOut, bool bDeath) const
 {
 	Things.Reset(); WearOut.Reset();
 	if (!Generator) return;
@@ -192,6 +192,8 @@ void URDCombatComponent::GatherDroppable(TArray<FName>& Things, TArray<float>& W
 	const FName Keep = Generator->bKeepStartGear ? StartShieldOf() : NAME_None;
 	for (const FName& N : CarriedOrder)
 	{
+		// (a dungeon's key or map stays hers: the way it opens is not lost at a death (the list of 2026-11-08b))
+		if (bDeath && Generator->IsDungeonChainItem(N)) continue;
 		const int32 Cnt = GetItemCount(N) - (N == Keep ? 1 : 0);
 		const int32 Ix = Generator->FindItem(N);
 		const bool bKept = Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield);

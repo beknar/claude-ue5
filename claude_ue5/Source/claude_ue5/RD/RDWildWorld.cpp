@@ -1184,6 +1184,7 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	}
 	Rivers.Reset(); Lakes.Reset(); Roads.Reset(); SegHash.Reset(); LakeHash.Reset();
 	PlaceTowns();
+	MakeTierChain();
 	AssignBiomes();
 	// the towns' ground: their region's, before the features
 	// (every town's ground at Brokenspire's height above the sea: the game's z 0 for all of them, so the town code is the same
@@ -1325,8 +1326,32 @@ int32 FRDWildWorld::NearestTown(double X, double Y, double& Dist) const
 
 int32 FRDWildWorld::TierAt(double X, double Y) const
 {
-	const double D = FVector2D(X, Y).Size();
-	return FMath::Clamp(1 + (int32)(D / 25000.0), 1, 5);
+	// (the list of 2026-11-08b: "between brokenspire and vell morrath, there should be monster encounters starting at Tier 1 to
+	// Tier 5 the closer one gets to vell morrath ... from vell morrath to ashenreach ... Tier 5 - Tier 10, then from Ashenreach to
+	// Graymourne ... Tier 10 Tier 15, then from Graymourne to Kethrys Spire ... Tier 15 - Tier 20, and from Kethrys Spire to
+	// Heaven ... Tier 20 - Tier 25": the chain of towns and their tiers (TierChain, "<town>|<tier>"), a point's tier read along the
+	// leg of the chain nearest it, from the tier of the town it leaves to the next one's. Until the list it was 1 to 5 by the
+	// distance from Brokenspire, 25 km a tier. The chain's towns are found once, at Init (MakeTierChain: PR #31's review))
+	const TArray<FVector2D>& At = TierSites; const TArray<float>& Ti = TierValues;
+	if (At.Num() < 2) return FMath::Clamp(1 + (int32)(FVector2D(X, Y).Size() / 25000.0), 1, 5);
+	const FVector2D P(X, Y);
+	double Best = 1e30; float Tier = Ti[0];
+	for (int32 K = 0; K + 1 < At.Num(); ++K)
+	{
+		double T; const double D = RDWSegDist(P, At[K], At[K + 1], T);
+		if (D < Best) { Best = D; Tier = FMath::Lerp(Ti[K], Ti[K + 1], (float)T); }
+	}
+	return FMath::Clamp(FMath::RoundToInt(Tier), 1, 99);
+}
+
+void FRDWildWorld::MakeTierChain()
+{
+	// (the towns of the chain that this world has, in order, with their tiers; Kethrys Spire and Heaven once they are placed)
+	static const TCHAR* RDWTierNames[] = { TEXT("Brokenspire"), TEXT("Vel Morrath"), TEXT("Ashenreach"), TEXT("Graymourne"), TEXT("Kethrys Spire"), TEXT("Heaven") };
+	static const float RDWTierOf[] = { 1.f, 5.f, 10.f, 15.f, 20.f, 25.f };
+	TierSites.Reset(); TierValues.Reset();
+	for (int32 K = 0; K < UE_ARRAY_COUNT(RDWTierNames); ++K)
+		for (const FRDWildTown& T : Towns) if (T.Name == RDWTierNames[K]) { TierSites.Add(T.Site); TierValues.Add(RDWTierOf[K]); break; }
 }
 
 FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const

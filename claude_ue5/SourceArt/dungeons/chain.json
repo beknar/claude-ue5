@@ -1,0 +1,16 @@
+{
+ "_doc": "The dungeons in order (the user's list of 2026-11-08b, docs/improvements9.txt: 'the defeat of the dungeon boss at Mistward Castle drops not just a reward, it drops a key and a map to vell morrath, that will be the key to opening its dungeon. this key will not open any of the other dungeons. the dungeons are opened in order, with Heaven being the last. Each town's dungeon drops a key to the next one'). Each entry: the dungeon's key (its levels' DungeonKey; Mistward Castle's is empty), its level, its town, its title, its key and its map (items of kind Key on every map, not found in containers). 905 writes them as the generators' DungeonChain and Items. Kethrys Spire's and Heaven's levels come with the list's fourth phase.",
+ "chain": [
+  {"key": "", "level": "mistward_castle", "town": "Brokenspire", "title": "Mistward Castle", "key_item": "", "map_item": ""},
+  {"key": "vel_morrath", "level": "vel_morrath", "town": "Vel Morrath", "title": "the Catacombs of Vel Morrath", "key_item": "Catacomb Key", "map_item": "Map to Vel Morrath",
+   "key_looks": "A black iron key with a skull for its bow: it opens the stair beneath Vel Morrath's cathedral, and no other door.", "map_looks": "The road from Brokenspire to the holy city of Vel Morrath, inked on vellum."},
+  {"key": "war_engine", "level": "war_engine", "town": "Ashenreach", "title": "the War Engine", "key_item": "Foundry Key", "map_item": "Map to Ashenreach",
+   "key_looks": "A heavy key of blackened steel, still warm: it opens the gate of Ashenreach's foundry, and no other door.", "map_looks": "The road from Vel Morrath to the forge city of Ashenreach across the burned plain."},
+  {"key": "sewers", "level": "sewers", "town": "Graymourne", "title": "the Sewers of Graymourne", "key_item": "Sluice Key", "map_item": "Map to Graymourne",
+   "key_looks": "A green-crusted bronze key: it opens the sluice gate under Graymourne's harbour, and no other door.", "map_looks": "The road from Ashenreach north to the fog-bound port of Graymourne."},
+  {"key": "kethrys", "level": "kethrys_spire", "town": "Kethrys Spire", "title": "the Black Tower of Kethrys Spire", "key_item": "Spire Key", "map_item": "Map to Kethrys Spire",
+   "key_looks": "A key of black glass that hums when held: it opens the black tower of Kethrys Spire, and no other door.", "map_looks": "The road from Graymourne to the mage city of Kethrys Spire."},
+  {"key": "heaven", "level": "heaven_fortress", "town": "Heaven", "title": "Kratos Aurorim Research", "key_item": "Kratos Keycard", "map_item": "Map to Heaven",
+   "key_looks": "A white keycard with a silver chip, stamped KRATOS AURORIM RESEARCH, LLC: it opens the research facility's doors, and no others.", "map_looks": "The road from Kethrys Spire to the shielded city of Heaven."}
+ ]
+}
