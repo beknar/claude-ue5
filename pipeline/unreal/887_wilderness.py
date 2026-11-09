@@ -142,6 +142,8 @@ def materials():
     # under about three pixels (fwidth) so that far fields do not shimmer. The crops' colours and spacing from biomes.json)
     farms = next((x for x in json.load(open(JSON, encoding="utf-8"))["biomes"] if x["name"] == "farms"), {})
     lin = lambda c: ", ".join(f"{(v / 255.0) ** 2.2:.4f}" for v in c)
+    # (the chunk packs the crop as (crop + 0.5) / 16 (FRDWildWorld::MaxCrops): a 17th would read as no crop at all)
+    assert len(farms.get("crops", [])) <= 16, f"{len(farms['crops'])} crops in biomes.json's farms: the ground's rows hold 16 (FRDWildWorld::MaxCrops)"
     cases = "".join(f"{'else ' if i else ''}if (k == {i}) {{ rowm = {float(c.get('row', 1.0)):.3f}; cover = {float(c.get('cover', 0.5)):.3f}; soil = float3({lin(c['soil'])}); leaf = float3({lin(c['leaf'])}); }}\n"
                     for i, c in enumerate(farms.get("crops", [])))
     rows = b.n(unreal.MaterialExpressionCustom, -100)

@@ -188,6 +188,12 @@ public:
 	TArray<FRDWildBiome> Biomes;     // the table (names, shapes, colours; meshes are read on the game thread only)
 	TMap<FString, int32> BiomeIndex;
 	int32 FarmsBiome = -1;           // the farms' (its fields' crops), -1 none
+	TArray<float> CropCum;           // the farms' crops' weights as running sums (Init)
+	/** the most crops the ground's rows can tell apart: the chunk packs a field's crop in UV0's v as (crop + 0.5) / MaxCrops and
+	 *  887's ground material reads floor(v x MaxCrops) (887 and Init check the farms' table against it) */
+	static constexpr int32 MaxCrops = 16;
+	/** a sample's field's crop's name ("" outside a field, or at a field's edge under MinField of its weight) */
+	FString CropName(const FRDWSample& S, float MinField = 0.f) const;
 	TArray<FRDWildTown> Towns;
 	float BaseH = 0.f;               // Brokenspire's ground (the game's z 0)
 	/** where a town's roads leave it (world metres, just outside its section), when its gate is known before Init */

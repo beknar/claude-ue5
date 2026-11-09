@@ -31,7 +31,6 @@ Done in phases, a PR each ([Brokenspire](docs/levels/brokenspire.md#the-list-of-
 - [ ] **Phase 8, the ridable horse** (built in Blender, bought, faster across the wilds).
 - [ ] **The grey disc in the sky** ("still appears whenever there is any blue sky"): not seen in pictures straight up and at 60 degrees, clear and fair, at 9, 12 and 16 o'clock, with the high clouds' dome shown and hidden; where and when the user saw it is to be asked. The clouds' new mode (half-size tracing) may have taken it with the edges' fringe.
 - [ ] **The clouds' new mode's cost:** the frame time of `r.VolumetricRenderTarget.Mode 1` against 0 not measured (two readings of one setting in the editor varied twice over).
-- [ ] **Start held just after closing the inventory:** within about 0.3 s it once read as a short press (the inventory opened); a player's pause is longer (`test_b9b.json`: twice ok with a 0.8 s pause).
 - [ ] **The new crops in the packaged game and from afar:** not packaged yet (`869` first: the new crops' materials need the instanced-mesh usage); the peas read as a low mat in rows, the flax shows thin bundles at the rows' ends, and the hemp alone looks like a sapling (the Blender previews).
 - [ ] **`888` with the thirteen crops:** `fields8` and `perf8` not run since (the crops' kinds and their plants' count changed).
 

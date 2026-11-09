@@ -1157,6 +1157,8 @@ public:
 	double TownHoldAt = 0.0;
 	/** the thing a storage line stores or takes back ("" for a found weapon, which does not stack) */
 	FString TownLineThing(int32 Line) const;
+	/** what decides which stored things stack on one line: the thing's name, and its wear where it wears ("" out of range) */
+	FString StashKey(int32 Index) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetTownHoldUses() const { return TownHoldUses; }
 	int32 TownHoldUses = 0;
 	/** the list of 2026-11-07 (RDTown8.cpp): her blow meets the barracks' dummies in its reach and arc (they rock; the sound and
@@ -1550,6 +1552,19 @@ public:
 	 *  opened the menu (tests) */
 	double StartHeldSince = -1.0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Menu") int32 MenuOpensByStart = 0;
+	/** the gamepad's Start as the device sends it (a Slate input processor, before any widget, the focus or the input mode): a
+	 *  press and a release of its own. The player controller's state cannot be trusted for a hold: closing the inventory
+	 *  changes the input mode, a change of focus flushes the held keys with simulated releases, and a Start held through it
+	 *  read as let go (PR #29's review; test_b9a). A test's SimulateKey reaches only the controller: used when the device has
+	 *  sent no Start this play */
+	TSharedPtr<class IInputProcessor> StartKeys;
+	double RawStartDownAt = -1.0, RawStartHandledAt = -1.0;
+	bool bRawStartDown = false, bRawStartSeen = false;
+	/** the hold and the tap forgotten (the menu or a town panel opened or shut: a Start pressed before is not acted on after) */
+	void ResetStartHold();
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+	/** r.VolumetricRenderTarget.Mode before this level's sky set it (RDSky.cpp), put back at EndPlay; -1 not set */
+	int32 VrtModeWas = -1;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") int32 GetMenuCursor() const { return MenuCursor; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void MoveMenuCursor(int32 Step);
 	/** a slider under the cursor one step (Step: -1 / 1) */

@@ -1476,6 +1476,7 @@ bool ARDDungeonGenerator::OpenTownPanel(FName Kind, int32 Who)
 	if (PlayerCombat->IsCraftingOpen()) PlayerCombat->SetCraftingOpen(false);
 	const bool bWasOpen = IsTownPanelOpen();
 	TownPanel = Kind; TownWho = Who; TownTab = 0; TownCursor = 0; TownNote.Reset(); TownBody.Reset();
+	ResetStartHold();          // (a Start pressed before the panel is not acted on when it shuts: PR #29's review)
 	// (a key or the stick held as it opens waits to be let go before it steps the cursor: TickTownPanel)
 	if (!bWasOpen) TownRepeatDir = 2;
 	BuildTownLines();
@@ -1494,6 +1495,7 @@ void ARDDungeonGenerator::CloseTownPanel()
 	if (!IsTownPanelOpen()) return;
 	TownPanel = NAME_None; TownWho = -1; TownLines.Reset(); TownRowBoxes.Reset(); TownTabBoxes.Reset();
 	TownPanelClosedFrame = GFrameCounter;
+	ResetStartHold();
 	UGameplayStatics::SetGamePaused(this, false);
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0)) { PC->SetShowMouseCursor(false); PC->SetInputMode(FInputModeGameOnly()); }
 }
@@ -1693,8 +1695,7 @@ void ARDDungeonGenerator::BuildTownLines()
 			TArray<FString> Keys; TArray<int32> LastAt, Count;
 			for (int32 I = 0; I < GI->StashThings.Num(); ++I)
 			{
-				const float Wr = GI->StashWear.IsValidIndex(I) ? GI->StashWear[I] : -1.f;
-				const FString K = GI->StashThings[I].ToString() + (Wr >= 0.f ? FString::Printf(TEXT("|%.0f"), Wr) : FString());
+				const FString K = StashKey(I);
 				const int32 At = Keys.Find(K);
 				if (At == INDEX_NONE) { Keys.Add(K); LastAt.Add(I); Count.Add(1); }
 				else { LastAt[At] = I; ++Count[At]; }
@@ -1940,8 +1941,12 @@ FString ARDDungeonGenerator::TownLineThing(int32 Line) const
 	const FTownLine& L = TownLines[Line];
 	if (L.Act == TEXT("deposit")) return L.Arg.StartsWith(TEXT("i:")) ? L.Arg : FString();
 	if (L.Act != TEXT("withdraw")) return FString();
+	return StashKey(FCString::Atoi(*L.Arg));
+}
+
+FString ARDDungeonGenerator::StashKey(int32 I) const
+{
 	const URDGameInstance* GI = URDGameInstance::Of(this);
-	const int32 I = FCString::Atoi(*L.Arg);
 	if (!GI || !GI->StashThings.IsValidIndex(I)) return FString();
 	const float Wr = GI->StashWear.IsValidIndex(I) ? GI->StashWear[I] : -1.f;
 	return GI->StashThings[I].ToString() + (Wr >= 0.f ? FString::Printf(TEXT("|%.0f"), Wr) : FString());

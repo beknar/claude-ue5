@@ -90,9 +90,14 @@ void ARDDungeonGenerator::BeginSky7()
 	// edge against the sky they bled a fringe of the sky's colour 2 to 4 pixels wide (pictures of 2026-11-08b, roofs at noon,
 	// fair and overcast). Mode 1 (traced at half size, upsampled) draws none and still lets the clouds meet the mountains;
 	// mode 2 also drew none but cannot meet opaque ground, and the wilds' peaks reach into the layer)
+	// (the setting is the whole process's: what it was is kept and put back when play here ends (EndPlay; PR #29's review), so
+	// levels without these clouds, the editor's views and later plays keep their own)
 	if (SkyClouds)
 		if (IConsoleVariable* V = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode")))
+		{
+			if (VrtModeWas < 0) VrtModeWas = V->GetInt();
 			V->Set(1, ECVF_SetByCode);
+		}
 	auto Dome = [&](UStaticMesh* Mesh, UMaterialInterface* Mat, const TCHAR* Name, TObjectPtr<UStaticMeshComponent>& Out, TObjectPtr<UMaterialInstanceDynamic>& Mid)
 	{
 		if (!Mesh || !Mat || IsValid(Out)) return;

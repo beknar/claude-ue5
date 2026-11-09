@@ -2743,22 +2743,33 @@ def step_start9():
     """the gamepad's Escape menu (the list of 2026-11-08b: "the esc menu is inaccessible from the gamepad"): Start pressed
     briefly opens the inventory (and closes it); held 0.8 s it opens the Escape menu instead (the inventory shut); Start
     again closes the menu; B too"""
-    g = G["gen"]; c = cb(); res = {}
+    g = G["gen"]; c = cb(); res = {"refused": []}
+    # (the keys as the device sends them, through Slate (the generator reads Start's own press and release there: a flush of the
+    # controller's keys when the inventory shuts no longer ends a hold, PR #29's review); a refusal falls back to the controller)
+    def spress(name, hold):
+        why = str(g.slate_key(key(name), True))
+        if why: res["refused"].append(f"{name}: {why}"); yield from press(name, hold); return
+        yield from rwait(hold); g.slate_key(key(name), False); yield from rwait(0.1)
     g.set_menu_open(False); c.set_inventory_open(False); yield from rwait(0.4)
-    yield from press("Gamepad_Special_Right", 0.15); yield from rwait(0.3)
+    yield from spress("Gamepad_Special_Right", 0.15); yield from rwait(0.3)
     res["tap_inventory"] = c.is_inventory_open(); res["tap_menu"] = g.is_menu_open()
-    yield from press("Gamepad_Special_Right", 0.15); yield from rwait(0.3); res["tap_again_shut"] = not c.is_inventory_open()
-    yield from rwait(0.8)          # (a moment after the inventory shuts, as a player's hand would take)
+    yield from spress("Gamepad_Special_Right", 0.15); yield from rwait(0.3); res["tap_again_shut"] = not c.is_inventory_open()
+    # (held at once after the inventory shut: test_b9a's failure, the hold read as let go)
     m0 = g.get_editor_property("menu_opens_by_start")
-    yield from press("Gamepad_Special_Right", 0.8); yield from rwait(0.3)
+    yield from spress("Gamepad_Special_Right", 0.8); yield from rwait(0.3)
     res["hold_menu"] = g.is_menu_open(); res["hold_inventory"] = c.is_inventory_open(); res["opens_by_start"] = g.get_editor_property("menu_opens_by_start") - m0
     shot("start9_menu", "1280x720"); yield from rwait(1.5)
-    yield from press("Gamepad_Special_Right", 0.12); yield from rwait(0.3); res["start_closes"] = not g.is_menu_open()
-    yield from press("Gamepad_Special_Right", 0.8); yield from rwait(0.3); res["hold_again"] = g.is_menu_open()
-    yield from press("Gamepad_FaceButton_Right", 0.12); yield from rwait(0.3); res["b_closes"] = not g.is_menu_open()
+    yield from spress("Gamepad_Special_Right", 0.12); yield from rwait(0.3); res["start_closes"] = not g.is_menu_open()
+    yield from spress("Gamepad_Special_Right", 0.8); yield from rwait(0.3); res["hold_again"] = g.is_menu_open()
+    yield from spress("Gamepad_FaceButton_Right", 0.12); yield from rwait(0.3); res["b_closes"] = not g.is_menu_open()
+    # (Start down, Escape opens the menu while it is held, Start let go, the menu shut: nothing of that Start is acted on after)
+    why = str(g.slate_key(key("Gamepad_Special_Right"), True)); yield from rwait(0.15)
+    yield from spress("Escape", 0.1); yield from rwait(0.2); res["esc_menu"] = g.is_menu_open()
+    g.slate_key(key("Gamepad_Special_Right"), False); yield from rwait(0.3)
+    g.set_menu_open(False); yield from rwait(0.5); res["stale_inventory"] = c.is_inventory_open()
     g.set_menu_open(False); c.set_inventory_open(False)
     ok = (res["tap_inventory"] and not res["tap_menu"] and res["tap_again_shut"] and res["hold_menu"] and not res["hold_inventory"]
-          and res["opens_by_start"] == 1 and res["start_closes"] and res["hold_again"] and res["b_closes"])
+          and res["opens_by_start"] == 1 and res["start_closes"] and res["hold_again"] and res["b_closes"] and res["esc_menu"] and not res["stale_inventory"])
     step_result("start9", ok, **res)
 def step_backspace9():
     """the Save page's name (the list of 2026-11-08b: "holding down the backspace key should backspace multiple times"): one

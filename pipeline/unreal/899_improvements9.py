@@ -143,13 +143,14 @@ def crops():
     REPORT.append(f"crops: {n} meshes of {len(kinds)} kinds ({', '.join(kinds)}) imported with their materials")
 
 
-for part in PARTS:
-    part = part.strip()
-    if not part: continue
-    try:
-        {"noshield": noshield, "pad": pad, "crops": crops}[part]()
-    except Exception as e:
-        import traceback
-        REPORT.append(f"{part}: FAILED {e!r}"); traceback.print_exc()
-print("899 " + " | ".join(REPORT))
-gc.collect()
+if __name__ == "__main__":          # (898's crops part imports this file for crops(): the one import of the crops' folder)
+    for part in PARTS:
+        part = part.strip()
+        if not part: continue
+        try:
+            {"noshield": noshield, "pad": pad, "crops": crops}[part]()
+        except Exception as e:
+            import traceback
+            REPORT.append(f"{part}: FAILED {e!r}"); traceback.print_exc()
+    print("899 " + " | ".join(REPORT))
+    gc.collect()

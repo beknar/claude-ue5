@@ -207,9 +207,8 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 		// (the list of 2026-11-08b: "have an indicator for what kind of crops there are at the farm terrain": in a field, its
 		// crop beside the region's name)
 		FString Region = Gen->Wild->BiomeName(S.Biome).ToUpper();
-		const FRDWildBiome* Fb = Gen->Wild->Biomes.IsValidIndex(Gen->Wild->FarmsBiome) ? &Gen->Wild->Biomes[Gen->Wild->FarmsBiome] : nullptr;
-		if (Fb && Fb->Crops.IsValidIndex(S.FieldCrop) && S.Field > 0.05f) Region += FString::Printf(TEXT("  ·  A FIELD OF %s"), *Fb->Crops[S.FieldCrop].Name.ToUpper());
-		CropLabelDrawn = Fb && Fb->Crops.IsValidIndex(S.FieldCrop) && S.Field > 0.05f ? Fb->Crops[S.FieldCrop].Name : FString();
+		CropLabelDrawn = Gen->Wild->CropName(S, 0.05f);
+		if (!CropLabelDrawn.IsEmpty()) Region += FString::Printf(TEXT("  ·  A FIELD OF %s"), *CropLabelDrawn.ToUpper());
 		const FString Title = Gen->bSky7 ? FString::Printf(TEXT("%s  ·  %s"), *Region, *ARDDungeonGenerator::WeatherName(Gen->Weather)) : Region;
 		float Tw0; UI.TextSize(Title, Tw0, Th0, Small, Sc * 1.15f, ERDType::Title);
 		UI.Text(Title, FLinearColor(0.f, 0.f, 0.f, 0.8f), C.X - Tw0 * 0.5f + 1.5f * Sc, Y0 + 1.5f * Sc, Small, Sc * 1.15f, ERDType::Title);

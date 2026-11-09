@@ -26,10 +26,9 @@ The game is the packaged one (`pipeline/package_mistward.ps1`): the hero menu, B
 | Next weapon or spell | the mouse wheel | Y |
 | Act on what is near (below) | F | X |
 | Inventory | I or Tab | Start (a short press) |
-| The Escape menu | Escape | Start held half a second |
+| The Escape menu | Escape | Start held half a second (once it is open, the D-pad, A and B work in it; Start or B closes it) |
 | Map | M | Back (View) |
 | Hide or show the helmet | H | |
-| Escape menu | Escape | none (once it is open, the D-pad, A and B work in it) |
 
 ## Each hero's own
 

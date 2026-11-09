@@ -1,0 +1,138 @@
+{
+ "tag": "b9c",
+ "plan": [
+  "start9",
+  "storage9",
+  "time9",
+  "crops9",
+  "sky9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "start9",
+   "ok": true,
+   "refused": [],
+   "tap_inventory": true,
+   "tap_menu": false,
+   "tap_again_shut": true,
+   "hold_menu": true,
+   "hold_inventory": false,
+   "opens_by_start": 1,
+   "start_closes": true,
+   "hold_again": true,
+   "b_closes": true,
+   "esc_menu": true,
+   "stale_inventory": false
+  },
+  {
+   "step": "storage9",
+   "ok": true,
+   "deposit_line": 0,
+   "held_stored": 5,
+   "carried_after": 0,
+   "other_after": 0,
+   "repeats": 4,
+   "withdraw_lines": [
+    "Small Healing Potion  x 5"
+   ],
+   "one_press_took": 1,
+   "held_0_75s_took": 3,
+   "withdraw_lines_after": [
+    "Small Healing Potion"
+   ]
+  },
+  {
+   "step": "time9",
+   "ok": true,
+   "hours_5s_at_1": 0.033,
+   "hours_5s_at_60": 2.0,
+   "dilation_at_2": 2.0,
+   "game_s_in_2s": 4.07,
+   "dilation_after": 1.0
+  },
+  {
+   "step": "crops9",
+   "ok": true,
+   "samples_by_crop": {
+    "wheat": 2675,
+    "barley": 2603,
+    "oats": 2163,
+    "rye": 1659,
+    "peas": 1178,
+    "beans": 988,
+    "flax": 834,
+    "hemp": 751,
+    "corn": 577,
+    "potatoes": 391,
+    "cabbages": 339,
+    "pumpkins": 331,
+    "sunflowers": 135
+   },
+   "top4": [
+    "wheat",
+    "barley",
+    "oats",
+    "rye"
+   ],
+   "visits": {
+    "barley": {
+     "at": [
+      -3000.0,
+      -1120.0
+     ],
+     "label": "barley",
+     "plants": 148154
+    },
+    "oats": {
+     "at": [
+      -3000.0,
+      -3000.0
+     ],
+     "label": "oats",
+     "plants": 21600
+    },
+    "flax": {
+     "at": [
+      -3000.0,
+      -2920.0
+     ],
+     "label": "flax",
+     "plants": 33224
+    },
+    "hemp": {
+     "at": [
+      -3000.0,
+      -680.0
+     ],
+     "label": "hemp",
+     "plants": 17381
+    }
+   }
+  },
+  {
+   "step": "sky9",
+   "ok": true,
+   "vrt_mode": 1
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_b9c_start9_menu.png",
+  "bs_b9c_storage9.png",
+  "bs_b9c_crops9_barley.png",
+  "bs_b9c_crops9_oats.png",
+  "bs_b9c_crops9_flax.png",
+  "bs_b9c_crops9_hemp.png",
+  "bs_b9c_sky9_fair_0.png",
+  "bs_b9c_sky9_fair_90.png",
+  "bs_b9c_sky9_fair_180.png",
+  "bs_b9c_sky9_fair_270.png",
+  "bs_b9c_sky9_overcast_0.png",
+  "bs_b9c_sky9_overcast_90.png",
+  "bs_b9c_sky9_overcast_180.png",
+  "bs_b9c_sky9_overcast_270.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}
