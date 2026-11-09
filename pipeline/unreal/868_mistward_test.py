@@ -108,7 +108,7 @@ The list of 2026-10-31b (docs/improvements5.txt; 879):
   (menu: also AUTOPLAY: its length chosen with the arrows, a click opens the castle with ?Autoplay=)
 The list of 2026-11-01 (docs/improvements6.txt; 880, balance6.json):
   stealth  the Rogue's dexterity energy and stealth: Q hides her for its seconds at its cost (the HUD's bar), the energy back
-           only out of it; a monster after her loses her, a trap stays set under her; the ambush (+150 %) with a dagger and
+           only out of it; a monster after her loses her, a trap stays set under her; the ambush (+75 %, balance6.json) with a dagger and
            a crossbow bolt ends it; refused with too little; a speed potion fills it; the Warrior has none
   growth   each hero's hit points, spells / chi and own weapons with tiers 2 to 5 open (by her shares), found weapons by their
            tier, mana back as her pool's share, a restart back to tier 1

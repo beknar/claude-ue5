@@ -1,8 +1,8 @@
 # Levels
 
-Every level in the project: what it is, its properties, and which characters can play it. The game modes and pawns were read from the levels' own map files (`claude_ue5/Content/.../*.umap`); the heroes' numbers come from the data the scripts put on the levels (`SourceArt/random_dungeon_magic4/heroes.json`, `SourceArt/random_dungeon_magic5/summoner_hero.json`, `SourceArt/summoner3/armour.json`). Each level's document under [levels/](levels/) (linked from README's [Levels](../README.md#levels) table) and [controls.md](controls.md) have the full detail of each one. The scripts that build them are in `pipeline/unreal/`, numbered in build order.
+Every level in the project: what it is, its properties, and which characters can play it. The game modes and pawns were read from the levels' own map files (`claude_ue5/Content/.../*.umap`); the heroes' numbers come from the data the scripts put on the levels (`SourceArt/random_dungeon_magic4/heroes.json`, `SourceArt/random_dungeon_magic5/summoner_hero.json`, `SourceArt/summoner3/armour.json`; in Mistward Castle and the levels copied from it, `SourceArt/mistward/balance6.json`). Each level's document under [levels/](levels/) (linked from README's [Levels](../README.md#levels) table) and [controls.md](controls.md) have the full detail of each one. The scripts that build them are in `pipeline/unreal/`, numbered in build order.
 
-There are **19 levels**: 18 to play, and the photo studio for stills. Two of them open with a menu level first, and ten have a `*_Cine` copy for their demo reel (see [Other maps](#other-maps)).
+There are **25 levels**: 24 to play, and the photo studio for stills. Four of them open with a menu level first (levels 4 and 5, Mistward Castle and Brokenspire), three are entered from the wilderness's cities (`vel_morrath`, `war_engine`, `sewers`), and ten have a `*_Cine` copy for their demo reel (see [Other maps](#other-maps)). The current game, packaged by `package_mistward.ps1`, is five of them and the hero menu: `brokenspire`, `mistward_castle`, `vel_morrath`, `war_engine` and `sewers` ([Mistward Castle's game](#mistward-castles-game)).
 
 ## At a glance
 
@@ -26,11 +26,15 @@ There are **19 levels**: 18 to play, and the photo studio for stills. Two of the
 | `random_dungeonmagic_level3` | dungeon game: daggers and crossbow | the Rogue | `BP_RDM3_GameMode` | `813` | `RandomDungeonMagic3_Rogue_Showcase` |
 | `random_dungeonmagic_level4` | dungeon game: choice of hero, items | Warrior, Mage, Warlock, Rogue (menu) | `BP_RDM4_GameMode` | `827` / `828` hero test | `RandomDungeonMagic4_Heroes_`, `_UI_`, `_Lettering_Showcase` |
 | `random_dungeonmagic_level5` | dungeon game: five heroes, armour, a weapons table, five tiers of rooms | Warrior, Mage, Warlock, Rogue, Summoner (menu; Summoner by default) | `BP_RDM4_GameMode` | `853` (through `828 -lv 5`) | `RandomDungeonMagic5_Summoner_Armour_`, `_Faces_`, `_MetaHuman_Faces_Showcase` |
-| `mistward_castle` | level 5's game as a castle: themed tiers, rooms of other shapes, traps, prisoners, shields, a torch, teleporters, bosses | Warrior (Warrior3), Mage, Warlock, Rogue (menu `mistward_castle_select`) | `BP_RDM4_GameMode` | `868` (`868_mistward_test.ps1`) | `MistwardCastle_Heroes_Showcase` |
-| `brokenspire` | the castle's starting town, generated for every new game: trades, townspeople and quests, gold, the castle's hall into the dungeon; the wilderness round it (300 x 300 km, three more towns, fast travel, a save) | the castle's six heroes (the hero menu `mistward_castle_select` opens it) | `BP_RDM4_GameMode` | `884` (`884_brokenspire_test.ps1`), `888` (`888_wilderness_test.ps1`) | - |
+| `mistward_castle` | level 5's game as a castle: themed tiers, rooms of other shapes, traps, prisoners, shields, a torch, teleporters, bosses, special rooms, harvests and scrolls, shooting monsters, autoplay, the heroes balanced tier by tier, the final boss Aurorim | Warrior (Warrior3), Mage, Warlock, Rogue, Martial Artist, Summoner (Summoner4) (menu `mistward_castle_select`) | `BP_RDM4_GameMode` | `868` (`868_mistward_test.ps1`) | `MistwardCastle_Heroes_`, `_Heroes2_` to `_Heroes5_Showcase`; `MistwardCastle_Aurorim_`, `_Aurorim2_..._Showcase` (Game Bar, `renders/gamebar renders/`) |
+| `martial_arts` | one room of the castle to try the Martial Artist in | the Martial Artist | `BP_RDM4_GameMode` | `868 martialroom -lv martial_arts` | - |
+| `brokenspire` | the castle's starting town, generated for every new game: trades, townspeople at their work and quests, an hour-long day, gold, the castle's hall into the dungeon; the wilderness round it (300 x 300 km, three more cities, a sky and weather, wild animals, farms, fast travel, a save) | the castle's six heroes (the hero menu `mistward_castle_select` opens it) | `BP_RDM4_GameMode` | `884` (`884_brokenspire_test.ps1`), `888` (`888_wilderness_test.ps1`) | `Brokenspire_`, `Brokenspire2_` to `Brokenspire4_..._Showcase`, `Brokenspire7_2026-11-05_Showcase` (Game Bar, `renders/gamebar renders/`) |
+| `vel_morrath` | the catacombs under Vel Morrath's cathedral: the castle's game in five tiers going down | the castle's six heroes (down the cathedral's stair) | `BP_RDM4_GameMode` | `884 holy,descend`, `868 catacombs -lv vel_morrath` | - |
+| `war_engine` | The War Engine under Ashenreach's Great Foundry: the castle's game in foundry brick, with its machines | the castle's six heroes (through the foundry's iron gate) | `BP_RDM4_GameMode` | `884 forge,descendwar` | - |
+| `sewers` | the sewers under Graymourne: the castle's game in five tiers going down, damp brick, with its drowned | the castle's six heroes (through the Sluice House's sewer gate) | `BP_RDM4_GameMode` | `884 port,descendsewer` | - |
 | `starship_level` | space flight | a space fighter | `SSGameMode` | `802` / `803` flight test | `Starship_Fighter_Showcase` |
 
-The editor starts on `L_Fig4_Meadow`, and a packaged game would too (`GameDefaultMap` in `Config/DefaultEngine.ini`). Each `*_Showcase` reel is also in a `_20MB` copy; `Fig4_Locomotion_Meadow.mp4`, the oldest, is not.
+The editor starts on `L_Fig4_Meadow` (`GameDefaultMap` in `Config/DefaultEngine.ini`); `package_mistward.ps1` and `package_starship.ps1` set it to the hero menu and to `starship_level` for their cook only, so their games start there. Each `*_Showcase` reel is also in a `_20MB` copy but three: `Fig4_Locomotion_Meadow.mp4`, the oldest, and `MistwardCastle_Heroes4_` and `_Heroes5_Showcase` (full size only, the user's choice).
 
 ## Showcases: the studio and the meadow
 
@@ -48,7 +52,7 @@ The meadow with fig4 walking in heels.
 
 ### `L_Meshy_Meadow`
 The meadow as a stage for the Meshy biped and the JRPG characters.
-- **Characters:** the Meshy AI biped (`BP_MeshyCharacter`: 18 moves on input actions plus a sprint on Ctrl), and the JRPG characters (`BP_JRPGFem1Character` … `BP_JRPGFem5Character`, `BP_JRPGCasterCharacter`, `BP_JRPGDarkCasterCharacter`, `BP_JRPGRogueCharacter`, `BP_JRPGSummonerCharacter`, `BP_JRPGSummoner3Character`). Each character's script sets the meadow's game mode to its own, so the one built last plays: now Fem5 (`BP_JRPGFem5GameMode`), the Warrior's model.
+- **Characters:** the Meshy AI biped (`BP_MeshyCharacter`: 18 moves on input actions plus a sprint on Ctrl), and the JRPG characters (`BP_JRPGFem1Character` … `BP_JRPGFem5Character`, `BP_JRPGCasterCharacter`, `BP_JRPGDarkCasterCharacter`, `BP_JRPGRogueCharacter`, `BP_JRPGSummonerCharacter`, `BP_JRPGSummoner3Character`, `BP_JRPGSummoner4Character`, `BP_JRPGWarrior3Character`, `BP_JRPGMartialArtistCharacter`). Each character's script sets the meadow's game mode to its own, so the one built last plays: now Fem5 (`BP_JRPGFem5GameMode`), the Warrior's model.
 - **Properties:** scripts `100`-`154` (Meshy), `500`-`540` and `600`-`650` (JRPG characters).
 
 ### `soldier_level`, `ff_level`, `ff2_level`
@@ -115,6 +119,8 @@ A nucleated village seen from a fixed isometric camera (`AIVVillageGenerator`).
 
 Six levels of one game, each a Save As copy of the one before:
 `random_dungeon_level` → `random_dungeoncombat_level` → `random_dungeonmagic_level` → `_level2` → `_level3` → `_level4` → `_level5`
+
+and on from level 5, [Mistward Castle's game](#mistward-castles-game): `_level5` → `mistward_castle` → `martial_arts`, `brokenspire`, `vel_morrath`, `war_engine`, `sewers` (each a Save As copy of the castle).
 
 All of them share the dungeon above: generated sections, rooms by purpose, doors and containers, and the tactical maps. They also share the C++ (`ARDDungeonGenerator`, `URDCombatComponent`) and its sound and music.
 
@@ -198,16 +204,10 @@ The dungeon with a choice of hero, mana, items and an inventory.
   - There are no armour items in this level: armour is on the cards only.
 - **Scripts:** `824`-`831`.
 
-### `mistward_castle`
-Level 5's game (a Save As copy of `random_dungeonmagic_level5`) as a castle: [mistward_castle: the castle](levels/mistward_castle.md#mistward_castle-the-castle) has the whole of it.
-- **Menu first:** through `mistward_castle_select`, "Mistward Castle" over CHOOSE YOUR HERO: the four heroes of level 5's menu (the Warrior is Warrior3, with the Heater Shield on her arm).
-- **Characters:** level 5's, with the same numbers; the Warrior alone carries shields, every hero the torch, the Rogue alone sees and disarms traps.
-- **Scripts:** `863`-`868`.
-
 ### `random_dungeonmagic_level5`
 Level 4's game with a fifth hero, the Summoner, and armour to find and wear.
 - **Menu first:** as level 4, through `random_dungeonmagic_level5_select` with five heroes.
-- **Characters:** level 4's four heroes, with the same numbers, and the Summoner, who is the default.
+- **Characters:** level 4's four heroes, with the same numbers (the Warrior's model Warrior3 since `862`: `BP_RDM5_Warrior3Character`, `ai models/Warrior3.glb`), and the Summoner, who is the default.
 
   | Hero | Blueprint | Model | Hit points | Mana (back a second) | Starts with | Can wear the armour found here |
   |---|---|---|---|---|---|---|
@@ -272,7 +272,48 @@ Level 4's game with a fifth hero, the Summoner, and armour to find and wear.
   - then Summoner2 (`BP_RDM5_Summoner2Character`, a whole MetaHuman fitted to `Summoner2.glb`, game mode `BP_RDM5S2_GameMode`, scripts `842`-`848`).
 
   Their characters and game modes are still in the project, but the level no longer uses them.
-- **Scripts:** `849`-`853`; the weapons and the tiers `854`, `855` (with `blender_numpy/weapon5_clips.py`).
+- **Scripts:** `849`-`853`; the weapons and the tiers `854`, `855` (with `blender_numpy/weapon5_clips.py`); armour by weight, the armour and loot tables, crafting, spells, rings, monsters by tier `856`-`859`; the heroes' arms `860`; Warrior3 `862`; the castle's third list, which is on level 5 too, `870`.
+
+## Mistward Castle's game
+
+Level 5's game rebuilt as a castle, with a town to start in, a continent round the town and three more cities, each over a dungeon of its own. Played from the hero menu `mistward_castle_select` ("Mistward Castle" over CHOOSE YOUR HERO), whose START opens Brokenspire; Brokenspire's Mistgate opens the castle, and each city's gate its dungeon. What she carries, her gold, her storage, her quests and her whole state go with her between them. Every one plays `BP_RDM4_GameMode`; all but `martial_arts` (the Martial Artist alone, no menu) with the castle's six heroes. The cities' three dungeons share the castle's heroes, balance, loot, traps, special rooms and bosses, and keep their own tiers, loot and counters under their own keys, apart from the castle's. This is the game `package_mistward.ps1` packages as a Shipping game (all but `martial_arts`), with a console of its own.
+
+| Hero | Blueprint | Model |
+|---|---|---|
+| Warrior | `BP_RDM5_Warrior3Character` | `ai models/Warrior3.glb` |
+| Mage | `BP_RDM_CasterCharacter` | `ai models/Mage.glb` |
+| Warlock | `BP_RDM2_DarkCasterCharacter` | `ai models/Warlock.glb` |
+| Rogue | `BP_RDM3_RogueCharacter` | `ai models/Rogue.glb` |
+| Martial Artist | `BP_MA_MartialArtistCharacter` | `ai models/MartialArtist2.glb` |
+| Summoner | `BP_SU4_SummonerCharacter` | `ai models/Summoner4.glb` |
+
+Their hit points, damage, mana and growth by tier are the balance of 2026-11-01 (`880`, `SourceArt/mistward/balance6.json`), not level 5's: [the numbers](levels/mistward_castle.md#mistward_castle-the-castle).
+
+### `mistward_castle`
+Level 5's game (a Save As copy of `random_dungeonmagic_level5`) as a castle: [mistward_castle: the castle](levels/mistward_castle.md#mistward_castle-the-castle) has the whole of it.
+- **Menu first:** through `mistward_castle_select`: the six heroes above (the Warrior with the Heater Shield on her arm); START opens Brokenspire, and AUTOPLAY plays any hero for a set time.
+- **Characters:** the Warrior alone carries shields, every hero the torch, the Rogue alone sees and disarms traps and hides in stealth; the Martial Artist fights with fists, feet, knives and ten chi attacks; the Summoner calls fighters to her side, a new summoning for each tier boss she slays.
+- **Properties:** five themed tiers (the stone dungeon, a castle keep, dwarven deep halls, then mixed) opening at 50 % of the tier before, rooms of other shapes with vaulted and domed ceilings, a boss and a guarded ring at each opening, thirteen kinds of traps, teleporters, prisoners and caged monsters, eight special rooms, boss slashes, harvests, potions and scrolls made at the anvil, monsters that shoot, the arena's audience; once tier 5 is half cleared the final boss, Aurorim, whose death opens a door back to Brokenspire.
+- **Scripts:** `863`-`880`, `889` (and `885`, `886`, `898`, shared with the town).
+
+### `martial_arts`
+One room of `mistward_castle` (the great hall alone, 30 m, no doors) to try the Martial Artist in: all ten chi attacks with infinite mana, her fists, dodge and dash, three monsters of tier 1 that come back after one falls. Script `873`; [its part of the castle's document](levels/mistward_castle.md).
+
+### `brokenspire`
+The castle's starting town ([Brokenspire](levels/brokenspire.md)) and the wilderness round it ([the wilderness](levels/wilderness.md)), on one level (a Save As copy of `mistward_castle`).
+- **The town:** a walled town of 500 m generated by rules from a new seed every game: the square, the trades and their services, homes lived in, burned and boarded up, 32 kinds of townspeople at their rounds of work, 16 quests, gardens, pens and cooking fires, an hour-long day and night, the castle building's Mistward Hall and its Mistgate into the castle.
+- **The wilderness:** a continent of 300 by 300 km made from one seed as she comes to it (the ground within a 2 km square round her), 29 terrain templates, rivers, lakes and roads, places to find, a sky, weather, wild animals to hunt, farms of crops, a map from above with a fog of war, fast travel and named saves.
+- **The cities:** [Vel Morrath](levels/vel_morrath.md) (a holy city north-east of Brokenspire), [Ashenreach](levels/ashenreach.md) (a forge city due north, at the edge of a burned plain) and [Graymourne](levels/graymourne.md) (a fog-bound port on the northern coast), each of Brokenspire's size with its own people and quests and a gate down into its dungeon, built as she nears it.
+- **Scripts:** `881`-`888`, `890`, `892`-`894`, `896`, `898`.
+
+### `vel_morrath`
+The catacombs under Vel Morrath's cathedral, entered by the stair at the choir's far wall ([Vel Morrath](levels/vel_morrath.md)): five tiers, each a floor 4.5 m below the last, joined by ramped stairs; the dungeon's old stone, the crypt stone, a buried cathedral's arches and deep halls by tier. The Escape menu's "Return to Vel Morrath" brings her back before the cathedral's door. Played from the editor it starts the generator's default hero. Script `891`.
+
+### `war_engine`
+The War Engine, the besieged factory under Ashenreach's Great Foundry, entered by the iron gate in its furnace hall ([Ashenreach](levels/ashenreach.md)): five tiers of foundry brick and dwarven forge halls, gears, chains and ore carts by the walls, and eleven kinds of machines and half-machines among the castle's monsters. "Return to Ashenreach" brings her back. Script `895`.
+
+### `sewers`
+The sewers under Graymourne, entered by the sewer gate in the Sluice House ([Graymourne](levels/graymourne.md)): five tiers going down as the catacombs' do, in damp sewer brick and a vaulted cistern, sludge, rags and the drowned's things by the walls, and eleven kinds of drowned sailors and fish-men among the castle's monsters. "Return to Graymourne" brings her back. Script `897`.
 
 ## Space
 
@@ -301,10 +342,13 @@ A space fighter in a 5 km x 5 km x 5 km combat area round a space station.
 | FF | Tripo, static | `BP_FFCharacter` | `ff_level` |
 | FF2 | Tripo, animated | `BP_FF2Character` | `ff2_level`, `castle_level`, `fantasy_castle_level` |
 | JRPG Fem1, Fem3, Fem4 | Meshy | `BP_JRPGFem1Character` … `Fem4` | `L_Meshy_Meadow` (when its game mode is theirs) |
-| Warrior (jrpg-fem5-tripo) | `ai models/Warrior.glb` | `BP_JRPGFem5Character`, `BP_SFC_Fem5Character`, `BP_RDM4_WarriorCharacter` | `L_Meshy_Meadow`, `sf-city-level`, `random_level`, `random_dungeon_level`, `random_isometric_village_level`, `random_dungeoncombat_level`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5` |
-| Mage (girl-caster-tripo) | `ai models/Mage.glb` | `BP_JRPGCasterCharacter`, `BP_RDM_CasterCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5` |
-| Warlock (girl-darkcaster-tripo) | `ai models/Warlock.glb` | `BP_JRPGDarkCasterCharacter`, `BP_RDM2_DarkCasterCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level2`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5` |
-| Rogue | `ai models/Rogue.glb` | `BP_JRPGRogueCharacter`, `BP_RDM3_RogueCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level3`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5` |
+| Warrior (jrpg-fem5-tripo) | `ai models/Warrior.glb` | `BP_JRPGFem5Character`, `BP_SFC_Fem5Character`, `BP_RDM4_WarriorCharacter` | `L_Meshy_Meadow`, `sf-city-level`, `random_level`, `random_dungeon_level`, `random_isometric_village_level`, `random_dungeoncombat_level`, `random_dungeonmagic_level4`; formerly `random_dungeonmagic_level5` |
+| Warrior (Warrior3) | `ai models/Warrior3.glb` | `BP_JRPGWarrior3Character`, `BP_RDM5_Warrior3Character` | `L_Meshy_Meadow`, `random_dungeonmagic_level5`, Mistward Castle's game (`mistward_castle`, `brokenspire`, `vel_morrath`, `war_engine`, `sewers`) |
+| Mage (girl-caster-tripo) | `ai models/Mage.glb` | `BP_JRPGCasterCharacter`, `BP_RDM_CasterCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5`, Mistward Castle's game |
+| Warlock (girl-darkcaster-tripo) | `ai models/Warlock.glb` | `BP_JRPGDarkCasterCharacter`, `BP_RDM2_DarkCasterCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level2`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5`, Mistward Castle's game |
+| Rogue | `ai models/Rogue.glb` | `BP_JRPGRogueCharacter`, `BP_RDM3_RogueCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level3`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5`, Mistward Castle's game |
+| Martial Artist | `ai models/MartialArtist2.glb` | `BP_JRPGMartialArtistCharacter`, `BP_MA_MartialArtistCharacter` | `L_Meshy_Meadow`, `martial_arts`, Mistward Castle's game |
+| Summoner (Summoner4) | `ai models/Summoner4.glb` | `BP_JRPGSummoner4Character`, `BP_SU4_SummonerCharacter` | `L_Meshy_Meadow`, Mistward Castle's game |
 | Summoner (Summoner3) | `ai models/Summoner3.glb` | `BP_JRPGSummoner3Character`, `BP_RDM5_Summoner3Character` | `L_Meshy_Meadow`, `random_dungeonmagic_level5` |
 | Summoner (the first) | `ai models/Summoner.glb` | `BP_JRPGSummonerCharacter`, `BP_RDM5_SummonerCharacter` | `L_Meshy_Meadow`; formerly `random_dungeonmagic_level5` |
 | Summoner2 | `ai models/Summoner2.glb`, as a MetaHuman | `BP_JRPGSummoner2Character`, `BP_RDM5_Summoner2Character` | formerly `random_dungeonmagic_level5` |
@@ -318,7 +362,7 @@ These are in the project's own folders but are not levels to play on their own.
 
 | Map | What it is |
 |---|---|
-| `random_dungeonmagic_level4_select`, `random_dungeonmagic_level5_select`, `mistward_castle_select` | the hero menus of levels 4 and 5 and of Mistward Castle (`RDHeroSelectGameMode`): they open the dungeon with the hero chosen |
+| `random_dungeonmagic_level4_select`, `random_dungeonmagic_level5_select`, `mistward_castle_select` | the hero menus of levels 4 and 5 and of Mistward Castle (`RDHeroSelectGameMode`): they open the dungeon with the hero chosen (Mistward Castle's opens Brokenspire, and starts the packaged game) |
 | `L_Fig4_Meadow_Cine`, `L_Meshy_Meadow_Cine`, `soldier_level_Cine`, `ff_level_Cine`, `ff2_level_Cine`, `castle_level_Cine`, `sf-city-level_Cine`, `random_level_Cine`, `random_dungeon_level_Cine`, `random_isometric_village_level_Cine` | copies for the demo reels (`MoviePipelineGameMode`): an AI demo character runs a recorded route on the sequence clock. The dungeon games and the fighter have no copy: their reels are rendered on the level itself, with a pilot script playing the game |
 | `fcl_lake_village`, `sfc_monolith` | sublevels streamed into `fantasy_castle_level` and `sf-city-level` |
 | `L_Tripo_Trio_Showcase`, `L_Tripo_Quartet_Showcase` | stages of the trio and quartet reels (`TripoTrio_Showcase`, `TripoQuartet_Showcase`: the Warrior, Mage, Warlock and then the Rogue on plinths) |

@@ -1,7 +1,7 @@
-# Package mistward_castle (and Brokenspire, its town, which the hero menu opens) as a standalone Windows game: one directory with claude_ue5.exe that runs on a PC without
+# Package the current game (the hero menu, Brokenspire with its wilderness and cities, mistward_castle, and the cities' dungeons vel_morrath, war_engine and sewers) as a standalone Windows game: one directory with claude_ue5.exe that runs on a PC without
 # Unreal, Visual Studio or any runtime installed. Close the editor first (package_starship.ps1's way):
-#   - builds the game target (Shipping) against the installed engine, cooks the hero menu (mistward_castle_select) and the
-#     castle (mistward_castle) and what they refer to, stages it into .pak / IoStore containers and archives it to
+#   - builds the game target (Shipping) against the installed engine, cooks the six maps ($maps below) and what they refer
+#     to, stages it into .pak / IoStore containers and archives it to
 #     <repo>\builds\mistward_castle\Windows
 #   - every map is named to the cook: the menu opens the town, the town the castle and (from Vel Morrath's cathedral) the
 #     catacombs (vel_morrath), Ashenreach's foundry The War Engine (war_engine), Graymourne's sewer gate the sewers (sewers),
@@ -16,8 +16,10 @@
 #     zeros from their first byte (not packages; no map here uses them). The cook runs with -IgnoreCookErrors and the
 #     script fails it itself on any other error in the cook's summary (KNOWN_BAD below). The whole output is kept in
 #     <Out>\package.log.
-# Args: [-Config Shipping|Development] [-Out <directory>] [-Test] (start the packaged game on the menu and in the castle,
-#   without a window, and check that it keeps running and leaves no crash report) [-TestOnly] (only that) [-SkipCook]
+# Args: [-Config Shipping|Development] [-Out <directory>] [-Test] (start the packaged game in each of its places in turn
+#   ($runs below: the menu, the town, the castle, each city by fast travel and each dungeon down from its city, without a
+#   window; then two runs in a window that takes the keyboard: a display setting, and the console typed into through
+#   Slate), and check that each got there, kept running and left no crash report) [-TestOnly] (only that) [-SkipCook]
 #   (stage and archive the last cook's output: after a cook that finished but was failed for its errors)
 param([string]$Config = "Shipping", [string]$Out = "", [switch]$Test, [switch]$TestOnly, [switch]$SkipCook)
 # (2026-11-08: two of the Favelas pack's level sequences are zeros as well; no map here uses them)
