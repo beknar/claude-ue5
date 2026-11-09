@@ -651,6 +651,38 @@ enum class ERDItemKind : uint8
 	Token
 };
 
+/** the list of 2026-11-08b's seventh phase (SourceArt/wilderness/poi.json, 912): a kind of the wilderness's small points of interest
+ *  ("the player should be able to interact or encounter something every 40 seconds when roaming the wilderness"): where it
+ *  stands (its regions' biomes by name, "*" any; beside a road or off it; Layer 0 a small vignette, 1 mid-size, 2 a landmark
+ *  (rarer, bigger)), what it is made of (Props: "prefix|count|ring radius m|scale|sink|collide" of the wilds' pieces), and what
+ *  she does there (Use: loot, resource, guarded, nest, buff, heal, lore, milestone, none). bRoaming: the encounter director's
+ *  (met on her way, not placed) */
+USTRUCT(BlueprintType)
+struct FRDWildPoiKind
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Layer = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoad = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoaming = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Props;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Use;
+	/** what it holds: "Item|min|max|chance" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Things;
+	/** what F says (lore, a blessing's name) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Text;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Monsters = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float MonsterHealth = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BuffDamage = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BuffArmour = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BuffSeconds = 0.f;
+	/** used again after a while (a wayshrine); else once a game */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bReusable = false;
+};
+
 /** the list of 2026-11-08b's sixth phase: how a secondary ability is used */
 UENUM(BlueprintType)
 enum class ERDSecondaryKind : uint8

@@ -11,6 +11,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "RD/RDTypes.h"
 #include "RDWild.generated.h"
 
 class UStaticMesh;
@@ -146,6 +147,8 @@ struct FRDWildPlace
 	/** a quest's place (the captain's of Brokenspire, 2026-11-07): "wolves" (the den on the mill road), "patrol" (the old
 	 *  watchtower); empty for the others */
 	UPROPERTY(BlueprintReadOnly) FString Quest;
+	/** the seventh phase: a small point of interest's kind (its index into PoiKinds; -1: a place) */
+	UPROPERTY(BlueprintReadOnly) int32 Poi = -1;
 };
 
 /** the shapes of ground a biome can have */
@@ -301,6 +304,15 @@ public:
 	/** the quests' places (Brokenspire's captain: the wolves' den, the old watchtower): QuestIdBase + their index, between
 	 *  the places' ids (under 2^24) and the towns' */
 	static constexpr int32 QuestIdBase = 1 << 29;
+	/** the seventh phase's small points of interest (PoisIn): a 120 m grid, one in most of its cells, of the kinds of the
+	 *  region (PoiKinds, set after Init from the generator's WildPoiKinds); their ids PoiIdBase + (cell x << 12 | cell y) (the
+	 *  continent is 2500 cells across), in the free range under the farms' 2^28 */
+	static constexpr int32 PoiIdBase = 1 << 24;
+	static constexpr double PoiCellM = 120.0;
+	TArray<FRDWildPoiKind> PoiKinds;
+	float PoiFill = 0.8f;
+	FIntPoint PoiCellOf(double X, double Y) const { return FIntPoint(FMath::FloorToInt((X - Xs) / PoiCellM), FMath::FloorToInt((Y - Yw) / PoiCellM)); }
+	void PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const;
 	TArray<FRDWildPlace> QuestPlaces;
 	/** a quest goal's place ("wild:wolves" -> the den), or null */
 	const FRDWildPlace* QuestPlaceFor(const FString& Goal) const;

@@ -99,6 +99,13 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A mesh's origin is not its foot or its middle**: the Lake Village fence's origin is its middle (half of it under the ground); farm pieces are put by their box's middle and bottom.
 - **PR #30's review (2026-11-08)**: a place that spreads (a farmstead 40 m round) is checked over its whole ground (rings of samples), not at its point, and against the other places' points; a ridge in what she walks on is measured against the same ground with no farm (`BareHeight`), not against a line through the land (the land's own swell passed the first test); an animal that walks reads a height grid taken once over its pen, not the world's height each frame; something that lays 30 pieces and 14 actors waits its turn, one a frame (`WildFarmQueue`).
 
+## Something every 40 seconds (2026-11-08b, phase 7: `FRDWildWorld::PoisIn`, `RD/RDWildPoi.cpp`, `912`, `888 poi7`)
+
+- **Count what a run meets, not what a rule allows**: a 160 m grid at 80 % gave a median gap of 77 s along the lines, and near Brokenspire nothing at all (every farm ground refused, `FarmKind != 0`). Measure along lines of the world's model per region before playing: the mountains' slopes and the farms took most of it. Refuse only the fields and the yards, try a few spots in a cell, allow a slope.
+- **A world's spacing alone leaves gaps** (exponential-like: the 90th percentile twice the median): the 40 s is kept in play by the director, which meets her when 25 s pass with nothing near.
+- **An event log said once per change reads long gaps**: "near" said only when what was near changed made a 49.5 s gap of a run that was never 30 s without something. Say it again every 3 s while it lasts.
+- **A memory reading of one run is not a measure**: `stream` read +1078 MB, then +119 MB in the same build (and +666, -191, +1638 before). Read it twice before blaming a change.
+
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).

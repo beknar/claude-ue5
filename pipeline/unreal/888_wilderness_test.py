@@ -11,6 +11,8 @@ Steps:
           the frames' times, every chunk the same both ways
   quests  (2026-11-07) the captain's two wilderness quests: their places, taken, played (the den's pack, the patrol's
           remains), turned in
+  poi7    (2026-11-09, 912) the points of interest: the seconds between them along 14 lines of the world's model, a 150 s
+          run in play (what met her never 40 s apart), each use made with F
   secondary9 (2026-11-09, 911) a wild place's Hallowed Stone taken and not laid again, the lairs' monsters' Seraph Feathers,
           the Martial Artist's Water Walk over a lake
   wild25  (2026-11-09, 910) lairs and spawn points of six tiers along the roads, Brokenspire to Heaven: each monster of its
@@ -609,6 +611,100 @@ def step_secondary9():
     ok_f = fe["kills"] >= 3 and fe["feathers"] >= 1
     ok_w = bool(ww.get("used")) and ww.get("walked_cm", 0) >= 800 and ww.get("over_water_samples", 0) > 20 and ww["feet_over_water_cm"] and ww["feet_over_water_cm"][0] > -25 and not ww.get("on_after")
     step_result("secondary9", ok_s and ok_f and ok_w, stone_ok=ok_s, feathers_ok=ok_f, water_ok=ok_w, **res)
+
+
+def step_poi7():
+    """the seventh phase's points of interest (912, RD/RDWildPoi.cpp, FRDWildWorld::PoisIn): (a) on the world's model, along
+    eight lines out of Brokenspire and six through other regions (2 km each), every point of interest or place within 75 m
+    of the way: the seconds between them at her run of 3.5 m/s (most under 40), many kinds, each line its region's mix;
+    (b) in play, a 150 s run off the roads: what met her (something within 45 m, a director's encounter) never more than 40 s
+    apart; (c) each use made with F where it stands: a pile taken, a blessing, a rest, a story, a milestone's ways"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    RUN = 3.5
+    def along(x0, y0, dx, dy, length):
+        seen = {}
+        for k in range(0, int(length) + 1, 250):
+            for p in places_near(x0 + dx * k, y0 + dy * k, 320):
+                t = (p["x"] - x0) * dx + (p["y"] - y0) * dy; d = abs((p["x"] - x0) * dy - (p["y"] - y0) * dx)
+                if -30 <= t <= length + 30 and d <= 75: seen[p["id"]] = (t, p["kind"])
+                if d <= 400: CANDS[p["id"]] = p
+        ts = sorted(v[0] for v in seen.values())
+        gaps = [b - a for a, b in zip([0.0] + ts, ts + [length])]
+        sec = sorted(x / RUN for x in gaps)
+        return {"n": len(ts), "kinds": sorted({v[1] for v in seen.values()}), "p50_s": round(sec[len(sec) // 2], 1) if sec else None,
+                "p90_s": round(sec[int(len(sec) * 0.9)], 1) if sec else None, "max_s": round(sec[-1], 1) if sec else None, "secs": sec}
+    lines = {}; CANDS = {}
+    T = towns(); b = T.get("Brokenspire", {"x": 0.0, "y": 0.0})
+    for k in range(8):
+        a = k * math.pi / 4.0; dx, dy = math.cos(a), math.sin(a)
+        lines[f"brokenspire_{k * 45}"] = along(b["x"] + dx * 1200, b["y"] + dy * 1200, dx, dy, 2000.0)
+    bl = {}
+    for l in g.get_wild_biome_lines():
+        p = str(l).split("|"); bl[p[0]] = (float(p[2]), float(p[3]))
+    for bn in ("marshes", "pine forests", "mountains", "savannahs", "tundras", "volcanoes"):
+        if bn in bl: lines[bn] = along(bl[bn][0] - 1000, bl[bn][1], 1.0, 0.0, 2000.0)
+    # (PR #36's review: the cells north of 165.8 km and east of 95.8 km had none (11 bits a cell): a line from each town there)
+    for tn, t in T.items():
+        if t["x"] > 165000 or t["y"] > 95000:
+            d_ = math.hypot(b["x"] - t["x"], b["y"] - t["y"]) or 1.0; dx, dy = (b["x"] - t["x"]) / d_, (b["y"] - t["y"]) / d_
+            lines["from_" + tn.lower().replace(" ", "_")] = along(t["x"] + dx * 1500, t["y"] + dy * 1500, dx, dy, 2000.0)
+    allsec = sorted(s for v in lines.values() for s in v["secs"])
+    kinds = sorted({k for v in lines.values() for k in v["kinds"]})
+    for v in lines.values(): v.pop("secs")
+    res["model"] = {"lines": lines, "p50_s": round(allsec[len(allsec) // 2], 1), "p90_s": round(allsec[int(len(allsec) * 0.9)], 1), "max_s": round(allsec[-1], 1), "kinds": kinds}
+    # ---- (b) a run in play
+    x0, y0 = b["x"] - 1800.0, b["y"] + 900.0
+    g.wild_drop_all(); g.wild_put_her(x0, y0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    n0 = len([str(l) for l in g.get_wild_encounter_lines()]) - 1
+    t0 = now()
+    yield from run_her((-0.8, 0.6), 150.0)
+    ev = [str(l).split("|") for l in g.get_wild_encounter_lines()][n0:-1]
+    times = [float(e[0]) for e in ev if float(e[0]) >= t0]
+    gaps = [round(b_ - a_, 1) for a_, b_ in zip([t0] + times, times + [now()])]
+    state = str(g.get_wild_encounter_lines()[-1]).split("|")
+    res["run"] = {"seconds": round(now() - t0, 1), "events": len(times), "met": sum(1 for e in ev if e[1] == "met"), "near": sorted({e[2] for e in ev if e[1] == "near"}),
+                  "max_gap_s": max(gaps) if gaps else None, "gaps": gaps[:40], "state": state, "moved_m": round(math.hypot(G["pawn"].get_actor_location().x / 100 - x0, G["pawn"].get_actor_location().y / 100 - y0))}
+    # ---- (c) the uses
+    uses = {}
+    near = [p for p in CANDS.values() if p["kind"] in ("abandoned_camp", "lost_body", "herb_patch", "ore_vein", "grave", "cairn", "wayshrine", "milestone", "broken_wagon", "standing_stones", "hermit_hut", "ruined_wall")]
+    want = {}
+    for p in sorted(near, key=lambda q: math.hypot(q["x"] - b["x"], q["y"] - b["y"])):
+        use = {"abandoned_camp": "loot", "lost_body": "loot", "broken_wagon": "loot", "herb_patch": "loot", "ore_vein": "loot", "grave": "lore", "cairn": "lore", "ruined_wall": "lore",
+               "wayshrine": "heal", "hermit_hut": "heal", "milestone": "milestone", "standing_stones": "buff"}[p["kind"]]
+        if use not in want: want[use] = p
+    for use, p in want.items():
+        g.wild_drop_all(); g.wild_put_her(p["x"] - 6.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+        c = cb()
+        if use == "loot":
+            piles = [x for x in g.get_editor_property("loot_piles") if x and unreal.SystemLibrary.is_valid(x) and math.hypot(x.get_actor_location().x / 100 - p["x"], x.get_actor_location().y / 100 - p["y"]) < 6]
+            if not piles: uses[use] = {"kind": p["kind"], "piles": 0}; continue
+            at = piles[0].get_actor_location(); things = [str(t) for t in piles[0].things]
+            G["pawn"].set_actor_location(V(at.x - 90.0, at.y, at.z + 100.0), False, True); yield from rwait(0.5)
+            n_before = {t: c.get_item_count(t) for t in set(things)}
+            yield from press("F"); yield from rwait(0.6)
+            uses[use] = {"kind": p["kind"], "things": things, "gained": {t: c.get_item_count(t) - n_before[t] for t in n_before}}
+            g.wild_drop_all(); g.wild_put_her(p["x"] - 6.0, p["y"]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+            uses[use]["laid_again"] = len([x for x in g.get_editor_property("loot_piles") if x and unreal.SystemLibrary.is_valid(x) and math.hypot(x.get_actor_location().x / 100 - p["x"], x.get_actor_location().y / 100 - p["y"]) < 6])
+        else:
+            z = G["pawn"].get_actor_location().z
+            G["pawn"].set_actor_location(V(p["x"] * 100.0 - 150.0, p["y"] * 100.0, z), False, True); yield from rwait(0.5)
+            if use == "heal": c.set_health(c.get_max_health() * 0.5)
+            prompt = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
+            yield from press("F"); yield from rwait(0.5)
+            uses[use] = {"kind": p["kind"], "prompt": prompt, "says": str(c.message), "blessing": str(c.get_blessing()), "hp_share": round(c.get_health() / c.get_max_health(), 2)}
+    res["uses"] = uses
+    g.wild_drop_all(); g.wild_put_her(b["x"], b["y"]); yield from wait_chunks(30, 40)
+    quiet(False)
+    m = res["model"]; r = res["run"]
+    # (the world's spacing alone: half the gaps under 40 s, every line some; the 40 s itself is play's, with the director (b))
+    ok_m = m["p50_s"] <= 40 and len(m["kinds"]) >= 15 and all(v["n"] >= 5 for v in m["lines"].values()) and sum(1 for v in m["lines"].values() if len(v["kinds"]) >= 4) >= len(m["lines"]) - 2
+    ok_r = r["events"] >= 4 and r["max_gap_s"] is not None and r["max_gap_s"] <= 40.5
+    ok_u = (uses.get("loot", {}).get("things") and all(v > 0 for v in uses["loot"]["gained"].values()) and uses["loot"].get("laid_again") == 0
+            and ("lore" not in uses or len(uses["lore"]["says"]) > 20) and ("milestone" not in uses or "km" in uses["milestone"]["says"])
+            and ("heal" not in uses or uses["heal"]["hp_share"] == 1.0) and ("buff" not in uses or uses["buff"]["blessing"] not in ("", "None"))
+            and len(uses) >= 3)
+    step_result("poi7", ok_m and ok_r and ok_u, model_ok=ok_m, run_ok=ok_r, uses_ok=bool(ok_u), **res)
 
 
 # ------------------------------------------------------------------------------------------------ fast travel
@@ -1629,7 +1725,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

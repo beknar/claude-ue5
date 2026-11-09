@@ -75,7 +75,8 @@ void ARDDungeonGenerator::StartWild()
 	if (WildFound.Num() == 0) WildFound.Add(FRDWildWorld::TownIdBase);      // (Brokenspire: known from the start)
 	TSharedPtr<FRDWildWorld, ESPMode::ThreadSafe> W = Wild;
 	const TArray<FRDWildBiome> Biomes = WildBiomes;
-	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed]() { W->Init(Seed, Biomes); });
+	const TArray<FRDWildPoiKind> Pois = WildPoiKinds; const float Fill = WildPoiFill;
+	WildStream->Init = Async(EAsyncExecution::Thread, [W, Biomes, Seed, Pois, Fill]() { W->PoiKinds = Pois; W->PoiFill = Fill; W->Init(Seed, Biomes); });
 	UE_LOG(LogRDWild, Log, TEXT("RDWILD the world asked for (seed %u, %d biomes)"), Seed, Biomes.Num());
 }
 
@@ -563,6 +564,13 @@ TArray<FString> ARDDungeonGenerator::GetWildPlacesNear(FVector At, float RadiusM
 	const FIntPoint C0 = Wild->PlaceCellOf(X - RadiusM, Y - RadiusM), C1 = Wild->PlaceCellOf(X + RadiusM, Y + RadiusM);
 	TArray<FRDWildPlace> Ps;
 	for (int32 I = C0.X; I <= C1.X; ++I) for (int32 J = C0.Y; J <= C1.Y; ++J) Wild->PlacesIn(FIntPoint(I, J), Ps);
+	// (the seventh phase: the small points of interest too, for a search of 1.5 km or less (a 120 m grid: each cell's making
+	// samples the world; PR #36's review))
+	if (RadiusM <= 1500.f)
+	{
+		const FIntPoint Q0 = Wild->PoiCellOf(X - RadiusM, Y - RadiusM), Q1 = Wild->PoiCellOf(X + RadiusM, Y + RadiusM);
+		for (int32 I = Q0.X; I <= Q1.X; ++I) for (int32 J = Q0.Y; J <= Q1.Y; ++J) Wild->PoisIn(FIntPoint(I, J), Ps);
+	}
 	for (const FRDWildPlace& P : Ps)
 		if (FVector2D::Distance(P.At, FVector2D(X, Y)) <= RadiusM)
 			Out.Add(FString::Printf(TEXT("%d|%s|%s|%.0f|%.0f|%.1f|%d|%d"), P.Id, *P.Kind, *P.Name, P.At.X, P.At.Y, P.H, P.Tier, WildFound.Contains(P.Id) ? 1 : 0));
