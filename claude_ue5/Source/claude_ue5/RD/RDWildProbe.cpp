@@ -54,27 +54,43 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 	// (the grid)
 	const int32 N = FMath::FloorToInt(2.0 * Half / Step) + 1;
 	const double X0 = X - Half, Y0 = Y - Half;
-	TArray<float> H, Water, W1; TArray<uint8> B, B2;
+	TArray<float> H, Water, W1, Hd; TArray<uint8> B, B2, Col, Fk, Crop;
 	H.SetNumZeroed(N * N); Water.SetNumZeroed(N * N); W1.SetNumZeroed(N * N); B.SetNumZeroed(N * N); B2.SetNumZeroed(N * N);
+	// (the list of 2026-11-08b: the ground's colour as the drawn ground has it (sRGB), the farms' kind and crop there, and how far
+	// the walked height (Height) is from the drawn one (Sample: the ridges are added in both))
+	Col.SetNumZeroed(N * N * 3); Fk.SetNumZeroed(N * N); Crop.SetNumZeroed(N * N); Hd.SetNumZeroed(N * N);
+	const bool bHeights = FParse::Param(*Params, TEXT("Heights"));
 	const double T0 = FPlatformTime::Seconds();
 	ParallelFor(N, [&](int32 I)
 	{
 		for (int32 J = 0; J < N; ++J)
 		{
 			FRDWSample S;
-			W.Sample(X0 + I * Step, Y0 + J * Step, S, true, (float)Step);
+			const double Px = X0 + I * Step, Py = Y0 + J * Step;
+			W.Sample(Px, Py, S, true, (float)Step);
 			const int32 K = I * N + J;
 			H[K] = S.H; Water[K] = S.Water; W1[K] = S.W1; B[K] = (uint8)FMath::Clamp(S.Biome, 0, 255); B2[K] = (uint8)FMath::Clamp(S.Biome2, 0, 255);
+			const FColor C = S.Color.ToFColor(true);
+			Col[K * 3] = C.R; Col[K * 3 + 1] = C.G; Col[K * 3 + 2] = C.B;
+			Fk[K] = S.FarmKind; Crop[K] = (uint8)(S.FieldCrop + 1);
+			if (bHeights) Hd[K] = W.Height(Px, Py) - S.H;
 		}
 	});
 	UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE %d x %d samples, %.1f s"), N, N, FPlatformTime::Seconds() - T0);
 	bool bOk = RDProbeWrite(Out / TEXT("h.bin"), H) && RDProbeWrite(Out / TEXT("water.bin"), Water) && RDProbeWrite(Out / TEXT("w1.bin"), W1)
-		&& RDProbeWrite(Out / TEXT("b.bin"), B) && RDProbeWrite(Out / TEXT("b2.bin"), B2);
+		&& RDProbeWrite(Out / TEXT("b.bin"), B) && RDProbeWrite(Out / TEXT("b2.bin"), B2) && RDProbeWrite(Out / TEXT("col.bin"), Col)
+		&& RDProbeWrite(Out / TEXT("farm.bin"), Fk) && RDProbeWrite(Out / TEXT("crop.bin"), Crop);
+	if (bHeights) bOk &= RDProbeWrite(Out / TEXT("hdiff.bin"), Hd);
 
 	FString Info = FString::Printf(TEXT("seed|%u\nmap|%s\ngrid|%d|%.3f|%.3f|%.3f\nbaseh|%.3f\n"), Seed, *Map, N, X0, Y0, Step, W.BaseH);
 	for (int32 Q = 0; Q < W.Biomes.Num(); ++Q)
 		Info += FString::Printf(TEXT("biome|%d|%s|%d|%.1f|%.1f\n"), Q, *W.Biomes[Q].Name, W.Biomes[Q].Shape, W.Biomes[Q].Base, W.Biomes[Q].Amp);
 	for (const FRDWildTown& T : W.Towns) Info += FString::Printf(TEXT("town|%s|%.1f|%.1f|%.2f\n"), *T.Name, T.Site.X, T.Site.Y, T.H);
+	{
+		TArray<FRDWildPlace> Fs; W.FarmsteadsIn(X0, Y0, X0 + 2.0 * Half, Y0 + 2.0 * Half, Fs);
+		for (const FRDWildPlace& P : Fs) Info += FString::Printf(TEXT("farmstead|%d|%s|%.1f|%.1f|%.1f\n"), P.Id, *P.Name, P.At.X, P.At.Y, P.Yaw);
+	}
+	if (W.FarmsBiome >= 0) for (const FRDWildCrop& Cr : W.Biomes[W.FarmsBiome].Crops) Info += FString::Printf(TEXT("crop|%s|%.1f\n"), *Cr.Name, Cr.Weight);
 	bOk &= FFileHelper::SaveStringToFile(Info, *(Out / TEXT("info.txt")));
 
 	// (the points: what each is made of)

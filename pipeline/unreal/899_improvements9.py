@@ -1,5 +1,5 @@
-"""The user's list of 2026-11-08b (docs/improvements9.txt), its first phase: the quick fixes. Run with play stopped. Parts
-(argv[1], default all, in this order):
+"""The user's list of 2026-11-08b (docs/improvements9.txt), in phases: the first the quick fixes, the second the medieval
+farms. Run with play stopped. Parts (argv[1], default all, in this order):
   noshield the Warrior starts with no shield (StartShield emptied) on every map of the packaged game: brokenspire,
            mistward_castle, vel_morrath, war_engine, sewers (level 5 keeps its own)
   pad      every hero's gamepad list on those maps: Start opens the inventory, held half a second the Escape menu
@@ -7,6 +7,10 @@
            since this list oats, rye, peas, beans, flax, hemp) imported to /Game/RandomDungeon/Wild/Crops, each kind's stalk
            and leaf materials (instances of 887's bark and leaf masters: run 887 trees first). The farms' thirteen crops
            (biomes.json's crops and foliage, read by 887 data) name them
+  farms    (the second phase) brokenspire's farm folk's lines and the paddocks' most animals from SourceArt/wilderness/
+           farms.json (WildFarmLines, WildFarmAnimalsMax). The farms' layout (great fields of strips, crofts, pasture) and the
+           farmsteads are C++ (RDWildWorld.cpp FarmAt / FarmsteadsIn, RDWildFarm.cpp); their pieces are biomes.json's
+           "farmhouse", "barn", "paddock", "trough", "woodpile", "scarecrow" (887 data)
 Run after it on brokenspire: 887 materials,data,level (the ground's rows read the crop / 16; the crops' table and weights;
 level builds the town again and saves it).
 The C++ of the list (storage stacks and holds, the gamepad's Escape menu, Backspace held, rd.TimeSpeed / rd.GameSpeed, the
@@ -14,7 +18,7 @@ crops' weights and the crop under the minimap) needs build_cpp.ps1 first.
 Args: [parts]   e.g.  ue_exec.py 899_improvements9.py noshield,pad"""
 import unreal, os, sys, json, gc
 
-PARTS = (sys.argv[1] if len(sys.argv) > 1 else "noshield,pad,crops").split(",")
+PARTS = (sys.argv[1] if len(sys.argv) > 1 else "noshield,pad,crops,farms").split(",")
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SA = os.path.join(REPO, "claude_ue5", "SourceArt")
 MAPS = "/Game/RandomDungeon/Maps/"
@@ -143,12 +147,23 @@ def crops():
     REPORT.append(f"crops: {n} meshes of {len(kinds)} kinds ({', '.join(kinds)}) imported with their materials")
 
 
+# ================================================================================================ the farms' families
+def farms():
+    J = json.load(open(os.path.join(SA, "wilderness", "farms.json"), encoding="utf-8"))
+    lines = [f"{who}|{line}" for who, ls in J["lines"].items() for line in ls]
+    g = open_map(MAP)
+    g.set_editor_property("wild_farm_lines", lines)
+    g.set_editor_property("wild_farm_animals_max", int(J.get("animals_max", 6)))
+    les.save_current_level()
+    REPORT.append(f"farms: {len(lines)} lines of {len(J['lines'])} kinds of farm folk, at most {J.get('animals_max', 6)} animals a paddock")
+
+
 if __name__ == "__main__":          # (898's crops part imports this file for crops(): the one import of the crops' folder)
     for part in PARTS:
         part = part.strip()
         if not part: continue
         try:
-            {"noshield": noshield, "pad": pad, "crops": crops}[part]()
+            {"noshield": noshield, "pad": pad, "crops": crops, "farms": farms}[part]()
         except Exception as e:
             import traceback
             REPORT.append(f"{part}: FAILED {e!r}"); traceback.print_exc()

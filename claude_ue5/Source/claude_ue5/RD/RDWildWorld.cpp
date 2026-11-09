@@ -26,6 +26,26 @@ namespace
 		return FVector2D::Distance(P, A + Ab * T);
 	}
 	const TCHAR* RDWKinds[] = { TEXT("village"), TEXT("camp"), TEXT("house"), TEXT("spawn"), TEXT("ruins"), TEXT("ritual"), TEXT("cave"), TEXT("lair") };
+	// a jittered grid's point for a cell (Cs metres, the point Jit to 1 - Jit across it)
+	FORCEINLINE FVector2D RDWCellPoint(int32 I, int32 J, double Cs, double Jit, uint32 S)
+	{
+		return FVector2D((I + Jit + (1.0 - 2.0 * Jit) * FRDWildWorld::Rand01(I, J, S)) * Cs, (J + Jit + (1.0 - 2.0 * Jit) * FRDWildWorld::Rand01(I, J, S + 3u)) * Cs);
+	}
+	// the cell whose point is nearest (X, Y), half the gap to the second nearest (metres to the cell's edge) and the point
+	FORCEINLINE void RDWVoronoi(double X, double Y, double Cs, double Jit, uint32 S, FIntPoint& Cell, double& Edge, FVector2D& Site)
+	{
+		const int32 Ci = FMath::FloorToInt(X / Cs), Cj = FMath::FloorToInt(Y / Cs);
+		double D1 = 1e30, D2 = 1e30;
+		for (int32 Di = -1; Di <= 1; ++Di)
+			for (int32 Dj = -1; Dj <= 1; ++Dj)
+			{
+				const FVector2D P = RDWCellPoint(Ci + Di, Cj + Dj, Cs, Jit, S);
+				const double Dd = FMath::Square(X - P.X) + FMath::Square(Y - P.Y);
+				if (Dd < D1) { D2 = D1; D1 = Dd; Cell = FIntPoint(Ci + Di, Cj + Dj); Site = P; }
+				else if (Dd < D2) D2 = Dd;
+			}
+		Edge = (FMath::Sqrt(D2) - FMath::Sqrt(D1)) * 0.5;
+	}
 }
 
 uint32 FRDWildWorld::Hash(int32 X, int32 Y, uint32 S)
@@ -373,16 +393,18 @@ float FRDWildWorld::ShapeHeight(int32 B, double X, double Y, const FVector2D& Si
 	}
 }
 
-float FRDWildWorld::LandHeight(double X, double Y, bool bDetail, int32* OutB, int32* OutB2, float* OutW, float* OutC) const
+float FRDWildWorld::LandHeight(double X, double Y, bool bDetail, int32* OutB, int32* OutB2, float* OutW, float* OutC, float* OutFarm) const
 {
 	int32 Bi[4]; float W[4]; FVector2D Si[4];
 	const int32 N = Blend(X, Y, Bi, W, Si);
-	float H = 0.f, Rocky = 0.f;
+	float H = 0.f, Rocky = 0.f, Farm = 0.f;
 	for (int32 Q = 0; Q < N; ++Q)
 	{
 		H += W[Q] * ShapeHeight(Bi[Q], X, Y, Si[Q], bDetail);
 		if (Biomes[Bi[Q]].Shape == ERDWShape::RockyCoast) Rocky += W[Q];
+		if (Bi[Q] == FarmsBiome) Farm += W[Q];
 	}
+	if (OutFarm) *OutFarm = Farm;
 	H += LandRelief(X, Y, bDetail, Bi, W, N);
 	if (OutB) *OutB = N > 0 ? Bi[0] : 0;
 	if (OutB2) *OutB2 = N > 1 ? Bi[1] : (N > 0 ? Bi[0] : 0);
@@ -404,6 +426,154 @@ FString FRDWildWorld::CropName(const FRDWSample& S, float MinField) const
 {
 	const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
 	return Fb && Fb->Crops.IsValidIndex(S.FieldCrop) && S.Field > MinField ? Fb->Crops[S.FieldCrop].Name : FString();
+}
+
+// ------------------------------------------------------------------------------------------------ the farms (the list of 2026-11-08b)
+int32 FRDWildWorld::PickCrop(int32 A, int32 B, uint32 S) const
+{
+	// (the crops' weights, biomes.json's "weight", the commonest first: their running sums are made once at Init)
+	const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
+	if (!Fb || Fb->Crops.Num() == 0) return -1;
+	if (CropCum.Num() != Fb->Crops.Num() || CropCum.Last() <= 0.f) return 0;
+	const float Pick = Rand01(A, B, S) * CropCum.Last();
+	return FMath::Min(Algo::UpperBound(CropCum, Pick), CropCum.Num() - 1);
+}
+
+float FRDWildWorld::FarmWeight(double X, double Y) const
+{
+	if (FarmsBiome < 0) return 0.f;
+	int32 Bi[4]; float W[4]; FVector2D Si[4];
+	const int32 N = Blend(X, Y, Bi, W, Si);
+	float F = 0.f;
+	for (int32 Q = 0; Q < N; ++Q) if (Bi[Q] == FarmsBiome) F += W[Q];
+	return F;
+}
+
+void FRDWildWorld::FarmAt(double X, double Y, float FarmW, FRDWFarm& O) const
+{
+	O = FRDWFarm();
+	if (FarmW <= 0.2f) return;
+	// ---- the great field: the land nearest a point of a jittered 420 m grid, the land warped so its edges bend (the list of
+	// 2026-11-04: "it should not be that regular or mechanical"); toward the farms' edge the great fields thin out, each at a
+	// farm weight of its own, and each eases in over 4 to 14 m from its edge (a lane, a hedge bank, a stream's grass)
+	const double Wx = X + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 88u) * 45.0, Wy = Y + Fbm(X, Y, 1.0 / 700.0, 2, Seed + 89u) * 45.0;
+	FIntPoint G; double Eg; FVector2D Site;
+	RDWVoronoi(Wx, Wy, GreatFieldM, 0.15, Seed + 90u, G, Eg, Site);
+	const float Need = 0.22f + 0.5f * Rand01(G.X, G.Y, Seed + 91u);
+	const float Fade = RDWSmooth(Need, Need + 0.12f, FarmW) * RDWSmooth(4.f, 14.f, (float)Eg);
+	if (Fade <= 0.f) return;
+	const float Pr = Rand01(G.X, G.Y, Seed + 85u);
+	O.Kind = Pr < 0.60f ? 1 : Pr < 0.80f ? 2 : Pr < 0.94f ? 3 : 0;
+	if (O.Kind == 0) return;
+	O.Great = G; O.Site = Site; O.Fade = Fade;
+	const float GAng = Rand01(G.X, G.Y, Seed + 92u) * PI;
+	// (pasture: grass over the old ridges ("still visible in English pastures today"); a field's own, or a holding's beyond its
+	// plots, or a holding by a town's wall: one way of making it (PR #30's review: three copies))
+	auto Pasture = [&]()
+	{
+		O.Kind = 3;
+		const double V = X * -FMath::Sin(GAng) + Y * FMath::Cos(GAng) + Rand01(G.X, G.Y, Seed + 106u) * 18.0;
+		O.Ridge = 0.16f * FMath::Square(FMath::Sin(PI * (float)(V / 18.0 - FMath::FloorToDouble(V / 18.0)))) * Fade;
+		O.Furrow = 0.f;
+	};
+	auto Strips = [&](float Ang, float Width, float Off)
+	{
+		// (ridge-and-furrow: each strip ploughed into a ridge, its edges the furrows between it and its neighbours)
+		O.Ang = Ang; O.StripW = Width; O.StripOff = Off;
+		const double V = X * -FMath::Sin(Ang) + Y * FMath::Cos(Ang) + Off;
+		const double Sn = FMath::FloorToDouble(V / Width);
+		const float F = (float)(V / Width - Sn);
+		O.Strip = (int32)Sn;
+		O.Furrow = 1.f - RDWSmooth(0.35f, 1.2f, FMath::Min(F, 1.f - F) * Width);
+		return FMath::Square(FMath::Sin(PI * F));
+	};
+	if (O.Kind == 1)
+	{
+		// ---- an open field: one crop the whole field ("rotation was decided for each whole field"), its furlongs (a Voronoi
+		// about 150 m across) each its strips' own way (the field's, or across it), headlands of grass between them where the
+		// plough turned; the strips 15 to 24 m wide, unfenced, divided only by their furrows
+		FIntPoint Fl; double Ef; FVector2D Fp;
+		RDWVoronoi(Wx, Wy, 150.0, 0.1, Seed + 95u, Fl, Ef, Fp);
+		const float Ang = FMath::Fmod(GAng + (Rand01(Fl.X, Fl.Y, Seed + 96u) < 0.5f ? 0.f : HALF_PI) + (Rand01(Fl.X, Fl.Y, Seed + 97u) - 0.5f) * 0.35f + 2.f * PI, PI);
+		const float Wd = 15.f + 9.f * Rand01(Fl.X, Fl.Y, Seed + 98u);
+		const float Rd = Strips(Ang, Wd, Rand01(Fl.X, Fl.Y, Seed + 99u) * Wd);
+		O.Plot = Fl;
+		O.Crop = PickCrop(G.X, G.Y, Seed + 141u);
+		O.Field = Fade * RDWSmooth(2.f, 4.5f, (float)Ef) * (1.f - 0.65f * O.Furrow);
+		O.Ridge = (0.28f + 0.14f * Rand01(Fl.X, Fl.Y, Seed + 100u)) * Rd * Fade * RDWSmooth(1.f, 5.f, (float)Ef);
+		O.Shade = 0.91f + 0.18f * Rand01(O.Strip, Fl.X * 7919 + Fl.Y, Seed + 101u);
+		return;
+	}
+	if (O.Kind == 3) { Pasture(); return; }
+	// ---- crofts: the farmstead's yard round the field's point, the small plots round it (30 to 60 m, a farm of its own size)
+	// out to 120 to 190 m, each one of the holding's three crops or grass, grass baulks between them; the rest of the field the
+	// holding's pasture (a first look drew plots of every crop over the whole 420 m field: confetti)
+	const double Dsite = FVector2D::Distance(FVector2D(X, Y), Site);
+	// (no holding beside a town's wall: its field is pasture (FarmsteadsIn would put no farmstead there, and an empty yard showed))
+	for (const FRDWildTown& T : Towns) if (FVector2D::DistSquared(Site, T.Site) < FMath::Square(450.0)) { Pasture(); return; }
+	if (Dsite < 34.0) { O.Kind = 4; return; }
+	const double Reach = 120.0 + 70.0 * Rand01(G.X, G.Y, Seed + 109u) + 25.0 * Fbm(X, Y, 1.0 / 90.0, 2, Seed + 110u);
+	if (Dsite > Reach) { Pasture(); return; }
+	const double Pm = 30.0 + 30.0 * Rand01(G.X, G.Y, Seed + 107u);
+	FIntPoint Pl; double Ep; FVector2D Pp;
+	RDWVoronoi(Wx, Wy, Pm, 0.15, Seed + 102u, Pl, Ep, Pp);
+	O.Plot = Pl;
+	O.Ang = Rand01(Pl.X, Pl.Y, Seed + 104u) * PI;
+	if (Rand01(Pl.X, Pl.Y, Seed + 103u) < 0.6f)
+	{
+		O.Crop = PickCrop(G.X * 3 + (int32)(Rand01(Pl.X, Pl.Y, Seed + 105u) * 3.f), G.Y, Seed + 111u);
+		O.Field = Fade * RDWSmooth(1.2f, 3.5f, (float)Ep) * RDWSmooth(0.f, 6.f, (float)(Reach - Dsite));
+		O.Shade = 0.94f + 0.12f * Rand01(Pl.X, Pl.Y, Seed + 108u);
+	}
+}
+
+void FRDWildWorld::FarmsteadsIn(double X0, double Y0, double X1, double Y1, TArray<FRDWildPlace>& Out) const
+{
+	if (FarmsBiome < 0) return;
+	// (a great field's point lies in its own cell: the cells the box covers (PR #30's review: a ring round them never passed))
+	const int32 I0 = FMath::FloorToInt(X0 / GreatFieldM), I1 = FMath::FloorToInt(X1 / GreatFieldM);
+	const int32 J0 = FMath::FloorToInt(Y0 / GreatFieldM), J1 = FMath::FloorToInt(Y1 / GreatFieldM);
+	for (int32 Gi = I0; Gi <= I1; ++Gi)
+		for (int32 Gj = J0; Gj <= J1; ++Gj)
+		{
+			const float Pr = Rand01(Gi, Gj, Seed + 85u);
+			if (Pr < 0.60f || Pr >= 0.80f) continue;
+			const FVector2D At = RDWCellPoint(Gi, Gj, GreatFieldM, 0.15, Seed + 90u);
+			if (At.X < X0 || At.X >= X1 || At.Y < Y0 || At.Y >= Y1) continue;
+			if (At.X < Xs || At.X > Xn || At.Y < Yw || At.Y > Ye) continue;
+			// (well inside the farms, its own field round it, dry, off the roads, a way from the towns, on level ground)
+			const float Fw = FarmWeight(At.X, At.Y);
+			FRDWFarm Fm; FarmAt(At.X, At.Y, Fw, Fm);
+			if (Fm.Kind != 4 || Fm.Great != FIntPoint(Gi, Gj) || Fm.Fade < 0.5f) continue;
+			FRDWSample S; Sample(At.X, At.Y, S, false);
+			if (S.WaterKind != 0 || S.Road > 0.02f || S.H < 1.f) continue;
+			// (its whole ground dry, off the roads and level: the barn, the paddock and the cart stand 10 to 30 m out, the scarecrow
+			// and the farmer up to 40 (PR #30's review: a road 12 m off lay under the barn, the point alone was looked at))
+			float Lo = S.H, Hi = S.H; bool bBad = false;
+			for (const double Rr : { 10.0, 22.0, 34.0 })
+				for (int32 K = 0; K < 8 && !bBad; ++K)
+				{
+					const double A = K * PI / 4.0;
+					FRDWSample Q; Sample(At.X + FMath::Cos(A) * Rr, At.Y + FMath::Sin(A) * Rr, Q, false);
+					if (Q.WaterKind != 0 || Q.Road > 0.02f) bBad = true;
+					Lo = FMath::Min(Lo, Q.H); Hi = FMath::Max(Hi, Q.H);
+				}
+			if (bBad || Hi - Lo > 4.5f) continue;
+			// (nor on another place: a village, a camp, a lair, a quest's place, within 150 m (PR #30's review))
+			{
+				TArray<FRDWildPlace> Near;
+				const FIntPoint Ca = PlaceCellOf(At.X - 150.0, At.Y - 150.0), Cb = PlaceCellOf(At.X + 150.0, At.Y + 150.0);
+				for (int32 Ci = Ca.X; Ci <= Cb.X; ++Ci) for (int32 Cj = Ca.Y; Cj <= Cb.Y; ++Cj) PlacesIn(FIntPoint(Ci, Cj), Near);
+				if (Near.ContainsByPredicate([&](const FRDWildPlace& Q) { return FVector2D::DistSquared(Q.At, At) < FMath::Square(150.0); })) continue;
+			}
+			FRDWildPlace P;
+			P.Id = FarmIdBase + (((Gi & 0x3FF) << 10) | (Gj & 0x3FF));
+			P.Kind = TEXT("farmstead"); P.At = At; P.H = S.H; P.Biome = S.Biome; P.Tier = TierAt(At.X, At.Y);
+			P.Name = NameFor(P.Kind, Hash(Gi, Gj, Seed + 125u));
+			// (square to its field's way, turned a quarter at a time)
+			P.Yaw = FMath::RadiansToDegrees(Rand01(Gi, Gj, Seed + 92u) * PI) + 90.f * (int32)(Rand01(Gi, Gj, Seed + 126u) * 4.f);
+			Out.Add(P);
+		}
 }
 
 float FRDWildWorld::LandRelief(double X, double Y, bool bDetail, const int32* Bi, const float* W, int32 N) const
@@ -536,10 +706,23 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 	return H;
 }
 
+float FRDWildWorld::BareHeight(double X, double Y) const
+{
+	// (the ground with no farm on it: the land, its water, roads and towns (the farms' ridges are measured against it))
+	return Feature(X, Y, LandHeight(X, Y, true), nullptr);
+}
+
 float FRDWildWorld::Height(double X, double Y) const
 {
-	const float H = LandHeight(X, Y, true);
-	return Feature(X, Y, H, nullptr);
+	// (the farms' weight from the same blend as the land's height (PR #30's review: a second Blend on every call))
+	float Fw = 0.f;
+	const float H = LandHeight(X, Y, true, nullptr, nullptr, nullptr, nullptr, &Fw);
+	FRDWSample Fs;
+	const float Hf = Feature(X, Y, H, &Fs);
+	// (the farms' ridge-and-furrow, as Sample adds it: what she walks on and what the places' props stand on)
+	if (Fw <= 0.2f || Fs.WaterKind != 0 || Fs.Road >= 0.1f || Hf < 0.5f) return Hf;
+	FRDWFarm Fm; FarmAt(X, Y, Fw, Fm);
+	return Hf + Fm.Ridge * (1.f - RDWSmooth(0.02f, 0.1f, Fs.Road));
 }
 
 void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float PixelM) const
@@ -606,66 +789,37 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	else if (Kind == 5 && H >= Water) { Water = -1e9f; Kind = 0; }
 	if (C < 0.f && H < 0.f && Kind == 0) { Water = 0.f; Kind = 1; }
 	if (Kind == 0 && H < 0.f && C < 0.02f) { Water = 0.f; Kind = 1; }
-	// farms: fields of crops in parcels (rows), between the roads
+	// farms: the great fields (FarmAt): open fields of strips, crofts, pasture
 	float Field = 0.f;
-	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f;
-	if (Farm > 0.2f && Fs.Road < 0.1f)
+	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f; O.FarmKind = 0; O.StripW = 0.f; O.StripOff = 0.f;
+	if (Farm > 0.2f && Fs.Road < 0.1f && Fs.WaterKind == 0 && H >= 0.5f)
 	{
-		// (the list of 2026-11-04: "the different terrain types are in regular squares and grids on the map. it should not be
-		// that regular or mechanical": the fields were one grid of 140 x 95 m parcels turned 20 degrees. Now each field is the
-		// land nearest a point of a jittered grid (70 to 160 m across), the land warped so the fields' edges bend, each field
-		// its own crop and its rows its own way, grass strips (hedgerows) along the edges; toward the farms' edge the fields
-		// thin out, each at a farm weight of its own, not along one line)
-		const double Wx = X + Fbm(X, Y, 1.0 / 300.0, 2, Seed + 88u) * 26.0, Wy = Y + Fbm(X, Y, 1.0 / 300.0, 2, Seed + 89u) * 26.0;
-		constexpr double Cs = 112.0;
-		const int32 Ci = FMath::FloorToInt(Wx / Cs), Cj = FMath::FloorToInt(Wy / Cs);
-		double D1 = 1e18, D2 = 1e18; int32 Fbi = Ci, Fbj = Cj;
-		for (int32 Di = -1; Di <= 1; ++Di)
-			for (int32 Dj = -1; Dj <= 1; ++Dj)
-			{
-				const int32 Pi = Ci + Di, Pj = Cj + Dj;
-				const double Px = (Pi + 0.12 + 0.76 * Rand01(Pi, Pj, Seed + 90u)) * Cs, Py = (Pj + 0.12 + 0.76 * Rand01(Pi, Pj, Seed + 93u)) * Cs;
-				const double Dd = FMath::Square(Wx - Px) + FMath::Square(Wy - Py);
-				if (Dd < D1) { D2 = D1; D1 = Dd; Fbi = Pi; Fbj = Pj; }
-				else if (Dd < D2) D2 = Dd;
-			}
-		const float Edge = (float)(FMath::Sqrt(D2) - FMath::Sqrt(D1)) * 0.5f;
-		const float Pr = Rand01(Fbi, Fbj, Seed + 85u);
-		const float Need = 0.22f + 0.55f * Rand01(Fbi, Fbj, Seed + 91u);
-		if (Pr < 0.86f && Farm > Need && Edge > 2.2f)
+		FRDWFarm Fm; FarmAt(X, Y, Farm, Fm);
+		// (ridge-and-furrow: "ploughing left each strip as a raised ridge" (Height adds the same: what she walks on))
+		H += Fm.Ridge * (1.f - RDWSmooth(0.02f, 0.1f, Fs.Road));
+		O.FarmKind = Fm.Kind;
+		const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
+		if (Fb && Fb->Crops.IsValidIndex(Fm.Crop) && Fm.Field > 0.f)
 		{
-			// (seen from far, a pixel spans fields: their own colours fade into the region's)
-			// (the list of 2026-11-07: "the different colors of the farm terrain look like abrupt banding ... instead of smoothly
-			// and gradually blending": a field's colour came in whole within one 2 m quad of its hedgerow, six crops of very
-			// different colours side by side, and 10 m stripes for its rows on the 2 m grid. Now a field eases in over 2.2 to 8 m
-			// from its edge, its colour is its crop's (soil with its leaves over a share of it) drawn half way toward the
-			// region's own ground, and its rows are the ground material's (at every pixel, faded out where they would shimmer))
-			Field = RDWSmooth(Need, Need + 0.12f, Farm) * RDWSmooth(2.2f, 8.f, Edge) * (1.f - RDWSmooth(25.f, 110.f, PixelM));
-			const FRDWildBiome* Fb = Biomes.IsValidIndex(FarmsBiome) ? &Biomes[FarmsBiome] : nullptr;
-			FLinearColor Cc(0.30f, 0.30f, 0.12f);
-			if (Fb && Fb->Crops.Num() > 0)
-			{
-				// (the list of 2026-11-08b: "apply the list of most common crops ... in this order: wheat, barley, oats, rye, peas,
-				// beans, flax, hemp, corn, potatoes, cabbages, pumpkins, sunflowers": each field's crop drawn by the crops'
-				// weights (biomes.json's "weight", the commonest first), from a hash of its own; the weights' running sums are made
-				// once at Init (CropCum), not on every sample)
-				O.FieldCrop = 0;
-				if (CropCum.Num() == Fb->Crops.Num() && CropCum.Last() > 0.f)
-				{
-					const float Pick = Rand01(Fbi, Fbj, Seed + 141u) * CropCum.Last();
-					O.FieldCrop = FMath::Min(Algo::UpperBound(CropCum, Pick), CropCum.Num() - 1);
-				}
-				const FRDWildCrop& Cr = Fb->Crops[O.FieldCrop];
-				Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f));
-			}
-			O.FieldCell = FIntPoint(Fbi, Fbj);
-			O.FieldAng = Rand01(Fbi, Fbj, Seed + 92u) * PI;
-			// (a field's own shade varies a little across it)
-			Cc *= 0.94f + 0.12f * (0.5f + 0.5f * Fbm(X, Y, 1.0 / 60.0, 2, Seed + 94u));
+			// (seen from far, a pixel spans fields: their own colours fade into the region's (the list of 2026-11-07: a field
+			// eases in from its edge, its colour its crop's (soil with its leaves over a share of it) drawn half way toward the
+			// region's own ground, its rows the ground material's))
+			Field = Fm.Field * (1.f - RDWSmooth(25.f, 110.f, PixelM));
+			const FRDWildCrop& Cr = Fb->Crops[Fm.Crop];
+			FLinearColor Cc = FMath::Lerp(Cr.Soil, Cr.Leaf, FMath::Clamp(Cr.Cover, 0.f, 1.f));
+			// (the strips: each a shade of its own ("a few very large single-crop areas cut into thin stripes"), the furrows
+			// between them bare soil; both faded out where a pixel spans several)
+			Cc *= FMath::Lerp(Fm.Shade, 1.f, RDWSmooth(8.f, 30.f, PixelM));
+			Cc = FMath::Lerp(Cc, Cr.Soil * 0.82f, Fm.Furrow * (1.f - RDWSmooth(1.5f, 6.f, PixelM)));
+			Cc *= 0.95f + 0.1f * (0.5f + 0.5f * Fbm(X, Y, 1.0 / 60.0, 2, Seed + 94u));
 			Col = FMath::Lerp(Col, FMath::Lerp(Col, Cc, 0.75f), Field);
+			O.FieldCrop = Fm.Crop;
+			// (the field the chunk plants together: a furlong or a plot, with its great field (a cell of each scale is unique
+			// within a great field's reach))
+			O.FieldCell = FIntPoint(Fm.Plot.X * 1024 + (Fm.Great.X & 1023), Fm.Plot.Y * 1024 + (Fm.Great.Y & 1023));
+			O.FieldAng = Fm.Ang; O.StripW = Fm.StripW; O.StripOff = Fm.StripOff;
 		}
-	}
-	// the ground's colour: rock, snow, sand, mud, lava, roads mixed over the biomes' own
+	}	// the ground's colour: rock, snow, sand, mud, lava, roads mixed over the biomes' own
 	FLinearColor G = Col;
 	if (Sand > 0.f) G = FMath::Lerp(G, FLinearColor(0.56f, 0.50f, 0.37f), FMath::Clamp(Sand, 0.f, 1.f));
 	if (Mud > 0.f) G = FMath::Lerp(G, FLinearColor(0.16f, 0.15f, 0.10f), FMath::Clamp(Mud * 0.7f, 0.f, 1.f));
@@ -1186,6 +1340,7 @@ FString FRDWildWorld::NameFor(const FString& Kind, uint32 H) const
 	if (Kind == TEXT("village")) return Root + Sv[H2 % UE_ARRAY_COUNT(Sv)];
 	if (Kind == TEXT("camp")) return Root + TEXT(" Camp");
 	if (Kind == TEXT("house")) return FString(Fam[H2 % UE_ARRAY_COUNT(Fam)]) + ((H2 / 7) % 2 ? TEXT("'s Farmstead") : TEXT("'s Cottage"));
+	if (Kind == TEXT("farmstead")) return FString(Fam[H2 % UE_ARRAY_COUNT(Fam)]) + ((H2 / 7) % 3 == 0 ? TEXT("'s Croft") : (H2 / 7) % 3 == 1 ? TEXT("'s Farm") : TEXT("'s Holding"));
 	if (Kind == TEXT("spawn")) return Root + TEXT(" Hollow");
 	if (Kind == TEXT("ruins")) return TEXT("Ruins of ") + Root + Sv[H2 % UE_ARRAY_COUNT(Sv)];
 	if (Kind == TEXT("ritual")) return Root + ((H2 % 2) ? TEXT(" Stones") : TEXT(" Circle"));

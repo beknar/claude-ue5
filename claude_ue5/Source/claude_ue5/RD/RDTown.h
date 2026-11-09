@@ -90,10 +90,16 @@ public:
 	bool IsAtWork() const { return Act == 3; }
 	/** the clip it plays now (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetClipName() const;
+	/** out in the wilds (a farmstead's family, the list of 2026-11-08b): no section; it stands at its post at its work (its
+	 *  def's work clip of that kind, the prop in its hand), turns to her when she speaks to it, and says its own lines */
+	void SetStandWork(FName Kind, FName Prop) { StandWork = Kind; StandProp = Prop; }
+	void SetTitle(const FString& InTitle) { Title = InTitle; }
+	TArray<FString> OwnLines;
 protected:
 	virtual void Tick(float Dt) override;
 private:
 	TArray<int32> Jobs;
+	FName StandWork, StandProp;
 	int32 JobI = -1, WorkAt = -1, GoFails = 0, JobsDone = 0;
 	float WorkUntil = 0.f, JobMin = 20.f, JobMax = 40.f;
 	/** 0 none, 1 going, 2 gliding, 3 working, 4 strolling */
@@ -151,6 +157,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetState() const { return State; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetChanges() const { return Changes; }
 	USkeletalMeshComponent* GetBody() const { return Body; }
+	/** out in the wilds (a farmstead's paddock, the list of 2026-11-08b): it keeps to the wild ground's height as it walks, and
+	 *  the paddock is turned PenYaw degrees (its half sizes along and across that way) */
+	bool bWildGround = false;
+	float PenYaw = 0.f;
+	/** the ground's height (cm) over the pen, read once when the farm is made (GroundN x GroundN points GroundStep apart from
+	 *  GroundO): read as it walks (PR #30's review: the world's whole height every frame for every animal) */
+	TArray<float> GroundGrid;
+	FVector2D GroundO = FVector2D::ZeroVector;
+	float GroundStep = 100.f;
+	int32 GroundN = 0;
+	float GroundZAt(const FVector& P) const;
 protected:
 	virtual void Tick(float Dt) override;
 private:

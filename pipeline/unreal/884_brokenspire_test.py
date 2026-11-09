@@ -2882,11 +2882,171 @@ def step_crops9():
     grains = {"wheat", "barley", "oats", "rye"}
     ok = (len(cnt) >= 12 and set(top4) == grains and res["visits"] and all(v["label"] == k and v["plants"] > 200 for k, v in res["visits"].items()))
     step_result("crops9", ok, **res)
+def step_farms9():
+    """the medieval farms (the list of 2026-11-08b's second phase: "make the farms in the wilderness look more like medieval
+    farms, with different sizes of farms, from the croft to the strip"; no hedges or fences between strips; one crop per field;
+    ridge-and-furrow; "farm houses, barns, fenced in animals, and farm families"):
+      layout  over the farms round Brokenspire (a point every 20 m, 4 km square, the town's ground left out): the kinds' shares
+              (open field, crofts, pasture, yards); every open field (great field) one crop; its strips 15 to 24 m and the crofts'
+              plots smaller; across one open field 80 m at 0.25 m: the furrows between the strips (one a strip width) and the
+              ridges (0.25 m or more over the furrows), the walked ground (Height) rising and falling with them
+      fences  in the chunks round her: no fence piece where the ground is an open field
+      farm    put before the nearest farmstead: its record (props, animals, folk), every animal in its pen and on the ground,
+              the family on the ground at their work (the farmer's Tend, the farmwife's Scatter), F at one of them: the prompt
+              names them, they turn to her, a line of the farm's; pictures of the farmstead and the strips"""
+    g = G["gen"]; res = {}; quiet(True)
+    t0 = time.time()
+    while time.time() - t0 < 60 and not g.is_wild_ready(): yield
+    # ---- the layout
+    kinds = {}; crops_of = {}; strip_w = []; plots = {}
+    for ix in range(-100, 101):
+        for iy in range(-100, 101):
+            x, y = ix * 20.0, iy * 20.0
+            if abs(x) < 400 and abs(y) < 400: continue
+            p = str(g.get_wild_farm_at(x, y)).split("|")
+            if len(p) < 12: continue
+            k = int(p[0]); kinds[k] = kinds.get(k, 0) + 1
+            if k == 1 and int(p[3]) >= 0 and float(p[4]) > 0.3:
+                crops_of.setdefault(p[1], set()).add(int(p[3])); strip_w.append(float(p[6]))
+            if k == 2: plots.setdefault(p[1] + "/" + p[2], 0); plots[p[1] + "/" + p[2]] += 1
+        if ix % 8 == 0: yield
+    tot = max(1, sum(kinds.values()))
+    res["kind_shares"] = {["none", "open field", "crofts", "pasture", "yard"][k]: round(v / tot, 3) for k, v in sorted(kinds.items())}
+    res["open_fields"] = len(crops_of)
+    res["open_fields_with_more_than_one_crop"] = [f for f, s in crops_of.items() if len(s) > 1]
+    res["crops_in_open_fields"] = len(set().union(*crops_of.values())) if crops_of else 0
+    res["strip_w_m"] = [round(min(strip_w), 1), round(max(strip_w), 1)] if strip_w else []
+    # (a croft plot's size: its samples 20 m apart, its area about n x 400 m2)
+    pa = sorted(plots.values()); res["croft_plot_m2_median"] = pa[len(pa) // 2] * 400 if pa else 0
+    # ---- one open field crossed at 0.25 m: furrows, ridges, the walked ground
+    cross = None
+    for ix in range(-80, 81, 4):
+        for iy in range(-80, 81, 4):
+            x, y = ix * 25.0, iy * 25.0
+            if abs(x) < 500 and abs(y) < 500: continue
+            p = str(g.get_wild_farm_at(x, y)).split("|")
+            if int(p[0]) == 1 and float(p[4]) > 0.5:
+                cross = (x, y, float(p[5]), float(p[6])); break
+        if cross: break
+    if cross:
+        x, y, ang, sw = cross
+        ax, ay = -math.sin(ang), math.cos(ang)
+        rows = []
+        for i in range(-160, 161):
+            d = i * 0.25; px, py = x + ax * d, y + ay * d
+            p = str(g.get_wild_farm_at(px, py)).split("|")
+            rows.append((d, int(p[0]), int(p[8]), float(p[9]), float(p[10]), float(p[11]), p[2], float(p[12])))
+        same = [r for r in rows if r[1] == 1 and r[6] == rows[160][6]]
+        strips = sorted({r[2] for r in same})
+        furrow_runs = 0; prev = False
+        for r in same:
+            f = r[3] > 0.9
+            if f and not prev: furrow_runs += 1
+            prev = f
+        ridge = [r[4] for r in same]; hs = [r[5] for r in same]
+        # (the ridges in what she walks on (Height), not the land's lie (PR #30's review: a fit to a line passed on the relief
+        # alone): the walked height less the same ground with no farm on it, against the ridge the layout gives: how closely it
+        # follows (correlation), by how much (slope: 1 if the ridge is all of it) and its rise and fall)
+        diff = [r[5] - r[7] for r in same]
+        n = len(diff)
+        if n > 10:
+            mh, mr = sum(diff) / n, sum(ridge) / n
+            cov = sum((a - mh) * (b - mr) for a, b in zip(diff, ridge)); vh = sum((a - mh) ** 2 for a in diff); vr = sum((b - mr) ** 2 for b in ridge)
+            res["walked_follows_ridge"] = {"corr": round(cov / max(1e-12, math.sqrt(vh * vr)), 3), "slope": round(cov / max(1e-12, vr), 3),
+                                           "walked_less_bare_m": [round(min(diff), 3), round(max(diff), 3)]}
+        res["cross"] = {"at": [x, y], "strip_w": sw, "samples": len(same), "strips": len(strips), "furrows": furrow_runs,
+                        "ridge_min_max_m": [round(min(ridge), 3), round(max(ridge), 3)] if ridge else None}
+    yield
+    # ---- the nearest farmstead: put before it
+    fs = [str(s).split("|") for s in g.find_wild_farmsteads(0.0, 0.0, 3500.0)]
+    res["farmsteads_within_3_5km"] = len(fs)
+    ok_farm = False
+    if fs:
+        fid, fname, fx, fy, fyaw = int(fs[0][0]), fs[0][1], float(fs[0][2]), float(fs[0][3]), float(fs[0][4])
+        a = math.radians(fyaw)
+        bx, by = fx + math.cos(a) * 26.0, fy + math.sin(a) * 26.0
+        g.wild_put_her(bx, by); yield from wait(4.0)
+        t1 = time.time()
+        while time.time() - t1 < 30 and int(str(g.get_wild_state()).split("|")[4] or 0) > 0: yield
+        yield from wait(2.0)
+        lines = [str(s).split("|") for s in g.get_wild_farm_lines()]
+        rec = next((l for l in lines if l[0] == "farm" and int(l[1]) == fid), None)
+        res["farm"] = {"name": fname, "at": [fx, fy]}
+        if rec:
+            res["farm"].update({"props": int(rec[7]), "animals": int(rec[8]), "folk": int(rec[9])})
+            an = [l for l in lines if l[0] == "animal" and int(l[1]) == fid]
+            fo = [l for l in lines if l[0] == "folk" and int(l[1]) == fid]
+            res["animals"] = [{"kind": l[2], "in_pen": l[6] == "1", "above_ground_cm": round(float(l[5]) - float(l[8]), 1)} for l in an]
+            res["folk"] = [{"title": l[2], "clip": l[6], "feet_above_ground_cm": round(float(l[5]) - 92.0 - float(l[7]), 1), "body": l[8] if len(l) > 8 else "?"} for l in fo]
+            # (let the animals walk a while, then read them again: they keep to their pens and to the ground)
+            yield from wait(12.0)
+            lines2 = [str(s).split("|") for s in g.get_wild_farm_lines()]
+            an2 = [l for l in lines2 if l[0] == "animal" and int(l[1]) == fid]
+            res["animals_after_12s"] = [{"in_pen": l[6] == "1", "above_ground_cm": round(float(l[5]) - float(l[8]), 1), "state": int(l[7])} for l in an2]
+            # (F at the farmwife, or whoever is there: 1.3 m before them)
+            who = next((l for l in fo if "farmwife" in l[2]), fo[0] if fo else None)
+            if who:
+                wx, wy, wz = float(who[3]), float(who[4]), float(who[5])
+                # (beside them along the farm's way, facing them: before the farmwife is the paddock's fence, behind her the house)
+                pl = G["pawn"]; pl.set_actor_location(V(wx + math.cos(a) * 140.0, wy + math.sin(a) * 140.0, wz + 20.0), False, True); yield from wait(1.0)
+                here = pl.get_actor_location()
+                res["prompt"] = str(g.describe_nearest(here))
+                b0 = str(g.get_editor_property("last_bark"))
+                g.interact_nearest(here); yield from wait(1.5)
+                res["bark"] = str(g.get_editor_property("last_bark")); res["bark_new"] = res["bark"] != b0
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=fyaw + 180.0)); yield from rwait(0.6)
+                shot("farms9_talk", "1280x720"); yield from rwait(1.5)
+            # (pictures: the farmstead from its yard, raised, and the strips beyond)
+            G["pawn"].set_actor_location(V(bx * 100.0 + 0, by * 100.0, g.wild_ground_z(V(bx * 100.0, by * 100.0, 0)) + 120.0), False, True); yield from wait(1.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-14, yaw=fyaw + 180.0)); yield from rwait(1.0)
+            shot("farms9_farmstead", "1280x720"); yield from rwait(1.5)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-14, yaw=fyaw + 135.0)); yield from rwait(1.0)
+            shot("farms9_farmstead2", "1280x720"); yield from rwait(1.5)
+            # (from the paddock's side, 30 m off, looking at the farmhouse)
+            sx, sy = fx + math.cos(a) * 14.0 + math.sin(a) * 30.0, fy + math.sin(a) * 14.0 - math.cos(a) * 30.0
+            G["pawn"].set_actor_location(V(sx * 100.0, sy * 100.0, g.wild_ground_z(V(sx * 100.0, sy * 100.0, 0)) + 120.0), False, True); yield from wait(1.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=math.degrees(math.atan2(fy - sy, fx - sx)))); yield from rwait(1.0)
+            shot("farms9_paddock", "1280x720"); yield from rwait(1.5)
+            in_pen = all(a_["in_pen"] for a_ in res["animals"] + res["animals_after_12s"])
+            grounded = all(abs(a_["above_ground_cm"]) < 30 for a_ in res["animals"] + res["animals_after_12s"])
+            folk_ok = all(abs(f_["feet_above_ground_cm"]) < 30 for f_ in res["folk"])
+            clips = " ".join(f_["clip"] for f_ in res["folk"])
+            # (each body fits who they are: the farmwife a townswoman, the farmer and the farmhand townsmen, the child a child)
+            bodies_ok = all(("woman" in f_["body"]) == ("farmwife" in f_["title"]) and (not f_["title"].startswith("child") or "Child" in f_["body"] or "Kid" in f_["body"]) for f_ in res["folk"])
+            res["bodies_ok"] = bodies_ok
+            ok_farm = (res["farm"]["props"] >= 8 and res["farm"]["animals"] >= 2 and res["farm"]["folk"] >= 2 and in_pen and grounded and folk_ok and bodies_ok
+                       and "Tend" in clips and "Scatter" in clips and "talk to the" in res.get("prompt", "") and res.get("bark_new", False) and fname in res.get("bark", ""))
+    # ---- fences: none where the ground is an open field
+    fences = []
+    for ch in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+        for cm in ch.get_components_by_class(unreal.StaticMeshComponent):
+            m = cm.static_mesh
+            if m and "fence" in m.get_name().lower():
+                l = cm.get_world_location()
+                k = int(str(g.get_wild_farm_at(l.x / 100.0, l.y / 100.0)).split("|")[0])
+                fences.append((m.get_name(), k))
+    res["fence_pieces"] = len(fences); res["fences_in_open_fields"] = [f for f in fences if f[1] == 1]
+    # (a picture of the strips: raised over the open field crossed)
+    if cross:
+        g.wild_put_her(cross[0], cross[1]); yield from wait(4.0)
+        t1 = time.time()
+        while time.time() - t1 < 25 and int(str(g.get_wild_state()).split("|")[4] or 0) > 0: yield
+        yield from wait(1.5)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=math.degrees(cross[2]))); yield from rwait(1.0)
+        shot("farms9_strips", "1280x720"); yield from rwait(1.5)
+    quiet(False)
+    cr = res.get("cross", {})
+    ok = (res["open_fields"] >= 5 and not res["open_fields_with_more_than_one_crop"] and res["crops_in_open_fields"] >= 8
+          and res["strip_w_m"] and res["strip_w_m"][0] >= 15 and res["strip_w_m"][1] <= 24 and 0 < res["croft_plot_m2_median"] < 4000
+          and cr.get("strips", 0) >= 3 and cr.get("furrows", 0) >= cr.get("strips", 0) - 1 and cr.get("ridge_min_max_m") and cr["ridge_min_max_m"][1] - cr["ridge_min_max_m"][0] >= 0.25
+          and res.get("walked_follows_ridge", {}).get("corr", 0) >= 0.98 and 0.9 <= res.get("walked_follows_ridge", {}).get("slope", 0) <= 1.1
+          and res["walked_follows_ridge"]["walked_less_bare_m"][1] - res["walked_follows_ridge"]["walked_less_bare_m"][0] >= 0.25 and res["farmsteads_within_3_5km"] >= 3 and ok_farm and res["fence_pieces"] > 0 and not res["fences_in_open_fields"])
+    step_result("farms9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "crops9": step_crops9})
+              "sky9": step_sky9, "crops9": step_crops9, "farms9": step_farms9})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     for s in PLAN:

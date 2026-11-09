@@ -1,0 +1,77 @@
+{
+ "tag": "f9d",
+ "plan": [
+  "crops9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "crops9",
+   "ok": true,
+   "samples_by_crop": {
+    "wheat": 2259,
+    "barley": 1961,
+    "rye": 1610,
+    "oats": 1566,
+    "peas": 1381,
+    "flax": 714,
+    "hemp": 589,
+    "beans": 555,
+    "potatoes": 358,
+    "corn": 326,
+    "pumpkins": 71,
+    "cabbages": 47,
+    "sunflowers": 10
+   },
+   "top4": [
+    "wheat",
+    "barley",
+    "rye",
+    "oats"
+   ],
+   "visits": {
+    "barley": {
+     "at": [
+      -3000.0,
+      -360.0
+     ],
+     "label": "barley",
+     "plants": 230772
+    },
+    "oats": {
+     "at": [
+      -3000.0,
+      -2280.0
+     ],
+     "label": "oats",
+     "plants": 11882
+    },
+    "flax": {
+     "at": [
+      -3000.0,
+      -2760.0
+     ],
+     "label": "flax",
+     "plants": 249547
+    },
+    "hemp": {
+     "at": [
+      -3000.0,
+      -1880.0
+     ],
+     "label": "hemp",
+     "plants": 5568
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_f9d_crops9_barley.png",
+  "bs_f9d_crops9_oats.png",
+  "bs_f9d_crops9_flax.png",
+  "bs_f9d_crops9_hemp.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

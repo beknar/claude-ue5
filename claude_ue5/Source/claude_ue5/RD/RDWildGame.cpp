@@ -86,6 +86,7 @@ void ARDDungeonGenerator::TickWild(float Dt, APlayerController* PC)
 	if (!IsWildReady()) return;
 	if (!bWildMadeLogged) { bWildMadeLogged = true; UE_LOG(LogRDWild, Log, TEXT("RDWILD the world made in %.2f s: %d rivers, %d lakes, %d roads, %d biome cells"), Wild->InitSeconds, Wild->Rivers.Num(), Wild->Lakes.Num(), Wild->Roads.Num(), Wild->CellBiome.Num()); }
 	TickWildLoad();
+	TickWildFarms();
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	TickWildRunSpeed(P);          // (the list of 2026-11-07: rd.WildRunSpeed)

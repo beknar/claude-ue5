@@ -117,7 +117,7 @@ void ARDTownsfolk::FaceToward(const FVector& P, float Seconds)
 FString ARDTownsfolk::NextLine()
 {
 	if (!Gen || !Gen->Townsfolk.IsValidIndex(Def)) return FString();
-	const TArray<FString>& L = Gen->Townsfolk[Def].Lines;
+	const TArray<FString>& L = OwnLines.Num() > 0 ? OwnLines : Gen->Townsfolk[Def].Lines;
 	if (L.Num() == 0) return FString();
 	const int32 I = LinesSaid == 0 ? 0 : R.RandRange(0, L.Num() - 1);
 	++LinesSaid;
@@ -205,6 +205,12 @@ void ARDTownsfolk::Tick(float Dt)
 	if (Wander <= 0.f || !Section)
 	{
 		if (FVector::Dist2D(L, Post) < 60.f) Turn(FRotator(0, HomeYaw, 0).Vector(), 90.f);
+		// (a farmstead's family: back at its work once she has gone)
+		if (!StandWork.IsNone())
+		{
+			if (UAnimationAsset* Wc = WorkClip(StandWork)) PlayAnim(Wc, 1.f);
+			if (!PropComp && !StandProp.IsNone()) SetProp(StandProp);
+		}
 		return;
 	}
 	if (Now < NextTrip) return;
@@ -1200,6 +1206,8 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 		return FString();
 	}
 	if (IsTownPanelOpen()) return FString();
+	// (a farmstead's family out in the wilds (the list of 2026-11-08b))
+	if (const ARDTownsfolk* Wf = WildFolkForF(From)) return FString::Printf(TEXT("talk to the %s"), *Wf->Title);
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
@@ -1239,6 +1247,16 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		return FString();
 	}
 	if (TownPanelClosedFrame == GFrameCounter) return TEXT("closed");
+	// (a farmstead's family: they turn to her and say a line of their own)
+	if (ARDTownsfolk* Wf = WildFolkForF(From))
+	{
+		Wf->FaceToward(From, 8.f);
+		TownCount(TEXT("talk:farm"));
+		const FString Line = Wf->NextLine();
+		LastBark = FString::Printf(TEXT("%s|%s"), *Wf->Title, *Line);
+		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s:  \"%s\""), *Wf->Title, *Line));
+		return TEXT("bark");
+	}
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
 		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T)) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }

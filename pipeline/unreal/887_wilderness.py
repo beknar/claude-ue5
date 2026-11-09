@@ -353,6 +353,7 @@ def data():
     g.set_editor_property("wild_biomes", out)
     pieces = {}; scales = {}
     for kind, paths in J["pieces"].items():
+        if kind.startswith("_"): continue          # (a note, not a kind)
         for i, path in enumerate(paths):
             m = unreal.load_asset(path)
             if not m or not isinstance(m, unreal.StaticMesh): missing.append(f"piece {kind}: {path}"); continue

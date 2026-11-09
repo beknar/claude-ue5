@@ -30,6 +30,9 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 	if (!C || !IsWildReady()) return;
 	for (const FRDWildPlace& P : Places)
 	{
+		// (the farms' farmsteads: RDWildFarm.cpp)
+		// (one a frame, after the chunk's own steps: a farmstead is some 30 pieces, 10 animals and 4 people (PR #30's review))
+		if (P.Kind == TEXT("farmstead")) { WildFarmQueue.Add({ C, P }); continue; }
 		FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 77, Wild->Seed));
 		const FVector O = C->GetActorLocation();
 		int32 Laid = 0;
