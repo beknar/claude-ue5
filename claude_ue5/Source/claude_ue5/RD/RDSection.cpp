@@ -22,6 +22,7 @@
 #include "HAL/PlatformTime.h"
 #include "Misc/ScopeExit.h"
 #include "RD/RDMistward.h"
+#include "RD/RDTown.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRandomDungeon, Log, All);
 
@@ -637,7 +638,9 @@ UPointLightComponent* ARDSection::AddLight(const FVector& Loc, const FLinearColo
 	L->SetWorldLocation(Loc);
 	L->SetIntensityUnits(ELightUnits::Candelas);
 	L->SetIntensity(Candelas);
-	L->SetLightColor(Color);
+	// (a dungeon's own light (the list of 2026-11-08b: the Black Tower's cold violet): every light of its sets drawn toward the
+	// level's tint; 0 on every other level)
+	L->SetLightColor(Generator && !Generator->bTown && Generator->DungeonLightTintShare > 0.f ? FMath::Lerp(Color, Generator->DungeonLightTint, FMath::Clamp(Generator->DungeonLightTintShare, 0.f, 1.f)) : Color);
 	L->SetAttenuationRadius(Radius);
 	L->SetSourceRadius(6.f);
 	L->SetCastShadows(bShadows);
@@ -1587,6 +1590,39 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 	}
 	case ERDRoomKind::Library:
 	{
+		// (Kethrys Spire's meditation chambers (the list of 2026-11-08b): a rune circle glowing on the floor in the room's middle,
+		// small rune stones round it, a ring of candles, a candle stand in each quarter; no shelves or desks)
+		if (Generator->bTown && Generator->TownPlan == 4 && TownBlds.IsValidIndex(Rm.Block) && TownBlds[Rm.Block].Kind == TK_Meditation)
+		{
+			const FVector& Mc = Ctr;
+			AddEffect(TEXT("MageRune"), Mc + FVector(0, 0, 6.f), 1.2f);
+			AddLight(Mc + FVector(0, 0, 140.f), FLinearColor(0.5f, 0.45f, 1.f), 90.f, 900.f, false, 0.15f);
+			// (its stones off the lane cross (PR #32's review: at 190 cm on the diagonals they stood in it, where the townsfolk and
+			// her way in from the door go): on the four tiles nearest its middle that are off the room's lane row and column (fixed
+			// radii were too near in a five-tile room: test_ks8, ks10), each blocking its tile
+			TArray<FIntPoint> Off;
+			for (int32 X = Rm.Min.X; X < Rm.Max.X; ++X)
+				for (int32 Y = Rm.Min.Y; Y < Rm.Max.Y; ++Y)
+					if (X != Rm.Lane.X && Y != Rm.Lane.Y) Off.Add(FIntPoint(X, Y));
+			Off.Sort([&](const FIntPoint& A, const FIntPoint& Bt) { return FVector::DistSquared2D(TileWorld(A), Mc) < FVector::DistSquared2D(TileWorld(Bt), Mc); });
+			int32 Stones = 0;
+			for (const FIntPoint& T : Off)
+			{
+				if (Stones >= 4) break;
+				const FVector P = TileWorld(T);
+				const float A = (P - Mc).Rotation().Yaw;
+				if (!AddPieceAt(TEXT("Mage.RuneStone"), P, A + 180.f, 0.35f)) continue;
+				MarkBlocked(P, 0.f, FVector2D(80.f, 80.f), false);
+				++Stones;
+			}
+			for (int32 K = 0; K < 8; ++K)
+			{
+				const FVector P = Mc + FRotator(0, 22.5f + 45.f * K, 0).RotateVector(FVector(250.f, 0, 0));
+				if (LaneFree(Rm, P, 40.f)) Candles(P, 6.f);
+			}
+			for (const FVector& Q : Quads) { const FVector P = (Q + Mc) * 0.5f + (Q - Mc).GetSafeNormal2D() * 120.f; if (LaneFree(Rm, P, 60.f)) Center(TEXT("CandleStand"), P, 0.f); }
+			break;
+		}
 		FurnishWalls(R, Rm, { TEXT("Bookshelf"), TEXT("Bookshelf"), TEXT("Bookshelf2") }, 240.f, 0.9f);
 		for (const FVector& Q : Quads)
 		{

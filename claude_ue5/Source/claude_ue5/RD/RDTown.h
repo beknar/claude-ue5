@@ -19,13 +19,18 @@ class UCapsuleComponent;
 /** (Ashenreach's forge city, 2026-11-07 (RDForge.cpp): the besieged foundry at its middle over The War Engine, the guild's
  *  workshops) */
 enum ERDTownKind : uint8 { TK_Castle, TK_Smithy, TK_Store, TK_Healer, TK_Temple, TK_Storehouse, TK_Tavern, TK_Home, TK_Chapel, TK_Barracks, TK_Witch,
-	TK_Cathedral, TK_Monastery, TK_Foundry, TK_Workshop, TK_SluiceHouse, TK_Warehouse, TK_Count };
+	TK_Cathedral, TK_Monastery, TK_Foundry, TK_Workshop, TK_SluiceHouse, TK_Warehouse,
+	/** Kethrys Spire's mage city (the list of 2026-11-08b, RDMage.cpp): the black tower at its middle over its dungeon, the
+	 *  libraries, the laboratories, the study rooms, the meditation chambers */
+	TK_Spire, TK_Library, TK_Laboratory, TK_Study, TK_Meditation, TK_Count };
 /** what stands outdoors, and the services inside the buildings (the counter, the basin, the altar, the stash, the smith's
  *  place by his anvil, the tavern's bar); the holy city's statues, fountain and wayside shrines; the forge city's great anvil,
  *  open forges, ore carts on their rails and the barricade before its foundry */
 enum ERDTownSpot : uint8 { TS_Well, TS_Board, TS_Circle, TS_Stall, TS_Still, TS_Mill, TS_Grave, TS_Graveyard, TS_Tower, TS_Gate, TS_Lamp, TS_Tent,
 	TS_Counter, TS_Basin, TS_Altar, TS_Stash, TS_Smith, TS_Bar, TS_Statue, TS_Fountain, TS_Shrine, TS_Anvil, TS_Forge, TS_Cart, TS_Barricade,
-	TS_Pier, TS_Ship, TS_Boat, TS_Wreck, TS_Body, TS_Gibbet, TS_DockProps };
+	TS_Pier, TS_Ship, TS_Boat, TS_Wreck, TS_Body, TS_Gibbet, TS_DockProps,
+	/** Kethrys Spire: a rune circle glowing on the ground, a crystal pylon */
+	TS_Rune, TS_Crystal };
 
 /** the kinds of place a townsperson's round of work is made of (the third list, 2026-11-02): a cooking pot, a spit, a garden,
  *  a pen, a tavern's seat, serving at a tavern's table, chatting (the well, the square), the smithy, the bar, a camp's fire */
@@ -35,7 +40,8 @@ inline FString RDTownKindName(uint8 Kind)
 {
 	static const TCHAR* Names[] = { TEXT("castle"), TEXT("smithy"), TEXT("store"), TEXT("healer"), TEXT("temple"), TEXT("storehouse"), TEXT("tavern"),
 	                                TEXT("home"), TEXT("chapel"), TEXT("barracks"), TEXT("witch's hut"), TEXT("cathedral"), TEXT("monastery"), TEXT("foundry"), TEXT("workshop"),
-	                                TEXT("sluice house"), TEXT("warehouse") };
+	                                TEXT("sluice house"), TEXT("warehouse"), TEXT("black tower"), TEXT("library"), TEXT("laboratory"),
+	                                TEXT("study"), TEXT("meditation chamber") };
 	return Kind < TK_Count ? FString(Names[Kind]) : FString(TEXT("?"));
 }
 
@@ -44,8 +50,8 @@ inline FString RDTownSpotName(uint8 Kind)
 	static const TCHAR* Names[] = { TEXT("well"), TEXT("board"), TEXT("circle"), TEXT("stall"), TEXT("still"), TEXT("mill"), TEXT("grave"), TEXT("graveyard"),
 	                                TEXT("tower"), TEXT("gate"), TEXT("lamp"), TEXT("tent"), TEXT("counter"), TEXT("basin"), TEXT("altar"), TEXT("stash"), TEXT("smith"), TEXT("bar"),
 	                                TEXT("statue"), TEXT("fountain"), TEXT("shrine"), TEXT("anvil"), TEXT("forge"), TEXT("cart"), TEXT("barricade"),
-	                                TEXT("pier"), TEXT("ship"), TEXT("boat"), TEXT("wreck"), TEXT("body"), TEXT("gibbet"), TEXT("dock props") };
-	return Kind <= TS_DockProps ? FString(Names[Kind]) : FString(TEXT("?"));
+	                                TEXT("pier"), TEXT("ship"), TEXT("boat"), TEXT("wreck"), TEXT("body"), TEXT("gibbet"), TEXT("dock props"), TEXT("rune"), TEXT("crystal") };
+	return Kind <= TS_Crystal ? FString(Names[Kind]) : FString(TEXT("?"));
 }
 
 UCLASS()

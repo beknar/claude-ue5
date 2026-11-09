@@ -48,6 +48,11 @@ static FName RDTIconOf(uint8 Kind, uint8 State)
 	case TK_Workshop: return TEXT("mapicon_smithy");
 	case TK_SluiceHouse: return TEXT("mapicon_storehouse");     // (Graymourne's: the storehouse's picture)
 	case TK_Warehouse: return TEXT("mapicon_storehouse");
+	case TK_Spire: return TEXT("mapicon_castle");               // (Kethrys Spire's: the castle's and the witch's pictures)
+	case TK_Library: return TEXT("mapicon_witch");
+	case TK_Laboratory: return TEXT("mapicon_witch");
+	case TK_Study: return TEXT("mapicon_witch");
+	case TK_Meditation: return TEXT("mapicon_witch");
 	default: return State == 1 ? FName(TEXT("mapicon_burned")) : State == 2 ? FName(TEXT("mapicon_boarded")) : FName(TEXT("mapicon_home"));
 	}
 }
@@ -73,6 +78,11 @@ static FString RDTLabelOf(uint8 Kind)
 	case TK_Workshop: return TEXT("WORKSHOP");
 	case TK_SluiceHouse: return TEXT("THE SLUICE HOUSE · into the sewers");
 	case TK_Warehouse: return TEXT("WAREHOUSE");
+	case TK_Spire: return TEXT("THE BLACK TOWER · sealed for a century");
+	case TK_Library: return TEXT("LIBRARY");
+	case TK_Laboratory: return TEXT("LABORATORY");
+	case TK_Study: return TEXT("STUDY");
+	case TK_Meditation: return TEXT("MEDITATION");
 	default: return FString();
 	}
 }
@@ -665,6 +675,8 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 		case TK_Foundry: Nm = TEXT("mapc_castle"); break;
 		case TK_Workshop: Nm = TEXT("mapc_smithy"); break;
 		case TK_SluiceHouse: case TK_Warehouse: Nm = TEXT("mapc_storehouse"); break;
+		case TK_Spire: Nm = TEXT("mapc_castle"); break;
+		case TK_Library: case TK_Laboratory: case TK_Study: case TK_Meditation: Nm = TEXT("mapc_witch"); break;
 		default: Nm = Bd.State == 1 ? FName(TEXT("mapc_burned")) : Bd.State == 2 ? FName(TEXT("mapc_boarded")) : Bd.Style == 1 ? FName(TEXT("mapc_home3")) : Bd.Style == 2 ? FName(TEXT("mapc_home1")) : FName(TEXT("mapc_home2")); break;
 		}
 		const float Grow = Bd.Kind == TK_Castle ? 1.12f : Bd.Kind == TK_Home ? 1.3f : 1.22f;

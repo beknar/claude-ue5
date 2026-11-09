@@ -996,6 +996,12 @@ public:
 	/** each wilderness town's own dungeon level by the town's name (2026-11-07: Ashenreach's War Engine, Graymourne's sewers;
 	 *  each city's script sets its own); Vel Morrath's is CatacombsLevel when it is not here */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") TMap<FString, FString> TownDungeons;
+	/** Kethrys Spire's black tower: how high its round tower rises over the town's ground (cm; RDMage.cpp) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float SpireTowerTop = 5500.f;
+	/** a dungeon's own light: every light of its sets drawn this share toward this colour (0: the torches' own; 907 sets the
+	 *  Black Tower's cold violet) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") FLinearColor DungeonLightTint = FLinearColor::White;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float DungeonLightTintShare = 0.f;
 	// ---- the dungeons' keys in order (the list of 2026-11-08b's third phase, RDKeys.cpp): "<dungeon key>|<level>|<town>|<title>|
 	// <key item>|<map item>" from Mistward Castle (its key empty, no key or map) to Heaven; each dungeon's boss drops the next's key
 	// and map, and the way into a town's dungeon is refused without its key. 905 writes it on every map (SourceArt/dungeons/chain.json)

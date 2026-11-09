@@ -1,0 +1,28 @@
+{
+ "_doc": "The Black Tower's casters (the user's list of 2026-11-08b: Kethrys Spire's dungeon inside the black tower), read by 907: each a kind added to the castle's (whose weights are cut so the casters' weight is twice theirs in each tier), measured as 895 measures the machines. A kind's clips on another skeleton than its mesh's are made playable (the mesh's skeleton made compatible with the clips', saved). Each shoots from afar (the castle's monsters that shoot, 879): range medium 8 m or long 15 m, its bolt one of Magic Projectiles Vol. 5's. parts: skeletal meshes worn over the body (leader pose).",
+ "clip_pack": "/Game/MysticDungeon",
+ "monsters": [
+  {"name": "Skeleton_Mage", "title": "Skeletal Adept", "tier": 1, "weight": 4, "mesh": "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_Skeleton",
+   "parts": ["/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Robe", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Hood", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Shoulders", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Arms"],
+   "idle": "MM_Idle", "walk": "MF_Unarmed_Walk_Fwd", "attacks": ["MM_Attack_01", "MM_Attack_02"], "hit": "MM_HitReact_Front_Lgt_01", "death": "MM_Death_Front_01",
+   "sound": "Mutant", "ability": "None", "ranged": {"range": "medium", "fx": "V5:Ghostly01"}},
+  {"name": "Skeleton_Witch", "title": "Bone Witch", "tier": 2, "weight": 4, "mesh": "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Female_Skeleton",
+   "parts": ["/Game/MysticDungeon/ModularCharacter/Meshes/SK_FemaleSkelMage_Robe", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_FemaleSkelMage_Hood", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_FemaleSkelMage_Shoulders", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_FemaleSkelMage_Arms"],
+   "idle": "MM_Idle", "walk": "MF_Unarmed_Walk_Fwd", "attacks": ["MM_Attack_02", "MM_Attack_03"], "hit": "MM_HitReact_Front_Lgt_02", "death": "MM_Death_Back_01",
+   "sound": "Mutant", "ability": "Weaken", "ranged": {"range": "medium", "fx": "V5:Spiral01"}},
+  {"name": "Spire_Witch", "title": "Witch of the Spire", "tier": 3, "weight": 4, "mesh": "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE5/Full/SKM_Witch_Full",
+   "idle": "MM_Idle", "walk": "MF_Unarmed_Walk_Fwd", "attacks": ["MM_Attack_01", "MM_ChargedAttack"], "hit": "MM_HitReact_Front_Med_01", "death": "MM_Death_Front_02",
+   "sound": "Daemon", "ability": "Slow", "ranged": {"range": "long", "fx": "V5:Lightning01"}},
+  {"name": "Skeleton_Archmage", "title": "Lich of the Black Tower", "tier": 4, "weight": 3, "scale": 1.25, "mesh": "/Game/MysticDungeon/ModularCharacter/Meshes/SK_Male_Skeleton",
+   "parts": ["/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Robe", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Hood", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Shoulders_CloakVariant", "/Game/MysticDungeon/ModularCharacter/Meshes/SK_MaleSkelMage_Arms"],
+   "idle": "MM_Idle", "walk": "MF_Unarmed_Walk_Fwd", "attacks": ["MM_ChargedAttack", "MM_Attack_03"], "hit": "MM_HitReact_Front_Hvy_01", "death": "MM_Death_Left_01",
+   "sound": "Mutant", "ability": "Poison", "ranged": {"range": "long", "fx": "V5:Orb02"}},
+  {"name": "Spire_Witch_Elder", "title": "Elder Witch", "tier": 5, "weight": 3, "scale": 1.1, "mesh": "/Game/Warriors_Pack/Mesh/Fantasy_Witch/Mesh_UE5/Full/SKM_Witch_Full",
+   "idle": "MM_Idle", "walk": "MF_Unarmed_Walk_Fwd", "attacks": ["MM_ChargedAttack", "MM_Attack_02"], "hit": "MM_HitReact_Front_Hvy_01", "death": "MM_Death_Right_01",
+   "sound": "Daemon", "ability": "Weaken", "ranged": {"range": "long", "fx": "V5:Sun01"}}
+ ],
+ "ranges": {"medium": 800, "long": 1500, "min": 300},
+ "damage": {"medium": 0.55, "long": 0.45},
+ "cooldown": {"medium": 2.0, "long": 2.6},
+ "speed": {"medium": 1500, "long": 1900}
+}

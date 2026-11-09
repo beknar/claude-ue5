@@ -1,0 +1,200 @@
+{
+ "tag": "ks12",
+ "plan": [
+  "descendspire"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "descendspire",
+   "ok": true,
+   "set_town": {
+    "found_wear": 47.29999923706055,
+    "slash": [
+     "Ember Slash",
+     true
+    ],
+    "armour": "Plate Armour",
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true,
+    "quick": true
+   },
+   "down": {
+    "level": "kethrys_spire",
+    "left": 57,
+    "arrived": 57,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "POISON 1.6/s",
+     "WEAKENED -50%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     123,
+     123
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "tower": {
+    "key": "kethrys",
+    "title": "The Black Tower of Kethrys Spire",
+    "themes": [
+     "Arcane",
+     "Arcane",
+     "Castle",
+     "Arcane",
+     "Mixed"
+    ],
+    "section": [
+     0,
+     0
+    ],
+    "return_line": "button|Return to Kethrys Spire",
+    "return_town": "Kethrys Spire",
+    "caster_kinds": {
+     "Skeleton_Mage": true,
+     "Skeleton_Witch": true,
+     "Spire_Witch": true,
+     "Skeleton_Archmage": true,
+     "Spire_Witch_Elder": true
+    }
+   },
+   "enter_counter": 1,
+   "caster_clips": {
+    "Skeleton_Archmage": {
+     "bones_moved_cm": 85.81,
+     "moving": true,
+     "parts": 4
+    },
+    "Skeleton_Mage": {
+     "bones_moved_cm": 26.49,
+     "moving": true,
+     "parts": 4
+    },
+    "Skeleton_Witch": {
+     "bones_moved_cm": 1.44,
+     "moving": true,
+     "parts": 4
+    },
+    "Spire_Witch": {
+     "bones_moved_cm": 1.1,
+     "moving": true,
+     "parts": 0
+    },
+    "Spire_Witch_Elder": {
+     "bones_moved_cm": 0.49,
+     "moving": true,
+     "parts": 0
+    }
+   },
+   "casters_spawned": 5,
+   "set_tower": {
+    "used": [
+     [
+      "Small Speed Potion",
+      true
+     ],
+     [
+      "Bread",
+      true
+     ]
+    ],
+    "killed": true
+   },
+   "up": {
+    "level": "brokenspire",
+    "left": 59,
+    "arrived": 59,
+    "left_vs_arrived": [],
+    "test_vs_left": [],
+    "kinds": [
+     "effect",
+     "hp",
+     "mana",
+     "quick",
+     "slash",
+     "stat",
+     "timed"
+    ],
+    "summons": [],
+    "summons_before": [],
+    "kills": [
+     0,
+     0
+    ],
+    "inventory_same": true,
+    "quick_same": true,
+    "torch": [
+     false,
+     false
+    ],
+    "buffs": [
+     "SLOWED -60%"
+    ],
+    "armour": [
+     "Plate Armour",
+     "Plate Armour"
+    ],
+    "gold": [
+     125,
+     125
+    ],
+    "stealthed": [
+     false,
+     false
+    ],
+    "ok": true
+   },
+   "back": {
+    "town": "Kethrys Spire",
+    "from_return_at_m": 0.0,
+    "from_tower_door_m": 2.5
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
+ "shots": [
+  "bs_ks12_ks_tower_dungeon_start.png",
+  "bs_ks12_ks_casters.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

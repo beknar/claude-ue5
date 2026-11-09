@@ -1,4 +1,4 @@
-"""mistward_castle, brokenspire, vel_morrath, war_engine and sewers for a packaged game: every material their generators' pieces are drawn with gets the InstancedStaticMeshes
+"""mistward_castle, brokenspire, vel_morrath, war_engine, sewers and kethrys_spire for a packaged game: every material their generators' pieces are drawn with gets the InstancedStaticMeshes
 usage. The sections draw every piece through instanced meshes (ARDSection's HISMs). The editor adds a missing usage flag
 while it plays, so play in the editor looked right; a packaged game has no shaders for it and draws the default material
 (the packaged game's log: "Material ... missing usage flag InstancedStaticMeshes! Default Material will be used in game";
@@ -83,7 +83,7 @@ pieces_of(VEL)
 # and props; a monster drawn in a material of its own (FRDMonsterDef::Material: the iron golem's rusted iron, a static pack's
 # material) needs the skeletal-mesh usage)
 nskel = 0
-for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers"):
+for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewers", "/Game/RandomDungeon/Maps/kethrys_spire"):
     g_ = pieces_of(m_)
     for d in g_.get_editor_property("monsters"):
         mm = d.get_editor_property("material")
