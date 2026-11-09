@@ -304,6 +304,11 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 		// families": a farmstead in each croft field's yard, laid as a place is)
 		// (none by a town: FarmAt makes a croft field within 450 m of one pasture)
 		W.FarmsteadsIn(X0, Y0, X0 + Cm, Y0 + Cm, D.Places);
+		// (the seventh phase: the small points of interest whose point is in it)
+		TArray<FRDWildPlace> Pois;
+		const FIntPoint Q0 = W.PoiCellOf(X0, Y0), Q1 = W.PoiCellOf(X0 + Cm, Y0 + Cm);
+		for (int32 Ci = Q0.X; Ci <= Q1.X; ++Ci) for (int32 Cj = Q0.Y; Cj <= Q1.Y; ++Cj) W.PoisIn(FIntPoint(Ci, Cj), Pois);
+		for (const FRDWildPlace& P : Pois) if (P.At.X >= X0 && P.At.X < X0 + Cm && P.At.Y >= Y0 && P.At.Y < Y0 + Cm) D.Places.Add(P);
 	}
 	D.Ms = (FPlatformTime::Seconds() - T0) * 1000.0;
 }

@@ -1,0 +1,88 @@
+{
+ "tag": "pf2",
+ "plan": [
+  "stream"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stream",
+   "ok": true,
+   "mem_start": 22087.0,
+   "mem_far": 22548.0,
+   "mem_back": 22206.0,
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22087
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22256
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22396
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22641
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22548
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22527
+    },
+    {
+     "y": 7100.0,
+     "chunks": 70,
+     "near": 4,
+     "mem": 22484
+    },
+    {
+     "y": 5600.0,
+     "chunks": 70,
+     "near": 4,
+     "mem": 22520
+    },
+    {
+     "y": 4100.0,
+     "chunks": 68,
+     "near": 4,
+     "mem": 22000
+    },
+    {
+     "y": 2600.0,
+     "chunks": 69,
+     "near": 4,
+     "mem": 22179
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 87.2,
+   "build_ms_max": 157.6
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "windows_shown_again": 3
+}

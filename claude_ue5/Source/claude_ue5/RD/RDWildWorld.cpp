@@ -1446,6 +1446,13 @@ void FRDWildWorld::PlacesIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
 bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 {
 	TArray<FRDWildPlace> Ps;
+	// (the seventh phase's small points of interest: their cell in the id)
+	if (Id >= PoiIdBase && Id < PoiIdBase + (1 << 22))
+	{
+		PoisIn(FIntPoint(((Id - PoiIdBase) >> 11) & 0x7FF, (Id - PoiIdBase) & 0x7FF), Ps);
+		for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
+		return false;
+	}
 	if (Id >= QuestIdBase && Id < TownIdBase)
 	{
 		if (!QuestPlaces.IsValidIndex(Id - QuestIdBase)) return false;
@@ -1455,4 +1462,77 @@ bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 	else PlacesIn(FIntPoint((Id >> 14) & 0x3FF, (Id >> 4) & 0x3FF), Ps);
 	for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
 	return false;
+}
+
+// ================================================================================================ the seventh phase's points of interest
+void FRDWildWorld::PoisIn(FIntPoint Cell, TArray<FRDWildPlace>& Out) const
+{
+	if (PoiKinds.Num() == 0 || Cell.X < 0 || Cell.Y < 0 || Cell.X > 0x7FF || Cell.Y > 0x7FF) return;
+	const double X0 = Xs + Cell.X * PoiCellM, Y0 = Yw + Cell.Y * PoiCellM;
+	if (X0 < Xs || X0 + PoiCellM > Xn || Y0 < Yw || Y0 + PoiCellM > Ye) return;
+	if (Rand01(Cell.X, Cell.Y, Seed + 911u) > PoiFill) return;
+	// (none in or by a town, on a quest's place or a place)
+	{
+		double Dt; NearestTown(X0 + PoiCellM * 0.5, Y0 + PoiCellM * 0.5, Dt);
+		if (Dt < 700.0) return;
+	}
+	// (up to four tries in the cell: the first spot on dry ground, off the fields and the farmsteads' yards, and flat enough)
+	FVector2D At; FRDWSample S; bool bRoad = false, bOk = false;
+	for (int32 Try = 0; Try < 4 && !bOk; ++Try)
+	{
+		At = FVector2D(X0 + (0.15 + 0.7 * Rand01(Cell.X, Cell.Y, Seed + 912u + Try * 31u)) * PoiCellM, Y0 + (0.15 + 0.7 * Rand01(Cell.X, Cell.Y, Seed + 913u + Try * 31u)) * PoiCellM);
+		bool bNear = false;
+		for (const FRDWildPlace& Q : QuestPlaces) if (FVector2D::Distance(Q.At, At) < 120.0) bNear = true;
+		if (bNear) continue;
+		Sample(At.X, At.Y, S, false);
+		// (beside a road: stepped off it, its way down the road's falling value)
+		bRoad = S.Road > 0.1f;
+		if (bRoad)
+		{
+			float Best = S.Road; FVector2D To = At;
+			for (int32 K = 0; K < 8; ++K)
+			{
+				const double A = K * PI / 4.0;
+				const FVector2D Q = At + FVector2D(FMath::Cos(A), FMath::Sin(A)) * 12.0;
+				FRDWSample Sq; Sample(Q.X, Q.Y, Sq, false);
+				if (Sq.Road < Best && Sq.WaterKind == 0) { Best = Sq.Road; To = Q; }
+			}
+			if (Best > 0.05f) continue;
+			At = To; Sample(At.X, At.Y, S, false);
+		}
+		if (S.WaterKind != 0 || S.H < 2.f || S.Lava > 0.3f || S.Field > 0.3f || S.FarmKind == 4) continue;
+		// (flat enough to stand on: 8 m of rise over a 9 m ring at most: the mountains' slopes hold cairns and veins)
+		float Lo = S.H, Hi = S.H;
+		for (int32 K = 0; K < 4; ++K) { const double A = K * PI / 2.0; const float Hk = Height(At.X + FMath::Cos(A) * 9.0, At.Y + FMath::Sin(A) * 9.0); Lo = FMath::Min(Lo, Hk); Hi = FMath::Max(Hi, Hk); }
+		if (Hi - Lo > 8.f) continue;
+		bOk = true;
+	}
+	if (!bOk) return;
+	// (a place's 4 km cell: none within 90 m of its place)
+	{
+		TArray<FRDWildPlace> Ps; PlacesIn(PlaceCellOf(At.X, At.Y), Ps);
+		for (const FRDWildPlace& P : Ps) if (FVector2D::Distance(P.At, At) < 90.0) return;
+	}
+	// (the kinds of the region, beside the road or off it; landmarks in one cell in nine)
+	const FString Bn = Biomes.IsValidIndex(S.Biome) ? Biomes[S.Biome].Name : FString();
+	const uint32 H = Hash(Cell.X, Cell.Y, Seed + 914u);
+	TArray<float> Wt; float Sum = 0.f;
+	for (const FRDWildPoiKind& K : PoiKinds)
+	{
+		float W = 0.f;
+		if (!K.bRoaming && K.bRoad == bRoad && (K.Layer < 2 || H % 9u == 0u))
+			for (const FString& B : K.Biomes) if (B == TEXT("*") || B == Bn) { W = K.Weight; break; }
+		Wt.Add(W); Sum += W;
+	}
+	if (Sum <= 0.f) return;
+	float U = Rand01(Cell.X, Cell.Y, Seed + 915u) * Sum;
+	int32 Ki = 0;
+	for (; Ki < Wt.Num() - 1; ++Ki) { if (Wt[Ki] > 0.f && U < Wt[Ki]) break; U -= Wt[Ki]; }
+	while (Ki > 0 && Wt[Ki] <= 0.f) --Ki;
+	if (Wt[Ki] <= 0.f) return;
+	FRDWildPlace P;
+	P.Id = PoiIdBase + ((Cell.X & 0x7FF) << 11) + (Cell.Y & 0x7FF);
+	P.Kind = PoiKinds[Ki].Name.ToString(); P.Name = PoiKinds[Ki].Title; P.At = At; P.H = S.H; P.Biome = S.Biome; P.Poi = Ki;
+	P.Tier = TierAt(At.X, At.Y); P.Yaw = Rand01(Cell.X, Cell.Y, Seed + 916u) * 360.f;
+	Out.Add(P);
 }

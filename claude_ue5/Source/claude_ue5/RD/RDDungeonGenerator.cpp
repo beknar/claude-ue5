@@ -1425,6 +1425,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 			}
 	// (mistward: her dropped things, a teleporter pad, a trap she has seen (the Rogue disarms it) come before the rest)
 	if (LootPiles.Num() > 0 && TakeLootNear(From, 260.f)) return TEXT("loot");
+	if (bWild) { const FString Wp = WildPoiInteract(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
 	// (Brokenspire: someone of the town, a service, the gate, a boarded door; the castle's way back)
 	if (bTown || bTownLink) { const FString Tw = TownInteract(From); if (!Tw.IsEmpty()) return Tw; }
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
@@ -1523,6 +1524,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	// review's find)
 	const ARDLootPile* Lp = nullptr; float LpD = 260.f;
 	for (const ARDLootPile* P : LootPiles) if (IsValid(P)) { const float D = FVector::Dist2D(P->GetActorLocation(), From); if (D < LpD) { LpD = D; Lp = P; } }
+	if (!Lp && bWild) { const FString Wp = WildPoiDescribe(From); if (!Wp.IsEmpty()) return Wp; }          // (the seventh phase)
 	if (Lp)
 		{
 			// (hers, where she fell; or something the rules laid on the floor: the guarded ring; or a dead monster's parts)

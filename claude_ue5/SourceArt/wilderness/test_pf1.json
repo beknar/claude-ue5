@@ -1,0 +1,135 @@
+{
+ "tag": "pf1",
+ "plan": [
+  "stream",
+  "perf8"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "stream",
+   "ok": false,
+   "mem_start": 21575.0,
+   "mem_far": 22553.0,
+   "mem_back": 22653.0,
+   "max_chunks": 72,
+   "outside_square": 0,
+   "samples": [
+    {
+     "y": 2600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21577
+    },
+    {
+     "y": 4100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 21744
+    },
+    {
+     "y": 5600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22008
+    },
+    {
+     "y": 7100.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22221
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22553
+    },
+    {
+     "y": 8600.0,
+     "chunks": 64,
+     "near": 4,
+     "mem": 22395
+    },
+    {
+     "y": 7100.0,
+     "chunks": 69,
+     "near": 4,
+     "mem": 22485
+    },
+    {
+     "y": 5600.0,
+     "chunks": 70,
+     "near": 4,
+     "mem": 22502
+    },
+    {
+     "y": 4100.0,
+     "chunks": 67,
+     "near": 4,
+     "mem": 22511
+    },
+    {
+     "y": 2600.0,
+     "chunks": 66,
+     "near": 4,
+     "mem": 22642
+    }
+   ],
+   "dropped": 376,
+   "built": 384,
+   "active_km2_max": 4.5,
+   "compute_ms": 90.2,
+   "build_ms_max": 188.3
+  },
+  {
+   "step": "perf8",
+   "ok": true,
+   "fps_grasslands": 37.2,
+   "fps_farms_crops": 52.5,
+   "crop_instances": 0,
+   "fps_farms_no_crops": 52.5,
+   "fps_only_wheat": [
+    0,
+    52.2
+   ],
+   "fps_only_corn": [
+    28191,
+    50.2
+   ],
+   "fps_only_cabbage": [
+    938,
+    52.1
+   ],
+   "fps_only_potato": [
+    0,
+    51.5
+   ],
+   "fps_only_pumpkin": [
+    5535,
+    51.1
+   ],
+   "fps_only_sunflower": [
+    0,
+    51.2
+   ],
+   "run_farms_5x": {
+    "frames": 673,
+    "mean_ms": 22.3,
+    "over_50ms": 15,
+    "over_100ms": 3,
+    "max_ms": 139.0
+   },
+   "run_grasslands_5x": {
+    "frames": 568,
+    "mean_ms": 26.4,
+    "over_50ms": 22,
+    "over_100ms": 0,
+    "max_ms": 61.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "windows_shown_again": 3
+}

@@ -2111,6 +2111,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> FindWildFarmsteads(float Xm, float Ym, float Rm) const;
 	ARDSection* EnsureWildSection();
 	void SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace& P);
+	// ---- the seventh phase: the small points of interest and the encounter director (RDWildPoi.cpp; 912 from poi.json)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TArray<FRDWildPoiKind> WildPoiKinds;
+	/** the share of the 160 m grid's cells that hold one */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildPoiFill = 0.8f;
+	/** the director: an encounter on her way once this long has gone by with nothing within WildEngageM (cm) of her */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildEncounterGap = 25.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildEngageM = 4500.f;
+	struct FRDWildPoiLive { int32 Id = 0; int32 Kind = -1; FVector At = FVector::ZeroVector; TWeakObjectPtr<ARDWildChunk> Chunk; };
+	TArray<FRDWildPoiLive> WildPoiLive;
+	TMap<int32, float> WildPoiReadyAt;
+	TArray<TWeakObjectPtr<ARDMonster>> WildRoamers;
+	TArray<FString> WildEngagements;
+	float WildLastEngaged = -1.f, WildEncounterTick = 0.f, WildLastNearSaid = -100.f;
+	FString WildLastNear;
+	int32 WildPoisLaid = 0, WildPoisUsed = 0, WildEncountersMade = 0;
+	bool IsWildPoiUsed(int32 Id) const;
+	void SpawnWildPoi(ARDWildChunk* C, const FRDWildPlace& P);
+	const FRDWildPoiLive* WildPoiNear(const FVector& From, float Reach) const;
+	FString WildPoiDescribe(const FVector& From) const;
+	FString WildPoiInteract(const FVector& From);
+	void TickWildEncounters(float Dt, const FVector& Her);
+	/** what met her (tests): "<time>|near|<what>|", "<time>|met|<kind>|<x>|<y>", "<time>|used|<kind>|<what it said>", and last
+	 *  "state|<laid>|<used>|<encounters asked>|<roamers>|<last engaged>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild") TArray<FString> GetWildEncounterLines() const;
 	// ---- the captain's two wilderness quests (2026-11-07, RDWildQuest.cpp): "wild:wolves" (the Mill Road Den's pack killed,
 	// every one: read from the kills kept, WildKilled), "wild:patrol" (the lost patrol's remains found at the old watchtower)
 	/** how many monsters a quest's place has (its kills' keys are its id x 16 + 0..N-1) */

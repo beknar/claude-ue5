@@ -1,0 +1,320 @@
+{
+ "tag": "pi4",
+ "plan": [
+  "poi7"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "poi7",
+   "ok": true,
+   "model_ok": true,
+   "run_ok": true,
+   "uses_ok": true,
+   "model": {
+    "lines": {
+     "brokenspire_0": {
+      "n": 10,
+      "kinds": [
+       "abandoned_camp",
+       "great_ruin",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 53.7,
+      "p90_s": 109.7,
+      "max_s": 131.4
+     },
+     "brokenspire_45": {
+      "n": 14,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "great_ruin",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 25.9,
+      "p90_s": 69.3,
+      "max_s": 119.0
+     },
+     "brokenspire_90": {
+      "n": 13,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "lost_body",
+       "ruined_wall"
+      ],
+      "p50_s": 41.4,
+      "p90_s": 66.0,
+      "max_s": 66.3
+     },
+     "brokenspire_135": {
+      "n": 12,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "monster_nest"
+      ],
+      "p50_s": 30.9,
+      "p90_s": 96.6,
+      "max_s": 189.7
+     },
+     "brokenspire_180": {
+      "n": 11,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "great_ruin",
+       "lost_body",
+       "monster_nest"
+      ],
+      "p50_s": 35.4,
+      "p90_s": 64.9,
+      "max_s": 188.0
+     },
+     "brokenspire_225": {
+      "n": 13,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 34.5,
+      "p90_s": 86.1,
+      "max_s": 88.9
+     },
+     "brokenspire_270": {
+      "n": 14,
+      "kinds": [
+       "abandoned_camp",
+       "great_ruin",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall"
+      ],
+      "p50_s": 32.9,
+      "p90_s": 59.4,
+      "max_s": 142.3
+     },
+     "brokenspire_315": {
+      "n": 13,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "great_ruin",
+       "lost_body",
+       "monster_nest"
+      ],
+      "p50_s": 31.1,
+      "p90_s": 88.7,
+      "max_s": 101.5
+     },
+     "marshes": {
+      "n": 19,
+      "kinds": [
+       "abandoned_camp",
+       "bog_shrine",
+       "drowned_ruin",
+       "grave",
+       "great_ruin",
+       "herb_patch",
+       "hermit_hut",
+       "lost_body",
+       "monster_nest"
+      ],
+      "p50_s": 30.9,
+      "p90_s": 46.3,
+      "max_s": 72.9
+     },
+     "pine forests": {
+      "n": 8,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "hidden_cache",
+       "monster_nest",
+       "woodcutters"
+      ],
+      "p50_s": 23.7,
+      "p90_s": 372.6,
+      "max_s": 372.6
+     },
+     "mountains": {
+      "n": 5,
+      "kinds": [
+       "abandoned_camp",
+       "cairn",
+       "lost_body",
+       "ruined_wall"
+      ],
+      "p50_s": 37.4,
+      "p90_s": 422.6,
+      "max_s": 422.6
+     },
+     "savannahs": {
+      "n": 19,
+      "kinds": [
+       "abandoned_camp",
+       "grave",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall",
+       "sun_altar"
+      ],
+      "p50_s": 24.6,
+      "p90_s": 54.0,
+      "max_s": 78.6
+     },
+     "tundras": {
+      "n": 16,
+      "kinds": [
+       "abandoned_camp",
+       "cairn",
+       "frozen_corpse",
+       "grave",
+       "great_ruin",
+       "lost_body",
+       "monster_nest",
+       "ruined_wall",
+       "standing_stones"
+      ],
+      "p50_s": 33.4,
+      "p90_s": 51.7,
+      "max_s": 75.1
+     },
+     "volcanoes": {
+      "n": 12,
+      "kinds": [
+       "abandoned_camp",
+       "fire_altar",
+       "lost_body",
+       "ore_vein",
+       "ruined_wall"
+      ],
+      "p50_s": 27.4,
+      "p90_s": 52.9,
+      "max_s": 244.0
+     }
+    },
+    "p50_s": 31.4,
+    "p90_s": 72.3,
+    "max_s": 422.6,
+    "kinds": [
+     "abandoned_camp",
+     "bog_shrine",
+     "cairn",
+     "drowned_ruin",
+     "fire_altar",
+     "frozen_corpse",
+     "grave",
+     "great_ruin",
+     "herb_patch",
+     "hermit_hut",
+     "hidden_cache",
+     "lost_body",
+     "monster_nest",
+     "ore_vein",
+     "ruined_wall",
+     "standing_stones",
+     "sun_altar",
+     "woodcutters"
+    ]
+   },
+   "run": {
+    "seconds": 150.0,
+    "events": 28,
+    "met": 2,
+    "near": [
+     "animal",
+     "pile",
+     "roamer"
+    ],
+    "max_gap_s": 27.3,
+    "gaps": [
+     8.5,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.1,
+     27.3,
+     7.1,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.0,
+     27.3,
+     7.1,
+     3.0,
+     3.0,
+     3.1,
+     3.0,
+     3.0,
+     3.1
+    ],
+    "state": [
+     "state",
+     "197",
+     "0",
+     "2",
+     "0",
+     "155.0"
+    ],
+    "moved_m": 529
+   },
+   "uses": {
+    "loot": {
+     "kind": "abandoned_camp",
+     "things": [
+      "Bread",
+      "Straw Rope"
+     ],
+     "gained": {
+      "Straw Rope": 1,
+      "Bread": 1
+     },
+     "laid_again": 0
+    },
+    "lore": {
+     "kind": "grave",
+     "prompt": "look at the lonely grave",
+     "says": "Here lies a traveller of the old roads. Someone left a ring of pebbles; the wind has scattered them.",
+     "blessing": "",
+     "hp_share": 1.0
+    },
+    "heal": {
+     "kind": "hermit_hut",
+     "prompt": "rest at the hermit's hut",
+     "says": "You rest by the hermit's hearth: your wounds close, your mana comes back.",
+     "blessing": "",
+     "hp_share": 1.0
+    },
+    "buff": {
+     "kind": "standing_stones",
+     "prompt": "pray at the standing stones",
+     "says": "The Blessing of the Stones:  your blows 10% stronger, 10% less of each blow reaches you, for 5 minutes",
+     "blessing": "The Blessing of the Stones",
+     "hp_share": 1.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "error": null,
+ "windows_shown_again": 3
+}

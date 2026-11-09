@@ -101,6 +101,64 @@ The quick fixes of [docs/improvements9.txt](../improvements9.txt) (the town's sh
 - **The roads' tiers** (`TierAt`): along the chain of towns (Brokenspire 1, Vel Morrath 5, Ashenreach 10, Graymourne 15, Kethrys Spire 20, Heaven 25), a place's tier read on the leg of the chain nearest it, from one town's tier to the next's (until the list: 1 to 5 by the distance from Brokenspire, 25 km a tier). Every town of the chain is in the world since 2026-11-09 (Heaven the last). **Until the list's fifth phase (the rebalance to tier 25) a monster of a tier past 5 has tier 5's strength** (`TierHealth` / `TierDamage` have five entries) and its kind and its harvest's parts are among tier 5's (PR #31's review: a part's tiers are 1 to 5, a monster of tier 10 gave none).
 - Measured (`884 keys9`, `test_k9d.json`, after PR #31's review; `868 finalboss`, `test_k9e.json`): the chain in its order, with no key only the castle open; tiers 1 at Brokenspire, 3 half way to Vel Morrath, 5 at Vel Morrath, 8 half way to Ashenreach, 10 at Ashenreach, 13 half way to Graymourne, 15 at Graymourne, 1 behind Brokenspire; the map to Vel Morrath taken: the land by the city revealed (not before); at Vel Morrath the stair (a dry run) refused ("locked") with its line; the drop: one pile, not hers, the Catacomb Key and the map, taken with F; the stair then goes down (the dry run), Ashenreach's way still locked; a second drop gives nothing; she falls: the key and the map stay with her, not in her pile; Vel Morrath's last tier's boss counted slain (an old save's progress) gives the War Engine's way; the every-way switch leaves no saved counter; Aurorim's pile held both. The `holy` step passed with every way open (`run()` opens them for the steps that go down; `keys9` shuts them for itself).
 
+## The list of 2026-11-08b, seventh part: something every 40 seconds
+
+The user's words: "in order to retain engagement, the player should be able to interact or encounter something every 40 seconds when roaming the wilderness. the terrain generation algorithm should take this into account." She runs 3.5 m/s, so 40 s is about 140 m.
+
+**Before:** the places came one in a 4 km cell, at a 48 % chance, about one in 33 km².
+
+**Now there are two things:**
+
+**Small points of interest** (`FRDWildWorld::PoisIn`, `RD/RDWildPoi.cpp`, `SourceArt/wilderness/poi.json`, `912`).
+- **Where they go:** one in 85 % of the cells of a 120 m grid. A cell tries up to four spots: on dry ground, off the crop fields and the farmsteads' yards, 8 m of rise or less over a 9 m ring, 700 m from the towns, and 90 m from the places.
+- **Kinds by region:** 24 kinds are placed, each tied to its regions by the biomes' names:
+  - bog shrines and drowned ruins in the marshes;
+  - fire altars on the volcanoes;
+  - sun altars on the savannahs and in the canyons;
+  - cairns, ore veins and frozen travellers on the high and cold ground;
+  - woodcutters and hidden caches in the forests;
+  - camps, bodies, graves, nests and ruined walls anywhere.
+- **Beside the roads:** wayshrines, milestones, abandoned wagons and ambush points stand stepped off the road.
+- **Landmarks:** one cell in nine may hold a landmark (an ancient ruin, a giant's bones), drawn at the chunks' whole reach.
+- **What they do:**
+  - loot and resources: a pile taken once a game;
+  - guards: a nest's or a cache's of the place's tier;
+  - blessings: 10–15 % more damage or less taken, for 5 min;
+  - rests: hit points and mana back, every 3 min;
+  - stories;
+  - milestones: the two nearest towns, how far and which way.
+- **What she keeps:** what is used is kept in the game instance's `WildKilled`, saved, at `-(id + 2)`.
+- **Ids:** they take the free range `2^24 + (cell x << 11 | cell y)`, and `FindPlace` decodes it.
+- **Not places:** they are not found or announced, and not on the map. `GetWildPlacesNear` lists them for a search of 3 km or less.
+
+**The encounter director** (`TickWildEncounters`). Once a second it asks what is near her (within 45 m):
+- a fight;
+- a point of interest not used;
+- a pile;
+- an animal;
+- its own roamers.
+
+When 25 s pass with none, it meets her 45–70 m ahead on her way with a roaming kind of the region:
+- ambushers (2 of the road's tier);
+- a prowling pack (3, in the forests and on the cold ground);
+- a lost satchel (a pile).
+
+Its roamers go once she is 250 m off. It is off inside the towns' walls.
+
+**Measured** (`888 poi7 -Light`, `test_pi4.json`):
+- **The world's spacing:** along 14 lines of the world's model (8 out of Brokenspire, 6 through other regions, 2 km each), the points within 75 m of the way.
+  - Half the gaps are under 31.4 s at her run; 90 % are under 72 s.
+  - 18 kinds were seen.
+  - The longest gaps are in the mountains and a pine forest (7 min), where the slopes and lakes leave few spots.
+- **In play:** a 150 s run off the roads met something 28 times, two of them the director's. The longest gap was 27.3 s.
+- **Each use:** made with F where it stands:
+  - a pile taken, with its things gained, and not laid again;
+  - a grave's story;
+  - a hermit's rest from half to full;
+  - the standing stones' blessing.
+- **Performance:**
+  - `perf8`'s frame rates were unchanged: 52 a second in the farms, 37 in the grasslands.
+  - `stream`'s memory over a flight out and back read +1078 MB in its first run (failed) and +119 MB in the next. Its earlier records read +666, −191 and +1638: the measure varies run to run.
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:
