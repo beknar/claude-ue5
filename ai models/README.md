@@ -17,6 +17,8 @@ The characters this project uses in its current and future scenes, made with [Tr
 | `MartialArtist.glb` | (none) | Martial artist, rigged (61 bones), with Tripo's clips: idle, two boxing moves, two front kicks, four hit reactions (body, side, head) | not used yet |
 | `Aurorim Low.glb` | (none) | Aurorim, an angel of four wings in white and gold robes with a halo, rigged (65 Mixamo bones, no wing bones), with Tripo's clips: three boxing moves, a front kick, walk, run, five hit reactions | The final boss of mistward_castle's tier 5 since 2026-11-03 (character `Aurorim`, scripts `889` and `blender_numpy/aurorim_build.py`: wing bones added, his idle, flight, lance throw, light-calling cast and death made for him; his punches and flinch his own) |
 | `MartialArtist2.glb` | (none) | Martial artist, rigged (61 bones), with Tripo's clips: walk, run, running upstairs, three boxing moves, two front kicks, a dance | The Martial Artist of mistward_castle and martial_arts (character `MartialArtist`, scripts `872` / `873`: her walk, run, boxing and kicks; her idle, knife stabs, roll, dash and ten chi attacks made for her by `martialartist_clips.py`) |
+| `chicken.glb`, `goat.glb`, `pig.glb`, `rabbit.glb` | (none) | Farm animals, Tripo's own rigs (the pig's 7 bones), no clips | Brokenspire's pens and the wilds' farmsteads since 2026-11-10 (the rabbit also the wilds' hare): their meshes and textures on `farm_animals.py`'s skeletons and clips by `blender_numpy/tripo_animals.py`, script `915` |
+| `ridinghorse.glb` | (none) | A saddled paint horse, Tripo's rig, no clips | The stable's horse since 2026-11-10 (the same way; its Walk and Run, the `saddle` bone on its saddle's top) |
 
 ## Renamed models
 
