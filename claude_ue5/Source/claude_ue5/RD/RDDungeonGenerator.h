@@ -1585,6 +1585,26 @@ public:
 	/** tests: how many pieces are hidden now, and each "mesh|x|y|z" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetSeeThroughLines() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") int32 GetSeeThroughCount() const { return SeeHidden.Num(); }
+	// ---- the list of 2026-11-10's fourth phase (RD/RDList10d.cpp)
+	/** what each role says (914 lines: SourceArt/brokenspire/role_lines_*.json, SourceArt/heaven/role_lines.json) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TArray<FRDRoleLines> RoleLines;
+	/** a townsperson's pool of lines: its def's and its role's for the town she is in */
+	void TownLinePool(int32 InDef, ERDTownRole InRole, TArray<FString>& Out) const;
+	/** "if an NPC is supposed to be sleeping at night, have them sleep in their beds": every sleeper given a bed of its building
+	 *  (the town's beds where they stand; one put on a free tile where there are fewer than its sleepers), lying in it at night on
+	 *  its def's work clip "Sleep" (914 sleep) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bTownBeds = false;
+	void AssignTownBeds(class ARDSection* S);
+	/** "there should be more children in town, and they are supposed to be asleep at night" and "the town should be 25% more
+	 *  populated with more children as the population increases. leave the number of buildings the same": a lived-in home with a
+	 *  resident has a second grown-up one time in HomeSecondShare and a child one time in HomeChildShare, the children at home (they
+	 *  go in at evening and sleep); the square's three children are left out when homes have children */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bMorePeople = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float HomeSecondShare = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float HomeChildShare = 0.33f;
+	/** tests: "posts|<n>" "adults2|<n>" "homekids|<n>" "squarekids|<dropped>" "beds|<recorded>|<made>|<sleepers>|<given>" and per
+	 *  townsperson "folk|<i>|<role>|<asleep>|<in bed>|<bed x>|<y>|<z>|<clip>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetTownSleepLines() const;
 	// ---- the list of 2026-11-10's third phase (RD/RDList10c.cpp)
 	/** "the fighter and only the fighter should be able to craft basic weapons and armor she has already looted at a forge - a forge
 	 *  is a new crafting station": a forge (ForgePieces wherever they stand, the town smithy's forge, one by the anvil of a set with no

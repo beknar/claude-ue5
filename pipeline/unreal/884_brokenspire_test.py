@@ -703,6 +703,10 @@ def step_folk():
     F = folk()
     wanderers = [f for f in F if f["role"] in ("Child", "Idiot", "Militia")]
     res["walked"] = {f["title"]: f["walks"] - w0.get(f["i"], 0) for f in wanderers}
+    res["hour"] = round(g.get_town_hour(), 2)
+    res["still"] = [{"who": f["title"], "res": g.get_townsfolk(f["i"]).is_resident(), "home": g.get_townsfolk(f["i"]).get_home_building(), "here": section().town_building_at(f["at"]),
+                     "at": [round(f["at"].x), round(f["at"].y)], "work": str(g.get_townsfolk(f["i"]).get_work_state())[:60], "clip": g.get_townsfolk(f["i"]).get_clip_name()}
+                    for f in wanderers if f["walks"] - w0.get(f["i"], 0) == 0]
     S = section()
     res["militia"] = [{"at": [round(f["at"].x), round(f["at"].y)], "paths": [len(S.find_path_world(f["at"], f["at"] + d)) for d in (V(900, 0, 0), V(-900, 0, 0), V(0, 900, 0), V(0, -900, 0))]} for f in wanderers if f["role"] in ("Militia", "Idiot")]
     # a bark
@@ -713,7 +717,10 @@ def step_folk():
     talk_to("Elder"); put(V(G["pawn"].get_actor_location().x + 400, G["pawn"].get_actor_location().y, 0), yaw=180.0); yield from wait(0.5)
     res["names"] = [str(n) for n in G["pc"].get_hud().get_town_names_drawn()]
     shot("names"); yield from rwait(1.2)
-    ok = all(v > 0 for v in res["walked"].values()) and len(res["walked"]) >= 4 and "|" in res["bark"] and len(res["bark"].split("|")[1]) > 5 and any("Aldric" in n for n in res["names"])
+    # (a wanderer at its round of work (886: going to a place, at it) is about its day too: the walks counter counts only its strolls,
+    # and with the homes' children (2026-11-10) more of them are at work over the 40 s)
+    res["idle"] = [x["who"] for x in res["still"] if x["work"].split("|")[0] not in ("going", "gliding", "working")]
+    ok = not res["idle"] and len(res["walked"]) >= 4 and "|" in res["bark"] and len(res["bark"].split("|")[1]) > 5 and any("Aldric" in n for n in res["names"])
     step_result("folk", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ the gate
@@ -3553,6 +3560,142 @@ def step_forge10():
         c.set_crafting_open(False); yield from rwait(0.3)
     step_result("forge10", res.get("forges", 0) >= 1 and "forge" in res.get("says", "") and res.get("f") == "forge" and "Viking Shortsword" in res.get("recipes", [])
                 and res["ovens"] >= 1 and res.get("oven_f") == "oven" and res.get("bread", [0, 0])[1] == res.get("bread", [0, 0])[0] + 1, **res)
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-10's fourth phase
+LINE_ROLES = ("Townsfolk", "Child", "Guard", "Militia", "Soldier", "Refugee", "Drunk", "Witch", "Idiot", "Preacher", "Mourner")
+def sleep_lines():
+    out = {"folk": []}
+    for l in G["gen"].get_town_sleep_lines():
+        p = str(l).split("|")
+        if p[0] == "folk": out["folk"].append({"i": int(p[1]), "role": p[2], "asleep": p[3] == "1", "inbed": p[4] == "1", "bed": V(float(p[5]), float(p[6]), float(p[7])), "clip": p[8], "home": int(p[9]),
+                               "hasbed": p[10] == "1", "here": int(p[11]), "walking": p[12] == "1", "act": int(p[13])})
+        elif p[0] == "beds": out["beds"] = {"recorded": int(p[1]), "made": int(p[2]), "sleepers": int(p[3]), "given": int(p[4])}
+        else: out[p[0]] = int(p[1])
+    return out
+def step_lines10():
+    """"generate at least 30 different things the non-interactive NPCs can say depending on what their job is": one townsperson of
+    each role who only talks is spoken to 34 times; its pool holds 30 lines or more, it says 30 different ones or more, and no two
+    roles' pools are the same"""
+    g = G["gen"]; res = {}; quiet(True); g.set_town_hour(11.0); yield from rwait(0.5)
+    seen = {}
+    for role in LINE_ROLES:
+        f = next((x for x in folk() if x["role"] == role), None)
+        if not f: continue
+        t = g.get_townsfolk(f["i"]); said = []
+        for k in range(34):
+            if k % 6 == 0: talk_to(role); yield from rwait(0.15)
+            g.set_editor_property("last_bark", "")
+            r_ = str(g.interact_nearest(G["pawn"].get_actor_location()))
+            lb = str(g.get_editor_property("last_bark"))
+            if r_ == "bark" and "|" in lb: said.append(lb.split("|", 1)[1])
+            yield from rwait(0.05)
+        seen[role] = {"pool": t.get_line_pool_size(), "said": len(said), "distinct": len(set(said)), "first": said[:2]}
+    res["roles"] = seen
+    res["missing"] = [r for r in LINE_ROLES if r not in seen]
+    quiet(False)
+    step_result("lines10", len(seen) >= 8 and all(v["pool"] >= 30 and v["distinct"] >= 30 for v in seen.values()), **res)
+
+def step_sleep10():
+    """"if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation or clip in blender" and "there
+    should be more children in town, and they are supposed to be asleep at night": the evening walks everyone with a building home
+    (the game four times as fast), at 23 o'clock each sleeper lies in a bed of its building on the Sleep clip (its hips over the
+    bed's top, its head beside them at their height), the children too; every sleeper has a bed of its own; in the morning they are up
+    where they lay down from"""
+    g = G["gen"]; res = {}; quiet(True)
+    h_was = g.get_town_hour(); g.set_town_hour(20.0)
+    GS.set_global_time_dilation(G["w"], 4.0); t0 = time.time()
+    while time.time() - t0 < 90.0:
+        yield from rwait(2.0)
+        walking = sum(1 for f in folk() if g.get_townsfolk(f["i"]).is_walking() and g.get_townsfolk(f["i"]).is_resident())
+        if walking == 0: break
+    res["walk_home_s"] = round(time.time() - t0, 1); res["still_walking"] = walking
+    g.set_town_hour(23.0); yield from rwait(2.0)
+    GS.set_global_time_dilation(G["w"], 1.0); yield from rwait(1.0)
+    L = sleep_lines(); res["beds"] = L.get("beds")
+    sl = [f for f in L["folk"] if f["hasbed"]]
+    # (no bed: the tavern's customers (RDTownLife's, sat at its tables), the drunk and the Dwarf smith (no Sleep clip on their skeletons))
+    res["no_bed_with_building"] = [(f["role"], f["here"] == f["home"]) for f in L["folk"] if f["home"] >= 0 and not f["hasbed"]][:12]
+    res["sleepers"] = len(sl); res["asleep"] = sum(1 for f in sl if f["asleep"]); res["in_bed"] = sum(1 for f in sl if f["inbed"])
+    res["on_sleep_clip"] = sum(1 for f in sl if f["inbed"] and "Sleep" in f["clip"])
+    kids = [f for f in sl if f["role"] == "Child"]; res["children"] = {"at_home": len(kids), "in_bed": sum(1 for f in kids if f["inbed"]), "square": sum(1 for f in L["folk"] if f["role"] == "Child" and f["home"] < 0)}
+    awake = [f for f in sl if not f["asleep"]]
+    res["awake_sample"] = [(f["role"], f["clip"], "home" if f["here"] == f["home"] else f"bld {f['here']}", f["walking"], f["act"]) for f in awake[:12]]
+    # (beds of their own: no two sleepers at one bed)
+    beds = [(round(f["bed"].x), round(f["bed"].y)) for f in sl if f["inbed"]]
+    res["shared_beds"] = len(beds) - len(set(beds))
+    # (the pose: hips over the bed's top, the head beside them, about as high: lying, not standing in it)
+    poses = []; bad = []
+    # (a body that is not drawn is not posed (OnlyTickPoseWhenRendered): each is read with her 2 m from its bed, looking at it, after a
+    # second in view; its clip's place must have moved (it plays))
+    meas = [x for x in sl if x["inbed"]][:14]
+    for f in meas:
+        t = g.get_townsfolk(f["i"]); m = t.get_component_by_class(unreal.SkeletalMeshComponent); b_ = f["bed"]
+        put(V(b_.x + 200, b_.y, 0), yaw=180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=180.0))
+        p0 = m.get_position(); yield from rwait(1.2)
+        if abs(m.get_position() - p0) <= 0.01: p0 = m.get_position(); yield from rwait(1.5)          # (one in a row of barracks beds: a second look)
+        pv = m.get_socket_location("pelvis"); hd = m.get_socket_location("head")
+        q = {"role": f["role"], "mesh": m.get_editor_property("skeletal_mesh_asset").get_name(), "hips_over_top": round(pv.z - f["bed"].z, 1), "head_rise": round(hd.z - pv.z, 1),
+             "head_off": round(dist2(hd, pv), 1), "on_bed": round(dist2(pv, f["bed"]), 1), "plays": abs(m.get_position() - p0) > 0.01,
+             "bld": g.get_section(unreal.IntPoint(0, 0)).town_building_at(pv) == f["home"]}
+        poses.append(q)
+        if not (3 <= q["hips_over_top"] <= 45 and abs(q["head_rise"]) <= 30 and q["head_off"] >= 35 and q["on_bed"] <= 60 and q["bld"] and q["plays"]): bad.append(q)
+    res["poses"] = poses[:12]; res["bad_poses"] = bad[:10]; res["poses_n"] = len(poses)
+    # (two pictures from inside a home: a bed of the town's and one put for a sleeper)
+    S = section(); shots_ = []
+    cand = [x for x in sl if x["inbed"] and x["role"] in ("Townsfolk", "Child")]
+    BC = {b["i"]: b["c"] for b in blds()}
+    for want_made in ((False, True) if cand else ()):
+        f = cand[0] if not want_made else cand[-1]          # (the households' sleepers come last: a bed put for them)
+        b_ = f["bed"]; c_ = BC.get(f["home"], b_)
+        # (from inside its building: 2 m from the bed toward the building's middle, looking at the bed)
+        dx, dy = c_.x - b_.x, c_.y - b_.y; n_ = math.hypot(dx, dy) or 1.0
+        st = V(b_.x + dx / n_ * 200, b_.y + dy / n_ * 200, 0); yw = math.degrees(math.atan2(-dy, -dx))
+        put(st, yaw=yw, z=0.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=yw)); yield from rwait(1.5)
+        sn = f"sleep10_{'b' if want_made else 'a'}"; shot(sn, "1280x720"); shots_.append(sn); yield from rwait(1.2)
+    res["shots"] = shots_
+    # (the morning: up and out of bed, where they lay down from)
+    g.set_town_hour(7.0); yield from rwait(2.0)
+    L2 = sleep_lines(); up = [f for f in L2["folk"] if f["hasbed"]]
+    res["morning"] = {"asleep": sum(1 for f in up if f["asleep"]), "in_bed": sum(1 for f in up if f["inbed"])}
+    g.set_town_hour(h_was); quiet(False)
+    ok = res["sleepers"] > 0 and res["asleep"] >= 0.9 * res["sleepers"] and res["in_bed"] == res["asleep"] and res["on_sleep_clip"] == res["in_bed"] \
+        and res["shared_beds"] == 0 and not bad and res["children"]["at_home"] > 0 and res["children"]["in_bed"] >= 0.9 * res["children"]["at_home"] \
+        and res["beds"]["given"] == res["beds"]["sleepers"] and res["morning"]["in_bed"] == 0 and res["morning"]["asleep"] == 0
+    step_result("sleep10", ok, **res)
+
+def step_people10():
+    """"the town should be 25% more populated with more children as the population increases. leave the number of buildings the same":
+    on one seed the town is built with the households (bMorePeople) and without: the buildings and their places are the same, the
+    people 20 to 30 % more, the children more; the frame rate in the square with them"""
+    g = G["gen"]; res = {}; quiet(True)
+    seed0 = G["gi"].get_editor_property("town_seed")
+    def count():
+        B = blds(); F = folk(); L = sleep_lines()
+        return {"buildings": len(B), "at": json.dumps(sorted([round(b["c"].x), round(b["c"].y)] for b in B)), "people": len(F),
+                "children": sum(1 for f in F if f["role"] == "Child"), "adults2": L.get("adults2"), "homekids": L.get("homekids"), "squarekids": L.get("squarekids")}
+    runs = {}
+    for s_ in (seed0, 4444):
+        for on in (False, True):
+            g.set_editor_property("more_people", on); g.rebuild_town(s_); yield from rwait(2.0); refresh(); g = G["gen"]
+            runs[f"{s_}_{'on' if on else 'off'}"] = count()
+    g.set_editor_property("more_people", True); g.rebuild_town(seed0); yield from rwait(2.0); refresh(); g = G["gen"]
+    out = {}
+    for s_ in (seed0, 4444):
+        a_, b_ = runs[f"{s_}_off"], runs[f"{s_}_on"]
+        out[str(s_)] = {"buildings": [a_["buildings"], b_["buildings"]], "same_places": a_["at"] == b_["at"], "people": [a_["people"], b_["people"]],
+                        "ratio": round(b_["people"] / max(a_["people"], 1), 3), "children": [a_["children"], b_["children"]],
+                        "adults2": b_["adults2"], "homekids": b_["homekids"], "squarekids": b_["squarekids"]}
+    res["seeds"] = out
+    sq = place("square"); put(V(sq.x + 300, sq.y, 0), yaw=0.0); yield from rwait(4.0)
+    fps = []; t0 = time.time()
+    while time.time() - t0 < 10.0:
+        yield
+        fps.append(g.get_fps())
+    fps = [f for f in fps if f > 0]
+    res["fps_square"] = {"mean": round(sum(fps) / len(fps), 1) if fps else None, "min": round(min(fps), 1) if fps else None}
+    quiet(False)
+    ok = all(v["buildings"][0] == v["buildings"][1] and v["same_places"] and 1.2 <= v["ratio"] <= 1.3 and v["children"][1] > v["children"][0] for v in out.values())
+    step_result("people10", ok, **res)
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
     indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every
@@ -3870,7 +4013,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
+              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)

@@ -34,7 +34,19 @@ The third phase (C++ RD/RDList10c.cpp):
   block    "when the warrior does a shield block, she should be in a new animation shield block stance like in this picture":
            AS_Warrior3_BlockLunge (blender_numpy/warrior3_block.py through tripo_build.py) imported, her AnimBP's whole-body blend
            toward it under the upper body's layer (BlockLegsAlpha: while she stands), the layer's clip the same, BlockClip on every map
-C++ first (RD/RDList10b.cpp, RD/RDList10c.cpp). Args: [brewers] [horse] [food] [noshield] [sky] [stairs] [dungeon] [crowd] [see] [forge] [oven] [ankh] [block]"""
+The fourth phase (C++ RD/RDList10d.cpp):
+  lines    "generate at least 30 different things the non-interactive NPCs can say depending on what their job is": brokenspire's
+           RoleLines from SourceArt/brokenspire/role_lines_a.json, _b, _c (every town; a line naming the castle or the Mistgate
+           Brokenspire's alone) and SourceArt/heaven/role_lines.json (Heaven's alone); the farm families' lines from
+           SourceArt/wilderness/farm_lines10.json added to WildFarmLines
+  sleep    "if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation or clip in blender":
+           AS_Town_Sleep (blender_numpy/town_work_clips.py only=Sleep writefbx into SourceArt/brokenspire/work_clips/sleep) imported
+           on the NPC pack's skeleton, every townsfolk def with work clips given it as "Sleep"
+  people   "there should be more children in town ..." and "the town should be 25% more populated ...": brokenspire's bTownBeds and
+           bMorePeople (HomeSecondShare, HomeChildShare)
+  sleepsrc the four FBX town_work_clips.py takes (the NPC pack's SKM_Manny, NPC_Character_01's body, MM_Idle, MM_Walk_Fwd) exported to
+           SourceArt/brokenspire/work_clips/src (then Blender, then sleep)
+C++ first (RD/RDList10b.cpp, RD/RDList10c.cpp, RD/RDList10d.cpp). Args: [brewers] [horse] [food] [noshield] [sky] [stairs] [dungeon] [crowd] [see] [forge] [oven] [ankh] [block] [lines] [sleep] [people] [sleepsrc]"""
 import sys, unreal
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
@@ -42,7 +54,7 @@ V = unreal.Vector
 MAPS = "/Game/RandomDungeon/Maps/"
 GAME_MAPS = ("brokenspire", "mistward_castle", "vel_morrath", "war_engine", "sewers", "kethrys_spire", "heaven_fortress")
 DUNGEONS = GAME_MAPS[1:]
-STEPS = [a for a in sys.argv[1:] if a in ("brewers", "horse", "food", "noshield", "sky", "stairs", "dungeon", "crowd", "see", "forge", "oven", "ankh", "block")] or ["brewers", "horse", "food", "noshield", "sky", "stairs", "dungeon", "crowd", "see", "forge", "oven", "ankh", "block"]
+STEPS = [a for a in sys.argv[1:] if a in ("brewers", "horse", "food", "noshield", "sky", "stairs", "dungeon", "crowd", "see", "forge", "oven", "ankh", "block", "lines", "sleep", "people", "sleepsrc")] or ["brewers", "horse", "food", "noshield", "sky", "stairs", "dungeon", "crowd", "see", "forge", "oven", "ankh", "block", "lines", "sleep", "people"]
 REPORT = []
 
 
@@ -398,6 +410,100 @@ if "block" in STEPS:
         bt_ = g.get_editor_property("block_clip_time"); bt_[unreal.Name("Warrior")] = 0.0; g.set_editor_property("block_clip_time", bt_)
         return "the Warrior's block clip BlockLunge"
     each(GAME_MAPS, block, "block")
+
+SA_ROOT = r"E:\code\claude-ue5\claude_ue5\SourceArt"
+if "lines" in STEPS:
+    import os, json, re
+    entries = []
+    for f in ("brokenspire/role_lines_a.json", "brokenspire/role_lines_b.json", "brokenspire/role_lines_c.json", "heaven/role_lines.json"):
+        for e in json.load(open(os.path.join(SA_ROOT, f), encoding="utf-8"))["lines"]:
+            town = e.get("town", "")
+            if town:
+                entries.append((e["role"], town, True, e["lines"])); continue
+            # (a line naming the castle or the Mistgate stands only in Brokenspire, by Mistward Castle)
+            local = [l for l in e["lines"] if re.search(r"\b(castle|mistgate|mistward)\b", l, re.I)]
+            entries.append((e["role"], "", False, [l for l in e["lines"] if l not in local]))
+            if local: entries.append((e["role"], "Brokenspire", False, local))
+    farm = json.load(open(os.path.join(SA_ROOT, "wilderness", "farm_lines10.json"), encoding="utf-8"))["lines"]
+    def lines(g):
+        rl = []
+        for role, town, only, ls in entries:
+            r = unreal.RDRoleLines(); r.set_editor_property("role", unreal.Name(role)); r.set_editor_property("town", town)
+            r.set_editor_property("only", only); r.set_editor_property("lines", ls); rl.append(r)
+        g.set_editor_property("role_lines", rl)
+        wl = [l for l in g.get_editor_property("wild_farm_lines")]
+        have = set(str(l) for l in wl)
+        n = 0
+        for who, ls in farm.items():
+            for l in ls:
+                k = f"{who}|{l}"
+                if k not in have: wl.append(k); n += 1
+        g.set_editor_property("wild_farm_lines", wl)
+        return f"{len(rl)} role sets ({sum(len(e[3]) for e in entries)} lines), {n} farm lines added ({len(wl)} in all)"
+    each(["brokenspire"], lines, "lines")
+
+if "sleepsrc" in STEPS:
+    import os
+    OUT = os.path.join(SA_ROOT, "brokenspire", "work_clips", "src"); os.makedirs(OUT, exist_ok=True)
+    for path, fn in (("/Game/NPC_Characters_Pack/Demoscene_UE5/Mesh/SKM_Manny", "SKM_Manny.fbx"),
+                     ("/Game/NPC_Characters_Pack/Mesh/NPC_Character_01/Mesh_UE5/Full/SKM_NPC_Character_01_Full_01", "Body_Character01.fbx"),
+                     ("/Game/NPC_Characters_Pack/Demoscene_UE5/Animations/MM_Idle", "MM_Idle.fbx"),
+                     ("/Game/NPC_Characters_Pack/Demoscene_UE5/Animations/MM_Walk_Fwd", "MM_Walk_Fwd.fbx")):
+        t = unreal.AssetExportTask(); t.object = unreal.load_asset(path); t.filename = os.path.join(OUT, fn); t.automated = True; t.prompt = False; t.replace_identical = True
+        o = unreal.FbxExportOption(); o.set_editor_property("collision", False); t.options = o
+        REPORT.append(f"sleepsrc {fn}: {unreal.Exporter.run_asset_export_task(t)}")
+
+if "sleep" in STEPS:
+    import os, json
+    FBX = os.path.join(SA_ROOT, "brokenspire", "work_clips", "sleep", "SK_Manny_Town_Work_Clips.fbx")
+    js = json.load(open(os.path.join(SA_ROOT, "brokenspire", "work_clips", "sleep", "town_work_clips.json"), encoding="utf-8"))
+    DW = "/Game/RandomDungeon/Anims/Town/Work"; DST = DW + "/AS_Town_Sleep"
+    skel = unreal.load_asset("/Game/NPC_Characters_Pack/Demoscene_UE5/Mesh/SKM_Manny_Skeleton")
+    o = unreal.FbxImportUI(); o.set_editor_property("import_mesh", False); o.set_editor_property("import_as_skeletal", True)
+    o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION); o.set_editor_property("skeleton", skel)
+    o.set_editor_property("import_animations", True); o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)
+    tmp = DW + "/_import_sleep"
+    t = unreal.AssetImportTask(); t.filename = FBX; t.destination_path = tmp; t.automated = True; t.replace_existing = True; t.save = True; t.options = o
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
+    new = next((pth for pth in t.imported_object_paths if isinstance(unreal.load_asset(pth), unreal.AnimSequence)), None)
+    assert new, "the Sleep clip was not imported"
+    def defs_with(g, clip):
+        """every townsfolk def whose mesh is on the clip's skeleton (the NPC pack's) given the clip as Sleep, the cities' own too (they
+        have no work clips); one on another skeleton (the drunk's, the Dwarf smith's) has none"""
+        # (each NPC pack has its own copy of the Manny skeleton (the kids', the knights', the beggars'...): the clip's is made
+        # compatible with each, saved, as 907 does for its casters)
+        tf = list(g.get_editor_property("townsfolk")); n = 0
+        for d in tf:
+            m = d.get_editor_property("mesh")
+            ms = m.get_editor_property("skeleton") if m else None
+            on = ms is not None and ms.get_name() == skel.get_name()
+            if on and ms != skel and not any(x == skel for x in ms.get_editor_property("compatible_skeletons")):
+                ms.add_compatible_skeleton(skel); eal.save_loaded_asset(ms, only_if_is_dirty=False)
+            wc = d.get_editor_property("work_clips")
+            if on: wc[unreal.Name("Sleep")] = clip; n += 1
+            elif unreal.Name("Sleep") in wc: wc.pop(unreal.Name("Sleep"))
+            d.set_editor_property("work_clips", wc)
+        g.set_editor_property("townsfolk", tf)
+        return n
+    # (made again: its users onto the new import, the old one deleted, the new renamed, its users onto that (914 block's way))
+    na = unreal.load_asset(new)
+    if eal.does_asset_exist(DST): each(["brokenspire"], lambda g: f"{defs_with(g, na)} defs moved onto the new import", "sleep repoint"); eal.delete_asset(DST)
+    eal.rename_asset(new.split(".")[0], DST); clip = unreal.load_asset(DST)
+    L = float(js["clips"]["Sleep"].get("length_s", clip.get_play_length()))
+    if L > 0 and abs(clip.get_play_length() - L) > 0.02: clip.set_editor_property("rate_scale", clip.get_play_length() / L)
+    clip.set_editor_property("enable_root_motion", False); clip.set_editor_property("force_root_lock", True); eal.save_loaded_asset(clip, False)
+    for pth in eal.list_assets(tmp, recursive=True):
+        if eal.does_asset_exist(pth.split(".")[0]): eal.delete_asset(pth.split(".")[0])
+    eal.delete_directory(tmp)
+    each(["brokenspire"], lambda g: f"Sleep ({clip.get_play_length():.2f} s) for {defs_with(g, clip)} defs", "sleep")
+
+if "people" in STEPS:
+    def people(g):
+        g.set_editor_property("town_beds", True); g.set_editor_property("more_people", True)
+        # (measured (884 people10): a child in 45 % of the homes and a second grown-up in 20 % made 36 % and 31 % more people)
+        g.set_editor_property("home_second_share", 0.2); g.set_editor_property("home_child_share", 0.33)
+        return f"beds on, households: a second grown-up {g.get_editor_property('home_second_share')}, a child {g.get_editor_property('home_child_share')}"
+    each(["brokenspire"], people, "people")
 
 open_map("mistward_castle")
 print("LIST10 " + " | ".join(REPORT))

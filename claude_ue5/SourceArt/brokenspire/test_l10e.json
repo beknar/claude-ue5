@@ -1,0 +1,339 @@
+{
+ "tag": "l10e",
+ "plan": [
+  "sleep10",
+  "lines10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sleep10",
+   "ok": false,
+   "walk_home_s": 8.3,
+   "still_walking": 0,
+   "beds": {
+    "recorded": 57,
+    "made": 68,
+    "sleepers": 86,
+    "given": 86
+   },
+   "no_bed_with_building": [
+    [
+     "Drunk",
+     true
+    ],
+    [
+     "Smith",
+     true
+    ],
+    [
+     "Witch",
+     false
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ]
+   ],
+   "sleepers": 86,
+   "asleep": 86,
+   "in_bed": 85,
+   "on_sleep_clip": 85,
+   "children": {
+    "at_home": 13,
+    "in_bed": 13,
+    "square": 0
+   },
+   "awake_sample": [],
+   "shared_beds": 0,
+   "poses": [
+    {
+     "role": "Priest",
+     "mesh": "SKM_NPC_Character_05_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 7.3,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Scholar",
+     "mesh": "SK_UE5_NPC_Plague_doctor_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 8.0,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Trader",
+     "mesh": "SKM_NPC_Character_03_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.7,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Healer",
+     "mesh": "SK_UE5_NPC_Queen_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 7.7,
+     "head_off": 66.3,
+     "on_bed": 0.6,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Keeper",
+     "mesh": "SK_UE5_NPC_Servant_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 97.9,
+     "head_rise": 66.7,
+     "head_off": 1.6,
+     "on_bed": 1.8,
+     "plays": false,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Knight_05_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.7,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 29.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 27.7,
+     "head_rise": 7.7,
+     "head_off": 62.9,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.3,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.3,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.1,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    }
+   ],
+   "bad_poses": [
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 97.9,
+     "head_rise": 66.7,
+     "head_off": 1.6,
+     "on_bed": 1.8,
+     "plays": false,
+     "bld": true
+    }
+   ],
+   "poses_n": 14,
+   "shots": [
+    "sleep10_a",
+    "sleep10_b"
+   ],
+   "morning": {
+    "asleep": 0,
+    "in_bed": 0
+   }
+  },
+  {
+   "step": "lines10",
+   "ok": true,
+   "roles": {
+    "Townsfolk": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "We bake twice a week now. Flour's running out.",
+      "I've swept this step every morning for twenty years. The dust never tires, and neither do I."
+     ]
+    },
+    "Child": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "Are you going to the castle? Will you bring me back a monster tooth?",
+      "When the bells ring at night, I hide under the blanket and hold my breath."
+     ]
+    },
+    "Guard": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "Move along. The gate's barred, captain's orders.",
+      "Don't mind me. I'm just counting faces. I like to know who comes back."
+     ]
+    },
+    "Militia": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "Quiet night. They're always quiet, until they aren't.",
+      "Left, right, left, right. I've marched so much I dream in footsteps now."
+     ]
+    },
+    "Soldier": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "Off duty. Go bother the captain.",
+      "Sergeant says orcs fight in packs. So do we. Difference is, they enjoy it."
+     ]
+    },
+    "Refugee": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "We left everything at Harrowfield. The cattle, the barn. My mother's grave.",
+      "Hunger is a patient thing. It sits beside you all day and never says a word."
+     ]
+    },
+    "Drunk": {
+     "pool": 37,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
+      "I fought orcs, I did. Fifty of them. Or five. It was dark, and I was thirsty."
+     ]
+    },
+    "Witch": {
+     "pool": 37,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "Ahh. The mist likes you. I can smell it on your boots.",
+      "Leave a coin on the hearthstone when you go. My house spirits sulk otherwise."
+     ]
+    },
+    "Idiot": {
+     "pool": 37,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "I counted the towers. Eleven! No, twelve. No... I'll count again.",
+      "Goodbye! Or hello. I always mix them up, so I say both to be safe."
+     ]
+    },
+    "Preacher": {
+     "pool": 37,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "Repent! The breath beneath the hill will take us all, and it will not be quick!",
+      "Beneath our feet lies a pit dug by our own sins. Each tier is a vice made flesh."
+     ]
+    },
+    "Mourner": {
+     "pool": 36,
+     "said": 34,
+     "distinct": 34,
+     "first": [
+      "He was nineteen. He went up the castle road with the watch and they brought back his spear.",
+      "Do not walk on the fresh mounds, please. Some of us are still saying goodbye."
+     ]
+    }
+   },
+   "missing": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_l10e_sleep10_a.png",
+  "bs_l10e_sleep10_b.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

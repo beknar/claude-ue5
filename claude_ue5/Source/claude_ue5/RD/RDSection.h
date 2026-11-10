@@ -371,6 +371,16 @@ public:
 	/** the forges of the set (the list of 2026-11-10: the generator's ForgePieces where they stand) and the one put by the anvil */
 	TArray<FVector> ForgePoints;
 	void EnsureForge();
+	/** the list of 2026-11-10's fourth phase: the town's beds (where each stands, its yaw (its foot toward +X), its building, who
+	 *  has it); the ones put in play for sleepers who had none (their meshes); the households' extra people planned */
+	struct FTownBed { FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; int32 Taken = -1; bool bMade = false; };
+	TArray<FTownBed> TownBeds;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UStaticMeshComponent>> TownBedMeshes;
+	int32 TownAdults2 = 0, TownHomeKids = 0, TownSquareKidsDropped = 0, TownPostsPlanned = 0;
+	/** a bed put in a building on a free tile of its rooms (no random draw); its index, -1 none */
+	int32 AddTownBed(int32 Bld);
+	/** the households' second grown-ups and children (bMorePeople) */
+	void PlanHouseholds();
 	/** a piece FurnishWalls placed: where (its middle), its yaw, its size */
 	struct FPlacedPiece { FVector At = FVector::ZeroVector; float Yaw = 0.f; FVector Size = FVector::ZeroVector; };
 	TArray<FShelf> Shelves;
