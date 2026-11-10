@@ -2982,6 +2982,25 @@
    1.0
   ]
  },
+ "ankh": {
+  "kind": "icon",
+  "size": [
+   130,
+   256
+  ],
+  "border": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "inner": [
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ]
+ },
  "_icons": {
   "Small Healing Potion": "healing_vial",
   "Medium Healing Potion": "healing_flask",
@@ -3016,6 +3035,12 @@
   "Travel Cake": "travel_cake",
   "Sweet Roll": "sweet_roll",
   "Well Done Steak": "steak",
+  "Wheat": "ingredient_wheat",
+  "Wild Carrot": "ingredient_carrot",
+  "Pumpkin": "ingredient_pumpkin",
+  "Sunflower Seeds": "ingredient_sunflower_seeds",
+  "Herbs": "ingredient_herbs",
+  "Cheese": "cheese",
   "Plate Armour": "armour_PlateArmour",
   "Bear Warrior\u2019s Armour": "armour_BearArmour",
   "Tiefling\u2019s Armour": "armour_TieflingArmour",

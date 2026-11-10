@@ -1585,6 +1585,53 @@ public:
 	/** tests: how many pieces are hidden now, and each "mesh|x|y|z" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetSeeThroughLines() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") int32 GetSeeThroughCount() const { return SeeHidden.Num(); }
+	// ---- the list of 2026-11-10's third phase (RD/RDList10c.cpp)
+	/** "the fighter and only the fighter should be able to craft basic weapons and armor she has already looted at a forge - a forge
+	 *  is a new crafting station": a forge (ForgePieces wherever they stand, the town smithy's forge, one by the anvil of a set with no
+	 *  forge) opens the crafting panel on its own recipes (Station "Forge", 914's); only ForgeHeroes work it, and a recipe shows only
+	 *  for what she has looted (HasLooted: the game instance's LootedItems, every weapon, shield and armour that went into her pack) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bForge = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TArray<FName> ForgeHeroes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TArray<FName> ForgePieces;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") FName ForgeStationPiece = TEXT("Forge");
+	bool FindNearestForge(const FVector& From, float MaxDistance, FVector& At) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FVector> GetAllForges() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") bool HasLooted(FName Item) const;
+	void NoteLooted(FName Item);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FName> GetLootedItems() const;
+	FString ForgeRefusal() const;
+	/** heroes by their titles in a sentence ("the Mage and the Martial Artist"): the potions' and the forge's refusals */
+	FString HeroesInWords(const TArray<FName>& Names) const;
+	/** "everyone should be able to craft food items from food components at an oven": the dungeons' kitchens' bread ovens are ovens too
+	 *  (bDungeonOvens: their recipes the town's, 914's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bDungeonOvens = false;
+	bool FindNearestOven(const FVector& From, float MaxDistance, FVector& At) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FVector> GetAllOvens() const;
+	/** F at a forge or a dungeon's oven (nearer than the anvil and any door or container): "" if none */
+	FString StationInteract(const FVector& From, float DoorD);
+	FString StationDescribe(const FVector& From, float DoorD) const;
+	/** "new type of item that can be held in the left hand and put in the quick slot: revealing light, looks like an ankh, found on
+	 *  Tier 2 monsters or in containers" (the user's choice: it lights the way as the torch does and within AnkhRevealRange shows the
+	 *  traps (outlined, as the Rogue sees them) and the chests and trunks not looted (on the map)): an item of kind Light held as the
+	 *  torch is (its fit's mesh in her left hand), its light pale */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float AnkhLight = 40.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float AnkhLightRadius = 1400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") FLinearColor AnkhColor = FLinearColor(0.8f, 0.88f, 1.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") FVector AnkhGlowAt = FVector(0.f, 0.f, 25.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float AnkhRevealRange = 1000.f;
+	/** a tier-2 monster's chance to drop one (when she has none) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float AnkhDropChance = 0.06f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 AnkhTrapsShown = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 AnkhCachesShown = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 AnkhDrops = 0;
+	/** the chests and trunks it has shown (set and container key) */
+	TSet<FIntVector> AnkhRevealed;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") FName GetAnkhItem() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") bool IsContainerRevealed(FIntPoint Section, int32 Key) const { return AnkhRevealed.Contains(FIntVector(Section.X, Section.Y, Key)); }
+	float AnkhClock = 0.f, AnkhNext = 0.f;
+	void TickAnkh(float Dt);
+	/** a killed monster of the game's tier 2 may drop the ankh (a pile of its own) */
+	void AnkhDropFor(class ARDMonster* Monster);
 	/** the castle's way back to the town (an arch in the great hall): F there */
 	FVector CastleWayBack = FVector::ZeroVector;
 	UPROPERTY(Transient) TObjectPtr<AActor> CastleWayBackActor;

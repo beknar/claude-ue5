@@ -1,0 +1,34 @@
+{
+ "tag": "k10u",
+ "plan": [
+  "forge10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "forge10",
+   "ok": true,
+   "forge_spots": 0,
+   "forges": 1,
+   "says": "use the forge",
+   "f": "forge",
+   "recipes": [
+    "Viking Shortsword"
+   ],
+   "ovens": 21,
+   "oven_says": "bake at the oven",
+   "oven_f": "oven",
+   "baked": true,
+   "bread": [
+    0,
+    1
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_k10u_forge10.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

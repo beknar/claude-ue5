@@ -853,6 +853,9 @@ void URDCombatComponent::AddItem(FName Name, int32 Count)
 	if (Name.IsNone() || Count <= 0) return;
 	// (a weapon made for her hero joins her weapons, each with its own durability; one not for her stays an item)
 	const int32 Ix = Generator ? Generator->FindItem(Name) : -1;
+	// (the list of 2026-11-10: every weapon, shield and set of armour that comes into her pack is one the forge can make again)
+	if (Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Weapon || Generator->Items[Ix].Kind == ERDItemKind::Shield || Generator->Items[Ix].Kind == ERDItemKind::Armour))
+		Generator->NoteLooted(Name);
 	if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Weapon)
 	{
 		int32 Left = Count;
@@ -964,7 +967,18 @@ bool URDCombatComponent::UseItem(FName Name)
 	if (It.Kind == ERDItemKind::Armour) return WearArmour(Name);          // (worn, not used up)
 	// (mistward: a shield to her left hand, the torch lit or put out, a teleport ring used)
 	if (It.Kind == ERDItemKind::Shield) return WearShield(Name);
-	if (It.Kind == ERDItemKind::Torch) { TorchItem = Name; return HoldTorch(!bTorchHeld); }
+	// (the list of 2026-11-10: the ankh (kind Light) is held as the torch is; one held while the other is used is changed for it)
+	if (It.Kind == ERDItemKind::Torch || It.Kind == ERDItemKind::Light)
+	{
+		if (bTorchHeld && TorchItem != Name)
+		{
+			// (refused (no fit for her hero), the one she holds stays hers (PR #40's review: the ankh's name over the torch in her hand))
+			const FName Was = TorchItem; TorchItem = Name;
+			if (HoldTorch(true)) return true;
+			TorchItem = Was; UpdateLeftHand(); return false;
+		}
+		TorchItem = Name; return HoldTorch(!bTorchHeld);
+	}
 	if (It.Kind == ERDItemKind::Teleport)
 	{
 		if (bInventoryOpen) SetInventoryOpen(false);
@@ -1105,7 +1119,7 @@ TArray<FString> URDCombatComponent::GetAllInventoryLines() const
 			const int32 Ix = Generator->FindItem(N);
 			Out.Add(FString::Printf(TEXT("shield|%s|%d|%.0f|%.0f|%d"), *N.ToString(), N == WornShield ? 1 : 0, GetShieldWear(N), Ix >= 0 ? Generator->Items[Ix].Durability : 0.f, GetItemCount(N)));
 		}
-	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Torch) Out.Add(FString::Printf(TEXT("torch|%s|%d|%d"), *N.ToString(), bTorchHeld && TorchItem == N ? 1 : 0, GetItemCount(N)));
+	for (const FName& N : CarriedOrder) if (KindOf(N) == ERDItemKind::Torch || KindOf(N) == ERDItemKind::Light) Out.Add(FString::Printf(TEXT("torch|%s|%d|%d"), *N.ToString(), bTorchHeld && TorchItem == N ? 1 : 0, GetItemCount(N)));
 	for (const FName& N : CarriedOrder)
 		if (KindOf(N) == ERDItemKind::Teleport) { const int32 Ix = Generator->FindItem(N); Out.Add(FString::Printf(TEXT("teleport|%s|%d"), *N.ToString(), Ix >= 0 ? Generator->Items[Ix].TeleportTier : 0)); }
 	// (level 5: her rings, worn or not; tomes her hero cannot learn)
@@ -1327,7 +1341,9 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		const int32 Ri = Generator->FindItem(Rc.Item);
 		const ERDItemKind Rk = Ri >= 0 ? Generator->Items[Ri].Kind : ERDItemKind::Component;
 		const TCHAR* Grp = Rk == ERDItemKind::Repair ? TEXT("1repair") : (Rk == ERDItemKind::Healing || Rk == ERDItemKind::Mana || Rk == ERDItemKind::Speed) ? TEXT("2potion")
-			: Rk == ERDItemKind::Scroll ? TEXT("3scroll") : Rk == ERDItemKind::Food ? TEXT("4food") : TEXT("5other");
+			: Rk == ERDItemKind::Scroll ? TEXT("3scroll") : Rk == ERDItemKind::Food ? TEXT("4food")
+			// (the list of 2026-11-10: the forge's arms and armour under headings of their own)
+			: Rk == ERDItemKind::Weapon || Rk == ERDItemKind::Shield ? TEXT("6arms") : Rk == ERDItemKind::Armour ? TEXT("7armour") : TEXT("5other");
 		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s|%s"), *Rc.Item.ToString(), PlanCraft(Rc, Take) ? 1 : 0, *FString::Join(Ps, TEXT(";")), Grp));
 	}
 	// (by group, then by name (or the table's order without alphabetical crafting: the sort is stable))

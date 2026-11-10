@@ -1,0 +1,41 @@
+{
+ "foot_l_off_cm": 0.0,
+ "foot_r_off_cm": 3.3,
+ "shield_hand_off_cm": 0.0,
+ "sword_hand_off_cm": 11.15,
+ "pelvis": [
+  0.003,
+  -0.204,
+  0.78
+ ],
+ "foot_l": [
+  0.17,
+  -0.42,
+  0.118
+ ],
+ "foot_r": [
+  -0.138,
+  0.399,
+  0.14
+ ],
+ "hand_l": [
+  0.048,
+  -0.608,
+  1.207
+ ],
+ "hand_r": [
+  -0.205,
+  -0.403,
+  0.878
+ ],
+ "head": [
+  0.001,
+  -0.276,
+  1.302
+ ],
+ "previews": [
+  "D:\\claude-scratch\\claude\\8c37119093eaee83\\72180577-22ed-4688-bb54-c390e9b1fac7\\scratchpad\\w3block\\block_preview_side.png",
+  "D:\\claude-scratch\\claude\\8c37119093eaee83\\72180577-22ed-4688-bb54-c390e9b1fac7\\scratchpad\\w3block\\block_preview_front.png",
+  "D:\\claude-scratch\\claude\\8c37119093eaee83\\72180577-22ed-4688-bb54-c390e9b1fac7\\scratchpad\\w3block\\block_preview_three_quarter.png"
+ ]
+}

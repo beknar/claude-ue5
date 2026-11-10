@@ -495,6 +495,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool HoldTorch(bool bHold);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool IsTorchHeld() const { return bTorchHeld; }
 	/** the torch (or the ankh) she holds or last held */
+	/** the list of 2026-11-10: the held light is the ankh (an item of kind Light) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") bool IsAnkhHeld() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") FName GetTorchItem() const { return TorchItem; }
 	/** the torch's light on her (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") UPointLightComponent* GetTorchLight() const { return TorchLight; }
@@ -774,7 +776,7 @@ private:
 	TWeakObjectPtr<class UAnimMontage> BlockMontage;
 	/** her AnimBP's upper-body block layer (885's: a layered blend from spine_01 up over her locomotion, weighted by its float
 	 *  BlockAlpha): the shield raised while her legs walk (the user's of 2026-11-02); 0 to 1, eased; -1: her AnimBP has none */
-	float BlockLayerNow = 0.f, BlockLayerTarget = 0.f;
+	float BlockLayerNow = 0.f, BlockLayerTarget = 0.f; float BlockLegsNow = 0.f;          // (the list of 2026-11-10: the stance's legs while she stands)
 	bool HasBlockLayer();
 	void TickBlockLayer();
 public:

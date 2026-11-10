@@ -121,25 +121,17 @@ bool ARDDungeonGenerator::HeroReadsScroll(ERDSpellType Type) const
 FString ARDDungeonGenerator::RecipeRefusal(const FRDRecipe& Rc) const
 {
 	const int32 Ix = FindItem(Rc.Item);
+	// (the list of 2026-11-10: the forge's recipes, the Warrior's alone and only for what she has looted)
+	if (Rc.Station == TEXT("Forge"))
+	{
+		if (const FString Fr = ForgeRefusal(); !Fr.IsEmpty()) return Fr;
+		if (!HasLooted(Rc.Item)) return FString::Printf(TEXT("You have not found a %s to forge one after"), *Rc.Item.ToString().ToLower());
+	}
 	// (the list of 2026-11-10: healing and mana potions are brewed only by the heroes named (the Mage and the Martial Artist))
 	if (PotionBrewers.Num() > 0 && Ix >= 0 && (Items[Ix].Kind == ERDItemKind::Healing || Items[Ix].Kind == ERDItemKind::Mana) && !PotionBrewers.Contains(CurrentHero))
 	{
-		// (who brews, by their heroes' titles, from the list itself (PR #38's review))
-		TArray<FString> Who;
-		for (const FName& Hb : PotionBrewers)
-		{
-			const FRDHeroDef* H = Heroes.FindByPredicate([&Hb](const FRDHeroDef& D) { return D.Name == Hb; });
-			// (the cards' titles are in capitals ("MARTIAL ARTIST"): written as words in a sentence)
-			FString Ti = H && !H->Title.IsEmpty() ? H->Title : Hb.ToString();
-			if (Ti == Ti.ToUpper())
-			{
-				Ti = Ti.ToLower();
-				for (int32 C = 0; C < Ti.Len(); ++C) if (C == 0 || Ti[C - 1] == TEXT(' ')) Ti[C] = FChar::ToUpper(Ti[C]);
-			}
-			Who.Add(FString(TEXT("the ")) + Ti);
-		}
-		const FString List = Who.Num() <= 1 ? FString::Join(Who, TEXT("")) : FString::Join(TArrayView<const FString>(Who.GetData(), Who.Num() - 1), TEXT(", ")) + TEXT(" and ") + Who.Last();
-		return FString::Printf(TEXT("Only %s brew the %s"), *List, *Rc.Item.ToString().ToLower());
+		// (who brews, by their heroes' titles, from the list itself (PR #38's review); one helper with the forge's (PR #40's))
+		return FString::Printf(TEXT("Only %s brew the %s"), *HeroesInWords(PotionBrewers), *Rc.Item.ToString().ToLower());
 	}
 	if (!bRecipeTiers) return FString();
 	if (Ix >= 0 && Items[Ix].Kind == ERDItemKind::Scroll)

@@ -162,6 +162,8 @@ public:
 	 *  tables' food she took ("<seed>:<table>") */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TMap<FString, int32> GardensHarvested;
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FString> FoodTaken;
+	/** the list of 2026-11-10: every weapon, shield and set of armour that has gone into her pack (the forge makes those) */
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TArray<FName> LootedItems;
 	/** the portcullis raised (it stays as she left it) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") bool bPortcullisUp = false;
 	/** the eighth phase: she has bought a horse at a stable */

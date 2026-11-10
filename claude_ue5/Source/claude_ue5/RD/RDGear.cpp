@@ -73,6 +73,8 @@ void URDCombatComponent::UpdateLeftHand()
 	LeftComp->SetRelativeTransform(Fit->Weapon.OffHandGrip);
 	LeftComp->SetVisibility(true);
 	const bool bTorch = bTorchHeld;
+	// (the list of 2026-11-10: the ankh's light is pale and has no flame)
+	const bool bAnkh = bTorch && IsAnkhHeld();
 	if (bTorch)
 	{
 		// (the flame at the torch's head, a warm light that goes with it)
@@ -88,10 +90,13 @@ void URDCombatComponent::UpdateLeftHand()
 			TorchLight->RegisterComponent();
 		}
 		TorchLight->AttachToComponent(LeftComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-		TorchLight->SetRelativeLocation(Generator->TorchFlame + FVector(0, 0, 15));
-		TorchLight->SetIntensity(Generator->TorchLight);
+		TorchLight->SetRelativeLocation(bAnkh ? Generator->AnkhGlowAt : Generator->TorchFlame + FVector(0, 0, 15));
+		TorchLight->SetIntensity(bAnkh ? Generator->AnkhLight : Generator->TorchLight);
+		TorchLight->SetLightColor(bAnkh ? Generator->AnkhColor : FLinearColor(1.f, 0.56f, 0.24f));
+		TorchLight->SetAttenuationRadius(bAnkh ? Generator->AnkhLightRadius : 1600.f);
 		TorchLight->SetVisibility(true);
-		if (!TorchFlame && Generator->TorchFx) TorchFlame = RDMSpawnFx(GetOwner(), Generator->TorchFx, Generator->TorchFlame, FRotator::ZeroRotator, Generator->TorchFxScale, LeftComp, false, false);
+		if (bAnkh && TorchFlame) { TorchFlame->DeactivateImmediate(); TorchFlame->DestroyComponent(); TorchFlame = nullptr; }
+		if (!bAnkh && !TorchFlame && Generator->TorchFx) TorchFlame = RDMSpawnFx(GetOwner(), Generator->TorchFx, Generator->TorchFlame, FRotator::ZeroRotator, Generator->TorchFxScale, LeftComp, false, false);
 	}
 	else
 	{
@@ -138,11 +143,14 @@ bool URDCombatComponent::HoldTorch(bool bHold)
 			for (const FName& N : CarriedOrder) { const int32 Ix = Generator->FindItem(N); if (Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Torch) { TorchItem = N; break; } }
 		}
 		if (TorchItem.IsNone()) { SetMessage(TEXT("You have no torch: an anvil makes one")); return false; }
-		if (!FitOf(TorchItem)) { SetMessage(FString::Printf(TEXT("The %s cannot hold the torch"), *Generator->PlayerTitle.ToLower())); return false; }
+		if (!FitOf(TorchItem)) { SetMessage(FString::Printf(TEXT("The %s cannot hold the %s"), *Generator->PlayerTitle.ToLower(), *TorchItem.ToString().ToLower())); return false; }
 	}
 	bTorchHeld = bHold;
 	UpdateLeftHand(); UpdateWalkSpeed();
-	SetMessage(bHold ? FString(TEXT("You light the torch: it lights your way (your left hand is busy)")) : FString(TEXT("You put out the torch")));
+	const int32 Ti = Generator->FindItem(TorchItem);
+	if (Ti >= 0 && Generator->Items[Ti].Kind == ERDItemKind::Light)
+		SetMessage(bHold ? FString::Printf(TEXT("You raise the %s: its light shows the traps and the unlooted chests near you"), *TorchItem.ToString().ToLower()) : FString::Printf(TEXT("You lower the %s"), *TorchItem.ToString().ToLower()));
+	else SetMessage(bHold ? FString(TEXT("You light the torch: it lights your way (your left hand is busy)")) : FString(TEXT("You put out the torch")));
 	Generator->PlaySoundAt(bHold ? FName(TEXT("Env.Torch")) : FName(TEXT("Player.Inventory")), GetOwner()->GetActorLocation());
 	return true;
 }

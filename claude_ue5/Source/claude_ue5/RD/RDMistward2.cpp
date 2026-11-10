@@ -174,7 +174,7 @@ bool URDCombatComponent::IsQuickableItem(FName Item) const
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
 	if (Ix < 0) return false;
 	const ERDItemKind K = Generator->Items[Ix].Kind;
-	return K == ERDItemKind::Torch || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed;
+	return K == ERDItemKind::Torch || K == ERDItemKind::Light || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed;
 }
 
 bool URDCombatComponent::UseAbility(FName Ability)
@@ -469,6 +469,24 @@ void URDCombatComponent::TickBlockLayer()
 			FProperty* P = AI->GetClass()->FindPropertyByName(TEXT("BlockAlpha"));
 			if (FDoubleProperty* Dp = CastField<FDoubleProperty>(P)) Dp->SetPropertyValue_InContainer(AI, BlockLayerNow);
 			else if (FFloatProperty* Fp = CastField<FFloatProperty>(P)) Fp->SetPropertyValue_InContainer(AI, BlockLayerNow);
+		}
+	}
+	// (the list of 2026-11-10: "when the warrior does a shield block, she should be in a new animation shield block stance": the
+	// stance's legs (a lunge) over her whole body while she stands still in it, BlockLegsAlpha (914 block's AnimBP); moving, her
+	// legs walk as before under the upper body's layer)
+	const ACharacter* Ch = Cast<ACharacter>(GetOwner());
+	const float Sp = Ch ? Ch->GetVelocity().Size2D() : 0.f;
+	const float LegsTarget = BlockLayerTarget > 0.5f && Sp < 40.f ? BlockLayerNow : 0.f;
+	if (BlockLegsNow != LegsTarget)
+	{
+		const float Dt = GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f;
+		BlockLegsNow = FMath::FInterpConstantTo(BlockLegsNow, LegsTarget, Dt, 5.f);
+		USkeletalMeshComponent* M = Body();
+		if (UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr)
+		{
+			FProperty* P = AI->GetClass()->FindPropertyByName(TEXT("BlockLegsAlpha"));
+			if (FDoubleProperty* Dp = CastField<FDoubleProperty>(P)) Dp->SetPropertyValue_InContainer(AI, BlockLegsNow);
+			else if (FFloatProperty* Fp = CastField<FFloatProperty>(P)) Fp->SetPropertyValue_InContainer(AI, BlockLegsNow);
 		}
 	}
 }
