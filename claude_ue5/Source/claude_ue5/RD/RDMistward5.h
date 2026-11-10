@@ -12,6 +12,7 @@
 class USkeletalMeshComponent;
 class UAnimationAsset;
 class USkeletalMesh;
+struct FRDCrowdParts;
 
 UCLASS()
 class CLAUDE_UE5_API ARDSpectator : public AActor
@@ -20,7 +21,7 @@ class CLAUDE_UE5_API ARDSpectator : public AActor
 public:
 	ARDSpectator();
 	/** its body, its clips (claps and cheers: one is chosen each time), its seed (its own delays) */
-	void Init(USkeletalMesh* Mesh, UAnimationAsset* InIdle, const TArray<UAnimationAsset*>& InClaps, const TArray<UAnimationAsset*>& InCheers, int32 Seed);
+	void Init(USkeletalMesh* Mesh, UAnimationAsset* InIdle, const TArray<UAnimationAsset*>& InClaps, const TArray<UAnimationAsset*>& InCheers, int32 Seed, const FRDCrowdParts* Parts = nullptr);
 	/** after Delay seconds: a clap (or a cheer) once, then back to idle */
 	void React(bool bCheer, float Delay);
 	/** what it does now: "idle", "clap", "cheer", "leaving" (tests) */
@@ -32,12 +33,15 @@ public:
 	bool IsLeaving() const { return LeaveAt >= 0.f; }
 	bool ShouldGo() const { return LeaveAt >= 0.f && Age >= LeaveAt; }
 	USkeletalMeshComponent* GetBody() const { return Body; }
+	/** its head and hair put on (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") int32 GetPartCount() const { return PartsMade.Num(); }
 protected:
 	virtual void Tick(float Dt) override;
 private:
 	UPROPERTY() TObjectPtr<USceneComponent> Root;
 	UPROPERTY() TObjectPtr<USkeletalMeshComponent> Body;
 	UPROPERTY(Transient) TObjectPtr<UAnimationAsset> IdleAnim;
+	UPROPERTY(Transient) TArray<TObjectPtr<USkeletalMeshComponent>> PartsMade;
 	UPROPERTY(Transient) TArray<TObjectPtr<UAnimationAsset>> Claps;
 	UPROPERTY(Transient) TArray<TObjectPtr<UAnimationAsset>> Cheers;
 	FRandomStream R;

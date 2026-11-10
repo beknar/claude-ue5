@@ -83,6 +83,7 @@ void ARDDungeonGenerator::BeginSky7()
 		SkyClouds->SetMaterial(SkyCloudMID);
 		SkyClouds->SetLayerBottomAltitude(1.6f);
 		SkyClouds->SetLayerHeight(4.f);
+		SkyClouds->SetTracingMaxDistance(SkyCloudTraceKm);          // (the list of 2026-11-10: out to the horizon)
 	}
 	// (the list of 2026-11-08b: "when looking up at the sky, there is a blue outline against any object ... whenever there is
 	// any blue sky"; "when there is no blue sky, there is a grey shimmering border around objects on the ground". The clouds
@@ -192,6 +193,7 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	// ---- what follows her camera every frame: the dome, the moon, the rain or snow
 	FVector Cam = L;
 	if (PC && PC->PlayerCameraManager) Cam = PC->PlayerCameraManager->GetCameraLocation();
+	TickFarLand(Cam);          // (the list of 2026-11-10: the far land to the horizon)
 	if (SkyStars) SkyStars->SetWorldLocationAndRotation(Cam, FRotator(0.f, SkyTime * 0.15f, 0.f));
 	if (SkyHigh) SkyHigh->SetWorldLocationAndRotation(Cam, FRotator(0.f, SkyTime * 0.6f, 0.f));
 	if (SkyMoon && DayMoon)

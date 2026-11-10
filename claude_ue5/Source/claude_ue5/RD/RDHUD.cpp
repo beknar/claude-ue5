@@ -1055,6 +1055,10 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 		}
 		// (mistward: the traps she has seen: the Rogue's)
 		for (const ARDSection::FTrapInst& T : S->TrapList) if (T.bSeen && T.State == 0) Out.Add({ FVector2D(T.At), 11 });
+		// (the list of 2026-11-10: "there should be an indicator on the map if a player walks into a room and there are prisoners
+		// in the cells": a cell still holding its prisoner, once its room is discovered (she has been in it))
+		for (const ARDSection::FCell& Cl : S->Cells)
+			if (Cl.Occupant == 1 && !Cl.bOpened && Cl.Who.IsValid() && Discovered(Cl.Frame.GetLocation())) Out.Add({ FVector2D(Cl.Frame.GetLocation()), 13 });
 	}
 	// (mistward: what the tiers' openings set waiting (a boss: wherever it is; a guarded ring until its container is opened),
 	// her dropped things, the teleporter pads she has seen)
@@ -1073,6 +1077,7 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 	}
 	for (const ARDLootPile* Lp : Gen->LootPiles) if (IsValid(Lp) && Lp->bHers) Out.Add({ FVector2D(Lp->GetActorLocation()), 9 });
 	for (const TPair<int32, FVector>& Pd : Gen->Pads) if (Discovered(Pd.Value) || Pd.Key == 1) Out.Add({ FVector2D(Pd.Value), 10 });
+	for (const TPair<int32, FVector>& Bp : Gen->BossPorts) if (Discovered(Bp.Value)) Out.Add({ FVector2D(Bp.Value), 10 });          // (a boss's teleporter)
 	// (mistward4: her allies, wherever they are)
 	if (Gen->bAllyMarkers)
 		for (const ARDMonster* Al : Gen->GetAllies()) if (IsValid(Al) && !Al->IsDead()) Out.Add({ FVector2D(Al->GetActorLocation()), 12 });
@@ -1105,6 +1110,17 @@ void ARDHUD::MistMark(int32 Kind, const FVector2D& S, float Sz)
 		DrawLine(S.X - Sz * 0.7f, S.Y - Sz * 0.7f, S.X + Sz * 0.7f, S.Y + Sz * 0.7f, BossC, Sz * 0.3f);
 		DrawLine(S.X - Sz * 0.7f, S.Y + Sz * 0.7f, S.X + Sz * 0.7f, S.Y - Sz * 0.7f, BossC, Sz * 0.3f);
 		break;
+	case 13:
+	{
+		// (the list of 2026-11-10: a prisoner in a cell, a pale figure behind three bars)
+		static const FLinearColor PrisC(0.95f, 0.9f, 0.75f, 1.f), BarC(0.55f, 0.6f, 0.7f, 1.f);
+		SoftDot(S, Sz * 1.8f, RDTacA(PrisC, 0.3f));
+		SoftDot(S - FVector2D(0.f, Sz * 0.45f), Sz * 0.38f, PrisC);
+		Box(S + FVector2D(-Sz * 0.32f, -Sz * 0.05f), S + FVector2D(Sz * 0.32f, Sz * 0.75f), PrisC);
+		for (const float Bx : { -0.6f, 0.f, 0.6f }) DrawLine(S.X + Sz * Bx, S.Y - Sz * 0.95f, S.X + Sz * Bx, S.Y + Sz * 0.95f, BarC, Sz * 0.2f);
+		DrawLine(S.X - Sz * 0.85f, S.Y - Sz * 0.95f, S.X + Sz * 0.85f, S.Y - Sz * 0.95f, BarC, Sz * 0.2f);
+		break;
+	}
 	case 12:
 	{
 		// (mistward4: her ally, a green ring with a green middle: the monsters are red dots and orange triangles)
@@ -1439,16 +1455,21 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 		if (Gen->MaxTier > 0) Key(5, TEXT("sealed passage"));
 		if (Gen->Recipes.Num() > 0) Key(6, TEXT("anvil: make repair items"));
 		// (mistward: its own markers, a column of their own to the right of the key)
-		if (Gen->bBossEncounters || Gen->bRingGuards || Gen->bDropOnDeath || Gen->bTeleporters || Gen->Traps.Num() > 0 || Gen->bAllyMarkers)
+		const bool bPrisonKey = Gen->PrisonerDefs.Num() > 0;
+		if (Gen->bBossEncounters || Gen->bRingGuards || Gen->bDropOnDeath || Gen->bTeleporters || Gen->Traps.Num() > 0 || Gen->bAllyMarkers || bPrisonKey)
 		{
-			float Y2 = B.Y - (Gen->bAllyMarkers ? 189.f : 166.f) * Sc; const float X2 = X + 250.f * Sc;
+			// (its lines from the bottom up: 23 a line over the 51 of the rim; 166 for five, as before)
+			const int32 Nk = (Gen->bBossEncounters ? 1 : 0) + (Gen->bRingGuards ? 1 : 0) + (Gen->bDropOnDeath ? 1 : 0) + (Gen->bTeleporters || Gen->bBossPorts ? 1 : 0)
+				+ (Gen->Traps.Num() > 0 && Gen->HeroFindsTraps() ? 1 : 0) + (Gen->bAllyMarkers ? 1 : 0) + (bPrisonKey ? 1 : 0);
+			float Y2 = B.Y - (51.f + 23.f * FMath::Max(Nk, 5)) * Sc; const float X2 = X + 250.f * Sc;
 			auto Key2 = [&](int32 Kind, const TCHAR* What) { MistMark(Kind, FVector2D(X2 + 6.f * Sc, Y2 + 8.f * Sc), 6.f * Sc); UI.Text(What, Ink, X2 + 24.f * Sc, Y2, Small, Sc); Y2 += 23.f * Sc; };
 			if (Gen->bBossEncounters) Key2(7, TEXT("a tier's boss"));
 			if (Gen->bRingGuards) Key2(8, TEXT("a guarded ring"));
 			if (Gen->bDropOnDeath) Key2(9, TEXT("your dropped things"));
-			if (Gen->bTeleporters) Key2(10, TEXT("teleporter"));
+			if (Gen->bTeleporters || Gen->bBossPorts) Key2(10, TEXT("teleporter"));
 			if (Gen->Traps.Num() > 0 && Gen->HeroFindsTraps()) Key2(11, TEXT("a trap you have seen"));
 			if (Gen->bAllyMarkers) Key2(12, TEXT("your ally"));
+			if (bPrisonKey) Key2(13, TEXT("a prisoner in a cell"));
 		}
 	}
 	int32 Disc = 0, All = 0; Gen->GetDiscoveryStats(Disc, All);

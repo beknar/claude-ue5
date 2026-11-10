@@ -152,7 +152,8 @@ void ARDDungeonGenerator::TickShow7(float RealDt, APlayerController* PC)
 			for (UInstancedStaticMeshComponent* C : Ics)
 			{
 				const UMaterialInterface* M = C ? C->GetMaterial(0) : nullptr;
-				if (!M || !M->GetName().StartsWith(TEXT("MI_BS_Sign_"))) continue;
+				// (not the see-through's hidden copies: their parked slots stand under the town's middle)
+				if (!M || !M->GetName().StartsWith(TEXT("MI_BS_Sign_")) || C->ComponentHasTag(TEXT("RDSeeProxy"))) continue;
 				for (int32 K = 0; K < C->GetInstanceCount(); ++K)
 				{
 					FTransform T; C->GetInstanceTransform(K, T, true);

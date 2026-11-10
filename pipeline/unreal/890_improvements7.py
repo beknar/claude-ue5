@@ -251,7 +251,11 @@ def sky():
     uv = b.n(unreal.MaterialExpressionTextureCoordinate, -1200, u_tiling=2.0, v_tiling=1.0)
     pn = b.n(unreal.MaterialExpressionPanner, -1000, speed_x=0.002, speed_y=0.0005); b.c(uv, "", pn, "Coordinate")
     cu = b.n(unreal.MaterialExpressionCustom, -1000)
-    cu.set_editor_property("code", "float3 d = normalize(P - C);\nreturn 1.0 - smoothstep(0.55, 0.85, d.z);")
+    # (the list of 2026-11-10: "there is still a disc in the sky in the day time": faded out between 0.55 and 0.85 the high
+    # clouds left a clear round patch overhead with wisps all round it, a disc against the blue (884 sky10's pictures straight
+    # up). They thin now over most of the sky's height, nothing left only at the top where they pinch, and they fade at the
+    # horizon too, where the dome dips under it)
+    cu.set_editor_property("code", "float3 d = normalize(P - C);\nreturn smoothstep(-0.02, 0.12, d.z) * (1.0 - smoothstep(0.25, 0.98, d.z));")
     cu.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT1)
     ins = []
     for nm in ("P", "C"):

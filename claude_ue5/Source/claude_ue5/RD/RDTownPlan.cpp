@@ -2979,12 +2979,82 @@ void ARDSection::CastleStairBuild()
 	const float Th = FMath::Max((float)Cw->Size.X, 40.f), Len = FMath::Max((float)Cw->Size.Y, 100.f), Ht = FMath::Max((float)Cw->Size.Z, 100.f);
 	const float Run = RDTCSteps * RDTCStepRun, Rise = Top / RDTCSteps;
 	const float Yc = Hy - RDTCStairWidth * 0.5f - 10.f;
-	// the steps: each a block of Castle Forge's stone from the floor to its tread (the stair one solid mass, as a stone stair
-	// against a wall is), 2 cm over the next so that no seam shows
-	for (int32 I = 0; I < RDTCSteps; ++I)
+	if (Generator->StairBlockMaterial && bBuildStatic)
 	{
-		const float X = Hx - M - Run + (I + 0.5f) * RDTCStepRun, H = (I + 1) * Rise;
-		AddPiece(TEXT("Town.CWall"), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, X, Yc, 0.f), FVector((RDTCStepRun + 2.f) / Th, RDTCStairWidth / Len, H / Ht)));
+		// (the list of 2026-11-10: "the stairway to get into the guard towers in mistward castle looks like a series of stairs was
+		// built up and angled until it reached the top. a stone stairway should look like this: E:\temp\stonestairway.jpg"; the
+		// steps were 30 wall pieces each squashed or stretched to its own height, every one's courses another size (884 k10g's
+		// picture)). As the picture's: a dressed block for each step, a rise thick, standing 6 cm proud of the wall under it on the
+		// open side with a 3 cm nose; under them a coursed wall stepping up with the stair, its stone the castle wall's at the wall's
+		// own scale (planar texture coordinates in the castle's frame, so the courses run on from step to step). One mesh, its
+		// collision the blocks' and the wall's own.
+		const FVector Org = GetActorLocation();
+		const float X0 = Hx - M - Run, Ya = Yc - RDTCStairWidth * 0.5f, Yb = Yc + RDTCStairWidth * 0.5f;
+		const float Proud = 6.f, Nose = 3.f;
+		struct FRDStairMesh { TArray<FVector> V, N; TArray<int32> T; TArray<FVector2D> UV; TArray<FProcMeshTangent> Tg; };
+		FRDStairMesh Blk, Wal;
+		// a face from four corners in the castle's frame, its outward way; the triangles' front outward (UE's procedural mesh draws
+		// the side where cross(V1 - V0, V2 - V0) points away from the viewer), the texture laid by the face's axis
+		auto Face = [&](FRDStairMesh& Ms, float Cm, const FVector& A, const FVector& Bq, const FVector& C, const FVector& D, const FVector& Out)
+		{
+			const int32 I0 = Ms.V.Num();
+			// (the outward way in the world from the frame itself, whichever way the frame turns)
+			const FVector Ow = (TownBldPoint(B, A.X + Out.X, A.Y + Out.Y, A.Z + Out.Z) - TownBldPoint(B, A.X, A.Y, A.Z)).GetSafeNormal();
+			// (the tangent along the texture's U: the frame's X, or its Y on a face across X; without it the stone's normal map lit
+			// the wall dark (884 k10h's picture))
+			const FVector Ua = FMath::Abs(Out.X) > 0.5f ? FVector(0, 1, 0) : FVector(1, 0, 0);
+			const FVector Uw = (TownBldPoint(B, A.X + Ua.X, A.Y + Ua.Y, A.Z) - TownBldPoint(B, A.X, A.Y, A.Z)).GetSafeNormal();
+			for (const FVector& P : { A, Bq, C, D })
+			{
+				Ms.V.Add(TownBldPoint(B, P.X, P.Y, P.Z) - Org); Ms.N.Add(Ow); Ms.Tg.Add(FProcMeshTangent(Uw, false));
+				Ms.UV.Add(FMath::Abs(Out.Z) > 0.5f ? FVector2D(P.X, P.Y) / Cm : FMath::Abs(Out.X) > 0.5f ? FVector2D(P.Y, -P.Z) / Cm : FVector2D(P.X, -P.Z) / Cm);
+			}
+			const FVector Cr = FVector::CrossProduct(Ms.V[I0 + 1] - Ms.V[I0], Ms.V[I0 + 2] - Ms.V[I0]);
+			if (FVector::DotProduct(Cr, Ow) < 0.f) Ms.T.Append({ I0, I0 + 1, I0 + 2, I0, I0 + 2, I0 + 3 });
+			else Ms.T.Append({ I0, I0 + 2, I0 + 1, I0, I0 + 3, I0 + 2 });
+		};
+		auto Box = [&](FRDStairMesh& Ms, float Cm, const FVector& L, const FVector& H, bool bBottom, bool bBack)
+		{
+			Face(Ms, Cm, FVector(L.X, L.Y, H.Z), FVector(H.X, L.Y, H.Z), FVector(H.X, H.Y, H.Z), FVector(L.X, H.Y, H.Z), FVector(0, 0, 1));
+			if (bBottom) Face(Ms, Cm, FVector(L.X, L.Y, L.Z), FVector(L.X, H.Y, L.Z), FVector(H.X, H.Y, L.Z), FVector(H.X, L.Y, L.Z), FVector(0, 0, -1));
+			Face(Ms, Cm, FVector(L.X, L.Y, L.Z), FVector(L.X, L.Y, H.Z), FVector(L.X, H.Y, H.Z), FVector(L.X, H.Y, L.Z), FVector(-1, 0, 0));
+			if (bBack) Face(Ms, Cm, FVector(H.X, L.Y, L.Z), FVector(H.X, H.Y, L.Z), FVector(H.X, H.Y, H.Z), FVector(H.X, L.Y, H.Z), FVector(1, 0, 0));
+			Face(Ms, Cm, FVector(L.X, L.Y, L.Z), FVector(H.X, L.Y, L.Z), FVector(H.X, L.Y, H.Z), FVector(L.X, L.Y, H.Z), FVector(0, -1, 0));
+		};
+		const float Bc = FMath::Max(Generator->StairBlockUVCm, 10.f), Wc = FMath::Max(Generator->StairWallUVCm, 10.f);
+		for (int32 I = 0; I < RDTCSteps; ++I)
+		{
+			const float Xa = X0 + I * RDTCStepRun;
+			// (a block: its nose over the step below, its open end proud of the wall; its underside shows only where it stands proud)
+			Box(Blk, Bc, FVector(Xa - Nose, Ya - Proud, I * Rise), FVector(Xa + RDTCStepRun, Yb, (I + 1) * Rise), true, I == RDTCSteps - 1);
+			// (the wall under it, from the floor to the block, its face set back by the blocks' stand; the first block lies on the floor)
+			if (I > 0) Box(Wal, Wc, FVector(Xa, Ya, 0.f), FVector(Xa + RDTCStepRun, Yb, I * Rise), false, false);
+		}
+		UProceduralMeshComponent* Pm = NewObject<UProceduralMeshComponent>(this);
+		Pm->ComponentTags.Add(TEXT("RDCastleStair"));
+		Pm->SetupAttachment(RootComponent);
+		Pm->SetCollisionProfileName(TEXT("BlockAll"));
+		Pm->bUseAsyncCooking = false;
+		Pm->SetCastShadow(true);
+		Pm->RegisterComponent();
+		AddInstanceComponent(Pm);
+		Pm->SetWorldLocation(Org); Pm->SetWorldRotation(FRotator::ZeroRotator);
+		Pm->CreateMeshSection(0, Blk.V, Blk.T, Blk.N, Blk.UV, TArray<FColor>(), Blk.Tg, true);
+		Pm->CreateMeshSection(1, Wal.V, Wal.T, Wal.N, Wal.UV, TArray<FColor>(), Wal.Tg, true);
+		Pm->SetMaterial(0, Generator->StairBlockMaterial);
+		UMaterialInterface* Wm = Generator->StairWallMaterial ? Generator->StairWallMaterial.Get() : Cw->Material ? Cw->Material.Get() : Cw->Mesh ? Cw->Mesh->GetMaterial(0) : nullptr;
+		if (Wm) Pm->SetMaterial(1, Wm);
+		CastleStairMesh = Pm;
+	}
+	else
+	{
+		// the steps: each a block of Castle Forge's stone from the floor to its tread (the stair one solid mass, as a stone stair
+		// against a wall is), 2 cm over the next so that no seam shows
+		for (int32 I = 0; I < RDTCSteps; ++I)
+		{
+			const float X = Hx - M - Run + (I + 0.5f) * RDTCStepRun, H = (I + 1) * Rise;
+			AddPiece(TEXT("Town.CWall"), FTransform(FRotator(0, Yaw0, 0), TownBldPoint(B, X, Yc, 0.f), FVector((RDTCStepRun + 2.f) / Th, RDTCStairWidth / Len, H / Ht)));
+		}
 	}
 	// the stairwell's balustrade on the walk, a metre high round the opening but where the stair comes up: along its inner side,
 	// its back end and the rest of its front end beside the stair's top

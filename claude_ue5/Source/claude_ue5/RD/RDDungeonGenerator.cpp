@@ -1429,6 +1429,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	LootPiles.Reset(); Harvests = HarvestRolls = 0;
 	Pads.Reset(); PadSections.Reset(); PadRingsTaken.Reset(); PadActors.Reset(); PadChoice = 0; Teleports = 0;
 	CellsOpened.Reset(); PrisonersFreed = CellBreakouts = 0;
+	ClearBossPorts(); ShelvesSearched.Reset(); ShelvesSearchedCount = 0; ClearSeeThrough();          // (the list of 2026-11-10)
 	SpentTraps.Reset(); DisarmKey = FIntVector(0, 0, -1); TrapsTriggered = TrapsDisarmed = TrapHits = 0; LastTrap.Reset();
 	TrapR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x7D15u)); PendingRingTiers.Reset(); RestoredBossTiers.Reset(); RestoredRingTiers.Reset();
 	// (the third list: the tables' weapons back, the fixtures full, the arenas and vaults as they were, the slashes not given)
@@ -1496,6 +1497,9 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the third list: an armory table's weapon, a shrine, a fountain, a vault's door)
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = UseSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = UsePadNear(From); if (!Pd.IsEmpty()) return Pd; }
+	// (the list of 2026-11-10: a boss's teleporter; a library's shelf, when no door or container is nearer)
+	if (bBossPorts) { const FString Bp = BossPortUse(From); if (!Bp.IsEmpty()) return Bp; }
+	if (bLibraryShelves) { const FString Sh = ShelfSearch(From); if (!Sh.IsEmpty()) return Sh; }
 	if (Traps.Num() > 0 && BeginDisarmNear(From)) return TEXT("disarm");
 	// (level 5: an anvil nearer than any door or container opens her crafting panel)
 	FVector Anvil;
@@ -1604,6 +1608,8 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (bTown || bTownLink) { const FString Tw = TownDescribe(From); if (!Tw.IsEmpty()) return Tw; }
 	if (bSpecialRooms || bWeaponPickups) { const FString Sp = DescribeSpecialNear(From); if (!Sp.IsEmpty()) return Sp; }
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
+	if (bBossPorts) { const FString Bp = BossPortDescribe(From); if (!Bp.IsEmpty()) return Bp; }
+	if (bLibraryShelves) { const FString Sh = ShelfDescribe(From); if (!Sh.IsEmpty()) return Sh; }
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
@@ -1884,6 +1890,12 @@ void ARDDungeonGenerator::Tick(float Dt)
 			const TArray<int32> D = GetPadDestinations();
 			if (D.Num() > 0) { const int32 I = D.Find(PadChoice); PadChoice = D[(I == INDEX_NONE ? 0 : I + 1) % D.Num()]; }
 		}
+	// (the list of 2026-11-10: G at a boss's teleporter turns it between the first room and the town)
+	if (bBossPorts && BossPorts.Num() > 0)
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0); PC && PC->GetPawn() && PC->WasInputKeyJustPressed(EKeys::G) && BossPortNear(PC->GetPawn()->GetActorLocation()) > 0 && CanBossPortToTown())
+			BossPortChoice = 1 - BossPortChoice;
+	if (bSeeThrough) TickSeeThrough(Dt);
+	else if (SeeHidden.Num() > 0) ClearSeeThrough();
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
 	else TickMusic(Dt);         // (the self test measures single sounds: no music under them, only the room tone)
 	const AActor* Pawn = GetTrackedActor();

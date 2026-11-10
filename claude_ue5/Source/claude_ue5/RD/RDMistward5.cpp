@@ -258,10 +258,24 @@ ARDSpectator::ARDSpectator()
 	Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 }
 
-void ARDSpectator::Init(USkeletalMesh* Mesh, UAnimationAsset* InIdle, const TArray<UAnimationAsset*>& InClaps, const TArray<UAnimationAsset*>& InCheers, int32 Seed)
+void ARDSpectator::Init(USkeletalMesh* Mesh, UAnimationAsset* InIdle, const TArray<UAnimationAsset*>& InClaps, const TArray<UAnimationAsset*>& InCheers, int32 Seed, const FRDCrowdParts* Parts)
 {
 	R.Initialize(Seed);
 	Body->SetSkeletalMesh(Mesh);
+	// (the list of 2026-11-10: "some of the NPC crowd in the Arena have no heads": the pack's _Full_02 bodies carry their head and
+	// hair as meshes of their own, put on as the townsfolk's are, following the body)
+	if (Parts)
+		for (USkeletalMesh* P : Parts->Parts)
+		{
+			if (!P) continue;
+			USkeletalMeshComponent* C = NewObject<USkeletalMeshComponent>(this);
+			C->SetSkeletalMeshAsset(P);
+			C->SetupAttachment(Body);
+			C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			C->RegisterComponent();
+			C->SetLeaderPoseComponent(Body);
+			PartsMade.Add(C);
+		}
 	IdleAnim = InIdle;
 	for (UAnimationAsset* A : InClaps) if (A) Claps.Add(A);
 	for (UAnimationAsset* A : InCheers) if (A) Cheers.Add(A);
@@ -371,7 +385,7 @@ void ARDDungeonGenerator::CrowdAppear(ARDSection* S, int32 Room)
 		FActorSpawnParameters Pa; Pa.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		ARDSpectator* A = GetWorld()->SpawnActor<ARDSpectator>(ARDSpectator::StaticClass(), FTransform(FRotator(0, Sp.Yaw, 0), Sp.P), Pa);
 		if (!A) continue;
-		A->Init(CrowdMeshes[Sp.H % (uint32)CrowdMeshes.Num()], CrowdIdle, ClapList, CheerList, (int32)Sp.H);
+		{ const int32 Bi = (int32)(Sp.H % (uint32)CrowdMeshes.Num()); A->Init(CrowdMeshes[Bi], CrowdIdle, ClapList, CheerList, (int32)Sp.H, CrowdParts.IsValidIndex(Bi) ? &CrowdParts[Bi] : nullptr); }
 		if (CrowdAppearFx) RDMSpawnFx(this, CrowdAppearFx, Sp.P + FVector(0, 0, 60.f), FRotator::ZeroRotator, CrowdAppearFxScale, nullptr, true, true);
 		Crowd.Add(A); Taken.Add(Sp.P); ++Made;
 	}
