@@ -1,0 +1,152 @@
+{
+ "tag": "a10b",
+ "plan": [
+  "animals10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "animals10",
+   "ok": true,
+   "kinds": {
+    "SK_Tripo_Chicken": 30,
+    "SK_Tripo_Pig": 9,
+    "SK_Tripo_Goat": 12,
+    "SK_Farm_Cow": 5,
+    "SK_Tripo_Rabbit": 10
+   },
+   "each": {
+    "SK_Farm_Cow": {
+     "mesh": "SK_Farm_Cow",
+     "materials": [
+      "M_Farm_Cow_A_coat",
+      "M_Farm_Cow_A_black",
+      "M_Farm_Cow_A_udder",
+      "M_Farm_Cow_A_muzzle",
+      "M_Farm_Cow_A_nostril",
+      "M_Farm_Cow_A_hoof",
+      "M_Farm_Cow_A_horn",
+      "M_Farm_Cow_A_tuft",
+      "M_Farm_Cow_A_eye"
+     ],
+     "plays": true
+    },
+    "SK_Tripo_Chicken": {
+     "mesh": "SK_Tripo_Chicken",
+     "materials": [
+      "M_Tripo_Chicken"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      0.8,
+      2.0
+     ],
+     "feet_head_rest_cm": [
+      1.0,
+      1.0
+     ],
+     "feet_off_cm": 1.0
+    },
+    "SK_Tripo_Goat": {
+     "mesh": "SK_Tripo_Goat",
+     "materials": [
+      "M_Tripo_Goat"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_head_rest_cm": [
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_off_cm": 0.0
+    },
+    "SK_Tripo_Pig": {
+     "mesh": "SK_Tripo_Pig",
+     "materials": [
+      "M_Tripo_Pig"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      4.0,
+      4.0,
+      4.0,
+      4.0
+     ],
+     "feet_head_rest_cm": [
+      4.0,
+      4.0,
+      4.0,
+      4.0
+     ],
+     "feet_off_cm": 0.0
+    },
+    "SK_Tripo_Rabbit": {
+     "mesh": "SK_Tripo_Rabbit",
+     "materials": [
+      "M_Tripo_Rabbit"
+     ],
+     "plays": true,
+     "feet_head_over_ground_cm": [
+      0.6,
+      2.9,
+      0.6,
+      3.0
+     ],
+     "feet_head_rest_cm": [
+      1.2,
+      2.0,
+      1.2,
+      2.0
+     ],
+     "feet_off_cm": 1.0
+    }
+   },
+   "shots": [
+    "animals10_cow",
+    "animals10_chicken",
+    "animals10_goat",
+    "animals10_pig",
+    "animals10_rabbit"
+   ],
+   "moved_of": {
+    "SK_Tripo_Chicken": [
+     29,
+     30
+    ],
+    "SK_Tripo_Pig": [
+     7,
+     9
+    ],
+    "SK_Tripo_Goat": [
+     12,
+     12
+    ],
+    "SK_Farm_Cow": [
+     4,
+     5
+    ],
+    "SK_Tripo_Rabbit": [
+     10,
+     10
+    ]
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_a10b_animals10_cow.png",
+  "bs_a10b_animals10_chicken.png",
+  "bs_a10b_animals10_goat.png",
+  "bs_a10b_animals10_pig.png",
+  "bs_a10b_animals10_rabbit.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

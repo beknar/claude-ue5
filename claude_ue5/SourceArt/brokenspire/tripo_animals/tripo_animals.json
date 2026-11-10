@@ -1,0 +1,1310 @@
+{
+ "fps": 30,
+ "units": "cm",
+ "faces": "+X",
+ "Chicken": {
+  "glb": "chicken.glb",
+  "placed": {
+   "turn_deg": 0.0,
+   "scale": 0.4212
+  },
+  "fit": {
+   "axis_scale": [
+    0.936,
+    1.008,
+    1.0
+   ],
+   "feet": {
+    "leg_l": [
+     7.9,
+     4.5,
+     1567
+    ],
+    "leg_r": [
+     5.0,
+     -4.5,
+     1537
+    ]
+   }
+  },
+  "size_cm": {
+   "length_x": 35.2,
+   "width_y": 23.6,
+   "height_z": 42.1,
+   "min": [
+    -14.0,
+    -11.0,
+    0.0
+   ],
+   "max": [
+    21.2,
+    12.6,
+    42.1
+   ],
+   "back_height": 30.3
+  },
+  "triangles": 10670,
+  "vertices": 22738,
+  "bones": [
+   "root",
+   "pelvis",
+   "spine_01",
+   "neck_01",
+   "neck_02",
+   "head",
+   "tail_01",
+   "wing_l",
+   "wing_r",
+   "thigh_l",
+   "shin_l",
+   "tarsus_l",
+   "toes_l",
+   "thigh_r",
+   "shin_r",
+   "tarsus_r",
+   "toes_r"
+  ],
+  "legs": {
+   "leg_l": [
+    "thigh_l",
+    "shin_l",
+    "tarsus_l",
+    "toes_l"
+   ],
+   "leg_r": [
+    "thigh_r",
+    "shin_r",
+    "tarsus_r",
+    "toes_r"
+   ]
+  },
+  "foot_head_z": {
+   "leg_l": 1.0,
+   "leg_r": 1.0
+  },
+  "rest_pose_rebuilt_err_cm": 0.2378,
+  "weights": {
+   "sum_min": 1.0,
+   "sum_max": 1.0,
+   "bones_per_vertex_max": 4,
+   "unweighted_vertices": 0,
+   "farthest_from_moving_bone_cm": 13.9,
+   "that_bone": "wing_l"
+  },
+  "clips": {
+   "Idle": {
+    "length_s": 5.0,
+    "frames": 151,
+    "ik_overreach_cm": {
+     "leg_l": 0.0,
+     "leg_r": 0.0
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 3.168,
+    "edge_squash_min": 0.237,
+    "edge_stretch_p99_5": 1.528,
+    "loop_seam_cm": 0.0,
+    "feet": {
+     "leg_l": {
+      "sole_z_min": 0.02,
+      "sole_z_max": 0.021,
+      "slide_cm": 0.0
+     },
+     "leg_r": {
+      "sole_z_min": 0.165,
+      "sole_z_max": 0.165,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Graze": {
+    "length_s": 4.0,
+    "frames": 121,
+    "ik_overreach_cm": {
+     "leg_l": 0.0,
+     "leg_r": 0.0
+    },
+    "neck_down_deg": 118.43,
+    "head_below_horizontal_deg": 70,
+    "mouth_z_solved": 0.4,
+    "lowest_vertex_z": -0.011,
+    "edge_stretch_max": 4.617,
+    "edge_squash_min": 0.052,
+    "edge_stretch_p99_5": 2.164,
+    "loop_seam_cm": 0.0,
+    "mouth_lowest_z": 0.39,
+    "mouth_highest_z": 13.59,
+    "feet": {
+     "leg_l": {
+      "sole_z_min": 0.086,
+      "sole_z_max": 0.139,
+      "slide_cm": 0.032
+     },
+     "leg_r": {
+      "sole_z_min": 0.196,
+      "sole_z_max": 0.232,
+      "slide_cm": 0.041
+     }
+    }
+   },
+   "Walk": {
+    "length_s": 0.7,
+    "frames": 22,
+    "ik_overreach_cm": {
+     "leg_l": 0.0,
+     "leg_r": 0.0
+    },
+    "designed_speed_cm_s": 21.8,
+    "wanted_speed_cm_s": 35,
+    "stance_sweep_cm": {
+     "leg": 9.1
+    },
+    "half_sweep_limit_cm": {
+     "leg_l": 4.57,
+     "leg_r": 5.42
+    },
+    "lowest_vertex_z": -0.05,
+    "edge_stretch_max": 5.029,
+    "edge_squash_min": 0.136,
+    "edge_stretch_p99_5": 1.788,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 21.7,
+    "feet": {
+     "leg_l": {
+      "stance_frames": 10,
+      "speed_cm_s": 21.35,
+      "off_steady_cm": 0.011,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.03,
+      "sole_z_max": 0.068
+     },
+     "leg_r": {
+      "stance_frames": 9,
+      "speed_cm_s": 22.05,
+      "off_steady_cm": 0.001,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.143,
+      "sole_z_max": 0.188
+     }
+    }
+   }
+  },
+  "walk_speed_cm_s": 21.7,
+  "walk_cycle_s": 0.7,
+  "fbx": "SK_Tripo_Chicken.fbx",
+  "texture": "T_Tripo_Chicken.png"
+ },
+ "Goat": {
+  "glb": "goat.glb",
+  "placed": {
+   "turn_deg": 90.0,
+   "scale": 1.2095
+  },
+  "fit": {
+   "axis_scale": [
+    1.13,
+    1.256,
+    1.0
+   ],
+   "feet": {
+    "front_l": [
+     23.9,
+     10.0,
+     643
+    ],
+    "rear_l": [
+     -39.1,
+     10.0,
+     612
+    ],
+    "front_r": [
+     28.3,
+     -10.0,
+     645
+    ],
+    "rear_r": [
+     -39.1,
+     -10.2,
+     612
+    ]
+   }
+  },
+  "size_cm": {
+   "length_x": 120.9,
+   "width_y": 40.7,
+   "height_z": 102.7,
+   "min": [
+    -51.1,
+    -20.4,
+    0.0
+   ],
+   "max": [
+    69.7,
+    20.3,
+    102.7
+   ],
+   "back_height": 80.8
+  },
+  "triangles": 10290,
+  "vertices": 21342,
+  "bones": [
+   "root",
+   "pelvis",
+   "spine_01",
+   "spine_02",
+   "neck_01",
+   "neck_02",
+   "head",
+   "jaw",
+   "ear_l",
+   "ear_r",
+   "tail_01",
+   "upperarm_l",
+   "forearm_l",
+   "cannon_front_l",
+   "hoof_front_l",
+   "thigh_l",
+   "shin_l",
+   "cannon_rear_l",
+   "hoof_rear_l",
+   "upperarm_r",
+   "forearm_r",
+   "cannon_front_r",
+   "hoof_front_r",
+   "thigh_r",
+   "shin_r",
+   "cannon_rear_r",
+   "hoof_rear_r"
+  ],
+  "legs": {
+   "front_l": [
+    "upperarm_l",
+    "forearm_l",
+    "cannon_front_l",
+    "hoof_front_l"
+   ],
+   "rear_l": [
+    "thigh_l",
+    "shin_l",
+    "cannon_rear_l",
+    "hoof_rear_l"
+   ],
+   "front_r": [
+    "upperarm_r",
+    "forearm_r",
+    "cannon_front_r",
+    "hoof_front_r"
+   ],
+   "rear_r": [
+    "thigh_r",
+    "shin_r",
+    "cannon_rear_r",
+    "hoof_rear_r"
+   ]
+  },
+  "foot_head_z": {
+   "front_l": 5.0,
+   "rear_l": 5.0,
+   "front_r": 5.0,
+   "rear_r": 5.0
+  },
+  "rest_pose_rebuilt_err_cm": 0.68995,
+  "weights": {
+   "sum_min": 1.0,
+   "sum_max": 1.0,
+   "bones_per_vertex_max": 4,
+   "unweighted_vertices": 0,
+   "farthest_from_moving_bone_cm": 29.0,
+   "that_bone": "upperarm_l"
+  },
+  "clips": {
+   "Idle": {
+    "length_s": 5.0,
+    "frames": 151,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 9.15,
+    "edge_squash_min": 0.129,
+    "edge_stretch_p99_5": 1.831,
+    "loop_seam_cm": 0.0,
+    "feet": {
+     "front_l": {
+      "sole_z_min": 0.059,
+      "sole_z_max": 0.059,
+      "slide_cm": 0.0
+     },
+     "rear_l": {
+      "sole_z_min": 0.177,
+      "sole_z_max": 0.177,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "rear_r": {
+      "sole_z_min": 0.177,
+      "sole_z_max": 0.177,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Graze": {
+    "length_s": 4.0,
+    "frames": 121,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "neck_down_deg": 104.57,
+    "head_below_horizontal_deg": 70,
+    "mouth_z_solved": 1.0,
+    "lowest_vertex_z": -0.013,
+    "edge_stretch_max": 8.879,
+    "edge_squash_min": 0.072,
+    "edge_stretch_p99_5": 2.475,
+    "loop_seam_cm": 0.0,
+    "mouth_lowest_z": -0.01,
+    "mouth_highest_z": 2.64,
+    "feet": {
+     "front_l": {
+      "sole_z_min": 0.059,
+      "sole_z_max": 0.059,
+      "slide_cm": 0.0
+     },
+     "rear_l": {
+      "sole_z_min": 0.177,
+      "sole_z_max": 0.177,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "rear_r": {
+      "sole_z_min": 0.177,
+      "sole_z_max": 0.177,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Walk": {
+    "length_s": 0.85,
+    "frames": 27,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 63.1,
+    "wanted_speed_cm_s": 75,
+    "stance_sweep_cm": {
+     "front": 33.3,
+     "rear": 33.3
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 18.76,
+     "rear_l": 16.64,
+     "front_r": 24.03,
+     "rear_r": 16.64
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 5.622,
+    "edge_squash_min": 0.048,
+    "edge_stretch_p99_5": 1.939,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 63.14,
+    "feet": {
+     "front_l": {
+      "stance_frames": 12,
+      "speed_cm_s": 63.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.059,
+      "sole_z_max": 0.059
+     },
+     "rear_l": {
+      "stance_frames": 12,
+      "speed_cm_s": 63.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.177,
+      "sole_z_max": 0.177
+     },
+     "front_r": {
+      "stance_frames": 12,
+      "speed_cm_s": 63.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_r": {
+      "stance_frames": 13,
+      "speed_cm_s": 63.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.177,
+      "sole_z_max": 0.177
+     }
+    }
+   }
+  },
+  "walk_speed_cm_s": 63.14,
+  "walk_cycle_s": 0.85,
+  "fbx": "SK_Tripo_Goat.fbx",
+  "texture": "T_Tripo_Goat.png"
+ },
+ "Pig": {
+  "glb": "pig.glb",
+  "placed": {
+   "turn_deg": 90.0,
+   "scale": 1.1137
+  },
+  "fit": {
+   "axis_scale": [
+    0.844,
+    0.949,
+    1.0
+   ],
+   "feet": {
+    "front_l": [
+     27.8,
+     9.1,
+     695
+    ],
+    "rear_l": [
+     -30.1,
+     8.9,
+     710
+    ],
+    "front_r": [
+     36.7,
+     -13.5,
+     455
+    ],
+    "rear_r": [
+     -17.5,
+     -11.8,
+     659
+    ]
+   }
+  },
+  "size_cm": {
+   "length_x": 111.3,
+   "width_y": 45.6,
+   "height_z": 68.9,
+   "min": [
+    -43.0,
+    -26.7,
+    0.0
+   ],
+   "max": [
+    68.3,
+    18.9,
+    68.9
+   ],
+   "back_height": 66.3
+  },
+  "triangles": 10011,
+  "vertices": 20791,
+  "bones": [
+   "root",
+   "pelvis",
+   "spine_01",
+   "spine_02",
+   "neck_01",
+   "head",
+   "jaw",
+   "ear_l",
+   "ear_r",
+   "tail_01",
+   "tail_02",
+   "upperarm_l",
+   "forearm_l",
+   "cannon_front_l",
+   "hoof_front_l",
+   "thigh_l",
+   "shin_l",
+   "cannon_rear_l",
+   "hoof_rear_l",
+   "upperarm_r",
+   "forearm_r",
+   "cannon_front_r",
+   "hoof_front_r",
+   "thigh_r",
+   "shin_r",
+   "cannon_rear_r",
+   "hoof_rear_r"
+  ],
+  "legs": {
+   "front_l": [
+    "upperarm_l",
+    "forearm_l",
+    "cannon_front_l",
+    "hoof_front_l"
+   ],
+   "rear_l": [
+    "thigh_l",
+    "shin_l",
+    "cannon_rear_l",
+    "hoof_rear_l"
+   ],
+   "front_r": [
+    "upperarm_r",
+    "forearm_r",
+    "cannon_front_r",
+    "hoof_front_r"
+   ],
+   "rear_r": [
+    "thigh_r",
+    "shin_r",
+    "cannon_rear_r",
+    "hoof_rear_r"
+   ]
+  },
+  "foot_head_z": {
+   "front_l": 4.0,
+   "rear_l": 4.0,
+   "front_r": 4.0,
+   "rear_r": 4.0
+  },
+  "rest_pose_rebuilt_err_cm": 0.77663,
+  "weights": {
+   "sum_min": 1.0,
+   "sum_max": 1.0,
+   "bones_per_vertex_max": 4,
+   "unweighted_vertices": 0,
+   "farthest_from_moving_bone_cm": 30.2,
+   "that_bone": "spine_02"
+  },
+  "clips": {
+   "Idle": {
+    "length_s": 5.0,
+    "frames": 151,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 4.39,
+    "edge_squash_min": 0.075,
+    "edge_stretch_p99_5": 1.751,
+    "loop_seam_cm": 0.0,
+    "feet": {
+     "front_l": {
+      "sole_z_min": 0.326,
+      "sole_z_max": 0.326,
+      "slide_cm": 0.0
+     },
+     "rear_l": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": 0.489,
+      "sole_z_max": 0.49,
+      "slide_cm": 0.0
+     },
+     "rear_r": {
+      "sole_z_min": 0.489,
+      "sole_z_max": 0.489,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Graze": {
+    "length_s": 4.0,
+    "frames": 121,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "neck_down_deg": 87.93,
+    "head_below_horizontal_deg": 62,
+    "mouth_z_solved": 1.0,
+    "lowest_vertex_z": -0.091,
+    "edge_stretch_max": 4.753,
+    "edge_squash_min": 0.075,
+    "edge_stretch_p99_5": 2.411,
+    "loop_seam_cm": 0.0,
+    "mouth_lowest_z": -0.09,
+    "mouth_highest_z": 1.86,
+    "feet": {
+     "front_l": {
+      "sole_z_min": 0.326,
+      "sole_z_max": 0.326,
+      "slide_cm": 0.0
+     },
+     "rear_l": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": 0.489,
+      "sole_z_max": 0.49,
+      "slide_cm": 0.0
+     },
+     "rear_r": {
+      "sole_z_min": 0.489,
+      "sole_z_max": 0.489,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Walk": {
+    "length_s": 0.9,
+    "frames": 28,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 39.1,
+    "wanted_speed_cm_s": 60,
+    "stance_sweep_cm": {
+     "front": 21.8,
+     "rear": 21.8
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 16.13,
+     "rear_l": 12.73,
+     "front_r": 10.92,
+     "rear_r": 13.15
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 4.054,
+    "edge_squash_min": 0.067,
+    "edge_stretch_p99_5": 1.689,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 39.14,
+    "feet": {
+     "front_l": {
+      "stance_frames": 12,
+      "speed_cm_s": 39.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.326,
+      "sole_z_max": 0.326
+     },
+     "rear_l": {
+      "stance_frames": 12,
+      "speed_cm_s": 39.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "front_r": {
+      "stance_frames": 13,
+      "speed_cm_s": 39.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.489,
+      "sole_z_max": 0.49
+     },
+     "rear_r": {
+      "stance_frames": 13,
+      "speed_cm_s": 39.14,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.489,
+      "sole_z_max": 0.489
+     }
+    }
+   }
+  },
+  "walk_speed_cm_s": 39.14,
+  "walk_cycle_s": 0.9,
+  "fbx": "SK_Tripo_Pig.fbx",
+  "texture": "T_Tripo_Pig.png"
+ },
+ "Rabbit": {
+  "glb": "rabbit.glb",
+  "placed": {
+   "turn_deg": -90.0,
+   "scale": 0.3593
+  },
+  "fit": {
+   "axis_scale": [
+    0.902,
+    0.989,
+    1.0
+   ],
+   "feet": {
+    "front_l": [
+     11.6,
+     5.1,
+     1790
+    ],
+    "hind_l": [
+     -1.3,
+     1.9,
+     1626
+    ],
+    "front_r": [
+     11.5,
+     -4.6,
+     1784
+    ],
+    "hind_r": [
+     -2.5,
+     -1.9,
+     1557
+    ]
+   }
+  },
+  "size_cm": {
+   "length_x": 35.9,
+   "width_y": 18.8,
+   "height_z": 32.3,
+   "min": [
+    -9.9,
+    -9.1,
+    0.0
+   ],
+   "max": [
+    26.1,
+    9.7,
+    32.3
+   ],
+   "back_height": 29.2
+  },
+  "triangles": 8897,
+  "vertices": 18389,
+  "bones": [
+   "root",
+   "pelvis",
+   "spine_01",
+   "neck_01",
+   "head",
+   "jaw",
+   "ear_l",
+   "ear_r",
+   "tail_01",
+   "upperarm_l",
+   "forearm_l",
+   "paw_l",
+   "thigh_l",
+   "shin_l",
+   "foot_l",
+   "upperarm_r",
+   "forearm_r",
+   "paw_r",
+   "thigh_r",
+   "shin_r",
+   "foot_r"
+  ],
+  "legs": {
+   "front_l": [
+    "upperarm_l",
+    "forearm_l",
+    "paw_l"
+   ],
+   "hind_l": [
+    "thigh_l",
+    "shin_l",
+    "foot_l"
+   ],
+   "front_r": [
+    "upperarm_r",
+    "forearm_r",
+    "paw_r"
+   ],
+   "hind_r": [
+    "thigh_r",
+    "shin_r",
+    "foot_r"
+   ]
+  },
+  "foot_head_z": {
+   "front_l": 1.2,
+   "hind_l": 2.0,
+   "front_r": 1.2,
+   "hind_r": 2.0
+  },
+  "rest_pose_rebuilt_err_cm": 0.98948,
+  "weights": {
+   "sum_min": 1.0,
+   "sum_max": 1.0,
+   "bones_per_vertex_max": 4,
+   "unweighted_vertices": 0,
+   "farthest_from_moving_bone_cm": 22.9,
+   "that_bone": "neck_01"
+  },
+  "clips": {
+   "Idle": {
+    "length_s": 5.0,
+    "frames": 151,
+    "ik_overreach_cm": {
+     "hind_l": 0.0,
+     "hind_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 7.348,
+    "edge_squash_min": 0.111,
+    "edge_stretch_p99_5": 2.57,
+    "loop_seam_cm": 0.0,
+    "feet": {
+     "front_l": {
+      "sole_z_min": 0.316,
+      "sole_z_max": 0.316,
+      "slide_cm": 0.0
+     },
+     "hind_l": {
+      "sole_z_min": 0.526,
+      "sole_z_max": 0.526,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": 0.316,
+      "sole_z_max": 0.316,
+      "slide_cm": 0.0
+     },
+     "hind_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Graze": {
+    "length_s": 4.0,
+    "frames": 121,
+    "ik_overreach_cm": {
+     "hind_l": 0.0,
+     "hind_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "neck_down_deg": 29.6,
+    "head_below_horizontal_deg": 50,
+    "mouth_z_solved": 0.6,
+    "lowest_vertex_z": -0.277,
+    "edge_stretch_max": 7.349,
+    "edge_squash_min": 0.149,
+    "edge_stretch_p99_5": 2.65,
+    "loop_seam_cm": 0.0,
+    "mouth_lowest_z": -0.28,
+    "mouth_highest_z": 0.31,
+    "feet": {
+     "front_l": {
+      "sole_z_min": 0.316,
+      "sole_z_max": 0.316,
+      "slide_cm": 0.0
+     },
+     "hind_l": {
+      "sole_z_min": 0.526,
+      "sole_z_max": 0.526,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": 0.316,
+      "sole_z_max": 0.316,
+      "slide_cm": 0.0
+     },
+     "hind_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Walk": {
+    "length_s": 0.6,
+    "frames": 19,
+    "ik_overreach_cm": {
+     "hind_l": 0.0,
+     "hind_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 18.7,
+    "wanted_speed_cm_s": 50,
+    "stance_sweep_cm": {
+     "front": 5.6,
+     "hind": 4.5
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 2.83,
+     "hind_l": 5.24,
+     "front_r": 2.8,
+     "hind_r": 5.14
+    },
+    "lowest_vertex_z": -0.026,
+    "edge_stretch_max": 5.911,
+    "edge_squash_min": 0.112,
+    "edge_stretch_p99_5": 1.835,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 18.7,
+    "feet": {
+     "front_l": {
+      "stance_frames": 6,
+      "speed_cm_s": 18.7,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.316,
+      "sole_z_max": 0.316
+     },
+     "hind_l": {
+      "stance_frames": 6,
+      "speed_cm_s": 18.7,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.526,
+      "sole_z_max": 0.526
+     },
+     "front_r": {
+      "stance_frames": 7,
+      "speed_cm_s": 18.7,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.316,
+      "sole_z_max": 0.316
+     },
+     "hind_r": {
+      "stance_frames": 6,
+      "speed_cm_s": 18.7,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     }
+    }
+   }
+  },
+  "walk_speed_cm_s": 18.7,
+  "walk_cycle_s": 0.6,
+  "fbx": "SK_Tripo_Rabbit.fbx",
+  "texture": "T_Tripo_Rabbit.png"
+ },
+ "Horse": {
+  "glb": "ridinghorse.glb",
+  "placed": {
+   "turn_deg": -0.0,
+   "scale": 2.9238
+  },
+  "fit": {
+   "axis_scale": [
+    1.168,
+    1.213,
+    1.0
+   ],
+   "feet": {
+    "front_l": [
+     54.1,
+     15.8,
+     246
+    ],
+    "rear_l": [
+     -81.7,
+     24.9,
+     205
+    ],
+    "front_r": [
+     54.0,
+     -15.9,
+     244
+    ],
+    "rear_r": [
+     -81.6,
+     -25.0,
+     205
+    ]
+   },
+   "tail": {
+    "vertices": 553,
+    "root": [
+     -115.1,
+     -0.0,
+     148.9
+    ],
+    "end": [
+     -122.8,
+     -2.0,
+     53.6
+    ]
+   },
+   "saddle_top_cm": 174.7
+  },
+  "size_cm": {
+   "length_x": 292.2,
+   "width_y": 79.8,
+   "height_z": 214.0,
+   "min": [
+    -139.8,
+    -39.9,
+    0.0
+   ],
+   "max": [
+    152.4,
+    39.9,
+    214.0
+   ],
+   "back_height": 174.7
+  },
+  "triangles": 9742,
+  "vertices": 20534,
+  "bones": [
+   "root",
+   "pelvis",
+   "spine_01",
+   "spine_02",
+   "neck_01",
+   "neck_02",
+   "head",
+   "jaw",
+   "ear_l",
+   "ear_r",
+   "tail_01",
+   "tail_02",
+   "tail_03",
+   "saddle",
+   "upperarm_l",
+   "forearm_l",
+   "cannon_front_l",
+   "hoof_front_l",
+   "thigh_l",
+   "shin_l",
+   "cannon_rear_l",
+   "hoof_rear_l",
+   "upperarm_r",
+   "forearm_r",
+   "cannon_front_r",
+   "hoof_front_r",
+   "thigh_r",
+   "shin_r",
+   "cannon_rear_r",
+   "hoof_rear_r"
+  ],
+  "legs": {
+   "front_l": [
+    "upperarm_l",
+    "forearm_l",
+    "cannon_front_l",
+    "hoof_front_l"
+   ],
+   "rear_l": [
+    "thigh_l",
+    "shin_l",
+    "cannon_rear_l",
+    "hoof_rear_l"
+   ],
+   "front_r": [
+    "upperarm_r",
+    "forearm_r",
+    "cannon_front_r",
+    "hoof_front_r"
+   ],
+   "rear_r": [
+    "thigh_r",
+    "shin_r",
+    "cannon_rear_r",
+    "hoof_rear_r"
+   ]
+  },
+  "foot_head_z": {
+   "front_l": 16.0,
+   "rear_l": 15.0,
+   "front_r": 16.0,
+   "rear_r": 15.0
+  },
+  "rest_pose_rebuilt_err_cm": 3.83359,
+  "weights": {
+   "sum_min": 1.0,
+   "sum_max": 1.0,
+   "bones_per_vertex_max": 4,
+   "unweighted_vertices": 0,
+   "farthest_from_moving_bone_cm": 70.9,
+   "that_bone": "neck_01"
+  },
+  "clips": {
+   "Idle": {
+    "length_s": 5.0,
+    "frames": 151,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 7.146,
+    "edge_squash_min": 0.112,
+    "edge_stretch_p99_5": 1.802,
+    "loop_seam_cm": 0.0,
+    "feet": {
+     "front_l": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "rear_l": {
+      "sole_z_min": 1.428,
+      "sole_z_max": 1.428,
+      "slide_cm": 0.0
+     },
+     "front_r": {
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0,
+      "slide_cm": 0.0
+     },
+     "rear_r": {
+      "sole_z_min": 1.428,
+      "sole_z_max": 1.428,
+      "slide_cm": 0.0
+     }
+    }
+   },
+   "Walk": {
+    "length_s": 1.1,
+    "frames": 34,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 109.8,
+    "wanted_speed_cm_s": 150,
+    "stance_sweep_cm": {
+     "front": 74.9,
+     "rear": 74.9
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 37.44,
+     "rear_l": 48.92,
+     "front_r": 37.48,
+     "rear_r": 49.19
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 5.583,
+    "edge_squash_min": 0.047,
+    "edge_stretch_p99_5": 1.93,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 109.79,
+    "feet": {
+     "front_l": {
+      "stance_frames": 15,
+      "speed_cm_s": 109.79,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_l": {
+      "stance_frames": 16,
+      "speed_cm_s": 109.79,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 1.428,
+      "sole_z_max": 1.428
+     },
+     "front_r": {
+      "stance_frames": 16,
+      "speed_cm_s": 109.79,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_r": {
+      "stance_frames": 16,
+      "speed_cm_s": 109.79,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 1.428,
+      "sole_z_max": 1.428
+     }
+    }
+   },
+   "Run": {
+    "length_s": 0.6,
+    "frames": 19,
+    "ik_overreach_cm": {
+     "rear_l": 0.0,
+     "rear_r": 0.0,
+     "front_l": 0.0,
+     "front_r": 0.0
+    },
+    "designed_speed_cm_s": 328.4,
+    "wanted_speed_cm_s": 900,
+    "stance_sweep_cm": {
+     "front": 74.9,
+     "rear": 74.9
+    },
+    "half_sweep_limit_cm": {
+     "front_l": 37.44,
+     "rear_l": 48.92,
+     "front_r": 37.48,
+     "rear_r": 49.19
+    },
+    "lowest_vertex_z": -0.0,
+    "edge_stretch_max": 6.331,
+    "edge_squash_min": 0.095,
+    "edge_stretch_p99_5": 2.316,
+    "loop_seam_cm": 0.0,
+    "walk_speed_cm_s": 328.41,
+    "feet": {
+     "front_l": {
+      "stance_frames": 6,
+      "speed_cm_s": 328.41,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": -0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_l": {
+      "stance_frames": 6,
+      "speed_cm_s": 328.41,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 1.428,
+      "sole_z_max": 1.428
+     },
+     "front_r": {
+      "stance_frames": 5,
+      "speed_cm_s": 328.41,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 0.0,
+      "sole_z_max": 0.0
+     },
+     "rear_r": {
+      "stance_frames": 5,
+      "speed_cm_s": 328.41,
+      "off_steady_cm": 0.0,
+      "y_drift_cm": 0.0,
+      "sole_z_min": 1.428,
+      "sole_z_max": 1.428
+     }
+    }
+   }
+  },
+  "walk_speed_cm_s": 109.79,
+  "walk_cycle_s": 1.1,
+  "run_speed_cm_s": 328.41,
+  "run_cycle_s": 0.6,
+  "fbx": "SK_Tripo_Horse.fbx",
+  "texture": "T_Tripo_Horse.png"
+ }
+}

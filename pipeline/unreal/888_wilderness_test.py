@@ -786,7 +786,13 @@ def step_horse9():
     res["speed_m_s"] = {"foot": round(foot, 2), "mounted": round(mounted, 2), "ratio": round(mounted / max(foot, 0.01), 2), "want": round(g.get_editor_property("horse_def").speed_mul, 2)}
     yield from press("F"); yield from rwait(0.8)
     res["after_dismount"] = hs()
-    p0 = G["pawn"].get_actor_location(); yield from run_her((1.0, 0.3), 3.0); p1 = G["pawn"].get_actor_location()
+    # (away from the horse left beside her: run the way it stands, its box (on once she is 2 m clear) stopped her (2026-11-10, the
+    # Tripo horse set down the way she ran: 0.03 m/s))
+    ha = res["after_dismount"]; p0 = G["pawn"].get_actor_location()
+    aw = (p0.x - ha["x"], p0.y - ha["y"]); n_ = math.hypot(*aw) or 1.0
+    yield from run_her((aw[0] / n_, aw[1] / n_), 3.0); p1 = G["pawn"].get_actor_location()
+    # (her own speed back, not the saddle's (5.5 times): within a fifth of her speed on foot, the way away from the horse is other ground
+    # than the way she was measured on (2.93 against 3.46 m/s uphill))
     res["speed_m_s"]["after"] = round(math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 3.0, 2)
     # (PR #37's review: a death in the saddle gets her off and keeps her death clip (it was stopped with the rider's: she stood up))
     g.call_horse(); yield from rwait(0.5); g.mount_horse(); yield from rwait(0.8)
@@ -802,7 +808,7 @@ def step_horse9():
     ok = (b["stable_horse"] == 1 and b["owned"] == 0 and "horse" in res["prompt"] and res["bought"] and res["gold_taken"] == res["price"] > 0
           and a["owned"] == 1 and a["spawned"] == 1 and res["gi_owned"]
           and mt["mounted"] == 1 and abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 15) and mt["rider"] not in ("", "None") and res["attack_refused"]
-          and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < 0.4
+          and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < max(0.4, 0.2 * sp["foot"])
           and res["death"]["dead"] and res["death"]["mounted"] == 0 and res["death"]["montage"]
           # (the list of 2026-11-10: blocked by it standing, not while ridden; at least five times her speed)
           and res["blocking_before_mount"] is True and res["blocking_mounted"] is False and res["walk_into_horse"]["nearest_cm"] > 35

@@ -140,6 +140,15 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **A wanderer at work is not idle**: `884 folk` counted only strolls (`Walks`); with the homes' children more of them were at their round of work over its 40 s. One on its way to work must have moved.
 - **PR #41's review (2026-11-10)**: one asleep beside a service took F from it (the smithy's forge at night): a sleeper who only talks is passed over for anything else F reaches, a keeper or a quest's giver wakes to serve; a footprint list made per room is gone by the time the townsfolk spawn: the town keeps its every footprint (`TownFeet`) for what is put afterwards, and a thing put and taken away again frees its blocked tiles; a line naming a town is not said in it (`ExceptTown`); a bag of lines refilled can start with the line just said; a pool keyed by its size kept old lines of the same count; a check made every tick for every resident is made once every 3 s; after an actor is moved in a tick, read its place again or return.
 
+## The list of 2026-11-10's fifth phase (`915`, `blender_numpy/tripo_animals.py`, `884 animals10`)
+
+- **A Tripo rig's labels can lie**: the riding horse's `Head` bones stand at its tail (its first build faced backwards: its tail fitted 2 m up, its stride 40 cm/s); the pig's rig has 7 bones. Take an animal's long way from its mesh (the body's main axis) and its front from a measure that holds for the kind (the horse's highest point), then fit our own skeleton.
+- **A spec's size is the whole animal as built**: the metaball body alone leaves out the lofted parts (the chicken's legs, the rabbit's ears, the horns); scaled to it, the Tripo chicken stood 32 cm with straight legs and no stride. `farm_animals.json`'s box is the built one.
+- **A leg fitted straight has no stride** (as the Blender horse's first build): the Tripo horse stands straight-legged; its knees and hocks bent half back to the spec's gave 34 cm a half stride and no overreach in the gallop.
+- **A threshold made for one skin fails another**: `farm_animals.py`'s mouth points (head or jaw 90 % or more) found none on the rabbit, whose head shares its weight with its ears and neck, and its graze was never solved (the neck 0 degrees down). 60 %, else the points nearest the head's end.
+- **The FBX import made the material but did not unpack the embedded texture**: `915` imports the PNG and makes a material of its own.
+- **A test that runs her a fixed way after dismounting ran her into the horse** (its box comes on once she is 2 m clear): run her away from it.
+
 ## The list of 2026-11-10's second phase (`914 sky,stairs,see`, `RD/RDSkyFar.cpp`, `RDTownPlan.cpp`'s `CastleStairBuild`, `RD/RDList10b.cpp`)
 
 - **A sky's fault is told apart by hiding its parts one at a time** (`884 sky10`: as drawn, then without the far land, the high clouds' dome, the stars, the volumetric clouds, the fog): the "border by the horizon" was nothing drawn past the chunks' 2 km (the atmosphere's own ground under the horizon), not the fog or the clouds; the "disc" was the high clouds' dome thinning to nothing round its top.

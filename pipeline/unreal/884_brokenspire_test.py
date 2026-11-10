@@ -3712,6 +3712,61 @@ def step_people10():
     quiet(False)
     ok = all(v["buildings"][0] == v["buildings"][1] and v["same_places"] and 1.2 <= v["ratio"] <= 1.3 and v["children"][1] > v["children"][0] for v in out.values())
     step_result("people10", ok, **res)
+TRIPO_J = os.path.join(OUT, "tripo_animals", "tripo_animals.json")
+def step_animals10():
+    """the list of 2026-11-10's fifth phase: "replace the chickens (goats, rabbits, pigs) in the game with the chicken model in ai
+    models/chicken.glb and animate it": every pen's chickens, pigs, goats and rabbits are the Tripo meshes (SK_Tripo_<Animal>, their
+    texture's material), the cow the Blender one (no cow.glb); each plays its clips (the clip's place moves while she looks at it),
+    stands with its planted feet on the ground (within 6 cm), and walks about its pen (it moved over 30 s); a picture of each kind
+    from 3 m"""
+    g = G["gen"]; res = {}; quiet(True); g.set_town_hour(11.0)
+    TJ = json.load(open(TRIPO_J, encoding="utf-8"))
+    acts = list(GS.get_all_actors_of_class(G["w"], unreal.RDTownAnimal))
+    def info(a):
+        m = a.get_component_by_class(unreal.SkeletalMeshComponent); sk = m.get_editor_property("skeletal_mesh_asset") if m else None
+        mats = [str(x.get_name()) for x in m.get_materials()]
+        return m, (sk.get_name() if sk else None), mats
+    kinds = {}
+    for a in acts:
+        _m, nm, _mt = info(a); kinds.setdefault(nm or "(no mesh)", []).append(a)
+    res["kinds"] = {k: len(v) for k, v in kinds.items()}
+    p0 = {a.get_name(): a.get_actor_location() for a in acts}
+    out = {}; shots_ = []
+    for nm, al in sorted(kinds.items()):
+        a = al[0]; m, _n, mats = info(a); L = a.get_actor_location(); yw = a.get_actor_rotation().yaw
+        # (her 3 m off its side, looking at it; a second in view so its pose is drawn)
+        side = yw + 90.0; st = V(L.x + math.cos(math.radians(side)) * 300, L.y + math.sin(math.radians(side)) * 300, 0)
+        put(st, yaw=side + 180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=side + 180.0))
+        q0 = m.get_position(); yield from rwait(1.2)
+        r = {"mesh": nm, "materials": mats, "plays": abs(m.get_position() - q0) > 0.01}
+        kind = nm.replace("SK_Tripo_", "").replace("SK_Farm_", "").split("_")[0]
+        if kind in TJ:
+            feet = [b[-1] for b in TJ[kind]["legs"].values()]          # (the chain's last bone is the planted one)
+            rest = [TJ[kind].get("foot_head_z", {}).get(k_) for k_ in TJ[kind]["legs"]]
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(L.x, L.y, L.z + 300), V(L.x, L.y, L.z - 400), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, list(acts) + [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            gz = hit.to_tuple()[4].z if hit and hit.to_tuple()[0] else None
+            # (a planted bone's tail is its sole's point: its head plus its rest length down)
+            lows = []
+            for b in feet:
+                tl = m.get_socket_location(b); lows.append(round(tl.z - gz, 1) if gz is not None else None)
+            r["feet_head_over_ground_cm"] = lows; r["feet_head_rest_cm"] = rest
+            # (each planted bone's head where it stands at rest over its sole: its feet on the ground, within 4 cm (PR #42's review))
+            r["feet_off_cm"] = max((abs(l_ - r_) for l_, r_ in zip(lows, rest) if l_ is not None and r_ is not None), default=None)
+        sn = f"animals10_{kind.lower()}"; shot(sn, "1280x720"); shots_.append(sn); yield from rwait(1.2)
+        out[nm] = r
+    res["each"] = out; res["shots"] = shots_
+    yield from rwait(25.0)
+    moved = {}
+    for nm, al in kinds.items():
+        moved[nm] = sum(1 for a in al if unreal.SystemLibrary.is_valid(a) and dist2(a.get_actor_location(), p0[a.get_name()]) > 30)
+    res["moved_of"] = {nm: [moved[nm], len(kinds[nm])] for nm in kinds}
+    quiet(False)
+    want = {"SK_Tripo_Chicken", "SK_Tripo_Pig", "SK_Tripo_Goat", "SK_Tripo_Rabbit"}
+    ok = want <= set(kinds) and not [k for k in kinds if k.startswith("SK_Farm_") and "Cow" not in k] \
+        and all(v["plays"] for v in out.values()) and all(any("M_Tripo" in x for x in v["materials"]) for k, v in out.items() if k.startswith("SK_Tripo")) \
+        and "(no mesh)" not in kinds and all(m_ >= 0.5 * n_ for m_, n_ in res["moved_of"].values()) \
+        and all(v.get("feet_off_cm") is not None and v["feet_off_cm"] <= 4.0 for k, v in out.items() if k.startswith("SK_Tripo"))
+    step_result("animals10", ok, **res)
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
     indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every
@@ -4029,7 +4084,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
+              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)

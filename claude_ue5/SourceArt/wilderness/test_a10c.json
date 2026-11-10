@@ -1,0 +1,183 @@
+{
+ "tag": "a10c",
+ "plan": [
+  "horse9",
+  "life7"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    -950,
+    20850
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 0.0,
+    "mounted": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "clip": "none",
+    "rate": 0.0,
+    "speed": 0.0,
+    "saddle_z": 0.0,
+    "pelvis_z": 94.8,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": -1.0
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": -939.0,
+    "y": 20820.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 175.1,
+    "pelvis_z": 94.1,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 222.2
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 68
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140578.0,
+    "y": -1591986.0,
+    "z": -1911.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1736.2,
+    "pelvis_z": -1722.2,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "attack_refused": true,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 143070.0,
+    "y": -1591239.0,
+    "z": -1984.0,
+    "clip": "run",
+    "rate": 5.92,
+    "speed": 1944.0,
+    "saddle_z": -1810.4,
+    "pelvis_z": -1796.4,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "speed_m_s": {
+    "foot": 3.45,
+    "mounted": 19.42,
+    "ratio": 5.62,
+    "want": 5.5,
+    "after": 2.97
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155015.0,
+    "y": -1587960.0,
+    "z": -2151.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1977.1,
+    "pelvis_z": -2056.4,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 221.6
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
+  },
+  {
+   "step": "life7",
+   "ok": true,
+   "visits": {
+    "meadows": {
+     "animals": [
+      "Squirrel"
+     ],
+     "n": 3,
+     "swarms": [
+      "Butterflies"
+     ]
+    },
+    "taigas": {
+     "animals": [
+      "Deer",
+      "Squirrel",
+      "Wolf"
+     ],
+     "n": 6,
+     "swarms": [
+      "Bird flock"
+     ]
+    },
+    "grasslands": {
+     "animals": [
+      "Deer",
+      "Hare"
+     ],
+     "n": 3,
+     "swarms": [
+      "Butterflies"
+     ]
+    }
+   },
+   "flee": {
+    "flee_cm": 259.6,
+    "state_far": 1,
+    "state_near": 3,
+    "fled": 1,
+    "ran_m": 16.7
+   },
+   "night_swarms": [
+    "Fireflies"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "wd_a10c_horse_idle.png",
+  "wd_a10c_horse_side.png",
+  "wd_a10c_horse_back.png",
+  "wd_a10c_life7_meadows.png",
+  "wd_a10c_life7_taigas.png",
+  "wd_a10c_life7_grasslands.png",
+  "wd_a10c_life7_flee.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

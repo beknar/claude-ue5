@@ -1422,4 +1422,5 @@ def main():
     log("DONE", path)
 
 
-main()
+if __name__ == "__main__":          # (tripo_animals.py imports this file for its rigs and clips)
+    main()
