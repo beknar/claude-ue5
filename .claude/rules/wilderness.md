@@ -114,6 +114,19 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A box that stops her must not be set on her**: the horse called or left where no spot beside her was found stood on her; its box waits until she is 2 m clear.
 - **A speed's run-up**: at 5.5 times her speed the gallop needs a couple of seconds to reach it; measured over a whole 4 s run it read 5.04. Measure after it is up to speed.
 
+## The list of 2026-11-10's sixth phase (`916`, `RD/RDWild10.cpp`, `888 houses10,tower10,farms10,travellers10`)
+
+- **A pack's house scaled to its height shrinks its doors**: the village houses stand 13.6 m in their own units; laid at 9 m their 2.3 m doors would be 1.5 m. Enterable, they are laid at 0.8 (1.85 m doors) and the village's ring widened for them.
+- **Python takes an `In` off a struct's names** (`InMin`, `InMax` are `min`, `max`), and **a bool and an array of one name are one Python name** (`bWildHouses` and `WildHouses` both `wild_houses`: the bool is `bWildHouseInsides`).
+- **interactive.json holds Blender's y** for the hinges and the leaves' ways (the dungeon rules' note): a leaf's way goes into its width's sign.
+- **A door that swings out at her shuts her out**: opened from 1.1 m, the leaf (1.5 m) swung into her place; it swings away from whoever opens it.
+- **A mesh with no simple collision under the default trace flag is walked through**: the Lake Village barn and farmhouse (CTF_USE_DEFAULT, 0 simple shapes). Their mesh is their collision now.
+- **A road a few metres wide is missed by samples 100 m apart**: a test that needs a road starts from a place that is beside one by design (the den).
+- **A camp beside the road lay in a bean field**: a thing put off a road looks at its ground (field, water) first.
+- **Picture a kit's pieces before trusting their letters**: the tower quarters' doorway is B (882's note put it at D, a small window); the wild tower's "doorway" was a window and she walked through its wall between the hidden colliders, while the test passed. A test that walks through a doorway must also look at it.
+- **A floor on the highest ground under a ring stands over its doorway's sill on a slope**: the tower stands on that ground, a stone footing down to the lowest, steps from its doorway.
+- **PR #43's review (2026-11-10)**: what replaces a mesh's collision must cover the whole of it (the third storey's kept walls had none); a prop that holds a light hands the light over to whatever takes its place (`SetProp` ends the lantern); a nearer door wins over a person; the draws of one call keep their order when split (MSVC: right to left); a search over a world's cells is kept for the cell she is in.
+
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).

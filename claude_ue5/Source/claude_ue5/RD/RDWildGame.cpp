@@ -436,7 +436,9 @@ void ARDDungeonGenerator::SetWildNear(ARDWildChunk* C, bool bNear)
 			H->RegisterComponent();
 			C->NearFoliage.Add(H);
 		}
-		H->AddInstances(In.X, false, false, false);
+			// (the list of 2026-11-10: none in a house's room)
+		if (C->Clears.Num() == 0) H->AddInstances(In.X, false, false, false);
+		else { TArray<FTransform> Keep; Keep.Reserve(In.X.Num()); for (const FTransform& X : In.X) if (!C->IsClear(X.GetLocation())) Keep.Add(X); H->AddInstances(Keep, false, false, false); }
 	}
 }
 

@@ -1,0 +1,109 @@
+{
+ "tag": "w10g",
+ "plan": [
+  "places"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "places",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "camp",
+     "name": "Wolf Camp",
+     "found": true,
+     "props": 17,
+     "monsters": 2
+    },
+    {
+     "kind": "ruins",
+     "name": "The Old Watchtower",
+     "found": true,
+     "props": 77,
+     "monsters": 4
+    },
+    {
+     "kind": "ritual",
+     "name": "Oak Circle",
+     "found": true,
+     "props": 24,
+     "monsters": 5
+    },
+    {
+     "kind": "house",
+     "name": "Wynne's Farmstead",
+     "found": true,
+     "props": 45,
+     "monsters": 3
+    },
+    {
+     "kind": "village",
+     "name": "Briarmere",
+     "found": true,
+     "props": 73,
+     "monsters": 1
+    },
+    {
+     "kind": "cave",
+     "name": "Elm Cave",
+     "found": true,
+     "props": 25,
+     "monsters": 5
+    },
+    {
+     "kind": "lair",
+     "name": "The Mill Road Den",
+     "found": true,
+     "props": 34,
+     "monsters": 7,
+     "monster_m": [
+      20.2,
+      10.5
+     ],
+     "aggro": true
+    },
+    {
+     "kind": "spawn",
+     "name": "Oak Hollow",
+     "found": true,
+     "props": 30,
+     "monsters": 6,
+     "monster_m": [
+      14.7,
+      5.7
+     ],
+     "aggro": true
+    }
+   ],
+   "census": {
+    "camp": 9,
+    "cave": 10,
+    "house": 11,
+    "lair": 14,
+    "ritual": 8,
+    "ruins": 14,
+    "spawn": 6,
+    "village": 10
+   },
+   "killed_stays": {
+    "place": "Oak Hollow",
+    "before": 3,
+    "after": 2
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "wd_w10g_place_camp.png",
+  "wd_w10g_place_ruins.png",
+  "wd_w10g_place_ritual.png",
+  "wd_w10g_place_house.png",
+  "wd_w10g_place_village.png",
+  "wd_w10g_place_cave.png",
+  "wd_w10g_place_lair.png",
+  "wd_w10g_place_spawn.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

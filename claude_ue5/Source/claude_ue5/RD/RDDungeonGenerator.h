@@ -1607,6 +1607,56 @@ public:
 	/** tests: "posts|<n>" "adults2|<n>" "homekids|<n>" "squarekids|<dropped>" "beds|<recorded>|<made>|<sleepers>|<given>" and per
 	 *  townsperson "folk|<i>|<role>|<asleep>|<in bed>|<bed x>|<y>|<z>|<clip>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetTownSleepLines() const;
+	// ---- the list of 2026-11-10's sixth phase (RD/RDWild10.cpp)
+	/** "the buildings in the wilderness do not have an interior and there is no way to get inside": the wilds' houses laid as the
+	 *  village houses' open copies (WildPieces' "house" and "farmhouse" entries, 916), at WildHouseScale, each with its doors on
+	 *  their hinges (F), a floor over the ground, its furniture, a lamp, its plants cleared and a plinth where the ground falls */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bWildHouseInsides = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TArray<FRDWildHouse> WildHouses;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TObjectPtr<UMaterialInterface> WildPlinthMaterial = nullptr;
+	/** a house with its door, floor and furniture; false if the mesh is not a wild house's */
+	bool FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm, uint32 Salt);
+	/** the Old Watchtower climbed: its doorway open (hidden boxes round its ring, not its quarters' collision), a spiral stair up to
+	 *  a floor at the second storey's top */
+	void FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw = -1e6f);
+	/** the nearest wild door within Reach of a point (its chunk and index), F's */
+	ARDWildChunk* WildDoorNear(const FVector& From, float Reach, int32& Index) const;
+	FString WildDoorDescribe(const FVector& From) const;
+	FString WildDoorInteract(const FVector& From);
+	void TickWildDoors(float Dt);
+	/** "the house|<chunk x>|<y>|<x>|<y>|<z>|<doors>|<furniture>|<lit>|<floor z>|<what it is>" of every wild house laid, and "door|<x>|<y>|<z>|<open
+	 *  0..1>|<to>" of every door (tests) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") TArray<FString> GetWildHouseLines() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") TArray<FString> GetWildTowerLines() const;
+	TArray<FString> WildTowerLines;
+	/** the farmsteads on the map: found as places are (within WildDiscoverM), drawn with wmap_farmstead */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bWildFarmsOnMap = false;
+	/** the liveliness ideas built ("what can be done to make the town / the wilderness more lively?"): travellers on the wilds' roads,
+	 *  walking from town to town by day and camped round a fire beside the road at night (WildTravellerGroups at most, within
+	 *  WildTravellerM of her); hens loose in a town's square, running from her (TownHens); the town's watch with lanterns at night */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bWildTravellers = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") int32 WildTravellerGroups = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float WildTravellerM = 450.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TArray<FName> WildTravellerRoles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") int32 TownHens = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bNightLanterns = false;
+	struct FTraveller { TArray<TWeakObjectPtr<class ARDTownsfolk>> Folk; int32 Road = -1; int32 Seg = 0; int32 Dir = 1; bool bCamped = false; FVector Camp = FVector::ZeroVector;
+		TArray<TWeakObjectPtr<UActorComponent>> CampBits; uint32 Seed = 0; FString Name; };
+	TArray<FTraveller> WildTravellers;
+	int32 WildTravellersMade = 0;
+	/** the farmsteads round her great field cell (the map's: searched once a cell, PR #43's review: four times a second it was) */
+	FIntPoint WildFarmCell = FIntPoint(MAX_int32, MAX_int32);
+	TArray<FRDWildPlace> WildFarmNear;
+	float TravellerClock = 0.f, LanternClock = 0.f;
+	void TickWild10(float Dt, const FVector& Her);
+	void TickWildTravellers(const FVector& Her);
+	void CampTravellers(FTraveller& T);
+	void SpawnTownHens();
+	void TickNightLanterns();
+	/** "group|<i>|<x>|<y>|<z>|<folk>|<camped 0/1>|<walking>|<road>|<name>" (tests); a group sent at her for a test */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") TArray<FString> GetWildTravellerLines() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") bool ForceWildTravellers();
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") TArray<FString> GetTownHenLines() const;
 	// ---- the list of 2026-11-10's third phase (RD/RDList10c.cpp)
 	/** "the fighter and only the fighter should be able to craft basic weapons and armor she has already looted at a forge - a forge
 	 *  is a new crafting station": a forge (ForgePieces wherever they stand, the town smithy's forge, one by the anvil of a set with no

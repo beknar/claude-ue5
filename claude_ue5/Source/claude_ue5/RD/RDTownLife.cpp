@@ -17,6 +17,8 @@
 #include "Animation/AnimSequenceBase.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/PointLightComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDTownLife, Log, All);
 
@@ -44,6 +46,9 @@ UAnimationAsset* ARDTownsfolk::WorkClip(FName Kind) const
 void ARDTownsfolk::SetProp(FName Prop)
 {
 	if (PropComp) { PropComp->DestroyComponent(); PropComp = nullptr; }
+	// (the lantern goes with any other prop: its light with it (PR #43's review: left hanging, and the lantern never came back))
+	if (LanternLight) { LanternLight->DestroyComponent(); LanternLight = nullptr; }
+	bLanternOn = false;
 	if (Prop.IsNone() || !Gen) return;
 	const FRDTownProp* P = Gen->TownProps.Find(Prop);
 	if (!P || !P->Mesh) return;
@@ -269,6 +274,26 @@ void ARDTownAnimal::Tick(float Dt)
 	if (!Gen) return;
 	const float Now = GetWorld()->GetTimeSeconds();
 	const FVector L = GetActorLocation();
+	// (the list of 2026-11-10: a loose hen runs from her, a couple of metres, quick, within its round)
+	if (bLoose && Now >= NextFleeCheck)
+	{
+		NextFleeCheck = Now + 0.2f;
+		if (const APawn* Pw = UGameplayStatics::GetPlayerPawn(this, 0))
+		{
+			FVector Aw = L - Pw->GetActorLocation(); Aw.Z = 0.f;
+			if (Aw.Size() < FleeCm && Now >= FleeUntil)
+			{
+				SetState(2, Now);
+				FVector T = L + Aw.GetSafeNormal() * 220.f;
+				T.X = FMath::Clamp(T.X, PenAt.X - PenHalf.X, PenAt.X + PenHalf.X); T.Y = FMath::Clamp(T.Y, PenAt.Y - PenHalf.Y, PenAt.Y + PenHalf.Y);
+				// (cornered against its round's edge: along it instead)
+				if (FVector::Dist2D(T, L) < 60.f) T = L + FVector(-Aw.Y, Aw.X, 0.f).GetSafeNormal() * 160.f;
+				To = FVector(T.X, T.Y, L.Z); Until = Now + 3.f; FleeUntil = Now + 1.6f; ++Flees;
+				SetActorRotation(FRotator(0.f, (To - L).Rotation().Yaw, 0.f));
+				Body->SetPlayRate(2.5f);
+			}
+		}
+	}
 	if (State == 2)
 	{
 		FVector D = To - L; D.Z = 0.f;
@@ -278,7 +303,7 @@ void ARDTownAnimal::Tick(float Dt)
 		// (it walks the way it faces once it has nearly turned)
 		if (FMath::Abs(FMath::FindDeltaAngleDegrees(GetActorRotation().Yaw, Want.Yaw)) < 35.f)
 		{
-			FVector Nl = L + GetActorForwardVector() * FMath::Min(Speed * Dt, D.Size());
+			FVector Nl = L + GetActorForwardVector() * FMath::Min(Speed * (Now < FleeUntil ? 3.f : 1.f) * Dt, D.Size());
 			// (on the wild ground: at its height where it steps (the paddock's ground rises and falls a little))
 			if (bWildGround && GroundN > 1) Nl.Z = GroundZAt(Nl);
 			SetActorLocation(Nl, false);
@@ -344,6 +369,7 @@ void ARDDungeonGenerator::SpawnTownAnimals()
 		}
 	}
 	UE_LOG(LogRDTownLife, Log, TEXT("RDTOWN %d animals in %d pens"), TownAnimalActors.Num(), S->TownPens.Num());
+	SpawnTownHens();          // (the list of 2026-11-10: hens loose about the square, RDWild10.cpp)
 }
 
 void ARDDungeonGenerator::SpawnTownSpits()

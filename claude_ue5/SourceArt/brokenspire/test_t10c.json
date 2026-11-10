@@ -1,0 +1,78 @@
+{
+ "tag": "t10c",
+ "plan": [
+  "castlewalls"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "castlewalls",
+   "ok": true,
+   "towers": 4,
+   "stair_towers": 1,
+   "walk_z": 661.0,
+   "blind_arches": 166,
+   "blind_arches_outside": 0,
+   "arched_door_pieces": 0,
+   "watchtower_doors": 21,
+   "pieces": {
+    "SM_Castle_Stone_Wall_01a": 1304,
+    "SM_Castle_Stone_Wall_02h": 240,
+    "SM_Castle_Stone_Wall_02f": 96,
+    "SM_Castle_Stone_Wall_02g": 13,
+    "SM_Castle_Stone_Wall_02d": 7,
+    "SM_Castle_Stone_Parapet_01a": 651,
+    "SM_Castle_Tower_Wall_02": 64,
+    "SM_Tower_Roof_02a": 16,
+    "SM_Stone_Stairs_01a": 252
+   },
+   "through_the_walk": {},
+   "walk_traces": {
+    "n": 81,
+    "miss": 0,
+    "min": 374.5,
+    "max": 653.8
+   },
+   "climb": {
+    "reached": 21,
+    "of": 21,
+    "z_max": 745.6,
+    "seconds": 5.0,
+    "end": [
+     3519,
+     17781,
+     738
+    ],
+    "end_from_tower_m": 0.26,
+    "walk_z": 661.0,
+    "in_tower": true,
+    "stair_well_tiles": 2,
+    "stair_room": 134
+   },
+   "outside_nearest_cm": [
+    350,
+    350,
+    350,
+    350,
+    350,
+    350,
+    350,
+    350,
+    350,
+    350,
+    350,
+    350
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_t10c_castle_stair.png",
+  "bs_t10c_castle_tower_inside.png",
+  "bs_t10c_castle_tower_door.png",
+  "bs_t10c_castle_stairwell.png",
+  "bs_t10c_castle_front.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

@@ -1452,6 +1452,14 @@ bool FRDWildWorld::FindPlace(int32 Id, FRDWildPlace& Out) const
 		Out = QuestPlaces[Id - QuestIdBase]; return true;
 	}
 	if (Id >= TownIdBase) { const int32 Ti = Id - TownIdBase; if (!Towns.IsValidIndex(Ti)) return false; PlacesIn(PlaceCellOf(Towns[Ti].Site.X, Towns[Ti].Site.Y), Ps); }
+	else if (Id >= FarmIdBase)
+	{
+		// (a farmstead's (the list of 2026-11-10: on the map): its great field's cell from its id, 10 bits a way, signed)
+		int32 Gi = ((Id - FarmIdBase) >> 10) & 0x3FF, Gj = (Id - FarmIdBase) & 0x3FF;
+		if (Gi >= 512) Gi -= 1024;
+		if (Gj >= 512) Gj -= 1024;
+		FarmsteadsIn(Gi * GreatFieldM, Gj * GreatFieldM, (Gi + 1) * GreatFieldM, (Gj + 1) * GreatFieldM, Ps);
+	}
 	else PlacesIn(FIntPoint((Id >> 14) & 0x3FF, (Id >> 4) & 0x3FF), Ps);
 	for (const FRDWildPlace& P : Ps) if (P.Id == Id) { Out = P; return true; }
 	return false;

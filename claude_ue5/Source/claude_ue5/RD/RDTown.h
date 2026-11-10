@@ -111,6 +111,14 @@ public:
 	void SetStandWork(FName Kind, FName Prop) { StandWork = Kind; StandProp = Prop; }
 	void SetTitle(const FString& InTitle) { Title = InTitle; }
 	TArray<FString> OwnLines;
+	/** the list of 2026-11-10's sixth phase: a traveller on the wilds' roads: no section; it walks the points it is given (world, on
+	 *  the wild ground) and stands, or sits at its camp's fire (its StandWork) */
+	bool bRoadWalker = false;
+	TArray<FVector> RoadPath;
+	/** a lantern in its hand at night (the town's watch): its light with it */
+	void SetLantern(bool bOn);
+	void TickRoad(float Dt);
+	bool HasLantern() const { return bLanternOn; }
 	/** the list of 2026-11-10: its bed (the top of it, its yaw: its foot toward the yaw's way), lain in while asleep */
 	void SetBed(const FVector& Top, float Yaw) { BedAt = Top; BedYaw = Yaw; bHasBed = true; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") bool IsInBed() const { return bInBed; }
@@ -160,7 +168,8 @@ private:
 	void SetClip(bool bWalk);
 	int32 HomeBld = -1;
 	FVector HomeIn = FVector::ZeroVector;
-	bool bResident_ = false, bWentHome = false, bSleeping = false;
+	bool bResident_ = false, bWentHome = false, bSleeping = false, bLanternOn = false;
+	UPROPERTY(Transient) TObjectPtr<class UPointLightComponent> LanternLight;
 	/** the list of 2026-11-10: a walk home stopped on the way (another at the door, a door) is tried again every 3 s, the
 	 *  fourth time it is put inside */
 	float HomeRetryAt = 0.f; int32 HomeFails = 0;
@@ -201,6 +210,10 @@ public:
 	float GroundStep = 100.f;
 	int32 GroundN = 0;
 	float GroundZAt(const FVector& P) const;
+	/** the list of 2026-11-10: loose in the town (no pen): it runs from her when she comes within FleeCm, within its round */
+	bool bLoose = false;
+	float FleeCm = 260.f;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetFlees() const { return Flees; }
 protected:
 	virtual void Tick(float Dt) override;
 private:
@@ -211,7 +224,7 @@ private:
 	FRandomStream R;
 	FVector PenAt = FVector::ZeroVector, To = FVector::ZeroVector;
 	FVector2D PenHalf = FVector2D(200.f, 200.f);
-	int32 State = 0, Changes = 0;
-	float Until = 0.f, Speed = 40.f;
+	int32 State = 0, Changes = 0, Flees = 0;
+	float Until = 0.f, Speed = 40.f, NextFleeCheck = 0.f, FleeUntil = -1.f;
 	void SetState(int32 S, float Now);
 };

@@ -201,6 +201,8 @@ void ARDTownsfolk::Tick(float Dt)
 		if (Act != 3) { Turn(FaceAt - GetActorLocation(), 240.f); SetClip(false); }
 		return;
 	}
+	// (the list of 2026-11-10's sixth phase: a traveller on the wilds' roads: RDWild10.cpp)
+	if (bRoadWalker) { TickRoad(Dt); return; }
 	// (its day: home at evening, asleep at night; asleep, it stands where it is, or keeps its seat)
 	TickDay(Now);
 	// (the list of 2026-11-10: asleep, in its bed, lying, on its Sleep clip; awake, out of it where it stood before)
@@ -858,7 +860,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); } }
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); } }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1298,6 +1300,8 @@ void ARDDungeonGenerator::TickTownTour(float RealDt)
 }
 
 // ================================================================================================ F in the town
+/** a title that says its own article ("a townswoman on the road to ...") is said as it is; another takes "the" */
+static FString RDTTheTitle(const FString& T, bool bCap) { const bool bArt = T.StartsWith(TEXT("a ")) || T.StartsWith(TEXT("an ")); return bArt ? (bCap ? T.Left(1).ToUpper() + T.Mid(1) : T) : (bCap ? TEXT("The ") : TEXT("the ")) + T; }
 /** a role F wakes to serve at night: a quest's giver or a keeper of a service */
 static bool RDTServes(ERDTownRole R)
 {
@@ -1314,7 +1318,13 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	}
 	if (IsTownPanelOpen()) return FString();
 	// (a farmstead's family out in the wilds (the list of 2026-11-08b))
-	if (const ARDTownsfolk* Wf = WildFolkForF(From)) return FString::Printf(TEXT("talk to the %s"), *Wf->Title);
+	// (the list of 2026-11-10's sixth phase: a wild house's door, before the wild folk when it is the nearer (PR #43's review))
+	{
+		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
+		const ARDTownsfolk* Wf = WildFolkForF(From);
+		if (Dc && (!Wf || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildDoorDescribe(From);
+		if (Wf) return FString::Printf(TEXT("talk to %s"), *RDTTheTitle(Wf->Title, false));
+	}
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
@@ -1365,13 +1375,18 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	}
 	if (TownPanelClosedFrame == GFrameCounter) return TEXT("closed");
 	// (a farmstead's family: they turn to her and say a line of their own)
+	{
+		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
+		const ARDTownsfolk* Wf0 = WildFolkForF(From);
+		if (Dc && (!Wf0 || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf0->GetActorLocation(), From))) return WildDoorInteract(From);
+	}
 	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
 		Wf->FaceToward(From, 8.f);
 		TownCount(TEXT("talk:farm"));
 		const FString Line = Wf->NextLine();
 		LastBark = FString::Printf(TEXT("%s|%s"), *Wf->Title, *Line);
-		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s:  \"%s\""), *Wf->Title, *Line));
+		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s:  \"%s\""), *RDTTheTitle(Wf->Title, true), *Line));
 		return TEXT("bark");
 	}
 	int32 Who = -1; float Best = 240.f;

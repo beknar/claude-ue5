@@ -91,6 +91,17 @@ def house():
     return finish(f)
 
 
+def farmstead():
+    # (the list of 2026-11-10: "the small farm holdings should be noted on the large map"): a barn with its gambrel roof over three
+    # rows of a field
+    f = canvas(); d = ImageDraw.Draw(f)
+    rect(d, 0.22, 0.36, 0.78, 0.66)                                    # the barn
+    poly(d, [(0.16, 0.38), (0.28, 0.20), (0.50, 0.10), (0.72, 0.20), (0.84, 0.38)])   # its roof
+    for k in range(3): rect(d, 0.10, 0.72 + k * 0.075, 0.90, 0.72 + k * 0.075 + 0.04)  # the field's rows
+    f = cut(f, lambda m: (m.rectangle([0.42 * S, 0.46 * S, 0.58 * S, 0.66 * S], fill=255), m.rectangle([0.44 * S, 0.22 * S, 0.56 * S, 0.30 * S], fill=255)))
+    return finish(f)
+
+
 def camp():
     f = canvas(); d = ImageDraw.Draw(f)
     poly(d, [(0.10, 0.84), (0.42, 0.24), (0.74, 0.84)])                # a tent
@@ -163,11 +174,11 @@ if __name__ == "__main__":
     out = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else "wild_symbols")
     os.makedirs(out, exist_ok=True)
     for name, fn in (("town", town), ("city", city), ("village", village), ("house", house), ("camp", camp), ("spawn", spawn), ("ruins", ruins),
-                     ("ritual", ritual), ("cave", cave), ("lair", lair), ("select", select), ("fog", fog)):
+                     ("ritual", ritual), ("cave", cave), ("lair", lair), ("farmstead", farmstead), ("select", select), ("fog", fog)):
         fn().save(os.path.join(out, f"wmap_{name}.png"))
     # a contact sheet to look at
-    names = ["town", "city", "village", "house", "camp", "spawn", "ruins", "ritual", "cave", "lair"]
-    sheet = Image.new("RGBA", (256 * 5, 256 * 2), (120, 126, 110, 255))
+    names = ["town", "city", "village", "house", "camp", "spawn", "ruins", "ritual", "cave", "lair", "farmstead"]
+    sheet = Image.new("RGBA", (256 * 5, 256 * 3), (120, 126, 110, 255))
     for i, n in enumerate(names): sheet.alpha_composite(Image.open(os.path.join(out, f"wmap_{n}.png")), ((i % 5) * 256, (i // 5) * 256))
     sheet.save(os.path.join(out, "_sheet.png"))
     print("WILDSYM", out, len(names) + 2)
