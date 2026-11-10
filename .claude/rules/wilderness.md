@@ -117,3 +117,7 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).
+
+## The far land (2026-11-10, `RD/RDSkyFar.cpp`)
+
+- **Past the chunks' 2 km nothing was drawn**: a ring of coarse land (1.1 to 80 km, 14 rings of 96 points from `Wild->Sample`, 4 m under the ground so the chunks always draw over it) closes the horizon; it is made again once she has gone 400 m (4 to 6 ms). Its components are `Transient` without Blueprint flags: a test finds them by name (`RDFarLand`, `RDSkyHigh`, ...).

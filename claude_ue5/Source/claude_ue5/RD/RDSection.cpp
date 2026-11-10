@@ -1147,7 +1147,7 @@ TArray<FVector> ARDSection::WallSlots(const FRoom& Rm, int32 Side, float Spacing
 	return Out;
 }
 
-void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers)
+void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers, TArray<FTransform>* Placed)
 {
 	if (Names.Num() == 0) return;
 	for (int32 Side = 0; Side < 4; ++Side)
@@ -1161,7 +1161,7 @@ void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FN
 			const FVector Pos = W + FRotator(0, Yaw, 0).RotateVector(FVector(P->Size.X * 0.5f + 32.f, 0, 0));
 			if (!LaneFree(Rm, Pos, FMath::Max(P->Size.X, P->Size.Y) * 0.5f)) continue;
 			if (bContainers && P->Moving) AddContainer(Nm, Pos, Yaw, Nm.ToString().ToLower());
-			else if (AddPieceAt(Nm, Pos, Yaw)) MarkBlocked(Pos, Yaw, FVector2D(P->Size.X, P->Size.Y));
+			else if (AddPieceAt(Nm, Pos, Yaw)) { MarkBlocked(Pos, Yaw, FVector2D(P->Size.X, P->Size.Y)); if (Placed) Placed->Add(FTransform(FRotator(0, Yaw, 0), Pos, FVector(P->Size.X, P->Size.Y, P->Size.Z))); }
 		}
 }
 
@@ -1623,7 +1623,13 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 			for (const FVector& Q : Quads) { const FVector P = (Q + Mc) * 0.5f + (Q - Mc).GetSafeNormal2D() * 120.f; if (LaneFree(Rm, P, 60.f)) Center(TEXT("CandleStand"), P, 0.f); }
 			break;
 		}
-		FurnishWalls(R, Rm, { TEXT("Bookshelf"), TEXT("Bookshelf"), TEXT("Bookshelf2") }, 240.f, 0.9f);
+		{
+			// (the list of 2026-11-10: the shelves are searched for scrolls, their parts and tomes: where each stands, its room;
+			// the draws are FurnishWalls' own, so nothing else moves)
+			TArray<FTransform> Placed;
+			FurnishWalls(R, Rm, { TEXT("Bookshelf"), TEXT("Bookshelf"), TEXT("Bookshelf2") }, 240.f, 0.9f, false, &Placed);
+			for (const FTransform& Tf : Placed) { FShelf Sh; Sh.At = Tf.GetLocation(); Sh.Yaw = Tf.Rotator().Yaw; Sh.Depth = Tf.GetScale3D().X; Sh.Room = Rooms.IndexOfByPredicate([&Rm](const FRoom& X) { return &X == &Rm; }); Shelves.Add(Sh); }
+		}
 		for (const FVector& Q : Quads)
 		{
 			const float Yaw = R.RandBool() ? 0.f : 90.f;
@@ -2012,7 +2018,7 @@ void ARDSection::BeginGenerate(ARDDungeonGenerator* InGenerator, FIntPoint InCoo
 	GenStart = FPlatformTime::Seconds();
 	Generator = InGenerator; Coord = InCoord; Seed = InSeed; bEditorBuilt = bEditorBuild;
 	bBuildStatic = true; bBuildInteractive = true;
-	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1;
+	NumInstances = 0; NumLights = 0; NextRoom = 0; NextCorr = 0; GenTicks = 0; FurnishMs = 0.0; AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset();
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	GenR.Initialize(Seed);
@@ -2159,7 +2165,7 @@ void ARDSection::ActivateForPlay()
 	// same plan as the editor build (same seed); only the interactive part is instantiated
 	bBuildStatic = false; bBuildInteractive = true;
 	ClearInteractive();
-	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1;
+	FirePoints.Reset(); AnvilPoints.Reset(); AnvilRoom = -1; Shelves.Reset();
 	Theme = Generator->ThemeOf(Coord);
 	ThemeNames.Reset(); ThemeNamesOf = Theme;
 	const int32 Inst = NumInstances, Lights = NumLights;

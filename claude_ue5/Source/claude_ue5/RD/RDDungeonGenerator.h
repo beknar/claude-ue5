@@ -794,6 +794,8 @@ public:
 	 *  they cheer when a wave comes and clap and cheer when a monster falls; they leave when it is won or lost */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") bool bArenaCrowd = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<TObjectPtr<USkeletalMesh>> CrowdMeshes;
+	/** each crowd body's own head and hair (the list of 2026-11-10: "some of the NPC crowd in the Arena have no heads") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<FRDCrowdParts> CrowdParts;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TObjectPtr<UAnimationAsset> CrowdIdle = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<TObjectPtr<UAnimationAsset>> CrowdClaps;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward5") TArray<TObjectPtr<UAnimationAsset>> CrowdCheers;
@@ -1417,6 +1419,27 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
 	static FString WeatherName(int32 Kind);
+	/** the list of 2026-11-10 (RDSkyFar.cpp): the far land round her in the wilds, a ring from 1.1 to 80 km of the world model's
+	 *  heights and colours under the fog (the horizon's dark strip, 884 sky10); its material (914), how far she goes before it is
+	 *  made again (m), how far under the ground it sits (cm), the water's colour; tests: GetFarLandState "made|shown|x|y|ms|builds" */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> FarLandMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandRebuildM = 400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandSink = 400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FLinearColor FarWaterColor = FLinearColor(0.035f, 0.06f, 0.08f);
+	/** how far the volumetric clouds are traced (km; the engine's 50 left them ending short of the horizon) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float SkyCloudTraceKm = 160.f;
+	/** the list of 2026-11-10: the castle's inside stair as a stone stair against a wall (E:\temp\stonestairway.jpg): a solid block
+	 *  for each step on a coursed wall stepping up under them (RDTownPlan.cpp's CastleStairBuild); the blocks' and the wall's materials
+	 *  (914's; none: the stretched wall pieces of before), each one's centimetres a texture repeat */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Town") TObjectPtr<UMaterialInterface> StairBlockMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Town") TObjectPtr<UMaterialInterface> StairWallMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Town") float StairBlockUVCm = 120.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Town") float StairWallUVCm = 330.f;
+	UPROPERTY(Transient) TObjectPtr<class UProceduralMeshComponent> FarLand;
+	FVector2D FarLandAt = FVector2D::ZeroVector;
+	int32 FarLandBuilds = 0; float FarLandBuildMs = 0.f;
+	void TickFarLand(const FVector& Cam);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetFarLandState() const;
 	/** the list of 2026-11-10 (RDConsoleCmds.cpp): the weather now (0-7), and whether rd.Weather holds it (no change by itself) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") int32 GetWeather() const { return Weather; }
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Sky") bool bWeatherHeld = false;
@@ -1511,6 +1534,58 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") FString TableFoodTake(const FVector& From);
 	/** where the food not yet taken lies on the tables of every set built (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FVector> GetTableFoodPoints() const;
+	// ---- the list of 2026-11-10's second phase (RD/RDList10b.cpp)
+	/** "when the tier boss appears, a teleporter back to the first dungeon room or to brokenspire should spawn there with him": a pad
+	 *  in his room as he is set (PlaceBoss); F takes her to the first room, [G] turns it to the town (a level with a way back) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bBossPorts = false;
+	TMap<int32, FVector> BossPorts;
+	UPROPERTY(Transient) TMap<int32, TObjectPtr<class ARDTeleporter>> BossPortActors;
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|List10") int32 BossPortChoice = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 BossPortUses = 0;
+	void PlaceBossPort(int32 Tier, class ARDSection* S, int32 Room, const TArray<FVector>& Free, int32 Used);
+	int32 BossPortNear(const FVector& From, float Reach = 170.f) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") FString BossPortDescribe(const FVector& From) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") FString BossPortUse(const FVector& From);
+	/** tests: "tier|x|y|z" of every boss's teleporter */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetBossPortLines() const;
+	bool CanBossPortToTown() const;
+	void ClearBossPorts();
+	/** "a library's bookshelves should contain either scrolls of that tier or below or crafting components for scrolls of that tier or
+	 *  below, could also contain tomes": a library's shelves are searched with F (each once: ShelvesSearched by set and shelf) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bLibraryShelves = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float ShelfLootChance = 0.7f;
+	TSet<FIntVector> ShelvesSearched;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 ShelvesSearchedCount = 0;
+	const ARDSection* ShelfNear(const FVector& From, int32& OutIndex) const;
+	/** what a set's shelf holds (the rules: scrolls, the scrolls' recipe parts and tomes, of its tier or below) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FName> ShelfLootOf(FIntPoint Section, int32 Index) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") FString ShelfDescribe(const FVector& From) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") FString ShelfSearch(const FVector& From);
+	/** tests: "sx|sy|index|x|y|z|room|searched" of every library shelf of the sets built */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetShelfLines() const;
+	bool IsScrollPart(FName Item) const;
+	/** "if the player walks under a structure that blocks sight of her, make the structure see-through": the town's instanced pieces
+	 *  between her and the camera (or where its boom would put it), but what she stands on, are hidden while they stand there
+	 *  (their collision kept by a hidden copy that the camera and sight lines pass through) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bSeeThrough = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float SeeThroughHold = 0.5f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 SeeThroughTotal = 0;
+	struct FSeeHidden { TWeakObjectPtr<class UInstancedStaticMeshComponent> C; int32 I = -1; FTransform T; float Until = 0.f; TWeakObjectPtr<class UInstancedStaticMeshComponent> Proxy; int32 ProxyI = -1; };
+	TArray<FSeeHidden> SeeHidden;
+	TMap<TWeakObjectPtr<class UInstancedStaticMeshComponent>, TWeakObjectPtr<class UInstancedStaticMeshComponent>> SeeProxies;
+	TMap<TWeakObjectPtr<class UInstancedStaticMeshComponent>, TArray<int32>> SeeProxyFree;
+	/** a set's instanced pieces by their boxes on a 4 m grid, made once a set (a town's roofs have no collision: no trace finds them) */
+	struct FSeeRef { TWeakObjectPtr<class UInstancedStaticMeshComponent> C; int32 I = -1; FBox B; };
+	struct FSeeGrid { TMap<FIntPoint, TArray<int32>> Cells; TArray<FSeeRef> Refs; };
+	TMap<TWeakObjectPtr<class ARDSection>, FSeeGrid> SeeGrids;
+	FSeeGrid& SeeGridOf(class ARDSection* S);
+	void HideSeeThrough(class UInstancedStaticMeshComponent* C, int32 Inst);
+	float SeeThroughClock = 0.f, SeeThroughNext = 0.f;
+	void TickSeeThrough(float Dt);
+	void ClearSeeThrough();
+	/** tests: how many pieces are hidden now, and each "mesh|x|y|z" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetSeeThroughLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") int32 GetSeeThroughCount() const { return SeeHidden.Num(); }
 	/** the castle's way back to the town (an arch in the great hall): F there */
 	FVector CastleWayBack = FVector::ZeroVector;
 	UPROPERTY(Transient) TObjectPtr<AActor> CastleWayBackActor;

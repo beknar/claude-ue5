@@ -1,0 +1,335 @@
+{
+ "tag": "l10k",
+ "plan": [
+  "list10b",
+  "arena5",
+  "list10"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10b",
+   "ok": true,
+   "opened_before": [],
+   "opened_n": 1,
+   "prisoner_cells": 46,
+   "prisoner": {
+    "room": 16,
+    "before": 0,
+    "after_minimap": 1,
+    "big_map": 1
+   },
+   "shelf_census": {
+    "1": {
+     "SCROLL": 49,
+     "COMPONENT": 54,
+     "TOME": 16
+    },
+    "2": {
+     "COMPONENT": 28,
+     "TOME": 19,
+     "SCROLL": 54
+    },
+    "3": {
+     "SCROLL": 43,
+     "COMPONENT": 56,
+     "TOME": 16
+    },
+    "4": {
+     "TOME": 17,
+     "SCROLL": 45,
+     "COMPONENT": 41
+    },
+    "5": {
+     "TOME": 24,
+     "COMPONENT": 38,
+     "SCROLL": 45
+    }
+   },
+   "shelf_bad": [],
+   "shelves_built": 157,
+   "shelf": {
+    "at": [
+     0,
+     0,
+     0
+    ],
+    "says": "search the bookshelf",
+    "f": "shelf",
+    "want": [
+     "Scroll of Dark Fire"
+    ],
+    "got": {
+     "Scroll of Dark Fire": 1
+    },
+    "again": "",
+    "searched": 1
+   },
+   "ports": {
+    "before": 0,
+    "after": 1,
+    "bosses": 2,
+    "lines": [
+     [
+      "2",
+      "-5850.0",
+      "-9750.0",
+      "0.0"
+     ]
+    ]
+   },
+   "port_from_boss_m": 9.74,
+   "port_same_room": true,
+   "port_says": "teleport back to the first room    [G] to Brokenspire",
+   "port_f": "teleport",
+   "to_first_room_m": 0.0,
+   "port_says_g": "teleport to Brokenspire    [G] the first room",
+   "port_f_g": "town",
+   "last_travel": "town"
+  },
+  {
+   "step": "arena5",
+   "ok": true,
+   "room": 18,
+   "began": true,
+   "lead": 3.0,
+   "crowd": 18,
+   "wave_at_half_lead": -1,
+   "facing_middle": 18,
+   "by_a_door": 0,
+   "toward_walls": 18,
+   "meshes": 8,
+   "heads": {
+    "SK_NPC_Character_05_Full_02": [
+     2
+    ],
+    "SK_NPC_Character_04_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_05_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_02_Full_02": [
+     3
+    ],
+    "SK_NPC_Character_01_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_02_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_04_Full_02": [
+     1
+    ],
+    "SK_NPC_Character_01_Full_02": [
+     3
+    ]
+   },
+   "headless": [],
+   "first_wave_after": 3.03,
+   "cheers_at_wave": 1,
+   "doing_after_wave": [
+    "cheer"
+   ],
+   "ring_used": false,
+   "ring_moved_her": 0,
+   "door_says": "the arena's doors are barred until its last wave falls",
+   "door_f": "arena barred",
+   "door_open": false,
+   "put_back": 1,
+   "back_in_room": true,
+   "refused": 3,
+   "claps_after_kill": 1,
+   "doing_after_kill": [
+    "cheer",
+    "clap"
+   ],
+   "won": 1,
+   "crowd_after_win": 0,
+   "reactions": null
+  },
+  {
+   "step": "list10",
+   "ok": true,
+   "refused": [],
+   "gold": 55,
+   "inv_open": true,
+   "cur_torch": true,
+   "cur_shield": true,
+   "cur_potion": true,
+   "slots": [
+    "Dagger",
+    "None",
+    "#Torch",
+    "#Kite Shield",
+    "#Small Healing Potion",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "inv_closed": true,
+   "torch_lit": true,
+   "torch_out": true,
+   "shield_worn": "Kite Shield",
+   "potion": {
+    "hp_gain": 14.0,
+    "left": 1,
+    "was": 2
+   },
+   "quick_used": 4,
+   "weapon": "Viking Shortsword",
+   "bar_after_weapon": [
+    "Dagger",
+    "Viking Shortsword",
+    "#Torch",
+    "#Kite Shield",
+    "#Small Healing Potion",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "worn_out": {
+    "blows": 24,
+    "wear": 0.0,
+    "still_worn": "Kite Shield",
+    "count": 1,
+    "share_before": 0.24,
+    "share_after": 0.12,
+    "message": "Your kite shield is worn out: it takes half as much of a blow until it is mended"
+   },
+   "mend_line": "mend|Kite Shield|gKite Shield|0|Iron Ingot:0:4;Steel Ingot:0:2|0|230",
+   "cur_mend": true,
+   "mended": {
+    "wear": 230.0,
+    "full": 230.0,
+    "share": 0.24,
+    "took": {
+     "Iron Ingot": 4,
+     "Steel Ingot": 2
+    },
+    "need": {
+     "Iron Ingot": 4,
+     "Steel Ingot": 2
+    },
+    "mends": 1
+   },
+   "spare": {
+    "swapped": true,
+    "blows": 24,
+    "wear": 230.0,
+    "full": 230.0,
+    "count": 2,
+    "spares": [
+     0.0
+    ],
+    "share": 0.24,
+    "message": "Your kite shield is worn out: you take up a whole one (the worn one goes in your pack)"
+   },
+   "repair_kit": {
+    "line": "armour|Kite Shield|201|230|230",
+    "mended": true,
+    "before": 201.2,
+    "after": 230.0
+   },
+   "cur_stack": true,
+   "tap_left": 2,
+   "cur_stack2": true,
+   "held_left": 0,
+   "stacks": 1,
+   "hold_moved": {
+    "left": 2,
+    "why": ""
+   },
+   "groups": {
+    "order": [
+     "1repair",
+     "5other"
+    ],
+    "repair": [
+     "Leather Strips",
+     "Patch Kit",
+     "Repair Kit",
+     "Slickstone",
+     "Whetstone"
+    ],
+    "repair_kind_ok": true,
+    "contiguous": true
+   },
+   "warrior_potions": [],
+   "warrior_craft": {
+    "made": false,
+    "message": "Only the Mage and the Martial Artist brew the small healing potion"
+   },
+   "mage_potions": 4,
+   "mage_craft": true,
+   "food_points": 32,
+   "food_prompt": "take the food (bread)",
+   "food_got": {
+    "Bread": 3,
+    "Cheese": 0,
+    "Fruit": 0
+   },
+   "food_taken": 1,
+   "quest_option": "choice|Quest window|On",
+   "quest_toggled": true,
+   "save_page": [
+    "text|Name|Mistward Castle day 1",
+    "choice|Save over|a new save  (Enter: choose a save)",
+    "button|Save (over the save of that name)",
+    "button|Back"
+   ],
+   "save_name": "Mistward Castle day 1",
+   "dropdown": [
+    "button|A new save",
+    "button|Mistward Castle day 1: Mistward Castle, 2026-11-10 03:27 (Warrior)",
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|save: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|Back"
+   ],
+   "dropdown_page": 4,
+   "over_slot": "save_mistward_castle_day_1_3d3f8a",
+   "after_pick": [
+    "text|Name|Mistward Castle day 1",
+    "choice|Save over|Mistward Castle day 1",
+    "button|Save (over \"Mistward Castle day 1\")",
+    "button|Back"
+   ],
+   "dropdown_again": 4,
+   "escape_from_dropdown": {
+    "page": 3,
+    "open": true,
+    "slot_kept": "save_mistward_castle_day_1_3d3f8a"
+   },
+   "saves_before": 4,
+   "saves_after": 4,
+   "over_same_slot": true,
+   "over_file": {
+    "before": 1794310040.7115324,
+    "after": 1794310045.159758
+   }
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l10k_l10b_prisoner_minimap.png",
+  "mw_l10k_l10b_prisoner_map.png",
+  "mw_l10k_l10b_shelf.png",
+  "mw_l10k_l10b_bossport.png",
+  "mw_l10k_arena_crowd.png",
+  "mw_l10k_arena_clap.png",
+  "mw_l10k_l10_inventory_gold.png",
+  "mw_l10k_l10_bar_torch.png",
+  "mw_l10k_l10_bar_weapon.png",
+  "mw_l10k_l10_anvil_mend.png",
+  "mw_l10k_l10_anvil_groups.png",
+  "mw_l10k_l10_food.png",
+  "mw_l10k_l10_quests_off.png",
+  "mw_l10k_l10_quests_on.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

@@ -49,6 +49,15 @@ enum class ERDMonsterAbility : uint8
 	None, Poison, Weaken, Slow
 };
 
+/** the list of 2026-11-10: a crowd body's separate parts (the NPC Characters pack's _Full_02 bodies carry their heads and hair as
+ *  meshes of their own, Separate/), following the body (leader pose); CrowdParts[i] goes with CrowdMeshes[i] */
+USTRUCT(BlueprintType)
+struct FRDCrowdParts
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<TObjectPtr<USkeletalMesh>> Parts;
+};
+
 /** A wandering monster type: its own skeletal mesh and idle / walk clips (played directly, no AnimBP). */
 USTRUCT(BlueprintType)
 struct FRDMonsterDef

@@ -3206,6 +3206,17 @@ def step_arena5():
         if any(dist2(at, d) < 240 for d in doors): by_door += 1
         if min(dist2(at, tl) for tl in tiles) > 50: wallish += 1         # (off the tiles' middles: toward a wall)
     res.update({"facing_middle": faces, "by_a_door": by_door, "toward_walls": wallish, "meshes": len({p[1] for p in crowd})})
+    # (the list of 2026-11-10: "some of the NPC crowd in the Arena have no heads": every pack body of no head of its own (the
+    # _Full_02 ones) wears its head and hair)
+    specs = list(GS.get_all_actors_of_class(G["w"], unreal.RDSpectator))
+    heads = {}
+    for a in specs:
+        b = next((x for x in a.get_components_by_class(unreal.SkeletalMeshComponent) if x.get_name().startswith("Body")), None)
+        m = b.get_editor_property("skeletal_mesh_asset") if b else None
+        mn = m.get_name() if m else "none"
+        heads.setdefault(mn, set()).add(a.get_part_count())
+    res["heads"] = {k: sorted(v) for k, v in heads.items()}
+    res["headless"] = sorted(k for k, v in heads.items() if "_Full_02" in k and min(v) == 0)
     yield from wait(max(lead * 0.5 - 0.4, 0.1)); res["wave_at_half_lead"] = g.get_arena_wave()
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=0)); shot("arena_crowd", "1920x1080")
     while g.get_arena_wave() < 0 and now() - t0 < lead + 4: yield
@@ -3248,7 +3259,8 @@ def step_arena5():
           and res["wave_at_half_lead"] == -1 and res["first_wave_after"] >= lead - 0.2 and res["cheers_at_wave"] >= 1
           and ("cheer" in res["doing_after_wave"]) and res.get("ring_moved_her", 999) < 50 and res.get("door_open") is False
           and res.get("put_back", 0) >= 1 and res.get("back_in_room") and res["refused"] >= 2 and res["claps_after_kill"] >= 1
-          and any(d in ("clap", "cheer") for d in res["doing_after_kill"]) and res["won"] >= 1 and res["crowd_after_win"] == 0)
+          and any(d in ("clap", "cheer") for d in res["doing_after_kill"]) and res["won"] >= 1 and res["crowd_after_win"] == 0
+          and not res["headless"])
     step_result("arena5", ok, **res)
 
 def step_ceilings():
@@ -4441,6 +4453,123 @@ def step_console():
         elif q[0] == "note": res[q[1]] = q[2]
     res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
     step_result("console", bool(checks) and txt.strip().endswith("result|ok"), **res)
+def step_list10b():
+    """the list of 2026-11-10's second phase in the castle: a cell's prisoner marked on the minimap once she has been in its room
+    (none before; the mark at the cell); a library's shelf searched with F gives scrolls, scroll parts or tomes of its tier or below
+    (and a census of every tier's shelves by the game's own draw: nothing else, nothing of a higher tier), then says nothing more;
+    a tier's boss set with a teleporter in his room: F there takes her to the first room, [G] turns it to Brokenspire (the travel
+    dry run: the town's level), pictures of the pad and the mark"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    hud = G["pc"].get_hud(); res = {}
+    ITEMS = {str(i.get_editor_property("name")): i for i in g.get_editor_property("items")}
+    # ---- the prisoners: the sets round the start with cells; her in a cell's room
+    secs = [I2(0, 0)]
+    # (tier 2 opened with its encounters: its boss stands in a room of the start set she has seen (the great hall), his teleporter
+    # beside him)
+    ports0 = len(g.get_boss_port_lines())
+    # (the boss stands in a room she has explored that is not the one she is in (PickExploredRoom): three rooms of the start set
+    # visited, then back to the great hall)
+    S0 = g.get_section(I2(0, 0)); hall = S0.room_at(g.get_start_room_center()); seen = 0
+    for ri in range(S0.get_num_rooms()):
+        if ri == hall or seen >= 3: continue
+        if len(S0.get_room_free_tiles(ri)) < 6: continue
+        put(S0.get_room_center(ri), 0.0); yield from wait(0.5); seen += 1
+    put(g.get_start_room_center(), 0.0); yield from wait(1.2)
+    res["opened_before"] = sorted(int(t) for t in g.tiers_opened)
+    res["opened_n"] = g.debug_open_tiers(2, True); yield from wait(1.0)
+    for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
+        if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+        secs.append(s_)
+    cells = []
+    for s_ in secs:
+        S = g.get_section(s_)
+        if not S: continue
+        for l in S.get_cell_lines():
+            p = str(l).split("|")
+            if p[2] == "1" and p[3] in ("0", "False", "false"): cells.append({"s": s_, "at": V(float(p[4]), float(p[5]), float(p[6]))})
+    res["prisoner_cells"] = len(cells)
+    if cells:
+        cl = cells[0]; S = g.get_section(cl["s"]); room = S.room_at(cl["at"])
+        def marks13(): return [v for v in hud.get_marks_drawn() if int(v.z) == 13]
+        # (before: put far from it, the room not yet seen; then in the room's middle)
+        put(g.get_start_room_center(), 0.0); yield from rwait(0.6)
+        before = [m for m in marks13() if math.hypot(m.x - cl["at"].x, m.y - cl["at"].y) < 80]
+        mid = S.get_room_center(room); put(mid, 0.0); yield from wait(1.0); yield from rwait(0.4)
+        after = [m for m in marks13() if math.hypot(m.x - cl["at"].x, m.y - cl["at"].y) < 80]
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=0)); shot("l10b_prisoner_minimap", "1280x720"); yield from rwait(1.0)
+        yield from press("M"); yield from rwait(0.6)
+        big = [m for m in marks13() if math.hypot(m.x - cl["at"].x, m.y - cl["at"].y) < 80]
+        shot("l10b_prisoner_map", "1280x720"); yield from rwait(1.0); yield from press("M")
+        res["prisoner"] = {"room": room, "before": len(before), "after_minimap": len(after), "big_map": len(big)}
+    # ---- the shelves: the rule over every tier by the game's draw, then one searched
+    RECIPES = list(g.get_editor_property("recipes"))
+    def kind_of(n): it = ITEMS.get(str(n)); return str(it.kind).split(".")[-1].split(":")[0] if it else "?"
+    def tiers_of(n): it = ITEMS.get(str(n)); return list(it.get_editor_property("tiers")) if it else []
+    parts = set()
+    for rc in RECIPES:
+        if "SCROLL" in kind_of(rc.get_editor_property("item")):
+            for pt in rc.get_editor_property("parts"): parts.update(str(x) for x in pt.get_editor_property("any_of"))
+    census = {}; bad = []
+    for t in range(1, 6):
+        sec = I2(t - 1, 0); gt = g.global_tier(t); got = {}
+        for i in range(120):
+            for n in g.shelf_loot_of(sec, i):
+                k = kind_of(n); got[k] = got.get(k, 0) + 1
+                tr = tiers_of(n)
+                fits = ("SCROLL" in k or "TOME" in k or ("COMPONENT" in k and str(n) in parts)) and (not tr or min(tr) <= gt)
+                if not fits: bad.append(f"t{t}:{n}:{k}:{tr}")
+        census[t] = got
+    res["shelf_census"] = census; res["shelf_bad"] = bad[:12]
+    sl = [str(l).split("|") for l in g.get_shelf_lines()]
+    res["shelves_built"] = len(sl)
+    pick = next((p for p in sl if p[7] == "0" and g.shelf_loot_of(I2(int(p[0]), int(p[1])), int(p[2]))), None)
+    if pick:
+        sx, sy, si = int(pick[0]), int(pick[1]), int(pick[2])
+        front = V(float(pick[8]), float(pick[9]), float(pick[5])); at = V(float(pick[3]), float(pick[4]), float(pick[5]))
+        want = [str(n) for n in g.shelf_loot_of(I2(sx, sy), si)]
+        yaw = math.degrees(math.atan2(at.y - front.y, at.x - front.x))
+        put(V(front.x + (front.x - at.x) * 0.6, front.y + (front.y - at.y) * 0.6, front.z), yaw); yield from wait(0.6)
+        here = G["pawn"].get_actor_location()
+        says = str(g.describe_nearest(here, 260.0))
+        n0 = {n: c.get_item_count(n) for n in want}
+        f = str(g.interact_nearest(here, 260.0)); yield from wait(0.5)
+        gotn = {n: c.get_item_count(n) - n0[n] for n in want}
+        shot("l10b_shelf", "1280x720"); yield from rwait(1.0)
+        res["shelf"] = {"at": [sx, sy, si], "says": says, "f": f, "want": want, "got": gotn, "again": str(g.describe_nearest(here, 260.0)), "searched": g.shelves_searched_count}
+    # ---- the boss's teleporter
+    g.set_editor_property("travel_dry_run", True)
+    bp = [str(l).split("|") for l in g.get_boss_port_lines()]
+    bosses = [x for x in enc() if x["kind"] == "boss"]
+    res["ports"] = {"before": ports0, "after": len(bp), "bosses": len(bosses), "lines": bp[:4]}
+    if bp and bosses:
+        p = bp[0]; pt = V(float(p[1]), float(p[2]), float(p[3]))
+        b = min(bosses, key=lambda x: math.hypot(x["at"][0] - pt.x, x["at"][1] - pt.y))
+        res["port_from_boss_m"] = round(math.hypot(b["at"][0] - pt.x, b["at"][1] - pt.y) / 100, 2)
+        Sb = section_at(pt); res["port_same_room"] = Sb is not None and Sb.room_at(pt) == Sb.room_at(V(*b["at"]))
+        # (his band lets her be: quiet; none killed, or their parts would lie by the pad and F take them first)
+        put(V(pt.x + 100, pt.y, pt.z), 180.0); yield from wait(0.6)
+        here = G["pawn"].get_actor_location()
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=180)); shot("l10b_bossport", "1280x720"); yield from rwait(1.0)
+        res["port_says"] = str(g.describe_nearest(here, 260.0))
+        res["port_f"] = str(g.interact_nearest(here, 260.0)); yield from wait(0.6)
+        res["to_first_room_m"] = round(dist2(G["pawn"].get_actor_location(), g.get_start_room_center()) / 100, 2)
+        put(V(pt.x + 100, pt.y, pt.z), 180.0); yield from wait(0.6)
+        yield from press("G"); yield from wait(0.3)
+        here = G["pawn"].get_actor_location()
+        res["port_says_g"] = str(g.describe_nearest(here, 260.0))
+        res["port_f_g"] = str(g.interact_nearest(here, 260.0)); yield from wait(0.3)
+        res["last_travel"] = str(g.get_editor_property("last_travel"))
+        g.set_editor_property("boss_port_choice", 0)
+    g.set_editor_property("travel_dry_run", False)
+    quiet(False)
+    pr = res.get("prisoner", {}); sh = res.get("shelf", {})
+    ok = (res["prisoner_cells"] > 0 and pr.get("before") == 0 and pr.get("after_minimap", 0) >= 1 and pr.get("big_map", 0) >= 1
+          and not bad and sum(sum(v.values()) for v in census.values()) > 50
+          and sh.get("says") == "search the bookshelf" and sh.get("f") == "shelf" and all(v >= 1 for v in sh.get("got", {0: 0}).values()) and sh.get("again") != "search the bookshelf"
+          and res["ports"]["after"] >= 1 and res.get("port_same_room") and "first room" in res.get("port_says", "") and res.get("port_f") == "teleport"
+          and res.get("to_first_room_m", 99) < 3.0 and "Brokenspire" in res.get("port_says_g", "") and res.get("port_f_g") == "town" and res.get("last_travel", "") == "town")          # (the dry run of ReturnToTown records its kind)
+    step_result("list10b", ok, **res)
+
 def step_list10():
     """the list of 2026-11-10's first phase in the castle, walked through with the keys as the devices send them (Slate):
     gold in the inventory (a picture); a torch, a shield and a potion put on quick slots 3-5 from the inventory with the number
@@ -4659,7 +4788,7 @@ def step_list10():
           and res["dropdown_page"] == 4 and res["over_slot"] and res["saves_after"] == res["saves_before"] and res["over_same_slot"])
     step_result("list10", ok, **res)
 
-STEPS = {"list10": step_list10, "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+STEPS = {"list10": step_list10, "list10b": step_list10b, "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,
