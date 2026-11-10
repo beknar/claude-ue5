@@ -124,7 +124,8 @@ piece("Parapet", WS + "SM_Castle_Stone_Parapet_01a_NN", front="+y", collision=Fa
 for n, m in (("CWall", "01a"), ("CWallSlit", "02h"), ("CWallWin1", "02f"), ("CWallWin2", "02g"), ("CWallWinL", "02d")):
     piece(n, WS + f"SM_Castle_Stone_Wall_{m}_NN", front="+y")
 # (the round tower's quarters: their origin is the tower's middle, the quarter between +X and +Y (raw: no centring); a slit,
-# a small window, a window, a doorway, plain stone)
+# a small window, a window, a doorway, plain stone): pictured 2026-11-10 they are A plain, B the doorway, C a window, D a small
+# window, E a cross slit (the pack's letters are not in that order))
 for c in "abcde":
     piece("TowerRing" + c.upper(), WS + f"SM_Castle_Tower_Wall_02{c}_NN", front="+x", mode="raw", collision=False)
 piece("TowerCone", WS + "SM_Tower_Roof_02a_NN", front="+x", mode="raw", collision=False)

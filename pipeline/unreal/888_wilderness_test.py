@@ -1610,12 +1610,24 @@ def step_tower10():
     q = G["pawn"].get_actor_location()
     res["climb"] = {"reached": i, "of": len(pts), "feet_z_max_over_floor": round(zmax - hh - gf, 1), "top_over_floor": round(top - gf, 1)}
     res["feet_after_over_top"] = round(q.z - hh - top, 1)
+    # (PR #43's review: the third storey's two quarters left standing hold her: she walks at the middle of their wall from the top's
+    # floor for 3 s and stays inside the ring, on the floor)
+    kept = float(t[8]) if len(t) > 8 else None
+    if kept is not None and kept > -1e5:
+        wall = at(kept + 90.0, 420.0); t1 = time.time()
+        while time.time() - t1 < 3.0:
+            q = G["pawn"].get_actor_location(); dv = V(wall.x - q.x, wall.y - q.y, 0); n_ = math.hypot(dv.x, dv.y) or 1.0
+            G["pawn"].add_movement_input(V(dv.x / n_, dv.y / n_, 0), 1.0, False); yield
+        q = G["pawn"].get_actor_location()
+        res["pushed_at_wall"] = {"from_middle_cm": round(math.hypot(q.x - C.x, q.y - C.y)), "feet_over_top": round(q.z - hh - top, 1)}
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=dyaw)); yield from rwait(0.8)
     shot("tower10_top", "1280x720"); yield from rwait(1.5)
     put(at(dyaw, 900.0), yaw=dyaw + 180.0, z=g.wild_ground_z(at(dyaw, 900.0))); yield from rwait(1.2); shot("tower10_door", "1280x720"); yield from rwait(1.5)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
     quiet(False)
-    step_result("tower10", res["climb"]["reached"] == res["climb"]["of"] and abs(res["feet_after_over_top"]) < 30 and pieces >= 4, **res)
+    pw = res.get("pushed_at_wall")
+    step_result("tower10", res["climb"]["reached"] == res["climb"]["of"] and abs(res["feet_after_over_top"]) < 30 and pieces >= 4
+                and pw is not None and pw["from_middle_cm"] < 290 and abs(pw["feet_over_top"]) < 30, **res)
 
 def step_farms10():
     """"the small farm holdings should be noted on the large map": a farmstead she walks past is found (said so) and is on the big map:

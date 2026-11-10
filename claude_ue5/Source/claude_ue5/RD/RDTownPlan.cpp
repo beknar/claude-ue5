@@ -3161,12 +3161,14 @@ void ARDSection::CastleTowersBuild(const FTownBld& B)
 				TCHAR V = TEXT('E');
 				switch (St)
 				{
-				case 0: V = Rel < 10.f ? TEXT('A') : TEXT('E'); break;
-				case 1: V = Rel < 10.f ? TEXT('B') : Rel < 100.f ? TEXT('A') : TEXT('E'); break;
-				case 2: V = Rel < 10.f ? TEXT('A') : Rel < 100.f ? TEXT('B') : TEXT('E'); break;
-				default: V = Rel < 10.f ? TEXT('C') : Rel < 100.f ? TEXT('A') : TEXT('B'); break;
+				case 0: V = Rel < 10.f ? TEXT('E') : TEXT('A'); break;          // (the letters as pictured: E a slit, A plain, D a small window)
+				case 1: V = Rel < 10.f ? TEXT('D') : Rel < 100.f ? TEXT('E') : TEXT('A'); break;
+				case 2: V = Rel < 10.f ? TEXT('E') : Rel < 100.f ? TEXT('D') : TEXT('A'); break;
+				default: V = Rel < 10.f ? TEXT('C') : Rel < 100.f ? TEXT('E') : TEXT('D'); break;
 				}
-				if (St == 2 && RDTCAngleDiff(Mid, Inw) < 10.f) V = TEXT('D');
+				// (the doorway from the walk: quarter B (pictured 2026-11-10: A plain, B the doorway, C a window, D a small window, E a cross
+			// slit); D, a small window, had stood there and she walked through its wall between the colliders)
+			if (St == 2 && RDTCAngleDiff(Mid, Inw) < 10.f) V = TEXT('B');
 				const FName Nm(*FString::Printf(TEXT("Town.TowerRing%c"), V));
 				AddPiece(Generator->Piece(Nm) ? Nm : FName(TEXT("Town.TowerRingA")), FTransform(FRotator(0, Yaw0 + Q, 0), C + FVector(0, 0, Zs[St]), FVector(1.f, 1.f, Sz[St])), true);
 			}

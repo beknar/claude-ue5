@@ -1,0 +1,44 @@
+{
+ "tag": "h10e",
+ "plan": [
+  "tower10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "tower10",
+   "ok": true,
+   "tower_lines": [
+    [
+     "tower",
+     "-239367",
+     "173266",
+     "77",
+     "669",
+     "6",
+     "-135",
+     "-607",
+     "-90"
+    ]
+   ],
+   "climb": {
+    "reached": 40,
+    "of": 40,
+    "feet_z_max_over_floor": 593.8,
+    "top_over_floor": 592.0
+   },
+   "feet_after_over_top": 1.8,
+   "pushed_at_wall": {
+    "from_middle_cm": 219,
+    "feet_over_top": 2.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_h10e_tower10_top.png",
+  "wd_h10e_tower10_door.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

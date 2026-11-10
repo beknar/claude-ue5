@@ -122,7 +122,16 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			// (the captain's "The Lost Patrol": a ruined watchtower, Brokenspire's round tower's quarters (Castle Forge, 882's
 			// Town.TowerRing*: their origin the ring's middle) two storeys whole and a third broken, its fallen stones; the five
 			// of the watch lie before its doorway, which faces the road)
-			const float Z0 = WildGroundZ(FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0)) - 40.f;
+			float Z0 = WildGroundZ(FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0)) - 40.f;
+			// (the list of 2026-11-10: walked into: it stands on the highest ground under its ring, its doorway's sill at its floor (sunk 40 cm
+			// on a slope, the doorway opened a metre over the ground and the floor stood over its sill); a footing and steps where the
+			// ground falls (FitWildTower))
+			if (bWildHouseInsides)
+			{
+				float Gm = Z0 + 40.f;
+				for (int32 K = 0; K < 8; ++K) for (const float Rr : { 200.f, 320.f }) Gm = FMath::Max(Gm, WildGroundZ(FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0) + FRotator(0, 45.f * K, 0).RotateVector(FVector(Rr, 0, 0))));
+				Z0 = Gm + 2.f;
+			}
 			const FRDPiece* Rp = Piece(TEXT("Town.TowerRingE"));
 			const float Hs = Rp ? FMath::Max((float)Rp->Size.Z - 14.f, 100.f) : 300.f;
 			auto Quarter = [&](TCHAR V, float Yaw, float Z)
@@ -144,14 +153,16 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			};
 			// (the doorway quarter's middle on the way to the road: a quarter spans its yaw to its yaw + 90)
 			const float Y0 = P.Yaw - 45.f;
-			static const TCHAR Low[4] = { TEXT('D'), TEXT('A'), TEXT('E'), TEXT('A') };
-			static const TCHAR Mid[4] = { TEXT('B'), TEXT('A'), TEXT('C'), TEXT('A') };
+			// (the quarters by what they are, pictured (2026-11-10): A plain, B the doorway, C a window, D a small window, E a cross slit;
+			// 882's note had them in another order and D, a small window, stood as the doorway)
+			static const TCHAR Low[4] = { TEXT('B'), TEXT('A'), TEXT('E'), TEXT('A') };
+			static const TCHAR Mid[4] = { TEXT('D'), TEXT('A'), TEXT('C'), TEXT('E') };
 			for (int32 K = 0; K < 4; ++K) Quarter(Low[K], Y0 + 90.f * K, Z0);
 			for (int32 K = 0; K < 4; ++K) Quarter(Mid[K], Y0 + 90.f * K, Z0 + Hs);
-			if (bWildHouseInsides) FitWildTower(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0, Hs, P.Yaw);
 			const int32 Kept = R.RandRange(0, 3);
 			Quarter(TEXT('E'), Y0 + 90.f * Kept, Z0 + 2.f * Hs);
 			Quarter(TEXT('A'), Y0 + 90.f * ((Kept + 1) % 4), Z0 + 2.f * Hs);
+			if (bWildHouseInsides) FitWildTower(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0, Hs, P.Yaw, Y0 + 90.f * Kept);
 			for (int32 I = 0; I < 3; ++I)
 			{
 				const float A = FMath::DegreesToRadians(P.Yaw + 120.f + 60.f * I + R.FRandRange(-15.f, 15.f)), D = R.FRandRange(8.f, 12.f);
@@ -164,7 +175,9 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		else if (P.Kind == TEXT("village"))
 		{
 			// (the houses with their insides are laid at their doors' height for her: larger, so the ring is wider (the same draws))
-			const int32 Nh = R.RandRange(4, 7); const float Rh = R.FRandRange(18.f, 26.f) * (bWildHouseInsides ? 1.3f : 1.f);
+			// (the draws in the order the old one call made them (MSVC evaluates arguments right to left: the radius first), so every
+			// village keeps its layout (PR #43's review))
+			const float Rh = R.FRandRange(18.f, 26.f) * (bWildHouseInsides ? 1.3f : 1.f); const int32 Nh = R.RandRange(4, 7);
 			Ring(Nh, Rh, 14.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("house"), At, Yaw, 1.f, 25.f); });
 			Put(TEXT("well"), P.At, R.FRandRange(0.f, 360.f));
 			Ring(3, 9.f, 25.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("hay"), At, Yaw + R.FRandRange(-40.f, 40.f), 1.f, 5.f); });

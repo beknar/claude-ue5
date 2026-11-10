@@ -211,7 +211,17 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 	TArray<FRDWildPlace> Ps;
 	for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) Wild->PlacesIn(C + FIntPoint(I, J), Ps);
 	// (the list of 2026-11-10: "the small farm holdings should be noted on the large map": the farmsteads found as places are)
-	if (bWildFarmsOnMap) Wild->FarmsteadsIn(AtM.X - WildDiscoverM - 50.0, AtM.Y - WildDiscoverM - 50.0, AtM.X + WildDiscoverM + 50.0, AtM.Y + WildDiscoverM + 50.0, Ps);
+	if (bWildFarmsOnMap)
+	{
+		// (searched again only when her great field cell changes: the 3 x 3 cells round her (PR #43's review))
+		const FIntPoint Gc(FMath::FloorToInt(AtM.X / FRDWildWorld::GreatFieldM), FMath::FloorToInt(AtM.Y / FRDWildWorld::GreatFieldM));
+		if (Gc != WildFarmCell)
+		{
+			WildFarmCell = Gc; WildFarmNear.Reset();
+			Wild->FarmsteadsIn((Gc.X - 1) * FRDWildWorld::GreatFieldM, (Gc.Y - 1) * FRDWildWorld::GreatFieldM, (Gc.X + 2) * FRDWildWorld::GreatFieldM, (Gc.Y + 2) * FRDWildWorld::GreatFieldM, WildFarmNear);
+		}
+		Ps.Append(WildFarmNear);
+	}
 	for (const FRDWildPlace& P : Ps)
 	{
 		if (WildFound.Contains(P.Id)) continue;

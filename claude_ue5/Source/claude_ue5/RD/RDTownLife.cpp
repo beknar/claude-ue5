@@ -18,6 +18,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/PointLightComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDTownLife, Log, All);
 
@@ -45,6 +46,9 @@ UAnimationAsset* ARDTownsfolk::WorkClip(FName Kind) const
 void ARDTownsfolk::SetProp(FName Prop)
 {
 	if (PropComp) { PropComp->DestroyComponent(); PropComp = nullptr; }
+	// (the lantern goes with any other prop: its light with it (PR #43's review: left hanging, and the lantern never came back))
+	if (LanternLight) { LanternLight->DestroyComponent(); LanternLight = nullptr; }
+	bLanternOn = false;
 	if (Prop.IsNone() || !Gen) return;
 	const FRDTownProp* P = Gen->TownProps.Find(Prop);
 	if (!P || !P->Mesh) return;

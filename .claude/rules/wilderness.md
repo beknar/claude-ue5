@@ -123,6 +123,9 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A mesh with no simple collision under the default trace flag is walked through**: the Lake Village barn and farmhouse (CTF_USE_DEFAULT, 0 simple shapes). Their mesh is their collision now.
 - **A road a few metres wide is missed by samples 100 m apart**: a test that needs a road starts from a place that is beside one by design (the den).
 - **A camp beside the road lay in a bean field**: a thing put off a road looks at its ground (field, water) first.
+- **Picture a kit's pieces before trusting their letters**: the tower quarters' doorway is B (882's note put it at D, a small window); the wild tower's "doorway" was a window and she walked through its wall between the hidden colliders, while the test passed. A test that walks through a doorway must also look at it.
+- **A floor on the highest ground under a ring stands over its doorway's sill on a slope**: the tower stands on that ground, a stone footing down to the lowest, steps from its doorway.
+- **PR #43's review (2026-11-10)**: what replaces a mesh's collision must cover the whole of it (the third storey's kept walls had none); a prop that holds a light hands the light over to whatever takes its place (`SetProp` ends the lantern); a nearer door wins over a person; the draws of one call keep their order when split (MSVC: right to left); a search over a world's cells is kept for the cell she is in.
 
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 

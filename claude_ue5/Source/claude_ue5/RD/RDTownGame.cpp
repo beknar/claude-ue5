@@ -1300,6 +1300,8 @@ void ARDDungeonGenerator::TickTownTour(float RealDt)
 }
 
 // ================================================================================================ F in the town
+/** a title that says its own article ("a townswoman on the road to ...") is said as it is; another takes "the" */
+static FString RDTTheTitle(const FString& T, bool bCap) { const bool bArt = T.StartsWith(TEXT("a ")) || T.StartsWith(TEXT("an ")); return bArt ? (bCap ? T.Left(1).ToUpper() + T.Mid(1) : T) : (bCap ? TEXT("The ") : TEXT("the ")) + T; }
 /** a role F wakes to serve at night: a quest's giver or a keeper of a service */
 static bool RDTServes(ERDTownRole R)
 {
@@ -1316,10 +1318,13 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	}
 	if (IsTownPanelOpen()) return FString();
 	// (a farmstead's family out in the wilds (the list of 2026-11-08b))
-	// (a traveller's title says its own article: "a townswoman on the road to ...")
-	if (const ARDTownsfolk* Wf = WildFolkForF(From)) return Wf->Title.StartsWith(TEXT("a ")) || Wf->Title.StartsWith(TEXT("an ")) ? FString::Printf(TEXT("talk to %s"), *Wf->Title) : FString::Printf(TEXT("talk to the %s"), *Wf->Title);
-	// (the list of 2026-11-10's sixth phase: a wild house's door)
-	if (const FString Wd = WildDoorDescribe(From); !Wd.IsEmpty()) return Wd;
+	// (the list of 2026-11-10's sixth phase: a wild house's door, before the wild folk when it is the nearer (PR #43's review))
+	{
+		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
+		const ARDTownsfolk* Wf = WildFolkForF(From);
+		if (Dc && (!Wf || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf->GetActorLocation(), From))) return WildDoorDescribe(From);
+		if (Wf) return FString::Printf(TEXT("talk to %s"), *RDTTheTitle(Wf->Title, false));
+	}
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
@@ -1370,17 +1375,20 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	}
 	if (TownPanelClosedFrame == GFrameCounter) return TEXT("closed");
 	// (a farmstead's family: they turn to her and say a line of their own)
+	{
+		int32 Di = -1; const ARDWildChunk* Dc = bWild && bWildHouseInsides ? WildDoorNear(From, 190.f, Di) : nullptr;
+		const ARDTownsfolk* Wf0 = WildFolkForF(From);
+		if (Dc && (!Wf0 || FVector::Dist2D(Dc->Doors[Di].At, From) < FVector::Dist2D(Wf0->GetActorLocation(), From))) return WildDoorInteract(From);
+	}
 	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
 		Wf->FaceToward(From, 8.f);
 		TownCount(TEXT("talk:farm"));
 		const FString Line = Wf->NextLine();
 		LastBark = FString::Printf(TEXT("%s|%s"), *Wf->Title, *Line);
-		const bool bArt = Wf->Title.StartsWith(TEXT("a ")) || Wf->Title.StartsWith(TEXT("an "));
-		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(bArt ? FString::Printf(TEXT("%s%s:  \"%s\""), *Wf->Title.Left(1).ToUpper(), *Wf->Title.Mid(1), *Line) : FString::Printf(TEXT("The %s:  \"%s\""), *Wf->Title, *Line));
+		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s:  \"%s\""), *RDTTheTitle(Wf->Title, true), *Line));
 		return TEXT("bark");
 	}
-	if (const FString Wd = WildDoorInteract(From); !Wd.IsEmpty()) return Wd;
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
 		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T) && !(bTownSkipSleepers && T->IsSleeping() && !RDTServes(T->TownRole))) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }

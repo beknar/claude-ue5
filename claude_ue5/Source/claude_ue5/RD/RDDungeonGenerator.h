@@ -1618,7 +1618,7 @@ public:
 	bool FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm, uint32 Salt);
 	/** the Old Watchtower climbed: its doorway open (hidden boxes round its ring, not its quarters' collision), a spiral stair up to
 	 *  a floor at the second storey's top */
-	void FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw);
+	void FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw = -1e6f);
 	/** the nearest wild door within Reach of a point (its chunk and index), F's */
 	ARDWildChunk* WildDoorNear(const FVector& From, float Reach, int32& Index) const;
 	FString WildDoorDescribe(const FVector& From) const;
@@ -1641,16 +1641,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") int32 TownHens = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bNightLanterns = false;
 	struct FTraveller { TArray<TWeakObjectPtr<class ARDTownsfolk>> Folk; int32 Road = -1; int32 Seg = 0; int32 Dir = 1; bool bCamped = false; FVector Camp = FVector::ZeroVector;
-		TArray<TWeakObjectPtr<UActorComponent>> CampBits; TWeakObjectPtr<AActor> CampActor; uint32 Seed = 0; FString Name; };
+		TArray<TWeakObjectPtr<UActorComponent>> CampBits; uint32 Seed = 0; FString Name; };
 	TArray<FTraveller> WildTravellers;
-	int32 WildTravellersMade = 0, WildCampsMade = 0;
+	int32 WildTravellersMade = 0;
+	/** the farmsteads round her great field cell (the map's: searched once a cell, PR #43's review: four times a second it was) */
+	FIntPoint WildFarmCell = FIntPoint(MAX_int32, MAX_int32);
+	TArray<FRDWildPlace> WildFarmNear;
 	float TravellerClock = 0.f, LanternClock = 0.f;
 	void TickWild10(float Dt, const FVector& Her);
 	void TickWildTravellers(const FVector& Her);
 	void CampTravellers(FTraveller& T);
 	void SpawnTownHens();
 	void TickNightLanterns();
-	UPROPERTY(Transient) TArray<TObjectPtr<class ARDTownAnimal>> TownHenActors;
 	/** "group|<i>|<x>|<y>|<z>|<folk>|<camped 0/1>|<walking>|<road>|<name>" (tests); a group sent at her for a test */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") TArray<FString> GetWildTravellerLines() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") bool ForceWildTravellers();

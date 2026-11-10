@@ -43,13 +43,7 @@ namespace
 
 bool ARDWildChunk::IsClear(const FVector& L) const
 {
-	for (const FClear& Cl : Clears)
-	{
-		const FVector2D D(L.X - Cl.C.X, L.Y - Cl.C.Y);
-		const float S = FMath::Sin(FMath::DegreesToRadians(-Cl.Yaw)), Co = FMath::Cos(FMath::DegreesToRadians(-Cl.Yaw));
-		const FVector2D Q(D.X * Co - D.Y * S, D.X * S + D.Y * Co);
-		if (FMath::Abs(Q.X) <= Cl.H.X && FMath::Abs(Q.Y) <= Cl.H.Y) return true;
-	}
+	for (const FClear& Cl : Clears) if (Cl.Contains(L)) return true;
 	return false;
 }
 
@@ -117,7 +111,9 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		L->SetupAttachment(Pv);
 		L->RegisterComponent();
 		C->PlaceProps.Add(L);
-		if (!bInside) continue;
+		// (a door the house's data puts on an X wall only: the outward way, the swing, the steps and the back wall are read from it;
+		// one on another wall stays shut (PR #43's review))
+		if (!bInside || FMath::Abs(D.Pivot.X) < 0.8f * FMath::Max(FMath::Abs(H->InMin.X), FMath::Abs(H->InMax.X))) continue;
 		ARDWildChunk::FDoor Dr;
 		Dr.Pivot = Pv;
 		Dr.At = T.TransformPosition(D.Pivot + FVector(0.f, D.Width * 0.5f, 0.f));
@@ -243,16 +239,11 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	for (UHierarchicalInstancedStaticMeshComponent* Hm : C->NearFoliage) Clean(Hm);
 	{
 		// (the place's own props laid before this house (indices under Before) within a metre of its room: taken away)
-		ARDWildChunk::FClear Big = Cl; Big.H += FVector2D(110.f, 110.f);
-		const float S = FMath::Sin(FMath::DegreesToRadians(-Big.Yaw)), Co = FMath::Cos(FMath::DegreesToRadians(-Big.Yaw));
 		for (int32 K = FMath::Min(Before, C->PlaceProps.Num()) - 1; K >= 0; --K)
 		{
 			UStaticMeshComponent* P = C->PlaceProps[K];
 			if (!P || P == Sm) continue;
-			const FVector Pl = Gt.InverseTransformPosition(P->GetComponentLocation());
-			const FVector2D D(Pl.X - Big.C.X, Pl.Y - Big.C.Y);
-			const FVector2D Q(D.X * Co - D.Y * S, D.X * S + D.Y * Co);
-			if (FMath::Abs(Q.X) <= Big.H.X && FMath::Abs(Q.Y) <= Big.H.Y) { P->DestroyComponent(); C->PlaceProps.RemoveAt(K); ++Rec.PropsGone; }
+			if (Cl.Contains(Gt.InverseTransformPosition(P->GetComponentLocation()), 110.f)) { P->DestroyComponent(); C->PlaceProps.RemoveAt(K); ++Rec.PropsGone; }
 		}
 	}
 	C->Houses.Add(Rec);
@@ -261,7 +252,7 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 }
 
 // ================================================================================================ the watchtower climbed
-void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw)
+void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, float Z0, float Hs, float DoorYaw, float KeptYaw)
 {
 	if (!C) return;
 	const FRDPiece* Cp = Piece(TEXT("Town.Collider"));
@@ -292,12 +283,16 @@ void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, floa
 			};
 			if (RDW10AngDiff(A, DoorYaw) < 11.25f) { Box(Z0 + 255.f, Z0 + 2.f * Hs); }
 			else Box(Z0, Z0 + 2.f * Hs);
+			// (the broken third storey: its two quarters left standing (from KeptYaw, 180 degrees) (PR #43's review: walked through, she fell))
+			if (KeptYaw > -1e5f && FMath::Fmod(FMath::Fmod(A - KeptYaw, 360.f) + 360.f, 360.f) < 180.f) Box(Z0 + 2.f * Hs, Z0 + 3.f * Hs);
 		}
 	// (the floor at the doorway: the ground's highest under the ring; the spiral from it to the second storey's top, clockwise from
 	// just past the door)
-	float Gf = -1e9f;
-	for (int32 K = 0; K < 8; ++K) Gf = FMath::Max(Gf, WildGroundZ(Mid + FRotator(0, 45.f * K, 0).RotateVector(FVector(200.f, 0, 0))));
-	Gf = FMath::Max(Gf, WildGroundZ(Mid)) + 2.f;
+	// (the floor at the doorway's sill: the tower stands on the highest ground under its ring (RDWildPlaces); a stone footing down to
+	// the lowest where it falls)
+	const float Gf = Z0 + 2.f;
+	float Gmin = 1e9f;
+	for (int32 K = 0; K < 8; ++K) Gmin = FMath::Min(Gmin, WildGroundZ(Mid + FRotator(0, 45.f * K, 0).RotateVector(FVector(330.f, 0, 0))));
 	const float Top = Z0 + 2.f * Hs;
 	UMaterialInterface* Stone = nullptr;
 	if (const FRDPiece* Fs = Piece(TEXT("Floor_Stone"))) Stone = Fs->Material ? Fs->Material.Get() : (Fs->Mesh ? Fs->Mesh->GetMaterial(0) : nullptr);
@@ -331,6 +326,24 @@ void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, floa
 	Fl->bUseComplexAsSimpleCollision = true;
 	Fl->RegisterComponent();
 	Sector(Fl, 0, 0.f, 300.f, 0.f, 360.f, Gf, 30.f);
+	if (Cp && Z0 - Gmin > 8.f)
+		if (UStaticMeshComponent* Ft = Add(Cp, FTransform(FRotator(0, DoorYaw, 0), FVector(Mid.X, Mid.Y, Gmin - 30.f), FVector(6.6f, 6.6f, (Z0 + 1.f - (Gmin - 30.f)) / 100.f)), false))
+			if (Stone) Ft->SetMaterial(0, Stone);
+	// (steps out of the doorway where the ground before it lies lower than the floor (on a slope its edge was too tall a step: 888
+	// tower10 stopped her at the door))
+	{
+		const FVector Dw = FRotator(0, DoorYaw, 0).RotateVector(FVector(1, 0, 0));
+		const float Drop = Gf - WildGroundZ(Mid + Dw * 390.f);
+		if (Drop > 25.f)
+			for (int32 K = 0, N = FMath::Min(FMath::CeilToInt(Drop / 26.f), 8); K < N; ++K)
+			{
+				const float StepTop = Gf - Drop * K / N, R0 = 330.f + 40.f * K;
+				const FVector P = Mid + Dw * (R0 + 20.f);
+				const float Zb = WildGroundZ(P) - 25.f;
+				if (Cp) if (UStaticMeshComponent* St = Add(Cp, FTransform(FRotator(0, DoorYaw, 0), FVector(P.X, P.Y, Zb), FVector(0.42f, 1.3f, FMath::Max(StepTop - Zb, 5.f) / 100.f)), false))
+					if (Stone) St->SetMaterial(0, Stone);
+			}
+	}
 	int32 Pieces_ = 0;
 	float Ys = DoorYaw - 22.f;
 	if (Sp && Top - Gf > 150.f)
@@ -353,7 +366,7 @@ void ARDDungeonGenerator::FitWildTower(ARDWildChunk* C, const FVector& Mid, floa
 				if (Wl && Stone) Wl->SetMaterial(0, Stone);
 			}
 	}
-	WildTowerLines.Add(FString::Printf(TEXT("tower|%.0f|%.0f|%.0f|%.0f|%d|%.0f|%.0f"), Mid.X, Mid.Y, Gf, Top, Pieces_, DoorYaw, Ys));
+	WildTowerLines.Add(FString::Printf(TEXT("tower|%.0f|%.0f|%.0f|%.0f|%d|%.0f|%.0f|%.0f"), Mid.X, Mid.Y, Gf, Top, Pieces_, DoorYaw, Ys, KeptYaw));
 }
 
 // ================================================================================================ the doors
@@ -450,7 +463,7 @@ void ARDTownsfolk::TickRoad(float Dt)
 	}
 	if (!StandWork.IsNone())
 	{
-		if (UAnimationAsset* Wc = WorkClip(StandWork)) PlayAnim(Wc, 1.f);
+		if (UAnimationAsset* Wc = WorkClip(StandWork)) PlayAnim(Wc, 1.f); else SetClip(false);
 		SetActorRotation(FRotator(0.f, FMath::RInterpConstantTo(GetActorRotation(), FRotator(0.f, HomeYaw, 0.f), Dt, 180.f).Yaw, 0.f));
 		return;
 	}
@@ -460,10 +473,11 @@ void ARDTownsfolk::TickRoad(float Dt)
 void ARDTownsfolk::SetLantern(bool bOn)
 {
 	if (bOn == bLanternOn) return;
-	bLanternOn = bOn;
-	if (LanternLight) { LanternLight->DestroyComponent(); LanternLight = nullptr; }
-	if (!bOn) { SetProp(NAME_None); return; }
+	// (at work it holds its work's prop: no lantern then; off, only the lantern goes (PR #43's review: it took a work prop with it))
+	if (bOn && Act == 3) return;
+	if (!bOn) { SetProp(NAME_None); return; }          // (SetProp ends the lantern and its light)
 	SetProp(TEXT("Lantern"));
+	bLanternOn = true;
 	if (!PropComp) { bLanternOn = false; return; }
 	UPointLightComponent* Lt = NewObject<UPointLightComponent>(this);
 	Lt->SetupAttachment(PropComp);
@@ -517,7 +531,6 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 		{
 			for (auto& F : T.Folk) if (F.IsValid()) F->Destroy();
 			for (auto& B : T.CampBits) if (B.IsValid()) B->DestroyComponent();
-			if (T.CampActor.IsValid()) T.CampActor->Destroy();
 			WildTravellers.RemoveAt(G);
 		}
 	}
@@ -554,7 +567,9 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 			// (side by side and a little behind each other, on the road's right)
 			for (int32 K = 0; K < Next.Num(); ++K)
 			{
-				const FVector2D A = K == 0 ? FVector2D(Fk->GetActorLocation().X / 100.0, Fk->GetActorLocation().Y / 100.0) : Next[K - 1];
+				// (from the end of its own way (PR #43's review: from where it stood, a follower's queue doubled back))
+				const FVector Ql = Fk->RoadPath.Num() > 0 ? Fk->RoadPath.Last() : Fk->GetActorLocation();
+				const FVector2D A = K == 0 ? FVector2D(Ql.X / 100.0, Ql.Y / 100.0) : Next[K - 1];
 				const FVector2D Dd = (Next[K] - A).GetSafeNormal(), Rt(-Dd.Y, Dd.X);
 				const FVector2D Pm = Next[K] + Rt * (1.2f + 0.9f * F) - Dd * (1.4f * F);
 				Fk->RoadPath.Add(FVector(Pm.X * 100.0, Pm.Y * 100.0, 0.0));
@@ -584,7 +599,7 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 		// (its folk: the travelling roles' shared people)
 		TArray<int32> Pool;
 		for (int32 D = 0; D < Townsfolk.Num(); ++D)
-			if (Townsfolk[D].Mesh && Townsfolk[D].Town.IsEmpty() && WildTravellerRoles.Contains(FName(*StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)Townsfolk[D].Role)))) Pool.Add(D);
+			if (Townsfolk[D].Mesh && Townsfolk[D].Town.IsEmpty() && Townsfolk[D].WorkClips.Contains(TEXT("SitTalk")) && WildTravellerRoles.Contains(FName(*StaticEnum<ERDTownRole>()->GetNameStringByValue((int64)Townsfolk[D].Role)))) Pool.Add(D);
 		if (Pool.Num() == 0) return;
 		FTraveller T; T.Road = Ri; T.Seg = S; T.Dir = -Dir; T.Seed = Seed;
 		const FRDWildTown* To = Wild->Towns.IsValidIndex(T.Dir > 0 ? Rd.To : Rd.From) ? &Wild->Towns[T.Dir > 0 ? Rd.To : Rd.From] : nullptr;
@@ -603,6 +618,9 @@ void ARDDungeonGenerator::TickWildTravellers(const FVector& Her)
 			F->SetTitle(FString::Printf(TEXT("%s on the road to %s"), *F->Title, *T.Name));
 			T.Folk.Add(F);
 		}
+		// (the group at its slowest's pace: they walk together (PR #43's review: a slower one fell further behind at every top-up))
+		float Pace = 1e9f; for (auto& F : T.Folk) if (F.IsValid()) Pace = FMath::Min(Pace, F->Speed);
+		for (auto& F : T.Folk) if (F.IsValid()) F->Speed = Pace;
 		if (T.Folk.Num() > 0) { WildTravellers.Add(T); UE_LOG(LogRDWild10, Log, TEXT("RDTRAVELLERS %d on the road to %s at (%.0f, %.0f) m"), T.Folk.Num(), *T.Name, At.X, At.Y); }
 	}
 }
@@ -611,7 +629,7 @@ void ARDDungeonGenerator::CampTravellers(FTraveller& T)
 {
 	ARDTownsfolk* Lead = T.Folk.Num() > 0 ? T.Folk[0].Get() : nullptr;
 	if (!Lead || !Wild->Roads.IsValidIndex(T.Road)) return;
-	T.bCamped = true; ++WildCampsMade;
+	T.bCamped = true;
 	// (its camp 7 m off the road's side, where the leader is: a fire on its stones, logs round it to sit on, the fire's light)
 	const FRDWildWorld::FRoad& Rd = Wild->Roads[T.Road];
 	const FVector L = Lead->GetActorLocation();
@@ -720,7 +738,7 @@ void ARDDungeonGenerator::SpawnTownHens()
 {
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	const int32 Def = TownAnimals.IndexOfByPredicate([](const FRDTownAnimalDef& D) { return D.Name == TEXT("Chicken") && D.Mesh; });
-	if (TownHens <= 0 || !S || Def < 0) return;
+	if (TownHens <= 0 || !S || Def < 0 || TownPlan == 5) return;          // (Heaven: no farm animals (heaven.md))
 	FVector Sq = FVector::ZeroVector;
 	if (!GetTownPlace(TEXT("square"), Sq)) return;
 	// (each on a free tile of the open ground within 24 m of the square, its round that tile's middle and 1.2 m round it: nothing in
