@@ -373,10 +373,13 @@ public:
 	void EnsureForge();
 	/** the list of 2026-11-10's fourth phase: the town's beds (where each stands, its yaw (its foot toward +X), its building, who
 	 *  has it); the ones put in play for sleepers who had none (their meshes); the households' extra people planned */
-	struct FTownBed { FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; int32 Taken = -1; bool bMade = false; };
+	/** a made bed's tiles it blocked (freed with it: the townsfolk spawned again lay theirs afresh) */
+	struct FTownBed { FVector At = FVector::ZeroVector; float Yaw = 0.f; int32 Bld = -1; int32 Taken = -1; bool bMade = false; TArray<int32> Blocks; };
+	/** the made beds taken away: their meshes, footprints and blocked tiles (before the townsfolk are spawned again) */
+	void ClearMadeTownBeds();
 	TArray<FTownBed> TownBeds;
 	UPROPERTY(Transient) TArray<TObjectPtr<class UStaticMeshComponent>> TownBedMeshes;
-	int32 TownAdults2 = 0, TownHomeKids = 0, TownSquareKidsDropped = 0, TownPostsPlanned = 0;
+	int32 TownAdults2 = 0, TownHomeKids = 0, TownSquareKidsDropped = 0;
 	/** a bed put in a building on a free tile of its rooms (no random draw); its index, -1 none */
 	int32 AddTownBed(int32 Bld);
 	/** the households' second grown-ups and children (bMorePeople) */
@@ -486,6 +489,9 @@ private:
 	/** mistward (bTidyFurniture): footprints placed in the room being furnished; a container's way in */
 	struct FFoot { FVector2D C; FVector2D H; float Yaw = 0.f; bool bAccess = false; FName Name; };
 	TArray<FFoot> Feet;
+	/** the town's every footprint and container's way in, kept past each room's furnishing (the list of 2026-11-10: a bed put
+	 *  for a sleeper goes on none of them: PR #41's review) */
+	TArray<FFoot> TownFeet;
 	int32 FurnRoom = -1;
 	bool FootFree(const FVector& Loc, float Yaw, const FVector2D& Size, bool bAccess) const;
 	/** on the room's own floor (every tile under it is the room's) */

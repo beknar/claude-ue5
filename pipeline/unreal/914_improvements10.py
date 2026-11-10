@@ -415,21 +415,29 @@ SA_ROOT = r"E:\code\claude-ue5\claude_ue5\SourceArt"
 if "lines" in STEPS:
     import os, json, re
     entries = []
+    TOWNS = (("Brokenspire", r"\bbrokenspire\b"), ("Vel Morrath", r"\bvel morrath\b"), ("Ashenreach", r"\bashenreach\b"),
+             ("Graymourne", r"\bgraymourne\b"), ("Kethrys Spire", r"\bkethrys\b"), ("Heaven", r"\bheaven\b"))
     for f in ("brokenspire/role_lines_a.json", "brokenspire/role_lines_b.json", "brokenspire/role_lines_c.json", "heaven/role_lines.json"):
         for e in json.load(open(os.path.join(SA_ROOT, f), encoding="utf-8"))["lines"]:
             town = e.get("town", "")
             if town:
-                entries.append((e["role"], town, True, e["lines"])); continue
-            # (a line naming the castle or the Mistgate stands only in Brokenspire, by Mistward Castle)
+                entries.append((e["role"], town, True, "", e["lines"])); continue
+            # (a line naming the castle or the Mistgate stands only in Brokenspire, by Mistward Castle; a line naming a town is not
+            # said in it (PR #41's review: "My brother guards the walls of Vel Morrath" was said in Vel Morrath))
             local = [l for l in e["lines"] if re.search(r"\b(castle|mistgate|mistward)\b", l, re.I)]
-            entries.append((e["role"], "", False, [l for l in e["lines"] if l not in local]))
-            if local: entries.append((e["role"], "Brokenspire", False, local))
+            if local: entries.append((e["role"], "Brokenspire", False, "", local))
+            groups = {}
+            for l in e["lines"]:
+                if l in local: continue
+                named = ",".join(t for t, rx in TOWNS if re.search(rx, l, re.I))
+                groups.setdefault(named, []).append(l)
+            for named, ls in groups.items(): entries.append((e["role"], "", False, named, ls))
     farm = json.load(open(os.path.join(SA_ROOT, "wilderness", "farm_lines10.json"), encoding="utf-8"))["lines"]
     def lines(g):
         rl = []
-        for role, town, only, ls in entries:
+        for role, town, only, ex, ls in entries:
             r = unreal.RDRoleLines(); r.set_editor_property("role", unreal.Name(role)); r.set_editor_property("town", town)
-            r.set_editor_property("only", only); r.set_editor_property("lines", ls); rl.append(r)
+            r.set_editor_property("only", only); r.set_editor_property("except_town", ex); r.set_editor_property("lines", ls); rl.append(r)
         g.set_editor_property("role_lines", rl)
         wl = [l for l in g.get_editor_property("wild_farm_lines")]
         have = set(str(l) for l in wl)
@@ -439,7 +447,7 @@ if "lines" in STEPS:
                 k = f"{who}|{l}"
                 if k not in have: wl.append(k); n += 1
         g.set_editor_property("wild_farm_lines", wl)
-        return f"{len(rl)} role sets ({sum(len(e[3]) for e in entries)} lines), {n} farm lines added ({len(wl)} in all)"
+        return f"{len(rl)} role sets ({sum(len(e[4]) for e in entries)} lines, {sum(len(e[4]) for e in entries if e[3])} kept from the towns they name), {n} farm lines added ({len(wl)} in all)"
     each(["brokenspire"], lines, "lines")
 
 if "sleepsrc" in STEPS:

@@ -448,6 +448,7 @@ void ARDSection::AddFoot(const FVector& Loc, float Yaw, const FVector2D& Size, b
 {
 	FFoot F; F.C = FVector2D(Loc.X, Loc.Y); F.H = FVector2D(FMath::Max(Size.X * 0.5f - RDFootSlack, 1.f), FMath::Max(Size.Y * 0.5f - RDFootSlack, 1.f)); F.Yaw = Yaw; F.bAccess = bAccess; F.Name = Name;
 	Feet.Add(F);
+	if (Generator && Generator->bTown) TownFeet.Add(F);
 }
 
 bool ARDSection::OnRoomFloor(const FVector& Loc, float Yaw, const FVector2D& Size, int32 RI) const

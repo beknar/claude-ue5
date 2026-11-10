@@ -157,7 +157,7 @@ void ARDSection::PlanTown(FRandomStream& R)
 	TownInner = FIntRect(Ground.Min, Ground.Max);
 	TownBorder.Reset(); TownPaths.Reset(); TownRoadMask.Init(0, N * N); TownTowerDoors.Reset(); TownTowerMids.Reset();
 	TownWorks.Reset(); TownPens.Reset(); TownGardens.Reset(); TownSpits.Reset(); TownGrassClumps = 0; TownSmallBushes = 0;
-	TownOvens.Reset(); TownBeds.Reset(); TownAdults2 = TownHomeKids = TownSquareKidsDropped = 0; TownFoods.Reset(); TownDummies.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
+	TownOvens.Reset(); TownBeds.Reset(); TownFeet.Reset(); TownAdults2 = TownHomeKids = TownSquareKidsDropped = 0; TownFoods.Reset(); TownDummies.Reset(); TownPortcullis = -1; TownLevers.Reset(); TownPenGates.Reset(); TownLiftW.Reset(); bTownLiftOn = false;
 	CastleStairwell.Reset(); CastleStairRoom = -1; CastleStairFoot = CastleStairTop = FVector::ZeroVector;
 	// (a frame grid of what each tile is taken by: 0 free, 1 road, 2 square, 3 building or its margin, 4 kept clear, 9 outside)
 	TArray<uint8> Use; Use.Init(0, S * S);

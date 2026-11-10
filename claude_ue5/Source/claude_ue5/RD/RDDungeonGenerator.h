@@ -1258,6 +1258,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") class ARDTownsfolk* GetTownsfolk(int32 Index) const { return TownPeople.IsValidIndex(Index) ? TownPeople[Index].Get() : nullptr; }
 	/** what she heard last from someone of the town (who|line) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") FString LastBark;
+	/** F passing over the townsfolk asleep who only talk (PR #41's review: one asleep by the smithy's forge took F from it) */
+	mutable bool bTownSkipSleepers = false;
 	/** the town panel's rows as the HUD drew them (the mouse reads them) */
 	TArray<FBox2D> TownRowBoxes;
 	TArray<FBox2D> TownTabBoxes;

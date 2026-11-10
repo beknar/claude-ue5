@@ -691,7 +691,7 @@ SAT_EDGES = 4.0      # (the mean brightness step between neighbouring pixels a p
 # ------------------------------------------------------------------------------------------------ the townspeople
 def step_folk():
     g = G["gen"]; res = {}
-    w0 = {f["i"]: f["walks"] for f in folk()}
+    w0 = {f["i"]: f["walks"] for f in folk()}; p0 = {f["i"]: f["at"] for f in folk()}
     # (the frame rate over the wait, in the square: the town's two hundred buildings and their lights)
     sq = place("square"); put(V(sq.x + 300, sq.y, 0), yaw=0.0)
     fps = []; t0 = now()
@@ -705,7 +705,7 @@ def step_folk():
     res["walked"] = {f["title"]: f["walks"] - w0.get(f["i"], 0) for f in wanderers}
     res["hour"] = round(g.get_town_hour(), 2)
     res["still"] = [{"who": f["title"], "res": g.get_townsfolk(f["i"]).is_resident(), "home": g.get_townsfolk(f["i"]).get_home_building(), "here": section().town_building_at(f["at"]),
-                     "at": [round(f["at"].x), round(f["at"].y)], "work": str(g.get_townsfolk(f["i"]).get_work_state())[:60], "clip": g.get_townsfolk(f["i"]).get_clip_name()}
+                     "at": [round(f["at"].x), round(f["at"].y)], "moved": round(dist2(f["at"], p0.get(f["i"], f["at"]))), "work": str(g.get_townsfolk(f["i"]).get_work_state())[:60], "clip": g.get_townsfolk(f["i"]).get_clip_name()}
                     for f in wanderers if f["walks"] - w0.get(f["i"], 0) == 0]
     S = section()
     res["militia"] = [{"at": [round(f["at"].x), round(f["at"].y)], "paths": [len(S.find_path_world(f["at"], f["at"] + d)) for d in (V(900, 0, 0), V(-900, 0, 0), V(0, 900, 0), V(0, -900, 0))]} for f in wanderers if f["role"] in ("Militia", "Idiot")]
@@ -719,7 +719,8 @@ def step_folk():
     shot("names"); yield from rwait(1.2)
     # (a wanderer at its round of work (886: going to a place, at it) is about its day too: the walks counter counts only its strolls,
     # and with the homes' children (2026-11-10) more of them are at work over the 40 s)
-    res["idle"] = [x["who"] for x in res["still"] if x["work"].split("|")[0] not in ("going", "gliding", "working")]
+    # (PR #41's review: one on its way to work must have moved; at work it stands)
+    res["idle"] = [x["who"] for x in res["still"] if not (x["work"].split("|")[0] == "working" or (x["work"].split("|")[0] in ("going", "gliding") and x["moved"] >= 50))]
     ok = not res["idle"] and len(res["walked"]) >= 4 and "|" in res["bark"] and len(res["bark"].split("|")[1]) > 5 and any("Aldric" in n for n in res["names"])
     step_result("folk", ok, **res)
 
@@ -3588,11 +3589,13 @@ def step_lines10():
             lb = str(g.get_editor_property("last_bark"))
             if r_ == "bark" and "|" in lb: said.append(lb.split("|", 1)[1])
             yield from rwait(0.05)
-        seen[role] = {"pool": t.get_line_pool_size(), "said": len(said), "distinct": len(set(said)), "first": said[:2]}
+        seen[role] = {"pool": t.get_line_pool_size(), "said": len(said), "distinct": len(set(said)), "first": said[:2],
+                      "back_to_back": sum(1 for a_, b_ in zip(said, said[1:]) if a_ == b_), "names_here": [l for l in said if "brokenspire" in l.lower()]}
     res["roles"] = seen
     res["missing"] = [r for r in LINE_ROLES if r not in seen]
     quiet(False)
-    step_result("lines10", len(seen) >= 8 and all(v["pool"] >= 30 and v["distinct"] >= 30 for v in seen.values()), **res)
+    # (PR #41's review: no line twice in a row, none naming the town it is said in)
+    step_result("lines10", len(seen) >= 8 and all(v["pool"] >= 30 and v["distinct"] >= 30 and v["back_to_back"] == 0 and not v["names_here"] for v in seen.values()), **res)
 
 def step_sleep10():
     """"if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation or clip in blender" and "there
@@ -3653,6 +3656,18 @@ def step_sleep10():
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=yw)); yield from rwait(1.5)
         sn = f"sleep10_{'b' if want_made else 'a'}"; shot(sn, "1280x720"); shots_.append(sn); yield from rwait(1.2)
     res["shots"] = shots_
+    # (PR #41's review: at night F still reaches the smithy's service and a keeper wakes to serve)
+    sp_ = {p["kind"]: p for p in spots()}
+    if "smith" in sp_:
+        put(sp_["smith"]["at"]); yield from rwait(0.4)
+        res["night_smith_says"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        res["night_smith_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); res["night_smith_panel"] = str(g.get_town_panel()); yield from rwait(0.3)
+        g.close_town_panel(); cb().set_crafting_open(False); yield from rwait(0.3)
+    tr = talk_to("Trader"); yield from rwait(0.3)
+    if tr:
+        res["night_trader_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); res["night_trader_panel"] = str(g.get_town_panel())
+        res["night_trader_in_bed"] = g.get_townsfolk(tr["i"]).is_in_bed(); yield from rwait(0.3)
+        g.close_town_panel(); yield from rwait(0.3)
     # (the morning: up and out of bed, where they lay down from)
     g.set_town_hour(7.0); yield from rwait(2.0)
     L2 = sleep_lines(); up = [f for f in L2["folk"] if f["hasbed"]]
@@ -3660,7 +3675,8 @@ def step_sleep10():
     g.set_town_hour(h_was); quiet(False)
     ok = res["sleepers"] > 0 and res["asleep"] >= 0.9 * res["sleepers"] and res["in_bed"] == res["asleep"] and res["on_sleep_clip"] == res["in_bed"] \
         and res["shared_beds"] == 0 and not bad and res["children"]["at_home"] > 0 and res["children"]["in_bed"] >= 0.9 * res["children"]["at_home"] \
-        and res["beds"]["given"] == res["beds"]["sleepers"] and res["morning"]["in_bed"] == 0 and res["morning"]["asleep"] == 0
+        and res["beds"]["given"] == res["beds"]["sleepers"] and res["morning"]["in_bed"] == 0 and res["morning"]["asleep"] == 0 \
+        and "asleep" not in res.get("night_smith_says", "") and res.get("night_trader_panel") == "store" and res.get("night_trader_in_bed") is False
     step_result("sleep10", ok, **res)
 
 def step_people10():

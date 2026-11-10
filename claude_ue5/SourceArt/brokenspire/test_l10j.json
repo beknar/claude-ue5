@@ -1,5 +1,5 @@
 {
- "tag": "l10e",
+ "tag": "l10j",
  "plan": [
   "sleep10",
   "lines10"
@@ -9,13 +9,13 @@
   {
    "step": "sleep10",
    "ok": false,
-   "walk_home_s": 8.3,
+   "walk_home_s": 8.6,
    "still_walking": 0,
    "beds": {
-    "recorded": 57,
-    "made": 68,
-    "sleepers": 86,
-    "given": 86
+    "recorded": 66,
+    "made": 34,
+    "sleepers": 59,
+    "given": 59
    },
    "no_bed_with_building": [
     [
@@ -24,6 +24,14 @@
     ],
     [
      "Smith",
+     true
+    ],
+    [
+     "Trader",
+     true
+    ],
+    [
+     "Keeper",
      true
     ],
     [
@@ -57,23 +65,15 @@
     [
      "Townsfolk",
      true
-    ],
-    [
-     "Townsfolk",
-     true
-    ],
-    [
-     "Townsfolk",
-     true
     ]
    ],
-   "sleepers": 86,
-   "asleep": 86,
-   "in_bed": 85,
-   "on_sleep_clip": 85,
+   "sleepers": 59,
+   "asleep": 59,
+   "in_bed": 58,
+   "on_sleep_clip": 58,
    "children": {
-    "at_home": 13,
-    "in_bed": 13,
+    "at_home": 9,
+    "in_bed": 9,
     "square": 0
    },
    "awake_sample": [],
@@ -83,8 +83,8 @@
      "role": "Priest",
      "mesh": "SKM_NPC_Character_05_Full_02",
      "hips_over_top": 29.1,
-     "head_rise": 7.3,
-     "head_off": 66.3,
+     "head_rise": 8.1,
+     "head_off": 66.2,
      "on_bed": 0.5,
      "plays": true,
      "bld": true
@@ -93,18 +93,8 @@
      "role": "Scholar",
      "mesh": "SK_UE5_NPC_Plague_doctor_Full_02",
      "hips_over_top": 29.1,
-     "head_rise": 8.0,
+     "head_rise": 7.3,
      "head_off": 66.3,
-     "on_bed": 0.5,
-     "plays": true,
-     "bld": true
-    },
-    {
-     "role": "Trader",
-     "mesh": "SKM_NPC_Character_03_Full_01",
-     "hips_over_top": 29.1,
-     "head_rise": 8.7,
-     "head_off": 66.2,
      "on_bed": 0.5,
      "plays": true,
      "bld": true
@@ -113,18 +103,8 @@
      "role": "Healer",
      "mesh": "SK_UE5_NPC_Queen_Full_02",
      "hips_over_top": 29.1,
-     "head_rise": 7.7,
-     "head_off": 66.3,
-     "on_bed": 0.6,
-     "plays": true,
-     "bld": true
-    },
-    {
-     "role": "Keeper",
-     "mesh": "SK_UE5_NPC_Servant_Full_01",
-     "hips_over_top": 29.1,
-     "head_rise": 7.4,
-     "head_off": 66.3,
+     "head_rise": 8.6,
+     "head_off": 66.2,
      "on_bed": 0.5,
      "plays": true,
      "bld": true
@@ -132,18 +112,18 @@
     {
      "role": "Soldier",
      "mesh": "SKM_Viking_Full_010",
-     "hips_over_top": 97.9,
-     "head_rise": 66.7,
-     "head_off": 1.6,
-     "on_bed": 1.8,
-     "plays": false,
+     "hips_over_top": 29.1,
+     "head_rise": 8.1,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
      "bld": true
     },
     {
      "role": "Soldier",
      "mesh": "SKM_Knight_05_Full_01",
      "hips_over_top": 29.1,
-     "head_rise": 7.9,
+     "head_rise": 7.3,
      "head_off": 66.3,
      "on_bed": 0.7,
      "plays": true,
@@ -153,7 +133,17 @@
      "role": "Soldier",
      "mesh": "SKM_Viking_Full_010",
      "hips_over_top": 29.1,
-     "head_rise": 7.4,
+     "head_rise": 8.3,
+     "head_off": 66.2,
+     "on_bed": 0.6,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.9,
      "head_off": 66.3,
      "on_bed": 0.5,
      "plays": true,
@@ -161,17 +151,7 @@
     },
     {
      "role": "Townsfolk",
-     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
-     "hips_over_top": 27.7,
-     "head_rise": 7.7,
-     "head_off": 62.9,
-     "on_bed": 0.5,
-     "plays": true,
-     "bld": true
-    },
-    {
-     "role": "Townsfolk",
-     "mesh": "SKM_NPC_Character_02_Full_01",
+     "mesh": "SKM_NPC_Character_04_Full_01",
      "hips_over_top": 29.1,
      "head_rise": 8.3,
      "head_off": 66.2,
@@ -181,9 +161,9 @@
     },
     {
      "role": "Townsfolk",
-     "mesh": "SKM_NPC_Character_01_Full_01",
+     "mesh": "SKM_NPC_Character_04_Full_01",
      "hips_over_top": 29.1,
-     "head_rise": 7.3,
+     "head_rise": 8.1,
      "head_off": 66.3,
      "on_bed": 0.5,
      "plays": true,
@@ -191,32 +171,47 @@
     },
     {
      "role": "Townsfolk",
-     "mesh": "SKM_NPC_Character_02_Full_01",
+     "mesh": "SKM_NPC_Character_01_Full_01",
      "hips_over_top": 29.1,
-     "head_rise": 8.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.0,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.0,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_01_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.8,
      "head_off": 66.3,
      "on_bed": 0.5,
      "plays": true,
      "bld": true
     }
    ],
-   "bad_poses": [
-    {
-     "role": "Soldier",
-     "mesh": "SKM_Viking_Full_010",
-     "hips_over_top": 97.9,
-     "head_rise": 66.7,
-     "head_off": 1.6,
-     "on_bed": 1.8,
-     "plays": false,
-     "bld": true
-    }
-   ],
+   "bad_poses": [],
    "poses_n": 14,
    "shots": [
     "sleep10_a",
     "sleep10_b"
    ],
+   "night_smith_says": "the smith's work",
+   "night_smith_f": "smith",
+   "night_smith_panel": "smith",
+   "night_trader_f": "bark",
+   "night_trader_panel": "store",
+   "night_trader_in_bed": false,
    "morning": {
     "asleep": 0,
     "in_bed": 0
@@ -232,8 +227,10 @@
      "distinct": 34,
      "first": [
       "We bake twice a week now. Flour's running out.",
-      "I've swept this step every morning for twenty years. The dust never tires, and neither do I."
-     ]
+      "Fine weather for once. Enjoy it, traveller, the mist will roll back in by evening."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Child": {
      "pool": 36,
@@ -241,8 +238,10 @@
      "distinct": 34,
      "first": [
       "Are you going to the castle? Will you bring me back a monster tooth?",
-      "When the bells ring at night, I hide under the blanket and hold my breath."
-     ]
+      "I can count to fifty and I know all my letters except the squiggly one."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Guard": {
      "pool": 36,
@@ -250,8 +249,10 @@
      "distinct": 34,
      "first": [
       "Move along. The gate's barred, captain's orders.",
-      "Don't mind me. I'm just counting faces. I like to know who comes back."
-     ]
+      "Heard scratching under the castle stones last night. I told the sergeant. He laughed at me."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Militia": {
      "pool": 36,
@@ -259,8 +260,10 @@
      "distinct": 34,
      "first": [
       "Quiet night. They're always quiet, until they aren't.",
-      "Left, right, left, right. I've marched so much I dream in footsteps now."
-     ]
+      "They gave us a banner. It's mostly patches now, but it's ours, and we're proud of it."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Soldier": {
      "pool": 36,
@@ -268,8 +271,10 @@
      "distinct": 34,
      "first": [
       "Off duty. Go bother the captain.",
-      "Sergeant says orcs fight in packs. So do we. Difference is, they enjoy it."
-     ]
+      "My old captain died with a laugh on his lips. I'd like to go the same way, but much later."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Refugee": {
      "pool": 36,
@@ -277,8 +282,10 @@
      "distinct": 34,
      "first": [
       "We left everything at Harrowfield. The cattle, the barn. My mother's grave.",
-      "Hunger is a patient thing. It sits beside you all day and never says a word."
-     ]
+      "I was a weaver in my village. Give me a loom and I'll earn my keep, I swear it."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Drunk": {
      "pool": 37,
@@ -286,8 +293,10 @@
      "distinct": 34,
      "first": [
       "The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
-      "I fought orcs, I did. Fifty of them. Or five. It was dark, and I was thirsty."
-     ]
+      "Why do spiders have eight legs? So they can run from me twice as fast!"
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Witch": {
      "pool": 37,
@@ -295,8 +304,10 @@
      "distinct": 34,
      "first": [
       "Ahh. The mist likes you. I can smell it on your boots.",
-      "Leave a coin on the hearthstone when you go. My house spirits sulk otherwise."
-     ]
+      "I see a door in your future, and something hungry waiting behind it."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Idiot": {
      "pool": 37,
@@ -304,8 +315,10 @@
      "distinct": 34,
      "first": [
       "I counted the towers. Eleven! No, twelve. No... I'll count again.",
-      "Goodbye! Or hello. I always mix them up, so I say both to be safe."
-     ]
+      "Dogs bark at the moon because it owes them money. Everyone knows that."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Preacher": {
      "pool": 37,
@@ -313,8 +326,10 @@
      "distinct": 34,
      "first": [
       "Repent! The breath beneath the hill will take us all, and it will not be quick!",
-      "Beneath our feet lies a pit dug by our own sins. Each tier is a vice made flesh."
-     ]
+      "The trolls are slow and the undead are slower. Only sin runs faster than you."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     },
     "Mourner": {
      "pool": 36,
@@ -322,8 +337,10 @@
      "distinct": 34,
      "first": [
       "He was nineteen. He went up the castle road with the watch and they brought back his spear.",
-      "Do not walk on the fresh mounds, please. Some of us are still saying goodbye."
-     ]
+      "My son went down through the gate with a borrowed sword. They never found the sword either."
+     ],
+     "back_to_back": 0,
+     "names_here": []
     }
    },
    "missing": []
@@ -331,8 +348,8 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_l10e_sleep10_a.png",
-  "bs_l10e_sleep10_b.png"
+  "bs_l10j_sleep10_a.png",
+  "bs_l10j_sleep10_b.png"
  ],
  "error": null,
  "windows_shown_again": 3

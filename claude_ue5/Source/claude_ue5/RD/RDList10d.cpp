@@ -61,36 +61,66 @@ int32 ARDSection::AddTownBed(int32 Bld)
 	if (!P || !P->Mesh || !TownBlds.IsValidIndex(Bld)) return -1;
 	const FTownBld& B = TownBlds[Bld];
 	const float S = Generator->TileSize;
-	// (a free tile of the building's rooms, not the door's nor beside it, nor by a bed: the one nearest a wall, then farthest from
-	// the door; the bed's head against that wall)
-	FIntPoint Pick(-1, -1); float PickScore = MAX_flt; int32 PickSide = 0;
+	// (a free tile of the building's rooms, not the door's nor beside it, nor by a bed, nor on its room's lane row or column (the
+	// lane is kept walkable: MarkBlocked leaves it so, and a bed there stood in the townsfolk's way): the one nearest a wall, then
+	// farthest from the door; the bed's head against that wall; its footprint on its room's floor and clear of every footprint and
+	// container's way in the furnishing laid (TownFeet: PR #41's review)
+	struct FCand { FIntPoint T; float Score; int32 Side; };
+	TArray<FCand> Cands;
 	for (int32 X = B.Min.X; X < B.Max.X; ++X)
 		for (int32 Y = B.Min.Y; Y < B.Max.Y; ++Y)
 		{
 			const FIntPoint T(X, Y);
 			if (!In(T) || Type[Idx(T)] != 1 || Blocked[Idx(T)] || !B.Rooms.Contains(RoomAtLocal(T))) continue;
+			const int32 RI = RoomAtLocal(T);
+			if (Rooms.IsValidIndex(RI) && (X == Rooms[RI].Lane.X || Y == Rooms[RI].Lane.Y)) continue;
 			if (FMath::Max(FMath::Abs(X - B.DoorTile.X), FMath::Abs(Y - B.DoorTile.Y)) <= 1) continue;
 			const FVector W = TileWorld(T);
 			if (TownBeds.ContainsByPredicate([&](const FTownBed& Bd) { return FVector::Dist2D(Bd.At, W) < 200.f; })) continue;
 			const int32 E[4] = { X - B.Min.X, B.Max.X - 1 - X, Y - B.Min.Y, B.Max.Y - 1 - Y };
 			int32 Side = 0; for (int32 K = 1; K < 4; ++K) if (E[K] < E[Side]) Side = K;
-			const float Score = E[Side] * 1000.f - FVector::Dist2D(W, TileWorld(B.DoorTile));
-			if (Score < PickScore) { PickScore = Score; Pick = T; PickSide = Side; }
+			Cands.Add({ T, (float)(E[Side] * 1000.0 - FVector::Dist2D(W, TileWorld(B.DoorTile))), Side });
 		}
-	if (Pick.X < 0) return -1;
+	Cands.Sort([](const FCand& A_, const FCand& B_) { return A_.Score < B_.Score; });
 	// (its foot into the room: away from the wall it lies against; its middle moved toward that wall, its head against it)
 	static const float RDBedYaw[4] = { 0.f, 180.f, 90.f, -90.f };
-	const float Yaw = RDBedYaw[PickSide];
-	const FVector Fwd = FRotator(0.f, Yaw, 0.f).Vector();
-	const FVector At = TileWorld(Pick) - Fwd * FMath::Max(0.f, (S - P->Size.X) * 0.5f - 15.f);
+	float Yaw = 0.f; FVector At = FVector::ZeroVector; FVector Fc; FVector2D Sz; bool bFound = false;
+	for (const FCand& C : Cands)
+	{
+		Yaw = RDBedYaw[C.Side];
+		const FVector Fwd = FRotator(0.f, Yaw, 0.f).Vector();
+		At = TileWorld(C.T) - Fwd * FMath::Max(0.f, (S - P->Size.X) * 0.5f - 15.f);
+		float Front; FootOf(P, FTransform(FRotator(0.f, Yaw, 0.f), At), Fc, Sz, Front);
+		if (!OnRoomFloor(Fc, Yaw, Sz, RoomAtLocal(C.T))) continue;
+		// (FootFree reads Feet, the room being furnished: the town's every footprint for it, then the room's put back)
+		TArray<FFoot> RoomFeet = MoveTemp(Feet); Feet = TownFeet;
+		const bool bClear = FootFree(Fc, Yaw, Sz, false);
+		Feet = MoveTemp(RoomFeet);
+		if (!bClear) continue;
+		bFound = true; break;
+	}
+	if (!bFound) return -1;
 	const FTransform World = P->Adjust * FTransform(FRotator(0.f, Yaw, 0.f), At);
 	UStaticMeshComponent* M = AddMesh(RootComponent, P->Mesh, World.GetRelativeTransform(GetActorTransform()), true);
 	if (!M) return -1;
 	if (P->Material) M->SetMaterial(0, P->Material);
 	TownBedMeshes.Add(M);
+	TArray<uint8> Before = Blocked;
 	MarkBlocked(At, Yaw, FVector2D(P->Size.X, P->Size.Y));
-	FTownBed Bd; Bd.At = At; Bd.Yaw = Yaw; Bd.Bld = Bld; Bd.bMade = true;
+	TArray<int32> Blocks; for (int32 I = 0; I < Blocked.Num(); ++I) if (Blocked[I] && !Before[I]) Blocks.Add(I);
+	AddFoot(Fc, Yaw, Sz, false, TEXT("Bed"));          // (into TownFeet: the next bed keeps off it)
+	FTownBed Bd; Bd.At = At; Bd.Yaw = Yaw; Bd.Bld = Bld; Bd.bMade = true; Bd.Blocks = MoveTemp(Blocks);
 	return TownBeds.Add(Bd);
+}
+
+void ARDSection::ClearMadeTownBeds()
+{
+	for (UStaticMeshComponent* Bm : TownBedMeshes) if (IsValid(Bm)) Bm->DestroyComponent();
+	TownBedMeshes.Reset();
+	for (const FTownBed& Bd : TownBeds) if (Bd.bMade) for (const int32 I : Bd.Blocks) if (Blocked.IsValidIndex(I)) Blocked[I] = 0;
+	TownBeds.RemoveAll([](const FTownBed& Bd) { return Bd.bMade; });
+	TownFeet.RemoveAll([](const FFoot& F) { return F.Name == TEXT("Bed"); });
+	for (FTownBed& Bd : TownBeds) Bd.Taken = -1;
 }
 
 void ARDDungeonGenerator::AssignTownBeds(ARDSection* S)

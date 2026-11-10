@@ -167,6 +167,8 @@ private:
 	FVector BedAt = FVector::ZeroVector, PreBed = FVector::ZeroVector; float BedYaw = 0.f; bool bHasBed = false, bInBed = false;
 	/** its lines' pool (made the first time) and the bag drawn from without a repeat until it is empty */
 	TArray<FString> LinePool; TArray<int32> LineBag; bool bPoolMade = false;
+	/** the own lines the pool was made from (a farmstead's are set after it is made: a change makes it again) and the line said last */
+	TArray<FString> PoolOwn; int32 LastSaid = -1;
 	void MakeLinePool();
 	/** the town's hour's part of its day: in or out, asleep or awake; true while it walks to where its hour wants it */
 	bool TickDay(float Now);
