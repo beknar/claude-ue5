@@ -1,0 +1,111 @@
+{
+ "fps": 30,
+ "skeleton_root": "root",
+ "frames_note": "frame count = length x 30 + 1; the last frame equals the first",
+ "axes": "her: (her right, forward, up) cm from the root; ue: UE component space (she faces +Y, her right is -X)",
+ "idle_source": {
+  "frames": 229,
+  "joint_rebuild_err_cm": 0.0001,
+  "root_travel_cm": 0.0,
+  "root_turn_rad_max": 0.0
+ },
+ "wrist_limits_deg": {
+  "flex": [
+   -50.0,
+   60.0
+  ],
+  "deviation": [
+   -30.0,
+   15.0
+  ],
+  "twist": [
+   -80.0,
+   80.0
+  ],
+  "twist_counted_from": {
+   "l": {
+    "deg_from_palm_in": 36.9,
+    "palm_her": [
+     0.67,
+     -0.09,
+     -0.73
+    ]
+   },
+   "r": {
+    "deg_from_palm_in": -36.7,
+    "palm_her": [
+     -0.67,
+     -0.09,
+     -0.73
+    ]
+   }
+  }
+ },
+ "clips": {
+  "Sleep": {
+   "frames": 121,
+   "length_s": 4.0,
+   "loop_first_last_deg": 0.0,
+   "loop_last_step_deg": 0.0,
+   "largest_step_deg": 0.06,
+   "largest_step_frame": 23,
+   "arm_loop_last_step_deg": 0.0,
+   "arm_largest_step_deg": 0.06,
+   "arm_largest_step_frame": 23,
+   "loop_last_step_bone": "pelvis",
+   "largest_step_bone": "ik_hand_gun",
+   "wrist_over_max_deg": 0.0,
+   "arm_in_body_min_cm": -0.22,
+   "arm_in_body_frames": 0,
+   "hands_cross_frames": 0,
+   "feet_slide_cm": {
+    "foot_l": 0.0,
+    "foot_r": 0.0,
+    "ball_l": 0.0,
+    "ball_r": 0.0
+   },
+   "wrist_worst": {
+    "frame": 0,
+    "l": [
+     2.5,
+     -10.2,
+     -23.4
+    ],
+    "r": [
+     5.7,
+     -10.8,
+     33.2
+    ]
+   },
+   "pelvis_over_root_cm": 27.1,
+   "lowest_skin_cm": 1.0,
+   "length_along_cm": 181.5,
+   "width_cm": 61.9,
+   "highest_cm": 62.9,
+   "head_behind_cm": 94.9,
+   "feet_ahead_cm": 86.7
+  }
+ },
+ "fbx": "SK_Manny_Town_Work_Clips.fbx",
+ "fbx_check": {
+  "objects": [
+   "root"
+  ],
+  "armature": "root",
+  "units_x": 1.0,
+  "rest_joint_err_cm": 0.0003,
+  "rest_turn_err_deg": 0.1047,
+  "takes": {
+   "root|root|Sleep": [
+    1.0,
+    121.0
+   ]
+  },
+  "frame_joint_err_cm": {
+   "Sleep@0": 0.0,
+   "Sleep@40": 0.0,
+   "Sleep@120": 0.0
+  },
+  "manny_vs_made_rest_cm": 0.0
+ }
+}

@@ -1,0 +1,229 @@
+{
+ "tag": "l10f",
+ "plan": [
+  "sleep10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sleep10",
+   "ok": true,
+   "walk_home_s": 6.0,
+   "still_walking": 0,
+   "beds": {
+    "recorded": 58,
+    "made": 78,
+    "sleepers": 98,
+    "given": 98
+   },
+   "no_bed_with_building": [
+    [
+     "Drunk",
+     true
+    ],
+    [
+     "Smith",
+     true
+    ],
+    [
+     "Witch",
+     false
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ]
+   ],
+   "sleepers": 98,
+   "asleep": 97,
+   "in_bed": 97,
+   "on_sleep_clip": 97,
+   "children": {
+    "at_home": 23,
+    "in_bed": 23,
+    "square": 0
+   },
+   "awake_sample": [
+    [
+     "Innkeeper",
+     "AS_Town_CarryWalk",
+     "bld -1",
+     true,
+     1
+    ]
+   ],
+   "shared_beds": 0,
+   "poses": [
+    {
+     "role": "Priest",
+     "mesh": "SKM_NPC_Character_05_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Scholar",
+     "mesh": "SK_UE5_NPC_Plague_doctor_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Trader",
+     "mesh": "SKM_NPC_Character_03_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.3,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Healer",
+     "mesh": "SK_UE5_NPC_Queen_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 8.2,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Keeper",
+     "mesh": "SK_UE5_NPC_Servant_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.2,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 29.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Knight_05_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.4,
+     "head_off": 66.3,
+     "on_bed": 0.6,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 29.1,
+     "head_rise": 8.5,
+     "head_off": 66.2,
+     "on_bed": 0.7,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 27.7,
+     "head_rise": 7.6,
+     "head_off": 62.9,
+     "on_bed": 0.0,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Beggar_03_Full_01",
+     "hips_over_top": 27.7,
+     "head_rise": 7.6,
+     "head_off": 62.9,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_04_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.8,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.9,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    }
+   ],
+   "bad_poses": [],
+   "poses_n": 14,
+   "shots": [
+    "sleep10_a",
+    "sleep10_b"
+   ],
+   "morning": {
+    "asleep": 0,
+    "in_bed": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_l10f_sleep10_a.png",
+  "bs_l10f_sleep10_b.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

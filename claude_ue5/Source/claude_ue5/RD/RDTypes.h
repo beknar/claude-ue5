@@ -49,6 +49,21 @@ enum class ERDMonsterAbility : uint8
 	None, Poison, Weaken, Slow
 };
 
+/** the list of 2026-11-10: what a townsperson of a role says ("generate at least 30 different things the non-interactive NPCs
+ *  can say depending on what their job is"), for every town (Town empty) or one (its name: Heaven's modern people, Brokenspire's
+ *  castle lines); bOnly: that town's lines alone, the shared ones left out; ExceptTown: not in these towns (comma-separated: a line
+ *  that names a town is not said in it (PR #41's review)) */
+USTRUCT(BlueprintType)
+struct FRDRoleLines
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Role;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FString Town;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bOnly = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FString ExceptTown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FString> Lines;
+};
+
 /** the list of 2026-11-10: a crowd body's separate parts (the NPC Characters pack's _Full_02 bodies carry their heads and hair as
  *  meshes of their own, Separate/), following the body (leader pose); CrowdParts[i] goes with CrowdMeshes[i] */
 USTRUCT(BlueprintType)

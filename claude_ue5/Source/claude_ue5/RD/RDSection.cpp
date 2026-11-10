@@ -448,6 +448,7 @@ void ARDSection::AddFoot(const FVector& Loc, float Yaw, const FVector2D& Size, b
 {
 	FFoot F; F.C = FVector2D(Loc.X, Loc.Y); F.H = FVector2D(FMath::Max(Size.X * 0.5f - RDFootSlack, 1.f), FMath::Max(Size.Y * 0.5f - RDFootSlack, 1.f)); F.Yaw = Yaw; F.bAccess = bAccess; F.Name = Name;
 	Feet.Add(F);
+	if (Generator && Generator->bTown) TownFeet.Add(F);
 }
 
 bool ARDSection::OnRoomFloor(const FVector& Loc, float Yaw, const FVector2D& Size, int32 RI) const
@@ -524,6 +525,7 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	// the town's and table food's block they were recorded only where table food was on))
 	if (Generator && Name == TEXT("BreadOven") && (Generator->bTown || Generator->bDungeonOvens)) TownOvens.Add(T.GetLocation());
 	if (Generator && Generator->bForge && Generator->ForgePieces.Contains(Name)) ForgePoints.Add(T.GetLocation());
+	if (Generator && Generator->bTown && Name == TEXT("Bed")) { FTownBed Bd; Bd.At = T.GetLocation(); Bd.Yaw = T.Rotator().Yaw; Bd.Bld = TownBuildingAt(Bd.At); TownBeds.Add(Bd); }
 	// (improvements7, the town: its kitchens' ovens bake; what stands on the open ground (the trees, the grass) stands on its
 	// rise and fall; a prep table has food on it to take (in play too: the food is interactive))
 	if (Generator && (Generator->bTown || Generator->bTableFood))          // (the list of 2026-11-10: the castle's prep tables too)

@@ -1,0 +1,141 @@
+{
+ "tag": "l10l",
+ "plan": [
+  "talk",
+  "doors",
+  "services"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "talk",
+   "ok": true,
+   "prompt": "talk to Aldric Venn",
+   "panel": "talk",
+   "lines": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: Word from the Spire|15 g|1",
+    "bye|Farewell||1"
+   ],
+   "asked_changed_text": true,
+   "accepted": true,
+   "quest": {
+    "state": "taken",
+    "progress": 0,
+    "count": 1
+   },
+   "scholar_panel": "talk",
+   "scholar_lines": [
+    "ask|What is the Mistward?||1",
+    "ask|Who broke the spire?||1",
+    "ask|What should I look for down there?||1",
+    "accept|Quest: The Third Seal|150 g|1",
+    "bye|Farewell||1"
+   ],
+   "quest_ready": {
+    "state": "ready",
+    "progress": 1,
+    "count": 1
+   },
+   "turnin": true,
+   "gold": 15,
+   "quest_done": {
+    "state": "done",
+    "progress": 1,
+    "count": 1
+   },
+   "next_offered": true,
+   "lines_after": [
+    "ask|Why do you need my help?||1",
+    "ask|What is Mistward Castle?||1",
+    "ask|What happened to the town?||1",
+    "accept|Quest: The Mistward Hall|60 g|1",
+    "bye|Farewell||1"
+   ],
+   "captain_later": [],
+   "captain_wild_offered": [
+    "Quest: Wolves on the Mill Road",
+    "Quest: The Lost Patrol"
+   ]
+  },
+  {
+   "step": "doors",
+   "ok": true,
+   "prompt": "open door",
+   "door_open": 1.0,
+   "walked_in": true,
+   "container": {
+    "kind": "crate",
+    "looted": true,
+    "gold_found": 4,
+    "lines": 0
+   },
+   "boarded_prompt": "pry the boards loose",
+   "after_pry": false,
+   "boarded_door_open": 1.0,
+   "castle_door_open": 1.0
+  },
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -25,
+    "hp": 1.0
+   },
+   "weapon": "Viking Shortsword",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ],
+   "wild": true,
+   "circle_others_ok": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "error": null,
+ "windows_shown_again": 3
+}

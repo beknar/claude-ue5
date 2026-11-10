@@ -114,14 +114,62 @@ void ARDTownsfolk::FaceToward(const FVector& P, float Seconds)
 	Path.Reset(); SetClip(false);
 }
 
+void ARDDungeonGenerator::TownLinePool(int32 InDef, ERDTownRole InRole, TArray<FString>& Out) const
+{
+	// (its def's own lines, then its role's for the town she is in: that town's, and the shared ones unless that town's are
+	// its alone (Heaven's modern people))
+	Out.Reset();
+	if (Townsfolk.IsValidIndex(InDef)) Out.Append(Townsfolk[InDef].Lines);
+	const FString Here = bTownHome ? FString(TEXT("Brokenspire")) : TownName;
+	const FName Rn(*RDTRoleName(InRole));
+	const bool bOnlyHere = RoleLines.ContainsByPredicate([&](const FRDRoleLines& L) { return L.Role == Rn && L.Town == Here && L.bOnly; });
+	for (const FRDRoleLines& L : RoleLines)
+	{
+		if (L.Role != Rn) continue;
+		if (L.Town.IsEmpty() ? bOnlyHere : L.Town != Here) continue;
+		if (!L.ExceptTown.IsEmpty())
+		{
+			TArray<FString> Ex; L.ExceptTown.ParseIntoArray(Ex, TEXT(","));
+			if (Ex.Contains(Here)) continue;
+		}
+		for (const FString& Ln : L.Lines) Out.AddUnique(Ln);
+	}
+}
+
+void ARDTownsfolk::MakeLinePool()
+{
+	bPoolMade = true; LinePool.Reset(); LineBag.Reset(); LinesSaid = 0; LastSaid = -1; PoolOwn = OwnLines;
+	if (OwnLines.Num() > 0) LinePool = OwnLines;
+	else if (Gen && Gen->Townsfolk.IsValidIndex(Def)) Gen->TownLinePool(Def, TownRole, LinePool);
+}
+
+int32 ARDTownsfolk::GetLinePoolSize()
+{
+	if (!bPoolMade) MakeLinePool();
+	return LinePool.Num();
+}
+
+FString ARDTownsfolk::GetRoleName() const { return RDTRoleName(TownRole); }
+
 FString ARDTownsfolk::NextLine()
 {
 	if (!Gen || !Gen->Townsfolk.IsValidIndex(Def)) return FString();
-	const TArray<FString>& L = OwnLines.Num() > 0 ? OwnLines : Gen->Townsfolk[Def].Lines;
-	if (L.Num() == 0) return FString();
-	const int32 I = LinesSaid == 0 ? 0 : R.RandRange(0, L.Num() - 1);
+	// (the list of 2026-11-10: its def's lines and its role's for the town (at least 30 a job), drawn from a shuffled bag: no line
+	// again until all have been said; the first time its def's first, its greeting)
+	if (!bPoolMade || OwnLines != PoolOwn) MakeLinePool();
+	if (LinePool.Num() == 0) return FString();
+	if (LinesSaid == 0) { ++LinesSaid; LastSaid = 0; return LinePool[0]; }
+	if (LineBag.Num() == 0)
+	{
+		// (the first bag leaves out the greeting just said)
+		for (int32 I = LinesSaid == 1 && LinePool.Num() > 1 ? 1 : 0; I < LinePool.Num(); ++I) LineBag.Add(I);
+		for (int32 I = LineBag.Num() - 1; I > 0; --I) LineBag.Swap(I, R.RandRange(0, I));
+		// (the next drawn is the bag's last: never the line just said (PR #41's review: a repeat at every bag's edge))
+		if (LineBag.Num() > 1 && LineBag.Last() == LastSaid) LineBag.Swap(0, LineBag.Num() - 1);
+	}
 	++LinesSaid;
-	return L[I];
+	LastSaid = LineBag.Pop();
+	return LinePool[LastSaid];
 }
 
 void ARDTownsfolk::Tick(float Dt)
@@ -129,7 +177,7 @@ void ARDTownsfolk::Tick(float Dt)
 	Super::Tick(Dt);
 	const float Now = GetWorld()->GetTimeSeconds();
 	// (the list of 2026-11-04: on the open ground's rise and fall, at its own height over it)
-	if (Section && Section->TownLiftW.Num() > 0)
+	if (Section && Section->TownLiftW.Num() > 0 && !bInBed)          // (in bed it lies on the bed's top)
 	{
 		const FVector P = GetActorLocation();
 		const float Lz = Section->TownLiftAt(FVector2D(P));
@@ -146,10 +194,40 @@ void ARDTownsfolk::Tick(float Dt)
 	};
 	// (she spoke to it: it turns to her and stands; at work it keeps at it where it is (a seated customer turned away from the
 	// table))
-	if (Now < FaceUntil) { if (Act != 3) { Turn(FaceAt - L, 240.f); SetClip(false); } return; }
+	if (Now < FaceUntil)
+	{
+		// (woken to serve (a keeper, a quest's giver, PR #41's review): up out of bed to face her, back in it once she has gone)
+		if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
+		if (Act != 3) { Turn(FaceAt - GetActorLocation(), 240.f); SetClip(false); }
+		return;
+	}
 	// (its day: home at evening, asleep at night; asleep, it stands where it is, or keeps its seat)
 	TickDay(Now);
-	if (bSleeping && Path.Num() == 0) { if (Act != 3) SetClip(false); return; }
+	// (the list of 2026-11-10: asleep, in its bed, lying, on its Sleep clip; awake, out of it where it stood before)
+	if (bInBed && !bSleeping)
+	{
+		bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); SetClip(false);
+		return;          // (PR #41's review: the rest of the tick read where it lay)
+	}
+	if (bSleeping && Path.Num() == 0)
+	{
+		if (bHasBed)
+		{
+			// (a keeper still at its work when it falls asleep (the innkeeper at the bar) leaves it for its bed: asleep at work it was
+			// counted asleep and stood there)
+			if (Act != 0) EndWork();
+			if (!bInBed)
+			{
+				PreBed = GetActorLocation(); bInBed = true;
+				SetActorLocationAndRotation(BedAt + FVector(0.f, 0.f, 92.f), FRotator(0.f, BedYaw, 0.f));
+				UAnimationAsset* Sl = WorkClip(TEXT("Sleep"));
+				if (Sl) PlayAnim(Sl, 1.f); else SetClip(false);
+			}
+			return;
+		}
+		if (Act != 3) SetClip(false);
+		return;
+	}
 	// (the last steps onto its place of work, straight, through the fence's gap or between the stools)
 	if (Act == 2)
 	{
@@ -242,7 +320,8 @@ bool ARDTownsfolk::TickDay(float Now)
 	if (!Gen || !Gen->bDayNight || HomeBld < 0 || !Section) return false;
 	const float H = Gen->GetTownHour();
 	const bool bNight = H >= 22.f || H < 6.f;
-	const FVector L = GetActorLocation();
+	// (in bed: where it lay down from (its way to its post in the morning starts there, on the floor))
+	const FVector L = bInBed ? PreBed : GetActorLocation();
 	if (bResident_)
 	{
 		// (a resident: home from 19 o'clock to half past six; the way there or back once, when its hour turns)
@@ -251,11 +330,19 @@ bool ARDTownsfolk::TickDay(float Now)
 		{
 			// (its work left for the evening, taken up again in the morning)
 			if (Act != 0) EndWork();
-			bWentHome = bWant;
+			bWentHome = bWant; HomeFails = 0; HomeRetryAt = Now + 3.f;
 			TArray<FVector> P = Section->FindPathWorld(L, bWant ? HomeIn : Post);
 			if (P.Num() >= 2) { P.RemoveAt(0); for (FVector& Q : P) Q.Z = L.Z; Path = P; ++Walks; }
 			else if (bWant) SetActorLocation(FVector(HomeIn.X, HomeIn.Y, L.Z));       // (no way found: it is home all the same)
 			NextTrip = Now + R.FRandRange(5.f, 12.f);
+		}
+		// (the list of 2026-11-10: stopped on the way home (two of a household at one door, a door): tried again, then put inside;
+		// once a walk ended it was never made again, and half the town stood in the streets all night)
+		if (bWant && Path.Num() == 0 && Act == 0 && !bInBed && Now >= HomeRetryAt && (HomeRetryAt = Now + 3.f, Section->TownBuildingAt(L) != HomeBld))
+		{
+			TArray<FVector> P = ++HomeFails <= 3 ? Section->FindPathWorld(L, HomeIn) : TArray<FVector>();
+			if (P.Num() >= 2) { P.RemoveAt(0); for (FVector& Q : P) Q.Z = L.Z; Path = P; ++Walks; }
+			else { SetActorLocation(FVector(HomeIn.X, HomeIn.Y, L.Z)); HomeFails = 0; }
 		}
 		bSleeping = bNight && bWentHome && Path.Num() == 0 && Section->TownBuildingAt(L) == HomeBld;
 		return Path.Num() > 0;
@@ -652,6 +739,8 @@ void ARDDungeonGenerator::SpawnTownPeople()
 	TownPeople.Reset();
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return;
+	// (the beds put for the last people: made again for these)
+	S->ClearMadeTownBeds();
 	TMap<ERDTownRole, TArray<int32>> ByRole;
 	// (a town with people of its own for a role (Vel Morrath, 2026-11-06: its archbishop, monks, templars...) has those in that
 	// role; the shared ones (no town) fill the others)
@@ -669,6 +758,7 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		if (Df.Mesh) for (int32 K = 0; K < FMath::Max(1, Df.Count); ++K) ByRole.FindOrAdd(Ro).Add(I);
 	}
 	TMap<ERDTownRole, int32> Used;
+	TMap<int32, int32> InHome;          // (a household's members inside the door side by side: one spot made them stop on each other)
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	for (int32 K = 0; K < S->TownPosts.Num(); ++K)
 	{
@@ -702,13 +792,17 @@ void ARDDungeonGenerator::SpawnTownPeople()
 		if (S->TownBlds.IsValidIndex(Po.Bld))
 		{
 			const ARDSection::FTownBld& Hb = S->TownBlds[Po.Bld];
-			const bool bResident = Po.Role == ERDTownRole::Townsfolk;
+			// (the list of 2026-11-10: a home's child lives there as a grown-up does: in at evening, asleep at night)
+			const bool bResident = Po.Role == ERDTownRole::Townsfolk || Po.Role == ERDTownRole::Child;
 			const FVector Out = FVector(RDTGDir4[Hb.DoorSide].X, RDTGDir4[Hb.DoorSide].Y, 0.f);
-			T->SetHome(Po.Bld, bResident ? S->LocalToWorld(Hb.DoorTile) - Out * 230.f + FVector(0, 0, 92.f) : At + FVector(0, 0, 92.f), bResident);
+			static const float RDTGHomeSide[3] = { 0.f, 95.f, -95.f };
+			const float Side = bResident ? RDTGHomeSide[InHome.FindOrAdd(Po.Bld)++ % 3] : 0.f;
+			T->SetHome(Po.Bld, bResident ? S->LocalToWorld(Hb.DoorTile) - Out * 230.f + FVector(Out.Y, -Out.X, 0.f) * Side + FVector(0, 0, 92.f) : At + FVector(0, 0, 92.f), bResident);
 		}
 		TownPeople.Add(T);
 	}
 	UE_LOG(LogRDTownGame, Log, TEXT("RDTOWN %d townspeople at %d posts"), TownPeople.Num(), S->TownPosts.Num());
+	if (bTownBeds) AssignTownBeds(S);          // (the list of 2026-11-10: a bed for each sleeper)
 	// (the third list: their rounds of work, the tavern's customers, the pens' animals, the spits)
 	SpawnTownLife();
 }
@@ -1204,6 +1298,13 @@ void ARDDungeonGenerator::TickTownTour(float RealDt)
 }
 
 // ================================================================================================ F in the town
+/** a role F wakes to serve at night: a quest's giver or a keeper of a service */
+static bool RDTServes(ERDTownRole R)
+{
+	return R == ERDTownRole::Elder || R == ERDTownRole::Scholar || R == ERDTownRole::Captain || R == ERDTownRole::Smith || R == ERDTownRole::Trader
+		|| R == ERDTownRole::Healer || R == ERDTownRole::Priest || R == ERDTownRole::Keeper;
+}
+
 FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 {
 	if (!bTown)
@@ -1217,10 +1318,19 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
-		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T)) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }
+		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T) && !(bTownSkipSleepers && T->IsSleeping() && !RDTServes(T->TownRole))) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }
 	// (a door or a container nearer than them: that is what F does)
 	if (Who >= 0) if (const ARDSection* S0 = GetSection(FIntPoint::ZeroValue)) { bool bD0 = false; int32 I0 = -1; if (Best > 160.f || S0->FindNearestInteractive(From, Best, bD0, I0) < Best - 30.f) Who = -1; }
-	if (Who >= 0) return FString::Printf(TEXT("talk to %s"), *TownPeople[Who]->Title);
+	if (Who >= 0)
+	{
+		// (one asleep who only talks: what else F reaches comes first; a keeper or a quest's giver wakes to serve)
+		if (TownPeople[Who]->IsSleeping() && !RDTServes(TownPeople[Who]->TownRole))
+		{
+			bTownSkipSleepers = true; const FString Else = TownDescribe(From); bTownSkipSleepers = false;
+			return Else.IsEmpty() ? FString::Printf(TEXT("%s (asleep)"), *TownPeople[Who]->Title) : Else;
+		}
+		return FString::Printf(TEXT("talk to %s"), *TownPeople[Who]->Title);
+	}
 	if (const FString Th = TownThingDescribe(From); !Th.IsEmpty()) return Th;
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);
 	if (!S) return FString();
@@ -1266,11 +1376,20 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	}
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
-		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T)) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }
+		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T) && !(bTownSkipSleepers && T->IsSleeping() && !RDTServes(T->TownRole))) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }
 	if (Who >= 0) if (const ARDSection* S0 = GetSection(FIntPoint::ZeroValue)) { bool bD0 = false; int32 I0 = -1; if (Best > 160.f || S0->FindNearestInteractive(From, Best, bD0, I0) < Best - 30.f) Who = -1; }
 	if (Who >= 0)
 	{
 		ARDTownsfolk* T = TownPeople[Who];
+		// (the list of 2026-11-10: asleep, it sleeps on: no turning, no line; what else F reaches comes first (PR #41's review); a keeper
+		// or a quest's giver wakes to serve)
+		if (T->IsSleeping() && !RDTServes(T->TownRole))
+		{
+			bTownSkipSleepers = true; const FString Else = TownInteract(From); bTownSkipSleepers = false;
+			if (!Else.IsEmpty()) return Else;
+			if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s is asleep"), *T->Title.ToLower()));
+			return TEXT("asleep");
+		}
 		T->FaceToward(From, 8.f);
 		TownCount(FString::Printf(TEXT("talk:%s"), *RDTRoleName(T->TownRole)));
 		// (the elder, the scholar, the captain: their panel; a keeper: a word and the service of the building; the others a line)

@@ -1,0 +1,398 @@
+{
+ "tag": "l10k",
+ "plan": [
+  "sleep10",
+  "folk",
+  "people10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "sleep10",
+   "ok": true,
+   "walk_home_s": 12.2,
+   "still_walking": 0,
+   "beds": {
+    "recorded": 74,
+    "made": 43,
+    "sleepers": 70,
+    "given": 70
+   },
+   "no_bed_with_building": [
+    [
+     "Drunk",
+     true
+    ],
+    [
+     "Smith",
+     true
+    ],
+    [
+     "Trader",
+     true
+    ],
+    [
+     "Witch",
+     false
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ],
+    [
+     "Townsfolk",
+     true
+    ]
+   ],
+   "sleepers": 70,
+   "asleep": 69,
+   "in_bed": 69,
+   "on_sleep_clip": 69,
+   "children": {
+    "at_home": 11,
+    "in_bed": 11,
+    "square": 0
+   },
+   "awake_sample": [
+    [
+     "Innkeeper",
+     "AS_Town_CarryWalk",
+     "bld -1",
+     true,
+     1
+    ]
+   ],
+   "shared_beds": 0,
+   "poses": [
+    {
+     "role": "Priest",
+     "mesh": "SKM_NPC_Character_05_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 7.6,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Scholar",
+     "mesh": "SK_UE5_NPC_Plague_doctor_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 8.0,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Healer",
+     "mesh": "SK_UE5_NPC_Queen_Full_02",
+     "hips_over_top": 29.1,
+     "head_rise": 7.6,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Keeper",
+     "mesh": "SK_UE5_NPC_Servant_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.6,
+     "head_off": 66.2,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 29.1,
+     "head_rise": 8.1,
+     "head_off": 66.3,
+     "on_bed": 0.7,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Knight_05_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.3,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Soldier",
+     "mesh": "SKM_Viking_Full_010",
+     "hips_over_top": 29.1,
+     "head_rise": 8.3,
+     "head_off": 66.2,
+     "on_bed": 0.6,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.8,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Kid_05_Full_01",
+     "hips_over_top": 27.2,
+     "head_rise": 6.9,
+     "head_off": 61.7,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 7.3,
+     "head_off": 66.3,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SK_UE5_NPC_Kid_05_Full_01",
+     "hips_over_top": 27.2,
+     "head_rise": 7.4,
+     "head_off": 61.6,
+     "on_bed": 0.5,
+     "plays": true,
+     "bld": true
+    },
+    {
+     "role": "Townsfolk",
+     "mesh": "SKM_NPC_Character_02_Full_01",
+     "hips_over_top": 29.1,
+     "head_rise": 8.4,
+     "head_off": 66.2,
+     "on_bed": 0.0,
+     "plays": true,
+     "bld": true
+    }
+   ],
+   "bad_poses": [],
+   "poses_n": 14,
+   "shots": [
+    "sleep10_a",
+    "sleep10_b"
+   ],
+   "night_smith_says": "the smith's work",
+   "night_smith_f": "smith",
+   "night_smith_panel": "smith",
+   "night_trader_f": "bark",
+   "night_trader_panel": "store",
+   "night_trader_in_bed": false,
+   "morning": {
+    "asleep": 0,
+    "in_bed": 0
+   }
+  },
+  {
+   "step": "folk",
+   "ok": true,
+   "fps": {
+    "mean": 29.7,
+    "min": 2.1
+   },
+   "walked": {
+    "Simple Tam": 20,
+    "a militiaman": 3,
+    "a militiawoman": 2,
+    "Little Wren": 6,
+    "Tobin": 9,
+    "Pip": 1
+   },
+   "hour": 8.28,
+   "still": [
+    {
+     "who": "Little Wren",
+     "res": true,
+     "home": 10,
+     "here": -1,
+     "at": [
+      -3654,
+      6640
+     ],
+     "moved": 4153,
+     "work": "working|1|Scatter|15.7|2|Scatter@3,Stroll|1,-1,50|15.2|37.2",
+     "clip": "AS_Town_Scatter"
+    },
+    {
+     "who": "Pip",
+     "res": true,
+     "home": 94,
+     "here": -1,
+     "at": [
+      -5872,
+      17550
+     ],
+     "moved": 5133,
+     "work": "going|50|Talk|0.0|0||-1,15,50|17.8|32.4",
+     "clip": "AS_NPC_Kids_Pack_WalkLocked"
+    }
+   ],
+   "militia": [
+    {
+     "at": [
+      -5822,
+      -10350
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    },
+    {
+     "at": [
+      13055,
+      -13611
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      5
+     ]
+    },
+    {
+     "at": [
+      9450,
+      8584
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      5
+     ]
+    },
+    {
+     "at": [
+      -14253,
+      15826
+     ],
+     "paths": [
+      6,
+      4,
+      4,
+      10
+     ]
+    },
+    {
+     "at": [
+      -10653,
+      -15062
+     ],
+     "paths": [
+      4,
+      4,
+      4,
+      4
+     ]
+    }
+   ],
+   "bark": "Old Pell|The spire... the spire went *crack*. Like that. *Crack.* I was there. Mostly.",
+   "names": [
+    "Aldric Venn|!"
+   ],
+   "idle": []
+  },
+  {
+   "step": "people10",
+   "ok": true,
+   "seeds": {
+    "580510001": {
+     "buildings": [
+      135,
+      135
+     ],
+     "same_places": true,
+     "people": [
+      99,
+      126
+     ],
+     "ratio": 1.273,
+     "children": [
+      3,
+      19
+     ],
+     "adults2": 11,
+     "homekids": 19,
+     "squarekids": 3
+    },
+    "4444": {
+     "buildings": [
+      127,
+      127
+     ],
+     "same_places": true,
+     "people": [
+      93,
+      117
+     ],
+     "ratio": 1.258,
+     "children": [
+      3,
+      16
+     ],
+     "adults2": 11,
+     "homekids": 16,
+     "squarekids": 3
+    }
+   },
+   "fps_square": {
+    "mean": 31.2,
+    "min": 29.5
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "bs_l10k_sleep10_a.png",
+  "bs_l10k_sleep10_b.png",
+  "bs_l10k_names.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

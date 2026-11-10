@@ -55,7 +55,12 @@ frames of each clip, with stand-in props placed from the sockets and placement n
 the FBX back and checks its reference pose and frames against the poses made.
 Blender: -b -P town_work_clips.py -- SKM_Manny.fbx Body_Character01.fbx MM_Idle.fbx MM_Walk_Fwd.fbx out_dir [nopreview]
 [only=Stir,Crank,...] (the four FBX exported from Unreal: the pack's mannequin, a townsperson's body, MM_Idle and
-MM_Walk_Fwd; with only= the FBX is not written and the JSON is town_work_clips_partial.json)"""
+MM_Walk_Fwd; with only= the FBX is not written and the JSON is town_work_clips_partial.json, unless writefbx is given too: then
+the FBX holds only those clips (the list of 2026-11-10's Sleep: its own out_dir, imported on its own by 914 sleep))
+Sleep (the list of 2026-11-10: "if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation
+or clip in blender"): lying on her back, the pelvis tipped back a quarter turn (the whole body with it: her feet toward her
+forward, her head behind), lowered until the lowest skin rests 1 cm over the root (the bed's top in the game), a slow breath
+over 4 s (the chest and the head), the loop closed."""
 import json, math, os, sys
 import bpy
 import numpy as np
@@ -71,6 +76,8 @@ MANNY_FBX, BODY_FBX, IDLE_FBX, WALK_FBX, OUT_DIR = argv[:5]
 OPTS = argv[5:]
 PREVIEW = "nopreview" not in OPTS
 ONLY = next((o[5:].split(",") for o in OPTS if o.startswith("only=")), None)
+WRITE_FBX = "writefbx" in OPTS
+SLEEP_LEN = 4.0
 PREV_DIR = os.path.join(OUT_DIR, "preview")
 FPS = 30
 F, U, LEAN, OUT = C.F, C.U, C.LEAN, C.OUT
@@ -1536,6 +1543,39 @@ def make_talk(B, base):
     return Ws, {}, None, None, {}
 
 
+# ---------------------------------------------------------------- asleep (the list of 2026-11-10)
+def make_sleep(B):
+    """lying on her back in bed: the pelvis tipped back a quarter turn about her left-right way (the legs and the body follow
+    it: her feet toward her forward, her head behind her), the arms as the idle hangs them (along her sides), the head a little
+    to one side; lowered until the lowest skin of frame 0 rests 1 cm over the root; a breath over SLEEP_LEN (the chest and the
+    head rising a little)"""
+    P = B.poser; m = B.meter; h = B.h
+    n = int(round(SLEEP_LEN * FPS))
+    P.start(); p0 = h.pose.bones["pelvis"].head.copy()
+    def pose(t, z):
+        br = 0.5 - 0.5 * math.cos(2.0 * math.pi * t / SLEEP_LEN)
+        P.start(); P.pelvis(move=from_her(0.0, 0.0, z) - p0, pitch=-90.0)
+        P.body(lean=-2.0 * br, look=-4.0 + 2.0 * br, tilt=10.0, keep_head=0.0)
+        out = P.finish()
+        for ik, b, rel in B.ctx["ik_follow"]: out[ik] = out[b] @ rel
+        return out
+    # (the bed under her: the lowest skin of the lying body, measured, put 1 cm over the root)
+    z = 15.0
+    for _ in range(3):
+        W = pose(0.0, z); set_world(B.arm, W); co = m.coords()
+        low = float(co[:, 2].min()); z += 1.0 - low
+        if abs(1.0 - low) < 0.2: break
+    log("sleep: the pelvis %.1f cm over the root, the lowest skin %.2f cm over it" % (z, low))
+    ctx = B.ctx; ctx["prev_arm"] = {}
+    Ws = [pose(i / FPS, z) for i in range(n)]
+    Ws.append(Ws[0])
+    set_world(B.arm, Ws[0]); co = m.coords()
+    info = {"pelvis_over_root_cm": round(z, 2), "lowest_skin_cm": round(float(co[:, 2].min()), 2),
+            "length_along_cm": round(float(co[:, 1].max() - co[:, 1].min()), 1), "width_cm": round(float(co[:, 0].max() - co[:, 0].min()), 1),
+            "highest_cm": round(float(co[:, 2].max()), 1), "head_behind_cm": round(float(-co[:, 1].min()), 1), "feet_ahead_cm": round(float(co[:, 1].max()), 1)}
+    return Ws, info, None, None, {}
+
+
 # ---------------------------------------------------------------- idle windows
 def idle_loop(B, idle, L):
     """a window of L frames of the idle (its cycle wraps), the one whose ends differ least, closed into a loop: each
@@ -1885,6 +1925,8 @@ def main():
         elif name == "Talk":
             base, wi = idle_loop(B, idle, int(round(TALK_LEN * FPS)))
             Ws, info, extra, summ, pr = make_talk(B, base); info["idle_window"] = wi
+        elif name == "Sleep":
+            Ws, info, extra, summ, pr = make_sleep(B); legs = False
         rep, rows, frames = measure(B, name, Ws, extra, legs)
         if summ: rep.update(summ(rows))
         rep.update(info)
@@ -1909,7 +1951,7 @@ def main():
           "idle_source": idle_info, "wrist_limits_deg": {"flex": list(R.FLEX), "deviation": list(R.DEV), "twist": list(R.TWIST),
                                                          "twist_counted_from": B.ref_turn},
           "clips": clean(report)}
-    if ONLY:
+    if ONLY and not WRITE_FBX:
         json.dump(js, open(os.path.join(OUT_DIR, "town_work_clips_partial.json"), "w"), indent=1)
         log("DONE (partial)"); return
     # ---- export (the pose back to the reference pose after keying: the bones' own transforms are read back as it)
