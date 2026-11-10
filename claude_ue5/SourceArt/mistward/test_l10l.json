@@ -1,0 +1,163 @@
+{
+ "tag": "l10l",
+ "plan": [
+  "list10b",
+  "arena5"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10b",
+   "ok": true,
+   "opened_before": [],
+   "opened_n": 1,
+   "port_band_nearest_m": 10.82,
+   "prisoner_cells": 38,
+   "prisoner": {
+    "room": 16,
+    "before": 0,
+    "after_minimap": 1,
+    "big_map": 1
+   },
+   "shelf_census": {
+    "1": {
+     "SCROLL": 45,
+     "TOME": 26,
+     "COMPONENT": 38
+    },
+    "2": {
+     "TOME": 15,
+     "COMPONENT": 49,
+     "SCROLL": 51
+    },
+    "3": {
+     "SCROLL": 60,
+     "COMPONENT": 32,
+     "TOME": 19
+    },
+    "4": {
+     "SCROLL": 50,
+     "COMPONENT": 40,
+     "TOME": 17
+    },
+    "5": {
+     "TOME": 15,
+     "COMPONENT": 46,
+     "SCROLL": 41
+    }
+   },
+   "shelf_bad": [],
+   "shelves_built": 186,
+   "shelf": {
+    "at": [
+     0,
+     0,
+     0
+    ],
+    "says": "search the bookshelf",
+    "f": "shelf",
+    "want": [
+     "Scroll of Fire Bolt"
+    ],
+    "got": {
+     "Scroll of Fire Bolt": 1
+    },
+    "again": "",
+    "searched": 1
+   },
+   "ports": {
+    "before": 0,
+    "after": 1,
+    "bosses": 2,
+    "lines": [
+     [
+      "2",
+      "-5850.0",
+      "-9750.0",
+      "0.0"
+     ]
+    ]
+   },
+   "port_from_boss_m": 9.7,
+   "port_same_room": true,
+   "port_says": "teleport back to the first room    [G] to Brokenspire",
+   "port_f": "teleport",
+   "to_first_room_m": 0.0,
+   "port_says_g": "teleport to Brokenspire    [G] the first room",
+   "port_f_g": "town",
+   "last_travel": "town"
+  },
+  {
+   "step": "arena5",
+   "ok": true,
+   "room": 18,
+   "began": true,
+   "lead": 3.0,
+   "crowd": 18,
+   "wave_at_half_lead": -1,
+   "facing_middle": 18,
+   "by_a_door": 0,
+   "toward_walls": 18,
+   "meshes": 8,
+   "heads": {
+    "SK_NPC_Character_03_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_04_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_02_Full_02": [
+     3
+    ],
+    "SK_NPC_Character_03_Full_02": [
+     2
+    ],
+    "SK_NPC_Character_01_Full_01": [
+     0
+    ],
+    "SK_NPC_Character_04_Full_02": [
+     1
+    ],
+    "SK_NPC_Character_05_Full_02": [
+     2
+    ],
+    "SK_NPC_Character_05_Full_01": [
+     0
+    ]
+   },
+   "headless": [],
+   "first_wave_after": 3.03,
+   "cheers_at_wave": 1,
+   "doing_after_wave": [
+    "cheer"
+   ],
+   "ring_used": false,
+   "ring_moved_her": 0,
+   "door_says": "the arena's doors are barred until its last wave falls",
+   "door_f": "arena barred",
+   "door_open": false,
+   "put_back": 1,
+   "back_in_room": true,
+   "refused": 3,
+   "claps_after_kill": 1,
+   "doing_after_kill": [
+    "cheer",
+    "clap"
+   ],
+   "won": 1,
+   "crowd_after_win": 0,
+   "reactions": null
+  }
+ ],
+ "windows_hidden": "Message Log",
+ "shots": [
+  "mw_l10l_l10b_prisoner_minimap.png",
+  "mw_l10l_l10b_prisoner_map.png",
+  "mw_l10l_l10b_shelf.png",
+  "mw_l10l_l10b_bossport.png",
+  "mw_l10l_arena_crowd.png",
+  "mw_l10l_arena_clap.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

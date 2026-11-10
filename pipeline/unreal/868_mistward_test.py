@@ -4477,6 +4477,12 @@ def step_list10b():
     put(g.get_start_room_center(), 0.0); yield from wait(1.2)
     res["opened_before"] = sorted(int(t) for t in g.tiers_opened)
     res["opened_n"] = g.debug_open_tiers(2, True); yield from wait(1.0)
+    # (PR #39's review: none of the boss's band stands on the pad's tile: measured as they are set, before they wander)
+    bp0 = [str(l).split("|") for l in g.get_boss_port_lines()]
+    if bp0:
+        pt0 = V(float(bp0[0][1]), float(bp0[0][2]), 0)
+        near = [x for x in enc() if x["kind"] in ("boss", "band") and x.get("tier") == 2]
+        res["port_band_nearest_m"] = round(min((math.hypot(x["at"][0] - pt0.x, x["at"][1] - pt0.y) for x in near), default=9900) / 100, 2)
     for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
         if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
         secs.append(s_)
@@ -4566,7 +4572,7 @@ def step_list10b():
     ok = (res["prisoner_cells"] > 0 and pr.get("before") == 0 and pr.get("after_minimap", 0) >= 1 and pr.get("big_map", 0) >= 1
           and not bad and sum(sum(v.values()) for v in census.values()) > 50
           and sh.get("says") == "search the bookshelf" and sh.get("f") == "shelf" and all(v >= 1 for v in sh.get("got", {0: 0}).values()) and sh.get("again") != "search the bookshelf"
-          and res["ports"]["after"] >= 1 and res.get("port_same_room") and "first room" in res.get("port_says", "") and res.get("port_f") == "teleport"
+          and res["ports"]["after"] >= 1 and res.get("port_same_room") and res.get("port_band_nearest_m", 0) >= 1.0 and "first room" in res.get("port_says", "") and res.get("port_f") == "teleport"
           and res.get("to_first_room_m", 99) < 3.0 and "Brokenspire" in res.get("port_says_g", "") and res.get("port_f_g") == "town" and res.get("last_travel", "") == "town")          # (the dry run of ReturnToTown records its kind)
     step_result("list10b", ok, **res)
 

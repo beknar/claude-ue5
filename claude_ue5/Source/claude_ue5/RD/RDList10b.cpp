@@ -7,8 +7,8 @@
 //     once; what it holds is drawn from a stream of its own (the set, the shelf, the session's seed), as a container's is;
 //   - "if the player walks under a structure that blocks sight of her, make the structure see-through": the town's instanced
 //     pieces that stand between her and the camera (where the camera is, and where its boom would put it), but what she stands
-//     on, are hidden while they stand there; a hidden copy of each keeps its collision (the camera and sight lines pass
-//     through it), so the boom no longer stops on them and the camera stays out where it was.
+//     on, are hidden while they stand there; a hidden copy of each keeps its collision (only the camera passes through it:
+//     bolts, sight lines and traces still meet it), so the boom no longer stops on them and the camera stays out where it was.
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDSection.h"
 #include "RD/RDMistward.h"
@@ -33,20 +33,22 @@ bool ARDDungeonGenerator::CanBossPortToTown() const
 	return bTownLink && !bTown && !TownLevel.IsEmpty();
 }
 
-void ARDDungeonGenerator::PlaceBossPort(int32 Tier, ARDSection* S, int32 Room, const TArray<FVector>& Free, int32 Used)
+void ARDDungeonGenerator::PlaceBossPort(int32 Tier, ARDSection* S, int32 Room, const TArray<FVector>& Free, const TArray<FVector>& Spots)
 {
 	if (!S || !GetWorld()) return;
 	if (TObjectPtr<ARDTeleporter>* Old = BossPortActors.Find(Tier); Old && IsValid(*Old)) return;
-	// (the free tile farthest from the room's middle: his band stands on the nearer ones)
+	// (the free tile farthest from the room's middle that none of him and his band stands on (PR #39's review: in a small room
+	// the band's spots run to the last tile, Free[min(N-1, 1+2I)], and their parts would lie on the pad, F taking them first))
 	FVector At = S->GetRoomCenter(Room);
-	if (Free.Num() > 0) At = Free.Last();
+	for (int32 I = Free.Num() - 1; I >= 0; --I)
+		if (!Spots.ContainsByPredicate([&](const FVector& P) { return FVector::Dist2D(P, Free[I]) < 100.f; })) { At = Free[I]; break; }
 	FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ARDTeleporter* A = GetWorld()->SpawnActor<ARDTeleporter>(ARDTeleporter::StaticClass(), FTransform(At), Sp);
 	if (!A) return;
 	A->Init(this, 0, false);
 	BossPorts.Add(Tier, At); BossPortActors.Add(Tier, A);
 	UE_LOG(LogRDList10b, Log, TEXT("RDBOSSPORT tier %d at (%.0f, %.0f, %.0f) in room %d of (%d,%d) (%d free tiles, %d taken by him and his band)"),
-	       Tier, At.X, At.Y, At.Z, Room, S->Coord.X, S->Coord.Y, Free.Num(), Used);
+	       Tier, At.X, At.Y, At.Z, Room, S->Coord.X, S->Coord.Y, Free.Num(), Spots.Num());
 }
 
 void ARDDungeonGenerator::ClearBossPorts()
@@ -113,16 +115,6 @@ FString ARDDungeonGenerator::BossPortUse(const FVector& From)
 }
 
 // ================================================================================================ the library's shelves
-bool ARDDungeonGenerator::IsScrollPart(FName Item) const
-{
-	for (const FRDRecipe& Rc : Recipes)
-	{
-		const int32 Pi = FindItem(Rc.Item);
-		if (Pi < 0 || Items[Pi].Kind != ERDItemKind::Scroll) continue;
-		for (const FRDRecipePart& Pt : Rc.Parts) if (Pt.AnyOf.Contains(Item)) return true;
-	}
-	return false;
-}
 
 TArray<FName> ARDDungeonGenerator::ShelfLootOf(FIntPoint Section, int32 Index) const
 {
@@ -197,8 +189,19 @@ const ARDSection* ARDDungeonGenerator::ShelfNear(const FVector& From, int32& Out
 			if (D < 160.f && D < Bd) { Bd = D; Best = S; OutIndex = I; }
 		}
 	}
-	// (a door or a container nearer than it is what F does)
-	if (Best) { bool bD = false; int32 Di = -1; if (Best->FindNearestInteractive(From, Bd, bD, Di) < Bd) { OutIndex = -1; return nullptr; } }
+	// (a door or a container nearer than it is what F does, in any set round her (PR #39's review: a shelf by a set's border
+	// took F from the next set's door))
+	if (Best)
+	{
+		const FIntPoint Here = WorldToSection(From);
+		for (int32 Dx = -1; Dx <= 1; ++Dx)
+			for (int32 Dy = -1; Dy <= 1; ++Dy)
+				if (const ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy)))
+				{
+					bool bD = false; int32 Di = -1;
+					if (S->FindNearestInteractive(From, Bd, bD, Di) < Bd) { OutIndex = -1; return nullptr; }
+				}
+	}
 	return Best;
 }
 
@@ -300,9 +303,12 @@ void ARDDungeonGenerator::TickSeeThrough(float Dt)
 	}
 	// (the new ones: every piece of her set (and the sets beside it) whose box the line meets: the town's roofs
 	// have no collision, so no trace finds them; the pieces' boxes on a grid, made once a set)
+	for (auto It = SeeGrids.CreateIterator(); It; ++It) if (!It.Key().IsValid()) It.RemoveCurrent();          // (dropped sets' grids go)
 	TArray<ARDSection*> Near;
 	const FIntPoint Here = WorldToSection(Her->GetActorLocation());
-	for (int32 Dx = -1; Dx <= 1; ++Dx) for (int32 Dy = -1; Dy <= 1; ++Dy) if (ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy))) Near.Add(S);
+	// (a set still being built over frames has no grid yet (PR #39's review: made then, it held the pieces flushed so far and
+	// never the later roofs))
+	for (int32 Dx = -1; Dx <= 1; ++Dx) for (int32 Dy = -1; Dy <= 1; ++Dy) if (ARDSection* S = GetSection(Here + FIntPoint(Dx, Dy)); S && !S->IsBuilding()) Near.Add(S);
 	for (const FVector& E : Ends)
 	{
 		const FVector2D Lo(FMath::Min(Head.X, E.X), FMath::Min(Head.Y, E.Y)), Hi(FMath::Max(Head.X, E.X), FMath::Max(Head.Y, E.Y));
@@ -343,22 +349,24 @@ void ARDDungeonGenerator::TickSeeThrough(float Dt)
 
 ARDDungeonGenerator::FSeeGrid& ARDDungeonGenerator::SeeGridOf(ARDSection* S)
 {
-	// (dropped sets' grids go)
-	for (auto It = SeeGrids.CreateIterator(); It; ++It) if (!It.Key().IsValid()) It.RemoveCurrent();
 	if (FSeeGrid* G = SeeGrids.Find(S)) return *G;
 	FSeeGrid& Gd = SeeGrids.Add(S);
 	const double T0 = FPlatformTime::Seconds();
+	// (the hidden ones at their places as they were, looked up by component and instance)
+	TMap<TPair<const UInstancedStaticMeshComponent*, int32>, FTransform> Was;
+	for (const FSeeHidden& H : SeeHidden) if (H.C.IsValid()) Was.Add({ H.C.Get(), H.I }, H.T);
 	TArray<UInstancedStaticMeshComponent*> Comps; S->GetComponents<UInstancedStaticMeshComponent>(Comps);
 	for (UInstancedStaticMeshComponent* C : Comps)
 	{
 		if (!C || !C->GetStaticMesh() || C->ComponentHasTag(TEXT("RDSeeProxy")) || !C->IsVisible() || C->bHiddenInGame) continue;
+		// (not the grass, flowers and small things: under the height a piece needs to hide her, or faded with distance)
 		const FBox Mb = C->GetStaticMesh()->GetBoundingBox();
+		if (C->InstanceEndCullDistance > 0 || Mb.GetSize().Z < RDSeeAbove) continue;
 		for (int32 I = 0; I < C->GetInstanceCount(); ++I)
 		{
 			FTransform T;
 			if (!C->GetInstanceTransform(I, T, true)) continue;
-			// (a hidden one is in the list at its place as it was)
-			if (const FSeeHidden* H = SeeHidden.FindByPredicate([&](const FSeeHidden& X) { return X.C.Get() == C && X.I == I; })) T = H->T;
+			if (const FTransform* Wt = Was.Find({ C, I })) T = *Wt;
 			const FBox B = Mb.TransformBy(T);
 			if (B.GetSize().GetMax() > 4000.f) continue;          // (nothing that big is a piece over her)
 			const int32 Ri = Gd.Refs.Add({ C, I, B });
@@ -393,7 +401,8 @@ void ARDDungeonGenerator::HideSeeThrough(UInstancedStaticMeshComponent* C, int32
 			P->SetupAttachment(C->GetOwner()->GetRootComponent());
 			P->SetCollisionObjectType(C->GetCollisionObjectType());
 			P->SetCollisionResponseToChannels(C->GetCollisionResponseToChannels());
-			P->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+			// (the camera alone passes it (PR #39's review: ignoring Visibility too let her bolts fly through a wall she could not
+			// walk through, and the horse's clear-line and ground traces pass it))
 			P->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 			P->SetCollisionEnabled(C->GetCollisionEnabled());
 			P->SetHiddenInGame(true); P->SetCastShadow(false);

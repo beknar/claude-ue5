@@ -3375,11 +3375,19 @@ def step_sky10():
             if variant == "nofog" and fc: fc.set_fog_density(fd)
     G["pawn"].set_actor_hidden_in_game(False); g.set_town_hour(12.0)
     restore_boom(boom, keep)
+    # (PR #39's review: the ring made again before a gap can open behind her: not after 100 m, again after 200 m (FarLandRebuildM
+    # 150, the ring from 850 m: the chunks reach 1.0 km at the least))
+    fl0 = str(g.get_far_land_state()).split("|"); p0 = G["pawn"].get_actor_location()
+    for dm, key in ((100, "after_100m"), (200, "after_200m")):
+        put(V(p0.x + dm * 100, p0.y, p0.z - 100), z=None); yield from rwait(1.5)
+        res[key] = int(str(g.get_far_land_state()).split("|")[5]) - int(fl0[5])
+    put(V(p0.x, p0.y, p0.z - 100), z=None); yield from rwait(1.0)
+    res["rebuild_m"] = g.get_editor_property("far_land_rebuild_m")
     bn = G["pawn"].get_component_by_class(unreal.SpringArmComponent)
     res["boom_after"] = [round(bn.get_editor_property("target_offset").z), keep[0][2] if keep else None] if bn else None
     res["far_land_after"] = str(g.get_far_land_state())
     fl = res["far_land_after"].split("|")
-    step_result("sky10", len(fl) > 5 and fl[0] == "1" and int(fl[5]) >= 1, **res)
+    step_result("sky10", len(fl) > 5 and fl[0] == "1" and int(fl[5]) >= 1 and res.get("after_100m") == 0 and res.get("after_200m", 0) >= 1, **res)
 def step_sun10():
     """(a probe) the sun's disc looked at straight, clear and fair, at 9, 12 and 16 o'clock: the camera along the sun light's way"""
     g = G["gen"]; res = {"shots": []}
@@ -3483,13 +3491,27 @@ def step_see10():
                 need = [l for l in lines if col.get(l.split("|")[0])]
                 r["with_collision"] = len(need); r["copies"] = sum(1 for l in need if l.split("|")[4] == "1")
                 r["collision_kept"] = r["copies"] == len(need)
+                # (PR #39's review: the copy blocks sight lines (bolts, the horse's clear line) and only the camera passes it: a line
+                # down through the first one's place meets the copy on Visibility, never on Camera)
+                if need:
+                    p = need[0].split("|"); x, y, z = float(p[1]), float(p[2]), float(p[3])
+                    def via(ch):
+                        # (level lines across the wall's line at its middle height, along X and along Y: a wall stands on its line)
+                        for a0, a1 in ((V(x - 150, y, z + 150), V(x + 150, y, z + 150)), (V(x, y - 150, z + 150), V(x, y + 150, z + 150))):
+                            hs = unreal.SystemLibrary.line_trace_multi(w, a0, a1, ch, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True) or []
+                            if any(h.to_tuple()[10] and h.to_tuple()[10].component_has_tag("RDSeeProxy") for h in hs): return True
+                        return False
+                    r["copy_blocks_sight"] = via(unreal.TraceTypeQuery.TRACE_TYPE_QUERY1)
+                    r["copy_blocks_camera"] = via(unreal.TraceTypeQuery.TRACE_TYPE_QUERY2)
             sn = f"see10_{nm}_{'on' if on else 'off'}"; shot(sn, "1280x720"); res["shots"].append(sn); yield from rwait(1.5)
         res[nm] = r
     g.set_editor_property("see_through", True)
     res["total"] = g.get_editor_property("see_through_total")
     # (the eaves: two of three hide something; every spot hides nothing with the switch off and keeps collision)
     ok = (sum(1 for n, _a, _y in spots_ if n.startswith("eave") and res[n]["on"]["hidden"] > 0) >= 2
-          and all(res[n]["off"]["hidden"] == 0 and res[n].get("collision_kept") for n, _a, _y in spots_))
+          and all(res[n]["off"]["hidden"] == 0 and res[n].get("collision_kept") for n, _a, _y in spots_)
+          and all(res[n].get("copy_blocks_camera") is not True for n, _a, _y in spots_)
+          and any(res[n].get("copy_blocks_sight") for n, _a, _y in spots_))
     step_result("see10", ok, **res)
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an

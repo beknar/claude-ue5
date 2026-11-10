@@ -1147,7 +1147,7 @@ TArray<FVector> ARDSection::WallSlots(const FRoom& Rm, int32 Side, float Spacing
 	return Out;
 }
 
-void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers, TArray<FTransform>* Placed)
+void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers, TArray<FPlacedPiece>* Placed)
 {
 	if (Names.Num() == 0) return;
 	for (int32 Side = 0; Side < 4; ++Side)
@@ -1161,7 +1161,7 @@ void ARDSection::FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FN
 			const FVector Pos = W + FRotator(0, Yaw, 0).RotateVector(FVector(P->Size.X * 0.5f + 32.f, 0, 0));
 			if (!LaneFree(Rm, Pos, FMath::Max(P->Size.X, P->Size.Y) * 0.5f)) continue;
 			if (bContainers && P->Moving) AddContainer(Nm, Pos, Yaw, Nm.ToString().ToLower());
-			else if (AddPieceAt(Nm, Pos, Yaw)) { MarkBlocked(Pos, Yaw, FVector2D(P->Size.X, P->Size.Y)); if (Placed) Placed->Add(FTransform(FRotator(0, Yaw, 0), Pos, FVector(P->Size.X, P->Size.Y, P->Size.Z))); }
+			else if (AddPieceAt(Nm, Pos, Yaw)) { MarkBlocked(Pos, Yaw, FVector2D(P->Size.X, P->Size.Y)); if (Placed) Placed->Add({ Pos, Yaw, FVector(P->Size) }); }
 		}
 }
 
@@ -1626,9 +1626,9 @@ void ARDSection::Furnish(FRandomStream& R, int32 RI)
 		{
 			// (the list of 2026-11-10: the shelves are searched for scrolls, their parts and tomes: where each stands, its room;
 			// the draws are FurnishWalls' own, so nothing else moves)
-			TArray<FTransform> Placed;
+			TArray<FPlacedPiece> Placed;
 			FurnishWalls(R, Rm, { TEXT("Bookshelf"), TEXT("Bookshelf"), TEXT("Bookshelf2") }, 240.f, 0.9f, false, &Placed);
-			for (const FTransform& Tf : Placed) { FShelf Sh; Sh.At = Tf.GetLocation(); Sh.Yaw = Tf.Rotator().Yaw; Sh.Depth = Tf.GetScale3D().X; Sh.Room = Rooms.IndexOfByPredicate([&Rm](const FRoom& X) { return &X == &Rm; }); Shelves.Add(Sh); }
+			for (const FPlacedPiece& Pp : Placed) { FShelf Sh; Sh.At = Pp.At; Sh.Yaw = Pp.Yaw; Sh.Depth = Pp.Size.X; Sh.Room = RI; Shelves.Add(Sh); }
 		}
 		for (const FVector& Q : Quads)
 		{

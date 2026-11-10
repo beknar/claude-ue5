@@ -1,5 +1,5 @@
 {
- "tag": "k10r",
+ "tag": "k10s",
  "plan": [
   "sky10",
   "stair10",
@@ -54,7 +54,7 @@
     "sky10_00_nofog_p25",
     "sky10_00_nofog_p80"
    ],
-   "far_land": "1|1|-15|46|4.3|1",
+   "far_land": "1|1|-28|6|13.3|1",
    "parts": {
     "high": true,
     "stars": true,
@@ -62,16 +62,19 @@
     "farland": true
    },
    "sky_state": {
-    "0": "clear|0.04|0.00|0.12|0.00|0|1|537|1|0.000|0.000|1000000|0|0|0",
-    "1": "fair|0.32|0.00|0.25|0.00|0|2|534|1|0.000|0.000|1000000|0|0|0",
+    "0": "clear|0.04|0.00|0.12|0.00|0|1|536|1|0.000|0.000|1000000|0|0|0",
+    "1": "fair|0.32|0.00|0.25|0.00|0|2|533|1|0.000|0.000|1000000|0|0|0",
     "2": "cloudy|0.62|0.00|0.40|0.05|0|3|534|1|0.000|0.000|1000000|0|0|0",
     "3": "overcast|0.90|0.00|0.45|0.20|0|4|534|1|0.000|0.000|1000000|0|0|0"
    },
+   "after_100m": 0,
+   "after_200m": 1,
+   "rebuild_m": 150.0,
    "boom_after": [
     0,
     0.0
    ],
-   "far_land_after": "1|1|-21|63|3.6|3"
+   "far_land_after": "1|1|-45|16|12.1|5"
   },
   {
    "step": "stair10",
@@ -123,7 +126,7 @@
   },
   {
    "step": "see10",
-   "ok": true,
+   "ok": false,
    "shots": [
     "see10_eave0_on",
     "see10_eave0_off",
@@ -138,7 +141,7 @@
     "arm": 320.0,
     "collision": true,
     "probe": "<CollisionChannel.ECC_CAMERA: 4>",
-    "offset": "<Struct 'Vector' (0x000001CE31F376B0) {x: 0.000000, y: 0.000000, z: 0.000000}>",
+    "offset": "<Struct 'Vector' (0x0000012E7F41CAB0) {x: 0.000000, y: 0.000000, z: 0.000000}>",
     "pawn": "BP_RDM5_Warrior3Character_C_0"
    },
    "eave0": {
@@ -150,15 +153,17 @@
      "hidden": 2,
      "meshes": [
       "SM_Wood_Doorway",
-      "SM_Wood_WallWindowLarge"
+      "SM_Wood_WallWindow"
      ]
     },
     "with_collision": 2,
     "copies": 2,
     "collision_kept": true,
+    "copy_blocks_sight": false,
+    "copy_blocks_camera": false,
     "cam_off": {
-     "from_her_m": 1.45,
-     "z": 139
+     "from_her_m": 1.46,
+     "z": 140
     },
     "off": {
      "hidden": 0,
@@ -167,22 +172,24 @@
    },
    "eave1": {
     "cam_on": {
-     "from_her_m": 0.22,
-     "z": 22
+     "from_her_m": 3.33,
+     "z": 318
     },
     "on": {
      "hidden": 2,
      "meshes": [
       "SM_Wood_Doorway",
-      "SM_Wood_WallWindow"
+      "SM_Wood_Wall"
      ]
     },
     "with_collision": 2,
     "copies": 2,
     "collision_kept": true,
+    "copy_blocks_sight": false,
+    "copy_blocks_camera": false,
     "cam_off": {
-     "from_her_m": 0.22,
-     "z": 22
+     "from_her_m": 1.46,
+     "z": 140
     },
     "off": {
      "hidden": 0,
@@ -204,9 +211,11 @@
     "with_collision": 2,
     "copies": 2,
     "collision_kept": true,
+    "copy_blocks_sight": false,
+    "copy_blocks_camera": false,
     "cam_off": {
-     "from_her_m": 1.31,
-     "z": 125
+     "from_her_m": 1.38,
+     "z": 132
     },
     "off": {
      "hidden": 0,
@@ -221,7 +230,7 @@
     "on": {
      "hidden": 1,
      "meshes": [
-      "SM_Castle_Tower_Wall_02a_NN"
+      "SM_Castle_Tower_Wall_02c_NN"
      ]
     },
     "with_collision": 0,
@@ -236,7 +245,7 @@
      "meshes": []
     }
    },
-   "total": 47
+   "total": 15
   },
   {
    "step": "castlewalls",
@@ -247,17 +256,17 @@
    "blind_arches": 166,
    "blind_arches_outside": 0,
    "arched_door_pieces": 0,
-   "watchtower_doors": 22,
+   "watchtower_doors": 21,
    "pieces": {
-    "SM_Castle_Stone_Wall_01a": 1306,
-    "SM_Castle_Stone_Wall_02h": 254,
-    "SM_Castle_Stone_Wall_02f": 103,
-    "SM_Castle_Stone_Wall_02g": 14,
-    "SM_Castle_Stone_Wall_02d": 6,
-    "SM_Castle_Stone_Parapet_01a": 654,
+    "SM_Castle_Stone_Wall_01a": 1215,
+    "SM_Castle_Stone_Wall_02h": 272,
+    "SM_Castle_Stone_Wall_02f": 96,
+    "SM_Castle_Stone_Wall_02g": 23,
+    "SM_Castle_Stone_Wall_02d": 8,
+    "SM_Castle_Stone_Parapet_01a": 628,
     "SM_Castle_Tower_Wall_02": 64,
     "SM_Tower_Roof_02a": 16,
-    "SM_Stone_Stairs_01a": 264
+    "SM_Stone_Stairs_01a": 252
    },
    "through_the_walk": {},
    "walk_traces": {
@@ -272,15 +281,15 @@
     "z_max": 745.6,
     "seconds": 5.0,
     "end": [
-     -5309,
-     -17791,
+     17791,
+     -1709,
      738
     ],
     "end_from_tower_m": 0.13,
     "walk_z": 661.0,
     "in_tower": true,
     "stair_well_tiles": 2,
-    "stair_room": 119
+    "stair_room": 122
    },
    "outside_nearest_cm": [
     350,
@@ -300,12 +309,12 @@
   {
    "step": "watch",
    "ok": true,
-   "watchtowers": 22,
+   "watchtowers": 21,
    "climb": {
     "reached": 76,
     "of": 76,
     "z_max": 1005.1,
-    "seconds": 8.1
+    "seconds": 8.2
    },
    "end_z": 998.3,
    "onto_the_floor": {
@@ -333,64 +342,64 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log",
  "shots": [
-  "bs_k10r_sky10_w0.png",
-  "bs_k10r_sky10_w1.png",
-  "bs_k10r_sky10_w2.png",
-  "bs_k10r_sky10_w3.png",
-  "bs_k10r_sky10_12_drawn_p-3.png",
-  "bs_k10r_sky10_12_drawn_p25.png",
-  "bs_k10r_sky10_12_drawn_p80.png",
-  "bs_k10r_sky10_12_nofarland_p-3.png",
-  "bs_k10r_sky10_12_nofarland_p25.png",
-  "bs_k10r_sky10_12_nofarland_p80.png",
-  "bs_k10r_sky10_12_nohigh_p-3.png",
-  "bs_k10r_sky10_12_nohigh_p25.png",
-  "bs_k10r_sky10_12_nohigh_p80.png",
-  "bs_k10r_sky10_12_nostars_p-3.png",
-  "bs_k10r_sky10_12_nostars_p25.png",
-  "bs_k10r_sky10_12_nostars_p80.png",
-  "bs_k10r_sky10_12_noclouds_p-3.png",
-  "bs_k10r_sky10_12_noclouds_p25.png",
-  "bs_k10r_sky10_12_noclouds_p80.png",
-  "bs_k10r_sky10_12_nofog_p-3.png",
-  "bs_k10r_sky10_12_nofog_p25.png",
-  "bs_k10r_sky10_12_nofog_p80.png",
-  "bs_k10r_sky10_00_drawn_p-3.png",
-  "bs_k10r_sky10_00_drawn_p25.png",
-  "bs_k10r_sky10_00_drawn_p80.png",
-  "bs_k10r_sky10_00_nofarland_p-3.png",
-  "bs_k10r_sky10_00_nofarland_p25.png",
-  "bs_k10r_sky10_00_nofarland_p80.png",
-  "bs_k10r_sky10_00_nohigh_p-3.png",
-  "bs_k10r_sky10_00_nohigh_p25.png",
-  "bs_k10r_sky10_00_nohigh_p80.png",
-  "bs_k10r_sky10_00_nostars_p-3.png",
-  "bs_k10r_sky10_00_nostars_p25.png",
-  "bs_k10r_sky10_00_nostars_p80.png",
-  "bs_k10r_sky10_00_noclouds_p-3.png",
-  "bs_k10r_sky10_00_noclouds_p25.png",
-  "bs_k10r_sky10_00_noclouds_p80.png",
-  "bs_k10r_sky10_00_nofog_p-3.png",
-  "bs_k10r_sky10_00_nofog_p25.png",
-  "bs_k10r_sky10_00_nofog_p80.png",
-  "bs_k10r_stair10_side.png",
-  "bs_k10r_stair10_foot.png",
-  "bs_k10r_stair10_top.png",
-  "bs_k10r_see10_eave0_on.png",
-  "bs_k10r_see10_eave0_off.png",
-  "bs_k10r_see10_eave1_on.png",
-  "bs_k10r_see10_eave1_off.png",
-  "bs_k10r_see10_eave2_on.png",
-  "bs_k10r_see10_eave2_off.png",
-  "bs_k10r_see10_tower0_on.png",
-  "bs_k10r_see10_tower0_off.png",
-  "bs_k10r_castle_stair.png",
-  "bs_k10r_castle_tower_inside.png",
-  "bs_k10r_castle_tower_door.png",
-  "bs_k10r_castle_stairwell.png",
-  "bs_k10r_castle_front.png",
-  "bs_k10r_watch_top.png",
-  "bs_k10r_watch_door.png"
+  "bs_k10s_sky10_w0.png",
+  "bs_k10s_sky10_w1.png",
+  "bs_k10s_sky10_w2.png",
+  "bs_k10s_sky10_w3.png",
+  "bs_k10s_sky10_12_drawn_p-3.png",
+  "bs_k10s_sky10_12_drawn_p25.png",
+  "bs_k10s_sky10_12_drawn_p80.png",
+  "bs_k10s_sky10_12_nofarland_p-3.png",
+  "bs_k10s_sky10_12_nofarland_p25.png",
+  "bs_k10s_sky10_12_nofarland_p80.png",
+  "bs_k10s_sky10_12_nohigh_p-3.png",
+  "bs_k10s_sky10_12_nohigh_p25.png",
+  "bs_k10s_sky10_12_nohigh_p80.png",
+  "bs_k10s_sky10_12_nostars_p-3.png",
+  "bs_k10s_sky10_12_nostars_p25.png",
+  "bs_k10s_sky10_12_nostars_p80.png",
+  "bs_k10s_sky10_12_noclouds_p-3.png",
+  "bs_k10s_sky10_12_noclouds_p25.png",
+  "bs_k10s_sky10_12_noclouds_p80.png",
+  "bs_k10s_sky10_12_nofog_p-3.png",
+  "bs_k10s_sky10_12_nofog_p25.png",
+  "bs_k10s_sky10_12_nofog_p80.png",
+  "bs_k10s_sky10_00_drawn_p-3.png",
+  "bs_k10s_sky10_00_drawn_p25.png",
+  "bs_k10s_sky10_00_drawn_p80.png",
+  "bs_k10s_sky10_00_nofarland_p-3.png",
+  "bs_k10s_sky10_00_nofarland_p25.png",
+  "bs_k10s_sky10_00_nofarland_p80.png",
+  "bs_k10s_sky10_00_nohigh_p-3.png",
+  "bs_k10s_sky10_00_nohigh_p25.png",
+  "bs_k10s_sky10_00_nohigh_p80.png",
+  "bs_k10s_sky10_00_nostars_p-3.png",
+  "bs_k10s_sky10_00_nostars_p25.png",
+  "bs_k10s_sky10_00_nostars_p80.png",
+  "bs_k10s_sky10_00_noclouds_p-3.png",
+  "bs_k10s_sky10_00_noclouds_p25.png",
+  "bs_k10s_sky10_00_noclouds_p80.png",
+  "bs_k10s_sky10_00_nofog_p-3.png",
+  "bs_k10s_sky10_00_nofog_p25.png",
+  "bs_k10s_sky10_00_nofog_p80.png",
+  "bs_k10s_stair10_side.png",
+  "bs_k10s_stair10_foot.png",
+  "bs_k10s_stair10_top.png",
+  "bs_k10s_see10_eave0_on.png",
+  "bs_k10s_see10_eave0_off.png",
+  "bs_k10s_see10_eave1_on.png",
+  "bs_k10s_see10_eave1_off.png",
+  "bs_k10s_see10_eave2_on.png",
+  "bs_k10s_see10_eave2_off.png",
+  "bs_k10s_see10_tower0_on.png",
+  "bs_k10s_see10_tower0_off.png",
+  "bs_k10s_castle_stair.png",
+  "bs_k10s_castle_tower_inside.png",
+  "bs_k10s_castle_tower_door.png",
+  "bs_k10s_castle_stairwell.png",
+  "bs_k10s_castle_front.png",
+  "bs_k10s_watch_top.png",
+  "bs_k10s_watch_door.png"
  ],
  "error": null,
  "windows_shown_again": 2

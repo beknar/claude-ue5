@@ -1419,11 +1419,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
 	static FString WeatherName(int32 Kind);
-	/** the list of 2026-11-10 (RDSkyFar.cpp): the far land round her in the wilds, a ring from 1.1 to 80 km of the world model's
+	/** the list of 2026-11-10 (RDSkyFar.cpp): the far land round her in the wilds, a ring from 0.85 to 80 km of the world model's
 	 *  heights and colours under the fog (the horizon's dark strip, 884 sky10); its material (914), how far she goes before it is
 	 *  made again (m), how far under the ground it sits (cm), the water's colour; tests: GetFarLandState "made|shown|x|y|ms|builds" */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") TObjectPtr<UMaterialInterface> FarLandMaterial;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandRebuildM = 400.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandRebuildM = 150.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandSink = 400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FLinearColor FarWaterColor = FLinearColor(0.035f, 0.06f, 0.08f);
 	/** how far the volumetric clouds are traced (km; the engine's 50 left them ending short of the horizon) */
@@ -1542,7 +1542,7 @@ public:
 	UPROPERTY(Transient) TMap<int32, TObjectPtr<class ARDTeleporter>> BossPortActors;
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|List10") int32 BossPortChoice = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 BossPortUses = 0;
-	void PlaceBossPort(int32 Tier, class ARDSection* S, int32 Room, const TArray<FVector>& Free, int32 Used);
+	void PlaceBossPort(int32 Tier, class ARDSection* S, int32 Room, const TArray<FVector>& Free, const TArray<FVector>& Spots);
 	int32 BossPortNear(const FVector& From, float Reach = 170.f) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") FString BossPortDescribe(const FVector& From) const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") FString BossPortUse(const FVector& From);
@@ -1563,10 +1563,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") FString ShelfSearch(const FVector& From);
 	/** tests: "sx|sy|index|x|y|z|room|searched" of every library shelf of the sets built */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FString> GetShelfLines() const;
-	bool IsScrollPart(FName Item) const;
 	/** "if the player walks under a structure that blocks sight of her, make the structure see-through": the town's instanced pieces
 	 *  between her and the camera (or where its boom would put it), but what she stands on, are hidden while they stand there
-	 *  (their collision kept by a hidden copy that the camera and sight lines pass through) */
+	 *  (their collision kept by a hidden copy that only the camera passes through) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bSeeThrough = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") float SeeThroughHold = 0.5f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 SeeThroughTotal = 0;

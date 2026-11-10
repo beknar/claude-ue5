@@ -368,6 +368,8 @@ public:
 	/** a library's bookshelves (the list of 2026-11-10: searched with F for scrolls, their parts and tomes): where each stands (its
 	 *  middle), its yaw (its front toward the room, +X), its depth, its room */
 	struct FShelf { FVector At = FVector::ZeroVector; float Yaw = 0.f; float Depth = 50.f; int32 Room = -1; };
+	/** a piece FurnishWalls placed: where (its middle), its yaw, its size */
+	struct FPlacedPiece { FVector At = FVector::ZeroVector; float Yaw = 0.f; FVector Size = FVector::ZeroVector; };
 	TArray<FShelf> Shelves;
 	/** the stair's mesh of blocks and wall (the list of 2026-11-10; tagged RDCastleStair), for the tests */
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TObjectPtr<class UProceduralMeshComponent> CastleStairMesh;
@@ -682,6 +684,6 @@ private:
 	TArray<FVector> WallSlots(const FRoom& Rm, int32 Side, float Spacing, float Clear, float Margin) const;
 	static float InwardYaw(int32 Side);
 	bool LaneFree(const FRoom& Rm, const FVector& P, float Radius) const;
-	void FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers = false, TArray<FTransform>* Placed = nullptr);
+	void FurnishWalls(FRandomStream& R, const FRoom& Rm, const TArray<FName>& Names, float Spacing, float Chance, bool bContainers = false, TArray<FPlacedPiece>* Placed = nullptr);
 	void LightRoom(FRandomStream& R, const FRoom& Rm, int32 RoomIndex);
 };

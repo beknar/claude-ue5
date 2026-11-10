@@ -478,7 +478,7 @@ bool ARDDungeonGenerator::PlaceBoss(int32 Tier)
 	Encounters.Add(E);
 	RespawnEncounters(S);
 	// (the list of 2026-11-10: a teleporter beside him, back to the first room or to the town)
-	if (bBossPorts) PlaceBossPort(Tier, S, Room, Free, E.Spots.Num());
+	if (bBossPorts) PlaceBossPort(Tier, S, Room, Free, E.Spots);
 	// ("in the armory", the room's kind; "see your map": the boss's mark is on it)
 	FString Where = TEXT("A ROOM YOU HAVE SEEN");
 	if (const FRDSectionMap* M = MapData.Find(S->Coord); M && M->Rects.IsValidIndex(Room)) Where = TEXT("THE ") + KindName(M->Rects[Room].Kind).ToUpper();

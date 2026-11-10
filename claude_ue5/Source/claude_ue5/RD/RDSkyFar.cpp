@@ -2,9 +2,13 @@
 // border between near the horizon and the rest of the sky. this also happens in the night time"). Pictures from 40 m over the
 // town (884 sky10) showed the border: the drawn land ends with the chunks' 2 km square, and from there to the horizon nothing
 // was drawn, a dark strip of the sky atmosphere's own ground under the horizon by day and by night. A ring of coarse land from
-// 1.1 km to 80 km round her closes it: its heights and colours the world model's (the ground's colour, the water's), 4 m under the
-// real ground so the chunks always draw over it, fogged as the far land is; made again when she has gone 400 m from where it was
-// made. Only in the wilds (bWild), only with a material (FarLandMaterial, 914's).
+// 0.85 km to 80 km round her closes it: its heights and colours the world model's (the ground's colour, the water's), under the
+// real ground so the chunks draw over it, fogged as the far land is; made again when she has gone 150 m from where it was made.
+// The chunks reach 1.0 to 1.1 km round her: the ring starts at the nearer less the 150 m, so no gap opens behind her before it is made
+// again (PR #39's review: from 1.1 km and every 400 m a strip up to 500 m wide opened behind a rider); where it lies under the
+// chunks its near rings are dense (192 points round, 100 to 200 m apart) and sunk deeper (4 m and 6 % of the way to the next
+// ring), so a valley between two of its points does not stand it over the real ground. Only in the wilds (bWild), only with a
+// material (FarLandMaterial, 914's).
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDWild.h"
 #include "ProceduralMeshComponent.h"
@@ -17,8 +21,10 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDSkyFar, Log, All);
 namespace
 {
 	// (the rings' radii, metres: close near the chunks, wide far off)
-	const double RDFarRadii[] = { 1100.0, 1400.0, 1800.0, 2400.0, 3200.0, 4400.0, 6000.0, 8500.0, 12000.0, 17000.0, 25000.0, 37000.0, 55000.0, 80000.0 };
-	constexpr int32 RDFarSegs = 96;
+	const double RDFarRadii[] = { 850.0, 950.0, 1050.0, 1150.0, 1300.0, 1500.0, 1800.0, 2400.0, 3200.0, 4400.0, 6000.0, 8500.0, 12000.0, 17000.0, 25000.0, 37000.0, 55000.0, 80000.0 };
+	constexpr int32 RDFarSegs = 192;
+	/** past this the ring is beyond every chunk: its plain sink */
+	constexpr double RDFarUnderChunksM = 2000.0;
 }
 
 void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
@@ -50,8 +56,10 @@ void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
 			FRDWSample S; Wild->Sample(X, Y, S, false);
 			const bool bWater = S.WaterKind != 0;
 			const float H = bWater ? FMath::Max(S.H, S.Water) : S.H;
-			// (under the real ground near her, so the chunks draw over it; a little more far off, where it is all fog)
-			V.Add(FVector(X * 100.0, Y * 100.0, Wild->ToZ(H) - FarLandSink));
+			// (under the real ground, so the chunks draw over it; deeper where it lies under the chunks, by the way to the next ring)
+			const double Gap = R + 1 < NR ? RDFarRadii[R + 1] - RDFarRadii[R] : 0.0;
+			const float Sink = FarLandSink + (RDFarRadii[R] < RDFarUnderChunksM ? (float)(Gap * 0.06 * 100.0) : 0.f);
+			V.Add(FVector(X * 100.0, Y * 100.0, Wild->ToZ(H) - Sink));
 			Col.Add(bWater ? FarWaterColor : S.Color);
 			N.Add(FVector::UpVector); UV.Add(FVector2D(X / 100.0, Y / 100.0)); Tg.Add(FProcMeshTangent(1.f, 0.f, 0.f));
 		}
