@@ -27,6 +27,10 @@ Each dungeon keeps its own five tiers of sets of rooms. A level's base (`Dungeon
 
 The game's tier (`GameGlobalTier`) is the deepest one opened in any dungeon of the chain. It sets the town's prices: 1 to 8 over the first five tiers as before, then about 17 % a tier, so 17.5 at tier 10 and 185 at tier 25.
 - **Gold:** a kill and a container pay by the game's tier of where she earned them: x the tier over the first five, then growing as the prices do (5 x the price factor over 8: about 11 at tier 10, 115 at tier 25).
+- **Store:** an item is priced by its kind and its own lowest tier (the same table).
+  - **What is used up** (potions, food, scrolls, repair items, torches) also grows past tier 5 as a kill's gold does (`RDUsedUpScale`: x 2.19 at tier 10, x 23.1 at tier 25), so it costs as many kills as at tier 5. A tier-1 healing potion costs 12 gold at tier 1 and 277 at tier 25.
+  - **No profit from trading:** a stronger potion is never cheaper than a weaker one, and a potion bought before a tier opens sells for less than it cost after (the store's sell share is 0.35 of the price, and the price grows by 1.17 a tier).
+  - **Stock:** the store sells the potions, food, repair items and torches of the tiers opened. It sells the scrolls whose tiers include one of the game's last two (`910` lays them again in every band).
 - **Healer:** prices a point of her hit points and mana down by her growth past tier 5, so a whole heal costs as many kills as before. It also sets the tier she grows by (`GrowthTier`): at least the deepest she has opened anywhere, so a new dungeon never sets her back to tier 1.
 
 ## Strength by tier
@@ -115,6 +119,13 @@ Every map now carries every dungeon's kinds: 88 kinds, weight 0 except on their 
 | Aurorim | never |
 
 ## The tests
+
+The list of 2026-11-10's seventh phase ran the rebalance in every dungeon and city:
+- **`868 tier25`** now reads its expectations from `tier25.json` (each dungeon's tiers, quality, tomes, later abilities), so it runs on every dungeon past the castle. It passed on each: Vel Morrath (`test_p7v.json`), the War Engine (`test_p7w2.json`), the Sewers (`test_p7s.json`), Kethrys Spire (`test_p7k.json`) and Heaven (`test_p7h2.json`; its tiers 24 and 25, its things Celestial).
+- **The castle** keeps its own tiers 1 to 5 (`868 tiers`, `test_p7t.json`).
+- **`888 cities25`** (`-Light`, `test_c25f.json`) checks the six cities' store, horse, blessing and healer at game tiers 1, 5, 7, 8, 10 and 25 ([Brokenspire's seventh part](levels/brokenspire.md#the-list-of-2026-11-10-seventh-part-the-rebalance-in-each-city)).
+- **`868 tier25` on the War Engine again** (`test_p7w3.json`) after PR #44's review renamed its summon's record (`later.Summoner.summon`).
+- **`888 wild25`** (`test_w25p7.json`) again.
 
 `868 tier25` runs on Vel Morrath (`-lv vel_morrath`, `test_t25e.json`).
 - **Tiers:** the level's tiers are the game's 6-10.

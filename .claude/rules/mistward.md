@@ -235,6 +235,11 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
   - A flag beside a saved counter is a second truth that outlives a restart: the later abilities read the game instance's counter only.
   - A value read at every blow is kept for the frame, keyed also by what changes within it (the tiers opened).
   - Numbers that the stages filter by: each stage's own range (`910`'s spells 301 on and 311 on).
+- **PR #44's review (2026-11-10, the list of 2026-11-10's seventh phase)**:
+  - A price that steps with the tier inverts ranks and pays a trade. Pricing each potion at its band copy's tier made a stronger one cheaper than a weaker one between tiers 6 and 9, and paid 28 % to buy at one tier and sell at the next.
+  - What is used up grows smoothly with the game's tier, as a kill's gold (`RDUsedUpScale`). The store's sell share (0.35) against 1.17 a tier then keeps a trade from paying.
+  - Test it by trading (buy, open the next tier, sell) and by rank, not against a copy of the formula.
+  - A healer's price read after the test changed the tiers needs her maxima refreshed (`RefreshMaxima`). A hero switched while tier 25 was held came back with tier 25's hit points.
 - **The castle's stages write the tables `910` builds from**: rerun `910` after any of them (`855`, `857`-`859`, `871`, `872`, `876`, `880`, and the dungeons' `895`, `897`, `907`, `909`).
 
 ## The secondary abilities (`911`, `RD/RDSecondary.cpp`, `SourceArt/balance/secondary.json`, `docs/secondary.md`; the list of 2026-11-08b's sixth phase)
