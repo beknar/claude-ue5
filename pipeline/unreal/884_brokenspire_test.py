@@ -3535,9 +3535,24 @@ def step_forge10():
         res["recipes"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
         shot("forge10", "1280x720"); yield from rwait(1.0)
         c.set_crafting_open(False); yield from rwait(0.3)
-    ovens = [s for s in spots() if s["kind"].lower() == "oven"] or [{"at": o} for o in list(g.get_all_ovens())[:1]]
-    res["ovens"] = len(list(g.get_all_ovens()))
-    step_result("forge10", res.get("forges", 0) >= 1 and "forge" in res.get("says", "") and res.get("f") == "forge" and "Viking Shortsword" in res.get("recipes", []) and res["ovens"] >= 1, **res)
+    # (a town oven bakes: bread from two wheat (PR #40's review: counting the ovens said nothing of their baking))
+    ovens = list(g.get_all_ovens()); res["ovens"] = len(ovens)
+    if ovens:
+        ov = min(ovens, key=lambda o: dist2(o, G["pawn"].get_actor_location())); osay = ""
+        for r_ in (140, 110, 170):
+            for a_ in range(0, 360, 45):
+                p_ = V(ov.x + math.cos(math.radians(a_)) * r_, ov.y + math.sin(math.radians(a_)) * r_, 0)
+                put(p_, yaw=math.degrees(math.atan2(ov.y - p_.y, ov.x - p_.x)), z=0.0); yield from rwait(0.15)
+                osay = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+                if "oven" in osay: break
+            if "oven" in osay: break
+        res["oven_says"] = osay
+        c.add_item("Wheat", 2); b0 = c.get_item_count("Bread")
+        res["oven_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.4)
+        res["baked"] = c.craft("Bread"); res["bread"] = [b0, c.get_item_count("Bread")]
+        c.set_crafting_open(False); yield from rwait(0.3)
+    step_result("forge10", res.get("forges", 0) >= 1 and "forge" in res.get("says", "") and res.get("f") == "forge" and "Viking Shortsword" in res.get("recipes", [])
+                and res["ovens"] >= 1 and res.get("oven_f") == "oven" and res.get("bread", [0, 0])[1] == res.get("bread", [0, 0])[0] + 1, **res)
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
     indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every

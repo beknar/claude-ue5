@@ -1600,6 +1600,8 @@ public:
 	void NoteLooted(FName Item);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FName> GetLootedItems() const;
 	FString ForgeRefusal() const;
+	/** heroes by their titles in a sentence ("the Mage and the Martial Artist"): the potions' and the forge's refusals */
+	FString HeroesInWords(const TArray<FName>& Names) const;
 	/** "everyone should be able to craft food items from food components at an oven": the dungeons' kitchens' bread ovens are ovens too
 	 *  (bDungeonOvens: their recipes the town's, 914's) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bDungeonOvens = false;

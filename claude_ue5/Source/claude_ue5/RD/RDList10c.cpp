@@ -48,19 +48,24 @@ TArray<FName> ARDDungeonGenerator::GetLootedItems() const
 }
 
 // ================================================================================================ the forge and the dungeons' ovens
-FString ARDDungeonGenerator::ForgeRefusal() const
+FString ARDDungeonGenerator::HeroesInWords(const TArray<FName>& Names) const
 {
-	if (ForgeHeroes.Num() == 0 || ForgeHeroes.Contains(CurrentHero)) return FString();
-	// (who works it, by the heroes' titles in words, as the potions' refusal says it)
+	// (the heroes by their titles, as words in a sentence: "the Mage and the Martial Artist"; the cards' titles are in capitals)
 	TArray<FString> Who;
-	for (const FName& Hb : ForgeHeroes)
+	for (const FName& Hb : Names)
 	{
 		const FRDHeroDef* H = Heroes.FindByPredicate([&Hb](const FRDHeroDef& D) { return D.Name == Hb; });
 		FString Ti = H && !H->Title.IsEmpty() ? H->Title : Hb.ToString();
 		if (Ti == Ti.ToUpper()) { Ti = Ti.ToLower(); for (int32 C = 0; C < Ti.Len(); ++C) if (C == 0 || Ti[C - 1] == TEXT(' ')) Ti[C] = FChar::ToUpper(Ti[C]); }
 		Who.Add(TEXT("the ") + Ti);
 	}
-	return FString::Printf(TEXT("Only %s works the forge"), *FString::Join(Who, TEXT(" and ")));
+	return Who.Num() <= 1 ? FString::Join(Who, TEXT("")) : FString::Join(TArrayView<const FString>(Who.GetData(), Who.Num() - 1), TEXT(", ")) + TEXT(" and ") + Who.Last();
+}
+
+FString ARDDungeonGenerator::ForgeRefusal() const
+{
+	if (ForgeHeroes.Num() == 0 || ForgeHeroes.Contains(CurrentHero)) return FString();
+	return FString::Printf(TEXT("Only %s works the forge"), *HeroesInWords(ForgeHeroes));
 }
 
 bool ARDDungeonGenerator::FindNearestForge(const FVector& From, float MaxDistance, FVector& At) const
@@ -119,8 +124,10 @@ FString ARDDungeonGenerator::StationDescribe(const FVector& From, float DoorD) c
 {
 	if (Recipes.Num() == 0) return FString();
 	const float Lim = FMath::Min(DoorD, AnvilReach);
-	FVector An, At; const float Ad = FindNearestAnvil(From, Lim, An) ? FVector::Dist2D(An, From) : 1e9f;
-	if (bForge && FindNearestForge(From, Lim, At) && FVector::Dist2D(At, From) < Ad) return ForgeRefusal().IsEmpty() ? FString(TEXT("use the forge")) : FString(TEXT("the forge (the Warrior's)"));
+	FVector An, At; const bool bAnvil = FindNearestAnvil(From, Lim, An); const float Ad = bAnvil ? FVector::Dist2D(An, From) : 1e9f;
+	// (a hero who does not work the forge, with an anvil in reach: the anvil is what F does (PR #40's review))
+	if (bForge && FindNearestForge(From, Lim, At) && FVector::Dist2D(At, From) < Ad && (ForgeRefusal().IsEmpty() || !bAnvil))
+		return ForgeRefusal().IsEmpty() ? FString(TEXT("use the forge")) : FString::Printf(TEXT("the forge (only %s works it)"), *HeroesInWords(ForgeHeroes));
 	// (the town's ovens are the town's things: TownThingDescribe)
 	if (bDungeonOvens && !bTown && FindNearestOven(From, Lim, At) && FVector::Dist2D(At, From) < Ad) return TEXT("bake at the oven");
 	return FString();
@@ -130,8 +137,8 @@ FString ARDDungeonGenerator::StationInteract(const FVector& From, float DoorD)
 {
 	if (!PlayerCombat || Recipes.Num() == 0) return FString();
 	const float Lim = FMath::Min(DoorD, AnvilReach);
-	FVector An, At; const float Ad = FindNearestAnvil(From, Lim, An) ? FVector::Dist2D(An, From) : 1e9f;
-	if (bForge && FindNearestForge(From, Lim, At) && FVector::Dist2D(At, From) < Ad)
+	FVector An, At; const bool bAnvil = FindNearestAnvil(From, Lim, An); const float Ad = bAnvil ? FVector::Dist2D(An, From) : 1e9f;
+	if (bForge && FindNearestForge(From, Lim, At) && FVector::Dist2D(At, From) < Ad && (ForgeRefusal().IsEmpty() || !bAnvil))
 	{
 		if (const FString Fr = ForgeRefusal(); !Fr.IsEmpty()) { PlayerCombat->ShowMessage(Fr); return TEXT("forge refused"); }
 		PlayerCombat->SetCraftStation(TEXT("Forge"));
@@ -235,6 +242,8 @@ void ARDDungeonGenerator::AnkhDropFor(ARDMonster* Monster)
 {
 	const FName Ankh = GetAnkhItem();
 	if (Ankh.IsNone() || !Monster || !PlayerCombat || Monster->IsAlly() || AnkhDropChance <= 0.f) return;
+	// (a dungeon's: the wilds' and a town's tier is not the sets' ring round the start (PR #40's review))
+	if (bWild || bTown) return;
 	// (of the game's tier 2: the castle's tier 2, or a dungeon whose second band is tier 2)
 	if (GlobalTier(TierOf(WorldToSection(Monster->GetActorLocation()))) != 2) return;
 	if (PlayerCombat->GetItemCount(Ankh) > 0) return;

@@ -15,7 +15,14 @@
    "recipes": [
     "Viking Shortsword"
    ],
-   "ovens": 28
+   "ovens": 21,
+   "oven_says": "bake at the oven",
+   "oven_f": "oven",
+   "baked": true,
+   "bread": [
+    0,
+    1
+   ]
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",

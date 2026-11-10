@@ -32,8 +32,10 @@
    "chest_m": 5.1,
    "caches_shown": 2,
    "quickable": true,
+   "slot_raised": true,
+   "slot_lowered": true,
    "drop": {
-    "tier2_monsters": 74,
+    "tier2_monsters": 67,
     "drops": 1
    },
    "parts_ok": {

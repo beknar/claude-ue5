@@ -27,16 +27,22 @@
     2
    ],
    "steel_left": 1,
-   "mage_says": "the forge (the Warrior's)",
+   "mage_says": "the forge (only the Warrior works it)",
    "mage_f": "forge refused",
    "mage_message": null,
    "mage_crafting_open": false,
+   "mage_between": {
+    "anvil_forge_m": 4.2,
+    "says": "use the anvil",
+    "f": "anvil",
+    "station": "None"
+   },
    "parts_ok": {
     "forge": true
    }
   }
  ],
- "windows_hidden": "Message Log, Content Browser",
+ "windows_hidden": "Content Browser, Message Log",
  "shots": [
   "mw_l10m_l10c_forge.png"
  ],

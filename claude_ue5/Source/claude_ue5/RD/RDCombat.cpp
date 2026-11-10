@@ -970,7 +970,13 @@ bool URDCombatComponent::UseItem(FName Name)
 	// (the list of 2026-11-10: the ankh (kind Light) is held as the torch is; one held while the other is used is changed for it)
 	if (It.Kind == ERDItemKind::Torch || It.Kind == ERDItemKind::Light)
 	{
-		if (bTorchHeld && TorchItem != Name) { TorchItem = Name; return HoldTorch(true); }
+		if (bTorchHeld && TorchItem != Name)
+		{
+			// (refused (no fit for her hero), the one she holds stays hers (PR #40's review: the ankh's name over the torch in her hand))
+			const FName Was = TorchItem; TorchItem = Name;
+			if (HoldTorch(true)) return true;
+			TorchItem = Was; UpdateLeftHand(); return false;
+		}
 		TorchItem = Name; return HoldTorch(!bTorchHeld);
 	}
 	if (It.Kind == ERDItemKind::Teleport)

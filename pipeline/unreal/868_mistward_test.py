@@ -4508,6 +4508,14 @@ def step_list10c(parts=("forge", "oven", "ankh", "block")):
             res["mage_message"] = str(c.get_message()) if hasattr(c, "get_message") else None
             res["mage_crafting_open"] = c.is_crafting_open()
             c.set_crafting_open(False)
+            # (the Mage between the forge and the anvil: the anvil is what F does (PR #40's review: the forge's refusal took it))
+            ans = list(g.get_all_anvils()); an = min(ans, key=lambda a_: dist2(a_, fg)) if ans else None
+            if an:
+                d_ = V(fg.x - an.x, fg.y - an.y, 0); dl = math.hypot(d_.x, d_.y) or 1.0
+                put(V(an.x + d_.x / dl * 140, an.y + d_.y / dl * 140, an.z), math.degrees(math.atan2(-d_.y, -d_.x))); yield from rwait(0.3)
+                res["mage_between"] = {"anvil_forge_m": round(dl / 100, 1), "says": str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0)),
+                                       "f": str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0))}
+                yield from rwait(0.3); res["mage_between"]["station"] = str(c.get_craft_station()); c.set_crafting_open(False)
             c = yield from restart("Warrior"); quiet(True)
     # ---- a kitchen's oven (the start set's or tier 2's)
     if "oven" in parts:
@@ -4544,6 +4552,12 @@ def step_list10c(parts=("forge", "oven", "ankh", "block")):
             shot("l10c_ankh", "1280x720"); yield from rwait(1.0)
             # (a trap not seen: her 7 m from it; the chests near her marked)
             tl = [t for t in trap_lines() if t["state"] == 0 and not t["seen"]]
+            # (none set round her: tier 2's sets have more (PR #40's review: with none the reveal passed unmeasured))
+            if not tl:
+                if not g.is_tier_open(2): g.debug_open_tiers(2, False); yield from rwait(0.3)
+                for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
+                    if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+                tl = [t for t in trap_lines() if t["state"] == 0 and not t["seen"]]
             res["traps_unseen"] = len(tl)
             if tl:
                 t = tl[0]; S = g.get_section(t["s"]); rt = S.room_at(t["at"])
@@ -4562,9 +4576,13 @@ def step_list10c(parts=("forge", "oven", "ankh", "block")):
                 put(tiles_[0] if tiles_ else V(best.x + 400, best.y, best.z), 0.0); yield from rwait(0.8)
                 res["chest_m"] = round(dist2(G["pawn"].get_actor_location(), best) / 100, 1)
             res["caches_shown"] = g.ankh_caches_shown
-            # (the quick bar: the ankh put on slot 6 by its entry, used by the slot)
+            # (the quick bar: the ankh put on slot 6 by its entry, raised and lowered by its key (6))
             c.use_item(ank); yield from rwait(0.2)
-            res["quickable"] = c.assign_quick_entry(5, "#" + ank) if hasattr(c, "assign_quick_entry") else None
+            res["quickable"] = c.assign_quick_entry(5, "#" + ank)
+            g.slate_key(key("Six"), True); yield from rwait(0.15); g.slate_key(key("Six"), False); yield from rwait(0.4)
+            res["slot_raised"] = c.is_ankh_held()
+            g.slate_key(key("Six"), True); yield from rwait(0.15); g.slate_key(key("Six"), False); yield from rwait(0.4)
+            res["slot_lowered"] = not c.is_ankh_held()
             # (a tier-2 monster's drop: the chance at 1, her ankh put away first)
             c.remove_item(ank, 1)
             g.set_editor_property("ankh_drop_chance", 1.0)
@@ -4612,11 +4630,15 @@ def step_list10c(parts=("forge", "oven", "ankh", "block")):
     if "forge" in parts:
         oks["forge"] = (res.get("forges", 0) >= 1 and "forge" in res.get("forge_says", "") and res.get("forge_f") == "forge" and not res.get("recipes_before")
                         and res.get("looted_after") and any("Viking Shortsword" in l for l in res.get("recipes_after", [])) and bool(res.get("made")) and res["swords"][1] == res["swords"][0] + 1
-                        and res.get("mage_f") == "forge refused" and not res.get("mage_crafting_open"))
+                        and res.get("mage_f") == "forge refused" and not res.get("mage_crafting_open")
+                        and (res.get("mage_between") or {}).get("f") == "anvil")
     if "oven" in parts:
         oks["oven"] = res.get("ovens", 0) >= 1 and res.get("oven_f") == "oven" and "Bread" in res.get("oven_recipes", []) and res.get("bread", [0, 0])[1] == res.get("bread", [0, 0])[0] + 1
     if "ankh" in parts:
-        oks["ankh"] = (bool(res.get("held")) and bool(res.get("light")) and (res.get("trap") is None or bool(res["trap"]["seen"])) and res.get("caches_shown", 0) >= 1
+        lc = (res.get("light") or {}).get("colour", [255, 0, 0])
+        oks["ankh"] = (bool(res.get("held")) and bool(res.get("light")) and lc[2] >= lc[0]          # (its pale light, not the torch's orange)
+                       and res.get("trap") is not None and bool(res["trap"]["seen"]) and res.get("caches_shown", 0) >= 1
+                       and bool(res.get("quickable")) and bool(res.get("slot_raised")) and bool(res.get("slot_lowered"))
                        and res.get("drop", {}).get("drops", 0) >= 1)
     if "block" in parts:
         fa = res["feet_apart_cm"]
