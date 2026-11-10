@@ -3723,12 +3723,12 @@ def step_animals10():
     TJ = json.load(open(TRIPO_J, encoding="utf-8"))
     acts = list(GS.get_all_actors_of_class(G["w"], unreal.RDTownAnimal))
     def info(a):
-        m = a.get_component_by_class(unreal.SkeletalMeshComponent); sk = m.get_editor_property("skeletal_mesh_asset")
+        m = a.get_component_by_class(unreal.SkeletalMeshComponent); sk = m.get_editor_property("skeletal_mesh_asset") if m else None
         mats = [str(x.get_name()) for x in m.get_materials()]
         return m, (sk.get_name() if sk else None), mats
     kinds = {}
     for a in acts:
-        _m, nm, _mt = info(a); kinds.setdefault(nm, []).append(a)
+        _m, nm, _mt = info(a); kinds.setdefault(nm or "(no mesh)", []).append(a)
     res["kinds"] = {k: len(v) for k, v in kinds.items()}
     p0 = {a.get_name(): a.get_actor_location() for a in acts}
     out = {}; shots_ = []
@@ -3741,31 +3741,32 @@ def step_animals10():
         r = {"mesh": nm, "materials": mats, "plays": abs(m.get_position() - q0) > 0.01}
         kind = nm.replace("SK_Tripo_", "").replace("SK_Farm_", "").split("_")[0]
         if kind in TJ:
-            feet = [b[-1] for b in TJ[kind]["legs"].values()]
+            feet = [b[-1] for b in TJ[kind]["legs"].values()]          # (the chain's last bone is the planted one)
+            rest = [TJ[kind].get("foot_head_z", {}).get(k_) for k_ in TJ[kind]["legs"]]
             hit = unreal.SystemLibrary.line_trace_single(G["w"], V(L.x, L.y, L.z + 300), V(L.x, L.y, L.z - 400), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, list(acts) + [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
             gz = hit.to_tuple()[4].z if hit and hit.to_tuple()[0] else None
             # (a planted bone's tail is its sole's point: its head plus its rest length down)
             lows = []
             for b in feet:
                 tl = m.get_socket_location(b); lows.append(round(tl.z - gz, 1) if gz is not None else None)
-            r["feet_head_over_ground_cm"] = lows
+            r["feet_head_over_ground_cm"] = lows; r["feet_head_rest_cm"] = rest
+            # (each planted bone's head where it stands at rest over its sole: its feet on the ground, within 4 cm (PR #42's review))
+            r["feet_off_cm"] = max((abs(l_ - r_) for l_, r_ in zip(lows, rest) if l_ is not None and r_ is not None), default=None)
         sn = f"animals10_{kind.lower()}"; shot(sn, "1280x720"); shots_.append(sn); yield from rwait(1.2)
         out[nm] = r
     res["each"] = out; res["shots"] = shots_
     yield from rwait(25.0)
     moved = {}
     for nm, al in kinds.items():
-        moved[nm] = sum(1 for a in al if IsValid(a) and dist2(a.get_actor_location(), p0[a.get_name()]) > 30)
+        moved[nm] = sum(1 for a in al if unreal.SystemLibrary.is_valid(a) and dist2(a.get_actor_location(), p0[a.get_name()]) > 30)
     res["moved_of"] = {nm: [moved[nm], len(kinds[nm])] for nm in kinds}
     quiet(False)
     want = {"SK_Tripo_Chicken", "SK_Tripo_Pig", "SK_Tripo_Goat", "SK_Tripo_Rabbit"}
     ok = want <= set(kinds) and not [k for k in kinds if k.startswith("SK_Farm_") and "Cow" not in k] \
         and all(v["plays"] for v in out.values()) and all(any("M_Tripo" in x for x in v["materials"]) for k, v in out.items() if k.startswith("SK_Tripo")) \
-        and all(m_ > 0 for m_, n_ in res["moved_of"].values())
+        and "(no mesh)" not in kinds and all(m_ >= 0.5 * n_ for m_, n_ in res["moved_of"].values()) \
+        and all(v.get("feet_off_cm") is not None and v["feet_off_cm"] <= 4.0 for k, v in out.items() if k.startswith("SK_Tripo"))
     step_result("animals10", ok, **res)
-def IsValid(a):
-    try: return a is not None and a.is_valid() if hasattr(a, "is_valid") else a is not None
-    except Exception: return False
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
     indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every

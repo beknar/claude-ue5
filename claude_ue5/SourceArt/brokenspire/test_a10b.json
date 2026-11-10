@@ -1,5 +1,5 @@
 {
- "tag": "t5a",
+ "tag": "a10b",
  "plan": [
   "animals10"
  ],
@@ -9,12 +9,11 @@
    "step": "animals10",
    "ok": true,
    "kinds": {
-    "SK_Tripo_Chicken": 24,
-    "SK_Tripo_Pig": 8,
-    "SK_Tripo_Goat": 11,
+    "SK_Tripo_Chicken": 30,
+    "SK_Tripo_Pig": 9,
+    "SK_Tripo_Goat": 12,
     "SK_Farm_Cow": 5,
-    "SK_Tripo_Rabbit": 10,
-    "SK_Farm_Cow_B": 4
+    "SK_Tripo_Rabbit": 10
    },
    "each": {
     "SK_Farm_Cow": {
@@ -32,21 +31,6 @@
      ],
      "plays": true
     },
-    "SK_Farm_Cow_B": {
-     "mesh": "SK_Farm_Cow_B",
-     "materials": [
-      "M_Farm_Cow_B_coat",
-      "M_Farm_Cow_B_white",
-      "M_Farm_Cow_B_udder",
-      "M_Farm_Cow_B_muzzle",
-      "M_Farm_Cow_B_nostril",
-      "M_Farm_Cow_B_hoof",
-      "M_Farm_Cow_B_horn",
-      "M_Farm_Cow_B_tuft",
-      "M_Farm_Cow_B_eye"
-     ],
-     "plays": true
-    },
     "SK_Tripo_Chicken": {
      "mesh": "SK_Tripo_Chicken",
      "materials": [
@@ -54,9 +38,14 @@
      ],
      "plays": true,
      "feet_head_over_ground_cm": [
-      0.9,
-      1.8
-     ]
+      0.8,
+      2.0
+     ],
+     "feet_head_rest_cm": [
+      1.0,
+      1.0
+     ],
+     "feet_off_cm": 1.0
     },
     "SK_Tripo_Goat": {
      "mesh": "SK_Tripo_Goat",
@@ -65,11 +54,18 @@
      ],
      "plays": true,
      "feet_head_over_ground_cm": [
-      9.6,
-      4.8,
-      4.9,
-      6.0
-     ]
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_head_rest_cm": [
+      5.0,
+      5.0,
+      5.0,
+      5.0
+     ],
+     "feet_off_cm": 0.0
     },
     "SK_Tripo_Pig": {
      "mesh": "SK_Tripo_Pig",
@@ -82,7 +78,14 @@
       4.0,
       4.0,
       4.0
-     ]
+     ],
+     "feet_head_rest_cm": [
+      4.0,
+      4.0,
+      4.0,
+      4.0
+     ],
+     "feet_off_cm": 0.0
     },
     "SK_Tripo_Rabbit": {
      "mesh": "SK_Tripo_Rabbit",
@@ -91,15 +94,21 @@
      ],
      "plays": true,
      "feet_head_over_ground_cm": [
+      0.6,
+      2.9,
+      0.6,
+      3.0
+     ],
+     "feet_head_rest_cm": [
       1.2,
-      3.6,
+      2.0,
       1.2,
-      4.4
-     ]
+      2.0
+     ],
+     "feet_off_cm": 1.0
     }
    },
    "shots": [
-    "animals10_cow",
     "animals10_cow",
     "animals10_chicken",
     "animals10_goat",
@@ -108,40 +117,35 @@
    ],
    "moved_of": {
     "SK_Tripo_Chicken": [
-     24,
-     24
+     29,
+     30
     ],
     "SK_Tripo_Pig": [
-     8,
-     8
+     7,
+     9
     ],
     "SK_Tripo_Goat": [
-     11,
-     11
+     12,
+     12
     ],
     "SK_Farm_Cow": [
      4,
      5
     ],
     "SK_Tripo_Rabbit": [
-     9,
+     10,
      10
-    ],
-    "SK_Farm_Cow_B": [
-     3,
-     4
     ]
    }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_t5a_animals10_cow.png",
-  "bs_t5a_animals10_cow.png",
-  "bs_t5a_animals10_chicken.png",
-  "bs_t5a_animals10_goat.png",
-  "bs_t5a_animals10_pig.png",
-  "bs_t5a_animals10_rabbit.png"
+  "bs_a10b_animals10_cow.png",
+  "bs_a10b_animals10_chicken.png",
+  "bs_a10b_animals10_goat.png",
+  "bs_a10b_animals10_pig.png",
+  "bs_a10b_animals10_rabbit.png"
  ],
  "error": null,
  "windows_shown_again": 3

@@ -47,6 +47,9 @@ def RDTweak(key, A):
     """the spec's clip settings changed for the Tripo mesh, where its skin creased (measured in the sheets): the rabbit's round haunch
     folded at the back as its spine tipped 14 degrees to graze; the horse's flank creased under a hind swing folded 55 degrees"""
     if key == "rabbit": A["graze"]["pre"] = {"spine_01": 7}
+    # (the chicken's neck fitted to the mesh is shorter than the spec's: with the body tipped 28 degrees its beak stopped 3.5 cm off
+    # the ground at the neck's furthest turn)
+    if key == "chicken": A["graze"]["pre"] = {"pelvis": 40, "spine_01": 12}
     if key == "horse":
         A["run"]["gait"]["rear"].update(fold=35, tilt=35, height=11); A["run"]["gait"]["front"].update(fold=48, tilt=42, height=14)                                   # (a tail of its own in the mesh: found and its bones laid along it)
 NO_SKIN = ("root", "saddle")
@@ -171,6 +174,11 @@ def fit_bones(S, V, spec_lo, spec_hi):
                 q = base + off
                 pts[j].x += (q.x - pts[j].x) * kb; pts[j].z += (q.z - pts[j].z) * kb
         for j, b in enumerate(chain): B[b][1] = pts[j]; B[b][2] = pts[j + 1]
+    # chain joints shared: a bone's head is its parent's tail (one point, the same object) where they were one point in the spec,
+    # before the fits below move them (PR #42's review: done after them, it put the fitted neck's root back on the spine's mapped tail)
+    sp = {n: (h, t) for n, _p, h, t in S.bones}
+    for n, par, h, t in S.bones:
+        if par and (Vector(h) - Vector(sp[par][1])).length < 1e-3: B[n][1] = B[par][2]
     # (the neck's and head's joints to the middle of the mesh across them: a slab of the mesh at each joint's x)
     for n in ("neck_01", "neck_02", "head"):
         if n not in B: continue
@@ -196,13 +204,11 @@ def fit_bones(S, V, spec_lo, spec_hi):
                 band = (d >= qs[k_ - 1] + 0.75 * (qs[k_] - qs[k_ - 1])) & (d <= qs[k_] + 1e-6)
                 m = P[band].mean(0) if band.any() else P[np.argmax(d)]
                 pts.append(Vector(tuple(m)))
-            for k_, b in enumerate(tails): B[b][1] = pts[k_]; B[b][2] = pts[k_ + 1]
+            for k_, b in enumerate(tails):
+                B[b][1][:] = pts[k_]
+                B[b][2][:] = pts[k_ + 1]
             report["tail"] = {"vertices": int(cand.sum()), "root": [round(x, 1) for x in rp], "end": [round(x, 1) for x in pts[-1]]}
             S.tail_mask = cand
-    # chain joints shared: a bone's head at its parent's tail where they were one point in the spec
-    sp = {n: (h, t) for n, _p, h, t in S.bones}
-    for n, par, h, t in S.bones:
-        if par and (Vector(h) - Vector(sp[par][1])).length < 1e-3: B[n][1] = B[par][2].copy()
     if "saddle" in B:                                              # (the horse's seat: the top of its back there)
         p = B["saddle"][1]
         sel = np.hypot(V[:, 0] - p.x, V[:, 1]) < 0.06 * H
@@ -332,7 +338,10 @@ def export(S, arm, ob, clips, sc):
 # ---------------------------------------------------------------- the run
 def main():
     os.makedirs(OUT, exist_ok=True); os.makedirs(PREV, exist_ok=True)
-    report = {"fps": FA.FPS, "units": "cm", "faces": "+X"}
+    # (a run of some animals keeps the others' records (PR #42's review: 915 builds its kinds from this file))
+    jp = os.path.join(OUT, "tripo_animals.json")
+    report = json.load(open(jp, encoding="utf-8")) if os.path.exists(jp) else {}
+    report.update({"fps": FA.FPS, "units": "cm", "faces": "+X"})
     for key, glb in KINDS.items():
         if ONLY and key not in ONLY: continue
         bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -381,6 +390,8 @@ def main():
                            "back_height": round(float(back[:, 2].max()), 1) if len(back) else None},
                "triangles": int(len(G["T"])), "vertices": int(len(V)), "bones": G["names"],
                "legs": {lg["id"]: [b for b in lg["bones"] if b] for lg in S.legs},
+               # (each planted bone's head over the ground at rest: its sole is on it, the test reads the head in play)
+               "foot_head_z": {lg["id"]: round(float(S.bone_seg(lg["bones"][3])[0].z), 2) for lg in S.legs},
                "rest_pose_rebuilt_err_cm": round(rest_err, 5), "weights": FA.weight_check(S, G),
                "clips": {k: {**cinfo[k], **meas[k]} for k in clips}}
         rec["walk_speed_cm_s"] = meas["Walk"]["walk_speed_cm_s"]; rec["walk_cycle_s"] = S.anim["walk"]["T"]

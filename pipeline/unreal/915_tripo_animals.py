@@ -24,7 +24,9 @@ def fbx_task(path, dest):
     o = unreal.FbxImportUI()
     o.set_editor_property("import_mesh", True); o.set_editor_property("import_as_skeletal", True)
     o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_SKELETAL_MESH)
-    o.set_editor_property("import_animations", True); o.set_editor_property("import_materials", True); o.set_editor_property("import_textures", True)
+    # (imported over an existing skeleton its bones' rest places are taken anew: tripo_animals.py's fit moves them (860's lesson))
+    o.skeletal_mesh_import_data.set_editor_property("update_skeleton_reference_pose", True)
+    o.set_editor_property("import_animations", True); o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)          # (the material is made from the PNG: material_for)
     t = unreal.AssetImportTask(); t.filename = path; t.destination_path = dest
     t.automated = True; t.replace_existing = True; t.save = True; t.options = o
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
@@ -40,6 +42,7 @@ def material_for(name, d):
     t.automated = True; t.replace_existing = True; t.save = True
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
     tex = unreal.load_asset(f"{d}/T_Tripo_{name}")
+    if not tex: return None, "the texture did not import"
     mp = f"{d}/M_Tripo_{name}"
     if eal.does_asset_exist(mp): eal.delete_asset(mp)
     m = unreal.AssetToolsHelpers.get_asset_tools().create_asset(f"M_Tripo_{name}", d, unreal.Material, unreal.MaterialFactoryNew())
@@ -64,11 +67,8 @@ def assets_of(name):
 if "import" in STEPS:
     for name in KINDS:
         d = f"{DT}/{name}"
-        # (its clips first, then its mesh and skeleton: deleted the other way round the clips lost their skeleton (886's lesson))
-        if eal.does_directory_exist(d):
-            ps = [p.split(".")[0] for p in eal.list_assets(d, recursive=True)]
-            order = lambda p: 0 if isinstance(unreal.load_asset(p), unreal.AnimSequence) else 1 if isinstance(unreal.load_asset(p), unreal.SkeletalMesh) else 2
-            for p in sorted(ps, key=order): eal.delete_asset(p)
+        # (imported over what is there: the level's pens, hare and horse keep pointing at the same assets (PR #42's review: deleted
+        # first, a run of this step alone left the level's references to nothing))
         fbx_task(os.path.join(SA, J[name]["fbx"]), d)
         mesh, seqs, a = assets_of(name)
         if not mesh: REPORT.append(f"import {name}: NO MESH"); continue
@@ -91,7 +91,9 @@ if "level" in STEPS:
     g = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
     # the pens' animals: the kinds Tripo made replaced (their Blender colourings with them), the cow kept
     old = list(g.get_editor_property("town_animals"))
-    kept = [t for t in old if str(t.name).split("_")[0] not in KINDS]
+    # (the cow's first colouring alone: the pens take the list's kinds in turn, and with its second the cow had a third of them
+    # (PR #42's review); before, two of eleven)
+    kept = [t for t in old if str(t.name).split("_")[0] not in KINDS and "_" not in str(t.name)]
     made = []
     for name in KINDS:
         if name == "Horse": continue
@@ -134,7 +136,9 @@ if "level" in STEPS:
             g.set_editor_property("horse_def", d)
             REPORT.append(f"horse: {mesh.get_name()}, clips {sorted(seqs)}, walk {J['Horse']['walk_speed_cm_s']} / run {J['Horse'].get('run_speed_cm_s')} cm/s, saddle {J['Horse']['fit'].get('saddle_top_cm')} cm")
     g.modify(); les.save_current_level()
-    del g
+    del g, old, kept, made, new, rab, fa
 print("TRIPO " + " | ".join(REPORT))
+for _n in ("mesh", "seqs", "a", "mat", "tex", "d", "F", "_a", "s", "ad", "ms"):
+    globals().pop(_n, None)
 import gc
 gc.collect()
