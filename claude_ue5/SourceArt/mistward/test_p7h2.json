@@ -1,0 +1,235 @@
+{
+ "tag": "p7h2",
+ "plan": [
+  "tier25"
+ ],
+ "level": "heaven_fortress",
+ "steps": [
+  {
+   "step": "tier25",
+   "ok": true,
+   "mons_ok": true,
+   "loot_ok": true,
+   "later_ok": true,
+   "key": "heaven",
+   "base": 24,
+   "cap": 25,
+   "global": [
+    25,
+    25,
+    25,
+    25,
+    25
+   ],
+   "growth_tier": 25,
+   "chain_index": 5,
+   "expect": {
+    "quality": "Celestial",
+    "mine": {
+     "MartialArtist": "Heaven's Gale",
+     "Rogue": "Death's Kiss",
+     "Summoner": "Summon Tier 10"
+    },
+    "next": {
+     "MartialArtist": null,
+     "Rogue": null,
+     "Summoner": null
+    },
+    "summon_kind": "Kratos_Commander"
+   },
+   "tables": 25,
+   "monsters": {
+    "count": 19,
+    "count_t1": 19,
+    "same_again": true,
+    "want_h": 65.595,
+    "want_d": 27.399,
+    "off": [],
+    "ratios": [
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3280.0,
+       50.0
+      ],
+      "d": [
+       308.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3280.0,
+       50.0
+      ],
+      "d": [
+       308.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3280.0,
+       50.0
+      ],
+      "d": [
+       308.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3280.0,
+       50.0
+      ],
+      "d": [
+       308.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3280.0,
+       50.0
+      ],
+      "d": [
+       308.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Kratos_Trooper",
+      "tier": 1,
+      "h": [
+       3280.0,
+       50.0
+      ],
+      "d": [
+       308.0,
+       11.0
+      ],
+      "ok": true
+     }
+    ]
+   },
+   "hero_hp": {
+    "here": 1350.0,
+    "as_tier1": 140.0
+   },
+   "loot": {
+    "0,0": {
+     "tier": 1,
+     "game_tier": 25,
+     "things": 16579,
+     "off_tier": [],
+     "forced": [
+      "Bronze Ingot",
+      "Celestial Broddi's Shield",
+      "Celestial Costalmed’s Armour",
+      "Celestial Crusader Shield",
+      "Celestial Dexterity Ring 10",
+      "Celestial Dexterity Ring 9",
+      "Celestial Dwarf Crossbow",
+      "Celestial Epic Plate (Female)",
+      "Celestial Epic Plate (Male)",
+      "Celestial HP Potency Ring 10",
+      "Celestial HP Potency Ring 9",
+      "Celestial Magic Potency Ring 10"
+     ],
+     "forced_off": [],
+     "fine": 5866,
+     "quality": "Celestial",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Meteor Storm": 26
+     },
+     "slot_want": 26
+    },
+    "1,0": {
+     "tier": 2,
+     "game_tier": 25,
+     "things": 16166,
+     "off_tier": [],
+     "forced": [],
+     "forced_off": [],
+     "fine": 5634,
+     "quality": "Celestial",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Null Sanctum": 27
+     },
+     "slot_want": 27
+    }
+   },
+   "tomes_seen": 2,
+   "later": {
+    "gold": {
+     "gained": 4759,
+     "game_tier": 25,
+     "want_min": 4621
+    },
+    "MartialArtist": {
+     "set4": true,
+     "boss": "Nasty",
+     "killed": 1,
+     "new": [
+      "Heaven's Gale",
+      "Smashing Strike",
+      "Roundhouse Kick"
+     ],
+     "message": "A new ability: Heaven's Gale"
+    },
+    "Rogue": {
+     "weapons": [
+      "Daggers",
+      "Crossbow",
+      "Death's Kiss"
+     ]
+    },
+    "Summoner": {
+     "weapons": [
+      "Fire",
+      "Dark Fire",
+      "Summon Tier 1",
+      "Summon Tier 10"
+     ],
+     "summon6": {
+      "started": true,
+      "mana": 236.0,
+      "growth_tier": 25,
+      "allies": [
+       {
+        "kind": "Kratos_Commander",
+        "hp": 3936,
+        "damage": 370.0,
+        "tier": 25
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_p7h2_tier25_golem.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

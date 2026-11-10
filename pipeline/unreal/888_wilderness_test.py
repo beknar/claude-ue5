@@ -1697,6 +1697,114 @@ def step_travellers10():
         and res["night"] and res["night"]["camped"] and res["night"]["bits"] >= 2 and any("Sit" in x for x in res.get("sitting", [])) and res["morning"] and not res["morning"]["camped"]
     step_result("travellers10", ok, **res)
 
+def step_cities25():
+    """the list of 2026-11-10's seventh phase ("test the re-balanced changes in each city and dungeon"): in each of the six cities, the
+    town loaded round her, the game's tier set to 1, 10 and 25 (the dungeons' tiers opened, as saved: the castle's, Vel Morrath's,
+    Heaven's): its store holds the potions, food, repair and torches of the tiers opened (more of them as the tier rises, none of a
+    tier past it), each priced by its tier in the game's band (910 lays the potions, food and scrolls again in each band of five
+    tiers under one name: their tier t + 5k nearest the game's; its kind's base x the price table: 8 x 1.17^(tier - 5) past
+    tier 5), so a healing potion costs 17.5 times as much at tier 10 and 185 at 25, as the gold a kill pays grows; the horse and
+    the temple's blessing grow by the table (x 17.5 at tier 10, x 185 at 25); the healer's price for half her hit points recorded"""
+    g = G["gen"]; res = {"cities": {}}; quiet(True)
+    yield from wait_ready(90)
+    gi = G["gi"] if G.get("gi") else GS.get_game_instance(G["w"])
+    chain = [str(l).split("|")[0] for l in g.get_editor_property("dungeon_chain")]
+    res["chain"] = chain
+    BASE = {"HEALING": None, "MANA": None, "SPEED": 12.0, "FOOD": 4.0, "REPAIR": 16.0, "TORCH": 6.0, "SCROLL": 25.0, "COMPONENT": 3.0}
+    IT = {}
+    for it in g.get_editor_property("items"):
+        k = str(it.kind).split(".")[-1].split(":")[0]; ts = list(it.tiers)
+        IT[str(it.name)] = (k, ts, float(it.amount))
+    c0 = list(gi.get_editor_property("castle_tiers")); d0 = {str(k): v for k, v in gi.get_editor_property("dungeons").items()}
+    def set_tier(t):
+        """the game's tier t by what is opened: the castle's 1-5, else the chain's dungeon whose band holds it"""
+        ds = gi.get_editor_property("dungeons")
+        for k in list(ds.keys()):
+            v = ds[k]; v.set_editor_property("tiers", []); ds[k] = v
+        if t <= 5: gi.set_editor_property("castle_tiers", list(range(1, t + 1)))
+        else:
+            gi.set_editor_property("castle_tiers", [1, 2, 3, 4, 5])
+            key = "vel_morrath" if t <= 10 else chain[-1]
+            v = unreal.RDDungeonSave(); v.set_editor_property("tiers", [1, 2, 3, 4, 5] if t <= 10 else [1, 2])
+            ds[key] = v
+        gi.set_editor_property("dungeons", ds)
+    def table(t): return [1, 2, 3.5, 5.5, 8][t - 1] if t <= 5 else 8.0 * 1.17 ** (min(t, 25) - 5)
+    def band(name, gt):
+        ts = IT.get(name, ("", [], 0))[1]
+        if not ts: return 1
+        t_ = min(ts)
+        while t_ + 5 <= gt and t_ + 5 in ts: t_ += 5
+        return t_
+    def want_price(name, gt):
+        k, ts, amt = IT.get(name, ("?", [], 0.0))
+        b = 8.0 + amt * 40.0 if k in ("HEALING", "MANA") else BASE.get(k)
+        return None if b is None else max(1, round(b * table(band(name, gt))))
+    def lines_of(kind):
+        if not g.open_town_panel(kind, -1): return None
+        L = [str(l).split("|") for l in g.get_town_panel_lines()]
+        g.close_town_panel(); return L
+    T = towns()
+    for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+        t = T.get(name)
+        if not t: res["cities"][name] = "not found"; continue
+        g.wild_drop_all(); g.wild_put_her(t["x"], t["y"] - 1300.0)
+        yield from wait_town(150, lambda s_: s_["name"] == name and s_["section"] == 1 and s_["loading"] == 0)
+        r = {"tiers": {}}; bad = []
+        for tier in (1, 10, 25):
+            set_tier(tier); yield from rwait(0.4)
+            cb().set_health(cb().get_max_health() * 0.5); yield from rwait(0.2)
+            row = {"game_tier": g.get_game_tier(), "horse": g.horse_price_now()}
+            st = lines_of("store") or []
+            buys = {b[1]: int(b[2].split()[0]) for b in st if b[0] == "buy" and b[2].split()[0].isdigit()}
+            row["stock"] = len(buys); row["top_tier"] = max((band(n, tier) for n in buys), default=0)
+            row["scrolls"] = sum(1 for n in buys if IT.get(n, ("",))[0] == "SCROLL")
+            heal = sorted(p for n, p in buys.items() if IT.get(n, ("",))[0] == "HEALING"); row["healing"] = heal
+            row["past_tier"] = [n for n in buys if band(n, tier) > tier]
+            row["mispriced"] = [f"{n} {p} (want {want_price(n, tier)})" for n, p in buys.items() if want_price(n, tier) is not None and p != want_price(n, tier)][:5]
+            te = lines_of("temple") or []
+            bl = [b for b in te if b[0] == "bless"]; row["bless"] = int(bl[0][2].split()[0]) if bl and bl[0][2].split()[0].isdigit() else None
+            he = lines_of("healer") or []
+            hl = [b for b in he if b[0] == "heal"]; row["heal_half"] = hl[0][2] if hl else None
+            r["tiers"][str(tier)] = row
+            if row["game_tier"] != tier: bad.append(f"game tier {row['game_tier']} for {tier}")
+            if row["past_tier"]: bad.append(f"items past tier {tier}: {row['past_tier'][:3]}")
+            if row["mispriced"]: bad.append(f"mispriced at {tier}: {row['mispriced']}")
+        cb().set_health(cb().get_max_health())
+        if name == "Brokenspire":
+            # (the scrolls: the store's are those within a tier of the game's band, for a hero who reads them: the Mage's)
+            h0 = str(g.get_editor_property("current_hero")); g.switch_hero("Mage"); yield from rwait(1.5); refresh(); g = G["gen"]
+            r["mage_scrolls"] = {}
+            for tier in (10, 25):
+                set_tier(tier); yield from rwait(0.4)
+                st = lines_of("store") or []
+                sc = [b[1] for b in st if b[0] == "buy" and IT.get(b[1], ("",))[0] == "SCROLL"]
+                r["mage_scrolls"][str(tier)] = [f"{n} {band(n, tier)}" for n in sc]
+                if not sc: bad.append(f"no scrolls for the Mage at tier {tier}")
+                if any(band(n, tier) < tier - 1 for n in sc): bad.append(f"old scrolls at tier {tier}")
+            g.switch_hero(h0); yield from rwait(1.5); refresh(); g = G["gen"]
+        t1 = r["tiers"]["1"]
+        for tier in (10, 25):
+            tr = r["tiers"][str(tier)]; w_ = table(tier)
+            if t1["horse"] and abs(tr["horse"] / t1["horse"] - w_) / w_ > 0.03: bad.append(f"horse {t1['horse']}->{tr['horse']} at {tier}")
+            if t1["bless"] and tr["bless"] and abs(tr["bless"] / t1["bless"] - w_) / w_ > 0.03: bad.append(f"blessing {t1['bless']}->{tr['bless']} at {tier}")
+        if not (r["tiers"]["25"]["top_tier"] > r["tiers"]["10"]["top_tier"] > r["tiers"]["1"]["top_tier"]):
+            bad.append("the stock's tiers do not follow the game's")
+        h1, h25 = r["tiers"]["1"]["healing"], r["tiers"]["25"]["healing"]
+        if not (h1 and h25 and h25[0] >= 10 * h1[0]): bad.append(f"healing potions {h1[:1]} -> {h25[:1]}: not by the band")
+        if r["tiers"]["10"]["scrolls"] > 0 and r["tiers"]["25"]["scrolls"] == 0: bad.append("no scrolls at tier 25")
+        r["bad"] = bad
+        res["cities"][name] = r
+    gi.set_editor_property("castle_tiers", c0)
+    ds = gi.get_editor_property("dungeons")
+    for k in list(ds.keys()):
+        if k not in d0: ds.pop(k)
+    for k, v in d0.items(): ds[k] = v
+    gi.set_editor_property("dungeons", ds)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    ok = len(res["cities"]) == 6 and all(isinstance(v, dict) and not v["bad"] for v in res["cities"].values())
+    step_result("cities25", ok, **res)
+
 def run_her(dir_xy, sec, rec=None, every=0.1):
     """her run along a way (her move input each frame, her run switch on), a record of her feet against the drawn ground"""
     p = G["pawn"]; cbc = cb(); cbc.set_run_mode(True)
@@ -2097,7 +2205,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

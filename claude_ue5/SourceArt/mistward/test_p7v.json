@@ -1,0 +1,235 @@
+{
+ "tag": "p7v",
+ "plan": [
+  "tier25"
+ ],
+ "level": "vel_morrath",
+ "steps": [
+  {
+   "step": "tier25",
+   "ok": true,
+   "mons_ok": true,
+   "loot_ok": true,
+   "later_ok": true,
+   "key": "vel_morrath",
+   "base": 5,
+   "cap": 0,
+   "global": [
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "growth_tier": 6,
+   "chain_index": 1,
+   "expect": {
+    "quality": "Fine",
+    "mine": {
+     "MartialArtist": "Crashing Wave",
+     "Rogue": "Barbed Bolt",
+     "Summoner": "Summon Tier 6"
+    },
+    "next": {
+     "MartialArtist": "Thunder Step",
+     "Rogue": "Incendiary Bolt",
+     "Summoner": "Summon Tier 7"
+    },
+    "summon_kind": "Iron_Golem"
+   },
+   "tables": 25,
+   "monsters": {
+    "count": 19,
+    "count_t1": 19,
+    "same_again": true,
+    "want_h": 7.616,
+    "want_d": 5.329,
+    "off": [],
+    "ratios": [
+     {
+      "kind": "Half_Creature_05",
+      "tier": 1,
+      "h": [
+       370.0,
+       49.0
+      ],
+      "d": [
+       58.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Half_Creature_05",
+      "tier": 1,
+      "h": [
+       370.0,
+       49.0
+      ],
+      "d": [
+       58.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Medic",
+      "tier": 1,
+      "h": [
+       414.0,
+       54.0
+      ],
+      "d": [
+       65.0,
+       12.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Medic",
+      "tier": 1,
+      "h": [
+       414.0,
+       54.0
+      ],
+      "d": [
+       65.0,
+       12.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Medic",
+      "tier": 1,
+      "h": [
+       414.0,
+       54.0
+      ],
+      "d": [
+       65.0,
+       12.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Medic",
+      "tier": 1,
+      "h": [
+       414.0,
+       54.0
+      ],
+      "d": [
+       65.0,
+       12.0
+      ],
+      "ok": true
+     }
+    ]
+   },
+   "hero_hp": {
+    "here": 262.0,
+    "as_tier1": 140.0
+   },
+   "loot": {
+    "0,0": {
+     "tier": 1,
+     "game_tier": 6,
+     "things": 16023,
+     "off_tier": [],
+     "forced": [
+      "Bread",
+      "Bronze Ingot",
+      "Cheese",
+      "Coarse Hide",
+      "Copper Ingot",
+      "Cured Leather Strip",
+      "Epoxy",
+      "Fine Arming Sword",
+      "Fine Bone Blade",
+      "Fine Dagger",
+      "Fine Desert Hero’s Armour",
+      "Fine Dexterity Ring 1"
+     ],
+     "forced_off": [],
+     "fine": 5337,
+     "quality": "Fine",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Life Drain": 6
+     },
+     "slot_want": 6
+    },
+    "1,0": {
+     "tier": 2,
+     "game_tier": 7,
+     "things": 15137,
+     "off_tier": [],
+     "forced": [],
+     "forced_off": [],
+     "fine": 5872,
+     "quality": "Fine",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Dispel Hex": 7
+     },
+     "slot_want": 7
+    }
+   },
+   "tomes_seen": 2,
+   "later": {
+    "gold": {
+     "gained": 480,
+     "game_tier": 10,
+     "want_min": 438
+    },
+    "MartialArtist": {
+     "set4": true,
+     "boss": "Nasty",
+     "killed": 1,
+     "new": [
+      "Crashing Wave",
+      "Smashing Strike",
+      "Roundhouse Kick"
+     ],
+     "message": "A new ability: Crashing Wave"
+    },
+    "Rogue": {
+     "weapons": [
+      "Daggers",
+      "Crossbow",
+      "Barbed Bolt"
+     ]
+    },
+    "Summoner": {
+     "weapons": [
+      "Fire",
+      "Dark Fire",
+      "Summon Tier 1",
+      "Summon Tier 6"
+     ],
+     "summon6": {
+      "started": true,
+      "mana": 46.0,
+      "growth_tier": 6,
+      "allies": [
+       {
+        "kind": "Iron_Golem",
+        "hp": 396,
+        "damage": 62.0,
+        "tier": 6
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_p7v_tier25_golem.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

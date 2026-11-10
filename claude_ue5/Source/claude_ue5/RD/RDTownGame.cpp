@@ -424,13 +424,24 @@ static float RDTierPrice(int32 Tier)
 // (PR #34's review: gold by the level's own 1-5 against prices to 185 left the town's services out of reach past the castle))
 static float RDTierGold(int32 Tier) { return Tier <= 5 ? (float)FMath::Max(Tier, 1) : 5.f * RDTierPrice(Tier) / 8.f; }
 
+// (an item's tier as the game stands: its lowest, or for one 910 lays again in every dungeon at its rank (the potions, food and
+// scrolls: its tiers t, t + 5, ... under one name) its tier in the game's band (the list of 2026-11-10's seventh phase: a potion
+// heals a share of her hit points at every tier, and priced by its lowest it cost 12 gold at tier 25, where a kill pays 116 times
+// tier 1's; the store's scrolls, those within a tier of the game's by their lowest, were none past tier 6))
+static int32 RDBandTier(const FRDItemDef& It, int32 Gt)
+{
+	if (It.Tiers.Num() == 0) return 1;
+	int32 T = 99; for (const int32 X : It.Tiers) T = FMath::Min(T, X);
+	while (T + 5 <= Gt && It.Tiers.Contains(T + 5)) T += 5;
+	return T;
+}
+
 int32 ARDDungeonGenerator::PriceOf(FName Item) const
 {
 	const int32 Ix = FindItem(Item);
 	if (Ix < 0) return 0;
 	const FRDItemDef& It = Items[Ix];
-	int32 T = 1;
-	if (It.Tiers.Num() > 0) { T = 99; for (const int32 X : It.Tiers) T = FMath::Min(T, X); }
+	const int32 T = RDBandTier(It, GetGameTier());
 	float Base = 10.f;
 	switch (It.Kind)
 	{
@@ -460,8 +471,7 @@ TArray<FName> ARDDungeonGenerator::TownStock() const
 	const FRDHeroDef* H = FindHero(CurrentHero);
 	for (const FRDItemDef& It : Items)
 	{
-		int32 Ti = 1;
-		if (It.Tiers.Num() > 0) { Ti = 99; for (const int32 X : It.Tiers) Ti = FMath::Min(Ti, X); }
+		const int32 Ti = RDBandTier(It, T);
 		if (Ti > T) continue;
 		const bool bScroll = It.Kind == ERDItemKind::Scroll;
 		if (bScroll && !(H && H->ScrollTypes.Num() > 0)) continue;

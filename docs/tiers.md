@@ -27,6 +27,7 @@ Each dungeon keeps its own five tiers of sets of rooms. A level's base (`Dungeon
 
 The game's tier (`GameGlobalTier`) is the deepest one opened in any dungeon of the chain. It sets the town's prices: 1 to 8 over the first five tiers as before, then about 17 % a tier, so 17.5 at tier 10 and 185 at tier 25.
 - **Gold:** a kill and a container pay by the game's tier of where she earned them: x the tier over the first five, then growing as the prices do (5 x the price factor over 8: about 11 at tier 10, 115 at tier 25).
+- **Store:** an item is priced by its kind and its tier (the same table). The potions, food and scrolls, laid again in every band of five tiers under one name (`910`), take their tier in the game's band (`RDBandTier`: a tier-1 healing potion is a tier-21 one at game tier 25, 1184 gold). The store sells the potions, food, repair items and torches of the tiers opened, and the scrolls of the band's last two tiers.
 - **Healer:** prices a point of her hit points and mana down by her growth past tier 5, so a whole heal costs as many kills as before. It also sets the tier she grows by (`GrowthTier`): at least the deepest she has opened anywhere, so a new dungeon never sets her back to tier 1.
 
 ## Strength by tier
@@ -115,6 +116,12 @@ Every map now carries every dungeon's kinds: 88 kinds, weight 0 except on their 
 | Aurorim | never |
 
 ## The tests
+
+The list of 2026-11-10's seventh phase ran the rebalance in every dungeon and city:
+- **`868 tier25`** now reads its expectations from `tier25.json` (each dungeon's tiers, quality, tomes, later abilities), so it runs on every dungeon past the castle. It passed on each: Vel Morrath (`test_p7v.json`), the War Engine (`test_p7w2.json`), the Sewers (`test_p7s.json`), Kethrys Spire (`test_p7k.json`) and Heaven (`test_p7h2.json`; its tiers 24 and 25, its things Celestial).
+- **The castle** keeps its own tiers 1 to 5 (`868 tiers`, `test_p7t.json`).
+- **`888 cities25`** (`-Light`, `test_c25d.json`) checks the six cities' store, horse, blessing and healer at game tiers 1, 10 and 25 ([Brokenspire's seventh part](levels/brokenspire.md#the-list-of-2026-11-10-seventh-part-the-rebalance-in-each-city)).
+- **`888 wild25`** (`test_w25p7.json`) again.
 
 `868 tier25` runs on Vel Morrath (`-lv vel_morrath`, `test_t25e.json`).
 - **Tiers:** the level's tiers are the game's 6-10.

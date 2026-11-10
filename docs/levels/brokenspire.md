@@ -169,6 +169,22 @@ The list's fifth phase, the Tripo animals (`915_tripo_animals.py`; Blender `blen
 
 Two of the ideas built for "what can be done to make the town more lively?" (`916 life`, `RD/RDWild10.cpp`; `884 town10 -Light`, `test_t10d.json`): eight **hens loose about the square** (not in Heaven, which has no farm animals), each on a free tile of the open ground near it (nothing in their way), that run from her when she comes within 2.6 m (measured: its flight counted, 67 cm further off a second later), and **the watch's lanterns**: the militia and guards awake carry a lit lantern from 20 to 6 (measured: none by day, all eight at 22, none at 11 again) (`bs_t10b_town10_hens.png`, `bs_t10b_town10_lantern.png`). The wilderness's travellers are in [the wilderness's document](wilderness.md#the-list-of-2026-11-10-sixth-part-houses-to-walk-into-the-farms-on-the-map-travellers).
 
+## The list of 2026-11-10, seventh part: the rebalance in each city
+
+"Test the re-balanced changes in each city and dungeon" (no stage; C++ `RDBandTier` in `RD/RDTownGame.cpp`; `888 cities25 -Light`, `test_c25d.json`). In each of the six cities, with the game's tier set to 1, 10 and 25 through what is opened (the castle's tiers, Vel Morrath's, Heaven's):
+- **Measured:**
+  - the game's tier read 1, 10 and 25;
+  - the horse cost 60, 1052 and 11091 gold, and the temple's blessing 20, 351 and 3697 (x 17.5 and x 185, the table's);
+  - the healer asked 18, 199 and 577 gold for half her hit points (a point priced down by her growth: her hit points grow too);
+  - every item in the store was priced by the rule, and none was of a tier past the game's.
+- **Found and fixed:** the potions, food and scrolls, which `910` lays again in every band of five tiers under one name, were priced by their lowest tier. A healing potion heals a share of her hit points at any tier, so it cost 12 gold at tier 25, where a kill pays 116 times tier 1's gold. The store's scrolls (those within a tier of the game's, by their lowest) were none past tier 6. Both now take the item's tier in the game's band:
+  - a healing potion costs 12, 112 and 1184 gold at tiers 1, 10 and 25;
+  - the Mage is offered the tier 9 and 10 scrolls at tier 10 and the tier 24 and 25 ones at tier 25.
+
+  Nothing changes up to tier 5.
+
+The dungeons are in [docs/tiers.md](../tiers.md#the-tests).
+
 ## The castle's hall and the way into the dungeon
 
 The Mistward Hall is guarded by 5 to 10 monsters of tier 1 (their number and kinds from the town's seed). Each keeps to the hall (`ARDMonster::HomeRoom`): it wanders only there, and takes no foe outside it, so she can fight them in the hall or walk out. Killed, they stay dead for the game.

@@ -1,0 +1,248 @@
+{
+ "tag": "p7k",
+ "plan": [
+  "tier25"
+ ],
+ "level": "kethrys_spire",
+ "steps": [
+  {
+   "step": "tier25",
+   "ok": true,
+   "mons_ok": true,
+   "loot_ok": true,
+   "later_ok": true,
+   "key": "kethrys",
+   "base": 20,
+   "cap": 0,
+   "global": [
+    21,
+    22,
+    23,
+    24,
+    25
+   ],
+   "growth_tier": 21,
+   "chain_index": 4,
+   "expect": {
+    "quality": "Celestial",
+    "mine": {
+     "MartialArtist": "Comet Fist",
+     "Rogue": "Storm Bolt",
+     "Summoner": "Summon Tier 9"
+    },
+    "next": {
+     "MartialArtist": "Heaven's Gale",
+     "Rogue": "Death's Kiss",
+     "Summoner": "Summon Tier 10"
+    },
+    "summon_kind": "Skeleton_Archmage"
+   },
+   "tables": 25,
+   "monsters": {
+    "count": 19,
+    "count_t1": 19,
+    "same_again": true,
+    "want_h": 41.687,
+    "want_d": 19.41,
+    "off": [],
+    "ratios": [
+     {
+      "kind": "Skeleton_Mage",
+      "tier": 1,
+      "h": [
+       2084.0,
+       50.0
+      ],
+      "d": [
+       218.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Skeleton_Mage",
+      "tier": 1,
+      "h": [
+       2084.0,
+       50.0
+      ],
+      "d": [
+       218.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Skeleton_Mage",
+      "tier": 1,
+      "h": [
+       2084.0,
+       50.0
+      ],
+      "d": [
+       218.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Skeleton_Mage",
+      "tier": 1,
+      "h": [
+       2084.0,
+       50.0
+      ],
+      "d": [
+       218.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Skeleton_Mage",
+      "tier": 1,
+      "h": [
+       2084.0,
+       50.0
+      ],
+      "d": [
+       218.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Skeleton_Mage",
+      "tier": 1,
+      "h": [
+       2084.0,
+       50.0
+      ],
+      "d": [
+       218.0,
+       11.0
+      ],
+      "ok": true
+     }
+    ]
+   },
+   "hero_hp": {
+    "here": 956.0,
+    "as_tier1": 140.0
+   },
+   "loot": {
+    "0,0": {
+     "tier": 1,
+     "game_tier": 21,
+     "things": 16166,
+     "off_tier": [],
+     "forced": [
+      "Bread",
+      "Bronze Ingot",
+      "Celestial Arming Sword",
+      "Celestial Bone Blade",
+      "Celestial Dagger",
+      "Celestial Desert Hero’s Armour",
+      "Celestial Dexterity Ring 1",
+      "Celestial Dexterity Ring 2",
+      "Celestial Dexterity Ring 3",
+      "Celestial Dexterity Ring 4",
+      "Celestial Eastern Knight’s Armour",
+      "Celestial Eastern Sabre"
+     ],
+     "forced_off": [],
+     "fine": 5461,
+     "quality": "Celestial",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Spectral Bulwark": 21
+     },
+     "slot_want": 21
+    },
+    "1,0": {
+     "tier": 2,
+     "game_tier": 22,
+     "things": 11228,
+     "off_tier": [],
+     "forced": [
+      "Bronze Ingot",
+      "Celestial Bear Warrior’s Armour",
+      "Celestial Bedvar’s Armour",
+      "Celestial Bone Blade",
+      "Celestial Crocodile Warrior’s Armour",
+      "Celestial Crossbow",
+      "Celestial Demonic Armour",
+      "Celestial Dexterity Ring 3",
+      "Celestial Dexterity Ring 4",
+      "Celestial Dexterity Ring 5",
+      "Celestial Dexterity Ring 6",
+      "Celestial Dock Shield"
+     ],
+     "forced_off": [],
+     "fine": 4266,
+     "quality": "Celestial",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Hellfire Pillar": 22
+     },
+     "slot_want": 22
+    }
+   },
+   "tomes_seen": 2,
+   "later": {
+    "gold": {
+     "gained": 4932,
+     "game_tier": 25,
+     "want_min": 4621
+    },
+    "MartialArtist": {
+     "set4": true,
+     "boss": "Nasty",
+     "killed": 1,
+     "new": [
+      "Comet Fist",
+      "Smashing Strike",
+      "Roundhouse Kick"
+     ],
+     "message": "A new ability: Comet Fist"
+    },
+    "Rogue": {
+     "weapons": [
+      "Daggers",
+      "Crossbow",
+      "Storm Bolt"
+     ]
+    },
+    "Summoner": {
+     "weapons": [
+      "Fire",
+      "Dark Fire",
+      "Summon Tier 1",
+      "Summon Tier 9"
+     ],
+     "summon6": {
+      "started": true,
+      "mana": 167.0,
+      "growth_tier": 21,
+      "allies": [
+       {
+        "kind": "Skeleton_Archmage",
+        "hp": 2418,
+        "damage": 253.0,
+        "tier": 21
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_p7k_tier25_golem.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}
