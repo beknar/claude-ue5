@@ -167,7 +167,7 @@ The list's fifth phase, the Tripo animals (`915_tripo_animals.py`; Blender `blen
 
 ## The list of 2026-11-10, sixth part: the town's liveliness
 
-Two of the ideas built for "what can be done to make the town more lively?" (`916 life`, `RD/RDWild10.cpp`; `884 town10 -Light`, `test_t10b.json`): eight **hens loose about the square** (not in Heaven, which has no farm animals), each on a free tile of the open ground near it (nothing in their way), that run from her when she comes within 2.6 m (measured: its flight counted, 67 cm further off a second later), and **the watch's lanterns**: the militia and guards awake carry a lit lantern from 20 to 6 (measured: none by day, all eight at 22, none at 11 again) (`bs_t10b_town10_hens.png`, `bs_t10b_town10_lantern.png`). The wilderness's travellers are in [the wilderness's document](wilderness.md#the-list-of-2026-11-10-sixth-part-houses-to-walk-into-the-farms-on-the-map-travellers).
+Two of the ideas built for "what can be done to make the town more lively?" (`916 life`, `RD/RDWild10.cpp`; `884 town10 -Light`, `test_t10d.json`): eight **hens loose about the square** (not in Heaven, which has no farm animals), each on a free tile of the open ground near it (nothing in their way), that run from her when she comes within 2.6 m (measured: its flight counted, 67 cm further off a second later), and **the watch's lanterns**: the militia and guards awake carry a lit lantern from 20 to 6 (measured: none by day, all eight at 22, none at 11 again) (`bs_t10b_town10_hens.png`, `bs_t10b_town10_lantern.png`). The wilderness's travellers are in [the wilderness's document](wilderness.md#the-list-of-2026-11-10-sixth-part-houses-to-walk-into-the-farms-on-the-map-travellers).
 
 ## The castle's hall and the way into the dungeon
 

@@ -1,5 +1,5 @@
 {
- "tag": "t10b",
+ "tag": "t10d",
  "plan": [
   "town10"
  ],
@@ -15,8 +15,8 @@
      1.0
     ],
     "from_her_before": 110,
-    "from_her_after": 189,
-    "moved": 79
+    "from_her_after": 188,
+    "moved": 78
    },
    "day": [
     {
@@ -137,10 +137,10 @@
    "day_after": 0
   }
  ],
- "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
  "shots": [
-  "bs_t10b_town10_hens.png",
-  "bs_t10b_town10_lantern.png"
+  "bs_t10d_town10_hens.png",
+  "bs_t10d_town10_lantern.png"
  ],
  "error": null,
  "windows_shown_again": 3
