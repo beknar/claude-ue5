@@ -716,6 +716,9 @@ public:
 	void HarvestKill(ARDMonster* Monster, bool bBig);
 	/** the anvil offers a recipe only once its tier is open; a scroll's only to a hero who reads scrolls of its spell's type */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Mistward3") bool bRecipeTiers = false;
+	/** the list of 2026-11-10: the heroes who brew healing and mana potions at the anvil (empty: everyone; 914 sets the Mage and the
+	 *  Martial Artist on every map of the game) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") TArray<FName> PotionBrewers;
 	/** the highest tier open (1 before any other opens; MaxTier 0: every recipe's) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward3") int32 GetHighestOpenTier() const;
 	/** why the anvil does not offer it ("" when it does) */
@@ -749,6 +752,13 @@ public:
 	/** the upper left controls panel is shown (the Options page's switch; kept in the game's user settings) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") bool IsControlsHintShown() const { return bControlsShown; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward4") void SetControlsHintShown(bool bShow);
+	/** the list of 2026-11-10: the quest window (her quests taken and ready, with their progress), on or off from the Options page */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") bool IsQuestWindowShown() const { return bQuestWindowShown; }
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") void SetQuestWindowShown(bool bShow);
+	bool bQuestWindowShown = true;
+	/** the list of 2026-11-10: the Save page's drop-down: the save to save over (empty: a new one by its name), and a save's name */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|List10") FString SaveOverSlot;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") FString SaveNameOf(const FString& Slot) const;
 	/** the Escape menu's page (0 the main one, 1 Options) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward4") int32 GetMenuPage() const { return MenuPage; }
 	/** the resolutions the Options page offers (the common ones no larger than the screen), "1920x1080" each */
@@ -1407,6 +1417,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
 	static FString WeatherName(int32 Kind);
+	/** the list of 2026-11-10 (RDConsoleCmds.cpp): the weather now (0-7), and whether rd.Weather holds it (no change by itself) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") int32 GetWeather() const { return Weather; }
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Sky") bool bWeatherHeld = false;
+	/** rd.GoTo: out to a major city (the wilds' fast travel at once; from a dungeon back to Brokenspire first) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") bool ConsoleGoTo(const FString& City);
+	/** a fast travel that nothing refuses (rd.GoTo, for testing) */
+	bool bTravelForced = false;
+	/** tests: the wilderness's next encounter is of this kind (a roaming kind's name), at the director's next second, whatever is near */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void ForceWildEncounter(FName Kind) { ForcedEncounterKind = Kind; }
+	FName ForcedEncounterKind;
 	// the showcase pilot of the list of 2026-11-04 (RDShow7.cpp): -RDShow7 in the game, StartShow7 in play (a rehearsal; Go
 	// empty: at once)
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Show7") void StartShow7(const FString& Go, const FString& Done);
@@ -1482,6 +1502,15 @@ public:
 	/** the list of 2026-11-04's things of the town (RDTown7.cpp): a table's food, a garden, an oven, the gate's levers */
 	FString TownThingInteract(const FVector& From);
 	FString TownThingDescribe(const FVector& From) const;
+	/** the list of 2026-11-10: food on the prep tables of the castle and the game's other dungeons (914 sets it with the bare table
+	 *  and the town's food pieces): laid in every set as in a town, taken with F into her pack */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List10") bool bTableFood = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List10") int32 TableFoodTaken = 0;
+	const ARDSection* TableFoodNear(const FVector& From, int32& OutIndex) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") FString TableFoodDescribe(const FVector& From) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List10") FString TableFoodTake(const FVector& From);
+	/** where the food not yet taken lies on the tables of every set built (tests) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List10") TArray<FVector> GetTableFoodPoints() const;
 	/** the castle's way back to the town (an arch in the great hall): F there */
 	FVector CastleWayBack = FVector::ZeroVector;
 	UPROPERTY(Transient) TObjectPtr<AActor> CastleWayBackActor;
@@ -2120,6 +2149,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildEngageM = 4500.f;
 	struct FRDWildPoiLive { int32 Id = 0; int32 Kind = -1; FVector At = FVector::ZeroVector; TWeakObjectPtr<ARDWildChunk> Chunk; };
 	TArray<FRDWildPoiLive> WildPoiLive;
+	/** the list of 2026-11-10: the placed ambushes already sprung this play (their ids) */
+	TSet<int32> WildAmbushSprung;
 	TMap<int32, float> WildPoiReadyAt;
 	TArray<TWeakObjectPtr<ARDMonster>> WildRoamers;
 	TArray<FString> WildEngagements;

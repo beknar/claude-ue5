@@ -648,7 +648,10 @@ enum class ERDItemKind : uint8
 	Scroll,
 	/** the list of 2026-11-08b's sixth phase: an Angel Token: used, she chooses one of her hero's secondary abilities to raise a
 	 *  rank (the generator's Secondaries) */
-	Token
+	Token,
+	/** the list of 2026-11-10: the revealing light (the ankh), carried in the left hand as the torch: it lights her way and, within
+	 *  its Amount of metres, outlines traps, shows stealthed monsters and marks hidden caches */
+	Light
 };
 
 /** the list of 2026-11-08b's eighth phase (913): the ridable horse: its meshes (her bay, the stable's grey), its clips (made in
@@ -669,7 +672,7 @@ struct FRDHorseDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GallopFrom = 420.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SaddleBone = TEXT("saddle");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Price = 60.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpeedMul = 2.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float SpeedMul = 5.5f;          // (the list of 2026-11-10: at least five times her own; 2.2 until then)
 	/** her root this far over the saddle bone (cm) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RiderLift = 0.f;
 };
@@ -701,6 +704,8 @@ struct FRDWildPoiKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Layer = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoad = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoaming = false;
+	/** the list of 2026-11-10: an ambush: its monsters hunt her (a roaming one's at once; a placed one's once she is within 60 m) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bHunts = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Props;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Use;
 	/** what it holds: "Item|min|max|chance" */

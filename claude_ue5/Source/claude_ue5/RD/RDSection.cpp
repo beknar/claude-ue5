@@ -522,9 +522,9 @@ bool ARDSection::AddPiece(FName Name, const FTransform& T, bool bForceNoCollisio
 	if (Generator && Name == Generator->AnvilPiece) AnvilPoints.Add(T.GetLocation());
 	// (improvements7, the town: its kitchens' ovens bake; what stands on the open ground (the trees, the grass) stands on its
 	// rise and fall; a prep table has food on it to take (in play too: the food is interactive))
-	if (Generator && Generator->bTown)
+	if (Generator && (Generator->bTown || Generator->bTableFood))          // (the list of 2026-11-10: the castle's prep tables too)
 	{
-		if (Name == TEXT("BreadOven")) TownOvens.Add(T.GetLocation());
+		if (Name == TEXT("BreadOven") && Generator->bTown) TownOvens.Add(T.GetLocation());
 		if (Name == TEXT("PrepTable") && FurnRoom >= 0)
 		{
 			const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(T.GetLocation().X), FMath::RoundToInt(T.GetLocation().Y))), 0xF00Du);

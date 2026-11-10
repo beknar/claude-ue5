@@ -360,6 +360,63 @@ bool ARDDungeonGenerator::TownHarvestGarden(ARDSection* S, int32 Garden)
 	return true;
 }
 
+// (the list of 2026-11-10: "if there is food on a table, the player should be able to put it into the inventory": the castle and
+// the game's other dungeons (bTableFood) lay the town's food on their kitchens' prep tables in every set; F takes it as in a town)
+const ARDSection* ARDDungeonGenerator::TableFoodNear(const FVector& From, int32& OutIndex) const
+{
+	OutIndex = -1;
+	const ARDSection* Best = nullptr; float Bd = TownThingReach;
+	for (const TPair<FIntPoint, TObjectPtr<ARDSection>>& Kv : Sections)
+	{
+		const ARDSection* S = Kv.Value;
+		if (!IsValid(S)) continue;
+		for (int32 I = 0; I < S->TownFoods.Num(); ++I)
+		{
+			const ARDSection::FTownFood& F = S->TownFoods[I];
+			if (F.bTaken || FMath::Abs(F.At.Z - From.Z) > 160.f) continue;
+			const float D = FVector::Dist2D(F.At, From);
+			if (D < Bd) { Bd = D; Best = S; OutIndex = I; }
+		}
+	}
+	// (a door or a container nearer than it is what F does, as in the town)
+	if (Best) { bool bD = false; int32 Di = -1; if (Best->FindNearestInteractive(From, Bd, bD, Di) < Bd) { OutIndex = -1; return nullptr; } }
+	return Best;
+}
+
+TArray<FVector> ARDDungeonGenerator::GetTableFoodPoints() const
+{
+	TArray<FVector> Out;
+	for (const TPair<FIntPoint, TObjectPtr<ARDSection>>& Kv : Sections)
+		if (const ARDSection* S = Kv.Value; IsValid(S))
+			for (const ARDSection::FTownFood& F : S->TownFoods) if (!F.bTaken) Out.Add(F.At);
+	return Out;
+}
+
+FString ARDDungeonGenerator::TableFoodDescribe(const FVector& From) const
+{
+	int32 I = -1;
+	const ARDSection* S = bTableFood ? TableFoodNear(From, I) : nullptr;
+	if (!S) return FString();
+	TArray<FString> It; for (const FName& N_ : S->TownFoods[I].Items) It.AddUnique(N_.ToString().ToLower());
+	return FString::Printf(TEXT("take the food (%s)"), *FString::Join(It, TEXT(", ")));
+}
+
+FString ARDDungeonGenerator::TableFoodTake(const FVector& From)
+{
+	int32 I = -1;
+	ARDSection* S = bTableFood && PlayerCombat ? const_cast<ARDSection*>(TableFoodNear(From, I)) : nullptr;
+	if (!S) return FString();
+	const TArray<FName> It = S->TownFoods[I].Items;
+	if (!S->TakeTownFood(I)) return FString();
+	TMap<FName, int32> Cnt; for (const FName& N_ : It) Cnt.FindOrAdd(N_)++;
+	TArray<FString> Got;
+	for (const TPair<FName, int32>& C : Cnt) { if (FindItem(C.Key) < 0) continue; PlayerCombat->AddItem(C.Key, C.Value); Got.Add(FString::Printf(TEXT("%d %s"), C.Value, *C.Key.ToString().ToLower())); }
+	PlayerCombat->ShowMessage(FString::Printf(TEXT("You take the food from the table:  %s"), *FString::Join(Got, TEXT(", "))));
+	PlaySoundAt(TEXT("Player.Loot"), From);
+	++TableFoodTaken;
+	return TEXT("food");
+}
+
 FString ARDDungeonGenerator::TownThingDescribe(const FVector& From) const
 {
 	const ARDSection* S = GetSection(FIntPoint::ZeroValue);

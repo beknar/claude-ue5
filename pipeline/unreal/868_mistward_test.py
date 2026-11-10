@@ -125,6 +125,11 @@ The rebalance to tier 25 (910; the list of 2026-11-08b's fifth phase):
            tables say (the same seed with and without the level's base); loot of the game's tier only (quality copies), each
            tome its tier's one spell; the tier-5 boss: the dungeon's ability for the Martial Artist, the Rogue, the Summoner
            (Summon Tier 6 calls an Iron Golem)
+The list of 2026-11-10's first phase (914):
+  list10   gold in the inventory; a torch, a shield and a potion on quick slots 3-5 from the inventory and used with them; a
+           found weapon's durability bar; a shield worn out at half its share, mended at the anvil for half its breakdown; a
+           stack broken down with Enter held; the anvil's recipes grouped (repair items first); potions the Mage's, not the
+           Warrior's; a prep table's food taken with F; the quest window's option; the Save page's drop-down (pictures)
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -2644,8 +2649,9 @@ def step_recipes():
     and the Martial Artist are offered none, the Mage all of tiers 1 and 2 (11), the Warlock only their offense and curses (8),
     the Summoner all 11; the Mage makes a Scroll of Fire Bolt (2 Faint Essence, 1 Venom Sac). Wood Glue in the Slickstone,
     the Patch Kit, the Repair Kit and the torch (a Slickstone made uses 5). Null Sanctum's and Apocalypse's scrolls take 6
-    Radiant Essence. The fires' volumes are sounds.json's x 0.2"""
-    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    Radiant Essence. The fires' volumes are sounds.json's x 0.2. (The potions are the Mage's since the list of 2026-11-10: only
+    she and the Martial Artist brew them; list10 checks the Warrior is refused)"""
+    c = yield from restart("Mage"); g = G["gen"]; quiet(True)
     put(g.get_start_room_center(), 0.0); yield from wait(0.3)
     R_ = {str(r.item): r for r in g.get_editor_property("recipes")}
     res = {"highest": g.get_highest_open_tier(), "offered_t1": craft_names(c)}
@@ -2934,7 +2940,7 @@ def step_options():
     g.set_user_volume(1, kept[2]); g.set_controls_hint_shown(kept[3])
     o = res["open"]; op = res["options"]
     ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Save the game", "button|Load a game", "button|Options", "button|Return to Brokenspire", "button|Choose another hero (a new game)", "button|Quit"]
-          and op["page"] == 1 and op["action"] == "options" and [l.split("|")[0] for l in op["lines"]] == ["volume"] * 4 + ["choice"] * 3 + ["button"] * 2
+          and op["page"] == 1 and op["action"] == "options" and [l.split("|")[0] for l in op["lines"]] == ["volume"] * 4 + ["choice"] * 4 + ["button"] * 2          # (the quest window's choice since the list of 2026-11-10)
           and res["controls_off"]["shown"] is False and res["controls_off"]["line"].endswith("|Off") and abs(res["volume"]["before"] - res["volume"]["after"] - 0.1) < 0.011
           and res["display"]["mode"] == 2 and res["display"]["to"] != res["display"]["from"] and res["applied"]["said"].startswith("saved") and res["applied"]["saved"] == want
           and res["escape_back"]["open"] and res["escape_back"]["page"] == 0 and res["escape_back"]["cursor"] == oi and not res["escape_closed"]["open"] and not res["escape_closed"]["paused"]
@@ -4435,7 +4441,225 @@ def step_console():
         elif q[0] == "note": res[q[1]] = q[2]
     res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
     step_result("console", bool(checks) and txt.strip().endswith("result|ok"), **res)
-STEPS = {"secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+def step_list10():
+    """the list of 2026-11-10's first phase in the castle, walked through with the keys as the devices send them (Slate):
+    gold in the inventory (a picture); a torch, a shield and a potion put on quick slots 3-5 from the inventory with the number
+    keys, then used with them in play (lit / put out, taken up, drunk); a found weapon's durability bar (a picture); a shield worn
+    out stays on her arm at half its share (no break) and is mended at the anvil with Enter for half of what it breaks down into
+    (its share back); a stack of shields broken down whole with Enter held (a tap: one); the anvil's recipes grouped, the repair
+    items' first and apart (a picture); the Warrior brews no potion, the Mage does; a prep table's food taken with F into her
+    pack; the quest window's option (pictures on and off); the Save page's drop-down: a save made, chosen from the drop-down and
+    saved over (its slot kept, its time newer)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.5)
+    res = {"refused": []}
+    def hold(nm, sec=0.1):
+        why = yield from slate_hold(nm, sec)
+        if why: res["refused"].append(f"{nm}: {why}")
+        yield from rwait(0.25)
+    def cursor_to(match, get_lines, get_cur, move):
+        ls = [str(x) for x in get_lines()]
+        i = next((k for k, l in enumerate(ls) if match(l)), -1)
+        if i < 0: return False
+        for _ in range(60):
+            cur = get_cur()
+            if cur == i: return True
+            move(1 if i > cur else -1)
+        return get_cur() == i
+    ITEMS = {str(i.get_editor_property("name")): i for i in g.get_editor_property("items")}
+    # ---- gold in the inventory (a picture)
+    g.add_gold(37, "test"); res["gold"] = g.get_gold()
+    yield from hold("I"); res["inv_open"] = c.is_inventory_open()
+    shot("l10_inventory_gold", "1280x720"); yield from rwait(1.0)
+    # ---- the quick bar's items: tab 1 (the torch, a shield), tab 2 (a potion), the number keys 3, 4, 5
+    shield = "Kite Shield"; potion = "Small Healing Potion"
+    c.add_item("Torch", 1); c.add_item(shield, 1); c.add_item(potion, 2); yield from rwait(0.3)
+    c.set_inventory_tab(1); yield from rwait(0.2)
+    res["cur_torch"] = cursor_to(lambda l: l.startswith("torch|Torch"), c.get_inventory_lines, c.get_inventory_cursor, c.move_inventory_cursor)
+    yield from hold("Three")
+    res["cur_shield"] = cursor_to(lambda l: l.startswith(f"shield|{shield}"), c.get_inventory_lines, c.get_inventory_cursor, c.move_inventory_cursor)
+    yield from hold("Four")
+    c.set_inventory_tab(2); yield from rwait(0.2)
+    res["cur_potion"] = cursor_to(lambda l: l.startswith(f"item|{potion}"), c.get_inventory_lines, c.get_inventory_cursor, c.move_inventory_cursor)
+    yield from hold("Five")
+    qs = [str(x) for x in c.get_quick_slots()]; res["slots"] = qs[:10]
+    yield from hold("I"); res["inv_closed"] = not c.is_inventory_open()
+    yield from wait(0.3)
+    # (in play: 3 lights the torch, 3 again puts it out; 4 takes up the shield; 5 drinks the potion)
+    yield from hold("Three"); res["torch_lit"] = c.is_torch_held()
+    shot("l10_bar_torch", "1280x720"); yield from rwait(1.0)
+    yield from hold("Three"); res["torch_out"] = not c.is_torch_held()
+    yield from hold("Four"); res["shield_worn"] = str(c.get_worn_shield())
+    c.set_health(c.get_max_health() * 0.4); h0 = c.get_health(); n0 = c.get_item_count(potion)
+    yield from hold("Five"); res["potion"] = {"hp_gain": round(c.get_health() - h0, 1), "left": c.get_item_count(potion), "was": n0}
+    res["quick_used"] = c.get_editor_property("quick_items_used")
+    # ---- a found weapon's durability bar (a picture)
+    # (a weapon item the Warrior wields: one that joins her weapons when she takes it)
+    wname = None
+    for n, i in ITEMS.items():
+        if "WEAPON" not in str(i.get_editor_property("kind")): continue
+        k0 = len(g.get_editor_property("weapons")); c.add_item(n, 1)
+        if len(g.get_editor_property("weapons")) > k0: wname = n; break
+    yield from wait(0.4)
+    res["weapon"] = wname; res["bar_after_weapon"] = [str(x) for x in c.get_quick_slots()][:10]
+    shot("l10_bar_weapon", "1280x720"); yield from rwait(1.0)
+    # ---- a shield worn out: half its share, still on her arm; mended at the anvil for half its breakdown
+    sh_full = ITEMS[shield].get_editor_property("durability"); share0 = c.get_shield_share()
+    blows = 0
+    while c.get_shield_wear(shield) > 0 and blows < 400:
+        c.set_health(c.get_max_health()); c.apply_damage(40.0, None); blows += 1
+        if blows % 20 == 0: yield
+    c.set_health(c.get_max_health()); yield from wait(0.2)
+    res["worn_out"] = {"blows": blows, "wear": c.get_shield_wear(shield), "still_worn": str(c.get_worn_shield()), "count": c.get_item_count(shield),
+                       "share_before": round(share0, 4), "share_after": round(c.get_shield_share(), 4), "message": str(c.message)}
+    c.set_crafting_open(True); yield from rwait(0.3)
+    ml = next((str(x) for x in c.get_craft_lines() if str(x).startswith(f"mend|{shield}|")), "")
+    res["mend_line"] = ml
+    need = {}
+    if ml:
+        for p in ml.split("|")[4].split(";"):
+            q = p.split(":")
+            if len(q) == 3: need[q[0]] = int(q[2])
+    for n, k in need.items(): c.add_item(n, k + 1)
+    before = {n: c.get_item_count(n) for n in need}
+    res["cur_mend"] = cursor_to(lambda l: l.startswith(f"mend|{shield}|"), c.get_craft_lines, c.get_craft_cursor, c.move_craft_cursor)
+    shot("l10_anvil_mend", "1280x720"); yield from rwait(1.0)
+    yield from hold("Enter")
+    res["mended"] = {"wear": c.get_shield_wear(shield), "full": sh_full, "share": round(c.get_shield_share(), 4),
+                     "took": {n: before[n] - c.get_item_count(n) for n in need}, "need": need, "mends": c.get_editor_property("anvil_mends")}
+    # ---- PR #38's review: a spare taken up when the one on her arm wears out; a repair item mends a shield
+    c.set_crafting_open(False); yield from rwait(0.2)
+    c.add_item(shield, 1); yield from rwait(0.2)
+    blows = 0; prev = c.get_shield_wear(shield); swapped = False
+    while blows < 400:
+        c.set_health(c.get_max_health()); c.apply_damage(40.0, None); blows += 1
+        w_ = c.get_shield_wear(shield)
+        if w_ > prev: swapped = True; break          # (worn out, the spare taken up: whole again)
+        if w_ <= 0: break
+        prev = w_
+        if blows % 20 == 0: yield
+    c.set_health(c.get_max_health()); yield from wait(0.2)
+    res["spare"] = {"swapped": swapped, "blows": blows, "wear": round(c.get_shield_wear(shield), 1), "full": sh_full, "count": c.get_item_count(shield), "spares": [round(x, 1) for x in c.get_spares(shield)],
+                    "share": round(c.get_shield_share(), 4), "message": str(c.message)}
+    for _ in range(3): c.set_health(c.get_max_health()); c.apply_damage(40.0, None)
+    w_before = c.get_shield_wear(shield)
+    c.add_item("Patch Kit", 1); c.use_item("Patch Kit"); yield from rwait(0.3)
+    rl = [str(x) for x in c.get_repair_lines()]
+    ri = next((i for i, l in enumerate(rl) if l.startswith(f"armour|{shield}|")), -1)
+    res["repair_kit"] = {"line": rl[ri] if ri >= 0 else None, "mended": c.repair_entry(ri) if ri >= 0 else False, "before": round(w_before, 1), "after": round(c.get_shield_wear(shield), 1)}
+    c.set_inventory_open(False); yield from rwait(0.2)
+    c.set_crafting_open(True); yield from rwait(0.3)
+    # ---- a stack broken down: a tap one, held the whole stack
+    other = next(n for n in SH if n not in (shield, "Heater Shield"))
+    c.add_item(other, 3); yield from rwait(0.3)
+    res["cur_stack"] = cursor_to(lambda l: l.startswith(f"breakdown|{other}|"), c.get_craft_lines, c.get_craft_cursor, c.move_craft_cursor)
+    yield from hold("Enter", 0.1); res["tap_left"] = c.get_item_count(other)
+    res["cur_stack2"] = cursor_to(lambda l: l.startswith(f"breakdown|{other}|"), c.get_craft_lines, c.get_craft_cursor, c.move_craft_cursor)
+    yield from hold("Enter", 1.0); res["held_left"] = c.get_item_count(other); res["stacks"] = c.get_editor_property("stacks_broken_down")
+    # (PR #38's review: a hold whose cursor moves off its line does nothing, let go or held on)
+    c.add_item(other, 2); yield from rwait(0.3)
+    cursor_to(lambda l: l.startswith(f"breakdown|{other}|"), c.get_craft_lines, c.get_craft_cursor, c.move_craft_cursor)
+    why = str(g.slate_key(key("Enter"), True)); yield from rwait(0.2); c.move_craft_cursor(1); yield from rwait(0.9)
+    why = why or str(g.slate_key(key("Enter"), False)); yield from rwait(0.3)
+    res["hold_moved"] = {"left": c.get_item_count(other), "why": why}
+    # ---- the recipes grouped: the repair items' first and apart; the Warrior brews no potion
+    cl = [str(x) for x in c.get_craft_lines() if str(x).startswith("recipe|")]
+    groups = [l.split("|")[-1] for l in cl]
+    reps = [l.split("|")[1] for l in cl if l.endswith("|1repair")]
+    kind_rep = sorted(n for n in reps if "REPAIR" in str(ITEMS[n].get_editor_property("kind"))) if reps else []
+    res["groups"] = {"order": list(dict.fromkeys(groups)), "repair": reps, "repair_kind_ok": kind_rep == sorted(reps),
+                     "contiguous": all(groups[i] <= groups[i + 1] for i in range(len(groups) - 1))}
+    c.move_craft_cursor(-200); yield from rwait(0.2)
+    shot("l10_anvil_groups", "1280x720"); yield from rwait(1.0)
+    res["warrior_potions"] = [n for n in craft_names(c) if "Potion" in n and ("Healing" in n or "Mana" in n)]
+    res["warrior_craft"] = {"made": c.craft(potion), "message": str(c.message)}
+    c.set_crafting_open(False); yield from rwait(0.2)
+    g.switch_hero("Mage"); yield from wait(0.6); refresh(); c = cb()
+    for n, k in (("Faint Essence", 2), ("Mutant Ichor", 2)): c.add_item(n, k)
+    res["mage_potions"] = len([n for n in craft_names(c) if "Potion" in n and ("Healing" in n or "Mana" in n)])
+    res["mage_craft"] = c.craft(potion)
+    g.switch_hero("Warrior"); yield from wait(0.6); refresh(); c = cb()
+    # ---- a prep table's food, F
+    pts = list(g.get_table_food_points()); res["food_points"] = len(pts)
+    if pts:
+        here = G["pawn"].get_actor_location()
+        f = min(pts, key=lambda p: dist2(p, here))
+        put(V(f.x + 110.0, f.y, f.z - 80.0), 180.0); yield from wait(0.5)
+        res["food_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+        b0 = {n: c.get_item_count(n) for n in ("Bread", "Cheese", "Fruit")}
+        yield from hold("F")
+        res["food_got"] = {n: c.get_item_count(n) - v for n, v in b0.items()}
+        res["food_taken"] = g.get_editor_property("table_food_taken")
+        shot("l10_food", "1280x720"); yield from rwait(1.0)
+    # ---- the quest window's option (pictures on and off)
+    g.set_menu_open(True); yield from rwait(0.3)
+    items = [str(x) for x in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(items) if l == "button|Options")); yield from rwait(0.3)
+    ol = [str(x) for x in g.get_menu_lines()]; qi = next((i for i, l in enumerate(ol) if l.startswith("choice|Quest window")), -1)
+    res["quest_option"] = ol[qi] if qi >= 0 else None
+    was = g.is_quest_window_shown()
+    if qi >= 0: g.activate_menu_line(qi)
+    res["quest_toggled"] = g.is_quest_window_shown() != was
+    g.set_menu_open(False); yield from rwait(0.3)
+    shot("l10_quests_" + ("on" if g.is_quest_window_shown() else "off"), "1280x720"); yield from rwait(1.0)
+    g.set_quest_window_shown(not g.is_quest_window_shown()); yield from rwait(0.3)
+    shot("l10_quests_" + ("on" if g.is_quest_window_shown() else "off"), "1280x720"); yield from rwait(1.0)
+    g.set_quest_window_shown(True)
+    # ---- the Save page's drop-down: a save made by its name, then chosen and saved over
+    g.set_menu_open(True); yield from rwait(0.3)
+    ml_ = [str(x) for x in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(ml_) if l == "button|Save the game")); yield from rwait(0.3)
+    sl = [str(x) for x in g.get_menu_lines()]; res["save_page"] = sl
+    nm = next((l.split("|", 2)[2] for l in sl if l.startswith("text|Name|")), ""); res["save_name"] = nm
+    g.activate_menu_line(next(i for i, l in enumerate(sl) if l.startswith("button|Save"))); yield from rwait(1.0)
+    infos0 = {str(s).split("|")[0]: str(s) for s in g.get_save_slots()}
+    SAVES = r"E:\code\claude-ue5\claude_ue5\Saved\SaveGames"
+    def mtime(slot): p_ = os.path.join(SAVES, slot + ".sav"); return os.path.getmtime(p_) if os.path.exists(p_) else 0.0
+    g.set_menu_open(True); yield from rwait(0.3)
+    ml_ = [str(x) for x in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(ml_) if l == "button|Save the game")); yield from rwait(0.3)
+    sl = [str(x) for x in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(sl) if l.startswith("choice|Save over"))); yield from rwait(0.3)
+    dl = [str(x) for x in g.get_menu_lines()]; res["dropdown"] = dl; res["dropdown_page"] = g.get_menu_page()
+    pick = next((i for i, l in enumerate(dl) if nm and l.startswith("button|" + nm)), -1)
+    if pick >= 0: g.activate_menu_line(pick); yield from rwait(0.3)
+    res["over_slot"] = str(g.get_editor_property("save_over_slot")); res["after_pick"] = [str(x) for x in g.get_menu_lines()]
+    # (PR #38's review: Escape on the drop-down goes back to the Save page)
+    g.activate_menu_line(next(i for i, l in enumerate(res["after_pick"]) if l.startswith("choice|Save over"))); yield from rwait(0.3)
+    res["dropdown_again"] = g.get_menu_page()
+    yield from press("Escape"); yield from rwait(0.3)
+    res["escape_from_dropdown"] = {"page": g.get_menu_page(), "open": g.is_menu_open() if hasattr(g, "is_menu_open") else None, "slot_kept": str(g.get_editor_property("save_over_slot"))}
+    t_before = mtime(res["over_slot"])
+    yield from rwait(1.2)
+    sl = [str(x) for x in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(sl) if l.startswith("button|Save"))); yield from rwait(1.0)
+    infos1 = {str(s).split("|")[0]: str(s) for s in g.get_save_slots()}
+    res["saves_before"] = len(infos0); res["saves_after"] = len(infos1)
+    res["over_same_slot"] = res["over_slot"] in infos1 and mtime(res["over_slot"]) > t_before > 0.0
+    res["over_file"] = {"before": t_before, "after": mtime(res["over_slot"])}
+    g.set_menu_open(False)
+    quiet(False)
+    wo, md_ = res["worn_out"], res["mended"]
+    ok = (not res["refused"] and res["inv_open"] and res["inv_closed"]
+          and len(qs) >= 5 and qs[2] == "#Torch" and qs[3] == f"#{shield}" and qs[4] == f"#{potion}"
+          and res["torch_lit"] and res["torch_out"] and res["shield_worn"] == shield
+          and res["potion"]["hp_gain"] > 0 and res["potion"]["left"] == res["potion"]["was"] - 1 and res["quick_used"] >= 4
+          and wo["wear"] <= 0 and wo["still_worn"] == shield and wo["count"] == 1 and abs(wo["share_after"] - wo["share_before"] * 0.5) < 1e-3
+          and bool(md_["need"]) and abs(md_["wear"] - md_["full"]) < 0.5 and abs(md_["share"] - wo["share_before"]) < 1e-3
+          and md_["took"] == md_["need"] and md_["mends"] >= 1
+          and res["tap_left"] == 2 and res["held_left"] == 0 and res["stacks"] >= 1 and res["hold_moved"]["left"] == 2 and not res["hold_moved"]["why"]
+          and res["spare"]["count"] == 2 and res["spare"]["wear"] > 0 and abs(res["spare"]["share"] - wo["share_before"]) < 1e-3 and 0.0 in res["spare"]["spares"]
+          and res["repair_kit"]["line"] and res["repair_kit"]["mended"] and res["repair_kit"]["after"] > res["repair_kit"]["before"]
+          and res["dropdown_again"] == 4 and res["escape_from_dropdown"]["page"] == 3 and res["escape_from_dropdown"]["slot_kept"] == res["over_slot"]
+          and res["groups"]["order"][:1] == ["1repair"] and res["groups"]["repair_kind_ok"] and res["groups"]["contiguous"]
+          and not res["warrior_potions"] and not res["warrior_craft"]["made"] and "Only the Mage" in res["warrior_craft"]["message"]
+          and res["mage_potions"] > 0 and res["mage_craft"]
+          and res["food_points"] > 0 and "take the food" in res.get("food_prompt", "") and sum(res.get("food_got", {}).values()) > 0 and res.get("food_taken", 0) >= 1
+          and res["quest_option"] is not None and res["quest_toggled"]
+          and res["dropdown_page"] == 4 and res["over_slot"] and res["saves_after"] == res["saves_before"] and res["over_same_slot"])
+    step_result("list10", ok, **res)
+
+STEPS = {"list10": step_list10, "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

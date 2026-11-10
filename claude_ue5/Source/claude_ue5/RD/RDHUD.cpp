@@ -1923,6 +1923,15 @@ void ARDHUD::DrawInventory(float Sc)
 	UI.TextSize(Gen->PlayerTitle, Tw, Th, Small, Sc * 1.2f, ERDType::Title);
 	UI.Text(Gen->PlayerTitle, Gold, B.X - Pd - Tin - Tw, A.Y + 18.f * Sc, Small, Sc * 1.2f, ERDType::Title);
 	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 42.f * Sc, Small, Sc * 0.95f); }
+	// (the list of 2026-11-10: her purse, left of her hero's title, wherever gold is kept (the towns and every dungeon of the game))
+	if (Gen->bTown || Gen->bTownLink)
+	{
+		const FString Gd = FString::Printf(TEXT("GOLD  %d"), Gen->GetGold());
+		float Gw, Gh; UI.TextSize(Gd, Gw, Gh, Small, Sc * 1.2f, ERDType::Title);
+		const float Gx = B.X - Pd - Tin - Tw - 36.f * Sc - Gw;
+		if (UI.Has(TEXT("icon_gold"))) UI.Fit(TEXT("icon_gold"), FVector2D(Gx - 30.f * Sc, A.Y + 16.f * Sc), FVector2D(Gx - 4.f * Sc, A.Y + 42.f * Sc));
+		UI.Text(Gd, FLinearColor(1.f, 0.86f, 0.3f), Gx, A.Y + 18.f * Sc, Small, Sc * 1.2f, ERDType::Title);
+	}
 	// ---- the list (left)
 	const float Lx = A.X + Pd, Lw = W * 0.5f - Pd;
 	float Y = A.Y + 76.f * Sc + TabH;
@@ -2351,25 +2360,77 @@ void ARDHUD::DrawCrafting(float Sc)
 	const bool bOven = Cb->GetCraftStation() == TEXT("Oven");
 	UI.Text(bOven ? TEXT("THE OVEN") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
-	const FString Sub = bOven ? TEXT("bake food from the gardens' ingredients") : TEXT("make repair items  ·  break down the weapons you found");
+	const FString Sub = bOven ? TEXT("bake food from the gardens' ingredients") : TEXT("make repair items  ·  mend what is worn  ·  break down the weapons you found");
 	UI.TextSize(Sub, Tw, Th, Small, Sc * 1.05f);
 	UI.Text(Sub, Gold, B.X - Pd - Tin - Tw, A.Y + 22.f * Sc, Small, Sc * 1.05f);
 	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 46.f * Sc, Small, Sc * 0.95f); }
 	const float Lx = A.X + Pd, Lw = W * 0.42f - Pd;
 	float Y = A.Y + 80.f * Sc;
-	UI.Text(TEXT("RECIPES"), Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
-	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(Lx - 8.f * Sc, Y - 18.f * Sc), FVector2D(Lx + Lw + 8.f * Sc, Y + 12.f * Sc));
-	Y += 4.f * Sc;
 	TArray<TArray<FString>> Parsed;
-	// (level 5: the weapons to break down follow the recipes; a long list scrolls with the cursor)
-	const int32 Fit = FMath::Max(4, FMath::FloorToInt32((H - 80.f * Sc - 30.f * Sc - 40.f * Sc - 120.f * Sc) / Rh));
+	// (the list of 2026-11-10: the recipes under a heading for each group, repair items first and apart from the rest; then what
+	// she can mend, then what she can break down)
+	FString RecipeGroup;
+	auto GroupHead = [&](const FString& G)
+	{
+		const TCHAR* Hd = G == TEXT("1repair") ? TEXT("REPAIR ITEMS  (THEY MEND WHAT YOU WEAR AND WIELD)") : G == TEXT("2potion") ? TEXT("POTIONS")
+			: G == TEXT("3scroll") ? TEXT("SCROLLS") : G == TEXT("4food") ? TEXT("FOOD") : TEXT("OTHER THINGS");
+		if (!RecipeGroup.IsEmpty()) Y += 8.f * Sc;
+		RecipeGroup = G;
+		UI.Text(Hd, Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
+		if (bDivider) UI.Fit(TEXT("divider"), FVector2D(Lx - 8.f * Sc, Y - 18.f * Sc), FVector2D(Lx + Lw + 8.f * Sc, Y + 12.f * Sc));
+		Y += 4.f * Sc;
+	};
+	// (level 5: the weapons to break down follow the recipes; a long list scrolls with the cursor; the headings take some rows)
+	// (PR #38's review: every heading the list will draw (each recipe group, MEND, BREAK DOWN: about 38 px each) taken off its rows)
+	TSet<FString> HeadKinds;
+	for (const FString& Ln : Lines)
+	{
+		if (Ln.StartsWith(TEXT("recipe|"))) { int32 Bar = 0; Ln.FindLastChar(TEXT('|'), Bar); HeadKinds.Add(Ln.Mid(Bar + 1)); }
+		else if (Ln.StartsWith(TEXT("mend|"))) HeadKinds.Add(TEXT("mend"));
+		else if (Ln.StartsWith(TEXT("breakdown|"))) HeadKinds.Add(TEXT("breakdown"));
+	}
+	const float HeadsH = HeadKinds.Num() * 38.f * Sc;
+	const int32 Fit = FMath::Max(4, FMath::FloorToInt32((H - 80.f * Sc - 30.f * Sc - 40.f * Sc - 120.f * Sc - HeadsH) / Rh));
 	const int32 First = Lines.Num() > Fit ? FMath::Clamp(Cur - Fit / 2, 0, Lines.Num() - Fit) : 0;
-	bool bBreakHead = false;
+	bool bBreakHead = false, bMendHead = false;
 	for (int32 I = 0; I < Lines.Num(); ++I)
 	{
 		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"), false);
 		Parsed.Add(P);
 		if (P.Num() < 3 || I < First || I >= First + Fit) continue;
+		if (P[0] == TEXT("mend") && P.Num() >= 7)
+		{
+			// (the list of 2026-11-10: worn gear mended for half its materials)
+			if (!bMendHead)
+			{
+				bMendHead = true;
+				Y += 8.f * Sc;
+				UI.Text(TEXT("MEND  (HALF THE MATERIALS)"), Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;
+				if (bDivider) UI.Fit(TEXT("divider"), FVector2D(Lx - 8.f * Sc, Y - 18.f * Sc), FVector2D(Lx + Lw + 8.f * Sc, Y + 12.f * Sc));
+				Y += 4.f * Sc;
+			}
+			const bool bOn = I == Cur, bCan = P[3] == TEXT("1");
+			const FVector2D R0(Lx, Y), R1(Lx + Lw, Y + Rh - 4.f * Sc);
+			if (bOn)
+			{
+				const FRDUIArt* Pl = UI.Find(TEXT("button"));
+				if (bPlate) UI.Nine(TEXT("button"), R0 - FVector2D(4.f * Sc), R1 + FVector2D(4.f * Sc), (Rh + 4.f * Sc) / FMath::Max((float)Pl->Texture->GetSizeY(), 1.f), FLinearColor(1.25f, 1.05f, 0.7f));
+				else Box(R0, R1, FLinearColor(0.36f, 0.27f, 0.10f, 0.95f));
+				Frame(R0, R1, Gold, 2.f * Sc);
+			}
+			float Ix = 0.f;
+			const FName Ic = P[2].StartsWith(TEXT("w")) ? WeaponIcon(FCString::Atoi(*P[2].Mid(1))) : ItemIcon(FName(*P[2].Mid(1)));
+			if (UI.Has(Ic)) { Ix = Rh; UI.Fit(Ic, FVector2D(R0.X + 8.f * Sc, R0.Y - 2.f * Sc), FVector2D(R0.X + 4.f * Sc + Rh, R1.Y + 2.f * Sc)); }
+			float Nw, Nh, Nk = Sc * 1.1f;
+			UI.TextSize(P[1], Nw, Nh, Small, Nk);
+			if (Nw > Lw - Ix - 150.f * Sc) Nk *= FMath::Max((Lw - Ix - 150.f * Sc) / Nw, 0.7f);
+			UI.Text(P[1], bOn ? FLinearColor::White : FLinearColor(0.86f, 0.84f, 0.78f), R0.X + 12.f * Sc + Ix, R0.Y + 8.f * Sc, Small, Nk);
+			const FString Tag = FString::Printf(TEXT("%s / %s"), *P[5], *P[6]);
+			UI.TextSize(Tag, Tw, Th, Small, Sc, ERDType::Label);
+			UI.Text(Tag, bCan ? Have : Dim, R1.X - 12.f * Sc - Tw, R0.Y + 10.f * Sc, Small, Sc, ERDType::Label);
+			Y += Rh;
+			continue;
+		}
 		if (P[0] == TEXT("breakdown"))
 		{
 			if (!bBreakHead)
@@ -2404,6 +2465,7 @@ void ARDHUD::DrawCrafting(float Sc)
 			Y += Rh;
 			continue;
 		}
+		if (P[0] == TEXT("recipe")) { const FString G = P.Num() >= 5 ? P[4] : FString(TEXT("5other")); if (G != RecipeGroup) GroupHead(G); }
 		const bool bOn = I == Cur, bCan = P[2] == TEXT("1");
 		const FVector2D R0(Lx, Y), R1(Lx + Lw, Y + Rh - 4.f * Sc);
 		if (bOn)
@@ -2428,7 +2490,35 @@ void ARDHUD::DrawCrafting(float Sc)
 	Box(FVector2D(Rx - Pd * 0.5f, Ry), FVector2D(Rx - Pd * 0.5f + 1.f, B.Y - 110.f * Sc), FLinearColor(0.75f, 0.65f, 0.45f, 0.4f));
 	if (Lines.Num() > Fit)
 		UI.Text(FString::Printf(TEXT("%d more above,  %d more below"), First, Lines.Num() - First - Fit), Dim, Lx + 12.f * Sc, Y + 6.f * Sc, Small, Sc * 0.95f);
-	if (Parsed.IsValidIndex(Cur) && Parsed[Cur].Num() >= 5 && Parsed[Cur][0] == TEXT("breakdown"))
+	if (Parsed.IsValidIndex(Cur) && Parsed[Cur].Num() >= 7 && Parsed[Cur][0] == TEXT("mend"))
+	{
+		// (the list of 2026-11-10: a worn thing to mend: its durability, what mending it takes against what she has)
+		const TArray<FString>& P = Parsed[Cur];
+		const FName Ic = P[2].StartsWith(TEXT("w")) ? WeaponIcon(FCString::Atoi(*P[2].Mid(1))) : ItemIcon(FName(*P[2].Mid(1)));
+		const float Sz = 104.f * Sc;
+		if (UI.Has(Ic)) { UI.Fit(TEXT("slot"), FVector2D(Rx, Ry), FVector2D(Rx + Sz, Ry + Sz)); UI.Fit(Ic, FVector2D(Rx + 16.f * Sc, Ry + 14.f * Sc), FVector2D(Rx + Sz - 16.f * Sc, Ry + Sz - 14.f * Sc)); }
+		UI.Text(P[1].ToUpper(), FLinearColor::White, Rx + (UI.Has(Ic) ? Sz + 16.f * Sc : 0.f), Ry + Sz * 0.5f - 16.f * Sc, Medium, Sc * 1.05f, ERDType::Title);
+		Ry += Sz + 12.f * Sc;
+		UI.Text(FString::Printf(TEXT("Durability %s of %s: mended to full for half of what it breaks down into"), *P[5], *P[6]), RDInk, Rx, Ry, Small, Sc * 1.05f); Ry += 30.f * Sc;
+		UI.Text(TEXT("IT TAKES"), Dim, Rx, Ry, Small, Sc, ERDType::Label); Ry += 24.f * Sc;
+		TArray<FString> Parts; P[4].ParseIntoArray(Parts, TEXT(";"));
+		const float Cw = Rw * 0.5f;
+		for (int32 K = 0; K < Parts.Num(); ++K)
+		{
+			TArray<FString> Q; Parts[K].ParseIntoArray(Q, TEXT(":"), false);
+			if (Q.Num() < 3) continue;
+			const int32 Hv = FCString::Atoi(*Q[1]), Nd = FCString::Atoi(*Q[2]);
+			const float Px = Rx + (K % 2) * Cw, Py = Ry + (K / 2) * 27.f * Sc;
+			UI.Text(Q[0], FLinearColor(0.86f, 0.84f, 0.78f), Px, Py, Small, Sc);
+			const FString N = FString::Printf(TEXT("%d / %d"), Hv, Nd);
+			UI.TextSize(N, Tw, Th, Small, Sc, ERDType::Label);
+			UI.Text(N, Hv >= Nd ? Have : Lack, Px + Cw - 16.f * Sc - Tw, Py + 1.f * Sc, Small, Sc, ERDType::Label);
+		}
+		Ry += ((Parts.Num() + 1) / 2) * 27.f * Sc + 14.f * Sc;
+		UI.Text(P[3] == TEXT("1") ? (bPad ? TEXT("A  mend it") : TEXT("Enter  mend it")) : TEXT("You lack some of what it takes: breaking things down gives materials"),
+		        P[3] == TEXT("1") ? Gold : Dim, Rx, Ry, Small, Sc * 1.05f);
+	}
+	else if (Parsed.IsValidIndex(Cur) && Parsed[Cur].Num() >= 5 && Parsed[Cur][0] == TEXT("breakdown"))
 	{
 		// (level 5: a weapon to break down: what it gives, against what she carries)
 		const TArray<FString>& P = Parsed[Cur];
@@ -2467,6 +2557,9 @@ void ARDHUD::DrawCrafting(float Sc)
 		const bool bDrawn = P[3] == TEXT("1");
 		UI.Text(bDrawn ? TEXT("It is in your hands: draw another weapon first") : (bPad ? TEXT("A  break it down (it is gone)") : TEXT("Enter  break it down (it is gone)")),
 		        bDrawn ? Dim : Gold, Rx, Ry, Small, Sc * 1.05f);
+		// (the list of 2026-11-10: the whole stack with the button held)
+		if (!bDrawn && Gen->bInventoryTabs && BreakdownCount(P[2]) > 1)
+			UI.Text(bPad ? TEXT("Hold A  break down every one") : TEXT("Hold Enter  break down every one"), Gold, Rx, Ry + 28.f * Sc, Small, Sc * 1.05f);
 	}
 	else if (Parsed.IsValidIndex(Cur) && Parsed[Cur].Num() >= 3)
 	{
@@ -2506,8 +2599,8 @@ void ARDHUD::DrawCrafting(float Sc)
 	const float Fy = B.Y - 92.f * Sc;
 	if (bDivider) UI.Fit(TEXT("divider"), FVector2D(A.X + Pd, Fy - 20.f * Sc), FVector2D(B.X - Pd, Fy + 20.f * Sc));
 	if (Cb->MessageTime > -50.f && !Cb->Message.IsEmpty()) UI.Text(Cb->Message, FLinearColor(1.f, 0.93f, 0.75f), A.X + Pd + Tin, Fy + 14.f * Sc, Small, Sc * 1.15f);
-	const FString Keys = bPad ? TEXT("D-pad / left stick  select      A  make it / break it down      B or X  close")
-	                          : TEXT("W S / arrows / wheel  select      Enter or E  make it / break it down      F, Backspace or Tab  close");
+	const FString Keys = bPad ? TEXT("D-pad / left stick  select      A  make, mend, break down (held: the whole stack)      B or X  close")
+	                          : TEXT("W S / arrows / wheel  select      Enter or E  make, mend, break down (held: the whole stack)      F, Backspace or Tab  close");
 	UI.Text(Keys, Dim, A.X + Pd + Tin, Fy + 50.f * Sc, Small, Sc * 1.05f);
 }
 
@@ -2575,6 +2668,34 @@ void ARDHUD::DrawHotbar(float Sc)
 			UI.Text(URDCombatComponent::SlotLabel(Q), Q < 10 ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
 			continue;
 		}
+		// (the list of 2026-11-10: an item on the bar: its picture, how many she has (dim at none), a frame while it is in her hand)
+		const FName QIt = Q >= 0 && Qs.IsValidIndex(Q) && URDCombatComponent::IsQuickItem(Qs[Q]) ? URDCombatComponent::QuickItemOf(Qs[Q]) : NAME_None;
+		if (!QIt.IsNone())
+		{
+			const FVector2D A(X0 + Si * (S + Gp), Y0), B = A + FVector2D(S);
+			const int32 Cnt = Cb->GetItemCount(QIt);
+			const bool bReady = Cb->GetReadyAbility() == Qs[Q];
+			const bool bHeld = (Cb->IsTorchHeld() && Cb->GetTorchItem() == QIt) || Cb->GetWornShield() == QIt;
+			if (bSlot) { const FRDUIArt* Sa = UI.Find(TEXT("slot")); UI.Nine(TEXT("slot"), A, B, 12.f * Sc / FMath::Max((float)Sa->Border.X * Sa->Texture->GetSizeX(), 1.f), bReady || bHeld ? FLinearColor(1.15f, 1.05f, 0.85f) : FLinearColor(0.62f, 0.62f, 0.62f)); }
+			else Box(A, B, FLinearColor(0.06f, 0.06f, 0.08f, 0.85f));
+			const FName Ic = ItemIcon(QIt);
+			const FLinearColor Tint = Cnt <= 0 ? FLinearColor(0.35f, 0.35f, 0.35f) : (bReady || bHeld ? FLinearColor::White : FLinearColor(0.8f, 0.8f, 0.8f));
+			if (UI.Has(Ic)) UI.Fit(Ic, A + FVector2D(8.f * Sc), B - FVector2D(8.f * Sc), Tint);
+			else
+			{
+				TArray<FString> Ws; QIt.ToString().ParseIntoArray(Ws, TEXT(" "));
+				FString Ab; for (const FString& Wd : Ws) if (Wd.Len() > 0 && Ab.Len() < 3) Ab += Wd.Left(1).ToUpper();
+				UI.TextSize(Ab, Tw, Th, Small, Sc * 1.4f, ERDType::Title);
+				UI.Text(Ab, Tint, (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.4f, ERDType::Title);
+			}
+			const FString Ct = FString::Printf(TEXT("%d"), Cnt);
+			UI.TextSize(Ct, Tw, Th, Small, Sc * 0.9f);
+			UI.Text(Ct, Cnt <= 0 ? FLinearColor(1.f, 0.4f, 0.35f) : FLinearColor(0.95f, 0.92f, 0.8f), B.X - Tw - 5.f * Sc, B.Y - Th - 2.f * Sc, Small, Sc * 0.9f);
+			if (bHeld) Frame(A + FVector2D(3.f), B - FVector2D(3.f), FLinearColor(1.f, 0.6f, 0.25f, 0.95f), 2.f * Sc);
+			if (bReady) Frame(A + FVector2D(1.f), B - FVector2D(1.f), FLinearColor(0.55f, 0.85f, 1.f, 0.95f), 2.5f * Sc);
+			UI.Text(URDCombatComponent::SlotLabel(Q), Q < 10 ? FLinearColor(1.f, 0.82f, 0.35f) : FLinearColor(0.6f, 0.55f, 0.4f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
+			continue;
+		}
 		if (!Gen->Weapons.IsValidIndex(I))
 		{
 			// (an empty quick slot: dim, its number)
@@ -2620,6 +2741,14 @@ void ARDHUD::DrawHotbar(float Sc)
 		UI.Text(Key, bQuick && Q >= 10 ? FLinearColor(0.6f, 0.55f, 0.4f) : FLinearColor(1.f, 0.82f, 0.35f), A.X + 5.f * Sc, A.Y + 2.f * Sc, Small, Sc * 0.95f, ERDType::Title);
 		// (the third list: a weapon with a slash on it: a band of the slash's colour along the slot's foot)
 		if (const FRDSlashDef* Sl = Cb->SlashOf(I)) Box(FVector2D(A.X + 6.f * Sc, B.Y - 7.f * Sc), FVector2D(B.X - 6.f * Sc, B.Y - 3.f * Sc), FLinearColor(Sl->Color.R, Sl->Color.G, Sl->Color.B, 0.95f));
+		// (the list of 2026-11-10: a found weapon's durability left, a red bar over the foot on a dark track)
+		if (Wp.Durability > 0.f)
+		{
+			const float F = FMath::Clamp(Cb->GetWeaponWear(I) / Wp.Durability, 0.f, 1.f);
+			const float Bx0 = A.X + 6.f * Sc, Bx1 = B.X - 6.f * Sc, By0 = B.Y - 12.f * Sc, By1 = B.Y - 8.f * Sc;
+			Box(FVector2D(Bx0, By0), FVector2D(Bx1, By1), FLinearColor(0.08f, 0.02f, 0.02f, 0.85f));
+			if (F > 0.f) Box(FVector2D(Bx0, By0), FVector2D(Bx0 + (Bx1 - Bx0) * F, By1), FLinearColor(0.85f, 0.08f, 0.06f, 0.95f));
+		}
 		if (Wp.ManaCost > 0.f)
 		{
 			const FString Mc = FString::Printf(TEXT("%.0f"), Wp.ManaCost);
@@ -2666,7 +2795,7 @@ void ARDHUD::DrawMenu(float Sc)
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 	}
 	float Tw, Th;
-	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : TEXT("PAUSED");
+	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : Gen->GetMenuPage() == 4 ? TEXT("SAVE OVER WHICH SAVE?") : TEXT("PAUSED");
 	UI.TextSize(Head, Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
 	UI.Text(Head, RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
 	Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset();
@@ -2734,7 +2863,8 @@ void ARDHUD::DrawMenu(float Sc)
 		Y += Rh;
 	}
 	const FString Keys = !Gen->bOptionsMenu ? FString(TEXT("W S  choose      A D  volume      Enter  press      mouse  click or drag      Esc  back to the game"))
-	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Enter  save      Esc  back"))
+	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Left Right  the save to save over      Enter  save      Esc  back"))
+	                   : Gen->GetMenuPage() == 4 ? FString(TEXT("W S  choose      Enter  this one      Esc  back to the Save page"))
 	                   : Gen->GetMenuPage() == 1 ? FString(TEXT("W S  choose      A D  change      Enter  press      mouse  click or drag      Esc  back"))
 	                                             : FString(TEXT("W S  choose      Enter  press      mouse  click      Esc  back to the game"));
 	UI.TextSize(Keys, Tw, Th, Small, Sc);

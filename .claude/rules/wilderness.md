@@ -107,6 +107,13 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **PR #36's review (2026-11-09)**: an id's bits must hold the grid's whole span (11 bits a 120 m cell left a third of the continent empty: 2500 cells across), and a test must reach every part (its lines lay near Brokenspire); a check near a cell's edge takes the next cell's places too; what a director makes it takes away (its satchels); "something near" is something to do (an emptied spot, a cleared nest stopped the director); a pile of found things is not a harvest ("take the bread"); one helper per rule (the pieces' laying, the things' rolls, the tier's kinds).
 - **A memory reading of one run is not a measure**: `stream` read +1078 MB, then +119 MB in the same build (and +666, -191, +1638 before). Read it twice before blaming a change.
 
+## The list of 2026-11-10's first phase
+
+- **The encounter director sends nothing while anything is near her** (a point of interest, an animal, a monster within 45 m): on the plains something nearly always is, and a test waited 40 s for an ambush in vain. `ForceWildEncounter(<kind>)` sends one now.
+- **An ambush hunts** (`ARDMonster::bHunting`, a minute): from beyond its noticing distance and past its leash; it comes at its kind's own chase speed (a slow one at 1.5 m/s).
+- **A box that stops her must not be set on her**: the horse called or left where no spot beside her was found stood on her; its box waits until she is 2 m clear.
+- **A speed's run-up**: at 5.5 times her speed the gallop needs a couple of seconds to reach it; measured over a whole 4 s run it read 5.04. Measure after it is up to speed.
+
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).

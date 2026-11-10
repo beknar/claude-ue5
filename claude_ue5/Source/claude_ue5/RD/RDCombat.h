@@ -201,6 +201,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 Dashes = 0;
 	/** abilities made from the quick bar (UseAbility: a number key, or ready on the D-pad and the attack button) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 AbilitiesUsed = 0;
+	/** the list of 2026-11-10: items used from the quick bar (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 QuickItemsUsed = 0;
+	/** the list of 2026-11-10: whole stacks broken down at the anvil, gear mended at the anvil (tests) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 StacksBrokenDown = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 AnvilMends = 0;
 	/** what the last dash did: how far she meant to go (cm) and the monster it went at (none: straight ahead) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") float LastDashLength = 0.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") TWeakObjectPtr<ARDMonster> LastDashTarget;
@@ -301,6 +306,8 @@ public:
 	 *  it is not kept twice: its pieces mend the one she has to full. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourWear(FName Item) const { const float* W = ArmourWear.Find(Item); return W ? *W : 0.f; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourDurability(FName Item) const;
+	/** the list of 2026-11-10: a set of armour's or a shield's full durability (what a repair item mends; 0: neither) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetGearDurability(FName Item) const;
 	/** tests and the reel: set what is left of a set's durability */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetArmourWear(FName Item, float Value);
 	/** the share of her speed the worn set takes (0: none) */
@@ -342,6 +349,14 @@ public:
 	/** makes one (false: no such recipe, or she lacks what it takes); uses the parts up */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool Craft(FName Item);
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool CraftEntry();
+	/** the list of 2026-11-10: the button held on a line to break down: every one of that thing she has (the one in her hands or
+	 *  worn kept); how many were broken down */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") int32 CraftEntryAll();
+	/** the list of 2026-11-10: a worn found weapon ("w<index>") or shield or set of armour ("g<item>") mended to full at the anvil
+	 *  for half of what it breaks down into (rounded up) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") bool MendAtAnvil(const FString& Code);
+	/** half of each material an item breaks down into: "<item>:<she has>:<it takes>;..." and whether she has it all */
+	FString MendParts(FName Item, const FString& Type, bool& bCan) const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Combat") int32 ItemsCrafted = 0;
 	/** the frame the crafting panel was shut on (the generator's F, read after it in the same frame, must not open it again) */
 	uint64 CraftClosedFrame = 0;
@@ -479,6 +494,8 @@ public:
 	/** the torch in her left hand (on / off; false: she has none) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward") bool HoldTorch(bool bHold);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") bool IsTorchHeld() const { return bTorchHeld; }
+	/** the torch (or the ankh) she holds or last held */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") FName GetTorchItem() const { return TorchItem; }
 	/** the torch's light on her (tests) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") UPointLightComponent* GetTorchLight() const { return TorchLight; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward") UStaticMeshComponent* GetLeftHandMesh() const { return LeftComp; }
@@ -556,6 +573,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") TArray<FName> GetAbilities() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool UseAbility(FName Ability);
 	static bool IsAbility(FName Entry) { return Entry.ToString().StartsWith(TEXT("@")); }
+	/** the list of 2026-11-10: an item on the bar ("#<item>": a torch, a shield, a potion, the ankh), used as from the inventory */
+	static bool IsQuickItem(FName Entry) { return Entry.ToString().StartsWith(TEXT("#")); }
+	static FName QuickItemOf(FName Entry) { return FName(*Entry.ToString().Mid(1)); }
+	/** an item of a kind that goes on the bar (whether she carries it or not) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Mistward2") bool IsQuickableItem(FName Item) const;
+	/** an item put on the bar as an entry ("#<item>") */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward2") bool AssignQuickItem(int32 Slot, FName Item) { return AssignQuickEntry(Slot, FName(*(TEXT("#") + Item.ToString()))); }
 	/** a slot's number as the bar shows it: 1 to 9, 0, then 11, 12... (those have no key) */
 	static FString SlotLabel(int32 Slot) { return Slot < 10 ? FString::FromInt((Slot + 1) % 10) : FString::FromInt(Slot + 1); }
 	/** her weapon list's index of the weapon a slot names (-1: none, or an ability) */
@@ -888,6 +912,11 @@ private:
 	int32 RepairCursor = 0;
 	bool bCraftOpen = false;
 	int32 CraftCursor = 0;
+	/** the list of 2026-11-10: when the use button went down on a line to break down (real seconds; -1: not held), and whether the
+	 *  hold already broke down the whole stack */
+	double CraftHoldAt = -1.0;
+	bool bCraftHoldDone = false;
+	FString CraftHoldLine; int32 CraftHoldCursor = -1;
 	void WearDownArmour();
 	void RemoveCarried(FName Name, int32 Count);
 	void PlayUiSound(FName Key, FName Fallback);

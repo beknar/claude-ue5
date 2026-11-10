@@ -115,7 +115,8 @@ if "level" in STEPS:
     for k in ("Idle", "Walk", "Run"): d.set_editor_property(k.lower(), seqs.get(k))
     d.set_editor_property("walk_clip_speed", float(J["walk_speed_cm_s"])); d.set_editor_property("run_clip_speed", float(J.get("run_speed_cm_s", 260.0)))
     d.set_editor_property("gallop_from", 250.0); d.set_editor_property("saddle_bone", "saddle")
-    d.set_editor_property("price", 60.0); d.set_editor_property("speed_mul", 2.2); d.set_editor_property("rider_lift", 14.0)          # (her pelvis this far over the saddle bone)
+    # (the list of 2026-11-10: "at least 5x faster than what the player can move": 5.5 her own speed, 2.2 until then)
+    d.set_editor_property("price", 60.0); d.set_editor_property("speed_mul", 5.5); d.set_editor_property("rider_lift", 14.0)          # (her pelvis this far over the saddle bone)
     g.set_editor_property("horse_def", d)
     rc_map = {}
     for hero, ch in HERO_RIG.items():

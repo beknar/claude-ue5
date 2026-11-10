@@ -14,6 +14,11 @@ class CLAUDE_UE5_API ARDHorse : public AActor
 public:
 	ARDHorse();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TObjectPtr<USkeletalMeshComponent> Body;
+	/** the list of 2026-11-10 ("the player can walk through the horse"): a box round its body that stops pawns while it stands
+	 *  unridden; off while she rides it (her capsule is what moves then) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") TObjectPtr<class UBoxComponent> Blocker;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void SetBlocking(bool bOn);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsBlocking() const;
 	/** hers (bought), or the stable's own standing by the stable to be bought */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") bool bHers = false;
 	/** the clip it plays now ("idle", "walk", "run") and at what rate (tests) */

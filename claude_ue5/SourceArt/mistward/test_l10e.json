@@ -1,0 +1,186 @@
+{
+ "tag": "l10e",
+ "plan": [
+  "list10"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10",
+   "ok": true,
+   "refused": [],
+   "gold": 37,
+   "inv_open": true,
+   "cur_torch": true,
+   "cur_shield": true,
+   "cur_potion": true,
+   "slots": [
+    "Dagger",
+    "None",
+    "#Torch",
+    "#Kite Shield",
+    "#Small Healing Potion",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "inv_closed": true,
+   "torch_lit": true,
+   "torch_out": true,
+   "shield_worn": "Kite Shield",
+   "potion": {
+    "hp_gain": 14.0,
+    "left": 1,
+    "was": 2
+   },
+   "quick_used": 4,
+   "weapon": "Viking Shortsword",
+   "bar_after_weapon": [
+    "Dagger",
+    "Viking Shortsword",
+    "#Torch",
+    "#Kite Shield",
+    "#Small Healing Potion",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "worn_out": {
+    "blows": 24,
+    "wear": 0.0,
+    "still_worn": "Kite Shield",
+    "count": 1,
+    "share_before": 0.24,
+    "share_after": 0.12,
+    "message": "Your kite shield is worn out: it takes half as much of a blow until it is mended"
+   },
+   "mend_line": "mend|Kite Shield|gKite Shield|0|Iron Ingot:0:4;Steel Ingot:0:2|0|230",
+   "cur_mend": true,
+   "mended": {
+    "wear": 230.0,
+    "full": 230.0,
+    "share": 0.24,
+    "took": {
+     "Iron Ingot": 4,
+     "Steel Ingot": 2
+    },
+    "need": {
+     "Iron Ingot": 4,
+     "Steel Ingot": 2
+    },
+    "mends": 1
+   },
+   "spare": {
+    "swapped": true,
+    "blows": 24,
+    "wear": 230.0,
+    "full": 230.0,
+    "count": 2,
+    "spares": [
+     0.0
+    ],
+    "share": 0.24,
+    "message": "Your kite shield is worn out: you take up a whole one (the worn one goes in your pack)"
+   },
+   "repair_kit": {
+    "line": "armour|Kite Shield|201|230|230",
+    "mended": true,
+    "before": 201.2,
+    "after": 230.0
+   },
+   "cur_stack": true,
+   "tap_left": 2,
+   "cur_stack2": true,
+   "held_left": 0,
+   "stacks": 1,
+   "hold_moved": {
+    "left": 2,
+    "why": ""
+   },
+   "groups": {
+    "order": [
+     "1repair",
+     "5other"
+    ],
+    "repair": [
+     "Leather Strips",
+     "Patch Kit",
+     "Repair Kit",
+     "Slickstone",
+     "Whetstone"
+    ],
+    "repair_kind_ok": true,
+    "contiguous": true
+   },
+   "warrior_potions": [],
+   "warrior_craft": {
+    "made": false,
+    "message": "Only the Mage and the Martial Artist brew the small healing potion"
+   },
+   "mage_potions": 4,
+   "mage_craft": true,
+   "food_points": 16,
+   "food_prompt": "take the food (bread)",
+   "food_got": {
+    "Bread": 3,
+    "Cheese": 0,
+    "Fruit": 0
+   },
+   "food_taken": 1,
+   "quest_option": "choice|Quest window|On",
+   "quest_toggled": true,
+   "save_page": [
+    "text|Name|Mistward Castle day 1",
+    "choice|Save over|a new save  (Enter: choose a save)",
+    "button|Save (over the save of that name)",
+    "button|Back"
+   ],
+   "save_name": "Mistward Castle day 1",
+   "dropdown": [
+    "button|A new save",
+    "button|Mistward Castle day 1: Mistward Castle, 2026-11-10 01:16 (Warrior)",
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|save: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|Back"
+   ],
+   "dropdown_page": 4,
+   "over_slot": "save_mistward_castle_day_1_3d3f8a",
+   "after_pick": [
+    "text|Name|Mistward Castle day 1",
+    "choice|Save over|Mistward Castle day 1",
+    "button|Save (over \"Mistward Castle day 1\")",
+    "button|Back"
+   ],
+   "dropdown_again": 4,
+   "escape_from_dropdown": {
+    "page": 3,
+    "open": true,
+    "slot_kept": "save_mistward_castle_day_1_3d3f8a"
+   },
+   "saves_before": 4,
+   "saves_after": 4,
+   "over_same_slot": true,
+   "over_file": {
+    "before": 1794302196.0383577,
+    "after": 1794302200.487043
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_l10e_l10_inventory_gold.png",
+  "mw_l10e_l10_bar_torch.png",
+  "mw_l10e_l10_bar_weapon.png",
+  "mw_l10e_l10_anvil_mend.png",
+  "mw_l10e_l10_anvil_groups.png",
+  "mw_l10e_l10_food.png",
+  "mw_l10e_l10_quests_off.png",
+  "mw_l10e_l10_quests_on.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

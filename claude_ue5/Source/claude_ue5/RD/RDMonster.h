@@ -135,6 +135,9 @@ public:
 	 *  height alone, chases her straight, and gives up beyond WildLeash of its home */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bOpenGround = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FVector HomeAt = FVector::ZeroVector;
+	/** the list of 2026-11-10: an ambush's: it hunts her until HuntUntil (game seconds), from any distance under 150 m */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bHunting = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float HuntUntil = 0.f;
 	float WildLeash = 6000.f;
 	/** Brokenspire: the guard of the Mistward Hall it is (the game remembers which she killed) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") int32 GuardIndex = -1;

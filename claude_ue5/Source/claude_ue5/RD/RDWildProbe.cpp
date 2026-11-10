@@ -93,6 +93,28 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 	if (W.FarmsBiome >= 0) for (const FRDWildCrop& Cr : W.Biomes[W.FarmsBiome].Crops) Info += FString::Printf(TEXT("crop|%s|%.1f\n"), *Cr.Name, Cr.Weight);
 	bOk &= FFileHelper::SaveStringToFile(Info, *(Out / TEXT("info.txt")));
 
+	// (-Places: every place of the continent as the game makes them, cell by cell (PlacesIn: the towns, the quests' places, the
+	// villages, camps, houses, spawn points, ruins, ritual sites, caves and lairs), counted by kind and listed)
+	if (FParse::Param(*Params, TEXT("Places")))
+	{
+		TMap<FString, int32> Count; FString Txt;
+		const int32 Cx = FMath::CeilToInt((W.Xn - W.Xs) / FRDWildWorld::PlaceCellM), Cy = FMath::CeilToInt((W.Ye - W.Yw) / FRDWildWorld::PlaceCellM);
+		for (int32 I = 0; I < Cx; ++I)
+			for (int32 J = 0; J < Cy; ++J)
+			{
+				TArray<FRDWildPlace> Ps; W.PlacesIn(FIntPoint(I, J), Ps);
+				for (const FRDWildPlace& P : Ps)
+				{
+					++Count.FindOrAdd(P.Kind);
+					Txt += FString::Printf(TEXT("place|%s|%s|%.1f|%.1f|%d|%s\n"), *P.Kind, *P.Name, P.At.X, P.At.Y, P.Tier, *W.BiomeName(P.Biome));
+				}
+			}
+		FString Head = FString::Printf(TEXT("seed|%u\ncells|%d|%d\n"), Seed, Cx, Cy);
+		Count.KeySort(TLess<FString>());
+		for (const TPair<FString, int32>& C : Count) { Head += FString::Printf(TEXT("count|%s|%d\n"), *C.Key, C.Value); UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE places %s %d"), *C.Key, C.Value); }
+		bOk &= FFileHelper::SaveStringToFile(Head + Txt, *(Out / TEXT("places.txt")));
+	}
+
 	// (the points: what each is made of)
 	if (!Points.IsEmpty())
 	{

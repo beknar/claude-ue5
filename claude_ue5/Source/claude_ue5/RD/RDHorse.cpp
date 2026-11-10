@@ -13,6 +13,7 @@
 #include "RD/RDGameInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -33,6 +34,17 @@ ARDHorse::ARDHorse()
 	Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);           // (her capsule is what moves and collides)
 	Body->SetGenerateOverlapEvents(false);
 	Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	// (the list of 2026-11-10: a box that stops pawns (her, monsters, townsfolk) and nothing else: the camera passes, traces pass)
+	Blocker = CreateDefaultSubobject<UBoxComponent>(TEXT("Blocker"));
+	Blocker->SetupAttachment(Body);
+	Blocker->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Blocker->SetCollisionObjectType(ECC_WorldDynamic);
+	Blocker->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Blocker->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	Blocker->SetGenerateOverlapEvents(false);
+	Blocker->SetCanEverAffectNavigation(false);
+	Blocker->SetBoxExtent(FVector(100.f, 32.f, 70.f));
+	Blocker->SetRelativeLocation(FVector(0.f, 0.f, 95.f));
 }
 
 void ARDHorse::Init(const FRDHorseDef& InDef, bool bSecondColouring)
@@ -40,7 +52,27 @@ void ARDHorse::Init(const FRDHorseDef& InDef, bool bSecondColouring)
 	Def = InDef;
 	USkeletalMesh* M = bSecondColouring && Def.MeshB ? Def.MeshB.Get() : Def.Mesh.Get();
 	if (M) Body->SetSkeletalMesh(M);
+	// (the box from the mesh's own bounds: its body from the knees up, a little inside its outline)
+	if (M && Blocker)
+	{
+		const FBoxSphereBounds Bd = M->GetBounds();
+		const FVector E = Bd.BoxExtent, O = Bd.Origin;
+		const float Bottom = O.Z - E.Z, Top = O.Z + E.Z;
+		const float Z0 = Bottom + (Top - Bottom) * 0.3f;
+		Blocker->SetBoxExtent(FVector(FMath::Max(E.X * 0.85f, 20.f), FMath::Max(E.Y * 0.85f, 20.f), FMath::Max((Top - Z0) * 0.5f, 20.f)));
+		Blocker->SetRelativeLocation(FVector(O.X, O.Y, (Z0 + Top) * 0.5f));
+	}
 	PlayFor(0.f);
+}
+
+void ARDHorse::SetBlocking(bool bOn)
+{
+	if (Blocker) Blocker->SetCollisionEnabled(bOn ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+}
+
+bool ARDHorse::IsBlocking() const
+{
+	return Blocker && Blocker->GetCollisionEnabled() != ECollisionEnabled::NoCollision;
 }
 
 void ARDHorse::PlayFor(float Speed)
@@ -48,7 +80,8 @@ void ARDHorse::PlayFor(float Speed)
 	// (the walk up to a canter's speed, then the gallop; each at the rate its soles keep pace with the ground, held within reason)
 	FName Want = TEXT("idle"); UAnimSequenceBase* Clip = Def.Idle; float Rate = 1.f;
 	if (Speed > 40.f && Def.Walk && (Speed < Def.GallopFrom || !Def.Run)) { Want = TEXT("walk"); Clip = Def.Walk; Rate = FMath::Clamp(Speed / FMath::Max(Def.WalkClipSpeed, 1.f), 0.5f, 3.f); }
-	else if (Speed >= Def.GallopFrom && Def.Run) { Want = TEXT("run"); Clip = Def.Run; Rate = FMath::Clamp(Speed / FMath::Max(Def.RunClipSpeed, 1.f), 0.5f, 3.5f); }
+	// (the list of 2026-11-10: at five times her speed the gallop plays up to six times over: its legs keep up with the ground)
+	else if (Speed >= Def.GallopFrom && Def.Run) { Want = TEXT("run"); Clip = Def.Run; Rate = FMath::Clamp(Speed / FMath::Max(Def.RunClipSpeed, 1.f), 0.5f, 6.f); }
 	if (!Clip) return;
 	if (Want != ClipNow) { Body->PlayAnimation(Clip, true); ClipNow = Want; }
 	Body->SetPlayRate(Rate); RateNow = Rate;
@@ -101,6 +134,8 @@ bool ARDDungeonGenerator::CallHorse()
 	const FVector At = HorseSpotBeside(Her);
 	if (!Horse) Horse = SpawnHorseAt(At, Her->GetActorRotation().Yaw, true);
 	else { Horse->SetActorLocationAndRotation(At, FRotator(0.f, Her->GetActorRotation().Yaw, 0.f)); Horse->PlayFor(0.f); }
+	// (its box stops her only once she is clear of it: set down where she stands (no spot found beside her) it would hold her inside)
+	if (Horse) Horse->SetBlocking(false);
 	return Horse != nullptr;
 }
 
@@ -129,6 +164,7 @@ bool ARDDungeonGenerator::MountHorse()
 	if (!C || !Horse || bMounted || !PlayerCombat || PlayerCombat->IsDead()) return false;
 	if (PlayerCombat->IsBusyForMount()) { PlayerCombat->ShowMessage(TEXT("Not in the middle of a move")); return false; }
 	bMounted = true;
+	Horse->SetBlocking(false);          // (the list of 2026-11-10: ridden, it stops nothing: her capsule does)
 	// (no jump from the saddle: it lifted the horse; the generator's tick after her movement's, so the horse is put under where
 	// she is this frame, not where she was (it trailed her by 26 cm at a gallop: PR #37's review))
 	JumpWas = C->GetCharacterMovement()->JumpZVelocity; C->GetCharacterMovement()->JumpZVelocity = 0.f;
@@ -160,6 +196,7 @@ bool ARDDungeonGenerator::DismountHorse()
 		// (the horse left standing beside her, on the ground (PR #37's review: moved without a trace it floated on a slope))
 		if (Horse) { Horse->SetActorLocation(HorseSpotBeside(C)); Horse->PlayFor(0.f); }
 	}
+	if (Horse) Horse->SetBlocking(false);          // (on again once she is clear of it: TickHorse)
 	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); }
 	RiderClipNow = NAME_None;
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE dismounted"));
@@ -189,6 +226,8 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 			StableHorse = SpawnHorseAt(St->At, St->Yaw, false);
 		}
 	}
+	// (the list of 2026-11-10: unridden, its box on once she stands clear of it (2 m from its middle))
+	if (!bMounted && Horse && !Horse->IsBlocking() && FVector::Dist2D(C->GetActorLocation(), Horse->GetActorLocation()) > 200.f) Horse->SetBlocking(true);
 	if (!bMounted || !Horse) return;
 	// ---- riding: the horse under her, its clip by her speed; her root on its saddle, her rider clip by its gait
 	const float Hh = C->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
@@ -209,7 +248,7 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	{
 		const FName Want(*Horse->ClipNow.ToString());
 		// (at the horse's pace: her bounce in step with its stride (PR #37's review))
-		const float Rate = FMath::Clamp(Horse->RateNow, 0.5f, 3.f);
+		const float Rate = FMath::Clamp(Horse->RateNow, 0.5f, 6.f);          // (as the gallop's: in step with its stride, PR #38's review)
 		if (Want != RiderClipNow || !AI->IsSlotActive(RDHorseSlot))
 		{
 			RiderMontage = AI->PlaySlotAnimationAsDynamicMontage(Clip, RDHorseSlot, 0.25f, 0.25f, Rate, 10000);

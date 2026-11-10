@@ -246,6 +246,14 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **`888 secondary9` kills the Mill Road Den's pack**: run `quests` in another session.
 - **`quickbar` is martial_arts's step** (it expects her 11 weapons): run it with `-lv martial_arts`, not in a castle batch.
 
+## The list of 2026-11-10's first phase (`914`; on every map of the game)
+
+- **Python prints an enum as `<RDItemKind.REPAIR: 7>`**: a test's `str(kind).endswith("REPAIR")` matched nothing (the repair group and the weapon search found none). Test with `in`. A struct array (`weapon_fits`) is an `Array`, not a map: no `.keys()`.
+- **A save's info is stamped to the minute**: saving over it within the minute left the info string the same; measure the save file's modification time.
+- **The quest window in a dungeon stood over the minimap's tier lines** (the tracker's place was the town's, `ClipY * 0.47`); below them at 0.56 there, and cut to stop above the status panel. Look at a HUD change on a dungeon level and in a town.
+- **A whole stack on a held button**: a tap acts when the button is let go (a press that might become a hold must wait), held 0.6 s the whole stack; a recipe still acts on the press.
+- **The castle's prep table is the kit's mesh with its food modelled on it**: food to take needs the bare table (890's) and the town's food pieces, and the saved start section built again (its furniture is saved).
+
 ## The packaged game (`869`, `pipeline/package_mistward.ps1`, 2026-10-27)
 
 - **Play in the editor hides missing material usages**: the editor sets a usage a material lacks while it draws (in memory only, and the package did not even show as dirty), so the castle looked right in play while the packaged game drew 7 base materials' pieces (the furniture kit's iron, food, embers and flames; DarkHalls, Gothic Props, HallowedDepths, Medieval Weapons) in the default material, and the menu's two Fig4 studio materials lacked the Nanite usage. `869` sets and saves them; the menu's are saved every run. Look for "missing usage flag" in a Development package's log, never only in the editor's.

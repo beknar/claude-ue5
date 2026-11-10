@@ -1159,6 +1159,12 @@ float URDCombatComponent::GetArmourDurability(FName Item) const
 	return Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour ? Generator->Items[Ix].Durability : 0.f;
 }
 
+float URDCombatComponent::GetGearDurability(FName Item) const
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	return Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield) ? Generator->Items[Ix].Durability : 0.f;
+}
+
 void URDCombatComponent::SetArmourWear(FName Item, float Value)
 {
 	if (GetItemCount(Item) <= 0 || GetArmourDurability(Item) <= 0.f) return;
@@ -1217,7 +1223,7 @@ TArray<FString> URDCombatComponent::GetRepairLines() const
 	const float Share = Generator->Items[Ix].Amount;
 	for (const FName& N : CarriedOrder)
 	{
-		const float Full = GetArmourDurability(N);
+		const float Full = GetGearDurability(N);          // (the list of 2026-11-10: a shield too)
 		if (Full <= 0.f) continue;
 		const float Left = GetArmourWear(N);
 		Out.Add(FString::Printf(TEXT("armour|%s|%.0f|%.0f|%.0f"), *N.ToString(), Left, Full, FMath::Min(Full, Left + Full * Share)));
@@ -1253,7 +1259,7 @@ bool URDCombatComponent::RepairEntry(int32 Line)
 	const int32 Wi = bArmour ? -1 : FCString::Atoi(*P[1]);
 	if (!bArmour) { SyncWear(); if (!Wear.IsValidIndex(Wi) || !Generator->Weapons.IsValidIndex(Wi)) return false; }
 	const float Left = bArmour ? GetArmourWear(FName(*Name)) : Wear[Wi];
-	const float Full = bArmour ? GetArmourDurability(FName(*Name)) : Generator->Weapons[Wi].Durability;
+	const float Full = bArmour ? GetGearDurability(FName(*Name)) : Generator->Weapons[Wi].Durability;
 	const float After = FMath::Min(Full, Left + Full * Share);
 	const FString Kit = RepairWith.ToString().ToLower();
 	if (Left >= Full) { SetMessage(FString::Printf(TEXT("Your %s is whole already"), *Name.ToLower())); return false; }
@@ -1266,7 +1272,7 @@ bool URDCombatComponent::RepairEntry(int32 Line)
 	PlayUiSound(TEXT("Player.Repair"), TEXT("Player.Inventory"));
 	UE_LOG(LogTemp, Log, TEXT("RDREPAIR %s mended %s %.0f -> %.0f / %.0f"), *Used.ToString(), *Name, Left, After, Full);
 	if (GetItemCount(Used) <= 0) CancelRepair();
-	if (bArmour && FName(*Name) == WornArmour) UpdateWalkSpeed();
+	if (bArmour && (FName(*Name) == WornArmour || FName(*Name) == WornShield)) UpdateWalkSpeed();
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
 	return true;
 }
@@ -1278,6 +1284,7 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 	if (bOpen && bInventoryOpen) SetInventoryOpen(false);
 	KeyRepeatDir = 0;
 	bCraftOpen = bOpen;
+	CraftHoldAt = -1.0; bCraftHoldDone = false; CraftHoldLine.Reset();          // (PR #38's review: a hold never outlives the panel)
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); }
 	else CraftClosedFrame = GFrameCounter;
 	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
@@ -1316,11 +1323,50 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 		TArray<FString> Ps;
 		for (const FRDRecipePart& Pt : Rc.Parts) Ps.Add(FString::Printf(TEXT("%s:%d:%d"), *Pt.Label, PartHave(Pt), Pt.Count));
 		TMap<FName, int32> Take;          // (the recipe as it is, not looked up again by name: the PR review's find, every frame)
-		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s"), *Rc.Item.ToString(), PlanCraft(Rc, Take) ? 1 : 0, *FString::Join(Ps, TEXT(";"))));
+		// (the list of 2026-11-10: each recipe's group, its own section on the anvil: repair items apart from the rest)
+		const int32 Ri = Generator->FindItem(Rc.Item);
+		const ERDItemKind Rk = Ri >= 0 ? Generator->Items[Ri].Kind : ERDItemKind::Component;
+		const TCHAR* Grp = Rk == ERDItemKind::Repair ? TEXT("1repair") : (Rk == ERDItemKind::Healing || Rk == ERDItemKind::Mana || Rk == ERDItemKind::Speed) ? TEXT("2potion")
+			: Rk == ERDItemKind::Scroll ? TEXT("3scroll") : Rk == ERDItemKind::Food ? TEXT("4food") : TEXT("5other");
+		Out.Add(FString::Printf(TEXT("recipe|%s|%d|%s|%s"), *Rc.Item.ToString(), PlanCraft(Rc, Take) ? 1 : 0, *FString::Join(Ps, TEXT(";")), Grp));
 	}
-	if (Generator->bAlphabeticalCrafting) Out.Sort(ByName);
+	// (by group, then by name (or the table's order without alphabetical crafting: the sort is stable))
+	const bool bAlpha = Generator->bAlphabeticalCrafting;
+	Out.StableSort([&ByName, bAlpha](const FString& A, const FString& B)
+	{
+		int32 Ia = 0, Ib = 0; A.FindLastChar(TEXT('|'), Ia); B.FindLastChar(TEXT('|'), Ib);
+		const FString Ga = A.Mid(Ia + 1), Gb = B.Mid(Ib + 1);
+		return Ga != Gb ? Ga < Gb : (bAlpha && ByName(A, B));
+	});
 	const int32 NumRecipes = Out.Num();
 	if (!CraftStation.IsNone()) return Out;          // (an oven breaks nothing down)
+	// (the list of 2026-11-10: gear she carries that is worn, mended to full at the anvil for half of what it breaks down into:
+	// "mend|<name>|w<weapon index> or g<item>|<1 she has it all>|<part>:<has>:<needs>;...|<left>|<full>", before the breakdowns)
+	{
+		TArray<FString> Mends;
+		for (int32 I = 0; I < Generator->Weapons.Num(); ++I)
+		{
+			const FRDWeaponDef& W = Generator->Weapons[I];
+			if (W.Item.IsNone() || W.bScroll || W.Durability <= 0.f || GetWeaponWear(I) >= W.Durability) continue;
+			bool bCan = false; const FString Pt = MendParts(W.Item, W.WeaponType, bCan);
+			if (!Pt.IsEmpty()) Mends.Add(FString::Printf(TEXT("mend|%s|w%d|%d|%s|%.0f|%.0f"), *W.Name.ToString(), I, bCan ? 1 : 0, *Pt, GetWeaponWear(I), W.Durability));
+		}
+		for (const FName& N : CarriedOrder)
+		{
+			const int32 Ix = Generator->FindItem(N);
+			if (Ix < 0) continue;
+			const ERDItemKind K = Generator->Items[Ix].Kind;
+			if (K != ERDItemKind::Shield && K != ERDItemKind::Armour) continue;
+			const float Full = K == ERDItemKind::Shield ? Generator->Items[Ix].Durability : GetArmourDurability(N);
+			const float Left = K == ERDItemKind::Shield ? GetShieldWear(N) : GetArmourWear(N);
+			if (Full <= 0.f || Left >= Full) continue;
+			bool bCan = false; const FString Pt = MendParts(N, Generator->Items[Ix].WeaponType, bCan);
+			if (!Pt.IsEmpty()) Mends.Add(FString::Printf(TEXT("mend|%s|g%s|%d|%s|%.0f|%.0f"), *N.ToString(), *N.ToString(), bCan ? 1 : 0, *Pt, Left, Full));
+		}
+		if (Generator->bAlphabeticalCrafting) Mends.Sort(ByName);
+		Out.Append(Mends);
+	}
+	const int32 NumBeforeBreak = Out.Num();
 	// (mistward: armour (bArmourStacks) and shields she carries break down too: "breakdown|<name>|g<name>|<1 worn>|...")
 	for (const FName& N : CarriedOrder)
 	{
@@ -1352,13 +1398,79 @@ TArray<FString> URDCombatComponent::GetCraftLines() const
 			if (!Gives.IsEmpty()) Out.Add(FString::Printf(TEXT("breakdown|%s|i%s|0|%s"), *N.ToString(), *N.ToString(), *Gives));
 		}
 	}
-	if (Generator->bAlphabeticalCrafting && Out.Num() > NumRecipes)
+	if (Generator->bAlphabeticalCrafting && Out.Num() > NumBeforeBreak)
 	{
-		TArray<FString> Tail(Out.GetData() + NumRecipes, Out.Num() - NumRecipes);
+		TArray<FString> Tail(Out.GetData() + NumBeforeBreak, Out.Num() - NumBeforeBreak);
 		Tail.Sort(ByName);
-		for (int32 I = 0; I < Tail.Num(); ++I) Out[NumRecipes + I] = Tail[I];
+		for (int32 I = 0; I < Tail.Num(); ++I) Out[NumBeforeBreak + I] = Tail[I];
 	}
 	return Out;
+}
+
+FString URDCombatComponent::MendParts(FName Item, const FString& Type, bool& bCan) const
+{
+	// (half of each material it breaks down into, rounded up: "<item>:<she has>:<it takes>;...")
+	bCan = false;
+	const FString G = BreakdownText(Item, Type);
+	if (G.IsEmpty()) return FString();
+	TArray<FString> Ps; G.ParseIntoArray(Ps, TEXT(";"));
+	TArray<FString> Out;
+	bCan = true;
+	for (const FString& P : Ps)
+	{
+		FString N, C;
+		if (!P.Split(TEXT(":"), &N, &C)) continue;
+		const int32 Need = FMath::Max(1, (FCString::Atoi(*C) + 1) / 2), Have = GetItemCount(FName(*N));
+		bCan &= Have >= Need;
+		Out.Add(FString::Printf(TEXT("%s:%d:%d"), *N, Have, Need));
+	}
+	return FString::Join(Out, TEXT(";"));
+}
+
+bool URDCombatComponent::MendAtAnvil(const FString& Code)
+{
+	if (!Generator || bDead || Code.Len() < 2) return false;
+	FName Item; FString Type, Nm; int32 Wi = -1;
+	if (Code.StartsWith(TEXT("w")))
+	{
+		Wi = FCString::Atoi(*Code.Mid(1));
+		if (!Generator->Weapons.IsValidIndex(Wi)) return false;
+		const FRDWeaponDef& W = Generator->Weapons[Wi];
+		Item = W.Item; Type = W.WeaponType; Nm = W.Name.ToString();
+		if (W.Durability <= 0.f || GetWeaponWear(Wi) >= W.Durability) { SetMessage(FString::Printf(TEXT("The %s needs no mending"), *Nm.ToLower())); return false; }
+	}
+	else
+	{
+		Item = FName(*Code.Mid(1)); Nm = Item.ToString();
+		const int32 Ix = Generator->FindItem(Item);
+		if (Ix < 0 || GetItemCount(Item) <= 0) return false;
+		Type = Generator->Items[Ix].WeaponType;
+	}
+	bool bCan = false;
+	const FString Pt = MendParts(Item, Type, bCan);
+	if (Pt.IsEmpty()) return false;
+	TArray<FString> Ps; Pt.ParseIntoArray(Ps, TEXT(";"));
+	if (!bCan)
+	{
+		TArray<FString> Miss;
+		for (const FString& P : Ps) { TArray<FString> Q; P.ParseIntoArray(Q, TEXT(":")); if (Q.Num() == 3 && FCString::Atoi(*Q[1]) < FCString::Atoi(*Q[2])) Miss.Add(FString::Printf(TEXT("%d %s"), FCString::Atoi(*Q[2]) - FCString::Atoi(*Q[1]), *Q[0].ToLower())); }
+		SetMessage(FString::Printf(TEXT("To mend the %s you need %s more"), *Nm.ToLower(), *FString::Join(Miss, TEXT(", "))));
+		return false;
+	}
+	TArray<FString> Took;
+	for (const FString& P : Ps) { TArray<FString> Q; P.ParseIntoArray(Q, TEXT(":")); if (Q.Num() == 3) { RemoveCarried(FName(*Q[0]), FCString::Atoi(*Q[2])); Took.Add(FString::Printf(TEXT("%s %s"), *Q[2], *Q[0].ToLower())); } }
+	if (Wi >= 0) { SyncWear(); if (Wear.IsValidIndex(Wi)) Wear[Wi] = Generator->Weapons[Wi].Durability; }
+	else
+	{
+		const int32 Ix = Generator->FindItem(Item);
+		ArmourWear.FindOrAdd(Item) = Generator->Items[Ix].Kind == ERDItemKind::Shield ? Generator->Items[Ix].Durability : GetArmourDurability(Item);
+		UpdateWalkSpeed();
+	}
+	++AnvilMends;
+	SetMessage(FString::Printf(TEXT("You mend the %s at the anvil:  %s"), *Nm.ToLower(), *FString::Join(Took, TEXT(", "))));
+	PlayUiSound(TEXT("Player.Craft"), TEXT("Player.Loot"));
+	UE_LOG(LogTemp, Log, TEXT("RDMEND %s at the anvil (%s)"), *Nm, *Pt);
+	return true;
 }
 
 FString URDCombatComponent::BreakdownText(FName Item, const FString& Type) const
@@ -1482,11 +1594,63 @@ bool URDCombatComponent::CraftEntry()
 	if (!L.IsValidIndex(CraftCursor)) return false;
 	TArray<FString> P; L[CraftCursor].ParseIntoArray(P, TEXT("|"));
 	if (P.Num() >= 2 && P[0] == TEXT("recipe")) return Craft(FName(*P[1]));
+	if (P.Num() >= 3 && P[0] == TEXT("mend")) { const bool bM = MendAtAnvil(P[2]); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); return bM; }
 	if (P.Num() < 3 || P[0] != TEXT("breakdown")) return false;
 	const bool bOk = P[2].StartsWith(TEXT("w")) ? BreakDownWeapon(FCString::Atoi(*P[2].Mid(1)))
 	               : P[2].StartsWith(TEXT("g")) ? BreakDownGear(FName(*P[2].Mid(1))) : BreakDownItem(FName(*P[2].Mid(1)));
 	CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1));
 	return bOk;
+}
+
+int32 URDCombatComponent::CraftEntryAll()
+{
+	if (!Generator) return 0;
+	const TArray<FString> L = GetCraftLines();
+	if (!L.IsValidIndex(CraftCursor)) return 0;
+	TArray<FString> P; L[CraftCursor].ParseIntoArray(P, TEXT("|"));
+	if (P.Num() < 3 || P[0] != TEXT("breakdown")) return CraftEntry() ? 1 : 0;
+	// (what she had before, to say what the whole stack gave)
+	const TMap<FName, int32> Before = Carried;
+	int32 Done = 0; FString Name = P[1];
+	if (P[2].StartsWith(TEXT("w")))
+	{
+		// (every found weapon of the same item but the one in her hands)
+		const int32 W0 = FCString::Atoi(*P[2].Mid(1));
+		if (!Generator->Weapons.IsValidIndex(W0)) return 0;
+		const FName Item = Generator->Weapons[W0].Item;
+		for (int32 Guard = 0; Guard < 200; ++Guard)
+		{
+			int32 Pick = -1;
+			for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (Generator->Weapons[I].Item == Item && I != WeaponIndex) { Pick = I; break; }
+			if (Pick < 0 || !BreakDownWeapon(Pick)) break;
+			++Done;
+		}
+	}
+	else
+	{
+		const FName Item(*P[2].Mid(1));
+		const bool bGear = P[2].StartsWith(TEXT("g"));
+		for (int32 Guard = 0; Guard < 200 && GetItemCount(Item) > 0; ++Guard)
+		{
+			if (!(bGear ? BreakDownGear(Item) : BreakDownItem(Item))) break;
+			++Done;
+		}
+	}
+	if (Done > 1)
+	{
+		TArray<FString> Got;
+		for (const TPair<FName, int32>& C : Carried)
+		{
+			const int32* B = Before.Find(C.Key);
+			const int32 D = C.Value - (B ? *B : 0);
+			if (D > 0) Got.Add(FString::Printf(TEXT("%d %s"), D, *C.Key.ToString().ToLower()));
+		}
+		SetMessage(FString::Printf(TEXT("You break down %d %s:  %s"), Done, *Name.ToLower(), *FString::Join(Got, TEXT(", "))));
+	}
+	StacksBrokenDown += Done > 0 ? 1 : 0;
+	CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1));
+	UE_LOG(LogTemp, Log, TEXT("RDBREAKDOWN stack %s: %d"), *Name, Done);
+	return Done;
 }
 
 TArray<USkeletalMeshComponent*> URDCombatComponent::GetArmourMeshes() const
@@ -1791,7 +1955,27 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 	{
 		if (bToggle || Pressed({ EKeys::F, EKeys::BackSpace, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_FaceButton_Left })) { SetCraftingOpen(false); return; }
 		Steer([this](int32 S) { MoveCraftCursor(S); });
-		if (bUse) CraftEntry();
+		// (the list of 2026-11-10: on a line to break down, a tap breaks down one when let go, the button held 0.6 s the whole stack;
+		// a recipe is made as the button goes down, as before)
+		// (PR #38's review: the hold keeps the line it began on; the cursor moved off it, or the line gone, ends it with nothing done;
+		// the lines are read only while a button is down or a hold runs, not every frame)
+		const double Now = FPlatformTime::Seconds();
+		if (bUse)
+		{
+			const TArray<FString> Cl = GetCraftLines();
+			if (Cl.IsValidIndex(CraftCursor) && Cl[CraftCursor].StartsWith(TEXT("breakdown|"))) { CraftHoldAt = Now; bCraftHoldDone = false; CraftHoldLine = Cl[CraftCursor]; CraftHoldCursor = CraftCursor; }
+			else { CraftHoldAt = -1.0; CraftEntry(); }
+		}
+		else if (CraftHoldAt >= 0.0)
+		{
+			const bool bHeld = PC->IsInputKeyDown(EKeys::Enter) || PC->IsInputKeyDown(EKeys::SpaceBar) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom)
+				|| PC->IsInputKeyDown(EKeys::E) || (!bMouse && PC->IsInputKeyDown(EKeys::LeftMouseButton));
+			const TArray<FString> Cl = GetCraftLines();
+			const bool bSame = CraftCursor == CraftHoldCursor && Cl.IsValidIndex(CraftCursor) && Cl[CraftCursor] == CraftHoldLine;
+			if (!bSame) CraftHoldAt = -1.0;
+			else if (bHeld && !bCraftHoldDone && Now - CraftHoldAt >= 0.6) { CraftEntryAll(); bCraftHoldDone = true; CraftHoldLine.Reset(); }
+			else if (!bHeld) { if (!bCraftHoldDone) CraftEntry(); CraftHoldAt = -1.0; }
+		}
 		return;
 	}
 	if (!bInventoryOpen) { if (bToggle && !bDead) SetInventoryOpen(true); return; }
@@ -1846,7 +2030,10 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 		if (L.IsValidIndex(InventoryCursor)) L[InventoryCursor].ParseIntoArray(P, TEXT("|"), false);
 		const int32 Wi = P.Num() >= 5 && P[0] == TEXT("weapon") ? FCString::Atoi(*P[4]) : -1;
 		// (an ability's line: "@<name>" on the bar)
-		const FName Ab = P.Num() >= 2 && P[0] == TEXT("ability") ? FName(*(TEXT("@") + P[1])) : NAME_None;
+		FName Ab = P.Num() >= 2 && P[0] == TEXT("ability") ? FName(*(TEXT("@") + P[1])) : NAME_None;
+		// (the list of 2026-11-10: a torch, a shield, a potion or the ankh: "#<item>" on the bar)
+		if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("shield") || P[0] == TEXT("torch")) && IsQuickableItem(FName(*P[1])))
+			Ab = FName(*(TEXT("#") + P[1]));
 		if (Generator->bQuickSlots)
 		{
 			// (the slot the gamepad's Y puts it into: any of the bar's, or one past its end (a new slot))

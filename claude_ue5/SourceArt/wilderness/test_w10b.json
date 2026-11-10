@@ -1,0 +1,187 @@
+{
+ "tag": "w10b",
+ "plan": [
+  "list10w",
+  "horse9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "list10w",
+   "ok": false,
+   "storm": {
+    "weather": 5,
+    "held": true,
+    "sky": "storm|1.00|1.00|1.00|0.45|0|1|540|1|0.000|0.000|1000000|1|0|0"
+   },
+   "fog": {
+    "weather": 7,
+    "held": true
+   },
+   "auto": {
+    "weather": 7,
+    "held": false
+   },
+   "goto": {
+    "town": "Ashenreach",
+    "loaded": 1.0,
+    "secs": 1.2,
+    "from_site_m": 202.7
+   },
+   "back": "Brokenspire",
+   "ambush": {
+    "hunters": 2,
+    "track_m": [
+     56.9,
+     56.1,
+     55.4,
+     54.7,
+     54.0,
+     53.2,
+     52.5,
+     51.7,
+     51.0,
+     50.3,
+     49.5,
+     48.8,
+     48.0,
+     47.3,
+     46.6,
+     45.8,
+     45.1,
+     44.3,
+     43.6,
+     42.9,
+     42.2,
+     41.4,
+     40.7,
+     40.0
+    ],
+    "aggro_m": 25.0
+   }
+  },
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    550,
+    20550
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 0.0,
+    "mounted": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "clip": "none",
+    "rate": 0.0,
+    "speed": 0.0,
+    "saddle_z": 0.0,
+    "pelvis_z": 95.6,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": -1.0
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 543.0,
+    "y": 20520.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 156.4,
+    "pelvis_z": 95.5,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 220.5
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 64
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140565.0,
+    "y": -1591990.0,
+    "z": -1911.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1754.3,
+    "pelvis_z": -1740.3,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "attack_refused": true,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 141314.0,
+    "y": -1591766.0,
+    "z": -1932.0,
+    "clip": "run",
+    "rate": 5.21,
+    "speed": 1355.0,
+    "saddle_z": -1775.5,
+    "pelvis_z": -1761.5,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "speed_m_s": {
+    "foot": 3.42,
+    "mounted": 19.43,
+    "ratio": 5.69,
+    "want": 5.5,
+    "after": 3.39
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155017.0,
+    "y": -1587978.0,
+    "z": -2151.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1994.8,
+    "pelvis_z": -2056.4,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 190.8
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_w10b_horse_idle.png",
+  "wd_w10b_horse_side.png",
+  "wd_w10b_horse_back.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

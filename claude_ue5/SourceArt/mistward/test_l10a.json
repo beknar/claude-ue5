@@ -1,0 +1,623 @@
+{
+ "tag": "l10a",
+ "plan": [
+  "list10",
+  "shields",
+  "recipes",
+  "gearbreak",
+  "slots",
+  "tabs",
+  "options"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10",
+   "ok": false,
+   "refused": [],
+   "gold": 37,
+   "inv_open": true,
+   "cur_torch": true,
+   "cur_shield": true,
+   "cur_potion": true,
+   "slots": [
+    "Dagger",
+    "None",
+    "#Torch",
+    "#Kite Shield",
+    "#Small Healing Potion",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "inv_closed": true,
+   "torch_lit": true,
+   "torch_out": true,
+   "shield_worn": "Kite Shield",
+   "potion": {
+    "hp_gain": 14.0,
+    "left": 1,
+    "was": 2
+   },
+   "quick_used": 4,
+   "weapon": null,
+   "worn_out": {
+    "blows": 24,
+    "wear": 0.0,
+    "still_worn": "Kite Shield",
+    "count": 1,
+    "share_before": 0.24,
+    "share_after": 0.12,
+    "message": "Your kite shield is worn out: it takes half as much of a blow until it is mended"
+   },
+   "mend_line": "mend|Kite Shield|gKite Shield|0|Iron Ingot:0:4;Steel Ingot:0:2|0|230",
+   "cur_mend": true,
+   "mended": {
+    "wear": 230.0,
+    "full": 230.0,
+    "share": 0.24,
+    "took": {
+     "Iron Ingot": 4,
+     "Steel Ingot": 2
+    },
+    "need": {
+     "Iron Ingot": 4,
+     "Steel Ingot": 2
+    },
+    "mends": 1
+   },
+   "cur_stack": true,
+   "tap_left": 2,
+   "cur_stack2": true,
+   "held_left": 0,
+   "stacks": 1,
+   "groups": {
+    "order": [
+     "1repair",
+     "5other"
+    ],
+    "repair": [
+     "Leather Strips",
+     "Patch Kit",
+     "Repair Kit",
+     "Slickstone",
+     "Whetstone"
+    ],
+    "repair_kind_ok": false,
+    "contiguous": true
+   },
+   "warrior_potions": [],
+   "warrior_craft": {
+    "made": false,
+    "message": "Only the Mage and the Martial Artist brew the small healing potion"
+   },
+   "mage_potions": 4,
+   "mage_craft": true,
+   "food_points": 16,
+   "food_prompt": "take the food (bread)",
+   "food_got": {
+    "Bread": 3,
+    "Cheese": 0,
+    "Fruit": 0
+   },
+   "food_taken": 1,
+   "quest_option": "choice|Quest window|On",
+   "quest_toggled": true,
+   "save_page": [
+    "text|Name|Mistward Castle day 1",
+    "choice|Save over|a new save  (Enter: choose a save)",
+    "button|Save",
+    "button|Back"
+   ],
+   "save_name": "Mistward Castle day 1",
+   "dropdown": [
+    "button|A new save",
+    "button|Mistward Castle day 1: Mistward Castle, 2026-11-10 00:23 (Warrior)",
+    "button|Test Save 7: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|save: the wilds: farms, 3 km from Brokenspire, 2026-11-07 09:39 (Summoner)",
+    "button|Back"
+   ],
+   "dropdown_page": 4,
+   "over_slot": "save_mistward_castle_day_1_3d3f8a",
+   "after_pick": [
+    "text|Name|Mistward Castle day 1",
+    "choice|Save over|Mistward Castle day 1",
+    "button|Save (over \"Mistward Castle day 1\")",
+    "button|Back"
+   ],
+   "saves_before": 4,
+   "saves_after": 4,
+   "over_same_slot": false
+  },
+  {
+   "step": "shields",
+   "ok": true,
+   "start": {
+    "worn": "None",
+    "in_hand": false,
+    "share": 0.0,
+    "start_shield": "None",
+    "want_share": null
+   },
+   "speed": {
+    "with": 321.6,
+    "without": 353.4,
+    "taken_off_in_hand": false,
+    "back_on": "Heater Shield",
+    "measured_share": 0.09,
+    "want_share": 0.09
+   },
+   "blow": {
+    "lost": 32.0,
+    "want_lost": 32.0,
+    "shield_lost": 8.0
+   },
+   "kite": {
+    "count": 2,
+    "spares": 1,
+    "worn": "Kite Shield",
+    "share": 0.24,
+    "want_share": 0.24,
+    "broke_down": true,
+    "count_after": 1,
+    "materials": {
+     "Iron Ingot": 8,
+     "Steel Ingot": 4,
+     "Timber": 0
+    },
+    "last_refused": true,
+    "refused_says": "You wear the kite shield: take it off first",
+    "anvil_line": [
+     "breakdown|Kite Shield|gKite Shield|1|Iron Ingot:8;Steel Ingot:4"
+    ]
+   },
+   "mage": {
+    "wore": false,
+    "says": "The mage carries no shield"
+   }
+  },
+  {
+   "step": "recipes",
+   "ok": true,
+   "highest": 1,
+   "offered_t1": [
+    "Leather Strips",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Whetstone",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Scroll of Ash Ward",
+    "Scroll of Dark Fire",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Angel Token",
+    "Torch"
+   ],
+   "small": {
+    "made": true,
+    "count": 1,
+    "faint_left": 2,
+    "ichor_left": 2
+   },
+   "large_t1": {
+    "made": false,
+    "message": "The large healing potion is of tier 2: the anvil makes it once tier 2 is open"
+   },
+   "highest_after": 2,
+   "offered_t2": [
+    "Leather Strips",
+    "Patch Kit",
+    "Repair Kit",
+    "Slickstone",
+    "Whetstone",
+    "Large Healing Potion",
+    "Large Mana Potion",
+    "Medium Healing Potion",
+    "Medium Mana Potion",
+    "Small Healing Potion",
+    "Small Mana Potion",
+    "Uncommon Healing Potion",
+    "Uncommon Mana Potion",
+    "Scroll of Ash Ward",
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Dispel Hex",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Iron Skin",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash",
+    "Angel Token",
+    "Torch"
+   ],
+   "large_t2": {
+    "made": true,
+    "count": 1
+   },
+   "scrolls": {
+    "Warrior": 0,
+    "MartialArtist": 0,
+    "Mage": 11,
+    "Warlock": 8,
+    "Summoner": 11
+   },
+   "mage_scrolls": [
+    "Scroll of Ash Ward",
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Dispel Hex",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Iron Skin",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "warlock_scrolls": [
+    "Scroll of Blood Nova",
+    "Scroll of Bone Spear",
+    "Scroll of Chain Lightning",
+    "Scroll of Dark Fire",
+    "Scroll of Fire Bolt",
+    "Scroll of Frost Shard",
+    "Scroll of Life Drain",
+    "Scroll of Shadow Lash"
+   ],
+   "fire_scroll": {
+    "made": true,
+    "count": 1,
+    "faint_left": 0,
+    "venom_left": 0
+   },
+   "wood_glue": {
+    "Slickstone": 5,
+    "Patch Kit": 10,
+    "Repair Kit": 15,
+    "Torch": 1
+   },
+   "slickstone": {
+    "made": true,
+    "wood_glue_left": 1
+   },
+   "great": {
+    "Null Sanctum": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "troll heart",
+      3
+     ]
+    ],
+    "Apocalypse": [
+     [
+      "radiant essence",
+      6
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ],
+    "Meteor Storm": [
+     [
+      "radiant essence",
+      4
+     ],
+     [
+      "daemon ash",
+      3
+     ]
+    ]
+   },
+   "fires": {
+    "Env.Torch": [
+     0.044,
+     0.044
+    ],
+    "Env.Brazier": [
+     0.052,
+     0.052
+    ],
+    "Env.Hearth": [
+     0.068,
+     0.068
+    ]
+   }
+  },
+  {
+   "step": "gearbreak",
+   "ok": true,
+   "listed": [
+    "HP Potency Ring 3",
+    "Torch"
+   ],
+   "ring": {
+    "ok": true,
+    "left": 1
+   },
+   "worn": true,
+   "ring_worn": {
+    "ok": false,
+    "message": "You wear the hp potency ring 3: take it off first",
+    "left": 1
+   },
+   "torch_lit": {
+    "held": true,
+    "ok": false,
+    "message": "The torch burns in your hand: put it out first"
+   },
+   "torch": {
+    "held": false,
+    "ok": true,
+    "left": 0
+   },
+   "got": {
+    "Copper Ingot": 2,
+    "Bronze Ingot": 2,
+    "Faint Essence": 2,
+    "Wood Log": 1,
+    "Straw Rope": 1,
+    "Oils": 1
+   }
+  },
+  {
+   "step": "slots",
+   "ok": true,
+   "slots_filled": [
+    "Dagger",
+    "Arming Sword",
+    "Longbow",
+    "Viking Sword",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "refused": [],
+   "after_5": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "Viking Sword",
+    "Longbow",
+    "None",
+    "None",
+    "None",
+    "None",
+    "None"
+   ],
+   "assign_slot": 7,
+   "after_y": [
+    "Dagger",
+    "Arming Sword",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "None",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "after_rmb": [
+    "Dagger",
+    "None",
+    "None",
+    "None",
+    "Longbow",
+    "None",
+    "Arming Sword",
+    "Viking Sword",
+    "None",
+    "None"
+   ],
+   "drawn_seq": [
+    "Longbow",
+    "Dagger",
+    "Longbow",
+    "Arming Sword",
+    "Longbow"
+   ]
+  },
+  {
+   "step": "tabs",
+   "ok": true,
+   "tabs": {
+    "0": {
+     "kinds": [
+      "weapon"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    },
+    "1": {
+     "kinds": [
+      "armour",
+      "shield"
+     ],
+     "lines": 2,
+     "all_its_own": true
+    },
+    "2": {
+     "kinds": [
+      "item"
+     ],
+     "lines": 1,
+     "all_its_own": true
+    },
+    "3": {
+     "kinds": [
+      "component",
+      "repair"
+     ],
+     "lines": 2,
+     "all_its_own": true
+    },
+    "4": {
+     "kinds": [
+      "key",
+      "ring",
+      "slash"
+     ],
+     "lines": 3,
+     "all_its_own": true
+    }
+   },
+   "refused": [],
+   "lines_total": 11,
+   "lines_in_tabs": 11,
+   "key_tabs": [
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "tab_boxes": 5,
+   "clicked_tab": 3,
+   "e_on_potions": {
+    "tab_after": 3,
+    "drunk": 0
+   },
+   "daggers_lines": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|52|52|1|2|"
+   ],
+   "daggers_after_wear": [
+    "weapon|Dagger|0|0|0|1|",
+    "weapon|Dagger|20|52|1|1|",
+    "weapon|Dagger|52|52|2|1|"
+   ],
+   "anvil_kite": true,
+   "anvil_says": "You break down the kite shield:  8 iron ingot, 4 steel ingot   (1 left)",
+   "anvil_dagger": true,
+   "anvil_dagger_says": "You break down the dagger:  2 steel ingot, 3 iron ingot, 2 cured leather strip   (1 left)"
+  },
+  {
+   "step": "options",
+   "ok": false,
+   "controls_before": true,
+   "open": {
+    "why": "",
+    "open": true,
+    "page": 0,
+    "lines": [
+     "button|Resume",
+     "button|Save the game",
+     "button|Load a game",
+     "button|Options",
+     "button|Return to Brokenspire",
+     "button|Choose another hero (a new game)",
+     "button|Quit"
+    ]
+   },
+   "options": {
+    "page": 1,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|1.00",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|On",
+     "choice|Quest window|On",
+     "choice|Resolution|the screen's own (windowed fullscreen)",
+     "choice|Display mode|Windowed fullscreen",
+     "button|Apply display settings",
+     "button|Back"
+    ],
+    "action": "options"
+   },
+   "controls_off": {
+    "shown": false,
+    "line": "choice|Controls hint|Off"
+   },
+   "volume": {
+    "before": 1.0,
+    "after": 0.9
+   },
+   "display": {
+    "choices": [
+     "1280x720",
+     "1600x900",
+     "1920x1080",
+     "2560x1440",
+     "3840x2160"
+    ],
+    "from": [
+     1920,
+     1080
+    ],
+    "to": [
+     2560,
+     1440
+    ],
+    "mode": 2,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|0.90",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|Off",
+     "choice|Quest window|On",
+     "choice|Resolution|2560 x 1440",
+     "choice|Display mode|Windowed",
+     "button|Apply display settings",
+     "button|Back"
+    ]
+   },
+   "applied": {
+    "said": "saved 2560x1440 mode 2 in the editor's user settings (the editor's play window keeps its size)",
+    "saved": [
+     2560,
+     1440
+    ],
+    "mode": "<WindowMode.WINDOWED: 2>"
+   },
+   "escape_back": {
+    "open": true,
+    "page": 0,
+    "cursor": 3,
+    "options_at": 3
+   },
+   "escape_closed": {
+    "open": false,
+    "paused": false
+   },
+   "controls_drawn_off": false,
+   "controls_drawn_on": true
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_l10a_l10_inventory_gold.png",
+  "mw_l10a_l10_bar_torch.png",
+  "mw_l10a_l10_bar_weapon.png",
+  "mw_l10a_l10_anvil_mend.png",
+  "mw_l10a_l10_anvil_groups.png",
+  "mw_l10a_l10_food.png",
+  "mw_l10a_l10_quests_off.png",
+  "mw_l10a_l10_quests_on.png",
+  "mw_l10a_shield_kite.png",
+  "mw_l10a_slots_inventory.png",
+  "mw_l10a_slots_bar.png",
+  "mw_l10a_tabs_weapons.png",
+  "mw_l10a_tabs_magic.png",
+  "mw_l10a_tabs_anvil.png",
+  "mw_l10a_options_page.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
