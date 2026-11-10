@@ -1687,10 +1687,11 @@ def step_block():
     while now() - t0 < 2.0:
         # (the stick pushed up, as her move comes in against the camera: the list of 2026-11-07's block walks her along her facing)
         cy_ = math.radians(G["pc"].get_control_rotation().yaw); G["pawn"].add_movement_input(V(math.cos(cy_), math.sin(cy_), 0.0), 1.0, False)
-        feet.append(G["pawn"].get_actor_transform().inverse_transform_location(body.get_socket_location("foot_l")).x); hands.append(hand()[1]); yield
+        feet.append(G["pawn"].get_actor_transform().inverse_transform_location(body.get_socket_location("foot_l")).x); hands.append(hand()); yield
     g.slate_key(key("Gamepad_LeftShoulder"), False); yield from rwait(0.3)
     res["walk_block"] = {"blocking": c.is_blocking(), "layer": round(c.get_block_layer(), 2), "foot_swing_cm": round(max(feet) - min(feet), 1) if feet else 0,
-                         "moved_cm": round((G["pawn"].get_actor_location() - p0).length(), 1), "hand_z_min": round(min(hands), 1) if hands else None}
+                         "moved_cm": round((G["pawn"].get_actor_location() - p0).length(), 1), "hand_z_min": round(min(h[1] for h in hands), 1) if hands else None,
+                         "hand_fwd_min": round(min(h[0] for h in hands), 1) if hands else None}
     # (blocking when play restarts: the held pose let go (the PR review's find: the flag was cleared, the paused clip stayed))
     c.set_blocking(True); yield from wait(0.5)
     g.restart_play(0); yield from wait(1.2); refresh(); c = cb(); body = G["pawn"].get_editor_property("mesh")
@@ -1707,9 +1708,11 @@ def step_block():
           and b_["lost"] < p_["lost"] * 0.8 and p_["shield_lost"] > 0 and abs(b_["shield_lost"] / max(p_["shield_lost"], 1e-3) - 5.0 * (want_share / max(share, 1e-3))) < 1.0
           and res["swing_refused"] and not res["after_release"]["blocking"] and res["after_release"]["speed"] > s1 * 1.8
           and res["hand_block"][1] > res["hand_rest"][1] + 15 and res["after_release"]["hand"][1] < res["hand_block"][1] - 10
+          and res["hand_block"][0] > res["hand_rest"][0] + 30          # (the stance of 2026-11-10: the shield pushed out before her)
           and res["lb_blocking"] and not res["lt_blocking"] and res["lt_run_switched"] and not res["mage_blocking"]
           and "LT|switch walk / run" in res["pad_list"] and "LB (hold)|block with the shield" in res["pad_list"]
           and res["walk_block"]["foot_swing_cm"] > 20 and res["walk_block"]["moved_cm"] > 100 and (res["walk_block"]["hand_z_min"] or 0) > res["hand_rest"][1] + 10
+          and (res["walk_block"]["hand_fwd_min"] or 0) > res["hand_rest"][0] + 30
           and not res["after_restart"]["blocking"] and res["after_restart"]["hand"][1] < res["hand_block"][1] - 10)
     step_result("block", ok, **res)
 
@@ -4453,6 +4456,177 @@ def step_console():
         elif q[0] == "note": res[q[1]] = q[2]
     res["checks"] = checks; res["lines"] = [str(x) for x in con.get_lines()][-30:]
     step_result("console", bool(checks) and txt.strip().endswith("result|ok"), **res)
+def step_list10c(parts=("forge", "oven", "ankh", "block")):
+    """the list of 2026-11-10's third phase in the castle: the forge by the great hall's anvil (the Warrior: nothing to forge before
+    she has looted anything; a Viking Shortsword taken up, it is offered and forged from its materials; the Mage refused); a
+    kitchen's bread oven (bread baked from wheat, as anyone); the ankh (held in her left hand from the inventory and the quick bar,
+    its pale light, the traps within 10 m outlined and the chests and trunks marked; a tier-2 monster's drop with the chance at 1);
+    the block's stance (standing: her feet a lunge apart along her facing; walking: her legs her walk's), pictures. Its waits are
+    the real clock's: the crafting panel pauses the game, and a wait on the game's clock never ended (the first run stood 25 min)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    res = {}
+    put(g.get_start_room_center(), 0.0); yield from rwait(0.6)
+    def stand_by(at, deep=None):
+        for r_ in (150, 180, 120, 210):
+            for a_ in range(0, 360, 45):
+                p_ = V(at.x + math.cos(math.radians(a_)) * r_, at.y + math.sin(math.radians(a_)) * r_, at.z)
+                put(p_, math.degrees(math.atan2(at.y - p_.y, at.x - p_.x)))
+                yield
+                d_ = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+                if deep is None or deep in d_: return d_
+        return ""
+    # ---- the forge
+    if "forge" in parts:
+        fs = list(g.get_all_forges()); res["forges"] = len(fs)
+        hall = g.get_start_room_center()
+        fg = min(fs, key=lambda f: dist2(f, hall)) if fs else None
+        res["forge_from_hall_m"] = round(dist2(fg, hall) / 100, 1) if fg else None
+        if fg:
+            res["forge_says"] = yield from stand_by(fg, "forge")
+            looted0 = [str(n) for n in g.get_looted_items()]
+            res["looted_before"] = looted0
+            res["forge_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
+            res["station"] = str(c.get_craft_station())
+            res["recipes_before"] = [l for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")][:6]
+            c.set_crafting_open(False)
+            c.add_item("Viking Shortsword", 1); yield from rwait(0.2)
+            res["looted_after"] = "Viking Shortsword" in [str(n) for n in g.get_looted_items()]
+            for m_, n_ in (("Steel Ingot", 4), ("Iron Ingot", 6), ("Cured Leather Strip", 4)): c.add_item(m_, n_)
+            res["forge_f2"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
+            res["recipes_after"] = [l for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")][:6]
+            shot("l10c_forge", "1280x720"); yield from rwait(1.0)
+            n0 = sum(1 for w in g.get_editor_property("weapons") if str(w.get_editor_property("name")) == "Viking Shortsword")
+            res["can"] = c.can_craft("Viking Shortsword"); res["made"] = c.craft("Viking Shortsword"); yield from rwait(0.2)
+            res["swords"] = [n0, sum(1 for w in g.get_editor_property("weapons") if str(w.get_editor_property("name")) == "Viking Shortsword")]
+            res["steel_left"] = c.get_item_count("Steel Ingot")
+            c.set_crafting_open(False); yield from rwait(0.2)
+            # (the Mage at the same forge)
+            c = yield from restart("Mage"); quiet(True)
+            yield from stand_by(fg, "forge")
+            res["mage_says"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+            res["mage_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.2)
+            res["mage_message"] = str(c.get_message()) if hasattr(c, "get_message") else None
+            res["mage_crafting_open"] = c.is_crafting_open()
+            c.set_crafting_open(False)
+            c = yield from restart("Warrior"); quiet(True)
+    # ---- a kitchen's oven (the start set's or tier 2's)
+    if "oven" in parts:
+        ovens = list(g.get_all_ovens())
+        if not ovens:
+            g.debug_open_tiers(2, False); yield from rwait(0.3)
+            for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
+                if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+                ovens = list(g.get_all_ovens())
+                if ovens: break
+        res["ovens"] = len(ovens)
+        if ovens:
+            ov = ovens[0]
+            res["oven_says"] = yield from stand_by(ov, "oven")
+            c.add_item("Wheat", 2); b0 = c.get_item_count("Bread")
+            res["oven_f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.3)
+            res["oven_recipes"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
+            shot("l10c_oven", "1280x720"); yield from rwait(1.0)
+            res["baked"] = c.craft("Bread"); res["bread"] = [b0, c.get_item_count("Bread")]
+            c.set_crafting_open(False)
+    # ---- the ankh
+    if "ankh" in parts:
+        ank = str(g.get_ankh_item()); res["ankh_item"] = ank
+        if ank and ank != "None":
+            hall0 = g.get_start_room_center()
+            put(hall0, 0.0); yield from rwait(0.4)
+            c.add_item(ank, 1)
+            res["inv_line"] = [str(l) for l in c.get_all_inventory_lines() if ank in str(l)][:1]
+            res["used"] = c.use_item(ank); yield from rwait(0.3)
+            res["held"] = c.is_ankh_held()
+            L = c.get_torch_light()
+            res["light"] = {"intensity": round(L.intensity, 1), "radius": round(L.attenuation_radius), "colour": [round(L.light_color.r), round(L.light_color.g), round(L.light_color.b)]} if L else None
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=G["pawn"].get_actor_rotation().yaw + 150)); yield from rwait(0.6)
+            shot("l10c_ankh", "1280x720"); yield from rwait(1.0)
+            # (a trap not seen: her 7 m from it; the chests near her marked)
+            tl = [t for t in trap_lines() if t["state"] == 0 and not t["seen"]]
+            res["traps_unseen"] = len(tl)
+            if tl:
+                t = tl[0]; S = g.get_section(t["s"]); rt = S.room_at(t["at"])
+                pts = [p for p in (S.get_room_free_tiles(rt) if rt >= 0 else []) if 400 < dist2(p, t["at"]) < 900] or [V(t["at"].x + 700, t["at"].y, t["at"].z)]
+                put(pts[0], 0.0); yield from rwait(0.8)
+                t2 = next((x for x in trap_lines() if x["s"] == t["s"] and x["i"] == t["i"]), None)
+                res["trap"] = {"m": round(dist2(pts[0], t["at"]) / 100, 1), "seen": t2["seen"] if t2 else None, "shown": g.ankh_traps_shown}
+            # (a chest or trunk not looted: her 5 m from it in its room (the great hall's stand at its far walls, over 10 m from its middle))
+            S0 = g.get_section(I2(0, 0)); best = None
+            for ci in range(S0.get_num_containers()):
+                if str(S0.get_container_kind(ci)) in ("chest", "trunk") and not S0.is_container_looted(ci):
+                    cl_ = S0.get_container_location(ci)
+                    if best is None or dist2(cl_, hall0) < dist2(best, hall0): best = cl_
+            if best:
+                rm_ = S0.room_at(best); tiles_ = [p for p in (S0.get_room_free_tiles(rm_) if rm_ >= 0 else []) if 250 < dist2(p, best) < 650]
+                put(tiles_[0] if tiles_ else V(best.x + 400, best.y, best.z), 0.0); yield from rwait(0.8)
+                res["chest_m"] = round(dist2(G["pawn"].get_actor_location(), best) / 100, 1)
+            res["caches_shown"] = g.ankh_caches_shown
+            # (the quick bar: the ankh put on slot 6 by its entry, used by the slot)
+            c.use_item(ank); yield from rwait(0.2)
+            res["quickable"] = c.assign_quick_entry(5, "#" + ank) if hasattr(c, "assign_quick_entry") else None
+            # (a tier-2 monster's drop: the chance at 1, her ankh put away first)
+            c.remove_item(ank, 1)
+            g.set_editor_property("ankh_drop_chance", 1.0)
+            if not g.is_tier_open(2): g.debug_open_tiers(2, False); yield from rwait(0.3)
+            ms = [m for m in g.get_monsters() if alive(m) and g.global_tier(g.tier_of(g.world_to_section(m.get_actor_location()))) == 2]
+            if not ms:
+                for s_ in (I2(1, 0), I2(-1, 0), I2(0, 1), I2(0, -1)):
+                    if not g.is_section_generated(s_): g.generate_section_now(s_); yield from built(s_)
+                yield from rwait(1.0)
+                ms = [m for m in g.get_monsters() if alive(m) and g.global_tier(g.tier_of(g.world_to_section(m.get_actor_location()))) == 2]
+            d0 = g.ankh_drops
+            if ms: ms[0].apply_damage(1e7, G["pawn"]); yield from rwait(0.6)
+            res["drop"] = {"tier2_monsters": len(ms), "drops": g.ankh_drops - d0}
+            g.set_editor_property("ankh_drop_chance", 0.06)
+    # ---- the block's stance
+    if "block" in parts:
+        c = yield from restart("Warrior"); quiet(True)
+        put(g.get_start_room_center(), 0.0); yield from rwait(0.4)
+        c.add_item("Kite Shield", 1); c.wear_shield("Kite Shield"); yield from rwait(0.3)
+        body = G["pawn"].get_editor_property("mesh")
+        def apart():
+            f_ = G["pawn"].get_actor_forward_vector(); a_ = body.get_socket_location("foot_l"); b_ = body.get_socket_location("foot_r")
+            return round(abs((a_ - b_).dot(f_)), 1)
+        res["feet_apart_cm"] = {"standing": apart()}
+        g.slate_key(key("RightMouseButton"), True); yield from rwait(0.9)
+        res["blocking"] = c.is_blocking(); res["feet_apart_cm"]["block_still"] = apart()
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=G["pawn"].get_actor_rotation().yaw + 90)); yield from rwait(0.6)
+        shot("l10c_block_side", "1280x720"); yield from rwait(1.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-5, yaw=G["pawn"].get_actor_rotation().yaw + 150)); yield from rwait(0.6)
+        shot("l10c_block_front", "1280x720"); yield from rwait(1.0)
+        # (walking forward in the block: the stance's legs go, her walk's come)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=G["pawn"].get_actor_rotation().yaw)); yield from rwait(0.3)
+        t0 = time.time(); seen = []; swing = []; p0 = G["pawn"].get_actor_location()
+        while time.time() - t0 < 1.5:
+            # (the stick pushed up against the camera, which stands behind her: the block walks her along her facing)
+            cy_ = math.radians(G["pc"].get_control_rotation().yaw); G["pawn"].add_movement_input(V(math.cos(cy_), math.sin(cy_), 0.0), 1.0, False); seen.append(apart())
+            f_ = G["pawn"].get_actor_forward_vector(); swing.append((body.get_socket_location("foot_l") - G["pawn"].get_actor_location()).dot(f_)); yield
+        res["feet_apart_cm"]["block_walk_max"] = max(seen[-20:]) if seen else None
+        # (her walk's legs: the left foot swinging forward and back against her as she walks, and how far she went)
+        res["walk"] = {"foot_swing_cm": round(max(swing[-30:]) - min(swing[-30:]), 1) if swing else None, "moved_cm": round(dist2(G["pawn"].get_actor_location(), p0))}
+        g.slate_key(key("RightMouseButton"), False); yield from rwait(0.6)
+        res["feet_apart_cm"]["after"] = apart()
+    quiet(False)
+    oks = {}
+    if "forge" in parts:
+        oks["forge"] = (res.get("forges", 0) >= 1 and "forge" in res.get("forge_says", "") and res.get("forge_f") == "forge" and not res.get("recipes_before")
+                        and res.get("looted_after") and any("Viking Shortsword" in l for l in res.get("recipes_after", [])) and bool(res.get("made")) and res["swords"][1] == res["swords"][0] + 1
+                        and res.get("mage_f") == "forge refused" and not res.get("mage_crafting_open"))
+    if "oven" in parts:
+        oks["oven"] = res.get("ovens", 0) >= 1 and res.get("oven_f") == "oven" and "Bread" in res.get("oven_recipes", []) and res.get("bread", [0, 0])[1] == res.get("bread", [0, 0])[0] + 1
+    if "ankh" in parts:
+        oks["ankh"] = (bool(res.get("held")) and bool(res.get("light")) and (res.get("trap") is None or bool(res["trap"]["seen"])) and res.get("caches_shown", 0) >= 1
+                       and res.get("drop", {}).get("drops", 0) >= 1)
+    if "block" in parts:
+        fa = res["feet_apart_cm"]
+        bw = fa.get("block_walk_max")
+        oks["block"] = (bool(res.get("blocking")) and fa["block_still"] > fa["standing"] + 30 and bw is not None and bw < fa["block_still"] - 20
+                        and res.get("walk", {}).get("moved_cm", 0) > 30 and (res.get("walk", {}).get("foot_swing_cm") or 0) > 8)
+    res["parts_ok"] = oks
+    ok = all(oks.values())
+    step_result("list10c_" + "_".join(parts) if len(parts) < 4 else "list10c", ok, **res)
+
 def step_list10b():
     """the list of 2026-11-10's second phase in the castle: a cell's prisoner marked on the minimap once she has been in its room
     (none before; the mark at the cell); a library's shelf searched with F gives scrolls, scroll parts or tomes of its tier or below
@@ -4794,7 +4968,8 @@ def step_list10():
           and res["dropdown_page"] == 4 and res["over_slot"] and res["saves_after"] == res["saves_before"] and res["over_same_slot"])
     step_result("list10", ok, **res)
 
-STEPS = {"list10": step_list10, "list10b": step_list10b, "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+STEPS = {"list10": step_list10, "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
+         "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

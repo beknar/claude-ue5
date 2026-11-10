@@ -3513,6 +3513,31 @@ def step_see10():
           and all(res[n].get("copy_blocks_camera") is not True for n, _a, _y in spots_)
           and any(res[n].get("copy_blocks_sight") for n, _a, _y in spots_))
     step_result("see10", ok, **res)
+def step_forge10():
+    """the list of 2026-11-10's third phase in the town: the smithy's forge (its Forge piece) is a forge (the Warrior: "use the forge", F opens the
+    forge's recipes, a looted Viking Shortsword offered); the town's ovens still bake (bread from wheat)"""
+    g = G["gen"]; c = G["pawn"].get_component_by_class(unreal.RDCombatComponent); res = {}; quiet(True)
+    # (Brokenspire's smithy has a forge piece (ForgePieces); a forge city's open forges are spots)
+    fs = [{"at": f} for f in g.get_all_forges()]
+    res["forge_spots"] = len([s for s in spots() if s["kind"].lower() == "forge"]); res["forges"] = len(fs)
+    if fs:
+        at = fs[0]["at"]
+        for r_ in (150, 120, 180):
+            for a_ in range(0, 360, 45):
+                p_ = V(at.x + math.cos(math.radians(a_)) * r_, at.y + math.sin(math.radians(a_)) * r_, 0)
+                put(p_, yaw=math.degrees(math.atan2(at.y - p_.y, at.x - p_.x)), z=0.0); yield from rwait(0.15)
+                d_ = str(g.describe_nearest(G["pawn"].get_actor_location(), 260.0))
+                if "forge" in d_: break
+            if "forge" in d_: break
+        res["says"] = d_
+        c.add_item("Viking Shortsword", 1)
+        res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location(), 260.0)); yield from rwait(0.4)
+        res["recipes"] = [l.split("|")[1] for l in (str(x) for x in c.get_craft_lines()) if l.startswith("recipe|")]
+        shot("forge10", "1280x720"); yield from rwait(1.0)
+        c.set_crafting_open(False); yield from rwait(0.3)
+    ovens = [s for s in spots() if s["kind"].lower() == "oven"] or [{"at": o} for o in list(g.get_all_ovens())[:1]]
+    res["ovens"] = len(list(g.get_all_ovens()))
+    step_result("forge10", res.get("forges", 0) >= 1 and "forge" in res.get("says", "") and res.get("f") == "forge" and "Viking Shortsword" in res.get("recipes", []) and res["ovens"] >= 1, **res)
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
     indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every
@@ -3830,7 +3855,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
+              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)

@@ -1,0 +1,110 @@
+{
+ "tag": "l10p",
+ "plan": [
+  "list10c_block",
+  "block"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10c_block",
+   "ok": true,
+   "feet_apart_cm": {
+    "standing": 1.8,
+    "block_still": 78.4,
+    "block_walk_max": 33.7,
+    "after": 1.6
+   },
+   "blocking": true,
+   "walk": {
+    "foot_swing_cm": 43.6,
+    "moved_cm": 134
+   },
+   "parts_ok": {
+    "block": true
+   }
+  },
+  {
+   "step": "block",
+   "ok": true,
+   "shield": "Kite Shield",
+   "share": 0.24,
+   "refused": [],
+   "hand_rest": [
+    2.1,
+    7.9
+   ],
+   "plain": {
+    "lost": 30.4,
+    "shield_lost": 9.6,
+    "share": 0.24
+   },
+   "blocking": true,
+   "hand_block": [
+    58.2,
+    30.8
+   ],
+   "blocked": {
+    "lost": 18.4,
+    "shield_lost": 108.0,
+    "share": 0.54,
+    "hits": 1
+   },
+   "swing_refused": true,
+   "after_release": {
+    "blocking": false,
+    "speed": 311.0,
+    "hand": [
+     6.1,
+     8.5
+    ]
+   },
+   "lb_blocking": true,
+   "lt_blocking": false,
+   "lt_run_switched": true,
+   "pad_list": [
+    "Left stick|move",
+    "Right stick|look / turn the camera",
+    "A|jump",
+    "LT|switch walk / run",
+    "LB (hold)|block with the shield",
+    "RB|strike",
+    "D-pad left / right|quick slots",
+    "Start|inventory (held: the menu)",
+    "X|open door or container",
+    "Back|map"
+   ],
+   "speed": {
+    "normal": 311.0,
+    "blocking": 90.0,
+    "ratio": 0.289
+   },
+   "walk_block": {
+    "blocking": false,
+    "layer": 0.0,
+    "foot_swing_cm": 65.6,
+    "moved_cm": 182.5,
+    "hand_z_min": 30.8,
+    "hand_fwd_min": 43.0
+   },
+   "after_restart": {
+    "blocking": false,
+    "hand": [
+     2.0,
+     7.9
+    ]
+   },
+   "mage_blocking": false,
+   "block_move_speed": 90.0
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_l10p_l10c_block_side.png",
+  "mw_l10p_l10c_block_front.png",
+  "mw_l10p_block_on.png",
+  "mw_l10p_block_off.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

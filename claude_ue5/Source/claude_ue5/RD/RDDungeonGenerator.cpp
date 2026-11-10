@@ -1375,6 +1375,7 @@ void ARDDungeonGenerator::OnMonsterKilled(ARDMonster* Monster)
 	if (Monster && Monster->bFinalBoss) OnFinalBossKilled(Monster);
 	// (the list of 2026-10-30: its parts float over it until she takes them; a boss's or a usurper's are more)
 	if (bHarvest && Monster) HarvestKill(Monster, bBossKill);
+	if (Monster) AnkhDropFor(Monster);          // (the list of 2026-11-10: tier 2's monsters may drop the ankh)
 	// (the tiers: it stays dead, also when its section is generated again)
 	if (Monster && Monster->Section && Monster->SpawnIndex >= 0)
 		if (FRDSectionProgress* P = Progress.Find(Monster->Section->Coord))
@@ -1430,6 +1431,7 @@ void ARDDungeonGenerator::RestartPlay(int32 Seed)
 	Pads.Reset(); PadSections.Reset(); PadRingsTaken.Reset(); PadActors.Reset(); PadChoice = 0; Teleports = 0;
 	CellsOpened.Reset(); PrisonersFreed = CellBreakouts = 0;
 	ClearBossPorts(); ShelvesSearched.Reset(); ShelvesSearchedCount = 0; ClearSeeThrough();          // (the list of 2026-11-10)
+	AnkhRevealed.Reset(); AnkhTrapsShown = AnkhCachesShown = AnkhDrops = 0;
 	SpentTraps.Reset(); DisarmKey = FIntVector(0, 0, -1); TrapsTriggered = TrapsDisarmed = TrapHits = 0; LastTrap.Reset();
 	TrapR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x7D15u)); PendingRingTiers.Reset(); RestoredBossTiers.Reset(); RestoredRingTiers.Reset();
 	// (the third list: the tables' weapons back, the fixtures full, the arenas and vaults as they were, the slashes not given)
@@ -1500,6 +1502,7 @@ FString ARDDungeonGenerator::InteractNearest(FVector From, float MaxDistance)
 	// (the list of 2026-11-10: a boss's teleporter; a library's shelf, when no door or container is nearer)
 	if (bBossPorts) { const FString Bp = BossPortUse(From); if (!Bp.IsEmpty()) return Bp; }
 	if (bLibraryShelves) { const FString Sh = ShelfSearch(From); if (!Sh.IsEmpty()) return Sh; }
+	if (bForge || bDungeonOvens) { const FString St = StationInteract(From, Best ? BestD : 1e9f); if (!St.IsEmpty()) return St; }          // (the list of 2026-11-10)
 	if (Traps.Num() > 0 && BeginDisarmNear(From)) return TEXT("disarm");
 	// (level 5: an anvil nearer than any door or container opens her crafting panel)
 	FVector Anvil;
@@ -1610,6 +1613,7 @@ FString ARDDungeonGenerator::DescribeNearest(FVector From, float MaxDistance) co
 	if (bTeleporters) { const FString Pd = DescribePadNear(From); if (!Pd.IsEmpty()) return Pd; }
 	if (bBossPorts) { const FString Bp = BossPortDescribe(From); if (!Bp.IsEmpty()) return Bp; }
 	if (bLibraryShelves) { const FString Sh = ShelfDescribe(From); if (!Sh.IsEmpty()) return Sh; }
+	if (bForge || bDungeonOvens) { const FString St = StationDescribe(From, Best ? BestD : 1e9f); if (!St.IsEmpty()) return St; }
 	if (Traps.Num() > 0) { const FString Tr = DescribeTrapNear(From); if (!Tr.IsEmpty()) return Tr; }
 	FVector Anvil;
 	if (Recipes.Num() > 0 && FindNearestAnvil(From, FMath::Min(BestD, AnvilReach), Anvil)) return TEXT("use the anvil");
@@ -1896,6 +1900,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 			BossPortChoice = 1 - BossPortChoice;
 	if (bSeeThrough) TickSeeThrough(Dt);
 	else if (SeeHidden.Num() > 0) ClearSeeThrough();
+	TickAnkh(Dt);          // (the list of 2026-11-10: the ankh's light)
 	if (!SoundTestDir.IsEmpty()) TickSoundTest(Dt);
 	else TickMusic(Dt);         // (the self test measures single sounds: no music under them, only the room tone)
 	const AActor* Pawn = GetTrackedActor();

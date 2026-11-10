@@ -1,0 +1,45 @@
+{
+ "tag": "l10m",
+ "plan": [
+  "list10c_forge"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10c_forge",
+   "ok": true,
+   "forges": 3,
+   "forge_from_hall_m": 7.6,
+   "forge_says": "use the forge",
+   "looted_before": [],
+   "forge_f": "forge",
+   "station": "Forge",
+   "recipes_before": [],
+   "looted_after": true,
+   "forge_f2": "forge",
+   "recipes_after": [
+    "recipe|Viking Shortsword|1|steel ingot:4:3;iron ingot:6:5;cured leather strip:4:3|6arms"
+   ],
+   "can": true,
+   "made": true,
+   "swords": [
+    1,
+    2
+   ],
+   "steel_left": 1,
+   "mage_says": "the forge (the Warrior's)",
+   "mage_f": "forge refused",
+   "mage_message": null,
+   "mage_crafting_open": false,
+   "parts_ok": {
+    "forge": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_l10m_l10c_forge.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

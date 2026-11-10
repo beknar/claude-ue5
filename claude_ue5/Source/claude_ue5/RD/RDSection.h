@@ -368,6 +368,9 @@ public:
 	/** a library's bookshelves (the list of 2026-11-10: searched with F for scrolls, their parts and tomes): where each stands (its
 	 *  middle), its yaw (its front toward the room, +X), its depth, its room */
 	struct FShelf { FVector At = FVector::ZeroVector; float Yaw = 0.f; float Depth = 50.f; int32 Room = -1; };
+	/** the forges of the set (the list of 2026-11-10: the generator's ForgePieces where they stand) and the one put by the anvil */
+	TArray<FVector> ForgePoints;
+	void EnsureForge();
 	/** a piece FurnishWalls placed: where (its middle), its yaw, its size */
 	struct FPlacedPiece { FVector At = FVector::ZeroVector; float Yaw = 0.f; FVector Size = FVector::ZeroVector; };
 	TArray<FShelf> Shelves;

@@ -1,0 +1,38 @@
+{
+ "tag": "l10n",
+ "plan": [
+  "list10c_oven"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10c_oven",
+   "ok": true,
+   "ovens": 10,
+   "oven_says": "bake at the oven",
+   "oven_f": "oven",
+   "oven_recipes": [
+    "Bread",
+    "Fruit",
+    "Hardtack",
+    "Nuts and Seeds",
+    "Sweet Roll",
+    "Travel Cake"
+   ],
+   "baked": true,
+   "bread": [
+    0,
+    1
+   ],
+   "parts_ok": {
+    "oven": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_l10n_l10c_oven.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

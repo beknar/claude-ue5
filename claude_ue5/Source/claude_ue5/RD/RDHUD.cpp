@@ -1036,7 +1036,8 @@ void ARDHUD::GatherPois(TArray<FRDPoi>& Out, const FVector& L, float SenseDistan
 			const FString Kd = S->GetContainerKind(I);
 			if (S->IsContainerLooted(I) || (Kd != TEXT("chest") && Kd != TEXT("trunk"))) continue;
 			const FVector P = S->GetContainerLocation(I);
-			if (Discovered(P)) Out.Add({ FVector2D(P), 2 });
+			// (the list of 2026-11-10: or one the ankh's light has shown, seen or not)
+			if (Discovered(P) || Gen->IsContainerRevealed(S->Coord, S->ContainerKey(I))) Out.Add({ FVector2D(P), 2 });
 		}
 		// (level 5: the anvils she has seen, where repair items are made)
 		if (Gen->Recipes.Num() > 0)
@@ -1724,6 +1725,8 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 	}
 	case ERDItemKind::Torch:
 		return TEXT("Made at an anvil.  Lit, it is carried in your left hand and lights your way (your shield, or your second blade, waits meanwhile).");
+	case ERDItemKind::Light:
+		return FString::Printf(TEXT("Found on tier 2's monsters and in its chests.  Raised in your left hand it lights your way, and within %.0f m it shows the traps (outlined) and the chests and trunks not yet looted (on your map).  Your shield waits meanwhile."), Gen ? Gen->AnkhRevealRange / 100.f : 10.f);
 	case ERDItemKind::Teleport:
 		return FString::Printf(TEXT("Found on the teleporter of tier %d.  Used, it carries you to the first tier's teleporter in the great hall; that teleporter takes you back to tier %d's while you hold this ring."), It.TeleportTier, It.TeleportTier);
 	case ERDItemKind::Slash:
@@ -2378,10 +2381,11 @@ void ARDHUD::DrawCrafting(float Sc)
 	}
 	const bool bDivider = UI.Has(TEXT("divider")), bPlate = UI.Has(TEXT("button"));
 	const float Tin = UI.Has(TEXT("panel_wide")) ? 24.f * Sc : 0.f;
-	const bool bOven = Cb->GetCraftStation() == TEXT("Oven");
-	UI.Text(bOven ? TEXT("THE OVEN") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
+	const bool bOven = Cb->GetCraftStation() == TEXT("Oven"), bForge = Cb->GetCraftStation() == TEXT("Forge");
+	UI.Text(bOven ? TEXT("THE OVEN") : bForge ? TEXT("THE FORGE") : TEXT("THE ANVIL"), RDInk, A.X + Pd + Tin, A.Y + 16.f * Sc, Medium, Sc * 1.5f, ERDType::Title);
 	float Tw, Th;
-	const FString Sub = bOven ? TEXT("bake food from the gardens' ingredients") : TEXT("make repair items  ·  mend what is worn  ·  break down the weapons you found");
+	const FString Sub = bOven ? TEXT("bake food from its ingredients") : bForge ? TEXT("forge again the plain arms and armour you have found")
+	                          : TEXT("make repair items  ·  mend what is worn  ·  break down the weapons you found");
 	UI.TextSize(Sub, Tw, Th, Small, Sc * 1.05f);
 	UI.Text(Sub, Gold, B.X - Pd - Tin - Tw, A.Y + 22.f * Sc, Small, Sc * 1.05f);
 	if (Cb->bInventoryPausesGame) { float Pw, Ph; UI.TextSize(TEXT("the game is paused"), Pw, Ph, Small, Sc * 0.95f); UI.Text(TEXT("the game is paused"), Dim, B.X - Pd - Tin - Pw, A.Y + 46.f * Sc, Small, Sc * 0.95f); }
@@ -2394,7 +2398,8 @@ void ARDHUD::DrawCrafting(float Sc)
 	auto GroupHead = [&](const FString& G)
 	{
 		const TCHAR* Hd = G == TEXT("1repair") ? TEXT("REPAIR ITEMS  (THEY MEND WHAT YOU WEAR AND WIELD)") : G == TEXT("2potion") ? TEXT("POTIONS")
-			: G == TEXT("3scroll") ? TEXT("SCROLLS") : G == TEXT("4food") ? TEXT("FOOD") : TEXT("OTHER THINGS");
+			: G == TEXT("3scroll") ? TEXT("SCROLLS") : G == TEXT("4food") ? TEXT("FOOD")
+		               : G == TEXT("6arms") ? TEXT("WEAPONS AND SHIELDS") : G == TEXT("7armour") ? TEXT("ARMOUR") : TEXT("OTHER THINGS");
 		if (!RecipeGroup.IsEmpty()) Y += 8.f * Sc;
 		RecipeGroup = G;
 		UI.Text(Hd, Dim, Lx, Y, Small, Sc * 1.05f, ERDType::Label); Y += 26.f * Sc;

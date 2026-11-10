@@ -1,0 +1,50 @@
+{
+ "tag": "l10o",
+ "plan": [
+  "list10c_ankh"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list10c_ankh",
+   "ok": true,
+   "ankh_item": "Revealing Ankh",
+   "inv_line": [
+    "torch|Revealing Ankh|0|1"
+   ],
+   "used": true,
+   "held": true,
+   "light": {
+    "intensity": 40.0,
+    "radius": 1400,
+    "colour": [
+     231,
+     241,
+     255
+    ]
+   },
+   "traps_unseen": 25,
+   "trap": {
+    "m": 6.7,
+    "seen": 1,
+    "shown": 1
+   },
+   "chest_m": 5.1,
+   "caches_shown": 2,
+   "quickable": true,
+   "drop": {
+    "tier2_monsters": 74,
+    "drops": 1
+   },
+   "parts_ok": {
+    "ankh": true
+   }
+  }
+ ],
+ "windows_hidden": "Message Log, Content Browser",
+ "shots": [
+  "mw_l10o_l10c_ankh.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

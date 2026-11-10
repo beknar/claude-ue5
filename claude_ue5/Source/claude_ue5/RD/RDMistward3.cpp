@@ -121,6 +121,12 @@ bool ARDDungeonGenerator::HeroReadsScroll(ERDSpellType Type) const
 FString ARDDungeonGenerator::RecipeRefusal(const FRDRecipe& Rc) const
 {
 	const int32 Ix = FindItem(Rc.Item);
+	// (the list of 2026-11-10: the forge's recipes, the Warrior's alone and only for what she has looted)
+	if (Rc.Station == TEXT("Forge"))
+	{
+		if (const FString Fr = ForgeRefusal(); !Fr.IsEmpty()) return Fr;
+		if (!HasLooted(Rc.Item)) return FString::Printf(TEXT("You have not found a %s to forge one after"), *Rc.Item.ToString().ToLower());
+	}
 	// (the list of 2026-11-10: healing and mana potions are brewed only by the heroes named (the Mage and the Martial Artist))
 	if (PotionBrewers.Num() > 0 && Ix >= 0 && (Items[Ix].Kind == ERDItemKind::Healing || Items[Ix].Kind == ERDItemKind::Mana) && !PotionBrewers.Contains(CurrentHero))
 	{

@@ -294,3 +294,13 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A draw by the items' weights is a draw by what the table weighs most**: the shelves' first draw gave nine tomes in ten (the tomes' weights). Draw the kind the rule names first, then the item.
 - **A dry run of the way back records its kind** (`LastTravel` "town"), not the level's name.
 - **Python cannot see a plain C++ getter**: `ARDSpectator::GetBody` is not a UFUNCTION; find the body among its skeletal mesh components by name.
+
+## The list of 2026-11-10's third phase (`914 forge,oven,ankh,block`, `RD/RDList10c.cpp`, `868 list10c_*`)
+
+- **The crafting panel pauses the game**: a test step that opened the forge and then waited on the game's clock stood 25 minutes. Wait on the real clock (`rwait`) in any step that opens a panel.
+- **Split a long step into parts that run alone** (`list10c_forge`, `_oven`, `_ankh`, `_block`): Claude Code stops a background command when the machine runs short of memory while the session waits, and the editor in play reaches 18 GB; a part of a few minutes runs in the foreground.
+- **`consolidate_assets` crashed the editor** (an access violation) on its second run over the same clip, and the crash left the old name a redirector and a half-made graph. Re-import a used asset by pointing its users at the new one and saving them, deleting the old, renaming the new into its name and pointing its users again (`914 block`'s `repoint`).
+- **A graph edit stopped half way leaves links cut**: the first, failed run of `914 block` had cut her slot from the layer, and the next found nothing to join to the new blend's A: out of the block she stood in her reference pose (her resting hand 52 cm over her middle, 8 before), and the old block step's raised-hand check read the wrong pose. Check a node's inputs after an edit, and compare a rest measure with an earlier record before changing a check.
+- **Blender's IK constraint did not reach the pose read back in a background run**, and **a Tripo rig's bone tails are not its children's heads** (aimed at the calf's tail, the ankle missed by 18 cm): `warrior3_block.py` solves two bones itself, by the joints' heads.
+- **A stance on a forearm-mounted shield**: leaning her spine 27 degrees laid the shield flat across her belly (the picture); the forearm and hand are turned back to the guard's own after the lean.
+- **`0.0 or 999` is 999**: a measured 0 read as "missing" in a check (`block_walk_max`); compare with `None`.
