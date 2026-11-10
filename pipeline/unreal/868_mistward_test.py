@@ -4527,6 +4527,28 @@ def step_list10():
     yield from hold("Enter")
     res["mended"] = {"wear": c.get_shield_wear(shield), "full": sh_full, "share": round(c.get_shield_share(), 4),
                      "took": {n: before[n] - c.get_item_count(n) for n in need}, "need": need, "mends": c.get_editor_property("anvil_mends")}
+    # ---- PR #38's review: a spare taken up when the one on her arm wears out; a repair item mends a shield
+    c.set_crafting_open(False); yield from rwait(0.2)
+    c.add_item(shield, 1); yield from rwait(0.2)
+    blows = 0; prev = c.get_shield_wear(shield); swapped = False
+    while blows < 400:
+        c.set_health(c.get_max_health()); c.apply_damage(40.0, None); blows += 1
+        w_ = c.get_shield_wear(shield)
+        if w_ > prev: swapped = True; break          # (worn out, the spare taken up: whole again)
+        if w_ <= 0: break
+        prev = w_
+        if blows % 20 == 0: yield
+    c.set_health(c.get_max_health()); yield from wait(0.2)
+    res["spare"] = {"swapped": swapped, "blows": blows, "wear": round(c.get_shield_wear(shield), 1), "full": sh_full, "count": c.get_item_count(shield), "spares": [round(x, 1) for x in c.get_spares(shield)],
+                    "share": round(c.get_shield_share(), 4), "message": str(c.message)}
+    for _ in range(3): c.set_health(c.get_max_health()); c.apply_damage(40.0, None)
+    w_before = c.get_shield_wear(shield)
+    c.add_item("Patch Kit", 1); c.use_item("Patch Kit"); yield from rwait(0.3)
+    rl = [str(x) for x in c.get_repair_lines()]
+    ri = next((i for i, l in enumerate(rl) if l.startswith(f"armour|{shield}|")), -1)
+    res["repair_kit"] = {"line": rl[ri] if ri >= 0 else None, "mended": c.repair_entry(ri) if ri >= 0 else False, "before": round(w_before, 1), "after": round(c.get_shield_wear(shield), 1)}
+    c.set_inventory_open(False); yield from rwait(0.2)
+    c.set_crafting_open(True); yield from rwait(0.3)
     # ---- a stack broken down: a tap one, held the whole stack
     other = next(n for n in SH if n not in (shield, "Heater Shield"))
     c.add_item(other, 3); yield from rwait(0.3)
@@ -4534,6 +4556,12 @@ def step_list10():
     yield from hold("Enter", 0.1); res["tap_left"] = c.get_item_count(other)
     res["cur_stack2"] = cursor_to(lambda l: l.startswith(f"breakdown|{other}|"), c.get_craft_lines, c.get_craft_cursor, c.move_craft_cursor)
     yield from hold("Enter", 1.0); res["held_left"] = c.get_item_count(other); res["stacks"] = c.get_editor_property("stacks_broken_down")
+    # (PR #38's review: a hold whose cursor moves off its line does nothing, let go or held on)
+    c.add_item(other, 2); yield from rwait(0.3)
+    cursor_to(lambda l: l.startswith(f"breakdown|{other}|"), c.get_craft_lines, c.get_craft_cursor, c.move_craft_cursor)
+    why = str(g.slate_key(key("Enter"), True)); yield from rwait(0.2); c.move_craft_cursor(1); yield from rwait(0.9)
+    why = why or str(g.slate_key(key("Enter"), False)); yield from rwait(0.3)
+    res["hold_moved"] = {"left": c.get_item_count(other), "why": why}
     # ---- the recipes grouped: the repair items' first and apart; the Warrior brews no potion
     cl = [str(x) for x in c.get_craft_lines() if str(x).startswith("recipe|")]
     groups = [l.split("|")[-1] for l in cl]
@@ -4596,6 +4624,11 @@ def step_list10():
     pick = next((i for i, l in enumerate(dl) if nm and l.startswith("button|" + nm)), -1)
     if pick >= 0: g.activate_menu_line(pick); yield from rwait(0.3)
     res["over_slot"] = str(g.get_editor_property("save_over_slot")); res["after_pick"] = [str(x) for x in g.get_menu_lines()]
+    # (PR #38's review: Escape on the drop-down goes back to the Save page)
+    g.activate_menu_line(next(i for i, l in enumerate(res["after_pick"]) if l.startswith("choice|Save over"))); yield from rwait(0.3)
+    res["dropdown_again"] = g.get_menu_page()
+    yield from press("Escape"); yield from rwait(0.3)
+    res["escape_from_dropdown"] = {"page": g.get_menu_page(), "open": g.is_menu_open() if hasattr(g, "is_menu_open") else None, "slot_kept": str(g.get_editor_property("save_over_slot"))}
     t_before = mtime(res["over_slot"])
     yield from rwait(1.2)
     sl = [str(x) for x in g.get_menu_lines()]
@@ -4614,7 +4647,10 @@ def step_list10():
           and wo["wear"] <= 0 and wo["still_worn"] == shield and wo["count"] == 1 and abs(wo["share_after"] - wo["share_before"] * 0.5) < 1e-3
           and bool(md_["need"]) and abs(md_["wear"] - md_["full"]) < 0.5 and abs(md_["share"] - wo["share_before"]) < 1e-3
           and md_["took"] == md_["need"] and md_["mends"] >= 1
-          and res["tap_left"] == 2 and res["held_left"] == 0 and res["stacks"] >= 1
+          and res["tap_left"] == 2 and res["held_left"] == 0 and res["stacks"] >= 1 and res["hold_moved"]["left"] == 2 and not res["hold_moved"]["why"]
+          and res["spare"]["count"] == 2 and res["spare"]["wear"] > 0 and abs(res["spare"]["share"] - wo["share_before"]) < 1e-3 and 0.0 in res["spare"]["spares"]
+          and res["repair_kit"]["line"] and res["repair_kit"]["mended"] and res["repair_kit"]["after"] > res["repair_kit"]["before"]
+          and res["dropdown_again"] == 4 and res["escape_from_dropdown"]["page"] == 3 and res["escape_from_dropdown"]["slot_kept"] == res["over_slot"]
           and res["groups"]["order"][:1] == ["1repair"] and res["groups"]["repair_kind_ok"] and res["groups"]["contiguous"]
           and not res["warrior_potions"] and not res["warrior_craft"]["made"] and "Only the Mage" in res["warrior_craft"]["message"]
           and res["mage_potions"] > 0 and res["mage_craft"]

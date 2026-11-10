@@ -248,7 +248,7 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 	{
 		const FName Want(*Horse->ClipNow.ToString());
 		// (at the horse's pace: her bounce in step with its stride (PR #37's review))
-		const float Rate = FMath::Clamp(Horse->RateNow, 0.5f, 4.f);
+		const float Rate = FMath::Clamp(Horse->RateNow, 0.5f, 6.f);          // (as the gallop's: in step with its stride, PR #38's review)
 		if (Want != RiderClipNow || !AI->IsSlotActive(RDHorseSlot))
 		{
 			RiderMontage = AI->PlaySlotAnimationAsDynamicMontage(Clip, RDHorseSlot, 0.25f, 0.25f, Rate, 10000);

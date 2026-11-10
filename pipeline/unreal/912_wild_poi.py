@@ -23,6 +23,7 @@ for k in D["kinds"]:
     p.set_editor_property("name", k["name"]); p.set_editor_property("title", k["title"]); p.set_editor_property("biomes", k["biomes"])
     p.set_editor_property("weight", float(k.get("weight", 1.0))); p.set_editor_property("layer", int(k.get("layer", 0)))
     p.set_editor_property("road", bool(k.get("road", False))); p.set_editor_property("roaming", bool(k.get("roaming", False)))
+    p.set_editor_property("hunts", bool(k.get("hunts", False)))          # (the list of 2026-11-10: an ambush hunts her)
     p.set_editor_property("props", k.get("props", [])); p.set_editor_property("use", k.get("use", "None"))
     p.set_editor_property("things", k.get("things", [])); p.set_editor_property("text", k.get("text", ""))
     p.set_editor_property("monsters", int(k.get("monsters", 0))); p.set_editor_property("monster_health", float(k.get("monster_health", 1.0)))

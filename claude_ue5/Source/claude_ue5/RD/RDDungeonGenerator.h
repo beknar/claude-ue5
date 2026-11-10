@@ -2149,6 +2149,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") float WildEngageM = 4500.f;
 	struct FRDWildPoiLive { int32 Id = 0; int32 Kind = -1; FVector At = FVector::ZeroVector; TWeakObjectPtr<ARDWildChunk> Chunk; };
 	TArray<FRDWildPoiLive> WildPoiLive;
+	/** the list of 2026-11-10: the placed ambushes already sprung this play (their ids) */
+	TSet<int32> WildAmbushSprung;
 	TMap<int32, float> WildPoiReadyAt;
 	TArray<TWeakObjectPtr<ARDMonster>> WildRoamers;
 	TArray<FString> WildEngagements;

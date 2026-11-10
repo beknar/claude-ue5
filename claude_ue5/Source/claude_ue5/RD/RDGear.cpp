@@ -157,8 +157,21 @@ void URDCombatComponent::WearDownShield(float Took)
 	W = FMath::Max(0.f, W - Took);
 	if (W > 0.f || !bWasWhole) return;
 	// (the list of 2026-11-10: it no longer breaks: worn out, it stays on her arm and takes half its share of a blow until it is
-	// mended at an anvil or with a repair item, as armour does; said once, as it wears out)
+	// mended at an anvil or with a repair item, as armour does; said once, as it wears out. With a whole one of the same in her
+	// pack she takes that up and the worn one goes in her pack (PR #38's review: spares had always taken a broken one's place))
 	++ShieldsBroken;
+	if (TArray<float>* Sp = Spares.Find(WornShield); Sp && Sp->Num() > 0)
+	{
+		Sp->Sort(TGreater<float>());          // (the whole ones first: a breakdown takes the most worn, the last)
+		if ((*Sp)[0] > 0.f)
+		{
+			W = (*Sp)[0]; (*Sp)[0] = 0.f; Sp->Sort(TGreater<float>());
+			SetMessage(FString::Printf(TEXT("Your %s is worn out: you take up a whole one (the worn one goes in your pack)"), *WornShield.ToString().ToLower()));
+			if (Generator && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Draw"), GetOwner()->GetActorLocation());
+			UE_LOG(LogTemp, Log, TEXT("RDSHIELD %s worn out: a spare taken up"), *WornShield.ToString());
+			return;
+		}
+	}
 	SetMessage(FString::Printf(TEXT("Your %s is worn out: it takes half as much of a blow until it is mended"), *WornShield.ToString().ToLower()));
 	if (Generator && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Break"), GetOwner()->GetActorLocation());
 	UE_LOG(LogTemp, Log, TEXT("RDSHIELD %s worn out"), *WornShield.ToString());
@@ -252,6 +265,15 @@ bool URDCombatComponent::BreakDownGear(FName Item)
 	}
 	const FString Gives = BreakdownText(Item, It.WeaponType);
 	if (Gives.IsEmpty()) return false;
+	// (the list of 2026-11-10: the most worn copy goes (PR #38's review: a spare was taken first, a whole one thrown away while the
+	// worn one stayed on her arm): spares whole first, and the copy in use changes places with the last spare when that is less worn)
+	if (TArray<float>* Sp = Spares.Find(Item); Sp && Sp->Num() > 0)
+	{
+		Sp->Sort(TGreater<float>());
+		float& Use = ArmourWear.FindOrAdd(Item);
+		if (Sp->Last() > Use) Swap(Sp->Last(), Use);
+		Sp->Sort(TGreater<float>());
+	}
 	RemoveCarried(Item, 1);
 	TArray<FString> Ps; Gives.ParseIntoArray(Ps, TEXT(";"));
 	TArray<FString> Got;

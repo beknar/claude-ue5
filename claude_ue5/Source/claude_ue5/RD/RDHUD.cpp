@@ -2381,7 +2381,16 @@ void ARDHUD::DrawCrafting(float Sc)
 		Y += 4.f * Sc;
 	};
 	// (level 5: the weapons to break down follow the recipes; a long list scrolls with the cursor; the headings take some rows)
-	const int32 Fit = FMath::Max(4, FMath::FloorToInt32((H - 80.f * Sc - 30.f * Sc - 40.f * Sc - 120.f * Sc) / Rh) - 2);
+	// (PR #38's review: every heading the list will draw (each recipe group, MEND, BREAK DOWN: about 38 px each) taken off its rows)
+	TSet<FString> HeadKinds;
+	for (const FString& Ln : Lines)
+	{
+		if (Ln.StartsWith(TEXT("recipe|"))) { int32 Bar = 0; Ln.FindLastChar(TEXT('|'), Bar); HeadKinds.Add(Ln.Mid(Bar + 1)); }
+		else if (Ln.StartsWith(TEXT("mend|"))) HeadKinds.Add(TEXT("mend"));
+		else if (Ln.StartsWith(TEXT("breakdown|"))) HeadKinds.Add(TEXT("breakdown"));
+	}
+	const float HeadsH = HeadKinds.Num() * 38.f * Sc;
+	const int32 Fit = FMath::Max(4, FMath::FloorToInt32((H - 80.f * Sc - 30.f * Sc - 40.f * Sc - 120.f * Sc - HeadsH) / Rh));
 	const int32 First = Lines.Num() > Fit ? FMath::Clamp(Cur - Fit / 2, 0, Lines.Num() - Fit) : 0;
 	bool bBreakHead = false, bMendHead = false;
 	for (int32 I = 0; I < Lines.Num(); ++I)
@@ -2786,7 +2795,7 @@ void ARDHUD::DrawMenu(float Sc)
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 	}
 	float Tw, Th;
-	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : TEXT("PAUSED");
+	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : Gen->GetMenuPage() == 4 ? TEXT("SAVE OVER WHICH SAVE?") : TEXT("PAUSED");
 	UI.TextSize(Head, Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
 	UI.Text(Head, RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
 	Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset();
@@ -2854,7 +2863,8 @@ void ARDHUD::DrawMenu(float Sc)
 		Y += Rh;
 	}
 	const FString Keys = !Gen->bOptionsMenu ? FString(TEXT("W S  choose      A D  volume      Enter  press      mouse  click or drag      Esc  back to the game"))
-	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Enter  save      Esc  back"))
+	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Left Right  the save to save over      Enter  save      Esc  back"))
+	                   : Gen->GetMenuPage() == 4 ? FString(TEXT("W S  choose      Enter  this one      Esc  back to the Save page"))
 	                   : Gen->GetMenuPage() == 1 ? FString(TEXT("W S  choose      A D  change      Enter  press      mouse  click or drag      Esc  back"))
 	                                             : FString(TEXT("W S  choose      Enter  press      mouse  click      Esc  back to the game"));
 	UI.TextSize(Keys, Tw, Th, Small, Sc);

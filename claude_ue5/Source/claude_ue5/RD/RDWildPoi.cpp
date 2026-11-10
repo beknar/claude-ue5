@@ -181,6 +181,24 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	if (WildEncounterTick > 0.f) return;
 	WildEncounterTick = 1.f;
 	if (WildLastEngaged < 0.f || IsInTownWalls(Her) || PlayerCombat->IsDead()) { WildLastEngaged = Now; return; }
+	// (the list of 2026-11-10, PR #38's review: a placed ambush (a road's ambush point) springs once she is within 60 m: its guards
+	// (laid round it) hunt her, once a play)
+	if (WildSection)
+		for (const FRDWildPoiLive& L : WildPoiLive)
+		{
+			if (!L.Chunk.IsValid() || !WildPoiKinds.IsValidIndex(L.Kind) || !WildPoiKinds[L.Kind].bHunts || WildAmbushSprung.Contains(L.Id)) continue;
+			if (FVector::Dist2D(L.At, Her) > 6000.f || FMath::Abs(L.At.Z - Her.Z) > 900.f) continue;
+			WildAmbushSprung.Add(L.Id);
+			int32 Sprung = 0;
+			for (ARDMonster* M : WildSection->SpawnedMonsters)
+				if (IsValid(M) && !M->IsDead() && !M->IsAlly() && FVector::Dist2D(M->HomeAt, L.At) < 2000.f) { M->bHunting = true; M->HuntUntil = Now + 60.f; ++Sprung; }
+			if (Sprung > 0)
+			{
+				if (!WildPoiKinds[L.Kind].Text.IsEmpty()) PlayerCombat->ShowMessage(WildPoiKinds[L.Kind].Text);
+				WildEngagements.Add(FString::Printf(TEXT("%.1f|met|%s|%.0f|%.0f"), Now, *WildPoiKinds[L.Kind].Name.ToString(), L.At.X / 100.f, L.At.Y / 100.f));
+				UE_LOG(LogRDWildPoi, Log, TEXT("RDENCOUNTER %s sprung: %d hunt her"), *WildPoiKinds[L.Kind].Name.ToString(), Sprung);
+			}
+		}
 	// (the list of 2026-11-10, tests: an encounter of a kind named (ForceWildEncounter) comes now, whatever is near)
 	const bool bForced = !ForcedEncounterKind.IsNone();
 	// (something to do near her (PR #36's review: not a spot already emptied or cleared): a fight, a point of interest still to
@@ -265,7 +283,7 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 				M->Setup(Ws_, Def, (int32)Rs.GetUnsignedInt());
 				M->Empower(Tier, K.MonsterHealth > 0.f ? K.MonsterHealth : 1.f, 1.f, 1.f, K.Title);
 				// (the list of 2026-11-10: "when the player is ambushed, the ambushers should make their way to her immediately")
-				if (K.Name.ToString().Contains(TEXT("ambush"))) { M->bHunting = true; M->HuntUntil = Now + 60.f; }
+				if (K.bHunts) { M->bHunting = true; M->HuntUntil = Now + 60.f; }          // (PR #38's review: the kind's flag, not its name)
 				Ws_->SpawnedMonsters.Add(M);
 				WildRoamers.Add(M); ++Made;
 			}

@@ -306,6 +306,8 @@ public:
 	 *  it is not kept twice: its pieces mend the one she has to full. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourWear(FName Item) const { const float* W = ArmourWear.Find(Item); return W ? *W : 0.f; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetArmourDurability(FName Item) const;
+	/** the list of 2026-11-10: a set of armour's or a shield's full durability (what a repair item mends; 0: neither) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Combat") float GetGearDurability(FName Item) const;
 	/** tests and the reel: set what is left of a set's durability */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Combat") void SetArmourWear(FName Item, float Value);
 	/** the share of her speed the worn set takes (0: none) */
@@ -914,6 +916,7 @@ private:
 	 *  hold already broke down the whole stack */
 	double CraftHoldAt = -1.0;
 	bool bCraftHoldDone = false;
+	FString CraftHoldLine; int32 CraftHoldCursor = -1;
 	void WearDownArmour();
 	void RemoveCarried(FName Name, int32 Count);
 	void PlayUiSound(FName Key, FName Fallback);

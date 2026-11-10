@@ -1159,6 +1159,12 @@ float URDCombatComponent::GetArmourDurability(FName Item) const
 	return Ix >= 0 && Generator->Items[Ix].Kind == ERDItemKind::Armour ? Generator->Items[Ix].Durability : 0.f;
 }
 
+float URDCombatComponent::GetGearDurability(FName Item) const
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	return Ix >= 0 && (Generator->Items[Ix].Kind == ERDItemKind::Armour || Generator->Items[Ix].Kind == ERDItemKind::Shield) ? Generator->Items[Ix].Durability : 0.f;
+}
+
 void URDCombatComponent::SetArmourWear(FName Item, float Value)
 {
 	if (GetItemCount(Item) <= 0 || GetArmourDurability(Item) <= 0.f) return;
@@ -1217,7 +1223,7 @@ TArray<FString> URDCombatComponent::GetRepairLines() const
 	const float Share = Generator->Items[Ix].Amount;
 	for (const FName& N : CarriedOrder)
 	{
-		const float Full = GetArmourDurability(N);
+		const float Full = GetGearDurability(N);          // (the list of 2026-11-10: a shield too)
 		if (Full <= 0.f) continue;
 		const float Left = GetArmourWear(N);
 		Out.Add(FString::Printf(TEXT("armour|%s|%.0f|%.0f|%.0f"), *N.ToString(), Left, Full, FMath::Min(Full, Left + Full * Share)));
@@ -1253,7 +1259,7 @@ bool URDCombatComponent::RepairEntry(int32 Line)
 	const int32 Wi = bArmour ? -1 : FCString::Atoi(*P[1]);
 	if (!bArmour) { SyncWear(); if (!Wear.IsValidIndex(Wi) || !Generator->Weapons.IsValidIndex(Wi)) return false; }
 	const float Left = bArmour ? GetArmourWear(FName(*Name)) : Wear[Wi];
-	const float Full = bArmour ? GetArmourDurability(FName(*Name)) : Generator->Weapons[Wi].Durability;
+	const float Full = bArmour ? GetGearDurability(FName(*Name)) : Generator->Weapons[Wi].Durability;
 	const float After = FMath::Min(Full, Left + Full * Share);
 	const FString Kit = RepairWith.ToString().ToLower();
 	if (Left >= Full) { SetMessage(FString::Printf(TEXT("Your %s is whole already"), *Name.ToLower())); return false; }
@@ -1266,7 +1272,7 @@ bool URDCombatComponent::RepairEntry(int32 Line)
 	PlayUiSound(TEXT("Player.Repair"), TEXT("Player.Inventory"));
 	UE_LOG(LogTemp, Log, TEXT("RDREPAIR %s mended %s %.0f -> %.0f / %.0f"), *Used.ToString(), *Name, Left, After, Full);
 	if (GetItemCount(Used) <= 0) CancelRepair();
-	if (bArmour && FName(*Name) == WornArmour) UpdateWalkSpeed();
+	if (bArmour && (FName(*Name) == WornArmour || FName(*Name) == WornShield)) UpdateWalkSpeed();
 	InventoryCursor = FMath::Clamp(InventoryCursor, 0, FMath::Max(0, GetInventoryLines().Num() - 1));
 	return true;
 }
@@ -1278,6 +1284,7 @@ void URDCombatComponent::SetCraftingOpen(bool bOpen)
 	if (bOpen && bInventoryOpen) SetInventoryOpen(false);
 	KeyRepeatDir = 0;
 	bCraftOpen = bOpen;
+	CraftHoldAt = -1.0; bCraftHoldDone = false; CraftHoldLine.Reset();          // (PR #38's review: a hold never outlives the panel)
 	if (bOpen) { if (AttackTime >= 0.f) EndAttack(); CraftCursor = FMath::Clamp(CraftCursor, 0, FMath::Max(0, GetCraftLines().Num() - 1)); }
 	else CraftClosedFrame = GFrameCounter;
 	if (bInventoryPausesGame || !bOpen) UGameplayStatics::SetGamePaused(this, bOpen);
@@ -1950,17 +1957,23 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 		Steer([this](int32 S) { MoveCraftCursor(S); });
 		// (the list of 2026-11-10: on a line to break down, a tap breaks down one when let go, the button held 0.6 s the whole stack;
 		// a recipe is made as the button goes down, as before)
-		const TArray<FString> Cl = GetCraftLines();
-		const bool bBreakLine = Cl.IsValidIndex(CraftCursor) && Cl[CraftCursor].StartsWith(TEXT("breakdown|"));
-		const bool bHeld = PC->IsInputKeyDown(EKeys::Enter) || PC->IsInputKeyDown(EKeys::SpaceBar) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom)
-			|| PC->IsInputKeyDown(EKeys::E) || (!bMouse && PC->IsInputKeyDown(EKeys::LeftMouseButton));
+		// (PR #38's review: the hold keeps the line it began on; the cursor moved off it, or the line gone, ends it with nothing done;
+		// the lines are read only while a button is down or a hold runs, not every frame)
 		const double Now = FPlatformTime::Seconds();
-		if (bUse && bBreakLine) { CraftHoldAt = Now; bCraftHoldDone = false; }
-		else if (bUse) CraftEntry();
-		if (CraftHoldAt >= 0.0)
+		if (bUse)
 		{
-			if (!bBreakLine) CraftHoldAt = -1.0;
-			else if (bHeld && !bCraftHoldDone && Now - CraftHoldAt >= 0.6) { CraftEntryAll(); bCraftHoldDone = true; }
+			const TArray<FString> Cl = GetCraftLines();
+			if (Cl.IsValidIndex(CraftCursor) && Cl[CraftCursor].StartsWith(TEXT("breakdown|"))) { CraftHoldAt = Now; bCraftHoldDone = false; CraftHoldLine = Cl[CraftCursor]; CraftHoldCursor = CraftCursor; }
+			else { CraftHoldAt = -1.0; CraftEntry(); }
+		}
+		else if (CraftHoldAt >= 0.0)
+		{
+			const bool bHeld = PC->IsInputKeyDown(EKeys::Enter) || PC->IsInputKeyDown(EKeys::SpaceBar) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom)
+				|| PC->IsInputKeyDown(EKeys::E) || (!bMouse && PC->IsInputKeyDown(EKeys::LeftMouseButton));
+			const TArray<FString> Cl = GetCraftLines();
+			const bool bSame = CraftCursor == CraftHoldCursor && Cl.IsValidIndex(CraftCursor) && Cl[CraftCursor] == CraftHoldLine;
+			if (!bSame) CraftHoldAt = -1.0;
+			else if (bHeld && !bCraftHoldDone && Now - CraftHoldAt >= 0.6) { CraftEntryAll(); bCraftHoldDone = true; CraftHoldLine.Reset(); }
 			else if (!bHeld) { if (!bCraftHoldDone) CraftEntry(); CraftHoldAt = -1.0; }
 		}
 		return;
@@ -2019,7 +2032,7 @@ void URDCombatComponent::TickInventory(APlayerController* PC)
 		// (an ability's line: "@<name>" on the bar)
 		FName Ab = P.Num() >= 2 && P[0] == TEXT("ability") ? FName(*(TEXT("@") + P[1])) : NAME_None;
 		// (the list of 2026-11-10: a torch, a shield, a potion or the ankh: "#<item>" on the bar)
-		if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("shield") || P[0] == TEXT("torch") || P[0] == TEXT("light")) && IsQuickableItem(FName(*P[1])))
+		if (P.Num() >= 2 && (P[0] == TEXT("item") || P[0] == TEXT("shield") || P[0] == TEXT("torch")) && IsQuickableItem(FName(*P[1])))
 			Ab = FName(*(TEXT("#") + P[1]));
 		if (Generator->bQuickSlots)
 		{

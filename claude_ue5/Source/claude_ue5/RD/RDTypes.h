@@ -704,6 +704,8 @@ struct FRDWildPoiKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Layer = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoad = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bRoaming = false;
+	/** the list of 2026-11-10: an ambush: its monsters hunt her (a roaming one's at once; a placed one's once she is within 60 m) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bHunts = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Props;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Use;
 	/** what it holds: "Item|min|max|chance" */

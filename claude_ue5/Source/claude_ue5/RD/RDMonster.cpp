@@ -803,7 +803,8 @@ bool ARDMonster::TickCombat(float Dt)
 	}
 	// (the list of 2026-11-10: an ambush hunts her: it makes its way to her at once, from beyond its noticing distance, and no
 	// distance or leash drops it while the hunt lasts (a minute, or until she is 150 m off); after it, its home is where it is)
-	const bool bHunt = bHunting && !bAlly && GetWorld()->GetTimeSeconds() < HuntUntil && Dist < 15000.f;
+	// (a test's quiet (no noticing at all) holds for a hunt too; nor across a great height (PR #38's review))
+	const bool bHunt = bHunting && !bAlly && G->AggroDistance > 0.f && GetWorld()->GetTimeSeconds() < HuntUntil && Dist < 15000.f && Dz < 900.f;
 	if (bHunting && !bHunt) { bHunting = false; HomeAt = L; }
 	if (bHunt && !bAggro) { bAggro = true; Path.Reset(); WaitTime = 0.f; ChaseTimer = 0.f; StuckTime = 0.f; Roar(); }
 	if (!bAggro && !bAlly)

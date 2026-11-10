@@ -830,6 +830,10 @@ void ARDDungeonGenerator::BackToMainMenu()
 {
 	// (the cursor back on the line that opened the page: with Save and Load on the main page, "1" was Save, and Back then
 	// Enter overwrote her saved game)
+	// (the list of 2026-11-10: the Save page's drop-down goes back to the Save page, on its line (PR #38's review: Escape, B and Start
+	// took it to the main page))
+	if (MenuPage == 4) { MenuPage = 3; MenuCursor = FMath::Max(0, MenuItems().IndexOfByKey(FName(TEXT("saveover")))); return; }
+	if (MenuPage == 3) SaveOverSlot.Reset();
 	const FName From = MenuPage == 2 ? FName(TEXT("load")) : MenuPage == 3 ? FName(TEXT("save")) : FName(TEXT("options"));
 	MenuPage = 0;
 	MenuCursor = FMath::Max(0, MenuItems().IndexOfByKey(From));
@@ -1047,7 +1051,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (Id == TEXT("resume")) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
 	if (Id == TEXT("options")) { LastMenuAction = TEXT("options"); OpenOptionsPage(); return true; }
 	// (the list of 2026-11-10: the drop-down's Back goes back to the Save page, not the main page)
-	if (Id == TEXT("back") && MenuPage == 4) { LastMenuAction = TEXT("back"); MenuPage = 3; MenuCursor = 1; return true; }
+	if (Id == TEXT("back") && MenuPage == 4) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
 	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
 	if (Id == TEXT("saveover")) { LastMenuAction = TEXT("saveover"); MenuPage = 4; MenuCursor = 0; SaveSlotsAt = -10.0; return true; }
 	if (Id == TEXT("overnew")) { LastMenuAction = TEXT("overnew"); SaveOverSlot.Reset(); MenuPage = 3; MenuCursor = 2; return true; }

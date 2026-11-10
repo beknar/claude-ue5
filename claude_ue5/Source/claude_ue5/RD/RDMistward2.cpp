@@ -174,8 +174,7 @@ bool URDCombatComponent::IsQuickableItem(FName Item) const
 	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
 	if (Ix < 0) return false;
 	const ERDItemKind K = Generator->Items[Ix].Kind;
-	return K == ERDItemKind::Torch || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed
-		|| K == ERDItemKind::Light;
+	return K == ERDItemKind::Torch || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed;
 }
 
 bool URDCombatComponent::UseAbility(FName Ability)
