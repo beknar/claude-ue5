@@ -64,6 +64,29 @@ struct FRDRoleLines
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FString> Lines;
 };
 
+/** the list of 2026-11-10's sixth phase ("the buildings in the wilderness do not have an interior and there is no way to get
+ *  inside"): a wild house's mesh with its doorways open (the village houses' _open copies), its doors' leaves on their hinges and
+ *  its inside (mesh units: the house is laid at the generator's WildHouseScale), measured by 916 */
+USTRUCT(BlueprintType)
+struct FRDWildHouseDoor
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TObjectPtr<UStaticMesh> Leaf = nullptr;
+	/** its hinge in the house mesh's frame; the leaf runs +Y from it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FVector Pivot = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float Width = 148.f;
+};
+USTRUCT(BlueprintType)
+struct FRDWildHouse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TObjectPtr<UStaticMesh> Mesh = nullptr;
+	/** its room inside the walls (mesh units) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FVector2D InMin = FVector2D(-600.f, -500.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FVector2D InMax = FVector2D(600.f, 500.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FRDWildHouseDoor> Doors;
+};
+
 /** the list of 2026-11-10: a crowd body's separate parts (the NPC Characters pack's _Full_02 bodies carry their heads and hair as
  *  meshes of their own, Separate/), following the body (leader pose); CrowdParts[i] goes with CrowdMeshes[i] */
 USTRUCT(BlueprintType)

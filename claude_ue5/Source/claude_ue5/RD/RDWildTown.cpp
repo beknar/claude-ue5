@@ -210,6 +210,8 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 	const FIntPoint C = Wild->PlaceCellOf(AtM.X, AtM.Y);
 	TArray<FRDWildPlace> Ps;
 	for (int32 I = -1; I <= 1; ++I) for (int32 J = -1; J <= 1; ++J) Wild->PlacesIn(C + FIntPoint(I, J), Ps);
+	// (the list of 2026-11-10: "the small farm holdings should be noted on the large map": the farmsteads found as places are)
+	if (bWildFarmsOnMap) Wild->FarmsteadsIn(AtM.X - WildDiscoverM - 50.0, AtM.Y - WildDiscoverM - 50.0, AtM.X + WildDiscoverM + 50.0, AtM.Y + WildDiscoverM + 50.0, Ps);
 	for (const FRDWildPlace& P : Ps)
 	{
 		if (WildFound.Contains(P.Id)) continue;

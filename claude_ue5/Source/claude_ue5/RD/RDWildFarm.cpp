@@ -161,7 +161,7 @@ void ARDDungeonGenerator::SpawnWildFarm(ARDWildChunk* C, const FRDWildPlace& P)
 	UStaticMesh* HouseM = Pick(TEXT("farmhouse"), TEXT("house"));
 	UStaticMesh* BarnM = Pick(TEXT("barn"), TEXT("house"));
 	const FVector2D Hh = HalfOf(HouseM), Bh = HalfOf(BarnM);
-	PutMesh(HouseM, 0.f, 0.f, 0.f, 25.f);
+	if (UStaticMeshComponent* Hm = PutMesh(HouseM, 0.f, 0.f, 0.f, 25.f)) FitWildHouse(C, Hm, HashCombine((uint32)P.Id, 0x4B0Bu));          // (the list of 2026-11-10: its doors and inside)
 	const float BarnV = Hh.Y + Bh.Y + 3.f;
 	PutMesh(BarnM, 0.f, BarnV, 0.f, 15.f);
 	// ---- the paddock (7 x 5.5 m half sizes) on the house's other side, its gate toward the house; the hen run behind the house
@@ -276,6 +276,14 @@ ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Re
 	ARDTownsfolk* Best = nullptr; float Bd = Reach;
 	for (const FRDWildFarmRec& F : WildFarms)
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : F.Folk)
+			if (ARDTownsfolk* T = W.Get(); IsValid(T))
+			{
+				const float D = FVector::Dist2D(T->GetActorLocation(), From);
+				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
+			}
+	// (the list of 2026-11-10's sixth phase: the travellers on the roads)
+	for (const FTraveller& G : WildTravellers)
+		for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk)
 			if (ARDTownsfolk* T = W.Get(); IsValid(T))
 			{
 				const float D = FVector::Dist2D(T->GetActorLocation(), From);

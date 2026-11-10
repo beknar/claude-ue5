@@ -411,5 +411,15 @@ public:
 	UPROPERTY(BlueprintReadOnly) bool bMaking = false;
 	/** the ground's collision (hidden, BlockAll); cooked on a worker unless she was running fast when it was asked */
 	UPROPERTY() TObjectPtr<UProceduralMeshComponent> GroundCollision = nullptr;
+	/** the list of 2026-11-10: its houses' doors (a leaf on its hinge: F opens and shuts it) and its houses (their insides) */
+	struct FDoor { TWeakObjectPtr<USceneComponent> Pivot; FVector At = FVector::ZeroVector; FVector Out = FVector::ForwardVector; float OutYaw = -90.f; float OpenYaw = -90.f; float Alpha = 0.f; float Target = 0.f; };
+	TArray<FDoor> Doors;
+	struct FHouse { FVector C = FVector::ZeroVector; FVector2D H = FVector2D::ZeroVector; float Yaw = 0.f; int32 Doors = 0; int32 Furniture = 0; int32 PropsGone = 0; bool bLit = false; float FloorZ = 0.f; FString Of; };
+	TArray<FHouse> Houses;
+	/** ground kept clear of plants (a house's inside): its middle and half sizes (cm, the chunk's frame) and its yaw; the near grass
+	 *  made as she comes leaves it out */
+	struct FClear { FVector2D C = FVector2D::ZeroVector; FVector2D H = FVector2D::ZeroVector; float Yaw = 0.f; };
+	TArray<FClear> Clears;
+	bool IsClear(const FVector& Local) const;
 	virtual void Destroyed() override;
 };

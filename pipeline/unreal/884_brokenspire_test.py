@@ -3767,6 +3767,47 @@ def step_animals10():
         and "(no mesh)" not in kinds and all(m_ >= 0.5 * n_ for m_, n_ in res["moved_of"].values()) \
         and all(v.get("feet_off_cm") is not None and v["feet_off_cm"] <= 4.0 for k, v in out.items() if k.startswith("SK_Tripo"))
     step_result("animals10", ok, **res)
+def step_town10():
+    """the town's liveliness (the list of 2026-11-10: "what can be done to make the town more lively?"): hens loose about the square
+    (TownHens), one runs from her when she comes up to it (it is a metre further off a second later, its flight counted); at night the
+    militia and the guards awake carry a lantern with its light, none by day; pictures"""
+    g = G["gen"]; res = {}; quiet(True); g.set_town_hour(11.0); yield from rwait(1.0)
+    def hens(): return [dict(zip(("x", "y", "z", "state", "flees"), [float(x) for x in str(l).split("|")[1:]])) for l in g.get_town_hen_lines()]
+    H = hens(); res["hens"] = len(H)
+    if H:
+        h = H[0]; hp = V(h["x"], h["y"], h["z"])
+        put(V(hp.x + 400, hp.y, 0), yaw=180.0, z=0.0); yield from rwait(1.0)
+        H1 = hens(); h1 = min(H1, key=lambda e: math.hypot(e["x"] - hp.x, e["y"] - hp.y)); f0 = h1["flees"]; p1 = V(h1["x"], h1["y"], 0)
+        G["pawn"].set_actor_location(V(p1.x + 110, p1.y, G["pawn"].get_actor_location().z), False, True); yield from rwait(1.2)
+        H2 = hens(); h2 = min(H2, key=lambda e: math.hypot(e["x"] - p1.x, e["y"] - p1.y))
+        me = G["pawn"].get_actor_location()
+        res["hen"] = {"flees": [f0, h2["flees"]], "from_her_before": 110, "from_her_after": round(math.hypot(h2["x"] - me.x, h2["y"] - me.y)), "moved": round(math.hypot(h2["x"] - p1.x, h2["y"] - p1.y))}
+        # (a picture: her 3 m from the hen, looking down at it)
+        G["pawn"].set_actor_location(V(h2["x"] + 300, h2["y"], G["pawn"].get_actor_location().z), False, True)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=180.0)); yield from rwait(0.8); shot("town10_hens", "1280x720"); yield from rwait(1.5)
+    def lit():
+        out = []
+        for f in folk():
+            if f["role"] not in ("Militia", "Guard"): continue
+            t = g.get_townsfolk(f["i"])
+            out.append({"i": f["i"], "role": f["role"], "lights": len(t.get_components_by_class(unreal.PointLightComponent)), "props": len(t.get_components_by_class(unreal.StaticMeshComponent)), "asleep": t.is_sleeping()})
+        return out
+    res["day"] = lit()
+    g.set_town_hour(22.0); yield from rwait(4.5)
+    res["night"] = lit()
+    awake = [x for x in res["night"] if not x["asleep"]]
+    if awake:
+        t = g.get_townsfolk(awake[0]["i"]); at = t.get_actor_location()
+        fw_ = t.get_actor_forward_vector()
+        put(V(at.x + fw_.x * 250, at.y + fw_.y * 250, 0), yaw=math.degrees(math.atan2(-fw_.y, -fw_.x)))
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=math.degrees(math.atan2(-fw_.y, -fw_.x)) + 25.0)); yield from rwait(1.5)
+        shot("town10_lantern", "1280x720"); yield from rwait(1.5)
+    g.set_town_hour(11.0); yield from rwait(3.0)
+    res["day_after"] = sum(x["lights"] for x in lit())
+    quiet(False)
+    ok = res["hens"] >= 4 and res.get("hen") and res["hen"]["flees"][1] > res["hen"]["flees"][0] and res["hen"]["from_her_after"] - res["hen"]["from_her_before"] > 40 \
+        and sum(x["lights"] for x in res["day"]) == 0 and awake and all(x["lights"] >= 1 for x in awake) and res["day_after"] == 0
+    step_result("town10", ok, **res)
 def step_crops9():
     """the farms' thirteen crops (the list of 2026-11-08b: "apply the list of most common crops ... in this order" and "have an
     indicator for what kind of crops there are"): over the farms round Brokenspire (a 6 km square, a point every 40 m) every
@@ -4084,7 +4125,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
+              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)

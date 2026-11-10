@@ -1497,6 +1497,194 @@ def clear_spot(name, rmin=1500, rmax=5000):
             if all(math.hypot(px - a, py - b) > 1400.0 for a, b in tl) and sample(px, py)["biome"] == name and sample(px, py)["water"] == 0:
                 return (px, py)
     return None
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-10's sixth phase
+def wild_houses():
+    out, doors = [], []
+    for l in G["gen"].get_wild_house_lines():
+        p = str(l).split("|")
+        if p[0] == "house": out.append({"x": float(p[3]), "y": float(p[4]), "z": float(p[5]), "doors": int(p[6]), "furniture": int(p[7]), "lit": p[8] == "1", "floor": float(p[9]), "of": p[10], "hx": float(p[11]), "hy": float(p[12]), "yaw": float(p[13])})
+        elif p[0] == "door": doors.append({"x": float(p[1]), "y": float(p[2]), "z": float(p[3]), "alpha": float(p[4]), "to": float(p[5])})
+    return out, doors
+def in_house(h, q, pad=0.0):
+    a = math.radians(-h["yaw"]); dx, dy = q.x - h["x"], q.y - h["y"]
+    lx, ly = dx * math.cos(a) - dy * math.sin(a), dx * math.sin(a) + dy * math.cos(a)
+    return abs(lx) <= h["hx"] + pad and abs(ly) <= h["hy"] + pad
+def walk_to(pt, sec=6.0, near=60.0):
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        q = G["pawn"].get_actor_location(); dv = V(pt.x - q.x, pt.y - q.y, 0); n_ = math.hypot(dv.x, dv.y)
+        if n_ < near: return True
+        G["pawn"].add_movement_input(V(dv.x / n_, dv.y / n_, 0), 1.0, False); yield
+    return False
+def plants_in(h):
+    """the plants' instances standing in a house's room (every chunk's foliage, the near grass too)"""
+    n = 0; r = max(h["hx"], h["hy"]) * 1.5
+    box = unreal.Box(min=V(h["x"] - r, h["y"] - r, h["z"] - 3000), max=V(h["x"] + r, h["y"] + r, h["z"] + 3000))
+    for c in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+        for hm in c.get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent):
+            for i in hm.get_instances_overlapping_box(box, True) or []:
+                t = hm.get_instance_transform(i, True)
+                t = t[1] if isinstance(t, tuple) else t
+                if t and in_house(h, t.translation, -10.0): n += 1
+    return n
+def step_houses10():
+    """"the buildings in the wilderness do not have an interior and there is no way to get inside or climb any stairs on the outside":
+    at a lone house or a village and at a farmstead: each house laid with its doors, furniture and lamp; she opens a door by F from
+    outside (it swings open), walks in by her own movement, stands on its floor inside its room (her feet within 15 cm of the floor),
+    no plant stands in the room; a picture inside; she walks out and shuts it"""
+    g = G["gen"]; res = {"visits": []}; quiet(True)
+    yield from wait_ready(90)
+    near = sorted([p for p in places_near(0, 0, 25000) if p["kind"] in ("house", "village")], key=lambda p: math.hypot(p["x"], p["y"]))
+    fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 3500.0)]
+    goals = [(p["kind"], p["name"], p["x"], p["y"]) for p in near[:2]] + [("farmstead", f[1], float(f[2]), float(f[3])) for f in fs[:1]]
+    for kind, name, x, y in goals:
+        v = {"kind": kind, "name": name}
+        g.wild_drop_all(); g.wild_put_her(x - 40.0, y); yield from wait_chunks(30, 50); yield from rwait(2.0)
+        hs, ds = wild_houses()
+        hs = [h for h in hs if math.hypot(h["x"] / 100.0 - x, h["y"] / 100.0 - y) < 60.0 and h["doors"] > 0]
+        v["houses"] = len(hs)
+        if not hs: res["visits"].append(v); continue
+        h = min(hs, key=lambda h: math.hypot(h["x"] / 100.0 - x, h["y"] / 100.0 - y)); v["house"] = {k: h[k] for k in ("of", "doors", "furniture", "lit", "floor")}
+        d = min(ds, key=lambda d: math.hypot(d["x"] - h["x"], d["y"] - h["y"]) if math.hypot(d["x"] - h["x"], d["y"] - h["y"]) < max(h["hx"], h["hy"]) * 1.6 else 1e9)
+        out = V(d["x"] - h["x"], d["y"] - h["y"], 0); n_ = math.hypot(out.x, out.y) or 1.0; out = V(out.x / n_, out.y / n_, 0)
+        # (3.5 m out, past the steps a house on a slope has before its door (up to six, 2.5 m), then up to the door)
+        st = V(d["x"] + out.x * 350, d["y"] + out.y * 350, 0)
+        put(st, yaw=math.degrees(math.atan2(-out.y, -out.x)), z=g.wild_ground_z(st)); yield from rwait(0.8)
+        v["to_door"] = yield from walk_to(V(d["x"] + out.x * 110, d["y"] + out.y * 110, 0), 6.0, 40.0)
+        yield from rwait(0.3)
+        v["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+        v["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.6)
+        _hs, ds2 = wild_houses(); dn = min(ds2, key=lambda e: math.hypot(e["x"] - d["x"], e["y"] - d["y"])); v["door_open"] = dn["alpha"]
+        # (in by her own movement: through the door, then to the room's middle)
+        r1 = yield from walk_to(V(d["x"] - out.x * 150, d["y"] - out.y * 150, 0), 6.0)
+        r2 = yield from walk_to(V(h["x"], h["y"], 0), 6.0, 90.0)
+        yield from rwait(0.6)
+        q = G["pawn"].get_actor_location(); hh = G["pawn"].get_component_by_class(unreal.CapsuleComponent).get_scaled_capsule_half_height()
+        v["walked_in"] = [r1, r2]; v["inside"] = in_house(h, q); v["feet_over_floor_cm"] = round(q.z - hh - h["floor"], 1)
+        v["plants_in_room"] = plants_in(h)
+        # (a picture of the room from her place, the camera's way the back wall)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=math.degrees(math.atan2(-out.y, -out.x)))); yield from rwait(1.2)
+        sn = f"houses10_{len(res['visits'])}_{kind}"; shot(sn, "1280x720"); v["shot"] = sn; yield from rwait(1.5)
+        # (out again and shut)
+        yield from walk_to(V(d["x"] + out.x * 170, d["y"] + out.y * 170, 0), 8.0)
+        v["f_shut"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.6)
+        _hs, ds3 = wild_houses(); v["door_after"] = min(ds3, key=lambda e: math.hypot(e["x"] - d["x"], e["y"] - d["y"]))["alpha"]
+        res["visits"].append(v)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    done = [v for v in res["visits"] if "house" in v]
+    ok = len(done) >= 2 and any(v["kind"] == "farmstead" for v in done) and all(
+        v["house"]["furniture"] >= 5 and v["house"]["lit"] and "open the door" in v["prompt"] and v["door_open"] > 0.95 and v["inside"]
+        and abs(v["feet_over_floor_cm"]) < 15 and v["plants_in_room"] == 0 and v["door_after"] < 0.05 for v in done)
+    step_result("houses10", ok, **res)
+
+def step_tower10():
+    """the Old Watchtower climbed: she walks in at its doorway from the road, up its spiral by her own movement to the second storey's
+    top, onto its floor (it holds her there); a picture from the top"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    tw = wq().get("wild:patrol")
+    assert tw, "no tower"
+    yaw = tw["yaw"]; fw = (math.cos(math.radians(yaw)), math.sin(math.radians(yaw)))
+    g.wild_drop_all(); g.wild_put_her(tw["x"] + fw[0] * 25.0, tw["y"] + fw[1] * 25.0); yield from wait_chunks(30, 50); yield from rwait(2.0)
+    tl = [str(l).split("|") for l in g.get_wild_tower_lines()]
+    tl = [t for t in tl if math.hypot(float(t[1]) / 100.0 - tw["x"], float(t[2]) / 100.0 - tw["y"]) < 20.0]
+    res["tower_lines"] = tl[-1:] if tl else None
+    if not tl: quiet(False); step_result("tower10", False, **res); return
+    t = tl[-1]; C = V(float(t[1]), float(t[2]), 0); gf, top, pieces, dyaw = float(t[3]), float(t[4]), int(t[5]), float(t[6])
+    def at(ang, r): a = math.radians(ang); return V(C.x + r * math.cos(a), C.y + r * math.sin(a), 0)
+    door = at(dyaw, 300.0); sa = dyaw - 22.0
+    put(at(dyaw, 650.0), yaw=dyaw + 180.0, z=g.wild_ground_z(at(dyaw, 650.0))); yield from rwait(1.0)
+    pts = [at(dyaw, 380.0), at(dyaw, 180.0)] + [at(sa - k * 15, 120) for k in range(0, 6 * pieces + 1)] + [at(sa - pieces * 90 - 45, 135)]
+    t0 = time.time(); i = 0; zmax = -1e9; last = time.time(); li = 0
+    while i < len(pts) and time.time() - t0 < 90:
+        q = G["pawn"].get_actor_location(); zmax = max(zmax, q.z)
+        while i < len(pts) and math.hypot(pts[i].x - q.x, pts[i].y - q.y) < 45.0: i += 1
+        if i >= len(pts): break
+        if i != li: li, last = i, time.time()
+        if time.time() - last > 8.0: break
+        dv = V(pts[i].x - q.x, pts[i].y - q.y, 0); n_ = math.hypot(dv.x, dv.y) or 1.0
+        G["pawn"].add_movement_input(V(dv.x / n_, dv.y / n_, 0), 1.0, False); yield
+    hh = G["pawn"].get_component_by_class(unreal.CapsuleComponent).get_scaled_capsule_half_height()
+    yield from rwait(1.0)
+    q = G["pawn"].get_actor_location()
+    res["climb"] = {"reached": i, "of": len(pts), "feet_z_max_over_floor": round(zmax - hh - gf, 1), "top_over_floor": round(top - gf, 1)}
+    res["feet_after_over_top"] = round(q.z - hh - top, 1)
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=dyaw)); yield from rwait(0.8)
+    shot("tower10_top", "1280x720"); yield from rwait(1.5)
+    put(at(dyaw, 900.0), yaw=dyaw + 180.0, z=g.wild_ground_z(at(dyaw, 900.0))); yield from rwait(1.2); shot("tower10_door", "1280x720"); yield from rwait(1.5)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    step_result("tower10", res["climb"]["reached"] == res["climb"]["of"] and abs(res["feet_after_over_top"]) < 30 and pieces >= 4, **res)
+
+def step_farms10():
+    """"the small farm holdings should be noted on the large map": a farmstead she walks past is found (said so) and is on the big map:
+    its place under the map's cross names it; a picture of the map"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 3500.0)]
+    assert fs, "no farmstead"
+    f = fs[0]; fid, fx, fy = int(f[0]), float(f[2]), float(f[3]); res["farmstead"] = f[1]
+    g.set_map_open(True); yield from rwait(0.4); g.set_wild_map_view(fx, fy, 20.0); yield from rwait(1.2)
+    res["hover_before"] = map_state()["hover"]
+    g.set_map_open(False); yield from rwait(0.3)
+    g.wild_drop_all(); g.wild_put_her(fx - 30.0, fy); yield from wait_chunks(30, 50); yield from rwait(2.5)
+    g.set_map_open(True); yield from rwait(0.4); g.set_wild_map_view(fx, fy, 20.0); yield from rwait(1.5)
+    ms = map_state(); res["hover_after"] = ms["hover"]; res["hover_name"] = ms["hover_name"]
+    shot("farms10_map", "1280x720"); yield from rwait(1.5)
+    g.set_map_open(False); yield from rwait(0.3)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    step_result("farms10", res["hover_before"] != fid and res["hover_after"] == fid and f[1] in res["hover_name"], **res)
+
+def step_travellers10():
+    """the wilds' liveliness: travellers on a road near her (by day walking along it, 2 or 3 together), she talks to one (a line);
+    at night they camp beside the road round a fire and sit; in the morning they walk on; pictures"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    h0 = g.get_town_hour(); g.set_town_hour(10.0)
+    # (beside a road: the captain's den lies beside the road north (its place is the world's; a ring of samples 100 m apart missed
+    # every road, a few metres wide))
+    den = wq().get("wild:wolves")
+    rd = (den["x"], den["y"]) if den else (900.0, 0.0)
+    res["road_at"] = rd
+    g.wild_drop_all(); g.wild_put_her(rd[0], rd[1]); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    res["forced"] = g.force_wild_travellers(); yield from rwait(1.5)
+    def grp():
+        out = []
+        for l in g.get_wild_traveller_lines():
+            p = str(l).split("|")
+            if p[0] == "group": out.append({"x": float(p[2]), "y": float(p[3]), "z": float(p[4]), "folk": int(p[5]), "camped": p[6] == "1", "walking": int(p[7]), "to": p[9], "bits": int(p[13])})
+        return out
+    G0 = grp(); res["groups"] = len(G0)
+    if not G0: g.set_town_hour(h0); quiet(False); step_result("travellers10", False, **res); return
+    g0 = G0[0]; p0 = V(g0["x"], g0["y"], 0); yield from rwait(6.0)
+    g1 = grp()[0]; res["walked_m"] = round(math.hypot(g1["x"] - p0.x, g1["y"] - p0.y) / 100.0, 1); res["walking"] = g1["walking"]; res["to"] = g1["to"]
+    # (to them: a word)
+    lead = V(g1["x"], g1["y"], g1["z"])
+    G["pawn"].set_actor_location(V(lead.x + 150, lead.y, lead.z + 20), False, True); yield from rwait(0.3)
+    res["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+    res["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); res["said"] = str(g.get_editor_property("last_bark"))
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=180.0)); yield from rwait(0.8); shot("travellers10_road", "1280x720"); yield from rwait(1.5)
+    # (night: camped)
+    g.set_town_hour(22.5); yield from rwait(14.0)
+    g2 = grp(); res["night"] = g2[0] if g2 else None
+    if g2:
+        c = g2[0]; cp = None
+        for l in g.get_wild_traveller_lines():
+            p = str(l).split("|")
+            if p[0] == "group": cp = V(float(p[10]), float(p[11]), float(p[12])); break
+        res["sitting"] = [str(l).split("|")[6] for l in g.get_wild_traveller_lines() if str(l).startswith("folk|")]
+        if cp:
+            G["pawn"].set_actor_location(V(cp.x + 650, cp.y, cp.z + 100), False, True); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-20, yaw=180.0)); yield from rwait(1.5)
+            shot("travellers10_camp", "1280x720"); yield from rwait(1.5)
+    g.set_town_hour(8.0); yield from rwait(6.0)
+    g3 = grp(); res["morning"] = g3[0] if g3 else None
+    g.set_town_hour(h0); quiet(False)
+    ok = res["forced"] and 2 <= g0["folk"] <= 3 and res["walked_m"] > 3 and res["walking"] >= 1 and "talk to" in res["prompt"] and res["f"] == "bark" and len(res["said"].split("|", 1)[-1]) > 5 \
+        and res["night"] and res["night"]["camped"] and res["night"]["bits"] >= 2 and any("Sit" in x for x in res.get("sitting", [])) and res["morning"] and not res["morning"]["camped"]
+    step_result("travellers10", ok, **res)
+
 def run_her(dir_xy, sec, rec=None, every=0.1):
     """her run along a way (her move input each frame, her run switch on), a record of her feet against the drawn ground"""
     p = G["pawn"]; cbc = cb(); cbc.set_run_mode(True)
@@ -1897,7 +2085,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"list10w": step_list10w, "horse9": step_horse9, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

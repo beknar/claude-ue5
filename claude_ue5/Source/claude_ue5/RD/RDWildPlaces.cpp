@@ -43,6 +43,8 @@ UStaticMeshComponent* ARDDungeonGenerator::LayWildPiece(ARDWildChunk* C, const F
 	if (bFar) { Sm->SetCachedMaxDrawDistance(0.f); Sm->bNeverDistanceCull = true; }          // (a landmark: seen from the chunks' whole reach)
 	Sm->RegisterComponent();
 	C->PlaceProps.Add(Sm);
+	// (the list of 2026-11-10: a house with its doors and its inside, RDWild10.cpp)
+	FitWildHouse(C, Sm, HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(At.X), FMath::RoundToInt(At.Y))), 0x4B0Bu));
 	return Sm;
 }
 
@@ -133,6 +135,9 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 				Sm->SetStaticMesh(Q->Mesh);
 				Sm->SetupAttachment(C->Ground);
 				Sm->SetRelativeTransform(T);
+				// (the list of 2026-11-10: walked into and climbed: its quarters' own collision closed its doorway's foot; hidden boxes
+				// round its ring instead (FitWildTower))
+				if (bWildHouseInsides) Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				Sm->RegisterComponent();
 				C->PlaceProps.Add(Sm);
 				++Laid;
@@ -143,6 +148,7 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			static const TCHAR Mid[4] = { TEXT('B'), TEXT('A'), TEXT('C'), TEXT('A') };
 			for (int32 K = 0; K < 4; ++K) Quarter(Low[K], Y0 + 90.f * K, Z0);
 			for (int32 K = 0; K < 4; ++K) Quarter(Mid[K], Y0 + 90.f * K, Z0 + Hs);
+			if (bWildHouseInsides) FitWildTower(C, FVector(P.At.X * 100.0, P.At.Y * 100.0, 0.0), Z0, Hs, P.Yaw);
 			const int32 Kept = R.RandRange(0, 3);
 			Quarter(TEXT('E'), Y0 + 90.f * Kept, Z0 + 2.f * Hs);
 			Quarter(TEXT('A'), Y0 + 90.f * ((Kept + 1) % 4), Z0 + 2.f * Hs);
@@ -157,7 +163,9 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 		}
 		else if (P.Kind == TEXT("village"))
 		{
-			Ring(R.RandRange(4, 7), R.FRandRange(18.f, 26.f), 14.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("house"), At, Yaw, 1.f, 25.f); });
+			// (the houses with their insides are laid at their doors' height for her: larger, so the ring is wider (the same draws))
+			const int32 Nh = R.RandRange(4, 7); const float Rh = R.FRandRange(18.f, 26.f) * (bWildHouseInsides ? 1.3f : 1.f);
+			Ring(Nh, Rh, 14.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("house"), At, Yaw, 1.f, 25.f); });
 			Put(TEXT("well"), P.At, R.FRandRange(0.f, 360.f));
 			Ring(3, 9.f, 25.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("hay"), At, Yaw + R.FRandRange(-40.f, 40.f), 1.f, 5.f); });
 			Put(TEXT("cart"), P.At + FVector2D(6.f, -5.f), R.FRandRange(0.f, 360.f));

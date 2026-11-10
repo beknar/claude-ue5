@@ -1,0 +1,82 @@
+{
+ "tag": "w10f",
+ "plan": [
+  "travellers10",
+  "tower10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "travellers10",
+   "ok": true,
+   "road_at": [
+    -217.5,
+    -1760.1
+   ],
+   "forced": true,
+   "groups": 1,
+   "walked_m": 11.4,
+   "walking": 2,
+   "to": "Ashenreach",
+   "prompt": "talk to a townswoman on the road to Ashenreach",
+   "f": "bark",
+   "said": "a townswoman on the road to Ashenreach|We bake twice a week now. Flour's running out.",
+   "night": {
+    "x": -41236.0,
+    "y": -155738.0,
+    "z": -1417.0,
+    "folk": 2,
+    "camped": true,
+    "walking": 0,
+    "to": "Ashenreach",
+    "bits": 5
+   },
+   "sitting": [
+    "AS_Town_SitTalk",
+    "AS_Town_SitTalk"
+   ],
+   "morning": {
+    "x": -40609.0,
+    "y": -156618.0,
+    "z": -1368.0,
+    "folk": 2,
+    "camped": false,
+    "walking": 2,
+    "to": "Ashenreach",
+    "bits": 0
+   }
+  },
+  {
+   "step": "tower10",
+   "ok": true,
+   "tower_lines": [
+    [
+     "tower",
+     "-239847",
+     "173101",
+     "118",
+     "657",
+     "5",
+     "-135",
+     "-517"
+    ]
+   ],
+   "climb": {
+    "reached": 34,
+    "of": 34,
+    "feet_z_max_over_floor": 540.8,
+    "top_over_floor": 539.0
+   },
+   "feet_after_over_top": 1.8
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser, Message Log",
+ "shots": [
+  "wd_w10f_travellers10_road.png",
+  "wd_w10f_travellers10_camp.png",
+  "wd_w10f_tower10_top.png",
+  "wd_w10f_tower10_door.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

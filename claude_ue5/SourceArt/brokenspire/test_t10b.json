@@ -1,0 +1,147 @@
+{
+ "tag": "t10b",
+ "plan": [
+  "town10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "town10",
+   "ok": true,
+   "hens": 8,
+   "hen": {
+    "flees": [
+     0.0,
+     1.0
+    ],
+    "from_her_before": 110,
+    "from_her_after": 189,
+    "moved": 79
+   },
+   "day": [
+    {
+     "i": 4,
+     "role": "Guard",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 5,
+     "role": "Guard",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 6,
+     "role": "Guard",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 7,
+     "role": "Guard",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 9,
+     "role": "Militia",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 10,
+     "role": "Militia",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 11,
+     "role": "Militia",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    },
+    {
+     "i": 12,
+     "role": "Militia",
+     "lights": 0,
+     "props": 0,
+     "asleep": false
+    }
+   ],
+   "night": [
+    {
+     "i": 4,
+     "role": "Guard",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 5,
+     "role": "Guard",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 6,
+     "role": "Guard",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 7,
+     "role": "Guard",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 9,
+     "role": "Militia",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 10,
+     "role": "Militia",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 11,
+     "role": "Militia",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    },
+    {
+     "i": 12,
+     "role": "Militia",
+     "lights": 1,
+     "props": 1,
+     "asleep": false
+    }
+   ],
+   "day_after": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "shots": [
+  "bs_t10b_town10_hens.png",
+  "bs_t10b_town10_lantern.png"
+ ],
+ "error": null,
+ "windows_shown_again": 3
+}

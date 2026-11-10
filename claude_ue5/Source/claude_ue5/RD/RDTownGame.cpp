@@ -201,6 +201,8 @@ void ARDTownsfolk::Tick(float Dt)
 		if (Act != 3) { Turn(FaceAt - GetActorLocation(), 240.f); SetClip(false); }
 		return;
 	}
+	// (the list of 2026-11-10's sixth phase: a traveller on the wilds' roads: RDWild10.cpp)
+	if (bRoadWalker) { TickRoad(Dt); return; }
 	// (its day: home at evening, asleep at night; asleep, it stands where it is, or keeps its seat)
 	TickDay(Now);
 	// (the list of 2026-11-10: asleep, in its bed, lying, on its Sleep clip; awake, out of it where it stood before)
@@ -858,7 +860,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); } }
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); } }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1314,7 +1316,10 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	}
 	if (IsTownPanelOpen()) return FString();
 	// (a farmstead's family out in the wilds (the list of 2026-11-08b))
-	if (const ARDTownsfolk* Wf = WildFolkForF(From)) return FString::Printf(TEXT("talk to the %s"), *Wf->Title);
+	// (a traveller's title says its own article: "a townswoman on the road to ...")
+	if (const ARDTownsfolk* Wf = WildFolkForF(From)) return Wf->Title.StartsWith(TEXT("a ")) || Wf->Title.StartsWith(TEXT("an ")) ? FString::Printf(TEXT("talk to %s"), *Wf->Title) : FString::Printf(TEXT("talk to the %s"), *Wf->Title);
+	// (the list of 2026-11-10's sixth phase: a wild house's door)
+	if (const FString Wd = WildDoorDescribe(From); !Wd.IsEmpty()) return Wd;
 	// (someone near: talk)
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
@@ -1371,9 +1376,11 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		TownCount(TEXT("talk:farm"));
 		const FString Line = Wf->NextLine();
 		LastBark = FString::Printf(TEXT("%s|%s"), *Wf->Title, *Line);
-		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("The %s:  \"%s\""), *Wf->Title, *Line));
+		const bool bArt = Wf->Title.StartsWith(TEXT("a ")) || Wf->Title.StartsWith(TEXT("an "));
+		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(bArt ? FString::Printf(TEXT("%s%s:  \"%s\""), *Wf->Title.Left(1).ToUpper(), *Wf->Title.Mid(1), *Line) : FString::Printf(TEXT("The %s:  \"%s\""), *Wf->Title, *Line));
 		return TEXT("bark");
 	}
+	if (const FString Wd = WildDoorInteract(From); !Wd.IsEmpty()) return Wd;
 	int32 Who = -1; float Best = 240.f;
 	for (int32 I = 0; I < TownPeople.Num(); ++I)
 		if (const ARDTownsfolk* T = TownPeople[I]; IsValid(T) && !(bTownSkipSleepers && T->IsSleeping() && !RDTServes(T->TownRole))) { const float D = FVector::Dist2D(T->GetActorLocation(), From); if (D < Best && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Best = D; Who = I; } }
