@@ -1699,110 +1699,147 @@ def step_travellers10():
 
 def step_cities25():
     """the list of 2026-11-10's seventh phase ("test the re-balanced changes in each city and dungeon"): in each of the six cities, the
-    town loaded round her, the game's tier set to 1, 10 and 25 (the dungeons' tiers opened, as saved: the castle's, Vel Morrath's,
-    Heaven's): its store holds the potions, food, repair and torches of the tiers opened (more of them as the tier rises, none of a
-    tier past it), each priced by its tier in the game's band (910 lays the potions, food and scrolls again in each band of five
-    tiers under one name: their tier t + 5k nearest the game's; its kind's base x the price table: 8 x 1.17^(tier - 5) past
-    tier 5), so a healing potion costs 17.5 times as much at tier 10 and 185 at 25, as the gold a kill pays grows; the horse and
-    the temple's blessing grow by the table (x 17.5 at tier 10, x 185 at 25); the healer's price for half her hit points recorded"""
+    town loaded round her (checked, not only waited for), the game's tier set to 1, 5, 7, 8, 10 and 25 (the dungeons' tiers opened, as
+    saved: the castle's, Vel Morrath's, Heaven's; put back in a finally):
+      - the store sells nothing of a tier past the game's (by each item's own tiers), and the Mage the scrolls of the game's last two
+        tiers (by each scroll's own tiers: 910 lays them again in every band);
+      - a stronger healing or mana potion is never cheaper than a weaker one, at every tier;
+      - past tier 5 what is used up (potions, food, scrolls, repair, torches) grows as the gold a kill pays (tier 5's x the price
+        table over 8: x 2.19 at 10, x 23.1 at 25), within a gold; the horse and the temple's blessing by the price table (x 17.5, x 185);
+      - in Brokenspire a potion bought at tier 7 (the gold taken as shown) and sold once tier 8 opens pays back less than it cost;
+      - the healer's price for half her hit points (her maxima as the tier makes them, her mana full) grows past tier 5 as the
+        kills' gold (her hit points grow too: a point is priced down by her growth)"""
     g = G["gen"]; res = {"cities": {}}; quiet(True)
     yield from wait_ready(90)
     gi = G["gi"] if G.get("gi") else GS.get_game_instance(G["w"])
     chain = [str(l).split("|")[0] for l in g.get_editor_property("dungeon_chain")]
     res["chain"] = chain
-    BASE = {"HEALING": None, "MANA": None, "SPEED": 12.0, "FOOD": 4.0, "REPAIR": 16.0, "TORCH": 6.0, "SCROLL": 25.0, "COMPONENT": 3.0}
+    USED = ("HEALING", "MANA", "SPEED", "FOOD", "SCROLL", "REPAIR", "TORCH")
     IT = {}
     for it in g.get_editor_property("items"):
         k = str(it.kind).split(".")[-1].split(":")[0]; ts = list(it.tiers)
         IT[str(it.name)] = (k, ts, float(it.amount))
-    c0 = list(gi.get_editor_property("castle_tiers")); d0 = {str(k): v for k, v in gi.get_editor_property("dungeons").items()}
-    def set_tier(t):
-        """the game's tier t by what is opened: the castle's 1-5, else the chain's dungeon whose band holds it"""
+    def kind(n): return IT.get(n, ("", [], 0.0))[0]
+    def low(n): ts = IT.get(n, ("", [], 0.0))[1]; return min(ts) if ts else 1
+    # (what the game instance holds, copied as plain lists: the map's values are not kept by reference)
+    c0 = list(gi.get_editor_property("castle_tiers"))
+    d0 = {str(k): list(v.get_editor_property("tiers")) for k, v in gi.get_editor_property("dungeons").items()}
+    def set_tiers(per):
         ds = gi.get_editor_property("dungeons")
         for k in list(ds.keys()):
-            v = ds[k]; v.set_editor_property("tiers", []); ds[k] = v
-        if t <= 5: gi.set_editor_property("castle_tiers", list(range(1, t + 1)))
+            if str(k) not in per: per[str(k)] = []
+        for k, ts in per.items():
+            v = ds[k] if k in ds else unreal.RDDungeonSave()
+            v.set_editor_property("tiers", ts); ds[k] = v
+        gi.set_editor_property("dungeons", ds)
+    def set_tier(t):
+        """the game's tier t by what is opened: the castle's 1-5, else the chain's dungeon whose band holds it (Vel Morrath 6-10, Heaven's
+        first two 24-25)"""
+        if t <= 5: gi.set_editor_property("castle_tiers", list(range(1, t + 1))); set_tiers({})
         else:
             gi.set_editor_property("castle_tiers", [1, 2, 3, 4, 5])
-            key = "vel_morrath" if t <= 10 else chain[-1]
-            v = unreal.RDDungeonSave(); v.set_editor_property("tiers", [1, 2, 3, 4, 5] if t <= 10 else [1, 2])
-            ds[key] = v
-        gi.set_editor_property("dungeons", ds)
+            set_tiers({"vel_morrath": list(range(1, t - 4))} if t <= 10 else {chain[-1]: [1, 2]})
     def table(t): return [1, 2, 3.5, 5.5, 8][t - 1] if t <= 5 else 8.0 * 1.17 ** (min(t, 25) - 5)
-    def band(name, gt):
-        ts = IT.get(name, ("", [], 0))[1]
-        if not ts: return 1
-        t_ = min(ts)
-        while t_ + 5 <= gt and t_ + 5 in ts: t_ += 5
-        return t_
-    def want_price(name, gt):
-        k, ts, amt = IT.get(name, ("?", [], 0.0))
-        b = 8.0 + amt * 40.0 if k in ("HEALING", "MANA") else BASE.get(k)
-        return None if b is None else max(1, round(b * table(band(name, gt))))
-    def lines_of(kind):
-        if not g.open_town_panel(kind, -1): return None
+    def lines_of(kind_, tab=0):
+        if not g.open_town_panel(kind_, -1): return None
+        g.set_town_tab(tab)
         L = [str(l).split("|") for l in g.get_town_panel_lines()]
         g.close_town_panel(); return L
-    T = towns()
-    for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
-        t = T.get(name)
-        if not t: res["cities"][name] = "not found"; continue
-        g.wild_drop_all(); g.wild_put_her(t["x"], t["y"] - 1300.0)
-        yield from wait_town(150, lambda s_: s_["name"] == name and s_["section"] == 1 and s_["loading"] == 0)
-        r = {"tiers": {}}; bad = []
-        for tier in (1, 10, 25):
-            set_tier(tier); yield from rwait(0.4)
-            cb().set_health(cb().get_max_health() * 0.5); yield from rwait(0.2)
-            row = {"game_tier": g.get_game_tier(), "horse": g.horse_price_now()}
-            st = lines_of("store") or []
-            buys = {b[1]: int(b[2].split()[0]) for b in st if b[0] == "buy" and b[2].split()[0].isdigit()}
-            row["stock"] = len(buys); row["top_tier"] = max((band(n, tier) for n in buys), default=0)
-            row["scrolls"] = sum(1 for n in buys if IT.get(n, ("",))[0] == "SCROLL")
-            heal = sorted(p for n, p in buys.items() if IT.get(n, ("",))[0] == "HEALING"); row["healing"] = heal
-            row["past_tier"] = [n for n in buys if band(n, tier) > tier]
-            row["mispriced"] = [f"{n} {p} (want {want_price(n, tier)})" for n, p in buys.items() if want_price(n, tier) is not None and p != want_price(n, tier)][:5]
-            te = lines_of("temple") or []
-            bl = [b for b in te if b[0] == "bless"]; row["bless"] = int(bl[0][2].split()[0]) if bl and bl[0][2].split()[0].isdigit() else None
-            he = lines_of("healer") or []
-            hl = [b for b in he if b[0] == "heal"]; row["heal_half"] = hl[0][2] if hl else None
-            r["tiers"][str(tier)] = row
-            if row["game_tier"] != tier: bad.append(f"game tier {row['game_tier']} for {tier}")
-            if row["past_tier"]: bad.append(f"items past tier {tier}: {row['past_tier'][:3]}")
-            if row["mispriced"]: bad.append(f"mispriced at {tier}: {row['mispriced']}")
-        cb().set_health(cb().get_max_health())
-        if name == "Brokenspire":
-            # (the scrolls: the store's are those within a tier of the game's band, for a hero who reads them: the Mage's)
-            h0 = str(g.get_editor_property("current_hero")); g.switch_hero("Mage"); yield from rwait(1.5); refresh(); g = G["gen"]
-            r["mage_scrolls"] = {}
-            for tier in (10, 25):
+    def buys_of(st): return {b[1]: int(b[2].split()[0]) for b in st if b[0] == "buy" and b[2].split()[0].isdigit()}
+    TIERS = (1, 5, 7, 8, 10, 25)
+    try:
+        T = towns()
+        for name in ("Brokenspire", "Vel Morrath", "Ashenreach", "Graymourne", "Kethrys Spire", "Heaven"):
+            t = T.get(name)
+            if not t: res["cities"][name] = {"bad": ["not found"]}; continue
+            g.wild_drop_all(); g.wild_put_her(t["x"], t["y"] - 1300.0)
+            yield from wait_town(150, lambda s_: s_["name"] == name and s_["section"] == 1 and s_["loading"] == 0)
+            ts_ = town_state()
+            if not (ts_["name"] == name and ts_["section"] == 1 and ts_["loading"] == 0):
+                res["cities"][name] = {"bad": [f"not loaded in 150 s: {ts_}"]}; continue
+            r = {"tiers": {}}; bad = []
+            for tier in TIERS:
                 set_tier(tier); yield from rwait(0.4)
-                st = lines_of("store") or []
-                sc = [b[1] for b in st if b[0] == "buy" and IT.get(b[1], ("",))[0] == "SCROLL"]
-                r["mage_scrolls"][str(tier)] = [f"{n} {band(n, tier)}" for n in sc]
-                if not sc: bad.append(f"no scrolls for the Mage at tier {tier}")
-                if any(band(n, tier) < tier - 1 for n in sc): bad.append(f"old scrolls at tier {tier}")
-            g.switch_hero(h0); yield from rwait(1.5); refresh(); g = G["gen"]
-        t1 = r["tiers"]["1"]
-        for tier in (10, 25):
-            tr = r["tiers"][str(tier)]; w_ = table(tier)
-            if t1["horse"] and abs(tr["horse"] / t1["horse"] - w_) / w_ > 0.03: bad.append(f"horse {t1['horse']}->{tr['horse']} at {tier}")
-            if t1["bless"] and tr["bless"] and abs(tr["bless"] / t1["bless"] - w_) / w_ > 0.03: bad.append(f"blessing {t1['bless']}->{tr['bless']} at {tier}")
-        if not (r["tiers"]["25"]["top_tier"] > r["tiers"]["10"]["top_tier"] > r["tiers"]["1"]["top_tier"]):
-            bad.append("the stock's tiers do not follow the game's")
-        h1, h25 = r["tiers"]["1"]["healing"], r["tiers"]["25"]["healing"]
-        if not (h1 and h25 and h25[0] >= 10 * h1[0]): bad.append(f"healing potions {h1[:1]} -> {h25[:1]}: not by the band")
-        if r["tiers"]["10"]["scrolls"] > 0 and r["tiers"]["25"]["scrolls"] == 0: bad.append("no scrolls at tier 25")
-        r["bad"] = bad
-        res["cities"][name] = r
-    gi.set_editor_property("castle_tiers", c0)
-    ds = gi.get_editor_property("dungeons")
-    for k in list(ds.keys()):
-        if k not in d0: ds.pop(k)
-    for k, v in d0.items(): ds[k] = v
-    gi.set_editor_property("dungeons", ds)
+                cb().refresh_maxima(); cb().set_mana(cb().get_max_mana()); cb().set_health(cb().get_max_health() * 0.5); yield from rwait(0.2)
+                row = {"game_tier": g.get_game_tier(), "horse": g.horse_price_now()}
+                buys = buys_of(lines_of("store") or []); row["prices"] = buys; row["stock"] = len(buys)
+                row["past_tier"] = [n for n in buys if low(n) > tier]
+                # (a stronger potion of a kind never cheaper: by each potion's own amount)
+                for k in ("HEALING", "MANA"):
+                    ps = sorted(((IT[n][2], p, n) for n, p in buys.items() if kind(n) == k))
+                    row.setdefault("inversions", []).extend(f"{a[2]} {a[1]} > {b[2]} {b[1]}" for a, b in zip(ps, ps[1:]) if b[0] > a[0] and b[1] < a[1])
+                te = lines_of("temple") or []
+                bl = [b for b in te if b[0] == "bless"]; row["bless"] = int(bl[0][2].split()[0]) if bl and bl[0][2].split()[0].isdigit() else None
+                he = lines_of("healer") or []
+                hl = [b for b in he if b[0] == "heal"]; row["heal_half"] = int(hl[0][2].split()[0]) if hl and hl[0][2].split()[0].isdigit() else None
+                row["max_health"] = round(cb().get_max_health(), 1)
+                r["tiers"][str(tier)] = row
+                if row["game_tier"] != tier: bad.append(f"game tier {row['game_tier']} for {tier}")
+                if row["past_tier"]: bad.append(f"items past tier {tier}: {row['past_tier'][:3]}")
+                if row["inversions"]: bad.append(f"a stronger potion cheaper at {tier}: {row['inversions'][:3]}")
+            set_tier(1); yield from rwait(0.3); cb().refresh_maxima(); cb().set_health(cb().get_max_health())
+            t1, t5 = r["tiers"]["1"], r["tiers"]["5"]
+            for tier in (10, 25):
+                tr = r["tiers"][str(tier)]; w_ = table(tier)
+                if t1["horse"] and abs(tr["horse"] / t1["horse"] - w_) / w_ > 0.03: bad.append(f"horse {t1['horse']}->{tr['horse']} at {tier}")
+                if t1["bless"] and tr["bless"] and abs(tr["bless"] / t1["bless"] - w_) / w_ > 0.03: bad.append(f"blessing {t1['bless']}->{tr['bless']} at {tier}")
+                # (the used-up things as the kills' gold: tier 5's price x table(tier) / 8, within a gold for the rounding)
+                gw = table(tier) / 8.0; off = []
+                for n, p5 in t5["prices"].items():
+                    if kind(n) in USED and n in tr["prices"] and abs(tr["prices"][n] - p5 * gw) > 1.0 + 0.01 * p5 * gw: off.append(f"{n} {p5}->{tr['prices'][n]} (x {gw:.2f})")
+                if off: bad.append(f"not as the kills' gold at {tier}: {off[:3]}")
+                r[f"used_up_x{tier}"] = gw
+                if t5["heal_half"] and tr["heal_half"] and abs(tr["heal_half"] - t5["heal_half"] * gw) > 1.0 + 0.02 * t5["heal_half"] * gw:
+                    bad.append(f"healer {t5['heal_half']}->{tr['heal_half']} at {tier} (x {gw:.2f})")
+            if name == "Brokenspire":
+                # (a potion bought at tier 7 and sold after tier 8 opens: the gold as the game moves it)
+                set_tier(7); yield from rwait(0.3); g.add_gold(100000, "test")
+                if g.open_town_panel("store", -1):
+                    g.set_town_tab(0)
+                    L = [str(l).split("|") for l in g.get_town_panel_lines()]
+                    hb = sorted((int(b[2].split()[0]), i, b[1]) for i, b in enumerate(L) if b[0] == "buy" and kind(b[1]) == "HEALING" and b[2].split()[0].isdigit())
+                    if hb:
+                        price, ix, item = hb[-1]; n0 = cb().get_item_count(item); g0 = g.get_gold()
+                        g.activate_town_entry(ix); yield from rwait(0.3)
+                        paid = g0 - g.get_gold(); got = cb().get_item_count(item) - n0
+                        g.close_town_panel(); set_tier(8); yield from rwait(0.3)
+                        sold = None
+                        if g.open_town_panel("store", -1):
+                            g.set_town_tab(1)
+                            L = [str(l).split("|") for l in g.get_town_panel_lines()]
+                            si = [i for i, b in enumerate(L) if b[0] == "sell" and b[1].split("  x ")[0] == item]
+                            if si:
+                                g1 = g.get_gold(); g.activate_town_entry(si[0]); yield from rwait(0.3); sold = g.get_gold() - g1
+                            g.close_town_panel()
+                        r["trade"] = {"item": item, "shown": price, "paid": paid, "got": got, "sold_at_8": sold}
+                        if paid != price or got != 1: bad.append(f"bought {item}: shown {price}, paid {paid}, got {got}")
+                        if sold is None or sold >= paid: bad.append(f"bought at 7 for {paid}, sold at 8 for {sold}")
+                    else: bad.append("no healing potion to buy at tier 7")
+                g.add_gold(-g.get_gold(), "test")
+                # (the scrolls, for a hero who reads them: the Mage's, of the game's last two tiers by their own tiers)
+                h0 = str(g.get_editor_property("current_hero")); g.switch_hero("Mage"); yield from rwait(1.5); refresh(); g = G["gen"]
+                r["mage_scrolls"] = {}
+                for tier in (5, 10, 25):
+                    set_tier(tier); yield from rwait(0.4)
+                    sc = [n for n in buys_of(lines_of("store") or []) if kind(n) == "SCROLL"]
+                    r["mage_scrolls"][str(tier)] = sc
+                    if not sc: bad.append(f"no scrolls for the Mage at tier {tier}")
+                    old = [n for n in sc if not any(tier - 1 <= x <= tier for x in IT[n][1])]
+                    if old: bad.append(f"scrolls not of tiers {tier - 1}-{tier} at {tier}: {old[:3]}")
+                g.switch_hero(h0); yield from rwait(1.5); refresh(); g = G["gen"]
+            for row in r["tiers"].values(): row["prices"] = {n: p for n, p in row["prices"].items() if kind(n) in ("HEALING", "SCROLL")}
+            r["bad"] = bad
+            res["cities"][name] = r
+    finally:
+        gi.set_editor_property("castle_tiers", c0)
+        ds = gi.get_editor_property("dungeons")
+        for k in list(ds.keys()):
+            if str(k) not in d0: ds.pop(k)
+        gi.set_editor_property("dungeons", ds); set_tiers(dict(d0))
+        if cb(): cb().refresh_maxima(); cb().set_health(cb().get_max_health())
+        quiet(False)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
-    quiet(False)
-    ok = len(res["cities"]) == 6 and all(isinstance(v, dict) and not v["bad"] for v in res["cities"].values())
+    ok = len(res["cities"]) == 6 and all(not v["bad"] for v in res["cities"].values())
     step_result("cities25", ok, **res)
 
 def run_her(dir_xy, sec, rec=None, every=0.1):

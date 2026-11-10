@@ -1,0 +1,248 @@
+{
+ "tag": "p7w3",
+ "plan": [
+  "tier25"
+ ],
+ "level": "war_engine",
+ "steps": [
+  {
+   "step": "tier25",
+   "ok": true,
+   "mons_ok": true,
+   "loot_ok": true,
+   "later_ok": true,
+   "key": "war_engine",
+   "base": 10,
+   "cap": 0,
+   "global": [
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "growth_tier": 11,
+   "chain_index": 2,
+   "expect": {
+    "quality": "Masterwork",
+    "mine": {
+     "MartialArtist": "Thunder Step",
+     "Rogue": "Incendiary Bolt",
+     "Summoner": "Summon Tier 7"
+    },
+    "next": {
+     "MartialArtist": "Dragon Palm",
+     "Rogue": "Shadow Fangs",
+     "Summoner": "Summon Tier 8"
+    },
+    "summon_kind": "Cyber_Soldier"
+   },
+   "tables": 25,
+   "monsters": {
+    "count": 19,
+    "count_t1": 19,
+    "same_again": true,
+    "want_h": 13.422,
+    "want_d": 8.199,
+    "off": [],
+    "ratios": [
+     {
+      "kind": "Scrap_Hound",
+      "tier": 1,
+      "h": [
+       671.0,
+       50.0
+      ],
+      "d": [
+       92.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Scrap_Hound",
+      "tier": 1,
+      "h": [
+       671.0,
+       50.0
+      ],
+      "d": [
+       92.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Scrap_Hound",
+      "tier": 1,
+      "h": [
+       671.0,
+       50.0
+      ],
+      "d": [
+       92.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Scrap_Hound",
+      "tier": 1,
+      "h": [
+       671.0,
+       50.0
+      ],
+      "d": [
+       92.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Scrap_Hound",
+      "tier": 1,
+      "h": [
+       671.0,
+       50.0
+      ],
+      "d": [
+       92.0,
+       11.0
+      ],
+      "ok": true
+     },
+     {
+      "kind": "Scrap_Hound",
+      "tier": 1,
+      "h": [
+       671.0,
+       50.0
+      ],
+      "d": [
+       92.0,
+       11.0
+      ],
+      "ok": true
+     }
+    ]
+   },
+   "hero_hp": {
+    "here": 404.0,
+    "as_tier1": 140.0
+   },
+   "loot": {
+    "0,0": {
+     "tier": 1,
+     "game_tier": 11,
+     "things": 16277,
+     "off_tier": [],
+     "forced": [
+      "Bread",
+      "Bronze Ingot",
+      "Cheese",
+      "Coarse Hide",
+      "Copper Ingot",
+      "Cured Leather Strip",
+      "Epoxy",
+      "Fish",
+      "Fruit",
+      "Glue",
+      "Hardwood",
+      "Herbs"
+     ],
+     "forced_off": [],
+     "fine": 5585,
+     "quality": "Masterwork",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Plague Cloud": 11
+     },
+     "slot_want": 11
+    },
+    "1,0": {
+     "tier": 2,
+     "game_tier": 12,
+     "things": 11508,
+     "off_tier": [],
+     "forced": [
+      "Bronze Ingot",
+      "Coarse Hide",
+      "Epoxy",
+      "Fruit",
+      "Glue",
+      "Hardwood",
+      "Large Healing Potion",
+      "Large Mana Potion",
+      "Large Speed Potion",
+      "Leather Strips",
+      "Light Leather",
+      "Masterwork Bedvar’s Armour"
+     ],
+     "forced_off": [],
+     "fine": 4478,
+     "quality": "Masterwork",
+     "plain_tiered": 0,
+     "other_quality": 0,
+     "tomes": {
+      "Tome of Shadow Veil": 12
+     },
+     "slot_want": 12
+    }
+   },
+   "tomes_seen": 2,
+   "later": {
+    "gold": {
+     "gained": 999,
+     "game_tier": 15,
+     "want_min": 961
+    },
+    "MartialArtist": {
+     "set4": true,
+     "boss": "Nasty",
+     "killed": 1,
+     "new": [
+      "Thunder Step",
+      "Smashing Strike",
+      "Roundhouse Kick"
+     ],
+     "message": "A new ability: Thunder Step"
+    },
+    "Rogue": {
+     "weapons": [
+      "Daggers",
+      "Crossbow",
+      "Incendiary Bolt"
+     ]
+    },
+    "Summoner": {
+     "weapons": [
+      "Fire",
+      "Dark Fire",
+      "Summon Tier 1",
+      "Summon Tier 7"
+     ],
+     "summon": {
+      "started": true,
+      "mana": 71.0,
+      "growth_tier": 11,
+      "allies": [
+       {
+        "kind": "Cyber_Soldier",
+        "hp": 725,
+        "damage": 100.0,
+        "tier": 11
+       }
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "windows_hidden": "Content Browser, Message Log",
+ "shots": [
+  "mw_p7w3_tier25_golem.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

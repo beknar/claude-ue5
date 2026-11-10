@@ -171,17 +171,18 @@ Two of the ideas built for "what can be done to make the town more lively?" (`91
 
 ## The list of 2026-11-10, seventh part: the rebalance in each city
 
-"Test the re-balanced changes in each city and dungeon" (no stage; C++ `RDBandTier` in `RD/RDTownGame.cpp`; `888 cities25 -Light`, `test_c25d.json`). In each of the six cities, with the game's tier set to 1, 10 and 25 through what is opened (the castle's tiers, Vel Morrath's, Heaven's):
-- **Measured:**
-  - the game's tier read 1, 10 and 25;
-  - the horse cost 60, 1052 and 11091 gold, and the temple's blessing 20, 351 and 3697 (x 17.5 and x 185, the table's);
-  - the healer asked 18, 199 and 577 gold for half her hit points (a point priced down by her growth: her hit points grow too);
-  - every item in the store was priced by the rule, and none was of a tier past the game's.
-- **Found and fixed:** the potions, food and scrolls, which `910` lays again in every band of five tiers under one name, were priced by their lowest tier. A healing potion heals a share of her hit points at any tier, so it cost 12 gold at tier 25, where a kill pays 116 times tier 1's gold. The store's scrolls (those within a tier of the game's, by their lowest) were none past tier 6. Both now take the item's tier in the game's band:
-  - a healing potion costs 12, 112 and 1184 gold at tiers 1, 10 and 25;
-  - the Mage is offered the tier 9 and 10 scrolls at tier 10 and the tier 24 and 25 ones at tier 25.
-
-  Nothing changes up to tier 5.
+"Test the re-balanced changes in each city and dungeon" (no stage; C++ `RDUsedUpScale` in `RD/RDTownGame.cpp`; `888 cities25 -Light`, `test_c25f.json`). In each of the six cities, the town checked as loaded, with the game's tier set to 1, 5, 7, 8, 10 and 25 through what is opened (the castle's tiers, Vel Morrath's, Heaven's):
+- **The horse and the blessing:** the horse cost 60, 480, 1052 and 11091 gold and the temple's blessing 20, 160, 351 and 3697 at tiers 1, 5, 10 and 25 (x 17.5 and x 185, the price table).
+- **The healer:** asked 18, 241, 529 and 5566 gold for half her hit points (140, 241, 371 and 1350 as the tiers make them). Past tier 5 that grows as a kill's gold (x 2.19, x 23.1): a point is priced down by her growth.
+- **The store:**
+  - nothing in it was of a tier past the game's;
+  - no stronger potion was cheaper than a weaker one;
+  - past tier 5 everything used up grew as a kill's gold, within a gold;
+  - a Legendary Healing Potion bought at tier 7 for 438 gold (taken as shown) sold for 180 once tier 8 opened.
+- **The Mage's scrolls:** offered those of the game's last two tiers at 5, 10 and 25.
+- **Found and fixed:** the potions, food and scrolls were priced by their own lowest tier, and a potion heals a share of her hit points at any tier. So a healing potion cost 12 gold at tier 25, where a kill pays 116 times tier 1's gold. The store's scrolls (within a tier of the game's, by their lowest) were none past tier 6.
+  - **The first fix** priced each at its copy's tier in the band. PR #44's review found that it made a stronger potion cheaper than a weaker one between tiers 6 and 9, and paid 28 % to buy one and sell it once the next tier opened.
+  - **Now** what is used up grows with the game's tier as the kills' gold does: a healing potion costs 12 gold at tiers 1 to 5, 16 at 7, 26 at 10 and 277 at 25. The repair items and torches grow the same way. The scrolls are chosen by their own tiers. Nothing changes up to tier 5.
 
 The dungeons are in [docs/tiers.md](../tiers.md#the-tests).
 

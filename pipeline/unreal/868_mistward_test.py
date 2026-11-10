@@ -4123,14 +4123,16 @@ def step_catacombs():
     step_result("catacombs", ok, floors_ok=floors_ok, stairs_ok=stairs_ok, walks_ok=walks_ok, placed_ok=placed_ok, **res)
 
 def step_tier25():
-    """the rebalance to tier 25 (910, SourceArt/balance/tier25.json; the list of 2026-11-08b's fifth phase), on a dungeon past
-    the castle (-lv vel_morrath): its tiers are the game's 6-10 (GlobalTier); the start set's monsters, the same seed spawned with
-    the level's base taken away and put back, are as much stronger as the tier tables say (hit points and blows, monster by
-    monster) and so is she (her hit points by her growth); every container's loot in the start set and in a tier-2 set over 40
-    session seeds holds only things of the game's tier (the castle's tiered gear in its quality copies: Fine in tiers 6-10, none
-    of the others), and each tome is the one spell of its tier's place (Slot = the chain's index x 5 + the tier); the tier-5 boss
-    slain: the Martial Artist earns the dungeon's ability (Crashing Wave), the Rogue and the Summoner theirs (Barbed Bolt, Summon
-    Tier 6), none of the next dungeon's; Summon Tier 6 called: an Iron Golem at her side"""
+    """the rebalance to tier 25 (910, SourceArt/balance/tier25.json; the list of 2026-11-08b's fifth phase), on any dungeon past
+    the castle (-lv vel_morrath, war_engine, sewers, kethrys_spire, heaven_fortress; what it expects of each read from
+    tier25.json: the list of 2026-11-10's seventh phase): its tiers are the game's (GlobalTier: Vel Morrath's 6-10, Heaven's 24-25);
+    the start set's monsters, the same seed spawned with the level's base taken away and put back, are as much stronger as the
+    tier tables say (hit points and blows, monster by monster) and so is she (her hit points by her growth); every container's loot
+    in the start set and in a tier-2 set over 40 session seeds holds only things of the game's tier (the castle's tiered gear in
+    the quality of the dungeon's band: Fine 6-10, Masterwork 11-15, Exalted 16-20, Celestial 21-25; none of the others), and each
+    tome is the one spell of its tier's place (Slot = the chain's index x 5 + the tier); the tier-5 boss slain: the Martial Artist,
+    the Rogue and the Summoner earn the dungeon's abilities (tier25.json's "later" for this dungeon), none of the next dungeon's;
+    the Summoner's new summoning called: its kind at her side (the record's later.Summoner.summon)"""
     c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
     S0 = I2(0, 0)
     res = {"key": str(g.get_editor_property("dungeon_key")), "base": g.get_editor_property("dungeon_tier_base"), "cap": g.get_editor_property("dungeon_tier_cap"),
@@ -4248,7 +4250,7 @@ def step_tier25():
         st = c.start_attack_with(si); taken = round(m0 - c.get_mana(), 1); yield from wait(2.5)
         al = [a for a in g.get_allies() if str(a.summon_spell) == mine["Summoner"]]
         # (its tier the game's she grows by (PR #34's review: spawned at it, Empower mapped it again))
-        later["Summoner"]["summon6"] = {"started": st, "mana": taken, "growth_tier": g.growth_tier(),
+        later["Summoner"]["summon"] = {"started": st, "mana": taken, "growth_tier": g.growth_tier(),
                                         "allies": [{"kind": str(a.monster_name), "hp": round(a.get_max_health()), "damage": round(a.get_damage(), 1), "tier": a.tier} for a in al]}
         if al: G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=G["pawn"].get_actor_rotation().yaw + 150)); yield from wait(0.4); shot("tier25_golem"); yield from rwait(0.8)
     res["later"] = later
@@ -4256,7 +4258,7 @@ def step_tier25():
     later_ok = (later["MartialArtist"]["killed"] > 0 and mine["MartialArtist"] in later["MartialArtist"]["new"]
                 and mine["Rogue"] in later["Rogue"]["weapons"] and mine["Summoner"] in later["Summoner"]["weapons"]
                 and all(nxt[h] is None or nxt[h] not in (later[h].get("weapons") or later[h].get("new")) for h in nxt)
-                and any(a["kind"] == SK and a["tier"] == later["Summoner"]["summon6"]["growth_tier"] for a in later["Summoner"].get("summon6", {}).get("allies", []))
+                and any(a["kind"] == SK and a["tier"] == later["Summoner"]["summon"]["growth_tier"] for a in later["Summoner"].get("summon", {}).get("allies", []))
                 and later["gold"]["gained"] >= later["gold"]["want_min"])
     c = yield from restart("Warrior"); quiet(False)
     cap = res["cap"]

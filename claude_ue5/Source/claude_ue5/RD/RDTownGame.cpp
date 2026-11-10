@@ -424,16 +424,25 @@ static float RDTierPrice(int32 Tier)
 // (PR #34's review: gold by the level's own 1-5 against prices to 185 left the town's services out of reach past the castle))
 static float RDTierGold(int32 Tier) { return Tier <= 5 ? (float)FMath::Max(Tier, 1) : 5.f * RDTierPrice(Tier) / 8.f; }
 
-// (an item's tier as the game stands: its lowest, or for one 910 lays again in every dungeon at its rank (the potions, food and
-// scrolls: its tiers t, t + 5, ... under one name) its tier in the game's band (the list of 2026-11-10's seventh phase: a potion
-// heals a share of her hit points at every tier, and priced by its lowest it cost 12 gold at tier 25, where a kill pays 116 times
-// tier 1's; the store's scrolls, those within a tier of the game's by their lowest, were none past tier 6))
-static int32 RDBandTier(const FRDItemDef& It, int32 Gt)
+// (the list of 2026-11-10's seventh phase: the things used up (potions, food, scrolls, repair items, torches) are priced past tier 5
+// by the gold a kill pays, so one costs as many kills at every tier as at tier 5. 910 lays the potions, food and scrolls again in
+// every band of five tiers under one name, and a potion heals a share of her hit points at any tier: priced by its own tier alone,
+// a healing potion cost 12 gold at tier 25, where a kill pays 116 times tier 1's. A step to its copy's tier (PR #44's review) made
+// a stronger potion cheaper than a weaker one between tiers 6 and 9 and paid 28 % to buy one and sell it once the next tier
+// opened; growing with the game's tier, the store's sell share (0.35) keeps that from paying)
+static bool RDUsedUp(ERDItemKind K)
 {
-	if (It.Tiers.Num() == 0) return 1;
-	int32 T = 99; for (const int32 X : It.Tiers) T = FMath::Min(T, X);
-	while (T + 5 <= Gt && It.Tiers.Contains(T + 5)) T += 5;
-	return T;
+	return K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed || K == ERDItemKind::Food || K == ERDItemKind::Scroll
+		|| K == ERDItemKind::Repair || K == ERDItemKind::Torch;
+}
+static float RDUsedUpScale(int32 Gt) { return Gt <= 5 ? 1.f : RDTierGold(Gt) / RDTierGold(5); }
+
+// (an item's lowest tier, and its highest at or under the game's: the copy of it the game has reached)
+static int32 RDLowTier(const FRDItemDef& It) { int32 T = 99; for (const int32 X : It.Tiers) T = FMath::Min(T, X); return It.Tiers.Num() ? T : 1; }
+static int32 RDReachedTier(const FRDItemDef& It, int32 Gt)
+{
+	int32 T = 0; for (const int32 X : It.Tiers) if (X <= Gt) T = FMath::Max(T, X);
+	return It.Tiers.Num() == 0 ? 1 : T;
 }
 
 int32 ARDDungeonGenerator::PriceOf(FName Item) const
@@ -441,7 +450,7 @@ int32 ARDDungeonGenerator::PriceOf(FName Item) const
 	const int32 Ix = FindItem(Item);
 	if (Ix < 0) return 0;
 	const FRDItemDef& It = Items[Ix];
-	const int32 T = RDBandTier(It, GetGameTier());
+	const int32 T = RDLowTier(It);
 	float Base = 10.f;
 	switch (It.Kind)
 	{
@@ -460,7 +469,7 @@ int32 ARDDungeonGenerator::PriceOf(FName Item) const
 	case ERDItemKind::Scroll: Base = 25.f; break;
 	default: return 0;                   // (teleport rings, keys: not for sale)
 	}
-	return FMath::Max(1, FMath::RoundToInt(Base * RDTierPrice(T)));
+	return FMath::Max(1, FMath::RoundToInt(Base * RDTierPrice(T) * (RDUsedUp(It.Kind) ? RDUsedUpScale(GetGameTier()) : 1.f)));
 }
 
 TArray<FName> ARDDungeonGenerator::TownStock() const
@@ -471,9 +480,10 @@ TArray<FName> ARDDungeonGenerator::TownStock() const
 	const FRDHeroDef* H = FindHero(CurrentHero);
 	for (const FRDItemDef& It : Items)
 	{
-		const int32 Ti = RDBandTier(It, T);
-		if (Ti > T) continue;
+		if (RDLowTier(It) > T) continue;
 		const bool bScroll = It.Kind == ERDItemKind::Scroll;
+		// (a scroll of the last two tiers the game has reached: by its copy's tier (910's), else none past tier 6)
+		const int32 Ti = RDReachedTier(It, T);
 		if (bScroll && !(H && H->ScrollTypes.Num() > 0)) continue;
 		if (It.Kind == ERDItemKind::Healing || It.Kind == ERDItemKind::Mana || It.Kind == ERDItemKind::Speed || It.Kind == ERDItemKind::Food || It.Kind == ERDItemKind::Repair
 			|| (bScroll && Ti >= T - 1) || It.Kind == ERDItemKind::Torch)

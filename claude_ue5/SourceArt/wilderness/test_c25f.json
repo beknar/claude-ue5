@@ -1,0 +1,803 @@
+{
+ "tag": "c25f",
+ "plan": [
+  "cities25"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cities25",
+   "ok": true,
+   "cities": {
+    "Brokenspire": {
+     "tiers": {
+      "1": {
+       "game_tier": 1,
+       "horse": 60,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16
+       },
+       "stock": 15,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 20,
+       "heal_half": 18,
+       "max_health": 140.0
+      },
+      "5": {
+       "game_tier": 5,
+       "horse": 480,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16,
+        "Large Healing Potion": 40,
+        "Uncommon Healing Potion": 48,
+        "Wondrous Healing Potion": 98,
+        "Rare Healing Potion": 112,
+        "Very Rare Healing Potion": 198,
+        "Legendary Healing Potion": 320
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 160,
+       "heal_half": 241,
+       "max_health": 241.0
+      },
+      "7": {
+       "game_tier": 7,
+       "horse": 657,
+       "prices": {
+        "Small Healing Potion": 16,
+        "Medium Healing Potion": 22,
+        "Large Healing Potion": 55,
+        "Uncommon Healing Potion": 66,
+        "Wondrous Healing Potion": 134,
+        "Rare Healing Potion": 153,
+        "Very Rare Healing Potion": 271,
+        "Legendary Healing Potion": 438
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 219,
+       "heal_half": 330,
+       "max_health": 286.0
+      },
+      "8": {
+       "game_tier": 8,
+       "horse": 769,
+       "prices": {
+        "Small Healing Potion": 19,
+        "Medium Healing Potion": 26,
+        "Large Healing Potion": 64,
+        "Uncommon Healing Potion": 77,
+        "Wondrous Healing Potion": 157,
+        "Rare Healing Potion": 179,
+        "Very Rare Healing Potion": 317,
+        "Legendary Healing Potion": 513
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 256,
+       "heal_half": 386,
+       "max_health": 312.0
+      },
+      "10": {
+       "game_tier": 10,
+       "horse": 1052,
+       "prices": {
+        "Small Healing Potion": 26,
+        "Medium Healing Potion": 35,
+        "Large Healing Potion": 88,
+        "Uncommon Healing Potion": 105,
+        "Wondrous Healing Potion": 215,
+        "Rare Healing Potion": 246,
+        "Very Rare Healing Potion": 434,
+        "Legendary Healing Potion": 702
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 351,
+       "heal_half": 529,
+       "max_health": 371.0
+      },
+      "25": {
+       "game_tier": 25,
+       "horse": 11091,
+       "prices": {
+        "Small Healing Potion": 277,
+        "Medium Healing Potion": 370,
+        "Large Healing Potion": 924,
+        "Uncommon Healing Potion": 1109,
+        "Wondrous Healing Potion": 2264,
+        "Rare Healing Potion": 2588,
+        "Very Rare Healing Potion": 4575,
+        "Legendary Healing Potion": 7394
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 3697,
+       "heal_half": 5566,
+       "max_health": 1350.0
+      }
+     },
+     "used_up_x10": 2.192448035699999,
+     "used_up_x25": 23.105599163649618,
+     "trade": {
+      "item": "Legendary Healing Potion",
+      "shown": 438,
+      "paid": 438,
+      "got": 1,
+      "sold_at_8": 180
+     },
+     "mage_scrolls": {
+      "5": [
+       "Scroll of Mirror of Retribution",
+       "Scroll of Soul Rend",
+       "Scroll of Blizzard",
+       "Scroll of Corpse Explosion",
+       "Scroll of Spectral Bulwark",
+       "Scroll of Hellfire Pillar",
+       "Scroll of Void Rift",
+       "Scroll of Undying Pact",
+       "Scroll of Summon Abyssal Knight",
+       "Scroll of Meteor Storm",
+       "Scroll of Null Sanctum",
+       "Scroll of Apocalypse"
+      ],
+      "10": [
+       "Scroll of Mirror of Retribution",
+       "Scroll of Soul Rend",
+       "Scroll of Blizzard",
+       "Scroll of Corpse Explosion",
+       "Scroll of Spectral Bulwark",
+       "Scroll of Hellfire Pillar",
+       "Scroll of Void Rift",
+       "Scroll of Undying Pact",
+       "Scroll of Summon Abyssal Knight",
+       "Scroll of Meteor Storm",
+       "Scroll of Null Sanctum",
+       "Scroll of Apocalypse"
+      ],
+      "25": [
+       "Scroll of Mirror of Retribution",
+       "Scroll of Soul Rend",
+       "Scroll of Blizzard",
+       "Scroll of Corpse Explosion",
+       "Scroll of Spectral Bulwark",
+       "Scroll of Hellfire Pillar",
+       "Scroll of Void Rift",
+       "Scroll of Undying Pact",
+       "Scroll of Summon Abyssal Knight",
+       "Scroll of Meteor Storm",
+       "Scroll of Null Sanctum",
+       "Scroll of Apocalypse"
+      ]
+     },
+     "bad": []
+    },
+    "Vel Morrath": {
+     "tiers": {
+      "1": {
+       "game_tier": 1,
+       "horse": 60,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16
+       },
+       "stock": 15,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 20,
+       "heal_half": 18,
+       "max_health": 140.0
+      },
+      "5": {
+       "game_tier": 5,
+       "horse": 480,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16,
+        "Large Healing Potion": 40,
+        "Uncommon Healing Potion": 48,
+        "Wondrous Healing Potion": 98,
+        "Rare Healing Potion": 112,
+        "Very Rare Healing Potion": 198,
+        "Legendary Healing Potion": 320
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 160,
+       "heal_half": 241,
+       "max_health": 241.0
+      },
+      "7": {
+       "game_tier": 7,
+       "horse": 657,
+       "prices": {
+        "Small Healing Potion": 16,
+        "Medium Healing Potion": 22,
+        "Large Healing Potion": 55,
+        "Uncommon Healing Potion": 66,
+        "Wondrous Healing Potion": 134,
+        "Rare Healing Potion": 153,
+        "Very Rare Healing Potion": 271,
+        "Legendary Healing Potion": 438
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 219,
+       "heal_half": 330,
+       "max_health": 286.0
+      },
+      "8": {
+       "game_tier": 8,
+       "horse": 769,
+       "prices": {
+        "Small Healing Potion": 19,
+        "Medium Healing Potion": 26,
+        "Large Healing Potion": 64,
+        "Uncommon Healing Potion": 77,
+        "Wondrous Healing Potion": 157,
+        "Rare Healing Potion": 179,
+        "Very Rare Healing Potion": 317,
+        "Legendary Healing Potion": 513
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 256,
+       "heal_half": 386,
+       "max_health": 312.0
+      },
+      "10": {
+       "game_tier": 10,
+       "horse": 1052,
+       "prices": {
+        "Small Healing Potion": 26,
+        "Medium Healing Potion": 35,
+        "Large Healing Potion": 88,
+        "Uncommon Healing Potion": 105,
+        "Wondrous Healing Potion": 215,
+        "Rare Healing Potion": 246,
+        "Very Rare Healing Potion": 434,
+        "Legendary Healing Potion": 702
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 351,
+       "heal_half": 529,
+       "max_health": 371.0
+      },
+      "25": {
+       "game_tier": 25,
+       "horse": 11091,
+       "prices": {
+        "Small Healing Potion": 277,
+        "Medium Healing Potion": 370,
+        "Large Healing Potion": 924,
+        "Uncommon Healing Potion": 1109,
+        "Wondrous Healing Potion": 2264,
+        "Rare Healing Potion": 2588,
+        "Very Rare Healing Potion": 4575,
+        "Legendary Healing Potion": 7394
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 3697,
+       "heal_half": 5566,
+       "max_health": 1350.0
+      }
+     },
+     "used_up_x10": 2.192448035699999,
+     "used_up_x25": 23.105599163649618,
+     "bad": []
+    },
+    "Ashenreach": {
+     "tiers": {
+      "1": {
+       "game_tier": 1,
+       "horse": 60,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16
+       },
+       "stock": 15,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 20,
+       "heal_half": 18,
+       "max_health": 140.0
+      },
+      "5": {
+       "game_tier": 5,
+       "horse": 480,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16,
+        "Large Healing Potion": 40,
+        "Uncommon Healing Potion": 48,
+        "Wondrous Healing Potion": 98,
+        "Rare Healing Potion": 112,
+        "Very Rare Healing Potion": 198,
+        "Legendary Healing Potion": 320
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 160,
+       "heal_half": 241,
+       "max_health": 241.0
+      },
+      "7": {
+       "game_tier": 7,
+       "horse": 657,
+       "prices": {
+        "Small Healing Potion": 16,
+        "Medium Healing Potion": 22,
+        "Large Healing Potion": 55,
+        "Uncommon Healing Potion": 66,
+        "Wondrous Healing Potion": 134,
+        "Rare Healing Potion": 153,
+        "Very Rare Healing Potion": 271,
+        "Legendary Healing Potion": 438
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 219,
+       "heal_half": 330,
+       "max_health": 286.0
+      },
+      "8": {
+       "game_tier": 8,
+       "horse": 769,
+       "prices": {
+        "Small Healing Potion": 19,
+        "Medium Healing Potion": 26,
+        "Large Healing Potion": 64,
+        "Uncommon Healing Potion": 77,
+        "Wondrous Healing Potion": 157,
+        "Rare Healing Potion": 179,
+        "Very Rare Healing Potion": 317,
+        "Legendary Healing Potion": 513
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 256,
+       "heal_half": 386,
+       "max_health": 312.0
+      },
+      "10": {
+       "game_tier": 10,
+       "horse": 1052,
+       "prices": {
+        "Small Healing Potion": 26,
+        "Medium Healing Potion": 35,
+        "Large Healing Potion": 88,
+        "Uncommon Healing Potion": 105,
+        "Wondrous Healing Potion": 215,
+        "Rare Healing Potion": 246,
+        "Very Rare Healing Potion": 434,
+        "Legendary Healing Potion": 702
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 351,
+       "heal_half": 529,
+       "max_health": 371.0
+      },
+      "25": {
+       "game_tier": 25,
+       "horse": 11091,
+       "prices": {
+        "Small Healing Potion": 277,
+        "Medium Healing Potion": 370,
+        "Large Healing Potion": 924,
+        "Uncommon Healing Potion": 1109,
+        "Wondrous Healing Potion": 2264,
+        "Rare Healing Potion": 2588,
+        "Very Rare Healing Potion": 4575,
+        "Legendary Healing Potion": 7394
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 3697,
+       "heal_half": 5566,
+       "max_health": 1350.0
+      }
+     },
+     "used_up_x10": 2.192448035699999,
+     "used_up_x25": 23.105599163649618,
+     "bad": []
+    },
+    "Graymourne": {
+     "tiers": {
+      "1": {
+       "game_tier": 1,
+       "horse": 60,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16
+       },
+       "stock": 15,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 20,
+       "heal_half": 18,
+       "max_health": 140.0
+      },
+      "5": {
+       "game_tier": 5,
+       "horse": 480,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16,
+        "Large Healing Potion": 40,
+        "Uncommon Healing Potion": 48,
+        "Wondrous Healing Potion": 98,
+        "Rare Healing Potion": 112,
+        "Very Rare Healing Potion": 198,
+        "Legendary Healing Potion": 320
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 160,
+       "heal_half": 241,
+       "max_health": 241.0
+      },
+      "7": {
+       "game_tier": 7,
+       "horse": 657,
+       "prices": {
+        "Small Healing Potion": 16,
+        "Medium Healing Potion": 22,
+        "Large Healing Potion": 55,
+        "Uncommon Healing Potion": 66,
+        "Wondrous Healing Potion": 134,
+        "Rare Healing Potion": 153,
+        "Very Rare Healing Potion": 271,
+        "Legendary Healing Potion": 438
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 219,
+       "heal_half": 330,
+       "max_health": 286.0
+      },
+      "8": {
+       "game_tier": 8,
+       "horse": 769,
+       "prices": {
+        "Small Healing Potion": 19,
+        "Medium Healing Potion": 26,
+        "Large Healing Potion": 64,
+        "Uncommon Healing Potion": 77,
+        "Wondrous Healing Potion": 157,
+        "Rare Healing Potion": 179,
+        "Very Rare Healing Potion": 317,
+        "Legendary Healing Potion": 513
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 256,
+       "heal_half": 386,
+       "max_health": 312.0
+      },
+      "10": {
+       "game_tier": 10,
+       "horse": 1052,
+       "prices": {
+        "Small Healing Potion": 26,
+        "Medium Healing Potion": 35,
+        "Large Healing Potion": 88,
+        "Uncommon Healing Potion": 105,
+        "Wondrous Healing Potion": 215,
+        "Rare Healing Potion": 246,
+        "Very Rare Healing Potion": 434,
+        "Legendary Healing Potion": 702
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 351,
+       "heal_half": 529,
+       "max_health": 371.0
+      },
+      "25": {
+       "game_tier": 25,
+       "horse": 11091,
+       "prices": {
+        "Small Healing Potion": 277,
+        "Medium Healing Potion": 370,
+        "Large Healing Potion": 924,
+        "Uncommon Healing Potion": 1109,
+        "Wondrous Healing Potion": 2264,
+        "Rare Healing Potion": 2588,
+        "Very Rare Healing Potion": 4575,
+        "Legendary Healing Potion": 7394
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 3697,
+       "heal_half": 5566,
+       "max_health": 1350.0
+      }
+     },
+     "used_up_x10": 2.192448035699999,
+     "used_up_x25": 23.105599163649618,
+     "bad": []
+    },
+    "Kethrys Spire": {
+     "tiers": {
+      "1": {
+       "game_tier": 1,
+       "horse": 60,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16
+       },
+       "stock": 15,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 20,
+       "heal_half": 18,
+       "max_health": 140.0
+      },
+      "5": {
+       "game_tier": 5,
+       "horse": 480,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16,
+        "Large Healing Potion": 40,
+        "Uncommon Healing Potion": 48,
+        "Wondrous Healing Potion": 98,
+        "Rare Healing Potion": 112,
+        "Very Rare Healing Potion": 198,
+        "Legendary Healing Potion": 320
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 160,
+       "heal_half": 241,
+       "max_health": 241.0
+      },
+      "7": {
+       "game_tier": 7,
+       "horse": 657,
+       "prices": {
+        "Small Healing Potion": 16,
+        "Medium Healing Potion": 22,
+        "Large Healing Potion": 55,
+        "Uncommon Healing Potion": 66,
+        "Wondrous Healing Potion": 134,
+        "Rare Healing Potion": 153,
+        "Very Rare Healing Potion": 271,
+        "Legendary Healing Potion": 438
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 219,
+       "heal_half": 330,
+       "max_health": 286.0
+      },
+      "8": {
+       "game_tier": 8,
+       "horse": 769,
+       "prices": {
+        "Small Healing Potion": 19,
+        "Medium Healing Potion": 26,
+        "Large Healing Potion": 64,
+        "Uncommon Healing Potion": 77,
+        "Wondrous Healing Potion": 157,
+        "Rare Healing Potion": 179,
+        "Very Rare Healing Potion": 317,
+        "Legendary Healing Potion": 513
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 256,
+       "heal_half": 386,
+       "max_health": 312.0
+      },
+      "10": {
+       "game_tier": 10,
+       "horse": 1052,
+       "prices": {
+        "Small Healing Potion": 26,
+        "Medium Healing Potion": 35,
+        "Large Healing Potion": 88,
+        "Uncommon Healing Potion": 105,
+        "Wondrous Healing Potion": 215,
+        "Rare Healing Potion": 246,
+        "Very Rare Healing Potion": 434,
+        "Legendary Healing Potion": 702
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 351,
+       "heal_half": 529,
+       "max_health": 371.0
+      },
+      "25": {
+       "game_tier": 25,
+       "horse": 11091,
+       "prices": {
+        "Small Healing Potion": 277,
+        "Medium Healing Potion": 370,
+        "Large Healing Potion": 924,
+        "Uncommon Healing Potion": 1109,
+        "Wondrous Healing Potion": 2264,
+        "Rare Healing Potion": 2588,
+        "Very Rare Healing Potion": 4575,
+        "Legendary Healing Potion": 7394
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 3697,
+       "heal_half": 5566,
+       "max_health": 1350.0
+      }
+     },
+     "used_up_x10": 2.192448035699999,
+     "used_up_x25": 23.105599163649618,
+     "bad": []
+    },
+    "Heaven": {
+     "tiers": {
+      "1": {
+       "game_tier": 1,
+       "horse": 60,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16
+       },
+       "stock": 15,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 20,
+       "heal_half": 18,
+       "max_health": 140.0
+      },
+      "5": {
+       "game_tier": 5,
+       "horse": 480,
+       "prices": {
+        "Small Healing Potion": 12,
+        "Medium Healing Potion": 16,
+        "Large Healing Potion": 40,
+        "Uncommon Healing Potion": 48,
+        "Wondrous Healing Potion": 98,
+        "Rare Healing Potion": 112,
+        "Very Rare Healing Potion": 198,
+        "Legendary Healing Potion": 320
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 160,
+       "heal_half": 241,
+       "max_health": 241.0
+      },
+      "7": {
+       "game_tier": 7,
+       "horse": 657,
+       "prices": {
+        "Small Healing Potion": 16,
+        "Medium Healing Potion": 22,
+        "Large Healing Potion": 55,
+        "Uncommon Healing Potion": 66,
+        "Wondrous Healing Potion": 134,
+        "Rare Healing Potion": 153,
+        "Very Rare Healing Potion": 271,
+        "Legendary Healing Potion": 438
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 219,
+       "heal_half": 330,
+       "max_health": 286.0
+      },
+      "8": {
+       "game_tier": 8,
+       "horse": 769,
+       "prices": {
+        "Small Healing Potion": 19,
+        "Medium Healing Potion": 26,
+        "Large Healing Potion": 64,
+        "Uncommon Healing Potion": 77,
+        "Wondrous Healing Potion": 157,
+        "Rare Healing Potion": 179,
+        "Very Rare Healing Potion": 317,
+        "Legendary Healing Potion": 513
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 256,
+       "heal_half": 386,
+       "max_health": 312.0
+      },
+      "10": {
+       "game_tier": 10,
+       "horse": 1052,
+       "prices": {
+        "Small Healing Potion": 26,
+        "Medium Healing Potion": 35,
+        "Large Healing Potion": 88,
+        "Uncommon Healing Potion": 105,
+        "Wondrous Healing Potion": 215,
+        "Rare Healing Potion": 246,
+        "Very Rare Healing Potion": 434,
+        "Legendary Healing Potion": 702
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 351,
+       "heal_half": 529,
+       "max_health": 371.0
+      },
+      "25": {
+       "game_tier": 25,
+       "horse": 11091,
+       "prices": {
+        "Small Healing Potion": 277,
+        "Medium Healing Potion": 370,
+        "Large Healing Potion": 924,
+        "Uncommon Healing Potion": 1109,
+        "Wondrous Healing Potion": 2264,
+        "Rare Healing Potion": 2588,
+        "Very Rare Healing Potion": 4575,
+        "Legendary Healing Potion": 7394
+       },
+       "stock": 40,
+       "past_tier": [],
+       "inversions": [],
+       "bless": 3697,
+       "heal_half": 5566,
+       "max_health": 1350.0
+      }
+     },
+     "used_up_x10": 2.192448035699999,
+     "used_up_x25": 23.105599163649618,
+     "bad": []
+    }
+   },
+   "chain": [
+    "",
+    "vel_morrath",
+    "war_engine",
+    "sewers",
+    "kethrys",
+    "heaven"
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Message Log, Content Browser",
+ "error": null,
+ "windows_shown_again": 3
+}
