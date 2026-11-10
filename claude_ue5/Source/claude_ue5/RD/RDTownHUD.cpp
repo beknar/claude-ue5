@@ -897,24 +897,38 @@ void ARDHUD::DrawTownTracker(float Sc)
 	if (!GI) return;
 	TArray<TPair<FString, FLinearColor>> Ls;
 	Ls.Add({ FString::Printf(TEXT("GOLD  %d"), GI->Gold), RDTGold });
-	for (const FString& Q : Gen->GetQuestLines())
+	// (the list of 2026-11-10: the quest window, on or off from the Options page: every quest taken or ready, its progress and its
+	// hint, under its heading; off, the purse alone)
+	if (Gen->IsQuestWindowShown())
 	{
-		TArray<FString> P; Q.ParseIntoArray(P, TEXT("|"), false);
-		if (P.Num() < 7 || (P[3] != TEXT("taken") && P[3] != TEXT("ready"))) continue;
-		const bool bReady = P[3] == TEXT("ready");
-		Ls.Add({ bReady ? FString::Printf(TEXT("%s  -  done: back to the %s"), *P[2], *P[1].ToLower()) : FString::Printf(TEXT("%s  %s/%s"), *P[2], *P[4], *P[5]),
-		         bReady ? FLinearColor(0.55f, 0.95f, 0.55f) : RDTInk });
-		if (!bReady && !P[6].IsEmpty()) Ls.Add({ FString::Printf(TEXT("   %s"), *P[6]), RDTDim });
-		if (Ls.Num() > 10) break;
+		Ls.Add({ TEXT("QUESTS"), RDTGold });
+		int32 Shown = 0;
+		for (const FString& Q : Gen->GetQuestLines())
+		{
+			TArray<FString> P; Q.ParseIntoArray(P, TEXT("|"), false);
+			if (P.Num() < 7 || (P[3] != TEXT("taken") && P[3] != TEXT("ready"))) continue;
+			const bool bReady = P[3] == TEXT("ready");
+			Ls.Add({ bReady ? FString::Printf(TEXT("%s  -  done: back to the %s"), *P[2], *P[1].ToLower()) : FString::Printf(TEXT("%s  %s/%s"), *P[2], *P[4], *P[5]),
+			         bReady ? FLinearColor(0.55f, 0.95f, 0.55f) : RDTInk });
+			if (!bReady && !P[6].IsEmpty()) Ls.Add({ FString::Printf(TEXT("   %s"), *P[6]), RDTDim });
+			++Shown;
+			if (Ls.Num() > 16) break;
+		}
+		if (Shown == 0) Ls.Add({ TEXT("none taken: a quest giver's mark is a gold !"), RDTDim });
 	}
+	auto TypeOf = [](const FString& S) { return S.StartsWith(TEXT("GOLD")) || S == TEXT("QUESTS") ? ERDType::Label : ERDType::Text; };
 	float Wmax = 0.f, Tw, Th = 0.f;
-	for (const auto& Lp : Ls) { UI.TextSize(Lp.Key, Tw, Th, Small, Sc, Lp.Key.StartsWith(TEXT("GOLD")) ? ERDType::Label : ERDType::Text); Wmax = FMath::Max(Wmax, Tw); }
-	const float X1 = Canvas->ClipX - 24.f * Sc, Y0 = Canvas->ClipY * 0.47f;
-	Box(FVector2D(X1 - Wmax - 20.f * Sc, Y0 - 6.f * Sc), FVector2D(X1 + 6.f * Sc, Y0 + (Th + 4.f * Sc) * Ls.Num() + 6.f * Sc), FLinearColor(0.02f, 0.02f, 0.03f, 0.5f));
+	for (const auto& Lp : Ls) { UI.TextSize(Lp.Key, Tw, Th, Small, Sc, TypeOf(Lp.Key)); Wmax = FMath::Max(Wmax, Tw); }
+	// (in a dungeon the minimap's tier lines stand under it: the window below them; never down into the status panel)
+	const float X1 = Canvas->ClipX - 24.f * Sc, Y0 = Canvas->ClipY * (Gen->bTown ? 0.47f : 0.56f);
+	const int32 Room = FMath::Max(2, FMath::FloorToInt32((Canvas->ClipY * 0.74f - Y0) / FMath::Max(Th + 4.f * Sc, 1.f)));
+	if (Ls.Num() > Room) Ls.SetNum(Room);
+	Box(FVector2D(X1 - Wmax - 20.f * Sc, Y0 - 6.f * Sc), FVector2D(X1 + 6.f * Sc, Y0 + (Th + 4.f * Sc) * Ls.Num() + 6.f * Sc), FLinearColor(0.02f, 0.02f, 0.03f, Gen->IsQuestWindowShown() ? 0.62f : 0.5f));
+	if (Gen->IsQuestWindowShown()) Frame(FVector2D(X1 - Wmax - 20.f * Sc, Y0 - 6.f * Sc), FVector2D(X1 + 6.f * Sc, Y0 + (Th + 4.f * Sc) * Ls.Num() + 6.f * Sc), FLinearColor(0.75f, 0.62f, 0.35f, 0.7f), 1.5f * Sc);
 	float Y = Y0;
 	for (const auto& Lp : Ls)
 	{
-		const ERDType Ty = Lp.Key.StartsWith(TEXT("GOLD")) ? ERDType::Label : ERDType::Text;
+		const ERDType Ty = TypeOf(Lp.Key);
 		UI.TextSize(Lp.Key, Tw, Th, Small, Sc, Ty);
 		UI.Text(Lp.Key, Lp.Value, X1 - Tw - 6.f * Sc, Y, Small, Sc, Ty);
 		Y += Th + 4.f * Sc;

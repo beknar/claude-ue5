@@ -166,7 +166,7 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		bDry = M < 0.25f;
 	}
 	// ---- the next weather, when its time comes
-	if (Now >= WeatherUntil)
+	if (Now >= WeatherUntil && !bWeatherHeld)          // (the list of 2026-11-10: rd.Weather holds it)
 	{
 		++WeatherChanges;
 		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)WeatherChanges * 2654435761u);

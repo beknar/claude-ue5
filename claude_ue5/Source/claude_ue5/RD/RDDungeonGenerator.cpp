@@ -859,7 +859,24 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 		L.Add(TEXT("back"));
 		return L;
 	}
-	if (MenuPage == 3) return { TEXT("savename"), TEXT("savedo"), TEXT("back") };
+	if (MenuPage == 3) return { TEXT("savename"), TEXT("saveover"), TEXT("savedo"), TEXT("back") };
+	// (the list of 2026-11-10: the Save page's drop-down: the saves on disk to save over (not the autosave), or a new one)
+	if (MenuPage == 4)
+	{
+		TArray<FName> L;
+		L.Add(TEXT("overnew"));
+		for (const FString& S : GetSaveSlots())
+		{
+			FString Slot, Rest; S.Split(TEXT("|"), &Slot, &Rest);
+			if (Slot == TEXT("autosave") || Slot.IsEmpty()) continue;
+			L.Add(FName(*(TEXT("over:") + Slot)));
+			if (L.Num() >= 12) break;
+		}
+		L.Add(TEXT("back"));
+		return L;
+	}
+	// (the list of 2026-11-10: where there are quests (the towns and the game's dungeons), the quest window on or off)
+	if (bTown || bTownLink) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("questwin"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
 	return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("controls"), TEXT("res"), TEXT("mode"), TEXT("apply"), TEXT("back") };
 }
 
@@ -891,15 +908,27 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 			Out.Add(P.Num() >= 4 ? FString::Printf(TEXT("button|%s: %s, %s (%s)"), *What, *P[2], *P[0], *P[3]) : FString::Printf(TEXT("button|%s: none"), *What));
 		}
 		else if (Id == TEXT("savename")) Out.Add(FString::Printf(TEXT("text|Name|%s"), *SaveNameText.Replace(TEXT("|"), TEXT(" "))));
+		else if (Id == TEXT("saveover"))
+			Out.Add(SaveOverSlot.IsEmpty() ? FString(TEXT("choice|Save over|a new save  (Enter: choose a save)"))
+			                               : FString::Printf(TEXT("choice|Save over|%s"), *SaveNameOf(SaveOverSlot).Replace(TEXT("|"), TEXT(" "))));
+		else if (Id == TEXT("overnew")) Out.Add(TEXT("button|A new save"));
+		else if (Id.ToString().StartsWith(TEXT("over:")))
+		{
+			const FString Slot = Id.ToString().RightChop(5);
+			TArray<FString> P; GetSaveInfo(Slot).ParseIntoArray(P, TEXT("|"), false);
+			Out.Add(P.Num() >= 4 ? FString::Printf(TEXT("button|%s: %s, %s (%s)"), *SaveNameOf(Slot), *P[2], *P[0], *P[3]) : FString::Printf(TEXT("button|%s"), *SaveNameOf(Slot)));
+		}
 		else if (Id == TEXT("savedo"))
 		{
-			const bool bOver = URDSaveGame::Info(SlotForName(SaveNameText)).Len() > 0;
-			Out.Add(bOver ? FString(TEXT("button|Save (over the save of that name)")) : FString(TEXT("button|Save")));
+			const bool bOver = !SaveOverSlot.IsEmpty() || URDSaveGame::Info(SlotForName(SaveNameText)).Len() > 0;
+			Out.Add(!SaveOverSlot.IsEmpty() ? FString::Printf(TEXT("button|Save (over \"%s\")"), *SaveNameOf(SaveOverSlot).Replace(TEXT("|"), TEXT(" ")))
+			        : bOver ? FString(TEXT("button|Save (over the save of that name)")) : FString(TEXT("button|Save")));
 		}
 		else if (Id == TEXT("hero")) Out.Add(bTown || bTownLink ? FString(TEXT("button|Choose another hero (a new game)")) : FString(TEXT("button|Choose another hero")));
 		else if (Id == TEXT("town")) Out.Add(FString::Printf(TEXT("button|Return to %s"), *WayBackName()));
 		else if (Id == TEXT("quit")) Out.Add(TEXT("button|Quit"));
 		else if (Id == TEXT("controls")) Out.Add(FString::Printf(TEXT("choice|Controls hint|%s"), bControlsShown ? TEXT("On") : TEXT("Off")));
+		else if (Id == TEXT("questwin")) Out.Add(FString::Printf(TEXT("choice|Quest window|%s"), bQuestWindowShown ? TEXT("On") : TEXT("Off")));
 		else if (Id == TEXT("res"))
 			// (windowed fullscreen covers the screen whatever the size chosen: the engine sizes that window to the screen)
 			Out.Add(PendingWindowMode == 1 ? FString(TEXT("choice|Resolution|the screen's own (windowed fullscreen)"))
@@ -985,6 +1014,17 @@ void ARDDungeonGenerator::StepMenuValue(int32 Step)
 	if (V >= 0) { SetUserVolume(V, UserVolumes[V] + 0.05f * Step); return; }
 	// (mistward4's choices: the controls hint on / off, a resolution, a display mode; the last two wait for Apply)
 	if (Id == TEXT("controls")) SetControlsHintShown(!bControlsShown);
+	else if (Id == TEXT("questwin")) SetQuestWindowShown(!bQuestWindowShown);
+	else if (Id == TEXT("saveover"))
+	{
+		// (the list of 2026-11-10: left and right go through the saves on disk, "a new save" among them)
+		TArray<FString> Slots = { FString() };
+		for (const FString& S : GetSaveSlots()) { FString Slot, Rest; S.Split(TEXT("|"), &Slot, &Rest); if (!Slot.IsEmpty() && Slot != TEXT("autosave")) Slots.Add(Slot); }
+		int32 K = Slots.IndexOfByKey(SaveOverSlot);
+		K = ((FMath::Max(K, 0) + Step) % Slots.Num() + Slots.Num()) % Slots.Num();
+		SaveOverSlot = Slots[K];
+		if (!SaveOverSlot.IsEmpty()) SaveNameText = SaveNameOf(SaveOverSlot);
+	}
 	else if (Id == TEXT("res") && PendingWindowMode != 1)
 	{
 		const TArray<FString> Ch = GetResolutionChoices();
@@ -1006,12 +1046,24 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (RDMenuVolumeOf(Id) >= 0) return false;
 	if (Id == TEXT("resume")) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
 	if (Id == TEXT("options")) { LastMenuAction = TEXT("options"); OpenOptionsPage(); return true; }
+	// (the list of 2026-11-10: the drop-down's Back goes back to the Save page, not the main page)
+	if (Id == TEXT("back") && MenuPage == 4) { LastMenuAction = TEXT("back"); MenuPage = 3; MenuCursor = 1; return true; }
 	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
+	if (Id == TEXT("saveover")) { LastMenuAction = TEXT("saveover"); MenuPage = 4; MenuCursor = 0; SaveSlotsAt = -10.0; return true; }
+	if (Id == TEXT("overnew")) { LastMenuAction = TEXT("overnew"); SaveOverSlot.Reset(); MenuPage = 3; MenuCursor = 2; return true; }
+	if (Id.ToString().StartsWith(TEXT("over:")))
+	{
+		LastMenuAction = Id.ToString();
+		SaveOverSlot = Id.ToString().RightChop(5);
+		SaveNameText = SaveNameOf(SaveOverSlot);
+		MenuPage = 3; MenuCursor = 2;          // (on Save)
+		return true;
+	}
 	if (Id == TEXT("save"))
 	{
 		// (the list of 2026-11-04: a page to name it on, the place and the day offered as its name)
 		LastMenuAction = TEXT("save");
-		MenuPage = 3; MenuCursor = 0;
+		MenuPage = 3; MenuCursor = 0; SaveOverSlot.Reset();
 		if (SaveNameText.IsEmpty())
 		{
 			const APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
@@ -1026,8 +1078,10 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 		LastMenuAction = TEXT("savedo");
 		const FString Nm = SaveNameText.TrimStartAndEnd();
 		if (Nm.IsEmpty()) { if (PlayerCombat) PlayerCombat->ShowMessage(TEXT("Give the save a name first")); return false; }
-		const FString Slot = SlotForName(Nm);
+		// (the list of 2026-11-10: over the save chosen in the drop-down, under the name on the page)
+		const FString Slot = SaveOverSlot.IsEmpty() ? SlotForName(Nm) : SaveOverSlot;
 		const bool bOk = bMenuDryRun || SaveGameNow(Slot, TEXT("menu"), Nm);
+		if (bOk) SaveOverSlot.Reset();
 		if (PlayerCombat) PlayerCombat->ShowMessage(bOk ? FString::Printf(TEXT("The game is saved as \"%s\""), *Nm) : FString(TEXT("The game could not be saved")));
 		if (bOk) BackToMainMenu();
 		return bOk;
@@ -1036,7 +1090,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (Id == TEXT("loadauto") || Id == TEXT("loadsave")) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save")); }
 	if (Id.ToString().StartsWith(TEXT("load:"))) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id.ToString().RightChop(5)); }
 	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
-	if (Id == TEXT("controls") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
+	if (Id == TEXT("controls") || Id == TEXT("questwin") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
 	if (Id == TEXT("town"))
 	{
 		LastMenuAction = TEXT("town");
@@ -1130,10 +1184,14 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 		TickSaveNameKeys(PC);
 		if (Pressed({ EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
 		if (Pressed({ EKeys::Down, EKeys::Gamepad_DPad_Down })) MoveMenuCursor(1);
+		// (the list of 2026-11-10: the arrows and the D-pad left / right step the drop-down's choice; A and D are letters here)
+		if (Pressed({ EKeys::Left, EKeys::Gamepad_DPad_Left })) StepMenuValue(-1);
+		if (Pressed({ EKeys::Right, EKeys::Gamepad_DPad_Right })) StepMenuValue(1);
 		if (Pressed({ EKeys::Enter, EKeys::Gamepad_FaceButton_Bottom }))
 		{
 			const TArray<FName> It3 = MenuItems();
 			if (It3.IsValidIndex(MenuCursor) && It3[MenuCursor] == TEXT("back")) BackToMainMenu();
+			else if (It3.IsValidIndex(MenuCursor) && It3[MenuCursor] == TEXT("saveover")) ActivateMenuLine(MenuCursor);
 			else ActivateMenuLine(It3.IndexOfByKey(FName(TEXT("savedo"))));
 			return;
 		}

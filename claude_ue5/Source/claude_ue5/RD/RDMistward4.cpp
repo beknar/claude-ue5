@@ -27,12 +27,28 @@ void ARDDungeonGenerator::LoadOptions()
 {
 	bool B = true;
 	if (GConfig && GConfig->GetBool(RD4OptionsSection, TEXT("ShowControls"), B, GGameUserSettingsIni)) bControlsShown = B;
+	B = true;
+	if (GConfig && GConfig->GetBool(RD4OptionsSection, TEXT("ShowQuests"), B, GGameUserSettingsIni)) bQuestWindowShown = B;
 }
 
 void ARDDungeonGenerator::SetControlsHintShown(bool bShow)
 {
 	bControlsShown = bShow;
 	if (GConfig) { GConfig->SetBool(RD4OptionsSection, TEXT("ShowControls"), bShow, GGameUserSettingsIni); GConfig->Flush(false, GGameUserSettingsIni); }
+}
+
+void ARDDungeonGenerator::SetQuestWindowShown(bool bShow)
+{
+	// (the list of 2026-11-10: the quest window shown or not, kept as the controls hint is)
+	bQuestWindowShown = bShow;
+	if (GConfig) { GConfig->SetBool(RD4OptionsSection, TEXT("ShowQuests"), bShow, GGameUserSettingsIni); GConfig->Flush(false, GGameUserSettingsIni); }
+}
+
+FString ARDDungeonGenerator::SaveNameOf(const FString& Slot) const
+{
+	// (a save's own name (the info's sixth field), else its slot)
+	TArray<FString> P; GetSaveInfo(Slot).ParseIntoArray(P, TEXT("|"), false);
+	return P.Num() >= 6 && !P[5].IsEmpty() ? P[5] : Slot;
 }
 
 TArray<FString> ARDDungeonGenerator::GetResolutionChoices() const

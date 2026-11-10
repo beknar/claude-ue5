@@ -1,0 +1,213 @@
+{
+ "tag": "b10a",
+ "plan": [
+  "list7",
+  "noshield9",
+  "start9",
+  "backspace9",
+  "services"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "list7",
+   "ok": false,
+   "animal": {
+    "kind": "Pig",
+    "without_cm": 13.8,
+    "with_cm": 13.8,
+    "stopped": false
+   },
+   "cobbles_m": 2.0,
+   "cobbles_profile": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.12,
+    0.12,
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "lift": {
+    "max_cm": 140.0,
+    "min_cm": -140.0,
+    "under_buildings_cm": 0.0,
+    "highest": [
+     -22950,
+     -13950,
+     140.0
+    ],
+    "walked_z": 140.0
+   },
+   "mill_base_cm": 128.1,
+   "mill": {
+    "lowest_cm": 739.5,
+    "house": true,
+    "house_m": 3.2
+   },
+   "tavern": {
+    "seats": 12,
+    "seats_lit": 12,
+    "nearest_light_m": 0.67,
+    "luma": 81.4
+   },
+   "pens": {
+    "gates": 12,
+    "prompt": "open gate",
+    "opened": true,
+    "shut": false
+   },
+   "garden_prompt": "harvest the garden",
+   "garden": {
+    "crops": "5,3,2",
+    "got": {
+     "Pumpkin": 3,
+     "Sunflower Seeds": 3,
+     "Herbs": 3
+    },
+    "again": "This garden has been harvested: it grows again by tomorrow",
+    "ripe_after": false
+   },
+   "food": {
+    "tables": 44,
+    "prompt": "take the food (fruit)",
+    "got": {
+     "Fruit": 2
+    },
+    "taken": true
+   },
+   "oven": {
+    "ovens": 26,
+    "prompt": "bake at the oven",
+    "station": "Oven",
+    "open": true,
+    "lines": [
+     "Bread",
+     "Fruit",
+     "Hardtack",
+     "Nuts and Seeds",
+     "Sweet Roll",
+     "Travel Cake"
+    ],
+    "baked": true,
+    "bread": 1,
+    "wheat_used": 2
+   }
+  },
+  {
+   "step": "noshield9",
+   "ok": true,
+   "start_shield_map": {},
+   "worn": "None",
+   "shield_meshes_on_her": [],
+   "blocks_without": false,
+   "given": "Broddi's Shield",
+   "blocks_with": true
+  },
+  {
+   "step": "start9",
+   "ok": true,
+   "refused": [],
+   "tap_inventory": true,
+   "tap_menu": false,
+   "tap_again_shut": true,
+   "hold_menu": true,
+   "hold_inventory": false,
+   "opens_by_start": 1,
+   "start_closes": true,
+   "hold_again": true,
+   "b_closes": true,
+   "esc_menu": true,
+   "stale_inventory": false
+  },
+  {
+   "step": "backspace9",
+   "ok": true,
+   "save_line": 1,
+   "one_press": 1,
+   "held_1_2s": 14,
+   "left_after_long_hold": ""
+  },
+  {
+   "step": "services",
+   "ok": true,
+   "buy": {
+    "ok": true,
+    "gold": -12,
+    "count": 1
+   },
+   "sell": {
+    "ok": true,
+    "gold": 4,
+    "count": 0
+   },
+   "heal": {
+    "ok": true,
+    "gold": -25,
+    "hp": 1.0
+   },
+   "weapon": "Viking Shortsword",
+   "repair": {
+    "line": 0,
+    "ok": true,
+    "gold": -9,
+    "wear": 1.0
+   },
+   "anvil_opens_crafting": true,
+   "bless": {
+    "ok": true,
+    "gold": -20,
+    "blessing": "Blessing of the Spire"
+   },
+   "deposit": {
+    "ok": true,
+    "carried": -1,
+    "stash": [
+     "Small Healing Potion"
+    ]
+   },
+   "withdraw": {
+    "ok": true,
+    "carried": 0,
+    "stash": 0
+   },
+   "circle": [
+    "here|Brokenspire|YOU ARE HERE|0",
+    "castle|Mistward Castle|SEALED|0",
+    "none|No other circle found yet|FIND|0",
+    "bye|Step away||1"
+   ],
+   "board": [
+    "Quest: Rats in the Cellars",
+    "Quest: The Drinkers",
+    "Quest: Dead Soldiers Walking"
+   ],
+   "wild": true,
+   "circle_others_ok": true
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_b10a_list7_lift.png",
+  "bs_b10a_list7_mill.png",
+  "bs_b10a_list7_tavern.png",
+  "bs_b10a_noshield9.png",
+  "bs_b10a_start9_menu.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

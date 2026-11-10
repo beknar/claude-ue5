@@ -1,0 +1,48 @@
+the inventory doesn't say how much gold the character has
+the warrior should not have a default shield on
+generate at least 30 different things the non-interactive NPCs can say depending on what their job is
+make a way to change the weather in the console
+in town, there is still a disc in the sky in the day time, there is a visible border between near the horizon and the rest of the sky.  this also happens in the night time.
+the stairway to get into the guard towers in mistward castle looks like a series of stairs was built up and
+angled until it reached the top.  a stone stairway should look like this: E:\temp\stonestairway.jpg
+let torches be put into the quickslot bar
+let potions be put into the quickslot bar
+there should be an indicator on the map if a player walks into a room and there are prisoners in the cells
+a library's bookshelves should contain either scrolls of that tier or below or crafting components for scrolls of that tier or below, could also contain tomes
+at the anvil, when you long press the button to break down something, you should be able to break down the entire stack of that item
+only mages and martial artists should be able to make healing potions and mana potions at the anvil
+some of the NPC crowd in the Arena have no heads
+enable shields to be put into the quick slot
+when the warrior does a shield block, she should be in a new animation shield block stance like in this picture: "E:\temp\shield_block.jpg"
+if there is food on a table, the player should be able to put it into the inventory
+in the inventory, in the crafting menu, the items that can actually repair items should have a separate section from the crafting components
+when the tier boss appears, a teleporter back to the first dungeon room or to brokenspire should spawn there with him
+be able to repair weapons / armor at half materials cost at an anvil
+weapons on the quick bar should have a red colored bar to indicate how many of its durability points are left
+when shields run out of durability, instead of breaking, they should only have half their efficacy, like weapons
+new type of item that can be held in the left hand and put in the quick slot: revealing light, looks like an ankh, found on Tier 2 monsters or in containers.  new model needed for this in blender and new icon needed to be made on image server.
+save game should be able to choose to save to an existing save file, using a drop-down menu
+if an NPC is supposed to be sleeping at night, have them sleep in their beds with a new animation or clip in blender
+there should be more children in town, and they are supposed to be asleep at night
+the town should be 25% more populated with more children as the population increases.  leave the number of buildings the same.
+there should be a window for quests that can be configured to show up or not in the ESC menu
+the player can walk through the horse
+replace the chickens in the game with the chicken model in "E:\code\claude-ue5\ai models\chicken.glb" and animate it 
+replace the riding horses in the game with the chicken in "E:\code\claude-ue5\ai models\ridinghorse.glb" and animate it
+replace the goats in the game with the chicken in "E:\code\claude-ue5\ai models\goat.glb" and animate it
+replace the rabbits in the game with the chicken in "E:\code\claude-ue5\ai models\rabbit.glb" and animate it
+replace the pigs in the game with the chicken in "E:\code\claude-ue5\ai models\pig.glb" and animate it
+replace the cows in the game with the chicken in "E:\code\claude-ue5\ai models\cow.glb" and animate it
+if the player walks under a structure that blocks sight of her, make the structure see-through
+horse travel should be at least 5x faster than what the player can move
+the fighter and only the fighter should be able to craft basic weapons and armor she has already looted at a forge - a forge is a new crafting station
+everyone should be able to craft food items from food components at an oven - an oven is a new crafting station
+when the player is ambushed in the wilderness, the ambushers should make their way to her immediately instead of wandering around, even if she is not in their usual detection range
+the buildings in the wilderness do not have an interior and there is no way to get inside or climb any stairs on the outside
+what can be done to make the town more lively?
+what can be done to make the wilderness more lively and alive?
+the small farm holdings should be noted on the large map
+make a console command that will teleport the player to each of the major cities - for testing only
+test all changes with walk-throughs to make sure they actually happen
+test the re-balanced changes in each city and dungeon
+when done, commit to a PR, review it, correct any errors, merge if mergeable

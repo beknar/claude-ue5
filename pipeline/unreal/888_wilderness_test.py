@@ -749,18 +749,33 @@ def step_horse9():
     yield from rwait(0.6)
     g.call_horse(); yield from rwait(0.5)
     hp_ = hs(); d_ = math.hypot(hp_["x"] - G["pawn"].get_actor_location().x, hp_["y"] - G["pawn"].get_actor_location().y)
+    # (the list of 2026-11-10, "the player can walk through the horse": she walks straight at its middle for 3 s and stops at its
+    # side; the nearest she comes to its middle is kept (its box's half width and her capsule's radius, about 60 cm); then back)
+    hz = g.get_editor_property("horse")
+    res["blocking_before_mount"] = hz.is_blocking() if hz else None
+    q0 = G["pawn"].get_actor_location(); hc = V(hp_["x"], hp_["y"], q0.z)
+    dmin = 1e9; t0 = time.time()
+    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-12, yaw=math.degrees(math.atan2(hc.y - q0.y, hc.x - q0.x))))
+    while time.time() - t0 < 3.0:
+        q = G["pawn"].get_actor_location(); dv = V(hc.x - q.x, hc.y - q.y, 0.0)
+        G["pawn"].add_movement_input(dv, 1.0); dmin = min(dmin, math.hypot(dv.x, dv.y)); yield
+    res["walk_into_horse"] = {"start_cm": round(d_), "nearest_cm": round(dmin)}
+    G["pawn"].set_actor_location(q0, False, True); yield from rwait(0.5)
     res["horse_at_cm"] = round(d_); res["mount_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location(), 400.0))
     yield from press("F"); yield from rwait(1.0)
     m = hs(); res["mounted"] = m; res["attack_refused"] = not cb().start_attack()
+    hz = g.get_editor_property("horse"); res["blocking_mounted"] = hz.is_blocking() if hz else None
     G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=G["pawn"].get_actor_rotation().yaw + 90)); yield from rwait(0.6); shot("horse_idle", "1280x720"); yield from rwait(1.0)
-    p0 = G["pawn"].get_actor_location()
+    # (her speed mounted once the horse is up to it: the last 3 s of a 6 s run (the list of 2026-11-10: at 5.5 times her speed the
+    # gallop takes a couple of seconds to reach it; over the whole run it read 5.04))
     run = []
-    t0 = time.time()
-    for _ in run_her((1.0, 0.3), 4.0):
+    t0 = time.time(); pm = None; tm = 0.0
+    for _ in run_her((1.0, 0.3), 6.0):
         if time.time() - t0 > 2.0 and len(run) < 6: run.append(hs())
+        if pm is None and time.time() - t0 >= 3.0: pm = G["pawn"].get_actor_location(); tm = time.time()
         yield
-    p1 = G["pawn"].get_actor_location()
-    mounted = math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 4.0
+    p1 = G["pawn"].get_actor_location(); t1 = time.time()
+    mounted = math.hypot(p1.x - pm.x, p1.y - pm.y) / 100.0 / max(t1 - tm, 0.1) if pm else 0.0
     res["riding"] = run[-1] if run else None
     # (pictures: from the side as she gallops, then from behind)
     for nm, yawoff in (("horse_side", 90.0), ("horse_back", 0.0)):
@@ -788,8 +803,74 @@ def step_horse9():
           and a["owned"] == 1 and a["spawned"] == 1 and res["gi_owned"]
           and mt["mounted"] == 1 and abs(mt["pelvis_z"] - mt["saddle_z"] - 14.0) < 15 and mt["pelvis_off_xy"] < 15 and (rd.get("pelvis_off_xy", 99) < 15) and mt["rider"] not in ("", "None") and res["attack_refused"]
           and rd.get("clip") == "run" and abs(sp["ratio"] - sp["want"]) < 0.35 and res["after_dismount"]["mounted"] == 0 and abs(sp["after"] - sp["foot"]) < 0.4
-          and res["death"]["dead"] and res["death"]["mounted"] == 0 and res["death"]["montage"])
+          and res["death"]["dead"] and res["death"]["mounted"] == 0 and res["death"]["montage"]
+          # (the list of 2026-11-10: blocked by it standing, not while ridden; at least five times her speed)
+          and res["blocking_before_mount"] is True and res["blocking_mounted"] is False and res["walk_into_horse"]["nearest_cm"] > 35
+          and sp["ratio"] >= 5.0)
     step_result("horse9", ok, **res)
+
+
+def step_list10w():
+    """the list of 2026-11-10 in the wilds: rd.Weather typed at the console sets the weather at once and holds it (storm, then fog,
+    then auto lets it go); rd.GoTo ashenreach puts her at Ashenreach's gate with the city built round her, rd.GoTo brokenspire
+    back; an ambush (only its kind left roaming, the director's gap 2 s) comes at her from 45-70 m, beyond its noticing distance,
+    while she stands still: its monsters hunt her and close in"""
+    g = G["gen"]; res = {}
+    yield from wait_ready(90)
+    w = G["w"]
+    # ---- the weather
+    unreal.SystemLibrary.execute_console_command(w, "rd.Weather storm"); yield from rwait(0.5)
+    res["storm"] = {"weather": g.get_weather(), "held": g.get_editor_property("weather_held"), "sky": str(g.get_sky_state())}
+    unreal.SystemLibrary.execute_console_command(w, "rd.Weather fog"); yield from rwait(0.5)
+    res["fog"] = {"weather": g.get_weather(), "held": g.get_editor_property("weather_held")}
+    unreal.SystemLibrary.execute_console_command(w, "rd.Weather auto"); yield from rwait(0.5)
+    res["auto"] = {"weather": g.get_weather(), "held": g.get_editor_property("weather_held")}
+    # ---- rd.GoTo
+    unreal.SystemLibrary.execute_console_command(w, "rd.GoTo ashenreach")
+    t0 = time.time(); ts = {}
+    while time.time() - t0 < 90:
+        yield from rwait(1.0); ts = town_state()
+        if ts.get("name") == "Ashenreach" and ts.get("loading", 1) == 0 and ts.get("section", 0) == 1: break
+    p = G["pawn"].get_actor_location()
+    tw = towns().get("Ashenreach") or {}
+    res["goto"] = {"town": ts.get("name"), "loaded": ts.get("section"), "secs": round(time.time() - t0, 1),
+                   "from_site_m": round(math.hypot(p.x / 100.0 - tw.get("x", 0.0), p.y / 100.0 - tw.get("y", 0.0)), 1) if tw else None}
+    unreal.SystemLibrary.execute_console_command(w, "rd.GoTo brokenspire")
+    t0 = time.time()
+    while time.time() - t0 < 60:
+        yield from rwait(1.0); ts = town_state()
+        if ts.get("name") == "Brokenspire" and ts.get("section", 0) == 1: break
+    res["back"] = ts.get("name")
+    # ---- an ambush
+    xy = clear_spot("plains"); g.wild_put_her(*xy); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    c = cb(); c.set_health(c.get_max_health())
+    hunters = []; t0 = time.time()
+    while time.time() - t0 < 40 and not hunters:
+        g.force_wild_encounter("roam_ambush")
+        yield from rwait(1.5)
+        hunters = [m for m in GS.get_all_actors_of_class(w, unreal.RDMonster) if m.get_editor_property("hunting") and not m.is_dead()]
+    me = G["pawn"].get_actor_location()
+    track = []
+    if hunters:
+        t1 = time.time()
+        while time.time() - t1 < 12:
+            c.set_health(c.get_max_health())
+            ds = [dist2(m.get_actor_location(), me) / 100.0 for m in hunters if unreal.SystemLibrary.is_valid(m) and not m.is_dead()]
+            if ds: track.append(round(min(ds), 1))
+            if ds and min(ds) < 4.0: break
+            yield from rwait(0.5)
+    res["ambush"] = {"hunters": len(hunters), "track_m": track[:30], "aggro_m": g.get_editor_property("wild_aggro_distance") / 100.0}
+    for m in hunters:
+        if unreal.SystemLibrary.is_valid(m): m.destroy_actor()
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    am = res["ambush"]
+    ok = (res["storm"]["weather"] == 5 and res["storm"]["held"] and res["fog"]["weather"] == 7 and res["fog"]["held"] and not res["auto"]["held"]
+          and res["goto"]["town"] == "Ashenreach" and res["goto"]["loaded"] == 1 and (res["goto"]["from_site_m"] or 9999) < 1600 and res["back"] == "Brokenspire"
+          # (they come straight at her from beyond their noticing distance at their own chase speed (a slow kind: 1.5 m/s), the
+          # distance falling at every sample: 10 m or more in 12 s)
+          and am["hunters"] > 0 and len(am["track_m"]) >= 10 and am["track_m"][0] > am["aggro_m"]
+          and (min(am["track_m"]) < 6.0 or (am["track_m"][0] - am["track_m"][-1] >= 10.0 and all(b_ <= a_ + 0.3 for a_, b_ in zip(am["track_m"], am["track_m"][1:])))))
+    step_result("list10w", ok, **res)
 
 
 # ------------------------------------------------------------------------------------------------ fast travel
@@ -1810,7 +1891,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"horse9": step_horse9, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list10w": step_list10w, "horse9": step_horse9, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

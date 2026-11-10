@@ -1209,7 +1209,7 @@ FString ARDDungeonGenerator::TownDescribe(const FVector& From) const
 	if (!bTown)
 	{
 		if (bTownLink && !CastleWayBack.IsZero() && FVector::Dist2D(From, CastleWayBack) < 260.f && FMath::Abs(From.Z - CastleWayBack.Z) < 250.f) return FString::Printf(TEXT("return to %s"), *WayBackName());
-		return FString();
+		return TableFoodDescribe(From);          // (the list of 2026-11-10: a prep table's food in the castle)
 	}
 	if (IsTownPanelOpen()) return FString();
 	// (a farmstead's family out in the wilds (the list of 2026-11-08b))
@@ -1251,7 +1251,7 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	if (!bTown)
 	{
 		if (bTownLink && !CastleWayBack.IsZero() && FVector::Dist2D(From, CastleWayBack) < 260.f && FMath::Abs(From.Z - CastleWayBack.Z) < 250.f) { ReturnToTown(); return TEXT("town"); }
-		return FString();
+		return TableFoodTake(From);          // (the list of 2026-11-10: a prep table's food in the castle)
 	}
 	if (TownPanelClosedFrame == GFrameCounter) return TEXT("closed");
 	// (a farmstead's family: they turn to her and say a line of their own)

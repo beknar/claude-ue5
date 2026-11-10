@@ -116,7 +116,7 @@ void URDCombatComponent::StackedWeaponLines(TArray<FString>& Out) const
 // ================================================================================================ quick slots
 int32 URDCombatComponent::WeaponOfSlot(int32 Slot) const
 {
-	if (!Generator || !QuickSlots.IsValidIndex(Slot) || QuickSlots[Slot].IsNone() || IsAbility(QuickSlots[Slot])) return -1;
+	if (!Generator || !QuickSlots.IsValidIndex(Slot) || QuickSlots[Slot].IsNone() || IsAbility(QuickSlots[Slot]) || IsQuickItem(QuickSlots[Slot])) return -1;
 	const FName N = QuickSlots[Slot];
 	if (Generator->Weapons.IsValidIndex(WeaponIndex) && Generator->Weapons[WeaponIndex].Name == N) return WeaponIndex;
 	for (int32 I = 0; I < Generator->Weapons.Num(); ++I) if (Generator->Weapons[I].Name == N && !Generator->Weapons[I].bAlongside && !Generator->Weapons[I].bScroll) return I;
@@ -137,8 +137,11 @@ void URDCombatComponent::FillQuickSlots()
 	// bar and not taken off it goes into the first empty slot, or a new one at the end: the bar holds them all (the user's of
 	// 2026-10-29: the Martial Artist's eleventh, Spinning Kick, had no slot and the D-pad never reached it))
 	const TArray<FName> Ab = GetAbilities();
+	// (an item's entry stays while she has none left (a potion drunk up shows 0 until she finds another), unless it is no
+	// item of a kind the bar takes)
 	for (FName& N : QuickSlots)
-		if (!N.IsNone() && (IsAbility(N) ? !Ab.Contains(N) : !Generator->Weapons.ContainsByPredicate([&N](const FRDWeaponDef& W) { return W.Name == N && !W.bAlongside && !W.bScroll; }))) N = NAME_None;
+		if (!N.IsNone() && (IsQuickItem(N) ? !IsQuickableItem(QuickItemOf(N))
+			: IsAbility(N) ? !Ab.Contains(N) : !Generator->Weapons.ContainsByPredicate([&N](const FRDWeaponDef& W) { return W.Name == N && !W.bAlongside && !W.bScroll; }))) N = NAME_None;
 	for (const FRDWeaponDef& W : Generator->Weapons)
 	{
 		if (W.bAlongside || W.bScroll || QuickSlots.Contains(W.Name) || QuickOff.Contains(W.Name)) continue;
@@ -166,8 +169,28 @@ TArray<FName> URDCombatComponent::GetAbilities() const
 	return Out;
 }
 
+bool URDCombatComponent::IsQuickableItem(FName Item) const
+{
+	const int32 Ix = Generator ? Generator->FindItem(Item) : -1;
+	if (Ix < 0) return false;
+	const ERDItemKind K = Generator->Items[Ix].Kind;
+	return K == ERDItemKind::Torch || K == ERDItemKind::Shield || K == ERDItemKind::Healing || K == ERDItemKind::Mana || K == ERDItemKind::Speed
+		|| K == ERDItemKind::Light;
+}
+
 bool URDCombatComponent::UseAbility(FName Ability)
 {
+	// (the list of 2026-11-10: an item made ready on the bar is used as from the inventory: a torch or the ankh lit or put out,
+	// a shield taken up or put away, a potion drunk)
+	if (IsQuickItem(Ability))
+	{
+		const FName It = QuickItemOf(Ability);
+		if (GetItemCount(It) <= 0) { SetMessage(FString::Printf(TEXT("You have no %s left"), *It.ToString().ToLower())); return false; }
+		const bool bUsed = UseItem(It);
+		if (bUsed) { ++QuickItemsUsed; ReadyAbility = NAME_None; }
+		UpdateQuickFirst();
+		return bUsed;
+	}
 	if (!GetAbilities().Contains(Ability)) return false;
 	const FName Sec(*Ability.ToString().Mid(1));
 	const bool bDone = Generator && Generator->FindSecondary(Sec) ? UseSecondary(Sec)          // (the sixth phase's)
@@ -217,11 +240,17 @@ bool URDCombatComponent::AssignQuickSlot(int32 Slot, int32 Index)
 bool URDCombatComponent::AssignQuickEntry(int32 Slot, FName Entry)
 {
 	if (!Generator || Entry.IsNone()) return false;
-	const bool bAbility = IsAbility(Entry);
-	if (bAbility ? !GetAbilities().Contains(Entry) : !Generator->Weapons.ContainsByPredicate([&Entry](const FRDWeaponDef& W) { return W.Name == Entry && !W.bAlongside && !W.bScroll; })) return false;
+	const bool bAbility = IsAbility(Entry), bItem = IsQuickItem(Entry);
+	if (bItem)
+	{
+		const FName It = QuickItemOf(Entry);
+		if (!IsQuickableItem(It)) { SetMessage(FString::Printf(TEXT("The %s cannot go on the quick bar"), *It.ToString().ToLower())); return false; }
+		if (GetItemCount(It) <= 0) return false;
+	}
+	else if (bAbility ? !GetAbilities().Contains(Entry) : !Generator->Weapons.ContainsByPredicate([&Entry](const FRDWeaponDef& W) { return W.Name == Entry && !W.bAlongside && !W.bScroll; })) return false;
 	if (QuickSlots.Num() < 10) QuickSlots.SetNum(10);
 	if (Slot < 0 || Slot > QuickSlots.Num()) return false;
-	const FString Nm = bAbility ? Entry.ToString().Mid(1) : Entry.ToString();
+	const FString Nm = bAbility || bItem ? Entry.ToString().Mid(1) : Entry.ToString();
 	const int32 From = QuickSlots.IndexOfByKey(Entry);
 	if (From == Slot)
 	{
@@ -254,7 +283,7 @@ bool URDCombatComponent::AssignQuickEntry(int32 Slot, FName Entry)
 
 bool URDCombatComponent::SelectQuickSlot(int32 Slot)
 {
-	if (QuickSlots.IsValidIndex(Slot) && IsAbility(QuickSlots[Slot])) return UseAbility(QuickSlots[Slot]);
+	if (QuickSlots.IsValidIndex(Slot) && (IsAbility(QuickSlots[Slot]) || IsQuickItem(QuickSlots[Slot]))) return UseAbility(QuickSlots[Slot]);
 	const int32 I = WeaponOfSlot(Slot);
 	if (I < 0) return false;
 	ReadyAbility = NAME_None;
@@ -273,9 +302,9 @@ void URDCombatComponent::CycleQuickSlot(int32 Step)
 	{
 		const int32 S = (((From < 0 ? (Step > 0 ? -1 : 0) : From) + Step * K) % N + N) % N;
 		if (!QuickSlots.IsValidIndex(S) || QuickSlots[S].IsNone()) continue;
-		if (IsAbility(QuickSlots[S]))
+		if (IsAbility(QuickSlots[S]) || IsQuickItem(QuickSlots[S]))
 		{
-			if (!GetAbilities().Contains(QuickSlots[S])) continue;
+			if (IsQuickItem(QuickSlots[S]) ? GetItemCount(QuickItemOf(QuickSlots[S])) <= 0 : !GetAbilities().Contains(QuickSlots[S])) continue;
 			ReadyAbility = QuickSlots[S];
 			SetMessage(FString::Printf(TEXT("%s ready: the attack button makes it"), *QuickSlots[S].ToString().Mid(1)));
 			PlayUiSound(TEXT("Player.Draw"), TEXT("Player.Inventory"));

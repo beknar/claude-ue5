@@ -350,7 +350,7 @@ bool ARDDungeonGenerator::WildFastTravel(int32 PlaceId)
 	FRDWildPlace P;
 	if (!Wild->FindPlace(PlaceId, P)) { WildTravelRefusal = TEXT("no such place"); return false; }
 	if (!WildFound.Contains(PlaceId)) { WildTravelRefusal = FString::Printf(TEXT("You have not found %s yet"), *P.Name); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
-	if (IsWildCombat()) { WildTravelRefusal = TEXT("You cannot travel while enemies are near"); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
+	if (IsWildCombat() && !bTravelForced) { WildTravelRefusal = TEXT("You cannot travel while enemies are near"); if (PlayerCombat) PlayerCombat->ShowMessage(WildTravelRefusal); return false; }
 	APawn* Her = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!Her) return false;
 	const FVector2D From(Her->GetActorLocation().X / 100.0, Her->GetActorLocation().Y / 100.0);

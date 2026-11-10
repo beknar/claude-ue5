@@ -801,6 +801,11 @@ bool ARDMonster::TickCombat(float Dt)
 		if (bAggro) { bAggro = false; Path.Reset(); WaitTime = 0.5f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr; }
 		return false;
 	}
+	// (the list of 2026-11-10: an ambush hunts her: it makes its way to her at once, from beyond its noticing distance, and no
+	// distance or leash drops it while the hunt lasts (a minute, or until she is 150 m off); after it, its home is where it is)
+	const bool bHunt = bHunting && !bAlly && GetWorld()->GetTimeSeconds() < HuntUntil && Dist < 15000.f;
+	if (bHunting && !bHunt) { bHunting = false; HomeAt = L; }
+	if (bHunt && !bAggro) { bAggro = true; Path.Reset(); WaitTime = 0.f; ChaseTimer = 0.f; StuckTime = 0.f; Roar(); }
 	if (!bAggro && !bAlly)
 	{
 		CombatBranch = TEXT("unseen");
@@ -826,7 +831,7 @@ bool ARDMonster::TickCombat(float Dt)
 	CurrentFoe = P;
 	float Lose = bOpenGround && G->LoseDistance > 1.f ? FMath::Max(G->LoseDistance, G->WildAggroDistance * 1.8f) : G->LoseDistance;
 	if (bFinalBoss && G->bFinalBandFighting) Lose = FMath::Max(Lose, 4500.f);
-	if (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash))
+	if (!bHunt && (Dist > Lose || Dz > (bOpenGround ? 900.f : 400.f) || (bOpenGround && FVector::Dist2D(L, HomeAt) > WildLeash)))
 	{
 		CombatBranch = TEXT("lost");
 		bAggro = false; Path.Reset(); WaitTime = 1.f; GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * SpeedMul(); CurrentFoe = nullptr;

@@ -46,7 +46,10 @@ float URDCombatComponent::GetShieldShare() const
 {
 	if (!IsShieldInHand()) return 0.f;
 	const int32 Ix = Generator->FindItem(WornShield);
-	return Ix >= 0 ? Generator->Items[Ix].Amount : 0.f;
+	if (Ix < 0) return 0.f;
+	// (the list of 2026-11-10: a shield worn out takes half its share, as armour does, until it is mended (the start shield never wears))
+	const bool bWorn = Generator->Items[Ix].Durability > 0.f && GetShieldWear(WornShield) <= 0.f && !(Generator->bKeepStartGear && WornShield == StartShieldOf());
+	return Generator->Items[Ix].Amount * (bWorn ? 0.5f : 1.f);
 }
 
 void URDCombatComponent::UpdateLeftHand()
@@ -150,26 +153,15 @@ void URDCombatComponent::WearDownShield(float Took)
 	// (the third list, bKeepStartGear: the shield her hero starts with never breaks: "these they always have")
 	if (Generator && Generator->bKeepStartGear && WornShield == StartShieldOf()) return;
 	float& W = ArmourWear.FindOrAdd(WornShield);
+	const bool bWasWhole = W > 0.f;
 	W = FMath::Max(0.f, W - Took);
-	if (W > 0.f) return;
-	// (it breaks: a spare one of the same takes its place, or it is gone)
-	const FName Gone = WornShield;
+	if (W > 0.f || !bWasWhole) return;
+	// (the list of 2026-11-10: it no longer breaks: worn out, it stays on her arm and takes half its share of a blow until it is
+	// mended at an anvil or with a repair item, as armour does; said once, as it wears out)
 	++ShieldsBroken;
-	if (TArray<float>* Sp = Spares.Find(Gone); Sp && Sp->Num() > 0)
-	{
-		W = Sp->Pop();
-		int32* N = Carried.Find(Gone); if (N) --*N;
-		SetMessage(FString::Printf(TEXT("Your %s broke: you take up the next one"), *Gone.ToString().ToLower()));
-	}
-	else
-	{
-		RemoveCarried(Gone, 1);
-		WornShield = NAME_None;
-		SetMessage(FString::Printf(TEXT("Your %s broke"), *Gone.ToString().ToLower()));
-	}
+	SetMessage(FString::Printf(TEXT("Your %s is worn out: it takes half as much of a blow until it is mended"), *WornShield.ToString().ToLower()));
 	if (Generator && GetOwner()) Generator->PlaySoundAt(TEXT("Player.Break"), GetOwner()->GetActorLocation());
-	UpdateLeftHand(); UpdateWalkSpeed();
-	UE_LOG(LogTemp, Log, TEXT("RDSHIELD %s broke"), *Gone.ToString());
+	UE_LOG(LogTemp, Log, TEXT("RDSHIELD %s worn out"), *WornShield.ToString());
 }
 
 // ------------------------------------------------------------------------------------------------ what she drops, takes back, breaks down
