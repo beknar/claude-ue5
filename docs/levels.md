@@ -284,7 +284,7 @@ Level 5's game rebuilt as a castle, with a town to start in, a continent round t
 | Mage | `BP_RDM_CasterCharacter` | `ai models/Mage.glb` |
 | Warlock | `BP_RDM2_DarkCasterCharacter` | `ai models/Warlock.glb` |
 | Rogue | `BP_RDM3_RogueCharacter` | `ai models/Rogue.glb` |
-| Martial Artist | `BP_MA_MartialArtistCharacter` | `ai models/MartialArtist2.glb` |
+| Martial Artist | `BP_MA_MartialArtistCharacter` | `ai models/MartialArtist3.glb` (MartialArtist2's until 2026-11-10) |
 | Summoner | `BP_SU4_SummonerCharacter` | `ai models/Summoner4.glb` |
 
 Their hit points, damage, mana and growth by tier are the balance of 2026-11-01 (`880`, `SourceArt/mistward/balance6.json`), not level 5's: [the numbers](levels/mistward_castle.md#mistward_castle-the-castle).
@@ -347,7 +347,7 @@ A space fighter in a 5 km x 5 km x 5 km combat area round a space station.
 | Mage (girl-caster-tripo) | `ai models/Mage.glb` | `BP_JRPGCasterCharacter`, `BP_RDM_CasterCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5`, Mistward Castle's game |
 | Warlock (girl-darkcaster-tripo) | `ai models/Warlock.glb` | `BP_JRPGDarkCasterCharacter`, `BP_RDM2_DarkCasterCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level2`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5`, Mistward Castle's game |
 | Rogue | `ai models/Rogue.glb` | `BP_JRPGRogueCharacter`, `BP_RDM3_RogueCharacter` | `L_Meshy_Meadow`, `random_dungeonmagic_level3`, `random_dungeonmagic_level4`, `random_dungeonmagic_level5`, Mistward Castle's game |
-| Martial Artist | `ai models/MartialArtist2.glb` | `BP_JRPGMartialArtistCharacter`, `BP_MA_MartialArtistCharacter` | `L_Meshy_Meadow`, `martial_arts`, Mistward Castle's game |
+| Martial Artist | `ai models/MartialArtist3.glb` (MartialArtist2's until 2026-11-10) | `BP_JRPGMartialArtistCharacter`, `BP_MA_MartialArtistCharacter` | `L_Meshy_Meadow`, `martial_arts`, Mistward Castle's game |
 | Summoner (Summoner4) | `ai models/Summoner4.glb` | `BP_JRPGSummoner4Character`, `BP_SU4_SummonerCharacter` | `L_Meshy_Meadow`, Mistward Castle's game |
 | Summoner (Summoner3) | `ai models/Summoner3.glb` | `BP_JRPGSummoner3Character`, `BP_RDM5_Summoner3Character` | `L_Meshy_Meadow`, `random_dungeonmagic_level5` |
 | Summoner (the first) | `ai models/Summoner.glb` | `BP_JRPGSummonerCharacter`, `BP_RDM5_SummonerCharacter` | `L_Meshy_Meadow`; formerly `random_dungeonmagic_level5` |

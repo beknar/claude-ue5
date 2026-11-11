@@ -137,7 +137,15 @@ void ARDDungeonGenerator::ApplyDayNight()
 		DayMoon->SetIntensity(MoonLux * RDTDSmooth(-2.f, 8.f, Me) * FMath::Lerp(1.f, 0.35f, Cv * Cv));
 	}
 	if (DaySky) DaySky->SetIntensity(DaySkyLight * FMath::Lerp(NightSkyShare, 1.f, DayLight) * FMath::Lerp(1.f, 0.7f, Cv));
-	if (DayFog) DayFog->SetFogInscatteringColor(DayFogLight * FMath::Lerp(0.12f, 1.f, DayLight));
+	if (DayFog)
+	{
+		// (in the wilds the fog by the low sun dims and warms toward FogLowSunShare of the sun's low colour, as the sky by the
+		// horizon does: in its daylight grey it lit the far land white under a dusky sky (884 horizonprobe, 17:30); 0 at night
+		// and with the sun high, so noon's and night's are as before)
+		const float Dusk = bSky7 && bWild ? RDTDSmooth(-6.f, 0.f, Elev) * (1.f - RDTDSmooth(4.f, 28.f, Elev)) : 0.f;
+		const FLinearColor DuskTint = FMath::Lerp(FLinearColor::White, Low * FogLowSunShare, Dusk);
+		DayFog->SetFogInscatteringColor(DayFogLight * FMath::Lerp(0.12f, 1.f, DayLight) * DuskTint);
+	}
 	if (DayPost)
 	{
 		DayPost->Settings.bOverride_AutoExposureBias = true;

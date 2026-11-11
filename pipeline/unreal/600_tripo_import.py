@@ -2,7 +2,13 @@
 skeletal mesh -> /Game/JRPG/Character/SK_JRPG_<CH>, its own clips (separate FBX, imported onto that skeleton) ->
 /Game/JRPG/<CH>Anims/AS_<CH>_<Clip>, material M_JRPG_<CH> (base colour; normal / metal-rough if the GLB had them; two-sided).
 The mesh's shape keys come in as morph targets (printed: "morph targets").
-Args: CH (e.g. Fem5)."""
+glb [roll,pitch,yaw]: the mesh and the clips straight from the source GLB (build.json's "source") through Interchange's glTF
+importer, not tripo_build's FBX pair; scaled to build.json's height and turned by the given turn (a pipeline asset of the
+character's own, /Game/JRPG/Pipelines/PL_<CH>_Glb), then given the usual names (2026-11-10, MartialArtist3: Unreal read her FBX's
+thighs turned 18 to 123 degrees about their own length from what the file and Blender hold, with either FBX importer, and her
+stockings were wrung in every clip or torn at rest; the GLB is what the three.js viewer plays, and its import holds every bone
+where the GLB's clips put it). tripo_build writes <name>.glb of its own scene (standing, her height, in metres), which this takes when it is there: no turn or scale is applied at import (applied there, the turn left the clips' root unturned and the scale doubled her size).
+Args: CH (e.g. Fem5) [glb [roll,pitch,yaw]]."""
 import os, sys, json, importlib, unreal
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mat_lib as L
@@ -12,35 +18,93 @@ CH = sys.argv[1] if len(sys.argv) > 1 else "Fem5"
 SRC = r"E:\code\claude-ue5\claude_ue5\SourceArt\jrpg_" + CH.lower(); NAME = "SK_JRPG_" + CH
 D = "/Game/JRPG"; A = f"{D}/{CH}Anims"
 info = json.load(open(os.path.join(SRC, "build.json")))
-t = unreal.AssetImportTask(); t.filename = os.path.join(SRC, NAME + ".fbx"); t.destination_path = D + "/Character"
-t.automated = True; t.replace_existing = True; t.save = True
-o = unreal.FbxImportUI(); o.import_mesh = True; o.import_as_skeletal = True; o.import_animations = False; o.import_materials = False; o.import_textures = False
-o.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH; t.options = o
-# (the shape keys a build carries become morph targets: the Summoner's face, summoner_face.py)
-o.skeletal_mesh_import_data.set_editor_property("import_morph_targets", True)
-L.at.import_asset_tasks([t])
-kinds = {}
-for p in t.imported_object_paths:
-    a = unreal.load_asset(p)
-    if a: kinds.setdefault(a.get_class().get_name(), []).append(p)
-print({k: len(v) for k, v in kinds.items()})
-sk = unreal.load_asset(kinds["SkeletalMesh"][0]); skel = sk.get_editor_property("skeleton")
-o = unreal.FbxImportUI()
-o.set_editor_property("import_mesh", False); o.set_editor_property("import_as_skeletal", True)
-o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)
-o.set_editor_property("skeleton", skel); o.set_editor_property("import_animations", True)
-o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)
-ta = unreal.AssetImportTask(); ta.filename = os.path.join(SRC, NAME + "_Clips.fbx"); ta.destination_path = D + "/_ClipImport"
-ta.automated = True; ta.replace_existing = True; ta.save = True; ta.options = o
-L.at.import_asset_tasks([ta])
-for p in ta.imported_object_paths:
-    a = unreal.load_asset(p)
-    if isinstance(a, unreal.AnimSequence):
-        clip = p.split(".")[-1].split("Armature_A_")[-1]; dst = f"{A}/AS_{CH}_{clip}"
-        if eal.does_asset_exist(dst): eal.delete_asset(dst)
-        eal.rename_asset(p.split(".")[0], dst)
-for p in eal.list_assets(D + "/_ClipImport", recursive=True): eal.delete_asset(p.split(".")[0])
-eal.delete_directory(D + "/_ClipImport")
+GLB = "glb" in sys.argv[2:]
+TURN = [float(v) for v in next((x for x in sys.argv[2:] if x.count(",") == 2), "0,0,0").split(",")]
+if GLB:
+    # (tripo_build's own GLB when it wrote one: standing, her height, in metres, no turn or scale left to apply (an import's turn
+    # left the clips' root unturned, its scale went into the root and the mesh both: she came out twice her size); else the
+    # source GLB, scaled and turned here)
+    if info.get("glb") and os.path.exists(info["glb"]): src = info["glb"]; scale = 1.0
+    else: src = info["source"]; scale = float(info["height_cm"]) / (float(info["source_height_m"]) * 100.0)
+    stem = os.path.splitext(os.path.basename(src))[0]
+    tmp = D + "/_GlbImport"; PD = D + "/Pipelines"; PIPE = f"{PD}/PL_{CH}_Glb"
+    if eal.does_directory_exist(tmp): eal.delete_directory(tmp)
+    if eal.does_asset_exist(PIPE): eal.delete_asset(PIPE)
+    pipe = L.at.duplicate_asset(f"PL_{CH}_Glb", PD, unreal.load_asset("/Interchange/Pipelines/DefaultAssetsPipeline"))
+    pipe.set_editor_property("import_offset_rotation", unreal.Rotator(roll=TURN[0], pitch=TURN[1], yaw=TURN[2]))
+    pipe.set_editor_property("import_offset_uniform_scale", scale); eal.save_loaded_asset(pipe, only_if_is_dirty=False)
+    params = unreal.ImportAssetParameters(); params.is_automated = True; params.override_pipelines = [unreal.SoftObjectPath(pipe.get_path_name())]
+    mgr = unreal.InterchangeManager.get_interchange_manager_scripted()
+    mgr.import_asset(tmp, unreal.InterchangeManager.create_source_data(src), params)
+    got = {}
+    for q in eal.list_assets(tmp, recursive=True):
+        x = unreal.load_asset(q.split(".")[0]); got.setdefault(x.get_class().get_name(), []).append(q.split(".")[0])
+    print("glb imported from", src, "| scale", round(scale, 4), "turn", TURN, "|", {k: len(v) for k, v in got.items()})
+    assert len(got.get("SkeletalMesh", [])) == 1 and len(got.get("Skeleton", [])) == 1, got
+    # (the usual names: what was there is deleted first (917 clean deletes it with the maps closed))
+    moves = [(got["SkeletalMesh"][0], f"{D}/Character/{NAME}"), (got["Skeleton"][0], f"{D}/Character/{NAME}_Skeleton")]
+    moves += [(q, f"{D}/Character/{NAME}_PhysicsAsset") for q in got.get("PhysicsAsset", [])[:1]]
+    for q in got.get("AnimSequence", []):
+        clip = q.split("/")[-1]; clip = clip[len(stem):] if clip.startswith(stem) else clip
+        clip = clip.lstrip("_"); clip = clip[2:] if clip.startswith("A_") else clip          # (tripo_build's actions are A_<clip>)
+        moves.append((q, f"{A}/AS_{CH}_{clip}"))
+    for s_, d_ in moves:
+        if eal.does_asset_exist(d_): eal.delete_asset(d_)
+        assert eal.rename_asset(s_, d_), (s_, d_)
+    for q in eal.list_assets(tmp, recursive=True): eal.delete_asset(q.split(".")[0])
+    eal.delete_directory(tmp)
+    sk = unreal.load_asset(f"{D}/Character/{NAME}"); skel = sk.get_editor_property("skeleton")
+    # (the import's turn stands the mesh and the skeleton's rest up, not the clips' root track, which keeps the GLB's unturned
+    # root: every clip laid her on her side, her pelvis 86 cm out along Y (2026-11-10). Her root does not move in any clip: each
+    # clip's root track is her rest's root, the turn included)
+    APE_ = unreal.AnimPoseExtensions
+    rt = APE_.get_bone_pose(APE_.get_reference_pose(skel), "root", unreal.AnimPoseSpaces.LOCAL)
+    nroot = 0
+    for s_, d_ in moves:
+        if not d_.startswith(A): continue
+        clip_ = unreal.load_asset(d_); ctrl = clip_.controller
+        n = unreal.AnimationLibrary.get_num_frames(clip_) + 1
+        ctrl.open_bracket(unreal.Text("root track"), True)
+        ctrl.set_bone_track_keys("root", [rt.translation] * n, [rt.rotation] * n, [rt.scale3d] * n, True)
+        ctrl.close_bracket(True); nroot += 1
+    print("root tracks set to her rest's root:", nroot)
+    for x in [skel, sk.get_editor_property("physics_asset"), sk] + [unreal.load_asset(d_) for s_, d_ in moves if d_.startswith(A)]:
+        if x: eal.save_loaded_asset(x, only_if_is_dirty=False)
+    kinds = {"SkeletalMesh": [sk.get_path_name()]}
+else:
+    t = unreal.AssetImportTask(); t.filename = os.path.join(SRC, NAME + ".fbx"); t.destination_path = D + "/Character"
+    t.automated = True; t.replace_existing = True; t.save = True
+    o = unreal.FbxImportUI(); o.import_mesh = True; o.import_as_skeletal = True; o.import_animations = False; o.import_materials = False; o.import_textures = False
+    o.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH; t.options = o
+    # (the shape keys a build carries become morph targets: the Summoner's face, summoner_face.py)
+    o.skeletal_mesh_import_data.set_editor_property("import_morph_targets", True)
+    L.at.import_asset_tasks([t])
+    kinds = {}
+    for p in t.imported_object_paths:
+        a = unreal.load_asset(p)
+        if a: kinds.setdefault(a.get_class().get_name(), []).append(p)
+    print({k: len(v) for k, v in kinds.items()})
+    sk = unreal.load_asset(kinds["SkeletalMesh"][0]); skel = sk.get_editor_property("skeleton")
+    # (saved here: an automated task can save the mesh but not the skeleton and physics asset it makes, and an editor that went
+    # down later took the skeleton with it (2026-11-10: her mesh then had none, her clips no skeleton))
+    for a in (skel, sk.get_editor_property("physics_asset")):
+        if a: print("saved", a.get_name(), eal.save_loaded_asset(a, only_if_is_dirty=False))
+    o = unreal.FbxImportUI()
+    o.set_editor_property("import_mesh", False); o.set_editor_property("import_as_skeletal", True)
+    o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)
+    o.set_editor_property("skeleton", skel); o.set_editor_property("import_animations", True)
+    o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)
+    ta = unreal.AssetImportTask(); ta.filename = os.path.join(SRC, NAME + "_Clips.fbx"); ta.destination_path = D + "/_ClipImport"
+    ta.automated = True; ta.replace_existing = True; ta.save = True; ta.options = o
+    L.at.import_asset_tasks([ta])
+    for p in ta.imported_object_paths:
+        a = unreal.load_asset(p)
+        if isinstance(a, unreal.AnimSequence):
+            clip = p.split(".")[-1].split("Armature_A_")[-1]; dst = f"{A}/AS_{CH}_{clip}"
+            if eal.does_asset_exist(dst): eal.delete_asset(dst)
+            eal.rename_asset(p.split(".")[0], dst)
+    for p in eal.list_assets(D + "/_ClipImport", recursive=True): eal.delete_asset(p.split(".")[0])
+    eal.delete_directory(D + "/_ClipImport")
 print("clips:", sorted((a.split(".")[-1], round(unreal.load_asset(a.split(".")[0]).get_play_length(), 2)) for a in eal.list_assets(A, recursive=False)))
 T = {}
 for role, kind in (("Color", "color"), ("Normal", "normal"), ("MetalRough", "linear")):

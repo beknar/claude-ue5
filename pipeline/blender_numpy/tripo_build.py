@@ -73,11 +73,27 @@ print("source height m", round(h, 4), "unit scale", round(S, 3))
 sc.unit_settings.system = 'METRIC'; sc.unit_settings.scale_length = 0.01
 for o in meshes:
     mw = o.matrix_world.copy(); o.parent = None; o.matrix_world = mw
+# (the armature too: MartialArtist3.glb's hangs under an empty RootNode with a quarter turn, which an object's apply leaves
+# on it (it applies the object's own transform, not its parent's): the FBX's armature node carried (-90, -90, 0))
+if arm.parent:
+    mw = arm.matrix_world.copy(); arm.parent = None; arm.matrix_world = mw
 for o in [arm] + meshes: o.matrix_world = Matrix.Scale(S, 4) @ o.matrix_world
 bpy.ops.object.select_all(action='DESELECT')
-for o in [arm] + meshes: o.select_set(True)
-bpy.context.view_layer.objects.active = arm
+for o in meshes: o.select_set(True)
+bpy.context.view_layer.objects.active = meshes[0]
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+# (the armature's transform moved into its bones exactly, each bone's whole matrix, its roll included: transform_apply works a
+# bone out again from its head, tail and roll, and a bone pointing almost straight down has no sure roll: MartialArtist3's
+# thighs came out turned 95 and 18 degrees about their own length, and her skin was wrung in every clip (2026-11-10))
+Mw = arm.matrix_world.copy(); s_ = Mw.to_scale().x
+bpy.ops.object.select_all(action='DESELECT'); arm.select_set(True); bpy.context.view_layer.objects.active = arm
+bpy.ops.object.mode_set(mode='EDIT')
+for eb in arm.data.edit_bones:
+    m = Mw @ eb.matrix; L = eb.length * s_
+    R = m.to_3x3().normalized().to_4x4(); R.translation = m.translation
+    eb.matrix = R; eb.length = L
+bpy.ops.object.mode_set(mode='OBJECT')
+arm.matrix_world = Matrix.Identity(4)
 for o in meshes:
     o.parent = arm; o.matrix_parent_inverse.identity()
     mods = [m for m in o.modifiers if m.type == 'ARMATURE'] or [o.modifiers.new("Armature", 'ARMATURE')]
@@ -120,6 +136,37 @@ bpy.ops.export_scene.fbx(filepath=os.path.join(out, NAME + "_Clips.fbx"), use_se
                          bake_anim=True, bake_anim_use_all_actions=True, bake_anim_use_nla_strips=False, bake_anim_force_startend_keying=True,
                          bake_anim_simplify_factor=0.0, apply_unit_scale=True, apply_scale_options='FBX_SCALE_NONE',
                          use_armature_deform_only=False, mesh_smooth_type='FACE', use_tspace=True, path_mode='STRIP')
+# (the same scene as one GLB as well, for 600's "glb": Unreal's FBX importers read MartialArtist3's thighs turned about their own
+# length (2026-11-10); the glTF importer holds them as the file does. Its rig, mesh and clips are this build's: standing, her
+# height, every bone baked exactly; no turn or scale is left for the import to apply)
+# (in metres: the glTF exporter takes a Blender unit for a metre whatever the scene's unit scale, and this scene is in cm: the
+# bones moved exactly again, the mesh applied, every location key of the clips scaled with them)
+K = 0.01
+bpy.ops.object.select_all(action='DESELECT'); arm.select_set(True); bpy.context.view_layer.objects.active = arm
+bpy.ops.object.mode_set(mode='EDIT')
+for eb in arm.data.edit_bones:
+    m = eb.matrix.copy(); L_ = eb.length * K
+    R = m.to_3x3().normalized().to_4x4(); R.translation = m.translation * K
+    eb.matrix = R; eb.length = L_
+bpy.ops.object.mode_set(mode='OBJECT')
+for o in meshes:
+    o.parent = None; o.matrix_world = Matrix.Scale(K, 4) @ o.matrix_world
+    bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); bpy.context.view_layer.objects.active = o
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    o.parent = arm; o.matrix_parent_inverse.identity()
+for act in bpy.data.actions:
+    # (each curve once: a layered action (Blender 4.4 on) holds them in its strips' channelbags, an older one in fcurves)
+    fcs = [fc for lay in (getattr(act, "layers", None) or []) for st in lay.strips for cb in getattr(st, "channelbags", []) for fc in cb.fcurves]
+    if not fcs and hasattr(act, "fcurves"): fcs = list(act.fcurves)
+    for fc in fcs:
+        if fc.data_path.endswith(".location"):
+            for kp in fc.keyframe_points: kp.co.y *= K; kp.handle_left.y *= K; kp.handle_right.y *= K
+bpy.context.view_layer.update()
+bpy.ops.object.select_all(action='DESELECT')
+for o in [arm] + meshes: o.select_set(True)
+bpy.ops.export_scene.gltf(filepath=os.path.join(out, NAME + ".glb"), export_format='GLB', use_selection=True, export_animations=True,
+                          export_animation_mode='ACTIONS', export_force_sampling=True, export_skins=True, export_yup=True, export_apply=False)
 json.dump({"clips": {k: len(v) for k, v in clips.items()}, "textures": tex, "height_cm": HEIGHT_CM, "hair": hair_report,
-           "proportions": PROPORTIONS}, open(os.path.join(out, "build.json"), "w"), indent=1)
+           "proportions": PROPORTIONS, "source": os.path.abspath(src), "source_height_m": round(h, 5), "glb": os.path.join(out, NAME + ".glb")},
+          open(os.path.join(out, "build.json"), "w"), indent=1)
 print("EXPORT DONE")

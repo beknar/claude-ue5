@@ -1,0 +1,68 @@
+{
+ "tag": "cloudless",
+ "plan": [
+  "cloudless"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "cloudless",
+   "ok": true,
+   "shots": [
+    "cloudless_clear_p-3",
+    "cloudless_clear_p25",
+    "cloudless_clear_p85",
+    "cloudless_clear_novolcloud_p-3",
+    "cloudless_clear_novolcloud_p25",
+    "cloudless_clear_novolcloud_p85",
+    "cloudless_cloudless_p-3",
+    "cloudless_cloudless_p25",
+    "cloudless_cloudless_p85"
+   ],
+   "clear": {
+    "weather": "clear",
+    "cover": 0.04,
+    "clouds_visible": true,
+    "high_amount": 1.0
+   },
+   "clear_novolcloud": {
+    "weather": "clear",
+    "cover": 0.04,
+    "clouds_visible": true,
+    "high_amount": 1.0
+   },
+   "cloudless": {
+    "weather": "cloudless",
+    "cover": 0.0,
+    "clouds_visible": false,
+    "high_amount": 0.0
+   },
+   "cloudless_later": {
+    "weather": "cloudless",
+    "cover": 0.0,
+    "clouds_visible": false,
+    "high_amount": 0.0
+   },
+   "fair_after": {
+    "weather": "fair",
+    "cover": 0.32,
+    "clouds_visible": true,
+    "high_amount": 1.0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor, Content Browser",
+ "shots": [
+  "bs_cloudless_cloudless_clear_p-3.png",
+  "bs_cloudless_cloudless_clear_p25.png",
+  "bs_cloudless_cloudless_clear_p85.png",
+  "bs_cloudless_cloudless_clear_novolcloud_p-3.png",
+  "bs_cloudless_cloudless_clear_novolcloud_p25.png",
+  "bs_cloudless_cloudless_clear_novolcloud_p85.png",
+  "bs_cloudless_cloudless_cloudless_p-3.png",
+  "bs_cloudless_cloudless_cloudless_p25.png",
+  "bs_cloudless_cloudless_cloudless_p85.png"
+ ],
+ "error": null,
+ "windows_shown_again": 2
+}

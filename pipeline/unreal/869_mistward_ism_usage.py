@@ -9,6 +9,10 @@ two of the wilderness's Nanite plants) is copied into the project (PluginCopies)
 instances made from it pointed at the copy (a copy made once is kept: delete PluginCopies to make the copies again).
 The hero menu (mistward_castle_select) the same way for its placed meshes: a Nanite mesh's materials need the Nanite usage
 (the packaged menu: Fig4's studio cyclorama and plinth materials "missing usage flag Nanite").
+Every mesh a map refers to (its actors' properties: the generators' monsters, weapons, townsfolk, animals, props..., found
+through the asset registry, and one step further through Blueprints) the same way (2026-11-10, the Development package's
+log): a Nanite static mesh's materials need the Nanite usage (MAT_Orc_Ursag, M_Orme_Crossbow on Heaven's fortress's monsters'
+weapons), a skeletal mesh's the skeletal-mesh usage and, with cloth on it, the clothing usage (MAT_Orc_Dardan in Brokenspire).
 Each map is loaded once (an `obj gc` before each load). Run before pipeline/package_mistward.ps1; it ends on mistward_castle.
 Args: [check] (report only)"""
 import sys, unreal
@@ -49,11 +53,50 @@ def use(mesh, mats=None):
         want(b, "used_with_instanced_static_meshes")
         if nan: want(b, "used_with_nanite")
 meshes, overrides, nwild, nmenu = set(), 0, 0, 0
+AR = unreal.AssetRegistryHelpers.get_asset_registry()
+DEP = unreal.AssetRegistryDependencyOptions(include_soft_package_references=True, include_hard_package_references=True, include_searchable_names=False,
+                                            include_soft_management_references=False, include_hard_management_references=False)
+scanned, nref = set(), {"static": 0, "nanite": 0, "skeletal": 0, "cloth": 0}
+def refs_of(m_):
+    """the meshes a map's package refers to, directly or through a Blueprint it refers to"""
+    out, seen, front = [], set(), [m_]
+    for depth in range(2):
+        nxt = []
+        for pk in front:
+            for d in (AR.get_dependencies(pk, DEP) or []):
+                d = str(d)
+                if d in seen or not d.startswith(OWN): continue
+                seen.add(d)
+                for ad in AR.get_assets_by_package_name(d):
+                    cls = str(ad.asset_class_path.asset_name)
+                    if cls in ("StaticMesh", "SkeletalMesh"): out.append(ad)
+                    elif cls == "Blueprint" and depth == 0: nxt.append(d)
+        front = nxt
+    return out
+def scan_refs(m_):
+    for ad in refs_of(m_):
+        key = str(ad.package_name)
+        if key in scanned: continue
+        scanned.add(key)
+        m = ad.get_asset()
+        if isinstance(m, unreal.StaticMesh):
+            nref["static"] += 1
+            if m.get_editor_property("nanite_settings").enabled:
+                nref["nanite"] += 1
+                for b in bases_of(m): want(b, "used_with_nanite")
+        elif isinstance(m, unreal.SkeletalMesh):
+            nref["skeletal"] += 1
+            cloth = len(m.get_editor_property("mesh_clothing_assets")) > 0
+            if cloth: nref["cloth"] += 1
+            for b in bases_of(m, [sm.get_editor_property("material_interface") for sm in m.get_editor_property("materials")]):
+                want(b, "used_with_skeletal_mesh")
+                if cloth: want(b, "used_with_clothing")
 def pieces_of(m_):
     """a map's generator pieces: each mesh, and a piece drawn in a material of its own (FRDPiece::Material: the burned houses'
     MI_Wood_Burnt, through HismsMat) in that material too (the PR review's find: only the meshes' own were checked)"""
     global overrides
     open_map(m_)
+    scan_refs(m_)
     g_ = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator))
     for p in g_.get_editor_property("pieces").values():
         if not p.mesh: continue
@@ -91,6 +134,7 @@ for m_ in ("/Game/RandomDungeon/Maps/war_engine", "/Game/RandomDungeon/Maps/sewe
             nskel += 1; note(mm); want(mm.get_base_material(), "used_with_skeletal_mesh")
 # the menu: its placed meshes; Nanite ones need the Nanite usage
 open_map(MENU)
+scan_refs(MENU)
 for a in eas.get_all_level_actors():
     for c in a.get_components_by_class(unreal.StaticMeshComponent):
         m = c.get_editor_property("static_mesh")
@@ -101,6 +145,7 @@ for a in eas.get_all_level_actors():
 g_ = pieces_of(MAP)
 del g_
 print("ISMUSAGE pieces in materials of their own:", overrides, "| the wilderness's plants:", nwild, "| monsters in materials of their own:", nskel)
+print("ISMUSAGE meshes the maps refer to:", nref)
 # (the editor sets a usage it needs while it draws, in memory only: the menu's two read true here while the files on disk,
 # and so the package, did not have them. Such a material is saved too.)
 # (they did not show as dirty either: the menu's Nanite materials are saved every run, the castle's when one is dirty)

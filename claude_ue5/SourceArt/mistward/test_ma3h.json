@@ -1,0 +1,90 @@
+{
+ "tag": "ma3h",
+ "plan": [
+  "menulook"
+ ],
+ "level": "mistward_castle_select",
+ "steps": [
+  {
+   "step": "menulook",
+   "ok": true,
+   "tried": [
+    [
+     "Hero_0",
+     "Warrior",
+     "(390, 1343) is not over the game's viewport"
+    ],
+    [
+     "Hero_1",
+     "Warrior",
+     "(716, 1343) is not over the game's viewport"
+    ],
+    [
+     "Hero_2",
+     "Warrior",
+     "(1042, 1343) is not over the game's viewport"
+    ],
+    [
+     "Hero_3",
+     "Warrior",
+     "(1368, 1343) is not over the game's viewport"
+    ],
+    [
+     "Hero_4",
+     "Warrior",
+     "(1694, 1343) is not over the game's viewport"
+    ],
+    [
+     "Hero_5",
+     "Warrior",
+     "(2020, 1343) is not over the game's viewport"
+    ],
+    [
+     "Hero_6",
+     "Warrior",
+     "no button Hero_6"
+    ],
+    [
+     "Hero_7",
+     "Warrior",
+     "no button Hero_7"
+    ],
+    [
+     "Step",
+     "Mage"
+    ],
+    [
+     "Step",
+     "Warlock"
+    ],
+    [
+     "Step",
+     "Rogue"
+    ],
+    [
+     "Step",
+     "MartialArtist"
+    ]
+   ],
+   "hero": "MartialArtist",
+   "shown": true,
+   "views": [
+    0.0,
+    0.0,
+    45.0,
+    90.0,
+    180.0
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_ma3h_menulook_0.png",
+  "mw_ma3h_menulook_1.png",
+  "mw_ma3h_menulook_2.png",
+  "mw_ma3h_menulook_3.png",
+  "mw_ma3h_menulook_4.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
