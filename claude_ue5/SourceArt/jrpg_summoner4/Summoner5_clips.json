@@ -1,0 +1,121 @@
+{
+ "fps": 24,
+ "height": 0.9995,
+ "clips": {
+  "CastBolt": {
+   "frames": 24,
+   "length": 0.9583,
+   "feet_low": -0.003,
+   "feet_low_source": -0.0049,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 19.9,
+   "sole_roll_source": 4.5,
+   "ankle_frames_held": 0
+  },
+  "Summon1": {
+   "frames": 41,
+   "length": 1.6667,
+   "feet_low": -0.0002,
+   "feet_low_source": -0.0018,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 17.3,
+   "sole_roll_source": 3.1,
+   "ankle_frames_held": 0
+  },
+  "Summon2": {
+   "frames": 36,
+   "length": 1.4583,
+   "feet_low": -0.0085,
+   "feet_low_source": -0.0111,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 24.2,
+   "sole_roll_source": 2.3,
+   "ankle_frames_held": 0
+  },
+  "Summon3": {
+   "frames": 49,
+   "length": 2.0,
+   "feet_low": -0.0133,
+   "feet_low_source": -0.0166,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 55.7,
+   "sole_roll_source": 14.4,
+   "ankle_frames_held": 18
+  },
+  "Summon4": {
+   "frames": 54,
+   "length": 2.2083,
+   "feet_low": -0.0041,
+   "feet_low_source": -0.006,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 25.7,
+   "sole_roll_source": 2.9,
+   "ankle_frames_held": 0
+  },
+  "Summon5": {
+   "frames": 48,
+   "length": 1.9583,
+   "feet_low": -0.0064,
+   "feet_low_source": -0.0086,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 26.6,
+   "sole_roll_source": 5.8,
+   "ankle_frames_held": 0
+  },
+  "Stab1": {
+   "frames": 18,
+   "length": 0.7083,
+   "feet_low": 0.0042,
+   "feet_low_source": 0.0028,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 17.1,
+   "sole_roll_source": 1.3,
+   "ankle_frames_held": 0
+  },
+  "Stab2": {
+   "frames": 19,
+   "length": 0.75,
+   "feet_low": 0.0042,
+   "feet_low_source": 0.0028,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 16.2,
+   "sole_roll_source": 1.3,
+   "ankle_frames_held": 0
+  },
+  "Stab3": {
+   "frames": 20,
+   "length": 0.7917,
+   "feet_low": 0.0042,
+   "feet_low_source": 0.0028,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 18.2,
+   "sole_roll_source": 1.3,
+   "ankle_frames_held": 0
+  },
+  "Hit_to_body_01": {
+   "frames": 32,
+   "length": 1.2917,
+   "feet_low": 0.0046,
+   "feet_low_source": 0.0075,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 60.6,
+   "sole_roll_source": 23.1,
+   "ankle_frames_held": 32
+  },
+  "Idle": {
+   "frames": 217,
+   "length": 9.0,
+   "own": true
+  },
+  "Run": {
+   "frames": 31,
+   "length": 1.25,
+   "own": true
+  },
+  "Walk": {
+   "frames": 57,
+   "length": 2.3333,
+   "own": true
+  }
+ }
+}

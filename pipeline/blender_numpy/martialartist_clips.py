@@ -2,7 +2,8 @@
 rig (the user's of 2026-10-28). Her own clips are kept as Tripo made them (Walk, Run, Box_01-03 and Front_kick_01-02: her
 basic punches and kicks), each recentred where it holds her pelvis off its rest place (warrior3_clips.recentre); her
 Dance_01 and Run_upstairs are dropped. Made for her:
-  Idle            a fighting stance (left foot forward, fists up by her chin), breathing; 2.4 s loop
+  Idle            a calm square stand, hands down and loose: breathing, she puts her hands on her hips and taps her foot,
+                  rolls her shoulders, looks left and right and rises onto her toes; 9 s loop, solved every frame (`calm`)
   Stab1-3, RollF, RollB   rogue_clips.py's (a knife in each hand; the dodge's roll), solved on her rig
   Dash            a low lunge held while the game carries her forward (0.5 s)
   Chi_<Name>      the ten chi attacks, each a move that looks like its name (CHI below)
@@ -52,13 +53,15 @@ def open_hand(side, curl=4.0):
     return sp
 
 
-def hand(fr, side, x, y, z, pole, axis=None, palm=None, closed=True):
-    """the hand's root at (x her right, y forward, z up) cm from the base of her neck, the elbow toward `pole`, the hand's
-    own way (wrist to knuckles) `axis` and its palm facing `palm` as near as the wrist allows"""
+def hand(fr, side, x, y, z, pole, axis=None, palm=None, closed=True, pole_w=None):
+    """the hand's root at (x her right, y forward, z up) cm from the base of her neck, the elbow toward `pole` (`pole_w`:
+    how firmly, rogue_clips.solve_arm's weight; None its default), the hand's own way (wrist to knuckles) `axis` and its
+    palm facing `palm` as near as the wrist allows"""
     want = {}
     if axis is not None: want["axis"] = fr.v(axis)
     if palm is not None: want["palm"] = fr.v(palm)
-    sp = {f"arm_{side}": ("reach", fr.at(x, y, z), fr.v(pole), want, None)}
+    op = ("reach", fr.at(x, y, z), fr.v(pole), want, None) + ((pole_w,) if pole_w is not None else ())
+    sp = {f"arm_{side}": op}
     sp.update(fist(side) if closed else open_hand(side))
     return sp
 
@@ -185,6 +188,107 @@ RIGHT_GUARD_YAW = -40.0
 def right_guard(fr, x, y, z):
     g = Fr(fr.yaw + RIGHT_GUARD_YAW)
     return hand(g, "r", x, y, z, g.D("r", 0.6, 0.0, -0.8), axis=C.D("r", -0.2, 0.6, 0.8), palm=C.D("r", -1.0, 0.0, 0.0))
+
+
+# Her idle (the user's of 2026-11-11: "with her hands down and not in a ready or bladed stance ... look at the warrior idle
+# for reference ... make it different enough so that they don't look the same while moving"). The Warrior's (Tripo's 15 s
+# idle.001) is a relaxed stand, arms hanging, her weight moved slowly from foot to foot and her feet set again (30 cm). Hers
+# stands square and still-footed, hands down and loose, and does what a fighter does between bouts, each move eased in from
+# the calm stand and back to it within the loop:
+#   1.2-4.0 s  her hands on her hips, her weight on her left leg, her right foot tapping four times (the user's of
+#              2026-11-11: in place of shaking out her hands)
+#   4.2-5.7 s  rolls her shoulders               5.9-7.5 s  looks to her left and right
+#   7.5-8.8 s  rises onto her toes twice
+# under a breath every third of the loop and a small sway of the hips. Every frame is solved from the time (`calm(ctx, t)`),
+# so nothing stops at a key the way `C.sample`'s eased keys would; the loop's last frame is its first.
+# The chi attacks and the dash still start and end in `stance()`: they were measured as they are.
+IDLE_T = 9.0                                                              # (216 frames at 24: the loop closes on a frame)
+IDLE_HALF_WIDTH = 11.0                                                    # (cm from her middle to each ankle: shoulder width)
+# (her rest, measured: the waist 33 to 40 cm under the neck's base, the hip joints 8 cm out, the arm 32 cm shoulder to
+# wrist; the wrists on her hip bones 26 cm from the shoulders bend the elbows out to her sides)
+# (at (14, 1, -27) MartialArtist3's longer arms set her hands on the front of her shorts, the elbows hardly out: hands on
+# her thighs. Higher, at her sides; at 16.5 cm out the palms stood off her hips seen from the front. The user's of
+# 2026-11-11, with a photograph: the elbows straight out to her sides (not back), the hands turned so the fingers point
+# forward and the thumbs back, the palms on the sides of her waist: the wrist a little behind her side's middle)
+# (at y -2.5 with the elbows out the hands came round to the front, the fingers meeting over her navel)
+HIPS_HAND = (14.5, -6.0, -21.0)
+HIPS_POLE = (1.0, 0.1, 0.05)                                              # (the elbow: out to her side)
+HIPS_T = (1.2, 4.0, 0.5)                                                  # (on her hips from, to, and the ease each way, s)
+# (an elbow out to her side with the hand at her waist turns the upper arm about 90 degrees about itself; rogue_clips holds
+# that turn to ARM_ROLL (40: the Rogue's cape hangs from her upper arms) and the elbows stayed back by her body. She has no
+# cape: on her hips it may go to 100, as crowd_clips' cheering arms go to 90)
+HIPS_ARM_ROLL = 100.0
+# (with that alone the elbows came out only to just past her sides: the elbow's way to the pole weighs 0.0004 a degree
+# squared against the upper arm's turn and the wrist; ten times it on her hips)
+HIPS_POLE_W = 0.004
+HIPS_AXIS = (-0.3, 0.9, -0.3)                                             # (wrist to knuckles: forward, a little in and down)
+TAPS = (1.75, 3.45, 4)                                                    # (the taps' window, s, and how many)
+
+
+def bump(t, t0, t1):
+    """where t is in [t0, t1] (0 to 1), and the window's envelope sin^2 (0 at both ends, with no speed there)"""
+    if t <= t0 or t >= t1: return 0.0, 0.0
+    u = (t - t0) / (t1 - t0); return u, math.sin(math.pi * u) ** 2
+
+
+def plateau(t, t0, t1, ease):
+    """0 before t0, up to 1 over `ease` seconds, held, and down to 0 by t1 (smoothstep each way: no speed at the turns)"""
+    if t <= t0 or t >= t1: return 0.0
+    x = min(1.0, (t - t0) / ease, (t1 - t) / ease)
+    return x * x * (3.0 - 2.0 * x)
+
+
+def mix(a, b, k): return (a * (1.0 - k) + b * k).normalized()
+
+
+def calm(ctx, t):
+    ph = 2.0 * math.pi * t / IDLE_T
+    breath = math.sin(3.0 * ph)                                           # (three breaths a loop)
+    sway = math.sin(ph)                                                   # (her hips toward her right and back once)
+    hips = plateau(t, *HIPS_T); ur, roll = bump(t, 4.2, 5.7); ul, look = bump(t, 5.9, 7.5); ut, toes = bump(t, 7.5, 8.8)
+    t0, t1, n = TAPS
+    tap = math.sin(math.pi * (((t - t0) / (t1 - t0) * n) % 1.0)) ** 2 if t0 < t < t1 else 0.0   # (toes up and down: 0 to 1)
+    fr = Fr()
+    # the head: to her left, then to her right (zero turn and zero speed at the window's ends), her shoulders a little with it
+    # (32 degrees of the head alone hardly showed from the front: 45, and a fifth of it in her spine)
+    turn = 45.0 * math.sin(2.0 * math.pi * ul) * math.sin(math.pi * ul) if look else 0.0
+    # (hands on hips: her weight on her left leg, that hip up and her spine back over it)
+    sp = body(ctx, fr, twist=-0.2 * turn, lean=2.0 - 1.2 * breath, side=-1.0 * sway + 3.0 * hips, drop=1.5 - 0.4 * breath, look=0.0)
+    cm = ctx["cm"]
+    sp.setdefault("pelvis", []).append(("move", RIGHT * (1.8 * sway - 2.2 * hips) * cm))
+    if hips: sp["pelvis"].append(("rot", F, 4.0 * hips))
+    # the toes: two rises over the window (sin^2 of a whole turn: two humps), the pelvis lifted with the heels
+    rise = math.sin(2.0 * math.pi * ut) ** 2 if toes else 0.0
+    if rise: sp["pelvis"].append(("move", U * (2.6 * rise) * cm))
+    for side, sgn in (("l", 1.0), ("r", -1.0)):
+        A = ctx["legs_rest"][side]["ankle"]
+        x = (A.x - sgn * IDLE_HALF_WIDTH * cm) / cm                       # (plant's x is toward her right, from the rest ankle)
+        if side == "r" and tap:
+            # the tap: her toes up about the heel (a negative pitch; plant lowers the ankle 9 cm x sin, the heel's pivot
+            # lifts it about 3: given back as z)
+            p = 22.0 * tap; z = 12.0 * math.sin(math.radians(p))
+            sp.update(plant(side, x, 0.0, z=z, yaw=8.0 * sgn, pitch=-p))
+        else:
+            sp.update(plant(side, x, 0.0, yaw=8.0 * sgn, pitch=16.0 * rise))
+    # the shoulders: up with each breath; the roll goes up and back, then down and forward
+    up = 1.5 * max(0.0, breath) + 16.0 * math.sin(math.pi * ur) ** 2 * (1.0 if roll else 0.0)
+    back = 12.0 * math.sin(2.0 * math.pi * ur) * math.sin(math.pi * ur) if roll else 0.0
+    sp["clavicle_l"] = [("rot", F, up), ("rot", U, back)]
+    sp["clavicle_r"] = [("rot", F, -up), ("rot", U, -back)]
+    # (the rest of the turn on top of the spine's fifth: the neck and head take it; her chin up 7 degrees: she looked at her feet)
+    sp["neck_01"].append(("rot", U, turn * 0.4)); sp["head"] = [("rot", U, turn * 0.4), ("rot", LEAN, -7.0), ("rot", F, 6.0 * hips)]
+    # the hands: hanging loose by her thighs, palms in, the elbows a little bent (20 cm out and 36 down held her arms straight
+    # and away from her like a mannequin's); on her hips the palms on her hip bones, fingers forward and down, elbows out
+    hx, hy, hz = HIPS_HAND
+    for side, sgn in (("l", -1.0), ("r", 1.0)):
+        x = sgn * (15.5 + (hx - 15.5) * hips)
+        y = 5.0 + (hy - 5.0) * hips - 0.35 * back
+        z = -32.0 + (hz + 32.0) * hips + 0.6 * breath + 0.3 * up
+        pole = mix(fr.D(side, 0.3, -1.0, 0.0), fr.D(side, *HIPS_POLE), hips)
+        axis = mix(C.D(side, 0.0, 0.15, -1.0), C.D(side, *HIPS_AXIS), hips)
+        sp.update(hand(fr, side, x, y, z, pole, axis=axis, palm=C.D(side, -1.0, 0.0, 0.0), closed=False, pole_w=0.0004 + HIPS_POLE_W * hips))
+        sp.update(open_hand(side, curl=14.0 + 6.0 * hips))
+    return sp
 
 
 def guard_l(fr): return hand(fr, "l", -8, 18, 0, fr.D("l", 0.5, 0.0, -1.0), axis=C.D("l", -0.2, 0.5, 0.85), palm=C.D("l", -1.0, 0.0, 0.0))
@@ -401,8 +505,30 @@ def make_clips(arm_obj, scene, clips):
     for nm in ("Stab1", "Stab2", "Stab3", "RollF", "RollB"): out[nm] = made[nm]
     ctx = C.context(arm_obj); DC.add_thumb_op(ctx, arm_obj); ctx["cm"] = R.model_height(scene) / 170.0; R.arm_context(ctx, arm_obj); leg_context(ctx, arm_obj)
     P = lambda spec: apply(arm_obj, spec, ctx)
-    i0, i1 = P(stance(ctx)), P(stance(ctx, k=1.0))
-    out["Idle"] = C.sample([(0.0, i0), (1.2, i1), (2.4, i0)])
+    i0 = P(stance(ctx))
+    # (the idle solved frame by frame with each upper arm kept near its turn a frame before (rogue_clips' prev_arm, as
+    # town_work_clips' 0.03): solved afresh, the arms swung 21 degrees in one frame as her hands left her hips, where the
+    # elbow went from out to her side back to hanging)
+    ctx["cont_w"] = 0.03
+
+    def idle_at(t):
+        keep = R.ARM_ROLL; R.ARM_ROLL = keep + (HIPS_ARM_ROLL - keep) * plateau(t, *HIPS_T)
+        try: fr_ = P(calm(ctx, t))
+        finally: R.ARM_ROLL = keep
+        ctx["prev_arm"] = {s_: arm_obj.pose.bones[f"upperarm_{s_}"].matrix.to_quaternion() for s_ in "rl"}
+        return fr_, ctx["prev_arm"]
+    n = int(round(IDLE_T * FPS)); first = [idle_at(i / FPS) for i in range(n)]
+    # (and the loop's start again from its end: the first frame, solved with no frame before it, took another turn of the
+    # left upper arm than the one the loop came round to (20 degrees across the seam); solved again until it meets the
+    # first pass, which it then is)
+    idle = [f_ for f_, _ in first]; ctx["prev_arm"] = first[-1][1]; again = 0
+    for i in range(n):
+        f_, arms = idle_at(i / FPS); idle[i] = f_; again += 1
+        gap = lambda s_: min(d_, 360.0 - d_) if (d_ := math.degrees(arms[s_].rotation_difference(first[i][1][s_]).angle)) else 0.0
+        if all(gap(s_) < 0.5 for s_ in "rl"): break
+    print("MA idle: the loop's first %d frames solved again from its end" % again)
+    for k_ in ("prev_arm", "cont_w"): ctx.pop(k_, None)
+    out["Idle"] = idle + [idle[0]]
     times = {}
     for name, keys, hit, bone in CHI + [("Dash", DASH, 0.0, "pelvis")]:
         poses = [(t, i0 if fn is None else P(fn(ctx, k))) for t, fn, k in keys]
