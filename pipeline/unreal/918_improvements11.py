@@ -18,10 +18,15 @@ Steps (name them; several in one run):
            crossbow, 822's measures; the Summoner's knives), her found weapons' fits (855's knives, bows and crossbows) and
            her torch; on the hero menu the same in its hero copies and the weapons it holds on her
 The bodies (blender_numpy): the Rogue: martialartist3_retarget.py -- Rogue.glb SourceArt/jrpg_rogue Rogue2.glb --maker
-rogue_clips,weapon5_clips --tag Rogue --carry Stab1,Stab2,Stab3,Shoot,RollF,RollB,W5_Bow --own --noskin --name Rogue2 --env
-W5_CLIPS=Bow --env W5_HERO=Rogue, then tripo_build.py on Rogue2_Animated.glb (SK_JRPG_Rogue Rogue 170 -). The Summoner:
-summoner5_idle.py, martialartist3_retarget.py (Summoner4.glb's casts, knives and flinch), summoner5_cloak.py, tripo_build.py
-(SK_JRPG_Summoner4 Summoner4 168 -).
+rogue_clips,weapon5_clips --tag Rogue --carry Stab1,Stab2,Stab3,Shoot,RollF,RollB,W5_Bow --own --inplace Walk,Run --noskin
+--name Rogue2 --env W5_CLIPS=Bow --env W5_HERO=Rogue, then tripo_build.py on Rogue2_Animated.glb (SK_JRPG_Rogue Rogue 170 -).
+The Summoner: summoner5_idle.py (Summoner5.glb -> Summoner5_Idle.glb), summoner5_cloak.py (-> Summoner5_Cloak.glb: the cloak
+baked while her walk and run still carry her, so it billows with her speed), then martialartist3_retarget.py --
+Summoner4.glb SourceArt/jrpg_summoner4 Summoner5_Cloak.glb --maker summoner4_clips --tag Summoner4 --carry
+CastBolt,Summon1,Summon2,Summon3,Summon4,Summon5,Stab1,Stab2,Stab3,Hit_to_body_01 --own --inplace Walk,Run --noskin --name
+Summoner5, tripo_build.py on Summoner5_Animated.glb (SK_JRPG_Summoner4 Summoner4 168 -).
+In the editor: clean, 600 <CH> glb, 610 / 615 / 620, the armour (the Rogue: 849 heroes, summoner3_armour.py, 851), 913 rider,
+rig, then 819 (her character's MoveScale made an override again and her new walk / run speeds baked in).
 Args: steps [Hero]"""
 import os, sys, unreal
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -55,15 +60,28 @@ def import_clips(src, skel_path, tmp, pipe_name, fps=24):
     return out
 
 
+def clip_fps(a):
+    """a clip's frames a second, from its own frame count and length"""
+    return AL.get_num_frames(a) / a.get_play_length()
+
+
+def quat_deg(a, b):
+    """the angle between two turns, degrees"""
+    import math
+    d = abs(a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w)
+    return math.degrees(2.0 * math.acos(min(1.0, d)))
+
+
 def copy_clip(src, dst):
     """src's frames and bone tracks into dst in place (dst keeps its path, its users and its settings)"""
     names = [str(n) for n in AL.get_animation_track_names(src)]
     n = AL.get_num_frames(src)
+    # (the import is sampled at the asset's own rate (import_clips' fps): the frames go across one for one, so a rate
+    # that differs would play the clip faster or slower)
+    fps_s, fps_d = clip_fps(src), clip_fps(dst)
+    assert abs(fps_s - fps_d) < 0.05, ("the import's rate is not the asset's", fps_s, fps_d)
     ctrl = dst.controller
     ctrl.open_bracket(unreal.Text("new clip"), True)
-    # (the import is sampled at the asset's own rate (import_clips' fps): the frames go across one for one)
-    fps_s = n / src.get_play_length()
-    assert abs(fps_s - 24.0) < 0.05, ("the import is not at 24 a second (her clips' rate)", fps_s)
     ctrl.set_number_of_frames(unreal.FrameNumber(n), True)
     old = [str(x) for x in AL.get_animation_track_names(dst)]
     for b in old:
@@ -79,12 +97,15 @@ def copy_clip(src, dst):
     ctrl.close_bracket(True)
     eal.save_loaded_asset(dst, only_if_is_dirty=False)
     # (checked: every bone's place and turn at a few frames, the copy against the import)
-    worst = 0.0
+    worst_cm = worst_deg = 0.0
     for f in sorted({0, n // 4, n // 2, 3 * n // 4, n}):
         a = AL.get_bone_poses_for_frame(src, names, f, False); b = AL.get_bone_poses_for_frame(dst, names, f, False)
         for ta, tb in zip(a, b):
-            worst = max(worst, (ta.translation - tb.translation).length(), abs(ta.rotation.get_angle_distance(tb.rotation) if hasattr(ta.rotation, "get_angle_distance") else 0.0))
-    return n, len(names), worst
+            worst_cm = max(worst_cm, (ta.translation - tb.translation).length()); worst_deg = max(worst_deg, quat_deg(ta.rotation, tb.rotation))
+    # (its frame count is not read back: in the session that copied it, get_num_frames gave the old clip's (58) until a
+    # restart; the poses read the new data)
+    assert worst_cm < 0.1 and worst_deg < 0.1, ("the copy is not the import", worst_cm, worst_deg)
+    return n, len(names), worst_cm, worst_deg
 
 
 if "maidle" in STEPS:
@@ -93,16 +114,17 @@ if "maidle" in STEPS:
     before = dst.get_play_length()
     others = {q.split(".")[0]: unreal.load_asset(q.split(".")[0]).get_play_length() for q in eal.list_assets(f"/Game/JRPG/{CH}Anims", recursive=False) if not q.split(".")[0].endswith("_Idle")}
     tmp = "/Game/JRPG/_IdleImport"
-    got = import_clips(os.path.join(SA, "jrpg_martialartist", "SK_JRPG_MartialArtist.glb"), f"/Game/JRPG/Character/SK_JRPG_{CH}_Skeleton", tmp, f"PL_{CH}_Clips")
+    fps = round(clip_fps(dst))
+    got = import_clips(os.path.join(SA, "jrpg_martialartist", "SK_JRPG_MartialArtist.glb"), f"/Game/JRPG/Character/SK_JRPG_{CH}_Skeleton", tmp, f"PL_{CH}_Clips", fps)
     idle = next((a for k, a in got.items() if k.endswith("Idle")), None)
     assert idle, ("no Idle among", sorted(got))
-    n, nb, worst = copy_clip(idle, dst)
+    n, nb, worst, worst_deg = copy_clip(idle, dst)
     for k in list(got): got[k] = None
     idle = None
     eal.delete_directory(tmp)
     after = unreal.load_asset(DST).get_play_length()
     same = sum(1 for p, L in others.items() if abs(unreal.load_asset(p).get_play_length() - L) < 1e-4)
-    REPORT.append(f"maidle: {DST} {before:.3f} s -> {after:.3f} s ({n} frames, {nb} bone tracks; the copy against the import at most {worst:.4f} cm); "
+    REPORT.append(f"maidle: {DST} {before:.3f} s -> {after:.3f} s ({n} frames, {nb} bone tracks; the copy against the import at most {worst:.4f} cm, {worst_deg:.4f} deg); "
                   f"her other clips untouched: {same} of {len(others)} the same length")
 
 # ---------------------------------------------------------------- a hero's new body (Rogue2, Summoner5)
@@ -141,7 +163,9 @@ if "clean" in STEPS:
     for folder in (f"/Game/JRPG/{CH}Anims", f"/Game/JRPG/{CH}Locomotion", f"/Game/RandomDungeon/Horse/Anims/{CH}", f"/Game/JRPG/HeroArmour/{CH}"):
         for p in eal.list_assets(folder, recursive=True):
             if eal.delete_asset(p.split(".")[0]): gone += 1
-    for p in cfg["extra"] + [MESH, phys.get_path_name().split(".")[0] if phys else None, skel]:
+    # (610's IK rig and retargeter too: left, they would pass rig's check though 610 had not been run on the new body)
+    RIGS = [f"/Game/JRPG/Rigs/IK_JRPG_{CH}_Auto", f"/Game/JRPG/Rigs/RTG_Quinn_To_JRPG_{CH}"]
+    for p in cfg["extra"] + RIGS + [MESH, phys.get_path_name().split(".")[0] if phys else None, skel]:
         if p and eal.does_asset_exist(p) and eal.delete_asset(p): gone += 1
     REPORT.append(f"clean {HERO}: {gone} assets of her old body deleted; mesh left {eal.does_asset_exist(MESH)}, skeleton left {eal.does_asset_exist(skel)}")
 
@@ -150,6 +174,8 @@ if "rig" in STEPS:
     cfg = BODIES[HERO]; CH = cfg["ch"]
     mesh = unreal.load_asset(f"/Game/JRPG/Character/SK_JRPG_{CH}"); rig = unreal.load_asset(f"/Game/JRPG/Rigs/IK_JRPG_{CH}_Auto")
     assert mesh and rig, f"600-620 for {CH} first"
+    rm = unreal.IKRigController.get_controller(rig).get_skeletal_mesh()
+    assert rm and rm.get_path_name() == mesh.get_path_name(), (f"IK_JRPG_{CH}_Auto is not on her mesh: 610 again", rm)
     RT = json.load(open(os.path.join(SA, f"jrpg_{CH.lower()}", "times.json")))
     FR = json.load(open(os.path.join(SA, "random_dungeon_magic5", "weapon_frames.json"), encoding="utf-8"))["weapons"]
     BY_MESH = {}
@@ -176,6 +202,12 @@ if "rig" in STEPS:
     REPORT.append(f"rig {HERO}: flinch {flinch.get_name()}, death {death.get_name()}, character {chbp.get_name()}; stabs {[v[1] for v in stab.values()]} of {[v[0] for v in stab.values()]}")
     torch_cache = {}
 
+    kept = {}
+
+    def kept_grip(k, mp):
+        """a weapon whose mesh weapon_frames.json does not know: its old grip stays, and the report says so"""
+        kept[f"{k} {mp.split('/')[-1]}"] = kept.get(f"{k} {mp.split('/')[-1]}", 0) + 1
+
     def kind_of(wd):
         ats = [a.get_path_name() for a in wd.attacks if a]
         if any(p in stab for p in ats): return "knife"
@@ -192,18 +224,21 @@ if "rig" in STEPS:
             else:
                 key = BY_MESH.get(mp)
                 if key: wd.grip = GR.mapped(dag["r"], key, "r"); wd.off_hand_grip = GR.mapped(dag["l"], key, "l")
-            ats = list(wd.attacks)
-            wd.hit_times = [stab[a.get_path_name()][1] if a.get_path_name() in stab else h for a, h in zip(ats, list(wd.hit_times))]
-            wd.attack_ends = [round(min(stab[a.get_path_name()][0], stab[a.get_path_name()][1] + 0.24), 3) if a.get_path_name() in stab else e
-                              for a, e in zip(ats, list(wd.attack_ends))]
+                else: kept_grip(k, mp)
+            # (an empty slot in the attacks is passed over, as kind_of does)
+            ats = [a.get_path_name() if a else "" for a in wd.attacks]
+            wd.hit_times = [stab[p][1] if p in stab else h for p, h in zip(ats, list(wd.hit_times))]
+            wd.attack_ends = [round(min(stab[p][0], stab[p][1] + 0.24), 3) if p in stab else e for p, e in zip(ats, list(wd.attack_ends))]
             if hol and str(wd.holster_bone) not in ("", "None"): wd.holster_grip = hol["r"]
             if hol and str(wd.off_hand_holster_bone) not in ("", "None"): wd.off_hand_holster_grip = hol["l"]
         elif k == "crossbow":
             if mp == XBOW_MESH and xbow: wd.grip = xbow
             elif BY_MESH.get(mp): wd.grip = GR.found("crossbow", BY_MESH[mp])
+            else: kept_grip(k, mp)
             if hol_back and str(wd.holster_bone) not in ("", "None"): wd.holster_bone = BACK_BONE; wd.holster_grip = hol_back
         elif k == "bow":
             if BY_MESH.get(mp): wd.grip = GR.found("bow", BY_MESH[mp])
+            else: kept_grip(k, mp)
         return k
 
     def torch_of(wd):
@@ -302,6 +337,7 @@ if "rig" in STEPS:
         les.save_current_level()
         REPORT.append(f"{MENU}: {n} of her weapons in its copy, {moved} meshes on her figure put where her grips now are")
 
+    REPORT.append(f"grips kept from her old body (mesh not in weapon_frames.json): {kept or 'none'}")
     if castle: do_menu(castle)
     gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
     les.load_level(MAPS + "mistward_castle")

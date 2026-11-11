@@ -152,6 +152,8 @@ if tad:
         for act in list(bpy.data.actions):
             name = act.name.split(".")[0]; name = name[:1].upper() + name[1:]
             name = re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")
+            # (two actions cut to one name ('idle' and 'idle.001'): one would replace the other unseen)
+            assert name not in OWN, ("--own: two of her clips are both named", name, [a.name for a in bpy.data.actions])
             tad.action = act
             if hasattr(tad, "action_slot") and act.slots: tad.action_slot = act.slots[0]
             f0, f1 = [int(round(v)) for v in act.frame_range]; fr_ = []
