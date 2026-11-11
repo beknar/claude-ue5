@@ -127,6 +127,12 @@ public:
 	// ---- mistward_castle
 	/** as strong as a monster of tier InTier, times the multipliers, bigger by ScaleMul; its bar's name (a boss, a guard) */
 	void Empower(int32 InTier, float HealthMul, float DamageMul, float ScaleMul, const FString& InTitle);
+	/** the list of 2026-11-11: the Escape menu's difficulty on its hit points and blows (Setup and Empower call it) */
+	void ApplyDifficulty();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bHellElite = false;
+	bool bDifficultyCounted = false;
+	/** the factors the difficulty (and hell's elite) put on its hit points and blow (Raise Dead takes them off) */
+	float DiffHealthMul = 1.f, DiffDamageMul = 1.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bBoss = false;
 	/** Brokenspire: the room of its section it keeps to (-1: none). It wanders only there, and takes no foe outside it: she
 	 *  fights it in the room or walks out (the Mistward Hall's guards) */

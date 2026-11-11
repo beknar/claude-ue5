@@ -182,6 +182,86 @@ public:
 	/** martial_arts: a chi attack with no monster within its range is made all the same (its bolt flies straight ahead and
 	 *  bursts at the end of its range); off, it is refused and costs nothing */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bChiWithoutTarget = false;
+	/** the list of 2026-11-11: her chi attacks are hers to make with no monster near, at no mana (on every map; the castle
+	 *  refused them until then): one with a monster within its range takes its mana as before */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Martial") bool bChiFreeWithoutTarget = true;
+	/** tests: chi attacks made with no monster in range (no mana taken) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Martial") int32 ChiFreeMade = 0;
+	// ---- the list of 2026-11-11 (RDList11.cpp): the town's guards fight a monster that comes into the town
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") bool bTownGuardsFight = true;
+	/** their blows (918 guards: the Dwarf pack's warrior attacks on the NPC packs' Manny skeleton) and each one's hit time (s) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") TArray<TObjectPtr<UAnimSequenceBase>> TownGuardStrikes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") TArray<float> TownGuardHitTimes;
+	/** how far a guard sees a monster in its town (cm), how far from its post it follows one, how fast it runs, how fast its
+	 *  blows play, its blow as a share of the monster's whole health (so a few guards bring down a monster of any tier), its
+	 *  health as so many of the monster's blows, and how long a beaten guard rests at its post */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardSight = 2500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardLeash = 6000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardRunSpeed = 380.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardStrikeRate = 1.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardBlowShare = 0.12f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardBlowsToBeat = 14.f;
+	/** a guard that sees another fighting this near joins it (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardCall = 4000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardRest = 20.f;
+	/** the guards fighting now (the monsters may take one of them for their foe) */
+	TArray<TWeakObjectPtr<class ARDTownsfolk>> FightingGuards;
+	/** what the HUD shows for her weapon Index (its Label or its Name: FRDWeaponDef::Shown, which the HUD draws) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") FString GetWeaponShown(int32 Index) const { return Weapons.IsValidIndex(Index) ? Weapons[Index].Shown() : FString(); }
+	/** tests: the guards fighting now, and every guard's "<title>|<role>|<fighting 0/1>|<fights>|<strikes>|<hits>|<damage>|<blows
+	 *  taken>|<health>|<sword drawn 0/1>|<x>|<y>|<z>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") int32 CountFightingGuards() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") TArray<FString> GetGuardLines() const;
+	/** tests: a monster of the wilds' kinds put at a place (in a town too), hunting her as an ambush's does; -> it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") class ARDMonster* SpawnTestAmbusher(FVector At, int32 Tier = 1);
+	// ---- the list of 2026-11-11: the Escape menu's Gameplay page (kept in GameUserSettings.ini's [RandomDungeon.Options])
+	/** her things at her death: kept on her (true), or left in a pile where she fell (bDropOnDeath, the game's way until now) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") bool bKeepItemsOnDeath = false;
+	/** 0 easy, 1 fair (the game as it was), 2 difficult, 3 hell: the monsters' hit points and blows times DifficultyScale (the
+	 *  user's 0.6 / 1 / 1.5 / 2.5); in hell HellCountMul as many and HellEliteShare of them elites (EliteHealthMul, EliteDamageMul:
+	 *  the HUD's elite mark is 1.25 times its tier's hit points). For the monsters met from the change on */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") int32 Difficulty = 1;
+	static constexpr int32 NumDifficulties = 4;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") TArray<float> DifficultyScale = { 0.6f, 1.f, 1.5f, 2.5f };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float HellCountMul = 1.25f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float HellEliteShare = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float EliteHealthMul = 1.6f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float EliteDamageMul = 1.25f;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") void SetKeepItemsOnDeath(bool bKeep);
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") void SetDifficulty(int32 InDifficulty);
+	static FString DifficultyName(int32 D);
+	/** the difficulty's factor on a monster's hit points and blows, and on how many come */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") float DifficultyMul() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") float DifficultyCountMul() const;
+	/** a count of monsters by the difficulty (hell: a quarter more, rounded up) */
+	int32 DifficultyCount(int32 N) const { return N <= 0 ? N : FMath::CeilToInt(N * DifficultyCountMul() - 1e-3f); }
+	/** while a summon or another ally of hers is made: the difficulty is not put on it */
+	bool bSpawningAlly = false;
+	/** tests: the monsters made elites by hell, and those the difficulty scaled */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 ElitesMade = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 DifficultyScaled = 0;
+	// ---- the list of 2026-11-11's console commands (RDConsoleCmds.cpp, RDList11.cpp)
+	/** rd.Tier: her tier set by hand (GrowthTier; her slashes, chi attacks, later abilities and learned spells to that tier);
+	 *  0: the game's own. Kept in the game instance for the levels she goes to */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") FString ConsoleSetTier(int32 N);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") int32 ConsoleTierNow() const;
+	/** rd.Pois: every place of the map shown on it (found or not) and listed, the small points of interest within ConsolePoiKm
+	 *  of her too; rd.Pois hide: the map back to what she has found herself. -> how many listed */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") int32 ConsoleShowPlaces(bool bShow);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") bool bWildShowAllPlaces = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float ConsolePoiKm = 3.f;
+	TArray<FRDWildPlace> ConsolePlaces;
+	/** "<n>|<name>|<kind>|<x m>|<y m>|<found 0/1>|<km from her>" (the last listing) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") TArray<FString> GetConsolePlaceLines() const;
+	/** tests: how many places she has found (rd.Pois must not change it) and how many the maps draw now */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") int32 GetWildFoundCount() const { return WildFound.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") int32 GetWildKnownPlaceCount() const { TArray<FRDWildPlace> P; WildKnownPlaces(P); return P.Num(); }
+	/** rd.GoToPoi <number | name>: to a place of the listing (a town by fast travel) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") bool ConsoleGoToPlace(const FString& What);
+	/** rd.RevealMap: the whole map drawn as seen (the wilds' fog, the dungeons' tactical maps); rd.RevealMap off: as she has
+	 *  seen it. What she has seen is not changed (nor saved) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") void SetMapRevealAll(bool bAll);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") bool bMapRevealAll = false;
 	/** the locked weapons gained so far (her hero's LockedWeapons, in order) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Martial") int32 WeaponsUnlocked = 0;
 	/** her hero's weapons at the start (her card's, and with bUnlockAll all her locked ones) */
@@ -777,6 +857,8 @@ public:
 	 *  fullscreen, 2 windowed): set and applied as Apply does (the packaged game's check of Apply); and -RDMarkFile=<path>:
 	 *  "castle|<map>|<hero>" written there (a packaged game's test knows it reached the castle) */
 	void ApplyDisplayFromCommandLine();
+	/** the list of 2026-11-11: the smallest the game's window may be dragged to (a packaged game's) */
+	void ApplyWindowLimits();
 	/** -RDMarkFile=<path>: where a packaged game's test reads where the game got ("castle|<map>|<hero>", "town|<name>|<hero>") */
 	void WriteTestMark(const FString& Kind, const FString& Where) const;
 

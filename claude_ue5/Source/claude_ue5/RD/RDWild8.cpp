@@ -18,7 +18,7 @@
 DEFINE_LOG_CATEGORY_STATIC(LogRDWild8, Log, All);
 
 static TAutoConsoleVariable<float> CVarRDWildRunSpeed(TEXT("rd.WildRunSpeed"), 1.f,
-	TEXT("Her running speed in the wilderness (outside the towns' walls), for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest)."));
+	TEXT("Her running speed in the wilderness and its towns, for testing: 1, 5, 10, 15, 20, 30 or 40 (another number takes the nearest)."));
 
 float ARDDungeonGenerator::WildRunSpeedChoice(float Asked)
 {
@@ -54,7 +54,10 @@ void ARDDungeonGenerator::TickWildRunSpeed(APawn* P)
 	if (!CM || !PlayerCombat) return;
 	const FVector L = Ch->GetActorLocation();
 	const float Asked = GetWildRunSpeed();
-	const float Want = (IsWildReady() && !IsInTownWalls(L)) ? Asked : 1.f;
+	// (the list of 2026-11-11: "in console: run speed should also apply to towns": within the towns' walls too (it was the wilds'
+	// only); the castle and the dungeons have no TickWild)
+	const float Want = IsWildReady() ? Asked : 1.f;
+	(void)L;
 	// (a new pawn (another hero, a respawn) comes with its own movement at 1x: applied again to it from its own base, never
 	// the last pawn's; PR #27's review)
 	if (WildRunMove.Get() != CM) { WildRunMove = CM; WildRunApplied = 1.f; }

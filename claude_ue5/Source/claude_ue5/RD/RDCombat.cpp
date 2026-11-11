@@ -346,8 +346,13 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
 	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen || bCraftOpen || bBlocking) return false;
+	// (the list of 2026-11-11: "martial artist should be able to do all of her chi moves even without a monster around, but if
+	// there's not a monster around, it should not take any mana": a chi attack (a bolt spell with a range of its own) with no
+	// monster within its range that she can see is made at no mana)
+	const bool bChi = W->bSpell && W->BoltRange > 0.f;
+	const bool bChiFree = bChi && Generator->bChiFreeWithoutTarget && !PickTarget(W->BoltRange, true);
 	// (a spell that costs more mana than she has is not cast)
-	if (W->ManaCost > 0.f && Mana < W->ManaCost && !Generator->bInfiniteMana)
+	if (!bChiFree && W->ManaCost > 0.f && Mana < W->ManaCost && !Generator->bInfiniteMana)
 	{
 		const float Now = GetWorld()->GetTimeSeconds();
 		if (Now - NoManaTime > 0.6f)
@@ -387,7 +392,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 		}
 	// (the Martial Artist's chi attacks (bolts with a range of their own): with no monster within it that she can see, none
 	// is made and no mana spent (the first test's chi at 6 m took its 7 mana for nothing); martial_arts: made all the same)
-	if (W->bSpell && W->BoltRange > 0.f && !Generator->bChiWithoutTarget && !PickTarget(W->BoltRange, true))
+	if (bChi && !bChiFree && !Generator->bChiWithoutTarget && !PickTarget(W->BoltRange, true))
 		{
 			const float Now = GetWorld()->GetTimeSeconds();
 			if (Now - NoManaTime > 0.6f) { ++CastsRefused; SetMessage(FString::Printf(TEXT("No monster within %.1f m for %s"), W->Reach / 100.f, *W->Name.ToString())); }
@@ -442,7 +447,9 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	bWhooshDone = false;
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
 	++NextOf[Index]; ++AttacksMade;
-	if (W->ManaCost > 0.f && !Generator->bInfiniteMana) Mana = FMath::Max(0.f, Mana - W->ManaCost);      // (martial_arts: never taken)
+	bAttackFree = bChiFree;
+	if (bChiFree) ++Generator->ChiFreeMade;
+	else if (W->ManaCost > 0.f && !Generator->bInfiniteMana) Mana = FMath::Max(0.f, Mana - W->ManaCost);      // (martial_arts: never taken)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
 	VeilUntil = FMath::Min(VeilUntil, GetWorld()->GetTimeSeconds());      // (an attack ends her veil: they see her again)
 	// (mistward6: an attack out of stealth ends it, and is an ambush)
@@ -650,7 +657,8 @@ void URDCombatComponent::Fall()
 	Health = 0.f;
 	EndAttack(); EndRoll();
 	// (mistward: everything she found drops where she falls; she comes back with what her hero started with)
-	if (Generator && Generator->bDropOnDeath && O)
+	// (the list of 2026-11-11: the Escape menu's Gameplay page may have her keep it all)
+	if (Generator && Generator->bDropOnDeath && !Generator->bKeepItemsOnDeath && O)
 	{
 		TArray<FName> Things; TArray<float> ThingWear;
 		GatherDroppable(Things, ThingWear, true);
@@ -2321,6 +2329,7 @@ void URDCombatComponent::LaunchBolt()
 	FBolt B;
 	B.At = (W->bBoltFromWeapon && WeaponComp) ? WeaponComp->GetComponentTransform().TransformPosition(W->BoltMuzzle) : M->GetSocketLocation(W->SpellBone) + Fw * 12.f;
 	B.Weapon = AttackIndex;
+	B.bFree = bAttackFree;
 	ARDMonster* Tg = LastTarget.Get();
 	if (Tg && !Tg->IsDead())
 	{
@@ -2499,6 +2508,7 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	// the flames on the bolt die away where they are (a moment, then gone: EndBoltFx); its light flares and fades
 	EndBoltFx(B);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, W.SpellLightIntensity * 3.f }); }
+	if (!PayFreeBolt(B, At, Direct, W.BoltSplash)) { ++BoltsElsewhere; LastBurstAt = At; LastBoltFlown = B.Flown; return; }
 	bool bAny = false;
 	auto Hurt = [&](ARDMonster* Mo, float Amount, const FVector& Where)
 	{

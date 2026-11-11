@@ -1,0 +1,257 @@
+{
+ "tag": "m11d",
+ "plan": [
+  "list11",
+  "options"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list11",
+   "ok": true,
+   "fists": {
+    "name": "Fists",
+    "label": "Basic Attacks",
+    "shown": "Basic Attacks"
+   },
+   "chi_alone": [
+    {
+     "name": "Straight Punch",
+     "mana_cost": 7.0,
+     "started": true,
+     "bolts": 1,
+     "mana_before": 50.63,
+     "mana_after": 50.63,
+     "free_counted": 1
+    },
+    {
+     "name": "Side Kick",
+     "mana_cost": 17.0,
+     "started": true,
+     "bolts": 1,
+     "mana_before": 50.61,
+     "mana_after": 50.61,
+     "free_counted": 1
+    }
+   ],
+   "chi_target": {
+    "started": true,
+    "spent": 7.0,
+    "cost": 7.0,
+    "free_counted": 0
+   },
+   "chi_meets": {
+    "paid": {
+     "started": true,
+     "free": 1,
+     "paid": 1,
+     "harmless": 0,
+     "lost": 23.0,
+     "mana_before": 100.0,
+     "mana_after": 95.2
+    },
+    "harmless": {
+     "started": true,
+     "free": 1,
+     "paid": 0,
+     "harmless": 1,
+     "lost": 0.0,
+     "mana_before": 0.6,
+     "mana_after": 3.5
+    }
+   },
+   "hud_line": "Fists",
+   "fits_with_shield": 0,
+   "sword": "Viking Shortsword",
+   "with_shield": [
+    "SM_Shield_3"
+   ],
+   "worn_after": "None",
+   "after_off": [],
+   "menu_main": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Gameplay",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "gameplay_page": 5,
+   "gameplay_lines": [
+    "choice|When you die|drop your items where you fall",
+    "choice|Difficulty|Fair",
+    "button|Back"
+   ],
+   "deathdrop_after_enter": "choice|When you die|keep your items",
+   "difficulty_round": [
+    "choice|Difficulty|Difficult",
+    "choice|Difficulty|Hell",
+    "choice|Difficulty|Easy",
+    "choice|Difficulty|Fair"
+   ],
+   "back_cursor_line": "button|Gameplay",
+   "death_keep_True": {
+    "dead": true,
+    "ingots": 3,
+    "potions": 1,
+    "new_piles": 0
+   },
+   "death_keep_False": {
+    "dead": true,
+    "ingots": 0,
+    "potions": 0,
+    "new_piles": 1
+   },
+   "difficulty": {
+    "0": {
+     "min_health": 24.0,
+     "min_damage": 5.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "1": {
+     "min_health": 40.0,
+     "min_damage": 9.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "2": {
+     "min_health": 60.0,
+     "min_damage": 14.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "3": {
+     "min_health": 100.0,
+     "min_damage": 23.0,
+     "elites": 10,
+     "count_mul": 1.25
+    }
+   },
+   "difficulty_ratios": {
+    "0": [
+     0.6,
+     0.556
+    ],
+    "1": [
+     1.0,
+     1.0
+    ],
+    "2": [
+     1.5,
+     1.556
+    ],
+    "3": [
+     2.5,
+     2.556
+    ]
+   },
+   "gameplay_ok": true
+  },
+  {
+   "step": "options",
+   "ok": true,
+   "controls_before": true,
+   "open": {
+    "why": "",
+    "open": true,
+    "page": 0,
+    "lines": [
+     "button|Resume",
+     "button|Save the game",
+     "button|Load a game",
+     "button|Options",
+     "button|Gameplay",
+     "button|Return to Brokenspire",
+     "button|Choose another hero (a new game)",
+     "button|Quit"
+    ]
+   },
+   "options": {
+    "page": 1,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|1.00",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|On",
+     "choice|Quest window|On",
+     "choice|Resolution|the screen's own (windowed fullscreen)",
+     "choice|Display mode|Windowed fullscreen",
+     "button|Apply display settings",
+     "button|Back"
+    ],
+    "action": "options"
+   },
+   "controls_off": {
+    "shown": false,
+    "line": "choice|Controls hint|Off"
+   },
+   "volume": {
+    "before": 1.0,
+    "after": 0.9
+   },
+   "display": {
+    "choices": [
+     "1280x720",
+     "1600x900",
+     "1920x1080",
+     "2560x1440",
+     "3840x2160"
+    ],
+    "from": [
+     1920,
+     1080
+    ],
+    "to": [
+     2560,
+     1440
+    ],
+    "mode": 2,
+    "lines": [
+     "volume|Overall volume|1.00",
+     "volume|Action sounds|0.90",
+     "volume|Environment sounds|1.00",
+     "volume|Music|1.00",
+     "choice|Controls hint|Off",
+     "choice|Quest window|On",
+     "choice|Resolution|2560 x 1440",
+     "choice|Display mode|Windowed",
+     "button|Apply display settings",
+     "button|Back"
+    ]
+   },
+   "applied": {
+    "said": "saved 2560x1440 mode 2 in the editor's user settings (the editor's play window keeps its size)",
+    "saved": [
+     2560,
+     1440
+    ],
+    "mode": "<WindowMode.WINDOWED: 2>"
+   },
+   "escape_back": {
+    "open": true,
+    "page": 0,
+    "cursor": 3,
+    "options_at": 3
+   },
+   "escape_closed": {
+    "open": false,
+    "paused": false
+   },
+   "controls_drawn_off": false,
+   "controls_drawn_on": true
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_m11d_l11_basic_attacks.png",
+  "mw_m11d_l11_shield_off.png",
+  "mw_m11d_l11_gameplay_page.png",
+  "mw_m11d_options_page.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

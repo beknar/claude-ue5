@@ -127,9 +127,35 @@ public:
 	/** the lines it has (its def's and its role's: tests) and how many different it has said */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") int32 GetLinePoolSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Brokenspire") FString GetRoleName() const;
+	/** the list of 2026-11-11 (RDList11.cpp): a guard, a militiaman, a soldier or the captain fights a monster that has come
+	 *  into its town (an ambush from the wilds after her): it runs at it with its sword drawn (its def's GuardWeapon) and strikes
+	 *  (the generator's TownGuardStrikes); the monster may turn on it; beaten down it falls back to its post a while */
+	bool IsGuardFighter() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") bool IsFighting() const { return GuardFoe.IsValid(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") AActor* GetGuardFoe() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") float GetGuardHealth() const { return GuardHealth; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") bool IsSwordDrawn() const;
+	/** a monster's blow on it (it fights on until its health is gone, then falls back to its post) */
+	void TakeGuardBlow(float Dmg, AActor* From);
+	/** tests: fights begun, blows struck, blows landed, the damage done, blows taken */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GuardFights = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GuardStrikes = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GuardHits = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") float GuardDamageDone = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GuardBlowsTaken = 0;
 protected:
 	virtual void Tick(float Dt) override;
 private:
+	/** true when the fight took the frame */
+	bool TickGuardFight(float Dt, float Now);
+	void EndGuardFight(float Now, bool bBeaten);
+	class ARDMonster* FindGuardFoe() const;
+	TWeakObjectPtr<class ARDMonster> GuardFoe;
+	TArray<FVector> GuardPath;
+	float GuardScanAt = 0.f, GuardSwingT = -1.f, GuardSwingLen = 0.f, GuardSwingHit = 0.f, GuardReadyAt = 0.f, GuardHealth = -1.f, GuardRestUntil = -100.f, GuardRepathAt = 0.f, GuardStuck = 0.f;
+	int32 GuardSwingK = 0;
+	bool bGuardHitDone = false, bGuardEngaged = false;
+	UPROPERTY(Transient) TObjectPtr<class UStaticMeshComponent> GuardSword;
 	TArray<int32> Jobs;
 	FName StandWork, StandProp;
 	int32 JobI = -1, WorkAt = -1, GoFails = 0, JobsDone = 0;

@@ -258,6 +258,10 @@ struct FRDWeaponDef
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	/** the list of 2026-11-11: what the player is shown for it, when not its Name (the Martial Artist's "Fists" are shown as
+	 *  "Basic Attacks"; the Name stays its key in saves, the quick bar and the tables) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Label;
+	FString Shown() const { return Label.IsEmpty() ? Name.ToString() : Label; }
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> Mesh = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName HandBone = TEXT("hand_r");
 	/** the mesh relative to the hand bone */
@@ -1149,6 +1153,10 @@ struct FRDTownsfolkDef
 	 *  "Scatter", "SitDrink", "SitTalk", "CarryWalk", "CarryIdle", "Talk", "Hammer", "Forge"); a kind it has no clip for it
 	 *  does not take up. 886 fills them. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, TObjectPtr<UAnimationAsset>> WorkClips;
+	/** the list of 2026-11-11: a guard's sword drawn when it fights (none: it strikes bare-handed) and where it is held on hand_r
+	 *  (918 guards: its pack's own sword, the grip from the body's reference pose) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UStaticMesh> GuardWeapon = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FTransform GuardGrip;
 };
 
 /** Brokenspire: a thing a townsperson holds at work (the third list, 2026-11-02: a ladle, a tray, a mug, a bowl, a hammer):

@@ -1,0 +1,205 @@
+{
+ "tag": "k11c",
+ "plan": [
+  "console11"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "console11",
+   "ok": true,
+   "time": {
+    "morning": "08:00",
+    "noon": "12:00",
+    "afternoon": "15:00"
+   },
+   "in_walls": true,
+   "town_speed": {
+    "at_1": 353.4,
+    "at_5": 1767.0,
+    "ratio": 5.0,
+    "back": 353.4
+   },
+   "pois": {
+    "listed": 2839,
+    "known_before": 6,
+    "known_shown": 2839,
+    "found_before": 1,
+    "found_after": 1,
+    "kinds": [
+     "abandoned_camp",
+     "ambush_point",
+     "camp",
+     "cave",
+     "city",
+     "grave",
+     "great_ruin",
+     "house",
+     "lair",
+     "lost_body",
+     "milestone",
+     "monster_nest",
+     "ritual",
+     "ruined_wall",
+     "ruins",
+     "spawn",
+     "town",
+     "village"
+    ],
+    "first": [
+     [
+      "1",
+      "Brokenspire",
+      "town",
+      "0",
+      "0",
+      "1",
+      "0.07"
+     ],
+     [
+      "2",
+      "Monster nest",
+      "monster_nest",
+      "-292",
+      "-641",
+      "0",
+      "0.65"
+     ],
+     [
+      "3",
+      "Abandoned camp",
+      "abandoned_camp",
+      "561",
+      "-450",
+      "0",
+      "0.67"
+     ],
+     [
+      "4",
+      "Monster nest",
+      "monster_nest",
+      "498",
+      "-553",
+      "0",
+      "0.69"
+     ],
+     [
+      "5",
+      "Lonely grave",
+      "grave",
+      "-579",
+      "-433",
+      "0",
+      "0.69"
+     ]
+    ],
+    "known_hidden": 6
+   },
+   "goto": {
+    "to": [
+     "1043",
+     "A body clutching a map",
+     "lost_body",
+     "-240",
+     "-3052",
+     "0",
+     "3.00"
+    ],
+    "from_it_m": 6.2
+   },
+   "reveal_on": true,
+   "reveal_off": true,
+   "tier": [
+    {
+     "hero": "Warrior",
+     "hp": 140.0,
+     "mana": 0.0,
+     "slashes": 1,
+     "spells": 0,
+     "weapons": 1,
+     "tier": 1,
+     "said": "rd.Tier: tier 1: 0 abilities given, 0 taken; 0 spells learned, 0 forgotten; 1 slashes given, 0 taken; 140 hit points, 0 mana"
+    },
+    {
+     "hero": "Warrior",
+     "hp": 241.0,
+     "mana": 0.0,
+     "slashes": 5,
+     "spells": 0,
+     "weapons": 1,
+     "tier": 5,
+     "said": "rd.Tier: tier 5: 0 abilities given, 0 taken; 0 spells learned, 0 forgotten; 4 slashes given, 0 taken; 241 hit points, 0 mana"
+    },
+    {
+     "hero": "Warrior",
+     "hp": 165.0,
+     "mana": 0.0,
+     "slashes": 2,
+     "spells": 0,
+     "weapons": 1,
+     "tier": 2,
+     "said": "rd.Tier: tier 2: 0 abilities given, 0 taken; 0 spells learned, 0 forgotten; 0 slashes given, 3 taken; 165 hit points, 0 mana"
+    },
+    {
+     "hero": "MartialArtist",
+     "hp": 196.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 8,
+     "weapons": 9,
+     "tier": 3,
+     "said": "rd.Tier: tier 3: 2 abilities given, 0 taken; 0 spells learned, 0 forgotten; 0 slashes given, 0 taken; 196 hit points, 100 mana"
+    },
+    {
+     "hero": "MartialArtist",
+     "hp": 140.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 4,
+     "weapons": 5,
+     "tier": 1,
+     "said": "rd.Tier: tier 1: 0 abilities given, 4 taken; 0 spells learned, 0 forgotten; 0 slashes given, 0 taken; 140 hit points, 100 mana"
+    },
+    {
+     "hero": "Mage",
+     "hp": 70.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 3,
+     "weapons": 3,
+     "tier": 1,
+     "said": "rd.Tier: tier 1: 0 abilities given, 0 taken; 1 spells learned, 0 forgotten; 0 slashes given, 0 taken; 70 hit points, 100 mana"
+    },
+    {
+     "hero": "Mage",
+     "hp": 172.0,
+     "mana": 154.0,
+     "slashes": 0,
+     "spells": 12,
+     "weapons": 12,
+     "tier": 10,
+     "said": "rd.Tier: tier 10: 0 abilities given, 0 taken; 9 spells learned, 0 forgotten; 0 slashes given, 0 taken; 172 hit points, 154 mana"
+    },
+    {
+     "hero": "Mage",
+     "hp": 91.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 5,
+     "weapons": 5,
+     "tier": 3,
+     "said": "rd.Tier: tier 3: 0 abilities given, 0 taken; 0 spells learned, 7 forgotten; 0 slashes given, 0 taken; 91 hit points, 100 mana"
+    }
+   ],
+   "tier_after": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_k11c_console11_map_pois.png",
+  "bs_k11c_console11_map_revealed.png",
+  "bs_k11c_console11_map_normal.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

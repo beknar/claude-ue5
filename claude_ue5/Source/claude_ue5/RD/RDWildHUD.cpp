@@ -117,7 +117,9 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		if (P.Id == Pick) UI.Fit(TEXT("wmap_select"), S - FVector2D(Ic * 1.9f), S + FVector2D(Ic * 1.9f), FLinearColor(1.f, 1.f, 1.f, 0.95f));
 		if (!UI.Fit(RDWSymbolOf(P.Kind), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 1.f, 1.f, bFound ? 1.f : 0.55f))) SoftDot(S, 6.f * Sc, FLinearColor(0.95f, 0.9f, 0.78f, 1.f));
 		// (a taken quest's place is named at every zoom: it is where she is sent)
-		if (bTown || Mpp < 18.0 || P.Id == Pick || Gen->IsWildQuestShown(P.Id))
+		// (the list of 2026-11-11: rd.Pois' small points of interest are named only close in (a 3 km view of them was all names))
+		const bool bSmall = P.Id >= FRDWildWorld::PoiIdBase && P.Id < FRDWildWorld::FarmIdBase;
+		if (bTown || (Mpp < (bSmall ? 3.0 : 18.0)) || P.Id == Pick || Gen->IsWildQuestShown(P.Id))
 		{
 			const FString Nm = bTown ? P.Name.ToUpper() : P.Name;
 			const float Ts = Sc * (bTown ? 1.15f : 0.9f);
@@ -184,7 +186,9 @@ void ARDHUD::DrawWildMinimap(float Sc, const FVector& L, float Yaw)
 		const FVector2D S = ToS(P.At);
 		if (FVector2D::Distance(S, C) > R * 0.86f) continue;
 		const float Ic = 11.f * Sc;
-		UI.Fit(RDWSymbolOf(P.Kind), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 1.f, 1.f, Gen->WildFound.Contains(P.Id) ? 1.f : 0.6f));
+		// (a small point of interest (rd.Pois) has no symbol: a dot)
+		if (!UI.Fit(RDWSymbolOf(P.Kind), S - FVector2D(Ic), S + FVector2D(Ic), FLinearColor(1.f, 1.f, 1.f, Gen->WildFound.Contains(P.Id) ? 1.f : 0.6f)))
+			SoftDot(S, 4.5f * Sc, FLinearColor(0.95f, 0.9f, 0.78f, 0.9f));
 	}
 	for (const ARDMonster* Mo : Gen->GetMonsters())
 	{

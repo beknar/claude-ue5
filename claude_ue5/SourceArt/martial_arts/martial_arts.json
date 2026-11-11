@@ -46,7 +46,7 @@
             {"fx": "SL/NS_Slash_Lightning", "bones": ["foot_r"], "scale": 0.8, "at": [0.5], "life": 1.0}],
    "hit": "MP5/Hits/NS_Hit_Lightning01", "hit_scale": 1.3}
  ],
- "fists": {"clips": ["Box_01", "Front_kick_02"], "whole": true, "icon": "ma_fists", "damage": 14, "_damage": "the table damage before 2026-10-29: 872 now sets her fists to the Warrior average weapon damage a second times their average clip, and scales the chi table so the ten do the same over their moves", "reach": 160, "arc": 120, "play_rate": 1.15, "sound": "Axe"},
+ "fists": {"label": "Basic Attacks", "clips": ["Box_01", "Front_kick_02"], "whole": true, "icon": "ma_fists", "damage": 14, "_damage": "the table damage before 2026-10-29: 872 now sets her fists to the Warrior average weapon damage a second times their average clip, and scales the chi table so the ten do the same over their moves", "reach": 160, "arc": 120, "play_rate": 1.15, "sound": "Axe"},
  "knife_types": ["short blades"],
  "hero": {
   "title": "MARTIAL ARTIST", "health": 140, "mana": 100, "mana_per_second": 2.0, "accent": [0.95, 0.55, 0.72],
@@ -58,7 +58,7 @@
                 "Dodges (B), dashes into a strike (V)",
                 "HP and Dexterity rings (Dexterity: not her chi)"],
   "controls_keys": ["W A S D|move", "Mouse|look / turn the camera", "Space|jump", "R|switch walk / run", "1 - 0|quick slots", "Shift (held)|run",
-                    "B|dodge (roll)", "V / right mouse|dash into a strike", "Wheel|switch fists / chi", "Left mouse|strike or chi attack",
+                    "B|dodge (roll)", "V / right mouse|dash into a strike", "Wheel|switch basic attacks / chi", "Left mouse|strike or chi attack",
                     "I / Tab|inventory", "F|open door or container", "M|map"],
   "controls_pad": ["Left stick|move", "Right stick|look / turn the camera", "A|jump", "LT|switch walk / run", "D-pad left / right|quick slots",
                    "B|dodge (roll)", "RT|dash into a strike", "Y|switch weapon", "RB|strike or chi attack", "Start|inventory", "X|open door or container", "Back|map"]

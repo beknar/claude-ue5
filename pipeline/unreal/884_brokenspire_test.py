@@ -3293,6 +3293,139 @@ def step_time9():
     ok = (res["hours_5s_at_1"] < 0.2 and 1.4 <= res["hours_5s_at_60"] <= 2.6 and res["dilation_at_2"] == 2.0 and 3.4 <= res["game_s_in_2s"] <= 4.6
           and res["dilation_after"] == 1.0)
     step_result("time9", ok, **res)
+def step_fight11():
+    """the town's guards fight what comes into the town (the list of 2026-11-11: "when an ambush from outside town appears in the
+    wilderness and makes it into town, the guards should fight it"): an ambusher put on the town's ground near a guard, hunting
+    her (she is kept on her feet and stands off); the guards near it run at it with their swords drawn and strike; its hit points
+    fall by their blows; once it is dead they put their swords away and go back. Pictures of the fight"""
+    g = G["gen"]; res = {}; c = cb()
+    g.set_town_hour(11.0); yield from rwait(1.0)
+    gl = lambda: [str(x).split("|") for x in g.get_guard_lines()]
+    guards = [x for x in gl() if x[1] in ("Guard", "Militia", "Soldier")]
+    res["guards"] = len(guards); res["strikes_loaded"] = len(g.get_editor_property("town_guard_strikes"))
+    # (the guard nearest the square)
+    sq = place("square")
+    gd = min(guards, key=lambda x: math.hypot(float(x[10]) - sq.x, float(x[11]) - sq.y)) if guards else None
+    if not gd: step_result("fight11", False, **res); return
+    at = V(float(gd[10]), float(gd[11]), float(gd[12]))
+    res["guard"] = gd[0]
+    # (the monster 5 m from the guard, she 12 m off on a way with a clear line to it (the first run's pictures were of a house's
+    # wall), facing it)
+    best = None
+    for k in range(16):
+        a = k * math.pi / 8; me_ = V(at.x + math.cos(a) * 1200, at.y + math.sin(a) * 1200, 0)
+        mo_ = V(at.x + math.cos(a) * 500, at.y + math.sin(a) * 500, 0)
+        h = unreal.SystemLibrary.line_trace_single(G["w"], V(me_.x, me_.y, 150), V(at.x, at.y, 150), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        h = h.to_tuple() if h else None
+        # (clear up to the guard itself: a hit on the guard's own capsule counts as clear)
+        if not (h and h[0]) or dist2(h[4], at) < 80: best = (me_, mo_, a); break
+    me_, mo_, a = best or (V(at.x + 1200, at.y, 0), V(at.x + 500, at.y, 0), 0.0)
+    res["clear_line"] = best is not None
+    put(me_, yaw=math.degrees(a) + 180.0); yield from rwait(1.0)
+    m = g.spawn_test_ambusher(mo_, 1)
+    res["spawned"] = bool(m)
+    if not m: step_result("fight11", False, **res); return
+    h0 = m.get_max_health(); res["monster"] = {"kind": str(m.get_editor_property("monster_name")), "health": h0}
+    t0 = time.time(); fights = 0; drawn = False; shots = 0; hmin = h0
+    while time.time() - t0 < 40:
+        c.set_health(c.get_max_health())
+        fights = max(fights, g.count_fighting_guards())
+        G_ = gl(); drawn = drawn or any(x[9] == "1" for x in G_)
+        if m and unreal.SystemLibrary.is_valid(m): hmin = min(hmin, m.get_health())
+        if fights and shots < 2 and time.time() - t0 > 3 + shots * 4:
+            ml = m.get_actor_location(); me = G["pawn"].get_actor_location()
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=math.degrees(math.atan2(ml.y - me.y, ml.x - me.x))))
+            yield from rwait(0.3); shot(f"fight11_{shots}", "1280x720"); shots += 1; yield from rwait(1.2)
+        if not unreal.SystemLibrary.is_valid(m) or m.is_dead(): break
+        yield
+    res["dead"] = (not unreal.SystemLibrary.is_valid(m)) or m.is_dead(); res["seconds"] = round(time.time() - t0, 1)
+    res["health_min"] = round(hmin, 1); res["most_fighting"] = fights; res["sword_seen"] = drawn
+    G_ = gl(); res["fighters"] = [{"who": x[0], "role": x[1], "fights": int(x[3]), "strikes": int(x[4]), "hits": int(x[5]), "damage": float(x[6]), "taken": int(x[7])} for x in G_ if int(x[3]) > 0]
+    yield from rwait(3.0)
+    res["after"] = {"fighting": g.count_fighting_guards(), "swords_out": sum(1 for x in gl() if x[9] == "1")}
+    # (PR #47's review: a monster destroyed in the fight (a roamer dropped far from her, a place's with its chunk) ends it too)
+    m2 = g.spawn_test_ambusher(mo_, 1); t0 = time.time()
+    while time.time() - t0 < 15 and g.count_fighting_guards() == 0: c.set_health(c.get_max_health()); yield
+    res["destroyed"] = {"fighting_before": g.count_fighting_guards()}
+    if m2: m2.destroy_actor()
+    yield from rwait(1.5)
+    res["destroyed"].update({"fighting_after": g.count_fighting_guards(), "swords_out": sum(1 for x in gl() if x[9] == "1")})
+    dmg = sum(f["damage"] for f in res["fighters"])
+    ok = (res["strikes_loaded"] == 4 and fights >= 1 and drawn and sum(f["hits"] for f in res["fighters"]) >= 1 and dmg > 0
+          and res["dead"] and dmg >= h0 * 0.99 and res["after"]["fighting"] == 0 and res["after"]["swords_out"] == 0
+          and res["destroyed"]["fighting_before"] >= 1 and res["destroyed"]["fighting_after"] == 0 and res["destroyed"]["swords_out"] == 0)
+    step_result("fight11", ok, **res)
+def step_console11():
+    """the list of 2026-11-11's console commands, typed as the game's console passes them (the player controller):
+    rd.Time morning / noon / afternoon (the town's clock); rd.WildRunSpeed 5 inside the town's walls (her top speed 5 times);
+    rd.RevealMap and off (the switch; pictures of the map); rd.Pois (the map's places listed and drawn, nothing marked found)
+    and hide; rd.GoToPoi to a listed place 3 km or more off (she stands within 30 m of it); rd.Tier: the Warrior's slashes
+    (5, then 2), the Martial Artist's chi attacks (tier 3: 8 of 10; tier 1: 4), the Mage's tomes (tier 10: every slot up to it),
+    her hit points growing with the tier; rd.Tier 0"""
+    g = G["gen"]; w = G["w"]; res = {}
+    def cmd(c_): unreal.SystemLibrary.execute_console_command(w, c_)
+    # ---- the time of day
+    res["time"] = {}
+    for nm in ("morning", "noon", "afternoon"):
+        cmd(f"rd.Time {nm}"); yield from rwait(0.4); res["time"][nm] = str(g.get_town_clock())
+    # ---- run speed in the town
+    def ws(): return G["pawn"].get_editor_property("character_movement").get_editor_property("max_walk_speed")
+    put(place("square"), 0.0); yield from rwait(0.8)
+    res["in_walls"] = g.is_in_town_walls(G["pawn"].get_actor_location())
+    s1 = ws(); cmd("rd.WildRunSpeed 5"); yield from rwait(0.6); s5 = ws(); cmd("rd.WildRunSpeed 1"); yield from rwait(0.6)
+    res["town_speed"] = {"at_1": round(s1, 1), "at_5": round(s5, 1), "ratio": round(s5 / max(s1, 1.0), 2), "back": round(ws(), 1)}
+    # ---- the places listed (nothing marked found), and to one 3 km or more off
+    f0 = g.get_wild_found_count(); k0 = g.get_wild_known_place_count()
+    cmd("rd.Pois"); yield from rwait(1.0)
+    L = [str(x).split("|") for x in g.get_console_place_lines()]
+    res["pois"] = {"listed": len(L), "known_before": k0, "known_shown": g.get_wild_known_place_count(), "found_before": f0, "found_after": g.get_wild_found_count(),
+                   "kinds": sorted({x[2] for x in L})[:30], "first": L[:5]}
+    far = next((x for x in L if x[5] == "0" and 3.0 <= float(x[6]) <= 12.0 and x[2] not in ("town", "city")), None)
+    res["goto"] = {"to": far[:7] if far else None}
+    if far:
+        cmd(f"rd.GoToPoi {far[0]}"); yield from rwait(3.0)
+        me = G["pawn"].get_actor_location()
+        res["goto"]["from_it_m"] = round(math.hypot(me.x / 100 - float(far[3]), me.y / 100 - float(far[4])), 1)
+    # ---- out there, the wilds' map: the places shown, then hidden; the whole map revealed, then as she has seen it
+    g.set_map_open(True); yield from rwait(1.2); shot("console11_map_pois", "1280x720"); yield from rwait(1.2)
+    cmd("rd.Pois hide"); yield from rwait(0.5); res["pois"]["known_hidden"] = g.get_wild_known_place_count()
+    cmd("rd.RevealMap"); yield from rwait(0.6); res["reveal_on"] = g.get_editor_property("map_reveal_all")
+    shot("console11_map_revealed", "1280x720"); yield from rwait(1.2)
+    cmd("rd.RevealMap off"); yield from rwait(0.6); shot("console11_map_normal", "1280x720"); yield from rwait(1.2)
+    res["reveal_off"] = not g.get_editor_property("map_reveal_all")
+    g.set_map_open(False); yield from rwait(0.5)
+    if far: cmd("rd.GoTo brokenspire"); yield from rwait(6.0); refresh(); g = G["gen"]
+    # ---- the tier
+    def tier_state(hero):
+        c = cb(); W = list(g.get_editor_property("weapons"))
+        sl = [str(s.name) for s in g.get_editor_property("slashes")]
+        return {"hero": hero, "hp": round(c.get_max_health(), 1), "mana": round(c.get_max_mana(), 1),
+                "slashes": sum(c.get_item_count(s) for s in sl) + sum(1 for x in W if str(x.slash) not in ("None", "")),
+                "spells": sum(1 for x in W if x.spell), "weapons": len(W)}
+    res["tier"] = []
+    for hero, tiers in (("Warrior", (1, 5, 2)), ("MartialArtist", (3, 1)), ("Mage", (1, 10, 3))):
+        if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from wait(1.0); refresh(); g = G["gen"]
+        for t in tiers:
+            # (PR #47's review: the one in her hands forgotten, she draws another: the Martial Artist's last chi drawn before tier 1)
+            if hero == "MartialArtist" and t == 1: cb().select_weapon(len(g.get_editor_property("weapons")) - 1); yield from rwait(0.4)
+            cmd(f"rd.Tier {t}"); yield from rwait(0.6)
+            wi = cb().get_weapon_index(); nw = len(g.get_editor_property("weapons"))
+            res["tier"].append(dict(tier_state(hero), tier=t, said=str(cb().message)[:160], drawn_ok=0 <= wi < nw))
+    cmd("rd.Tier 0"); yield from rwait(0.3)
+    res["tier_after"] = g.console_tier_now()
+    if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from wait(1.0); refresh()
+    T = {(x["hero"], x["tier"]): x for x in res["tier"]}
+    ok = (res["time"] == {"morning": "08:00", "noon": "12:00", "afternoon": "15:00"} and res["in_walls"]
+          and 4.8 <= res["town_speed"]["ratio"] <= 5.2 and abs(res["town_speed"]["back"] - res["town_speed"]["at_1"]) < 1
+          and res["reveal_on"] and res["reveal_off"]
+          and res["pois"]["listed"] > 100 and res["pois"]["known_shown"] >= res["pois"]["listed"] and res["pois"]["found_after"] == res["pois"]["found_before"]
+          and res["pois"]["known_hidden"] == res["pois"]["known_before"]
+          and res["goto"].get("from_it_m") is not None and res["goto"]["from_it_m"] < 30
+          and T[("Warrior", 5)]["slashes"] == 5 and T[("Warrior", 2)]["slashes"] == 2 and T[("Warrior", 5)]["hp"] > T[("Warrior", 1)]["hp"]
+          and T[("MartialArtist", 3)]["spells"] == 8 and T[("MartialArtist", 1)]["spells"] == 4
+          and T[("Mage", 10)]["spells"] > T[("Mage", 1)]["spells"] and T[("Mage", 3)]["spells"] < T[("Mage", 10)]["spells"]
+          and res["tier_after"] == 0 and all(x["drawn_ok"] for x in res["tier"]))
+    step_result("console11", ok, **res)
 def step_noshield9():
     """the Warrior's start (the list of 2026-11-08b: "the warrior should have no default shield"): she wears none, carries
     none, no shield is drawn on her (a mesh named a shield on her), and her block (LB held) does not come up; a shield
@@ -4280,7 +4413,7 @@ def step_keys9():
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
-              "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
+              "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9, "fight11": step_fight11, "console11": step_console11,
               "sky9": step_sky9, "sky10": step_sky10, "skyspin": step_skyspin, "cloudless": step_cloudless, "horizon": step_horizon, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None

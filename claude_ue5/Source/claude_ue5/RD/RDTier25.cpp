@@ -64,6 +64,8 @@ int32 ARDDungeonGenerator::GameGlobalTier() const
 
 int32 ARDDungeonGenerator::GrowthTier() const
 {
+	// (the list of 2026-11-11: rd.Tier's, while it is set)
+	if (const int32 Ct = ConsoleTierNow(); Ct > 0) return Ct;
 	return FMath::Max(bTown ? 1 : GlobalTier(GetOpenTier()), GameGlobalTier());
 }
 

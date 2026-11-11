@@ -158,6 +158,8 @@ public:
 	 *  kept while she is in the castle (the castle is indoors: its clock stands still there) */
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") float TownHour = -1.f;
 	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "RandomDungeon|Brokenspire") int32 TownDay = 1;
+	/** the list of 2026-11-11: rd.Tier's tier (0: none, the game's own): kept between the levels, not in a save (a test's) */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|List11") int32 ConsoleTier = 0;
 	/** the list of 2026-11-04: the gardens she harvested (town seed and garden packed, "<seed>:<garden>") and the day of it; the
 	 *  tables' food she took ("<seed>:<table>") */
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "RandomDungeon|Brokenspire") TMap<FString, int32> GardensHarvested;

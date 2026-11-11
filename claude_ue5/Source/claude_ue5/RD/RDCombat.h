@@ -443,6 +443,11 @@ public:
 	float AmbushMul(int32 Index) const;
 	/** her hit points', mana's and energy's tops again (a tier opened: mistward6's growth) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") void RefreshMaxima() { UpdateMaxima(); }
+	/** the list of 2026-11-11 (rd.Tier): a weapon or spell of hers by name taken away (as a broken one goes); true if she had it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") bool ForgetWeapon(FName Name);
+	/** tests: free chi bolts that met a monster and paid their mana then, and those that could not and did no harm */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 ChiFreePaid = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 ChiFreeHarmless = 0;
 	/** what is on her: "<label>|<seconds left>|<good 1 / bad 0>" (spells, poison, weakness, slowness) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") TArray<FString> GetBuffLines() const;
 	/** a monster's blow carried its ability (poison, weaken, slow) with Power (its tier's) */
@@ -977,7 +982,12 @@ private:
 		/** the list of 2026-11-07: with no monster to fly at, the wilderness animal ahead of her it flies at (aimed at its body:
 		 *  a bolt at her hand's height passed over a wolf's back) */
 		TWeakObjectPtr<class ARDWildAnimal> Animal;
+		/** the list of 2026-11-11: a chi attack made at no mana (no monster in range): it pays when it meets one (PayFreeBolt) */
+		bool bFree = false;
 	};
+	/** a free chi bolt meeting a monster (struck, or in its burst's Reach): its mana taken now, or false: it does no harm */
+	bool PayFreeBolt(FBolt& B, const FVector& At, ARDMonster* Direct, float Reach);
+	bool bAttackFree = false;
 	void LaunchSpellBolt(int32 Spell, const FVector& From, ARDMonster* Target, float Dmg, int32 ChainLeft, const TArray<TWeakObjectPtr<ARDMonster>>& Done);
 	void LaunchGoalBolt(int32 Spell, const FVector& From, const FVector& To, float Speed, bool bWisp);
 	TArray<FBolt> Bolts;

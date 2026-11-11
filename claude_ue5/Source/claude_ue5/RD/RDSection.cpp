@@ -2236,7 +2236,9 @@ void ARDSection::SpawnMonsters(FRandomStream& R)
 	for (int32 RI = 0; RI < Rooms.Num(); ++RI) if (Rooms[RI].Kind != ERDRoomKind::Junction) Order.Add(RI);
 	if (Generator->bCombat)
 	{
-		Want = FMath::RoundToInt(Order.Num() * Generator->MonsterCoverage);
+		// (the list of 2026-11-11: hell's quarter more; a section made again at another difficulty keeps its kills by their place
+		// in this order, so a change of difficulty can bring back or leave out one there)
+		Want = FMath::Min(Order.Num(), Generator->DifficultyCount(FMath::RoundToInt(Order.Num() * Generator->MonsterCoverage)));
 		for (int32 I = Order.Num() - 1; I > 0; --I) Order.Swap(I, R.RandRange(0, I));
 	}
 	// (each one's place in this order is its SpawnIndex: one she killed is drawn as before and skipped, so a section

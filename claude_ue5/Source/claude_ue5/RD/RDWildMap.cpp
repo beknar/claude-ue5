@@ -177,6 +177,7 @@ void ARDDungeonGenerator::TickWildMap(float Dt)
 float ARDDungeonGenerator::WildRevealedShare(double Xm, double Ym, double Radius) const
 {
 	// (fine: the cells round the point; coarse: how much of the 1.6 km block is revealed)
+	if (bMapRevealAll) return 1.f;          // (the list of 2026-11-11: rd.RevealMap)
 	if (Radius < 120.0)
 	{
 		int32 N = 0;
@@ -262,7 +263,7 @@ UTexture2D* ARDDungeonGenerator::WildMini(const FVector2D& At)
 					Out = (*T)[Pr * RDWTileN + Pc];
 				}
 				else { WildMapTile(L, Ti, Tj, true); Out = FColor(26, 28, 24); }
-				if (!IsWildRevealed(X, Y)) Out = FColor(150, 144, 128);
+				if (!bMapRevealAll && !IsWildRevealed(X, Y)) Out = FColor(150, 144, 128);
 				Out.A = (uint8)(255.f * FMath::Clamp((1.f - (float)Rr) / 0.12f, 0.f, 1.f));
 			}
 			Px[R * N + C] = Out;
@@ -293,6 +294,12 @@ void ARDDungeonGenerator::WildKnownPlaces(TArray<FRDWildPlace>& Out) const
 	// (a quest's place while its quest is taken: the captain said where; not found, so no travel there)
 	for (const FRDWildPlace& Q : Wild->QuestPlaces)
 		if (!WildFound.Contains(Q.Id) && IsWildQuestShown(Q.Id)) Out.Add(Q);
+	// (the list of 2026-11-11: rd.Pois shows every place of its listing, found or not)
+	if (bWildShowAllPlaces)
+	{
+		TSet<int32> Have; for (const FRDWildPlace& P : Out) Have.Add(P.Id);
+		for (const FRDWildPlace& P : ConsolePlaces) if (!Have.Contains(P.Id)) Out.Add(P);
+	}
 }
 
 bool ARDDungeonGenerator::IsWildCombat() const

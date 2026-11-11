@@ -3,6 +3,7 @@
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDCombat.h"
 #include "RD/RDBlood.h"
+#include "RD/RDTown.h"
 #include "AnimationRuntime.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -81,6 +82,7 @@ void ARDMonster::Setup(ARDSection* InSection, const FRDMonsterDef& Def, int32 In
 		float MeanH = 1.f, MeanD = 1.f; G->MeanMonsterFactors(MeanH, MeanD, Section->Coord);
 		MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(G->GetMonsterHealth(Section->Coord) * Def.HealthFactor / MeanH));
 		Damage = FMath::Max(1.f, FMath::RoundToFloat(G->GetMonsterDamage(Section->Coord) * Def.DamageFactor / MeanD));
+		ApplyDifficulty();          // (the list of 2026-11-11: the Escape menu's difficulty)
 		Reach = Def.Reach; AttackInterval = Def.AttackInterval;
 		AttackCooldown = R.FRandRange(0.f, 0.6f);
 		// (it must keep its pose up to date while she fights it at the edge of the view)
@@ -312,6 +314,26 @@ void ARDMonster::Die()
 	if (G && !bAlly) G->OnMonsterKilled(this);
 }
 
+void ARDMonster::ApplyDifficulty()
+{
+	// (the list of 2026-11-11: "a difficulty option from easy to fair to difficult to hell ... scale the encounters up or down":
+	// its hit points and blows by the difficulty; in hell a share are elites (a roll from its own id, never a stream the play
+	// draws from). Not on her summons and allies)
+	ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	if (!G || !bCombat || bAlly || G->bSpawningAlly) return;
+	const float K = G->DifficultyMul();
+	bool bElite = false;
+	if (G->Difficulty >= 3 && G->HellEliteShare > 0.f)
+		bElite = (float)(HashCombine(GetTypeHash(MonsterName), (uint32)GetUniqueID() * 2654435761u) % 10000u) / 10000.f < G->HellEliteShare;
+	DiffHealthMul = DiffDamageMul = 1.f;
+	if (K == 1.f && !bElite) return;
+	DiffHealthMul = K * (bElite ? G->EliteHealthMul : 1.f); DiffDamageMul = K * (bElite ? G->EliteDamageMul : 1.f);
+	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * DiffHealthMul));
+	Damage = FMath::Max(1.f, FMath::RoundToFloat(Damage * DiffDamageMul));
+	if (!bDifficultyCounted) { bDifficultyCounted = true; ++G->DifficultyScaled; if (bElite) ++G->ElitesMade; }
+	bHellElite = bElite;
+}
+
 // ------------------------------------------------------------------------------------------------ mistward
 void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float ScaleMul, const FString& InTitle)
 {
@@ -329,6 +351,7 @@ void ARDMonster::Empower(int32 InTier, float HealthMul, float DamageMul, float S
 	if (!(bOpenGround && G->MeanWildFactors(MeanH, MeanD, InTier))) G->MeanMonsterFactors(MeanH, MeanD, TierSection);
 	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(RefH * G->TierValueAt(G->TierHealth, InTier, 1.f) * Hf / MeanH * HealthMul));
 	Damage = FMath::Max(1.f, FMath::RoundToFloat(RefD * G->TierValueAt(G->TierDamage, InTier, 1.f) * Df / MeanD * DamageMul));
+	ApplyDifficulty();          // (the list of 2026-11-11: made again from its tier's, so the difficulty goes on once)
 	Tier = InTier;
 	if (G->MaxTier > 0)
 	{
@@ -449,6 +472,7 @@ void ARDMonster::BecomeAlly(float Seconds, float InHealth, float InDamage)
 {
 	const bool bRise = bDead;
 	bAlly = true; bDead = false; bCorpse = false; bFrozen = false; bBodyDown = false;
+	bHellElite = false; DiffHealthMul = DiffDamageMul = 1.f;          // (PR #47's review: hers is no elite of hell's)
 	MaxHealth = Health = FMath::Max(1.f, InHealth); Damage = FMath::Max(1.f, InDamage);
 	AllySeconds = Seconds; AllyLeft = Seconds;
 	bAggro = false; AttackTime = -1.f; Path.Reset(); DeadTime = 0.f; CurrentFoe = nullptr; Burns.Reset(); SlowUntil = CurseUntil = -100.f;
@@ -609,6 +633,15 @@ AActor* ARDMonster::PickFoe(URDCombatComponent* Pc, bool& bFoePlayer) const
 		if (D > G->AggroDistance || FMath::Abs(A->GetActorLocation().Z - L.Z) > 300.f) continue;
 		if (!Best || D < BestD * 0.85f) { Best = A; BestD = D; bFoePlayer = false; }
 	}
+	// (the list of 2026-11-11: a town's guard that fights it, close by)
+	for (const TWeakObjectPtr<ARDTownsfolk>& Gw : G->FightingGuards)
+	{
+		ARDTownsfolk* Gd = Gw.Get();
+		if (!Gd || !Gd->IsFighting()) continue;
+		const float D = FVector::Dist2D(Gd->GetActorLocation(), L);
+		if (D > 600.f || FMath::Abs(Gd->GetActorLocation().Z - L.Z) > 300.f) continue;
+		if (!Best || D < BestD * 0.85f) { Best = Gd; BestD = D; bFoePlayer = false; }
+	}
 	return Best;
 }
 
@@ -731,6 +764,7 @@ bool ARDMonster::TickCombat(float Dt)
 	AActor* P = AttackTime >= 0.f && CurrentFoe.IsValid() ? CurrentFoe.Get() : PickFoe(Pc, bFoePlayer);
 	if (AttackTime >= 0.f && P) bFoePlayer = Pc && P == Pc->GetOwner();
 	if (const ARDMonster* Fm = Cast<ARDMonster>(P); Fm && Fm->IsDead()) P = nullptr;
+	if (const ARDTownsfolk* Ft = Cast<ARDTownsfolk>(P); Ft && !Ft->IsFighting()) P = nullptr;          // (a guard beaten back)
 	if (!P || (bFoePlayer && Pc->IsDead()))
 	{
 		CurrentFoe = nullptr;
@@ -778,6 +812,7 @@ bool ARDMonster::TickCombat(float Dt)
 				// (mistward6: a blow that passes a hidden Rogue by carries no poison, weakness or slowness either)
 				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden && !Pc->bLastBlowAbsorbed) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
 				else if (ARDMonster* Fm = Cast<ARDMonster>(P)) { Fm->ApplyDamageAt(Dmg, this, nullptr); G->AddHitText(Fm->GetActorLocation() + FVector(0, 0, Fm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false); }
+				else if (ARDTownsfolk* Ft = Cast<ARDTownsfolk>(P)) Ft->TakeGuardBlow(Dmg, this);          // (the list of 2026-11-11: a guard)
 				++HitsLanded;
 			}
 		}

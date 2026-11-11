@@ -60,7 +60,16 @@ void URDCombatComponent::UpdateLeftHand()
 	if (bTorchHeld && !TorchItem.IsNone() && GetItemCount(TorchItem) > 0) Fit = FitOf(TorchItem);
 	else if (IsShieldInHand()) Fit = FitOf(WornShield);
 	// (what her drawn weapon has in the other hand gives way to the shield or the torch)
-	if (OffHandComp) { const FRDWeaponDef* W = Weapon(); OffHandComp->SetVisibility(!Fit && W && W->OffHandMesh != nullptr); }
+	// (the list of 2026-11-11: "when the warrior puts on a shield in inventory, then takes it off, her default appears on her arm
+	// again": a found sword's fit still carried the old built-in shield (SM_Shield_1) in its off hand. Where shields are things
+	// she finds and wears, a weapon's own shield is never shown: 918 noshield11 also takes them off the data)
+	if (OffHandComp)
+	{
+		const FRDWeaponDef* W = Weapon();
+		bool bOwnShield = W && W->OffHandMesh && W->OffHandMesh->GetName().Contains(TEXT("Shield"));
+		if (bOwnShield) bOwnShield = Generator->Items.ContainsByPredicate([](const FRDItemDef& It) { return It.Kind == ERDItemKind::Shield; });
+		OffHandComp->SetVisibility(!Fit && W && W->OffHandMesh != nullptr && !bOwnShield);
+	}
 	if (!Fit || !M)
 	{
 		LeftComp->SetVisibility(false);

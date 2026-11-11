@@ -17,6 +17,16 @@ Steps (name them; several in one run):
            on every map of the game where she is: her weapons' grips, holsters and blows (the Rogue's daggers and
            crossbow, 822's measures; the Summoner's knives), her found weapons' fits (855's knives, bows and crossbows) and
            her torch; on the hero menu the same in its hero copies and the weapons it holds on her
+The list's second phase (C++ RD/RDList11.cpp first):
+  noshield11  every found weapon's fit (any hero), the heroes' weapons (all three lists) and the level's without a shield mesh in
+           the off hand, on every map of the game ("when the warrior puts on a shield ... then takes it off, her default
+           appears on her arm again": 105 found swords' fits held SM_Shield_1)
+  basic    the Martial Artist's "Fists" labelled "Basic Attacks" (FRDWeaponDef::Label: the HUD's; the name stays the key) and her
+           controls' "switch basic attacks / chi", on every map and the hero menu (872 and martial_arts.json carry it too)
+  guards   (brokenspire) the guards' strikes: the Dwarf pack's Anim_Warrior_Attack_1-4 retargeted onto the NPC_Characters
+           pack's Manny (every guard's skeleton takes it as compatible), their hit times (the right hand's fastest after
+           0.3 s); each guard, militiaman, soldier, captain and templar its pack's sword (Knight_0N's, the Vikings a knight's;
+           Heaven's none: bare-handed) and its grip from the Manny's reference pose
 The bodies (blender_numpy): the Rogue: martialartist3_retarget.py -- Rogue.glb SourceArt/jrpg_rogue Rogue2.glb --maker
 rogue_clips,weapon5_clips --tag Rogue --carry Stab1,Stab2,Stab3,Shoot,RollF,RollB,W5_Bow --own --inplace Walk,Run --noskin
 --name Rogue2 --env W5_CLIPS=Bow --env W5_HERO=Rogue, then tripo_build.py on Rogue2_Animated.glb (SK_JRPG_Rogue Rogue 170 -).
@@ -27,7 +37,7 @@ CastBolt,Summon1,Summon2,Summon3,Summon4,Summon5,Stab1,Stab2,Stab3,Hit_to_body_0
 Summoner5, tripo_build.py on Summoner5_Animated.glb (SK_JRPG_Summoner4 Summoner4 168 -).
 In the editor: clean, 600 <CH> glb, 610 / 615 / 620, the armour (the Rogue: 849 heroes, summoner3_armour.py, 851), 913 rider,
 rig, then 819 (her character's MoveScale made an override again and her new walk / run speeds baked in).
-Args: steps [Hero]"""
+Args: steps [Hero]   (maidle | clean <Hero> | rig <Hero> | noshield11 | basic | guards)"""
 import os, sys, unreal
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools(); AL = unreal.AnimationLibrary
@@ -341,6 +351,180 @@ if "rig" in STEPS:
     if castle: do_menu(castle)
     gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
     les.load_level(MAPS + "mistward_castle")
+
+# ---------------------------------------------------------------- the list's second phase
+def each_map(maps, fn, what):
+    """fn(gen) on each map that has a generator, saved; its report"""
+    for m in maps:
+        if not eal.does_asset_exist(MAPS + m): REPORT.append(f"{what} {m}: no map"); continue
+        if not ues.get_editor_world().get_path_name().startswith(MAPS + m + "."): les.load_level(MAPS + m)
+        gen = next((a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDDungeonGenerator)), None)
+        if not gen: REPORT.append(f"{what} {m}: no generator"); continue
+        r = fn(gen)
+        gen.modify(); les.save_current_level()
+        REPORT.append(f"{what} {m}: {r}")
+        gen = None
+        import gc; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+
+
+def is_shield(mesh): return bool(mesh) and "shield" in mesh.get_name().lower()
+
+
+if "noshield11" in STEPS:
+    # ("when the warrior puts on a shield in inventory, then takes it off, her default appears on her arm again": 899 and 914 took
+    # the shield meshes off her hero's weapons and the level's, but every found sword's fit (855's) still had the old built-in
+    # SM_Shield_1 in its off hand, shown once no shield is worn. Every hero's, every list)
+    def noshield11(g):
+        def strip(ws):
+            n = 0; out = []
+            for w in ws:
+                if is_shield(w.get_editor_property("off_hand_mesh")): w.set_editor_property("off_hand_mesh", None); n += 1
+                out.append(w)
+            return out, n
+        items = list(g.get_editor_property("items")); fits_n = 0
+        for it in items:
+            if it.kind != unreal.RDItemKind.WEAPON: continue
+            fits = list(it.weapon_fits); ch = False
+            for f in fits:
+                wd = f.weapon
+                if is_shield(wd.off_hand_mesh): wd.off_hand_mesh = None; f.weapon = wd; ch = True; fits_n += 1
+            if ch: it.weapon_fits = fits
+        g.set_editor_property("items", items)
+        heroes = list(g.get_editor_property("heroes")); hn = 0
+        for h in heroes:
+            for lst in ("weapons", "locked_weapons", "later_weapons"):
+                try: ws = list(h.get_editor_property(lst))
+                except Exception: continue
+                ws, k = strip(ws); h.set_editor_property(lst, ws); hn += k
+        g.set_editor_property("heroes", heroes)
+        lw, ln = strip(list(g.get_editor_property("weapons"))); g.set_editor_property("weapons", lw)
+        left = sum(1 for it in g.get_editor_property("items") if it.kind == unreal.RDItemKind.WEAPON for f in it.weapon_fits if is_shield(f.weapon.off_hand_mesh))
+        return f"shield meshes off {fits_n} found weapons' fits, {hn} of the heroes' weapons, {ln} of the level's; left {left}"
+    each_map(GAME_MAPS, noshield11, "noshield11")
+
+if "basic" in STEPS:
+    # ("the martial artist's default attacks without chi should be labeled as 'Basic Attacks'": the weapon keeps its name
+    # "Fists" (the key of saves, the quick bar, the tables); FRDWeaponDef::Label is what the HUD shows)
+    LABEL = "Basic Attacks"
+    def label_ws(ws):
+        n = 0
+        for w in ws:
+            if str(w.name) == "Fists": w.set_editor_property("label", LABEL); n += 1
+        return ws, n
+    def fix_hero(h):
+        n = 0
+        for lst in ("weapons", "locked_weapons", "later_weapons"):
+            try: ws = list(h.get_editor_property(lst))
+            except Exception: continue
+            ws, k = label_ws(ws); h.set_editor_property(lst, ws); n += k
+        # (her controls' lines: "switch fists / chi")
+        t = h.export_text()
+        if "switch fists / chi" in t: h.import_text(t.replace("switch fists / chi", "switch basic attacks / chi")); n += 100
+        return n
+    def basic(g):
+        heroes = list(g.get_editor_property("heroes")); hn = 0
+        for h in heroes:
+            if str(h.name) == "MartialArtist": hn += fix_hero(h)
+        g.set_editor_property("heroes", heroes)
+        lw, ln = label_ws(list(g.get_editor_property("weapons"))); g.set_editor_property("weapons", lw)
+        return f"her weapons labelled {hn % 100}{' and her controls' if hn >= 100 else ''}, the level's {ln}"
+    each_map(GAME_MAPS, basic, "basic")
+    les.load_level(MAPS + MENU)
+    sel = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDHeroSelect))
+    hs = list(sel.get_editor_property("heroes")); n = 0
+    for h in hs:
+        if str(h.name) == "MartialArtist": n += fix_hero(h)
+    sel.set_editor_property("heroes", hs); les.save_current_level(); sel = None
+    REPORT.append(f"basic {MENU}: {n % 100} labelled")
+
+if "guards" in STEPS:
+    # ("when an ambush from outside town ... makes it into town, the guards should fight it": none of the NPC packs has a strike;
+    # the Dwarf pack's warrior attacks (its UE4 mannequin) retargeted onto the NPC_Characters pack's Manny, which every guard's
+    # skeleton (Knights_Pack, Vikings, NPC_Distopia) lists as compatible (914 sleep); each guard's own pack's sword in hand)
+    TD = "/Game/RandomDungeon/Anims/Town/Guard"; TR = "/Game/RandomDungeon/Anims/Town/Rigs"
+    src_mesh = unreal.load_asset("/Game/Dwarf_Pack/Mesh/SK_Mannequin"); assert src_mesh
+    tgt_mesh = unreal.load_asset("/Game/NPC_Characters_Pack/Demoscene_UE5/Mesh/SKM_Manny")
+    if not tgt_mesh:
+        sk = "/Game/NPC_Characters_Pack/Demoscene_UE5/Mesh/SKM_Manny_Skeleton"
+        tgt_mesh = next((unreal.load_asset(p.split(".")[0]) for p in eal.list_assets("/Game/NPC_Characters_Pack/Demoscene_UE5/Mesh", recursive=True)
+                         if isinstance(unreal.load_asset(p.split(".")[0]), unreal.SkeletalMesh) and unreal.load_asset(p.split(".")[0]).skeleton.get_path_name().startswith(sk)), None)
+    assert tgt_mesh, "no mesh on the NPC pack's Manny skeleton"
+    def mk(cls, fac, name, folder):
+        p = f"{folder}/{name}"
+        if eal.does_asset_exist(p): eal.delete_asset(p)
+        return at.create_asset(name, folder, cls, fac) or unreal.load_asset(p)
+    def auto_rig(name, mesh):
+        r = mk(unreal.IKRigDefinition, unreal.IKRigDefinitionFactory(), name, TR)
+        c = unreal.IKRigController.get_controller(r); c.set_skeletal_mesh(mesh); c.apply_auto_generated_retarget_definition()
+        try: c.apply_auto_fbik()
+        except Exception: pass
+        eal.save_loaded_asset(r); return r
+    srig = auto_rig("IK_Guard_DwarfSource", src_mesh); trig = auto_rig("IK_Guard_NPCManny", tgt_mesh)
+    rtg = mk(unreal.IKRetargeter, unreal.IKRetargetFactory(), "RTG_Guard_Dwarf_To_NPCManny", TR)
+    rc = unreal.IKRetargeterController.get_controller(rtg); rc.add_default_ops()
+    rc.set_ik_rig(unreal.RetargetSourceOrTarget.SOURCE, srig); rc.set_ik_rig(unreal.RetargetSourceOrTarget.TARGET, trig)
+    rc.set_preview_mesh(unreal.RetargetSourceOrTarget.SOURCE, src_mesh); rc.set_preview_mesh(unreal.RetargetSourceOrTarget.TARGET, tgt_mesh)
+    rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.SOURCE, srig); rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.TARGET, trig)
+    rc.auto_map_chains(unreal.AutoMapChainType.FUZZY, True)
+    rm = rc.get_op_controller(rc.get_index_of_op_by_name("Root Motion"))
+    rm.set_source_root_bone("root"); rm.set_target_root_bone("root"); rm.set_target_pelvis_bone("pelvis")
+    try: rc.auto_align_all_bones(unreal.RetargetSourceOrTarget.TARGET)
+    except Exception as e: print("GUARD align", e)
+    eal.save_loaded_asset(rtg)
+    CLIPS = ["Anim_Warrior_Attack_1", "Anim_Warrior_Attack_2", "Anim_Warrior_Attack_3", "Anim_Warrior_Attack_4"]
+    if eal.does_directory_exist(TD):
+        for p in eal.list_assets(TD, recursive=False): eal.delete_asset(p.split(".")[0])
+    inp = unreal.IKRetargetBatchOperationInputs()
+    inp.set_editor_property("assets_to_retarget", [eal.find_asset_data(f"/Game/Dwarf_Pack/Animations/1With_Weapon/{c}") for c in CLIPS])
+    inp.set_editor_property("source_mesh", src_mesh); inp.set_editor_property("target_mesh", tgt_mesh)
+    inp.set_editor_property("ik_retarget_asset", rtg); inp.set_editor_property("suffix", "_Guard")
+    inp.set_editor_property("target_path", TD); inp.set_editor_property("include_referenced_assets", False)
+    inp.set_editor_property("overwrite_existing_files", True)
+    unreal.IKRetargetBatchOperation.run_batch_retarget(inp)
+    strikes, hits = [], []
+    for c in CLIPS:
+        a = unreal.load_asset(f"{TD}/{c}_Guard"); assert a, c
+        a.set_editor_property("enable_root_motion", False); a.set_editor_property("force_root_lock", True); eal.save_loaded_asset(a, False)
+        # (its blow: the right hand's fastest moment after the first 0.3 s (the raise))
+        L, hit = MR.fastest(a, ["hand_r"], 0.3)
+        strikes.append(a); hits.append(round(hit, 3))
+    # (the sword in the hand: its pommel at the mesh's origin, the blade up its +Z; held as a dagger is held (ma_rig's hand
+    # frame on the NPC Manny's reference pose), its crossguard along the knuckles)
+    APE = unreal.AnimPoseExtensions; ML = unreal.MathLibrary
+    ref = APE.get_reference_pose(tgt_mesh.skeleton)
+    def bone(n): return APE.get_bone_pose(ref, n, unreal.AnimPoseSpaces.WORLD)
+    hand = bone("hand_r"); h = hand.translation
+    fore = (h - bone("lowerarm_r").translation).normal()
+    along = (bone("middle_01_r").translation - h).normal()
+    th = bone("thumb_01_r").translation - h; th = th - along * th.dot(along); th = (th - fore * th.dot(fore)).normal()
+    palm = h + fore * 7.0 + (bone("middle_01_r").translation - h) * 0.25
+    SWORDS = {"Knight_01": "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Sword", "Knight_02": "/Game/Knights_Pack/Meshes/Knight_02/Weapons/SM_Knight_02_Sword",
+              "Knight_03": "/Game/Knights_Pack/Meshes/Knight_03/Weapon/SM_Knight_03_Sword", "Knight_04": "/Game/Knights_Pack/Meshes/Knight_01/Weapons/SM_Knight_01_Sword",
+              "Knight_05": "/Game/Knights_Pack/Meshes/Knight_05/Weapon/SM_Knight_05_Sword", "Viking": "/Game/Knights_Pack/Meshes/Knight_02/Weapons/SM_Knight_02_Sword"}
+    GRIP_Z = 9.0
+    def grip_of(sw):
+        bb = sw.get_bounding_box(); gx = (bb.max.x - bb.min.x) > (bb.max.y - bb.min.y)
+        # (the guard's long axis on the mesh (x or y) along the hand's knuckles, the blade along the thumb)
+        rot = ML.make_rot_from_zx(th, along) if gx else ML.make_rot_from_zy(th, along)
+        return ML.make_relative_transform(unreal.Transform(palm - ML.get_up_vector(rot) * GRIP_Z, rot, V(1, 1, 1)), hand)
+    V = unreal.Vector
+    FIGHT = ("GUARD", "MILITIA", "SOLDIER", "CAPTAIN", "TEMPLAR")
+    def guards(g):
+        g.set_editor_property("town_guard_strikes", strikes); g.set_editor_property("town_guard_hit_times", hits)
+        g.set_editor_property("town_guards_fight", True)
+        defs = list(g.get_editor_property("townsfolk")); n = 0; bare = []; by = {}
+        for d in defs:
+            if str(d.role).split(".")[-1].split(":")[0].upper() not in FIGHT: continue
+            mp = d.mesh.get_path_name() if d.mesh else ""
+            key = next((k for k in SWORDS if k in mp), None)
+            if key:
+                sw = unreal.load_asset(SWORDS[key]); d.set_editor_property("guard_weapon", sw); d.set_editor_property("guard_grip", grip_of(sw)); by[key] = by.get(key, 0) + 1
+            else:
+                d.set_editor_property("guard_weapon", None); bare.append(str(d.name))
+            n += 1
+        g.set_editor_property("townsfolk", defs)
+        return f"{n} fighters ({by}; bare-handed {bare}), strikes {[a.get_name() for a in strikes]} hit at {hits}"
+    each_map(("brokenspire",), guards, "guards")
 
 print("918 " + " | ".join(REPORT))
 import gc
