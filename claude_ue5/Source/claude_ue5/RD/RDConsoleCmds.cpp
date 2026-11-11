@@ -1,6 +1,7 @@
 // Console commands of the list of 2026-11-10 (docs/improvements10.txt): the weather set by hand, and a jump to each major city for
 // testing. Typed at the editor's console or the game's own (RDConsole.cpp passes any line to the player controller).
-//   rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|0-7>   the weather at once, held there; rd.Weather auto: it changes again
+//   rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|cloudless|0-8>   the weather at once, held there; rd.Weather auto: it
+//   changes again (cloudless, 2026-11-10: no cloud layer at all; the rotation never picks it)
 //   rd.GoTo <brokenspire|ashenreach|graymourne|velmorrath|kethrys|heaven> out to that city, by the map's fast travel (from a dungeon
 //   back to Brokenspire first); for testing: found or not, enemies near or not
 #include "RD/RDDungeonGenerator.h"
@@ -33,15 +34,15 @@ namespace
 		if (!G) { UE_LOG(LogRDConsoleCmds, Warning, TEXT("rd.Weather: no generator in this world")); return; }
 		if (Args.Num() == 0)
 		{
-			RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s%s (clear, fair, cloudy, overcast, rain, storm, snow, fog, or auto)"), *ARDDungeonGenerator::WeatherName(G->GetWeather()), G->bWeatherHeld ? TEXT(", held") : TEXT("")));
+			RDCmdSay(G, FString::Printf(TEXT("rd.Weather: %s%s (clear, fair, cloudy, overcast, rain, storm, snow, fog, cloudless, or auto)"), *ARDDungeonGenerator::WeatherName(G->GetWeather()), G->bWeatherHeld ? TEXT(", held") : TEXT("")));
 			return;
 		}
 		const FString A = Args[0].ToLower();
 		if (A == TEXT("auto")) { G->bWeatherHeld = false; RDCmdSay(G, TEXT("rd.Weather: the weather changes by itself again")); return; }
 		int32 K = -1;
 		if (A.IsNumeric()) K = FCString::Atoi(*A);
-		else for (int32 I = 0; I < 8; ++I) if (ARDDungeonGenerator::WeatherName(I) == A) K = I;
-		if (K < 0 || K > 7) { RDCmdSay(G, FString::Printf(TEXT("rd.Weather: no weather named %s"), *Args[0])); return; }
+		else for (int32 I = 0; I < ARDDungeonGenerator::NumWeathers; ++I) if (ARDDungeonGenerator::WeatherName(I) == A) K = I;
+		if (K < 0 || K >= ARDDungeonGenerator::NumWeathers) { RDCmdSay(G, FString::Printf(TEXT("rd.Weather: no weather named %s"), *Args[0])); return; }
 		if (!G->bSky7 || !G->bTown) { RDCmdSay(G, TEXT("rd.Weather: this level has no sky of its own (the towns and the wilderness have)")); return; }
 		G->SetWeather(K, true);
 		G->bWeatherHeld = true;
@@ -62,7 +63,7 @@ namespace
 	}
 
 	FAutoConsoleCommandWithWorldAndArgs GRDWeatherCmd(TEXT("rd.Weather"),
-		TEXT("The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|0-7>; rd.Weather auto lets it change again"),
+		TEXT("The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|cloudless|0-8>; cloudless: no clouds at all, not even on the horizon (never chosen by itself); rd.Weather auto lets it change again"),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDWeatherCommand));
 	FAutoConsoleCommandWithWorldAndArgs GRDGoToCmd(TEXT("rd.GoTo"),
 		TEXT("For testing: out to a major city by fast travel (found or not): rd.GoTo <brokenspire|velmorrath|ashenreach|graymourne|kethrys|heaven>"),

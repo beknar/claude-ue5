@@ -3396,6 +3396,162 @@ def step_sky10():
     res["far_land_after"] = str(g.get_far_land_state())
     fl = res["far_land_after"].split("|")
     step_result("sky10", len(fl) > 5 and fl[0] == "1" and int(fl[5]) >= 1 and res.get("after_100m") == 0 and res.get("after_200m", 0) >= 1, **res)
+def step_skyspin():
+    """the shipping game (2026-11-10): "there is still a disc in the sky that rotates faster than the sky closer to the horizon":
+    the high clouds' dome was turned about the zenith. Now it must not turn (its yaw stays 0) and its layer drifts in a straight
+    line along the wind (the drift grows by SkyHighSpeed x (0.4 + the wind) a second). Pictures straight up, the volumetric
+    clouds and the far land hidden and the drift 16 times as fast, 4 s apart (skyspin_up_a / _b: measured offline by
+    blender_numpy/sky_shift.py, every part's shift the same translation, not a turn), the layer's brightness there with and
+    without it, and the sky as drawn at noon, fair and cloudy, and at midnight"""
+    g = G["gen"]; res = {"shots": []}
+    def st():
+        p = str(g.get_sky_state()).split("|")
+        return {"wind": float(p[3]), "drift": float(p[15]), "yaw": float(p[16]), "wx": float(p[17]), "wy": float(p[18])} if len(p) > 18 else {}
+    G["pawn"].set_actor_hidden_in_game(True)
+    boom = G["pawn"].get_component_by_class(unreal.SpringArmComponent)
+    to_ = boom.get_editor_property("target_offset") if boom else None
+    keep = ((to_.x, to_.y, to_.z), bool(boom.get_editor_property("do_collision_test"))) if boom else None
+    if boom: boom.set_editor_property("target_offset", V(0, 0, 4000)); boom.set_editor_property("do_collision_test", False)
+    high = clouds = far = None; sp = None
+    try:
+        comps = {c.get_name(): c for c in g.get_components_by_class(unreal.SceneComponent)}
+        high, clouds, far = comps.get("RDSkyHigh"), comps.get("RDSkyClouds"), comps.get("RDFarLand")
+        res["parts"] = {"high": high is not None, "clouds": clouds is not None, "farland": far is not None}
+        g.set_town_hour(12.0); g.set_weather(1, True); yield from rwait(4.0)
+        sp = g.get_editor_property("sky_high_speed"); res["speed"] = sp
+        a = st(); t0 = now(); yield from rwait(3.0); b = st(); dt = now() - t0
+        res["before"], res["after"], res["game_s"] = a, b, round(dt, 2)
+        if a and b:
+            tile = g.get_editor_property("sky_high_tile_cm")
+            moved = (b["drift"] - a["drift"]) % tile
+            res["drift_cm"] = round(moved); res["drift_want_cm"] = round(sp * (0.4 + a["wind"]) * dt)
+        # (only the high clouds: their motion overhead, sped up)
+        for c_ in (clouds, far):
+            if c_: c_.set_visibility(False)
+        g.set_editor_property("sky_high_speed", sp * 16.0); yield from rwait(1.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=85.0, yaw=30.0)); yield from rwait(1.0)
+        for nm in ("skyspin_up_a", "skyspin_up_b"):
+            res.setdefault("up_drift", []).append(st().get("drift"))
+            shot(nm, "960x540"); res["shots"].append(nm); yield from rwait(4.0)
+        # (the layer is drawn: the middle of the view overhead brighter with it than without it (a first build drew nothing but a
+        # grain: its noise's position pin was not joined))
+        box = (0.27, 0.42, 0.73, 0.88)
+        res["luma_with"] = yield from shot_luma("skyspin_luma_with", box)
+        if high: high.set_visibility(False)
+        yield from rwait(0.6); res["luma_without"] = yield from shot_luma("skyspin_luma_without", box)
+        if high: high.set_visibility(True)
+        g.set_editor_property("sky_high_speed", sp)
+        for c_ in (clouds, far):
+            if c_: c_.set_visibility(True)
+        # (as drawn)
+        for hour, wk, pitch, nm in ((12.0, 1, 25.0, "skyspin_noon_fair_p25"), (12.0, 1, 85.0, "skyspin_noon_fair_p85"), (12.0, 2, 25.0, "skyspin_noon_cloudy_p25"),
+                                    (12.0, 2, 85.0, "skyspin_noon_cloudy_p85"), (12.0, 3, 25.0, "skyspin_noon_overcast_p25"),
+                                    (0.0, 1, 85.0, "skyspin_night_fair_p85"), (0.0, 1, 25.0, "skyspin_night_fair_p25")):
+            g.set_town_hour(hour); g.set_weather(wk, True); yield from rwait(3.0)
+            if high: res.setdefault("amount", {})[wk] = round(high.get_material(0).get_scalar_parameter_value("Amount"), 3)   # (by weather: 1 fair, 3 overcast)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=30.0)); yield from rwait(1.0)
+            shot(nm, "960x540"); res["shots"].append(nm); yield from rwait(1.3)
+        g.set_town_hour(12.0); g.set_weather(1, True)
+    finally:
+        for c_ in (clouds, far, high):
+            if c_: c_.set_visibility(True)
+        if sp is not None: g.set_editor_property("sky_high_speed", sp)
+        G["pawn"].set_actor_hidden_in_game(False)
+        restore_boom(boom, keep)
+    ok = (bool(a) and bool(b) and abs(a["yaw"]) < 0.01 and abs(b["yaw"]) < 0.01 and res.get("drift_want_cm", 0) > 0
+          and 0.6 <= res["drift_cm"] / res["drift_want_cm"] <= 1.4
+          and res.get("luma_with") is not None and res.get("luma_without") is not None and res["luma_with"] - res["luma_without"] >= 4.0
+          and res.get("amount", {}).get(1, 0) > 0.99 and res.get("amount", {}).get(3, 1) < 0.05)
+    step_result("skyspin", ok, **res)
+def step_cloudless():
+    """truly clear weather (2026-11-10: "a setting for the console [that gives] truly clear weather that's separate from the
+    current clear"): from 40 m over the town at noon, her body hidden, pictures of the horizon (pitch -3), 25 degrees and
+    straight up for clear weather as drawn, for clear with the engine's r.VolumetricCloud 0 (what a build without cloudless can
+    do from its console), and for rd.Weather cloudless; cloudless must be its own weather (its name, held), with the cloud
+    layer hidden and the high clouds' Amount 0, and fair weather after it must bring the clouds back"""
+    g = G["gen"]; w = G["w"]; res = {"shots": []}
+    def cmd(c_): unreal.SystemLibrary.execute_console_command(w, c_)
+    G["pawn"].set_actor_hidden_in_game(True)
+    boom = G["pawn"].get_component_by_class(unreal.SpringArmComponent)
+    to_ = boom.get_editor_property("target_offset") if boom else None
+    keep = ((to_.x, to_.y, to_.z), bool(boom.get_editor_property("do_collision_test"))) if boom else None
+    if boom: boom.set_editor_property("target_offset", V(0, 0, 4000)); boom.set_editor_property("do_collision_test", False)
+    try:
+        comps = {c.get_name(): c for c in g.get_components_by_class(unreal.SceneComponent)}
+        high, clouds = comps.get("RDSkyHigh"), comps.get("RDSkyClouds")
+        def state(tag_):
+            p = str(g.get_sky_state()).split("|")
+            res[tag_] = {"weather": p[0], "cover": float(p[1]), "clouds_visible": bool(clouds and clouds.is_visible()),
+                         "high_amount": round(high.get_material(0).get_scalar_parameter_value("Amount"), 3) if high else None}
+        g.set_town_hour(12.0)
+        for variant, cmds in (("clear", ["rd.Weather clear"]), ("clear_novolcloud", ["rd.Weather clear", "r.VolumetricCloud 0"]),
+                              ("cloudless", ["r.VolumetricCloud 1", "rd.Weather cloudless"])):
+            for c_ in cmds: cmd(c_)
+            yield from rwait(4.0); state(variant)
+            for pitch in (-3, 25, 85):
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=float(pitch), yaw=30.0)); yield from rwait(1.0)
+                nm = f"cloudless_{variant}_p{pitch}"; shot(nm, "960x540"); res["shots"].append(nm); yield from rwait(1.3)
+        # (it stays: the weather's own clock does not turn it, held as every rd.Weather is)
+        yield from rwait(2.0); state("cloudless_later")
+        cmd("rd.Weather fair"); yield from rwait(2.0); state("fair_after")
+    finally:
+        cmd("r.VolumetricCloud 1"); cmd("rd.Weather auto"); g.set_weather(1, True)
+        G["pawn"].set_actor_hidden_in_game(False)
+        restore_boom(boom, keep)
+    c = res.get("cloudless", {}); f = res.get("fair_after", {})
+    ok = (c.get("weather") == "cloudless" and c.get("clouds_visible") is False and c.get("high_amount") == 0.0
+          and res.get("cloudless_later", {}).get("weather") == "cloudless"
+          and f.get("weather") == "fair" and f.get("clouds_visible") is True and (f.get("high_amount") or 0) > 0.9)
+    step_result("cloudless", ok, **res)
+def step_horizon():
+    """the far land and the haze over it (2026-11-10: "when the sky is cloudless, there is still a strip of white near the
+    horizon"; "if it's distant land, it should be textured the same way it would be textured when approached"): from 40 m over
+    the town, her body hidden, cloudless, pictures of the horizon (pitch -3) at 9, 12, 17.5 and 22 o'clock (measured offline by
+    blender_numpy/sky_horizon.py: the land just under the horizon against the sky just over it), and at noon in fair, overcast
+    and fog weather. Checked here: the far land is drawn in the chunks' ground material; the fog's cap is the clear air's in
+    cloudless and fair weather, higher overcast, the level's own in fog; the evening's fog is dimmer and warmer than noon's,
+    the night's as before (the day's colour x 0.12)"""
+    g = G["gen"]; w = G["w"]; res = {"shots": [], "haze": {}}
+    def cmd(c_): unreal.SystemLibrary.execute_console_command(w, c_)
+    def haze():
+        p = str(g.get_haze_state()).split("|"); c = [float(x) for x in p[1].split(",")]
+        return {"cap": float(p[0]), "col": c, "level_cap": float(p[2])}
+    cmd("rd.Weather cloudless")
+    G["pawn"].set_actor_hidden_in_game(True)
+    boom = G["pawn"].get_component_by_class(unreal.SpringArmComponent)
+    to_ = boom.get_editor_property("target_offset") if boom else None
+    keep = ((to_.x, to_.y, to_.z), bool(boom.get_editor_property("do_collision_test"))) if boom else None
+    if boom: boom.set_editor_property("target_offset", V(0, 0, 4000)); boom.set_editor_property("do_collision_test", False)
+    try:
+        yield from rwait(2.0)
+        fl = str(g.get_far_land_state()).split("|"); res["far_land"] = fl
+        res["clear_cap"] = g.get_editor_property("fog_clear_max_opacity")
+        for hour in (9.0, 12.0, 17.5, 22.0):
+            g.set_town_hour(hour); yield from rwait(3.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3.0, yaw=30.0)); yield from rwait(1.5)
+            nm = f"horizon_{int(hour * 10):03d}"; shot(nm, "960x540"); res["shots"].append(nm); yield from rwait(1.3)
+            res["haze"][nm] = haze()
+        g.set_town_hour(12.0)
+        for wname in ("fair", "overcast", "fog"):
+            cmd(f"rd.Weather {wname}"); yield from rwait(3.0)
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3.0, yaw=30.0)); yield from rwait(1.0)
+            nm = f"horizon_120_{wname}"; shot(nm, "960x540"); res["shots"].append(nm); yield from rwait(1.3)
+            res["haze"][nm] = haze()
+    finally:
+        cmd("rd.Weather auto"); g.set_weather(1, True)
+        G["pawn"].set_actor_hidden_in_game(False); restore_boom(boom, keep)
+    hz = res["haze"]; cc = res["clear_cap"]
+    def lum(c): return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    noon, eve, night = hz["horizon_120"]["col"], hz["horizon_175"]["col"], hz["horizon_220"]["col"]
+    res["evening_vs_noon"] = {"luminance": round(lum(eve) / max(lum(noon), 1e-6), 3), "red_over_blue": [round(noon[0] / max(noon[2], 1e-6), 3), round(eve[0] / max(eve[2], 1e-6), 3)]}
+    res["night_vs_noon"] = [round(night[k] / max(noon[k], 1e-6), 3) for k in range(3)]
+    ok = (len(fl) > 6 and fl[6] == "M_RD_WildGround"
+          and all(abs(hz[f"horizon_{h}"]["cap"] - cc) < 0.005 for h in ("090", "120", "175", "220"))
+          and abs(hz["horizon_120_fair"]["cap"] - cc) < 0.005 and cc + 0.05 < hz["horizon_120_overcast"]["cap"] < 0.6
+          and hz["horizon_120_fog"]["cap"] > 0.9
+          and res["evening_vs_noon"]["luminance"] < 0.5 and res["evening_vs_noon"]["red_over_blue"][1] > 1.5 * res["evening_vs_noon"]["red_over_blue"][0]
+          and all(abs(r - 0.12) < 0.005 for r in res["night_vs_noon"]))
+    step_result("horizon", ok, **res)
 def step_sun10():
     """(a probe) the sun's disc looked at straight, clear and fair, at 9, 12 and 16 o'clock: the camera along the sun light's way"""
     g = G["gen"]; res = {"shots": []}
@@ -4125,7 +4281,7 @@ STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "
               "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9,
-              "sky9": step_sky9, "sky10": step_sky10, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
+              "sky9": step_sky9, "sky10": step_sky10, "skyspin": step_skyspin, "cloudless": step_cloudless, "horizon": step_horizon, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})
 def run():
     o = G.get("gen"); R["windows_hidden"] = str(o.slate_clear_view()) if o else None
     # (every dungeon's way open for the steps that go down (the list of 2026-11-08b's keys); keys9 shuts them for itself)

@@ -131,6 +131,28 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).
 
+## The high clouds that turned (2026-11-10, the shipping game: `RD/RDSky.cpp`, `890 sky`, `884 skyspin`)
+
+- **A sky layer turned about the zenith reads as a disc spinning overhead** against layers that drift in a straight line (the volumetric clouds); a texture panned along a sphere's U is a turn about the zenith too. Every layer moves the way the others do: the high clouds are a flat layer drifting along the clouds' wind, and their dome never turns.
+- **`connect_material_expressions` fails silently on a wrong pin name**: the noise node's position pin is "World Position" (`get_material_expression_input_names`). Joined as "Position" nothing was joined and the noise read the world's centimetres: a grain over the whole sky, unchanged when the layer's tile was made 10,000 times wider. Assert the connections a material depends on.
+- **`TextureExporterPNG` on an HDR texture asserts and takes the editor down** (`SupportsTexture`, the engine's `T_CloudPattern`): don't export a texture to look at it without knowing its format.
+- **Motion in two pictures is measured part by part** (`blender_numpy/sky_shift.py`): phase correlation of the whole on soft cloud shapes gave weak, disagreeing peaks; a least-squares search per part gave one shift for all within 1.6 px.
+
+## The far land as the ground, and its haze (2026-11-10, later: `RD/RDSkyFar.cpp`, `RD/RDSky.cpp`, `RD/RDTownDay.cpp`, `884 horizon`)
+
+- **A strip at the horizon is told apart by measuring down a column** (`blender_numpy/sky_horizon.py`): the sky darkened smoothly to (126, 181, 204) and jumped in one row to a flat (183, 194, 208) with hill-shaped tops: land, not sky. Measure each change as the land against the sky just over it, at several hours: the fog's fixed daylight grey made it +22 at noon and +110 at 17:30.
+- **What a far quad holds, it holds over kilometres**: one lava sample spread a glow over a whole hill, as a lava quad and again as the ground material's own glow from the colour's alpha; a lake's level held at a dry corner would float a sheet over the lowland. The far land has no lava, and its water goes down under a dry corner's ground.
+- **The sky atmosphere's aerial perspective follows the hour; a fog colour does not**: the fog lit by the atmosphere (`HeightFogContribution` up to 8, its own colour off) turned the near town blue and stayed blue at dusk. The clear air's haze is the atmosphere's; the height fog is capped low there and rises with the weather's and the port's fog, and dims and warms with the sun low.
+- **PR #45's review (2026-11-11)**: the far land's water lay under the chunks too, sunk only its ring's few metres: under a
+  chunk's lake deeper than that it was a second surface between the chunk's water and its bed. No far water where the chunks
+  lie or may come before the ring is made again (`WildDropM`, half a chunk, `FarLandRebuildM`: 81 quads left of 83). The far
+  land and the chunks take a ground vertex from one function (`RDWildGroundVertex`, RDWild.h), or a change to the rock, snow
+  or crops' encoding would have to be made twice. A material's parameters that a tick's arithmetic depends on are set in the
+  same tick (the drift wrapped at the live tile, the material repeated at the one set at start). A table's count is one
+  constant (`ARDDungeonGenerator::NumWeathers`, `WeatherCloudless`), not literals in each file. A test step that sets an
+  engine console variable or hides her puts it back in a `finally`.
+- **A probe's setting the game resets four times a second is set every frame, or made the game's own**: the fog's density and colour are written by `ApplySky7` and `ApplyDayNight`; the probe's later rounds set generator properties the game applies.
+
 ## The far land (2026-11-10, `RD/RDSkyFar.cpp`)
 
 - **Past the chunks' 2 km nothing was drawn**: a ring of coarse land (0.85 to 80 km, 17 rings of 192 points from `Wild->Sample`, under the ground so the chunks draw over it) closes the horizon; made again once she has gone 150 m (12 ms). PR #39's review: a ring that starts where the chunks end leaves a gap behind her until it is made again (its inner edge must be the chunks' reach less the distance it is made again at), and one that lies under the chunks shows over a valley between two of its points unless it is sunk by its spacing (4 m and 6 % of the way to the next ring). Its components are `Transient` without Blueprint flags: a test finds them by name (`RDFarLand`, `RDSkyHigh`, ...).

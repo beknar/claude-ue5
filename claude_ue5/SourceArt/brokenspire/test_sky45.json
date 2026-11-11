@@ -1,0 +1,238 @@
+{
+ "tag": "sky45",
+ "plan": [
+  "skyspin",
+  "cloudless",
+  "horizon"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "skyspin",
+   "ok": true,
+   "shots": [
+    "skyspin_up_a",
+    "skyspin_up_b",
+    "skyspin_noon_fair_p25",
+    "skyspin_noon_fair_p85",
+    "skyspin_noon_cloudy_p25",
+    "skyspin_noon_cloudy_p85",
+    "skyspin_noon_overcast_p25",
+    "skyspin_night_fair_p85",
+    "skyspin_night_fair_p25"
+   ],
+   "parts": {
+    "high": true,
+    "clouds": true,
+    "farland": true
+   },
+   "speed": 2500.0,
+   "before": {
+    "wind": 0.25,
+    "drift": 13036.0,
+    "yaw": 0.0,
+    "wx": 1.0,
+    "wy": 0.0
+   },
+   "after": {
+    "wind": 0.25,
+    "drift": 17980.0,
+    "yaw": 0.0,
+    "wx": 1.0,
+    "wy": 0.0
+   },
+   "game_s": 3.04,
+   "drift_cm": 4944,
+   "drift_want_cm": 4944,
+   "up_drift": [
+    71124.0,
+    145151.0
+   ],
+   "luma_with": 75.25,
+   "luma_without": 66.14,
+   "amount": {
+    "1": 1.0,
+    "2": 0.612,
+    "3": 0.0
+   }
+  },
+  {
+   "step": "cloudless",
+   "ok": true,
+   "shots": [
+    "cloudless_clear_p-3",
+    "cloudless_clear_p25",
+    "cloudless_clear_p85",
+    "cloudless_clear_novolcloud_p-3",
+    "cloudless_clear_novolcloud_p25",
+    "cloudless_clear_novolcloud_p85",
+    "cloudless_cloudless_p-3",
+    "cloudless_cloudless_p25",
+    "cloudless_cloudless_p85"
+   ],
+   "clear": {
+    "weather": "clear",
+    "cover": 0.04,
+    "clouds_visible": true,
+    "high_amount": 1.0
+   },
+   "clear_novolcloud": {
+    "weather": "clear",
+    "cover": 0.04,
+    "clouds_visible": true,
+    "high_amount": 1.0
+   },
+   "cloudless": {
+    "weather": "cloudless",
+    "cover": 0.0,
+    "clouds_visible": false,
+    "high_amount": 0.0
+   },
+   "cloudless_later": {
+    "weather": "cloudless",
+    "cover": 0.0,
+    "clouds_visible": false,
+    "high_amount": 0.0
+   },
+   "fair_after": {
+    "weather": "fair",
+    "cover": 0.32,
+    "clouds_visible": true,
+    "high_amount": 1.0
+   }
+  },
+  {
+   "step": "horizon",
+   "ok": true,
+   "shots": [
+    "horizon_090",
+    "horizon_120",
+    "horizon_175",
+    "horizon_220",
+    "horizon_120_fair",
+    "horizon_120_overcast",
+    "horizon_120_fog"
+   ],
+   "haze": {
+    "horizon_090": {
+     "cap": 0.12,
+     "col": [
+      0.42,
+      0.45,
+      0.5
+     ],
+     "level_cap": 0.94
+    },
+    "horizon_120": {
+     "cap": 0.12,
+     "col": [
+      0.42,
+      0.45,
+      0.5
+     ],
+     "level_cap": 0.94
+    },
+    "horizon_175": {
+     "cap": 0.12,
+     "col": [
+      0.14,
+      0.0924,
+      0.0643
+     ],
+     "level_cap": 0.94
+    },
+    "horizon_220": {
+     "cap": 0.12,
+     "col": [
+      0.0504,
+      0.054,
+      0.06
+     ],
+     "level_cap": 0.94
+    },
+    "horizon_120_fair": {
+     "cap": 0.12,
+     "col": [
+      0.42,
+      0.45,
+      0.5
+     ],
+     "level_cap": 0.94
+    },
+    "horizon_120_overcast": {
+     "cap": 0.284,
+     "col": [
+      0.42,
+      0.45,
+      0.5
+     ],
+     "level_cap": 0.94
+    },
+    "horizon_120_fog": {
+     "cap": 0.94,
+     "col": [
+      0.42,
+      0.45,
+      0.5
+     ],
+     "level_cap": 0.94
+    }
+   },
+   "far_land": [
+    "1",
+    "1",
+    "66",
+    "8",
+    "11.0",
+    "2",
+    "M_RD_WildGround",
+    "81"
+   ],
+   "clear_cap": 0.11999999731779099,
+   "evening_vs_noon": {
+    "luminance": 0.225,
+    "red_over_blue": [
+     0.84,
+     2.177
+    ]
+   },
+   "night_vs_noon": [
+    0.12,
+    0.12,
+    0.12
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_sky45_skyspin_up_a.png",
+  "bs_sky45_skyspin_up_b.png",
+  "bs_sky45_skyspin_luma_with.png",
+  "bs_sky45_skyspin_luma_without.png",
+  "bs_sky45_skyspin_noon_fair_p25.png",
+  "bs_sky45_skyspin_noon_fair_p85.png",
+  "bs_sky45_skyspin_noon_cloudy_p25.png",
+  "bs_sky45_skyspin_noon_cloudy_p85.png",
+  "bs_sky45_skyspin_noon_overcast_p25.png",
+  "bs_sky45_skyspin_night_fair_p85.png",
+  "bs_sky45_skyspin_night_fair_p25.png",
+  "bs_sky45_cloudless_clear_p-3.png",
+  "bs_sky45_cloudless_clear_p25.png",
+  "bs_sky45_cloudless_clear_p85.png",
+  "bs_sky45_cloudless_clear_novolcloud_p-3.png",
+  "bs_sky45_cloudless_clear_novolcloud_p25.png",
+  "bs_sky45_cloudless_clear_novolcloud_p85.png",
+  "bs_sky45_cloudless_cloudless_p-3.png",
+  "bs_sky45_cloudless_cloudless_p25.png",
+  "bs_sky45_cloudless_cloudless_p85.png",
+  "bs_sky45_horizon_090.png",
+  "bs_sky45_horizon_120.png",
+  "bs_sky45_horizon_175.png",
+  "bs_sky45_horizon_220.png",
+  "bs_sky45_horizon_120_fair.png",
+  "bs_sky45_horizon_120_overcast.png",
+  "bs_sky45_horizon_120_fog.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

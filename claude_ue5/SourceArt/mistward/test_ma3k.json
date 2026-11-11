@@ -1,0 +1,133 @@
+{
+ "tag": "ma3k",
+ "plan": [
+  "martial",
+  "maarm"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "martial",
+   "ok": true,
+   "hero": "MartialArtist",
+   "hp": 140.0,
+   "mana": 100.0,
+   "weapons": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ],
+   "pawn": "BP_MA_MartialArtistCharacter_C",
+   "fists": {
+    "damage": 44.0,
+    "damage_of": 44.0,
+    "bonus": 0.0,
+    "started": true,
+    "lost": 44.0,
+    "hits": 1
+   },
+   "ring_worn": true,
+   "ring": {
+    "amount": 2.200000047683716,
+    "fists": 140.8,
+    "chi": 23.0
+   },
+   "knife": {
+    "index": 3,
+    "damage": 11.0,
+    "damage_of": 38.5,
+    "bonus": 2.5,
+    "both_hands": true,
+    "type": "short blades",
+    "lost": 38.5
+   },
+   "ring_off": {
+    "fists": 44.0,
+    "knife": 14.3
+   },
+   "chi": {
+    "name": "Straight Punch",
+    "started": true,
+    "mana": 7.0,
+    "lost": 23.0,
+    "fx": 38,
+    "released": 0,
+    "bolts": 1,
+    "damage_of": 23.0,
+    "pictured": true,
+    "splash_lost": 11.5
+   },
+   "chi_far": {
+    "name": "Straight Punch",
+    "started": false,
+    "mana": 0.0,
+    "lost": 0.0,
+    "fx": 0,
+    "released": 0,
+    "bolts": 0,
+    "damage_of": 23.0,
+    "pictured": false
+   },
+   "dash": {
+    "started": true,
+    "before_m": 6.0,
+    "after_m": 0.76,
+    "length": 444.0,
+    "at_it": true,
+    "attacked": 1,
+    "lost": 44.0,
+    "dashes": 1
+   },
+   "rolls": 1,
+   "medium_worn": "None",
+   "light_worn": "Desert Hero’s Armour",
+   "armour_share": 0.2,
+   "boss": {
+    "weapons": [
+     "Smashing Strike",
+     "Roundhouse Kick"
+    ],
+    "unlocked": 2
+   },
+   "asked": 2,
+   "after_ask": [
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_death": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick",
+    "Smashing Strike",
+    "Roundhouse Kick",
+    "Chain Punch",
+    "Rear Kick"
+   ],
+   "after_restart": [
+    "Fists",
+    "Straight Punch",
+    "Side Kick"
+   ]
+  },
+  {
+   "step": "maarm",
+   "ok": true,
+   "flare_r": 27.6,
+   "flare_l": 30.1,
+   "past_shoulder_r": 17.4,
+   "past_shoulder_l": 19.3
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_ma3k_ma_knife.png",
+  "mw_ma3k_ma_chi_straight.png",
+  "mw_ma3k_ma_dash.png",
+  "mw_ma3k_ma_armour.png",
+  "mw_ma3k_ma_stance.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

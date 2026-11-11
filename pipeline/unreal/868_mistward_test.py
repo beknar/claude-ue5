@@ -1241,6 +1241,47 @@ def step_death():
     step_result("death", ok, **res)
 
 # ------------------------------------------------------------------------------------------------ the hero menu with the mouse
+def step_menulook():
+    """(play in mistward_castle_select: 868_mistward_test.ps1 menulook <tag> 600 -lv mistward_castle_select) the Martial Artist
+    on the menu (MartialArtist3, 2026-11-10: "the legs are misshapen ... when the model is imported into UE, it should look like
+    what's in [the three.js viewer]"): her name clicked, then five pictures across her idle (1920 x 1080), to set beside the
+    GLB's own clip"""
+    w = G["w"]; s = (GS.get_all_actors_of_class(w, unreal.RDHeroSelect) or [None])[0]
+    assert s, "open mistward_castle_select for the menulook step"
+    s.set_editor_property("stay_on_confirm", True); yield from rwait(1.0)
+    def buttons(): return {str(l).split("|")[0]: tuple(float(v) for v in str(l).split("|")[1:5]) for l in s.get_buttons()}
+    def click(name):
+        # (step_menu's: the pointer moved near the button, then onto it, then pressed and let go)
+        b = buttons().get(name)
+        if not b: return f"no button {name}"
+        why = str(s.slate_mouse_move(unreal.Vector2D(b[0] - 40, b[1] - 40))); yield from rwait(0.15)
+        why = why or str(s.slate_mouse_move(mid(b))); yield from rwait(0.15)
+        why = why or str(s.slate_mouse_button(mid(b), key("LeftMouseButton"), True)); yield from rwait(0.1)
+        why = why or str(s.slate_mouse_button(mid(b), key("LeftMouseButton"), False)); yield from rwait(0.6)
+        return why
+    res = {"tried": []}
+    # (held before she is chosen: the menu sets its turn back to her front when a hero is shown)
+    rate = s.get_editor_property("turn_rate"); front = s.get_editor_property("front_yaw"); s.set_editor_property("turn_rate", 0.0)
+    for k in range(8):
+        if str(s.get_hero_name()) == "MartialArtist": break
+        why = yield from click(f"Hero_{k}")
+        res["tried"].append([f"Hero_{k}", str(s.get_hero_name()), why])
+    # (a click the editor's view does not reach (its layout varies): stepped by the menu's own Step, what its arrows call)
+    for k in range(8):
+        if str(s.get_hero_name()) == "MartialArtist": break
+        s.step(1); yield from rwait(0.6); res["tried"].append(["Step", str(s.get_hero_name())])
+    res["hero"] = str(s.get_hero_name()); res["shown"] = s.is_figure_shown(s.get_index())
+    # (the turntable held: her front as the menu first shows her (FrontYaw), then her three-quarter, side and back, each
+    # seen twice a second apart in her idle)
+    res["views"] = []
+    try:
+        for k, turn in enumerate((0.0, 0.0, 45.0, 90.0, 180.0)):
+            s.set_editor_property("front_yaw", front + turn); yield from rwait(1.0)
+            shot(f"menulook_{k}", "1920x1080"); res["views"].append(turn); yield from rwait(0.85)
+    finally:
+        s.set_editor_property("front_yaw", front); s.set_editor_property("turn_rate", rate)
+    yield from rwait(1.0)
+    step_result("menulook", res["hero"] == "MartialArtist" and res["shown"], **res)
 def step_menu():
     """(play in mistward_castle_select: 868_mistward_test.ps1 menu <tag>) the pointer shown and free; a click on a hero's name
     shows her, the arrows step, her name clicked again starts; START clicked opens mistward_castle as the hero shown, where
@@ -2479,8 +2520,12 @@ def step_chilook():
         at = sorted({round(max(first + 0.06, hit - 0.12), 3), round(hit, 3), round(min(float(t["length"]) - 0.05, hit + 0.14), 3)})
         put(g.get_start_room_center(), 0.0); c.select_weapon(i); yield from wait(0.4)
         G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-6, yaw=G["pawn"].get_actor_rotation().yaw + 135)); yield from wait(0.6)
+        # (what she had and what the game said when a move did not start (2026-11-10: one move a run, a different one each time,
+        # with her mana full))
+        mana_had = round(c.get_mana(), 1); busy = c.is_attacking()
         GS.set_global_time_dilation(G["w"], 0.25)
         m0 = c.limb_fx_made; st = c.start_attack_with(i); k = 0; most = 0; seen = []; places = []
+        said = str(c.get_message()) if not st and hasattr(c, "get_message") else ""
         t0 = time.time()
         while c.is_attacking() and time.time() - t0 < 12:
             yield
@@ -2510,7 +2555,7 @@ def step_chilook():
                 L_ = [str(x) for x in c.get_spell_fx_lines()]
                 after.append([round(0.25 * k2, 2), sum(int(x.split("|")[1]) for x in L_), sorted({x.split("|")[0] for x in L_})]); k2 += 1
         last = max((a[0] for a in after if a[1] > 0), default=0.0)
-        res[nm] = {"started": st, "made": made, "want": len(L), "pictures_at": at, "particles_then": seen, "most": most, "left": left,
+        res[nm] = {"started": st, "mana_had": mana_had, "busy_before": busy, "said": said, "made": made, "want": len(L), "pictures_at": at, "particles_then": seen, "most": most, "left": left,
                    "places": places, "after_move": after, "last_particles_s": last}
     g.set_editor_property("one_room_monsters", 3); quiet(False)
     # (nothing of hers left more than LINGER_S after a move ends)
@@ -5003,7 +5048,7 @@ def step_list10():
     step_result("list10", ok, **res)
 
 STEPS = {"list10": step_list10, "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
-         "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
+         "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,
          "startgear": step_startgear, "pickups": step_pickups, "rooms": step_rooms, "slashes": step_slashes, "tomemana": step_tomemana,

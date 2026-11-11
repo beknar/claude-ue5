@@ -213,7 +213,7 @@ def sky():
     folder(SKY)
     moon_png = os.path.join(SA, "wilderness", "sky", "moon.png")
     moon = import_tex(moon_png, SKY, "T_RD_Moon") if os.path.exists(moon_png) else None
-    stars_t = unreal.load_asset("/Engine/EngineSky/T_Sky_Stars"); clouds_t = unreal.load_asset("/Engine/EngineSky/T_Sky_Clouds_M")
+    stars_t = unreal.load_asset("/Engine/EngineSky/T_Sky_Stars")
     def sky_flags(m, additive):
         m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
         m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE if additive else unreal.BlendMode.BLEND_TRANSLUCENT)
@@ -248,27 +248,67 @@ def sky():
     # stretched)
     # (laid flat from the view's way instead, the engine's cloud picture (not made to tile) showed its seams as straight lines
     # running to the horizon: the sphere's UVs are kept and the high clouds thin out toward the top, where they pinched)
-    uv = b.n(unreal.MaterialExpressionTextureCoordinate, -1200, u_tiling=2.0, v_tiling=1.0)
-    pn = b.n(unreal.MaterialExpressionPanner, -1000, speed_x=0.002, speed_y=0.0005); b.c(uv, "", pn, "Coordinate")
-    cu = b.n(unreal.MaterialExpressionCustom, -1000)
     # (the list of 2026-11-10: "there is still a disc in the sky in the day time": faded out between 0.55 and 0.85 the high
     # clouds left a clear round patch overhead with wisps all round it, a disc against the blue (884 sky10's pictures straight
-    # up). They thin now over most of the sky's height, nothing left only at the top where they pinch, and they fade at the
-    # horizon too, where the dome dips under it)
-    cu.set_editor_property("code", "float3 d = normalize(P - C);\nreturn smoothstep(-0.02, 0.12, d.z) * (1.0 - smoothstep(0.25, 0.98, d.z));")
-    cu.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    # up). They then thinned over most of the sky's height, nothing left only at the top where they pinched)
+    # (2026-11-10, the shipping game: "there is still a disc in the sky that rotates faster than the sky closer to the horizon":
+    # the dome was turned about the zenith (0.6 degrees a second) and its texture panned along the sphere's U, which is a turn
+    # about the zenith too, while the volumetric clouds below drift in a straight line: overhead the high clouds spun as a disc.
+    # They are a flat layer now (a ceiling SkyHighHeight up, the way to it from the camera), drawn from the material's own
+    # gradient noise (tiling: the engine's cloud picture does not tile, and laid flat its seams ran to the horizon, 2026-11-07),
+    # stretched along the wind as high clouds are, and moved only by the drift along the wind the game sets (Drift, wrapped at
+    # TileCm, where both layers' noise repeats): no turn, no pinch at the top, nothing to fade there)
+    def layer(reps, stretch, z):
+        cu = b.n(unreal.MaterialExpressionCustom, -1000)
+        cu.set_editor_property("code", "float3 d = normalize(P - C);\nfloat t = H / max(d.z, 0.03);\nfloat2 w = C.xy + d.xy * t;\n"
+                                       "float2 a = normalize(Wd.xy + float2(1e-5, 0.0));\nfloat u = dot(w, a) - Dr;\nfloat v = dot(w, float2(-a.y, a.x));\n"
+                                       f"return float3(u * {reps:.1f} / T, v * {reps * stretch:.1f} / T, {z});")
+        cu.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+        ins = []
+        for nm in ("P", "C", "H", "T", "Dr", "Wd"):
+            ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
+        cu.set_editor_property("inputs", ins)
+        for pin, src in (("P", wp), ("C", cam), ("H", hp), ("T", tp), ("Dr", dp), ("Wd", wdm)): b.c(src, "", cu, pin)
+        return cu
+    wp = b.n(unreal.MaterialExpressionWorldPosition, -1300); cam = b.n(unreal.MaterialExpressionCameraPositionWS, -1300)
+    hp = b.n(unreal.MaterialExpressionScalarParameter, -1300, parameter_name="Height", default_value=900000.0)
+    tp = b.n(unreal.MaterialExpressionScalarParameter, -1300, parameter_name="TileCm", default_value=2.4e7)
+    dp = b.n(unreal.MaterialExpressionScalarParameter, -1300, parameter_name="Drift", default_value=0.0)
+    wd = b.n(unreal.MaterialExpressionVectorParameter, -1300, parameter_name="WindDir", default_value=unreal.LinearColor(1, 0, 0, 0))
+    wdm = b.n(unreal.MaterialExpressionComponentMask, -1200, r=True, g=True, b=True); b.c(wd, "", wdm, "")
+    # (the noise repeats every 64 of its cells in each axis (a multiple of 4, as the gradient noise needs; its levels repeat with
+    # it): the streaks are 64 cells along the wind in a 240 km tile (3.75 km each) and 2.5 times finer across (repeating every
+    # 96 km), the breaks in them 192 along (1.25 km) and 1.6 times finer across (every 50 km): along the wind both repeat at the
+    # tile, where the drift wraps)
+    def noise(q, levels):
+        n = b.n(unreal.MaterialExpressionNoise, -800, noise_function=unreal.NoiseFunction.NOISEFUNCTION_GRADIENT_ALU, scale=1.0, quality=1,
+                turbulence=False, levels=levels, level_scale=2.0, output_min=0.0, output_max=1.0, tiling=True, repeat_size=64)
+        # (its pin is "World Position": joined as "Position" nothing was joined, silently, and the noise read the world's
+        # centimetres, a grain of 1 cm cells over the whole sky (884 skyspin's first pictures))
+        assert MEL.connect_material_expressions(q, "", n, "World Position"), "the noise's position pin"
+        return n
+    n1 = noise(layer(64.0, 2.5, 0.37), 4); n2 = noise(layer(192.0, 1.6, 3.71), 3)
+    sh = b.n(unreal.MaterialExpressionCustom, -600)
+    # (faded out toward the horizon from 20 degrees up to 3: below it the layer, seen nearly edge on, drew a band of scales)
+    sh.set_editor_property("code", "float3 d = normalize(P - C);\nfloat f = smoothstep(0.05, 0.34, d.z);\n"
+                                   "return saturate((A * 0.72 + B * 0.28 - Th) * K) * f;")
+    sh.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT1)
     ins = []
-    for nm in ("P", "C"):
+    for nm in ("P", "C", "A", "B", "Th", "K"):
         ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
-    cu.set_editor_property("inputs", ins)
-    b.c(b.n(unreal.MaterialExpressionWorldPosition, -1300), "", cu, "P"); b.c(b.n(unreal.MaterialExpressionCameraPositionWS, -1300), "", cu, "C")
-    fade = cu
-    ct = b.n(unreal.MaterialExpressionTextureSample, -800, texture=clouds_t); b.c(pn, "", ct, "UVs")
+    sh.set_editor_property("inputs", ins)
+    # (0.52 and 3: soft wisps; at 0.47 and 4 hard grey patches toward the horizon, at 0.56 and 2.2 barely any (884 skyspin's
+    # pictures of the three, 2026-11-10))
+    th = b.n(unreal.MaterialExpressionScalarParameter, -800, parameter_name="Thresh", default_value=0.52)
+    kk = b.n(unreal.MaterialExpressionScalarParameter, -800, parameter_name="Contrast", default_value=3.0)
+    for pin, src in (("P", wp), ("C", cam), ("A", n1), ("B", n2), ("Th", th), ("K", kk)): b.c(src, "", sh, pin)
     br = b.n(unreal.MaterialExpressionScalarParameter, -900, parameter_name="Bright", default_value=1.0)
     col = b.n(unreal.MaterialExpressionConstant3Vector, -800, constant=unreal.LinearColor(0.9, 0.92, 0.96, 1))
-    b.out(b.mul(b.mul(col, br), ct, bp="R"), "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
-    op = b.mul(b.mul(ct, b.n(unreal.MaterialExpressionConstant, -700, r=0.45), ap="R"), fade)
-    b.out(op, "", unreal.MaterialProperty.MP_OPACITY)
+    b.out(b.mul(b.mul(col, br), sh), "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    # (Amount: the game thins the layer as the cloud cover closes (a translucent layer is drawn over the volumetric clouds, which
+    # are below it: in cloudy weather its wisps lay on the lower clouds))
+    am = b.n(unreal.MaterialExpressionScalarParameter, -800, parameter_name="Amount", default_value=1.0)
+    b.out(b.mul(b.mul(sh, b.n(unreal.MaterialExpressionConstant, -700, r=0.45)), am), "", unreal.MaterialProperty.MP_OPACITY)
     sky_flags(b.m, False); high = b.finish()
     # the rain and snow of our own: thin planes round her camera, falling by their world position offset (the packs' rain
     # system did not show round the camera); Amount, Origin (the field's corner), Wind, Bright set in play

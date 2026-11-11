@@ -181,6 +181,19 @@ struct FRDWSample
 	float StripW = 0.f, StripOff = 0.f;
 };
 
+/** a ground vertex as the ground material reads it: its colour (the lava in its alpha), UV0 the field rows' way and crop, UV1
+ *  rock and snow, UV2 sand and mud, UV3 the road and the field's weight. One rule for the chunks (RDWildChunk.cpp) and the far
+ *  land drawn as the ground (RDSkyFar.cpp: "textured the same way it would be textured when approached", PR #45's review) */
+struct FRDWGroundVertex
+{
+	FLinearColor C;
+	FVector2D UV0, UV1, UV2, UV3;
+	float Slope = 0.f;          // degrees from level
+};
+/** the sample's ground vertex at a normal: rock where it is steep, the snow sliding off the steepest; with ForestShare the colour
+ *  goes toward Forest by the canopy first (the far land, which grows no crowns) */
+CLAUDE_UE5_API FRDWGroundVertex RDWildGroundVertex(const FRDWSample& Q, const FVector& Nr, const FLinearColor& Forest = FLinearColor::Black, float ForestShare = 0.f);
+
 /** the farms' layout at a point (the list of 2026-11-08b: "make the farms in the wilderness look more like medieval farms, with
  *  different sizes of farms, from the croft to the strip"): the farms are great fields (a warped Voronoi about 420 m across),
  *  each an open field of unfenced strips (one crop the whole field, its furlongs each their own way, the strips divided by

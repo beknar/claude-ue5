@@ -20,8 +20,9 @@
 #   ($runs below: the menu, the town, the castle, each city by fast travel and each dungeon down from its city, without a
 #   window; then two runs in a window that takes the keyboard: a display setting, and the console typed into through
 #   Slate), and check that each got there, kept running and left no crash report) [-TestOnly] (only that) [-SkipCook]
-#   (stage and archive the last cook's output: after a cook that finished but was failed for its errors)
-param([string]$Config = "Shipping", [string]$Out = "", [switch]$Test, [switch]$TestOnly, [switch]$SkipCook)
+#   (stage and archive the last cook's output: after a cook that finished but was failed for its errors) [-Only <name,...>]
+#   (the test's runs of those names only, e.g. -Only console,kethrys)
+param([string]$Config = "Shipping", [string]$Out = "", [switch]$Test, [switch]$TestOnly, [switch]$SkipCook, [string[]]$Only = @())
 # (2026-11-08: two of the Favelas pack's level sequences are zeros as well; no map here uses them)
 $KNOWN_BAD = 'LogAssetRegistry: Error: Package is unloadable: .*/Content/(Kitchen_Asset_Kit/|Favelas/Sequencers/(LS_)?OverViewLevelSequence\.uasset)'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -120,10 +121,15 @@ public static class RDWin {
     @{ name = "heaven_fortress"; args = @("-RDStartHero=Warrior", "-RDTownGo=dungeon:heaven", "-RDAllKeys", "-RDMarkFile=$mark"); secs = 90; castle = $true; map = "heaven_fortress" },
               @{ name = "ashenreach"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:ashenreach", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Ashenreach|Warrior*" },
               @{ name = "graymourne"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:graymourne", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Graymourne|Warrior*" },
+              # (2026-11-10: the last two cities by fast travel too, Kethrys Spire and Heaven: their dungeons were run, the cities not)
+              @{ name = "kethrys"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:kethrysspire", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Kethrys Spire|Warrior*" },
+              @{ name = "heaven"; args = @("-RDStartHero=Warrior", "-RDTownGo=town:heaven", "-RDMarkFile=$mark"); secs = 150; castle = $true; want = "town|Heaven|Warrior*" },
               @{ name = "display"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDApplyDisplay=1600x900x2"); secs = 30; window = $true; castle = $true },
               # (2026-11-08: the game's own console (RD/RDConsole.cpp), in a window of its own (the keys go to its focused line):
-              #  its self-test types into it through Slate and writes what it measured, and its picture beside it)
-              @{ name = "console"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDConsoleTest=$ctest", "-windowed", "-ResX=1280", "-ResY=720"); secs = 75; shown = $true; console = $true; castle = $true; map = "brokenspire" })
+              #  its self-test types into it through Slate and writes what it measured, and its picture beside it; -RDConsole: it is
+              #  off by default where Unreal's own console is, a Development game (2026-11-10: the Development package's run failed))
+              @{ name = "console"; args = @("-RDStartHero=Warrior", "-RDMarkFile=$mark", "-RDConsoleTest=$ctest", "-RDConsole", "-windowed", "-ResX=1280", "-ResY=720"); secs = 75; shown = $true; console = $true; castle = $true; map = "brokenspire" })
+    if ($Only.Count) { $Only = @($Only | ForEach-Object { $_ -split "," }); $runs = @($runs | Where-Object { $Only -contains $_.name }) }
     try {
     foreach ($run in $runs) {
         $before = @(Get-ChildItem $crashes -Directory -ErrorAction SilentlyContinue).Count

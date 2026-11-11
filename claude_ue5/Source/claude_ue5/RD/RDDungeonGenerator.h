@@ -1392,6 +1392,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") FVector2D MusicRotateSeconds = FVector2D(300.f, 600.f);
 	// the sky and weather's state (RDSky.cpp)
 	void BeginSky7();
+	/** the high clouds' height, tile and wind (the volumetric clouds' CloudWind, else +X) into their material */
+	void ApplySkyHighLayer();
 	void TickSky7(float Dt, APlayerController* PC);
 	void ApplySky7();
 	UPROPERTY(Transient) TObjectPtr<class UVolumetricCloudComponent> SkyClouds;
@@ -1407,8 +1409,11 @@ public:
 	UPROPERTY(Transient) TObjectPtr<class UNiagaraComponent> WeatherWind;
 	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> WeatherRainSound;
 	UPROPERTY(Transient) TObjectPtr<class UAudioComponent> WeatherWindSound;
-	/** 0 clear, 1 fair, 2 cloudy, 3 overcast, 4 rain, 5 storm, 6 snow, 7 fog */
+	/** 0 clear, 1 fair, 2 cloudy, 3 overcast, 4 rain, 5 storm, 6 snow, 7 fog, 8 cloudless (no cloud layer at all: rd.Weather
+	 *  only, the rotation never picks it) */
 	int32 Weather = 1, WeatherChanges = 0;
+	/** the cloud layer hidden for cloudless weather (its visibility is set only when this changes) */
+	bool bSkyCloudless = false;
 	float WeatherUntil = 0.f, SkyCover = 0.25f, SkyCoverWant = 0.25f, SkyRain = 0.f, SkyRainWant = 0.f, SkyWind = 0.2f, SkyWindWant = 0.2f, SkyFog = 0.f, SkyFogWant = 0.f, SkyApplyT = 0.f, SkyTime = 0.f;
 	bool bSkyCold = false, bSkySnowing = false;
 	float DayFogDensity = 0.02f, DayFogStart = 0.f, DaySkyLightBase = 1.f;
@@ -1421,6 +1426,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
 	static FString WeatherName(int32 Kind);
+	/** the weathers (RDSky.cpp's looks and names): the rotation picks among the first NumRotationWeathers; cloudless, the last,
+	 *  only by rd.Weather (one count for every table and the console, PR #45's review) */
+	static constexpr int32 NumWeathers = 9;
+	static constexpr int32 NumRotationWeathers = 8;
+	static constexpr int32 WeatherCloudless = 8;
 	/** the list of 2026-11-10 (RDSkyFar.cpp): the far land round her in the wilds, a ring from 0.85 to 80 km of the world model's
 	 *  heights and colours under the fog (the horizon's dark strip, 884 sky10); its material (914), how far she goes before it is
 	 *  made again (m), how far under the ground it sits (cm), the water's colour; tests: GetFarLandState "made|shown|x|y|ms|builds" */
@@ -1428,8 +1438,38 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandRebuildM = 150.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarLandSink = 400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FLinearColor FarWaterColor = FLinearColor(0.035f, 0.06f, 0.08f);
+	/** (2026-11-10: "if it's distant land, it should be textured the same way it would be textured when approached and
+	 *  generated") the far land drawn as the chunks draw the ground: WildGroundMaterial with the chunks' vertex data (the colour
+	 *  with rock and snow by its slope, the fields, sand, mud, roads), its normals from its heights, its water in the
+	 *  chunks' water materials (its lava only the ground's colour: a far quad is kilometres across); off: FarLandMaterial's flat colour as before. Its forests have no trees: their ground is darkened
+	 *  toward FarForestColor by the canopy (times FarForestShare), as a forest's crowns read from afar */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") bool bFarLandAsGround = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") FLinearColor FarForestColor = FLinearColor(0.022f, 0.045f, 0.018f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FarForestShare = 0.7f;
+	int32 FarLandWaterQuads = 0;
+	/** the haze over the far land (2026-11-10: the far land 20 to 80 km off took the height fog's own colour, a fixed daylight
+	 *  grey, and read as a white strip under the sky, brightest at sunset; 884 horizonprobe measured the land against the sky
+	 *  over it). In the wilds' clear air the fog's opacity is capped at FogClearMaxOpacity (the sky atmosphere's own aerial
+	 *  perspective, which follows the hour, is the distance's haze), rising to the level's own cap as the weather's fog and
+	 *  the port's thicken; FogMaxOpacityWant >= 0 sets it outright (tests). With the sun low the fog's colour dims toward
+	 *  FogLowSunShare of the sun's low colour, as the sky by the horizon does (noon's and night's are unchanged) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FogClearMaxOpacity = 0.12f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FogLowSunShare = 0.35f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float FogMaxOpacityWant = -1.f;
+	float DayFogMax = -1.f;
+	/** what the haze is now (tests): "<fog max opacity>|<fog colour r,g,b>|<the level's own cap>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetHazeState() const;
 	/** how far the volumetric clouds are traced (km; the engine's 50 left them ending short of the horizon) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float SkyCloudTraceKm = 160.f;
+	/** the high clouds (2026-11-10, the shipping game: "a disc in the sky that rotates faster than the sky closer to the horizon"):
+	 *  no longer a dome turned about the zenith but a flat layer this high (cm), drifting in a straight line along the volumetric
+	 *  clouds' wind (their CloudWind) at this speed (cm/s, times 0.4 + the wind), its texture repeating across this (cm: the
+	 *  drift is wrapped at it: 890's noise repeats there) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float SkyHighHeight = 900000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float SkyHighSpeed = 2500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sky") float SkyHighTileCm = 2.4e7f;
+	double SkyHighDrift = 0.0;
+	FVector2D SkyHighWindDir = FVector2D(1.f, 0.f);
 	/** the list of 2026-11-10: the castle's inside stair as a stone stair against a wall (E:\temp\stonestairway.jpg): a solid block
 	 *  for each step on a coursed wall stepping up under them (RDTownPlan.cpp's CastleStairBuild); the blocks' and the wall's materials
 	 *  (914's; none: the stretched wall pieces of before), each one's centimetres a texture repeat */
