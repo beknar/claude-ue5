@@ -88,25 +88,33 @@ namespace
 		                     : FString::Printf(TEXT("rd.Time: %s, kept for the towns and the wilds (this level is indoors)"), *G->GetTownClock()));
 	}
 
-	void RDPoisCommand(const TArray<FString>& Args, UWorld* World)
+	void RDPoisCommand(const TArray<FString>& Args, UWorld* World, FOutputDevice& Ar)
 	{
 		ARDDungeonGenerator* G = RDCmdGenerator(World);
 		if (!G) return;
-		if (Args.Num() > 0 && (Args[0].ToLower() == TEXT("hide") || Args[0].ToLower() == TEXT("off")))
+		const FString A0 = Args.Num() > 0 ? Args[0].ToLower() : FString();
+		if (A0 == TEXT("hide") || A0 == TEXT("off"))
 		{
 			G->ConsoleShowPlaces(false);
 			RDCmdSay(G, TEXT("rd.Pois: the map shows only what you have found again"));
+			Ar.Log(TEXT("rd.Pois: the map shows only what you have found again"));
 			return;
 		}
 		const int32 N = G->ConsoleShowPlaces(true);
-		if (N == 0) { RDCmdSay(G, TEXT("rd.Pois: the places are the wilds' (go out of the dungeon first)")); return; }
-		// (the listing in the console's log, the nearest first; rd.GoToPoi <number> goes to one)
-		for (const FString& L : G->GetConsolePlaceLines())
+		if (N == 0) { RDCmdSay(G, TEXT("rd.Pois: the places are the wilds' (go out of the dungeon first)")); Ar.Log(TEXT("rd.Pois: the places are the wilds'")); return; }
+		// (the listing, the nearest first, to the console that ran it (PR #47's review: the game's own console shows what a command
+		// writes to its output, and a Shipping game writes no log): the nearest 40, or every one with rd.Pois all; rd.GoToPoi
+		// <number> goes to one)
+		const bool bAll = A0 == TEXT("all");
+		const TArray<FString> Lines = G->GetConsolePlaceLines();
+		for (int32 I = 0; I < Lines.Num() && (bAll || I < 40); ++I)
 		{
-			TArray<FString> P; L.ParseIntoArray(P, TEXT("|"), false);
-			if (P.Num() >= 7) UE_LOG(LogRDConsoleCmds, Display, TEXT("  %4s  %-28s %-10s %7s km%s"), *P[0], *P[1], *P[2], *P[6], P[5] == TEXT("1") ? TEXT("  (found)") : TEXT(""));
+			TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"), false);
+			if (P.Num() >= 7) Ar.Logf(TEXT("%4s  %s (%s)  %s km%s"), *P[0], *P[1], *P[2], *P[6], P[5] == TEXT("1") ? TEXT("  found") : TEXT(""));
 		}
-		RDCmdSay(G, FString::Printf(TEXT("rd.Pois: %d places on the map, listed in the console's log (rd.GoToPoi <number or name>; rd.Pois hide)"), N));
+		const FString S = FString::Printf(TEXT("rd.Pois: %d places on the map%s (rd.GoToPoi <number or name>; rd.Pois all; rd.Pois hide)"), N, bAll || N <= 40 ? TEXT("") : TEXT(", the nearest 40 listed"));
+		Ar.Log(S);
+		RDCmdSay(G, S);
 	}
 
 	void RDGoToPoiCommand(const TArray<FString>& Args, UWorld* World)
@@ -137,8 +145,8 @@ namespace
 
 	FAutoConsoleCommandWithWorldAndArgs GRDTimeCmd(TEXT("rd.Time"), TEXT("The time of day: rd.Time <dawn|morning|noon|afternoon|evening|night|midnight|0-24>"),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDTimeCommand));
-	FAutoConsoleCommandWithWorldAndArgs GRDPoisCmd(TEXT("rd.Pois"), TEXT("Every place of the map shown on it and listed (the small points of interest near her too); rd.Pois hide: only those found again"),
-		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDPoisCommand));
+	FAutoConsoleCommandWithWorldArgsAndOutputDevice GRDPoisCmd(TEXT("rd.Pois"), TEXT("Every place of the map shown on it and the nearest 40 listed (the small points of interest near her too); rd.Pois all: all listed; rd.Pois hide: only those found again"),
+		FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateStatic(&RDPoisCommand));
 	FAutoConsoleCommandWithWorldAndArgs GRDGoToPoiCmd(TEXT("rd.GoToPoi"), TEXT("To a place of rd.Pois' listing: rd.GoToPoi <number | name>"),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDGoToPoiCommand));
 	FAutoConsoleCommandWithWorldAndArgs GRDTierCmd(TEXT("rd.Tier"), TEXT("Her tier set by hand, with that tier's abilities, spells and slashes (a lower one takes them away): rd.Tier <1-30>; rd.Tier 0: the game's own"),

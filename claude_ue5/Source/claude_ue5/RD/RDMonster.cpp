@@ -325,9 +325,11 @@ void ARDMonster::ApplyDifficulty()
 	bool bElite = false;
 	if (G->Difficulty >= 3 && G->HellEliteShare > 0.f)
 		bElite = (float)(HashCombine(GetTypeHash(MonsterName), (uint32)GetUniqueID() * 2654435761u) % 10000u) / 10000.f < G->HellEliteShare;
+	DiffHealthMul = DiffDamageMul = 1.f;
 	if (K == 1.f && !bElite) return;
-	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * K * (bElite ? G->EliteHealthMul : 1.f)));
-	Damage = FMath::Max(1.f, FMath::RoundToFloat(Damage * K * (bElite ? G->EliteDamageMul : 1.f)));
+	DiffHealthMul = K * (bElite ? G->EliteHealthMul : 1.f); DiffDamageMul = K * (bElite ? G->EliteDamageMul : 1.f);
+	MaxHealth = Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * DiffHealthMul));
+	Damage = FMath::Max(1.f, FMath::RoundToFloat(Damage * DiffDamageMul));
 	if (!bDifficultyCounted) { bDifficultyCounted = true; ++G->DifficultyScaled; if (bElite) ++G->ElitesMade; }
 	bHellElite = bElite;
 }
@@ -470,6 +472,7 @@ void ARDMonster::BecomeAlly(float Seconds, float InHealth, float InDamage)
 {
 	const bool bRise = bDead;
 	bAlly = true; bDead = false; bCorpse = false; bFrozen = false; bBodyDown = false;
+	bHellElite = false; DiffHealthMul = DiffDamageMul = 1.f;          // (PR #47's review: hers is no elite of hell's)
 	MaxHealth = Health = FMath::Max(1.f, InHealth); Damage = FMath::Max(1.f, InDamage);
 	AllySeconds = Seconds; AllyLeft = Seconds;
 	bAggro = false; AttackTime = -1.f; Path.Reset(); DeadTime = 0.f; CurrentFoe = nullptr; Burns.Reset(); SlowUntil = CurseUntil = -100.f;

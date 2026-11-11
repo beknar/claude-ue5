@@ -206,6 +206,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float TownGuardRest = 20.f;
 	/** the guards fighting now (the monsters may take one of them for their foe) */
 	TArray<TWeakObjectPtr<class ARDTownsfolk>> FightingGuards;
+	/** what the HUD shows for her weapon Index (its Label or its Name: FRDWeaponDef::Shown, which the HUD draws) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") FString GetWeaponShown(int32 Index) const { return Weapons.IsValidIndex(Index) ? Weapons[Index].Shown() : FString(); }
 	/** tests: the guards fighting now, and every guard's "<title>|<role>|<fighting 0/1>|<fights>|<strikes>|<hits>|<damage>|<blows
 	 *  taken>|<health>|<sword drawn 0/1>|<x>|<y>|<z>" */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") int32 CountFightingGuards() const;

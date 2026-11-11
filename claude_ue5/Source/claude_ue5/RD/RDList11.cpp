@@ -70,7 +70,7 @@ ARDMonster* ARDTownsfolk::FindGuardFoe() const
 
 void ARDTownsfolk::EndGuardFight(float Now, bool bBeaten)
 {
-	GuardFoe = nullptr; GuardSwingT = -1.f; GuardPath.Reset(); GuardStuck = 0.f;
+	GuardFoe = nullptr; GuardSwingT = -1.f; GuardPath.Reset(); GuardStuck = 0.f; bGuardEngaged = false;
 	if (Gen) Gen->FightingGuards.RemoveAll([this](const TWeakObjectPtr<ARDTownsfolk>& W) { return !W.IsValid() || W.Get() == this; });
 	if (GuardSword) GuardSword->SetVisibility(false);
 	CurAnim = nullptr;
@@ -101,6 +101,9 @@ bool ARDTownsfolk::TickGuardFight(float Dt, float Now)
 {
 	if (!Gen || !Gen->bTownGuardsFight || !Section || !IsGuardFighter() || bRoadWalker) return false;
 	ARDMonster* Foe = GuardFoe.Get();
+	// (PR #47's review: a foe destroyed in the fight (a roamer dropped once she is 250 m off, a place's with its chunk) ends it too:
+	// the sword put away, the swing let go, back to its post)
+	if (!Foe && bGuardEngaged) EndGuardFight(Now, false);
 	if (Foe && (Foe->IsDead() || FVector::Dist2D(Foe->GetActorLocation(), Post) > Gen->TownGuardLeash * 1.2f || !Section->IsWalkable(Section->WorldToLocal(Foe->GetActorLocation()))))
 	{
 		EndGuardFight(Now, false);
@@ -113,7 +116,7 @@ bool ARDTownsfolk::TickGuardFight(float Dt, float Now)
 		Foe = FindGuardFoe();
 		if (!Foe) return false;
 		// (to arms: out of bed, off its work, its sword drawn)
-		GuardFoe = Foe; ++GuardFights;
+		GuardFoe = Foe; ++GuardFights; bGuardEngaged = true;
 		Gen->FightingGuards.AddUnique(this);
 		if (bInBed) { bInBed = false; SetActorLocationAndRotation(PreBed, FRotator(0.f, HomeYaw, 0.f)); }
 		if (Act != 0) EndWork();
@@ -250,8 +253,41 @@ bool URDCombatComponent::ForgetWeapon(FName Name)
 	if (!Generator) return false;
 	const int32 I = Generator->Weapons.IndexOfByPredicate([Name](const FRDWeaponDef& W) { return W.Name == Name; });
 	if (I < 0) return false;
+	const bool bDrawn = I == WeaponIndex;
 	DropWeaponAt(I);
+	// (PR #47's review: the one in her hands forgotten, she draws the first she has, as when one breaks (WeaponIndex left on it
+	// pointed at the next weapon, or past the list)
+	if (bDrawn)
+	{
+		WeaponIndex = -1;
+		for (int32 K = 0; K < Generator->Weapons.Num(); ++K) if (!Generator->Weapons[K].bAlongside && !Generator->Weapons[K].bScroll) { SelectWeapon(K); break; }
+	}
 	return true;
+}
+
+bool URDCombatComponent::PayFreeBolt(FBolt& B, const FVector& At, ARDMonster* Direct, float Reach)
+{
+	// (PR #47's review: a chi made at no mana with no monster in range could still hurt one that came into its way or its burst:
+	// it takes its mana when it does, or, without enough, does no harm)
+	if (!B.bFree || !Generator) return true;
+	bool bMeets = Direct && !Direct->IsDead();
+	if (!bMeets && Reach > 0.f)
+		for (const ARDMonster* Mo : Generator->GetMonsters())
+		{
+			if (!Mo || Mo->IsDead()) continue;
+			const FVector P = Mo->GetActorLocation();
+			if (FVector::Dist2D(P, At) - Mo->GetCapsuleComponent()->GetScaledCapsuleRadius() <= Reach && FMath::Abs(P.Z - At.Z) < Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 120.f) { bMeets = true; break; }
+		}
+	if (!bMeets) return true;
+	const float Cost = Generator->Weapons.IsValidIndex(B.Weapon) ? Generator->Weapons[B.Weapon].ManaCost : 0.f;
+	if (Generator->bInfiniteMana || Mana >= Cost)
+	{
+		if (!Generator->bInfiniteMana) Mana = FMath::Max(0.f, Mana - Cost);
+		B.bFree = false; ++ChiFreePaid;
+		return true;
+	}
+	++ChiFreeHarmless;
+	return false;
 }
 
 FString ARDDungeonGenerator::ConsoleSetTier(int32 N)

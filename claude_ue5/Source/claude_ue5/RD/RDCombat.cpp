@@ -447,6 +447,7 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 	bWhooshDone = false;
 	if (NextAttack % 2 == 0) Generator->PlaySoundAt(TEXT("Player.Attack"), GetOwner()->GetActorLocation());      // (her effort: every other swing)
 	++NextOf[Index]; ++AttacksMade;
+	bAttackFree = bChiFree;
 	if (bChiFree) ++Generator->ChiFreeMade;
 	else if (W->ManaCost > 0.f && !Generator->bInfiniteMana) Mana = FMath::Max(0.f, Mana - W->ManaCost);      // (martial_arts: never taken)
 	if (W->Cooldown > 0.f) ReadyAt.Add(W->Name, GetWorld()->GetTimeSeconds() + W->Cooldown);
@@ -2328,6 +2329,7 @@ void URDCombatComponent::LaunchBolt()
 	FBolt B;
 	B.At = (W->bBoltFromWeapon && WeaponComp) ? WeaponComp->GetComponentTransform().TransformPosition(W->BoltMuzzle) : M->GetSocketLocation(W->SpellBone) + Fw * 12.f;
 	B.Weapon = AttackIndex;
+	B.bFree = bAttackFree;
 	ARDMonster* Tg = LastTarget.Get();
 	if (Tg && !Tg->IsDead())
 	{
@@ -2506,6 +2508,7 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	// the flames on the bolt die away where they are (a moment, then gone: EndBoltFx); its light flares and fades
 	EndBoltFx(B);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, W.SpellLightIntensity * 3.f }); }
+	if (!PayFreeBolt(B, At, Direct, W.BoltSplash)) { ++BoltsElsewhere; LastBurstAt = At; LastBoltFlown = B.Flown; return; }
 	bool bAny = false;
 	auto Hurt = [&](ARDMonster* Mo, float Amount, const FVector& Where)
 	{

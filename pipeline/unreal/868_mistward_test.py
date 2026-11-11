@@ -90,7 +90,7 @@ The user's list of 2026-10-30 (docs/improvements3.txt; 875-877):
            third refused), her soldiers fighting, daggers in both hands and never enchanted, no armour, magic rings only, no
            tome, the torch; a tier boss: Summon Tier 2 (the Gunner); kept through a death, gone at a restart
 The user's list of 2026-10-31 (878):
-  options  Escape: the main page (Resume, Options, Return to Brokenspire, Choose another hero (a new game), Quit); Options: the volumes, the controls hint off
+  options  Escape: the main page (Resume, Save, Load, Options, Gameplay (2026-11-11), Return to Brokenspire, Choose another hero (a new game), Quit); Options: the volumes, the controls hint off
            (the HUD draws no panel) and on, a display mode and a resolution applied (saved in the editor), Escape back, closed
   allyspace six of the Summoner's allies called apart; following her and waiting round her they keep apart (sampled; the
            switch off first: they gather into each other); the summons panel's rows and hit points; their marks on both maps
@@ -2990,7 +2990,7 @@ def step_options():
     GUS2.set_screen_resolution(kept[0]); GUS2.set_fullscreen_mode(kept[1]); GUS2.save_settings()
     g.set_user_volume(1, kept[2]); g.set_controls_hint_shown(kept[3])
     o = res["open"]; op = res["options"]
-    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Save the game", "button|Load a game", "button|Options", "button|Return to Brokenspire", "button|Choose another hero (a new game)", "button|Quit"]
+    ok = (res["controls_before"] and not o["why"] and o["open"] and o["page"] == 0 and o["lines"] == ["button|Resume", "button|Save the game", "button|Load a game", "button|Options", "button|Gameplay", "button|Return to Brokenspire", "button|Choose another hero (a new game)", "button|Quit"]
           and op["page"] == 1 and op["action"] == "options" and [l.split("|")[0] for l in op["lines"]] == ["volume"] * 4 + ["choice"] * 4 + ["button"] * 2          # (the quest window's choice since the list of 2026-11-10)
           and res["controls_off"]["shown"] is False and res["controls_off"]["line"].endswith("|Off") and abs(res["volume"]["before"] - res["volume"]["after"] - 0.1) < 0.011
           and res["display"]["mode"] == 2 and res["display"]["to"] != res["display"]["from"] and res["applied"]["said"].startswith("saved") and res["applied"]["saved"] == want
@@ -5061,7 +5061,7 @@ def step_list11():
     kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.6)
     put(g.get_start_room_center(), 0.0); yield from wait(0.5)
     W = list(g.get_editor_property("weapons"))
-    res["fists"] = {"name": str(W[0].name), "label": str(W[0].get_editor_property("label"))}
+    res["fists"] = {"name": str(W[0].name), "label": str(W[0].get_editor_property("label")), "shown": str(g.get_weapon_shown(0))}
     chis = [i for i, w in enumerate(W) if w.spell]
     res["chi_alone"] = []
     for i in chis:
@@ -5078,7 +5078,20 @@ def step_list11():
     c.set_mana(c.get_max_mana()); m0 = c.get_mana(); f0 = g.get_editor_property("chi_free_made")
     c.select_weapon(i); yield from wait(0.3); m0 = c.get_mana(); st = c.start_attack_with(i); m1 = c.get_mana(); yield from wait(1.2)
     res["chi_target"] = {"started": st, "spent": round(m0 - m1, 2), "cost": W[i].mana_cost, "free_counted": g.get_editor_property("chi_free_made") - f0}
-    drop([m])
+    drop([m]); yield from wait(0.4)
+    # (PR #47's review: a free chi that meets a monster after all (one just past its range, in its burst) pays its mana then, or
+    # without it does no harm)
+    res["chi_meets"] = {}
+    for label, mana in (("paid", 1.0), ("harmless", 0.0)):
+        put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+        m = spawn_dummy(ahead(460)); yield from wait(0.6); h0 = m.get_health()
+        c.set_mana(c.get_max_mana() * mana); p0 = c.get_editor_property("chi_free_paid"); z0 = c.get_editor_property("chi_free_harmless"); f0 = g.get_editor_property("chi_free_made")
+        c.select_weapon(i); yield from wait(0.3); mb = c.get_mana(); st = c.start_attack_with(i)
+        t0 = time.time()
+        while time.time() - t0 < float(W[i].attack_ends[0]) + 0.8: yield
+        res["chi_meets"][label] = {"started": st, "free": g.get_editor_property("chi_free_made") - f0, "paid": c.get_editor_property("chi_free_paid") - p0,
+                                   "harmless": c.get_editor_property("chi_free_harmless") - z0, "lost": round(h0 - m.get_health(), 1), "mana_before": round(mb, 1), "mana_after": round(c.get_mana(), 1)}
+        drop([m]); yield from wait(0.4)
     c.select_weapon(0); yield from wait(0.3)
     res["hud_line"] = str(next((x for x in c.get_quick_slots() if str(x)), ""))
     shot("l11_basic_attacks", "1280x720"); yield from rwait(1.0)
@@ -5142,8 +5155,9 @@ def step_list11():
         res["difficulty"] = {}
         for d in range(4):
             g.set_difficulty(d); hs, ds, el = [], [], 0
-            for k in range(12):
-                m = g.spawn_monster_named(kind, V(spot.x + 120 * (k % 4), spot.y + 120 * (k // 4), spot.z), 1, 1.0, 1.0, 1.0)
+            # (PR #47's review: hell's elites are a fifth by a hash of the monster's id: 12 made had no elite one run in 14; 40 one in 7500)
+            for k in range(40 if d == 3 else 12):
+                m = g.spawn_monster_named(kind, V(spot.x + 120 * (k % 4), spot.y + 120 * ((k // 4) % 3), spot.z), 1, 1.0, 1.0, 1.0)
                 hs.append(m.get_max_health()); ds.append(m.get_damage()); el += 1 if m.get_editor_property("hell_elite") else 0
                 drop([m])
             res["difficulty"][d] = {"min_health": min(hs), "min_damage": min(ds), "elites": el, "count_mul": g.difficulty_count_mul()}
@@ -5155,9 +5169,11 @@ def step_list11():
     def ratio(d, k): return round(df[d][k] / df[1][k], 3) if df.get(1, {}).get(k) else None
     res["difficulty_ratios"] = {d: (ratio(d, "min_health"), ratio(d, "min_damage")) for d in df}
     ch = res["chi_alone"]
-    ok = (res["fists"]["name"] == "Fists" and res["fists"]["label"] == "Basic Attacks"
+    ok = (res["fists"]["name"] == "Fists" and res["fists"]["label"] == "Basic Attacks" and res["fists"]["shown"] == "Basic Attacks"
           and len(ch) == len(chis) and len(ch) >= 2 and all(x["started"] and x["bolts"] == 1 and x["mana_after"] == x["mana_before"] and x["free_counted"] == 1 for x in ch)
           and res["chi_target"]["started"] and abs(res["chi_target"]["spent"] - res["chi_target"]["cost"]) < 0.01 and res["chi_target"]["free_counted"] == 0
+          and res["chi_meets"]["paid"]["free"] == 1 and res["chi_meets"]["paid"]["paid"] == 1 and res["chi_meets"]["paid"]["lost"] > 0
+          and res["chi_meets"]["harmless"]["free"] == 1 and res["chi_meets"]["harmless"]["harmless"] == 1 and res["chi_meets"]["harmless"]["lost"] == 0
           and res["fits_with_shield"] == 0 and res["sword"] and len(res["with_shield"]) >= 1 and res["worn_after"] in ("None", "") and not res["after_off"])
     rr = res.get("difficulty_ratios", {})
     gp_ok = (res.get("gameplay_page") == 5 and res.get("gameplay_lines", [])[:2] == ["choice|When you die|drop your items where you fall", "choice|Difficulty|Fair"]
@@ -5168,7 +5184,7 @@ def step_list11():
              and res.get("death_keep_False", {}).get("ingots") == 0 and res["death_keep_False"]["new_piles"] == 1
              # (each as fair's times the factor, rounded as the game rounds them: a blow of 9 at 0.6 is 5)
              and all(df.get(d) and abs(df[d][k] - round(df[1][k] * want)) <= 1 for d, want in ((0, 0.6), (2, 1.5), (3, 2.5)) for k in ("min_health", "min_damage"))
-             and res["difficulty"][3]["elites"] >= 1 and res["difficulty"][1]["elites"] == 0 and res["difficulty"][3]["count_mul"] == 1.25)
+             and 1 <= res["difficulty"][3]["elites"] <= 20 and res["difficulty"][1]["elites"] == 0 and res["difficulty"][3]["count_mul"] == 1.25)
     res["gameplay_ok"] = gp_ok
     step_result("list11", ok and gp_ok, **res)
 

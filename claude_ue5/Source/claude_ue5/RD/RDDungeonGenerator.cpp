@@ -741,7 +741,8 @@ bool ARDDungeonGenerator::RaiseAlly(ARDMonster* Corpse, float Seconds, float Hea
 	if (Corpse->Section && Corpse->SpawnIndex >= 0)
 		if (FRDSectionProgress* P = Progress.Find(Corpse->Section->Coord)) { P->Consumed.AddUnique(Corpse->SpawnIndex); P->Corpses.Remove(Corpse->SpawnIndex); }
 	if (Corpse->Section) Corpse->Section->SpawnedMonsters.Remove(Corpse);
-	Corpse->BecomeAlly(Seconds, Corpse->GetMaxHealth() * HealthShare, Corpse->GetDamage());
+	// (PR #47's review: the difficulty and hell's elite factors it was made with taken off: hers are not the difficulty's)
+	Corpse->BecomeAlly(Seconds, Corpse->GetMaxHealth() / FMath::Max(Corpse->DiffHealthMul, 0.01f) * HealthShare, Corpse->GetDamage() / FMath::Max(Corpse->DiffDamageMul, 0.01f));
 	Allies.AddUnique(Corpse);
 	return true;
 }

@@ -331,6 +331,7 @@ void URDCombatComponent::SpellPierce(FBolt& B, ARDMonster* Mo, const FVector& At
 {
 	const FRDSpellDef* S = Generator && Generator->Spells.IsValidIndex(B.Spell) ? &Generator->Spells[B.Spell] : nullptr;
 	if (!S || !Mo) return;
+	if (!PayFreeBolt(B, At, Mo, 0.f)) return;          // (the list of 2026-11-11: a free chi pays when it meets one)
 	const float Dmg = B.Dmg >= 0.f ? B.Dmg : (Generator->Weapons.IsValidIndex(B.Weapon) ? GetDamageOf(B.Weapon) : S->Damage);
 	SpellHurt(Mo, Dmg, At, true);
 	if (S->Slow > 0.f) Mo->SlowFor(S->Slow, S->Duration > 0.f ? S->Duration : 2.f);
@@ -352,6 +353,8 @@ void URDCombatComponent::SpellBurst(FBolt& B, const FVector& At, ARDMonster* Dir
 		TimedFx.Add({ HitFx, Generator->Weapons[B.Weapon].BurstLife > 0.f ? Generator->Weapons[B.Weapon].BurstLife : 2.f, true });
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Hit.%s"), *S->SoundKey.ToString())), At);
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, S->LightIntensity * 3.f }); }
+	// (the list of 2026-11-11: a free chi pays when it meets one, or does no harm)
+	if (!PayFreeBolt(B, At, Direct, FMath::Max(S->Radius, S->Splash))) { ++BoltsElsewhere; LastBurstAt = At; return; }
 	// (what stays on a monster it struck: a slow, a burn that gives some back to her)
 	auto Hold = [&](ARDMonster* Mo)
 	{

@@ -154,7 +154,7 @@ private:
 	TArray<FVector> GuardPath;
 	float GuardScanAt = 0.f, GuardSwingT = -1.f, GuardSwingLen = 0.f, GuardSwingHit = 0.f, GuardReadyAt = 0.f, GuardHealth = -1.f, GuardRestUntil = -100.f, GuardRepathAt = 0.f, GuardStuck = 0.f;
 	int32 GuardSwingK = 0;
-	bool bGuardHitDone = false;
+	bool bGuardHitDone = false, bGuardEngaged = false;
 	UPROPERTY(Transient) TObjectPtr<class UStaticMeshComponent> GuardSword;
 	TArray<int32> Jobs;
 	FName StandWork, StandProp;

@@ -994,9 +994,10 @@ void ARDHUD::Triangle(const FVector2D& P, float R, const FLinearColor& C)
 bool ARDHUD::IsElite(const ARDMonster* M) const
 {
 	if (!M || !M->Section || !Gen) return false;
-	// (the list of 2026-11-11: against its tier's at the difficulty; hell's elites always)
+	// (the list of 2026-11-11: hell's elites always; the rest against its tier's at the difficulty it was made at (PR #47's review:
+	// at the menu's difficulty now, a change on the Gameplay page marked every monster out, or none))
 	if (M->bHellElite) return true;
-	const float Avg = Gen->GetMonsterHealth(M->Section->Coord) * Gen->DifficultyMul();
+	const float Avg = Gen->GetMonsterHealth(M->Section->Coord) * M->DiffHealthMul;
 	return Avg > 0.f && M->GetMaxHealth() > Avg * 1.25f;
 }
 

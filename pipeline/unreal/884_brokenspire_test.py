@@ -3343,9 +3343,17 @@ def step_fight11():
     G_ = gl(); res["fighters"] = [{"who": x[0], "role": x[1], "fights": int(x[3]), "strikes": int(x[4]), "hits": int(x[5]), "damage": float(x[6]), "taken": int(x[7])} for x in G_ if int(x[3]) > 0]
     yield from rwait(3.0)
     res["after"] = {"fighting": g.count_fighting_guards(), "swords_out": sum(1 for x in gl() if x[9] == "1")}
+    # (PR #47's review: a monster destroyed in the fight (a roamer dropped far from her, a place's with its chunk) ends it too)
+    m2 = g.spawn_test_ambusher(mo_, 1); t0 = time.time()
+    while time.time() - t0 < 15 and g.count_fighting_guards() == 0: c.set_health(c.get_max_health()); yield
+    res["destroyed"] = {"fighting_before": g.count_fighting_guards()}
+    if m2: m2.destroy_actor()
+    yield from rwait(1.5)
+    res["destroyed"].update({"fighting_after": g.count_fighting_guards(), "swords_out": sum(1 for x in gl() if x[9] == "1")})
     dmg = sum(f["damage"] for f in res["fighters"])
     ok = (res["strikes_loaded"] == 4 and fights >= 1 and drawn and sum(f["hits"] for f in res["fighters"]) >= 1 and dmg > 0
-          and res["dead"] and dmg >= h0 * 0.99 and res["after"]["fighting"] == 0 and res["after"]["swords_out"] == 0)
+          and res["dead"] and dmg >= h0 * 0.99 and res["after"]["fighting"] == 0 and res["after"]["swords_out"] == 0
+          and res["destroyed"]["fighting_before"] >= 1 and res["destroyed"]["fighting_after"] == 0 and res["destroyed"]["swords_out"] == 0)
     step_result("fight11", ok, **res)
 def step_console11():
     """the list of 2026-11-11's console commands, typed as the game's console passes them (the player controller):
@@ -3398,8 +3406,11 @@ def step_console11():
     for hero, tiers in (("Warrior", (1, 5, 2)), ("MartialArtist", (3, 1)), ("Mage", (1, 10, 3))):
         if str(g.get_editor_property("current_hero")) != hero: g.switch_hero(hero); yield from wait(1.0); refresh(); g = G["gen"]
         for t in tiers:
+            # (PR #47's review: the one in her hands forgotten, she draws another: the Martial Artist's last chi drawn before tier 1)
+            if hero == "MartialArtist" and t == 1: cb().select_weapon(len(g.get_editor_property("weapons")) - 1); yield from rwait(0.4)
             cmd(f"rd.Tier {t}"); yield from rwait(0.6)
-            res["tier"].append(dict(tier_state(hero), tier=t, said=str(cb().message)[:160]))
+            wi = cb().get_weapon_index(); nw = len(g.get_editor_property("weapons"))
+            res["tier"].append(dict(tier_state(hero), tier=t, said=str(cb().message)[:160], drawn_ok=0 <= wi < nw))
     cmd("rd.Tier 0"); yield from rwait(0.3)
     res["tier_after"] = g.console_tier_now()
     if str(g.get_editor_property("current_hero")) != "Warrior": g.switch_hero("Warrior"); yield from wait(1.0); refresh()
@@ -3413,7 +3424,7 @@ def step_console11():
           and T[("Warrior", 5)]["slashes"] == 5 and T[("Warrior", 2)]["slashes"] == 2 and T[("Warrior", 5)]["hp"] > T[("Warrior", 1)]["hp"]
           and T[("MartialArtist", 3)]["spells"] == 8 and T[("MartialArtist", 1)]["spells"] == 4
           and T[("Mage", 10)]["spells"] > T[("Mage", 1)]["spells"] and T[("Mage", 3)]["spells"] < T[("Mage", 10)]["spells"]
-          and res["tier_after"] == 0)
+          and res["tier_after"] == 0 and all(x["drawn_ok"] for x in res["tier"]))
     step_result("console11", ok, **res)
 def step_noshield9():
     """the Warrior's start (the list of 2026-11-08b: "the warrior should have no default shield"): she wears none, carries
