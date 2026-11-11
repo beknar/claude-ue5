@@ -186,6 +186,8 @@ void ARDTownsfolk::Tick(float Dt)
 		if (FloorZ0 < -1e8f) FloorZ0 = P.Z;
 		if (FMath::Abs(P.Z - (FloorZ0 + Lz)) > 0.5f) SetActorLocation(FVector(P.X, P.Y, FloorZ0 + Lz));
 	}
+	// (the list of 2026-11-11: a guard fights a monster that has come into its town (RDList11.cpp))
+	if (TickGuardFight(Dt, Now)) return;
 	const FVector L = GetActorLocation();
 	auto Turn = [&](const FVector& Dir, float Rate)
 	{

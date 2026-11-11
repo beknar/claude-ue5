@@ -1,0 +1,239 @@
+{
+ "tag": "k11a",
+ "plan": [
+  "fight11",
+  "console11"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "fight11",
+   "ok": true,
+   "guards": 11,
+   "strikes_loaded": 4,
+   "guard": "a militiawoman",
+   "spawned": true,
+   "monster": {
+    "kind": "Rat",
+    "health": 40.0
+   },
+   "dead": false,
+   "seconds": 40.0,
+   "health_min": 12.0,
+   "most_fighting": 1,
+   "sword_seen": true,
+   "fighters": [
+    {
+     "who": "a militiawoman",
+     "role": "Militia",
+     "fights": 1,
+     "strikes": 11,
+     "hits": 10,
+     "damage": 28.0,
+     "taken": 10
+    }
+   ],
+   "after": {
+    "fighting": 0,
+    "swords_out": 0
+   }
+  },
+  {
+   "step": "console11",
+   "ok": true,
+   "time": {
+    "morning": "08:00",
+    "noon": "12:00",
+    "afternoon": "15:00"
+   },
+   "in_walls": false,
+   "town_speed": {
+    "at_1": 353.4,
+    "at_5": 1767.0,
+    "ratio": 5.0,
+    "back": 353.4
+   },
+   "reveal_on": true,
+   "reveal_off": true,
+   "pois": {
+    "listed": 2854,
+    "known_before": 6,
+    "known_shown": 2854,
+    "found_before": 1,
+    "found_after": 1,
+    "kinds": [
+     "abandoned_camp",
+     "ambush_point",
+     "camp",
+     "cave",
+     "city",
+     "grave",
+     "great_ruin",
+     "house",
+     "lair",
+     "lost_body",
+     "monster_nest",
+     "ritual",
+     "ruined_wall",
+     "ruins",
+     "spawn",
+     "town",
+     "village"
+    ],
+    "first": [
+     [
+      "1",
+      "Brokenspire",
+      "town",
+      "0",
+      "0",
+      "1",
+      "0.36"
+     ],
+     [
+      "2",
+      "Lonely grave",
+      "grave",
+      "-579",
+      "-433",
+      "0",
+      "0.37"
+     ],
+     [
+      "3",
+      "Monster nest",
+      "monster_nest",
+      "-292",
+      "-641",
+      "0",
+      "0.39"
+     ],
+     [
+      "4",
+      "Lonely grave",
+      "grave",
+      "-701",
+      "-153",
+      "0",
+      "0.46"
+     ],
+     [
+      "5",
+      "Lonely grave",
+      "grave",
+      "-706",
+      "-328",
+      "0",
+      "0.46"
+     ]
+    ],
+    "known_hidden": 6
+   },
+   "goto": {
+    "to": [
+     "1058",
+     "Lonely grave",
+     "grave",
+     "477",
+     "-3158",
+     "0",
+     "3.00"
+    ],
+    "from_it_m": 6.0
+   },
+   "tier": [
+    {
+     "hero": "Warrior",
+     "hp": 140.0,
+     "mana": 0.0,
+     "slashes": 1,
+     "spells": 0,
+     "weapons": 1,
+     "tier": 1,
+     "said": "rd.Tier: tier 1: 0 abilities given, 0 taken; 0 spells learned, 0 forgotten; 1 slashes given, 0 taken; 140 hit points, 0 mana"
+    },
+    {
+     "hero": "Warrior",
+     "hp": 241.0,
+     "mana": 0.0,
+     "slashes": 5,
+     "spells": 0,
+     "weapons": 1,
+     "tier": 5,
+     "said": "rd.Tier: tier 5: 0 abilities given, 0 taken; 0 spells learned, 0 forgotten; 4 slashes given, 0 taken; 241 hit points, 0 mana"
+    },
+    {
+     "hero": "Warrior",
+     "hp": 165.0,
+     "mana": 0.0,
+     "slashes": 2,
+     "spells": 0,
+     "weapons": 1,
+     "tier": 2,
+     "said": "rd.Tier: tier 2: 0 abilities given, 0 taken; 0 spells learned, 0 forgotten; 0 slashes given, 3 taken; 165 hit points, 0 mana"
+    },
+    {
+     "hero": "MartialArtist",
+     "hp": 196.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 8,
+     "weapons": 9,
+     "tier": 3,
+     "said": "rd.Tier: tier 3: 2 abilities given, 0 taken; 0 spells learned, 0 forgotten; 0 slashes given, 0 taken; 196 hit points, 100 mana"
+    },
+    {
+     "hero": "MartialArtist",
+     "hp": 140.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 4,
+     "weapons": 5,
+     "tier": 1,
+     "said": "rd.Tier: tier 1: 0 abilities given, 4 taken; 0 spells learned, 0 forgotten; 0 slashes given, 0 taken; 140 hit points, 100 mana"
+    },
+    {
+     "hero": "Mage",
+     "hp": 70.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 3,
+     "weapons": 3,
+     "tier": 1,
+     "said": "rd.Tier: tier 1: 0 abilities given, 0 taken; 1 spells learned, 0 forgotten; 0 slashes given, 0 taken; 70 hit points, 100 mana"
+    },
+    {
+     "hero": "Mage",
+     "hp": 172.0,
+     "mana": 154.0,
+     "slashes": 0,
+     "spells": 12,
+     "weapons": 12,
+     "tier": 10,
+     "said": "rd.Tier: tier 10: 0 abilities given, 0 taken; 9 spells learned, 0 forgotten; 0 slashes given, 0 taken; 172 hit points, 154 mana"
+    },
+    {
+     "hero": "Mage",
+     "hp": 91.0,
+     "mana": 100.0,
+     "slashes": 0,
+     "spells": 5,
+     "weapons": 5,
+     "tier": 3,
+     "said": "rd.Tier: tier 3: 0 abilities given, 0 taken; 0 spells learned, 7 forgotten; 0 slashes given, 0 taken; 91 hit points, 100 mana"
+    }
+   ],
+   "tier_after": 0
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_k11a_fight11_0.png",
+  "bs_k11a_fight11_1.png",
+  "bs_k11a_console11_map_revealed.png",
+  "bs_k11a_console11_map_normal.png",
+  "bs_k11a_console11_map_pois.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

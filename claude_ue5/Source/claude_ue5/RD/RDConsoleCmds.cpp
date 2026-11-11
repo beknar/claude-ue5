@@ -4,6 +4,13 @@
 //   changes again (cloudless, 2026-11-10: no cloud layer at all; the rotation never picks it)
 //   rd.GoTo <brokenspire|ashenreach|graymourne|velmorrath|kethrys|heaven> out to that city, by the map's fast travel (from a dungeon
 //   back to Brokenspire first); for testing: found or not, enemies near or not
+// The list of 2026-11-11 (docs/improvements11.txt):
+//   rd.Time <dawn|morning|noon|afternoon|evening|night|midnight|0-24>   the time of day
+//   rd.Pois [hide]        every place of the map on it and listed (the small points of interest near her too); hide: only those found
+//   rd.GoToPoi <n|name>   to a place of that listing
+//   rd.Tier <1-30|0>      her tier, with its abilities, spells and slashes (a lower one takes them away); 0 the game's own
+//   rd.RevealMap [off]    the whole map shown; off: as she has seen it
+//   (rd.WildRunSpeed applies within the towns' walls too: RDWild8.cpp)
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDGameInstance.h"
 #include "RD/RDCombat.h"
@@ -61,6 +68,83 @@ namespace
 		if (City.IsEmpty()) { RDCmdSay(G, FString::Printf(TEXT("rd.GoTo: no city named %s"), *FString::Join(Args, TEXT(" ")))); return; }
 		G->ConsoleGoTo(City);
 	}
+
+	// ---- the list of 2026-11-11 (docs/improvements11.txt)
+	void RDTimeCommand(const TArray<FString>& Args, UWorld* World)
+	{
+		// ("in console: need way to set the time of day: morning, noon, afternoon")
+		ARDDungeonGenerator* G = RDCmdGenerator(World);
+		if (!G) return;
+		if (Args.Num() == 0) { RDCmdSay(G, FString::Printf(TEXT("rd.Time: %s (dawn, morning, noon, afternoon, evening, night, midnight, or an hour 0-24)"), *G->GetTownClock())); return; }
+		static const TPair<const TCHAR*, float> Names[] = { { TEXT("dawn"), 6.f }, { TEXT("morning"), 8.f }, { TEXT("noon"), 12.f }, { TEXT("afternoon"), 15.f },
+		                                                    { TEXT("evening"), 19.f }, { TEXT("night"), 22.f }, { TEXT("midnight"), 0.f } };
+		const FString A = Args[0].ToLower();
+		float H = -1.f;
+		if (A.IsNumeric()) H = FCString::Atof(*A);
+		else for (const auto& N : Names) if (A == N.Key) H = N.Value;
+		if (H < 0.f || H > 24.f) { RDCmdSay(G, FString::Printf(TEXT("rd.Time: no time of day named %s"), *Args[0])); return; }
+		G->SetTownHour(H);
+		RDCmdSay(G, G->bTown ? FString::Printf(TEXT("rd.Time: %s"), *G->GetTownClock())
+		                     : FString::Printf(TEXT("rd.Time: %s, kept for the towns and the wilds (this level is indoors)"), *G->GetTownClock()));
+	}
+
+	void RDPoisCommand(const TArray<FString>& Args, UWorld* World)
+	{
+		ARDDungeonGenerator* G = RDCmdGenerator(World);
+		if (!G) return;
+		if (Args.Num() > 0 && (Args[0].ToLower() == TEXT("hide") || Args[0].ToLower() == TEXT("off")))
+		{
+			G->ConsoleShowPlaces(false);
+			RDCmdSay(G, TEXT("rd.Pois: the map shows only what you have found again"));
+			return;
+		}
+		const int32 N = G->ConsoleShowPlaces(true);
+		if (N == 0) { RDCmdSay(G, TEXT("rd.Pois: the places are the wilds' (go out of the dungeon first)")); return; }
+		// (the listing in the console's log, the nearest first; rd.GoToPoi <number> goes to one)
+		for (const FString& L : G->GetConsolePlaceLines())
+		{
+			TArray<FString> P; L.ParseIntoArray(P, TEXT("|"), false);
+			if (P.Num() >= 7) UE_LOG(LogRDConsoleCmds, Display, TEXT("  %4s  %-28s %-10s %7s km%s"), *P[0], *P[1], *P[2], *P[6], P[5] == TEXT("1") ? TEXT("  (found)") : TEXT(""));
+		}
+		RDCmdSay(G, FString::Printf(TEXT("rd.Pois: %d places on the map, listed in the console's log (rd.GoToPoi <number or name>; rd.Pois hide)"), N));
+	}
+
+	void RDGoToPoiCommand(const TArray<FString>& Args, UWorld* World)
+	{
+		ARDDungeonGenerator* G = RDCmdGenerator(World);
+		if (!G) return;
+		if (Args.Num() == 0) { RDCmdSay(G, TEXT("rd.GoToPoi <number from rd.Pois | a name>")); return; }
+		const FString W = FString::Join(Args, TEXT(" "));
+		RDCmdSay(G, G->ConsoleGoToPlace(W) ? FString::Printf(TEXT("rd.GoToPoi: to %s"), *W) : FString::Printf(TEXT("rd.GoToPoi: no place %s (rd.Pois lists them; in the wilds only)"), *W));
+	}
+
+	void RDTierCommand(const TArray<FString>& Args, UWorld* World)
+	{
+		ARDDungeonGenerator* G = RDCmdGenerator(World);
+		if (!G) return;
+		if (Args.Num() == 0 || !Args[0].IsNumeric()) { RDCmdSay(G, FString::Printf(TEXT("rd.Tier <1-30 | 0 the game's own>: now %d%s"), G->GrowthTier(), G->ConsoleTierNow() > 0 ? TEXT(" (set by hand)") : TEXT(""))); return; }
+		RDCmdSay(G, TEXT("rd.Tier: ") + G->ConsoleSetTier(FCString::Atoi(*Args[0])));
+	}
+
+	void RDRevealMapCommand(const TArray<FString>& Args, UWorld* World)
+	{
+		ARDDungeonGenerator* G = RDCmdGenerator(World);
+		if (!G) return;
+		const bool bOff = Args.Num() > 0 && (Args[0].ToLower() == TEXT("off") || Args[0] == TEXT("0") || Args[0].ToLower() == TEXT("normal"));
+		G->SetMapRevealAll(!bOff);
+		RDCmdSay(G, bOff ? TEXT("rd.RevealMap: the map as you have seen it") : TEXT("rd.RevealMap: the whole map shown (rd.RevealMap off: as you have seen it)"));
+	}
+
+	FAutoConsoleCommandWithWorldAndArgs GRDTimeCmd(TEXT("rd.Time"), TEXT("The time of day: rd.Time <dawn|morning|noon|afternoon|evening|night|midnight|0-24>"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDTimeCommand));
+	FAutoConsoleCommandWithWorldAndArgs GRDPoisCmd(TEXT("rd.Pois"), TEXT("Every place of the map shown on it and listed (the small points of interest near her too); rd.Pois hide: only those found again"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDPoisCommand));
+	FAutoConsoleCommandWithWorldAndArgs GRDGoToPoiCmd(TEXT("rd.GoToPoi"), TEXT("To a place of rd.Pois' listing: rd.GoToPoi <number | name>"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDGoToPoiCommand));
+	FAutoConsoleCommandWithWorldAndArgs GRDTierCmd(TEXT("rd.Tier"), TEXT("Her tier set by hand, with that tier's abilities, spells and slashes (a lower one takes them away): rd.Tier <1-30>; rd.Tier 0: the game's own"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDTierCommand));
+	FAutoConsoleCommandWithWorldAndArgs GRDRevealMapCmd(TEXT("rd.RevealMap"), TEXT("The whole map shown (the wilds' and the dungeon's); rd.RevealMap off: as she has seen it"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDRevealMapCommand));
 
 	FAutoConsoleCommandWithWorldAndArgs GRDWeatherCmd(TEXT("rd.Weather"),
 		TEXT("The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|cloudless|0-8>; cloudless: no clouds at all, not even on the horizon (never chosen by itself); rd.Weather auto lets it change again"),

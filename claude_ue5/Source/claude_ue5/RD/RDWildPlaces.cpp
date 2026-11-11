@@ -257,6 +257,9 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	const bool bLair = P.Kind == TEXT("lair") && P.Quest.IsEmpty();
 	int32 Kind = Kinds[R.RandRange(0, Kinds.Num() - 1)];
 	int32 N = bLair ? R.RandRange(3, 5) : R.RandRange(2, 3);
+	// (the list of 2026-11-11: hell's quarter more, after the draw: the place's other draws keep their order; the kills are kept
+	// by number, so the extra ones come last)
+	N = DifficultyCount(N);
 	// (the captain's quests: the den's pack of ripper dogs, the nearest the castle's monsters come to wolves, at tier 1's
 	// strength; the watchtower's three of what killed the patrol)
 	if (!P.Quest.IsEmpty())

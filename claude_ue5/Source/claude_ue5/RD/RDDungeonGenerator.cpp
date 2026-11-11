@@ -834,7 +834,7 @@ void ARDDungeonGenerator::BackToMainMenu()
 	// took it to the main page))
 	if (MenuPage == 4) { MenuPage = 3; MenuCursor = FMath::Max(0, MenuItems().IndexOfByKey(FName(TEXT("saveover")))); return; }
 	if (MenuPage == 3) SaveOverSlot.Reset();
-	const FName From = MenuPage == 2 ? FName(TEXT("load")) : MenuPage == 3 ? FName(TEXT("save")) : FName(TEXT("options"));
+	const FName From = MenuPage == 2 ? FName(TEXT("load")) : MenuPage == 3 ? FName(TEXT("save")) : MenuPage == 5 ? FName(TEXT("gameplay")) : FName(TEXT("options"));
 	MenuPage = 0;
 	MenuCursor = FMath::Max(0, MenuItems().IndexOfByKey(From));
 }
@@ -845,10 +845,12 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 	static const FName Vol[4] = { TEXT("vol0"), TEXT("vol1"), TEXT("vol2"), TEXT("vol3") };
 	if (!bOptionsMenu) return { Vol[0], Vol[1], Vol[2], Vol[3], TEXT("resume"), TEXT("hero"), TEXT("quit") };
 	// (Brokenspire: the castle's way back to the town)
-	if (MenuPage == 0 && bTownLink && !bTown && !TownLevel.IsEmpty()) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("town"), TEXT("hero"), TEXT("quit") };
+	// (the list of 2026-11-11: a Gameplay page after Options: her things at death, the difficulty)
+	if (MenuPage == 0 && bTownLink && !bTown && !TownLevel.IsEmpty()) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("gameplay"), TEXT("town"), TEXT("hero"), TEXT("quit") };
 	// (Brokenspire and the wilderness: the game saved and loaded (the user's choice of 2026-11-03))
-	if (MenuPage == 0 && bTown) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("hero"), TEXT("quit") };
-	if (MenuPage == 0) return { TEXT("resume"), TEXT("options"), TEXT("hero"), TEXT("quit") };
+	if (MenuPage == 0 && bTown) return { TEXT("resume"), TEXT("save"), TEXT("load"), TEXT("options"), TEXT("gameplay"), TEXT("hero"), TEXT("quit") };
+	if (MenuPage == 0) return { TEXT("resume"), TEXT("options"), TEXT("gameplay"), TEXT("hero"), TEXT("quit") };
+	if (MenuPage == 5) return { TEXT("deathdrop"), TEXT("difficulty"), TEXT("back") };
 	// (the list of 2026-11-04: the saves on disk by their names, newest first (the autosave among them); the Save page's name)
 	if (MenuPage == 2)
 	{
@@ -901,6 +903,9 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 		if (V >= 0) Out.Add(FString::Printf(TEXT("volume|%s|%.2f"), VolLabel[V], UserVolumes[V]));
 		else if (Id == TEXT("resume")) Out.Add(TEXT("button|Resume"));
 		else if (Id == TEXT("options")) Out.Add(TEXT("button|Options"));
+		else if (Id == TEXT("gameplay")) Out.Add(TEXT("button|Gameplay"));
+		else if (Id == TEXT("deathdrop")) Out.Add(FString::Printf(TEXT("choice|When you die|%s"), bKeepItemsOnDeath ? TEXT("keep your items") : TEXT("drop your items where you fall")));
+		else if (Id == TEXT("difficulty")) Out.Add(FString::Printf(TEXT("choice|Difficulty|%s"), *DifficultyName(Difficulty)));
 		else if (Id == TEXT("save")) Out.Add(TEXT("button|Save the game"));
 		else if (Id == TEXT("load")) Out.Add(TEXT("button|Load a game"));
 		else if (Id == TEXT("loadauto") || Id == TEXT("loadsave") || Id.ToString().StartsWith(TEXT("load:")))
@@ -1019,6 +1024,8 @@ void ARDDungeonGenerator::StepMenuValue(int32 Step)
 	// (mistward4's choices: the controls hint on / off, a resolution, a display mode; the last two wait for Apply)
 	if (Id == TEXT("controls")) SetControlsHintShown(!bControlsShown);
 	else if (Id == TEXT("questwin")) SetQuestWindowShown(!bQuestWindowShown);
+	else if (Id == TEXT("deathdrop")) SetKeepItemsOnDeath(!bKeepItemsOnDeath);
+	else if (Id == TEXT("difficulty")) SetDifficulty(((Difficulty + Step) % NumDifficulties + NumDifficulties) % NumDifficulties);
 	else if (Id == TEXT("saveover"))
 	{
 		// (the list of 2026-11-10: left and right go through the saves on disk, "a new save" among them)
@@ -1050,6 +1057,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (RDMenuVolumeOf(Id) >= 0) return false;
 	if (Id == TEXT("resume")) { LastMenuAction = TEXT("resume"); SetMenuOpen(false); return true; }
 	if (Id == TEXT("options")) { LastMenuAction = TEXT("options"); OpenOptionsPage(); return true; }
+	if (Id == TEXT("gameplay")) { LastMenuAction = TEXT("gameplay"); MenuPage = 5; MenuCursor = 0; return true; }
 	// (the list of 2026-11-10: the drop-down's Back goes back to the Save page, not the main page)
 	if (Id == TEXT("back") && MenuPage == 4) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
 	if (Id == TEXT("back")) { LastMenuAction = TEXT("back"); BackToMainMenu(); return true; }
@@ -1094,7 +1102,7 @@ bool ARDDungeonGenerator::ActivateMenuLine(int32 Line)
 	if (Id == TEXT("loadauto") || Id == TEXT("loadsave")) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id == TEXT("loadauto") ? TEXT("autosave") : TEXT("save")); }
 	if (Id.ToString().StartsWith(TEXT("load:"))) { LastMenuAction = Id.ToString(); return LoadGameFrom(Id.ToString().RightChop(5)); }
 	if (Id == TEXT("apply")) { LastMenuAction = TEXT("apply"); return ApplyDisplaySettings(); }
-	if (Id == TEXT("controls") || Id == TEXT("questwin") || Id == TEXT("res") || Id == TEXT("mode")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
+	if (Id == TEXT("controls") || Id == TEXT("questwin") || Id == TEXT("res") || Id == TEXT("mode") || Id == TEXT("deathdrop") || Id == TEXT("difficulty")) { LastMenuAction = Id.ToString(); MenuCursor = L; StepMenuValue(1); return true; }
 	if (Id == TEXT("town"))
 	{
 		LastMenuAction = TEXT("town");

@@ -245,7 +245,10 @@ ARDMonster* ARDDungeonGenerator::SummonKindAlly(FName Kind, FVector At, FName Sp
 	// (PR #34's review: SummonStrength's tier is the game's; Empower maps a level's tier through GlobalTier, so it is given the
 	// level's tier that maps to it (else Vel Morrath's summons at 12 read tier 17's), and the summon then holds the game's, as
 	// SetStrength reads it when it grows)
+	// (the list of 2026-11-11: hers, so the difficulty is not put on it)
+	bSpawningAlly = true;
 	ARDMonster* M = SpawnMonsterKind(K, At, bGrow ? LevelTierOf(T) : T, 1.f, 1.f, 1.f, Title);
+	bSpawningAlly = false;
 	if (!M) return nullptr;
 	if (bGrow) M->Tier = T;
 	// (hers: out of its set's monsters (her blows and spells pass it by), among her allies until it falls)

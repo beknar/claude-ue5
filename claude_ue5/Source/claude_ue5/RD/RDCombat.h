@@ -443,6 +443,8 @@ public:
 	float AmbushMul(int32 Index) const;
 	/** her hit points', mana's and energy's tops again (a tier opened: mistward6's growth) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") void RefreshMaxima() { UpdateMaxima(); }
+	/** the list of 2026-11-11 (rd.Tier): a weapon or spell of hers by name taken away (as a broken one goes); true if she had it */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") bool ForgetWeapon(FName Name);
 	/** what is on her: "<label>|<seconds left>|<good 1 / bad 0>" (spells, poison, weakness, slowness) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Spells") TArray<FString> GetBuffLines() const;
 	/** a monster's blow carried its ability (poison, weaken, slow) with Power (its tier's) */

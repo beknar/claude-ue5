@@ -94,6 +94,7 @@ print(f"MA damage: the Warrior's average weapon {WARRIOR_DPS:.1f} a second; her 
       f" (was {F['damage']}); the chi table x {CHI_SCALE:.3f} ({_cd / _cl:.1f} a second before): {CHI_DAMAGE}")
 fists.damage = float(FIST_DAMAGE); fists.reach = float(F["reach"]); fists.arc = float(F["arc"]); fists.play_rate = float(F["play_rate"])
 fists.weapon_type = "unarmed"; fists.sound_key = F["sound"]; fists.icon = F.get("icon", "None")          # (874's picture)
+fists.label = F.get("label", "")          # (the list of 2026-11-11: shown as "Basic Attacks"; "Fists" stays its key)
 print("MA fists:", " | ".join(report))
 # her knife (both hands): rogue_clips' stabs on her rig
 knife = blank("Knife"); knife.mesh = dm; knife.off_hand_mesh = dm

@@ -16,11 +16,16 @@
 #include "Misc/CommandLine.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
+#include "Engine/GameViewportClient.h"
+#include "Widgets/SWindow.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward4, Log, All);
 
 static const TCHAR* RD4OptionsSection = TEXT("RandomDungeon.Options");
 static constexpr float RD4AllyGap = 25.f;          // (cm between two allies' capsules, and an ally's and hers)
+// (the list of 2026-11-11: the smallest a window may be dragged to: the HUD's panels are laid out for 1280 x 720 and still read at
+// this; smaller, the inventory's columns ran into each other)
+static const FIntPoint RD4MinWindow(960, 540);
 
 // ================================================================================================ the Options page
 void ARDDungeonGenerator::LoadOptions()
@@ -29,6 +34,40 @@ void ARDDungeonGenerator::LoadOptions()
 	if (GConfig && GConfig->GetBool(RD4OptionsSection, TEXT("ShowControls"), B, GGameUserSettingsIni)) bControlsShown = B;
 	B = true;
 	if (GConfig && GConfig->GetBool(RD4OptionsSection, TEXT("ShowQuests"), B, GGameUserSettingsIni)) bQuestWindowShown = B;
+	// (the list of 2026-11-11: the Gameplay page's)
+	B = false;
+	if (GConfig && GConfig->GetBool(RD4OptionsSection, TEXT("KeepItemsOnDeath"), B, GGameUserSettingsIni)) bKeepItemsOnDeath = B;
+	int32 D = 1;
+	if (GConfig && GConfig->GetInt(RD4OptionsSection, TEXT("Difficulty"), D, GGameUserSettingsIni)) Difficulty = FMath::Clamp(D, 0, NumDifficulties - 1);
+}
+
+void ARDDungeonGenerator::SetKeepItemsOnDeath(bool bKeep)
+{
+	bKeepItemsOnDeath = bKeep;
+	if (GConfig) { GConfig->SetBool(RD4OptionsSection, TEXT("KeepItemsOnDeath"), bKeep, GGameUserSettingsIni); GConfig->Flush(false, GGameUserSettingsIni); }
+}
+
+void ARDDungeonGenerator::SetDifficulty(int32 InDifficulty)
+{
+	Difficulty = FMath::Clamp(InDifficulty, 0, NumDifficulties - 1);
+	if (GConfig) { GConfig->SetInt(RD4OptionsSection, TEXT("Difficulty"), Difficulty, GGameUserSettingsIni); GConfig->Flush(false, GGameUserSettingsIni); }
+	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS difficulty %s (x%.2f)"), *DifficultyName(Difficulty), DifficultyMul());
+}
+
+FString ARDDungeonGenerator::DifficultyName(int32 D)
+{
+	static const TCHAR* Names[NumDifficulties] = { TEXT("Easy"), TEXT("Fair"), TEXT("Difficult"), TEXT("Hell") };
+	return Names[FMath::Clamp(D, 0, NumDifficulties - 1)];
+}
+
+float ARDDungeonGenerator::DifficultyMul() const
+{
+	return DifficultyScale.IsValidIndex(Difficulty) ? FMath::Max(DifficultyScale[Difficulty], 0.05f) : 1.f;
+}
+
+float ARDDungeonGenerator::DifficultyCountMul() const
+{
+	return Difficulty >= NumDifficulties - 1 ? FMath::Max(HellCountMul, 1.f) : 1.f;
 }
 
 void ARDDungeonGenerator::SetControlsHintShown(bool bShow)
@@ -59,8 +98,18 @@ TArray<FString> ARDDungeonGenerator::GetResolutionChoices() const
 	static const FIntPoint Common[5] = { { 1280, 720 }, { 1600, 900 }, { 1920, 1080 }, { 2560, 1440 }, { 3840, 2160 } };
 	FIntPoint Desk(3840, 2160);
 	if (const UGameUserSettings* Gs = GEngine ? GEngine->GetGameUserSettings() : nullptr) Desk = Gs->GetDesktopResolution();
+	TArray<FIntPoint> Rs;
+	for (const FIntPoint& R : Common) if (Desk.X <= 0 || (R.X <= Desk.X && R.Y <= Desk.Y)) Rs.Add(R);
+	// (the list of 2026-11-11: a window grown or shrunk by its corner keeps its size: the engine saves it as the resolution, and
+	// it is a choice of its own here, or Apply would put the window back to a common size)
+	if (const UGameUserSettings* Gs = GEngine ? GEngine->GetGameUserSettings() : nullptr; Gs && Gs->GetFullscreenMode() == EWindowMode::Windowed)
+	{
+		const FIntPoint Now = Gs->GetScreenResolution();
+		if (Now.X >= RD4MinWindow.X && Now.Y >= RD4MinWindow.Y && !Rs.Contains(Now)) Rs.Add(Now);
+	}
+	Rs.Sort([](const FIntPoint& A, const FIntPoint& B) { return A.X * A.Y < B.X * B.Y; });
 	TArray<FString> Out;
-	for (const FIntPoint& R : Common) if (Desk.X <= 0 || (R.X <= Desk.X && R.Y <= Desk.Y)) Out.Add(FString::Printf(TEXT("%dx%d"), R.X, R.Y));
+	for (const FIntPoint& R : Rs) Out.Add(FString::Printf(TEXT("%dx%d"), R.X, R.Y));
 	if (Out.Num() == 0) Out.Add(TEXT("1280x720"));
 	return Out;
 }
@@ -115,11 +164,25 @@ void ARDDungeonGenerator::WriteTestMark(const FString& Kind, const FString& Wher
 		FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s|%s|%s"), *Kind, *Where, *CurrentHero.ToString()), *Mark);
 }
 
+void ARDDungeonGenerator::ApplyWindowLimits()
+{
+	// (the list of 2026-11-11: "when in windowed mode, let the user grow the window by clicking and expanding on the corner". The
+	// game's window has a sizing frame in windowed mode (measured: WS_THICKFRAME, its corner hit-tests as a sizing corner, a
+	// window grown by 500 x 300 keeps it and the engine saves it); windowed fullscreen, the first start's mode, has no frame to
+	// drag. Here: the smallest it may be dragged to)
+	if (GIsEditor || !GEngine || !GEngine->GameViewport) return;
+	const TSharedPtr<SWindow> Win = GEngine->GameViewport->GetWindow();
+	if (!Win.IsValid()) return;
+	Win->SetSizeLimits(FWindowSizeLimits().SetMinWidth((float)RD4MinWindow.X).SetMinHeight((float)RD4MinWindow.Y));
+	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS the window may be sized down to %dx%d"), RD4MinWindow.X, RD4MinWindow.Y);
+}
+
 void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
 {
 	// (-RDMarkFile=<path>: the castle writes where it is and as whom, so a test of a packaged game knows it got here: a
 	// Shipping game writes no log, and a run that stayed on the menu had passed as the castle's)
 	WriteTestMark(TEXT("castle"), GetWorld()->GetMapName());
+	ApplyWindowLimits();
 	FString S;
 	if (!FParse::Value(FCommandLine::Get(), TEXT("RDApplyDisplay="), S)) return;
 	TArray<FString> P; S.ParseIntoArray(P, TEXT("x"));

@@ -27,13 +27,19 @@ static const FName RDMaSlot(TEXT("DefaultSlot"));          // (her AnimBP's slot
 void ARDDungeonGenerator::StartWeaponsOf(const FRDHeroDef& H, TArray<FRDWeaponDef>& Out) const
 {
 	Out = H.Weapons;
+	// (the list of 2026-11-11: rd.Tier's tier: her locked weapons of the bosses up to it (UnlockPerBoss a boss, a tier's boss
+	// each tier), her later abilities of the dungeons whose last tier it reaches (dungeon I + 1 of the chain: tiers 5 (I + 1) + 1
+	// to 5 (I + 2)))
+	const int32 Ct = ConsoleTierNow();
 	if (bUnlockAll) Out.Append(H.LockedWeapons);
+	else if (Ct > 0) for (int32 I = 0; I < FMath::Min(H.LockedWeapons.Num(), FMath::Max(H.UnlockPerBoss, 1) * Ct); ++I) Out.Add(H.LockedWeapons[I]);
 	// (the rebalance to tier 25: the later dungeons' abilities she has earned (or, with bUnlockAll, all of them))
 	const URDGameInstance* GI = URDGameInstance::Of(this);
 	const TArray<FRDChainLink>& C = Chain();
 	for (int32 I = 0; I < H.LaterWeapons.Num(); ++I)
 	{
-		const bool bEarned = bUnlockAll || (C.IsValidIndex(I + 1) && GI && GI->GetCounter(URDGameInstance::DungeonCounter(C[I + 1].Key, TEXT("bossdone:5"))) > 0);
+		const bool bEarned = bUnlockAll || (Ct > 0 ? Ct >= 5 * (I + 2)
+			: (C.IsValidIndex(I + 1) && GI && GI->GetCounter(URDGameInstance::DungeonCounter(C[I + 1].Key, TEXT("bossdone:5"))) > 0));
 		if (bEarned && !Out.ContainsByPredicate([&](const FRDWeaponDef& W) { return W.Name == H.LaterWeapons[I].Name; })) Out.Add(H.LaterWeapons[I]);
 	}
 }

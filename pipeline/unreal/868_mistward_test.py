@@ -5050,7 +5050,129 @@ def step_list10():
           and res["dropdown_page"] == 4 and res["over_slot"] and res["saves_after"] == res["saves_before"] and res["over_same_slot"])
     step_result("list10", ok, **res)
 
-STEPS = {"list10": step_list10, "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
+def step_list11():
+    """the list of 2026-11-11's second phase in the castle: the Martial Artist's chi attacks with no monster near (each one made,
+    its bolt out, her mana unchanged, ChiFreeMade counted) and with one near (its mana taken); her fists shown as "Basic Attacks"
+    (the weapon's label, her quick bar's line); the Warrior with a found sword in hand puts on a shield and takes it off again:
+    no shield mesh shows on her (every found weapon's fit without one); the Escape menu's Gameplay page"""
+    res = {}
+    # ---- the Martial Artist: her chi alone, at no mana
+    c = yield from restart("MartialArtist"); g = G["gen"]; quiet(True)
+    kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.6)
+    put(g.get_start_room_center(), 0.0); yield from wait(0.5)
+    W = list(g.get_editor_property("weapons"))
+    res["fists"] = {"name": str(W[0].name), "label": str(W[0].get_editor_property("label"))}
+    chis = [i for i, w in enumerate(W) if w.spell]
+    res["chi_alone"] = []
+    for i in chis:
+        c.set_mana(c.get_max_mana() * 0.5); m0 = c.get_mana(); f0 = g.get_editor_property("chi_free_made"); b0 = c.bolts_cast
+        c.select_weapon(i); yield from wait(0.3)
+        m0 = c.get_mana(); st = c.start_attack_with(i); m1 = c.get_mana()          # (the mana is taken as the attack starts; read at once: it refills after)
+        t0 = time.time()
+        while time.time() - t0 < float(W[i].attack_ends[0]) + 0.4: yield
+        res["chi_alone"].append({"name": str(W[i].name), "mana_cost": W[i].mana_cost, "started": st, "bolts": c.bolts_cast - b0,
+                                 "mana_before": round(m0, 2), "mana_after": round(m1, 2), "free_counted": g.get_editor_property("chi_free_made") - f0})
+        yield from wait(0.3)
+    # (with a monster within its range: its mana taken as before)
+    i = chis[0]; m = spawn_dummy(ahead(250)); yield from wait(0.6)
+    c.set_mana(c.get_max_mana()); m0 = c.get_mana(); f0 = g.get_editor_property("chi_free_made")
+    c.select_weapon(i); yield from wait(0.3); m0 = c.get_mana(); st = c.start_attack_with(i); m1 = c.get_mana(); yield from wait(1.2)
+    res["chi_target"] = {"started": st, "spent": round(m0 - m1, 2), "cost": W[i].mana_cost, "free_counted": g.get_editor_property("chi_free_made") - f0}
+    drop([m])
+    c.select_weapon(0); yield from wait(0.3)
+    res["hud_line"] = str(next((x for x in c.get_quick_slots() if str(x)), ""))
+    shot("l11_basic_attacks", "1280x720"); yield from rwait(1.0)
+    # ---- the Warrior: a found sword in hand, a shield on and off: no shield mesh on her
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+    left = [str(i.name) for i in g.get_editor_property("items") if "WEAPON" in str(i.kind) for f in i.weapon_fits if f.weapon.off_hand_mesh and "shield" in f.weapon.off_hand_mesh.get_name().lower()]
+    res["fits_with_shield"] = len(left)
+    sword = None
+    for i in g.get_editor_property("items"):
+        if "WEAPON" not in str(i.kind) or "sword" not in str(i.name).lower() or "two" in str(i.name).lower(): continue
+        k0 = len(g.get_editor_property("weapons")); c.add_item(str(i.name), 1)
+        if len(g.get_editor_property("weapons")) > k0: sword = str(i.name); break
+    yield from wait(0.4)
+    res["sword"] = sword
+    if sword:
+        wi = next(k for k, w in enumerate(g.get_editor_property("weapons")) if str(w.name) == sword or sword in str(w.name))
+        c.select_weapon(wi); yield from wait(0.8)
+    def shields_on_her():
+        return [cm.static_mesh.get_name() for cm in G["pawn"].get_components_by_class(unreal.StaticMeshComponent)
+                if cm.static_mesh and "shield" in cm.static_mesh.get_name().lower() and cm.is_visible()]
+    sh = "Kite Shield"; c.add_item(sh, 1); c.wear_shield(sh); yield from wait(0.5)
+    res["with_shield"] = shields_on_her()
+    c.wear_shield(sh); yield from wait(0.5)          # (the same shield again takes it off)
+    res["worn_after"] = str(c.get_worn_shield()); res["after_off"] = shields_on_her()
+    shot("l11_shield_off", "1280x720"); yield from rwait(1.0)
+    # ---- the Escape menu's Gameplay page: its rows, keep or drop her things at death, the difficulty on new monsters
+    keep0 = g.get_editor_property("keep_items_on_death"); diff0 = g.get_editor_property("difficulty")
+    try:
+        g.set_menu_open(True); yield from rwait(0.3)
+        main = [str(x) for x in g.get_menu_lines()]
+        gi = next((k for k, l in enumerate(main) if l == "button|Gameplay"), -1)
+        res["menu_main"] = main
+        g.activate_menu_line(gi); yield from rwait(0.3)
+        res["gameplay_page"] = g.get_menu_page(); res["gameplay_lines"] = [str(x) for x in g.get_menu_lines()]
+        shot("l11_gameplay_page", "1280x720"); yield from rwait(0.8)
+        # (Right on each choice: the death row to keep, the difficulty round its four)
+        g.set_keep_items_on_death(False); g.set_difficulty(1)
+        g.activate_menu_line(0); yield from rwait(0.2)
+        res["deathdrop_after_enter"] = [str(x) for x in g.get_menu_lines()][0]
+        seen = []
+        for _ in range(4):
+            g.activate_menu_line(1); yield from rwait(0.1); seen.append([str(x) for x in g.get_menu_lines()][1])
+        res["difficulty_round"] = seen
+        g.activate_menu_line(2); yield from rwait(0.2); res["back_cursor_line"] = main[g.get_menu_cursor()] if 0 <= g.get_menu_cursor() < len(main) else None
+        g.set_menu_open(False); yield from rwait(0.3)
+        # (her things at death: kept, then dropped)
+        for keep in (True, False):
+            c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+            g.set_keep_items_on_death(keep)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.4)
+            c.add_item("Iron Ingot", 3); c.add_item("Small Healing Potion", 1); yield from wait(0.2)
+            np0 = len([p for p in g.loot_piles if p])
+            c.apply_damage(c.get_health() / max(1.0 - c.get_shield_share(), 0.1) + 5.0, None); yield from wait(1.5)
+            res[f"death_keep_{keep}"] = {"dead": c.is_dead(), "ingots": c.get_item_count("Iron Ingot"), "potions": c.get_item_count("Small Healing Potion"),
+                                         "new_piles": len([p for p in g.loot_piles if p]) - np0}
+            t0 = time.time()
+            while c.is_dead() and time.time() - t0 < 20: yield
+            yield from wait(0.8)
+        # (the difficulty: the same kind made at each, its hit points and blow against fair's; hell's share of elites)
+        kind = str(g.get_editor_property("monsters")[0].name); spot = ahead(600)
+        res["difficulty"] = {}
+        for d in range(4):
+            g.set_difficulty(d); hs, ds, el = [], [], 0
+            for k in range(12):
+                m = g.spawn_monster_named(kind, V(spot.x + 120 * (k % 4), spot.y + 120 * (k // 4), spot.z), 1, 1.0, 1.0, 1.0)
+                hs.append(m.get_max_health()); ds.append(m.get_damage()); el += 1 if m.get_editor_property("hell_elite") else 0
+                drop([m])
+            res["difficulty"][d] = {"min_health": min(hs), "min_damage": min(ds), "elites": el, "count_mul": g.difficulty_count_mul()}
+            yield from wait(0.2)
+    finally:
+        g.set_keep_items_on_death(keep0); g.set_difficulty(diff0)
+    quiet(False)
+    df = res.get("difficulty", {})
+    def ratio(d, k): return round(df[d][k] / df[1][k], 3) if df.get(1, {}).get(k) else None
+    res["difficulty_ratios"] = {d: (ratio(d, "min_health"), ratio(d, "min_damage")) for d in df}
+    ch = res["chi_alone"]
+    ok = (res["fists"]["name"] == "Fists" and res["fists"]["label"] == "Basic Attacks"
+          and len(ch) == len(chis) and len(ch) >= 2 and all(x["started"] and x["bolts"] == 1 and x["mana_after"] == x["mana_before"] and x["free_counted"] == 1 for x in ch)
+          and res["chi_target"]["started"] and abs(res["chi_target"]["spent"] - res["chi_target"]["cost"]) < 0.01 and res["chi_target"]["free_counted"] == 0
+          and res["fits_with_shield"] == 0 and res["sword"] and len(res["with_shield"]) >= 1 and res["worn_after"] in ("None", "") and not res["after_off"])
+    rr = res.get("difficulty_ratios", {})
+    gp_ok = (res.get("gameplay_page") == 5 and res.get("gameplay_lines", [])[:2] == ["choice|When you die|drop your items where you fall", "choice|Difficulty|Fair"]
+             and res.get("deathdrop_after_enter") == "choice|When you die|keep your items"
+             and res.get("difficulty_round") == ["choice|Difficulty|Difficult", "choice|Difficulty|Hell", "choice|Difficulty|Easy", "choice|Difficulty|Fair"]
+             and res.get("back_cursor_line") == "button|Gameplay"
+             and res.get("death_keep_True", {}).get("ingots") == 3 and res["death_keep_True"]["new_piles"] == 0
+             and res.get("death_keep_False", {}).get("ingots") == 0 and res["death_keep_False"]["new_piles"] == 1
+             # (each as fair's times the factor, rounded as the game rounds them: a blow of 9 at 0.6 is 5)
+             and all(df.get(d) and abs(df[d][k] - round(df[1][k] * want)) <= 1 for d, want in ((0, 0.6), (2, 1.5), (3, 2.5)) for k in ("min_health", "min_damage"))
+             and res["difficulty"][3]["elites"] >= 1 and res["difficulty"][1]["elites"] == 0 and res["difficulty"][3]["count_mul"] == 1.25)
+    res["gameplay_ok"] = gp_ok
+    step_result("list11", ok and gp_ok, **res)
+
+STEPS = {"list10": step_list10, "list11": step_list11, "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,

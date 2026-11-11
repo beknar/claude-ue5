@@ -1,0 +1,140 @@
+{
+ "tag": "m11b",
+ "plan": [
+  "list11"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list11",
+   "ok": false,
+   "fists": {
+    "name": "Fists",
+    "label": "Basic Attacks"
+   },
+   "chi_alone": [
+    {
+     "name": "Straight Punch",
+     "mana_cost": 7.0,
+     "started": true,
+     "bolts": 1,
+     "mana_before": 50.0,
+     "mana_after": 52.72,
+     "free_counted": 1
+    },
+    {
+     "name": "Side Kick",
+     "mana_cost": 17.0,
+     "started": true,
+     "bolts": 1,
+     "mana_before": 50.0,
+     "mana_after": 53.07,
+     "free_counted": 1
+    }
+   ],
+   "chi_target": {
+    "started": true,
+    "spent": 4.56,
+    "cost": 7.0,
+    "free_counted": 0
+   },
+   "hud_line": "Fists",
+   "fits_with_shield": 0,
+   "sword": "Viking Shortsword",
+   "with_shield": [
+    "SM_Shield_3"
+   ],
+   "worn_after": "None",
+   "after_off": [],
+   "menu_main": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Gameplay",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "gameplay_page": 5,
+   "gameplay_lines": [
+    "choice|When you die|drop your items where you fall",
+    "choice|Difficulty|Fair",
+    "button|Back"
+   ],
+   "deathdrop_after_enter": "choice|When you die|keep your items",
+   "difficulty_round": [
+    "choice|Difficulty|Difficult",
+    "choice|Difficulty|Hell",
+    "choice|Difficulty|Easy",
+    "choice|Difficulty|Fair"
+   ],
+   "back_cursor_line": "button|Gameplay",
+   "death_keep_True": {
+    "dead": true,
+    "ingots": 3,
+    "potions": 1,
+    "new_piles": 0
+   },
+   "death_keep_False": {
+    "dead": true,
+    "ingots": 0,
+    "potions": 0,
+    "new_piles": 1
+   },
+   "difficulty": {
+    "0": {
+     "min_health": 24.0,
+     "min_damage": 5.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "1": {
+     "min_health": 40.0,
+     "min_damage": 9.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "2": {
+     "min_health": 60.0,
+     "min_damage": 14.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "3": {
+     "min_health": 100.0,
+     "min_damage": 23.0,
+     "elites": 2,
+     "count_mul": 1.25
+    }
+   },
+   "difficulty_ratios": {
+    "0": [
+     0.6,
+     0.556
+    ],
+    "1": [
+     1.0,
+     1.0
+    ],
+    "2": [
+     1.5,
+     1.556
+    ],
+    "3": [
+     2.5,
+     2.556
+    ]
+   },
+   "gameplay_ok": false
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_m11b_l11_basic_attacks.png",
+  "mw_m11b_l11_shield_off.png",
+  "mw_m11b_l11_gameplay_page.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

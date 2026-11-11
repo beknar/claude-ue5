@@ -271,7 +271,7 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 		if (Ws_ && Kinds.Num() > 0)
 		{
 			const FRDMonsterDef& Def = Monsters[Kinds[Rs.RandRange(0, Kinds.Num() - 1)]];
-			for (int32 I = 0; I < K.Monsters; ++I)
+			for (int32 I = 0; I < DifficultyCount(K.Monsters); ++I)          // (the list of 2026-11-11: hell's quarter more)
 			{
 				const float A = Rs.FRandRange(0.f, 2.f * PI), D = Rs.FRandRange(200.f, 600.f);
 				FVector Q(At.X + FMath::Cos(A) * D, At.Y + FMath::Sin(A) * D, 0.f);

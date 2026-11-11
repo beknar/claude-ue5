@@ -475,7 +475,7 @@ void ARDHUD::DrawCombat(float Sc)
 			if (bPad) Key = (Wp.bAlongside && !bLbBlocks) ? FString(TEXT("LB")) : (Wp.bSpell && Cb->GetAlongsideSpell() < 0 && !bLbBlocks) ? FString(TEXT("LB / RB")) : FString(TEXT("RB"));
 			if (bPad && Gen->bRogueControls) Key = bOn ? FString(TEXT("RB")) : FString(TEXT("Y"));      // (the rogue: Y draws it, RB uses it)
 			UI.Text(Key, bOn ? FLinearColor(1.f, 0.82f, 0.35f) : Tc, S0.X + 7.f * Sc, S0.Y + 4.f * Sc, Small, Sc, ERDType::Title);
-			const FString N = Wp.Name.ToString().ToUpper();
+			const FString N = Wp.Shown().ToUpper();
 			if (bIcon)
 			{
 				// (beside the picture: the name, the damage, the mana a cast takes, a line each)
@@ -602,7 +602,7 @@ void ARDHUD::DrawCombat(float Sc)
 		const FString T = TEXT("YOU HAVE FALLEN");
 		float Tw, Th; UI.TextSize(T, Tw, Th, Medium, Sc * 2.6f, ERDType::Title);
 		UI.Text(T, FLinearColor(0.95f, 0.2f, 0.15f), (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f, Medium, Sc * 2.6f, ERDType::Title);
-		const FString U = Gen->bDropOnDeath && Gen->LootPiles.ContainsByPredicate([](const ARDLootPile* Lp) { return IsValid(Lp) && Lp->bHers; }) ? TEXT("your things lie where you fell: back to the great hall...") : TEXT("back to the middle of the dungeon...");
+		const FString U = Gen->bDropOnDeath && !Gen->bKeepItemsOnDeath && Gen->LootPiles.ContainsByPredicate([](const ARDLootPile* Lp) { return IsValid(Lp) && Lp->bHers; }) ? TEXT("your things lie where you fell: back to the great hall...") : TEXT("back to the middle of the dungeon...");
 		UI.TextSize(U, Tw, Th, Small, Sc * 1.3f);
 		UI.Text(U, RDInk, (Canvas->ClipX - Tw) * 0.5f, Canvas->ClipY * 0.4f + 62.f * Sc, Small, Sc * 1.3f);
 	}
@@ -994,13 +994,18 @@ void ARDHUD::Triangle(const FVector2D& P, float R, const FLinearColor& C)
 bool ARDHUD::IsElite(const ARDMonster* M) const
 {
 	if (!M || !M->Section || !Gen) return false;
-	const float Avg = Gen->GetMonsterHealth(M->Section->Coord);
+	// (the list of 2026-11-11: against its tier's at the difficulty; hell's elites always)
+	if (M->bHellElite) return true;
+	const float Avg = Gen->GetMonsterHealth(M->Section->Coord) * Gen->DifficultyMul();
 	return Avg > 0.f && M->GetMaxHealth() > Avg * 1.25f;
 }
 
 void ARDHUD::CacheTiles()
 {
-	int32 Sig = 17 + Gen->MapData.Num();
+	// (the list of 2026-11-11: rd.RevealMap draws every room and hallway made so far as discovered; what she has discovered (the
+	// tiers' progress) is not changed)
+	const bool bAll = Gen->bMapRevealAll;
+	int32 Sig = 17 + Gen->MapData.Num() + (bAll ? 1000003 : 0);
 	for (const auto& KV : Gen->MapData)
 		for (const FRDMapRect& R : KV.Value.Rects) Sig = Sig * 31 + (R.Min.X * 7 + R.Min.Y * 13 + R.Max.X * 3 + R.Max.Y) * 2 + (R.bDiscovered ? 1 : 0);
 	if (Sig == TileSig && Tiles.Num() > 0) return;
@@ -1011,7 +1016,7 @@ void ARDHUD::CacheTiles()
 				for (int32 Y = R.Min.Y; Y < R.Max.Y; ++Y)
 				{
 					if (R.Mask.Num() > 0 && !R.HasTile(FIntPoint(X, Y))) continue;      // (mistward: a shaped room's floor only)
-					Tiles.FindOrAdd(FIntPoint(X, Y)) |= 1 | (R.bDiscovered ? 2 : 0) | (R.bCorridor ? 4 : 0);
+					Tiles.FindOrAdd(FIntPoint(X, Y)) |= 1 | (R.bDiscovered || bAll ? 2 : 0) | (R.bCorridor ? 4 : 0);
 				}
 }
 
@@ -2055,7 +2060,7 @@ void ARDHUD::DrawInventory(float Sc)
 			if (P.Num() >= 6 && FCString::Atoi(*P[5]) > 1) Tag += FString::Printf(TEXT("   x %s"), *P[5]);
 			// (its quick slot's number, its slash)
 			if (Gen->bQuickSlots && !Wp.bAlongside) { const int32 Qs = Cb->GetQuickSlots().IndexOfByKey(Wp.Name); Tag += Qs != INDEX_NONE ? FString::Printf(TEXT("   [%s]"), *URDCombatComponent::SlotLabel(Qs)) : FString(TEXT("   OFF THE BAR")); }
-			const FString Nm = !Wp.Slash.IsNone() ? FString::Printf(TEXT("%s  +  %s"), *Wp.Name.ToString(), *Wp.Slash.ToString()) : Wp.Name.ToString();
+			const FString Nm = !Wp.Slash.IsNone() ? FString::Printf(TEXT("%s  +  %s"), *Wp.Shown(), *Wp.Slash.ToString()) : Wp.Shown();
 			Row(I, Nm, Tag, Wp.bAlongside ? RDCyan : Gold, Wp.Icon);
 		}
 		else if (Kd == TEXT("ability") && P.Num() >= 3)
@@ -2748,7 +2753,7 @@ void ARDHUD::DrawHotbar(float Sc)
 		else
 		{
 			// (no picture: the first letters of its name)
-			TArray<FString> Ws; Wp.Name.ToString().ParseIntoArray(Ws, TEXT(" "));
+			TArray<FString> Ws; Wp.Shown().ParseIntoArray(Ws, TEXT(" "));
 			FString Ab; for (const FString& Wd : Ws) if (Wd.Len() > 0 && Ab.Len() < 3) Ab += Wd.Left(1).ToUpper();
 			UI.TextSize(Ab, Tw, Th, Small, Sc * 1.4f, ERDType::Title);
 			UI.Text(Ab, Tint, (A.X + B.X - Tw) * 0.5f, (A.Y + B.Y - Th) * 0.5f, Small, Sc * 1.4f, ERDType::Title);
@@ -2792,7 +2797,7 @@ void ARDHUD::DrawHotbar(float Sc)
 	}
 	else if (Gen->Weapons.IsValidIndex(Cb->GetWeaponIndex()))
 	{
-		FString T = Gen->Weapons[Cb->GetWeaponIndex()].Name.ToString().ToUpper();
+		FString T = Gen->Weapons[Cb->GetWeaponIndex()].Shown().ToUpper();
 		// (the bar longer than ten: where the chosen one is on it)
 		if (bQuick && Qs.Num() > 10) { const int32 C = Cb->GetQuickCursor(); if (C >= 0) T += FString::Printf(TEXT("    (slot %s of %d: the D-pad)"), *URDCombatComponent::SlotLabel(C), Qs.Num()); }
 		else if (!bQuick && Gen->Weapons.Num() > 10) T += FString::Printf(TEXT("    (%d more: the wheel)"), Gen->Weapons.Num() - 10);
@@ -2821,7 +2826,7 @@ void ARDHUD::DrawMenu(float Sc)
 		Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc);
 	}
 	float Tw, Th;
-	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : Gen->GetMenuPage() == 4 ? TEXT("SAVE OVER WHICH SAVE?") : TEXT("PAUSED");
+	const TCHAR* Head = Gen->GetMenuPage() == 1 ? TEXT("OPTIONS") : Gen->GetMenuPage() == 5 ? TEXT("GAMEPLAY") : Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : Gen->GetMenuPage() == 3 ? TEXT("SAVE THE GAME") : Gen->GetMenuPage() == 4 ? TEXT("SAVE OVER WHICH SAVE?") : TEXT("PAUSED");
 	UI.TextSize(Head, Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
 	UI.Text(Head, RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
 	Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset();
@@ -2892,6 +2897,7 @@ void ARDHUD::DrawMenu(float Sc)
 	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Left Right  the save to save over      Enter  save      Esc  back"))
 	                   : Gen->GetMenuPage() == 4 ? FString(TEXT("W S  choose      Enter  this one      Esc  back to the Save page"))
 	                   : Gen->GetMenuPage() == 1 ? FString(TEXT("W S  choose      A D  change      Enter  press      mouse  click or drag      Esc  back"))
+	                   : Gen->GetMenuPage() == 5 ? FString(TEXT("W S  choose      A D  change      Esc  back          (the difficulty: the monsters met from now on)"))
 	                                             : FString(TEXT("W S  choose      Enter  press      mouse  click      Esc  back to the game"));
 	UI.TextSize(Keys, Tw, Th, Small, Sc);
 	UI.Text(Keys, Dim, (A.X + B.X - Tw) * 0.5f, B.Y - 48.f * Sc, Small, Sc);

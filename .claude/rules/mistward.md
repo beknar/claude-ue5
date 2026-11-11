@@ -335,3 +335,10 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **A stance on a forearm-mounted shield**: leaning her spine 27 degrees laid the shield flat across her belly (the picture); the forearm and hand are turned back to the guard's own after the lean.
 - **`0.0 or 999` is 999**: a measured 0 read as "missing" in a check (`block_walk_max`); compare with `None`.
 - **PR #40's review (2026-11-10)**: a station a hero cannot use must not take F from the one beside it she can (the forge's refusal kept the Mage from the anvil 4 m off); a record kept for a game goes with a new game (`NewGame` empties `LootedItems`); a rule keyed by the sets' tier ring is a dungeon's (the ankh's drop in the wilds rolled by the ring); what is recorded in a piece's placing must not sit inside another switch's block (the ovens and forges were recorded only where table food was on); a list filled in a set's furnishing is reset where the furnishing is redone (the dungeons' ovens doubled at each restart: 10 counted, 5 there); a held item changed for another that is refused keeps the first (the ankh's name over the torch in her hand); one helper for one wording (`HeroesInWords`); a test of a reveal must find a thing to reveal, and of a quick slot use its key.
+
+## The list of 2026-11-11's second phase (`918 noshield11,basic`, `868 list11`)
+
+- **A found weapon's fit is a weapon of its own**: 899 and 914 took the shield mesh off her hero's and the level's weapons, but each found sword's `WeaponFits` entry carried `SM_Shield_1` too and showed it once no shield was worn. Data copied per fit must be cleaned per fit.
+- **Read the mana in the tick the attack starts**: read after the clip's wait, her mana had refilled (50.0 -> 52.7 for a free chi, 4.56 "spent" of 7).
+- **A factor on a small integer is rounded**: a blow of 9 at 0.6 is 5 (0.556): compare with the rounded product, not the ratio.
+- **The weapon's name is a key; show a label**: "Fists" names her in saves, the quick bar, the balance tables and the tests; the display goes through `FRDWeaponDef::Shown()`.
