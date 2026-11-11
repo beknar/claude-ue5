@@ -29,7 +29,6 @@ namespace
 	constexpr int32 RDFarSegs = 192;
 	/** past this the ring is beyond every chunk: its plain sink */
 	constexpr double RDFarUnderChunksM = 2000.0;
-	float RDFarSmooth(float A, float B, float X) { const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return T * T * (3.f - 2.f * T); }
 }
 
 void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
@@ -97,22 +96,13 @@ void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
 			if (Nr.IsNearlyZero()) Nr = FVector::UpVector;
 			N.Add(Nr);
 			Tg.Add(FProcMeshTangent((FVector(1, 0, 0) - Nr * Nr.X).GetSafeNormal(), false));
-			const float Slope = FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp((float)Nr.Z, 0.f, 1.f)));
-			const float Rk = FMath::Max(Q.Rock, RDFarSmooth(31.f, 46.f, Slope)) * (Q.WaterKind ? 0.3f : 1.f);
-			const float Sn = Q.Snow * (1.f - RDFarSmooth(38.f, 58.f, Slope));
-			FLinearColor C = Q.Color;
-			// (the forest's crowns, which the far land does not grow)
-			if (Q.WaterKind == 0) C = FMath::Lerp(C, FarForestColor, FMath::Clamp(Q.Canopy * FarForestShare, 0.f, 1.f));
-			if (Rk > Q.Rock && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Rk - Q.Rock) * 0.85f);
-			if (Sn < Q.Snow && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Q.Snow - Sn) * 0.7f);
+			// (the chunks' own rule, with the forest's crowns, which the far land does not grow, in its colour)
+			FRDWGroundVertex G = RDWildGroundVertex(Q, Nr, FarForestColor, FarForestShare);
 			// (the ground material glows by the colour's alpha, the lava: across a far triangle kilometres wide one lava sample
 			// smeared an orange glow over a whole hill (884 horizonprobe's pictures): the far land has none)
-			C.A = 0.f;
-			Col.Add(C);
-			UV.Add(FVector2D(Q.FieldAng / PI, Q.FieldCrop >= 0 ? (Q.FieldCrop + 0.5) / double(FRDWildWorld::MaxCrops) : 0.0));
-			UV1.Add(FVector2D(Rk, Sn));
-			UV2.Add(FVector2D(Q.Sand, Q.Mud));
-			UV3.Add(FVector2D(Q.Road, Q.FieldCrop >= 0 ? Q.Field * (1.f - Q.Road) : 0.f));
+			G.C.A = 0.f;
+			Col.Add(G.C);
+			UV.Add(G.UV0); UV1.Add(G.UV1); UV2.Add(G.UV2); UV3.Add(G.UV3);
 		}
 	// (the triangles' front up: UE's procedural mesh draws the side where cross(V1 - V0, V2 - V0) points away from the viewer, so
 	// seen from above that cross points down (the ceilings' lesson, RDCeilings.cpp))
@@ -129,22 +119,31 @@ void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
 	// ---- water over the far land's quads, as the chunks lay them (RDWildChunk.cpp): a quad with water at a corner is a
 	// flat sheet at its water's level (the land above it hides it past the shore); sunk with its ring, as the land is
 	FarLandWaterQuads = 0;
-	for (int32 Sec = 1; Sec <= 4; ++Sec) if (FarLand->GetNumSections() > Sec) FarLand->ClearMeshSection(Sec);
+	for (int32 Sec = 1; Sec <= 3; ++Sec) if (FarLand->GetNumSections() > Sec) FarLand->ClearMeshSection(Sec);
 	if (bAsGround)
 	{
+		// (none where the chunks lie or may come before it is made again (PR #45's review): sunk only its ring's few metres, a sheet
+		// under a chunk's lake deeper than that was a second surface between the chunk's water and its bed. The chunks reach
+		// WildDropM and half a chunk round her, and she goes FarLandRebuildM before it is made again)
+		const double ChunksM = WildDropM + WildChunkM * 0.5 + FarLandRebuildM;
 		struct FRDFarWater { TArray<FVector> V; TArray<int32> T; TArray<FVector2D> UV; TArray<FLinearColor> C; };
-		FRDFarWater Wt[4];
+		FRDFarWater Wt[3];
 		for (int32 R = 0; R + 1 < NR; ++R)
 			for (int32 A = 0; A < RDFarSegs; ++A)
 			{
 				const int32 A1 = (A + 1) % RDFarSegs;
 				const int32 Ks[4] = { R * RDFarSegs + A, R * RDFarSegs + A1, (R + 1) * RDFarSegs + A, (R + 1) * RDFarSegs + A1 };
-				int32 Kind = 0; float Lv = -1e9f;
-				for (const int32 K : Ks) { const FRDWSample& Q = Smp[K]; if (Q.WaterKind) { Kind = Q.WaterKind; Lv = FMath::Max(Lv, Q.Water); } }
+				int32 Kind = 0; float Lv = -1e9f; bool bUnderChunks = false;
+				for (const int32 K : Ks)
+				{
+					const FRDWSample& Q = Smp[K]; if (Q.WaterKind) { Kind = Q.WaterKind; Lv = FMath::Max(Lv, Q.Water); }
+					if (FMath::Max(FMath::Abs(Bare[K].X / 100.0 - Here.X), FMath::Abs(Bare[K].Y / 100.0 - Here.Y)) < ChunksM) bUnderChunks = true;
+				}
 				// (water only: a far quad is up to 25 km across, and a lava sample at one corner spread a glowing sheet over a whole hill
 				// (884 horizonprobe's pictures); the far lava is the ground's own colour)
-				if (!Kind) continue;
-				const int32 Sec = !Kind ? 3 : (Kind == 1 ? 1 : (Kind == 6 ? 2 : 0));
+				if (!Kind || bUnderChunks) continue;
+				// (the chunks' water materials: 0 fresh, 1 the sea, 2 a spring)
+				const int32 Sec = Kind == 1 ? 1 : (Kind == 6 ? 2 : 0);
 				FRDFarWater& W = Wt[Sec];
 				const int32 Base = W.V.Num();
 				for (const int32 K : Ks)
@@ -152,8 +151,8 @@ void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
 					const FRDWSample& Q = Smp[K];
 					// (at a dry corner the sheet goes down under its ground, not out at the water's level: a quad is up to 25 km across,
 					// and a mountain lake's level held over the lowland at its other corners would float there)
-					const float Hv = Kind ? (Q.WaterKind ? Q.Water : FMath::Min(Lv, Q.H - 1.f)) : Q.H;
-					const float Zw = Kind ? Wild->ToZ(Hv) + (Kind == 1 ? 0.f : 2.f) : Bare[K].Z + 6.f;
+					const float Hv = Q.WaterKind ? Q.Water : FMath::Min(Lv, Q.H - 1.f);
+					const float Zw = Wild->ToZ(Hv) + (Kind == 1 ? 0.f : 2.f);
 					W.V.Add(FVector(Bare[K].X, Bare[K].Y, Zw - SinkOf[K]));
 					// (one repeat every 16 m from the continent's corner, as the chunks' water)
 					W.UV.Add(FVector2D((Bare[K].X / 100.0 - Wild->Xs) / 16.0, (Bare[K].Y / 100.0 - Wild->Yw) / 16.0));
@@ -163,8 +162,8 @@ void ARDDungeonGenerator::TickFarLand(const FVector& Cam)
 				W.T.Append({ Base, Base + 1, Base + 2 }); W.T.Append({ Base + 1, Base + 3, Base + 2 });
 				++FarLandWaterQuads;
 			}
-		UMaterialInterface* Wm[4] = { WildWaterMaterial, WildSeaMaterial ? WildSeaMaterial.Get() : WildWaterMaterial.Get(), WildSpringMaterial ? WildSpringMaterial.Get() : WildWaterMaterial.Get(), WildLavaMaterial };
-		for (int32 S = 0; S < 4; ++S)
+		UMaterialInterface* Wm[3] = { WildWaterMaterial, WildSeaMaterial ? WildSeaMaterial.Get() : WildWaterMaterial.Get(), WildSpringMaterial ? WildSpringMaterial.Get() : WildWaterMaterial.Get() };
+		for (int32 S = 0; S < 3; ++S)
 		{
 			if (Wt[S].V.Num() == 0 || !Wm[S]) continue;
 			TArray<FVector> Up; Up.Init(FVector::UpVector, Wt[S].V.Num());

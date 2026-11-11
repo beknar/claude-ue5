@@ -33,6 +33,36 @@ namespace
 	FORCEINLINE float RDWCSmooth(float A, float B, float X) { const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return T * T * (3.f - 2.f * T); }
 }
 
+FRDWGroundVertex RDWildGroundVertex(const FRDWSample& Q, const FVector& Nr, const FLinearColor& Forest, float ForestShare)
+{
+	FRDWGroundVertex G;
+	G.Slope = FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp((float)Nr.Z, 0.f, 1.f)));
+	// rock where it is steep, snow sliding off the steepest
+	const float Rk = FMath::Max(Q.Rock, RDWCSmooth(31.f, 46.f, G.Slope)) * (Q.WaterKind ? 0.3f : 1.f);
+	const float Sn = Q.Snow * (1.f - RDWCSmooth(38.f, 58.f, G.Slope));
+	FLinearColor C = Q.Color;
+	if (ForestShare > 0.f && Q.WaterKind == 0) C = FMath::Lerp(C, Forest, FMath::Clamp(Q.Canopy * ForestShare, 0.f, 1.f));
+	if (Rk > Q.Rock && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Rk - Q.Rock) * 0.85f);
+	if (Sn < Q.Snow && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Q.Snow - Sn) * 0.7f);
+	C.A = Q.Lava;
+	G.C = C;
+	// (UV0, which the ground material no longer reads for its detail (the world position does): the list of 2026-11-07's
+	// field rows, their way (0-1 of half a turn) and their crop (/ 8); UV3's V their weight)
+	// (the crop / 16: thirteen crops since the list of 2026-11-08b (887's ground material reads floor(v x 16)))
+	G.UV0 = FVector2D(Q.FieldAng / PI, Q.FieldCrop >= 0 ? (Q.FieldCrop + 0.5) / double(FRDWildWorld::MaxCrops) : 0.0);
+	G.UV1 = FVector2D(Rk, Sn);
+	// (the list of 2026-11-04: "the road outside brokenspire is visible on the map, but it is indistinguishable and not
+	// visible in the wilderness": it was 80 % of the mud layer, 3 m wide, on a 2 m grid. It has a layer of its own now: a
+	// trodden earth road, darker in its wheel ruts)
+	G.UV2 = FVector2D(Q.Sand, Q.Mud);
+	G.UV3 = FVector2D(Q.Road, Q.FieldCrop >= 0 ? Q.Field * (1.f - Q.Road) : 0.f);
+	return G;
+}
+
+namespace
+{
+}
+
 void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 {
 	const double T0 = FPlatformTime::Seconds();
@@ -81,26 +111,10 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			D.N[K] = Nr;
 			// (the detail textures' U runs along X: the tangent is X made square to the normal)
 			D.Tan[K] = FProcMeshTangent((FVector(1, 0, 0) - Nr * Nr.X).GetSafeNormal(), false);
-			const float Slope = FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp((float)Nr.Z, 0.f, 1.f)));
-			D.Slope[K] = Slope;
-			// rock where it is steep, snow sliding off the steepest
-			const float Rk = FMath::Max(Q.Rock, RDWCSmooth(31.f, 46.f, Slope)) * (Q.WaterKind ? 0.3f : 1.f);
-			const float Sn = Q.Snow * (1.f - RDWCSmooth(38.f, 58.f, Slope));
-			FLinearColor C = Q.Color;
-			if (Rk > Q.Rock && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Rk - Q.Rock) * 0.85f);
-			if (Sn < Q.Snow && Q.WaterKind == 0) C = FMath::Lerp(C, Q.RockColor, (Q.Snow - Sn) * 0.7f);
-			C.A = Q.Lava;
-			D.C[K] = C;
-			// (UV0, which the ground material no longer reads for its detail (the world position does): the list of 2026-11-07's
-			// field rows, their way (0-1 of half a turn) and their crop (/ 8); UV3's V their weight)
-			// (the crop / 16: thirteen crops since the list of 2026-11-08b (887's ground material reads floor(v x 16)))
-			D.UV0[K] = FVector2D(Q.FieldAng / PI, Q.FieldCrop >= 0 ? (Q.FieldCrop + 0.5) / double(FRDWildWorld::MaxCrops) : 0.0);
-			D.UV1[K] = FVector2D(Rk, Sn);
-			// (the list of 2026-11-04: "the road outside brokenspire is visible on the map, but it is indistinguishable and not
-			// visible in the wilderness": it was 80 % of the mud layer, 3 m wide, on a 2 m grid. It has a layer of its own now: a
-			// trodden earth road, darker in its wheel ruts)
-			D.UV2[K] = FVector2D(Q.Sand, Q.Mud);
-			D.UV3[K] = FVector2D(Q.Road, Q.FieldCrop >= 0 ? Q.Field * (1.f - Q.Road) : 0.f);
+			const FRDWGroundVertex G = RDWildGroundVertex(Q, Nr);
+			D.Slope[K] = G.Slope;
+			D.C[K] = G.C;
+			D.UV0[K] = G.UV0; D.UV1[K] = G.UV1; D.UV2[K] = G.UV2; D.UV3[K] = G.UV3;
 		}
 	D.T.Reserve((Nv - 1) * (Nv - 1) * 6);
 	for (int32 I = 0; I + 1 < Nv; ++I)

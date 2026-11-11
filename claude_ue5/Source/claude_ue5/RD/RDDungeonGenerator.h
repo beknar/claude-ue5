@@ -1392,6 +1392,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Sound") FVector2D MusicRotateSeconds = FVector2D(300.f, 600.f);
 	// the sky and weather's state (RDSky.cpp)
 	void BeginSky7();
+	/** the high clouds' height, tile and wind (the volumetric clouds' CloudWind, else +X) into their material */
+	void ApplySkyHighLayer();
 	void TickSky7(float Dt, APlayerController* PC);
 	void ApplySky7();
 	UPROPERTY(Transient) TObjectPtr<class UVolumetricCloudComponent> SkyClouds;
@@ -1424,6 +1426,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Sky") FString GetSkyState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Sky") void SetWeather(int32 Kind, bool bAtOnce);
 	static FString WeatherName(int32 Kind);
+	/** the weathers (RDSky.cpp's looks and names): the rotation picks among the first NumRotationWeathers; cloudless, the last,
+	 *  only by rd.Weather (one count for every table and the console, PR #45's review) */
+	static constexpr int32 NumWeathers = 9;
+	static constexpr int32 NumRotationWeathers = 8;
+	static constexpr int32 WeatherCloudless = 8;
 	/** the list of 2026-11-10 (RDSkyFar.cpp): the far land round her in the wilds, a ring from 0.85 to 80 km of the world model's
 	 *  heights and colours under the fog (the horizon's dark strip, 884 sky10); its material (914), how far she goes before it is
 	 *  made again (m), how far under the ground it sits (cm), the water's colour; tests: GetFarLandState "made|shown|x|y|ms|builds" */

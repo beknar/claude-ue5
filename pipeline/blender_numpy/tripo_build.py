@@ -86,6 +86,7 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 # bone out again from its head, tail and roll, and a bone pointing almost straight down has no sure roll: MartialArtist3's
 # thighs came out turned 95 and 18 degrees about their own length, and her skin was wrung in every clip (2026-11-10))
 Mw = arm.matrix_world.copy(); s_ = Mw.to_scale().x
+print("armature scale", round(s_, 5), "(the unit scale", round(S, 5), "times its own)")
 bpy.ops.object.select_all(action='DESELECT'); arm.select_set(True); bpy.context.view_layer.objects.active = arm
 bpy.ops.object.mode_set(mode='EDIT')
 for eb in arm.data.edit_bones:
@@ -122,7 +123,9 @@ for name, frames in clips.items():
         for pb in arm.pose.bones:
             if pb.name not in fr: continue          # (the hair chains: no keys, Unreal swings them)
             loc, rot, scl = fr[pb.name]
-            pb.location = loc * S; pb.rotation_quaternion = rot; pb.scale = scl
+            # (by the armature's whole scale, as its bones were baked: S and any scale its parent empty had (PR #45's review); S
+            # alone left every clip's bone moves short or long by that factor)
+            pb.location = loc * s_; pb.rotation_quaternion = rot; pb.scale = scl
             pb.keyframe_insert("location", frame=i, group=pb.name); pb.keyframe_insert("rotation_quaternion", frame=i, group=pb.name)
             pb.keyframe_insert("scale", frame=i, group=pb.name)
     print("keyed", name, len(frames))

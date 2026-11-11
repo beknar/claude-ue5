@@ -143,6 +143,14 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A strip at the horizon is told apart by measuring down a column** (`blender_numpy/sky_horizon.py`): the sky darkened smoothly to (126, 181, 204) and jumped in one row to a flat (183, 194, 208) with hill-shaped tops: land, not sky. Measure each change as the land against the sky just over it, at several hours: the fog's fixed daylight grey made it +22 at noon and +110 at 17:30.
 - **What a far quad holds, it holds over kilometres**: one lava sample spread a glow over a whole hill, as a lava quad and again as the ground material's own glow from the colour's alpha; a lake's level held at a dry corner would float a sheet over the lowland. The far land has no lava, and its water goes down under a dry corner's ground.
 - **The sky atmosphere's aerial perspective follows the hour; a fog colour does not**: the fog lit by the atmosphere (`HeightFogContribution` up to 8, its own colour off) turned the near town blue and stayed blue at dusk. The clear air's haze is the atmosphere's; the height fog is capped low there and rises with the weather's and the port's fog, and dims and warms with the sun low.
+- **PR #45's review (2026-11-11)**: the far land's water lay under the chunks too, sunk only its ring's few metres: under a
+  chunk's lake deeper than that it was a second surface between the chunk's water and its bed. No far water where the chunks
+  lie or may come before the ring is made again (`WildDropM`, half a chunk, `FarLandRebuildM`: 81 quads left of 83). The far
+  land and the chunks take a ground vertex from one function (`RDWildGroundVertex`, RDWild.h), or a change to the rock, snow
+  or crops' encoding would have to be made twice. A material's parameters that a tick's arithmetic depends on are set in the
+  same tick (the drift wrapped at the live tile, the material repeated at the one set at start). A table's count is one
+  constant (`ARDDungeonGenerator::NumWeathers`, `WeatherCloudless`), not literals in each file. A test step that sets an
+  engine console variable or hides her puts it back in a `finally`.
 - **A probe's setting the game resets four times a second is set every frame, or made the game's own**: the fog's density and colour are written by `ApplySky7` and `ApplyDayNight`; the probe's later rounds set generator properties the game applies.
 
 ## The far land (2026-11-10, `RD/RDSkyFar.cpp`)

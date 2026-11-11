@@ -83,6 +83,20 @@ if "rig" in STEPS:
         if say: REPORT.append(f"   {str(wd.name)}: blows {old} -> {list(wd.hit_times)}")
         return True
 
+    chi_seen = {}
+    MATIMES = json.load(open(os.path.join(SRC, "ma_times.json")))
+    def chi_check(wd):
+        """a chi attack keeps its hit time (martialartist_clips.py's ma_times.json): martialartist3_retarget.py writes a frame
+        for each of the source clip's, so the clip must be as long as the clip maker's, within a frame (PR #45's review: only
+        the fists and knives were measured again). (Her striking bone's fastest moment or farthest reach is no measure of a
+        chi's blow: a chain of punches or a kick's wind-up is faster earlier, and her feet stand 80 cm from her pelvis)"""
+        ats = list(wd.attacks)
+        if not wd.spell or not ats or not ats[0]: return
+        p = ats[0].get_path_name()
+        if p in chi_seen: return
+        clip = p.split(".")[-1].replace(f"AS_{CH}_", ""); t = MATIMES.get(clip)
+        chi_seen[p] = (str(wd.name), round(ats[0].get_play_length(), 3), t and round(float(t["length"]), 3), t and float(t["hit"]), round(list(wd.hit_times)[0], 3) if list(wd.hit_times) else None)
+
     def do_map(m):
         """her rig's parts on one map's generator (in a function: its actors are let go when it returns)"""
         if not ues.get_editor_world().get_path_name().startswith(MAPS + m + "."): les.load_level(MAPS + m)
@@ -97,7 +111,7 @@ if "rig" in STEPS:
             except Exception: continue
             for wd in ws:
                 wd.get_hit = flinch; wd.death = death; nw += 1
-                remeasure(wd, fist_hit)
+                if not remeasure(wd, fist_hit): chi_check(wd)
             h.set_editor_property(lst, ws)
         h.pawn_class = chbp.generated_class()
         gen.set_editor_property("heroes", heroes)
@@ -126,6 +140,9 @@ if "rig" in STEPS:
         # loading new map" is a fatal error (it took the editor down when the generator was still in a variable here))
         gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
     les.load_level(MAPS + "mistward_castle")
+    off = [v[0] for v in chi_seen.values() if v[2] is None or abs(v[1] - v[2]) > 1.0 / 24 + 0.005 or v[4] is None or abs(v[4] - v[3]) > 0.005]
+    REPORT.append(f"chi: {len(chi_seen)} clips (name, its length, the clip maker's, the hit there, the weapon's hit) {list(chi_seen.values())}; "
+                  f"{len(off)} off by more than a frame or not at the clip maker's hit {off}")
 
 print("917 " + " | ".join(REPORT))
 import gc

@@ -44,7 +44,7 @@ namespace
 	float RDSkySmooth(float A, float B, float X) { const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f); return T * T * (3.f - 2.f * T); }
 	// (per weather: the clouds' cover, rain, wind, fog)
 	struct FRDWeatherLook { float Cover, Rain, Wind, Fog; };
-	const FRDWeatherLook RDWeatherLooks[9] = {
+	const FRDWeatherLook RDWeatherLooks[ARDDungeonGenerator::NumWeathers] = {
 		{ 0.04f, 0.f, 0.12f, 0.f },     // clear
 		{ 0.32f, 0.f, 0.25f, 0.f },     // fair
 		{ 0.62f, 0.f, 0.40f, 0.05f },   // cloudy
@@ -56,13 +56,27 @@ namespace
 		{ 0.f, 0.f, 0.08f, 0.f } };     // cloudless (rd.Weather only: the rotation never picks it)
 	/** (2026-11-10: "truly clear weather ... separate from the current clear": clear's clouds never go below the cover range's
 	 *  0.05 and pile up along the horizon as a white band (884 sky10's pictures); cloudless draws no cloud layer at all) */
-	constexpr int32 RDWeatherCloudless = 8;
+	constexpr int32 RDWeatherCloudless = ARDDungeonGenerator::WeatherCloudless;
+	static_assert(RDWeatherCloudless == ARDDungeonGenerator::NumWeathers - 1, "cloudless is the last weather");
 }
 
 FString ARDDungeonGenerator::WeatherName(int32 K)
 {
-	static const TCHAR* N[] = { TEXT("clear"), TEXT("fair"), TEXT("cloudy"), TEXT("overcast"), TEXT("rain"), TEXT("storm"), TEXT("snow"), TEXT("fog"), TEXT("cloudless") };
-	return K >= 0 && K < 9 ? FString(N[K]) : FString(TEXT("?"));
+	static const TCHAR* N[NumWeathers] = { TEXT("clear"), TEXT("fair"), TEXT("cloudy"), TEXT("overcast"), TEXT("rain"), TEXT("storm"), TEXT("snow"), TEXT("fog"), TEXT("cloudless") };
+	return K >= 0 && K < NumWeathers ? FString(N[K]) : FString(TEXT("?"));
+}
+
+void ARDDungeonGenerator::ApplySkyHighLayer()
+{
+	if (!SkyHighMID) return;
+	// (the high clouds drift the way the volumetric clouds do: along their CloudWind, else +X)
+	FLinearColor Cw(1.f, 0.f, 0.f, 1.f);
+	if (SkyCloudMID) SkyCloudMID->GetVectorParameterValue(FName(TEXT("CloudWind")), Cw);
+	const FVector2D Wd(Cw.R, Cw.G);
+	SkyHighWindDir = Wd.SizeSquared() > 1e-8f ? Wd.GetSafeNormal() : FVector2D(1.f, 0.f);
+	SkyHighMID->SetScalarParameterValue(TEXT("Height"), SkyHighHeight);
+	SkyHighMID->SetScalarParameterValue(TEXT("TileCm"), FMath::Max(SkyHighTileCm, 1.f));
+	SkyHighMID->SetVectorParameterValue(TEXT("WindDir"), FLinearColor(SkyHighWindDir.X, SkyHighWindDir.Y, 0.f, 0.f));
 }
 
 void ARDDungeonGenerator::BeginSky7()
@@ -124,17 +138,7 @@ void ARDDungeonGenerator::BeginSky7()
 	if (SkyStars && SkyDomeMesh) { const float Sr = FMath::Max(SkyDomeMesh->GetBounds().SphereRadius, 1.f); SkyStars->SetWorldScale3D(FVector(4.0e6f / Sr)); }
 	Dome(SkyDomeMesh, SkyHighCloudMaterial, TEXT("RDSkyHigh"), SkyHigh, SkyHighMID);
 	if (SkyHigh && SkyDomeMesh) { const float Sr = FMath::Max(SkyDomeMesh->GetBounds().SphereRadius, 1.f); SkyHigh->SetWorldScale3D(FVector(3.6e6f / Sr)); }
-	// (the high clouds drift the way the volumetric clouds do: along their CloudWind, else +X)
-	if (SkyHighMID)
-	{
-		FLinearColor Cw(1.f, 0.f, 0.f, 1.f);
-		if (SkyCloudMID) SkyCloudMID->GetVectorParameterValue(FName(TEXT("CloudWind")), Cw);
-		const FVector2D Wd(Cw.R, Cw.G);
-		SkyHighWindDir = Wd.SizeSquared() > 1e-8f ? Wd.GetSafeNormal() : FVector2D(1.f, 0.f);
-		SkyHighMID->SetScalarParameterValue(TEXT("Height"), SkyHighHeight);
-		SkyHighMID->SetScalarParameterValue(TEXT("TileCm"), FMath::Max(SkyHighTileCm, 1.f));
-		SkyHighMID->SetVectorParameterValue(TEXT("WindDir"), FLinearColor(SkyHighWindDir.X, SkyHighWindDir.Y, 0.f, 0.f));
-	}
+	ApplySkyHighLayer();
 	Dome(SkyQuadMesh, SkyMoonMaterial, TEXT("RDSkyMoon"), SkyMoon, SkyMoonMID);
 	// (the weather of the start: fair; the next in a while)
 	if (WeatherUntil <= 0.f)
@@ -186,12 +190,12 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 	{
 		++WeatherChanges;
 		const uint32 H = HashCombine((uint32)SessionSeed ^ 0x5EA7u, (uint32)WeatherChanges * 2654435761u);
-		const float Wt[8] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, 0.6f };
+		const float Wt[NumRotationWeathers] = { 2.f, 3.f, 2.5f, 1.5f, bDry ? 0.3f : 1.5f, bDry ? 0.15f : 0.6f, 0.f, 0.6f };
 		float Sum = 0.f; for (const float X : Wt) Sum += X;
 		float Pick = ((H >> 4) % 10000u) / 10000.f * Sum;
 		int32 K = 0;
-		for (; K < 7; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
-		if (K == Weather) K = (K + 1) % 8 == 6 ? 7 : (K + 1) % 8;
+		for (; K < NumRotationWeathers - 1; ++K) { if (Pick < Wt[K]) break; Pick -= Wt[K]; }
+		if (K == Weather) K = (K + 1) % NumRotationWeathers == 6 ? 7 : (K + 1) % NumRotationWeathers;
 		if (bSkyCold && (K == 4 || K == 5)) K = 6;
 		Weather = K;
 		const FRDWeatherLook& Lk = RDWeatherLooks[Weather];
@@ -218,6 +222,9 @@ void ARDDungeonGenerator::TickSky7(float Dt, APlayerController* PC)
 		SkyHigh->SetWorldLocationAndRotation(Cam, FRotator::ZeroRotator);
 		if (SkyHighMID)
 		{
+			// (its height, tile and wind read every time (PR #45's review): a tile changed in play while the material kept the
+			// old one made the drift wrap at one period and the layer repeat at another: the whole layer jumped at each wrap)
+			ApplySkyHighLayer();
 			SkyHighDrift = FMath::Fmod(SkyHighDrift + double(SkyHighSpeed) * (0.4 + SkyWind) * Dt, double(FMath::Max(SkyHighTileCm, 1.f)));
 			SkyHighMID->SetScalarParameterValue(TEXT("Drift"), float(SkyHighDrift));
 		}

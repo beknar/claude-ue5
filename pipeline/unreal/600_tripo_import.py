@@ -54,20 +54,29 @@ if GLB:
     for q in eal.list_assets(tmp, recursive=True): eal.delete_asset(q.split(".")[0])
     eal.delete_directory(tmp)
     sk = unreal.load_asset(f"{D}/Character/{NAME}"); skel = sk.get_editor_property("skeleton")
-    # (the import's turn stands the mesh and the skeleton's rest up, not the clips' root track, which keeps the GLB's unturned
-    # root: every clip laid her on her side, her pelvis 86 cm out along Y (2026-11-10). Her root does not move in any clip: each
-    # clip's root track is her rest's root, the turn included)
+    # (an import turn stands the mesh and the skeleton's rest up, not the clips' root track, which keeps the GLB's unturned
+    # root: every clip laid her on her side, her pelvis 86 cm out along Y (2026-11-10). Only then is each clip's root track set
+    # to her rest's root, the turn included, which holds for a rig whose root never moves; with no turn (tripo_build's own GLB)
+    # the clips keep their own root, and how far it strays from the rest's is printed (PR #45's review: a character whose
+    # clips move the root would have lost it))
     APE_ = unreal.AnimPoseExtensions
     rt = APE_.get_bone_pose(APE_.get_reference_pose(skel), "root", unreal.AnimPoseSpaces.LOCAL)
-    nroot = 0
+    turned = any(abs(float(v)) > 1e-3 for v in TURN)
+    nroot, stray = 0, 0.0
     for s_, d_ in moves:
         if not d_.startswith(A): continue
-        clip_ = unreal.load_asset(d_); ctrl = clip_.controller
+        clip_ = unreal.load_asset(d_)
+        if not turned:
+            for t_ in (0.0, clip_.get_play_length() * 0.5, clip_.get_play_length()):
+                p_ = APE_.get_bone_pose(APE_.get_anim_pose_at_time(clip_, t_, unreal.AnimPoseEvaluationOptions()), "root", unreal.AnimPoseSpaces.LOCAL)
+                stray = max(stray, (p_.translation - rt.translation).length())
+            continue
+        ctrl = clip_.controller
         n = unreal.AnimationLibrary.get_num_frames(clip_) + 1
         ctrl.open_bracket(unreal.Text("root track"), True)
         ctrl.set_bone_track_keys("root", [rt.translation] * n, [rt.rotation] * n, [rt.scale3d] * n, True)
         ctrl.close_bracket(True); nroot += 1
-    print("root tracks set to her rest's root:", nroot)
+    print("root tracks set to her rest's root:", nroot, "" if turned else f"(no turn: kept; the farthest from the rest's {stray:.2f} cm)")
     for x in [skel, sk.get_editor_property("physics_asset"), sk] + [unreal.load_asset(d_) for s_, d_ in moves if d_.startswith(A)]:
         if x: eal.save_loaded_asset(x, only_if_is_dirty=False)
     kinds = {"SkeletalMesh": [sk.get_path_name()]}

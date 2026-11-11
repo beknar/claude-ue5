@@ -41,8 +41,8 @@ namespace
 		if (A == TEXT("auto")) { G->bWeatherHeld = false; RDCmdSay(G, TEXT("rd.Weather: the weather changes by itself again")); return; }
 		int32 K = -1;
 		if (A.IsNumeric()) K = FCString::Atoi(*A);
-		else for (int32 I = 0; I < 9; ++I) if (ARDDungeonGenerator::WeatherName(I) == A) K = I;
-		if (K < 0 || K > 8) { RDCmdSay(G, FString::Printf(TEXT("rd.Weather: no weather named %s"), *Args[0])); return; }
+		else for (int32 I = 0; I < ARDDungeonGenerator::NumWeathers; ++I) if (ARDDungeonGenerator::WeatherName(I) == A) K = I;
+		if (K < 0 || K >= ARDDungeonGenerator::NumWeathers) { RDCmdSay(G, FString::Printf(TEXT("rd.Weather: no weather named %s"), *Args[0])); return; }
 		if (!G->bSky7 || !G->bTown) { RDCmdSay(G, TEXT("rd.Weather: this level has no sky of its own (the towns and the wilderness have)")); return; }
 		G->SetWeather(K, true);
 		G->bWeatherHeld = true;
