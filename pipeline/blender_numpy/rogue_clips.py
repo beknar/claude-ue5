@@ -320,7 +320,9 @@ def solve_arm(arm_obj, ctx, side, op):
         Uw = op[1].normalized(); want, exact = op[3], None
         for al in range(-90, 91, 15): cands.append((Uw, Quaternion(Uw, math.radians(al)) @ op[2].normalized(), 0.002 * al * al))
     else:
-        _, at, pole, want, exact = op
+        # (an optional sixth: the weight of the elbow's way to the pole; the Martial Artist's hands on her hips ask for her
+        # elbows out to her sides more firmly than the default lets them, against the wrist's and the upper arm's costs)
+        _, at, pole, want, exact = op[:5]; pole_w = op[5] if len(op) > 5 else 0.0004
         if at[0] in ("crossbow", "palm_on"):                      # (cm along the crossbow in the right hand: forward, up, to her left)
             R_ = ctx["arms"]["r"]; qr = P["hand_r"].matrix.to_quaternion(); fw, uw = qr @ R_["local"]["front"], qr @ R_["local"]["up"]
             goal = P["hand_r"].head + qr @ R_["palm_pt"] + (fw * at[1] + uw * at[2] + uw.cross(fw) * at[3]) * ctx["cm"]
@@ -335,7 +337,7 @@ def solve_arm(arm_obj, ctx, side, op):
         for k in range(36):
             ph = math.radians(10 * k); p = e1 * math.cos(ph) + e2 * math.sin(ph)
             Uw = dn * math.cos(ang) + p * math.sin(ang); E = S + Uw * a
-            cands.append((Uw, (S + dn * dist - E).normalized(), 0.0004 * math.degrees(p.angle(pole - dn * pole.dot(dn))) ** 2))
+            cands.append((Uw, (S + dn * dist - E).normalized(), pole_w * math.degrees(p.angle(pole - dn * pole.dot(dn))) ** 2))
     qx = exact_hand(A, exact["front"], exact["up"]) if exact else None
     # (a head to keep the elbow and forearm out of (weapon5_clips' head_ball, in the head's rest frame): the elbow chosen for
     # the wrist alone went behind her head for a hilt raised over it)

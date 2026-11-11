@@ -1,0 +1,116 @@
+{
+ "fps": 24,
+ "height": 0.9995,
+ "clips": {
+  "Stab1": {
+   "frames": 18,
+   "length": 0.7083,
+   "feet_low": -0.0051,
+   "feet_low_source": 0.0032,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 9.3,
+   "sole_roll_source": 2.9,
+   "ankle_frames_held": 0
+  },
+  "Stab2": {
+   "frames": 19,
+   "length": 0.75,
+   "feet_low": -0.0051,
+   "feet_low_source": 0.0032,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 8.5,
+   "sole_roll_source": 2.9,
+   "ankle_frames_held": 0
+  },
+  "Stab3": {
+   "frames": 20,
+   "length": 0.7917,
+   "feet_low": -0.0051,
+   "feet_low_source": 0.0032,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 10.4,
+   "sole_roll_source": 2.9,
+   "ankle_frames_held": 0
+  },
+  "Shoot": {
+   "frames": 24,
+   "length": 0.9583,
+   "feet_low": -0.0051,
+   "feet_low_source": 0.0032,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 4.6,
+   "sole_roll_source": 2.9,
+   "ankle_frames_held": 0
+  },
+  "RollF": {
+   "frames": 20,
+   "length": 0.7917,
+   "feet_low": -0.0067,
+   "feet_low_source": 0.0015,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 27.7,
+   "sole_roll_source": 3.2,
+   "ankle_frames_held": 0
+  },
+  "RollB": {
+   "frames": 20,
+   "length": 0.7917,
+   "feet_low": -0.0067,
+   "feet_low_source": 0.0015,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 27.7,
+   "sole_roll_source": 3.2,
+   "ankle_frames_held": 0
+  },
+  "W5_Bow": {
+   "frames": 29,
+   "length": 1.1667,
+   "feet_low": -0.0067,
+   "feet_low_source": 0.0016,
+   "ankle_short": 0.0,
+   "ankle_bend_source": 7.0,
+   "sole_roll_source": 2.9,
+   "ankle_frames_held": 0
+  },
+  "Hit_to_body_01": {
+   "frames": 32,
+   "length": 1.2917,
+   "own": true
+  },
+  "Hit_to_body_02": {
+   "frames": 42,
+   "length": 1.7083,
+   "own": true
+  },
+  "Hit_to_head": {
+   "frames": 45,
+   "length": 1.8333,
+   "own": true
+  },
+  "Hit_to_side": {
+   "frames": 31,
+   "length": 1.25,
+   "own": true
+  },
+  "Hit_to_stomach": {
+   "frames": 38,
+   "length": 1.5417,
+   "own": true
+  },
+  "Idle": {
+   "frames": 369,
+   "length": 15.3333,
+   "own": true
+  },
+  "Run": {
+   "frames": 31,
+   "length": 1.25,
+   "own": true
+  },
+  "Walk": {
+   "frames": 57,
+   "length": 2.3333,
+   "own": true
+  }
+ }
+}

@@ -15,18 +15,43 @@ legs are shorter and her arms longer for her height. So a clip does not go over 
 Writes <out_dir>/MartialArtist3_Animated.glb (every clip an animation of its name) and <out_dir>/ma3_clips.json (each
 clip's length, its blow's time from ma_times.json, the walk's and the run's speed measured from the planted foot, the
 feet's lowest place in each clip against the rest pose's).
-Blender: -b -P martialartist3_retarget.py -- MartialArtist2.glb out_dir MartialArtist3.glb [preview_prefix [clip:frame,...]]"""
+Blender: -b -P martialartist3_retarget.py -- MartialArtist2.glb out_dir MartialArtist3.glb [preview_prefix [clip:frame,...]]
+  [--maker m1,m2] [--tag T] [--carry a,b] [--own] [--noskin] [--name N] [--env K=V] (another hero's body: the Rogue's attacks
+  from Rogue.glb onto Rogue2.glb, the Summoner's casts from Summoner4.glb onto Summoner5, each beside her own clips)"""
 import bpy, sys, os, json, math, re
 from mathutils import Matrix, Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 argv = sys.argv[sys.argv.index("--") + 1:]
+# (another hero's body the same way, the user's list of 2026-11-11 (Rogue2, Summoner5): options after the positional args,
+# their defaults the Martial Artist's run as it was:
+#   --maker m1,m2   the source's clip makers, in turn (martialartist_clips); --tag T  tripo_proportions' tag (MartialArtist)
+#   --carry a,b     only these of the source's clips are carried (all)
+#   --own           the target GLB's own clips kept as they are, beside the carried ones (she has none: MartialArtist3)
+#   --noskin        MartialArtist3's skin fixes left out (her thighs' and hips' weights; another body has its own)
+#   --name N        the output's name: <out_dir>/<N>_Animated.glb, <N>_clips.json (MartialArtist3, ma3_clips.json)
+#   --env K=V       set before the makers run (weapon5_clips' W5_CLIPS / W5_HERO)
+#   --inplace a,b   these of her own clips walked in place: the pelvis's steady way over the clip taken out, flat on the
+#                   floor, and the rest centred (Rogue2's and Summoner5's walk and run carry her forward; the game's
+#                   locomotion plays clips in place and 610 reads their speed from the planted foot: 4.3 cm/s for her walk))
+OPT = {"maker": "martialartist_clips", "tag": "MartialArtist", "carry": "", "own": False, "skin": True, "name": "MartialArtist3", "inplace": ""}
+_pos = []; _i = 0
+while _i < len(argv):
+    a_ = argv[_i]
+    if a_ in ("--maker", "--tag", "--carry", "--name", "--inplace"): OPT[a_[2:]] = argv[_i + 1]; _i += 2; continue
+    if a_ == "--env": k_, v_ = argv[_i + 1].split("=", 1); os.environ[k_] = v_; _i += 2; continue
+    if a_ == "--own": OPT["own"] = True; _i += 1; continue
+    if a_ == "--noskin": OPT["skin"] = False; _i += 1; continue
+    _pos.append(a_); _i += 1
+argv = _pos
 SRC, OUT, TGT = argv[0], argv[1], argv[2]
+# (the makers find their output folder as argv[1] (times.json and the rest go there): the positional args alone)
+sys.argv = sys.argv[:sys.argv.index("--") + 1] + _pos
 PREVIEW = argv[3] if len(argv) > 3 else None
 SHOTS = [(s.split(":")[0], int(s.split(":")[1])) for s in argv[4].split(",")] if len(argv) > 4 else []
 os.makedirs(OUT, exist_ok=True)
 FPS = 24
 VIEWS = [(v.split(":")[0], float(v.split(":")[1])) for v in os.environ.get("MA3_VIEWS", "front:0,side:90,q:35").split(",")]   # (name:degrees round her)
-SKIN = os.environ.get("MA3_SKIN", "1") != "0"                   # (0: Tripo's weights as they came, to compare)
+SKIN = os.environ.get("MA3_SKIN", "1") != "0" and OPT["skin"]  # (0 / --noskin: Tripo's weights as they came)
 ZOOM = int(os.environ.get("MA3_ZOOM", "1"))
 TRACE = os.environ.get("MA3_TRACE", "").split(",")
 FINGERS = ("thumb", "index", "middle", "ring", "pinky")
@@ -79,12 +104,18 @@ ad.action = None
 for a in list(bpy.data.actions): bpy.data.actions.remove(a)
 for pb in arm.pose.bones: pb.matrix_basis.identity()
 bpy.context.view_layer.update()
-import tripo_proportions
-tripo_proportions.apply(arm, meshes, "MartialArtist")
-import martialartist_clips as MA
-for name, frames in MA.make_clips(arm, sc, clips).items(): clips[name] = frames
-for pb in arm.pose.bones: pb.matrix_basis.identity()
-bpy.context.view_layer.update()
+import tripo_proportions, importlib
+tripo_proportions.apply(arm, meshes, OPT["tag"])
+for mk in [m.strip() for m in OPT["maker"].split(",") if m.strip()]:
+    MK = importlib.import_module(mk)
+    for name, frames in MK.make_clips(arm, sc, clips).items(): clips[name] = frames
+    for pb in arm.pose.bones: pb.matrix_basis.identity()
+    bpy.context.view_layer.update()
+if OPT["carry"]:
+    want = [c.strip() for c in OPT["carry"].split(",") if c.strip()]
+    lost = [c for c in want if c not in clips]
+    assert not lost, ("the source has no", lost, sorted(clips))
+    clips = {c: clips[c] for c in want}
 print("MA3 source clips:", {k: len(v) for k, v in clips.items()})
 
 AW = arm.matrix_world.copy()
@@ -111,7 +142,40 @@ if PREVIEW:                                                     # (MartialArtist
 
 # ---------------------------------------------------------------- MartialArtist3
 sc, arm, meshes = load(TGT)
-if arm.animation_data: arm.animation_data.action = None
+# (--own: the target's own clips, each frame's bones as the clip has them, named as tripo_build names them; then her
+# importer's tracks and actions go, or they would be written out a second time)
+OWN = {}
+tad = arm.animation_data
+if tad:
+    for t in list(tad.nla_tracks): tad.nla_tracks.remove(t)
+    if OPT["own"]:
+        for act in list(bpy.data.actions):
+            name = act.name.split(".")[0]; name = name[:1].upper() + name[1:]
+            name = re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")
+            # (two actions cut to one name ('idle' and 'idle.001'): one would replace the other unseen)
+            assert name not in OWN, ("--own: two of her clips are both named", name, [a.name for a in bpy.data.actions])
+            tad.action = act
+            if hasattr(tad, "action_slot") and act.slots: tad.action_slot = act.slots[0]
+            f0, f1 = [int(round(v)) for v in act.frame_range]; fr_ = []
+            for t in range(f0, f1 + 1):
+                sc.frame_set(t); fr_.append({pb.name: (pb.matrix_basis.to_translation(), pb.matrix_basis.to_quaternion()) for pb in arm.pose.bones})
+            OWN[name] = fr_
+    tad.action = None
+    for a in list(bpy.data.actions): bpy.data.actions.remove(a)
+if OWN: print("MA3 her own clips kept:", {k: len(v) for k, v in OWN.items()})
+for nm in [c.strip() for c in OPT["inplace"].split(",") if c.strip()]:
+    assert nm in OWN, ("--inplace: no clip of hers named", nm, sorted(OWN))
+    fr_ = OWN[nm]; pbn = arm.data.bones["pelvis"]
+    # (the pelvis's place is in its bone's rest frame: its way over the clip in the world, flat, and back into that frame)
+    M = (arm.matrix_world.to_3x3() @ pbn.matrix_local.to_3x3()); Mi = M.inverted()
+    world = [M @ f["pelvis"][0] for f in fr_]
+    drift = world[-1] - world[0]; drift.z = 0.0; n_ = len(fr_) - 1
+    flat = [w - drift * (i / n_) for i, w in enumerate(world)]
+    mean = sum(flat, Vector()) / len(flat); mean.z = 0.0
+    for i, f in enumerate(fr_):
+        loc, rot = f["pelvis"]; f["pelvis"] = (Mi @ (flat[i] - mean), rot)
+    print("MA3 %s walked in place: the pelvis's way over the clip %.3f (%.3f a second), its middle %.3f off her rest, taken out" % (
+        nm, drift.length, drift.length * FPS / max(1, n_), mean.length))
 for pb in arm.pose.bones: pb.matrix_basis.identity()
 bpy.context.view_layer.update()
 AW = arm.matrix_world.copy(); AWI = AW.inverted(); AWQ = AW.to_quaternion()
@@ -424,8 +488,13 @@ tp = os.path.join(OUT, "ma_times.json")
 if os.path.exists(tp):
     for n, t in json.load(open(tp)).items():
         if n in META: META[n]["hit"] = t["hit"]; META[n]["bone"] = t["bone"]
+# (--own: her own clips first, as they came, then the carried ones)
+if OWN:
+    T_FRAMES = {**OWN, **{k: v for k, v in T_FRAMES.items() if k not in OWN}}
+    for k, v in OWN.items(): META.setdefault(k, {"frames": len(v), "length": round((len(v) - 1) / FPS, 4), "own": True})
 zs = [(meshes[0].matrix_world @ v.co).z for v in meshes[0].data.vertices]
-json.dump({"fps": FPS, "height": round(max(zs) - min(zs), 4), "clips": META}, open(os.path.join(OUT, "ma3_clips.json"), "w"), indent=1)
+CLIPS_JSON = "ma3_clips.json" if OPT["name"] == "MartialArtist3" else f"{OPT['name']}_clips.json"
+json.dump({"fps": FPS, "height": round(max(zs) - min(zs), 4), "clips": META}, open(os.path.join(OUT, CLIPS_JSON), "w"), indent=1)
 for n, m in META.items(): print("MA3 clip", n, m)
 
 
@@ -443,18 +512,20 @@ ad = arm.animation_data or arm.animation_data_create()
 acts = []
 for name, frames in T_FRAMES.items():
     act = bpy.data.actions.new(name); act.use_fake_user = True; ad.action = act
+    # (the pelvis's place, and any other bone's that a clip of her own moves (its root, a prop's bone))
+    moved = {"pelvis"} | {b for b in frames[0] if any(fr[b][0].length > 1e-5 for fr in frames)}
     for i, fr in enumerate(frames):
         for pb in arm.pose.bones:
             loc, rot = fr[pb.name]; pb.location = loc; pb.rotation_quaternion = rot
             pb.keyframe_insert("rotation_quaternion", frame=i, group=pb.name)
-            if pb.name == "pelvis": pb.keyframe_insert("location", frame=i, group=pb.name)
+            if pb.name in moved: pb.keyframe_insert("location", frame=i, group=pb.name)
     acts.append(act); print("keyed", name, len(frames))
 ad.action = None
 for act in acts:
     tr = ad.nla_tracks.new(); tr.name = act.name; st = tr.strips.new(act.name, 0, act); st.name = act.name
 for pb in arm.pose.bones: pb.matrix_basis.identity()
 bpy.context.view_layer.update()
-glb = os.path.join(OUT, "MartialArtist3_Animated.glb")
+glb = os.path.join(OUT, f"{OPT['name']}_Animated.glb")
 bpy.ops.export_scene.gltf(filepath=glb, export_format='GLB', export_animations=True, export_animation_mode='NLA_TRACKS',
                           export_force_sampling=True, export_optimize_animation_size=False, export_skins=True, export_yup=True)
 print("MA3 DONE", glb, os.path.getsize(glb))

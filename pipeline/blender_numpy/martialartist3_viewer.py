@@ -1,7 +1,7 @@
 """A three.js page that plays MartialArtist3's clips (martialartist3_retarget.py's MartialArtist3_Animated.glb and
-ma3_clips.json): three shots, Walk, Run (she moves at the speed measured from her planted foot, the camera with her) and
-Combat (her idle, the three boxing clips, the two front kicks, the dash and the ten chi attacks, each faded into the
-next, its name shown). A shot is a function of its time alone (the clip and its place in it, the fade from the clip
+ma3_clips.json): four shots, Idle (her 9 s idle twice round, closer; the page opens on it), Walk, Run (she moves at the
+speed measured from her planted foot, the camera with her) and Combat (her idle's calm first 1.1 s, the three boxing
+clips, the two front kicks, the dash and the ten chi attacks, each faded into the next, its name shown). A shot is a function of its time alone (the clip and its place in it, the fade from the clip
 before, how far she has come), so the slider under it scrubs it back and forth as well as showing where it is; with
 rewind (the shot from its start), stop (held at its start), pause, speed, a camera to drag and a button that records
 the shot as a WebM file.
@@ -41,7 +41,7 @@ PAGE = r"""<!doctype html>
 <div id="bar">
   <div id="scrub"><input id="seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Place in the shot"><span id="time">0.00 / 0.00 s</span></div>
   <div id="keys">
-    <button data-shot="walk">Walk</button><button data-shot="run">Run</button><button data-shot="combat">Combat</button><button data-shot="all">All three</button>
+    <button data-shot="idle">Idle</button><button data-shot="walk">Walk</button><button data-shot="run">Run</button><button data-shot="combat">Combat</button><button data-shot="all">All four</button>
     <span class="sep"></span>
     <button id="rewind" title="Back to the start of the shot">Rewind</button><button id="stop" title="Stop at the start of the shot">Stop</button><button id="pause">Pause</button>
     <label>Speed <select id="speed"><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1" selected>1x</option></select></label>
@@ -57,7 +57,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const META = __META__, COMBAT = __COMBAT__, HEIGHT_M = __HEIGHT__;
-const SCALE = HEIGHT_M / META.height, FADE = 0.15, LOOPS = { walk: 3, run: 6 };       // (a walk or run shot: whole loops of its clip)
+const SCALE = HEIGHT_M / META.height, FADE = 0.15, LOOPS = { idle: 2, walk: 3, run: 6 };   // (an idle, walk or run shot: whole loops of its clip)
+// (in the combat shot the idle plays only its calm first 1.1 s, before her hands go to her hips: it is 9 s long)
+const COMBAT_IDLE = 1.1, span = n => n === 'Idle' ? Math.min(COMBAT_IDLE, dur(n)) : dur(n);
+const CLIP = { idle: 'Idle', walk: 'Walk', run: 'Run' }, NEXT = { idle: 'walk', walk: 'run', run: 'combat', combat: 'idle' };
 const $ = id => document.getElementById(id);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -103,12 +106,12 @@ function pose() {
   if (shot === 'combat') {
     let i = starts.length - 1; while (i > 0 && T < starts[i]) i--;
     name = COMBAT[i]; const local = T - starts[i], a = acts[name], w = i > 0 ? Math.min(1, local / FADE) : 1;
-    a.time = Math.min(local, dur(name) - 1e-4); a.setEffectiveWeight(w);
-    if (w < 1) { const p = acts[COMBAT[i - 1]]; p.time = dur(COMBAT[i - 1]) - 1e-4; p.setEffectiveWeight(1 - w); }
+    a.time = Math.min(local, span(name) - 1e-4); a.setEffectiveWeight(w);
+    if (w < 1) { const p = acts[COMBAT[i - 1]]; p.time = span(COMBAT[i - 1]) - 1e-4; p.setEffectiveWeight(1 - w); }
   } else {
-    name = shot === 'walk' ? 'Walk' : 'Run'; const a = acts[name];
+    name = CLIP[shot]; const a = acts[name];
     a.time = T % dur(name); a.setEffectiveWeight(1);
-    z = META.clips[name].speed * SCALE * (lap * length + T);                       // (she faces +Z)
+    if (shot !== 'idle') z = META.clips[name].speed * SCALE * (lap * length + T);  // (she faces +Z; the idle stays put)
   }
   mixer.update(0);
   const dz = z - hero.position.z; hero.position.z = z; camera.position.z += dz; controls.target.z += dz;
@@ -123,18 +126,19 @@ function pose() {
 function setPaused(p) { paused = p; state.paused = p; $('pause').textContent = p ? 'Play' : 'Pause'; $('pause').classList.toggle('on', p); }
 function endShot() {
   if (onShotEnd) { const f = onShotEnd; onShotEnd = null; f(); }
-  if (playAll) start({ walk: 'run', run: 'combat', combat: 'walk' }[shot], true);
-  else { T = 0; if (shot !== 'combat') lap++; }                                    // (a shot alone goes round; a walk goes on from where she is)
+  if (playAll) start(NEXT[shot], true);
+  else { T = 0; if (shot === 'walk' || shot === 'run') lap++; }                     // (a shot alone goes round; a walk goes on from where she is)
 }
 function start(which, keepAll) {
   playAll = !!keepAll; shot = which; T = 0; lap = 0;
-  if (which === 'combat') { starts = []; let t = 0; for (const n of COMBAT) { starts.push(t); t += dur(n); } length = t; }
-  else length = LOOPS[which] * dur(which === 'walk' ? 'Walk' : 'Run');
+  if (which === 'combat') { starts = []; let t = 0; for (const n of COMBAT) { starts.push(t); t += span(n); } length = t; }
+  else length = LOOPS[which] * dur(CLIP[which]);
   Object.assign(state, { shot: which, length });
   document.querySelectorAll('[data-shot]').forEach(b => b.classList.toggle('on', b.dataset.shot === (playAll ? 'all' : which)));
-  $('shot').textContent = { walk: 'Walking', run: 'Running', combat: 'Combat' }[which];
+  $('shot').textContent = { idle: 'Idle', walk: 'Walking', run: 'Running', combat: 'Combat' }[which];
   pose();
-  controls.target.set(0, 0.9, 0); camera.position.copy(controls.target).add(which === 'combat' ? new THREE.Vector3(2.6, 1.35, 3.6) : new THREE.Vector3(3.4, 1.3, 2.6));
+  const view = { idle: [1.5, 1.2, 2.6], combat: [2.6, 1.35, 3.6] }[which] || [3.4, 1.3, 2.6];
+  controls.target.set(0, 0.9, 0); camera.position.copy(controls.target).add(new THREE.Vector3(...view));
   controls.update();
 }
 // the shot from its start again (the camera stays as it was turned); held there when stopped
@@ -149,15 +153,15 @@ new GLTFLoader().parse(bytes(), '', gltf => {
   gltf.scene.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; if (o.material) { o.material.metalness = 0; o.material.roughness = 0.85; } } });
   mixer = new THREE.AnimationMixer(gltf.scene);
   const have = Object.fromEntries(gltf.animations.map(c => [c.name, c]));
-  const lacking = COMBAT.concat(['Walk', 'Run']).filter(n => !have[n]);
+  const lacking = COMBAT.concat(['Walk', 'Run']).filter(n => !have[n]);       // (Idle is COMBAT's first)
   if (lacking.length) { state.error = 'clips missing: ' + lacking.join(', '); $('msg').textContent = state.error; return; }
   for (const n of new Set(COMBAT.concat(['Walk', 'Run']))) { const a = mixer.clipAction(have[n]); a.play(); a.setEffectiveWeight(0); acts[n] = a; }
   $('msg').remove(); state.ready = true; state.clips = gltf.animations.length;
-  const asked = new URLSearchParams(location.search).get('shot');           // (?shot=walk | run | combat opens on that shot)
-  if (['walk', 'run', 'combat'].includes(asked)) start(asked); else start('walk', true);
+  const asked = new URLSearchParams(location.search).get('shot');           // (?shot=idle | walk | run | combat opens on that shot)
+  if (['idle', 'walk', 'run', 'combat'].includes(asked)) start(asked); else start('idle', true);
 }, e => { state.error = String(e); $('msg').textContent = 'The model did not load: ' + e; });
 
-document.querySelectorAll('[data-shot]').forEach(b => b.onclick = () => { if (!state.ready) return; setPaused(false); b.dataset.shot === 'all' ? start('walk', true) : start(b.dataset.shot); });
+document.querySelectorAll('[data-shot]').forEach(b => b.onclick = () => { if (!state.ready) return; setPaused(false); b.dataset.shot === 'all' ? start('idle', true) : start(b.dataset.shot); });
 $('pause').onclick = () => setPaused(!paused);
 $('rewind').onclick = () => restart(false);
 $('stop').onclick = () => restart(true);

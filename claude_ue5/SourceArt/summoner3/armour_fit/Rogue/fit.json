@@ -2,168 +2,170 @@
  "TieflingArmour": {
   "bones": {
    "upperarm_l": [
-    0.927,
-    0.683,
-    1.008,
-    1.089
+    0.659,
+    0.613,
+    0.693,
+    0.67
    ],
    "upperarm_r": [
-    1.036,
+    0.725,
+    0.694,
     0.745,
-    0.962,
-    1.104
+    0.815
    ],
    "lowerarm_l": [
-    0.529,
-    0.634,
-    0.581,
-    0.581
+    0.667,
+    0.88,
+    0.774,
+    0.774
    ],
    "lowerarm_twist_01_l": [
-    0.671,
-    0.699,
-    0.551,
-    0.507
+    0.971,
+    1.057,
+    0.732,
+    0.645
    ],
    "lowerarm_r": [
-    0.581,
-    0.62,
-    0.543,
-    0.581
+    0.744,
+    0.864,
+    0.625,
+    0.744
    ],
    "lowerarm_twist_01_r": [
-    0.567,
-    0.801,
-    0.744,
-    0.539
+    0.753,
+    1.03,
+    0.944,
+    0.651
    ],
    "spine_01": [
-    0.741,
-    0.715,
-    0.675,
+    0.506,
+    0.548,
+    0.5,
     0.5
    ],
    "calf_l": [
-    1.034,
-    0.783,
-    1.105,
-    1.469
+    0.955,
+    0.82,
+    1.286,
+    1.549
    ],
    "calf_r": [
-    1.39,
-    0.906,
-    1.67,
-    1.65
+    1.574,
+    0.751,
+    0.82,
+    1.7
    ]
   },
   "pieces": {
    "SK_UE4_Fantasy_Hero_Armors_01.001": {
     "verts": 2658,
-    "pushed": 736,
-    "pushed_max_cm": 3.04,
+    "pushed": 245,
+    "pushed_max_cm": 2.26,
     "unweighted": 0
    },
    "SK_UE4_Fantasy_Hero_Armors_02.001": {
     "verts": 9862,
-    "pushed": 531,
-    "pushed_max_cm": 2.85,
+    "pushed": 278,
+    "pushed_max_cm": 1.12,
     "unweighted": 0
    },
    "SK_UE4_Fantasy_Hero_Armors_03.001": {
     "verts": 6023,
-    "pushed": 1372,
-    "pushed_max_cm": 1.43,
+    "pushed": 3260,
+    "pushed_max_cm": 3.32,
     "unweighted": 0
    },
    "SK_UE4_Fantasy_Hero_Armors_04.001": {
     "verts": 8852,
-    "pushed": 1063,
-    "pushed_max_cm": 4.14,
+    "pushed": 402,
+    "pushed_max_cm": 1.75,
     "unweighted": 0
    }
   },
   "materials": [
-   "M_Fantasy_Hero_01",
-   "M_Fantasy_Hero_01.001",
-   "M_Fantasy_Hero_01.002",
-   "M_Fantasy_Hero_01.003"
+   "M_Fantasy_Hero_01.004",
+   "M_Fantasy_Hero_01.005",
+   "M_Fantasy_Hero_01.006",
+   "M_Fantasy_Hero_01.007"
   ],
+  "pct": 70.0,
+  "need_legs": 90.0,
   "verts": 27395
  },
  "DesertHeroArmour": {
   "bones": {
    "lowerarm_l": [
-    0.5,
-    0.56,
-    0.66,
-    0.562
+    0.591,
+    0.809,
+    0.949,
+    0.73
    ],
    "lowerarm_r": [
-    0.707,
-    0.551,
-    0.5,
-    0.646
+    0.98,
+    0.802,
+    0.701,
+    0.762
    ],
    "upperarm_l": [
-    0.946,
-    0.651,
-    0.941,
-    1.245
+    0.709,
+    0.719,
+    0.657,
+    0.752
    ],
    "upperarm_r": [
-    0.915,
-    0.668,
-    0.952,
-    1.273
+    0.677,
+    0.737,
+    0.79,
+    0.955
    ],
    "spine_03": [
-    0.714,
-    0.835,
-    0.73,
-    0.76
+    0.5,
+    0.553,
+    0.5,
+    0.518
    ],
    "calf_l": [
-    0.592,
-    0.716,
-    0.793,
-    0.701
+    0.646,
+    0.913,
+    0.832,
+    0.797
    ],
    "calf_r": [
-    1.018,
-    0.841,
-    0.516,
-    0.792
+    0.916,
+    0.855,
+    0.563,
+    0.778
    ]
   },
   "pieces": {
    "SK_Fantasy_Hero_02_Arms_Armors_01.001": {
     "verts": 16552,
-    "pushed": 467,
-    "pushed_max_cm": 3.31,
+    "pushed": 108,
+    "pushed_max_cm": 0.66,
     "unweighted": 0
    },
    "SK_Fantasy_Hero_02_Arms_Armors_02.001": {
     "verts": 1488,
-    "pushed": 142,
-    "pushed_max_cm": 1.8,
+    "pushed": 236,
+    "pushed_max_cm": 4.35,
     "unweighted": 0
    },
    "SK_Fantasy_Hero_02_Body_Armors.001": {
     "verts": 8435,
-    "pushed": 558,
-    "pushed_max_cm": 3.42,
+    "pushed": 3960,
+    "pushed_max_cm": 5.18,
     "unweighted": 0
    },
    "SK_Fantasy_Hero_02_Legs_Armors.001": {
     "verts": 9976,
-    "pushed": 134,
-    "pushed_max_cm": 1.54,
+    "pushed": 784,
+    "pushed_max_cm": 1.86,
     "unweighted": 0
    },
    "SK_Fantasy_Hero_02_Shoulder_Armors.001": {
     "verts": 17218,
-    "pushed": 2412,
-    "pushed_max_cm": 3.22,
+    "pushed": 769,
+    "pushed_max_cm": 1.82,
     "unweighted": 0
    }
   },
@@ -174,124 +176,126 @@
    "M_Fantasy_Hero_02_01.008",
    "M_Fantasy_Hero_02_01.009"
   ],
+  "pct": 95.0,
+  "need_legs": 90.0,
   "verts": 53669
  },
  "OrmeArmour": {
   "bones": {
    "spine_03": [
-    0.727,
-    0.611,
-    0.606,
+    0.548,
+    0.543,
+    0.579,
     0.5
    ],
    "upperarm_l": [
-    0.78,
-    0.634,
-    0.958,
-    0.747
+    0.6,
+    0.621,
+    0.678,
+    0.5
    ],
    "clavicle_r": [
-    1.021,
-    0.874,
-    0.874,
-    0.728
+    1.142,
+    0.851,
+    0.851,
+    0.561
    ],
    "upperarm_r": [
-    0.952,
-    0.65,
-    0.782,
-    0.743
+    0.672,
+    0.571,
+    0.678,
+    0.791
    ],
    "hand_r": [
-    0.816,
-    1.007,
-    0.5,
-    0.585
+    1.522,
+    1.405,
+    0.766,
+    0.909
    ],
    "thumb_01_r": [
-    0.51,
-    0.5,
-    0.52,
-    0.51
-   ],
-   "lowerarm_twist_01_r": [
-    0.5,
-    0.5,
-    0.5,
-    0.5
-   ],
-   "thigh_l": [
     0.613,
-    0.617,
-    0.608,
+    0.51,
+    0.716,
     0.613
    ],
+   "lowerarm_twist_01_r": [
+    0.551,
+    0.514,
+    0.557,
+    0.57
+   ],
+   "thigh_l": [
+    0.766,
+    0.955,
+    0.577,
+    0.766
+   ],
    "calf_l": [
-    0.5,
-    0.5,
-    0.5,
-    0.5
+    0.592,
+    0.656,
+    0.528,
+    0.592
    ],
    "thigh_r": [
-    0.65,
-    0.667,
-    0.659,
-    0.659
+    0.616,
+    0.825,
+    0.72,
+    0.72
    ],
    "calf_r": [
-    0.5,
-    0.5,
-    0.5,
-    0.5
+    0.585,
+    0.554,
+    0.569,
+    0.569
    ],
    "hand_l": [
-    0.5,
-    0.7,
-    0.768,
-    0.5
+    0.787,
+    1.021,
+    1.281,
+    0.844
    ],
    "thumb_01_l": [
-    0.607,
-    0.523,
-    0.565,
-    0.565
+    0.685,
+    0.55,
+    0.618,
+    0.618
    ],
    "lowerarm_twist_01_l": [
-    0.5,
-    0.5,
-    0.5,
-    0.5
+    0.597,
+    0.513,
+    0.532,
+    0.576
    ]
   },
   "pieces": {
    "SK_Dwarf_Orme_Armor_01.001": {
     "verts": 2376,
-    "pushed": 641,
-    "pushed_max_cm": 3.5,
+    "pushed": 426,
+    "pushed_max_cm": 2.63,
     "unweighted": 0
    },
    "SK_Dwarf_Orme_Armor_02.001": {
     "verts": 1039,
-    "pushed": 38,
-    "pushed_max_cm": 1.21,
+    "pushed": 4,
+    "pushed_max_cm": 0.53,
     "unweighted": 0
    },
    "SK_Dwarf_Orme_Armor_03.001": {
     "verts": 1288,
-    "pushed": 78,
-    "pushed_max_cm": 2.17,
+    "pushed": 6,
+    "pushed_max_cm": 0.37,
     "unweighted": 0
    },
    "SK_Dwarf_Orme_Armor_04.001": {
     "verts": 1364,
-    "pushed": 165,
-    "pushed_max_cm": 1.97,
+    "pushed": 5,
+    "pushed_max_cm": 0.48,
     "unweighted": 0
    },
    "SK_Dwarf_Orme_Armor_05.001": {
     "verts": 1039,
-    "pushed": 37,
-    "pushed_max_cm": 2.02,
+    "pushed": 11,
+    "pushed_max_cm": 0.81,
     "unweighted": 0
    }
   },
@@ -302,178 +306,180 @@
    "M_Orme_Body.008",
    "M_Orme_Body.009"
   ],
+  "pct": 95.0,
+  "need_legs": 90.0,
   "verts": 7106
  },
  "OrcWarriorArmour": {
   "bones": {
    "upperarm_l": [
-    0.661,
-    0.616,
-    1.107,
-    1.129
+    0.909,
+    0.871,
+    0.765,
+    0.715
    ],
    "spine_02": [
-    0.691,
-    0.752,
-    0.822,
-    0.5
+    0.683,
+    0.813,
+    0.705,
+    0.531
    ],
    "spine_03": [
-    0.863,
-    0.806,
-    0.847,
+    0.681,
+    0.541,
+    0.73,
     0.5
    ],
    "lowerarm_l": [
-    1.188,
-    1.011,
-    0.848,
-    1.016
+    1.635,
+    1.24,
+    1.282,
+    1.386
    ],
    "lowerarm_r": [
-    0.865,
-    0.928,
-    1.247,
-    1.013
+    1.353,
+    1.296,
+    1.7,
+    1.45
    ],
    "hand_l": [
-    0.712,
-    0.68,
-    0.657,
-    0.543
+    1.217,
+    0.977,
+    1.126,
+    0.775
    ],
    "hand_r": [
-    0.698,
-    0.675,
-    0.721,
-    0.54
+    1.241,
+    1.068,
+    1.196,
+    0.77
    ],
    "thumb_02_l": [
-    1.223,
-    1.086,
-    1.53,
-    1.099
+    1.435,
+    1.167,
+    1.7,
+    1.697
    ],
    "thumb_02_r": [
-    1.451,
-    1.087,
-    1.144,
-    1.145
+    1.664,
+    1.1,
+    1.309,
+    1.7
    ],
    "pelvis": [
-    0.7,
-    0.651,
-    0.602,
-    0.651
+    0.58,
+    0.64,
+    0.701,
+    0.64
    ],
    "spine_01": [
-    0.751,
-    0.843,
-    0.733,
-    0.5
+    0.558,
+    0.669,
+    0.5,
+    0.531
    ],
    "thigh_l": [
-    1.222,
-    0.781,
-    0.929,
-    1.186
+    1.441,
+    1.116,
+    0.964,
+    1.067
    ],
    "thigh_r": [
-    1.018,
-    0.796,
-    1.121,
-    1.188
+    1.073,
+    0.946,
+    1.36,
+    1.108
    ],
    "calf_l": [
-    0.827,
-    1.02,
-    0.998,
-    0.876
+    0.82,
+    1.371,
+    1.049,
+    0.839
    ],
    "calf_r": [
-    1.209,
-    1.319,
-    1.194,
-    0.94
+    1.238,
+    1.251,
+    0.693,
+    0.879
    ],
    "foot_l": [
-    0.713,
-    0.775,
-    0.752,
-    1.622
+    0.795,
+    1.154,
+    1.238,
+    1.097
    ],
    "ball_l": [
-    0.949,
-    0.5,
-    0.716,
+    1.655,
+    1.025,
+    1.229,
     1.7
    ],
    "foot_r": [
-    0.905,
-    0.921,
-    0.855,
-    1.553
+    1.386,
+    1.136,
+    0.681,
+    1.032
    ],
    "ball_r": [
-    0.76,
-    0.5,
-    0.656,
+    1.383,
+    0.953,
+    1.426,
     1.7
    ]
   },
   "pieces": {
    "SK_Orc_01_Armor_01.001": {
     "verts": 996,
-    "pushed": 240,
-    "pushed_max_cm": 3.92,
+    "pushed": 99,
+    "pushed_max_cm": 1.72,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_02.001": {
     "verts": 2997,
-    "pushed": 663,
-    "pushed_max_cm": 4.83,
+    "pushed": 755,
+    "pushed_max_cm": 5.16,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_03.001": {
     "verts": 3182,
-    "pushed": 261,
-    "pushed_max_cm": 4.65,
+    "pushed": 71,
+    "pushed_max_cm": 4.54,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_04.001": {
     "verts": 956,
-    "pushed": 27,
-    "pushed_max_cm": 0.62,
+    "pushed": 24,
+    "pushed_max_cm": 0.28,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_05.001": {
     "verts": 1008,
-    "pushed": 65,
-    "pushed_max_cm": 0.84,
+    "pushed": 58,
+    "pushed_max_cm": 0.81,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_06.001": {
     "verts": 4251,
-    "pushed": 958,
-    "pushed_max_cm": 2.34,
+    "pushed": 2595,
+    "pushed_max_cm": 4.27,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_07.001": {
     "verts": 1740,
-    "pushed": 320,
-    "pushed_max_cm": 2.89,
+    "pushed": 343,
+    "pushed_max_cm": 3.1,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_08.001": {
     "verts": 2188,
-    "pushed": 115,
-    "pushed_max_cm": 2.68,
+    "pushed": 17,
+    "pushed_max_cm": 0.32,
     "unweighted": 0
    },
    "SK_Orc_01_Armor_09.001": {
     "verts": 5380,
-    "pushed": 272,
-    "pushed_max_cm": 2.7,
+    "pushed": 168,
+    "pushed_max_cm": 1.24,
     "unweighted": 0
    }
   },
@@ -488,196 +494,198 @@
    "M_Orc_01_Armor.016",
    "M_Orc_01_Armor.017"
   ],
+  "pct": 95.0,
+  "need_legs": 90.0,
   "verts": 22698
  },
  "OrcArmour": {
   "bones": {
    "upperarm_l": [
-    1.082,
-    0.591,
-    1.006,
-    1.396
+    1.034,
+    0.736,
+    0.738,
+    0.739
    ],
    "upperarm_r": [
-    1.097,
-    0.593,
-    1.7,
-    1.7
+    0.72,
+    0.768,
+    0.891,
+    0.827
    ],
    "spine_03": [
-    0.815,
-    0.876,
-    0.932,
+    0.5,
+    0.634,
+    0.972,
     0.5
    ],
    "lowerarm_l": [
-    0.541,
-    0.598,
-    0.503,
-    0.522
+    0.777,
+    0.743,
+    0.831,
+    0.756
    ],
    "lowerarm_r": [
-    0.52,
-    0.53,
-    0.557,
-    0.621
+    0.876,
+    0.737,
+    0.805,
+    0.803
    ],
    "hand_l": [
-    0.519,
-    0.513,
-    0.544,
-    0.5
+    0.79,
+    0.72,
+    0.9,
+    0.75
    ],
    "hand_r": [
-    0.546,
-    0.552,
-    0.533,
-    0.5
+    0.999,
+    0.787,
+    0.854,
+    0.777
    ],
    "spine_01": [
-    0.706,
-    0.706,
-    0.706,
-    0.706
+    0.539,
+    0.539,
+    0.539,
+    0.539
    ],
    "pelvis": [
+    0.582,
+    0.5,
     0.677,
-    0.573,
-    0.615,
-    0.707
+    0.734
    ],
    "spine_02": [
-    0.841,
-    0.801,
-    0.857,
-    0.574
+    0.74,
+    0.908,
+    0.797,
+    0.768
    ],
    "thigh_l": [
-    0.783,
-    0.737,
-    0.761,
-    0.851
+    0.774,
+    0.835,
+    0.698,
+    0.788
    ],
    "thigh_r": [
-    0.81,
-    0.756,
-    0.81,
-    0.864
+    0.751,
+    0.816,
+    0.803,
+    0.842
    ],
    "calf_l": [
-    0.739,
-    0.512,
-    0.89,
-    0.999
+    0.684,
+    0.761,
+    0.891,
+    0.875
    ],
    "foot_l": [
-    0.842,
-    0.86,
-    0.86,
-    1.315
+    0.854,
+    1.279,
+    1.267,
+    0.965
    ],
    "ball_l": [
-    0.758,
-    0.5,
-    0.91,
-    0.723
+    1.397,
+    1.138,
+    1.65,
+    1.395
    ],
    "calf_r": [
-    1.06,
-    0.591,
-    0.93,
-    1.049
+    0.993,
+    0.674,
+    0.597,
+    0.763
    ],
    "foot_r": [
-    0.959,
-    0.96,
-    0.85,
-    1.345
+    1.42,
+    1.271,
+    0.738,
+    1.023
    ],
    "ball_r": [
-    1.106,
-    0.5,
-    0.61,
-    0.739
+    1.7,
+    1.12,
+    1.167,
+    1.329
    ]
   },
   "pieces": {
    "SK_Orc_02_Armor_01.001": {
     "verts": 1013,
-    "pushed": 276,
-    "pushed_max_cm": 2.3,
+    "pushed": 179,
+    "pushed_max_cm": 2.45,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_02.001": {
     "verts": 1013,
-    "pushed": 163,
-    "pushed_max_cm": 2.84,
+    "pushed": 260,
+    "pushed_max_cm": 4.62,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_03.001": {
     "verts": 1012,
-    "pushed": 160,
-    "pushed_max_cm": 4.34,
+    "pushed": 486,
+    "pushed_max_cm": 4.92,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_04.001": {
     "verts": 3278,
-    "pushed": 257,
-    "pushed_max_cm": 4.14,
+    "pushed": 163,
+    "pushed_max_cm": 3.82,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_05.001": {
     "verts": 2252,
-    "pushed": 103,
-    "pushed_max_cm": 3.28,
+    "pushed": 134,
+    "pushed_max_cm": 3.1,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_06.001": {
     "verts": 652,
-    "pushed": 22,
-    "pushed_max_cm": 3.3,
+    "pushed": 31,
+    "pushed_max_cm": 0.82,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_07.001": {
     "verts": 610,
-    "pushed": 32,
-    "pushed_max_cm": 3.07,
+    "pushed": 1,
+    "pushed_max_cm": 0.81,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_09.001": {
     "verts": 402,
-    "pushed": 11,
-    "pushed_max_cm": 0.41,
+    "pushed": 3,
+    "pushed_max_cm": 0.2,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_10.001": {
     "verts": 632,
-    "pushed": 15,
-    "pushed_max_cm": 2.96,
+    "pushed": 418,
+    "pushed_max_cm": 3.11,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_11.001": {
     "verts": 1604,
-    "pushed": 513,
-    "pushed_max_cm": 2.81,
+    "pushed": 533,
+    "pushed_max_cm": 5.19,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_12.001": {
     "verts": 1230,
-    "pushed": 226,
-    "pushed_max_cm": 1.82,
+    "pushed": 305,
+    "pushed_max_cm": 1.51,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_14.001": {
     "verts": 2566,
-    "pushed": 144,
-    "pushed_max_cm": 3.54,
+    "pushed": 136,
+    "pushed_max_cm": 1.06,
     "unweighted": 0
    },
    "SK_Orc_02_Armor_15.001": {
     "verts": 1012,
-    "pushed": 152,
-    "pushed_max_cm": 4.91,
+    "pushed": 445,
+    "pushed_max_cm": 4.97,
     "unweighted": 0
    }
   },
@@ -696,106 +704,108 @@
    "M_Orc_02_Armor.024",
    "M_Orc_02_Armor.025"
   ],
+  "pct": 95.0,
+  "need_legs": 90.0,
   "verts": 17276
  },
  "OrcSkirmisherArmour": {
   "bones": {
    "pelvis": [
-    0.998,
-    0.857,
-    1.006,
-    0.953
+    0.97,
+    0.5,
+    1.017,
+    0.829
    ],
    "thigh_l": [
-    1.041,
-    0.776,
-    0.84,
-    0.886
+    1.268,
+    1.093,
+    0.847,
+    1.069
    ],
    "thigh_r": [
-    0.92,
-    0.783,
-    0.93,
-    0.878
+    0.944,
+    0.938,
+    1.192,
+    1.024
    ],
    "calf_l": [
-    1.576,
-    1.148,
-    1.395,
-    1.268
+    1.386,
+    1.305,
+    1.438,
+    1.277
    ],
    "foot_l": [
-    1.424,
+    1.607,
     1.7,
-    0.97,
-    1.68
+    1.367,
+    1.357
    ],
    "calf_r": [
-    1.661,
-    1.508,
-    1.7,
-    1.405
+    1.685,
+    1.312,
+    1.172,
+    1.372
    ],
    "foot_r": [
-    1.157,
+    1.534,
     1.7,
-    1.65,
-    1.7
+    1.336,
+    1.363
    ],
    "ball_l": [
-    0.644,
-    0.5,
-    0.5,
-    0.548
+    1.029,
+    1.059,
+    1.018,
+    1.035
    ],
    "ball_r": [
-    0.531,
-    0.5,
-    0.532,
-    0.521
+    1.176,
+    1.068,
+    0.918,
+    1.054
    ],
    "head": [
-    1.574,
-    1.087,
-    1.604,
+    1.7,
+    1.176,
+    1.7,
     1.7
    ]
   },
   "pieces": {
    "SK_Orc_03_Armor_01.001": {
     "verts": 1472,
-    "pushed": 333,
-    "pushed_max_cm": 1.63,
+    "pushed": 559,
+    "pushed_max_cm": 5.08,
     "unweighted": 0
    },
    "SK_Orc_03_Armor_02.001": {
     "verts": 1101,
-    "pushed": 189,
-    "pushed_max_cm": 1.64,
+    "pushed": 1051,
+    "pushed_max_cm": 3.52,
     "unweighted": 0
    },
    "SK_Orc_03_Armor_03.001": {
     "verts": 2182,
-    "pushed": 140,
-    "pushed_max_cm": 3.52,
+    "pushed": 180,
+    "pushed_max_cm": 2.16,
     "unweighted": 0
    },
    "SK_Orc_03_Armor_04.001": {
     "verts": 4246,
-    "pushed": 375,
-    "pushed_max_cm": 4.15,
+    "pushed": 176,
+    "pushed_max_cm": 1.74,
     "unweighted": 0
    },
    "SK_Orc_03_Armor_05.001": {
     "verts": 1411,
-    "pushed": 62,
-    "pushed_max_cm": 2.57,
+    "pushed": 131,
+    "pushed_max_cm": 2.23,
     "unweighted": 0
    },
    "SK_Orc_03_Helmet.001": {
     "verts": 3005,
-    "pushed": 210,
-    "pushed_max_cm": 4.67,
+    "pushed": 406,
+    "pushed_max_cm": 4.9,
     "unweighted": 0
    }
   },
@@ -807,160 +817,162 @@
    "M_Orc_03_Armor.010",
    "M_Orc_03_Armor.011"
   ],
+  "pct": 95.0,
+  "need_legs": 90.0,
   "verts": 13417
  },
  "OrcBruiserArmour": {
   "bones": {
    "head": [
-    1.221,
-    1.048,
-    1.282,
-    1.677
-   ],
-   "upperarm_l": [
-    1.101,
-    0.636,
-    0.874,
-    1.428
-   ],
-   "lowerarm_l": [
-    0.547,
-    0.5,
-    0.5,
-    0.643
-   ],
-   "upperarm_r": [
-    0.953,
-    0.648,
+    1.518,
+    1.209,
     1.7,
     1.7
    ],
+   "upperarm_l": [
+    0.914,
+    0.914,
+    0.552,
+    0.745
+   ],
+   "lowerarm_l": [
+    0.712,
+    0.632,
+    0.571,
+    0.741
+   ],
+   "upperarm_r": [
+    0.552,
+    0.895,
+    1.017,
+    0.779
+   ],
    "lowerarm_r": [
-    0.5,
-    0.5,
-    0.53,
-    0.628
+    0.626,
+    0.618,
+    0.655,
+    0.703
    ],
    "lowerarm_twist_01_l": [
-    0.736,
-    0.55,
-    0.5,
-    0.686
+    1.077,
+    0.829,
+    0.669,
+    0.897
    ],
    "lowerarm_twist_01_r": [
-    0.519,
-    0.616,
-    0.742,
-    0.698
+    0.694,
+    0.808,
+    1.025,
+    0.91
    ],
    "pelvis": [
-    0.573,
-    0.512,
-    0.52,
-    0.617
+    0.5,
+    0.5,
+    0.57,
+    0.613
    ],
    "thigh_l": [
-    0.6,
-    0.573,
-    0.595,
-    0.632
+    0.577,
+    0.565,
+    0.589,
+    0.577
    ],
    "thigh_r": [
-    0.625,
-    0.575,
-    0.613,
-    0.64
+    0.662,
+    0.54,
+    0.609,
+    0.624
    ],
    "calf_l": [
-    0.663,
-    0.535,
-    0.757,
-    1.366
+    0.578,
+    0.539,
+    0.732,
+    1.213
    ],
    "foot_l": [
-    0.799,
-    0.632,
-    0.705,
-    1.7
+    0.869,
+    0.868,
+    0.832,
+    1.418
    ],
    "ball_l": [
-    0.791,
-    0.5,
-    0.5,
-    0.597
+    1.676,
+    0.993,
+    1.014,
+    1.228
    ],
    "calf_r": [
-    0.897,
-    0.702,
-    1.122,
-    1.431
+    0.808,
+    0.554,
+    0.5,
+    1.011
    ],
    "foot_r": [
-    0.728,
-    0.751,
-    0.942,
-    1.7
+    0.951,
+    0.762,
+    0.761,
+    1.444
    ],
    "ball_r": [
-    0.508,
-    0.5,
-    0.548,
-    0.519
+    1.015,
+    0.885,
+    1.409,
+    1.103
    ]
   },
   "pieces": {
    "SK_Orc_05_Armor_01_Mesh.001": {
     "verts": 1447,
-    "pushed": 113,
-    "pushed_max_cm": 4.61,
+    "pushed": 160,
+    "pushed_max_cm": 4.3,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_02_Mesh.001": {
     "verts": 4822,
-    "pushed": 551,
-    "pushed_max_cm": 2.56,
+    "pushed": 58,
+    "pushed_max_cm": 0.69,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_03_Mesh.001": {
     "verts": 1032,
-    "pushed": 79,
-    "pushed_max_cm": 3.32,
+    "pushed": 77,
+    "pushed_max_cm": 4.16,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_04_Mesh.001": {
     "verts": 2366,
-    "pushed": 332,
-    "pushed_max_cm": 2.31,
+    "pushed": 374,
+    "pushed_max_cm": 5.29,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_05_Mesh.001": {
     "verts": 1745,
-    "pushed": 29,
-    "pushed_max_cm": 0.52,
+    "pushed": 98,
+    "pushed_max_cm": 1.46,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_06_Mesh.001": {
     "verts": 508,
-    "pushed": 141,
-    "pushed_max_cm": 1.97,
+    "pushed": 182,
+    "pushed_max_cm": 1.43,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_08_Mesh.001": {
     "verts": 1060,
-    "pushed": 80,
-    "pushed_max_cm": 2.32,
+    "pushed": 56,
+    "pushed_max_cm": 1.37,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_09_Mesh.001": {
     "verts": 1690,
-    "pushed": 51,
-    "pushed_max_cm": 1.23,
+    "pushed": 191,
+    "pushed_max_cm": 1.66,
     "unweighted": 0
    },
    "SK_Orc_05_Armor_10_Mesh.001": {
     "verts": 1672,
-    "pushed": 82,
-    "pushed_max_cm": 3.07,
+    "pushed": 64,
+    "pushed_max_cm": 1.99,
     "unweighted": 0
    }
   },
@@ -975,6 +987,8 @@
    "M_Orc_05_Armors.016",
    "M_Orc_05_Armors.017"
   ],
+  "pct": 95.0,
+  "need_legs": 90.0,
   "verts": 16342
  }
 }

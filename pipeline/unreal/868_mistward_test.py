@@ -1260,15 +1260,18 @@ def step_menulook():
         why = why or str(s.slate_mouse_button(mid(b), key("LeftMouseButton"), False)); yield from rwait(0.6)
         return why
     res = {"tried": []}
+    # (another hero by the run's third argument, "hero=Rogue" (the list of 2026-11-11: Rogue2 and Summoner5 on the menu))
+    opt = dict(kv.split("=", 1) for kv in (sys.argv[3] if len(sys.argv) > 3 else "").split(";") if "=" in kv)
+    WANT = opt.get("hero", "MartialArtist")
     # (held before she is chosen: the menu sets its turn back to her front when a hero is shown)
     rate = s.get_editor_property("turn_rate"); front = s.get_editor_property("front_yaw"); s.set_editor_property("turn_rate", 0.0)
     for k in range(8):
-        if str(s.get_hero_name()) == "MartialArtist": break
+        if str(s.get_hero_name()) == WANT: break
         why = yield from click(f"Hero_{k}")
         res["tried"].append([f"Hero_{k}", str(s.get_hero_name()), why])
     # (a click the editor's view does not reach (its layout varies): stepped by the menu's own Step, what its arrows call)
     for k in range(8):
-        if str(s.get_hero_name()) == "MartialArtist": break
+        if str(s.get_hero_name()) == WANT: break
         s.step(1); yield from rwait(0.6); res["tried"].append(["Step", str(s.get_hero_name())])
     res["hero"] = str(s.get_hero_name()); res["shown"] = s.is_figure_shown(s.get_index())
     # (the turntable held: her front as the menu first shows her (FrontYaw), then her three-quarter, side and back, each
@@ -1277,11 +1280,11 @@ def step_menulook():
     try:
         for k, turn in enumerate((0.0, 0.0, 45.0, 90.0, 180.0)):
             s.set_editor_property("front_yaw", front + turn); yield from rwait(1.0)
-            shot(f"menulook_{k}", "1920x1080"); res["views"].append(turn); yield from rwait(0.85)
+            shot(f"menulook_{WANT}_{k}" if WANT != "MartialArtist" else f"menulook_{k}", "1920x1080"); res["views"].append(turn); yield from rwait(0.85)
     finally:
         s.set_editor_property("front_yaw", front); s.set_editor_property("turn_rate", rate)
     yield from rwait(1.0)
-    step_result("menulook", res["hero"] == "MartialArtist" and res["shown"], **res)
+    step_result("menulook", res["hero"] == WANT and res["shown"], **res)
 def step_menu():
     """(play in mistward_castle_select: 868_mistward_test.ps1 menu <tag>) the pointer shown and free; a click on a hero's name
     shows her, the arrows step, her name clicked again starts; START clicked opens mistward_castle as the hero shown, where

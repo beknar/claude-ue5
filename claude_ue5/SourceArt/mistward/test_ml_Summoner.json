@@ -1,0 +1,64 @@
+{
+ "tag": "ml_Summoner",
+ "plan": [
+  "menulook"
+ ],
+ "level": "mistward_castle_select",
+ "steps": [
+  {
+   "step": "menulook",
+   "ok": true,
+   "tried": [
+    [
+     "Hero_0",
+     "Warrior",
+     ""
+    ],
+    [
+     "Hero_1",
+     "Mage",
+     ""
+    ],
+    [
+     "Hero_2",
+     "Warlock",
+     ""
+    ],
+    [
+     "Hero_3",
+     "Rogue",
+     ""
+    ],
+    [
+     "Hero_4",
+     "MartialArtist",
+     ""
+    ],
+    [
+     "Hero_5",
+     "Summoner",
+     ""
+    ]
+   ],
+   "hero": "Summoner",
+   "shown": true,
+   "views": [
+    0.0,
+    0.0,
+    45.0,
+    90.0,
+    180.0
+   ]
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_ml_Summoner_menulook_Summoner_0.png",
+  "mw_ml_Summoner_menulook_Summoner_1.png",
+  "mw_ml_Summoner_menulook_Summoner_2.png",
+  "mw_ml_Summoner_menulook_Summoner_3.png",
+  "mw_ml_Summoner_menulook_Summoner_4.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

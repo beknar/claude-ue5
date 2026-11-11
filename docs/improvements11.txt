@@ -1,0 +1,55 @@
+import the newly changed MartialArtist3.glb model into the shipping binary.  the newest clips are the idle motions.  the other 
+animations should not be affected at all.
+import the new Summoner5.glb as the replacement Summoner model using her own walk, run, and idle animations, while retargeting the
+spell casting animations from the old Summoner model.
+import the Rogue2.glb as the new model for the Rogue character into the shipping binary, using her own walk, run, idle and hit animations, while retargeting the attack animations from the old Rogue model
+need new animation and visual for starfall that's different from meter storm
+	choose from the VFX packs in the 3d fab vault
+need new animation and visual for spell singularity that's different from void rift
+	choose from the VFX packs in the 3d fab vault
+need animation and visual for spell soul rend that's different from life drain
+	choose from the VFX packs in the 3d fab vault
+when the warrior puts on a shield in inventory, then takes it off, her default appears on her arm again
+when an ambush from outside town appears in the wilderness and makes it into town, the guards should fight it
+cantrips: the base cantrip at tier 1 for every caster is the fire bolt.  it costs no mana and it scales in damage per tier
+the warrior earns 1 slash per tier, which means she needs to have 30 slashes, and currently there are only 20.  
+there needs to be 10 more slashes with different effects and different VFX.  combine and recolor VFX if necessary.
+need warlock only spell list, 11 more to round out 30 spells that she can cast.  use these and divide them up between 
+the dungeon tiers of the 6 dungeons and assign the proper cost, damage for the tier that they go into.  assign
+VFX that's different from the other spells, combining, recoloring or adding more custom particle effects if they need it in
+order to look different:
+Name	Type	Effect
+Curse of Rot	Curse	One target loses 6% of max HP as poison over 8s. Stacks up to 3 times.
+Hex of Lethargy	Curse	Enemies in an area move 30% slower and attack 15% slower for 6s.
+Mark of the Hunted	Curse	One target is visible through walls and you get +10% crit chance against it for 20s. Only one mark at a time.
+Curse of Greed	Curse	If the target dies while cursed, it drops 50% more gold and has a 15% chance of an extra item.
+Curse of Silence	Curse	The target can’t cast or use abilities for 3s (1.5s against elites and bosses).
+Withering Brand	Curse	The target receives 50% less healing and its regeneration stops for 10s.
+Curse of Brittle Bones	Curse	The target loses 25% armor for 8s, and physical crits knock it down.
+Leech Hex	Curse	15% of all damage dealt to the target (by anyone) heals you, for 10s.
+Curse of Dread	Curse	Enemies in an area flee in fear for 3s and take 15% more damage while afraid. The fear ends early once one takes damage equal to 10% of its max HP.
+Contagion	Curse	When a cursed enemy dies, all its curses jump to up to 3 enemies within 8m, with their remaining duration.
+Elemental Ruin	Curse	Choose fire, frost, shock or shadow: the target loses 40% resistance to that element for 12s.
+Chains of Kinship	Curse	Links up to 4 enemies. 30% of the damage any one of them takes is split among the others, for 8s.
+Doom	Curse	After 10s, the target takes 50% of all the damage it took while doomed. If it drops below 20% HP before that, it dies instantly (bosses take the burst instead).
+martial artist should be able to do all of her chi moves even without a monster around, but if there's not a monster around, it should not take any mana
+not all the buildings at a farmhold have interiors nor can the doors be opened.  example: Garrick's hold
+all the farms use the exact same design.  have at least 50 different designs for farms, and they should all have interiors.  they should have these types of buildings: the farmhouse, the barn, gardens, animals in pens with different configurations for pens and the kinds of animals in them
+the martial artist's default attacks without chi should be labeled as 'Basic Attacks'
+farmholds should have some food in them to loot - none of the containers work
+in console: need way to set the time of day: morning, noon, afternoon
+in console: need way to list all points of interest in map, then make them go away again if they haven't already been discovered by hand
+in console: need way to go to a point of interest listed in map
+in console: a way to set the tier of a character, giving them the max abilities/spells/etc of that tier or taking those abilities away if a lower tier is set
+when in windowed mode, let the user grow the window by clicking and expanding on the corner
+meadows should have clusters of trees, strips of trees and clearings free of trees
+in meadows, there should be some scattering of debris: dead tree stumps, differently sized/shaped fallen branches, differently sized / shaped logs, leaves blowing in the wind, the grass should be moving in the wind, etc
+there should be more different types of events that the player can encounter in the wilderness -- most of the types encountered are the satchels found and ambushers - what else can the player find within a 40s amount of time?
+in console: run speed should also apply to towns
+in graymourne, the terrain should be shoreline, with the water extending out into an ocean.  the player should be able to fall into
+the water, but be able to walk out via ramps.  the docks should not be surrounded by walls.  the procedural terrain generation for this area should be a shoreline on the northern edge that is walkable by the player, and the sea should extend 2km from the shore with the far away land obscured by volumetric fog, even during a clear day
+when the player goes in the water, there should be displacement, a splash and a wake
+some NPCs in graymourne do not have heads.  ex
+in console: a way to reveal the entire map and then to make it return to normal
+near graymourne, it shifts abruptly to coastal regions.  it should gradually turn into the coast from the previous biome
+in the ESC menu, there should be a gameplay section and it should contain these items: an option to drop all items when dying or to keep your items, a difficulty option from easy to fair to difficult to hell. 'fair' is the normal difficulty.  scale the encounters up or down according to those difficulty indicators
