@@ -250,13 +250,30 @@ void ARDHUD::DrawCombat(float Sc)
 		// (level 5: the gallery's name; cursed, slowed or burning: a mark after it)
 		const FString Nm = Mo->Title.IsEmpty() ? Mo->MonsterName.ToString().Replace(TEXT("_"), TEXT(" ")) : Mo->Title;
 		FString Marks;
-		if (Mo->GetCurseShare() > 0.f) Marks += TEXT("  CURSED");
+		if (Mo->GetCurseShare() > 0.f || Mo->HasAnyCurse11()) Marks += TEXT("  CURSED");
+		if (Mo->IsAfraid()) Marks += TEXT("  AFRAID");
+		if (Mo->IsSilenced()) Marks += TEXT("  SILENCED");
 		if (Mo->GetSlowShare() > 0.f) Marks += TEXT("  SLOWED");
 		if (Mo->IsBurning()) Marks += TEXT("  BURNING");
 		// (mistward5, the user's of 2026-11-01: its name and its bar only, no hit points)
 		const FString N = Gen->bNameOnlyBars ? Nm.ToUpper() : FString::Printf(TEXT("%s  %.0f%s"), *Nm.ToUpper(), Mo->GetHealth(), *Marks);
 		float Tw, Th; UI.TextSize(N, Tw, Th, Small, Sc, ERDType::Label);
 		UI.Text(N, RDInk, S.X - Tw * 0.5f, A.Y - Th - 3.f * Sc, Small, Sc, ERDType::Label);
+	}
+	// ---- the list of 2026-11-11: Mark of the Hunted: its mark drawn over walls (at the screen's edge when it is behind her)
+	if (const ARDMonster* Hm = Gen->GetHuntedMark(); Hm && !Hm->IsDead())
+	{
+		FVector S = Project(Hm->GetActorLocation() + FVector(0, 0, Hm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 10.f), false);
+		const bool bBehind = S.Z <= 0.f;
+		FVector2D Hp(S.X, S.Y);
+		if (bBehind) Hp = FVector2D(Canvas->ClipX - Hp.X, Canvas->ClipY - 40.f * Sc);
+		Hp.X = FMath::Clamp(Hp.X, 30.f * Sc, Canvas->ClipX - 30.f * Sc); Hp.Y = FMath::Clamp(Hp.Y, 30.f * Sc, Canvas->ClipY - 30.f * Sc);
+		const float R = 16.f * Sc;
+		const FLinearColor Mc(1.f, 0.25f, 0.12f, 0.95f);
+		DrawLine(Hp.X - R, Hp.Y, Hp.X, Hp.Y - R, Mc, 2.5f * Sc); DrawLine(Hp.X, Hp.Y - R, Hp.X + R, Hp.Y, Mc, 2.5f * Sc);
+		DrawLine(Hp.X + R, Hp.Y, Hp.X, Hp.Y + R, Mc, 2.5f * Sc); DrawLine(Hp.X, Hp.Y + R, Hp.X - R, Hp.Y, Mc, 2.5f * Sc);
+		float Tw, Th; UI.TextSize(TEXT("HUNTED"), Tw, Th, Small, Sc * 0.9f, ERDType::Label);
+		UI.Text(TEXT("HUNTED"), Mc, Hp.X - Tw * 0.5f, Hp.Y + R + 2.f * Sc, Small, Sc * 0.9f, ERDType::Label);
 	}
 	// ---- level 5: her allies (green bars, the time they have left)
 	for (const ARDMonster* Mo : Gen->GetAllies())
@@ -1702,7 +1719,10 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		FString S = FString::Printf(TEXT("Teaches %s (%s): %s.  %.0f mana"), *Sp.Name.ToString(), RDSpellTypeName(Sp.Type), *Sp.Effect, Sp.Mana);
 		if (Sp.Cooldown > 0.f) S += FString::Printf(TEXT(", cooldown %.0f s"), Sp.Cooldown);
 		S += TEXT(".");
-		if (Gen && !Gen->HeroLearns(Sp.Type)) S += FString::Printf(TEXT("  The %s cannot learn it."), *Gen->PlayerTitle.ToLower());
+		if (Gen && !Gen->HeroCanLearnSpell(Sp))
+			S += Gen->HeroLearns(Sp.Type) && Sp.OnlyHeroes.Num() > 0
+				? FString::Printf(TEXT("  Only the %s learns it."), *Sp.OnlyHeroes[0].ToString().ToLower())
+				: FString::Printf(TEXT("  The %s cannot learn it."), *Gen->PlayerTitle.ToLower());
 		// (the user's of 2026-10-28: the Mage's pool grows with Null Sanctum and Apocalypse)
 		else if (const FRDHeroDef* H = Gen ? Gen->FindHero(Gen->CurrentHero) : nullptr)
 			if (const float* Pool = H->TomeMana.Find(Sp.Name)) S += FString::Printf(TEXT("  Learning it raises your mana pool to %.0f."), *Pool);

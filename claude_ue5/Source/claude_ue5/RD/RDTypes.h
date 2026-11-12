@@ -416,7 +416,63 @@ enum class ERDSlashEffect : uint8
 	/** the monster held for Seconds (once every Radius seconds for each monster) */
 	Stun,
 	/** each hit one of Burn, Slow, Poison, Drain at random */
-	Prismatic
+	Prismatic,
+	// ---- the list of 2026-11-11: ten more (the Weapon Slash pack's looks, RDList11c.cpp)
+	/** every monster in an arc before her within Radius takes Amount of the hit */
+	Cleave,
+	/** a monster under Amount of its hit points takes the hit again */
+	Execute,
+	/** Amount of the hit bled over Seconds, stacking with each hit */
+	Bleed,
+	/** the monster takes Amount more from everything for Seconds */
+	Sunder,
+	/** the hit comes again, Amount of it, a moment later */
+	Echo,
+	/** the ground shakes: every monster within Radius held for Seconds */
+	Quake,
+	/** a kill with it gives her Amount of her hit points back */
+	Rally,
+	/** every monster round her within Radius takes Amount of the hit */
+	Whirl,
+	/** the monster's blows Amount weaker for Seconds */
+	Weaken,
+	/** a kill with it bursts: every monster within Radius takes Amount of the hit */
+	Soulfire
+};
+
+/** the list of 2026-11-11: the Warlock's curses (a Curse spell's CurseEffect; RDList11c.cpp) */
+UENUM(BlueprintType)
+enum class ERDCurseEffect : uint8
+{
+	/** (an older curse: Curse of Frailty's share on what it takes and deals) */
+	None,
+	/** 6 % of its hit points as poison over 8 s, up to 3 at once */
+	Rot,
+	/** an area: 30 % slower, its blows 15 % slower, for 6 s */
+	Lethargy,
+	/** marked through walls for 20 s, her blows 10 % likelier to strike twice as hard; one mark at a time */
+	Hunted,
+	/** killed while cursed: 50 % more gold, 15 % a thing besides */
+	Greed,
+	/** no shot, beam or ability for 3 s (1.5 s an elite or a boss) */
+	Silence,
+	/** half the healing it gets and none of its own for 10 s */
+	Withering,
+	/** 25 % more from blows of weapons for 8 s, and those that strike twice as hard knock it down */
+	Brittle,
+	/** 15 % of every hurt it takes heals her, for 10 s */
+	Leech,
+	/** an area: they run from her for 3 s and take 15 % more; one that takes a tenth of its hit points stops running */
+	Dread,
+	/** killed while cursed: its curses go to up to 3 within 8 m with the time they had left */
+	Contagion,
+	/** 40 % more from one element (fire, frost, shock, shadow: the element of the spell she cast last) for 12 s */
+	Ruin,
+	/** up to 4 bound for 8 s: 30 % of what one takes is split among the others */
+	Kinship,
+	/** after 10 s it takes half of all it took meanwhile; under a fifth of its hit points before that it dies (a boss: the burst) */
+	Doom,
+	Count
 };
 
 /** mistward_castle (docs/improvements2.txt): a weapon flourish a boss gives (the Stylized Slashes pack's effects): it goes on
@@ -444,6 +500,9 @@ struct FRDSlashDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Text;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FLinearColor Color = FLinearColor(1.f, 0.5f, 0.2f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
+	/** the list of 2026-11-11: its Fx is a trail on her weapon (the Weapon Slash pack's static-mesh versions): attached to the
+	 *  weapon in her hand for the swing (on a bolt, to the bolt), not set before her at the hit */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bTrail = false;
 };
 
 /** random_dungeonmagic_level5: the spell table's types; a hero learns the types her card lists (FRDHeroDef::Learns) */
@@ -571,6 +630,21 @@ struct FRDSpellDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Icon = NAME_None;
 	/** a Summon spell: the monster kind that comes (the generator's Monsters by name) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SummonKind = NAME_None;
+	/** the list of 2026-11-11: a curse of the Warlock's (Kind Curse); the heroes alone who learn it (empty: every hero whose card
+	 *  learns its type); its element (fire, frost, shock, shadow or none: Elemental Ruin's) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERDCurseEffect CurseEffect = ERDCurseEffect::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FName> OnlyHeroes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Element = NAME_None;
+};
+
+/** the list of 2026-11-11: a spell's own cast clip on a hero (Starfall, Singularity, Soul Rend): the clip, its release (s), its end */
+USTRUCT(BlueprintType)
+struct FRDSpellClip
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Clip = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Hit = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float End = 0.f;
 };
 
 /** mistward_castle (docs/improvements3.txt): a monster family's part, harvested from the dead of these tiers (the family is
@@ -1029,6 +1103,9 @@ struct FRDHeroDef
 	 *  mana pool at least this much (rings no longer add past it): the Mage's Null Sanctum 220 and Apocalypse 300, which cost
 	 *  more than the best ring gives (871) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, float> TomeMana;
+	/** the list of 2026-11-11: a spell's own cast clip on her (by the spell's name: Starfall, Singularity, Soul Rend); the others
+	 *  are cast with her first spell's clips */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FName, FRDSpellClip> SpellClips;
 	/** the Martial Artist (the user's of 2026-10-28, mistward_castle and martial_arts): the share more damage a weapon type
 	 *  does in her hands (her knives and daggers: "short blades") */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TMap<FString, float> TypeBonus;

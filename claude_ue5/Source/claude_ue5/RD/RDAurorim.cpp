@@ -94,6 +94,7 @@ void ARDMonster::TickHover(float Dt)
 
 bool ARDMonster::TrySkyBeam(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt)
 {
+	if (IsSilenced()) { ++SilencedRefusals; return false; }          // (the list of 2026-11-11: Curse of Silence)
 	if (!bSkyBeam || !P || BeamWaitLeft > 0.f || AttackCooldown > 0.f || !BeamClip) return false;
 	// (out of its blows' reach, in its range, not far above or below: the light falls where its foe stands)
 	if (Gap <= Reach * 1.5f || Dist < BeamMin || Dist > BeamMax || Dz > 300.f) return false;
@@ -115,7 +116,7 @@ void ARDMonster::ReleaseBeam(AActor* P)
 	// (where its foe stands now, on the floor: the mark, and the light a moment after; one who moves on is spared)
 	const FVector At = RDAUFloor(GetWorld(), P->GetActorLocation(), P);
 	const float Sc = GetMesh()->GetComponentScale().X / FMath::Max(GetMesh()->GetRelativeScale3D().X, 0.01f);
-	G->QueueSkyBeam(this, At, BeamDelay, BeamRadius, Damage * BeamShare * (1.f - GetCurseShare()), BeamFx, BeamMarkFx, BeamHitFx, BeamFxScale, BeamMarkScale * FMath::Max(Sc, 0.5f),
+	G->QueueSkyBeam(this, At, BeamDelay, BeamRadius, Damage * BeamShare * BlowMul(), BeamFx, BeamMarkFx, BeamHitFx, BeamFxScale, BeamMarkScale * FMath::Max(Sc, 0.5f),
 		bBeamFxUser, bBeamMarkUser, bBeamHitUser);
 	++BeamsCast;
 }

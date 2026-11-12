@@ -1,0 +1,914 @@
+{
+ "tag": "s11i",
+ "plan": [
+  "spells11_cantrip",
+  "spells11_spells",
+  "slashes",
+  "secondary"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "spells11_cantrip",
+   "ok": true,
+   "cantrip": {
+    "index": 0,
+    "mana_cost": 0.0,
+    "label": "Fire Bolt (cantrip)",
+    "heroes": {
+     "Warrior": [],
+     "Mage": [
+      [
+       0.0,
+       "Fire Bolt (cantrip)"
+      ]
+     ],
+     "Warlock": [
+      [
+       0.0,
+       "Fire Bolt (cantrip)"
+      ]
+     ],
+     "Rogue": [],
+     "MartialArtist": [],
+     "Summoner": [
+      [
+       0.0,
+       "Fire Bolt (cantrip)"
+      ]
+     ]
+    },
+    "t1": {
+     "tier": 1,
+     "spell_mul": 1.0,
+     "started": true,
+     "mana_before": 0.76,
+     "mana_after": 0.76,
+     "bolts": 1,
+     "lost": 25.0
+    },
+    "t10": {
+     "tier": 10,
+     "spell_mul": 2.6083,
+     "started": true,
+     "mana_before": 1.16,
+     "mana_after": 1.16,
+     "bolts": 1,
+     "lost": 65.2
+    },
+    "ratio": 2.608,
+    "want_ratio": 2.608
+   },
+   "oks": {
+    "cantrip": true
+   }
+  },
+  {
+   "step": "spells11_spells",
+   "ok": true,
+   "spells": {
+    "heroes_clips": {
+     "Mage": [
+      "Singularity",
+      "Soul Rend",
+      "Starfall"
+     ],
+     "Warlock": [
+      "Singularity",
+      "Soul Rend",
+      "Starfall"
+     ],
+     "Summoner": [
+      "Singularity",
+      "Soul Rend",
+      "Starfall"
+     ]
+    },
+    "mage_knows_rot": false,
+    "cast": {
+     "Starfall": {
+      "knows": true,
+      "index": 30,
+      "looks": {
+       "cast_fx": "NS_Muzzle_ShootingStar01",
+       "bolt_fx": "NS_Projectile_ShootingStar01",
+       "impact_fx": "NS_Hit_Sun01",
+       "area_fx": null
+      },
+      "old_looks": {
+       "cast_fx": null,
+       "bolt_fx": "NS_Projectile_Rock_V1",
+       "impact_fx": "NS_GroundExplosion_04",
+       "area_fx": null
+      },
+      "clip": "AS_Caster_Cast_Starfall",
+      "shown": "Starfall",
+      "hit": 1.15,
+      "end": 2.0,
+      "want_hit": 1.15,
+      "started": true,
+      "particles_at_monster": 207,
+      "lost": 588.0
+     },
+     "Singularity": {
+      "knows": true,
+      "index": 31,
+      "looks": {
+       "cast_fx": "NS_Muzzle_RotatingSpheres",
+       "bolt_fx": null,
+       "impact_fx": "NS_Absorption_Purple",
+       "area_fx": "NS_Vortex_Void"
+      },
+      "old_looks": {
+       "cast_fx": null,
+       "bolt_fx": null,
+       "impact_fx": "NS_GroundExplosion_10",
+       "area_fx": "NS_Muzzle_Wind01"
+      },
+      "clip": "AS_Caster_Cast_Singularity",
+      "shown": "Singularity",
+      "hit": 1.25,
+      "end": 2.0,
+      "want_hit": 1.25,
+      "started": true,
+      "particles_at_monster": 33259,
+      "lost": 1200.0
+     },
+     "Soul Rend": {
+      "knows": true,
+      "index": 19,
+      "looks": {
+       "cast_fx": "NS_Muzzle_Orb01",
+       "bolt_fx": "NS_Projectile_Orb01",
+       "impact_fx": "NS_Absorption_Teal",
+       "area_fx": null
+      },
+      "old_looks": {
+       "cast_fx": "NS_Muzzle_Ghostly01",
+       "bolt_fx": "NS_Projectile_Ghostly01",
+       "impact_fx": "NS_Hit_Ghostly01",
+       "area_fx": null
+      },
+      "clip": "AS_Caster_Cast_SoulRend",
+      "shown": "Soul Rend",
+      "hit": 0.75,
+      "end": 1.583,
+      "want_hit": 0.75,
+      "started": true,
+      "particles_at_monster": 10616,
+      "lost": 1200.0
+     }
+    },
+    "warlock": {
+     "Starfall": {
+      "knows": true,
+      "clip": "AS_DarkCaster_Cast_Starfall",
+      "hit": 1.15
+     },
+     "Singularity": {
+      "knows": true,
+      "clip": "AS_DarkCaster_Cast_Singularity",
+      "hit": 1.25
+     },
+     "Soul Rend": {
+      "knows": true,
+      "clip": "AS_DarkCaster_Cast_SoulRend",
+      "hit": 0.75
+     }
+    }
+   },
+   "oks": {
+    "spells": true
+   }
+  },
+  {
+   "step": "slashes",
+   "ok": true,
+   "refused": [],
+   "boss_gave": [
+    "Verdant Slash"
+   ],
+   "boss_slash_tier": [
+    2
+   ],
+   "tab": 4,
+   "picking": true,
+   "pick_lines": [
+    "weapon|0|Dagger|",
+    "weapon|1|Longbow|"
+   ],
+   "on_dagger": "Ember Slash",
+   "off_dagger": "None",
+   "back_in_pack": 1,
+   "on_bow": true,
+   "bow_slash": "Ember Slash",
+   "swing": {
+    "started": true,
+    "fx_max": 31,
+    "bonus": 6.0,
+    "monster_lost": 22.1,
+    "pictured": true
+   },
+   "shot": {
+    "bonus": 6.0,
+    "procs": 2
+   },
+   "each": {
+    "Ember Slash": {
+     "applied": true,
+     "effect": "burn",
+     "hit": true,
+     "bonus": 6.0,
+     "want_bonus": 6.0,
+     "fx": 30,
+     "procs": {
+      "burn": 1
+     },
+     "burning": true,
+     "dot": 10.06,
+     "want_dot": 10.1,
+     "ok": true
+    },
+    "Frost Slash": {
+     "applied": true,
+     "effect": "slow",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 43,
+     "procs": {
+      "slow": 1
+     },
+     "slow": 0.25,
+     "ok": true
+    },
+    "Venom Slash": {
+     "applied": true,
+     "effect": "poison",
+     "hit": true,
+     "bonus": 4.0,
+     "want_bonus": 4.0,
+     "fx": 29,
+     "procs": {
+      "poison": 1
+     },
+     "burning": true,
+     "dot": 11.91,
+     "want_dot": 12.0,
+     "ok": true
+    },
+    "Gale Slash": {
+     "applied": true,
+     "effect": "swift",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 26,
+     "procs": {
+      "swift": 1
+     },
+     "speed_bonus": 0.1,
+     "ok": true
+    },
+    "Blood Slash": {
+     "applied": true,
+     "effect": "drain",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 45,
+     "procs": {
+      "drain": 1
+     },
+     "healed": 6.99,
+     "want": 6.99,
+     "ok": true
+    },
+    "Wave Slash": {
+     "applied": true,
+     "effect": "knockback",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 65,
+     "procs": {
+      "knockback": 1
+     },
+     "moved_cm": 301,
+     "want_cm": 300.0,
+     "ok": true
+    },
+    "Verdant Slash": {
+     "applied": true,
+     "effect": "regen",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 26,
+     "procs": {
+      "regen": 1
+     },
+     "regen": 1.5,
+     "ok": true
+    },
+    "Petal Slash": {
+     "applied": true,
+     "effect": "evade",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 60,
+     "procs": {
+      "evade": 1
+     },
+     "evade": 0.15,
+     "ok": true
+    },
+    "Crystal Slash": {
+     "applied": true,
+     "effect": "shield",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 29,
+     "procs": {
+      "shield": 1
+     },
+     "up": true,
+     "absorbed": true,
+     "down_after": true,
+     "ok": true
+    },
+    "Storm Slash": {
+     "applied": true,
+     "effect": "chain",
+     "hit": true,
+     "bonus": 44.3,
+     "want_bonus": 15.0,
+     "fx": 49,
+     "procs": {
+      "chain": 1
+     },
+     "spawned": [
+      true,
+      true,
+      true
+     ],
+     "others_lost": [
+      14.7,
+      14.7,
+      0.0
+     ],
+     "ok": true
+    },
+    "Ink Slash": {
+     "applied": true,
+     "effect": "blind",
+     "hit": true,
+     "bonus": 13.0,
+     "want_bonus": 13.0,
+     "fx": 30,
+     "procs": {
+      "blind": 1
+     },
+     "blind": 0.4,
+     "ok": true
+    },
+    "Tide Slash": {
+     "applied": true,
+     "effect": "tide",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 66,
+     "procs": {
+      "tide": 1
+     },
+     "slow": 0.2,
+     "moved_cm": 406,
+     "ok": true
+    },
+    "Inferno Slash": {
+     "applied": true,
+     "effect": "inferno",
+     "hit": true,
+     "bonus": 100.6,
+     "want_bonus": 24.0,
+     "fx": 62,
+     "procs": {
+      "inferno": 1
+     },
+     "near_lost": 38.4,
+     "near_burning": true,
+     "far_lost": 0.0,
+     "ok": true
+    },
+    "Shadow Slash": {
+     "applied": true,
+     "effect": "curse",
+     "hit": true,
+     "bonus": 22.0,
+     "want_bonus": 22.0,
+     "fx": 27,
+     "procs": {
+      "curse": 1
+     },
+     "curse": 0.25,
+     "ok": true
+    },
+    "Neon Slash": {
+     "applied": true,
+     "effect": "haste",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 36,
+     "procs": {
+      "haste": 1
+     },
+     "haste": 0.2,
+     "swing_s": 0.479,
+     "ok": true
+    },
+    "Pulse Slash": {
+     "applied": true,
+     "effect": "deflect",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 34,
+     "procs": {
+      "deflect": 1
+     },
+     "deflect": 0.25,
+     "ok": true
+    },
+    "Magma Slash": {
+     "applied": true,
+     "effect": "magma",
+     "hit": true,
+     "bonus": 36.0,
+     "want_bonus": 36.0,
+     "fx": 25,
+     "procs": {
+      "magma": 1
+     },
+     "burning": false,
+     "dot": 40.0,
+     "want_dot": 36.0,
+     "ok": true
+    },
+    "Void Slash": {
+     "applied": true,
+     "effect": "void",
+     "hit": true,
+     "bonus": 34.0,
+     "want_bonus": 34.0,
+     "fx": 40,
+     "procs": {
+      "void": 1
+     },
+     "closer_cm": [
+      152,
+      159,
+      0
+     ],
+     "slow": 0.25,
+     "ok": true
+    },
+    "Overload Slash": {
+     "applied": true,
+     "effect": "stun",
+     "hit": true,
+     "bonus": 38.0,
+     "want_bonus": 38.0,
+     "fx": 14,
+     "procs": {
+      "stun": 1
+     },
+     "stunned": true,
+     "second_waits": true,
+     "ok": true
+    },
+    "Prismatic Slash": {
+     "applied": true,
+     "effect": "prismatic",
+     "hit": true,
+     "bonus": 32.0,
+     "want_bonus": 32.0,
+     "fx": 37,
+     "procs": {
+      "drain": 1,
+      "prismatic": 1
+     },
+     "ok": true
+    },
+    "Rending Slash": {
+     "applied": true,
+     "effect": "bleed",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 13,
+     "procs": {
+      "bleed": 1
+     },
+     "dot": 7.66,
+     "want_dot": 7.7,
+     "ok": true
+    },
+    "Gust Slash": {
+     "applied": true,
+     "effect": "cleave",
+     "hit": true,
+     "bonus": 14.65,
+     "want_bonus": 5.0,
+     "fx": 53,
+     "procs": {
+      "cleave": 1
+     },
+     "others_lost": [
+      9.7,
+      0.0,
+      0.0
+     ],
+     "want": 9.6,
+     "ok": true
+    },
+    "Thorn Slash": {
+     "applied": true,
+     "effect": "weaken",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 46,
+     "procs": {
+      "weaken": 1
+     },
+     "blow_mul": 0.8,
+     "ok": true
+    },
+    "Spark Slash": {
+     "applied": true,
+     "effect": "echo",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 42,
+     "procs": {
+      "echo": 1
+     },
+     "echo": 11.65,
+     "want": 11.65,
+     "echo_hits": 1,
+     "ok": true
+    },
+    "Sundering Slash": {
+     "applied": true,
+     "effect": "sunder",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 16,
+     "procs": {
+      "sunder": 1
+     },
+     "blow_100": 115.0,
+     "ok": true
+    },
+    "Riptide Slash": {
+     "applied": true,
+     "effect": "whirl",
+     "hit": true,
+     "bonus": 42.3,
+     "want_bonus": 14.0,
+     "fx": 10,
+     "procs": {
+      "whirl": 1
+     },
+     "others_lost": [
+      14.2,
+      14.2,
+      0.0
+     ],
+     "want": 14.1,
+     "ok": true
+    },
+    "Quake Slash": {
+     "applied": true,
+     "effect": "quake",
+     "hit": true,
+     "bonus": 22.0,
+     "want_bonus": 22.0,
+     "fx": 101,
+     "procs": {
+      "quake": 1
+     },
+     "stunned": [
+      true,
+      true,
+      false
+     ],
+     "second_waits": 2,
+     "ok": true
+    },
+    "Headsman's Slash": {
+     "applied": true,
+     "effect": "execute",
+     "hit": true,
+     "bonus": 58.3,
+     "want_bonus": 22.0,
+     "fx": 16,
+     "procs": {
+      "execute": 1
+     },
+     "lost": 58.3,
+     "want": 58.3,
+     "ok": true
+    },
+    "Warcry Slash": {
+     "applied": true,
+     "effect": "rally",
+     "hit": true,
+     "bonus": 34.0,
+     "want_bonus": 34.0,
+     "fx": 42,
+     "procs": {
+      "rally": 1
+     },
+     "killed": true,
+     "healed": 19.8,
+     "want": 19.8,
+     "ok": true
+    },
+    "Soulfire Slash": {
+     "applied": true,
+     "effect": "soulfire",
+     "hit": true,
+     "bonus": 62.98,
+     "want_bonus": 34.0,
+     "fx": 77,
+     "procs": {
+      "soulfire": 1
+     },
+     "killed": true,
+     "others_lost": [
+      29.0,
+      0.0
+     ],
+     "want": 29.0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "step": "secondary",
+   "ok": true,
+   "token_ok": true,
+   "warrior_ok": true,
+   "mage_ok": true,
+   "warlock_ok": true,
+   "summoner_ok": true,
+   "martial_ok": true,
+   "token": {
+    "made": true,
+    "count": 1,
+    "began": true,
+    "lines": [
+     "rank|ShieldBash|Shield Bash|0|6|stuns every enemy within reach in front of her for 5 s  (every 14 s)",
+     "rank|Grapple|Grapple|0|6|holds the enemy before her where it stands for 5 s (it still strikes)  (every 12 s)",
+     "rank|Trip|Trip|0|6|throws the enemy before her prone for 5 s: it neither moves nor strikes  (every 12 s)",
+     "rank|BlindingStrike|Blinding Strike|0|6|a blow of her weapon that blinds the enemy before her for 5 s (its blows miss)  (every 12 s)",
+     "rank|SweepingPush|Sweeping Push|0|6|pushes every enemy within reach 20 m away from her  (every 16 s)",
+     "rank|PullingAttack|Pulling Attack|0|6|pulls an enemy up to 40 m away before her into her reach  (every 12 s)"
+    ],
+    "entry": true,
+    "rank": 1,
+    "left": 0,
+    "on_bar": true,
+    "picking_after": false
+   },
+   "warrior": {
+    "bash": {
+     "ok": true,
+     "last": "ShieldBash|2|5.00",
+     "says": "Shield Bash",
+     "stunned": [
+      true,
+      true
+     ],
+     "stunned_4_7s": [
+      true,
+      true
+     ],
+     "stunned_5_7s": [
+      false,
+      false
+     ],
+     "again": false
+    },
+    "grapple": {
+     "ok": true,
+     "last": "Grapple|1|5.00",
+     "says": "Grapple",
+     "slow": 1.0,
+     "moved_cm": 0,
+     "stunned": false
+    },
+    "trip": {
+     "ok": true,
+     "last": "Trip|1|5.00",
+     "says": "Trip",
+     "stunned": true
+    },
+    "blind": {
+     "ok": true,
+     "last": "BlindingStrike|1|5.00",
+     "says": "Blinding Strike",
+     "lost": 14.3,
+     "blind": 1.0
+    },
+    "push": {
+     "ok": true,
+     "last": "SweepingPush|2|20.00",
+     "says": "Sweeping Push",
+     "monsters": [
+      {
+       "moved_cm": 1530,
+       "free_cm": 1582,
+       "away": true
+      },
+      {
+       "moved_cm": 1530,
+       "free_cm": 1582,
+       "away": true
+      }
+     ]
+    },
+    "pull": {
+     "from_cm": 1027,
+     "ok": true,
+     "last": "PullingAttack|1|10.27",
+     "says": "Pulling Attack",
+     "to_cm": 186
+    }
+   },
+   "mage": {
+    "swarm": {
+     "ok": true,
+     "last": "ManaSwarm|5|10.20",
+     "says": "Mana Swarm",
+     "mana_after": 0.0,
+     "lost": 51.0
+    },
+    "boost": {
+     "fire": 30.0,
+     "plain": 25.0
+    },
+    "ablation": {
+     "ok": true,
+     "last": "AblationShield|2|10.00",
+     "says": "Ablation Shield",
+     "monster_lost": 40.0,
+     "hp_lost_two": 0.0,
+     "hp_lost_third": 20.0
+    },
+    "recharge": {
+     "ok": true,
+     "last": "RechargeShield|1|5.00",
+     "says": "Mana Recharge Shield",
+     "hp_lost": 0.0,
+     "mana": 30.3
+    },
+    "step": {
+     "ok": true,
+     "last": "MistyStep|1|10.00",
+     "says": "Misty Step",
+     "moved_cm": 1000,
+     "foe_before_cm": 224,
+     "foe_after_cm": 1159
+    }
+   },
+   "warlock": {
+    "mana_shield": {
+     "ok": true,
+     "last": "ManaShield|1|5.00",
+     "says": "Mana Shield",
+     "hp_lost": 0.0,
+     "mana_taken": 19.8
+    },
+    "curse": {
+     "ok": true,
+     "last": "CurseShield|1|5.00",
+     "says": "Curse Shield"
+    },
+    "blind": {
+     "ok": true,
+     "last": "BlindingShield|1|5.00",
+     "says": "Blinding Shield"
+    },
+    "bleed": {
+     "ok": true,
+     "last": "BleedingShield|1|5.00",
+     "says": "Bleeding Shield"
+    },
+    "auras": {
+     "curse": 0.25,
+     "blind": 1.0,
+     "bled": 11.2
+    },
+    "transfer": {
+     "ok": true,
+     "last": "MistyTransfer|1|16.00",
+     "says": "Misty Transfer",
+     "moved_cm": 1600
+    },
+    "blade": {
+     "ok": true,
+     "last": "ManaBlade|1|2.0",
+     "says": "Mana Blade on",
+     "plain": 22.0,
+     "lost_plain": 22.0,
+     "lost_blade": 34.0,
+     "mana_taken": 3.5,
+     "blows": 1
+    }
+   },
+   "summoner": {
+    "grown": {
+     "base": {
+      "hp": 40.0,
+      "damage": 9.0,
+      "pace": 1.0
+     },
+     "hp": 48.0,
+     "damage": 11.0,
+     "pace": 1.2000000476837158
+    },
+    "healing": {
+     "ok": true,
+     "last": "SummonHealing|1|10.00",
+     "says": "Summon Healing",
+     "healed": 4.8,
+     "max": 48.0
+    },
+    "soul": {
+     "harvests": 1,
+     "healed": 4.8,
+     "boost": 1.2,
+     "boost_left": 9.6
+    }
+   },
+   "martial": {
+    "leap": {
+     "ok": true,
+     "last": "WallRun|1|8.50",
+     "says": "Wall Run",
+     "moved_cm": 793,
+     "planned_cm": 850,
+     "room_cm": 1196,
+     "air": false
+    },
+    "flash": {
+     "ok": true,
+     "last": "FlashStep|1|9.56",
+     "says": "Flash Steps",
+     "moved_cm": 974,
+     "past_it": true,
+     "planned_cm": 956
+    },
+    "water": {
+     "ok": false,
+     "last": "FlashStep|1|9.56",
+     "says": "Water Walk: no water before you"
+    },
+    "parry": {
+     "ok": true,
+     "last": "Parry|1|5.00",
+     "says": "Parry",
+     "hp_lost": 0.0,
+     "parried": 1,
+     "staggered": true,
+     "again": false
+    },
+    "iron": {
+     "ok": true,
+     "last": "IronSkin|1|10.00",
+     "says": "Iron Skin",
+     "plain": 50.0,
+     "skin": 45.0
+    }
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_s11i_s11_starfall.png",
+  "mw_s11i_s11_singularity.png",
+  "mw_s11i_s11_soulrend.png",
+  "mw_s11i_slash_pick.png",
+  "mw_s11i_slash_swing.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

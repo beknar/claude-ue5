@@ -626,8 +626,17 @@ FName ARDDungeonGenerator::TomeSpellOf(FIntPoint Section, int32 Index, int32 Pic
 	if (Spells.ContainsByPredicate([](const FRDSpellDef& S) { return S.Slot > 0; }))
 	{
 		const int32 Want = FMath::Max(ChainIndexHere(), 0) * 5 + Tier;
-		const FRDSpellDef* Sp = Spells.FindByPredicate([Want](const FRDSpellDef& S) { return S.Slot == Want; });
-		return Sp ? Sp->Name : NAME_None;
+		// (the list of 2026-11-11: a tier's place can hold a spell of one hero's own too (the Warlock's curses): for her that one
+		// first until she knows it, then the place's other; for the other heroes the place's other)
+		const FRDSpellDef* First = nullptr; const FRDSpellDef* Own = nullptr;
+		for (const FRDSpellDef& S : Spells)
+		{
+			if (S.Slot != Want) continue;
+			if (S.OnlyHeroes.Num() > 0) { if (S.OnlyHeroes.Contains(CurrentHero) && !Own) Own = &S; }
+			else if (!First) First = &S;
+		}
+		if (Own && !(PlayerCombat && PlayerCombat->KnowsSpell(Own->Name))) return Own->Name;
+		return First ? First->Name : (Own ? Own->Name : NAME_None);
 	}
 	float Sum = 0.f;
 	for (const FRDSpellDef& S : Spells) if (S.Tier == Tier) Sum += FMath::Max(S.DropChance, 0.f);
@@ -665,7 +674,8 @@ bool ARDDungeonGenerator::MakeSpellWeapon(int32 SpellIndex, FRDWeaponDef& Out) c
 	if (!Base) return false;
 	const FRDSpellDef& S = Spells[SpellIndex];
 	Out = *Base;
-	Out.Name = S.Name; Out.SpellIndex = SpellIndex; Out.bAlongside = false;
+	// (the base's label is its own: the cantrip's "Fire Bolt (cantrip)" named every learned spell in the status panel)
+	Out.Name = S.Name; Out.Label.Empty(); Out.SpellIndex = SpellIndex; Out.bAlongside = false;
 	Out.Damage = S.Damage; Out.ManaCost = S.Mana; Out.Cooldown = S.Cooldown; Out.Reach = S.Reach;
 	Out.BoltSpeed = S.BoltSpeed; Out.BoltTurnRate = 260.f; Out.BoltSplash = S.Splash;
 	Out.ChargeEffect = S.CastFx; Out.ChargeEffectScale = S.CastFxScale;
@@ -674,6 +684,12 @@ bool ARDDungeonGenerator::MakeSpellWeapon(int32 SpellIndex, FRDWeaponDef& Out) c
 	Out.SpellLightColor = S.LightColor; Out.SpellLightIntensity = S.LightIntensity;
 	Out.SoundKey = S.SoundKey; Out.Icon = S.Icon;
 	Out.Durability = 0.f; Out.Item = NAME_None; Out.SpeedRating = Out.DamageRating = 0; Out.WeaponType.Reset();
+	// (the list of 2026-11-11: a spell with a cast clip of its own on her (Starfall, Singularity, Soul Rend) is cast with it)
+	if (const FRDSpellClip* Sc = H->SpellClips.Find(S.Name); Sc && Sc->Clip)
+	{
+		Out.Attacks = { Sc->Clip }; Out.AttackStarts = { 0.f };
+		Out.AttackEnds = { Sc->End > 0.f ? Sc->End : Sc->Clip->GetPlayLength() }; Out.HitTimes = { Sc->Hit };
+	}
 	return true;
 }
 

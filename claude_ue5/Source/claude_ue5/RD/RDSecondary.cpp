@@ -557,6 +557,7 @@ float URDCombatComponent::AbsorbBySecondary(float Amount, AActor* From)
 	{
 		--AblationLayers; ++PeeledLayers;
 		const FRDSecondaryDef* D = SecDef(RDSecAblation);
+		if (Mo && !Mo->IsDead()) CurrentSpellElement = NAME_None;          // (PR #48's review: no earlier spell's element)
 		if (Mo && !Mo->IsDead()) SpellHurt(Mo, Amount * (D && D->Share > 0.f ? D->Share : 1.f), Mo->GetActorLocation() + FVector(0, 0, 40.f), true);
 		return 0.f;
 	}

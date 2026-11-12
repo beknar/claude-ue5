@@ -1,0 +1,700 @@
+{
+ "tag": "s11g",
+ "plan": [
+  "slashes",
+  "tomemana",
+  "list11"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "slashes",
+   "ok": true,
+   "refused": [],
+   "boss_gave": [
+    "Petal Slash"
+   ],
+   "boss_slash_tier": [
+    2
+   ],
+   "tab": 4,
+   "picking": true,
+   "pick_lines": [
+    "weapon|0|Dagger|",
+    "weapon|1|Longbow|"
+   ],
+   "on_dagger": "Ember Slash",
+   "off_dagger": "None",
+   "back_in_pack": 1,
+   "on_bow": true,
+   "bow_slash": "Ember Slash",
+   "swing": {
+    "started": true,
+    "fx_max": 31,
+    "bonus": 6.0,
+    "monster_lost": 22.3,
+    "pictured": true
+   },
+   "shot": {
+    "bonus": 6.0,
+    "procs": 2
+   },
+   "each": {
+    "Ember Slash": {
+     "applied": true,
+     "effect": "burn",
+     "hit": true,
+     "bonus": 6.0,
+     "want_bonus": 6.0,
+     "fx": 30,
+     "procs": {
+      "burn": 1
+     },
+     "burning": true,
+     "dot": 10.06,
+     "want_dot": 10.1,
+     "ok": true
+    },
+    "Frost Slash": {
+     "applied": true,
+     "effect": "slow",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 43,
+     "procs": {
+      "slow": 1
+     },
+     "slow": 0.25,
+     "ok": true
+    },
+    "Venom Slash": {
+     "applied": true,
+     "effect": "poison",
+     "hit": true,
+     "bonus": 4.0,
+     "want_bonus": 4.0,
+     "fx": 29,
+     "procs": {
+      "poison": 1
+     },
+     "burning": true,
+     "dot": 11.91,
+     "want_dot": 12.0,
+     "ok": true
+    },
+    "Gale Slash": {
+     "applied": true,
+     "effect": "swift",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 26,
+     "procs": {
+      "swift": 1
+     },
+     "speed_bonus": 0.1,
+     "ok": true
+    },
+    "Blood Slash": {
+     "applied": true,
+     "effect": "drain",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 45,
+     "procs": {
+      "drain": 1
+     },
+     "healed": 6.99,
+     "want": 6.99,
+     "ok": true
+    },
+    "Wave Slash": {
+     "applied": true,
+     "effect": "knockback",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 65,
+     "procs": {
+      "knockback": 1
+     },
+     "moved_cm": 300,
+     "want_cm": 300.0,
+     "ok": true
+    },
+    "Verdant Slash": {
+     "applied": true,
+     "effect": "regen",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 26,
+     "procs": {
+      "regen": 1
+     },
+     "regen": 1.5,
+     "ok": true
+    },
+    "Petal Slash": {
+     "applied": true,
+     "effect": "evade",
+     "hit": true,
+     "bonus": 8.0,
+     "want_bonus": 8.0,
+     "fx": 53,
+     "procs": {
+      "evade": 1
+     },
+     "evade": 0.15,
+     "ok": true
+    },
+    "Crystal Slash": {
+     "applied": true,
+     "effect": "shield",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 29,
+     "procs": {
+      "shield": 1
+     },
+     "up": true,
+     "absorbed": true,
+     "down_after": true,
+     "ok": true
+    },
+    "Storm Slash": {
+     "applied": true,
+     "effect": "chain",
+     "hit": true,
+     "bonus": 44.3,
+     "want_bonus": 15.0,
+     "fx": 46,
+     "procs": {
+      "chain": 1
+     },
+     "spawned": [
+      true,
+      true,
+      true
+     ],
+     "others_lost": [
+      14.7,
+      14.7,
+      0.0
+     ],
+     "ok": true
+    },
+    "Ink Slash": {
+     "applied": true,
+     "effect": "blind",
+     "hit": true,
+     "bonus": 13.0,
+     "want_bonus": 13.0,
+     "fx": 30,
+     "procs": {
+      "blind": 1
+     },
+     "blind": 0.4,
+     "ok": true
+    },
+    "Tide Slash": {
+     "applied": true,
+     "effect": "tide",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 66,
+     "procs": {
+      "tide": 1
+     },
+     "slow": 0.2,
+     "moved_cm": 403,
+     "ok": true
+    },
+    "Inferno Slash": {
+     "applied": true,
+     "effect": "inferno",
+     "hit": true,
+     "bonus": 100.6,
+     "want_bonus": 24.0,
+     "fx": 62,
+     "procs": {
+      "inferno": 1
+     },
+     "near_lost": 38.4,
+     "near_burning": true,
+     "far_lost": 0.0,
+     "ok": true
+    },
+    "Shadow Slash": {
+     "applied": true,
+     "effect": "curse",
+     "hit": true,
+     "bonus": 22.0,
+     "want_bonus": 22.0,
+     "fx": 26,
+     "procs": {
+      "curse": 1
+     },
+     "curse": 0.25,
+     "ok": true
+    },
+    "Neon Slash": {
+     "applied": true,
+     "effect": "haste",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 36,
+     "procs": {
+      "haste": 1
+     },
+     "haste": 0.2,
+     "swing_s": 0.479,
+     "ok": true
+    },
+    "Pulse Slash": {
+     "applied": true,
+     "effect": "deflect",
+     "hit": true,
+     "bonus": 20.0,
+     "want_bonus": 20.0,
+     "fx": 34,
+     "procs": {
+      "deflect": 1
+     },
+     "deflect": 0.25,
+     "ok": true
+    },
+    "Magma Slash": {
+     "applied": true,
+     "effect": "magma",
+     "hit": true,
+     "bonus": 36.0,
+     "want_bonus": 36.0,
+     "fx": 25,
+     "procs": {
+      "magma": 1
+     },
+     "burning": false,
+     "dot": 40.0,
+     "want_dot": 36.0,
+     "ok": true
+    },
+    "Void Slash": {
+     "applied": true,
+     "effect": "void",
+     "hit": true,
+     "bonus": 34.0,
+     "want_bonus": 34.0,
+     "fx": 40,
+     "procs": {
+      "void": 1
+     },
+     "closer_cm": [
+      157,
+      135,
+      0
+     ],
+     "slow": 0.25,
+     "ok": true
+    },
+    "Overload Slash": {
+     "applied": true,
+     "effect": "stun",
+     "hit": true,
+     "bonus": 38.0,
+     "want_bonus": 38.0,
+     "fx": 14,
+     "procs": {
+      "stun": 1
+     },
+     "stunned": true,
+     "second_waits": true,
+     "ok": true
+    },
+    "Prismatic Slash": {
+     "applied": true,
+     "effect": "prismatic",
+     "hit": true,
+     "bonus": 32.0,
+     "want_bonus": 32.0,
+     "fx": 37,
+     "procs": {
+      "slow": 1,
+      "prismatic": 1
+     },
+     "ok": true
+    },
+    "Rending Slash": {
+     "applied": true,
+     "effect": "bleed",
+     "hit": true,
+     "bonus": 5.0,
+     "want_bonus": 5.0,
+     "fx": 13,
+     "procs": {
+      "bleed": 1
+     },
+     "dot": 7.65,
+     "want_dot": 7.7,
+     "ok": true
+    },
+    "Gust Slash": {
+     "applied": true,
+     "effect": "cleave",
+     "hit": true,
+     "bonus": 14.65,
+     "want_bonus": 5.0,
+     "fx": 41,
+     "procs": {
+      "cleave": 1
+     },
+     "others_lost": [
+      9.7,
+      0.0,
+      0.0
+     ],
+     "want": 9.6,
+     "ok": true
+    },
+    "Thorn Slash": {
+     "applied": true,
+     "effect": "weaken",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 46,
+     "procs": {
+      "weaken": 1
+     },
+     "blow_mul": 0.8,
+     "ok": true
+    },
+    "Spark Slash": {
+     "applied": true,
+     "effect": "echo",
+     "hit": true,
+     "bonus": 9.0,
+     "want_bonus": 9.0,
+     "fx": 56,
+     "procs": {
+      "echo": 1
+     },
+     "echo": 11.65,
+     "want": 11.65,
+     "echo_hits": 1,
+     "ok": true
+    },
+    "Sundering Slash": {
+     "applied": true,
+     "effect": "sunder",
+     "hit": true,
+     "bonus": 14.0,
+     "want_bonus": 14.0,
+     "fx": 18,
+     "procs": {
+      "sunder": 1
+     },
+     "blow_100": 115.0,
+     "ok": true
+    },
+    "Riptide Slash": {
+     "applied": true,
+     "effect": "whirl",
+     "hit": true,
+     "bonus": 42.3,
+     "want_bonus": 14.0,
+     "fx": 10,
+     "procs": {
+      "whirl": 1
+     },
+     "others_lost": [
+      14.2,
+      14.2,
+      0.0
+     ],
+     "want": 14.1,
+     "ok": true
+    },
+    "Quake Slash": {
+     "applied": true,
+     "effect": "quake",
+     "hit": true,
+     "bonus": 22.0,
+     "want_bonus": 22.0,
+     "fx": 94,
+     "procs": {
+      "quake": 1
+     },
+     "stunned": [
+      true,
+      true,
+      false
+     ],
+     "ok": true
+    },
+    "Headsman's Slash": {
+     "applied": true,
+     "effect": "execute",
+     "hit": true,
+     "bonus": 58.3,
+     "want_bonus": 22.0,
+     "fx": 11,
+     "procs": {
+      "execute": 1
+     },
+     "lost": 58.3,
+     "want": 58.3,
+     "ok": true
+    },
+    "Warcry Slash": {
+     "applied": true,
+     "effect": "rally",
+     "hit": true,
+     "bonus": 34.0,
+     "want_bonus": 34.0,
+     "fx": 41,
+     "procs": {
+      "rally": 1
+     },
+     "killed": true,
+     "healed": 19.8,
+     "want": 19.8,
+     "ok": true
+    },
+    "Soulfire Slash": {
+     "applied": true,
+     "effect": "soulfire",
+     "hit": true,
+     "bonus": 62.98,
+     "want_bonus": 34.0,
+     "fx": 84,
+     "procs": {
+      "soulfire": 1
+     },
+     "killed": true,
+     "others_lost": [
+      29.0,
+      0.0
+     ],
+     "want": 29.0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "step": "tomemana",
+   "ok": true,
+   "tomes": {
+    "Null Sanctum": "Tome of Null Sanctum",
+    "Apocalypse": "Tome of Apocalypse"
+   },
+   "ring": "Magic Potency Ring 10",
+   "tome_mana": 0.0,
+   "base": 100.0,
+   "ringed": 200.0,
+   "sanctum": {
+    "knows": true,
+    "pool": 220.0,
+    "pool_before": 200.0,
+    "mana_gain": 20.0,
+    "message": "You learn Null Sanctum:  key 3.  Your mana pool grows to 220",
+    "tome_mana": 220.0,
+    "index": 2,
+    "cast": true,
+    "mana_taken": 220.0
+   },
+   "ring_off": 220.0,
+   "apocalypse": {
+    "knows": true,
+    "pool": 300.0,
+    "pool_before": 220.0,
+    "mana_gain": 80.0,
+    "message": "You learn Apocalypse:  key 4.  Your mana pool grows to 300",
+    "tome_mana": 300.0,
+    "index": 3,
+    "cast": true,
+    "mana_taken": 300.0
+   },
+   "dead": true,
+   "after_death": {
+    "revived": true,
+    "knows": [
+     true,
+     true
+    ],
+    "pool": 300.0
+   },
+   "after_restart": {
+    "knows": [
+     false,
+     false
+    ],
+    "pool": 100.0
+   },
+   "summoner": {
+    "knows": false,
+    "pool_before": 60.0,
+    "pool": 60.0
+   }
+  },
+  {
+   "step": "list11",
+   "ok": true,
+   "fists": {
+    "name": "Fists",
+    "label": "Basic Attacks",
+    "shown": "Basic Attacks"
+   },
+   "chi_alone": [
+    {
+     "name": "Straight Punch",
+     "mana_cost": 7.0,
+     "started": true,
+     "bolts": 1,
+     "mana_before": 50.63,
+     "mana_after": 50.63,
+     "free_counted": 1
+    },
+    {
+     "name": "Side Kick",
+     "mana_cost": 17.0,
+     "started": true,
+     "bolts": 1,
+     "mana_before": 50.62,
+     "mana_after": 50.62,
+     "free_counted": 1
+    }
+   ],
+   "chi_target": {
+    "started": true,
+    "spent": 7.0,
+    "cost": 7.0,
+    "free_counted": 0
+   },
+   "chi_meets": {
+    "paid": {
+     "started": true,
+     "free": 1,
+     "paid": 1,
+     "harmless": 0,
+     "lost": 23.0,
+     "mana_before": 100.0,
+     "mana_after": 95.2
+    },
+    "harmless": {
+     "started": true,
+     "free": 1,
+     "paid": 0,
+     "harmless": 1,
+     "lost": 0.0,
+     "mana_before": 0.6,
+     "mana_after": 3.5
+    }
+   },
+   "hud_line": "Fists",
+   "fits_with_shield": 0,
+   "sword": "Viking Shortsword",
+   "with_shield": [
+    "SM_Shield_3"
+   ],
+   "worn_after": "None",
+   "after_off": [],
+   "menu_main": [
+    "button|Resume",
+    "button|Save the game",
+    "button|Load a game",
+    "button|Options",
+    "button|Gameplay",
+    "button|Return to Brokenspire",
+    "button|Choose another hero (a new game)",
+    "button|Quit"
+   ],
+   "gameplay_page": 5,
+   "gameplay_lines": [
+    "choice|When you die|drop your items where you fall",
+    "choice|Difficulty|Fair",
+    "button|Back"
+   ],
+   "deathdrop_after_enter": "choice|When you die|keep your items",
+   "difficulty_round": [
+    "choice|Difficulty|Difficult",
+    "choice|Difficulty|Hell",
+    "choice|Difficulty|Easy",
+    "choice|Difficulty|Fair"
+   ],
+   "back_cursor_line": "button|Gameplay",
+   "death_keep_True": {
+    "dead": true,
+    "ingots": 3,
+    "potions": 1,
+    "new_piles": 0
+   },
+   "death_keep_False": {
+    "dead": true,
+    "ingots": 0,
+    "potions": 0,
+    "new_piles": 1
+   },
+   "difficulty": {
+    "0": {
+     "min_health": 24.0,
+     "min_damage": 5.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "1": {
+     "min_health": 40.0,
+     "min_damage": 9.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "2": {
+     "min_health": 60.0,
+     "min_damage": 14.0,
+     "elites": 0,
+     "count_mul": 1.0
+    },
+    "3": {
+     "min_health": 100.0,
+     "min_damage": 23.0,
+     "elites": 8,
+     "count_mul": 1.25
+    }
+   },
+   "difficulty_ratios": {
+    "0": [
+     0.6,
+     0.556
+    ],
+    "1": [
+     1.0,
+     1.0
+    ],
+    "2": [
+     1.5,
+     1.556
+    ],
+    "3": [
+     2.5,
+     2.556
+    ]
+   },
+   "gameplay_ok": true
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_s11g_slash_pick.png",
+  "mw_s11g_slash_swing.png",
+  "mw_s11g_l11_basic_attacks.png",
+  "mw_s11g_l11_shield_off.png",
+  "mw_s11g_l11_gameplay_page.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

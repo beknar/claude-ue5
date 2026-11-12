@@ -51,6 +51,21 @@ struct FRDCarry;
  *  (whose end would take it off); StartStealth / EndStealth and a stealth carried to another level (RDCarry.cpp) */
 static constexpr ERDSpellKind RDStealthAuraKind = (ERDSpellKind)200;
 
+/** the list of 2026-11-11: what a hit on a monster is (the generator's HitElement while it lands): "weapon" for her weapons'
+ *  blows, bolts and slashes (Brittle Bones, the hunted mark), a spell's element for a spell (Elemental Ruin), none for a burn's
+ *  tick, a burst, a monster's blow (PR #48's review: "no element" had counted as a weapon's blow) */
+inline FName RDHitWeapon() { static const FName N(TEXT("weapon")); return N; }
+/** a spell weapon's element by a word of its name (one not of the table: its spell's Element is not there) */
+inline FName RDElementOfName(FName Name)
+{
+	const FString S = Name.ToString();
+	if (S.Contains(TEXT("Fire")) || S.Contains(TEXT("Ember")) || S.Contains(TEXT("Flame"))) return FName(TEXT("fire"));
+	if (S.Contains(TEXT("Frost")) || S.Contains(TEXT("Ice"))) return FName(TEXT("frost"));
+	if (S.Contains(TEXT("Lightning")) || S.Contains(TEXT("Shock")) || S.Contains(TEXT("Storm"))) return FName(TEXT("shock"));
+	if (S.Contains(TEXT("Dark")) || S.Contains(TEXT("Shadow")) || S.Contains(TEXT("Void"))) return FName(TEXT("shadow"));
+	return FName(TEXT("magic"));
+}
+
 class URDCombatComponent;
 
 /** the list of 2026-11-07 (docs/improvements8.txt): her move input filtered while she blocks (forward or back only, slowly;
@@ -445,6 +460,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Mistward6") void RefreshMaxima() { UpdateMaxima(); }
 	/** the list of 2026-11-11 (rd.Tier): a weapon or spell of hers by name taken away (as a broken one goes); true if she had it */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") bool ForgetWeapon(FName Name);
+	/** the list of 2026-11-11's third phase (RDList11c.cpp): a curse of the Warlock's released; the element of the spell she cast
+	 *  last (Elemental Ruin's choice) */
+	void ReleaseCurse11(const struct FRDSpellDef& S, int32 SpellIndex);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") FName LastCastElement = TEXT("shadow");
+	/** the element of the spell whose hurt SpellHurt deals (its callers set it) */
+	FName CurrentSpellElement = NAME_None;
+	/** tests: her doubled blows, the Echo slash's echoes, the slashes' kills (Rally, Soulfire) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 CritsDealt = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") TMap<FName, int32> CursesCast;
+	struct FEcho { TWeakObjectPtr<ARDMonster> M; float Amount = 0.f; float At = 0.f; };
+	TArray<FEcho> Echoes;
 	/** tests: free chi bolts that met a monster and paid their mana then, and those that could not and did no harm */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 ChiFreePaid = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 ChiFreeHarmless = 0;
@@ -808,6 +834,11 @@ private:
 	bool bSwingFxDone = false;
 	/** the swing's slash effect (at the hit's moment, along her facing) */
 	void PlaySwingSlash(const FRDSlashDef& S, const FVector& Dir);
+public:
+	/** the list of 2026-11-11: a trail slash's Fx on a component (her weapon, a bolt) for Seconds */
+	void StartSlashTrail(const FRDSlashDef& S, USceneComponent* On, float Seconds);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 SlashTrails = 0;
+private:
 	/** a hit with a slash on a monster: its bonus (with Dmg, the hit's own damage, for the shares) and effect */
 	void SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dmg, const FVector& At, bool bPrimary = true);
 	void TickBlocking(const class APlayerController* PC);

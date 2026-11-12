@@ -37,12 +37,22 @@ CastBolt,Summon1,Summon2,Summon3,Summon4,Summon5,Stab1,Stab2,Stab3,Hit_to_body_0
 Summoner5, tripo_build.py on Summoner5_Animated.glb (SK_JRPG_Summoner4 Summoner4 168 -).
 In the editor: clean, 600 <CH> glb, 610 / 615 / 620, the armour (the Rogue: 849 heroes, summoner3_armour.py, 851), 913 rider,
 rig, then 819 (her character's MoveScale made an override again and her new walk / run speeds baked in).
-Args: steps [Hero]   (maidle | clean <Hero> | rig <Hero> | noshield11 | basic | guards)"""
+The list's third phase (C++ RD/RDList11c.cpp first; after 910 and 905, which rebuild the made-up spells and the tome spells'
+places; from SourceArt/balance/list11_spells.json; on every map of the game):
+  cantrip  the casters' Fire at no mana, labelled "Fire Bolt (cantrip)" (its damage grows with her tier as every spell's)
+  spells3  Starfall's, Singularity's and Soul Rend's looks (the packs' systems by name), every spell's element by a word of its
+           name, the Warlock's thirteen curses (OnlyHeroes, their CurseEffect, place, mana) and their tomes
+  slashes3 ten more slashes for the Warrior (two a tier, trails on her blade) and their items
+  casts3   the three casts (blender_numpy/spell_casts11.py through tripo_build.py into SourceArt/spell11_clips/<CH>) imported
+           onto the Mage's, the Warlock's and the Summoner's skeletons, and named in their heroes' SpellClips
+  icons3 <dir>  the curses' and Starfall's and Singularity's pictures (spell_<name>.png, rdm4_ui_gen.py / rdm4_ui_cut.py)
+Args: steps [Hero | dir], several steps space- or comma-separated   (maidle | clean <Hero> | rig <Hero> | noshield11 | basic |
+guards | cantrip | spells3 | slashes3 | casts3 | icons3 <dir>)"""
 import os, sys, unreal
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 eal = unreal.EditorAssetLibrary; at = unreal.AssetToolsHelpers.get_asset_tools(); AL = unreal.AnimationLibrary
 SA = r"E:\code\claude-ue5\claude_ue5\SourceArt"
-STEPS = [a for a in sys.argv[1:] if not a.startswith("-")]
+STEPS = [s for a in sys.argv[1:] if not a.startswith("-") for s in (a.split(",") if not os.path.isabs(a) else [a])]
 REPORT = []
 
 
@@ -525,6 +535,249 @@ if "guards" in STEPS:
         g.set_editor_property("townsfolk", defs)
         return f"{n} fighters ({by}; bare-handed {bare}), strikes {[a.get_name() for a in strikes]} hit at {hits}"
     each_map(("brokenspire",), guards, "guards")
+
+# ---------------------------------------------------------------- the list's third phase: spells, curses, slashes
+L11 = None
+FX_PACKS = ("MagicProjectilesVol5", "MagicProjectilesVol4", "VortexNiagaraFX", "AbsorbtionFX", "Aura", "AbstractFX", "EnergySourceFX", "ShockWaves", "WeaponSlashFX")
+_FX = {}
+
+
+def fx(name):
+    """a Niagara system by its asset name, searched in the packs (the first pack that has it)"""
+    if not name: return None
+    if name in _FX: return _FX[name]
+    ar = unreal.AssetRegistryHelpers.get_asset_registry()
+    for pk in FX_PACKS:
+        for a in ar.get_assets_by_path("/Game/" + pk, recursive=True):
+            if str(a.asset_name) == name:
+                _FX[name] = unreal.load_asset(str(a.package_name)); return _FX[name]
+    raise RuntimeError(f"no system {name} in {FX_PACKS}")
+
+
+def copy_struct(cls, src):
+    c = cls(); c.import_text(src.export_text()); return c
+
+
+if any(s in STEPS for s in ("cantrip", "spells3", "slashes3", "icons3")):
+    L11 = json.load(open(os.path.join(SA, "balance", "list11_spells.json"), encoding="utf-8"))
+
+if "cantrip" in STEPS:
+    # ("the base cantrip at tier 1 for every caster is the fire bolt. it costs no mana and it scales in damage per tier": the
+    # casters' starting Fire; its damage grows with her tier as every spell's does (TierSpellMul))
+    C = L11["cantrip"]
+    def cantrip_hero(h):
+        n = 0
+        if str(h.name) not in C["heroes"]: return 0
+        for lst in ("weapons", "locked_weapons", "later_weapons"):
+            try: ws = list(h.get_editor_property(lst))
+            except Exception: continue
+            for w in ws:
+                if str(w.name) == C["weapon"]:
+                    w.set_editor_property("mana_cost", 0.0); w.set_editor_property("mana_share", 0.0); w.set_editor_property("label", C["label"]); n += 1
+            h.set_editor_property(lst, ws)
+        return n
+    def cantrip(g):
+        heroes = list(g.get_editor_property("heroes")); n = sum(cantrip_hero(h) for h in heroes)
+        g.set_editor_property("heroes", heroes)
+        ws = list(g.get_editor_property("weapons")); k = 0
+        for w in ws:
+            if str(w.name) == C["weapon"] and str(g.get_editor_property("default_hero")) in C["heroes"]: w.set_editor_property("mana_cost", 0.0); w.set_editor_property("mana_share", 0.0); w.set_editor_property("label", C["label"]); k += 1
+        g.set_editor_property("weapons", ws)
+        return f"{n} heroes' fire bolts at no mana, the level's {k}"
+    each_map(GAME_MAPS, cantrip, "cantrip")
+    les.load_level(MAPS + MENU)
+    sel = next(a for a in eas.get_all_level_actors() if isinstance(a, unreal.RDHeroSelect))
+    hs = list(sel.get_editor_property("heroes")); n = sum(cantrip_hero(h) for h in hs)
+    sel.set_editor_property("heroes", hs); les.save_current_level(); sel = None
+    REPORT.append(f"cantrip {MENU}: {n}")
+
+if "spells3" in STEPS:
+    # (Starfall, Singularity and Soul Rend looks of their own; every spell's element; the Warlock's thirteen curses and their tomes)
+    def light(s, v): s.set_editor_property("light_color", unreal.LinearColor(v[0], v[1], v[2], 1.0)); s.set_editor_property("light_intensity", float(v[3]))
+    ELEM = {w.lower(): e for e, ws in L11["elements"].items() for w in ws}
+    def element_of(name):
+        for w in str(name).replace("'", "").split():
+            if w.lower() in ELEM: return ELEM[w.lower()]
+        return None
+    def spells3(g):
+        spells = list(g.get_editor_property("spells")); by = {str(s.name): i for i, s in enumerate(spells)}
+        looked = []
+        for nm, lk in L11["looks"].items():
+            if nm not in by: continue
+            s = spells[by[nm]]
+            for k, fld in (("cast", "cast_fx"), ("bolt", "bolt_fx"), ("impact", "impact_fx"), ("area", "area_fx")):
+                if k in lk: s.set_editor_property(fld, fx(lk[k]))
+            for fld in ("cast_fx_scale", "bolt_fx_scale", "impact_fx_scale", "area_fx_scale"): s.set_editor_property(fld, 1.0)
+            if "area_every" in lk: s.set_editor_property("area_every", float(lk["area_every"]))
+            s.set_editor_property("use_colors", bool(lk.get("colors", False)))
+            if "light" in lk: light(s, lk["light"])
+            spells[by[nm]] = s; looked.append(nm)
+        # (the curses: Curse of Frailty's struct as their base (the curse kind, its sound), updated in place on a second run)
+        base = spells[by["Curse of Frailty"]]
+        made = []
+        for k, c in enumerate(L11["curses"]):
+            s = copy_struct(unreal.RDSpellDef, spells[by[c["name"]]]) if c["name"] in by else copy_struct(unreal.RDSpellDef, base)
+            slot = int(c["slot"]); tier = (slot - 1) % 5 + 1
+            for fld, v in (("name", c["name"]), ("number", 401 + k), ("type", unreal.RDSpellType.CURSE), ("kind", unreal.RDSpellKind.CURSE), ("effect", c["text"]),
+                           ("mana", float(12 + 6 * slot)), ("cooldown", float(c["cooldown"])), ("duration", float(c["duration"])), ("drop_chance", 0.0),
+                           ("tier", tier), ("slot", slot), ("damage", 0.0), ("reach", 1400.0), ("radius", float(c.get("radius", 0))), ("amount", float(c["amount"])),
+                           ("count", int(c.get("count", 0))), ("curse_effect", getattr(unreal.RDCurseEffect, c["effect"].upper())), ("only_heroes", ["Warlock"]),
+                           ("element", "shadow"), ("icon", "None"), ("use_colors", False)):
+                s.set_editor_property(fld, v)
+            s.set_editor_property("cast_fx", fx(c["cast"])); s.set_editor_property("impact_fx", fx(c["impact"])); s.set_editor_property("area_fx", fx(c["mark"]))
+            for fld, v in (("cast_fx_scale", 1.0), ("impact_fx_scale", 1.0), ("area_fx_scale", 0.8), ("area_every", 0.0)): s.set_editor_property(fld, v)
+            if c["name"] in by: spells[by[c["name"]]] = s
+            else: by[c["name"]] = len(spells); spells.append(s)
+            made.append(c["name"])
+        # (every spell's element, by a word of its name; the curses' none for Elemental Ruin's choice)
+        ne = 0
+        for i, s in enumerate(spells):
+            if str(s.name) in made: s.set_editor_property("element", "None"); spells[i] = s; continue
+            e = element_of(s.name); s.set_editor_property("element", e or "None"); spells[i] = s; ne += 1 if e else 0
+        g.set_editor_property("spells", spells)
+        # (their tomes: Curse of Frailty's tome copied, in the game's tier of its place)
+        items = list(g.get_editor_property("items")); names = {str(it.name): i for i, it in enumerate(items)}
+        src = items[names["Tome of Curse of Frailty"]]; nt = 0
+        for c in L11["curses"]:
+            t = copy_struct(unreal.RDItemDef, items[names["Tome of " + c["name"]]] if ("Tome of " + c["name"]) in names else src)
+            t.set_editor_property("name", "Tome of " + c["name"]); t.set_editor_property("spell", c["name"]); t.set_editor_property("tiers", [min(int(c["slot"]), 25)])
+            if ("Tome of " + c["name"]) in names: items[names["Tome of " + c["name"]]] = t
+            else: names[t.get_editor_property("name")] = len(items); items.append(t)
+            nt += 1
+        g.set_editor_property("items", items)
+        return f"looks {looked}; curses {len(made)} (spells {len(spells)}), their tomes {nt}; {ne} spells with an element"
+    each_map(GAME_MAPS, spells3, "spells3")
+
+if "slashes3" in STEPS:
+    # ("the warrior earns 1 slash per tier ... 30 slashes, and currently there are only 20": ten more, two to each tier, the
+    # Weapon Slash pack's trails on her blade, Magic Projectiles' unused hits)
+    def slashes3(g):
+        sl = list(g.get_editor_property("slashes")); by = {str(s.name): i for i, s in enumerate(sl)}
+        items = list(g.get_editor_property("items")); names = {str(it.name): i for i, it in enumerate(items)}
+        src_item = {}
+        for it in items:
+            if it.kind == unreal.RDItemKind.SLASH: src_item.setdefault(int(sl[by[str(it.name)]].tier) if str(it.name) in by else 0, it)
+        for e in L11["slashes"]:
+            s = copy_struct(unreal.RDSlashDef, sl[by[e["name"]]]) if e["name"] in by else unreal.RDSlashDef()
+            for fld, v in (("name", e["name"]), ("tier", int(e["tier"])), ("bonus", float(e["bonus"])), ("type", e["type"]), ("effect", getattr(unreal.RDSlashEffect, e["effect"].upper())),
+                           ("amount", float(e.get("amount", 0))), ("seconds", float(e.get("seconds", 0))), ("radius", float(e.get("radius", 0))), ("count", int(e.get("count", 0))),
+                           ("text", e["text"]), ("color", unreal.LinearColor(*e["color"], 1.0)), ("trail", True), ("fx_scale", 1.0), ("impact_fx_scale", 1.0)):
+                s.set_editor_property(fld, v)
+            s.set_editor_property("fx", fx(e["fx"])); s.set_editor_property("impact_fx", fx(e["impact"]))
+            if e["name"] in by: sl[by[e["name"]]] = s
+            else: by[e["name"]] = len(sl); sl.append(s)
+            # (its item, as a slash of its tier is)
+            base = src_item.get(int(e["tier"])) or next(iter(src_item.values()))
+            t = copy_struct(unreal.RDItemDef, items[names[e["name"]]] if e["name"] in names else base)
+            t.set_editor_property("name", e["name"])
+            if e["name"] in names: items[names[e["name"]]] = t
+            else: names[e["name"]] = len(items); items.append(t)
+        g.set_editor_property("slashes", sl); g.set_editor_property("items", items)
+        per = {}
+        for s in sl: per[int(s.tier)] = per.get(int(s.tier), 0) + 1
+        return f"{len(sl)} slashes, by tier {dict(sorted(per.items()))}"
+    each_map(GAME_MAPS, slashes3, "slashes3")
+
+if "casts3" in STEPS:
+    # ("need new animation and visual for starfall / singularity / soul rend": blender_numpy/spell_casts11.py's three casts, made by
+    # tripo_build.py on each caster's own body into SourceArt/spell11_clips/<CH> (the Warlock's arms lengthened as her build's),
+    # imported onto her skeleton: the Mage's and the Warlock's FBX (855's way), the Summoner's GLB (her body came in so: 917's note,
+    # the FBX misread an 80-bone rig's thighs); her hero's SpellClips on every map)
+    CASTERS = {"Mage": "Caster", "Warlock": "DarkCaster", "Summoner": "Summoner4"}
+    SPELL_OF = {"Cast_Starfall": "Starfall", "Cast_Singularity": "Singularity", "Cast_SoulRend": "Soul Rend"}
+    AD = "/Game/RandomDungeon/Spells11/Anims"
+    got_all = {}
+    for hero, ch in CASTERS.items():
+        d = os.path.join(SA, "spell11_clips", ch)
+        times = json.load(open(os.path.join(d, "spell_casts11_times.json")))
+        tmp = f"{AD}/_import_{ch}"
+        if eal.does_directory_exist(tmp): eal.delete_directory(tmp)
+        skel_path = f"/Game/JRPG/Character/SK_JRPG_{ch}_Skeleton" if ch == "Summoner4" else unreal.load_asset(f"/Game/JRPG/Character/SK_JRPG_{ch}").get_editor_property("skeleton").get_path_name().split(".")[0]
+        if ch == "Summoner4":
+            imported = import_clips(os.path.join(d, f"SK_JRPG_{ch}.glb"), skel_path, tmp, f"PL_{ch}_Spells11", 24)
+        else:
+            o = unreal.FbxImportUI()
+            o.set_editor_property("import_mesh", False); o.set_editor_property("import_as_skeletal", True)
+            o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)
+            o.set_editor_property("skeleton", unreal.load_asset(skel_path)); o.set_editor_property("import_animations", True)
+            o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)
+            t = unreal.AssetImportTask(); t.filename = os.path.join(d, f"SK_JRPG_{ch}_Clips.fbx"); t.destination_path = tmp; t.automated = True; t.replace_existing = True; t.save = True; t.options = o
+            at.import_asset_tasks([t])
+            imported = {}
+            for q in eal.list_assets(tmp, recursive=True):
+                x = unreal.load_asset(q.split(".")[0])
+                if isinstance(x, unreal.AnimSequence): imported[x.get_name()] = x
+        got = {}
+        for clip in SPELL_OF:
+            src = next((a for k, a in imported.items() if k.endswith(clip)), None)
+            assert src, (ch, clip, sorted(imported))
+            dst = f"{AD}/{ch}/AS_{ch}_{clip}"
+            if eal.does_asset_exist(dst): eal.delete_asset(dst)
+            eal.rename_asset(src.get_path_name().split(".")[0], dst); a = unreal.load_asset(dst)
+            a.set_editor_property("enable_root_motion", False); a.set_editor_property("force_root_lock", True); eal.save_loaded_asset(a, False)
+            got[clip] = (a, times[clip]["release"], round(a.get_play_length(), 3))
+        imported = None
+        for q in eal.list_assets(tmp, recursive=True): eal.delete_asset(q.split(".")[0])
+        eal.delete_directory(tmp)
+        got_all[hero] = got
+        REPORT.append(f"casts3 {ch}: " + ", ".join(f"{k} {v[2]} s (release {v[1]})" for k, v in got.items()))
+
+    def casts3(g):
+        heroes = list(g.get_editor_property("heroes")); n = 0
+        for h in heroes:
+            hc = got_all.get(str(h.name))
+            if not hc: continue
+            m = {}
+            for clip, (a, hit, L) in hc.items():
+                sc_ = unreal.RDSpellClip(); sc_.set_editor_property("clip", a); sc_.set_editor_property("hit", float(hit)); sc_.set_editor_property("end", float(L))
+                m[SPELL_OF[clip]] = sc_
+            h.set_editor_property("spell_clips", m); n += len(m)
+        g.set_editor_property("heroes", heroes)
+        return f"{n} spell clips on the casters"
+    each_map(GAME_MAPS, casts3, "casts3")
+
+if "icons3" in STEPS:
+    # (the curses' pictures and Starfall's and Singularity's own (they showed Meteor Storm's and Void Rift's), painted by
+    # blender_numpy/rdm4_ui_gen.py and cut by rdm4_ui_cut.py --export into <dir>: each spell_<name>.png a UI texture
+    # /Game/RandomDungeon/UI/T_RDM4_spell_<name> (877's way), an entry of that name in every map's UIArt, the spell's Icon)
+    k_ = STEPS.index("icons3")
+    D3 = STEPS[k_ + 1] if len(STEPS) > k_ + 1 else ""
+    assert os.path.isdir(D3), "918 icons3: give the folder of the cut pictures (spell_<name>.png)"
+    def pic_name(n): return "spell_" + "_".join("".join(ch if ch.isalnum() else " " for ch in n.lower()).split())
+    WANT = {n: pic_name(n) for n in [c["name"] for c in L11["curses"]] + ["Starfall", "Singularity"]}
+    lost = [p for p in WANT.values() if not os.path.exists(os.path.join(D3, p + ".png"))]
+    assert not lost, f"918 icons3: no picture for {lost} in {D3}"
+    DEST = "/Game/RandomDungeon/UI"; tasks = []
+    for p in WANT.values():
+        t = unreal.AssetImportTask()
+        t.set_editor_property("filename", os.path.join(D3, p + ".png")); t.set_editor_property("destination_path", DEST)
+        t.set_editor_property("destination_name", "T_RDM4_" + p); t.set_editor_property("replace_existing", True)
+        t.set_editor_property("automated", True); t.set_editor_property("save", False); tasks.append(t)
+    at.import_asset_tasks(tasks)
+    TEX = {}
+    for p in WANT.values():
+        a = unreal.load_asset(f"{DEST}/T_RDM4_{p}")
+        assert a, f"918 icons3: {p} was not imported"
+        a.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_EDITOR_ICON)
+        a.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_UI)
+        a.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
+        a.set_editor_property("never_stream", True); a.set_editor_property("srgb", True)
+        a.set_editor_property("address_x", unreal.TextureAddress.TA_CLAMP); a.set_editor_property("address_y", unreal.TextureAddress.TA_CLAMP)
+        eal.save_loaded_asset(a, False); TEX[p] = a
+    def icons3(g):
+        ua = g.get_editor_property("ui_art")
+        for p, a in TEX.items():
+            art = unreal.RDUIArt(); art.set_editor_property("texture", a)
+            art.set_editor_property("border", unreal.Vector4(0, 0, 0, 0)); art.set_editor_property("inner", unreal.Vector4(0, 0, 1, 1))
+            ua[unreal.Name(p)] = art
+        g.set_editor_property("ui_art", ua)
+        spells = list(g.get_editor_property("spells")); n = 0
+        for i, s in enumerate(spells):
+            if str(s.name) in WANT: s.set_editor_property("icon", WANT[str(s.name)]); spells[i] = s; n += 1
+        g.set_editor_property("spells", spells)
+        return f"{len(TEX)} pictures, {n} spells' icons"
+    each_map(GAME_MAPS, icons3, "icons3")
+    TEX = None
 
 print("918 " + " | ".join(REPORT))
 import gc

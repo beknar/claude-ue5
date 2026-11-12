@@ -84,8 +84,9 @@ public:
 	/** its hit points as a share of its top (a summon brought from the other level as hurt as it was) */
 	void SetHealthShare(float Share) { if (!bDead) Health = FMath::Max(1.f, FMath::RoundToFloat(MaxHealth * FMath::Clamp(Share, 0.f, 1.f))); }
 	/** the list of 2026-11-08b's sixth phase: an ally healed (the Summoner's healing, her soul harvest); its pace of blows (her
-	 *  frenzy: its wait between blows divided by it) and a boost on its blows until a time (her soul harvest) */
-	void HealBy(float Amount) { if (!bDead && Amount > 0.f) Health = FMath::Min(MaxHealth, Health + Amount); }
+	 *  frenzy: its wait between blows divided by it) and a boost on its blows until a time (her soul harvest).
+	 *  The list of 2026-11-11: a heal on a monster under Withering Brand is its share less (RDList11c.cpp) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") void HealBy(float Amount);
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float AllyPace = 1.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float AllyBoost = 1.f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float AllyBoostUntil = -100.f;
@@ -123,6 +124,56 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetAttackInterval() const { return AttackInterval; }
 	/** the one it fights now (none: nobody) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") AActor* GetFoe() const { return CurrentFoe.Get(); }
+
+	// ---- the list of 2026-11-11 (RDList11c.cpp): the Warlock's curses and two slashes' marks on it
+	/** one of the curses for Seconds: Amount its share (Rot: hit points a second), Element Ruin's, Group Kinship's binding */
+	void Curse11(ERDCurseEffect E, float Seconds, float Amount, FName Element = NAME_None, int32 Group = -1);
+	bool HasCurse11(ERDCurseEffect E) const;
+	float CurseLeft11(ERDCurseEffect E) const;
+	float CurseAmount11(ERDCurseEffect E) const;
+	void EndCurse11(ERDCurseEffect E);
+	/** tests: "<curse>|<seconds left>|<amount>|<more>" for each curse on it */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") TArray<FString> GetCurseLines() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") bool IsAfraid() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") bool IsSilenced() const;
+	/** the Sunder and Weaken slashes: it takes Share more for Seconds; its blows Share weaker for Seconds */
+	void SunderFor(float Share, float Seconds);
+	void WeakenFor(float Share, float Seconds);
+	/** its blow's factor (a curse, a weakening) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") float BlowMul() const;
+	/** a hold from her slashes and curses (the Quake Slash, Brittle Bones' knock-down) that keeps the final boss's poise: within
+	 *  FinalBossPoise of his last flinch he shrugs it off (PR #48's review); whether it held */
+	bool HoldFor11(float Seconds);
+	/** any of the thirteen curses on it now (the HUD's mark, every frame: no lines built) */
+	bool HasAnyCurse11() const;
+	/** an elite (hell's, or past its tier's hit points by a quarter) or a boss */
+	bool IsEliteOrBoss() const;
+	/** tests: what its curses did (doubled blows, knockdowns, hit points given to her, hurt shared, doom's burst, executed) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 CritsTaken = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 KnockedDown = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") float LeechGiven = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") float KinShared = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") float DoomBurst = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") bool bDoomExecuted = false;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 SilencedRefusals = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 CursesSpread = 0;
+	/** the damage it takes, its curses' share in it (and what they do with it); after it, what follows from it */
+	float CurseDamageIn(float Amount, AActor* From);
+	void CurseAfterHit(float Amount);
+	void CurseOnDeath();
+	void TickCurses11(float Dt);
+	/** afraid: a step away from her (true: the frame is taken) */
+	bool TickFear(float Dt);
+private:
+	float C11Until[(int32)ERDCurseEffect::Count] = {};
+	float C11Amount[(int32)ERDCurseEffect::Count] = {};
+	FName RuinElement = NAME_None;
+	int32 KinGroup = -1, CritRolls = 0;
+	/** Curse of Rot: when each of its (up to) three poisons ends; a stack is free again once its poison has run out */
+	float RotEnds[3] = { -100.f, -100.f, -100.f };
+	int32 RotStacksNow() const;
+	float DoomTaken = 0.f, DreadTaken = 0.f, SunderUntil = -100.f, SunderShare = 0.f, WeakenUntil = -100.f, WeakenShare = 0.f;
+public:
 
 	// ---- mistward_castle
 	/** as strong as a monster of tier InTier, times the multipliers, bigger by ScaleMul; its bar's name (a boss, a guard) */

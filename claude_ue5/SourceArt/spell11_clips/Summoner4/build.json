@@ -1,0 +1,29 @@
+{
+ "clips": {
+  "CastBolt": 24,
+  "Hit_to_body_01": 32,
+  "Idle": 217,
+  "Run": 31,
+  "Stab1": 18,
+  "Stab2": 19,
+  "Stab3": 20,
+  "Summon1": 41,
+  "Summon2": 36,
+  "Summon3": 49,
+  "Summon4": 54,
+  "Summon5": 48,
+  "Walk": 57,
+  "Cast_Starfall": 49,
+  "Cast_Singularity": 49,
+  "Cast_SoulRend": 39
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\spell11_clips\\Summoner4\\T_Summoner4_Color.png"
+ },
+ "height_cm": 168.0,
+ "hair": null,
+ "proportions": null,
+ "source": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\jrpg_summoner4\\Summoner5_Animated.glb",
+ "source_height_m": 0.99951,
+ "glb": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\spell11_clips\\Summoner4\\SK_JRPG_Summoner4.glb"
+}

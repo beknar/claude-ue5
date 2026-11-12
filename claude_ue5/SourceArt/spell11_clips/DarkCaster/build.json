@@ -1,0 +1,48 @@
+{
+ "clips": {
+  "Idle": 369,
+  "Run": 31,
+  "Walk": 57,
+  "Cast_Starfall": 49,
+  "Cast_Singularity": 49,
+  "Cast_SoulRend": 39
+ },
+ "textures": {
+  "Color": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\spell11_clips\\DarkCaster\\T_DarkCaster_Color.png"
+ },
+ "height_cm": 170.0,
+ "hair": null,
+ "proportions": {
+  "r": {
+   "shoulder_to_wrist_before": 0.20427,
+   "after": 0.28598
+  },
+  "l": {
+   "shoulder_to_wrist_before": 0.20027,
+   "after": 0.28037
+  },
+  "factor": 1.4,
+  "vertices_moved": {
+   "SK_JRPG_DarkCaster": 8877
+  },
+  "shoulders": {
+   "r": {
+    "collarbone_before": 0.04718,
+    "after": 0.06605
+   },
+   "l": {
+    "collarbone_before": 0.04718,
+    "after": 0.06605
+   },
+   "joints_before": 0.13275,
+   "joints_after": 0.17023,
+   "factor": 1.4,
+   "vertices_moved": {
+    "SK_JRPG_DarkCaster": 15796
+   }
+  }
+ },
+ "source": "E:\\code\\claude-ue5\\ai models\\Warlock.glb",
+ "source_height_m": 0.99942,
+ "glb": "E:\\code\\claude-ue5\\claude_ue5\\SourceArt\\spell11_clips\\DarkCaster\\SK_JRPG_DarkCaster.glb"
+}

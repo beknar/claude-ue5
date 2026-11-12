@@ -214,6 +214,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") TArray<FString> GetGuardLines() const;
 	/** tests: a monster of the wilds' kinds put at a place (in a town too), hunting her as an ambush's does; -> it */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") class ARDMonster* SpawnTestAmbusher(FVector At, int32 Tier = 1);
+	// ---- the list of 2026-11-11's third phase (RDList11c.cpp): the Warlock's curses
+	/** Mark of the Hunted's one monster (the HUD marks it through walls) */
+	TWeakObjectPtr<class ARDMonster> HuntedMark;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") class ARDMonster* GetHuntedMark() const;
+	/** tests: a hit on a monster from her of a kind ("weapon", a spell's element, or none: a burn's tick), as the game lands it;
+	 *  what it took */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") float TestHit11(class ARDMonster* M, float Amount, FName Element);
+	/** the element of the spell whose hurt is being dealt now (none: a weapon's blow, a slash, a burn); Brittle Bones and
+	 *  Elemental Ruin read it */
+	FName HitElement = NAME_None;
+	int32 KinGroupNext = 0;
+	/** a crit's chance on Mark of the Hunted and Brittle Bones (the game has no crits otherwise): her blows twice as hard */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") float CurseCritChance = 0.1f;
+	/** tests: Curse of Greed's gold more and things given */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GreedGold = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|List11") int32 GreedThings = 0;
+	/** whether her hero learns the spell: its type on her card, and it is no other hero's own (OnlyHeroes) */
+	bool HeroCanLearnSpell(const FRDSpellDef& S) const;
 	// ---- the list of 2026-11-11: the Escape menu's Gameplay page (kept in GameUserSettings.ini's [RandomDungeon.Options])
 	/** her things at her death: kept on her (true), or left in a pile where she fell (bDropOnDeath, the game's way until now) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|List11") bool bKeepItemsOnDeath = false;
