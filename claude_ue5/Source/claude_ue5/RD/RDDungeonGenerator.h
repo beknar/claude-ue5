@@ -2456,8 +2456,51 @@ public:
 		/** each animal's own pen: its middle (cm) and half sizes (cm, along and across the farm's way) */
 		TArray<FVector4> AnimalPens;
 		TArray<TWeakObjectPtr<ARDTownsfolk>> Folk;
+		/** the list of 2026-11-11's fourth phase: its design (FarmDesigns' index; -1 the old fixed layout), its buildings, the
+		 *  containers and gardens in it; what it made (its components, and its doors', houses' and clears' ranges in its chunk), so
+		 *  a test's farm can be taken away again */
+		int32 Design = -1, Buildings = 0, Boxes = 0;
+		TArray<TWeakObjectPtr<UActorComponent>> Comps;
+		int32 Door0 = 0, Door1 = 0, House0 = 0, House1 = 0, Clear0 = 0, Clear1 = 0;
+		/** each animal's pen's yaw (a barn's stall turns with its barn; AnimalPens' half sizes are along and across it) */
+		TArray<float> AnimalPenYaws;
+		/** its pieces as instances, one component a mesh, material and collision (PR #49's review: a component a piece was several
+		 *  hundred in one frame) */
+		TMap<FString, TWeakObjectPtr<class UInstancedStaticMeshComponent>> Batch;
 	};
+	/** one piece of a farm as an instance of its batch (world transform) */
+	void WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false);
 	TArray<FRDWildFarmRec> WildFarms;
+	/** the list of 2026-11-11's fourth phase (RD/RDWildFarm11.cpp, 919 farms): the farmsteads' designs (SourceArt/wilderness/
+	 *  farm_designs.json), one picked by each farmstead's id; empty: the old fixed layout */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Farm11") TArray<FRDFarmDesign> FarmDesigns;
+	/** what a wild container gives by its kind ("chest", "barrel", "crate", "wardrobe", "barn", "granary", "coop", "shed"):
+	 *  "Item|min|max|chance" entries joined by ";" (RollWildThings; one roll at least gives its first entry's item) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Farm11") TMap<FName, FString> FarmLoot;
+	/** a farmstead of a design: its buildings of the town's kit, pens, gardens and yard; its family (SpawnWildFarm with designs) */
+	void SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P, int32 Design);
+	/** a building of the town's kit in a farm's frame: floor over its highest ground, a plinth down to the lowest, walls, its
+	 *  door on its hinge (F), roof and gables, its inside by its kind; its record in the chunk's Houses */
+	void WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P, const FRDFarmPart& Pt, int32 PartIx, FRDWildFarmRec& Rec);
+	/** a container of the dungeon's pieces in the wilds (a body, its lid or doors on their hinges) that F opens and loots once
+	 *  (Key, kept in the game instance's WildKilled): a chunk door with bBox; a garden's harvest is one with no moving part */
+	bool AddWildBox(ARDWildChunk* C, FName Piece, const FTransform& At, FName Kind, int64 Key, const FString& Loot, FRDWildFarmRec* Rec = nullptr, const FVector* FrontAt = nullptr);
+	/** F at a wild container: its loot to her, the game remembering it */
+	void OpenWildBox(ARDWildChunk* C, int32 Index);
+	/** a rectangle of a chunk kept clear of plants (a building's inside, a garden) */
+	void WildClearRect(ARDWildChunk* C, const FVector& Mid, float Yaw, const FVector2D& Half, FRDWildFarmRec* Rec = nullptr);
+	/** tests (888 farms11): a farm of a design built at a point (m) of a loaded chunk, as a farmstead is; its id (0: none) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Farm11") int32 SpawnFarmDesignAt(int32 Design, float Xm, float Ym, float Yaw);
+	/** tests: a farm built by SpawnFarmDesignAt taken away again (its components, doors, houses, animals and folk) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Farm11") bool RemoveWildFarm(int32 Id);
+	/** the wild containers of the near chunks: "box|<kind>|<x>|<y>|<z>|<alpha>|<looted 0/1>|<key>"; the farms' buildings:
+	 *  "fbld|<farm id>|<kind>|<x>|<y>|<z floor>|<nx>|<ny>|<yaw>|<door x>|<door y>|<furniture>|<boxes>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Farm11") TArray<FString> GetWildBoxLines() const;
+	/** tests: containers looted in the wilds, their things (counted as they are given) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Farm11") int32 WildBoxesOpened = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Farm11") int32 WildBoxThings = 0;
+	/** the farm buildings' lines (GetWildBoxLines' "fbld"), kept as they are built */
+	TArray<FString> WildFarmBldLines;
 	/** the farm folk within reach of a point (cm), nearest first (null: none) */
 	ARDTownsfolk* NearestWildFolk(const FVector& From, float Reach = 240.f) const;
 	/** the farm folk F talks to: within 2 m, unless a door or container of a loaded town is nearer (as the town's people) */

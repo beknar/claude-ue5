@@ -245,6 +245,8 @@ void ARDTownAnimal::Init(ARDDungeonGenerator* InGenerator, int32 InDef, int32 In
 		Collider->SetBoxExtent(FVector(FMath::Max(D.HalfSize.X, 12.f), FMath::Max(D.HalfSize.Y, 10.f), Hh));
 		Collider->SetRelativeLocation(FVector(0, 0, Hh));
 		Collider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		// (never stepped up on: a hen's box is lower than her step, and the list of 2026-11-11's test stood her on one in a coop)
+		Collider->CanCharacterStepUpOn = ECB_No;
 	}
 	SetState(R.RandRange(0, 1), GetWorld()->GetTimeSeconds());
 	if (const UAnimSequenceBase* S = Cast<UAnimSequenceBase>(Body->AnimationData.AnimToPlay)) Body->SetPosition(R.FRandRange(0.f, S->GetPlayLength()));

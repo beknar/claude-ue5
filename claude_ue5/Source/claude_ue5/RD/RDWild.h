@@ -425,7 +425,16 @@ public:
 	/** the ground's collision (hidden, BlockAll); cooked on a worker unless she was running fast when it was asked */
 	UPROPERTY() TObjectPtr<UProceduralMeshComponent> GroundCollision = nullptr;
 	/** the list of 2026-11-10: its houses' doors (a leaf on its hinge: F opens and shuts it) and its houses (their insides) */
-	struct FDoor { TWeakObjectPtr<USceneComponent> Pivot; FVector At = FVector::ZeroVector; FVector Out = FVector::ForwardVector; float OutYaw = -90.f; float OpenYaw = -90.f; float Alpha = 0.f; float Target = 0.f; };
+	struct FDoor
+	{
+		TWeakObjectPtr<USceneComponent> Pivot; FVector At = FVector::ZeroVector; FVector Out = FVector::ForwardVector; float OutYaw = -90.f; float OpenYaw = -90.f; float Alpha = 0.f; float Target = 0.f;
+		/** the list of 2026-11-11's fourth phase: a container (AddWildBox): its lid or doors turn about Axis from Closed by Angle
+		 *  (a wardrobe's second door Pivot2); its kind, the key the game keeps it looted under, what it gives */
+		bool bBox = false;
+		TWeakObjectPtr<USceneComponent> Pivot2;
+		FVector Axis = FVector::RightVector; FQuat Closed = FQuat::Identity, Closed2 = FQuat::Identity; float Angle = 0.f, Angle2 = 0.f;
+		FName Kind; int64 Key = 0; FString Loot;
+	};
 	TArray<FDoor> Doors;
 	struct FHouse { FVector C = FVector::ZeroVector; FVector2D H = FVector2D::ZeroVector; float Yaw = 0.f; int32 Doors = 0; int32 Furniture = 0; int32 PropsGone = 0; bool bLit = false; float FloorZ = 0.f; FString Of; };
 	TArray<FHouse> Houses;

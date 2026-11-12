@@ -1,0 +1,1045 @@
+{
+ "tag": "f11f",
+ "plan": [
+  "farms11",
+  "houses10"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "farms11",
+   "ok": true,
+   "visits": [
+    {
+     "name": "Odric's Croft",
+     "design": 32,
+     "buildings": 5,
+     "kinds": [
+      "barn",
+      "coop",
+      "granary",
+      "house",
+      "shed"
+     ],
+     "boxes": 21,
+     "furniture_min": 5,
+     "walks": [
+      {
+       "kind": "house",
+       "furniture": 9,
+       "boxes": 4,
+       "to_door": true,
+       "prompt": "open the door",
+       "f": "door",
+       "door_open": 1.0,
+       "walked_in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": -0.2,
+       "shot": "farms11_house"
+      },
+      {
+       "kind": "barn",
+       "furniture": 7,
+       "boxes": 4,
+       "to_door": true,
+       "prompt": "open the door",
+       "f": "door",
+       "door_open": 1.0,
+       "walked_in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 0.6,
+       "shot": "farms11_barn"
+      },
+      {
+       "kind": "shed",
+       "furniture": 6,
+       "boxes": 4,
+       "to_door": true,
+       "prompt": "open the door",
+       "f": "door",
+       "door_open": 1.0,
+       "walked_in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": -0.1
+      },
+      {
+       "kind": "granary",
+       "furniture": 5,
+       "boxes": 4,
+       "to_door": true,
+       "prompt": "open the door",
+       "f": "door",
+       "door_open": 1.0,
+       "walked_in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 0.6
+      },
+      {
+       "kind": "coop",
+       "furniture": 5,
+       "boxes": 4,
+       "to_door": true,
+       "prompt": "open the door",
+       "f": "door",
+       "door_open": 1.0,
+       "walked_in": [
+        true,
+        true
+       ],
+       "inside": true,
+       "feet_over_floor_cm": 0.4
+      }
+     ],
+     "box_prompt": "open the chest",
+     "box_f": "container",
+     "box": {
+      "kind": "chest",
+      "things": 2,
+      "alpha": 1.0,
+      "looted": true,
+      "new_lines": [
+       "item|Bread|1",
+       "item|Jerky|1"
+      ],
+      "found": [
+       "Bread",
+       "Jerky"
+      ]
+     },
+     "box_prompt_after": "",
+     "garden_prompt": "harvest the garden",
+     "garden_f": "container",
+     "garden": {
+      "things": 3,
+      "found": [
+       "Herbs"
+      ]
+     },
+     "animals": 10,
+     "animals_in_pens": 10
+    },
+    {
+     "name": "Elsa's Holding",
+     "design": 17,
+     "buildings": 4,
+     "kinds": [
+      "barn",
+      "granary",
+      "house",
+      "shed"
+     ],
+     "boxes": 17,
+     "furniture_min": 5
+    },
+    {
+     "name": "Wynne's Holding",
+     "design": 54,
+     "buildings": 3,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6
+    }
+   ],
+   "designs": 60,
+   "farmsteads": 49,
+   "built": {
+    "0": {
+     "id": 269484031,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "1": {
+     "id": 269484030,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 16,
+     "gardens": 1,
+     "removed": true
+    },
+    "2": {
+     "id": 269484029,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 19,
+     "gardens": 1,
+     "removed": true
+    },
+    "3": {
+     "id": 269484028,
+     "kinds": [
+      "barn",
+      "coop",
+      "granary",
+      "house"
+     ],
+     "boxes": 17,
+     "furniture_min": 5,
+     "animals": 9,
+     "gardens": 1,
+     "removed": true
+    },
+    "4": {
+     "id": 269484027,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 9,
+     "gardens": 1,
+     "removed": true
+    },
+    "5": {
+     "id": 269484026,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 9,
+     "furniture_min": 7,
+     "animals": 7,
+     "gardens": 1,
+     "removed": true
+    },
+    "6": {
+     "id": 269484025,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 9,
+     "furniture_min": 7,
+     "animals": 8,
+     "gardens": 1,
+     "removed": true
+    },
+    "7": {
+     "id": 269484024,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 9,
+     "furniture_min": 7,
+     "animals": 11,
+     "gardens": 1,
+     "removed": true
+    },
+    "8": {
+     "id": 269484023,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 9,
+     "furniture_min": 7,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "9": {
+     "id": 269484022,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 6,
+     "gardens": 1,
+     "removed": true
+    },
+    "10": {
+     "id": 269484021,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 14,
+     "furniture_min": 5,
+     "animals": 7,
+     "gardens": 2,
+     "removed": true
+    },
+    "11": {
+     "id": 269484020,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 14,
+     "furniture_min": 6,
+     "animals": 9,
+     "gardens": 2,
+     "removed": true
+    },
+    "12": {
+     "id": 269484019,
+     "kinds": [
+      "barn",
+      "granary",
+      "house",
+      "shed"
+     ],
+     "boxes": 17,
+     "furniture_min": 5,
+     "animals": 8,
+     "gardens": 1,
+     "removed": true
+    },
+    "13": {
+     "id": 269484018,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 10,
+     "gardens": 2,
+     "removed": true
+    },
+    "14": {
+     "id": 269484017,
+     "kinds": [
+      "barn",
+      "coop",
+      "granary",
+      "house"
+     ],
+     "boxes": 17,
+     "furniture_min": 5,
+     "animals": 15,
+     "gardens": 1,
+     "removed": true
+    },
+    "15": {
+     "id": 269484016,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 14,
+     "furniture_min": 5,
+     "animals": 12,
+     "gardens": 2,
+     "removed": true
+    },
+    "16": {
+     "id": 269484015,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 2,
+     "gardens": 1,
+     "removed": true
+    },
+    "17": {
+     "id": 269484014,
+     "kinds": [
+      "barn",
+      "granary",
+      "house",
+      "shed"
+     ],
+     "boxes": 17,
+     "furniture_min": 5,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "18": {
+     "id": 269484013,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 12,
+     "gardens": 1,
+     "removed": true
+    },
+    "19": {
+     "id": 269484012,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 12,
+     "gardens": 1,
+     "removed": true
+    },
+    "20": {
+     "id": 269484011,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 8,
+     "gardens": 2,
+     "removed": true
+    },
+    "21": {
+     "id": 269484010,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 15,
+     "gardens": 2,
+     "removed": true
+    },
+    "22": {
+     "id": 269484009,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "23": {
+     "id": 269484008,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 5,
+     "gardens": 1,
+     "removed": true
+    },
+    "24": {
+     "id": 269484007,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 3,
+     "gardens": 2,
+     "removed": true
+    },
+    "25": {
+     "id": 269484006,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 19,
+     "gardens": 1,
+     "removed": true
+    },
+    "26": {
+     "id": 269484005,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 7,
+     "gardens": 1,
+     "removed": true
+    },
+    "27": {
+     "id": 269484004,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 17,
+     "gardens": 1,
+     "removed": true
+    },
+    "28": {
+     "id": 269484003,
+     "kinds": [
+      "barn",
+      "coop",
+      "granary",
+      "house"
+     ],
+     "boxes": 18,
+     "furniture_min": 5,
+     "animals": 6,
+     "gardens": 2,
+     "removed": true
+    },
+    "29": {
+     "id": 269484002,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 14,
+     "gardens": 1,
+     "removed": true
+    },
+    "30": {
+     "id": 269484001,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 13,
+     "gardens": 2,
+     "removed": true
+    },
+    "31": {
+     "id": 269484000,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 14,
+     "furniture_min": 5,
+     "animals": 2,
+     "gardens": 2,
+     "removed": true
+    },
+    "32": {
+     "id": 269483999,
+     "kinds": [
+      "barn",
+      "coop",
+      "granary",
+      "house",
+      "shed"
+     ],
+     "boxes": 21,
+     "furniture_min": 5,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "33": {
+     "id": 269483998,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 9,
+     "gardens": 2,
+     "removed": true
+    },
+    "34": {
+     "id": 269483997,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 16,
+     "gardens": 1,
+     "removed": true
+    },
+    "35": {
+     "id": 269483996,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 3,
+     "gardens": 1,
+     "removed": true
+    },
+    "36": {
+     "id": 269483995,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 4,
+     "gardens": 1,
+     "removed": true
+    },
+    "37": {
+     "id": 269483994,
+     "kinds": [
+      "barn",
+      "coop",
+      "house",
+      "shed"
+     ],
+     "boxes": 18,
+     "furniture_min": 5,
+     "animals": 5,
+     "gardens": 2,
+     "removed": true
+    },
+    "38": {
+     "id": 269483993,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 8,
+     "animals": 6,
+     "gardens": 2,
+     "removed": true
+    },
+    "39": {
+     "id": 269483992,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 14,
+     "furniture_min": 5,
+     "animals": 10,
+     "gardens": 2,
+     "removed": true
+    },
+    "40": {
+     "id": 269483991,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 11,
+     "gardens": 1,
+     "removed": true
+    },
+    "41": {
+     "id": 269483990,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 28,
+     "gardens": 1,
+     "removed": true
+    },
+    "42": {
+     "id": 269483989,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "43": {
+     "id": 269483988,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 2,
+     "gardens": 1,
+     "removed": true
+    },
+    "44": {
+     "id": 269483987,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 14,
+     "furniture_min": 5,
+     "animals": 4,
+     "gardens": 2,
+     "removed": true
+    },
+    "45": {
+     "id": 269483986,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 12,
+     "gardens": 1,
+     "removed": true
+    },
+    "46": {
+     "id": 269483985,
+     "kinds": [
+      "barn",
+      "granary",
+      "house",
+      "shed"
+     ],
+     "boxes": 17,
+     "furniture_min": 5,
+     "animals": 5,
+     "gardens": 1,
+     "removed": true
+    },
+    "47": {
+     "id": 269483984,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 9,
+     "furniture_min": 7,
+     "animals": 12,
+     "gardens": 1,
+     "removed": true
+    },
+    "48": {
+     "id": 269483983,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 6,
+     "gardens": 1,
+     "removed": true
+    },
+    "49": {
+     "id": 269483982,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 14,
+     "gardens": 2,
+     "removed": true
+    },
+    "50": {
+     "id": 269483981,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 9,
+     "furniture_min": 7,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "51": {
+     "id": 269483980,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 12,
+     "gardens": 1,
+     "removed": true
+    },
+    "52": {
+     "id": 269483979,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 10,
+     "gardens": 1,
+     "removed": true
+    },
+    "53": {
+     "id": 269483978,
+     "kinds": [
+      "barn",
+      "coop",
+      "granary",
+      "house"
+     ],
+     "boxes": 18,
+     "furniture_min": 5,
+     "animals": 11,
+     "gardens": 2,
+     "removed": true
+    },
+    "54": {
+     "id": 269483977,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 13,
+     "furniture_min": 6,
+     "animals": 13,
+     "gardens": 1,
+     "removed": true
+    },
+    "55": {
+     "id": 269483976,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 14,
+     "furniture_min": 5,
+     "animals": 7,
+     "gardens": 2,
+     "removed": true
+    },
+    "56": {
+     "id": 269483975,
+     "kinds": [
+      "barn",
+      "house",
+      "shed"
+     ],
+     "boxes": 14,
+     "furniture_min": 6,
+     "animals": 9,
+     "gardens": 2,
+     "removed": true
+    },
+    "57": {
+     "id": 269483974,
+     "kinds": [
+      "barn",
+      "coop",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 6,
+     "gardens": 1,
+     "removed": true
+    },
+    "58": {
+     "id": 269483973,
+     "kinds": [
+      "barn",
+      "granary",
+      "house"
+     ],
+     "boxes": 13,
+     "furniture_min": 5,
+     "animals": 5,
+     "gardens": 1,
+     "removed": true
+    },
+    "59": {
+     "id": 269483972,
+     "kinds": [
+      "barn",
+      "house"
+     ],
+     "boxes": 10,
+     "furniture_min": 7,
+     "animals": 10,
+     "gardens": 2,
+     "removed": true
+    }
+   },
+   "designs_seen": [
+    17,
+    32,
+    54
+   ]
+  },
+  {
+   "step": "houses10",
+   "ok": true,
+   "visits": [
+    {
+     "kind": "house",
+     "name": "Wynne's Farmstead",
+     "houses": 1,
+     "house": {
+      "of": "SM_house_04_open",
+      "doors": 2,
+      "furniture": 9,
+      "lit": true,
+      "floor": -559.0
+     },
+     "to_door": true,
+     "prompt": "open the door",
+     "f": "door",
+     "door_open": 1.0,
+     "walked_in": [
+      true,
+      true
+     ],
+     "inside": true,
+     "feet_over_floor_cm": 2.5,
+     "plants_in_room": 0,
+     "shot": "houses10_0_house",
+     "f_shut": "door",
+     "door_after": 0.0
+    },
+    {
+     "kind": "house",
+     "name": "Wynne's Cottage",
+     "houses": 1,
+     "house": {
+      "of": "SM_house_02_open",
+      "doors": 1,
+      "furniture": 9,
+      "lit": true,
+      "floor": 1168.0
+     },
+     "to_door": true,
+     "prompt": "open the door",
+     "f": "door",
+     "door_open": 1.0,
+     "walked_in": [
+      true,
+      true
+     ],
+     "inside": true,
+     "feet_over_floor_cm": 3.5,
+     "plants_in_room": 0,
+     "shot": "houses10_1_house",
+     "f_shut": "door",
+     "door_after": 0.0
+    },
+    {
+     "kind": "farmstead",
+     "name": "Odric's Croft",
+     "houses": 5,
+     "house": {
+      "of": "kit:coop",
+      "doors": 1,
+      "furniture": 5,
+      "lit": true,
+      "floor": -185.0
+     },
+     "to_door": true,
+     "prompt": "open the door",
+     "f": "door",
+     "door_open": 1.0,
+     "walked_in": [
+      true,
+      true
+     ],
+     "inside": true,
+     "feet_over_floor_cm": 0.2,
+     "plants_in_room": 0,
+     "shot": "houses10_2_farmstead",
+     "f_shut": "door",
+     "door_after": 0.0
+    }
+   ]
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_f11f_farms11_house.png",
+  "wd_f11f_farms11_barn.png",
+  "wd_f11f_farms11_chest.png",
+  "wd_f11f_farms11_garden.png",
+  "wd_f11f_farms11_yard.png",
+  "wd_f11f_farms11_design0.png",
+  "wd_f11f_farms11_design30.png",
+  "wd_f11f_farms11_design59.png",
+  "wd_f11f_houses10_0_house.png",
+  "wd_f11f_houses10_1_house.png",
+  "wd_f11f_houses10_2_farmstead.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

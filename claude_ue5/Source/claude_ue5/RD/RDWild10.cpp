@@ -111,35 +111,46 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		L->SetupAttachment(Pv);
 		L->RegisterComponent();
 		C->PlaceProps.Add(L);
-		// (a door the house's data puts on an X wall only: the outward way, the swing, the steps and the back wall are read from it;
-		// one on another wall stays shut (PR #43's review))
-		if (!bInside || FMath::Abs(D.Pivot.X) < 0.8f * FMath::Max(FMath::Abs(H->InMin.X), FMath::Abs(H->InMax.X))) continue;
+		// (a door on an X wall: the outward way, the swing, the steps and the back wall are read from it (PR #43's review); the list
+		// of 2026-11-11's fourth phase: one on a Y wall opens too (it had stayed shut: "nor can the doors be opened", Garrick's
+		// hold): its outward way is its wall's, its leaf's way from its mesh's middle)
+		if (!bInside) continue;
+		const float Xw = FMath::Max(FMath::Abs(H->InMin.X), FMath::Abs(H->InMax.X)), Yw = FMath::Max(FMath::Abs(H->InMin.Y), FMath::Abs(H->InMax.Y));
+		const bool bXWall = FMath::Abs(D.Pivot.X) >= 0.8f * Xw;
+		if (!bXWall && FMath::Abs(D.Pivot.Y) < 0.8f * Yw) continue;
+		FVector Lead(0.f, D.Width * 0.5f, 0.f);          // (from the hinge to the doorway's middle, the house's frame)
+		FVector Ld(0.f, D.Width >= 0.f ? 1.f : -1.f, 0.f);
+		if (!bXWall)
+		{
+			const FVector Lc = D.Leaf->GetBoundingBox().GetCenter();
+			Lead = FVector(Lc.X, 0.f, 0.f); Ld = FVector(Lc.X >= 0.f ? 1.f : -1.f, 0.f, 0.f);
+		}
+		const FVector Outw = bXWall ? FVector(D.Pivot.X > 0.f ? 1.f : -1.f, 0.f, 0.f) : FVector(0.f, D.Pivot.Y > 0.f ? 1.f : -1.f, 0.f);
 		ARDWildChunk::FDoor Dr;
 		Dr.Pivot = Pv;
-		Dr.At = T.TransformPosition(D.Pivot + FVector(0.f, D.Width * 0.5f, 0.f));
+		Dr.At = T.TransformPosition(D.Pivot + Lead);
 		// (the leaf runs along Y from its hinge, the way its width's sign says (916: interactive.json's leaf_dir in Unreal's axes);
 		// open, it swings out of the house: the quarter turn that puts it along its wall's outward way)
-		const FVector Ld(0.f, D.Width >= 0.f ? 1.f : -1.f, 0.f), Outw(D.Pivot.X > 0.f ? 1.f : -1.f, 0.f, 0.f);
 		Dr.OutYaw = FVector::DotProduct(FRotator(0.f, 90.f, 0.f).RotateVector(Ld), Outw) > 0.f ? 90.f : -90.f;
 		Dr.OpenYaw = Dr.OutYaw;
 		Dr.Out = T.TransformVectorNoScale(Outw);
 		C->Doors.Add(Dr);
 		++Rec.Doors;
 		// (a step or two before a door where the ground outside lies lower than the sill)
-		const float Out = D.Pivot.X > 0.f ? 1.f : -1.f;
-		const FVector Fr = T.TransformPosition(FVector(D.Pivot.X + Out * 60.f / Sc, D.Pivot.Y + D.Width * 0.5f, 0.f));
+		const FVector Fr = T.TransformPosition(D.Pivot + Lead + Outw * (60.f / Sc));
 		const float Drop = Base - WildGroundZ(Fr);
 		if (Drop > 30.f)
 		{
 			const int32 N = FMath::Min(FMath::CeilToInt(Drop / 28.f), 6);
+			const FVector Mid = (D.Pivot + Lead) * Sc;
 			for (int32 K = 0; K < N; ++K)
 			{
 				const float Top = Base - Drop * K / N;
 				const float Depth = 42.f;
-				const FVector Lc = FVector(D.Pivot.X * Sc + Out * (Depth * (K + 0.5f) + 8.f), (D.Pivot.Y + D.Width * 0.5f) * Sc, 0.f);
+				const FVector Lc = FVector(Mid.X, Mid.Y, 0.f) + Outw * (Depth * (K + 0.5f) + 8.f);
 				const FVector W = RDW10At(O, Yaw, Lc.X, Lc.Y, 0.f);
 				const float Z0 = WildGroundZ(W) - 20.f;
-				Mesh(RDW10Cube(), FTransform(FRotator(0.f, Yaw, 0.f), FVector(W.X, W.Y, (Top + Z0) * 0.5f), FVector(Depth / 100.f, 2.f, FMath::Max(Top - Z0, 5.f) / 100.f)), true, WildPlinthMaterial);
+				Mesh(RDW10Cube(), FTransform(FRotator(0.f, Yaw + (bXWall ? 0.f : 90.f), 0.f), FVector(W.X, W.Y, (Top + Z0) * 0.5f), FVector(Depth / 100.f, 2.f, FMath::Max(Top - Z0, 5.f) / 100.f)), true, WildPlinthMaterial);
 			}
 		}
 	}
@@ -181,6 +192,18 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 		if (Mesh(P->Mesh, P->Adjust * FTransform(FRotator(0.f, Yaw + YawL, 0.f), W), P->bCollision, P->Material)) { ++Rec.Furniture; return true; }
 		return false;
 	};
+	// (the list of 2026-11-11's fourth phase: its chest, barrel, crate and wardrobe are containers that open and give food
+	// ("farmholds should have some food in them to loot - none of the containers work"); kept looted under a key of the house)
+	int32 BoxN = 0;
+	auto PutBox = [&](FName Name, float X, float Y, float YawL, const TCHAR* Kind) -> bool
+	{
+		const FRDPiece* P = Piece(Name);
+		if (!P || !P->Mesh) return false;
+		const int64 Key = (2LL << 40) + (int64)(Salt & 0x0FFFFFFFu) * 8 + BoxN++;
+		const FString* L = FarmLoot.Find(FName(Kind));
+		if (AddWildBox(C, Name, FTransform(FRotator(0.f, Yaw + YawL, 0.f), RDW10At(O, Yaw, X, Y, 1.f)), FName(Kind), Key, L ? *L : FString())) { ++Rec.Furniture; return true; }
+		return false;
+	};
 	const float W = Mx.X - Mn.X;
 	if (const FRDPiece* Fp = Piece(TEXT("Fireplace")))
 	{
@@ -193,14 +216,15 @@ bool ARDDungeonGenerator::FitWildHouse(ARDWildChunk* C, UStaticMeshComponent* Sm
 	{
 		BedY = Mx.Y - Bp->Size.Y * 0.5f - 25.f;
 		Put(TEXT("Bed"), Xb + Ds * (Bp->Size.X * 0.5f + 6.f), BedY, Face);
-		if (const FRDPiece* Cp = Piece(TEXT("Chest"))) Put(TEXT("Chest"), Xb + Ds * (Bp->Size.X + 14.f + Cp->Size.X * 0.5f), BedY, Face);
+		if (const FRDPiece* Cp = Piece(TEXT("Chest"))) PutBox(TEXT("Chest"), Xb + Ds * (Bp->Size.X + 14.f + Cp->Size.X * 0.5f), BedY, Face, TEXT("chest"));
 	}
 	Put(TEXT("TableLong"), Xb + Ds * W * 0.55f, Mn.Y + (Mx.Y - Mn.Y) * 0.32f, 0.f);
 	if (const FRDPiece* Tp = Piece(TEXT("TableLong")))
 		for (const float Sd : { -1.f, 1.f }) Put(TEXT("Bench"), Xb + Ds * W * 0.55f + Sd * (Tp->Size.X * 0.5f + 30.f), Mn.Y + (Mx.Y - Mn.Y) * 0.32f, 0.f);
-	Put(TEXT("Barrel"), Xb + Ds * 45.f, Mn.Y + 45.f, R.FRandRange(0.f, 360.f));
-	Put(TEXT("Crate"), Xb + Ds * 45.f, Mn.Y + 125.f, Face);
-	Put(TEXT("Wardrobe"), Xb + Ds * W * 0.62f, Mx.Y - 32.f, -90.f);
+	// (the barrel's turn is still drawn: the stream's later draws keep their places)
+	PutBox(TEXT("Barrel"), Xb + Ds * 45.f, Mn.Y + 45.f, R.FRandRange(0.f, 360.f), TEXT("barrel"));
+	PutBox(TEXT("Crate"), Xb + Ds * 45.f, Mn.Y + 125.f, Face, TEXT("crate"));
+	PutBox(TEXT("Wardrobe"), Xb + Ds * W * 0.62f, Mx.Y - 32.f, -90.f, TEXT("wardrobe"));
 	// ---- a lamp under its roof (the fire's glow is small)
 	{
 		UPointLightComponent* Lt = NewObject<UPointLightComponent>(C);
@@ -381,6 +405,7 @@ ARDWildChunk* ARDDungeonGenerator::WildDoorNear(const FVector& From, float Reach
 		{
 			const ARDWildChunk::FDoor& D = C->Doors[I];
 			if (!D.Pivot.IsValid()) continue;
+			if (D.bBox && D.Target > 0.5f) continue;          // (a container opened (and looted) takes F no more)
 			const float Dd = FVector::Dist2D(D.At, From);
 			if (Dd < Bd && FMath::Abs(D.At.Z - From.Z) < 220.f) { Bd = Dd; Best = C; Index = I; }
 		}
@@ -392,7 +417,12 @@ FString ARDDungeonGenerator::WildDoorDescribe(const FVector& From) const
 {
 	if (!bWild || !bWildHouseInsides) return FString();
 	int32 I = -1;
-	if (const ARDWildChunk* C = WildDoorNear(From, 190.f, I)) return C->Doors[I].Target > 0.5f ? TEXT("close the door") : TEXT("open the door");
+	if (const ARDWildChunk* C = WildDoorNear(From, 190.f, I))
+	{
+		const ARDWildChunk::FDoor& D = C->Doors[I];
+		if (D.bBox) return D.Kind == TEXT("garden") ? FString(TEXT("harvest the garden")) : FString::Printf(TEXT("open the %s"), *D.Kind.ToString());
+		return D.Target > 0.5f ? TEXT("close the door") : TEXT("open the door");
+	}
 	return FString();
 }
 
@@ -403,6 +433,7 @@ FString ARDDungeonGenerator::WildDoorInteract(const FVector& From)
 	if (ARDWildChunk* C = WildDoorNear(From, 190.f, I))
 	{
 		ARDWildChunk::FDoor& D = C->Doors[I];
+		if (D.bBox) { OpenWildBox(C, I); return TEXT("container"); }
 		// (opened, it swings away from her: in from outside, out from inside (888 houses10: swung out at her 1.1 m before it, the leaf
 		// shut her out); the way is chosen while it is shut)
 		if (D.Target < 0.5f && D.Alpha < 0.05f) D.OpenYaw = FVector::DotProduct(From - D.At, D.Out) > 0.f ? -D.OutYaw : D.OutYaw;
@@ -422,6 +453,13 @@ void ARDDungeonGenerator::TickWildDoors(float Dt)
 		{
 			if (FMath::IsNearlyEqual(D.Alpha, D.Target) || !D.Pivot.IsValid()) continue;
 			D.Alpha = FMath::FInterpConstantTo(D.Alpha, D.Target, Dt, 1.4f);
+			if (D.bBox)
+			{
+				// (a container's lid or doors about their hinge's axis (the list of 2026-11-11's fourth phase))
+				D.Pivot->SetRelativeRotation(D.Closed * FQuat(D.Axis, FMath::DegreesToRadians(D.Angle * D.Alpha)));
+				if (USceneComponent* P2 = D.Pivot2.Get()) P2->SetRelativeRotation(D.Closed2 * FQuat(D.Axis, FMath::DegreesToRadians(D.Angle2 * D.Alpha)));
+				continue;
+			}
 			D.Pivot->SetRelativeRotation(FRotator(0.f, D.OpenYaw * D.Alpha, 0.f));
 		}
 	}
@@ -437,6 +475,7 @@ TArray<FString> ARDDungeonGenerator::GetWildHouseLines() const
 		for (const ARDWildChunk::FHouse& H : C->Houses)
 			Out.Add(FString::Printf(TEXT("house|%d|%d|%.0f|%.0f|%.0f|%d|%d|%d|%.0f|%s|%.0f|%.0f|%.1f"), C->Coord.X, C->Coord.Y, H.C.X, H.C.Y, H.C.Z, H.Doors, H.Furniture, H.bLit ? 1 : 0, H.FloorZ, *H.Of, H.H.X, H.H.Y, H.Yaw));
 		for (const ARDWildChunk::FDoor& D : C->Doors)
+			if (!D.bBox)          // (the containers are GetWildBoxLines')
 			Out.Add(FString::Printf(TEXT("door|%.0f|%.0f|%.0f|%.2f|%.0f"), D.At.X, D.At.Y, D.At.Z, D.Alpha, D.Target));
 	}
 	return Out;

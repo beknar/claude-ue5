@@ -87,6 +87,38 @@ struct FRDWildHouse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FRDWildHouseDoor> Doors;
 };
 
+/** the list of 2026-11-11's fourth phase ("all the farms use the exact same design. have at least 50 different designs for farms,
+ *  and they should all have interiors"): one part of a farmstead's design (919, SourceArt/wilderness/farm_designs.json), in the
+ *  farm's frame (metres along its way U and across it V): a building of the town's kit (house, barn, shed, coop, granary: Nx tiles
+ *  deep along its door's way (its +X after Yaw), Ny wide; Style 0 timber, 1 stone, 2 thatch; Animals in a barn's stall), a pen
+ *  (Hu, Hv half sizes; Shape 0 a rectangle, 1 two pens side by side, 2 round), a garden (Variant: its crops, Town.CropN by digit), or
+ *  a yard thing (well, cart, woodpile, hay, trough, scarecrow) */
+USTRUCT(BlueprintType)
+struct FRDFarmPart
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Kind;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float U = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float V = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float Yaw = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") int32 Nx = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") int32 Ny = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float Hu = 3.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float Hv = 3.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") int32 Style = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") int32 Shape = 0;
+	/** the animals: "Kind:count", several comma-separated (a double pen's two halves) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FString Animals;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FString Variant;
+};
+USTRUCT(BlueprintType)
+struct FRDFarmDesign
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon") TArray<FRDFarmPart> Parts;
+};
+
 /** the list of 2026-11-10: a crowd body's separate parts (the NPC Characters pack's _Full_02 bodies carry their heads and hair as
  *  meshes of their own, Separate/), following the body (leader pose); CrowdParts[i] goes with CrowdMeshes[i] */
 USTRUCT(BlueprintType)

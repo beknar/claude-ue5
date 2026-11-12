@@ -1649,6 +1649,136 @@ def step_farms10():
     quiet(False)
     step_result("farms10", res["hover_before"] != fid and res["hover_after"] == fid and f[1] in res["hover_name"], **res)
 
+def last_found(): return [str(x) for x in G["gen"].get_editor_property("last_found_list")]
+def box_lines():
+    """the wild containers ("box"), the designed farms ("farm11") and their buildings ("fbld") (GetWildBoxLines)"""
+    boxes, farms, blds = [], {}, []
+    for l in G["gen"].get_wild_box_lines():
+        p = str(l).split("|")
+        if p[0] == "box": boxes.append({"kind": p[1], "x": float(p[2]), "y": float(p[3]), "z": float(p[4]), "alpha": float(p[5]), "looted": p[6] == "1", "key": int(p[7])})
+        elif p[0] == "farm11": farms[int(p[1])] = {"design": int(p[2]), "buildings": int(p[3]), "boxes": int(p[4])}
+        elif p[0] == "fbld": blds.append({"farm": int(p[1]), "kind": p[2], "x": float(p[3]), "y": float(p[4]), "floor": float(p[5]), "nx": int(p[6]), "ny": int(p[7]),
+                                          "yaw": float(p[8]), "dx": float(p[9]), "dy": float(p[10]), "furniture": int(p[11]), "boxes": int(p[12])})
+    return boxes, farms, blds
+def step_farms11():
+    """the list of 2026-11-11's fourth phase (919 farms, RD/RDWildFarm11.cpp): the farmsteads near Brokenspire each built from a design
+    of their own (their designs told apart); at the first: every building has its door (F opens it, she walks in by her own movement
+    and stands on its floor inside its walls, a picture inside the house and the barn), its furniture and containers; a chest
+    opened by F gives her food (her things counted, the container open and kept looted: F passes it by after), a garden harvested
+    gives its crops; the farm's animals stay in their pens; then every one of the designs built in turn at a spot near her and
+    measured (its buildings with a door, furniture and containers; its gardens and animals) and taken away again"""
+    g = G["gen"]; res = {"visits": []}; quiet(True)
+    yield from wait_ready(90)
+    nd = len(g.get_editor_property("farm_designs")); res["designs"] = nd
+    fs = [str(x).split("|") for x in g.find_wild_farmsteads(0.0, 0.0, 6000.0)]
+    res["farmsteads"] = len(fs)
+    seen = {}
+    for k, f in enumerate(fs[:3]):
+        fid, fx, fy = int(f[0]), float(f[2]), float(f[3])
+        g.wild_drop_all(); g.wild_put_her(fx - 30.0, fy); yield from wait_chunks(30, 50); yield from rwait(3.0)
+        boxes, farms, blds = box_lines()
+        fm = farms.get(fid); mine = [b for b in blds if b["farm"] == fid]
+        v = {"name": f[1], "design": fm["design"] if fm else None, "buildings": len(mine), "kinds": sorted(b["kind"] for b in mine),
+             "boxes": fm["boxes"] if fm else 0, "furniture_min": min((b["furniture"] for b in mine), default=0)}
+        seen[fid] = v["design"]
+        if k == 0 and mine:
+            # ---- every building: F at its door, in by her own movement, on its floor
+            v["walks"] = []
+            hs, ds = wild_houses()
+            for b in mine:
+                a = math.radians(b["yaw"]); out = V(math.cos(a), math.sin(a), 0)
+                hx = b["nx"] * 150.0; hy = b["ny"] * 150.0
+                h = {"x": b["x"], "y": b["y"], "hx": hx - 30.0, "hy": hy - 30.0, "yaw": b["yaw"]}
+                st = V(b["dx"] + out.x * 330, b["dy"] + out.y * 330, 0)
+                put(st, yaw=math.degrees(math.atan2(-out.y, -out.x)), z=g.wild_ground_z(st)); yield from rwait(0.8)
+                w = {"kind": b["kind"], "furniture": b["furniture"], "boxes": b["boxes"]}
+                w["to_door"] = yield from walk_to(V(b["dx"] + out.x * 115, b["dy"] + out.y * 115, 0), 6.0, 40.0)
+                yield from rwait(0.3)
+                w["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                w["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.6)
+                _h, ds2 = wild_houses(); dn = min(ds2, key=lambda e: math.hypot(e["x"] - b["dx"], e["y"] - b["dy"])); w["door_open"] = round(dn["alpha"], 2)
+                r1 = yield from walk_to(V(b["dx"] - out.x * 160, b["dy"] - out.y * 160, 0), 6.0)
+                r2 = yield from walk_to(V(b["x"], b["y"], 0), 6.0, 90.0)
+                yield from rwait(0.5)
+                q = G["pawn"].get_actor_location(); hh = G["pawn"].get_component_by_class(unreal.CapsuleComponent).get_scaled_capsule_half_height()
+                w["walked_in"] = [r1, r2]; w["inside"] = in_house(h, q); w["feet_over_floor_cm"] = round(q.z - hh - b["floor"], 1)
+                if b["kind"] in ("house", "barn") and not any(x["kind"] == b["kind"] and "shot" in x for x in v["walks"]):
+                    G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=math.degrees(math.atan2(-out.y, -out.x)))); yield from rwait(1.2)
+                    w["shot"] = f"farms11_{b['kind']}"; shot(w["shot"], "1280x720"); yield from rwait(1.5)
+                v["walks"].append(w)
+            # ---- a chest (or another store of the house) opened: her food; then F passes it by
+            boxes, _f, _b = box_lines()
+            hb = next((b for b in mine if b["kind"] == "house"), mine[0])
+            inb = [x for x in boxes if not x["looted"] and in_house({"x": hb["x"], "y": hb["y"], "hx": hb["nx"] * 150.0, "hy": hb["ny"] * 150.0, "yaw": hb["yaw"]}, V(x["x"], x["y"], 0))]
+            ch = next((x for x in inb if x["kind"] == "chest"), inb[0] if inb else None)
+            if ch:
+                c = cb(); n0 = g.get_editor_property("wild_box_things")
+                to = V(hb["x"] - ch["x"], hb["y"] - ch["y"], 0); n_ = math.hypot(to.x, to.y) or 1.0
+                at = V(ch["x"] + to.x / n_ * 110, ch["y"] + to.y / n_ * 110, 0)
+                put(at, yaw=math.degrees(math.atan2(-to.y, -to.x)), z=hb["floor"]); yield from rwait(0.8)
+                lines0 = {str(l) for l in c.get_all_inventory_lines()}
+                v["box_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                v["box_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.5)
+                boxes2, _f, _b = box_lines(); b2 = min(boxes2, key=lambda x: math.hypot(x["x"] - ch["x"], x["y"] - ch["y"]))
+                v["box"] = {"kind": ch["kind"], "things": g.get_editor_property("wild_box_things") - n0, "alpha": round(b2["alpha"], 2), "looted": b2["looted"],
+                            "new_lines": sorted({str(l) for l in c.get_all_inventory_lines()} - lines0)[:6], "found": last_found()}
+                v["box_prompt_after"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                shot("farms11_chest", "1280x720"); yield from rwait(1.5)
+            # ---- a garden harvested
+            gd = next((x for x in boxes if x["kind"] == "garden" and not x["looted"]), None)
+            if gd:
+                n0 = g.get_editor_property("wild_box_things")
+                put(V(gd["x"], gd["y"], 0), z=g.wild_ground_z(V(gd["x"], gd["y"], 0))); yield from rwait(0.8)
+                v["garden_prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+                v["garden_f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(1.0)
+                v["garden"] = {"things": g.get_editor_property("wild_box_things") - n0, "found": last_found()}
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-25, yaw=0)); yield from rwait(0.8); shot("farms11_garden", "1280x720"); yield from rwait(1.5)
+            # ---- the animals in their pens after a while
+            yield from rwait(6.0)
+            al = [str(l).split("|") for l in g.get_wild_farm_lines() if str(l).startswith(f"animal|{fid}|")]
+            v["animals"] = len(al); v["animals_in_pens"] = sum(1 for a in al if a[6] == "1")
+            # ---- the yard from above it
+            put(V(fx * 100.0 - 4200.0, fy * 100.0, 0), yaw=0.0, z=g.wild_ground_z(V(fx * 100.0 - 4200.0, fy * 100.0, 0)))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=0)); yield from rwait(1.0); shot("farms11_yard", "1280x720"); yield from rwait(1.5)
+        res["visits"].append(v)
+    # ---- every design, built in turn near the first farm and taken away again
+    res["built"] = {}
+    if fs:
+        fx, fy = float(fs[0][2]), float(fs[0][3])
+        sx, sy = fx + 90.0, fy
+        g.wild_drop_all(); g.wild_put_her(sx - 45.0, sy); yield from wait_chunks(30, 50); yield from rwait(2.0)
+        for d in range(nd):
+            fid = g.spawn_farm_design_at(d, sx, sy, 0.0)
+            yield from rwait(0.15)
+            boxes, farms, blds = box_lines()
+            fm = farms.get(fid, {}); mine = [b for b in blds if b["farm"] == fid]
+            hs, _ds = wild_houses()
+            al = [str(l).split("|") for l in g.get_wild_farm_lines() if str(l).startswith(f"animal|{fid}|")]
+            kinds = sorted(b["kind"] for b in mine)
+            gardens = sum(1 for x in boxes if x["kind"] == "garden" and math.hypot(x["x"] / 100.0 - sx, x["y"] / 100.0 - sy) < 40.0)
+            res["built"][d] = {"id": fid, "kinds": kinds, "boxes": fm.get("boxes", 0), "furniture_min": min((b["furniture"] for b in mine), default=0),
+                               "animals": len(al), "gardens": gardens}
+            if d in (0, nd // 2, nd - 1):
+                put(V(sx * 100.0 - 4200.0, sy * 100.0, 0), yaw=0.0, z=g.wild_ground_z(V(sx * 100.0 - 4200.0, sy * 100.0, 0)))
+                G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=0)); yield from rwait(1.0); shot(f"farms11_design{d}", "1280x720"); yield from rwait(1.5)
+            res["built"][d]["removed"] = g.remove_wild_farm(fid)
+            yield
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    vs = [v for v in res["visits"] if v.get("design") is not None]
+    v0 = res["visits"][0] if res["visits"] else {}
+    walks = v0.get("walks", [])
+    built = res["built"]
+    res["designs_seen"] = sorted(set(seen.values()))
+    ok = (nd >= 50 and len(vs) >= 3 and len(set(v["design"] for v in vs)) == len(vs)
+          and all("house" in v["kinds"] and "barn" in v["kinds"] and v["furniture_min"] >= 5 and v["boxes"] >= 6 for v in vs)
+          and walks and all("open the door" in w["prompt"] and w["door_open"] > 0.95 and w["inside"] and abs(w["feet_over_floor_cm"]) < 15 for w in walks)
+          and v0.get("box", {}).get("things", 0) >= 1 and v0["box"]["looted"] and v0["box"]["alpha"] > 0.95 and "open the" in v0.get("box_prompt", "") and "open the " + v0["box"]["kind"] not in v0.get("box_prompt_after", "")
+          and v0.get("garden", {}).get("things", 0) >= 1 and "harvest the garden" in v0.get("garden_prompt", "")
+          and v0.get("animals", 0) >= 2 and v0["animals_in_pens"] == v0["animals"]
+          and len(built) == nd and all(b["id"] and "house" in b["kinds"] and "barn" in b["kinds"] and b["furniture_min"] >= 5 and b["boxes"] >= 6 and b["gardens"] >= 1 and b["animals"] >= 1 and b["removed"] for b in built.values()))
+    step_result("farms11", ok, **res)
+
 def step_travellers10():
     """the wilds' liveliness: travellers on a road near her (by day walking along it, 2 or 3 together), she talks to one (a line);
     at night they camp beside the road round a fire and sit; in the morning they walk on; pictures"""
@@ -2242,7 +2372,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"farms11": step_farms11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():
