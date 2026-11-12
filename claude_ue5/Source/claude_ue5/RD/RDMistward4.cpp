@@ -173,8 +173,12 @@ void ARDDungeonGenerator::ApplyWindowLimits()
 	if (GIsEditor || !GEngine || !GEngine->GameViewport) return;
 	const TSharedPtr<SWindow> Win = GEngine->GameViewport->GetWindow();
 	if (!Win.IsValid()) return;
-	Win->SetSizeLimits(FWindowSizeLimits().SetMinWidth((float)RD4MinWindow.X).SetMinHeight((float)RD4MinWindow.Y));
-	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS the window may be sized down to %dx%d"), RD4MinWindow.X, RD4MinWindow.Y);
+	// (Slate's limits are in its own units, the screen's pixels over its scaling: given 960 x 540 on a 200 % screen the window
+	// could not be smaller than 1920 x 1080 of the screen's pixels, and a 1600 x 900 window asked on the Options page came out
+	// 1894 x 1009 inside (the packaged game's display test, 2026-11-12). The limit is the screen's pixels, as the HUD is laid out)
+	const float Dpi = FMath::Max(Win->GetDPIScaleFactor(), 0.5f);
+	Win->SetSizeLimits(FWindowSizeLimits().SetMinWidth(RD4MinWindow.X / Dpi).SetMinHeight(RD4MinWindow.Y / Dpi));
+	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS the window may be sized down to %dx%d of the screen's pixels (its scaling %.2f)"), RD4MinWindow.X, RD4MinWindow.Y, Dpi);
 }
 
 void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
