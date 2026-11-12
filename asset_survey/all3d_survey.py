@@ -4,7 +4,8 @@
   2. I:\\game assets\\3d cgaxis models: the CGAxis volumes (read from the zips' file lists: nothing is extracted)
   3. I:\\game assets\\3d fab library data cache: the Fab downloads (VaultCache/<pack>/manifest), the library's listings
      (VaultCache/FabLibrary/<listing>/unreal-engine/manifest) and the loose zips
-  4. C:\\Users\\kestanol\\AppData\\Roaming\\kitbash3d\\kits: the KitBash3D kits
+  4. I:\\game assets\\3d kitbash3d assets: the KitBash3D kits (the Cargo app's own copy, C:\\Users\\kestanol\\AppData\\Roaming\\
+     kitbash3d\\kits, is compared with it by file count and size)
 Counts of skeletal meshes, static meshes, clips, effects... are by the packs' naming (SK_, SM_, A_ / an Animations folder, NS_ ...):
 approximate. A pack's title, tags, store link and engine versions come from its own manifest; a download's binary manifest
 has none of them, and they come from its listing.
@@ -16,7 +17,8 @@ CONTENT = os.path.join(REPO, "claude_ue5", "Content")
 CG = r"I:\game assets\3d cgaxis models"
 FAB = r"I:\game assets\3d fab library data cache"
 VAULT = os.path.join(FAB, "VaultCache")
-KB = r"C:\Users\kestanol\AppData\Roaming\kitbash3d\kits"
+KB = r"I:\game assets\3d kitbash3d assets"
+KB_APP = r"C:\Users\kestanol\AppData\Roaming\kitbash3d\kits"   # (where Cargo downloads them)
 OUT = os.path.join(REPO, "docs", "all3dassets.md")
 GB = 1024.0 ** 3
 
@@ -404,7 +406,7 @@ def main():
     w("1. [The project](#1-the-project-ecodeclaude-ue5)")
     w("2. [CGAxis models](#2-cgaxis-models-igame-assets3d-cgaxis-models)")
     w("3. [The Fab library](#3-the-fab-library-igame-assets3d-fab-library-data-cache)")
-    w("4. [KitBash3D kits](#4-kitbash3d-kits-cuserskestanolappdataroamingkitbash3dkits)")
+    w("4. [KitBash3D kits](#4-kitbash3d-kits-igame-assets3d-kitbash3d-assets)")
     w("")
 
     # ---------------------------------------------------------------- 1. the project
@@ -452,14 +454,19 @@ def main():
     w("")
     w("Fab packs downloaded as whole projects (a `.uproject` beside their `Content`) into the repository's root, ignored by git; their content is copied into `claude_ue5/Content` when used.")
     w("")
-    w("| Folder | Fab pack (store) | Its Content folders | Contents | Size | Path |")
-    w("|---|---|---|---|---|---|")
+    roots = []
     for d in sorted(os.listdir(REPO), key=str.lower):
         full = os.path.join(REPO, d)
         if not os.path.isdir(full) or d == "claude_ue5": continue
+        if [f for f in os.listdir(full) if f.endswith(".uproject")] or d == "CityScooterRigged": roots.append(d)
+    if roots:
+        w("| Folder | Fab pack (store) | Its Content folders | Contents | Size | Path |")
+        w("|---|---|---|---|---|---|")
+    else:
+        w("None now: the 29 that were here were deleted on 2026-11-10 (no level used them); each is still in the Fab library (section 3).")
+    for d in roots:
+        full = os.path.join(REPO, d)
         cdir = os.path.join(full, "Content")
-        up = [f for f in os.listdir(full) if f.endswith(".uproject")]
-        if not (up or d == "CityScooterRigged"): continue
         cnt, size, n = scan_dir(full)
         tops = [t for t in os.listdir(cdir) if not t.startswith("__") and t != "Splash"] if os.path.isdir(cdir) else os.listdir(full)
         key = re.sub(r"[^a-z0-9]", "", d.lower())
@@ -588,19 +595,56 @@ def main():
         if z["ext"].get("exe"): what = "a packaged Windows demo (exe, pak): no editable assets"
         w(f"| `{md(f)}` | {what} | {', '.join('`' + md(t) + '`' for t in z['tops'])} | {gb(os.path.getsize(p))} | `{p}` |")
     w("")
+    cp = os.path.join(FAB, "claude-ue5 project assets")
+    if os.path.isdir(cp):
+        w("### The project's files copied here")
+        w("")
+        w("A copy of the project's files that no pack in `VaultCache` holds (made 2026-11-10, before the unused packs were deleted from the project): "
+          "the project's own Content folders, the packs imported from their Unity downloads, files the project added to or edited in pack folders, "
+          "and the 3D source files. Each keeps its path in the project; `README.txt` says what is there.")
+        w("")
+        w("| Folder | Contents | Files | Size | Path |")
+        w("|---|---|---|---|---|")
+        for d in sorted(os.listdir(cp), key=str.lower):
+            full = os.path.join(cp, d)
+            if not os.path.isdir(full): continue
+            cnt, size, n = scan_dir(full)
+            tops = sorted(os.listdir(full), key=str.lower)
+            sub = f" ({len(tops)} entries)" if len(tops) > 8 else f" ({', '.join('`' + md(t) + '`' for t in tops)})"
+            w(f"| `{md(d)}`{sub} | {summary(cnt)} | {n} | {gb(size)} | `{full}` |")
+        w("")
 
     # ---------------------------------------------------------------- 4. KitBash3D
-    w("## 4. KitBash3D kits (`C:\\Users\\kestanol\\AppData\\Roaming\\kitbash3d\\kits`)")
+    w("## 4. KitBash3D kits (`I:\\game assets\\3d kitbash3d assets`)")
     w("")
-    w("The KitBash3D app's downloads: each kit's models as USD files (a folder a model, with its LOD and material files), its materials and PNG / EXR textures. "
+    w("The KitBash3D kits: each kit's models as USD files (a folder a model, with its LOD and material files), its materials and PNG / EXR textures. "
       "Unreal imports USD through its USD Importer plugin.")
     w("")
+
+    def tree(d):
+        n = size = 0
+        for dp, dn, fn in os.walk(d):
+            for f in fn:
+                n += 1; size += os.path.getsize(os.path.join(dp, f))
+        return n, size
+    # (only folders are kits (PR #52's review: a loose file in either folder was taken for a kit, or stopped the survey), and a
+    # library drive that is not there is said, not a stop)
+    dirs = lambda d: sorted(k for k in os.listdir(d) if os.path.isdir(os.path.join(d, k))) if os.path.isdir(d) else []
+    kits = dirs(KB)
+    if not kits: w(f"No kits found: `{KB}` is not there or holds no kit folder."); w("")
+    if os.path.isdir(KB_APP):
+        same = [k for k in kits if os.path.isdir(os.path.join(KB_APP, k)) and tree(os.path.join(KB, k)) == tree(os.path.join(KB_APP, k))]
+        other = sorted(set(dirs(KB_APP)) - set(same))
+        w(f"The Cargo app downloads them into `{KB_APP}`: " +
+          (f"{len(same)} of its kits are the same as these (the same files and size)" if same else "none of its kits matches these") +
+          (f"; different or only there: {', '.join('`' + k + '`' for k in other)}." if other else "."))
+        w("")
     w("| Kit | Version | Models | Materials | Textures | Size | Path |")
     w("|---|---|---|---|---|---|---|")
     kb_models = {}
-    for k in sorted(os.listdir(KB)):
+    for k in kits:
         kd = os.path.join(KB, k)
-        for ver in sorted(os.listdir(kd)):
+        for ver in dirs(kd):
             vd = os.path.join(kd, ver)
             models = sorted(os.listdir(os.path.join(vd, "Models"))) if os.path.isdir(os.path.join(vd, "Models")) else []
             mats = os.listdir(os.path.join(vd, "Materials")) if os.path.isdir(os.path.join(vd, "Materials")) else []
