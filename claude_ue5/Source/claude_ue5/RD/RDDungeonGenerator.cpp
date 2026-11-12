@@ -1732,6 +1732,10 @@ void ARDDungeonGenerator::BeginPlay()
 		Warm2(ShrineFx); Warm2(HealFountainFx); Warm2(SpeedFountainFx); Warm2(ManaFountainFx); Warm2(BlessFx);
 		UE_LOG(LogRandomDungeonGen, Log, TEXT("RDSLASH %d effects asked to compile"), Num);
 	}
+	// (the list of 2026-11-11: the water's splash (its first in a session showed nothing: 9.4 s to compile) and the leaves)
+	if (WaterSplashFx) WaterSplashFx->RequestCompile(false);
+	if (WaterRingFx) WaterRingFx->RequestCompile(false);
+	if (WildLeavesFx) WildLeavesFx->RequestCompile(false);
 #endif
 	SlashR.Initialize((int32)HashCombine((uint32)SessionSeed, 0x51A5u));
 	MapData.Reset();

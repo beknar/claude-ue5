@@ -57,6 +57,13 @@ ARDTownsfolk* ARDDungeonGenerator::NearestWildFolk(const FVector& From, float Re
 				const float D = FVector::Dist2D(T->GetActorLocation(), From);
 				if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
 			}
+	// (the list of 2026-11-11: the people the director met her with)
+	for (const TWeakObjectPtr<ARDTownsfolk>& W : WildRoamFolk)
+		if (ARDTownsfolk* T = W.Get(); IsValid(T))
+		{
+			const float D = FVector::Dist2D(T->GetActorLocation(), From);
+			if (D < Bd && FMath::Abs(T->GetActorLocation().Z - From.Z) < 200.f) { Bd = D; Best = T; }
+		}
 	// (the list of 2026-11-10's sixth phase: the travellers on the roads)
 	for (const FTraveller& G : WildTravellers)
 		for (const TWeakObjectPtr<ARDTownsfolk>& W : G.Folk)

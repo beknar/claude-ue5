@@ -137,6 +137,16 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A picture from a raised point is a fall**: falls hurt (886); put her on the ground for a view and step back far enough (42 m for a yard).
 - **PR #49's review (2026-11-12)**: a thing of many pieces made in one frame is instances, one component a mesh, material, collision and visibility (`WildFarmInstance`), not a component a piece; a rule kept in two places says the same (the door's place across its wall in `farm_designs.py`'s `door_y` and `RDWF11DoorY`; the containers' hinge sign `RDContainerSign`, the dungeon's too); keys counted per thing made, never by a part's index times a slot count; a part turned its own way records its turn for whatever reads it back (the animals' pens); one rule's old copy goes when the new one covers it (the fixed layout is the default design); taking a range out of a shared list moves the ranges after it.
 
+## The meadows, the leaves and the director's new kinds (the list of 2026-11-11's fifth phase: `920`, `RD/RDWild11.cpp`, `888 meadows11,events11`)
+
+- **A struct read out of a list from Python is a copy**: `890`'s wind set the swaying materials on copies of the biomes' foliage and wrote nothing back; for nine days no grass in the wilds swayed, and nothing measured it. Write the element back into its list and the list back into its owner (`fol[i] = F`, `bios[i] = B`), then read the result from the level (the test reads the grass instances' material).
+- **A pattern's strength is a spread, not a count**: 43 trees round a spot with 95 % of cells bare "had groves" by eye, but the counts per cell were spread 1.4 times a random one's (barely clustered): density raised to 120 a hectare, 3.1.
+- **Measure a debris mesh before naming it**: a "branch" 6 m standing, "logs" that were stacks, branch cards 2 cm thick flat on the ground.
+- **Screen an effect against the base**: the base leaves (`WildLeavesFx` already on) showed in every candidate's picture; `SetWildLeavesFx` swaps the one system for the screening. Of six leaf systems only one read as leaves blowing at play's distance (the first choice was a few dark specks): look at the full-size crops, not a contact sheet.
+- **A test's log read by count misses lines**: the encounter lines are kept to 400; take the lines newer than the step's start by their time.
+- **A pile in reach takes F before a person**: a test that speaks to someone where an earlier event left things takes them up first (`events11`'s refugee).
+- **The port's coast** is in `graymourne.md`'s rules (the sea lifted to the harbour, every target that eases to a town's height less the lift).
+
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).

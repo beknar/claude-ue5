@@ -12,6 +12,7 @@
 #include "RD/RDMistward.h"
 #include "RD/RDCombat.h"
 #include "RD/RDSection.h"
+#include "RD/RDTown.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProceduralMeshComponent.h"
 #include "RD/RDGameInstance.h"
@@ -213,6 +214,8 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 		for (const ARDMonster* M : WildSection->SpawnedMonsters) if (IsValid(M) && !M->IsDead() && !M->IsAlly() && FVector::Dist2D(M->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("monster"); break; }
 	if (Near.IsEmpty()) for (const ARDWildAnimal* An : WildAnimals) if (IsValid(An) && !An->IsDead() && FVector::Dist2D(An->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("animal"); break; }
 	if (Near.IsEmpty()) for (const TWeakObjectPtr<ARDMonster>& M : WildRoamers) if (M.IsValid() && !M->IsDead() && FVector::Dist2D(M->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("roamer"); break; }
+	// (the list of 2026-11-11: one met on the way who has not given yet)
+	if (Near.IsEmpty()) for (const TWeakObjectPtr<ARDTownsfolk>& T : WildRoamFolk) if (T.IsValid() && !T->bWildGiven && FVector::Dist2D(T->GetActorLocation(), Her) < WildEngageM) { Near = TEXT("folk"); break; }
 	if (!Near.IsEmpty())
 	{
 		// (said again every 3 s while it lasts: the tests read the gaps between what met her)
@@ -264,7 +267,9 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	const FRDWildPoiKind& K = WildPoiKinds[Pick];
 	const int32 Tier = Wild->TierAt(At.X / 100.0, At.Y / 100.0);
 	int32 Made = 0;
-	if (K.Monsters > 0 && Monsters.Num() > 0)
+	// (the list of 2026-11-11: a point of interest laid ahead of her, a herd, a person on the way (RDWild11.cpp))
+	if (!K.Place.IsEmpty() || !K.Animals.IsEmpty() || !K.Folk.IsEmpty()) Made = MakeWildEncounter11(K, At, Rs);
+	else if (K.Monsters > 0 && Monsters.Num() > 0)
 	{
 		ARDSection* Ws_ = EnsureWildSection();
 		TArray<int32> Kinds; WildKindsForTier(Tier, Kinds);
@@ -303,7 +308,10 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	WildLastEngaged = Now;
 	if (WildEngagements.Num() > 400) WildEngagements.RemoveAt(0, WildEngagements.Num() - 400);
 	WildEngagements.Add(FString::Printf(TEXT("%.1f|met|%s|%.0f|%.0f"), Now, *K.Name.ToString(), At.X / 100.f, At.Y / 100.f));
-	if (!K.Text.IsEmpty()) PlayerCombat->ShowMessage(K.Text);
+	// (a person on the way says their own lines when she speaks to them (K.Text is those lines, joined by "|": shown here it
+	// printed the bar and said them before she came, PR #50's review): the meeting names them)
+	if (!K.Folk.IsEmpty()) { if (!K.Title.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("On the way: %s"), *K.Title)); }
+	else if (!K.Text.IsEmpty()) PlayerCombat->ShowMessage(K.Text);
 	UE_LOG(LogRDWildPoi, Log, TEXT("RDENCOUNTER %s at (%.0f, %.0f) m, tier %d, %d made"), *K.Name.ToString(), At.X / 100.f, At.Y / 100.f, Tier, Made);
 }
 

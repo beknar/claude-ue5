@@ -31,6 +31,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDTown, Log, All);
 
 // the town's building kinds and the things that stand outside (RDTown.h names them for the generator and the HUD)
 #include "RD/RDTown.h"
+#include "RD/RDWild.h"
 
 static const FIntPoint RDTDir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntPoint(0, -1), FIntPoint(0, 1) };
 
@@ -182,7 +183,10 @@ void ARDSection::PlanTown(FRandomStream& R)
 	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : (bMage || bModern) ? 15 : 21;
 	// (the port's harbour in the frame: from 26 tiles before the far wall to it, 24 tiles in from each side; its quay the 4 rows
 	// before it)
-	const int32 Hu0 = S - 26, Hv0 = 24, Hv1 = S - 24;
+	// (the numbers the world cuts the sea bed out of the harbour's mouth by: FRDWildWorld's, one rule (PR #50's review))
+	const int32 Hu0 = S - FRDWildWorld::PortHarbourDepthTiles, Hv0 = FRDWildWorld::PortHarbourSideTiles, Hv1 = S - FRDWildWorld::PortHarbourSideTiles;
+	if (bPort && Generator->bPortWaterOpen && (F.O != FRDWildWorld::PortFrameMarginTiles || !FMath::IsNearlyEqual(Generator->TileSize, FRDWildWorld::PortTileM * 100.f)))
+		UE_LOG(LogRDTown, Error, TEXT("RDTOWN the port's frame (margin %d, tile %.0f cm) is not the world's (%d, %.0f): the sea bed outside will not meet the harbour"), F.O, Generator->TileSize, FRDWildWorld::PortFrameMarginTiles, FRDWildWorld::PortTileM * 100.f);
 	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners; the cathedral (or
 	// the foundry) a little past the town's middle, the plaza before it)
 	const int32 Cu0 = bMid ? S / 2 - CD / 2 + 4 : S - 3 - CD, Cv0 = Vc - CW / 2;
@@ -274,7 +278,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 				const FIntPoint T = F.Tile(U, V);
 				Use[U * S + V] = 9; Type[Idx(T)] = 0; Owner[Idx(T)] = -1; TownRoadMask[Idx(T)] = 0;
 			}
-		TownHarbour = F.Rect(Hu0, Hv0, S, Hv1);
+		// (open to the sea (the list of 2026-11-11, bPortWaterOpen): on through the frame's margin to the section's edge, where the
+		// wilds' sea goes on)
+		TownHarbour = F.Rect(Hu0, Hv0, Generator->bPortWaterOpen ? S + F.O : S, Hv1);
 		for (int32 K = 0; K < 5; ++K)
 		{
 			const int32 Pv = Hv0 + 10 + K * ((Hv1 - Hv0 - 22) / 4);
@@ -868,12 +874,13 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// one more half way)
 	for (int32 I = 0, J = TownBorder.Num() - 1; I < TownBorder.Num(); J = I++)
 	{
+		// (none over a harbour open to the sea: the list of 2026-11-11, "the docks should not be surrounded by walls")
 		FTownSpot Sp; Sp.Kind = TS_Tower; Sp.At = FVector(TownBorder[I].X, TownBorder[I].Y, GetActorLocation().Z);
-		TownSpots.Add(Sp);
+		if (!NearOpenHarbour(Sp.At, 450.f)) TownSpots.Add(Sp);
 		if (FVector2D::Distance(TownBorder[I], TownBorder[J]) > 34.f * Generator->TileSize)
 		{
 			FTownSpot Sm; Sm.Kind = TS_Tower; const FVector2D Mm = (TownBorder[I] + TownBorder[J]) * 0.5f; Sm.At = FVector(Mm.X, Mm.Y, GetActorLocation().Z);
-			TownSpots.Add(Sm);
+			if (!NearOpenHarbour(Sm.At, 450.f)) TownSpots.Add(Sm);
 		}
 	}
 	// ---- the gate (on the gate's stretch, across the main road), outside it the way on
@@ -1844,6 +1851,7 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 					bool bInTower = false;
 					for (const FTownSpot& Sp : TownSpots) if (Sp.Kind == TS_Tower && FVector::Dist2D(Sp.At, P) < 300.f + Seg * 0.5f - 40.f) { bInTower = true; break; }
 					if (bInTower) continue;                                           // (the tower's own faces close it)
+					if (NearOpenHarbour(P, 150.f)) continue;                         // (the harbour open to the sea: no wall along it)
 					// (a wall piece runs along its +Y, its face toward +X: the parapet's the same; plain stone below, an arrow slit in
 					// one upper segment of three, by a hash of the place: until 2026-11-02 every piece was one with an arched doorway)
 					const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(P.X), FMath::RoundToInt(P.Y))), 0x5117u);

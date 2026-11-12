@@ -48,6 +48,7 @@ int32 URDWildProbeCommandlet::Main(const FString& Params)
 	if (Seed == 0) Seed = (uint32)(Gen->WildSeedFixed != 0 ? Gen->WildSeedFixed : Gen->StartSeed);
 
 	FRDWildWorld W;
+	W.bPortSea = Gen->bPortWaterOpen && !FParse::Param(*Params, TEXT("NoPortSea"));   // (the level's own world: the port's open sea, the list of 2026-11-11; -NoPortSea: as before it)
 	W.Init(Seed, Gen->WildBiomes);
 	UE_LOG(LogRDWildProbe, Display, TEXT("RDWILDPROBE the world made: seed %u, %d biomes, %d towns, %.2f s"), Seed, W.Biomes.Num(), W.Towns.Num(), W.InitSeconds);
 

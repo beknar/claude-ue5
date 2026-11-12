@@ -411,14 +411,16 @@ def wind():
         MEL.set_material_instance_parent(c, made[bn]); eal.save_loaded_asset(c, only_if_is_dirty=False)
         swayed[mi_.get_path_name()] = c
         return c
-    bios = g.get_editor_property("wild_biomes"); n = 0
-    for B in bios:
-        fol = B.get_editor_property("foliage")
-        for F in fol:
+    # (each biome put back into the list: a struct read out of it is a copy (the list of 2026-11-11 found the wilds' grass had never
+    # swayed: the changed copies were dropped))
+    bios = list(g.get_editor_property("wild_biomes")); n = 0
+    for bi, B in enumerate(bios):
+        fol = list(B.get_editor_property("foliage"))
+        for fi, F in enumerate(fol):
             if str(F.kind) not in ("grass", "bush", "flower") or not F.mesh: continue
             mats = [sway_of(s.material_interface) for s in F.mesh.static_materials]
-            if any(mats): F.set_editor_property("materials", [m_ if m_ else s.material_interface for m_, s in zip(mats, F.mesh.static_materials)]); n += 1
-        B.set_editor_property("foliage", fol)
+            if any(mats): F.set_editor_property("materials", [m_ if m_ else s.material_interface for m_, s in zip(mats, F.mesh.static_materials)]); fol[fi] = F; n += 1
+        B.set_editor_property("foliage", fol); bios[bi] = B
     g.set_editor_property("wild_biomes", bios)
     # (the town's grass and bushes: a piece's material for all its slots)
     P = g.get_editor_property("pieces"); tn = 0

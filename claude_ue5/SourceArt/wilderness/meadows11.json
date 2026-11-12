@@ -1,0 +1,27 @@
+{
+ "_doc": "The list of 2026-11-11's fifth phase (920 meadows): 'meadows should have clusters of trees, strips of trees and clearings free of trees; in meadows, there should be some scattering of debris: dead tree stumps, differently sized/shaped fallen branches, differently sized / shaped logs, leaves blowing in the wind, the grass should be moving in the wind'. biomes: the ones changed. trees / bushes: their kind's density (a hectare where the biome is whole; trees only where the grove pattern is, FRDWildWorld::Grove) and grove share. debris: [mesh, kind, a hectare, scale min, scale max, flags (c collision, a lean with the slope, n only near her), grove share, sink cm]: the meadow beech's own stump and log, four other logs (1 to 2.9 m, measured), seven dead branches, four leaf piles (meshes measured first: a 6 m standing branch, two log stacks and flat 2 cm branch cards left out). leaves: the blown leaves' Niagara system round her and the biomes it blows in.",
+ "biomes": ["meadows"],
+ "trees": {"density": 120, "grove": 1.0},
+ "bushes": {"grove": 0.55},
+ "debris": [
+  ["/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Stump_01","log",1.4,0.8,1.2,"c",0.0,12],
+  ["/Game/CastleofEternalMist/Scanned_Foliage/Objects/Foliage/EuropeanBeech/SM_EuropeanBeech_Log_01","log",0.8,0.6,1.0,"ca",0.5,8],
+  ["/Game/Village_Collection/Props/SM_WoodLog_Var1/Meshes/FBX/SM_WoodLog_Var1","log",0.5,0.8,1.3,"ca",0.4,6],
+  ["/Game/Medieval_Lake_Village/Meshs/SM_Branch01","litter",1.0,0.8,1.3,"an",0.5,2],
+  ["/Game/Volstok_District/Meshes/LP/SM_Dead_Leaf_Pile_01a","litter",1.8,0.8,1.4,"an",0.85,1],
+  ["/Game/Volstok_District/Meshes/LP/SM_Dead_Leaf_Pile_01b","litter",1.8,0.8,1.4,"an",0.85,1],
+  ["/Game/Volstok_District/Meshes/LP/SM_Dead_Leaf_Pile_01c","litter",1.8,0.8,1.4,"an",0.85,1],
+  ["/Game/Volstok_District/Meshes/LP/SM_Dead_Leaf_Pile_01d","litter",1.8,0.8,1.4,"an",0.85,1],
+  ["/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WoodLogs/sm_WoodLog_01a","log",0.5,0.8,1.2,"ca",0.4,6],
+  ["/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WoodLogs/sm_WoodLog_01b","log",0.5,0.8,1.2,"ca",0.4,6],
+  ["/Game/HouseForge_01/Viking_Village_Props/Meshes/Props/WoodLogs/sm_WoodLog_01d","log",0.5,0.8,1.2,"ca",0.4,6],
+  ["/Game/BoneTemple/Meshes/SM_TreeDead_Branch01","litter",0.8,0.8,1.3,"an",0.6,4],
+  ["/Game/BoneTemple/Meshes/SM_TreeDead_Branch03","litter",0.8,0.8,1.3,"an",0.6,4],
+  ["/Game/BoneTemple/Meshes/SM_TreeDead_Branch05","litter",0.8,0.8,1.3,"an",0.6,4],
+  ["/Game/BoneTemple/Meshes/SM_TreeDead_Branch07","litter",0.8,0.8,1.3,"an",0.6,4],
+  ["/Game/BoneTemple/Meshes/SM_TreeDead_Branch09","litter",0.8,0.8,1.3,"an",0.6,4],
+  ["/Game/BoneTemple/Meshes/SM_TreeDead_Branch11","litter",0.8,0.8,1.3,"an",0.6,4]
+ ],
+ "leaves": {"fx": "/Game/Medieval_Fantasy_Village/Fx/Flying_leaves/NS_leaves", "_fx": "chosen by 888 meadows11's screening (2026-11-12, wd_w11b_leaves11_*): the only one whose leaves read blowing across the view; FXS_Leaves left a few dark specks, NS_flying_leaves red petals", "candidates": ["/Game/Flower_meadows/FX/NS_flying_leaves", "/Game/Medieval_Fantasy_Village/Fx/Flying_leaves/NS_leaves", "/Game/Old_Windmill/Fx/Flying_leaves/NS_leaves", "/Game/PureNature_Meadows/Fx/FXS_Leaves", "/Game/Medieval_Lake_Village/VFX/NS_FallenLeaves", "/Game/MERIDIAN/VOL31_14WidowSt/VFX/NS_Falling_Leaves_01a"],
+            "biomes": ["meadows", "grasslands", "farms", "plains", "hills", "temperate autumn forests", "temperate aspen"], "ahead": 700, "scale": 1.0}
+}

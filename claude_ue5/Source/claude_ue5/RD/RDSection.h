@@ -447,6 +447,12 @@ public:
 	// ---- map
 	FRDSectionMap BuildMapData() const;
 
+	/** the port's harbour (the list of 2026-11-11: the water under her, the ramps' lines for the tests) */
+	bool HasHarbour() const { return TownHarbour.Area() > 0; }
+	bool IsHarbourWaterTile(const FIntPoint& Local) const { return InHarbourWater(Local); }
+	const TArray<FVector>& GetRampFeet() const { return TownRampFeet; }
+	const TArray<FVector>& GetRampTops() const { return TownRampTops; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
@@ -576,6 +582,11 @@ private:
 	void PortSpotBuild(const FTownSpot& Sp);
 	void SewerGateBuild(int32 BI);
 	bool InHarbourWater(const FIntPoint& T) const;
+	/** the list of 2026-11-11: whether the harbour is open to the sea (the generator's bPortWaterOpen) and a world point is within
+	 *  Reach cm of its rectangle (no town wall or tower stands there) */
+	bool NearOpenHarbour(const FVector& W, float Reach) const;
+	/** tests: the ramps up out of the harbour (world: foot in the water, top on the quay) */
+	TArray<FVector> TownRampFeet, TownRampTops;
 	void FoundryShell(int32 BI);
 	/** Kethrys Spire's mage city (the list of 2026-11-08b, RDMage.cpp): the black tower (its gatehouse and hall, the round tower
 	 *  over the hall, its cap, the sealed gate), a rune circle or a crystal pylon outdoors, a laboratory's cauldrons and tables */
