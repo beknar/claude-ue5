@@ -218,6 +218,9 @@ public:
 	/** Mark of the Hunted's one monster (the HUD marks it through walls) */
 	TWeakObjectPtr<class ARDMonster> HuntedMark;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") class ARDMonster* GetHuntedMark() const;
+	/** tests: a hit on a monster from her of a kind ("weapon", a spell's element, or none: a burn's tick), as the game lands it;
+	 *  what it took */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|List11") float TestHit11(class ARDMonster* M, float Amount, FName Element);
 	/** the element of the spell whose hurt is being dealt now (none: a weapon's blow, a slash, a burn); Brittle Bones and
 	 *  Elemental Ruin read it */
 	FName HitElement = NAME_None;

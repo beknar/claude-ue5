@@ -38,9 +38,10 @@ void ARDMonster::Curse11(ERDCurseEffect E, float Seconds, float Amount, FName El
 	const bool bWas = Now < C11Until[K];
 	if (E == ERDCurseEffect::Rot)
 	{
-		// (stacks up to three: each its own poison over its time)
-		if (!bWas) RotStacks = 0;
-		if (RotStacks < 3) { ++RotStacks; AddBurn(Amount, Seconds, 0.f); }
+		// (stacks up to three: each its own poison over its time; a stack whose poison has run out is free again (PR #48's
+		// review: counted until the whole curse ended, a fourth cast while one poison was left did nothing))
+		for (float& End : RotEnds)
+			if (End <= Now) { End = Now + Seconds; AddBurn(Amount, Seconds, 0.f); break; }
 		C11Until[K] = FMath::Max(C11Until[K], Now + Seconds); C11Amount[K] = Amount;
 		return;
 	}
@@ -53,6 +54,14 @@ void ARDMonster::Curse11(ERDCurseEffect E, float Seconds, float Amount, FName El
 	case ERDCurseEffect::Doom: if (!bWas) DoomTaken = 0.f; break;
 	case ERDCurseEffect::Dread: DreadTaken = 0.f; AttackTime = -1.f; Path.Reset(); break;
 	case ERDCurseEffect::Lethargy: SlowFor(0.3f, Seconds); break;
+	case ERDCurseEffect::Silence:
+		// (a shot or beam already in its wind-up is broken off: it would have gone off at its hit time (PR #48's review))
+		if (AttackTime >= 0.f && (bRangedSwing || bBeamSwing))
+		{
+			AttackTime = -1.f; bRangedSwing = bBeamSwing = false; bHitDone = true; ++SilencedRefusals;
+			bWalkingAnim = true; SetWalkingAnim(false);
+		}
+		break;
 	default: break;
 	}
 }
@@ -89,7 +98,7 @@ TArray<FString> ARDMonster::GetCurseLines() const
 		const ERDCurseEffect E = (ERDCurseEffect)K;
 		if (!HasCurse11(E)) continue;
 		FString More;
-		if (E == ERDCurseEffect::Rot) More = FString::Printf(TEXT("stacks %d"), RotStacks);
+		if (E == ERDCurseEffect::Rot) More = FString::Printf(TEXT("stacks %d"), RotStacksNow());
 		else if (E == ERDCurseEffect::Ruin) More = RuinElement.ToString();
 		else if (E == ERDCurseEffect::Kinship) More = FString::Printf(TEXT("group %d"), KinGroup);
 		else if (E == ERDCurseEffect::Doom) More = FString::Printf(TEXT("taken %.1f"), DoomTaken);
@@ -105,6 +114,35 @@ void ARDMonster::HealBy(float Amount)
 	// (Withering Brand: the heal it gets is its share less; no monster here heals itself, so there is no regeneration to stop)
 	if (HasCurse11(ERDCurseEffect::Withering)) Amount *= FMath::Clamp(1.f - C11Amount[(int32)ERDCurseEffect::Withering], 0.f, 1.f);
 	Health = FMath::Min(MaxHealth, Health + Amount);
+}
+
+bool ARDMonster::HoldFor11(float Seconds)
+{
+	if (bDead || !GetWorld()) return false;
+	const ARDDungeonGenerator* G = Section ? Section->Generator.Get() : nullptr;
+	if (bFinalBoss && G && G->FinalBossPoise > 0.f)
+	{
+		const float Now = GetWorld()->GetTimeSeconds();
+		if (Now - LastFlinchTime < G->FinalBossPoise) { ++FlinchesShrugged; return false; }
+		LastFlinchTime = Now;
+	}
+	StunFor(Seconds);
+	return true;
+}
+
+bool ARDMonster::HasAnyCurse11() const
+{
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	for (int32 K = 1; K < (int32)ERDCurseEffect::Count; ++K) if (Now < C11Until[K]) return true;
+	return false;
+}
+
+int32 ARDMonster::RotStacksNow() const
+{
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	int32 N = 0;
+	for (const float End : RotEnds) N += End > Now ? 1 : 0;
+	return N;
 }
 
 bool ARDMonster::IsAfraid() const { return HasCurse11(ERDCurseEffect::Dread); }
@@ -143,21 +181,24 @@ float ARDMonster::CurseDamageIn(float Amount, AActor* From)
 	URDCombatComponent* Pc = G->GetPlayerCombat();
 	const AActor* Her = Pc ? Pc->GetOwner() : nullptr;
 	const bool bHers = Her && From == Her;
-	const bool bWeapon = G->HitElement.IsNone();          // (a weapon's blow, a slash, a burn: no spell's element)
+	// (her weapon's blow, bolt or slash; a spell's hit carries its element; a burn's tick, a burst or a turned blow nothing (PR
+	// #48's review: "no element" had counted as a weapon's blow, and a burning brittle monster was knocked down every tick))
+	const bool bWeapon = G->HitElement == RDHitWeapon();
+	const bool bDirect = !G->HitElement.IsNone();
 	float A = Amount;
 	if (Now < SunderUntil) A *= 1.f + SunderShare;
 	if (HasCurse11(ERDCurseEffect::Brittle) && bWeapon && bHers) A *= 1.f + C11Amount[(int32)ERDCurseEffect::Brittle];
 	if (HasCurse11(ERDCurseEffect::Dread)) A *= 1.f + C11Amount[(int32)ERDCurseEffect::Dread];
-	if (HasCurse11(ERDCurseEffect::Ruin) && !G->HitElement.IsNone() && G->HitElement == RuinElement) A *= 1.f + C11Amount[(int32)ERDCurseEffect::Ruin];
-	// (her blows twice as hard: on the hunted its 10 %, on the brittle a weapon's 10 % (knocking it down))
-	if (bHers && !GRDL11Sharing)
+	if (HasCurse11(ERDCurseEffect::Ruin) && bDirect && !bWeapon && G->HitElement == RuinElement) A *= 1.f + C11Amount[(int32)ERDCurseEffect::Ruin];
+	// (her blows and spells twice as hard: on the hunted its 10 %, on the brittle a weapon's 10 % (knocking it down))
+	if (bHers && bDirect && !GRDL11Sharing)
 	{
 		const bool bHunted = HasCurse11(ERDCurseEffect::Hunted), bBrittle = HasCurse11(ERDCurseEffect::Brittle) && bWeapon;
 		const float Chance = (bHunted ? C11Amount[(int32)ERDCurseEffect::Hunted] : 0.f) + (bBrittle ? G->CurseCritChance : 0.f);
 		if (Chance > 0.f && RDL11Roll(GetUniqueID(), (uint32)(++CritRolls)) < Chance)
 		{
 			A *= 2.f; ++CritsTaken; ++Pc->CritsDealt;
-			if (bBrittle && !bDead) { StunFor(1.2f); ++KnockedDown; }
+			if (bBrittle && !bDead && HoldFor11(1.2f)) ++KnockedDown;
 		}
 	}
 	// (Leech Hex: a share of every hurt it takes, by anyone, heals her)
@@ -254,6 +295,16 @@ bool ARDMonster::TickFear(float Dt)
 
 // ================================================================================================ the generator's side
 ARDMonster* ARDDungeonGenerator::GetHuntedMark() const { return HuntedMark.Get(); }
+
+float ARDDungeonGenerator::TestHit11(ARDMonster* M, float Amount, FName Element)
+{
+	if (!IsValid(M) || M->IsDead()) return 0.f;
+	const float H0 = M->GetHealth();
+	const FName Was = HitElement; HitElement = Element;
+	M->ApplyDamage(Amount, PlayerCombat ? PlayerCombat->GetOwner() : nullptr);
+	HitElement = Was;
+	return H0 - M->GetHealth();
+}
 
 bool ARDDungeonGenerator::HeroCanLearnSpell(const FRDSpellDef& S) const
 {

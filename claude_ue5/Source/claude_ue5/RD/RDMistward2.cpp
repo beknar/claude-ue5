@@ -45,6 +45,8 @@ static const FName RDM2Interactive(TEXT("RDInteractive"));
 static void RDM2EndFx(UFXSystemComponent* F) { if (F) { F->DeactivateImmediate(); F->DestroyComponent(); } }
 /** how far a knock carries a monster for each cm/s of launch speed (measured: 300 cm/s, 1.09 m) */
 static constexpr float RDM2KnockCmPerSpeed = 0.36f;
+/** the list of 2026-11-11: the Quake Slash holds a monster once in this many seconds */
+static constexpr float RDQuakeWait = 4.f;
 
 /** a share (0..1) from a hash: the third list's rolls draw from no stream the play uses */
 static float RDM2Roll(uint32 A, uint32 B) { return (float)(HashCombine(A, B * 2654435761u + 0x9E37u) % 100000u) / 100000.f; }
@@ -725,7 +727,9 @@ void URDCombatComponent::SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dm
 	auto Hurt = [&](ARDMonster* M, float Amount, const FVector& Where)
 	{
 		if (!M || M->IsDead() || Amount <= 0.f) return;
+		const FName WasElement = Generator->HitElement; Generator->HitElement = RDHitWeapon();          // (a slash is her weapon's)
 		const bool bKilled = M->ApplyDamageEx(Amount, O, &Where, false, false);
+		Generator->HitElement = WasElement;
 		Generator->AddHitText(M->GetActorLocation() + FVector(0, 0, M->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 30.f), Amount, false);
 		DamageDealt += Amount; SlashBonusDealt += Amount;
 		if (bKilled) ++Kills;
@@ -841,7 +845,14 @@ void URDCombatComponent::SlashHit(const FRDSlashDef& S, ARDMonster* Mo, float Dm
 	case ERDSlashEffect::Sunder: if (!Mo->IsDead()) Mo->SunderFor(Amount, Secs); break;
 	case ERDSlashEffect::Echo: Echoes.Add({ Mo, (Dmg + S.Bonus) * Amount, Now + FMath::Max(Secs, 0.2f) }); break;
 	case ERDSlashEffect::Quake:
-		for (ARDMonster* M : Near(Mo->GetActorLocation(), S.Radius, nullptr)) { M->StunFor(Secs); if (M != Mo) Impact(M->GetActorLocation()); }
+		// (each monster held once in 4 s, the final boss by his poise (PR #48's review: a swing a second held a whole pack and
+		// Aurorim for good))
+		for (ARDMonster* M : Near(Mo->GetActorLocation(), S.Radius, nullptr))
+		{
+			float& Ready = StunReadyAt.FindOrAdd(M->GetUniqueID() ^ 0x51A4E000u);
+			if (Now < Ready) { SlashProcs.FindOrAdd(TEXT("quake_wait"))++; continue; }
+			if (M->HoldFor11(Secs)) { Ready = Now + RDQuakeWait; if (M != Mo) Impact(M->GetActorLocation()); }
+		}
 		break;
 	case ERDSlashEffect::Rally:
 		if (Mo->IsDead()) HealBy(MaxHealth * Amount);
@@ -872,7 +883,10 @@ void URDCombatComponent::TickSlashAreas(float Dt)
 			ARDMonster* M = Echoes[I].M.Get();
 			if (IsValid(M) && !M->IsDead())
 			{
+				const FName WasElement = Generator ? Generator->HitElement : NAME_None;
+				if (Generator) Generator->HitElement = RDHitWeapon();
 				const bool bKilled = M->ApplyDamageEx(Echoes[I].Amount, GetOwner(), nullptr, true, false);
+				if (Generator) Generator->HitElement = WasElement;
 				if (Generator) Generator->AddHitText(M->GetActorLocation() + FVector(0, 0, M->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 30.f), Echoes[I].Amount, false);
 				DamageDealt += Echoes[I].Amount; SlashBonusDealt += Echoes[I].Amount; SlashProcs.FindOrAdd(TEXT("echo_hit"))++;
 				if (bKilled) ++Kills;

@@ -51,7 +51,10 @@ bool URDCombatComponent::LearnSpell(FName Spell)
 	const FRDSpellDef& S = Generator->Spells[Si];
 	if (!Generator->HeroCanLearnSpell(S))          // (the list of 2026-11-11: and no other hero's own)
 	{
-		SetMessage(FString::Printf(TEXT("The %s cannot learn %s (%s)"), *Generator->PlayerTitle.ToLower(), *S.Name.ToString(), RDSpellTypeName(S.Type)));
+		// (the reason: another hero's own (PR #48's review: the type was named, one the Mage learns), or its type)
+		const FString Why = Generator->HeroLearns(S.Type) && S.OnlyHeroes.Num() > 0
+			? FString::Printf(TEXT("only the %s learns it"), *S.OnlyHeroes[0].ToString().ToLower()) : FString(RDSpellTypeName(S.Type));
+		SetMessage(FString::Printf(TEXT("The %s cannot learn %s (%s)"), *Generator->PlayerTitle.ToLower(), *S.Name.ToString(), *Why));
 		return false;
 	}
 	FRDWeaponDef W;

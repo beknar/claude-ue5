@@ -1,172 +1,14 @@
 {
- "tag": "s11c",
+ "tag": "s11h",
  "plan": [
-  "spells11"
+  "spells11_curses",
+  "spells11_slashes"
  ],
  "level": "mistward_castle",
  "steps": [
   {
-   "step": "spells11",
-   "ok": false,
-   "cantrip": {
-    "index": 0,
-    "mana_cost": 0.0,
-    "label": "Fire Bolt (cantrip)",
-    "heroes": {
-     "Warrior": [],
-     "Mage": [
-      [
-       0.0,
-       "Fire Bolt (cantrip)"
-      ]
-     ],
-     "Warlock": [
-      [
-       0.0,
-       "Fire Bolt (cantrip)"
-      ]
-     ],
-     "Rogue": [],
-     "MartialArtist": [],
-     "Summoner": [
-      [
-       0.0,
-       "Fire Bolt (cantrip)"
-      ]
-     ]
-    },
-    "t1": {
-     "tier": 1,
-     "spell_mul": 1.0,
-     "started": true,
-     "mana_before": 0.78,
-     "mana_after": 0.78,
-     "bolts": 1,
-     "lost": 25.0
-    },
-    "t10": {
-     "tier": 10,
-     "spell_mul": 2.6083,
-     "started": true,
-     "mana_before": 1.24,
-     "mana_after": 1.24,
-     "bolts": 1,
-     "lost": 65.2
-    },
-    "ratio": 2.608,
-    "want_ratio": 2.608
-   },
-   "spells": {
-    "heroes_clips": {
-     "Mage": [
-      "Singularity",
-      "Soul Rend",
-      "Starfall"
-     ],
-     "Warlock": [
-      "Singularity",
-      "Soul Rend",
-      "Starfall"
-     ],
-     "Summoner": [
-      "Singularity",
-      "Soul Rend",
-      "Starfall"
-     ]
-    },
-    "mage_knows_rot": false,
-    "cast": {
-     "Starfall": {
-      "knows": true,
-      "index": 30,
-      "looks": {
-       "cast_fx": "NS_Muzzle_ShootingStar01",
-       "bolt_fx": "NS_Projectile_ShootingStar01",
-       "impact_fx": "NS_Hit_Sun01",
-       "area_fx": null
-      },
-      "old_looks": {
-       "cast_fx": null,
-       "bolt_fx": "NS_Projectile_Rock_V1",
-       "impact_fx": "NS_GroundExplosion_04",
-       "area_fx": null
-      },
-      "clip": "AS_Caster_Cast_Starfall",
-      "shown": "Starfall",
-      "hit": 1.15,
-      "end": 2.0,
-      "want_hit": 1.15,
-      "started": true,
-      "particles_at_monster": 210,
-      "lost": 735.0
-     },
-     "Singularity": {
-      "knows": true,
-      "index": 31,
-      "looks": {
-       "cast_fx": "NS_Muzzle_RotatingSpheres",
-       "bolt_fx": null,
-       "impact_fx": "NS_Absorption_Purple",
-       "area_fx": "NS_Vortex_Void"
-      },
-      "old_looks": {
-       "cast_fx": null,
-       "bolt_fx": null,
-       "impact_fx": "NS_GroundExplosion_10",
-       "area_fx": "NS_Muzzle_Wind01"
-      },
-      "clip": "AS_Caster_Cast_Singularity",
-      "shown": "Singularity",
-      "hit": 1.25,
-      "end": 2.0,
-      "want_hit": 1.25,
-      "started": true,
-      "particles_at_monster": 33326,
-      "lost": 1053.0
-     },
-     "Soul Rend": {
-      "knows": true,
-      "index": 19,
-      "looks": {
-       "cast_fx": "NS_Muzzle_Orb01",
-       "bolt_fx": "NS_Projectile_Orb01",
-       "impact_fx": "NS_Absorption_Teal",
-       "area_fx": null
-      },
-      "old_looks": {
-       "cast_fx": "NS_Muzzle_Ghostly01",
-       "bolt_fx": "NS_Projectile_Ghostly01",
-       "impact_fx": "NS_Hit_Ghostly01",
-       "area_fx": null
-      },
-      "clip": "AS_Caster_Cast_SoulRend",
-      "shown": "Soul Rend",
-      "hit": 0.75,
-      "end": 1.583,
-      "want_hit": 0.75,
-      "started": true,
-      "particles_at_monster": 10586,
-      "lost": 1200.0
-     }
-    },
-    "warlock": {
-     "Starfall": {
-      "knows": true,
-      "clip": "AS_DarkCaster_Cast_Starfall",
-      "hit": 1.15
-     },
-     "Singularity": {
-      "knows": true,
-      "clip": "AS_DarkCaster_Cast_Singularity",
-      "hit": 1.25
-     },
-     "Soul Rend": {
-      "knows": true,
-      "clip": "AS_DarkCaster_Cast_SoulRend",
-      "hit": 0.75
-     }
-    }
-   },
+   "step": "spells11_curses",
+   "ok": true,
    "curses": {
     "learned": {
      "Curse of Rot": true,
@@ -198,6 +40,60 @@
      "Chains of Kinship": "Chains of Kinship",
      "Doom": "Doom"
     },
+    "icons": {
+     "Curse of Rot": [
+      "spell_curse_of_rot",
+      true
+     ],
+     "Hex of Lethargy": [
+      "spell_hex_of_lethargy",
+      true
+     ],
+     "Mark of the Hunted": [
+      "spell_mark_of_the_hunted",
+      true
+     ],
+     "Withering Brand": [
+      "spell_withering_brand",
+      true
+     ],
+     "Curse of Silence": [
+      "spell_curse_of_silence",
+      true
+     ],
+     "Curse of Brittle Bones": [
+      "spell_curse_of_brittle_bones",
+      true
+     ],
+     "Curse of Greed": [
+      "spell_curse_of_greed",
+      true
+     ],
+     "Leech Hex": [
+      "spell_leech_hex",
+      true
+     ],
+     "Curse of Dread": [
+      "spell_curse_of_dread",
+      true
+     ],
+     "Contagion": [
+      "spell_contagion",
+      true
+     ],
+     "Elemental Ruin": [
+      "spell_elemental_ruin",
+      true
+     ],
+     "Chains of Kinship": [
+      "spell_chains_of_kinship",
+      true
+     ],
+     "Doom": [
+      "spell_doom",
+      true
+     ]
+    },
     "rot": {
      "started": [
       true,
@@ -206,18 +102,22 @@
      "mana_taken": 24.0,
      "want_mana": 24,
      "first": [
-      7.14,
+      7.15,
       9.0,
       "stacks 1"
      ],
      "second": [
-      7.26,
+      7.24,
       9.0,
       "stacks 2"
      ],
-     "lost_4s": 75.0,
+     "lost_4s": 74.1,
      "want_4s": 72.0,
-     "particles": 11243
+     "particles": 11268
+    },
+    "rot_again": {
+     "before": 2,
+     "after": 3
     },
     "lethargy": {
      "slow": [
@@ -235,11 +135,12 @@
     },
     "hunted": {
      "marked_a": true,
-     "crits": 7,
-     "doubled": 7,
-     "plain": 53,
+     "crits": 2,
+     "doubled": 2,
+     "plain": 58,
      "marked_b": true,
-     "a_still": false
+     "a_still": false,
+     "burns_doubled": 0
     },
     "withering": {
      "healed": 50.0,
@@ -256,8 +157,8 @@
       true
      ],
      "left": [
-      2.91,
-      1.41
+      2.95,
+      1.45
      ],
      "after_2s": [
       true,
@@ -272,12 +173,16 @@
       50.0,
       50.0,
       50.0,
-      100.0,
+      50.0,
       50.0
      ],
      "plain_monster": 40.0,
      "nobodys": 40.0,
-     "crits": 1
+     "crits": 0,
+     "her_burns": [
+      40.0
+     ],
+     "her_spell": 40.0
     },
     "greed": {
      "greed_gold": 1,
@@ -293,8 +198,8 @@
       true
      ],
      "fled_cm": [
-      189,
-      189
+      186,
+      186
      ],
      "blow_10": 11.5,
      "a_after_tenth": false
@@ -303,28 +208,28 @@
      "spread": 3,
      "near_rot": [
       [
-       7.35,
+       7.3,
        0.3,
        "stacks 1"
       ],
       [
-       7.35,
+       7.3,
        0.3,
        "stacks 1"
       ],
       [
-       7.35,
+       7.3,
        0.3,
        "stacks 1"
       ]
      ],
      "far_rot": null,
-     "left_was": 7.46
+     "left_was": 7.44
     },
     "ruin": {
      "last_element": "fire",
      "line": [
-      11.75,
+      11.79,
       0.4,
       "fire"
      ],
@@ -355,7 +260,7 @@
      "a_lost_at_end": 200.0
     },
     "cast_counts": {
-     "Curse of Rot": 3,
+     "Curse of Rot": 7,
      "Hex of Lethargy": 3,
      "Mark of the Hunted": 2,
      "Withering Brand": 1,
@@ -370,6 +275,13 @@
      "Doom": 2
     }
    },
+   "oks": {
+    "curses": true
+   }
+  },
+  {
+   "step": "spells11_slashes",
+   "ok": true,
    "slashes": {
     "count": 30,
     "by_tier": {
@@ -400,7 +312,7 @@
       "hit": true,
       "bonus": 14.65,
       "want_bonus": 5.0,
-      "fx": 52,
+      "fx": 54,
       "procs": {
        "cleave": 1
       },
@@ -431,14 +343,14 @@
       "hit": true,
       "bonus": 9.0,
       "want_bonus": 9.0,
-      "fx": 38,
+      "fx": 54,
       "procs": {
        "echo": 1
       },
-      "echo": 0.0,
+      "echo": 11.65,
       "want": 11.65,
-      "echo_hits": 0,
-      "ok": false
+      "echo_hits": 1,
+      "ok": true
      },
      "Sundering Slash": {
       "applied": true,
@@ -446,7 +358,7 @@
       "hit": true,
       "bonus": 14.0,
       "want_bonus": 14.0,
-      "fx": 13,
+      "fx": 20,
       "procs": {
        "sunder": 1
       },
@@ -459,7 +371,7 @@
       "hit": true,
       "bonus": 42.3,
       "want_bonus": 14.0,
-      "fx": 12,
+      "fx": 10,
       "procs": {
        "whirl": 1
       },
@@ -477,7 +389,7 @@
       "hit": true,
       "bonus": 22.0,
       "want_bonus": 22.0,
-      "fx": 120,
+      "fx": 106,
       "procs": {
        "quake": 1
       },
@@ -486,6 +398,7 @@
        true,
        false
       ],
+      "second_waits": 2,
       "ok": true
      },
      "Headsman's Slash": {
@@ -494,7 +407,7 @@
       "hit": true,
       "bonus": 58.3,
       "want_bonus": 22.0,
-      "fx": 14,
+      "fx": 28,
       "procs": {
        "execute": 1
       },
@@ -508,7 +421,7 @@
       "hit": true,
       "bonus": 34.0,
       "want_bonus": 34.0,
-      "fx": 47,
+      "fx": 41,
       "procs": {
        "rally": 1
       },
@@ -523,7 +436,7 @@
       "hit": true,
       "bonus": 62.98,
       "want_bonus": 34.0,
-      "fx": 85,
+      "fx": 81,
       "procs": {
        "soulfire": 1
       },
@@ -538,25 +451,19 @@
     },
     "trail": {
      "trails": 1,
-     "fx_max": 60
+     "fx_max": 64
     }
    },
    "oks": {
-    "cantrip": true,
-    "spells": true,
-    "curses": true,
-    "slashes": false
+    "slashes": true
    }
   }
  ],
  "windows_hidden": "",
  "shots": [
-  "mw_s11c_s11_starfall.png",
-  "mw_s11c_s11_singularity.png",
-  "mw_s11c_s11_soulrend.png",
-  "mw_s11c_s11_hunted.png",
-  "mw_s11c_s11_curses.png",
-  "mw_s11c_s11_slash_trail.png"
+  "mw_s11h_s11_hunted.png",
+  "mw_s11h_s11_curses.png",
+  "mw_s11h_s11_slash_trail.png"
  ],
  "error": null,
  "windows_shown_again": 0

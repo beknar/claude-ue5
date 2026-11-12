@@ -141,6 +141,11 @@ public:
 	void WeakenFor(float Share, float Seconds);
 	/** its blow's factor (a curse, a weakening) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|List11") float BlowMul() const;
+	/** a hold from her slashes and curses (the Quake Slash, Brittle Bones' knock-down) that keeps the final boss's poise: within
+	 *  FinalBossPoise of his last flinch he shrugs it off (PR #48's review); whether it held */
+	bool HoldFor11(float Seconds);
+	/** any of the thirteen curses on it now (the HUD's mark, every frame: no lines built) */
+	bool HasAnyCurse11() const;
 	/** an elite (hell's, or past its tier's hit points by a quarter) or a boss */
 	bool IsEliteOrBoss() const;
 	/** tests: what its curses did (doubled blows, knockdowns, hit points given to her, hurt shared, doom's burst, executed) */
@@ -163,7 +168,10 @@ private:
 	float C11Until[(int32)ERDCurseEffect::Count] = {};
 	float C11Amount[(int32)ERDCurseEffect::Count] = {};
 	FName RuinElement = NAME_None;
-	int32 KinGroup = -1, RotStacks = 0, CritRolls = 0;
+	int32 KinGroup = -1, CritRolls = 0;
+	/** Curse of Rot: when each of its (up to) three poisons ends; a stack is free again once its poison has run out */
+	float RotEnds[3] = { -100.f, -100.f, -100.f };
+	int32 RotStacksNow() const;
 	float DoomTaken = 0.f, DreadTaken = 0.f, SunderUntil = -100.f, SunderShare = 0.f, WeakenUntil = -100.f, WeakenShare = 0.f;
 public:
 

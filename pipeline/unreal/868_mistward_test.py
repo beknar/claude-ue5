@@ -2139,7 +2139,10 @@ def slash_trial(c, name, idx):
         # (a blow of 100 by nobody: what it takes with the sunder on, against 100)
         ha = hp(main); main.apply_damage(100.0, None); r["blow_100"] = round(ha - hp(main), 2); r["ok"] = abs(r["blow_100"] - 100.0 * (1.0 + sd.amount)) < 0.6
     elif eff == "quake":
-        r["stunned"] = [main.is_stunned()] + [m.is_stunned() if alive(m) else None for m in others]; r["ok"] = r["stunned"] == [True, True, False]
+        r["stunned"] = [main.is_stunned()] + [m.is_stunned() if alive(m) else None for m in others]
+        # (PR #48's review: each held once in 4 s: a second hit at once waits)
+        qw = md(c.slash_procs).get("quake_wait", 0); c.apply_slash_hit_now(idx, main); r["second_waits"] = md(c.slash_procs).get("quake_wait", 0) - qw
+        r["ok"] = r["stunned"] == [True, True, False] and r["second_waits"] == 2
     elif eff == "execute":
         r["lost"] = round((h0 or 0) - (h1 or 0), 1); r["want"] = round(sd.bonus + c.get_damage_of(idx) + sd.bonus, 1)
         r["ok"] = r["procs"].get("execute", 0) == 1 and abs(r["lost"] - r["want"]) < 1.0
@@ -5363,6 +5366,15 @@ def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
                         "lost_4s": round(h1 - hp(m), 1), "want_4s": round(2 * m.get_max_health() * CU["Rot"]["amount"] / CU["Rot"]["duration"] * 4.0, 1),
                         "particles": s11_parts(c, m.get_actor_location(), 300.0)}
             drop([m]); yield from wait(0.3)
+            # (PR #48's review: a stack is free again once its poison ends, while the curse's later stacks still run: three casts 1 s
+            # apart, the first's 8 s over: two left, a fourth cast makes three)
+            m = spawn_dummy(ahead(500)); yield from wait(0.6); t0 = now()
+            for k in range(3):
+                now_cast("Rot", m); yield from wait(1.0)
+            while now() - t0 < 8.4: yield
+            n_before = int(s11_lines(m).get("rot", (0, 0, "stacks 0"))[2].split()[-1]); now_cast("Rot", m); yield from wait(0.1)
+            r["rot_again"] = {"before": n_before, "after": int(s11_lines(m).get("rot", (0, 0, "stacks 0"))[2].split()[-1])}
+            drop([m]); yield from wait(0.3)
             # (Lethargy: three in its area slowed, one beyond not)
             ms = [spawn_dummy(ahead(500)), spawn_dummy(ahead(500, 180)), spawn_dummy(ahead(650, -150)), spawn_dummy(ahead(1300))]; yield from wait(0.6)
             now_cast("Lethargy", ms[0]); yield from wait(0.2)
@@ -5372,12 +5384,13 @@ def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
             a = spawn_dummy(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
             now_cast("Hunted", a); yield from wait(0.2); mark_a = g.get_hunted_mark() == a
             cr0 = c.crits_dealt; losses = []
-            for _ in range(60):
-                hb = a.get_health(); a.apply_damage(5.0, pawn); losses.append(round(hb - a.get_health(), 2))
+            for _ in range(60): losses.append(round(g.test_hit11(a, 5.0, "weapon"), 2))          # (her weapon's blows)
+            # (PR #48's review: a burn's tick from her (no kind) is never doubled)
+            burns = [round(g.test_hit11(a, 5.0, "None"), 2) for _ in range(30)]
             shot("s11_hunted", "1280x720"); yield from rwait(1.0)
             now_cast("Hunted", b); yield from wait(0.2)
             r["hunted"] = {"marked_a": mark_a, "crits": c.crits_dealt - cr0, "doubled": sum(1 for x in losses if x > 7.5), "plain": sum(1 for x in losses if abs(x - 5) < 0.01),
-                           "marked_b": g.get_hunted_mark() == b, "a_still": "hunted" in s11_lines(a)}
+                           "marked_b": g.get_hunted_mark() == b, "a_still": "hunted" in s11_lines(a), "burns_doubled": sum(1 for x in burns if x > 7.5)}
             drop([a, b]); yield from wait(0.3)
             # (Withering: a heal of 100 gives 50; on one without it 100)
             a = spawn_dummy(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
@@ -5397,11 +5410,12 @@ def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
             now_cast("Brittle", a); yield from wait(0.2)
             la = []
             cr0 = c.crits_dealt
-            for _ in range(8):
-                h_ = a.get_health(); a.apply_damage(40.0, pawn); la.append(round(h_ - a.get_health(), 2))
-            h_ = b.get_health(); b.apply_damage(40.0, pawn); lb = round(h_ - b.get_health(), 2)
+            for _ in range(8): la.append(round(g.test_hit11(a, 40.0, "weapon"), 2))          # (her weapon's blows)
+            lb = round(g.test_hit11(b, 40.0, "weapon"), 2)
             h_ = a.get_health(); a.apply_damage(40.0, None); ln = round(h_ - a.get_health(), 2)
-            r["brittle"] = {"hers": la, "plain_monster": lb, "nobodys": ln, "crits": c.crits_dealt - cr0}
+            # (PR #48's review: her burn's tick and her spell's hit are no weapon's blow)
+            lburn = [round(g.test_hit11(a, 40.0, "None"), 2) for _ in range(10)]; lspell = round(g.test_hit11(a, 40.0, "fire"), 2)
+            r["brittle"] = {"hers": la, "plain_monster": lb, "nobodys": ln, "crits": c.crits_dealt - cr0, "her_burns": sorted(set(lburn)), "her_spell": lspell}
             drop([a, b]); yield from wait(0.3)
             # (Greed: killed while cursed, half as much gold again)
             a = s11_mob(ahead(500)); yield from wait(0.6)
@@ -5469,7 +5483,9 @@ def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
                   and all(rot["started"]) and abs(rot["mana_taken"] - rot["want_mana"]) < 0.01 and rot["first"] and rot["first"][2] == "stacks 1" and rot["second"] and rot["second"][2] == "stacks 2"
                   and rot["want_4s"] * 0.6 < rot["lost_4s"] < rot["want_4s"] * 1.5
                   and le["cursed"] == [True, True, True, False] and all(abs(s - 0.3) < 0.01 for s in le["slow"][:3]) and le["slow"][3] == 0
-                  and hu["marked_a"] and hu["crits"] >= 1 and hu["doubled"] == hu["crits"] and hu["marked_b"] and not hu["a_still"]
+                  and hu["marked_a"] and hu["crits"] >= 1 and hu["doubled"] == hu["crits"] and hu["marked_b"] and not hu["a_still"] and hu["burns_doubled"] == 0
+                  and br["her_burns"] == [40.0] and br["her_spell"] == 40.0
+                  and r["rot_again"]["before"] == 2 and r["rot_again"]["after"] == 3
                   and abs(wt["healed"] - 50) < 0.6 and abs(wt["healed_plain"] - 100) < 0.6
                   and si["silenced"] == [True, True] and abs(si["left"][0] - 3.0) < 0.15 and abs(si["left"][1] - 1.5) < 0.15 and si["after_2s"][1] is False and si["after_2s"][0] is True
                   and abs(min(br["hers"]) - 50) < 0.01 and abs(br["plain_monster"] - 40) < 0.01 and abs(br["nobodys"] - 40) < 0.01

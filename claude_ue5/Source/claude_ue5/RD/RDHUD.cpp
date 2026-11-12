@@ -250,7 +250,7 @@ void ARDHUD::DrawCombat(float Sc)
 		// (level 5: the gallery's name; cursed, slowed or burning: a mark after it)
 		const FString Nm = Mo->Title.IsEmpty() ? Mo->MonsterName.ToString().Replace(TEXT("_"), TEXT(" ")) : Mo->Title;
 		FString Marks;
-		if (Mo->GetCurseShare() > 0.f || Mo->GetCurseLines().Num() > 0) Marks += TEXT("  CURSED");
+		if (Mo->GetCurseShare() > 0.f || Mo->HasAnyCurse11()) Marks += TEXT("  CURSED");
 		if (Mo->IsAfraid()) Marks += TEXT("  AFRAID");
 		if (Mo->IsSilenced()) Marks += TEXT("  SILENCED");
 		if (Mo->GetSlowShare() > 0.f) Marks += TEXT("  SLOWED");
@@ -1719,7 +1719,10 @@ FString ARDHUD::DescribeItem(const FRDItemDef& It) const
 		FString S = FString::Printf(TEXT("Teaches %s (%s): %s.  %.0f mana"), *Sp.Name.ToString(), RDSpellTypeName(Sp.Type), *Sp.Effect, Sp.Mana);
 		if (Sp.Cooldown > 0.f) S += FString::Printf(TEXT(", cooldown %.0f s"), Sp.Cooldown);
 		S += TEXT(".");
-		if (Gen && !Gen->HeroLearns(Sp.Type)) S += FString::Printf(TEXT("  The %s cannot learn it."), *Gen->PlayerTitle.ToLower());
+		if (Gen && !Gen->HeroCanLearnSpell(Sp))
+			S += Gen->HeroLearns(Sp.Type) && Sp.OnlyHeroes.Num() > 0
+				? FString::Printf(TEXT("  Only the %s learns it."), *Sp.OnlyHeroes[0].ToString().ToLower())
+				: FString::Printf(TEXT("  The %s cannot learn it."), *Gen->PlayerTitle.ToLower());
 		// (the user's of 2026-10-28: the Mage's pool grows with Null Sanctum and Apocalypse)
 		else if (const FRDHeroDef* H = Gen ? Gen->FindHero(Gen->CurrentHero) : nullptr)
 			if (const float* Pool = H->TomeMana.Find(Sp.Name)) S += FString::Printf(TEXT("  Learning it raises your mana pool to %.0f."), *Pool);

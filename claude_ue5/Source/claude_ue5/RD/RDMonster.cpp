@@ -750,7 +750,6 @@ bool ARDMonster::TickCombat(float Dt)
 	// (her ally: its time runs out, and it falls)
 	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
-	if (TickFear(Dt)) return true;          // (the list of 2026-11-11: Curse of Dread: it runs from her)
 	RangedWaitLeft = FMath::Max(0.f, RangedWaitLeft - Dt);
 	BeamWaitLeft = FMath::Max(0.f, BeamWaitLeft - Dt);
 	CombatBranch = TEXT("none");
@@ -764,6 +763,9 @@ bool ARDMonster::TickCombat(float Dt)
 	URDCombatComponent* Pc = G->GetPlayerCombat();
 	// (mistward: locked in its cell, it waits)
 	if (bCaged) { SetWalkingAnim(false); return true; }
+	// (the list of 2026-11-11: Curse of Dread: it runs from her; after the stun and the cell (PR #48's review: a held or caged
+	// one ran on), and after the shot's and beam's waits have counted down)
+	if (TickFear(Dt)) { CombatBranch = TEXT("fear"); return true; }
 	// the one it fights (level 5: her or her allies; her ally fights the monsters)
 	bool bFoePlayer = false;
 	AActor* P = AttackTime >= 0.f && CurrentFoe.IsValid() ? CurrentFoe.Get() : PickFoe(Pc, bFoePlayer);

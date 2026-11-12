@@ -482,7 +482,10 @@ void URDCombatComponent::Strike()
 		if (Dist > 40.f && FVector::DotProduct(D.GetSafeNormal(), Fw) < MinCos) continue;
 		Generator->PlaySoundAt(HitSound, Mo->GetActorLocation());
 		const float Dmg = GetDamageOf(AttackIndex) + Mb;         // (with her melee bonus)
+		// (the list of 2026-11-11: a weapon's blow, for Brittle Bones and the hunted mark (PR #48's review: not a burn's tick))
+		const FName WasElement = Generator->HitElement; Generator->HitElement = RDHitWeapon();
 		const bool bKilled = Mo->ApplyDamage(Dmg, O);
+		Generator->HitElement = WasElement;
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false);
 		DamageDealt += Dmg; ++HitsLanded; bAny = true;
 		if (bKilled) ++Kills;
@@ -535,6 +538,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 	if (Now < DeflectUntil && DeflectShare > 0.f && SpellR.FRand() < DeflectShare)
 		if (ARDMonster* Mo = Cast<ARDMonster>(From); Mo && !Mo->IsDead())
 		{
+			CurrentSpellElement = NAME_None;          // (a turned blow has no spell's element: PR #48's review)
 			SpellHurt(Mo, Amount, Mo->GetActorLocation() + FVector(0, 0, 40.f), true);
 			++Reflected; SlashProcs.FindOrAdd(TEXT("deflected"))++;
 			return;
@@ -559,6 +563,7 @@ void URDCombatComponent::ApplyDamage(float Amount, AActor* From)
 		if (ARDMonster* Mo = Cast<ARDMonster>(From); Mo && !Mo->IsDead())
 		{
 			const float Back = Amount * MirrorShare;
+			CurrentSpellElement = NAME_None;
 			SpellHurt(Mo, Back, Mo->GetActorLocation() + FVector(0, 0, 40.f), true);
 			Amount -= Back; ++Reflected;
 			if (Amount <= 0.f) return;
@@ -2513,9 +2518,14 @@ void URDCombatComponent::Burst(FBolt& B, const FVector& At, ARDMonster* Direct)
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, W.SpellLightIntensity * 3.f }); }
 	if (!PayFreeBolt(B, At, Direct, W.BoltSplash)) { ++BoltsElsewhere; LastBurstAt = At; LastBoltFlown = B.Flown; return; }
 	bool bAny = false;
+	// (a bow's or crossbow's bolt is a weapon's blow; a spell weapon's that is not of the table carries its name's element)
+	// (bows and crossbows are spell weapons here, their bolt a mesh: a weapon's blow)
+	const FName BoltElement = W.bSpell && !W.BoltMesh ? RDElementOfName(W.Name) : RDHitWeapon();
 	auto Hurt = [&](ARDMonster* Mo, float Amount, const FVector& Where)
 	{
+		const FName WasElement = Generator->HitElement; Generator->HitElement = BoltElement;
 		const bool bKilled = Mo->ApplyDamageAt(Amount, O, &Where);
+		Generator->HitElement = WasElement;
 		Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Amount, false);
 		DamageDealt += Amount; ++HitsLanded; bAny = true;
 		if (bKilled) ++Kills;

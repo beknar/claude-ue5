@@ -1511,7 +1511,8 @@ void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 		if ((float)(HashCombine(H, 0x6EEDu) % 1000u) / 1000.f < 0.15f && M->Section)
 		{
 			const FName Thing = LootOf(M->Section->Coord, (int32)(H % 997u) + 4000);
-			if (!Thing.IsNone()) { TArray<float> Wr; Wr.Add(-1.f); if (DropLoot(M->GetActorLocation(), { Thing }, Wr)) ++GreedThings; }
+			// (the monster's, not her things (PR #48's review: a pile is hers by default))
+			if (!Thing.IsNone()) { TArray<float> Wr; Wr.Add(-1.f); if (ARDLootPile* Pl = DropLoot(M->GetActorLocation(), { Thing }, Wr)) { Pl->bHers = false; ++GreedThings; } }
 		}
 	}
 	if (Gold > 0) AddGold(Gold, bBossKill || M->bBoss ? TEXT("the boss's hoard") : FString());

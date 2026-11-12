@@ -51,6 +51,21 @@ struct FRDCarry;
  *  (whose end would take it off); StartStealth / EndStealth and a stealth carried to another level (RDCarry.cpp) */
 static constexpr ERDSpellKind RDStealthAuraKind = (ERDSpellKind)200;
 
+/** the list of 2026-11-11: what a hit on a monster is (the generator's HitElement while it lands): "weapon" for her weapons'
+ *  blows, bolts and slashes (Brittle Bones, the hunted mark), a spell's element for a spell (Elemental Ruin), none for a burn's
+ *  tick, a burst, a monster's blow (PR #48's review: "no element" had counted as a weapon's blow) */
+inline FName RDHitWeapon() { static const FName N(TEXT("weapon")); return N; }
+/** a spell weapon's element by a word of its name (one not of the table: its spell's Element is not there) */
+inline FName RDElementOfName(FName Name)
+{
+	const FString S = Name.ToString();
+	if (S.Contains(TEXT("Fire")) || S.Contains(TEXT("Ember")) || S.Contains(TEXT("Flame"))) return FName(TEXT("fire"));
+	if (S.Contains(TEXT("Frost")) || S.Contains(TEXT("Ice"))) return FName(TEXT("frost"));
+	if (S.Contains(TEXT("Lightning")) || S.Contains(TEXT("Shock")) || S.Contains(TEXT("Storm"))) return FName(TEXT("shock"));
+	if (S.Contains(TEXT("Dark")) || S.Contains(TEXT("Shadow")) || S.Contains(TEXT("Void"))) return FName(TEXT("shadow"));
+	return FName(TEXT("magic"));
+}
+
 class URDCombatComponent;
 
 /** the list of 2026-11-07 (docs/improvements8.txt): her move input filtered while she blocks (forward or back only, slowly;

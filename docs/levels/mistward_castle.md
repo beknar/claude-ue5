@@ -465,7 +465,7 @@ On the castle and every map of the game (`918 noshield11,basic`; C++ `RD/RDList1
 
 ## The list of 2026-11-11's third part
 
-The spells and slashes, on every map of the game (`918 cantrip,spells3,slashes3,casts3`, from `SourceArt/balance/list11_spells.json`; the casts made in Blender by `blender_numpy/spell_casts11.py`; C++ `RD/RDList11c.cpp`, the curses' hooks in `RD/RDMonster.cpp`, `RD/RDSpells.cpp`, `RD/RDMistward2.cpp`). Walked through in `868 spells11` (its four parts run alone as `spells11_cantrip`, `_spells`, `_curses`, `_slashes`; `test_s11c.json`, the slashes' `test_s11e.json`, the curses with their pictures `test_s11f.json`), every number below measured there.
+The spells and slashes, on every map of the game (`918 cantrip,spells3,slashes3,casts3`, from `SourceArt/balance/list11_spells.json`; the casts made in Blender by `blender_numpy/spell_casts11.py`; C++ `RD/RDList11c.cpp`, the curses' hooks in `RD/RDMonster.cpp`, `RD/RDSpells.cpp`, `RD/RDMistward2.cpp`). Walked through in `868 spells11` (its four parts run alone as `spells11_cantrip`, `_spells`, `_curses`, `_slashes`; after PR #48's review `test_s11h.json` (the curses and slashes) and `test_s11i.json` (the cantrip and the three spells, with `slashes` and `secondary`)), every number below measured there (the tables' from the first runs; the review's runs measured the same).
 
 - **The cantrip** ("the base cantrip at tier 1 for every caster is the fire bolt. it costs no mana and it scales in damage per tier"): the Mage's, the Warlock's and the Summoner's Fire costs nothing and is shown as "Fire Bolt (cantrip)"; cast at 0.8 mana it went off and left her mana where it was. Its damage grows with her tier as every spell's does (`TierSpellMul`): 25 on a monster at tier 1, 65.2 at tier 10 (`rd.Tier 10`; the multiplier 2.608, the damage 2.608 times).
 - **Starfall, Singularity and Soul Rend look and move otherwise** ("need new animation and visual for starfall that's different from meteor storm", the same for Singularity against Void Rift and Soul Rend against Life Drain):
@@ -516,6 +516,18 @@ The spells and slashes, on every map of the game (`918 cantrip,spells3,slashes3,
 - **What the test found on the way:**
   - A learned spell is made from her first spell weapon, so it took the cantrip's new label: every learned spell showed as "Fire Bolt (cantrip)" on the status panel and the quick bar ("FBC"). `MakeSpellWeapon` clears the label now (measured: each shows its own name).
   - The Spark Slash's echo never struck: the slashes' tick ran only while a slash's ground area lasted. It runs while an echo waits too.
+- **PR #48's review**, each fixed:
+  - A hit says what dealt it: "weapon" for her weapons' blows, bows' and crossbows' bolts and slashes, a spell's element for a spell, nothing for a burn's tick, a burst or a turned blow. "No element" had counted as a weapon's blow, so a burning monster under Brittle Bones took +25 % and a knock-down roll every tick. Measured: her weapon's blows take 50 for 40, her burn's ticks and her fire spell's hit 40; the hunted mark doubled 2 of 60 weapon blows and none of 30 burn ticks.
+  - A Rot stack is free again once its poison ends. Before, three casts filled it until the whole curse ended. Measured: three casts 1 s apart, 8.4 s later two left, a fourth cast makes three.
+  - The fear comes after the stun and the cell: a held or caged monster ran on.
+  - Silence breaks off a shot or beam already in its wind-up.
+  - The Quake Slash holds each monster once in 4 s, and the final boss by his poise. A swing a second had held a pack, and Aurorim, for good. Measured: a second hit at once held neither of the two again.
+  - Greed's extra thing is the monster's pile, not hers.
+  - A reflected or turned blow carries no earlier spell's element.
+  - The tome's text and the refusal say "only the warlock learns it".
+  - The HUD's curse mark no longer builds strings every frame.
+  - Not changed: a trail slash on a bow gets only the arrow's trail (bows are spell weapons here, so the swing's trail on the weapon skips them).
+  - Not measured: Silence on a wind-up and the fear under a stun (no shooter or stun was put in the test).
 - **Not measured:** Lethargy's slower blows (the monsters' wait between blows), Brittle's knock-down beyond the doubled blow's stun, Silence stopping a shot (the shooters check it, not measured here), Hunted's mark seen through a wall on the map. No monster in the game heals itself, so Withering Brand acts only on heals the game gives a monster (measured with a test heal), and a monster's regeneration does not exist to stop.
 
 ![Singularity cast at a plague rat](../images/mistward_singularity.jpg)
