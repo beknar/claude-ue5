@@ -1752,6 +1752,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	++GenTicks;
+	if (bOptionsMenu) KeepWindowLimits();
 	if (bOpeningMenu) return;
 	// (mistward: the frame rate, smoothed over about a second of frames, from the real time between frames)
 	if (bShowFps)

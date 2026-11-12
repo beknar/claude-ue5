@@ -96,6 +96,7 @@ public static class RDWin {
     [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
     [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr h);
     [DllImport("user32.dll")] public static extern uint GetDpiForSystem();
+    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
 }
 '@
     # (the castle writes a mark when it begins (-RDMarkFile): a run that stayed on the menu had passed as the castle's)
@@ -137,7 +138,7 @@ public static class RDWin {
         # (the display run's "saved" must come from this run: the settings files are taken away first (put back at the end))
         if ($run.window) { foreach ($g in $gus) { if (Test-Path $g) { Remove-Item $g -Force } } }
         if ($run.console) { foreach ($f in @($ctest, [IO.Path]::ChangeExtension($ctest, "png"))) { if (Test-Path $f) { Remove-Item $f -Force } } }
-        $client = $null; $dpi = 0; $want = "1600x900"
+        $client = $null; $least = $null; $saved = $null; $dpi = 0; $want = "1600x900"
         # (claude_ue5.exe is a launcher: the game is the exe under claude_ue5\Binaries\Win64, which it starts and waits for:
         #  claude_ue5-Win64-Shipping.exe, but in a Development package claude_ue5.exe too: found by its folder, not its name
         #  (by the Shipping name the Development games were never found, nor stopped))
@@ -156,6 +157,12 @@ public static class RDWin {
             # (the size in the screen's real pixels, and the window handling the screen's scaling itself (its DPI the screen's):
             #  unaware of it (the engine's default), Windows stretched a 1600 x 900 window to 3200 x 1800 on a 200 % screen)
             $dpi = [RDWin]::GetDpiForWindow($p.MainWindowHandle)
+            # (the settings read before the window is shrunk below (a resize may be saved as the resolution))
+            $saved = $gus | Where-Object { Test-Path $_ } | ForEach-Object { Select-String -Path $_ -Pattern '^ResolutionSizeX=1600' } | Select-Object -First 1
+            # (the least size (PR #51's review): the window asked to 400 x 300 as a drag would, its inside read: 960 x 540 of the
+            #  screen's pixels, the frame outside it)
+            [void][RDWin]::SetWindowPos($p.MainWindowHandle, [IntPtr]::Zero, 0, 0, 400, 300, 0x16); Start-Sleep 2
+            $r2 = New-Object RDWin+RECT; if ([RDWin]::GetClientRect($p.MainWindowHandle, [ref]$r2)) { $least = "$($r2.R - $r2.L)x$($r2.B - $r2.T)" }
         }
         if ($run.name -ne "menu" -and -not $run.window) { "memory every 5 s (MB): $($mem -join ' ')" }
         foreach ($q in @($p, $l)) { if ($q -and -not $q.HasExited) { Stop-Process -Id $q.Id -Force -Confirm:$false } }
@@ -179,9 +186,8 @@ public static class RDWin {
             # (the window's inside the size asked, its scaling the screen's (the game handles it; unaware it read 96 on a
             #  200 % screen), and this run's settings say so: Apply as the menu's)
             $sys = [RDWin]::GetDpiForSystem()
-            $saved = $gus | Where-Object { Test-Path $_ } | ForEach-Object { Select-String -Path $_ -Pattern '^ResolutionSizeX=1600' } | Select-Object -First 1
-            $ok = $ok -and $client -eq $want -and $dpi -eq $sys -and [bool]$saved
-            "TEST display: {0} | {5} | window inside {1} pixels (asked {4} windowed) | its scaling {3} %, the screen's {6} % | saved in this run's settings: {2}" -f ($(if ($ok) { "ok" } else { "FAILED" })), $client, [bool]$saved, [int]($dpi * 100 / 96), $want, $where, [int]($sys * 100 / 96)
+            $ok = $ok -and $client -eq $want -and $dpi -eq $sys -and [bool]$saved -and $least -eq "960x540"
+            "TEST display: {0} | {5} | window inside {1} pixels (asked {4} windowed) | its scaling {3} %, the screen's {6} % | saved in this run's settings: {2} | shrunk to 400 x 300: {7} inside (least 960x540)" -f ($(if ($ok) { "ok" } else { "FAILED" })), $client, [bool]$saved, [int]($dpi * 100 / 96), $want, $where, [int]($sys * 100 / 96), $least
         }
         else { "TEST {0}: {1} | ran {6} s: {2} | exit code {3} | new crash reports {4} | peak memory {5:N0} MB{7}" -f $run.name, ($(if ($ok) { "ok" } else { "FAILED" })), $alive, ($(if ($alive) { "-" } else { $p.ExitCode })), ($after - $before), ($peak / 1MB), $run.secs, $(if ($run.castle) { " | $where" } else { "" }) }
         if (-not $ok) { $bad++ }

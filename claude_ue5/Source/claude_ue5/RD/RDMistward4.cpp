@@ -18,6 +18,11 @@
 #include "Misc/Parse.h"
 #include "Engine/GameViewportClient.h"
 #include "Widgets/SWindow.h"
+#include "Framework/Application/SlateApplication.h"
+#include "GenericPlatform/GenericWindow.h"
+#if PLATFORM_WINDOWS
+#include "Windows/WindowsHWrapper.h"
+#endif
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDMistward4, Log, All);
 
@@ -26,6 +31,9 @@ static constexpr float RD4AllyGap = 25.f;          // (cm between two allies' ca
 // (the list of 2026-11-11: the smallest a window may be dragged to: the HUD's panels are laid out for 1280 x 720 and still read at
 // this; smaller, the inventory's columns ran into each other)
 static const FIntPoint RD4MinWindow(960, 540);
+// (the window's limit as last set: its scaling and window, for KeepWindowLimits)
+static float RD4LimitDpi = 0.f;
+static const SWindow* RD4LimitWin = nullptr;
 
 // ================================================================================================ the Options page
 void ARDDungeonGenerator::LoadOptions()
@@ -136,8 +144,10 @@ bool ARDDungeonGenerator::ApplyDisplaySettings()
 	UGameUserSettings* Gs = GEngine ? GEngine->GetGameUserSettings() : nullptr;
 	if (!Gs) { LastApplied = TEXT("no user settings"); return false; }
 	const EWindowMode::Type Mode = (EWindowMode::Type)FMath::Clamp(PendingWindowMode, 0, 2);
-	// (windowed fullscreen: the screen's own size, which is what that window is anyway)
-	const FIntPoint Res = Mode == EWindowMode::WindowedFullscreen ? Gs->GetDesktopResolution() : PendingResolution;
+	// (windowed fullscreen: the screen's own size, which is what that window is anyway; a window no smaller than the least size
+	// a drag can make (PR #51's review: a resize from code is clamped by Slate in other units))
+	FIntPoint Res = Mode == EWindowMode::WindowedFullscreen ? Gs->GetDesktopResolution() : PendingResolution;
+	if (Mode == EWindowMode::Windowed) Res = FIntPoint(FMath::Max(Res.X, RD4MinWindow.X), FMath::Max(Res.Y, RD4MinWindow.Y));
 	Gs->SetFullscreenMode(Mode);
 	Gs->SetScreenResolution(Res);
 	if (GIsEditor)
@@ -151,6 +161,7 @@ bool ARDDungeonGenerator::ApplyDisplaySettings()
 	else
 	{
 		Gs->ApplySettings(false); Gs->ConfirmVideoMode(); Gs->SaveSettings();
+		ApplyWindowLimits();            // (the frame came or went with the mode)
 		LastApplied = FString::Printf(TEXT("applied %dx%d mode %d"), Res.X, Res.Y, (int32)Mode);
 	}
 	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS %s"), *LastApplied);
@@ -164,21 +175,64 @@ void ARDDungeonGenerator::WriteTestMark(const FString& Kind, const FString& Wher
 		FFileHelper::SaveStringToFile(FString::Printf(TEXT("%s|%s|%s"), *Kind, *Where, *CurrentHero.ToString()), *Mark);
 }
 
+void ARDDungeonGenerator::KeepWindowLimits()
+{
+	// (the window's scaling or frame changed (moved to another screen, the screen's scaling changed, a frame come or gone with the
+	// mode): the limit set again, since Windows scales it by the scaling of the moment at each resize (PR #51's review; the
+	// engine's own event for it is the editor's only). Looked at once a second)
+	if (GIsEditor || !GEngine || !GEngine->GameViewport) return;
+	static double Next = 0.0;
+	const double Now = FPlatformTime::Seconds();
+	if (Now < Next) return;
+	Next = Now + 1.0;
+	const TSharedPtr<SWindow> Win = GEngine->GameViewport->GetWindow();
+	if (!Win.IsValid()) return;
+	float Fx = 0.f;
+#if PLATFORM_WINDOWS
+	if (const TSharedPtr<FGenericWindow> N = Win->GetNativeWindow())
+		if (HWND H = (HWND)N->GetOSWindowHandle()) Fx = (::GetWindowLongW(H, GWL_STYLE) & WS_THICKFRAME) ? 1.f : 0.f;
+#endif
+	// (what is compared: the scaling, the window and whether it is framed (a framed one measures its frame, a frameless one is
+	// given a framed window's))
+	static float LastFramed = -1.f;
+	if (RD4LimitDpi != Win->GetDPIScaleFactor() || RD4LimitWin != Win.Get() || LastFramed != Fx) { LastFramed = Fx; ApplyWindowLimits(); }
+}
+
 void ARDDungeonGenerator::ApplyWindowLimits()
 {
 	// (the list of 2026-11-11: "when in windowed mode, let the user grow the window by clicking and expanding on the corner". The
 	// game's window has a sizing frame in windowed mode (measured: WS_THICKFRAME, its corner hit-tests as a sizing corner, a
 	// window grown by 500 x 300 keeps it and the engine saves it); windowed fullscreen, the first start's mode, has no frame to
 	// drag. Here: the smallest it may be dragged to)
-	if (GIsEditor || !GEngine || !GEngine->GameViewport) return;
+	if (GIsEditor || !GEngine || !GEngine->GameViewport || !FSlateApplication::IsInitialized()) return;
 	const TSharedPtr<SWindow> Win = GEngine->GameViewport->GetWindow();
 	if (!Win.IsValid()) return;
-	// (Slate's limits are in its own units, the screen's pixels over its scaling: given 960 x 540 on a 200 % screen the window
-	// could not be smaller than 1920 x 1080 of the screen's pixels, and a 1600 x 900 window asked on the Options page came out
-	// 1894 x 1009 inside (the packaged game's display test, 2026-11-12). The limit is the screen's pixels, as the HUD is laid out)
-	const float Dpi = FMath::Max(Win->GetDPIScaleFactor(), 0.5f);
-	Win->SetSizeLimits(FWindowSizeLimits().SetMinWidth(RD4MinWindow.X / Dpi).SetMinHeight(RD4MinWindow.Y / Dpi));
-	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS the window may be sized down to %dx%d of the screen's pixels (its scaling %.2f)"), RD4MinWindow.X, RD4MinWindow.Y, Dpi);
+	// (Slate's limits are in its own units, the screen's pixels over its scaling, and they are the whole window's, its frame and
+	// title bar included (WindowsApplication's WM_GETMINMAXINFO): given 960 x 540 on a 200 % screen the window could not be
+	// smaller than 1920 x 1080, and a 1600 x 900 window asked on the Options page came out 1894 x 1009 inside (the packaged
+	// game's display run, 2026-11-12). The limit here is 960 x 540 of the screen's pixels inside, the frame added: as the window
+	// has it when it has one, else as Windows gives a framed window at this scaling)
+	float Dpi = Win->GetDPIScaleFactor();
+	if (Dpi <= 0.f) { UE_LOG(LogRDMistward4, Warning, TEXT("RDOPTIONS the window's scaling reads %.2f: taken as 1"), Dpi); Dpi = 1.f; }
+	FIntPoint Frame(0, 0);
+#if PLATFORM_WINDOWS
+	if (const TSharedPtr<FGenericWindow> N = Win->GetNativeWindow())
+		if (HWND H = (HWND)N->GetOSWindowHandle())
+		{
+			RECT O, C;
+			const LONG Style = ::GetWindowLongW(H, GWL_STYLE);
+			if ((Style & WS_THICKFRAME) && ::GetWindowRect(H, &O) && ::GetClientRect(H, &C)) Frame = FIntPoint((O.right - O.left) - (C.right - C.left), (O.bottom - O.top) - (C.bottom - C.top));
+			else
+			{
+				RECT R = { 0, 0, RD4MinWindow.X, RD4MinWindow.Y };
+				if (::AdjustWindowRectExForDpi(&R, WS_OVERLAPPEDWINDOW, 0, 0, ::GetDpiForWindow(H))) Frame = FIntPoint((R.right - R.left) - RD4MinWindow.X, (R.bottom - R.top) - RD4MinWindow.Y);
+			}
+		}
+#endif
+	const FVector2D Lim((RD4MinWindow.X + Frame.X) / Dpi, (RD4MinWindow.Y + Frame.Y) / Dpi);
+	Win->SetSizeLimits(FWindowSizeLimits().SetMinWidth((float)Lim.X).SetMinHeight((float)Lim.Y));
+	RD4LimitDpi = Win->GetDPIScaleFactor(); RD4LimitWin = Win.Get();
+	UE_LOG(LogRDMistward4, Log, TEXT("RDOPTIONS the window's least size: %.0f x %.0f Slate units (its scaling %.2f, its frame %d x %d px): %d x %d px inside"), Lim.X, Lim.Y, Dpi, Frame.X, Frame.Y, RD4MinWindow.X, RD4MinWindow.Y);
 }
 
 void ARDDungeonGenerator::ApplyDisplayFromCommandLine()
