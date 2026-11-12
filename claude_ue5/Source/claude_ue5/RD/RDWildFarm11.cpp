@@ -44,8 +44,36 @@ namespace
 		if (!Cube.IsValid()) Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
 		return Cube.Get();
 	}
-	/** the key a farm's container n is kept looted under (above the kills' place x 16 + n and the points' negative keys) */
-	int64 RDWF11Key(int32 FarmId, int32 N) { return (1LL << 40) + (int64)(uint32)FarmId * 64 + (N & 63); }
+	/** the key a farm's container n is kept looted under (above the kills' place x 16 + n and the points' negative keys); n is the
+	 *  farm's own count of containers as they are made (PR #49's review: a building's index x 8 met the gardens' keys) */
+	int64 RDWF11Key(int32 FarmId, int32 N) { return (1LL << 40) + (int64)(uint32)FarmId * 128 + FMath::Clamp(N, 0, 127); }
+	/** where a kit building's door stands across its +X wall (cm; a barn's off the stall's half): farm_designs.py's door_front says
+	 *  the same */
+	float RDWF11DoorY(FName Kind, int32 Ny, float M)
+	{
+		Ny = FMath::Clamp(Ny, 2, 8);
+		const int32 K = Kind == TEXT("barn") ? FMath::Max(0, (Ny - 1) / 2) : Ny / 2;
+		return (K + 0.5f) * M - Ny * M * 0.5f;
+	}
+	/** the design a farmstead takes when the level has none (919 not run): the one layout every farm had before the list of
+	 *  2026-11-11, its farmhouse and barn of the kit */
+	FRDFarmDesign RDWF11Default()
+	{
+		FRDFarmDesign D; D.Name = TEXT("default");
+		auto Add = [&](const TCHAR* Kind, float U, float V, float Yaw, int32 Nx, int32 Ny, float Hu, float Hv, int32 Shape, const TCHAR* Animals, const TCHAR* Variant)
+		{
+			FRDFarmPart P; P.Kind = Kind; P.U = U; P.V = V; P.Yaw = Yaw; P.Nx = Nx; P.Ny = Ny; P.Hu = Hu; P.Hv = Hv; P.Shape = Shape; P.Animals = Animals; P.Variant = Variant;
+			D.Parts.Add(P);
+		};
+		Add(TEXT("house"), 0.f, 0.f, 0.f, 3, 4, 0.f, 0.f, 0, TEXT(""), TEXT(""));
+		Add(TEXT("barn"), 0.f, 15.f, 0.f, 4, 5, 0.f, 0.f, 0, TEXT("Cow:2"), TEXT(""));
+		Add(TEXT("pen"), 1.f, -16.f, 0.f, 0, 0, 7.f, 5.5f, 0, TEXT("Goat:3"), TEXT(""));
+		Add(TEXT("pen"), -13.f, 0.5f, 0.f, 0, 0, 2.5f, 3.f, 0, TEXT("Chicken:5"), TEXT(""));
+		Add(TEXT("garden"), 13.f, -7.f, 0.f, 0, 0, 3.f, 2.f, 0, TEXT(""), TEXT("14"));
+		Add(TEXT("well"), 12.f, 5.f, 0.f, 0, 0, 0.f, 0.f, 0, TEXT(""), TEXT(""));
+		Add(TEXT("woodpile"), -3.f, 8.f, 0.f, 0, 0, 0.f, 0.f, 0, TEXT(""), TEXT(""));
+		return D;
+	}
 	/** "Kind:count, Kind:count" */
 	TArray<TPair<FString, int32>> RDWF11Animals(const FString& S)
 	{
@@ -111,22 +139,21 @@ bool ARDDungeonGenerator::AddWildBox(ARDWildChunk* C, FName PieceName, const FTr
 			const FBox B = Mesh->GetBoundingBox().TransformBy(Rel);
 			D.Axis = bVert ? FVector::UpVector : FVector::RightVector;
 			const FVector Tip = bVert ? FVector(0.f, B.GetCenter().Y, 0.f) : FVector(B.GetCenter().X, 0.f, 0.f);
-			const FVector Want = bVert ? FVector(1.f, 0.f, 0.f) : FVector::UpVector;
-			const FVector Pp = FQuat(D.Axis, FMath::DegreesToRadians(60.f)).RotateVector(Tip);
-			Angle = 100.f * (FVector::DotProduct(Pp - Tip, Want) >= 0.f ? 1.f : -1.f);
+			Angle = 100.f * RDContainerSign(D.Axis, Tip, bVert ? FVector(1.f, 0.f, 0.f) : FVector::UpVector);
 			Closed = Hp->GetRelativeRotation().Quaternion();
 			return Hp;
 		};
 		D.Pivot = Moving(P->Moving, P->Hinge, D.Angle, D.Closed);
 		if (P->Moving2) D.Pivot2 = Moving(P->Moving2, P->Hinge2, D.Angle2, D.Closed2);
 	}
-	// (no moving part (a garden's harvest): its base, never turned)
-	if (!D.Pivot.IsValid()) D.Pivot = Bs;
+	// (no moving part (a garden's harvest): its base, never turned: the tick's turn is its own rotation (PR #49's review: it was
+	// set to the chunk's axes when opened))
+	if (!D.Pivot.IsValid()) { D.Pivot = Bs; D.Closed = Bs->GetRelativeRotation().Quaternion(); D.Angle = D.Angle2 = 0.f; }
 	// (looted before, in this game: built open and empty)
 	if (const URDGameInstance* GI = URDGameInstance::Of(this); GI && GI->WildKilled.Contains(Key))
 	{
 		D.Alpha = D.Target = 1.f;
-		if (D.Pivot.Get() != Bs) D.Pivot->SetRelativeRotation(D.Closed * FQuat(D.Axis, FMath::DegreesToRadians(D.Angle)));
+		D.Pivot->SetRelativeRotation(D.Closed * FQuat(D.Axis, FMath::DegreesToRadians(D.Angle)));
 		if (USceneComponent* P2 = D.Pivot2.Get()) P2->SetRelativeRotation(D.Closed2 * FQuat(D.Axis, FMath::DegreesToRadians(D.Angle2)));
 	}
 	C->Doors.Add(D);
@@ -163,6 +190,27 @@ void ARDDungeonGenerator::OpenWildBox(ARDWildChunk* C, int32 Index)
 	WildBoxThings += Got.Num();
 	PlaySoundAt(TEXT("Player.Loot"), D.At);
 	UE_LOG(LogRDWildFarm11, Log, TEXT("RDWILDBOX %s (%lld): %s"), *D.Kind.ToString(), D.Key, *FString::JoinBy(Got, TEXT(", "), [](const FName& X) { return X.ToString(); }));
+}
+
+void ARDDungeonGenerator::WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen)
+{
+	if (!C || !C->Ground || !M) return;
+	const FString Key = FString::Printf(TEXT("%s|%s|%d|%d"), *M->GetPathName(), Mat ? *Mat->GetPathName() : TEXT("-"), bCollide ? 1 : 0, bUnseen ? 1 : 0);
+	UInstancedStaticMeshComponent* Is = Rec.Batch.FindRef(Key).Get();
+	if (!Is)
+	{
+		Is = NewObject<UInstancedStaticMeshComponent>(C);
+		Is->SetStaticMesh(M);
+		if (Mat) Is->SetMaterial(0, Mat);
+		if (!bCollide) Is->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (bUnseen) Is->SetHiddenInGame(true);
+		Is->SetupAttachment(C->Ground);
+		Is->RegisterComponent();
+		Rec.Batch.Add(Key, Is);
+		Rec.Comps.Add(Is);
+	}
+	Is->AddInstance(World, true);
+	++Rec.Props;
 }
 
 void ARDDungeonGenerator::WildClearRect(ARDWildChunk* C, const FVector& Mid, float Yaw, const FVector2D& Half, FRDWildFarmRec* Rec)
@@ -219,26 +267,17 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	const FVector O(C2.X * 100.0, C2.Y * 100.0, Base);
 	auto At = [&](float X, float Y, float Z) { return O + Rot.RotateVector(FVector(X, Y, 0.f)) + FVector(0.f, 0.f, Z); };
 	auto Keep = [&](UActorComponent* X) { if (X) Rec.Comps.Add(X); };
-	auto Mesh = [&](UStaticMesh* Ms, const FTransform& W, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false) -> UStaticMeshComponent*
+	// (every piece an instance of the farm's batch of its mesh: PR #49's review)
+	auto Mesh = [&](UStaticMesh* Ms, const FTransform& W, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false) -> bool
 	{
-		if (!Ms) return nullptr;
-		UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
-		Sm->SetStaticMesh(Ms);
-		Sm->SetupAttachment(C->Ground);
-		if (Mat) Sm->SetMaterial(0, Mat);
-		if (!bCollide) Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (bUnseen) Sm->SetHiddenInGame(true);
-		Sm->RegisterComponent();
-		Sm->SetWorldTransform(W);
-		C->PlaceProps.Add(Sm);
-		Keep(Sm);
-		++Rec.Props;
-		return Sm;
+		if (!Ms) return false;
+		WildFarmInstance(C, Rec, Ms, W, bCollide, Mat, bUnseen);
+		return true;
 	};
-	auto Put = [&](FName Name, const FTransform& T) -> UStaticMeshComponent*
+	auto Put = [&](FName Name, const FTransform& T) -> bool
 	{
 		const FRDPiece* Pc = Piece(Name);
-		return Pc && Pc->Mesh ? Mesh(Pc->Mesh, Pc->Adjust * T, Pc->bCollision, Pc->Material) : nullptr;
+		return Pc && Pc->Mesh && Mesh(Pc->Mesh, Pc->Adjust * T, Pc->bCollision, Pc->Material);
 	};
 	// (a hidden box over a piece's whole bounds: a window's sill stands out of the wall where its collision does not reach)
 	auto BoundsCollider = [&](FName Name, const FTransform& T)
@@ -267,7 +306,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 			Put(Pn(TEXT("Floor")), FTransform(FRotator(0.f, Yaw + 90.f * R.RandRange(0, 3), 0.f), At((I + 0.5f) * M - Hx, (J + 0.5f) * M - Hy, 2.f)));
 	// ---- the walls: the doorway in the +X wall (on a barn, off the stall's half), windows in a house's
 	const int32 DoorK = Kind == TEXT("barn") ? FMath::Max(0, (Ny - 1) / 2) : Ny / 2;
-	const float DoorY = (DoorK + 0.5f) * M - Hy;
+	const float DoorY = RDWF11DoorY(Kind, Ny, M);
 	const bool bWindows = Kind == TEXT("house");
 	struct FSide { FVector2D Out; int32 N; };
 	const FSide Sides[4] = { { FVector2D(1, 0), Ny }, { FVector2D(-1, 0), Ny }, { FVector2D(0, 1), Nx }, { FVector2D(0, -1), Nx } };
@@ -370,7 +409,6 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	// ---- its inside, by its kind (the room inside the walls; the door's wall +X, the back wall -X; a piece's front is its +X)
 	const FVector2D Mn(-Hx + 30.f, -Hy + 30.f), Mx(Hx - 30.f, Hy - 30.f);
 	const float Wd = Mx.X - Mn.X;
-	int32 BoxN = PartIx * 8;
 	auto PutAt = [&](FName Name, float X, float Y, float YawL) -> bool
 	{
 		const FRDPiece* Pc = Piece(Name);
@@ -397,7 +435,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 		if (!Pc || !Pc->Mesh) return false;
 		const FString* L = FarmLoot.Find(FName(LootKind));
 		const FName Kn = Name == TEXT("Wardrobe") ? FName(TEXT("wardrobe")) : Name == TEXT("Chest") ? FName(TEXT("chest")) : Name == TEXT("Barrel") ? FName(TEXT("barrel")) : FName(TEXT("crate"));
-		if (AddWildBox(C, Name, FTransform(FRotator(0.f, Yaw + YawL, 0.f), At(X, Y, 1.f)), Kn, RDWF11Key(P.Id, BoxN++), L ? *L : FString(), &Rec)) { ++Furniture; return true; }
+		if (AddWildBox(C, Name, FTransform(FRotator(0.f, Yaw + YawL, 0.f), At(X, Y, 1.f)), Kn, RDWF11Key(P.Id, Rec.Boxes), L ? *L : FString(), &Rec)) { ++Furniture; return true; }
 		return false;
 	};
 	auto Lamp = [&](float Candelas)
@@ -465,7 +503,10 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 	{
 		const float Ys = Kind == TEXT("barn") ? FMath::Max(DoorY + 110.f, 0.f) : Mn.Y;      // (the stall's near side, off the doorway)
 		const float Xg = Mx.X - 140.f;                                                       // (its front fence, the way in kept before it)
-		const FVector2D SMin(Mn.X + 20.f, Ys + 20.f), SMax(Xg - 20.f, Mx.Y - 20.f);
+		// (a coop's hens in the back two fifths of it, the middle free to walk (PR #49's review: their area held the middle, where
+		// the test walks and a hen now stops her))
+		const float Xb = Kind == TEXT("barn") ? Xg - 20.f : Mn.X + (Mx.X - Mn.X) * 0.4f;
+		const FVector2D SMin(Mn.X + 20.f, Ys + 20.f), SMax(Xb, Mx.Y - 20.f);
 		if (SMax.X - SMin.X > 120.f && SMax.Y - SMin.Y > 120.f)
 		{
 			TArray<UStaticMesh*> Fm; WildPiecesOf(TEXT("paddock"), Fm);
@@ -520,7 +561,7 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 					An->Init(this, Kd, -1, PenAt, Half, HashCombine((uint32)P.Id, (uint32)(PartIx * 97 + K) * 2654435761u));
 					C->Props.Add(An);
 					Rec.Animals.Add(An);
-					Rec.AnimalPens.Add(FVector4(PenAt.X, PenAt.Y, Half.X, Half.Y));
+					Rec.AnimalPens.Add(FVector4(PenAt.X, PenAt.Y, Half.X, Half.Y)); Rec.AnimalPenYaws.Add(Yaw);          // (the building's turn)
 				}
 			}
 		}
@@ -537,8 +578,10 @@ void ARDDungeonGenerator::WildKitBuilding(ARDWildChunk* C, const FRDWildPlace& P
 // ================================================================================================ a farmstead of a design
 void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P, int32 Design)
 {
-	if (!C || !FarmDesigns.IsValidIndex(Design)) return;
-	const FRDFarmDesign& Dz = FarmDesigns[Design];
+	if (!C || !IsWildReady()) return;
+	// (no designs on the level: the default, the one layout every farm had)
+	static const FRDFarmDesign Fallback = RDWF11Default();
+	const FRDFarmDesign& Dz = FarmDesigns.IsValidIndex(Design) ? FarmDesigns[Design] : Fallback;
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 78, Wild->Seed));
 	const FVector O = C->GetActorLocation();
 	// (the buildings' lines of farms gone with their chunks, and of this one built before, dropped)
@@ -551,18 +594,12 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 	Rec.Door0 = C->Doors.Num(); Rec.House0 = C->Houses.Num(); Rec.Clear0 = C->Clears.Num();
 	auto Keep = [&](UActorComponent* X) { if (X) Rec.Comps.Add(X); };
 	auto ScaleOf = [&](const UStaticMesh* M) { const float* Ks = WildPieceScale.Find(FName(*M->GetName())); return Ks ? *Ks : 1.f; };
-	auto Comp = [&](UStaticMesh* M, const FTransform& T, bool bCollide) -> UStaticMeshComponent*
+	// (a piece at a transform relative to the chunk's corner: an instance of the farm's batch of its mesh)
+	auto Comp = [&](UStaticMesh* M, const FTransform& T, bool bCollide) -> bool
 	{
-		UStaticMeshComponent* Sm = NewObject<UStaticMeshComponent>(C);
-		Sm->SetStaticMesh(M);
-		Sm->SetupAttachment(C->Ground);
-		Sm->SetRelativeTransform(T);
-		if (!bCollide) Sm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Sm->RegisterComponent();
-		C->PlaceProps.Add(Sm);
-		Keep(Sm);
-		++Rec.Props;
-		return Sm;
+		if (!M) return false;
+		WildFarmInstance(C, Rec, M, FTransform(T.GetRotation(), T.GetTranslation() + O, T.GetScale3D()), bCollide, nullptr);
+		return true;
 	};
 	auto Pick = [&](const FString& Prefix, const FString& Or) -> UStaticMesh*
 	{
@@ -571,9 +608,9 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 		return Ms.Num() > 0 ? Ms[R.RandRange(0, Ms.Num() - 1)] : nullptr;
 	};
 	// one piece at a point of the farm's frame (metres): its box's middle and bottom on the point, sunk (cm at its scale)
-	auto PutMesh = [&](UStaticMesh* M, float U, float V, float Yaw, float Sink = 10.f, bool bCollide = true) -> UStaticMeshComponent*
+	auto PutMesh = [&](UStaticMesh* M, float U, float V, float Yaw, float Sink = 10.f, bool bCollide = true) -> bool
 	{
-		if (!M) return nullptr;
+		if (!M) return false;
 		const float Sc = ScaleOf(M);
 		const FVector2D At = RDWF11At(P, U, V);
 		const float Z = WildGroundZ(FVector(At.X * 100.0, At.Y * 100.0, 0.0));
@@ -670,7 +707,7 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 			A->Init(this, Kd, -1, PenAt, Half, HashCombine((uint32)P.Id, Salt + (uint32)K * 2654435761u));
 			C->Props.Add(A);
 			Rec.Animals.Add(A);
-			Rec.AnimalPens.Add(FVector4(PenAt.X, PenAt.Y, Half.X, Half.Y));
+			Rec.AnimalPens.Add(FVector4(PenAt.X, PenAt.Y, Half.X, Half.Y)); Rec.AnimalPenYaws.Add(P.Yaw);
 		}
 	};
 	// ---- the parts, in the design's order
@@ -683,9 +720,10 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 		if (K == TEXT("house") || K == TEXT("barn") || K == TEXT("shed") || K == TEXT("coop") || K == TEXT("granary"))
 		{
 			WildKitBuilding(C, P, Pt, Pi, Rec);
-			// (where its door is, for the family's places)
-			const float Hx = FMath::Clamp(Pt.Nx, 2, 6) * TileSize * 0.5f / 100.f;
-			const FVector2D Door = FVector2D(Pt.U, Pt.V) + FVector2D(FMath::Cos(FMath::DegreesToRadians(Pt.Yaw)), FMath::Sin(FMath::DegreesToRadians(Pt.Yaw))) * (Hx + 1.8f);
+			// (where its door is, for the family's places: 1.8 m before the +X wall, at the door's place across it (PR #49's review))
+			const float Hx = FMath::Clamp(Pt.Nx, 2, 6) * TileSize * 0.5f / 100.f, Dy = RDWF11DoorY(Pt.Kind, Pt.Ny, TileSize) / 100.f;
+			const FVector2D Fw(FMath::Cos(FMath::DegreesToRadians(Pt.Yaw)), FMath::Sin(FMath::DegreesToRadians(Pt.Yaw))), Sd(-Fw.Y, Fw.X);
+			const FVector2D Door = FVector2D(Pt.U, Pt.V) + Fw * (Hx + 1.8f) + Sd * Dy;
 			if (K == TEXT("house") && HouseDoor.X > 1e8f) HouseDoor = Door;
 			if (K == TEXT("barn") && BarnDoor.X > 1e8f) BarnDoor = Door;
 		}
@@ -716,11 +754,17 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 			}
 			if (PenGate.X > 1e8f)
 			{
+				// (outside the gate the pen has: a round one's facing the middle, a double one's on its first half's side (PR #49's
+				// review: the farmwife stood at a closed end), a single one's on its side toward the middle)
 				const float Rr = Pt.Shape == 2 ? Pt.Hu : 0.f;
-				const int32 G = GateSide(Pt.U, Pt.V);
+				const bool bDouble = Pt.Shape == 1 && Ak.Num() >= 2;
+				const int32 G0 = GateSide(Pt.U, Pt.V);
+				const int32 G = bDouble ? (G0 < 2 ? 2 + (Pt.V > 0.f ? 0 : 1) : G0) : G0;
+				const FVector2D Mid(bDouble ? Pt.U - Pt.Hu * 0.5f : Pt.U, Pt.V);
+				const float Hu = bDouble ? Pt.Hu * 0.5f : Pt.Hu;
 				const FVector2D Gp = Pt.Shape == 2 ? FVector2D(Pt.U, Pt.V) - FVector2D(Pt.U, Pt.V).GetSafeNormal() * (Rr + 1.1f)
-					: FVector2D(Pt.U, Pt.V) + (G == 0 ? FVector2D(-Pt.Hu - 1.1f, 0.f) : G == 1 ? FVector2D(Pt.Hu + 1.1f, 0.f) : G == 2 ? FVector2D(0.f, -Pt.Hv - 1.1f) : FVector2D(0.f, Pt.Hv + 1.1f));
-				PenGate = Gp; PenGateYaw = FMath::RadiansToDegrees(FMath::Atan2(Pt.V - Gp.Y, Pt.U - Gp.X));
+					: Mid + (G == 0 ? FVector2D(-Hu - 1.1f, 0.f) : G == 1 ? FVector2D(Hu + 1.1f, 0.f) : G == 2 ? FVector2D(0.f, -Pt.Hv - 1.1f) : FVector2D(0.f, Pt.Hv + 1.1f));
+				PenGate = Gp; PenGateYaw = FMath::RadiansToDegrees(FMath::Atan2(Mid.Y - Gp.Y, Mid.X - Gp.X));
 			}
 		}
 		else if (K == TEXT("garden"))
@@ -766,7 +810,7 @@ void ARDDungeonGenerator::SpawnWildFarm11(ARDWildChunk* C, const FRDWildPlace& P
 			const FVector2D Gp = FVector2D(Pt.U, Pt.V) + (G == 0 ? FVector2D(-Pt.Hu - 0.7f, 0.f) : G == 1 ? FVector2D(Pt.Hu + 0.7f, 0.f) : G == 2 ? FVector2D(0.f, -Pt.Hv - 0.7f) : FVector2D(0.f, Pt.Hv + 0.7f));
 			const FVector2D Gw = RDWF11At(P, Gp.X, Gp.Y);
 			const FVector GateW(Gw.X * 100.0, Gw.Y * 100.0, WildGroundZ(FVector(Gw.X * 100.0, Gw.Y * 100.0, 0.0)) + 40.f);
-			AddWildBox(C, NAME_None, FTransform(FRotator(0.f, P.Yaw, 0.f), GateW), FName(TEXT("garden")), RDWF11Key(P.Id, 56 + (Pi & 7)), Loot, &Rec, &GateW);
+			AddWildBox(C, NAME_None, FTransform(FRotator(0.f, P.Yaw, 0.f), GateW), FName(TEXT("garden")), RDWF11Key(P.Id, Rec.Boxes), Loot, &Rec, &GateW);
 		}
 		else
 		{
@@ -874,6 +918,13 @@ bool ARDDungeonGenerator::RemoveWildFarm(int32 Id)
 		if (F.Clear1 <= C->Clears.Num() && F.Clear0 < F.Clear1) C->Clears.RemoveAt(F.Clear0, F.Clear1 - F.Clear0);
 		if (F.House1 <= C->Houses.Num() && F.House0 < F.House1) C->Houses.RemoveAt(F.House0, F.House1 - F.House0);
 		if (F.Door1 <= C->Doors.Num() && F.Door0 < F.Door1) C->Doors.RemoveAt(F.Door0, F.Door1 - F.Door0);
+		// (the ranges of the chunk's other farms after it move down with what was taken out (PR #49's review))
+		for (FRDWildFarmRec& O : WildFarms)
+		{
+			if (&O == &F || O.Chunk.Get() != C) continue;
+			auto Shift = [](int32& A, int32& B, int32 A0, int32 B0) { const int32 N = B0 - A0; if (N > 0 && A >= B0) { A -= N; B -= N; } };
+			Shift(O.Clear0, O.Clear1, F.Clear0, F.Clear1); Shift(O.House0, O.House1, F.House0, F.House1); Shift(O.Door0, O.Door1, F.Door0, F.Door1);
+		}
 		for (const TWeakObjectPtr<UActorComponent>& W : F.Comps) if (UActorComponent* X = W.Get()) X->DestroyComponent();
 		C->PlaceProps.RemoveAll([](const TObjectPtr<UStaticMeshComponent>& S) { return !IsValid(S) || S->IsBeingDestroyed(); });
 		for (const TWeakObjectPtr<ARDTownAnimal>& A : F.Animals) if (A.IsValid()) { C->Props.Remove(A.Get()); A->Destroy(); }

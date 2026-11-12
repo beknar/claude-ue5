@@ -19,6 +19,14 @@ class UMaterialInterface;
 /** a fire that is heard in play: 0 torch, 1 brazier / cooking fire, 2 hearth */
 struct FRDFirePoint { FVector At; uint8 Kind; };
 
+/** a container's moving part opens 100 degrees about Axis, the way that swings its middle (Tip, from the hinge) toward Want: the
+ *  sign of that turn (the dungeon's containers and the wilds' (AddWildBox) alike) */
+inline float RDContainerSign(const FVector& Axis, const FVector& Tip, const FVector& Want)
+{
+	const FVector P = FQuat(Axis, FMath::DegreesToRadians(60.f)).RotateVector(Tip);
+	return FVector::DotProduct(P - Tip, Want) >= 0.f ? 1.f : -1.f;
+}
+
 UCLASS()
 class CLAUDE_UE5_API ARDSection : public AActor
 {

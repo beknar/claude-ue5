@@ -2462,7 +2462,14 @@ public:
 		int32 Design = -1, Buildings = 0, Boxes = 0;
 		TArray<TWeakObjectPtr<UActorComponent>> Comps;
 		int32 Door0 = 0, Door1 = 0, House0 = 0, House1 = 0, Clear0 = 0, Clear1 = 0;
+		/** each animal's pen's yaw (a barn's stall turns with its barn; AnimalPens' half sizes are along and across it) */
+		TArray<float> AnimalPenYaws;
+		/** its pieces as instances, one component a mesh, material and collision (PR #49's review: a component a piece was several
+		 *  hundred in one frame) */
+		TMap<FString, TWeakObjectPtr<class UInstancedStaticMeshComponent>> Batch;
 	};
+	/** one piece of a farm as an instance of its batch (world transform) */
+	void WildFarmInstance(ARDWildChunk* C, FRDWildFarmRec& Rec, UStaticMesh* M, const FTransform& World, bool bCollide, UMaterialInterface* Mat, bool bUnseen = false);
 	TArray<FRDWildFarmRec> WildFarms;
 	/** the list of 2026-11-11's fourth phase (RD/RDWildFarm11.cpp, 919 farms): the farmsteads' designs (SourceArt/wilderness/
 	 *  farm_designs.json), one picked by each farmstead's id; empty: the old fixed layout */

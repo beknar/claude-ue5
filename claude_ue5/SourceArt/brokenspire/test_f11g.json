@@ -1,5 +1,5 @@
 {
- "tag": "f11e",
+ "tag": "f11g",
  "plan": [
   "farms9"
  ],
@@ -52,60 +52,60 @@
      151.5,
      -587.2
     ],
-    "props": 220,
+    "props": 308,
     "animals": 10,
     "folk": 3
    },
    "animals": [
     {
-     "kind": "Goat",
+     "kind": "Cow",
      "in_pen": true,
-     "above_ground_cm": 23.0
+     "above_ground_cm": 18.0
+    },
+    {
+     "kind": "Cow",
+     "in_pen": true,
+     "above_ground_cm": 18.0
+    },
+    {
+     "kind": "Cow",
+     "in_pen": true,
+     "above_ground_cm": 24.0
     },
     {
      "kind": "Goat",
      "in_pen": true,
-     "above_ground_cm": 21.0
+     "above_ground_cm": 0.0
     },
     {
      "kind": "Goat",
      "in_pen": true,
-     "above_ground_cm": 28.0
+     "above_ground_cm": 0.0
     },
     {
-     "kind": "Pig",
+     "kind": "Goat",
+     "in_pen": true,
+     "above_ground_cm": 0.0
+    },
+    {
+     "kind": "Goat",
+     "in_pen": true,
+     "above_ground_cm": 0.0
+    },
+    {
+     "kind": "Cow",
+     "in_pen": true,
+     "above_ground_cm": 0.0
+    },
+    {
+     "kind": "Cow",
      "in_pen": true,
      "above_ground_cm": -1.0
     },
     {
-     "kind": "Pig",
+     "kind": "Cow",
      "in_pen": true,
-     "above_ground_cm": -1.0
-    },
-    {
-     "kind": "Pig",
-     "in_pen": true,
-     "above_ground_cm": -1.0
-    },
-    {
-     "kind": "Chicken",
-     "in_pen": true,
-     "above_ground_cm": 12.0
-    },
-    {
-     "kind": "Chicken",
-     "in_pen": true,
-     "above_ground_cm": 12.0
-    },
-    {
-     "kind": "Chicken",
-     "in_pen": true,
-     "above_ground_cm": 13.0
-    },
-    {
-     "kind": "Chicken",
-     "in_pen": true,
-     "above_ground_cm": 11.0
+     "above_ground_cm": 0.0
     }
    ],
    "folk": [
@@ -122,61 +122,61 @@
      "body": "Townswoman2"
     },
     {
-     "title": "child of Odric's Croft",
-     "clip": "MM_Idle",
+     "title": "farmhand of Odric's Croft",
+     "clip": "AS_Town_Talk",
      "feet_above_ground_cm": 0.0,
-     "body": "Child1"
+     "body": "Townsman3"
     }
    ],
    "animals_after_12s": [
     {
      "in_pen": true,
-     "above_ground_cm": 28.0,
+     "above_ground_cm": 24.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 14.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 24.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 0.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 0.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 0.0,
+     "state": 0
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 0.0,
      "state": 2
     },
     {
      "in_pen": true,
-     "above_ground_cm": 15.0,
-     "state": 1
-    },
-    {
-     "in_pen": true,
-     "above_ground_cm": 28.0,
-     "state": 1
-    },
-    {
-     "in_pen": true,
      "above_ground_cm": 0.0,
-     "state": 1
-    },
-    {
-     "in_pen": true,
-     "above_ground_cm": 0.0,
-     "state": 1
+     "state": 2
     },
     {
      "in_pen": true,
      "above_ground_cm": -1.0,
-     "state": 0
-    },
-    {
-     "in_pen": true,
-     "above_ground_cm": 9.0,
      "state": 1
     },
     {
      "in_pen": true,
-     "above_ground_cm": 13.0,
-     "state": 0
-    },
-    {
-     "in_pen": true,
-     "above_ground_cm": 13.0,
-     "state": 1
-    },
-    {
-     "in_pen": true,
-     "above_ground_cm": 11.0,
+     "above_ground_cm": 0.0,
      "state": 1
     }
    ],
@@ -184,17 +184,17 @@
    "bark": "farmwife of Odric's Croft|Mind the gate, they'll be out and in the beans before you can whistle.",
    "bark_new": true,
    "bodies_ok": true,
-   "fence_pieces": 90,
+   "fence_pieces": 3,
    "fences_in_open_fields": []
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "bs_f11e_farms9_talk.png",
-  "bs_f11e_farms9_farmstead.png",
-  "bs_f11e_farms9_farmstead2.png",
-  "bs_f11e_farms9_paddock.png",
-  "bs_f11e_farms9_strips.png"
+  "bs_f11g_farms9_talk.png",
+  "bs_f11g_farms9_farmstead.png",
+  "bs_f11g_farms9_farmstead2.png",
+  "bs_f11g_farms9_paddock.png",
+  "bs_f11g_farms9_strips.png"
  ],
  "error": null,
  "windows_shown_again": 1

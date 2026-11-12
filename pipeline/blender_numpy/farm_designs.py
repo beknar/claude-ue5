@@ -44,13 +44,21 @@ def foot(p):
     return p["u"], p["v"], 1.0, 1.0
 
 
+def door_y(p):
+    """where the door stands across the +X wall (metres; a barn's off its stall's half): RDWildFarm11.cpp's RDWF11DoorY"""
+    ny = max(2, min(8, p["ny"]))
+    k = max(0, (ny - 1) // 2) if p["kind"] == "barn" else ny // 2
+    return (k + 0.5) * TILE - ny * TILE / 2
+
+
 def door_front(p):
-    """the 4 m before a building's door (a rectangle like a footprint), or None"""
+    """the 4 m before a building's door, the doorway's 3 m across (a rectangle like a footprint), or None (PR #49's review: it
+    took the wall's middle, 1.5 m off the door of an even width)"""
     if p["kind"] not in ("house", "barn", "shed", "coop", "granary"): return None
     a = math.radians(p["yaw"]); fx, fy = math.cos(a), math.sin(a)
-    hx = p["nx"] * TILE / 2
-    cx, cy = p["u"] + fx * (hx + 2.2), p["v"] + fy * (hx + 2.2)
-    return cx, cy, (2.0 if abs(fx) > 0.5 else 1.0), (1.0 if abs(fx) > 0.5 else 2.0)
+    hx, dy = p["nx"] * TILE / 2, door_y(p)
+    cx, cy = p["u"] + fx * (hx + 2.2) - fy * dy, p["v"] + fy * (hx + 2.2) + fx * dy
+    return cx, cy, (2.0 if abs(fx) > 0.5 else 1.6), (1.6 if abs(fx) > 0.5 else 2.0)
 
 
 def overlaps(a, b, gap):

@@ -172,13 +172,13 @@ The list of 2026-11-10's sixth phase (`916_wilderness10.py`: `houses`, `map`, `l
 
 ## The list of 2026-11-11, fourth part: the farmsteads' designs
 
-The list of 2026-11-11's fourth phase (`docs/improvements11.txt`; `blender_numpy/farm_designs.py`, `919_farms11.py`; C++ `RD/RDWildFarm11.cpp`, the wild containers and side doors in `RD/RDWild10.cpp`). Walked through in `888 farms11 -Light` (`test_f11d.json`), with `houses10` and `884 farms9` again.
+The list of 2026-11-11's fourth phase (`docs/improvements11.txt`; `blender_numpy/farm_designs.py`, `919_farms11.py`; C++ `RD/RDWildFarm11.cpp`, the wild containers and side doors in `RD/RDWild10.cpp`). Walked through in `888 farms11 -Light` (`test_f11f.json` after PR #49's review), with `houses10` and `884 farms9` (`test_f11g.json`) again.
 
 - **Sixty designs** ("all the farms use the exact same design. have at least 50 different designs for farms"):
   - `farm_designs.py` lays out 60 by six plans (a row, a courtyard, an L, scattered, compact, long), each from a seeded stream.
   - A design is kept only if every footprint stands 2 m clear of the others, inside 31 m of the middle (the yard `FarmsteadsIn` keeps level and dry), with 4 m clear before every door. One that repeats another's buildings, pens and plan is drawn again.
-  - Every design has a farmhouse, a barn, a pen and a garden. Many also have coops (24), granaries (20), sheds (19), second pens and gardens, and yard things (well, cart, woodpile, hay, trough, scarecrow).
-  - Pens come in three shapes: one rectangle (59), two side by side with a kind each (16), and round (27). They hold the town's five farm animals (cows, goats, pigs, hens, rabbits). Half the barns have a stall inside with cattle, goats or pigs, and most coops have hens.
+  - Every design has a farmhouse, a barn, a pen and a garden. Many also have coops (20), granaries (20), sheds (15), second pens and gardens, and yard things (well, cart, woodpile, hay, trough, scarecrow).
+  - Pens come in three shapes: one rectangle (56), two side by side with a kind each (28), and round (21). They hold the town's five farm animals (cows, goats, pigs, hens, rabbits). Half the barns have a stall inside with cattle, goats or pigs, and most coops have hens.
   - A farmstead takes one design by its id. The three nearest Brokenspire in the test had three different designs.
 - **Every building has an inside and a door** ("not all the buildings at a farmhold have interiors nor can the doors be opened. example: Garrick's hold"):
   - Each building of a design is raised from the town's kit (`Town.<Timber|Stone|Thatch>_<part>`), 2 to 6 tiles of 3 m by 2 to 8.
@@ -188,13 +188,13 @@ The list of 2026-11-11's fourth phase (`docs/improvements11.txt`; `blender_numpy
     - the farmhouse: a fireplace and fire, a bed and chest, a long table with benches, a barrel, a crate, a wardrobe in a wide one, a lamp;
     - the barn: hay along the back, a trough, stores at its corners, its stall fenced off;
     - the shed, coop and granary: hay or sacks in a back corner, four stores, a woodpile in a shed.
-  - The open village houses' doors on a side wall open now too: their leaf's way is taken from its mesh. The test walked her in at every building of the first farm: the house, the barn and the coop each opened, and she stood on its floor inside its walls (0.6, 0.3 and 0.1 cm).
+  - The open village houses' doors on a side wall open now too: their leaf's way is taken from its mesh. The test walked her in at every building of the first farm: the house, barn, shed, granary and coop each opened, and she stood on its floor inside its walls (within 0.6 cm).
 - **Food in the farms, containers that work** ("farmholds should have some food in them to loot - none of the containers work"):
   - The wilds' chests, barrels, crates and wardrobes open with F (a lid lifts, doors swing) and give food by their kind (`FarmLoot`: bread, cheese, jerky, fruit, fish, wheat, nuts and seeds, hardtack, carrots, pumpkins...; a barn's and granary's grain), always at least one thing. A garden harvested gives its crops (`Town.Crop1..6`'s items).
   - Each is kept looted in the game (`WildKilled`, saved). A chunk made again builds it open and empty, and F passes it by.
   - The village and lone houses' containers work the same way.
   - Measured: the chest gave Bread x 2 and Jerky (the FOUND plaque, her things counted); the garden gave Wild Carrot, Wheat and Sunflower Seeds; all 10 animals were still in their pens 6 s later.
-- **Each design built and taken away**: `SpawnFarmDesignAt` built all 60 in turn near the first farm, and `RemoveWildFarm` took each away. Each had a house and a barn, every building five things or more, 9 to 21 containers, 1 or 2 gardens and 2 to 19 animals.
+- **Each design built and taken away**: `SpawnFarmDesignAt` built all 60 in turn near the first farm, and `RemoveWildFarm` took each away. Each had a house and a barn, every building five things or more, 9 to 21 containers, 1 or 2 gardens and 2 to 28 animals.
 - **On the way**:
   - In a coop the test stood her 44 cm up, on its hay and then its hens: a small building's hay goes in a corner, its hens keep to its back without a fence, and the farm animals' boxes cannot be stepped on (`CanCharacterStepUpOn`, the town's animals too).
   - The yard's cart, scaled for the yard, filled a barn: a barn has a trough instead.

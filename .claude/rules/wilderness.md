@@ -135,6 +135,7 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A small room's middle must stay free**: the test walks her to a building's middle; a coop's hay and its hens stood her 44 cm up. A low box an animal carries is never stepped up on (`CanCharacterStepUpOn`).
 - **A prop scaled for the yard is too big indoors**: the cart filled a barn.
 - **A picture from a raised point is a fall**: falls hurt (886); put her on the ground for a view and step back far enough (42 m for a yard).
+- **PR #49's review (2026-11-12)**: a thing of many pieces made in one frame is instances, one component a mesh, material, collision and visibility (`WildFarmInstance`), not a component a piece; a rule kept in two places says the same (the door's place across its wall in `farm_designs.py`'s `door_y` and `RDWF11DoorY`; the containers' hinge sign `RDContainerSign`, the dungeon's too); keys counted per thing made, never by a part's index times a slot count; a part turned its own way records its turn for whatever reads it back (the animals' pens); one rule's old copy goes when the new one covers it (the fixed layout is the default design); taking a range out of a shared list moves the ranges after it.
 
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
