@@ -1,0 +1,207 @@
+{
+ "tag": "p11d",
+ "plan": [
+  "port11"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "port11",
+   "ok": true,
+   "open": true,
+   "ramps": 8,
+   "water0": {
+    "in": false,
+    "splashes": 0,
+    "rings": 0,
+    "at": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "fx": true
+   },
+   "mouth_lines": [
+    {
+     "from": [
+      19771180,
+      -15150
+     ],
+     "hit_m": null,
+     "what": null
+    },
+    {
+     "from": [
+      19771180,
+      -10050
+     ],
+     "hit_m": null,
+     "what": null
+    },
+    {
+     "from": [
+      19771180,
+      -3450
+     ],
+     "hit_m": null,
+     "what": null
+    },
+    {
+     "from": [
+      19771180,
+      3150
+     ],
+     "hit_m": null,
+     "what": null
+    },
+    {
+     "from": [
+      19771180,
+      9750
+     ],
+     "hit_m": null,
+     "what": null
+    },
+    {
+     "from": [
+      19771180,
+      14850
+     ],
+     "hit_m": null,
+     "what": null
+    }
+   ],
+   "walled": [],
+   "sea": [
+    {
+     "m": 170,
+     "kind": 1,
+     "ground_z": -170,
+     "water_z": -110
+    },
+    {
+     "m": 230,
+     "kind": 1,
+     "ground_z": -170,
+     "water_z": -110
+    },
+    {
+     "m": 260,
+     "kind": 1,
+     "ground_z": -170,
+     "water_z": -109
+    },
+    {
+     "m": 300,
+     "kind": 1,
+     "ground_z": -196,
+     "water_z": -110
+    },
+    {
+     "m": 400,
+     "kind": 1,
+     "ground_z": -394,
+     "water_z": -109
+    },
+    {
+     "m": 600,
+     "kind": 1,
+     "ground_z": -954,
+     "water_z": -110
+    },
+    {
+     "m": 900,
+     "kind": 1,
+     "ground_z": -1070,
+     "water_z": -110
+    },
+    {
+     "m": 1500,
+     "kind": 1,
+     "ground_z": -907,
+     "water_z": -110
+    },
+    {
+     "m": 2300,
+     "kind": 1,
+     "ground_z": -2925,
+     "water_z": -110
+    }
+   ],
+   "coast": [
+    {
+     "off_m": -4000,
+     "max_drop_m": 0.43,
+     "shore_m": -140,
+     "h_inland": 46.0
+    },
+    {
+     "off_m": -2000,
+     "max_drop_m": 0.23,
+     "shore_m": 20,
+     "h_inland": 75.9
+    },
+    {
+     "off_m": -1000,
+     "max_drop_m": 0.15,
+     "shore_m": 260,
+     "h_inland": 76.0
+    },
+    {
+     "off_m": 1000,
+     "max_drop_m": 0.11,
+     "shore_m": 580,
+     "h_inland": 75.8
+    },
+    {
+     "off_m": 2000,
+     "max_drop_m": 0.14,
+     "shore_m": 720,
+     "h_inland": 75.8
+    },
+    {
+     "off_m": 4000,
+     "max_drop_m": 0.15,
+     "shore_m": 40,
+     "h_inland": 45.6
+    }
+   ],
+   "fall": {
+    "z0": 85,
+    "z": -85,
+    "z_min": -55,
+    "splashes": 1,
+    "in": true,
+    "splash_at": [
+     19771403.0,
+     -9550.0,
+     -110.0
+    ],
+    "face_under": -110,
+    "rings_wading": 8,
+    "in_while_wading": true,
+    "rings_live_max": 6,
+    "out": {
+     "z_at_foot": -85,
+     "in_at_foot": true,
+     "z": 85,
+     "past_top_m": 13.62,
+     "in": false,
+     "on_ground": true
+    }
+   },
+   "heads": {
+    "people": 163,
+    "headless": []
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_p11d_port11_splash.png",
+  "bs_p11d_port11_wake.png",
+  "bs_p11d_port11_mouth.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

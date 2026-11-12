@@ -29,6 +29,30 @@ bool ARDSection::InHarbourWater(const FIntPoint& T) const
 	return true;
 }
 
+bool ARDDungeonGenerator::WaterFaceAt(const FVector& At, float& Z) const
+{
+	// (in a loaded town: its harbour's water, the piers not; else the wilds' own)
+	if (bWild && IsInLoadedTown(At))
+	{
+		const ARDSection* S = GetSection(FIntPoint::ZeroValue);
+		if (!S || !S->HasHarbour()) return false;
+		const FVector L = At - S->GetActorLocation();
+		const FIntPoint T(FMath::FloorToInt(L.X / TileSize), FMath::FloorToInt(L.Y / TileSize));
+		if (!S->IsHarbourWaterTile(T)) return false;
+		Z = S->GetActorLocation().Z + RDPortWaterZ;
+		return true;
+	}
+	return WildWaterZAt(At, Z);
+}
+
+bool ARDSection::NearOpenHarbour(const FVector& W, float Reach) const
+{
+	if (!Generator || !Generator->bPortWaterOpen || TownHarbour.Area() <= 0) return false;
+	const float M = Generator->TileSize;
+	const FVector L = W - GetActorLocation();
+	return L.X > TownHarbour.Min.X * M - Reach && L.X < TownHarbour.Max.X * M + Reach && L.Y > TownHarbour.Min.Y * M - Reach && L.Y < TownHarbour.Max.Y * M + Reach;
+}
+
 void ARDSection::HarbourBuild()
 {
 	if (TownHarbour.Area() <= 0) return;
@@ -61,6 +85,48 @@ void ARDSection::HarbourBuild()
 		W->SetCastShadow(false);
 		if (UMaterialInterface* Mt = Generator->WildSeaMaterial ? Generator->WildSeaMaterial.Get() : Generator->WildWaterMaterial.Get()) W->SetMaterial(0, Mt);
 	}
+	// ---- open to the sea (the list of 2026-11-11: "the player should be able to fall into the water, but be able to walk out via
+	// ramps"): no blockers; she drops 1.7 m from the quay or a pier to the harbour's floor (60 cm of water over it) and walks up a
+	// stone ramp out of it. A ramp half way between each two piers along the quay and one on each side quay, each a tile wide,
+	// from 20 cm into the quay down to the floor 6 m out (16 degrees)
+	TownRampFeet.Reset(); TownRampTops.Reset();
+	if (Generator->bPortWaterOpen)
+	{
+		const FRDPiece* Rp = Generator->Piece(TEXT("Port.Ramp"));
+		const float Px = Rp ? FMath::Max((float)Rp->Size.X, 1.f) : 100.f, Py = Rp ? FMath::Max((float)Rp->Size.Y, 1.f) : 100.f, Pz = Rp ? FMath::Max((float)Rp->Size.Z, 1.f) : 100.f;
+		auto Ramp = [&](const FIntPoint& T, const FIntPoint& Dl)
+		{
+			// (T a water tile, Dl the way to the quay beside it)
+			if (!InHarbourWater(T) || !In(T + Dl) || Type[Idx(T + Dl)] == 0 || InHarbourWater(T + Dl)) return;
+			for (const FIntRect& Pr : TownPiers) if (Pr.Contains(T + Dl)) return;
+			const FVector Wl(Dl.X, Dl.Y, 0), E = TileWorld(T) + Wl * (M * 0.5f);
+			const FVector Top = E + Wl * 20.f + FVector(0, 0, 5.f), Foot = E - Wl * 600.f + FVector(0, 0, RDPortWalkZ);
+			const FVector Al = Foot - Top;
+			const FRotator Ro = Al.Rotation();                      // (its +X down the ramp, pitched down)
+			const float Th = 30.f;
+			const FVector Loc = (Top + Foot) * 0.5f - Ro.RotateVector(FVector(0, 0, Th));   // (a piece's origin is its bottom's middle)
+			AddPiece(TEXT("Port.Ramp"), FTransform(Ro, Loc, FVector(Al.Size() / Px, (M - 20.f) / Py, Th / Pz)));
+			TownRampFeet.Add(Foot); TownRampTops.Add(Top);
+		};
+		// (along the main quay: the harbour's edge on the land's side of the piers)
+		TArray<int32> Ys;
+		for (const FIntRect& Pr : TownPiers) Ys.Add((Pr.Min.Y + Pr.Max.Y) / 2);
+		Ys.Sort();
+		if (Ys.Num() && TownPiers.Num())
+		{
+			const int32 Qx = TownPiers[0].Min.X;                          // (the piers' root: the first water row off the quay)
+			const FIntPoint Dl = (In(FIntPoint(Qx - 1, Ys[0])) && Type[Idx(FIntPoint(Qx - 1, Ys[0]))] != 0 && !TownHarbour.Contains(FIntPoint(Qx - 1, Ys[0]))) ? FIntPoint(-1, 0) : FIntPoint(1, 0);
+			TArray<int32> Mids;
+			Mids.Add((TownHarbour.Min.Y + Ys[0]) / 2);
+			for (int32 K = 1; K < Ys.Num(); ++K) Mids.Add((Ys[K - 1] + Ys[K]) / 2);
+			Mids.Add((Ys.Last() + TownHarbour.Max.Y) / 2);
+			for (const int32 Y : Mids) Ramp(FIntPoint(Dl.X < 0 ? TownHarbour.Min.X : TownHarbour.Max.X - 1, Y), Dl);
+			// (the side quays, a third of the way out along them)
+			const int32 Xs = Dl.X < 0 ? TownHarbour.Min.X + 6 : TownHarbour.Max.X - 7;
+			Ramp(FIntPoint(Xs, TownHarbour.Min.Y), FIntPoint(0, -1));
+			Ramp(FIntPoint(Xs, TownHarbour.Max.Y - 1), FIntPoint(0, 1));
+		}
+	}
 	// ---- the blockers: an invisible wall 1.5 m high along every edge where walked ground meets the water (the quay, the
 	// harbour's sides, each pier's sides and end)
 	int32 Walls = 0;
@@ -86,7 +152,7 @@ void ARDSection::HarbourBuild()
 				if (In(Nb) && InHarbourWater(Nb)) continue;
 				if (!In(Nb) || Type[Idx(Nb)] == 0) continue;            // (outside the town or the wall: nothing to keep in)
 				const FVector C = TileWorld(T), E = FVector(Dir[S_].X, Dir[S_].Y, 0) * (M * 0.5f), Al(Dir[S_].Y, -Dir[S_].X, 0);
-				Blocker(C + E - Al * (M * 0.5f), C + E + Al * (M * 0.5f));
+				if (!Generator->bPortWaterOpen) Blocker(C + E - Al * (M * 0.5f), C + E + Al * (M * 0.5f));
 				// (the quay's stone face down to the bed where the land meets the water; the piers stand on their pilings)
 				bool bPier = false;
 				for (const FIntRect& Pr : TownPiers) if (Pr.Contains(Nb)) bPier = true;

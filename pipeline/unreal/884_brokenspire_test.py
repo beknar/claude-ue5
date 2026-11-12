@@ -2922,6 +2922,15 @@ def step_port():
         g.set_editor_property("travel_dry_run", False)
     quiet(False)
     k = kinds; pc_ = res["piece_counts"]; pw = res.get("pier_walk") or {}
+    # (the harbour open to the sea (the list of 2026-11-11, 920 port): no blockers, so a push off a pier or the quay drops her into
+    # the water, and there are no blocker edges to trace; port11 measures the open harbour)
+    res["open"] = bool(g.get_editor_property("port_water_open"))
+    if res["open"]:
+        held = (pw and abs(pw["z_on_deck"] - 90) < 40 and not res.get("on_pier") and len(res["harbour_edges"]) == 0 and not res.get("edge_push"))
+    else:
+        held = (pw and abs(pw["z_on_deck"] - 90) < 40 and pw["z_min_pushed"] > pw["z_on_deck"] - 30 and not res.get("on_pier")
+                and len(res["harbour_edges"]) >= 3 and all(e["dipped"] == 0 for e in list(res["harbour_edges"].values()) + list(res["deck_edges"].values()))
+                and set(res.get("edge_push") or {}) == set(res["harbour_edges"]) and all(e["from_line_m"] < 0 and e["z_min"] > e["z0"] - 30 for e in res["edge_push"].values()))
     ok = (res["sea_north_m"] is not None and res["sea_north_m"] < 1500 and res["plan"] == 3 and sh is not None and res["sluice_house"]["from_middle_m"] < 120
           and "sewers" in res["dungeon_level"] and res["harbour_water"]
           and sk.get("pier", 0) == 5 and sk.get("ship", 0) == 5 and sk.get("boat", 0) == 5 and sk.get("wreck", 0) == 2 and sk.get("gibbet", 0) == 3 and sk.get("body", 0) >= 8 and sk.get("dock props", 0) >= 3
@@ -2932,11 +2941,128 @@ def step_port():
           and all(roles.get(r, 0) >= 1 for r in ("Elder", "Scholar", "Captain", "Sailor", "Dockhand", "Fisher", "Mourner"))
           and "Harbourmaster Edda Strand" in res["titles"] and "Aldric Venn" not in res["titles"]
           and any("Old Grate" in str(p) for p in res["harbourmaster"]["panel"]) and res["port_fog"] > 0.8 and res["fog"] and all(f["start_m"] < 20 and f["density"] > 0.1 for f in res["fog"])
-          and pw and abs(pw["z_on_deck"] - 90) < 40 and pw["z_min_pushed"] > pw["z_on_deck"] - 30 and not res.get("on_pier")
-          and len(res["harbour_edges"]) >= 3 and all(e["dipped"] == 0 for e in list(res["harbour_edges"].values()) + list(res["deck_edges"].values()))
-          and set(res.get("edge_push") or {}) == set(res["harbour_edges"]) and all(e["from_line_m"] < 0 and e["z_min"] > e["z0"] - 30 for e in res["edge_push"].values())
-          and res.get("gate_travel") == "catacombs")
+          and held and res.get("gate_travel") == "catacombs")
     step_result("port", ok, **res)
+
+def step_port11():
+    """the list of 2026-11-11 on Graymourne (920 port, 920 heads): the harbour open to the sea (no blocker, no town wall or
+    tower across its mouth: a line 2.5 m up from each ramp's top out to sea meets nothing for 120 m), the wilds' sea on beyond
+    it (water past the section's edge and out to 600 m), the coast round it gentle (no 20 m step dropping more than 6 m on
+    lines across the coast 1 to 4 km either side); she falls off the quay into the water (her feet on the harbour's floor, a
+    splash made where she came in), wades (rings made) and walks out up a ramp onto the quay; every townsperson has a head
+    (the highest of its meshes 12 cm or more over its neck)"""
+    g = G["gen"]; res = {}
+    ti, x, y = yield from to_town("Graymourne")
+    res["open"] = bool(g.get_editor_property("port_water_open"))
+    def w11():
+        return [str(l).split("|") for l in g.get_wild11_lines()]
+    def water():
+        p_ = next((p_ for p_ in w11() if p_[0] == "water"), None)
+        return {"in": p_[1] == "1", "splashes": int(p_[2]), "rings": int(p_[3]), "at": [float(p_[4]), float(p_[5]), float(p_[6])], "fx": p_[7] == "1" and p_[8] == "1"} if p_ else None
+    ramps = [(V(float(p_[1]), float(p_[2]), float(p_[3])), V(float(p_[4]), float(p_[5]), float(p_[6]))) for p_ in w11() if p_[0] == "ramp"]
+    res["ramps"] = len(ramps); res["water0"] = water()
+    S = section()
+    # (no wall across the mouth: from each ramp's top out along +X (the port plan's frame: the harbour toward the sea), 2.5 m up)
+    clear = []
+    quay = [(f_, t_) for f_, t_ in ramps if abs(f_.x - t_.x) > abs(f_.y - t_.y)]      # (the main quay's: down toward +X)
+    for foot, top in quay:
+        a = V(top.x, top.y, top.z + 250.0); b = V(top.x + 12000.0, top.y, top.z + 250.0)
+        h = unreal.SystemLibrary.line_trace_single(G["w"], a, b, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        h = h.to_tuple() if h else None
+        hit = bool(h and h[0])
+        comp = next((q for q in (h or ()) if isinstance(q, unreal.PrimitiveComponent)), None) if hit else None
+        sm_ = comp.get_editor_property("static_mesh") if isinstance(comp, unreal.StaticMeshComponent) else None
+        clear.append({"from": [round(top.x), round(top.y)], "hit_m": round((h[4].x - a.x) / 100, 1) if hit else None, "what": (sm_.get_name() if sm_ else (comp.get_name() if comp else None))})
+    res["mouth_lines"] = clear
+    # (a wall, a tower or a blocker in the way; a ship or a wreck may stand there)
+    walled = [c for c in clear if c["what"] and any(k in c["what"] for k in ("Castle_Stone_Wall", "Tower", "Cube", "Parapet", "Collider"))]
+    res["walled"] = walled
+    # (the wilds' sea beyond: samples out from the section's edge (half its 504 m) along the harbour's middle line)
+    ys = sorted(t_.y for _, t_ in quay)
+    ym = ys[len(ys) // 2] if ys else y * 100.0
+    sea = []
+    for d in (170, 230, 260, 300, 400, 600, 900, 1500, 2300):
+        p_ = str(g.get_wild_sample_at(V(x * 100.0 + d * 100.0, ym, 0))).split("|")
+        if len(p_) > 6: sea.append({"m": d, "kind": int(float(p_[5])), "ground_z": round(float(p_[1])), "water_z": round(float(p_[1]) + (float(p_[6]) - float(p_[0])) * 100) if int(float(p_[5])) else None})
+    res["sea"] = sea
+    # (the coast either side: lines along +X from 300 m inland to 900 m out, 20 m apart, the largest drop between two samples)
+    coast = []
+    for off in (-4000, -2000, -1000, 1000, 2000, 4000):
+        zs = []
+        for d in range(-300, 901, 20):
+            p_ = str(g.get_wild_sample_at(V((x + d) * 100.0, (y + off) * 100.0, 0))).split("|")
+            if len(p_) > 5: zs.append((d, float(p_[0]), int(float(p_[5]))))
+        drops = [zs[i][1] - zs[i + 1][1] for i in range(len(zs) - 1)]
+        shore = next((d for d, h_, k_ in zs if k_ == 1), None)
+        coast.append({"off_m": off, "max_drop_m": round(max(drops), 2) if drops else None, "shore_m": shore, "h_inland": round(zs[0][1], 1) if zs else None})
+    res["coast"] = coast
+    # (into the water: from 3 m inland of the quay beside the second ramp (5 m along the quay from it), pushed toward the water)
+    fall = None
+    if ramps:
+        foot, top = ramps[min(1, len(ramps) - 1)]
+        wd = V(foot.x - top.x, foot.y - top.y, 0); n = math.hypot(wd.x, wd.y) or 1.0; wd = V(wd.x / n, wd.y / n, 0)
+        al = V(-wd.y, wd.x, 0)
+        st = V(top.x - wd.x * 300.0 + al.x * 500.0, top.y - wd.y * 300.0 + al.y * 500.0, 0)
+        quiet(True)
+        yaw = math.degrees(math.atan2(wd.y, wd.x))
+        put(st, yaw=yaw); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-18, yaw=yaw)); yield from wait(1.2)
+        w0 = water(); z0 = G["pawn"].get_actor_location().z
+        t0 = time.time(); zmin = z0
+        while time.time() - t0 < 3.0:
+            G["pawn"].add_movement_input(wd, 1.0); yield
+            zmin = min(zmin, G["pawn"].get_actor_location().z)
+            w_ = water()
+            if w_ and w_["splashes"] > w0["splashes"]: break
+        # (the splash where she came in, from her side and above)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=yaw + 90.0)); yield from rwait(0.35)
+        shot("port11_splash"); yield from rwait(1.0)
+        yield from wait(0.6)
+        w1 = water(); p1 = G["pawn"].get_actor_location()
+        fall = {"z0": round(z0), "z": round(p1.z), "z_min": round(zmin), "splashes": w1["splashes"] - w0["splashes"], "in": w1["in"], "splash_at": w1["at"],
+                "face_under": round(g.get_water_face_under_her())}
+        # (wading along the quay, away from the ramp (toward it she walked up it and out in a second): rings behind her)
+        r0 = water()["rings"]; t0 = time.time(); still_in = True; live = 0
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-30, yaw=math.degrees(math.atan2(al.y, al.x))))
+        while time.time() - t0 < 2.0:
+            G["pawn"].add_movement_input(al, 1.0); yield
+            still_in = still_in and bool(water()["in"]); live = max(live, g.get_water_rings_live())
+        shot("port11_wake"); yield from rwait(1.0)
+        fall["rings_wading"] = water()["rings"] - r0; fall["in_while_wading"] = still_in; fall["rings_live_max"] = live
+        # (out up the ramp: from 1 m out past its foot, walked toward its top for 6 s)
+        put(V(foot.x + wd.x * 100.0, foot.y + wd.y * 100.0, foot.z), yaw=yaw + 180.0); yield from wait(1.0)
+        zf = G["pawn"].get_actor_location().z; in_f = water()["in"]
+        t0 = time.time()
+        while time.time() - t0 < 6.0:
+            G["pawn"].add_movement_input(V(-wd.x, -wd.y, 0), 1.0); yield
+        p2 = G["pawn"].get_actor_location()
+        fall["out"] = {"z_at_foot": round(zf), "in_at_foot": in_f, "z": round(p2.z), "past_top_m": round(((p2.x - top.x) * -wd.x + (p2.y - top.y) * -wd.y) / 100, 2), "in": water()["in"],
+                       "on_ground": G["pawn"].get_editor_property("character_movement").is_moving_on_ground()}
+        # (the harbour's mouth and the sea beyond, from the ramp's top, on a clear day at noon: the far land hidden in the port's fog)
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Weather clear"); unreal.SystemLibrary.execute_console_command(G["w"], "rd.Time noon")
+        put(V(top.x - wd.x * 200.0, top.y - wd.y * 200.0, 0), yaw=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-3, yaw=0.0)); yield from wait(3.0)
+        shot("port11_mouth"); yield from rwait(1.2)
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Weather auto")
+        quiet(False)
+    res["fall"] = fall
+    # (every townsperson's head: the top of its meshes over its body's neck bone)
+    heads = {"people": 0, "headless": []}
+    for a in GS.get_all_actors_of_class(G["w"], unreal.RDTownsfolk):
+        sk = a.get_components_by_class(unreal.SkeletalMeshComponent)
+        body = next((c for c in sk if c.does_socket_exist("neck_01")), None)
+        if not body: continue
+        heads["people"] += 1
+        neck = body.get_socket_location("neck_01").z
+        top = max(o.z + e.z for o, e, _ in (unreal.SystemLibrary.get_component_bounds(c) for c in sk))
+        if top < neck + 12.0: heads["headless"].append({"mesh": body.get_skeletal_mesh_asset().get_name() if body.get_skeletal_mesh_asset() else None, "over_neck_cm": round(top - neck, 1)})
+    res["heads"] = heads
+    f = fall or {}; o = f.get("out") or {}
+    ok = (res["open"] and res["ramps"] >= 5 and len(clear) >= 4 and not walled
+          and all(s_["kind"] == 1 for s_ in sea if s_["m"] >= 260) and any(s_["m"] >= 2300 for s_ in sea) and all(abs(s_["water_z"] + 110) < 15 for s_ in sea if s_["water_z"] is not None)
+          and all(c["max_drop_m"] is not None and c["max_drop_m"] < 6.0 for c in coast)
+          and f.get("splashes", 0) >= 1 and f.get("in") and f.get("z", 0) < -40 and f.get("rings_wading", 0) >= 3 and f.get("in_while_wading") and f.get("rings_live_max", 0) >= 2 and abs(f.get("face_under", 0) + 110) < 15
+          and o.get("in_at_foot") and not o.get("in") and o.get("z", -999) > 60 and o.get("past_top_m", -9) > 0.5
+          and heads["people"] > 30 and not heads["headless"])
+    step_result("port11", ok, **res)
 
 def step_descendsewer():
     """the sewer gate of Graymourne's sluice house, both ways: down into the sewers (the level sewers, 897: its floors going
@@ -4411,7 +4537,7 @@ def step_keys9():
           and res["war_engine_before"] == 0 and res["war_engine_after_old_progress"] == 1 and res["all_keys_counter"] == 0)
     step_result("keys9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
-              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "descendsewer": step_descendsewer,
+              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "port11": step_port11, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9, "fight11": step_fight11, "console11": step_console11,
               "sky9": step_sky9, "sky10": step_sky10, "skyspin": step_skyspin, "cloudless": step_cloudless, "horizon": step_horizon, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})

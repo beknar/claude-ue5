@@ -1,0 +1,539 @@
+{
+ "tag": "w11b",
+ "plan": [
+  "world",
+  "meadows11",
+  "events11"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "world",
+   "ok": true,
+   "state": {
+    "ready": 1,
+    "seed": 20261103,
+    "init_s": 0.14,
+    "chunks": 64,
+    "in_flight": 0,
+    "built": 64,
+    "dropped": 0,
+    "max_active": 64,
+    "compute_ms": 121.8,
+    "build_ms_max": 27.7,
+    "revealed": 114,
+    "found": 1,
+    "towns": 6,
+    "wild_ticks": 127,
+    "gen_ticks": 127,
+    "paused": 0,
+    "menu": 0,
+    "panel": 0
+   },
+   "towns": {
+    "Brokenspire": {
+     "kind": "town",
+     "x": 0.0,
+     "y": 0.0,
+     "h": 75.9,
+     "style": 0
+    },
+    "Ashenreach": {
+     "kind": "city",
+     "x": 70000.0,
+     "y": 0.0,
+     "h": 75.9,
+     "style": 1
+    },
+    "Graymourne": {
+     "kind": "coast",
+     "x": 197550.0,
+     "y": 0.0,
+     "h": 75.9,
+     "style": 1
+    },
+    "Vel Morrath": {
+     "kind": "city",
+     "x": 55000.0,
+     "y": 75000.0,
+     "h": 75.9,
+     "style": 1
+    },
+    "Kethrys Spire": {
+     "kind": "city",
+     "x": 152550.0,
+     "y": -70000.0,
+     "h": 75.9,
+     "style": 1
+    },
+    "Heaven": {
+     "kind": "city",
+     "x": 114237.0,
+     "y": -110915.0,
+     "h": 75.9,
+     "style": 1
+    }
+   },
+   "graymourne_sea_north_m": 200.0,
+   "velmorrath_sea_east_m": null,
+   "kethrys_from_graymourne_km": 83.2,
+   "heaven_from_kethrys_km": 56.1,
+   "checks": {
+    "brokenspire_mid_south": true,
+    "ashenreach_middle": true,
+    "ashenreach_north_of_brokenspire": true,
+    "graymourne_north_coast": true,
+    "velmorrath_north_east": true,
+    "velmorrath_inland": true,
+    "kethrys_north_west_inland": true,
+    "heaven_past_kethrys_inland": true
+   },
+   "biomes": {
+    "grasslands": {
+     "cells": 7,
+     "x": 8946.0,
+     "y": -772.0,
+     "km": 9.0
+    },
+    "meadows": {
+     "cells": 12,
+     "x": 12786.0,
+     "y": 11844.0,
+     "km": 17.4
+    },
+    "farms": {
+     "cells": 3,
+     "x": 1500.0,
+     "y": -1200.0,
+     "km": 1.9
+    },
+    "savannahs": {
+     "cells": 13,
+     "x": -13506.0,
+     "y": -34642.0,
+     "km": 37.2
+    },
+    "hills": {
+     "cells": 47,
+     "x": -19383.0,
+     "y": 10596.0,
+     "km": 22.1
+    },
+    "mountains": {
+     "cells": 22,
+     "x": 20594.0,
+     "y": 618.0,
+     "km": 20.6
+    },
+    "tundras": {
+     "cells": 12,
+     "x": 118681.0,
+     "y": -20325.0,
+     "km": 120.4
+    },
+    "plains": {
+     "cells": 29,
+     "x": 1392.0,
+     "y": -15924.0,
+     "km": 16.0
+    },
+    "pine forests": {
+     "cells": 14,
+     "x": 62479.0,
+     "y": -33839.0,
+     "km": 71.1
+    },
+    "temperate autumn forests": {
+     "cells": 4,
+     "x": 26654.0,
+     "y": -77277.0,
+     "km": 81.7
+    },
+    "marshes": {
+     "cells": 1,
+     "x": 49156.0,
+     "y": 25994.0,
+     "km": 55.6
+    },
+    "wetlands": {
+     "cells": 1,
+     "x": 41377.0,
+     "y": 36806.0,
+     "km": 55.4
+    },
+    "mountains and peaks": {
+     "cells": 10,
+     "x": -30356.0,
+     "y": -35557.0,
+     "km": 46.8
+    },
+    "volcanoes": {
+     "cells": 1,
+     "x": 24447.0,
+     "y": 6140.0,
+     "km": 25.2
+    },
+    "coastal regions": {
+     "cells": 28,
+     "x": -61519.0,
+     "y": -2512.0,
+     "km": 61.6
+    },
+    "arctic regions": {
+     "cells": 1,
+     "x": 167972.0,
+     "y": 38005.0,
+     "km": 172.2
+    },
+    "canyons": {
+     "cells": 1,
+     "x": -16020.0,
+     "y": -17308.0,
+     "km": 23.6
+    },
+    "mesas": {
+     "cells": 1,
+     "x": -32822.0,
+     "y": 9106.0,
+     "km": 34.1
+    },
+    "canyon networks": {
+     "cells": 2,
+     "x": -26111.0,
+     "y": -5827.0,
+     "km": 26.8
+    },
+    "cold steppes": {
+     "cells": 9,
+     "x": 79545.0,
+     "y": 69533.0,
+     "km": 105.7
+    },
+    "highland moorland": {
+     "cells": 20,
+     "x": 53179.0,
+     "y": 38407.0,
+     "km": 65.6
+    },
+    "boreal pine forest": {
+     "cells": 7,
+     "x": 105169.0,
+     "y": -46969.0,
+     "km": 115.2
+    },
+    "temperate aspen": {
+     "cells": 14,
+     "x": 62442.0,
+     "y": -20562.0,
+     "km": 65.7
+    },
+    "volcanic tundra": {
+     "cells": 7,
+     "x": 122983.0,
+     "y": -1577.0,
+     "km": 123.0
+    },
+    "burned plain": {
+     "cells": 2,
+     "x": 75000.0,
+     "y": 0.0,
+     "km": 75.0
+    },
+    "geothermal caldera": {
+     "cells": 5,
+     "x": 55686.0,
+     "y": -87651.0,
+     "km": 103.8
+    },
+    "glacial": {
+     "cells": 18,
+     "x": 113544.0,
+     "y": -62136.0,
+     "km": 129.4
+    },
+    "taigas": {
+     "cells": 4,
+     "x": 135204.0,
+     "y": 41593.0,
+     "km": 141.5
+    },
+    "rocky coastal": {
+     "cells": 234,
+     "x": -45718.0,
+     "y": -26193.0,
+     "km": 52.7
+    }
+   },
+   "missing_templates": [],
+   "rivers": 26,
+   "lakes": 76,
+   "roads": [
+    "road|Brokenspire|Ashenreach|84.7|2|272",
+    "road|Ashenreach|Graymourne|161.1|70300|0",
+    "road|Brokenspire|Vel Morrath|135.1|2|272",
+    "road|Ashenreach|Vel Morrath|88.1|69941|294",
+    "road|Graymourne|Kethrys Spire|91.0|197388|-252",
+    "road|Kethrys Spire|Heaven|58.9|152345|-70219"
+   ],
+   "river_lengths_km": [
+    24.4,
+    22.5,
+    21.3,
+    20.8,
+    18.7,
+    16.9,
+    16.6,
+    15.8
+   ],
+   "map_continent": {
+    "ok": true,
+    "s": 1.2
+   },
+   "map_around": {
+    "ok": true,
+    "s": 0.7
+   },
+   "map_near": {
+    "ok": true,
+    "s": 0.6
+   },
+   "place_ids": {
+    "count": 34,
+    "north": 11,
+    "town_range_not_towns": [],
+    "shared": []
+   }
+  },
+  {
+   "step": "meadows11",
+   "ok": true,
+   "spot": [
+    12786,
+    11844
+   ],
+   "trees_250m": 183,
+   "bare_share": 0.89,
+   "dispersion": 3.12,
+   "max_cell": 6,
+   "bare_80m_square": true,
+   "debris_100m": {
+    "leaves": 4,
+    "branch": 10,
+    "stump": 3,
+    "log": 4
+   },
+   "grass_near": 99,
+   "grass_materials": [
+    "MI_Clasters_Grass_varient_Wind"
+   ],
+   "wind": "MPC_RD_Wind",
+   "leaves": {
+    "on": true,
+    "biome": "meadows",
+    "fx": true,
+    "x": 1278993.0,
+    "y": 1184435.0,
+    "z": 1093.0
+   },
+   "screen": [
+    {
+     "fx": "Flower_meadows/NS_flying_leaves",
+     "shot": "leaves11_0",
+     "on": true
+    },
+    {
+     "fx": "Fx/NS_leaves",
+     "shot": "leaves11_1",
+     "on": true
+    },
+    {
+     "fx": "Fx/NS_leaves",
+     "shot": "leaves11_2",
+     "on": true
+    },
+    {
+     "fx": "PureNature_Meadows/FXS_Leaves",
+     "shot": "leaves11_3",
+     "on": true
+    },
+    {
+     "fx": "Medieval_Lake_Village/NS_FallenLeaves",
+     "shot": "leaves11_4",
+     "on": true
+    },
+    {
+     "fx": "VOL31_14WidowSt/NS_Falling_Leaves_01a",
+     "shot": "leaves11_5",
+     "on": true
+    }
+   ]
+  },
+  {
+   "step": "events11",
+   "ok": false,
+   "kinds": {
+    "roam_find": {
+     "met": true,
+     "placed": [
+      "abandoned_camp"
+     ],
+     "herd": 0,
+     "folk_new": 0
+    },
+    "roam_forage": {
+     "met": true,
+     "placed": [
+      "herb_patch"
+     ],
+     "herd": 0,
+     "folk_new": 0
+    },
+    "roam_stone": {
+     "met": true,
+     "placed": [
+      "milestone"
+     ],
+     "herd": 0,
+     "folk_new": 0
+    },
+    "roam_ruin": {
+     "met": true,
+     "placed": [
+      "great_ruin"
+     ],
+     "herd": 0,
+     "folk_new": 0
+    },
+    "roam_nest": {
+     "met": true,
+     "placed": [
+      "monster_nest"
+     ],
+     "herd": 0,
+     "folk_new": 0
+    },
+    "roam_deer": {
+     "met": true,
+     "placed": [],
+     "herd": 4,
+     "folk_new": 0
+    },
+    "roam_hares": {
+     "met": true,
+     "placed": [],
+     "herd": 3,
+     "folk_new": 0
+    },
+    "roam_wolves": {
+     "met": true,
+     "placed": [],
+     "herd": 3,
+     "folk_new": 0
+    },
+    "roam_pilgrim": {
+     "met": true,
+     "placed": [],
+     "herd": 0,
+     "folk_new": 1,
+     "prompt": "talk to a weary pilgrim",
+     "f": "gift",
+     "new_things": [
+      "item|Bread|1"
+     ],
+     "gold": 0,
+     "f_again": "bark",
+     "given": true
+    },
+    "roam_pedlar": {
+     "met": true,
+     "placed": [],
+     "herd": 0,
+     "folk_new": 1,
+     "prompt": "talk to a travelling pedlar",
+     "f": "gift",
+     "new_things": [
+      "item|Jerky|1"
+     ],
+     "gold": 0,
+     "f_again": "bark",
+     "given": true
+    },
+    "roam_hunter": {
+     "met": true,
+     "placed": [],
+     "herd": 0,
+     "folk_new": 1,
+     "prompt": "talk to a lost hunter",
+     "f": "gift",
+     "new_things": [
+      "item|Fish|2",
+      "item|Jerky|3"
+     ],
+     "gold": 0,
+     "f_again": "bark",
+     "given": true
+    },
+    "roam_courier": {
+     "met": true,
+     "placed": [],
+     "herd": 0,
+     "folk_new": 1,
+     "prompt": "talk to a courier",
+     "f": "gift",
+     "new_things": [],
+     "gold": 12,
+     "f_again": "bark",
+     "given": true
+    },
+    "roam_refugee": {
+     "met": true,
+     "placed": [],
+     "herd": 0,
+     "folk_new": 1,
+     "prompt": "take up what lies here (3)",
+     "f": "loot",
+     "new_things": [
+      "item|Bread|3",
+      "item|Small Healing Potion|1"
+     ],
+     "gold": 0,
+     "f_again": "gift",
+     "given": true
+    }
+   },
+   "herd_shot": true,
+   "shot": true,
+   "good": {
+    "roam_find": true,
+    "roam_forage": true,
+    "roam_stone": true,
+    "roam_ruin": true,
+    "roam_nest": true,
+    "roam_deer": true,
+    "roam_hares": true,
+    "roam_wolves": true,
+    "roam_pilgrim": true,
+    "roam_pedlar": true,
+    "roam_hunter": true,
+    "roam_courier": true,
+    "roam_refugee": false
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_w11b_meadows11_0.png",
+  "wd_w11b_meadows11_1.png",
+  "wd_w11b_meadows11_2.png",
+  "wd_w11b_leaves11_0.png",
+  "wd_w11b_leaves11_1.png",
+  "wd_w11b_leaves11_2.png",
+  "wd_w11b_leaves11_3.png",
+  "wd_w11b_leaves11_4.png",
+  "wd_w11b_leaves11_5.png",
+  "wd_w11b_events11_herd.png",
+  "wd_w11b_events11_folk.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

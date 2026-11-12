@@ -2542,6 +2542,72 @@ public:
 	void WildKindsForTier(int32 Tier, TArray<int32>& Kinds) const;
 	/** the director's lost satchels (gone with her far off, as its roamers) */
 	TArray<TWeakObjectPtr<ARDLootPile>> WildRoamPiles;
+	/** the list of 2026-11-11's fifth phase (RD/RDWild11.cpp): what the director met her with besides monsters and piles: the people
+	 *  on the way (they talk and give), the herds; gone once she is 250 m away, as the roamers */
+	TArray<TWeakObjectPtr<ARDTownsfolk>> WildRoamFolk;
+	TArray<TWeakObjectPtr<class ARDWildAnimal>> WildRoamHerd;
+	int32 WildDirectorPlaces = 0;
+	/** the director's new kinds: a point of interest laid ahead of her, a herd, a person on the way; what it made */
+	int32 MakeWildEncounter11(const FRDWildPoiKind& K, const FVector2D& At, FRandomStream& Rs);
+	/** one met on the way gives her their gift (and gold) the first time she speaks to them */
+	void GiveWildGift(ARDTownsfolk* T);
+	/** a sum of gold at a place of the wilds, grown with its tier as a kill's (RDTierGold) */
+	int32 WildGoldAt(int32 Base, const FVector& At) const;
+	/** the fifth phase's tick in the wilds: the leaves blowing round her in the meadows and woods, the splash and wake as she
+	 *  goes in water */
+	void TickWild11(float Dt, const FVector& Her);
+	/** the leaves blown round her (a Niagara system before the camera) where she is in one of WildLeavesBiomes, out of towns */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") TObjectPtr<UNiagaraSystem> WildLeavesFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") TArray<FString> WildLeavesBiomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") float WildLeavesAhead = 700.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") float WildLeavesScale = 1.f;
+	UPROPERTY(Transient) TObjectPtr<class UNiagaraComponent> WildLeavesComp = nullptr;
+	/** tests (888 meadows11's screening): the leaves' system changed now (the one blowing taken away, the new one made where she
+	 *  is) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild11") void SetWildLeavesFx(UNiagaraSystem* Fx);
+	FString WildLeavesBiome;
+	float WildLeavesClock = 0.f;
+	/** the list of 2026-11-11 (Graymourne: "the terrain should be shoreline, with the water extending out into an ocean. the player
+	 *  should be able to fall into the water, but be able to walk out via ramps. the docks should not be surrounded by walls"):
+	 *  the port on its coast with the sea lifted to its harbour's water round it (FRDWildWorld::bPortSea), no blockers along the
+	 *  harbour's edges but ramps up out of it (Port.Ramp), no wall along the harbour */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") bool bPortWaterOpen = false;
+	/** "when the player goes in the water, there should be displacement, a splash and a wake": a splash where she comes into water
+	 *  (falling or running in), rings on its face round her while she stands in it, a wake behind her as she wades */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") TObjectPtr<UNiagaraSystem> WaterSplashFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") TObjectPtr<UNiagaraSystem> WaterRingFx = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") float WaterSplashScale = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") float WaterRingScale = 1.f;
+	/** where the water's face is under her (cm): the wilds' water or the harbour's; false: none */
+	bool WaterFaceAt(const FVector& At, float& Z) const;
+	bool bInWater = false;
+	float WaterWakeClock = 0.f;
+	/** the rings on the water's face, our own (no pack's ripple showed on the harbour's water by day: 920 port's screening): a
+	 *  flat ring (WaterRingMesh, a plane, in WaterRingMaterial: its Fade parameter) growing from a radius to another and fading
+	 *  over its life; a big one where she comes in */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") TObjectPtr<UMaterialInterface> WaterRingMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") TObjectPtr<UStaticMesh> WaterRingMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") FVector2D WaterRingRadius = FVector2D(35.f, 190.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") float WaterRingLife = 1.6f;
+	struct FWaterRing { TWeakObjectPtr<UStaticMeshComponent> C; TWeakObjectPtr<UMaterialInstanceDynamic> M; float Age = 0.f, Life = 1.f, From = 30.f, To = 200.f, Strength = 1.f; };
+	TArray<FWaterRing> WaterRingsLive;
+	void MakeWaterRing(const FVector& At, float From, float To, float Life, float Strength);
+	void TickWaterRings(float Dt);
+	/** tests: the rings on the water now */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild11") int32 GetWaterRingsLive() const { return WaterRingsLive.Num(); }
+	/** the splashes and rings made, each ended after WaterFxLife s (a pack's ripple can loop for ever) */
+	TArray<TPair<TWeakObjectPtr<UNiagaraComponent>, float>> WaterFxMade;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild11") float WaterFxLife = 2.5f;
+	/** tests: splashes and wake rings made, the last splash's place */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild11") int32 WaterSplashes = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild11") int32 WaterRings = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Wild11") FVector LastSplashAt = FVector::ZeroVector;
+	/** tests: whether she is in water now, and its face's height (cm; -1e9 none) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild11") float GetWaterFaceUnderHer() const;
+	/** the loaded chunk a point (cm) is in (null: none) */
+	class ARDWildChunk* WildChunkAtCm(const FVector2D& At) const;
+	/** tests: "leaves|<on 0/1>|<biome>|<particles>|<x>|<y>|<z>"; "folk|<title>|<x>|<y>|<given 0/1>" for the director's people; "herd|<kind>|<n>" */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild11") TArray<FString> GetWild11Lines() const;
 	void SpawnWildPoi(ARDWildChunk* C, const FRDWildPlace& P);
 	const FRDWildPoiLive* WildPoiNear(const FVector& From, float Reach) const;
 	FString WildPoiDescribe(const FVector& From) const;

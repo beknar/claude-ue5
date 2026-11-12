@@ -882,7 +882,7 @@ void ARDDungeonGenerator::RebuildTown(int32 Seed)
 // ================================================================================================ every frame
 void ARDDungeonGenerator::TickTown(float Dt, APlayerController* PC)
 {
-	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); } }
+	if (bTown) { TickDayNight(Dt); TickTownLights(Dt); TickTownLife(Dt); TickTownSatellite(Dt); TickSky7(Dt, PC); if (PC && PC->GetPawn()) { TickWildLife(Dt, PC->GetPawn()->GetActorLocation()); if (bWild) TickWildEncounters(Dt, PC->GetPawn()->GetActorLocation()); TickHorse(Dt); TickWild10(Dt, PC->GetPawn()->GetActorLocation()); TickWild11(Dt, PC->GetPawn()->GetActorLocation()); } }
 	APawn* P = PC ? PC->GetPawn() : nullptr;
 	if (!P) return;
 	ARDSection* S = GetSection(FIntPoint::ZeroValue);
@@ -1409,6 +1409,8 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 		const FString Line = Wf->NextLine();
 		LastBark = FString::Printf(TEXT("%s|%s"), *Wf->Title, *Line);
 		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s:  \"%s\""), *RDTTheTitle(Wf->Title, true), *Line));
+		// (the list of 2026-11-11: one met on the way gives her what they have, the first time she speaks to them)
+		if (!Wf->WildGift.IsEmpty() || Wf->WildGiftGold > 0) { GiveWildGift(Wf); return TEXT("gift"); }
 		return TEXT("bark");
 	}
 	int32 Who = -1; float Best = 240.f;
@@ -1492,6 +1494,12 @@ void ARDDungeonGenerator::TownCount(const FString& Key, int32 Amount)
 void ARDDungeonGenerator::TownCountMax(const FString& Key, int32 Value)
 {
 	if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->CountMax(Key, Value);
+}
+
+int32 ARDDungeonGenerator::WildGoldAt(int32 Base, const FVector& At) const
+{
+	// (the wilds' tier is the game's already)
+	return Base <= 0 ? 0 : FMath::RoundToInt(Base * RDTierGold(IsWildReady() ? Wild->TierAt(At.X / 100.0, At.Y / 100.0) : 1));
 }
 
 void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)

@@ -111,6 +111,12 @@ public:
 	void SetStandWork(FName Kind, FName Prop) { StandWork = Kind; StandProp = Prop; }
 	void SetTitle(const FString& InTitle) { Title = InTitle; }
 	TArray<FString> OwnLines;
+	/** the list of 2026-11-11: one met on the way (the director's): what they give her the first time she speaks to them
+	 *  ("Item|min|max|chance" joined by ";", gold); emptied once given */
+	FString WildGift;
+	int32 WildGiftGold = 0;
+	/** tests: whether it was given */
+	bool bWildGiven = false;
 	/** the list of 2026-11-10's sixth phase: a traveller on the wilds' roads: no section; it walks the points it is given (world, on
 	 *  the wild ground) and stands, or sits at its camp's fire (its StandWork) */
 	bool bRoadWalker = false;

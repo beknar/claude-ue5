@@ -26,6 +26,7 @@ TAG = sys.argv[2] if len(sys.argv) > 2 else "t"
 V = unreal.Vector; GS = unreal.GameplayStatics
 TOWN_ID = 1 << 30   # (a town's place id: FRDWildWorld::TownIdBase + its index)
 OUT = r"E:\code\claude-ue5\claude_ue5\SourceArt\wilderness"
+SA = r"E:\code\claude-ue5\claude_ue5\SourceArt"
 SHOTS = r"E:\code\claude-ue5\claude_ue5\Saved\Screenshots\WindowsEditor"
 UES = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 G = {"w": UES.get_game_world()}
@@ -1779,6 +1780,133 @@ def step_farms11():
           and len(built) == nd and all(b["id"] and "house" in b["kinds"] and "barn" in b["kinds"] and b["furniture_min"] >= 5 and b["boxes"] >= 6 and b["gardens"] >= 1 and b["animals"] >= 1 and b["removed"] for b in built.values()))
     step_result("farms11", ok, **res)
 
+def w11_lines():
+    out = {"folk": [], "herd": 0}
+    for l in G["gen"].get_wild11_lines():
+        p = str(l).split("|")
+        if p[0] == "leaves": out["leaves"] = {"on": p[1] == "1", "biome": p[2], "fx": p[3] == "1", "x": float(p[4]), "y": float(p[5]), "z": float(p[6])}
+        elif p[0] == "folk": out["folk"].append({"title": p[1], "x": float(p[2]), "y": float(p[3]), "given": p[4] == "1"})
+        elif p[0] == "herd": out["herd"] = int(p[1])
+    return out
+def instances_near(at, r, pred):
+    """the chunks' instances within r cm of a point whose mesh's name passes pred: [(mesh name, x, y, material name)]"""
+    out = []; box = unreal.Box(min=V(at.x - r, at.y - r, at.z - 5000), max=V(at.x + r, at.y + r, at.z + 5000))
+    for c in GS.get_all_actors_of_class(G["w"], unreal.RDWildChunk):
+        for hm in c.get_components_by_class(unreal.InstancedStaticMeshComponent):
+            sm = hm.static_mesh
+            if not sm or not pred(sm.get_name()): continue
+            mat = hm.get_material(0); mn = mat.get_name() if mat else ""
+            for i in hm.get_instances_overlapping_box(box, True) or []:
+                t = hm.get_instance_transform(i, True); t = t[1] if isinstance(t, tuple) else t
+                if t and math.hypot(t.translation.x - at.x, t.translation.y - at.y) <= r: out.append((sm.get_name(), t.translation.x, t.translation.y, mn))
+    return out
+def step_meadows11():
+    """the list of 2026-11-11's fifth phase, the meadows (920 meadows, leaves; FRDWildWorld::Grove): in a meadow far from the towns,
+    the beeches within 250 m in clusters and strips with clearings between (counted on a 20 m grid: most cells bare, the counts far
+    more bunched than at random, some cells dense, a bare 80 m square), the debris there (stumps, logs, branches, leaf piles), the
+    grass on its swaying material, the leaves blown before the camera; each leaves candidate pictured before her (the choice's
+    screening), and pictures of the meadow"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("meadows")
+    assert sp, "no meadow"
+    res["spot"] = [round(sp[0]), round(sp[1])]
+    g.wild_drop_all(); g.wild_put_her(sp[0], sp[1]); yield from wait_chunks(40, 60); yield from rwait(4.0)
+    L = G["pawn"].get_actor_location()
+    trees = instances_near(L, 25000, lambda n: "EuropeanBeech_M" in n)
+    res["trees_250m"] = len(trees)
+    # (a 20 m grid over the 500 m square round her: how bunched the trees are)
+    cells = {}
+    for _, x, y, _m in trees: cells[(int((x - L.x) // 2000), int((y - L.y) // 2000))] = cells.get((int((x - L.x) // 2000), int((y - L.y) // 2000)), 0) + 1
+    n_cells = 25 * 25; counts = [cells.get((i, j), 0) for i in range(-12, 13) for j in range(-12, 13)]
+    mean = sum(counts) / n_cells; var = sum((c - mean) ** 2 for c in counts) / n_cells
+    res["bare_share"] = round(sum(1 for c in counts if c == 0) / n_cells, 3); res["dispersion"] = round(var / mean, 2) if mean > 0 else None; res["max_cell"] = max(counts)
+    # (a bare 80 m square: four by four cells of none)
+    res["bare_80m_square"] = any(all(cells.get((i + a, j + b), 0) == 0 for a in range(4) for b in range(4)) for i in range(-12, 10) for j in range(-12, 10))
+    deb = instances_near(L, 10000, lambda n: any(k in n for k in ("Stump", "Log", "WoodLog", "Branch", "Leaf_Pile")))
+    kinds = {}
+    for n, *_ in deb: k = "stump" if "Stump" in n else "log" if "Log" in n else "leaves" if "Leaf" in n else "branch"; kinds[k] = kinds.get(k, 0) + 1
+    res["debris_100m"] = kinds
+    grass = instances_near(L, 1500, lambda n: n == "SM_Grass_2")
+    res["grass_near"] = len(grass); res["grass_materials"] = sorted({m for *_x, m in grass})
+    res["wind"] = str(g.get_editor_property("wind_collection").get_name()) if g.get_editor_property("wind_collection") else None
+    yield from rwait(1.0)
+    res["leaves"] = w11_lines().get("leaves")
+    # (pictures: the meadow round her each way)
+    for k, yaw in enumerate((0, 120, 240)):
+        put(V(L.x, L.y, 0), yaw=yaw, z=g.wild_ground_z(V(L.x, L.y, 0))); yield from rwait(1.2); shot(f"meadows11_{k}", "1280x720"); yield from rwait(1.4)
+    # (the leaves candidates, each before her for a picture, then gone)
+    res["screen"] = []
+    MJ = json.load(open(os.path.join(SA, "wilderness", "meadows11.json"), encoding="utf-8"))
+    # (each alone as the game's own leaves: the one blowing taken away first (the first screening's red blew in every picture))
+    for k, path in enumerate(MJ["leaves"]["candidates"]):
+        g.set_wild_leaves_fx(unreal.load_asset(path)); yield from rwait(4.0)
+        shot(f"leaves11_{k}", "1280x720"); yield from rwait(1.4)
+        res["screen"].append({"fx": path.split("/")[-3] + "/" + path.rsplit("/", 1)[-1], "shot": f"leaves11_{k}", "on": w11_lines().get("leaves", {}).get("on")})
+    g.set_wild_leaves_fx(unreal.load_asset(MJ["leaves"]["fx"])); yield from rwait(1.0)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    lv = res["leaves"] or {}
+    ok = (res["trees_250m"] >= 40 and res["bare_share"] > 0.6 and (res["dispersion"] or 0) > 2.0 and res["max_cell"] >= 4 and res["bare_80m_square"]
+          and all(kinds.get(k, 0) > 0 for k in ("stump", "log", "branch", "leaves"))
+          and res["grass_near"] > 50 and res["grass_materials"] and all(m.endswith("_Wind") for m in res["grass_materials"])
+          and lv.get("on") and lv.get("biome") == "meadows")
+    step_result("meadows11", ok, **res)
+
+def step_events11():
+    """the list of 2026-11-11's fifth phase, the director's new kinds (920 events, RD/RDWild11.cpp): each forced ahead of her in turn:
+    a point of interest laid (its kind of her region, said in the engagements), a herd (the wild animals made), a person on the way
+    (she walks to them, speaks: they give her their gift, and do not give twice); pictures of a few"""
+    g = G["gen"]; res = {"kinds": {}}; quiet(True)
+    yield from wait_ready(90)
+    sp = clear_spot("meadows")
+    g.wild_drop_all(); g.wild_put_her(sp[0], sp[1]); yield from wait_chunks(40, 60); yield from rwait(3.0)
+    EJ = json.load(open(os.path.join(SA, "wilderness", "events11.json"), encoding="utf-8"))
+    def lines(): return [str(l) for l in g.get_wild_encounter_lines()]
+    for k, e in enumerate(EJ["kinds"]):
+        name = e["name"]
+        # (her own spot again, facing a new way each time: the encounter comes 45-70 m ahead)
+        put(V(sp[0] * 100.0, sp[1] * 100.0, 0), yaw=k * 27.0 % 360, z=g.wild_ground_z(V(sp[0] * 100.0, sp[1] * 100.0, 0))); yield from rwait(0.6)
+        # (the lines from now on, by their time: the list keeps its last 400)
+        t0 = now(); w0 = w11_lines(); folk0 = len(w0["folk"])
+        g.force_wild_encounter(name); yield from rwait(2.5)
+        new = [l for l in lines() if l.split("|")[0].replace(".", "", 1).isdigit() and float(l.split("|")[0]) >= t0 - 0.05]
+        r = {"met": any(f"|met|{name}|" in l for l in new), "placed": [l.split("|")[2] for l in new if "|placed|" in l]}
+        w1 = w11_lines(); r["herd"] = w1["herd"] - w0["herd"]; r["folk_new"] = len(w1["folk"]) - folk0
+        if e.get("folk") and r["folk_new"] > 0:
+            fk = w1["folk"][-1]
+            c = cb(); lines0 = {str(x) for x in c.get_all_inventory_lines()}; gold0 = g.get_gold()
+            to = V(fk["x"] - sp[0] * 100.0, fk["y"] - sp[1] * 100.0, 0); n_ = math.hypot(to.x, to.y) or 1.0
+            st = V(fk["x"] - to.x / n_ * 150, fk["y"] - to.y / n_ * 150, 0)
+            put(st, yaw=math.degrees(math.atan2(to.y, to.x)), z=g.wild_ground_z(st)); yield from rwait(0.8)
+            # (a pile in reach takes F first, as the game's rule says (an earlier kind's things laid here: the refugee's first F took
+            # one): taken up before the person is spoken to)
+            r["piles_taken"] = 0
+            while r["piles_taken"] < 4 and str(g.describe_nearest(G["pawn"].get_actor_location())).startswith("take up"):
+                g.interact_nearest(G["pawn"].get_actor_location()); r["piles_taken"] += 1; yield from rwait(0.5)
+            lines0 = {str(x) for x in c.get_all_inventory_lines()}; gold0 = g.get_gold()
+            r["prompt"] = str(g.describe_nearest(G["pawn"].get_actor_location()))
+            r["f"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.6)
+            r["new_things"] = sorted({str(x) for x in c.get_all_inventory_lines()} - lines0)[:5]; r["gold"] = g.get_gold() - gold0
+            r["f_again"] = str(g.interact_nearest(G["pawn"].get_actor_location())); yield from rwait(0.4)
+            r["given"] = any(f["given"] for f in w11_lines()["folk"] if f["title"] == fk["title"])
+            if "shot" not in res: shot("events11_folk", "1280x720"); res["shot"] = True; yield from rwait(1.4)
+        if e.get("animals") and r["herd"] > 0 and "herd_shot" not in res: yield from rwait(0.5); shot("events11_herd", "1280x720"); res["herd_shot"] = True; yield from rwait(1.4)
+        res["kinds"][name] = r
+        yield from rwait(0.5)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    ks = res["kinds"]
+    def good(e):
+        r = ks.get(e["name"], {})
+        if not r.get("met"): return False
+        if e.get("place"): return len(r["placed"]) == 1 and r["placed"][0] in e["place"].split(",")
+        if e.get("animals"): return r["herd"] >= 1
+        if e.get("folk"): return r["folk_new"] == 1 and r.get("f") == "gift" and (len(r.get("new_things", [])) > 0 or r.get("gold", 0) > 0) and r.get("given") and r.get("f_again") != "gift"
+        return True
+    res["good"] = {e["name"]: good(e) for e in EJ["kinds"]}
+    step_result("events11", all(res["good"].values()), **res)
+
 def step_travellers10():
     """the wilds' liveliness: travellers on a road near her (by day walking along it, 2 or 3 together), she talks to one (a line);
     at night they camp beside the road round a fire and sit; in the morning they walk on; pictures"""
@@ -2372,7 +2500,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"farms11": step_farms11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

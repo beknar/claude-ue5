@@ -19,6 +19,9 @@ namespace
 	constexpr double RDWLakeBankM = 400.0, RDWPondBankM = 150.0;
 	// how far out a road's bank can reach (metres from its middle) where its bed is over or under the ground
 	constexpr double RDWRoadBankM = 60.0;
+	/** the port's harbour from the town's middle (m): its quay's line toward the sea (+X) and its half width (the port plan's
+	 *  Hu0 = S - 26 and Hv0 / Hv1 = 24 / S - 24 tiles of a 168-tile section, 3 m a tile) */
+	constexpr float RDWPortQuayM = 162.f, RDWPortHalfM = 168.f;
 	FORCEINLINE double RDWSegDist(const FVector2D& P, const FVector2D& A, const FVector2D& B, double& T)
 	{
 		const FVector2D Ab = B - A; const double L2 = Ab.SizeSquared();
@@ -66,6 +69,38 @@ float FRDWildWorld::Perlin(double X, double Y, uint32 S)
 	const float N00 = G(Ix, Iy, Dx, Dy), N10 = G(Ix + 1, Iy, Dx - 1.f, Dy), N01 = G(Ix, Iy + 1, Dx, Dy - 1.f), N11 = G(Ix + 1, Iy + 1, Dx - 1.f, Dy - 1.f);
 	const float U = RDWFade(Dx), V = RDWFade(Dy);
 	return 1.41f * FMath::Lerp(FMath::Lerp(N00, N10, U), FMath::Lerp(N01, N11, U), V);
+}
+
+float FRDWildWorld::PortFlatten(double X, double Y, float H) const
+{
+	// (the list of 2026-11-11: "near graymourne, it shifts abruptly to coastal regions. it should gradually turn into the coast
+	// from the previous biome": the glacial uplands 22 km south stood 1300 m high and fell to the coast in under 3 km (42 degrees
+	// between two samples, RDWildProbe). Round the port the land's height over the shore is scaled down: to 35 % within 9 km,
+	// back to the whole by 30 km, so the uplands rise from the coast over kilometres)
+	if (!bPortSea || H <= 1.f) return H;
+	const float D = (float)FVector2D::Distance(FVector2D(X, Y), PortSite);
+	if (D >= 30000.f) return H;
+	return 1.f + (H - 1.f) * FMath::Lerp(0.35f, 1.f, RDWSmooth(9000.f, 30000.f, D));
+}
+
+float FRDWildWorld::PortLift(double X, double Y) const
+{
+	if (!bPortSea || PortLiftM <= 0.f) return 0.f;
+	const float D = (float)FVector2D::Distance(FVector2D(X, Y), PortSite);
+	return D >= 6000.f ? 0.f : PortLiftM * (1.f - RDWSmooth(2500.f, 6000.f, D));
+}
+
+float FRDWildWorld::Grove(double X, double Y) const
+{
+	// (clusters: blobs of a slow noise over its upper part)
+	const float Cl = RDWSmooth(0.12f, 0.30f, Fbm(X, Y, 1.0 / 170.0, 3, Seed + 301u));
+	// (strips: the zero lines of a warped noise, about 15 m wide, broken by another)
+	const double Wx = X + 90.0 * Fbm(X, Y, 1.0 / 650.0, 2, Seed + 302u);
+	const float Ln = FMath::Abs(Fbm(Wx, Y, 1.0 / 520.0, 2, Seed + 303u));
+	const float St = (1.f - RDWSmooth(0.012f, 0.03f, Ln)) * RDWSmooth(-0.15f, 0.05f, Fbm(X, Y, 1.0 / 300.0, 2, Seed + 304u));
+	// (clearings: wide areas of none)
+	const float Open = RDWSmooth(-0.22f, -0.06f, Fbm(X, Y, 1.0 / 900.0, 2, Seed + 305u));
+	return FMath::Clamp(FMath::Max(Cl, St), 0.f, 1.f) * Open;
 }
 
 float FRDWildWorld::Fbm(double X, double Y, double Freq, int32 Oct, uint32 S, float Gain)
@@ -278,7 +313,9 @@ int32 FRDWildWorld::Blend(double X, double Y, int32* Idx, float* W, FVector2D* S
 			const int32 K = I * CellsY + J;
 			Ci[N] = K; Cd[N] = FVector2D::Distance(FVector2D(Wx, Wy), CellSite[K]); Dmin = FMath::Min(Dmin, Cd[N]); ++N;
 		}
-	constexpr double Tau = 2400.0;
+	// (the list of 2026-11-11: "near graymourne, it shifts abruptly to coastal regions. it should gradually turn into the coast
+	// from the previous biome": the regions round the port flow into each other over 2.6 times the distance, eased back by 22 km)
+	const double Tau = 2400.0 * (bPortSea ? 1.0 + 1.6 * (1.0 - RDWSmooth(9000.f, 22000.f, (float)FVector2D::Distance(FVector2D(X, Y), PortSite))) : 1.0);
 	float Tw[RDWBlendMax];
 	for (int32 Q = 0; Q < N; ++Q) Tw[Q] = (float)FMath::Exp(-(Cd[Q] - Dmin) / Tau);
 	// the five heaviest, in order (a picked one marked -1)
@@ -406,6 +443,7 @@ float FRDWildWorld::LandHeight(double X, double Y, bool bDetail, int32* OutB, in
 	}
 	if (OutFarm) *OutFarm = Farm;
 	H += LandRelief(X, Y, bDetail, Bi, W, N);
+	H = PortFlatten(X, Y, H);
 	if (OutB) *OutB = N > 0 ? Bi[0] : 0;
 	if (OutB2) *OutB2 = N > 1 ? Bi[1] : (N > 0 ? Bi[0] : 0);
 	if (OutW) *OutW = N > 0 ? W[0] : 1.f;
@@ -695,11 +733,30 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		// more than a kilometre)
 		const double D = FVector2D::Distance(P, T.Site);
 		if (D > 1150.0) continue;
+		// (the list of 2026-11-11: the port on its coast, its harbour open to the sea: its square (its section, 504 m across, and a
+		// little) flat and dry, the sea round it left as it is; the land eased as every town's. Its ground is lifted after the
+		// features with the sea (PortLift): here it is the town's height less the lift)
+		const bool bPortHere = bPortSea && FVector2D::Distance(T.Site, PortSite) < 1.0;
+		const float Dsq = (float)FMath::Max(FMath::Abs(X - T.Site.X), FMath::Abs(Y - T.Site.Y));
 		float F = 1.f - RDWSmooth(400.f, 1150.f, (float)D);
-		if (H < 2.f && D > 400.0) F *= 1.f - RDWSmooth(400.f, 470.f, (float)D);
-		H = FMath::Lerp(H, T.H, F);
+		if (bPortHere) { if (Dsq < 262.f) F = 1.f; else if (H < 2.f) F *= 1.f - RDWSmooth(262.f, 330.f, Dsq); }
+		else if (H < 2.f && D > 400.0) F *= 1.f - RDWSmooth(400.f, 470.f, (float)D);
+		H = FMath::Lerp(H, T.H - PortLift(X, Y), F);
 		// (the road runs on up to the town's own ground, which draws it from the gate: its section is 360 to 504 m across)
-		if (D < 400.0) { Water = -1e9f; Kind = 0; }
+		if (bPortHere ? Dsq < 262.f : D < 400.0) { Water = -1e9f; Kind = 0; }
+		// (the harbour's way out: north of its quay and across its width (the port plan's harbour, RDTownPlan.cpp: frame G 0, so
+		// its +X is the town's sea side) the bed 60 cm under the harbour's walked floor at the section's edge, deepening out to
+		// sea, the sea's water over it; its sides eased over 14 m. The sea here is 0 before the lift, the harbour's water after it)
+		if (bPortHere && X - T.Site.X > RDWPortQuayM)
+		{
+			const float Ws = 1.f - RDWSmooth(RDWPortHalfM - 2.f, RDWPortHalfM + 12.f, (float)FMath::Abs(Y - T.Site.Y));
+			if (Ws > 0.f)
+			{
+				const float Bed = -0.6f - 9.f * RDWSmooth(255.f, 700.f, (float)(X - T.Site.X));
+				H = FMath::Lerp(H, FMath::Min(H, Bed), Ws);
+				if (H < -0.05f) { Water = 0.f; Kind = 1; }
+			}
+		}
 		if (D < 170.0) Road = 0.f;
 	}
 	if (Out) { Out->Water = Water; Out->WaterKind = Kind; Out->Road = Road; }
@@ -708,8 +765,9 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 
 float FRDWildWorld::BareHeight(double X, double Y) const
 {
-	// (the ground with no farm on it: the land, its water, roads and towns (the farms' ridges are measured against it))
-	return Feature(X, Y, LandHeight(X, Y, true), nullptr);
+	// (the ground with no farm on it: the land, its water, roads and towns (the farms' ridges are measured against it); the port's
+	// lift (the list of 2026-11-11) on all of it)
+	return Feature(X, Y, LandHeight(X, Y, true), nullptr) + PortLift(X, Y);
 }
 
 float FRDWildWorld::Height(double X, double Y) const
@@ -719,10 +777,11 @@ float FRDWildWorld::Height(double X, double Y) const
 	const float H = LandHeight(X, Y, true, nullptr, nullptr, nullptr, nullptr, &Fw);
 	FRDWSample Fs;
 	const float Hf = Feature(X, Y, H, &Fs);
+	const float Lf = PortLift(X, Y);
 	// (the farms' ridge-and-furrow, as Sample adds it: what she walks on and what the places' props stand on)
-	if (Fw <= 0.2f || Fs.WaterKind != 0 || Fs.Road >= 0.1f || Hf < 0.5f) return Hf;
+	if (Fw <= 0.2f || Fs.WaterKind != 0 || Fs.Road >= 0.1f || Hf < 0.5f) return Hf + Lf;
 	FRDWFarm Fm; FarmAt(X, Y, Fw, Fm);
-	return Hf + Fm.Ridge * (1.f - RDWSmooth(0.02f, 0.1f, Fs.Road));
+	return Hf + Lf + Fm.Ridge * (1.f - RDWSmooth(0.02f, 0.1f, Fs.Road));
 }
 
 void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float PixelM) const
@@ -756,6 +815,7 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 		}
 	}
 	Col *= Macro;
+	H = PortFlatten(X, Y, H);              // (as LandHeight: what is drawn and what is walked are one height)
 	O.Biome = N > 0 ? Bi[0] : 0; O.Biome2 = N > 1 ? Bi[1] : O.Biome; O.W1 = N > 0 ? W[0] : 1.f;
 	// the coast (as LandHeight)
 	const float C = Continent(X, Y);
@@ -789,6 +849,8 @@ void FRDWildWorld::Sample(double X, double Y, FRDWSample& O, bool bDetail, float
 	else if (Kind == 5 && H >= Water) { Water = -1e9f; Kind = 0; }
 	if (C < 0.f && H < 0.f && Kind == 0) { Water = 0.f; Kind = 1; }
 	if (Kind == 0 && H < 0.f && C < 0.02f) { Water = 0.f; Kind = 1; }
+	// (the list of 2026-11-11: round the port the land, the sea floor and the sea lifted together, the sea to its harbour's water)
+	if (const float Lf = PortLift(X, Y); Lf > 0.f) { H += Lf; if (Kind != 0) Water += Lf; }
 	// farms: the great fields (FarmAt): open fields of strips, crofts, pasture
 	float Field = 0.f;
 	O.FieldCell = FIntPoint(MIN_int32, MIN_int32); O.FieldCrop = -1; O.FieldAng = 0.f; O.FarmKind = 0; O.StripW = 0.f; O.StripOff = 0.f;
@@ -861,8 +923,11 @@ void FRDWildWorld::PlaceTowns()
 	// (the port (the user's of 2026-11-07, docs/graymourne.txt): Brokenspire's size, its harbour along its northern wall, so it
 	// stands nearer the coast: its sea wall about 150 m from it (until then a small town 650 m inland))
 	G.Tiles = 168; G.Plan = 3;
-	G.Site = NorthCoast - FVector2D(400.0, 0.0);
+	// (the list of 2026-11-11: with its harbour open to the sea, the coast crosses its harbour: the site 150 m inside it, the
+	// section's last 100 m over the sea's edge)
+	G.Site = NorthCoast - FVector2D(bPortSea ? 150.0 : 400.0, 0.0);
 	for (int32 I = 0; I < 40 && Continent(G.Site.X, G.Site.Y) < 0.0005f; ++I) G.Site.X -= 100.0;     // (on land, a few hundred metres from the sea)
+	if (bPortSea) PortSite = G.Site;
 	// (Vel Morrath, the user's of 2026-11-06: "to the east, but not on the coast. north east of Brokenspire": 55 km north, and
 	// east toward the coast but 35 km or more inside it (until then 9 km inside it, due east))
 	const FVector2D NeCoast = Walk(FVector2D(55000.0, 30000.0), FVector2D(0, 1));
@@ -1147,7 +1212,9 @@ void FRDWildWorld::MakeRoads()
 			// (eased to a town's height as its ground is (Feature: 400 to 1150 m); left at the old 480 to 1700 m when the ground's
 			// was shortened, the road ran up to 12 m over or under the ground between 1.15 and 1.7 km from every town: the
 			// user's of 2026-11-08, found by RDWildProbe)
-			for (const FRDWildTown& T : Towns) { const double D = FVector2D::Distance(R.P[I], T.Site); if (D < 1150.0) R.Z[I] = FMath::Lerp(R.Z[I], T.H, 1.f - RDWSmooth(400.f, 1150.f, (float)D)); }
+			// (the target less the port's lift, as Feature's: round Graymourne the lift is added after the features, and a road eased
+			// to the town's whole height stood 8 m over the ground 1 km out (the list of 2026-11-11, RDWildProbe and wild_seams.py))
+			for (const FRDWildTown& T : Towns) { const double D = FVector2D::Distance(R.P[I], T.Site); if (D < 1150.0) R.Z[I] = FMath::Lerp(R.Z[I], T.H - PortLift(R.P[I].X, R.P[I].Y), 1.f - RDWSmooth(400.f, 1150.f, (float)D)); }
 		}
 		R.Box = FBox2D(R.P);
 		Roads.Add(MoveTemp(R));
@@ -1213,6 +1280,8 @@ void FRDWildWorld::Init(uint32 InSeed, const TArray<FRDWildBiome>& InBiomes)
 	// wherever a town stands; each one's region is eased to it over a couple of km)
 	const float Hb = FMath::Clamp(LandHeight(Towns[0].Site.X, Towns[0].Site.Y, false), 12.f, 120.f);
 	for (FRDWildTown& T : Towns) T.H = Hb;
+	// (the list of 2026-11-11: the sea round the port at its harbour's water, 1.1 m under the town's ground)
+	PortLiftM = bPortSea ? FMath::Max(0.f, Hb - 1.1f) : 0.f;
 	MakeRivers();
 	MakeLakes();
 	// the ponds and hot springs of every 4 km cell, once

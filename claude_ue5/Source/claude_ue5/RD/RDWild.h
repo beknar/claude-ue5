@@ -54,6 +54,10 @@ struct FRDWildFoliage
 	 *  (Density then weighs it against the crop's other kinds); -1 scattered as before */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Crop = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float StepM = 0.8f;
+	/** the list of 2026-11-11 ("meadows should have clusters of trees, strips of trees and clearings free of trees"): how much the
+	 *  world's grove pattern (FRDWildWorld::Grove: clusters, strips, clearings) decides where it grows (0 everywhere alike, 1 only
+	 *  in the groves) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Grove = 0.f;
 };
 
 /** the list of 2026-11-07 ("the farm terrain should have regular lines of crops, like corn, cabbages, potatoes, pumpkins"): a
@@ -332,6 +336,20 @@ public:
 
 	// ---- the noise (public for the map and the chunks)
 	static float Perlin(double X, double Y, uint32 S);
+	/** the list of 2026-11-11: the groves of an open land at a point (metres): 1 in a cluster of trees (60-150 m across) or a strip
+	 *  of them (about 15 m wide, broken), 0 between them, and 0 over the clearings (large areas a few hundred metres across) */
+	float Grove(double X, double Y) const;
+	/** the list of 2026-11-11 ("in graymourne, the terrain should be shoreline, with the water extending out into an ocean"): set
+	 *  before Init (the generator's bPortWaterOpen): the port stands on its coast, its harbour open to the sea, and the land and
+	 *  sea round it are lifted so the sea is at the harbour's water (PortLift); its coast blends in wider (Blend) */
+	bool bPortSea = false;
+	FVector2D PortSite = FVector2D(1e12, 1e12);
+	float PortLiftM = 0.f;
+	/** how much the land and the sea are lifted at a point (metres): PortLiftM within 2.5 km of the port, easing to 0 by 6 km */
+	float PortLift(double X, double Y) const;
+	/** the land's height over the shore scaled down round the port (35 % within 9 km, the whole by 30 km): the uplands rise
+	 *  from its coast over kilometres (LandHeight and Sample alike, before the coast) */
+	float PortFlatten(double X, double Y, float H) const;
 	static float Fbm(double X, double Y, double Freq, int32 Oct, uint32 S, float Gain = 0.5f);
 	static float Ridged(double X, double Y, double Freq, int32 Oct, uint32 S);
 	static uint32 Hash(int32 X, int32 Y, uint32 S);

@@ -11,6 +11,15 @@ The city is a wilderness town on `brokenspire` with the port plan (`FRDWildTown:
 - **The blockers are measured by pushing**: she walks a pier, is pushed across it 2.5 s each way, and must stay on its deck (2.55 m off its middle: the 3 m edge less her capsule).
 - **A pier's way out** comes from the ship moored beside it (the longer axis of ship minus pier): the spot lines carry no yaw.
 
+## Open to the sea (the list of 2026-11-11, `920 port`, `bPortWaterOpen`, `884 port11`)
+
+- **The sea is lifted to the harbour, not the harbour lowered to the sea**: every town code assumes its ground at z 0, so the land, the sea floor and the sea round the port are lifted after the features (`PortLift`, added in `Height`, `BareHeight` and `Sample`); every target that eases toward a town's height near the port takes the lift off first (`T.H - PortLift`): the ground's in `Feature` and the roads' beds in `MakeRoads`. The roads' were left at `T.H` and a road stood 8 m over the ground 1 km out (`wild_seams.py` found it, a 6.5 m step).
+- **A loaded town's hole in the wilds' ground must not stand over the land's own**: the chunks sink their ground under a loaded town from z 0 at its edge; at the harbour's mouth that was a 1.7 m ridge of land between the harbour and the sea (`Min(land, sink)` now), and the wilds' water there doubled the harbour's own at the same height (none inside a loaded town's square).
+- **A harbour's ramps go where nothing is moored**: half way between the piers (the ships lie 4.6 tiles off a pier, the gap is 22), not by the piers.
+- **Screen an effect on the water it will play on, by day**: of nine water effects in the project only ArtemisTemple's single splash (at three times) showed on the harbour's water at noon; the MERIDIAN ripple at four times was invisible, and in the first test's picture a faint dark stain. The rings are a material of our own on a plane. In the editor a pack's effect showed nothing for its first 9.4 s (compiling): the generator asks for the water's effects at play's start.
+- **A test that wades must wade away from the way out**: toward the ramp she walked up it and out of the water in a second, before the next ring was due (0 rings, a "failure" of the wake). It checks she stayed in the water while it counted.
+- **Measure the world round a change with and without it** (`RDWildProbe -NoPortSea`): the 24 km square round the port had 161 seams without the open sea (the town's raised ground a cliff over the sea) and 1 with it; a seam test by ratio is unchanged by scaling the ground, so that one was there before.
+
 ## The fog
 
 - **A density alone did nothing near**: the wilds' fog starts 250 m out (887's `WILD_FOG` start 25000 cm), so nine times its density left the whole town clear (the wall 80 m off sharp, gm1). `PortFogStart` draws the start in to 5 m as `PortFog` rises. The test reads the world's fog component, not the generator's number.

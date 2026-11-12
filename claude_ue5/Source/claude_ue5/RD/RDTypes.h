@@ -876,6 +876,16 @@ struct FRDWildPoiKind
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float BuffSeconds = 0.f;
 	/** used again after a while (a wayshrine); else once a game */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bReusable = false;
+	/** the list of 2026-11-11 ("there should be more different types of events that the player can encounter in the wilderness --
+	 *  most of the types encountered are the satchels found and ambushers"): a roaming kind the director meets her with may be
+	 *  one of the points of interest laid ahead of her (Place: their names, comma-separated, one of them of her region), a
+	 *  herd of the wild animals (Animals: "Kind:count, ..."), or a person on the way (Folk: a townsfolk def's name) who talks
+	 *  (Text) and gives (Gift: "Item|min|max|chance" entries joined by ";", and GiftGold) the first time she speaks to them */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Place;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Animals;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Folk;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Gift;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 GiftGold = 0;
 };
 
 /** the list of 2026-11-08b's sixth phase: how a secondary ability is used */

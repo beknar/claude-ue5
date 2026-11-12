@@ -88,7 +88,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 				const double Ex = D.TownHalfM - FMath::Abs(X - D.TownAt.X), Ey = D.TownHalfM - FMath::Abs(Y - D.TownAt.Y);
 				const double In = FMath::Min(Ex, Ey);
 				// (3 m under: the town's own ground has hollows since the list of 2026-11-04 (1.4 m at most))
-				if (In >= 0.0) Zc = FMath::Lerp(0.f, -300.f, RDWCSmooth(0.f, 3.f, (float)In));
+				// (never above the land's own: the port's sea runs on under its harbour's mouth, the list of 2026-11-11)
+				if (In >= 0.0) Zc = FMath::Min(Zc, FMath::Lerp(0.f, -300.f, RDWCSmooth(0.f, 3.f, (float)In)));
 			}
 			Z[I * Nb + J] = Zc;
 		}
@@ -135,6 +136,12 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			for (const FRDWSample* Q : Qs) if (Q->WaterKind) { Kind = Q->WaterKind; Lv = FMath::Max(Lv, Q->Water); Deep = FMath::Max(Deep, Q->Water - Q->H); }
 			const float LavaQ = FMath::Max(FMath::Max(Qs[0]->Lava, Qs[1]->Lava), FMath::Max(Qs[2]->Lava, Qs[3]->Lava));
 			if (!Kind && LavaQ < 0.45f) continue;
+			// (none in a loaded town's section: the port's harbour has its own water there at the same height (the list of 2026-11-11))
+			if (D.bTownHole)
+			{
+				const double Qx = X0 + (I + 0.5) * St, Qy = Y0 + (J + 0.5) * St;
+				if (FMath::Abs(Qx - D.TownAt.X) < D.TownHalfM && FMath::Abs(Qy - D.TownAt.Y) < D.TownHalfM) continue;
+			}
 			const int32 Sec = !Kind ? 3 : (Kind == 1 ? 1 : (Kind == 6 ? 2 : 0));
 			FRDWChunkData::FWater& Wt = D.Water[Sec];
 			const int32 Base = Wt.V.Num();
@@ -204,6 +211,8 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 					// factor took every one of them, the savannah's acacias too)
 					if (bTree && B.Canopy > 0.05f) Wb *= FMath::Clamp(Q.Canopy / B.Canopy, 0.f, 1.2f);
 					if (F.Clump > 0.f) Wb *= RDWCSmooth(-0.1f, 0.35f, FRDWildWorld::Fbm(X0 + Lx, Y0 + Ly, 1.0 / 60.0, 2, Hs + 3u)) * F.Clump + (1.f - F.Clump);
+					// (the list of 2026-11-11: a meadow's trees in clusters and strips, its clearings bare)
+					if (F.Grove > 0.f) Wb *= FMath::Lerp(1.f, W.Grove(X0 + Lx, Y0 + Ly), FMath::Clamp(F.Grove, 0.f, 1.f));
 					if (Q.Road > 0.15f || (Q.Snow > 0.85f && !bTree && F.Kind != TEXT("rock") && F.Kind != TEXT("ice"))) continue;
 					if (bCrop ? Q.Field < 0.5f : (Q.Field > 0.3f && F.Kind != TEXT("rock"))) continue;
 					// (a farmstead's yard: its grass only (its house, barn and paddock stand there))

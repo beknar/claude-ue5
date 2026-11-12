@@ -274,7 +274,9 @@ void ARDSection::PlanTown(FRandomStream& R)
 				const FIntPoint T = F.Tile(U, V);
 				Use[U * S + V] = 9; Type[Idx(T)] = 0; Owner[Idx(T)] = -1; TownRoadMask[Idx(T)] = 0;
 			}
-		TownHarbour = F.Rect(Hu0, Hv0, S, Hv1);
+		// (open to the sea (the list of 2026-11-11, bPortWaterOpen): on through the frame's margin to the section's edge, where the
+		// wilds' sea goes on)
+		TownHarbour = F.Rect(Hu0, Hv0, Generator->bPortWaterOpen ? S + F.O : S, Hv1);
 		for (int32 K = 0; K < 5; ++K)
 		{
 			const int32 Pv = Hv0 + 10 + K * ((Hv1 - Hv0 - 22) / 4);
@@ -868,12 +870,13 @@ void ARDSection::PlanTown(FRandomStream& R)
 	// one more half way)
 	for (int32 I = 0, J = TownBorder.Num() - 1; I < TownBorder.Num(); J = I++)
 	{
+		// (none over a harbour open to the sea: the list of 2026-11-11, "the docks should not be surrounded by walls")
 		FTownSpot Sp; Sp.Kind = TS_Tower; Sp.At = FVector(TownBorder[I].X, TownBorder[I].Y, GetActorLocation().Z);
-		TownSpots.Add(Sp);
+		if (!NearOpenHarbour(Sp.At, 450.f)) TownSpots.Add(Sp);
 		if (FVector2D::Distance(TownBorder[I], TownBorder[J]) > 34.f * Generator->TileSize)
 		{
 			FTownSpot Sm; Sm.Kind = TS_Tower; const FVector2D Mm = (TownBorder[I] + TownBorder[J]) * 0.5f; Sm.At = FVector(Mm.X, Mm.Y, GetActorLocation().Z);
-			TownSpots.Add(Sm);
+			if (!NearOpenHarbour(Sm.At, 450.f)) TownSpots.Add(Sm);
 		}
 	}
 	// ---- the gate (on the gate's stretch, across the main road), outside it the way on
@@ -1844,6 +1847,7 @@ void ARDSection::TownOutdoors(FRandomStream& R0, int32 Step)
 					bool bInTower = false;
 					for (const FTownSpot& Sp : TownSpots) if (Sp.Kind == TS_Tower && FVector::Dist2D(Sp.At, P) < 300.f + Seg * 0.5f - 40.f) { bInTower = true; break; }
 					if (bInTower) continue;                                           // (the tower's own faces close it)
+					if (NearOpenHarbour(P, 150.f)) continue;                         // (the harbour open to the sea: no wall along it)
 					// (a wall piece runs along its +Y, its face toward +X: the parapet's the same; plain stone below, an arrow slit in
 					// one upper segment of three, by a hash of the place: until 2026-11-02 every piece was one with an arched doorway)
 					const uint32 Hh = HashCombine(GetTypeHash(FIntPoint(FMath::RoundToInt(P.X), FMath::RoundToInt(P.Y))), 0x5117u);
