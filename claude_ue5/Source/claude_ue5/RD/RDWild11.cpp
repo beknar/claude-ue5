@@ -143,7 +143,9 @@ bool ARDDungeonGenerator::GiveWildGift(ARDTownsfolk* T)
 // ================================================================================================ the leaves in the wind
 void ARDDungeonGenerator::TickWild11(float Dt, const FVector& Her)
 {
-	if (!bWild || !IsWildReady()) return;
+	// (a swim cut off by a fast travel or the wilds rebuilt round her ends here: TickSwim runs only below, and she came to a
+	// town's gate at a swimmer's speed, raised and unable to jump or strike until the chunks were ready (PR #53's review))
+	if (!bWild || !IsWildReady()) { if (bSwimming) EndSwim(SwimPawn.Get()); return; }
 	// (the director's people and herds far behind her gone)
 	for (int32 I = WildRoamFolk.Num() - 1; I >= 0; --I)
 		if (ARDTownsfolk* T = WildRoamFolk[I].Get(); !T || FVector::Dist2D(T->GetActorLocation(), Her) > 25000.f) { if (T) T->Destroy(); WildRoamFolk.RemoveAt(I); }

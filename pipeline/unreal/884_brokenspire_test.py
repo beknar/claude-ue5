@@ -3070,7 +3070,8 @@ def step_swim12():
     six: put in the deep water she swims (her treading idle on her slot, her head held just over the face), no blow or roll; she
     swims along the quay (the swim loop, her speed a share of her walk's, strokes sounded, ripples made on the water's face, its
     parameter collection's sources fresh) and walks out up a ramp (no longer swimming, her mesh back where it was); pictures of
-    each treading and swimming. Then the water's sounds measured in what the game puts out (recorded, as 853's fire): the splash
+    each treading and swimming. PR #53's review: a swing begun on the quay is broken off as she starts to swim; her horse called
+    beside her in the water is not mounted; out of the water her jump is hers again. Then the water's sounds measured in what the game puts out (recorded, as 853's fire): the splash
     as she falls in and her strokes, each against the same with its set's volume at 0"""
     g = G["gen"]; res = {"heroes": {}}
     ti, x, y = yield from to_town("Graymourne")
@@ -3098,7 +3099,13 @@ def step_swim12():
         # (on the quay first: her mesh's place there, to see it put back)
         put(V(top.x - wd.x * 300.0, top.y - wd.y * 300.0, 0), yaw=yaw_al); yield from wait(1.0)
         mz0 = G["pawn"].get_editor_property("mesh").get_editor_property("relative_location").z
-        put(deep, yaw=yaw_al, z=floor_z); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-18, yaw=yaw_al + 100.0)); yield from wait(2.0)
+        jz0 = G["pawn"].get_editor_property("character_movement").get_editor_property("jump_z_velocity")
+        # (PR #53's review: a swing begun on the quay and carried into the deep water is broken off as she starts to swim, its
+        # blow never released from the water)
+        sw0 = cb().start_attack()
+        put(deep, yaw=yaw_al, z=floor_z); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-18, yaw=yaw_al + 100.0)); yield from wait(0.3)
+        r["swing_broken"] = {"begun": sw0, "swimming": swim()["on"], "attacking": cb().is_attacking()}
+        yield from wait(1.7)
         s1 = swim(); r["idle"] = {k: s1[k] for k in ("on", "clip", "under")}
         r["attack_refused"] = not cb().start_attack(); r["roll_refused"] = not cb().start_roll(al)
         shot(f"swim12_{hero}_idle", "1280x720"); yield from rwait(1.2)
@@ -3121,7 +3128,8 @@ def step_swim12():
         while time.time() - t0 < 7.0:
             G["pawn"].add_movement_input(V(-wd.x, -wd.y, 0), 1.0); yield
         s3 = swim(); p3 = G["pawn"].get_actor_location()
-        r["out"] = {"on": s3["on"], "z": round(p3.z), "mesh_back_cm": round(G["pawn"].get_editor_property("mesh").get_editor_property("relative_location").z - mz0, 1)}
+        r["out"] = {"on": s3["on"], "z": round(p3.z), "mesh_back_cm": round(G["pawn"].get_editor_property("mesh").get_editor_property("relative_location").z - mz0, 1),
+                    "jump_back": abs(G["pawn"].get_editor_property("character_movement").get_editor_property("jump_z_velocity") - jz0) < 0.5}
         res["heroes"][hero] = r
     # ---- the open sea: the wilds' own swimming floor (145 cm under the face, RDWildChunk.cpp) past the harbour's mouth, and far
     # out where it is over 8 m deep (where a sheet 3 m over the water used to lie): she swims, held at the face, and does not sink
@@ -3140,6 +3148,16 @@ def step_swim12():
         sea[name_] = {"depth_m": round(float(p_[6]) - float(p_[0]), 1) if len(p_) > 6 else None, "kind": int(float(p_[5])) if len(p_) > 5 else None,
                       "on": s_["on"], "on_after": s2_["on"], "pelvis": s2_["pelvis"], "z_change": round(z1_ - z0_), "strokes": s2_["strokes"] - s_["strokes"]}
     res["sea"] = sea
+    # (and no horse from the water (PR #53's review): the saddle took the swim's jump (none) and her raised body as hers to give
+    # back. Her horse called beside her far out at sea, the mount refused. Here, not in the harbour: a horse left by the swim
+    # line held the next heroes (its box comes on once she is 2 m clear))
+    own0 = G["gi"].get_editor_property("horse_owned"); G["gi"].set_editor_property("horse_owned", True)
+    try:
+        called = g.call_horse(); yield from wait(0.5)
+        res["mount"] = {"swimming": swim()["on"], "called": called, "mounted": g.mount_horse(), "is_mounted": g.is_mounted()}
+        if g.is_mounted(): g.dismount_horse()
+    finally:
+        G["gi"].set_editor_property("horse_owned", own0)
     # ---- the sounds, measured in the output: the splash (a fall off the quay) and the strokes, each with its set at 0 as well
     lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); bg0 = lms.get_editor_property("bAllowBackgroundAudio")
     lms.set_editor_property("bAllowBackgroundAudio", True); unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
@@ -3224,8 +3242,11 @@ def step_swim12():
               h["idle"]["on"] and "Idle_Swim" in h["idle"]["clip"] and 5 < h["idle"]["under"] < 35 and h["attack_refused"] and h["roll_refused"]
               and any("Anim_Swim" in c and "Idle" not in c for c in h["swim"]["clips"]) and h["swim"]["pelvis"] is not None and -15 < h["swim"]["pelvis"] < 5 and h["swim"]["strokes"] >= 2 and h["swim"]["ripples"] >= 4
               and h["swim"]["fresh_sources"] >= 3 and (h["swim"]["her_push"] or 0) > 0 and 0 < h["swim"]["speed_max"] <= h["swim"]["top"] + 5
-              and not h["out"]["on"] and h["out"]["z"] > 60 and abs(h["out"]["mesh_back_cm"]) < 1.0
+              and not h["out"]["on"] and h["out"]["z"] > 60 and abs(h["out"]["mesh_back_cm"]) < 1.0 and h["out"]["jump_back"]
+              and (not h["swing_broken"]["begun"] or (h["swing_broken"]["swimming"] and not h["swing_broken"]["attacking"]))
               for h in H.values())
+          and sum(1 for h in H.values() if h["swing_broken"]["begun"]) >= 3
+          and (lambda m: m is not None and m["swimming"] and m["called"] and not m["mounted"] and not m["is_mounted"])(res.get("mount"))
           and len(res.get("sea", {})) == 2 and all(v["kind"] == 1 and v["on"] and v["on_after"] and v["pelvis"] is not None and -25 < v["pelvis"] < 10 and abs(v["z_change"]) < 30 and v["strokes"] >= 2 for v in res["sea"].values())
           and (res["sea"].get("deep") or {}).get("depth_m", 0) > 8
           and snd_res.get("splashes_made", 0) >= 2 and (snd_res["splash_db_over_silent"] or 0) > 6.0 and (snd_res["strokes_db_over_silent"] or 0) > 3.0

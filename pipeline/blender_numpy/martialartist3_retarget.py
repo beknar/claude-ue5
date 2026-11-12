@@ -18,8 +18,8 @@ feet's lowest place in each clip against the rest pose's).
 Blender: -b -P martialartist3_retarget.py -- MartialArtist2.glb out_dir MartialArtist3.glb [preview_prefix [clip:frame,...]]
   [--maker m1,m2] [--tag T] [--carry a,b] [--own] [--noskin] [--name N] [--env K=V] (another hero's body: the Rogue's attacks
   from Rogue.glb onto Rogue2.glb, the Summoner's casts from Summoner4.glb onto Summoner5, each beside her own clips)
-A target with summoner5_cloak.py's cloak bones: in the carried clips the cloak hangs from her upper back, its lower bones
-drawn back toward the way they hang at rest and kept over the floor (hang())."""
+A target with summoner5_cloak.py's cloak bones: in the carried clips the cloak hangs from her upper back, turned back toward
+hanging by one turn for the whole cloak (a share of it down each chain) and kept over the floor (cloak_turn(), hang())."""
 import bpy, sys, os, json, math, re
 from mathutils import Matrix, Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -337,9 +337,8 @@ def cloak_turn(A):
     return Qs, R, flat
 
 
-def hang(A, b):
-    if CLOAK_BONES[b.name] == 0 or not hasattr(hang, "turn") or hang.turn[0] is not A: hang.turn = (A, cloak_turn(A))
-    Qs, R, _ = hang.turn[1]
+def hang(A, b, turn):
+    Qs, R, com = turn
     m = A[b.name]; head = m.translation.copy(); L = b.length
     cur = (m.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized()
     k = CLOAK_BONES[b.name]; f = CLOAK_SHARE[min(k, len(CLOAK_SHARE) - 1)]
@@ -350,7 +349,7 @@ def hang(A, b):
         # out on the floor, 4.9 times its edges' length in the roll; near the top its own way, flat: laid the common way
         # there, a chain's first bone that met the floor turned back while its neighbour, a little over it, went on
         # forward (3.8 times))
-        dw = AW.to_3x3() @ new; own = Vector((dw.x, dw.y, 0.0)); com = hang.turn[1][2]
+        dw = AW.to_3x3() @ new; own = Vector((dw.x, dw.y, 0.0))
         wk = CLOAK_BONES[b.name] / max(1, max(CLOAK_BONES.values()))
         flat = own.normalized() * (1.0 - wk) + com * wk if own.length > 1e-4 else com
         if flat.length < 1e-4: flat = com
@@ -479,10 +478,12 @@ def solve(Q, pel, ankles):
             if math.degrees(t.angle) > ANKLE_TURN + 1.0: t = Quaternion(t.axis, math.radians(ANKLE_TURN))
             new = (Q[f"calf_{s}"] @ T_Q0[f"calf_{s}"].inverted()) @ sw @ t @ T_Q0[f"foot_{s}"]
             fix = new @ Q[f"foot_{s}"].inverted(); Q[f"foot_{s}"] = new; Q[f"ball_{s}"] = fix @ Q[f"ball_{s}"]
-    A.clear()
+    A.clear(); turn = None
     for b in ORDER:
         place(b)
-        if b.name in CLOAK_BONES: hang(A, b)
+        if b.name in CLOAK_BONES:
+            if turn is None: turn = cloak_turn(A)                  # (once a frame: her upper back is placed before any cloak bone)
+            hang(A, b, turn)
     solve.bend = bend
     out = {}
     for b in ORDER:

@@ -414,7 +414,7 @@ bool URDCombatComponent::ToggleHelmet()
 // ================================================================================================ blocking
 void URDCombatComponent::SetBlocking(bool bOn)
 {
-	if (bOn && Generator && (Generator->IsMounted() || Generator->IsSwimming())) return;          // (the eighth phase: no block from the saddle; 2026-11-12: nor swimming)
+	if (bOn && Generator && Generator->IsRidingOrSwimming()) return;          // (the eighth phase: no block from the saddle; 2026-11-12: nor swimming)
 	if (!Generator) return;
 	// (only a hero who blocks, with a shield in her hand, standing, not swinging)
 	if (bOn && (!Generator->HeroBlocks() || !IsShieldInHand() || bDead || AttackTime >= 0.f || RollTime >= 0.f || bInventoryOpen || bCraftOpen)) bOn = false;

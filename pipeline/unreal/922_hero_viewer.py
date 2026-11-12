@@ -9,8 +9,11 @@ Args: <out dir> [hero,hero,...]"""
 import json, os, sys, unreal
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "HeroViewer")
 ONLY = [h for a in sys.argv[2:] for h in a.split(",") if h]
-# (the hero menu's six and their rigs: every map's hero keeps her asset names, 917 / 918)
-HERO_RIG = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "MartialArtist": "MartialArtist", "Summoner": "Summoner4"}
+# (the hero menu's six and their rigs: hero_rigs.py, shared with 913 and 921)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hero_rigs, importlib
+importlib.reload(hero_rigs)
+HERO_RIG = hero_rigs.HERO_RIG
 ar = unreal.AssetRegistryHelpers.get_asset_registry()
 REPORT = []
 

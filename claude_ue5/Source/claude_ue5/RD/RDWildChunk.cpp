@@ -168,7 +168,7 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 				{
 					const FRDWSample& Sq = *Qs[Q];
 					const float Dq = Sq.WaterKind ? Sq.Water - Sq.H : 0.f;
-					D.Block.Add(FVector(Ij[Q][0] * St * 100.0, Ij[Q][1] * St * 100.0, W.ToZ(Lv) - 100.f * FMath::Clamp(Dq, 0.9f, 1.45f)));
+					D.Block.Add(FVector(Ij[Q][0] * St * 100.0, Ij[Q][1] * St * 100.0, W.ToZ(Lv) - 100.f * FMath::Clamp(Dq, 0.9f, FRDWildWorld::SwimFloorWildCm / 100.f)));
 				}
 				D.BlockT.Add(Bb); D.BlockT.Add(Bb + 2); D.BlockT.Add(Bb + 1);
 				D.BlockT.Add(Bb + 1); D.BlockT.Add(Bb + 2); D.BlockT.Add(Bb + 3);

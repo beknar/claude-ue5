@@ -129,7 +129,7 @@ void URDCombatComponent::SetDexEnergy(float Value) { DexEnergy = FMath::Clamp(Va
 
 bool URDCombatComponent::StartStealth()
 {
-	if (Generator && (Generator->IsMounted() || Generator->IsSwimming())) return false;
+	if (Generator && Generator->IsRidingOrSwimming()) return false;
 	const FRDHeroDef* H = Generator && Generator->bStealth && !bDead ? Generator->FindHero(Generator->CurrentHero) : nullptr;
 	if (!H || H->DexEnergy <= 0.f || MaxDexEnergy <= 0.f || !GetOwner()) return false;
 	if (IsStealthed()) { EndStealth(TEXT("ended")); return true; }        // (again while in it: out of it, no energy back)

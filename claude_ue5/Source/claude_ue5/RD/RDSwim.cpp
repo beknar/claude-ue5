@@ -49,8 +49,10 @@ void ARDDungeonGenerator::TickSwim(float Dt, ACharacter* C, bool bIn, float Fz)
 		bSwimming = true; ++SwimsBegun; SwimPawn = C;
 		SwimMeshWas = M->GetRelativeLocation();
 		SwimJumpWas = CM->JumpZVelocity; CM->JumpZVelocity = 0.f;
-		// (a block or a swing under way ends: none goes on in the water)
-		PlayerCombat->SetBlocking(false);
+		// (a block, a swing, a roll or a dash under way ends: none goes on in the water (the swing's blow landed from it until PR
+		// #53's review))
+		PlayerCombat->BreakOffMoves();
+		bSwimMoving = false;
 		PlayerCombat->SwimFactor = FMath::Clamp(SwimSpeedMul, 0.1f, 1.f); PlayerCombat->RefreshWalkSpeed();
 		SwimClipNow = NAME_None; SwimStrokeClock = 0.f;
 		UE_LOG(LogRDSwim, Log, TEXT("RDSWIM %s swims (feet %.0f cm under the face)"), *CurrentHero.ToString(), Fz - Feet);
@@ -58,7 +60,10 @@ void ARDDungeonGenerator::TickSwim(float Dt, ACharacter* C, bool bIn, float Fz)
 	// (her clip: the treading idle, or the swim loop at a rate by her speed against her swimming top speed)
 	const float Sp = C->GetVelocity().Size2D();
 	const FRDSwimClips* SC = SwimClips.Find(CurrentHero);
-	const bool bMove = Sp > SwimMoveFrom;
+	// (swimming along from SwimMoveFrom, treading again only under 60 % of it: one line flipped the clip and the bone she is
+	// held by every frame about it (PR #53's review))
+	bSwimMoving = Sp > (bSwimMoving ? SwimMoveFrom * 0.6f : SwimMoveFrom);
+	const bool bMove = bSwimMoving;
 	UAnimSequenceBase* Clip = SC ? (bMove ? SC->Swim.Get() : SC->Idle.Get()) : nullptr;
 	if (UAnimInstance* AI = M->GetAnimInstance(); AI && Clip)
 	{
@@ -111,7 +116,7 @@ void ARDDungeonGenerator::EndSwim(ACharacter* C)
 		if (UAnimInstance* AI = C->GetMesh()->GetAnimInstance(); AI && !(PlayerCombat && PlayerCombat->IsDead())) AI->StopSlotAnimation(0.25f, RDSwimSlot);
 	}
 	if (PlayerCombat) { PlayerCombat->SwimFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); }
-	SwimClipNow = NAME_None; SwimMontage = nullptr;
+	SwimClipNow = NAME_None; SwimMontage = nullptr; bSwimMoving = false;
 	UE_LOG(LogRDSwim, Log, TEXT("RDSWIM out of the deep water"));
 }
 

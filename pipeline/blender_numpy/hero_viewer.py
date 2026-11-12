@@ -245,6 +245,8 @@ function pickHero(id) {
 const dur = () => acts[list[idx].name].getClip().duration;
 let loopsDone = 0;
 function play(i) {
+  // (a hero with no clip that reached her bones: her model at rest and a word, not a stopped page (PR #53's review))
+  if (!list.length) { $('name').textContent = 'No animations'; $('info').textContent = 'none of her clips matched her bones'; state.clip = null; return; }
   idx = (i + list.length) % list.length; T = 0; loopsDone = 0;
   for (const n in acts) acts[n].setEffectiveWeight(0);
   const c = list[idx]; $('clip').value = String(idx); $('name').textContent = c.name;

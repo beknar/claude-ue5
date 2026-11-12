@@ -343,7 +343,7 @@ bool URDCombatComponent::StartAttack()
 
 bool URDCombatComponent::StartAttackWith(int32 Index)
 {
-	if (Generator && (Generator->IsMounted() || Generator->IsSwimming())) return false;          // (the eighth phase: no blow from the saddle; 2026-11-12: nor swimming)
+	if (Generator && Generator->IsRidingOrSwimming()) return false;          // (the eighth phase: no blow from the saddle; 2026-11-12: nor swimming)
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
 	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen || bCraftOpen || bBlocking) return false;
@@ -2711,7 +2711,7 @@ bool URDCombatComponent::IsDodging() const
 
 bool URDCombatComponent::StartRoll(FVector Dir)
 {
-	if (Generator && (Generator->IsMounted() || Generator->IsSwimming())) return false;
+	if (Generator && Generator->IsRidingOrSwimming()) return false;
 	ACharacter* C = Cast<ACharacter>(GetOwner());
 	USkeletalMeshComponent* M = Body();
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;

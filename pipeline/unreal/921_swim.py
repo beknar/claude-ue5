@@ -18,17 +18,14 @@ STEPS = [s for a in sys.argv[1:] for s in a.split(",") if s] or ["clips", "sound
 SA = r"E:\code\claude-ue5\claude_ue5\SourceArt"
 MAP = "/Game/RandomDungeon/Maps/brokenspire"
 RIGS = "/Game/RandomDungeon/Swim/Rigs"; ANIMS = "/Game/RandomDungeon/Swim/Anims"
-# (the hero menu's six, by the rigs 913's rider clips go to: every map's hero keeps her asset names, 917 / 918)
-HERO_RIG = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "MartialArtist": "MartialArtist", "Summoner": "Summoner4"}
+# (the hero menu's six and their rigs, and the retarget onto them: hero_rigs.py, shared with 913 and 922)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hero_rigs, importlib
+importlib.reload(hero_rigs)
+HERO_RIG = hero_rigs.HERO_RIG
 SRC = "/Game/Animations_Warrior"
 SWIM = {"Idle": f"{SRC}/Animations/Without_Weapon/Anim_Idle_Swim", "Swim": f"{SRC}/Animations/Without_Weapon/Anim_Swim"}
 REPORT = []
-
-
-def make(cls, fac, name, folder):
-    p = f"{folder}/{name}"
-    if eal.does_asset_exist(p): eal.delete_asset(p)
-    return at.create_asset(name, folder, cls, fac)
 
 
 def generator():
@@ -41,44 +38,8 @@ if "clips" in STEPS:
     clips = {k: unreal.load_asset(p) for k, p in SWIM.items()}
     assert all(clips.values()), f"the pack's swim clips: {clips}"
     src_mesh = unreal.load_asset(f"{SRC}/Mesh/SK_Mannequin"); assert src_mesh, "the pack's mannequin"
-    rig = make(unreal.IKRigDefinition, unreal.IKRigDefinitionFactory(), "IK_Swim_Source", RIGS)
-    c = unreal.IKRigController.get_controller(rig); c.set_skeletal_mesh(src_mesh); c.apply_auto_generated_retarget_definition()
-    try: c.apply_auto_fbik()
-    except Exception: pass
-    eal.save_loaded_asset(rig)
-    for hero, ch in HERO_RIG.items():
-        tgt_mesh = unreal.load_asset(f"/Game/JRPG/Character/SK_JRPG_{ch}"); tgt_rig = unreal.load_asset(f"/Game/JRPG/Rigs/IK_JRPG_{ch}_Auto")
-        if not tgt_mesh or not tgt_rig: REPORT.append(f"clips {hero}: no mesh or rig for {ch}"); continue
-        rtg = make(unreal.IKRetargeter, unreal.IKRetargetFactory(), f"RTG_Swim_To_{ch}", RIGS)
-        rc = unreal.IKRetargeterController.get_controller(rtg)
-        rc.add_default_ops()
-        rc.set_ik_rig(unreal.RetargetSourceOrTarget.SOURCE, rig); rc.set_ik_rig(unreal.RetargetSourceOrTarget.TARGET, tgt_rig)
-        rc.set_preview_mesh(unreal.RetargetSourceOrTarget.SOURCE, src_mesh); rc.set_preview_mesh(unreal.RetargetSourceOrTarget.TARGET, tgt_mesh)
-        rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.SOURCE, rig); rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.TARGET, tgt_rig)
-        rc.auto_map_chains(unreal.AutoMapChainType.FUZZY, True)
-        rm = rc.get_op_controller(rc.get_index_of_op_by_name("Root Motion"))          # (add_default_ops leaves it without bones)
-        rm.set_source_root_bone("root"); rm.set_target_root_bone("root"); rm.set_target_pelvis_bone("pelvis")
-        try: rc.auto_align_all_bones(unreal.RetargetSourceOrTarget.TARGET)
-        except Exception as e: print("SWIM align", e)
-        eal.save_loaded_asset(rtg)
-        out = f"{ANIMS}/{ch}"
-        for p in SWIM.values():
-            n = p.rsplit("/", 1)[-1]
-            if eal.does_asset_exist(f"{out}/{n}_{ch}"): eal.delete_asset(f"{out}/{n}_{ch}")
-        inp = unreal.IKRetargetBatchOperationInputs()
-        # (the batch takes the registry's records of them, not the loaded clips)
-        inp.set_editor_property("assets_to_retarget", [eal.find_asset_data(p) for p in SWIM.values()]); inp.set_editor_property("source_mesh", src_mesh); inp.set_editor_property("target_mesh", tgt_mesh)
-        inp.set_editor_property("ik_retarget_asset", rtg); inp.set_editor_property("suffix", "_" + ch); inp.set_editor_property("target_path", out)
-        inp.set_editor_property("include_referenced_assets", False); inp.set_editor_property("overwrite_existing_files", True)
-        unreal.IKRetargetBatchOperation.run_batch_retarget(inp)
-        made = []
-        for p in SWIM.values():
-            n = p.rsplit("/", 1)[-1]
-            a = unreal.load_asset(f"{out}/{n}_{ch}")
-            if not a: continue
-            a.set_editor_property("enable_root_motion", False); a.set_editor_property("force_root_lock", True); eal.save_loaded_asset(a, False)
-            made.append(f"{n} {a.get_play_length():.2f} s")
-        REPORT.append(f"clips {hero} ({ch}): {made}")
+    for hero, (ch, made, why) in hero_rigs.retarget_onto_heroes(src_mesh, list(SWIM.values()), RIGS, ANIMS, "Swim", "SWIM").items():
+        REPORT.append(f"clips {hero}: {why}" if why else f"clips {hero} ({ch}): {[a.get_name().rsplit('_' + ch, 1)[0] + f' {a.get_play_length():.2f} s' for a in made]}")
 
 if "sounds" in STEPS:
     aud = os.path.join(SA, "brokenspire", "audio_water")

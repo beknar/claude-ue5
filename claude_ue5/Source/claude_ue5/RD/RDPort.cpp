@@ -47,7 +47,7 @@ bool ARDDungeonGenerator::WaterFaceAt(const FVector& At, float& Z) const
 
 float ARDSection::HarbourFloorZ() const
 {
-	return Generator && Generator->bPortWaterOpen ? -250.f : RDPortWalkZ;
+	return Generator && Generator->bPortWaterOpen ? RDPortWaterZ - FRDWildWorld::SwimFloorHarbourCm : RDPortWalkZ;
 }
 
 bool ARDSection::NearOpenHarbour(const FVector& W, float Reach) const
@@ -91,9 +91,9 @@ void ARDSection::HarbourBuild()
 		if (UMaterialInterface* Mt = Generator->WildSeaMaterial ? Generator->WildSeaMaterial.Get() : Generator->WildWaterMaterial.Get()) W->SetMaterial(0, Mt);
 	}
 	// ---- open to the sea (the list of 2026-11-11: "the player should be able to fall into the water, but be able to walk out via
-	// ramps"): no blockers; she drops 1.7 m from the quay or a pier to the harbour's floor (60 cm of water over it) and walks up a
-	// stone ramp out of it. A ramp half way between each two piers along the quay and one on each side quay, each a tile wide,
-	// from 20 cm into the quay down to the floor 6 m out (16 degrees)
+	// ramps"): no blockers; she drops 2.5 m from the quay or a pier to the harbour's floor (140 cm of water over it, swum since
+	// 2026-11-12: HarbourFloorZ) and walks up a stone ramp out of it. A ramp half way between each two piers along the quay and
+	// one on each side quay, each a tile wide, from 20 cm into the quay down to the floor 8 m out (17 degrees)
 	TownRampFeet.Reset(); TownRampTops.Reset();
 	if (Generator->bPortWaterOpen)
 	{

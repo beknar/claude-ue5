@@ -748,7 +748,7 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 		// (the road runs on up to the town's own ground, which draws it from the gate: its section is 360 to 504 m across)
 		if (bPortHere ? Dsq < 262.f : D < 400.0) { Water = -1e9f; Kind = 0; }
 		// (the harbour's way out: north of its quay and across its width (the port plan's harbour, RDTownPlan.cpp: frame G 0, so
-		// its +X is the town's sea side) the bed 60 cm under the harbour's walked floor at the section's edge, deepening out to
+		// its +X is the town's sea side) the bed 10 cm under the harbour's swum floor at the section's edge, deepening out to
 		// sea, the sea's water over it; its sides eased over 14 m. The sea here is 0 before the lift, the harbour's water after it)
 		if (bPortHere && X - T.Site.X > RDWPortQuayM(T.Tiles))
 		{
@@ -756,9 +756,9 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 			const float Ws = 1.f - RDWSmooth(Hm - 2.f, Hm + 12.f, (float)FMath::Abs(Y - T.Site.Y));
 			if (Ws > 0.f)
 			{
-				// (1.5 m under the sea at the section's edge, the harbour's floor's depth since she swims there (2026-11-12:
+				// (SwimBedMouthCm under the sea at the section's edge, under the harbour's floor since she swims there (2026-11-12:
 				// the wilds' swimming floor 145 cm under the face meets the harbour's 140 cm); 0.6 m until then)
-				const float Bed = -1.5f - 9.f * RDWSmooth(255.f, 700.f, (float)(X - T.Site.X));
+				const float Bed = -FRDWildWorld::SwimBedMouthCm / 100.f - 9.f * RDWSmooth(255.f, 700.f, (float)(X - T.Site.X));
 				H = FMath::Lerp(H, FMath::Min(H, Bed), Ws);
 				if (H < -0.05f) { Water = 0.f; Kind = 1; }
 			}

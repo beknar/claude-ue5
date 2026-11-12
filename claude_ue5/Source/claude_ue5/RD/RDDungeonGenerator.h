@@ -2591,7 +2591,7 @@ public:
 	/** each hero's swimming clips (921 clips), by hero name as RiderClips */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") TMap<FName, FRDSwimClips> SwimClips;
 	/** she swims once her feet are this far under the water's face (cm; the swim floor under deep water is 145 cm down) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimDepth = 120.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimDepth = FRDWildWorld::SwimDepthCm;
 	/** her speed swimming, a share of her walk's */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimSpeedMul = 0.55f;
 	/** her pelvis this far under the water's face while she swims along (her back at the face), her head this far over it while
@@ -2604,6 +2604,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimStrokeEvery = 0.67f;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") bool bSwimming = false;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Swim") bool IsSwimming() const { return bSwimming; }
+	/** on the horse or swimming: no blow, block, roll, dash, chi, stealth or ability (one gate for them all: PR #53's review) */
+	bool IsRidingOrSwimming() const { return bMounted || bSwimming; }
 	/** tests: strokes sounded, swims begun */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") int32 SwimStrokes = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") int32 SwimsBegun = 0;
@@ -2612,6 +2614,7 @@ public:
 	void TickSwim(float Dt, class ACharacter* C, bool bIn, float Fz);
 	void EndSwim(class ACharacter* C);
 	FName SwimClipNow;
+	bool bSwimMoving = false;          // (swimming along, not treading: on from SwimMoveFrom, off under 60 % of it)
 	TWeakObjectPtr<ACharacter> SwimPawn;
 	UPROPERTY(Transient) TObjectPtr<UAnimMontage> SwimMontage = nullptr;
 	FVector SwimMeshWas = FVector::ZeroVector;
