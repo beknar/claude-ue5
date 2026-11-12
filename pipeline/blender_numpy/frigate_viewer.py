@@ -103,6 +103,7 @@ function bytes(b64) {
 }
 const state = { ready: false, error: null, ship: null, triangles: 0, frames: 0 };
 window.__frigate = state;
+let wanted = null;
 function show(ship, viewName) {
   const done = gltf => {
     if (current && loaded[current.name]) scene.remove(loaded[current.name].scene);
@@ -122,8 +123,10 @@ function show(ship, viewName) {
     document.querySelectorAll('[data-ship]').forEach(b => b.classList.toggle('on', b.dataset.ship === ship.name));
     view(viewName || 'picture');
   };
+  // (the ship asked for last is the one shown: a slow parse that ends after another ship was picked is kept, not shown (PR #52's review))
+  wanted = ship.name;
   if (loaded[ship.name]) return done(loaded[ship.name]);
-  new GLTFLoader().parse(bytes(ship.glb), '', gltf => { loaded[ship.name] = gltf; done(gltf); },
+  new GLTFLoader().parse(bytes(ship.glb), '', gltf => { loaded[ship.name] = gltf; if (wanted === ship.name) done(gltf); },
                          e => { state.error = String(e); $('info').textContent = 'The model did not load: ' + e; });
 }
 for (const s of SHIPS) {

@@ -228,7 +228,9 @@ for sx in (1, -1):
         drop = (py - 752) * KP                                                          # (canted out 25 degrees as it falls)
         p = Q(px, sx * 34, 752); p.z -= drop * math.cos(math.radians(25)); p.x += sx * drop * math.sin(math.radians(25))
         pts.append(p)
-    prism(pts, Vector((math.cos(math.radians(25)), 0, math.sin(math.radians(25)))) * (0.6 * sx), WHITE, None, 0.1)
+    # (its thickness across the fin's plane on both sides: the fin falls along (sx sin 25, 0, -cos 25), so across it is
+    # (cos 25, 0, sx sin 25) (PR #52's review: the -X fin was thickened at 40 degrees to its plane))
+    prism(pts, Vector((math.cos(math.radians(25)), 0, sx * math.sin(math.radians(25)))) * (0.6 * sx), WHITE, None, 0.1)
 
 # ---------------------------------------------------------------- a twin-barrel turret on each side
 for sx in (1, -1):
@@ -276,7 +278,9 @@ for sx in (1, -1):
     for j in range(nv):
         for i in range(nu):
             a = j * (nu + 1) + i
-            F.append((a, a + 1, a + nu + 2, a + nu + 1) if sx > 0 else (a, a + nu + 1, a + nu + 2, a + 1))
+            # (wound to face out of the hull: Q's px runs +Y and its py -Z, so (a, a+1, ...) faced -X on the +X side, inward on both
+            # (PR #52's review); an open sheet's normals are not recalculated)
+            F.append((a, a + nu + 1, a + nu + 2, a + 1) if sx > 0 else (a, a + 1, a + nu + 2, a + nu + 1))
     mesh_obj(V, F, DECAL, uv=UV, closed=False)
 
 # ---------------------------------------------------------------- underneath: two pods, the missile, small fins

@@ -41,7 +41,8 @@ def plating(name, base, seed, seam=0.7, tone=0.035, depth=4):
             for (cx, cy) in ((x0 + 12, y0 + 12), (x1 - 12, y1 - 12)):
                 d.ellipse((cx - 4, cy - 4, cx + 4, cy + 4), fill=dark(0.6))
         if rng.random() < 0.15 and x1 - x0 > 140 and y1 - y0 > 70:
-            w, h = rng.randint(40, 120), rng.randint(16, 40); sx, sy = rng.randint(x0 + 15, x1 - 15 - w), rng.randint(y0 + 12, y1 - 12 - h)
+            # (no wider or taller than the panel leaves room for (PR #52's review: a panel 141-149 px wide gave randint an empty range))
+            w, h = rng.randint(40, min(120, x1 - x0 - 31)), rng.randint(16, min(40, y1 - y0 - 25)); sx, sy = rng.randint(x0 + 15, x1 - 15 - w), rng.randint(y0 + 12, y1 - 12 - h)
             d.rectangle((sx, sy, sx + w, sy + h), outline=dark(0.65), width=3)
     a = np.asarray(img).astype(np.float32)
     a *= (0.975 + 0.025 * np.asarray(Image.effect_noise((S, S), 40).filter(ImageFilter.GaussianBlur(2))).astype(np.float32)[..., None] / 128.0)

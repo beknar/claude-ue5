@@ -173,7 +173,7 @@ HULL_S = [
     (31.0, HM, -5.4, 9.3, 3.4, 2.6, 1.6), (35.1, HM, -5.2, 10.2, 3.4, 3.5, 1.6), (46.1, HM, -5.0, 12.4, 3.4, 5.7, 1.6),
     (56.0, HM, -5.0, 14.4, 3.4, 7.7, 1.6), (64.6, HM - 0.4, -5.0, 15.4, 3.4, 8.7, 1.6), (66.4, 9.4, -4.8, 15.4, 3.2, 8.7, 1.6),
     (69.3, 7.6, -4.2, 13.4, 3.0, 6.7, 1.8)]                                           # (the nose, under its red cap)
-KNUCKLE = 6.7                                                                          # (the superstructure's knuckle: the side's top)            # (the nose, under its red cap)
+KNUCKLE = 6.7                                                                          # (the superstructure's knuckle: the side's top)
 
 
 def section(s, hw, zb, zt, cw, ch, cb):
@@ -298,7 +298,7 @@ for sx in (1, -1):
     box(59.4, 61.4, side_x(sx, xm + 0.3), side_x(sx, xm + 0.5), -0.9, -0.2, GLOW, 0.04)
     box(27.4, 64.6, side_x(sx, xm), side_x(sx, xm + 0.12), -5.2, -4.7, TRIM, 0.03)
     for s, z in ((36.0, 5.6), (38.5, -2.2)):
-        socket(s, z, xm + 0.25 if z > 7 else xm + 0.3, sx, 0.62 if z > 7 else 0.4)
+        socket(s, z, xm + 0.3, sx, 0.4)
     # ------------------------------------------------------------ the bow: the wedge plates (drooping), red leading edges
     wx0, wx1 = HM - 2.2, HM
     WEDGE = [(58.0, -5.6), (65.5, 4.5), (92.1, -0.6), (87.8, -5.8)]
@@ -376,17 +376,20 @@ for sx in (1, -1):                                                              
                *sorted((side_x(sx, 6.7), side_x(sx, 6.92))), TRIM, None, 0.04)
 box(2.5, 26.0, -1.3, 1.3, 7.85, 8.45, METAL, 0.12)                                               # (the spine, low on the deck)
 side_prism([(26.0, 7.85), (44.0, top_mid(44.0)), (44.0, top_mid(44.0) + 0.8), (26.0, 8.45)], -1.6, 1.6, METAL, None, 0.12)
+spine_top = lambda s: 8.45 + (top_mid(44.0) + 0.8 - 8.45) * (s - 26.0) / 18.0      # (that sloped part's top, s 26 to 44)
 for x in (-0.85, 0.0, 0.85):                                                         # (its pipe runs)
     cylinder(P(2.8, x, 8.55), P(25.5, x, 8.55), 0.16, TRIM, 10)
 for _ in range(46):                                                                  # (greebles: low aft, taller by the head and the mount)
     s0 = rng.uniform(3, 58); d = rng.uniform(0.5, 1.8); w = rng.uniform(0.4, 1.4)
     h = rng.uniform(0.15, 0.45) if s0 < 22 else rng.uniform(0.25, 1.0)
-    zt = 8.45 if s0 < 26 else top_mid(s0 + d) + 0.8
     x0 = rng.uniform(-1.6, 1.6 - w) if rng.random() < 0.6 or s0 < 26 else rng.choice([-1, 1]) * rng.uniform(1.8, 2.6)
+    # (its base on what is under it (PR #52's review: past s 26 every one stood at the spine's top, 0.7 m over the deck off
+    # the spine or past its end at s 44): the aft spine's top, the sloped spine's where it lies wholly over it, else the deck's)
+    on_spine = -1.6 <= x0 and x0 + w <= 1.6 and s0 + d <= 44.0
+    zt = 8.45 if s0 < 26 else (max(spine_top(s0), spine_top(s0 + d)) if on_spine else max(top_mid(s0), top_mid(s0 + d)))
     box(s0, s0 + d, x0, x0 + w, zt - 0.1, zt + h, rng.choice([TRIM, METAL, METAL, DECK, DARK]), 0.04)
 
 # ---------------------------------------------------------------- the sensor head (its window aft) and the barrels' mount
-deck31 = top_mid(31.0)
 deck31 = top_mid(31.0)
 box(31.2, 35.4, -1.5, 1.5, deck31 - 0.3, 12.5, METAL, 0.2)                                        # (the neck)
 cylinder(P(32.0, -1.8, 11.9), P(32.0, 1.8, 11.9), 0.45, TRIM, 14)

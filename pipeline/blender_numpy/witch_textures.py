@@ -30,8 +30,10 @@ PAL = {
     "stock_black": sample(720, 1200, 5), "stock_purple": sample(430, 1260, 5), "bandage": sample(450, 1050, 4),
     "glove": sample(180, 470, 4), "eye": sample(603, 338, 2),
 }
-# (the hair: the median of the yellow pixels of her side locks (x 430-480 and 640-700, y 420-650), the 25th percentile
-# for its shade; a sample that fell on an outline or a highlight is set from the picture's flat colours)
+# (the hair's two colours are chosen by eye from her side locks (x 430-480 and 640-700, y 420-650), not measured: the yellow
+# pixels there have a median of (234, 165, 74) (measured 2026-11-12 for PR #52's review, which found this comment calling the
+# numbers measured), but the darker 25 % of them are still (229, 157, 53), too light for the hair's shading; the shade is the
+# darker gold of the locks' inner strands)
 FALLBACK = {"gold": (236, 168, 40), "band_red": (150, 40, 32), "buckle": (175, 175, 180)}
 for k, v in FALLBACK.items():
     if k == "gold" and not (PAL[k][0] > 180 and PAL[k][1] > 120 and PAL[k][2] < 110): PAL[k] = v

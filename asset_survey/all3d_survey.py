@@ -627,9 +627,14 @@ def main():
             for f in fn:
                 n += 1; size += os.path.getsize(os.path.join(dp, f))
         return n, size
+    # (only folders are kits (PR #52's review: a loose file in either folder was taken for a kit, or stopped the survey), and a
+    # library drive that is not there is said, not a stop)
+    dirs = lambda d: sorted(k for k in os.listdir(d) if os.path.isdir(os.path.join(d, k))) if os.path.isdir(d) else []
+    kits = dirs(KB)
+    if not kits: w(f"No kits found: `{KB}` is not there or holds no kit folder."); w("")
     if os.path.isdir(KB_APP):
-        same = [k for k in sorted(os.listdir(KB)) if os.path.isdir(os.path.join(KB_APP, k)) and tree(os.path.join(KB, k)) == tree(os.path.join(KB_APP, k))]
-        other = sorted(set(os.listdir(KB_APP)) - set(same))
+        same = [k for k in kits if os.path.isdir(os.path.join(KB_APP, k)) and tree(os.path.join(KB, k)) == tree(os.path.join(KB_APP, k))]
+        other = sorted(set(dirs(KB_APP)) - set(same))
         w(f"The Cargo app downloads them into `{KB_APP}`: " +
           (f"{len(same)} of its kits are the same as these (the same files and size)" if same else "none of its kits matches these") +
           (f"; different or only there: {', '.join('`' + k + '`' for k in other)}." if other else "."))
@@ -637,9 +642,9 @@ def main():
     w("| Kit | Version | Models | Materials | Textures | Size | Path |")
     w("|---|---|---|---|---|---|---|")
     kb_models = {}
-    for k in sorted(os.listdir(KB)):
+    for k in kits:
         kd = os.path.join(KB, k)
-        for ver in sorted(os.listdir(kd)):
+        for ver in dirs(kd):
             vd = os.path.join(kd, ver)
             models = sorted(os.listdir(os.path.join(vd, "Models"))) if os.path.isdir(os.path.join(vd, "Models")) else []
             mats = os.listdir(os.path.join(vd, "Materials")) if os.path.isdir(os.path.join(vd, "Materials")) else []

@@ -218,9 +218,14 @@ me = bpy.data.meshes.new("Head"); bm.to_mesh(me); bm.free()
 head = bpy.data.objects.new("Head", me); COL.objects.link(head)
 me.materials.append(M["face"])
 uvl = me.uv_layers.new(name="UVMap")
-for lp in me.loops:
-    v = me.vertices[lp.vertex_index].co
-    uvl.data[lp.index].uv = (0.5 + v.x / 0.22, 0.5 + (v.z - 1.45) / 0.22) if v.y < 0.02 else (0.02, 0.98)
+# (face by face, not vertex by vertex: a face wholly before y 0.02 takes the picture's face projected on it, any other the skin
+# corner (PR #52's review: a face across the line ran from the projected face to the corner, a strip across the whole face
+# texture: streaks on her cheeks and jaw))
+for p in me.polygons:
+    front = all(me.vertices[me.loops[li].vertex_index].co.y < 0.02 for li in p.loop_indices)
+    for li in p.loop_indices:
+        v = me.vertices[me.loops[li].vertex_index].co
+        uvl.data[li].uv = (0.5 + v.x / 0.22, 0.5 + (v.z - 1.45) / 0.22) if front else (0.02, 0.98)
 for p in me.polygons: p.use_smooth = True
 
 # ---------------------------------------------------------------- hair
@@ -247,9 +252,18 @@ me = bpy.data.meshes.new("HairCap"); bm.to_mesh(me); bm.free()
 hcap = bpy.data.objects.new("HairCap", me); COL.objects.link(hcap)
 me.materials.append(M["hair"])
 uvl = me.uv_layers.new(name="UVMap")
-for lp in me.loops:
-    v = me.vertices[lp.vertex_index].co
-    uvl.data[lp.index].uv = (math.atan2(v.x, v.y) / (2 * math.pi) + 0.5, 0.75 + (v.z - HEAD_C.z) * 2)
+# (u round her head wraps at her front (-Y): a face across it is kept whole, as the body's are (PR #52's review: it squeezed the
+# whole texture into one face, a striped seam over the bangs))
+for p in me.polygons:
+    us = [(li, math.atan2(me.vertices[me.loops[li].vertex_index].co.x, me.vertices[me.loops[li].vertex_index].co.y) / (2 * math.pi) + 0.5,
+           0.75 + (me.vertices[me.loops[li].vertex_index].co.z - HEAD_C.z) * 2) for li in p.loop_indices]
+    # (the top pole has no direction round her (u 0.5 from atan2(0, 0)): it takes its face's other corners' u)
+    pole = [math.hypot(me.vertices[me.loops[li].vertex_index].co.x, me.vertices[me.loops[li].vertex_index].co.y) < 1e-5 for li, _, _ in us]
+    rest = [u for (_, u, _), p_ in zip(us, pole) if not p_]
+    lo = min(rest) if rest else 0.0
+    rest = [u - 1.0 if u - lo > 0.5 else u for u in rest]
+    for (li, u, vv), p_ in zip(us, pole):
+        uvl.data[li].uv = (sum(rest) / len(rest) if p_ and rest else (u - 1.0 if u - lo > 0.5 else u), vv)
 for p in me.polygons: p.use_smooth = True
 solidify(hcap, 0.006, offset=1.0); bake(hcap)
 
