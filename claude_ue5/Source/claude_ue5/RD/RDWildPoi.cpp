@@ -308,7 +308,10 @@ void ARDDungeonGenerator::TickWildEncounters(float Dt, const FVector& Her)
 	WildLastEngaged = Now;
 	if (WildEngagements.Num() > 400) WildEngagements.RemoveAt(0, WildEngagements.Num() - 400);
 	WildEngagements.Add(FString::Printf(TEXT("%.1f|met|%s|%.0f|%.0f"), Now, *K.Name.ToString(), At.X / 100.f, At.Y / 100.f));
-	if (!K.Text.IsEmpty()) PlayerCombat->ShowMessage(K.Text);
+	// (a person on the way says their own lines when she speaks to them (K.Text is those lines, joined by "|": shown here it
+	// printed the bar and said them before she came, PR #50's review): the meeting names them)
+	if (!K.Folk.IsEmpty()) { if (!K.Title.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("On the way: %s"), *K.Title)); }
+	else if (!K.Text.IsEmpty()) PlayerCombat->ShowMessage(K.Text);
 	UE_LOG(LogRDWildPoi, Log, TEXT("RDENCOUNTER %s at (%.0f, %.0f) m, tier %d, %d made"), *K.Name.ToString(), At.X / 100.f, At.Y / 100.f, Tier, Made);
 }
 

@@ -1,8 +1,7 @@
 {
- "tag": "w11b",
+ "tag": "w11e",
  "plan": [
   "world",
-  "meadows11",
   "events11"
  ],
  "level": "brokenspire",
@@ -13,19 +12,19 @@
    "state": {
     "ready": 1,
     "seed": 20261103,
-    "init_s": 0.14,
-    "chunks": 64,
-    "in_flight": 0,
-    "built": 64,
+    "init_s": 0.15,
+    "chunks": 47,
+    "in_flight": 18,
+    "built": 46,
     "dropped": 0,
-    "max_active": 64,
-    "compute_ms": 121.8,
-    "build_ms_max": 27.7,
-    "revealed": 114,
+    "max_active": 47,
+    "compute_ms": 116.7,
+    "build_ms_max": 16.8,
+    "revealed": 112,
     "found": 1,
     "towns": 6,
-    "wild_ticks": 127,
-    "gen_ticks": 127,
+    "wild_ticks": 55,
+    "gen_ticks": 55,
     "paused": 0,
     "menu": 0,
     "panel": 0
@@ -61,23 +60,23 @@
     },
     "Kethrys Spire": {
      "kind": "city",
-     "x": 152550.0,
+     "x": 152400.0,
      "y": -70000.0,
      "h": 75.9,
      "style": 1
     },
     "Heaven": {
      "kind": "city",
-     "x": 114237.0,
-     "y": -110915.0,
+     "x": 114106.0,
+     "y": -110906.0,
      "h": 75.9,
      "style": 1
     }
    },
    "graymourne_sea_north_m": 200.0,
    "velmorrath_sea_east_m": null,
-   "kethrys_from_graymourne_km": 83.2,
-   "heaven_from_kethrys_km": 56.1,
+   "kethrys_from_graymourne_km": 83.3,
+   "heaven_from_kethrys_km": 56.0,
    "checks": {
     "brokenspire_mid_south": true,
     "ashenreach_middle": true,
@@ -266,28 +265,28 @@
    },
    "missing_templates": [],
    "rivers": 26,
-   "lakes": 76,
+   "lakes": 75,
    "roads": [
-    "road|Brokenspire|Ashenreach|84.7|2|272",
+    "road|Brokenspire|Ashenreach|83.1|272|-14",
     "road|Ashenreach|Graymourne|161.1|70300|0",
-    "road|Brokenspire|Vel Morrath|135.1|2|272",
+    "road|Brokenspire|Vel Morrath|136.3|272|-14",
     "road|Ashenreach|Vel Morrath|88.1|69941|294",
-    "road|Graymourne|Kethrys Spire|91.0|197388|-252",
-    "road|Kethrys Spire|Heaven|58.9|152345|-70219"
+    "road|Graymourne|Kethrys Spire|91.0|197387|-252",
+    "road|Kethrys Spire|Heaven|58.9|152195|-70219"
    ],
    "river_lengths_km": [
+    25.7,
     24.4,
     22.5,
     21.3,
     20.8,
     18.7,
     16.9,
-    16.6,
-    15.8
+    16.6
    ],
    "map_continent": {
     "ok": true,
-    "s": 1.2
+    "s": 1.1
    },
    "map_around": {
     "ok": true,
@@ -305,77 +304,13 @@
    }
   },
   {
-   "step": "meadows11",
-   "ok": true,
-   "spot": [
-    12786,
-    11844
-   ],
-   "trees_250m": 183,
-   "bare_share": 0.89,
-   "dispersion": 3.12,
-   "max_cell": 6,
-   "bare_80m_square": true,
-   "debris_100m": {
-    "leaves": 4,
-    "branch": 10,
-    "stump": 3,
-    "log": 4
-   },
-   "grass_near": 99,
-   "grass_materials": [
-    "MI_Clasters_Grass_varient_Wind"
-   ],
-   "wind": "MPC_RD_Wind",
-   "leaves": {
-    "on": true,
-    "biome": "meadows",
-    "fx": true,
-    "x": 1278993.0,
-    "y": 1184435.0,
-    "z": 1093.0
-   },
-   "screen": [
-    {
-     "fx": "Flower_meadows/NS_flying_leaves",
-     "shot": "leaves11_0",
-     "on": true
-    },
-    {
-     "fx": "Fx/NS_leaves",
-     "shot": "leaves11_1",
-     "on": true
-    },
-    {
-     "fx": "Fx/NS_leaves",
-     "shot": "leaves11_2",
-     "on": true
-    },
-    {
-     "fx": "PureNature_Meadows/FXS_Leaves",
-     "shot": "leaves11_3",
-     "on": true
-    },
-    {
-     "fx": "Medieval_Lake_Village/NS_FallenLeaves",
-     "shot": "leaves11_4",
-     "on": true
-    },
-    {
-     "fx": "VOL31_14WidowSt/NS_Falling_Leaves_01a",
-     "shot": "leaves11_5",
-     "on": true
-    }
-   ]
-  },
-  {
    "step": "events11",
-   "ok": false,
+   "ok": true,
    "kinds": {
     "roam_find": {
      "met": true,
      "placed": [
-      "abandoned_camp"
+      "broken_wagon"
      ],
      "herd": 0,
      "folk_new": 0
@@ -435,6 +370,7 @@
      "placed": [],
      "herd": 0,
      "folk_new": 1,
+     "piles_taken": 0,
      "prompt": "talk to a weary pilgrim",
      "f": "gift",
      "new_things": [
@@ -449,10 +385,12 @@
      "placed": [],
      "herd": 0,
      "folk_new": 1,
+     "piles_taken": 0,
      "prompt": "talk to a travelling pedlar",
      "f": "gift",
      "new_things": [
-      "item|Jerky|1"
+      "item|Jerky|2",
+      "item|Small Mana Potion|1"
      ],
      "gold": 0,
      "f_again": "bark",
@@ -463,11 +401,11 @@
      "placed": [],
      "herd": 0,
      "folk_new": 1,
+     "piles_taken": 0,
      "prompt": "talk to a lost hunter",
      "f": "gift",
      "new_things": [
-      "item|Fish|2",
-      "item|Jerky|3"
+      "item|Jerky|5"
      ],
      "gold": 0,
      "f_again": "bark",
@@ -478,6 +416,7 @@
      "placed": [],
      "herd": 0,
      "folk_new": 1,
+     "piles_taken": 0,
      "prompt": "talk to a courier",
      "f": "gift",
      "new_things": [],
@@ -490,14 +429,15 @@
      "placed": [],
      "herd": 0,
      "folk_new": 1,
-     "prompt": "take up what lies here (3)",
-     "f": "loot",
+     "piles_taken": 0,
+     "prompt": "talk to a refugee",
+     "f": "gift",
      "new_things": [
-      "item|Bread|3",
-      "item|Small Healing Potion|1"
+      "item|Hardtack|2",
+      "item|Nuts and Seeds|2"
      ],
-     "gold": 0,
-     "f_again": "gift",
+     "gold": 4,
+     "f_again": "bark",
      "given": true
     }
    },
@@ -516,23 +456,14 @@
     "roam_pedlar": true,
     "roam_hunter": true,
     "roam_courier": true,
-    "roam_refugee": false
+    "roam_refugee": true
    }
   }
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "wd_w11b_meadows11_0.png",
-  "wd_w11b_meadows11_1.png",
-  "wd_w11b_meadows11_2.png",
-  "wd_w11b_leaves11_0.png",
-  "wd_w11b_leaves11_1.png",
-  "wd_w11b_leaves11_2.png",
-  "wd_w11b_leaves11_3.png",
-  "wd_w11b_leaves11_4.png",
-  "wd_w11b_leaves11_5.png",
-  "wd_w11b_events11_herd.png",
-  "wd_w11b_events11_folk.png"
+  "wd_w11e_events11_herd.png",
+  "wd_w11e_events11_folk.png"
  ],
  "error": null,
  "windows_shown_again": 1

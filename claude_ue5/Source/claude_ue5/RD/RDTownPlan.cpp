@@ -31,6 +31,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDTown, Log, All);
 
 // the town's building kinds and the things that stand outside (RDTown.h names them for the generator and the HUD)
 #include "RD/RDTown.h"
+#include "RD/RDWild.h"
 
 static const FIntPoint RDTDir4[4] = { FIntPoint(-1, 0), FIntPoint(1, 0), FIntPoint(0, -1), FIntPoint(0, 1) };
 
@@ -182,7 +183,10 @@ void ARDSection::PlanTown(FRandomStream& R)
 	const int32 CD = bHoly ? 27 : bForge ? 25 : bPort ? 9 : 17, CW = bHoly ? 19 : bPort ? 9 : (bMage || bModern) ? 15 : 21;
 	// (the port's harbour in the frame: from 26 tiles before the far wall to it, 24 tiles in from each side; its quay the 4 rows
 	// before it)
-	const int32 Hu0 = S - 26, Hv0 = 24, Hv1 = S - 24;
+	// (the numbers the world cuts the sea bed out of the harbour's mouth by: FRDWildWorld's, one rule (PR #50's review))
+	const int32 Hu0 = S - FRDWildWorld::PortHarbourDepthTiles, Hv0 = FRDWildWorld::PortHarbourSideTiles, Hv1 = S - FRDWildWorld::PortHarbourSideTiles;
+	if (bPort && Generator->bPortWaterOpen && (F.O != FRDWildWorld::PortFrameMarginTiles || !FMath::IsNearlyEqual(Generator->TileSize, FRDWildWorld::PortTileM * 100.f)))
+		UE_LOG(LogRDTown, Error, TEXT("RDTOWN the port's frame (margin %d, tile %.0f cm) is not the world's (%d, %.0f): the sea bed outside will not meet the harbour"), F.O, Generator->TileSize, FRDWildWorld::PortFrameMarginTiles, FRDWildWorld::PortTileM * 100.f);
 	// (a tile of ground and the lane behind the castle: its round corner towers stand 5 m out from its corners; the cathedral (or
 	// the foundry) a little past the town's middle, the plaza before it)
 	const int32 Cu0 = bMid ? S / 2 - CD / 2 + 4 : S - 3 - CD, Cv0 = Vc - CW / 2;

@@ -94,38 +94,54 @@ void ARDSection::HarbourBuild()
 	{
 		const FRDPiece* Rp = Generator->Piece(TEXT("Port.Ramp"));
 		const float Px = Rp ? FMath::Max((float)Rp->Size.X, 1.f) : 100.f, Py = Rp ? FMath::Max((float)Rp->Size.Y, 1.f) : 100.f, Pz = Rp ? FMath::Max((float)Rp->Size.Z, 1.f) : 100.f;
-		auto Ramp = [&](const FIntPoint& T, const FIntPoint& Dl)
+		// (what is moored in the harbour: a ramp's line is kept 7 m from a ship's middle and 4 m from a boat's or a wreck's, plus
+		// half a tile (PR #50's review: a ramp could have been laid under a boat); a spot's middle only, its hull not measured)
+		TArray<TPair<FVector, float>> Moored;
+		for (const FTownSpot& Sp : TownSpots)
+			if (Sp.Kind == TS_Ship || Sp.Kind == TS_Boat || Sp.Kind == TS_Wreck)
+				Moored.Add({ Sp.At, Sp.Kind == TS_Ship ? 700.f : 400.f });
+		auto Ramp = [&](const FIntPoint& T, const FIntPoint& Dl) -> bool
 		{
 			// (T a water tile, Dl the way to the quay beside it)
-			if (!InHarbourWater(T) || !In(T + Dl) || Type[Idx(T + Dl)] == 0 || InHarbourWater(T + Dl)) return;
-			for (const FIntRect& Pr : TownPiers) if (Pr.Contains(T + Dl)) return;
+			if (!InHarbourWater(T) || !In(T + Dl) || Type[Idx(T + Dl)] == 0 || InHarbourWater(T + Dl)) return false;
+			for (const FIntRect& Pr : TownPiers) if (Pr.Contains(T + Dl)) return false;
 			const FVector Wl(Dl.X, Dl.Y, 0), E = TileWorld(T) + Wl * (M * 0.5f);
 			const FVector Top = E + Wl * 20.f + FVector(0, 0, 5.f), Foot = E - Wl * 600.f + FVector(0, 0, RDPortWalkZ);
+			for (const TPair<FVector, float>& Mo : Moored)
+				if (FMath::PointDistToSegment(FVector(Mo.Key.X, Mo.Key.Y, 0), FVector(Top.X, Top.Y, 0), FVector(Foot.X, Foot.Y, 0)) < Mo.Value + M * 0.5f) return false;
 			const FVector Al = Foot - Top;
 			const FRotator Ro = Al.Rotation();                      // (its +X down the ramp, pitched down)
 			const float Th = 30.f;
 			const FVector Loc = (Top + Foot) * 0.5f - Ro.RotateVector(FVector(0, 0, Th));   // (a piece's origin is its bottom's middle)
 			AddPiece(TEXT("Port.Ramp"), FTransform(Ro, Loc, FVector(Al.Size() / Px, (M - 20.f) / Py, Th / Pz)));
 			TownRampFeet.Add(Foot); TownRampTops.Add(Top);
+			return true;
 		};
-		// (along the main quay: the harbour's edge on the land's side of the piers)
+		// (a ramp near a row or column: there, or a few tiles either way along the quay if something is moored before it)
+		auto RampNear = [&](const FIntPoint& T, const FIntPoint& Dl)
+		{
+			const FIntPoint Along(FMath::Abs(Dl.Y), FMath::Abs(Dl.X));
+			for (const int32 O : { 0, 3, -3, 6, -6 }) if (Ramp(T + Along * O, Dl)) return;
+		};
+		// (the main quay: the harbour's end whose edge has the more land beyond it (PR #50's review: one tile's row decided it))
+		auto LandRow = [&](int32 X) { int32 N = 0; for (int32 Y = TownHarbour.Min.Y; Y < TownHarbour.Max.Y; ++Y) { const FIntPoint Q(X, Y); if (In(Q) && Type[Idx(Q)] != 0 && !TownHarbour.Contains(Q)) ++N; } return N; };
+		const FIntPoint Dl = LandRow(TownHarbour.Min.X - 1) >= LandRow(TownHarbour.Max.X) ? FIntPoint(-1, 0) : FIntPoint(1, 0);
 		TArray<int32> Ys;
 		for (const FIntRect& Pr : TownPiers) Ys.Add((Pr.Min.Y + Pr.Max.Y) / 2);
 		Ys.Sort();
-		if (Ys.Num() && TownPiers.Num())
+		TArray<int32> Mids;
+		if (Ys.Num())
 		{
-			const int32 Qx = TownPiers[0].Min.X;                          // (the piers' root: the first water row off the quay)
-			const FIntPoint Dl = (In(FIntPoint(Qx - 1, Ys[0])) && Type[Idx(FIntPoint(Qx - 1, Ys[0]))] != 0 && !TownHarbour.Contains(FIntPoint(Qx - 1, Ys[0]))) ? FIntPoint(-1, 0) : FIntPoint(1, 0);
-			TArray<int32> Mids;
 			Mids.Add((TownHarbour.Min.Y + Ys[0]) / 2);
 			for (int32 K = 1; K < Ys.Num(); ++K) Mids.Add((Ys[K - 1] + Ys[K]) / 2);
 			Mids.Add((Ys.Last() + TownHarbour.Max.Y) / 2);
-			for (const int32 Y : Mids) Ramp(FIntPoint(Dl.X < 0 ? TownHarbour.Min.X : TownHarbour.Max.X - 1, Y), Dl);
-			// (the side quays, a third of the way out along them)
-			const int32 Xs = Dl.X < 0 ? TownHarbour.Min.X + 6 : TownHarbour.Max.X - 7;
-			Ramp(FIntPoint(Xs, TownHarbour.Min.Y), FIntPoint(0, -1));
-			Ramp(FIntPoint(Xs, TownHarbour.Max.Y - 1), FIntPoint(0, 1));
 		}
+		else Mids.Add((TownHarbour.Min.Y + TownHarbour.Max.Y) / 2);
+		for (const int32 Y : Mids) RampNear(FIntPoint(Dl.X < 0 ? TownHarbour.Min.X : TownHarbour.Max.X - 1, Y), Dl);
+		// (the side quays, 6 tiles out from the main quay (the town's land along them ends there or soon after))
+		const int32 Xs = Dl.X < 0 ? TownHarbour.Min.X + 6 : TownHarbour.Max.X - 7;
+		RampNear(FIntPoint(Xs, TownHarbour.Min.Y), FIntPoint(0, -1));
+		RampNear(FIntPoint(Xs, TownHarbour.Max.Y - 1), FIntPoint(0, 1));
 	}
 	// ---- the blockers: an invisible wall 1.5 m high along every edge where walked ground meets the water (the quay, the
 	// harbour's sides, each pier's sides and end)

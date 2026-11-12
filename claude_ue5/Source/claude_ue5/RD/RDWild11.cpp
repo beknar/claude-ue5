@@ -30,14 +30,10 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDWild11, Log, All);
 
 ARDWildChunk* ARDDungeonGenerator::WildChunkAtCm(const FVector2D& At) const
 {
-	for (const auto& Kv : WildChunks)
-	{
-		ARDWildChunk* K = Kv.Value;
-		if (!IsValid(K) || K->bMaking) continue;
-		const FVector L = K->GetActorLocation();
-		if (At.X >= L.X && At.X < L.X + WildChunkM * 100.f && At.Y >= L.Y && At.Y < L.Y + WildChunkM * 100.f) return K;
-	}
-	return nullptr;
+	// (by its key, as RDWild10's and RDWild8's lookups: PR #50's review)
+	const FIntPoint C(FMath::FloorToInt(At.X / 100.0 / WildChunkM), FMath::FloorToInt(At.Y / 100.0 / WildChunkM));
+	const TObjectPtr<ARDWildChunk>* F = WildChunks.Find(C);
+	return F && IsValid(*F) && !(*F)->bMaking ? F->Get() : nullptr;
 }
 
 // ================================================================================================ the director's new kinds
@@ -63,7 +59,11 @@ int32 ARDDungeonGenerator::MakeWildEncounter11(const FRDWildPoiKind& K, const FV
 		if (ARDWildChunk* C = Ks.Num() > 0 ? WildChunkAtCm(At) : nullptr)
 		{
 			FRDWildPlace P;
-			P.Id = (1 << 29) + (1 << 25) + (++WildDirectorPlaces & 0xFFFFF);
+			// (its id keys what is kept of it (its "used" mark, its guards' kills in WildKilled, saved): counted in the game's own
+			// counters, so a load does not lay a new place under an old one's id (PR #50's review: a session's counter began at 0))
+			int32 Nth = ++WildDirectorPlaces;
+			if (URDGameInstance* GI = Cast<URDGameInstance>(GetGameInstance())) Nth = ++GI->Counters.FindOrAdd(TEXT("wild:laid"));
+			P.Id = (1 << 29) + (1 << 25) + (Nth & 0xFFFFF);
 			P.Kind = TEXT("poi"); P.Poi = Ks[Rs.RandRange(0, Ks.Num() - 1)]; P.Name = WildPoiKinds[P.Poi].Title;
 			P.At = At / 100.0; P.Yaw = Rs.FRandRange(0.f, 360.f); P.Tier = Wild->TierAt(P.At.X, P.At.Y); P.Biome = S.Biome;
 			SpawnWildPoi(C, P);
@@ -114,9 +114,10 @@ int32 ARDDungeonGenerator::MakeWildEncounter11(const FRDWildPoiKind& K, const FV
 	return Made;
 }
 
-void ARDDungeonGenerator::GiveWildGift(ARDTownsfolk* T)
+bool ARDDungeonGenerator::GiveWildGift(ARDTownsfolk* T)
 {
-	if (!T || !PlayerCombat || T->bWildGiven) return;
+	// (false: nothing given (no one to give to yet), the gift kept for the next time (PR #50's review: "gift" was said for it))
+	if (!T || !PlayerCombat || T->bWildGiven) return false;
 	TArray<FString> Lines; T->WildGift.ParseIntoArray(Lines, TEXT(";"), true);
 	FRandomStream R((int32)HashCombine(T->GetUniqueID(), 0x61F7u));
 	TArray<FName> Got = RollWildThings(Lines, R);
@@ -136,6 +137,7 @@ void ARDDungeonGenerator::GiveWildGift(ARDTownsfolk* T)
 	T->WildGift.Empty(); T->WildGiftGold = 0; T->bWildGiven = true;
 	WildEngagements.Add(FString::Printf(TEXT("%.1f|given|%s|%d things, %d gold"), GetWorld()->GetTimeSeconds(), *T->Title, Got.Num(), Gold));
 	PlaySoundAt(TEXT("Player.Loot"), T->GetActorLocation());
+	return true;
 }
 
 // ================================================================================================ the leaves in the wind
@@ -154,10 +156,14 @@ void ARDDungeonGenerator::TickWild11(float Dt, const FVector& Her)
 	{
 		float Fz = 0.f;
 		const float Feet = Her.Z - (Ch->GetCapsuleComponent() ? Ch->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 90.f);
-		const bool bIn = WaterFaceAt(Her, Fz) && Feet < Fz - 5.f && Feet > Fz - 400.f;
+		// (in once her feet are 5 cm under the face, out only once they are 10 cm over it: a capsule bobbing at a shore's or a
+		// ramp's edge crossed one line every few frames and splashed each time (PR #50's review); and a splash a second at most)
+		const bool bIn = WaterFaceAt(Her, Fz) && Feet < Fz + (bInWater ? 10.f : -5.f) && Feet > Fz - 400.f;
 		const FVector V = Ch->GetVelocity();
-		if (bIn && !bInWater)
+		const float NowS = GetWorld()->GetTimeSeconds();
+		if (bIn && !bInWater && NowS - LastSplashTime >= 1.f)
 		{
+			LastSplashTime = NowS;
 			const float Hard = FMath::Clamp(-V.Z / 600.f, 0.f, 1.f);
 			LastSplashAt = FVector(Her.X, Her.Y, Fz);
 			if (WaterSplashFx)

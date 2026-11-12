@@ -1,5 +1,5 @@
 {
- "tag": "p11b",
+ "tag": "p11e",
  "plan": [
   "port11",
   "port"
@@ -132,9 +132,9 @@
    "coast": [
     {
      "off_m": -4000,
-     "max_drop_m": 0.43,
+     "max_drop_m": 0.29,
      "shore_m": -140,
-     "h_inland": 46.0
+     "h_inland": 75.4
     },
     {
      "off_m": -2000,
@@ -162,30 +162,31 @@
     },
     {
      "off_m": 4000,
-     "max_drop_m": 0.15,
+     "max_drop_m": 0.05,
      "shore_m": 40,
-     "h_inland": 45.6
+     "h_inland": 75.1
     }
    ],
    "fall": {
     "z0": 85,
     "z": -85,
-    "z_min": -13,
+    "z_min": -72,
     "splashes": 1,
     "in": true,
     "splash_at": [
-     19771403.0,
+     19771413.0,
      -9550.0,
      -110.0
     ],
     "face_under": -110,
-    "rings_wading": 3,
+    "rings_wading": 7,
     "in_while_wading": true,
+    "rings_live_max": 5,
     "out": {
      "z_at_foot": -85,
      "in_at_foot": true,
      "z": 85,
-     "past_top_m": 13.6,
+     "past_top_m": 13.71,
      "in": false,
      "on_ground": true
     }
@@ -209,7 +210,7 @@
     "0",
     "1",
     "0",
-    "10.4",
+    "8.5",
     "1",
     "1",
     "1",
@@ -415,18 +416,18 @@
    ],
    "pier_walk": {
     "z_on_deck": 91,
-    "z_min_pushed": -85,
+    "z_min_pushed": -86,
     "on_ground": true
    },
    "pier_push": [
     {
      "side": 1.0,
-     "off_middle_m": 8.86,
+     "off_middle_m": 8.25,
      "z": -85
     },
     {
      "side": -1.0,
-     "off_middle_m": 7.63,
+     "off_middle_m": 7.88,
      "z": -85
     }
    ],
@@ -440,14 +441,14 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "bs_p11b_port11_splash.png",
-  "bs_p11b_port11_wake.png",
-  "bs_p11b_port11_mouth.png",
-  "bs_p11b_gm_harbour.png",
-  "bs_p11b_gm_quay.png",
-  "bs_p11b_gm_mouth.png",
-  "bs_p11b_gm_dead.png",
-  "bs_p11b_gm_sewer_gate.png"
+  "bs_p11e_port11_splash.png",
+  "bs_p11e_port11_wake.png",
+  "bs_p11e_port11_mouth.png",
+  "bs_p11e_gm_harbour.png",
+  "bs_p11e_gm_quay.png",
+  "bs_p11e_gm_mouth.png",
+  "bs_p11e_gm_dead.png",
+  "bs_p11e_gm_sewer_gate.png"
  ],
  "error": null,
  "windows_shown_again": 1

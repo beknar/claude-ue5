@@ -345,8 +345,15 @@ public:
 	bool bPortSea = false;
 	FVector2D PortSite = FVector2D(1e12, 1e12);
 	float PortLiftM = 0.f;
-	/** how much the land and the sea are lifted at a point (metres): PortLiftM within 2.5 km of the port, easing to 0 by 6 km */
+	/** how much the land and the sea are lifted at a point (metres): PortLiftM within 2.5 km of the port, easing to 0 by 40 km */
 	float PortLift(double X, double Y) const;
+	/** the port plan's harbour (RDTownPlan.cpp's bPort) in its frame's tiles: from PortHarbourDepthTiles before the frame's far
+	 *  edge to it, PortHarbourSideTiles in from each side; the frame PortFrameMarginTiles in from the section's edge, a tile
+	 *  PortTileM; the frame's G 0 puts the sea at +X. The world's sea bed out of the harbour's mouth is cut by the same numbers */
+	static constexpr int32 PortHarbourDepthTiles = 26;
+	static constexpr int32 PortHarbourSideTiles = 24;
+	static constexpr int32 PortFrameMarginTiles = 4;
+	static constexpr float PortTileM = 3.f;
 	/** the land's height over the shore scaled down round the port (35 % within 9 km, the whole by 30 km): the uplands rise
 	 *  from its coast over kilometres (LandHeight and Sample alike, before the coast) */
 	float PortFlatten(double X, double Y, float H) const;

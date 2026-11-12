@@ -1405,12 +1405,13 @@ FString ARDDungeonGenerator::TownInteract(const FVector& From)
 	if (ARDTownsfolk* Wf = WildFolkForF(From))
 	{
 		Wf->FaceToward(From, 8.f);
-		TownCount(TEXT("talk:farm"));
+		// (a farm's people only: the director's travellers are not farm folk (PR #50's review))
+		if (!WildRoamFolk.Contains(TWeakObjectPtr<ARDTownsfolk>(Wf))) TownCount(TEXT("talk:farm"));
 		const FString Line = Wf->NextLine();
 		LastBark = FString::Printf(TEXT("%s|%s"), *Wf->Title, *Line);
 		if (PlayerCombat && !Line.IsEmpty()) PlayerCombat->ShowMessage(FString::Printf(TEXT("%s:  \"%s\""), *RDTTheTitle(Wf->Title, true), *Line));
 		// (the list of 2026-11-11: one met on the way gives her what they have, the first time she speaks to them)
-		if (!Wf->WildGift.IsEmpty() || Wf->WildGiftGold > 0) { GiveWildGift(Wf); return TEXT("gift"); }
+		if ((!Wf->WildGift.IsEmpty() || Wf->WildGiftGold > 0) && GiveWildGift(Wf)) return TEXT("gift");
 		return TEXT("bark");
 	}
 	int32 Who = -1; float Best = 240.f;

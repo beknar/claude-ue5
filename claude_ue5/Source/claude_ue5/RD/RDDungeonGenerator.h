@@ -2550,7 +2550,7 @@ public:
 	/** the director's new kinds: a point of interest laid ahead of her, a herd, a person on the way; what it made */
 	int32 MakeWildEncounter11(const FRDWildPoiKind& K, const FVector2D& At, FRandomStream& Rs);
 	/** one met on the way gives her their gift (and gold) the first time she speaks to them */
-	void GiveWildGift(ARDTownsfolk* T);
+	bool GiveWildGift(ARDTownsfolk* T);
 	/** a sum of gold at a place of the wilds, grown with its tier as a kill's (RDTierGold) */
 	int32 WildGoldAt(int32 Base, const FVector& At) const;
 	/** the fifth phase's tick in the wilds: the leaves blowing round her in the meadows and woods, the splash and wake as she
@@ -2581,7 +2581,7 @@ public:
 	/** where the water's face is under her (cm): the wilds' water or the harbour's; false: none */
 	bool WaterFaceAt(const FVector& At, float& Z) const;
 	bool bInWater = false;
-	float WaterWakeClock = 0.f;
+	float WaterWakeClock = 0.f, LastSplashTime = -100.f;
 	/** the rings on the water's face, our own (no pack's ripple showed on the harbour's water by day: 920 port's screening): a
 	 *  flat ring (WaterRingMesh, a plane, in WaterRingMaterial: its Fade parameter) growing from a radius to another and fading
 	 *  over its life; a big one where she comes in */
