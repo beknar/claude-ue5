@@ -17,7 +17,9 @@ clip's length, its blow's time from ma_times.json, the walk's and the run's spee
 feet's lowest place in each clip against the rest pose's).
 Blender: -b -P martialartist3_retarget.py -- MartialArtist2.glb out_dir MartialArtist3.glb [preview_prefix [clip:frame,...]]
   [--maker m1,m2] [--tag T] [--carry a,b] [--own] [--noskin] [--name N] [--env K=V] (another hero's body: the Rogue's attacks
-  from Rogue.glb onto Rogue2.glb, the Summoner's casts from Summoner4.glb onto Summoner5, each beside her own clips)"""
+  from Rogue.glb onto Rogue2.glb, the Summoner's casts from Summoner4.glb onto Summoner5, each beside her own clips)
+A target with summoner5_cloak.py's cloak bones: in the carried clips the cloak hangs from her upper back, turned back toward
+hanging by one turn for the whole cloak (a share of it down each chain) and kept over the floor (cloak_turn(), hang())."""
 import bpy, sys, os, json, math, re
 from mathutils import Matrix, Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -298,6 +300,66 @@ print("MA3 bones: %d planned, %d following their parents: %s" % (len(PLAN), len(
 def leg_len(pos, s): return (pos[f"calf_{s}"] - pos[f"thigh_{s}"]).length + (pos[f"foot_{s}"] - pos[f"calf_{s}"]).length
 
 
+# her cloak's chains in the carried clips (summoner5_cloak.py's bones, cloak_<chain>_<bone>: the Summoner's and the Rogue's;
+# their own clips were keyed there): left at rest under her upper back they stood stiff out of it, and in the Rogue's
+# rolls, curled low, the cloak went 70 cm through the floor (the preview's RollF). The cloak as she carries it (each bone
+# its rest way turned as her upper back turns) is turned back toward hanging by one turn for the whole cloak, the one that
+# takes her upper back's "down" to the world's, a share of it down each chain (none at the top, where it hangs from her
+# back). Each bone pulled toward its own way down tore the hem upside down in the roll (neighbouring chains' pulls, near
+# opposite to their ways, went off in different ways: a hem edge 7 times its length); one turn keeps the sheet whole.
+# None goes under the floor: a bone whose end would is laid along it, still pointing the way it went
+CLOAK_BONES = {b.name: int(b.name.split("_")[2]) for b in B if re.fullmatch(r"cloak_\d+_\d+", b.name)}
+CLOAK_SHARE = (0.0, 0.35, 0.6, 0.8)                             # (the turn's share at each bone down a chain)
+CLOAK_FLOOR = min(T_POS[f"ball_{s}"].z for s in "lr") + 0.015
+CLOAK_REST = {n: (B[n].matrix_local.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized() for n in CLOAK_BONES}
+DOWN_A = (AWI.to_3x3() @ Vector((0.0, 0.0, -1.0))).normalized(); LEFT_A = (AWI.to_3x3() @ Vector((1.0, 0.0, 0.0))).normalized()
+SP_REST_Q = B["spine_05"].matrix_local.to_quaternion() if CLOAK_BONES else None
+BACK_A = (AWI.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized()                    # (she faces -Y)
+MID_HEM = "cloak_%d_%d" % (max(int(n.split("_")[1]) for n in CLOAK_BONES) // 2, max(CLOAK_BONES.values())) if CLOAK_BONES else None
+if CLOAK_BONES: print("MA3 her cloak: %d bones hang and keep over the floor in the carried clips" % len(CLOAK_BONES))
+
+
+def cloak_turn(A):
+    """her upper back's turn from rest, and the turn that takes its carried "down" to the world's (about her left when
+    she is near upside down: a roll turns her about it)"""
+    Qs = A["spine_05"].to_quaternion() @ SP_REST_Q.inverted()
+    carried = Qs @ DOWN_A; ang = carried.angle(DOWN_A)
+    ax = carried.cross(DOWN_A)
+    if ax.length < 0.2 * math.sin(max(ang, 1e-3)) or ang > math.radians(150):
+        ax = Qs @ LEFT_A; ax = ax - DOWN_A * ax.dot(DOWN_A)
+        if carried.cross(DOWN_A).dot(ax) < 0: ax = -ax
+    R = Quaternion(ax.normalized(), ang) if ax.length > 1e-6 else Quaternion()
+    # (the way the cloak lies on the floor: its middle chain's hem, flat; else behind her back; else behind her rest)
+    flat = None
+    for d in (Quaternion().slerp(R, CLOAK_SHARE[-1]) @ (Qs @ CLOAK_REST[MID_HEM]), Qs @ BACK_A, BACK_A):
+        w = AW.to_3x3() @ d; w = Vector((w.x, w.y, 0.0))
+        if w.length > 0.2: flat = w.normalized(); break
+    return Qs, R, flat
+
+
+def hang(A, b, turn):
+    Qs, R, com = turn
+    m = A[b.name]; head = m.translation.copy(); L = b.length
+    cur = (m.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized()
+    k = CLOAK_BONES[b.name]; f = CLOAK_SHARE[min(k, len(CLOAK_SHARE) - 1)]
+    new = (Quaternion().slerp(R, f) @ (Qs @ CLOAK_REST[b.name])).normalized()
+    hw = AW @ head; tw = hw + (AW.to_3x3() @ new) * L
+    if tw.z < CLOAK_FLOOR:
+        # (laid the way the cloak's middle trails at the hem, every chain alike: each laid its own way out fanned the hem
+        # out on the floor, 4.9 times its edges' length in the roll; near the top its own way, flat: laid the common way
+        # there, a chain's first bone that met the floor turned back while its neighbour, a little over it, went on
+        # forward (3.8 times))
+        dw = AW.to_3x3() @ new; own = Vector((dw.x, dw.y, 0.0))
+        wk = CLOAK_BONES[b.name] / max(1, max(CLOAK_BONES.values()))
+        flat = own.normalized() * (1.0 - wk) + com * wk if own.length > 1e-4 else com
+        if flat.length < 1e-4: flat = com
+        dz = max(-1.0, min(1.0, (CLOAK_FLOOR - hw.z) / L))
+        new = (AWI.to_3x3() @ (flat.normalized() * math.sqrt(1.0 - dz * dz) + Vector((0.0, 0.0, dz)))).normalized()
+    if (new - cur).length < 1e-6: return
+    q = cur.rotation_difference(new) @ m.to_quaternion()
+    A[b.name] = Matrix.LocRotScale(head, q, None)
+
+
 K = sum(leg_len(T_POS, s) for s in "lr") / sum(leg_len(S_POS, s) for s in "lr")
 print("MA3 legs: hers %.3f, MartialArtist2's %.3f of the height: the pelvis and the ankles move by %.3f" % (leg_len(T_POS, "l"), leg_len(S_POS, "l"), K))
 ORDER = list(B)                                                 # (parents first)
@@ -416,8 +478,12 @@ def solve(Q, pel, ankles):
             if math.degrees(t.angle) > ANKLE_TURN + 1.0: t = Quaternion(t.axis, math.radians(ANKLE_TURN))
             new = (Q[f"calf_{s}"] @ T_Q0[f"calf_{s}"].inverted()) @ sw @ t @ T_Q0[f"foot_{s}"]
             fix = new @ Q[f"foot_{s}"].inverted(); Q[f"foot_{s}"] = new; Q[f"ball_{s}"] = fix @ Q[f"ball_{s}"]
-    A.clear()
-    for b in ORDER: place(b)
+    A.clear(); turn = None
+    for b in ORDER:
+        place(b)
+        if b.name in CLOAK_BONES:
+            if turn is None: turn = cloak_turn(A)                  # (once a frame: her upper back is placed before any cloak bone)
+            hang(A, b, turn)
     solve.bend = bend
     out = {}
     for b in ORDER:

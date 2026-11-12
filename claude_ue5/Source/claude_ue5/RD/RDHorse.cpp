@@ -163,6 +163,9 @@ bool ARDDungeonGenerator::MountHorse()
 	ACharacter* C = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	if (!C || !Horse || bMounted || !PlayerCombat || PlayerCombat->IsDead()) return false;
 	if (PlayerCombat->IsBusyForMount()) { PlayerCombat->ShowMessage(TEXT("Not in the middle of a move")); return false; }
+	// (2026-11-12, PR #53's review: mounted from the water, the saddle kept the swim's jump (none) and her raised body as hers to
+	// give back: after it she never jumped again and floated over her capsule)
+	if (bSwimming) { PlayerCombat->ShowMessage(TEXT("Not while swimming")); return false; }
 	bMounted = true;
 	Horse->SetBlocking(false);          // (the list of 2026-11-10: ridden, it stops nothing: her capsule does)
 	// (no jump from the saddle: it lifted the horse; the generator's tick after her movement's, so the horse is put under where

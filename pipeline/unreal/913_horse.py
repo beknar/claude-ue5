@@ -13,7 +13,11 @@ eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.Edi
 SA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "claude_ue5", "SourceArt", "brokenspire", "horse"))
 STEPS = [a for a in sys.argv[1:] if a in ("import", "rider", "level")] or ["import", "rider", "level"]
 DH = "/Game/RandomDungeon/Town/Animals/Horse"; RIGS = "/Game/RandomDungeon/Horse/Rigs"; ANIMS = "/Game/RandomDungeon/Horse/Anims"
-HERO_RIG = {"Warrior": "Warrior3", "Mage": "Caster", "Warlock": "DarkCaster", "Rogue": "Rogue", "MartialArtist": "MartialArtist", "Summoner": "Summoner4"}
+# (the hero menu's six and their rigs, and the retarget onto them: hero_rigs.py, shared with 921 and 922)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hero_rigs, importlib
+importlib.reload(hero_rigs)
+HERO_RIG = hero_rigs.HERO_RIG
 RIDER = {"Idle": "Anim_Rider_Idle_01", "Walk": "Anim_Rider_Walk", "Run": "Anim_Rider_Run"}
 J = json.load(open(os.path.join(SA, "farm_animals.json"), encoding="utf-8"))["Horse"]
 REPORT = []
@@ -36,12 +40,6 @@ def horse_assets():
     meshes = sorted([a for a in assets if isinstance(a, unreal.SkeletalMesh)], key=lambda a: a.get_name())
     seqs = {a.get_name().split("_")[-1]: a for a in assets if isinstance(a, unreal.AnimSequence)}
     return meshes, seqs
-
-
-def make(cls, fac, name, folder):
-    p = f"{folder}/{name}"
-    if eal.does_asset_exist(p): eal.delete_asset(p)
-    return unreal.AssetToolsHelpers.get_asset_tools().create_asset(name, folder, cls, fac)
 
 
 if "import" in STEPS:
@@ -69,40 +67,8 @@ if "rider" in STEPS:
         a = next((x for x in ar.get_assets_by_path("/Game/Animals_Pack", recursive=True) if str(x.asset_name) == n and str(x.asset_class_path.asset_name) == "AnimSequence"), None)
         assert a, n; clips[k] = a
     src_mesh = unreal.load_asset("/Game/Animals_Pack/Demoscene/Mesh/SK_Mannequin"); assert src_mesh, "the Animals pack's mannequin"
-    rig = make(unreal.IKRigDefinition, unreal.IKRigDefinitionFactory(), "IK_Rider_Source", RIGS)
-    c = unreal.IKRigController.get_controller(rig); c.set_skeletal_mesh(src_mesh); c.apply_auto_generated_retarget_definition()
-    try: c.apply_auto_fbik()
-    except Exception: pass
-    eal.save_loaded_asset(rig)
-    for hero, ch in HERO_RIG.items():
-        tgt_mesh = unreal.load_asset(f"/Game/JRPG/Character/SK_JRPG_{ch}"); tgt_rig = unreal.load_asset(f"/Game/JRPG/Rigs/IK_JRPG_{ch}_Auto")
-        if not tgt_mesh or not tgt_rig: REPORT.append(f"rider {hero}: no mesh or rig for {ch}"); continue
-        rtg = make(unreal.IKRetargeter, unreal.IKRetargetFactory(), f"RTG_Rider_To_{ch}", RIGS)
-        rc = unreal.IKRetargeterController.get_controller(rtg)
-        rc.add_default_ops()
-        rc.set_ik_rig(unreal.RetargetSourceOrTarget.SOURCE, rig); rc.set_ik_rig(unreal.RetargetSourceOrTarget.TARGET, tgt_rig)
-        rc.set_preview_mesh(unreal.RetargetSourceOrTarget.SOURCE, src_mesh); rc.set_preview_mesh(unreal.RetargetSourceOrTarget.TARGET, tgt_mesh)
-        rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.SOURCE, rig); rc.assign_ik_rig_to_all_ops(unreal.RetargetSourceOrTarget.TARGET, tgt_rig)
-        rc.auto_map_chains(unreal.AutoMapChainType.FUZZY, True)
-        rm = rc.get_op_controller(rc.get_index_of_op_by_name("Root Motion"))          # (add_default_ops leaves it without bones)
-        rm.set_source_root_bone("root"); rm.set_target_root_bone("root"); rm.set_target_pelvis_bone("pelvis")
-        try: rc.auto_align_all_bones(unreal.RetargetSourceOrTarget.TARGET)
-        except Exception as e: print("RIDER align", e)
-        eal.save_loaded_asset(rtg)
-        out = f"{ANIMS}/{ch}"
-        for n in RIDER.values():
-            if eal.does_asset_exist(f"{out}/{n}_{ch}"): eal.delete_asset(f"{out}/{n}_{ch}")
-        inp = unreal.IKRetargetBatchOperationInputs()
-        inp.set_editor_property("assets_to_retarget", list(clips.values())); inp.set_editor_property("source_mesh", src_mesh); inp.set_editor_property("target_mesh", tgt_mesh)
-        inp.set_editor_property("ik_retarget_asset", rtg); inp.set_editor_property("suffix", "_" + ch); inp.set_editor_property("target_path", out)
-        inp.set_editor_property("include_referenced_assets", False); inp.set_editor_property("overwrite_existing_files", True)
-        unreal.IKRetargetBatchOperation.run_batch_retarget(inp)
-        made = []
-        for n in RIDER.values():
-            a = unreal.load_asset(f"{out}/{n}_{ch}")
-            if not a: continue
-            a.set_editor_property("enable_root_motion", False); a.set_editor_property("force_root_lock", True); eal.save_loaded_asset(a, False); made.append(n)
-        REPORT.append(f"rider {hero} ({ch}): {len(made)} of 3")
+    for hero, (ch, made, why) in hero_rigs.retarget_onto_heroes(src_mesh, [str(a.package_name) for a in clips.values()], RIGS, ANIMS, "Rider", "RIDER").items():
+        REPORT.append(f"rider {hero}: {why}" if why else f"rider {hero} ({ch}): {len(made)} of {len(RIDER)}")
 
 if "level" in STEPS:
     MAP = "/Game/RandomDungeon/Maps/brokenspire"

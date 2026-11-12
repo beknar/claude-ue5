@@ -143,7 +143,9 @@ bool ARDDungeonGenerator::GiveWildGift(ARDTownsfolk* T)
 // ================================================================================================ the leaves in the wind
 void ARDDungeonGenerator::TickWild11(float Dt, const FVector& Her)
 {
-	if (!bWild || !IsWildReady()) return;
+	// (a swim cut off by a fast travel or the wilds rebuilt round her ends here: TickSwim runs only below, and she came to a
+	// town's gate at a swimmer's speed, raised and unable to jump or strike until the chunks were ready (PR #53's review))
+	if (!bWild || !IsWildReady()) { if (bSwimming) EndSwim(SwimPawn.Get()); return; }
 	// (the director's people and herds far behind her gone)
 	for (int32 I = WildRoamFolk.Num() - 1; I >= 0; --I)
 		if (ARDTownsfolk* T = WildRoamFolk[I].Get(); !T || FVector::Dist2D(T->GetActorLocation(), Her) > 25000.f) { if (T) T->Destroy(); WildRoamFolk.RemoveAt(I); }
@@ -152,7 +154,7 @@ void ARDDungeonGenerator::TickWild11(float Dt, const FVector& Her)
 	// ---- the water round her ("when the player goes in the water, there should be displacement, a splash and a wake"): a splash
 	// where she comes into it (falling in throws it higher), then rings on its face: behind her as she wades (her wake), now and
 	// then round her as she stands in it
-	if (const ACharacter* Ch = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0)))
+	if (ACharacter* Ch = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0)))
 	{
 		float Fz = 0.f;
 		const float Feet = Her.Z - (Ch->GetCapsuleComponent() ? Ch->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 90.f);
@@ -171,19 +173,30 @@ void ARDDungeonGenerator::TickWild11(float Dt, const FVector& Her)
 					WaterFxMade.Add({ C, WaterFxLife });
 			PlaySoundAt(TEXT("Player.Splash"), LastSplashAt);
 			MakeWaterRing(LastSplashAt, WaterRingRadius.X * 1.5f, WaterRingRadius.Y * (1.6f + Hard), WaterRingLife * 1.4f, 1.f);
+			AddWaterRipple(LastSplashAt, 0.7f + 0.3f * Hard);          // (2026-11-12: the water's own face displaced round her)
 			++WaterSplashes; WaterWakeClock = 0.f;
 			UE_LOG(LogRDWild11, Log, TEXT("RDWATER splash at (%.0f, %.0f, %.0f), falling %.0f cm/s"), Her.X, Her.Y, Fz, -V.Z);
 		}
 		bInWater = bIn;
+		// (2026-11-12: swimming where it is deep (RDSwim.cpp), and the water's face pushed round her)
+		TickSwim(Dt, Ch, bIn, Fz);
+		TickWaterRipples(Her, bIn, Fz, V.Size2D());
 		if (bIn)
 		{
 			const float Sp = V.Size2D();
+			// (2026-11-12: a step's sound as she wades along, the shallow water's; swimming has its strokes)
+			if (!bSwimming && Sp > 80.f)
+			{
+				WadeClock -= Dt * FMath::Clamp(Sp / 300.f, 0.6f, 1.6f);
+				if (WadeClock <= 0.f) { WadeClock = 0.42f; PlaySoundAt(TEXT("Player.Wade"), FVector(Her.X, Her.Y, Fz)); ++WadeSteps; }
+			}
 			WaterWakeClock -= Dt;
 			if (Sp > 80.f) WaterWakeClock = FMath::Min(WaterWakeClock, 0.22f);       // (a wake from her first steps, not after a standing ring's wait)
 			if (WaterWakeClock <= 0.f)
 			{
 				WaterWakeClock = Sp > 80.f ? 0.22f : 1.1f;
 				const FVector Back = Sp > 80.f ? -V.GetSafeNormal2D() * 60.f : FVector::ZeroVector;
+				AddWaterRipple(FVector(Her.X, Her.Y, Fz) + Back, Sp > 80.f ? 0.55f : 0.3f);          // (her wake on the face: rings spread behind her)
 				// (our own ring where the material is set; else the pack's ripple)
 				if (WaterRingMaterial && WaterRingMesh)
 					MakeWaterRing(FVector(Her.X, Her.Y, Fz) + Back, WaterRingRadius.X, WaterRingRadius.Y * (Sp > 80.f ? 1.f : 0.75f), WaterRingLife, Sp > 80.f ? 0.8f : 0.55f);

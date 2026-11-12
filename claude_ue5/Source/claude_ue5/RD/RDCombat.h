@@ -254,8 +254,13 @@ public:
 	float WildRunFactor = 1.f;
 	/** the eighth phase: on her horse, this many times as fast */
 	float MountFactor = 1.f;
+	/** the user's of 2026-11-12: her speed swimming (the generator's SwimSpeedMul while she swims) */
+	float SwimFactor = 1.f;
 	/** a swing, a roll or a block under way (no mounting in one: PR #37's review) */
 	bool IsBusyForMount() const { return AttackTime >= 0.f || IsDodging() || bBlocking; }
+	// (2026-11-12, PR #53's review: a swim begun breaks off a swing, a roll or a dash under way, as a roll breaks off a swing: its
+	// blow would have landed from the water)
+	void BreakOffMoves() { if (AttackTime >= 0.f) EndAttack(); EndRoll(); SetBlocking(false); }
 	void RefreshWalkSpeed() { UpdateWalkSpeed(); }
 	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
 	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A

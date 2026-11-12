@@ -3064,6 +3064,195 @@ def step_port11():
           and heads["people"] > 30 and not heads["headless"])
     step_result("port11", ok, **res)
 
+SWIM_HEROES = ("Warrior", "Mage", "Warlock", "Rogue", "MartialArtist", "Summoner")
+def step_swim12():
+    """the user's of 2026-11-12 (921, RD/RDSwim.cpp): swimming in Graymourne's harbour, 140 cm deep, for each of the hero menu's
+    six: put in the deep water she swims (her treading idle on her slot, her head held just over the face), no blow or roll; she
+    swims along the quay (the swim loop, her speed a share of her walk's, strokes sounded, ripples made on the water's face, its
+    parameter collection's sources fresh) and walks out up a ramp (no longer swimming, her mesh back where it was); pictures of
+    each treading and swimming. PR #53's review: a swing begun on the quay is broken off as she starts to swim; her horse called
+    beside her in the water is not mounted; out of the water her jump is hers again. Then the water's sounds measured in what the game puts out (recorded, as 853's fire): the splash
+    as she falls in and her strokes, each against the same with its set's volume at 0"""
+    g = G["gen"]; res = {"heroes": {}}
+    ti, x, y = yield from to_town("Graymourne")
+    quiet(True)
+    def swim():
+        p = str(g.get_swim_line()).split("|")
+        return {"on": p[1] == "1", "clip": p[2], "under": float(p[3]), "speed": float(p[4]), "top": float(p[5]), "strokes": int(p[6]), "begun": int(p[7]), "ripples": int(p[8]),
+                "pelvis": float(p[9]) if len(p) > 9 else None}
+    rl = [str(l).split("|") for l in g.get_wild11_lines() if str(l).startswith("ramp|")]
+    ramps = [(V(float(p[1]), float(p[2]), float(p[3])), V(float(p[4]), float(p[5]), float(p[6]))) for p in rl]
+    quay = [(f_, t_) for f_, t_ in ramps if abs(f_.x - t_.x) > abs(f_.y - t_.y)]
+    res["ramps"] = len(ramps)
+    if not quay:
+        quiet(False); step_result("swim12", False, **res); return
+    foot, top = quay[min(2, len(quay) - 1)]
+    wd = V(foot.x - top.x, foot.y - top.y, 0); n_ = math.hypot(wd.x, wd.y) or 1.0; wd = V(wd.x / n_, wd.y / n_, 0)
+    al = V(-wd.y, wd.x, 0); yaw_al = math.degrees(math.atan2(al.y, al.x))
+    deep = V(foot.x + wd.x * 500.0, foot.y + wd.y * 500.0, 0)
+    floor_z = foot.z
+    mpc = unreal.load_asset("/Game/RandomDungeon/Wild/MPC_RD_Water")
+    def mpc_v(nm): return unreal.MaterialLibrary.get_vector_parameter_value(G["w"], mpc, nm) if mpc else None
+    for hero in SWIM_HEROES:
+        yield from as_hero(hero)
+        r = {}
+        # (on the quay first: her mesh's place there, to see it put back)
+        put(V(top.x - wd.x * 300.0, top.y - wd.y * 300.0, 0), yaw=yaw_al); yield from wait(1.0)
+        mz0 = G["pawn"].get_editor_property("mesh").get_editor_property("relative_location").z
+        jz0 = G["pawn"].get_editor_property("character_movement").get_editor_property("jump_z_velocity")
+        # (PR #53's review: a swing begun on the quay and carried into the deep water is broken off as she starts to swim, its
+        # blow never released from the water)
+        sw0 = cb().start_attack()
+        put(deep, yaw=yaw_al, z=floor_z); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-18, yaw=yaw_al + 100.0)); yield from wait(0.3)
+        r["swing_broken"] = {"begun": sw0, "swimming": swim()["on"], "attacking": cb().is_attacking()}
+        yield from wait(1.7)
+        s1 = swim(); r["idle"] = {k: s1[k] for k in ("on", "clip", "under")}
+        r["attack_refused"] = not cb().start_attack(); r["roll_refused"] = not cb().start_roll(al)
+        shot(f"swim12_{hero}_idle", "1280x720"); yield from rwait(1.2)
+        # (along the quay 3 s: the swim loop, her speed, strokes, ripples)
+        t0 = time.time(); clips = set(); spmax = 0.0; heads = []; pelv = []
+        while time.time() - t0 < 3.0:
+            G["pawn"].add_movement_input(al, 1.0); yield
+            s_ = swim(); clips.add(s_["clip"]); spmax = max(spmax, s_["speed"])
+            if time.time() - t0 > 1.0: heads.append(s_["under"]); pelv.append(s_["pelvis"])          # (her head and pelvis over the face through the strokes: their medians)
+            if time.time() - t0 > 1.6 and not r.get("shot"): shot(f"swim12_{hero}_swim", "1280x720"); r["shot"] = True
+        s2 = swim()
+        src = [mpc_v(f"Src{i}") for i in range(8)]; now = unreal.MaterialLibrary.get_scalar_parameter_value(G["w"], mpc, "Now") if mpc else 0.0
+        her = mpc_v("Her")
+        r["swim"] = {"clips": sorted(clips), "under": round(sorted(heads)[len(heads) // 2], 1) if heads else s2["under"], "head_range": [round(min(heads), 1), round(max(heads), 1)] if heads else None,
+                     "pelvis": round(sorted(pelv)[len(pelv) // 2], 1) if pelv and None not in pelv else None, "speed_max": round(spmax), "top": s2["top"], "strokes": s2["strokes"] - s1["strokes"], "ripples": s2["ripples"] - s1["ripples"],
+                     "fresh_sources": sum(1 for c in src if c and c.a > 0 and 0 <= now - c.b < 2.0), "her_push": round(her.a, 2) if her else None}
+        # (out: from 1 m past the ramp's foot, walked up it 7 s)
+        put(V(foot.x + wd.x * 100.0, foot.y + wd.y * 100.0, 0), yaw=math.degrees(math.atan2(-wd.y, -wd.x)), z=floor_z); yield from wait(1.0)
+        t0 = time.time()
+        while time.time() - t0 < 7.0:
+            G["pawn"].add_movement_input(V(-wd.x, -wd.y, 0), 1.0); yield
+        s3 = swim(); p3 = G["pawn"].get_actor_location()
+        r["out"] = {"on": s3["on"], "z": round(p3.z), "mesh_back_cm": round(G["pawn"].get_editor_property("mesh").get_editor_property("relative_location").z - mz0, 1),
+                    "jump_back": abs(G["pawn"].get_editor_property("character_movement").get_editor_property("jump_z_velocity") - jz0) < 0.5}
+        res["heroes"][hero] = r
+    # ---- the open sea: the wilds' own swimming floor (145 cm under the face, RDWildChunk.cpp) past the harbour's mouth, and far
+    # out where it is over 8 m deep (where a sheet 3 m over the water used to lie): she swims, held at the face, and does not sink
+    yield from as_hero("Warrior")
+    sea = {}
+    for name_, d_ in (("mouth", 400.0), ("deep", 1500.0)):
+        p_ = str(g.get_wild_sample_at(V(x * 100.0 + d_ * 100.0, deep.y, 0))).split("|")
+        at_ = V(x * 100.0 + d_ * 100.0, deep.y, 0)
+        g.wild_put_her(x + d_, deep.y / 100.0); yield from wait(1.5)          # (its chunk made at once, its collision cooked)
+        put(at_, yaw=0.0, z=float(p_[1]) + (float(p_[6]) - float(p_[0])) * 100.0 - 140.0 if len(p_) > 6 else -250.0); yield from wait(2.5)
+        z0_ = G["pawn"].get_actor_location().z; s_ = swim()
+        t0 = time.time()
+        while time.time() - t0 < 3.0:
+            G["pawn"].add_movement_input(al, 1.0); yield
+        s2_ = swim(); z1_ = G["pawn"].get_actor_location().z
+        sea[name_] = {"depth_m": round(float(p_[6]) - float(p_[0]), 1) if len(p_) > 6 else None, "kind": int(float(p_[5])) if len(p_) > 5 else None,
+                      "on": s_["on"], "on_after": s2_["on"], "pelvis": s2_["pelvis"], "z_change": round(z1_ - z0_), "strokes": s2_["strokes"] - s_["strokes"]}
+    res["sea"] = sea
+    # (and no horse from the water (PR #53's review): the saddle took the swim's jump (none) and her raised body as hers to give
+    # back. Her horse called beside her far out at sea, the mount refused. Here, not in the harbour: a horse left by the swim
+    # line held the next heroes (its box comes on once she is 2 m clear))
+    own0 = G["gi"].get_editor_property("horse_owned"); G["gi"].set_editor_property("horse_owned", True)
+    try:
+        called = g.call_horse(); yield from wait(0.5)
+        res["mount"] = {"swimming": swim()["on"], "called": called, "mounted": g.mount_horse(), "is_mounted": g.is_mounted()}
+        if g.is_mounted(): g.dismount_horse()
+    finally:
+        G["gi"].set_editor_property("horse_owned", own0)
+    # ---- the sounds, measured in the output: the splash (a fall off the quay) and the strokes, each with its set at 0 as well
+    lms = unreal.find_object(None, "/Script/UnrealEd.Default__LevelEditorMiscSettings"); bg0 = lms.get_editor_property("bAllowBackgroundAudio")
+    lms.set_editor_property("bAllowBackgroundAudio", True); unreal.RDDungeonGenerator.set_unfocused_volume(1.0)
+    mv0 = g.get_editor_property("music_volume"); g.set_editor_property("music_volume", 0.0)
+    unreal.SystemLibrary.execute_console_command(G["w"], "rd.Weather cloudless")
+    out = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "BSSwim", TAG); os.makedirs(out, exist_ok=True)
+    # (every other set silent while one is measured: the town's own bed (people, fires, wind) sat at -27 dB under the first
+    # run's splash; then on: that set alone at its volume, off: nothing)
+    vols = {str(k_): v_.volume for k_, v_ in g.get_editor_property("sounds").items()}
+    def set_only(key):
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st = snd[k_]; st.volume = vols[str(k_)] if str(k_) == key else 0.0; snd[k_] = st
+        g.set_editor_property("sounds", snd)
+    def restore_all():
+        snd = g.get_editor_property("sounds")
+        for k_ in list(snd.keys()):
+            st = snd[k_]; st.volume = vols[str(k_)]; snd[k_] = st
+        g.set_editor_property("sounds", snd)
+    def splashes():
+        return next(int(str(l).split("|")[2]) for l in g.get_wild11_lines() if str(l).startswith("water|"))
+    def rms_of(path):
+        import wave, array
+        w_ = wave.open(path, "rb"); data = array.array("h", w_.readframes(w_.getnframes())); w_.close()
+        return math.sqrt(sum(float(v) * v for v in data) / len(data)) / 32768.0 if len(data) else 0.0
+    # (the game's other sounds (bursts round -23 dB, from no sound set: they stayed with every set at 0) fill the recordings, and
+    # strokes 0.75 s apart leave no quiet before each: the loudest 30 % of the tenth-second windows, the set on against off; the
+    # recording's events counted beside it)
+    def written(path):
+        """until the recording can be read (the audio thread writes it after the stop: once it was still open)"""
+        t0 = time.time()
+        while time.time() - t0 < 5.0:
+            try:
+                with open(path, "rb"): return True
+            except OSError: yield
+        return False
+    def loud(path, times, share=0.3, win_s=0.1):
+        import wave, array
+        w_ = wave.open(path, "rb"); sr = w_.getframerate(); ch = w_.getnchannels(); data = array.array("h", w_.readframes(w_.getnframes())); w_.close()
+        mono = [(sum(data[i:i + ch]) / ch) / 32768.0 for i in range(0, len(data) - ch + 1, ch)]
+        n = int(sr * win_s); db = []
+        for i in range(0, len(mono) - n, n):
+            seg = mono[i:i + n]; db.append(20 * math.log10(max(math.sqrt(sum(v * v for v in seg) / n), 1e-6)))
+        db.sort(reverse=True); k = max(1, int(len(db) * share))
+        return (round(sum(db[:k]) / k, 1) if db else None), len(times)
+    def fall(name):
+        put(V(top.x - wd.x * 250.0 + al.x * 300.0, top.y - wd.y * 250.0 + al.y * 300.0, 0), yaw=math.degrees(math.atan2(wd.y, wd.x))); yield from wait(1.5)
+        n0 = splashes(); g.start_recording_output(4.0); t0 = time.time(); times = []
+        while time.time() - t0 < 2.5:
+            G["pawn"].add_movement_input(wd, 1.0); yield
+            if splashes() > n0 + len(times): times.append(time.time() - t0)
+        yield from rwait(0.8); g.stop_recording_output(out, name); yield from rwait(0.5)
+        yield from written(os.path.join(out, name + ".wav")); return loud(os.path.join(out, name + ".wav"), times)
+    def strokes(name):
+        put(deep, yaw=yaw_al, z=floor_z); yield from wait(1.5)
+        n0 = swim()["strokes"]; g.start_recording_output(3.5); t0 = time.time(); times = []
+        while time.time() - t0 < 3.0:
+            G["pawn"].add_movement_input(al, 1.0); yield
+            k = swim()["strokes"] - n0
+            while len(times) < k: times.append(time.time() - t0)
+        g.stop_recording_output(out, name); yield from rwait(0.5)
+        yield from written(os.path.join(out, name + ".wav")); return loud(os.path.join(out, name + ".wav"), times)
+    snd_res = {}
+    try:
+        sp0 = splashes()
+        set_only("Player.Splash"); snd_res["splash_on"] = yield from fall("splash_on")
+        set_only(""); snd_res["splash_off"] = yield from fall("splash_off")
+        snd_res["splashes_made"] = splashes() - sp0
+        set_only("Player.Swim"); snd_res["strokes_on"] = yield from strokes("strokes_on")
+        set_only(""); snd_res["strokes_off"] = yield from strokes("strokes_off")
+    finally:
+        restore_all()
+        g.set_editor_property("music_volume", mv0); lms.set_editor_property("bAllowBackgroundAudio", bg0)
+        unreal.SystemLibrary.execute_console_command(G["w"], "rd.Weather auto")
+        quiet(False)
+    # (how much louder the recording's loudest moments are with the set on than off)
+    rise = lambda on, off: round(on[0] - off[0], 1) if on and off and on[0] is not None and off[0] is not None else None
+    snd_res["splash_db_over_silent"] = rise(snd_res.get("splash_on"), snd_res.get("splash_off")); snd_res["strokes_db_over_silent"] = rise(snd_res.get("strokes_on"), snd_res.get("strokes_off"))
+    res["sounds"] = snd_res
+    H = res["heroes"]
+    ok = (len(H) == 6 and all(
+              h["idle"]["on"] and "Idle_Swim" in h["idle"]["clip"] and 5 < h["idle"]["under"] < 35 and h["attack_refused"] and h["roll_refused"]
+              and any("Anim_Swim" in c and "Idle" not in c for c in h["swim"]["clips"]) and h["swim"]["pelvis"] is not None and -15 < h["swim"]["pelvis"] < 5 and h["swim"]["strokes"] >= 2 and h["swim"]["ripples"] >= 4
+              and h["swim"]["fresh_sources"] >= 3 and (h["swim"]["her_push"] or 0) > 0 and 0 < h["swim"]["speed_max"] <= h["swim"]["top"] + 5
+              and not h["out"]["on"] and h["out"]["z"] > 60 and abs(h["out"]["mesh_back_cm"]) < 1.0 and h["out"]["jump_back"]
+              and (not h["swing_broken"]["begun"] or (h["swing_broken"]["swimming"] and not h["swing_broken"]["attacking"]))
+              for h in H.values())
+          and sum(1 for h in H.values() if h["swing_broken"]["begun"]) >= 3
+          and (lambda m: m is not None and m["swimming"] and m["called"] and not m["mounted"] and not m["is_mounted"])(res.get("mount"))
+          and len(res.get("sea", {})) == 2 and all(v["kind"] == 1 and v["on"] and v["on_after"] and v["pelvis"] is not None and -25 < v["pelvis"] < 10 and abs(v["z_change"]) < 30 and v["strokes"] >= 2 for v in res["sea"].values())
+          and (res["sea"].get("deep") or {}).get("depth_m", 0) > 8
+          and snd_res.get("splashes_made", 0) >= 2 and (snd_res["splash_db_over_silent"] or 0) > 6.0 and (snd_res["strokes_db_over_silent"] or 0) > 3.0
+          and (snd_res["strokes_on"] or (0, 0))[1] >= 2)
+    step_result("swim12", ok, **res)
+
 def step_descendsewer():
     """the sewer gate of Graymourne's sluice house, both ways: down into the sewers (the level sewers, 897: its floors going
     down, its name, its drowned and its way back) with her whole state; the drowned, one of each kind spawned in a row, their
@@ -4537,7 +4726,7 @@ def step_keys9():
           and res["war_engine_before"] == 0 and res["war_engine_after_old_progress"] == 1 and res["all_keys_counter"] == 0)
     step_result("keys9", ok, **res)
 STEPS.update({"mapzoom": step_mapzoom, "life": step_life, "falls": step_falls, "dagger": step_dagger, "satellite": step_satellite, "list7": step_list7, "carry": step_carry,
-              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "port11": step_port11, "descendsewer": step_descendsewer,
+              "holy": step_holy, "descend": step_descend, "forge": step_forge, "descendwar": step_descendwar, "port": step_port, "port11": step_port11, "swim12": step_swim12, "descendsewer": step_descendsewer,
               "planks": step_planks, "dummies": step_dummies, "storage": step_storage, "block8": step_block8, "console": step_console,
               "storage9": step_storage9, "start9": step_start9, "backspace9": step_backspace9, "time9": step_time9, "noshield9": step_noshield9, "fight11": step_fight11, "console11": step_console11,
               "sky9": step_sky9, "sky10": step_sky10, "skyspin": step_skyspin, "cloudless": step_cloudless, "horizon": step_horizon, "sun10": step_sun10, "stair10": step_stair10, "see10": step_see10, "forge10": step_forge10, "lines10": step_lines10, "town10": step_town10, "animals10": step_animals10, "sleep10": step_sleep10, "people10": step_people10, "crops9": step_crops9, "farms9": step_farms9, "keys9": step_keys9, "spire": step_spire, "descendspire": step_descendspire, "heaven": step_heaven, "descendheaven": step_descendheaven})

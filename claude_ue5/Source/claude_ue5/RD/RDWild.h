@@ -354,6 +354,17 @@ public:
 	static constexpr int32 PortHarbourSideTiles = 24;
 	static constexpr int32 PortFrameMarginTiles = 4;
 	static constexpr float PortTileM = 3.f;
+	/** the swimming's depths (cm), one set (2026-11-12; PR #53's review: they must change together): she swims once her feet are
+	 *  SwimDepthCm under the face (the generator's SwimDepth's default), so every swum floor lies deeper than that and its 15 cm
+	 *  way out: the wilds' floor under deep water down to SwimFloorWildCm (RDWildChunk.cpp), the open harbour's floor
+	 *  SwimFloorHarbourCm under its water (RDPort.cpp's HarbourFloorZ), and the bed out of the harbour's mouth SwimBedMouthCm
+	 *  under the sea at the section's edge (RDWildWorld.cpp), so the harbour's floor and the wilds' meet there */
+	static constexpr float SwimDepthCm = 120.f;
+	static constexpr float SwimFloorWildCm = 145.f;
+	static constexpr float SwimFloorHarbourCm = 140.f;
+	static constexpr float SwimBedMouthCm = 150.f;
+	static_assert(SwimFloorWildCm > SwimDepthCm + 15.f && SwimFloorHarbourCm > SwimDepthCm + 15.f, "a swum floor deeper than the swim's start and its way out");
+	static_assert(SwimBedMouthCm >= SwimFloorWildCm && SwimBedMouthCm >= SwimFloorHarbourCm, "the mouth's bed under both floors it joins");
 	/** the land's height over the shore scaled down round the port (35 % within 9 km, the whole by 30 km): the uplands rise
 	 *  from its coast over kilometres (LandHeight and Sample alike, before the coast) */
 	float PortFlatten(double X, double Y, float H) const;

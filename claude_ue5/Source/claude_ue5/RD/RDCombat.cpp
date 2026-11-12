@@ -286,7 +286,8 @@ void URDCombatComponent::UpdateWalkSpeed()
 	const float K = (bSlowed ? 0.12f : 1.f) * (1.f + GetSpeedBonus()) * (1.f - FMath::Clamp(GetArmourSlow(), 0.f, 0.9f)) * (1.f - GetSlowness())
 		* (1.f - FMath::Clamp(ShieldSlow, 0.f, 0.9f)) * (bHeldOn ? 0.f : 1.f)
 		* (bBlocking && Generator && Generator->BlockMoveSpeed <= 0.f ? 1.f - FMath::Clamp(Generator->BlockSlow, 0.f, 0.95f) : 1.f)          // (the third list: blocking)
-		* FMath::Max(WildRunFactor, 0.1f) * FMath::Max(MountFactor, 0.1f);          // (the list of 2026-11-07: rd.WildRunSpeed; the eighth phase: her horse)
+		* FMath::Max(WildRunFactor, 0.1f) * FMath::Max(MountFactor, 0.1f)          // (the list of 2026-11-07: rd.WildRunSpeed; the eighth phase: her horse)
+		* FMath::Max(SwimFactor, 0.1f);                                            // (2026-11-12: swimming)
 	// (the list of 2026-11-07: while she blocks, her slow block walk at most, walking or running (FilterBlockMove gives her
 	// move its full size along her facing); slower still if something else slows her more)
 	if (bBlocking && Generator && Generator->BlockMoveSpeed > 0.f)
@@ -342,7 +343,7 @@ bool URDCombatComponent::StartAttack()
 
 bool URDCombatComponent::StartAttackWith(int32 Index)
 {
-	if (Generator && Generator->IsMounted()) return false;          // (the eighth phase: no blow from the saddle)
+	if (Generator && Generator->IsRidingOrSwimming()) return false;          // (the eighth phase: no blow from the saddle; 2026-11-12: nor swimming)
 	const FRDWeaponDef* W = Generator && Generator->Weapons.IsValidIndex(Index) ? &Generator->Weapons[Index] : nullptr;
 	USkeletalMeshComponent* M = Body();
 	if (!W || !M || bDead || AttackTime >= 0.f || RollTime >= 0.f || W->Attacks.Num() == 0 || bInventoryOpen || bCraftOpen || bBlocking) return false;
@@ -2710,7 +2711,7 @@ bool URDCombatComponent::IsDodging() const
 
 bool URDCombatComponent::StartRoll(FVector Dir)
 {
-	if (Generator && Generator->IsMounted()) return false;
+	if (Generator && Generator->IsRidingOrSwimming()) return false;
 	ACharacter* C = Cast<ACharacter>(GetOwner());
 	USkeletalMeshComponent* M = Body();
 	UAnimInstance* AI = M ? M->GetAnimInstance() : nullptr;

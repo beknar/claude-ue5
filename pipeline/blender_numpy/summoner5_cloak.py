@@ -21,19 +21,36 @@ vertices followed different arms.
   and stronger with speed.
 Writes <out.glb> (the model with the cloak's bones and every clip, keyed by frame) and, with a prefix, pictures of each
 clip at a few frames from the front, side, back and three-quarter.
-Blender: -b -P summoner5_cloak.py -- Summoner5.glb out.glb [picture_prefix]"""
+The Rogue's body (Rogue2.glb, the user's of 2026-11-12: "the rogue's shoot and other animations involving her arms take
+part of her cloak with her forward ... use the same solution for the cloak that was used for the new summoner model"):
+`--hero Rogue2`. Tripo skinned her cloak the same way (its panels 56 to 74 % on her upper arms' twist bones, both arms,
+16 % on her head). Her cloak is longer (from her shoulders, 0.81, to her ankles, 0.06), her hair reaches lower (0.60)
+and she is all in black: her profile's heights and the colours of the small pieces that join it (HERO below); no sleeve
+of hers is red, so none is kept apart.
+Blender: -b -P summoner5_cloak.py -- Summoner5.glb out.glb [picture_prefix] [--hero Summoner5 | Rogue2]"""
 import bpy, bmesh, sys, os, math
 from mathutils import Vector, Matrix, Quaternion
 from collections import defaultdict
 argv = sys.argv[sys.argv.index("--") + 1:]
+HERO_NAME = "Summoner5"
+if "--hero" in argv:
+    _k = argv.index("--hero"); HERO_NAME = argv[_k + 1]; argv = argv[:_k] + argv[_k + 2:]
 SRC, OUT = argv[0], argv[1]
 PICS = argv[2] if len(argv) > 2 else None
 FPS = 24
-HEIGHT_M = 1.65                                    # (her height in the viewer and the game: the model is 1.0 tall)
+# (each body's numbers, the model's units (1.0 tall): the Summoner's as they were built)
+HERO = {
+    "Summoner5": {"height_m": 1.65, "joints": (0.66, 0.54, 0.42, 0.29, 0.16), "top": (0.60, 0.70), "grow_top": 0.56,
+                  "small": ("purple", "gold")},
+    # (her shoulders' joints at 0.814, her cloak's top 0.81 and its hem's lowest 0.056; her hair's ends at 0.60)
+    "Rogue2": {"height_m": 1.70, "joints": (0.76, 0.585, 0.41, 0.235, 0.06), "top": (0.71, 0.79), "grow_top": 0.60,
+               "small": ("black", "other")},
+}[HERO_NAME]
+HEIGHT_M = HERO["height_m"]                        # (her height in the viewer and the game: the model is 1.0 tall)
 CHAINS = (-95.0, -62.0, -30.0, 0.0, 30.0, 62.0, 95.0)  # (degrees round her middle from straight behind; + toward her left)
-JOINTS = (0.66, 0.54, 0.42, 0.29, 0.16)            # (heights of the chains' joints, the model's units: shoulders to hem)
+JOINTS = HERO["joints"]                            # (heights of the chains' joints, the model's units: shoulders to hem)
 SHARE = (0.05, 0.25, 0.35, 0.35)                   # (each bone's part of the turn back: little under her hair)
-TOP = (0.60, 0.70)                                 # (the top band: from all chain to all spine over these heights)
+TOP = HERO["top"]                                  # (the top band: from all chain to all spine over these heights)
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=SRC)
@@ -142,7 +159,7 @@ def kd_of(ks):
 # arms within 5 cm of their bones, and every piece mostly on her arms within 6 cm that touches them (a fifth of its
 # vertices within 5 mm), its lining, cuffs and trims, until none does
 SLEEVE = {k for k, (ids, ps, lo, hi, sh, glove) in enumerate(ISL) if k not in picked and sh["arm"] >= 0.6 and ARMD[k] < 0.05 and colour(ids) == "red"}
-while True:
+while SLEEVE:                                      # (none on the Rogue: nothing of hers is red)
     kd = kd_of(SLEEVE); new = []
     for k, (ids, ps, lo, hi, sh, glove) in enumerate(ISL):
         if k in SLEEVE or k in picked or sh["arm"] < 0.5 or ARMD[k] >= 0.06: continue
@@ -155,7 +172,7 @@ print("CLOAK her sleeves: %d pieces, %d vertices, kept on her arms" % (len(SLEEV
 # average, no leg's, trunk's, glove's, sleeve's or hair's, joins it, until none does. Hair lies on the cloak's back: grown
 # without a height its strands joined (531 pieces, 9917 vertices) and streamed back with it; her hair ends at 0.54, the
 # pieces looked for hang below 0.56)
-GROW_TOP = 0.56
+GROW_TOP = HERO["grow_top"]
 inside = set(picked); grown = 0
 while True:
     kd = kd_of(inside); new = []
@@ -184,7 +201,7 @@ while True:
     kd = kd_of(inside); new = []
     for k, (ids, ps, lo, hi, sh, glove) in enumerate(ISL):
         if k in inside or k in SLEEVE or glove or len(ids) > 60 or sh["leg"] >= 0.5 or sh["trunk"] >= 0.5 or sh["head"] >= 0.5: continue
-        if sum(1 for p in ps if kd.find(p)[2] < 0.01) >= 0.5 * len(ps) and colour(ids) in ("purple", "gold"): new.append(k)
+        if sum(1 for p in ps if kd.find(p)[2] < 0.01) >= 0.5 * len(ps) and colour(ids) in HERO["small"]: new.append(k)
     if not new: break
     inside.update(new); touching += len(new)
 print("CLOAK and %d small pieces of it lying on it" % touching)
@@ -199,6 +216,9 @@ def theta(p): return math.degrees(math.atan2(p.x - CX, p.y - CY))   # (0 behind 
 
 
 TH = {i: theta(P[i]) for i in CLOAK}
+_ths = sorted(TH.values())
+print("CLOAK its angles round her: %.0f to %.0f (1 %% and 99 %%), the rule's pieces' colours %s" % (
+    _ths[len(_ths) // 100], _ths[-1 - len(_ths) // 100], dict(sorted(defaultdict(int, {c: sum(1 for k in picked if colour(ISL[k][0]) == c) for c in ("black", "purple", "red", "gold", "other")}).items()))))
 
 
 # ---------------------------------------------------------------- the chains: each joint where the cloak is

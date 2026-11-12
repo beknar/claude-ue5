@@ -2585,6 +2585,48 @@ public:
 	bool WaterFaceAt(const FVector& At, float& Z) const;
 	bool bInWater = false;
 	float WaterWakeClock = 0.f, LastSplashTime = -100.f;
+	// ---- swimming (the user's of 2026-11-12: "create swimming animations for all current playable classes that are found in
+	// the choose a hero menu. create a splash sound for when a player falls into the water or is swimming. have water
+	// displacement and a wake for when the player moves through the water"; RD/RDSwim.cpp, 921)
+	/** each hero's swimming clips (921 clips), by hero name as RiderClips */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") TMap<FName, FRDSwimClips> SwimClips;
+	/** she swims once her feet are this far under the water's face (cm; the swim floor under deep water is 145 cm down) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimDepth = FRDWildWorld::SwimDepthCm;
+	/** her speed swimming, a share of her walk's */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimSpeedMul = 0.55f;
+	/** her pelvis this far under the water's face while she swims along (her back at the face), her head this far over it while
+	 *  she treads (cm; the rest of her follows the clip) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimPelvisMove = 6.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimHeadIdle = 18.f;
+	/** the swim loop from this speed (cm/s), the treading idle below it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimMoveFrom = 40.f;
+	/** a stroke's sound every this many seconds of the swim loop, as she moves */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") float SwimStrokeEvery = 0.67f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") bool bSwimming = false;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Swim") bool IsSwimming() const { return bSwimming; }
+	/** on the horse or swimming: no blow, block, roll, dash, chi, stealth or ability (one gate for them all: PR #53's review) */
+	bool IsRidingOrSwimming() const { return bMounted || bSwimming; }
+	/** tests: strokes sounded, swims begun */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") int32 SwimStrokes = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") int32 SwimsBegun = 0;
+	/** tests: "swim|<on>|<clip>|<her head over the face cm>|<speed>|<max walk>|<strokes>|<begun>|<ripples>|<her pelvis over it>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Swim") FString GetSwimLine() const;
+	void TickSwim(float Dt, class ACharacter* C, bool bIn, float Fz);
+	void EndSwim(class ACharacter* C);
+	FName SwimClipNow;
+	bool bSwimMoving = false;          // (swimming along, not treading: on from SwimMoveFrom, off under 60 % of it)
+	TWeakObjectPtr<ACharacter> SwimPawn;
+	UPROPERTY(Transient) TObjectPtr<UAnimMontage> SwimMontage = nullptr;
+	FVector SwimMeshWas = FVector::ZeroVector;
+	float SwimJumpWas = 0.f, SwimStrokeClock = 0.f, WadeClock = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") int32 WadeSteps = 0;
+	// ---- the water's displacement (the water's material reads the ripples from a parameter collection: 8 sources, each a place,
+	// the time it began and its strength, rings spreading from each over the face's normal; her own a bulge where she is)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Swim") TObjectPtr<class UMaterialParameterCollection> WaterRipples = nullptr;
+	int32 RippleNext = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Swim") int32 RipplesMade = 0;
+	void AddWaterRipple(const FVector& At, float Strength);
+	void TickWaterRipples(const FVector& Her, bool bIn, float Fz, float Speed);
 	/** the rings on the water's face, our own (no pack's ripple showed on the harbour's water by day: 920 port's screening): a
 	 *  flat ring (WaterRingMesh, a plane, in WaterRingMaterial: its Fade parameter) growing from a radius to another and fading
 	 *  over its life; a big one where she comes in */

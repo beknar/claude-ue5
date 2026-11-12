@@ -844,6 +844,16 @@ struct FRDRiderClips
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Run;
 };
 
+/** the user's of 2026-11-12 ("create swimming animations for all current playable classes"): a hero's two swimming clips, the
+ *  "92 Animations For Warrior" pack's treading idle and swim loop retargeted onto her rig (921 clips) */
+USTRUCT(BlueprintType)
+struct FRDSwimClips
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Idle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Swim;
+};
+
 /** the list of 2026-11-08b's seventh phase (SourceArt/wilderness/poi.json, 912): a kind of the wilderness's small points of interest
  *  ("the player should be able to interact or encounter something every 40 seconds when roaming the wilderness"): where it
  *  stands (its regions' biomes by name, "*" any; beside a road or off it; Layer 0 a small vignette, 1 mid-size, 2 a landmark

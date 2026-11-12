@@ -147,6 +147,15 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A pile in reach takes F before a person**: a test that speaks to someone where an earlier event left things takes them up first (`events11`'s refugee).
 - **The port's coast** is in `graymourne.md`'s rules (the sea lifted to the harbour, every target that eases to a town's height less the lift).
 
+## Swimming (the user's of 2026-11-12: `RD/RDSwim.cpp`, `921`, `887 materials`, `884 swim12`)
+
+- **Read a claimed rule in the geometry before keeping it**: the "invisible wall that keeps her out of the deep sea" was a flat sheet 3 m over the water past 8 m deep; nothing stopped her there (she would have walked off the floor's edge to the sea bed). The swimming floor follows each corner's depth (to 145 cm under the face), so there is no step between wading and swimming either.
+- **A body held under an opaque face is gone**: by her pelvis 22 cm down, a flat swim loop's whole body lay under the water (the first pictures showed only the wake); by her head over the face, some rigs' flat bodies lay on top of it. Swimming along, by the pelvis just under (6 cm); treading, by the head over (18 cm). Ease the mesh slowly: chasing each stroke's bob moved the body against it. Read the medians over the strokes, not one moment.
+- **Python names drop "Kismet"**: `UKismetMaterialLibrary` is `unreal.MaterialLibrary` (as `KismetSystemLibrary` is `SystemLibrary`); the step stopped half way on `unreal.KismetMaterialLibrary`.
+- **A batch retarget takes the registry's records** (`eal.find_asset_data(path)`), not loaded clips: "Cannot nativize 'AnimSequence' as 'AssetData'".
+- **Measure a sound against its own moments, the game's others silent, its set on and off**: the town's own bed (people, fires, wind) sat at -27 dB, and bursts round -23 dB came from no sound set (they stayed with every set at 0), so a whole recording's level showed a splash as +0.3 dB. A recording's loudest 30 % of tenth-second windows, the set on against off, showed it (+12.5 dB); a before / after window round each event fails for strokes 0.75 s apart (each "before" is the last stroke's sound). Wait until the recording can be opened: it was still being written after the stop.
+- **A long session runs the machine short of memory for brokenspire's play**: a test was stopped with 1.2 GB of 32 free (the editor 20.7 GB, its map's load 115 s). Restart the editor before the swim test, and after a stage that loads brokenspire.
+
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).

@@ -1,0 +1,13 @@
+{
+  "comment": "the user's of 2026-11-12 ('create a splash sound for when a player falls into the water or is swimming'): the water's sounds on brokenspire. Player.Splash where she comes into water (a body jumping into the sea, and the lighter falls into water), Player.Swim a stroke as she swims (hands scooping water), Player.Wade a step in shallow water. Khron Studio's Sound Of Survival Vol 1 (the pack sounds.json already draws from). Converted by pipeline/blender_numpy/rdc_sound_prep.py into SourceArt/brokenspire/audio_water/ (ignored), imported by pipeline/unreal/921_swim.py sounds",
+  "root": "I:/game assets",
+  "packs": {
+    "khron": "complete rpg creator bundle/sound of survival vol1/Khron Studio - Sound Of Survival Vol 1 (UCS System 192Khz)"
+  },
+  "sets": {
+    "Player.Splash": {"from": [["khron", "Character/Character_Jump_Into_The_Sea/.*\\.wav$"], ["khron", "Character/Character_Fall_After_Jump_Water/.*\\.wav$"]],
+                      "max_len": 2.2, "level": -10, "volume": 1.3, "pitch_var": 0.06, "inner": 400, "falloff": 3000},
+    "Player.Swim": {"from": [["khron", "Pick Up Materials/Pick_Up_Water/.*\\.wav$"]], "max_len": 0.9, "level": -17, "volume": 0.9, "pitch_var": 0.08, "inner": 300, "falloff": 2200},
+    "Player.Wade": {"from": [["khron", "Character/Character_Footsteps/Character_Footstep_Water/.*\\.wav$"]], "max_len": 0.6, "level": -26, "volume": 0.55, "pitch_var": 0.08, "inner": 250, "falloff": 1800}
+  }
+}
