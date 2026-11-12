@@ -1,5 +1,5 @@
-#include "RD/RDSave.h"
 #include "RD/RDHeroSelect.h"
+#include "RD/RDSave.h"
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDUIArt.h"
 #include "RD/RDInputSim.h"
@@ -65,6 +65,9 @@ ARDHeroSelect::ARDHeroSelect()
 void ARDHeroSelect::BeginPlay()
 {
 	Super::BeginPlay();
+	// (the window's least size from the first screen a packaged game shows (PR #51's review: only the levels set it, and a
+	// window dragged small on the menu was saved so))
+	ARDDungeonGenerator::ApplyWindowLimits();
 	// (the menu opened again from the dungeon shows the hero played last)
 	int32 Start = 0;
 	if (const AGameModeBase* GM = GetWorld()->GetAuthGameMode())
@@ -183,6 +186,7 @@ bool ARDHeroSelect::ContinueGame()
 void ARDHeroSelect::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	ARDDungeonGenerator::KeepWindowLimits();
 	if (bQuitButton && GetWorld()->GetRealTimeSeconds() - ContinueReadAt > 2.f)
 	{
 		ContinueReadAt = GetWorld()->GetRealTimeSeconds();
