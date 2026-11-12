@@ -2054,7 +2054,14 @@ def slash_trial(c, name, idx):
         # (two within its reach (2.3 m before it and 2.3 m beside it), one well beyond (11 m))
         for off, side in ((230, 0.0), (0, 2.3), (1100, 0.0)):
             q = V(at0.x + f.x * off + r_.x * side * 100, at0.y + f.y * off + r_.y * side * 100, at0.z); others.append(spawn_dummy(q))
+    # (the list of 2026-11-11's ten: cleave and whirl one before the first, one behind her (the whirl's, not the cleave's arc),
+    # one well beyond; quake and soulfire one 2 m past the first, one well beyond)
+    offs = {"cleave": (100, -300, 1100), "whirl": (100, -300, 1100), "quake": (200, 1100), "soulfire": (200, 1100)}.get(eff, ())
+    for off in offs: others.append(spawn_dummy(V(at0.x + f.x * off, at0.y + f.y * off, at0.z)))
     yield from wait(0.4)
+    # (execute wants one under 30 %, rally and soulfire a kill: the first hurt down before the blow)
+    if eff == "execute" and alive(main): main.apply_damage(main.get_health() - main.get_max_health() * 0.2, None)
+    if eff in ("rally", "soulfire") and alive(main): main.apply_damage(main.get_health() - max(main.get_max_health() * 0.004, 1.0), None)
     hp = lambda m: m.get_health() if alive(m) else None
     pos = lambda m: m.get_actor_location() if alive(m) else None
     h0 = hp(main); o_h0 = [hp(m) for m in others]; o_p0 = [pos(m) for m in others]; m_p0 = pos(main)
@@ -2114,8 +2121,37 @@ def slash_trial(c, name, idx):
         r["ok"] = r["stunned"] and r["second_waits"]
     elif eff == "prismatic":
         r["ok"] = r["procs"].get("prismatic", 0) == 1 and any(k in r["procs"] for k in ("burn", "slow", "poison", "drain"))
-    # (the bonus on the monster struck; a chain or an inferno deal more to the others round it, counted too)
-    r["ok"] = bool(r.get("ok")) and applied and ok_hit and (abs(r["bonus"] - sd.bonus) < 0.6 or (eff in ("chain", "inferno") and r["bonus"] >= sd.bonus - 0.6)) and r["fx"] > 0
+    # ---- the list of 2026-11-11's ten
+    elif eff == "bleed":
+        yield from wait(max(sd.seconds, 1.0) + 0.6); r["dot"] = round((h1 or 0) - (hp(main) or 0), 2)
+        r["want_dot"] = round((c.get_damage_of(idx) + sd.bonus) * sd.amount, 1); r["ok"] = r["dot"] > r["want_dot"] * 0.6
+    elif eff in ("cleave", "whirl"):
+        r["others_lost"] = [round((a or 0) - (hp(m) or 0), 1) for a, m in zip(o_h0, others)]; r["want"] = round((c.get_damage_of(idx) + sd.bonus) * sd.amount, 1)
+        # (the cleave's arc is before her: the one behind her untouched; the whirl's round her: both near ones)
+        r["ok"] = abs(r["others_lost"][0] - r["want"]) < 1.0 and r["others_lost"][2] == 0 and ((r["others_lost"][1] == 0) if eff == "cleave" else abs(r["others_lost"][1] - r["want"]) < 1.0)
+    elif eff == "weaken": r["blow_mul"] = round(main.blow_mul(), 3); r["ok"] = abs(r["blow_mul"] - (1.0 - sd.amount)) < 0.01
+    elif eff == "echo":
+        # (it comes 0.4 s after the hit: at the test's slow frames that can be before h1 was read; measured from before the hit)
+        yield from wait(0.5)
+        r["echo"] = round((h0 or 0) - (hp(main) or 0) - sd.bonus, 2); r["want"] = round((c.get_damage_of(idx) + sd.bonus) * sd.amount, 2); r["echo_hits"] = md(c.slash_procs).get("echo_hit", 0) - procs0.get("echo_hit", 0)
+        r["ok"] = abs(r["echo"] - r["want"]) < 1.0 and r["echo_hits"] == 1
+    elif eff == "sunder":
+        # (a blow of 100 by nobody: what it takes with the sunder on, against 100)
+        ha = hp(main); main.apply_damage(100.0, None); r["blow_100"] = round(ha - hp(main), 2); r["ok"] = abs(r["blow_100"] - 100.0 * (1.0 + sd.amount)) < 0.6
+    elif eff == "quake":
+        r["stunned"] = [main.is_stunned()] + [m.is_stunned() if alive(m) else None for m in others]; r["ok"] = r["stunned"] == [True, True, False]
+    elif eff == "execute":
+        r["lost"] = round((h0 or 0) - (h1 or 0), 1); r["want"] = round(sd.bonus + c.get_damage_of(idx) + sd.bonus, 1)
+        r["ok"] = r["procs"].get("execute", 0) == 1 and abs(r["lost"] - r["want"]) < 1.0
+    elif eff == "rally":
+        r["killed"] = not alive(main); r["healed"] = round(c.get_health() - her0, 2); r["want"] = round(c.get_max_health() * sd.amount, 2)
+        r["ok"] = r["killed"] and abs(r["healed"] - r["want"]) < 1.0 and r["procs"].get("rally", 0) == 1
+    elif eff == "soulfire":
+        r["killed"] = not alive(main); r["others_lost"] = [round((a or 0) - (hp(m) or 0), 1) for a, m in zip(o_h0, others)]; r["want"] = round((c.get_damage_of(idx) + sd.bonus) * sd.amount, 1)
+        r["ok"] = r["killed"] and abs(r["others_lost"][0] - r["want"]) < 1.0 and r["others_lost"][1] == 0
+    # (the bonus on the monster struck; a chain or an inferno deal more to the others round it, counted too, as do the cleave, the
+    # whirl, the soulfire's burst and the execute's second hit)
+    r["ok"] = bool(r.get("ok")) and applied and ok_hit and (abs(r["bonus"] - sd.bonus) < 0.6 or (eff in ("chain", "inferno", "cleave", "whirl", "soulfire", "execute") and r["bonus"] >= sd.bonus - 0.6)) and r["fx"] > 0
     drop([main] + others); c.remove_slash(idx)
     return r
 
@@ -2190,7 +2226,8 @@ def step_slashes():
     ok = ((not g.get_editor_property("boss_encounters") or (len(res["boss_gave"]) == 1 and res["boss_slash_tier"] == [2]))
           and res["tab"] == 4 and res["picking"] and res["on_dagger"] == "Ember Slash" and res["off_dagger"] == "None" and res["back_in_pack"] == 1
           and res["on_bow"] and res["bow_slash"] == "Ember Slash" and sw["started"] and sw["fx_max"] > 0 and abs(sw["bonus"] - 6.0) < 0.6 and sw["monster_lost"] > 6
-          and res["shot"]["bonus"] > 0 and len(ev) == 20 and all(v.get("ok") for v in ev.values()))
+          # (twenty until the list of 2026-11-11, thirty since: every one the level has)
+          and res["shot"]["bonus"] > 0 and len(ev) == len(g.get_editor_property("slashes")) >= 20 and all(v.get("ok") for v in ev.values()))
     step_result("slashes", ok, **res)
 
 def step_tomemana():
@@ -5188,7 +5225,297 @@ def step_list11():
     res["gameplay_ok"] = gp_ok
     step_result("list11", ok and gp_ok, **res)
 
-STEPS = {"list10": step_list10, "list11": step_list11, "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
+def s11_parts(c, at, r=400.0):
+    n = c.get_spell_particles(at, r); return n[0] if isinstance(n, tuple) else n
+def s11_widx(sp): return next((k for k, d in enumerate(G["gen"].get_editor_property("weapons")) if str(d.name) == sp), -1)
+def s11_mob(at, hmul=1.0):
+    """a monster that does no harm with its kind's own hit points (not an elite: Silence's full time, a kill that drops gold)"""
+    g = G["gen"]; return g.spawn_monster_named(str(g.get_editor_property("monsters")[0].name), V(at.x, at.y, at.z), 1, hmul, 0.0, 1.0)
+def s11_lines(m):
+    """its curses as {name: (seconds left, amount, more)}"""
+    out = {}
+    for l in (m.get_curse_lines() if alive(m) else []):
+        p = str(l).split("|"); out[p[0]] = (float(p[1]), float(p[2]), p[3] if len(p) > 3 else "")
+    return out
+
+def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
+    """the list of 2026-11-11's third phase (918 cantrip, spells3, slashes3, casts3; RD/RDList11c.cpp): the casters' fire bolt at
+    no mana, its damage growing with her tier (rd.Tier 1 against 10); Starfall, Singularity and Soul Rend cast with their own
+    clips (the hero's SpellClips: the clip on her spell weapon, its hit at the release spell_casts11.py wrote) and looks other
+    than Meteor Storm's, Void Rift's and Life Drain's, each cast at a monster (what it lost, its particles, a picture at the
+    release); the Warlock's thirteen curses, learned from their tomes (the Mage refused), each measured on monsters: Rot's
+    poison and stacks, Lethargy's slow on all in its area, the hunted mark and its doubled blows, Withering's halved heal,
+    Silence's time (halved on an elite), Brittle's blows, Greed's gold, Leech's heal, Dread's flight and its end, Contagion's
+    jump, Ruin's element, Kinship's share, Doom's burst and execute; the Warrior's ten new slashes (slash_trial) and a trail on
+    her blade in a real swing"""
+    res = {}; g = G["gen"]; K = unreal.RDItemKind
+    L11 = json.load(open(os.path.join(SA, "balance", "list11_spells.json"), encoding="utf-8"))
+    tome = {str(i.spell): str(i.name) for i in items_of(K.TOME)}
+    oks = {}
+    try:
+        if "cantrip" in parts:
+            # ---- the cantrip: the Mage's Fire at no mana, its damage at tier 1 and tier 10
+            c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+            kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.5)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.4)
+            fi = s11_widx(L11["cantrip"]["weapon"]); W = list(g.get_editor_property("weapons"))
+            r = {"index": fi, "mana_cost": W[fi].mana_cost if fi >= 0 else None, "label": str(W[fi].get_editor_property("label")) if fi >= 0 else None,
+                 "heroes": {str(h.name): [(float(w.mana_cost), str(w.get_editor_property("label"))) for w in h.weapons if str(w.name) == L11["cantrip"]["weapon"]] for h in g.get_editor_property("heroes")}}
+            def fire_at(tier):
+                g.console_set_tier(tier); yield from wait(0.3)
+                put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+                m = spawn_dummy(ahead(500)); yield from wait(0.5); h0 = m.get_health()
+                c.set_mana(0.0); c.select_weapon(fi); yield from wait(0.3)
+                b0 = c.bolts_cast; m0 = c.get_mana(); st = c.start_attack_with(fi); m1 = c.get_mana()
+                yield from wait(float(W[fi].attack_ends[0]) + 1.0)
+                out = {"tier": tier, "spell_mul": round(g.tier_spell_mul(), 4), "started": st, "mana_before": round(m0, 2), "mana_after": round(m1, 2),
+                       "bolts": c.bolts_cast - b0, "lost": round(h0 - hp(m), 1)}
+                drop([m]); yield from wait(0.3)
+                return out
+            r["t1"] = yield from fire_at(1)
+            r["t10"] = yield from fire_at(10)
+            g.console_set_tier(0); yield from wait(0.3)
+            r["ratio"] = round(r["t10"]["lost"] / r["t1"]["lost"], 3) if r["t1"]["lost"] else None
+            r["want_ratio"] = round(r["t10"]["spell_mul"] / r["t1"]["spell_mul"], 3) if r["t1"]["spell_mul"] else None
+            ok = (fi >= 0 and r["mana_cost"] == 0 and r["label"] == L11["cantrip"]["label"]
+                  and all(v and all(x[0] == 0 and x[1] == L11["cantrip"]["label"] for x in v) for h, v in r["heroes"].items() if h in L11["cantrip"]["heroes"])
+                  and all(r[k]["started"] and r[k]["bolts"] == 1 and r[k]["mana_after"] == r[k]["mana_before"] and r[k]["mana_before"] < 5 and r[k]["lost"] > 0 for k in ("t1", "t10"))
+                  # (each a whole number: the ratio within a point either end)
+                  and r["ratio"] and r["want_ratio"] > 1.0 and abs(r["t10"]["lost"] - r["t1"]["lost"] * r["want_ratio"]) <= 1.0 + r["want_ratio"])
+            res["cantrip"] = r; oks["cantrip"] = ok
+        if "spells" in parts:
+            # ---- Starfall, Singularity, Soul Rend: their own clips and looks, cast at a monster
+            c = yield from restart("Mage"); g = G["gen"]; quiet(True)
+            kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.5)
+            g.console_set_tier(30); yield from wait(0.5)          # (her pool and every spell of the chain: rd.Tier 30)
+            inf0 = g.get_editor_property("infinite_mana"); g.set_editor_property("infinite_mana", True)
+            SP = {str(s.name): s for s in g.get_editor_property("spells")}
+            def looks(n):
+                s = SP.get(n); return {k: (s.get_editor_property(k).get_name() if s and s.get_editor_property(k) else None) for k in ("cast_fx", "bolt_fx", "impact_fx", "area_fx")}
+            OLD = {"Starfall": "Meteor Storm", "Singularity": "Void Rift", "Soul Rend": "Life Drain"}
+            times = {}
+            for ch in ("Caster", "DarkCaster", "Summoner4"):
+                try: times[ch] = json.load(open(os.path.join(SA, "spell11_clips", ch, "spell_casts11_times.json")))
+                except Exception: pass
+            CLIP = {"Starfall": "Cast_Starfall", "Singularity": "Cast_Singularity", "Soul Rend": "Cast_SoulRend"}
+            r = {"heroes_clips": {str(h.name): sorted(str(k) for k in md(h.spell_clips)) for h in g.get_editor_property("heroes") if str(h.name) in ("Mage", "Warlock", "Summoner")}}
+            # (the Mage cannot learn a curse)
+            c.add_item(tome.get("Curse of Rot", "Tome of Curse of Rot"), 1); yield from wait(0.2)
+            r["mage_knows_rot"] = c.knows_spell("Curse of Rot")
+            r["cast"] = {}
+            for n, old in OLD.items():
+                put(g.get_start_room_center(), 0.0); yield from wait(0.4)
+                i = s11_widx(n); W = list(g.get_editor_property("weapons"))
+                q = {"knows": c.knows_spell(n), "index": i, "looks": looks(n), "old_looks": looks(old)}
+                if i >= 0:
+                    w = W[i]; q["clip"] = w.attacks[0].get_name() if len(w.attacks) else None; q["shown"] = str(g.get_weapon_shown(i))
+                    q["hit"] = round(float(w.hit_times[0]), 3) if len(w.hit_times) else None; q["end"] = round(float(w.attack_ends[0]), 3) if len(w.attack_ends) else None
+                    q["want_hit"] = times.get("Caster", {}).get(CLIP[n], {}).get("release")
+                    m = spawn_dummy(ahead(650)); yield from wait(0.6); h0 = m.get_health(); at = m.get_actor_location()
+                    c.select_weapon(i); yield from wait(0.3)
+                    q["started"] = bool(c.start_attack_with(i)); t0 = now(); fxm = 0; pictured = False
+                    while now() - t0 < (q["end"] or 2.0) + 2.0:
+                        yield
+                        fxm = max(fxm, s11_parts(c, at, 500.0))
+                        if not pictured and q["hit"] and now() - t0 > q["hit"] + 0.3: shot("s11_" + n.lower().replace(" ", "")); pictured = True
+                    q["particles_at_monster"] = fxm; q["lost"] = round(h0 - hp(m), 1)
+                    drop([m]); yield from rwait(1.0)
+                r["cast"][n] = q
+            # (the Warlock: those of the three she learns cast with her own clips)
+            c = yield from restart("Warlock"); g = G["gen"]; quiet(True); g.console_set_tier(30); yield from wait(0.5)
+            r["warlock"] = {}
+            for n in OLD:
+                i = s11_widx(n); W = list(g.get_editor_property("weapons"))
+                r["warlock"][n] = {"knows": c.knows_spell(n), "clip": (W[i].attacks[0].get_name() if i >= 0 and len(W[i].attacks) else None), "hit": round(float(W[i].hit_times[0]), 3) if i >= 0 and len(W[i].hit_times) else None}
+            g.console_set_tier(0); g.set_editor_property("infinite_mana", inf0); yield from wait(0.3)
+            cc = r["cast"]
+            ok = (not r["mage_knows_rot"] and all(v == sorted(OLD) for v in r["heroes_clips"].values()) and len(r["heroes_clips"]) >= 2
+                  and all(q["knows"] and q.get("started") and q.get("shown") == n and (q.get("clip") or "").startswith("AS_Caster_" + CLIP[n]) and q.get("want_hit") and abs(q["hit"] - q["want_hit"]) < 0.02
+                          and q["looks"] != q["old_looks"] and not (set(v for v in q["looks"].values() if v) & set(v for v in q["old_looks"].values() if v))
+                          and q["particles_at_monster"] > 0 and q["lost"] > 0 for n, q in cc.items())
+                  and all((not v["knows"]) or (v["clip"] or "").startswith("AS_DarkCaster_" + CLIP[n]) for n, v in r["warlock"].items()) and any(v["knows"] for v in r["warlock"].values()))
+            res["spells"] = r; oks["spells"] = ok
+        if "curses" in parts:
+            # ---- the Warlock's thirteen curses
+            c = yield from restart("Warlock"); g = G["gen"]; quiet(True)
+            kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.5)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.4)
+            CU = {cu["effect"]: cu for cu in L11["curses"]}
+            r = {"learned": {}}
+            for cu in L11["curses"]:
+                c.add_item(tome.get(cu["name"], "Tome of " + cu["name"]), 1); yield from wait(0.1); r["learned"][cu["name"]] = c.knows_spell(cu["name"])
+            def wi(e): return s11_widx(CU[e]["name"])
+            r["shown"] = {cu["name"]: str(g.get_weapon_shown(s11_widx(cu["name"]))) for cu in L11["curses"]}
+            # (each its own picture, there in the level's painted art (918 icons3))
+            ua = {str(k) for k in g.get_editor_property("ui_art").keys()}; Wl = list(g.get_editor_property("weapons"))
+            r["icons"] = {cu["name"]: (str(Wl[s11_widx(cu["name"])].icon), str(Wl[s11_widx(cu["name"])].icon) in ua) for cu in L11["curses"]}
+            def now_cast(e, m): return bool(c.cast_spell_now(wi(e), m))
+            pawn = G["pawn"]
+            # (Rot as she casts it: its mana taken, its clip, its poison; again for a second stack)
+            m = spawn_dummy(ahead(500)); yield from wait(0.6); h0 = m.get_health()
+            i = wi("Rot"); c.select_weapon(i); yield from wait(0.3)
+            c.set_mana(c.get_max_mana()); m0 = c.get_mana(); st = c.start_attack_with(i); m1 = c.get_mana()
+            yield from wait(float(g.get_editor_property("weapons")[i].attack_ends[0]) + 0.4)
+            first = s11_lines(m).get("rot"); yield from wait(1.2)
+            c.set_mana(c.get_max_mana()); st2 = c.start_attack_with(i); yield from wait(float(g.get_editor_property("weapons")[i].attack_ends[0]) + 0.4)
+            second = s11_lines(m).get("rot"); h1 = hp(m); yield from wait(4.0)
+            r["rot"] = {"started": [st, st2], "mana_taken": round(m0 - m1, 2), "want_mana": 12 + 6 * CU["Rot"]["slot"], "first": first, "second": second,
+                        "lost_4s": round(h1 - hp(m), 1), "want_4s": round(2 * m.get_max_health() * CU["Rot"]["amount"] / CU["Rot"]["duration"] * 4.0, 1),
+                        "particles": s11_parts(c, m.get_actor_location(), 300.0)}
+            drop([m]); yield from wait(0.3)
+            # (Lethargy: three in its area slowed, one beyond not)
+            ms = [spawn_dummy(ahead(500)), spawn_dummy(ahead(500, 180)), spawn_dummy(ahead(650, -150)), spawn_dummy(ahead(1300))]; yield from wait(0.6)
+            now_cast("Lethargy", ms[0]); yield from wait(0.2)
+            r["lethargy"] = {"slow": [round(x.get_slow_share(), 3) for x in ms], "cursed": ["lethargy" in s11_lines(x) for x in ms]}
+            drop(ms); yield from wait(0.3)
+            # (Hunted: the mark, her blows doubled about one in ten, one mark at a time)
+            a = spawn_dummy(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
+            now_cast("Hunted", a); yield from wait(0.2); mark_a = g.get_hunted_mark() == a
+            cr0 = c.crits_dealt; losses = []
+            for _ in range(60):
+                hb = a.get_health(); a.apply_damage(5.0, pawn); losses.append(round(hb - a.get_health(), 2))
+            shot("s11_hunted", "1280x720"); yield from rwait(1.0)
+            now_cast("Hunted", b); yield from wait(0.2)
+            r["hunted"] = {"marked_a": mark_a, "crits": c.crits_dealt - cr0, "doubled": sum(1 for x in losses if x > 7.5), "plain": sum(1 for x in losses if abs(x - 5) < 0.01),
+                           "marked_b": g.get_hunted_mark() == b, "a_still": "hunted" in s11_lines(a)}
+            drop([a, b]); yield from wait(0.3)
+            # (Withering: a heal of 100 gives 50; on one without it 100)
+            a = spawn_dummy(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
+            now_cast("Withering", a); yield from wait(0.2)
+            for x in (a, b): x.apply_damage(500.0, None)
+            ha, hb = a.get_health(), b.get_health(); a.heal_by(100.0); b.heal_by(100.0)
+            r["withering"] = {"healed": round(a.get_health() - ha, 2), "healed_plain": round(b.get_health() - hb, 2), "line": s11_lines(a).get("withering")}
+            drop([a, b]); yield from wait(0.3)
+            # (Silence: 3 s on an ordinary one, half on an elite (the dummy's 30 times the hit points))
+            a = s11_mob(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
+            now_cast("Silence", a); now_cast("Silence", b); yield from wait(0.05)
+            r["silence"] = {"silenced": [a.is_silenced(), b.is_silenced()], "left": [s11_lines(a).get("silence", (0,))[0], s11_lines(b).get("silence", (0,))[0]]}
+            yield from wait(2.0); r["silence"]["after_2s"] = [a.is_silenced() if alive(a) else None, b.is_silenced() if alive(b) else None]
+            drop([a, b]); yield from wait(0.3)
+            # (Brittle: her blows 25 % more (one doubled now and then); nobody's blow plain)
+            a = spawn_dummy(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
+            now_cast("Brittle", a); yield from wait(0.2)
+            la = []
+            cr0 = c.crits_dealt
+            for _ in range(8):
+                h_ = a.get_health(); a.apply_damage(40.0, pawn); la.append(round(h_ - a.get_health(), 2))
+            h_ = b.get_health(); b.apply_damage(40.0, pawn); lb = round(h_ - b.get_health(), 2)
+            h_ = a.get_health(); a.apply_damage(40.0, None); ln = round(h_ - a.get_health(), 2)
+            r["brittle"] = {"hers": la, "plain_monster": lb, "nobodys": ln, "crits": c.crits_dealt - cr0}
+            drop([a, b]); yield from wait(0.3)
+            # (Greed: killed while cursed, half as much gold again)
+            a = s11_mob(ahead(500)); yield from wait(0.6)
+            now_cast("Greed", a); yield from wait(0.2); gg0 = g.get_editor_property("greed_gold")
+            a.apply_damage(1e7, pawn); yield from wait(0.4)
+            r["greed"] = {"greed_gold": g.get_editor_property("greed_gold") - gg0, "things": g.get_editor_property("greed_things")}
+            # (Leech: 15 % of a blow of 100 by nobody heals her)
+            a = spawn_dummy(ahead(500)); yield from wait(0.6)
+            now_cast("Leech", a); yield from wait(0.2)
+            c.set_health(c.get_max_health() * 0.5); h_ = c.get_health(); l0 = a.get_editor_property("leech_given")
+            a.apply_damage(100.0, None)
+            r["leech"] = {"healed": round(c.get_health() - h_, 2), "given": round(a.get_editor_property("leech_given") - l0, 2)}
+            drop([a]); yield from wait(0.3)
+            # (Dread: both in its area flee; 15 % more; a tenth of its hit points taken ends it)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+            a = s11_mob(ahead(450)); b = s11_mob(ahead(450, 200)); yield from wait(0.6)
+            L0 = pawn.get_actor_location(); d0 = [dist2(x.get_actor_location(), L0) for x in (a, b)]
+            now_cast("Dread", a); yield from wait(0.05); afraid = [a.is_afraid(), b.is_afraid()]
+            yield from wait(1.5); d1 = [dist2(x.get_actor_location(), L0) if alive(x) else None for x in (a, b)]
+            h_ = b.get_health(); b.apply_damage(10.0, None); l15 = round(h_ - b.get_health(), 2)
+            a.apply_damage(a.get_max_health() * 0.1 / 1.15 + 1.0, None); yield from wait(0.1)
+            r["dread"] = {"afraid": afraid, "fled_cm": [round(y - x) if y is not None else None for x, y in zip(d0, d1)], "blow_10": l15, "a_after_tenth": a.is_afraid() if alive(a) else None}
+            drop([a, b]); yield from wait(0.3)
+            # (Contagion: its Rot jumps to the three nearest within 8 m with the time it had, not to one 12 m off)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+            a = s11_mob(ahead(500)); near = [spawn_dummy(ahead(500, s)) for s in (-250, 250)] + [spawn_dummy(ahead(800))]; far = spawn_dummy(ahead(500 + 1200)); yield from wait(0.6)
+            now_cast("Rot", a); now_cast("Contagion", a); yield from wait(0.5)
+            left = s11_lines(a).get("rot", (0,))[0]; a.apply_damage(1e7, pawn); yield from wait(0.1)
+            r["contagion"] = {"spread": a.get_editor_property("curses_spread"), "near_rot": [s11_lines(x).get("rot") for x in near], "far_rot": s11_lines(far).get("rot"), "left_was": round(left, 2)}
+            drop(near + [far]); yield from wait(0.3)
+            # (Ruin: her fire bolt, then Ruin: fire; the next fire bolt 40 % more than the one before it)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+            fi = s11_widx(L11["cantrip"]["weapon"]); W = list(g.get_editor_property("weapons"))
+            a = spawn_dummy(ahead(500)); yield from wait(0.6)
+            def bolt():
+                h_ = a.get_health(); c.select_weapon(fi); yield from wait(0.3); c.start_attack_with(fi); yield from wait(float(W[fi].attack_ends[0]) + 1.0); return round(h_ - a.get_health(), 1)
+            plain = yield from bolt(); elem = str(c.get_editor_property("last_cast_element"))
+            now_cast("Ruin", a); yield from wait(0.2); line = s11_lines(a).get("ruin")
+            ruined = yield from bolt()
+            r["ruin"] = {"last_element": elem, "line": line, "plain": plain, "ruined": ruined}
+            drop([a]); yield from wait(0.3)
+            # (Kinship: the four nearest bound (a fifth in the area not); 30 % of a blow on one split among the other three)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.3)
+            ms = [spawn_dummy(ahead(500)), spawn_dummy(ahead(500, 150)), spawn_dummy(ahead(500, -150)), spawn_dummy(ahead(650)), spawn_dummy(ahead(500, 520))]; yield from wait(0.6)
+            now_cast("Kinship", ms[0]); yield from wait(0.2)
+            bound = ["kinship" in s11_lines(x) for x in ms]
+            hs = [x.get_health() for x in ms]; ms[0].apply_damage(100.0, None)
+            r["kinship"] = {"bound": bound, "lost": [round(h_ - x.get_health(), 2) for h_, x in zip(hs, ms)], "shared": round(ms[0].get_editor_property("kin_shared"), 2)}
+            shot("s11_curses", "1280x720"); yield from rwait(1.0)
+            drop(ms); yield from wait(0.3)
+            # (Doom: after 10 s half of what it took meanwhile; another taken under a fifth dies at once)
+            a = spawn_dummy(ahead(500)); b = spawn_dummy(ahead(500, 300)); yield from wait(0.6)
+            now_cast("Doom", a); now_cast("Doom", b); yield from wait(0.2)
+            a.apply_damage(200.0, None); a.apply_damage(200.0, None); ha = a.get_health()
+            b.apply_damage(b.get_health() - b.get_max_health() * 0.15, None); yield from wait(0.1)
+            r["doom"] = {"b_dead": not alive(b), "b_executed": b.get_editor_property("doom_executed")}
+            yield from wait(10.3)
+            r["doom"].update({"burst": round(a.get_editor_property("doom_burst"), 1), "a_lost_at_end": round(ha - hp(a), 1)})
+            drop([a, b]); yield from wait(0.3)
+            r["cast_counts"] = md(c.get_editor_property("curses_cast"))
+            le, hu, wt, si, br, gr = r["lethargy"], r["hunted"], r["withering"], r["silence"], r["brittle"], r["greed"]
+            rot = r["rot"]
+            ok = (all(r["learned"].values()) and len(r["learned"]) == 13 and all(k == v for k, v in r["shown"].items())
+                  and all(v[1] for v in r["icons"].values()) and len({v[0] for v in r["icons"].values()}) == 13
+                  and all(rot["started"]) and abs(rot["mana_taken"] - rot["want_mana"]) < 0.01 and rot["first"] and rot["first"][2] == "stacks 1" and rot["second"] and rot["second"][2] == "stacks 2"
+                  and rot["want_4s"] * 0.6 < rot["lost_4s"] < rot["want_4s"] * 1.5
+                  and le["cursed"] == [True, True, True, False] and all(abs(s - 0.3) < 0.01 for s in le["slow"][:3]) and le["slow"][3] == 0
+                  and hu["marked_a"] and hu["crits"] >= 1 and hu["doubled"] == hu["crits"] and hu["marked_b"] and not hu["a_still"]
+                  and abs(wt["healed"] - 50) < 0.6 and abs(wt["healed_plain"] - 100) < 0.6
+                  and si["silenced"] == [True, True] and abs(si["left"][0] - 3.0) < 0.15 and abs(si["left"][1] - 1.5) < 0.15 and si["after_2s"][1] is False and si["after_2s"][0] is True
+                  and abs(min(br["hers"]) - 50) < 0.01 and abs(br["plain_monster"] - 40) < 0.01 and abs(br["nobodys"] - 40) < 0.01
+                  and gr["greed_gold"] > 0
+                  and abs(r["leech"]["given"] - 15) < 0.1 and abs(r["leech"]["healed"] - 15) < 0.6
+                  and r["dread"]["afraid"] == [True, True] and all(x is not None and x > 50 for x in r["dread"]["fled_cm"]) and abs(r["dread"]["blow_10"] - 11.5) < 0.01 and r["dread"]["a_after_tenth"] is False
+                  and r["contagion"]["spread"] == 3 and all(x and abs(x[0] - r["contagion"]["left_was"]) < 0.3 for x in r["contagion"]["near_rot"]) and r["contagion"]["far_rot"] is None
+                  and r["ruin"]["last_element"] == "fire" and r["ruin"]["line"] and r["ruin"]["line"][2] == "fire" and r["ruin"]["plain"] > 0 and abs(r["ruin"]["ruined"] - round(r["ruin"]["plain"] * 1.4)) <= 1.0
+                  and r["kinship"]["bound"] == [True, True, True, True, False] and abs(r["kinship"]["lost"][0] - 70) < 0.01 and all(abs(x - 10) < 0.01 for x in r["kinship"]["lost"][1:4]) and r["kinship"]["lost"][4] == 0
+                  and r["doom"]["b_dead"] and r["doom"]["b_executed"] and abs(r["doom"]["burst"] - 200) < 0.6 and abs(r["doom"]["a_lost_at_end"] - 200) < 0.6)
+            res["curses"] = r; oks["curses"] = ok
+        if "slashes" in parts:
+            # ---- the Warrior's ten new slashes, and a trail on her blade
+            c = yield from restart("Warrior"); g = G["gen"]; quiet(True)
+            kill_all_near(G["pawn"].get_actor_location(), 8000); yield from wait(0.5)
+            put(g.get_start_room_center(), 0.0); yield from wait(0.4)
+            names = [e["name"] for e in L11["slashes"]]
+            have = [str(s.name) for s in g.get_editor_property("slashes")]
+            r = {"count": len(have), "by_tier": {}, "each": {}}
+            for s in g.get_editor_property("slashes"): r["by_tier"][int(s.tier)] = r["by_tier"].get(int(s.tier), 0) + 1
+            # (a real swing with the Rending Slash on her weapon: its trail on the blade, pictured in the swing, first: the trials'
+            # effects and harvests buried it)
+            c.add_item(names[0], 1); c.apply_slash(names[0], 0); c.select_weapon(0); yield from wait(0.4)
+            t0 = c.get_editor_property("slash_trails"); c.start_attack(); fxm = 0; pictured = False; ts = now()
+            while now() - ts < 1.4:
+                yield
+                fxm = max(fxm, c.get_slash_fx_alive())
+                if not pictured and now() - ts > 0.3: shot("s11_slash_trail"); pictured = True
+            r["trail"] = {"trails": c.get_editor_property("slash_trails") - t0, "fx_max": fxm}
+            c.remove_slash(0); yield from rwait(1.0)
+            for n in names:
+                try: r["each"][n] = yield from slash_trial(c, n, 0)
+                except Exception as e: r["each"][n] = {"ok": False, "error": str(e)}
+                yield from wait(0.3)
+            ok = (all(n in have for n in names) and r["count"] >= 30 and all(v >= 6 for t, v in r["by_tier"].items() if 1 <= t <= 5)
+                  and all(v.get("ok") for v in r["each"].values()) and r["trail"]["trails"] >= 1)
+            res["slashes"] = r; oks["slashes"] = ok
+    finally:
+        try: G["gen"].console_set_tier(0)
+        except Exception: pass
+        quiet(False)
+    res["oks"] = oks
+    step_result("spells11" if len(parts) == 4 else "spells11_" + "_".join(parts), bool(oks) and all(oks.values()), **res)
+
+STEPS = {"list10": step_list10, "list11": step_list11, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+         "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,
          "death": step_death, "outline": step_outline, "tabs": step_tabs, "slots": step_slots, "helmet": step_helmet, "block": step_block,

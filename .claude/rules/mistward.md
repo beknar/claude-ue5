@@ -342,3 +342,13 @@ Every rule a switch on the generator ("Mistward2" category), on in Mistward and 
 - **Read the mana in the tick the attack starts**: read after the clip's wait, her mana had refilled (50.0 -> 52.7 for a free chi, 4.56 "spent" of 7).
 - **A factor on a small integer is rounded**: a blow of 9 at 0.6 is 5 (0.556): compare with the rounded product, not the ratio.
 - **The weapon's name is a key; show a label**: "Fists" names her in saves, the quick bar, the balance tables and the tests; the display goes through `FRDWeaponDef::Shown()`.
+
+## The list of 2026-11-11's third phase (`918 cantrip,spells3,slashes3,casts3`, `RD/RDList11c.cpp`, `868 spells11`)
+
+- **A thing made by copying another takes all of it**: a learned spell is her first spell weapon copied (`MakeSpellWeapon`), so the cantrip's new label named every learned spell "Fire Bolt (cantrip)" (the panel, the quick bar's "FBC"). A field added for one weapon's display is cleared wherever a weapon is made from another.
+- **A tick gated on one list misses the next one's work**: the slashes' tick ran only while a ground area lasted (`SlashAreas`), and the Spark Slash's echoes waited forever. Gate it on every list it works through.
+- **At the test's frames a delay can be over before the read meant to come before it**: the echo, 0.4 s after the hit, had landed by the read 0.25 s after it (the test's 0.15 s of real time plus its game time). Measure from before the cause.
+- **Mana refills between `set_mana(0)` and the cast**: 0.8 the next frame. A free cast is one that leaves her mana where it was, not one at 0.
+- **`spawn_dummy`'s 30 times the hit points is an elite** to `IsEliteOrBoss` (more than 1.25 times its set's mean): Silence lasted half on it. An ordinary monster for a test is its kind's own hit points (`s11_mob`).
+- **`910` rebuilds the made-up spells from their sources and numbers every tome spell's place again**: run it (and `905`) before `918 cantrip,spells3,slashes3,casts3`, never after, or Starfall's and Singularity's looks and the curses' places are lost.
+- **No monster heals itself**: Withering Brand halves `ARDMonster::HealBy` (a UFUNCTION now, for the test), which only allies get in play.

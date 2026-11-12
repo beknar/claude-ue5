@@ -1,0 +1,563 @@
+{
+ "tag": "s11c",
+ "plan": [
+  "spells11"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "spells11",
+   "ok": false,
+   "cantrip": {
+    "index": 0,
+    "mana_cost": 0.0,
+    "label": "Fire Bolt (cantrip)",
+    "heroes": {
+     "Warrior": [],
+     "Mage": [
+      [
+       0.0,
+       "Fire Bolt (cantrip)"
+      ]
+     ],
+     "Warlock": [
+      [
+       0.0,
+       "Fire Bolt (cantrip)"
+      ]
+     ],
+     "Rogue": [],
+     "MartialArtist": [],
+     "Summoner": [
+      [
+       0.0,
+       "Fire Bolt (cantrip)"
+      ]
+     ]
+    },
+    "t1": {
+     "tier": 1,
+     "spell_mul": 1.0,
+     "started": true,
+     "mana_before": 0.78,
+     "mana_after": 0.78,
+     "bolts": 1,
+     "lost": 25.0
+    },
+    "t10": {
+     "tier": 10,
+     "spell_mul": 2.6083,
+     "started": true,
+     "mana_before": 1.24,
+     "mana_after": 1.24,
+     "bolts": 1,
+     "lost": 65.2
+    },
+    "ratio": 2.608,
+    "want_ratio": 2.608
+   },
+   "spells": {
+    "heroes_clips": {
+     "Mage": [
+      "Singularity",
+      "Soul Rend",
+      "Starfall"
+     ],
+     "Warlock": [
+      "Singularity",
+      "Soul Rend",
+      "Starfall"
+     ],
+     "Summoner": [
+      "Singularity",
+      "Soul Rend",
+      "Starfall"
+     ]
+    },
+    "mage_knows_rot": false,
+    "cast": {
+     "Starfall": {
+      "knows": true,
+      "index": 30,
+      "looks": {
+       "cast_fx": "NS_Muzzle_ShootingStar01",
+       "bolt_fx": "NS_Projectile_ShootingStar01",
+       "impact_fx": "NS_Hit_Sun01",
+       "area_fx": null
+      },
+      "old_looks": {
+       "cast_fx": null,
+       "bolt_fx": "NS_Projectile_Rock_V1",
+       "impact_fx": "NS_GroundExplosion_04",
+       "area_fx": null
+      },
+      "clip": "AS_Caster_Cast_Starfall",
+      "shown": "Starfall",
+      "hit": 1.15,
+      "end": 2.0,
+      "want_hit": 1.15,
+      "started": true,
+      "particles_at_monster": 210,
+      "lost": 735.0
+     },
+     "Singularity": {
+      "knows": true,
+      "index": 31,
+      "looks": {
+       "cast_fx": "NS_Muzzle_RotatingSpheres",
+       "bolt_fx": null,
+       "impact_fx": "NS_Absorption_Purple",
+       "area_fx": "NS_Vortex_Void"
+      },
+      "old_looks": {
+       "cast_fx": null,
+       "bolt_fx": null,
+       "impact_fx": "NS_GroundExplosion_10",
+       "area_fx": "NS_Muzzle_Wind01"
+      },
+      "clip": "AS_Caster_Cast_Singularity",
+      "shown": "Singularity",
+      "hit": 1.25,
+      "end": 2.0,
+      "want_hit": 1.25,
+      "started": true,
+      "particles_at_monster": 33326,
+      "lost": 1053.0
+     },
+     "Soul Rend": {
+      "knows": true,
+      "index": 19,
+      "looks": {
+       "cast_fx": "NS_Muzzle_Orb01",
+       "bolt_fx": "NS_Projectile_Orb01",
+       "impact_fx": "NS_Absorption_Teal",
+       "area_fx": null
+      },
+      "old_looks": {
+       "cast_fx": "NS_Muzzle_Ghostly01",
+       "bolt_fx": "NS_Projectile_Ghostly01",
+       "impact_fx": "NS_Hit_Ghostly01",
+       "area_fx": null
+      },
+      "clip": "AS_Caster_Cast_SoulRend",
+      "shown": "Soul Rend",
+      "hit": 0.75,
+      "end": 1.583,
+      "want_hit": 0.75,
+      "started": true,
+      "particles_at_monster": 10586,
+      "lost": 1200.0
+     }
+    },
+    "warlock": {
+     "Starfall": {
+      "knows": true,
+      "clip": "AS_DarkCaster_Cast_Starfall",
+      "hit": 1.15
+     },
+     "Singularity": {
+      "knows": true,
+      "clip": "AS_DarkCaster_Cast_Singularity",
+      "hit": 1.25
+     },
+     "Soul Rend": {
+      "knows": true,
+      "clip": "AS_DarkCaster_Cast_SoulRend",
+      "hit": 0.75
+     }
+    }
+   },
+   "curses": {
+    "learned": {
+     "Curse of Rot": true,
+     "Hex of Lethargy": true,
+     "Mark of the Hunted": true,
+     "Withering Brand": true,
+     "Curse of Silence": true,
+     "Curse of Brittle Bones": true,
+     "Curse of Greed": true,
+     "Leech Hex": true,
+     "Curse of Dread": true,
+     "Contagion": true,
+     "Elemental Ruin": true,
+     "Chains of Kinship": true,
+     "Doom": true
+    },
+    "shown": {
+     "Curse of Rot": "Curse of Rot",
+     "Hex of Lethargy": "Hex of Lethargy",
+     "Mark of the Hunted": "Mark of the Hunted",
+     "Withering Brand": "Withering Brand",
+     "Curse of Silence": "Curse of Silence",
+     "Curse of Brittle Bones": "Curse of Brittle Bones",
+     "Curse of Greed": "Curse of Greed",
+     "Leech Hex": "Leech Hex",
+     "Curse of Dread": "Curse of Dread",
+     "Contagion": "Contagion",
+     "Elemental Ruin": "Elemental Ruin",
+     "Chains of Kinship": "Chains of Kinship",
+     "Doom": "Doom"
+    },
+    "rot": {
+     "started": [
+      true,
+      true
+     ],
+     "mana_taken": 24.0,
+     "want_mana": 24,
+     "first": [
+      7.14,
+      9.0,
+      "stacks 1"
+     ],
+     "second": [
+      7.26,
+      9.0,
+      "stacks 2"
+     ],
+     "lost_4s": 75.0,
+     "want_4s": 72.0,
+     "particles": 11243
+    },
+    "lethargy": {
+     "slow": [
+      0.3,
+      0.3,
+      0.3,
+      0.0
+     ],
+     "cursed": [
+      true,
+      true,
+      true,
+      false
+     ]
+    },
+    "hunted": {
+     "marked_a": true,
+     "crits": 7,
+     "doubled": 7,
+     "plain": 53,
+     "marked_b": true,
+     "a_still": false
+    },
+    "withering": {
+     "healed": 50.0,
+     "healed_plain": 100.0,
+     "line": [
+      9.79,
+      0.5,
+      ""
+     ]
+    },
+    "silence": {
+     "silenced": [
+      true,
+      true
+     ],
+     "left": [
+      2.91,
+      1.41
+     ],
+     "after_2s": [
+      true,
+      false
+     ]
+    },
+    "brittle": {
+     "hers": [
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      100.0,
+      50.0
+     ],
+     "plain_monster": 40.0,
+     "nobodys": 40.0,
+     "crits": 1
+    },
+    "greed": {
+     "greed_gold": 1,
+     "things": 0
+    },
+    "leech": {
+     "healed": 15.0,
+     "given": 15.0
+    },
+    "dread": {
+     "afraid": [
+      true,
+      true
+     ],
+     "fled_cm": [
+      189,
+      189
+     ],
+     "blow_10": 11.5,
+     "a_after_tenth": false
+    },
+    "contagion": {
+     "spread": 3,
+     "near_rot": [
+      [
+       7.35,
+       0.3,
+       "stacks 1"
+      ],
+      [
+       7.35,
+       0.3,
+       "stacks 1"
+      ],
+      [
+       7.35,
+       0.3,
+       "stacks 1"
+      ]
+     ],
+     "far_rot": null,
+     "left_was": 7.46
+    },
+    "ruin": {
+     "last_element": "fire",
+     "line": [
+      11.75,
+      0.4,
+      "fire"
+     ],
+     "plain": 25.0,
+     "ruined": 35.0
+    },
+    "kinship": {
+     "bound": [
+      true,
+      true,
+      true,
+      true,
+      false
+     ],
+     "lost": [
+      70.0,
+      10.0,
+      10.0,
+      10.0,
+      0.0
+     ],
+     "shared": 30.0
+    },
+    "doom": {
+     "b_dead": true,
+     "b_executed": true,
+     "burst": 200.0,
+     "a_lost_at_end": 200.0
+    },
+    "cast_counts": {
+     "Curse of Rot": 3,
+     "Hex of Lethargy": 3,
+     "Mark of the Hunted": 2,
+     "Withering Brand": 1,
+     "Curse of Silence": 2,
+     "Curse of Brittle Bones": 1,
+     "Curse of Greed": 1,
+     "Leech Hex": 1,
+     "Curse of Dread": 2,
+     "Contagion": 1,
+     "Elemental Ruin": 1,
+     "Chains of Kinship": 4,
+     "Doom": 2
+    }
+   },
+   "slashes": {
+    "count": 30,
+    "by_tier": {
+     "1": 6,
+     "2": 6,
+     "3": 6,
+     "4": 6,
+     "5": 6
+    },
+    "each": {
+     "Rending Slash": {
+      "applied": true,
+      "effect": "bleed",
+      "hit": true,
+      "bonus": 5.0,
+      "want_bonus": 5.0,
+      "fx": 13,
+      "procs": {
+       "bleed": 1
+      },
+      "dot": 7.61,
+      "want_dot": 7.7,
+      "ok": true
+     },
+     "Gust Slash": {
+      "applied": true,
+      "effect": "cleave",
+      "hit": true,
+      "bonus": 14.65,
+      "want_bonus": 5.0,
+      "fx": 52,
+      "procs": {
+       "cleave": 1
+      },
+      "others_lost": [
+       9.7,
+       0.0,
+       0.0
+      ],
+      "want": 9.6,
+      "ok": true
+     },
+     "Thorn Slash": {
+      "applied": true,
+      "effect": "weaken",
+      "hit": true,
+      "bonus": 9.0,
+      "want_bonus": 9.0,
+      "fx": 46,
+      "procs": {
+       "weaken": 1
+      },
+      "blow_mul": 0.8,
+      "ok": true
+     },
+     "Spark Slash": {
+      "applied": true,
+      "effect": "echo",
+      "hit": true,
+      "bonus": 9.0,
+      "want_bonus": 9.0,
+      "fx": 38,
+      "procs": {
+       "echo": 1
+      },
+      "echo": 0.0,
+      "want": 11.65,
+      "echo_hits": 0,
+      "ok": false
+     },
+     "Sundering Slash": {
+      "applied": true,
+      "effect": "sunder",
+      "hit": true,
+      "bonus": 14.0,
+      "want_bonus": 14.0,
+      "fx": 13,
+      "procs": {
+       "sunder": 1
+      },
+      "blow_100": 115.0,
+      "ok": true
+     },
+     "Riptide Slash": {
+      "applied": true,
+      "effect": "whirl",
+      "hit": true,
+      "bonus": 42.3,
+      "want_bonus": 14.0,
+      "fx": 12,
+      "procs": {
+       "whirl": 1
+      },
+      "others_lost": [
+       14.2,
+       14.2,
+       0.0
+      ],
+      "want": 14.1,
+      "ok": true
+     },
+     "Quake Slash": {
+      "applied": true,
+      "effect": "quake",
+      "hit": true,
+      "bonus": 22.0,
+      "want_bonus": 22.0,
+      "fx": 120,
+      "procs": {
+       "quake": 1
+      },
+      "stunned": [
+       true,
+       true,
+       false
+      ],
+      "ok": true
+     },
+     "Headsman's Slash": {
+      "applied": true,
+      "effect": "execute",
+      "hit": true,
+      "bonus": 58.3,
+      "want_bonus": 22.0,
+      "fx": 14,
+      "procs": {
+       "execute": 1
+      },
+      "lost": 58.3,
+      "want": 58.3,
+      "ok": true
+     },
+     "Warcry Slash": {
+      "applied": true,
+      "effect": "rally",
+      "hit": true,
+      "bonus": 34.0,
+      "want_bonus": 34.0,
+      "fx": 47,
+      "procs": {
+       "rally": 1
+      },
+      "killed": true,
+      "healed": 16.8,
+      "want": 16.8,
+      "ok": true
+     },
+     "Soulfire Slash": {
+      "applied": true,
+      "effect": "soulfire",
+      "hit": true,
+      "bonus": 62.98,
+      "want_bonus": 34.0,
+      "fx": 85,
+      "procs": {
+       "soulfire": 1
+      },
+      "killed": true,
+      "others_lost": [
+       29.0,
+       0.0
+      ],
+      "want": 29.0,
+      "ok": true
+     }
+    },
+    "trail": {
+     "trails": 1,
+     "fx_max": 60
+    }
+   },
+   "oks": {
+    "cantrip": true,
+    "spells": true,
+    "curses": true,
+    "slashes": false
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_s11c_s11_starfall.png",
+  "mw_s11c_s11_singularity.png",
+  "mw_s11c_s11_soulrend.png",
+  "mw_s11c_s11_hunted.png",
+  "mw_s11c_s11_curses.png",
+  "mw_s11c_s11_slash_trail.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

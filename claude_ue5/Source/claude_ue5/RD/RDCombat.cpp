@@ -441,6 +441,8 @@ bool URDCombatComponent::StartAttackWith(int32 Index)
 		if (Best) O->SetActorRotation(FRotator(0.f, ((Best->GetActorLocation() - L) * FVector(1, 1, 0)).Rotation().Yaw, 0.f));
 	}
 	AI->PlaySlotAnimationAsDynamicMontage(Clip, RDCombatSlot, 0.1f, 0.18f, Rate, 1, -1.f, T0);
+	// (the list of 2026-11-11: a trail slash on the weapon in her hand, for the swing)
+	if (!W->bSpell && WeaponComp) if (const FRDSlashDef* Sl = SlashOf(Index); Sl && Sl->bTrail) StartSlashTrail(*Sl, WeaponComp, (T1 - T0) / Rate);
 	// (its effects on her fists and legs: each from its time in the clip)
 	EndLimbFx(); LimbOn.SetNum(W->LimbFx.Num()); AttackT0 = T0; AttackRate = Rate;
 	AttackTime = 0.f; AttackLen = (T1 - T0) / Rate; AttackHit = FMath::Clamp((Hit - T0) / Rate, 0.05f, AttackLen); bHitDone = false;
@@ -762,7 +764,7 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 	TickSpells(Dt, Now);
 	TickScrollWeapon();          // (mistward: a scroll's weapon gone once its cast and bolts are done)
 	// (the third list: the slashes' burning ground and pulls; quick slots for weapons found or spells learned)
-	if (SlashAreas.Num() > 0) TickSlashAreas(Dt);
+	if (SlashAreas.Num() > 0 || Echoes.Num() > 0) TickSlashAreas(Dt);          // (the Echo slash's hits too: they waited for an area that never came)
 	if (Generator->Secondaries.Num() > 0) TickSecondary(Dt);          // (the sixth phase's abilities)
 	if (Generator->bQuickSlots && (Generator->Weapons.Num() != LastWeaponCount || WeaponSig() != LastWeaponSig)) FillQuickSlots();
 	if (bHeldOn && Now >= HeldUntil) { bHeldOn = false; UpdateWalkSpeed(); }       // (mistward: the snare lets go)
@@ -2355,6 +2357,7 @@ void URDCombatComponent::LaunchBolt()
 	// (level 5: a spell of the table: its bolt pierces, jumps, carries its colours)
 	const FRDSpellDef* S = SpellOf(AttackIndex);
 	if (S) { B.Spell = W->SpellIndex; B.bPierce = S->bPierce; B.ChainLeft = S->Count > 0 && S->Radius > 0.f ? S->Count : 0; }
+	if (S && !S->Element.IsNone()) LastCastElement = S->Element;          // (the list of 2026-11-11: Elemental Ruin's element)
 	if (Grown) { Grown->SetWorldLocationAndRotation(B.At, R); B.Fx = Grown; }
 	else if (W->BoltEffect) B.Fx = S ? SpawnSpellFx(W->BoltEffect, B.At, R, W->BoltEffectScale, S) : SpawnFx(W->BoltEffect, B.At, R, W->BoltEffectScale);
 	if (W->BoltCoreEffect) B.Core = SpawnFx(W->BoltCoreEffect, B.At, R, W->BoltCoreEffectScale);
@@ -2376,7 +2379,7 @@ void URDCombatComponent::LaunchBolt()
 	Bolts.Add(B);
 	++BoltsCast; LastBoltFrom = B.At;
 	// (the third list: a slash on a bow or a crossbow sweeps out with the shot)
-	if (const FRDSlashDef* Sl = SlashOf(AttackIndex)) PlaySwingSlash(*Sl, B.Vel);
+	if (const FRDSlashDef* Sl = SlashOf(AttackIndex)) { PlaySwingSlash(*Sl, B.Vel); if (Sl->bTrail && B.Mesh.IsValid()) StartSlashTrail(*Sl, B.Mesh.Get(), 2.f); }
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Cast.%s"), *WeaponSound(*W).ToString())), B.At);
 }
 

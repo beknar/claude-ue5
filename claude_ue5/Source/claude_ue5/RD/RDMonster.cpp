@@ -244,7 +244,9 @@ bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bo
 {
 	if (!bCombat || bDead || Amount <= 0.f) return false;
 	Amount *= 1.f + GetCurseShare();            // (cursed: it takes more)
+	Amount = CurseDamageIn(Amount, From);       // (the list of 2026-11-11: the Warlock's curses, the Sunder slash)
 	Health = FMath::Max(0.f, Health - Amount);
+	CurseAfterHit(Amount);
 	LastHurtTime = GetWorld()->GetTimeSeconds();
 	bAggro = true; WaitTime = 0.f;
 	if (!bWound)
@@ -299,6 +301,7 @@ bool ARDMonster::ApplyDamageEx(float Amount, AActor* From, const FVector* At, bo
 
 void ARDMonster::Die()
 {
+	CurseOnDeath();          // (the list of 2026-11-11: Contagion's curses go on; the hunted mark ends)
 	bDead = true; bAggro = false; AttackTime = -1.f; Stun = 0.f; DeadTime = 0.f;
 	Burns.Reset(); CurrentFoe = nullptr;
 	Path.Reset();
@@ -720,6 +723,7 @@ bool ARDMonster::TickCombat(float Dt)
 {
 	ARDDungeonGenerator* G = Section->Generator;
 	TickStatus(Dt);
+	TickCurses11(Dt);          // (the list of 2026-11-11: Doom's burst, the mark's end)
 	if (bDead)
 	{
 		// the body lies a while, then sinks into the floor and is gone (level 5: it stays; an ally of hers is gone)
@@ -746,6 +750,7 @@ bool ARDMonster::TickCombat(float Dt)
 	// (her ally: its time runs out, and it falls)
 	if (bAlly && AllySeconds > 0.f && (AllyLeft -= Dt) <= 0.f) { Health = 0.f; Die(); return true; }
 	AttackCooldown = FMath::Max(0.f, AttackCooldown - Dt);
+	if (TickFear(Dt)) return true;          // (the list of 2026-11-11: Curse of Dread: it runs from her)
 	RangedWaitLeft = FMath::Max(0.f, RangedWaitLeft - Dt);
 	BeamWaitLeft = FMath::Max(0.f, BeamWaitLeft - Dt);
 	CombatBranch = TEXT("none");
@@ -806,11 +811,11 @@ bool ARDMonster::TickCombat(float Dt)
 			if (bMissBlind) ++BlindMisses;
 			if (!bMissBlind && Gap <= Reach + 30.f && Dz < 260.f && FVector::DotProduct(D.GetSafeNormal(), GetActorForwardVector()) > 0.3f)
 			{
-				float Dmg = Damage * (1.f - GetCurseShare());
+				float Dmg = Damage * BlowMul();          // (a curse, the Weaken slash)
 				// (the sixth phase: the Summoner's soul harvest on her summons' blows a while)
 				if (bAlly && GetWorld()->GetTimeSeconds() < AllyBoostUntil) Dmg *= AllyBoost;
 				// (mistward6: a blow that passes a hidden Rogue by carries no poison, weakness or slowness either)
-				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !bHerHidden && !Pc->bLastBlowAbsorbed) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
+				if (bFoePlayer) { const bool bHerHidden = Pc->IsStealthed(); Pc->ApplyDamage(Dmg, this); if (Ability != ERDMonsterAbility::None && !IsSilenced() && !bHerHidden && !Pc->bLastBlowAbsorbed) Pc->ApplyMonsterAbility(Ability, AbilityPower, Dmg); }
 				else if (ARDMonster* Fm = Cast<ARDMonster>(P)) { Fm->ApplyDamageAt(Dmg, this, nullptr); G->AddHitText(Fm->GetActorLocation() + FVector(0, 0, Fm->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false); }
 				else if (ARDTownsfolk* Ft = Cast<ARDTownsfolk>(P)) Ft->TakeGuardBlow(Dmg, this);          // (the list of 2026-11-11: a guard)
 				++HitsLanded;
@@ -821,7 +826,7 @@ bool ARDMonster::TickCombat(float Dt)
 			// (a shot: its own longer wait; its blows may follow at once when its foe closes in)
 			if (bRangedSwing) { RangedWaitLeft = RangedWait; bRangedSwing = false; }
 			else if (bBeamSwing) { BeamWaitLeft = BeamWait; bBeamSwing = false; }
-			else AttackCooldown = AttackInterval / (bAlly ? FMath::Max(AllyPace, 0.1f) : 1.f);          // (an ally: the Summoner's frenzy)
+			else AttackCooldown = AttackInterval / (bAlly ? FMath::Max(AllyPace, 0.1f) : 1.f) * (1.f + CurseAmount11(ERDCurseEffect::Lethargy));          // (an ally: the Summoner's frenzy; Hex of Lethargy's slower blows)
 			EndFistFx();
 			AttackTime = -1.f; bWalkingAnim = true; SetWalkingAnim(false);
 		}

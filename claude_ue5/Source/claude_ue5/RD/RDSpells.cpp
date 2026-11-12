@@ -49,7 +49,7 @@ bool URDCombatComponent::LearnSpell(FName Spell)
 	const int32 Si = Generator ? Generator->FindSpell(Spell) : -1;
 	if (Si < 0 || KnowsSpell(Spell)) return false;
 	const FRDSpellDef& S = Generator->Spells[Si];
-	if (!Generator->HeroLearns(S.Type))
+	if (!Generator->HeroCanLearnSpell(S))          // (the list of 2026-11-11: and no other hero's own)
 	{
 		SetMessage(FString::Printf(TEXT("The %s cannot learn %s (%s)"), *Generator->PlayerTitle.ToLower(), *S.Name.ToString(), RDSpellTypeName(S.Type)));
 		return false;
@@ -287,7 +287,11 @@ FVector URDCombatComponent::SpellTargetPoint(float Reach) const
 void URDCombatComponent::SpellHurt(ARDMonster* Mo, float Dmg, const FVector& Where, bool bWound)
 {
 	if (!Mo || Mo->IsDead() || Dmg <= 0.f || !Generator) return;
+	// (the list of 2026-11-11: a spell's hurt carries its element (Elemental Ruin), and is no weapon's blow (Brittle Bones))
+	const FName WasElement = Generator->HitElement;
+	Generator->HitElement = CurrentSpellElement.IsNone() ? FName(TEXT("magic")) : CurrentSpellElement;
 	const bool bKilled = Mo->ApplyDamageEx(Dmg, GetOwner(), &Where, bWound, bWound);
+	Generator->HitElement = WasElement;
 	Generator->AddHitText(Mo->GetActorLocation() + FVector(0, 0, Mo->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), Dmg, false);
 	CountSpellDamage(Dmg);
 	if (bKilled) ++Kills;
@@ -332,6 +336,7 @@ void URDCombatComponent::SpellPierce(FBolt& B, ARDMonster* Mo, const FVector& At
 	const FRDSpellDef* S = Generator && Generator->Spells.IsValidIndex(B.Spell) ? &Generator->Spells[B.Spell] : nullptr;
 	if (!S || !Mo) return;
 	if (!PayFreeBolt(B, At, Mo, 0.f)) return;          // (the list of 2026-11-11: a free chi pays when it meets one)
+	CurrentSpellElement = S->Element;
 	const float Dmg = B.Dmg >= 0.f ? B.Dmg : (Generator->Weapons.IsValidIndex(B.Weapon) ? GetDamageOf(B.Weapon) : S->Damage);
 	SpellHurt(Mo, Dmg, At, true);
 	if (S->Slow > 0.f) Mo->SlowFor(S->Slow, S->Duration > 0.f ? S->Duration : 2.f);
@@ -355,6 +360,7 @@ void URDCombatComponent::SpellBurst(FBolt& B, const FVector& At, ARDMonster* Dir
 	if (UPointLightComponent* L = B.Light.Get()) { L->SetWorldLocation(At); Flashes.Add({ L, 0.f, S->LightIntensity * 3.f }); }
 	// (the list of 2026-11-11: a free chi pays when it meets one, or does no harm)
 	if (!PayFreeBolt(B, At, Direct, FMath::Max(S->Radius, S->Splash))) { ++BoltsElsewhere; LastBurstAt = At; return; }
+	CurrentSpellElement = S->Element;
 	// (what stays on a monster it struck: a slow, a burn that gives some back to her)
 	auto Hold = [&](ARDMonster* Mo)
 	{
@@ -431,6 +437,9 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 	const FVector Hand = M ? M->GetSocketLocation(Generator->Weapons[Wi].SpellBone) : L;
 	SpellsReleased.FindOrAdd(S->Name)++;
 	Generator->PlaySoundAt(FName(*FString::Printf(TEXT("Player.Cast.%s"), *S->SoundKey.ToString())), Hand);
+	// (the list of 2026-11-11: its element on its hurt; a spell that is no curse is the element Elemental Ruin then takes)
+	CurrentSpellElement = S->Element;
+	if (S->Kind != ERDSpellKind::Curse && !S->Element.IsNone()) LastCastElement = S->Element;
 	auto Around = [&](const FVector& C, float R, TFunctionRef<void(ARDMonster*)> Do)
 	{
 		for (ARDMonster* Mo : Generator->GetMonsters())
@@ -501,6 +510,8 @@ void URDCombatComponent::ReleaseSpell(int32 Wi)
 		break;
 	case ERDSpellKind::Curse:
 	{
+		// (the list of 2026-11-11: the Warlock's thirteen, RDList11c.cpp)
+		if (S->CurseEffect != ERDCurseEffect::None) { ReleaseCurse11(*S, Si); break; }
 		const FVector At = SpellTargetPoint(S->Reach);
 		SpawnSpellFx(S->ImpactFx, At, FRotator::ZeroRotator, S->ImpactFxScale, S);
 		Around(At, S->Radius, [&](ARDMonster* Mo)
@@ -717,6 +728,7 @@ void URDCombatComponent::TickSpells(float Dt, float Now)
 			{
 				DrainTick = 0.25f;
 				const float D = DrainDps * 0.25f;
+				CurrentSpellElement = S->Element;
 				SpellHurt(T, D, T->GetActorLocation(), false);
 				HealBy(D * DrainShare);
 			}
@@ -750,6 +762,7 @@ void URDCombatComponent::TickSpells(float Dt, float Now)
 		if (Ar.Dps > 0.f && (Ar.HurtTimer -= Dt) <= 0.f)
 		{
 			Ar.HurtTimer = 0.5f;
+			CurrentSpellElement = S->Element;
 			for (ARDMonster* Mo : Generator->GetMonsters())
 			{
 				if (!Mo || Mo->IsDead()) continue;

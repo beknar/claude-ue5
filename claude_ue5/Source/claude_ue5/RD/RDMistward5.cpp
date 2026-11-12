@@ -59,7 +59,7 @@ void ARDMonster::SetupRanged(const FRDMonsterDef& Def)
 
 float ARDMonster::GetShotDamage() const
 {
-	return bShoots ? Damage * RangedShare * (1.f - GetCurseShare()) : 0.f;
+	return bShoots ? Damage * RangedShare * BlowMul() : 0.f;
 }
 
 FVector ARDMonster::ShotMuzzle() const
@@ -70,6 +70,7 @@ FVector ARDMonster::ShotMuzzle() const
 
 bool ARDMonster::TryShoot(AActor* P, const FVector& D, float Dist, float Dz, float Gap, float Dt)
 {
+	if (IsSilenced()) { ++SilencedRefusals; return false; }          // (the list of 2026-11-11: Curse of Silence)
 	if (!P || RangedWaitLeft > 0.f || AttackCooldown > 0.f || !RangedClip) return false;
 	// (out of its blows' reach, in its range, not far above or below)
 	if (Gap <= Reach * 1.5f || Dist < RangedMin || Dist > RangedRange || Dz > 250.f) return false;

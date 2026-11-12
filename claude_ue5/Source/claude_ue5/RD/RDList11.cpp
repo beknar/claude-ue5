@@ -322,7 +322,7 @@ FString ARDDungeonGenerator::ConsoleSetTier(int32 N)
 	int32 Learned = 0, Forgot = 0;
 	for (const FRDSpellDef& S : Spells)
 	{
-		if (S.Slot <= 0 || !HeroLearns(S.Type)) continue;
+		if (S.Slot <= 0 || !HeroCanLearnSpell(S)) continue;
 		const bool bCard = H->Weapons.ContainsByPredicate([&S](const FRDWeaponDef& W) { return W.Name == S.Name; });
 		if (S.Slot <= N) { if (!Cb->KnowsSpell(S.Name) && Cb->LearnSpell(S.Name)) ++Learned; }
 		else if (!bCard && Cb->KnowsSpell(S.Name))

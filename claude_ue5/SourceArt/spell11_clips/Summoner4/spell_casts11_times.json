@@ -1,0 +1,14 @@
+{
+ "Cast_Starfall": {
+  "length": 2.0,
+  "release": 1.15
+ },
+ "Cast_Singularity": {
+  "length": 2.0,
+  "release": 1.25
+ },
+ "Cast_SoulRend": {
+  "length": 1.6,
+  "release": 0.75
+ }
+}

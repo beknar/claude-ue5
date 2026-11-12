@@ -1503,6 +1503,17 @@ void ARDDungeonGenerator::TownOnKill(ARDMonster* M, bool bBossKill)
 	const uint32 H = HashCombine(GetTypeHash(M->GetUniqueID()), (uint32)SessionSeed ^ 0x601Du);
 	int32 Gold = FMath::RoundToInt(FMath::Lerp(KillGold.X, KillGold.Y, (H % 1000u) / 999.f) * T);
 	if (bBossKill || M->bBoss) Gold += FMath::RoundToInt(BossGold * T);
+	// (the list of 2026-11-11: Curse of Greed: half as much gold again, and a thing besides one time in seven or so)
+	if (M->HasCurse11(ERDCurseEffect::Greed))
+	{
+		const int32 More = FMath::RoundToInt(Gold * M->CurseAmount11(ERDCurseEffect::Greed));
+		Gold += More; GreedGold += More;
+		if ((float)(HashCombine(H, 0x6EEDu) % 1000u) / 1000.f < 0.15f && M->Section)
+		{
+			const FName Thing = LootOf(M->Section->Coord, (int32)(H % 997u) + 4000);
+			if (!Thing.IsNone()) { TArray<float> Wr; Wr.Add(-1.f); if (DropLoot(M->GetActorLocation(), { Thing }, Wr)) ++GreedThings; }
+		}
+	}
 	if (Gold > 0) AddGold(Gold, bBossKill || M->bBoss ? TEXT("the boss's hoard") : FString());
 	if (bTown)
 	{

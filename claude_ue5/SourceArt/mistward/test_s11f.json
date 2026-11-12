@@ -1,0 +1,280 @@
+{
+ "tag": "s11f",
+ "plan": [
+  "spells11_curses"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "spells11_curses",
+   "ok": true,
+   "curses": {
+    "learned": {
+     "Curse of Rot": true,
+     "Hex of Lethargy": true,
+     "Mark of the Hunted": true,
+     "Withering Brand": true,
+     "Curse of Silence": true,
+     "Curse of Brittle Bones": true,
+     "Curse of Greed": true,
+     "Leech Hex": true,
+     "Curse of Dread": true,
+     "Contagion": true,
+     "Elemental Ruin": true,
+     "Chains of Kinship": true,
+     "Doom": true
+    },
+    "shown": {
+     "Curse of Rot": "Curse of Rot",
+     "Hex of Lethargy": "Hex of Lethargy",
+     "Mark of the Hunted": "Mark of the Hunted",
+     "Withering Brand": "Withering Brand",
+     "Curse of Silence": "Curse of Silence",
+     "Curse of Brittle Bones": "Curse of Brittle Bones",
+     "Curse of Greed": "Curse of Greed",
+     "Leech Hex": "Leech Hex",
+     "Curse of Dread": "Curse of Dread",
+     "Contagion": "Contagion",
+     "Elemental Ruin": "Elemental Ruin",
+     "Chains of Kinship": "Chains of Kinship",
+     "Doom": "Doom"
+    },
+    "icons": {
+     "Curse of Rot": [
+      "spell_curse_of_rot",
+      true
+     ],
+     "Hex of Lethargy": [
+      "spell_hex_of_lethargy",
+      true
+     ],
+     "Mark of the Hunted": [
+      "spell_mark_of_the_hunted",
+      true
+     ],
+     "Withering Brand": [
+      "spell_withering_brand",
+      true
+     ],
+     "Curse of Silence": [
+      "spell_curse_of_silence",
+      true
+     ],
+     "Curse of Brittle Bones": [
+      "spell_curse_of_brittle_bones",
+      true
+     ],
+     "Curse of Greed": [
+      "spell_curse_of_greed",
+      true
+     ],
+     "Leech Hex": [
+      "spell_leech_hex",
+      true
+     ],
+     "Curse of Dread": [
+      "spell_curse_of_dread",
+      true
+     ],
+     "Contagion": [
+      "spell_contagion",
+      true
+     ],
+     "Elemental Ruin": [
+      "spell_elemental_ruin",
+      true
+     ],
+     "Chains of Kinship": [
+      "spell_chains_of_kinship",
+      true
+     ],
+     "Doom": [
+      "spell_doom",
+      true
+     ]
+    },
+    "rot": {
+     "started": [
+      true,
+      true
+     ],
+     "mana_taken": 24.0,
+     "want_mana": 24,
+     "first": [
+      7.12,
+      9.0,
+      "stacks 1"
+     ],
+     "second": [
+      7.23,
+      9.0,
+      "stacks 2"
+     ],
+     "lost_4s": 73.4,
+     "want_4s": 72.0,
+     "particles": 11256
+    },
+    "lethargy": {
+     "slow": [
+      0.3,
+      0.3,
+      0.3,
+      0.0
+     ],
+     "cursed": [
+      true,
+      true,
+      true,
+      false
+     ]
+    },
+    "hunted": {
+     "marked_a": true,
+     "crits": 4,
+     "doubled": 4,
+     "plain": 56,
+     "marked_b": true,
+     "a_still": false
+    },
+    "withering": {
+     "healed": 50.0,
+     "healed_plain": 100.0,
+     "line": [
+      9.77,
+      0.5,
+      ""
+     ]
+    },
+    "silence": {
+     "silenced": [
+      true,
+      true
+     ],
+     "left": [
+      2.92,
+      1.42
+     ],
+     "after_2s": [
+      true,
+      false
+     ]
+    },
+    "brittle": {
+     "hers": [
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      100.0,
+      50.0,
+      50.0
+     ],
+     "plain_monster": 40.0,
+     "nobodys": 40.0,
+     "crits": 1
+    },
+    "greed": {
+     "greed_gold": 1,
+     "things": 0
+    },
+    "leech": {
+     "healed": 15.0,
+     "given": 15.0
+    },
+    "dread": {
+     "afraid": [
+      true,
+      true
+     ],
+     "fled_cm": [
+      188,
+      188
+     ],
+     "blow_10": 11.5,
+     "a_after_tenth": false
+    },
+    "contagion": {
+     "spread": 3,
+     "near_rot": [
+      [
+       7.36,
+       0.3,
+       "stacks 1"
+      ],
+      [
+       7.36,
+       0.3,
+       "stacks 1"
+      ],
+      [
+       7.36,
+       0.3,
+       "stacks 1"
+      ]
+     ],
+     "far_rot": null,
+     "left_was": 7.47
+    },
+    "ruin": {
+     "last_element": "fire",
+     "line": [
+      11.77,
+      0.4,
+      "fire"
+     ],
+     "plain": 25.0,
+     "ruined": 35.0
+    },
+    "kinship": {
+     "bound": [
+      true,
+      true,
+      true,
+      true,
+      false
+     ],
+     "lost": [
+      70.0,
+      10.0,
+      10.0,
+      10.0,
+      0.0
+     ],
+     "shared": 30.0
+    },
+    "doom": {
+     "b_dead": true,
+     "b_executed": true,
+     "burst": 200.0,
+     "a_lost_at_end": 200.0
+    },
+    "cast_counts": {
+     "Curse of Rot": 3,
+     "Hex of Lethargy": 3,
+     "Mark of the Hunted": 2,
+     "Withering Brand": 1,
+     "Curse of Silence": 2,
+     "Curse of Brittle Bones": 1,
+     "Curse of Greed": 1,
+     "Leech Hex": 1,
+     "Curse of Dread": 2,
+     "Contagion": 1,
+     "Elemental Ruin": 1,
+     "Chains of Kinship": 4,
+     "Doom": 2
+    }
+   },
+   "oks": {
+    "curses": true
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_s11f_s11_hunted.png",
+  "mw_s11f_s11_curses.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}
