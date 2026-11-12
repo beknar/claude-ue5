@@ -127,6 +127,15 @@ A continent of 300 x 300 km round Brokenspire, on the `brokenspire` level (the g
 - **A floor on the highest ground under a ring stands over its doorway's sill on a slope**: the tower stands on that ground, a stone footing down to the lowest, steps from its doorway.
 - **PR #43's review (2026-11-10)**: what replaces a mesh's collision must cover the whole of it (the third storey's kept walls had none); a prop that holds a light hands the light over to whatever takes its place (`SetProp` ends the lantern); a nearer door wins over a person; the draws of one call keep their order when split (MSVC: right to left); a search over a world's cells is kept for the cell she is in.
 
+## The farmsteads' designs (the list of 2026-11-11's fourth phase: `RD/RDWildFarm11.cpp`, `919`, `blender_numpy/farm_designs.py`, `888 farms11`)
+
+- **A layout made as data is checked before it is built**: `farm_designs.py` refuses a design whose footprints come within 2 m, that leaves the yard's 31 m, or that blocks a door's 4 m; look at its contact sheet from above (a scratch picture of the 60) before the stage.
+- **A wild container is a chunk door with `bBox`**: its find, prompt, F and tick are the doors' (`WildDoorNear` passes an opened one by, the houses' `door|` lines leave them out). Its key goes into `WildKilled` (saved) above every other range: `(1 << 40)` + farm id x 64 + n for a farm's, `(2 << 40)` for a house's; the kills are place x 16 + n, the points' negative.
+- **Build a test's thing so it can be taken away**: a farm built by `SpawnFarmDesignAt` keeps every component it made and its ranges of the chunk's doors, houses and clears (`FRDWildFarmRec::Comps`, `Door0`..`Clear1`); `RemoveWildFarm` takes them out, so all 60 designs are measured in one play without piling up.
+- **A small room's middle must stay free**: the test walks her to a building's middle; a coop's hay and its hens stood her 44 cm up. A low box an animal carries is never stepped up on (`CanCharacterStepUpOn`).
+- **A prop scaled for the yard is too big indoors**: the cart filled a barn.
+- **A picture from a raised point is a fall**: falls hurt (886); put her on the ground for a view and step back far enough (42 m for a yard).
+
 ## The dungeons' keys (2026-11-08b, phase 3: `RD/RDKeys.cpp`, `905`)
 
 - **PR #31's review (2026-11-08)**: something given once a game (a key from a boss who never comes back) is the player's when it is given, not when its pile is taken (a death or a door taken at once lost the chain); a new rule needs a way in for the saves made before it (the keys from the counters of what she has done); a test's switch must never be a saved counter (it went into the autosaves); a table read every tick is parsed once (the chain, the tiers' towns at Init); a reveal that found nothing to reveal is not marked done; a tier past a table's last needs the table's last (the harvest's parts).

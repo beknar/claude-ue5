@@ -170,11 +170,44 @@ The list of 2026-11-10's sixth phase (`916_wilderness10.py`: `houses`, `map`, `l
 - **The farms on the map** ("the small farm holdings should be noted on the large map"): a farmstead she passes within the finding distance is found as a place is ("Discovered: ...") and drawn on the big map and the minimap with its symbol (a barn over a field's rows), named, and travelled to as places are (`FindPlace` reads a farmstead's id). Measured: Odric's Croft not under the map's cross before she passed it, under it and named after (`wd_w10c_farms10_map.png`).
 - **Travellers on the roads** (the liveliness the list asked for: "what can be done to make the wilderness more lively and alive?"): up to three groups of two or three (the shared townsfolk, refugees and soldiers) on the roads within 450 m of her, out of sight along them when they come, walking towards a town ("a townswoman on the road to Brokenspire"), each with the role's lines; at night they camp beside the road (the side with no field or water, else its verge) round a fire with its light and sit on logs, in the morning they go on. Travellers are people with a sitting clip, walk at the group's slowest pace, and a nearer door takes F before them. Measured: a pair walked 11 m in 6 s, she talked to one (a line of the role's: "talk to a refugee on the road to Ashenreach"), camped at 22:30 (fire, light, two logs: 5 pieces) sitting, walking on at 8 (`wd_w10e_travellers10_road.png`, `wd_w10f_travellers10_camp.png`).
 
+## The list of 2026-11-11, fourth part: the farmsteads' designs
+
+The list of 2026-11-11's fourth phase (`docs/improvements11.txt`; `blender_numpy/farm_designs.py`, `919_farms11.py`; C++ `RD/RDWildFarm11.cpp`, the wild containers and side doors in `RD/RDWild10.cpp`). Walked through in `888 farms11 -Light` (`test_f11d.json`), with `houses10` and `884 farms9` again.
+
+- **Sixty designs** ("all the farms use the exact same design. have at least 50 different designs for farms"):
+  - `farm_designs.py` lays out 60 by six plans (a row, a courtyard, an L, scattered, compact, long), each from a seeded stream.
+  - A design is kept only if every footprint stands 2 m clear of the others, inside 31 m of the middle (the yard `FarmsteadsIn` keeps level and dry), with 4 m clear before every door. One that repeats another's buildings, pens and plan is drawn again.
+  - Every design has a farmhouse, a barn, a pen and a garden. Many also have coops (24), granaries (20), sheds (19), second pens and gardens, and yard things (well, cart, woodpile, hay, trough, scarecrow).
+  - Pens come in three shapes: one rectangle (59), two side by side with a kind each (16), and round (27). They hold the town's five farm animals (cows, goats, pigs, hens, rabbits). Half the barns have a stall inside with cattle, goats or pigs, and most coops have hens.
+  - A farmstead takes one design by its id. The three nearest Brokenspire in the test had three different designs.
+- **Every building has an inside and a door** ("not all the buildings at a farmhold have interiors nor can the doors be opened. example: Garrick's hold"):
+  - Each building of a design is raised from the town's kit (`Town.<Timber|Stone|Thatch>_<part>`), 2 to 6 tiles of 3 m by 2 to 8.
+  - Its floor lies over the ground's highest point under it, on a stone plinth down to the lowest (the plinth is the floor's collision). Windows in a house get a hidden box over their sills.
+  - The doorway carries the kit's door on its hinge (F opens it, and it swings away from her); steps go down where the ground falls before the door.
+  - Its inside goes by its kind:
+    - the farmhouse: a fireplace and fire, a bed and chest, a long table with benches, a barrel, a crate, a wardrobe in a wide one, a lamp;
+    - the barn: hay along the back, a trough, stores at its corners, its stall fenced off;
+    - the shed, coop and granary: hay or sacks in a back corner, four stores, a woodpile in a shed.
+  - The open village houses' doors on a side wall open now too: their leaf's way is taken from its mesh. The test walked her in at every building of the first farm: the house, the barn and the coop each opened, and she stood on its floor inside its walls (0.6, 0.3 and 0.1 cm).
+- **Food in the farms, containers that work** ("farmholds should have some food in them to loot - none of the containers work"):
+  - The wilds' chests, barrels, crates and wardrobes open with F (a lid lifts, doors swing) and give food by their kind (`FarmLoot`: bread, cheese, jerky, fruit, fish, wheat, nuts and seeds, hardtack, carrots, pumpkins...; a barn's and granary's grain), always at least one thing. A garden harvested gives its crops (`Town.Crop1..6`'s items).
+  - Each is kept looted in the game (`WildKilled`, saved). A chunk made again builds it open and empty, and F passes it by.
+  - The village and lone houses' containers work the same way.
+  - Measured: the chest gave Bread x 2 and Jerky (the FOUND plaque, her things counted); the garden gave Wild Carrot, Wheat and Sunflower Seeds; all 10 animals were still in their pens 6 s later.
+- **Each design built and taken away**: `SpawnFarmDesignAt` built all 60 in turn near the first farm, and `RemoveWildFarm` took each away. Each had a house and a barn, every building five things or more, 9 to 21 containers, 1 or 2 gardens and 2 to 19 animals.
+- **On the way**:
+  - In a coop the test stood her 44 cm up, on its hay and then its hens: a small building's hay goes in a corner, its hens keep to its back without a fence, and the farm animals' boxes cannot be stepped on (`CanCharacterStepUpOn`, the town's animals too).
+  - The yard's cart, scaled for the yard, filled a barn: a barn has a trough instead.
+
+![A farmstead's yard: a barn and a house of thatch, its garden beds, a scarecrow](../images/wild_farm11_yard.jpg)
+
+![Inside a barn: the goats' stall and its hay rack](../images/wild_farm11_barn.jpg)
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:
 
-- Caves are a mouth among rocks: there is no inside. Villages, camps and lone houses have their buildings and props but nobody in them (the farmsteads have their families). The farmhouses and barns cannot be entered (they are whole meshes with collision), and the farm folk stand at their work: they do not walk, sleep or go in at night.
+- Caves are a mouth among rocks: there is no inside. Villages, camps and lone houses have their buildings and props but nobody in them (the farmsteads have their families). Since the list of 2026-11-11 every farm building can be entered; the farm folk stand at their work: they do not walk, sleep or go in at night. The farm buildings have one storey, and the gardens are harvested once a game (the town's grow again by the next day).
 - Monsters live only at spawn points, lairs and the captain's two quests' places; between places there are only the animals that flee from her (deer, wolves, squirrels, hares), which never fight (since the list of 2026-11-07 she can hunt them).
 - Birds and insects are effects round her (flocks and swarms), not creatures: nothing hunts them and they do not land.
 - The weather has no lightning, puddles or wet ground: the rain and snow are falling drops round the camera, the storm a darker sky, more rain and stronger wind.
@@ -238,4 +271,5 @@ The tool's exit code is 1 for the 15 known unreadable pack files the asset regis
 2e. The list of 2026-11-08b's first part: Brokenspire's rebuild note 3g (`899_improvements9.py`, then `887 materials,data,level`).
 2g. Its third part, the dungeons' keys: C++ first (`RD/RDKeys.cpp`, `TierAt`), then `905_dungeon_keys.py` (every map of the game: the chain and the key and map items). Check with `884 keys9 -Light` and `868 finalboss`.
 2f. Its second part, the medieval farms: C++ first (`build_cpp.ps1`), then on `brokenspire` `899_improvements9.py farms` (the families' lines) and `887_wilderness.py data` (the farmsteads' pieces and the well's height) and the level saved (`887 level`, or save it). Check with `884 farms9 -Light` and the probe (its `col.bin`, `farm.bin`, `crop.bin`, and with `-Heights` `hdiff.bin`: the walked height less the drawn one).
+2h. The list of 2026-11-11's fourth part, the farmsteads' designs: C++ first (`RD/RDWildFarm11.cpp`), `python pipeline/blender_numpy/farm_designs.py [count] [seed]` (writes `SourceArt/wilderness/farm_designs.json`: 60 designs from seed 1111), then `919_farms11.py` (on `brokenspire`: the designs and the containers' loot; it reports any piece, item or animal they name that the level lacks). Check with `888_wilderness_test.ps1 farms11,houses10 <tag> 2400 -Light` and `884 farms9 -Light`.
 3. `888_wilderness_test.ps1 all <tag>`; Brokenspire's own test (`884_brokenspire_test.ps1 all`) after anything shared: its `gate` step expects the gate open when the wilderness is on.

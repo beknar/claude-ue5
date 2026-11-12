@@ -1,0 +1,201 @@
+{
+ "tag": "f11e",
+ "plan": [
+  "farms9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "farms9",
+   "ok": true,
+   "kind_shares": {
+    "none": 0.125,
+    "open field": 0.595,
+    "crofts": 0.073,
+    "pasture": 0.204,
+    "yard": 0.004
+   },
+   "open_fields": 67,
+   "open_fields_with_more_than_one_crop": [],
+   "crops_in_open_fields": 11,
+   "strip_w_m": [
+    15.0,
+    24.0
+   ],
+   "croft_plot_m2_median": 1200,
+   "walked_follows_ridge": {
+    "corr": 1.0,
+    "slope": 1.0,
+    "walked_less_bare_m": [
+     0.0,
+     0.313
+    ]
+   },
+   "cross": {
+    "at": [
+     -2000.0,
+     -1400.0
+    ],
+    "strip_w": 22.92,
+    "samples": 321,
+    "strips": 5,
+    "furrows": 4,
+    "ridge_min_max_m": [
+     0.0,
+     0.313
+    ]
+   },
+   "farmsteads_within_3_5km": 23,
+   "farm": {
+    "name": "Odric's Croft",
+    "at": [
+     151.5,
+     -587.2
+    ],
+    "props": 220,
+    "animals": 10,
+    "folk": 3
+   },
+   "animals": [
+    {
+     "kind": "Goat",
+     "in_pen": true,
+     "above_ground_cm": 23.0
+    },
+    {
+     "kind": "Goat",
+     "in_pen": true,
+     "above_ground_cm": 21.0
+    },
+    {
+     "kind": "Goat",
+     "in_pen": true,
+     "above_ground_cm": 28.0
+    },
+    {
+     "kind": "Pig",
+     "in_pen": true,
+     "above_ground_cm": -1.0
+    },
+    {
+     "kind": "Pig",
+     "in_pen": true,
+     "above_ground_cm": -1.0
+    },
+    {
+     "kind": "Pig",
+     "in_pen": true,
+     "above_ground_cm": -1.0
+    },
+    {
+     "kind": "Chicken",
+     "in_pen": true,
+     "above_ground_cm": 12.0
+    },
+    {
+     "kind": "Chicken",
+     "in_pen": true,
+     "above_ground_cm": 12.0
+    },
+    {
+     "kind": "Chicken",
+     "in_pen": true,
+     "above_ground_cm": 13.0
+    },
+    {
+     "kind": "Chicken",
+     "in_pen": true,
+     "above_ground_cm": 11.0
+    }
+   ],
+   "folk": [
+    {
+     "title": "farmer of Odric's Croft",
+     "clip": "AS_Town_Tend",
+     "feet_above_ground_cm": 0.0,
+     "body": "Townsman2"
+    },
+    {
+     "title": "farmwife of Odric's Croft",
+     "clip": "AS_Town_Scatter",
+     "feet_above_ground_cm": 0.0,
+     "body": "Townswoman2"
+    },
+    {
+     "title": "child of Odric's Croft",
+     "clip": "MM_Idle",
+     "feet_above_ground_cm": 0.0,
+     "body": "Child1"
+    }
+   ],
+   "animals_after_12s": [
+    {
+     "in_pen": true,
+     "above_ground_cm": 28.0,
+     "state": 2
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 15.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 28.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 0.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 0.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": -1.0,
+     "state": 0
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 9.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 13.0,
+     "state": 0
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 13.0,
+     "state": 1
+    },
+    {
+     "in_pen": true,
+     "above_ground_cm": 11.0,
+     "state": 1
+    }
+   ],
+   "prompt": "talk to the farmwife of Odric's Croft",
+   "bark": "farmwife of Odric's Croft|Mind the gate, they'll be out and in the beans before you can whistle.",
+   "bark_new": true,
+   "bodies_ok": true,
+   "fence_pieces": 90,
+   "fences_in_open_fields": []
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_f11e_farms9_talk.png",
+  "bs_f11e_farms9_farmstead.png",
+  "bs_f11e_farms9_farmstead2.png",
+  "bs_f11e_farms9_paddock.png",
+  "bs_f11e_farms9_strips.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

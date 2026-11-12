@@ -32,6 +32,9 @@ namespace
 void ARDDungeonGenerator::SpawnWildFarm(ARDWildChunk* C, const FRDWildPlace& P)
 {
 	if (!C || !IsWildReady()) return;
+	// (the list of 2026-11-11's fourth phase: one of the designs, by the farmstead's id (RDWildFarm11.cpp); the fixed layout below
+	// is the one every farm had)
+	if (FarmDesigns.Num() > 0) { SpawnWildFarm11(C, P, (int32)(FRDWildWorld::Hash(P.Id, 91, Wild->Seed) % (uint32)FarmDesigns.Num())); return; }
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 77, Wild->Seed));
 	const FVector O = C->GetActorLocation();
 	FRDWildFarmRec Rec; Rec.Id = P.Id; Rec.Name = P.Name; Rec.At = P.At; Rec.Yaw = P.Yaw; Rec.Chunk = C;
