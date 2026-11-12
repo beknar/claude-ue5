@@ -585,6 +585,9 @@ private:
 	/** the list of 2026-11-11: whether the harbour is open to the sea (the generator's bPortWaterOpen) and a world point is within
 	 *  Reach cm of its rectangle (no town wall or tower stands there) */
 	bool NearOpenHarbour(const FVector& W, float Reach) const;
+	/** the harbour's walked floor under its water (cm, the section's): 1.7 m under the quay, 2.5 m with the harbour open to the
+	 *  sea, where she swims (the user's of 2026-11-12: 140 cm of water, deeper than her swimming's 120) */
+	float HarbourFloorZ() const;
 	/** tests: the ramps up out of the harbour (world: foot in the water, top on the quay) */
 	TArray<FVector> TownRampFeet, TownRampTops;
 	void FoundryShell(int32 BI);

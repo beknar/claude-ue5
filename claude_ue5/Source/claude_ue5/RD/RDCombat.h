@@ -254,6 +254,8 @@ public:
 	float WildRunFactor = 1.f;
 	/** the eighth phase: on her horse, this many times as fast */
 	float MountFactor = 1.f;
+	/** the user's of 2026-11-12: her speed swimming (the generator's SwimSpeedMul while she swims) */
+	float SwimFactor = 1.f;
 	/** a swing, a roll or a block under way (no mounting in one: PR #37's review) */
 	bool IsBusyForMount() const { return AttackTime >= 0.f || IsDodging() || bBlocking; }
 	void RefreshWalkSpeed() { UpdateWalkSpeed(); }

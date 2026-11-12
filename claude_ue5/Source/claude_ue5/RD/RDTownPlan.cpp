@@ -2844,7 +2844,7 @@ void ARDSection::TownGround()
 					RDTPTouching(P, M, N, Tt);
 					bool bWater = true, bPier = false;
 					for (const FIntPoint& Q : Tt) { bWater &= InHarbourWater(Q); bPier |= TownHarbour.Contains(Q) && !InHarbourWater(Q); }
-					if (bWater) Zw = -170.f; else if (bPier) Zw = 0.f;
+					if (bWater) Zw = HarbourFloorZ(); else if (bPier) Zw = 0.f;
 				}
 				Vw[I * NvW + J] = FVector(P.X, P.Y, Zw);
 			}

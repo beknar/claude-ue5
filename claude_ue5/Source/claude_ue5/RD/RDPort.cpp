@@ -45,6 +45,11 @@ bool ARDDungeonGenerator::WaterFaceAt(const FVector& At, float& Z) const
 	return WildWaterZAt(At, Z);
 }
 
+float ARDSection::HarbourFloorZ() const
+{
+	return Generator && Generator->bPortWaterOpen ? -250.f : RDPortWalkZ;
+}
+
 bool ARDSection::NearOpenHarbour(const FVector& W, float Reach) const
 {
 	if (!Generator || !Generator->bPortWaterOpen || TownHarbour.Area() <= 0) return false;
@@ -106,7 +111,8 @@ void ARDSection::HarbourBuild()
 			if (!InHarbourWater(T) || !In(T + Dl) || Type[Idx(T + Dl)] == 0 || InHarbourWater(T + Dl)) return false;
 			for (const FIntRect& Pr : TownPiers) if (Pr.Contains(T + Dl)) return false;
 			const FVector Wl(Dl.X, Dl.Y, 0), E = TileWorld(T) + Wl * (M * 0.5f);
-			const FVector Top = E + Wl * 20.f + FVector(0, 0, 5.f), Foot = E - Wl * 600.f + FVector(0, 0, RDPortWalkZ);
+			// (down to the harbour's floor: 2.5 m since she swims there, over 8 m out (17 degrees))
+			const FVector Top = E + Wl * 20.f + FVector(0, 0, 5.f), Foot = E - Wl * 800.f + FVector(0, 0, HarbourFloorZ());
 			for (const TPair<FVector, float>& Mo : Moored)
 				if (FMath::PointDistToSegment(FVector(Mo.Key.X, Mo.Key.Y, 0), FVector(Top.X, Top.Y, 0), FVector(Foot.X, Foot.Y, 0)) < Mo.Value + M * 0.5f) return false;
 			const FVector Al = Foot - Top;

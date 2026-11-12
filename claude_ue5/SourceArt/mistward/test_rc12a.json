@@ -1,0 +1,90 @@
+{
+ "tag": "rc12a",
+ "plan": [
+  "stealth"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "stealth",
+   "ok": true,
+   "energy": 100.0,
+   "cost": 40.0,
+   "abilities": [
+    "@Dodge",
+    "@Stealth"
+   ],
+   "switch": true,
+   "q": {
+    "stealthed": true,
+    "taken": 40.0,
+    "says": "You slip into the shadows: unseen for 8 s (your first blow strikes 75% harder)",
+    "buffs": [
+     "STEALTH"
+    ]
+   },
+   "lasted": 7.78,
+   "regen_in_it": 0.05,
+   "ended_by": "time",
+   "regen_after": 1.5,
+   "monster": {
+    "came": {
+     "attacks": 1,
+     "m": 1.41
+    },
+    "attacks_in_stealth": 0,
+    "hp_lost": 0.0,
+    "aggro": false,
+    "evaded": 0,
+    "still": true
+   },
+   "trap": {
+    "name": "Pit",
+    "triggered": 0,
+    "passed": 1,
+    "hp_lost": 0.0,
+    "state": [
+     0
+    ]
+   },
+   "ambush": {
+    "Daggers": {
+     "plain": 13.0,
+     "ambush": 22.8,
+     "ambushes": 1,
+     "ended_by": "attack",
+     "stealthed": false,
+     "damage_of": 13.0
+    },
+    "Crossbow": {
+     "plain": 33.8,
+     "ambush": 59.2,
+     "ambushes": 1,
+     "ended_by": "attack",
+     "stealthed": false,
+     "damage_of": 33.8
+    }
+   },
+   "refused": {
+    "started": false,
+    "says": "Not enough dexterity energy for stealth (10 of 40)",
+    "stealthed": false
+   },
+   "speed_potion": {
+    "energy": 100.0,
+    "says": "Drank the small speed potion:  +10% speed for 30 s, your dexterity energy full"
+   },
+   "warrior": {
+    "energy": 0.0,
+    "started": false,
+    "abilities": []
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "shots": [
+  "mw_rc12a_stealth_hud.png"
+ ],
+ "error": null,
+ "windows_shown_again": 0
+}

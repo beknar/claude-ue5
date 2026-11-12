@@ -159,10 +159,17 @@ void RDWildComputeChunk(const FRDWildWorld& W, FRDWChunkData& D)
 			Wt.T.Add(Base + 1); Wt.T.Add(Base + 2); Wt.T.Add(Base + 3);
 			if (Kind && Deep > 0.9f)
 			{
-				// (she wades no deeper than 90 cm; past the sea's shelf a wall)
-				const bool bWall = Kind == 1 && Deep > 8.f;
+				// (she wades no deeper than 90 cm; since 2026-11-12 deeper water's floor follows its depth down to 145 cm under the
+				// face, where she swims (RDSwim.cpp: her feet 120 cm under it), each corner by its own depth so the floor has no
+				// step where wading turns to swimming. The deep sea's sheet 3 m over the water (Deep > 8 m) is gone: it held
+				// nothing (she would have walked off the floor's edge onto the sea bed); the sea is swum)
 				const int32 Bb = D.Block.Num();
-				for (int32 Q = 0; Q < 4; ++Q) D.Block.Add(FVector(Ij[Q][0] * St * 100.0, Ij[Q][1] * St * 100.0, W.ToZ(Lv) + (bWall ? 300.f : -90.f)));
+				for (int32 Q = 0; Q < 4; ++Q)
+				{
+					const FRDWSample& Sq = *Qs[Q];
+					const float Dq = Sq.WaterKind ? Sq.Water - Sq.H : 0.f;
+					D.Block.Add(FVector(Ij[Q][0] * St * 100.0, Ij[Q][1] * St * 100.0, W.ToZ(Lv) - 100.f * FMath::Clamp(Dq, 0.9f, 1.45f)));
+				}
 				D.BlockT.Add(Bb); D.BlockT.Add(Bb + 2); D.BlockT.Add(Bb + 1);
 				D.BlockT.Add(Bb + 1); D.BlockT.Add(Bb + 2); D.BlockT.Add(Bb + 3);
 			}

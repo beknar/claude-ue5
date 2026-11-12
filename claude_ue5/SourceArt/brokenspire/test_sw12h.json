@@ -1,0 +1,272 @@
+{
+ "tag": "sw12h",
+ "plan": [
+  "swim12"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "swim12",
+   "ok": true,
+   "heroes": {
+    "Warrior": {
+     "idle": {
+      "on": true,
+      "clip": "Anim_Idle_Swim_Warrior3",
+      "under": 20.1
+     },
+     "attack_refused": true,
+     "roll_refused": true,
+     "shot": true,
+     "swim": {
+      "clips": [
+       "Anim_Idle_Swim_Warrior3",
+       "Anim_Swim_Warrior3"
+      ],
+      "under": -6.8,
+      "head_range": [
+       -9.5,
+       9.7
+      ],
+      "pelvis": -4.3,
+      "speed_max": 194,
+      "top": 194.0,
+      "strokes": 3,
+      "ripples": 7,
+      "fresh_sources": 6,
+      "her_push": 0.84
+     },
+     "out": {
+      "on": false,
+      "z": 84,
+      "mesh_back_cm": 0.0
+     }
+    },
+    "Mage": {
+     "idle": {
+      "on": true,
+      "clip": "Anim_Idle_Swim_Caster",
+      "under": 19.3
+     },
+     "attack_refused": true,
+     "roll_refused": true,
+     "shot": true,
+     "swim": {
+      "clips": [
+       "Anim_Idle_Swim_Caster",
+       "Anim_Swim_Caster"
+      ],
+      "under": -11.0,
+      "head_range": [
+       -11.8,
+       -0.6
+      ],
+      "pelvis": -6.4,
+      "speed_max": 210,
+      "top": 210.0,
+      "strokes": 3,
+      "ripples": 8,
+      "fresh_sources": 8,
+      "her_push": 0.87
+     },
+     "out": {
+      "on": false,
+      "z": 86,
+      "mesh_back_cm": 0.0
+     }
+    },
+    "Warlock": {
+     "idle": {
+      "on": true,
+      "clip": "Anim_Idle_Swim_DarkCaster",
+      "under": 19.8
+     },
+     "attack_refused": true,
+     "roll_refused": true,
+     "shot": true,
+     "swim": {
+      "clips": [
+       "Anim_Idle_Swim_DarkCaster",
+       "Anim_Swim_DarkCaster"
+      ],
+      "under": -8.7,
+      "head_range": [
+       -9.3,
+       1.5
+      ],
+      "pelvis": -5.5,
+      "speed_max": 209,
+      "top": 209.0,
+      "strokes": 3,
+      "ripples": 8,
+      "fresh_sources": 8,
+      "her_push": 0.87
+     },
+     "out": {
+      "on": false,
+      "z": 86,
+      "mesh_back_cm": 0.0
+     }
+    },
+    "Rogue": {
+     "idle": {
+      "on": true,
+      "clip": "Anim_Idle_Swim_Rogue",
+      "under": 19.8
+     },
+     "attack_refused": true,
+     "roll_refused": true,
+     "shot": true,
+     "swim": {
+      "clips": [
+       "Anim_Idle_Swim_Rogue",
+       "Anim_Swim_Rogue"
+      ],
+      "under": -9.2,
+      "head_range": [
+       -10.4,
+       0.4
+      ],
+      "pelvis": -5.6,
+      "speed_max": 207,
+      "top": 207.0,
+      "strokes": 3,
+      "ripples": 6,
+      "fresh_sources": 6,
+      "her_push": 0.87
+     },
+     "out": {
+      "on": false,
+      "z": 86,
+      "mesh_back_cm": 0.0
+     }
+    },
+    "MartialArtist": {
+     "idle": {
+      "on": true,
+      "clip": "Anim_Idle_Swim_MartialArtist",
+      "under": 19.8
+     },
+     "attack_refused": true,
+     "roll_refused": true,
+     "shot": true,
+     "swim": {
+      "clips": [
+       "Anim_Idle_Swim_MartialArtist",
+       "Anim_Swim_MartialArtist"
+      ],
+      "under": -7.3,
+      "head_range": [
+       -8.1,
+       3.2
+      ],
+      "pelvis": -4.5,
+      "speed_max": 207,
+      "top": 207.0,
+      "strokes": 3,
+      "ripples": 8,
+      "fresh_sources": 8,
+      "her_push": 0.87
+     },
+     "out": {
+      "on": false,
+      "z": 84,
+      "mesh_back_cm": 0.0
+     }
+    },
+    "Summoner": {
+     "idle": {
+      "on": true,
+      "clip": "Anim_Idle_Swim_Summoner4",
+      "under": 19.6
+     },
+     "attack_refused": true,
+     "roll_refused": true,
+     "shot": true,
+     "swim": {
+      "clips": [
+       "Anim_Idle_Swim_Summoner4",
+       "Anim_Swim_Summoner4"
+      ],
+      "under": -7.8,
+      "head_range": [
+       -8.7,
+       4.9
+      ],
+      "pelvis": -4.9,
+      "speed_max": 207,
+      "top": 207.0,
+      "strokes": 3,
+      "ripples": 6,
+      "fresh_sources": 6,
+      "her_push": 0.87
+     },
+     "out": {
+      "on": false,
+      "z": 85,
+      "mesh_back_cm": 0.0
+     }
+    }
+   },
+   "ramps": 8,
+   "sea": {
+    "mouth": {
+     "depth_m": 3.8,
+     "kind": 1,
+     "on": true,
+     "on_after": true,
+     "pelvis": -3.5,
+     "z_change": 0,
+     "strokes": 5
+    },
+    "deep": {
+     "depth_m": 8.3,
+     "kind": 1,
+     "on": true,
+     "on_after": true,
+     "pelvis": -3.5,
+     "z_change": 0,
+     "strokes": 5
+    }
+   },
+   "sounds": {
+    "splash_on": [
+     -29.8,
+     1
+    ],
+    "splash_off": [
+     -43.0,
+     1
+    ],
+    "splashes_made": 2,
+    "strokes_on": [
+     -22.6,
+     4
+    ],
+    "strokes_off": [
+     -43.2,
+     5
+    ],
+    "splash_db_over_silent": 13.2,
+    "strokes_db_over_silent": 20.6
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "bs_sw12h_swim12_Warrior_idle.png",
+  "bs_sw12h_swim12_Warrior_swim.png",
+  "bs_sw12h_swim12_Mage_idle.png",
+  "bs_sw12h_swim12_Mage_swim.png",
+  "bs_sw12h_swim12_Warlock_idle.png",
+  "bs_sw12h_swim12_Warlock_swim.png",
+  "bs_sw12h_swim12_Rogue_idle.png",
+  "bs_sw12h_swim12_Rogue_swim.png",
+  "bs_sw12h_swim12_MartialArtist_idle.png",
+  "bs_sw12h_swim12_MartialArtist_swim.png",
+  "bs_sw12h_swim12_Summoner_idle.png",
+  "bs_sw12h_swim12_Summoner_swim.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

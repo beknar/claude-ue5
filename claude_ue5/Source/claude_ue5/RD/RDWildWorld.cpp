@@ -756,7 +756,9 @@ float FRDWildWorld::Feature(double X, double Y, float H, FRDWSample* Out) const
 			const float Ws = 1.f - RDWSmooth(Hm - 2.f, Hm + 12.f, (float)FMath::Abs(Y - T.Site.Y));
 			if (Ws > 0.f)
 			{
-				const float Bed = -0.6f - 9.f * RDWSmooth(255.f, 700.f, (float)(X - T.Site.X));
+				// (1.5 m under the sea at the section's edge, the harbour's floor's depth since she swims there (2026-11-12:
+				// the wilds' swimming floor 145 cm under the face meets the harbour's 140 cm); 0.6 m until then)
+				const float Bed = -1.5f - 9.f * RDWSmooth(255.f, 700.f, (float)(X - T.Site.X));
 				H = FMath::Lerp(H, FMath::Min(H, Bed), Ws);
 				if (H < -0.05f) { Water = 0.f; Kind = 1; }
 			}

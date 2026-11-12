@@ -3,7 +3,8 @@ brokenspire level (play stopped). Parts (argv, default "materials,data,level"):
   materials  /Game/RandomDungeon/Wild/M_RD_WildGround (the terrain chunks' ground: the world's colour from above in the
              vertex colour, its layers (rock, snow / sand, mud) in UV1 / UV2 carried by Hive Sherwood's, AlienPlanet's
              textures' detail; lava glowing from the vertex alpha), M_RD_WildWater with MI_RD_WildSea / MI_RD_WildSpring
-             (depth in the vertex colour's red, a panning normal), M_RD_WildLava
+             (depth in the vertex colour's red, a panning normal; since 2026-11-12 the normal bent by the ripples round her that
+             the game writes into MPC_RD_Water, RD/RDSwim.cpp), M_RD_WildLava
   data       the generator's WildBiomes from SourceArt/wilderness/biomes.json (each plant and rock scaled to the height the
              table gives it, from its mesh's bounds; a missing mesh is reported and left out), WildPieces / WildPieceScale (the
              places' props), the fire and steam effects
@@ -81,6 +82,46 @@ class MB:
         st = MEL.get_statistics(self.m)
         REPORT.append(f"{self.m.get_name()}: {st.num_pixel_shader_instructions} pixel instructions, {st.num_samplers} samplers")
         return self.m
+
+
+# (the water's ripples, 2026-11-12: each source a ring spreading at SPEED cm/s for LIFE s, a band WIDTH wide, waves of WAVE cm,
+# its strength fading with its age; her own push a bulge BULGE cm round her. Sources 2 cm apart at 200 km out are within a float's
+# precision: the rings are tens of cm)
+RIPPLE_HLSL = """
+float4 S[8] = { S0, S1, S2, S3, S4, S5, S6, S7 };
+const float SPEED = 110.0, LIFE = 1.9, WIDTH = 28.0, WAVE = 26.0, BULGE = 75.0;
+float2 t = 0;
+for (int i = 0; i < 8; i++)
+{
+    float age = Now - S[i].z;
+    if (S[i].w <= 0.0 || age < 0.0 || age > LIFE) continue;
+    float2 d = P.xy - S[i].xy;
+    float r = length(d) + 0.001;
+    float x = r - SPEED * age;
+    float env = exp(-x * x / (WIDTH * WIDTH)) * (1.0 - age / LIFE) * S[i].w;
+    t += (d / r) * cos(x * 6.2831853 / WAVE) * env;
+}
+float2 dh = P.xy - Her.xy;
+float rh = length(dh) + 0.001;
+t += (dh / rh) * Her.w * (rh / BULGE) * exp(-rh * rh / (BULGE * BULGE)) * 0.9;
+return t * 0.55;
+"""
+
+
+def water_ripples():
+    """MPC_RD_Water: the 8 ripple sources (x, y, the time they began, strength), her own push (x, y, the face's z, strength) and
+    the clock they are timed by (Now: the game's, set each frame by the game)"""
+    p = f"{D}/MPC_RD_Water"
+    if not eal.does_asset_exist(p):
+        at.create_asset("MPC_RD_Water", D, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
+    mpc = unreal.load_asset(p)
+    vs = []
+    for nm in [f"Src{i}" for i in range(8)] + ["Her"]:
+        v = unreal.CollectionVectorParameter(); v.set_editor_property("parameter_name", nm); v.set_editor_property("default_value", unreal.LinearColor(0, 0, -100, 0)); vs.append(v)
+    s = unreal.CollectionScalarParameter(); s.set_editor_property("parameter_name", "Now"); s.set_editor_property("default_value", 0.0)
+    mpc.set_editor_property("vector_parameters", vs); mpc.set_editor_property("scalar_parameters", [s])
+    eal.save_loaded_asset(mpc, only_if_is_dirty=False)
+    return mpc
 
 
 def materials():
@@ -185,6 +226,26 @@ def materials():
     nb = w.n(unreal.MaterialExpressionAdd, -300); w.c(pans[0], "", nb, "A"); w.c(pans[1], "", nb, "B")
     nn = w.n(unreal.MaterialExpressionNormalize, -200); w.c(nb, "", nn, "")
     flat = w.lerp(w.const3((0, 0, 1)), nn, w.const(0.55))
+    # (the user's of 2026-11-12: "have water displacement and a wake for when the player moves through the water": rings
+    # spreading over the face from up to 8 sources the game writes into MPC_RD_Water (where she came in, her wake, rings as she
+    # stands: RDSwim.cpp's AddWaterRipple), and a bulge pushed round her (Her: x, y, the face's z, how hard), as a tilt of the
+    # face's normal: per pixel, so the water's coarse mesh does not matter)
+    mpc = water_ripples()
+    rp = w.n(unreal.MaterialExpressionCustom, -700)
+    rp.set_editor_property("code", RIPPLE_HLSL)
+    rp.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT2)
+    pins = ["P", "Now", "Her"] + [f"S{i}" for i in range(8)]
+    ins = []
+    for nm in pins:
+        ci = unreal.CustomInput(); ci.set_editor_property("input_name", nm); ins.append(ci)
+    rp.set_editor_property("inputs", ins)
+    w.c(wwp, "", rp, "P")
+    for nm, pin in [("Now", "Now"), ("Her", "Her")] + [(f"Src{i}", f"S{i}") for i in range(8)]:
+        cp = w.n(unreal.MaterialExpressionCollectionParameter, -1000, collection=mpc, parameter_name=nm)
+        w.c(cp, "", rp, pin)
+    tilt = w.n(unreal.MaterialExpressionAppendVector, -500); w.c(rp, "", tilt, "A"); w.c(w.const(0.0), "", tilt, "B")
+    bent = w.n(unreal.MaterialExpressionAdd, -400); w.c(flat, "", bent, "A"); w.c(tilt, "", bent, "B")
+    flat = w.n(unreal.MaterialExpressionNormalize, -300); w.c(bent, "", flat, "")
     shallow = w.n(unreal.MaterialExpressionVectorParameter, -800, parameter_name="Shallow", default_value=unreal.LinearColor(0.05, 0.11, 0.10, 1))
     deep = w.n(unreal.MaterialExpressionVectorParameter, -800, parameter_name="Deep", default_value=unreal.LinearColor(0.008, 0.035, 0.05, 1))
     wvc = w.n(unreal.MaterialExpressionVertexColor, -800)

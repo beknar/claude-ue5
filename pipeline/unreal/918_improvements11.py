@@ -27,7 +27,9 @@ The list's second phase (C++ RD/RDList11.cpp first):
            pack's Manny (every guard's skeleton takes it as compatible), their hit times (the right hand's fastest after
            0.3 s); each guard, militiaman, soldier, captain and templar its pack's sword (Knight_0N's, the Vikings a knight's;
            Heaven's none: bare-handed) and its grip from the Manny's reference pose
-The bodies (blender_numpy): the Rogue: martialartist3_retarget.py -- Rogue.glb SourceArt/jrpg_rogue Rogue2.glb --maker
+The bodies (blender_numpy): the Rogue: summoner5_cloak.py -- Rogue2.glb SourceArt/jrpg_rogue/Rogue2_Cloak.glb --hero Rogue2
+(her cloak's own bones, as the Summoner's: Tripo had skinned it to her arms, and her Shoot drew it forward; the user's of
+2026-11-12), then martialartist3_retarget.py -- Rogue.glb SourceArt/jrpg_rogue Rogue2_Cloak.glb --maker
 rogue_clips,weapon5_clips --tag Rogue --carry Stab1,Stab2,Stab3,Shoot,RollF,RollB,W5_Bow --own --inplace Walk,Run --noskin
 --name Rogue2 --env W5_CLIPS=Bow --env W5_HERO=Rogue, then tripo_build.py on Rogue2_Animated.glb (SK_JRPG_Rogue Rogue 170 -).
 The Summoner: summoner5_idle.py (Summoner5.glb -> Summoner5_Idle.glb), summoner5_cloak.py (-> Summoner5_Cloak.glb: the cloak
@@ -35,7 +37,7 @@ baked while her walk and run still carry her, so it billows with her speed), the
 Summoner4.glb SourceArt/jrpg_summoner4 Summoner5_Cloak.glb --maker summoner4_clips --tag Summoner4 --carry
 CastBolt,Summon1,Summon2,Summon3,Summon4,Summon5,Stab1,Stab2,Stab3,Hit_to_body_01 --own --inplace Walk,Run --noskin --name
 Summoner5, tripo_build.py on Summoner5_Animated.glb (SK_JRPG_Summoner4 Summoner4 168 -).
-In the editor: clean, 600 <CH> glb, 610 / 615 / 620, the armour (the Rogue: 849 heroes, summoner3_armour.py, 851), 913 rider,
+In the editor: clean, 600 <CH> glb, 610 / 615 / 620, the armour (the Rogue: 849 heroes, summoner3_armour.py, 851), 913 rider, 921 clips (the swim clips on her skeleton),
 rig, then 819 (her character's MoveScale made an override again and her new walk / run speeds baked in).
 The list's third phase (C++ RD/RDList11c.cpp first; after 910 and 905, which rebuild the made-up spells and the tome spells'
 places; from SourceArt/balance/list11_spells.json; on every map of the game):
