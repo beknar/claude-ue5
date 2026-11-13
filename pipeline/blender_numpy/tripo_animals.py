@@ -51,8 +51,12 @@ def RDTweak(key, A):
     # the ground at the neck's furthest turn)
     if key == "chicken": A["graze"]["pre"] = {"pelvis": 40, "spine_01": 12}
     if key == "horse":
-        A["run"]["gait"]["rear"].update(fold=35, tilt=35, height=11); A["run"]["gait"]["front"].update(fold=48, tilt=42, height=14)                                   # (a tail of its own in the mesh: found and its bones laid along it)
+        A["run"]["gait"]["rear"].update(fold=35, tilt=35, height=11); A["run"]["gait"]["front"].update(fold=48, tilt=42, height=14)
 NO_SKIN = ("root", "saddle")
+# (a leg's bones take only the skin within this share of the animal's height of them, its upper bone, then the others: the skeleton
+# has no bone near a horse's belly, so the belly's skin was the legs' nearest, and the list of 2026-11-12's longer strides drew it
+# down between the legs as a flap; cleared, it takes the trunk's bones)
+LEG_REACH = {"horse": (0.17, 0.12)}                            # (0.09 left the elbows' skin boxy)
 
 
 def log(*a): print("TRIPO", *a, flush=True)
@@ -240,6 +244,17 @@ def skin(S, ob, V):
             j = names.index(b); _n, _p, h, t = next(x for x in S.bones if x[0] == b)
             top = max(h.z, t.z) if b != lg["bones"][0] else h.z
             W[V[:, 2] > top + 0.04 * Hh, j] = 0.0
+    reach = LEG_REACH.get(S.name.lower())
+    legj = []
+    if reach:
+        for lg in S.legs:
+            for k, b in enumerate([x for x in lg["bones"] if x]):
+                j = names.index(b); legj.append(j)
+                W[D[:, j] > (reach[0] if k == 0 else reach[1]) * Hh, j] = 0.0
+        # (a vertex left with nothing goes to its nearest bone that is not a leg's)
+        Dn = D.copy(); Dn[:, legj] = 1e9
+        cleared = W.sum(1) <= 0
+        near = np.where(cleared, Dn.argmin(1), near)
     # (the tail's vertices on its own bones alone)
     tm = getattr(S, "tail_mask", None)
     if tm is not None:
@@ -396,6 +411,7 @@ def main():
                "clips": {k: {**cinfo[k], **meas[k]} for k in clips}}
         rec["walk_speed_cm_s"] = meas["Walk"]["walk_speed_cm_s"]; rec["walk_cycle_s"] = S.anim["walk"]["T"]
         if "Run" in meas: rec["run_speed_cm_s"] = meas["Run"]["walk_speed_cm_s"]; rec["run_cycle_s"] = S.anim["run"]["T"]
+        if "Canter" in meas: rec["canter_speed_cm_s"] = meas["Canter"]["walk_speed_cm_s"]; rec["canter_cycle_s"] = S.anim["canter"]["T"]
         log(S.name, json.dumps({k: rec[k] for k in ("placed", "fit", "size_cm", "triangles", "weights", "walk_speed_cm_s")}))
         for k in clips: log(S.name, k, json.dumps(rec["clips"][k])[:900])
         if PREVIEW:

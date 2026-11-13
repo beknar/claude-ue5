@@ -824,8 +824,13 @@ struct FRDHorseDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Idle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Walk;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Run;
+	/** the list of 2026-11-12 ("horses when either walking or galloping move in an unnatural manner"): a canter between the walk
+	 *  and the gallop, each gait made for the speeds it is ridden at (farm_animals.py's real_gait) and played from its own speed up */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimSequenceBase> Canter;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float WalkClipSpeed = 87.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float CanterClipSpeed = 650.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RunClipSpeed = 260.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float CanterFrom = 400.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GallopFrom = 420.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName SaddleBone = TEXT("saddle");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Price = 60.f;

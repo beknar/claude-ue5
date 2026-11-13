@@ -13,6 +13,8 @@ Steps:
           remains), turned in
   horse9  (2026-11-09, 913) the stable by Brokenspire's gate, the horse bought, mounted with F, her speed on it against on foot
           on the plains, the gallop under her, off with F; pictures of her riding
+  gait12  (2026-11-12, 915) the horse's walk, canter and gallop ridden on the plains: each gait's clip, rate and strides a
+          second, its hooves measured in the world (no slide while down), her rider clip by the gait; pictures from the side
   poi7    (2026-11-09, 912) the points of interest: the seconds between them along 14 lines of the world's model, a 150 s
           run in play (what met her never 40 s apart), each use made with F
   secondary9 (2026-11-09, 911) a wild place's Hallowed Stone taken and not laid again, the lairs' monsters' Seraph Feathers,
@@ -957,9 +959,14 @@ def step_horse9():
     # ---- out on the plains: on foot, then mounted
     xy = clear_spot("plains"); g.wild_put_her(*xy); yield from wait_chunks(30, 50); yield from rwait(1.0)
     g.call_horse(); yield from rwait(0.8)
-    p0 = G["pawn"].get_actor_location()
-    yield from run_her((1.0, 0.3), 4.0); p1 = G["pawn"].get_actor_location()
-    foot = math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / 4.0
+    # (on foot as mounted, once up to speed: the last 2.5 s of a 4 s run (the list of 2026-11-12's run read 3.25 m/s over the whole
+    # run, its start in it, against 19.44 mounted measured up to speed: 5.98 for 5.5))
+    t0 = time.time(); p0 = None; tf = 0.0
+    for _ in run_her((1.0, 0.3), 4.0):
+        if p0 is None and time.time() - t0 >= 1.5: p0 = G["pawn"].get_actor_location(); tf = time.time()
+        yield
+    p1 = G["pawn"].get_actor_location()
+    foot = math.hypot(p1.x - p0.x, p1.y - p0.y) / 100.0 / max(time.time() - tf, 0.1) if p0 else 0.0
     yield from rwait(0.6)
     g.call_horse(); yield from rwait(0.5)
     hp_ = hs(); d_ = math.hypot(hp_["x"] - G["pawn"].get_actor_location().x, hp_["y"] - G["pawn"].get_actor_location().y)
@@ -1028,6 +1035,108 @@ def step_horse9():
           and res["blocking_before_mount"] is True and res["blocking_mounted"] is False and res["walk_into_horse"]["nearest_cm"] > 35
           and sp["ratio"] >= 5.0)
     step_result("horse9", ok, **res)
+
+
+def step_gait12():
+    """the horse's gaits (the list of 2026-11-12: "horses when either walking or galloping move in an unnatural manner - redo their
+    animations so that they move like real horses"; farm_animals.py's real_gait, RDHorse.cpp's PlayFor): ridden on the plains at
+    three speeds (a slow walk, her walk: a canter, her run: the gallop), the horse's clip, its rate and strides a second, and each
+    hoof measured in the world: while a hoof is down (its lowest few cm against the horse's own feet) it must not slide (the old
+    clips played past their rates' limits and slid 60 % of the speed at her walk); her rider clip by the gait; pictures from the side"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    gi = G["gi"]; owned0 = gi.get_editor_property("horse_owned")
+    gi.set_editor_property("horse_owned", True)
+    xy = clear_spot("plains"); g.wild_put_her(*xy); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    g.call_horse(); yield from rwait(0.8); g.mount_horse(); yield from rwait(1.0)
+    hz = g.get_editor_property("horse")
+    if not hz or not g.is_mounted():
+        gi.set_editor_property("horse_owned", owned0); quiet(False); step_result("gait12", False, mounted=False); return
+    body = hz.get_editor_property("body")
+    HOOVES = ("hoof_front_l", "hoof_front_r", "hoof_rear_l", "hoof_rear_r")
+    hd = g.get_editor_property("horse_def")
+    res["def"] = {"canter": bool(hd.canter), "walk_clip": round(hd.walk_clip_speed), "canter_clip": round(hd.canter_clip_speed),
+                  "run_clip": round(hd.run_clip_speed), "canter_from": round(hd.canter_from), "gallop_from": round(hd.gallop_from)}
+    # (the plains' way: straight on, a little to the side of where the spot finder looked)
+    dxy = (1.0, 0.3); n_ = math.hypot(*dxy); dxy = (dxy[0] / n_, dxy[1] / n_)
+    def ride(name, scale, run, sec_up=2.0, sec=3.0, pic=None):
+        cb().set_run_mode(run)
+        d = V(dxy[0], dxy[1], 0.0)
+        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-10, yaw=math.degrees(math.atan2(dxy[1], dxy[0]))))
+        t0 = time.time(); rows = []; clips = []; shot_done = False
+        while time.time() - t0 < sec_up + sec:
+            G["pawn"].add_movement_input(d, scale)
+            t = time.time() - t0
+            if t >= sec_up:
+                h = hz.get_actor_location()
+                vel = G["pawn"].get_velocity()
+                rows.append((time.time(), h, [body.get_socket_location(b) for b in HOOVES], vel.length(),
+                             hz.get_actor_rotation().yaw, math.degrees(math.atan2(vel.y, vel.x))))
+                clips.append((str(hz.get_editor_property("clip_now")), hz.get_editor_property("rate_now"), hz.get_strides_a_second(),
+                              str(g.get_horse_state()).split("|")[11]))
+            yield
+        # (the picture from her side after the measured stretch: the camera turned under the measure would turn her and the horse)
+        if pic:
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-8, yaw=math.degrees(math.atan2(dxy[1], dxy[0])) + 90.0))
+            t1 = time.time()
+            while time.time() - t1 < 1.4:
+                G["pawn"].add_movement_input(d, scale)
+                if not shot_done and time.time() - t1 >= 0.6: shot(pic, "1280x720"); shot_done = True
+                yield
+        # each hoof: down while within 2 cm of its lowest over the 0.3 s round it, against the horse's feet (the ground under the
+        # hoof and under her differ along a ride); its slide between two frames both down, along the horse and across it
+        slides = []; along = []; across = []; downs = 0
+        for k in range(len(HOOVES)):
+            rel = [r[2][k].z - r[1].z for r in rows]
+            for i in range(1, len(rows)):
+                near = [rel[j] for j in range(len(rows)) if abs(rows[j][0] - rows[i][0]) <= 0.15]
+                lo = min(near)
+                if rel[i] < lo + 2.0 and rel[i - 1] < lo + 2.0:
+                    dt = rows[i][0] - rows[i - 1][0]
+                    # (two frames further apart than half the gallop's stance can be two stances: at 16 frames a second the
+                    # first run read a hoof's next landing as a slide of the horse's whole speed)
+                    if dt <= 0 or dt > 0.035: continue
+                    a, b = rows[i - 1][2][k], rows[i][2][k]
+                    dx, dy = b.x - a.x, b.y - a.y; yw = math.radians(rows[i][4])
+                    slides.append(math.hypot(dx, dy) / dt); downs += 1
+                    along.append(abs(dx * math.cos(yw) + dy * math.sin(yw)) / dt); across.append(abs(-dx * math.sin(yw) + dy * math.cos(yw)) / dt)
+        offs = sorted(abs((r[4] - r[5] + 180.0) % 360.0 - 180.0) for r in rows if r[3] > 50.0)
+        along.sort(); across.sort()
+        sp = sorted(r[3] for r in rows)
+        speed = sp[len(sp) // 2] if sp else 0.0
+        slides.sort()
+        cn = [c[0] for c in clips]
+        main = max(set(cn), key=cn.count) if cn else ""
+        rates = sorted(c[1] for c in clips if c[0] == main); st = sorted(c[2] for c in clips if c[0] == main)
+        out = {"speed_cm_s": round(speed), "clip": main, "clip_share": round(cn.count(main) / max(len(cn), 1), 2),
+               "rate": round(rates[len(rates) // 2], 2) if rates else None, "strides_a_second": round(st[len(st) // 2], 2) if st else None,
+               "frames": len(rows), "frame_ms_median": round(1000.0 * sorted(rows[i][0] - rows[i - 1][0] for i in range(1, len(rows)))[(len(rows) - 1) // 2]) if len(rows) > 2 else None,
+               "hoof_down_pairs": downs,
+               "slide_median_cm_s": round(slides[len(slides) // 2]) if slides else None,
+               "slide_share": round(slides[len(slides) // 2] / max(speed, 1.0), 3) if slides else None,
+               "slide_along_cm_s": round(along[len(along) // 2]) if along else None, "slide_across_cm_s": round(across[len(across) // 2]) if across else None,
+               "facing_off_deg": [round(offs[len(offs) // 2], 1), round(offs[-1], 1)] if offs else None,
+               "rider": max(set(c[3] for c in clips), key=[c[3] for c in clips].count) if clips else ""}
+        res[name] = out
+    # (her speeds by the stick's share: Python's move input passes by her character's MoveScale, the walk / run switch's, so the
+    # first run's "walk" with the switch off went at her full speed (1944 cm/s); a tenth, a third and the whole of her speed are a
+    # walk, her walk (about 5.5 times hers on foot: a canter) and her run)
+    yield from ride("walk", 0.1, False)
+    yield from ride("canter", 0.33, False, pic="gait12_canter")
+    yield from ride("gallop", 1.0, True, pic="gait12_gallop")
+    cb().set_run_mode(False)
+    g.dismount_horse(); yield from rwait(0.5)
+    gi.set_editor_property("horse_owned", owned0)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    quiet(False)
+    w, c, r = res["walk"], res["canter"], res["gallop"]
+    def good(x, clip):
+        return (x["clip"] == clip and x["clip_share"] >= 0.9 and x["hoof_down_pairs"] >= 6 and x["slide_share"] is not None and x["slide_share"] < 0.15)
+    ok = (res["def"]["canter"] and good(w, "walk") and good(c, "canter") and good(r, "run")
+          # (each near its own rate: the clip made for the speed it is ridden at)
+          and 0.6 <= (c["rate"] or 0) <= 1.6 and 0.6 <= (r["rate"] or 0) <= 1.8
+          and w["rider"] == "walk" and c["rider"] == "canter" and r["rider"] == "run")
+    step_result("gait12", ok, **res)
 
 
 def step_list10w():
@@ -2713,7 +2822,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"list12": step_list12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list12": step_list12, "gait12": step_gait12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

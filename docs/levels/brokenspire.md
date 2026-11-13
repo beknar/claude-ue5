@@ -354,7 +354,7 @@ The user's words: "make a rideable horse for a player to buy and ride with incre
 
 **Riding** (`RD/RDHorse.cpp`):
 - **Getting on and off:** F beside it gets her on (after every nearer thing F reaches: a townsperson, the stable, a door, a chest); F again gets her off. No mounting in a swing, a roll or a block.
-- **Moving:** her capsule still moves and collides, and the horse goes under it. The horse plays its walk below 250 cm/s and its gallop above, at the rate its soles keep to the ground (the gallop near 3 times at her ridden speed).
+- **Moving:** her capsule still moves and collides, and the horse goes under it. The horse plays its walk below 250 cm/s and its gallop above, at the rate its soles keep to the ground (the gallop near 3 times at her ridden speed). Since 2026-11-12 it also canters, each gait made for its own speed: see [the horse's gaits](#the-horses-gaits-the-list-of-2026-11-12-second-part).
 - **Her seat:** her pelvis sits 14 cm over the saddle bone, read each frame against her mesh. The camel rider's pelvis is 2 m over its root and forward of it, so a fixed lift put her above the horse or on its withers.
 - **Her clips:** her hero's rider clip plays by its gait.
 - **Speed:** `HorseDef.SpeedMul` (2.2) times as fast, through the combat component's `MountFactor`.
@@ -373,6 +373,43 @@ The user's words: "make a rideable horse for a player to buy and ride with incre
   - A death in the saddle got her off with her death clip still playing.
 - **Pictures:** of her riding from the side and from behind.
 - **Regression:** `884 services,keys9,storage9 -Light` still pass with the stable (`test_hrt2.json`).
+
+## The horse's gaits (the list of 2026-11-12, second part)
+
+The user's words: "horses when either walking or galloping move in an unnatural manner - redo their animations so that they move like real horses".
+
+**What was wrong:** the clips were made for slow speeds (a walk of 110 cm/s and a gallop of 328) while the horse is ridden at 5.5 times her speed (about 6 m/s at her walk and 19 m/s at her run). The game played the walk up to 3 times over and the gallop up to 6 times, and past those limits the hooves slid along the ground. Measured with the old clips in play: the hooves slid at 39 % of the horse's speed in the walk and 69 % in the gallop.
+
+**The gaits** (`farm_animals.py`'s `real_gait`: `gait_targets`, `gait_plan`; the Tripo horse through `tripo_animals.py`), each made for the speed it is ridden at:
+- **The walk:** 1.7 m/s, four beats in the lateral order (left hind, left fore, right hind, right fore), 0.86 strides a second, the head nodding as each fore hoof lands.
+- **The canter:** 6.5 m/s, three beats (left hind; right hind with left fore; right fore) and a moment in the air, 1.76 strides a second, the forehand rocking up as the hind legs push.
+- **The gallop:** 17 m/s, four beats (left hind, right hind, left fore, right fore) and a long moment in the air with the legs gathered under the body, 2.73 strides a second, the tail streaming and the ears back.
+- **The swing:** a hoof lifts early and folds (most at about 40 % of the swing, straight again by 80 %), reaches a few % past its landing point and draws back onto it.
+- **The body:** let down and pitched nose-down only as far as a leg needs to reach its hoof (`ik_overreach_cm` 0.02 cm at most), smoothed round the loop.
+- **The skin:** the skeleton has no bone near the belly, so the belly's skin had taken the legs' bones, and the longer strides drew it down between the legs as a flap. A leg's bones now take only the skin within 17 % (the upper bone) and 12 % (the others) of the horse's height of them (`tripo_animals.py`'s `LEG_REACH`).
+- **Their lengths:** whole 30ths of a second (35, 17 and 11 frames): the game's import samples at 30 a second.
+
+**In the game** (`RD/RDHorse.cpp`'s `PlayFor`; `FRDHorseDef`'s `Canter`, `CanterClipSpeed`, `CanterFrom` 400 cm/s, `GallopFrom` 1300 cm/s):
+- Below 4 m/s it walks, to 13 m/s it canters, beyond that it gallops, each at the rate its soles keep to the ground. A gait is kept until the speed is 10 % past its edge, so the clips do not flip at an edge.
+- Ridden at her walk the horse canters; at her run it gallops.
+- Her rider clip is the run's in the canter too. It plays one loop to the horse's stride, whatever the two clips' lengths.
+
+**The import** (`915`): imported with the existing horse, the FBX neither made the new canter nor refreshed the walk's and gallop's keys (only their `rate_scale` changed). `915` now deletes the kind's clips with an empty level open, imports the takes into a scratch folder (into the mesh's own folder Interchange found "nothing to import") and moves them into place, then checks each clip's length against Blender's.
+
+**Measured** (`888 gait12 -Light`, `test_g12d.json`): ridden on the plains at three speeds. A hoof counts as down while it is within 2 cm of its lowest over 0.3 s; its slide is measured between two frames 35 ms apart at most.
+
+| Gait | Speed | Clip, rate | Strides a second | Hooves' slide while down |
+|---|---|---|---|---|
+| walk | 1.94 m/s | walk, 1.14 | 0.98 | 0 cm/s (0.2 %) |
+| canter | 6.41 m/s | canter, 0.99 | 1.74 | 4 cm/s (0.6 %) |
+| gallop | 19.44 m/s | gallop, 1.14 | 3.12 | 126 cm/s (6.5 %, 30 pairs of frames: its stance is 3 frames) |
+
+- The horse faced the way it went (0.0 degrees off).
+- Her rider clip followed the gait.
+- Pictures from her side at the canter and the gallop.
+- `888 horse9` still passes. Her speed on foot is now measured once she is up to speed, as the mounted speed is: 3.56 m/s on foot, 19.49 mounted, 5.48 times for 5.5.
+
+**Not measured:** the walk ridden at its own speed in play needs a light touch on the stick (the keyboard's walk is the horse's canter); the Blender horse in `horse/` is built with the same gaits but not imported (the game rides the Tripo horse).
 ## The test
 
 `pipeline\unreal\884_brokenspire_test.ps1 <plan> <tag> [-Light]` (plan `all`: every step); `SourceArt/brokenspire/test_<tag>.json`. `-Light` (since 2026-11-08b: play in the editor's 4K view on `brokenspire` ran the 12 GB GPU out of memory, the editor holding the level twice, its own and play's): the editor on an empty level with its viewports not drawn live and virtual shadows off, play in a 1280 x 720 window of its own (`RD/RDEditorPlay.cpp`), the town opened from play with the hero; GPU memory about 8.2 to 8.6 GB in play, all put back after. Her state between the levels (2026-11-06): `test_c1.json` (`carry`) and `test_c2.json` (`castle`, `trip`: `trip`'s blow sized to her hit points and shield alone left her in plate standing (63 of 140) when it came straight after `castle`; it strikes again until she falls now). The records of the second list of 2026-11-02 (the irregular wall, the earth roads, the watchtowers, the lit buildings, the signs and notices, the burned houses, the windows, the walkers, the circle): `test_ball5.json` (town, doors, talk, services, guards, folk, gate, map, pictures, daynight, shape, watch ok; castlewalls failed there on its own old rule, which counted the watchtowers' doors as the town wall's arches), `test_rest1.json` (castlewalls, lights, signs, burned, windows, castle, trip ok) and `test_rest2.json` (walkers, circle, tour ok, after the tests' own fixes: a turning walker's foot left out, the circle played in the town, the tour's map is the scroll); the castle's `test_m11.json` (basics, block with her legs walking under the shield) and `test_m13menu.json` (the menu, its music playing; START and AUTOPLAY open Brokenspire since the town). Each PIE play is a new game, so each run plays another town. The frame rate in the square, in the editor's play window at 2440 x 1616: 30 a second (24 at the least). The castle's own test after the town (`868 all`, `test_m7all.json`): 38 of 39, the Escape menu's main page now has Return to Brokenspire (the step's list updated: `test_m7o.json`); `test_m7s.json`: basics, death, start gear, options, harvest, cells and stealth after the last changes, all ok. After the wilderness (2026-11-03), in four batches with the editor started again between them (one session for all the steps runs the machine short of memory): `test_tb1.json` to `test_tb4.json`, every step ok but three, each the test's own: services expected the circle's old "for later" line (with the wilderness it says to find a town, or lists the towns found), walkers' child's planted foot at 51 cm/s against a limit of 49 (the clip's own; in the rerun 0 to 47, each under a third of its body's speed, the same child 31.6 against 147.9) and satellite read its picture past its end (the engine's export pads the file with zeros after IEND: the reader stops at IEND now); all three ok again in `test_tb1s.json` and `test_tbsat.json`. Since: `test_r1.json` (2026-11-06, `castle` and `trip`: the castle's Escape menu now reads Resume, Save the game, Load a game, Options, Return to Brokenspire, Choose another hero, Quit; back in the town 1.5 m from the castle's door, the same town; the pile by the arch 3.9 m from the hall's middle, tier 2's boss set once a room of tier 1 was seen) and `test_r5.json` (`castle` again); `test_r4.json` (`talk` with the captain's wilderness quests still offered as later, `mapzoom`); `test_tw1.json` (2026-11-07, `talk` after `893`: the captain offers both wilderness quests); the list of 2026-11-07's `test_b8.json` and `test_b8b.json` (see the table). The cities' steps (`holy`, `descend`, `forge`, `descendwar`, `port`, `descendsewer`) are in their own documents.

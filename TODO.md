@@ -25,6 +25,11 @@ Done in phases: 1 gold, the map in its scroll, the mouse on the big map, rd.MapT
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).
   - The teleports' outcomes are measured by calling the click at its screen point: through Slate the real mouse resting over the play window pulled the game's pointer to itself and turned presses into drags (`RDMAPPOINTER`'s log: the pointer jumped to the same spot every time). The pointer's own path (a pick under it, the wheel, a drag, a click that travels) is measured through Slate.
+- [ ] **Phase 2, the horse's gaits, what is not done or measured:** ([Brokenspire](docs/levels/brokenspire.md#the-horses-gaits-the-list-of-2026-11-12-second-part)):
+  - The horse walks only below 4 m/s: with the keyboard her walk is its canter, and its walk needs a light touch on the stick.
+  - The gallop's slide (6.5 % of its speed) is read from 30 pairs of frames: its stance lasts about 3 frames at the test's frame rate.
+  - The Blender horse (`SourceArt/brokenspire/horse/`) is built with the same gaits but not imported: the game rides the Tripo horse.
+  - Nobody has watched the gaits in motion: they were judged in eight still frames a gait and two in-game pictures.
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

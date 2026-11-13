@@ -64,18 +64,71 @@ def assets_of(name):
     return mesh, seqs, a
 
 
+def import_takes(name, d, mesh, want):
+    """the FBX's takes `want` imported on their own, onto the mesh's skeleton, and moved into the kind's folder under the names the
+    import gives (the saved levels find them by path). The list of 2026-11-12: imported with an existing mesh, the FBX neither
+    refreshed the takes it had made (the horse's Walk and Run kept the old clips' keys, 1.1 and 0.6 s long, only their rate_scale
+    set to the new lengths: in play its hooves slid 39 and 69 % of its speed) nor made a new one (its Canter); imported alone
+    into the mesh's own folder Interchange found "nothing to import": into a scratch folder of its own it takes them all"""
+    tmp = f"{d}/_takes"
+    if eal.does_directory_exist(tmp): eal.delete_directory(tmp)
+    o = unreal.FbxImportUI()
+    o.set_editor_property("import_mesh", False); o.set_editor_property("import_as_skeletal", True)
+    o.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)
+    o.set_editor_property("skeleton", mesh.get_editor_property("skeleton"))
+    o.set_editor_property("import_animations", True); o.set_editor_property("import_materials", False); o.set_editor_property("import_textures", False)
+    t = unreal.AssetImportTask(); t.filename = os.path.join(SA, J[name]["fbx"]); t.destination_path = tmp
+    t.automated = True; t.replace_existing = True; t.save = True; t.options = o
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
+    got = []
+    for p in eal.list_assets(tmp, recursive=True):
+        x = unreal.load_asset(p.split(".")[0])
+        k = x.get_name().split("_")[-1] if isinstance(x, unreal.AnimSequence) else None
+        if k in want:
+            n = x.get_name(); x = None
+            eal.rename_asset(p.split(".")[0], f"{d}/{n}"); got.append(k)
+    eal.delete_directory(tmp)
+    return got
+
+
 if "import" in STEPS:
     for name in KINDS:
         d = f"{DT}/{name}"
-        # (imported over what is there: the level's pens, hare and horse keep pointing at the same assets (PR #42's review: deleted
-        # first, a run of this step alone left the level's references to nothing))
+        # (the mesh imported over what is there: the level's pens, hare and horse keep pointing at the same assets (PR #42's review:
+        # deleted first, a run of this step alone left the level's references to nothing); its clips are imported again under
+        # their paths below)
         fbx_task(os.path.join(SA, J[name]["fbx"]), d)
         mesh, seqs, a = assets_of(name)
         if not mesh: REPORT.append(f"import {name}: NO MESH"); continue
+        # (Interchange samples at 30 a second: a clip of another rate comes in up to a frame short; a clip further off than that
+        # is not the one Blender built)
+        def is_stale(k, s):
+            L = float(J[name]["clips"].get(k, {}).get("length_s", s.get_play_length()))
+            return L > 0 and abs(s.get_play_length() - L) > 1.0 / 30.0 + 0.005
+        # (every clip, not only those of another length: the whole-frame strides came out as long as the old ones' imports, to
+        # within a frame, with the old keys)
+        old = list(seqs)
+        want = old + [k for k in J[name].get("clips", {}) if k not in seqs]
+        if want:
+            # (an import keeps a clip asset that is there: the kind's clips are deleted with an empty level open (none of the maps
+            # holds them then) and imported again under their paths; the level step points the pens, hare and horse at them)
+            if old and not ues.get_editor_world().get_path_name().startswith("/Game/RandomLevel/Test/rl_scratch."):
+                unreal.EditorLoadingAndSavingUtils.load_map("/Game/RandomLevel/Test/rl_scratch")
+            paths = [seqs[k].get_path_name().split(".")[0] for k in old]
+            seqs = None; a = None
+            import gc; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+            for p in paths: eal.delete_asset(p)
+            got = import_takes(name, d, mesh, want)
+            mesh, seqs, a = assets_of(name)
+            REPORT.append(f"import {name}: {sorted(got)} imported again")
+        stale = []
         for k, s in seqs.items():
             L = float(J[name]["clips"].get(k, {}).get("length_s", s.get_play_length()))
-            if L > 0 and abs(s.get_play_length() - L) > 0.02: s.set_editor_property("rate_scale", s.get_play_length() / L)
+            if is_stale(k, s): stale.append(f"{k} {s.get_play_length():.3f} s for {L:.3f}")
+            s.set_editor_property("rate_scale", s.get_play_length() / L if L > 0 and abs(s.get_play_length() - L) > 0.002 else 1.0)
             eal.save_loaded_asset(s, only_if_is_dirty=False)
+        missing = [k for k in J[name].get("clips", {}) if k not in seqs]
+        assert not stale and not missing, f"915: {name}'s clips are not the FBX's: {stale}, missing {missing}"
         mat, tex = material_for(name, d)
         if mat:
             ms = list(mesh.get_editor_property("materials"))
@@ -130,11 +183,14 @@ if "level" in STEPS:
         if mesh:
             d = g.get_editor_property("horse_def")
             d.set_editor_property("mesh", mesh); d.set_editor_property("mesh_b", mesh)
-            for k in ("Idle", "Walk", "Run"): d.set_editor_property(k.lower(), seqs.get(k))
+            for k in ("Idle", "Walk", "Run", "Canter"): d.set_editor_property(k.lower(), seqs.get(k))
             d.set_editor_property("walk_clip_speed", float(J["Horse"]["walk_speed_cm_s"])); d.set_editor_property("run_clip_speed", float(J["Horse"].get("run_speed_cm_s", 260.0)))
+            # (the list of 2026-11-12: the canter, from 4 m/s; the gallop from 13 (913's numbers))
+            d.set_editor_property("canter_clip_speed", float(J["Horse"].get("canter_speed_cm_s", 650.0)))
+            d.set_editor_property("canter_from", 400.0); d.set_editor_property("gallop_from", 1300.0 if seqs.get("Canter") else 250.0)
             d.set_editor_property("saddle_bone", "saddle")
             g.set_editor_property("horse_def", d)
-            REPORT.append(f"horse: {mesh.get_name()}, clips {sorted(seqs)}, walk {J['Horse']['walk_speed_cm_s']} / run {J['Horse'].get('run_speed_cm_s')} cm/s, saddle {J['Horse']['fit'].get('saddle_top_cm')} cm")
+            REPORT.append(f"horse: {mesh.get_name()}, clips {sorted(seqs)}, walk {J['Horse']['walk_speed_cm_s']} / canter {J['Horse'].get('canter_speed_cm_s')} / run {J['Horse'].get('run_speed_cm_s')} cm/s, saddle {J['Horse']['fit'].get('saddle_top_cm')} cm")
     g.modify(); les.save_current_level()
     del g, old, kept, made, new, rab, fa
 print("TRIPO " + " | ".join(REPORT))

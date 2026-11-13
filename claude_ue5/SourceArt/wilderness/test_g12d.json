@@ -1,0 +1,204 @@
+{
+ "tag": "g12d",
+ "plan": [
+  "gait12",
+  "horse9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "gait12",
+   "ok": true,
+   "def": {
+    "canter": true,
+    "walk_clip": 170,
+    "canter_clip": 650,
+    "run_clip": 1700,
+    "canter_from": 400,
+    "gallop_from": 1300
+   },
+   "walk": {
+    "speed_cm_s": 194,
+    "clip": "walk",
+    "clip_share": 1.0,
+    "rate": 1.14,
+    "strides_a_second": 0.98,
+    "frames": 127,
+    "frame_ms_median": 23,
+    "hoof_down_pairs": 311,
+    "slide_median_cm_s": 0,
+    "slide_share": 0.002,
+    "slide_along_cm_s": 0,
+    "slide_across_cm_s": 0,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "walk"
+   },
+   "canter": {
+    "speed_cm_s": 641,
+    "clip": "canter",
+    "clip_share": 1.0,
+    "rate": 0.99,
+    "strides_a_second": 1.74,
+    "frames": 145,
+    "frame_ms_median": 21,
+    "hoof_down_pairs": 189,
+    "slide_median_cm_s": 4,
+    "slide_share": 0.006,
+    "slide_along_cm_s": 4,
+    "slide_across_cm_s": 0,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "canter"
+   },
+   "gallop": {
+    "speed_cm_s": 1944,
+    "clip": "run",
+    "clip_share": 1.0,
+    "rate": 1.14,
+    "strides_a_second": 3.12,
+    "frames": 144,
+    "frame_ms_median": 20,
+    "hoof_down_pairs": 30,
+    "slide_median_cm_s": 126,
+    "slide_share": 0.065,
+    "slide_along_cm_s": 126,
+    "slide_across_cm_s": 8,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "run"
+   }
+  },
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    20850,
+    50
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155014.0,
+    "y": -1587956.0,
+    "z": -2151.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1975.9,
+    "pelvis_z": 95.6,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": 1593689.9
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 20537.0,
+    "y": 260.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 174.2,
+    "pelvis_z": 95.5,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 222.2
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 70
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140581.0,
+    "y": -1591986.0,
+    "z": -1911.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1736.5,
+    "pelvis_z": -1722.5,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "attack_refused": true,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 143070.0,
+    "y": -1591239.0,
+    "z": -1984.0,
+    "clip": "run",
+    "rate": 1.14,
+    "speed": 1944.0,
+    "saddle_z": -1821.0,
+    "pelvis_z": -1807.0,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "speed_m_s": {
+    "foot": 3.56,
+    "mounted": 19.49,
+    "ratio": 5.48,
+    "want": 5.5,
+    "after": 3.04
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155016.0,
+    "y": -1587962.0,
+    "z": -2151.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1976.4,
+    "pelvis_z": -2056.5,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 221.6
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_g12d_gait12_canter.png",
+  "wd_g12d_gait12_gallop.png",
+  "wd_g12d_horse_idle.png",
+  "wd_g12d_horse_side.png",
+  "wd_g12d_horse_back.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}
