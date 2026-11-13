@@ -1184,87 +1184,101 @@ def step_ruins12():
     list names. Every kind among the world's ruins within 150 km of Brokenspire (CountWildRuins); then the nearest ruin of each kind
     (ruins12=<kind>+<kind> for some) visited: she is put 45 m before its front, the chunks round her made, and what was laid read
     (its pieces, where they stand, its containers, its guardians: GetWildRuinLines), its chest found among the wild boxes, a picture
-    of it from where she stands, then she is moved to 20 m: a line the HUD showed over the visit names it"""
+    of it from where she stands, then she is moved to 20 m: a line the HUD showed over the visit names it. It passes when every
+    kind is laid with 3 pieces or more, none gone, none standing over the ground by more than its part raised it, none laid to
+    collide that stops nothing, its chest, its guards standing (none inside a piece) and the line naming it"""
     g = G["gen"]; res = {"kinds": {}}; quiet(True)
     yield from wait_ready(90)
     kinds = [str(k.get_editor_property("name")) for k in g.get_editor_property("wild_ruin_kinds")]
     res["table"] = len(kinds)
     res["counts"] = {str(l).split("|")[0]: int(str(l).split("|")[1]) for l in g.count_wild_ruins(0.0, 0.0, 150.0)}
     want = G.get("look_only") or kinds
-    for kd in want:
-        r = {}
-        f = str(g.find_wild_ruin(kd, 0.0, 0.0, 150.0))
-        if not f: res["kinds"][kd] = {"found": False}; continue
-        rid, cx, cy, yw, nm = f.split("|", 4); rid = int(rid); cx = float(cx); cy = float(cy); yw = float(yw)
-        r.update({"found": True, "id": rid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
-        # (her place: 45 m out before its front (its yaw's way: the rock-cut temple was pictured from behind its rock; at 32 m the
-        # castle's keep stood round the camera), else the first way round whose ground is dry, looking at its middle)
-        # (and gentle: put on the canyons' terraces by the sand-buried city she fell 12 m and died)
-        def gentle(x, y):
-            s0 = sample(x, y)
-            if s0["water"]: return False
-            return all(abs(sample(x + dx, y + dy)["h"] - s0["h"]) < 1.2 for dx, dy in ((3, 0), (-3, 0), (0, 3), (0, -3)))
-        spot = None
-        for rr in (45.0, 55.0, 40.0):
-            for a in [yw + d_ for d_ in (0, 45, -45, 90, -90, 135, -135, 180)]:
-                sx, sy = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
-                if gentle(sx, sy): spot = (sx, sy); break
-            if spot: break
-        spot = spot or (cx + 45.0, cy)
-        msgs = []
-        try: cb().set_editor_property("message", "")
-        except Exception: pass
-        g.wild_put_her(*spot); yield from watching(wait_chunks(30, 50), msgs); yield from watching(rwait(2.0), msgs)
-        lines = [str(l).split("|") for l in g.get_wild_ruin_lines()]
-        mine = next((p for p in lines if int(p[1]) == rid), None)
-        r["laid"] = {"kind": mine[2], "pieces": int(mine[6]), "boxes": int(mine[7]), "guards": int(mine[8])} if mine else None
-        # (each piece where it stands: its distance from the middle and its bottom against the ground under its middle)
-        pcs = [str(l).split("|") for l in g.get_wild_ruin_piece_lines(rid)]
-        dists = sorted(math.hypot(float(q[1]) / 100.0 - cx, float(q[2]) / 100.0 - cy) for q in pcs if q[0] != "gone")
-        offs = sorted((float(q[3]) - float(q[5])) for q in pcs if q[0] != "gone")
-        r["pieces_m_from_middle"] = [round(dists[0], 1), round(dists[len(dists) // 2], 1), round(dists[-1], 1)] if dists else None
-        r["bottom_over_ground_cm"] = [round(offs[0]), round(offs[len(offs) // 2]), round(offs[-1])] if offs else None
-        r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
-        boxes, _f, _b = box_lines()
-        r["chests"] = sum(1 for b in boxes if (3 << 40) <= b["key"] < (4 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 40.0)
-        mons = [m for m in GS.get_all_actors_of_class(G["w"], unreal.RDMonster) if unreal.SystemLibrary.is_valid(m)]
-        r["monsters_within_20m"] = sum(1 for m in mons if math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < 20.0)
-        # (the camera at its middle 3 m over its ground, the chunks round her made: on a slope a fixed pitch looked into the hill)
-        yield from watching(wait_chunks(20, 50), msgs)
-        p = G["pawn"].get_actor_location(); gz = sample(cx, cy)["z"]
-        dh = math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y)
-        pitch = max(-25.0, min(12.0, math.degrees(math.atan2(gz + 300.0 - (p.z + 200.0), dh)) - 4.0))
-        G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=math.degrees(math.atan2(cy * 100.0 - p.y, cx * 100.0 - p.x))))
-        yield from watching(rwait(1.5), msgs); shot(f"ruins12_{kd}", "1280x720"); yield from watching(rwait(1.2), msgs)
-        # (the message as she comes within 30 m: she is moved to dry ground 20 to 28 m from its middle (her own way first; the
-        # submerged town's middle lies 12 m out in the water), else into the water 20 m out; every line the HUD showed over the
-        # visit is kept (its discovery, said with its kind, may come at 32 m, and a fall's line after it))
-        a0 = math.degrees(math.atan2(spot[1] - cy, spot[0] - cx)); near = None
-        for rr in (20.0, 24.0, 28.0):
-            for a in [a0 + d_ for d_ in (0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180)]:
-                tx, ty = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
-                if not sample(tx, ty)["water"]: near = (tx, ty); break
-            if near: break
-        if not near: near = (cx + (spot[0] - cx) * 20.0 / math.hypot(spot[0] - cx, spot[1] - cy), cy + (spot[1] - cy) * 20.0 / math.hypot(spot[0] - cx, spot[1] - cy))
-        s20 = sample(*near)
-        z20 = s20["z"] + (max(0.0, s20["water_m"] - s20["h"]) * 100.0 if s20["water"] else 0.0)
-        # (on whatever stands there, as she would come to it: put on the ground under a dune piece she was pushed out over it and
-        # fell 9 m, and the fall's message hid the ruin's)
-        hit = unreal.SystemLibrary.line_trace_single(G["w"], V(near[0] * 100.0, near[1] * 100.0, z20 + 3000.0), V(near[0] * 100.0, near[1] * 100.0, z20 - 300.0),
-                                                     unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
-        ht = hit.to_tuple() if hit else None
-        if ht and ht[0]: z20 = max(z20, ht[4].z)
-        G["pawn"].set_actor_location(V(near[0] * 100.0, near[1] * 100.0, z20 + 100.0), False, True); yield from watching(rwait(1.6), msgs)
-        r["told_from_m"] = round(math.hypot(near[0] - cx, near[1] - cy), 1)
-        r["told"] = " | ".join(msgs)
-        r["title"] = mine[3] if mine else ""
-        res["kinds"][kd] = r
+    try:
+        for kd in want:
+            r = {}
+            f = str(g.find_wild_ruin(kd, 0.0, 0.0, 150.0))
+            if not f: res["kinds"][kd] = {"found": False}; continue
+            rid, cx, cy, yw, nm = f.split("|", 4); rid = int(rid); cx = float(cx); cy = float(cy); yw = float(yw)
+            r.update({"found": True, "id": rid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
+            # (her place: 45 m out before its front (its yaw's way: the rock-cut temple was pictured from behind its rock; at 32 m the
+            # castle's keep stood round the camera), else the first way round whose ground is dry, looking at its middle)
+            # (and gentle: put on the canyons' terraces by the sand-buried city she fell 12 m and died)
+            def gentle(x, y):
+                s0 = sample(x, y)
+                if s0["water"]: return False
+                return all(abs(sample(x + dx, y + dy)["h"] - s0["h"]) < 1.2 for dx, dy in ((3, 0), (-3, 0), (0, 3), (0, -3)))
+            spot = None
+            for rr in (45.0, 55.0, 40.0):
+                for a in [yw + d_ for d_ in (0, 45, -45, 90, -90, 135, -135, 180)]:
+                    sx, sy = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                    if gentle(sx, sy): spot = (sx, sy); break
+                if spot: break
+            spot = spot or (cx + 45.0, cy)
+            msgs = []
+            try: cb().set_editor_property("message", "")
+            except Exception: pass
+            g.wild_put_her(*spot); yield from watching(wait_chunks(30, 50), msgs); yield from watching(rwait(2.0), msgs)
+            lines = [str(l).split("|") for l in g.get_wild_ruin_lines()]
+            mine = next((p for p in lines if int(p[1]) == rid), None)
+            r["laid"] = {"kind": mine[2], "pieces": int(mine[6]), "boxes": int(mine[7]), "guards": int(mine[8])} if mine else None
+            # (its guards as they stand: the living ones of its place, and those inside one of its pieces' boxes)
+            r["guards_standing"] = int(mine[11]) if mine and len(mine) > 12 else -1
+            r["guards_in_a_piece"] = int(mine[12]) if mine and len(mine) > 12 else -1
+            # (each piece where it stands: its distance from the middle and its bottom against the ground under its middle)
+            pcs = [str(l).split("|") for l in g.get_wild_ruin_piece_lines(rid)]
+            dists = sorted(math.hypot(float(q[1]) / 100.0 - cx, float(q[2]) / 100.0 - cy) for q in pcs if q[0] != "gone")
+            offs = sorted((float(q[3]) - float(q[5])) for q in pcs if q[0] != "gone")
+            r["pieces_m_from_middle"] = [round(dists[0], 1), round(dists[len(dists) // 2], 1), round(dists[-1], 1)] if dists else None
+            r["bottom_over_ground_cm"] = [round(offs[0]), round(offs[len(offs) // 2]), round(offs[-1])] if offs else None
+            r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
+            # (no piece stands over the ground under its middle by more than its part raised it (its bottom goes on the lowest ground
+            # under its corners, less its sink); the houses laid as the villages lay theirs (lift -1) are not measured so)
+            r["floating"] = sorted(set(q[0] for q in pcs if q[0] != "gone" and len(q) > 7 and float(q[7]) >= 0 and float(q[3]) - float(q[5]) > float(q[7]) + 2.0))
+            # (a piece laid to collide that stops nothing is walked through: every one must stop her)
+            r["walked_through"] = sorted(set(q[0] for q in pcs if len(q) > 6 and q[6] == "0"))
+            r["solid"] = sum(1 for q in pcs if len(q) > 6 and q[6] == "1")
+            boxes, _f, _b = box_lines()
+            r["chests"] = sum(1 for b in boxes if (3 << 40) <= b["key"] < (4 << 40) and math.hypot(b["x"] / 100.0 - cx, b["y"] / 100.0 - cy) < 40.0)
+            mons = [m for m in GS.get_all_actors_of_class(G["w"], unreal.RDMonster) if unreal.SystemLibrary.is_valid(m)]
+            r["monsters_within_20m"] = sum(1 for m in mons if math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < 20.0)
+            # (the camera at its middle 3 m over its ground, the chunks round her made: on a slope a fixed pitch looked into the hill)
+            yield from watching(wait_chunks(20, 50), msgs)
+            p = G["pawn"].get_actor_location(); gz = sample(cx, cy)["z"]
+            dh = math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y)
+            pitch = max(-25.0, min(12.0, math.degrees(math.atan2(gz + 300.0 - (p.z + 200.0), dh)) - 4.0))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=math.degrees(math.atan2(cy * 100.0 - p.y, cx * 100.0 - p.x))))
+            yield from watching(rwait(1.5), msgs); shot(f"ruins12_{kd}", "1280x720"); yield from watching(rwait(1.2), msgs)
+            # (the message as she comes within 30 m: she is moved to dry ground 20 to 28 m from its middle (her own way first; the
+            # submerged town's middle lies 12 m out in the water), else into the water 20 m out; every line the HUD showed over the
+            # visit is kept (its discovery, said with its kind, may come at 32 m, and a fall's line after it))
+            a0 = math.degrees(math.atan2(spot[1] - cy, spot[0] - cx)); near = None
+            for rr in (20.0, 24.0, 28.0):
+                for a in [a0 + d_ for d_ in (0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180)]:
+                    tx, ty = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                    if not sample(tx, ty)["water"]: near = (tx, ty); break
+                if near: break
+            if not near: near = (cx + (spot[0] - cx) * 20.0 / math.hypot(spot[0] - cx, spot[1] - cy), cy + (spot[1] - cy) * 20.0 / math.hypot(spot[0] - cx, spot[1] - cy))
+            s20 = sample(*near)
+            z20 = s20["z"] + (max(0.0, s20["water_m"] - s20["h"]) * 100.0 if s20["water"] else 0.0)
+            # (on whatever stands there, as she would come to it: put on the ground under a dune piece she was pushed out over it and
+            # fell 9 m, and the fall's message hid the ruin's)
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(near[0] * 100.0, near[1] * 100.0, z20 + 3000.0), V(near[0] * 100.0, near[1] * 100.0, z20 - 300.0),
+                                                         unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+            ht = hit.to_tuple() if hit else None
+            if ht and ht[0]: z20 = max(z20, ht[4].z)
+            G["pawn"].set_actor_location(V(near[0] * 100.0, near[1] * 100.0, z20 + 100.0), False, True); yield from watching(rwait(1.6), msgs)
+            r["told_from_m"] = round(math.hypot(near[0] - cx, near[1] - cy), 1)
+            r["told"] = " | ".join(msgs)
+            r["title"] = mine[3] if mine else ""
+            res["kinds"][kd] = r
+    finally:
+        quiet(False)
     g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
-    quiet(False)
     seen = [k for k, v in res["kinds"].items() if v.get("found")]
     ok = res["table"] >= 20 and all(res["counts"].get(k, 0) > 0 for k in kinds) \
         and all(v.get("found") and v.get("laid") and v["laid"]["kind"] == k and v["laid"]["pieces"] >= 3 and v["chests"] >= 1
-                and v["title"] and v["title"] in v["told"] for k, v in res["kinds"].items()) \
+                and v["title"] and v["title"] in v["told"] and not v["walked_through"] and not v["floating"] and v["pieces_gone"] == 0
+                and v["guards_standing"] >= v["laid"]["guards"] and v["guards_in_a_piece"] == 0 for k, v in res["kinds"].items()) \
         and len(seen) == len(want)
     step_result("ruins12", ok, **res)
 

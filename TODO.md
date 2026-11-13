@@ -34,7 +34,8 @@ Done in phases (1 to 3 so far): 1 gold, the map in its scroll, the mouse on the 
   - The ruins are set pieces of the packs' meshes over the land: the catacombs, the barrow's passage and the rock-cut temple have no inside beyond their entrance; the tell is a mound, not dug into.
   - Two kinds are rare round Brokenspire (one submerged town and one sand-buried city within 150 km): their biomes and water are rare there.
   - Some pictures show little of their ruin: the tell's mound is low, the barrow and the catacombs' entrance are small at 45 m, and the sand-buried city's (in the canyons) is hidden by a canyon wall; the pieces' readouts say they stand there.
-  - A piece's collision is its mesh's own: whether she can walk through every doorway and up every step was not tried.
+  - Every piece laid to collide stops her (the test checks each one's collision); whether she can walk through every doorway and up every step was not tried.
+  - A submerged town is moved into the water up to 300 m from its place: its mark on the map and its discovery stay at the place (its kind is told as she comes to the ruin).
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

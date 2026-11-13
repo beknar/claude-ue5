@@ -299,6 +299,15 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		if (GI && GI->WildKilled.Contains(Key)) continue;
 		FVector At(P.At.X * 100.0 + FMath::Cos(A) * D, P.At.Y * 100.0 + FMath::Sin(A) * D, 0.0);
 		At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
+		// (a ruin's guards off its pieces: drawn where the castle's keep or the rock-cut temple's cliff stands they were spawned
+		// inside it (PR #56's review). Rings round its middle after the draws, so the place's stream is unchanged)
+		if (const FRuinLaid* Rl = P.Kind == TEXT("ruins") ? WildRuinsLaid.FindByPredicate([&](const FRuinLaid& X) { return X.Id == P.Id; }) : nullptr)
+			for (int32 K = 0; K < 36 && WildRuinInPiece(*Rl, At, Def.CapsuleRadius + 40.f, Def.CapsuleHalfHeight); ++K)
+			{
+				const float A2 = A + K * (2.f * PI / 12.f), D2 = (4.f + 4.f * (K / 12)) * 100.f;
+				At = FVector(Rl->At.X * 100.0 + FMath::Cos(A2) * D2, Rl->At.Y * 100.0 + FMath::Sin(A2) * D2, 0.0);
+				At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
+			}
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), At), Sp);
 		if (!M) continue;

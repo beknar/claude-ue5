@@ -13,8 +13,8 @@
      "found": true,
      "id": 459844,
      "at_km": [
-      32.97,
-      123.01
+      32.98,
+      123.02
      ],
      "name": "Ruins of Blackby",
      "laid": {
@@ -23,21 +23,26 @@
       "boxes": 1,
       "guards": 0
      },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.0,
-      5.4,
+      5.3,
       11.2
      ],
      "bottom_over_ground_cm": [
-      -449,
-      -175,
-      -143
+      -264,
+      -174,
+      -157
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 13,
      "chests": 1,
      "monsters_within_20m": 0,
      "told_from_m": 20.0,
-     "told": "Submerged ruins: a town the water took; columns and walls stand up out of it",
+     "told": "Discovered: Ruins of Blackby | Submerged ruins: a town the water took; columns and walls stand up out of it",
      "title": "Submerged ruins"
     },
     "ashcity": {
@@ -54,17 +59,22 @@
       "boxes": 1,
       "guards": 2
      },
+     "guards_standing": 2,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       6.0,
       9.2,
       15.1
      ],
      "bottom_over_ground_cm": [
-      -318,
-      -99,
-      -2
+      -357,
+      -122,
+      -6
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 17,
      "chests": 1,
      "monsters_within_20m": 2,
      "told_from_m": 20.0,
@@ -85,17 +95,22 @@
       "boxes": 1,
       "guards": 0
      },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.5,
       7.8,
       13.9
      ],
      "bottom_over_ground_cm": [
-      -1045,
-      -227,
-      -29
+      -1034,
+      -214,
+      -23
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 20,
      "chests": 1,
      "monsters_within_20m": 0,
      "told_from_m": 20.0,
@@ -116,6 +131,8 @@
       "boxes": 1,
       "guards": 0
      },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       4.8,
       11.9,
@@ -123,10 +140,13 @@
      ],
      "bottom_over_ground_cm": [
       -43,
-      66,
-      208
+      72,
+      214
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 68,
      "chests": 1,
      "monsters_within_20m": 0,
      "told_from_m": 20.0,
@@ -147,17 +167,22 @@
       "boxes": 1,
       "guards": 0
      },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.7,
       18.0,
       30.0
      ],
      "bottom_over_ground_cm": [
-      -82,
-      -41,
+      -83,
+      -42,
       -6
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 15,
      "chests": 1,
      "monsters_within_20m": 0,
      "told_from_m": 20.0,
@@ -178,6 +203,8 @@
       "boxes": 1,
       "guards": 0
      },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.0,
       16.3,
@@ -189,6 +216,9 @@
       76
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 12,
      "chests": 1,
      "monsters_within_20m": 0,
      "told_from_m": 20.0,
@@ -209,17 +239,22 @@
       "boxes": 1,
       "guards": 2
      },
+     "guards_standing": 2,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       3.2,
       6.9,
       12.1
      ],
      "bottom_over_ground_cm": [
-      -54,
-      -12,
+      -56,
+      -13,
       -5
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 13,
      "chests": 1,
      "monsters_within_20m": 2,
      "told_from_m": 20.0,
@@ -240,17 +275,22 @@
       "boxes": 1,
       "guards": 3
      },
+     "guards_standing": 3,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.0,
       9.5,
       15.0
      ],
      "bottom_over_ground_cm": [
-      -41,
-      -12,
-      -1
+      -43,
+      -31,
+      -5
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 15,
      "chests": 1,
      "monsters_within_20m": 3,
      "told_from_m": 20.0,
@@ -271,6 +311,8 @@
       "boxes": 1,
       "guards": 2
      },
+     "guards_standing": 2,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.0,
       16.2,
@@ -282,6 +324,9 @@
       283
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 19,
      "chests": 1,
      "monsters_within_20m": 2,
      "told_from_m": 20.0,
@@ -302,17 +347,22 @@
       "boxes": 1,
       "guards": 0
      },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.1,
       8.1,
       12.3
      ],
      "bottom_over_ground_cm": [
-      -59,
-      -22,
-      -13
+      -58,
+      -20,
+      -14
      ],
      "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 6,
      "chests": 1,
      "monsters_within_20m": 0,
      "told_from_m": 20.0,

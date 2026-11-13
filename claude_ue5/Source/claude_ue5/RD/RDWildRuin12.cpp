@@ -10,9 +10,12 @@
 #include "RD/RDWild.h"
 #include "RD/RDGameInstance.h"
 #include "RD/RDCombat.h"
+#include "RD/RDMonster.h"
+#include "RD/RDSection.h"
 #include "Components/StaticMeshComponent.h"
 #include "ProceduralMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRDRuin12, Log, All);
@@ -44,58 +47,66 @@ namespace
 	int64 RDR12Key(int32 PlaceId, int32 N) { return (3LL << 40) + (int64)(uint32)PlaceId * 8 + FMath::Clamp(N, 0, 7); }
 }
 
-int32 ARDDungeonGenerator::WildRuinKindOf(const FRDWildPlace& P) const
+namespace
 {
-	if (!Wild || P.Kind != TEXT("ruins") || !P.Quest.IsEmpty() || WildRuinKinds.Num() == 0) return -1;
+	/** water a ruin can stand in (over 30 cm deep), and ground with none at all (the shore) */
+	bool RDR12Deep(const FRDWildWorld& W, const FVector2D& At) { FRDWSample S; W.Sample(At.X, At.Y, S, false); return S.WaterKind != 0 && S.Water > S.H + 0.3f; }
+	bool RDR12Dry(const FRDWildWorld& W, const FVector2D& At) { FRDWSample S; W.Sample(At.X, At.Y, S, false); return S.WaterKind == 0 || S.Water <= S.H; }
+}
+
+const ARDDungeonGenerator::FRuinPick& ARDDungeonGenerator::WildRuinPickOf(const FRDWildPlace& P) const
+{
+	// (one answer a place, worked out once: the kind, the scan for water and the ruin's middle and shore were asked four or
+	// five times for each ruin as its chunk was made, each scan its own (PR #56's review: the kind's scan and the middle's were
+	// on different grids, and the middle could miss the water the kind had found))
+	if (const FRuinPick* Got = WildRuinPicks.Find(P.Id)) return *Got;
+	FRuinPick& Pk = WildRuinPicks.Add(P.Id);
+	Pk.Centre = Pk.Shore = P.At;
+	if (!Wild || P.Kind != TEXT("ruins") || !P.Quest.IsEmpty() || WildRuinKinds.Num() == 0) return Pk;
 	const FString Bn = Wild->Biomes.IsValidIndex(P.Biome) ? Wild->Biomes[P.Biome].Name : FString();
+	auto Fits = [&](const FRDWildRuinKind& K) { return K.Biomes.Contains(TEXT("*")) || K.Biomes.Contains(Bn); };
 	// (water within 300 m: the submerged ruins' ground. A place is never on water nor on land under 2 m: of the 340 ruins round
-	// Brokenspire none had water within 30 m, nor within 80 m; only a kind that wants water looks, eight ways every 25 m)
-	bool bWet = false;
-	if (WildRuinKinds.ContainsByPredicate([](const FRDWildRuinKind& K) { return K.bWater; }))
-		for (int32 K = 0; K < 8 && !bWet; ++K)
-		{
-			const float A = K * PI / 4.f;
-			for (float Rr = 25.f; Rr <= 300.f; Rr += 25.f)
+	// Brokenspire none had water within 30 m, nor within 80 m. Only where a water kind fits the biome: rings out every 25 m,
+	// eight ways each, the nearest wet sample first)
+	bool bWet = false; FVector2D Hit = P.At, Way(1, 0);
+	if (WildRuinKinds.ContainsByPredicate([&](const FRDWildRuinKind& K) { return K.bWater && Fits(K); }))
+		for (float Rr = 25.f; Rr <= 300.f && !bWet; Rr += 25.f)
+			for (int32 I = 0; I < 8 && !bWet; ++I)
 			{
-				FRDWSample S; Wild->Sample(P.At.X + FMath::Cos(A) * Rr, P.At.Y + FMath::Sin(A) * Rr, S, false);
-				if (S.WaterKind != 0 && S.Water > S.H + 0.3f) { bWet = true; break; }
+				const FVector2D D(FMath::Cos(I * PI / 4.f), FMath::Sin(I * PI / 4.f));
+				if (RDR12Deep(*Wild, P.At + D * Rr)) { bWet = true; Hit = P.At + D * Rr; Way = D; }
 			}
-		}
 	float Sum = 0.f;
 	TArray<float> W; W.SetNumZeroed(WildRuinKinds.Num());
 	for (int32 I = 0; I < WildRuinKinds.Num(); ++I)
 	{
 		const FRDWildRuinKind& K = WildRuinKinds[I];
-		if (K.bWater && !bWet) continue;
-		if (!K.Biomes.Contains(TEXT("*")) && !K.Biomes.Contains(Bn)) continue;
+		if ((K.bWater && !bWet) || !Fits(K)) continue;
 		W[I] = FMath::Max(K.Weight, 0.f); Sum += W[I];
 	}
-	if (Sum <= 0.f) return -1;
+	if (Sum <= 0.f) return Pk;
 	float Pick = (FRDWildWorld::Hash(P.Id, 0x1212, Wild->Seed) & 0xFFFFFF) / float(0x1000000) * Sum;
-	for (int32 I = 0; I < W.Num(); ++I) { if (W[I] <= 0.f) continue; if (Pick < W[I]) return I; Pick -= W[I]; }
-	for (int32 I = W.Num() - 1; I >= 0; --I) if (W[I] > 0.f) return I;
-	return -1;
+	for (int32 I = 0; I < W.Num() && Pk.Kind < 0; ++I) { if (W[I] <= 0.f) continue; if (Pick < W[I]) Pk.Kind = I; else Pick -= W[I]; }
+	for (int32 I = W.Num() - 1; I >= 0 && Pk.Kind < 0; --I) if (W[I] > 0.f) Pk.Kind = I;
+	if (Pk.Kind < 0 || !WildRuinKinds[Pk.Kind].bWater) return Pk;
+	// (into the water the kind found: its edge walked back to the metre, the middle 12 m past it if that is still deep (a stream
+	// may be narrower: then the wet sample itself), the shore the first ground with no water at all from 3 m before the edge)
+	FVector2D Edge = Hit;
+	for (int32 S = 1; S <= 25; ++S) { const FVector2D Q = Hit - Way * float(S); if (!RDR12Deep(*Wild, Q)) break; Edge = Q; }
+	const FVector2D Mid = Edge + Way * 12.f;
+	Pk.Centre = RDR12Deep(*Wild, Mid) ? Mid : Hit;
+	Pk.Shore = P.At;
+	for (int32 S = 3; S <= 40; ++S) { const FVector2D Q = Edge - Way * float(S); if (RDR12Dry(*Wild, Q)) { Pk.Shore = Q; break; } }
+	return Pk;
 }
 
-FVector2D ARDDungeonGenerator::WildRuinCentre(const FRDWildPlace& P, const FRDWildRuinKind& K, FVector2D* Shore) const
+int32 ARDDungeonGenerator::WildRuinKindOf(const FRDWildPlace& P) const { return WildRuinPickOf(P).Kind; }
+
+FVector2D ARDDungeonGenerator::WildRuinCentre(const FRDWildPlace& P, FVector2D* Shore) const
 {
-	if (Shore) *Shore = P.At;
-	if (!K.bWater || !Wild) return P.At;
-	// (into the water: the nearest wet point round it (sixteen ways, every 10 m out to 300) and 12 m on along its way)
-	float Best = 1e9f; FVector2D Way(0, 0);
-	for (int32 I = 0; I < 16; ++I)
-	{
-		const float A = I * PI / 8.f;
-		for (float Rr = 10.f; Rr <= 300.f && Rr < Best; Rr += 10.f)
-		{
-			FRDWSample S; Wild->Sample(P.At.X + FMath::Cos(A) * Rr, P.At.Y + FMath::Sin(A) * Rr, S, false);
-			if (S.WaterKind != 0 && S.Water > S.H + 0.3f) { Best = Rr; Way = FVector2D(FMath::Cos(A), FMath::Sin(A)); break; }
-		}
-	}
-	if (Best > 1e8f) return P.At;
-	// (its shore: 8 m before the water, on the way from the place)
-	if (Shore) *Shore = P.At + Way * FMath::Max(Best - 8.f, 0.f);
-	return P.At + Way * (Best + 12.f);
+	const FRuinPick& Pk = WildRuinPickOf(P);
+	if (Shore) *Shore = Pk.Shore;
+	return Pk.Centre;
 }
 
 UStaticMeshComponent* ARDDungeonGenerator::LayRuinPiece(ARDWildChunk* C, UStaticMesh* M, const FVector& At, const FRotator& Rot, const FVector& Scale, float Sink, bool bCollide)
@@ -137,7 +148,7 @@ void ARDDungeonGenerator::LayWildRuin(ARDWildChunk* C, const FRDWildPlace& P, co
 	if (!C || !Wild) return;
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 0x1213, Wild->Seed));
 	FVector2D Shore;
-	const FVector2D O = WildRuinCentre(P, K, &Shore);
+	const FVector2D O = WildRuinCentre(P, &Shore);
 	const float Yaw0 = P.Yaw;
 	const FRotator Frame(0.f, Yaw0, 0.f);
 	FRuinLaid Rec; Rec.Id = P.Id; Rec.Yaw = P.Yaw; Rec.Kind = WildRuinKinds.IndexOfByPredicate([&](const FRDWildRuinKind& X) { return X.Name == K.Name; }); Rec.At = O; Rec.Name = P.Name;
@@ -242,7 +253,7 @@ void ARDDungeonGenerator::LayWildRuin(ARDWildChunk* C, const FRDWildPlace& P, co
 			// laid gets its doors, its inside and its furniture (FitWildHouse))
 			if (RDR12Num(M, TEXT("wild"), 0.f, R) > 0.5f)
 			{
-				if (UStaticMeshComponent* Pc = LayWildPiece(C, Pre, Wxy, Wyaw, Sm, Sink, bCol, false, R)) { ++Rec.Pieces; Rec.Comps.Add(Pc); }
+				if (UStaticMeshComponent* Pc = LayWildPiece(C, Pre, Wxy, Wyaw, Sm, Sink, bCol, false, R)) { ++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(-1.f); }
 				continue;
 			}
 			if (!BoxPiece.IsEmpty())
@@ -258,13 +269,31 @@ void ARDDungeonGenerator::LayWildRuin(ARDWildChunk* C, const FRDWildPlace& P, co
 			const float Bh = FMath::Max((float)(Pitch > 45.f ? B.GetSize().X : B.GetSize().Z), 1.f);
 			const float Sc = Hm > 0.f ? Hm * 100.f / Bh : Sm;
 			const FRotator Rot(Pitch, Wyaw, Roll);
-			if (UStaticMeshComponent* Pc = LayRuinPiece(C, Mesh, FVector(Wxy.X * 100.0, Wxy.Y * 100.0, A.Z * 100.f), Rot, FVector(Sc * Sx, Sc * Sy, Sc * Sz), Sink * Sc * Sz, bCol)) { ++Rec.Pieces; Rec.Comps.Add(Pc); }
+			// (its sink: with a height in metres, centimetres of the piece as laid (only stretched by sz); with a scale, centimetres
+			// of the mesh scaled. Scaled by each mesh's own size, one part's pillars sank 75 to 300 cm (PR #56's review))
+			const float SinkCm = (Hm > 0.f ? Sink : Sink * Sc) * Sz;
+			if (UStaticMeshComponent* Pc = LayRuinPiece(C, Mesh, FVector(Wxy.X * 100.0, Wxy.Y * 100.0, A.Z * 100.f), Rot, FVector(Sc * Sx, Sc * Sy, Sc * Sz), SinkCm, bCol)) { ++Rec.Pieces; Rec.Comps.Add(Pc); Rec.Lifts.Add(A.Z * 100.f); }
 		}
 	}
 	Rec.Guards = K.Guards;
 	WildRuinsLaid.RemoveAll([&](const FRuinLaid& X) { return X.Id == P.Id; });
 	WildRuinsLaid.Add(Rec);
 	UE_LOG(LogRDRuin12, Log, TEXT("RDRUIN %s (%s): %d pieces, %d containers at (%.0f, %.0f)"), *P.Name, *K.Name.ToString(), Rec.Pieces, Rec.Boxes, O.X, O.Y);
+}
+
+bool ARDDungeonGenerator::WildRuinInPiece(const FRuinLaid& X, const FVector& L, float Radius, float HalfHeight) const
+{
+	// (a capsule there against each colliding piece's own collision: a long cairn turned across the ground fills its box's
+	// corners with nothing, and the box called a guard beside it inside)
+	const FCollisionShape Cap = FCollisionShape::MakeCapsule(Radius, FMath::Max(HalfHeight, Radius));
+	for (const TWeakObjectPtr<UStaticMeshComponent>& W : X.Comps)
+	{
+		UStaticMeshComponent* Sm = W.Get();
+		if (!Sm || Sm->GetCollisionEnabled() == ECollisionEnabled::NoCollision) continue;
+		if (!Sm->Bounds.GetBox().ExpandBy(Radius + 10.f).IsInside(L)) continue;
+		if (Sm->OverlapComponent(L, FQuat::Identity, Cap)) return true;
+	}
+	return false;
 }
 
 void ARDDungeonGenerator::TickWildRuins12(float Dt, const FVector& Her)
@@ -288,8 +317,19 @@ TArray<FString> ARDDungeonGenerator::GetWildRuinLines() const
 {
 	TArray<FString> Out;
 	for (const FRuinLaid& X : WildRuinsLaid)
-		Out.Add(FString::Printf(TEXT("ruin|%d|%s|%s|%.1f|%.1f|%d|%d|%d|%s|%.1f"), X.Id, WildRuinKinds.IsValidIndex(X.Kind) ? *WildRuinKinds[X.Kind].Name.ToString() : TEXT("?"),
-			WildRuinKinds.IsValidIndex(X.Kind) ? *WildRuinKinds[X.Kind].Title : TEXT(""), X.At.X, X.At.Y, X.Pieces, X.Boxes, X.Guards, *X.Name, X.Yaw));
+	{
+		// (its guards as they stand: the living ones of its place (their keys its id x 16 + n), and those inside a piece's box)
+		int32 Stand = 0, Inside = 0;
+		if (WildSection)
+			for (const TObjectPtr<ARDMonster>& Mo : WildSection->SpawnedMonsters)
+			{
+				if (!IsValid(Mo) || Mo->IsDead() || Mo->WildKey < 0 || Mo->WildKey / 16 != (int64)X.Id) continue;
+				++Stand;
+				if (WildRuinInPiece(X, Mo->GetActorLocation(), Mo->GetSimpleCollisionRadius() * 0.8f, Mo->GetSimpleCollisionHalfHeight() * 0.8f)) ++Inside;
+			}
+		Out.Add(FString::Printf(TEXT("ruin|%d|%s|%s|%.1f|%.1f|%d|%d|%d|%s|%.1f|%d|%d"), X.Id, WildRuinKinds.IsValidIndex(X.Kind) ? *WildRuinKinds[X.Kind].Name.ToString() : TEXT("?"),
+			WildRuinKinds.IsValidIndex(X.Kind) ? *WildRuinKinds[X.Kind].Title : TEXT(""), X.At.X, X.At.Y, X.Pieces, X.Boxes, X.Guards, *X.Name, X.Yaw, Stand, Inside));
+	}
 	return Out;
 }
 
@@ -298,13 +338,19 @@ TArray<FString> ARDDungeonGenerator::GetWildRuinPieceLines(int32 Id) const
 	TArray<FString> Out;
 	const FRuinLaid* X = WildRuinsLaid.FindByPredicate([&](const FRuinLaid& R) { return R.Id == Id; });
 	if (!X) return Out;
-	for (const TWeakObjectPtr<UStaticMeshComponent>& W : X->Comps)
+	for (int32 I = 0; I < X->Comps.Num(); ++I)
 	{
-		const UStaticMeshComponent* Sm = W.Get();
-		if (!Sm) { Out.Add(TEXT("gone|0|0|0|0|0")); continue; }
+		const UStaticMeshComponent* Sm = X->Comps[I].Get();
+		if (!Sm) { Out.Add(TEXT("gone|0|0|0|0|0|-|-1")); continue; }
 		const FBox B = Sm->Bounds.GetBox();
 		const FVector Ce = B.GetCenter();
-		Out.Add(FString::Printf(TEXT("%s|%.0f|%.0f|%.0f|%.0f|%.0f"), Sm->GetStaticMesh() ? *Sm->GetStaticMesh()->GetName() : TEXT("?"), Ce.X, Ce.Y, B.Min.Z, B.Max.Z, WildGroundZ(FVector(Ce.X, Ce.Y, 0.0))));
+		// (solid: 1 its collision on and something in it to stop her (simple shapes, or its mesh as its collision), 0 on with nothing
+		// to stop her (walked through), - off)
+		const UBodySetup* Bs = Sm->GetStaticMesh() ? Sm->GetStaticMesh()->GetBodySetup() : nullptr;
+		const bool bOn = Sm->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics || Sm->GetCollisionEnabled() == ECollisionEnabled::PhysicsOnly;
+		const bool bStops = Bs && (Bs->AggGeom.GetElementCount() > 0 || Bs->CollisionTraceFlag == CTF_UseComplexAsSimple);
+		Out.Add(FString::Printf(TEXT("%s|%.0f|%.0f|%.0f|%.0f|%.0f|%s|%.0f"), Sm->GetStaticMesh() ? *Sm->GetStaticMesh()->GetName() : TEXT("?"), Ce.X, Ce.Y, B.Min.Z, B.Max.Z, WildGroundZ(FVector(Ce.X, Ce.Y, 0.0)),
+			!bOn ? TEXT("-") : bStops ? TEXT("1") : TEXT("0"), X->Lifts.IsValidIndex(I) ? X->Lifts[I] : -1.f));
 	}
 	return Out;
 }
@@ -328,7 +374,7 @@ FString ARDDungeonGenerator::FindWildRuin(FName Kind, float X, float Y, float Ma
 				for (const FRDWildPlace& P : Ps)
 				{
 					if (P.Kind != TEXT("ruins") || WildRuinKindOf(P) != Want) continue;
-					const FVector2D Ce = WildRuinCentre(P, WildRuinKinds[Want]);
+					const FVector2D Ce = WildRuinCentre(P);
 					const float D = FVector2D::DistSquared(Ce, FVector2D(X, Y));
 					if (D < Best) { Best = D; Got = FString::Printf(TEXT("%d|%.1f|%.1f|%.1f|%s"), P.Id, Ce.X, Ce.Y, P.Yaw, *P.Name); }
 				}

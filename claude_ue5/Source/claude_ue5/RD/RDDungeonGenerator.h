@@ -2533,20 +2533,28 @@ public:
 	/** the kind a place of kind "ruins" is (an index into WildRuinKinds, -1: none fits or no table): from its id, its biome and the
 	 *  water round it; a pure function of the world */
 	int32 WildRuinKindOf(const FRDWildPlace& P) const;
-	/** where its parts are laid from (the place's point, or moved toward the water for a kind that wants it) */
-	FVector2D WildRuinCentre(const FRDWildPlace& P, const FRDWildRuinKind& K, FVector2D* Shore = nullptr) const;
+	/** where its parts are laid from (the place's point, or moved into the water for a kind that wants it) and its shore */
+	FVector2D WildRuinCentre(const FRDWildPlace& P, FVector2D* Shore = nullptr) const;
+	/** a place's kind, middle and shore, worked out once (the scan for water is the costly part) */
+	struct FRuinPick { int32 Kind = -1; FVector2D Centre = FVector2D::ZeroVector; FVector2D Shore = FVector2D::ZeroVector; };
+	mutable TMap<int32, FRuinPick> WildRuinPicks;
+	const FRuinPick& WildRuinPickOf(const FRDWildPlace& P) const;
 	void LayWildRuin(ARDWildChunk* C, const FRDWildPlace& P, const FRDWildRuinKind& K);
 	/** a piece laid by its box: its bottom on the lowest ground under it (less Sink cm), scaled to H metres high or by S */
 	UStaticMeshComponent* LayRuinPiece(ARDWildChunk* C, UStaticMesh* M, const FVector& At, const FRotator& Rot, const FVector& Scale, float Sink, bool bCollide);
 	/** the ruins laid (tests, the message as she comes): id, kind, its centre, how many pieces and containers */
-	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UStaticMeshComponent>> Comps; };
-	/** tests: a laid ruin's pieces: "<mesh>|<x>|<y>|<bottom z>|<top z>|<ground z under its middle>" (cm) */
+	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UStaticMeshComponent>> Comps; TArray<float> Lifts; };
+	/** a capsule at L (its middle) overlaps one of a laid ruin's colliding pieces */
+	bool WildRuinInPiece(const FRuinLaid& X, const FVector& L, float Radius, float HalfHeight) const;
+	/** tests: a laid ruin's pieces: "<mesh>|<x>|<y>|<bottom z>|<top z>|<ground z under its middle>|<solid>|<lift>" (cm; solid 1 it
+	 *  stops her, 0 its collision is on with nothing in it to stop her, - off; lift how far its part raised it, -1 laid otherwise) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildRuinPieceLines(int32 Id) const;
 	TArray<FRuinLaid> WildRuinsLaid;
 	TSet<int32> WildRuinsTold;
 	float WildRuinLook = 0.f;
 	void TickWildRuins12(float Dt, const FVector& Her);
-	/** tests: "ruin|<id>|<kind>|<title>|<x>|<y>|<pieces>|<boxes>|<guards>|<name>|<yaw>" (its front is its yaw's way) for each ruin laid in the chunks made */
+	/** tests: "ruin|<id>|<kind>|<title>|<x>|<y>|<pieces>|<boxes>|<guards>|<name>|<yaw>|<guards standing>|<inside a piece>" (its front
+	 *  is its yaw's way) for each ruin laid in the chunks made */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildRuinLines() const;
 	/** tests: the nearest ruin of a kind to a point (metres), searched over the world's places within MaxKm: "id|x|y|yaw|name" or "" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") FString FindWildRuin(FName Kind, float X, float Y, float MaxKm) const;
