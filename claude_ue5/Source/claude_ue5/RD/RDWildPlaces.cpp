@@ -202,6 +202,11 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			Put(TEXT("totem"), P.At, P.Yaw, 1.f, 10.f);
 			Ring(6, 5.f, 20.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("bones"), At, Yaw + R.FRandRange(0.f, 360.f), 1.f, 2.f, false); });
 		}
+		else if (P.Kind == TEXT("ruins") && WildRuinKindOf(P) >= 0)
+		{
+			// (the list of 2026-11-12: one of the twenty kinds of ruins, RDWildRuin12.cpp)
+			LayWildRuin(C, P, WildRuinKinds[WildRuinKindOf(P)]);
+		}
 		else if (P.Kind == TEXT("ruins"))
 		{
 			for (int32 I = 0, N = R.RandRange(4, 7); I < N; ++I)
@@ -227,7 +232,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			Ring(10, 3.f, 10.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("branch"), At, Yaw + 90.f + R.FRandRange(-20.f, 20.f), 1.f, 3.f, false); });
 		}
 		// (the caldera's hot springs steam: their places are the world's ponds of kind 6, laid by the chunk's water)
-		if (P.Kind == TEXT("spawn") || P.Kind == TEXT("lair") || !P.Quest.IsEmpty()) SpawnWildMonsters(C, P);
+		const int32 RuinK = P.Kind == TEXT("ruins") ? WildRuinKindOf(P) : -1;
+		if (P.Kind == TEXT("spawn") || P.Kind == TEXT("lair") || !P.Quest.IsEmpty() || (RuinK >= 0 && WildRuinKinds[RuinK].Guards > 0)) SpawnWildMonsters(C, P);
 		if (HallowedKinds.Num() > 0) LayHallowedStone(C, P);          // (the sixth phase: the Angel Tokens' stone)
 		UE_LOG(LogRDWildPlace, Verbose, TEXT("RDWILD %s (%s): %d props"), *P.Name, *P.Kind, Laid);
 	}
@@ -257,6 +263,8 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 	const bool bLair = P.Kind == TEXT("lair") && P.Quest.IsEmpty();
 	int32 Kind = Kinds[R.RandRange(0, Kinds.Num() - 1)];
 	int32 N = bLair ? R.RandRange(3, 5) : R.RandRange(2, 3);
+	// (the list of 2026-11-12: a ruin's guardians, its kind's number, after the draws)
+	if (const int32 Rk = P.Kind == TEXT("ruins") && P.Quest.IsEmpty() ? WildRuinKindOf(P) : -1; Rk >= 0) N = WildRuinKinds[Rk].Guards;
 	// (the list of 2026-11-11: hell's quarter more, after the draw: the place's other draws keep their order; the kills are kept
 	// by number, so the extra ones come last)
 	N = DifficultyCount(N);

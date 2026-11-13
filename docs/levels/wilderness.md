@@ -233,6 +233,41 @@ The user's of 2026-11-12: "create swimming animations for all current playable c
 
 ![Each hero swimming in Graymourne's harbour, her wake's rings behind her](../images/swim12_heroes.jpg)
 
+## The list of 2026-11-12, third part: twenty kinds of ruins
+
+The list of 2026-11-12's third phase (`docs/improvements12.txt`: "have at least 20 kinds of ruins", and the twenty it names). C++ `RD/RDWildRuin12.cpp`, stage `924_list12_wild.py ruins` from `SourceArt/wilderness/ruins12.json`. Measured in `888 ruins12 -Light` in two batches of ten (`test_r12f.json`, `test_r12g.json`).
+
+- **What a ruin is**: a wild place of kind "ruins" (the world's places are unchanged) is one of the twenty kinds, chosen from its id among the kinds its biome allows (`WildRuinKindOf`; the submerged town only where water lies within 300 m). Its parts are laid from its own random stream from 79 pack meshes in 61 groups (`r12_<group>#<n>` in the places' table), by a small layout language (`at`, `ring`, `arc`, `line`, `rect`, `grid`, `scatter`, `tiers`, with heights in metres, tilts, sinking, a share kept and a jitter). Every piece stands by its box: its bottom on the lowest ground under its corners.
+- **The kinds** (title, what she is told as she comes within 30 m):
+
+| Kind | Where | Guards | What stands there |
+|---|---|---|---|
+| Temple ruins | anywhere | 0 | toppled columns round an empty altar, a processional way of broken steps |
+| Castle ruins | 8 biomes | 3 | a slighted keep and broken curtain walls |
+| Abbey ruins | 7 | 2 | a roofless nave, its windows' tracery standing empty |
+| Forest-swallowed city | 6 | 2 | walls the forest took back, roots prying the stones apart |
+| A tell | 6 | 0 | a hill of the rubble of city on city, a dig cut into its side |
+| A barrow | 7 | 2 | a long cairn of piled stone, its stone-lined passage open |
+| Standing stones | 7 | 0 | a circle, a holed stone at its heart and a dolmen beside it |
+| Rock-cut temple | 7 | 2 | a temple carved into the living rock |
+| Cliff dwellings | canyons, mesas, mountains, hills | 0 | stone rooms against a rock face, row on row, reached by ladders |
+| Catacomb entrance | anywhere | 3 | a way down into burial galleries under the hill |
+| Submerged ruins | by water | 0 | columns and walls standing up out of the water |
+| Ash-buried town | the volcanic lands | 2 | houses half under grey ash |
+| Sand-buried city | 6 | 0 | the tops of arches and walls over drifting sand |
+| Amphitheatre | 7 | 0 | rows of stone seats round an empty stage |
+| Aqueduct | 9 | 0 | the arches of an aqueduct that outlasted its city |
+| Ghost town | 10 | 0 | a village left in a hurry: houses to walk into, tables still set |
+| Industrial ruins | 8 | 2 | a derelict mill, rusting hoppers, a crane, carts on broken rails |
+| Battlefield ruins | 7 | 3 | a fort's broken walls, swords standing in the earth, a shattered statue |
+| The forsaken works | 6 | 2 | works left all at once, the forest taking them back |
+| A folly | 6 | 0 | a ruin built ruined, in a lord's park |
+
+- **What each holds**: a chest or two of its kind's things (`Loot`, the wild boxes, kept looted under keys of their own: `(3 << 40)` + the place's id x 8 + n), and for nine kinds guardians of the place's tier (`Guards`, the spawn points' monsters).
+- **Measured** (`test_r12f.json`, `test_r12g.json`): all twenty among the world's ruins within 150 km of Brokenspire (temple 37 to submerged and sand-buried 1 each; none left without a kind); the nearest of each visited, laid of its kind with 6 (the folly) to 68 pieces (the amphitheatre's seats), a chest within 40 m, its guards standing within 20 m of its middle; a message naming it as she comes (with its discovery, in one line: the test keeps every line the HUD showed over the visit, which also brought her within 20 m: on its shore for the submerged town); a picture of each from 45 m before its front. The pieces' bottoms stand at or under the ground under their middles but for those laid on others (the cliff dwellings' upper rooms, the barrow's cairn, a raised wheel) and the sunk ones (the submerged town's columns 1.4 to 4.5 m down, the sand-buried city's arches up to 10 m).
+
+![The twenty ruins, each from 45 m before its front](../images/ruins12_kinds.jpg)
+
 ## Limits
 
 What is not there yet, and what has not been tested, is listed in [TODO.md](../../TODO.md). In short:
@@ -281,6 +316,7 @@ What is not there yet, and what has not been tested, is listed in [TODO.md](../.
 | `horse9` (2026-11-10) | as before, and: unridden its box stops her (walking at its middle from 2.2 m, the nearest 64 cm), ridden it stops nothing; mounted she goes 5 times her speed or more, measured over the last 3 s of a 6 s run (5.69 in `test_w10b.json`; over the whole 4 s it read 5.04, the gallop's run-up) |
 | `meadows11` | the list of 2026-11-11 (`test_w11d.json`): at a meadow spot the trees within 250 m (183), the 20 m cells bare (89 %) and the spread of their counts (3.1: clustered), an 80 m square with no tree; the debris within 100 m by kind; the grass by her on the swaying material; the leaves on in the meadows; six leaf systems pictured in one place (`leaves11_<n>`) |
 | `swim12` (884's) | (`SourceArt/brokenspire/test_sw12u.json`, `-Light`) the six heroes swimming in Graymourne's harbour and the sea beyond it; the splash's and strokes' sounds recorded; a swing begun on the quay broken off in the water, her horse not mounted from it, her jump hers again out of it (PR #53's review) ([Swimming](#swimming-2026-11-12)) |
+| `ruins12` | the list of 2026-11-12's third part (`test_r12f.json`, `test_r12g.json`; `ruins12=<kind>+<kind>` for some, run in two batches of ten): the table's 20 kinds, each among the ruins within 150 km; the nearest of each laid of its kind (3 pieces or more, where each stands against the ground), its chest within 40 m, its guards; the message naming it at 20 m; a picture from 45 m before its front ([its section](#the-list-of-2026-11-12-third-part-twenty-kinds-of-ruins)) |
 | `events11` | (`test_w11e.json`) each of the director's 13 new kinds forced ahead of her: met; a place laid of its kind, a herd made, a person who gives once (her things or gold more, the second F nothing) |
 | `quests` | (2026-11-07; 2026-11-08 `test_s12.json`) the captain's two quests: the Mill Road Den 1.8 km out, 45 m from the Ashenreach road, the Old Watchtower 3.0 km out off the Vel Morrath road, both dry; taken at the captain, on the map and named, no travel there before they are found; the den's four ripper dogs (three killed, the chunks made again: one left; the fourth: done); the tower's three guards, its 18 props; the patrol found 2.5 m from their remains, not 10 m; both turned in for 320 gold, off the map |
 
@@ -307,4 +343,5 @@ The tool's exit code is 1 for the 15 known unreadable pack files the asset regis
 2h. The list of 2026-11-11's fourth part, the farmsteads' designs: C++ first (`RD/RDWildFarm11.cpp`), `python pipeline/blender_numpy/farm_designs.py [count] [seed]` (writes `SourceArt/wilderness/farm_designs.json`: 60 designs from seed 1111), then `919_farms11.py` (on `brokenspire`: the designs and the containers' loot; it reports any piece, item or animal they name that the level lacks). Check with `888_wilderness_test.ps1 farms11,houses10 <tag> 2400 -Light` and `884 farms9 -Light`.
 2i. The list of 2026-11-11's fifth part: C++ first (`RD/RDWild11.cpp`, `RDWildWorld.cpp`, `RDWildChunk.cpp`, `RDPort.cpp`), then on `brokenspire` `890_improvements7.py wind` (once: the wilds' grass on the swaying copy), `920_wild11.py heads,meadows,leaves,events,port` (`meadows` after `887 data`, `events` after `912`, `port` after `896`). Check with `888_wilderness_test.ps1 meadows11,events11 <tag> 1700 -Light` and `884 port11,port -Light`.
 2j. Swimming (2026-11-12): C++ first (`RD/RDSwim.cpp`), `887_wilderness.py materials` (the water's ripples and `MPC_RD_Water`), `python pipeline/blender_numpy/rdc_sound_prep.py claude_ue5/SourceArt/brokenspire/water.json claude_ue5/SourceArt/brokenspire/audio_water` (the water's sounds), then `921_swim.py clips,sounds,level` on `brokenspire` (after `913 rider`'s rigs exist; `sounds` adds its three sets to the level's table and keeps the rest). Check with `884_brokenspire_test.ps1 swim12,port11 <tag> 2400 -Light` (restart the editor first: a long session left too little memory for its play).
+2k. The list of 2026-11-12's third part, the ruins: C++ first (`RD/RDWildRuin12.cpp`), then `924_list12_wild.py ruins` (on `brokenspire`: the ruins' pieces into the places' table and the twenty kinds; it checks every part's piece is there). Check with `888_wilderness_test.ps1 "ruins12=<ten kinds>" <tag> 1500 -Light` twice, the editor restarted between.
 3. `888_wilderness_test.ps1 all <tag>`; Brokenspire's own test (`884_brokenspire_test.ps1 all`) after anything shared: its `gate` step expects the gate open when the wilderness is on.

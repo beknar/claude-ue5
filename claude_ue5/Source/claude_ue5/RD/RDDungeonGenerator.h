@@ -2528,6 +2528,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") TArray<FString> FindWildFarmsteads(float Xm, float Ym, float Rm) const;
 	ARDSection* EnsureWildSection();
 	void SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace& P);
+	// ---- the list of 2026-11-12's third phase: twenty kinds of ruins (RDWildRuin12.cpp, 924)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TArray<FRDWildRuinKind> WildRuinKinds;
+	/** the kind a place of kind "ruins" is (an index into WildRuinKinds, -1: none fits or no table): from its id, its biome and the
+	 *  water round it; a pure function of the world */
+	int32 WildRuinKindOf(const FRDWildPlace& P) const;
+	/** where its parts are laid from (the place's point, or moved toward the water for a kind that wants it) */
+	FVector2D WildRuinCentre(const FRDWildPlace& P, const FRDWildRuinKind& K, FVector2D* Shore = nullptr) const;
+	void LayWildRuin(ARDWildChunk* C, const FRDWildPlace& P, const FRDWildRuinKind& K);
+	/** a piece laid by its box: its bottom on the lowest ground under it (less Sink cm), scaled to H metres high or by S */
+	UStaticMeshComponent* LayRuinPiece(ARDWildChunk* C, UStaticMesh* M, const FVector& At, const FRotator& Rot, const FVector& Scale, float Sink, bool bCollide);
+	/** the ruins laid (tests, the message as she comes): id, kind, its centre, how many pieces and containers */
+	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UStaticMeshComponent>> Comps; };
+	/** tests: a laid ruin's pieces: "<mesh>|<x>|<y>|<bottom z>|<top z>|<ground z under its middle>" (cm) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildRuinPieceLines(int32 Id) const;
+	TArray<FRuinLaid> WildRuinsLaid;
+	TSet<int32> WildRuinsTold;
+	float WildRuinLook = 0.f;
+	void TickWildRuins12(float Dt, const FVector& Her);
+	/** tests: "ruin|<id>|<kind>|<title>|<x>|<y>|<pieces>|<boxes>|<guards>|<name>|<yaw>" (its front is its yaw's way) for each ruin laid in the chunks made */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildRuinLines() const;
+	/** tests: the nearest ruin of a kind to a point (metres), searched over the world's places within MaxKm: "id|x|y|yaw|name" or "" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") FString FindWildRuin(FName Kind, float X, float Y, float MaxKm) const;
+	/** tests: every kind's count among the world's ruins within MaxKm of a point: "<kind>|<count>" */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") TArray<FString> CountWildRuins(float X, float Y, float MaxKm) const;
 	// ---- the seventh phase: the small points of interest and the encounter director (RDWildPoi.cpp; 912 from poi.json)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") TArray<FRDWildPoiKind> WildPoiKinds;
 	/** the share of the 120 m grid's cells that hold one */
