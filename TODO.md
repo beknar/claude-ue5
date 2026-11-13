@@ -20,7 +20,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-12 ([docs/improvements12.txt](docs/improvements12.txt))
 
-Done in phases: 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
+Done in phases (1 to 3 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; to come: 4 the hidden lairs; 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
 
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).
@@ -30,6 +30,12 @@ Done in phases: 1 gold, the map in its scroll, the mouse on the big map, rd.MapT
   - A gait change carries on at the same point of the stride, but the two gaits' poses are not blended: the legs still change shape in one frame.
   - The Blender horse (`SourceArt/brokenspire/horse/`) is built with the same gaits but not imported: the game rides the Tripo horse.
   - Nobody has watched the gaits in motion: they were judged in eight still frames a gait and two in-game pictures.
+- [ ] **Phase 3, the twenty ruins, what is not done or measured:** ([the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-12-third-part-twenty-kinds-of-ruins)):
+  - The ruins are set pieces of the packs' meshes over the land: the catacombs, the barrow's passage and the rock-cut temple have no inside beyond their entrance; the tell is a mound, not dug into.
+  - Two kinds are rare round Brokenspire (one submerged town and one sand-buried city within 150 km): their biomes and water are rare there.
+  - Some pictures show little of their ruin: the tell's mound is low, the barrow and the catacombs' entrance are small at 45 m, and the sand-buried city's (in the canyons) is hidden by a canyon wall; the pieces' readouts say they stand there.
+  - Every piece laid to collide stops her (the test checks each one's collision); whether she can walk through every doorway and up every step was not tried.
+  - A submerged town is moved into the water up to 300 m from its place: its mark on the map and its discovery stay at the place (its kind is told as she comes to the ruin).
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

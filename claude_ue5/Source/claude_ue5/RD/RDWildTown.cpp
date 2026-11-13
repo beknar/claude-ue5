@@ -232,7 +232,16 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 		WildLastFound = P.Name;
 		if (P.Town >= 0)
 			if (URDGameInstance* GI = URDGameInstance::Of(this)) GI->CirclesFound.AddUnique(FName(*P.Name));
-		if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s"), *P.Name));
+		// (the list of 2026-11-12: a ruin's kind is told with its discovery, one line: told apart, whichever came later hid the other.
+		// Only where the ruin stands at its place: one moved into the water (up to 300 m off) is told as she comes to it
+		// (TickWildRuins12), not where she found the place (PR #56's review))
+		const int32 RuinK = WildRuinKindOf(P);
+		if (PlayerCombat && RuinK >= 0 && FVector2D::Distance(WildRuinCentre(P), P.At) < 30.f)
+		{
+			WildRuinsTold.Add(P.Id);
+			PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s. %s: %s"), *P.Name, *WildRuinKinds[RuinK].Title, *WildRuinKinds[RuinK].Text));
+		}
+		else if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s"), *P.Name));
 		UE_LOG(LogRDWildTown, Log, TEXT("RDWILD found %s (%s) at (%.0f, %.0f)"), *P.Name, *P.Kind, P.At.X, P.At.Y);
 		WildAutosave(TEXT("found"));
 	}

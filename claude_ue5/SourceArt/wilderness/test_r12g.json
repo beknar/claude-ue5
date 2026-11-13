@@ -1,0 +1,414 @@
+{
+ "tag": "r12g",
+ "plan": [
+  "ruins12=submerged+ashcity+sandcity+amphitheatre+aqueduct+ghosttown+industrial+warruins+exclusion+folly"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "ruins12",
+   "ok": true,
+   "kinds": {
+    "submerged": {
+     "found": true,
+     "id": 459844,
+     "at_km": [
+      32.98,
+      123.02
+     ],
+     "name": "Ruins of Blackby",
+     "laid": {
+      "kind": "submerged",
+      "pieces": 13,
+      "boxes": 1,
+      "guards": 0
+     },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.0,
+      5.3,
+      11.2
+     ],
+     "bottom_over_ground_cm": [
+      -264,
+      -174,
+      -157
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 13,
+     "chests": 1,
+     "monsters_within_20m": 0,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Blackby | Submerged ruins: a town the water took; columns and walls stand up out of it",
+     "title": "Submerged ruins"
+    },
+    "ashcity": {
+     "found": true,
+     "id": 803508,
+     "at_km": [
+      117.97,
+      25.08
+     ],
+     "name": "Ruins of Blackdale",
+     "laid": {
+      "kind": "ashcity",
+      "pieces": 21,
+      "boxes": 1,
+      "guards": 2
+     },
+     "guards_standing": 2,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      6.0,
+      9.2,
+      15.1
+     ],
+     "bottom_over_ground_cm": [
+      -357,
+      -122,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 17,
+     "chests": 1,
+     "monsters_within_20m": 2,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Blackdale. Ash-buried town: houses half under grey ash, as they were the day the mountain fell on them",
+     "title": "Ash-buried town"
+    },
+    "sandcity": {
+     "found": true,
+     "id": 164372,
+     "at_km": [
+      -38.27,
+      -16.57
+     ],
+     "name": "Ruins of Redham",
+     "laid": {
+      "kind": "sandcity",
+      "pieces": 20,
+      "boxes": 1,
+      "guards": 0
+     },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.5,
+      7.8,
+      13.9
+     ],
+     "bottom_over_ground_cm": [
+      -1034,
+      -214,
+      -23
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 20,
+     "chests": 1,
+     "monsters_within_20m": 0,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Redham. Sand-buried city: the tops of arches and walls over drifting sand",
+     "title": "Sand-buried city"
+    },
+    "amphitheatre": {
+     "found": true,
+     "id": 246388,
+     "at_km": [
+      -18.01,
+      9.04
+     ],
+     "name": "Ruins of Hollowmere",
+     "laid": {
+      "kind": "amphitheatre",
+      "pieces": 68,
+      "boxes": 1,
+      "guards": 0
+     },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      4.8,
+      11.9,
+      14.8
+     ],
+     "bottom_over_ground_cm": [
+      -43,
+      72,
+      214
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 68,
+     "chests": 1,
+     "monsters_within_20m": 0,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Hollowmere. Amphitheatre: rows of stone seats round an empty stage",
+     "title": "Amphitheatre"
+    },
+    "aqueduct": {
+     "found": true,
+     "id": 311844,
+     "at_km": [
+      -0.97,
+      -11.59
+     ],
+     "name": "Ruins of Windstead",
+     "laid": {
+      "kind": "aqueduct",
+      "pieces": 15,
+      "boxes": 1,
+      "guards": 0
+     },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.7,
+      18.0,
+      30.0
+     ],
+     "bottom_over_ground_cm": [
+      -83,
+      -42,
+      -6
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 15,
+     "chests": 1,
+     "monsters_within_20m": 0,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Windstead. Aqueduct: the arches of an aqueduct that outlasted the city it fed",
+     "title": "Aqueduct"
+    },
+    "ghosttown": {
+     "found": true,
+     "id": 360852,
+     "at_km": [
+      11.05,
+      -47.49
+     ],
+     "name": "Ruins of Windham",
+     "laid": {
+      "kind": "ghosttown",
+      "pieces": 14,
+      "boxes": 1,
+      "guards": 0
+     },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.0,
+      16.3,
+      24.1
+     ],
+     "bottom_over_ground_cm": [
+      -18,
+      -2,
+      76
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 12,
+     "chests": 1,
+     "monsters_within_20m": 0,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Windham. Ghost town: a village left in a hurry: tables still set, doors open, not a soul",
+     "title": "Ghost town"
+    },
+    "industrial": {
+     "found": true,
+     "id": 229892,
+     "at_km": [
+      -22.36,
+      -19.86
+     ],
+     "name": "Ruins of Elmmere",
+     "laid": {
+      "kind": "industrial",
+      "pieces": 22,
+      "boxes": 1,
+      "guards": 2
+     },
+     "guards_standing": 2,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      3.2,
+      6.9,
+      12.1
+     ],
+     "bottom_over_ground_cm": [
+      -56,
+      -13,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 13,
+     "chests": 1,
+     "monsters_within_20m": 2,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Elmmere. Industrial ruins: a derelict mill and its works: rusting hoppers, a crane, carts on broken rails",
+     "title": "Industrial ruins"
+    },
+    "warruins": {
+     "found": true,
+     "id": 246228,
+     "at_km": [
+      -17.67,
+      -32.46
+     ],
+     "name": "Ruins of Redstead",
+     "laid": {
+      "kind": "warruins",
+      "pieces": 35,
+      "boxes": 1,
+      "guards": 3
+     },
+     "guards_standing": 3,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.0,
+      9.5,
+      15.0
+     ],
+     "bottom_over_ground_cm": [
+      -43,
+      -31,
+      -5
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 15,
+     "chests": 1,
+     "monsters_within_20m": 3,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Redstead. Battlefield ruins: a fort's broken walls left as they fell, the dead's swords still standing in the earth, a shattered statue to remember them",
+     "title": "Battlefield ruins"
+    },
+    "exclusion": {
+     "found": true,
+     "id": 672676,
+     "at_km": [
+      85.6,
+      83.99
+     ],
+     "name": "Ruins of Hawkholt",
+     "laid": {
+      "kind": "exclusion",
+      "pieces": 30,
+      "boxes": 1,
+      "guards": 2
+     },
+     "guards_standing": 2,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.0,
+      16.2,
+      25.6
+     ],
+     "bottom_over_ground_cm": [
+      -22,
+      -12,
+      283
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 19,
+     "chests": 1,
+     "monsters_within_20m": 2,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Hawkholt. The forsaken works: a place left all at once after something went wrong; the forest is taking it back",
+     "title": "The forsaken works"
+    },
+    "folly": {
+     "found": true,
+     "id": 230036,
+     "at_km": [
+      -21.64,
+      16.31
+     ],
+     "name": "Ruins of Redby",
+     "laid": {
+      "kind": "folly",
+      "pieces": 6,
+      "boxes": 1,
+      "guards": 0
+     },
+     "guards_standing": 0,
+     "guards_in_a_piece": 0,
+     "pieces_m_from_middle": [
+      0.1,
+      8.1,
+      12.3
+     ],
+     "bottom_over_ground_cm": [
+      -58,
+      -20,
+      -14
+     ],
+     "pieces_gone": 0,
+     "floating": [],
+     "walked_through": [],
+     "solid": 6,
+     "chests": 1,
+     "monsters_within_20m": 0,
+     "told_from_m": 20.0,
+     "told": "Discovered: Ruins of Redby. A folly: a ruin built ruined, to look old in a lord's park",
+     "title": "A folly"
+    }
+   },
+   "table": 20,
+   "counts": {
+    "temple": 37,
+    "castle": 17,
+    "abbey": 10,
+    "forestcity": 8,
+    "tell": 5,
+    "barrow": 8,
+    "megalith": 3,
+    "rockcut": 12,
+    "cliffdwell": 10,
+    "catacombs": 32,
+    "submerged": 1,
+    "ashcity": 3,
+    "sandcity": 1,
+    "amphitheatre": 9,
+    "aqueduct": 9,
+    "ghosttown": 11,
+    "industrial": 21,
+    "warruins": 8,
+    "exclusion": 2,
+    "folly": 5,
+    "none": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_r12g_ruins12_submerged.png",
+  "wd_r12g_ruins12_ashcity.png",
+  "wd_r12g_ruins12_sandcity.png",
+  "wd_r12g_ruins12_amphitheatre.png",
+  "wd_r12g_ruins12_aqueduct.png",
+  "wd_r12g_ruins12_ghosttown.png",
+  "wd_r12g_ruins12_industrial.png",
+  "wd_r12g_ruins12_warruins.png",
+  "wd_r12g_ruins12_exclusion.png",
+  "wd_r12g_ruins12_folly.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

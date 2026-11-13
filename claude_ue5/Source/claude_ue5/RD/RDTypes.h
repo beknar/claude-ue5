@@ -839,6 +839,30 @@ struct FRDHorseDef
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float RiderLift = 0.f;
 };
 
+/** the list of 2026-11-12's third phase ("have at least 20 kinds of ruins", "add these ruin types in the wilderness: temple ruins,
+ *  castle and fortress ruins, ..."): a kind of ruin a wild place of kind "ruins" is laid as (RDWildRuin12.cpp; 924 writes the table
+ *  from SourceArt/wilderness/ruins12.json). Its parts are lines of key=value pairs (a layout, a piece's prefix, a count, sizes),
+ *  laid from the place's own random stream */
+USTRUCT(BlueprintType)
+struct FRDWildRuinKind
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName Name;
+	/** what she is told as she comes to it ("Temple ruins"), and a line of what it is */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Title;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Text;
+	/** the biomes it is found in ("*": any) and how often against the other kinds there */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Biomes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float Weight = 1.f;
+	/** only where water lies within 30 m (its parts laid into it: the submerged ruins) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bWater = false;
+	/** "L=<at|ring|line|rect|scatter|grid|tiers>;p=<piece prefix>;n=<count>;r=..;h=<metres>;..." (RDWildRuin12.cpp) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FString> Parts;
+	/** its containers' things ("Item|min|max|chance;..."), and how many of the place's monsters guard it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Loot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Guards = 0;
+};
+
 /** a hero's rider clips (the Animals pack's camel rider's, retargeted to her by 913) */
 USTRUCT(BlueprintType)
 struct FRDRiderClips
