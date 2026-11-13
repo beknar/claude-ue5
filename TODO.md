@@ -20,7 +20,7 @@ Built and compiled, but no test has run it yet:
 
 ## The list of 2026-11-12 ([docs/improvements12.txt](docs/improvements12.txt))
 
-Done in phases (1 to 3 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; to come: 4 the hidden lairs; 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
+Done in phases (1 to 4 so far): 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; to come: 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
 
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).
@@ -36,6 +36,11 @@ Done in phases (1 to 3 so far): 1 gold, the map in its scroll, the mouse on the 
   - Some pictures show little of their ruin: the tell's mound is low, the barrow and the catacombs' entrance are small at 45 m, and the sand-buried city's (in the canyons) is hidden by a canyon wall; the pieces' readouts say they stand there.
   - Every piece laid to collide stops her (the test checks each one's collision); whether she can walk through every doorway and up every step was not tried.
   - A submerged town is moved into the water up to 300 m from its place: its mark on the map and its discovery stay at the place (its kind is told as she comes to the ruin).
+- [ ] **Phase 4, the lairs hidden, what is not done or measured:** ([the wilderness](docs/levels/wilderness.md#the-list-of-2026-11-12-fourth-part-the-lairs-hidden)):
+  - How hidden a lair is was measured by sight lines against the cover's own pieces, not by what a camera sees: the groves' crowns block only through their meshes' collision (a beech's is its trunk), so the bushes do most of it.
+  - The monsters notice her by distance as before, not by sight: a cover hides them from her, not her from them.
+  - The cave mouth is a mouth among rocks, as the wilds' caves are: no inside.
+  - Lairs on rough ground: a den where the land rises or falls more than 2.5 m within 8 m moves to the gentlest ground within 40 m, but on a mountain's face or a canyon's terraces there may be none: its cover's pieces stand a storey apart, its monsters may slide out of it, and from below or above it hides little. The test measures the nearest lair of each cover on gentle ground (2 m within 8 m) and sets her down on gentle ground near the den's height (set down on a terrace she fell to her death).
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

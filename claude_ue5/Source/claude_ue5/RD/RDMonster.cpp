@@ -177,6 +177,23 @@ void ARDMonster::SetPathFromTiles(const TArray<FIntPoint>& Tiles)
 	}
 }
 
+void ARDMonster::CoverRound(const FVector& From, const FVector& To, TArray<FVector>& Out) const
+{
+	// (round a lair's cover outside its walls, from From's way round to To's, 40 degrees a step, when they are more than 60 apart)
+	if (CoverOutR <= 0.f) return;
+	const FVector2D C(HomeAt.X, HomeAt.Y);
+	const float Af = FMath::Atan2(From.Y - C.Y, From.X - C.X), At = FMath::Atan2(To.Y - C.Y, To.X - C.X);
+	const float D = FMath::FindDeltaAngleRadians(Af, At);
+	if (FMath::Abs(D) < FMath::DegreesToRadians(60.f)) return;
+	const int32 N = FMath::CeilToInt(FMath::Abs(D) / FMath::DegreesToRadians(40.f));
+	const float Rr = CoverOutR + 300.f;
+	for (int32 I = 1; I < N; ++I)
+	{
+		const float A = Af + D * I / N;
+		Out.Add(FVector(C.X + FMath::Cos(A) * Rr, C.Y + FMath::Sin(A) * Rr, From.Z));
+	}
+}
+
 void ARDMonster::PickTrip()
 {
 	Path.Reset();
@@ -184,7 +201,15 @@ void ARDMonster::PickTrip()
 	// (the wilderness: a point round its home, straight there)
 	if (bOpenGround)
 	{
-		const float A = R.FRandRange(0.f, 2.f * PI), D = R.FRandRange(300.f, 1500.f);
+		const float A = R.FRandRange(0.f, 2.f * PI);
+		float D = R.FRandRange(300.f, 1500.f);
+		// (a lair's: inside its cover, and in through its opening when it is out of it, round the cover to it first (straight
+		// to the opening from the far side ran into the walls: PR #57's review))
+		if (CoverR > 0.f)
+		{
+			D = D / 1500.f * CoverR * 0.6f;
+			if (FVector::Dist2D(GetActorLocation(), HomeAt) > CoverOutR) { CoverRound(GetActorLocation(), CoverExit, Path); Path.Add(CoverExit); }
+		}
 		Path.Add(HomeAt + FVector(FMath::Cos(A) * D, FMath::Sin(A) * D, 0.f));
 		Goal = Path.Last(); StuckTime = 0.f;
 		return;
@@ -847,7 +872,9 @@ bool ARDMonster::TickCombat(float Dt)
 	// distance or leash drops it while the hunt lasts (a minute, or until she is 150 m off); after it, its home is where it is)
 	// (a test's quiet (no noticing at all) holds for a hunt too; nor across a great height (PR #38's review))
 	const bool bHunt = bHunting && !bAlly && G->AggroDistance > 0.f && GetWorld()->GetTimeSeconds() < HuntUntil && Dist < 15000.f && Dz < 900.f;
-	if (bHunting && !bHunt) { bHunting = false; HomeAt = L; }
+	// (its home moved: a lair's cover is no longer its (PR #57's review: its old opening, maybe 100 m off, would still have been
+	// taken as its way out))
+	if (bHunting && !bHunt) { bHunting = false; HomeAt = L; CoverR = CoverOutR = 0.f; CoverExit = FVector::ZeroVector; }
 	if (bHunt && !bAggro) { bAggro = true; Path.Reset(); WaitTime = 0.f; ChaseTimer = 0.f; StuckTime = 0.f; Roar(); }
 	if (!bAggro && !bAlly)
 	{
@@ -937,6 +964,23 @@ bool ARDMonster::TickCombat(float Dt)
 		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
 		TArray<FIntPoint> Tiles;
 		Path.Reset();
+		// (a lair's in its cover after her outside it: out through the opening first (inside its walls' radius, not only its own
+		// circle: past the circle it had dropped the opening and run at the walls), then round the cover toward her if she is
+		// on its far side)
+		if (bOpenGround && CoverR > 0.f && FVector::Dist2D(Pl, HomeAt) > CoverOutR)
+		{
+			if (FVector::Dist2D(L, HomeAt) < CoverOutR && FVector::Dist2D(L, CoverExit) > 120.f)
+			{
+				const FVector Gw = (CoverExit - HomeAt).GetSafeNormal2D();
+				// (behind the opening's inner point: to it first, so the way out runs along the opening, not across a wall)
+				const FVector In = HomeAt + Gw * CoverR * 0.5f;
+				if (FVector::DotProduct(L - HomeAt, Gw) < CoverR * 0.5f - 50.f) Path.Add(FVector(In.X, In.Y, L.Z));
+				Path.Add(CoverExit);
+				CoverRound(CoverExit, Pl, Path);
+			}
+			// (out of it, near: round it, not across it, to her on its far side)
+			else if (FVector::Dist2D(L, HomeAt) < CoverOutR + 600.f) CoverRound(L, Pl, Path);
+		}
 		if (bOpenGround || From == To || FMath::Abs(From.X - To.X) + FMath::Abs(From.Y - To.Y) == 1) Path.Add(Pl);
 		else if (bSameSection && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) { SetPathFromTiles(Tiles); if (Path.Num() > 0) Path.Last() = Pl; }
 		else if (!bSameSection && Dist < 900.f) Path.Add(Pl);

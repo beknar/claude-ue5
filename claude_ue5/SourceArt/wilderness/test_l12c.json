@@ -1,0 +1,783 @@
+{
+ "tag": "l12c",
+ "plan": [
+  "lairs12"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "lairs12",
+   "ok": true,
+   "covers": {
+    "grove": {
+     "found": true,
+     "id": 328327,
+     "at_km": [
+      1.05,
+      11.0
+     ],
+     "name": "Harpy Lair",
+     "laid": {
+      "cover": "grove",
+      "pieces": 49,
+      "exit": [
+       1047.1,
+       11015.6
+      ],
+      "reach_m": 10.9
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_AutumnTree01": [
+       3,
+       -115,
+       1279
+      ],
+      "SM_EuropeanBeech_M_01": [
+       6,
+       -102,
+       1356
+      ],
+      "SM_Bush02": [
+       20,
+       -32,
+       274
+      ],
+      "SM_Bush01": [
+       20,
+       -34,
+       268
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      0.9,
+      1.6,
+      1.7,
+      2.1,
+      2.7
+     ],
+     "cover_r_m": 6.0,
+     "sight_30m": {
+      "blocked": 156,
+      "lines": 240,
+      "monsters": 5,
+      "else_blocked": 0,
+      "hidden": 0.65
+     },
+     "sight_15m": {
+      "blocked": 163,
+      "lines": 240,
+      "else_blocked": 0,
+      "hidden": 0.68
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 9.1,
+     "woken_m": [
+      17.3,
+      7.0
+     ],
+     "woken_out_m": 11.0,
+     "home_after_20s": 5,
+     "monsters": 5,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 6.2,
+     "woken_side_m": [
+      17.1,
+      19.6
+     ],
+     "woken_side_out_m": 11.0
+    },
+    "pinegrove": {
+     "found": true,
+     "id": 492375,
+     "at_km": [
+      42.28,
+      64.31
+     ],
+     "name": "Wolf Lair",
+     "laid": {
+      "cover": "pinegrove",
+      "pieces": 71,
+      "exit": [
+       42291.4,
+       64319.4
+      ],
+      "reach_m": 11.2
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_Pine_Medium_2__Solid": [
+       3,
+       -71,
+       1410
+      ],
+      "SM_Pine_Medium_1__Solid": [
+       4,
+       -92,
+       1457
+      ],
+      "SM_Pine_Big_1__Solid": [
+       3,
+       -106,
+       1327
+      ],
+      "SM_Bush_Pine": [
+       58,
+       -43,
+       297
+      ],
+      "SM_EuropeanBeech_Log_01": [
+       2,
+       -75,
+       53
+      ],
+      "SM_Pine_Fallen_Solid": [
+       1,
+       -98,
+       104
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.2,
+      1.7,
+      3.4
+     ],
+     "cover_r_m": 6.0,
+     "sight_30m": {
+      "blocked": 127,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 2,
+      "hidden": 0.88
+     },
+     "sight_15m": {
+      "blocked": 129,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.9
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 8.5,
+     "woken_m": [
+      17.3,
+      6.2
+     ],
+     "woken_out_m": 11.8,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 3.6,
+     "woken_side_m": [
+      18.6,
+      20.1
+     ],
+     "woken_side_out_m": 11.7
+    },
+    "deadwood": {
+     "found": true,
+     "id": 524999,
+     "at_km": [
+      49.99,
+      28.9
+     ],
+     "name": "Ghoul Lair",
+     "laid": {
+      "cover": "deadwood",
+      "pieces": 67,
+      "exit": [
+       49997.4,
+       28912.1
+      ],
+      "reach_m": 11.5
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_DEAD_Tree_1_Solid": [
+       1,
+       -44,
+       604
+      ],
+      "SM_TreeDead04": [
+       5,
+       -55,
+       744
+      ],
+      "SM_TreeDead01": [
+       2,
+       -46,
+       694
+      ],
+      "SM_Bush02": [
+       15,
+       -22,
+       284
+      ],
+      "SM_Bush01": [
+       29,
+       -24,
+       274
+      ],
+      "SM_Pine_Fallen_Solid": [
+       3,
+       -70,
+       199
+      ],
+      "SM_EuropeanBeech_Log_01": [
+       4,
+       -49,
+       70
+      ],
+      "SM_JungleRubblePile_A": [
+       5,
+       -52,
+       204
+      ],
+      "SM_S_BrickRubbleV1": [
+       3,
+       -70,
+       196
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      0.9,
+      0.9,
+      0.9
+     ],
+     "cover_r_m": 6.0,
+     "sight_30m": {
+      "blocked": 100,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.69
+     },
+     "sight_15m": {
+      "blocked": 109,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.76
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 7.8,
+     "woken_m": [
+      16.1,
+      5.7
+     ],
+     "woken_out_m": 12.3,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 6.6,
+     "woken_side_m": [
+      18.7,
+      20.6
+     ],
+     "woken_side_out_m": 11.6
+    },
+    "ruin": {
+     "found": true,
+     "id": 344679,
+     "at_km": [
+      4.8,
+      3.81
+     ],
+     "name": "Boar Lair",
+     "laid": {
+      "cover": "ruin",
+      "pieces": 16,
+      "exit": [
+       4809.9,
+       3820.2
+      ],
+      "reach_m": 8.9
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_StoneWall_Damaged": [
+       7,
+       -27,
+       343
+      ],
+      "SM_S_BrokenWallPart": [
+       5,
+       -10,
+       265
+      ],
+      "SM_JungleRubblePile_A": [
+       3,
+       -21,
+       99
+      ],
+      "SM_S_BrickRubbleV1": [
+       1,
+       -22,
+       61
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.1,
+      1.2,
+      3.0
+     ],
+     "cover_r_m": 5.5,
+     "sight_30m": {
+      "blocked": 119,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.83
+     },
+     "sight_15m": {
+      "blocked": 108,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.75
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 4.6,
+     "woken_m": [
+      16.4,
+      8.5
+     ],
+     "woken_out_m": 9.5,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 5.0,
+     "woken_side_m": [
+      16.5,
+      19.2
+     ],
+     "woken_side_out_m": 9.2
+    },
+    "house": {
+     "found": true,
+     "id": 344695,
+     "at_km": [
+      5.14,
+      9.0
+     ],
+     "name": "Wyrm Lair",
+     "laid": {
+      "cover": "house",
+      "pieces": 15,
+      "exit": [
+       5136.8,
+       9005.1
+      ],
+      "reach_m": 6.7
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_StoneWall_Damaged": [
+       11,
+       -24,
+       315
+      ],
+      "SM_ChimneyTop": [
+       1,
+       -9,
+       441
+      ],
+      "SM_S_BrickRubbleV1": [
+       2,
+       -19,
+       52
+      ],
+      "SM_JungleRubblePile_A": [
+       1,
+       -18,
+       52
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      0.6,
+      1.3,
+      1.5
+     ],
+     "cover_r_m": 4.0,
+     "sight_30m": {
+      "blocked": 127,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.88
+     },
+     "sight_15m": {
+      "blocked": 126,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.88
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 4.6,
+     "woken_m": [
+      17.0,
+      10.7
+     ],
+     "woken_out_m": 7.3,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 4.6,
+     "woken_side_m": [
+      18.1,
+      18.6
+     ],
+     "woken_side_out_m": 7.2
+    },
+    "cave": {
+     "found": true,
+     "id": 295479,
+     "at_km": [
+      -6.59,
+      -8.29
+     ],
+     "name": "Harpy Lair",
+     "laid": {
+      "cover": "cave",
+      "pieces": 11,
+      "exit": [
+       -6596.2,
+       -8298.6
+      ],
+      "reach_m": 11.5
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_RockCliff_02": [
+       4,
+       -179,
+       554
+      ],
+      "SM_RockCliff_01_Solid": [
+       1,
+       -156,
+       558
+      ],
+      "SM_Ind_Min_Cave": [
+       1,
+       -186,
+       514
+      ],
+      "SM_Boulder_02_Solid": [
+       3,
+       -104,
+       233
+      ],
+      "SM_Boulder_01_Solid": [
+       2,
+       -96,
+       242
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.4,
+      1.5,
+      1.7,
+      1.8
+     ],
+     "cover_r_m": 5.5,
+     "sight_30m": {
+      "blocked": 166,
+      "lines": 192,
+      "monsters": 4,
+      "else_blocked": 0,
+      "hidden": 0.86
+     },
+     "sight_15m": {
+      "blocked": 168,
+      "lines": 192,
+      "else_blocked": 0,
+      "hidden": 0.88
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 7.7,
+     "woken_m": [
+      17.0,
+      6.3
+     ],
+     "woken_out_m": 11.7,
+     "home_after_20s": 4,
+     "monsters": 4,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 6.6,
+     "woken_side_m": [
+      16.7,
+      19.5
+     ],
+     "woken_side_out_m": 11.9
+    },
+    "berm": {
+     "found": true,
+     "id": 491927,
+     "at_km": [
+      42.95,
+      -47.89
+     ],
+     "name": "Wolf Lair",
+     "laid": {
+      "cover": "berm",
+      "pieces": 11,
+      "exit": [
+       42942.3,
+       -47901.7
+      ],
+      "reach_m": 14.0
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "berm": [
+       1,
+       -90,
+       266
+      ],
+      "SM_GorseBushLarge_01": [
+       7,
+       -19,
+       135
+      ],
+      "SM_HeatherBush_01": [
+       3,
+       -12,
+       147
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.0,
+      1.4,
+      1.4,
+      2.2,
+      2.2
+     ],
+     "cover_r_m": 4.5,
+     "sight_30m": {
+      "blocked": 196,
+      "lines": 240,
+      "monsters": 5,
+      "else_blocked": 0,
+      "hidden": 0.82
+     },
+     "sight_15m": {
+      "blocked": 195,
+      "lines": 240,
+      "else_blocked": 0,
+      "hidden": 0.81
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 8.6,
+     "woken_m": [
+      17.0,
+      3.4
+     ],
+     "woken_out_m": 14.6,
+     "home_after_20s": 5,
+     "monsters": 5,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 4.1,
+     "woken_side_m": [
+      16.8,
+      20.7
+     ],
+     "woken_side_out_m": 14.6
+    },
+    "rocks": {
+     "found": true,
+     "id": 197159,
+     "at_km": [
+      -30.22,
+      -11.34
+     ],
+     "name": "Bear Lair",
+     "laid": {
+      "cover": "rocks",
+      "pieces": 16,
+      "exit": [
+       -30217.7,
+       -11353.7
+      ],
+      "reach_m": 11.3
+     },
+     "den_moved_m": 25.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_Boulder_01_Solid": [
+       8,
+       -74,
+       311
+      ],
+      "SM_Boulder_02_Solid": [
+       8,
+       -89,
+       323
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.3,
+      1.3,
+      2.4
+     ],
+     "cover_r_m": 5.0,
+     "sight_30m": {
+      "blocked": 99,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 45,
+      "hidden": 0.69
+     },
+     "sight_15m": {
+      "blocked": 123,
+      "lines": 144,
+      "else_blocked": 20,
+      "hidden": 0.85
+     },
+     "woken_way_deg": 30.0,
+     "woken_s": 8.1,
+     "woken_m": [
+      18.0,
+      9.7
+     ],
+     "woken_out_m": 11.5,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 8.1,
+     "woken_side_m": [
+      16.8,
+      20.4
+     ],
+     "woken_side_out_m": 11.8
+    },
+    "thicket": {
+     "found": true,
+     "id": 426535,
+     "at_km": [
+      25.15,
+      -12.68
+     ],
+     "name": "Ghoul Lair",
+     "laid": {
+      "cover": "thicket",
+      "pieces": 42,
+      "exit": [
+       25144.8,
+       -12678.5
+      ],
+      "reach_m": 5.0
+     },
+     "den_moved_m": 0.0,
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_HeatherBush_01": [
+       14,
+       -59,
+       253
+      ],
+      "SM_GorseBushLarge_01": [
+       20,
+       -64,
+       224
+      ],
+      "SM_Bush01": [
+       5,
+       -37,
+       227
+      ],
+      "SM_Bush02": [
+       3,
+       -25,
+       203
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      2.0,
+      2.3,
+      2.5
+     ],
+     "cover_r_m": 5.0,
+     "sight_30m": {
+      "blocked": 120,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.83
+     },
+     "sight_15m": {
+      "blocked": 121,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.84
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 3.0,
+     "woken_m": [
+      17.1,
+      12.1
+     ],
+     "woken_out_m": 5.9,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 2.1,
+     "woken_side_m": [
+      17.7,
+      18.2
+     ],
+     "woken_side_out_m": 5.5
+    }
+   },
+   "table": 9,
+   "counts": {
+    "grove": 26,
+    "pinegrove": 25,
+    "deadwood": 11,
+    "ruin": 69,
+    "house": 18,
+    "cave": 20,
+    "berm": 5,
+    "rocks": 29,
+    "thicket": 10,
+    "none": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_l12c_lairs12_grove.png",
+  "wd_l12c_lairs12_pinegrove.png",
+  "wd_l12c_lairs12_deadwood.png",
+  "wd_l12c_lairs12_ruin.png",
+  "wd_l12c_lairs12_house.png",
+  "wd_l12c_lairs12_cave.png",
+  "wd_l12c_lairs12_berm.png",
+  "wd_l12c_lairs12_rocks.png",
+  "wd_l12c_lairs12_thicket.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

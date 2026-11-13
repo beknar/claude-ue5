@@ -335,12 +335,12 @@
     },
     "catacombs": {
      "found": true,
-     "id": 459460,
+     "id": 148052,
      "at_km": [
-      34.72,
-      27.61
+      -41.51,
+      0.04
      ],
-     "name": "Ruins of Elmham",
+     "name": "Ruins of Elmwell",
      "laid": {
       "kind": "catacombs",
       "pieces": 18,
@@ -351,13 +351,13 @@
      "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.5,
-      10.3,
+      5.8,
       15.0
      ],
      "bottom_over_ground_cm": [
-      -97,
-      -13,
-      -8
+      -78,
+      -11,
+      -6
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -366,7 +366,7 @@
      "chests": 1,
      "monsters_within_20m": 3,
      "told_from_m": 20.0,
-     "told": "Discovered: Ruins of Elmham. Catacomb entrance: a way down into burial galleries under the hill",
+     "told": "Discovered: Ruins of Elmwell. Catacomb entrance: a way down into burial galleries under the hill",
      "title": "Catacomb entrance"
     }
    },

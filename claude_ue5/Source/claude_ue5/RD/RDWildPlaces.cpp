@@ -230,6 +230,8 @@ void ARDDungeonGenerator::SpawnWildPlaces(ARDWildChunk* C, const TArray<FRDWildP
 			Put(TEXT("skeleton"), P.At, P.Yaw, 1.f, 5.f, false);
 			Ring(R.RandRange(6, 9), 6.f, 25.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("bones"), At, Yaw + R.FRandRange(0.f, 360.f), 1.f, 2.f, false); });
 			Ring(10, 3.f, 10.f, [&](const FVector2D& At, float Yaw) { Put(TEXT("branch"), At, Yaw + 90.f + R.FRandRange(-20.f, 20.f), 1.f, 3.f, false); });
+			// (the list of 2026-11-12's fourth phase: hidden behind something, RDWildLair12.cpp; after the den's draws, its own stream)
+			if (const int32 Lc = WildLairCoverOf(P); Lc >= 0) LayWildLair(C, P, WildLairCovers[Lc]);
 		}
 		// (the caldera's hot springs steam: their places are the world's ponds of kind 6, laid by the chunk's water)
 		const int32 RuinK = P.Kind == TEXT("ruins") ? WildRuinKindOf(P) : -1;
@@ -291,13 +293,22 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		}
 	}
 	const FRDMonsterDef& Def = Monsters[Kind];
+	// (a hidden lair's: inside its cover's circle, wandering there, out by its opening (the list of 2026-11-12's fourth phase))
+	const FRuinLaid* Cover = bLair ? WildLairsLaid.FindByPredicate([&](const FRuinLaid& X) { return X.Id == P.Id; }) : nullptr;
+	const float HideCm = Cover && WildLairCovers.IsValidIndex(Cover->Kind) ? WildLairCovers[Cover->Kind].HideR * 100.f : 0.f;
 	for (int32 I = 0; I < N; ++I)
 	{
-		const float A = R.FRandRange(0.f, 2.f * PI), D = R.FRandRange(300.f, 900.f), Yaw = R.FRandRange(0.f, 360.f);
+		// (the draws in their old order, A, D, Yaw: every place's monsters stand where they did)
+		const float A = R.FRandRange(0.f, 2.f * PI);
+		float D = R.FRandRange(300.f, 900.f);
+		const float Yaw = R.FRandRange(0.f, 360.f);
+		if (HideCm > 0.f) D = D / 900.f * HideCm * 0.6f;
 		// (one killed stays dead: its draws are made first, so the others keep their places)
 		const int64 Key = (int64)P.Id * 16 + I;
 		if (GI && GI->WildKilled.Contains(Key)) continue;
-		FVector At(P.At.X * 100.0 + FMath::Cos(A) * D, P.At.Y * 100.0 + FMath::Sin(A) * D, 0.0);
+		// (round its place, or a hidden lair's den, which may have moved off a slope)
+		const FVector2D Base = Cover ? Cover->At : P.At;
+		FVector At(Base.X * 100.0 + FMath::Cos(A) * D, Base.Y * 100.0 + FMath::Sin(A) * D, 0.0);
 		At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
 		// (a ruin's guards off its pieces: drawn where the castle's keep or the rock-cut temple's cliff stands they were spawned
 		// inside it (PR #56's review). Rings round its middle after the draws, so the place's stream is unchanged)
@@ -308,11 +319,26 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 				At = FVector(Rl->At.X * 100.0 + FMath::Cos(A2) * D2, Rl->At.Y * 100.0 + FMath::Sin(A2) * D2, 0.0);
 				At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
 			}
+		// (a lair's off its cover's pieces the same way, nearer its middle)
+		if (Cover)
+			for (int32 K = 0; K < 24 && WildRuinInPiece(*Cover, At, Def.CapsuleRadius + 30.f, Def.CapsuleHalfHeight); ++K)
+			{
+				const float A2 = A + K * (2.f * PI / 8.f), D2 = HideCm * (0.15f + 0.15f * (K / 8));
+				At = FVector(Cover->At.X * 100.0 + FMath::Cos(A2) * D2, Cover->At.Y * 100.0 + FMath::Sin(A2) * D2, 0.0);
+				At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
+			}
 		FActorSpawnParameters Sp; Sp.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		ARDMonster* M = GetWorld()->SpawnActor<ARDMonster>(ARDMonster::StaticClass(), FTransform(FRotator(0, Yaw, 0), At), Sp);
 		if (!M) continue;
 		M->SpawnIndex = -1;
 		M->bOpenGround = true; M->HomeAt = At; M->WildKey = Key;
+		if (Cover && HideCm > 0.f)
+		{
+			M->HomeAt = FVector(Cover->At.X * 100.0, Cover->At.Y * 100.0, At.Z);
+			M->CoverR = HideCm;
+			M->CoverOutR = Cover->OutR * 100.f;
+			M->CoverExit = FVector(Cover->Exit.X * 100.0, Cover->Exit.Y * 100.0, WildGroundZ(FVector(Cover->Exit.X * 100.0, Cover->Exit.Y * 100.0, 0.0)) + Def.CapsuleHalfHeight);
+		}
 		M->Setup(Ws, Def, (int32)FRDWildWorld::Hash(P.Id, 100 + I, Wild->Seed));
 		M->Empower(P.Tier, bLair ? 1.35f : 1.f, bLair ? 1.2f : 1.f, 1.f, bLair ? FString::Printf(TEXT("%s"), *P.Name) : P.Quest == TEXT("wolves") ? FString(TEXT("Mill Road Wolf")) : FString());
 		Ws->SpawnedMonsters.Add(M);
