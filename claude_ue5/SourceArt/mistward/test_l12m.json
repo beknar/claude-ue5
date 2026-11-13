@@ -1,0 +1,40 @@
+{
+ "tag": "l12m",
+ "plan": [
+  "list12"
+ ],
+ "level": "mistward_castle",
+ "steps": [
+  {
+   "step": "list12",
+   "ok": true,
+   "rooms": 49,
+   "other_room_tiles": 1627,
+   "unrevealed": {
+    "pointer": false,
+    "struck": true
+   },
+   "revealed": {
+    "pointer": true,
+    "struck": false
+   },
+   "frame_kind": 3,
+   "floor": {
+    "slate": "",
+    "click": "teleported -150 -3150",
+    "teleports": 1,
+    "off_tile_cm": 0,
+    "above_its_floor_cm": 2.4,
+    "map_open": false
+   },
+   "wall": {
+    "slate": "",
+    "click": "refused: nothing to stand on at -150 -3000",
+    "moved_cm": 0
+   }
+  }
+ ],
+ "windows_hidden": "",
+ "error": null,
+ "windows_shown_again": 0
+}

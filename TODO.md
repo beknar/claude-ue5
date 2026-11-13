@@ -23,9 +23,8 @@ Built and compiled, but no test has run it yet:
 Done in phases: 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
 
 - [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
-  - `rd.MapTeleport` on a dungeon's tactical map (the wilds' and a town's were measured).
   - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).
-  - The first run of `888 list12` missed every click on the wilds' map at 4 frames a second; the two runs after it (with the clicks logged, `RDMAPPOINTER`) took every click. Not explained.
+  - The teleports' outcomes are measured by calling the click at its screen point: through Slate the real mouse resting over the play window pulled the game's pointer to itself and turned presses into drags (`RDMAPPOINTER`'s log: the pointer jumped to the same spot every time). The pointer's own path (a pick under it, the wheel, a drag, a click that travels) is measured through Slate.
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

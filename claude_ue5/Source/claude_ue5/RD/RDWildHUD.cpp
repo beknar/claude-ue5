@@ -45,7 +45,7 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 	{
 		float Px = 0.f, Py = 0.f;
 		APlayerController* PCp = GetOwningPlayerController();
-		if (PCp && PCp->ShouldShowMouseCursor() && PCp->GetMousePosition(Px, Py) && Gen->MapXSheet.IsInside(FVector2D(Px, Py))) PickAt = FVector2D(Px, Py);
+		if (Gen->bMapPointerLead && PCp && PCp->ShouldShowMouseCursor() && PCp->GetMousePosition(Px, Py) && Gen->MapXSheet.IsInside(FVector2D(Px, Py))) PickAt = FVector2D(Px, Py);
 	}
 	// the world in its tiles (a coarser tile's part while the finer one is made)
 	const int32 Lv = Gen->WildMapLevelFor(Mpp);

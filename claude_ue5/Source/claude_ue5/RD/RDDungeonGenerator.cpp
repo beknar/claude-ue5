@@ -1295,38 +1295,33 @@ FString ARDDungeonGenerator::MoveEditorStopKey(bool bShift)
 
 void ARDDungeonGenerator::UpdateMapScrollInput(APlayerController* PC)
 {
-	const bool bWant = bMapOpen && bTacticalMaps;
+	// (the big map's keys: the arrows (and in the towns and the wilds the right stick, which zooms it); its mouse (the pointer's
+	// moves and the wheel) while the map has the pointer: the towns' and the wilds' maps, and any map with rd.MapTeleport on a
+	// revealed map (the list of 2026-11-12). Each a context of its own over the game's; PR #54's review: the mouse keys were
+	// listed twice, and the subsystem was looked up every tick)
+	const bool bWant = bMapOpen && bTacticalMaps, bWantMouse = bWant && (bTown || WantsMapPointer());
+	if (bWant == bMapScrollInput && bWantMouse == bMapMouseInput) return;
 	if (!PC || !PC->GetLocalPlayer()) return;
 	UEnhancedInputLocalPlayerSubsystem* EI = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 	if (!EI) return;
-	// (the list of 2026-11-12: a dungeon's map with the pointer up for rd.MapTeleport: the mouse is the map's, not the camera's)
-	const bool bWantMouse = WantsMapPointer() && !bTown;
-	if (bWantMouse != bMapMouseInput)
-	{
-		if (!MapMouseContext)
-		{
-			if (!MapScrollAction) { MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll")); MapScrollAction->bConsumeInput = true; }
-			MapMouseContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapMouse"));
-			for (const FKey& K : { EKeys::Mouse2D, EKeys::MouseX, EKeys::MouseY, EKeys::MouseWheelAxis }) MapMouseContext->MapKey(MapScrollAction, K);
-		}
-		if (bWantMouse) EI->AddMappingContext(MapMouseContext, 1000); else EI->RemoveMappingContext(MapMouseContext);
-		bMapMouseInput = bWantMouse;
-	}
-	if (bWant == bMapScrollInput) return;
-	if (!MapScrollContext)
+	if (!MapScrollAction)
 	{
 		// (an action that consumes its keys: the contexts under it do not see them; the generator reads the keys itself)
-		if (!MapScrollAction) { MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll")); MapScrollAction->bConsumeInput = true; }
+		MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll")); MapScrollAction->bConsumeInput = true;
+	}
+	if (!MapScrollContext)
+	{
 		MapScrollContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapScroll"));
 		for (const FKey& K : { EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right }) MapScrollContext->MapKey(MapScrollAction, K);
-		// (Brokenspire's map zooms and is dragged: the mouse, its wheel and the right stick are the map's while it is open, or
-		// the camera turned behind it)
-		if (bTown) for (const FKey& K : { EKeys::Mouse2D, EKeys::MouseX, EKeys::MouseY, EKeys::MouseWheelAxis, EKeys::Gamepad_Right2D, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY })
-			MapScrollContext->MapKey(MapScrollAction, K);
+		if (bTown) for (const FKey& K : { EKeys::Gamepad_Right2D, EKeys::Gamepad_RightX, EKeys::Gamepad_RightY }) MapScrollContext->MapKey(MapScrollAction, K);
 	}
-	if (bWant) EI->AddMappingContext(MapScrollContext, 1000);
-	else EI->RemoveMappingContext(MapScrollContext);
-	bMapScrollInput = bWant;
+	if (!MapMouseContext)
+	{
+		MapMouseContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapMouse"));
+		for (const FKey& K : { EKeys::Mouse2D, EKeys::MouseX, EKeys::MouseY, EKeys::MouseWheelAxis }) MapMouseContext->MapKey(MapScrollAction, K);
+	}
+	if (bWant != bMapScrollInput) { if (bWant) EI->AddMappingContext(MapScrollContext, 1000); else EI->RemoveMappingContext(MapScrollContext); bMapScrollInput = bWant; }
+	if (bWantMouse != bMapMouseInput) { if (bWantMouse) EI->AddMappingContext(MapMouseContext, 1000); else EI->RemoveMappingContext(MapMouseContext); bMapMouseInput = bWantMouse; }
 }
 
 bool ARDDungeonGenerator::ReloadSection(FIntPoint Coord)

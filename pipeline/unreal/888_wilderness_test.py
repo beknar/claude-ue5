@@ -433,9 +433,18 @@ def to_screen(f, wx, wy):
     return (f["cx"] + (wy - f["vy"]) * f["k"], f["cy"] + (f["vx"] - wx) * f["k"])
 def to_world(f, sx, sy): return (f["vx"] - (sy - f["cy"]) / f["k"], f["vy"] + (sx - f["cx"]) / f["k"])
 def v2(p): return unreal.Vector2D(float(p[0]), float(p[1]))
-def slate_click(p):
-    g = G["gen"]; why = str(g.slate_mouse_button(v2(p), key("LeftMouseButton"), True)); yield from rwait(0.08)
-    why = why or str(g.slate_mouse_button(v2(p), key("LeftMouseButton"), False)); yield from rwait(0.3)
+def slate_click(p, map_click=True):
+    """a click through Slate at p; on a big map, again (up to three times) when the map took no click: the real mouse resting
+    over the play window drags the game's pointer to itself when the screen changes (the rules' "the real mouse over the game's
+    view"), and the press became a drag (RDMAPPOINTER's log)"""
+    g = G["gen"]; why = ""
+    for k in range(3 if map_click else 1):
+        n0 = g.get_editor_property("map_clicks")
+        g.slate_mouse_move(v2(p)); yield from rwait(0.05)
+        why = str(g.slate_mouse_button(v2(p), key("LeftMouseButton"), True)); yield from rwait(0.08)
+        why = why or str(g.slate_mouse_button(v2(p), key("LeftMouseButton"), False)); yield from rwait(0.3)
+        if not map_click or g.get_editor_property("map_clicks") > n0: break
+        R.setdefault("click_retries", 0); R["click_retries"] += 1
     return why
 def wait_tiles(sec=20):
     t0 = time.time()
@@ -481,9 +490,18 @@ def step_list12():
     why = str(g.slate_mouse_move(v2((sb[0] + 40, sb[1] + 40)))); yield from rwait(0.2)
     why = why or str(g.slate_mouse_move(v2(sb))); yield from rwait(0.5)
     ms = map_state()
+    for _ in range(2):
+        if int(ms["hover"]) >= 0: break
+        g.slate_mouse_move(v2((sb[0] + 30, sb[1] + 30))); yield from rwait(0.1); g.slate_mouse_move(v2(sb)); yield from rwait(0.5); ms = map_state()
+        R.setdefault("click_retries", 0); R["click_retries"] += 1
     bid = next((int(float(p[0])) for p in [str(l).split("|") for l in g.get_wild_places_near(V(b["x"] * 100.0, b["y"] * 100.0, 0), 300)] if p[1] in ("town", "city")), -1)
     res["pick"] = {"slate": why, "at": [round(sb[0]), round(sb[1])], "hover": int(ms["hover"]), "hover_name": ms["hover_name"], "brokenspire_id": bid,
                    "centre_far": round(math.hypot(sb[0] - f["cx"], sb[1] - f["cy"]))}
+    # (PR #54's review: the keys or the pad moving the map hand the pick back to the cross: an arrow held, Brokenspire no longer
+    # picked under the resting pointer)
+    cb().simulate_key(key("Up"), True); yield from rwait(0.3); cb().simulate_key(key("Up"), False); yield from rwait(0.4)
+    res["pick"]["after_keys_hover"] = int(map_state()["hover"])
+    f = map_frame()          # (the arrow moved the map: its frame now)
     # (the wheel about the pointer: the world point under it before and after)
     pw = (f["cx"] + 180.0, f["cy"] - 120.0); wb = to_world(f, *pw)
     g.slate_mouse_move(v2(pw)); yield from rwait(0.2)
@@ -501,11 +519,28 @@ def step_list12():
     g.slate_mouse_button(v2((d0[0] + 120, d0[1])), key("LeftMouseButton"), False); yield from rwait(0.4)
     c1 = (map_state()["cx"], map_state()["cy"])
     res["drag"] = {"moved_m": round(math.hypot(c1[0] - c0[0], c1[1] - c0[1])), "clicked": str(g.get_editor_property("last_map_click")) != lc0}
+    def click_world(view, wx, wy):
+        """a click on the big map at the world point (cm), the view set again (a wild map) and the point found on the screen anew
+        before each try: a press the real mouse dragged away panned the map, and the same pixel was then 8 km off"""
+        why = ""
+        for k in range(3):
+            if view: g.set_wild_map_view(*view); yield from wait_tiles(5)
+            else: yield from rwait(0.2)
+            s = to_screen(map_frame(), wx, wy); n0 = g.get_editor_property("map_clicks")
+            g.slate_mouse_move(v2(s)); yield from rwait(0.3)
+            why = yield from slate_click(s, False)
+            if g.get_editor_property("map_clicks") > n0: break
+            R.setdefault("click_retries", 0); R["click_retries"] += 1
+        return why
+    def click_logic(view, wx, wy):
+        """the click's outcome at the world point's screen point, ClickMapAt called with it (the real mouse over the play window
+        pulls the game's pointer to itself and spoils Slate's clicks: the pointer's own path is measured by the travel click)"""
+        if view: g.set_wild_map_view(*view); yield from wait_tiles(5)
+        else: yield from rwait(0.3)
+        s = to_screen(map_frame(), wx, wy); g.click_map_at(v2(s)); yield from rwait(0.3)
+        return s
     # (the click on the place: back over Brokenspire, the pointer on it, a click)
-    g.set_wild_map_view(b["x"] + 2500.0, b["y"] - 1500.0, 12.0); yield from wait_tiles(10)
-    f = map_frame(); sb = to_screen(f, b["x"] * 100.0, b["y"] * 100.0)
-    g.slate_mouse_move(v2(sb)); yield from rwait(0.4)
-    why3 = yield from slate_click(sb); yield from rwait(1.5)
+    why3 = yield from click_world((b["x"] + 2500.0, b["y"] - 1500.0, 12.0), b["x"] * 100.0, b["y"] * 100.0); yield from rwait(1.5)
     res["travel_click"] = {"slate": why3, "last_click": str(g.get_editor_property("last_map_click")), "map_open": bool(g.get_editor_property("map_open")),
                            "in_walls": bool(g.is_in_town_walls(G["pawn"].get_actor_location()))}
     yield from rwait(1.0)
@@ -515,66 +550,78 @@ def step_list12():
     ex("rd.RevealMap off"); ex("rd.MapTeleport")
     g.wild_put_her(b["x"] + 600.0, b["y"]); yield from wait_chunks(30, 40); yield from rwait(0.6)
     g.set_map_open(True); yield from rwait(0.4)
-    g.set_wild_map_view(b["x"] + 1500.0, b["y"] + 1000.0, 14.0); yield from wait_tiles(10)
-    f = map_frame(); tw = (b["x"] + 2200.0, b["y"] + 1400.0); st = to_screen(f, tw[0] * 100.0, tw[1] * 100.0)
-    g.slate_mouse_move(v2(st)); yield from rwait(0.3)
-    yield from slate_click(st)
+    tv = (b["x"] + 1500.0, b["y"] + 1000.0, 14.0); tw = (b["x"] + 2200.0, b["y"] + 1400.0)
+    yield from click_logic(tv, tw[0] * 100.0, tw[1] * 100.0)
     refused = str(g.get_editor_property("last_map_click"))
     ex("rd.RevealMap"); yield from rwait(0.4)
     n0 = g.get_editor_property("map_teleports")
-    yield from slate_click(st); yield from rwait(2.0)
+    yield from click_logic(tv, tw[0] * 100.0, tw[1] * 100.0); yield from rwait(2.0)
     hp = G["pawn"].get_actor_location()
     res["teleport"] = {"refused": refused, "click": str(g.get_editor_property("last_map_click")), "teleports": g.get_editor_property("map_teleports") - n0,
                        "off_target_m": round(math.hypot(hp.x / 100.0 - tw[0], hp.y / 100.0 - tw[1]), 1), "map_open": bool(g.get_editor_property("map_open"))}
+    # (PR #54's review: out at sea there is nothing to stand on: 3 km past the nearest coast, the click refused, she not moved)
+    seas = [(d, dx, dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)) for d in [sea_along(b["x"], b["y"], dx, dy, 120000.0, 500.0)] if d is not None]
+    if seas:
+        d, dx, dy = min(seas); sw = (b["x"] + dx * (d + 3000.0), b["y"] + dy * (d + 3000.0))
+        g.set_map_open(True); yield from rwait(0.4); before = G["pawn"].get_actor_location()
+        yield from click_logic((sw[0], sw[1], 14.0), sw[0] * 100.0, sw[1] * 100.0); yield from rwait(1.0)
+        res["sea"] = {"click": str(g.get_editor_property("last_map_click")), "moved_m": round(dist2(G["pawn"].get_actor_location(), before) / 100.0, 1),
+                      "water": int(sample(*sw)["water"])}
+        g.set_map_open(False); yield from rwait(0.3)
+    else: res["sea"] = None
     # (the town's map, inside Brokenspire's walls: a click on the square)
     ex("rd.GoTo brokenspire"); yield from rwait(4.0)
     sq = place("square")
     g.set_map_open(True); yield from rwait(1.0)
     f = map_frame(); res["town_map_kind"] = f["kind"]
     if sq and f["kind"] == 2:
-        ss = to_screen(f, sq.x, sq.y)
-        g.slate_mouse_move(v2(ss)); yield from rwait(0.3)
-        yield from slate_click(ss); yield from rwait(1.5)
+        yield from click_logic(None, sq.x, sq.y); yield from rwait(1.5)
         hp = G["pawn"].get_actor_location()
         res["town_teleport"] = {"click": str(g.get_editor_property("last_map_click")), "off_square_m": round(dist2(hp, sq) / 100.0, 1)}
     else: res["town_teleport"] = None
     g.set_map_open(False); ex("rd.MapTeleport off"); ex("rd.RevealMap off"); yield from rwait(0.5)
     # ---- the Escape menu's saves as cards
     made = []
-    for nm in ("Test12 A", "Test12 B", "Test12 C", "Test12 D"):
-        slot = "save_test12_" + nm[-1].lower()          # (the menu lists save_* slots only)
-        if g.save_game_now(slot, "test", nm): made.append(slot)
-    g.set_menu_open(True); yield from rwait(0.4)
-    lines = [str(l) for l in g.get_menu_lines()]
-    g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("button|Save the game"))); yield from rwait(0.3)
-    lines = [str(l) for l in g.get_menu_lines()]
-    g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("choice|Save over"))); yield from rwait(0.6)
-    boxes = [[float(x) for x in str(s).split("|")] for s in g.get_menu_boxes()]
-    lines4 = [str(l) for l in g.get_menu_lines()]
-    cols = len(set(round(bx[0]) for bx in boxes[:-1])); rows = len(set(round(bx[1]) for bx in boxes[:-1]))
-    shot("l12_save_grid", "1280x720"); yield from rwait(1.2)
-    # (the keys: right a card, down a row)
-    g.move_menu_grid(1, 0); c_r = g.get_menu_cursor(); g.move_menu_grid(0, 1); c_d = g.get_menu_cursor()
-    # (a click on the third card, "Test12 ..." (the first is "a new save"))
-    pick = next((i for i, l in enumerate(lines4) if "Test12" in l), -1)
-    bx = boxes[pick] if pick >= 0 else None
-    why4 = (yield from slate_click(((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2))) if bx else "no card"
-    res["grid"] = {"page": 4, "cards": len(boxes) - 1, "columns": cols, "rows": rows, "lines": lines4[:6], "cursor_right": c_r, "cursor_down": c_d,
-                   "slate": why4, "after_page": g.get_menu_page(), "last_action": str(g.get_editor_property("last_menu_action")), "picked_line": lines4[pick] if pick >= 0 else None}
-    # (the Load page as cards too)
-    g.set_menu_open(False); yield from rwait(0.3); g.set_menu_open(True); yield from rwait(0.3)
-    lines = [str(l) for l in g.get_menu_lines()]
-    g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("button|Load a game"))); yield from rwait(0.6)
-    lb = [[float(x) for x in str(s).split("|")] for s in g.get_menu_boxes()]
-    res["load_grid"] = {"cards": len(lb) - 1, "columns": len(set(round(bx[0]) for bx in lb[:-1])), "grid_page": bool(g.is_menu_grid_page())}
-    shot("l12_load_grid", "1280x720"); yield from rwait(1.2)
-    g.set_menu_open(False); yield from rwait(0.3)
-    for s in made: GS.delete_game_in_slot(s, 0)
+    # (PR #54's review: the test's saves are taken away whatever happens: a failure between left them in the player's Load list)
+    try:
+        for nm in ("Test12 A", "Test12 B", "Test12 C", "Test12 D"):
+            slot = "save_test12_" + nm[-1].lower()          # (the menu lists save_* slots only)
+            if g.save_game_now(slot, "test", nm): made.append(slot)
+        g.set_menu_open(True); yield from rwait(0.4)
+        lines = [str(l) for l in g.get_menu_lines()]
+        g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("button|Save the game"))); yield from rwait(0.3)
+        lines = [str(l) for l in g.get_menu_lines()]
+        g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("choice|Save over"))); yield from rwait(0.6)
+        boxes = [[float(x) for x in str(s).split("|")] for s in g.get_menu_boxes()]
+        lines4 = [str(l) for l in g.get_menu_lines()]
+        cols = len(set(round(bx[0]) for bx in boxes[:-1])); rows = len(set(round(bx[1]) for bx in boxes[:-1]))
+        shot("l12_save_grid", "1280x720"); yield from rwait(1.2)
+        # (the keys: right a card, down a row)
+        g.move_menu_grid(1, 0); c_r = g.get_menu_cursor(); g.move_menu_grid(0, 1); c_d = g.get_menu_cursor()
+        # (a click on the third card, "Test12 ..." (the first is "a new save"))
+        pick = next((i for i, l in enumerate(lines4) if "Test12" in l), -1)
+        bx = boxes[pick] if pick >= 0 else None
+        why4 = (yield from slate_click(((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2), False)) if bx else "no card"
+        res["grid"] = {"page": 4, "cards": len(boxes) - 1, "columns": cols, "rows": rows, "lines": lines4[:6], "cursor_right": c_r, "cursor_down": c_d,
+                       "slate": why4, "after_page": g.get_menu_page(), "last_action": str(g.get_editor_property("last_menu_action")), "picked_line": lines4[pick] if pick >= 0 else None}
+        # (the Load page as cards too)
+        g.set_menu_open(False); yield from rwait(0.3); g.set_menu_open(True); yield from rwait(0.3)
+        lines = [str(l) for l in g.get_menu_lines()]
+        g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("button|Load a game"))); yield from rwait(0.6)
+        lb = [[float(x) for x in str(s).split("|")] for s in g.get_menu_boxes()]
+        res["load_grid"] = {"cards": len(lb) - 1, "columns": len(set(round(bx[0]) for bx in lb[:-1])), "grid_page": bool(g.is_menu_grid_page())}
+        shot("l12_load_grid", "1280x720"); yield from rwait(1.2)
+    finally:
+        try: g.set_menu_open(False)
+        except Exception: pass
+        for s in made: GS.delete_game_in_slot(s, 0)
+    yield from rwait(0.3)
     quiet(False)
     I, M, P, W, D, TR, TP = res["inventory"], res["map"], res["pick"], res["wheel"], res["drag"], res["travel_click"], res["teleport"]
     ok = (I["gold"] >= 123 and I["icon_drawn"]
           and M["frame_kind"] == 1 and M["pointer_up"] and M["edge_drawn"]
-          and P["hover"] == P["brokenspire_id"] and P["centre_far"] > 40
+          and P["hover"] == P["brokenspire_id"] and P["centre_far"] > 40 and P["after_keys_hover"] != P["brokenspire_id"]
+          and res["sea"] is not None and res["sea"]["click"].startswith("refused") and res["sea"]["moved_m"] < 1 and res["sea"]["water"] == 1
           and W["k_after"] > W["k_before"] and W["moved_under_pointer_m"] <= 3 * W["m_a_pixel"]
           and D["moved_m"] > 50 and not D["clicked"]
           and TR["last_click"].startswith("travelled") and not TR["map_open"] and not res["pointer_after"]

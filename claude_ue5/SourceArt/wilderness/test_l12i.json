@@ -1,5 +1,5 @@
 {
- "tag": "l12c",
+ "tag": "l12i",
  "plan": [
   "list12"
  ],
@@ -26,7 +26,8 @@
     "hover": 1073741824,
     "hover_name": "Brokenspire",
     "brokenspire_id": 1073741824,
-    "centre_far": 243
+    "centre_far": 243,
+    "after_keys_hover": -1
    },
    "wheel": {
     "slate": "",
@@ -48,14 +49,19 @@
    "pointer_after": false,
    "teleport": {
     "refused": "refused: reveal the map first (rd.RevealMap)",
-    "click": "teleported 220069 140600",
+    "click": "teleported 220000 140000",
     "teleports": 1,
-    "off_target_m": 6.0,
+    "off_target_m": 0.0,
     "map_open": false
+   },
+   "sea": {
+    "click": "refused: nothing to stand on at -6650001 0",
+    "moved_m": 0.0,
+    "water": 1
    },
    "town_map_kind": 2,
    "town_teleport": {
-    "click": "teleported 5704 -450",
+    "click": "teleported 1650 6600",
     "off_square_m": 0.0
    },
    "grid": {
@@ -65,10 +71,10 @@
     "rows": 3,
     "lines": [
      "button|A new save",
-     "button|Test12 D: Brokenspire, 2026-11-12 19:58 (Warrior)",
-     "button|Test12 C: Brokenspire, 2026-11-12 19:58 (Warrior)",
-     "button|Test12 B: Brokenspire, 2026-11-12 19:58 (Warrior)",
-     "button|Test12 A: Brokenspire, 2026-11-12 19:58 (Warrior)",
+     "button|Test12 D: Brokenspire, 2026-11-12 20:48 (Warrior)",
+     "button|Test12 C: Brokenspire, 2026-11-12 20:48 (Warrior)",
+     "button|Test12 B: Brokenspire, 2026-11-12 20:48 (Warrior)",
+     "button|Test12 A: Brokenspire, 2026-11-12 20:48 (Warrior)",
      "button|Mistward Castle day 1: Mistward Castle, 2026-11-10 03:27 (Warrior)"
     ],
     "cursor_right": 1,
@@ -76,7 +82,7 @@
     "slate": "",
     "after_page": 3,
     "last_action": "over:save_test12_d",
-    "picked_line": "button|Test12 D: Brokenspire, 2026-11-12 19:58 (Warrior)"
+    "picked_line": "button|Test12 D: Brokenspire, 2026-11-12 20:48 (Warrior)"
    },
    "load_grid": {
     "cards": 8,
@@ -87,20 +93,20 @@
  ],
  "windows_hidden": "claude_ue5 - Unreal Editor",
  "shots": [
-  "wd_l12c_l12_inventory.png",
-  "wd_l12c_l12_map_cut.png",
-  "wd_l12c_l12_map_cut2.png",
-  "wd_l12c_l12_save_grid.png",
-  "wd_l12c_l12_load_grid.png"
+  "wd_l12i_l12_inventory.png",
+  "wd_l12i_l12_map_cut.png",
+  "wd_l12i_l12_map_cut2.png",
+  "wd_l12i_l12_save_grid.png",
+  "wd_l12i_l12_load_grid.png"
  ],
  "frames": {
   "l12_map_cut": {
    "kind": 1,
    "cx": 640.0,
    "cy": 355.05,
-   "vx": 90000.0,
-   "vy": -70000.0,
-   "k": 0.002,
+   "vx": 250000.0,
+   "vy": -150000.0,
+   "k": 0.00083333,
    "a": [
     391.8,
     67.5

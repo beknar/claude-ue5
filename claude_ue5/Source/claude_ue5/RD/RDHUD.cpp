@@ -2957,12 +2957,20 @@ void ARDHUD::DrawMenuGrid(float Sc, const TArray<FString>& Lines)
 		Frame(R0, R1, bOn ? Gold : FLinearColor(0.55f, 0.48f, 0.34f, 0.85f), (bOn ? 2.f : 1.f) * Sc);
 	};
 	// (a line fitted to a width: cut with an ellipsis)
-	auto Fit = [&](FString S, float MaxW, float Scale, ERDType Ty)
+	auto Fit = [&](const FString& S, float MaxW, float Scale, ERDType Ty)
 	{
+		// (the longest start of it that fits with "...", found by halving: PR #54's review, a letter at a time every frame was dozens
+		// of measures a line)
 		float W1, H1; UI.TextSize(S, W1, H1, Small, Scale, Ty);
 		if (W1 <= MaxW) return S;
-		while (S.Len() > 4 && W1 > MaxW) { S.LeftChopInline(1); UI.TextSize(S + TEXT("..."), W1, H1, Small, Scale, Ty); }
-		return S + TEXT("...");
+		int32 Lo = 1, Hi = S.Len() - 1;
+		while (Lo < Hi)
+		{
+			const int32 Md = (Lo + Hi + 1) / 2;
+			UI.TextSize(S.Left(Md) + TEXT("..."), W1, H1, Small, Scale, Ty);
+			if (W1 <= MaxW) Lo = Md; else Hi = Md - 1;
+		}
+		return S.Left(Lo) + TEXT("...");
 	};
 	for (int32 I = 0; I < Lines.Num(); ++I)
 	{

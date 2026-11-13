@@ -2781,7 +2781,11 @@ public:
 	// ---- the list of 2026-11-12 (docs/improvements12.txt), its first phase (RD/RDList12.cpp): the mouse on the big map, a click
 	// to teleport there (the console's rd.MapTeleport, once the map is revealed)
 	/** the pointer is up over the big map: the town's and the wilds' always, any map while rd.MapTeleport is on */
-	bool WantsMapPointer() const { return bMapOpen && bTacticalMaps && (bTown || bMapClickTeleport); }
+	bool WantsMapPointer() const { return bMapOpen && bTacticalMaps && (bTown || (bMapClickTeleport && bMapRevealAll)); }
+	/** the pointer leads the wilds' map's pick (it moved or clicked since the keys or the pad last moved the map): else the cross
+	 *  does, as before (PR #54's review: the pad's A travelled to the place under a resting pointer) */
+	bool bMapPointerLead = false;
+	FVector2D MapPointerLast = FVector2D(-1.f, -1.f);
 	/** rd.MapTeleport: a click on the big map teleports her there, once the map is revealed (rd.RevealMap) */
 	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Map") bool bMapClickTeleport = false;
 	/** the big map as last drawn (the HUD writes it): a world point W (cm) is on the screen at C + (W.Y - Vw.Y, Vw.X - W.X) x K; the
@@ -2801,6 +2805,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Map") FString GetMapFrame() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") TArray<FString> GetMenuBoxes() const;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Map") int32 MapTeleports = 0;
+	/** tests: clicks the big map took (a press the real mouse dragged away is none: the test tries again) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Map") int32 MapClicks = 0;
 	/** the pointer over the wilds' map: the found place under it (the HUD's pick) */
 	FVector2D MapPressAt = FVector2D::ZeroVector;
 	bool bMapPress = false, bMapPointerUp = false;

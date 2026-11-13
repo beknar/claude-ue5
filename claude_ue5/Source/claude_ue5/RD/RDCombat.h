@@ -262,7 +262,12 @@ public:
 	// blow would have landed from the water)
 	void BreakOffMoves() { if (AttackTime >= 0.f) EndAttack(); EndRoll(); SetBlocking(false); }
 	/** the list of 2026-11-12: the pointer up or down for the big map, whatever it was (the Escape menu sets the cursor itself) */
-	void SetPointerShown(bool bShow) { bPointerShown = !bShow; ShowPointer(bShow); }
+	void SetPointerShown(bool bShow)
+	{
+		// (PR #54's review: with no controller ShowPointer does nothing, and the flag must not be left the other way round)
+		const bool bWas = bPointerShown; bPointerShown = !bShow; ShowPointer(bShow);
+		if (bPointerShown != bShow) bPointerShown = bWas;
+	}
 	void RefreshWalkSpeed() { UpdateWalkSpeed(); }
 	/** the inventory (I or Tab, the gamepad's Start): a list of her weapons, then the items she carries. Open, the game is
 	 *  paused; W / S or the arrows, the wheel, the D-pad move the cursor, Enter, Space, E, the left mouse button or A
