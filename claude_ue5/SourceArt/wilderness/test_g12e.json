@@ -1,0 +1,208 @@
+{
+ "tag": "g12e",
+ "plan": [
+  "gait12",
+  "horse9"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "gait12",
+   "ok": true,
+   "mounted": true,
+   "def": {
+    "canter": true,
+    "walk_clip": 170,
+    "canter_clip": 650,
+    "run_clip": 1700,
+    "canter_from": 400,
+    "gallop_from": 1300
+   },
+   "walk": {
+    "speed_cm_s": 194,
+    "clip": "walk",
+    "clip_share": 1.0,
+    "rate": 1.14,
+    "strides_a_second": 0.98,
+    "game_speed": 1.0,
+    "frames": 139,
+    "frame_ms_game": 20.6,
+    "hoof_down_pairs": 345,
+    "slide_median_cm_s": 0,
+    "slide_share": 0.002,
+    "slide_along_cm_s": 0,
+    "slide_across_cm_s": 0,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "walk"
+   },
+   "canter": {
+    "speed_cm_s": 641,
+    "clip": "canter",
+    "clip_share": 1.0,
+    "rate": 0.99,
+    "strides_a_second": 1.74,
+    "game_speed": 1.0,
+    "frames": 133,
+    "frame_ms_game": 21.4,
+    "hoof_down_pairs": 174,
+    "slide_median_cm_s": 3,
+    "slide_share": 0.005,
+    "slide_along_cm_s": 3,
+    "slide_across_cm_s": 0,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "canter"
+   },
+   "gallop": {
+    "speed_cm_s": 1944,
+    "clip": "run",
+    "clip_share": 1.0,
+    "rate": 1.14,
+    "strides_a_second": 3.12,
+    "game_speed": 0.4,
+    "frames": 350,
+    "frame_ms_game": 8.3,
+    "hoof_down_pairs": 95,
+    "slide_median_cm_s": 66,
+    "slide_share": 0.034,
+    "slide_along_cm_s": 66,
+    "slide_across_cm_s": 3,
+    "facing_off_deg": [
+     0.0,
+     0.0
+    ],
+    "rider": "run"
+   }
+  },
+  {
+   "step": "horse9",
+   "ok": true,
+   "stable_spots": 1,
+   "stable_at": [
+    -20250,
+    1750
+   ],
+   "before": {
+    "owned": 0.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155016.0,
+    "y": -1587966.0,
+    "z": -2151.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1975.9,
+    "pelvis_z": 95.5,
+    "rider": "None",
+    "stable_horse": 1.0,
+    "pelvis_off_xy": 1599304.6
+   },
+   "prompt": "the stable: a horse for 60 gold",
+   "bought": true,
+   "gold_taken": 60,
+   "price": 60,
+   "after_buy": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": -20064.0,
+    "y": 1939.0,
+    "z": 0.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": 174.2,
+    "pelvis_z": 95.5,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 222.2
+   },
+   "gi_owned": true,
+   "blocking_before_mount": true,
+   "walk_into_horse": {
+    "start_cm": 220,
+    "nearest_cm": 69
+   },
+   "horse_at_cm": 220,
+   "mount_prompt": "ride your horse",
+   "mounted": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 140545.0,
+    "y": -1591996.0,
+    "z": -1911.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1736.4,
+    "pelvis_z": -1722.4,
+    "rider": "idle",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "attack_refused": true,
+   "blocking_mounted": false,
+   "riding": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 1.0,
+    "x": 142992.0,
+    "y": -1591262.0,
+    "z": -1981.0,
+    "clip": "run",
+    "rate": 1.14,
+    "speed": 1944.0,
+    "saddle_z": -1835.0,
+    "pelvis_z": -1821.0,
+    "rider": "run",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 0.0
+   },
+   "speed_m_s": {
+    "foot": 3.53,
+    "mounted": 19.44,
+    "ratio": 5.5,
+    "want": 5.5,
+    "after": 3.0
+   },
+   "after_dismount": {
+    "owned": 1.0,
+    "spawned": 1.0,
+    "mounted": 0.0,
+    "x": 155023.0,
+    "y": -1588010.0,
+    "z": -2151.0,
+    "clip": "idle",
+    "rate": 1.0,
+    "speed": 0.0,
+    "saddle_z": -1976.6,
+    "pelvis_z": -2056.4,
+    "rider": "None",
+    "stable_horse": 0.0,
+    "pelvis_off_xy": 221.6
+   },
+   "death": {
+    "dead": true,
+    "mounted": 0.0,
+    "montage": true
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_g12e_gait12_canter.png",
+  "wd_g12e_gait12_gallop.png",
+  "wd_g12e_horse_idle.png",
+  "wd_g12e_horse_side.png",
+  "wd_g12e_horse_back.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

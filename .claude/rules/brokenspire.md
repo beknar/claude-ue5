@@ -131,6 +131,23 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **PR #37's review (2026-11-09)**: a thing F reaches by being near (her horse) comes after every nearer one (it took the stable's, a door's and a chest's F); what the saddle forbids, forbid at every way in (a dash, a block, a secondary ability, a jump, not only the blow); a cleanup that stops a slot's clip stops a death's on the same slot; what follows her is moved after her movement's tick; a thing set down beside her is set on the ground (traced); nothing sold before it is made; a placed spot is checked against the plan's tiles.
 - **A new spot by the gate meets the gate's guards**: at 7 m the stable's F talked to a guard (3.2 m off). Test a spot's prompt from where a player stands, the town's side.
 
+## The horse's gaits (the list of 2026-11-12's second phase: `farm_animals.py`'s `real_gait`, `915`, `RDHorse.cpp`, `888 gait12`)
+
+- **A clip is made for the speed it is played at**: the old walk (110 cm/s) and gallop (328) were played up to 3 and 6 times over at the ridden speeds, and past those limits the hooves slid (39 % and 69 % of the speed, measured). Each gait is made for its speed now, with a horse's stride rate, and played near rate 1.
+- **Measure a gait by its hooves in the world**: a hoof down (within 2 cm of its lowest over 0.3 s, against the horse's own feet) must hold still; split its slide along and across the horse, and read the horse's facing against its way. Count only frame pairs closer than half the shortest stance: at 16 frames a second the next landing read as a slide of the whole speed.
+- **An FBX imported over an existing mesh keeps the clip assets it finds**: neither the new take (the canter) was made nor the old takes' keys refreshed; only `915`'s `rate_scale` changed, which hid it (the lengths looked right). Imported alone into the mesh's folder, Interchange found "nothing to import". `915` deletes the kind's clips with an empty level open, imports into a scratch folder and moves them in; a check by length could not tell the old keys from the new (whole-frame strides came out as long as the old imports).
+- **A skin weighted by nearness takes the legs' bones where the skeleton has nothing nearer**: the belly's skin was the forearms' and shins' and hung as a flap once the strides lengthened. `LEG_REACH` keeps a leg's bones to the skin round the leg.
+- **A clip's length a whole number of the import's frames**: Interchange samples at 30 a second; a stride of 0.58 s came in as 17 frames, a part of a frame short at its loop.
+- **Python's move input passes by her MoveScale**: the walk / run switch is in her character's Blueprint, so a test's `add_movement_input` goes at her full speed whatever `set_run_mode` says; a test sets her speed by the input's scale.
+- **PR #55's review (2026-11-12)**:
+  - An old per-mesh override survives a new design unless it is keyed to the old one: `tripo_animals.py`'s `RDTweak` still held the new gallop's swing to the old one's (11-14 cm), and the slide test could not see it. Look at the clip itself after a design change, not only its measure.
+  - Nothing is deleted before its replacement is in hand and checked (`915`'s clips: imported and checked in a scratch folder first).
+  - Two gaits sharing one rider clip must not start it again between them; a change of gait keeps the stride's phase.
+  - A measure that needs N frames inside a short event is slowed to get them (`set_global_time_dilation`, the game's own clock), not left to the editor's frame rate.
+  - A fallback for a weight cleared from one group of bones must not land on a group the rules keep apart (the tail, the ears, the jaw).
+  - Numbers two stages write go in one place (`horse_gaits.py`, the edges in the clips' record).
+- **A test that reads an animal's feet at one moment** reads a walking one's lifted hoof; read each planted bone's lowest over a second, and trace the ground from just over the animal (`884 animals10`).
+
 ## The list of 2026-11-10's fourth phase (`914 lines,sleep,people`, `RD/RDList10d.cpp`, `884 lines10,sleep10,people10`)
 
 - **A body that is not drawn is not posed**: the townsfolk tick their pose only when rendered (`OnlyTickPoseWhenRendered`, update-rate optimisations on), so a sleeper read from Python inside a house stood in its reference pose with its Sleep clip's position at 0.0, and setting `visibility_based_anim_tick_option` from Python changed nothing. Read a pose with her looking at it (a second in view: the clip's position moves, hips 29 cm over the bed), and check the clip's position moves.

@@ -639,13 +639,37 @@ def horse():
     S.anim = dict(neck=[("neck_01", 0.35), ("neck_02", 0.35), ("head", 0.3)], look=28, look_pitch=-4, breaths=2, breath_z=0.6,
                   breath_pitch=0.4, ears=["ear_l", "ear_r"], ear_flick=25, tail=["tail_01", "tail_02", "tail_03"], tail_swish=12,
                   graze=None,                                     # (its long neck curled under its chest: the horse has no graze)
-                  walk=dict(T=1.1, v=150, bob=2.0, nod=4, roll=1.2, tail=6,
-                            phase={"rear_l": 0.0, "front_l": 0.25, "rear_r": 0.5, "front_r": 0.75},
-                            gait={"front": dict(duty=0.62, height=13, tilt=34, fold=45), "rear": dict(duty=0.62, height=13, tilt=34, fold=40)}),
-                  run=dict(T=0.6, v=900, bob=2, nod=7, roll=0.8, tail=14,
-                           phase={"rear_l": 0.0, "rear_r": 0.1, "front_r": 0.45, "front_l": 0.55},
-                           # (a swing of 28 cm and a fold of 95 overreached the legs by 17 cm and crushed their faces: lower)
-                           gait={"front": dict(duty=0.38, height=17, tilt=50, fold=60), "rear": dict(duty=0.38, height=15, tilt=45, fold=55)}))
+                  # (the list of 2026-11-12: the gaits as a horse's (gait_targets, gait_plan), each made for the speed it is ridden
+                  # at: the ridden horse goes 5.5 times her own speed, 6.7 m/s at her walk and 21 m/s at her run. "land": each
+                  # hoof's landing as a share of the stride; "air": the moments with no hoof down (start, length) and how much the
+                  # body rises in them; "rock": the forehand's rise (degrees, the stride's share it is highest at); "nods": the
+                  # neck's and head's nod (degrees, the share it is lowest at, nods a stride); "flex": the back's; "sink": how far
+                  # the body may come down for a leg to reach)
+                  # (each gait's length a whole number of 30ths of a second: the game's import samples at 30 a second, and a stride
+                  # between two frames lost part of a frame at its loop)
+                  real_gait=True,
+                  # (the speeds the game changes gait at: the walk to 4 m/s, the canter to 13, then the gallop (the clips' record carries
+                  # them; 913 and 915 write them into the horse's def: PR #55's review, one place for both))
+                  gait_edges=dict(canter_from=400.0, gallop_from=1300.0),
+                  # the walk: four beats, the lateral sequence (left hind, left fore, right hind, right fore), about 0.9 strides
+                  # a second, the head nodding as each fore hoof lands
+                  walk=dict(T=35 / 30.0, v=170, bob=0.8, roll=1.0, tail=6, sink=14, lift=0.0,
+                            land={"rear_l": 0.0, "front_l": 0.25, "rear_r": 0.5, "front_r": 0.75},
+                            nods=[("neck_01", 4.0, 0.33, 2), ("head", -1.5, 0.33, 2)],
+                            gait={"front": dict(duty=0.62, height=14, tilt=50, fold=70, reach=0.05), "rear": dict(duty=0.62, height=12, tilt=45, fold=50, reach=0.04)}),
+                  # the canter, right lead: three beats (left hind; right hind with left fore; right fore) and a moment in the air,
+                  # about 1.7 strides a second
+                  canter=dict(T=17 / 30.0, v=650, roll=0.6, tail=10, tail_lift=15, ears_back=6, sink=28, lift=6.0, air=[(0.78, 0.22)],
+                              land={"rear_l": 0.0, "rear_r": 0.22, "front_l": 0.22, "front_r": 0.42}, rock=(4.0, 0.12),
+                              nods=[("neck_01", 7.0, 0.45, 1), ("head", -3.0, 0.45, 1)], flex=(3.0, 0.92),
+                              gait={"front": dict(duty=0.36, height=30, tilt=70, fold=100, reach=0.07), "rear": dict(duty=0.36, height=26, tilt=60, fold=75, reach=0.06)}),
+                  # the gallop, right lead: four beats (left hind, right hind, left fore, right fore) and a long moment in the
+                  # air with the legs gathered under the body, about 2.6 strides a second (at 2.3 its 7.3 m stride had the body down 25 cm
+                  # for the legs to reach)
+                  run=dict(T=11 / 30.0, v=1700, roll=0.4, tail=14, tail_lift=30, ears_back=14, sink=32, lift=9.0, air=[(0.6, 0.4)],
+                           land={"rear_l": 0.0, "rear_r": 0.1, "front_l": 0.28, "front_r": 0.38}, rock=(6.0, 0.08),
+                           nods=[("neck_01", 9.0, 0.36, 1), ("head", -4.0, 0.36, 1)], flex=(5.0, 0.88),
+                           gait={"front": dict(duty=0.21, height=40, tilt=80, fold=115, reach=0.08), "rear": dict(duty=0.21, height=34, tilt=70, fold=85, reach=0.07)}))
     return S
 
 
@@ -1020,6 +1044,140 @@ def walk_pose(rig, A, t, key="walk"):
     return P
 
 
+# ---------------------------------------------------------------- the horse's gaits as a horse moves (the list of 2026-11-12:
+# "horses when either walking or galloping move in an unnatural manner - redo their animations so that they move like real
+# horses"). Measured first: the gallop was made for 3.3 m/s and the game drove it at up to 21 m/s, six times over (ten strides a
+# second; a horse gallops at about two); the walk for 1.1 m/s and was played at her walking pace times 5.5. Each gait is now
+# made for the speeds it is ridden at, with a horse's own stride rate and footfalls (the walk's four beats, the canter's three
+# and a moment in the air, the transverse gallop's four and a long one), and its legs as a horse's: in the swing the hoof
+# flips off the ground, the knee or hock folds early and high, the leg reaches forward straight before it lands. The body is
+# not keyed: each frame it is let down and pitched just enough for every planted leg to reach its hoof without stretching
+# (rig.stretch), up to a lift in the air between the beats; the canter's and gallop's rocking, the fall at the stride's
+# widest and the rise into the moment of suspension come from where the legs are.
+def gait_targets(rig, W, t):
+    """real_gait: each foot's ground point, tilt and fold at time t, and whether it is in stance"""
+    feet, stance, since = {}, {}, {}
+    T = W["T"]
+    for lg in rig.S.legs:
+        G = W["gait"][lg["kind"]]; beta = G["duty"]; S = W["stride"][lg["kind"]]
+        # (each hoof's landing as a share of the stride: the walk's left hind, left fore, right hind, right fore; the old "phase"
+        # had them landing in the diagonal order, which no horse walks)
+        p = (t / T - W["land"][lg["id"]]) % 1.0
+        E0 = rig.t0[lg["bones"][3]].copy()
+        if p < beta:
+            u = p / beta; dx = S * (0.5 - u); dz = 0.0; tilt = fold = 0.0
+            stance[lg["id"]] = 0.12 < u < 0.88; since[lg["id"]] = u * beta * T
+        else:
+            u = (p - beta) / (1.0 - beta)
+            # forward: the hoof carried to a little past where it lands by 85 % of the swing, then drawn back onto it
+            reach = G.get("reach", 0.06)
+            fw = smooth(u / 0.85) * (1.0 + reach) if u < 0.85 else (1.0 + reach) - reach * smooth((u - 0.85) / 0.15)
+            dx = S * (fw - 0.5)
+            # up: fast at the push-off, highest a third of the way through, down onto the ground at the end
+            lift = math.sin(math.pi * min(1.0, u ** 0.7))
+            dz = G["height"] * lift
+            # the knee (or hock) folds early and is straight again before the hoof lands; the hoof flips at the push-off
+            fold = G["fold"] * (math.sin(math.pi * min(1.0, u / 0.8)) ** 1.2)
+            tilt = G["tilt"] * math.sin(math.pi * min(1.0, u / 0.6))
+            stance[lg["id"]] = False
+        feet[lg["id"]] = (E0 + Vector((dx, 0, dz)), tilt, fold)
+    return feet, stance, since
+
+
+def gait_extras(rig, P, A, W, t):
+    """the neck, head, spine, tail and ears over a gait's stride (W's curves; times as shares of the stride)"""
+    T = W["T"]; ph = t / T
+    for b, amp, at, n in W.get("nods", []):                     # (a nod: down at `at` of the stride, n a stride)
+        addrot(rig, P, b, qrot(pitch=amp * math.cos(2 * math.pi * n * (ph - at))))
+    if W.get("flex"):                                           # (the back: rounded as the hind legs come under, stretched as they push)
+        amp, at = W["flex"]
+        addrot(rig, P, "spine_01", qrot(pitch=amp * math.cos(2 * math.pi * (ph - at))))
+    for i, b in enumerate(A["tail"]):
+        addrot(rig, P, b, qrot(pitch=W.get("tail_lift", 0.0) * (1.0 if i == 0 else 0.3), roll=W["tail"] * math.sin(2 * math.pi * ph - 0.8 * i)))
+    for b in A["ears"]:
+        addrot(rig, P, b, qrot(pitch=-W.get("ears_back", 0.0) - 3 * math.cos(4 * math.pi * ph)))
+    if W.get("roll"):
+        addrot(rig, P, "pelvis", qrot(roll=W["roll"] * math.sin(2 * math.pi * ph)))
+
+
+def gait_plan(rig, A, key, n):
+    """each frame's body: the pelvis's height and pitch (and the neck's counter to it), as high as the gait's lift asks and no
+    higher than every planted leg reaches; smoothed over the loop without rising over what was found"""
+    W = A[key]; T = W["T"]; rows = []
+    ends = {"front": [lg["id"] for lg in rig.S.legs if lg["kind"] == "front"], "rear": [lg["id"] for lg in rig.S.legs if lg["kind"] != "front"]}
+    hip = rig.h0["pelvis"]; sh = rig.h0[next(lg for lg in rig.S.legs if lg["kind"] == "front")["bones"][0]]
+    D = max(abs(sh.x - hip.x), 1.0)
+
+    def pose(t, dz, pitch):
+        P = empty_pose(); P["feet"] = gait_targets(rig, W, t)[0]
+        P["off"]["pelvis"] = Vector((0, 0, dz)); addrot(rig, P, "pelvis", qrot(pitch=pitch))
+        gait_extras(rig, P, A, W, t)
+        return P
+
+    def over(t, dz, pitch):
+        rig.stretch = {}; rig.solve(pose(t, dz, pitch))
+        return max(rig.stretch.get(k, 0.0) for k in ends["rear"]), max(rig.stretch.get(k, 0.0) for k in ends["front"])
+
+    for i in range(n):
+        t = i / FPS; ph = (t / T) % 1.0
+        up = sum(W["lift"] * bump(ph, a, d) for a, d in W.get("air", [])) + W.get("bob", 0.0) * math.cos(4 * math.pi * ph)
+        # (the canter's and gallop's rocking asked for: the forehand up while the hind legs push (nose up at "rock"'s time),
+        # down as the fore legs take the weight; the planted legs then let it down as far as they must)
+        ra, rt = W.get("rock", (0.0, 0.0))
+        dz, pitch = up, -ra * math.cos(2 * math.pi * (ph - rt))
+        for _ in range(24):
+            o_r, o_f = over(t, dz, pitch)
+            if o_r <= 0.02 and o_f <= 0.02: break
+            # (the rear's need lowers the whole body; the front's beyond it half by the whole body, half by turning it nose-down:
+            # by turning alone the gallop's forehand pitched 21 degrees, more than a horse's)
+            ex = max(o_f - o_r, 0.0)
+            dz -= o_r * 1.05 + ex * 0.5
+            pitch += math.degrees(math.atan2(ex * 0.55, D))
+        rows.append([dz, pitch])
+    # smoothed round the loop (an erosion first: the smoothed body never stands higher than a frame allowed it)
+    a = np.array(rows); m = len(a); out = a.copy()
+    for c in range(2):
+        er = np.array([min(a[(i + k) % m, c] for k in range(-2, 3)) if c == 0 else a[i, c] for i in range(m)])
+        out[:, c] = [sum(er[(i + k) % m] * w for k, w in ((-2, 0.1), (-1, 0.2), (0, 0.4), (1, 0.2), (2, 0.1))) for i in range(m)]
+    # (a last pass: anything still over is let down further, frame by frame)
+    for i in range(m):
+        t = i / FPS
+        for _ in range(10):
+            o_r, o_f = over(t, out[i, 0], out[i, 1])
+            if o_r <= 0.02 and o_f <= 0.02: break
+            ex = max(o_f - o_r, 0.0)
+            out[i, 0] -= o_r * 1.05 + ex * 0.5 + 0.1
+            out[i, 1] += math.degrees(math.atan2(ex * 0.55, D))
+    rig.stretch = {}
+    return out, pose
+
+
+def plan_gait(rig, A, key):
+    """real_gait: the stance sweep from the gait's speed (v x duty x T), not the standing reach: the body is let down to reach
+    it (gait_plan); refused if even let down by `sink` the legs cannot"""
+    W = A[key]; T = W["T"]; lim = {}
+    for lg in rig.S.legs:
+        G = W["gait"][lg["kind"]]; E0 = rig.t0[lg["bones"][3]].copy()
+
+        def over(dx):
+            P = empty_pose(); P["off"]["pelvis"] = Vector((0, 0, -W.get("sink", 15.0)))
+            P["feet"][lg["id"]] = (E0 + Vector((dx, 0, 0)), 0.0, 0.0)
+            rig.stretch = {}; rig.solve(P); return rig.stretch.get(lg["id"], 0.0)
+        half = []
+        for sgn in (1.0, -1.0):
+            lo, hi = 0.0, 250.0
+            for _ in range(30):
+                mid = 0.5 * (lo + hi)
+                if over(sgn * mid) > 1e-4: hi = mid
+                else: lo = mid
+            half.append(lo)
+        lim[lg["id"]] = round(min(half), 2)
+    W["v_eff"] = min([W["v"]] + [2 * lim[lg["id"]] * 0.95 / (W["gait"][lg["kind"]]["duty"] * T) for lg in rig.S.legs])
+    W["stride"] = {k: W["v_eff"] * G["duty"] * T for k, G in W["gait"].items()}
+    rig.stretch = {}
+    return lim
+
+
 def plan_stride(rig, A, key="walk"):
     """the longest stance sweep each leg reaches without its IK clamping (with the body up by the bob), and the walk
     speed that comes from it: the wanted speed or less (key: "run" for the horse's gallop)"""
@@ -1050,19 +1208,34 @@ def plan_stride(rig, A, key="walk"):
 def make_clips(rig, S):
     A = S.anim; rig.stretch = {}
     g0, mz = graze_g(rig, A, A["graze_z"]) if A.get("graze") else (0.0, 0.0)
-    lim = plan_stride(rig, A)
-    lim_run = plan_stride(rig, A, "run") if "run" in A else None
+    real = bool(A.get("real_gait"))
+    gaits = [k for k in ("walk", "canter", "run") if k in A]
+    lims = {k: (plan_gait(rig, A, k) if real else plan_stride(rig, A, k)) for k in gaits}
+    lim, lim_run = lims["walk"], lims.get("run")
     clips, info = {}, {}
     todo = [("Idle", IDLE_LEN, lambda t: idle_pose(rig, A, t))]
     if A.get("graze"): todo.append(("Graze", GRAZE_LEN, lambda t: graze_pose(rig, A, t, g0)))
-    todo.append(("Walk", A["walk"]["T"], lambda t: walk_pose(rig, A, t)))
-    if "run" in A: todo.append(("Run", A["run"]["T"], lambda t: walk_pose(rig, A, t, "run")))          # (the horse's gallop)
+    for k in gaits:
+        nm = {"walk": "Walk", "canter": "Canter", "run": "Run"}[k]
+        if real: todo.append((nm, A[k]["T"], k))
+        else: todo.append((nm, A[k]["T"], (lambda kk: (lambda t: walk_pose(rig, A, t, kk)))(k)))          # (the horse's gallop was "run")
     for name, L, fn in todo:
         n = int(round(L * FPS)); rig.stretch = {}
-        frames = [rig.basis(rig.solve(fn(i / FPS))) for i in range(n)]
+        if isinstance(fn, str):
+            # (a real gait: the body planned for the whole loop first, then each frame posed and solved)
+            plan, pose = gait_plan(rig, A, fn, n); rig.stretch = {}
+            frames = [rig.basis(rig.solve(pose(i / FPS, plan[i, 0], plan[i, 1]))) for i in range(n)]
+            A[fn]["plan"] = plan
+        else:
+            frames = [rig.basis(rig.solve(fn(i / FPS))) for i in range(n)]
         frames.append(frames[0])                                # the last key is the first: a seamless loop
         clips[name] = frames
         info[name] = dict(length_s=L, frames=n + 1, ik_overreach_cm={k: round(v, 3) for k, v in rig.stretch.items()})
+        if isinstance(fn, str):
+            pl = A[fn]["plan"]
+            info[name]["body_cm"] = [round(float(pl[:, 0].min()), 1), round(float(pl[:, 0].max()), 1)]
+            info[name]["pitch_deg"] = [round(float(pl[:, 1].min()), 1), round(float(pl[:, 1].max()), 1)]
+            info[name]["strides_a_second"] = round(1.0 / A[fn]["T"], 2)
     if "Graze" in info:
         info["Graze"]["neck_down_deg"] = round(g0, 2); info["Graze"]["head_below_horizontal_deg"] = A["graze"]["head_deg"]
         info["Graze"]["mouth_z_solved"] = round(mz, 2)
@@ -1070,9 +1243,10 @@ def make_clips(rig, S):
     info["Walk"]["wanted_speed_cm_s"] = A["walk"]["v"]
     info["Walk"]["stance_sweep_cm"] = {k: round(v, 1) for k, v in A["walk"]["stride"].items()}
     info["Walk"]["half_sweep_limit_cm"] = lim
-    if lim_run is not None:
-        info["Run"]["designed_speed_cm_s"] = round(A["run"]["v_eff"], 1); info["Run"]["wanted_speed_cm_s"] = A["run"]["v"]
-        info["Run"]["stance_sweep_cm"] = {k: round(v, 1) for k, v in A["run"]["stride"].items()}; info["Run"]["half_sweep_limit_cm"] = lim_run
+    for k, nm in (("canter", "Canter"), ("run", "Run")):
+        if k in A:
+            info[nm]["designed_speed_cm_s"] = round(A[k]["v_eff"], 1); info[nm]["wanted_speed_cm_s"] = A[k]["v"]
+            info[nm]["stance_sweep_cm"] = {kk: round(v, 1) for kk, v in A[k]["stride"].items()}; info[nm]["half_sweep_limit_cm"] = lims[k]
     return clips, info
 
 
@@ -1121,10 +1295,11 @@ def measure(S, rig, arm, ob, G, clips):
                 R["mouth_lowest_z"] = round(min(r["_mouth"] for r in rows), 2)
                 R["mouth_highest_z"] = round(max(r["_mouth"] for r in rows), 2)
         else:
-            Wk = S.anim["run" if name == "Run" else "walk"]; speeds = []
+            Wk = S.anim[{"Run": "run", "Canter": "canter"}.get(name, "walk")]; speeds = []
+            tg = gait_targets if S.anim.get("real_gait") else walk_targets
             for k in soles:
                 ts = [i / FPS for i in range(len(rows) - 1)]
-                wt = [walk_targets(rig, Wk, t) for t in ts]
+                wt = [tg(rig, Wk, t) for t in ts]
                 st = [i for i in range(len(ts)) if wt[i][1][k]]
                 x = np.array([rows[i][k][1][0] for i in st]); y = np.array([rows[i][k][1][1] for i in st])
                 tt = np.array([wt[i][2][k] for i in st]); z = [rows[i][k][0] for i in st]
@@ -1402,6 +1577,8 @@ def main():
         rec["walk_speed_cm_s"] = meas["Walk"]["walk_speed_cm_s"]
         rec["walk_cycle_s"] = S.anim["walk"]["T"]; rec["walk_stride_cm"] = round(rec["walk_speed_cm_s"] * S.anim["walk"]["T"], 1)
         if "Run" in meas: rec["run_speed_cm_s"] = meas["Run"]["walk_speed_cm_s"]; rec["run_cycle_s"] = S.anim["run"]["T"]
+        if "Canter" in meas: rec["canter_speed_cm_s"] = meas["Canter"]["walk_speed_cm_s"]; rec["canter_cycle_s"] = S.anim["canter"]["T"]
+        if S.anim.get("gait_edges"): rec["canter_from_cm_s"] = S.anim["gait_edges"]["canter_from"]; rec["gallop_from_cm_s"] = S.anim["gait_edges"]["gallop_from"]
         log(S.name, json.dumps({k: rec[k] for k in ("size_cm", "triangles", "rest_pose_rebuilt_err_cm", "weights", "walk_speed_cm_s")}))
         for k in clips: log(S.name, k, json.dumps(rec["clips"][k]))
         if len(G["T"]) >= TRI_BUDGET: log(S.name, "OVER THE TRIANGLE BUDGET", len(G["T"]))

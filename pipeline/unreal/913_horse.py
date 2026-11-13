@@ -15,8 +15,8 @@ STEPS = [a for a in sys.argv[1:] if a in ("import", "rider", "level")] or ["impo
 DH = "/Game/RandomDungeon/Town/Animals/Horse"; RIGS = "/Game/RandomDungeon/Horse/Rigs"; ANIMS = "/Game/RandomDungeon/Horse/Anims"
 # (the hero menu's six and their rigs, and the retarget onto them: hero_rigs.py, shared with 921 and 922)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import hero_rigs, importlib
-importlib.reload(hero_rigs)
+import hero_rigs, horse_gaits, importlib
+importlib.reload(hero_rigs); importlib.reload(horse_gaits)
 HERO_RIG = hero_rigs.HERO_RIG
 RIDER = {"Idle": "Anim_Rider_Idle_01", "Walk": "Anim_Rider_Walk", "Run": "Anim_Rider_Run"}
 J = json.load(open(os.path.join(SA, "farm_animals.json"), encoding="utf-8"))["Horse"]
@@ -78,9 +78,10 @@ if "level" in STEPS:
     meshes, seqs = horse_assets()
     d = unreal.RDHorseDef()
     d.set_editor_property("mesh", meshes[0]); d.set_editor_property("mesh_b", meshes[1] if len(meshes) > 1 else meshes[0])
-    for k in ("Idle", "Walk", "Run"): d.set_editor_property(k.lower(), seqs.get(k))
-    d.set_editor_property("walk_clip_speed", float(J["walk_speed_cm_s"])); d.set_editor_property("run_clip_speed", float(J.get("run_speed_cm_s", 260.0)))
-    d.set_editor_property("gallop_from", 250.0); d.set_editor_property("saddle_bone", "saddle")
+    # (its clips, their sole speeds and, with a canter, the gait edges the clips' record carries (the list of 2026-11-12: the walk to
+    # 4 m/s, the canter to 13); ridden at her walk (6.7 m/s) it canters, at her run (21 m/s) it gallops)
+    horse_gaits.gaits_into_def(d, J, seqs)
+    d.set_editor_property("saddle_bone", "saddle")
     # (the list of 2026-11-10: "at least 5x faster than what the player can move": 5.5 her own speed, 2.2 until then)
     d.set_editor_property("price", 60.0); d.set_editor_property("speed_mul", 5.5); d.set_editor_property("rider_lift", 14.0)          # (her pelvis this far over the saddle bone)
     g.set_editor_property("horse_def", d)

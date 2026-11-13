@@ -21,14 +21,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") bool IsBlocking() const;
 	/** hers (bought), or the stable's own standing by the stable to be bought */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") bool bHers = false;
-	/** the clip it plays now ("idle", "walk", "run") and at what rate (tests) */
+	/** the clip it plays now ("idle", "walk", "canter", "run") and at what rate (tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") FName ClipNow;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float RateNow = 1.f;
+	/** the strides a second its clip takes at its rate now (her rider clip in step; tests: the list of 2026-11-12) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetStridesASecond() const;
 	void Init(const FRDHorseDef& InDef, bool bSecondColouring);
-	/** its clip for a speed (cm/s): idle still, the walk, the gallop, at the rate its soles keep to the ground */
+	/** its clip for a speed (cm/s): idle still, the walk, the canter, the gallop, at the rate its soles keep to the ground */
 	void PlayFor(float Speed);
 	/** where the rider's root goes: its saddle bone */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") FVector GetSaddleLocation() const;
 private:
 	FRDHorseDef Def;
+	UPROPERTY() TObjectPtr<UAnimSequenceBase> ClipAsset;
 };

@@ -2682,6 +2682,8 @@ public:
 	FName RiderClipNow;
 	float JumpWas = 0.f, StableLookIn = 0.f;
 	UPROPERTY(Transient) TObjectPtr<class UAnimMontage> RiderMontage;
+	/** the rider clip playing (the list of 2026-11-12: two gaits share one) */
+	UPROPERTY(Transient) TObjectPtr<class UAnimSequenceBase> RiderClipAsset;
 	FVector HorseSpotBeside(const APawn* Her) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") bool HasHorse() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Horse") bool IsMounted() const { return bMounted; }
