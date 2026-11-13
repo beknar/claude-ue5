@@ -1,0 +1,660 @@
+{
+ "tag": "l12c",
+ "plan": [
+  "lairs12"
+ ],
+ "level": "brokenspire",
+ "steps": [
+  {
+   "step": "lairs12",
+   "ok": true,
+   "covers": {
+    "grove": {
+     "found": true,
+     "id": 328327,
+     "at_km": [
+      1.05,
+      11.0
+     ],
+     "name": "Harpy Lair",
+     "laid": {
+      "cover": "grove",
+      "pieces": 49,
+      "exit": [
+       1049.6,
+       11012.0
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_AutumnTree01": [
+       3,
+       -115,
+       1279
+      ],
+      "SM_EuropeanBeech_M_01": [
+       6,
+       -102,
+       1356
+      ],
+      "SM_Bush02": [
+       20,
+       -30,
+       277
+      ],
+      "SM_Bush01": [
+       20,
+       -33,
+       270
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.0,
+      1.6,
+      1.8,
+      2.0,
+      2.7
+     ],
+     "cover_r_m": 6.0,
+     "sight_30m": {
+      "blocked": 146,
+      "lines": 240,
+      "monsters": 5,
+      "else_blocked": 0,
+      "hidden": 0.61
+     },
+     "sight_15m": {
+      "blocked": 157,
+      "lines": 240,
+      "else_blocked": 0,
+      "hidden": 0.65
+     },
+     "woken_m": [
+      17.3,
+      11.3
+     ]
+    },
+    "pinegrove": {
+     "found": true,
+     "id": 295591,
+     "at_km": [
+      -5.61,
+      20.26
+     ],
+     "name": "Spider Lair",
+     "laid": {
+      "cover": "pinegrove",
+      "pieces": 71,
+      "exit": [
+       -5620.9,
+       20259.6
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_Pine_Big_1_": [
+       4,
+       -187,
+       1393
+      ],
+      "SM_Pine_Medium_1_": [
+       3,
+       -131,
+       1278
+      ],
+      "SM_Pine_Medium_2_": [
+       3,
+       -109,
+       1132
+      ],
+      "SM_Bush_Pine": [
+       58,
+       -72,
+       274
+      ],
+      "SM_Pine_Fallen": [
+       2,
+       -185,
+       31
+      ],
+      "SM_EuropeanBeech_Log_01": [
+       1,
+       -127,
+       -34
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      2.2,
+      2.4,
+      2.7,
+      3.0,
+      3.5
+     ],
+     "cover_r_m": 6.0,
+     "sight_30m": {
+      "blocked": 181,
+      "lines": 240,
+      "monsters": 5,
+      "else_blocked": 8,
+      "hidden": 0.75
+     },
+     "sight_15m": {
+      "blocked": 187,
+      "lines": 240,
+      "else_blocked": 0,
+      "hidden": 0.78
+     },
+     "woken_m": [
+      15.1,
+      6.2
+     ]
+    },
+    "deadwood": {
+     "found": true,
+     "id": 508663,
+     "at_km": [
+      47.18,
+      39.79
+     ],
+     "name": "Bear Lair",
+     "laid": {
+      "cover": "deadwood",
+      "pieces": 42,
+      "exit": [
+       47183.3,
+       39799.3
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_TreeDead04": [
+       5,
+       -60,
+       653
+      ],
+      "SM_DEAD_Tree_1": [
+       2,
+       -46,
+       717
+      ],
+      "SM_TreeDead01": [
+       1,
+       -62,
+       650
+      ],
+      "SM_Bush02": [
+       9,
+       -22,
+       257
+      ],
+      "SM_Bush01": [
+       11,
+       -26,
+       254
+      ],
+      "SM_EuropeanBeech_Log_01": [
+       5,
+       -65,
+       64
+      ],
+      "SM_Pine_Fallen": [
+       3,
+       -81,
+       188
+      ],
+      "SM_S_BrickRubbleV1": [
+       4,
+       -62,
+       126
+      ],
+      "SM_JungleRubblePile_A": [
+       2,
+       -38,
+       135
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.0,
+      1.5,
+      2.2
+     ],
+     "cover_r_m": 6.0,
+     "sight_30m": {
+      "blocked": 86,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.6
+     },
+     "sight_15m": {
+      "blocked": 69,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.48
+     },
+     "woken_m": [
+      18.5,
+      1.3
+     ]
+    },
+    "ruin": {
+     "found": true,
+     "id": 344679,
+     "at_km": [
+      4.8,
+      3.81
+     ],
+     "name": "Boar Lair",
+     "laid": {
+      "cover": "ruin",
+      "pieces": 16,
+      "exit": [
+       4808.6,
+       3817.7
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_StoneWall_Damaged": [
+       7,
+       -24,
+       335
+      ],
+      "SM_S_BrokenWallPart": [
+       5,
+       -9,
+       268
+      ],
+      "SM_JungleRubblePile_A": [
+       3,
+       -21,
+       99
+      ],
+      "SM_S_BrickRubbleV1": [
+       1,
+       -22,
+       61
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.0,
+      1.2,
+      3.0
+     ],
+     "cover_r_m": 5.5,
+     "sight_30m": {
+      "blocked": 115,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.8
+     },
+     "sight_15m": {
+      "blocked": 103,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.72
+     },
+     "woken_m": [
+      16.4,
+      11.5
+     ]
+    },
+    "house": {
+     "found": true,
+     "id": 344695,
+     "at_km": [
+      5.14,
+      9.0
+     ],
+     "name": "Wyrm Lair",
+     "laid": {
+      "cover": "house",
+      "pieces": 15,
+      "exit": [
+       5136.9,
+       9002.9
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_StoneWall_Damaged": [
+       11,
+       -24,
+       315
+      ],
+      "SM_ChimneyTop": [
+       1,
+       -9,
+       441
+      ],
+      "SM_S_BrickRubbleV1": [
+       2,
+       -19,
+       52
+      ],
+      "SM_JungleRubblePile_A": [
+       1,
+       -18,
+       52
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      0.6,
+      1.3,
+      1.5
+     ],
+     "cover_r_m": 4.0,
+     "sight_30m": {
+      "blocked": 127,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.88
+     },
+     "sight_15m": {
+      "blocked": 126,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.88
+     },
+     "woken_m": [
+      17.0,
+      8.5
+     ]
+    },
+    "cave": {
+     "found": true,
+     "id": 295479,
+     "at_km": [
+      -6.59,
+      -8.29
+     ],
+     "name": "Harpy Lair",
+     "laid": {
+      "cover": "cave",
+      "pieces": 10,
+      "exit": [
+       -6593.3,
+       -8293.9
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_RockCliff_02": [
+       4,
+       -179,
+       554
+      ],
+      "SM_RockCliff_01": [
+       1,
+       -156,
+       558
+      ],
+      "SM_Ind_Min_Cave": [
+       1,
+       -186,
+       514
+      ],
+      "SM_Boulder_02": [
+       2,
+       -68,
+       225
+      ],
+      "SM_Boulder_01": [
+       2,
+       -72,
+       242
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.4,
+      1.5,
+      1.7,
+      1.7
+     ],
+     "cover_r_m": 5.5,
+     "sight_30m": {
+      "blocked": 192,
+      "lines": 192,
+      "monsters": 4,
+      "else_blocked": 0,
+      "hidden": 1.0
+     },
+     "sight_15m": {
+      "blocked": 192,
+      "lines": 192,
+      "else_blocked": 0,
+      "hidden": 1.0
+     },
+     "woken_m": [
+      17.0,
+      11.2
+     ]
+    },
+    "berm": {
+     "found": true,
+     "id": 491927,
+     "at_km": [
+      42.95,
+      -47.89
+     ],
+     "name": "Wolf Lair",
+     "laid": {
+      "cover": "berm",
+      "pieces": 11,
+      "exit": [
+       42945.3,
+       -47893.2
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "berm": [
+       1,
+       -90,
+       266
+      ],
+      "SM_GorseBushLarge_01": [
+       7,
+       -19,
+       135
+      ],
+      "SM_HeatherBush_01": [
+       3,
+       -20,
+       141
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      1.0,
+      1.4,
+      1.4,
+      2.2,
+      2.2
+     ],
+     "cover_r_m": 4.5,
+     "sight_30m": {
+      "blocked": 196,
+      "lines": 240,
+      "monsters": 5,
+      "else_blocked": 0,
+      "hidden": 0.82
+     },
+     "sight_15m": {
+      "blocked": 195,
+      "lines": 240,
+      "else_blocked": 0,
+      "hidden": 0.81
+     },
+     "woken_m": [
+      17.0,
+      7.8
+     ]
+    },
+    "rocks": {
+     "found": true,
+     "id": 410295,
+     "at_km": [
+      21.08,
+      25.18
+     ],
+     "name": "Boar Lair",
+     "laid": {
+      "cover": "rocks",
+      "pieces": 16,
+      "exit": [
+       21078.7,
+       25186.8
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_Boulder_02": [
+       8,
+       -232,
+       165
+      ],
+      "SM_Boulder_01": [
+       8,
+       -225,
+       164
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      0.7,
+      1.6,
+      2.9,
+      3.0
+     ],
+     "cover_r_m": 5.0,
+     "sight_30m": {
+      "blocked": 119,
+      "lines": 192,
+      "monsters": 4,
+      "else_blocked": 12,
+      "hidden": 0.62
+     },
+     "sight_15m": {
+      "blocked": 125,
+      "lines": 192,
+      "else_blocked": 0,
+      "hidden": 0.65
+     },
+     "woken_m": [
+      15.0,
+      8.4
+     ]
+    },
+    "thicket": {
+     "found": true,
+     "id": 426535,
+     "at_km": [
+      25.15,
+      -12.68
+     ],
+     "name": "Ghoul Lair",
+     "laid": {
+      "cover": "thicket",
+      "pieces": 42,
+      "exit": [
+       25144.3,
+       -12678.5
+      ]
+     },
+     "pieces_gone": 0,
+     "pieces": {
+      "SM_HeatherBush_01": [
+       14,
+       -48,
+       244
+      ],
+      "SM_GorseBushLarge_01": [
+       20,
+       -60,
+       247
+      ],
+      "SM_Bush01": [
+       5,
+       -26,
+       211
+      ],
+      "SM_Bush02": [
+       3,
+       -20,
+       191
+      ]
+     },
+     "walked_through": [],
+     "floating": [],
+     "monsters_m_from_middle": [
+      2.0,
+      2.3,
+      2.5
+     ],
+     "cover_r_m": 5.0,
+     "sight_30m": {
+      "blocked": 118,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 0,
+      "hidden": 0.82
+     },
+     "sight_15m": {
+      "blocked": 120,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.83
+     },
+     "woken_m": [
+      17.1,
+      6.6
+     ]
+    }
+   },
+   "table": 9,
+   "counts": {
+    "grove": 26,
+    "pinegrove": 25,
+    "deadwood": 11,
+    "ruin": 69,
+    "house": 18,
+    "cave": 20,
+    "berm": 5,
+    "rocks": 29,
+    "thicket": 10,
+    "none": 0
+   }
+  }
+ ],
+ "windows_hidden": "claude_ue5 - Unreal Editor",
+ "shots": [
+  "wd_l12c_lairs12_grove.png",
+  "wd_l12c_lairs12_pinegrove.png",
+  "wd_l12c_lairs12_deadwood.png",
+  "wd_l12c_lairs12_ruin.png",
+  "wd_l12c_lairs12_house.png",
+  "wd_l12c_lairs12_cave.png",
+  "wd_l12c_lairs12_berm.png",
+  "wd_l12c_lairs12_rocks.png",
+  "wd_l12c_lairs12_thicket.png"
+ ],
+ "error": null,
+ "windows_shown_again": 1
+}

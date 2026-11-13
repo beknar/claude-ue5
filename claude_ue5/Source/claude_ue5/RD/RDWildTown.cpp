@@ -241,6 +241,8 @@ void ARDDungeonGenerator::TickWildPlaces(const FVector2D& AtM)
 			WildRuinsTold.Add(P.Id);
 			PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s. %s: %s"), *P.Name, *WildRuinKinds[RuinK].Title, *WildRuinKinds[RuinK].Text));
 		}
+		else if (const int32 LairK = WildLairCoverOf(P); PlayerCombat && LairK >= 0)
+			PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s. %s: %s"), *P.Name, *WildLairCovers[LairK].Title, *WildLairCovers[LairK].Text));
 		else if (PlayerCombat) PlayerCombat->ShowMessage(FString::Printf(TEXT("Discovered: %s"), *P.Name));
 		UE_LOG(LogRDWildTown, Log, TEXT("RDWILD found %s (%s) at (%.0f, %.0f)"), *P.Name, *P.Kind, P.At.X, P.At.Y);
 		WildAutosave(TEXT("found"));

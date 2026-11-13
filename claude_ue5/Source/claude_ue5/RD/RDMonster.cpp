@@ -184,7 +184,14 @@ void ARDMonster::PickTrip()
 	// (the wilderness: a point round its home, straight there)
 	if (bOpenGround)
 	{
-		const float A = R.FRandRange(0.f, 2.f * PI), D = R.FRandRange(300.f, 1500.f);
+		const float A = R.FRandRange(0.f, 2.f * PI);
+		float D = R.FRandRange(300.f, 1500.f);
+		// (a lair's: inside its cover, and in through its opening when it is out of it)
+		if (CoverR > 0.f)
+		{
+			D = D / 1500.f * CoverR * 0.6f;
+			if (FVector::Dist2D(GetActorLocation(), HomeAt) > CoverR) Path.Add(CoverExit);
+		}
 		Path.Add(HomeAt + FVector(FMath::Cos(A) * D, FMath::Sin(A) * D, 0.f));
 		Goal = Path.Last(); StuckTime = 0.f;
 		return;
@@ -937,6 +944,8 @@ bool ARDMonster::TickCombat(float Dt)
 		const FIntPoint From = WalkableTileAt(L), To = WalkableTileAt(Pl);
 		TArray<FIntPoint> Tiles;
 		Path.Reset();
+		// (a lair's in its cover after her outside it: out through the opening first)
+		if (bOpenGround && CoverR > 0.f && FVector::Dist2D(L, HomeAt) < CoverR && FVector::Dist2D(Pl, HomeAt) > CoverR && FVector::Dist2D(L, CoverExit) > 120.f) Path.Add(CoverExit);
 		if (bOpenGround || From == To || FMath::Abs(From.X - To.X) + FMath::Abs(From.Y - To.Y) == 1) Path.Add(Pl);
 		else if (bSameSection && Section->FindPath(From, To, Tiles) && Tiles.Num() >= 2) { SetPathFromTiles(Tiles); if (Path.Num() > 0) Path.Last() = Pl; }
 		else if (!bSameSection && Dist < 900.f) Path.Add(Pl);

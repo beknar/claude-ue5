@@ -861,6 +861,10 @@ struct FRDWildRuinKind
 	/** its containers' things ("Item|min|max|chance;..."), and how many of the place's monsters guard it */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FString Loot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32 Guards = 0;
+	/** the list of 2026-11-12's fourth phase, a lair's cover (WildLairCovers): the circle its monsters keep to (metres; they stand
+	 *  and wander in its inner 0.6), and the way its opening faces in the place's frame (degrees), the way out they take after her */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float HideR = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) float GapYaw = 0.f;
 };
 
 /** a hero's rider clips (the Animals pack's camel rider's, retargeted to her by 913) */

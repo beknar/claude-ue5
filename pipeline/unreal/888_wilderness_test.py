@@ -15,6 +15,9 @@ Steps:
           on the plains, the gallop under her, off with F; pictures of her riding
   ruins12 (2026-11-12, 924 ruins) the twenty kinds of ruins: each among the world's ruins, the nearest of each visited (its
           pieces, its chest, its guardians), a picture of each (ruins12=<kind>+<kind> for some)
+  lairs12 (2026-11-12, 924 lairs) the lairs hidden behind something: each cover among the world's lairs, the nearest of each
+          visited: its monsters inside it, how many sight lines to them its pieces block from 30 m and 15 m, woken they come
+          out to her by its opening; a picture of each (lairs12=<cover>+<cover> for some)
   gait12  (2026-11-12, 915) the horse's walk, canter and gallop ridden on the plains: each gait's clip, rate and strides a
           second, its hooves measured in the world (no slide while down), her rider clip by the gait; pictures from the side
   poi7    (2026-11-09, 912) the points of interest: the seconds between them along 14 lines of the world's model, a 150 s
@@ -1281,6 +1284,113 @@ def step_ruins12():
                 and v["guards_standing"] >= v["laid"]["guards"] and v["guards_in_a_piece"] == 0 for k, v in res["kinds"].items()) \
         and len(seen) == len(want)
     step_result("ruins12", ok, **res)
+
+
+def step_lairs12():
+    """the list of 2026-11-12's fourth phase (924 lairs, RD/RDWildLair12.cpp): "monster lairs ... should be hiding behind something,
+    a stand of trees, a ruin, a cave, an abandoned house, an earth berm". Every cover among the world's lairs within 150 km of
+    Brokenspire (CountWildLairs); then the nearest lair of each cover (lairs12=<cover>+<cover> for some) visited with the monsters
+    quiet: what was laid round it (no piece laid to collide that stops nothing, none over the ground by more than its part
+    raised it), its monsters within its circle, and how hidden they are: sight lines from an eye 1.7 m up at 16 points 30 m round
+    it (and 15 m) to each monster's legs, chest and head, traced against the cover's own pieces (WildLairSight; the lines its
+    pieces left open that something else blocks are counted apart); a picture from 30 m out on its closed side. Then the
+    monsters woken with her 18 m out before its opening: they come out to her"""
+    g = G["gen"]; res = {"covers": {}}; quiet(True)
+    yield from wait_ready(90)
+    covers = [str(k.get_editor_property("name")) for k in g.get_editor_property("wild_lair_covers")]
+    res["table"] = len(covers)
+    res["counts"] = {str(l).split("|")[0]: int(str(l).split("|")[1]) for l in g.count_wild_lairs(0.0, 0.0, 150.0)}
+    want = G.get("look_only") or covers
+    def gentle(x, y):
+        s0 = sample(x, y)
+        if s0["water"]: return False
+        return all(abs(sample(x + dx, y + dy)["h"] - s0["h"]) < 1.2 for dx, dy in ((3, 0), (-3, 0), (0, 3), (0, -3)))
+    def nearest():
+        d = 1e9
+        for m in g.get_monsters():
+            if m and not m.is_dead(): d = min(d, dist2(m.get_actor_location(), G["pawn"].get_actor_location()))
+        return d / 100.0
+    try:
+        for cv in want:
+            r = {}
+            f = str(g.find_wild_lair(cv, 0.0, 0.0, 150.0))
+            if not f: res["covers"][cv] = {"found": False}; continue
+            lid, cx, cy, yw, nm = f.split("|", 4); lid = int(lid); cx = float(cx); cy = float(cy); yw = float(yw)
+            r.update({"found": True, "id": lid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
+            # (she stands 45 m out on its closed side (behind it), on gentle dry ground, while its chunks are made)
+            spot = None
+            for rr in (45.0, 55.0):
+                for a in [yw + 180 + d_ for d_ in (0, 30, -30, 60, -60, 90, -90)]:
+                    sx, sy = cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a))
+                    if gentle(sx, sy): spot = (sx, sy); break
+                if spot: break
+            spot = spot or (cx - 45.0, cy)
+            g.wild_put_her(*spot); yield from wait_chunks(30, 50); yield from rwait(2.0)
+            lines = [str(l).split("|") for l in g.get_wild_lair_lines()]
+            mine = next((p for p in lines if int(p[1]) == lid), None)
+            r["laid"] = {"cover": mine[2], "pieces": int(mine[5]), "exit": [float(mine[6]), float(mine[7])]} if mine else None
+            pcs = [str(l).split("|") for l in g.get_wild_lair_piece_lines(lid)]
+            r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
+            # (each kind of piece: how many, its bottom and top over the ground under its middle, the lowest and highest (cm))
+            kinds_ = {}
+            for q in pcs:
+                if q[0] == "gone": continue
+                kinds_.setdefault(q[0], []).append((float(q[3]) - float(q[5]), float(q[4]) - float(q[5])))
+            r["pieces"] = {k_: [len(v_), round(min(b for b, _t in v_)), round(max(t_ for _b, t_ in v_))] for k_, v_ in kinds_.items()}
+            r["walked_through"] = sorted(set(q[0] for q in pcs if len(q) > 6 and q[6] == "0"))
+            r["floating"] = sorted(set(q[0] for q in pcs if q[0] != "gone" and len(q) > 7 and float(q[7]) >= 0 and float(q[3]) - float(q[5]) > float(q[7]) + 2.0))
+            mons = [m for m in g.get_monsters() if m and not m.is_dead() and math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < 25.0]
+            r["monsters_m_from_middle"] = sorted(round(math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy), 1) for m in mons)
+            r["cover_r_m"] = round(mons[0].get_editor_property("cover_r") / 100.0, 1) if mons else 0.0
+            sb, sl, sm, so = [int(x) for x in str(g.wild_lair_sight(lid, 30.0, 16)).split("|")]
+            r["sight_30m"] = {"blocked": sb, "lines": sl, "monsters": sm, "else_blocked": so, "hidden": round(sb / sl, 2) if sl else 0.0}
+            sb2, sl2, _m2, so2 = [int(x) for x in str(g.wild_lair_sight(lid, 15.0, 16)).split("|")]
+            r["sight_15m"] = {"blocked": sb2, "lines": sl2, "else_blocked": so2, "hidden": round(sb2 / sl2, 2) if sl2 else 0.0}
+            # (a picture from 30 m on its closed side, looking at its middle: of the ways round its closed half, the first from which
+            # a line from her eye to its middle meets nothing but the cover's own pieces (the region's rocks and trees are the chunk's
+            # instanced plants: on the mountains a boulder of the region's filled the view))
+            gz0 = sample(cx, cy)["z"]; pick = None
+            for a in [yw + 180 + d_ for d_ in (0, 25, -25, 50, -50, 75, -75, 100, -100)]:
+                px, py = cx + 30.0 * math.cos(math.radians(a)), cy + 30.0 * math.sin(math.radians(a))
+                sp = sample(px, py)
+                if sp["water"]: continue
+                hit = unreal.SystemLibrary.line_trace_single(G["w"], V(px * 100.0, py * 100.0, sp["z"] + 250.0), V(cx * 100.0, cy * 100.0, gz0 + 150.0),
+                                                             unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+                ht = hit.to_tuple() if hit else None
+                comp = ht[10] if ht and ht[0] else None
+                # (an earth bank is a procedural mesh too, but drawn: the ground's collision is hidden, its drawn ground named Ground)
+                bank = isinstance(comp, unreal.ProceduralMeshComponent) and comp.is_visible() and comp.get_name() not in ("Ground", "Water")
+                piece = isinstance(comp, unreal.StaticMeshComponent) and not isinstance(comp, unreal.InstancedStaticMeshComponent)
+                if comp is None or bank or piece:
+                    pick = (px, py, sp); break
+                pick = pick or (px, py, sp)
+            if pick:
+                G["pawn"].set_actor_location(V(pick[0] * 100.0, pick[1] * 100.0, pick[2]["z"] + 120.0), False, True); yield from rwait(1.0)
+            p = G["pawn"].get_actor_location(); gz = sample(cx, cy)["z"]
+            pitch = max(-25.0, min(12.0, math.degrees(math.atan2(gz + 150.0 - (p.z + 200.0), math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y))) - 4.0))
+            G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=math.degrees(math.atan2(cy * 100.0 - p.y, cx * 100.0 - p.x))))
+            yield from rwait(1.5); shot(f"lairs12_{cv}", "1280x720"); yield from rwait(1.2)
+            # (woken: she stands 18 m out before its opening; its monsters must come out to her)
+            if mine and mons:
+                ex, ey = r["laid"]["exit"]
+                ax, ay = (ex - cx), (ey - cy); al = math.hypot(ax, ay) or 1.0
+                fx, fy = cx + ax / al * 18.0, cy + ay / al * 18.0
+                sf = sample(fx, fy)
+                G["pawn"].set_actor_location(V(fx * 100.0, fy * 100.0, sf["z"] + 120.0), False, True); yield from rwait(0.6)
+                cb().set_health(cb().get_max_health()); quiet(False)
+                d0 = nearest(); yield from wait(6.0); d1 = nearest()
+                quiet(True); cb().set_health(cb().get_max_health())
+                r["woken_m"] = [round(d0, 1), round(d1, 1)]
+            res["covers"][cv] = r
+    finally:
+        quiet(False)
+    g.wild_drop_all(); g.wild_put_her(0.0, 0.0); yield from wait_chunks(30, 40)
+    seen = [k for k, v in res["covers"].items() if v.get("found")]
+    ok = res["table"] >= 6 and all(res["counts"].get(k, 0) > 0 for k in covers) and len(seen) == len(want) \
+        and all(v.get("laid") and v["laid"]["cover"] == k and v["laid"]["pieces"] >= 3 and not v["walked_through"] and not v["floating"]
+                and v["pieces_gone"] == 0 and v["sight_30m"]["monsters"] >= 1 and v["sight_30m"]["hidden"] >= 0.6
+                and v.get("woken_m") and v["woken_m"][1] < v["woken_m"][0] - 3.0 for k, v in res["covers"].items())
+    step_result("lairs12", ok, **res)
 
 
 def step_list10w():
@@ -2966,7 +3076,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list12": step_list12, "gait12": step_gait12, "ruins12": step_ruins12, "lairs12": step_lairs12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

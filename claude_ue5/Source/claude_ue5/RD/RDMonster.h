@@ -192,6 +192,10 @@ public:
 	 *  height alone, chases her straight, and gives up beyond WildLeash of its home */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") bool bOpenGround = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FVector HomeAt = FVector::ZeroVector;
+	/** the list of 2026-11-12's fourth phase (a lair hidden behind something): the cover's radius round HomeAt (cm; 0 none), in which
+	 *  it wanders, and its way out (a point just outside its opening), through which it goes after her and comes home */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float CoverR = 0.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FVector CoverExit = FVector::ZeroVector;
 	/** the list of 2026-11-10: an ambush's: it hunts her until HuntUntil (game seconds), from any distance under 150 m */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bHunting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float HuntUntil = 0.f;
