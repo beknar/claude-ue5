@@ -4341,18 +4341,25 @@ def step_animals10():
         # (her 3 m off its side, looking at it; a second in view so its pose is drawn)
         side = yw + 90.0; st = V(L.x + math.cos(math.radians(side)) * 300, L.y + math.sin(math.radians(side)) * 300, 0)
         put(st, yaw=side + 180.0, z=0.0); G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=-15, yaw=side + 180.0))
-        q0 = m.get_position(); yield from rwait(1.2)
-        r = {"mesh": nm, "materials": mats, "plays": abs(m.get_position() - q0) > 0.01}
         kind = nm.replace("SK_Tripo_", "").replace("SK_Farm_", "").split("_")[0]
-        if kind in TJ:
-            feet = [b[-1] for b in TJ[kind]["legs"].values()]          # (the chain's last bone is the planted one)
-            rest = [TJ[kind].get("foot_head_z", {}).get(k_) for k_ in TJ[kind]["legs"]]
-            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(L.x, L.y, L.z + 300), V(L.x, L.y, L.z - 400), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, list(acts) + [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
+        feet = [b[-1] for b in TJ[kind]["legs"].values()] if kind in TJ else []          # (the chain's last bone is the planted one)
+        # (each planted bone's lowest over the second she looks, against the ground under the animal where it stands then: read at
+        # one moment a walking goat's lifted hoof read 11 cm (the list of 2026-11-12's run), and a trace from 3 m up met what stood
+        # over a chicken (-18 cm): the trace starts just over its back)
+        q0 = m.get_position(); t0 = time.time(); low = [None] * len(feet)
+        while time.time() - t0 < 1.2:
+            La = a.get_actor_location()
+            hit = unreal.SystemLibrary.line_trace_single(G["w"], V(La.x, La.y, La.z + 60), V(La.x, La.y, La.z - 400), unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, list(acts) + [G["pawn"]], unreal.DrawDebugTrace.NONE, True)
             gz = hit.to_tuple()[4].z if hit and hit.to_tuple()[0] else None
-            # (a planted bone's tail is its sole's point: its head plus its rest length down)
-            lows = []
-            for b in feet:
-                tl = m.get_socket_location(b); lows.append(round(tl.z - gz, 1) if gz is not None else None)
+            if gz is not None:
+                for i_, b in enumerate(feet):
+                    v_ = m.get_socket_location(b).z - gz
+                    low[i_] = v_ if low[i_] is None else min(low[i_], v_)
+            yield
+        r = {"mesh": nm, "materials": mats, "plays": abs(m.get_position() - q0) > 0.01}
+        if kind in TJ:
+            rest = [TJ[kind].get("foot_head_z", {}).get(k_) for k_ in TJ[kind]["legs"]]
+            lows = [round(v_, 1) if v_ is not None else None for v_ in low]
             r["feet_head_over_ground_cm"] = lows; r["feet_head_rest_cm"] = rest
             # (each planted bone's head where it stands at rest over its sole: its feet on the ground, within 4 cm (PR #42's review))
             r["feet_off_cm"] = max((abs(l_ - r_) for l_, r_ in zip(lows, rest) if l_ is not None and r_ is not None), default=None)

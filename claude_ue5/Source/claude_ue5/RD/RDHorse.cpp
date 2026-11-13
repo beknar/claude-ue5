@@ -89,8 +89,19 @@ void ARDHorse::PlayFor(float Speed)
 	if (Speed > 40.f && Def.Run && Speed >= GallopAt) { Want = TEXT("run"); Clip = Def.Run; Rate = FMath::Clamp(Speed / FMath::Max(Def.RunClipSpeed, 1.f), 0.5f, bCanter ? 2.5f : 6.f); }
 	else if (Speed > 40.f && bCanter && Speed >= CanterAt) { Want = TEXT("canter"); Clip = Def.Canter; Rate = FMath::Clamp(Speed / FMath::Max(Def.CanterClipSpeed, 1.f), 0.5f, 2.2f); }
 	else if (Speed > 40.f && Def.Walk) { Want = TEXT("walk"); Clip = Def.Walk; Rate = FMath::Clamp(Speed / FMath::Max(Def.WalkClipSpeed, 1.f), 0.5f, 3.f); }
-	if (!Clip) return;
-	if (Want != ClipNow) { Body->PlayAnimation(Clip, true); ClipNow = Want; ClipAsset = Clip; }
+	// (no clip for the gait (a def without an Idle): standing still, and saying so (PR #55's review: the last gait's strides were
+	// still read, and her rider clip bounced on at its rate))
+	if (!Clip) { if (ClipAsset) Body->Stop(); ClipNow = Want; ClipAsset = nullptr; RateNow = 0.f; return; }
+	if (Want != ClipNow)
+	{
+		// (from one gait to another at the same point of the stride: every gait's loop starts as its left hind lands, so the legs
+		// carry on from where they were instead of jumping to a new stride's start (PR #55's review: the gaits were hard cuts))
+		const bool bStride = ClipAsset && ClipNow != TEXT("idle") && Want != TEXT("idle");
+		const float Phase = bStride && ClipAsset->GetPlayLength() > 0.f ? FMath::Fmod(Body->GetPosition() / ClipAsset->GetPlayLength(), 1.f) : 0.f;
+		Body->PlayAnimation(Clip, true);
+		if (bStride) Body->SetPosition(Phase * Clip->GetPlayLength(), false);
+		ClipNow = Want; ClipAsset = Clip;
+	}
 	Body->SetPlayRate(Rate); RateNow = Rate;
 }
 
@@ -190,7 +201,7 @@ bool ARDDungeonGenerator::MountHorse()
 	MountMeshWas = C->GetMesh()->GetRelativeLocation();
 	if (USpringArmComponent* B = C->FindComponentByClass<USpringArmComponent>()) { BoomArmWas = B->TargetArmLength; BoomOffsetWas = B->TargetOffset; B->TargetArmLength += 140.f; B->TargetOffset.Z += 110.f; }
 	PlayerCombat->MountFactor = FMath::Max(HorseDef.SpeedMul, 1.f); PlayerCombat->RefreshWalkSpeed();
-	RiderClipNow = NAME_None;
+	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
 	TickHorse(0.f);
 	PlayerCombat->ShowMessage(TEXT("You ride your horse  (F: get off)"));
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE mounted"));
@@ -216,7 +227,7 @@ bool ARDDungeonGenerator::DismountHorse()
 	}
 	if (Horse) Horse->SetBlocking(false);          // (on again once she is clear of it: TickHorse)
 	if (PlayerCombat) { PlayerCombat->MountFactor = 1.f; PlayerCombat->RefreshWalkSpeed(); }
-	RiderClipNow = NAME_None;
+	RiderClipNow = NAME_None; RiderClipAsset = nullptr;
 	UE_LOG(LogRDHorse, Log, TEXT("RDHORSE dismounted"));
 	return true;
 }
@@ -272,12 +283,15 @@ void ARDDungeonGenerator::TickHorse(float Dt)
 		const float Strides = Horse->GetStridesASecond();
 		const float Loop = Clip->GetPlayLength() / FMath::Max(Clip->RateScale, 0.01f);          // (her clip's loop at rate 1, its own rate_scale in)
 		const float Rate = Strides > 0.f ? FMath::Clamp(Loop * Strides, 0.3f, 6.f) : FMath::Clamp(Horse->RateNow, 0.5f, 6.f);
-		if (Want != RiderClipNow || !AI->IsSlotActive(RDHorseSlot))
+		// (started again only for another clip: the canter and the gallop share her run's, which went back to its start at every
+		// change between them (PR #55's review))
+		if (Clip != RiderClipAsset || !AI->IsSlotActive(RDHorseSlot))
 		{
 			RiderMontage = AI->PlaySlotAnimationAsDynamicMontage(Clip, RDHorseSlot, 0.25f, 0.25f, Rate, 10000);
-			RiderClipNow = Want;
+			RiderClipAsset = Clip;
 		}
 		else if (RiderMontage) AI->Montage_SetPlayRate(RiderMontage, Rate);
+		RiderClipNow = Want;
 	}
 }
 

@@ -24,12 +24,11 @@ public:
 	/** the clip it plays now ("idle", "walk", "canter", "run") and at what rate (tests) */
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") FName ClipNow;
 	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon") float RateNow = 1.f;
-	/** the clip's asset and its length, and the strides a second it takes at its rate now (tests: the list of 2026-11-12) */
-	const UAnimSequenceBase* ClipNowAsset() const { return ClipAsset; }
+	/** the strides a second its clip takes at its rate now (her rider clip in step; tests: the list of 2026-11-12) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") float GetStridesASecond() const;
 	void Init(const FRDHorseDef& InDef, bool bSecondColouring);
 	/** its clip for a speed (cm/s): idle still, the walk, the canter, the gallop, at the rate its soles keep to the ground */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon") void PlayFor(float Speed);
+	void PlayFor(float Speed);
 	/** where the rider's root goes: its saddle bone */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon") FVector GetSaddleLocation() const;
 private:

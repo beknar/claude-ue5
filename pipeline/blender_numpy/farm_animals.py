@@ -648,6 +648,9 @@ def horse():
                   # (each gait's length a whole number of 30ths of a second: the game's import samples at 30 a second, and a stride
                   # between two frames lost part of a frame at its loop)
                   real_gait=True,
+                  # (the speeds the game changes gait at: the walk to 4 m/s, the canter to 13, then the gallop (the clips' record carries
+                  # them; 913 and 915 write them into the horse's def: PR #55's review, one place for both))
+                  gait_edges=dict(canter_from=400.0, gallop_from=1300.0),
                   # the walk: four beats, the lateral sequence (left hind, left fore, right hind, right fore), about 0.9 strides
                   # a second, the head nodding as each fore hoof lands
                   walk=dict(T=35 / 30.0, v=170, bob=0.8, roll=1.0, tail=6, sink=14, lift=0.0,
@@ -1575,6 +1578,7 @@ def main():
         rec["walk_cycle_s"] = S.anim["walk"]["T"]; rec["walk_stride_cm"] = round(rec["walk_speed_cm_s"] * S.anim["walk"]["T"], 1)
         if "Run" in meas: rec["run_speed_cm_s"] = meas["Run"]["walk_speed_cm_s"]; rec["run_cycle_s"] = S.anim["run"]["T"]
         if "Canter" in meas: rec["canter_speed_cm_s"] = meas["Canter"]["walk_speed_cm_s"]; rec["canter_cycle_s"] = S.anim["canter"]["T"]
+        if S.anim.get("gait_edges"): rec["canter_from_cm_s"] = S.anim["gait_edges"]["canter_from"]; rec["gallop_from_cm_s"] = S.anim["gait_edges"]["gallop_from"]
         log(S.name, json.dumps({k: rec[k] for k in ("size_cm", "triangles", "rest_pose_rebuilt_err_cm", "weights", "walk_speed_cm_s")}))
         for k in clips: log(S.name, k, json.dumps(rec["clips"][k]))
         if len(G["T"]) >= TRI_BUDGET: log(S.name, "OVER THE TRIANGLE BUDGET", len(G["T"]))

@@ -50,8 +50,13 @@ def RDTweak(key, A):
     # (the chicken's neck fitted to the mesh is shorter than the spec's: with the body tipped 28 degrees its beak stopped 3.5 cm off
     # the ground at the neck's furthest turn)
     if key == "chicken": A["graze"]["pre"] = {"pelvis": 40, "spine_01": 12}
-    if key == "horse":
+    # (the old gallop's swing was held low here; the list of 2026-11-12's gaits (real_gait) keep the spec's swing (PR #55's review:
+    # held, its 6 m stride skimmed the ground with stiff legs), the flank's skin kept by LEG_REACH)
+    if key == "horse" and not A.get("real_gait"):
         A["run"]["gait"]["rear"].update(fold=35, tilt=35, height=11); A["run"]["gait"]["front"].update(fold=48, tilt=42, height=14)
+    # (the new gallop's hind swing a little less than the spec's on this mesh: at fold 85 its haunch pinched as the legs gathered)
+    elif key == "horse":
+        A["run"]["gait"]["rear"].update(fold=65, tilt=55, height=28)
 NO_SKIN = ("root", "saddle")
 # (a leg's bones take only the skin within this share of the animal's height of them, its upper bone, then the others: the skeleton
 # has no bone near a horse's belly, so the belly's skin was the legs' nearest, and the list of 2026-11-12's longer strides drew it
@@ -251,8 +256,11 @@ def skin(S, ob, V):
             for k, b in enumerate([x for x in lg["bones"] if x]):
                 j = names.index(b); legj.append(j)
                 W[D[:, j] > (reach[0] if k == 0 else reach[1]) * Hh, j] = 0.0
-        # (a vertex left with nothing goes to its nearest bone that is not a leg's)
+        # (a vertex left with nothing goes to its nearest bone that is not a leg's, nor a tail's, an ear's or the jaw's (PR #55's
+        # review: a haunch's vertex by the tail's root would have swung with the tail))
         Dn = D.copy(); Dn[:, legj] = 1e9
+        for j, n in enumerate(names):
+            if n.startswith(ACCESSORY): Dn[:, j] = 1e9
         cleared = W.sum(1) <= 0
         near = np.where(cleared, Dn.argmin(1), near)
     # (the tail's vertices on its own bones alone)
@@ -412,6 +420,7 @@ def main():
         rec["walk_speed_cm_s"] = meas["Walk"]["walk_speed_cm_s"]; rec["walk_cycle_s"] = S.anim["walk"]["T"]
         if "Run" in meas: rec["run_speed_cm_s"] = meas["Run"]["walk_speed_cm_s"]; rec["run_cycle_s"] = S.anim["run"]["T"]
         if "Canter" in meas: rec["canter_speed_cm_s"] = meas["Canter"]["walk_speed_cm_s"]; rec["canter_cycle_s"] = S.anim["canter"]["T"]
+        if S.anim.get("gait_edges"): rec["canter_from_cm_s"] = S.anim["gait_edges"]["canter_from"]; rec["gallop_from_cm_s"] = S.anim["gait_edges"]["gallop_from"]
         log(S.name, json.dumps({k: rec[k] for k in ("placed", "fit", "size_cm", "triangles", "weights", "walk_speed_cm_s")}))
         for k in clips: log(S.name, k, json.dumps(rec["clips"][k])[:900])
         if PREVIEW:

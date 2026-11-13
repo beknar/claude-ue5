@@ -1134,8 +1134,8 @@
    "sum_max": 1.0,
    "bones_per_vertex_max": 4,
    "unweighted_vertices": 0,
-   "farthest_from_moving_bone_cm": 80.5,
-   "that_bone": "head"
+   "farthest_from_moving_bone_cm": 125.7,
+   "that_bone": "pelvis"
   },
   "clips": {
    "Idle": {
@@ -1279,7 +1279,7 @@
     "lowest_vertex_z": -0.0,
     "edge_stretch_max": 9.723,
     "edge_squash_min": 0.031,
-    "edge_stretch_p99_5": 3.71,
+    "edge_stretch_p99_5": 3.714,
     "loop_seam_cm": 0.0,
     "walk_speed_cm_s": 650.0,
     "feet": {
@@ -1324,15 +1324,15 @@
      "rear_l": 0.0,
      "rear_r": 0.0,
      "front_l": 0.0,
-     "front_r": 0.0
+     "front_r": 0.016
     },
     "body_cm": [
-     -15.2,
-     -4.5
+     -22.4,
+     -9.2
     ],
     "pitch_deg": [
-     -1.7,
-     5.2
+     2.1,
+     7.1
     ],
     "strides_a_second": 2.73,
     "designed_speed_cm_s": 1700,
@@ -1349,8 +1349,8 @@
     },
     "lowest_vertex_z": -0.0,
     "edge_stretch_max": 19.205,
-    "edge_squash_min": 0.088,
-    "edge_stretch_p99_5": 3.328,
+    "edge_squash_min": 0.065,
+    "edge_stretch_p99_5": 4.647,
     "loop_seam_cm": 0.0,
     "walk_speed_cm_s": 1700.0,
     "feet": {
@@ -1360,7 +1360,7 @@
       "off_steady_cm": 0.0,
       "y_drift_cm": 0.0,
       "sole_z_min": -0.0,
-      "sole_z_max": -0.0
+      "sole_z_max": 0.0
      },
      "rear_l": {
       "stance_frames": 2,
@@ -1395,6 +1395,8 @@
   "run_cycle_s": 0.36666666666666664,
   "canter_speed_cm_s": 650.0,
   "canter_cycle_s": 0.5666666666666667,
+  "canter_from_cm_s": 400.0,
+  "gallop_from_cm_s": 1300.0,
   "fbx": "SK_Tripo_Horse.fbx",
   "texture": "T_Tripo_Horse.png"
  }

@@ -389,6 +389,8 @@
   "run_cycle_s": 0.36666666666666664,
   "canter_speed_cm_s": 650.0,
   "canter_cycle_s": 0.5666666666666667,
+  "canter_from_cm_s": 400.0,
+  "gallop_from_cm_s": 1300.0,
   "fbx": {
    "A": "SK_Farm_Horse.fbx",
    "B": "SK_Farm_Horse_B.fbx"

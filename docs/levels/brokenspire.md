@@ -391,23 +391,28 @@ The user's words: "horses when either walking or galloping move in an unnatural 
 
 **In the game** (`RD/RDHorse.cpp`'s `PlayFor`; `FRDHorseDef`'s `Canter`, `CanterClipSpeed`, `CanterFrom` 400 cm/s, `GallopFrom` 1300 cm/s):
 - Below 4 m/s it walks, to 13 m/s it canters, beyond that it gallops, each at the rate its soles keep to the ground. A gait is kept until the speed is 10 % past its edge, so the clips do not flip at an edge.
+- A change of gait carries on at the same point of the stride (every gait's loop starts as its left hind lands), so the legs do not jump to a new stride's start.
 - Ridden at her walk the horse canters; at her run it gallops.
-- Her rider clip is the run's in the canter too. It plays one loop to the horse's stride, whatever the two clips' lengths.
+- Her rider clip is the run's in the canter too, and is not started again between them. It plays one loop to the horse's stride, whatever the two clips' lengths.
+- The gait edges are in the clips' record (`farm_animals.py`'s `gait_edges`), written into the horse's def by `pipeline/unreal/horse_gaits.py` for both `913` and `915`.
 
-**The import** (`915`): imported with the existing horse, the FBX neither made the new canter nor refreshed the walk's and gallop's keys (only their `rate_scale` changed). `915` now deletes the kind's clips with an empty level open, imports the takes into a scratch folder (into the mesh's own folder Interchange found "nothing to import") and moves them into place, then checks each clip's length against Blender's.
+**The Tripo horse's gallop** keeps the spec's front swing and a slightly smaller hind swing (fold 65, tilt 55, lift 28; at fold 85 its haunch pinched as the legs gathered). Until PR #55's review an old override held the whole gallop swing low (the hooves 11 to 14 cm up), and the gallop skimmed the ground with stiff legs.
 
-**Measured** (`888 gait12 -Light`, `test_g12d.json`): ridden on the plains at three speeds. A hoof counts as down while it is within 2 cm of its lowest over 0.3 s; its slide is measured between two frames 35 ms apart at most.
+**The import** (`915`): imported with the existing horse, the FBX neither made the new canter nor refreshed the walk's and gallop's keys (only their `rate_scale` changed). `915` now imports the takes into a scratch folder (into the mesh's own folder Interchange found "nothing to import") and checks them there (every take, each the length Blender built). Only then does it delete the kind's old clips, with an empty level open, and move the new ones into place.
+
+**Measured** (`888 gait12 -Light`, `test_g12e.json`): ridden on the plains at three speeds, in the game's time. A hoof counts as down while it is within 2 cm of its lowest over 0.3 s; its slide is measured between two frames 35 ms apart at most. The gallop is measured with the game at 0.4 of its speed: its stance lasts about 3 frames at 50 frames a second.
 
 | Gait | Speed | Clip, rate | Strides a second | Hooves' slide while down |
 |---|---|---|---|---|
 | walk | 1.94 m/s | walk, 1.14 | 0.98 | 0 cm/s (0.2 %) |
-| canter | 6.41 m/s | canter, 0.99 | 1.74 | 4 cm/s (0.6 %) |
-| gallop | 19.44 m/s | gallop, 1.14 | 3.12 | 126 cm/s (6.5 %, 30 pairs of frames: its stance is 3 frames) |
+| canter | 6.41 m/s | canter, 0.99 | 1.74 | 3 cm/s (0.5 %) |
+| gallop | 19.44 m/s | gallop, 1.14 | 3.12 | 66 cm/s (3.4 %, 95 pairs of frames) |
 
 - The horse faced the way it went (0.0 degrees off).
 - Her rider clip followed the gait.
 - Pictures from her side at the canter and the gallop.
-- `888 horse9` still passes. Her speed on foot is now measured once she is up to speed, as the mounted speed is: 3.56 m/s on foot, 19.49 mounted, 5.48 times for 5.5.
+- `888 horse9` still passes. Her speed on foot is now measured once she is up to speed, as the mounted speed is: 3.53 m/s on foot, 19.44 mounted, 5.50 times for 5.5.
+- `884 animals10` (the pens' animals, whose clips `915` imports again) passes twice (`test_an12d.json`). It now takes each planted bone's lowest over a second against the ground traced from just over the animal: read at one moment, a walking goat's lifted hoof read 11 cm, and a trace from 3 m up met something standing over a chicken (−18 cm).
 
 **Not measured:** the walk ridden at its own speed in play needs a light touch on the stick (the keyboard's walk is the horse's canter); the Blender horse in `horse/` is built with the same gaits but not imported (the game rides the Tripo horse).
 ## The test

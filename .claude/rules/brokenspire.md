@@ -139,6 +139,14 @@ The starting town: a Save As copy of mistward_castle whose generator has `bTown`
 - **A skin weighted by nearness takes the legs' bones where the skeleton has nothing nearer**: the belly's skin was the forearms' and shins' and hung as a flap once the strides lengthened. `LEG_REACH` keeps a leg's bones to the skin round the leg.
 - **A clip's length a whole number of the import's frames**: Interchange samples at 30 a second; a stride of 0.58 s came in as 17 frames, a part of a frame short at its loop.
 - **Python's move input passes by her MoveScale**: the walk / run switch is in her character's Blueprint, so a test's `add_movement_input` goes at her full speed whatever `set_run_mode` says; a test sets her speed by the input's scale.
+- **PR #55's review (2026-11-12)**:
+  - An old per-mesh override survives a new design unless it is keyed to the old one: `tripo_animals.py`'s `RDTweak` still held the new gallop's swing to the old one's (11-14 cm), and the slide test could not see it. Look at the clip itself after a design change, not only its measure.
+  - Nothing is deleted before its replacement is in hand and checked (`915`'s clips: imported and checked in a scratch folder first).
+  - Two gaits sharing one rider clip must not start it again between them; a change of gait keeps the stride's phase.
+  - A measure that needs N frames inside a short event is slowed to get them (`set_global_time_dilation`, the game's own clock), not left to the editor's frame rate.
+  - A fallback for a weight cleared from one group of bones must not land on a group the rules keep apart (the tail, the ears, the jaw).
+  - Numbers two stages write go in one place (`horse_gaits.py`, the edges in the clips' record).
+- **A test that reads an animal's feet at one moment** reads a walking one's lifted hoof; read each planted bone's lowest over a second, and trace the ground from just over the animal (`884 animals10`).
 
 ## The list of 2026-11-10's fourth phase (`914 lines,sleep,people`, `RD/RDList10d.cpp`, `884 lines10,sleep10,people10`)
 

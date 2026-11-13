@@ -8,7 +8,10 @@ pigs the same; the cow's model was not given: the Blender cow stays). Steps (all
            (the cow and its colourings kept), the wilds' hare (WildFauna's "Hare", made from the rabbit as 890 makes it) and the
            stable's horse (HorseDef: both its meshes the Tripo horse, its clips and their ground speeds)
 Blender first: -b -P pipeline/blender_numpy/tripo_animals.py -- claude_ue5/SourceArt/brokenspire/tripo_animals. Args: [import] [level]"""
-import os, sys, json, unreal
+import os, sys, json, importlib, unreal
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import horse_gaits
+importlib.reload(horse_gaits)
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
 SA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "claude_ue5", "SourceArt", "brokenspire", "tripo_animals"))
@@ -64,12 +67,22 @@ def assets_of(name):
     return mesh, seqs, a
 
 
-def import_takes(name, d, mesh, want):
-    """the FBX's takes `want` imported on their own, onto the mesh's skeleton, and moved into the kind's folder under the names the
-    import gives (the saved levels find them by path). The list of 2026-11-12: imported with an existing mesh, the FBX neither
-    refreshed the takes it had made (the horse's Walk and Run kept the old clips' keys, 1.1 and 0.6 s long, only their rate_scale
-    set to the new lengths: in play its hooves slid 39 and 69 % of its speed) nor made a new one (its Canter); imported alone
-    into the mesh's own folder Interchange found "nothing to import": into a scratch folder of its own it takes them all"""
+def clip_off(name, k, s):
+    """how a clip asset's length differs from the one Blender built, or None within a frame (Interchange samples at 30 a second:
+    a clip of another rate comes in up to a frame short)"""
+    L = float(J[name]["clips"].get(k, {}).get("length_s", s.get_play_length()))
+    return f"{k} {s.get_play_length():.3f} s for {L:.3f}" if L > 0 and abs(s.get_play_length() - L) > 1.0 / 30.0 + 0.005 else None
+
+
+def import_takes(name, d, mesh):
+    """the FBX's takes imported again, onto the mesh's skeleton, under the names and paths they had (the saved levels find them by
+    path). The list of 2026-11-12: imported with an existing mesh, the FBX neither refreshed the takes it had made (the horse's Walk
+    and Run kept the old clips' keys, 1.1 and 0.6 s long, only their rate_scale set to the new lengths: in play its hooves slid 39
+    and 69 % of its speed) nor made a new one (its Canter); an import keeps a clip asset that is there, and imported alone into the
+    mesh's own folder Interchange found "nothing to import". So the takes go into a scratch folder first and are checked there
+    (every take, each the length Blender built); only then are the kind's old clips deleted, with an empty level open (none of
+    the maps holds them), and the new ones moved in (PR #55's review: deleted first, a failed import left the level's pens, hare
+    and horse pointing at nothing)"""
     tmp = f"{d}/_takes"
     if eal.does_directory_exist(tmp): eal.delete_directory(tmp)
     o = unreal.FbxImportUI()
@@ -80,15 +93,26 @@ def import_takes(name, d, mesh, want):
     t = unreal.AssetImportTask(); t.filename = os.path.join(SA, J[name]["fbx"]); t.destination_path = tmp
     t.automated = True; t.replace_existing = True; t.save = True; t.options = o
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([t])
-    got = []
+    new = {}
     for p in eal.list_assets(tmp, recursive=True):
         x = unreal.load_asset(p.split(".")[0])
-        k = x.get_name().split("_")[-1] if isinstance(x, unreal.AnimSequence) else None
-        if k in want:
-            n = x.get_name(); x = None
-            eal.rename_asset(p.split(".")[0], f"{d}/{n}"); got.append(k)
+        if isinstance(x, unreal.AnimSequence): new[x.get_name().split("_")[-1]] = (p.split(".")[0], x.get_name(), clip_off(name, x.get_name().split("_")[-1], x))
+        x = None
+    want = list(J[name].get("clips", {}))
+    bad = [k for k in want if k not in new] + [new[k][2] for k in want if k in new and new[k][2]]
+    if bad:
+        eal.delete_directory(tmp)
+        raise RuntimeError(f"915: {name}'s takes did not import as Blender built them ({bad}): its clips are left as they were")
+    # (the kind's own clips, not the scratch folder's: listed without recursion)
+    paths = [p.split(".")[0] for p in eal.list_assets(d, recursive=False)
+             if eal.find_asset_data(p.split(".")[0]).asset_class_path.asset_name == "AnimSequence"]
+    if not ues.get_editor_world().get_path_name().startswith("/Game/RandomLevel/Test/rl_scratch."):
+        unreal.EditorLoadingAndSavingUtils.load_map("/Game/RandomLevel/Test/rl_scratch")
+    import gc; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
+    for p in paths: eal.delete_asset(p)
+    for k in want: eal.rename_asset(new[k][0], f"{d}/{new[k][1]}")
     eal.delete_directory(tmp)
-    return got
+    return sorted(want)
 
 
 if "import" in STEPS:
@@ -100,31 +124,16 @@ if "import" in STEPS:
         fbx_task(os.path.join(SA, J[name]["fbx"]), d)
         mesh, seqs, a = assets_of(name)
         if not mesh: REPORT.append(f"import {name}: NO MESH"); continue
-        # (Interchange samples at 30 a second: a clip of another rate comes in up to a frame short; a clip further off than that
-        # is not the one Blender built)
-        def is_stale(k, s):
-            L = float(J[name]["clips"].get(k, {}).get("length_s", s.get_play_length()))
-            return L > 0 and abs(s.get_play_length() - L) > 1.0 / 30.0 + 0.005
         # (every clip, not only those of another length: the whole-frame strides came out as long as the old ones' imports, to
         # within a frame, with the old keys)
-        old = list(seqs)
-        want = old + [k for k in J[name].get("clips", {}) if k not in seqs]
-        if want:
-            # (an import keeps a clip asset that is there: the kind's clips are deleted with an empty level open (none of the maps
-            # holds them then) and imported again under their paths; the level step points the pens, hare and horse at them)
-            if old and not ues.get_editor_world().get_path_name().startswith("/Game/RandomLevel/Test/rl_scratch."):
-                unreal.EditorLoadingAndSavingUtils.load_map("/Game/RandomLevel/Test/rl_scratch")
-            paths = [seqs[k].get_path_name().split(".")[0] for k in old]
-            seqs = None; a = None
-            import gc; gc.collect(); unreal.SystemLibrary.execute_console_command(None, "obj gc")
-            for p in paths: eal.delete_asset(p)
-            got = import_takes(name, d, mesh, want)
-            mesh, seqs, a = assets_of(name)
-            REPORT.append(f"import {name}: {sorted(got)} imported again")
+        seqs = None; a = None
+        got = import_takes(name, d, mesh)
+        mesh, seqs, a = assets_of(name)
+        REPORT.append(f"import {name}: {got} imported again")
         stale = []
         for k, s in seqs.items():
             L = float(J[name]["clips"].get(k, {}).get("length_s", s.get_play_length()))
-            if is_stale(k, s): stale.append(f"{k} {s.get_play_length():.3f} s for {L:.3f}")
+            if clip_off(name, k, s): stale.append(clip_off(name, k, s))
             s.set_editor_property("rate_scale", s.get_play_length() / L if L > 0 and abs(s.get_play_length() - L) > 0.002 else 1.0)
             eal.save_loaded_asset(s, only_if_is_dirty=False)
         missing = [k for k in J[name].get("clips", {}) if k not in seqs]
@@ -183,11 +192,8 @@ if "level" in STEPS:
         if mesh:
             d = g.get_editor_property("horse_def")
             d.set_editor_property("mesh", mesh); d.set_editor_property("mesh_b", mesh)
-            for k in ("Idle", "Walk", "Run", "Canter"): d.set_editor_property(k.lower(), seqs.get(k))
-            d.set_editor_property("walk_clip_speed", float(J["Horse"]["walk_speed_cm_s"])); d.set_editor_property("run_clip_speed", float(J["Horse"].get("run_speed_cm_s", 260.0)))
-            # (the list of 2026-11-12: the canter, from 4 m/s; the gallop from 13 (913's numbers))
-            d.set_editor_property("canter_clip_speed", float(J["Horse"].get("canter_speed_cm_s", 650.0)))
-            d.set_editor_property("canter_from", 400.0); d.set_editor_property("gallop_from", 1300.0 if seqs.get("Canter") else 250.0)
+            # (its clips, their sole speeds and the gait edges from the clips' record: horse_gaits.py, 913's too)
+            horse_gaits.gaits_into_def(d, J["Horse"], seqs)
             d.set_editor_property("saddle_bone", "saddle")
             g.set_editor_property("horse_def", d)
             REPORT.append(f"horse: {mesh.get_name()}, clips {sorted(seqs)}, walk {J['Horse']['walk_speed_cm_s']} / canter {J['Horse'].get('canter_speed_cm_s')} / run {J['Horse'].get('run_speed_cm_s')} cm/s, saddle {J['Horse']['fit'].get('saddle_top_cm')} cm")
