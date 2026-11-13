@@ -129,6 +129,7 @@
   {"name": "rep_slickstone", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a smooth dark polished oval stone with a brown leather strap wrapped around its middle, slight three-quarter view"},
   {"name": "rep_leather_strips", "kind": "icon", "size": [1024, 1024], "prompt": "a game item illustration of a bundle of brown leather strips tied together with a small iron buckle, slight three-quarter view"},
   {"name": "map_anvil", "kind": "icon", "size": [1024, 1024], "prompt": "a game map marker of a small blacksmith's anvil in flat side profile, its horn pointing left, dark iron with a bright polished top edge, a simple bold chunky silhouette"},
+   {"name": "icon_gold", "kind": "icon", "size": [1024, 1024], "prompt": "a small neat stack of five thick shiny gold coins with two more gold coins leaning against it, each coin stamped with a simple crown, warm gold metal with bright highlights"},
    {"name": "spell_fire_bolt", "kind": "icon", "size": [1024, 1024], "prompt": "a game spell illustration of a fast streaking bolt of bright orange fire with a long flaming tail, flying diagonally"},
    {"name": "spell_dark_fire", "kind": "icon", "size": [1024, 1024], "prompt": "a game spell illustration of a swirling bolt of dark violet and black flame with a few purple sparks, flying diagonally"},
    {"name": "spell_ash_ward", "kind": "icon", "size": [1024, 1024], "prompt": "a game spell illustration of a glowing round dome-shaped barrier of swirling grey ash and small orange embers"},
@@ -221,7 +222,7 @@
  ],
  "picks": {
   "_note": "the seed chosen for each element, by its measurements (no flag) and by eye: no symbol, signature, plate or backdrop; the sweet roll from the teal round",
-  "panel": 581825022, "slot": 739131222, "bar_health": 963699389, "bar_mana": 1729531870,
+  "panel": 581825022, "slot": 739131222, "bar_health": 963699389, "bar_mana": 1729531870, "icon_gold": 1526966597,
   "healing_vial": 2052433557, "healing_flask": 1199155713, "healing_large": 685098752, "healing_ornate": 1022223967,
   "mana_vial": 1152784735, "mana_flask": 1763123420, "mana_large": 112926950, "mana_ornate": 222855137,
   "speed_vial": 1464087945, "speed_flask": 104177295, "speed_large": 1771684754, "speed_ornate": 1760770904,

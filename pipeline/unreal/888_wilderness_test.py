@@ -17,6 +17,9 @@ Steps:
           run in play (what met her never 40 s apart), each use made with F
   secondary9 (2026-11-09, 911) a wild place's Hallowed Stone taken and not laid again, the lairs' monsters' Seraph Feathers,
           the Martial Artist's Water Walk over a lake
+  list12  (2026-11-12, 923) the list of 2026-11-12's first phase: gold in the inventory, the map's scroll cut, the mouse on
+          the big map (pick, click to travel, wheel, drag), rd.MapTeleport (refused unrevealed; the wilds, the town), the saves as
+          a screen of cards
   wild25  (2026-11-09, 910) lairs and spawn points of six tiers along the roads, Brokenspire to Heaven: each monster of its
           place's tier and of a kind whose wild band holds it, the kinds changing along the way
 Writes SourceArt/wilderness/test_<tag>.json and logs "WILDTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
@@ -418,6 +421,169 @@ def step_map():
           and res["map_continent"]["level"] <= 2 and res["open"]["level"] >= 8 and any(a in res["map_continent_drawn"] for a in ("wmap_town", "wmap_city"))
           and res["fog_drag"]["builds"] <= 3)
     step_result("map", ok, **res)
+
+
+# ------------------------------------------------------------------------------------------------ the list of 2026-11-12, phase 1
+def map_frame():
+    p = str(G["gen"].get_map_frame()).split("|")
+    return {"kind": int(p[0]), "cx": float(p[1]), "cy": float(p[2]), "vx": float(p[3]), "vy": float(p[4]), "k": float(p[5]),
+            "a": (float(p[6]), float(p[7])), "b": (float(p[8]), float(p[9]))}
+def to_screen(f, wx, wy):
+    """a world point (cm) on the big map as last drawn: C + (W.Y - Vw.Y, Vw.X - W.X) x K"""
+    return (f["cx"] + (wy - f["vy"]) * f["k"], f["cy"] + (f["vx"] - wx) * f["k"])
+def to_world(f, sx, sy): return (f["vx"] - (sy - f["cy"]) / f["k"], f["vy"] + (sx - f["cx"]) / f["k"])
+def v2(p): return unreal.Vector2D(float(p[0]), float(p[1]))
+def slate_click(p):
+    g = G["gen"]; why = str(g.slate_mouse_button(v2(p), key("LeftMouseButton"), True)); yield from rwait(0.08)
+    why = why or str(g.slate_mouse_button(v2(p), key("LeftMouseButton"), False)); yield from rwait(0.3)
+    return why
+def wait_tiles(sec=20):
+    t0 = time.time()
+    while time.time() - t0 < sec and map_state()["asked"] > 0: yield
+    yield from rwait(0.5)
+def step_list12():
+    """the user's list of 2026-11-12 (docs/improvements12.txt), its first phase (RD/RDList12.cpp, 923 scrollcut):
+    - gold in the inventory in the wilds (its picture, the purse's icon drawn);
+    - the wilds' map: two pictures of the same screen with the map moved far between them, for blender_numpy/l12_scroll_check.py
+      (past the scroll's torn edge, in its holes and between its threads nothing may change: the map is not drawn there);
+    - the mouse on it: the pointer up while it is open and down after; the place under the pointer picked (Brokenspire's mark),
+      a click there travels to it (through Slate, as the device sends it); the wheel zooms about the pointer (the world point
+      under it stays); a drag moves the map and travels nowhere;
+    - rd.MapTeleport: a click refused while the map is not revealed; revealed, a click 2 km off puts her there; in Brokenspire's
+      walls, the town's map: a click on the square puts her on it;
+    - the Escape menu's Load page and the saves to save over as a screen of cards: three a row, a card picked with a click (the
+      save over chosen, back on the Save page), the keys moving by a card and a row"""
+    g = G["gen"]; res = {}; quiet(True)
+    yield from wait_ready(90)
+    g.wild_put_her(900.0, -700.0); yield from wait_chunks(30, 50); yield from rwait(1.0)
+    pc = G["pc"]
+    # ---- gold in the inventory (the wilds)
+    g.add_gold(123, "test"); cb().set_inventory_open(True); yield from rwait(1.0)
+    res["inventory"] = {"gold": g.get_gold(), "icon_drawn": "icon_gold" in drawn()}
+    shot("l12_inventory", "1280x720"); yield from rwait(1.2)
+    cb().set_inventory_open(False); yield from rwait(0.5)
+    # ---- the map: the cut, the pointer, a place picked under it, a click to travel there
+    T = towns(); b = T["Brokenspire"]
+    g.set_map_open(True); yield from rwait(0.6)
+    g.set_wild_map_view(b["x"] + 2500.0, b["y"] - 1500.0, 12.0); yield from wait_tiles()
+    f = map_frame()
+    res["map"] = {"frame_kind": f["kind"], "pointer_up": bool(pc.get_editor_property("show_mouse_cursor")), "edge_drawn": "mapc_scroll_edge" in drawn()}
+    R.setdefault("frames", {})["l12_map_cut"] = f
+    shot("l12_map_cut", "1280x720"); yield from rwait(1.5)
+    # (the same screen with the map far away (other tiles under the sheet): blender_numpy/l12_scroll_check.py compares the two
+    # pictures: where the scroll's edge is neither parchment nor its open middle nothing may change (only the backdrop is there),
+    # inside the map must)
+    g.set_wild_map_view(b["x"] + 40000.0, b["y"] + 30000.0, 160.0); yield from wait_tiles()
+    shot("l12_map_cut2", "1280x720"); yield from rwait(1.5)
+    g.set_wild_map_view(b["x"] + 2500.0, b["y"] - 1500.0, 12.0); yield from wait_tiles(10)
+    f = map_frame()
+    sb = to_screen(f, b["x"] * 100.0, b["y"] * 100.0)
+    why = str(g.slate_mouse_move(v2((sb[0] + 40, sb[1] + 40)))); yield from rwait(0.2)
+    why = why or str(g.slate_mouse_move(v2(sb))); yield from rwait(0.5)
+    ms = map_state()
+    bid = next((int(float(p[0])) for p in [str(l).split("|") for l in g.get_wild_places_near(V(b["x"] * 100.0, b["y"] * 100.0, 0), 300)] if p[1] in ("town", "city")), -1)
+    res["pick"] = {"slate": why, "at": [round(sb[0]), round(sb[1])], "hover": int(ms["hover"]), "hover_name": ms["hover_name"], "brokenspire_id": bid,
+                   "centre_far": round(math.hypot(sb[0] - f["cx"], sb[1] - f["cy"]))}
+    # (the wheel about the pointer: the world point under it before and after)
+    pw = (f["cx"] + 180.0, f["cy"] - 120.0); wb = to_world(f, *pw)
+    g.slate_mouse_move(v2(pw)); yield from rwait(0.2)
+    why2 = str(g.slate_wheel(v2(pw), 1.0)); yield from rwait(0.5)
+    f2 = map_frame(); wa = to_world(f2, *pw)
+    res["wheel"] = {"slate": why2, "k_before": f["k"], "k_after": f2["k"], "moved_under_pointer_m": round(math.hypot(wa[0] - wb[0], wa[1] - wb[1]) / 100.0, 1),
+                    "m_a_pixel": round(1.0 / f2["k"] / 100.0, 2)}
+    # (a drag: the map moves, nothing is travelled to)
+    c0 = (map_state()["cx"], map_state()["cy"]); lc0 = str(g.get_editor_property("last_map_click"))
+    d0 = (f2["cx"] - 150.0, f2["cy"] + 60.0)
+    g.slate_mouse_move(v2(d0)); yield from rwait(0.1)
+    g.slate_mouse_button(v2(d0), key("LeftMouseButton"), True); yield from rwait(0.1)
+    for k in range(1, 9):
+        g.slate_mouse_move(v2((d0[0] + 15 * k, d0[1]))); yield from rwait(0.05)
+    g.slate_mouse_button(v2((d0[0] + 120, d0[1])), key("LeftMouseButton"), False); yield from rwait(0.4)
+    c1 = (map_state()["cx"], map_state()["cy"])
+    res["drag"] = {"moved_m": round(math.hypot(c1[0] - c0[0], c1[1] - c0[1])), "clicked": str(g.get_editor_property("last_map_click")) != lc0}
+    # (the click on the place: back over Brokenspire, the pointer on it, a click)
+    g.set_wild_map_view(b["x"] + 2500.0, b["y"] - 1500.0, 12.0); yield from wait_tiles(10)
+    f = map_frame(); sb = to_screen(f, b["x"] * 100.0, b["y"] * 100.0)
+    g.slate_mouse_move(v2(sb)); yield from rwait(0.4)
+    why3 = yield from slate_click(sb); yield from rwait(1.5)
+    res["travel_click"] = {"slate": why3, "last_click": str(g.get_editor_property("last_map_click")), "map_open": bool(g.get_editor_property("map_open")),
+                           "in_walls": bool(g.is_in_town_walls(G["pawn"].get_actor_location()))}
+    yield from rwait(1.0)
+    res["pointer_after"] = bool(pc.get_editor_property("show_mouse_cursor"))
+    # ---- rd.MapTeleport: refused unrevealed, then a click 2 km out; then the town's map
+    ex = lambda c: unreal.SystemLibrary.execute_console_command(G["w"], c)
+    ex("rd.RevealMap off"); ex("rd.MapTeleport")
+    g.wild_put_her(b["x"] + 600.0, b["y"]); yield from wait_chunks(30, 40); yield from rwait(0.6)
+    g.set_map_open(True); yield from rwait(0.4)
+    g.set_wild_map_view(b["x"] + 1500.0, b["y"] + 1000.0, 14.0); yield from wait_tiles(10)
+    f = map_frame(); tw = (b["x"] + 2200.0, b["y"] + 1400.0); st = to_screen(f, tw[0] * 100.0, tw[1] * 100.0)
+    g.slate_mouse_move(v2(st)); yield from rwait(0.3)
+    yield from slate_click(st)
+    refused = str(g.get_editor_property("last_map_click"))
+    ex("rd.RevealMap"); yield from rwait(0.4)
+    n0 = g.get_editor_property("map_teleports")
+    yield from slate_click(st); yield from rwait(2.0)
+    hp = G["pawn"].get_actor_location()
+    res["teleport"] = {"refused": refused, "click": str(g.get_editor_property("last_map_click")), "teleports": g.get_editor_property("map_teleports") - n0,
+                       "off_target_m": round(math.hypot(hp.x / 100.0 - tw[0], hp.y / 100.0 - tw[1]), 1), "map_open": bool(g.get_editor_property("map_open"))}
+    # (the town's map, inside Brokenspire's walls: a click on the square)
+    ex("rd.GoTo brokenspire"); yield from rwait(4.0)
+    sq = place("square")
+    g.set_map_open(True); yield from rwait(1.0)
+    f = map_frame(); res["town_map_kind"] = f["kind"]
+    if sq and f["kind"] == 2:
+        ss = to_screen(f, sq.x, sq.y)
+        g.slate_mouse_move(v2(ss)); yield from rwait(0.3)
+        yield from slate_click(ss); yield from rwait(1.5)
+        hp = G["pawn"].get_actor_location()
+        res["town_teleport"] = {"click": str(g.get_editor_property("last_map_click")), "off_square_m": round(dist2(hp, sq) / 100.0, 1)}
+    else: res["town_teleport"] = None
+    g.set_map_open(False); ex("rd.MapTeleport off"); ex("rd.RevealMap off"); yield from rwait(0.5)
+    # ---- the Escape menu's saves as cards
+    made = []
+    for nm in ("Test12 A", "Test12 B", "Test12 C", "Test12 D"):
+        slot = "save_test12_" + nm[-1].lower()          # (the menu lists save_* slots only)
+        if g.save_game_now(slot, "test", nm): made.append(slot)
+    g.set_menu_open(True); yield from rwait(0.4)
+    lines = [str(l) for l in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("button|Save the game"))); yield from rwait(0.3)
+    lines = [str(l) for l in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("choice|Save over"))); yield from rwait(0.6)
+    boxes = [[float(x) for x in str(s).split("|")] for s in g.get_menu_boxes()]
+    lines4 = [str(l) for l in g.get_menu_lines()]
+    cols = len(set(round(bx[0]) for bx in boxes[:-1])); rows = len(set(round(bx[1]) for bx in boxes[:-1]))
+    shot("l12_save_grid", "1280x720"); yield from rwait(1.2)
+    # (the keys: right a card, down a row)
+    g.move_menu_grid(1, 0); c_r = g.get_menu_cursor(); g.move_menu_grid(0, 1); c_d = g.get_menu_cursor()
+    # (a click on the third card, "Test12 ..." (the first is "a new save"))
+    pick = next((i for i, l in enumerate(lines4) if "Test12" in l), -1)
+    bx = boxes[pick] if pick >= 0 else None
+    why4 = (yield from slate_click(((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2))) if bx else "no card"
+    res["grid"] = {"page": 4, "cards": len(boxes) - 1, "columns": cols, "rows": rows, "lines": lines4[:6], "cursor_right": c_r, "cursor_down": c_d,
+                   "slate": why4, "after_page": g.get_menu_page(), "last_action": str(g.get_editor_property("last_menu_action")), "picked_line": lines4[pick] if pick >= 0 else None}
+    # (the Load page as cards too)
+    g.set_menu_open(False); yield from rwait(0.3); g.set_menu_open(True); yield from rwait(0.3)
+    lines = [str(l) for l in g.get_menu_lines()]
+    g.activate_menu_line(next(i for i, l in enumerate(lines) if l.startswith("button|Load a game"))); yield from rwait(0.6)
+    lb = [[float(x) for x in str(s).split("|")] for s in g.get_menu_boxes()]
+    res["load_grid"] = {"cards": len(lb) - 1, "columns": len(set(round(bx[0]) for bx in lb[:-1])), "grid_page": bool(g.is_menu_grid_page())}
+    shot("l12_load_grid", "1280x720"); yield from rwait(1.2)
+    g.set_menu_open(False); yield from rwait(0.3)
+    for s in made: GS.delete_game_in_slot(s, 0)
+    quiet(False)
+    I, M, P, W, D, TR, TP = res["inventory"], res["map"], res["pick"], res["wheel"], res["drag"], res["travel_click"], res["teleport"]
+    ok = (I["gold"] >= 123 and I["icon_drawn"]
+          and M["frame_kind"] == 1 and M["pointer_up"] and M["edge_drawn"]
+          and P["hover"] == P["brokenspire_id"] and P["centre_far"] > 40
+          and W["k_after"] > W["k_before"] and W["moved_under_pointer_m"] <= 3 * W["m_a_pixel"]
+          and D["moved_m"] > 50 and not D["clicked"]
+          and TR["last_click"].startswith("travelled") and not TR["map_open"] and not res["pointer_after"]
+          and TP["refused"].startswith("refused: reveal") and TP["teleports"] == 1 and TP["off_target_m"] < 25 and not TP["map_open"]
+          and res["town_teleport"] is not None and res["town_teleport"]["click"].startswith("teleported") and res["town_teleport"]["off_square_m"] < 6
+          and res["grid"]["columns"] == 3 and res["grid"]["rows"] >= 2 and res["grid"]["cursor_right"] == 1 and res["grid"]["cursor_down"] == 4
+          and res["grid"]["after_page"] == 3 and res["grid"]["last_action"].startswith("over:")
+          and res["load_grid"]["grid_page"] and res["load_grid"]["columns"] == 3)
+    step_result("list12", ok, **res)
 
 
 # ------------------------------------------------------------------------------------------------ places, monsters
@@ -2500,7 +2666,7 @@ def step_speed8():
     step_result("speed8", ok, **res)
 
 
-STEPS = {"farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
+STEPS = {"list12": step_list12, "farms11": step_farms11, "meadows11": step_meadows11, "events11": step_events11, "list10w": step_list10w, "horse9": step_horse9, "houses10": step_houses10, "cities25": step_cities25, "tower10": step_tower10, "farms10": step_farms10, "travellers10": step_travellers10, "poi7": step_poi7, "secondary9": step_secondary9, "wild25": step_wild25, "world": step_world, "look": step_look, "stream": step_stream, "towns": step_towns, "gate": step_gate, "map": step_map, "places": step_places, "travel": step_travel, "save": step_save, "memprobe": step_memprobe,
          "sky7": step_sky7, "life7": step_life7, "ground7": step_ground7, "music7": step_music7, "build7": step_build7, "quests": step_quests,
          "rain8": step_rain8, "sky8": step_sky8, "fields8": step_fields8, "ground8": step_ground8, "animals8": step_animals8, "speed8": step_speed8, "perf8": step_perf8}
 def run():

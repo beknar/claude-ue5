@@ -186,4 +186,6 @@ private:
 	void DrawHotbar(float Sc);
 	/** level 5: the Escape menu: the four volumes as sliders, then its buttons (the generator keeps the boxes for the mouse) */
 	void DrawMenu(float Sc);
+	/** the list of 2026-11-12: the Load page and the saves to save over as a screen of cards */
+	void DrawMenuGrid(float Sc, const TArray<FString>& Lines);
 };

@@ -329,7 +329,14 @@ void ARDDungeonGenerator::TickWildMapInput(APlayerController* PC, float Dt)
 	if (Hit(EKeys::MouseScrollUp) || Hit(EKeys::Add) || Hit(EKeys::Equals)) Z -= 1.f;
 	if (Hit(EKeys::MouseScrollDown) || Hit(EKeys::Subtract) || Hit(EKeys::Hyphen)) Z += 1.f;
 	Z += (Down(EKeys::Gamepad_RightY) != 0.f ? -PC->GetInputAnalogKeyState(EKeys::Gamepad_RightY) * Dt * 3.f : 0.f);
-	if (Z != 0.f) WildMapMpp = FMath::Clamp(WildMapMpp * FMath::Pow(1.3, (double)Z), WildMapMinMpp, WildMapMaxMpp);
+	if (Z != 0.f)
+	{
+		// (the list of 2026-11-12: with the pointer over the sheet, about the point under it: it stays under the pointer)
+		float Px = 0.f, Py = 0.f; FVector Wp = FVector::ZeroVector;
+		const bool bAt = PC->ShouldShowMouseCursor() && PC->GetMousePosition(Px, Py) && MapXKind == 1 && MapScreenToWorld(FVector2D(Px, Py), Wp);
+		WildMapMpp = FMath::Clamp(WildMapMpp * FMath::Pow(1.3, (double)Z), WildMapMinMpp, WildMapMaxMpp);
+		if (bAt) WildMapCenter = FVector2D(Wp.X / 100.0 + (Py - MapXC.Y) * WildMapMpp, Wp.Y / 100.0 - (Px - MapXC.X) * WildMapMpp);
+	}
 	// pan: the arrows / D-pad / left stick, a left-mouse drag
 	const float Nn = Down(EKeys::Up) + Down(EKeys::Gamepad_DPad_Up) - Down(EKeys::Down) - Down(EKeys::Gamepad_DPad_Down) + PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
 	const float Ee = Down(EKeys::Right) + Down(EKeys::Gamepad_DPad_Right) - Down(EKeys::Left) - Down(EKeys::Gamepad_DPad_Left) + PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX);

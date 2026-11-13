@@ -789,7 +789,8 @@ void URDCombatComponent::TickComponent(float Dt, ELevelTick TickType, FActorComp
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController())) TickDevice(PC);
 	// (the tactical map is an overlay: she fights on under it; Brokenspire's map is zoomed and dragged with the mouse, its
 	// wheel and the right stick since the third list of 2026-11-02: her own keys wait while it is open)
-	if (!bScriptedOnly && (!Generator->bMapOpen || (Generator->bTacticalMaps && !Generator->bTown)))
+	// (the list of 2026-11-12: nor while a dungeon's map has the pointer up for rd.MapTeleport: its click would have struck)
+	if (!bScriptedOnly && (!Generator->bMapOpen || (Generator->bTacticalMaps && !Generator->bTown && !Generator->WantsMapPointer())))
 		if (const APawn* P = Cast<APawn>(GetOwner()))
 			if (const APlayerController* PC = Cast<APlayerController>(P->GetController()))
 			{

@@ -11,6 +11,8 @@
 //   rd.Tier <1-30|0>      her tier, with its abilities, spells and slashes (a lower one takes them away); 0 the game's own
 //   rd.RevealMap [off]    the whole map shown; off: as she has seen it
 //   (rd.WildRunSpeed applies within the towns' walls too: RDWild8.cpp)
+// The list of 2026-11-12 (docs/improvements12.txt):
+//   rd.MapTeleport [off]  a click on the big map teleports her there once the map is revealed (RDList12.cpp)
 #include "RD/RDDungeonGenerator.h"
 #include "RD/RDGameInstance.h"
 #include "RD/RDCombat.h"
@@ -143,6 +145,18 @@ namespace
 		RDCmdSay(G, bOff ? TEXT("rd.RevealMap: the map as you have seen it") : TEXT("rd.RevealMap: the whole map shown (rd.RevealMap off: as you have seen it)"));
 	}
 
+	// (the list of 2026-11-12: "in the console, enable click to teleport on a point on the map, when the map has been revealed")
+	void RDMapTeleportCommand(const TArray<FString>& Args, UWorld* World)
+	{
+		ARDDungeonGenerator* G = RDCmdGenerator(World);
+		if (!G) return;
+		const bool bOff = Args.Num() > 0 && (Args[0].ToLower() == TEXT("off") || Args[0] == TEXT("0"));
+		G->bMapClickTeleport = !bOff;
+		RDCmdSay(G, bOff ? TEXT("rd.MapTeleport: off")
+		                 : G->bMapRevealAll ? TEXT("rd.MapTeleport: click a point on the big map (M) to teleport there (rd.MapTeleport off: no more)")
+		                                    : TEXT("rd.MapTeleport: on once the map is revealed: rd.RevealMap, then click a point on the big map (M)"));
+	}
+
 	FAutoConsoleCommandWithWorldAndArgs GRDTimeCmd(TEXT("rd.Time"), TEXT("The time of day: rd.Time <dawn|morning|noon|afternoon|evening|night|midnight|0-24>"),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDTimeCommand));
 	FAutoConsoleCommandWithWorldArgsAndOutputDevice GRDPoisCmd(TEXT("rd.Pois"), TEXT("Every place of the map shown on it and the nearest 40 listed (the small points of interest near her too); rd.Pois all: all listed; rd.Pois hide: only those found again"),
@@ -153,6 +167,8 @@ namespace
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDTierCommand));
 	FAutoConsoleCommandWithWorldAndArgs GRDRevealMapCmd(TEXT("rd.RevealMap"), TEXT("The whole map shown (the wilds' and the dungeon's); rd.RevealMap off: as she has seen it"),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDRevealMapCommand));
+	FAutoConsoleCommandWithWorldAndArgs GRDMapTeleportCmd(TEXT("rd.MapTeleport"), TEXT("A click on the big map teleports her to that point, once the map is revealed (rd.RevealMap); rd.MapTeleport off: no more"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&RDMapTeleportCommand));
 
 	FAutoConsoleCommandWithWorldAndArgs GRDWeatherCmd(TEXT("rd.Weather"),
 		TEXT("The weather at once, held: rd.Weather <clear|fair|cloudy|overcast|rain|storm|snow|fog|cloudless|0-8>; cloudless: no clouds at all, not even on the horizon (never chosen by itself); rd.Weather auto lets it change again"),

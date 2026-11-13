@@ -311,6 +311,7 @@ void ARDHUD::DrawTownMap(float Sc, const FVector& L, float Yaw)
 	const float Pad = Ms * 0.09f, K = (Ms - Pad * 2.f) / Span;
 	const FVector2D Mid((In0.X + In1.X) * 0.5f, (In0.Y + In1.Y) * 0.5f), Cm = (A + B) * 0.5f + FVector2D(0.f, Ms * 0.015f);
 	auto ToM = [&](const FVector2D& W) { return Cm + FVector2D(W.Y - Mid.Y, -(W.X - Mid.X)) * K; };
+	Gen->MapXC = Cm; Gen->MapXVw = Mid; Gen->MapXK = K; Gen->MapXSheet = FBox2D(A, B); Gen->MapXKind = 2;          // (the list of 2026-11-12: rd.MapTeleport's click)
 	auto Rect = [&](const FVector& W0, const FVector& W1, const FLinearColor& Col)
 	{
 		const FVector2D P = ToM(FVector2D(W0.X, W0.Y)), Q = ToM(FVector2D(W1.X, W1.Y));
@@ -505,6 +506,7 @@ void ARDHUD::DrawTownMapColour(float Sc, const FVector& L, float Yaw)
 	TownMapSpan = Span; Gen->TownMapPxPerCm = K;
 	const bool bZoomed = Zm > 1.01f || !Gen->MapPan.IsNearlyZero(1.f);
 	auto ToM = [&](const FVector2D& W) { return Cm + FVector2D(W.Y - Mid.Y, -(W.X - Mid.X)) * K; };
+	Gen->MapXC = Cm; Gen->MapXVw = Mid; Gen->MapXK = K; Gen->MapXSheet = FBox2D(A, B); Gen->MapXKind = 2;          // (the list of 2026-11-12: rd.MapTeleport's click)
 	auto W2 = [](const FVector& V) { return FVector2D(V.X, V.Y); };
 	// (a tile rectangle's world corners)
 	auto TileW = [&](const FIntRect& R, FVector2D& W0, FVector2D& W1)

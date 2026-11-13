@@ -876,7 +876,7 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 		{
 			FString Slot, Rest; S.Split(TEXT("|"), &Slot, &Rest);
 			L.Add(Slot == TEXT("autosave") ? FName(TEXT("loadauto")) : FName(*(TEXT("load:") + Slot)));
-			if (L.Num() >= 8) break;
+			if (L.Num() >= RDMenuGridMax) break;          // (the list of 2026-11-12: a screen of cards, 8 lines until then)
 		}
 		if (!L.Contains(FName(TEXT("loadauto")))) L.Insert(FName(TEXT("loadauto")), 0);
 		L.Add(TEXT("back"));
@@ -893,7 +893,7 @@ TArray<FName> ARDDungeonGenerator::MenuItems() const
 			FString Slot, Rest; S.Split(TEXT("|"), &Slot, &Rest);
 			if (Slot == TEXT("autosave") || Slot.IsEmpty()) continue;
 			L.Add(FName(*(TEXT("over:") + Slot)));
-			if (L.Num() >= 12) break;
+			if (L.Num() >= RDMenuGridMax) break;
 		}
 		L.Add(TEXT("back"));
 		return L;
@@ -935,7 +935,7 @@ TArray<FString> ARDDungeonGenerator::GetMenuLines() const
 		}
 		else if (Id == TEXT("savename")) Out.Add(FString::Printf(TEXT("text|Name|%s"), *SaveNameText.Replace(TEXT("|"), TEXT(" "))));
 		else if (Id == TEXT("saveover"))
-			Out.Add(SaveOverSlot.IsEmpty() ? FString(TEXT("choice|Save over|a new save  (Enter: choose a save)"))
+			Out.Add(SaveOverSlot.IsEmpty() ? FString(TEXT("choice|Save over|a new save  (click or Enter: choose from your saves)"))
 			                               : FString::Printf(TEXT("choice|Save over|%s"), *SaveNameOf(SaveOverSlot).Replace(TEXT("|"), TEXT(" "))));
 		else if (Id == TEXT("overnew")) Out.Add(TEXT("button|A new save"));
 		else if (Id.ToString().StartsWith(TEXT("over:")))
@@ -1031,6 +1031,22 @@ void ARDDungeonGenerator::MoveMenuCursor(int32 Step)
 	MenuCursor = ((MenuCursor + Step) % N + N) % N;
 }
 
+void ARDDungeonGenerator::MoveMenuGrid(int32 Dx, int32 Dy)
+{
+	// (the cards are every item but the last, Back, which stands under them)
+	const int32 N = MenuItems().Num(), Cards = FMath::Max(N - 1, 0);
+	if (Cards == 0) { MenuCursor = FMath::Max(N - 1, 0); return; }
+	const bool bOnBack = MenuCursor >= Cards;
+	if (Dx != 0)
+	{
+		if (!bOnBack) MenuCursor = ((MenuCursor + Dx) % Cards + Cards) % Cards;
+		return;
+	}
+	if (bOnBack) { MenuCursor = Dy < 0 ? Cards - 1 : 0; return; }
+	const int32 To = MenuCursor + Dy * RDMenuGridCols;
+	MenuCursor = To < 0 || To >= Cards ? Cards : To;          // (past the first or the last row: Back)
+}
+
 void ARDDungeonGenerator::StepMenuValue(int32 Step)
 {
 	const TArray<FName> It = MenuItems();
@@ -1045,13 +1061,9 @@ void ARDDungeonGenerator::StepMenuValue(int32 Step)
 	else if (Id == TEXT("difficulty")) SetDifficulty(((Difficulty + Step) % NumDifficulties + NumDifficulties) % NumDifficulties);
 	else if (Id == TEXT("saveover"))
 	{
-		// (the list of 2026-11-10: left and right go through the saves on disk, "a new save" among them)
-		TArray<FString> Slots = { FString() };
-		for (const FString& S : GetSaveSlots()) { FString Slot, Rest; S.Split(TEXT("|"), &Slot, &Rest); if (!Slot.IsEmpty() && Slot != TEXT("autosave")) Slots.Add(Slot); }
-		int32 K = Slots.IndexOfByKey(SaveOverSlot);
-		K = ((FMath::Max(K, 0) + Step) % Slots.Num() + Slots.Num()) % Slots.Num();
-		SaveOverSlot = Slots[K];
-		if (!SaveOverSlot.IsEmpty()) SaveNameText = SaveNameOf(SaveOverSlot);
+		// (the list of 2026-11-10: left and right went through the saves on disk one at a time; the list of 2026-11-12: "pick from
+		// a screen of choices instead of scrolling choices": they open the screen of the saves instead)
+		ActivateMenuLine(MenuCursor);
 	}
 	else if (Id == TEXT("res") && PendingWindowMode != 1)
 	{
@@ -1225,6 +1237,15 @@ void ARDDungeonGenerator::TickMenu(APlayerController* PC)
 			return;
 		}
 	}
+	else if (IsMenuGridPage())
+	{
+		// (the list of 2026-11-12: the saves as a screen of cards, three a row: up and down a row, left and right a card)
+		if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuGrid(0, -1);
+		if (Pressed({ EKeys::S, EKeys::Down, EKeys::Gamepad_DPad_Down })) MoveMenuGrid(0, 1);
+		if (Pressed({ EKeys::A, EKeys::Left, EKeys::Gamepad_DPad_Left })) MoveMenuGrid(-1, 0);
+		if (Pressed({ EKeys::D, EKeys::Right, EKeys::Gamepad_DPad_Right })) MoveMenuGrid(1, 0);
+		if (Pressed({ EKeys::Enter, EKeys::SpaceBar, EKeys::Gamepad_FaceButton_Bottom })) { ActivateMenuLine(); return; }
+	}
 	else
 	{
 	if (Pressed({ EKeys::W, EKeys::Up, EKeys::Gamepad_DPad_Up })) MoveMenuCursor(-1);
@@ -1275,14 +1296,27 @@ FString ARDDungeonGenerator::MoveEditorStopKey(bool bShift)
 void ARDDungeonGenerator::UpdateMapScrollInput(APlayerController* PC)
 {
 	const bool bWant = bMapOpen && bTacticalMaps;
-	if (bWant == bMapScrollInput || !PC || !PC->GetLocalPlayer()) return;
+	if (!PC || !PC->GetLocalPlayer()) return;
 	UEnhancedInputLocalPlayerSubsystem* EI = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 	if (!EI) return;
+	// (the list of 2026-11-12: a dungeon's map with the pointer up for rd.MapTeleport: the mouse is the map's, not the camera's)
+	const bool bWantMouse = WantsMapPointer() && !bTown;
+	if (bWantMouse != bMapMouseInput)
+	{
+		if (!MapMouseContext)
+		{
+			if (!MapScrollAction) { MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll")); MapScrollAction->bConsumeInput = true; }
+			MapMouseContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapMouse"));
+			for (const FKey& K : { EKeys::Mouse2D, EKeys::MouseX, EKeys::MouseY, EKeys::MouseWheelAxis }) MapMouseContext->MapKey(MapScrollAction, K);
+		}
+		if (bWantMouse) EI->AddMappingContext(MapMouseContext, 1000); else EI->RemoveMappingContext(MapMouseContext);
+		bMapMouseInput = bWantMouse;
+	}
+	if (bWant == bMapScrollInput) return;
 	if (!MapScrollContext)
 	{
 		// (an action that consumes its keys: the contexts under it do not see them; the generator reads the keys itself)
-		MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll"));
-		MapScrollAction->bConsumeInput = true;
+		if (!MapScrollAction) { MapScrollAction = NewObject<UInputAction>(this, TEXT("IA_RD_MapScroll")); MapScrollAction->bConsumeInput = true; }
 		MapScrollContext = NewObject<UInputMappingContext>(this, TEXT("IMC_RD_MapScroll"));
 		for (const FKey& K : { EKeys::Up, EKeys::Down, EKeys::Left, EKeys::Right }) MapScrollContext->MapKey(MapScrollAction, K);
 		// (Brokenspire's map zooms and is dragged: the mouse, its wheel and the right stick are the map's while it is open, or
@@ -1868,6 +1902,7 @@ void ARDDungeonGenerator::Tick(float Dt)
 		if (PC->WasInputKeyJustPressed(EKeys::M) || (bCasterControls && PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) SetMapOpen(!bMapOpen);
 		// the big map scrolls under the arrow keys (the D-pad), C (the right stick pressed) brings it back over her
 		UpdateMapScrollInput(PC);
+		TickMapPointer(PC);          // (the list of 2026-11-12: the pointer over the big map, a click there: RDList12.cpp)
 		if (bMapOpen && bTacticalMaps && IsWildMapShown()) TickWildMapInput(PC, Dt);
 		else if (bMapOpen && bTacticalMaps && bTown) TickTownMapInput(PC, Dt);
 		else if (bMapOpen && bTacticalMaps)

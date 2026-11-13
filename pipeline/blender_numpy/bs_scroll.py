@@ -107,3 +107,26 @@ ring[..., 3] = ring[..., 3] * (1.0 - inner)
 out2 = os.path.join(D, "mapc_scroll_edge.png")
 Image.fromarray(ring.astype(np.uint8), "RGBA").save(out2)
 print(f"bs_scroll: {out2}, opaque {np.mean(ring[..., 3] > 128):.3f}, middle transparent {np.mean(ring[N // 3:2 * N // 3, N // 3:2 * N // 3, 3] < 5):.2f}")
+# where a map under the edge may be drawn (the list of 2026-11-12: "the wilderness map is a square with a scroll overlay on it,
+# with the square showing in the gaps of the irregular scroll edges. map square should not show up outside of the scroll
+# overlay"): the largest rectangle, even about the middle, in which every pixel of the edge is its parchment (alpha 0.9 or more)
+# or its open middle (the transparent pixels joined to the centre): no pixel past the torn outline, in a worn hole or between the
+# threads. ARDHUD::DrawWildMap draws the wilds' map inside these insets (a little more): change both together
+from collections import deque
+ea = ring[..., 3] / 255.0
+mid = np.zeros((N, N), bool); q = deque([(N // 2, N // 2)]); mid[N // 2, N // 2] = True
+while q:
+    y0, x0 = q.popleft()
+    for ddy, ddx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        y1, x1 = y0 + ddy, x0 + ddx
+        if 0 <= y1 < N and 0 <= x1 < N and not mid[y1, x1] and ea[y1, x1] < 0.9: mid[y1, x1] = True; q.append((y1, x1))
+bad = (ea < 0.9) & ~mid
+need = np.zeros(N, int)
+for y in range(N):
+    xs_ = np.nonzero(bad[y])[0]
+    if len(xs_): need[y] = np.minimum(xs_, N - 1 - xs_).max() + 1
+best = (0, 0, 0)
+for T in range(N // 3):
+    Lx = need[T:N - T].max()
+    if Lx < N // 2 and (N - 2 * Lx) * (N - 2 * T) > best[0]: best = ((N - 2 * Lx) * (N - 2 * T), Lx, T)
+print(f"bs_scroll: the map may be drawn {best[1] / N:.4f} of the edge's picture in from its sides and {best[2] / N:.4f} from its top and bottom")
