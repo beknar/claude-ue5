@@ -76,18 +76,7 @@ const ARDDungeonGenerator::FRuinPick& ARDDungeonGenerator::WildRuinPickOf(const 
 				const FVector2D D(FMath::Cos(I * PI / 4.f), FMath::Sin(I * PI / 4.f));
 				if (RDR12Deep(*Wild, P.At + D * Rr)) { bWet = true; Hit = P.At + D * Rr; Way = D; }
 			}
-	float Sum = 0.f;
-	TArray<float> W; W.SetNumZeroed(WildRuinKinds.Num());
-	for (int32 I = 0; I < WildRuinKinds.Num(); ++I)
-	{
-		const FRDWildRuinKind& K = WildRuinKinds[I];
-		if ((K.bWater && !bWet) || !Fits(K)) continue;
-		W[I] = FMath::Max(K.Weight, 0.f); Sum += W[I];
-	}
-	if (Sum <= 0.f) return Pk;
-	float Pick = (FRDWildWorld::Hash(P.Id, 0x1212, Wild->Seed) & 0xFFFFFF) / float(0x1000000) * Sum;
-	for (int32 I = 0; I < W.Num() && Pk.Kind < 0; ++I) { if (W[I] <= 0.f) continue; if (Pick < W[I]) Pk.Kind = I; else Pick -= W[I]; }
-	for (int32 I = W.Num() - 1; I >= 0 && Pk.Kind < 0; --I) if (W[I] > 0.f) Pk.Kind = I;
+	Pk.Kind = PickWildKind(WildRuinKinds, P, 0x1212, bWet);
 	if (Pk.Kind < 0 || !WildRuinKinds[Pk.Kind].bWater) return Pk;
 	// (into the water the kind found: its edge walked back to the metre, the middle 12 m past it if that is still deep (a stream
 	// may be narrower: then the wet sample itself), the shore the first ground with no water at all from 3 m before the edge)
@@ -101,6 +90,56 @@ const ARDDungeonGenerator::FRuinPick& ARDDungeonGenerator::WildRuinPickOf(const 
 }
 
 int32 ARDDungeonGenerator::WildRuinKindOf(const FRDWildPlace& P) const { return WildRuinPickOf(P).Kind; }
+
+int32 ARDDungeonGenerator::PickWildKind(const TArray<FRDWildRuinKind>& T, const FRDWildPlace& P, uint32 Salt, bool bWet) const
+{
+	// (a kind of the table by the place's biome ("*": any) and the kinds' weights, from a hash of its id; the water kinds only
+	// where water was found)
+	if (!Wild || T.Num() == 0) return -1;
+	const FString Bn = Wild->Biomes.IsValidIndex(P.Biome) ? Wild->Biomes[P.Biome].Name : FString();
+	float Sum = 0.f;
+	TArray<float> W; W.SetNumZeroed(T.Num());
+	for (int32 I = 0; I < T.Num(); ++I)
+	{
+		const FRDWildRuinKind& K = T[I];
+		if ((K.bWater && !bWet) || (!K.Biomes.Contains(TEXT("*")) && !K.Biomes.Contains(Bn))) continue;
+		W[I] = FMath::Max(K.Weight, 0.f); Sum += W[I];
+	}
+	if (Sum <= 0.f) return -1;
+	float Pick = (FRDWildWorld::Hash(P.Id, Salt, Wild->Seed) & 0xFFFFFF) / float(0x1000000) * Sum;
+	for (int32 I = 0; I < W.Num(); ++I) { if (W[I] <= 0.f) continue; if (Pick < W[I]) return I; Pick -= W[I]; }
+	for (int32 I = W.Num() - 1; I >= 0; --I) if (W[I] > 0.f) return I;
+	return -1;
+}
+
+bool ARDDungeonGenerator::FindNearestWildPlace(float X, float Y, float MaxKm, TFunctionRef<bool(const FRDWildPlace&, FVector2D&)> Match, FRDWildPlace& Out, FVector2D& OutAt) const
+{
+	// (rings of the world's place cells out from the point, on past the first ring that holds one until no nearer can be left:
+	// a ring's nearest point is a cell less than its number off, and a ruin's middle may lie 320 m from its place (PR #57's
+	// review: the first ring's best was not always the nearest))
+	if (!Wild) return false;
+	const FIntPoint C0 = Wild->PlaceCellOf(X, Y);
+	const int32 Rmax = FMath::CeilToInt(MaxKm * 1000.0 / FRDWildWorld::PlaceCellM);
+	double Best = 1e18; bool bGot = false;
+	for (int32 Ring = 0; Ring <= Rmax; ++Ring)
+	{
+		if (bGot && FMath::Square(FMath::Max(0.0, (Ring - 1) * (double)FRDWildWorld::PlaceCellM - 320.0)) > Best) break;
+		for (int32 I = -Ring; I <= Ring; ++I)
+			for (int32 J = -Ring; J <= Ring; ++J)
+			{
+				if (FMath::Max(FMath::Abs(I), FMath::Abs(J)) != Ring) continue;
+				TArray<FRDWildPlace> Ps; Wild->PlacesIn(C0 + FIntPoint(I, J), Ps);
+				for (const FRDWildPlace& P : Ps)
+				{
+					FVector2D A;
+					if (!Match(P, A)) continue;
+					const double D = FVector2D::DistSquared(A, FVector2D(X, Y));
+					if (D < Best) { Best = D; Out = P; OutAt = A; bGot = true; }
+				}
+			}
+	}
+	return bGot;
+}
 
 FVector2D ARDDungeonGenerator::WildRuinCentre(const FRDWildPlace& P, FVector2D* Shore) const
 {
@@ -269,9 +308,10 @@ void ARDDungeonGenerator::LayWildParts(ARDWildChunk* C, const FRDWildPlace& P, c
 		auto SeeOnly = [&](UPrimitiveComponent* Pc)
 		{
 			if (!Pc || ColV < 1.5f) return;
+			// (query only and every channel ignored: her bolts and spells trace the visibility channel and burst on a bush that blocked
+			// it (PR #57's review); the lairs' sight test traces the piece itself (LineTraceComponent), which takes no channel)
 			Pc->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			Pc->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-			Pc->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+			Pc->SetCollisionResponseToAllChannels(ECR_Ignore);
 		};
 		// (the instances' places in the place's frame (metres) and their yaw before the frame's)
 		struct FAt { FVector2D Xy; float Yaw; float Z; };
@@ -471,28 +511,9 @@ FString ARDDungeonGenerator::FindWildRuin(FName Kind, float X, float Y, float Ma
 	if (!Wild) return FString();
 	const int32 Want = WildRuinKinds.IndexOfByPredicate([&](const FRDWildRuinKind& K) { return K.Name == Kind; });
 	if (Want < 0) return FString();
-	// (rings of the world's place cells out from the point: the nearest first)
-	const FIntPoint C0 = Wild->PlaceCellOf(X, Y);
-	const int32 Rmax = FMath::CeilToInt(MaxKm * 1000.0 / FRDWildWorld::PlaceCellM);
-	for (int32 Ring = 0; Ring <= Rmax; ++Ring)
-	{
-		float Best = 1e18f; FString Got;
-		for (int32 I = -Ring; I <= Ring; ++I)
-			for (int32 J = -Ring; J <= Ring; ++J)
-			{
-				if (FMath::Max(FMath::Abs(I), FMath::Abs(J)) != Ring) continue;
-				TArray<FRDWildPlace> Ps; Wild->PlacesIn(C0 + FIntPoint(I, J), Ps);
-				for (const FRDWildPlace& P : Ps)
-				{
-					if (P.Kind != TEXT("ruins") || WildRuinKindOf(P) != Want) continue;
-					const FVector2D Ce = WildRuinCentre(P);
-					const float D = FVector2D::DistSquared(Ce, FVector2D(X, Y));
-					if (D < Best) { Best = D; Got = FString::Printf(TEXT("%d|%.1f|%.1f|%.1f|%s"), P.Id, Ce.X, Ce.Y, P.Yaw, *P.Name); }
-				}
-			}
-		if (!Got.IsEmpty()) return Got;
-	}
-	return FString();
+	FRDWildPlace Got; FVector2D Ce;
+	if (!FindNearestWildPlace(X, Y, MaxKm, [&](const FRDWildPlace& P, FVector2D& A) { if (P.Kind != TEXT("ruins") || WildRuinKindOf(P) != Want) return false; A = WildRuinCentre(P); return true; }, Got, Ce)) return FString();
+	return FString::Printf(TEXT("%d|%.1f|%.1f|%.1f|%s"), Got.Id, Ce.X, Ce.Y, Got.Yaw, *Got.Name);
 }
 
 TArray<FString> ARDDungeonGenerator::CountWildRuins(float X, float Y, float MaxKm) const

@@ -1294,7 +1294,9 @@ def step_lairs12():
     raised it), its monsters within its circle, and how hidden they are: sight lines from an eye 1.7 m up at 16 points 30 m round
     it (and 15 m) to each monster's legs, chest and head, traced against the cover's own pieces (WildLairSight; the lines its
     pieces left open that something else blocks are counted apart); a picture from 30 m out on its closed side. Then the
-    monsters woken with her 18 m out before its opening: they come out to her"""
+    monsters woken with her 18 m out before its opening (and nearer to her by 3 m), then off to its side: each time one comes out
+    past its walls within 20 s (the time is recorded); between the two she goes 60 m off and how many are home again after 25 s is recorded. Of each
+    cover the nearest lair on gentle ground (its den's ground within 2 m over 8 m)"""
     g = G["gen"]; res = {"covers": {}}; quiet(True)
     yield from wait_ready(90)
     covers = [str(k.get_editor_property("name")) for k in g.get_editor_property("wild_lair_covers")]
@@ -1313,7 +1315,9 @@ def step_lairs12():
     try:
         for cv in want:
             r = {}
-            f = str(g.find_wild_lair(cv, 0.0, 0.0, 150.0))
+            # (the nearest whose den's ground rises or falls 2 m at most within 8 m: on a canyon's terraces she was set down a storey
+            # over the den and fell to her death, and on a mountain's face its monsters could not reach her; those are in TODO)
+            f = str(g.find_wild_lair(cv, 0.0, 0.0, 150.0, 2.0))
             if not f: res["covers"][cv] = {"found": False}; continue
             lid, cx, cy, yw, nm = f.split("|", 4); lid = int(lid); cx = float(cx); cy = float(cy); yw = float(yw)
             r.update({"found": True, "id": lid, "at_km": [round(cx / 1000.0, 2), round(cy / 1000.0, 2)], "name": nm})
@@ -1328,7 +1332,11 @@ def step_lairs12():
             g.wild_put_her(*spot); yield from wait_chunks(30, 50); yield from rwait(2.0)
             lines = [str(l).split("|") for l in g.get_wild_lair_lines()]
             mine = next((p for p in lines if int(p[1]) == lid), None)
-            r["laid"] = {"cover": mine[2], "pieces": int(mine[5]), "exit": [float(mine[6]), float(mine[7])]} if mine else None
+            r["laid"] = {"cover": mine[2], "pieces": int(mine[5]), "exit": [float(mine[6]), float(mine[7])], "reach_m": float(mine[10]) if len(mine) > 10 else 0.0} if mine else None
+            # (its den: its place, or moved off a steep slope (a harpy lair on a mountain's face): measured from where it was laid)
+            if mine:
+                r["den_moved_m"] = round(math.hypot(float(mine[3]) - cx, float(mine[4]) - cy), 1)
+                cx, cy = float(mine[3]), float(mine[4])
             pcs = [str(l).split("|") for l in g.get_wild_lair_piece_lines(lid)]
             r["pieces_gone"] = sum(1 for q in pcs if q[0] == "gone")
             # (each kind of piece: how many, its bottom and top over the ground under its middle, the lowest and highest (cm))
@@ -1370,17 +1378,45 @@ def step_lairs12():
             pitch = max(-25.0, min(12.0, math.degrees(math.atan2(gz + 150.0 - (p.z + 200.0), math.hypot(cx * 100.0 - p.x, cy * 100.0 - p.y))) - 4.0))
             G["pc"].set_control_rotation(unreal.Rotator(roll=0, pitch=pitch, yaw=math.degrees(math.atan2(cy * 100.0 - p.y, cx * 100.0 - p.x))))
             yield from rwait(1.5); shot(f"lairs12_{cv}", "1280x720"); yield from rwait(1.2)
-            # (woken: she stands 18 m out before its opening; its monsters must come out to her)
+            # (woken: she stands 18 m out, before its opening and then off to its side; its monsters must come out to her past its
+            # walls (its reach), not stall against them (PR #57's review: 3 m nearer passed monsters stuck inside a ruin's wall))
+            def outside():
+                return max([math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) for m in g.get_monsters()
+                            if m and not m.is_dead() and math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < 40.0] or [0.0])
             if mine and mons:
-                ex, ey = r["laid"]["exit"]
-                ax, ay = (ex - cx), (ey - cy); al = math.hypot(ax, ay) or 1.0
-                fx, fy = cx + ax / al * 18.0, cy + ay / al * 18.0
-                sf = sample(fx, fy)
-                G["pawn"].set_actor_location(V(fx * 100.0, fy * 100.0, sf["z"] + 120.0), False, True); yield from rwait(0.6)
-                cb().set_health(cb().get_max_health()); quiet(False)
-                d0 = nearest(); yield from wait(6.0); d1 = nearest()
-                quiet(True); cb().set_health(cb().get_max_health())
-                r["woken_m"] = [round(d0, 1), round(d1, 1)]
+                ex, ey = r["laid"]["exit"]; reach = r["laid"]["reach_m"]
+                ga = math.degrees(math.atan2(ey - cy, ex - cx))
+                h0 = sample(cx, cy)["h"]
+                def trial_spot(a_deg):
+                    # (gentle dry ground 16 to 22 m out near the way asked, within 3 m of the den's height)
+                    for dd in (0, 15, -15, 30, -30, 45, -45):
+                        for rr in (18.0, 16.0, 20.0, 22.0):
+                            x_, y_ = cx + math.cos(math.radians(a_deg + dd)) * rr, cy + math.sin(math.radians(a_deg + dd)) * rr
+                            if gentle(x_, y_) and abs(sample(x_, y_)["h"] - h0) < 3.0: return (x_, y_, a_deg + dd)
+                    return (cx + math.cos(math.radians(a_deg)) * 18.0, cy + math.sin(math.radians(a_deg)) * 18.0, a_deg)
+                for tag, off in (("woken", 0.0), ("woken_side", 90.0)):
+                    fx, fy, fdeg = trial_spot(ga + off); fa = math.radians(fdeg)
+                    r[tag + "_way_deg"] = round(fdeg - ga, 0)
+                    g.wild_put_her(fx, fy); yield from rwait(0.8)
+                    cb().set_health(cb().get_max_health()); quiet(False)
+                    # (until one is out past its walls, 20 s at most: the ghouls walk 1 m a second, the harpies run)
+                    d0 = nearest(); t0 = time.time(); far = 0.0
+                    while time.time() - t0 < 20.0:
+                        # (her hit points kept up: a pack of ghouls killed her in 20 s and she woke in a town)
+                        yield from wait(0.5); far = outside(); cb().set_health(cb().get_max_health())
+                        if far > reach: break
+                    d1 = nearest()
+                    r[tag + "_s"] = round(time.time() - t0, 1)
+                    quiet(True); cb().set_health(cb().get_max_health())
+                    r[tag + "_m"] = [round(d0, 1), round(d1, 1)]
+                    r[tag + "_out_m"] = round(far, 1)
+                    if tag == "woken":
+                        # (she goes 60 m off (the game's own placing: set down by the sample's height in a wetland she fell out of
+                        # the world and its chunks were made again): they lose her and go home by its opening, in time for the side's)
+                        g.wild_put_her(cx + math.cos(fa) * 60.0, cy + math.sin(fa) * 60.0); yield from wait(25.0)
+                        back = [m for m in g.get_monsters() if m and not m.is_dead() and math.hypot(m.get_editor_property("home_at").x / 100.0 - cx, m.get_editor_property("home_at").y / 100.0 - cy) < 5.0]
+                        r["home_after_20s"] = sum(1 for m in back if math.hypot(m.get_actor_location().x / 100.0 - cx, m.get_actor_location().y / 100.0 - cy) < reach)
+                        r["monsters"] = len(back)
             res["covers"][cv] = r
     finally:
         quiet(False)
@@ -1389,7 +1425,10 @@ def step_lairs12():
     ok = res["table"] >= 6 and all(res["counts"].get(k, 0) > 0 for k in covers) and len(seen) == len(want) \
         and all(v.get("laid") and v["laid"]["cover"] == k and v["laid"]["pieces"] >= 3 and not v["walked_through"] and not v["floating"]
                 and v["pieces_gone"] == 0 and v["sight_30m"]["monsters"] >= 1 and v["sight_30m"]["hidden"] >= 0.6
-                and v.get("woken_m") and v["woken_m"][1] < v["woken_m"][0] - 3.0 for k, v in res["covers"].items())
+                and max(v["monsters_m_from_middle"] or [99]) <= v["cover_r_m"] + 0.5
+                and v.get("woken_m") and v["woken_m"][1] < v["woken_m"][0] - 3.0 and v["woken_out_m"] > v["laid"]["reach_m"]
+                and v.get("woken_side_m") and v["woken_side_out_m"] > v["laid"]["reach_m"]
+                for k, v in res["covers"].items())
     step_result("lairs12", ok, **res)
 
 

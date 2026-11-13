@@ -227,12 +227,12 @@
     },
     "industrial": {
      "found": true,
-     "id": 229892,
+     "id": 295396,
      "at_km": [
-      -22.36,
-      -19.86
+      -5.0,
+      -27.19
      ],
-     "name": "Ruins of Elmmere",
+     "name": "Ruins of Ashwick",
      "laid": {
       "kind": "industrial",
       "pieces": 22,
@@ -242,14 +242,14 @@
      "guards_standing": 2,
      "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
-      3.2,
-      6.9,
-      12.1
+      1.7,
+      7.8,
+      12.3
      ],
      "bottom_over_ground_cm": [
-      -56,
-      -13,
-      -5
+      -98,
+      -20,
+      -12
      ],
      "pieces_gone": 0,
      "floating": [],
@@ -258,7 +258,7 @@
      "chests": 1,
      "monsters_within_20m": 2,
      "told_from_m": 20.0,
-     "told": "Discovered: Ruins of Elmmere. Industrial ruins: a derelict mill and its works: rusting hoppers, a crane, carts on broken rails",
+     "told": "Discovered: Ruins of Ashwick. Industrial ruins: a derelict mill and its works: rusting hoppers, a crane, carts on broken rails",
      "title": "Industrial ruins"
     },
     "warruins": {
@@ -299,15 +299,15 @@
     },
     "exclusion": {
      "found": true,
-     "id": 672676,
+     "id": 459764,
      "at_km": [
-      85.6,
-      83.99
+      35.01,
+      103.66
      ],
-     "name": "Ruins of Hawkholt",
+     "name": "Ruins of Oakdale",
      "laid": {
       "kind": "exclusion",
-      "pieces": 30,
+      "pieces": 29,
       "boxes": 1,
       "guards": 2
      },
@@ -315,22 +315,22 @@
      "guards_in_a_piece": 0,
      "pieces_m_from_middle": [
       0.0,
-      16.2,
+      16.1,
       25.6
      ],
      "bottom_over_ground_cm": [
-      -22,
-      -12,
-      283
+      -105,
+      -11,
+      138
      ],
      "pieces_gone": 0,
      "floating": [],
      "walked_through": [],
-     "solid": 19,
+     "solid": 18,
      "chests": 1,
      "monsters_within_20m": 2,
      "told_from_m": 20.0,
-     "told": "Discovered: Ruins of Hawkholt. The forsaken works: a place left all at once after something went wrong; the forest is taking it back",
+     "told": "Discovered: Ruins of Oakdale. The forsaken works: a place left all at once after something went wrong; the forest is taking it back",
      "title": "The forsaken works"
     },
     "folly": {

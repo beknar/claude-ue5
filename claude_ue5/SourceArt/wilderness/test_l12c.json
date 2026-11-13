@@ -21,10 +21,12 @@
       "cover": "grove",
       "pieces": 49,
       "exit": [
-       1049.6,
-       11012.0
-      ]
+       1047.1,
+       11015.6
+      ],
+      "reach_m": 10.9
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
       "SM_AutumnTree01": [
@@ -39,209 +41,247 @@
       ],
       "SM_Bush02": [
        20,
-       -30,
-       277
+       -32,
+       274
       ],
       "SM_Bush01": [
        20,
-       -33,
-       270
+       -34,
+       268
       ]
      },
      "walked_through": [],
      "floating": [],
      "monsters_m_from_middle": [
-      1.0,
+      0.9,
       1.6,
-      1.8,
-      2.0,
+      1.7,
+      2.1,
       2.7
      ],
      "cover_r_m": 6.0,
      "sight_30m": {
-      "blocked": 146,
+      "blocked": 156,
       "lines": 240,
       "monsters": 5,
       "else_blocked": 0,
-      "hidden": 0.61
-     },
-     "sight_15m": {
-      "blocked": 157,
-      "lines": 240,
-      "else_blocked": 0,
       "hidden": 0.65
      },
+     "sight_15m": {
+      "blocked": 163,
+      "lines": 240,
+      "else_blocked": 0,
+      "hidden": 0.68
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 9.1,
      "woken_m": [
       17.3,
-      11.3
-     ]
+      7.0
+     ],
+     "woken_out_m": 11.0,
+     "home_after_20s": 5,
+     "monsters": 5,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 6.2,
+     "woken_side_m": [
+      17.1,
+      19.6
+     ],
+     "woken_side_out_m": 11.0
     },
     "pinegrove": {
      "found": true,
-     "id": 295591,
+     "id": 492375,
      "at_km": [
-      -5.61,
-      20.26
+      42.28,
+      64.31
      ],
-     "name": "Spider Lair",
+     "name": "Wolf Lair",
      "laid": {
       "cover": "pinegrove",
       "pieces": 71,
       "exit": [
-       -5620.9,
-       20259.6
-      ]
+       42291.4,
+       64319.4
+      ],
+      "reach_m": 11.2
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
-      "SM_Pine_Big_1_": [
+      "SM_Pine_Medium_2__Solid": [
+       3,
+       -71,
+       1410
+      ],
+      "SM_Pine_Medium_1__Solid": [
        4,
-       -187,
-       1393
+       -92,
+       1457
       ],
-      "SM_Pine_Medium_1_": [
+      "SM_Pine_Big_1__Solid": [
        3,
-       -131,
-       1278
-      ],
-      "SM_Pine_Medium_2_": [
-       3,
-       -109,
-       1132
+       -106,
+       1327
       ],
       "SM_Bush_Pine": [
        58,
-       -72,
-       274
-      ],
-      "SM_Pine_Fallen": [
-       2,
-       -185,
-       31
+       -43,
+       297
       ],
       "SM_EuropeanBeech_Log_01": [
+       2,
+       -75,
+       53
+      ],
+      "SM_Pine_Fallen_Solid": [
        1,
-       -127,
-       -34
+       -98,
+       104
       ]
      },
      "walked_through": [],
      "floating": [],
      "monsters_m_from_middle": [
-      2.2,
-      2.4,
-      2.7,
-      3.0,
-      3.5
+      1.2,
+      1.7,
+      3.4
      ],
      "cover_r_m": 6.0,
      "sight_30m": {
-      "blocked": 181,
-      "lines": 240,
-      "monsters": 5,
-      "else_blocked": 8,
-      "hidden": 0.75
+      "blocked": 127,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 2,
+      "hidden": 0.88
      },
      "sight_15m": {
-      "blocked": 187,
-      "lines": 240,
+      "blocked": 129,
+      "lines": 144,
       "else_blocked": 0,
-      "hidden": 0.78
+      "hidden": 0.9
      },
+     "woken_way_deg": 0.0,
+     "woken_s": 8.5,
      "woken_m": [
-      15.1,
+      17.3,
       6.2
-     ]
+     ],
+     "woken_out_m": 11.8,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 3.6,
+     "woken_side_m": [
+      18.6,
+      20.1
+     ],
+     "woken_side_out_m": 11.7
     },
     "deadwood": {
      "found": true,
-     "id": 508663,
+     "id": 524999,
      "at_km": [
-      47.18,
-      39.79
+      49.99,
+      28.9
      ],
-     "name": "Bear Lair",
+     "name": "Ghoul Lair",
      "laid": {
       "cover": "deadwood",
-      "pieces": 42,
+      "pieces": 67,
       "exit": [
-       47183.3,
-       39799.3
-      ]
+       49997.4,
+       28912.1
+      ],
+      "reach_m": 11.5
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
+      "SM_DEAD_Tree_1_Solid": [
+       1,
+       -44,
+       604
+      ],
       "SM_TreeDead04": [
        5,
-       -60,
-       653
-      ],
-      "SM_DEAD_Tree_1": [
-       2,
-       -46,
-       717
+       -55,
+       744
       ],
       "SM_TreeDead01": [
-       1,
-       -62,
-       650
+       2,
+       -46,
+       694
       ],
       "SM_Bush02": [
-       9,
+       15,
        -22,
-       257
+       284
       ],
       "SM_Bush01": [
-       11,
-       -26,
-       254
+       29,
+       -24,
+       274
+      ],
+      "SM_Pine_Fallen_Solid": [
+       3,
+       -70,
+       199
       ],
       "SM_EuropeanBeech_Log_01": [
-       5,
-       -65,
-       64
-      ],
-      "SM_Pine_Fallen": [
-       3,
-       -81,
-       188
-      ],
-      "SM_S_BrickRubbleV1": [
        4,
-       -62,
-       126
+       -49,
+       70
       ],
       "SM_JungleRubblePile_A": [
-       2,
-       -38,
-       135
+       5,
+       -52,
+       204
+      ],
+      "SM_S_BrickRubbleV1": [
+       3,
+       -70,
+       196
       ]
      },
      "walked_through": [],
      "floating": [],
      "monsters_m_from_middle": [
-      1.0,
-      1.5,
-      2.2
+      0.9,
+      0.9,
+      0.9
      ],
      "cover_r_m": 6.0,
      "sight_30m": {
-      "blocked": 86,
+      "blocked": 100,
       "lines": 144,
       "monsters": 3,
       "else_blocked": 0,
-      "hidden": 0.6
+      "hidden": 0.69
      },
      "sight_15m": {
-      "blocked": 69,
+      "blocked": 109,
       "lines": 144,
       "else_blocked": 0,
-      "hidden": 0.48
+      "hidden": 0.76
      },
+     "woken_way_deg": 0.0,
+     "woken_s": 7.8,
      "woken_m": [
-      18.5,
-      1.3
-     ]
+      16.1,
+      5.7
+     ],
+     "woken_out_m": 12.3,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 6.6,
+     "woken_side_m": [
+      18.7,
+      20.6
+     ],
+     "woken_side_out_m": 11.6
     },
     "ruin": {
      "found": true,
@@ -255,21 +295,23 @@
       "cover": "ruin",
       "pieces": 16,
       "exit": [
-       4808.6,
-       3817.7
-      ]
+       4809.9,
+       3820.2
+      ],
+      "reach_m": 8.9
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
       "SM_StoneWall_Damaged": [
        7,
-       -24,
-       335
+       -27,
+       343
       ],
       "SM_S_BrokenWallPart": [
        5,
-       -9,
-       268
+       -10,
+       265
       ],
       "SM_JungleRubblePile_A": [
        3,
@@ -285,28 +327,40 @@
      "walked_through": [],
      "floating": [],
      "monsters_m_from_middle": [
-      1.0,
+      1.1,
       1.2,
       3.0
      ],
      "cover_r_m": 5.5,
      "sight_30m": {
-      "blocked": 115,
+      "blocked": 119,
       "lines": 144,
       "monsters": 3,
       "else_blocked": 0,
-      "hidden": 0.8
+      "hidden": 0.83
      },
      "sight_15m": {
-      "blocked": 103,
+      "blocked": 108,
       "lines": 144,
       "else_blocked": 0,
-      "hidden": 0.72
+      "hidden": 0.75
      },
+     "woken_way_deg": 0.0,
+     "woken_s": 4.6,
      "woken_m": [
       16.4,
-      11.5
-     ]
+      8.5
+     ],
+     "woken_out_m": 9.5,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 5.0,
+     "woken_side_m": [
+      16.5,
+      19.2
+     ],
+     "woken_side_out_m": 9.2
     },
     "house": {
      "found": true,
@@ -320,10 +374,12 @@
       "cover": "house",
       "pieces": 15,
       "exit": [
-       5136.9,
-       9002.9
-      ]
+       5136.8,
+       9005.1
+      ],
+      "reach_m": 6.7
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
       "SM_StoneWall_Damaged": [
@@ -368,10 +424,22 @@
       "else_blocked": 0,
       "hidden": 0.88
      },
+     "woken_way_deg": 0.0,
+     "woken_s": 4.6,
      "woken_m": [
       17.0,
-      8.5
-     ]
+      10.7
+     ],
+     "woken_out_m": 7.3,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 4.6,
+     "woken_side_m": [
+      18.1,
+      18.6
+     ],
+     "woken_side_out_m": 7.2
     },
     "cave": {
      "found": true,
@@ -383,12 +451,14 @@
      "name": "Harpy Lair",
      "laid": {
       "cover": "cave",
-      "pieces": 10,
+      "pieces": 11,
       "exit": [
-       -6593.3,
-       -8293.9
-      ]
+       -6596.2,
+       -8298.6
+      ],
+      "reach_m": 11.5
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
       "SM_RockCliff_02": [
@@ -396,7 +466,7 @@
        -179,
        554
       ],
-      "SM_RockCliff_01": [
+      "SM_RockCliff_01_Solid": [
        1,
        -156,
        558
@@ -406,14 +476,14 @@
        -186,
        514
       ],
-      "SM_Boulder_02": [
-       2,
-       -68,
-       225
+      "SM_Boulder_02_Solid": [
+       3,
+       -104,
+       233
       ],
-      "SM_Boulder_01": [
+      "SM_Boulder_01_Solid": [
        2,
-       -72,
+       -96,
        242
       ]
      },
@@ -423,26 +493,38 @@
       1.4,
       1.5,
       1.7,
-      1.7
+      1.8
      ],
      "cover_r_m": 5.5,
      "sight_30m": {
-      "blocked": 192,
+      "blocked": 166,
       "lines": 192,
       "monsters": 4,
       "else_blocked": 0,
-      "hidden": 1.0
+      "hidden": 0.86
      },
      "sight_15m": {
-      "blocked": 192,
+      "blocked": 168,
       "lines": 192,
       "else_blocked": 0,
-      "hidden": 1.0
+      "hidden": 0.88
      },
+     "woken_way_deg": 0.0,
+     "woken_s": 7.7,
      "woken_m": [
       17.0,
-      11.2
-     ]
+      6.3
+     ],
+     "woken_out_m": 11.7,
+     "home_after_20s": 4,
+     "monsters": 4,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 6.6,
+     "woken_side_m": [
+      16.7,
+      19.5
+     ],
+     "woken_side_out_m": 11.9
     },
     "berm": {
      "found": true,
@@ -456,10 +538,12 @@
       "cover": "berm",
       "pieces": 11,
       "exit": [
-       42945.3,
-       -47893.2
-      ]
+       42942.3,
+       -47901.7
+      ],
+      "reach_m": 14.0
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
       "berm": [
@@ -474,8 +558,8 @@
       ],
       "SM_HeatherBush_01": [
        3,
-       -20,
-       141
+       -12,
+       147
       ]
      },
      "walked_through": [],
@@ -501,66 +585,91 @@
       "else_blocked": 0,
       "hidden": 0.81
      },
+     "woken_way_deg": 0.0,
+     "woken_s": 8.6,
      "woken_m": [
       17.0,
-      7.8
-     ]
+      3.4
+     ],
+     "woken_out_m": 14.6,
+     "home_after_20s": 5,
+     "monsters": 5,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 4.1,
+     "woken_side_m": [
+      16.8,
+      20.7
+     ],
+     "woken_side_out_m": 14.6
     },
     "rocks": {
      "found": true,
-     "id": 410295,
+     "id": 197159,
      "at_km": [
-      21.08,
-      25.18
+      -30.22,
+      -11.34
      ],
-     "name": "Boar Lair",
+     "name": "Bear Lair",
      "laid": {
       "cover": "rocks",
       "pieces": 16,
       "exit": [
-       21078.7,
-       25186.8
-      ]
+       -30217.7,
+       -11353.7
+      ],
+      "reach_m": 11.3
      },
+     "den_moved_m": 25.0,
      "pieces_gone": 0,
      "pieces": {
-      "SM_Boulder_02": [
+      "SM_Boulder_01_Solid": [
        8,
-       -232,
-       165
+       -74,
+       311
       ],
-      "SM_Boulder_01": [
+      "SM_Boulder_02_Solid": [
        8,
-       -225,
-       164
+       -89,
+       323
       ]
      },
      "walked_through": [],
      "floating": [],
      "monsters_m_from_middle": [
-      0.7,
-      1.6,
-      2.9,
-      3.0
+      1.3,
+      1.3,
+      2.4
      ],
      "cover_r_m": 5.0,
      "sight_30m": {
-      "blocked": 119,
-      "lines": 192,
-      "monsters": 4,
-      "else_blocked": 12,
-      "hidden": 0.62
+      "blocked": 99,
+      "lines": 144,
+      "monsters": 3,
+      "else_blocked": 45,
+      "hidden": 0.69
      },
      "sight_15m": {
-      "blocked": 125,
-      "lines": 192,
-      "else_blocked": 0,
-      "hidden": 0.65
+      "blocked": 123,
+      "lines": 144,
+      "else_blocked": 20,
+      "hidden": 0.85
      },
+     "woken_way_deg": 30.0,
+     "woken_s": 8.1,
      "woken_m": [
-      15.0,
-      8.4
-     ]
+      18.0,
+      9.7
+     ],
+     "woken_out_m": 11.5,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 8.1,
+     "woken_side_m": [
+      16.8,
+      20.4
+     ],
+     "woken_side_out_m": 11.8
     },
     "thicket": {
      "found": true,
@@ -574,31 +683,33 @@
       "cover": "thicket",
       "pieces": 42,
       "exit": [
-       25144.3,
+       25144.8,
        -12678.5
-      ]
+      ],
+      "reach_m": 5.0
      },
+     "den_moved_m": 0.0,
      "pieces_gone": 0,
      "pieces": {
       "SM_HeatherBush_01": [
        14,
-       -48,
-       244
+       -59,
+       253
       ],
       "SM_GorseBushLarge_01": [
        20,
-       -60,
-       247
+       -64,
+       224
       ],
       "SM_Bush01": [
        5,
-       -26,
-       211
+       -37,
+       227
       ],
       "SM_Bush02": [
        3,
-       -20,
-       191
+       -25,
+       203
       ]
      },
      "walked_through": [],
@@ -610,22 +721,34 @@
      ],
      "cover_r_m": 5.0,
      "sight_30m": {
-      "blocked": 118,
+      "blocked": 120,
       "lines": 144,
       "monsters": 3,
       "else_blocked": 0,
-      "hidden": 0.82
-     },
-     "sight_15m": {
-      "blocked": 120,
-      "lines": 144,
-      "else_blocked": 0,
       "hidden": 0.83
      },
+     "sight_15m": {
+      "blocked": 121,
+      "lines": 144,
+      "else_blocked": 0,
+      "hidden": 0.84
+     },
+     "woken_way_deg": 0.0,
+     "woken_s": 3.0,
      "woken_m": [
       17.1,
-      6.6
-     ]
+      12.1
+     ],
+     "woken_out_m": 5.9,
+     "home_after_20s": 3,
+     "monsters": 3,
+     "woken_side_way_deg": 90.0,
+     "woken_side_s": 2.1,
+     "woken_side_m": [
+      17.7,
+      18.2
+     ],
+     "woken_side_out_m": 5.5
     }
    },
    "table": 9,

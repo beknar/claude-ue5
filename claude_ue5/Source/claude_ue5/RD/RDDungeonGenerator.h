@@ -2543,7 +2543,12 @@ public:
 	/** a piece laid by its box: its bottom on the lowest ground under it (less Sink cm), scaled to H metres high or by S */
 	UStaticMeshComponent* LayRuinPiece(ARDWildChunk* C, UStaticMesh* M, const FVector& At, const FRotator& Rot, const FVector& Scale, float Sink, bool bCollide);
 	/** the ruins laid (tests, the message as she comes): id, kind, its centre, how many pieces and containers */
-	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UPrimitiveComponent>> Comps; TArray<float> Lifts; FVector2D Exit = FVector2D::ZeroVector; };
+	struct FRuinLaid { int32 Id = 0; int32 Kind = -1; FVector2D At = FVector2D::ZeroVector; int32 Pieces = 0; int32 Boxes = 0; int32 Guards = 0; FString Name; float Yaw = 0.f; TArray<TWeakObjectPtr<UPrimitiveComponent>> Comps; TArray<float> Lifts; FVector2D Exit = FVector2D::ZeroVector; float OutR = 0.f; };
+	/** a kind of a table (the ruins' kinds, the lairs' covers) for a place: by its biome and the kinds' weights, from a hash of its
+	 *  id and Salt; the water kinds only when bWet */
+	int32 PickWildKind(const TArray<FRDWildRuinKind>& T, const FRDWildPlace& P, uint32 Salt, bool bWet) const;
+	/** the nearest of the world's places within MaxKm of a point that Match takes (it sets the point measured from) */
+	bool FindNearestWildPlace(float X, float Y, float MaxKm, TFunctionRef<bool(const FRDWildPlace&, FVector2D&)> Match, FRDWildPlace& Out, FVector2D& OutAt) const;
 	/** a capsule at L (its middle) overlaps one of a laid ruin's colliding pieces */
 	bool WildRuinInPiece(const FRuinLaid& X, const FVector& L, float Radius, float HalfHeight) const;
 	/** a kind's parts laid round O in the frame of Yaw (the layout language of RDWildRuin12.cpp), its containers kept looted under
@@ -2559,12 +2564,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild12") TArray<FRDWildRuinKind> WildLairCovers;
 	/** the cover a lair has (an index into WildLairCovers, -1: none), from its id and its biome */
 	int32 WildLairCoverOf(const FRDWildPlace& P) const;
+	mutable TMap<int32, int32> WildLairPicks;
 	void LayWildLair(ARDWildChunk* C, const FRDWildPlace& P, const FRDWildRuinKind& K);
+	/** a lair's den: its place, or where the land rises or falls more than 2.5 m within 8 m of it, the dry ground of the least
+	 *  relief within 40 m */
+	FVector2D WildLairMiddle(const FRDWildPlace& P) const;
+	mutable TMap<int32, FVector2D> WildLairDens;
+	/** the most the land rises or falls 8 m from a point, eight ways (metres) */
+	float WildLairRelief(const FVector2D& A) const;
 	TArray<FRuinLaid> WildLairsLaid;
-	/** tests: "lair|<id>|<cover>|<x>|<y>|<pieces>|<exit x>|<exit y>|<name>|<yaw>" for each lair laid in the chunks made */
+	/** tests: "lair|<id>|<cover>|<x>|<y>|<pieces>|<exit x>|<exit y>|<name>|<yaw>|<reach m>" for each lair laid in the chunks made */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Wild12") TArray<FString> GetWildLairLines() const;
 	/** tests: the nearest lair of a cover to a point (metres) within MaxKm: "id|x|y|yaw|name" or "" */
-	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") FString FindWildLair(FName Cover, float X, float Y, float MaxKm) const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") FString FindWildLair(FName Cover, float X, float Y, float MaxKm, float MaxReliefM = 1000.f) const;
 	/** tests: every cover's count among the world's lairs within MaxKm of a point: "<cover>|<count>" (and "none|<count>") */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild12") TArray<FString> CountWildLairs(float X, float Y, float MaxKm) const;
 	/** tests: how hidden a laid lair's monsters are: sight lines from an eye 1.7 m over the ground at Ways points DistM round its

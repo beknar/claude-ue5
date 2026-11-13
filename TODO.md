@@ -40,7 +40,7 @@ Done in phases (1 to 4 so far): 1 gold, the map in its scroll, the mouse on the 
   - How hidden a lair is was measured by sight lines against the cover's own pieces, not by what a camera sees: the groves' crowns block only through their meshes' collision (a beech's is its trunk), so the bushes do most of it.
   - The monsters notice her by distance as before, not by sight: a cover hides them from her, not her from them.
   - The cave mouth is a mouth among rocks, as the wilds' caves are: no inside.
-  - The grove and the deadwood hide 60 to 61 % of the sight lines from 30 m (the bar); the deadwood 48 % from 15 m. The boulders' picture is taken on a mountainside and shows the slope more than the stones.
+  - Lairs on rough ground: a den where the land rises or falls more than 2.5 m within 8 m moves to the gentlest ground within 40 m, but on a mountain's face or a canyon's terraces there may be none: its cover's pieces stand a storey apart, its monsters may slide out of it, and from below or above it hides little. The test measures the nearest lair of each cover on gentle ground (2 m within 8 m) and sets her down on gentle ground near the den's height (set down on a terrace she fell to her death).
 
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 

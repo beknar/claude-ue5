@@ -18,31 +18,71 @@ DEFINE_LOG_CATEGORY_STATIC(LogRDLair12, Log, All);
 int32 ARDDungeonGenerator::WildLairCoverOf(const FRDWildPlace& P) const
 {
 	if (!Wild || P.Kind != TEXT("lair") || !P.Quest.IsEmpty() || WildLairCovers.Num() == 0) return -1;
-	const FString Bn = Wild->Biomes.IsValidIndex(P.Biome) ? Wild->Biomes[P.Biome].Name : FString();
-	float Sum = 0.f;
-	TArray<float> W; W.SetNumZeroed(WildLairCovers.Num());
-	for (int32 I = 0; I < WildLairCovers.Num(); ++I)
+	// (once a place, as the ruins' kinds: the one pick by biome and weight they share (PR #57's review))
+	if (const int32* Got = WildLairPicks.Find(P.Id)) return *Got;
+	return WildLairPicks.Add(P.Id, PickWildKind(WildLairCovers, P, 0x1215, false));
+}
+
+FVector2D ARDDungeonGenerator::WildLairMiddle(const FRDWildPlace& P) const
+{
+	if (!Wild) return P.At;
+	// (the den's ground by its relief: the most the land rises or falls 8 m from it, eight ways (metres): a slope read 3 m round a
+	// point missed the canyons' terraces, where a lair's boulders stood a storey apart)
+	auto Dry = [&](const FVector2D& A) { FRDWSample S; Wild->Sample(A.X, A.Y, S, false); return S.WaterKind == 0 || S.Water <= S.H; };
+	if (const FVector2D* Got = WildLairDens.Find(P.Id)) return *Got;
+	const float R0 = WildLairRelief(P.At);
+	if (R0 <= 2.5f) return WildLairDens.Add(P.Id, P.At);
+	// (rings every 5 m out to 40, eight ways: the dry point of the least relief)
+	FVector2D Best = P.At; float BestR = R0;
+	for (float Rr = 5.f; Rr <= 40.f; Rr += 5.f)
+		for (int32 I = 0; I < 8; ++I)
+		{
+			const FVector2D A = P.At + FVector2D(FMath::Cos(I * PI / 4.f), FMath::Sin(I * PI / 4.f)) * Rr;
+			if (!Dry(A)) continue;
+			const float Rl = WildLairRelief(A);
+			if (Rl < BestR - 0.2f) { BestR = Rl; Best = A; }
+		}
+	return WildLairDens.Add(P.Id, Best);
+}
+
+float ARDDungeonGenerator::WildLairRelief(const FVector2D& A) const
+{
+	if (!Wild) return 0.f;
+	FRDWSample S0; Wild->Sample(A.X, A.Y, S0, false);
+	float M = 0.f;
+	for (int32 I = 0; I < 8; ++I)
 	{
-		const FRDWildRuinKind& K = WildLairCovers[I];
-		if (!K.Biomes.Contains(TEXT("*")) && !K.Biomes.Contains(Bn)) continue;
-		W[I] = FMath::Max(K.Weight, 0.f); Sum += W[I];
+		FRDWSample S; Wild->Sample(A.X + FMath::Cos(I * PI / 4.f) * 8.0, A.Y + FMath::Sin(I * PI / 4.f) * 8.0, S, false);
+		M = FMath::Max(M, FMath::Abs(S.H - S0.H));
 	}
-	if (Sum <= 0.f) return -1;
-	float Pick = (FRDWildWorld::Hash(P.Id, 0x1215, Wild->Seed) & 0xFFFFFF) / float(0x1000000) * Sum;
-	for (int32 I = 0; I < W.Num(); ++I) { if (W[I] <= 0.f) continue; if (Pick < W[I]) return I; Pick -= W[I]; }
-	for (int32 I = W.Num() - 1; I >= 0; --I) if (W[I] > 0.f) return I;
-	return -1;
+	return M;
 }
 
 void ARDDungeonGenerator::LayWildLair(ARDWildChunk* C, const FRDWildPlace& P, const FRDWildRuinKind& K)
 {
 	if (!C || !Wild) return;
 	FRandomStream R((int32)FRDWildWorld::Hash(P.Id, 0x1214, Wild->Seed));
-	FRuinLaid Rec; Rec.Id = P.Id; Rec.Yaw = P.Yaw; Rec.At = P.At; Rec.Name = P.Name;
+	// (its den on ground she and its monsters can stand on: on a mountain's face (a harpy lair's boulders 13 m apart in height) its
+	// monsters slid out of the cover; the world is not reshaped, so the den moves to the gentlest ground within 40 m)
+	const FVector2D O = WildLairMiddle(P);
+	FRuinLaid Rec; Rec.Id = P.Id; Rec.Yaw = P.Yaw; Rec.At = O; Rec.Name = P.Name;
 	Rec.Kind = WildLairCovers.IndexOfByPredicate([&](const FRDWildRuinKind& X) { return X.Name == K.Name; });
-	LayWildParts(C, P, K, P.At, P.At, P.Yaw, R, (4LL << 40), Rec);
+	LayWildParts(C, P, K, O, O, P.Yaw, R, (4LL << 40), Rec);
+	// (its reach: the farthest of the pieces that stop her, by their boxes' middles and their thin half (1 m at most: a tree's box
+	// is its crown, its trunk is what stops her); an earth bank's whole half; its way out 2.5 m past that, on its opening's way (every cover opens at its
+	// frame's 0 degrees: its arcs are centred on 180))
+	Rec.OutR = K.HideR;
+	for (const TWeakObjectPtr<UPrimitiveComponent>& W : Rec.Comps)
+		if (const UPrimitiveComponent* Pc = W.Get())
+		{
+			if (Pc->GetCollisionEnabled() != ECollisionEnabled::QueryAndPhysics || Pc->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block) continue;
+			const FBox B = Pc->Bounds.GetBox();
+			const FVector E = B.GetExtent();
+			const float Half = Pc->IsA<UStaticMeshComponent>() ? FMath::Min3((float)E.X, (float)E.Y, 100.f) : FMath::Min((float)E.X, (float)E.Y);
+			Rec.OutR = FMath::Max(Rec.OutR, (float)(FVector2D::Distance(FVector2D(B.GetCenter().X, B.GetCenter().Y) / 100.0, O) + Half / 100.0));
+		}
 	const float Gy = FMath::DegreesToRadians(P.Yaw + K.GapYaw);
-	Rec.Exit = P.At + FVector2D(FMath::Cos(Gy), FMath::Sin(Gy)) * (K.HideR + 3.f);
+	Rec.Exit = O + FVector2D(FMath::Cos(Gy), FMath::Sin(Gy)) * (Rec.OutR + 2.5f);
 	WildLairsLaid.RemoveAll([&](const FRuinLaid& X) { return X.Id == P.Id; });
 	WildLairsLaid.Add(Rec);
 	UE_LOG(LogRDLair12, Log, TEXT("RDLAIR %s (%s): %d pieces at (%.0f, %.0f)"), *P.Name, *K.Name.ToString(), Rec.Pieces, P.At.X, P.At.Y);
@@ -52,8 +92,8 @@ TArray<FString> ARDDungeonGenerator::GetWildLairLines() const
 {
 	TArray<FString> Out;
 	for (const FRuinLaid& X : WildLairsLaid)
-		Out.Add(FString::Printf(TEXT("lair|%d|%s|%.1f|%.1f|%d|%.1f|%.1f|%s|%.1f"), X.Id, WildLairCovers.IsValidIndex(X.Kind) ? *WildLairCovers[X.Kind].Name.ToString() : TEXT("?"),
-			X.At.X, X.At.Y, X.Pieces, X.Exit.X, X.Exit.Y, *X.Name, X.Yaw));
+		Out.Add(FString::Printf(TEXT("lair|%d|%s|%.1f|%.1f|%d|%.1f|%.1f|%s|%.1f|%.1f"), X.Id, WildLairCovers.IsValidIndex(X.Kind) ? *WildLairCovers[X.Kind].Name.ToString() : TEXT("?"),
+			X.At.X, X.At.Y, X.Pieces, X.Exit.X, X.Exit.Y, *X.Name, X.Yaw, X.OutR));
 	return Out;
 }
 
@@ -62,31 +102,15 @@ TArray<FString> ARDDungeonGenerator::GetWildLairPieceLines(int32 Id) const
 	return PieceLinesOf(WildLairsLaid.FindByPredicate([&](const FRuinLaid& R) { return R.Id == Id; }));
 }
 
-FString ARDDungeonGenerator::FindWildLair(FName Cover, float X, float Y, float MaxKm) const
+FString ARDDungeonGenerator::FindWildLair(FName Cover, float X, float Y, float MaxKm, float MaxReliefM) const
 {
 	if (!Wild) return FString();
 	const int32 Want = WildLairCovers.IndexOfByPredicate([&](const FRDWildRuinKind& K) { return K.Name == Cover; });
 	if (Want < 0) return FString();
-	const FIntPoint C0 = Wild->PlaceCellOf(X, Y);
-	const int32 Rmax = FMath::CeilToInt(MaxKm * 1000.0 / FRDWildWorld::PlaceCellM);
-	for (int32 Ring = 0; Ring <= Rmax; ++Ring)
-	{
-		float Best = 1e18f; FString Got;
-		for (int32 I = -Ring; I <= Ring; ++I)
-			for (int32 J = -Ring; J <= Ring; ++J)
-			{
-				if (FMath::Max(FMath::Abs(I), FMath::Abs(J)) != Ring) continue;
-				TArray<FRDWildPlace> Ps; Wild->PlacesIn(C0 + FIntPoint(I, J), Ps);
-				for (const FRDWildPlace& P : Ps)
-				{
-					if (P.Kind != TEXT("lair") || WildLairCoverOf(P) != Want) continue;
-					const float D = FVector2D::DistSquared(P.At, FVector2D(X, Y));
-					if (D < Best) { Best = D; Got = FString::Printf(TEXT("%d|%.1f|%.1f|%.1f|%s"), P.Id, P.At.X, P.At.Y, P.Yaw, *P.Name); }
-				}
-			}
-		if (!Got.IsEmpty()) return Got;
-	}
-	return FString();
+	FRDWildPlace Got; FVector2D At;
+	// (MaxReliefM: only one whose den's ground rises or falls no more than that within 8 m)
+	if (!FindNearestWildPlace(X, Y, MaxKm, [&](const FRDWildPlace& P, FVector2D& A) { A = P.At; return P.Kind == TEXT("lair") && WildLairCoverOf(P) == Want && (MaxReliefM >= 999.f || WildLairRelief(WildLairMiddle(P)) <= MaxReliefM); }, Got, At)) return FString();
+	return FString::Printf(TEXT("%d|%.1f|%.1f|%.1f|%s"), Got.Id, At.X, At.Y, Got.Yaw, *Got.Name);
 }
 
 TArray<FString> ARDDungeonGenerator::CountWildLairs(float X, float Y, float MaxKm) const

@@ -196,6 +196,10 @@ public:
 	 *  it wanders, and its way out (a point just outside its opening), through which it goes after her and comes home */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float CoverR = 0.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") FVector CoverExit = FVector::ZeroVector;
+	/** the cover's outer radius (cm: its farthest piece's reach), inside which it keeps to its opening */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RandomDungeon") float CoverOutR = 0.f;
+	/** the way round a lair's cover, outside its walls, from From's side to To's (none when they are on the same side) */
+	void CoverRound(const FVector& From, const FVector& To, TArray<FVector>& Out) const;
 	/** the list of 2026-11-10: an ambush's: it hunts her until HuntUntil (game seconds), from any distance under 150 m */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") bool bHunting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "RandomDungeon") float HuntUntil = 0.f;

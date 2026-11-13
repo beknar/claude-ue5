@@ -306,7 +306,9 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		// (one killed stays dead: its draws are made first, so the others keep their places)
 		const int64 Key = (int64)P.Id * 16 + I;
 		if (GI && GI->WildKilled.Contains(Key)) continue;
-		FVector At(P.At.X * 100.0 + FMath::Cos(A) * D, P.At.Y * 100.0 + FMath::Sin(A) * D, 0.0);
+		// (round its place, or a hidden lair's den, which may have moved off a slope)
+		const FVector2D Base = Cover ? Cover->At : P.At;
+		FVector At(Base.X * 100.0 + FMath::Cos(A) * D, Base.Y * 100.0 + FMath::Sin(A) * D, 0.0);
 		At.Z = WildGroundZ(At) + Def.CapsuleHalfHeight + 10.f;
 		// (a ruin's guards off its pieces: drawn where the castle's keep or the rock-cut temple's cliff stands they were spawned
 		// inside it (PR #56's review). Rings round its middle after the draws, so the place's stream is unchanged)
@@ -334,6 +336,7 @@ void ARDDungeonGenerator::SpawnWildMonsters(ARDWildChunk* C, const FRDWildPlace&
 		{
 			M->HomeAt = FVector(Cover->At.X * 100.0, Cover->At.Y * 100.0, At.Z);
 			M->CoverR = HideCm;
+			M->CoverOutR = Cover->OutR * 100.f;
 			M->CoverExit = FVector(Cover->Exit.X * 100.0, Cover->Exit.Y * 100.0, WildGroundZ(FVector(Cover->Exit.X * 100.0, Cover->Exit.Y * 100.0, 0.0)) + Def.CapsuleHalfHeight);
 		}
 		M->Setup(Ws, Def, (int32)FRDWildWorld::Hash(P.Id, 100 + I, Wild->Seed));
