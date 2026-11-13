@@ -994,7 +994,8 @@ void ARDDungeonGenerator::TickTownMapInput(APlayerController* PC, float Dt)
 	const float Ee = Down(EKeys::Right) + Down(EKeys::Gamepad_DPad_Right) - Down(EKeys::Left) - Down(EKeys::Gamepad_DPad_Left);
 	MapPan += FVector2D(FMath::Clamp(Nn, -1.f, 1.f), FMath::Clamp(Ee, -1.f, 1.f)) * (Span * 0.35f / MapZoom) * Dt;
 	// (a drag with the left mouse button: the map follows the pointer; the screen's x is the world's +Y, its y the world's -X)
-	if (PC->IsInputKeyDown(EKeys::LeftMouseButton) && TownMapPxPerCm > 0.f)
+	// (the list of 2026-11-12: a press is a click until it moves past the click's slop (TickMapPointer), only then a drag)
+	if (PC->IsInputKeyDown(EKeys::LeftMouseButton) && !bMapPress && TownMapPxPerCm > 0.f)
 	{
 		float Mx = 0.f, My = 0.f;
 		PC->GetInputMouseDelta(Mx, My);

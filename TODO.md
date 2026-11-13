@@ -18,6 +18,14 @@ Built and compiled, but no test has run it yet:
 - [ ] **The caldera's steam and the volcanoes' lava** seen in a picture from her view (the code places them; no picture has shown them yet).
 - [ ] **The packaged game in the wilderness:** the package of 2026-11-06 (`builds\vel_morrath`) runs the town, puts her out in Vel Morrath and builds the city round her; a walk out of the gate, a journey, a save and load, and its memory over a long walk have not been run in it (worker threads, transient map textures and the save all behave differently packaged).
 
+## The list of 2026-11-12 ([docs/improvements12.txt](docs/improvements12.txt))
+
+Done in phases: 1 gold, the map in its scroll, the mouse on the big map, rd.MapTeleport, the saves as cards; 2 the horses' gaits; 3 the twenty ruins; 4 the hidden lairs; 5 the structures and quests; 6 tiers 26-30; 7 the Rogue's abilities.
+
+- [ ] **Phase 1, what is not measured:** ([Brokenspire](docs/levels/brokenspire.md)):
+  - The mouse on a town's big map beyond the teleport's click (its drag and wheel were there before).
+  - The teleports' outcomes are measured by calling the click at its screen point: through Slate the real mouse resting over the play window pulled the game's pointer to itself and turned presses into drags (`RDMAPPOINTER`'s log: the pointer jumped to the same spot every time). The pointer's own path (a pick under it, the wheel, a drag, a click that travels) is measured through Slate.
+
 ## The list of 2026-11-11 ([docs/improvements11.txt](docs/improvements11.txt))
 
 - [ ] **Phase 3 (spells, curses, slashes), what is not measured:** ([the castle](docs/levels/mistward_castle.md#the-list-of-2026-11-11s-third-part)):

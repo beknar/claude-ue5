@@ -2034,6 +2034,12 @@ public:
 	int32 VrtModeWas = -1;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") int32 GetMenuCursor() const { return MenuCursor; }
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void MoveMenuCursor(int32 Step);
+	/** the list of 2026-11-12 ("pick from a screen of choices instead of scrolling choices"): the Load page and the Save page's
+	 *  saves to save over are cards, RDMenuGridCols a row, Back under them; the keys move by a card or a row */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void MoveMenuGrid(int32 Dx, int32 Dy);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "RandomDungeon|Menu") bool IsMenuGridPage() const { return bOptionsMenu && (MenuPage == 2 || MenuPage == 4); }
+	static constexpr int32 RDMenuGridCols = 3;
+	static constexpr int32 RDMenuGridMax = 18;          // (cards on the screen: six rows)
 	/** a slider under the cursor one step (Step: -1 / 1) */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") void StepMenuValue(int32 Step);
 	/** the line under the cursor (or Line): a button is pressed; false on a slider */
@@ -2222,6 +2228,9 @@ private:
 	UPROPERTY(Transient) TObjectPtr<class UInputMappingContext> MapScrollContext;
 	UPROPERTY(Transient) TObjectPtr<class UInputAction> MapScrollAction;
 	bool bMapScrollInput = false;
+	/** the list of 2026-11-12: the mouse kept off the camera over a dungeon's map with the pointer up (rd.MapTeleport) */
+	UPROPERTY(Transient) TObjectPtr<class UInputMappingContext> MapMouseContext;
+	bool bMapMouseInput = false;
 	void UpdateMapScrollInput(APlayerController* PC);
 	UPROPERTY(Transient) TObjectPtr<URDCombatComponent> PlayerCombat;
 	UPROPERTY(Transient) TObjectPtr<URDBloodComponent> Blood;
@@ -2769,6 +2778,40 @@ public:
 	/** "middle x|middle y|m a pixel|level|tiles|tiles asked|tile ms|hovered id|hovered name|tiles made|refusal|last travel" */
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") FString GetWildMapState() const;
 	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Wild") void SetWildMapView(float Xm, float Ym, float Mpp);
+	// ---- the list of 2026-11-12 (docs/improvements12.txt), its first phase (RD/RDList12.cpp): the mouse on the big map, a click
+	// to teleport there (the console's rd.MapTeleport, once the map is revealed)
+	/** the pointer is up over the big map: the town's and the wilds' always, any map while rd.MapTeleport is on */
+	bool WantsMapPointer() const { return bMapOpen && bTacticalMaps && (bTown || (bMapClickTeleport && bMapRevealAll)); }
+	/** the pointer leads the wilds' map's pick (it moved or clicked since the keys or the pad last moved the map): else the cross
+	 *  does, as before (PR #54's review: the pad's A travelled to the place under a resting pointer) */
+	bool bMapPointerLead = false;
+	FVector2D MapPointerLast = FVector2D(-1.f, -1.f);
+	/** rd.MapTeleport: a click on the big map teleports her there, once the map is revealed (rd.RevealMap) */
+	UPROPERTY(BlueprintReadWrite, Category = "RandomDungeon|Map") bool bMapClickTeleport = false;
+	/** the big map as last drawn (the HUD writes it): a world point W (cm) is on the screen at C + (W.Y - Vw.Y, Vw.X - W.X) x K; the
+	 *  sheet the map is drawn on; 0 none drawn, 1 the wilds', 2 the town's, 3 a dungeon's */
+	FVector2D MapXC = FVector2D::ZeroVector, MapXVw = FVector2D::ZeroVector;
+	float MapXK = 0.f;
+	FBox2D MapXSheet = FBox2D(ForceInit);
+	int32 MapXKind = 0;
+	/** the screen point over the big map as a world point (cm, its z 0); false off the sheet or with no map drawn */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Map") bool MapScreenToWorld(FVector2D Screen, FVector& Out) const;
+	/** a click on the big map at this screen point, as the mouse makes it: with rd.MapTeleport on, there (once revealed); on the
+	 *  wilds' map, to the found place under it; the outcome in LastMapClick; true when it moved her */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Map") bool ClickMapAt(FVector2D Screen);
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Map") FString LastMapClick;
+	/** tests: "kind|C.x|C.y|Vw.x|Vw.y|K|sheet min x|min y|max x|max y" of the big map as last drawn; the Escape menu's line boxes as
+	 *  "min x|min y|max x|max y" (the cards on a grid page) */
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Map") FString GetMapFrame() const;
+	UFUNCTION(BlueprintCallable, Category = "RandomDungeon|Menu") TArray<FString> GetMenuBoxes() const;
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Map") int32 MapTeleports = 0;
+	/** tests: clicks the big map took (a press the real mouse dragged away is none: the test tries again) */
+	UPROPERTY(BlueprintReadOnly, Category = "RandomDungeon|Map") int32 MapClicks = 0;
+	/** the pointer over the wilds' map: the found place under it (the HUD's pick) */
+	FVector2D MapPressAt = FVector2D::ZeroVector;
+	bool bMapPress = false, bMapPointerUp = false;
+	void TickMapPointer(APlayerController* PC);
+	bool MapTeleportTo(const FVector& World);
 	void WildAutosave(const FString& Why);
 	// ---- the game saved to disk (RDSave.cpp)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RandomDungeon|Wild") bool bAutosave = true;

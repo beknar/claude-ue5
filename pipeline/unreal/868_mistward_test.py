@@ -130,6 +130,9 @@ The list of 2026-11-10's first phase (914):
            found weapon's durability bar; a shield worn out at half its share, mended at the anvil for half its breakdown; a
            stack broken down with Enter held; the anvil's recipes grouped (repair items first); potions the Mage's, not the
            Warrior's; a prep table's food taken with F; the quest window's option; the Save page's drop-down (pictures)
+The list of 2026-11-12's first phase (923, RD/RDList12.cpp):
+  list12   rd.MapTeleport on the castle's tactical map: unrevealed, the pointer down and a strike made under the map; revealed,
+           the pointer up and no strike; a click on another room's floor puts her on it, a click on a wall's top is refused
 Writes SourceArt/mistward/test_<tag>.json and logs "MWTEST done | <tag> | ok / FAILED | ...". Args: plan tag"""
 import unreal, sys, json, math, os, time
 __keep__ = True
@@ -5090,6 +5093,81 @@ def step_list10():
           and res["dropdown_page"] == 4 and res["over_slot"] and res["saves_after"] == res["saves_before"] and res["over_same_slot"])
     step_result("list10", ok, **res)
 
+def step_list12():
+    """the list of 2026-11-12's first phase in the castle (RD/RDList12.cpp; PR #54's review: the dungeon's side had no test):
+    rd.MapTeleport on the tactical map. Before the map is revealed the pointer stays down and she still fights under the map (the
+    left button strikes); revealed, the pointer is up and the button strikes nothing; a click on a floor tile of another room
+    puts her on that floor (not on the roof over it), a click on a wall's top is refused (her capsule fits nowhere under it
+    within a storey)"""
+    c = yield from restart("Warrior"); g = G["gen"]; quiet(True); res = {}
+    ex = lambda s: unreal.SystemLibrary.execute_console_command(G["w"], s)
+    def map_click(p):
+        # (the click's outcome at its screen point, ClickMapAt called with it: the real mouse resting over the editor's view pulls
+        # the game's pointer to itself and turned Slate's presses into drags (888 list12 measures the pointer's own path))
+        g.click_map_at(p); yield from rwait(0.3)
+        return ""
+    yield from wait(1.0)
+    me = G["pawn"].get_actor_location(); half = G["pawn"].get_editor_property("capsule_component").get_scaled_capsule_half_height()
+    S = g.get_section(I2(0, 0))
+    rooms = [(r_, list(S.get_room_free_tiles(r_))) for r_ in range(80)]
+    rooms = [(r_, t_) for r_, t_ in rooms if t_]
+    mine = min(rooms, key=lambda rt: min(dist2(t, me) for t in rt[1]))[0]
+    far = sorted([(r_, t) for r_, ts in rooms if r_ != mine for t in ts if dist2(t, me) > 600], key=lambda rt: dist2(rt[1], me))
+    res["rooms"] = len(rooms); res["other_room_tiles"] = len(far)
+    ex("rd.RevealMap off"); ex("rd.MapTeleport"); g.set_map_open(True); yield from rwait(0.8)
+    # (unrevealed: the pointer down, a strike still made under the map)
+    res["unrevealed"] = {"pointer": bool(G["pc"].get_editor_property("show_mouse_cursor"))}
+    c.simulate_key(key("LeftMouseButton"), True); yield from wait(0.15); c.simulate_key(key("LeftMouseButton"), False)
+    res["unrevealed"]["struck"] = bool(c.is_attacking()); yield from wait(1.8)
+    ex("rd.RevealMap"); yield from rwait(0.8)
+    res["revealed"] = {"pointer": bool(G["pc"].get_editor_property("show_mouse_cursor"))}
+    c.simulate_key(key("LeftMouseButton"), True); yield from wait(0.15); c.simulate_key(key("LeftMouseButton"), False)
+    res["revealed"]["struck"] = bool(c.is_attacking())
+    p = [float(x) for x in str(g.get_map_frame()).split("|")]
+    f = {"kind": int(p[0]), "cx": p[1], "cy": p[2], "vx": p[3], "vy": p[4], "k": p[5], "a": (p[6], p[7]), "b": (p[8], p[9])}
+    res["frame_kind"] = f["kind"]
+    to_s = lambda w: unreal.Vector2D(f["cx"] + (w.y - f["vy"]) * f["k"], f["cy"] + (f["vx"] - w.x) * f["k"])
+    inside = lambda s: f["a"][0] + 20 < s.x < f["b"][0] - 20 and f["a"][1] + 20 < s.y < f["b"][1] - 20
+    # (a floor tile of another room, on the sheet)
+    tgt = next(((r_, t) for r_, t in far if inside(to_s(t))), None)
+    if tgt:
+        n0 = g.get_editor_property("map_teleports")
+        why = yield from map_click(to_s(tgt[1])); yield from wait(1.0)
+        hp = G["pawn"].get_actor_location()
+        res["floor"] = {"slate": why, "click": str(g.get_editor_property("last_map_click")), "teleports": g.get_editor_property("map_teleports") - n0,
+                        "off_tile_cm": round(dist2(hp, tgt[1])), "above_its_floor_cm": round(hp.z - half - tgt[1].z, 1), "map_open": bool(g.get_editor_property("map_open"))}
+    else: res["floor"] = None
+    # (a wall: on the line between a room's edge tile and a tile of no room, where her capsule at the floor's height meets
+    # something (the wall itself, not a doorway); the game must refuse it)
+    g.set_map_open(True); yield from rwait(0.8)
+    p = [float(x) for x in str(g.get_map_frame()).split("|")]
+    f = {"kind": int(p[0]), "cx": p[1], "cy": p[2], "vx": p[3], "vy": p[4], "k": p[5], "a": (p[6], p[7]), "b": (p[8], p[9])}
+    here = G["pawn"].get_actor_location(); floor_z = here.z - half
+    tiles_all = [t for _, ts in rooms for t in ts]
+    ts_ = g.get_editor_property("tile_size"); rad = G["pawn"].get_editor_property("capsule_component").get_scaled_capsule_radius()
+    wall = None
+    for t in sorted(tiles_all, key=lambda t: dist2(t, here)):
+        for ux, uy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if any(dist2(o, V(t.x + ux * ts_, t.y + uy * ts_, 0)) < ts_ * 0.4 for o in tiles_all): continue      # (the next tile is a room's)
+            w = V(t.x + ux * ts_ * 0.5, t.y + uy * ts_ * 0.5, 0)
+            if not inside(to_s(w)): continue
+            hits = unreal.SystemLibrary.capsule_overlap_actors(G["w"], V(w.x, w.y, floor_z + half + 5), rad, half, [unreal.ObjectTypeQuery.OBJECT_TYPE_QUERY1], None, [G["pawn"]])
+            if isinstance(hits, tuple): hits = hits[1] if hits[0] else []
+            if hits: wall = w; break
+        if wall: break
+    if wall:
+        before = G["pawn"].get_actor_location()
+        why = yield from map_click(to_s(wall)); yield from wait(0.8)
+        res["wall"] = {"slate": why, "click": str(g.get_editor_property("last_map_click")), "moved_cm": round(dist3(G["pawn"].get_actor_location(), before))}
+    else: res["wall"] = None
+    g.set_map_open(False); ex("rd.MapTeleport off"); ex("rd.RevealMap off"); quiet(False)
+    F, Wl = res.get("floor"), res.get("wall")
+    ok = (not res["unrevealed"]["pointer"] and res["unrevealed"]["struck"] and res["revealed"]["pointer"] and not res["revealed"]["struck"] and res["frame_kind"] == 3
+          and F is not None and F["click"].startswith("teleported") and F["teleports"] == 1 and F["off_tile_cm"] < 60 and abs(F["above_its_floor_cm"]) < 30 and not F["map_open"]
+          and Wl is not None and Wl["click"].startswith("refused") and Wl["moved_cm"] < 5)
+    step_result("list12", ok, **res)
+
+
 def step_list11():
     """the list of 2026-11-11's second phase in the castle: the Martial Artist's chi attacks with no monster near (each one made,
     its bolt out, her mana unchanged, ChiFreeMade counted) and with one near (its mana taken); her fists shown as "Basic Attacks"
@@ -5530,7 +5608,7 @@ def step_spells11(parts=("cantrip", "spells", "curses", "slashes")):
     res["oks"] = oks
     step_result("spells11" if len(parts) == 4 else "spells11_" + "_".join(parts), bool(oks) and all(oks.values()), **res)
 
-STEPS = {"list10": step_list10, "list11": step_list11, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
+STEPS = {"list10": step_list10, "list11": step_list11, "list12": step_list12, "spells11": step_spells11, "spells11_cantrip": lambda: step_spells11(("cantrip",)),
          "spells11_spells": lambda: step_spells11(("spells",)), "spells11_curses": lambda: step_spells11(("curses",)), "spells11_slashes": lambda: step_spells11(("slashes",)), "list10b": step_list10b, "list10c": step_list10c, "list10c_forge": lambda: step_list10c(("forge",)), "list10c_oven": lambda: step_list10c(("oven",)),
          "list10c_ankh": lambda: step_list10c(("ankh",)), "list10c_block": lambda: step_list10c(("block",)), "secondary": step_secondary, "tier25": step_tier25, "console": step_console,"catacombs": step_catacombs, "finalboss": step_finalboss, "stealth": step_stealth, "growth": step_growth, "balance": step_balance, "ranged": step_ranged, "names": step_names, "arena5": step_arena5, "ceilings": step_ceilings, "autoplay": step_autoplay, "chilook": step_chilook, "options": step_options, "allyspace": step_allyspace, "maarm": step_maarm, "quickbar": step_quickbar, "menu": step_menu, "menulook": step_menulook, "basics": step_basics, "shields": step_shields, "torch": step_torch, "armour": step_armour, "inventory": step_inventory, "open": step_open,
          "heights": step_heights, "tiers": step_tiers, "layout": step_layout, "traps": step_traps, "teleport": step_teleport, "cells": step_cells,

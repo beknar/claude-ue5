@@ -11,6 +11,7 @@
 #include "Engine/Font.h"
 #include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
+#include "GameFramework/PlayerController.h"
 
 namespace
 {
@@ -24,12 +25,28 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 	UFont* Small = GEngine->GetSmallFont();
 	// the sheet: square as the town's, the scroll's torn edge round it, the keys under it
 	const float Ms = FMath::Min(Canvas->ClipY * 0.84f, Canvas->ClipX * 0.62f);
-	const FVector2D A((Canvas->ClipX - Ms) * 0.5f, (Canvas->ClipY - Ms) * 0.44f), B = A + FVector2D(Ms);
+	const FVector2D A0((Canvas->ClipX - Ms) * 0.5f, (Canvas->ClipY - Ms) * 0.44f), B0 = A0 + FVector2D(Ms);
+	// (the scroll's edge is drawn over A0 - 3 % .. B0 + 3 % of the sheet. The list of 2026-11-12: "the wilderness map is a square
+	// with a scroll overlay on it, with the square showing in the gaps of the irregular scroll edges. map square should not show up
+	// outside of the scroll overlay": the map is drawn only inside the scroll, where every pixel of the edge's picture is its
+	// parchment or its open middle: 11.07 % of the picture in from its sides and 5.08 % from its top and bottom
+	// (mapc_scroll_edge measured: bs_scroll.py prints it), with a little to spare; outside it the backdrop shows in the gaps)
+	const float Pic = Ms * 1.06f;
+	const FVector2D A = A0 - FVector2D(Ms * 0.03f) + FVector2D(Pic * 0.115f, Pic * 0.054f), B = B0 + FVector2D(Ms * 0.03f) - FVector2D(Pic * 0.115f, Pic * 0.054f);
 	const FVector2D Sz = B - A, Mid = (A + B) * 0.5f;
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.02f, 0.02f, 0.018f, 0.86f));
 	const double Mpp = Gen->WildMapMpp;
 	const FVector2D Cw = Gen->WildMapCenter;
 	auto ToS = [&](const FVector2D& Wm) { return FVector2D(Mid.X + (Wm.Y - Cw.Y) / Mpp, Mid.Y - (Wm.X - Cw.X) / Mpp); };
+	// (the list of 2026-11-12: the map's frame for the pointer and rd.MapTeleport's click: RDList12.cpp)
+	Gen->MapXC = Mid; Gen->MapXVw = Cw * 100.0; Gen->MapXK = (float)(1.0 / (Mpp * 100.0)); Gen->MapXSheet = FBox2D(A, B); Gen->MapXKind = 1;
+	// (the pointer over the sheet picks the place under it; else the cross at the view's middle does)
+	FVector2D PickAt = Mid;
+	{
+		float Px = 0.f, Py = 0.f;
+		APlayerController* PCp = GetOwningPlayerController();
+		if (Gen->bMapPointerLead && PCp && PCp->ShouldShowMouseCursor() && PCp->GetMousePosition(Px, Py) && Gen->MapXSheet.IsInside(FVector2D(Px, Py))) PickAt = FVector2D(Px, Py);
+	}
 	// the world in its tiles (a coarser tile's part while the finer one is made)
 	const int32 Lv = Gen->WildMapLevelFor(Mpp);
 	const double X0 = Cw.X - Sz.Y * 0.5 * Mpp, X1 = Cw.X + Sz.Y * 0.5 * Mpp, Y0 = Cw.Y - Sz.X * 0.5 * Mpp, Y1 = Cw.Y + Sz.X * 0.5 * Mpp;
@@ -104,7 +121,7 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		const FVector2D S = ToS(P.At);
 		if (S.X < A.X || S.X > B.X || S.Y < A.Y || S.Y > B.Y) continue;
 		const bool bFound = Gen->WildFound.Contains(P.Id);
-		const float D = FVector2D::Distance(S, Mid);
+		const float D = FVector2D::Distance(S, PickAt);
 		if (bFound && D < PickD) { PickD = D; Pick = P.Id; PickName = P.Name; PickKm = FVector2D::Distance(P.At, FVector2D(L.X / 100.0, L.Y / 100.0)) / 1000.0; }
 	}
 	Gen->WildMapHover = Pick; Gen->WildMapHoverName = PickName;
@@ -139,7 +156,7 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		DrawLine(Mid.X, Mid.Y - 9.f * Sc, Mid.X, Mid.Y - 3.f * Sc, Cr, 1.5f * Sc); DrawLine(Mid.X, Mid.Y + 3.f * Sc, Mid.X, Mid.Y + 9.f * Sc, Cr, 1.5f * Sc);
 	}
 	// the scroll's edge round it (the spec: "a papyrus or scroll look at the edges"), else a gold rule
-	if (!UI.Fit(TEXT("mapc_scroll_edge"), A - FVector2D(Ms * 0.03f), B + FVector2D(Ms * 0.03f)))
+	if (!UI.Fit(TEXT("mapc_scroll_edge"), A0 - FVector2D(Ms * 0.03f), B0 + FVector2D(Ms * 0.03f)))
 	{
 		const FLinearColor Gd(0.78f, 0.62f, 0.32f, 1.f);
 		DrawLine(A.X, A.Y, B.X, A.Y, Gd, 2.f * Sc); DrawLine(B.X, A.Y, B.X, B.Y, Gd, 2.f * Sc); DrawLine(B.X, B.Y, A.X, B.Y, Gd, 2.f * Sc); DrawLine(A.X, B.Y, A.X, A.Y, Gd, 2.f * Sc);
@@ -153,13 +170,15 @@ void ARDHUD::DrawWildMap(float Sc, const FVector& L, float Yaw)
 		UI.Text(T, FLinearColor(1.f, 0.86f, 0.55f, 1.f), A.X + 40.f * Sc, A.Y + 32.f * Sc, Small, Sc * 1.6f, ERDType::Title);
 		const double Across = Sz.X * Mpp / 1000.0;
 		const FString K1 = FString::Printf(TEXT("M close the map     wheel or + / -  zoom (%.1f km across)     drag or arrows  move     C  back to you"), Across);
-		const FString K2 = Pick >= 0 ? FString::Printf(TEXT("F / Enter / A  travel to %s (%.0f km)"), *PickName, PickKm) : FString(TEXT("put a place you have found under the cross to travel there"));
+		const FString K2 = Gen->bMapClickTeleport ? FString(Gen->bMapRevealAll ? TEXT("rd.MapTeleport: click a point to teleport there") : TEXT("rd.MapTeleport: reveal the map first (rd.RevealMap)"))
+		                 : Pick >= 0 ? FString::Printf(TEXT("click or F / Enter / A  travel to %s (%.0f km)"), *PickName, PickKm)
+		                 : FString(TEXT("point at a place you have found (or put it under the cross) to travel there"));
 		const FString K3 = Gen->WildTravelRefusal.IsEmpty() ? FString() : FString::Printf(TEXT("     %s"), *Gen->WildTravelRefusal);
 		float W1, H1; UI.TextSize(K1, W1, H1, Small, Sc);
-		UI.Text(K1, FLinearColor(0.86f, 0.84f, 0.78f, 0.95f), Mid.X - W1 * 0.5f, B.Y + Ms * 0.03f + 10.f * Sc, Small, Sc);
+		UI.Text(K1, FLinearColor(0.86f, 0.84f, 0.78f, 0.95f), Mid.X - W1 * 0.5f, B0.Y + Ms * 0.03f + 10.f * Sc, Small, Sc);
 		const FString K23 = K2 + K3;
 		float W2, H2; UI.TextSize(K23, W2, H2, Small, Sc);
-		UI.Text(K23, Pick >= 0 ? FLinearColor(1.f, 0.85f, 0.45f, 1.f) : FLinearColor(0.7f, 0.68f, 0.62f, 0.9f), Mid.X - W2 * 0.5f, B.Y + Ms * 0.03f + 12.f * Sc + H1, Small, Sc);
+		UI.Text(K23, Pick >= 0 ? FLinearColor(1.f, 0.85f, 0.45f, 1.f) : FLinearColor(0.7f, 0.68f, 0.62f, 0.9f), Mid.X - W2 * 0.5f, B0.Y + Ms * 0.03f + 12.f * Sc + H1, Small, Sc);
 	}
 	WildMapTilesDrawn = Drawn; WildMapStandIns = Stand;
 	if (UI.Drawn) UI.Drawn->AddUnique(TEXT("wild_map"));

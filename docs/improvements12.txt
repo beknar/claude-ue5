@@ -1,0 +1,223 @@
+amount of gold should show up in the inventory screen
+have at least 20 kinds of ruins
+horses when either walking or galloping move in an unnatural manner - redo their animations so that they move like real horses
+the wilderness map is a square with a scroll overlay on it, with the square showing in the gaps of the irregular scroll edges. map square should not show up outside of the scroll overlay.
+enable mouse on the big wilderness map
+in the console, enable click to teleport on a point on the map, when the map has been revealed
+in the ESC save menu, you should be able to use the mouse to pick from an screen of choices instead of scrolling choices
+monster lairs do not have any special structure around them.  they should be hiding behind something, a stand of trees, a ruin, a cave, an abandoned house, an earth berm, something that can hide them from sight so that they're not just out in the open.
+
+
+add these quest types that can be found in the wilderness.  add them to what can already be found in the wilderness.  the should have some kind of physical structure that holds them, like this list of structures:
+Structure	Why it works	Quests
+Cave system	Many chambers, darkness, no natural escape route	2, 4, 7, 8, 9, 18, 21
+Canyon or gorge	Natural chokepoints, ambush spots, flash-flood risk	5, 10, 16, 18, 19
+Cliff face or aerie	Climbing, nests, rare plants on narrow ledges	3, 11, 13, 14
+Mountain pass	The only route through, so whoever holds it controls it	5, 10, 15, 17, 19
+Waterfall grotto	A hidden space behind the falls	8, 11, 23
+Sinkhole or cenote	A vertical drop into an underground world, often treated as sacred	7, 8, 11, 23
+Ancient great tree	Big enough to live in and often holy, which makes it worth fighting over	4, 22, 23, 24
+Swamp island or bog	Fog, poor footing, things buried in the peat	11, 20, 21, 22
+Glacier or ice cave	Preserves bodies and gear for centuries	9, 14, 18, 19
+Volcanic caldera or lava tubes	Heat, fumes, unstable ground, rare minerals	3, 7, 11, 19, 22
+Sea caves or tidal flats	Access depends on the tide, natural smuggler hideouts	8, 16, 18, 19
+Rock spire, mesa or natural arch	High vantage, isolated, good for nests	6, 13, 23
+Beast den or burrow	Leads straight to the creature	1, 3, 4, 12
+Forest clearing or fairy ring	Neutral ground and a meeting place for the fey	20, 23, 24
+Lake island	Isolated, reachable only by boat or on ice	8, 21, 23
+
+Artificial structures
+
+Structure	Why it works	Quests
+Ruined fortress	Defensible, layered, full of history	2, 5, 7, 25
+Watchtower or fire lookout	Sightlines, signaling, a base for mapping	5, 6, 19, 25
+Abandoned mine	Tunnels, collapses, something dug up that shouldn’t have been	4, 8, 9, 14, 21
+Barrow or tomb	Guardians, grave goods, curses	7, 8, 21
+Standing stones or shrine	Ritual power tied to seasons and stars	20, 22, 23
+Trapper’s cabin or hunting lodge	Journals, trophies, the last stop before deep wilderness	1, 3, 9, 20
+Bridge or ford crossing	Natural toll point, easy to sabotage	5, 15, 16, 17
+Roadside waystation or inn	Rumors, travelers, alibis	15, 16, 17, 20
+Logging camp or sawmill	Industry pushing into the wild	4, 20, 24
+Bandit palisade	A ready-made lair with loot and prisoners	2, 14, 16
+Shipwreck or crashed vessel	Salvage, survivors, cargo someone wants kept quiet	8, 9, 18
+Hermit or witch hut	Knowledge, rare reagents, a reason to distrust them	11, 20, 22
+Abandoned village	Clues to whatever emptied it	9, 19, 20, 21
+Dam, weir or aqueduct	Control over water, which affects everyone downstream	7, 19, 24
+Smugglers’ tunnel	Hidden routes and caches	8, 16, 17
+
+Fantastical structures (if your setting allows them)
+
+A titan’s carcass: a skeleton or petrified body big enough to explore, which can host 3, 4, 7 and 22.
+A living beast’s back: a moving location that is also a creature, which suits 6, 13 and 25.
+A floating island or crystal formation: hard to reach and full of strange resources, good for 6, 11 and 23.
+A rift or portal scar: the source of corruption and monsters, for 4, 20 and 22.
+
+implement these quests for the locations above:
+Hunting and combat
+
+Monster bounty: Track and kill a named beast that’s been attacking travelers, following carcasses, tracks and torn camps to its territory. Twist: it was driven out of its home by something worse.
+Lair clearing: Wipe out a bandit camp, goblin warren or wyvern roost that’s choking a trade road. Twist: the “bandits” are displaced villagers.
+Legendary hunt: A multi-stage hunt for an apex creature, using bait, traps and its weak points, with a trophy or crafting material as the reward. Twist: a rival hunting party is after it too.
+Infestation: A spreading threat like giant spiders, rats or fungal crawlers that keeps coming back until the source (a nest, queen or blighted tree) is destroyed.
+Hold the pass: Defend a bridge, ford or mountain chokepoint against waves of attackers until help arrives or the refugees are through.
+
+Exploration and discovery
+
+Survey and cartography: Map an uncharted region by climbing vantage points, naming landmarks and finding water sources, for a guild or crown.
+Lost ruin: Find a site from fragmentary directions, an old legend or a half-burned map, then survive what’s inside.
+Buried cache: Treasure maps, smugglers’ stashes or a dead adventurer’s hoard, with riddles keyed to landmarks.
+Lost expedition: Follow an earlier party’s trail through abandoned camps and journal pages to learn what happened to them.
+Trailblazing: Find a safe route through mountains, marsh or forest for a caravan or army, then guide them through it.
+
+Gathering and taming
+
+Rare ingredient: Collect a flower that blooms only at midnight, during a storm or in one season, often in a dangerous spot.
+Live capture: Bring a creature back alive for a menagerie, a scholar or a breeding program, which means nonlethal tactics, cages and keeping it fed.
+Tame a mount: Earn the trust of a wild griffon, horse or great elk through a series of trials, feedings and chases.
+
+Rescue and escort
+
+Search and rescue: Find a missing child, hunter or lost patrol before nightfall or before the weather turns.
+Wilderness escort: Protect pilgrims, a caravan or someone who can’t fight on a dangerous crossing.
+Manhunt: Track an escaped prisoner, deserter or thief. Twist: they’re innocent, or running from something.
+Urgent delivery: Carry medicine, a message or a relic across hostile land before a deadline.
+
+Survival
+
+Stranded: After a shipwreck, an ambush or a fall, the party has lost its gear and has to find water, shelter and food and make its way back.
+Weather the disaster: A blizzard, wildfire or flash flood hits, and the party has to get people to safety or simply survive it.
+
+Mystery and supernatural
+
+Investigation: Livestock mutilations, vanishing travelers or strange lights in the woods, with clues spread across the area that point to the real cause.
+Restless spirit: Lay a haunting to rest at a lonely grave, battlefield or drowned village by settling its unfinished business.
+Blight cleansing: Rot, corruption or a poisoned spring is spreading. Find the source and purify or destroy it.
+Sacred site: Restore a shrine, relight a beacon or perform a rite at standing stones at the solstice, with guardians or rivals in the way.
+
+Factions and frontier
+
+Territory dispute: Druids against loggers, two clans fighting over a valley, or settlers against fey. The party can mediate, pick a side or play them against each other.
+Frontier outpost: Found, supply and defend a new settlement or watchtower, which unfolds into a chain of smaller quests.
+
+
+
+
+
+add these ruin types in the wilderness:
+Temple ruins: Religious complexes, often the best-surviving buildings of a civilization because they were built in stone to last. Think toppled columns, empty altars and processional avenues, as at Karnak or the Parthenon.
+Castle and fortress ruins: Broken curtain walls, hollow keeps and filled-in moats. Many were “slighted,” meaning deliberately wrecked by the winning side so they couldn’t be used again.
+Abbey and monastery ruins: Roofless Gothic naves with empty window tracery. In England, many date from Henry VIII’s Dissolution of the Monasteries, when the lead roofs were stripped and sold.
+Jungle-swallowed cities: Settlements taken back by forest, with tree roots prying apart walls and vines covering the façades. Ta Prohm at Angkor and Tikal are classic examples.
+Tells: Artificial hills built up over thousands of years as each generation built on the rubble of the last. Digging into one is like reading a timeline backward, as at Troy or Megiddo.
+Barrows and burial mounds: Earthen or stone mounds raised over burial chambers. They range from Neolithic long barrows to the kurgans of the Eurasian steppe.
+Megalithic monuments: Standing stones, stone circles, dolmens and long stone rows put up by prehistoric peoples. Their purpose is often debated, as at Stonehenge or Carnac.
+Rock-cut architecture: Tombs, temples and façades carved straight into living rock rather than built. Petra and the Ellora caves are the standout examples.
+Cliff dwellings: Multi-room settlements built into overhangs and alcoves in canyon walls, hard to reach and easy to defend. Mesa Verde is the best known.
+Underground cities and catacombs: Tunnels, chambers and burial galleries dug below ground for shelter, defense or burial. Examples include Derinkuyu in Cappadocia and the catacombs of Rome and Paris.
+Submerged ruins: Towns sunk by ground subsidence, rising seas or earthquakes, like Baiae and Pavlopetri. Villages drowned by modern reservoirs belong here too, and some resurface during droughts.
+Ash-buried cities: Places sealed almost instantly by volcanic ash or mud, which preserved a snapshot of daily life down to graffiti and bread loaves. Pompeii and Herculaneum are the famous ones.
+Sand-buried cities: Desert settlements slowly covered by drifting dunes after their water or trade routes failed. Many Silk Road oasis towns ended this way.
+Amphitheaters and theaters: Huge public entertainment structures. Their size made them useful as quarries, fortresses or even housing later on: medieval Arles had a whole neighborhood inside its amphitheater.
+Infrastructure ruins: Aqueducts, bridges, roads, harbors and frontier walls such as Pont du Gard and Hadrian’s Wall. They often outlast the cities they served.
+Ghost towns: Fairly recent settlements abandoned when the mine dried up, the railroad moved or the economy collapsed. They tend to be eerily intact, with furniture still inside, as at Bodie, California or Kolmanskop, Namibia.
+Industrial ruins: Derelict mills, factories, smelters, mineheads and power stations. They’re a favorite of urban explorers and photographers.
+War ruins and memorials: Structures destroyed in conflict and deliberately left that way as reminders. Examples include the Hiroshima Peace Memorial dome, the old Coventry Cathedral and the martyred village of Oradour-sur-Glane.
+Exclusion-zone ruins: Places abandoned suddenly because of disaster or contamination, then left to decay with nature moving back in. Pripyat near Chernobyl is the archetype.
+Follies (sham ruins): Fake ruins built on purpose, mostly in 18th-century landscape gardens, to look romantic and ancient. Some included crumbling towers and broken arches that were never whole.
+
+
+
+how to make the wilderness more interesting?  there should be more structure types found in the wilderness in addition to the structures and encounters found there now.  those structures can have containers, traps, hold prisoners, 
+implement the following abilities for the rogue, assign whether they use up dex, if they use damage, and assign VFX or new animations, or new models and textures if they need them, and scale their effectiveness from tiers 1-30 :
+Place: 1 (Mistward 1)
+Ability: Caltrops
+What it does: Scatters spikes over 3 m: monsters crossing them are slowed 40 %
+  and bleed
+How it looks: Real iron spike meshes on the floor, no glow
+────────────────────────────────────────
+Place: 3 (Mistward 3)
+Ability: Smoke Bomb
+What it does: A 4 m cloud: monsters inside lose her for 4 s, with no dexterity
+  energy spent
+How it looks: Thick grey billowing smoke (her stealth's aura is dark purple)
+────────────────────────────────────────
+Place: 5 (Mistward 5)
+Ability: Hamstring
+What it does: A dagger cut that slows its target 60 % for 5 s
+How it looks: A thin crimson ribbon trailing the blade
+────────────────────────────────────────
+Place: 7 (Vel Morrath 2)
+Ability: Marked for Death
+What it does: Her target takes +30 % from her for 10 s
+How it looks: A red rotating crosshair floating over its head
+────────────────────────────────────────
+Place: 9 (Vel Morrath 4)
+Ability: Grappling Hook
+What it does: Hooks a wall or monster up to 20 m away and pulls her to it
+How it looks: A visible hook and rope line
+────────────────────────────────────────
+Place: 11 (War Engine 1)
+Ability: Acid Flask
+What it does: A thrown vial: a 3 m puddle that eats armour (+25 % damage taken)
+  and burns
+How it looks: Shattering glass, then a bubbling amber-yellow pool
+────────────────────────────────────────
+Place: 13 (War Engine 3)
+Ability: Ricochet Bolt
+What it does: A crossbow bolt that bounces between up to 4 monsters
+How it looks: The bolt mesh itself zig-zagging, white-violet streaks, sparks at
+  each hit
+────────────────────────────────────────
+Place: 14 (War Engine 4)
+Ability: Shadow Double
+What it does: Leaves a copy of herself that draws monsters for 6 s, then bursts
+How it looks: Her own mesh in a smoky see-through material
+────────────────────────────────────────
+Place: 17 (Sewers 2)
+Ability: Net Shot
+What it does: Roots one monster for 4 s
+How it looks: A weighted net mesh unfolding in flight and wrapping it
+────────────────────────────────────────
+Place: 19 (Sewers 4)
+Ability: Fan of Knives
+What it does: 8 knives thrown in a ring, hitting everything round her
+How it looks: Spinning steel knife meshes flying outward
+────────────────────────────────────────
+Place: 21 (Kethrys 1)
+Ability: Flashbang
+What it does: Blinds and stuns monsters within 6 m for 3 s
+How it looks: A white flash and an expanding ring (not blue, not lightning)
+────────────────────────────────────────
+Place: 23 (Kethrys 3)
+Ability: Shadowstep
+What it does: Teleports behind her target and backstabs it with her ambush bonus
+How it looks: She breaks into drifting black ash and re-forms (the teleports'
+  effect is a blue circle)
+────────────────────────────────────────
+Place: 26 (Heaven 1)
+Ability: Gilded Lure
+What it does: A tossed coin: monsters within 15 m go after it for 5 s
+How it looks: A spinning gold coin with a glint
+────────────────────────────────────────
+Place: 27 (Heaven 2)
+Ability: Vanishing Act
+What it does: 12 s stealth that survives her first three blows
+How it looks: A heat-haze shimmer bending the view round her
+────────────────────────────────────────
+Place: 28 (Heaven 3)
+Ability: Death Lotus
+What it does: Spins, hitting everything within 3 m three times
+How it looks: Silver crescent arcs with her afterimages
+────────────────────────────────────────
+Place: 29 (Heaven 4)
+Ability: Thousand Cuts
+What it does: Her ultimate: marks every monster she can see within 20 m, then
+  blinks between them, slashing each
+How it looks: A moment of slowed time, then red slash lines across each target
+
+How they'd fit the game:
+- Earning: a manual found in that place's containers, as the Mage finds a tome, read from the inventory.
+- Growth: the damaging ones would grow with her own-weapon growth, the way her daggers and crossbow do. The control effects (slow, root, stun, blind) would keep their strength, as her stealth does now.
+- Use: they'd go on the quick bar with cooldowns, like the secondary abilities.
+
+

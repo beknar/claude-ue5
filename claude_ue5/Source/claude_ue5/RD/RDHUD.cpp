@@ -717,6 +717,7 @@ void ARDHUD::DrawHUD()
 	const bool bBigMap = Gen->bMapOpen && !bTac;
 	// (Brokenspire: the townspeople's names under everything else; the town's maps in place of the dungeon's)
 	if (Gen->bTown && !Gen->bMapOpen) DrawTownNames(Sc);
+	Gen->MapXKind = 0;          // (the list of 2026-11-12: the big map's frame, written by whichever map is drawn this frame)
 	if (bTac && Gen->bMapOpen) { if (Gen->IsWildMapShown()) DrawWildMap(Sc, L, Yaw); else if (Gen->bTown) DrawTownMap(Sc, L, Yaw); else DrawTacticalMap(Sc, L, Yaw); }
 	if (Gen->bCombat && !bBigMap && !(Gen->bTown && Gen->bMapOpen)) DrawCombat(Sc);
 	if (Gen->bCombat && !bBigMap && Gen->Spells.Num() > 0 && !(Gen->bTown && Gen->bMapOpen)) DrawHotbar(Sc);
@@ -1316,6 +1317,7 @@ void ARDHUD::DrawPaintedMap(float Sc, const FVector& L, float Yaw)
 	const FVector Vw = L + FVector(Gen->MapPan.X, Gen->MapPan.Y, 0.f);
 	MapView = FVector2D(Vw.X, Vw.Y);
 	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - Vw.Y, -(W.X - Vw.X)) * K; };
+	Gen->MapXC = C; Gen->MapXVw = FVector2D(Vw.X, Vw.Y); Gen->MapXK = K; Gen->MapXSheet = FBox2D(A, B); Gen->MapXKind = 3;          // (rd.MapTeleport's click)
 	// (everything fades out toward the board as the minimap's terrain does toward its rim: by the distance from the middle
 	// in shares of the area's half sizes)
 	auto Fade = [&](const FVector2D& S) { const FVector2D D = (S - C) / Hf; return FMath::Clamp((1.f - D.Size()) / 0.24f, 0.f, 1.f); };
@@ -1514,6 +1516,7 @@ void ARDHUD::DrawTacticalMap(float Sc, const FVector& L, float Yaw)
 	const FVector Vw = L + FVector(Gen->MapPan.X, Gen->MapPan.Y, 0.f);       // (her, or where the arrow keys scrolled it)
 	MapView = FVector2D(Vw.X, Vw.Y);
 	auto ToS = [&](const FVector2D& W) { return C + FVector2D(W.Y - Vw.Y, -(W.X - Vw.X)) * K; };
+	Gen->MapXC = C; Gen->MapXVw = FVector2D(Vw.X, Vw.Y); Gen->MapXK = K; Gen->MapXSheet = FBox2D(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY)); Gen->MapXKind = 3;
 	// a light veil only: the game shows through
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.012f, 0.02f, 0.28f));
 	CacheTiles();
@@ -1976,11 +1979,13 @@ void ARDHUD::DrawInventory(float Sc)
 	// (the list of 2026-11-10: her purse, left of her hero's title, wherever gold is kept (the towns and every dungeon of the game))
 	if (Gen->bTown || Gen->bTownLink)
 	{
+		// (the list of 2026-11-12: "amount of gold should show up in the inventory screen": larger, the purse's coins beside it
+		// (icon_gold, 923 icons: the picture had never been made))
 		const FString Gd = FString::Printf(TEXT("GOLD  %d"), Gen->GetGold());
-		float Gw, Gh; UI.TextSize(Gd, Gw, Gh, Small, Sc * 1.2f, ERDType::Title);
-		const float Gx = B.X - Pd - Tin - Tw - 36.f * Sc - Gw;
-		if (UI.Has(TEXT("icon_gold"))) UI.Fit(TEXT("icon_gold"), FVector2D(Gx - 30.f * Sc, A.Y + 16.f * Sc), FVector2D(Gx - 4.f * Sc, A.Y + 42.f * Sc));
-		UI.Text(Gd, FLinearColor(1.f, 0.86f, 0.3f), Gx, A.Y + 18.f * Sc, Small, Sc * 1.2f, ERDType::Title);
+		float Gw, Gh; UI.TextSize(Gd, Gw, Gh, Small, Sc * 1.5f, ERDType::Title);
+		const float Gx = B.X - Pd - Tin - Tw - 40.f * Sc - Gw;
+		if (UI.Has(TEXT("icon_gold"))) UI.Fit(TEXT("icon_gold"), FVector2D(Gx - 46.f * Sc, A.Y + 8.f * Sc), FVector2D(Gx - 6.f * Sc, A.Y + 48.f * Sc));
+		UI.Text(Gd, FLinearColor(1.f, 0.86f, 0.3f), Gx, A.Y + 14.f * Sc, Small, Sc * 1.5f, ERDType::Title);
 	}
 	// ---- the list (left)
 	const float Lx = A.X + Pd, Lw = W * 0.5f - Pd;
@@ -2834,6 +2839,7 @@ void ARDHUD::DrawMenu(float Sc)
 	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f);
 	Box(FVector2D(0, 0), FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor(0.f, 0.f, 0.01f, 0.62f));
 	const TArray<FString> Lines = Gen->GetMenuLines();
+	if (Gen->IsMenuGridPage()) { DrawMenuGrid(Sc, Lines); return; }
 	const float W = 760.f * Sc, Rh = 58.f * Sc, Pd = 34.f * Sc;
 	// (a gap where one kind of line gives way to another: the sliders, the choices, the buttons)
 	auto KindOf = [&Lines](int32 I) { FString K, Rest; Lines[I].Split(TEXT("|"), &K, &Rest); return K; };
@@ -2915,11 +2921,93 @@ void ARDHUD::DrawMenu(float Sc)
 		Y += Rh;
 	}
 	const FString Keys = !Gen->bOptionsMenu ? FString(TEXT("W S  choose      A D  volume      Enter  press      mouse  click or drag      Esc  back to the game"))
-	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      Left Right  the save to save over      Enter  save      Esc  back"))
+	                   : Gen->GetMenuPage() == 3 ? FString(TEXT("type the save's name      Backspace  delete      Up Down  choose      click Save over (or Left Right)  your saves      Enter  save      Esc  back"))
 	                   : Gen->GetMenuPage() == 4 ? FString(TEXT("W S  choose      Enter  this one      Esc  back to the Save page"))
 	                   : Gen->GetMenuPage() == 1 ? FString(TEXT("W S  choose      A D  change      Enter  press      mouse  click or drag      Esc  back"))
 	                   : Gen->GetMenuPage() == 5 ? FString(TEXT("W S  choose      A D  change      Esc  back          (the difficulty: the monsters met from now on)"))
 	                                             : FString(TEXT("W S  choose      Enter  press      mouse  click      Esc  back to the game"));
 	UI.TextSize(Keys, Tw, Th, Small, Sc);
 	UI.Text(Keys, Dim, (A.X + B.X - Tw) * 0.5f, B.Y - 48.f * Sc, Small, Sc);
+}
+
+void ARDHUD::DrawMenuGrid(float Sc, const TArray<FString>& Lines)
+{
+	// the list of 2026-11-12 ("in the ESC save menu, you should be able to use the mouse to pick from a screen of choices instead
+	// of scrolling choices"): the Load page's saves and the saves to save over as cards, three a row, every one on the screen at
+	// once; a card under the pointer is chosen, a click picks it; Back under them. A card: the save's name, then where and when
+	UFont* Small = GEngine->GetSmallFont(); UFont* Medium = GEngine->GetMediumFont();
+	const FLinearColor Gold(1.f, 0.82f, 0.35f), Dim(0.70f, 0.68f, 0.62f), Pale(0.86f, 0.84f, 0.78f);
+	const int32 Cols = ARDDungeonGenerator::RDMenuGridCols;
+	const int32 Cards = FMath::Max(Lines.Num() - 1, 0), Rows = FMath::Max(1, (Cards + Cols - 1) / Cols);
+	const float Pd = 34.f * Sc, Gap = 14.f * Sc, Ch = 96.f * Sc, Bh = 52.f * Sc;
+	const float W = FMath::Min(1180.f * Sc, Canvas->ClipX - 40.f * Sc), Cw = (W - Pd * 2.f - Gap * (Cols - 1)) / Cols;
+	const float H = 110.f * Sc + Rows * (Ch + Gap) + 24.f * Sc + Bh + 74.f * Sc;
+	const FVector2D A((Canvas->ClipX - W) * 0.5f, FMath::Max(10.f * Sc, (Canvas->ClipY - H) * 0.5f)), B = A + FVector2D(W, H);
+	if (!Board(TEXT("panel_wide"), A, B, Sc, 44.f * Sc)) { Box(A, B, FLinearColor(0.035f, 0.04f, 0.055f, 0.95f)); Frame(A, B, FLinearColor(0.75f, 0.65f, 0.45f, 0.9f), 2.f * Sc); }
+	const TCHAR* Head = Gen->GetMenuPage() == 2 ? TEXT("LOAD A GAME") : TEXT("SAVE OVER WHICH SAVE?");
+	float Tw, Th;
+	UI.TextSize(Head, Tw, Th, Medium, Sc * 1.6f, ERDType::Title);
+	UI.Text(Head, RDInk, (A.X + B.X - Tw) * 0.5f, A.Y + 22.f * Sc, Medium, Sc * 1.6f, ERDType::Title);
+	Gen->MenuRowBoxes.Reset(); Gen->MenuTrackBoxes.Reset();
+	const bool bPlate = UI.Has(TEXT("button"));
+	auto Plate = [&](const FVector2D& R0, const FVector2D& R1, bool bOn)
+	{
+		if (bOn && bPlate) { const FRDUIArt* Pl = UI.Find(TEXT("button")); UI.Nine(TEXT("button"), R0 - FVector2D(4.f * Sc), R1 + FVector2D(4.f * Sc), (R1.Y - R0.Y + 8.f * Sc) / FMath::Max((float)Pl->Texture->GetSizeY(), 1.f), FLinearColor(1.25f, 1.05f, 0.7f)); }
+		else Box(R0, R1, bOn ? FLinearColor(0.36f, 0.27f, 0.10f, 0.95f) : FLinearColor(0.06f, 0.055f, 0.05f, 0.88f));
+		Frame(R0, R1, bOn ? Gold : FLinearColor(0.55f, 0.48f, 0.34f, 0.85f), (bOn ? 2.f : 1.f) * Sc);
+	};
+	// (a line fitted to a width: cut with an ellipsis)
+	auto Fit = [&](const FString& S, float MaxW, float Scale, ERDType Ty)
+	{
+		// (the longest start of it that fits with "...", found by halving: PR #54's review, a letter at a time every frame was dozens
+		// of measures a line)
+		float W1, H1; UI.TextSize(S, W1, H1, Small, Scale, Ty);
+		if (W1 <= MaxW) return S;
+		int32 Lo = 1, Hi = S.Len() - 1;
+		while (Lo < Hi)
+		{
+			const int32 Md = (Lo + Hi + 1) / 2;
+			UI.TextSize(S.Left(Md) + TEXT("..."), W1, H1, Small, Scale, Ty);
+			if (W1 <= MaxW) Lo = Md; else Hi = Md - 1;
+		}
+		return S.Left(Lo) + TEXT("...");
+	};
+	for (int32 I = 0; I < Lines.Num(); ++I)
+	{
+		TArray<FString> P; Lines[I].ParseIntoArray(P, TEXT("|"));
+		const FString Label = P.Num() >= 2 ? P[1] : FString();
+		const bool bOn = I == Gen->GetMenuCursor();
+		if (I < Cards)
+		{
+			const int32 Cx = I % Cols, Cy = I / Cols;
+			const FVector2D R0(A.X + Pd + Cx * (Cw + Gap), A.Y + 104.f * Sc + Cy * (Ch + Gap)), R1 = R0 + FVector2D(Cw, Ch);
+			Gen->MenuRowBoxes.Add(FBox2D(R0, R1)); Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
+			Plate(R0, R1, bOn);
+			// (the line's "<name>: <where>, <when> (<hero>)": the name big, the rest under it)
+			FString Name = Label, Rest;
+			Label.Split(TEXT(": "), &Name, &Rest);
+			const float Tx = R0.X + 14.f * Sc, MaxW = Cw - 28.f * Sc;
+			UI.Text(Fit(Name, MaxW, Sc * 1.2f, ERDType::Title), bOn ? FLinearColor::White : Gold, Tx, R0.Y + 12.f * Sc, Small, Sc * 1.2f, ERDType::Title);
+			FString Where = Rest, When;
+			Rest.Split(TEXT(", "), &Where, &When);
+			if (!Where.IsEmpty()) UI.Text(Fit(Where, MaxW, Sc, ERDType::Text), bOn ? FLinearColor::White : Pale, Tx, R0.Y + 44.f * Sc, Small, Sc);
+			if (!When.IsEmpty()) UI.Text(Fit(When, MaxW, Sc * 0.95f, ERDType::Text), Dim, Tx, R0.Y + 68.f * Sc, Small, Sc * 0.95f);
+		}
+		else
+		{
+			// Back, under the cards
+			const float Y = A.Y + 104.f * Sc + Rows * (Ch + Gap) + 10.f * Sc;
+			const FVector2D R0((A.X + B.X) * 0.5f - 160.f * Sc, Y), R1((A.X + B.X) * 0.5f + 160.f * Sc, Y + Bh);
+			Gen->MenuRowBoxes.Add(FBox2D(R0, R1)); Gen->MenuTrackBoxes.Add(FBox2D(ForceInit));
+			Plate(R0, R1, bOn);
+			const FString T = Label.ToUpper();
+			UI.TextSize(T, Tw, Th, Small, Sc * 1.3f, ERDType::Title);
+			UI.Text(T, bOn ? FLinearColor::White : Pale, (R0.X + R1.X - Tw) * 0.5f, R0.Y + 10.f * Sc, Small, Sc * 1.3f, ERDType::Title);
+		}
+	}
+	const FString Keys = Gen->GetMenuPage() == 2 ? FString(TEXT("click a save to load it      arrows  choose      Enter  load      Esc  back"))
+	                                             : FString(TEXT("click the save to save over      arrows  choose      Enter  this one      Esc  back to the Save page"));
+	UI.TextSize(Keys, Tw, Th, Small, Sc);
+	UI.Text(Keys, Dim, (A.X + B.X - Tw) * 0.5f, B.Y - 48.f * Sc, Small, Sc);
+	if (UI.Drawn) UI.Drawn->AddUnique(TEXT("menu_grid"));
 }
